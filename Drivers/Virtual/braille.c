@@ -76,7 +76,7 @@ typedef struct {
   int (*getUnixConnection) (const struct sockaddr_un *address);
   int (*getInetConnection) (const struct sockaddr_in *address);
 } ModeEntry;
-const ModeEntry *mode;
+static const ModeEntry *mode;
 
 static char *
 formatAddress (const struct sockaddr *address) {
