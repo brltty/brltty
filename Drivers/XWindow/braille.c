@@ -36,44 +36,44 @@
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
 
-#if defined(HAVE_LIB_XAW)
+#if defined(HAVE_PKG_XAW)
 #define USE_XAW
 #include <X11/Xaw/Form.h>
 #include <X11/Xaw/Paned.h>
 #include <X11/Xaw/Label.h>
 #include <X11/Xaw/Command.h>
 #include <X11/Xaw/Repeater.h>
-#elif defined(HAVE_LIB_XAW3D)
+#elif defined(HAVE_PKG_XAW3D)
 #define USE_XAW
 #include <X11/Xaw3d/Form.h>
 #include <X11/Xaw3d/Paned.h>
 #include <X11/Xaw3d/Label.h>
 #include <X11/Xaw3d/Command.h>
 #include <X11/Xaw3d/Repeater.h>
-#elif defined(HAVE_LIB_NEXTAW)
+#elif defined(HAVE_PKG_NEXTAW)
 #define USE_XAW
 #include <X11/neXtaw/Form.h>
 #include <X11/neXtaw/Paned.h>
 #include <X11/neXtaw/Label.h>
 #include <X11/neXtaw/Command.h>
 #include <X11/neXtaw/Repeater.h>
-#elif defined(HAVE_LIB_XAWPLUS)
+#elif defined(HAVE_PKG_XAWPLUS)
 #define USE_XAW
 #include <X11/XawPlus/Form.h>
 #include <X11/XawPlus/Paned.h>
 #include <X11/XawPlus/Label.h>
 #include <X11/XawPlus/Command.h>
 #include <X11/XawPlus/Repeater.h>
-#elif defined(HAVE_LIB_XM)
+#elif defined(HAVE_PKG_XM)
 #define USE_XM
 #include <Xm/Xm.h>
 #include <Xm/Form.h>
 #include <Xm/PanedW.h>
 #include <Xm/Label.h>
 #include <Xm/PushB.h>
-#else /* HAVE_LIB_ */
-#error unknown Xt toolkit library
-#endif /* HAVE_LIB_ */
+#else /* HAVE_PKG_ */
+#error unknown xaw package
+#endif /* HAVE_PKG_ */
 
 #if defined(USE_XAW)
 #define formWidgetClass     formWidgetClass
@@ -112,7 +112,7 @@
 #define NvertDistance       XmNtopOffset
 #define NhorizDistance      XmNleftOffset
 #else /* USE_ */
-#error unknown Xt toolkit type
+#error unknown xaw prototype
 #endif /* USE_ */
 
 typedef enum {

@@ -37,7 +37,13 @@
 #include <locale.h>
 
 #include <stdarg.h>
+#if defined(HAVE_PKG_CURSES)
 #include <curses.h>
+#elif defined(HAVE_PKG_NCURSES)
+#include <ncurses.h>
+#else /* HAVE_PKG_ */
+#error unknown curses package
+#endif /* HAVE_PKG_ */
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>

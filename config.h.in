@@ -190,12 +190,16 @@ extern "C" {
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 
-/* Define only one of the following Xt toolkits. */
-#undef HAVE_LIB_XAW
-#undef HAVE_LIB_XAW3D
-#undef HAVE_LIB_NEXTAW
-#undef HAVE_LIB_XAWPLUS
-#undef HAVE_LIB_XM
+/* Define only one of the following curses packages. */
+#undef HAVE_PKG_CURSES
+#undef HAVE_PKG_NCURSES
+
+/* Define only one of the following Xaw packages. */
+#undef HAVE_PKG_XAW
+#undef HAVE_PKG_XAW3D
+#undef HAVE_PKG_NEXTAW
+#undef HAVE_PKG_XAWPLUS
+#undef HAVE_PKG_XM
 
 #define DEVICE_DIRECTORY "/dev"
 #define TRANSLATION_TABLE_EXTENSION ".tbl"

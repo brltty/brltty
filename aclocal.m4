@@ -452,3 +452,56 @@ ifelse(len([$1]), 0, [], [dnl
    }
 ])dnl
 ])
+
+AC_DEFUN([BRLTTY_PACKAGE_CHOOSE], [dnl
+BRLTTY_ARG_WITH(
+   [$1], [PACKAGE],
+   [which $1 package to use],
+   [$1_package], ["yes"]
+)
+if test "${$1_package}" = "no"
+then
+   $1_package=""
+elif test "${$1_package}" = "yes"
+then
+AC_CACHE_CHECK([which $1 package to use], [brltty_cv_package_$1], [dnl
+   brltty_cv_package_$1=""
+   brltty_packages=""
+   BRLTTY_PACKAGE_ADD(m4_shift($@))
+   for brltty_package in ${brltty_packages}
+   do
+      eval 'brltty_headers="${brltty_headers_'"${brltty_package}"'}"'
+      test -n "${brltty_headers}" && {
+         brltty_found=true
+         for brltty_header in ${brltty_headers}
+         do
+            AC_CHECK_HEADER([${brltty_header}], [], [brltty_found=false])
+            "${brltty_found}" || break
+         done
+         "${brltty_found}" && {
+            brltty_cv_package_$1="${brltty_package}"
+            break
+         }
+      }
+   done
+])
+   $1_package="${brltty_cv_package_$1}"
+fi
+AC_SUBST([$1_package])
+test -n "${$1_package}" && {
+   $1_package_uc="`echo "${$1_package}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
+   AC_DEFINE_UNQUOTED([HAVE_PKG_${$1_package_uc}])
+}
+BRLTTY_SUMMARY_ITEM([$1-package], [$1_package])
+])
+AC_DEFUN([BRLTTY_PACKAGE_ADD], [dnl
+ifelse($#, 0, [], [dnl
+
+set -- [$1]
+brltty_package="${1}"
+shift
+eval "brltty_headers_${brltty_package}"'="${*}"'
+brltty_packages="${brltty_packages} ${brltty_package}"
+ifelse($#, 1, [], [BRLTTY_PACKAGE_ADD(m4_shift($@))])
+])dnl
+])
