@@ -464,7 +464,7 @@ trackSpeech (int index) {
 }
 
 static void
-sayLines (int line, int count, int track) {
+sayLines (int line, int count, int track, int mute) {
   /* OK heres a crazy idea: why not send the attributes with the
    * text, in case some inflection or marking can be added...! The
    * speech driver's say function will receive a buffer of text
@@ -474,7 +474,7 @@ sayLines (int line, int count, int track) {
   int length = scr.cols * count;
   unsigned char buffer[length * 2];
 
-  speech->mute();
+  if (mute) speech->mute();
   readScreen(0, line, scr.cols, count, buffer, SCR_TEXT);
   if (speech->express) {
     readScreen(0, line, scr.cols, count, buffer+length, SCR_ATTRIB);
@@ -1349,13 +1349,13 @@ main (int argc, char *argv[]) {
             break;
 #ifdef ENABLE_SPEECH_SUPPORT
           case CMD_SAY_LINE:
-            sayLines(p->winy, 1, 0);
+            sayLines(p->winy, 1, 0, prefs.sayLineAction==slaMute);
             break;
           case CMD_SAY_ABOVE:
-            sayLines(0, p->winy+1, 1);
+            sayLines(0, p->winy+1, 1, 1);
             break;
           case CMD_SAY_BELOW:
-            sayLines(p->winy, scr.rows-p->winy, 1);
+            sayLines(p->winy, scr.rows-p->winy, 1, 1);
             break;
           case CMD_MUTE:
             speech->mute();
@@ -1618,7 +1618,7 @@ main (int argc, char *argv[]) {
                              so that the pipe doesn't fill up. */
     if (prefs.autospeak) {
       if (p->winy != oldwiny) {
-        sayLines(p->winy, 1, 0);
+        sayLines(p->winy, 1, 0, 1);
       }
     }
 #endif /* ENABLE_SPEECH_SUPPORT */

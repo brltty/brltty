@@ -30,6 +30,11 @@ typedef enum {
   sbwRestOfLine
 } SkipBlankWindowsMode;
 
+typedef enum {
+  slaMute,
+  slaQueue
+} SayLineAction;
+
 /*
  * Structure definition for preferences (settings which are saveable).
  * PREFS_MAGIC_NUMBER has to be bumped whenever the definition of
@@ -51,7 +56,7 @@ typedef struct {
   unsigned char blinkingAttributes;
   unsigned char spare5;
   unsigned char cursorStyle;
-  unsigned char spare6;
+  unsigned char sayLineAction;
   unsigned char cursorVisiblePeriod;
   unsigned char autospeak;
   unsigned char cursorInvisiblePeriod;

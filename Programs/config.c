@@ -678,6 +678,11 @@ loadPreferences (int change) {
           prefs.midiVolume = DEFAULT_MIDI_VOLUME;
           prefs.fmVolume = DEFAULT_FM_VOLUME;
         }
+        if (prefs.version == 1) {
+          prefs.version++;
+          prefs.sayLineAction = DEFAULT_SAY_LINE_ACTION;
+          prefs.autospeak = DEFAULT_AUTOSPEAK;
+        }
         if (change) changedPreferences();
       } else
         LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
@@ -967,6 +972,9 @@ updatePreferences (void) {
 #endif /* ENABLE_FM_TUNES */
         ")"
     };
+#ifdef ENABLE_SPEECH_SUPPORT
+    static const char *sayLineActions[] = {"Mute", "Queue"};
+#endif /* ENABLE_SPEECH_SUPPORT */
     typedef struct {
        unsigned char *setting;                        /* pointer to the item value */
        int (*changed) (void);
@@ -1025,6 +1033,7 @@ updatePreferences (void) {
        BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
        BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, "Alert Messages"),
 #ifdef ENABLE_SPEECH_SUPPORT
+       SYMBOLIC_ITEM(prefs.sayLineAction, NULL, NULL, "SayLine Action", sayLineActions),
        BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, "Autospeak"),
 #endif /* ENABLE_SPEECH_SUPPORT */
        SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
@@ -1611,7 +1620,7 @@ startup (int argc, char *argv[]) {
 
     prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
     prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
-    prefs.version = 1;
+    prefs.version = 2;
 
     prefs.showCursor = DEFAULT_SHOW_CURSOR;
     prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
@@ -1651,6 +1660,7 @@ startup (int argc, char *argv[]) {
     prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
     prefs.fmVolume = DEFAULT_FM_VOLUME;
 
+    prefs.sayLineAction = DEFAULT_SAY_LINE_ACTION;
     prefs.autospeak = DEFAULT_AUTOSPEAK;
 
     prefs.statusStyle = brailleDriver->statusStyle;
