@@ -35,6 +35,7 @@ struct UsbDeviceStruct {
   uint16_t language;
 
   unsigned char inputEndpoint;
+  unsigned char inputTransfer;
   int inputSize;
   struct UsbInputElement *inputElements;
   void *inputRequest;

@@ -17,7 +17,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.53])
-AC_INIT([brltty], [3.5pre2], [http://mielke.cc/brltty/])
+AC_INIT([brltty], [3.5pre3], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 
@@ -557,6 +557,7 @@ BRLTTY_BRAILLE_DRIVER([bn], [BrailleNote])
 BRLTTY_BRAILLE_DRIVER([cb], [CombiBraille])
 BRLTTY_BRAILLE_DRIVER([ec], [EcoBraille])
 BRLTTY_BRAILLE_DRIVER([eu], [EuroBraille])
+BRLTTY_BRAILLE_DRIVER([fs], [FreedomScientific])
 BRLTTY_BRAILLE_DRIVER([ht], [HandyTech])
 BRLTTY_BRAILLE_DRIVER([lt], [LogText])
 BRLTTY_BRAILLE_DRIVER([mb], [MultiBraille])

@@ -515,7 +515,7 @@ chooseUsbDevice (UsbDevice *device, void *data) {
 static int
 openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    if (usbBeginInput(usbDevice, usbInputEndpoint, 8, 8)) {
+    if (usbBeginInput(usbDevice, usbInputEndpoint, USB_ENDPOINT_TRANSFER_INTERRUPT, 8, 8)) {
       return 1;
     }
 

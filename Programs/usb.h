@@ -291,6 +291,7 @@ extern void *usbReapResponse (
 extern int usbBeginInput (
   UsbDevice *device,
   unsigned char endpoint,
+  unsigned char transfer,
   int size,
   int count
 );

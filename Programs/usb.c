@@ -144,7 +144,7 @@ usbAddInputElement (
   if ((input = malloc(sizeof(*input)))) {
     memset(input, 0, sizeof(*input));
     if ((input->request = usbSubmitRequest(device, device->inputEndpoint,
-                                           USB_ENDPOINT_TRANSFER_INTERRUPT,
+                                           device->inputTransfer,
                                            NULL, device->inputSize,
                                            input))) {
       if (device->inputElements) {
@@ -183,6 +183,7 @@ int
 usbBeginInput (
   UsbDevice *device,
   unsigned char endpoint,
+  unsigned char transfer,
   int size,
   int count
 ) {
@@ -190,6 +191,7 @@ usbBeginInput (
 
   device->inputRequest = NULL;
   device->inputEndpoint = endpoint | USB_DIR_IN;
+  device->inputTransfer = transfer;
   device->inputSize = size;
 
   while (actual < count) {
@@ -223,18 +225,17 @@ usbReapInput (
     }
 
     {
-      unsigned char *source = device->inputBuffer;
       int count = device->inputLength;
       if (length < count) count = length;
-      memcpy(target, source, count);
+      memcpy(target, device->inputBuffer, count);
 
       if ((device->inputLength -= count)) {
-        device->inputBuffer = source + count;
+        device->inputBuffer += count;
       } else {
+        device->inputLength = 0;
+        device->inputBuffer = NULL;
         free(device->inputRequest);
         device->inputRequest = NULL;
-        device->inputBuffer = NULL;
-        device->inputLength = 0;
       }
 
       target += count;
