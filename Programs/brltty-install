@@ -19,7 +19,7 @@
 # Installation script for binary BRLTTY distributions.
 # Usage: brltty-install dest-prefix [source-prefix]
 
-programName="${0##*/}"
+programName="${0}"
 programMessage()
 {
    echo "${programName}: ${1}"

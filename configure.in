@@ -243,6 +243,15 @@ in
 esac])
 AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 
+case "${host_os}"
+in
+   solaris*) AC_SEARCH_LIBS([_getfp], [pthread]);;
+   hpux*) AC_SEARCH_LIBS([__pthread_cancel_stack], [pthread]);;
+   *) AC_SEARCH_LIBS([pthread_create], [pthread c_r]);;
+esac
+
+AC_SEARCH_LIBS([socket], [socket])
+
 AC_CHECK_HEADERS([getopt.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])
 AC_CHECK_HEADERS([alloca.h sys/io.h linux/vt.h])
@@ -464,8 +473,6 @@ BRLTTY_ARG_DISABLE(
    api_objects='api_server.$O api_common.$O rangelist.$O'
    build_api="api"
    install_api="install-api"
-   AC_SEARCH_LIBS([pthread_create], [pthread c_r])
-   AC_SEARCH_LIBS([socket], [socket])
    BRLTTY_ARG_PARAMETERS([api])
 ])
 AC_SUBST([api_objects])

@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-programName="${0##*/}"
+programName="${0}"
 programMessage() {
    echo >&2 "${programName}: ${1}"
 }
