@@ -687,19 +687,19 @@ insertCharacter (unsigned char character, int flags) {
       case '/': character = '?'; break;
     }
   }
+
   if (flags & VPC_CONTROL) {
     if ((character & 0X6F) == 0X2F)
       character |= 0X50;
     else
       character &= 0X9F;
   }
-  if (flags & VPC_META) {
-    if (prefs.metaMode)
-      character |= 0X80;
-    else
-      if (!insertKey(KEY_ESCAPE)) return 0;
+
+  {
+    unsigned short key = character;
+    if (flags & VPC_META) key |= KEY_MOD_META;
+    return insertKey(key);
   }
-  return insertKey(character);
 }
 
 typedef int (*RowTester) (int column, int row, void *data);

@@ -921,11 +921,33 @@ insertCode (unsigned short key, int raw) {
 
 static int
 insertMapped (unsigned short key, int (*byteInserter)(unsigned char byte)) {
-  if (key < 0X100) {
-    unsigned char character = key & 0XFF;
-    if (!byteInserter(character)) return 0;
+  unsigned char buffer[3];
+  unsigned char *sequence;
+
+  if (key < KEY_RETURN) {
+    sequence = buffer + sizeof(buffer);
+    *--sequence = 0;
+    *--sequence = key & 0XFF;
+
+    if (key & KEY_MOD_META) {
+      long meta;
+      if (controlConsole(KDGKBMETA, &meta) == -1) return 0;
+
+      switch (meta) {
+        case K_METABIT:
+          *sequence |= 0X80;
+          break;
+
+        case K_ESCPREFIX:
+          *--sequence = 0X1B;
+          break;
+
+        default:
+          LogPrint(LOG_WARNING, "Unsupported keyboard meta mode: %ld", meta);
+          return 0;
+      }
+    }
   } else {
-    const char *sequence;
     switch (key) {
       case KEY_RETURN:
         sequence = "\r";
@@ -1033,10 +1055,11 @@ insertMapped (unsigned short key, int (*byteInserter)(unsigned char byte)) {
         LogPrint(LOG_WARNING, "Key %4.4X not suported in ANSI mode.", key);
         return 0;
     }
-    while (*sequence) {
-      if (!byteInserter(*sequence++)) return 0;
-    }
   }
+
+  while (*sequence)
+    if (!byteInserter(*sequence++))
+      return 0;
   return 1;
 }
 

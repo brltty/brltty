@@ -211,7 +211,7 @@ The main weakness of the <tt/screen/ approach is that
 BRLTTY can't be started until the user has logged in.
 
 In order for BRLTTY to successfully communicate with the refreshable braille display,
-the correct driver (serial, parallel, USB, Bluetooth) must be configured into the kernel.
+the correct driver (serial, parallel, USB, bluetooth) must be configured into the kernel.
 If the driver requires special options, then they must be supplied.
 If it's built into the kernel, then its options must be:
 <descrip>
@@ -859,7 +859,7 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--disable-usb-support/<label id="build-usb-support"></tag>
     Reduce program size by excluding support for USB devices.
   <tag><tt/--disable-bluetooth-support/<label id="build-bluetooth-support"></tag>
-    Reduce program size by excluding support for Bluetooth devices.
+    Reduce program size by excluding support for bluetooth devices.
   <tag><tt/--disable-speech-support/<label id="build-speech-support"></tag>
     Reduce program size by excluding support for speech synthesizers.
   <tag><tt/--disable-beeper-tunes/<label id="build-beeper-tunes"></tag>
@@ -2913,16 +2913,6 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-SIXDOTS" name="SIXDOTS"> command.
-  <tag>Meta Mode<label id="preference-meta-mode"></tag>
-    Enter a meta character by:
-    <descrip>
-      <tag/Escape Prefix/
-        Prefixing it with an <tt/escape/ byte.
-      <tag/High-order Bit/
-        Setting its high-order bit.
-    </descrip>
-    Use the <tt/setmetamode/ command to find out how your system has been configured.
-    The initial setting is <tt/Escape Prefix/.
   <tag>Skip Identical Lines<label id="preference-skip-identical-lines"></tag>
     When moving either up or down exactly one line with
     the <ref id="command-LNUP" name="LNUP">
@@ -4421,7 +4411,7 @@ if the qualifier is omitted then <tt/serial:/ is assumed.
 The following device types are supported:
 <descrip>
   <tag/Bluetooth/
-    For a Bluetooth device, specify <tt/bluez:/<em/address/.
+    For a bluetooth device, specify <tt/bluez:/<em/address/.
   <tag/Serial/
     For a serial device, specify <tt/serial:/<em>/path/to/device</>.
     The <tt/serial:/ qualifier is optional (for backward compatibility).

@@ -1169,7 +1169,6 @@ updatePreferences (void) {
     static const char *booleanValues[] = {"No", "Yes"};
     static const char *cursorStyles[] = {"Underline", "Block"};
     static const char *firmnessLevels[] = {"Minimum", "Low", "Medium", "High", "Maximum"};
-    static const char *metaModes[] = {"Escape Prefix", "High-order Bit"};
     static const char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
     static const char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Generic", "MDV", "Voyager"};
     static const char *textStyles[] = {"8-dot", "6-dot"};
@@ -1220,7 +1219,6 @@ updatePreferences (void) {
     MenuItem menu[] = {
        BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
        SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, "Text Style", textStyles),
-       SYMBOLIC_ITEM(prefs.metaMode, NULL, NULL, "Meta Mode", metaModes),
        BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, "Skip Identical Lines"),
        BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, "Skip Blank Windows"),
        SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
@@ -1939,7 +1937,6 @@ startup (int argc, char *argv[]) {
 
     prefs.textStyle = DEFAULT_TEXT_STYLE;
     prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
-    prefs.metaMode = DEFAULT_META_MODE;
 
     prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
     prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;

@@ -48,8 +48,9 @@ typedef struct {
 } ScreenBox;
 extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
 
+#define KEY_MOD_META 0X100
 typedef enum {
-  KEY_RETURN = 0X100,
+  KEY_RETURN = 0X200,
   KEY_TAB,
   KEY_BACKSPACE,
   KEY_ESCAPE,
