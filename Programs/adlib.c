@@ -31,7 +31,6 @@
 
 #include <stdlib.h>
 #include <unistd.h>  
-#include <math.h>
 
 #include "misc.h"
 #include "system.h"
@@ -104,11 +103,9 @@ int AL_testCard (int errorLevel) {
 }
 
 void AL_evaluatePitch (int pitch, int *exponent, int *mantissa) {
-   /* Would you belive it took three days to work out how to do this ? */
-   *exponent = -1;
-   do {
-      *mantissa = (int)(((float)pitch / 50000.0) / (1/(pow(2,abs(++*exponent-20))))); 
-   } while (*mantissa > 0X3FF);
+   int shift = 21;
+   while ((*mantissa = (int)((float)pitch * (1 << --shift) / 50000.0)) > 0X3FF);
+   *exponent = 20 - shift;
 }
 
 void AL_initiateTone (int channel, int exponent, int mantissa) {
