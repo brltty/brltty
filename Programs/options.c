@@ -45,6 +45,7 @@ typedef struct {
   const OptionEntry *optionTable;
   unsigned int optionCount;
   unsigned char *ensuredSettings;
+  int errorCount;
 } OptionProcessingInformation;
 
 static void
@@ -67,7 +68,7 @@ extendSetting (char **setting, const char *value, int prepend) {
 
 static void
 ensureSetting (
-  const OptionProcessingInformation *info,
+  OptionProcessingInformation *info,
   const OptionEntry *option,
   const char *value
 ) {
@@ -91,6 +92,7 @@ ensureSetting (
           *setting = 0;
         } else {
           LogPrint(LOG_ERR, "Invalid flag setting: %s", value);
+          info->errorCount++;
         }
       }
     }
@@ -99,7 +101,7 @@ ensureSetting (
 
 static void
 processBootParameters (
-  const OptionProcessingInformation *info,
+  OptionProcessingInformation *info,
   const char *parameterName
 ) {
   char *parameterString;
@@ -134,7 +136,7 @@ processBootParameters (
 
 static void
 processEnvironmentVariables (
-  const OptionProcessingInformation *info,
+  OptionProcessingInformation *info,
   const char *prefix
 ) {
   int prefixLength = strlen(prefix);
@@ -164,7 +166,7 @@ processEnvironmentVariables (
 
 static void
 setDefaultOptions (
-  const OptionProcessingInformation *info,
+  OptionProcessingInformation *info,
   int config
 ) {
   int optionIndex;
@@ -176,7 +178,7 @@ setDefaultOptions (
 }
 
 typedef struct {
-  const OptionProcessingInformation *info;
+  OptionProcessingInformation *info;
   char **settings;
 } ConfigurationFileProcessingData;
 
@@ -205,14 +207,17 @@ processConfigurationLine (
 
           if (!operand) {
             LogPrint(LOG_ERR, "Operand not supplied for configuration directive: %s", line);
+            conf->info->errorCount++;
           } else if (strtok(NULL, delimiters)) {
             while (strtok(NULL, delimiters));
             LogPrint(LOG_ERR, "Too many operands for configuration directive: %s", line);
+            conf->info->errorCount++;
           } else {
             char **setting = &conf->settings[optionIndex];
 
             if (*setting && !(option->flags & OPT_Extend)) {
               LogPrint(LOG_ERR, "Configuration directive specified more than once: %s", line);
+              conf->info->errorCount++;
               free(*setting);
               *setting = NULL;
             }
@@ -229,13 +234,14 @@ processConfigurationLine (
       }
     }
     LogPrint(LOG_ERR, "Unknown configuration directive: %s", line);
+    conf->info->errorCount++;
   }
   return 1;
 }
 
 static int
 processConfigurationFile (
-  const OptionProcessingInformation *info,
+  OptionProcessingInformation *info,
   const char *path,
   int optional
 ) {
@@ -264,12 +270,14 @@ processConfigurationFile (
     fclose(file);
     if (processed) return 1;
     LogPrint(LOG_ERR, "File '%s' processing error.", path);
+    info->errorCount++;
   } else {
     int ok = optional && (errno == ENOENT);
     LogPrint((ok? LOG_DEBUG: LOG_ERR),
              "Cannot open configuration file: %s: %s",
              path, strerror(errno));
     if (ok) return 1;
+    info->errorCount++;
   }
   return 0;
 }
@@ -433,6 +441,7 @@ processOptions (
   info.optionTable = optionTable;
   info.optionCount = optionCount;
   info.ensuredSettings = ensuredSettings;
+  info.errorCount = 0;
 
   {
     char *opt = shortOptions;
@@ -510,11 +519,13 @@ processOptions (
 
       case '?':
         LogPrint(LOG_ERR, "Unknown option: -%c", optopt);
-        return 0;
+        info.errorCount++;
+        break;
 
       case ':': /* An invalid option has been specified. */
         LogPrint(LOG_ERR, "Missing operand: -%c", optopt);
-        return 0;
+        info.errorCount++;
+        break;
 
       case 'H':                /* help */
         opt_helpAll = 1;
@@ -559,7 +570,7 @@ processOptions (
   }
   setDefaultOptions(&info, 1);
 
-  return 1;
+  return info.errorCount == 0;
 }
 
 short
