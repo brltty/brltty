@@ -29,7 +29,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _libdir /lib
 %define _sysconfdir /etc
 
-AutoProv: 0
+AutoProv: 1
 
 AutoReq: 1
 Requires: /bin/sh
@@ -48,6 +48,8 @@ Install this package if you use a refreshable braille display.
 Version: @BRLAPI_RELEASE@
 Group: Applications/System
 
+AutoProv: 1
+
 AutoReq: 1
 
 Summary: Appliation Programming Interface for BRLTTY.
@@ -61,6 +63,8 @@ a refreshable braille display.
 %package -n brlapi-devel
 Version: @BRLAPI_RELEASE@
 Group: Development/System
+
+AutoProv: 1
 
 AutoReq: 1
 Requires: brlapi = @BRLAPI_RELEASE@
