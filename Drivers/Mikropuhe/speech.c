@@ -54,9 +54,9 @@ static MPINT_ChannelSpeakFileType mpChannelSpeakFile = NULL;
 
 typedef struct {
   const char *name;
-  const void **address;
+  void *address;
 } SymbolEntry;
-#define SYMBOL_ENTRY(name) {"MPINT_" #name, (const void **)&mp##name}
+#define SYMBOL_ENTRY(name) {"MPINT_" #name, &mp##name}
 static const SymbolEntry symbolTable[] = {
   SYMBOL_ENTRY(ChannelInitEx),
   SYMBOL_ENTRY(ChannelExit),
@@ -341,9 +341,10 @@ loadSynthesisLibrary (void) {
       if ((speechLibrary = loadSharedObject(path))) {
         const SymbolEntry *symbol = symbolTable;
         while (symbol->name) {
-          if (findSharedSymbol(speechLibrary, symbol->name, symbol->address)) {
+          void **address = symbol->address;
+          if (findSharedSymbol(speechLibrary, symbol->name, address)) {
             LogPrint(LOG_DEBUG, "Mikropuhe symbol: %s -> %p",
-                     symbol->name, *symbol->address);
+                     symbol->name, *address);
           } else {
             LogPrint(LOG_ERR, "Mikropuhe symbol not found: %s", symbol->name);
           }
@@ -428,8 +429,10 @@ spk_close (void) {
 
   if (speechLibrary) {
     const SymbolEntry *symbol = symbolTable;
-    while (symbol->name)
-      *(symbol++)->address = NULL;
+    while (symbol->name) {
+      void **address = (symbol++)->address;
+      *address = NULL;
+    }
 
     unloadSharedObject(speechLibrary);
     speechLibrary = NULL;
