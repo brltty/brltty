@@ -24,10 +24,6 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef HAVE_FUNC_SIN
-#include <math.h>
-#endif /* HAVE_FUNC_SIN */
-
 #include "brltty.h"
 #include "misc.h"
 #include "system.h"
@@ -152,32 +148,38 @@ static int writeAmplitude (int amplitude) {
 
 static int playPcm (int note, int duration) {
    if (fileDescriptor != -1) {
-      unsigned long int sampleCount = sampleRate * duration / 1000;
+      long int sampleCount = sampleRate * duration / 1000;
       if (note) {
-         double volume = 32767.0 * (double)prefs.pcmVolume / 100.0;
-         double waveLength = (double)sampleRate / noteFrequencies[note];
-         int sampleNumber = 0;
-         int wasNegative = 1;
-         LogPrint(LOG_DEBUG, "Tone: msec=%d smct=%lu note=%d wvln=%.2E",
-                  duration, sampleCount, note, waveLength);
-         while (1) {
-            double amplitude =
-#ifdef HAVE_FUNC_SIN
-               sin(((double)sampleNumber / waveLength) * (2.0 * M_PI))
-#else /* HAVE_FUNC_SIN */
-               (double)((((int)((double)sampleNumber * 2.0 / waveLength) % 2) * -2) + 1)
-#endif /* HAVE_FUNC_SIN */
-               ;
-            int isNegative = amplitude < 0;
-            if ((sampleNumber >= sampleCount) && wasNegative && !isNegative) break;
-            if (!writeAmplitude((int)(amplitude * volume))) return 0;
-            wasNegative = isNegative;
-            ++sampleNumber;
+         /* A triangle waveform sounds nice, is lightweight, and avoids
+          * relying too much on floating-point performance and/or on
+          * expensive math functions like sin(). Considerations like
+	  * these are especially important on PDAs without any FPU.
+          */ 
+         float maxAmplitude = 32767.0 * prefs.pcmVolume / 100;
+         float waveLength = sampleRate / noteFrequencies[note];
+         float stepSample = 4 * maxAmplitude / waveLength;
+         float currSample = 0;
+         if (waveLength <= 2) stepSample = 0;
+         LogPrint(LOG_DEBUG, "Tone: msec=%d smct=%lu note=%d",
+                  duration, sampleCount, note);
+         while (sampleCount > 0) {
+            do {
+               sampleCount--;
+               if (!writeAmplitude(currSample)) return 0;
+               currSample += stepSample;
+               if (currSample >= maxAmplitude) {
+                  currSample = 2*maxAmplitude - currSample;
+                  stepSample = -stepSample;
+               } else if (currSample <= -maxAmplitude) {
+                  currSample = -2*maxAmplitude - currSample;
+                  stepSample = -stepSample;
+               }
+            } while ((stepSample < 0) || (currSample < 0) || (currSample > stepSample));
          }
       } else {
          LogPrint(LOG_DEBUG, "Tone: msec=%d smct=%lu note=%d",
                   duration, sampleCount, note);
-         while (sampleCount) {
+         while (sampleCount > 0) {
             if (!writeAmplitude(0)) return 0;
             --sampleCount;
          }
