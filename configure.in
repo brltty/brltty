@@ -702,13 +702,13 @@ in
 esac
 if test -n "${usb_object}"
 then
-   usb_objects="usb."'$O'" usb_${usb_object}."'$O'
    BRLTTY_ARG_DISABLE(
       [usb-support],
       [support for the Universal Serial Bus],
       [],
 [dnl
       AC_DEFINE([ENABLE_USB_SUPPORT])
+      usb_objects="usb."'$O'" usb_${usb_object}."'$O'
 ])
 fi
 AC_SUBST([usb_objects])
@@ -725,14 +725,14 @@ in
 esac
 if test -n "${bluetooth_object}"
 then
-   bluetooth_objects="bluez."'$O'" bluez_${bluetooth_object}."'$O'
-   BRLTTY_ARG_DISABLE(
-      [bluetooth-support],
-      [support for bluetooth capable devices],
-      [],
+   AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
+      BRLTTY_ARG_DISABLE(
+         [bluetooth-support],
+         [support for bluetooth capable devices],
+         [],
 [dnl
-      AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
          AC_DEFINE([ENABLE_BLUETOOTH_SUPPORT])
+         bluetooth_objects="bluez."'$O'" bluez_${bluetooth_object}."'$O'
 ])
 ])
 fi
