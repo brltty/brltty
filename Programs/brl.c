@@ -27,7 +27,7 @@
 #include <fcntl.h>
 
 #include "misc.h"
-#include "system.h"
+#include "sysmisc.h"
 #include "message.h"
 #include "brl.h"
 
@@ -46,7 +46,6 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) { re
 static void brl_writeWindow (BrailleDisplay *brl) { }
 static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) { }
 
-static const char *symbolName = "brl_driver";
 const BrailleDriver *braille = &noBraille;
 
 /*
@@ -67,59 +66,20 @@ void *contractionTable = NULL;
 /* load driver from library */
 /* return true (nonzero) on success */
 const BrailleDriver *
-loadBrailleDriver (const char **driver) {
-  const void *symbolAddress = NULL;
-
-  if (*driver != NULL)
-    if (strcmp(*driver, noBraille.identifier) == 0) {
-      *driver = NULL;
-      return &noBraille;
-    }
-
-  #ifdef BRAILLE_BUILTIN
-    {
-      extern BrailleDriver brl_driver;
-      if (*driver != NULL)
-        if (strcmp(*driver, brl_driver.identifier) == 0)
-          *driver = NULL;
-      if (*driver == NULL) {
-        return &brl_driver;
-      }
-    }
-  #else /* BRAILLE_BUILTIN */
-    if (*driver == NULL) {
-      return &noBraille;
-    }
-  #endif /* BRAILLE_BUILTIN */
-
-  {
-    const char *libraryName = *driver;
-
-    /* allow shortcuts */
-    if (strlen(libraryName) == 2) {
-      char buffer[0X80];
-      snprintf(buffer, sizeof(buffer), "%sb%s.%s",
-               LIBRARY_NAME, libraryName, LIBRARY_EXTENSION);
-      libraryName = strdup(buffer);
-    }
-
-    if (libraryName) {
-      void *libraryHandle = loadSharedObject(libraryName);
-      if (libraryHandle) {
-        if (!findSharedSymbol(libraryHandle, symbolName, &symbolAddress)) {
-          LogPrint(LOG_ERR, "Braille driver symbol not found: %s", symbolName);
-          unloadSharedObject(libraryHandle);
-          symbolAddress = NULL;
-        }
-      } else {
-        LogPrint(LOG_ERR, "Cannot open braille driver library: %s", libraryName);
-      }
-      if (libraryName != *driver) free((void *)libraryName);
-    } else {
-    }
-  }
-
-  return symbolAddress;
+loadBrailleDriver (const char **driver, const char *driverDirectory) {
+#ifdef BRAILLE_BUILTIN
+  extern BrailleDriver brl_driver;
+  const void *builtinAddress = &brl_driver;
+  const char *builtinIdentifier = brl_driver.identifier;
+#else /* BRAILLE_BUILTIN */
+  const void *builtinAddress = NULL;
+  const char *builtinIdentifier = NULL;
+#endif /* BRAILLE_BUILTIN */
+  return loadDriver(driver,
+                    driverDirectory, "brl_driver",
+                    "braille", 'b',
+                    builtinAddress, builtinIdentifier,
+                    &noBraille, noBraille.identifier);
 }
 
 int

@@ -26,7 +26,7 @@
 #include <fcntl.h>
 
 #include "misc.h"
-#include "system.h"
+#include "sysmisc.h"
 #include "spk.h"
 
 #define SPKSYMBOL noSpeech
@@ -41,65 +41,25 @@ static void spk_say (const unsigned char *buffer, int len) { }
 static void spk_mute (void) { }
 static void spk_close (void) { }
 
-static const char *symbolName = "spk_driver";
 const SpeechDriver *speech = &noSpeech;
 
 /* load driver from library */
 /* return true (nonzero) on success */
 const SpeechDriver *
-loadSpeechDriver (const char **driver) {
-  const void *symbolAddress = NULL;
-
-  if (*driver != NULL)
-    if (strcmp(*driver, noSpeech.identifier) == 0) {
-      *driver = NULL;
-      return &noSpeech;
-    }
-
-  #ifdef SPEECH_BUILTIN
-    {
-      extern SpeechDriver spk_driver;
-      if (*driver != NULL)
-        if (strcmp(*driver, spk_driver.identifier) == 0)
-          *driver = NULL;
-      if (*driver == NULL) {
-        return &spk_driver;
-      }
-    }
-  #else /* SPEECH_BUILTIN */
-    if (*driver == NULL) {
-      return &noSpeech;
-    }
-  #endif /* SPEECH_BUILTIN */
-
-  {
-    const char *libraryName = *driver;
-
-    /* allow shortcuts */
-    if (strlen(libraryName) == 2) {
-      char buffer[0X80];
-      snprintf(buffer, sizeof(buffer), "%ss%s.%s",
-               LIBRARY_NAME, libraryName, LIBRARY_EXTENSION);
-      libraryName = strdup(buffer);
-    }
-
-    if (libraryName) {
-      void *libraryHandle = loadSharedObject(libraryName);
-      if (libraryHandle) {
-        if (!findSharedSymbol(libraryHandle, symbolName, &symbolAddress)) {
-          LogPrint(LOG_ERR, "Speech driver symbol not found: %s", symbolName);
-          unloadSharedObject(libraryHandle);
-          symbolAddress = NULL;
-        }
-      } else {
-        LogPrint(LOG_ERR, "Cannot open speech driver library: %s", libraryName);
-      }
-      if (libraryName != *driver) free((void *)libraryName);
-    } else {
-    }
-  }
-
-  return symbolAddress;
+loadSpeechDriver (const char **driver, const char *driverDirectory) {
+#ifdef SPEECH_BUILTIN
+  extern SpeechDriver spk_driver;
+  const void *builtinAddress = &spk_driver;
+  const char *builtinIdentifier = spk_driver.identifier;
+#else /* SPEECH_BUILTIN */
+  const void *builtinAddress = NULL;
+  const char *builtinIdentifier = NULL;
+#endif /* SPEECH_BUILTIN */
+  return loadDriver(driver,
+                    driverDirectory, "spk_driver",
+                    "speech", 's',
+                    builtinAddress, builtinIdentifier,
+                    &noSpeech, noSpeech.identifier);
 }
 
 int

@@ -44,7 +44,7 @@ typedef struct {
   int (*isSpeaking) (void);		/* get current speaking position */
 } SpeechDriver;
 
-extern const SpeechDriver *loadSpeechDriver (const char **libraryName);
+extern const SpeechDriver *loadSpeechDriver (const char **driver, const char *driverDirectory);
 extern int listSpeechDrivers (void);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;

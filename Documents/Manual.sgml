@@ -1015,6 +1015,11 @@ It must be run as root.
     If it's not specified, then the device configured via the
     <ref id="build-braille-device" name="--with-braille-device"> build option
     is assumed.
+  <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the drivers reside.
+    If it's not specified, then the device configured via the
+    <ref id="build-library-directory" name="--libdir"> build option
+    is assumed.
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
 </descrip>

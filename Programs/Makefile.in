@@ -109,7 +109,7 @@ rangelist.o:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.o config.o options.o misc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+BRLTTY_OBJECTS = main.o config.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
 
 brltty: $(BRLTTY_OBJECTS) $(BRAILLE_TARGETS) $(SPEECH_TARGETS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(LDLIBS)
@@ -122,6 +122,9 @@ config.o:
 
 misc.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
+
+sysmisc.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sysmisc.c
 
 sys_linux.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
@@ -146,7 +149,7 @@ spk.o:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.o options.o misc.o $(SYSTEM_OBJECT) brl.o
+BRLTEST_OBJECTS = brltest.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) brl.o
 
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)

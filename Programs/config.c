@@ -74,6 +74,7 @@ static const char *opt_configurationFile = NULL;
 static const char *opt_contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 static short opt_environmentVariables = 0;
+static const char *opt_libraryDirectory = NULL;
 static short opt_logLevel = LOG_NOTICE;
 static short opt_noDaemon = 0;
 static short opt_noSpeech = 0;
@@ -98,14 +99,15 @@ static char *cfg_contractionTable = NULL;
 #ifdef ENABLE_API
 static char *cfg_apiParameters = NULL;
 #endif /* ENABLE_API */
-static char *cfg_brailleDevice = NULL;
 static char *cfg_brailleDriver = NULL;
+static char *cfg_brailleDevice = NULL;
 static char *cfg_brailleParameters = NULL;
 #ifdef ENABLE_SPEECH_SUPPORT
 static char *cfg_speechDriver = NULL;
 static char *cfg_speechParameters = NULL;
 #endif /* ENABLE_SPEECH_SUPPORT */
 static char *cfg_screenParameters = NULL;
+static char *cfg_libraryDirectory = NULL;
 
 static const BrailleDriver *brailleDriver;
 static char **brailleParameters = NULL;
@@ -165,13 +167,13 @@ configureApiParameters (const char *delimiters) {
 #endif /* ENABLE_API */
 
 static int
-configureBrailleDevice (const char *delimiters) {
-  return getToken(&cfg_brailleDevice, delimiters);
+configureBrailleDriver (const char *delimiters) {
+  return getToken(&cfg_brailleDriver, delimiters);
 }
 
 static int
-configureBrailleDriver (const char *delimiters) {
-  return getToken(&cfg_brailleDriver, delimiters);
+configureBrailleDevice (const char *delimiters) {
+  return getToken(&cfg_brailleDevice, delimiters);
 }
 
 static int
@@ -194,6 +196,11 @@ configureSpeechParameters (const char *delimiters) {
 static int
 configureScreenParameters (const char *delimiters) {
   return getToken(&cfg_screenParameters, delimiters);
+}
+
+static int
+configureLibraryDirectory (const char *delimiters) {
+  return getToken(&cfg_libraryDirectory, delimiters);
 }
 
 BEGIN_OPTION_TABLE
@@ -235,6 +242,8 @@ BEGIN_OPTION_TABLE
    "Parameters for the braille driver."},
   {'E', "environment-variables", NULL, NULL, 0,
    "Recognize environment variables."},
+  {'L', "library-directory", "directory", configureLibraryDirectory, OPT_Hidden,
+   "Path to directory for loading drivers."},
   {'M', "message-delay", "csecs", NULL, 0,
    "Message hold time [400]."},
   {'N', "no-speech", NULL, NULL, 0,
@@ -516,7 +525,7 @@ initializeBraille (void) {
 
 static void
 getBrailleDriver (void) {
-  if ((brailleDriver = loadBrailleDriver(&opt_brailleDriver))) {
+  if ((brailleDriver = loadBrailleDriver(&opt_brailleDriver, opt_libraryDirectory))) {
     processParameters(&brailleParameters, brailleDriver->parameters, "braille driver",
                       opt_brailleParameters, cfg_brailleParameters, "BRLTTY_BRAILLE_PARAMETERS");
   } else {
@@ -583,7 +592,7 @@ initializeSpeech (void) {
 
 static void
 getSpeechDriver (void) {
-  if ((speechDriver = loadSpeechDriver(&opt_speechDriver))) {
+  if ((speechDriver = loadSpeechDriver(&opt_speechDriver, opt_libraryDirectory))) {
     processParameters(&speechParameters, speechDriver->parameters, "speech driver",
                       opt_speechParameters, cfg_speechParameters, "BRLTTY_SPEECH_PARAMETERS");
   } else {
@@ -1349,6 +1358,9 @@ handleOption (const int option) {
     case 'E':                        /* parameter to speech driver */
       opt_environmentVariables = 1;
       break;
+    case 'L':                        /* name of driver */
+      opt_libraryDirectory = optarg;
+      break;
     case 'M': {        /* message delay */
       int value;
       int minimum = 1;
@@ -1455,6 +1467,7 @@ startup (int argc, char *argv[]) {
 #ifdef ENABLE_SPEECH_SUPPORT
   ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER", -1);
 #endif /* ENABLE_SPEECH_SUPPORT */
+  ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
 
   if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
   if (*opt_brailleDevice == 0) {

@@ -43,9 +43,12 @@ static unsigned char statusCells[StatusCellCount];        /* status cell buffer 
 BEGIN_OPTION_TABLE
   {'d', "device", "device", NULL, 0,
    "Path to device for accessing braille display."},
+  {'L', "library-directory", "directory", NULL, 0,
+   "Path to directory for loading drivers."},
 END_OPTION_TABLE
 
 static const char *opt_brailleDevice = NULL;
+static const char *opt_libraryDirectory = LIBRARY_DIRECTORY;
 
 static int
 handleOption (const int option) {
@@ -54,6 +57,9 @@ handleOption (const int option) {
       return 0;
     case 'd':
       opt_brailleDevice = optarg;
+      break;
+    case 'L':
+      opt_libraryDirectory = optarg;
       break;
   }
   return 1;
@@ -103,7 +109,7 @@ main (int argc, char *argv[]) {
   }
   if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
 
-  if ((braille = loadBrailleDriver(&driver))) {
+  if ((braille = loadBrailleDriver(&driver, opt_libraryDirectory))) {
     const char *const *parameterNames = braille->parameters;
     char **parameterSettings;
     if (!parameterNames) {

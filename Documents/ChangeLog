@@ -2,6 +2,7 @@ Note: this file is in reversed chronological order (bottom to top).
 
 
  - BRLTTY 3.3 released:
+   Add the -L (--library-directory=) option to brltty and brltest. (dm)
    Wrap long output lines from configure --help. (dm)
    Enhancements to en-us-g2 contraction table. (jb)
    Braille Lite driver enhancements: (dm)
