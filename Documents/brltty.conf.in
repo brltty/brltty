@@ -120,6 +120,9 @@
 #braille-parameters fs:DebugPackets=no # [no,yes]
 #braille-parameters fs:StatusCells= # [0,n,-n]
 
+# HandyTech Braille Driver Parameters
+#braille-parameters ht:InputMode=no # [no,yes]
+
 # Papenmeier Braille Driver Parameters
 #braille-parameters pm:ConfigFile=@DATA_DIRECTORY@/brltty-pm.conf
 #braille-parameters pm:DebugKeys=no # [no,yes]

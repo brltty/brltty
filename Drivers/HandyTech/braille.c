@@ -28,6 +28,11 @@
 #include "Programs/misc.h"
 #include "Programs/at2.h"
 
+typedef enum {
+  PARM_INPUTMODE
+} DriverParameter;
+#define BRLPARMS "inputmode"
+
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
@@ -46,7 +51,7 @@ typedef struct {
   int status;
 } Keys;
 static Keys currentKeys, pressedKeys, nullKeys;
-static unsigned char inputMode;
+static unsigned int inputMode;
 
 /* Braille display parameters */
 typedef int (ByteInterpreter) (BRL_DriverCommandContext context, unsigned char byte, int *command);
@@ -562,7 +567,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         unsigned char response[sizeof(HandyDescription) + 1];
         if (io->readBytes(response, sizeof(response), 0) == sizeof(response)) {
           if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
-            if (identifyModel(brl, response[sizeof(HandyDescription)])) return 1;
+            if (identifyModel(brl, response[sizeof(HandyDescription)])) {
+              if (*parameters[PARM_INPUTMODE])
+                validateYesNo(&inputMode, "input mode",
+                              parameters[PARM_INPUTMODE]);
+
+              return 1;
+            }
             deallocateBuffers();
           }
         }
