@@ -324,6 +324,10 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     {&serial->pendingAttributes.c_iflag, IXON, SERIAL_FLOW_OUTPUT_XON},
 #endif /* IXON */
 
+#ifdef linux
+    {&serial->pendingAttributes.c_cflag, 0x20000000, SERIAL_FLOW_INPUT_CTS},
+#endif /* linux */
+
     {NULL, 0, 0}
   };
   const FlowControlEntry *entry = flowControlTable;

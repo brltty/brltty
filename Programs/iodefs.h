@@ -31,15 +31,17 @@ typedef enum {
 } SerialParity;
 
 typedef enum {
-  SERIAL_FLOW_OUTPUT_XON = 0X01, /* output controlled by X-ON/X-OFF */
-  SERIAL_FLOW_OUTPUT_CTS = 0X02, /* output controlled by CTS(input) */
-  SERIAL_FLOW_OUTPUT_DSR = 0X04, /* output controlled by DSR(input) */
-  SERIAL_FLOW_OUTPUT_RTS = 0X08, /* output indicated by RTS(output) */
+  SERIAL_FLOW_OUTPUT_XON = 0X001, /* output controlled by X-ON/X-OFF(input) */
+  SERIAL_FLOW_OUTPUT_CTS = 0X002, /* output controlled by CTS(input) */
+  SERIAL_FLOW_OUTPUT_DSR = 0X004, /* output controlled by DSR(input) */
+  SERIAL_FLOW_OUTPUT_RTS = 0X008, /* output indicated by RTS(output) */
 
-  SERIAL_FLOW_INPUT_XON  = 0X10, /* input controlled by X-ON/X-OFF */
-  SERIAL_FLOW_INPUT_RTS  = 0X20, /* input controlled by RTS(output) */
-  SERIAL_FLOW_INPUT_DTR  = 0X40, /* input controlled by DTR(output) */
-  SERIAL_FLOW_INPUT_DSR  = 0X80, /* input enabled by DSR(input) */
+  SERIAL_FLOW_INPUT_XON  = 0X010, /* input controlled by X-ON/X-OFF(output) */
+  SERIAL_FLOW_INPUT_RTS  = 0X020, /* input controlled by RTS(output) */
+  SERIAL_FLOW_INPUT_DTR  = 0X040, /* input controlled by DTR(output) */
+  SERIAL_FLOW_INPUT_DSR  = 0X080, /* input enabled by DSR(input) */
+
+  SERIAL_FLOW_INPUT_CTS  = 0X100, /* input indicated by CTS(input) */
 
   SERIAL_FLOW_HARDWARE   = (SERIAL_FLOW_OUTPUT_CTS | SERIAL_FLOW_INPUT_RTS),
 

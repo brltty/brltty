@@ -31,9 +31,10 @@
 #include "Programs/message.h"
 
 typedef enum {
-  PARM_DISPSIZE=0
+  PARM_DISPSIZE=0,
+  PARM_PROMVER=1
 } DriverParameter;
-#define BRLPARMS "displaysize"
+#define BRLPARMS "displaysize", "promVersion"
 
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_KEY_CODES
@@ -188,9 +189,14 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   int i;
 #endif /* SendIdReq */
   int ds = BRAILLEDISPLAYSIZE;
+  int promVersion = 4;
   if (*parameters[PARM_DISPSIZE]) {
     int dsmin=20, dsmax=40;
     validateInteger(&ds, "Size of braille display",parameters[PARM_DISPSIZE],&dsmin,&dsmax);
+  }
+  if (*parameters[PARM_PROMVER]) {
+    int pvmin=3, pvmax=6;
+    validateInteger(&promVersion, "PROM version",parameters[PARM_PROMVER],&pvmin,&pvmax);
   }
 
   if (!isSerialDevice(&device)) {
@@ -199,6 +205,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   }
   if (!(serialDevice = serialOpenDevice(device))) return 0;
   serialSetParity(serialDevice, SERIAL_PARITY_ODD);
+  if (promVersion<4) serialSetFlowControl(serialDevice, SERIAL_FLOW_INPUT_CTS);
   serialRestartDevice(serialDevice,57600); 
 #ifdef SendIdReq
   {
