@@ -591,10 +591,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       {
         int cells = 3;
         const char *word = parameters[PARM_STATUSCELLS];
-        if (word && *word) {
+
+        {
           int maximum = textCells / 2;
           int minimum = -maximum;
-          int value;
+          int value = cells;
           if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
             cells = value;
           }
