@@ -278,6 +278,27 @@ chooseUsbDevice (UsbDevice *device, void *data) {
       }
       usbReleaseInterface(device, usbInterface);
     }
+  } else if ((descriptor->idVendor  == 0X0403) &&
+             (descriptor->idProduct == 0X6001)) {
+    /* A new generation HandyTech Braille Star 40/80 */
+    if (!usbVerifySerialNumber(device, serialNumber)) return 0;
+
+    usbInterface = 0;
+    if (usbClaimInterface(device, usbInterface)) {
+      if (usbSetConfiguration(device, 1)) {
+        if (usbSetAlternative(device, usbInterface, 0)) {
+          usbSerial = usbGetSerialOperations(device);
+          usbSerial->setBaud(device, baud2integer(baud));
+          usbSerial->setFlowControl(device, 0);
+          usbSerial->setDataFormat(device, 8, 1, USB_SERIAL_PARITY_ODD);
+
+          usbOutputEndpoint = 2;
+          usbInputEndpoint = 1;
+          return 1;
+        }
+      }
+      usbReleaseInterface(device, usbInterface);
+    }
   }
   return 0;
 }
@@ -1123,13 +1144,13 @@ interpretBrailleStarKeys (DriverCommandContext context, const Keys *keys, int *c
         break;
       case (ROCKER_LEFT_TOP):
         *command = VAL_PASSKEY + VPK_CURSOR_UP;
- 	return 1;
+        return 1;
       case (ROCKER_RIGHT_TOP):
         *command = CMD_LNUP;
         return 1;
       case (ROCKER_LEFT_BOTTOM):
         *command = VAL_PASSKEY + VPK_CURSOR_DOWN;
- 	return 1;
+        return 1;
       case (ROCKER_RIGHT_BOTTOM):
         *command = CMD_LNDN;
         return 1;
