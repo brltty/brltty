@@ -108,17 +108,27 @@ openPcmDevice (int errorLevel, const char *device) {
       snd_pcm_channel_info_t info;
       info.channel = SND_PCM_CHANNEL_PLAYBACK;
       if ((code = snd_pcm_channel_info(pcm->handle, &info)) >= 0) {
+	LogPrint(LOG_DEBUG, "QSA PCM Info: Frag=%d-%d Rate=%d-%d Chan=%d-%d",
+	         info.min_fragment_size, info.max_fragment_size,
+	         info.min_rate, info.max_rate,
+	         info.min_voices, info.max_voices);
 	memset(&pcm->parameters, 0, sizeof(pcm->parameters));
 
 	pcm->parameters.channel = info.channel;
-	pcm->parameters.mode = SND_PCM_MODE_BLOCK;
-
 	pcm->parameters.start_mode = SND_PCM_START_DATA;
 	pcm->parameters.stop_mode = SND_PCM_STOP_ROLLOVER;
 
-	pcm->parameters.buf.block.frag_size = MIN(MAX(0X400, info.min_fragment_size), info.max_fragment_size);
-	pcm->parameters.buf.block.frags_min = 1;
-	pcm->parameters.buf.block.frags_max = 0X40;
+	switch (pcm->parameters.mode = SND_PCM_MODE_BLOCK) {
+	  case SND_PCM_MODE_BLOCK:
+	    pcm->parameters.buf.block.frag_size = MIN(MAX(0X400, info.min_fragment_size), info.max_fragment_size);
+	    pcm->parameters.buf.block.frags_min = 1;
+	    pcm->parameters.buf.block.frags_max = 0X40;
+	    break;
+
+	  default:
+	    LogPrint(LOG_WARNING, "Unsupported QSA PCM mode: %d", pcm->parameters.mode);
+	    goto openError;
+	}
 
 	pcm->parameters.format.interleave = 1;
 	pcm->parameters.format.rate = info.max_rate;
