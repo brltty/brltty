@@ -238,11 +238,17 @@ typedef struct {
       { VAL_PASSKEY+VPK_BACKSPACE   , OFFS_FRONT +  5, 0004 }, \
       { VAL_PASSKEY+VPK_RETURN      , OFFS_FRONT +  9, 0004 }, \
                                                                \
-      { CMD_SPKHOME                 , OFFS_FRONT +  7, 0040 }, \
-      { CMD_SAY_ABOVE               , OFFS_FRONT +  6, 0040 }, \
-      { CMD_SAY_BELOW               , OFFS_FRONT +  8, 0040 }, \
-      { CMD_MUTE                    , OFFS_FRONT +  5, 0040 }, \
-      { CMD_SAY_LINE                , OFFS_FRONT +  9, 0040 }, \
+      { CMD_SPKHOME                 , OFFS_FRONT +  7, 0100 }, \
+      { CMD_SAY_ABOVE               , OFFS_FRONT +  6, 0100 }, \
+      { CMD_SAY_BELOW               , OFFS_FRONT +  8, 0100 }, \
+      { CMD_MUTE                    , OFFS_FRONT +  5, 0100 }, \
+      { CMD_SAY_LINE                , OFFS_FRONT +  9, 0100 }, \
+                                                               \
+      { CMD_RESTARTSPEECH           , OFFS_FRONT +  7, 0200 }, \
+      { CMD_SAY_SLOWER              , OFFS_FRONT +  6, 0200 }, \
+      { CMD_SAY_FASTER              , OFFS_FRONT +  8, 0200 }, \
+      { CMD_SAY_SOFTER              , OFFS_FRONT +  5, 0200 }, \
+      { CMD_SAY_LOUDER              , OFFS_FRONT +  9, 0200 }, \
                                                                \
       { CR_CUTBEGIN                 , ROUTINGKEY     , 0100 }, \
       { CR_CUTAPPEND                , ROUTINGKEY     , 0004 }, \
