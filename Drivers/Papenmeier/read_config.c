@@ -194,7 +194,7 @@ void terminals(int help, int verbose)
 	      search_symbol(HELPFILE), terminal->helpFile);
 
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(SIZE),      terminal->columns);
+	      search_symbol(DISPLAYSIZE),      terminal->columns);
       if (terminal->statusCount)
         fprintf(fh, "%s = %d\n", 
                 search_symbol(STATCELLS), terminal->statusCount);
