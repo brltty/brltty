@@ -647,7 +647,7 @@ findBrailleDriver (int *internal) {
 
         if (isSerialDevice(&dev)) {
           static const char *serialIdentifiers[] = {
-            "pm",
+            "pm", "ts",
             NULL
           };
           identifier = serialIdentifiers;
