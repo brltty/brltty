@@ -577,8 +577,8 @@ static void
 dimensionsChanged (int rows, int columns) {
   fwinshift = MAX(columns-prefs.windowOverlap, 1);
   hwinshift = columns / 2;
-  vwinshift = 5;
-  LogPrint(LOG_DEBUG, "fwin=%d hwin=%d vwin=%d",
+  vwinshift = (rows > 1)? rows: 5;
+  LogPrint(LOG_DEBUG, "Shifts: fwin=%d hwin=%d vwin=%d",
            fwinshift, hwinshift, vwinshift);
 }
 
