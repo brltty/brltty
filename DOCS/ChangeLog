@@ -1,7 +1,15 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
-   BrailleLite enhancements. (sd)
+   Fix problems with the skipping of blank windows and end-of-liens. (sd)
+   Make message delay by default; add option for no delay. (sd)
+   Display message when sound is off for critical operations like freeze/unfreeze. (sd)
+   Maintain reverse text translation table for input from braille display. (dm,sd)
+   Allow braille display to stick out to the right of the screen. (sd)
+   Added commands to switch to the next and previous virtual terminals. (sd)
+   Cosss-compile support added to make file. (sd)
+   BrailleLite driver enhancements. (sd)
+   Clean up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
    Add the HandyTech driver. Andreas Gross <andi@andi-bika.de>
    Add cut-and-paste for VideoBraille. (Christian Comaschi)
    List translation tables in make file. (dm)

@@ -637,189 +637,137 @@ void
 configmenu (void)
 {
   static short savecfg = 0;		/* 1 == save config on exit */
-  static struct item
-    {
-      short *ptr;			/* pointer to the item value */
-      char *desc;			/* item description */
-      short bool;			/* 0 == numeric, 1 == bolean */
-      short min;			/* minimum range */
-      short max;			/* maximum range */
-    }
-  menu[] =
-  {
-    {
-      &savecfg, "save config on exit", 1, 0, 1
-    }
-    ,
-    {
-      &env.csrvis, "cursor is visible", 1, 0, 1
-    }
-    ,
-    {
-      &env.csrsize, "block cursor", 1, 0, 1
-    }
-    ,
-    {
-      &env.csrblink, "blinking cursor", 1, 0, 1
-    }
-    ,
-    {
-      &env.capblink, "blinking capitals", 1, 0, 1
-    }
-    ,
-    {
-      &env.attrvis, "attributes are visible", 1, 0, 1
-    }
-    ,
-    {
-      &env.attrblink, "blinking attributes", 1, 0, 1
-    }
-    ,
-    {
-      &env.csroncnt, "blinking cursor visible period", 0, 1, 16
-    }
-    ,
-    {
-      &env.csroffcnt, "blinking cursor invisible period", 0, 1, 16
-    }
-    ,
-    {
-      &env.caponcnt, "blinking caps visible period", 0, 1, 16
-    }
-    ,
-    {
-      &env.capoffcnt, "blinking caps invisible period", 0, 1, 16
-    }
-    ,
-    {
-      &env.attroncnt, "blinking attributes visible period", 0, 1, 16
-    }
-    ,
-    {
-      &env.attroffcnt, "blinking attributes invisible period", 0, 1, 16
-    }
-    ,
-    {
-      &env.sixdots, "six dot text mode", 1, 0, 1
-    }
-    ,
-    {
-      &env.slidewin, "sliding window", 1, 0, 1
-    }
-    ,
-    {
-      &env.skpidlns, "skip identical lines", 1, 0, 1
-    }
-    ,
-    {
-      &env.skpblnkeol, "skip blank end-of-lines", 1, 0, 1
-    }
-    ,
-    {
-      &env.skpblnkwins, "skip blank braille windows", 1, 0, 1
-    }
-    ,
-    {
-      &env.sound, "audio signals", 1, 0, 1
-    }
-    ,
-    {
-      &env.stcellstyle, "status cells style", 0, 0, NB_STCELLSTYLES
-    }
+  char *booleanValues[] = {"No", "Yes"};
+  char *cursorShapes[] = {"Underline", "Block"};
+  char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Papenmeier", "MDV"};
+  char *textStyles[] = {"8 dot", "6 dot"};
+  typedef struct {
+     short *setting;			/* pointer to the item value */
+     char *description;			/* item description */
+     char **names;			/* 0 == numeric, 1 == bolean */
+     short minimum;			/* minimum range */
+     short maximum;			/* maximum range */
+  } MenuItem;
+  #define MENU_ITEM(setting, description, values, minimum, maximum) {&setting, description, values, minimum, maximum}
+  #define NUMERIC_ITEM(setting, description, minimum, maximum) MENU_ITEM(setting, description, NULL, minimum, maximum)
+  #define TIMING_ITEM(setting, description) NUMERIC_ITEM(setting, description, 1, 16)
+  #define SYMBOLIC_ITEM(setting, description, names) MENU_ITEM(setting, description, names, 0, ((sizeof(names) / sizeof(names[0])) - 1))
+  #define BOOLEAN_ITEM(setting, description) SYMBOLIC_ITEM(setting, description, booleanValues)
+  MenuItem menu[] = {
+     BOOLEAN_ITEM(savecfg, "Save Settings on Exit"),
+     SYMBOLIC_ITEM(env.sixdots, "Text Style", textStyles),
+     BOOLEAN_ITEM(env.skpidlns, "Skip Identical Lines"),
+     BOOLEAN_ITEM(env.skpblnkeol, "Skip Blank End-of-Lines"),
+     BOOLEAN_ITEM(env.skpblnkwins, "Skip Blank Windows"),
+     BOOLEAN_ITEM(env.slidewin, "Sliding Window"),
+     BOOLEAN_ITEM(env.csrvis, "Show Cursor"),
+     SYMBOLIC_ITEM(env.csrsize, "Cursor Shape", cursorShapes),
+     BOOLEAN_ITEM(env.csrblink, "Blinking Cursor"),
+     TIMING_ITEM(env.csroncnt, "Blinking Cursor Visible Period"),
+     TIMING_ITEM(env.csroffcnt, "Blinking Cursor Invisible Period"),
+     BOOLEAN_ITEM(env.attrvis, "Show Attributes"),
+     BOOLEAN_ITEM(env.attrblink, "Blinking Attributes"),
+     TIMING_ITEM(env.attroncnt, "Blinking Attributes Visible Period"),
+     TIMING_ITEM(env.attroffcnt, "Blinking Attributes Invisible Period"),
+     BOOLEAN_ITEM(env.capblink, "Blinking Capitals"),
+     TIMING_ITEM(env.caponcnt, "Blinking Capitals Visible Period"),
+     TIMING_ITEM(env.capoffcnt, "Blinking Capitals Invisible Period"),
+     BOOLEAN_ITEM(env.sound, "Audio Signals"),
+     SYMBOLIC_ITEM(env.stcellstyle, "Status Cells Style", statusStyles)
   };
-  struct brltty_env oldenv = env;	/* backup configuration */
-  int i;				/* for loops */
-  int k;				/* readbrl() value */
-  int l;				/* current menu item length */
-  int x = 0;				/* braille window pos in buffer */
-  static int n = 0;			/* current menu item */
-  int maxn = sizeof(menu)/sizeof(struct item) - 1;
-					/* hiest menu item index */
-  int updated = 0;			/* 1 when item's value has changed */
+  int menuSize = sizeof(menu) / sizeof(menu[0]);
+  static int menuIndex = 0;			/* current menu item */
+  struct brltty_env oldEnvironment = env;	/* backup configuration */
   unsigned char buffer[40];		/* display buffer */
+  int length;				/* current menu item length */
+  int indent = 0;				/* braille window pos in buffer */
+  int index;				/* for loops */
+  int key;				/* readbrl() value */
+  int updated = 0;			/* 1 when item's value has changed */
 
   /* status cells */
-  memset (statcells, 0, sizeof(statcells));
+  memset(statcells, 0, sizeof(statcells));
   statcells[0] = texttrans['C'];
   statcells[1] = texttrans['n'];
   statcells[2] = texttrans['f'];
   statcells[3] = texttrans['i'];
   statcells[4] = texttrans['g'];
   braille->setstatus(statcells);
-
-  message ("Configuration menu", 0);
+  message("Configuration Menu", 0);
 
   while (keep_going)
     {
+      MenuItem *item = &menu[menuIndex];
+
       /* First we draw the current menu item in the buffer */
-      strcpy (buffer, menu[n].desc);
-      if (menu[n].bool)
-	sprintf (buffer + strlen(buffer), ": %s", *menu[n].ptr ? "on" : "off");
+      sprintf(buffer, "%s: ", item->description);
+      if (item->names)
+         strcat(buffer, item->names[*item->setting]);
       else
-	sprintf (buffer + strlen(buffer), ": %d", *menu[n].ptr);
+         sprintf(buffer+strlen(buffer), "%d", *item->setting);
 
       /* Next we deal with the braille window position in the buffer.
        * This is intended for small displays... or long item descriptions 
        */
-      l = strlen (buffer);
-      if (updated) 
+      length = strlen(buffer);
+      if (updated)
 	{
 	  updated = 0;
 	  /* make sure the updated value is visible */
-	  if (l - x > brl.x * brl.y)
-	    x = l - brl.x * brl.y;
+	  if (length-indent > brl.x*brl.y)
+	    indent = length - brl.x*brl.y;
 	}
 
       /* Then draw the braille window */
-      memset (brl.disp, 0, brl.x * brl.y);
-      for (i = 0; i < MIN(brl.x * brl.y, l - x); i++)
-	brl.disp[i] = texttrans[buffer[i+x]];
+      memset(brl.disp, 0, brl.x*brl.y);
+      for (index=0; index<MIN(brl.x*brl.y, length-indent); index++)
+	brl.disp[index] = texttrans[buffer[indent+index]];
       braille->write(&brl);
       delay (DELAY_TIME);
 
       /* Now process any user interaction */
-      while ((k = braille->read(TBL_CMD)) != EOF)
-	switch (k)
+      while ((key = braille->read(TBL_CMD)) != EOF)
+	switch (key)
 	  {
 	  case CMD_NOOP:
 	    continue;
 	  case CMD_TOP:
 	  case CMD_TOP_LEFT:
-	    n = x = 0;
+	    menuIndex = indent = 0;
 	    break;
 	  case CMD_BOT:
 	  case CMD_BOT_LEFT:
-	    n = maxn;
-	    x = 0;
+	    menuIndex = menuSize - 1;
+	    indent = 0;
 	    break;
 	  case CMD_LNUP:
-	    if (--n < 0)
-	      n = maxn;
-	    x = 0;
+	    if (--menuIndex < 0)
+	      menuIndex = menuSize - 1;
+	    indent = 0;
 	    break;
 	  case CMD_LNDN:
-	    if (++n > maxn)
-	      n = 0;
-	    x = 0;
+	    if (++menuIndex >= menuSize)
+	      menuIndex = 0;
+	    indent = 0;
 	    break;
 	  case CMD_FWINLT:
-	    if( x > 0 )
-	      x -= MIN( brl.x * brl.y, x );
+	    if (indent > 0)
+	      indent -= MIN(brl.x*brl.y, indent);
 	    else
-	      play (snd_bounce);
+	      play(snd_bounce);
 	    break;
 	  case CMD_FWINRT:
-	    if( l - x > brl.x * brl.y )
-	      x += brl.x * brl.y;
+	    if (length-indent > brl.x*brl.y)
+	      indent += brl.x*brl.y;
 	    else
-	      play (snd_bounce);
+	      play(snd_bounce);
 	    break;
 	  case CMD_WINUP:
 	  case CMD_CHRLT:
 	  case CMD_KEY_LEFT:
 	  case CMD_KEY_UP:
-	    if (--*menu[n].ptr < menu[n].min)
-	      *menu[n].ptr = menu[n].max;
+	    if (--*item->setting < item->minimum)
+	      *item->setting = item->maximum;
 	    updated = 1;
 	    break;
 	  case CMD_WINDN:
@@ -828,12 +776,12 @@ configmenu (void)
 	  case CMD_KEY_DOWN:
 	  case CMD_HOME:
 	  case CMD_KEY_RETURN:
-	    if (++*menu[n].ptr > menu[n].max)
-	      *menu[n].ptr = menu[n].min;
+	    if (++*item->setting > item->maximum)
+	      *item->setting = item->minimum;
 	    updated = 1;
 	    break;
 	  case CMD_SAY:
-	    speech->say(buffer, l);
+	    speech->say(buffer, length);
 	    break;
 	  case CMD_MUTE:
 	    speech->mute();
@@ -849,21 +797,23 @@ configmenu (void)
 		"Press CONFIG again to quit.", MSG_WAITKEY |MSG_NODELAY);
 	    break;
 	  case CMD_RESET:
-	    env = oldenv;
-	    message ("changes undone", 0);
+	    env = oldEnvironment;
+	    message("Changes Discarded", 0);
 	    break;
 	  case CMD_SAVECONF:
 	    savecfg |= 1;
 	    /*break;*/
 	  default:
-	    if( k >= CR_ROUTEOFFSET && k < CR_ROUTEOFFSET + brl.x ) {
+	    if(key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
 		/* Why not setting a value with routing keys... */
-		if( menu[n].bool ) {
-		    *menu[n].ptr = k % 2;
-		}else{
-		    *menu[n].ptr = k - CR_ROUTEOFFSET;
-		    if( *menu[n].ptr > menu[n].max ) *menu[n].ptr = menu[n].max;
-		    if( *menu[n].ptr < menu[n].min ) *menu[n].ptr = menu[n].min;
+		if (item->names) {
+		   *item->setting = key % 2;
+		} else {
+		   *item->setting = key - CR_ROUTEOFFSET;
+		    if (*item->setting > item->maximum)
+		       *item->setting = item->maximum;
+		    if (*item->setting < item->minimum)
+		       *item->setting = item->minimum;
 		}
 		updated = 1;
 		break;
@@ -872,10 +822,11 @@ configmenu (void)
 	    /* For any other keystroke, we exit */
 	    if (savecfg)
 	      {
-		saveconfig ();
-		if(env.sound)
-		  play (snd_done);
-		else message("Saved", 0);
+		saveconfig();
+		if (env.sound)
+		   play(snd_done);
+		else
+		   message("Settings Saved", 0);
 	      }
 	    return;
 	  }

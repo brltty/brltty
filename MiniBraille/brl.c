@@ -115,7 +115,6 @@ static void initbrl(brldim *brl, const char *brldev)
 			if (n & 1 << standard[i])
 				xtbl[n] |= 1 << Tieman[i];
 	message("BRLTTY Ready", 0);
-	sleep(2);
 	beep();
 	return;
 

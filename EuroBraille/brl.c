@@ -769,7 +769,7 @@ static int readbrl(int type)
 	result = CMD_FWINRT;
 	break;
       case 31:
-	message(version_ID, 2);
+	message(version_ID, MSG_WAITKEY);
 	break;
      }
    return result;
@@ -966,8 +966,7 @@ static int
 		       res = CMD_NOOP;
 		       break;
 		     case 'V': /* Braille and Speech mode */
-		       message("! Speech unavailable", 2);
-		       delay (2000);
+		       message("! Speech unavailable", MSG_WAITKEY);
 		       break;
 		    }
 		  break;
@@ -1680,7 +1679,6 @@ static int
 				 break;
 			       default:
 				 message("! Undef Braille key ", 0);
-				 delay (1000);
 				 break;
 			      }
 			    break;
