@@ -207,7 +207,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for make shared object command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*)
+   linux*|openbsd*|freebsd*|netbsd*)
       brltty_ld_flag_shared="-shared"
       brltty_ld_flag_soname="-soname"
       ;;
@@ -246,7 +246,7 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 AC_PATH_XTRA
 AC_SEARCH_LIBS([socket], [socket])
 
-AC_CHECK_HEADERS([getopt.h syslog.h])
+AC_CHECK_HEADERS([getopt.h iconv.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])
 AC_CHECK_HEADERS([alloca.h sys/io.h linux/vt.h linux/input.h])
 AC_CHECK_HEADERS([linux/uinput.h], [], [], [
@@ -380,6 +380,9 @@ in
    freebsd*)
       system_object="freebsd"
       ;;
+   netbsd*)
+      system_object="netbsd"
+      ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
@@ -483,7 +486,7 @@ BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
 AC_CACHE_CHECK([for linkage editor flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*)
+   linux*|openbsd*|freebsd*|netbsd*)
       brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
       ;;
    solaris*)
@@ -507,6 +510,9 @@ else
    in
       linux*|openbsd*|freebsd*)
          brltty_cv_prog_ld_static="-static"
+         ;;
+      netbsd*)
+         brltty_cv_prog_ld_static="-Bstatic"
          ;;
       solaris*)
          brltty_cv_prog_ld_static="-dn"
@@ -537,7 +543,7 @@ y/ /,/
 
 case "${host_os}"
 in
-   linux*|solaris*|openbsd*|freebsd*)
+   linux*|solaris*|openbsd*|freebsd*|netbsd*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -557,6 +563,9 @@ in
       ;;
    freebsd*)
       usb_object="freebsd"
+      ;;
+   netbsd*)
+      usb_object="netbsd"
       ;;
    *)
       usb_object=""
@@ -624,6 +633,9 @@ in
       ;;
    freebsd*)
       brltty_cv_default_braille_device="/dev/cuaa0"
+      ;;
+   netbsd*)
+      brltty_cv_default_braille_device="/dev/dty00"
       ;;
    *)
       brltty_cv_default_braille_device=""

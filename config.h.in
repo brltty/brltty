@@ -34,6 +34,9 @@ extern "C" {
 /* Define this if the header file getopt.h exists. */
 #undef HAVE_GETOPT_H
 
+/* Define this if the header file iconv.h exists. */
+#undef HAVE_ICONV_H
+
 /* Define this if the header file syslog.h exists. */
 #undef HAVE_SYSLOG_H
 

@@ -185,6 +185,9 @@ sys_openbsd.$O:
 sys_freebsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_freebsd.c
 
+sys_netbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_netbsd.c
+
 ###############################################################################
 
 usb.$O:
@@ -201,6 +204,9 @@ usb_openbsd.$O:
 
 usb_freebsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_freebsd.c
+
+usb_netbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_netbsd.c
 
 ###############################################################################
 

@@ -63,6 +63,7 @@
 #braille-device	serial:tty0p0	# Primary HP-UX serial port.
 #braille-device	serial:cua00	# Primary OpenBSD serial port.
 #braille-device	serial:cuaa0	# Primary FreeBSD serial port.
+#braille-device	serial:dty00	# Primary NetBSD serial port.
 #braille-device	serial:ttyUSB0	# Primary Linux USB serial converter (old-style).
 #braille-device	serial:usb/tts/0	# Primary Linux USB serial converter (devfs).
 #braille-device	usb:		# First USB device matching braille driver.

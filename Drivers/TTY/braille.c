@@ -36,9 +36,13 @@
 
 #include <errno.h>
 #include <curses.h>
-#include <iconv.h>
 #include <ctype.h>
 #include <locale.h>
+
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+static iconv_t conv;
+#endif /* HAVE_ICONV_H */
 
 typedef enum {
   PARM_TERM,
@@ -55,7 +59,6 @@ typedef enum {
 #include "Programs/serial.h"
 
 static int tty_fd=-1;
-static iconv_t conv;
 #define MAXLINES 3
 #define MAXCOLS 80
 #define WHOLESIZE (MAXLINES * MAXCOLS)
@@ -135,10 +138,12 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  refresh();
  fflush(tty_ffd);
 
+#ifdef HAVE_ICONV_H
  if ((conv=iconv_open(cset,"ISO8859-1"))==(iconv_t)-1) {
   LogPrint(LOG_ERR,"unable to open conversion");
   goto outcurses;
  }
+#endif /* HAVE_ICONV_H */
 
  brl->x=cols;
  brl->y=lines; 
@@ -146,8 +151,11 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  LogPrint(LOG_INFO,"TTY: type=%s size=%dx%d",term,cols,lines);
  return 1;
 
+#ifdef HAVE_ICONV_H
  iconv_close(conv);
 outcurses:
+#endif /* HAVE_ICONV_H */
+
  endwin();
  delscreen(scr);
 outffd:
@@ -163,7 +171,10 @@ static void brl_close(BrailleDisplay *brl)
 {
  if (tty_fd>=0)
  {
+#ifdef HAVE_ICONV_H
   iconv_close(conv);
+#endif /* HAVE_ICONV_H */
+
   if (endwin()!=OK)
    LogPrint(LOG_ERR, "endwin error");
   delscreen(scr);
@@ -193,10 +204,12 @@ static void brl_writeWindow(BrailleDisplay *brl)
    c = brl->buffer[j*brl->x+i];
    sc=1; sd=1;
    pc=&c; pd=&d;
-   if (iconv(conv,&pc,&sc,&pd,&sd)<0 && !sd)
-    addch((unsigned char)c);
-   else
+#ifdef HAVE_ICONV_H
+   if (iconv(conv,&pc,&sc,&pd,&sd)>=0)
     addch((unsigned char)d);
+   else
+#endif /* HAVE_ICONV_H */
+    addch((unsigned char)c);
   }
   addch('\n');
  }

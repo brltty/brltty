@@ -145,7 +145,7 @@ BRLTTY provides the following capabilities:
 </itemize>
 
 <sect1>System Requirements<p>
-To date, BRLTTY runs under Linux, Solaris, OpenBSD, and FreeBSD.
+To date, BRLTTY runs under Linux, Solaris, OpenBSD, FreeBSD, and NetBSD.
 While ports to other Unix-like operating systems aren't currently planned,
 we do welcome any interest in such projects.
 
@@ -183,6 +183,12 @@ we do welcome any interest in such projects.
     <itemize>
       <item>
         The Intel architecture (release 5.1).
+    </itemize>
+  <tag/NetBSD/
+    This software has been tested on the following NetBSD systems:
+    <itemize>
+      <item>
+        The Intel architecture (release 1.6).
     </itemize>
 </descrip>
 
@@ -3193,7 +3199,8 @@ Notes:
         This setting is supported
         on Linux,
         on OpenBSD,
-        and on FreeBSD.
+        on FreeBSD,
+        and on NetBSD.
         It's always safe to use,
         although it may be somewhat soft.
         This device isn't available if the
@@ -3204,7 +3211,8 @@ Notes:
         on Linux (via <tt>/dev/dsp</>),
         on Solaris (via <tt>/dev/audio</>),
         on OpenBSD (via <tt>/dev/audio0</>),
-        and on FreeBSD (via <tt>/dev/dsp</>).
+        on FreeBSD (via <tt>/dev/dsp</>),
+        and on NetBSD (via <tt>/dev/audio0</>).
         It doesn't work when this device is already being used
         by another application.
         This device isn't available if the
