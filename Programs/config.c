@@ -461,7 +461,7 @@ reportTranslationTableMessage (const char *message) {
 }
 
 static int
-replaceTranslationTable (TranslationTable *table, const char *file, const char *name) {
+replaceTranslationTable (TranslationTable *table, const char *file, const char *type) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
@@ -470,6 +470,7 @@ replaceTranslationTable (TranslationTable *table, const char *file, const char *
     }
     free(path);
   }
+  if (!ok) LogPrint(LOG_ERR, "Cannot load %s table: %s", type, file);
   return ok;
 }
 

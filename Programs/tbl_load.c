@@ -37,7 +37,7 @@ static const unsigned char dotBits[] = {B1, B2, B3, B4, B5, B6, B7, B8};
 
 typedef struct {
   unsigned char cell;
-  unsigned defined:1;
+  unsigned char defined;
 } ByteEntry;
 
 typedef struct {
@@ -216,7 +216,7 @@ getByte (InputData *input, unsigned char *byte) {
 static int
 getCell (InputData *input, unsigned char *cell) {
   const char *location = input->location;
-  char enclosed = (*location == '[')? ']':
+  char enclosed = (*location == '(')? ')':
                   0;
   *cell = 0;
 
@@ -412,6 +412,7 @@ loadTranslationTable (
   input.ok = 1;
   input.file = file;
   input.line = 0;
+  input.undefined = 0XFF;
 
   if ((stream = fopen(file, "r"))) {
     if (processLines(stream, processTableLine, &input)) {

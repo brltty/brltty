@@ -52,259 +52,259 @@
 # Comments from Russians are very welcome as neither Hans Schou nor Dave Mielke
 # understand a single word in Russian.
 
-\X00 [73214568]  # null
-\X01 [7  1  68]  # start of heading
-\X02 [7 214 68]  # start of text
-\X03 [7  14 68]  # end of text
-\X04 [7  14 6 ]  # end of transmission
-\X05 [7  1 568]  # enquiry
-\X06 [ 32  5 8]  # acknowledge
-\X07 [732  568]  # bell
-\X08 [73     8]  # backspace
-\X09 [  2 4 68]  # horizontal tabulation
-\X0A [7     68]  # line feed
-\X0B [73  4568]  # vertical tabulation
-\X0C [7321  6 ]  # form feed
-\X0D [    45 8]  # carriage return
-\X0E [73 1456 ]  # shift out
-\X0F [7321 568]  # shift in
-\X10 [ 3  4568]  # data link escape
-\X11 [  214568]  # device control one
-\X12 [ 32 4 68]  # device control two
-\X13 [7   45 8]  # device control three
-\X14 [ 3  45 8]  # device control four
-\X15 [732  5 8]  # negative acknowledge
-\X16 [ 321  6 ]  # synchronous idle
-\X17 [7 2  568]  # end of transmission block
-\X18 [73  4  8]  # cancel
-\X19 [ 3 1456 ]  # end of medium
-\X1A [7   4 68]  # substitute
-\X1B [7 2 4 68]  # escape
-\X1C [7 21 568]  # file separator
-\X1D [7 214568]  # group separator
-\X1E [73214 68]  # record separator
-\X1F [7   4568]  # unit separator
-\X20 [        ]  # space
-\X21 [732  5  ]  # exclamation mark
-\X22 [     5  ]  # quotation mark
-\X23 [ 3  456 ]  # number sign
-\X24 [7    5  ]  # dollar sign
-\X25 [   14 6 ]  # percent sign
-\X26 [7 2  5 8]  # ampersand
-\X27 [ 3      ]  # apostrophe
-\X28 [7   4  8]  # left parenthesis
-\X29 [7    5 8]  # right parenthesis
-\X2A [7 21  68]  # asterisk
-\X2B [ 3  4 6 ]  # plus sign
-\X2C [      6 ]  # comma
-\X2D [ 3    6 ]  # hyphen-minus
-\X2E [    4 6 ]  # full stop
-\X2F [ 3  4   ]  # solidus
-\X30 [ 3   56 ]  # digit zero
-\X31 [  2     ]  # digit one
-\X32 [ 32     ]  # digit two
-\X33 [  2  5  ]  # digit three
-\X34 [  2  56 ]  # digit four
-\X35 [  2   6 ]  # digit five
-\X36 [ 32  5  ]  # digit six
-\X37 [ 32  56 ]  # digit seven
-\X38 [ 32   6 ]  # digit eight
-\X39 [ 3   5  ]  # digit nine
-\X3A [732     ]  # colon
-\X3B [     56 ]  # semicolon
-\X3C [  21  6 ]  # less-than sign
-\X3D [ 321456 ]  # equals sign
-\X3E [ 3  45  ]  # greater-than sign
-\X3F [   1456 ]  # question mark
-\X40 [7   4   ]  # commercial at
-\X41 [7  1   8]  # latin capital letter a
-\X42 [7 21   8]  # latin capital letter b
-\X43 [7  14  8]  # latin capital letter c
-\X44 [7  145 8]  # latin capital letter d
-\X45 [7  1 5 8]  # latin capital letter e
-\X46 [7 214  8]  # latin capital letter f
-\X47 [7 2145 8]  # latin capital letter g
-\X48 [7 21 5 8]  # latin capital letter h
-\X49 [7 2 4  8]  # latin capital letter i
-\X4A [7 2 45 8]  # latin capital letter j
-\X4B [73 1   8]  # latin capital letter k
-\X4C [7321   8]  # latin capital letter l
-\X4D [73 14  8]  # latin capital letter m
-\X4E [73 145 8]  # latin capital letter n
-\X4F [73 1 5 8]  # latin capital letter o
-\X50 [73214  8]  # latin capital letter p
-\X51 [732145 8]  # latin capital letter q
-\X52 [7321 5 8]  # latin capital letter r
-\X53 [732 4  8]  # latin capital letter s
-\X54 [732 45 8]  # latin capital letter t
-\X55 [73 1  68]  # latin capital letter u
-\X56 [7321  68]  # latin capital letter v
-\X57 [7 2 4568]  # latin capital letter w
-\X58 [73 14 68]  # latin capital letter x
-\X59 [73 14568]  # latin capital letter y
-\X5A [73 1 568]  # latin capital letter z
-\X5B [732 4 68]  # left square bracket
-\X5C [73   56 ]  # reverse solidus
-\X5D [7 21456 ]  # right square bracket
-\X5E [7   45  ]  # circumflex accent
-\X5F [    456 ]  # low line
-\X60 [    4   ]  # grave accent
-\X61 [   1   8]  # latin small letter a
-\X62 [  21   8]  # latin small letter b
-\X63 [   14  8]  # latin small letter c
-\X64 [   145 8]  # latin small letter d
-\X65 [   1 5 8]  # latin small letter e
-\X66 [  214  8]  # latin small letter f
-\X67 [  2145 8]  # latin small letter g
-\X68 [  21 5 8]  # latin small letter h
-\X69 [  2 4  8]  # latin small letter i
-\X6A [  2 45 8]  # latin small letter j
-\X6B [ 3 1   8]  # latin small letter k
-\X6C [ 321   8]  # latin small letter l
-\X6D [ 3 14  8]  # latin small letter m
-\X6E [ 3 145 8]  # latin small letter n
-\X6F [ 3 1 5 8]  # latin small letter o
-\X70 [ 3214  8]  # latin small letter p
-\X71 [ 32145 8]  # latin small letter q
-\X72 [ 321 5 8]  # latin small letter r
-\X73 [ 32 4  8]  # latin small letter s
-\X74 [ 32 45 8]  # latin small letter t
-\X75 [ 3 1  68]  # latin small letter u
-\X76 [ 321  68]  # latin small letter v
-\X77 [  2 4568]  # latin small letter w
-\X78 [ 3 14 68]  # latin small letter x
-\X79 [ 3 14568]  # latin small letter y
-\X7A [ 3 1 568]  # latin small letter z
-\X7B [732   68]  # left curly bracket
-\X7C [73  456 ]  # vertical line
-\X7D [  21456 ]  # right curly bracket
-\X7E [    45  ]  # tilde
-\X7F [7   456 ]  # delete
-\X80 [732 4568]  # box drawings light horizontal
-\X81 [  21  68]  # box drawings light vertical
-\X82 [ 32 4568]  # box drawings light down and right
-\X83 [     5 8]  # box drawings light down and left
-\X84 [  214 68]  # box drawings light up and right
-\X85 [       8]  # box drawings light up and left
-\X86 [   14 68]  # box drawings light vertical and right
-\X87 [ 3     8]  # box drawings light vertical and left
-\X88 [   1  68]  # box drawings light down and horizontal
-\X89 [ 3  4 68]  # box drawings light up and horizontal
-\X8A [ 321 568]  # box drawings light vertical and horizontal
-\X8B [ 3  4  8]  # upper half block
-\X8C [    4 68]  # lower half block
-\X8D [      68]  # full block
-\X8E [7 2    8]  # left half block
-\X8F [732    8]  # right half block
-\X90 [73   5 8]  # light shade
-\X91 [7 2   6 ]  # medium shade
-\X92 [ 3   568]  # dark shade
-\X93 [  2  568]  # top half integral
-\X94 [ 32  568]  # black square
-\X95 [ 32    8]  # bullet operator
-\X96 [     568]  # square root
-\X97 [ 3   5 8]  # almost equal to
-\X98 [    4568]  # less-than or equal to
-\X99 [73   568]  # greater-than or equal to
-\X9A [  21 568]  # no-break space
-\X9B [  2  5 8]  # bottom half integral
-\X9C [732  56 ]  # degree sign
-\X9D [  2   68]  # superscript two
-\X9E [73  45 8]  # middle dot
-\X9F [7  14568]  # division sign
-\XA0 [   14568]  # box drawings double horizontal
-\XA1 [73    6 ]  # box drawings double vertical
-\XA2 [7    568]  # box drawings down single and right double
-\XA3 [   1  6 ]  # cyrillic small letter io
-\XA4 [7 2     ]  # box drawings down double and right single
-\XA5 [    4  8]  # box drawings double down and right
-\XA6 [7 21  6 ]  # box drawings down single and left double
-\XA7 [7       ]  # box drawings down double and left single
-\XA8 [7  1456 ]  # box drawings double down and left
-\XA9 [7      8]  # box drawings up single and right double
-\XAA [7 2   68]  # box drawings up double and right single
-\XAB [7   4 6 ]  # box drawings double up and right
-\XAC [7 2  5  ]  # box drawings up single and left double
-\XAD [ 3    68]  # box drawings up double and left single
-\XAE [7321456 ]  # box drawings double up and left
-\XAF [7    56 ]  # box drawings vertical single and right double
-\XB0 [ 32   68]  # box drawings vertical double and right single
-\XB1 [  2    8]  # box drawings double vertical and right
-\XB2 [ 3214568]  # box drawings vertical single and left double
-\XB3 [7  1  6 ]  # cyrillic capital letter io
-\XB4 [7 2  56 ]  # box drawings vertical double and left single
-\XB5 [ 3214 68]  # box drawings double vertical and left
-\XB6 [73    68]  # box drawings down single and horizontal double
-\XB7 [   1 568]  # box drawings down double and horizontal single
-\XB8 [732   6 ]  # box drawings double down and horizontal
-\XB9 [73   5  ]  # box drawings up single and horizontal double
-\XBA [73      ]  # box drawings up double and horizontal single
-\XBB [73  4   ]  # box drawings double up and horizontal
-\XBC [7     6 ]  # box drawings vertical single and horizontal double
-\XBD [73  4 6 ]  # box drawings vertical double and horizontal single
-\XBE [73  45  ]  # box drawings double vertical and horizontal
-\XBF [73  4 68]  # copyright sign
-\XC0 [  21 56 ]  # cyrillic small letter yu
-\XC1 [   1    ]  # cyrillic small letter a
-\XC2 [  21    ]  # cyrillic small letter be
-\XC3 [   14   ]  # cyrillic small letter tse
-\XC4 [   145  ]  # cyrillic small letter de
-\XC5 [   1 5  ]  # cyrillic small letter ie
-\XC6 [  214   ]  # cyrillic small letter ef
-\XC7 [  2145  ]  # cyrillic small letter ghe
-\XC8 [  21 5  ]  # cyrillic small letter ha
-\XC9 [  2 4   ]  # cyrillic small letter i
-\XCA [ 3214 6 ]  # cyrillic small letter short i
-\XCB [ 3 1    ]  # cyrillic small letter ka
-\XCC [ 321    ]  # cyrillic small letter el
-\XCD [ 3 14   ]  # cyrillic small letter em
-\XCE [ 3 145  ]  # cyrillic small letter en
-\XCF [ 3 1 5  ]  # cyrillic small letter o
-\XD0 [ 3214   ]  # cyrillic small letter pe
-\XD1 [  214 6 ]  # cyrillic small letter ya
-\XD2 [ 321 5  ]  # cyrillic small letter er
-\XD3 [ 32 4   ]  # cyrillic small letter es
-\XD4 [ 32 45  ]  # cyrillic small letter te
-\XD5 [ 3 1  6 ]  # cyrillic small letter u
-\XD6 [  2 45  ]  # cyrillic small letter zhe
-\XD7 [  2 456 ]  # cyrillic small letter ve
-\XD8 [ 32 456 ]  # cyrillic small letter soft sign
-\XD9 [ 32 4 6 ]  # cyrillic small letter yeru
-\XDA [ 3 1 56 ]  # cyrillic small letter ze
-\XDB [   1 56 ]  # cyrillic small letter sha
-\XDC [  2 4 6 ]  # cyrillic small letter e
-\XDD [ 3 14 6 ]  # cyrillic small letter shcha
-\XDE [ 32145  ]  # cyrillic small letter che
-\XDF [ 321 56 ]  # cyrillic small letter hard sign
-\XE0 [7 21 56 ]  # cyrillic capital letter yu
-\XE1 [7  1    ]  # cyrillic capital letter a
-\XE2 [7 21    ]  # cyrillic capital letter be
-\XE3 [7  14   ]  # cyrillic capital letter tse
-\XE4 [7  145  ]  # cyrillic capital letter de
-\XE5 [7  1 5  ]  # cyrillic capital letter ie
-\XE6 [7 214   ]  # cyrillic capital letter ef
-\XE7 [7 2145  ]  # cyrillic capital letter ghe
-\XE8 [7 21 5  ]  # cyrillic capital letter ha
-\XE9 [7 2 4   ]  # cyrillic capital letter i
-\XEA [73214 6 ]  # cyrillic capital letter short i
-\XEB [73 1    ]  # cyrillic capital letter ka
-\XEC [7321    ]  # cyrillic capital letter el
-\XED [73 14   ]  # cyrillic capital letter em
-\XEE [73 145  ]  # cyrillic capital letter en
-\XEF [73 1 5  ]  # cyrillic capital letter o
-\XF0 [73214   ]  # cyrillic capital letter pe
-\XF1 [7 214 6 ]  # cyrillic capital letter ya
-\XF2 [7321 5  ]  # cyrillic capital letter er
-\XF3 [732 4   ]  # cyrillic capital letter es
-\XF4 [732 45  ]  # cyrillic capital letter te
-\XF5 [73 1  6 ]  # cyrillic capital letter u
-\XF6 [7 2 45  ]  # cyrillic capital letter zhe
-\XF7 [7 2 456 ]  # cyrillic capital letter ve
-\XF8 [732 456 ]  # cyrillic capital letter soft sign
-\XF9 [732 4 6 ]  # cyrillic capital letter yeru
-\XFA [73 1 56 ]  # cyrillic capital letter ze
-\XFB [7  1 56 ]  # cyrillic capital letter sha
-\XFC [7 2 4 6 ]  # cyrillic capital letter e
-\XFD [73 14 6 ]  # cyrillic capital letter shcha
-\XFE [732145  ]  # cyrillic capital letter che
-\XFF [7321 56 ]  # cyrillic capital letter hard sign
+\X00 (12345678)  # null
+\X01 (1    678)  # start of heading
+\X02 (12 4 678)  # start of text
+\X03 (1  4 678)  # end of text
+\X04 (1  4 67 )  # end of transmission
+\X05 (1   5678)  # enquiry
+\X06 ( 23 5  8)  # acknowledge
+\X07 ( 23 5678)  # bell
+\X08 (  3   78)  # backspace
+\X09 ( 2 4 6 8)  # horizontal tabulation
+\X0A (     678)  # line feed
+\X0B (  345678)  # vertical tabulation
+\X0C (123  67 )  # form feed
+\X0D (   45  8)  # carriage return
+\X0E (1 34567 )  # shift out
+\X0F (123 5678)  # shift in
+\X10 (  3456 8)  # data link escape
+\X11 (12 456 8)  # device control one
+\X12 ( 234 6 8)  # device control two
+\X13 (   45 78)  # device control three
+\X14 (  345  8)  # device control four
+\X15 ( 23 5 78)  # negative acknowledge
+\X16 (123  6  )  # synchronous idle
+\X17 ( 2  5678)  # end of transmission block
+\X18 (  34  78)  # cancel
+\X19 (1 3456  )  # end of medium
+\X1A (   4 678)  # substitute
+\X1B ( 2 4 678)  # escape
+\X1C (12  5678)  # file separator
+\X1D (12 45678)  # group separator
+\X1E (1234 678)  # record separator
+\X1F (   45678)  # unit separator
+\X20 (        )  # space
+\X21 ( 23 5 7 )  # exclamation mark
+\X22 (    5   )  # quotation mark
+\X23 (  3456  )  # number sign
+\X24 (    5 7 )  # dollar sign
+\X25 (1  4 6  )  # percent sign
+\X26 ( 2  5 78)  # ampersand
+\X27 (  3     )  # apostrophe
+\X28 (   4  78)  # left parenthesis
+\X29 (    5 78)  # right parenthesis
+\X2A (12   678)  # asterisk
+\X2B (  34 6  )  # plus sign
+\X2C (     6  )  # comma
+\X2D (  3  6  )  # hyphen-minus
+\X2E (   4 6  )  # full stop
+\X2F (  34    )  # solidus
+\X30 (  3 56  )  # digit zero
+\X31 ( 2      )  # digit one
+\X32 ( 23     )  # digit two
+\X33 ( 2  5   )  # digit three
+\X34 ( 2  56  )  # digit four
+\X35 ( 2   6  )  # digit five
+\X36 ( 23 5   )  # digit six
+\X37 ( 23 56  )  # digit seven
+\X38 ( 23  6  )  # digit eight
+\X39 (  3 5   )  # digit nine
+\X3A ( 23   7 )  # colon
+\X3B (    56  )  # semicolon
+\X3C (12   6  )  # less-than sign
+\X3D (123456  )  # equals sign
+\X3E (  345   )  # greater-than sign
+\X3F (1  456  )  # question mark
+\X40 (   4  7 )  # commercial at
+\X41 (1     78)  # latin capital letter a
+\X42 (12    78)  # latin capital letter b
+\X43 (1  4  78)  # latin capital letter c
+\X44 (1  45 78)  # latin capital letter d
+\X45 (1   5 78)  # latin capital letter e
+\X46 (12 4  78)  # latin capital letter f
+\X47 (12 45 78)  # latin capital letter g
+\X48 (12  5 78)  # latin capital letter h
+\X49 ( 2 4  78)  # latin capital letter i
+\X4A ( 2 45 78)  # latin capital letter j
+\X4B (1 3   78)  # latin capital letter k
+\X4C (123   78)  # latin capital letter l
+\X4D (1 34  78)  # latin capital letter m
+\X4E (1 345 78)  # latin capital letter n
+\X4F (1 3 5 78)  # latin capital letter o
+\X50 (1234  78)  # latin capital letter p
+\X51 (12345 78)  # latin capital letter q
+\X52 (123 5 78)  # latin capital letter r
+\X53 ( 234  78)  # latin capital letter s
+\X54 ( 2345 78)  # latin capital letter t
+\X55 (1 3  678)  # latin capital letter u
+\X56 (123  678)  # latin capital letter v
+\X57 ( 2 45678)  # latin capital letter w
+\X58 (1 34 678)  # latin capital letter x
+\X59 (1 345678)  # latin capital letter y
+\X5A (1 3 5678)  # latin capital letter z
+\X5B ( 234 678)  # left square bracket
+\X5C (  3 567 )  # reverse solidus
+\X5D (12 4567 )  # right square bracket
+\X5E (   45 7 )  # circumflex accent
+\X5F (   456  )  # low line
+\X60 (   4    )  # grave accent
+\X61 (1      8)  # latin small letter a
+\X62 (12     8)  # latin small letter b
+\X63 (1  4   8)  # latin small letter c
+\X64 (1  45  8)  # latin small letter d
+\X65 (1   5  8)  # latin small letter e
+\X66 (12 4   8)  # latin small letter f
+\X67 (12 45  8)  # latin small letter g
+\X68 (12  5  8)  # latin small letter h
+\X69 ( 2 4   8)  # latin small letter i
+\X6A ( 2 45  8)  # latin small letter j
+\X6B (1 3    8)  # latin small letter k
+\X6C (123    8)  # latin small letter l
+\X6D (1 34   8)  # latin small letter m
+\X6E (1 345  8)  # latin small letter n
+\X6F (1 3 5  8)  # latin small letter o
+\X70 (1234   8)  # latin small letter p
+\X71 (12345  8)  # latin small letter q
+\X72 (123 5  8)  # latin small letter r
+\X73 ( 234   8)  # latin small letter s
+\X74 ( 2345  8)  # latin small letter t
+\X75 (1 3  6 8)  # latin small letter u
+\X76 (123  6 8)  # latin small letter v
+\X77 ( 2 456 8)  # latin small letter w
+\X78 (1 34 6 8)  # latin small letter x
+\X79 (1 3456 8)  # latin small letter y
+\X7A (1 3 56 8)  # latin small letter z
+\X7B ( 23  678)  # left curly bracket
+\X7C (  34567 )  # vertical line
+\X7D (12 456  )  # right curly bracket
+\X7E (   45   )  # tilde
+\X7F (   4567 )  # delete
+\X80 ( 2345678)  # box drawings light horizontal
+\X81 (12   6 8)  # box drawings light vertical
+\X82 ( 23456 8)  # box drawings light down and right
+\X83 (    5  8)  # box drawings light down and left
+\X84 (12 4 6 8)  # box drawings light up and right
+\X85 (       8)  # box drawings light up and left
+\X86 (1  4 6 8)  # box drawings light vertical and right
+\X87 (  3    8)  # box drawings light vertical and left
+\X88 (1    6 8)  # box drawings light down and horizontal
+\X89 (  34 6 8)  # box drawings light up and horizontal
+\X8A (123 56 8)  # box drawings light vertical and horizontal
+\X8B (  34   8)  # upper half block
+\X8C (   4 6 8)  # lower half block
+\X8D (     6 8)  # full block
+\X8E ( 2    78)  # left half block
+\X8F ( 23   78)  # right half block
+\X90 (  3 5 78)  # light shade
+\X91 ( 2   67 )  # medium shade
+\X92 (  3 56 8)  # dark shade
+\X93 ( 2  56 8)  # top half integral
+\X94 ( 23 56 8)  # black square
+\X95 ( 23    8)  # bullet operator
+\X96 (    56 8)  # square root
+\X97 (  3 5  8)  # almost equal to
+\X98 (   456 8)  # less-than or equal to
+\X99 (  3 5678)  # greater-than or equal to
+\X9A (12  56 8)  # no-break space
+\X9B ( 2  5  8)  # bottom half integral
+\X9C ( 23 567 )  # degree sign
+\X9D ( 2   6 8)  # superscript two
+\X9E (  345 78)  # middle dot
+\X9F (1  45678)  # division sign
+\XA0 (1  456 8)  # box drawings double horizontal
+\XA1 (  3  67 )  # box drawings double vertical
+\XA2 (    5678)  # box drawings down single and right double
+\XA3 (1    6  )  # cyrillic small letter io
+\XA4 ( 2    7 )  # box drawings down double and right single
+\XA5 (   4   8)  # box drawings double down and right
+\XA6 (12   67 )  # box drawings down single and left double
+\XA7 (      7 )  # box drawings down double and left single
+\XA8 (1  4567 )  # box drawings double down and left
+\XA9 (      78)  # box drawings up single and right double
+\XAA ( 2   678)  # box drawings up double and right single
+\XAB (   4 67 )  # box drawings double up and right
+\XAC ( 2  5 7 )  # box drawings up single and left double
+\XAD (  3  6 8)  # box drawings up double and left single
+\XAE (1234567 )  # box drawings double up and left
+\XAF (    567 )  # box drawings vertical single and right double
+\XB0 ( 23  6 8)  # box drawings vertical double and right single
+\XB1 ( 2     8)  # box drawings double vertical and right
+\XB2 (123456 8)  # box drawings vertical single and left double
+\XB3 (1    67 )  # cyrillic capital letter io
+\XB4 ( 2  567 )  # box drawings vertical double and left single
+\XB5 (1234 6 8)  # box drawings double vertical and left
+\XB6 (  3  678)  # box drawings down single and horizontal double
+\XB7 (1   56 8)  # box drawings down double and horizontal single
+\XB8 ( 23  67 )  # box drawings double down and horizontal
+\XB9 (  3 5 7 )  # box drawings up single and horizontal double
+\XBA (  3   7 )  # box drawings up double and horizontal single
+\XBB (  34  7 )  # box drawings double up and horizontal
+\XBC (     67 )  # box drawings vertical single and horizontal double
+\XBD (  34 67 )  # box drawings vertical double and horizontal single
+\XBE (  345 7 )  # box drawings double vertical and horizontal
+\XBF (  34 678)  # copyright sign
+\XC0 (12  56  )  # cyrillic small letter yu
+\XC1 (1       )  # cyrillic small letter a
+\XC2 (12      )  # cyrillic small letter be
+\XC3 (1  4    )  # cyrillic small letter tse
+\XC4 (1  45   )  # cyrillic small letter de
+\XC5 (1   5   )  # cyrillic small letter ie
+\XC6 (12 4    )  # cyrillic small letter ef
+\XC7 (12 45   )  # cyrillic small letter ghe
+\XC8 (12  5   )  # cyrillic small letter ha
+\XC9 ( 2 4    )  # cyrillic small letter i
+\XCA (1234 6  )  # cyrillic small letter short i
+\XCB (1 3     )  # cyrillic small letter ka
+\XCC (123     )  # cyrillic small letter el
+\XCD (1 34    )  # cyrillic small letter em
+\XCE (1 345   )  # cyrillic small letter en
+\XCF (1 3 5   )  # cyrillic small letter o
+\XD0 (1234    )  # cyrillic small letter pe
+\XD1 (12 4 6  )  # cyrillic small letter ya
+\XD2 (123 5   )  # cyrillic small letter er
+\XD3 ( 234    )  # cyrillic small letter es
+\XD4 ( 2345   )  # cyrillic small letter te
+\XD5 (1 3  6  )  # cyrillic small letter u
+\XD6 ( 2 45   )  # cyrillic small letter zhe
+\XD7 ( 2 456  )  # cyrillic small letter ve
+\XD8 ( 23456  )  # cyrillic small letter soft sign
+\XD9 ( 234 6  )  # cyrillic small letter yeru
+\XDA (1 3 56  )  # cyrillic small letter ze
+\XDB (1   56  )  # cyrillic small letter sha
+\XDC ( 2 4 6  )  # cyrillic small letter e
+\XDD (1 34 6  )  # cyrillic small letter shcha
+\XDE (12345   )  # cyrillic small letter che
+\XDF (123 56  )  # cyrillic small letter hard sign
+\XE0 (12  567 )  # cyrillic capital letter yu
+\XE1 (1     7 )  # cyrillic capital letter a
+\XE2 (12    7 )  # cyrillic capital letter be
+\XE3 (1  4  7 )  # cyrillic capital letter tse
+\XE4 (1  45 7 )  # cyrillic capital letter de
+\XE5 (1   5 7 )  # cyrillic capital letter ie
+\XE6 (12 4  7 )  # cyrillic capital letter ef
+\XE7 (12 45 7 )  # cyrillic capital letter ghe
+\XE8 (12  5 7 )  # cyrillic capital letter ha
+\XE9 ( 2 4  7 )  # cyrillic capital letter i
+\XEA (1234 67 )  # cyrillic capital letter short i
+\XEB (1 3   7 )  # cyrillic capital letter ka
+\XEC (123   7 )  # cyrillic capital letter el
+\XED (1 34  7 )  # cyrillic capital letter em
+\XEE (1 345 7 )  # cyrillic capital letter en
+\XEF (1 3 5 7 )  # cyrillic capital letter o
+\XF0 (1234  7 )  # cyrillic capital letter pe
+\XF1 (12 4 67 )  # cyrillic capital letter ya
+\XF2 (123 5 7 )  # cyrillic capital letter er
+\XF3 ( 234  7 )  # cyrillic capital letter es
+\XF4 ( 2345 7 )  # cyrillic capital letter te
+\XF5 (1 3  67 )  # cyrillic capital letter u
+\XF6 ( 2 45 7 )  # cyrillic capital letter zhe
+\XF7 ( 2 4567 )  # cyrillic capital letter ve
+\XF8 ( 234567 )  # cyrillic capital letter soft sign
+\XF9 ( 234 67 )  # cyrillic capital letter yeru
+\XFA (1 3 567 )  # cyrillic capital letter ze
+\XFB (1   567 )  # cyrillic capital letter sha
+\XFC ( 2 4 67 )  # cyrillic capital letter e
+\XFD (1 34 67 )  # cyrillic capital letter shcha
+\XFE (12345 7 )  # cyrillic capital letter che
+\XFF (123 567 )  # cyrillic capital letter hard sign
