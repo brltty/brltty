@@ -31,13 +31,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
-#endif /* HAVE_SYS_SELECT_H */
-
-#include "Programs/brl.h"
 #include "Programs/message.h"
 #include "Programs/misc.h"
 
@@ -267,8 +260,7 @@ static TranslationTable outputTable;
 
 static int	InDate = 0;
 static int		chars_per_sec;
-static int		brl_fd;			/* file descriptor for Braille display */
-static struct termios	oldtio;		/* old terminal settings */
+static SerialDevice *	serialDevice;			/* file descriptor for Braille display */
 static unsigned char	*rawdata = NULL;		/* translated data to send to Braille */
 static unsigned char	*prevdata = NULL;	/* previously sent raw data */
 static unsigned char	*lcd_data = NULL;	/* previously sent to LCD */
@@ -315,7 +307,7 @@ static int endblk(BrailleDisplay *brl)
 
 static int sendbyte(unsigned char c)
 {
-  return (write(brl_fd, &c, 1));
+  return (serialWriteData(serialDevice, &c, 1));
 }
 
 static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
@@ -372,27 +364,21 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
    write(logfd, "\n", 1);
    close(logfd);
 #endif
-   return (write(brl_fd, buf, p - buf));
+   return (serialWriteData(serialDevice, buf, p - buf));
 }
 
 static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t sz)
 {
-  fd_set		fds;
-  struct timeval	tv;
   char			c;
 
-  if (write(brl_fd, p, sz) != sz)
+  if (serialWriteData(serialDevice, p, sz) != sz)
     return (0);
-  FD_ZERO(&fds);
-  FD_SET(brl_fd, &fds);
-  tv.tv_sec = 0;
-  tv.tv_usec = 20000;
-  if (select(brl_fd + 1, &fds, NULL, NULL, &tv) <= 0)
+  if (!serialAwaitInput(serialDevice, 20))
     return (0);
-  if (read(brl_fd, &c, 1) > 0 && c == ACK)
+  if (serialReadData(serialDevice, &c, 1, 0, 0) == 1 && c == ACK)
     return (1);
   else
-    read(brl_fd, &c, 1); /* This is done to trap the error code */
+    serialReadData(serialDevice, &c, 1, 0, 0); /* This is done to trap the error code */
   return (0);
 }
 
@@ -411,8 +397,6 @@ static void brl_identify (void)
 
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
-   struct termios newtio;	/* new terminal settings */
-
    {
      static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
      makeOutputTable(&dots, &outputTable);
@@ -426,19 +410,12 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    rawdata = prevdata = lcd_data = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-   if (!openSerialDevice(device, &brl_fd, &oldtio)) return 0;
-
-  /* Set 8E1, enable reading, parity generation, etc. */
-   newtio.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
-   newtio.c_iflag = INPCK;
-   newtio.c_oflag = 0;		/* raw output */
-   newtio.c_lflag = 0;		/* don't echo or generate signals */
-   newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-   newtio.c_cc[VTIME] = 0;
+   if (!(serialDevice = serialOpenDevice(device))) return 0;
+   serialSetParity(serialDevice, SERIAL_PARITY_EVEN);
 
   /* set speed */
    chars_per_sec = BAUDRATE / 10;
-   restartSerialDevice(brl_fd, &newtio, BAUDRATE);
+   serialRestartDevice(serialDevice, BAUDRATE);
 
   /* Set model params... */
    brl->helpPage = 0;
@@ -479,11 +456,10 @@ static void brl_close (BrailleDisplay *brl)
        free (lcd_data);
        lcd_data = NULL;
      }
-   if (brl_fd >= 0)
+   if (serialDevice)
      {
-       putSerialAttributes (brl_fd, &oldtio);	/* restore terminal settings */
-       close (brl_fd);
-       brl_fd = -1;
+       serialCloseDevice (serialDevice);
+       serialDevice = NULL;
      }
 }
 
@@ -942,20 +918,14 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *bp, size_t siz
   unsigned char		c;
   char			end;
   char			flag = 0;
-  fd_set		fds;
-  struct timeval	tv;
   unsigned char		par = 1;
 
-  tv.tv_sec = 0;
-  tv.tv_usec = 20000;
-  FD_ZERO(&fds);
-  FD_SET(brl_fd, &fds);
-  if (select(brl_fd + 1, &fds, NULL, NULL, &tv) <= 0)
+  if (!serialAwaitInput(serialDevice, 20))
     return (0);
   memset(bp, 0, size);
   for (i = 0, end = 0; !end; i++)
     {
-      if (read(brl_fd, &c, 1) < 0)
+      if (serialReadData(serialDevice, &c, 1, 0, 0) != 1)
 	return (0); /* Error while reading information */
       if (i >= size)
 	return (0); /* Packet is too long to be read */
@@ -990,7 +960,7 @@ static int readbrlkey(BrailleDisplay *brl)
   static int pos = 0, p = 0, pktready = 0;
   
   /* here we process incoming data */
-  while (!pktready && read (brl_fd, &c, 1))
+  while (!pktready && (serialReadData (serialDevice, &c, 1, 0, 0) == 1))
     {
 #ifdef		LOG_IO
       logfd = open("/tmp/eb-log.in", O_CREAT |  O_APPEND | O_WRONLY, 0600);

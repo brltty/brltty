@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 #define BRLSTAT ST_TiemanStyle
@@ -44,14 +43,13 @@ static int cmdtrans[0X100] = {
 };
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
-int CB_fileDescriptor;			/* file descriptor for Braille display */
+SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */
 static int brl_cols;			/* file descriptor for Braille display */
 int CB_charactersPerSecond;			/* file descriptor for Braille display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
 static short rawlen;			/* length of rawdata buffer */
-static struct termios oldtio;		/* old terminal settings */
 
 /* Function prototypes: */
 static int getbrlkey (void);		/* get a keystroke from the CombiBraille */
@@ -68,7 +66,6 @@ brl_identify (void)
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
-  struct termios newtio;	/* new terminal settings */
   short n, success;		/* loop counters, flags, etc. */
   unsigned char *init_seq = INIT_SEQ;	/* bytewise accessible copies */
   unsigned char *init_ack = INIT_ACK;
@@ -92,13 +89,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    */
 
   /* Now open the Braille display device for random access */
-  if (!openSerialDevice(device, &CB_fileDescriptor, &oldtio)) goto failure;
+  if (!(CB_serialDevice = serialOpenDevice(device))) goto failure;
+  serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE);
 
-  /* Set bps, flow control and 8n1, enable reading */
-  initializeSerialAttributes(&newtio);
-  setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
-
-  restartSerialDevice(CB_fileDescriptor, &newtio, BAUDRATE);		/* activate new settings */
+  serialRestartDevice(CB_serialDevice, BAUDRATE);		/* activate new settings */
   CB_charactersPerSecond = BAUDRATE / 10;
 
   /* CombiBraille initialisation procedure: */
@@ -111,14 +105,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 #endif /* MAX_ATTEMPTS == 0 */
     {
       if (init_seq[0])
-	if (write (CB_fileDescriptor, init_seq + 1, init_seq[0]) != init_seq[0])
+	if (serialWriteData (CB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
 	  continue;
       timeout_yet (0);		/* initialise timeout testing */
       n = 0;
       do
 	{
 	  delay (20);
-	  if (read (CB_fileDescriptor, &c, 1) == 0)
+	  if (serialReadData (CB_serialDevice, &c, 1, 0, 0) != 1)
 	    continue;
 	  if (n < init_ack[0] && c != init_ack[1 + n])
 	    continue;
@@ -130,7 +124,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     }
   if (!success)
     {
-      putSerialAttributes (CB_fileDescriptor, &oldtio);
       goto failure;
     }
 
@@ -150,8 +143,8 @@ failure:;
     free (prevdata);
   if (rawdata)
     free (rawdata);
-  if (CB_fileDescriptor >= 0)
-    close (CB_fileDescriptor);
+  if (CB_serialDevice)
+    serialCloseDevice (CB_serialDevice);
   return 0;
 }
 
@@ -184,13 +177,12 @@ brl_close (BrailleDisplay *brl)
       memcpy (rawdata + rawlen, close_seq + 1, close_seq[0]);
       rawlen += close_seq[0];
     }
-  write (CB_fileDescriptor, rawdata, rawlen);
+  serialWriteData (CB_serialDevice, rawdata, rawlen);
 
   free (prevdata);
   free (rawdata);
 
-  putSerialAttributes (CB_fileDescriptor, &oldtio);		/* restore terminal settings */
-  close (CB_fileDescriptor);
+  serialCloseDevice (CB_serialDevice);
 }
 
 
@@ -245,7 +237,7 @@ brl_writeWindow (BrailleDisplay *brl)
 	  memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
 	  rawlen += post_data[0];
 	}
-      write (CB_fileDescriptor, rawdata, rawlen);
+      serialWriteData (CB_serialDevice, rawdata, rawlen);
       brl->writeDelay += rawlen * 1000 / CB_charactersPerSecond;
     }
 }
@@ -284,7 +276,7 @@ getbrlkey (void)
   static unsigned char q[4];	/* input queue */
   unsigned char c;		/* character buffer */
 
-  while (read (CB_fileDescriptor, &c, 1))
+  while (serialReadData (CB_serialDevice, &c, 1, 0, 0) == 1)
     {
       if (ptr == 0 && c != 27)
 	continue;

@@ -39,9 +39,7 @@
 #define LOWER_ROUTING_DEFAULT BRL_BLK_ROUTE
 #define UPPER_ROUTING_DEFAULT BRL_BLK_DESCCHAR
 
-static int fileDescriptor = -1;
-static struct termios oldSettings;
-static struct termios newSettings;
+static SerialDevice *serialDevice = NULL;
 static int charactersPerSecond;
 
 static TranslationTable inputMap;
@@ -60,7 +58,7 @@ static int statusStart;
 
 static int
 readByte (unsigned char *byte) {
-  int received = read(fileDescriptor, byte, 1);
+  int received = serialReadData(serialDevice, byte, 1, 0, 0);
   if (received == -1) LogError("Albatross read");
   return received == 1;
 }
@@ -68,7 +66,7 @@ readByte (unsigned char *byte) {
 static int
 awaitByte (unsigned char *byte) {
   if (readByte(byte)) return 1;
-  if (awaitInput(fileDescriptor, 1000))
+  if (serialAwaitInput(serialDevice, 1000))
     if (readByte(byte))
       return 1;
   return 0;
@@ -77,7 +75,7 @@ awaitByte (unsigned char *byte) {
 static int
 writeBytes (BrailleDisplay *brl, unsigned char *bytes, int count) {
   brl->writeDelay += count * 1000 / charactersPerSecond;
-  if (safe_write(fileDescriptor, bytes, count) != -1) return 1;
+  if (serialWriteData(serialDevice, bytes, count) != -1) return 1;
   LogError("Albatross write");
   return 0;
 }
@@ -102,9 +100,9 @@ acknowledgeDisplay (BrailleDisplay *brl) {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
     if (!writeBytes(brl, acknowledgement, sizeof(acknowledgement))) return 0;
 
-    flushSerialInput(fileDescriptor);
+    serialDiscardInput(serialDevice);
     delay(100);
-    flushSerialInput(fileDescriptor);
+    serialDiscardInput(serialDevice);
   }
   LogPrint(LOG_DEBUG, "Albatross description byte: %02X", description);
 
@@ -239,15 +237,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     return 0;
   }
 
-  if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
+  if ((serialDevice = serialOpenDevice(device))) {
     int baudTable[] = {19200, 9600, 0};
     const int *baud = baudTable;
 
-    memset(&newSettings, 0, sizeof(newSettings));
-    newSettings.c_cflag = CS8 | CREAD;
-    newSettings.c_iflag = IGNPAR | IGNBRK;
-
-    while (restartSerialDevice(fileDescriptor, &newSettings, *baud)) {
+    while (serialRestartDevice(serialDevice, *baud)) {
       time_t start = time(NULL);
       int count = 0;
       unsigned char byte;
@@ -270,18 +264,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       if (!*++baud) baud = baudTable;
     }
 
-    putSerialAttributes(fileDescriptor, &oldSettings);
-    close(fileDescriptor);
-    fileDescriptor = -1;
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
   return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
-  putSerialAttributes(fileDescriptor, &oldSettings);
-  close(fileDescriptor);
-  fileDescriptor = -1;
+  serialCloseDevice(serialDevice);
+  serialDevice = NULL;
 }
 
 static void

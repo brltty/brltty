@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 #define BRLSTAT ST_TiemanStyle
@@ -112,9 +111,7 @@ static char VARIO_DEVICE_ID[] = {ESC, 0x84};
 #define MAXREAD 18
 /* Global variables */
 
-static int brl_fd;              /* file descriptor for comm port */
-static struct termios oldtio,	/* old terminal settings for com port */
-                      curtio;   /* current settings */
+static SerialDevice *serialDevice;              /* file descriptor for comm port */
 static unsigned char *rawdata,	/* translated data to send to display */
                      *prevdata, /* previous data sent */
                      *dispbuf;
@@ -125,19 +122,19 @@ static void brl_identify (void)
   LogPrint(LOG_INFO, "   "COPYRIGHT);
 }
 
-static int myread(int fd, void *buf, unsigned len)
+static int myread(void *buf, unsigned len)
 {
-  return timedRead(fd,buf,len,100,100);
+  return serialReadData(serialDevice,buf,len,100,100);
 }
 
-static int QueryDisplay(int brl_fd, char *reply)
+static int QueryDisplay(char *reply)
 /* For auto-detect: send query, read response and validate response. */
 {
-  if (write(brl_fd, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID))
+  if (serialWriteData(serialDevice, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID))
       == sizeof(VARIO_DEVICE_ID)) {
-    if (awaitInput(brl_fd, 100)) {
+    if (serialAwaitInput(serialDevice, 100)) {
       int count;
-      if ((count = myread(brl_fd, reply, VARIO_DEVICE_ID_REPLY_LEN)) != -1)
+      if ((count = myread(reply, VARIO_DEVICE_ID_REPLY_LEN)) != -1)
         if ((count == VARIO_DEVICE_ID_REPLY_LEN) &&
             (memcmp(reply, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID)) == 0)) {
           reply[VARIO_DEVICE_ID_REPLY_LEN] = 0;
@@ -168,17 +165,13 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   brl->buffer = rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
-
-  /* Construct new settings */
-  initializeSerialAttributes(&curtio);
-
-  if(!restartSerialDevice(brl_fd, &curtio, BAUDRATE)) goto failure;
+  if (!(serialDevice = serialOpenDevice(device))) goto failure;
+  if(!serialRestartDevice(serialDevice, BAUDRATE)) goto failure;
 
   /* Try to detect display by sending query */
   while(1) {
     LogPrint(LOG_DEBUG,"Sending query");
-    if(QueryDisplay(brl_fd,reply)) break;
+    if(QueryDisplay(reply)) break;
     delay(DETECT_DELAY);
   }
   LogPrint(LOG_DEBUG, "reply = '%s'", reply);
@@ -236,9 +229,8 @@ failure:;
 
 static void brl_close (BrailleDisplay *brl)
 {
-  if (brl_fd >= 0) {
-    putSerialAttributes (brl_fd, &oldtio);
-    close (brl_fd);
+  if (serialDevice) {
+    serialCloseDevice (serialDevice);
   }
   if (brl->buffer)
     free (brl->buffer);
@@ -261,8 +253,8 @@ static void display(const unsigned char *buf)
       rawdata[VARIO_DISPLAY_LEN+i+escs] = ESC;
     }
   }
-  write(brl_fd, rawdata, VARIO_DISPLAY_LEN+ncells+escs);
-  drainSerialOutput(brl_fd); /* Does this help? It seems at it made the scrolling
+  serialWriteData(serialDevice, rawdata, VARIO_DISPLAY_LEN+ncells+escs);
+  serialDrainOutput(serialDevice); /* Does this help? It seems at it made the scrolling
 		      smoother */
 }
 
@@ -377,7 +369,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 
   gettimeofday (&now, &dum_tz);
   /* Check for first byte */
-  if (!read (brl_fd, buf, 1)){
+  if (serialReadData (serialDevice, buf, 1, 0, 0) != 1){
     if (button_waitcount >= BUTTON_STEP) { 
       goto calcres;
     }
@@ -397,8 +389,8 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 	return BRL_CMD_RESTARTBRL;
       else if (ping_due){
 	LogPrint(LOG_DEBUG, "Display idle: sending query");
-	write (brl_fd, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID));
-	drainSerialOutput(brl_fd);
+	serialWriteData (serialDevice, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID));
+	serialDrainOutput(serialDevice);
 	pings++;
 	gettimeofday(&last_ping_sent, &dum_tz);
       }
@@ -431,7 +423,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       } /* else return(EOF) */;
     }
     i++;
-    if (!myread (brl_fd, buf+i, 1))
+    if (myread (buf+i, 1) != 1)
       return (EOF);
   } /* while */
   if (must_init_oldstat) {
@@ -445,7 +437,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 
   if (infotype == TSP) {
     /* Read the TSP data */
-    if (myread (brl_fd, sw_stat, tspdatacnt) != tspdatacnt) {
+    if (myread (sw_stat, tspdatacnt) != tspdatacnt) {
       return (EOF);
     }
     for (i=0; i<tspdatacnt; i++) {
@@ -462,12 +454,12 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   }
   else if (infotype == VARIO_DEVICE_ID[1]) {
     LogPrint(LOG_DEBUG,"Got reply to idle ping");
-    myread(brl_fd, buf, VARIO_DEVICE_ID_REPLY_LEN - 2);
+    myread(buf, VARIO_DEVICE_ID_REPLY_LEN - 2);
     return(EOF);
   } else if (infotype == BUTTON || infotype == FRONTKEY ||
 	     infotype == COMMANDKEY) {
     char c;
-    if (!myread(brl_fd, &c, 1)) {
+    if (myread(&c, 1) != 1) {
       return(EOF);
     }
     switch (infotype) {

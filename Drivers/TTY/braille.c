@@ -72,8 +72,7 @@ typedef enum {
 #define MAX_WINDOW_WIDTH 80
 #define MAX_WINDOW_SIZE (MAX_WINDOW_HEIGHT * MAX_WINDOW_WIDTH)
 
-static int ttyDescriptor = -1;
-static struct termios ttySettings;
+static SerialDevice *ttyDevice = NULL;
 static FILE *ttyStream = NULL;
 static SCREEN *ttyScreen = NULL;
 static char *classificationLocale = NULL;
@@ -100,7 +99,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   {
     int baud = ttyBaud;
-    if (validateSerialBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL))
+    if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL))
       ttyBaud = baud;
   }
 
@@ -137,12 +136,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       1
 #endif /* HAVE_ICONV_H */
       ) {
-    if (openSerialDevice(device, &ttyDescriptor, &ttySettings)) {
-      struct termios newSettings;
-      initializeSerialAttributes(&newSettings);
-
-      if (restartSerialDevice(ttyDescriptor, &newSettings, ttyBaud)) {
-        if ((ttyStream = fdopen(ttyDescriptor, "a+"))) {
+    if ((ttyDevice = serialOpenDevice(device))) {
+      if (serialRestartDevice(ttyDevice, ttyBaud)) {
+        if ((ttyStream = serialGetStream(ttyDevice))) {
           if ((ttyScreen = newterm(ttyType, ttyStream, ttyStream))) {
             cbreak();
             noecho();
@@ -165,25 +161,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             LogError("newterm");
           }
 
-          /* fclose() closes the file descriptor */
-          putSerialAttributes(ttyDescriptor, &ttySettings);
-          ttyDescriptor = -1;
-
-          fclose(ttyStream);
           ttyStream = NULL;
-        } else {
-          LogError("fdopen");
-        }
-
-        if (ttyDescriptor != -1) {
-          putSerialAttributes(ttyDescriptor, &ttySettings);
         }
       }
 
-      if (ttyDescriptor != -1) {
-        close(ttyDescriptor);
-        ttyDescriptor = -1;
-      }
+      serialCloseDevice(ttyDevice);
+      ttyDevice = NULL;
     }
 
 #ifdef HAVE_ICONV_H
@@ -208,18 +191,10 @@ brl_close (BrailleDisplay *brl) {
     ttyScreen = NULL;
   }
 
-  if (ttyStream) {
-    putSerialAttributes(ttyDescriptor, &ttySettings);
-    ttyDescriptor = -1;
-
-    fclose(ttyStream);
+  if (ttyDevice) {
     ttyStream = NULL;
-  }
-
-  if (ttyDescriptor != -1) {
-    putSerialAttributes(ttyDescriptor, &ttySettings);
-    close(ttyDescriptor);
-    ttyDescriptor = -1;
+    serialCloseDevice(ttyDevice);
+    ttyDevice = NULL;
   }
 
 #ifdef HAVE_ICONV_H

@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/spk.h"
 #include "Programs/misc.h"
 
 typedef enum {

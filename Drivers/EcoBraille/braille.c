@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 #include "Programs/brl_driver.h"
@@ -82,8 +81,7 @@ static BRLPARAMS Models[NB_MODEL] ={
 static TranslationTable outputTable;
 
 /* Global variables */
-static int brl_fd;			/* file descriptor for Braille display */
-static struct termios oldtio;		/* old terminal settings */
+static SerialDevice *serialDevice;			/* file descriptor for Braille display */
 static unsigned char *rawdata;		/* translated data to send to Braille */
 static unsigned char Status[MAX_STCELLS]; /* to hold status */
 static BRLPARAMS *model;		/* points to terminal model config struct */
@@ -159,7 +157,7 @@ static int WriteToBrlDisplay(char *Data)
   memcpy(buffTmp + DIM_BRL_WRITE_PREFIX + BrailleSize, BRL_WRITE_SUFIX, DIM_BRL_WRITE_SUFIX); 
   
   /* write directly to Braille Line  */
-  write(brl_fd, buffTmp, size);
+  serialWriteData(serialDevice, buffTmp, size);
   
   /* Destroy temporal buffer */
   free(buffTmp);
@@ -177,7 +175,6 @@ static void brl_identify(void)
 
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
-  struct termios newtio;	/* new terminal settings */
   short ModelID = MODEL;
   unsigned char buffer[DIM_BRL_ID + 6];
 
@@ -194,7 +191,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   rawdata = NULL;	/* clear pointers */
 
   /* Open the Braille display device */
-  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
+  if (!(serialDevice = serialOpenDevice(device))) goto failure;
   
 #ifdef DEBUG
   brl_log = open("/tmp/brllog", O_CREAT | O_WRONLY);
@@ -203,28 +200,17 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   }
 #endif /* DEBUG */
 
-  /* Set 8n1, enable reading */
-  newtio.c_cflag = CS8 | CLOCAL | CREAD;
-
-  /* Set xon/xoff control, Ignore bytes with parity errors and make terminal raw and dumb */
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;		/* raw output */
-  newtio.c_lflag = 0;		/* don't echo or generate signals */
-  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-  newtio.c_cc[VTIME] = 0;
-
   /* autodetecting ECO model */
   do{
       /* DTR back on */
-      restartSerialDevice(brl_fd, &newtio, BAUDRATE);	/* activate new settings */
-      delay(600);				/* give time to send ID string */
+      serialRestartDevice(serialDevice, BAUDRATE);	/* activate new settings */
       
       /* The 2 next lines can be commented out to try autodetect once anyway */
       if(ModelID != ECO_AUTO){
 	break;
       }
       	
-      if(read(brl_fd, &buffer, DIM_BRL_ID + 6) == DIM_BRL_ID + 6){
+      if(serialReadData(serialDevice, &buffer, DIM_BRL_ID + 6, 600, 100) == DIM_BRL_ID + 6){
 	  if(!strncmp (buffer, BRL_ID, DIM_BRL_ID)){
 	  
 	    /* Possible values; 0x20, 0x40, 0x80 */
@@ -251,11 +237,8 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   /*do{*/
       strcpy(buffer, SYS_READY);
       
-      if(write(brl_fd, &buffer, DIM_SYS_READY) == DIM_SYS_READY){
-         delay(100);
-      }
-      
-      read(brl_fd, &buffer, DIM_BRL_READY + 6);
+      serialWriteData(serialDevice, &buffer, DIM_SYS_READY);
+      serialReadData(serialDevice, &buffer, DIM_BRL_READY + 6, 100, 100);
       /*}while(strncmp (buffer, BRL_READY, DIM_BRL_READY));*/
       
       LogPrint(LOG_DEBUG, "buffer is: %s",buffer);
@@ -293,8 +276,7 @@ return 0;
 static void brl_close(BrailleDisplay *brl)
 {
   free(rawdata);
-  putSerialAttributes(brl_fd, &oldtio);	/* restore terminal settings */
-  close(brl_fd);
+  serialCloseDevice(serialDevice);
 
 #ifdef DEBUG  
   close(brl_log);
@@ -342,7 +324,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 #endif /* DEBUG */
 
   /* Read info from Braille Line */
-  if((bytes = read(brl_fd, buff, 18)) >= 9){
+  if((bytes = serialReadData(serialDevice, buff, 18, 0, 0)) >= 9){
 
 #ifdef DEBUG
      sprintf(tmp, "Type %d, Bytes read: %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x\n",

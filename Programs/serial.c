@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <termios.h>
 
 #ifdef HAVE_SYS_MODEM_H
 #include <sys/modem.h>
@@ -34,6 +35,14 @@
 
 #include "serial.h"
 #include "misc.h"
+
+struct SerialDeviceStruct {
+  int fileDescriptor;
+  struct termios originalAttributes;
+  struct termios currentAttributes;
+  struct termios pendingAttributes;
+  FILE *stream;
+};
 
 typedef struct {
   int baud;
@@ -173,17 +182,17 @@ getBaudEntry (int baud) {
   return NULL;
 }
 
-void
-initializeSerialAttributes (struct termios *attributes) {
+static void
+serialInitializeAttributes (struct termios *attributes) {
   memset(attributes, 0, sizeof(*attributes));
   attributes->c_cflag = CREAD | CLOCAL | CS8;
   attributes->c_iflag = IGNPAR | IGNBRK;
 }
 
 static int
-setSerialSpeed (struct termios *attributes, speed_t speed) {
-  if (cfsetispeed(attributes, speed) != -1) {
-    if (cfsetospeed(attributes, speed) != -1) {
+serialSetSpeed (SerialDevice *serial, speed_t speed) {
+  if (cfsetispeed(&serial->pendingAttributes, speed) != -1) {
+    if (cfsetospeed(&serial->pendingAttributes, speed) != -1) {
       return 1;
     } else {
       LogError("cfsetospeed");
@@ -195,10 +204,10 @@ setSerialSpeed (struct termios *attributes, speed_t speed) {
 }
 
 int
-setSerialBaud (struct termios *attributes, int baud) {
+serialSetBaud (SerialDevice *serial, int baud) {
   const BaudEntry *entry = getBaudEntry(baud);
   if (entry) {
-    if (setSerialSpeed(attributes, entry->speed)) {
+    if (serialSetSpeed(serial, entry->speed)) {
       return 1;
     }
   } else {
@@ -208,7 +217,7 @@ setSerialBaud (struct termios *attributes, int baud) {
 }
 
 int
-setSerialDataBits (struct termios *attributes, int bits) {
+serialSetDataBits (SerialDevice *serial, int bits) {
   tcflag_t size;
   switch (bits) {
 #ifdef CS5
@@ -232,17 +241,17 @@ setSerialDataBits (struct termios *attributes, int bits) {
       return 0;
   }
 
-  attributes->c_cflag &= ~CSIZE;
-  attributes->c_cflag |= size;
+  serial->pendingAttributes.c_cflag &= ~CSIZE;
+  serial->pendingAttributes.c_cflag |= size;
   return 1;
 }
 
 int
-setSerialStopBits (struct termios *attributes, int bits) {
+serialSetStopBits (SerialDevice *serial, int bits) {
   if (bits == 1) {
-    attributes->c_cflag &= ~CSTOPB;
+    serial->pendingAttributes.c_cflag &= ~CSTOPB;
   } else if (bits == 2) {
-    attributes->c_cflag |= CSTOPB;
+    serial->pendingAttributes.c_cflag |= CSTOPB;
   } else {
     LogPrint(LOG_WARNING, "Unknown serial stop bit count: %d", bits);
     return 0;
@@ -251,31 +260,31 @@ setSerialStopBits (struct termios *attributes, int bits) {
 }
 
 int
-setSerialParity (struct termios *attributes, SerialParity parity) {
+serialSetParity (SerialDevice *serial, SerialParity parity) {
   if (parity == SERIAL_PARITY_NONE) {
-    attributes->c_cflag &= ~(PARENB | PARODD);
+    serial->pendingAttributes.c_cflag &= ~(PARENB | PARODD);
   } else {
     if (parity == SERIAL_PARITY_EVEN) {
-      attributes->c_cflag &= ~PARODD;
+      serial->pendingAttributes.c_cflag &= ~PARODD;
     } else if (parity == SERIAL_PARITY_ODD) {
-      attributes->c_cflag |= PARODD;
+      serial->pendingAttributes.c_cflag |= PARODD;
     } else {
       LogPrint(LOG_WARNING, "Unknown serial parity: %c", parity);
       return 0;
     }
-    attributes->c_cflag |= PARENB;
+    serial->pendingAttributes.c_cflag |= PARENB;
   }
   return 1;
 }
 
 int
-setSerialFlowControl (struct termios *attributes, SerialFlowControl flow) {
+serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 #ifdef CRTSCTS
   if (flow & SERIAL_FLOW_HARDWARE) {
-    attributes->c_cflag |= CRTSCTS;
+    serial->pendingAttributes.c_cflag |= CRTSCTS;
     flow &= ~SERIAL_FLOW_HARDWARE;
   } else {
-    attributes->c_cflag &= ~CRTSCTS;
+    serial->pendingAttributes.c_cflag &= ~CRTSCTS;
   }
 #else /* CRTSCTS */
 #warning hardware flow control not settable on this platform
@@ -283,10 +292,10 @@ setSerialFlowControl (struct termios *attributes, SerialFlowControl flow) {
 
 #ifdef IXOFF
   if (flow & SERIAL_FLOW_SOFTWARE_INPUT) {
-    attributes->c_iflag |= IXOFF;
+    serial->pendingAttributes.c_iflag |= IXOFF;
     flow &= ~SERIAL_FLOW_SOFTWARE_INPUT;
   } else {
-    attributes->c_iflag &= ~IXOFF;
+    serial->pendingAttributes.c_iflag &= ~IXOFF;
   }
 #else /* IXOFF */
 #warning software input flow control not settable on this platform
@@ -294,10 +303,10 @@ setSerialFlowControl (struct termios *attributes, SerialFlowControl flow) {
 
 #ifdef IXON
   if (flow & SERIAL_FLOW_SOFTWARE_OUTPUT) {
-    attributes->c_iflag |= IXON;
+    serial->pendingAttributes.c_iflag |= IXON;
     flow &= ~SERIAL_FLOW_SOFTWARE_OUTPUT;
   } else {
-    attributes->c_iflag &= ~IXON;
+    serial->pendingAttributes.c_iflag &= ~IXON;
   }
 #else /* IXON */
 #warning software output flow control not settable on this platform
@@ -312,51 +321,58 @@ setSerialFlowControl (struct termios *attributes, SerialFlowControl flow) {
 }
 
 int
-getSerialAttributes (int descriptor, struct termios *attributes) {
-  if (tcgetattr(descriptor, attributes) != -1) return 1;
-  LogError("tcgetattr");
-  return 0;
-}
-
-int
-putSerialAttributes (int descriptor, const struct termios *attributes) {
-  if (tcsetattr(descriptor, TCSANOW, attributes) != -1) return 1;
-  LogError("tcsetattr");
-  return 0;
-}
-
-int
-putSerialBaud (int descriptor, int baud, struct termios *attributes) {
-  struct termios buffer;
-  if (!attributes)
-    if (!getSerialAttributes(descriptor, attributes=&buffer))
-      return 0;
-
-  if (setSerialBaud(attributes, baud))
-    if (putSerialAttributes(descriptor, attributes))
-      return 1;
-  return 0;
-}
-
-int
-flushSerialInput (int descriptor) {
-  if (tcflush(descriptor, TCIFLUSH) != -1) return 1;
+serialDiscardInput (SerialDevice *serial) {
+  if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
   LogError("TCIFLUSH");
   return 0;
 }
 
 int
-flushSerialOutput (int descriptor) {
-  if (tcflush(descriptor, TCOFLUSH) != -1) return 1;
+serialDiscardOutput (SerialDevice *serial) {
+  if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
   LogError("TCOFLUSH");
   return 0;
 }
 
 int
-drainSerialOutput (int descriptor) {
-  if (tcdrain(descriptor) != -1) return 1;
+serialDrainOutput (SerialDevice *serial) {
+  if (tcdrain(serial->fileDescriptor) != -1) return 1;
   LogError("tcdrain");
   return 0;
+}
+
+static void
+serialCopyAttributes (struct termios *destination, const struct termios *source) {
+  memcpy(destination, source, sizeof(*destination));
+}
+
+static int
+serialCompareAttributes (const struct termios *attributes, const struct termios *reference) {
+  return memcmp(attributes, reference, sizeof(*attributes));
+}
+
+static int
+serialReadAttributes (SerialDevice *serial) {
+  if (tcgetattr(serial->fileDescriptor, &serial->currentAttributes) != -1) return 1;
+  LogError("tcgetattr");
+  return 0;
+}
+
+static int
+serialWriteAttributes (SerialDevice *serial, const struct termios *attributes) {
+  if (serialCompareAttributes(attributes, &serial->currentAttributes) != 0) {
+    if (tcsetattr(serial->fileDescriptor, TCSADRAIN, attributes) == -1) {
+      LogError("tcsetattr");
+      return 0;
+    }
+    serialCopyAttributes(&serial->currentAttributes, attributes);
+  }
+  return 1;
+}
+
+static int
+serialFlushAttributes (SerialDevice *serial) {
+  return serialWriteAttributes(serial, &serial->pendingAttributes);
 }
 
 int
@@ -366,52 +382,7 @@ isSerialDevice (const char **path) {
 }
 
 int
-openSerialDevice (const char *path, int *descriptor, struct termios *attributes) {
-  char *device;
-  if ((device = getDevicePath(path))) {
-    if ((*descriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
-      if (isatty(*descriptor)) {
-        if (setBlockingIo(*descriptor, 1)) {
-          if (!attributes || getSerialAttributes(*descriptor, attributes)) {
-            LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", device, *descriptor);
-            free(device);
-            return 1;
-          }
-        }
-      } else {
-        LogPrint(LOG_ERR, "Not a serial device: %s", device);
-      }
-      close(*descriptor);
-      *descriptor = -1;
-    } else {
-      LogPrint(LOG_ERR, "Cannot open '%s': %s", device, strerror(errno));
-    }
-    free(device);
-  }
-  return 0;
-}
-
-int
-restartSerialDevice (int descriptor, struct termios *attributes, int baud) {
-  if (flushSerialOutput(descriptor)) {
-    if (setSerialSpeed(attributes, B0)) {
-      if (putSerialAttributes(descriptor, attributes)) {
-        delay(500);
-        if (flushSerialInput(descriptor)) {
-          if (setSerialBaud(attributes, baud)) {
-            if (putSerialAttributes(descriptor, attributes)) {
-              return 1;
-            }
-          }
-        }
-      }
-    }
-  }
-  return 0;
-}
-
-int
-validateSerialBaud (int *baud, const char *description, const char *word, const int *choices) {
+serialValidateBaud (int *baud, const char *description, const char *word, const int *choices) {
   if (!*word || isInteger(baud, word)) {
     const BaudEntry *entry = getBaudEntry(*baud);
     if (entry) {
@@ -433,28 +404,144 @@ validateSerialBaud (int *baud, const char *description, const char *word, const 
   return 0;
 }
 
+SerialDevice *
+serialOpenDevice (const char *path) {
+  SerialDevice *serial;
+  if ((serial = malloc(sizeof(*serial)))) {
+    char *device;
+    if ((device = getDevicePath(path))) {
+      if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+        if (isatty(serial->fileDescriptor)) {
+          if (setBlockingIo(serial->fileDescriptor, 1)) {
+            if (serialReadAttributes(serial)) {
+              serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
+              serialInitializeAttributes(&serial->pendingAttributes);
+
+              serial->stream = NULL;
+
+              LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d",
+                       device, serial->fileDescriptor);
+              free(device);
+              return serial;
+            }
+          }
+        } else {
+          LogPrint(LOG_ERR, "Not a serial device: %s", device);
+        }
+        close(serial->fileDescriptor);
+      } else {
+        LogPrint(LOG_ERR, "Cannot open '%s': %s", device, strerror(errno));
+      }
+      free(device);
+    }
+    free(serial);
+  } else {
+    LogError("serial device allocation");
+  }
+  return NULL;
+}
+
+void
+serialCloseDevice (SerialDevice *serial) {
+  serialWriteAttributes(serial, &serial->originalAttributes);
+  if (serial->stream) {
+    fclose(serial->stream);
+  } else {
+    close(serial->fileDescriptor);
+  }
+  free(serial);
+}
+
+int
+serialRestartDevice (SerialDevice *serial, int baud) {
+  if (serialDiscardOutput(serial)) {
+    if (serialSetSpeed(serial, B0)) {
+      if (serialFlushAttributes(serial)) {
+        delay(500);
+        if (serialDiscardInput(serial)) {
+          if (serialSetBaud(serial, baud)) {
+            if (serialFlushAttributes(serial)) {
+              return 1;
+            }
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+FILE *
+serialGetStream (SerialDevice *serial) {
+  if (!serial->stream) {
+    if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
+      LogError("fdopen");
+      return NULL;
+    }
+  }
+  return serial->stream;
+}
+
+int
+serialAwaitInput (SerialDevice *serial, int timeout) {
+  if (!serialFlushAttributes(serial)) return 0;
+  return awaitInput(serial->fileDescriptor, timeout);
+}
+
+int
+serialReadData (
+  SerialDevice *serial,
+  void *buffer, int size,
+  int initialTimeout, int subsequentTimeout
+) {
+  if (!serialFlushAttributes(serial)) return -1;
+  return timedRead(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+int
+serialReadChunk (
+  SerialDevice *serial,
+  unsigned char *buffer, int *offset, int count,
+  int initialTimeout, int subsequentTimeout
+) {
+  if (!serialFlushAttributes(serial)) return 0;
+  return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
+}
+
+int
+serialWriteData (
+  SerialDevice *serial,
+  const void *data, int size
+) {
+  if (serialFlushAttributes(serial)) {
+    if (safe_write(serial->fileDescriptor, data, size) != -1) return size;
+    LogError("serial write");
+  }
+  return -1;
+}
+
 static int
-getSerialControlLines (int descriptor, int *lines) {
-  if (ioctl(descriptor, TIOCMGET, lines) != -1) return 1;
+serialGetLines (SerialDevice *serial, int *lines) {
+  if (ioctl(serial->fileDescriptor, TIOCMGET, lines) != -1) return 1;
   LogError("TIOCMGET");
   return 0;
 }
 
 static int
-testSerialControlLines (int descriptor, int set, int clear) {
+serialTestLines (SerialDevice *serial, int set, int clear) {
   int lines;
-  if (getSerialControlLines(descriptor, &lines))
+  if (serialGetLines(serial, &lines))
     if (((lines & set) == set) && ((~lines & clear) == clear))
       return 1;
   return 0;
 }
 
 int
-testSerialClearToSend (int descriptor) {
-  return testSerialControlLines(descriptor, TIOCM_CTS, 0);
+serialTestLineCTS (SerialDevice *serial) {
+  return serialTestLines(serial, TIOCM_CTS, 0);
 }
 
 int
-testSerialDataSetReady (int descriptor) {
-  return testSerialControlLines(descriptor, TIOCM_DSR, 0);
+serialTestLineDSR (SerialDevice *serial) {
+  return serialTestLines(serial, TIOCM_DSR, 0);
 }

@@ -36,7 +36,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
@@ -50,8 +49,7 @@
 enum mode_t { NORMAL_MODE, F1_MODE, F2_MODE, MANAGE_MODE, CLOCK_MODE };
 
 /* global variables */
-static int brl_fd = -1;
-static struct termios oldtermios;
+static SerialDevice *serialDevice = NULL;
 static TranslationTable outputTable;
 unsigned char xlated[20]; /* translated content of display */
 unsigned char status[2]; /* xlated content of status area */
@@ -65,7 +63,7 @@ static enum mode_t mode = NORMAL_MODE;
 static void beep(void)
 {
 	AFTER_CMD_DELAY;
-	write(brl_fd, "\eB\r", 3);
+	serialWriteData(serialDevice, "\eB\r", 3);
 	AFTER_CMD_DELAY;
 };
 
@@ -79,7 +77,6 @@ static void brl_identify(void)
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
 	__label__ __errexit;
-	struct termios newtermios;
 	
 	{
 		static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
@@ -96,13 +93,12 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 	brl->y = 1;
 
 	/* open device */
-	if (!openSerialDevice(device, &brl_fd, &oldtermios)) goto __errexit;
-	initializeSerialAttributes(&newtermios);
-	restartSerialDevice(brl_fd, &newtermios, 9600);
+	if (!(serialDevice = serialOpenDevice(device))) goto __errexit;
+	serialRestartDevice(serialDevice, 9600);
 	/* hm, how to switch to 38400 ? 
-	write(brl_fd, "\eV\r", 3);
-	flushSerialInput(brl_fd);
-	putSerialBaud(brl_fd, 38400, &newtermios);
+	serialWriteData(serialDevice, "\eV\r", 3);
+	serialDiscardInput(serialDevice);
+	serialSetBaud(serialDevice, 38400);
 	*/
 
 	message("BRLTTY Ready", 0);
@@ -116,18 +112,17 @@ __errexit:
 
 static void brl_close(BrailleDisplay *brl)
 {
-	putSerialAttributes(brl_fd, &oldtermios);
-	close(brl_fd);
+	serialCloseDevice(serialDevice);
 }
 
 static void refresh(void)
 {
 	unsigned char datab[] = { 27, 'Z', '1' };
 	unsigned char datae[] = { 13 };
-	write(brl_fd, datab, sizeof datab);
-	write(brl_fd, status, sizeof status);
-	write(brl_fd, xlated, sizeof xlated);
-	write(brl_fd, datae, sizeof datae);
+	serialWriteData(serialDevice, datab, sizeof datab);
+	serialWriteData(serialDevice, status, sizeof status);
+	serialWriteData(serialDevice, xlated, sizeof xlated);
+	serialWriteData(serialDevice, datae, sizeof datae);
 };
 
 static void brl_writeWindow(BrailleDisplay *brl)
@@ -142,7 +137,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 {
 	unsigned char znak;
 	int rv;
-	rv = read(brl_fd, &znak, 1);
+	rv = serialReadData(serialDevice, &znak, 1, 0, 0);
 	switch (mode) {
 	case NORMAL_MODE:
 		if (rv == -1) return EOF;

@@ -64,7 +64,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 #define BRLSTAT ST_MDVStyle
@@ -185,9 +184,7 @@ static unsigned char query_reply_packet_hdr[] = {SOH, STX, QUERYREPLY, 6, ETX};
 
 /* Global variables */
 
-static int brl_fd;                /* file descriptor for comm port */
-static struct termios oldtio,	  /* old terminal settings for com port */
-                      curtio;     /* current settings */
+static SerialDevice *serialDevice;                /* file descriptor for comm port */
 static unsigned char *sendpacket, /* packet scratch pad */
                      *recvpacket,
                      *ackpacket,  /* code ACK len 0 prepared packet */
@@ -214,9 +211,9 @@ brl_identify (void)
 
 
 static int
-myread(int fd, void *buf, unsigned len)
+myread(void *buf, unsigned len)
 {
-  return timedRead(fd,buf,len,100,100);
+  return serialReadData(serialDevice,buf,len,100,100);
 }
 
 static int
@@ -228,7 +225,7 @@ receive_rest(unsigned char *packet)
 {
   int len, cksum;
   /* assuming we have already caught an SOH */
-  if(myread(brl_fd, packet+1, PACKET_HDR_LEN-1) != PACKET_HDR_LEN-1) return 0;
+  if(myread(packet+1, PACKET_HDR_LEN-1) != PACKET_HDR_LEN-1) return 0;
   /* Check for STX and ETX */
   if(packet[1] != packet_hdr[1] || packet[4] != packet_hdr[4]){
     LogPrint(LOG_DEBUG,"Invalid packet: STX %02x, ETX %02x",
@@ -237,7 +234,7 @@ receive_rest(unsigned char *packet)
   }
   len = packet[OFF_LEN];
   if(len > MAXPACKETLEN) return 0;
-  if(myread(brl_fd, packet+PACKET_HDR_LEN, len+NRCKSUMBYTES)
+  if(myread(packet+PACKET_HDR_LEN, len+NRCKSUMBYTES)
      != len+NRCKSUMBYTES){
     LogPrint(LOG_DEBUG,"receive_rest(): short read count");
     return 0;
@@ -272,11 +269,11 @@ expect_receive_packet(unsigned char *packet)
    packet, we skip it and try again. Returns 1 if a packet was successfully
    received, 0 otherwise. */
 {
-  if(!awaitInput(brl_fd, 200)) return 0;
+  if(!serialAwaitInput(serialDevice, 200)) return 0;
   while(1) {
     /* Read until we get an SOH */
     do {
-      if(myread(brl_fd, packet, 1) <= 0) return 0;
+      if(myread(packet, 1) != 1) return 0;
     } while(packet[0] != SOH);
     /* Now read and check the rest of the packet */
     if(receive_rest(packet)) break;
@@ -296,7 +293,7 @@ peek_receive_packet(unsigned char *packet)
   do {
     /* Check for first byte */
     do {
-      if(read(brl_fd, packet, 1) <= 0) return 0;
+      if(serialReadData(serialDevice, packet, 1, 0, 0) != 1) return 0;
     } while(packet[0] != SOH);
   } while(!receive_rest(packet));
   return 1;
@@ -323,12 +320,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       = routing_were_pressed = which_routing_keys = NULL;
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
+  if (!(serialDevice = serialOpenDevice(device))) goto failure;
 
-  /* Construct new settings */
-  initializeSerialAttributes(&curtio);
-
-  if(!restartSerialDevice(brl_fd, &curtio, 19200)) goto failure;
+  if(!serialRestartDevice(serialDevice, 19200)) goto failure;
  
 /* Allocate and init static packet buffers */
   if((sendpacket = (unsigned char *)malloc(MAXTOTALPACKETLEN)) == NULL
@@ -346,10 +340,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   sendpacket[OFF_LEN] = 0;
   put_cksum(sendpacket);
   while(1){
-    if(write(brl_fd, sendpacket, PACKET_HDR_LEN+NRCKSUMBYTES)
+    if(serialWriteData(serialDevice, sendpacket, PACKET_HDR_LEN+NRCKSUMBYTES)
        != PACKET_HDR_LEN+NRCKSUMBYTES)
       goto failure;
-    drainSerialOutput(brl_fd);
+    serialDrainOutput(serialDevice);
     while(expect_receive_packet(recvpacket)){
       if(memcmp(recvpacket, query_reply_packet_hdr, PACKET_HDR_LEN) == 0)
 	goto detected;
@@ -430,10 +424,9 @@ failure:;
 static void 
 brl_close (BrailleDisplay *brl)
 {
-  if (brl_fd >= 0)
+  if (serialDevice)
     {
-      putSerialAttributes (brl_fd, &oldtio);
-      close (brl_fd);
+      serialCloseDevice (serialDevice);
     }
   if (prevdata) free (prevdata);
   if (statbuf) free (statbuf);
@@ -479,8 +472,8 @@ brl_writeWindow (BrailleDisplay *brl)
      *(p++) = outputTable[brl->buffer[i]];
   put_cksum(sendpacket);
 
-  write(brl_fd, sendpacket, PACKET_HDR_LEN+nrstatcells+brl_cols+NRCKSUMBYTES);
-  drainSerialOutput(brl_fd);
+  serialWriteData(serialDevice, sendpacket, PACKET_HDR_LEN+nrstatcells+brl_cols+NRCKSUMBYTES);
+  serialDrainOutput(serialDevice);
 
   if(expect_receive_packet(recvpacket)){
     if(memcmp(recvpacket, ackpacket, ACKPACKETLEN) == 0)
@@ -524,7 +517,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
     }else packet_to_process = 0;
     if(memcmp(recvpacket, ackpacket, ACKPACKETLEN) != 0)
       /* ACK it, unless it is itself an ACK */
-      write(brl_fd, ackpacket, ACKPACKETLEN);
+      serialWriteData(serialDevice, ackpacket, ACKPACKETLEN);
     code = recvpacket[OFF_CODE];
   } while(code != REPORTKEYPRESS && code != REPORTROUTINGKEYPRESS
 	  && code != REPORTROUTINGKEYRELEASE);

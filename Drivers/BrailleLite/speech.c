@@ -30,7 +30,6 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "Programs/spk.h"
 #include "Programs/misc.h"
 
 #include "Programs/spk_driver.h"
@@ -84,10 +83,10 @@ spk_say (const unsigned char *buffer, int len)
 
   /* Keep it simple for now: */
   if (pre_speech[0])
-    write (BL_fileDescriptor, pre_speech + 1, pre_speech[0]);
-  write (BL_fileDescriptor, buffer, len);
+    serialWriteData (BL_serialDevice, pre_speech + 1, pre_speech[0]);
+  serialWriteData (BL_serialDevice, buffer, len);
   if (post_speech[0])
-    write (BL_fileDescriptor, post_speech + 1, post_speech[0]);
+    serialWriteData (BL_serialDevice, post_speech + 1, post_speech[0]);
 
 #if 0
   unsigned char c;
@@ -129,7 +128,7 @@ spk_mute (void)
 {
   unsigned char mute_seq[] = {MUTE_SEQ };
 
-  write (BL_fileDescriptor, mute_seq + 1, mute_seq[0]);
+  serialWriteData (BL_serialDevice, mute_seq + 1, mute_seq[0]);
 }
 
 

@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/scr.h"
 #include "Programs/message.h"
@@ -45,8 +44,7 @@ typedef enum {
 
 #define MAXPKTLEN 512
 
-static int brl_fd;
-static struct termios oldtio,newtio;
+static SerialDevice *serialDevice;
 #ifdef SendIdReq
 static struct TermInfo {
   unsigned char code; 
@@ -92,9 +90,9 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
   *y = chksum; y++; lgtho++; 
   *y = 3; y++; lgtho++; 
   for (i=1; i<=5; i++) {
-    if (write(brl_fd,obuf,lgtho) != lgtho) continue; /* write failed, retry */
-    drainSerialOutput(brl_fd);
-    res = timedRead(brl_fd,&chksum,1,1000,1000);
+    if (serialWriteData(serialDevice,obuf,lgtho) != lgtho) continue; /* write failed, retry */
+    serialDrainOutput(serialDevice);
+    res = serialReadData(serialDevice,&chksum,1,1000,0);
     if ((res==1) && (chksum == 0x04)) return 0;
   }
   return (-1);
@@ -114,13 +112,12 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size
   static unsigned char ack = 04;
   static unsigned char nack = 05;
   static int apacket = 0;
-  int res;
   static unsigned char prefix, checksum;
   unsigned char ch;
   static unsigned char buf[MAXPKTLEN]; 
   static unsigned char *q;
   if ((p==NULL) || (size<2) || (size>MAXPKTLEN)) return 0; 
-  while ((res = readChunk(brl_fd,&ch,&tmp,1,0,1000))==1) {
+  while (serialReadChunk(serialDevice,&ch,&tmp,1,0,1000)) {
     if (ch==0x02) {
       apacket = 1;
       prefix = 0xff; 
@@ -131,14 +128,14 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size
         prefix &= ~(0x40); 
       } else if (ch==0x03) {
         if (checksum==0) {
-          write(brl_fd,&ack,1); 
+          serialWriteData(serialDevice,&ack,1); 
           apacket = 0; q--;
           if (buf[0]!='+') {
             memcpy(p,buf,(q-buf));
             return q-&buf[0]; 
           }
         } else {
-          write(brl_fd,&nack,1);
+          serialWriteData(serialDevice,&nack,1);
           apacket = 0;
           return 0;
         }
@@ -200,13 +197,9 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
     unsupportedDevice(device);
     return 0;
   }
-  if (!openSerialDevice(device, &brl_fd, &oldtio)) return 0;
-  memset(&newtio, 0, sizeof(newtio)); 
-  newtio.c_cflag = CS8 | PARENB | PARODD | CLOCAL | CREAD;
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;
-  newtio.c_lflag = 0;
-  restartSerialDevice(brl_fd,&newtio,57600); 
+  if (!(serialDevice = serialOpenDevice(device))) return 0;
+  serialSetParity(serialDevice, SERIAL_PARITY_ODD);
+  serialRestartDevice(serialDevice,57600); 
 #ifdef SendIdReq
   {
     brl_writePacket(brl,(unsigned char *) &ch,1); 
@@ -248,9 +241,8 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 /* Closes the braille device and deallocates dynamic structures */
 static void brl_close(BrailleDisplay *brl)
 {
-  if (brl_fd>=0) {
-    putSerialAttributes(brl_fd,&oldtio);
-    close(brl_fd);
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
   }
 }
 

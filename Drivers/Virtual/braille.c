@@ -40,7 +40,6 @@
 
 #include "Programs/misc.h"
 #include "Programs/cmd.h"
-#include "Programs/brl.h"
 
 #define BRLSTAT ST_Generic
 #define BRL_HAVE_VISUAL_DISPLAY

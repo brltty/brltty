@@ -60,7 +60,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 #define BRLSTAT ST_TiemanStyle
@@ -73,13 +72,12 @@
 #define CR '\015'
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
-int brl_fd;			/* file descriptor for Braille display */
+SerialDevice *MB_serialDevice;			/* file descriptor for Braille display */
 static int brlcols;		/* length of braille line (auto-detected) */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
-unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
+static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
 static short rawlen;			/* length of rawdata buffer */
-static struct termios oldtio;		/* old terminal settings */
 
 /* message event coming from the braille line to the PC */
 typedef struct KeyStroke {
@@ -104,7 +102,6 @@ static void brl_identify (void) {
 
 
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-	struct termios newtio;	/* new terminal settings */
 	short i, n, success;		/* loop counters, flags, etc. */
 	unsigned char *init_seq = "\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
 	unsigned char *init_ack = "\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
@@ -128,13 +125,10 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 	 */
 
 	/* Now open the Braille display device for random access */
-	if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
+	if (!(MB_serialDevice = serialOpenDevice(device))) goto failure;
+	serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE);
 
-	/* Set flow control, enable reading */
-        initializeSerialAttributes(&newtio);
-	setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
-
-	restartSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
+	serialRestartDevice(MB_serialDevice, BAUDRATE);		/* activate new settings */
 
 	/* MultiBraille initialisation procedure:
 	 * [ESC][V][Braillelength][Software Version][CR]
@@ -149,13 +143,13 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 	for (i = 0; i < MAX_ATTEMPTS && !success; i++) {
 #endif /* MAX_ATTEMPTS == 0 */
 		if (init_seq[0])
-			if (write (brl_fd, init_seq + 1, init_seq[0]) != init_seq[0])
+			if (serialWriteData (MB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
 				continue;
 			timeout_yet (0);		/* initialise timeout testing */
 			n = 0;
 			do {
 				delay (20);
-				if (read (brl_fd, &c, 1) == 0)
+				if (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 0)
 					continue;
 				if (n < init_ack[0] && c != init_ack[1 + n])
 					continue;
@@ -163,17 +157,16 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 					brlcols = c, success = 1;
 					/* reading version-info */
 					/* firmware version == [Software Version] / 10.0 */
-					read (brl_fd, &c, 1);
+					serialReadData (MB_serialDevice, &c, 1, 0, 0);
 					LogPrint (LOG_INFO, "MultiBraille: Version: %2.1f", c/10.0);
 					/* read trailing [CR] */
-					read (brl_fd, &c, 1);
+					serialReadData (MB_serialDevice, &c, 1, 0, 0);
 				}
 				n++;
 			}
 			while (!timeout_yet (ACK_TIMEOUT) && n <= init_ack[0]);
 	}
   if (!success) {
-		putSerialAttributes (brl_fd, &oldtio);
 		goto failure;
 	}
 
@@ -199,8 +192,8 @@ failure:;
 		free (prevdata);
 	if (rawdata)
 		free (rawdata);
-	if (brl_fd >= 0)
-		close (brl_fd);
+	if (MB_serialDevice)
+		serialCloseDevice (MB_serialDevice);
 	return 0;
 }
 
@@ -228,13 +221,12 @@ static void brl_close (BrailleDisplay *brl) {
 		memcpy (rawdata + rawlen, close_seq + 1, close_seq[0]);
 		rawlen += close_seq[0];
 	}
-	write (brl_fd, rawdata, rawlen);
+	serialWriteData (MB_serialDevice, rawdata, rawlen);
 
 	free (prevdata);
 	free (rawdata);
 
-	putSerialAttributes (brl_fd, &oldtio);		/* restore terminal settings */
-	close (brl_fd);
+	serialCloseDevice (MB_serialDevice);
 }
 
 
@@ -288,7 +280,7 @@ static void brl_writeWindow (BrailleDisplay *brl) {
 			rawlen += post_data[0];
 		}
     
-		write (brl_fd, rawdata, rawlen);
+		serialWriteData (MB_serialDevice, rawdata, rawlen);
 	}
 }
 
@@ -351,24 +343,24 @@ static struct KeyStroke getbrlkey (void) {
 	unsigned char c, c_temp;		/* character buffer */
 	KeyStroke keystroke;
 		
-	while (read (brl_fd, &c, 1)) {
+	while (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 1) {
 		if (c != ESC) continue;	/* advance to next ESC-sequence */
 
-		read (brl_fd, &c, 1);		/* read block number */
+		serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read block number */
 		switch (c) {
 			case 'T':			/* front key message, (MB185CR only: also '0'-'9', '*', '#') */
 			case 'S':			/* top key message [1-2-4--8-16-32] */
 			case 'R':			/* cursor routing key [0 - maxkeys] */
 				keystroke.block = c;
-				read (brl_fd, &c, 1);		/* read keynumber */
+				serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read keynumber */
 				keystroke.key = c;
-				read (brl_fd, &c, 1);		/* read trailing [CR] */
+				serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read trailing [CR] */
   				/* LogPrint(LOG_NOTICE, "MultiBraille.o: Receiving: Key=%d, Block=%c", keystroke.key, keystroke.block); */
 				return keystroke;
 			default:			/* not supported command --> ignore */
 				c_temp = c;
 				keystroke.block = EOF;	/* invalid / not supported keystroke */
-				read (brl_fd, &c, 1);		/* read keynumber */
+				serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read keynumber */
   				/* keystroke.key = c; */
   				/* LogPrint(LOG_NOTICE, "MultiBraille.o: Ignored: Key=%d, Block=%c", keystroke.key, c_temp); */
 				return keystroke;

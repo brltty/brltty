@@ -185,62 +185,47 @@ static int charactersPerSecond;
 /* Serial IO */
 #include "Programs/serial.h"
 
-static int serialDevice = -1;			/* file descriptor for Braille display */
-static struct termios oldSerialSettings;	/* old terminal settings */
+static SerialDevice *serialDevice = NULL;			/* file descriptor for Braille display */
 
 static int
 openSerialPort (char **parameters, const char *device) {
-  if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
-    struct termios newSerialSettings;
+  if ((serialDevice = serialOpenDevice(device))) {
+    serialSetParity(serialDevice, SERIAL_PARITY_ODD);
 
-    initializeSerialAttributes(&newSerialSettings);
-    setSerialParity(&newSerialSettings, SERIAL_PARITY_ODD);
-
-    if (restartSerialDevice(serialDevice, &newSerialSettings, baud)) {
+    if (serialRestartDevice(serialDevice, baud)) {
       return 1;
     }
 
-    close(serialDevice);
-    serialDevice = -1;
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
   return 0;
 }
 
 static int
 awaitSerialInput (int milliseconds) {
-  return awaitInput(serialDevice, milliseconds);
+  return serialAwaitInput(serialDevice, milliseconds);
 }
 
 static int
 readSerialBytes (unsigned char *buffer, int count, int wait) {
   const int timeout = 100;
-  int offset = 0;
-  if (readChunk(serialDevice, buffer, &offset, count,
-                (wait? timeout: 0), timeout)) return offset;
-  if (errno == EAGAIN) return 0;
-  return -1;
+  return serialReadData(serialDevice, buffer, count,
+                        (wait? timeout: 0), timeout);
 }
 
 static int
 writeSerialBytes (const unsigned char *buffer, int length, int *delay) {
-  int count = safe_write(serialDevice, buffer, length);
-  if (delay) *delay += length * 1000 / charactersPerSecond;
-  if (count != length) {
-    if (count == -1) {
-      LogError("HandyTech serial write");
-    } else {
-      LogPrint(LOG_WARNING, "Trunccated serial write: %d < %d", count, length);
-    }
-  }
+  int count = serialWriteData(serialDevice, buffer, length);
+  if (delay && (count != -1)) *delay += length * 1000 / charactersPerSecond;
   return count;
 }
 
 static void
 closeSerialPort (void) {
-  if (serialDevice != -1) {
-    putSerialAttributes(serialDevice, &oldSerialSettings);
-    close(serialDevice);
-    serialDevice = -1;
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
 }
 

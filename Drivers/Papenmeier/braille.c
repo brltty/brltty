@@ -43,7 +43,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 typedef enum {
@@ -303,57 +302,50 @@ static int charactersPerSecond;
 /*--- Serial Operations ---*/
 
 #include "Programs/serial.h"
-static int serialDevice = -1;
-static struct termios oldSerialSettings;
+static SerialDevice *serialDevice = NULL;
 static const int serialBauds[] = {19200, 38400, 0};
 
 static int
 openSerialPort (char **parameters, const char *device) {
-  if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
-    struct termios newSerialSettings;
+  if ((serialDevice = serialOpenDevice(device))) {
+    serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
 
-    initializeSerialAttributes(&newSerialSettings);
-    setSerialFlowControl(&newSerialSettings, SERIAL_FLOW_HARDWARE);
+    if (serialRestartDevice(serialDevice, *baud)) return 1;
 
-    if (restartSerialDevice(serialDevice, &newSerialSettings, *baud)) return 1;
-
-    close(serialDevice);
-    serialDevice = -1;
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
   return 0;
 }
 
 static void
 closeSerialPort (void) {
-  if (serialDevice != -1) {
-    putSerialAttributes(serialDevice, &oldSerialSettings);		/* restore terminal settings */
-    close(serialDevice);
-    serialDevice = -1;
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
 }
 
 static void
 flushSerialPort (BrailleDisplay *brl) {
-  flushSerialOutput(serialDevice);
+  serialDiscardOutput(serialDevice);
   drainBrailleOutput(brl, 100);
-  flushSerialInput(serialDevice);
+  serialDiscardInput(serialDevice);
 }
 
 static int
 awaitSerialInput (int milliseconds) {
-  return awaitInput(serialDevice, milliseconds);
+  return serialAwaitInput(serialDevice, milliseconds);
 }
 
 static int
 readSerialBytes (void *buffer, int *offset, int length, int timeout) {
-  return readChunk(serialDevice, buffer, offset, length, 0, timeout);
+  return serialReadChunk(serialDevice, buffer, offset, length, 0, timeout);
 }
 
 static int
 writeSerialBytes (const void *buffer, int length) {
-  int written = safe_write(serialDevice, buffer, length);
-  if (written == -1) LogError("Serial write");
-  return written;
+  return serialWriteData(serialDevice, buffer, length);
 }
 
 static const InputOutputOperations serialOperations = {

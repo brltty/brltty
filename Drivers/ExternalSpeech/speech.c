@@ -37,7 +37,6 @@
 #include <stdarg.h>
 
 #include "Programs/misc.h"
-#include "Programs/spk.h"
 
 typedef enum {
   PARM_PROGRAM=0,

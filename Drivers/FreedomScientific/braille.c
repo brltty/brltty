@@ -56,53 +56,47 @@ static int debugPackets = 0;
 static int outputPayloadLimit;
 
 #include "Programs/serial.h"
-static int serialDevice = -1;
-static struct termios oldSerialSettings;
+static SerialDevice *serialDevice = NULL;
 static int serialCharactersPerSecond;
 
 static int
 openSerialPort (char **parameters, const char *device) {
-  if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
+  if ((serialDevice = serialOpenDevice(device))) {
     int baud = 57600;
-    struct termios newSerialSettings;
 
-    initializeSerialAttributes(&newSerialSettings);
-
-    if (restartSerialDevice(serialDevice, &newSerialSettings, baud)) {
+    if (serialRestartDevice(serialDevice, baud)) {
       serialCharactersPerSecond = baud / 10;
       return 1;
     }
 
-    close(serialDevice);
-    serialDevice = -1;
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
   return 0;
 }
 
 static void
 closeSerialPort (void) {
-  if (serialDevice != -1) {
-    putSerialAttributes(serialDevice, &oldSerialSettings);		/* restore terminal settings */
-    close(serialDevice);
-    serialDevice = -1;
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
 }
 
 static int
 awaitSerialInput (int milliseconds) {
-  return awaitInput(serialDevice, milliseconds);
+  return serialAwaitInput(serialDevice, milliseconds);
 }
 
 static int
 readSerialBytes (void *buffer, int length) {
-  return read(serialDevice, buffer, length);
+  return serialReadData(serialDevice, buffer, length, 0, 0);
 }
 
 static int
 writeSerialPacket (const void *buffer, int length, int *delay) {
-  int written = safe_write(serialDevice, buffer, length);
-  if (written == -1) LogError("Serial write");
-  if (delay) *delay += length * 1000 / serialCharactersPerSecond;
+  int written = serialWriteData(serialDevice, buffer, length);
+  if (delay && (written != -1)) *delay += length * 1000 / serialCharactersPerSecond;
   return written;
 }
 

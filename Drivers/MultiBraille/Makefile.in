@@ -32,3 +32,6 @@ include $(SRC_TOP)driver.mk
 braille.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 
+speech.$O:
+	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
+

@@ -33,13 +33,11 @@
 
 	/*	The filedescriptor of the open port, sorry to say, wee need a global
 	 *	one here */ 
-static int devfd=-1;
+static SerialDevice *serialDevice=NULL;
 static TranslationTable outputTable;
 
 int varioinit(const char *device) 
 {
-	struct 	termios		tiodata;
-
 	{
 		static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
 		makeOutputTable(&dots, &outputTable);
@@ -50,19 +48,14 @@ int varioinit(const char *device)
 		return -1;
 	}
 
-	if(openSerialDevice(device, &devfd, &tiodata)) {
-		tiodata.c_cflag=(CLOCAL|PARODD|PARENB|CREAD|CS8);
-		tiodata.c_iflag=IGNPAR;
-		tiodata.c_oflag=0;
-		tiodata.c_lflag=0;
-		tiodata.c_cc[VMIN]=0;
-		tiodata.c_cc[VTIME]=0;
-		if (restartSerialDevice(devfd, &tiodata, 19200)) {
+	if((serialDevice = serialOpenDevice(device))) {
+		serialSetParity(serialDevice, SERIAL_PARITY_ODD);
+		if (serialRestartDevice(serialDevice, 19200)) {
 			if (varioreset() == 0) return 0;
 		}
 
-		close(devfd);
-		devfd=-1;
+		serialCloseDevice(serialDevice);
+		serialDevice=NULL;
 	}
 
 	return -1;
@@ -70,9 +63,9 @@ int varioinit(const char *device)
 
 int varioclose(void)
 {
-	if(devfd!=-1) {
-		close(devfd);
-		devfd=-1;
+	if(serialDevice) {
+		serialCloseDevice(serialDevice);
+		serialDevice=NULL;
 		return 0;
 	}
 
@@ -81,9 +74,9 @@ int varioclose(void)
 
 int varioreset(void) 
 {
-	if(devfd!=-1) {
+	if(serialDevice) {
 		char c=VARIO_RESET;
-		int n=write(devfd,&c,1);
+		int n=serialWriteData(serialDevice,&c,1);
 		if (n==1) return 0;
 	}
 
@@ -92,12 +85,12 @@ int varioreset(void)
 
 int variodisplay(const unsigned char *buff)
 {
-	if (devfd!=-1) {
+	if (serialDevice) {
 		int n;
 		unsigned char outbuff[VARIO_DISPLAY_DATA_LEN + 40];
 		memcpy(outbuff,VARIO_DISPLAY_DATA,VARIO_DISPLAY_DATA_LEN);
 		memcpy(outbuff+VARIO_DISPLAY_DATA_LEN,buff,40);
-		if((n=write(devfd,outbuff,sizeof(outbuff)))==sizeof(outbuff)) return 0;
+		if((n=serialWriteData(serialDevice,outbuff,sizeof(outbuff)))==sizeof(outbuff)) return 0;
 	}
 	
 	return -1;
@@ -105,9 +98,9 @@ int variodisplay(const unsigned char *buff)
 
 int varioget(void)
 {
-	if(devfd!=-1) {
+	if(serialDevice) {
 		unsigned char c;
-		if(read(devfd,&c,1)==1) return c;
+		if(serialReadData(serialDevice,&c,1,0,0)==1) return c;
 	}
 
 	return -1;

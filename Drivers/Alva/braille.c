@@ -424,35 +424,30 @@ writeParameter (BrailleDisplay *brl, unsigned char parameter, unsigned char sett
 }
 
 #include "Programs/serial.h"
-static int serialDevice = -1;
-static struct termios oldSerialSettings;
-static struct termios newSerialSettings;
+static SerialDevice *serialDevice = NULL;
 static int serialCharactersPerSecond;
 
 static int
 openSerialPort (char **parameters, const char *device) {
   rewriteInterval = REWRITE_INTERVAL;
 
-  if (!openSerialDevice(device, &serialDevice, &oldSerialSettings)) return 0;
-
-  initializeSerialAttributes(&newSerialSettings);
+  if (!(serialDevice = serialOpenDevice(device))) return 0;
 
   return 1;
 }
 
 static int
 resetSerialPort (void) {
-  if (!restartSerialDevice(serialDevice, &newSerialSettings, BAUDRATE)) return 0;
+  if (!serialRestartDevice(serialDevice, BAUDRATE)) return 0;
   serialCharactersPerSecond = BAUDRATE / 10;
   return 1;
 }
 
 static void
 closeSerialPort (void) {
-  if (serialDevice != -1) {
-    putSerialAttributes(serialDevice, &oldSerialSettings);		/* restore terminal settings */
-    close(serialDevice);
-    serialDevice = -1;
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
 }
 
@@ -460,7 +455,7 @@ static int
 readSerialPacket (unsigned char *buffer, int length) {
   while (1) {
     unsigned char byte;
-    int count = read(serialDevice, &byte, 1);
+    int count = serialReadData(serialDevice, &byte, 1, 0, 0);
     if (count < 1) {
       if (count == -1) LogError("serial read");
       return count;
@@ -473,7 +468,7 @@ readSerialPacket (unsigned char *buffer, int length) {
 static int
 writeSerialPacket (const unsigned char *buffer, int length, int *delay) {
   if (delay) *delay += length * 1000 / serialCharactersPerSecond;
-  return safe_write(serialDevice, buffer, length);
+  return serialWriteData(serialDevice, buffer, length);
 }
 
 static const InputOutputOperations serialOperations = {

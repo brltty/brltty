@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 #include "Programs/brl_driver.h"

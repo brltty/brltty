@@ -33,7 +33,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 
 #define BRLSTAT ST_Generic
@@ -41,9 +40,7 @@
 #include "braille.h"
 #include "Programs/serial.h"
 
-static int fileDescriptor = -1;
-static struct termios oldSettings;
-static struct termios newSettings;
+static SerialDevice *serialDevice = NULL;
 
 #define screenHeight 25
 #define screenWidth 80
@@ -110,9 +107,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
    }
 
    makeDownloadFifo();
-   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
-      initializeSerialAttributes(&newSettings);
-      if (restartSerialDevice(fileDescriptor, &newSettings, 9600)) {
+   if ((serialDevice = serialOpenDevice(device))) {
+      if (serialRestartDevice(serialDevice, 9600)) {
          brl->y = screenHeight;
          brl->x = screenWidth;
          brl->buffer = &sourceImage[0][0];
@@ -120,17 +116,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
          deviceStatus = DEV_ONLINE;
          return 1;
       }
-      close(fileDescriptor);
-      fileDescriptor = -1;
+      serialCloseDevice(serialDevice);
+      serialDevice = NULL;
    }
    return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
-   putSerialAttributes(fileDescriptor, &oldSettings);
-   close(fileDescriptor);
-   fileDescriptor = -1;
+   serialCloseDevice(serialDevice);
+   serialDevice = NULL;
 }
 
 static int
@@ -155,7 +150,7 @@ checkData (const unsigned char *data, unsigned int length) {
 
 static int
 sendBytes (const unsigned char *bytes, size_t count) {
-   if (write(fileDescriptor, bytes, count) == -1) {
+   if (serialWriteData(serialDevice, bytes, count) == -1) {
       LogError("LogText write");
       return 0;
    }
@@ -239,7 +234,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 static int
 isOnline (void) {
-   int online = testSerialDataSetReady(fileDescriptor);
+   int online = serialTestLineDSR(serialDevice);
    if (online) {
       if (deviceStatus < DEV_ONLINE) {
          deviceStatus = DEV_ONLINE;
@@ -284,7 +279,7 @@ static int
 readKey (void) {
    unsigned char key;
    unsigned char arg;
-   if (read(fileDescriptor, &key, 1) != 1) return EOF;
+   if (serialReadData(serialDevice, &key, 1, 0, 0) != 1) return EOF;
    switch (key) {
       default:
          arg = 0;
@@ -292,7 +287,7 @@ readKey (void) {
       case KEY_FUNCTION:
       case KEY_FUNCTION2:
       case KEY_UPDATE:
-         while (read(fileDescriptor, &arg, 1) != 1) delay(1);
+         while (serialReadData(serialDevice, &arg, 1, 0, 0) != 1) delay(1);
          break;
    }
    {

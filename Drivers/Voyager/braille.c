@@ -53,7 +53,6 @@
 #include <errno.h>
 
 #include "Programs/misc.h"
-#include "Programs/message.h"
 
 typedef enum {
   PARM_INPUTMODE,
@@ -86,8 +85,7 @@ static const InputOutputOperations *io;
 
 #include "Programs/serial.h"
 
-static int serialDevice = -1;
-static struct termios oldSerialSettings;
+static SerialDevice *serialDevice = NULL;
 static const char *serialDeviceNames[] = {"Adapter", "Base"};
 
 static int
@@ -104,7 +102,7 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
       buffer[size++] = buffer[0];
 
 /*LogBytes("Output Packet", buffer, size);*/
-  return safe_write(serialDevice, buffer, size) != -1;
+  return serialWriteData(serialDevice, buffer, size) != -1;
 }
 
 static int
@@ -119,7 +117,7 @@ readSerialPacket (char *buffer, int size) {
       offset = 0;
     }
 
-    if (!readChunk(serialDevice, buffer, &offset, 1, 0, 100)) {
+    if (!serialReadChunk(serialDevice, buffer, &offset, 1, 0, 100)) {
       LogBytes("Partial Packet", buffer, offset);
       return 0;
     }
@@ -196,28 +194,24 @@ nextSerialPacket (unsigned char code, char *buffer, int size) {
 
 static int
 openSerialPort (char **parameters, const char *device) {
-  if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
-    struct termios newSerialSettings;
+  if ((serialDevice = serialOpenDevice(device))) {
+    serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
 
-    initializeSerialAttributes(&newSerialSettings);
-    setSerialFlowControl(&newSerialSettings, SERIAL_FLOW_HARDWARE);
-
-    if (restartSerialDevice(serialDevice, &newSerialSettings, 38400)) {
+    if (serialRestartDevice(serialDevice, 38400)) {
       return 1;
     }
 
-    close(serialDevice);
-    serialDevice = -1;
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
   return 0;
 }
 
 static void
 closeSerialPort (void) {
-  if (serialDevice != -1) {
-    putSerialAttributes(serialDevice, &oldSerialSettings);		/* restore terminal settings */
-    close(serialDevice);
-    serialDevice = -1;
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
 }
 

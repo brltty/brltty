@@ -31,12 +31,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
-#endif /* HAVE_SYS_SELECT_H */
-
 #ifdef HAVE_LINUX_VT_H
 #include <linux/vt.h>
 #endif /* HAVE_LINUX_VT_H */
@@ -55,9 +49,7 @@ typedef enum {
 #include "braille.h"
 #include "Programs/serial.h"
 
-static int fileDescriptor = -1;
-static struct termios oldSettings;
-static struct termios newSettings;
+static SerialDevice *serialDevice = NULL;
 
 static unsigned char *cellBuffer = NULL;
 static unsigned int cellCount = 0;
@@ -99,9 +91,7 @@ refreshCells (void) {
       }
    }
 
-   if (safe_write(fileDescriptor, outputBuffer, output-outputBuffer) == -1) {
-      LogError("BrailleNote write");
-   }
+   serialWriteData(serialDevice, outputBuffer, output-outputBuffer);
 }
 
 static void
@@ -124,11 +114,8 @@ writePrompt (const unsigned char *prompt) {
 static unsigned char
 getByte (void) {
    unsigned char byte;
-   fd_set mask;
-   FD_ZERO(&mask);
-   FD_SET(fileDescriptor, &mask);
-   select(fileDescriptor+1, &mask, NULL, NULL, NULL);
-   read(fileDescriptor, &byte, 1);
+   while (!serialAwaitInput(serialDevice, 1000000000));
+   serialReadData(serialDevice, &byte, 1, 0, 0);
    return byte;
 }
 
@@ -309,14 +296,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       return 0;
    }
 
-   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
-      initializeSerialAttributes(&newSettings);
-      while (restartSerialDevice(fileDescriptor, &newSettings, 38400)) {
+   if ((serialDevice = serialOpenDevice(device))) {
+      while (serialRestartDevice(serialDevice, 38400)) {
          unsigned char request[] = {BNO_BEGIN, BNO_DESCRIBE};
-         if (safe_write(fileDescriptor, request, sizeof(request)) != -1) {
+         if (serialWriteData(serialDevice, request, sizeof(request)) != -1) {
             unsigned char response[3];
-            int offset = 0;
-            if (readChunk(fileDescriptor, response, &offset, sizeof(response), 1000, 100)) {
+            if (serialReadData(serialDevice, response, sizeof(response), 1000, 100) == sizeof(response)) {
                if (response[0] == BNI_DESCRIBE) {
                   statusCells = response[1];
                   brl->x = response[2];
@@ -356,18 +341,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
          }
          delay(1000);
       }
-      putSerialAttributes(fileDescriptor, &oldSettings);
-      close(fileDescriptor);
-      fileDescriptor = -1;
+      serialCloseDevice(serialDevice);
+      serialDevice = NULL;
    }
    return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
-   putSerialAttributes(fileDescriptor, &oldSettings);
-   close(fileDescriptor);
-   fileDescriptor = -1;
+   serialCloseDevice(serialDevice);
+   serialDevice = NULL;
 
    free(outputBuffer);
    outputBuffer = NULL;
@@ -832,7 +815,7 @@ interpretRoutingKey (unsigned char key, BRL_DriverCommandContext context) {
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
    unsigned char character;
-   int count = read(fileDescriptor, &character, 1);
+   int count = serialReadData(serialDevice, &character, 1, 0, 0);
    int (*handler)(unsigned char, BRL_DriverCommandContext);
 
    if (count != 1) {
@@ -868,7 +851,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
    }
 
    delay(1);
-   if (read(fileDescriptor, &character, 1) != 1) {
+   if (serialReadData(serialDevice, &character, 1, 0, 0) != 1) {
       return EOF;
    }
 

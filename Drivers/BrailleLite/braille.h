@@ -22,7 +22,8 @@
  */
 
 /* used by speech.c */
-extern int BL_fileDescriptor;
+#include "Programs/serial.h"
+extern SerialDevice *BL_serialDevice;
 
 /* We always expect 8 data bits, no parity, 1 stop bit. */
 /* Select baudrate to use */

@@ -31,16 +31,11 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "Programs/spk.h"
+#include "Programs/misc.h"
 
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for speech definitions */
 #include "braille.h"
-
-/* These are shared with CombiBraille/braille.c: */
-extern int brl_fd;
-extern unsigned char *rawdata;
-
 
 /* charset conversion table from iso latin-1 == iso 8859-1 to cp437==ibmpc
  * for chars >=128. 
@@ -71,14 +66,15 @@ spk_identify (void)
 }
 
 
-static void
-spk_open (char *parm)
+static int
+spk_open (char **parameters)
 {
+  return 1;
 }
 
 
 static void
-spk_say (unsigned char *buffer, int len)
+spk_say (const unsigned char *buffer, int len)
 {
   unsigned char *pre_speech = PRE_SPEECH;
   unsigned char *post_speech = POST_SPEECH;
@@ -87,8 +83,7 @@ spk_say (unsigned char *buffer, int len)
 
   if (pre_speech[0])
     {
-      memcpy (rawdata, pre_speech + 1, pre_speech[0]);
-      write (brl_fd, rawdata, pre_speech[0]);
+      serialWriteData (MB_serialDevice, pre_speech+1, pre_speech[0]);
     }
   for (i = 0; i < len; i++)
     {
@@ -96,21 +91,20 @@ spk_say (unsigned char *buffer, int len)
       if (c >= 128) c = latin2cp437[c];
       if (c < 33)	/* space or control character */
 	{
-	  rawdata[0] = ' ';
-	  write (brl_fd, rawdata, 1);
+	  static const char blank = ' ';
+	  serialWriteData (MB_serialDevice, &blank, 1);
 	}
       else if (c > MAX_TRANS)
-	write (brl_fd, &c, 1);
+	serialWriteData (MB_serialDevice, &c, 1);
       else
 	{
-	  memcpy (rawdata, vocab[c - 33], strlen (vocab[c - 33]));
-	  write (brl_fd, rawdata, strlen (vocab[c - 33]));
+          char *word = vocab[c - 33];
+	  serialWriteData (MB_serialDevice, word, strlen (word));
 	}
     }
   if (post_speech[0])
     {
-      memcpy (rawdata, post_speech + 1, post_speech[0]);
-      write (brl_fd, rawdata, post_speech[0]);
+      serialWriteData (MB_serialDevice, post_speech+1, post_speech[0]);
     }
 }
 
@@ -119,9 +113,7 @@ static void
 spk_mute (void)
 {
   unsigned char *mute_seq = MUTE_SEQ;
-
-  memcpy (rawdata, mute_seq + 1, mute_seq[0]);
-  write (brl_fd, rawdata, mute_seq[0]);
+  serialWriteData (MB_serialDevice, mute_seq+1, mute_seq[0]);
 }
 
 

@@ -26,10 +26,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "Programs/scr.h"
-#include "Programs/message.h"
 
 #include <X11/Intrinsic.h>
 #include <X11/Xlib.h>

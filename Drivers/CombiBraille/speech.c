@@ -31,7 +31,6 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "Programs/spk.h"
 #include "Programs/misc.h"
 
 #include "Programs/spk_driver.h"
@@ -40,8 +39,6 @@
 
 static size_t spk_size = 0X1000;
 static unsigned char *spk_buffer = NULL;
-static int spk_fd = -1;
-static FILE *spk_stream = NULL;
 static unsigned int spk_written = 0;
 
 
@@ -78,20 +75,7 @@ static int
 spk_open (char **parameters)
 {
   if ((spk_buffer = malloc(spk_size))) {
-    if ((spk_fd = dup(CB_fileDescriptor)) != -1) {
-      if ((spk_stream = fdopen(spk_fd, "a"))) {
-        setvbuf(spk_stream, spk_buffer, _IOFBF, spk_size);
-        return 1;
-      } else {
-        LogError("fdopen");
-      }
-      close(spk_fd);
-      spk_fd = -1;
-    } else {
-      LogError("dup");
-    }
-    free(spk_buffer);
-    spk_buffer = NULL;
+    return 1;
   } else {
     LogError("malloc");
   }
@@ -102,14 +86,13 @@ spk_open (char **parameters)
 static void
 spk_write (const unsigned char *address, unsigned int count)
 {
-  fwrite(address, 1, count, spk_stream);
+  serialWriteData(CB_serialDevice, address, count);
   spk_written += count;
 }
 
 static void
 spk_flush (void)
 {
-  fflush(spk_stream);
   delay(spk_written * 1000 / CB_charactersPerSecond);
   spk_written = 0;
 }
@@ -153,14 +136,6 @@ spk_mute (void)
 static void
 spk_close (void)
 {
-  if (spk_stream) {
-    fclose(spk_stream);
-    spk_stream = NULL;
-    spk_fd = -1;
-  } else if (spk_fd != -1) {
-    close(spk_fd);
-    spk_fd = -1;
-  }
   if (spk_buffer) {
     free(spk_buffer);
     spk_buffer = NULL;

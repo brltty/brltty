@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BL_NEED_ARRAYS
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
@@ -49,21 +48,21 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
 #include "braille.h"
-#include "bindings.h"		/* for keybindings */
 #include "Programs/serial.h"
 
+#define BL_NEED_ARRAYS
+#include "bindings.h"		/* for keybindings */
 
 #define QSZ 256			/* size of internal input queue in bytes */
 #define INT_CSR_SPEED 2		/* on/off time in cycles */
 #define ACK_TIMEOUT 1000	/* timeout in ms for an ACK to come back */
 
-int BL_fileDescriptor = -1;		/* file descriptor for Braille display */
+SerialDevice *BL_serialDevice = NULL;		/* file descriptor for Braille display */
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
 static TranslationTable inputTable;	/* mapping for reversed display */
 static unsigned char *prevdata = NULL;	/* previously received data */
 static unsigned char *rawdata = NULL;	/* writebrl() buffer for raw Braille data */
-static struct termios oldtio;	/* old terminal settings */
 static int blitesz;	/* set to 18 or 40 */
 static int waiting_ack = 0;	/* waiting acknowledgement flag */
 static int reverse_kbd = 0;	/* reverse keyboard flag */
@@ -247,7 +246,7 @@ qfill (void)
 {
   unsigned char c;		/* character buffer */
 
-  while (read (BL_fileDescriptor, &c, 1))
+  while (serialReadData (BL_serialDevice, &c, 1, 0, 0) == 1)
     {
       if (waiting_ack && c == 5)	/* ^e is the acknowledgement character ... */
 	waiting_ack = 0;
@@ -290,7 +289,7 @@ await_ack (void) {
 static void
 write_prebrl (void) {
   static const unsigned char request[] = {0X05, 0X44};			/* code to send before Braille */
-  write(BL_fileDescriptor, request, sizeof(request));
+  serialWriteData(BL_serialDevice, request, sizeof(request));
 }
 
 static int
@@ -302,7 +301,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   /* Init string for Model detection */
 
   if (!*parameters[PARM_BAUDRATE] ||
-      !validateSerialBaud(&baudrate, "baud rate",
+      !serialValidateBaud(&baudrate, "baud rate",
 		    parameters[PARM_BAUDRATE], good_baudrates))
     baudrate = BAUDRATE;
 
@@ -325,13 +324,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   if ((qbase = (unsigned char *) malloc(QSZ))) {
     /* Open the Braille display device for random access */
     LogPrint(LOG_DEBUG, "Opening serial port: %s", device);
-    if (openSerialDevice(device, &BL_fileDescriptor, &oldtio)) {
-      struct termios newtio;	/* new terminal settings */
-      initializeSerialAttributes(&newtio);
-      setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
+    if ((BL_serialDevice = serialOpenDevice(device))) {
+      serialSetFlowControl(BL_serialDevice, SERIAL_FLOW_HARDWARE);
 
       /* activate new settings */
-      if (restartSerialDevice(BL_fileDescriptor, &newtio, baudrate)) {
+      if (serialRestartDevice(BL_serialDevice, baudrate)) {
         qflush();
         write_prebrl();
         if (await_ack()) {
@@ -342,7 +339,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
           {
             unsigned char cells[18];
             memset(cells, 0, sizeof(cells));
-            write(BL_fileDescriptor, cells, sizeof(cells));
+            serialWriteData(BL_serialDevice, cells, sizeof(cells));
             waiting_ack = 1;
             delay(400);
             qfill();
@@ -360,7 +357,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
             static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
             delay(200);
             qflush();
-            write(BL_fileDescriptor, request, sizeof(request));
+            serialWriteData(BL_serialDevice, request, sizeof(request));
             waiting_ack = 0;
             delay(200);
             qfill();
@@ -409,10 +406,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
         } else {
           LogPrint(LOG_DEBUG, "BrailleLite not responding.");
         }
-        putSerialAttributes(BL_fileDescriptor, &oldtio);
       }
-      close(BL_fileDescriptor);
-      BL_fileDescriptor = -1;
+      serialCloseDevice(BL_serialDevice);
+      BL_serialDevice = NULL;
     }
     free(qbase);
     qbase = NULL;
@@ -441,10 +437,9 @@ brl_close (BrailleDisplay * brl)
     qbase = NULL;
   }
 
-  if (BL_fileDescriptor != -1) {
-    putSerialAttributes(BL_fileDescriptor, &oldtio);	/* restore terminal settings */
-    close(BL_fileDescriptor);
-    BL_fileDescriptor = -1;
+  if (BL_serialDevice) {
+    serialCloseDevice(BL_serialDevice);
+    BL_serialDevice = NULL;
   }
 }
 
@@ -507,7 +502,7 @@ brl_writeWindow (BrailleDisplay * brl)
       if (!await_ack()) return;
 
       /* OK, now we'll suppose we're all clear to send Braille data. */
-      write(BL_fileDescriptor, rawdata, blitesz);
+      serialWriteData(BL_serialDevice, rawdata, blitesz);
       await_ack();
     }
 }

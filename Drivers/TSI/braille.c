@@ -88,7 +88,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
@@ -291,9 +290,7 @@ static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
 
 /* Global variables */
 
-static int brl_fd;              /* file descriptor for comm port */
-static struct termios oldtio,	/* old terminal settings for com port */
-                      curtio;   /* current settings */
+static SerialDevice *serialDevice;              /* file descriptor for comm port */
 static unsigned char *rawdata,	/* translated data to send to display */
                      *prevdata, /* previous data sent */
                      *dispbuf;
@@ -317,20 +314,20 @@ brl_identify (void)
 
 
 static int
-myread(int fd, void *buf, unsigned len)
+myread(void *buf, unsigned len)
 {
-  return timedRead(fd,buf,len,100,100);
+  return serialReadData(serialDevice,buf,len,100,100);
 }
 
 
 static int
-QueryDisplay(int brl_fd, char *reply)
+QueryDisplay(char *reply)
 /* For auto-detect: send query, read response and validate response header. */
 {
   int count;
-  if ((count = write(brl_fd, BRL_QUERY, DIM_BRL_QUERY)) == DIM_BRL_QUERY) {
-    if (awaitInput(brl_fd, 100)) {
-      if ((count = myread(brl_fd, reply, Q_REPLY_LENGTH)) != -1) {
+  if ((count = serialWriteData(serialDevice, BRL_QUERY, DIM_BRL_QUERY)) == DIM_BRL_QUERY) {
+    if (serialAwaitInput(serialDevice, 100)) {
+      if ((count = myread(reply, Q_REPLY_LENGTH)) != -1) {
         if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
           LogPrint(LOG_DEBUG, "Valid reply received.");
           return 1;
@@ -356,8 +353,8 @@ ResetTypematic (void)
 {
   static unsigned char params[2] =
     {BRL_TYPEMATIC_DELAY, BRL_TYPEMATIC_REPEAT};
-  write (brl_fd, BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
-  write (brl_fd, &params, 2);
+  serialWriteData (serialDevice, BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
+  serialWriteData (serialDevice, &params, 2);
 }
 
 
@@ -381,21 +378,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
-
-  /* Construct new settings */
-  initializeSerialAttributes(&curtio);
-
+  if (!(serialDevice = serialOpenDevice(device))) goto failure;
   /* Try to detect display by sending query */
   LogPrint(LOG_DEBUG,"Sending query at 9600bps");
-  if(!restartSerialDevice(brl_fd, &curtio, 9600)) goto failure;
-  if(!QueryDisplay(brl_fd,reply)){
+  if(!serialRestartDevice(serialDevice, 9600)) goto failure;
+  if(!QueryDisplay(reply)){
 #ifdef HIGHBAUD
     /* Then send the query at 19200bps, in case a PB was left ON
        at that speed */
     LogPrint(LOG_DEBUG,"Sending query at 19200bps");
-    if(!putSerialBaud(brl_fd, 19200, &curtio)) goto failure;
-    if(!QueryDisplay(brl_fd,reply)) goto failure;
+    if(!serialSetBaud(serialDevice, 19200)) goto failure;
+    if(!QueryDisplay(reply)) goto failure;
 #endif /* HIGHBAUD */
   }
 
@@ -483,19 +476,19 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
 #ifdef HIGHBAUD
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
-    write (brl_fd, BRL_UART192, DIM_BRL_UART192);
-    drainSerialOutput(brl_fd);
+    serialWriteData (serialDevice, BRL_UART192, DIM_BRL_UART192);
+    serialDrainOutput(serialDevice);
     delay(BAUD_DELAY);
-    if(!putSerialBaud(brl_fd, 19200, &curtio)) goto failure;
+    if(!serialSetBaud(serialDevice, 19200)) goto failure;
     LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
-    if(QueryDisplay(brl_fd,reply))
+    if(QueryDisplay(reply))
       LogPrint(LOG_DEBUG,"Display responded at 19200bps.");
     else{
       LogPrint(LOG_INFO,"Display did not respond at 19200bps, "
 	       "falling back to 9600bps.");
-      if(!putSerialBaud(brl_fd, 9600, &curtio)) goto failure;
+      if(!serialSetBaud(serialDevice, 9600)) goto failure;
       delay(BAUD_DELAY); /* just to be safe */
-      if(QueryDisplay(brl_fd,reply)) {
+      if(QueryDisplay(reply)) {
 	LogPrint(LOG_INFO,"Found display again at 9600bps.");
 	LogPrint(LOG_INFO, "Must be a TSI emulator.");
       }else{
@@ -548,9 +541,8 @@ failure:;
 static void 
 brl_close (BrailleDisplay *brl)
 {
-  if (brl_fd >= 0) {
-    putSerialAttributes (brl_fd, &oldtio);
-    close (brl_fd);
+  if (serialDevice) {
+    serialCloseDevice (serialDevice);
   }
   free (dispbuf);
   free (rawdata);
@@ -606,7 +598,7 @@ display (const unsigned char *pattern,
      I no longer have access to a Nav40 and PB80 for testing: I only have a
      PB40.  */
 
-  write (brl_fd, rawdata, DIM_BRL_SEND + 2 * length);
+  serialWriteData (serialDevice, rawdata, DIM_BRL_SEND + 2 * length);
 
   /* First a drain after the write helps make sure we don't fill up the
      buffer with info that will be overwritten immediately. This is not needed
@@ -628,9 +620,9 @@ display (const unsigned char *pattern,
   switch(slow_update){
   /* 0 does nothing */
   case 1: /* nav 40 */
-    drainSerialOutput(brl_fd); break;
+    serialDrainOutput(serialDevice); break;
   case 2: /* nav80, pb80, some emulators */
-    drainSerialOutput(brl_fd);
+    serialDrainOutput(serialDevice);
     shortdelay(SEND_DELAY);
     break;
   };
@@ -944,7 +936,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
  */
 
   /* Check for first byte */
-  if (read (brl_fd, buf, 1) < 1){
+  if (serialReadData (serialDevice, buf, 1, 0, 0) != 1){
     if((i = millisecondsBetween(&last_ping, &now) > PING_INTRVL)){
       int ping_due = (pings==0 || (millisecondsBetween(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
@@ -952,13 +944,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	return BRL_CMD_RESTARTBRL;
       else if(ping_due){
 	LogPrint(LOG_DEBUG,"Display idle: sending query");
-	drainSerialOutput(brl_fd);
+	serialDrainOutput(serialDevice);
 	delay(2*SEND_DELAY);
-	write (brl_fd, BRL_QUERY, DIM_BRL_QUERY);
+	serialWriteData (serialDevice, BRL_QUERY, DIM_BRL_QUERY);
 	if(slow_update == 1)
-	  drainSerialOutput(brl_fd);
+	  serialDrainOutput(serialDevice);
 	else if(slow_update == 2){
-	  drainSerialOutput(brl_fd);
+	  serialDrainOutput(serialDevice);
 	  delay(SEND_DELAY);
 	}
 	pings++;
@@ -1004,7 +996,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
       }
     }
     i++;
-    if (!myread (brl_fd, buf+i, 1))
+    if (myread (buf+i, 1) != 1)
       return (EOF);
   }/* while */
 
@@ -1024,7 +1016,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   }else if(packtype == K_QUERYREP){
     /* flush the last 10bytes of the reply. */
     LogPrint(LOG_DEBUG,"Got reply to idle ping");
-    myread(brl_fd, buf, Q_REPLY_LENGTH - Q_HEADER_LENGTH);
+    myread(buf, Q_REPLY_LENGTH - Q_HEADER_LENGTH);
     return(EOF);
   }else if(packtype == K_NAVKEY || packtype == K_PBKEY){
     /* construct code */
@@ -1049,7 +1041,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 
     /* read next byte: it indicates length of sequence */
     /* still VMIN = 0, VTIME = 1 */
-    if (!myread (brl_fd, &cnt, 1))
+    if (myread (&cnt, 1) != 1)
       return (EOF);
     
     /* if sw_bcnt and cnt disagree, then must be garbage??? */
@@ -1057,13 +1049,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
     if (cnt != sw_bcnt)
       return (EOF);
 
-    if (myread (brl_fd, buf, SW_NVERT) != SW_NVERT)
+    if (myread (buf, SW_NVERT) != SW_NVERT)
       return (EOF);
     cnt -= SW_NVERT;
     /* cnt now gives the number of bytes describing horizontal
        routing keys only */
     
-    if (myread (brl_fd, sw_stat, cnt) != cnt)
+    if (myread (sw_stat, cnt) != cnt)
       return (EOF);
 
     /* if key press is maintained, then packet is resent by display
