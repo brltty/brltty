@@ -392,10 +392,8 @@ awaitUsbInput (int milliseconds) {
 static int
 readUsbBytes (void *buffer, int *offset, int length, int timeout) {
   int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer+*offset, length, 
-                           (offset? timeout: 0), timeout);
-  if (count == -1)
-    if (errno == EAGAIN)
-      return 0;
+                           (*offset? timeout: 0), timeout);
+  if (count == -1) return 0;
   *offset += count;
   return 1;
 }
