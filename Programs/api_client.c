@@ -82,6 +82,8 @@ static int gai_error;
 static uint32_t brlx = 0;
 static uint32_t brly = 0;
 static int fd = -1; /* Descriptor of the socket connected to BrlApi */
+static int truetty = -1;
+
 pthread_mutex_t brlapi_fd_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concurrent fd access */
 static int state = 0;
 static pthread_mutex_t stateMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -429,8 +431,8 @@ static int brlapi_getControllingTty()
     if ((vt >= 1) && (vt <= MAXIMUM_VIRTUAL_CONSOLE)) return vt;
   }
 #endif /* linux */
-  /*if ((env = getenv("WINDOW")) && sscanf(env, "%u", &tty) == 1) return tty;
-  if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;*/
+  /*if ((env = getenv("WINDOW")) && sscanf(env, "%u", &tty) == 1) return tty;*/
+  if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
   return -1;
 }
@@ -439,13 +441,16 @@ static int brlapi_getControllingTty()
 /* Takes control of a tty */
 int brlapi_getTty(int tty, int how)
 {
-  int truetty = -1;
-  uint32_t uints[2];
+  uint32_t uints[BRLAPI_MAXPACKETSIZE/sizeof(uint32_t)],*curuints=uints;
   int res;
+  char *ttytreepath,*ttytreepathstop;
+  int ttypath;
 
   /* Determine which tty to take control of */
   if (tty<=0) truetty = brlapi_getControllingTty(); else truetty = tty;
-  if (truetty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return truetty; }
+  // 0 can be a valid screen WINDOW
+  // 0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero)
+  if (truetty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
   
   if (brlapi_getDisplaySize(&brlx, &brly)<0) return -1;
   
@@ -455,9 +460,18 @@ int brlapi_getTty(int tty, int how)
   pthread_mutex_unlock(&keybuf_mutex);
 
   /* OK, Now we know where we are, so get the effective control of the terminal! */
-  uints[0] = htonl(truetty);
-  uints[1] = htonl(how);
-  if ((res=brlapi_writePacketWaitForAck(fd,BRLPACKET_GETTTY,&uints[0],sizeof(uints)))<0)
+  ttytreepath = getenv("WINDOWSPATH");
+  if (ttytreepath)
+  for(; *ttytreepath && curuints-uints+2<=BRLAPI_MAXPACKETSIZE/sizeof(uint32_t);
+      *curuints++ = htonl(ttypath), ttytreepath = ttytreepathstop+1) {
+    ttypath=strtol(ttytreepath,&ttytreepathstop,0);
+    /* TODO: log it out. check overflow/underflow & co */
+    if (ttytreepathstop==ttytreepath) break;
+  }
+
+  *curuints++ = htonl(truetty); 
+  *curuints++ = htonl(how);
+  if ((res=brlapi_writePacketWaitForAck(fd,BRLPACKET_GETTTY,&uints[0],(curuints-uints)*sizeof(uint32_t)))<0)
     return res;
 
   pthread_mutex_lock(&stateMutex);
@@ -478,6 +492,15 @@ int brlapi_leaveTty()
   state &= ~STCONTROLLINGTTY;
   pthread_mutex_unlock(&stateMutex);  
   return res;
+}
+
+/* Function : brlapi_setFocus */
+/* sends the current focus to brltty */
+int brlapi_setFocus(int tty)
+{
+  uint32_t utty;
+  utty = htonl(tty);
+  return brlapi_writePacket(fd, BRLPACKET_SETFOCUS, &utty, sizeof(utty));
 }
 
 /* Function : brlapi_writeBrl */
@@ -713,6 +736,7 @@ const char *brlapi_errlist[] = {
   "couldn't find out tty number",       /* BRLERR_UNKNOWNTTY */
   "bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
   "unexpected end of file",             /* BRLERR_EOF */
+  "too many levels of recursion",       /* BRLERR_TOORECURSE */
 };
 
 /* brlapi_nerr: last error number */

@@ -45,13 +45,14 @@ extern "C" {
  *
  * @{ */
 
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 4) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 5) /** Communication protocol version */
 
 #define BRLPACKET_AUTHKEY           'K'    /**< Authentication key          */
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDRIVERNAME     'n'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDISPLAYSIZE    's'    /**< Dimensions of brl display   */
 #define BRLPACKET_GETTTY            't'    /**< Asks for a specified tty    */
+#define BRLPACKET_SETFOCUS          'F'    /**< Set current tty focus       */
 #define BRLPACKET_LEAVETTY          'L'    /**< Release the tty             */
 #define BRLPACKET_KEY               'k'    /**< Braille key                 */
 #define BRLPACKET_IGNOREKEYRANGE    'm'    /**< Mask key-range              */

@@ -225,8 +225,8 @@ int brlapi_getDriverId(unsigned char *id, size_t n);
  * \param name is the buffer given by the application
  * \param n is the maximum size for the name buffer
  *
- * \return -1 on error, or aApositive value giving the size of the needed
- * buffer, if th supplied one is to small (same as \e snprintf)
+ * \return -1 on error, or a positive value giving the size of the needed
+ * buffer, if the supplied one is to small (same as \e snprintf)
 */
 int brlapi_getDriverName(unsigned char *name, size_t n);
 
@@ -299,6 +299,19 @@ int brlapi_getTty(int tty, int how);
  * \sa brlapi_getTty()
  */
 int brlapi_leaveTty(void);
+
+/* brlapi_setFocus */
+/** tell the current tty to brltty
+ *
+ * This is intended for focus tellers, such as brltty, xbrlapi, screen, ...
+ * brlapi_getTty() must have been called beforewards to tell where this focus
+ * applies in the tty tree.
+ *
+ * \return 0 on success, -1 on error.
+ *
+ * \sa brlapi_getTty() brlapi_leaveTty()
+ */
+int brlapi_setFocus(int tty);
 
 /** @} */
 
@@ -577,6 +590,7 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_UNKNOWNTTY              14  /**< Couldn't find out the tty number */
 #define BRLERR_PROTOCOL_VERSION        15  /**< Bad protocol version */
 #define BRLERR_EOF                     16  /**< Unexpected end of file */
+#define BRLERR_TOORECURSE              16  /**< Too many levels of recursion */
 
 /* brlapi_errlist */
 /** Error message list
