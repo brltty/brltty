@@ -1049,8 +1049,10 @@ and some characteristics which have reasonable defaults
 but which those who think they know what they're doing may wish to play with.
 The <ref id="options-help" name="-h"> option
 displays a summary of all the options.
-The <ref id="options-version" name="-v"> option
-displays the current version of the program and the selected drivers.
+The <ref id="options-version" name="-V"> option
+displays the current version of the program, the API, and the selected drivers.
+The <ref id="options-verify" name="-v"> option
+displays the values of the options after all sources have been considered.
 
 It's probably best to have the system automatically start BRLTTY
 as part of the boot sequence
@@ -2384,9 +2386,12 @@ The <tt/brltty/ command accepts the following options:
     after initializing itself but before starting any of the selected drivers.
   <tag><tt/-q/ <tt/--quiet/<label id="options-quiet"></tag>
     Log less information.
-    This option changes the log level
+    This option changes the default log level
     (see the <ref id="options-log-level" name="-l"> option)
-    to <tt/notice/.
+    to <tt/notice/ if
+    either the <ref id="options-verify" name="-v">
+    or the <ref id="options-version" name="-V">
+    option is specified, and to <tt/warning/ otherwise.
   <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
     Specify the speech synthesizer driver.
     The two-letter <ref id="drivers" name="driver identification code">
@@ -2406,17 +2411,23 @@ The <tt/brltty/ command accepts the following options:
     configureation file directive for the default run-time setting.
     This setting can be changed with the
     <ref id="preference-text-table" name="Text Table"> preference.
-  <tag><tt/-v/ <tt/--version/<label id="options-version"></tag>
-    Display the current version of BRLTTY,
-    identify the selected drivers,
+  <tag><tt/-v/ <tt/--verify/<label id="options-verify"></tag>
+    Display the current versions
+    of BRLTTY itself,
+    of the server side of its application programming interface,
+    and of the selected braille and speech drivers,
     and then exit.
-    If the <ref id="options-quiet" name="-q"> option isn't specified, then
-    copyright information,
-    and the parameter settings for each of the selected drivers
-    are also displayed,
-    and the working directory, the preferences file,
-    the text and attributes translation tables,
-    and the braille display device and help file are identified.
+    If the <ref id="options-quiet" name="-q"> option isn't specified,
+    then also display copyright information as well as
+    the values of the options after all sources have been considered.
+    If more than one braille driver
+    (see the <ref id="options-braille-driver" name="-b"> command line option)
+    and/or more than one braille device
+    (see the <ref id="options-braille-device" name="-d"> command line option)
+    has been specified then braille driver autodetection is performed.
+    If more than one speech driver
+    (see the <ref id="options-speech-driver" name="-s"> command line option)
+    has been specified then speech driver autodetection is performed.
   <tag><tt/-A/<em/name/<tt/=/<em/value/<tt/,/... <tt/--api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-api-parameters"></tag>
     Specify parameters for the Application Programming Interface.
     If the same parameter is specified more than once,
@@ -2526,6 +2537,14 @@ The <tt/brltty/ command accepts the following options:
     Specify the interval (in hundredths of a second)
     at which the braille window is updated with new screen content.
     If not specified, then <tt/4/ (40 milliseconds) is assumed.
+  <tag><tt/-V/ <tt/--version/<label id="options-version"></tag>
+    Display the current versions
+    of BRLTTY itself,
+    of the server side of its application programming interface,
+    and of those drivers which have been linked into its binary,
+    and then exit.
+    If the <ref id="options-quiet" name="-q"> option isn't specified,
+    then also display copyright information.
   <tag><tt/-X/<em/name/<tt/=/<em/value/<tt/,/... <tt/--screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-screen-parameters"></tag>
     Specify parameters for the screen driver.
     If the same parameter is specified more than once,

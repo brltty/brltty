@@ -79,6 +79,15 @@ loadSpeechDriver (const char *identifier, int *internal, const char *driverDirec
                     &noSpeech, noSpeech.identifier);
 }
 
+void
+identifySpeechDrivers (void) {
+  const DriverEntry *entry = driverTable;
+  while (entry->address) {
+    const SpeechDriver *driver = entry++->address;
+    driver->identify();
+  }
+}
+
 int
 listSpeechDrivers (const char *directory) {
   int ok = 0;

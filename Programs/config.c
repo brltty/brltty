@@ -66,6 +66,7 @@
 char COPYRIGHT[] = "Copyright (C) 1995-2004 by The BRLTTY Team - all rights reserved.";
 
 static short opt_version = 0;
+static short opt_verify = 0;
 static short opt_quiet = 0;
 static short opt_noDaemon = 0;
 static short opt_standardError = 0;
@@ -267,7 +268,7 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_SPEECH_SUPPORT */
   {'t', "text-table", "file", configureTextTable, 0,
    "Path to text translation table file."},
-  {'v', "version", NULL, NULL, 0,
+  {'v', "verify", NULL, NULL, 0,
    "Print start-up messages and exit."},
 #ifdef ENABLE_API
   {'A', "api-parameters", "arg,...", configureApiParameters, 0,
@@ -305,6 +306,8 @@ BEGIN_OPTION_TABLE
    "Path to directory for text and attributes tables."},
   {'U', "update-interval", "csecs", NULL, 0,
    "Braille window update interval [4]."},
+  {'V', "version", NULL, NULL, 0,
+   "Print the versions of the core, API, and built-in drivers, and then exit."},
   {'X', "screen-parameters", "arg,...", configureScreenParameters, 0,
    "Parameters for the screen driver."},
 END_OPTION_TABLE
@@ -776,14 +779,18 @@ initializeBraille (void) {
 }
 
 static int
-openBrailleDriver (void) {
+openBrailleDriver (int verify) {
+  int oneDevice = brailleDevices[0] && !brailleDevices[1];
+  int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
+  int autodetect = oneDriver && (strcmp(brailleDrivers[0], "auto") == 0);
   const char *const *device = brailleDevices;
-  LogPrint(LOG_DEBUG, "Starting braille driver.");
+
+  if (!oneDevice || !oneDriver || autodetect) verify = 0;
+
   while (*device) {
     const char *const *identifier;
-    int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
 
-    if (oneDriver && (strcmp(brailleDrivers[0], "auto") == 0)) {
+    if (autodetect) {
       const char *type;
       const char *dev = *device;
 
@@ -835,28 +842,36 @@ openBrailleDriver (void) {
                                               opt_brailleParameters, cfg_brailleParameters,
                                               "BRLTTY_BRAILLE_PARAMETERS", BRAILLE_PARAMETERS);
         if (parameters) {
-          initializeBraille();
-          LogPrint(LOG_DEBUG, "Initializing braille driver: %s -> %s",
-                   driver->identifier, *device);
-          if (driver->open(&brl, parameters, *device)) {
-            brailleDriver = driver;
-            brailleInternal = internal;
+          int opened = verify;
+
+          if (!opened) {
+            LogPrint(LOG_DEBUG, "Initializing braille driver: %s -> %s",
+                     driver->identifier, *device);
+            initializeBraille();
+            if (driver->open(&brl, parameters, *device)) {
+              opened = 1;
+              brailleDriver = driver;
+              brailleInternal = internal;
+            }
+          }
+
+          if (opened) {
             brailleParameters = parameters;
 
-            LogPrint(LOG_INFO, "Braille Device: %s", *device);
             LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
-                     brailleDriver->identifier, brailleDriver->name,
-                     brailleDriver->date, brailleDriver->time);
-            brailleDriver->identify();
-            logParameters(brailleDriver->parameters, brailleParameters, "Braille");
-            LogPrint(LOG_INFO, "Help File: %s",
-                     brailleDriver->helpFile? brailleDriver->helpFile: "<NONE>");
+                     driver->identifier, driver->name,
+                     driver->date, driver->time);
+            driver->identify();
+            logParameters(driver->parameters, parameters, "Braille");
+            LogPrint(LOG_INFO, "Braille Device: %s", *device);
 
-            /* Initialize the braille driver help screen. */
+            /* Initialize the braille driver's help screen. */
+            LogPrint(LOG_INFO, "Help File: %s",
+                     driver->helpFile? driver->helpFile: "none");
             {
-              char *path = makePath(opt_dataDirectory, brailleDriver->helpFile);
+              char *path = makePath(opt_dataDirectory, driver->helpFile);
               if (path) {
-                if (openHelpScreen(path))
+                if (verify || openHelpScreen(path))
                   LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
                 else
                   LogPrint(LOG_WARNING, "Cannot open help file: %s", path);
@@ -866,7 +881,7 @@ openBrailleDriver (void) {
 
             {
               const char *part1 = "brltty-";
-              const char *part2 = brailleDriver->identifier;
+              const char *part2 = driver->identifier;
               const char *part3 = ".prefs";
               char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
               sprintf(path, "%s%s%s", part1, part2, part3);
@@ -901,7 +916,6 @@ openBrailleDriver (void) {
 
 static void
 closeBrailleDriver (void) {
-  LogPrint(LOG_DEBUG, "Stopping braille driver.");
   closeHelpScreen();
 
   if (brailleDriver) {
@@ -925,7 +939,7 @@ closeBrailleDriver (void) {
 static void
 startBrailleDriver (void) {
   while (1) {
-    if (brailleDriver || openBrailleDriver()) {
+    if (openBrailleDriver(0)) {
       if (allocateBrailleBuffer(&brl)) {
         braille = brailleDriver;
 
@@ -1003,12 +1017,14 @@ initializeSpeech (void) {
 }
 
 static int
-openSpeechDriver (void) {
-  const char *const *identifier;
+openSpeechDriver (int verify) {
   int oneDriver = speechDrivers[0] && !speechDrivers[1];
-  LogPrint(LOG_DEBUG, "Starting speech driver.");
+  int autodetect = oneDriver && (strcmp(speechDrivers[0], "auto") == 0);
+  const char *const *identifier;
 
-  if (oneDriver && (strcmp(speechDrivers[0], "auto") == 0)) {
+  if (!oneDriver || autodetect) verify = 0;
+
+  if (autodetect) {
     static const char *speechIdentifiers[] = {
       "al", "bl", "cb",
       NULL
@@ -1029,19 +1045,27 @@ openSpeechDriver (void) {
                                             opt_speechParameters, cfg_speechParameters,
                                             "BRLTTY_SPEECH_PARAMETERS", SPEECH_PARAMETERS);
       if (parameters) {
-        initializeSpeech();
-        LogPrint(LOG_DEBUG, "Initializing speech driver: %s",
-                 driver->identifier);
-        if (driver->open(parameters)) {
-          speechDriver = driver;
-          speechInternal = internal;
+        int opened = verify;
+
+        if (!opened) {
+          LogPrint(LOG_DEBUG, "Initializing speech driver: %s",
+                   driver->identifier);
+          initializeSpeech();
+          if (driver->open(parameters)) {
+            opened = 1;
+            speechDriver = driver;
+            speechInternal = internal;
+          }
+        }
+
+        if (opened) {
           speechParameters = parameters;
 
           LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
-                   speechDriver->identifier, speechDriver->name,
-                   speechDriver->date, speechDriver->time);
-          speechDriver->identify();
-          logParameters(speechDriver->parameters, speechParameters, "Speech");
+                   driver->identifier, driver->name,
+                   driver->date, driver->time);
+          driver->identify();
+          logParameters(driver->parameters, parameters, "Speech");
 
           return 1;
         } else {
@@ -1066,7 +1090,6 @@ openSpeechDriver (void) {
 
 static void
 closeSpeechDriver (void) {
-  LogPrint(LOG_DEBUG, "Stopping speech driver.");
   if (speechDriver) {
     speechDriver->close();
     if (!speechInternal) unloadSharedObject(speechDriver);
@@ -1083,7 +1106,7 @@ static void
 startSpeechDriver (void) {
   if (opt_noSpeech) {
     LogPrint(LOG_INFO, "Automatic speech driver initialization disabled.");
-  } else if (speechDriver || openSpeechDriver()) {
+  } else if (openSpeechDriver(0)) {
     speech = speechDriver;
     if (speech->rate) speech->rate(prefs.speechRate);
     if (speech->volume) speech->volume(prefs.speechVolume);
@@ -1746,11 +1769,6 @@ updatePreferences (void) {
 #endif /* ENABLE_PREFERENCES_MENU */
 
 static void
-exitTunes (void) {
-  closeTuneDevice(1);
-}
-
-static void
 exitScreen (void) {
    closeAllScreens();
 }
@@ -1813,8 +1831,11 @@ handleOption (const int option) {
     default:
       return 0;
 
-    case 'v':	/* --version */
+    case 'V':	/* --version */
       opt_version = 1;
+      break;
+    case 'v':	/* --verify */
+      opt_verify = 1;
       break;
     case 'q':	/* --quiet */
       opt_quiet = 1;
@@ -1950,15 +1971,26 @@ startup (int argc, char *argv[]) {
   initializeAllScreens();
 
   /* Set logging levels. */
-  if (opt_standardError)
-    LogClose();
+  if (opt_standardError) LogClose();
   setLogLevel(opt_logLevel);
-  setPrintLevel(opt_version?
-                    (opt_quiet? LOG_NOTICE: LOG_INFO):
-                    (opt_quiet? LOG_WARNING: LOG_NOTICE));
+  setPrintLevel((opt_version || opt_verify)?
+                  (opt_quiet? LOG_NOTICE: LOG_INFO):
+                  (opt_quiet? LOG_WARNING: LOG_NOTICE));
 
   LogPrint(LOG_NOTICE, "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
   LogPrint(LOG_INFO, "%s", COPYRIGHT);
+  if (opt_version) {
+#ifdef ENABLE_API
+    api_identify();
+#endif /* ENABLE_API */
+
+    identifyBrailleDrivers();
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    identifySpeechDrivers();
+#endif /* ENABLE_SPEECH_SUPPORT */
+    exit(0);
+  }
 
   if (!opt_noDaemon) {
     const int signalNumber = SIGUSR1;
@@ -2100,21 +2132,21 @@ startup (int argc, char *argv[]) {
     exit(4);
   }
 
-  if (opt_version) exit(0);
-
   /* initialize screen driver */
   screenParameters = processParameters(getScreenParameters(),
                                        "screen driver", NULL,
                                        opt_screenParameters, cfg_screenParameters,
                                        "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
   logParameters(getScreenParameters(), screenParameters, "Screen");
-  if (!openLiveScreen(screenParameters)) {                                
-    LogPrint(LOG_CRIT, "Cannot read screen.");
-    exit(7);
+  if (!opt_verify) {
+    if (!openLiveScreen(screenParameters)) {                                
+      LogPrint(LOG_CRIT, "Cannot read screen.");
+      exit(7);
+    }
+    atexit(exitScreen);
   }
-  atexit(exitScreen);
   
-  if (!opt_noDaemon) {
+  if (!(opt_noDaemon || opt_verify)) {
     setPrintOff();
 
     {
@@ -2149,9 +2181,12 @@ startup (int argc, char *argv[]) {
   /* Activate the braille display. */
   brailleDevices = splitString(opt_brailleDevice, ',', NULL);
   brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
-  atexit(exitTunes);
-  atexit(exitBrailleDriver);
-  startBrailleDriver();
+  if (opt_verify) {
+    if (openBrailleDriver(1)) closeBrailleDriver();
+  } else {
+    atexit(exitBrailleDriver);
+    startBrailleDriver();
+  }
 
 #ifdef ENABLE_API
   /* Activate the application programming interface. */
@@ -2161,20 +2196,32 @@ startup (int argc, char *argv[]) {
                                     opt_apiParameters, cfg_apiParameters,
                                     "BRLTTY_API_PARAMETERS", API_PARAMETERS);
   logParameters(api_parameters, apiParameters, "API");
-  if ((apiOpened = api_open(&brl, apiParameters))) {
-    atexit(exitApi);
+  if (!opt_verify) {
+    if ((apiOpened = api_open(&brl, apiParameters))) {
+      atexit(exitApi);
+    }
   }
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */
   speechDrivers = splitString(opt_speechDriver, ',', NULL);
-  atexit(exitSpeechDriver);
-  startSpeechDriver();
+  if (opt_verify) {
+    if (openSpeechDriver(1)) closeSpeechDriver();
+  } else {
+    atexit(exitSpeechDriver);
+    startSpeechDriver();
+  }
 
   /* Create the speech pass-through FIFO. */
-  if (opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
+  LogPrint(LOG_INFO, "Speech FIFO: %s",
+           opt_speechFifo? opt_speechFifo: "none");
+  if (!opt_verify) {
+    if (opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
+  }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+  if (opt_verify) exit(0);
 
   if (!opt_quiet) {
     char buffer[18 + 1];

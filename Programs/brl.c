@@ -87,6 +87,15 @@ loadBrailleDriver (const char *identifier, int *internal, const char *driverDire
                     &noBraille, noBraille.identifier);
 }
 
+void
+identifyBrailleDrivers (void) {
+  const DriverEntry *entry = driverTable;
+  while (entry->address) {
+    const BrailleDriver *driver = entry++->address;
+    driver->identify();
+  }
+}
+
 int
 listBrailleDrivers (const char *directory) {
   int ok = 0;

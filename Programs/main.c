@@ -387,6 +387,11 @@ exitLog (void) {
 }
 
 static void
+exitTunes (void) {
+  closeTuneDevice(1);
+}
+
+static void
 exitScreenParameters (void) {
   int i;
   /* don't forget that scrparam[0] is staticaly allocated */
@@ -868,6 +873,7 @@ main (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "Starting.");
   atexit(exitLog);
 
+  atexit(exitTunes);
   suppressTuneDeviceOpenErrors();
 
   /* Initialize global data assumed to be ready by the termination handler. */
