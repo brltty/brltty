@@ -532,7 +532,7 @@ int brlapi_getControllingTty()
 #endif /* linux */
  }
 
- if ((vt < MIN_NR_CONSOLES) || (vt > MAX_NR_CONSOLES)) return -1;
+ if ((vt < 1) || (vt > MAX_NR_CONSOLES)) return -1;
  return vt;
 }
 
