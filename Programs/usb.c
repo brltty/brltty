@@ -99,29 +99,13 @@ usbGetLanguage (
 }
 
 char *
-usbGetString (
-  UsbDevice *device,
-  unsigned char number,
-  int timeout
-) {
-  UsbDescriptor descriptor;
-  int count;
-  unsigned char *string;
-
-  if (!device->language)
-    if (!usbGetLanguage(device, &device->language, timeout))
-      return NULL;
-
-  if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
-                                number, device->language,
-                                &descriptor, timeout)) == -1)
-    return NULL;
-  count = (count - 2) / sizeof(descriptor.string.wData[0]);
-
-  if ((string = malloc(count+1))) {
+usbDecodeString (const UsbStringDescriptor *descriptor) {
+  int count = (descriptor->bLength - 2) / sizeof(descriptor->wData[0]);
+  char *string = malloc(count+1);
+  if (string) {
     string[count] = 0;
     while (count--) {
-      uint16_t character = getLittleEndian(descriptor.string.wData[count]);
+      uint16_t character = getLittleEndian(descriptor->wData[count]);
       if (character & 0XFF00) character = '?';
       string[count] = character;
     }
@@ -129,6 +113,26 @@ usbGetString (
     LogError("USB string allocation");
   }
   return string;
+}
+
+char *
+usbGetString (
+  UsbDevice *device,
+  unsigned char number,
+  int timeout
+) {
+  UsbDescriptor descriptor;
+
+  if (!device->language)
+    if (!usbGetLanguage(device, &device->language, timeout))
+      return NULL;
+
+  if (usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
+                       number, device->language,
+                       &descriptor, timeout) == -1)
+    return NULL;
+
+  return usbDecodeString(&descriptor.string);
 }
 
 void

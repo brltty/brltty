@@ -388,28 +388,6 @@ readUsbData (uint8_t request, uint16_t value, uint16_t index,
   }
 }
 
-#define MAX_STRING_LENGTH 0XFF
-#define RAW_STRING_SIZE (MAX_STRING_LENGTH * 2) + 2
-#define STRING_SIZE (MAX_STRING_LENGTH + 1)
-static unsigned char *
-decodeUsbString (unsigned char *buffer) {
-  static unsigned char string[STRING_SIZE];
-  int length = (buffer[0] - 2) / 2;
-  int index;
-
-  if (length < 0) {
-    length = 0;
-  } else if (length >= STRING_SIZE) {
-    length = STRING_SIZE - 1;
-  }
-
-  for (index=0; index<length; index++)
-    string[index] = buffer[2+2*index];
-  string[index] = 0;
-
-  return string;
-}
-
 static int
 openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
@@ -452,14 +430,22 @@ getUsbCellCount (unsigned char *count) {
 }
 
 static int
-logUsbSerialNumber (void) {
-  unsigned char buffer[RAW_STRING_SIZE];
-  int size = readUsbData(0X03, 0, 0, buffer, sizeof(buffer));
-  if (size == -1) return 0;
+logUsbString (unsigned char code, const char *description) {
+  UsbDescriptor descriptor;
+  if (readUsbData(code, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
+    char *string = usbDecodeString(&descriptor.string);
+    if (string) {
+      LogPrint(LOG_INFO, "Voyager %s: %s", description, string);
+      free(string);
+      return 1;
+    }
+  }
+  return 0;
+}
 
-  LogPrint(LOG_INFO, "Voyager Serial Number: %s",
-           decodeUsbString(buffer));
-  return 1;
+static int
+logUsbSerialNumber (void) {
+  return logUsbString(0X03, "Serial Number");
 }
 
 static int
@@ -475,13 +461,7 @@ logUsbHardwareVersion (void) {
 
 static int
 logUsbFirmwareVersion (void) {
-  unsigned char buffer[RAW_STRING_SIZE];
-  int size = readUsbData(0X05, 0, 0, buffer, sizeof(buffer));
-  if (size == -1) return 0;
-
-  LogPrint(LOG_INFO, "Voyager Firmware: %s",
-           decodeUsbString(buffer));
-  return 1;
+  return logUsbString(0X05, "Firmware");
 }
 
 static int

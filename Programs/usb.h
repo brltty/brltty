@@ -275,6 +275,7 @@ extern char *usbGetString (
   unsigned char number,
   int timeout
 );
+extern char *usbDecodeString (const UsbStringDescriptor *descriptor);
 extern void usbLogString (
   UsbDevice *device,
   unsigned char number,
