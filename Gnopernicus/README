@@ -4,10 +4,12 @@ Introduction
 This subdirectory contains what's necessary to integrate BRLTTY's BrlAPI as a
 "braille device" into Gnopernicus. YOu can now use Gnopernicus via this new
 driver with every braille display that is supported by BRLTTY. Be forewarned
-that it is far from finished, but basic braille displaying, and key
-transmission work fine. I'd love to receive comments.  If someone would take
-the time to integrate this code into the Gnopernicus cvs, that would be great!  
-Thanks.
+that it is far from finished, but basic braille displaying, as wel as key
+transmission, work fine.
+
+N.B.: This patch has been integrated into version 0.3.4 of Gnopernicus. From
+that version on, please use whatever is in Gnopernicus itself rather than this
+patch.
 
 
 Building BRLTTY

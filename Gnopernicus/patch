@@ -1,34 +1,274 @@
-Index: Makefile.am
+? autom4te.cache
+? gnopernicus_brltty.diff
+? intltool-extract
+? intltool-extract.in
+? intltool-merge
+? intltool-merge.in
+? intltool-update
+? intltool-update.in
+? braille/libbrl/diff1
+? braille/libbrl/ttybrl.c
+? brlmon/braille_fonts/fonts.dir
+? help/braille_monitor/C/omf_timestamp
+? help/gnopernicus/C/omf_timestamp
+? po/de.gmo
+? po/ro.gmo
+Index: ChangeLog
+===================================================================
+RCS file: /cvs/gnome/gnopernicus/ChangeLog,v
+retrieving revision 1.248
+diff -u -r1.248 ChangeLog
+--- ChangeLog	3 Jun 2003 09:39:56 -0000	1.248
++++ ChangeLog	6 Jun 2003 09:30:04 -0000
+@@ -1,3 +1,22 @@
++2003-06-06 Adi Dascal <ad@baum.ro> (patch from Mario Lang <mlang@delysid.org>)
++
++	* braille/ttybrl.c:
++	Added. Sources of brltty driver provided by Mario Lang.
++
++	* braille/librl/Makefile.am,
++	* braille/libbrl/braille.c:
++	Modified to support brltty driver - patch provided by Mario Lang.
++	Conditional compilation for brltty driver ontop of the above mentioned 
++	patch.
++	
++	* configure.in:
++	Added configuration for braille module : use or NOT of brltty, 
++	detection of brltty.
++	Cosmetical changes.
++	
++	* NEWS : 
++	Updated. Announce brltty support.
++	
+ 2003-06-03 Adi Dascal <ad@baum.ro>
+ 
+ 	* configure.in:
+Index: NEWS
+===================================================================
+RCS file: /cvs/gnome/gnopernicus/NEWS,v
+retrieving revision 1.12
+diff -u -r1.12 NEWS
+--- NEWS	3 Jun 2003 09:39:57 -0000	1.12
++++ NEWS	6 Jun 2003 09:30:04 -0000
+@@ -1,3 +1,7 @@
++Changes in 0.3.4
++================
++    * added support for BRLTTY 
++
+ Changes in 0.3.3
+ ================
+ 
+Index: configure.in
+===================================================================
+RCS file: /cvs/gnome/gnopernicus/configure.in,v
+retrieving revision 1.56
+diff -u -r1.56 configure.in
+--- configure.in	3 Jun 2003 09:39:57 -0000	1.56
++++ configure.in	6 Jun 2003 09:30:05 -0000
+@@ -136,8 +136,16 @@
+ dnl   	  to make this work with the tarballs.
+ AM_CONDITIONAL(ENABLE_GTK_DOC, test x$enable_gtk_doc = xyes)
+ 
++dnl **********************************************************************
++dnl Check for popt version
++dnl **********************************************************************
++
++AC_CHECK_LIB(popt, poptDupArgv,,
++AC_MSG_ERROR([You must have popt 1.5 or greater to compile the utilities.]))
++
++
+ dnl ***************************************************************************
+-dnl *                         deal with diffrent OSs                          *
++dnl *               deal with diffrent OSs for BRAILLE (serial port)          *
+ dnl ***************************************************************************
+ AC_MSG_CHECKING([system version (for braille's serial port name)])
+ system=`uname -s`-`uname -r`
+@@ -156,17 +164,14 @@
+ #fi
+ case $system in
+     Linux-*)
+-	echo $system
+ 	TTYNAME_0="/dev/ttyS0"
+ 	TTYNAME_1="/dev/ttyS1"
+ 	;;
+     SunOS-*)
+-	echo $system
+ 	TTYNAME_0="/dev/cua/a"
+ 	TTYNAME_1="/dev/cua/b"
+ 	;;
+     FreeBSD-*)
+-	echo $system
+ 	TTYNAME_0="/dev/cuaa0"
+ 	TTYNAME_1="/dev/cuaa1"
+ 	;;
+@@ -177,6 +182,54 @@
+ 
+ AC_SUBST(TTYNAME_0)
+ AC_SUBST(TTYNAME_1)
++
++dnl **********************************************************************
++dnl Check for BRLTTY support - brlapi.h
++dnl **********************************************************************
++AC_ARG_ENABLE(brltty,
++	    [AC_HELP_STRING([--enable-brltty],
++			    [enable brltty support [default=auto]])],,
++	    [enable_brltty=auto])
++
++AC_MSG_CHECKING([whether to enable brltty support])
++
++case "$enableval" in
++  no)
++       enable_brltty=false
++       AC_MSG_RESULT(no)
++       ;;
++  *)   enable_brltty=true
++#	LIBADD="-lbrlapi"
++#	CFLAGS="-I/usr/include"
++	AC_TRY_RUN([ /* is brltty available? */
++	#include <brltty/brlapi.h>
++	#include <brltty/brldefs.h>
++	int main()
++	{
++	/*  if (brlapi_initializeConnection (NULL, NULL) < 0)
++        return 1;
++	*/
++	return 0;
++	}
++	]
++	, dnl TRY_RUN succeded
++	AC_MSG_RESULT(yes)
++	, dnl TRY RUN failed
++        AC_MSG_RESULT(no)
++        enable_brltty=false
++	, echo "Failed to find headers for brltty"
++	)
++       ;;
++esac
++
++AM_CONDITIONAL(BUILD_BRLTTY_SUPPORT, $enable_brltty)
++if test "$enable_brltty" = "true"; then
++  BRLTTY_ACTIVE=-DBRLTTY_SUPPORT
++else
++  BRLTTY_ACTIVE=
++fi
++AC_SUBST(BRLTTY_ACTIVE)
++
+ dnl ***************************************************************************
+ dnl *                         test for X libraries                            *
+ dnl ***************************************************************************
+@@ -190,12 +243,25 @@
+ 
+ AC_SUBST(X_LIBS)
+ 
+-dnl **********************************************************************
+-dnl Check for popt version
+-dnl **********************************************************************
++dnl **************************************************************************
++dnl *		Let font installation path option			     *
++dnl **************************************************************************
++
++AC_MSG_CHECKING([default fonts path (for braille font)])
++AC_ARG_WITH(default-fonts-path,     [  --with-default-fonts-path=DIR     Set system default fonts path], 
++				    default_fonts_path="$withval", default_fonts_path=yes)
++
++case "$default_fonts_path" in
++yes)
++	DEFAULT_FONTS_PATH="/usr/share/fonts"
++	;;
++*)
++	DEFAULT_FONTS_PATH="$default_fonts_path"
++	;;
++esac
++AC_MSG_RESULT($DEFAULT_FONTS_PATH)
++AC_SUBST(DEFAULT_FONTS_PATH)
+ 
+-AC_CHECK_LIB(popt, poptDupArgv,,
+-AC_MSG_ERROR([You must have popt 1.5 or greater to compile the utilities.]))
+ 
+ 
+ dnl **********************************************************************
+@@ -243,23 +309,7 @@
+ fi
+ AC_SUBST(INET6_ACTIVE)
+ 
+-dnl **************************************************************************
+-dnl *		Let font installation path option			     *
+-dnl **************************************************************************
+-
+-AC_MSG_CHECKING([default fonts path])
+-AC_ARG_WITH(default-fonts-path,     [  --with-default-fonts-path=DIR     Set system default fonts path], default_fonts_path="$withval", default_fonts_path=yes)
+ 
+-case "$default_fonts_path" in
+-yes)
+-	DEFAULT_FONTS_PATH="/usr/share/fonts"
+-	;;
+-*)
+-	DEFAULT_FONTS_PATH="$default_fonts_path"
+-	;;
+-esac
+-AC_MSG_RESULT($DEFAULT_FONTS_PATH)
+-AC_SUBST(DEFAULT_FONTS_PATH)
+ 
+ 
+ dnl ***************************************************************************
+Index: braille/libbrl/Makefile.am
 ===================================================================
 RCS file: /cvs/gnome/gnopernicus/braille/libbrl/Makefile.am,v
 retrieving revision 1.10
 diff -u -r1.10 Makefile.am
---- Makefile.am	11 Apr 2003 13:11:39 -0000	1.10
-+++ Makefile.am	26 May 2003 12:40:23 -0000
-@@ -19,6 +19,8 @@
+--- braille/libbrl/Makefile.am	11 Apr 2003 13:11:39 -0000	1.10
++++ braille/libbrl/Makefile.am	6 Jun 2003 09:30:06 -0000
+@@ -7,6 +7,7 @@
+ 	   -I$(top_srcdir)/srconf/libsrconf 	\
+ 	   -DBRAILLE_TRANS_TABLES_DIR=\"$(sysconfdir)/gnopernicus-1.0/translation_tables/\" \
+ 	   -DTTYNAME0=\"$(TTYNAME_0)\" -DTTYNAME1=\"$(TTYNAME_1)\" \
++	   $(BRLTTY_ACTIVE)			\
+ 	   $(LIBBRL_CFLAGS) 			\
+ 	   -DG_LOG_DOMAIN=\"gnopernicus\"
+ 
+@@ -19,8 +20,13 @@
  libbrlincludedir =$(includedir)/gnopernicus-1.0/libbrl
  libbrldir=$(libdir)/gnopernicus-1.0
  
++if BUILD_BRLTTY_SUPPORT
 +libbrl_la_LIBADD = -lbrlapi
++endif
 +
  libbrlinclude_HEADERS = brlxmlapi.h  
  
++if BUILD_BRLTTY_SUPPORT
  libbrl_la_SOURCES = baumbrl.h    \
-@@ -30,6 +32,7 @@
+ 		    alvabrl.h	 \
+ 		    braille.h    \
+@@ -30,6 +36,19 @@
  		    sercomm.c    \
  		    baumbrl.c    \
  		    alvabrl.c	 \
 +		    ttybrl.c 	 \
  		    braille.c    \
  		    brlxml.c      
- 
-Index: braille.c
+-
++else
++libbrl_la_SOURCES = baumbrl.h    \
++		    alvabrl.h	 \
++		    braille.h    \
++		    brlxmlapi.h  \
++		    brlxml.h     \
++		    sercomm.h    \
++		    sercomm.c    \
++		    baumbrl.c    \
++		    alvabrl.c	 \
++		    braille.c    \
++		    brlxml.c      
++endif
+\ No newline at end of file
+Index: braille/libbrl/braille.c
 ===================================================================
 RCS file: /cvs/gnome/gnopernicus/braille/libbrl/braille.c,v
 retrieving revision 1.15
 diff -u -r1.15 braille.c
---- braille.c	5 May 2003 14:21:20 -0000	1.15
-+++ braille.c	26 May 2003 12:40:24 -0000
+--- braille/libbrl/braille.c	5 May 2003 14:21:20 -0000	1.15
++++ braille/libbrl/braille.c	6 Jun 2003 09:30:07 -0000
 @@ -48,7 +48,8 @@
    {"DM80P", "BAUM DM80 - 80 cells"},
    {"ALVA380", "ALVABRAILLE 380"},
@@ -39,7 +279,7 @@ diff -u -r1.15 braille.c
  
   };
  
-@@ -203,6 +204,11 @@
+@@ -203,6 +204,14 @@
  							strcmp("ALVA570", DeviceName) == 0 )
  		{			
  			rv = alva_brl_open_device (DeviceName, Port, DeviceCallback, CurrentDevice);			
@@ -47,7 +287,10 @@ diff -u -r1.15 braille.c
 +		
 +		else if (	strcmp("BRLTTY", DeviceName) == 0 )
 +		{			
++			rv = 0;
++#ifdef BRLTTY_SUPPORT		
 +			rv = brltty_brl_open_device (DeviceName, Port, DeviceCallback, CurrentDevice);			
++#endif
  		}
  		
  		else if (strcmp("PB40", DeviceName) == 0)
