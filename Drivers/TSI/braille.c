@@ -320,7 +320,7 @@ myread(void *buf, unsigned len)
 
 
 static int
-QueryDisplay(char *reply)
+QueryDisplay(unsigned char *reply)
 /* For auto-detect: send query, read response and validate response header. */
 {
   int count;
@@ -361,7 +361,7 @@ static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int i=0;
-  char reply[Q_REPLY_LENGTH];
+  unsigned char reply[Q_REPLY_LENGTH];
   int speed;
 
   {
