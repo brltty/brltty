@@ -368,12 +368,26 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
 
 static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
 {
-  return (WriteToBrlDisplay(brl, sz, p));
+  fd_set		fds;
+  struct timeval	tv;
+  char			c;
+
+  if (write(brl_fd, p, sz) != sz)
+    return (0);
+  FD_ZERO(&fds);
+  FD_SET(brl_fd, &fds);
+  tv.tv_sec = 0;
+  tv.tv_usec = 20000;
+  if (select(brl_fd + 1, &fds, NULL, NULL, &tv) <= 0)
+    return (0);
+  if (read(brl_fd, &c, 1) > 0 && c == ACK)
+    return (1);
+  return (0);
 }
 
 static int brl_reset(BrailleDisplay *brl)
 {
-  return 0;
+  return (brl_writePacket(brl, "\x02SI\x03MP\x37", 7));
 }
 
 static void brl_identify (void)
@@ -421,8 +435,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    while (!NbCols)
      {
 	int i = 0;
-	unsigned char AskIdent[] =
-	  {2, 'S', 'I',3,'M','P','\x37'};
+	unsigned char AskIdent[] = "\x2SI";
 	WriteToBrlDisplay (brl, sizeof(AskIdent), AskIdent);
 	while (!NbCols)
 	  {
@@ -690,6 +703,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 static int routing(BrailleDisplay *brl, int routekey)
 {
    int res = EOF;
+   int	flag = 0;
 
    switch (context)
      {
@@ -771,17 +785,24 @@ static int routing(BrailleDisplay *brl, int routekey)
       case 0:
 	switch (routekey)
 	  {
-	  case 0x57:
+	  case 0x29:
+	    if (model_ID == 5)
+	      flag = 1;
 	    /* no break */
-	   case 0x83: /* Entering in menu-mode */
-	     message("-:tty hlp info t", MSG_NODELAY);
-	     context = 1;
-	     res = CMD_NOOP;
-	     break;
-	   default:
-	     res = OffsetType + routekey - 1;
-	     OffsetType = CR_ROUTE;
-	     break;
+	  case 0x57:
+	  case 0x83: /* Entering in menu-mode */
+	    flag = 1;
+	    break;
+	  default:
+	    res = OffsetType + routekey - 1;
+	    OffsetType = CR_ROUTE;
+	    break;
+	  }
+	if (flag == 1)
+	  {
+	    message("-:tty hlp info t", MSG_NODELAY);
+	    context = 1;
+	    res = CMD_NOOP;
 	  }
 	break;
      }
@@ -897,101 +918,42 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
 
 static int brl_readPacket(BrailleDisplay *brl, unsigned char *bp, int size)
 {
-  int res = EOF;
-  unsigned char c;
-  static int DLEflag = 0, ErrFlag = 0;
-  static unsigned char buf[DIM_INBUFSZ];
-  static int pos = 0, p = 0, pktready = 0;
-  
-  /* here we process incoming data */
-  while (!pktready && read (brl_fd, &c, 1))
+  int			i,j;
+  unsigned char		c;
+  char			end;
+  char			flag = 0;
+  fd_set		fds;
+  struct timeval	tv;
+  unsigned char		par = 1;
+
+  tv.tv_sec = 0;
+  tv.tv_usec = 20000;
+  FD_ZERO(&fds);
+  FD_SET(brl_fd, &fds);
+  if (select(brl_fd + 1, &fds, NULL, NULL, &tv) <= 0)
+    return (0);
+  memset(bp, 0, size);
+  for (i = 0, end = 0; !end; i++)
     {
-      if (DLEflag)
-	{
-	  DLEflag = 0;
-	  if (pos < DIM_INBUFSZ) buf[pos++] = c;
-	}
-      else if( ErrFlag )
-	{
-	  ErrFlag = 0;
-	  /* Maybe should we check error code in c here? */
-	  ReWrite = 1;
-	}
-      else
-	switch (c)
-	  {
-	  case NACK:
-	    ErrFlag = 1;
-	    /* no break */
-	  case ACK:
-	  case SOH:
-	    pos = 0;
-	    break;
-	  case DLE:
-	    DLEflag = 1;
-	    break;
-	  case EOT:
-	    {
-	      /* end of packet, let's read it */
-	      int i;
-	      unsigned char parity = 0;
-	      if (pos < 4)
-		break;		/* packets can't be shorter */
-	      for( i = 0; i < pos-1; i++ )
-		parity ^= buf[i];
-	      if ( parity != buf[pos - 1])
-		{
-		  sendbyte (NACK);
-		  sendbyte (PRT_E_PAR);
-		}
-	      else if (buf[pos - 2] < 0x80)
-		{
-		  sendbyte (NACK);
-		  sendbyte (PRT_E_NUM);
-		}
-	      else
-		{
-		  /* packet is OK */
-		  sendbyte (ACK);
-		  pos -= 2;	/* now forget about packet number and parity */
-		  p = 0;
-		  pktready = 1;
-		}
-	      break;
-	    }
-	  default:
-	    if (pos < DIM_INBUFSZ)
-	      buf[pos++] = c;
-	    break;
-	  }
+      if (read(brl_fd, &c, 1) < 0)
+	return (0); /* Error while reading information */
+      if (i >= size)
+	return (0); /* Packet is too long to be read */
+      bp[i] = c;
+      if (c == SOH && i == 0)
+	flag = 2; /* start of packet */
+      if (c == EOT && flag == 2 && bp[i - 1] != DLE)
+	end = 1; /* We've done reading a packet */
     }
-  
-  /* Packet is OK, we go inside */
-  if (pktready)
+  for (j = 0; j < i - 2; j++)
+    par ^= bp[j];
+  if (bp[i - 2] != par)
     {
-      int lg;
-      int i;
-      for (lg = 0; res == EOF; )
-	{
-	  /* let's look at the next message */
-	  lg = buf[p++];
-	  if (lg >= 0x80 || p + lg > pos)
-	    {
-	      pktready = 0;	/* we are done with this packet */
-	      break;
-	    }
-	  for (i = lg; buf[i] != EOT && buf[i - 1] != DLE; i++)
-	    ;
-	  if (i > size)
-	    p += i + 1;
-	  else
-	    {
-	      memcpy(bp, buf + p + 1, i);
-	      return (0);
-	    }
-	}
+      sendbyte(NACK);
+      sendbyte(PRT_E_PAR);
+      return (-1);
     }
-  return (-1);
+  return (i);
 }
 
 #endif
@@ -1003,7 +965,7 @@ static int readbrlkey(BrailleDisplay *brl)
   int		logfd;
 #endif
   unsigned char c;
-  static int DLEflag = 0, ErrFlag = 0;
+  static int DLEflag = 0, ErrFlag = 0, old_pktnbr = 0;
   static unsigned char buf[DIM_INBUFSZ];
   static int pos = 0, p = 0, pktready = 0;
   
@@ -1046,9 +1008,9 @@ static int readbrlkey(BrailleDisplay *brl)
 	      unsigned char parity = 0;
 	      if (pos < 4)
 		break;		/* packets can't be shorter */
-	      for( i = 0; i < pos-1; i++ )
+	      for (i = 0; i < pos - 1; i++)
 		parity ^= buf[i];
-	      if ( parity != buf[pos - 1])
+	      if (parity != buf[pos - 1])
 		{
 		  sendbyte (NACK);
 		  sendbyte (PRT_E_PAR);
@@ -1058,10 +1020,18 @@ static int readbrlkey(BrailleDisplay *brl)
 		  sendbyte (NACK);
 		  sendbyte (PRT_E_NUM);
 		}
+	      else if (buf[pos - 2] == old_pktnbr)
+		{
+		  sendbyte(ACK);
+		  pktready = 0;
+		  pos = 0;
+		  return (EOF);
+		}
 	      else
 		{
 		  /* packet is OK */
 		  sendbyte (ACK);
+		  old_pktnbr = buf[pos - 2];
 		  pos -= 2;	/* now forget about packet number and parity */
 		  p = 0;
 		  pktready = 1;
@@ -1146,7 +1116,8 @@ static int readbrlkey(BrailleDisplay *brl)
 		    model_ID = 3;
 		  else if (buf[p + 2] == 'C' && (buf[p + 3] == 'Z' || buf[p + 3] == 'P'))
 		    model_ID = 4;
-		  else if (buf[p + 2] == 'I' && buf[p + 3] == 'R')
+		  else if (buf[p + 2] == 'I' &&
+			   (buf[p + 3] == 'R') || (buf[p + 3] == 'S'))
 		    model_ID = 5;
 		  else
 		    model_ID = 0;
@@ -1154,6 +1125,8 @@ static int readbrlkey(BrailleDisplay *brl)
 		    {
 		      strncpy(version_ID, buf + p + 2, 20);
 		      NbCols = (buf[p + 4] - '0') * 10;
+		      if (model_ID == 5 && NbCols == 30)
+			NbCols += 2;
 		      LogPrint(LOG_INFO, "Detected EuroBraille version %s: %d columns",
 			       version_ID, NbCols);
 		      brl->x = NbCols;

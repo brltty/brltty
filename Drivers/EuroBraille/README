@@ -1,4 +1,4 @@
-This is the EuroBraille family driver for BRLTTY, version 1.3.1
+This is the EuroBraille family driver for BRLTTY, version 1.3.2
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
@@ -16,13 +16,18 @@ on the following hardware:
    - a Scriba display (20 and 40);
    - an Azerbraille 40 and 80 display;
    - a Clio-PupiBraille display (80 cells)
-   - an IRIS display (init problems with Iris detection).
+   - an IRIS display (Iris-S20, Iris-S32 and Iris-40).
    - The driver is although tested with a NoteBraille display in order to 
      maintain backward compatibility.
 
 
 FIXES/ADDITIONS
 ===============
+Version 1.3.2:
+	- Remade the brl_ReadPacket and brl_WritePacket, to allow writting of 
+	  low-level packets and error code retrieving;
+	- Full Iris support;
+
 Version 1.3.1:
 	- Many code cleanups;
 	- Corrected AzerBraille 40 Programming keys bugs;
