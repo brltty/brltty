@@ -293,6 +293,7 @@ static const InputOutputOperations usbOperations = {
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
 #include "Programs/bluez.h"
+#include "Programs/io.h"
 
 static int bluezConnection = -1;
 
@@ -319,7 +320,7 @@ readBluezBytes (unsigned char *buffer, int length, int wait) {
 
 static int
 writeBluezBytes (const unsigned char *buffer, int length, int *delay) {
-  int count = safe_write(bluezConnection, buffer, length);
+  int count = writeData(bluezConnection, buffer, length);
   if (delay) *delay += length * 1000 / charactersPerSecond;
   if (count != length) {
     if (count == -1) {

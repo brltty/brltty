@@ -77,21 +77,6 @@ extern int processLines (FILE *file, /* The input file. */
 		         void *data); /* A pointer to caller-specific data. */
 extern int readLine (FILE *file, char **buffer, size_t *size);
 
-/* Safe wrappers for system calls which handle the various scenarios
- * which can occur when signals interrupt them.
- * These wrappers, rather than the system calls they wrap, should be
- * called from within all drivers since certain tasks, i.e. cursor routing,
- * are performed by forked processes which generate a SIGCHLD when they terminate.
- * This approach also makes it safe for internal events to be scheduled
- * via signals like SIGALRM and SIGIO.
- */
-size_t safe_write (int fd, const unsigned char *buffer, size_t length);
-
-extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);
-extern int setOpenFlags (int fileDescriptor, int state, int flags);
-extern int setBlockingIo (int fileDescriptor, int state);
-extern int setCloseOnExec (int fileDescriptor);
-
 extern void delay (int milliseconds);		/* sleep for `msec' milliseconds */
 extern void shortdelay (int milliseconds);
 extern long int millisecondsBetween (const struct timeval *from, const struct timeval *to);
@@ -140,17 +125,6 @@ extern int makeDirectory (const char *path);
 extern char *getDevicePath (const char *path);
 extern int isQualifiedDevice (const char **path, const char *qualifier);
 extern void unsupportedDevice (const char *path);
-
-extern int awaitInput (int descriptor, int milliseconds);
-extern int readChunk (
-  int descriptor,
-  unsigned char *buffer, int *offset, int count,
-  int initialTimeout, int subsequentTimeout
-);
-extern int timedRead (
-  int descriptor, unsigned char *buffer, int count,
-  int initialTimeout, int subsequentTimeout
-);
 
 extern int isInteger (int *value, const char *word);
 extern int isFloat (float *value, const char *word);

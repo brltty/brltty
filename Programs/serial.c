@@ -34,6 +34,7 @@
 #endif /* HAVE_SYS_MODEM_H */
 
 #include "serial.h"
+#include "io.h"
 #include "misc.h"
 
 struct SerialDeviceStruct {
@@ -514,7 +515,7 @@ serialWriteData (
   const void *data, int size
 ) {
   if (serialFlushAttributes(serial)) {
-    if (safe_write(serial->fileDescriptor, data, size) != -1) return size;
+    if (writeData(serial->fileDescriptor, data, size) != -1) return size;
     LogError("serial write");
   }
   return -1;

@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "io.h"
+
 struct MidiDeviceStruct {
   int fileDescriptor;
   int deviceNumber;
@@ -36,7 +38,7 @@ static MidiDevice *midiDevice = NULL;
 void
 seqbuf_dump (void) {
   if (_seqbufptr)
-    if (write(midiDevice->fileDescriptor, _seqbuf, _seqbufptr) == -1)
+    if (writeData(midiDevice->fileDescriptor, _seqbuf, _seqbufptr) == -1)
       LogError("MIDI write");
   _seqbufptr = 0;
 }

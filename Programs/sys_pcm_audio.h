@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "io.h"
+
 struct PcmDeviceStruct {
   int fileDescriptor;
 };
@@ -61,7 +63,7 @@ closePcmDevice (PcmDevice *pcm) {
 
 int
 writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
-  return safe_write(pcm->fileDescriptor, buffer, count) != -1;
+  return writeData(pcm->fileDescriptor, buffer, count) != -1;
 }
 
 static int
