@@ -58,7 +58,7 @@ static struct termios oldtermios;
 static TranslationTable outputTable;
 unsigned char xlated[20]; /* translated content of display */
 unsigned char status[2]; /* xlated content of status area */
-enum mode_t mode = NORMAL_MODE;
+static enum mode_t mode = NORMAL_MODE;
 
 /* #defines */
 /* delay this time after command - better: use CTS, DTR, CTR or find other signal which means "ready for next command" */

@@ -44,17 +44,17 @@ static int yyerror(char*);
 static int yyparse();
 
 /* to be called: */
-int parse();
+static int parse();
 
-char *nameval = NULL;
-int numval, keyindex, cmdval; 
+static char *nameval = NULL;
+static int numval, keyindex, cmdval; 
 
-int numkeys = 0;
-int keys[KEYMAX];
+static int numkeys = 0;
+static int keys[KEYMAX];
 
-int linenumber = 1;
+static int linenumber = 1;
 
-FILE* configfile = NULL;
+static FILE* configfile = NULL;
 
  /* --------------------------------------------------------------- */
  /* some functions set_*(): set the big table with the values read  */
