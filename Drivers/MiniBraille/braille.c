@@ -55,7 +55,7 @@ enum mode_t { NORMAL_MODE, F1_MODE, F2_MODE, MANAGE_MODE, CLOCK_MODE };
 /* global variables */
 static int brl_fd = -1;
 static struct termios oldtermios;
-static unsigned char xtbl[256];
+static TranslationTable outputTable;
 unsigned char xlated[20]; /* translated content of display */
 unsigned char status[2]; /* xlated content of status area */
 enum mode_t mode = NORMAL_MODE;
@@ -83,38 +83,31 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *brldev)
 {
 	__label__ __errexit;
 	struct termios newtermios;
-	unsigned char standard[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-	unsigned char Tieman[8] = { 0, 7, 1, 6, 2, 5, 3, 4 };
-	int n, i; /* counters */
 	
+	{
+		static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
+		makeOutputTable(&dots, &outputTable);
+	}
+
 	/* init geometry */
 	brl->x = 20;
 	brl->y = 1;
 
 	/* open device */
 	if (brldev == NULL)  goto __errexit;
-	brl_fd = open(brldev, O_RDWR | O_SYNC | O_NOCTTY);
-	if (brl_fd == -1) goto __errexit;
-	if (!isatty(brl_fd)) goto __errexit;
-	tcgetattr(brl_fd, &oldtermios); /* save old terminal setting */
-	tcgetattr(brl_fd, &newtermios);
+	if (!openSerialDevice(brldev, &brl_fd, &oldtermios)) goto __errexit;
+	memcpy(&newtermios, &oldtermios, sizeof(newtermios));
 	rawSerialDevice(&newtermios);
 	/* newtermios.c_iflag |= CRTSCTS; */
 	newtermios.c_cc[VMIN] = 0; /* non-blocking read */
 	newtermios.c_cc[VTIME] = 0;
-	tcflush(brl_fd, TCIFLUSH);
-	setSerialDevice(brl_fd, &newtermios, B9600);
+	resetSerialDevice(brl_fd, &newtermios, B9600);
 	/* hm, how to switch to 38400 ? 
 	write(brl_fd, "\eV\r", 3);
 	tcflush(brl_fd, TCIFLUSH);
 	setSerialDevice(brl_fd, &newtermios, B38400);
 	*/
 
-	memset(xtbl, 0, 256); /* fill xlatetable */
-	for (n = 0; n < 256; n++)
-		for (i = 0; i < 8; i++)
-			if (n & 1 << standard[i])
-				xtbl[n] |= 1 << Tieman[i];
 	message("BRLTTY Ready", 0);
 	beep();
 	return 1;
@@ -143,7 +136,7 @@ static void refresh(void)
 static void brl_writeWindow(BrailleDisplay *brl)
 {
 	int i;
-	for (i = 0; i < 20; i++) xlated[i] = xtbl[brl->buffer[i]];
+	for (i = 0; i < 20; i++) xlated[i] = outputTable[brl->buffer[i]];
 	refresh();
 }
 
@@ -265,8 +258,8 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 
 static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 {
-	status[0] = xtbl[s[0]];
-	status[1] = xtbl[s[1]];
+	status[0] = outputTable[s[0]];
+	status[1] = outputTable[s[1]];
 	/* refresh(); */
 }
 
