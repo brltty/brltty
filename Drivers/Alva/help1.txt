@@ -70,4 +70,6 @@ Up                say from top of screen through current line
 Down              say from current line through bottom of screen
 F2 Left           decrease speech rate
 F2 Right          increase speech rate
+F2 Down           decrease speech volume
+F2 Up             increase speech volume
 F1 F2             restart speech driver

@@ -31,7 +31,6 @@
 #include <sys/types.h>
 #include <signal.h>
 
-#include "Programs/spk.h"
 #include "Programs/misc.h"
 
 typedef enum {
@@ -39,12 +38,12 @@ typedef enum {
   PARM_GENDER,
   PARM_LANGUAGE,
   PARM_NAME,
-  PARM_PITCH,
-  PARM_RATE,
-  PARM_VOLUME
+  PARM_PITCH
 } DriverParameter;
-#define SPKPARMS "age", "gender", "language", "name", "pitch", "rate", "volume"
+#define SPKPARMS "age", "gender", "language", "name", "pitch"
 
+#define SPK_HAVE_RATE
+#define SPK_HAVE_VOLUME
 #include "Programs/spk_driver.h"
 #include <theta.h>
 
@@ -150,29 +149,21 @@ spk_open (char **parameters) {
         theta_set_pitch_shift(voice, pitch, NULL);
     }
 
-    {
-      double rate = 1.0;
-      static const double minimumRate = 0.1;
-      static const double maximumRate = 10.0;
-      if (validateFloat(&rate, "rate adjustment", parameters[PARM_RATE],
-                        &minimumRate, &maximumRate))
-        theta_set_rate_stretch(voice, 1.0/rate, NULL);
-    }
-
-    {
-      double volume = 1.0;
-      static const double minimumVolume = 0.0;
-      static const double maximumVolume = 10.0;
-      if (validateFloat(&volume, "volume adjustment", parameters[PARM_VOLUME],
-                        &minimumVolume, &maximumVolume))
-        theta_set_rescale(voice, volume, NULL);
-    }
-
     return 1;
   }
 
   LogPrint(LOG_WARNING, "No voices found.");
   return 0;
+}
+
+static void
+spk_close (void) {
+  spk_mute();
+
+  if (voice) {
+    theta_unload_voice(voice);
+    voice = NULL;
+  }
 }
 
 static int
@@ -225,11 +216,11 @@ spk_mute (void) {
 }
 
 static void
-spk_close (void) {
-  spk_mute();
+spk_rate (int setting) {
+  theta_set_rate_stretch(voice, spkDurationStretchTable[setting], NULL);
+}
 
-  if (voice) {
-    theta_unload_voice(voice);
-    voice = NULL;
-  }
+static void
+spk_volume (int setting) {
+  theta_set_rescale(voice, (double)setting/(double)SPK_DEFAULT_VOLUME, NULL);
 }

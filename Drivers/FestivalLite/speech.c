@@ -31,15 +31,14 @@
 #include <signal.h>
 #include <sys/types.h>
 
-#include "Programs/spk.h"
 #include "Programs/misc.h"
 
 typedef enum {
-  PARM_wpm,
   PARM_pitch
 } DriverParameter;
-#define SPKPARMS "wpm", "pitch"
+#define SPKPARMS "pitch"
 
+#define SPK_HAVE_RATE
 #include "Programs/spk_driver.h"
 #include <flite.h>
 #include <flite_version.h>
@@ -72,16 +71,6 @@ spk_open (char **parameters)
   voice = REGISTER_VOX(NULL);
 
   {
-    int wpm, minwpm = 50, maxwpm = 400;
-    if (!*parameters[PARM_wpm] ||
-        !validateInteger(&wpm, "words per minute", parameters[PARM_wpm],
-                         &minwpm, &maxwpm))
-      wpm = 175;
-    feat_set_float(voice->features, "duration_stretch",
-                   (float)1000 / ((wpm * 23) / 4));
-  }
-
-  {
     int pitch, minpitch = 50, maxpitch = 200;
     if (!*parameters[PARM_pitch] ||
         !validateInteger(&pitch, "pitch", parameters[PARM_pitch],
@@ -91,6 +80,15 @@ spk_open (char **parameters)
   }
 
   return 1;
+}
+
+static void
+spk_close (void)
+{
+  spk_mute();
+
+  UNREGISTER_VOX(voice);
+  voice = NULL;
 }
 
 static int
@@ -144,10 +142,8 @@ spk_mute (void)
 }
 
 static void
-spk_close (void)
+spk_rate (int setting)
 {
-  spk_mute();
-
-  UNREGISTER_VOX(voice);
-  voice = NULL;
+  feat_set_float(voice->features, "duration_stretch",
+                 spkDurationStretchTable[setting]);
 }

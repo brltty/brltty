@@ -31,6 +31,12 @@
 
 #include "Programs/misc.h"
 
+typedef enum {
+  PARM_COMMAND,
+  PARM_NAME
+} DriverParameter;
+#define SPKPARMS "command", "name"
+
 #define SPK_HAVE_RATE
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for speech definitions */
@@ -303,9 +309,25 @@ spk_identify (void) {
 
 static int
 spk_open (char **parameters) {
-  if ((festival = popen("festival", "w"))) {
+  const char *command = parameters[PARM_COMMAND];
+  if (!command || !*command) command = "festival";
+  if ((festival = popen(command, "w"))) {
     fputs("(audio_mode 'async)\n", festival);
     fputs("(Parameter.set 'Audio_Method 'netaudio)\n", festival);
+
+    {
+      const char *name = parameters[PARM_NAME];
+      if (name && *name) {
+        if (strcasecmp(name, "Kevin") == 0) {
+          fputs("(voice_ked_diphone)\n", festival);
+        } else if (strcasecmp(name, "Kal") == 0) {
+          fputs("(voice_kal_diphone)\n", festival);
+        } else {
+          LogPrint(LOG_WARNING, "Unknown Festival voice name: %s", name);
+        }
+      }
+    }
+
     fflush(festival);
     return 1;
   }

@@ -531,11 +531,6 @@ fixTranslationTablePath (const char **path, const char *prefix) {
   fixFilePath(path, TRANSLATION_TABLE_EXTENSION, prefix);
 }
 
-static int
-changedTuneDevice (unsigned char setting) {
-  return setTuneDevice(setting);
-}
-
 static void
 dimensionsChanged (int rows, int columns) {
   fwinshift = MAX(columns-prefs.windowOverlap, 1);
@@ -543,23 +538,6 @@ dimensionsChanged (int rows, int columns) {
   vwinshift = 5;
   LogPrint(LOG_DEBUG, "fwin=%d hwin=%d vwin=%d",
            fwinshift, hwinshift, vwinshift);
-}
-
-static int
-changedWindowAttributes (void) {
-  dimensionsChanged(brl.y, brl.x);
-  return 1;
-}
-
-static int
-changedWindowOverlap (unsigned char setting) {
-  return changedWindowAttributes();
-}
-
-static void
-changedPreferences (void) {
-  changedWindowAttributes();
-  changedTuneDevice(prefs.tuneDevice);
 }
 
 int
@@ -689,9 +667,10 @@ static void
 startSpeechDriver (void) {
    if (opt_noSpeech) {
       LogPrint(LOG_INFO, "Automatic speech driver initialization disabled.");
-   } else {
-      speechDriver->open(speechParameters);
+   } else if (speechDriver->open(speechParameters)) {
       speech = speechDriver;
+      if (speech->rate) speech->rate(prefs.speechRate);
+      if (speech->volume) speech->volume(prefs.speechVolume);
    }
 }
 
@@ -729,6 +708,17 @@ changedSpeechRate (unsigned char setting) {
   speech->rate(setting);
   return 1;
 }
+
+static int
+testSpeechVolume (void) {
+  return speech->volume != NULL;
+}
+
+static int
+changedSpeechVolume (unsigned char setting) {
+  speech->volume(setting);
+  return 1;
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -759,6 +749,20 @@ loadContractionTable (const char *file) {
   return 1;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+static int
+changedWindowAttributes (void) {
+  dimensionsChanged(brl.y, brl.x);
+  return 1;
+}
+
+static void
+changedPreferences (void) {
+  changedWindowAttributes();
+  setTuneDevice(prefs.tuneDevice);
+  if (speech->rate) speech->rate(prefs.speechRate);
+  if (speech->volume) speech->volume(prefs.speechVolume);
+}
 
 int
 loadPreferences (int change) {
@@ -805,6 +809,11 @@ loadPreferences (int change) {
           prefs.speechRate = SPK_DEFAULT_RATE;
         }
 
+        if (length == 41) {
+          length++;
+          prefs.speechVolume = SPK_DEFAULT_VOLUME;
+        }
+
         if (change) changedPreferences();
       } else
         LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
@@ -825,8 +834,7 @@ loadPreferences (int change) {
 }
 
 int 
-savePreferences (void)
-{
+savePreferences (void) {
   int ok = 0;
   int fd = open(opt_preferencesFile, O_WRONLY | O_CREAT | O_TRUNC);
   if (fd != -1) {
@@ -851,6 +859,11 @@ savePreferences (void)
 static int
 testTunes (void) {
    return prefs.alertTunes;
+}
+
+static int
+changedTuneDevice (unsigned char setting) {
+  return setTuneDevice(setting);
 }
 
 #if defined(ENABLE_PCM_TUNES) || defined(ENABLE_MIDI_TUNES) || defined(ENABLE_FM_TUNES)
@@ -1017,6 +1030,11 @@ testSlidingWindow (void) {
 }
 
 static int
+changedWindowOverlap (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
+static int
 changedTime (unsigned char setting) {
   return (PREFERENCES_TIME(setting) % updateInterval) == 0;
 }
@@ -1169,6 +1187,7 @@ updatePreferences (void) {
        SYMBOLIC_ITEM(prefs.sayLineMode, NULL, NULL, "Say-Line Mode", sayModes),
        BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, "Autospeak"),
        NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, "Speech Rate", 0, SPK_MAXIMUM_RATE),
+       NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, "Speech Volume", 0, SPK_MAXIMUM_VOLUME),
 #endif /* ENABLE_SPEECH_SUPPORT */
        SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
@@ -1825,10 +1844,12 @@ startup (int argc, char *argv[]) {
 
     prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
     prefs.autospeak = DEFAULT_AUTOSPEAK;
+    prefs.speechRate = SPK_DEFAULT_RATE;
+    prefs.speechVolume = SPK_DEFAULT_VOLUME;
 
     prefs.statusStyle = brailleDriver->statusStyle;
   }
-  changedTuneDevice(prefs.tuneDevice);
+  setTuneDevice(prefs.tuneDevice);
   atexit(exitTunes);
 
   /*

@@ -1,7 +1,7 @@
 This directory contains the BRLTTY speech synthesizer driver for the ViaVoice
 [http://www.ibm.com/software/speech/dev/ttssdk_linux.html] text to speech
-engine from International Business Machines (IBM) [http://www.ibm.com]. It has
-been implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
+engine from International Business Machines (IBM) [http://www.ibm.com]. It was
+implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
 
 BRLTTY's configure script automatically includes this driver if ViaVoice's
 software development kit has been installed. The default is to check the

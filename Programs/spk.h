@@ -47,6 +47,9 @@ typedef struct {
 
   /* These require SPK_HAVE_RATE. */
   void (*rate) (int setting);		/* mute speech */
+
+  /* These require SPK_HAVE_VOLUME. */
+  void (*volume) (int setting);		/* mute speech */
 } SpeechDriver;
 
 extern const SpeechDriver *loadSpeechDriver (const char *driver, const char *driverDirectory);
@@ -57,6 +60,9 @@ extern const SpeechDriver noSpeech;
 #define SPK_DEFAULT_RATE 10
 #define SPK_MAXIMUM_RATE (SPK_DEFAULT_RATE * 2)
 extern double spkDurationStretchTable[];
+
+#define SPK_DEFAULT_VOLUME 10
+#define SPK_MAXIMUM_VOLUME (SPK_DEFAULT_VOLUME * 2)
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 This directory contains the BRLTTY speech driver for the Theta text to speech
-engine from Cepstral [http://www.cepstral.com/]. It has been implemented, and
-is being maintained, by Dave Mielke <dave@mielke.cc>.
+engine from Cepstral [http://www.cepstral.com/]. It was implemented, and is
+being maintained, by Dave Mielke <dave@mielke.cc>.
 
 BRLTTY's configure script automatically includes this driver if Theta has been
 installed. The default is to check the directories /usr, /usr/local, and
@@ -25,7 +25,6 @@ This driver recognizes the following parameters:
    language  two-letter language code
    name      name (human), /path/to/directory
    pitch     -2.0-2.0 (octaves relative to default)
-   rate      0.1-10.0 (relative to default)
    volume    0.0-10.0 (relative to default)
 
 If the human name of the voice is specified then the voice path is searched. 

@@ -139,6 +139,8 @@ typedef enum {
   
   CMD_SAY_SLOWER /* decrease speech rate */,
   CMD_SAY_FASTER /* increase speech rate */,
+  CMD_SAY_SOFTER /* decrease speech volume */,
+  CMD_SAY_LOUDER /* increase speech volume */,
 
   DriverCommandCount /* must be last */
 } DriverCommand;

@@ -1463,6 +1463,20 @@ main (int argc, char *argv[]) {
               playTune(&tune_bad_command);
             }
             break;
+          case CMD_SAY_SOFTER:
+            if (speech->volume && (prefs.speechVolume > 0)) {
+              speech->volume(--prefs.speechVolume);
+            } else {
+              playTune(&tune_bad_command);
+            }
+            break;
+          case CMD_SAY_LOUDER:
+            if (speech->volume && (prefs.speechVolume < SPK_MAXIMUM_VOLUME)) {
+              speech->volume(++prefs.speechVolume);
+            } else {
+              playTune(&tune_bad_command);
+            }
+            break;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef ENABLE_LEARN_MODE

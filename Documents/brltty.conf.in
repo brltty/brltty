@@ -167,9 +167,12 @@
 #speech-parameters Uid=65534
 #speech-parameters Gid=65534
 
+# Festival Speech Driver Parameters
+#speech-parameters Command=festival # [/path/to/command]
+#speech-parameters Name= # [kevin,kal]
+
 # FestivalLite Speech Driver Parameters
 #speech-parameters Pitch=100 # [50-200]
-#speech-parameters WPM=175 # [50-400]
 
 # GenericSay Speech Driver Parameters
 #speech-parameters Command=/usr/local/bin/say
@@ -180,8 +183,6 @@
 #speech-parameters Language= # [two-letter language code]
 #speech-parameters Name= # [voice,/path/to/voice]
 #speech-parameters Pitch=0.0 # [-2.0-2.0]
-#speech-parameters Rate=1.0 # [0.1-10.0]
-#speech-parameters Volume=1.0 # [0.0-10.0]
 
 # ViaVoice Speech Driver Parameters
 #speech-parameters IniFile=/usr/lib/ViaVoiceTTS/eci.ini
