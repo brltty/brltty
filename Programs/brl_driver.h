@@ -66,11 +66,11 @@ BRLCONST BrailleDriver BRLSYMBOL = {
   BRLNAME,
   BRLDRIVER,
 
-  #ifdef BRLPARMS
-    brl_parameters,
-  #else
-    NULL,
-  #endif
+#ifdef BRLPARMS
+  brl_parameters,
+#else /* BRLPARMS */
+  NULL,
+#endif /* BRLPARMS */
 
   BRLHELP,
   PREFSTYLE,
