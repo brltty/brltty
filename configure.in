@@ -439,12 +439,17 @@ libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
 brltty_pcm_interfaces=""
+brltty_midi_interfaces=""
 case "${host_os}"
 in
    linux*)
       system_object="linux"
       brltty_pcm_interfaces="oss"
-      AC_CHECK_HEADER([alsa/asoundlib.h], [brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"])
+      brltty_midi_interfaces="oss"
+      AC_CHECK_HEADER([alsa/asoundlib.h], [dnl
+         brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"
+         brltty_midi_interfaces="${brltty_midi_interfaces} alsa"
+])
       ;;
    solaris*)
       system_object="solaris"
@@ -535,7 +540,7 @@ BRLTTY_ARG_DISABLE(
    case "${enableval}"
    in
       alsa)
-         AC_SEARCH_LIBS([snd_pcm_open], [asound], [], [AC_MSG_ERROR([ALSA library not found])])
+         AC_SEARCH_LIBS([snd_pcm_open], [asound], [], [AC_MSG_ERROR([ALSA PCM library not found])])
          ;;
    esac
 ])
@@ -544,10 +549,16 @@ AC_SUBST([pcm_tune_objects])
 BRLTTY_ARG_DISABLE(
    [midi-support],
    [support for the Musical Instrument Digital Interface],
-   [],
+   [${brltty_midi_interfaces}],
 [dnl
    AC_DEFINE([ENABLE_MIDI_SUPPORT])
    midi_tune_objects='midi.$O'
+   case "${enableval}"
+   in
+      alsa)
+         AC_SEARCH_LIBS([snd_seq_open], [asound], [], [AC_MSG_ERROR([ALSA MIDI library not found])])
+         ;;
+   esac
 ])
 AC_SUBST([midi_tune_objects])
 

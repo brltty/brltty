@@ -161,6 +161,10 @@ extern "C" {
 /* Define this to include MIDI (Musical Instrument Digital Interface) support. */
 #undef ENABLE_MIDI_SUPPORT
 
+/* If necessary, define only one of the following MIDI interfaces. */
+#undef USE_MIDI_SUPPORT_OSS
+#undef USE_MIDI_SUPPORT_ALSA
+
 /* Define this to include FM (soundcard synthesizer) support. */
 #undef ENABLE_FM_SUPPORT
 

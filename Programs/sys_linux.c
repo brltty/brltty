@@ -123,7 +123,14 @@ endBeep (void) {
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
+#if defined(USE_MIDI_SUPPORT_OSS)
 #include "sys_midi_oss.h"
+#elif defined(USE_MIDI_SUPPORT_ALSA)
+#include "sys_midi_alsa.h"
+#else /* USE_MIDI_SUPPORT_ */
+#warning MIDI interface either unspecified or unsupported
+#include "sys_midi_none.h"
+#endif /* USE_MIDI_SUPPORT_ */
 #endif /* ENABLE_MIDI_SUPPORT */
 
 int
