@@ -163,7 +163,13 @@ LogError (const char *action) {
 #ifdef __MINGW32__
 void
 LogWindowsError (const char *action) {
-  LogPrint(LOG_ERR, "%s error %ld.", action, GetLastError());
+  DWORD error = GetLastError();
+  char *message;
+  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                &message, 0, NULL);
+  LogPrint(LOG_ERR, "%s error %ld: %s", action, error, message);
+  LocalFree(message);
 }
 #endif /* __MINGW32__ */
 
