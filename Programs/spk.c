@@ -133,15 +133,15 @@ static int speechFifoDescriptor = -1;
 
 static void
 exitSpeechFifo (void) {
-  if (speechFifoDescriptor != -1) {
-    close(speechFifoDescriptor);
-    speechFifoDescriptor = -1;
-  }
-
   if (speechFifoPath) {
     unlink(speechFifoPath);
     free(speechFifoPath);
     speechFifoPath = NULL;
+  }
+
+  if (speechFifoDescriptor != -1) {
+    close(speechFifoDescriptor);
+    speechFifoDescriptor = -1;
   }
 }
 
