@@ -38,16 +38,16 @@ static char *opt_libraryDirectory = LIBRARY_DIRECTORY;
 static char *opt_dataDirectory = DATA_DIRECTORY;
 
 BEGIN_OPTION_TABLE
-  {'t', "text-string", "string", 0,
-   &opt_textString, NULL, NULL, -1,
+  {"text-string", "string", 't', 0, 0,
+   &opt_textString, NULL,
    "Text to be spoken."},
 
-  {'D', "data-directory", "directory", 0,
-   &opt_dataDirectory, DATA_DIRECTORY, NULL, -1,
+  {"data-directory", "directory", 'D', 0, 0,
+   &opt_dataDirectory, DATA_DIRECTORY,
    "Path to directory for configuration files."},
 
-  {'L', "library-directory", "directory", 0,
-   &opt_libraryDirectory, LIBRARY_DIRECTORY, NULL, -1,
+  {"library-directory", "directory", 'L', 0, 0,
+   &opt_libraryDirectory, LIBRARY_DIRECTORY,
    "Path to directory for loading drivers."},
 END_OPTION_TABLE
 
@@ -73,7 +73,7 @@ main (int argc, char *argv[]) {
   int internal;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "spktest", &argc, &argv,
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");
 

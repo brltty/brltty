@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 #include <errno.h>
 
 #include "options.h"
@@ -90,8 +91,8 @@ processBootParameters (
 
     for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
       const OptionEntry *option = &optionTable[optionIndex];
-      if ((option->bootParameter >= 0) && (option->bootParameter < count)) {
-        char *parameter = parameters[option->bootParameter];
+      if ((option->bootParameter) && (option->bootParameter <= count)) {
+        char *parameter = parameters[option->bootParameter-1];
         if (*parameter) ensureSetting(option, parameter);
       }
     }
@@ -105,13 +106,31 @@ processBootParameters (
 static void
 processEnvironmentVariables (
   const OptionEntry *optionTable,
-  unsigned int optionCount
+  unsigned int optionCount,
+  const char *prefix
 ) {
+  int prefixLength = strlen(prefix);
   int optionIndex;
   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
     const OptionEntry *option = &optionTable[optionIndex];
-    if (option->environmentVariable) {
-      ensureSetting(option, getenv(option->environmentVariable));
+    if (option->flags & OPT_Env) {
+      unsigned char delimiter = '_';
+      unsigned char name[prefixLength + 1 + strlen(option->word) + 1];
+      sprintf(name, "%s%c%s", prefix, delimiter, option->word);
+
+      {
+        unsigned char *character = name;
+        while (*character) {
+          if (islower(*character)) {
+            *character = toupper(*character);
+          } else if (*character == '-') {
+            *character = delimiter;
+          }
+          ++character;
+        }
+      }
+
+      ensureSetting(option, getenv(name));
     }
   }
 }
@@ -332,9 +351,10 @@ processOptions (
   const OptionEntry *optionTable,
   unsigned int optionCount,
   OptionHandler handleOption,
+  const char *applicationName,
   int *argc,
   char ***argv,
-  const char *bootParameter,
+  int *bootParameters,
   int *environmentVariables,
   char **configurationFile,
   const char *argumentsSummary
@@ -437,18 +457,20 @@ processOptions (
     exit(0);
   }
 
-  if (bootParameter) {
-    processBootParameters(optionTable, optionCount, bootParameter);
+  if (bootParameters && *bootParameters) {
+    processBootParameters(optionTable, optionCount, applicationName);
   }
 
   if (environmentVariables && *environmentVariables) {
-    processEnvironmentVariables(optionTable, optionCount);
+    processEnvironmentVariables(optionTable, optionCount, applicationName);
   }
 
-  setDefaultOptions(optionTable, optionCount, 0);
   if (configurationFile) {
     int optional = !*configurationFile;
+    setDefaultOptions(optionTable, optionCount, 0);
     processConfigurationFile(optionTable, optionCount, *configurationFile, optional);
+  } else {
+    setDefaultOptions(optionTable, optionCount, 0);
   }
   setDefaultOptions(optionTable, optionCount, 1);
 

@@ -46,7 +46,7 @@ main (int argc, char *argv[]) {
   int status = 2;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "txt2hlp", &argc, &argv,
                  NULL, NULL, NULL,
                  "output-file input-file ...");
 

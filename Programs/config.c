@@ -72,6 +72,7 @@ static short opt_quiet = 0;
 static short opt_noDaemon = 0;
 static short opt_standardError = 0;
 static short opt_logLevel = LOG_NOTICE;
+static int opt_bootParameters = 1;
 static int opt_environmentVariables = 0;
 
 static char *opt_configurationFile = NULL;
@@ -128,138 +129,138 @@ char *opt_midiDevice = NULL;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE
-  {'a', "attributes-table", "file", OPT_Config,
-   &opt_attributesTable, NULL, "BRLTTY_ATTRIBUTES_TABLE", -1,
+  {"attributes-table", "file", 'a', 0, OPT_Config | OPT_Env,
+   &opt_attributesTable, NULL,
    "Path to attributes translation table file."},
 
-  {'b', "braille-driver", "driver", OPT_Config,
-   &opt_brailleDriver, NULL, "BRLTTY_BRAILLE_DRIVER", 0,
+  {"braille-driver", "driver", 'b', 1, OPT_Config | OPT_Env,
+   &opt_brailleDriver, NULL,
    "Braille driver: one of {" BRAILLE_DRIVER_CODES "}"},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {'c', "contraction-table", "file", OPT_Config,
-   &opt_contractionTable, NULL, "BRLTTY_CONTRACTION_TABLE", -1,
+  {"contraction-table", "file", 'c', 0, OPT_Config | OPT_Env,
+   &opt_contractionTable, NULL,
    "Path to contraction table file."},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  {'d', "braille-device", "device", OPT_Config,
-   &opt_brailleDevice, BRAILLE_DEVICE, "BRLTTY_BRAILLE_DEVICE", 1,
+  {"braille-device", "device", 'd', 2, OPT_Config | OPT_Env,
+   &opt_brailleDevice, BRAILLE_DEVICE,
    "Path to device for accessing braille display."},
 
-  {'e', "standard-error", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"standard-error", NULL, 'e', 0, 0,
+   NULL, NULL,
    "Log to standard error rather than to syslog."},
 
-  {'f', "configuration-file", "file", 0,
-   &opt_configurationFile, CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE, "BRLTTY_CONFIGURATION_FILE", -1,
+  {"configuration-file", "file", 'f', 0, OPT_Env,
+   &opt_configurationFile, CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
    "Path to default parameters file."},
 
-  {'l', "log-level", "level", 0,
-   NULL, NULL, NULL, -1,
+  {"log-level", "level", 'l', 0, 0,
+   NULL, NULL,
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
 
 #ifdef ENABLE_MIDI_SUPPORT
-  {'m', "midi-device", "device", OPT_Config,
-   &opt_midiDevice, NULL, "BRLTTY_MIDI_DEVICE", -1,
+  {"midi-device", "device", 'm', 0, OPT_Config | OPT_Env,
+   &opt_midiDevice, NULL,
    "Device specifier for the Musical Instrument Digital Interface."},
 #endif /* ENABLE_MIDI_SUPPORT */
 
-  {'n', "no-daemon", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"no-daemon", NULL, 'n', 0, 0,
+   NULL, NULL,
    "Remain a foreground process."},
 
 #ifdef ENABLE_PCM_SUPPORT
-  {'p', "pcm-device", "device", OPT_Config,
-   &opt_pcmDevice, NULL, "BRLTTY_PCM_DEVICE", -1,
+  {"pcm-device", "device", 'p', 0, OPT_Config | OPT_Env,
+   &opt_pcmDevice, NULL,
    "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
 
-  {'q', "quiet", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"quiet", NULL, 'q', 0, 0,
+   NULL, NULL,
    "Suppress start-up messages."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'s', "speech-driver", "driver", OPT_Config,
-   &opt_speechDriver, NULL, "BRLTTY_SPEECH_DRIVER", -1,
+  {"speech-driver", "driver", 's', 0, OPT_Config | OPT_Env,
+   &opt_speechDriver, NULL,
    "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {'t', "text-table", "file", OPT_Config,
-   &opt_textTable, NULL, "BRLTTY_TEXT_TABLE", 2,
+  {"text-table", "file", 't', 3, OPT_Config | OPT_Env,
+   &opt_textTable, NULL,
    "Path to text translation table file."},
 
-  {'v', "verify", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"verify", NULL, 'v', 0, 0,
+   NULL, NULL,
    "Print start-up messages and exit."},
 
 #ifdef ENABLE_API
-  {'A', "api-parameters", "arg,...", OPT_Extend | OPT_Config,
-   &opt_apiParameters, API_PARAMETERS, "BRLTTY_API_PARAMETERS", -1,
+  {"api-parameters", "arg,...", 'A', 0, OPT_Extend | OPT_Config | OPT_Env,
+   &opt_apiParameters, API_PARAMETERS,
    "Parameters for the application programming interface."},
 #endif /* ENABLE_API */
 
-  {'B', "braille-parameters", "arg,...", OPT_Extend | OPT_Config,
-   &opt_brailleParameters, BRAILLE_PARAMETERS, "BRLTTY_BRAILLE_PARAMETERS", -1,
+  {"braille-parameters", "arg,...", 'B', 0, OPT_Extend | OPT_Config | OPT_Env,
+   &opt_brailleParameters, BRAILLE_PARAMETERS,
    "Parameters for the braille driver."},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {'C', "contractions-directory", "directory", OPT_Hidden | OPT_Config,
-   &opt_contractionsDirectory, DATA_DIRECTORY, "BRLTTY_CONTRACTIONS_DIRECTORY", -1,
+  {"contractions-directory", "directory", 'C', 0, OPT_Hidden | OPT_Config | OPT_Env,
+   &opt_contractionsDirectory, DATA_DIRECTORY,
    "Path to directory for contractions tables."},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  {'D', "data-directory", "directory", OPT_Hidden | OPT_Config,
-   &opt_dataDirectory, DATA_DIRECTORY, "BRLTTY_DATA_DIRECTORY", -1,
+  {"data-directory", "directory", 'D', 0, OPT_Hidden | OPT_Config | OPT_Env,
+   &opt_dataDirectory, DATA_DIRECTORY,
    "Path to directory for driver help and configuration files."},
 
-  {'E', "environment-variables", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"environment-variables", NULL, 'E', 0, 0,
+   NULL, NULL,
    "Recognize environment variables."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'F', "speech-fifo", "file", OPT_Config,
-   &opt_speechFifo, NULL, "BRLTTY_SPEECH_FIFO", -1,
+  {"speech-fifo", "file", 'F', 0, OPT_Config | OPT_Env,
+   &opt_speechFifo, NULL,
    "Path to speech pass-through FIFO."},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {'L', "library-directory", "directory", OPT_Hidden | OPT_Config,
-   &opt_libraryDirectory, LIBRARY_DIRECTORY, "BRLTTY_LIBRARY_DIRECTORY", -1,
+  {"library-directory", "directory", 'L', 0, OPT_Hidden | OPT_Config | OPT_Env,
+   &opt_libraryDirectory, LIBRARY_DIRECTORY,
    "Path to directory for loading drivers."},
 
-  {'M', "message-delay", "csecs", 0,
-   NULL, NULL, NULL, -1,
+  {"message-delay", "csecs", 'M', 0, 0,
+   NULL, NULL,
    "Message hold time [400]."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'N', "no-speech", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"no-speech", NULL, 'N', 0, 0,
+   NULL, NULL,
    "Defer speech until restarted by command."},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {'P', "pid-file", "file", 0,
-   &opt_pidFile, NULL, NULL, -1,
+  {"pid-file", "file", 'P', 0, 0,
+   &opt_pidFile, NULL,
    "Path to process identifier file."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'S', "speech-parameters", "arg,...", OPT_Extend | OPT_Config,
-   &opt_speechParameters, SPEECH_PARAMETERS, "BRLTTY_SPEECH_PARAMETERS", -1,
+  {"speech-parameters", "arg,...", 'S', 0, OPT_Extend | OPT_Config | OPT_Env,
+   &opt_speechParameters, SPEECH_PARAMETERS,
    "Parameters for the speech driver."},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {'T', "tables-directory", "directory", OPT_Hidden | OPT_Config,
-   &opt_tablesDirectory, DATA_DIRECTORY, "BRLTTY_TABLES_DIRECTORY", -1,
+  {"tables-directory", "directory", 'T', 0, OPT_Hidden | OPT_Config | OPT_Env,
+   &opt_tablesDirectory, DATA_DIRECTORY,
    "Path to directory for text and attributes tables."},
 
-  {'U', "update-interval", "csecs", 0,
-   NULL, NULL, NULL, -1,
+  {"update-interval", "csecs", 'U', 0, 0,
+   NULL, NULL,
    "Braille window update interval [4]."},
 
-  {'V', "version", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"version", NULL, 'V', 0, 0,
+   NULL, NULL,
    "Print the versions of the core, API, and built-in drivers, and then exit."},
 
-  {'X', "screen-parameters", "arg,...", OPT_Extend | OPT_Config,
-   &opt_screenParameters, SCREEN_PARAMETERS, "BRLTTY_SCREEN_PARAMETERS", -1,
+  {"screen-parameters", "arg,...", 'X', 0, OPT_Extend | OPT_Config | OPT_Env,
+   &opt_screenParameters, SCREEN_PARAMETERS,
    "Parameters for the screen driver."},
 END_OPTION_TABLE
 
@@ -1783,8 +1784,8 @@ handleOption (const int option) {
 void
 startup (int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
-                 "brltty", &opt_environmentVariables, &opt_configurationFile,
+                 "brltty", &argc, &argv,
+                 &opt_bootParameters, &opt_environmentVariables, &opt_configurationFile,
                  NULL);
   if (argc) LogPrint(LOG_ERR, "Excess parameter: %s", argv[0]);
 

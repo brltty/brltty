@@ -38,28 +38,28 @@ static int opt_showName = 0;
 static int opt_showSize = 0;
 
 BEGIN_OPTION_TABLE
-  {'i', "identifier", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"identifier", NULL, 'i', 0, 0,
+   NULL, NULL,
    "Show the driver's identifier."},
 
-  {'k', "brlapi-key", "file", 0,
-   &settings.authKey, NULL, NULL, -1,
+  {"brlapi-key", "file", 'k', 0, 0,
+   &settings.authKey, NULL,
    "Path to file containing BrlAPI's authentication key."},
 
-  {'l', "learn", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"learn", NULL, 'l', 0, 0,
+   NULL, NULL,
    "Enter interactive command learn mode."},
 
-  {'n', "name", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"name", NULL, 'n', 0, 0,
+   NULL, NULL,
    "Show the driver's name."},
 
-  {'s', "brlapi-server", "[host][:port]", 0,
-   &settings.hostName, NULL, NULL, -1,
+  {"brlapi-server", "[host][:port]", 's', 0, 0,
+   &settings.hostName, NULL,
    "Host name (or address) and port of the BrlAPI server."},
 
-  {'w', "window", NULL, 0,
-   NULL, NULL, NULL, -1,
+  {"window", NULL, 'w', 0, 0,
+   NULL, NULL,
    "Show the braille window's size."},
 END_OPTION_TABLE
 
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
   settings.hostName = NULL; settings.authKey = NULL;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "apitest", &argc, &argv,
                  NULL, NULL, NULL,
                  "");
 

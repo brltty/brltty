@@ -55,7 +55,7 @@ main (int argc, char *argv[]) {
   char *path;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "tbltest", &argc, &argv,
                  NULL, NULL, NULL,
                  "translation-table");
 

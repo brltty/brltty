@@ -25,29 +25,29 @@ extern "C" {
 #define OPT_Hidden	0X1
 #define OPT_Extend	0X2
 #define OPT_Config	0X4
+#define OPT_Env	0X8
 
 typedef struct {
-  unsigned char letter;
   const char *word;
   const char *argument;
-  int flags;
+  unsigned char letter;
+  unsigned char bootParameter;
+  unsigned char flags;
 
   char **setting;
   const char *defaultSetting;
-  const char *environmentVariable;
-  int bootParameter;
 
   const char *description;
 } OptionEntry;
 
 #define BEGIN_OPTION_TABLE static const OptionEntry optionTable[] = {
 #define END_OPTION_TABLE \
-  {'h', "help", NULL, 0, \
-   NULL, NULL, NULL, -1, \
+  {"help", NULL, 'h', 0, 0, \
+   NULL, NULL, \
    "Print this usage summary and exit."}, \
 \
-  {'H', "full-help", NULL, OPT_Hidden, \
-   NULL, NULL, NULL, -1, \
+  {"full-help", NULL, 'H', 0, OPT_Hidden, \
+   NULL, NULL, \
    "Print this full usage summary and exit."} \
 }; \
 static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
@@ -57,9 +57,10 @@ extern int processOptions (
   const OptionEntry *optionTable,
   unsigned int optionCount,
   OptionHandler handleOption,
+  const char *applicationName,
   int *argc,
   char ***argv,
-  const char *bootParameter,
+  int *bootParameters,
   int *environmentVariables,
   char **configurationFile,
   const char *argumentsSummary

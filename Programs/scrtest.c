@@ -39,20 +39,20 @@ static char *opt_boxTop = NULL;
 static char *opt_boxHeight = NULL;
 
 BEGIN_OPTION_TABLE
-  {'l', "left", "column", 0,
-   &opt_boxLeft, NULL, NULL, -1,
+  {"left", "column", 'l', 0, 0,
+   &opt_boxLeft, NULL,
    "Left edge of region (from 0)."},
 
-  {'c', "columns", "count", 0,
-   &opt_boxWidth, NULL, NULL, -1,
+  {"columns", "count", 'c', 0, 0,
+   &opt_boxWidth, NULL,
    "Width of region."},
 
-  {'t', "top", "row", 0,
-   &opt_boxTop, NULL, NULL, -1,
+  {"top", "row", 't', 0, 0,
+   &opt_boxTop, NULL,
    "Top edge of region (from 0)."},
 
-  {'r', "rows", "count", 0,
-   &opt_boxHeight, NULL, NULL, -1,
+  {"rows", "count", 'r', 0, 0,
+   &opt_boxHeight, NULL,
    "Height of region."},
 END_OPTION_TABLE
 
@@ -93,7 +93,7 @@ main (int argc, char *argv[]) {
   char **parameterSettings;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "scrtest", &argc, &argv,
                  NULL, NULL, NULL,
                  "[parameter=value ...]");
 

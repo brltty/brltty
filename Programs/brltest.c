@@ -46,16 +46,16 @@ static char *opt_libraryDirectory = LIBRARY_DIRECTORY;
 static char *opt_dataDirectory = DATA_DIRECTORY;
 
 BEGIN_OPTION_TABLE
-  {'d', "device", "device", 0,
-   &opt_brailleDevice, BRAILLE_DEVICE, NULL, -1,
+  {"device", "device", 'd', 0, 0,
+   &opt_brailleDevice, BRAILLE_DEVICE,
    "Path to device for accessing braille display."},
 
-  {'D', "data-directory", "directory", 0,
-   &opt_dataDirectory, DATA_DIRECTORY, NULL, -1,
+  {"data-directory", "directory", 'D', 0, 0,
+   &opt_dataDirectory, DATA_DIRECTORY,
    "Path to directory for driver help and configuration files."},
 
-  {'L', "library-directory", "directory", 0,
-   &opt_libraryDirectory, LIBRARY_DIRECTORY, NULL, -1,
+  {"library-directory", "directory", 'L', 0, 0,
+   &opt_libraryDirectory, LIBRARY_DIRECTORY,
    "Path to directory for loading drivers."},
 END_OPTION_TABLE
 
@@ -104,7 +104,7 @@ main (int argc, char *argv[]) {
   int internal;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "brltest", &argc, &argv,
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");
 

@@ -37,8 +37,8 @@
 static char *opt_textTable = NULL;
 
 BEGIN_OPTION_TABLE
-  {'t', "text-table", "file", 0,
-   &opt_textTable, TEXT_TABLE, NULL, -1,
+  {"text-table", "file", 't', 0, 0,
+   &opt_textTable, TEXT_TABLE,
    "Text translation table."},
 END_OPTION_TABLE
 
@@ -97,7 +97,7 @@ main (int argc, char *argv[]) {
   char *contractionTablePath;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "ctbtest", &argc, &argv,
                  NULL, NULL, NULL,
                  "contraction-table");
 

@@ -52,30 +52,30 @@ static unsigned char opt_midiInstrument = 0;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE
-  {'d', "device", "device", 0,
-   NULL, NULL, NULL, -1,
+  {"device", "device", 'd', 0, 0,
+   NULL, NULL,
    "Name of tune device."},
 
 #ifdef ENABLE_MIDI_SUPPORT
-  {'i', "instrument", "instrument", 0,
-   NULL, NULL, NULL, -1,
+  {"instrument", "instrument", 'i', 0, 0,
+   NULL, NULL,
    "Name of MIDI instrument."},
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
-  {'m', "midi-device", "device", 0,
-   &opt_midiDevice, NULL, NULL, -1,
+  {"midi-device", "device", 'm', 0, 0,
+   &opt_midiDevice, NULL,
    "Device specifier for the Musical Instrument Digital Interface."},
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #ifdef ENABLE_PCM_SUPPORT
-  {'p', "pcm-device", "device", 0,
-   &opt_pcmDevice, NULL, NULL, -1,
+  {"pcm-device", "device", 'p', 0, 0,
+   &opt_pcmDevice, NULL,
    "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
 
-  {'v', "level", "volume", 0,
-   NULL, NULL, NULL, -1,
+  {"level", "volume", 'v', 0, 0,
+   NULL, NULL,
    "Output volume."},
 END_OPTION_TABLE
 
@@ -145,7 +145,7 @@ int
 main (int argc, char *argv[]) {
   opt_tuneDevice = getDefaultTuneDevice();
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "tunetest", &argc, &argv,
                  NULL, NULL, NULL,
                  "{note duration} ...");
   if (!argc) {

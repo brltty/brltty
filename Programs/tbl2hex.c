@@ -55,7 +55,7 @@ main (int argc, char *argv[]) {
   TranslationTable table;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv,
+                 "tbl2hex", &argc, &argv,
                  NULL, NULL, NULL,
                  "translation-table");
 
