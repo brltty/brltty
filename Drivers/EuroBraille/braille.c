@@ -1117,7 +1117,7 @@ static int readbrlkey(BrailleDisplay *brl)
 		  else if (buf[p + 2] == 'C' && (buf[p + 3] == 'Z' || buf[p + 3] == 'P'))
 		    model_ID = 4;
 		  else if (buf[p + 2] == 'I' &&
-			   (buf[p + 3] == 'R') || (buf[p + 3] == 'S'))
+			   (buf[p + 3] == 'R' || buf[p + 3] == 'S'))
 		    model_ID = 5;
 		  else
 		    model_ID = 0;
