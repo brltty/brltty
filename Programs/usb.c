@@ -446,15 +446,15 @@ usbSetBelkinRtsState (UsbDevice *device, int state) {
 static int
 usbSetBelkinFlowControl (UsbDevice *device, int flow) {
   int value = 0;
-#define BELKIN_FLOW(from,to) if (flow & from) flow &= ~from, value |= to
-  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_XON, 0X0080);
+#define BELKIN_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), value |= (to)
   BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_CTS, 0X0001);
   BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_DSR, 0X0002);
-  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_RTS, 0X0020);
-  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_XON , 0X0100);
-  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_RTS , 0X0010);
-  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_DTR , 0X0008);
   BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_DSR , 0X0004);
+  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_DTR , 0X0008);
+  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_RTS , 0X0010);
+  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_RTS, 0X0020);
+  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_XON, 0X0080);
+  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_XON , 0X0100);
 #undef BELKIN_FLOW
   if (flow) {
     LogPrint(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
@@ -503,20 +503,15 @@ usbSetFtdiRtsState (UsbDevice *device, int state) {
 static int
 usbSetFtdiFlowControl (UsbDevice *device, int flow) {
   int index = 0;
-#define FTDI_FLOW(from,to) if (flow & from) flow &= ~from, index |= to
-  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_XON, 0X0080);
-  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_CTS, 0X0001);
-  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_DSR, 0X0002);
-  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_RTS, 0X0020);
-  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_XON , 0X0100);
-  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_RTS , 0X0010);
-  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_DTR , 0X0008);
-  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_DSR , 0X0004);
+#define FTDI_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), index |= (to)
+  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_CTS|USB_SERIAL_FLOW_INPUT_RTS, 0X0100);
+  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_DSR|USB_SERIAL_FLOW_INPUT_DTR, 0X0200);
+  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_XON|USB_SERIAL_FLOW_INPUT_XON, 0X0400);
 #undef FTDI_FLOW
   if (flow) {
     LogPrint(LOG_WARNING, "Unsupported FTDI flow control: %02X", flow);
   }
-  return usbSetFtdiAttribute(device, 2, ((index & 0X200)? 0X1311: 0), index);
+  return usbSetFtdiAttribute(device, 2, ((index & 0X0400)? 0X1311: 0), index);
 }
 static int
 usbSetFtdiBaud (UsbDevice *device, int divisor) {
