@@ -419,6 +419,7 @@ typedef struct {
   int (*readCommand) (BrailleDisplay *brl, DriverCommandContext cmds);
   void (*writeText) (BrailleDisplay *brl, int start, int count);
   void (*writeStatus) (BrailleDisplay *brl, int start, int count);
+  void (*flushCells) (BrailleDisplay *brl);
 } ProtocolOperations;
 
 static const ProtocolOperations *protocol;
@@ -639,6 +640,10 @@ writeStatus1 (BrailleDisplay *brl, int start, int count) {
 }
 
 static void
+flushCells1 (BrailleDisplay *brl) {
+}
+
+static void
 initializeTerminal1 (BrailleDisplay *brl) {
   initializeTable1(brl);
   drainBrailleOutput(brl, 0);
@@ -741,8 +746,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
 static const ProtocolOperations protocolOperations1 = {
   initializeTerminal1,
   readCommand1,
-  writeText1,
-  writeStatus1
+  writeText1, writeStatus1, flushCells1
 };
 
 static int
@@ -782,15 +786,25 @@ identifyTerminal1 (BrailleDisplay *brl) {
 
 /*--- Protocol 2 Operations ---*/
 
+typedef struct {
+  unsigned char type;
+  unsigned char length;
+  union {
+    unsigned char bytes[0XFF];
+  } data;
+} Packet2;
+
 #define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
+static int refreshDisplay;
+
 static int
-readPacket2 (BrailleDisplay *brl, char *packet, int size) {
+readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
   char buffer[0X203];
   int offset = 0;
-  unsigned char length;
-  int count;
+  int size;
+  int identity;
 
   while (1) {
     if (!io->readBytes(buffer, &offset, 1, 1000)) {
@@ -812,16 +826,11 @@ readPacket2 (BrailleDisplay *brl, char *packet, int size) {
           continue;
 
         case cETX:
-          if ((offset < 5) || (offset < count)) {
-            LogBytes("Short Packet", buffer, offset);
-          } else if (offset > count) {
-            LogBytes("Long Packet", buffer, offset);
-          } else {
+          if ((offset >= 5) && (offset == size)) {
             if (debug_reads) LogBytes("Input Packet", buffer, offset);
-            memcpy(packet, buffer, offset);
-            LogBytes("Input Packet", buffer, offset);
             return 1;
           }
+          LogBytes("Short Packet", buffer, offset);
           offset = 0;
           continue;
 
@@ -834,21 +843,47 @@ readPacket2 (BrailleDisplay *brl, char *packet, int size) {
     
             case 2:
               if (type != 0X40) break;
+              packet->type = value;
+              identity = value == 0X0A;
               continue;
     
             case 3:
               if (type != 0X50) break;
-              length = value << 4;
+              packet->length = value << 4;
               continue;
     
             case 4:
               if (type != 0X50) break;
-              length |= value;
-              count = length + 5;
+              packet->length |= value;
+
+              size = packet->length;
+              if (!identity) size *= 2;
+              size += 5;
               continue;
     
             default:
               if (type != 0X30) break;
+
+              if (offset == size) {
+                LogBytes("Long Packet", buffer, offset);
+                offset = 0;
+                continue;
+              }
+
+              {
+                int index = offset - 5;
+                if (identity) {
+                  packet->data.bytes[index] = byte;
+                } else {
+                  int high = !(index % 1);
+                  index /= 2;
+                  if (high) {
+                    packet->data.bytes[index] = value << 4;
+                  } else {
+                    packet->data.bytes[index] |= value;
+                  }
+                }
+              }
               continue;
           }
           break;
@@ -877,16 +912,20 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
   }
 
   *byte++ = cETX;
-  io->flushPort(brl);
-  return writeBytes(brl, buffer, byte-buffer);
+  {
+    int size = byte - buffer;
+    if (debug_writes) LogBytes("Output Packet", buffer, size);
+    io->flushPort(brl);
+    return writeBytes(brl, buffer, size);
+  }
 }
 
 static int
 interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
   {
-    unsigned char id = PM2_MAKE_BYTE(identity[4], identity[5]);
-    unsigned char major = LOW_NIBBLE(identity[6]);
-    unsigned char minor = PM2_MAKE_INTEGER2(identity[7], identity[8]);
+    unsigned char id = PM2_MAKE_BYTE(identity[0], identity[1]);
+    unsigned char major = LOW_NIBBLE(identity[2]);
+    unsigned char minor = PM2_MAKE_INTEGER2(identity[3], identity[4]);
     if (!interpretIdentity(brl, id, major, minor)) return 0;
   }
 
@@ -895,10 +934,35 @@ interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
 
 static void
 writeText2 (BrailleDisplay *brl, int start, int count) {
+  refreshDisplay = 1;
 }
 
 static void
 writeStatus2 (BrailleDisplay *brl, int start, int count) {
+  refreshDisplay = 1;
+}
+
+static void
+flushCells2 (BrailleDisplay *brl) {
+  if (refreshDisplay) {
+    unsigned char buffer[0XFF];
+    unsigned int size = 0;
+
+    buffer[size++] = 0;
+    buffer[size++] = 0;
+
+    memcpy(&buffer[size], currentStatus, terminal->statusCount);
+    size += terminal->statusCount;
+
+    memcpy(&buffer[size], currentText, terminal->columns);
+    size += terminal->columns;
+
+    buffer[size++] = 0;
+    buffer[size++] = 0;
+
+    writePacket2(brl, 0X43, size, buffer);
+    refreshDisplay = 0;
+  }
 }
 
 static void
@@ -913,8 +977,7 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
 static const ProtocolOperations protocolOperations2 = {
   initializeTerminal2,
   readCommand2,
-  writeText2,
-  writeStatus2
+  writeText2, writeStatus2, flushCells2
 };
 
 static int
@@ -923,11 +986,12 @@ identifyTerminal2 (BrailleDisplay *brl) {
   io->flushPort(brl);
   while (writePacket2(brl, 2, 0, NULL)) {
     while (io->awaitInput(100)) {
-      unsigned char identity[20];			/* answer has 10 chars */
-      if (readPacket2(brl, identity, sizeof(identity))) {
-        if (identity[1] == 0X4A) {
-          if (interpretIdentity2(brl, identity)) {
+      Packet2 packet;			/* answer has 10 chars */
+      if (readPacket2(brl, &packet)) {
+        if (packet.type == 0X0A) {
+          if (interpretIdentity2(brl, packet.data.bytes)) {
             protocol = &protocolOperations2;
+            refreshDisplay = 0;
             return 1;
           }
         }
@@ -1021,14 +1085,17 @@ updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned 
              void (*writeCells) (BrailleDisplay *brl, int start, int count)) {
   if (memcmp(cells, data, size) != 0) {
     int index;
+
     while (size) {
       index = size - 1;
       if (cells[index] != data[index]) break;
       size = index;
     }
+
     for (index=0; index<size; ++index) {
       if (cells[index] != data[index]) break;
     }
+
     if ((size -= index)) {
       memcpy(cells+index, data+index, size);
       writeCells(brl, index, size);
@@ -1042,6 +1109,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   if (debug_writes) LogBytes("Window", brl->buffer, terminal->columns);
   for (i=0; i<terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
   updateCells(brl, terminal->columns, brl->buffer, currentText, protocol->writeText);
+  protocol->flushCells(brl);
 }
 
 static void
