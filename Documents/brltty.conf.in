@@ -56,16 +56,15 @@
 # display is connected. Relative paths are anchored at "/dev". If not
 # specified, "@braille_device@" will be used.
 # (can be overridden with the -d [--braille-device=] option)
-#braille-device	ttyS0	# Primary Linux serial port (old-style).
-#braille-device	tts/0	# Primary Linux serial port (devfs).
-#braille-device	ttya	# Primary Solaris serial port.
-#braille-device	tty0p0	# Primary HP-UX serial port.
-#braille-device	cua00	# Primary OpenBSD serial port.
-#braille-device	ttyUSB0	# Primary Linux USB serial converter (old-style).
-#braille-device	usb/tts/0	# Primary Linux USB serial converter (devfs).
-#braille-device	brlvger	# Primary Linux USB Voyager port (old-style).
-#braille-device	brlvger0	# Primary Linux USB Voyager port (devfs 2.4).
-#braille-device	usb/brlvger0	# Primary Linux USB Voyager port (devfs 2.6).
+#braille-device	serial:ttyS0	# Primary Linux serial port (old-style).
+#braille-device	serial:tts/0	# Primary Linux serial port (devfs).
+#braille-device	serial:ttya	# Primary Solaris serial port.
+#braille-device	serial:tty0p0	# Primary HP-UX serial port.
+#braille-device	serial:cua00	# Primary OpenBSD serial port.
+#braille-device	serial:ttyUSB0	# Primary Linux USB serial converter (old-style).
+#braille-device	serial:usb/tts/0	# Primary Linux USB serial converter (devfs).
+#braille-device	usb:		# First USB device matching braille driver.
+#braille-device	usb:nnnnn	# Specific USB device by serial number.
 
 # The text-table directive specifies which text translation table to
 # use. Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,
