@@ -57,7 +57,7 @@ static int inputLength;
 
 typedef struct {
   const CommandEntry *entry;
-  unsigned int count;
+  unsigned int maximum;
 } CommandDescriptor;
 static CommandDescriptor *commandDescriptors = NULL;
 static const size_t commandSize = sizeof(*commandDescriptors);
@@ -297,7 +297,7 @@ allocateCommandDescriptors (void) {
       const CommandEntry *entry = commandTable;
       while (entry->name) {
         descriptor->entry = entry++;
-        descriptor->count = 0;
+        descriptor->maximum = 0;
         ++descriptor;
       }
     }
@@ -311,7 +311,7 @@ allocateCommandDescriptors (void) {
         int currentBlock = code & VAL_BLK_MASK;
         if (currentBlock != previousBlock) {
           if (currentBlock) {
-            descriptor->count = (VAL_ARG_MASK + 1) - (code & VAL_ARG_MASK);
+            descriptor->maximum = VAL_ARG_MASK - (code & VAL_ARG_MASK);
           }
           previousBlock = currentBlock;
         }
@@ -501,21 +501,76 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
-  int rc = EOF;
-  char *str = readString();
+  int command = EOF;
+  char *string = readString();
 
-  if (str) {
-    LogPrint(LOG_DEBUG, "cmd '%s' received", str);
+  if (string) {
+    static const char *delimiters = " ";
+    const char *word;
+    LogPrint(LOG_DEBUG, "Command received: %s", string);
 
-    if (strcmp(str, "quit") == 0) {
-      rc = CMD_RESTARTBRL;
-    } else {
-      const CommandDescriptor *descriptor = findCommand(str);
-      if (descriptor) rc = descriptor->entry->code;
+    if ((word = strtok(string, delimiters))) {
+      if (strcasecmp(word, "quit") == 0) {
+        command = CMD_RESTARTBRL;
+      } else {
+        const CommandDescriptor *descriptor = findCommand(word);
+        if (descriptor) {
+          int needsNumber = descriptor->maximum > 0;
+          int numberSpecified = 0;
+          int onSpecified = 0;
+          int offSpecified = 0;
+          int block;
+
+          command = descriptor->entry->code;
+          block = command & VAL_BLK_MASK;
+
+          while ((word = strtok(NULL, delimiters))) {
+            if (block == 0) {
+              if (!onSpecified) {
+                if (strcasecmp(word, "on") == 0) {
+                  onSpecified = 1;
+                  command |= VAL_SWITCHON;
+                  continue;
+                }
+              }
+
+              if (!offSpecified) {
+                if (strcasecmp(word, "off") == 0) {
+                  offSpecified = 1;
+                  command |= VAL_SWITCHOFF;
+                  continue;
+                }
+              }
+            }
+
+            if (needsNumber && !numberSpecified) {
+              char *end;
+              long int number = strtol(word, &end, 0);
+              if (!*end) {
+                numberSpecified = 1;
+                if ((number > 0) && (number <= descriptor->maximum)) {
+                  command += number;
+                } else {
+                  LogPrint(LOG_WARNING, "Number out of range: %s", word);
+                }
+                continue;
+              }
+            }
+
+            LogPrint(LOG_WARNING, "Unknown option: %s", word);
+          }
+
+          if (needsNumber && !numberSpecified) {
+            LogPrint(LOG_WARNING, "Number not specified.");
+          }
+        } else {
+          LogPrint(LOG_WARNING, "Unknown command: %s", word);
+        }
+      }
     }
 
-    free(str);
+    free(string);
   }
 
-  return rc;
+  return command;
 }
