@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "Programs/misc.h"
 
@@ -41,7 +42,8 @@ static struct termios newSettings;
 static TranslationTable outputTable;
 static int cellCount;
 static unsigned char cellContent[80];
-static int cursorCommand;
+static int lowerRoutingFunction;
+static int upperRoutingFunction;
 
 static int
 readByte (unsigned char *byte) {
@@ -53,7 +55,7 @@ readByte (unsigned char *byte) {
 static int
 awaitByte (unsigned char *byte) {
   if (readByte(byte)) return 1;
-  if (awaitInput(fileDescriptor, 4000))
+  if (awaitInput(fileDescriptor, 1000))
     if (readByte(byte))
       return 1;
   return 0;
@@ -79,9 +81,11 @@ acknowledgeDisplay (void) {
     delay(500);
     tcflush(fileDescriptor, TCIFLUSH);
   }
+  LogPrint(LOG_INFO, "Albatross attribute byte: %02X", attributes);
 
   cellCount = (attributes & 0X80)? 80: 40;
-  cursorCommand = CR_ROUTE;
+  lowerRoutingFunction = CR_ROUTE;
+  upperRoutingFunction = CR_DESCCHAR;
 
   LogPrint(LOG_INFO, "Albatross has %d columns.", cellCount);
   return 1;
@@ -132,14 +136,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
-    speed_t speedTable[] = {B9600, B19200, B0};
+    speed_t speedTable[] = {B19200, B9600, B0};
     const speed_t *speed = speedTable;
 
     memset(&newSettings, 0, sizeof(newSettings));
     newSettings.c_cflag = CS8 | CREAD;
-    newSettings.c_iflag = IGNPAR;
+    newSettings.c_iflag = IGNPAR | IGNBRK;
 
     while (resetSerialDevice(fileDescriptor, &newSettings, *speed)) {
+      time_t start = time(NULL);
+      int count = 0;
       unsigned char byte;
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
@@ -151,7 +157,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             return 1;
           }
         }
+
+        if (++count == 100) break;
+        if (difftime(time(NULL), start) > 5.0) break;
       }
+
       if (*++speed == B0) speed = speedTable;
     }
 
@@ -185,7 +195,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   unsigned char byte;
-  int cursorBase;
 
   while (readByte(&byte)) {
     if (byte == 0XFF) {
@@ -197,21 +206,33 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     }
     if (!cellCount) continue;
 
-    cursorBase = cursorCommand;
-    cursorCommand = CR_ROUTE;
+    {
+      int base;
+      int offset;
+
+      int lowerBase = lowerRoutingFunction;
+      int upperBase = (cellCount <= 46)? upperRoutingFunction: CMD_NOOP;
+      lowerRoutingFunction = CR_ROUTE;
+      upperRoutingFunction = CR_DESCCHAR;
+
+      if ((byte >= 2) && (byte <= 41)) {
+        base = lowerBase;
+        offset = byte - 2;
+      } else if ((byte >= 111) && (byte <= 116)) {
+        base = lowerBase;
+        offset = byte - 71;
+      } else if ((byte >= 152) && (byte <= 157)) {
+        base = upperBase;
+        offset = byte - 106;
+      } else {
+        goto notRouting;
+      }
+      if ((offset >= 0) && (offset < cellCount)) return base + offset;
+    }
+  notRouting:
+
     switch (byte) {
       default:
-        {
-          int offset;
-          if ((byte >= 2) && (byte <= 41)) {
-            offset = byte - 2;
-          } else if ((byte >= 111) && (byte <= 150)) {
-            offset = byte - 71;
-          } else {
-            offset = -1;
-          }
-          if ((offset >= 0) && (offset < cellCount)) return cursorBase + offset;
-        }
         break;
 
       case 0XFB:
@@ -231,11 +252,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         return CMD_CSRTRK;
 
       case  87: /* key: top left second */
-        cursorCommand = CR_CUTBEGIN;
+        lowerRoutingFunction = CR_CUTBEGIN;
+        upperRoutingFunction = CR_SETMARK;
         return CMD_NOOP;
 
       case  88: /* key: top left fourth */
-        cursorCommand = CR_CUTAPPEND;
+        lowerRoutingFunction = CR_CUTAPPEND;
+        upperRoutingFunction = CR_GOTOMARK;
         return CMD_NOOP;
 
       case  89: /* key: top left fifth upper */
@@ -257,11 +280,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         return CMD_NXDIFLN;
 
       case 198: /* key: top right second */
-        cursorCommand = CR_CUTRECT;
+        lowerRoutingFunction = CR_CUTRECT;
+        upperRoutingFunction = CR_NXINDENT;
         return CMD_NOOP;
 
       case 197: /* key: top right fourth */
-        cursorCommand = CR_CUTLINE;
+        lowerRoutingFunction = CR_CUTLINE;
+        upperRoutingFunction = CR_PRINDENT;
         return CMD_NOOP;
 
       case 199: /* key: top right fifth upper */

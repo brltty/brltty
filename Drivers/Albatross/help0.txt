@@ -11,7 +11,6 @@ Left    go left one window
 Right   go right one window
 
 Top Keys:
-(* means then press routing key)
 Hlp    enter/leave help screen
 Lrn    enter/leave learn mode
 Paste  paste from cut buffer
@@ -24,10 +23,24 @@ DifUp  go up to nearest line with different content
 DifDn  go down to nearest line with different content
 PgU    go up to last line of previous paragraph
 PgD    go down to first line of next paragraph
-CtB*   begin new cut buffer
-CtA*   append to cut buffer
-CtL*   linear cut
-CtR*   rectangular cut
+RF1    first alternate routing key function
+RF2    second alternate routing key function
+RF3    third alternate routing key function
+RF4    fourth alternate routing key function
+
+Lower Routing Keys:
+RF0       bring cursor to character
+RF1  ctn  start new cut buffer
+RF2  cta  append to current cut buffer
+RF3  ctl  linear cut
+RF4  ctr  rectangular cut
+
+Upper Routing Keys:
+RF0       describe character
+RF1  mwp  mark current window position
+RF2  gwp  go to previously marked window position
+RF3  iup  go up to nearest line without greater indent
+RF4  idn  go down to nearest line without greater indent
 
 Left Attribute Keys:
    upper: toggle screen freeze mode
