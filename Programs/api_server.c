@@ -116,6 +116,21 @@ typedef struct {
 
 typedef enum { TODISPLAY, FULL, EMPTY } BrlBufState;
 
+typedef enum {
+  READING_HEADER,
+  READING_CONTENT,
+  DISCARDING
+} PacketState;
+
+typedef struct {
+  header_t header;
+  unsigned char content[BRLAPI_MAXPACKETSIZE];
+  PacketState state;
+  int readBytes; /* Already read bytes */
+  unsigned char *p; /* Where read() should load datas */
+  int n; /* Value to give so read() */ 
+} Packet;
+
 typedef struct Connection {
   struct Connection *prev, *next;
   int fd;
@@ -129,6 +144,7 @@ typedef struct Connection {
   rangeList *unmaskedKeys;
   pthread_mutex_t maskMutex;
   time_t upTime;
+  Packet packet;
 } Connection;
 
 typedef struct Tty {
@@ -232,6 +248,63 @@ static void writeException(int fd, unsigned int err, brl_type_t type, const void
   brlapi_writePacket(fd,BRLPACKET_EXCEPTION,epacket, hdrsize+esize);
 }
 
+/* Function: initializePacket */
+/* Prepares a Packet structure */
+void initializePacket(Packet *packet)
+{
+  packet->state = READING_HEADER;
+  packet->readBytes = 0;
+  packet->p = (char *) &packet->header;
+  packet->n = sizeof(packet->header);
+}
+
+/* Function : readPacket */
+/* Reads a packet for the given connection */
+/* Returns -2 on EOF, -1 on error, 0 if the reading is not complete, */
+/* 1 if the packet has been read. */
+int readPacket(Connection *c)
+{
+  int res;
+  Packet *packet = &c->packet;
+read:
+  res = read(c->fd, packet->p, packet->n);
+  if (res==0) return -2; /* EOF */
+  if (res==-1) {
+    switch (errno) {
+      case EINTR: goto read;
+      case EAGAIN: return 0;
+      default: return -1;
+    }
+  }
+  packet->readBytes += res;
+  if ((packet->state==READING_HEADER) && (packet->readBytes==HEADERSIZE)) {
+    packet->header.size = ntohl(packet->header.size);
+    packet->header.type = ntohl(packet->header.type);
+    if (packet->header.size==0) goto out;
+    packet->readBytes = 0;
+    if (packet->header.size<=BRLAPI_MAXPACKETSIZE) {
+      packet->state = READING_CONTENT;
+      packet->n = packet->header.size;
+    } else {
+      packet->state = DISCARDING;
+      packet->n = BRLAPI_MAXPACKETSIZE;
+    }
+    packet->p = packet->content;
+  } else if (packet->readBytes==packet->header.size) goto out;
+  else if (packet->state==DISCARDING) {
+    packet->p = packet->content;
+    packet->n = MIN(packet->header.size-packet->readBytes, BRLAPI_MAXPACKETSIZE);
+  } else {
+    packet->n -= res;
+    packet->p += res;
+  }
+  goto read;
+
+out:
+  initializePacket(packet);
+  return 1;
+}
+
 /****************************************************************************/
 /** BRAILLE WINDOWS MANAGING                                               **/
 /****************************************************************************/
@@ -330,6 +403,7 @@ static Connection *createConnection(int fd, time_t currentTime)
   c->brailleWindow.text = NULL;
   c->brailleWindow.andAttr = NULL;
   c->brailleWindow.orAttr = NULL;
+  initializePacket(&c->packet);
   return c;
 
 out:
@@ -470,16 +544,18 @@ static void doLeaveTty(Connection *c) {
 /* If EOF is reached, closes fd and frees all associated ressources */
 static int processRequest(Connection *c)
 {
+  int res;
   ssize_t size;
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  unsigned char *packet = c->packet.content;
   authStruct *auth = (authStruct *) packet;
   uint32_t * ints = (uint32_t *) packet;
   brl_type_t type;
   const char *str;
   unsigned int len;
-  size = brlapi_readPacket(c->fd,&type,packet,sizeof(packet));
-  if (size<0) {
-    if (size==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(brlapi_libcerrno),c->fd);
+  res = readPacket(c);
+  if (res==0) return 0; /* No packet ready */
+  if (res<0) {
+    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(brlapi_libcerrno),c->fd);
     else {
       LogPrint(LOG_DEBUG,"Closing connection on fd %d",c->fd);
     }
@@ -499,6 +575,9 @@ static int processRequest(Connection *c)
     }
     return 1;
   }
+  size = c->packet.header.size;
+  type = c->packet.header.type;
+  
   if (c->auth==0) {
     if (ntohl(auth->protocolVersion)!=BRLAPI_PROTOCOL_VERSION) {
       writeError(c->fd, BRLERR_PROTOCOL_VERSION);
@@ -514,7 +593,7 @@ static int processRequest(Connection *c)
       return 1;
     }
   }
-  if (size>sizeof(packet)) {
+  if (size>BRLAPI_MAXPACKETSIZE) {
     LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %d",brlapi_packetType(type), c->fd);
     return 0;    
   }
@@ -653,7 +732,7 @@ static int processRequest(Connection *c)
     case BRLPACKET_UNIGNOREKEYSET: {
       int i = 0, res = 0;
       unsigned int nbkeys;
-      brl_keycode_t *k = (brl_keycode_t *) &packet;
+      brl_keycode_t *k = (brl_keycode_t *) packet;
       int (*fptr)(uint32_t, uint32_t, rangeList **);
       LogPrintRequest(type, c->fd);
       if (type==BRLPACKET_IGNOREKEYSET) fptr = removeRange; else fptr = addRange;
@@ -1252,6 +1331,10 @@ static void *server(void *arg)
         unauthConnLog++;
       } else {
         unauthConnections++;
+        if (fcntl(res, F_SETFL, O_NONBLOCK)<0) {
+          LogPrint(LOG_WARNING, "Failed to switch t) non-blocking mode: %s",strerror(errno));
+          break;
+        }
         c = createConnection(res, currentTime);
         if (c==NULL) {
           LogPrint(LOG_WARNING,"Failed to create connection structure");

@@ -74,6 +74,14 @@ extern "C" {
 /** Magic number to give when sending a BRLPACKET_GETRAW packet */
 #define BRLRAW_MAGIC (0xdeadbeefL)
 
+/** Structure of packets headers */
+typedef struct {
+  uint32_t size;
+  brl_type_t type;
+} header_t;
+
+#define HEADERSIZE sizeof(header_t)
+
 /** Structure of authentication packets */
 typedef struct {
   uint32_t protocolVersion;
