@@ -68,7 +68,7 @@ static void AL_writeDelay (int delay) {
 }
 
 void AL_writeRegister (int number, unsigned char data) {
-   LogPrint(LOG_DEBUG, "AL_writeRegister: %2.2X=%2.2X", number, data);
+   /* LogPrint(LOG_DEBUG, "AL_writeRegister: %2.2X=%2.2X", number, data); */
    writePort1(ALP_REGISTER, number);
    AL_writeDelay(6);
    writePort1(ALP_DATA, data);
@@ -112,7 +112,7 @@ void AL_evaluatePitch (int pitch, int *exponent, int *mantissa) {
 }
 
 void AL_initiateTone (int channel, int exponent, int mantissa) {
-   LogPrint(LOG_DEBUG, "AL_initiateTone: %1.1X[%3.3X]", exponent, mantissa);
+   /* LogPrint(LOG_DEBUG, "AL_initiateTone: %1.1X[%3.3X]", exponent, mantissa); */
    AL_writeRegister(ALR_FREQUENCY_LSB(channel),
                     (mantissa & 0XFF));
    AL_writeRegister(ALR_FREQUENCY_MSB(channel),
@@ -125,7 +125,7 @@ void AL_startTone (int channel, int pitch) {
    int exponent;
    int mantissa;
    AL_evaluatePitch(pitch, &exponent, &mantissa);
-   LogPrint(LOG_DEBUG, "AL_startTone: %d", pitch);
+   /* LogPrint(LOG_DEBUG, "AL_startTone: %d", pitch); */
    AL_initiateTone(channel, exponent, mantissa);
 }
 
