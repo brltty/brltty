@@ -222,7 +222,7 @@ static void writeException(int fd, unsigned int err, brl_type_t type, const void
   int hdrsize, esize;
   unsigned char epacket[BRLAPI_MAXPACKETSIZE];
   errorPacket_t * errorPacket = (errorPacket_t *) epacket;
-  LogPrint(LOG_DEBUG,"exception %u for packet type %u on fd %d", err, type, fd);
+  LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %d", err, (unsigned long)type, fd);
   hdrsize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
   errorPacket->code = htonl(err);
   errorPacket->type = htonl(type);
@@ -526,7 +526,7 @@ static int processRequest(Connection *c)
         for (tty2=tty->subttys; tty2 && tty2->number!=ntohl(*ptty); tty2=tty2->next);
 	if (!tty2) break;
 	tty = tty2;
-	LogPrint(LOG_DEBUG,"tty %#010x ok",ntohl(*ptty));
+	LogPrint(LOG_DEBUG,"tty %#010lx ok",(unsigned long)ntohl(*ptty));
       }
       if (!tty2) {
 	/* we were stopped at some point because the path doesn't exist yet */
@@ -547,7 +547,7 @@ static int processRequest(Connection *c)
 	  return 0;
 	}
 	ptty++;
-	LogPrint(LOG_DEBUG,"allocated tty %#010x",ntohl(*(ptty-1)));
+	LogPrint(LOG_DEBUG,"allocated tty %#010lx",(unsigned long)ntohl(*(ptty-1)));
 	for (; ptty<&ints[size/sizeof(uint32_t)-1]; ptty++) {
 	  if (!(tty2 = newTty(tty2,ntohl(*ptty)))) {
 	    /* gasp, couldn't allocate :/, clean tree */
@@ -560,7 +560,7 @@ static int processRequest(Connection *c)
             freeBrailleWindow(&c->brailleWindow);
 	    return 0;
 	  }
-	  LogPrint(LOG_DEBUG,"allocated tty %#010x",ntohl(*ptty));
+	  LogPrint(LOG_DEBUG,"allocated tty %#010lx",(unsigned long)ntohl(*ptty));
 	}
 	tty = tty2;
       }
@@ -626,7 +626,7 @@ static int processRequest(Connection *c)
       CHECKEXC(size==2*sizeof(brl_keycode_t),BRLERR_INVALID_PACKET);
       x = ntohl(ints[0]);
       y = ntohl(ints[1]);
-      LogPrint(LOG_DEBUG,"range: [%u..%u]",x,y);
+      LogPrint(LOG_DEBUG,"range: [%lu..%lu]",(unsigned long)x,(unsigned long)y);
       pthread_mutex_lock(&c->maskMutex);
       if (type==BRLPACKET_IGNOREKEYRANGE) res = removeRange(x,y,&c->unmaskedKeys);
       else res = addRange(x,y,&c->unmaskedKeys);
@@ -808,8 +808,14 @@ static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
 /* Returns the descriptor, or -1 if an error occurred */
 static int initializeTcpSocket(char *hostname, char *port)
 {
-  int fd=-1, yes=1;
+  int fd=-1;
   const char *fun;
+
+#ifdef __MINGW32__
+  char yes=1;
+#else /* __MINGW32__ */
+  int yes=1;
+#endif /* __MINGW32__ */
 
 #ifdef HAVE_GETADDRINFO
 
@@ -1441,11 +1447,11 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   c = whoGetsKey(&ttys,command,keycode);
   if (c) {
     if (c->how==BRLKEYCODES) {
-      LogPrint(LOG_DEBUG,"Transmitting unmasked key %u",keycode);
+      LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
       keycode = htonl(keycode);
       brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
     } else {
-      LogPrint(LOG_DEBUG,"Transmitting unmasked command %u",command);
+      LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
       keycode = htonl(command);
       brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
     }

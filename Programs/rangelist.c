@@ -76,7 +76,7 @@ void DisplayRangeList(rangeList *l)
   else {
     rangeList *c = l;
     while (1) {
-      printf("[%u..%u]",c->x,c->y);
+      printf("[%lu..%lu]",(unsigned long)c->x,(unsigned long)c->y);
       if (c->next==NULL) break;
       printf(",");
       c = c->next;
