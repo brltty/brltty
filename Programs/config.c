@@ -497,31 +497,6 @@ loadAttributesTable (const char *file) {
 }
 
 static void
-fixDevicePath (const char **path) {
-  const char *prefix = DEVICE_DIRECTORY;
-  const unsigned int prefixLength = strlen(prefix);
-  const unsigned int pathLength = strlen(*path);
-
-  if (prefixLength) {
-    if (**path != '/') {
-      char buffer[prefixLength + 1 +  pathLength + 1];
-      unsigned int length = 0;
-
-      memcpy(&buffer[length], prefix, prefixLength);
-      length += prefixLength;
-
-      if (buffer[length-1] != '/') buffer[length++] = '/';
-
-      memcpy(&buffer[length], *path, pathLength);
-      length += pathLength;
-
-      buffer[length] = 0;
-      *path = strdupWrapper(buffer);
-    }
-  }
-}
-
-static void
 fixFilePath (const char **path, const char *extension, const char *prefix) {
   const unsigned int prefixLength = strlen(prefix);
   const unsigned int pathLength = strlen(*path);
@@ -1638,18 +1613,16 @@ startup (int argc, char *argv[]) {
   ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
   ensureOptionSetting(&opt_dataDirectory, DATA_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
   ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER", 0);
-  ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
+  ensureOptionSetting(&opt_brailleDevice, BRAILLE_DEVICE, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
 #ifdef ENABLE_SPEECH_SUPPORT
   ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER", -1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
   if (*opt_brailleDevice == 0) {
     LogPrint(LOG_CRIT, "No braille device specified.");
     fprintf(stderr, "Use -d to specify one.\n");
     exit(4);
   }
-  fixDevicePath(&opt_brailleDevice);
 
   getBrailleDriver();
 #ifdef ENABLE_SPEECH_SUPPORT

@@ -277,12 +277,6 @@ AC_SUBST([$1_driver_objects])
 AC_SUBST([$1_help])
 AC_SUBST([$1_drivers])])
 
-AC_DEFUN([BRLTTY_DEVICE_PATH], [dnl
-if test `expr "${$1}" : '/'` -eq 0
-then
-   $1="/dev/${$1}"
-fi])
-
 AC_DEFUN([BRLTTY_FILE_PATH], [dnl
 ifelse(len([$3]), 0, [], [dnl
 if test `expr "${$1}" : '.*/'` -eq 0

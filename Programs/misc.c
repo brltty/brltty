@@ -232,33 +232,80 @@ makePath (const char *directory, const char *file) {
   return path;
 }
 
+static char *
+getDevicePath (const char *path) {
+  const char *prefix = DEVICE_DIRECTORY;
+  const unsigned int prefixLength = strlen(prefix);
+  const unsigned int pathLength = strlen(path);
+
+  if (prefixLength) {
+    if (*path != '/') {
+      char buffer[prefixLength + 1 +  pathLength + 1];
+      unsigned int length = 0;
+
+      memcpy(&buffer[length], prefix, prefixLength);
+      length += prefixLength;
+
+      if (buffer[length-1] != '/') buffer[length++] = '/';
+
+      memcpy(&buffer[length], path, pathLength);
+      length += pathLength;
+
+      buffer[length] = 0;
+      return strdupWrapper(buffer);
+    }
+  }
+  return strdupWrapper(path);
+}
+
+int
+isSerialDevice (const char **path) {
+  const char *prefix = "serial:";
+  int length = strlen(prefix);
+  if (strncmp(*path, prefix, length) == 0) {
+    *path += length;
+    return 1;
+  }
+  return !strchr(*path, ':');
+}
+
+void
+unsupportedDevice (const char *path) {
+  LogPrint(LOG_WARNING, "Unsupported device: %s", path);
+}
+
 int
 openSerialDevice (const char *path, int *descriptor, struct termios *attributes) {
-  if ((*descriptor = open(path, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
-    if (isatty(*descriptor)) {
-      int flags;
-      if ((flags = fcntl(*descriptor, F_GETFL)) != -1) {
-        flags &= ~O_NONBLOCK;
-        if (fcntl(*descriptor, F_SETFL, flags) != -1) {
-          if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
-            LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", path, *descriptor);
-            return 1;
+  char *device;
+  if ((device = getDevicePath(path))) {
+    if ((*descriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+      if (isatty(*descriptor)) {
+        int flags;
+        if ((flags = fcntl(*descriptor, F_GETFL)) != -1) {
+          flags &= ~O_NONBLOCK;
+          if (fcntl(*descriptor, F_SETFL, flags) != -1) {
+            if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
+              LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", device, *descriptor);
+              free(device);
+              return 1;
+            } else {
+              LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", device, strerror(errno));
+            }
           } else {
-            LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", path, strerror(errno));
+            LogError("F_SETFL");
           }
         } else {
-          LogError("F_SETFL");
+          LogError("F_GETFL");
         }
       } else {
-        LogError("F_GETFL");
+        LogPrint(LOG_ERR, "Not a serial device: %s", device);
       }
+      close(*descriptor);
+      *descriptor = -1;
     } else {
-      LogPrint(LOG_ERR, "Not a serial device: %s", path);
+      LogPrint(LOG_ERR, "Cannot open '%s': %s", device, strerror(errno));
     }
-    close(*descriptor);
-    *descriptor = -1;
-  } else {
-    LogPrint(LOG_ERR, "Cannot open '%s': %s", path, strerror(errno));
+    free(device);
   }
   return 0;
 }

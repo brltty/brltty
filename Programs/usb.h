@@ -176,6 +176,7 @@ typedef struct {
 typedef struct UsbDeviceStruct UsbDevice;
 typedef int (*UsbDeviceChooser) (UsbDevice *device, void *data);
 
+extern int isUsbDevice (const char **path);
 extern UsbDevice *usbOpenDevice (const char *path);
 extern UsbDevice *usbFindDevice (UsbDeviceChooser chooser, void *data);
 extern void usbCloseDevice (UsbDevice *device);

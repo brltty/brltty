@@ -111,11 +111,6 @@
 #include "Programs/misc.h"
 #include "Programs/brltty.h"
 
-typedef enum {
-  PARM_PORT,
-  PARM_SERIALNUMBER
-} DriverParameter;
-#define BRLPARMS "port", "serialnumber"
 #define BRLSTAT ST_AlvaStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
@@ -466,12 +461,12 @@ static unsigned char usbInputEndpoint;
 
 static int
 chooseUsbDevice (UsbDevice *device, void *data) {
-  char **parameters = data;
+  const char *serialNumber = data;
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
   if ((descriptor->idVendor == 0X6b0) && (descriptor->idProduct == 1)) {
     const unsigned int interface = 0;
 
-    if (!usbVerifySerialNumber(device, parameters[PARM_SERIALNUMBER])) return 0;
+    if (!usbVerifySerialNumber(device, serialNumber)) return 0;
 
     if (usbClaimInterface(device, interface) != -1) {
       if (usbSetConfiguration(device, 1) != -1) {
@@ -495,7 +490,7 @@ chooseUsbDevice (UsbDevice *device, void *data) {
 
 static int
 openUsbPort (char **parameters, const char *device) {
-  if ((usbDevice = usbFindDevice(chooseUsbDevice, parameters))) {
+  if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
     if (usbBeginInput(usbDevice, usbInputEndpoint, 8, 8) != -1) {
       return 1;
     } else {
@@ -641,7 +636,7 @@ getModelIdentifier (unsigned char *identifier) {
   return 0;
 }
 
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   unsigned char ModelID = MODEL;
 
@@ -650,46 +645,30 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
     makeOutputTable(&dots, &outputTable);
   }
 
-  {
-    static const char *const serialPort = "serial";
-#ifdef ENABLE_USB
-    static const char *const usbPort = "usb";
-#endif /* ENABLE_USB */
-    const char *const ports[] = {
-      serialPort,
-#ifdef ENABLE_USB
-      usbPort,
-#endif /* ENABLE_USB */
-      NULL
-    };
-    unsigned int port;
-    validateChoice(&port, "port type", parameters[PARM_PORT], ports);
-
-    if (ports[port] == serialPort) {
-      openPort = openSerialPort;
-      resetPort = resetSerialPort;
-      closePort = closeSerialPort;
-      readPacket = readSerialPacket;
-      writePacket = writeSerialPacket;
+  if (isSerialDevice(&device)) {
+    openPort = openSerialPort;
+    resetPort = resetSerialPort;
+    closePort = closeSerialPort;
+    readPacket = readSerialPacket;
+    writePacket = writeSerialPacket;
 
 #ifdef ENABLE_USB
-    } else if (ports[port] == usbPort) {
-      openPort = openUsbPort;
-      resetPort = resetUsbPort;
-      closePort = closeUsbPort;
-      readPacket = readUsbPacket;
-      writePacket = writeUsbPacket;
+  } else if (isUsbDevice(&device)) {
+    openPort = openUsbPort;
+    resetPort = resetUsbPort;
+    closePort = closeUsbPort;
+    readPacket = readUsbPacket;
+    writePacket = writeUsbPacket;
 #endif /* ENABLE_USB */
 
-    } else {
-      LogPrint(LOG_WARNING, "Unsupported port type: %s", ports[port]);
-      return 0;
-    }
+  } else {
+    LogPrint(LOG_WARNING, "Unsupported device: %s", device);
+    return 0;
   }
   inputUsed = 0;
 
   /* Open the Braille display device */
-  if (!openPort(parameters, dev)) goto failure;
+  if (!openPort(parameters, device)) goto failure;
 
   /* autodetecting ABT model */
   do {
