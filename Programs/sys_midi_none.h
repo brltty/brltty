@@ -17,32 +17,47 @@
 
 #warning MIDI support not available on this platform
 
-int
-getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
+MidiDevice *
+openMidiDevice (int errorLevel) {
   LogPrint(errorLevel, "MIDI device not supported.");
-  return -1;
+  return NULL;
 }
 
 void
-setMidiInstrument (unsigned char channel, unsigned char instrument) {
+closeMidiDevice (MidiDevice *midi) {
 }
 
-void
-beginMidiBlock (int descriptor) {
+int
+flushMidiDevice (MidiDevice *midi) {
+  return 1;
 }
 
-void
-endMidiBlock (int descriptor) {
+int
+setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument) {
+  return 1;
 }
 
-void
-startMidiNote (unsigned char channel, unsigned char note, unsigned char volume) {
+int
+beginMidiBlock (MidiDevice *midi) {
+  return 1;
 }
 
-void
-stopMidiNote (unsigned char channel) {
+int
+endMidiBlock (MidiDevice *midi) {
+  return 1;
 }
 
-void
-insertMidiWait (int duration) {
+int
+startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
+  return 1;
+}
+
+int
+stopMidiNote (MidiDevice *midi, unsigned char channel) {
+  return 1;
+}
+
+int
+insertMidiWait (MidiDevice *midi, int duration) {
+  return 1;
 }

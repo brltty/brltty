@@ -15,119 +15,170 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-static MidiBufferFlusher flushMidiBuffer;
-static int midiDevice;
+struct MidiDeviceStruct {
+  int fileDescriptor;
+  int deviceNumber;
+};
 
 #ifndef SAMPLE_TYPE_AWE
 #define SAMPLE_TYPE_AWE 0x20
 #endif /* SAMPLE_TYPE_AWE */
 
-int
-getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
-  const char *path = "/dev/sequencer";
-  int descriptor = open(path, O_WRONLY);
-  if (descriptor == -1) {
-    LogPrint(errorLevel, "Cannot open MIDI device: %s: %s", path, strerror(errno));
-  } else {
-    flushMidiBuffer = flushBuffer;
-
-    {
-      int count;
-      int awe = -1;
-      int fm = -1;
-      int gus = -1;
-      int ext = -1;
-
-      if (ioctl(descriptor, SNDCTL_SEQ_NRSYNTHS, &count) != -1) {
-        int index;
-        for (index=0; index<count; ++index) {
-          struct synth_info info;
-          info.device = index;
-          if (ioctl(descriptor, SNDCTL_SYNTH_INFO, &info) != -1) {
-            switch (info.synth_type) {
-              case SYNTH_TYPE_SAMPLE:
-                switch (info.synth_subtype) {
-                  case SAMPLE_TYPE_AWE:
-                    awe = index;
-                    continue;
-                  case SAMPLE_TYPE_GUS:
-                    gus = index;
-                    continue;
-                }
-                break;
-              case SYNTH_TYPE_FM:
-                fm = index;
-                continue;
-            }
-            LogPrint(LOG_DEBUG, "Unknown synthesizer: %d[%d]: %s",
-                     info.synth_type, info.synth_subtype, info.name);
-          } else {
-            LogPrint(errorLevel, "Cannot get description for synthesizer %d: %s",
-                     index, strerror(errno));
-          }
-        }
-
-        if (gus >= 0)
-          if (ioctl(descriptor, SNDCTL_SEQ_RESETSAMPLES, &gus) == -1)
-            LogPrint(errorLevel, "Cannot reset samples for gus synthesizer %d: %s",
-                     gus, strerror(errno));
-      } else {
-        LogPrint(errorLevel, "Cannot get MIDI synthesizer count: %s",
-                 strerror(errno));
-      }
-
-      if (ioctl(descriptor, SNDCTL_SEQ_NRMIDIS, &count) != -1) {
-        if (count > 0) ext = count - 1;
-      } else {
-        LogPrint(errorLevel, "Cannot get MIDI device count: %s",
-                 strerror(errno));
-      }
-
-      midiDevice = (awe >= 0)? awe:
-                   (gus >= 0)? gus:
-                   (fm >= 0)? fm:
-                   (ext >= 0)? ext:
-                   0;
-    }
-  }
-  return descriptor;
-}
-
+static MidiDevice *midiDevice = NULL;
 SEQ_DEFINEBUF(0X80);
+
 void
 seqbuf_dump (void) {
-  flushMidiBuffer(_seqbuf, _seqbufptr);
+  if (_seqbufptr)
+    if (write(midiDevice->fileDescriptor, _seqbuf, _seqbufptr) == -1)
+      LogError("MIDI write");
   _seqbufptr = 0;
 }
 
-void
-setMidiInstrument (unsigned char channel, unsigned char instrument) {
-  SEQ_SET_PATCH(midiDevice, channel, instrument);
+MidiDevice *
+openMidiDevice (int errorLevel) {
+  MidiDevice *midi;
+  if ((midi = malloc(sizeof(*midi)))) {
+    const char *path = "/dev/sequencer";
+    if ((midi->fileDescriptor = open(path, O_WRONLY)) != -1) {
+      {
+        int count;
+        int awe = -1;
+        int fm = -1;
+        int gus = -1;
+        int ext = -1;
+
+        if (ioctl(midi->fileDescriptor, SNDCTL_SEQ_NRSYNTHS, &count) != -1) {
+          int index;
+          for (index=0; index<count; ++index) {
+            struct synth_info info;
+            info.device = index;
+            if (ioctl(midi->fileDescriptor, SNDCTL_SYNTH_INFO, &info) != -1) {
+              switch (info.synth_type) {
+                case SYNTH_TYPE_SAMPLE:
+                  switch (info.synth_subtype) {
+                    case SAMPLE_TYPE_AWE:
+                      awe = index;
+                      continue;
+
+                    case SAMPLE_TYPE_GUS:
+                      gus = index;
+                      continue;
+                  }
+                  break;
+
+                case SYNTH_TYPE_FM:
+                  fm = index;
+                  continue;
+              }
+
+              LogPrint(LOG_DEBUG, "Unknown synthesizer: %d[%d]: %s",
+                       info.synth_type, info.synth_subtype, info.name);
+            } else {
+              LogPrint(errorLevel, "Cannot get description for synthesizer %d: %s",
+                       index, strerror(errno));
+            }
+          }
+
+          if (gus >= 0)
+            if (ioctl(midi->fileDescriptor, SNDCTL_SEQ_RESETSAMPLES, &gus) == -1)
+              LogPrint(errorLevel, "Cannot reset samples for gus synthesizer %d: %s",
+                       gus, strerror(errno));
+        } else {
+          LogPrint(errorLevel, "Cannot get MIDI synthesizer count: %s",
+                   strerror(errno));
+        }
+
+        if (ioctl(midi->fileDescriptor, SNDCTL_SEQ_NRMIDIS, &count) != -1) {
+          if (count > 0) ext = count - 1;
+        } else {
+          LogPrint(errorLevel, "Cannot get MIDI device count: %s",
+                   strerror(errno));
+        }
+
+        midi->deviceNumber = (awe >= 0)? awe:
+                             (gus >= 0)? gus:
+                             (fm >= 0)? fm:
+                             (ext >= 0)? ext:
+                             0;
+      }
+
+      return midi;
+    } else {
+      LogPrint(errorLevel, "Cannot open MIDI device: %s: %s", path, strerror(errno));
+    }
+
+    free(midi);
+  } else {
+    LogError("MIDI device allocation");
+  }
+  return NULL;
 }
 
 void
-beginMidiBlock (int descriptor) {
+closeMidiDevice (MidiDevice *midi) {
+  close(midi->fileDescriptor);
+  free(midi);
+}
+
+static void
+beginMidiOperation (MidiDevice *midi) {
+  midiDevice = midi;
+}
+
+static int
+endMidiOperation (MidiDevice *midi) {
+  midiDevice = NULL;
+  return 1;
+}
+
+int
+flushMidiDevice (MidiDevice *midi) {
+  beginMidiOperation(midi);
+  seqbuf_dump();
+  return endMidiOperation(midi);
+}
+
+int
+setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument) {
+  beginMidiOperation(midi);
+  SEQ_SET_PATCH(midi->deviceNumber, channel, instrument);
+  return endMidiOperation(midi);
+}
+
+int
+beginMidiBlock (MidiDevice *midi) {
+  beginMidiOperation(midi);
   SEQ_START_TIMER();
+  return endMidiOperation(midi);
 }
 
-void
-endMidiBlock (int descriptor) {
+int
+endMidiBlock (MidiDevice *midi) {
+  beginMidiOperation(midi);
   SEQ_STOP_TIMER();
   seqbuf_dump();
-  ioctl(descriptor, SNDCTL_SEQ_SYNC);
+  ioctl(midi->fileDescriptor, SNDCTL_SEQ_SYNC);
+  return endMidiOperation(midi);
 }
 
-void
-startMidiNote (unsigned char channel, unsigned char note, unsigned char volume) {
-  SEQ_START_NOTE(midiDevice, channel, note, 0X7F*volume/100);
+int
+startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
+  beginMidiOperation(midi);
+  SEQ_START_NOTE(midi->deviceNumber, channel, note, 0X7F*volume/100);
+  return endMidiOperation(midi);
 }
 
-void
-stopMidiNote (unsigned char channel) {
-  SEQ_STOP_NOTE(midiDevice, channel, 0, 0);
+int
+stopMidiNote (MidiDevice *midi, unsigned char channel) {
+  beginMidiOperation(midi);
+  SEQ_STOP_NOTE(midi->deviceNumber, channel, 0, 0);
+  return endMidiOperation(midi);
 }
 
-void
-insertMidiWait (int duration) {
+int
+insertMidiWait (MidiDevice *midi, int duration) {
+  beginMidiOperation(midi);
   SEQ_DELTA_TIME((duration + 9) / 10);
+  return endMidiOperation(midi);
 }

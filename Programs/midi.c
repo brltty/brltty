@@ -29,7 +29,7 @@
 #include "system.h"
 #include "notes.h"
 
-static int fileDescriptor = -1;
+static MidiDevice *midi = NULL;
 static int channelNumber = 0;
 
 const char *midiInstrumentTable[] = {
@@ -180,54 +180,45 @@ const char *midiInstrumentTable[] = {
 };
 const unsigned int midiInstrumentCount = sizeof(midiInstrumentTable) / sizeof(midiInstrumentTable[0]);
 
-static void flushBuffer (unsigned char *buffer, int length) {
-   if (length) {
-      if (write(fileDescriptor, buffer, length) == -1) {
-         LogError("MIDI write");
-      }
-   }
-}
-
 static int openMidi (int errorLevel) {
-   if (fileDescriptor == -1) {
-      if ((fileDescriptor = getMidiDevice(errorLevel, flushBuffer)) == -1) {
+   if (!midi) {
+      if (!(midi = openMidiDevice(errorLevel))) {
          LogPrint(LOG_DEBUG, "Cannot open MIDI.");
          return 0;
       }
-      setCloseOnExec(fileDescriptor);
-      LogPrint(LOG_DEBUG, "MIDI opened: fd=%d", fileDescriptor);
+      LogPrint(LOG_DEBUG, "MIDI opened.");
    }
-   setMidiInstrument(channelNumber, prefs.midiInstrument);
+   setMidiInstrument(midi, channelNumber, prefs.midiInstrument);
    return 1;
 }
 
 static int playMidi (int note, int duration) {
-   if (fileDescriptor != -1) {
-      beginMidiBlock(fileDescriptor);
+   if (midi) {
+      beginMidiBlock(midi);
       if (note) {
 	 LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d", duration, note);
-         startMidiNote(channelNumber, note, prefs.midiVolume);
-	 insertMidiWait(duration);
-         stopMidiNote(channelNumber);
+         startMidiNote(midi, channelNumber, note, prefs.midiVolume);
+	 insertMidiWait(midi, duration);
+         stopMidiNote(midi, channelNumber);
       } else {
 	 LogPrint(LOG_DEBUG, "Tone: msec=%d", duration);
-	 insertMidiWait(duration);
+	 insertMidiWait(midi, duration);
       }
-      endMidiBlock(fileDescriptor);
+      endMidiBlock(midi);
       return 1;
    }
    return 0;
 }
 
 static int flushMidi (void) {
-   return fileDescriptor != -1;
+   return flushMidiDevice(midi);
 }
 
 static void closeMidi (void) {
-   if (fileDescriptor != -1) {
-      close(fileDescriptor);
+   if (midi) {
+      closeMidiDevice(midi);
       LogPrint(LOG_DEBUG, "MIDI closed.");
-      fileDescriptor = -1;
+      midi = NULL;
    }
 }
 

@@ -60,14 +60,17 @@ extern void forcePcmOutput (PcmDevice *pcm);
 extern void awaitPcmOutput (PcmDevice *pcm);
 extern void cancelPcmOutput (PcmDevice *pcm);
 
+typedef struct MidiDeviceStruct MidiDevice;
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);
-extern int getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer);
-extern void setMidiInstrument (unsigned char channel, unsigned char instrument);
-extern void beginMidiBlock (int descriptor);
-extern void endMidiBlock (int descriptor);
-extern void startMidiNote (unsigned char channel, unsigned char note, unsigned char volume);
-extern void stopMidiNote (unsigned char channel);
-extern void insertMidiWait (int duration);
+extern MidiDevice *openMidiDevice (int errorLevel);
+extern void closeMidiDevice (MidiDevice *midi);
+extern int flushMidiDevice (MidiDevice *midi);
+extern int setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument);
+extern int beginMidiBlock (MidiDevice *midi);
+extern int endMidiBlock (MidiDevice *midi);
+extern int startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume);
+extern int stopMidiNote (MidiDevice *midi, unsigned char channel);
+extern int insertMidiWait (MidiDevice *midi, int duration);
 
 extern int enablePorts (int errorLevel, unsigned short int base, unsigned short int count);
 extern int disablePorts (unsigned short int base, unsigned short int count);
