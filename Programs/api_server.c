@@ -924,14 +924,18 @@ found:
   return c;
 }
 
-/* Function : api_writeWindow */
-static void api_writeWindow(BrailleDisplay *brl)
-{
+static inline void setCurrentRootTty() {
   int tty;
   if ((tty = currentVirtualTerminal()))
     ttys.focus = tty;
   else
     ttys.focus = -1;
+}
+
+/* Function : api_writeWindow */
+static void api_writeWindow(BrailleDisplay *brl)
+{
+  setCurrentRootTty();
   if (rawConnection!=NULL) return;
   pthread_mutex_lock(&connections_mutex);
   if (whoFillsTty(&ttys)!=NULL) {
@@ -946,11 +950,7 @@ static void api_writeWindow(BrailleDisplay *brl)
 /* Function : api_writeVisual */
 static void api_writeVisual(BrailleDisplay *brl)
 {
-  int tty;
-  if ((tty = currentVirtualTerminal()))
-    ttys.focus = tty;
-  else
-    ttys.focus = -1;
+  setCurrentRootTty();
   if (!TrueBraille->writeVisual) return;
   if (rawConnection!=NULL) return;
   pthread_mutex_lock(&connections_mutex);
@@ -994,7 +994,7 @@ found:
 /* Function : api_readCommand */
 static int api_readCommand(BrailleDisplay *disp, BRL_DriverCommandContext caller)
 {
-  int res, refresh = 0, tty;
+  int res, refresh = 0;
   ssize_t size;
   Tconnection *c;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
@@ -1009,10 +1009,7 @@ static int api_readCommand(BrailleDisplay *disp, BRL_DriverCommandContext caller
     }
     return EOF;
   }
-  if ((tty = currentVirtualTerminal()))
-    ttys.focus = tty;
-  else
-    ttys.focus = -1;
+  setCurrentRootTty();
   pthread_mutex_lock(&connections_mutex);
   c = whoFillsTty(&ttys);
   if (c && last_conn_write!=c) {
