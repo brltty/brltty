@@ -5,34 +5,34 @@ This is a virtual braille display driver for BRLTTY.  It uses a simple
 text-based protocol over a socket to transmit information to, and to receive
 information from, the virtual braille display application (from now on, "the
 display"). The intention of this driver is two-fold:
- * Give interested developers the ability to test BRLTTY without requiring 
+ * Give interested developers the ability to test BRLTTY without requiring
    access to a real braille display.
- * Enable the implementation of a visual braille display based on this driver 
-   which allows a sighted person to see, and even to experience, how a blind 
+ * Enable the implementation of a visual braille display based on this driver
+   which allows a sighted person to see, and even to experience, how a blind
    person uses a braille display to work with a computer.
 
 This driver supports the following parameters:
    mode={client | server}
-      This parameter determines which end of the socket connection is owned by 
-      the driver. If it's "client" then the driver periodically tries to 
-      connect to the display. If it's "server" then the driver waits for a 
+      This parameter determines which end of the socket connection is owned by
+      the driver. If it's "client" then the driver periodically tries to
+      connect to the display. If it's "server" then the driver waits for a
       connection request from the display. The default mode is "client".
    socket=<address>
-      This parameter specifies the network address of the display. The default 
-      address is a TCP/IP connection on the default port on the local host. The 
+      This parameter specifies the network address of the display. The default
+      address is a TCP/IP connection on the default port on the local host. The
       address may be:
       /path/to/unix-socket-file
-         If the address starts with a slash (/) then it's interpreted as the 
-         path to a unix socket file. If the driver is in "client" mode then the 
-         specified file must already exist. If the driver is in "server" mode 
-         then the specified file is created by the driver and must not already 
+         If the address starts with a slash (/) then it's interpreted as the
+         path to a unix socket file. If the driver is in "client" mode then the
+         specified file must already exist. If the driver is in "server" mode
+         then the specified file is created by the driver and must not already
          exist.
       [host][:[port]]
-         An IP address. The TCP/IP protocol is used. Both the host and port 
-         components of the address are optional. The delimiting colon (:) is 
-         only required if the port is being specified. The host may be a name, 
-         an alias, or an IPV4 address (in dotted-decimal form); if it's omitted 
-         then the local host is assumed. The port may be a service name or a 
+         An IP address. The TCP/IP protocol is used. Both the host and port
+         components of the address are optional. The delimiting colon (:) is
+         only required if the port is being specified. The host may be a name,
+         an alias, or an IPV4 address (in dotted-decimal form); if it's omitted
+         then the local host is assumed. The port may be a service name or a
          port number; if it's omitted then 35752 is assumed.
 
 
@@ -40,7 +40,7 @@ The Protocol
 ------------
 
 After the connection between the driver and the display is complete, data is
-exchanged between them via command lines. The driver first waits for a "cells"  
+exchanged between them via command lines. The driver first waits for a "cells"
 command in order to determine the dimensions of the braille window. After this
 has been taken care of, commands freely flow in both directions without any
 restrictions. The braille window dimensions are appropriately reconfigured
@@ -86,35 +86,35 @@ Commands Recognized by the Driver
 ---------------------------------
 
 Cells columns [rows]
-   The number of columns and rows in the text portion of the display. If the 
-   number of rows isn't supplied then 1 is assumed. This is the first command 
-   which the display must send to the driver. It may be sent at any other time 
-   as well to notify the driver that the dimensions of the text portion of the 
+   The number of columns and rows in the text portion of the display. If the
+   number of rows isn't supplied then 1 is assumed. This is the first command
+   which the display must send to the driver. It may be sent at any other time
+   as well to notify the driver that the dimensions of the text portion of the
    display have changed.
 
 Quit
-   Upon receipt of this command, the driver closes its end of the connection 
-   and then restarts. It's recognized at any time, including during the initial 
+   Upon receipt of this command, the driver closes its end of the connection
+   and then restarts. It's recognized at any time, including during the initial
    wait for the first "cells" command from the display.
 
 <basic-command> [state]
-   A basic command for the BRLTTY core. It may be any of the CMD_ constants 
+   A basic command for the BRLTTY core. It may be any of the CMD_ constants
    (without the CMD_ prefix) defined within "brldefs.h", e.g. LnDn. The
-   optional <state> operand (which may be either on or off), when applied to an 
+   optional <state> operand (which may be either on or off), when applied to an
    attribute toggling command, forces that attribute to the specified state.
 
 <cell-command> number
-   A cell command for the BRLTTY core. It may be any of the CR_ constants 
-   (without the CR_ prefix) defined within "brldefs.h", e.g. Route. The cell 
-   number, starting at 1 for the leftmost cell, must be supplied. If the 
-   display has more than one row then the cells for the top row are counted 
-   first, e.g. if the display has 32 columns and 2 rows then 35 refers to the 
+   A cell command for the BRLTTY core. It may be any of the CR_ constants
+   (without the CR_ prefix) defined within "brldefs.h", e.g. Route. The cell
+   number, starting at 1 for the leftmost cell, must be supplied. If the
+   display has more than one row then the cells for the top row are counted
+   first, e.g. if the display has 32 columns and 2 rows then 35 refers to the
    third cell on the second row.
 
 <key-command> [number]
-   A key command for the BRLTTY core. It may be any of the VPK_ constants 
-   (without the VPK_ prefix) defined within "brldefs.h", e.g. Return. The 
-   Function command requires that the function key number, starting at 1, be 
+   A key command for the BRLTTY core. It may be any of the VPK_ constants
+   (without the VPK_ prefix) defined within "brldefs.h", e.g. Return. The
+   Function command requires that the function key number, starting at 1, be
    supplied. All the other commands in this set don't accept a number operand.
 
 
@@ -122,24 +122,44 @@ Commands Sent to the Display
 ----------------------------
 
 Braille dots
-   Cells to be presented on the text portion of the display. Excess cells in 
+   Cells to be presented on the text portion of the display. Excess cells in
    the data should be ignored. Excess cells on the display should be blank.
 
 Visual string
-   Characters to be presented on the visual portion of the display. Excess 
-   characters in the data should be ignored. Excess characters on the display 
+   Characters to be presented on the visual portion of the display. Excess
+   characters in the data should be ignored. Excess characters on the display
    should be blank.
 
 Status dots
-   Cells to be presented on the status portion of the display. Excess cells in 
+   Cells to be presented on the status portion of the display. Excess cells in
    the data should be ignored. Excess cells on the display should be blank.
 
 <attribute> <setting>
-   The current setting of any of several attributes within the BRLTTY core. 
-   These are only sent if "Status Style" is set to "Generic". <attribute> is 
-   the name of any of the STAT_ constants (without the STAT_ prefix) defined 
-   within "brldefs.h", e.g. BrlRow. <setting> is a number. Rows and columns 
+   The current setting of any of several attributes within the BRLTTY core.
+   These are only sent if "Status Style" is set to "Generic". <attribute> is
+   the name of any of the STAT_ constants (without the STAT_ prefix) defined
+   within "brldefs.h", e.g. BrlRow. <setting> is a number. Rows and columns
    start at 1. Flags use 0 for "off" and 1 for "on".
+
+
+Security Implications
+---------------------
+
+Please be aware that this driver, when used carelessly, might open severe
+security holes. Connections to or from this driver are in no way authenticated
+so you yourself need to take care of protecting access to a BRLTTY instance
+which uses it. In particular, by sending out information about the currently
+active virtual console, this driver might expose valuable information about
+your system to a potential attacker. The attacker might also use the
+<key-command> family of commands to directly manipulate, possibly even
+inputting data to, your current, or even another, virtual console. In effect,
+this driver could be used to completely remote-control your system.
+
+Please be aware of these implications when experimenting with this driver. If
+you're using TCP/IP, be sure to protect access to the used host and port via
+facilities such as firewalls. You should take special precautions on multi-user
+systems where untrusted people could use unprotected access to this driver to
+gain root access to the machine.
 
 
  -- Mario Lang <mlang@delysid.org>
