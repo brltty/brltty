@@ -33,7 +33,7 @@ static void identbrl(void) {
   LogAndStderr(LOG_NOTICE, "VideoBraille Driver");
 }
 
-static void initbrl(brldim *brl, const char *dev) {
+static void initbrl(char **parameters, brldim *brl, const char *dev) {
   /*	Seems to signal en error */ 
   brl->x=-1;
   if (!vbinit()) {

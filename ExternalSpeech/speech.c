@@ -51,7 +51,7 @@ static char speaking = 0;
 
 static void identspk (void)
 {
-  LogAndStderr(LOG_INFO, VERSION);
+  LogAndStderr(LOG_NOTICE, VERSION);
   LogAndStderr(LOG_INFO, "   "COPYRIGHT);
 }
 
@@ -81,8 +81,9 @@ static void myperror2(char *msg, void *str1)
   closespk();
 }
 
-static void initspk (char *speechparm)
+static void initspk (char **parameters)
 {
+char *speechparm = parameters[0];
   int fd1[2], fd2[2];
   char *ptr, *s_uid, *s_gid;
   char *parm = NULL;

@@ -199,7 +199,7 @@ static int QueryDisplay(int brl_fd, char *reply)
   return 0;
 }
 
-static void initbrl (brldim *brl, const char *tty)
+static void initbrl (char **parameters, brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
   int i = 0;

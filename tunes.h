@@ -45,5 +45,5 @@ extern TuneDefinition tune_skip;
 extern TuneDefinition tune_skip_more;
 
 extern void setTuneDevice (unsigned char device);
-extern void closeTuneDevice (void);
+extern void closeTuneDevice (int immediate);
 extern void playTune (TuneDefinition *tune);

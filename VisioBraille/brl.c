@@ -123,9 +123,10 @@ static int isinbounds(unsigned char x,unsigned char a,unsigned char b)
 
 static void identbrl(void)
 {
+  LogAndStderr(LOG_NOTICE, "VisioBraille Driver");
 }
 
-static void initbrl(brldim *brl,const char *tty)
+static void initbrl(char **parameters, brldim *brl,const char *tty)
 {
  brl_fd = open(tty, O_RDWR | O_NOCTTY );
  if (brl_fd <0) {fprintf(stderr,"impossible d'ouvrir le port serie : %s",tty);perror("dev/ttyS0"); exit(-1); }

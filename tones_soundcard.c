@@ -67,7 +67,7 @@ static int generateSoundCard (int frequency, int duration) {
    return 0;
 }
 
-static void closeSoundCard (void) {
+static void closeSoundCard (int immediate) {
    if (fileDescriptor != -1) {
       close(fileDescriptor);
       LogPrint(LOG_DEBUG, "Sound card closed.");

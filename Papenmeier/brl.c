@@ -185,7 +185,7 @@ identify_terminal(brldim *brl)
 	  curr_stats = the_terminal->statcells;
 
 	  // TODO: ?? HACK
-	  braille->helpfile = the_terminal->helpfile;
+	  braille->help_file = the_terminal->helpfile;
 
 	  // key codes - starts at 0x300 
 	  // status keys - routing keys - step 3
@@ -299,7 +299,7 @@ try_init(brldim *brl, const char *dev, unsigned int baud)
 
 
 static void 
-initbrl (brldim *brl, const char *dev)
+initbrl (char **parameters, brldim *brl, const char *dev)
 {
   LogPrint(LOG_DEBUG,  "try 19200");
   try_init(brl, dev, B19200);
@@ -655,7 +655,7 @@ static void read_config()
 {
   char* env;
 
-  /* 1. try environment BRLTTY_CONF */
+  /* 1. try environment BRLTTY_PM_CONF */
   env = getenv(CONFIG_ENV);
   if (env != NULL) {
     read_file(env);

@@ -34,7 +34,7 @@ identbrl (void)
 }
 
 static void 
-initbrl (brldim *brl, const char *dev)
+initbrl (char **parameters, brldim *brl, const char *dev)
 {
 		/*	Seems to signal en error */ 
 	brl->x=-1;

@@ -100,7 +100,7 @@ static void identbrl (void) {
 }
 
 
-static void initbrl (brldim *brl, const char *brldev) {
+static void initbrl (char **parameters, brldim *brl, const char *brldev) {
 	brldim res;			/* return result */
 	struct termios newtio;	/* new terminal settings */
 	short i, n, success;		/* loop counters, flags, etc. */

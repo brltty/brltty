@@ -247,7 +247,7 @@ TuneDefinition tune_skip_more = {
 static ToneGenerator *toneGenerator = NULL;
 void setTuneDevice (unsigned char device) {
    if (toneGenerator)
-      toneGenerator->close();
+      toneGenerator->close(1);
    switch (device) {
       case tdSpeaker:
          toneGenerator = toneSpeaker();
@@ -264,8 +264,8 @@ void setTuneDevice (unsigned char device) {
    }
 }
 
-void closeTuneDevice (void) {
-   toneGenerator->close();
+void closeTuneDevice (int immediate) {
+   toneGenerator->close(immediate);
 }
  
 void playTune (TuneDefinition *tune) {
@@ -281,7 +281,7 @@ void playTune (TuneDefinition *tune) {
 	    }
 	    ++tone;
 	 }
-      // toneGenerator->close();
+      // toneGenerator->close(1);
       }
    }
    if (!tunePlayed) {

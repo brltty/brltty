@@ -110,7 +110,7 @@ identbrl (void)
 
 
 static void
-initbrl (brldim * brl, const char *brldev)
+initbrl (char **parameters, brldim * brl, const char *brldev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -162,7 +162,7 @@ initbrl (brldim * brl, const char *brldev)
     delay (10);	/* sleep for 10 ms */
     if (--timeout < 0)
     {
-      LogAndStderr(LOG_NOTICE, "BLT doesn't seem to be connected, giving up!");
+      LogPrint(LOG_WARNING, "BLT doesn't seem to be connected, giving up!");
       goto RestorePort;
     }
   }
@@ -195,7 +195,7 @@ initbrl (brldim * brl, const char *brldev)
   
   blitesz = res.x = BltLen;	/* initialise size of display - */
   res.y = 1;			/* Braille Lites are single line displays */
-  LogAndStderr(LOG_NOTICE, "Braille Lite %d detected",BltLen);
+  LogPrint(LOG_NOTICE, "Braille Lite %d detected",BltLen);
 
   /* Allocate space for buffers */
   res.disp = (unsigned char *) malloc (res.x);

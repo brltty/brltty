@@ -70,7 +70,7 @@
 /* Define the preferred/default status cells mode. */
 #define PREFSTYLE ST_Papenmeier
 
-#define CONFIG_ENV   "BRLTTY_CONF"
+#define CONFIG_ENV   "BRLTTY_PM_CONF"
 #define CONFIG_FILE  "/etc/brltty/brltty.pm.conf"
 
 #define MAXPATH  128

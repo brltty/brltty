@@ -374,7 +374,7 @@ peek_receive_packet(unsigned char *packet)
 }
 
 
-static void initbrl (brldim *brl, const char *tty)
+static void initbrl (char **parameters, brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
 

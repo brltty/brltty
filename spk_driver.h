@@ -21,7 +21,7 @@
 
 /* Routines provided by this speech driver. */
 static void identspk (void);/* print start-up messages */
-static void initspk (char *parm); /* initialize speech device */
+static void initspk (char **parameters); /* initialize speech device */
 static void say (unsigned char *buffer, int len); /* speak text */
 #ifdef SPK_HAVE_SAYATTRIBS
 static void sayWithAttribs (unsigned char *buffer, int len); /* speak text */
@@ -38,10 +38,19 @@ static int isSpeaking () { return 0; }
 #endif
 static void closespk (void); /* close speech device */
 
+#ifdef SPKPARMS
+static char *spk_parameters[] = {SPKPARMS, NULL};
+#endif
+
 speech_driver spk_driver = 
 {
   SPKNAME,
   SPKDRIVER,
+#ifdef SPKPARMS
+  spk_parameters,
+#else
+  NULL,
+#endif
   identspk,
   initspk,
   say,

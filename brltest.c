@@ -63,7 +63,7 @@ main (int argc, char *argv[])
   else
     printf ("Changed to directory %s\n", HOME_DIR);
   braille->identify();		/* start-up messages */
-  braille->initialize(&brl, argc > 1 ? argv[1] : BRLDEV);	/* initialise display */
+  braille->initialize(NULL, &brl, argc > 1 ? argv[1] : BRLDEV);	/* initialise display */
   if (brl.x == -1)
     {
       fprintf (stderr, "Initialisation error\n");

@@ -50,7 +50,7 @@ static int generateAdLib (int frequency, int duration) {
    return 1;
 }
 
-static void closeAdLib (void) {
+static void closeAdLib (int immediate) {
    if (cardOpen) {
       AL_disablePorts();
       LogPrint(LOG_DEBUG, "AdLib closed.");

@@ -69,7 +69,7 @@ identspk (void)
 
 
 static void
-initspk (char *parm)
+initspk (char **parameters)
 {
 }
 

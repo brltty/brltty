@@ -1,57 +1,28 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
-   Add the -B (--brailleparm=) option, and the braille-parameter brltty.conf directive. (dm)
-   Recognize priority names for -l (--log=) option. (dm)
+   Added -e (--errors) option to log to standard error rather than via syslog. (dm,sd)
+   Added -f (--file=) option to specify default parameters file (brltty.conf). (dm)
+   Recognize priority names (and abbreviations thereof) for -l (--log=) option. (dm)
       (emergency, alert, critical, error, warning, notice, information, debug)
-   Log command line option errors to syslog. (dm)
-   Implement user-settable attributes translation table. (dm)
+   Added -n (--nodaemon) option to make debugging easier and to permit invocation from inittab. (dm,sd)
+   Added -B (--brailleparm=) option, and the braille-parameter brltty.conf directive. (dm)
+   Renamed -p option to -S. (dm)
+   Rename speech-driverparm directive (brltty.conf) to speech-parameter. (dm)
+   Implemented user-settable attributes translation table. (dm)
       Introduce short option -a, long option --attribs=, and brltty.conf directive attributes-table.
       Change long option --table= to --text=.
       Change brltty.conf directive dot-translation to text-table.
-   Implement horizontal window scroll overlap. (dm)
-   Implement CR_MSGATTRIB (message attributes of character at routing key). (dm)
-      Added to Alva driver. (np)
-      Added to BrailleLite driver. (sd)
-      Added to BrailleNote driver. (dm)
-      Added to TSI driver. (sd)
-   Implement CMD_BACK (to go back after a cursor tracking motion). (dm)
-      Added to Alva driver. (np)
-      Added to BrailleLite driver. (sd)
-      Added to BrailleNote driver. (dm)
-      Added to Papenmeier driver. (dm)
-      Added to TSI driver. (sd)
-   Resolve conflict between .dat and .conf both being calledf configuration files. (dm)
+   Resolved conflict between .dat and .conf both being calledf configuration files. (dm)
       Short option -c becomes -p.
       Long option --config= becomes --prefs=.
-      /etc/brltty.conf directive braille-configuration becomes preferences-file.
+      brltty.conf directive braille-configuration becomes preferences-file.
       Default file extension .dat becomes .prefs.
       CMD_CONFMENU -> CMD_PREFMENU
       CMD_SAVECONF -> CMD_PREFSAVE
       CMD_RESET -> CMD_PREFLOAD
-   Inform readbrl of the current command context. (dm)
-   Converted CMD_ defines to enum. (dm)
-      CombiBraille: tables.h converted to cmdtrans.h, argtrans removed
-   Replaced CMD_SKPBLNKEOL with configurable skip blank windows mode. (dm)
-   Rename -p option to -S. (dm)
-   Rename speech-driverparm directive (brltty.conf) to speech-parameter. (dm)
-   Added -e (--errors) option to log to standard error rather than via syslog. (dm,sd)
-   Added -n (--nodaemon) option to make debugging easier and to permit invocation from inittab. (dm,sd)
-   Added -f (--file=) option to specify default parameters file (brltty.conf). (dm)
-   Added support for tunes via AdLib/OPL3/SB-FM. (dm)
-   Added support for tunes via MIDI (/dev/sequencer). (dm)
-   Added support for tunes via sound card (/dev/dsp). (dm,np)
-   Configuration menu made more user-friendly. (dm,sd)
-   Disable speech tracking when CMD_SAY is used. (np)
-   Fix problems with the skipping of blank windows and end-of-liens. (sd)
-   Make message delay by default; add MSG_NODELAY flag. (sd)
-   Display message when sound is off for critical operations like freeze/unfreeze. (sd)
-   Maintain reverse text translation table for input from braille display. (dm,sd)
-   Allow braille display to stick out to the right of the screen. (sd)
-   Added commands to switch to the next and previous virtual terminals. (sd)
-   Cross-compile support added to make file. (sd)
-   TSI driver enhancements. (sd)
-      Added bindings for go to beginning/end of current line.
+   BrailleNote driver added. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
+   HandyTech driver added. Andreas Gross <andi@andi-bika.de>
    BrailleLite driver enhancements. (sd)
       Auto-detect 18 verses 40.
       Add DETECT_FOREVER option.
@@ -64,23 +35,59 @@ Note: this file is in reversed chronological order (bottom to top).
       Fixed bug causing internal cursor to go off display during g-chord with advance bar left.
       Fixed k-chord to toggle off keyboard emulation.
       Portability fixes.
-   Clean up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
-   Add the HandyTech driver. Andreas Gross <andi@andi-bika.de>
-   Add cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
-   List translation tables in make file. (dm)
+   Papenmeier driver enhancements. (dm)
+      Cleaned up log messages.
+      Log display type even if unknown.
+      Fixed type 3 status key assignments: 5-8 -> 6-9.
+      Redefined type 3 front key 13 from cut_beg to cut_end.
+      Renamed environment variable BRLTTY_CONF to BRLTTY_PM_CONF.
+   TSI driver enhancements. (sd)
+      Added bindings for go to beginning/end of current line.
+   Cleaned up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
    Version 1.0 of the EuroBraille driver. Yannick Plassiard <Yannick.Plassiard@free.fr>
    MiniBraille delay after write fixed. (dm)
-   BrailleNote driver added. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
    Vario driver can now be statically linked. (dm)
-   Cleaned up Papenmeier log messages. (dm)
-   Log Papenmeier display type even if unknown. (dm)
-   Fixed Papenmeier type 3 status key assignments: 5-8 -> 6-9. (dm)
-   Redefined Papenmeier type 3 front key 13 to cut_end from cut_beg. (dm)
-   Rename environment variable BRLTTY_CONF to BRLTTY_PM_CONF. (dm)
+   Added cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
+   Added identification output to visioBraille driver. (dm)
    Stop GenericSay from reannouncing BRLTTY version during cursor routing. (dm)
-   Close console file descriptor in switchvt. (dm)
-   Change directory to right place if PREFIX is set. (dm)
+   List translation tables in make file. (dm)
+   Cross-compile support added to make file. (sd)
    INSTALL_ROOT added to make file. (dm)
+   Configuration menu made more user-friendly. (dm,sd)
+   Added support for tunes via sound card (/dev/dsp). (dm,np)
+   Added support for tunes via MIDI (/dev/sequencer). (dm)
+   Added support for tunes via AdLib/OPL3/SB-FM. (dm)
+   Replaced skip blank end-of-lines with configurable skip blank windows mode. (dm)
+   Implemented horizontal window scroll overlap. (dm)
+   Display message when sound is off for critical operations like freeze/unfreeze. (sd)
+   Allow braille display to stick out to the right of the screen. (sd)
+   Added commands to switch to the next and previous virtual terminals. (sd)
+   Implement CMD_BACK (to go back after a cursor tracking motion). (dm)
+      Added to Alva driver. (np)
+      Added to BrailleLite driver. (sd)
+      Added to BrailleNote driver. (dm)
+      Added to Papenmeier driver. (dm)
+      Added to TSI driver. (sd)
+   Implement CR_MSGATTRIB (message attributes of character at routing key). (dm)
+      Added to Alva driver. (np)
+      Added to BrailleLite driver. (sd)
+      Added to BrailleNote driver. (dm)
+      Added to TSI driver. (sd)
+   Maintain reverse text translation table for input from braille display. (dm,sd)
+   Converted CMD_ defines to enum. (dm)
+      CombiBraille: tables.h converted to cmdtrans.h, argtrans removed
+   Inform readbrl of the current command context. (dm)
+   Log command line option errors to syslog. (dm)
+   Make message delay by default; add MSG_NODELAY flag. (sd)
+   Close console file descriptor in switchvt. (dm)
+   Fix problems with the skipping of blank windows and ends of liens. (sd)
+   Change directory to right place if PREFIX is set. (dm)
+   Disable speech tracking when CMD_SAY is used. (np)
+   Audit all braille and speech drivers. (dm)
+      Ensure that first line of identification output uses LOG_NOTICE.
+      Ensure that subsequent lines of identification output use LOG_INFO.
+      Ensure that all driver identification lines use LogAndStderr.
+      Ensure that all driver execution reporting uses LogPrint.
 
 June 26, 2001:
  - BRLTTY 2.98 released:

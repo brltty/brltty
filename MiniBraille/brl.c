@@ -74,7 +74,7 @@ static void identbrl(void)
 	LogAndStderr(LOG_INFO, "   Copyright (C) 2000 by Brailcom o.p.s. <technik@brailcom.cz>"); 
 }
 
-static void initbrl(brldim *brl, const char *brldev)
+static void initbrl(char **parameters, brldim *brl, const char *brldev)
 {
 	__label__ __errexit;
 	struct termios newtermios;
@@ -119,7 +119,7 @@ static void initbrl(brldim *brl, const char *brldev)
 	return;
 
 __errexit:
-	LogAndStderr(LOG_ERR, "Cannot initialize MiniBraille");
+	LogPrint(LOG_ERR, "Cannot initialize MiniBraille");
 	brl->x = brl->y = -1;
 	if (brl->disp) free(brl->disp);
 	return;

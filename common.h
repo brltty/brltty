@@ -107,7 +107,8 @@ extern short csr_offright;		/* used for sliding window */
  */
 
 void startup(int argc, char *argv[]);
-void startbrl(void);
+void startBrailleDriver(void);
+void startSpeechDriver(void);
 void loadPreferences(void);
 void savePreferences(void);
 void updatePreferences(void);

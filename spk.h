@@ -21,8 +21,9 @@
 typedef struct {
    char *name;
    char *identifier;
+   char **parameters;
    void (*identify) (void);		/* print start-up messages */
-   void (*initialize) (char *parm);		/* initialize speech device */
+   void (*initialize) (char **parameters);		/* initialize speech device */
    void (*say) (unsigned char *buffer, int len);	/* speak text */
    void (*sayWithAttribs) (unsigned char *buffer, int len);	/* speak text */
    void (*mute) (void);		/* mute speech */
@@ -34,6 +35,5 @@ typedef struct {
 
 extern speech_driver *speech;
 extern char *speech_libname;	/* name of library */
-extern char *speech_parameter;	/* arbitraty initialization parameter */
 int load_speech_driver(void);
 int list_speech_drivers(void);

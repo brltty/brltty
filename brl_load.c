@@ -31,7 +31,6 @@
 
 braille_driver *braille = NULL;	/* filled by dynamic libs */
 char *braille_libname = NULL;	/* name of library */
-char *braille_parameter = NULL;	/* arbitrary initialization parameter */
 static void *library = NULL;	/* handle to driver */
 #define BRL_SYMBOL "brl_driver"
 

@@ -42,7 +42,7 @@
 
 
 char VERSION[] = "BRLTTY 2.99 (beta)";
-char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team.  All rights reserved.";
+char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 /*
  * Misc param variables
@@ -324,7 +324,7 @@ main (int argc, char *argv[])
    */
   while (keep_going)
     {
-      closeTuneDevice();
+      closeTuneDevice(1);
       TickCount++;
       /*
        * Process any Braille input 
@@ -342,13 +342,13 @@ main (int argc, char *argv[])
 	    braille->close(&brl);
 	    playTune(&tune_braille_off);
 	    LogPrint(LOG_INFO, "Reinitializing braille driver.");
-	    startbrl();
+	    startBrailleDriver();
 	    break;
 	  case CMD_RESTARTSPEECH:
 	    speech->mute();
 	    speech->close();
 	    LogPrint(LOG_INFO, "Reinitializing speech driver.");
-	    speech->initialize(speech_parameter);
+	    startSpeechDriver();
 	    break;
 	  case CMD_TOP:
 	    p->winy = 0;
@@ -1314,7 +1314,6 @@ main (int argc, char *argv[])
 
       delay (DELAY_TIME);
     }
-  closeTuneDevice();
 
   clrbrlstat();
   message("BRLTTY stopping.", 0);
@@ -1325,7 +1324,7 @@ main (int argc, char *argv[])
   /* don't forget that scrparam[0] is staticaly allocated */
   for (i = 1; i <= NBR_SCR; i++) 
     free(scrparam[i]);
-  closeTuneDevice();
+  closeTuneDevice(0);
   LogPrint(LOG_NOTICE, "Stopped.");
   LogClose();
   return 0;
@@ -1385,7 +1384,3 @@ message (unsigned char *text, short flags)
 	delay(DISPDEL);
     }
 }
-
-
-
-

@@ -47,7 +47,7 @@ identspk (void)
 }
 
 static void
-initspk (char *parm)
+initspk (char **parameters)
 {
   dev_fd = open (DevPath, O_WRONLY | O_NOCTTY | O_NONBLOCK);
 }

@@ -206,7 +206,7 @@ static void identbrl(void)
 }
 
 
-static void initbrl(brldim *brl, const char *dev)
+static void initbrl(char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			// return result
   struct termios newtio;	// new terminal settings

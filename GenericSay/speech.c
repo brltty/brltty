@@ -27,45 +27,53 @@
 
 #include "speech.h"
 #include "../spk.h"
-#include "../spk_driver.h"
 #include "../misc.h"
 
+typedef enum {
+   PARM_COMMAND
+} DriverParameter;
+#define SPKPARMS "command"
+#include "../spk_driver.h"
 
-static char say_path[] = SAY_CMD;	/* full path for the say command */
-static FILE *say_fd = NULL;
+static char *commandPath = SAY_CMD;	/* full path for the say command */
+static FILE *commandStream = NULL;
 
 static void
 identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, "Speech will be piped to \"%s\".", say_path);
+  LogAndStderr(LOG_NOTICE, "Generic Say Driver");
 }
 
 static void
-initspk (char *parm)
+initspk (char **parameters)
 {
+  char *command = parameters[PARM_COMMAND];
+  if (*command)
+    commandPath = command;
+  LogPrint(LOG_INFO, "Speech Command: %s", commandPath);
 }
 
 static void
-say (unsigned char *buffer, int len)
+say (unsigned char *buffer, int length)
 {
-  if (!say_fd)
-    say_fd = popen (say_path, "w");
-  if (say_fd)
+  if (!commandStream)
+    commandStream = popen(commandPath, "w");
+  if (commandStream)
     {
       const char *trailer = "\n";
-      fwrite (buffer, len, 1, say_fd);
-      fwrite (trailer, strlen(trailer), 1, say_fd);
-      fflush (say_fd);
+      fwrite(buffer, length, 1, commandStream);
+      fwrite(trailer, strlen(trailer), 1, commandStream);
+      fflush(commandStream);
     }
 }
 
 static void
 mutespk (void)
 {
-  if (say_fd)
+  if (commandStream)
     {
-       pclose(say_fd);
-       say_fd = NULL;
+       pclose(commandStream);
+       commandStream = NULL;
     }
 }
 

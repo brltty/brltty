@@ -352,7 +352,7 @@ static unsigned char *battery_msg;     /* low battery warning msg */
 static void 
 identbrl (void)
 {
-  LogAndStderr(LOG_INFO, VERSION);
+  LogAndStderr(LOG_NOTICE, VERSION);
   LogAndStderr(LOG_INFO, "   "COPYRIGHT);
 }
 
@@ -439,7 +439,7 @@ ResetTypematic (void)
 }
 
 
-static void initbrl (brldim *brl, const char *tty)
+static void initbrl (char **parameters, brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
   int i=0;

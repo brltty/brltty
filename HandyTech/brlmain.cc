@@ -36,12 +36,6 @@ extern "C"
 #include "../brl_driver.h"
 }
 
-static char StartupString[] =
-"  Handy driver, version 0.1 \n"
-"  Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de> \n";
-
-
-
 /* Braille display parameters */
 
 typedef struct
@@ -190,8 +184,9 @@ void
 identbrl (void)
 {
   /* Hello display... */
-  printf (StartupString);
-  printf ("  - compiled for terminal autodetection \n");
+  LogAndStderr(LOG_NOTICE, "Handy Tech Driver, version 0.1");
+  LogAndStderr(LOG_INFO, "  Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de>");
+  LogAndStderr(LOG_INFO, "  - compiled for terminal autodetection");
 }
 
 
@@ -210,7 +205,7 @@ int SendToHandy( unsigned char *data, int len )
 }
 
 
-void initbrl (brldim *brl, const char *dev)
+void initbrl (char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */

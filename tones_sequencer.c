@@ -219,9 +219,10 @@ static int generateSequencer (int frequency, int duration) {
    return 0;
 }
 
-static void closeSequencer (void) {
+static void closeSequencer (int immediate) {
    if (fileDescriptor != -1) {
-      ioctl(fileDescriptor, SNDCTL_SEQ_SYNC);
+      if (immediate)
+	 ioctl(fileDescriptor, SNDCTL_SEQ_SYNC);
       close(fileDescriptor);
       LogPrint(LOG_DEBUG, "Sequencer closed.");
       fileDescriptor = -1;

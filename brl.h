@@ -183,14 +183,15 @@ brldim;				/* used for writing to a braille display */
 
 typedef struct 
 {
-  char* name;			/* name of driver */
-  char* identifier;		/* name of driver */
-  char* helpfile;		/* name of help file */
-  int pref_style;		/* prefered status cells mode */
+  char *name;			/* name of driver */
+  char *identifier;		/* name of driver */
+  char **parameters;		/* user-supplied driver parameters */
+  char *help_file;		/* name of help file */
+  int status_style;		/* prefered status cells mode */
 
   /* Routines provided by the braille driver library: */
   void (*identify) (void);	/* print start-up messages */
-  void (*initialize) (brldim *, const char *);	/* initialise Braille display */
+  void (*initialize) (char **parameters, brldim *, const char *);	/* initialise Braille display */
   void (*close) (brldim *);		/* close braille display */
   void (*write) (brldim *);		/* write to braille display */
   int (*read) (DriverCommandContext);		/* get key press from braille display */
@@ -200,7 +201,6 @@ typedef struct
 
 extern braille_driver *braille;	/* filled by dynamic libs */
 extern char *braille_libname;	/* name of library */
-extern char *braille_parameter;	/* arbitrary initialization parameter */
 
 int load_braille_driver(void);
 int list_braille_drivers(void);

@@ -328,7 +328,7 @@ identbrl (void)
 {
   LogAndStderr(LOG_NOTICE, "Alva driver, version 2.1");
   LogAndStderr(LOG_INFO, "   Copyright (C) 1995-2000 by Nicolas Pitre <nico@cam.org>.");
-  LogAndStderr(LOG_NOTICE, "   Compiled for %s with %s version.",
+  LogAndStderr(LOG_INFO, "   Compiled for %s with %s version.",
 #if MODEL == ABT_AUTO
 	  "terminal autodetection",
 #else
@@ -368,7 +368,7 @@ int SendToAlva( unsigned char *data, int len )
 }
 
 
-static void initbrl (brldim *brl, const char *dev)
+static void initbrl (char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   int ModelID = MODEL;

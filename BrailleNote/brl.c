@@ -366,7 +366,7 @@ identbrl (void)
 }
 
 static void
-initbrl (brldim *brl, const char *device)
+initbrl (char **parameters, brldim *brl, const char *device)
 {
    if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
       if (tcgetattr(fileDescriptor, &oldSettings) != -1) {
