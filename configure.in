@@ -385,14 +385,6 @@ AC_SUBST([contracted_braille_objects])
 AC_SUBST([install_contraction_tables])
 
 BRLTTY_ARG_DISABLE(
-   [speech-support],
-   [speech synthesizer support], [dnl
-   AC_DEFINE([ENABLE_SPEECH_SUPPORT])
-   speech_support_object="spk.o"
-])
-AC_SUBST([speech_support_object])
-
-BRLTTY_ARG_DISABLE(
    [beeper-tunes],
    [tunes via beeper (console bell)], [dnl
    AC_DEFINE([ENABLE_BEEPER_TUNES])
@@ -652,6 +644,17 @@ then
    AC_CHECK_HEADER([eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice])])
 fi
 BRLTTY_ARG_DRIVER([speech])
+
+BRLTTY_ARG_DISABLE(
+   [speech-support],
+   [speech synthesizer support], [dnl
+   AC_DEFINE([ENABLE_SPEECH_SUPPORT])
+   speech_support_object="spk.o"
+], [
+   speech_driver=""
+   speech_drivers=""
+])
+AC_SUBST([speech_support_object])
 
 AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
 case "${host_os}"
