@@ -45,10 +45,10 @@ typedef struct {
   int status;
 } Keys;
 static Keys currentKeys, pressedKeys, nullKeys;
-static int inputMode;
+static unsigned char inputMode;
 
-static const int repeatDelay = 10;
-static const int repeatInterval = 3;
+static const unsigned char repeatDelay = 10;
+static const unsigned char repeatInterval = 3;
 static int repeatCounter;
 
 /* Braille display parameters */
@@ -61,90 +61,82 @@ static KeysInterpreter interpretBrailleWaveKeys;
 static KeysInterpreter interpretBrailleStarKeys;
 typedef struct {
   const char *name;
-  int identifier;
-  int columns;
-  int statusCells;
+  unsigned char identifier;
+  unsigned char columns;
+  unsigned char statusCells;
+  unsigned char helpPage;
   ByteInterpreter *interpretByte;
   KeysInterpreter *interpretKeys;
-  int helpPage;
   unsigned char *brailleStartAddress;
-  unsigned char brailleStartLength;
   unsigned char *brailleEndAddress;
-  unsigned char brailleEndLength;
   unsigned char *stopAddress;
+  unsigned char brailleStartLength;
+  unsigned char brailleEndLength;
   unsigned char stopLength;
 } ModelDescription;
 static const ModelDescription Models[] = {
   {
     "Modular 20+4", 0X80,
-    20, 4,
-    interpretKeyByte, interpretModularKeys, 0,
-    HandyBrailleStart, sizeof(HandyBrailleStart),
-    NULL, 0,
-    NULL, 0
+    20, 4, 0,
+    interpretKeyByte, interpretModularKeys,
+    HandyBrailleStart,         NULL, NULL,
+    sizeof(HandyBrailleStart), 0,    0
   }
   ,
   {
     "Modular 40+4", 0X89,
-    40, 4,
-    interpretKeyByte, interpretModularKeys, 0,
-    HandyBrailleStart, sizeof(HandyBrailleStart),
-    NULL, 0,
-    NULL, 0
+    40, 4, 0,
+    interpretKeyByte, interpretModularKeys,
+    HandyBrailleStart,         NULL, NULL,
+    sizeof(HandyBrailleStart), 0,    0
   }
   ,
   {
     "Modular 80+4", 0X88,
-    80, 4,
-    interpretKeyByte, interpretModularKeys, 0,
-    HandyBrailleStart, sizeof(HandyBrailleStart),
-    NULL, 0,
-    NULL, 0
+    80, 4, 0,
+    interpretKeyByte, interpretModularKeys,
+    HandyBrailleStart,         NULL, NULL,
+    sizeof(HandyBrailleStart), 0,    0
   }
   ,
   {
     "Braille Wave", 0X05,
-    40, 0,
-    interpretKeyByte, interpretBrailleWaveKeys, 0,
-    HandyBrailleStart, sizeof(HandyBrailleStart),
-    NULL, 0,
-    NULL, 0
+    40, 0, 0,
+    interpretKeyByte, interpretBrailleWaveKeys,
+    HandyBrailleStart,         NULL, NULL,
+    sizeof(HandyBrailleStart), 0,    0
   }
   ,
   {
     "Bookworm", 0X90,
-    8, 0,
-    interpretBookwormByte, NULL, 1,
-    HandyBrailleStart, sizeof(HandyBrailleStart),
-    BookwormBrailleEnd, sizeof(BookwormBrailleEnd),
-    BookwormStop, sizeof(BookwormStop)
+    8, 0, 1,
+    interpretBookwormByte, NULL,
+    HandyBrailleStart,         BookwormBrailleEnd,         BookwormStop,
+    sizeof(HandyBrailleStart), sizeof(BookwormBrailleEnd), sizeof(BookwormStop)
   }
   ,
   {
     "Braille Star 40", 0X74,
-    40, 0,
-    interpretKeyByte, interpretBrailleStarKeys, 2,
-    HandyBrailleStart, sizeof(HandyBrailleStart),
-    NULL, 0,
-    NULL, 0
+    40, 0, 2,
+    interpretKeyByte, interpretBrailleStarKeys,
+    HandyBrailleStart,         NULL, NULL,
+    sizeof(HandyBrailleStart), 0,    0
   }
   ,
   {
     "Braille Star 80", 0X78,
-    80, 0,
-    interpretKeyByte, interpretBrailleStarKeys, 2,
-    HandyBrailleStart, sizeof(HandyBrailleStart),
-    NULL, 0,
-    NULL, 0
+    80, 0, 2,
+    interpretKeyByte, interpretBrailleStarKeys,
+    HandyBrailleStart,         NULL, NULL,
+    sizeof(HandyBrailleStart), 0,    0
   }
   ,
   { /* end of table */
     NULL, 0,
-    0, 0,
-    NULL, NULL, 0,
-    NULL, 0,
-    NULL, 0,
-    NULL, 0
+    0, 0, 0,
+    NULL, NULL,
+    NULL, NULL, NULL,
+    0,    0,    0
   }
 };
 
@@ -211,7 +203,7 @@ typedef enum {
 static BrailleDisplayState currentState = BDS_OFF;
 static unsigned long int stateTimer = 0;
 static unsigned int retryCount = 0;
-static unsigned int updateRequired = 0;
+static unsigned char updateRequired = 0;
 
 /* common key constants */
 #define KEY_RELEASE 0X80
