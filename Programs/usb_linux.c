@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <asm/types.h>
 #include <linux/usb.h>
 #include <linux/usbdevice_fs.h>
 #include <linux/serial.h>
@@ -370,14 +371,13 @@ usbSubmitRequest (
     memset(urb, 0, sizeof(*urb));
     urb->endpoint = endpoint;
     urb->type = type;
-    urb->buffer = urb + 1;
+    urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
     if (buffer) memcpy(urb->buffer, buffer, length);
-    urb->buffer_length = length;
     urb->flags = flags;
     urb->signr = 0;
     urb->usercontext = data;
-    LogPrint(LOG_DEBUG, "submit urb: ept=%x typ=%d flg=%x sig=%d len=%d",
-             urb->endpoint, urb->type, urb->flags, urb->signr, urb->buffer_length);
+    LogPrint(LOG_DEBUG, "submit urb: ept=%x typ=%d flg=%x sig=%d len=%d urb=%p",
+             urb->endpoint, urb->type, urb->flags, urb->signr, urb->buffer_length, urb);
     if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
     free(urb);
   }
@@ -397,8 +397,10 @@ usbReapRequest (
     urb = NULL;
   } else if (!urb) {
     errno = EAGAIN;
+  } else {
+    LogPrint(LOG_DEBUG, "reaped urb: %p st=%d len=%d",
+             urb, urb->status, urb->actual_length);
   }
-  LogPrint(LOG_DEBUG, "reaped urb");
   return urb;
 }
 
@@ -412,7 +414,7 @@ usbAddInputElement (
     if ((input->urb = usbSubmitRequest(device, device->inputEndpoint,
                                        USBDEVFS_URB_TYPE_INTERRUPT,
                                        NULL, device->inputLength,
-                                       device->inputFlags, &input))) {
+                                       device->inputFlags, input))) {
       if (device->inputElements) {
         device->inputElements->previous = input;
         input->next = device->inputElements;
@@ -482,11 +484,12 @@ usbReapInput (
       if (length < count) count = length;
       memcpy(target, source, count);
 
-      if (!(urb->actual_length -= count)) {
+      if ((urb->actual_length -= count)) {
+        urb->buffer = source + count;
+      } else {
         free(urb);
         device->inputRequest = NULL;
       }
-      urb->buffer = source + count;
 
       target += count;
       length -= count;

@@ -18,6 +18,11 @@
 #include <stdint.h>
 
 typedef struct {
+  uint8_t bLength;         /* Descriptor size in bytes. */
+  uint8_t bDescriptorType; /* Descriptor type. */
+} __attribute__((packed)) UsbDescriptorHeader;
+
+typedef struct {
   uint8_t bLength;            /* Descriptor size in bytes (18). */
   uint8_t bDescriptorType;    /* Descriptor type (1 == device). */
   uint16_t bcdUSB;            /* USB revision number. */
@@ -64,28 +69,23 @@ typedef struct {
 } __attribute__((packed)) UsbInterfaceDescriptor;
 
 typedef struct {
-  uint8_t bLength;          /* Descriptor size in bytes (7). */
+  uint8_t bLength;          /* Descriptor size in bytes (7, 9 for audio). */
   uint8_t bDescriptorType;  /* Descriptor type (5 == endpoint). */
   uint8_t bEndpointAddress; /* Endpoint number (ored with 0X80 if input. */
   uint8_t bmAttributes;     /* Endpoint type and attributes. */
-  uint16_t wMaxPacketSiz;   /* Maximum packet size in bytes. */
+  uint16_t wMaxPacketSize;  /* Maximum packet size in bytes. */
   uint8_t bInterval;        /* Maximum interval in milliseconds between transfers. */
   uint8_t bRefresh;
   uint8_t bSynchAddress;
 } __attribute__((packed)) UsbEndpointDescriptor;
 
-typedef struct {
-  uint8_t bLength;         /* Descriptor size in bytes. */
-  uint8_t bDescriptorType; /* Descriptor type. */
-} __attribute__((packed)) UsbDescriptorHeader;
-
 typedef union {
+  UsbDescriptorHeader header;
   UsbDeviceDescriptor device;
   UsbConfigurationDescriptor configuration;
+  UsbStringDescriptor string;
   UsbInterfaceDescriptor interface;
   UsbEndpointDescriptor endpoint;
-  UsbStringDescriptor string;
-  UsbDescriptorHeader header;
   unsigned char bytes[0XFF];
 } UsbDescriptor;
 
