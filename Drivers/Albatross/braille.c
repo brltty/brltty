@@ -196,62 +196,75 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         updateDisplay(NULL);
         continue;
 
-/*
-      case  94:
-      case 204:
-        return CMD_HOME;
-      case  93:
-      case 203:
-        return CMD_NOOP;
-      case  91:
-      case 201:
+      case  83: /* top left first lower */
+      case 193: /* top right first lower */
+        return CMD_LEARN;
+
+      case  84: /* top left first upper */
+      case 194: /* top right first upper */
+        return CMD_HELP;
+
+      case  85: /* top left third upper */
+      case 195: /* top right third upper */
+        return CMD_PRDIFLN;
+
+      case  86: /* top left third lower */
+      case 196: /* top right third lower */
+        return CMD_NXDIFLN;
+
+      case  87: /* top left second */
+      case 198: /* top right second */
+        return CMD_CSRJMP_VERT;
+
+      case  88: /* top left fourth */
+      case 197: /* top right fourth */
+        return CMD_BACK;
+
+      case  89: /* top left fifth upper */
+      case 199: /* top right fifth upper */
+        return CMD_PREFMENU;
+
+      case  90: /* top left fifth lower */
+      case 200: /* top right fifth lower */
+        return CMD_INFO;
+
+      /* home */
+      case  91: /* front left first upper */
+      case 201: /* front right first upper */
         return CMD_TOP_LEFT;
-      case  92:
-      case 202:
+
+      /* end */
+      case  92: /* front left first lower */
+      case 202: /* front right first lower */
         return CMD_BOT_LEFT;
-      case  95:
-      case  98:
-      case 205:
+
+      /* cursor */
+      case  93: /* front left second upper */
+      case 203: /* front right second upper */
+        return CMD_CSRTRK;
+
+      /* extra cursor */
+      case  94: /* front left second lower */
+      case 204: /* front right second lower */
+        return CMD_HOME;
+
+      /* up */
+      case  95: /* front left third upper */
+      case 205: /* front right third upper */
         return CMD_LNUP;
-      case  96:
-      case 206:
-      case 208:
+
+      /* down */
+      case  96: /* front left third lower */
+      case 206: /* front right third lower */
         return CMD_LNDN;
-      case  85:
-      case 195:
-        return CMD_NOOP;
-      case  86:
-      case 196:
-        return CMD_NOOP;
-      case  84:
-      case 194:
-        return CMD_NOOP;
-      case  83:
-      case 193:
-        return CMD_NOOP;
-      case  87:
-      case 198:
-        return CMD_NOOP;
-      case  88:
-      case 197:
-        return CMD_NOOP;
-      case  89:
-      case 199:
-        return CMD_NOOP;
-      case  90:
-      case 200:
-        return CMD_NOOP;
-      case 105:
-      case 215:
-        return CMD_NOOP;
-      case 106:
-      case 216:
-        return CMD_NOOP;
-      case  97:
+
+      /* left */
+      case  97: /* front left fourth */
         return CMD_FWINLT;
-      case 207:
+
+      /* right */
+      case 207: /* front right fourth */
         return CMD_FWINRT;
-*/
     }
 
     LogPrint(LOG_WARNING, "Unexpected byte: %02X", byte);
