@@ -29,7 +29,7 @@ typedef struct {
 
 extern const void *
 loadDriver (
-  const char **driver,
+  const char *driver,
   const char *driverDirectory, const char *driverSymbol,
   const char *driverType, char driverCharacter,
   const DriverEntry *driverTable,

@@ -46,7 +46,7 @@ static void spk_close (void) { }
 const SpeechDriver *speech = &noSpeech;
 
 const SpeechDriver *
-loadSpeechDriver (const char **driver, const char *driverDirectory) {
+loadSpeechDriver (const char *driver, const char *driverDirectory) {
   return loadDriver(driver,
                     driverDirectory, "spk_driver",
                     "speech", 's',

@@ -30,7 +30,7 @@
 
 const void *
 loadDriver (
-  const char **driver,
+  const char *driver,
   const char *driverDirectory, const char *driverSymbol,
   const char *driverType, char driverCharacter,
   const DriverEntry *driverTable,
@@ -38,28 +38,25 @@ loadDriver (
 ) {
   const void *driverAddress = NULL;
 
-  if (*driver) {
-    if (strcmp(*driver, nullIdentifier) == 0) {
-      *driver = NULL;
-      return nullAddress;
-    }
+  if (!driver) {
+    if (driverTable)
+      if (driverTable->address)
+        return driverTable->address;
+    return nullAddress;
+  }
 
-    {
-      const DriverEntry *driverEntry = driverTable;
-      while (driverEntry->address) {
-        if (strcmp(*driver, *driverEntry->identifier) == 0) {
-          *driver = NULL;
-          return driverEntry->address;
-        }
-        ++driverEntry;
+  if (strcmp(driver, nullIdentifier) == 0) {
+    return nullAddress;
+  }
+
+  if (driverTable) {
+    const DriverEntry *driverEntry = driverTable;
+    while (driverEntry->address) {
+      if (strcmp(driver, *driverEntry->identifier) == 0) {
+        return driverEntry->address;
       }
+      ++driverEntry;
     }
-  } else if (!driverTable[0].address) {
-    return nullAddress;
-  } else if (!driverTable[1].address) {
-    return driverTable[0].address;
-  } else {
-    return nullAddress;
   }
 
   {
@@ -68,19 +65,19 @@ loadDriver (
     const char *symbolName;
 
     {
-      int length = strlen(LIBRARY_NAME) + strlen(*driver) + strlen(LIBRARY_EXTENSION) + 3;
+      int length = strlen(LIBRARY_NAME) + strlen(driver) + strlen(LIBRARY_EXTENSION) + 3;
       char *name = mallocWrapper(length);
       snprintf(name, length, "%s%c%s.%s",
-               LIBRARY_NAME, driverCharacter, *driver, LIBRARY_EXTENSION);
+               LIBRARY_NAME, driverCharacter, driver, LIBRARY_EXTENSION);
       libraryName = name;
     }
     libraryPath = makePath(driverDirectory, libraryName);
 
     {
-      int length = strlen(driverSymbol) + strlen(*driver) + 2;
+      int length = strlen(driverSymbol) + strlen(driver) + 2;
       char *name = mallocWrapper(length);
       snprintf(name, length, "%s_%s",
-               driverSymbol, *driver);
+               driverSymbol, driver);
       symbolName = name;
     }
 

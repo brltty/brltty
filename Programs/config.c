@@ -601,7 +601,7 @@ initializeBraille (void) {
 
 static void
 getBrailleDriver (void) {
-  if ((brailleDriver = loadBrailleDriver(&opt_brailleDriver, opt_libraryDirectory))) {
+  if ((brailleDriver = loadBrailleDriver(opt_brailleDriver, opt_libraryDirectory))) {
     processParameters(&brailleParameters, brailleDriver->parameters, "braille driver",
                       opt_brailleParameters, cfg_brailleParameters, "BRLTTY_BRAILLE_PARAMETERS");
   } else {
@@ -613,7 +613,7 @@ getBrailleDriver (void) {
     /* not fatal */
     brailleDriver = &noBraille;
   }
-  if (!opt_brailleDriver) opt_brailleDriver = "built-in";
+  if (!opt_brailleDriver) opt_brailleDriver = brailleDriver->identifier;
 }
 
 void
@@ -668,7 +668,7 @@ initializeSpeech (void) {
 
 static void
 getSpeechDriver (void) {
-  if ((speechDriver = loadSpeechDriver(&opt_speechDriver, opt_libraryDirectory))) {
+  if ((speechDriver = loadSpeechDriver(opt_speechDriver, opt_libraryDirectory))) {
     processParameters(&speechParameters, speechDriver->parameters, "speech driver",
                       opt_speechParameters, cfg_speechParameters, "BRLTTY_SPEECH_PARAMETERS");
   } else {
@@ -680,7 +680,7 @@ getSpeechDriver (void) {
     /* not fatal */
     speechDriver = &noSpeech;
   }
-  if (!opt_speechDriver) opt_speechDriver = "built-in";
+  if (!opt_speechDriver) opt_speechDriver = speechDriver->identifier;
 }
 
 void

@@ -163,8 +163,6 @@ AC_DEFINE_UNQUOTED(translit([$1_$2_codes], [a-z], [A-Z]), ["${brltty_item_codes_
 
 AC_DEFUN([BRLTTY_ARG_DRIVER], [dnl
 BRLTTY_ARG_ITEM([$1], [driver])
-BRLTTY_SUMMARY_ITEM([external-$1-drivers], [brltty_external_codes_$1])
-BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
 if test "${brltty_enabled_$1_support}" != "no"
 then
    if test -n "${brltty_internal_codes_$1}"
@@ -174,14 +172,16 @@ changequote(, )dnl
 changequote([, ])dnl
       $1_help="$1-help"
    fi
-   if test "${brltty_standalone_programs}" != "yes"
+   if test -n "${brltty_external_codes_$1}"
    then
-      if test -n "${brltty_external_codes_$1}"
+      if test "${brltty_standalone_programs}" != "yes"
       then
          $1_drivers="$1-drivers"
          install_drivers="install-drivers"
       fi
    fi
+   BRLTTY_SUMMARY_ITEM([external-$1-drivers], [brltty_external_codes_$1])
+   BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
 fi
 AC_SUBST([$1_driver_objects])
 AC_SUBST([$1_help])
