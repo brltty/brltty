@@ -163,7 +163,6 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
 void
 deallocateQueue (Queue *queue) {
   while (queue->head) deleteElement(queue->head);
-  while (discardedElements) free(retrieveElement());
   free(queue);
 }
 
