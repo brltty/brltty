@@ -1340,34 +1340,36 @@ openUinputDevice (void) {
 int
 execute_LinuxScreen (int command) {
   int blk = command & VAL_BLK_MASK;
+  int arg __attribute__((unused)) = command & VAL_ARG_MASK;
 
   switch (blk) {
     case VAL_PASSAT2:
+#ifdef HAVE_LINUX_INPUT_H
+      if (arg == 0XF0) {
+        at2Pressed = 0;
+      } else if (arg == 0XE0) {
+        at2Keys = at2KeysE0;
+      } else {
+        unsigned char key = at2Keys[arg];
+        int pressed __attribute__((unused)) = at2Pressed;
+
+        at2Keys = at2KeysOriginal;
+        at2Pressed = 1;
+
+        if (key) {
 #ifdef HAVE_LINUX_UINPUT_H
-      if (openUinputDevice()) {
-        int arg = command & VAL_ARG_MASK;
-        if (arg == 0XF0) {
-          at2Pressed = 0;
-        } else if (arg == 0XE0) {
-          at2Keys = at2KeysE0;
-        } else {
-          unsigned char key = at2Keys[arg];
-          int pressed = at2Pressed;
-
-          at2Keys = at2KeysOriginal;
-          at2Pressed = 1;
-
-          if (key) {
+          if (openUinputDevice()) {
             struct input_event event;
             event.type = EV_KEY;
             event.code = key;
             event.value = pressed;
             write(uinputDevice, &event, sizeof(event));
+            return 1;
           }
-        }
-        return 1;
-      }
 #endif /* HAVE_LINUX_UINPUT_H */
+        }
+      }
+#endif /* HAVE_LINUX_INPUT_H */
       break;
   }
   return 0;
