@@ -126,6 +126,9 @@
 #braille-parameters pm:DebugReads=no # [no,yes]
 #braille-parameters pm:DebugWrites=no # [no,yes]
 
+# VisioBraille Braille Driver Parameters
+#braille-parameters vs:DisplaySize=40 # [20-40]
+
 # Voyager Braille Driver Parameters
 #braille-parameters vo:BrlInput=yes # [yes,no]
 

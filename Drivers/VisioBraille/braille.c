@@ -34,6 +34,11 @@
 #include "Programs/scr.h"
 #include "Programs/message.h"
 
+typedef enum {
+  PARM_DISPSIZE=0
+} DriverParameter;
+#define BRLPARMS "displaysize"
+
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_KEY_CODES
 #include "Programs/brl_driver.h"
@@ -209,6 +214,13 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  unsigned char ch = '?';
  int i;
 #endif /* SendIdReq */
+ int ds = BRAILLEDISPLAYSIZE;
+ if (*parameters[PARM_DISPSIZE])
+ {
+  int dsmin=20, dsmax=40;
+  validateInteger(&ds, "Size of braille display",parameters[PARM_DISPSIZE],&dsmin,&dsmax);
+ }
+
  if (!isSerialDevice(&device)) {
   unsupportedDevice(device);
   return 0;
@@ -258,7 +270,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
    }
   }
  #else /* SendIdReq */
-  if (brl->x<=0) brl->x = BRAILLEDISPLAYSIZE;
+  if (brl->x<=0) brl->x = ds;
  #endif /* SendIdReq */
  brl->y=1; 
  return 1;
