@@ -29,6 +29,11 @@ options.$O:
 
 ###############################################################################
 
+tbl_load.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl_load.c
+
+###############################################################################
+
 ctb_compile.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctb_compile.c
 
@@ -121,7 +126,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) serial.$O brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS) $(SPEECH_DRIVER_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS) $(SPEECH_DRIVER_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -236,10 +241,10 @@ speech-drivers:
 ###############################################################################
 
 text.auto.h: $(SRC_TOP)$(TBL_DIR)/$(TEXTTRANS) tbl2hex
-	./tbl2hex <$(SRC_TOP)$(TBL_DIR)/$(TEXTTRANS) >$@
+	./tbl2hex $(SRC_TOP)$(TBL_DIR)/$(TEXTTRANS) >$@
 
 attrib.auto.h: $(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) tbl2hex
-	./tbl2hex <$(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) >$@
+	./tbl2hex $(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) >$@
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
@@ -272,13 +277,16 @@ txt2hlp.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O $(HOSTOPTS_OBJECTS)
+TBL2HEX_OBJECTS = tbl2hex.$O host_tbl_load.$O $(HOSTOPTS_OBJECTS)
 
 tbl2hex: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)
 
 tbl2hex.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
+
+host_tbl_load.$O:
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/tbl_load.c
 
 ###############################################################################
 

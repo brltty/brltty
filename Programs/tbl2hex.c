@@ -28,6 +28,8 @@
 #include <stdio.h>
 
 #include "options.h"
+#include "brl.h"
+#include "tbl_load.h"
 
 BEGIN_OPTION_TABLE
 END_OPTION_TABLE
@@ -41,26 +43,49 @@ handleOption (const int option) {
   return 1;
 }
 
+static void
+reportMessage (const char *message) {
+  fprintf(stderr, "%s: %s\n", programName, message);
+}
+
 int
 main (int argc, char *argv[]) {
-  unsigned char buffer[8];
-  unsigned int columns = sizeof(buffer);
-  unsigned int rows = 0X100 / columns;
-  unsigned int row;
+  int status;
+  TranslationTable table;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, NULL);
+                 &argc, &argv, "input-file");
 
-  for (row=0; row<rows; row++) {
-    unsigned int column;
-    fread(buffer, 1, columns, stdin);
-    for (column=0; column<columns; column++) {
-      int newline = column == (columns - 1);
-      int comma = (row < (rows - 1)) || !newline;
-      printf("0X%02X", buffer[column]);
-      if (comma) putchar(',');
-      putchar(newline? '\n': ' ');
+  if (loadTranslationTable(argv[0], &table, reportMessage)) {
+    unsigned int columns = 8;
+    unsigned int rows = 0X100 / columns;
+    unsigned int row;
+
+    for (row=0; row<rows; row++) {
+      const unsigned char *buffer = &table[row * columns];
+      unsigned int column;
+
+      for (column=0; column<columns; column++) {
+        int newline = column == (columns - 1);
+        int comma = (row < (rows - 1)) || !newline;
+
+        printf("0X%02X", buffer[column]);
+        if (ferror(stdout)) break;
+
+        if (comma) {
+          putchar(',');
+          if (ferror(stdout)) break;
+        }
+
+        putchar(newline? '\n': ' ');
+        if (ferror(stdout)) break;
+      }
+
+      if (!ferror(stdout)) fflush(stdout);
+      status = ferror(stdout)? 4: 0;
     }
+  } else {
+    status = 3;
   }
-  return 0;
+  return status;
 }

@@ -385,7 +385,9 @@ BRLTTY_ARG_DISABLE(
    [table-selection],
    [text/attribute/contraction table selection in preferences menu], [dnl
    AC_DEFINE([ENABLE_TABLE_SELECTION])
+   translation_table_objects='tbl_load.$O'
 ])
+AC_SUBST([translation_table_objects])
 
 BRLTTY_ARG_DISABLE(
    [learn-mode],
@@ -774,7 +776,7 @@ changequote(, )dnl
 brltty_setup_files="`echo "${brltty_driver_names}" | sed -e '
 s%  *% %g
 s% \([^ ][^ ]*\)% Drivers/\1%g
-s%^%. Programs Documents BrailleTables Unicode%
+s%^%. Programs Documents%
 s%\([^ ][^ ]*\) %\1/Makefile:setup.mk.in:\1/Makefile.in %g
 s% *$%%
 '`"

@@ -44,6 +44,7 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
+#include "tbl_load.h"
 #include "contract.h"
 #include "tunes.h"
 #include "message.h"
@@ -454,24 +455,18 @@ logParameters (const char *const *names, char **values, char *description) {
    }
 }
 
+static void
+reportTranslationTableMessage (const char *message) {
+  LogPrint(LOG_WARNING, "%s", message);
+}
+
 static int
-loadTranslationTable (TranslationTable *table, const char *file, const char *name) {
+replaceTranslationTable (TranslationTable *table, const char *file, const char *name) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
-    int fd = open(path, O_RDONLY);
-    if (fd >= 0) {
-      TranslationTable buffer;
-      if (read(fd, &buffer, sizeof(buffer)) == sizeof(buffer)) {
-        memcpy(table, &buffer, sizeof(buffer));
-        ok = 1;
-      } else {
-        LogPrint(LOG_ERR, "Cannot read %s translation table: %s", name, path);
-      }
-      close(fd);
-    } else {
-      LogPrint(LOG_ERR, "Cannot open %s translation table: %s: %s",
-               name, path, strerror(errno));
+    if (loadTranslationTable(path, table, reportTranslationTableMessage)) {
+      ok = 1;
     }
     free(path);
   }
@@ -479,15 +474,15 @@ loadTranslationTable (TranslationTable *table, const char *file, const char *nam
 }
 
 static int
-loadTextTable (const char *file) {
-  if (!loadTranslationTable(&textTable, file, "text")) return 0;
+replaceTextTable (const char *file) {
+  if (!replaceTranslationTable(&textTable, file, "text")) return 0;
   reverseTranslationTable(&textTable, &untextTable);
   return 1;
 }
 
 static int
-loadAttributesTable (const char *file) {
-  return loadTranslationTable(&attributesTable, file, "attributes");
+replaceAttributesTable (const char *file) {
+  return replaceTranslationTable(&attributesTable, file, "attributes");
 }
 
 static void
@@ -1012,12 +1007,12 @@ globChanged (GlobData *data) {
 
 static int
 changedTextTable (unsigned char setting) {
-  return loadTextTable(globChanged(&glob_textTable));
+  return replaceTextTable(globChanged(&glob_textTable));
 }
 
 static int
 changedAttributesTable (unsigned char setting) {
-  return loadAttributesTable(globChanged(&glob_attributesTable));
+  return replaceAttributesTable(globChanged(&glob_attributesTable));
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -1716,7 +1711,7 @@ startup (int argc, char *argv[]) {
 
   if (opt_textTable) {
     fixTranslationTablePath(&opt_textTable, TEXT_TABLE_PREFIX);
-    loadTextTable(opt_textTable);
+    replaceTextTable(opt_textTable);
   } else {
     opt_textTable = TEXT_TABLE;
     reverseTranslationTable(&textTable, &untextTable);
@@ -1731,7 +1726,7 @@ startup (int argc, char *argv[]) {
 
   if (opt_attributesTable) {
     fixTranslationTablePath(&opt_attributesTable, ATTRIBUTES_TABLE_PREFIX);
-    loadAttributesTable(opt_attributesTable);
+    replaceAttributesTable(opt_attributesTable);
   } else {
     opt_attributesTable = ATTRIBUTES_TABLE;
   }

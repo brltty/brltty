@@ -1,9 +1,1 @@
-Makefile
-reldeps.mk
-ibm437toiso
-ibm850toiso
-isotoibm437
-tbl2jbt
-tbl2tbl
-tbl2txt
-txt2tbl
+

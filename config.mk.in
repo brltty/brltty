@@ -21,7 +21,6 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PGM_DIR = Programs
 DOC_DIR = Documents
 TBL_DIR = BrailleTables
-UCD_DIR = Unicode
 CTB_DIR = ContractionTables
 DRV_DIR = lib
 DAT_DIR = data
@@ -143,6 +142,7 @@ ATTRTRANS = @attributes_table@
 
 SYSTEM_OBJECT = @system_object@
 USB_OBJECTS = @usb_objects@
+TBL_OBJECTS = @translation_table_objects@
 CTB_OBJECTS = @contracted_braille_objects@
 SPEECH_OBJECT = @speech_support_object@
 BEEPER_OBJECTS = @beeper_tune_objects@

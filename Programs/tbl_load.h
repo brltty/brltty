@@ -15,25 +15,23 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/*
- * unicode.h
- * $Id$
- * by Hans Schou
- */
+#ifndef _tbl_load_H
+#define _tbl_load_H
 
-typedef struct {
-  unsigned int unum;
-  const char *name;
-} UnicodeEntry;
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-typedef struct {
-  const char *name;
-  const char *desc;
-  unsigned int table[0X100];
-} CodePage;
+typedef void (*TranslationTableReporter) (const char *message);
 
-extern const UnicodeEntry *getUnicodeEntry (unsigned int unum);
-extern const CodePage *getCodePage (const char *name);
+extern int loadTranslationTable (
+  const char *file,
+  TranslationTable *table,
+  TranslationTableReporter report
+);
 
-extern const CodePage *const codePageTable[];
-extern const unsigned int codePageCount;
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* _tbl_load_H */
