@@ -84,15 +84,21 @@ In this dialog box, ensure that "BRLTTY" is the selected braille device.
 After applying your changes, "Close" the "Braille Settings" and "Input/Output
 Settings" windows.
 
-You might need to restart Gnopernicus to get working braille support.
+Braille should start working as soon as any needed configuration changes are
+made.
 
 
 There's a command-line interface to the Gnome configuration system (gconf)
 called "gconftool-2". You can get verbose help for it with "gconftool-2 --help"
 or something shorter with "gconftool-2 --usage".
 
-èBefore accessibility will work across the desktop, you need to check thi
-gconf key:
+The first step is to ensure that the accessibility features of Gnome are
+enabled. Gnopernicus, at start time, automatically detects if accessibility
+isn't enabled, and, if so, displays a dialog which asks the user if it should
+be enabled. Since a blind user can't see this dialog, here's how to ensure that
+the setting is correct ahead of time.
+
+Check the current setting by inspecting the relevant gconf key:
 
     gconftool-2 --get /apps/desktop/gnome/interface/accessibility
 
