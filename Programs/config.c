@@ -58,9 +58,11 @@
 char COPYRIGHT[] = "Copyright (C) 1995-2003 by The BRLTTY Team - all rights reserved.";
 
 #define DEVICE_DIRECTORY "/dev"
-#define TABLE_EXTENSION ".tbl"
+#define TRANSLATION_TABLE_EXTENSION ".tbl"
 #define TEXT_TABLE_PREFIX "text."
-#define ATTRIBUTES_TABLE_PREFIX "attr."
+#define ATTRIBUTES_TABLE_PREFIX ""
+#define CONTRACTION_TABLE_EXTENSION ".ctb"
+#define CONTRACTION_TABLE_PREFIX ""
 
 #ifdef ENABLE_API
 static char *opt_apiParameters = NULL;
@@ -494,8 +496,7 @@ loadAttributesTable (const char *file) {
 }
 
 static void
-fixTablePath (const char **path, const char *prefix) {
-  const char *extension = TABLE_EXTENSION;
+fixPath (const char **path, const char *extension, const char *prefix) {
   const unsigned int prefixLength = strlen(prefix);
   const unsigned int pathLength = strlen(*path);
   const unsigned int extensionLength = strlen(extension);
@@ -514,16 +515,23 @@ fixTablePath (const char **path, const char *prefix) {
   memcpy(&buffer[length], *path, pathLength);
   length += pathLength;
 
-  if ((pathLength < extensionLength) ||
-      (memcmp(&buffer[length-extensionLength], extension, extensionLength) != 0)) {
-    memcpy(&buffer[length], extension, extensionLength);
-    length += extensionLength;
+  if (extensionLength) {
+    if ((pathLength < extensionLength) ||
+        (memcmp(&buffer[length-extensionLength], extension, extensionLength) != 0)) {
+      memcpy(&buffer[length], extension, extensionLength);
+      length += extensionLength;
+    }
   }
 
   if (length > pathLength) {
     buffer[length] = 0;
     *path = strdupWrapper(buffer);
   }
+}
+
+static void
+fixTranslationTablePath (const char **path, const char *prefix) {
+  fixPath(path, TRANSLATION_TABLE_EXTENSION, prefix);
 }
 
 static int
@@ -1623,7 +1631,7 @@ startup (int argc, char *argv[]) {
   }
 
   if (opt_textTable) {
-    fixTablePath(&opt_textTable, TEXT_TABLE_PREFIX);
+    fixTranslationTablePath(&opt_textTable, TEXT_TABLE_PREFIX);
     loadTextTable(opt_textTable);
   } else {
     opt_textTable = TEXT_TABLE;
@@ -1631,28 +1639,39 @@ startup (int argc, char *argv[]) {
   }
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_textTable, opt_tablesDirectory, "text.*.tbl", opt_textTable, 0);
+  globPrepare(&glob_textTable, opt_tablesDirectory,
+              TEXT_TABLE_PREFIX "*" TRANSLATION_TABLE_EXTENSION,
+              opt_textTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
   if (opt_attributesTable) {
+    fixTranslationTablePath(&opt_attributesTable, ATTRIBUTES_TABLE_PREFIX);
     loadAttributesTable(opt_attributesTable);
-  } else
+  } else {
     opt_attributesTable = ATTRIBUTES_TABLE;
+  }
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_attributesTable, opt_tablesDirectory, "attr*.tbl", opt_attributesTable, 0);
+  globPrepare(&glob_attributesTable, opt_tablesDirectory,
+              "attr*" TRANSLATION_TABLE_EXTENSION,
+              opt_attributesTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
+  if (opt_contractionTable) {
+    fixPath(&opt_contractionTable, CONTRACTION_TABLE_EXTENSION, CONTRACTION_TABLE_PREFIX);
+    loadContractionTable(opt_contractionTable);
+  }
+  atexit(exitContractionTable);
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_contractionTable, opt_contractionsDirectory, "*.ctb", opt_contractionTable, 1);
+  globPrepare(&glob_contractionTable, opt_contractionsDirectory,
+              CONTRACTION_TABLE_PREFIX "*" CONTRACTION_TABLE_EXTENSION,
+              opt_contractionTable, 1);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
-  if (opt_contractionTable) loadContractionTable(opt_contractionTable);
-  atexit(exitContractionTable);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {

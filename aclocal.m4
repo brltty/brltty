@@ -143,13 +143,31 @@ AC_SUBST([$1_driver_object])
 AC_SUBST([$1_help])
 AC_SUBST([$1_drivers])])
 
+AC_DEFUN([BRLTTY_FILE_PATH], [dnl
+ifelse(len([$3]), 0, [], [dnl
+if test `expr "${$1}" : '.*/'` -eq 0
+then
+   if test `expr "${$1}" : '$3\.'` -eq 0
+   then
+      $1="$3.${$1}"
+   fi
+fi
+])dnl
+ifelse(len([$2]), 0, [], [dnl
+if test `expr "${$1}" : '.*\.$2$'` -eq 0
+then
+   $1="${$1}.$2"
+fi])])
+
+AC_DEFUN([BRLTTY_TABLE_PATH], [BRLTTY_FILE_PATH([$1], [tbl], [$2])])
+
 AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl
 define([brltty_tables_text], ifdef([brltty_tables_text], [brltty_tables_text])[
-m4_text_wrap([$2], [                    ], [- m4_format([%-17s], [$1]) ], brltty_help_width)])])
+m4_text_wrap([$2], [           ], [- m4_format([%-8s ], [$1])], brltty_help_width)])])
 
 AC_DEFUN([BRLTTY_ATTRIBUTES_TABLE], [dnl
 define([brltty_tables_attributes], ifdef([brltty_tables_attributes], [brltty_tables_attributes])[
-m4_text_wrap([$2], [                 ], [- m4_format([%-14s], [$1]) ], brltty_help_width)])])
+m4_text_wrap([$2], [             ], [- m4_format([%-10s ], [$1])], brltty_help_width)])])
 
 AC_DEFUN([BRLTTY_SUMMARY_BEGIN], [dnl
 brltty_summary_lines="

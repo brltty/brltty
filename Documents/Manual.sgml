@@ -3442,19 +3442,23 @@ BRLTTY is initially configured to use the
 In addition to this default text translation table,
 several alternatives are provided:
 <descrip>
-  <tag/text.danish.tbl/Danish
-  <tag/text.es.tbl/Spanish
-  <tag/text.french.tbl/French
-  <tag/text.german.tbl/German
-  <tag/text.it.tbl/Italian
-  <tag/text.no-h.tbl/Norwegian and German
-  <tag/text.no-p.tbl/Norwegian
-  <tag/text.pl-iso02.tbl/Polish (iso-8859-2)
-  <tag/text.simple.tbl/American English
-  <tag/text.sweden.tbl/Swedish
-  <tag/text.swedish.tbl/Swedish
-  <tag/text.uk.tbl/United Kingdom English
-  <tag/text.us.tbl/American English
+  <tag/cz/Czech (iso-8859-2)
+  <tag/da/Danish
+  <tag/de/German
+  <tag/es/Spanish
+  <tag/fr/French
+  <tag/fr-cbifs/French (Code Braille Informatique Français Standard)
+  <tag/it/Italian
+  <tag/nabcc/North American Braille Computer Code
+  <tag/no-h/Norwegian and German
+  <tag/no-p/Norwegian
+  <tag/pl/Polish (iso-8859-2)
+  <tag/ru/Russian (koi8-r)
+  <tag/se1/Swedish
+  <tag/se2/Swedish
+  <tag/uk/United Kingdom English
+  <tag/us/American English
+  <tag/vni/Vietnamese
 </descrip>
 See the <ref id="options-text-table" name="-t"> command line option,
 the <ref id="configure-text-table" name="text-table"> configuration file directive,

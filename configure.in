@@ -578,24 +578,24 @@ test "`expr "${braille_device}" : "/"`" -eq 0 && braille_device="/dev/${braille_
 AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"])
 BRLTTY_SUMMARY_ITEM([braille-device], [braille_device])
 
-BRLTTY_TEXT_TABLE([text.cz.tbl], [Czech (iso-8859-2)])
-BRLTTY_TEXT_TABLE([text.da.tbl], [Danish])
-BRLTTY_TEXT_TABLE([text.de.tbl], [German])
-BRLTTY_TEXT_TABLE([text.es.tbl], [Spanish])
-BRLTTY_TEXT_TABLE([text.fr.tbl], [French])
-BRLTTY_TEXT_TABLE([text.fr-cbifs.tbl], [French (Code Braille Informatique Français Standard)])
-BRLTTY_TEXT_TABLE([text.it.tbl], [Italian])
-BRLTTY_TEXT_TABLE([text.nabcc.tbl], [North American Braille Computer Code])
-BRLTTY_TEXT_TABLE([text.no-h.tbl], [Norwegian and German])
-BRLTTY_TEXT_TABLE([text.no-p.tbl], [Norwegian])
-BRLTTY_TEXT_TABLE([text.pl.tbl], [Polish (iso-8859-2)])
-BRLTTY_TEXT_TABLE([text.ru.tbl], [Russian (koi8-r)])
-BRLTTY_TEXT_TABLE([text.se1.tbl], [Swedish])
-BRLTTY_TEXT_TABLE([text.se2.tbl], [Swedish])
-BRLTTY_TEXT_TABLE([text.uk.tbl], [United Kingdom English])
-BRLTTY_TEXT_TABLE([text.us.tbl], [American English])
-BRLTTY_TEXT_TABLE([text.vni.tbl], [Vietnamese])
-brltty_default_text_table=text.nabcc.tbl
+BRLTTY_TEXT_TABLE([cz], [Czech (iso-8859-2)])
+BRLTTY_TEXT_TABLE([da], [Danish])
+BRLTTY_TEXT_TABLE([de], [German])
+BRLTTY_TEXT_TABLE([es], [Spanish])
+BRLTTY_TEXT_TABLE([fr], [French])
+BRLTTY_TEXT_TABLE([fr-cbifs], [French (Code Braille Informatique Français Standard)])
+BRLTTY_TEXT_TABLE([it], [Italian])
+BRLTTY_TEXT_TABLE([nabcc], [North American Braille Computer Code])
+BRLTTY_TEXT_TABLE([no-h], [Norwegian and German])
+BRLTTY_TEXT_TABLE([no-p], [Norwegian])
+BRLTTY_TEXT_TABLE([pl], [Polish (iso-8859-2)])
+BRLTTY_TEXT_TABLE([ru], [Russian (koi8-r)])
+BRLTTY_TEXT_TABLE([se1], [Swedish])
+BRLTTY_TEXT_TABLE([se2], [Swedish])
+BRLTTY_TEXT_TABLE([uk], [United Kingdom English])
+BRLTTY_TEXT_TABLE([us], [American English])
+BRLTTY_TEXT_TABLE([vni], [Vietnamese])
+brltty_default_text_table=nabcc
 BRLTTY_ARG_WITH(
    [text-table], [FILE],
    [default text table]brltty_tables_text,
@@ -610,14 +610,15 @@ elif test "${text_table}" = "yes"
 then
    text_table="${brltty_default_text_table}"
 fi
+BRLTTY_TABLE_PATH([text_table], [text])
 AC_SUBST([install_text_tables])
 AC_SUBST([text_table])
 AC_DEFINE_UNQUOTED([TEXT_TABLE], ["${text_table}"])
 BRLTTY_SUMMARY_ITEM([text-table], [text_table])
 
-BRLTTY_ATTRIBUTES_TABLE([attributes.tbl], [])
-BRLTTY_ATTRIBUTES_TABLE([attrib.tbl], [])
-brltty_default_attributes_table=attributes.tbl
+BRLTTY_ATTRIBUTES_TABLE([attributes], [])
+BRLTTY_ATTRIBUTES_TABLE([attrib], [])
+brltty_default_attributes_table=attributes
 BRLTTY_ARG_WITH(
    [attributes-table], [FILE],
    [default attributes table]brltty_tables_attributes,
@@ -632,6 +633,7 @@ elif test "${attributes_table}" = "yes"
 then
    attributes_table="${brltty_default_attributes_table}"
 fi
+BRLTTY_TABLE_PATH([attributes_table], [])
 AC_SUBST([install_attributes_tables])
 AC_SUBST([attributes_table])
 AC_DEFINE_UNQUOTED([ATTRIBUTES_TABLE], ["${attributes_table}"])
