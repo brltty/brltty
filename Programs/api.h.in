@@ -169,6 +169,8 @@ typedef struct {
  * brlapi_settings_t
  * brlapi_loadAuthKey()
  * brlapi_writePacket()
+ * brlapi_readPacketHeader()
+ * brlapi_readPacketContent()
  * brlapi_readPacket()
  */
 int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);

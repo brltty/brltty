@@ -151,37 +151,38 @@ static ssize_t brlapi_waitForPacket(brl_type_t expectedPacketType, void *packet,
   brl_keycode_t *code = (brl_keycode_t *) localPacket;
   errorPacket_t *errorPacket = (errorPacket_t *) localPacket;
   int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
-  while ((res=brlapi_readPacket(fd,&type,localPacket,sizeof(localPacket)))>=0) {
-    if (type==expectedPacketType) {
-      if (res<=size) {
-        if (res>0) memcpy(packet, localPacket, res);
-        return res;
-      } else {
-        brlapi_libcerrno=EFBIG;
-        brlapi_libcerrfun="brlapi_waitForPacket";
-        brlapi_errno=BRLERR_LIBCERR;
-        return -1;
-      }
-    }
-    if (type==BRLPACKET_ERROR) {
-      brlapi_errno = ntohl(*code);
-      return -1;
-    }
-    if (type==BRLPACKET_EXCEPTION) {
-      size_t esize;
-      if (res<hdrSize) esize = 0; else esize = res-hdrSize;
-      brlapi_errorHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
-      continue;
-    }
-    pthread_mutex_lock(&stateMutex);
-    st = state;
-    pthread_mutex_unlock(&stateMutex);
-    if ((type==BRLPACKET_KEY) && (st & STCONTROLLINGTTY) && (res==sizeof(brl_keycode_t))) {
-      handle_keycode(ntohl(*code));
-      continue;
-    }
-    syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %d\n",brlapi_packetType(type),res);
+
+readNextPacket:
+  res = brlapi_readPacketHeader(fd, &type);
+  if (res<0) goto out;
+  if (type==expectedPacketType) {
+    res = brlapi_readPacketContent(fd,res, packet, size);
+    if (res<0) goto out;
+    return res;
   }
+  
+  if ((res = brlapi_readPacketContent(fd, res, localPacket, sizeof(localPacket)))<0) goto out;
+  if (type==BRLPACKET_ERROR) {
+    brlapi_errno = ntohl(*code);
+    return -1;
+  }
+  if (type==BRLPACKET_EXCEPTION) {
+    size_t esize;
+    if (res<hdrSize) esize = 0; else esize = res-hdrSize;
+    brlapi_errorHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
+    goto readNextPacket;
+  }
+  pthread_mutex_lock(&stateMutex);
+  st = state;
+  pthread_mutex_unlock(&stateMutex);
+  if ((type==BRLPACKET_KEY) && (st & STCONTROLLINGTTY) && (res==sizeof(brl_keycode_t))) {
+    handle_keycode(ntohl(*code));
+    goto readNextPacket;
+  }
+  syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %d\n",brlapi_packetType(type),res);
+  goto readNextPacket;
+
+out:
   if (res==-2) brlapi_errno=BRLERR_EOF;
   return -1;
 }
@@ -381,8 +382,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
   if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, packet, sizeof(auth->protocolVersion)+authKeyLength))<0)
     goto outfd;
-  if ((err=brlapi_waitForAck())<0)
-    goto outfd;
+  if ((err=brlapi_waitForAck())<0) goto outfd;
   pthread_mutex_unlock(&brlapi_fd_mutex);
 
   pthread_mutex_lock(&stateMutex);
@@ -487,20 +487,18 @@ static ssize_t brlapi_request(brl_type_t request, void *packet, size_t size)
 /* Identify the driver used by brltty */
 int brlapi_getDriverId(unsigned char *id, size_t n)
 {
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  ssize_t res = brlapi_request(BRLPACKET_GETDRIVERID, packet, sizeof(packet));
-  if (res<0) return -1;
-  return snprintf(id, n, "%s", packet);
+  ssize_t res = brlapi_request(BRLPACKET_GETDRIVERID, id, n);
+  if ((res>0) && (res<=n)) id[res-1] = '\0';
+  return res; 
 }
 
 /* Function : brlapi_getDriverName */
 /* Name of the driver used by brltty */
 int brlapi_getDriverName(unsigned char *name, size_t n)
 {
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  ssize_t res = brlapi_request(BRLPACKET_GETDRIVERNAME, packet, sizeof(packet));
-  if (res<0) return -1;
-  return snprintf(name, n, "%s", packet);
+  ssize_t res = brlapi_request(BRLPACKET_GETDRIVERNAME, name, n);
+  if ((res>0) && (res<=n)) name[res-1] = '\0';
+  return res;
 }
 
 /* Function : brlapi_getDisplaySize */
@@ -511,7 +509,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
   ssize_t res;
 
   if (brlx*brly) { *x = brlx; *y = brly; return 0; }
-  res = brlapi_request(BRLPACKET_GETDISPLAYSIZE, displaySize, sizeof(displaySize)); 
+  res = brlapi_request(BRLPACKET_GETDISPLAYSIZE, displaySize, sizeof(displaySize));
   if (res==-1) { return -1; }
   brlx = ntohl(displaySize[0]);
   brly = ntohl(displaySize[1]);
@@ -861,11 +859,11 @@ const char *brlapi_errlist[] = {
   "Operation not supported",            /* BRLERR_OPNOTSUPP */
   "getaddrinfo error",                  /* BRLERR_GAIERR */
   "libc error",                         /* BRLERR_LIBCERR */
-  "couldn't find out tty number",       /* BRLERR_UNKNOWNTTY */
-  "bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
-  "unexpected end of file",             /* BRLERR_EOF */
-  "too many levels of recursion",       /* BRLERR_TOORECURSE */
-  "driver error",
+  "Couldn't find out tty number",       /* BRLERR_UNKNOWNTTY */
+  "Bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
+  "Unexpected end of file",             /* BRLERR_EOF */
+  "Too many levels of recursion",       /* BRLERR_TOORECURSE */
+  "Driver error",
 };
 
 /* brlapi_nerr: last error number */

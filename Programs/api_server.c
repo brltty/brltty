@@ -447,11 +447,11 @@ static int processRequest(Connection *c)
   ssize_t size;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   authStruct *auth = (authStruct *) packet;
-  uint32_t * ints = (uint32_t *) &packet[0];
+  uint32_t * ints = (uint32_t *) packet;
   brl_type_t type;
   const char *str;
   unsigned int len;
-  size = brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE);
+  size = brlapi_readPacket(c->fd,&type,packet,sizeof(packet));
   if (size<0) {
     if (size==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(brlapi_libcerrno),c->fd);
     else {
@@ -490,6 +490,10 @@ static int processRequest(Connection *c)
       writeError(c->fd, BRLERR_CONNREFUSED);
       return 1;
     }
+  }
+  if (size>sizeof(packet)) {
+    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %d",brlapi_packetType(type), c->fd);
+    return 0;    
   }
   switch (type) {
     case BRLPACKET_GETTTY: {

@@ -49,6 +49,14 @@
 #include "api.h"
 #include "api_protocol.h"
 
+#ifndef MIN
+#define MIN(a, b) (((a) < (b))? (a): (b))
+#endif /* MIN */
+
+#ifndef MAX
+#define MAX(a, b) (((a) > (b))? (a): (b))
+#endif /* MAX */
+
 int brlapi_libcerrno;
 const char *brlapi_libcerrfun;
 
@@ -138,49 +146,61 @@ ssize_t brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size
   return 0;
 }
 
+/* brlapi_readPacketHeader */
+/* Read a packet's header and return packet's size */
+ssize_t brlapi_readPacketHeader(int fd, brl_type_t *packetType)
+{
+  uint32_t header[2];
+  ssize_t res;
+  if ((res=brlapi_readFile(fd,header,sizeof(header))) != sizeof(header)) {
+    if (res<0) {
+      brlapi_errno = BRLERR_LIBCERR;
+      brlapi_libcerrno = errno;
+      brlapi_libcerrfun = "read in brlapi_readPacketHeader";
+      return -1;    
+    } else return -2;
+  }
+  *packetType = ntohl(header[1]);
+  return ntohl(header[0]);
+}
+
+/* brlapi_readPacketContent */
+/* Read a packet's content into the given buffer */
+/* If the packet is too large, the buffer is filled with the */
+/* beginning of the packet, the rest of the packet being discarded */
+/* Returns packet size, -1 on failure, -2 on EOF */
+ssize_t brlapi_readPacketContent(int fd, size_t packetSize, void *buf, size_t bufSize)
+{
+  ssize_t res;
+  char foo[BRLAPI_MAXPACKETSIZE];
+  if ((res = brlapi_readFile(fd,buf,MIN(bufSize,packetSize))) <0) goto out;
+  if (res<packetSize) return -2; /* pkt smaller than announced => EOF */
+  if (packetSize>bufSize) {
+    size_t discard = packetSize-bufSize;
+    for (res=0; res<discard / sizeof(foo); res++)
+      brlapi_readFile(fd,foo,sizeof(foo));
+    brlapi_readFile(fd,foo,discard % sizeof(foo));
+  }
+  return packetSize;
+
+out:
+  brlapi_errno = BRLERR_LIBCERR;
+  brlapi_libcerrno = errno;
+  brlapi_libcerrfun = "read in brlapi_readPacket";
+  return -1;
+}
+
 /* brlapi_readPacket */
 /* Read a packet */
 /* Returns packet's size, -2 if EOF, -1 on error */
-ssize_t brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
+/* If the packet is larger than the supplied buffer, then */
+/* the packet is truncated to buffer's size, like in the recv system call */
+/* with option MSG_TRUNC (rest of the pcket is read but discarded) */
+ssize_t brlapi_readPacket(int fd, brl_type_t *packetType, void *buf, size_t size)
 {
-  uint32_t header[2];
-  size_t n;
-  ssize_t res;
-  static unsigned char foo[BRLAPI_MAXPACKETSIZE];
-
-  /* first read packet header (size+type) */
-  if ((res=brlapi_readFile(fd,&header[0],sizeof(header))) != sizeof(header)) {
-    /* If there is a real error, we return -1 */
-    /* if we got not enough bytes for the header, we assume end of file */
-    /* is reached and we return -2 */
-    if (res<0) return -1; else return -2;
-  }
-  n = ntohl(header[0]);
-  *type = ntohl(header[1]);
-
-  /* if buf is NULL, let's use our fake buffer */
-  if (buf == NULL) {
-    if (n>BRLAPI_MAXPACKETSIZE) {
-      brlapi_libcerrno=EFBIG;
-      brlapi_libcerrfun="read in readPacket";
-      brlapi_errno=BRLERR_LIBCERR;
-      return -1;
-    }
-    buf=foo;
-  } else
-    /* check that his buffer is large enough */
-    if (n>size) {
-      brlapi_libcerrno=EFBIG;
-      brlapi_libcerrfun="read in readPacket";
-      brlapi_errno=BRLERR_LIBCERR;
-      return -1;
-    }
-
-  if ((res=brlapi_readFile(fd,buf,n)) != n) {
-    if (res<0) return -1; else return -2;
-  }
-
-  return n;
+  ssize_t res = brlapi_readPacketHeader(fd, packetType);
+  if (res<0) return res;
+  return brlapi_readPacketContent(fd, res, buf, size);
 }
 
 /* Function : brlapi_loadAuthKey */
