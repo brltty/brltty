@@ -200,7 +200,7 @@ void brlapi_splitHost(const char *host, char **hostname, char **port) {
     if (c != host) {
       *hostname = (char *)malloc(c-host+1);
       memcpy(*hostname, host, c-host);
-      hostname[c-host] = 0;
+      (*hostname)[c-host] = 0;
     }
     else
       *hostname = NULL;
