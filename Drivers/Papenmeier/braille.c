@@ -225,10 +225,8 @@ writeData (BrailleDisplay *brl, int offset, int count, const unsigned char *data
     unsigned char header[] = {
       cSTX,
       cIdSend,
-      0,
-      0,
-      0,
-      0,
+      0, 0, /* big endian data offset */
+      0, 0  /* big endian packet length */
     };
     unsigned char trailer[] = {cETX};
     int size = sizeof(header) + count + sizeof(trailer);
@@ -330,7 +328,7 @@ readBytes (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, in
 static int
 interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
   int tn;
-  LogBytes("Identity", identity, 10);
+  LogBytes("Identity", identity, IDENTITY_LENGTH);
   LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
            identity[2],
            identity[3], identity[4], identity[5],
@@ -406,7 +404,7 @@ identifyTerminal(BrailleDisplay *brl) {
   flushTerminal(brl);
   if (writeBytes(brl, badPacket, sizeof(badPacket))) {
     if (awaitInput(brl_fd, 1000)) {
-      unsigned char identity[10];			/* answer has 10 chars */
+      unsigned char identity[IDENTITY_LENGTH];			/* answer has 10 chars */
       if (readBytes(brl, identity, 0, 1, 0)) {
         if (identity[0] == cSTX) {
           if (readBytes(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {

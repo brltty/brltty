@@ -42,13 +42,14 @@
 
 #define BAUDRATE B19200
 
-/* codes used in protocoll */
-#define cSTX 02
-#define cETX 03
+/* codes used in protocol */
+#define cSTX 0X02
+#define cETX 0X03
 #define cIdSend 'S'
 #define cIdIdentify 'I'
 #define cIdReceive 'K'
 #define PRESSED 1
+#define IDENTITY_LENGTH 10
 
 /* maximum number of status cells */
 #define PMSC 22
