@@ -269,7 +269,7 @@ void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 }
 
 /* Function: getDots */
-/* Returns the braille dots corresponding to a BrailleAttribute structure */
+/* Returns the braille dots corresponding to a BrailleWindow structure */
 /* No allocation of buf is performed */
 void getDots(const BrailleWindow *brailleWindow, char *buf)
 {
@@ -279,6 +279,14 @@ void getDots(const BrailleWindow *brailleWindow, char *buf)
               brailleWindow->andAttr[i]) |
              brailleWindow->orAttr[i];              
   if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorDots();
+}
+
+/* Function: getText */
+/* Returns the text corresponding to a BrailleWindow structure */
+/* No allocation of buf is performed */
+void getText(const BrailleWindow *brailleWindow, char *buf)
+{
+  memcpy(buf,brailleWindow->text,displaySize);
 }
 
 /****************************************************************************/
@@ -1239,6 +1247,8 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
       char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
+      getText(&c->brailleWindow, buf);
+      trueBraille->writeVisual(brl);
       getDots(&c->brailleWindow, buf);
       trueBraille->writeWindow(brl);
       disp->buffer = oldbuf;

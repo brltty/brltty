@@ -6,7 +6,7 @@ device, but still want to have an idea of the result.
 It is most useful for writing BrlAPI applications.
 
 Assuming you're under X, first launch brltty:
-$ brltty -b xw -t identity
+$ brltty -b xw
 
 (note: to be able to run brltty as non-root user, give the
 --without-screen-driver option to ./configure before compiling)

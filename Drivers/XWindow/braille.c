@@ -120,6 +120,7 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "xtparms", "lines", "cols", "model"
 
+#define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
@@ -276,7 +277,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   memset(disp+y*(cols+1),' ',cols);
   disp[(y+1)*(cols+1)-1]='\n';
  }
- disp[lines*(cols+1)]=0;
+ disp[lines*(cols+1)-1]=0;
 #ifdef USE_XM
  display_cs = XmStringCreateLocalized(disp);
 #endif
@@ -322,6 +323,10 @@ static void brl_close(BrailleDisplay *brl)
 }
 
 static void brl_writeWindow(BrailleDisplay *brl)
+{
+}
+
+static void brl_writeVisual(BrailleDisplay *brl)
 {
  unsigned char data[brl->x*brl->y];
  static unsigned char displayed[WHOLESIZE];

@@ -69,6 +69,7 @@ typedef enum {
 #endif /* HAVE_ICONV_H */
 
 #define BRL_HAVE_KEY_CODES
+#define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "Programs/serial.h"
@@ -212,6 +213,10 @@ brl_close (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
+}
+
+static void
+brl_writeVisual (BrailleDisplay *brl) {
   static unsigned char previousContent[MAX_WINDOW_SIZE];
   char *previousLocale;
 
