@@ -37,7 +37,9 @@ Configuring Gnopernicus
 =======================
 
 You need to activate Braille Support, and to change the Braille Device Type to
-"BRLTTY".
+"BRLTTY". This configuration can be done not only via the GUI but also via the
+command line. Both of these interfaces are described here.
+
 
 When the focus is inside the Gnopernicus window, select
 
@@ -58,6 +60,7 @@ After applyingJ your changes, "Close" the "Braille Settings" and "Input/Output
 Settings" windows.
 
 You might need to restart Gnopernicus to get working braille support.
+
 
 There's a command-line interface to the Gnome configuration system (gconf)
 called "gconftool-2". You can get verbose help for it with "gconftool-2 --help"
@@ -111,6 +114,7 @@ and is used when you type "startx" to start the X-server.
  export PATH LD_LIBRARY_PATH PYTHONPATH PKG_CONFIG_PATH GDK_USE_XFT GTK_MODULES
  exec $GARNOME/bin/gnome-session
  ------------------------------------------------------------------------------
+
 
 Gnopernicus is started from a file in your home directory which Gnome reads
 when it starts up. While Gnome provides a GUI for adding startup programs,
