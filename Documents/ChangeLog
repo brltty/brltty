@@ -20,6 +20,7 @@ February 22, 2005:
       Check for already enqueued speech before the first wait.
    API changes:
       The flags and protocol version fields weren't being maintained in network byte order.
+      brlapi_writeFile() and brlapi_readFile() are only for use within api_common.c.
    Linux screen driver changes:
       If KD_FONT_OP_GET fails or returns a character count of 0
       then calculate the VGA character count from the screen font map.

@@ -135,6 +135,33 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref-HTML
 
 %changelog
+* Tue Feb 22 2005 Dave Mielke <dave@mielke.cc> 3.6.2
+-  French braille uses dots 348 for the inverted question mark.
+-  Don't build the TTY and XWindow drivers when braillifying a boot image.
+-  If mcookie isn't available then use /dev/urandom or /dev/random to generate the API key.
+-  The shared memory screen driver should primarily use a per user segment.
+-  Update the screen patch to generate a per-user shared memory key.
+-  Some platforms don't define PF_LOCAL.
+-  FreedomScientific braille driver changes:
+      Add support for the Focus 2 series (40 and 80).
+-  VisioBraille braille driver changes:
+      Return NOOP rather than EOF when CTRL or ALT is pressed.
+      Bind a key to BRL_CMD_LEARN.
+      Don't log timeouts when the display isn't connected.
+-  Mikropuhe speech driver changes:
+      Lock the mutex while calling pthread_cond_signal().
+      Check for already enqueued speech before the first wait.
+-  API changes:
+      The flags and protocol version fields weren't being maintained in network byte order.
+      brlapi_writeFile() and brlapi_readFile() are only for use within api_common.c.
+-  Linux screen driver changes:
+      If KD_FONT_OP_GET fails or returns a character count of 0
+      then calculate the VGA character count from the screen font map.
+      Only reevaluate the VGA character count when necessary.
+-  Queue facility changes:
+      Don't deallocate discarded elements when a queue is being deallocated.
+      Initialize queue data to NULL.
+      Deallocate an item beore discarding its element.
 * Wed Dec 22 2004 Dave Mielke <dave@mielke.cc> 3.6.1
 -  Remove the %pre and %post sections from the rpm for the time being.
 -  Remove use of PATH_MAX (the HURD doesn't have it).

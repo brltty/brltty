@@ -17,13 +17,13 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.53])
-AC_INIT([brltty], [3.6.1], [http://mielke.cc/brltty/])
+AC_INIT([brltty], [3.6.2], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 
 AC_SUBST([BRLAPI_MAJOR], [0])
 AC_SUBST([BRLAPI_MINOR], [3])
-AC_SUBST([BRLAPI_REVISION], [1])
+AC_SUBST([BRLAPI_REVISION], [2])
 AC_SUBST([BRLAPI_VERSION], [${BRLAPI_MAJOR}.${BRLAPI_MINOR}])
 AC_SUBST([BRLAPI_RELEASE], [${BRLAPI_VERSION}.${BRLAPI_REVISION}])
 AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${BRLAPI_RELEASE}"])

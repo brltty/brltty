@@ -30,14 +30,6 @@ extern "C" {
 
 #include <unistd.h>
 
-/* brlapi_writeFile */
-/* Exactly write a buffer in a file */
-ssize_t brlapi_writeFile(int fd, const unsigned char *buf, size_t size);
-
-/* brlapi_readFile */
-/* Exactly read a buffer from a file */
-ssize_t brlapi_readFile(int fd, unsigned char *buf, size_t size);
-
 #if !defined(PF_LOCAL) && defined(PF_UNIX)
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
