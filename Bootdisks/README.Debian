@@ -92,18 +92,20 @@ modification is
 Building the third floppy
 *************************
 
-1) Compile BRLTTY for the display you want to use, do this
-   "statically" (no usual libs linked so that BRLTTY works on its
-   own), and fake to install it in a personal directory specially
-   built ("mkdir $HOME/tmpbrl"). This is respectively done by adding
-   the "--with-braille-driver=DISPLAY",
-   "--enable-standalone-programs" and the
+1) Compile BRLTTY "statically" (no dependencies on shared libraries so
+   that BRLTTY works on its own), specify the display you want to use,
+   specify the braille table you want to use, and install it in a
+   personal directory specially built ("mkdir $HOME/tmpbrl"). This is
+   respectively done by adding the
+   "--enable-standalone-programs",
+   "--with-braille-driver=DISPLAY",
+   "--with-text-table=TABLE" and
    "--with-install-root=$HOME/tmpbrl" flags to the "configure" script
-   (c.f. BRLTTY's documentation ; replace the value "DISPLAY" in inner
+   (c.f. BRLTTY's documentation; replace the value "DISPLAY" in inner
    flag by the module name you want to use). After having run
    "configure" with these flags at least, do "make install" so that
    all BRLTTY's stuff goes to the temporary directory. Check it to
-   recognize etc, dev, lib and bin dirs in it : "ls $HOME/tmpbrl".
+   recognize etc, lib and bin dirs in it : "ls $HOME/tmpbrl".
 2) Create a tarball by first changing to the directory : "cd
    $HOME/tmpbrl", then "tar czf ../brltty.tar.gz *". You should have a
    file named "brltty.tar.gz" in the parent dir now. 
