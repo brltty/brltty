@@ -509,11 +509,7 @@ AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_packa
 
    for brltty_package in ${brltty_packages}
    do
-      eval 'brltty_function="${brltty_function_'"${brltty_package}"'}"'
       eval 'brltty_headers="${brltty_headers_'"${brltty_package}"'}"'
-      test "${brltty_function}" != "x" && {
-         AC_CHECK_LIB([${brltty_package}], [${brltty_function}], [], [continue])
-      }
       test -n "${brltty_headers}" && {
          brltty_found=true
          for brltty_header in ${brltty_headers}
@@ -521,15 +517,17 @@ AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_packa
             AC_CHECK_HEADER([${brltty_header}], [], [brltty_found=false])
             "${brltty_found}" || break
          done
-
-         "${brltty_found}" && {
-            brltty_cv_package_$1="${brltty_package}"
-            break
-         }
+         "${brltty_found}" || continue
       }
+
+      AC_CHECK_LIB([${brltty_package}], [main], [], [continue])
+      brltty_cv_package_$1="${brltty_package}"
+      break
    done
 ])
    brltty_package_$1="${brltty_cv_package_$1}"
+else
+   AC_HAVE_LIBRARY([${brltty_package_$1}], [], [brltty_package_$1=""])
 fi
 AC_SUBST([brltty_package_$1])
 test -n "${brltty_package_$1}" && {
@@ -542,8 +540,7 @@ ifelse($#, 0, [], [dnl
 
 set -- [$1]
 brltty_package="${1}"
-eval "brltty_function_${brltty_package}"'="${2}"'
-shift 2
+shift 1
 eval "brltty_headers_${brltty_package}"'="${*}"'
 brltty_packages="${brltty_packages} ${brltty_package}"
 ifelse($#, 1, [], [BRLTTY_PACKAGE_DEFINE(m4_shift($@))])])])

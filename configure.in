@@ -21,12 +21,12 @@ AC_INIT([brltty], [3.7pre1], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 
-AC_SUBST([BRLAPI_MAJOR], [0])
-AC_SUBST([BRLAPI_MINOR], [3])
-AC_SUBST([BRLAPI_REVISION], [1])
-AC_SUBST([BRLAPI_VERSION], [${BRLAPI_MAJOR}.${BRLAPI_MINOR}])
-AC_SUBST([BRLAPI_RELEASE], [${BRLAPI_VERSION}.${BRLAPI_REVISION}])
-AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${BRLAPI_RELEASE}"])
+AC_SUBST([api_major], [0])
+AC_SUBST([api_minor], [3])
+AC_SUBST([api_revision], [1])
+AC_SUBST([api_version], [${api_major}.${api_minor}])
+AC_SUBST([api_release], [${api_version}.${api_revision}])
+AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${api_release}"])
 
 AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
@@ -38,18 +38,6 @@ AC_CONFIG_HEADER([Programs/api.h])
 AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([acdir])
 AC_CANONICAL_SYSTEM
-
-BRLTTY_PACKAGE_CHOOSE([curses],
-   [ncursesw initscr ncurses.h],
-   [ncurses initscr ncurses.h],
-   [curses initscr curses.h])
-
-BRLTTY_PACKAGE_CHOOSE([xt_toolkit],
-   [Xaw x X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
-   [Xaw3d x X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
-   [neXtaw x X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
-   [XawPlus x X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
-   [Xm x Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
 
 brltty_default_execute_root="/${PACKAGE_NAME}-${PACKAGE_VERSION}"
 BRLTTY_ARG_WITH(
@@ -259,8 +247,6 @@ in
 esac])
 AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 
-AC_PATH_XTRA
-
 case "${host_os}"
 in
    mingw*)
@@ -270,6 +256,53 @@ in
       AC_SEARCH_LIBS([socket], [socket])
       ;;
 esac
+
+BRLTTY_ARG_DISABLE(
+   [api],
+   [the application programming interface],
+   [],
+[dnl
+   BRLTTY_CAP_PTHREADS([dnl
+      AC_DEFINE([ENABLE_API])
+      api_objects='api_server.$O api_common.$O rangelist.$O'
+      all_api="all-api"
+      install_api="install-api"
+      api_libraries="${LIBS}"
+      BRLTTY_ARG_PARAMETERS([api])
+   ])
+])
+AC_SUBST([api_objects])
+AC_SUBST([all_api])
+AC_SUBST([install_api])
+AC_SUBST([api_authfile], [brlapi.key])
+AC_SUBST([api_libraries])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"])
+
+BRLTTY_PACKAGE_CHOOSE([curses],
+   [ncursesw ncurses.h],
+   [ncurses ncurses.h],
+   [curses curses.h])
+
+AC_PATH_XTRA
+if test "${no_x}" != "yes"
+then
+   LDFLAGS="${LDFLAGS} ${X_LIBS}"
+
+   AC_HAVE_LIBRARY([X11], [
+      LIBS="-lX11 ${LIBS}"
+
+      AC_HAVE_LIBRARY([Xt], [
+         LIBS="-lXt ${LIBS}"
+
+         BRLTTY_PACKAGE_CHOOSE([xt_toolkit],
+            [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
+            [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
+            [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
+            [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
+            [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
+      ])
+   ])
+fi
 
 AC_CHECK_HEADERS([alloca.h getopt.h glob.h sys/select.h sys/wait.h syslog.h])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h])
@@ -615,25 +648,6 @@ BRLTTY_ARG_ENABLE(
    AC_CHECK_LIB([gpm], [Gpm_Open])
 ])
 
-BRLTTY_ARG_DISABLE(
-   [api],
-   [the application programming interface],
-   [],
-[dnl
-   BRLTTY_CAP_PTHREADS([dnl
-      AC_DEFINE([ENABLE_API])
-      api_objects='api_server.$O api_common.$O rangelist.$O'
-      all_api="all-api"
-      install_api="install-api"
-      BRLTTY_ARG_PARAMETERS([api])
-   ])
-])
-AC_SUBST([api_objects])
-AC_SUBST([all_api])
-AC_SUBST([install_api])
-AC_SUBST([api_keyfile], [brlapi.key])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
-
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
@@ -782,19 +796,16 @@ BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([tb], [TechniBraille])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
-BRLTTY_BRAILLE_DRIVER([tt], [TTY], [-l$(CURSES_LIB)])
+BRLTTY_BRAILLE_DRIVER([tt], [TTY])
 BRLTTY_BRAILLE_DRIVER([va], [Vario])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
-if test "${no_x}" != "yes"
-then
-   test -n "${brltty_package_xt_toolkit}" && {
-      BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(X_LIBS) -l$(XT_TOOLKIT_LIB) -lXt -lX11])
-   }
-fi
+test -n "${brltty_package_xt_toolkit}" && {
+   BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
+}
 BRLTTY_ARG_DRIVER([braille])
 
 AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl

@@ -161,10 +161,11 @@ PCM_OBJECTS = @pcm_tune_objects@
 MIDI_OBJECTS = @midi_tune_objects@
 FM_OBJECTS = @fm_tune_objects@
 
-API_VERSION = @BRLAPI_VERSION@
-API_RELEASE = @BRLAPI_RELEASE@
+API_VERSION = @api_version@
+API_RELEASE = @api_release@
 API_OBJECTS = @api_objects@
-API_KEYFILE = @api_keyfile@
+API_AUTHFILE = @api_authfile@
 ALL_API = @all_api@
 INSTALL_API = @install_api@
+API_LIBRARIES = @api_libraries@
 

@@ -107,7 +107,7 @@ API_ARC = $(API_NAME).$(ARC_EXT)
 api: $(API_LIB) $(API_ARC)
 
 $(API_LIB): $(API_LIB_OBJS)
-	$(MKLIB:<soname>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS) $(LDLIBS)
+	$(MKLIB:<soname>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS) $(API_LIBRARIES)
 
 $(API_ARC): $(API_LIB_OBJS)
 	ar rc $@ $(API_LIB_OBJS)
@@ -460,7 +460,7 @@ install-api-manpages:
 	$(INSTALL_DATA) $$* $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3
 
 install-api-key:
-	file=$(sysconfdir)/$(API_KEYFILE) && \
+	file=$(sysconfdir)/$(API_AUTHFILE) && \
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then umask 077 && mcookie >$$file; fi
 
