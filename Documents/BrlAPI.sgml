@@ -6,7 +6,7 @@
 <and>
 <name>Samuel Thibault <tt><htmlurl url="mailto:samuel.thibault@fnac.net" name="&lt;samuel.thibault@fnac.net&gt;"></tt><newline></name>
 </author>
-<date>V1.0, June 2003
+<date>V1.1, June 2004
 <abstract>
 This document describes how to use <tt>BrlAPI</tt>.
 </abstract>
@@ -66,7 +66,7 @@ thanks to a braille terminal or speech synthetizer.
 An application designed to handle a braille terminal thanks to <em/BrlAPI/.
 
 <tag/Command/
-A code returned by the driver, indicating an action do to, for instance
+A code returned by the driver, indicating an action to do, for instance
 "go to previous line", "go to next line", etc.
 
 <tag/Driver/
@@ -141,7 +141,7 @@ protocol that is used to communicate between server and clients.
 What should be read probably depends on what should be done by applications with
 <em/BrlAPI/.
 
-Reading chapters 2 and 3 is recommanded, since they provide useful
+Reading chapters 2 and 3 is recommended, since they provide useful
 information and (hopefully) lead to a good understanding of <em/BrlAPI/,
 for an efficient use.
 
@@ -189,7 +189,7 @@ advantage of a braille terminal could be wanted, to
 provide the suitable information to blind users, for instance.
 The idea of <em/BrlAPI/ is to propose an efficient communication
 mechanism, to control the braille display, read keys from the
-braille keyboard, or to exhange data with the braille terminal at
+braille keyboard, or to exchange data with the braille terminal at
 a lower level (e.g. to write file transfer protocols between
 braille terminals and Linux systems).
 
@@ -485,7 +485,7 @@ first:
 The first parameter tells the server the number of the tty to take
 control of. Setting 0 lets the library determine it for us.
 
-<p>The server is asked to send <em/brltty/ commands, which are device-independant.
+<p>The server is asked to send <em/brltty/ commands, which are device-independent.
 
 <p>Getting control might fail if, for instance, another application already took
 control of this tty, so testing is needed.
@@ -976,7 +976,7 @@ packet will be further discussed below.
 <p>
 <em/BrlAPI/'s library ships two functions to achieve packets sending and receiving
 using this protocol: <tt/brlapi_writePacket/ and <tt/brlapi_readPacket/. It
-is a good idea to use instead of rewriting them, since this protocol
+is a good idea to use these functions rather than rewriting them, since this protocol
 might change one day in favor of a real reliable packet transmission protocol
 such as the experimental RDP.
 
@@ -1011,7 +1011,7 @@ four following modes:
 <itemize>
 <item>authentication mode: this is the initial mode, when the client hasn't
 authenticated itself to the server yet. Only one <tt/BRLPACKET_AUTHKEY/ packet
-will be accepted, which makes the connection enter normal mode;
+will be accepted, which makes the connection enter normal mode.
 
 
 <item>normal mode: the client is authenticated, but didn't ask for a tty
@@ -1022,7 +1022,7 @@ or raw mode. The client can send either of these types of packet:
   <item><tt/BRLPACKET_GETTTY/ to enter tty handling mode,
   <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
   <item><tt/BRLPACKET_BYE/ to tell the server it wants to close the connection.
-  </itemize>;
+  </itemize>
 
 
 <item>tty handling mode: the client holds the control of a tty: <em/brltty/ has
@@ -1043,11 +1043,11 @@ display and keypresses. For this, it can send either of these types of packet:
   <item><tt/BRLPACKET_BYE/ to tell the server it wants to close the connection.
   </itemize>
 And the server might send either <tt/BRLPACKET_KEY/ or <tt/BRLPACKET_COMMAND/
-packets to signal key presses;
+packets to signal key presses.
 
 
 <item>raw mode: the client wants to exchange packets directly with the braille
-terminal. Only these types of packet will be accepted:
+terminal. Only these types of packet will be accepted.
   <itemize>
   <item><tt/BRLPACKET_LEAVERAW/ to get back to previous mode, either normal or
   tty handling mode.
@@ -1113,7 +1113,7 @@ This packet is then acknowledged by the server.
 <sect2><tt/BRLPACKET_KEY/ and <tt/BRLPACKET_COMMAND/ (see <em/brlapi_readKey()/
 and <em/brlapi_readCommand()/)
 <p>
-As soon as the client got a tty, it must be prepared to handle either
+As soon as the client gets a tty, it must be prepared to handle either
 <tt/BRLPACKET_KEY/ or <tt/BRLPACKET_COMMAND/ incoming packets (depending on the
 parameter given in the <tt/BRLPACKET_GETTTY/ packet), at any time (as soon as
 the key was pressed on the braille terminal, hopefuly).
@@ -1156,7 +1156,7 @@ characters are encoded in braille dots.
 
 <sect2><tt/BRLPACKET_STATWRITE/
 <p>
-Some braille terminals have a special status display, whose text is independant
+Some braille terminals have a special status display, whose text is independent
 from normal display's. To display text on it, the client can send a
 <tt/BRLPACKET_STATWRITE/ packet, just like <tt/BRLPACKET_WRITE/ packets.
 
@@ -1188,7 +1188,7 @@ send to the terminal. Whenever its receives a packet from the terminal, the
 server does exactly the same, so that packet exchanges between the terminal and
 the server are exactly reproduced between the server and the client.
 
-Packets' content depend on the braille driver, so that the client should
+Packets' content depends on the braille driver, so that the client should
 check for its id or name thanks to a <tt/BRLPACKET_GETDRIVERID/ packet or
 a <tt/BRLPACKET_GETDRIVERNAME/ packet, prior to sending any
 <tt/BRLPACKET_GETRAW/ packet.
