@@ -1,6 +1,14 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+January 15, 2004:
+ - BRLTTY 3.4.1 released:
+   Fix an invalid address conversion. (dm)
+   accept() can return 0. (st)
+   Reset the address length before calling accept(). (st)
+   Pasting accented characters doesn't work. (dm)
+   Only remove brltty-config from Programs during distclean. (ah)
+
 December 31, 2003:
  - BRLTTY 3.4 released:
    Allow --with-...-driver= identifiers to be prefixed with a minus sign. (dm)
