@@ -26,6 +26,7 @@
 # include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -36,8 +37,8 @@
 
 /*
 ** For debugging only
-** #define		LOG_IO
 */
+// #define		LOG_IO
 
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_VISUAL_DISPLAY
@@ -258,7 +259,7 @@ static TranslationTable outputTable;
 
 /* Global variables */
 
-static int	InDate = 0;
+static int	JustIdentified = 0;
 static int		chars_per_sec;
 static SerialDevice *	serialDevice;			/* file descriptor for Braille display */
 static unsigned char	*rawdata = NULL;		/* translated data to send to Braille */
@@ -593,12 +594,6 @@ int ViewOn(BrailleDisplay *brl)
    int touche;
    static int res2 = 0;
    static int exitviewon = 0;
-   if (InDate == 1)
-     {
-	InDate = 0;
-	ReWrite = 1;
-	return (0);
-     }
    switch (model_ID)
      {
       case 3:
@@ -1055,17 +1050,20 @@ static int readbrlkey(BrailleDisplay *brl)
 	      switch(buf[p + 1])
 		{
 		case 'B': /* PC-BRAILLE mode */
+		  if (JustIdentified == 0)
 		  {
 		    char AskIdent[3] = {2, 'S', 'I'};
 
 		    LogPrint(LOG_INFO, "EuroBraille terminal came in PC mode.");
 		    WriteToBrlDisplay(brl, 3, AskIdent);
-		    InDate = 0;
+		    JustIdentified = 0;
 		    ReWrite = 1; /* to refresh display */
 		    context = 0;
 		  
 		    res = BRL_CMD_NOOP;
 		  }
+		  else
+		    JustIdentified = 0;
 		  break;
 		case 'K': /* Leaving PC-Braille mode */
 		  LogPrint(LOG_INFO, "EuroBraille terminal is quitting PC mode.");
@@ -1102,6 +1100,7 @@ static int readbrlkey(BrailleDisplay *brl)
 		   * string as the amount of cells available and the two first letters
 		   * for the model name in order to optimize the key configuration.
 		   */
+		  JustIdentified = 1;
 		  if (buf[p + 2] == 'N' && buf[p + 3] == 'B')
 		    model_ID = 1;
 		  else if (buf[p + 2] == 'C' && buf[p + 3] == 'N')
