@@ -1,6 +1,6 @@
-BRLTTY Help Screen for Alva models
+Help Screen for Alva ABT and Delphi models
 From left to right, front keys are:
-PROG  HOME CURSOR  UP  LEFT  RIGHT  DOWN
+PROG  HOME  CURSOR  UP  LEFT  RIGHT  DOWN
 
 Movement keys:
 UP              up one line

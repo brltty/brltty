@@ -1,0 +1,46 @@
+Help Screen for Alva Satellite Models
+From left to right, the front keys are:
+Home  Left  Up  Down  Right  Cursor
+
+Home/Cursor Keys:
+Home              go back (undo cursor tracking)
+Cursor            go to cursor
+Home Cursor       toggle cursor tracking
+
+Up/Down Keys:
+Up                go up one line
+Down              go down one line
+Home Up           go to top-left corner
+Home Down         go to bottom-left corner
+Cursor Up         go to top line
+Cursor Down       go to bottom line
+Home Cursor Up    go up to nearest line with different highlighting
+Home Cursor Down  go down to nearest line with different highlighting
+
+Left/Right Keys:
+Left              go left one window
+Right             go right one window
+Home Left         go left half window
+Home Right        go right half window
+Cursor Left       go left one character
+Cursor Right      go right one character
+Home Cursor Left  go to start of line
+Home Cursor Right go to end of line
+
+Routing Keys:
+Lower             bring cursor to character
+Upper             describe character
+Home Lower        start new cut buffer
+Home Upper        append to existing cut buffer
+Cursor Lower      rectangular cut
+Cursor Upper      linear cut
+Home Cursor Lower go down to nearest line without greater indent
+Home Cursor Upper go up to nearest line without greater indent
+
+Status Keys:
+Upper1            go up to nearest line with different content
+Lower1            go down to nearest line with different content
+Upper2            go up to previous command prompt
+Lower2            go down to next command prompt
+Upper3            go up to last line of previous paragraph
+Lower3            go down to first line of next paragraph

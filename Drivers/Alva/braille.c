@@ -128,6 +128,7 @@ typedef struct
     unsigned char ID;
     unsigned char Cols;
     unsigned char NbStCells;
+    unsigned char HelpPage;
   }
 BRLPARAMS;
 
@@ -135,110 +136,85 @@ static BRLPARAMS Models[] =
 {
   {
     /* ID == 0 */
-    "ABT 320",
-    ABT320,
-    20,
-    3
+    "ABT 320", ABT320,
+    20, 3, 0
   }
   ,
   {
     /* ID == 1 */
-    "ABT 340",
-    ABT340,
-    40,
-    3
+    "ABT 340", ABT340,
+    40, 3, 0
   }
   ,
   {
     /* ID == 2 */
-    "ABT 340 Desktop",
-    ABT34D,
-    40,
-    5
+    "ABT 340 Desktop", ABT34D,
+    40, 5, 0
   }
   ,
   {
     /* ID == 3 */
-    "ABT 380",
-    ABT380,
-    80,
-    5
+    "ABT 380", ABT380,
+    80, 5, 0
   }
   ,
   {
     /* ID == 4 */
-    "ABT 382 Twin Space",
-    ABT382,
-    80,
-    5
+    "ABT 382 Twin Space", ABT382,
+    80, 5, 0
   }
   ,
   {
     /* ID == 10 */
-    "Delphi 420",
-    DEL420,
-    20,
-    3
+    "Delphi 420", DEL420,
+    20, 3, 0
   }
   ,
   {
     /* ID == 11 */
-    "Delphi 440",
-    DEL440,
-    40,
-    3
+    "Delphi 440", DEL440,
+    40, 3, 0
   }
   ,
   {
     /* ID == 12 */
-    "Delphi 440 Desktop",
-    DEL44D,
-    40,
-    5
+    "Delphi 440 Desktop", DEL44D,
+    40, 5, 0
   }
   ,
   {
     /* ID == 13 */
-    "Delphi 480",
-    DEL480,
-    80,
-    5
+    "Delphi 480", DEL480,
+    80, 5, 0
   }
   ,
   {
     /* ID == 14 */
-    "Satellite 544",
-    SAT544,
-    40,
-    3
+    "Satellite 544", SAT544,
+    40, 3, 1
   }
   ,
   {
     /* ID == 15 */
-    "Satellite 570 Pro",
-    SAT570P,
-    66,
-    3
+    "Satellite 570 Pro", SAT570P,
+    66, 3, 1
   }
   ,
   {
     /* ID == 16 */
-    "Satellite 584 Pro",
-    SAT584P,
-    80,
-    3
+    "Satellite 584 Pro", SAT584P,
+    80, 3, 1
   }
   ,
   {
     /* ID == 17 */
-    "Satellite 544 Traveller",
-    SAT544T,
-    40,
-    3
+    "Satellite 544 Traveller", SAT544T,
+    40, 3, 1
   }
   ,
   {
-    0,
+    NULL, 0,
+    0, 0, 0
   }
 };
 
@@ -309,24 +285,51 @@ static const char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define KEY_STATUS2_E	0x50000	/* fifth upper status key */
 #define KEY_STATUS2_F	0x60000	/* sixth upper status key */
 
+#define KEY_BTAB	0x0100000
+#define KEY_FTAB	0x0200000
+#define KEY_UPPAD	0x1000000
+#define KEY_DOWNPAD	0x2000000
+#define KEY_LEFTPAD	0x3000000
+#define KEY_RIGHTPAD	0x4000000
+
+#define KEY_BEAR	0x0400000
+#define KEY_FEAR	0x0800000
+#define KEY_NORTHPAD	0x5000000
+#define KEY_SOUTHPAD	0x6000000
+#define KEY_WESTPAD	0x7000000
+#define KEY_EASTPAD	0x8000000
+
 /* first cursor routing offset on main display (old firmware only) */
 #define KEY_ROUTING_OFFSET 168
 
 #if ! ABT3_OLD_FIRMWARE
 /* Index for new firmware protocol */
-static int OperatingKeys[10] =
-{KEY_PROG, KEY_HOME, KEY_CURSOR,
- KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
- KEY_CURSOR2, KEY_HOME2, KEY_PROG2};
+static int OperatingKeys[10] = {
+  KEY_PROG, KEY_HOME, KEY_CURSOR,
+  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
+  KEY_CURSOR2, KEY_HOME2, KEY_PROG2
+};
 #endif /* ! ABT3_OLD_FIRMWARE */
 
-static int StatusKeys1[6] =
-{KEY_STATUS1_A, KEY_STATUS1_B, KEY_STATUS1_C,
- KEY_STATUS1_D, KEY_STATUS1_E, KEY_STATUS1_F};
+static int StatusKeys1[6] = {
+  KEY_STATUS1_A, KEY_STATUS1_B, KEY_STATUS1_C,
+  KEY_STATUS1_D, KEY_STATUS1_E, KEY_STATUS1_F
+};
 
-static int StatusKeys2[6] =
-{KEY_STATUS2_A, KEY_STATUS2_B, KEY_STATUS2_C,
- KEY_STATUS2_D, KEY_STATUS2_E, KEY_STATUS2_F};
+static int StatusKeys2[6] = {
+  KEY_STATUS2_A, KEY_STATUS2_B, KEY_STATUS2_C,
+  KEY_STATUS2_D, KEY_STATUS2_E, KEY_STATUS2_F
+};
+
+static int WindowsKeys[6] = {
+  KEY_BTAB, KEY_UPPAD, KEY_LEFTPAD,
+  KEY_DOWNPAD, KEY_RIGHTPAD, KEY_FTAB
+};
+
+static int SpeechKeys[6] = {
+  KEY_BEAR, KEY_NORTHPAD, KEY_WESTPAD,
+  KEY_SOUTHPAD, KEY_EASTPAD, KEY_FEAR
+};
 
 static int (*openPort) (char **parameters, const char *device);
 static int (*resetPort) (void);
@@ -381,7 +384,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
   if (inputUsed) size = 1;
 #endif /* ! ABT3_OLD_FIRMWARE */
   if (!size) return 0;
-  // LogBytes("Input packet", inputBuffer, size);
+//LogBytes("Input Packet", inputBuffer, size);
 
   if (*length < size) {
     LogPrint(LOG_WARNING, "Truncted input packet: %d < %d", *length, size);
@@ -664,10 +667,9 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
             model->Name, model->Cols, model->NbStCells );
 
   /* Set model params... */
-  /* too many help screens, too little difference between them, so for now... */
-  /* brl->helpPage = model - Models; */
   brl->x = model->Cols;			/* initialise size of display */
   brl->y = BRLROWS;
+  brl->helpPage = model->HelpPage;			/* initialise size of display */
 
   /* Allocate space for buffers */
   rawdata = (unsigned char *) malloc (brl->x * brl->y);
@@ -777,7 +779,7 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
 #if ! ABT3_OLD_FIRMWARE
 
   switch (packet[0]) {
-    case 0X71:		/* Operating keys and Status keys of Touch Cursor */ {
+    case 0X71: { /* operating keys and status keys */
       unsigned char key = packet[1];
       if (key <= 0X09) {
         *Keys |= OperatingKeys[key];
@@ -797,7 +799,7 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
       return 1;
     }
 
-    case 0X72: {
+    case 0X72: { /* primary (lower) routing keys */
       unsigned char key = packet[1];
       if (key <= 0X5F) {			/* make */
         *Pos = key;
@@ -808,13 +810,29 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
       return 1;
     }
 
-    case 0X75: {
+    case 0X75: { /* secondary (upper) routing keys */
       unsigned char key = packet[1];
       if (key <= 0X5F) {			/* make */
         *Pos = key;
         *Keys |= KEY_ROUTING2;
       } else {
         *Keys &= ~KEY_ROUTING2;
+      }
+      return 1;
+    }
+
+    case 0X77: { /* windows keys and speech keys */
+      unsigned char key = packet[1];
+      if (key <= 0X05) {
+        *Keys |= WindowsKeys[key];
+      } else if ((key >= 0X80) && (key <= 0X85)) {
+        *Keys &= ~WindowsKeys[key - 0X80];
+      } else if ((key >= 0X20) && (key <= 0X25)) {
+        *Keys |= SpeechKeys[key - 0X20];
+      } else if ((key >= 0XA0) && (key <= 0XA5)) {
+        *Keys &= ~SpeechKeys[key - 0XA0];
+      } else {
+        *Keys = 0;
       }
       return 1;
     }
@@ -886,171 +904,291 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       Typematic = KeyDelay = KeyRepeat = 0;
     }
 
-  if (ProcessKey < 0)
-    {
-      /* Oops... seems we should restart from scratch... */
-      RoutingPos = 0;
-      CurrentKeys = LastKeys = ReleasedKeys = 0;
-      return CMD_RESTARTBRL;
+  if (ProcessKey < 0) {
+    /* Oops... seems we should restart from scratch... */
+    RoutingPos = 0;
+    CurrentKeys = LastKeys = ReleasedKeys = 0;
+    return CMD_RESTARTBRL;
+  }
+
+  if (ProcessKey > 0) {
+    if (CurrentKeys > LastKeys) {
+      /* These are the keys that should be processed when pressed */
+      LastKeys = CurrentKeys;	/* we keep it until it is released */
+      ReleasedKeys = 0;
+      switch (brl->helpPage) {
+        case 0: /* ABT and Delphi models */
+          switch (CurrentKeys) {
+            case KEY_HOME | KEY_UP:
+              res = CMD_TOP;
+              break;
+            case KEY_HOME | KEY_DOWN:
+              res = CMD_BOT;
+              break;
+            case KEY_UP:
+              res = CMD_LNUP;
+              Typematic = 1;
+              break;
+            case KEY_CURSOR | KEY_UP:
+              res = CMD_ATTRUP;
+              break;
+            case KEY_DOWN:
+              res = CMD_LNDN;
+              Typematic = 1;
+              break;
+            case KEY_CURSOR | KEY_DOWN:
+              res = CMD_ATTRDN;
+              break;
+            case KEY_LEFT:
+              res = CMD_FWINLT;
+              break;
+            case KEY_HOME | KEY_LEFT:
+              res = CMD_LNBEG;
+              break;
+            case KEY_CURSOR | KEY_LEFT:
+              res = CMD_HWINLT;
+              break;
+            case KEY_PROG | KEY_LEFT:
+              res = CMD_CHRLT;
+              Typematic = 1;
+              break;
+            case KEY_RIGHT:
+              res = CMD_FWINRT;
+              break;
+            case KEY_HOME | KEY_RIGHT:
+              res = CMD_LNEND;
+              break;
+            case KEY_PROG | KEY_RIGHT:
+              res = CMD_CHRRT;
+              Typematic = 1;
+              break;
+            case KEY_CURSOR | KEY_RIGHT:
+              res = CMD_HWINRT;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_UP:
+              res = CMD_PRDIFLN;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_DOWN:
+              res = CMD_NXDIFLN;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_LEFT:
+              res = CMD_MUTE;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
+              res = CMD_SAY_LINE;
+              break;
+            case KEY_PROG | KEY_DOWN:
+              res = CMD_FREEZE;
+              break;
+            case KEY_PROG | KEY_UP:
+              res = CMD_INFO;
+              break;
+            case KEY_PROG | KEY_CURSOR | KEY_LEFT:
+              res = CMD_BACK;
+              break;
+            case KEY_STATUS1_A:
+              res = CMD_CAPBLINK;
+              break;
+            case KEY_STATUS1_B:
+              res = CMD_CSRVIS;
+              break;
+            case KEY_STATUS1_C:
+              res = CMD_CSRBLINK;
+              break;
+            case KEY_CURSOR | KEY_STATUS1_A:
+              res = CMD_SIXDOTS;
+              break;
+            case KEY_CURSOR | KEY_STATUS1_B:
+              res = CMD_CSRSIZE;
+              break;
+            case KEY_CURSOR | KEY_STATUS1_C:
+              res = CMD_SLIDEWIN;
+              break;
+            case KEY_PROG | KEY_HOME | KEY_UP:
+              res = CMD_SPKHOME;
+              break;
+            case KEY_PROG | KEY_HOME | KEY_LEFT:
+              res = CMD_RESTARTSPEECH;
+              break;
+            case KEY_PROG | KEY_HOME | KEY_RIGHT:
+              res = CMD_SAY_BELOW;
+              break;
+            case KEY_ROUTING1:
+              /* normal Cursor routing keys */
+              res = CR_ROUTE + RoutingPos;
+              break;
+            case KEY_PROG | KEY_ROUTING1:
+              /* marking beginning of block */
+              res = CR_CUTBEGIN + RoutingPos;
+              break;
+            case KEY_HOME | KEY_ROUTING1:
+              /* marking end of block */
+              res = CR_CUTRECT + RoutingPos;
+              break;
+            case KEY_PROG | KEY_HOME | KEY_DOWN:
+              res = CMD_PASTE;
+              break;
+            case KEY_PROG | KEY_HOME | KEY_ROUTING1:
+              /* attribute for pointed character */
+              res = CR_DESCCHAR + RoutingPos;
+              break;
+          }
+          break;
+
+        case 1: /* Satellite models */
+          switch (CurrentKeys) {
+            case KEY_UP:
+              res = CMD_LNUP;
+              Typematic = 1;
+              break;
+            case KEY_DOWN:
+              res = CMD_LNDN;
+              Typematic = 1;
+              break;
+            case KEY_HOME | KEY_UP:
+              res = CMD_TOP_LEFT;
+              break;
+            case KEY_HOME | KEY_DOWN:
+              res = CMD_BOT_LEFT;
+              break;
+            case KEY_CURSOR | KEY_UP:
+              res = CMD_TOP;
+              break;
+            case KEY_CURSOR | KEY_DOWN:
+              res = CMD_BOT;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_UP:
+              res = CMD_ATTRUP;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_DOWN:
+              res = CMD_ATTRDN;
+              break;
+
+            case KEY_LEFT:
+              res = CMD_FWINLT;
+              break;
+            case KEY_RIGHT:
+              res = CMD_FWINRT;
+              break;
+            case KEY_HOME | KEY_LEFT:
+              res = CMD_HWINLT;
+              break;
+            case KEY_HOME | KEY_RIGHT:
+              res = CMD_HWINRT;
+              break;
+            case KEY_CURSOR | KEY_LEFT:
+              res = CMD_CHRLT;
+              Typematic = 1;
+              break;
+            case KEY_CURSOR | KEY_RIGHT:
+              res = CMD_CHRRT;
+              Typematic = 1;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_LEFT:
+              res = CMD_LNBEG;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
+              res = CMD_LNEND;
+              break;
+
+            case KEY_ROUTING1:
+              res = CR_ROUTE + RoutingPos;
+              break;
+            case KEY_ROUTING2:
+              res = CR_DESCCHAR + RoutingPos;
+              break;
+            case KEY_HOME | KEY_ROUTING1:
+              res = CR_CUTBEGIN + RoutingPos;
+              break;
+            case KEY_HOME | KEY_ROUTING2:
+              res = CR_CUTAPPEND + RoutingPos;
+              break;
+            case KEY_CURSOR | KEY_ROUTING1:
+              res = CR_CUTRECT + RoutingPos;
+              break;
+            case KEY_CURSOR | KEY_ROUTING2:
+              res = CR_CUTLINE + RoutingPos;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
+              res = CR_NXINDENT + RoutingPos;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_ROUTING2:
+              res = CR_PRINDENT + RoutingPos;
+              break;
+
+            case KEY_STATUS1_A:
+              res = CMD_NXDIFLN;
+              break;
+            case KEY_STATUS2_A:
+              res = CMD_PRDIFLN;
+              break;
+            case KEY_STATUS1_B:
+              res = CMD_NXPROMPT;
+              break;
+            case KEY_STATUS2_B:
+              res = CMD_PRPROMPT;
+              break;
+            case KEY_STATUS1_C:
+              res = CMD_NXPGRPH;
+              break;
+            case KEY_STATUS2_C:
+              res = CMD_PRPGRPH;
+              break;
+          }
+          break;
+
+      }
+    } else {
+      /* These are the keys that should be processed when released */
+      if (!ReleasedKeys)
+        {
+          ReleasedKeys = LastKeys;
+          switch (brl->helpPage) {
+            case 0: /* ABT and Delphi models */
+              switch (ReleasedKeys) {
+                case KEY_HOME:
+                  res = CMD_TOP_LEFT;
+                  break;
+                case KEY_CURSOR:
+                  res = CMD_HOME;
+                  ReWrite = 1;	/* force rewrite of whole display */
+                  break;
+                case KEY_PROG:
+                  res = CMD_HELP;
+                  /*res = CMD_SAY_LINE;*/
+                  break;
+                case KEY_PROG | KEY_HOME:
+                  res = CMD_DISPMD;
+                  break;
+                case KEY_HOME | KEY_CURSOR:
+                  res = CMD_CSRTRK;
+                  break;
+                case KEY_PROG | KEY_CURSOR:
+                  res = CMD_PREFMENU;
+                  break;
+              }
+              break;
+
+            case 1: /* Satellite models */
+              switch (ReleasedKeys) {
+                case KEY_HOME:
+                  res = CMD_BACK;
+                  break;
+                case KEY_CURSOR:
+                  res = CMD_HOME;
+                  break;
+                case KEY_HOME | KEY_CURSOR:
+                  res = CMD_CSRTRK;
+                  break;
+              }
+              break;
+
+          }
+        }
+      LastKeys = CurrentKeys;
+      if (!CurrentKeys)
+        ReleasedKeys = 0;
     }
-  else if(ProcessKey > 0)
-    {
-      if (CurrentKeys > LastKeys)
-	{
-	  /* These are the keys that should be processed when pressed */
-	  LastKeys = CurrentKeys;	/* we keep it until it is released */
-	  ReleasedKeys = 0;
-	  switch (CurrentKeys)
-	    {
-	    case KEY_HOME | KEY_UP:
-	      res = CMD_TOP;
-	      break;
-	    case KEY_HOME | KEY_DOWN:
-	      res = CMD_BOT;
-	      break;
-	    case KEY_UP:
-	      res = CMD_LNUP;
-	      Typematic = 1;
-	      break;
-	    case KEY_CURSOR | KEY_UP:
-	      res = CMD_ATTRUP;
-	      break;
-	    case KEY_DOWN:
-	      res = CMD_LNDN;
-	      Typematic = 1;
-	      break;
-	    case KEY_CURSOR | KEY_DOWN:
-	      res = CMD_ATTRDN;
-	      break;
-	    case KEY_LEFT:
-	      res = CMD_FWINLT;
-	      break;
-	    case KEY_HOME | KEY_LEFT:
-	      res = CMD_LNBEG;
-	      break;
-	    case KEY_CURSOR | KEY_LEFT:
-	      res = CMD_HWINLT;
-	      break;
-	    case KEY_PROG | KEY_LEFT:
-	      res = CMD_CHRLT;
-	      Typematic = 1;
-	      break;
-	    case KEY_RIGHT:
-	      res = CMD_FWINRT;
-	      break;
-	    case KEY_HOME | KEY_RIGHT:
-	      res = CMD_LNEND;
-	      break;
-	    case KEY_PROG | KEY_RIGHT:
-	      res = CMD_CHRRT;
-	      Typematic = 1;
-	      break;
-	    case KEY_CURSOR | KEY_RIGHT:
-	      res = CMD_HWINRT;
-	      break;
-	    case KEY_HOME | KEY_CURSOR | KEY_UP:
-	      res = CMD_PRDIFLN;
-	      break;
-	    case KEY_HOME | KEY_CURSOR | KEY_DOWN:
-	      res = CMD_NXDIFLN;
-	      break;
-	    case KEY_HOME | KEY_CURSOR | KEY_LEFT:
-	      res = CMD_MUTE;
-	      break;
-	    case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
-	      res = CMD_SAY_LINE;
-	      break;
-	    case KEY_PROG | KEY_DOWN:
-	      res = CMD_FREEZE;
-	      break;
-	    case KEY_PROG | KEY_UP:
-	      res = CMD_INFO;
-	      break;
-	    case KEY_PROG | KEY_CURSOR | KEY_LEFT:
-	      res = CMD_BACK;
-	      break;
-	    case KEY_STATUS1_A:
-	      res = CMD_CAPBLINK;
-	      break;
-	    case KEY_STATUS1_B:
-	      res = CMD_CSRVIS;
-	      break;
-	    case KEY_STATUS1_C:
-	      res = CMD_CSRBLINK;
-	      break;
-	    case KEY_CURSOR | KEY_STATUS1_A:
-	      res = CMD_SIXDOTS;
-	      break;
-	    case KEY_CURSOR | KEY_STATUS1_B:
-	      res = CMD_CSRSIZE;
-	      break;
-	    case KEY_CURSOR | KEY_STATUS1_C:
-	      res = CMD_SLIDEWIN;
-	      break;
-	    case KEY_PROG | KEY_HOME | KEY_UP:
-	      res = CMD_SPKHOME;
-	      break;
-	    case KEY_PROG | KEY_HOME | KEY_LEFT:
-	      res = CMD_RESTARTSPEECH;
-	      break;
-	    case KEY_PROG | KEY_HOME | KEY_RIGHT:
-	      res = CMD_SAY_BELOW;
-	      break;
-	    case KEY_ROUTING1:
-	      /* normal Cursor routing keys */
-	      res = CR_ROUTE + RoutingPos;
-	      break;
-	    case KEY_PROG | KEY_ROUTING1:
-	      /* marking beginning of block */
-	      res = CR_CUTBEGIN + RoutingPos;
-	      break;
-	    case KEY_HOME | KEY_ROUTING1:
-	      /* marking end of block */
-	      res = CR_CUTRECT + RoutingPos;
-	      break;
-	    case KEY_PROG | KEY_HOME | KEY_DOWN:
-	      res = CMD_PASTE;
-	      break;
-	    case KEY_PROG | KEY_HOME | KEY_ROUTING1:
-	      /* attribute for pointed character */
-	      res = CR_DESCCHAR + RoutingPos;
-	      break;
-	    }
-	}
-      else
-	{
-	  /* These are the keys that should be processed when released */
-	  if (!ReleasedKeys)
-	    {
-	      ReleasedKeys = LastKeys;
-	      switch (ReleasedKeys)
-		{
-		case KEY_HOME:
-		  res = CMD_TOP_LEFT;
-		  break;
-		case KEY_CURSOR:
-		  res = CMD_HOME;
-		  ReWrite = 1;	/* force rewrite of whole display */
-		  break;
-		case KEY_PROG:
-		  res = CMD_HELP;
-		  /*res = CMD_SAY_LINE;*/
-		  break;
-		case KEY_PROG | KEY_HOME:
-		  res = CMD_DISPMD;
-		  break;
-		case KEY_HOME | KEY_CURSOR:
-		  res = CMD_CSRTRK;
-		  break;
-		case KEY_PROG | KEY_CURSOR:
-		  res = CMD_PREFMENU;
-		  break;
-		}
-	    }
-	  LastKeys = CurrentKeys;
-	  if (!CurrentKeys)
-	    ReleasedKeys = 0;
-	}
-    }
+  }
   return (res);
 }
