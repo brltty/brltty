@@ -27,10 +27,10 @@ Manual: Manual.txt Manual.made
 
 BrlAPI: BrlAPI.txt BrlAPI.made
 
-api: api.made
+api: BrlAPIref.made
 
-api.made: $(SRC_TOP)$(PGM_DIR)/brlapi.h api_doxy.cfg
-	doxygen api_doxy.cfg
+BrlAPIref.made: $(SRC_TOP)$(PGM_DIR)/brlapi.h BrlAPIref_doxy.cfg
+	doxygen BrlAPIref_doxy.cfg
 	ln -sf man3/brlapi_*.3 .
 	touch $@
 
@@ -47,5 +47,5 @@ clean::
 	-rm -fr *-HTML man?
 
 distclean::
-	-rm -f api_doxy.cfg
+	-rm -f BrlAPIref_doxy.cfg
 

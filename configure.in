@@ -710,6 +710,6 @@ AC_OUTPUT([
    config.mk
    brltty.spec
    brltty.lsm
-   Documents/api_doxy.cfg
+   Documents/BrlAPIref_doxy.cfg
    Drivers/Voyager/mkhlp
    ${brltty_setup_files}])
