@@ -41,21 +41,23 @@
  * It is defined as extern RealScreen *live;
  */
 
-/* a frozen screen image */
-FrozenScreen frozen;                
+HelpScreen helpScreen;
+FrozenScreen frozenScreen;                
+RealScreen liveScreen;
+BaseScreen *currentScreen;
 
-/* the (possibly multi-page) online help */
-HelpScreen help;
-
-/* a pointer to the current screen object */
-Screen *current;
-
+void
+initializeAllScreens (void) {
+  initializeHelpScreen(&helpScreen);
+  initializeLiveScreen(&liveScreen);
+  initializeFrozenScreen(&frozenScreen);
+}
 
 void
 closeAllScreens (void) {
-  live->close();
-  frozen.close();
-  help.close();
+  frozenScreen.close();
+  liveScreen.close();
+  helpScreen.close();
 }
 
 
@@ -71,7 +73,7 @@ selectDisplay (int disp) {
         /* set help mode: */
         {
           if (!helpOpened) return dismd;
-          current = &help;
+          currentScreen = &helpScreen.base;
           curscrn = HELP_SCRN;
           return (dismd |= HELP_SCRN);
         }
@@ -79,8 +81,8 @@ selectDisplay (int disp) {
         /* clear help mode: */
         {
           if (curscrn == HELP_SCRN)
-            dismd & FROZ_SCRN ? (current = &frozen, curscrn = FROZ_SCRN) : \
-              (current = live, curscrn = LIVE_SCRN);
+            dismd & FROZ_SCRN ? (currentScreen = &frozenScreen.base, curscrn = FROZ_SCRN) : \
+              (currentScreen = &liveScreen.base, curscrn = LIVE_SCRN);
           return (dismd &= ~HELP_SCRN);
         }
     }
@@ -88,11 +90,11 @@ selectDisplay (int disp) {
     {
       if (disp & FROZ_SCRN)
         {
-          if (frozen.open(live))
+          if (frozenScreen.open(&liveScreen.base))
             {
               if (curscrn == LIVE_SCRN)
                 {
-                  current = &frozen;
+                  currentScreen = &frozenScreen.base;
                   curscrn = FROZ_SCRN;
                 }
               return (dismd |= FROZ_SCRN);
@@ -104,8 +106,8 @@ selectDisplay (int disp) {
         {
           if (curscrn == FROZ_SCRN)
             {
-              frozen.close();
-              current = live;
+              frozenScreen.close();
+              currentScreen = &liveScreen.base;
               curscrn = LIVE_SCRN;
             }
           return (dismd &= ~FROZ_SCRN);
@@ -117,7 +119,7 @@ selectDisplay (int disp) {
 
 void
 describeScreen (ScreenDescription *description) {
-  current->describe(*description);
+  currentScreen->describe(description);
 }
 
 
@@ -128,13 +130,13 @@ readScreen (short left, short top, short width, short height, unsigned char *buf
   box.top = top;
   box.width = width;
   box.height = height;
-  return current->read(box, buffer, mode);
+  return currentScreen->read(box, buffer, mode);
 }
 
 
 int
 insertKey (unsigned short key) {
-  return current->insert(key);
+  return currentScreen->insert(key);
 }
 
 
@@ -149,60 +151,60 @@ insertString (const unsigned char *string) {
 
 int
 routeCursor (int column, int row, int screen) {
-  return current->route(column, row, screen);
+  return currentScreen->route(column, row, screen);
 }
 
 
 int
 setPointer (int column, int row) {
-  return current->point(column, row);
+  return currentScreen->point(column, row);
 }
 
 int
 getPointer (int *column, int *row) {
-  return current->pointer(*column, *row);
+  return currentScreen->pointer(column, row);
 }
 
 
 int
 selectVirtualTerminal (int vt) {
-  return current->selectvt(vt);
+  return currentScreen->selectvt(vt);
 }
 
 
 int
 switchVirtualTerminal (int vt) {
-  return current->switchvt(vt);
+  return currentScreen->switchvt(vt);
 }
 
 
 int
 currentVirtualTerminal (void) {
-  return current->currentvt();
+  return currentScreen->currentvt();
 }
 
 
 int
 executeScreenCommand (int cmd) {
-  return current->execute(cmd);
+  return currentScreen->execute(cmd);
 }
 
 
 const char *const *
 getScreenParameters (void) {
-  return live->parameters();
+  return liveScreen.parameters();
 }
 
 
 int
-initializeLiveScreen (char **parameters) {
-  if (live->prepare(parameters)) {
-    if (live->open()) {
-      if (live->setup()) {
-        current = live;
+openLiveScreen (char **parameters) {
+  if (liveScreen.prepare(parameters)) {
+    if (liveScreen.open()) {
+      if (liveScreen.setup()) {
+        currentScreen = &liveScreen.base;
         return 1;
       }
-      live->close();
+      liveScreen.close();
     }
   }
   return 0;
@@ -210,47 +212,47 @@ initializeLiveScreen (char **parameters) {
 
 
 int
-initializeRoutingScreen (void) {
+openRoutingScreen (void) {
   /* This function should be used in a forked process. Though we want to
    * have a separate file descriptor for the live screen from the one used
    * in the main thread.  So we close and reopen the device.
    */
-  live->close();
-  return live->open();
+  liveScreen.close();
+  return liveScreen.open();
 }
 
 
 void
 describeRoutingScreen (ScreenDescription *desscription) {
-  live->describe(*desscription);
+  liveScreen.base.describe(desscription);
 }
 
 
 void
 closeRoutingScreen (void) {
-  live->close();
+  liveScreen.close();
 }
 
 
 int
-initializeHelpScreen (const char *file) {
-  return helpOpened = help.open(file);
+openHelpScreen (const char *file) {
+  return helpOpened = helpScreen.open(file);
 }
 
 
 void
 setHelpPageNumber (short page) {
-  help.setPageNumber(page);
+  helpScreen.setPageNumber(page);
 }
 
 
 short
 getHelpPageNumber (void) {
-  return help.getPageNumber();
+  return helpScreen.getPageNumber();
 }
 
 
 short
 getHelpPageCount (void) {
-  return help.getPageCount();
+  return helpScreen.getPageCount();
 }

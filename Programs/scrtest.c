@@ -93,13 +93,14 @@ int
 main (int argc, char *argv[]) {
   int status;
 
-  const char *const *parameterNames = getScreenParameters();
+  const char *const *parameterNames;
   char **parameterSettings;
 
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, "[parameter=value ...]");
 
-  if (!parameterNames) {
+  initializeAllScreens();
+  if (!(parameterNames = getScreenParameters())) {
     static const char *const noNames[] = {NULL};
     parameterNames = noNames;
   }
@@ -145,7 +146,7 @@ main (int argc, char *argv[]) {
     --argc;
   }
 
-  if (initializeLiveScreen(parameterSettings)) {
+  if (openLiveScreen(parameterSettings)) {
     ScreenDescription description;
     short left, top, width, height;
     unsigned char buffer[0X800];

@@ -21,26 +21,15 @@
 #include "scr_base.h"
 #include "help.h"
 
-class HelpScreen:public Screen {
-  int fileDescriptor;
-  HelpFileHeader fileHeader;
-  short pageNumber;
-  unsigned char cursorRow, cursorColumn;
-  HelpPageEntry *pageDescriptions;
-  unsigned char **pages;
-  unsigned char *characters;
-  int loadPages (const char *);
-public:
-  HelpScreen ();
-  int open (const char *helpfile); /* called every time the help screen is opened */
-  void close (void);		   /* called once to close the help screen */
-  void setPageNumber (short);
-  short getPageNumber (void);
-  short getPageCount (void);
-  void describe (ScreenDescription &);
-  unsigned char *read (ScreenBox, unsigned char *, ScreenMode);
-  int insert (unsigned short);
-  int route (int, int, int);
-};
+typedef struct {
+  BaseScreen base;
+  int (*open) (const char *);
+  void (*close) (void);		   /* called once to close the help screen */
+  void (*setPageNumber) (short);
+  short (*getPageNumber) (void);
+  short (*getPageCount) (void);
+} HelpScreen;
+
+extern void initializeHelpScreen (HelpScreen *);
 
 #endif /* _SCR_HELP_H */

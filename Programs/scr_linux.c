@@ -15,13 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* scr_linux.cc - screen library for use with Linux vcsa devices.
- *
- * Note: Although C++, this code requires no standard C++ library.
- * This is important as BRLTTY *must not* rely on too many
- * run-time shared libraries, nor be a huge executable.
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -39,14 +32,8 @@
 
 #include "misc.h"
 #include "scr.h"
+#include "scr_real.h"
 #include "scr_linux.h"
-
-
-/* Instanciation of the Linux driver here */
-static LinuxScreen screen;
-
-/* Pointer for external reference */
-RealScreen *live = &screen;
 
 static unsigned int debugCharacterTranslationTable = 0;
 static unsigned int debugApplicationCharacterMap = 0;
@@ -167,77 +154,8 @@ static const ApplicationCharacterMap cp437Map = {
    0x00b0, 0x2219, 0x00b7, 0x221a, 0x207f, 0x00b2, 0x25a0, 0x00a0
 };
 
-
-static const char *const screenParameters[] = {
-  "acm",
-  "debugacm",
-  "debugsfm",
-  "debugctt",
-  NULL
-};
-typedef enum {
-  PARM_ACM,
-  PARM_DEBUGACM,
-  PARM_DEBUGSFM,
-  PARM_DEBUGCTT
-} ScreenParameters;
-const char *const *LinuxScreen::parameters (void) {
-  return screenParameters;
-}
-
-
-int LinuxScreen::prepare (char **parameters) {
-  validateYesNo(&debugApplicationCharacterMap, "debug application character map flag", parameters[PARM_DEBUGACM]);
-  validateYesNo(&debugScreenFontMap, "debug screen font map flag", parameters[PARM_DEBUGSFM]);
-  validateYesNo(&debugCharacterTranslationTable, "debug character translation table flag", parameters[PARM_DEBUGCTT]);
-  setApplicationCharacterMap = &LinuxScreen::determineApplicationCharacterMap;
-  {
-    static const char *choices[] = {"default", "iso01", "vt100", "cp437", "user", NULL};
-    unsigned int choice;
-    if (validateChoice(&choice, "character set", parameters[PARM_ACM], choices)) {
-      if (choice) {
-        static const unsigned short *maps[] = {iso01Map, vt100Map, cp437Map, NULL};
-        const unsigned short *map = maps[choice-1];
-        if (map) {
-          memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
-          setApplicationCharacterMap = NULL;
-          logApplicationCharacterMap();
-        } else {
-          setApplicationCharacterMap = &LinuxScreen::getUserAcm;
-        }
-      }
-    }
-  }
-  if (setScreenPath()) {
-    screenDescriptor = -1;
-    if (setConsolePath()) {
-      consoleDescriptor = -1;
-      return 1;
-    }
-  }
-  return 0;
-}
-
-void LinuxScreen::logApplicationCharacterMap (void) {
-  if (debugApplicationCharacterMap) {
-    char buffer[0X80];
-    char *address = NULL;
-    unsigned char character = 0;
-    while (1) {
-      if (!(character % 8)) {
-        if (address) {
-          LogPrint(LOG_DEBUG, "%s", buffer);
-          if (!character) break;
-        }
-        address = buffer;
-        address += sprintf(address, "acm[%02X]:", character);
-      }
-      address += sprintf(address, " %4.4X", applicationCharacterMap[character++]);
-    }
-  }
-}
-
-static const char *findDevicePath (const char *paths, const char *description, int mode) {
+static const char *
+findDevicePath (const char *paths, const char *description, int mode) {
   char *devices = strdupWrapper(paths);
   char *tokens = devices;
   const char *delimiters = " ";
@@ -285,10 +203,11 @@ static const char *findDevicePath (const char *paths, const char *description, i
   return path;
 }
 
-static int setDevicePath (const char *&path, const char *paths, const char *description, int mode) {
+static int
+setDevicePath (const char **path, const char *paths, const char *description, int mode) {
   LogPrint(LOG_DEBUG, "%s Device List: %s", description, paths);
-  if ((path = findDevicePath(paths, description, mode))) {
-    LogPrint(LOG_INFO, "%s Device: %s", description, path);
+  if ((*path = findDevicePath(paths, description, mode))) {
+    LogPrint(LOG_INFO, "%s Device: %s", description, *path);
     return 1;
   } else {
     LogPrint(LOG_ERR, "%s Device not specified.", description);
@@ -296,20 +215,8 @@ static int setDevicePath (const char *&path, const char *paths, const char *desc
   return 0;
 }
 
-int LinuxScreen::setScreenPath (void) {
-  return setDevicePath(screenPath, LINUX_SCREEN_DEVICES, "Screen", R_OK|W_OK);
-}
-
-int LinuxScreen::setConsolePath (void) {
-  return setDevicePath(consolePath, LINUX_CONSOLE_DEVICES, "Console", R_OK|W_OK);
-}
-
-
-int LinuxScreen::open (void) {
-  return openScreen(0);
-}
-
-static char *makePath (const char *base, unsigned char vt) {
+static char *
+makePath (const char *base, unsigned char vt) {
   if (vt) {
     size_t length = strlen(base);
     char buffer[length+4];
@@ -321,57 +228,56 @@ static char *makePath (const char *base, unsigned char vt) {
   return strdup(base);
 }
 
-static int openDevice (const char *path, const char *description, int flags, int major, int minor) {
+static int
+openDevice (const char *path, const char *description, int flags, int major, int minor) {
+  int file;
   LogPrint(LOG_DEBUG, "Opening %s device: %s", description, path);
-  int file = ::open(path, flags);
-  if (file != -1) return file;
-  int create = errno == ENOENT;
-  LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
-           description, path, strerror(errno));
-
-  if (create) {
-    mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
-    LogPrint(LOG_NOTICE, "Creating %s device: %s mode=%06o major=%d minor=%d",
-             description, path, mode, major, minor);
-    if (mknod(path, mode, makedev(major, minor)) == -1) {
-      LogPrint(LOG_ERR, "Cannot create %s device: %s: %s",
-               description, path, strerror(errno));
-    } else {
-      if ((file = ::open(path, flags)) != -1) return file;
-      LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
-               description, path, strerror(errno));
-      if (unlink(path) == -1)
-        LogPrint(LOG_ERR, "Cannot remove %s device: %s: %s",
+  if ((file = open(path, flags)) == -1) {
+    LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
+             description, path, strerror(errno));
+    if (errno == ENOENT) {
+      mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
+      LogPrint(LOG_NOTICE, "Creating %s device: %s mode=%06o major=%d minor=%d",
+               description, path, mode, major, minor);
+      if (mknod(path, mode, makedev(major, minor)) == -1) {
+        LogPrint(LOG_ERR, "Cannot create %s device: %s: %s",
                  description, path, strerror(errno));
-      else
-        LogPrint(LOG_NOTICE, "Removed %s device: %s",
-                 description, path);
-    }
-  }
-  return -1;
-}
-
-int LinuxScreen::openScreen (unsigned char vt) {
-  char *path = makePath(screenPath, vt);
-  if (path) {
-    int screen = openDevice(path, "screen", O_RDWR, 7, 0X80|vt);
-    if (screen != -1) {
-      if (openConsole(vt)) {
-        closeScreen();
-        screenDescriptor = screen;
-        LogPrint(LOG_DEBUG, "Screen opened: %s: fd=%d", path, screenDescriptor);
-        free(path);
-        virtualTerminal = vt;
-        return 1;
+      } else if ((file = open(path, flags)) == -1) {
+        LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
+                 description, path, strerror(errno));
+        if (unlink(path) == -1)
+          LogPrint(LOG_ERR, "Cannot remove %s device: %s: %s",
+                   description, path, strerror(errno));
+        else
+          LogPrint(LOG_NOTICE, "Removed %s device: %s",
+                   description, path);
       }
-      ::close(screen);
     }
-    free(path);
   }
-  return 0;
+  return file;
 }
 
-int LinuxScreen::openConsole (unsigned char vt) {
+static const char *consolePath;
+static int consoleDescriptor;
+
+static int
+setConsolePath (void) {
+  return setDevicePath(&consolePath, LINUX_CONSOLE_DEVICES, "Console", R_OK|W_OK);
+}
+
+static void
+closeConsole (void) {
+  if (consoleDescriptor != -1) {
+    if (close(consoleDescriptor) == -1) {
+      LogError("Console close");
+    }
+    LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
+    consoleDescriptor = -1;
+  }
+}
+
+static int
+openConsole (unsigned char vt) {
   char *path = makePath(consolePath, vt);
   if (path) {
     int console = openDevice(path, "console", O_RDWR|O_NOCTTY, 4, vt);
@@ -387,11 +293,54 @@ int LinuxScreen::openConsole (unsigned char vt) {
   return 0;
 }
 
-int LinuxScreen::rebindConsole (void) {
+static const char *screenPath;
+static int screenDescriptor;
+static unsigned char virtualTerminal;
+
+static int
+setScreenPath (void) {
+  return setDevicePath(&screenPath, LINUX_SCREEN_DEVICES, "Screen", R_OK|W_OK);
+}
+
+static void
+closeScreen (void) {
+  if (screenDescriptor != -1) {
+    if (close(screenDescriptor) == -1) {
+      LogError("Screen close");
+    }
+    LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screenDescriptor);
+    screenDescriptor = -1;
+  }
+}
+
+static int
+openScreen (unsigned char vt) {
+  char *path = makePath(screenPath, vt);
+  if (path) {
+    int screen = openDevice(path, "screen", O_RDWR, 7, 0X80|vt);
+    if (screen != -1) {
+      if (openConsole(vt)) {
+        closeScreen();
+        screenDescriptor = screen;
+        LogPrint(LOG_DEBUG, "Screen opened: %s: fd=%d", path, screenDescriptor);
+        free(path);
+        virtualTerminal = vt;
+        return 1;
+      }
+      close(screen);
+    }
+    free(path);
+  }
+  return 0;
+}
+
+static int
+rebindConsole (void) {
   return virtualTerminal? 1: openConsole(0);
 }
 
-int LinuxScreen::controlConsole(int operation, void *argument) {
+static int
+controlConsole (int operation, void *argument) {
   int result = ioctl(consoleDescriptor, operation, argument);
   if (result == -1)
     if (errno == EIO)
@@ -400,100 +349,84 @@ int LinuxScreen::controlConsole(int operation, void *argument) {
   return result;
 }
 
+static ApplicationCharacterMap applicationCharacterMap;
+static int (*setApplicationCharacterMap) (int force);
 
-int LinuxScreen::setup (void) {
-  if (setTranslationTable(1)) {
-    return 1;
+static void
+logApplicationCharacterMap (void) {
+  if (debugApplicationCharacterMap) {
+    char buffer[0X80];
+    char *address = NULL;
+    unsigned char character = 0;
+    while (1) {
+      if (!(character % 8)) {
+        if (address) {
+          LogPrint(LOG_DEBUG, "%s", buffer);
+          if (!character) break;
+        }
+        address = buffer;
+        address += sprintf(address, "acm[%02X]:", character);
+      }
+      address += sprintf(address, " %4.4X", applicationCharacterMap[character++]);
+    }
+  }
+}
+
+static int
+getUserAcm (int force) {
+  ApplicationCharacterMap map;
+  if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
+    if (force || (memcmp(applicationCharacterMap, map, sizeof(applicationCharacterMap)) != 0)) {
+      memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
+      LogPrint(LOG_DEBUG, "Application character map changed.");
+      logApplicationCharacterMap();
+      return 1;
+    }
+  } else {
+    LogError("ioctl GIO_UNISCRNMAP");
   }
   return 0;
 }
 
-
-/* 
- * The virtual screen devices return the actual font positions of the glyphs to
- * be drawn on the screen. The problem is that the font may not have been
- * designed for the character set being used. Most PC video cards have a
- * built-in font defined for the CP437 character set, but Linux users often use
- * the ISO-Latin-1 character set. In addition, the PSF format used by the newer
- * font files, which contains an internal unicode to font-position table,
- * allows the actual font positions to be unrelated to any known character set.
- * The kernel translates each character to be written to the screen from the
- * character set being used into unicode, and then from unicode into the
- * position within the font being used of the glyph to be drawn on the screen.
- * We need to reverse this translation in order to get the character code in
- * the expected character set.
- */
-int LinuxScreen::setTranslationTable (int force) {
-  int sfmChanged = setScreenFontMap(force);
-  if (sfmChanged) {
-    setFontTableSize();
-  }
-
-  int acmChanged = setApplicationCharacterMap && (this->*setApplicationCharacterMap)(force);
-  if (acmChanged || sfmChanged) {
-    unsigned short directPosition = 0XFF;
-    if (isBigFontTable) directPosition |= 0X100;
-
-    memset(translationTable, '?', sizeof(translationTable));
-    for (int character=0XFF; character>=0; --character) {
-      unsigned short unicode = applicationCharacterMap[character];
-      int position;
-      if ((unicode & ~directPosition) == 0XF000) {
-        position = unicode & directPosition;
-      } else {
-        int first = 0;
-        int last = screenFontMapCount-1;
-        position = -1;
-        while (first <= last) {
-          int current = (first + last) / 2;
-          struct unipair *map = &screenFontMapTable[current];
-          if (map->unicode < unicode)
-            first = current + 1;
-          else if (map->unicode > unicode)
-            last = current - 1;
-          else {
-            if (map->fontpos < fontTableSize) position = map->fontpos;
-            break;
-          }
-        }
-      }
-      if (position < 0) {
-        if (debugCharacterTranslationTable) {
-          LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
-        }
-      } else {
-        translationTable[position] = character;
-        if (debugCharacterTranslationTable) {
-          LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
-                   character, unicode, position);
-        }
+static int
+determineApplicationCharacterMap (int force) {
+  const char *name = NULL;
+  if (!getUserAcm(force)) return 0;
+  {
+    unsigned short character;
+    for (character=0; character<0X100; ++character) {
+      if (applicationCharacterMap[character] != (character | 0XF000)) {
+        setApplicationCharacterMap = &getUserAcm;
+        name = "user";
+        break;
       }
     }
-    if (debugCharacterTranslationTable) {
-      const unsigned int count = 0X10;
-      for (int position=0; position<fontTableSize; position+=count) {
-        char description[0X20];
-        sprintf(description, "c2f[%02X]", position);
-        LogBytes(description, &translationTable[position], count);
-      }
-    }
-    return 1;
   }
-
-  return 0;
+  if (!name) {
+    memcpy(applicationCharacterMap, iso01Map, sizeof(applicationCharacterMap));
+    setApplicationCharacterMap = NULL;
+    logApplicationCharacterMap();
+    name = "iso01";
+  }
+  LogPrint(LOG_INFO, "Application Character Map: %s", name);
+  return 1;
 }
 
-int LinuxScreen::setFontTableSize (void) {
+static int fontTableSize;
+static int isBigFontTable;
+static int
+setFontTableSize (void) {
+  int ok = 0;
+  struct console_font_op cfo;
+
   fontTableSize = 0X100;
   isBigFontTable = 0;
 
-  console_font_op cfo;
   memset(&cfo, 0, sizeof(cfo));
   cfo.op = KD_FONT_OP_GET;
   cfo.height = 32;
   cfo.width = 16;
 
-  int ok = 0;
   if (controlConsole(KDFONTOP, &cfo) != -1) {
     switch (cfo.charcount) {
       case 0X200:
@@ -518,42 +451,11 @@ int LinuxScreen::setFontTableSize (void) {
   return ok;
 }
 
-int LinuxScreen::getUserAcm (int force) {
-  ApplicationCharacterMap map;
-  if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
-    if (force || (memcmp(applicationCharacterMap, map, sizeof(applicationCharacterMap)) != 0)) {
-      memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
-      LogPrint(LOG_DEBUG, "Application character map changed.");
-      logApplicationCharacterMap();
-      return 1;
-    }
-  } else {
-    LogError("ioctl GIO_UNISCRNMAP");
-  }
-  return 0;
-}
-
-int LinuxScreen::determineApplicationCharacterMap (int force) {
-  if (!getUserAcm(force)) return 0;
-  const char *name = NULL;
-  for (unsigned short character=0; character<0X100; ++character) {
-    if (applicationCharacterMap[character] != (character | 0XF000)) {
-      setApplicationCharacterMap = &LinuxScreen::getUserAcm;
-      name = "user";
-      break;
-    }
-  }
-  if (!name) {
-    memcpy(applicationCharacterMap, iso01Map, sizeof(applicationCharacterMap));
-    setApplicationCharacterMap = NULL;
-    logApplicationCharacterMap();
-    name = "iso01";
-  }
-  LogPrint(LOG_INFO, "Application Character Map: %s", name);
-  return 1;
-}
-
-int LinuxScreen::setScreenFontMap (int force) {
+static struct unipair *screenFontMapTable;
+static unsigned short screenFontMapCount;
+static unsigned short screenFontMapSize;
+static int
+setScreenFontMap (int force) {
   struct unimapdesc sfm;
   unsigned short size = force? 0X100: screenFontMapCount;
   while (1) {
@@ -604,36 +506,197 @@ int LinuxScreen::setScreenFontMap (int force) {
   return 1;
 }
 
+static const char *const screenParameters[] = {
+  "acm",
+  "debugacm",
+  "debugsfm",
+  "debugctt",
+  NULL
+};
+typedef enum {
+  PARM_ACM,
+  PARM_DEBUGACM,
+  PARM_DEBUGSFM,
+  PARM_DEBUGCTT
+} ScreenParameters;
+static const char *const *
+parameters_LinuxScreen (void) {
+  return screenParameters;
+}
 
-void LinuxScreen::close (void) {
+static int
+prepare_LinuxScreen (char **parameters) {
+  validateYesNo(&debugApplicationCharacterMap, "debug application character map flag", parameters[PARM_DEBUGACM]);
+  validateYesNo(&debugScreenFontMap, "debug screen font map flag", parameters[PARM_DEBUGSFM]);
+  validateYesNo(&debugCharacterTranslationTable, "debug character translation table flag", parameters[PARM_DEBUGCTT]);
+  setApplicationCharacterMap = &determineApplicationCharacterMap;
+  {
+    static const char *choices[] = {"default", "iso01", "vt100", "cp437", "user", NULL};
+    unsigned int choice;
+    if (validateChoice(&choice, "character set", parameters[PARM_ACM], choices)) {
+      if (choice) {
+        static const unsigned short *maps[] = {iso01Map, vt100Map, cp437Map, NULL};
+        const unsigned short *map = maps[choice-1];
+        if (map) {
+          memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
+          setApplicationCharacterMap = NULL;
+          logApplicationCharacterMap();
+        } else {
+          setApplicationCharacterMap = &getUserAcm;
+        }
+      }
+    }
+  }
+  if (setScreenPath()) {
+    screenDescriptor = -1;
+    if (setConsolePath()) {
+      consoleDescriptor = -1;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static int
+open_LinuxScreen (void) {
+  return openScreen(0);
+}
+
+/* 
+ * The virtual screen devices return the actual font positions of the glyphs to
+ * be drawn on the screen. The problem is that the font may not have been
+ * designed for the character set being used. Most PC video cards have a
+ * built-in font defined for the CP437 character set, but Linux users often use
+ * the ISO-Latin-1 character set. In addition, the PSF format used by the newer
+ * font files, which contains an internal unicode to font-position table,
+ * allows the actual font positions to be unrelated to any known character set.
+ * The kernel translates each character to be written to the screen from the
+ * character set being used into unicode, and then from unicode into the
+ * position within the font being used of the glyph to be drawn on the screen.
+ * We need to reverse this translation in order to get the character code in
+ * the expected character set.
+ */
+static unsigned char translationTable[0X200];
+static int
+setTranslationTable (int force) {
+  int acmChanged = setApplicationCharacterMap && setApplicationCharacterMap(force);
+  int sfmChanged = setScreenFontMap(force);
+
+  if (sfmChanged) {
+    setFontTableSize();
+  }
+
+  if (acmChanged || sfmChanged) {
+    unsigned short directPosition = 0XFF;
+    if (isBigFontTable) directPosition |= 0X100;
+
+    memset(translationTable, '?', sizeof(translationTable));
+    {
+       int character;
+       for (character=0XFF; character>=0; --character) {
+         unsigned short unicode = applicationCharacterMap[character];
+         int position;
+         if ((unicode & ~directPosition) == 0XF000) {
+           position = unicode & directPosition;
+         } else {
+           int first = 0;
+           int last = screenFontMapCount-1;
+           position = -1;
+           while (first <= last) {
+             int current = (first + last) / 2;
+             struct unipair *map = &screenFontMapTable[current];
+             if (map->unicode < unicode)
+               first = current + 1;
+             else if (map->unicode > unicode)
+               last = current - 1;
+             else {
+               if (map->fontpos < fontTableSize) position = map->fontpos;
+               break;
+             }
+           }
+         }
+         if (position < 0) {
+           if (debugCharacterTranslationTable) {
+             LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
+           }
+         } else {
+           translationTable[position] = character;
+           if (debugCharacterTranslationTable) {
+             LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
+                      character, unicode, position);
+           }
+         }
+       }
+    }
+    if (debugCharacterTranslationTable) {
+      const unsigned int count = 0X10;
+      int position;
+      for (position=0; position<fontTableSize; position+=count) {
+        char description[0X20];
+        sprintf(description, "c2f[%02X]", position);
+        LogBytes(description, &translationTable[position], count);
+      }
+    }
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+setup_LinuxScreen (void) {
+  if (setTranslationTable(1)) {
+    return 1;
+  }
+  return 0;
+}
+
+static void
+close_LinuxScreen (void) {
   closeConsole();
   closeScreen();
 }
 
-void LinuxScreen::closeScreen (void) {
-  if (screenDescriptor != -1) {
-    if (::close(screenDescriptor) == -1) {
-      LogError("Screen close");
+static void
+getScreenDescription (ScreenDescription *description) {
+  if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
+    unsigned char buffer[4];
+    int count = read(screenDescriptor, buffer, sizeof(buffer));
+    if (count == sizeof(buffer)) {
+      description->rows = buffer[0];
+      description->cols = buffer[1];
+      description->posx = buffer[2];
+      description->posy = buffer[3];
+    } else if (count == -1) {
+      LogError("Screen header read");
+    } else {
+      long int expected = sizeof(buffer);
+      LogPrint(LOG_ERR, "Truncated screen header: expected %ld bytes, read %d.",
+               expected, count);
     }
-    LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screenDescriptor);
-    screenDescriptor = -1;
+  } else {
+    LogError("Screen seek");
   }
 }
 
-void LinuxScreen::closeConsole (void) {
-  if (consoleDescriptor != -1) {
-    if (::close(consoleDescriptor) == -1) {
-      LogError("Console close");
+static void
+getConsoleDescription (ScreenDescription *description) {
+  if (virtualTerminal) {
+    description->no = virtualTerminal;
+  } else {
+    struct vt_stat state;
+    if (controlConsole(VT_GETSTATE, &state) != -1) {
+      description->no = state.v_active;
+    } else {
+      LogError("ioctl VT_GETSTATE");
     }
-    LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
-    consoleDescriptor = -1;
   }
 }
 
-
-void LinuxScreen::describe (ScreenDescription &desc) {
-  getScreenDescription(desc);
-  getConsoleDescription(desc);
+static void
+describe_LinuxScreen (ScreenDescription *description) {
+  getScreenDescription(description);
+  getConsoleDescription(description);
 
   /* Periodically recalculate font mapping. I don't know any way to be
    * notified when it changes, and the recalculation is not too
@@ -648,44 +711,10 @@ void LinuxScreen::describe (ScreenDescription &desc) {
   }
 }
 
-void LinuxScreen::getScreenDescription (ScreenDescription &stat) {
-  if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
-    unsigned char buffer[4];
-    int count = ::read(screenDescriptor, buffer, sizeof(buffer));
-    if (count == sizeof(buffer)) {
-      stat.rows = buffer[0];
-      stat.cols = buffer[1];
-      stat.posx = buffer[2];
-      stat.posy = buffer[3];
-    } else if (count == -1) {
-      LogError("Screen header read");
-    } else {
-      long int expected = sizeof(buffer);
-      LogPrint(LOG_ERR, "Truncated screen header: expected %ld bytes, read %d.",
-               expected, count);
-    }
-  } else {
-    LogError("Screen seek");
-  }
-}
-
-void LinuxScreen::getConsoleDescription (ScreenDescription &stat) {
-  if (virtualTerminal) {
-    stat.no = virtualTerminal;
-  } else {
-    struct vt_stat state;
-    if (controlConsole(VT_GETSTATE, &state) != -1) {
-      stat.no = state.v_active;
-    } else {
-      LogError("ioctl VT_GETSTATE");
-    }
-  }
-}
-
-
-unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+static unsigned char *
+read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
-  getScreenDescription(description);
+  getScreenDescription(&description);
   if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= description.cols) &&
       (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= description.rows)) {
     int text = mode == SCR_TEXT;
@@ -695,7 +724,11 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
       unsigned char line[length];
       unsigned char *target = buffer;
       off_t increment = description.cols * 2 - length;
-      for (int row=0; row<box.height; ++row) {
+      int row;
+      for (row=0; row<box.height; ++row) {
+        int count;
+        unsigned char *source;
+
         if (row) {
           if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
             LogError("Screen seek");
@@ -703,7 +736,7 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
           }
         }
 
-        int count = ::read(screenDescriptor, line, length);
+        count = read(screenDescriptor, line, length);
         if (count != length) {
           if (count == -1) {
             LogError("Screen data read");
@@ -714,17 +747,18 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
           return NULL;
         }
 
-        unsigned char *source = line;
+        source = line;
         if (text) {
           unsigned char src[box.width];
           unsigned char *trg = target;
-          for (int column=0; column<box.width; ++column) {
-            src[column] = *source;
-
+          int column;
+          for (column=0; column<box.width; ++column) {
             int position = *source;
             if (isBigFontTable)
               if (source[1] & 0X08)
                 position |= 0X100;
+            src[column] = *source;
+
             *target++ = translationTable[position];
             source += 2;
           }
@@ -736,8 +770,9 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
             LogBytes(desc, trg, box.width);
           }
         } else {
+          int column;
           source++;
-          for (int column=0; column<box.width; ++column) {
+          for (column=0; column<box.width; ++column) {
             if (isBigFontTable) *source &= 0XF7;
             *target++ = *source;
             source += 2;
@@ -756,38 +791,18 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
   return NULL;
 }
 
- 
-int LinuxScreen::insert (unsigned short key) {
-  int ok = 0;
-  LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
-  if (rebindConsole()) {
-    long mode;
-    if (controlConsole(KDGKBMODE, &mode) != -1) {
-      switch (mode) {
-        case K_RAW:
-          if (insertCode(key, 1)) ok = 1;
-          break;
-        case K_MEDIUMRAW:
-          if (insertCode(key, 0)) ok = 1;
-          break;
-        case K_XLATE:
-          if (insertMapped(key, &LinuxScreen::insertByte)) ok = 1;
-          break;
-        case K_UNICODE:
-          if (insertMapped(key, &LinuxScreen::insertUtf8)) ok = 1;
-          break;
-        default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %ld", mode);
-          break;
-      }
-    } else {
-      LogError("ioctl KDGKBMODE");
-    }
+static int
+insertByte (unsigned char byte) {
+  if (controlConsole(TIOCSTI, &byte) != -1) {
+    return 1;
+  } else {
+    LogError("ioctl TIOCSTI");
   }
-  return ok;
+  return 0;
 }
 
-int LinuxScreen::insertCode (unsigned short key, int raw) {
+static int
+insertCode (unsigned short key, int raw) {
   unsigned char prefix = 0X00;
   unsigned char code;
   switch (key) {
@@ -907,10 +922,11 @@ int LinuxScreen::insertCode (unsigned short key, int raw) {
   return 1;
 }
 
-int LinuxScreen::insertMapped (unsigned short key, int (LinuxScreen::*byteInserter)(unsigned char byte)) {
+static int
+insertMapped (unsigned short key, int (*byteInserter)(unsigned char byte)) {
   if (key < 0X100) {
     unsigned char character = key & 0XFF;
-    if (!(this->*byteInserter)(character)) return 0;
+    if (!byteInserter(character)) return 0;
   } else {
     const char *sequence;
     switch (key) {
@@ -1021,13 +1037,14 @@ int LinuxScreen::insertMapped (unsigned short key, int (LinuxScreen::*byteInsert
         return 0;
     }
     while (*sequence) {
-      if (!(this->*byteInserter)(*sequence++)) return 0;
+      if (!byteInserter(*sequence++)) return 0;
     }
   }
   return 1;
 }
 
-int LinuxScreen::insertUtf8 (unsigned char byte) {
+static int
+insertUtf8 (unsigned char byte) {
   if (byte & 0X80) {
     if (!insertByte(0XC0 | (byte >> 6))) return 0;
     byte &= 0XBF;
@@ -1036,31 +1053,55 @@ int LinuxScreen::insertUtf8 (unsigned char byte) {
   return 1;
 }
 
-int LinuxScreen::insertByte (unsigned char byte) {
-  if (controlConsole(TIOCSTI, &byte) != -1) {
-    return 1;
-  } else {
-    LogError("ioctl TIOCSTI");
+static int
+insert_LinuxScreen (unsigned short key) {
+  int ok = 0;
+  LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
+  if (rebindConsole()) {
+    long mode;
+    if (controlConsole(KDGKBMODE, &mode) != -1) {
+      switch (mode) {
+        case K_RAW:
+          if (insertCode(key, 1)) ok = 1;
+          break;
+        case K_MEDIUMRAW:
+          if (insertCode(key, 0)) ok = 1;
+          break;
+        case K_XLATE:
+          if (insertMapped(key, &insertByte)) ok = 1;
+          break;
+        case K_UNICODE:
+          if (insertMapped(key, &insertUtf8)) ok = 1;
+          break;
+        default:
+          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %ld", mode);
+          break;
+      }
+    } else {
+      LogError("ioctl KDGKBMODE");
+    }
   }
-  return 0;
+  return ok;
 }
 
-
-static int validateVt (int vt) {
+static int
+validateVt (int vt) {
   if ((vt >= 1) && (vt <= 0X3F)) return 1;
   LogPrint(LOG_DEBUG, "Virtual terminal %d is out of range.", vt);
   return 0;
 }
 
-int LinuxScreen::selectvt (int vt) {
+static int
+selectvt_LinuxScreen (int vt) {
   if (vt == virtualTerminal) return 1;
   if (vt && !validateVt(vt)) return 0;
   return openScreen(vt);
 }
 
-int LinuxScreen::switchvt (int vt) {
+static int
+switchvt_LinuxScreen (int vt) {
   if (validateVt(vt)) {
-    if (selectvt(0)) {
+    if (selectvt_LinuxScreen(0)) {
       if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
         LogPrint(LOG_DEBUG, "Switched to virtual tertminal %d.", vt);
         return 1;
@@ -1072,8 +1113,25 @@ int LinuxScreen::switchvt (int vt) {
   return 0;
 }
 
-int LinuxScreen::currentvt (void) {
-  ScreenDescription desc;
-  getConsoleDescription(desc);
-  return desc.no;
+static int
+currentvt_LinuxScreen (void) {
+  ScreenDescription description;
+  getConsoleDescription(&description);
+  return description.no;
+}
+
+void
+initializeLiveScreen (RealScreen *real) {
+  initializeRealScreen(real);
+  real->base.describe = describe_LinuxScreen;
+  real->base.read = read_LinuxScreen;
+  real->base.insert = insert_LinuxScreen;
+  real->base.selectvt = selectvt_LinuxScreen;
+  real->base.switchvt = switchvt_LinuxScreen;
+  real->base.currentvt = currentvt_LinuxScreen;
+  real->parameters = parameters_LinuxScreen;
+  real->prepare = prepare_LinuxScreen;
+  real->open = open_LinuxScreen;
+  real->setup = setup_LinuxScreen;
+  real->close = close_LinuxScreen;
 }

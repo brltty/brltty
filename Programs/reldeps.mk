@@ -170,7 +170,7 @@ route.o: $(SRC_DIR)/scr.h
 route.o: $(SRC_DIR)/route.h
 
 # Dependencies for scr.o:
-scr.o: $(SRC_DIR)/scr.cc
+scr.o: $(SRC_DIR)/scr.c
 scr.o: $(BLD_TOP)config.h
 scr.o: $(SRC_DIR)/scr.h
 scr.o: $(SRC_DIR)/scr_base.h
@@ -180,14 +180,14 @@ scr.o: $(SRC_DIR)/scr_help.h
 scr.o: $(SRC_DIR)/scr_real.h
 
 # Dependencies for scr_base.o:
-scr_base.o: $(SRC_DIR)/scr_base.cc
+scr_base.o: $(SRC_DIR)/scr_base.c
 scr_base.o: $(BLD_TOP)config.h
 scr_base.o: $(SRC_DIR)/misc.h
 scr_base.o: $(SRC_DIR)/scr.h
 scr_base.o: $(SRC_DIR)/scr_base.h
 
 # Dependencies for scr_frozen.o:
-scr_frozen.o: $(SRC_DIR)/scr_frozen.cc
+scr_frozen.o: $(SRC_DIR)/scr_frozen.c
 scr_frozen.o: $(BLD_TOP)config.h
 scr_frozen.o: $(SRC_DIR)/misc.h
 scr_frozen.o: $(SRC_DIR)/scr.h
@@ -195,7 +195,7 @@ scr_frozen.o: $(SRC_DIR)/scr_base.h
 scr_frozen.o: $(SRC_DIR)/scr_frozen.h
 
 # Dependencies for scr_help.o:
-scr_help.o: $(SRC_DIR)/scr_help.cc
+scr_help.o: $(SRC_DIR)/scr_help.c
 scr_help.o: $(BLD_TOP)config.h
 scr_help.o: $(SRC_DIR)/misc.h
 scr_help.o: $(SRC_DIR)/scr.h
@@ -204,16 +204,16 @@ scr_help.o: $(SRC_DIR)/scr_base.h
 scr_help.o: $(SRC_DIR)/scr_help.h
 
 # Dependencies for scr_linux.o:
-scr_linux.o: $(SRC_DIR)/scr_linux.cc
+scr_linux.o: $(SRC_DIR)/scr_linux.c
 scr_linux.o: $(BLD_TOP)config.h
 scr_linux.o: $(SRC_DIR)/misc.h
 scr_linux.o: $(SRC_DIR)/scr.h
 scr_linux.o: $(SRC_DIR)/scr_base.h
-scr_linux.o: $(SRC_DIR)/scr_linux.h
 scr_linux.o: $(SRC_DIR)/scr_real.h
+scr_linux.o: $(SRC_DIR)/scr_linux.h
 
 # Dependencies for scr_real.o:
-scr_real.o: $(SRC_DIR)/scr_real.cc
+scr_real.o: $(SRC_DIR)/scr_real.c
 scr_real.o: $(BLD_TOP)config.h
 scr_real.o: $(SRC_DIR)/misc.h
 scr_real.o: $(SRC_DIR)/route.h
@@ -222,7 +222,7 @@ scr_real.o: $(SRC_DIR)/scr_base.h
 scr_real.o: $(SRC_DIR)/scr_real.h
 
 # Dependencies for scr_shm.o:
-scr_shm.o: $(SRC_DIR)/scr_shm.cc
+scr_shm.o: $(SRC_DIR)/scr_shm.c
 scr_shm.o: $(BLD_TOP)config.h
 scr_shm.o: $(SRC_DIR)/scr.h
 scr_shm.o: $(SRC_DIR)/scr_base.h

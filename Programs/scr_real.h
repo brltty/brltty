@@ -20,24 +20,16 @@
 
 #include "scr_base.h"
 
-/* abstract base class - useful for screen source driver pointers */
-class RealScreen : public Screen {
-public:
-  virtual const char *const *parameters (void) = 0;
-  virtual int prepare (char **parameters) = 0;
-  virtual int open (void) = 0;
-  virtual int setup (void) = 0;
-  virtual void close (void) = 0;
-  int route (int, int, int);
-  int point (int, int);
-  int pointer (int &, int &);
-};
+typedef struct {
+  BaseScreen base;
+  const char *const * (*parameters) (void);
+  int (*prepare) (char **parameters);
+  int (*open) (void);
+  int (*setup) (void);
+  void (*close) (void);
+} RealScreen;
 
-
-/* The Live Screen type is instanciated elsewhere and choosen at link time
- * from all available screen source drivers.
- */
-
-extern RealScreen *live;
+extern void initializeRealScreen (RealScreen *);
+extern void initializeLiveScreen (RealScreen *);
 
 #endif /* _SCR_REAL_H */

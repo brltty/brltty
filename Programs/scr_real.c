@@ -37,6 +37,7 @@ extern int gpm_tried;
 static int
 gpmOpenConnection (void) {
   if (!gpm_flag) {
+    int wasTried = gpm_tried;
     Gpm_Connect connection;
     memset(&connection, 0, sizeof(connection));
     connection.eventMask = GPM_MOVE;
@@ -44,7 +45,6 @@ gpmOpenConnection (void) {
     connection.minMod = 0;
     connection.maxMod = ~0;
 
-    int wasTried = gpm_tried;
     gpm_tried = 0;
     gpm_zerobased = 1;
 
@@ -64,15 +64,13 @@ gpmCloseConnection (void) {
 }
 #endif /* HAVE_LIBGPM */
 
-
-int
-RealScreen::route (int column, int row, int screen) {
+static int
+route_RealScreen (int column, int row, int screen) {
   return csrjmp(column, row, screen);
 }
 
-
-int
-RealScreen::point (int column, int row) {
+static int
+point_RealScreen (int column, int row) {
 #ifdef HAVE_LIBGPM
   if (gpmOpenConnection()) {
     Gpm_Event event;
@@ -85,8 +83,8 @@ RealScreen::point (int column, int row) {
   return 0;
 }
 
-int
-RealScreen::pointer (int &column, int &row) {
+static int
+pointer_RealScreen (int *column, int *row) {
 #ifdef HAVE_LIBGPM
   if (gpmOpenConnection()) {
     if (gpm_fd >= 0) {
@@ -94,24 +92,23 @@ RealScreen::pointer (int &column, int &row) {
       int error = 0;
       while (1) {
         fd_set mask;
+        struct timeval timeout;
+        int count;
+        Gpm_Event event;
         FD_ZERO(&mask);
         FD_SET(gpm_fd, &mask);
-
-        struct timeval timeout;
         memset(&timeout, 0, sizeof(timeout));
 
-        int count = select(gpm_fd+1, &mask, NULL, NULL, &timeout);
-        if (count == 0) break;
+        if ((count = select(gpm_fd+1, &mask, NULL, NULL, &timeout)) == 0) break;
         error = 1;
         if (count < 0) break;
         if (!FD_ISSET(gpm_fd, &mask)) break;
 
-        Gpm_Event event;
         if (Gpm_GetEvent(&event) != 1) break;
         error = 0;
 
-        column = event.x;
-        row = event.y;
+        *column = event.x;
+        *row = event.y;
         ok = 1;
       }
 
@@ -121,4 +118,44 @@ RealScreen::pointer (int &column, int &row) {
   }
 #endif /* HAVE_LIBGPM */
   return 0;
+}
+
+static const char *const screenParameters[] = {
+  NULL
+};
+static const char *const *
+parameters_RealScreen (void) {
+  return screenParameters;
+}
+
+static int
+prepare_RealScreen (char **parameters) {
+  return 1;
+}
+
+static int
+open_RealScreen (void) {
+  return 1;
+}
+
+static int
+setup_RealScreen (void) {
+  return 1;
+}
+
+static void
+close_RealScreen (void) {
+}
+
+void
+initializeRealScreen (RealScreen *real) {
+  initializeBaseScreen(&real->base);
+  real->base.route = route_RealScreen;
+  real->base.point = point_RealScreen;
+  real->base.pointer = pointer_RealScreen;
+  real->parameters = parameters_RealScreen;
+  real->prepare = prepare_RealScreen;
+  real->open = open_RealScreen;
+  real->setup = setup_RealScreen;
+  real->close = close_RealScreen;
 }

@@ -63,7 +63,7 @@ void csrjmp_sub(int x, int y, int curscr)
     sigprocmask(SIG_UNBLOCK, &new_mask, NULL);
 
     /* Initialise second thread of screen reading: */
-    if (!initializeRoutingScreen()) return;
+    if (!openRoutingScreen()) return;
 
     describeRoutingScreen(&scr);
 

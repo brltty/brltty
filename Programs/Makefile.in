@@ -37,25 +37,25 @@ ctb_translate.o:
 SCREEN_OBJECTS = scr.o scr_base.o scr_real.o scr_frozen.o scr_help.o $(SCREEN_OBJECT)
 
 scr.o:
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr.cc
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr.c
 
 scr_base.o:
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_base.cc
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_base.c
 
 scr_real.o:
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_real.cc
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_real.c
 
 scr_frozen.o:
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_frozen.cc
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_frozen.c
 
 scr_help.o:
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_help.cc
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_help.c
 
 scr_linux.o:
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_linux.cc
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_linux.c
 
 scr_shm.o:
-	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_shm.cc
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_shm.c
 
 ###############################################################################
 
@@ -111,7 +111,7 @@ rangelist.o:
 BRLTTY_OBJECTS = main.o config.o options.o misc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
 
 brltty: $(BRLTTY_OBJECTS) $(BRAILLE_TARGETS) $(SPEECH_TARGETS)
-	$(CXX) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(LDLIBS)
 
 main.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
@@ -148,7 +148,7 @@ spk.o:
 BRLTEST_OBJECTS = brltest.o options.o misc.o $(SYSTEM_OBJECT) brl.o
 
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
-	$(CXX) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
 brltest.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c
@@ -158,7 +158,7 @@ brltest.o:
 SCRTEST_OBJECTS = scrtest.o options.o misc.o route.o
 
 scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)
-	$(CXX) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
 
 scrtest.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scrtest.c

@@ -1379,10 +1379,11 @@ handleOption (const int option) {
 }
 
 void
-startup(int argc, char *argv[]) {
+startup (int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, NULL);
   prepareBootParameters();
+  initializeAllScreens();
 
   /* Set logging levels. */
   if (opt_standardError)
@@ -1627,7 +1628,7 @@ startup(int argc, char *argv[]) {
   /*
    * Initialize screen library 
    */
-  if (!initializeLiveScreen(screenParameters)) {                                
+  if (!openLiveScreen(screenParameters)) {                                
     LogPrint(LOG_CRIT, "Cannot read screen.");
     exit(7);
   }
@@ -1682,7 +1683,7 @@ startup(int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   /* Initialize the braille driver help screen. */
-  if (!initializeHelpScreen(brailleDriver->helpFile))
+  if (!openHelpScreen(brailleDriver->helpFile))
     LogPrint(LOG_WARNING, "Cannot open help screen file: %s", brailleDriver->helpFile);
 
   if (!opt_quiet) {

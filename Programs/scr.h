@@ -66,6 +66,7 @@ typedef enum {
 } ConsoleKey;
 
 /* Routines which apply to all screens. */
+void initializeAllScreens (void);		/* close screen reading */
 void closeAllScreens (void);		/* close screen reading */
 int selectDisplay (int);		/* select display page */
 
@@ -84,19 +85,19 @@ int executeScreenCommand (int);
 
 /* Routines which apply to the live screen. */
 const char *const *getScreenParameters (void);			/* initialise screen reading functions */
-int initializeLiveScreen (char **parameters);			/* initialise screen reading functions */
+int openLiveScreen (char **parameters);			/* initialise screen reading functions */
 
 /* Routines which apply to the routing screen.
  * An extra `thread' for the cursor routing subprocess.
  * This is needed because the forked subprocess shares its parent's
  * file descriptors.  A readScreen equivalent is not needed.
  */
-int initializeRoutingScreen (void);
+int openRoutingScreen (void);
 void describeRoutingScreen (ScreenDescription *);
 void closeRoutingScreen (void);
 
 /* Routines which apply to the help screen. */
-int initializeHelpScreen (const char *);	/* open help screen file */
+int openHelpScreen (const char *);	/* open help screen file */
 void setHelpPageNumber (short);			/* set screen number (initial default 0) */
 short getHelpPageNumber (void);			/* set screen number (initial default 0) */
 short getHelpPageCount (void);			/* get number of help screens */

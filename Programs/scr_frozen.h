@@ -20,16 +20,12 @@
 
 #include "scr_base.h"
 
-class FrozenScreen:public Screen {
-  ScreenDescription description;
-  unsigned char *text;
-  unsigned char *attributes;
-public:
-  FrozenScreen ();
-  int open (Screen *);		/* called every time the screen is frozen */
-  void close (void);		/* called to discard frozen screen image */
-  void describe (ScreenDescription &);
-  unsigned char *read (ScreenBox, unsigned char *, ScreenMode);
-};
+typedef struct {
+  BaseScreen base;
+  int (*open) (BaseScreen *);		/* called every time the screen is frozen */
+  void (*close) (void);		/* called to discard frozen screen image */
+} FrozenScreen;
+
+extern void initializeFrozenScreen (FrozenScreen *);
 
 #endif /* _SCR_FROZEN_H */

@@ -1,0 +1,96 @@
+/*
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
+ *
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation.  Please see the file COPYING for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+
+#include "misc.h"
+#include "scr.h"
+#include "scr_base.h"
+
+static void
+describe_BaseScreen (ScreenDescription *description) {
+  description->rows = 0;
+  description->cols = 0;
+  description->posx = 0;
+  description->posy = 0;
+  description->no = 0;
+}
+
+static unsigned char *
+read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+  return NULL;
+}
+
+static int
+insert_BaseScreen (unsigned short key) {
+  return 0;
+}
+
+static int
+route_BaseScreen (int column, int row, int screen) {
+  return 0;
+}
+
+static int
+point_BaseScreen (int column, int row) {
+  return 0;
+}
+
+static int
+pointer_BaseScreen (int *column, int *row) {
+  return 0;
+}
+
+static int
+selectvt_BaseScreen (int vt) {
+  return 0;
+}
+
+static int
+switchvt_BaseScreen (int vt) {
+  return 0;
+}
+
+static int
+currentvt_BaseScreen (void) {
+  return 0;
+}
+
+static int
+execute_BaseScreen (int cmd) {
+  return 0;
+}
+
+void
+initializeBaseScreen (BaseScreen *base) {
+  base->describe = describe_BaseScreen;
+  base->read = read_BaseScreen;
+  base->insert = insert_BaseScreen;
+  base->route = route_BaseScreen;
+  base->point = point_BaseScreen;
+  base->pointer = pointer_BaseScreen;
+  base->selectvt = selectvt_BaseScreen;
+  base->switchvt = switchvt_BaseScreen;
+  base->currentvt = currentvt_BaseScreen;
+  base->execute = execute_BaseScreen;
+}
