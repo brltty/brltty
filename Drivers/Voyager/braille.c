@@ -70,26 +70,26 @@ typedef enum {
 #include "Programs/tbl.h"
 
 /* Workarounds for control transfer flakiness (at least in this demo model) */
-#define STALL_TRIES 7
+#define CONTROL_RETRIES 6
 
 /* control message request codes */
-#define BRLVGER_SET_DISPLAY_STATE    0
-#define BRLVGER_SET_DISPLAY_VOLTAGE  1
-#define BRLVGER_GET_DISPLAY_VOLTAGE  2
-#define BRLVGER_GET_SERIAL_NUMBER    3
-#define BRLVGER_GET_HARDWARE_VERSION 4
-#define BRLVGER_GET_FIRMWARE_VERSION 5
-#define BRLVGER_GET_DISPLAY_LENGTH   6
-#define BRLVGER_WRITE_BRAILLE        7
-#define BRLVGER_GET_DISPLAY_CURRENT  8
-#define BRLVGER_BEEP                 9
-#define BRLVGER_GET_KEYS            11
-#define BRLVGER_SET_DISPLAY_LENGTH  12
-#define BRLVGER_READ_MEMORY        128
-#define BRLVGER_WRITE_MEMORY       129
-#define BRLVGER_READ_CODE          130
-#define BRLVGER_WRITE_IO           131
-#define BRLVGER_READ_IO            132
+#define CTL_REQ_SET_DISPLAY_STATE    0
+#define CTL_REQ_SET_DISPLAY_VOLTAGE  1
+#define CTL_REQ_GET_DISPLAY_VOLTAGE  2
+#define CTL_REQ_GET_SERIAL_NUMBER    3
+#define CTL_REQ_GET_HARDWARE_VERSION 4
+#define CTL_REQ_GET_FIRMWARE_VERSION 5
+#define CTL_REQ_GET_DISPLAY_LENGTH   6
+#define CTL_REQ_WRITE_BRAILLE        7
+#define CTL_REQ_GET_DISPLAY_CURRENT  8
+#define CTL_REQ_BEEP                 9
+#define CTL_REQ_GET_KEYS            11
+#define CTL_REQ_SET_DISPLAY_LENGTH  12
+#define CTL_REQ_READ_MEMORY        128
+#define CTL_REQ_WRITE_MEMORY       129
+#define CTL_REQ_READ_CODE          130
+#define CTL_REQ_WRITE_IO           131
+#define CTL_REQ_READ_IO            132
 
 /* Global variables */
 static UsbChannel *usb = NULL;
@@ -111,60 +111,54 @@ static unsigned char statusCells;
 
 
 static int
-_sndcontrolmsg (const char *reqname, uint8_t request, uint16_t value, uint16_t index,
-	        const unsigned char *buffer, uint16_t size) {
-  int ret, repeats = STALL_TRIES;
-  do {
-    if (repeats == STALL_TRIES)
-      LogPrint(LOG_DEBUG, "ctl req 0X%X [%s]", request, reqname);
-    else
-      LogPrint(LOG_WARNING, "ctl req 0X%X (try %d) failed: %s",
-	       request, STALL_TRIES+1-repeats, strerror(errno));
-    ret = usbControlWrite(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
-                          request, value, index, buffer, size, 100);
-  } while(ret<0 && errno==EPIPE && --repeats);
-  if (ret < 0)
-    LogPrint(LOG_ERR, "ctl req 0X%X error: %s",
-             request, strerror(errno));
-  return ret;
+tellDisplay (uint8_t request, uint16_t value, uint16_t index,
+	     const unsigned char *buffer, uint16_t size) {
+  int try = 0;
+  while (1) {
+    int ret = usbControlWrite(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+                              request, value, index, buffer, size, 100);
+    if (ret != -1) return ret;
+    if (errno != EPIPE) break;
+    if (++try > CONTROL_RETRIES) break;
+    LogPrint(LOG_WARNING, "Voyager request 0X%X (try %d) failed: %s",
+             request, try, strerror(errno));
+  }
+  LogPrint(LOG_ERR, "Voyager request 0X%X error: %s",
+           request, strerror(errno));
+  return -1;
 }
-#define sndcontrolmsg(request, value, index, buffer, size) \
-  (_sndcontrolmsg(#request, request, value, index, buffer, size))
 
 static int
-_rcvcontrolmsg (const char *reqname, uint8_t request, uint16_t value, uint16_t index,
-	        unsigned char *buffer, uint16_t size) {
-  int ret, repeats = STALL_TRIES;
-  do {
-    if (repeats == STALL_TRIES)
-      LogPrint(LOG_DEBUG, "ctl req 0X%X [%s]", request, reqname);
-    else
-      LogPrint(LOG_WARNING, "ctl req 0X%X (try %d) failed: %s",
-	       request, STALL_TRIES+1-repeats, strerror(errno));
-    ret = usbControlRead(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
-                         request, value, index, buffer, size, 100);
-  } while(ret<0 && errno==EPIPE && --repeats);
-  if (ret < 0)
-    LogPrint(LOG_ERR, "ctl req 0X%X error: %s",
-             request, strerror(errno));
-  return ret;
+askDisplay (uint8_t request, uint16_t value, uint16_t index,
+	    unsigned char *buffer, uint16_t size) {
+  int try = 0;
+  while (1) {
+    int ret = usbControlRead(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+                             request, value, index, buffer, size, 100);
+    if (ret != -1) return ret;
+    if (errno != EPIPE) break;
+    if (++try > CONTROL_RETRIES) break;
+    LogPrint(LOG_WARNING, "Voyager request 0X%X (try %d) failed: %s",
+             request, try, strerror(errno));
+  }
+  LogPrint(LOG_ERR, "Voyager request 0X%X error: %s",
+           request, strerror(errno));
+  return -1;
 }
-#define rcvcontrolmsg(request, value, index, buffer, size) \
-  (_rcvcontrolmsg(#request, request, value, index, buffer, size))
 
 static int
 setDisplayState (uint16_t state) {
-  return sndcontrolmsg(BRLVGER_SET_DISPLAY_STATE, state, 0, NULL, 0) != -1;
+  return tellDisplay(CTL_REQ_SET_DISPLAY_STATE, state, 0, NULL, 0) != -1;
 }
 
 static int
 writeBraille (unsigned char *cells, uint16_t count, uint16_t start) {
-  return sndcontrolmsg(BRLVGER_WRITE_BRAILLE, 0, start, cells, count) != -1;
+  return tellDisplay(CTL_REQ_WRITE_BRAILLE, 0, start, cells, count) != -1;
 }
 
 static int
 soundBeep (uint16_t duration) {
-  return sndcontrolmsg(BRLVGER_BEEP, duration, 0, NULL, 0) != -1;
+  return tellDisplay(CTL_REQ_BEEP, duration, 0, NULL, 0) != -1;
 }
 
 #define MAX_STRING_LENGTH 0XFF
@@ -217,7 +211,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     /* log the serial number of the display */
     {
       unsigned char buffer[RAW_STRING_SIZE];
-      int size = rcvcontrolmsg(BRLVGER_GET_SERIAL_NUMBER, 0, 0, buffer, sizeof(buffer));
+      int size = askDisplay(CTL_REQ_GET_SERIAL_NUMBER, 0, 0, buffer, sizeof(buffer));
       if (size != -1)
         LogPrint(LOG_INFO, "Voyager Serial Number: %s",
                  decodeString(buffer));
@@ -226,7 +220,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     /* log the hardware version of the display */
     {
       unsigned char buffer[2];
-      int size = rcvcontrolmsg(BRLVGER_GET_HARDWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+      int size = askDisplay(CTL_REQ_GET_HARDWARE_VERSION, 0, 0, buffer, sizeof(buffer));
       if (size != -1)
         LogPrint(LOG_INFO, "Voyager Hardware: %u.%u",
                  buffer[0], buffer[1]);
@@ -235,7 +229,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     /* log the firmware version of the display */
     {
       unsigned char buffer[RAW_STRING_SIZE];
-      int size = rcvcontrolmsg(BRLVGER_GET_FIRMWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+      int size = askDisplay(CTL_REQ_GET_FIRMWARE_VERSION, 0, 0, buffer, sizeof(buffer));
       if (size != -1)
         LogPrint(LOG_INFO, "Voyager Firmware: %s",
                  decodeString(buffer));
@@ -245,7 +239,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     totalCells = 0;
     {
       unsigned char data[2];
-      int size = rcvcontrolmsg(BRLVGER_GET_DISPLAY_LENGTH, 0, 0, data, sizeof(data));
+      int size = askDisplay(CTL_REQ_GET_DISPLAY_LENGTH, 0, 0, data, sizeof(data));
       if (size != -1) {
         switch (data[1]) {
           case 48:
@@ -303,15 +297,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
       /* start the input packet monitor */
       {
-        int ret, repeats = STALL_TRIES;
-        do {
-          if (repeats == STALL_TRIES)
-            LogPrint(LOG_DEBUG, "begin input");
-          else
-            LogPrint(LOG_WARNING, "begin input (try %d) failed: %s",
-                     STALL_TRIES+1-repeats, strerror(errno));
+        int try = 0;
+        int ret;
+        while (1) {
           ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
-        } while (ret==0 && errno==EPIPE && --repeats);
+          if (ret != 0) break;
+          if (errno != EPIPE) break;
+          if (++try > CONTROL_RETRIES) break;
+          LogPrint(LOG_WARNING, "begin input (try %d) failed: %s",
+                   try, strerror(errno));
+        }
         if (ret == 0)
           LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
       }
@@ -840,12 +835,12 @@ static void
 brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char value = 0XFF - (setting * 0XFF / BF_MAXIMUM);
   LogPrint(LOG_DEBUG, "Setting voltage: %02X", value);
-  sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE, value, 0, NULL, 0);
+  tellDisplay(CTL_REQ_SET_DISPLAY_VOLTAGE, value, 0, NULL, 0);
 
   /* log the display voltage */
   {
     unsigned char buffer[2];
-    int size = rcvcontrolmsg(BRLVGER_GET_DISPLAY_VOLTAGE, 0, 0, buffer, sizeof(buffer));
+    int size = askDisplay(CTL_REQ_GET_DISPLAY_VOLTAGE, 0, 0, buffer, sizeof(buffer));
     if (size != -1)
       LogBytes("Display Voltage", buffer, size);
   }
@@ -853,7 +848,7 @@ brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
   /* log the display current */
   {
     unsigned char buffer[2];
-    int size = rcvcontrolmsg(BRLVGER_GET_DISPLAY_CURRENT, 0, 0, buffer, sizeof(buffer));
+    int size = askDisplay(CTL_REQ_GET_DISPLAY_CURRENT, 0, 0, buffer, sizeof(buffer));
     if (size != -1)
       LogBytes("Display Current", buffer, size);
   }
