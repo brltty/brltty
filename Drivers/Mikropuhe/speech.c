@@ -68,7 +68,7 @@ typedef struct {
 } SpeechSegment;
 static Queue *speechQueue = NULL;
 
-static int speechStarted = 0;
+static int speechThreadStarted = 0;
 static pthread_mutex_t speechMutex;
 static pthread_cond_t speechConditional;
 static pthread_t speechThread;
@@ -183,7 +183,7 @@ speechError (int code, const char *action) {
 
 static int
 speechWriter (const void *bytes, unsigned int count, void *data, void *reserved) {
-  if (speechStarted) {
+  if (speechThreadStarted) {
     int written = safe_write(speechDevice, bytes, count);
     if (written == count) return 0;
 
@@ -215,13 +215,13 @@ static void *
 speechMain (void *data) {
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
   pthread_mutex_lock(&speechMutex);
-  while (speechStarted) {
+  while (speechThreadStarted) {
     SpeechSegment *segment;
     pthread_cond_wait(&speechConditional, &speechMutex);
     while ((segment = dequeueItem(speechQueue))) {
       if (segment->tags) {
         speechWrite((unsigned char *)(segment+1), segment->length, segment->tags);
-      } else if (speechStarted && openDevice()) {
+      } else if (speechThreadStarted && openDevice()) {
         pthread_mutex_unlock(&speechMutex);
         speechWrite((unsigned char *)(segment+1), segment->length, segment->tags);
         pthread_mutex_lock(&speechMutex);
@@ -234,11 +234,11 @@ speechMain (void *data) {
 }
 
 static int
-speechStart (void) {
+startSpeechThread (void) {
   int error;
-  if (speechStarted) return 1;
+  if (speechThreadStarted) return 1;
 
-  speechStarted = 1;
+  speechThreadStarted = 1;
   if (!(error = pthread_mutex_init(&speechMutex, NULL))) {
     if (!(error = pthread_cond_init(&speechConditional, NULL))) {
       pthread_attr_t attributes;
@@ -264,13 +264,24 @@ speechStart (void) {
   } else {
     LogPrint(LOG_ERR, "Cannot initialize speech mutex: %s", strerror(error));
   }
-  speechStarted = 0;
+  speechThreadStarted = 0;
   return 0;
+}
+
+static void
+stopSpeechThread (void) {
+  if (speechThreadStarted) {
+    speechThreadStarted = 0;
+    pthread_cond_signal(&speechConditional);
+    pthread_join(speechThread, NULL);
+    pthread_cond_destroy(&speechConditional);
+    pthread_mutex_destroy(&speechMutex);
+  }
 }
 
 static int
 writeSpeech (const unsigned char *bytes, int length, int tags) {
-  if (speechStart()) {
+  if (startSpeechThread()) {
     SpeechSegment *segment;
     if ((segment = allocateSpeechSegment(bytes, length, tags))) {
       Element *element;
@@ -373,7 +384,7 @@ spk_open (char **parameters) {
 
 static void
 spk_close (void) {
-  spk_mute();
+  stopSpeechThread();
 
   if (speechDevice != -1) {
     close(speechDevice);
@@ -408,13 +419,8 @@ spk_say (const unsigned char *buffer, int length) {
 
 static void
 spk_mute (void) {
-  if (speechStarted) {
-    speechStarted = 0;
-    pthread_cond_signal(&speechConditional);
-    pthread_join(speechThread, NULL);
-    pthread_cond_destroy(&speechConditional);
-    pthread_mutex_destroy(&speechMutex);
-  }
+  stopSpeechThread();
+  if (speechDevice != -1) cancelPcmOutput(speechDevice);
 }
 
 static void

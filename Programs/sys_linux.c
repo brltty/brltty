@@ -231,6 +231,11 @@ setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
   }
   return doPcmAmplitudeFormat(descriptor, entry->external);
 }
+
+void
+cancelPcmOutput (int descriptor) {
+  ioctl(descriptor, SNDCTL_DSP_RESET, 0);
+}
 #endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES

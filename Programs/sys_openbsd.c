@@ -206,6 +206,10 @@ PcmAmplitudeFormat
 setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
   return getPcmAmplitudeFormat(descriptor);
 }
+
+void
+cancelPcmOutput (int descriptor) {
+}
 #endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES
