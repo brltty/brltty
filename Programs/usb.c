@@ -493,12 +493,16 @@ usbBeginInput (
   int actual = 0;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
-    if ((endpoint->direction.input.pending = newQueue(usbDeallocatePendingInputRequest, NULL))) {
-      setQueueData(endpoint->direction.input.pending, endpoint);
-      while (actual < count) {
-        if (!usbAddPendingInputRequest(endpoint)) break;
-        actual++;
+    if (!endpoint->direction.input.pending) {
+      if ((endpoint->direction.input.pending = newQueue(usbDeallocatePendingInputRequest, NULL))) {
+        setQueueData(endpoint->direction.input.pending, endpoint);
       }
+    }
+
+    if (endpoint->direction.input.pending) {
+      while ((actual = getQueueSize(endpoint->direction.input.pending)) < count)
+        if (!usbAddPendingInputRequest(endpoint))
+          break;
     }
   }
   return actual;
