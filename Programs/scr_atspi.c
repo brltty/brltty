@@ -125,6 +125,7 @@ static void caretPosition(long caret) {
 }
 
 static void finiTerm(void) {
+  LogPrint(LOG_DEBUG,"end of term %p",curTerm);
   Accessible_unref(curTerm);
   curTerm = NULL;
   Accessible_unref(curFocus);
@@ -137,7 +138,9 @@ static void restartTerm(Accessible *newTerm) {
   const char *e;
   long i,len;
   char *text;
-  finiTerm();
+
+  if (curFocus)
+    finiTerm();
   Accessible_ref(curFocus = newTerm);
   curTerm = Accessible_getText(newTerm);
   LogPrint(LOG_DEBUG,"new term %p",curTerm);
@@ -202,6 +205,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
   ev->next = evs;
   ev->ev = event;
   evs = ev;
+  int state_changed_focused;
 
   /* this is not atomic but we can only be recursively called within calls
    * to the lib */
@@ -215,13 +219,18 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
     /* pickup a list of events to handle */
     ev = evs;
     evs = NULL;
-    for (; ev; ev = ev->next) {
+    for (; ev; AccessibleEvent_unref(ev->ev), ev = ev->next) {
       event = ev->ev;
-      if (!strcmp(event->type,"focus:")) {
-	if (Accessible_getRole(event->source) == SPI_ROLE_TERMINAL)
-	  restartTerm(event->source);
-	else
+      state_changed_focused = !strcmp(event->type,"object:state-changed:focused");
+      if (state_changed_focused && !event->detail1) {
+	if (event->source == curFocus)
 	  finiTerm();
+      } else if (!strcmp(event->type,"focus:") || (state_changed_focused && event->detail1)) {
+	if (Accessible_getRole(event->source) != SPI_ROLE_TERMINAL) {
+	  if (curFocus)
+	    finiTerm();
+	} else if (event->source != curFocus)
+	  restartTerm(event->source);
       } else if (!strcmp(event->type,"object:text-caret-moved")) {
 	if (event->source != curFocus) continue;
 	caretPosition(event->detail1);
@@ -328,7 +337,6 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	caretPosition(AccessibleText_getCaretOffset(curTerm));
       } else
 	LogPrint(LOG_INFO,"event %s, source %p, detail1 %lu detail2 %lu",event->type,event->source,event->detail1,event->detail2);
-      AccessibleEvent_unref(event);
     }
     pthread_mutex_unlock(&updateMutex);
   }
@@ -342,6 +350,7 @@ static void *doAtSPIScreenOpen(void *arg) {
   static const char *events[] = {
     "object:text-changed",
     "object:text-caret-moved",
+    "object:state-changed:focused",
     "focus:",
   };
   const char **event;
@@ -359,6 +368,8 @@ static void *doAtSPIScreenOpen(void *arg) {
   if (!(SPI_deregisterGlobalEventListenerAll(evListener)))
     LogPrint(LOG_ERR,"SPI_deregisterGlobalEventListenerAll failed");
   AccessibleEventListener_unref(evListener);
+  if (curFocus)
+    finiTerm();
   if ((res=SPI_exit()))
     LogPrint(LOG_ERR,"SPI_exit returned %d",res);
   return NULL;
