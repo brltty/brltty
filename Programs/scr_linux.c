@@ -1188,7 +1188,7 @@ openUinputDevice (void) {
     strcpy(device.name, "brltty");
     if (write(uinputDevice, &device, sizeof(device)) == sizeof(device)) {
       ioctl(uinputDevice, UI_SET_EVBIT, EV_KEY);
-
+      ioctl(uinputDevice, UI_SET_EVBIT, EV_REP);
       {
         int key;
         for (key=KEY_RESERVED; key<KEY_UNKNOWN; key++) {
