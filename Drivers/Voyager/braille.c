@@ -51,17 +51,17 @@
 #include "Programs/message.h"
 
 typedef enum {
-  PARM_BRLINPUT,
+  PARM_INPUTMODE,
   PARM_STATUSCELLS
 } DriverParameter;
-#define BRLPARMS "brlinput", "statuscells"
+#define BRLPARMS "inputmode", "statuscells"
 
 #define BRLSTAT ST_VoyagerStyle
 #define BRL_HAVE_FIRMNESS
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
 
-static int brlinput = 1;
+static int inputMode = 0;
 
 /* Workaround USB<->Voyager flakiness: repeat commands */
 #define STALL_TRIES 7
@@ -100,8 +100,8 @@ static unsigned char textOffset;
 static unsigned char textCells;
 static unsigned char statusOffset;
 static unsigned char statusCells;
-#define IS_TEXT_KEYS(key1,key2) (((key1) >= textOffset) && ((key2) < (textOffset + textCells)))
-#define IS_TEXT_KEY(key) IS_TEXT_KEYS((key), (key))
+#define IS_TEXT_RANGE(key1,key2) (((key1) >= textOffset) && ((key2) < (textOffset + textCells)))
+#define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
 #define IS_STATUS_KEY(key) (((key) >= statusOffset) && ((key) < (statusOffset + statusCells)))
 
 static unsigned char *prevdata, /* previous pattern displayed */
@@ -185,10 +185,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int ret;
 
-  if (*parameters[PARM_BRLINPUT])
-    validateYesNo(&brlinput, "Allow braille input",
-                  parameters[PARM_BRLINPUT]);
-  brlinput = !!brlinput;
+  if (*parameters[PARM_INPUTMODE])
+    validateYesNo(&inputMode, "Allow braille input",
+                  parameters[PARM_INPUTMODE]);
+  inputMode = !!inputMode;
 
   if (!isUsbDevice(&device)) {
     LogPrint(LOG_ERR,"Unsupported port type. Must be USB.");
@@ -490,51 +490,52 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   int cmd = CMD_NOOP;
   int i, r, release, repeat = 0;
 
-  if(readbrl_init) {
+  if (readbrl_init) {
     /* initialize state */
     readbrl_init = 0;
     pending_cmd = EOF;
     memset(rtk_pressed, 0, sizeof(rtk_pressed));
   }
 
-  if(pending_cmd != EOF){
+  if (pending_cmd != EOF) {
     cmd = pending_cmd;
     pending_cmd = EOF;
     return cmd;
   }
 
   r = usbReapInput(usb->device, usb->definition.inputEndpoint, buf, 8, 0, 0);
-  if(r<0) {
-    if(errno == EAGAIN) {
+  if (r < 0) {
+    if (errno == EAGAIN) {
       /* no input */
       r = 0;
-    }else if(errno == ENODEV) {
+    } else if (errno == ENODEV) {
       /* Display was disconnected */
       return CMD_RESTARTBRL;
-    }else{
+    } else {
       LogPrint(LOG_NOTICE,"Read error: %s.", strerror(errno));
       readbrl_init = 1;
       return EOF;
     }
-  }else if(r>0 && r<8) {
+  } else if (r>0 && r<8) {
     /* The display handles read requests of only and exactly 8bytes */
     LogPrint(LOG_NOTICE,"Short read %d", r);
     readbrl_init = 1;
     return EOF;
   }
 
-  if(r==0) /* no new key */
+  if (r == 0) {
+    /* no new key */
     return EOF;
+  }
   /* one or more keys were pressed or released */
 
   /* We combine dot and front key info in keystate */
   keystate |= (buf[1]<<8) | buf[0];
   
-  for(i=2; i<8; i++) {
-    unsigned key = buf[i];
-    if(!key)
-      break;
-    if(key < 1 || key > totalCells) {
+  for (i=2; i<8; i++) {
+    unsigned char key = buf[i];
+    if (!key) break;
+    if (key < 1 || key > totalCells) {
       LogPrint(LOG_NOTICE, "Invalid routing key number %u", key);
       continue;
     }
@@ -543,12 +544,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   }
 
   /* build rtk_which */
-  for(howmanykeys = 0, i = 0; i < totalCells; i++)
-    if(rtk_pressed[i])
+  for (howmanykeys=0, i=0; i<totalCells; i++)
+    if (rtk_pressed[i])
       rtk_which[howmanykeys++] = i;
   /* rtk_pressed[i] tells if routing key i is pressed.
-     rtk_which[0] to rtk_which[howmanykeys-1] lists
-     the numbers of the keys that are pressed. */
+   * rtk_which[0] to rtk_which[howmanykeys-1] lists
+   * the numbers of the keys that are pressed.
+   */
 
   release = (!buf[0] && !buf[1] && !buf[2]);
 
@@ -644,24 +646,26 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  HKEY(302, K_RR|K_DOWN, CMD_CSRJMP_VERT,
 	       "Route cursor to current line");
 
-	  HLP(601, "A+D", "Input mode (toggle)")
-          case K_A|K_D:
-            if (release) {
-              cmd = CMD_NOOP | ((brlinput = !brlinput)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
-            }
-            break;
-	  HKEY(602, K_B+K_C, VAL_PASSDOTS+0, "Space bar")
+	  HKEY(602, K_B|K_C, VAL_PASSDOTS+0, "Space bar")
 	}
       }
     } else if (!(keystate & ~DOT_KEYS)) {
       /* Just dot keys */
       /* This is a character typed in braille */
       cmd = VAL_PASSDOTS | inputTable[keystate];
-    } else if ((keystate & SPACE_BAR) && !(keystate & FRONT_KEYS & ~SPACE_BAR)) {
+    } else if ((!inputMode || (keystate & SPACE_BAR)) &&
+               !(keystate & FRONT_KEYS & ~SPACE_BAR)) {
       /* Dots combined with B or C or both but no other front keys.
        * This is a chorded character typed in braille.
        */
       switch (keystate & DOT_KEYS) {
+        HLP(601, "Chord-1478", "Input mode (toggle)")
+        case DOT1|DOT4|DOT7|DOT8:
+          if (release) {
+            cmd = CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
+          }
+          break;
+
 	CKEY(205, DOT1|DOT2|DOT3|DOT4|DOT5|DOT6|DOT7|DOT8, CMD_PREFMENU, "Preferences menu (toggle)");
 	CKEY(610, DOT1|DOT2, VAL_PASSKEY + VPK_BACKSPACE, "Backspace key");
 	CKEY(610, DOT1|DOT4|DOT5, VAL_PASSKEY + VPK_DELETE, "Delete key");
@@ -701,7 +705,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
         cmd = CMD_CSRJMP_VERT;
       }
     } else if (howmanykeys == 3 &&
-               IS_TEXT_KEYS(rtk_which[0], rtk_which[2]) &&
+               IS_TEXT_RANGE(rtk_which[0], rtk_which[2]) &&
                rtk_which[0]+2 == rtk_which[1]) {
       HLP(405, "CRtx + CRt(x+2) + CRty", "Cut text from x through y")
       cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
@@ -761,11 +765,6 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
              "Go to previous/next line indented no more than #");
     }
   }
-
-  if (!brlinput &&
-     ((keystate & DOT_KEYS) || (keystate & (K_B|K_C)) == (K_B|K_C)))
-    /* braille dot keys or spacebar is disallowed. */
-    cmd = CMD_NOOP;
 
   if (release) {
     repeat = 0;

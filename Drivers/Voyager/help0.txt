@@ -65,7 +65,7 @@ CRt#+DOWN: Go right # cells
 CRt#+ B/C: Go to previous/next line indented no more than #
 
 Typing in Braille
-A+D: Input mode (toggle)
+Chord-1478: Input mode (toggle)
 B+C: Space bar
 Chord-12: Backspace key
 Chord-145: Delete key

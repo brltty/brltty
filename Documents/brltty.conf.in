@@ -135,7 +135,8 @@
 #braille-parameters vs:DisplaySize=40 # [20-40]
 
 # Voyager Braille Driver Parameters
-#braille-parameters vo:BrlInput=yes # [yes,no]
+#braille-parameters vo:InputMode=no # [no,yes]
+#braille-parameters vo:StatusCells=3 # [0,n,-n]
 
 
 ###########################

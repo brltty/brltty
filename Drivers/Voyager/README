@@ -65,11 +65,15 @@ the braille-parameters clause in your BRLTTY configuration file
 (/etc/brltty.conf) or via brltty's -B (--braille-parameters=) command
 line option.
 
-brlinput: This parameter specifies whether or not the eight top keys
-function as a braille keyboard. It may be set to either "yes" (the
-default) or "no".
+InputMode: This parameter specifies whether or not the eight top keys
+function as a braille keyboard. When set to "no" (the default), top
+key combinations perform various navigational and operational
+functions. When set to yes", they function as an 8-dot braille
+keyboard. If B, C, or B+C is pressed along with any top key
+combination then it's as if this parameter were set to "no".
 
-statuscells: This parameter specifies how many cells are to be reserved
+StatusCells: This parameter specifies how many cells are to be 
+reserved
 for status indicators. It may be an integer with an absolute value no
 greater than half the size of the display. If it's positive then the
 status cells are on the left, if it's negative then they're on the
