@@ -281,7 +281,7 @@ install-programs: brltty brltty-install
 	$(INSTALL_PROGRAM) brltty $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
-install-help: $(BRAILLE_DRIVERS) install-data-directory
+install-help: $(BRAILLE_DRIVERS) $(BRAILLE_HELP) install-data-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIRECTORY) 
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES)
@@ -299,7 +299,7 @@ install-contraction-tables: install-data-directory
 install-data-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIRECTORY) 
 
-install-drivers: brltty
+install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(LIB_EXT) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/*.lst $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
@@ -344,12 +344,12 @@ uninstall-data:
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.ctb
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.cti
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/brltty*
-	-rmdir $(INSTALL_ROOT)$(DATA_DIRECTORY)
+	-[ -d $(INSTALL_ROOT)$(DATA_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(DATA_DIRECTORY)
 
 uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/brltty-*.lst
-	-rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
+	-[ -d $(INSTALL_ROOT)$(LIBRARY_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
@@ -366,7 +366,7 @@ uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brlapi.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
-	-rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	-[ -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
 ###############################################################################
 
