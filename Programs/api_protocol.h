@@ -135,6 +135,42 @@ ssize_t brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size
  */
 ssize_t brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size);
 
+/* brlapi_fd_mutex */
+/** Mutex for protecting concurrent fd access
+ *
+ * In order to regulate concurrent access to the library's file descriptor and
+ * requests to / answers from \e BrlAPI server, every function of the library
+ * locks this mutex, namely
+ *
+ * - brlapi_initializeConnection()
+ * - brlapi_closeConnection()
+ * - brlapi_getRaw()
+ * - brlapi_leaveRaw()
+ * - brlapi_sendRaw()
+ * - brlapi_recvRaw()
+ * - brlapi_getDriverId()
+ * - brlapi_getDriverName()
+ * - brlapi_getDisplaySize()
+ * - brlapi_getTty()
+ * - brlapi_leaveTty()
+ * - brlapi_*write*()
+ * - brlapi_(un)?ignorekey(Range|Set)()
+ * - brlapi_readKey()
+ *
+ * If both these functions and brlapi_writePacket() or brlapi_readPacket() are
+ * used in a multithreaded application, this mutex must be locked before calling
+ * brlapi_writePacket() or brlapi_readPacket(), and unlocked afterwards.
+ */
+#ifdef __MINGW32__
+#include <windows.h>
+extern HANDLE brlapi_fd_mutex;
+#else /* __MINGW32__ */
+#include <pthread.h>
+extern pthread_mutex_t brlapi_fd_mutex;
+#endif /* __MINGW32__ */
+
+/* @} */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

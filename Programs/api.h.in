@@ -683,36 +683,6 @@ void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *buf, size_
 
 /** @} */
 
-#include <pthread.h>
-
-/* brlapi_fd_mutex */
-/** Mutex for protecting concurrent fd access
- *
- * In order to regulate concurrent access to the library's file descriptor and
- * requests to / answers from \e BrlAPI server, every function of the library
- * locks this mutex, namely
- *
- * - brlapi_initializeConnection()
- * - brlapi_closeConnection()
- * - brlapi_getRaw()
- * - brlapi_leaveRaw()
- * - brlapi_sendRaw()
- * - brlapi_recvRaw()
- * - brlapi_getDriverId()
- * - brlapi_getDriverName()
- * - brlapi_getDisplaySize()
- * - brlapi_getTty()
- * - brlapi_leaveTty()
- * - brlapi_*write*()
- * - brlapi_(un)?ignorekey(Range|Set)()
- * - brlapi_readKey()
- *
- * If both these functions and brlapi_writePacket() or brlapi_readPacket() are
- * used in a multithreaded application, this mutex must be locked before calling
- * brlapi_writePacket() or brlapi_readPacket(), and unlocked afterwards.
- */
-extern pthread_mutex_t brlapi_fd_mutex;
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
