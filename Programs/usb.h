@@ -191,11 +191,6 @@ extern int usbIsSerialDevice (
   UsbDevice *device,
   unsigned int interface
 );
-extern char *usbGetSerialDevice (
-  UsbDevice *device,
-  unsigned int interface
-);
-
 extern int usbClaimInterface (
   UsbDevice *device,
   unsigned int interface

@@ -31,7 +31,6 @@
 #include <sys/ioctl.h>
 #include <linux/compiler.h>
 #include <linux/usbdevice_fs.h>
-#include <linux/serial.h>
 
 #include "misc.h"
 #include "usb.h"
@@ -39,7 +38,9 @@
 
 int
 usbResetDevice (UsbDevice *device) {
-  return ioctl(device->file, USBDEVFS_RESET, NULL);
+  if (ioctl(device->file, USBDEVFS_RESET, NULL) != -1) return 1;
+  LogError("USB device reset");
+  return 0;
 }
 
 int
@@ -47,7 +48,9 @@ usbSetConfiguration (
   UsbDevice *device,
   unsigned int configuration
 ) {
-  return ioctl(device->file, USBDEVFS_SETCONFIGURATION, &configuration);
+  if (ioctl(device->file, USBDEVFS_SETCONFIGURATION, &configuration) != -1) return 1;;
+  LogError("USB configuration set");
+  return 0;
 }
 
 static char *
@@ -60,21 +63,6 @@ usbGetDriver (
   arg.interface = interface;
   if (ioctl(device->file, USBDEVFS_GETDRIVER, &arg) == -1) return NULL;
   return strdup(arg.driver);
-}
-
-static int
-usbControlDriver (
-  UsbDevice *device,
-  unsigned int interface,
-  int code,
-  void *data
-) {
-  struct usbdevfs_ioctl arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.ifno = interface;
-  arg.ioctl_code = code;
-  arg.data = data;
-  return ioctl(device->file, USBDEVFS_IOCTL, &arg);
 }
 
 int
@@ -93,31 +81,34 @@ usbIsSerialDevice (
   return yes;
 }
 
-char *
-usbGetSerialDevice (
+static int
+usbControlDriver (
+  UsbDevice *device,
+  unsigned int interface,
+  int code,
+  void *data
+) {
+  struct usbdevfs_ioctl arg;
+  memset(&arg, 0, sizeof(arg));
+  arg.ifno = interface;
+  arg.ioctl_code = code;
+  arg.data = data;
+  if (ioctl(device->file, USBDEVFS_IOCTL, &arg) != -1) return 1;
+  LogError("USB driver control");
+  return 0;
+}
+
+static int
+usbDisconnectDriver (
   UsbDevice *device,
   unsigned int interface
 ) {
-  char *path = NULL;
-  if (usbIsSerialDevice(device, interface)) {
-    struct serial_struct serial;
-    if (usbControlDriver(device, interface, TIOCGSERIAL, &serial) != -1) {
-      static const char *const prefixTable[] = {"/dev/ttyUSB", "/dev/usb/tts/", NULL};
-      const char *const *prefix = prefixTable;
-      while (*prefix) {
-        char buffer[0X80];
-        snprintf(buffer, sizeof(buffer), "%s%d", *prefix, serial.line);
-        if (access(buffer, F_OK) != -1) {
-          path = strdup(buffer);
-          break;
-        }
-        ++prefix;
-      }
-    } else {
-      LogError("USB control driver");
-    }
-  }
-  return path;
+#ifdef USBDEVFS_DISCONNECT
+  if (usbControlDriver(device, interface, USBDEVFS_DISCONNECT, NULL)) return 1;
+#else /* USBDEVFS_DISCONNECT */
+  LogPrint(LOG_WARNING, "USB driver disconnection not available.");
+#endif /* USBDEVFS_DISCONNECT */
+  return 0;
 }
 
 int
@@ -125,7 +116,25 @@ usbClaimInterface (
   UsbDevice *device,
   unsigned int interface
 ) {
-  return ioctl(device->file, USBDEVFS_CLAIMINTERFACE, &interface);
+  int disconnected = 0;
+claim:
+  if (ioctl(device->file, USBDEVFS_CLAIMINTERFACE, &interface) != -1) return 1;
+
+  if (errno == EBUSY) {
+    char *driver = usbGetDriver(device, interface);
+    if (driver) {
+      LogPrint(LOG_WARNING, "USB interface in use: %s", driver);
+      free(driver);
+
+      if (!disconnected) {
+        disconnected = 1;
+        if (usbDisconnectDriver(device, interface)) goto claim;
+      }
+    }
+  }
+
+  LogError("USB interface claim");
+  return 0;
 }
 
 int
@@ -133,7 +142,9 @@ usbReleaseInterface (
   UsbDevice *device,
   unsigned int interface
 ) {
-  return ioctl(device->file, USBDEVFS_RELEASEINTERFACE, &interface);
+  if (ioctl(device->file, USBDEVFS_RELEASEINTERFACE, &interface) != -1) return 1;
+  LogError("USB interface release");
+  return 0;
 }
 
 int
@@ -146,7 +157,9 @@ usbSetAlternative (
   memset(&arg, 0, sizeof(arg));
   arg.interface = interface;
   arg.altsetting = alternative;
-  return ioctl(device->file, USBDEVFS_SETINTERFACE, &arg);
+  if (ioctl(device->file, USBDEVFS_SETINTERFACE, &arg) != -1) return 1;
+  LogError("USB alternative set");
+  return 0;
 }
 
 int
@@ -154,7 +167,9 @@ usbResetEndpoint (
   UsbDevice *device,
   unsigned int endpoint
 ) {
-  return ioctl(device->file, USBDEVFS_RESETEP, &endpoint);
+  if (ioctl(device->file, USBDEVFS_RESETEP, &endpoint) != -1) return 1;
+  LogError("USB endpoint reset");
+  return 0;
 }
 
 int
@@ -162,7 +177,9 @@ usbClearEndpoint (
   UsbDevice *device,
   unsigned int endpoint
 ) {
-  return ioctl(device->file, USBDEVFS_CLEAR_HALT, &endpoint);
+  if (ioctl(device->file, USBDEVFS_CLEAR_HALT, &endpoint) != -1) return 1;
+  LogError("USB endpoint clear");
+  return 0;
 }
 
 int
@@ -190,7 +207,12 @@ usbControlTransfer (
   arg.setup.wLength = length;
   arg.transfer.data = data;
   arg.transfer.timeout = timeout;
-  return ioctl(device->file, USBDEVFS_CONTROL, &arg);
+
+  {
+    int count = ioctl(device->file, USBDEVFS_CONTROL, &arg);
+    if (count == -1) LogError("USB control transfer");
+    return count;
+  }
 }
 
 int
@@ -207,7 +229,12 @@ usbBulkTransfer (
   arg.data = data;
   arg.len = length;
   arg.timeout = timeout;
-  return ioctl(device->file, USBDEVFS_BULK, &arg);
+
+  {
+    int count = ioctl(device->file, USBDEVFS_BULK, &arg);
+    if (count == -1) LogError("USB bulk transfer");
+    return count;
+  }
 }
 
 void *
@@ -244,6 +271,7 @@ usbSubmitRequest (
     urb->signr = 0;
     urb->usercontext = data;
     if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
+    if (errno != ENXIO) LogError("USB URB submit");
     free(urb);
   }
   return NULL;
@@ -254,9 +282,14 @@ usbCancelRequest (
   UsbDevice *device,
   void *request
 ) {
-  int result = ioctl(device->file, USBDEVFS_DISCARDURB, request);
-  if (result != -1) free(request);
-  return result;
+  if (ioctl(device->file, USBDEVFS_DISCARDURB, request) == -1) {
+    if (errno != EINVAL) {
+      LogError("USB URB discard");
+      return 0;
+    }
+  }
+  free(request);
+  return 1;
 }
 
 void *
@@ -275,14 +308,14 @@ usbReapResponse (
             wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
             &urb) == -1) {
     urb = NULL;
+    if (wait || (errno != EAGAIN)) LogError("USB URB reap");
   } else if (!urb) {
     errno = EAGAIN;
   } else if (urb->status) {
-    int status = urb->status;
-    if (status < 0) status = -status;
+    if ((errno = urb->status) < 0) errno = -errno;
+    LogError("USB URB status");
     free(urb);
     urb = NULL;
-    errno = status;
   } else {
     response->buffer = urb->buffer;
     response->length = urb->actual_length;
@@ -294,7 +327,14 @@ usbReapResponse (
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   int count = read(device->file, &device->descriptor, USB_DESCRIPTOR_SIZE_DEVICE);
-  return count == USB_DESCRIPTOR_SIZE_DEVICE;
+  if (count == -1) {
+    LogError("USB device descriptor read");
+  } else if (count != USB_DESCRIPTOR_SIZE_DEVICE) {
+    LogPrint(LOG_ERR, "USB short device descriptor (%d).", count);
+  } else {
+    return 1;
+  }
+  return 0;
 }
 
 static UsbDevice *

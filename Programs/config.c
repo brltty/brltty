@@ -601,15 +601,10 @@ getBrailleDriver (void) {
 
 static void
 startBrailleDriver (void) {
-   int oldLogLevel = -1;
-   int oldPrintLevel = -1;
-
    while (1) {
       if (brailleDriver->open(&brl, brailleParameters, opt_brailleDevice)) {
          if (allocateBrailleBuffer(&brl)) {
             braille = brailleDriver;
-            if (oldLogLevel >= 0) setLogLevel(oldLogLevel);
-            if (oldPrintLevel >= 0) setPrintLevel(oldPrintLevel);
 
             clearStatusCells();
             setHelpPageNumber(brl.helpPage);
@@ -625,8 +620,6 @@ startBrailleDriver (void) {
 
       delay(5000);
       initializeBraille();
-      if (oldLogLevel < 0) oldLogLevel = setLogLevel(LOG_CRIT);
-      if (oldPrintLevel < 0) oldPrintLevel = setPrintLevel(LOG_CRIT);
    }
 }
 

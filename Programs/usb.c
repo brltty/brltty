@@ -76,12 +76,12 @@ usbGetString (
   int count;
   unsigned char *string;
 
-  if (!device->stringLanguage)
-    if (!usbGetLanguage(device, &device->stringLanguage, timeout))
+  if (!device->language)
+    if (!usbGetLanguage(device, &device->language, timeout))
       return NULL;
 
   if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
-                                number, device->stringLanguage,
+                                number, device->language,
                                 &descriptor, timeout)) == -1)
     return NULL;
   count = (count - 2) / sizeof(descriptor.string.wData[0]);
@@ -165,6 +165,7 @@ usbDeleteInputElement (
   UsbDevice *device,
   struct UsbInputElement *input
 ) {
+  if (input->request) usbCancelRequest(device, input->request);
   if (input->previous) {
     input->previous->next = input->next;
   } else {
@@ -182,15 +183,14 @@ usbBeginInput (
   int count
 ) {
   int actual = 0;
+
   device->inputRequest = NULL;
   device->inputEndpoint = endpoint | USB_DIR_IN;
   device->inputSize = size;
   device->inputFlags = 0;
+
   while (actual < count) {
-    if (!usbAddInputElement(device)) {
-      if (errno == ENXIO) break;
-      return -1;
-    }
+    if (!usbAddInputElement(device)) break;
     actual++;
   }
   return actual;
@@ -210,7 +210,11 @@ usbReapInput (
       UsbResponse response;
       if (!(device->inputRequest = usbReapResponse(device, &response, wait))) return -1;
       usbAddInputElement(device);
-      usbDeleteInputElement(device, response.context);
+      {
+        struct UsbInputElement *input = response.context;
+        input->request = NULL;
+        usbDeleteInputElement(device, input);
+      }
       device->inputBuffer = response.buffer;
       device->inputLength = response.length;
     }

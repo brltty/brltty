@@ -467,6 +467,7 @@ static const InputOutputOperations serialOperations = {
 #include "Programs/usb.h"
 
 static UsbDevice *usbDevice = NULL;
+static unsigned char usbInterface;
 static unsigned char usbOutputEndpoint;
 static unsigned char usbInputEndpoint;
 
@@ -475,25 +476,18 @@ chooseUsbDevice (UsbDevice *device, void *data) {
   const char *serialNumber = data;
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
   if ((descriptor->idVendor == 0X6b0) && (descriptor->idProduct == 1)) {
-    const unsigned int interface = 0;
-
     if (!usbVerifySerialNumber(device, serialNumber)) return 0;
 
-    if (usbClaimInterface(device, interface) != -1) {
-      if (usbSetConfiguration(device, 1) != -1) {
-        if (usbSetAlternative(device, interface, 0) != -1) {
+    usbInterface = 0;
+    if (usbClaimInterface(device, usbInterface)) {
+      if (usbSetConfiguration(device, 1)) {
+        if (usbSetAlternative(device, usbInterface, 0)) {
           usbInputEndpoint = 1;
           usbOutputEndpoint = 2;
           return 1;
-        } else {
-          LogError("set USB alternative");
         }
-      } else {
-        LogError("set USB configuration");
       }
-      usbReleaseInterface(device, interface);
-    } else {
-      LogError("claim USB interface");
+      usbReleaseInterface(device, usbInterface);
     }
   }
   return 0;
@@ -502,10 +496,8 @@ chooseUsbDevice (UsbDevice *device, void *data) {
 static int
 openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    if (usbBeginInput(usbDevice, usbInputEndpoint, 8, 8) != -1) {
+    if (usbBeginInput(usbDevice, usbInputEndpoint, 8, 8)) {
       return 1;
-    } else {
-      LogError("begin USB input");
     }
 
     usbCloseDevice(usbDevice);
@@ -526,6 +518,7 @@ resetUsbPort (void) {
 static void
 closeUsbPort (void) {
   if (usbDevice) {
+    usbReleaseInterface(usbDevice, usbInterface);
     usbCloseDevice(usbDevice);
     usbDevice = NULL;
   }
@@ -538,7 +531,6 @@ readUsbPacket (unsigned char *buffer, int length) {
     int count = usbReapInput(usbDevice, bytes, sizeof(bytes), 0);
     if (count == -1) {
       if (errno == EAGAIN) return 0;
-      LogError("USB read");
       return count;
     }
 

@@ -31,6 +31,8 @@ struct UsbInputElement {
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
   int file;
+  int interface;
+  uint16_t language;
 
   unsigned char inputEndpoint;
   int inputSize;
@@ -39,8 +41,6 @@ struct UsbDeviceStruct {
   void *inputRequest;
   unsigned char *inputBuffer;
   int inputLength;
-
-  uint16_t stringLanguage;
 };
 
 extern UsbDevice *usbTestDevice (
