@@ -365,7 +365,7 @@ distclean::
 	-rm -f brlapi.h
 
 clean::
-	-rm -f brltty brltty-install txt2hlp tbl2hex *test *-static
+	-rm -f brltty$X txt2hlp$X tbl2hex$X *test$X *-static$X
 	-rm -f $(API_LIB) $(API_ARC)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
