@@ -92,7 +92,7 @@ int
 main (int argc, char *argv[]) {
   int status;
   const char *driver = NULL;
-  int internal;
+  void *object;
 
   processOptions(optionTable, optionCount,
                  "brltest", &argc, &argv,
@@ -105,7 +105,7 @@ main (int argc, char *argv[]) {
   }
   if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
 
-  if ((braille = loadBrailleDriver(driver, &internal, opt_libraryDirectory))) {
+  if ((braille = loadBrailleDriver(driver, &object, opt_libraryDirectory))) {
     const char *const *parameterNames = braille->parameters;
     char **parameterSettings;
     if (!parameterNames) {

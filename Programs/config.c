@@ -782,9 +782,14 @@ closeBrailleDriver (void) {
 
   if (brailleDriver) {
     drainBrailleOutput(&brl, 0);
+
     brailleDriver->close(&brl);
-    if (brailleObject) unloadSharedObject(brailleObject);
     brailleDriver = NULL;
+
+    if (brailleObject) {
+      unloadSharedObject(brailleObject);
+      brailleObject = NULL;
+    }
   }
 
   if (brailleParameters) {
@@ -943,8 +948,12 @@ static void
 closeSpeechDriver (void) {
   if (speechDriver) {
     speechDriver->close();
-    if (speechObject) unloadSharedObject(speechObject);
     speechDriver = NULL;
+
+    if (speechObject) {
+      unloadSharedObject(speechObject);
+      speechObject = NULL;
+    }
   }
 
   if (speechParameters) {
