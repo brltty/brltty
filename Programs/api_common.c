@@ -337,6 +337,7 @@ brlapi_packetType_t brlapi_packetTypes[] = {
   { BRLPACKET_PACKET, "Packet" },
   { BRLPACKET_ACK, "Ack" },
   { BRLPACKET_ERROR, "Error" },
+  { BRLPACKET_EXCEPTION, "Exception" },
   { 0, NULL }
 };
 
