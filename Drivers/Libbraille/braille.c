@@ -122,7 +122,7 @@ brl_close(BrailleDisplay *brl)
 static void
 brl_writeVisual(BrailleDisplay *brl)
 {
-  braille_write(brl->buffer, brl->x);
+  braille_write((char *)brl->buffer, brl->x);
 }
 
 static void
