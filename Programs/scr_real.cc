@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 #include "misc.h"
 #include "route.h"
