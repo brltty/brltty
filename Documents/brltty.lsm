@@ -21,13 +21,12 @@ Alternate-site:	ftp.leb.net /pub/blinux
 Platforms:      Linux (kernel 1.1.92 or later)
 		Not X/graphics.
 		Supported Braille displays (serial communication only):
+		  - Alva B.V.: ABT3xx and Delphi series;
+		  - Blazie Engineering: BrailleLite;
 		  - Tieman B.V.: CombiBraille 25/45/85;
-		  - Alva B.V.: ABT3xx and Delphi series
-		    (parallel port communication also available);
-		  - Telesensory Systems Inc.: PowerBraille and Navigator;
+		  - EcoBraille;
 		  - EuroBraille series;
                   - Papenmeier Screen 2D Terminal;
-		  - Blazie Engineering's BrailleLite;
-		  - EcoBraille;
+		  - Telesensory Systems Inc.: PowerBraille and Navigator;
 Copying-policy: GPL
 End

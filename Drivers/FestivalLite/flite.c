@@ -36,22 +36,27 @@
 
 #define SPKNAME "FestivalLite"
 
+typedef enum {
+  PARM_wpm,
+  PARM_pitch
+} DriverParameter;
+#define SPKPARMS "wpm", "pitch"
+
 #include "Programs/spk_driver.h"
 #include <flite.h>
 #include <flite_version.h>
 
-extern	cst_voice	*REGISTER_VOX	(const char *voxdir);
-extern	cst_voice	*UNREGISTER_VOX	(const cst_voice *voice);
+extern	cst_voice *	REGISTER_VOX	(const char *voxdir);
+extern	void		UNREGISTER_VOX	(cst_voice *voice);
 
 static	cst_voice	*voice		= NULL;
-static	cst_features	*features	= NULL;
 static	const char	*outtype	= "play";
 
-static	pid_t		child		= 0;
+static	pid_t		child		= -1;
 
 static	int		fds[2];
-static	int		*const readfd = &fds[0];
-static	int		*const writefd = &fds[1];
+static	int		*const readfd	= &fds[0];
+static	int		*const writefd	= &fds[1];
 
 static void
 spk_identify (void)
@@ -64,11 +69,28 @@ spk_identify (void)
 static void
 spk_open (char **parameters)
 {
-  child = 0;
+  child = -1;
   flite_init();
-  features = new_features();
   voice = REGISTER_VOX(NULL);
-  feat_copy_into(features, voice->features);
+
+  {
+    int wpm, minwpm = 50, maxwpm = 400;
+    if (!*parameters[PARM_wpm] ||
+        !validateInteger(&wpm, "words per minute", parameters[PARM_wpm],
+                         &minwpm, &maxwpm))
+      wpm = 175;
+    feat_set_float(voice->features, "duration_stretch",
+                   (float)1000 / ((wpm * 23) / 4));
+  }
+
+  {
+    int pitch, minpitch = 50, maxpitch = 200;
+    if (!*parameters[PARM_pitch] ||
+        !validateInteger(&pitch, "pitch", parameters[PARM_pitch],
+                         &minpitch, &maxpitch))
+      pitch = 100;
+    feat_set_int(voice->features, "int_f0_target_mean", pitch);
+  }
 }
 
 static int
@@ -86,7 +108,7 @@ doChild (void)
 static void
 spk_say (const unsigned char *buffer, int length)
 {
-  if (child) goto ready;
+  if (child != -1) goto ready;
 
   if (pipe(fds) != -1) {
     if ((child = fork()) == -1) {
@@ -112,12 +134,12 @@ spk_say (const unsigned char *buffer, int length)
 static void
 spk_mute (void)
 {
-  if (child != 0) {
+  if (child != -1) {
     close(*readfd);
     close(*writefd);
 
     kill(child, SIGKILL);
-    child = 0;
+    child = -1;
   }
 }
 
@@ -125,11 +147,6 @@ static void
 spk_close (void)
 {
   spk_mute();
-
-  if (features) {
-    delete_features(features);
-    features = NULL;
-  }
 
   UNREGISTER_VOX(voice);
   voice = NULL;

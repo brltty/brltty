@@ -3874,7 +3874,7 @@ BRLTTY supports the following braille displays:
   <item>
     <htmlurl url="http://www.alva-bv.nl/alvacorp/alva_corp_home.html" name="Alva B.V.">:
     ABT3xx,
-    Delphi (serial and parallel ports),
+    Delphi,
     Satellite
   <item>
     <htmlurl url="http://www.baum.de/English/homeeng1.htm" name="Baum">:
@@ -3974,6 +3974,7 @@ BRLTTY supports the following speech synthesizers:
   <tag/ec/EcoBraille
   <tag/es/ExternalSpeech
   <tag/eu/EuroBraille
+  <tag/fl/FestivalLite
   <tag/fv/Festival
   <tag/gs/GenericSay
   <tag/ht/HandyTech
@@ -3989,6 +3990,7 @@ BRLTTY supports the following speech synthesizers:
   <tag/vd/VideoBraille
   <tag/vh/Vario/RBT (emulation 2)
   <tag/vo/Voyager
+  <tag/vr/Virtual
   <tag/vs/VisioBraille
   <tag/vv/ViaVoice
 </descrip>

@@ -149,6 +149,7 @@
 #speech-driver	bl	# BrailleLite
 #speech-driver	cb	# CombiBraille
 #speech-driver	es	# ExternalSpeech
+#speech-driver	fl	# FestivalLite Text to Speech Package
 #speech-driver	fv	# Festival Text to Speech Package
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)
 #speech-driver	tv	# Televox
@@ -168,6 +169,10 @@
 #speech-parameters Program=/usr/local/bin/externalspeech
 #speech-parameters Uid=65534
 #speech-parameters Gid=65534
+
+# FestivalLite Speech Driver Parameters
+#speech-parameters pitch= # [50-200]
+#speech-parameters wpm= # [50-400]
 
 # GenericSay Speech Driver Parameters
 #speech-parameters Command=/usr/local/bin/say

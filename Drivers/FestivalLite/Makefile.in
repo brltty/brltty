@@ -29,11 +29,11 @@ include $(SRC_TOP)driver.mk
 
 FLITE_LANG = usenglish
 FLITE_LEX = cmulex
-FLITE_VOX = cmu_us_kal
-#FLITE_VOX = cmu_us_kal16
+#FLITE_VOX = cmu_us_kal
+FLITE_VOX = cmu_us_kal16
 
 flite.$O:
-	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOX) -DUNREGISTER_VOX=unregister_$(FLITE_VOX) -c $(SRC_DIR)/flite.c
+	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOX:16=) -DUNREGISTER_VOX=unregister_$(FLITE_VOX:16=) -c $(SRC_DIR)/flite.c
 
 speech.$O: flite.$O
 	$(MKOBJ) speech.$O flite.$O -L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOX) -lflite_$(FLITE_LEX) -lflite_$(FLITE_LANG) -lflite
