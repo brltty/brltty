@@ -349,7 +349,11 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 	goto out;
       }
       if (he->h_addrtype != AF_INET) {
+#ifdef EAFNOSUPPORT
         errno = EAFNOSUPPORT;
+#else /* EAFNOSUPPORT */
+        errno = EINVAL;
+#endif /* EAFNOSUPPORT */
 	brlapi_libcerrfun = "gethostbyname";
 	goto outlibc;
       }

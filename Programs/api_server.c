@@ -929,10 +929,16 @@ cont:
       return -1;
     }
     if (he->h_addrtype != AF_INET) {
+#ifdef EAFNOSUPPORT
+      errno = EAFNOSUPPORT;
+#else /* EAFNOSUPPORT */
+      errno = EINVAL;
+#endif /* EAFNOSUPPORT */
       LogPrint(LOG_ERR,"unknown address type %d",he->h_addrtype);
       return -1;
     }
     if (he->h_length > sizeof(addr.sin_addr)) {
+      errno = EINVAL;
       LogPrint(LOG_ERR,"too big address: %d",he->h_length);
       return -1;
     }
