@@ -27,7 +27,7 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/kbio.h>
+#include <machine/speaker.h>
 #include <sys/soundcard.h>
 
 #include "misc.h"
@@ -38,7 +38,44 @@
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
 
-#include "sys_beep_kd.h"
+static int
+getSpeaker (void) {
+  static int speaker = -1;
+  if (speaker == -1) {
+    if ((speaker = open("/dev/speaker", O_WRONLY)) == -1) LogError("speaker open");
+  }
+  return speaker;
+}
+
+int
+canBeep (void) {
+  if (getSpeaker()) return 1;
+  return 0;
+}
+
+int
+timedBeep (unsigned short frequency, unsigned short milliseconds) {
+  int speaker = getSpeaker();
+  if (speaker != -1) {
+    tone_t tone;
+    memset(&tone, 0, sizeof(tone));
+    tone.frequency = frequency;
+    tone.duration = (milliseconds + 9) / 10;
+    if (ioctl(speaker, SPKRTONE, &tone) != -1) return 1;
+    LogError("speaker tone");
+  }
+  return 0;
+}
+
+int
+startBeep (unsigned short frequency) {
+  return 0;
+}
+
+int
+stopBeep (void) {
+  return 0;
+}
 
 #ifdef ENABLE_PCM_TUNES
 #include "sys_pcm_dsp.h"
