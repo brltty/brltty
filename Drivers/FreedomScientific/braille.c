@@ -536,6 +536,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
           LogError("read");
         } else if ((count == 0) && (inputCount > 0)) {
           if (io->awaitInput(1000)) goto retry;
+          if (errno != EAGAIN) count = -1;
           LogBytes("Aborted Input", inputBuffer.bytes, inputCount);
           inputCount = 0;
         }
@@ -647,6 +648,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       int count = readPacket(brl, &packet);
       if (count == -1) goto failure;
     }
+    if (errno != EAGAIN) goto failure;
 
     while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0) {
       int acknowledged = 0;
@@ -775,6 +777,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           return 1;
         }
       }
+      if (errno != EAGAIN) break;
 
       if (++tries == 5) {
         LogPrint(LOG_WARNING, "No response from display.");
