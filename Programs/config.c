@@ -57,13 +57,6 @@
 
 char COPYRIGHT[] = "Copyright (C) 1995-2003 by The BRLTTY Team - all rights reserved.";
 
-#define DEVICE_DIRECTORY "/dev"
-#define TRANSLATION_TABLE_EXTENSION ".tbl"
-#define TEXT_TABLE_PREFIX "text."
-#define ATTRIBUTES_TABLE_PREFIX ""
-#define CONTRACTION_TABLE_EXTENSION ".ctb"
-#define CONTRACTION_TABLE_PREFIX ""
-
 #ifdef ENABLE_API
 static char *opt_apiParameters = NULL;
 #endif /* ENABLE_API */
@@ -496,7 +489,32 @@ loadAttributesTable (const char *file) {
 }
 
 static void
-fixPath (const char **path, const char *extension, const char *prefix) {
+fixDevicePath (const char **path) {
+  const char *prefix = DEVICE_DIRECTORY;
+  const unsigned int prefixLength = strlen(prefix);
+  const unsigned int pathLength = strlen(*path);
+
+  if (prefixLength) {
+    if (**path != '/') {
+      char buffer[prefixLength + 1 +  pathLength + 1];
+      unsigned int length = 0;
+
+      memcpy(&buffer[length], prefix, prefixLength);
+      length += prefixLength;
+
+      if (buffer[length-1] != '/') buffer[length++] = '/';
+
+      memcpy(&buffer[length], *path, pathLength);
+      length += pathLength;
+
+      buffer[length] = 0;
+      *path = strdupWrapper(buffer);
+    }
+  }
+}
+
+static void
+fixFilePath (const char **path, const char *extension, const char *prefix) {
   const unsigned int prefixLength = strlen(prefix);
   const unsigned int pathLength = strlen(*path);
   const unsigned int extensionLength = strlen(extension);
@@ -531,7 +549,7 @@ fixPath (const char **path, const char *extension, const char *prefix) {
 
 static void
 fixTranslationTablePath (const char **path, const char *prefix) {
-  fixPath(path, TRANSLATION_TABLE_EXTENSION, prefix);
+  fixFilePath(path, TRANSLATION_TABLE_EXTENSION, prefix);
 }
 
 static int
@@ -1592,12 +1610,7 @@ startup (int argc, char *argv[]) {
     fprintf(stderr, "Use -d to specify one.\n");
     exit(4);
   }
-  if (*opt_brailleDevice != '/') {
-    const char *directory = DEVICE_DIRECTORY;
-    char buffer[strlen(directory) + 1 + strlen(opt_brailleDevice) + 1];
-    sprintf(buffer, "%s/%s", directory, opt_brailleDevice);
-    opt_brailleDevice = strdupWrapper(buffer);
-  }
+  fixDevicePath(&opt_brailleDevice);
 
   getBrailleDriver();
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1661,7 +1674,7 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (opt_contractionTable) {
-    fixPath(&opt_contractionTable, CONTRACTION_TABLE_EXTENSION, CONTRACTION_TABLE_PREFIX);
+    fixFilePath(&opt_contractionTable, CONTRACTION_TABLE_EXTENSION, CONTRACTION_TABLE_PREFIX);
     loadContractionTable(opt_contractionTable);
   }
   atexit(exitContractionTable);

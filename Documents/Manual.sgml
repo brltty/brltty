@@ -1824,7 +1824,7 @@ The following directives are recognized:
     <ref id="options-braille-driver" name="-b"> command line option.
   <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
     Specify the device to which the braille display is connected.
-    The full path must be supplied.
+    If a relative path is supplied, then it's anchored at <tt>/dev</>.
     See the <ref id="build-braille-device" name="--with-braille-device">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -1940,7 +1940,7 @@ The <tt/brltty/ command accepts the following options:
     <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
   <tag><tt/-d/<em/device/ <tt/--braille-device=/<em/device/<label id="options-braille-device"></tag>
     Specify the device to which the braille display is connected.
-    The full path must be supplied.
+    If a relative path is supplied, then it's anchored at <tt>/dev</>.
     See the <ref id="configure-braille-device" name="braille-device">
     configuration file directive for the default run-time setting.
   <tag><tt/-e/ <tt/--standard-error/<label id="options-standard-error"></tag>

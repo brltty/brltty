@@ -148,6 +148,13 @@ extern "C" {
 /* Define this if GPM is to be used. */
 #undef HAVE_LIBGPM
 
+#define DEVICE_DIRECTORY "/dev"
+#define TRANSLATION_TABLE_EXTENSION ".tbl"
+#define TEXT_TABLE_PREFIX "text."
+#define ATTRIBUTES_TABLE_PREFIX ""
+#define CONTRACTION_TABLE_EXTENSION ".ctb"
+#define CONTRACTION_TABLE_PREFIX ""
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

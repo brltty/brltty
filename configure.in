@@ -574,7 +574,7 @@ elif test "${braille_device}" = "yes"
 then
    braille_device="${brltty_cv_default_braille_device}"
 fi
-test "`expr "${braille_device}" : "/"`" -eq 0 && braille_device="/dev/${braille_device}"
+BRLTTY_DEVICE_PATH([braille_device])
 AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"])
 BRLTTY_SUMMARY_ITEM([braille-device], [braille_device])
 
