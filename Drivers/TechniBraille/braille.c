@@ -72,7 +72,7 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
       }
 
       if (offset == size) {
-        LogBytes("Input Packet", packet, offset);
+      //LogBytes("Input Packet", packet, offset);
         return offset;
       }
     }
@@ -103,7 +103,7 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
 
   {
     int size = byte - buffer;
-    LogBytes("Output Packet", buffer, size);
+  //LogBytes("Output Packet", buffer, size);
     brl->writeDelay += count * 1000 / charactersPerSecond;
     if (serialWriteData(serialDevice, buffer, size) != -1) return 1;
   }
