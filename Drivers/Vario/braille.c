@@ -111,7 +111,6 @@ static TranslationTable outputTable;
 static char VARIO_DISPLAY[] = {ESC, 0x01};
 #define VARIO_DISPLAY_LEN 2
 static char VARIO_DEVICE_ID[] = {ESC, 0x84};
-#define VARIO_DEVICE_ID_LEN 2
 #define VARIO_DEVICE_ID_REPLY_LEN 18
 #define MAXREAD 18
 /* Global variables */
@@ -150,15 +149,20 @@ static int myread(int fd, void *buf, unsigned len)
 static int QueryDisplay(int brl_fd, char *reply)
 /* For auto-detect: send query, read response and validate response. */
 {
-  int r=-1;
-  if (write(brl_fd, VARIO_DEVICE_ID, VARIO_DEVICE_ID_LEN) == VARIO_DEVICE_ID_LEN &&
-      (r = myread (brl_fd, reply, VARIO_DEVICE_ID_REPLY_LEN)) == VARIO_DEVICE_ID_REPLY_LEN &&
-      !memcmp (reply, VARIO_DEVICE_ID, VARIO_DEVICE_ID_LEN)) {
-    reply[VARIO_DEVICE_ID_REPLY_LEN] = 0;
-    LogPrint(LOG_DEBUG,"Valid reply received '%s'", reply+2);
-    return 1;
-  }
-  LogPrint(LOG_DEBUG,"Invalid reply of %d bytes", r);
+  if (write(brl_fd, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID))
+      == sizeof(VARIO_DEVICE_ID)) {
+    if (awaitInput(brl_fd, 100)) {
+      int count;
+      if ((count = myread(brl_fd, reply, VARIO_DEVICE_ID_REPLY_LEN)) != -1)
+        if ((count == VARIO_DEVICE_ID_REPLY_LEN) &&
+            (memcmp(reply, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID)) == 0)) {
+          reply[VARIO_DEVICE_ID_REPLY_LEN] = 0;
+          LogPrint(LOG_DEBUG,"Valid reply received: '%s'", reply+2);
+          return 1;
+        } else LogBytes("Unexpected response", reply, count);
+      else LogError("read");
+    }
+  } else LogError("write");
   return 0;
 }
 
@@ -435,7 +439,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
 	return CMD_RESTARTBRL;
       else if (ping_due){
 	LogPrint(LOG_DEBUG, "Display idle: sending query");
-	write (brl_fd, VARIO_DEVICE_ID, VARIO_DEVICE_ID_LEN);
+	write (brl_fd, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID));
 	tcdrain(brl_fd);
 	pings++;
 	gettimeofday(&last_ping_sent, &dum_tz);
