@@ -833,6 +833,7 @@ loadPreferences (int change) {
   return ok;
 }
 
+#ifdef ENABLE_PREFERENCES_MENU
 int 
 savePreferences (void) {
   int ok = 0;
@@ -855,7 +856,6 @@ savePreferences (void) {
   return ok;
 }
 
-#ifdef ENABLE_PREFERENCES_MENU
 static int
 testTunes (void) {
    return prefs.alertTunes;

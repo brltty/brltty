@@ -1391,14 +1391,18 @@ main (int argc, char *argv[]) {
           case CMD_SKPBLNKWINS:
             TOGGLE_PLAY(prefs.skipBlankWindows);
             break;
+          case CMD_AUTOREPEAT:
+            TOGGLE_PLAY(prefs.autorepeat);
+            break;
+
+#ifdef ENABLE_PREFERENCES_MENU
+          case CMD_PREFMENU:
+            updatePreferences();
+            break;
           case CMD_PREFSAVE:
             if (savePreferences()) {
               playTune(&tune_done);
             }
-            break;
-#ifdef ENABLE_PREFERENCES_MENU
-          case CMD_PREFMENU:
-            updatePreferences();
             break;
 #endif /* ENABLE_PREFERENCES_MENU */
           case CMD_PREFLOAD:
@@ -1407,6 +1411,7 @@ main (int argc, char *argv[]) {
               playTune(&tune_done);
             }
             break;
+
           case CMD_SWITCHVT_PREV:
             if (!switchVirtualTerminal(scr.no-1))
               playTune(&tune_bad_command);

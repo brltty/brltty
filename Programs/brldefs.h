@@ -136,6 +136,7 @@ typedef enum {
   CMD_PASTE /* insert cut buffer at cursor */,
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
+  CMD_AUTOREPEAT /* toggle autorepeat on/off */,
   
   /* advanced speech controls */
   CMD_AUTOSPEAK /* toggle autospeak on/off */,
