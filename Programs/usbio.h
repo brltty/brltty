@@ -245,10 +245,20 @@ extern int usbGetDescriptor (
   UsbDescriptor *descriptor,
   int timeout
 );
+extern int usbGetLanguage (
+  UsbDevice *device,
+  uint16_t *language,
+  int timeout
+);
 extern char *usbGetString (
   UsbDevice *device,
   unsigned char number,
   int timeout
+);
+extern void usbLogString (
+  UsbDevice *device,
+  int index,
+  const char *description
 );
 
 extern int usbBulkRead (

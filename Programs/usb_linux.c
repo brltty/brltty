@@ -54,7 +54,7 @@ struct UsbDeviceStruct {
   unsigned char *inputBuffer;
   int inputLength;
 
-  unsigned int stringLanguage;
+  uint16_t stringLanguage;
 };
 
 const UsbDeviceDescriptor *
@@ -220,6 +220,26 @@ usbGetDescriptor (
                             descriptor->bytes, sizeof(descriptor->bytes), timeout);
 }
 
+int
+usbGetLanguage (
+  UsbDevice *device,
+  uint16_t *language,
+  int timeout
+) {
+  UsbDescriptor descriptor;
+  int count;
+  if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
+                                0, 0, &descriptor, timeout)) != -1) {
+    if (count >= 4) {
+      *language = descriptor.string.wData[0];
+      return 1;
+    } else {
+      errno = ENODATA;
+    }
+  }
+  return 0;
+}
+
 char *
 usbGetString (
   UsbDevice *device,
@@ -230,16 +250,9 @@ usbGetString (
   int count;
   unsigned char *string;
 
-  if (!device->stringLanguage) {
-    if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING, 0, 0,
-                                  &descriptor, timeout)) == -1)
+  if (!device->stringLanguage)
+    if (!usbGetLanguage(device, &device->stringLanguage, timeout))
       return NULL;
-    if (count < 4) {
-      errno = ENODATA;
-      return NULL;
-    }
-    device->stringLanguage = descriptor.string.wData[0];
-  }
 
   if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
                                 number, device->stringLanguage,
@@ -256,6 +269,21 @@ usbGetString (
     }
   }
   return string;
+}
+
+void
+usbLogString (
+  UsbDevice *device,
+  int index,
+  const char *description
+) {
+  if (index) {
+    char *string = usbGetString(device, index, 1000);
+    if (string) {
+      LogPrint(LOG_INFO, "USB: %s: %s", description, string);
+      free(string);
+    }
+  }
 }
 
 static int
@@ -489,7 +517,15 @@ static UsbDevice *
 usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
   UsbDevice *device;
   if ((device = usbOpenDevice(path))) {
-    if (chooser(device, data)) return device;
+    LogPrint(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",
+             device->descriptor.idVendor,
+             device->descriptor.idProduct);
+    if (chooser(device, data)) {
+      usbLogString(device, device->descriptor.iManufacturer, "Manufacturer Name");
+      usbLogString(device, device->descriptor.iProduct, "Product Description");
+      usbLogString(device, device->descriptor.iSerialNumber, "Serial Number");
+      return device;
+    }
     usbCloseDevice(device);
   }
   return NULL;

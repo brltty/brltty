@@ -458,17 +458,6 @@ static UsbDevice *usbDevice = NULL;
 static unsigned char usbOutputEndpoint;
 static unsigned char usbInputEndpoint;
 
-static void
-logUsbString (UsbDevice *device, int index, const char *description) {
-  if (index) {
-    char *string = usbGetString(device, index, 1000);
-    if (string) {
-      LogPrint(LOG_INFO, "USB: %s: %s", description, string);
-      free(string);
-    }
-  }
-}
-
 static int
 chooseUsbDevice (UsbDevice *device, void *data) {
   char **parameters = data;
@@ -511,13 +500,6 @@ chooseUsbDevice (UsbDevice *device, void *data) {
 static int
 openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, parameters))) {
-    const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(usbDevice);
-    LogPrint(LOG_INFO, "USB device: vendor=%04X product=%04X input=%02X output=%02X",
-             descriptor->idVendor, descriptor->idProduct, usbInputEndpoint, usbOutputEndpoint);
-    logUsbString(usbDevice, descriptor->iManufacturer, "Manufacturer Name");
-    logUsbString(usbDevice, descriptor->iProduct, "Product Description");
-    logUsbString(usbDevice, descriptor->iSerialNumber, "Serial Number");
-
     if (usbBeginInput(usbDevice, usbInputEndpoint, 8, 8) != -1) {
       return 1;
     } else {
