@@ -733,10 +733,10 @@ static void brl_writeWindow (BrailleDisplay *brl)
   } else {
     /* We update only the display part that has been changed */
     from = 0;
-    while ((brl->buffer[from] == prevdata[from]) && (from < brl->x)) from++;
+    while ((from < brl->x) && (brl->buffer[from] == prevdata[from])) from++;
 
     to = brl->x - 1;
-    while ((brl->buffer[to] == prevdata[to]) && (to >= from)) to--;
+    while ((to > from) && (brl->buffer[to] == prevdata[to])) to--;
     to++;
   }
 
