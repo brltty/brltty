@@ -14,5 +14,3 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-
-#define BRLKEY2CMD /* We support key to brltty commands conversion */

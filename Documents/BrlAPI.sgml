@@ -1147,6 +1147,16 @@ the new current tty. For instance, when running an X server on VT7, the
 window IDs whenever X focus changes, allowing display and keypresses switching
 between xterms.
 
+<sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
+
+<p>
+For the server to know which tty is active, one particular client is responsible
+for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
+the new current tty. For instance, when running an X server on VT7, the
+<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_GETTTY(7)/ and will send
+window IDs whenever X focus changes, allowing display and keypresses switching
+between xterms.
+
 <sect2><tt/BRLPACKET_LEAVETTY/ (see <em/brlapi_leaveTty()/)
 <p>
 This should be sent to free the tty and masked keys lists.
