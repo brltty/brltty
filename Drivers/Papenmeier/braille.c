@@ -806,11 +806,8 @@ typedef struct {
 #define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
-static int left2;
-static int right2;
-
-static int refresh2;
-static Packet2 state2;
+static int leftModules2;
+static int rightModules2;
 
 typedef struct {
   int code;
@@ -819,6 +816,9 @@ typedef struct {
 static InputMapping2 *inputMap2 = NULL;
 static int inputBytes2;
 static int inputBits2;
+
+static unsigned char *inputState2 = NULL;
+static int refreshRequired2;
 
 static int
 readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
@@ -950,22 +950,22 @@ interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
 
 static void
 writeText2 (BrailleDisplay *brl, int start, int count) {
-  refresh2 = 1;
+  refreshRequired2 = 1;
 }
 
 static void
 writeStatus2 (BrailleDisplay *brl, int start, int count) {
-  refresh2 = 1;
+  refreshRequired2 = 1;
 }
 
 static void
 flushCells2 (BrailleDisplay *brl) {
-  if (refresh2) {
+  if (refreshRequired2) {
     unsigned char buffer[0XFF];
     unsigned int size = 0;
 
     {
-      int modules = left2;
+      int modules = leftModules2;
       while (modules-- > 0) {
         buffer[size++] = 0;
         buffer[size++] = 0;
@@ -979,7 +979,7 @@ flushCells2 (BrailleDisplay *brl) {
     size += terminal->columns;
 
     {
-      int modules = right2;
+      int modules = rightModules2;
       while (modules-- > 0) {
         buffer[size++] = 0;
         buffer[size++] = 0;
@@ -987,14 +987,14 @@ flushCells2 (BrailleDisplay *brl) {
     }
 
     writePacket2(brl, 3, size, buffer);
-    refresh2 = 0;
+    refreshRequired2 = 0;
   }
 }
 
 static void
 initializeTerminal2 (BrailleDisplay *brl) {
-  refresh2 = 1;
-  memset(&state2, 0, sizeof(state2));
+  memset(inputState2, 0, inputBytes2);
+  refreshRequired2 = 1;
 }
 
 static int 
@@ -1010,38 +1010,47 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
       case 0X0B: {
         int command = CMD_NOOP;
         int bytes = MIN(packet.length, inputBytes2);
-        int release = 0;
         int byte;
 
-        for (byte=0; byte<bytes; ++byte) {
-          unsigned char old = state2.data.bytes[byte];
-          unsigned char new = packet.data.bytes[byte];
+        /* Find out whihc keys have been released.
+         * The first one determines the command to be executed.
+         */
+        {
+          int release = 0;
+          for (byte=0; byte<bytes; ++byte) {
+            unsigned char old = inputState2[byte];
+            unsigned char new = packet.data.bytes[byte];
 
-          if (new != old) {
-            int index = byte * 8;
-            unsigned char bit = 0X01;
+            if (new != old) {
+              int index = byte * 8;
+              unsigned char bit = 0X01;
 
-            while (bit) {
-              if (!(new & bit) && (old & bit)) {
-                InputMapping2 *mapping = &inputMap2[index];
-                int cmd = handleKey(mapping->code, 0, mapping->offset);
+              while (bit) {
+                if (!(new & bit) && (old & bit)) {
+                  InputMapping2 *mapping = &inputMap2[index];
+                  inputState2[byte] &= ~bit;
 
-                if (!release) {
-                  command = cmd;
-                  release = 1;
+                  if (mapping->code != NOKEY) {
+                    int cmd = handleKey(mapping->code, 0, mapping->offset);
+                    if (!release) {
+                      release = 1;
+                      command = cmd;
+                    }
+                  }
                 }
 
-                state2.data.bytes[byte] &= ~bit;
+                index++;
+                bit <<= 1;
               }
-
-              index++;
-              bit <<= 1;
             }
           }
         }
 
+        /* Find out whihc keys have been pressed.
+         * The last one determines the command to be executed.
+         */
         for (byte=0; byte<bytes; ++byte) {
-          unsigned char old = state2.data.bytes[byte];
+          unsigned char old = inputState2[byte];
           unsigned char new = packet.data.bytes[byte];
 
           if (new != old) {
@@ -1051,9 +1060,10 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
             while (bit) {
               if ((new & bit) && !(old & bit)) {
                 InputMapping2 *mapping = &inputMap2[index];
-                command = handleKey(mapping->code, 1, mapping->offset);
-
-                state2.data.bytes[byte] |= bit;
+                inputState2[byte] |= bit;
+                if (mapping->code != NOKEY) {
+                  command = handleKey(mapping->code, 1, mapping->offset);
+                }
               }
 
               index++;
@@ -1067,11 +1077,17 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
     }
   }
 
+  if (errno != EAGAIN) return CMD_RESTARTBRL;
   return EOF;
 }
 
 static void
 releaseResources2 (void) {
+  if (inputState2) {
+    free(inputState2);
+    inputState2 = NULL;
+  }
+
   if (inputMap2) {
     free(inputMap2);
     inputMap2 = NULL;
@@ -1107,59 +1123,51 @@ mapSwitchKey2 (int count, int *byte, int *bit, int rear, int front) {
   }
 }
 
-static int
+static void
 mapInputModules2 (void) {
-  inputBytes2 = left2 + right2 + 1 + (((((left2 + right2) * 4) + ((terminal->statusCount + terminal->columns) * 2)) + 7) / 8);
-  inputBits2 = inputBytes2 * 8;
+  int byte = inputBytes2;
+  int bit = 0;
 
-  if ((inputMap2 = malloc(inputBits2 * sizeof(*inputMap2)))) {
-    int byte = inputBytes2;
-    int bit = 0;
-
-    {
-      int i;
-      for (i=0; i<inputBits2; ++i) {
-        InputMapping2 *mapping = &inputMap2[i];
-        mapping->code = NOKEY;
-        mapping->offset = 0;
-      }
+  {
+    int i;
+    for (i=0; i<inputBits2; ++i) {
+      InputMapping2 *mapping = &inputMap2[i];
+      mapping->code = NOKEY;
+      mapping->offset = 0;
     }
-
-    mapSwitchKey2(terminal->rightSwitches, &byte, &bit,
-                  OFFS_SWITCH+SWITCH_RIGHT_REAR,
-                  OFFS_SWITCH+SWITCH_RIGHT_FRONT);
-    mapSwitchKey2(terminal->rightKeys, &byte, &bit,
-                  OFFS_SWITCH+KEY_RIGHT_REAR,
-                  OFFS_SWITCH+KEY_RIGHT_FRONT);
-
-    {
-      unsigned char column = terminal->columns;
-      do {
-        nextInputModule2(&byte, &bit);
-        addInputMapping2(byte, bit, ROUTINGKEY, --column);
-      } while (column);
-    }
-
-    mapSwitchKey2(terminal->leftKeys, &byte, &bit,
-                  OFFS_SWITCH+KEY_LEFT_REAR,
-                  OFFS_SWITCH+KEY_LEFT_FRONT);
-    mapSwitchKey2(terminal->leftSwitches, &byte, &bit,
-                  OFFS_SWITCH+SWITCH_LEFT_REAR,
-                  OFFS_SWITCH+SWITCH_LEFT_FRONT);
-
-    byte--;
-    addInputMapping2(byte, 7, OFFS_EASY+EASY_L2, 0);
-    addInputMapping2(byte, 6, OFFS_EASY+EASY_R2, 0);
-    addInputMapping2(byte, 5, OFFS_EASY+EASY_L1, 0);
-    addInputMapping2(byte, 4, OFFS_EASY+EASY_R1, 0);
-    addInputMapping2(byte, 3, OFFS_EASY+EASY_D2, 0);
-    addInputMapping2(byte, 2, OFFS_EASY+EASY_D1, 0);
-    addInputMapping2(byte, 1, OFFS_EASY+EASY_U1, 0);
-    addInputMapping2(byte, 0, OFFS_EASY+EASY_U2, 0);
-
-    return 1;
   }
-  return 0;
+
+  mapSwitchKey2(terminal->rightSwitches, &byte, &bit,
+                OFFS_SWITCH+SWITCH_RIGHT_REAR,
+                OFFS_SWITCH+SWITCH_RIGHT_FRONT);
+  mapSwitchKey2(terminal->rightKeys, &byte, &bit,
+                OFFS_SWITCH+KEY_RIGHT_REAR,
+                OFFS_SWITCH+KEY_RIGHT_FRONT);
+
+  {
+    unsigned char column = terminal->columns;
+    do {
+      nextInputModule2(&byte, &bit);
+      addInputMapping2(byte, bit, ROUTINGKEY, --column);
+    } while (column);
+  }
+
+  mapSwitchKey2(terminal->leftKeys, &byte, &bit,
+                OFFS_SWITCH+KEY_LEFT_REAR,
+                OFFS_SWITCH+KEY_LEFT_FRONT);
+  mapSwitchKey2(terminal->leftSwitches, &byte, &bit,
+                OFFS_SWITCH+SWITCH_LEFT_REAR,
+                OFFS_SWITCH+SWITCH_LEFT_FRONT);
+
+  byte--;
+  addInputMapping2(byte, 7, OFFS_EASY+EASY_L2, 0);
+  addInputMapping2(byte, 6, OFFS_EASY+EASY_R2, 0);
+  addInputMapping2(byte, 5, OFFS_EASY+EASY_L1, 0);
+  addInputMapping2(byte, 4, OFFS_EASY+EASY_R1, 0);
+  addInputMapping2(byte, 3, OFFS_EASY+EASY_D2, 0);
+  addInputMapping2(byte, 2, OFFS_EASY+EASY_D1, 0);
+  addInputMapping2(byte, 1, OFFS_EASY+EASY_U1, 0);
+  addInputMapping2(byte, 0, OFFS_EASY+EASY_U2, 0);
 }
 
 static int
@@ -1179,10 +1187,23 @@ identifyTerminal2 (BrailleDisplay *brl) {
               makeOutputTable(&dots, &outputTable);
             }
 
-            left2 = terminal->leftSwitches + terminal->leftKeys;
-            right2 = terminal->rightSwitches + terminal->rightKeys;
-            if (mapInputModules2()) {
-              return 1;
+            leftModules2 = terminal->leftSwitches + terminal->leftKeys;
+            rightModules2 = terminal->rightSwitches + terminal->rightKeys;
+            {
+              int modules = leftModules2 + rightModules2;
+              inputBytes2 = modules + ((((modules * 4) + ((terminal->statusCount + terminal->columns) * 2)) + 7) / 8);
+            }
+            inputBits2 = inputBytes2 * 8;
+
+            if ((inputMap2 = malloc(inputBits2 * sizeof(*inputMap2)))) {
+              mapInputModules2();
+
+              if ((inputState2 = malloc(inputBytes2))) {
+                return 1;
+              }
+
+              free(inputMap2);
+              inputMap2 = NULL;
             }
           }
         }
