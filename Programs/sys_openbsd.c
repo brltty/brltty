@@ -24,8 +24,9 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <machine/spkr.h>
 #include <sys/audioio.h>
+#include <sys/time.h>
+#include <dev/wscons/wsconsio.h>
 
 #ifdef HAVE_FUNC_DLOPEN 
 #  include <dlfcn.h>
@@ -74,24 +75,22 @@ canBeep (void) {
 
 int
 timedBeep (unsigned short frequency, unsigned short milliseconds) {
-  int ok = 0;
-  int speaker;
-  if ((speaker = open("/dev/speaker", O_WRONLY)) != -1) {
-    tone_t tone;
-    tone.frequency = frequency;
-    tone.duration = milliseconds / 10;
-    if (!tone.duration) {
-      ok = 1;
-    } else if (ioctl(speaker, SPKRTONE, &tone) != -1) {
-      ok = 1;
+  int console = getConsole();
+  if (console != -1) {
+    struct wskbd_bell_data bell;
+    bell.which = WSKBD_BELL_DOALL;
+    bell.pitch = frequency;
+    bell.period = milliseconds;
+    bell.volume = 100;
+    if (!data.period) {
+      return 1;
+    } else if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) {
+      return 1;
     } else {
-      LogPrint(LOG_WARNING, "ioctl SPKRTONE failed: %s", strerror(errno));
+      LogPrint(LOG_WARNING, "ioctl WSKBDIO_COMPLEXBELL failed: %s", strerror(errno));
     }
-    close(speaker);
-  } else {
-    LogPrint(LOG_WARNING, "Unable to open speaker device: %s", strerror(errno));
   }
-  return ok;
+  return 0;
 }
 
 int
@@ -101,7 +100,19 @@ startBeep (unsigned short frequency) {
 
 int
 stopBeep (void) {
-  return 1;
+  int console = getConsole();
+  if (console != -1) {
+    struct wskbd_bell_data bell;
+    bell.which = WSKBD_BELL_DOVOLUME | WSKBD_BELL_DOPERIOD;
+    bell.volume = 0;
+    bell.period = 0;
+    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) {
+      return 1;
+    } else {
+      LogPrint(LOG_WARNING, "ioctl WSKBDIO_COMPLEXBELL failed: %s", strerror(errno));
+    }
+  }
+  return 0;
 }
 
 #ifdef ENABLE_PCM_TUNES
