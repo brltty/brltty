@@ -91,9 +91,9 @@ static char* search_cmd(int cmd)
 
 static char* search_onoff(int cmd)
 {
-  if (cmd & VAL_SWITCHON)
+  if (cmd & VAL_TOGGLE_ON)
     return search_code(ON, 0);
-  if (cmd & VAL_SWITCHOFF)
+  if (cmd & VAL_TOGGLE_OFF)
     return search_code(OFF, 0);
   return "";
 }
@@ -152,7 +152,7 @@ void terminals(int help, int verbose)
 
   /* TODO: Comment/Help for status display */
 
-#define CMDMASK    (VAL_SWITCHON-1)
+#define CMDMASK    (VAL_BLK_MASK | VAL_ARG_MASK)
 
   for(tn=0; tn < num_terminals; tn++) {
     if (pm_terminals[tn].name != 0) {

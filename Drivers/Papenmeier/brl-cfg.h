@@ -120,9 +120,9 @@ typedef struct {
  */
 
 #define CHGONOFF(cmd, offs, on, off) \
-      { cmd                , offs, 0  }, \
-      { cmd | VAL_SWITCHON , offs, on }, \
-      { cmd | VAL_SWITCHOFF, offs, off}
+      { cmd                 , offs, 0  }, \
+      { cmd | VAL_TOGGLE_ON , offs, on }, \
+      { cmd | VAL_TOGGLE_OFF, offs, off}
 
 
 /* modifiers for 9 front keys */
@@ -285,67 +285,67 @@ typedef struct {
 #define CMDS_EASY_LE(cmd1, key, mod, cmd2) CMDS_EASY_XX(cmd1, key, mod, cmd2, 0X4)
 #define CMDS_EASY_RI(cmd1, key, mod, cmd2) CMDS_EASY_XX(cmd1, key, mod, cmd2, 0X8)
 #define CMDS_EASY \
-  CMDS_EASY_UP( CMD_LNUP                    , NOKEY     , 0X00  , \
-                CMD_TOP                                        ), \
-  CMDS_EASY_DO( CMD_LNDN                    , NOKEY     , 0X00  , \
-                CMD_BOT                                        ), \
-  CMDS_EASY_LE( CMD_FWINLT                  , NOKEY     , 0X00  , \
-                CMD_LNBEG                                      ), \
-  CMDS_EASY_RI( CMD_FWINRT                  , NOKEY     , 0X00  , \
-                CMD_LNEND                                      ), \
-              { CR_ROUTE                    , ROUTINGKEY, 0X00 }, \
-  CMDS_EASY_UP( CR_PRINDENT                 , ROUTINGKEY, 0X00  , \
-                CR_SETLEFT                                     ), \
-  CMDS_EASY_DO( CR_NXINDENT                 , ROUTINGKEY, 0X00  , \
-                CR_DESCCHAR                                    ), \
-  CMDS_EASY_LE( CR_CUTAPPEND                , ROUTINGKEY, 0X00  , \
-                CR_CUTBEGIN                                    ), \
-  CMDS_EASY_RI( CR_CUTLINE                  , ROUTINGKEY, 0X00  , \
-                CR_CUTRECT                                     ), \
-  CMDS_EASY_UP( CMD_PRDIFLN                 , NOKEY     , 0X01  , \
-                CMD_ATTRUP                                     ), \
-  CMDS_EASY_DO( CMD_NXDIFLN                 , NOKEY     , 0X01  , \
-                CMD_ATTRDN                                     ), \
-  CMDS_EASY_LE( CMD_PRPROMPT                , NOKEY     , 0X01  , \
-                CMD_PRPGRPH                                    ), \
-  CMDS_EASY_RI( CMD_NXPROMPT                , NOKEY     , 0X01  , \
-                CMD_NXPGRPH                                    ), \
-  CMDS_EASY_UP( VAL_PASSKEY+VPK_CURSOR_UP   , NOKEY     , 0X04  , \
-                VAL_PASSKEY+VPK_PAGE_UP                        ), \
-  CMDS_EASY_DO( VAL_PASSKEY+VPK_CURSOR_DOWN , NOKEY     , 0X04  , \
-                VAL_PASSKEY+VPK_PAGE_DOWN                      ), \
-  CMDS_EASY_LE( VAL_PASSKEY+VPK_CURSOR_LEFT , NOKEY     , 0X04  , \
-                VAL_PASSKEY+VPK_HOME                           ), \
-  CMDS_EASY_RI( VAL_PASSKEY+VPK_CURSOR_RIGHT, NOKEY     , 0X04  , \
-                VAL_PASSKEY+VPK_END                            ), \
-  CMDS_EASY_UP( CMD_BACK                    , NOKEY     , 0X08  , \
-                CMD_HOME                                       ), \
-  CMDS_EASY_DO( CMD_PASTE                   , NOKEY     , 0X08  , \
-                CMD_CSRJMP_VERT                                ), \
-  CMDS_EASY_LE( CMD_CHRLT                   , NOKEY     , 0X08  , \
-                CMD_HWINLT                                     ), \
-  CMDS_EASY_RI( CMD_CHRRT                   , NOKEY     , 0X08  , \
-                CMD_HWINRT                                     ), \
-              { CMD_PREFMENU                , NOKEY     , 0X10 }, \
-              { CMD_INFO                    , NOKEY     , 0X20 }, \
-              { CMD_HELP                    , NOKEY     , 0X40 }, \
-              { CMD_LEARN                   , NOKEY     , 0X80 }, \
-  CMDS_EASY_UP( CMD_SIXDOTS  | VAL_SWITCHOFF, NOKEY     , 0X40  , \
-                CMD_FREEZE   | VAL_SWITCHOFF                   ), \
-  CMDS_EASY_DO( CMD_SKPIDLNS | VAL_SWITCHOFF, NOKEY     , 0X40  , \
-                CMD_SKPBLNKWINS | VAL_SWITCHOFF                ), \
-  CMDS_EASY_LE( CMD_ATTRVIS  | VAL_SWITCHOFF, NOKEY     , 0X40  , \
-                CMD_DISPMD   | VAL_SWITCHOFF                   ), \
-  CMDS_EASY_RI( CMD_CSRVIS   | VAL_SWITCHOFF, NOKEY     , 0X40  , \
-                CMD_CSRTRK   | VAL_SWITCHOFF                   ), \
-  CMDS_EASY_UP( CMD_SIXDOTS  | VAL_SWITCHON , NOKEY     , 0X80  , \
-                CMD_FREEZE   | VAL_SWITCHON                    ), \
-  CMDS_EASY_DO( CMD_SKPIDLNS | VAL_SWITCHON , NOKEY     , 0X80  , \
-                CMD_SKPBLNKWINS | VAL_SWITCHON                 ), \
-  CMDS_EASY_LE( CMD_ATTRVIS  | VAL_SWITCHON , NOKEY     , 0X80  , \
-                CMD_DISPMD   | VAL_SWITCHON                    ), \
-  CMDS_EASY_RI( CMD_CSRVIS   | VAL_SWITCHON , NOKEY     , 0X80  , \
-                CMD_CSRTRK   | VAL_SWITCHON                    )
+  CMDS_EASY_UP( CMD_LNUP                     , NOKEY     , 0X00  , \
+                CMD_TOP                                         ), \
+  CMDS_EASY_DO( CMD_LNDN                     , NOKEY     , 0X00  , \
+                CMD_BOT                                         ), \
+  CMDS_EASY_LE( CMD_FWINLT                   , NOKEY     , 0X00  , \
+                CMD_LNBEG                                       ), \
+  CMDS_EASY_RI( CMD_FWINRT                   , NOKEY     , 0X00  , \
+                CMD_LNEND                                       ), \
+              { CR_ROUTE                     , ROUTINGKEY, 0X00 }, \
+  CMDS_EASY_UP( CR_PRINDENT                  , ROUTINGKEY, 0X00  , \
+                CR_SETLEFT                                      ), \
+  CMDS_EASY_DO( CR_NXINDENT                  , ROUTINGKEY, 0X00  , \
+                CR_DESCCHAR                                     ), \
+  CMDS_EASY_LE( CR_CUTAPPEND                 , ROUTINGKEY, 0X00  , \
+                CR_CUTBEGIN                                     ), \
+  CMDS_EASY_RI( CR_CUTLINE                   , ROUTINGKEY, 0X00  , \
+                CR_CUTRECT                                      ), \
+  CMDS_EASY_UP( CMD_PRDIFLN                  , NOKEY     , 0X01  , \
+                CMD_ATTRUP                                      ), \
+  CMDS_EASY_DO( CMD_NXDIFLN                  , NOKEY     , 0X01  , \
+                CMD_ATTRDN                                      ), \
+  CMDS_EASY_LE( CMD_PRPROMPT                 , NOKEY     , 0X01  , \
+                CMD_PRPGRPH                                     ), \
+  CMDS_EASY_RI( CMD_NXPROMPT                 , NOKEY     , 0X01  , \
+                CMD_NXPGRPH                                     ), \
+  CMDS_EASY_UP( VAL_PASSKEY+VPK_CURSOR_UP    , NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_PAGE_UP                         ), \
+  CMDS_EASY_DO( VAL_PASSKEY+VPK_CURSOR_DOWN  , NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_PAGE_DOWN                       ), \
+  CMDS_EASY_LE( VAL_PASSKEY+VPK_CURSOR_LEFT  , NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_HOME                            ), \
+  CMDS_EASY_RI( VAL_PASSKEY+VPK_CURSOR_RIGHT , NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_END                             ), \
+  CMDS_EASY_UP( CMD_BACK                     , NOKEY     , 0X08  , \
+                CMD_HOME                                        ), \
+  CMDS_EASY_DO( CMD_PASTE                    , NOKEY     , 0X08  , \
+                CMD_CSRJMP_VERT                                 ), \
+  CMDS_EASY_LE( CMD_CHRLT                    , NOKEY     , 0X08  , \
+                CMD_HWINLT                                      ), \
+  CMDS_EASY_RI( CMD_CHRRT                    , NOKEY     , 0X08  , \
+                CMD_HWINRT                                      ), \
+              { CMD_PREFMENU                 , NOKEY     , 0X10 }, \
+              { CMD_INFO                     , NOKEY     , 0X20 }, \
+              { CMD_HELP                     , NOKEY     , 0X40 }, \
+              { CMD_LEARN                    , NOKEY     , 0X80 }, \
+  CMDS_EASY_UP( CMD_SIXDOTS  | VAL_TOGGLE_OFF, NOKEY     , 0X40  , \
+                CMD_FREEZE   | VAL_TOGGLE_OFF                   ), \
+  CMDS_EASY_DO( CMD_SKPIDLNS | VAL_TOGGLE_OFF, NOKEY     , 0X40  , \
+                CMD_SKPBLNKWINS | VAL_TOGGLE_OFF                ), \
+  CMDS_EASY_LE( CMD_ATTRVIS  | VAL_TOGGLE_OFF, NOKEY     , 0X40  , \
+                CMD_DISPMD   | VAL_TOGGLE_OFF                   ), \
+  CMDS_EASY_RI( CMD_CSRVIS   | VAL_TOGGLE_OFF, NOKEY     , 0X40  , \
+                CMD_CSRTRK   | VAL_TOGGLE_OFF                   ), \
+  CMDS_EASY_UP( CMD_SIXDOTS  | VAL_TOGGLE_ON , NOKEY     , 0X80  , \
+                CMD_FREEZE   | VAL_TOGGLE_ON                    ), \
+  CMDS_EASY_DO( CMD_SKPIDLNS | VAL_TOGGLE_ON , NOKEY     , 0X80  , \
+                CMD_SKPBLNKWINS | VAL_TOGGLE_ON                 ), \
+  CMDS_EASY_LE( CMD_ATTRVIS  | VAL_TOGGLE_ON , NOKEY     , 0X80  , \
+                CMD_DISPMD   | VAL_TOGGLE_ON                    ), \
+  CMDS_EASY_RI( CMD_CSRVIS   | VAL_TOGGLE_ON , NOKEY     , 0X80  , \
+                CMD_CSRTRK   | VAL_TOGGLE_ON                    )
 
 
 /* what to show for 2 status cells */

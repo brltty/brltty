@@ -45,7 +45,7 @@
 
 char* parameters[] = { "file", "y", "y", "y" };
 
-brldim dummy_brldim;		/* unused */
+BrailleDisplay dummy_brldim;		/* unused */
 
 static void finish(int sig);
 static void error(char* txt);
@@ -69,12 +69,12 @@ void simulate(int code, int ispressed, int offsroute)
   fprintf(stderr, "simulate %d %d %d\n", code, ispressed, offsroute);
   cmd = handle_key( code, ispressed, offsroute);
   cmd2 = cmd;
-  if (cmd >= VAL_SWITCHON) {
-    cmd2 = cmd % VAL_SWITCHON;
-    if (cmd & VAL_SWITCHON)
-      onoff = " 0N ";
-    if (cmd & VAL_SWITCHOFF)
-      onoff = " 0FF ";
+  if (cmd & VAL_TOGGLE_MASK) {
+    cmd2 = cmd & ~VAL_TOGGLE_MASK;
+    if (cmd & VAL_TOGGLE_ON)
+      onoff = " ON ";
+    if (cmd & VAL_TOGGLE_OFF)
+      onoff = " OFF ";
   }
   txt =  search_code(KEYCODE, cmd2);
   if (txt[0] == '?')

@@ -143,11 +143,14 @@ typedef enum {
 # define VAL_BLK_MASK 0XFF00
 # define VAL_FLG_MASK 0XFF0000
   
-/* For specifically turning on/off toggle commands */
-#define VAL_SWITCHON    0x10000
-#define VAL_SWITCHOFF   0x20000
-#define VAL_SWITCHMASK  (VAL_SWITCHON | VAL_SWITCHOFF)
-#define VAL_AUTOREPEAT  0x40000
+/* For explicitly setting toggles on/off. */
+#define VAL_TOGGLE_ON   0x010000
+#define VAL_TOGGLE_OFF  0x020000
+#define VAL_TOGGLE_MASK (VAL_TOGGLE_ON | VAL_TOGGLE_OFF)
+
+#define VAL_REPEAT_IMMEDIATE 0x800000
+#define VAL_REPEAT_DELAY     0x400000
+#define VAL_REPEAT_MASK      (VAL_REPEAT_IMMEDIATE | VAL_REPEAT_DELAY)
   
 /* cursor routing keys block offset values */
 /*

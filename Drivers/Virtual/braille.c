@@ -941,13 +941,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
               if (!switchSpecified) {
                 if (testWord(word, "on")) {
                   switchSpecified = 1;
-                  command |= VAL_SWITCHON;
+                  command |= VAL_TOGGLE_ON;
                   continue;
                 }
 
                 if (testWord(word, "off")) {
                   switchSpecified = 1;
-                  command |= VAL_SWITCHOFF;
+                  command |= VAL_TOGGLE_OFF;
                   continue;
                 }
               }

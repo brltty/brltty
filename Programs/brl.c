@@ -244,7 +244,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         int offset;
         snprintf(buffer, sizeof(buffer), "%s: %n%s",
                  candidate->name, &offset, candidate->description);
-        if ((blk == 0) && (key & VAL_SWITCHMASK)) {
+        if ((blk == 0) && (key & VAL_TOGGLE_MASK)) {
           char *description = buffer + offset;
           const char *oldVerb = "toggle";
           int oldLength = strlen(oldVerb);
@@ -253,7 +253,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
             int newLength = strlen(newVerb);
             memmove(description+newLength, description+oldLength, strlen(description+oldLength)+1);
             memcpy(description, newVerb, newLength);
-            if (key & VAL_SWITCHON) {
+            if (key & VAL_TOGGLE_ON) {
               char *end = strrchr(description, '/');
               if (end) *end = 0;
             } else {

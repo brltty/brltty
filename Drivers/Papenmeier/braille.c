@@ -550,21 +550,21 @@ handle_command(int cmd)
 {
   if (cmd == CMD_INPUT) {
     /* translate toggle -> ON/OFF */
-    cmd |= input_mode? VAL_SWITCHOFF: VAL_SWITCHON;
+    cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
   }
 
   switch (cmd) {
-    case CMD_INPUT | VAL_SWITCHON:
+    case CMD_INPUT | VAL_TOGGLE_ON:
       input_mode = 1;
       input_dots = 0;
-      cmd = VAL_SWITCHON;
+      cmd = VAL_TOGGLE_ON;
       if (debug_keys) {
         LogPrint(LOG_DEBUG, "input mode on"); 
       }
       break;
-    case CMD_INPUT | VAL_SWITCHOFF:
+    case CMD_INPUT | VAL_TOGGLE_OFF:
       input_mode = 0;
-      cmd = VAL_SWITCHOFF;
+      cmd = VAL_TOGGLE_OFF;
       if (debug_keys) {
         LogPrint(LOG_DEBUG, "input mode off"); 
       }

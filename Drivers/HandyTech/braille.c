@@ -52,10 +52,6 @@ typedef struct {
 static Keys currentKeys, pressedKeys, nullKeys;
 static unsigned char inputMode;
 
-static const unsigned char repeatDelay = 10;
-static const unsigned char repeatInterval = 3;
-static int repeatCounter;
-
 /* Braille display parameters */
 typedef int (ByteInterpreter) (DriverCommandContext context, unsigned char byte, int *command);
 static ByteInterpreter interpretKeyByte;
@@ -363,7 +359,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   nullKeys.status = -1;
   currentKeys = pressedKeys = nullKeys;
   inputMode = 0;
-  repeatCounter = repeatDelay;
 
   memset(rawStatus, 0, model->statusCells);
   memset(rawData, 0, model->columns);
@@ -513,14 +508,11 @@ interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command
 
   if ((byte >= KEY_ROUTING) &&
       (byte < (KEY_ROUTING + model->columns))) {
-    if (release) {
-      *command = EOF;
-    } else {
+    *command = CMD_NOOP;
+    if (!release) {
       currentKeys.column = byte - KEY_ROUTING;
       if (model->interpretKeys(context, &currentKeys, command)) {
         pressedKeys = nullKeys;
-      } else {
-        *command = CMD_NOOP;
       }
     }
     return 1;
@@ -528,14 +520,11 @@ interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command
 
   if ((byte >= KEY_STATUS) &&
       (byte < (KEY_STATUS + model->statusCells))) {
-    if (release) {
-      *command = EOF;
-    } else {
+    *command = CMD_NOOP;
+    if (!release) {
       currentKeys.status = byte - KEY_STATUS;
       if (model->interpretKeys(context, &currentKeys, command)) {
         pressedKeys = nullKeys;
-      } else {
-        *command = CMD_NOOP;
       }
     }
     return 1;
@@ -543,18 +532,19 @@ interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command
 
   if (byte < 0X20) {
     unsigned long int key = KEY(byte);
+    *command = CMD_NOOP;
     if (release) {
       currentKeys.front &= ~key;
       if (pressedKeys.front) {
-        int interpreted = model->interpretKeys(context, &pressedKeys, command);
+        model->interpretKeys(context, &pressedKeys, command);
         pressedKeys = nullKeys;
-        if (interpreted) return 1;
       }
-      *command = EOF;
     } else {
       currentKeys.front |= key;
       pressedKeys = currentKeys;
-      *command = CMD_NOOP;
+      if (model->interpretKeys(context, &currentKeys, command)) {
+        *command |= VAL_REPEAT_DELAY;
+      }
     }
     return 1;
   }
@@ -1212,7 +1202,6 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
           case BDS_READY: {
             int command;
             if (model->interpretByte(context, byte, &command)) {
-              repeatCounter = repeatDelay;
               updateBrailleCells(brl);
               return command;
             }
@@ -1267,21 +1256,6 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
     }
   }
   updateBrailleCells(brl);
-
-  if (!--repeatCounter) {
-    if ((currentState == BDS_READY) || (currentState == BDS_WRITING)) {
-      repeatCounter = repeatInterval;
-      if (currentKeys.front && (currentKeys.column < 0) && (currentKeys.status < 0)) {
-        int command;
-        if (model->interpretKeys(context, &currentKeys, &command)) {
-          pressedKeys = nullKeys;
-          return command;
-        }
-      }
-    } else {
-      repeatCounter = 1;
-    }
-  }
 
   return EOF;
 }

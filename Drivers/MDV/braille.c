@@ -616,9 +616,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  howmanykeys = 0;
 	}
       }else if(keycode == SHIFT_PRESS) {
-	cmd = CMD_CSRHIDE | VAL_SWITCHON;
+	cmd = CMD_CSRHIDE | VAL_TOGGLE_ON;
       }else if(keycode == SHIFT_RELEASE) {
-	cmd = CMD_CSRHIDE | VAL_SWITCHOFF;
+	cmd = CMD_CSRHIDE | VAL_TOGGLE_OFF;
       }else if(modifier == 0){
 	switch(key) {
           case LF: cmd = CMD_FWINLT; break;
@@ -674,7 +674,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	   only key 1 is mapped. */
 	if(whichkey == 1)
 	  return CMD_CSRHIDE 
-	    | ((code == REPORTROUTINGKEYPRESS) ? VAL_SWITCHOFF : VAL_SWITCHON);
+	    | ((code == REPORTROUTINGKEYPRESS) ? VAL_TOGGLE_OFF : VAL_TOGGLE_ON);
 	else return EOF;
       }
       whichkey -= nrstatcells;

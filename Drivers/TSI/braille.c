@@ -969,8 +969,8 @@ cut_cursor (BrailleDisplay *brl)
 #define KEYSPECIAL(code,action) \
     case code: { action }; break;
 #define KEYSW(codeon, codeoff, result) \
-    case codeon: res = result | VAL_SWITCHON; break; \
-    case codeoff: res = result | VAL_SWITCHOFF; break;
+    case codeon: res = result | VAL_TOGGLE_ON; break; \
+    case codeoff: res = result | VAL_TOGGLE_OFF; break;
 
 /* For cursor routing */
 /* lookup so find out if a certain key is active */

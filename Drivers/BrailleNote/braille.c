@@ -722,33 +722,33 @@ interpretBackspaceChord (unsigned char dots, DriverCommandContext cmds) {
 	 return VAL_PASSKEY + VPK_BACKSPACE;
 	 return EOF;
       case BNC_A:
-	 return CMD_DISPMD | VAL_SWITCHON;
+	 return CMD_DISPMD | VAL_TOGGLE_ON;
       case BNC_B:
-         return CMD_SKPBLNKWINS | VAL_SWITCHOFF;
+         return CMD_SKPBLNKWINS | VAL_TOGGLE_OFF;
       case BNC_D:
 	 temporaryRoutingOperation = CR_DESCCHAR;
          return CMD_NOOP;
       case BNC_F:
-         return CMD_FREEZE | VAL_SWITCHOFF;
+         return CMD_FREEZE | VAL_TOGGLE_OFF;
       case BNC_H:
 	 return CMD_HELP;
       case BNC_I:
-         return CMD_SKPIDLNS | VAL_SWITCHOFF;
+         return CMD_SKPIDLNS | VAL_TOGGLE_OFF;
       case BNC_M:
 	 temporaryRoutingOperation = CR_SETMARK;
 	 return CMD_NOOP;
       case BNC_S:
 	 return CMD_INFO;
       case BNC_T:
-	 return CMD_DISPMD | VAL_SWITCHOFF;
+	 return CMD_DISPMD | VAL_TOGGLE_OFF;
       case BNC_V:
 	 return CMD_SWITCHVT_PREV;
       case BNC_W:
-         return CMD_SLIDEWIN | VAL_SWITCHOFF;
+         return CMD_SLIDEWIN | VAL_TOGGLE_OFF;
       case BNC_6:
-         return CMD_SIXDOTS | VAL_SWITCHON;
+         return CMD_SIXDOTS | VAL_TOGGLE_ON;
       case BNC_8:
-         return CMD_SIXDOTS | VAL_SWITCHOFF;
+         return CMD_SIXDOTS | VAL_TOGGLE_OFF;
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
 	 return CMD_RESTARTSPEECH;
    }
@@ -775,18 +775,18 @@ interpretEnterChord (unsigned char dots, DriverCommandContext cmds) {
 	 return VAL_PASSKEY + VPK_RETURN;
 	 return EOF;
       case BNC_B:
-         return CMD_SKPBLNKWINS | VAL_SWITCHON;
+         return CMD_SKPBLNKWINS | VAL_TOGGLE_ON;
       case BNC_F:
-         return CMD_FREEZE | VAL_SWITCHON;
+         return CMD_FREEZE | VAL_TOGGLE_ON;
       case BNC_I:
-         return CMD_SKPIDLNS | VAL_SWITCHON;
+         return CMD_SKPIDLNS | VAL_TOGGLE_ON;
       case BNC_M:
 	 temporaryRoutingOperation = CR_GOTOMARK;
 	 return CMD_NOOP;
       case BNC_V:
 	 return CMD_SWITCHVT_NEXT;
       case BNC_W:
-         return CMD_SLIDEWIN | VAL_SWITCHON;
+         return CMD_SLIDEWIN | VAL_TOGGLE_ON;
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
 	 return CMD_RESTARTBRL;
    }

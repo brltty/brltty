@@ -216,8 +216,8 @@ inputline:  '\n'
        | statdef eq statdisp '\n'  { set_showstat(keyindex, numval);  }
        | MODIFIER eq anykey '\n'   { set_modifier(keyindex); }
        | keycode eq modifiers '\n' { set_keycode(cmdval, numkeys, keys); }
-       | keycode ON eq modifiers '\n' { set_keycode(cmdval | VAL_SWITCHON, numkeys, keys); }
-       | keycode OFF eq modifiers '\n' { set_keycode(cmdval | VAL_SWITCHOFF, numkeys, keys); }
+       | keycode ON eq modifiers '\n' { set_keycode(cmdval | VAL_TOGGLE_ON, numkeys, keys); }
+       | keycode OFF eq modifiers '\n' { set_keycode(cmdval | VAL_TOGGLE_OFF, numkeys, keys); }
        ;
 
 eq:    '='

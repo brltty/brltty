@@ -84,7 +84,7 @@ static unsigned int TickCount = 0;        /* incremented each main loop cycle */
 
 #define TOGGLEPLAY(var) playTune((var)? &tune_toggle_on: &tune_toggle_off)
 #define TOGGLE(var) \
-  (var = (command & VAL_SWITCHON)? 1: ((command & VAL_SWITCHOFF)? 0: (!var)))
+  (var = (command & VAL_TOGGLE_ON)? 1: ((command & VAL_TOGGLE_OFF)? 0: (!var)))
 
 
 unsigned char *curtbl = textTable;        /* active translation table */
@@ -837,8 +837,15 @@ main (int argc, char *argv[]) {
                                       ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
                                       CMDS_SCREEN);
         if (next != EOF) {
-          autorepeat = (next & VAL_AUTOREPEAT)? autorepeatDelay: 0;
-          command = next & ~VAL_AUTOREPEAT;
+          command = next & ~VAL_REPEAT_MASK;
+          if (next & VAL_REPEAT_DELAY) {
+            autorepeat = autorepeatDelay;
+            if (!(next & VAL_REPEAT_IMMEDIATE)) break;
+          } else if (next & VAL_REPEAT_IMMEDIATE) {
+            autorepeat = autorepeatInterval;
+          } else {
+            autorepeat = 0;
+          }     
         } else {
           if (!autorepeat) break;
           if ((autorepeat -= updateInterval) > 0) break;
@@ -853,9 +860,9 @@ main (int argc, char *argv[]) {
       if (!executeScreenCommand(command)) {
         switch (command & ~VAL_FLG_MASK) {
           case CMD_NOOP:        /* do nothing but loop */
-            if (command & VAL_SWITCHON)
+            if (command & VAL_TOGGLE_ON)
               playTune(&tune_toggle_on);
-            else if (command & VAL_SWITCHOFF)
+            else if (command & VAL_TOGGLE_OFF)
               playTune(&tune_toggle_off);
             else
               continue;
