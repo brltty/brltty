@@ -270,24 +270,22 @@ static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define KEY_CURSOR2 	0x080	/* the CURSOR2 key */
 #define KEY_HOME2 	0x100	/* the HOME2 key */
 #define KEY_PROG2 	0x200	/* the PROG2 key */
-#define KEY_ROUTING1	0x400	/* lower cursor routing key set */
-#define KEY_ROUTING2	0x800	/* upper cursor routing key set */
 
-/* those keys are not supposed to be combined, so their corresponding 
- * values are not bit exclusive between them.
- */
 #define KEY_STATUS1_A	0x01000	/* first lower status key */
 #define KEY_STATUS1_B	0x02000	/* second lower status key */
 #define KEY_STATUS1_C	0x03000	/* third lower status key */
 #define KEY_STATUS1_D	0x04000	/* fourth lower status key */
 #define KEY_STATUS1_E	0x05000	/* fifth lower status key */
 #define KEY_STATUS1_F	0x06000	/* sixth lower status key */
+#define KEY_ROUTING1	0x08000	/* lower cursor routing key set */
+
 #define KEY_STATUS2_A	0x10000	/* first upper status key */
 #define KEY_STATUS2_B	0x20000	/* second upper status key */
 #define KEY_STATUS2_C	0x30000	/* third upper status key */
 #define KEY_STATUS2_D	0x40000	/* fourth upper status key */
 #define KEY_STATUS2_E	0x50000	/* fifth upper status key */
 #define KEY_STATUS2_F	0x60000	/* sixth upper status key */
+#define KEY_ROUTING2	0x80000	/* upper cursor routing key set */
 
 #define KEY_SPK_F1	0x0100000
 #define KEY_SPK_F2	0x0200000
@@ -303,15 +301,21 @@ static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define KEY_BRL_LEFT	0x7000000
 #define KEY_BRL_RIGHT	0x8000000
 
+#define KEY_TUMBLER1A	0x10000000	/* left end of left tumbler key */
+#define KEY_TUMBLER1B	0x20000000	/* right end of left tumbler key */
+#define KEY_TUMBLER2A	0x30000000	/* left end of right tumbler key */
+#define KEY_TUMBLER2B	0x40000000	/* right end of right tumbler key */
+
 /* first cursor routing offset on main display (old firmware only) */
 #define KEY_ROUTING_OFFSET 168
 
 #if ! ABT3_OLD_FIRMWARE
 /* Index for new firmware protocol */
-static int OperatingKeys[10] = {
+static int OperatingKeys[14] = {
   KEY_PROG, KEY_HOME, KEY_CURSOR,
   KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
-  KEY_CURSOR2, KEY_HOME2, KEY_PROG2
+  KEY_CURSOR2, KEY_HOME2, KEY_PROG2,
+  KEY_TUMBLER1A, KEY_TUMBLER1B, KEY_TUMBLER2A, KEY_TUMBLER2B
 };
 #endif /* ! ABT3_OLD_FIRMWARE */
 
@@ -803,7 +807,7 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
   switch (packet[0]) {
     case 0X71: { /* operating keys and status keys */
       unsigned char key = packet[1];
-      if (key <= 0X09) {
+      if (key <= 0X0D) {
         *Keys |= OperatingKeys[key];
       } else if ((key >= 0X80) && (key <= 0X89)) {
         *Keys &= ~OperatingKeys[key - 0X80];
@@ -1110,22 +1114,26 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             case KEY_RIGHT:
               res = CMD_FWINRT;
               break;
-            case KEY_HOME | KEY_LEFT:
-              res = CMD_HWINLT;
-              break;
-            case KEY_HOME | KEY_RIGHT:
-              res = CMD_HWINRT;
-              break;
-            case KEY_CURSOR | KEY_LEFT:
+            case KEY_TUMBLER1A:
+            case KEY_BRL_F1 | KEY_LEFT:
               res = CMD_CHRLT;
               break;
-            case KEY_CURSOR | KEY_RIGHT:
+            case KEY_TUMBLER1B:
+            case KEY_BRL_F1 | KEY_RIGHT:
               res = CMD_CHRRT;
               break;
-            case KEY_HOME | KEY_CURSOR | KEY_LEFT:
+            case KEY_TUMBLER2A:
+            case KEY_BRL_F2 | KEY_LEFT:
+              res = CMD_HWINLT;
+              break;
+            case KEY_TUMBLER2B:
+            case KEY_BRL_F2 | KEY_RIGHT:
+              res = CMD_HWINRT;
+              break;
+            case KEY_HOME | KEY_LEFT:
               res = CMD_LNBEG;
               break;
-            case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
+            case KEY_HOME | KEY_RIGHT:
               res = CMD_LNEND;
               break;
 

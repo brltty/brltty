@@ -20,12 +20,12 @@ Home Cursor Down  go down to nearest line with different highlighting
 Left/Right Keys:
 Left              go left one window
 Right             go right one window
-Home Left         go left half window
-Home Right        go right half window
-Cursor Left       go left one character
-Cursor Right      go right one character
-Home Cursor Left  go to start of line
-Home Cursor Right go to end of line
+Home Left         go to start of line
+Home Right        go to end of line
+F1b Left          go left one character
+F1b Right         go right one character
+F2b Left          go left half window
+F2b Right        go right half window
 
 Braille (right) Key Pad:
 F1                enter/leave help display
