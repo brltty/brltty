@@ -27,9 +27,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <termios.h>
-#include <errno.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -212,19 +210,13 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *tty)
  unsigned char ch = '?';
  int i;
 #endif /* SendIdReq */
- brl_fd = open(tty, O_RDWR | O_NOCTTY );
- if (brl_fd < 0) 
- {
-  LogPrint(LOG_ERR,"Unable to open %s: %s",tty,strerror(errno)); 
-  return 0;
- }
- tcgetattr(brl_fd,&oldtio); 
+ if (!openSerialDevice(tty, &brl_fd, &oldtio)) return 0;
  memset(&newtio, 0, sizeof(newtio)); 
- newtio.c_cflag = B57600 |  CS8 | PARENB | PARODD | CLOCAL | CREAD;
+ newtio.c_cflag = CS8 | PARENB | PARODD | CLOCAL | CREAD;
  newtio.c_iflag = IGNPAR;
  newtio.c_oflag = 0;
  newtio.c_lflag = 0;
- tcsetattr(brl_fd,TCSANOW,&newtio); 
+ resetSerialDevice(brl_fd,&newtio,B57600); 
  #ifdef SendIdReq
  {
   brl_writePacket(brl,(unsigned char *) &ch,1); 
