@@ -269,6 +269,9 @@ serialInitializeAttributes (SerialAttributes *attributes) {
   attributes->fBinary = TRUE;
   attributes->ByteSize = 8;
   attributes->BaudRate = CBR_9600;
+  attributes->fRtsControl = RTS_CONTROL_ENABLE;
+  attributes->fDtrControl = DTR_CONTROL_ENABLE;
+  attributes->fTXContinueOnXoff = TRUE;
 #else /* __MINGW32__ */
   attributes->c_cflag = CREAD | CLOCAL | CS8;
   attributes->c_iflag = IGNPAR | IGNBRK;
@@ -451,11 +454,15 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
   if (flow & SERIAL_FLOW_INPUT_RTS) {
     flow &= ~SERIAL_FLOW_INPUT_RTS;
     serial->pendingAttributes.fRtsControl = RTS_CONTROL_HANDSHAKE;
+  } else {
+    serial->pendingAttributes.fRtsControl = RTS_CONTROL_ENABLE;
   }
 
   if (flow & SERIAL_FLOW_INPUT_DTR) {
     flow &= ~SERIAL_FLOW_INPUT_DTR;
     serial->pendingAttributes.fDtrControl = DTR_CONTROL_HANDSHAKE;
+  } else {
+    serial->pendingAttributes.fDtrControl = DTR_CONTROL_ENABLE;
   }
 
   if (flow & SERIAL_FLOW_INPUT_XON) {
