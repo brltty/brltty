@@ -644,6 +644,7 @@ fi
 
 BRLTTY_SEARCH_LIBS([sched_yield], [rt])
 BRLTTY_SEARCH_LIBS([sin], [m])
+BRLTTY_SEARCH_LIBS([pow], [m])
 case "${host_os}"
 in
    linux*)
