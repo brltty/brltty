@@ -382,14 +382,30 @@ usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
 }
 static int
 usbSetBelkinBaud (UsbDevice *device, int rate) {
-  return usbSetBelkinAttribute(device, 0, 230400/rate);
+  const int base = 230400;
+  if (base % rate) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin baud: %d", rate);
+    errno = EINVAL;
+    return -1;
+  }
+  return usbSetBelkinAttribute(device, 0, base/rate);
 }
 static int
 usbSetBelkinStopBits (UsbDevice *device, int bits) {
+  if ((bits < 1) || (bits > 2)) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin stop bits: %d", bits);
+    errno = EINVAL;
+    return -1;
+  }
   return usbSetBelkinAttribute(device, 1, bits-1);
 }
 static int
 usbSetBelkinDataBits (UsbDevice *device, int bits) {
+  if ((bits < 5) || (bits > 8)) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin data bits: %d", bits);
+    errno = EINVAL;
+    return -1;
+  }
   return usbSetBelkinAttribute(device, 2, bits-5);
 }
 static int
@@ -400,30 +416,48 @@ usbSetBelkinParity (UsbDevice *device, UsbSerialParity parity) {
     case USB_SERIAL_PARITY_ODD:   value = 2; break;
     case USB_SERIAL_PARITY_EVEN:  value = 1; break;
     case USB_SERIAL_PARITY_MARK:  value = 3; break;
-    default:
     case USB_SERIAL_PARITY_NONE:  value = 0; break;
+    default:
+      LogPrint(LOG_WARNING, "Unsupported Belkin parity: %d", parity);
+      errno = EINVAL;
+      return -1;
   }
   return usbSetBelkinAttribute(device, 3, value);
 }
 static int
 usbSetBelkinDtrState (UsbDevice *device, int state) {
+  if ((state < 0) || (state > 1)) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin DTR state: %d", state);
+    errno = EINVAL;
+    return -1;
+  }
   return usbSetBelkinAttribute(device, 10, state);
 }
 static int
 usbSetBelkinRtsState (UsbDevice *device, int state) {
+  if ((state < 0) || (state > 1)) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin RTS state: %d", state);
+    errno = EINVAL;
+    return -1;
+  }
   return usbSetBelkinAttribute(device, 11, state);
 }
 static int
 usbSetBelkinFlowControl (UsbDevice *device, int flow) {
   int value = 0;
-  if (flow & USB_SERIAL_FLOW_OUTPUT_XON) value |= 0X0080;
-  if (flow & USB_SERIAL_FLOW_OUTPUT_CTS) value |= 0X0001;
-  if (flow & USB_SERIAL_FLOW_OUTPUT_DSR) value |= 0X0002;
-  if (flow & USB_SERIAL_FLOW_OUTPUT_RTS) value |= 0X0020;
-  if (flow & USB_SERIAL_FLOW_INPUT_XON ) value |= 0X0100;
-  if (flow & USB_SERIAL_FLOW_INPUT_RTS ) value |= 0X0010;
-  if (flow & USB_SERIAL_FLOW_INPUT_DTR ) value |= 0X0008;
-  if (flow & USB_SERIAL_FLOW_INPUT_DSR ) value |= 0X0004;
+#define BELKIN_FLOW(from,to) if (flow & from) flow &= ~from, value |= to
+  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_XON, 0X0080);
+  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_CTS, 0X0001);
+  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_DSR, 0X0002);
+  BELKIN_FLOW(USB_SERIAL_FLOW_OUTPUT_RTS, 0X0020);
+  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_XON , 0X0100);
+  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_RTS , 0X0010);
+  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_DTR , 0X0008);
+  BELKIN_FLOW(USB_SERIAL_FLOW_INPUT_DSR , 0X0004);
+#undef BELKIN_FLOW
+  if (flow) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
+  }
   return usbSetBelkinAttribute(device, 16, value);
 }
 static const UsbSerialOperations usbBelkinOperations = {
