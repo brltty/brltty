@@ -37,6 +37,7 @@ extern int validateBaud (speed_t *value, const char *description, const char *wo
 extern int baud2integer (speed_t baud);
 
 extern void initializeSerialAttributes (struct termios *attributes);
+extern int setSerialSpeed (struct termios *attributes, int speed);
 extern int setSerialDataBits (struct termios *attributes, int bits);
 extern int setSerialStopBits (struct termios *attributes, int bits);
 
@@ -54,6 +55,8 @@ typedef enum {
   SERIAL_FLOW_NONE              = 0X0
 } SerialFlowControl;
 extern int setSerialFlowControl (struct termios *attributes, SerialFlowControl flow);
+
+extern int applySerialAttributes (const struct termios *attributes, int device);
 
 #ifdef __cplusplus
 }
