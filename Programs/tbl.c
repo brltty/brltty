@@ -142,6 +142,14 @@ getBit (InputData *input, unsigned char *set, unsigned char *mask) {
         {"bg-green" , 0X20},
         {"bg-red"   , 0X40},
         {"blink"    , 0X80},
+        {"bit01"    , 0X01},
+        {"bit02"    , 0X02},
+        {"bit04"    , 0X04},
+        {"bit08"    , 0X08},
+        {"bit10"    , 0X10},
+        {"bit20"    , 0X20},
+        {"bit40"    , 0X40},
+        {"bit80"    , 0X80},
         {NULL       , 0X00},
       };
       const BitEntry *bit = bitTable;
