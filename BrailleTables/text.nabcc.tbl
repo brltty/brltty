@@ -364,7 +364,7 @@
    \XA2 (12 4 67 )  # 162   ¢  cent sign
    \XA3 (  34567 )  # 163   £  pound sign
 
-# A few more characters follow this same convention but they're relationships
+# A few more characters follow this same convention but their relationships
 # to their base characters is a bit obscure:
 
    #Hex    Dots       Dec Char Description
