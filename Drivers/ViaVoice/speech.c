@@ -396,7 +396,7 @@ spk_rate (int setting) {
 
 static void
 spk_volume (int setting) {
-   double fraction = (double)setting / (double)SPK_MAXIMUM_VOLUME;
+   float fraction = (float)setting / (float)SPK_MAXIMUM_VOLUME;
    int volume = (int)(fraction * (2.0 - fraction) * 100.0);
    eciSetVoiceParam(eci, 0, eciVolume, volume);
 }

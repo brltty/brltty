@@ -142,9 +142,9 @@ spk_open (char **parameters) {
 
   if (voice) {
     {
-      double pitch = 0.0;
-      static const double minimumPitch = -2.0;
-      static const double maximumPitch = 2.0;
+      float pitch = 0.0;
+      static const float minimumPitch = -2.0;
+      static const float maximumPitch = 2.0;
       if (validateFloat(&pitch, "pitch shift", parameters[PARM_PITCH],
                         &minimumPitch, &maximumPitch))
         theta_set_pitch_shift(voice, pitch, NULL);
@@ -224,5 +224,5 @@ spk_rate (int setting) {
 
 static void
 spk_volume (int setting) {
-  theta_set_rescale(voice, (double)setting/(double)SPK_DEFAULT_VOLUME, NULL);
+  theta_set_rescale(voice, (float)setting/(float)SPK_DEFAULT_VOLUME, NULL);
 }

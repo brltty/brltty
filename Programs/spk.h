@@ -64,7 +64,7 @@ extern void setSpeechVolume (int setting);
 
 #define SPK_DEFAULT_RATE 10
 #define SPK_MAXIMUM_RATE (SPK_DEFAULT_RATE * 2)
-extern double spkDurationStretchTable[];
+extern float spkDurationStretchTable[];
 
 #define SPK_DEFAULT_VOLUME 10
 #define SPK_MAXIMUM_VOLUME (SPK_DEFAULT_VOLUME * 2)

@@ -485,7 +485,7 @@ isInteger (int *value, const char *word) {
 }
 
 int
-isFloat (double *value, const char *word) {
+isFloat (float *value, const char *word) {
   if (*word) {
     char *end;
     *value = strtod(word, &end);
@@ -519,7 +519,7 @@ validateInteger (int *value, const char *description, const char *word, const in
 }
 
 int
-validateFloat (double *value, const char *description, const char *word, const double *minimum, const double *maximum) {
+validateFloat (float *value, const char *description, const char *word, const float *minimum, const float *maximum) {
    if (*word && !isFloat(value, word)) {
       LogPrint(LOG_ERR, "The %s must be a floating-point number: %s",
                description, word);

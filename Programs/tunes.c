@@ -304,7 +304,7 @@ TuneDefinition tune_routing_failed = {
    NULL, 0, elements_routing_failed
 };
 
-const double noteFrequencies[] = {
+const float noteFrequencies[] = {
    /*   0 -5C  */     8.176,
    /*   1 -5C# */     8.662,
    /*   2 -5D  */     9.177,

@@ -132,9 +132,9 @@ extern int awaitInput (int descriptor, int milliseconds);
 extern int readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout);
 
 extern int isInteger (int *value, const char *word);
-extern int isFloat (double *value, const char *word);
+extern int isFloat (float *value, const char *word);
 extern int validateInteger (int *value, const char *description, const char *word, const int *minimum, const int *maximum);
-extern int validateFloat (double *value, const char *description, const char *word, const double *minimum, const double *maximum);
+extern int validateFloat (float *value, const char *description, const char *word, const float *minimum, const float *maximum);
 extern int validateChoice (unsigned int *value, const char *description, const char *word, const char *const *choices);
 extern int validateFlag (unsigned int *value, const char *description, const char *word, const char *on, const char *off);
 extern int validateOnOff (unsigned int *value, const char *description, const char *word);

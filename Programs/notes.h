@@ -34,7 +34,7 @@ extern const NoteGenerator pcmNoteGenerator;
 extern const NoteGenerator midiNoteGenerator;
 extern const NoteGenerator fmNoteGenerator;
 
-extern const double noteFrequencies[];
+extern const float noteFrequencies[];
 extern const unsigned int noteCount;
 
 #ifdef __cplusplus

@@ -47,7 +47,7 @@ static void spk_close (void) { }
 
 const SpeechDriver *speech = &noSpeech;
 
-double spkDurationStretchTable[] = {
+float spkDurationStretchTable[] = {
   3.0000,
   2.6879,
   2.4082,
