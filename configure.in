@@ -462,6 +462,7 @@ BRLTTY_ARG_DISABLE(
    build_api="api"
    install_api="install-api"
    BRLTTY_SEARCH_LIBS([pthread_create], [pthread c_r])
+   BRLTTY_SEARCH_LIBS([socket], [socket])
    BRLTTY_ARG_PARAMETERS([api])
 ])
 AC_SUBST([api_objects])
