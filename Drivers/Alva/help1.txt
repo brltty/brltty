@@ -27,24 +27,6 @@ Cursor Right      go right one character
 Home Cursor Left  go to start of line
 Home Cursor Right go to end of line
 
-Routing Keys:
-Lower             bring cursor to character
-Upper             describe character
-Home Lower        start new cut buffer at character
-Home Upper        append to existing cut buffer from character
-Cursor Lower      rectangular cut to character
-Cursor Upper      linear cut to character
-Home Cursor Lower go down to nearest line without greater indent
-Home Cursor Upper go up to nearest line without greater indent
-
-Status Keys:
-Lower1            toggle cursor visibility mode
-Lower2            toggle attribute underlining mode
-Lower3            toggle blinking capitals mode
-Upper1            toggle skip identical lines mode
-Upper2            toggle text/attributes display mode
-Upper3            toggle skip blank windows mode
-
 Braille (right) Key Pad:
 F1                enter/leave help display
 F2                enter/leave command learn mode
@@ -74,3 +56,23 @@ F2 Left           decrease speech rate
 F2 Right          increase speech rate
 F2 Up             increase speech volume
 F2 Down           decrease speech volume
+
+Routing Keys:
+Upper             describe character
+Lower             bring cursor to character
+F1b Upper         append to existing cut buffer from character
+F1b Lower         start new cut buffer at character
+F2b Upper         linear cut to character
+F2b Lower         rectangular cut to character
+Home Upper        remember current window position         
+Home Lower        go to remembered window position         
+Cursor Upper      go up to nearest line without greater indent
+Cursor Lower      go down to nearest line without greater indent
+
+Status Keys:
+Upper1            toggle skip identical lines mode
+Upper2            toggle text/attributes display mode
+Upper3            toggle skip blank windows mode
+Lower1            toggle cursor visibility mode
+Lower2            toggle attribute underlining mode
+Lower3            toggle blinking capitals mode

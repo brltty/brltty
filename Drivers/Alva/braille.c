@@ -1129,29 +1129,35 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_LNEND;
               break;
 
-            case KEY_ROUTING1:
-              res = CR_ROUTE + RoutingPos;
-              break;
             case KEY_ROUTING2:
               res = CR_DESCCHAR + RoutingPos;
               break;
-            case KEY_HOME | KEY_ROUTING1:
-              res = CR_CUTBEGIN + RoutingPos;
+            case KEY_ROUTING1:
+              res = CR_ROUTE + RoutingPos;
               break;
-            case KEY_HOME | KEY_ROUTING2:
+            case KEY_BRL_F1 | KEY_ROUTING2:
               res = CR_CUTAPPEND + RoutingPos;
               break;
-            case KEY_CURSOR | KEY_ROUTING1:
-              res = CR_CUTRECT + RoutingPos;
+            case KEY_BRL_F1 | KEY_ROUTING1:
+              res = CR_CUTBEGIN + RoutingPos;
               break;
-            case KEY_CURSOR | KEY_ROUTING2:
+            case KEY_BRL_F2 | KEY_ROUTING2:
               res = CR_CUTLINE + RoutingPos;
               break;
-            case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
-              res = CR_NXINDENT + RoutingPos;
+            case KEY_BRL_F2 | KEY_ROUTING1:
+              res = CR_CUTRECT + RoutingPos;
               break;
-            case KEY_HOME | KEY_CURSOR | KEY_ROUTING2:
+            case KEY_HOME | KEY_ROUTING2:
+              res = CR_SETMARK + RoutingPos;
+              break;
+            case KEY_HOME | KEY_ROUTING1:
+              res = CR_GOTOMARK + RoutingPos;
+              break;
+            case KEY_CURSOR | KEY_ROUTING2:
               res = CR_PRINDENT + RoutingPos;
+              break;
+            case KEY_CURSOR | KEY_ROUTING1:
+              res = CR_NXINDENT + RoutingPos;
               break;
 
             case KEY_STATUS1_A:
