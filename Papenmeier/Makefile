@@ -6,7 +6,7 @@
 # Stephane Doyon <doyons@jsp.umontreal.ca>
 # Nikhil Nair <nn201@cus.cam.ac.uk>
 #
-# Copyright (C) 1995 1999 by the BRLTTY team.  All rights reserved.
+# Copyright (C) 1995-2000 by the BRLTTY team.  All rights reserved.
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
 # This is free software, placed under the terms of the

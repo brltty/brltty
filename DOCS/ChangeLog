@@ -3,14 +3,19 @@ Note: this file should be read from bottom to top.
 
   ...
 
-December 99:
+01 January 2000:
+  - Released BRLTTY 2.21 (beta)
+
+December 1999:
   - Contribution of a driver for BAUM Vario (emulation mode 2 / HT-Protocol)
     + a Swedish braille table from Per Lejontand <per@acc.umu.se> (with
     assistance from Niklas Edmundsson <nikke@acc.umu.se>). BRLTTY beta
     version 2.20 will be circulated so that this driver can be tested.
-October 99:
+
+October 1999:
   - TSI driver: Workaround for quirks of TSI emulators such as Vario.
-June 99:
+
+June 1999:
   - Completed first stable beta version of MDV driver.
 
 21 June 1999:
