@@ -70,7 +70,7 @@ typedef enum {
 #define  EASYMAX   8
 #define  NAMEMAX   80
 #define  MODMAX    16
-#define  CMDMAX    280
+#define  CMDMAX    300
 #define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
@@ -132,8 +132,8 @@ typedef struct {
 
 #define CHGONOFF(cmd, offs, on, off) \
       { cmd                 , offs, 0  }, \
-      { cmd | VAL_TOGGLE_ON , offs, on }, \
-      { cmd | VAL_TOGGLE_OFF, offs, off}
+      { cmd | VAL_TOGGLE_OFF, offs, off}, \
+      { cmd | VAL_TOGGLE_ON , offs, on }
 
 
 /* modifiers for 9 front keys */
@@ -386,20 +386,20 @@ typedef struct {
       OFFS_EMPTY
 
 /* commands for 13 status keys */
-#define CMDS_STAT_13 \
-      CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 2, 1), \
-              { CMD_LEARN      , OFFS_STAT +  2, 0   }, \
-              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0   }, \
-              { CMD_BACK       , OFFS_STAT +  4, 0   }, \
-      CHGONOFF( CMD_INFO       , OFFS_STAT +  5, 2, 1), \
-      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 2, 1), \
-      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 2, 1), \
-      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 2, 1), \
-              { CMD_PREFMENU   , OFFS_STAT +  9, 0   }, \
-              { CMD_PREFLOAD   , OFFS_STAT + 10, 0   }, \
-      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 11, 2, 1), \
-      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 12, 2, 1), \
-              { CMD_PASTE      , OFFS_STAT + 13, 0   }
+#define CMDS_STAT_13(on, off) \
+      CHGONOFF( CMD_HELP       , OFFS_STAT +  1, on, off), \
+              { CMD_LEARN      , OFFS_STAT +  2, 0      }, \
+              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0      }, \
+              { CMD_BACK       , OFFS_STAT +  4, 0      }, \
+      CHGONOFF( CMD_INFO       , OFFS_STAT +  5, on, off), \
+      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, on, off), \
+      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, on, off), \
+      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, on, off), \
+              { CMD_PREFMENU   , OFFS_STAT +  9, 0      }, \
+              { CMD_PREFLOAD   , OFFS_STAT + 10, 0      }, \
+      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 11, on, off), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 12, on, off), \
+              { CMD_PASTE      , OFFS_STAT + 13, 0      }
 
 
 /* what to show for 20 status cells */
@@ -426,27 +426,27 @@ typedef struct {
       OFFS_EMPTY
 
 /* commands for 20 status keys */
-#define CMDS_STAT_20 \
-              { CMD_HELP       , OFFS_STAT +  1, 0000       }, \
-              { CMD_LEARN      , OFFS_STAT +  2, 0000       }, \
-              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
-              { CMD_BACK       , OFFS_STAT +  4, 0000       }, \
-              { CMD_INFO       , OFFS_STAT +  5, 0000       }, \
-      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 0200, 0100 ), \
-      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 0200, 0100 ), \
-      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 0200, 0100 ), \
-              { CMD_PREFMENU   , OFFS_STAT +  9, 0000       }, \
-              { CMD_PREFSAVE   , OFFS_STAT + 10, 0000       }, \
-              { CMD_PREFLOAD   , OFFS_STAT + 11, 0000       }, \
-      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 12, 0200, 0100 ), \
-      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 13, 0200, 0100 ), \
-      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 14, 0200, 0100 ), \
-      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 15, 0200, 0100 ), \
-      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 16, 0200, 0100 ), \
-      CHGONOFF( CMD_TUNES      , OFFS_STAT + 17, 0200, 0100 ), \
-      CHGONOFF( CMD_AUTOSPEAK  , OFFS_STAT + 18, 0200, 0100 ), \
-      CHGONOFF( CMD_AUTOREPEAT , OFFS_STAT + 19, 0200, 0100 ), \
-      CHGONOFF( CMD_PASTE      , OFFS_STAT + 20, 0200, 0100 )
+#define CMDS_STAT_20(on, off) \
+      CHGONOFF( CMD_HELP       , OFFS_STAT +  1, on, off ), \
+              { CMD_LEARN      , OFFS_STAT +  2, 0X0000  }, \
+              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0X0000  }, \
+              { CMD_BACK       , OFFS_STAT +  4, 0X0000  }, \
+      CHGONOFF( CMD_INFO       , OFFS_STAT +  5, on, off ), \
+      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, on, off ), \
+      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, on, off ), \
+      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, on, off ), \
+              { CMD_PREFMENU   , OFFS_STAT +  9, 0X0000  }, \
+              { CMD_PREFSAVE   , OFFS_STAT + 10, 0X0000  }, \
+              { CMD_PREFLOAD   , OFFS_STAT + 11, 0X0000  }, \
+      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 12, on, off ), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 13, on, off ), \
+      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 14, on, off ), \
+      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 15, on, off ), \
+      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 16, on, off ), \
+      CHGONOFF( CMD_TUNES      , OFFS_STAT + 17, on, off ), \
+      CHGONOFF( CMD_AUTOSPEAK  , OFFS_STAT + 18, on, off ), \
+      CHGONOFF( CMD_AUTOREPEAT , OFFS_STAT + 19, on, off ), \
+              { CMD_PASTE      , OFFS_STAT + 20, 0X0000  }
 
 
 /* what to show for 22 status cells */
@@ -475,29 +475,29 @@ typedef struct {
       OFFS_EMPTY
 
 /* commands for 22 status keys */
-#define CMDS_STAT_22 \
-      CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 0200, 0100 ), \
-              { CMD_LEARN      , OFFS_STAT +  2, 0000       }, \
-              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
-              { CMD_BACK       , OFFS_STAT +  4, 0000       }, \
-      CHGONOFF( CMD_INFO       , OFFS_STAT +  5, 0200, 0100 ), \
-      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 0200, 0100 ), \
-      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 0200, 0100 ), \
-      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 0200, 0100 ), \
-              { CMD_PREFMENU   , OFFS_STAT +  9, 0000       }, \
-              { CMD_PREFSAVE   , OFFS_STAT + 10, 0000       }, \
-              { CMD_PREFLOAD   , OFFS_STAT + 11, 0000       }, \
-      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 12, 0200, 0100 ), \
-      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 13, 0200, 0100 ), \
-      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 14, 0200, 0100 ), \
-      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 15, 0200, 0100 ), \
-      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 16, 0200, 0100 ), \
-      CHGONOFF( CMD_TUNES      , OFFS_STAT + 17, 0200, 0100 ), \
-              { CMD_RESTARTBRL , OFFS_STAT + 18, 0000       }, \
-      CHGONOFF( CMD_INPUT      , OFFS_STAT + 19, 0200, 0100 ), \
-      CHGONOFF( CMD_AUTOSPEAK  , OFFS_STAT + 20, 0200, 0100 ), \
-      CHGONOFF( CMD_AUTOREPEAT , OFFS_STAT + 21, 0200, 0100 ), \
-              { CMD_PASTE      , OFFS_STAT + 22, 0000       }
+#define CMDS_STAT_22(on, off) \
+      CHGONOFF( CMD_HELP       , OFFS_STAT +  1, on, off ), \
+              { CMD_LEARN      , OFFS_STAT +  2, 0X0000  }, \
+              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0X0000  }, \
+              { CMD_BACK       , OFFS_STAT +  4, 0X0000  }, \
+      CHGONOFF( CMD_INFO       , OFFS_STAT +  5, on, off ), \
+      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, on, off ), \
+      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, on, off ), \
+      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, on, off ), \
+              { CMD_PREFMENU   , OFFS_STAT +  9, 0X0000  }, \
+              { CMD_PREFSAVE   , OFFS_STAT + 10, 0X0000  }, \
+              { CMD_PREFLOAD   , OFFS_STAT + 11, 0X0000  }, \
+      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 12, on, off ), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 13, on, off ), \
+      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 14, on, off ), \
+      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 15, on, off ), \
+      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 16, on, off ), \
+      CHGONOFF( CMD_TUNES      , OFFS_STAT + 17, on, off ), \
+              { CMD_RESTARTBRL , OFFS_STAT + 18, 0X0000  }, \
+      CHGONOFF( CMD_INPUT      , OFFS_STAT + 19, on, off ), \
+      CHGONOFF( CMD_AUTOSPEAK  , OFFS_STAT + 20, on, off ), \
+      CHGONOFF( CMD_AUTOREPEAT , OFFS_STAT + 21, on, off ), \
+              { CMD_PASTE      , OFFS_STAT + 22, 0X0000  }
 
 
 static one_terminal pm_terminals[] =
@@ -536,7 +536,7 @@ static one_terminal pm_terminals[] =
     },
     {				/* commands + keys */
       CMDS_FRONT_9,
-      CMDS_STAT_13
+      CMDS_STAT_13(0X2, 0X1)
     },
   },
 
@@ -574,7 +574,7 @@ static one_terminal pm_terminals[] =
     },
     {				/* commands + keys */
       CMDS_FRONT_13,
-      CMDS_STAT_22
+      CMDS_STAT_22(0X80, 0X40)
     },
   },
 
@@ -613,8 +613,8 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMDS_STAT_13,
-      CMDS_EASY
+      CMDS_EASY,
+      CMDS_STAT_13(0X8000, 0X4000)
     },
   },
 
@@ -633,8 +633,8 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMDS_STAT_13,
-      CMDS_EASY
+      CMDS_EASY,
+      CMDS_STAT_13(0X8000, 0X4000)
     },
   },
 
@@ -674,7 +674,7 @@ static one_terminal pm_terminals[] =
     },
     {				/* commands + keys */
       CMDS_EASY,
-      CMDS_STAT_20
+      CMDS_STAT_20(0X8000, 0X4000)
     },
   },
 
