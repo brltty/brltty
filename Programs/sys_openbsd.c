@@ -82,7 +82,7 @@ timedBeep (unsigned short frequency, unsigned short milliseconds) {
     bell.pitch = frequency;
     bell.period = milliseconds;
     bell.volume = 100;
-    if (!data.period) {
+    if (!bell.period) {
       return 1;
     } else if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) {
       return 1;
