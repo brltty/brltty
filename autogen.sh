@@ -18,6 +18,6 @@
 
 cd "${0%/*}"
 [ -f Makefile ] && make -s distclean
-autoconf-2.53
+"${BRLTTY_AUTOCONF:-autoconf}"
 ./gendeps
 exit 0
