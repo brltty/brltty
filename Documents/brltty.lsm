@@ -1,7 +1,7 @@
 Begin4
 Title: brltty
-Version: 3.6pre2
-Entered-date: 2004/08/21
+Version: 3.6pre3
+Entered-date: 2004/09/04
 Description: Braille Display Driver for Linux/Unix
              BRLTTY is a background process (daemon) which provides access to
              the Linux/Unix console (when in text mode) for a blind person

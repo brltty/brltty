@@ -1,6 +1,26 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+September 3, 2004:
+ - BRLTTY 3.6pre3 released:
+   Restarting drivers caused strange corruptions.
+   Eliminate some compile warnings when many features are disabled.
+   Make the entire options mechanism be wholly table driven.
+   Specifying an invalid option yields a bogus excess parameter error.
+   Automatically generate long options to set flags to 0.
+   Abbreviation tests via strncasecmp() don't require an extra length check.
+   findSharedSymbol() needs to accept the address of any kind of pointer.
+   Go back to OSS being the default on Linux even if ALSA is available.
+   Remove the link dependency on libasound from the PCM/MIDI ALSA code.
+   Fix an Alva driver buffer indexing overflow.
+   Prevent the ClioNoteBraille (EuroBraille driver) from reidentifying after each frame is sent.
+   Add a HOWTO for reading Chinese big5.
+   More Nemeth Code changes to the big5 contraction table.
+   Move the preferences files from the data directory to the configuration directory to prevent loss.
+   Implicitly disable autospeak during speech tracking.
+   Protect serial port draining from system call interruptions.
+   Initial changes to support QNX.
+
 August 21, 2004:
  - BRLTTY 3.6pre2 released:
    Default PCM and/or MIDI support on Linux to ALSA if that seems to make sense.
