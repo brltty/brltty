@@ -44,6 +44,24 @@ static ContractionTableHeader *tableHeader;
 static ContractionTableOffset tableSize;
 static ContractionTableOffset tableUsed;
 
+static const char *const groupNames[] = {
+  "space",
+  "letter",
+  "digit",
+  "punctuation",
+  "uppercase",
+  "lowercase",
+  NULL
+};
+struct GroupEntry {
+  struct GroupEntry *next;
+  ContractionTableCharacterAttributes attribute;
+  BYTE length;
+  char name[1];
+};
+static struct GroupEntry *groupList;
+static ContractionTableCharacterAttributes groupAttribute;
+
 static const char *const opcodeNames[CTO_None] = {
   "include",
   "locale",
@@ -78,7 +96,11 @@ static const char *const opcodeNames[CTO_None] = {
 
   "begnum",
   "midnum",
-  "endnum"
+  "endnum",
+
+  "group",
+  "after",
+  "before"
 };
 static unsigned char opcodeLengths[CTO_None] = {0};
 
@@ -144,8 +166,15 @@ saveByteString (FileData *data, ContractionTableOffset *offset, const ByteString
   return saveBytes(data, offset, string->bytes, string->length);
 }
 
-static int
-addRule (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteString *replace) {
+static ContractionTableRule *
+addRule (
+  FileData *data,
+  ContractionTableOpcode opcode,
+  ByteString *find,
+  ByteString *replace,
+  ContractionTableCharacterAttributes after,
+  ContractionTableCharacterAttributes before
+) {
   ContractionTableOffset ruleOffset;
   int ruleSize = sizeof(ContractionTableRule) - 1;
   if (find) ruleSize += find->length;
@@ -153,6 +182,8 @@ addRule (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteSt
   if (allocateBytes(data, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
     ContractionTableRule *newRule = CTR(tableHeader, ruleOffset);
     newRule->opcode = opcode;
+    newRule->after = after;
+    newRule->before = before;
     if (find)
       memcpy(&newRule->findrep[0], &find->bytes[0],
              (newRule->findlen = find->length));
@@ -216,9 +247,63 @@ addRule (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteSt
       }
     }
 
-    return 1;
+    return newRule;
   }
-  return 0;
+  return NULL;
+}
+
+static const struct GroupEntry *
+findGroupEntry (const char *name, int length) {
+  const struct GroupEntry *group = groupList;
+  while (group) {
+    if (memcmp(name, group->name, length) == 0) return group;
+    group = group->next;
+  }
+  return NULL;
+}
+
+static struct GroupEntry *
+addGroupEntry (FileData *data, const char *name, int length) {
+  struct GroupEntry *group;
+  if (groupAttribute) {
+    if ((group = malloc(sizeof(*group) + length - 1))) {
+      memset(group, 0, sizeof(*group));
+      memcpy(group->name, name, (group->length = length));
+
+      group->attribute = groupAttribute;
+      groupAttribute <<= 1;
+
+      group->next = groupList;
+      groupList = group;
+      return group;
+    }
+  }
+  compileError(data, "contraction table group list overflow: %.*s", length, name);
+  return NULL;
+}
+
+static void
+deallocateGroupList (void) {
+  while (groupList) {
+    struct GroupEntry *group = groupList;
+    groupList = groupList->next;
+    free(group);
+  }
+}
+
+static int
+allocateGroupList (void) {
+  const char *const *name = groupNames;
+  groupList = NULL;
+  groupAttribute = 1;
+  while (*name) {
+    if (!addGroupEntry(NULL, *name, strlen(*name))) {
+      deallocateGroupList();
+      return 0;
+    }
+    ++name;
+  }
+  return 1;
 }
 
 static ContractionTableOpcode
@@ -418,6 +503,14 @@ parseDots (FileData *data, ByteString *cells, const char *token, const int lengt
 }				/*end of function parseDots */
 
 static int
+getCharacters (FileData *data, ByteString *characters, const char **token, int *length) {
+  if (getToken(data, token, length, "characters"))
+    if (parseText(data, characters, *token, *length))
+      return 1;
+  return 0;
+}
+
+static int
 getFindText (FileData *data, ByteString *find, const char **token, int *length) {
   if (getToken(data, token, length, "find text"))
     if (parseText(data, find, *token, *length))
@@ -451,6 +544,15 @@ setLocale (const char *locale) {
   return setlocale(LC_CTYPE, locale);
 }
 
+static int
+getGroupEntry (FileData *data, const struct GroupEntry **group, const char **token, int *length) {
+  if (getToken(data, token, length, "group name")) {
+    if ((*group = findGroupEntry(*token, *length))) return 1;
+    compileError(data, "group not found: %.*s", *length, *token);
+  }
+  return 0;
+}
+
 static const char *
 getLocale (void) {
   return setLocale(NULL);
@@ -481,7 +583,10 @@ processLine (FileData *data, const char *line) {
   const char *token = line;
   int length = 0;			/*length of token */
   ContractionTableOpcode opcode;
+  ContractionTableCharacterAttributes after = 0;
+  ContractionTableCharacterAttributes before = 0;
 
+doOpcode:
   if (!getToken(data, &token, &length, NULL)) return 1;			/*blank line */
   if (*token == '#') return 1;
   opcode = getOpcode(data, token, length);
@@ -489,6 +594,7 @@ processLine (FileData *data, const char *line) {
   switch (opcode) { /*Carry out operations */
     case CTO_None:
       break;
+
     case CTO_IncludeFile: {
       ByteString path;
       if (getToken(data, &token, &length, "include file path"))
@@ -497,6 +603,7 @@ processLine (FileData *data, const char *line) {
             goto failure;
       break;
     }
+
     case CTO_Locale: {
       ByteString locale;
       if (getToken(data, &token, &length, "locale specification"))
@@ -512,6 +619,7 @@ processLine (FileData *data, const char *line) {
         }
       break;
     }
+
     case CTO_Always:
     case CTO_LargeSign:
     case CTO_WholeWord:
@@ -533,27 +641,30 @@ processLine (FileData *data, const char *line) {
       ByteString replace;
       if (getFindText(data, &find, &token, &length))
         if (getReplacePattern(data, &replace, &token, &length))
-          if (!addRule(data, opcode, &find, &replace))
+          if (!addRule(data, opcode, &find, &replace, after, before))
             goto failure;
       break;
     }
+
     case CTO_Replace: {
       ByteString find;
       ByteString replace;
       if (getFindText(data, &find, &token, &length))
         if (getReplaceText(data, &replace, &token, &length))
-          if (!addRule(data, opcode, &find, &replace))
+          if (!addRule(data, opcode, &find, &replace, after, before))
             goto failure;
       break;
     }
+
     case CTO_Contraction:
     case CTO_Literal: {
       ByteString find;
       if (getFindText(data, &find, &token, &length))
-        if (!addRule(data, opcode, &find, NULL))
+        if (!addRule(data, opcode, &find, NULL, after, before))
           goto failure;
       break;
     }
+
     case CTO_CapitalSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "capital sign"))
@@ -562,6 +673,7 @@ processLine (FileData *data, const char *line) {
             goto failure;
       break;
     }
+
     case CTO_BeginCapitalSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "begin capital sign"))
@@ -570,6 +682,7 @@ processLine (FileData *data, const char *line) {
             goto failure;
       break;
     }
+
     case CTO_EndCapitalSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "end capital sign"))
@@ -578,6 +691,7 @@ processLine (FileData *data, const char *line) {
             goto failure;
       break;
     }
+
     case CTO_EnglishLetterSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "letter sign"))
@@ -586,6 +700,7 @@ processLine (FileData *data, const char *line) {
             goto failure;
       break;
     }
+
     case CTO_NumberSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "number sign"))
@@ -594,8 +709,46 @@ processLine (FileData *data, const char *line) {
             goto failure;
       break;
     }
+
+    case CTO_Group: {
+      const struct GroupEntry *group;
+      ByteString characters;
+      if (getToken(data, &token, &length, "group name")) {
+        if ((group = findGroupEntry(token, length))) {
+          compileError(data, "group already defined: %.*s", length, token);
+        } else if ((group = addGroupEntry(data, token, length))) {
+          if (getCharacters(data, &characters, &token, &length)) {
+            int index;
+            for (index=0; index<characters.length; ++index) {
+              ContractionTableCharacter *character = &tableHeader->characters[characters.bytes[index]];
+              character->attributes |= group->attribute;
+            }
+          }
+        }
+      }
+      break;
+    }
+
+    {
+      ContractionTableCharacterAttributes *attributes;
+      const struct GroupEntry *group;
+
+    case CTO_After:
+      attributes = &after;
+      goto doGroup;
+    case CTO_Before:
+      attributes = &before;
+    doGroup:
+
+      if (getGroupEntry(data, &group, &token, &length)) {
+        *attributes |= group->attribute;
+        goto doOpcode;
+      }
+      break;
+    }
+
     default:
-      compileError(data, "unimplemented opcode: %d", opcode);
+      compileError(data, "unimplemented opcode: %.*s", length, token);
       break;
   }				/*end of loop for processing tableStream */
   ok = 1;
@@ -765,16 +918,19 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
 
   if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
     if (headerOffset == 0) {
-      if (processFile(fileName)) {
-        if (auditTable()) {
-          ok = 1;
-          if (!noLocale) {
-            if (saveString(NULL, &tableHeader->locale, getLocale()))
-              cacheCharacterAttributes();
-            else
-              ok = 0;
+      if (allocateGroupList()) {
+        if (processFile(fileName)) {
+          if (auditTable()) {
+            ok = 1;
+            if (!noLocale) {
+              if (saveString(NULL, &tableHeader->locale, getLocale()))
+                cacheCharacterAttributes();
+              else
+                ok = 0;
+            }
           }
         }
+        deallocateGroupList();
       }
     } else {
       compileError(NULL, "contraction table header not allocated at offset 0.");
@@ -789,7 +945,7 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
   }
 
   if (errorCount)
-    LogPrint(LOG_ERR, "%d %s in contraction table '%s'.",
+    LogPrint(LOG_WARNING, "%d %s in contraction table '%s'.",
              errorCount, ((errorCount == 1)? "error": "errors"), fileName);
   return (void *)tableHeader;
 }

@@ -78,120 +78,124 @@ selectRule (int length) { /*check for valid contractions */
     currentOpcode = currentRule->opcode;
     currentFindLength = currentRule->findlen;
     if ((length == 1) ||
-        ((currentFindLength <= length) && compareBytes(src, currentRule->findrep, currentFindLength))) {
+        ((currentFindLength <= length) &&
+         compareBytes(src, currentRule->findrep, currentFindLength))) {
       /* check this rule */
       setAfter(currentFindLength);
-      switch (currentOpcode) { /*check validity of this contraction */
-        case CTO_Always:
-        case CTO_Repeated:
-        case CTO_Replace:
-        case CTO_Literal:
-          return 1;
-        case CTO_LargeSign:
-          if (!CTC(before, CTC_Space) || !CTC(after, CTC_Space))
-            currentOpcode = CTO_Always;
-          return 1;
-        case CTO_WholeWord:
-        case CTO_Contraction:
-          if (CTC(before, CTC_Space|CTC_Punctuation) &&
-              CTC(after, CTC_Space|CTC_Punctuation))
+      if ((!currentRule->after || CTC(before, currentRule->after)) &&
+        (!currentRule->before || CTC(after, currentRule->before))) {
+        switch (currentOpcode) { /*check validity of this contraction */
+          case CTO_Always:
+          case CTO_Repeated:
+          case CTO_Replace:
+          case CTO_Literal:
             return 1;
-          break;
-        case CTO_LowWord:
-          if (CTC(before, CTC_Space) && CTC(after, CTC_Space) &&
-              (previousOpcode != CTO_JoinableWord))
+          case CTO_LargeSign:
+            if (!CTC(before, CTC_Space) || !CTC(after, CTC_Space))
+              currentOpcode = CTO_Always;
             return 1;
-          break;
-        case CTO_JoinableWord:
-          if (CTC(before, CTC_Space|CTC_Punctuation) &&
-              CTC(after, CTC_Space) &&
-              (dest + currentRule->replen < destmax)) {
-            const BYTE *ptr = src + currentFindLength + 1;
-            while (ptr < srcmax) {
-              if (!CTC(*ptr, CTC_Space)) {
-                if (CTC(*ptr, CTC_Letter)) return 1;
-                break;
+          case CTO_WholeWord:
+          case CTO_Contraction:
+            if (CTC(before, CTC_Space|CTC_Punctuation) &&
+                CTC(after, CTC_Space|CTC_Punctuation))
+              return 1;
+            break;
+          case CTO_LowWord:
+            if (CTC(before, CTC_Space) && CTC(after, CTC_Space) &&
+                (previousOpcode != CTO_JoinableWord))
+              return 1;
+            break;
+          case CTO_JoinableWord:
+            if (CTC(before, CTC_Space|CTC_Punctuation) &&
+                CTC(after, CTC_Space) &&
+                (dest + currentRule->replen < destmax)) {
+              const BYTE *ptr = src + currentFindLength + 1;
+              while (ptr < srcmax) {
+                if (!CTC(*ptr, CTC_Space)) {
+                  if (CTC(*ptr, CTC_Letter)) return 1;
+                  break;
+                }
+                ptr++;
               }
-              ptr++;
             }
+            break;
+          case CTO_SuffixableWord:
+            if (CTC(before, CTC_Space|CTC_Punctuation) &&
+                CTC(after, CTC_Space|CTC_Letter|CTC_Punctuation))
+              return 1;
+            break;
+          case CTO_BegWord:
+            if (CTC(before, CTC_Space|CTC_Punctuation) &&
+                CTC(after, CTC_Letter))
+              return 1;
+            break;
+          case CTO_BegMidWord:
+            if (CTC(before, CTC_Letter|CTC_Space|CTC_Punctuation) &&
+                CTC(after, CTC_Letter))
+              return 1;
+            break;
+          case CTO_MidWord:
+            if (CTC(before, CTC_Letter) && CTC(after, CTC_Letter))
+              return 1;
+            break;
+          case CTO_MidEndWord:
+            if (CTC(before, CTC_Letter) &&
+                CTC(after, CTC_Letter|CTC_Space|CTC_Punctuation))
+              return 1;
+            break;
+          case CTO_EndWord:
+            if (CTC(before, CTC_Letter) &&
+                CTC(after, CTC_Space|CTC_Punctuation))
+              return 1;
+            break;
+          case CTO_BegNum:
+            if (CTC(before, CTC_Space|CTC_Punctuation) &&
+                CTC(after, CTC_Digit))
+              return 1;
+            break;
+          case CTO_MidNum:
+            if (CTC(before, CTC_Digit) && CTC(after, CTC_Digit))
+              return 1;
+            break;
+          case CTO_EndNum:
+            if (CTC(before, CTC_Digit) &&
+                CTC(after, CTC_Space|CTC_Punctuation))
+              return 1;
+            break;
+          {
+            int isPre;
+          case CTO_PrePunc:
+            isPre = 1;
+            goto doPunc;
+          case CTO_PostPunc:
+            isPre = 0;
+          doPunc:
+            if (CTC(*src, CTC_Punctuation)) {
+              const BYTE *pre = src;
+              const BYTE *post = src + currentFindLength;
+              while (--pre >= srcmin)
+                if (!CTC(*pre, CTC_Punctuation))
+                  break;
+              while (post < srcmax) {
+                if (!CTC(*post, CTC_Punctuation))
+                  break;
+                post++;
+              }
+              if (isPre) {
+                if (((pre < srcmin) || CTC(*pre, CTC_Space)) &&
+                    ((post < srcmax) && !CTC(*post, CTC_Space)))
+                  return 1;
+              } else {
+                if (((pre >= srcmin) && !CTC(*pre, CTC_Space)) &&
+                    ((post == srcmax) || CTC(*post, CTC_Space)))
+                  return 1;
+              }
+            }
+            break;
           }
-          break;
-        case CTO_SuffixableWord:
-          if (CTC(before, CTC_Space|CTC_Punctuation) &&
-              CTC(after, CTC_Space|CTC_Letter|CTC_Punctuation))
-            return 1;
-          break;
-        case CTO_BegWord:
-          if (CTC(before, CTC_Space|CTC_Punctuation) &&
-              CTC(after, CTC_Letter))
-            return 1;
-          break;
-        case CTO_BegMidWord:
-          if (CTC(before, CTC_Letter|CTC_Space|CTC_Punctuation) &&
-              CTC(after, CTC_Letter))
-            return 1;
-          break;
-        case CTO_MidWord:
-          if (CTC(before, CTC_Letter) && CTC(after, CTC_Letter))
-            return 1;
-          break;
-        case CTO_MidEndWord:
-          if (CTC(before, CTC_Letter) &&
-              CTC(after, CTC_Letter|CTC_Space|CTC_Punctuation))
-            return 1;
-          break;
-        case CTO_EndWord:
-          if (CTC(before, CTC_Letter) &&
-              CTC(after, CTC_Space|CTC_Punctuation))
-            return 1;
-          break;
-        case CTO_BegNum:
-          if (CTC(before, CTC_Space|CTC_Punctuation) &&
-              CTC(after, CTC_Digit))
-            return 1;
-          break;
-        case CTO_MidNum:
-          if (CTC(before, CTC_Digit) && CTC(after, CTC_Digit))
-            return 1;
-          break;
-        case CTO_EndNum:
-          if (CTC(before, CTC_Digit) &&
-              CTC(after, CTC_Space|CTC_Punctuation))
-            return 1;
-          break;
-        {
-          int isPre;
-        case CTO_PrePunc:
-          isPre = 1;
-          goto doPunc;
-        case CTO_PostPunc:
-          isPre = 0;
-        doPunc:
-          if (CTC(*src, CTC_Punctuation)) {
-            const BYTE *pre = src;
-            const BYTE *post = src + currentFindLength;
-            while (--pre >= srcmin)
-              if (!CTC(*pre, CTC_Punctuation))
-                break;
-            while (post < srcmax) {
-              if (!CTC(*post, CTC_Punctuation))
-                break;
-              post++;
-            }
-            if (isPre) {
-              if (((pre < srcmin) || CTC(*pre, CTC_Space)) &&
-                  ((post < srcmax) && !CTC(*post, CTC_Space)))
-                return 1;
-            } else {
-              if (((pre >= srcmin) && !CTC(*pre, CTC_Space)) &&
-                  ((post == srcmax) || CTC(*post, CTC_Space)))
-                return 1;
-            }
-          }
-          break;
+          default:
+            break;
         }
-        default:
-          break;
       }
     }				/*Done with checking this rule */
     ruleOffset = currentRule->next;

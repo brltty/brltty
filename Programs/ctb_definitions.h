@@ -22,6 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <inttypes.h>
 #define BYTE unsigned char
 
 #define CTA(table, offset) (((BYTE *)(table)) + (offset))
@@ -40,11 +41,12 @@ typedef enum {
   CTC_UpperCase   = 0X10,
   CTC_LowerCase   = 0X20
 } ContractionTableCharacterAttribute;
+typedef uint32_t ContractionTableCharacterAttributes;
 
 typedef struct {
   ContractionTableOffset rules;
   ContractionTableOffset always;
-  BYTE attributes;
+  ContractionTableCharacterAttributes attributes;
   BYTE uppercase;
   BYTE lowercase;
 } ContractionTableCharacter;
@@ -85,12 +87,18 @@ typedef enum { /*Op codes*/
   CTO_MidNum, /*middle of number, e.g., decimal point*/
   CTO_EndNum, /*end of number*/
 
+  CTO_Group, /*define a character group*/
+  CTO_After, /*only match if after character in gruop*/
+  CTO_Before, /*only match if before character in gruop*/
+
   CTO_None /*For internal use only*/
 } ContractionTableOpcode;
 
 typedef struct {
   ContractionTableOffset next; /*next entry*/
-  BYTE opcode; /*rule for testing validity of replacement*/
+  ContractionTableOpcode opcode; /*rule for testing validity of replacement*/
+  ContractionTableCharacterAttributes after; /*character types which must foollow*/
+  ContractionTableCharacterAttributes before; /*character types which must precede*/
   BYTE findlen; /*length of string to be replaced*/
   BYTE replen; /*length of replacement string*/
   BYTE findrep[1]; /*find and replacement strings*/
