@@ -113,7 +113,7 @@ processEnvironmentVariables (
   int optionIndex;
   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
     const OptionEntry *option = &optionTable[optionIndex];
-    if (option->flags & OPT_Env) {
+    if (option->flags & OPT_Environ) {
       unsigned char delimiter = '_';
       unsigned char name[prefixLength + 1 + strlen(option->word) + 1];
       sprintf(name, "%s%c%s", prefix, delimiter, option->word);
@@ -352,10 +352,10 @@ processOptions (
   unsigned int optionCount,
   OptionHandler handleOption,
   const char *applicationName,
-  int *argc,
-  char ***argv,
-  int *bootParameters,
-  int *environmentVariables,
+  int *argumentCount,
+  char ***argumentVector,
+  int *doBootParameters,
+  int *doEnvironmentVariables,
   char **configurationFile,
   const char *argumentsSummary
 ) {
@@ -397,7 +397,7 @@ processOptions (
     *opt = 0;
   }
 
-  programPath = **argv;
+  programPath = **argumentVector;
   programName = strrchr(programPath, '/');
   programName = programName? programName+1: programPath;
 
@@ -407,9 +407,9 @@ processOptions (
     int option;
 
 #ifdef HAVE_GETOPT_LONG
-    option = getopt_long(*argc, *argv, shortOptions, longOptions, NULL);
+    option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
 #else /* HAVE_GETOPT_LONG */
-    option = getopt(*argc, *argv, shortOptions);
+    option = getopt(*argumentCount, *argumentVector, shortOptions);
 #endif /* HAVE_GETOPT_LONG */
     if (option == -1) break;
 
@@ -448,7 +448,7 @@ processOptions (
         break;
     }
   }
-  *argv += optind, *argc -= optind;
+  *argumentVector += optind, *argumentCount -= optind;
 
   if (opt_help) {
     printHelp(optionTable, optionCount,
@@ -457,11 +457,11 @@ processOptions (
     exit(0);
   }
 
-  if (bootParameters && *bootParameters) {
+  if (doBootParameters && *doBootParameters) {
     processBootParameters(optionTable, optionCount, applicationName);
   }
 
-  if (environmentVariables && *environmentVariables) {
+  if (doEnvironmentVariables && *doEnvironmentVariables) {
     processEnvironmentVariables(optionTable, optionCount, applicationName);
   }
 

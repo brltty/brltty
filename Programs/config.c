@@ -129,21 +129,21 @@ char *opt_midiDevice = NULL;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE
-  {"attributes-table", "file", 'a', 0, OPT_Config | OPT_Env,
+  {"attributes-table", "file", 'a', 0, OPT_Config | OPT_Environ,
    &opt_attributesTable, NULL,
    "Path to attributes translation table file."},
 
-  {"braille-driver", "driver", 'b', 1, OPT_Config | OPT_Env,
+  {"braille-driver", "driver", 'b', 1, OPT_Config | OPT_Environ,
    &opt_brailleDriver, NULL,
    "Braille driver: one of {" BRAILLE_DRIVER_CODES "}"},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {"contraction-table", "file", 'c', 0, OPT_Config | OPT_Env,
+  {"contraction-table", "file", 'c', 0, OPT_Config | OPT_Environ,
    &opt_contractionTable, NULL,
    "Path to contraction table file."},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  {"braille-device", "device", 'd', 2, OPT_Config | OPT_Env,
+  {"braille-device", "device", 'd', 2, OPT_Config | OPT_Environ,
    &opt_brailleDevice, BRAILLE_DEVICE,
    "Path to device for accessing braille display."},
 
@@ -151,7 +151,7 @@ BEGIN_OPTION_TABLE
    NULL, NULL,
    "Log to standard error rather than to syslog."},
 
-  {"configuration-file", "file", 'f', 0, OPT_Env,
+  {"configuration-file", "file", 'f', 0, OPT_Environ,
    &opt_configurationFile, CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
    "Path to default parameters file."},
 
@@ -160,7 +160,7 @@ BEGIN_OPTION_TABLE
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
 
 #ifdef ENABLE_MIDI_SUPPORT
-  {"midi-device", "device", 'm', 0, OPT_Config | OPT_Env,
+  {"midi-device", "device", 'm', 0, OPT_Config | OPT_Environ,
    &opt_midiDevice, NULL,
    "Device specifier for the Musical Instrument Digital Interface."},
 #endif /* ENABLE_MIDI_SUPPORT */
@@ -170,7 +170,7 @@ BEGIN_OPTION_TABLE
    "Remain a foreground process."},
 
 #ifdef ENABLE_PCM_SUPPORT
-  {"pcm-device", "device", 'p', 0, OPT_Config | OPT_Env,
+  {"pcm-device", "device", 'p', 0, OPT_Config | OPT_Environ,
    &opt_pcmDevice, NULL,
    "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
@@ -180,12 +180,12 @@ BEGIN_OPTION_TABLE
    "Suppress start-up messages."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {"speech-driver", "driver", 's', 0, OPT_Config | OPT_Env,
+  {"speech-driver", "driver", 's', 0, OPT_Config | OPT_Environ,
    &opt_speechDriver, NULL,
    "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {"text-table", "file", 't', 3, OPT_Config | OPT_Env,
+  {"text-table", "file", 't', 3, OPT_Config | OPT_Environ,
    &opt_textTable, NULL,
    "Path to text translation table file."},
 
@@ -194,22 +194,22 @@ BEGIN_OPTION_TABLE
    "Print start-up messages and exit."},
 
 #ifdef ENABLE_API
-  {"api-parameters", "arg,...", 'A', 0, OPT_Extend | OPT_Config | OPT_Env,
+  {"api-parameters", "arg,...", 'A', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_apiParameters, API_PARAMETERS,
    "Parameters for the application programming interface."},
 #endif /* ENABLE_API */
 
-  {"braille-parameters", "arg,...", 'B', 0, OPT_Extend | OPT_Config | OPT_Env,
+  {"braille-parameters", "arg,...", 'B', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_brailleParameters, BRAILLE_PARAMETERS,
    "Parameters for the braille driver."},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {"contractions-directory", "directory", 'C', 0, OPT_Hidden | OPT_Config | OPT_Env,
+  {"contractions-directory", "directory", 'C', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_contractionsDirectory, DATA_DIRECTORY,
    "Path to directory for contractions tables."},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  {"data-directory", "directory", 'D', 0, OPT_Hidden | OPT_Config | OPT_Env,
+  {"data-directory", "directory", 'D', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_dataDirectory, DATA_DIRECTORY,
    "Path to directory for driver help and configuration files."},
 
@@ -218,12 +218,12 @@ BEGIN_OPTION_TABLE
    "Recognize environment variables."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {"speech-fifo", "file", 'F', 0, OPT_Config | OPT_Env,
+  {"speech-fifo", "file", 'F', 0, OPT_Config | OPT_Environ,
    &opt_speechFifo, NULL,
    "Path to speech pass-through FIFO."},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {"library-directory", "directory", 'L', 0, OPT_Hidden | OPT_Config | OPT_Env,
+  {"library-directory", "directory", 'L', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_libraryDirectory, LIBRARY_DIRECTORY,
    "Path to directory for loading drivers."},
 
@@ -242,12 +242,12 @@ BEGIN_OPTION_TABLE
    "Path to process identifier file."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {"speech-parameters", "arg,...", 'S', 0, OPT_Extend | OPT_Config | OPT_Env,
+  {"speech-parameters", "arg,...", 'S', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_speechParameters, SPEECH_PARAMETERS,
    "Parameters for the speech driver."},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {"tables-directory", "directory", 'T', 0, OPT_Hidden | OPT_Config | OPT_Env,
+  {"tables-directory", "directory", 'T', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_tablesDirectory, DATA_DIRECTORY,
    "Path to directory for text and attributes tables."},
 
@@ -259,7 +259,7 @@ BEGIN_OPTION_TABLE
    NULL, NULL,
    "Print the versions of the core, API, and built-in drivers, and then exit."},
 
-  {"screen-parameters", "arg,...", 'X', 0, OPT_Extend | OPT_Config | OPT_Env,
+  {"screen-parameters", "arg,...", 'X', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_screenParameters, SCREEN_PARAMETERS,
    "Parameters for the screen driver."},
 END_OPTION_TABLE

@@ -22,10 +22,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define OPT_Hidden	0X1
-#define OPT_Extend	0X2
-#define OPT_Config	0X4
-#define OPT_Env	0X8
+#define OPT_Hidden	0X01
+#define OPT_Extend	0X02
+#define OPT_Config	0X04
+#define OPT_Environ	0X08
 
 typedef struct {
   const char *word;
@@ -58,10 +58,10 @@ extern int processOptions (
   unsigned int optionCount,
   OptionHandler handleOption,
   const char *applicationName,
-  int *argc,
-  char ***argv,
-  int *bootParameters,
-  int *environmentVariables,
+  int *argumentCount,
+  char ***argumentVector,
+  int *doBootParameters,
+  int *doEnvironmentVariables,
   char **configurationFile,
   const char *argumentsSummary
 );
