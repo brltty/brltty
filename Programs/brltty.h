@@ -104,8 +104,6 @@ extern void updatePreferences (void);
 
 extern void restartBrailleDriver (void);
 extern int getBrailleCommand (DriverCommandContext cmds);
-extern void clearStatusCells (void);
-extern void setStatusText (const char *text);
 
 extern void restartSpeechDriver (void);
 

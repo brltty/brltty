@@ -251,6 +251,8 @@ typedef enum {
   STAT_TUNES /* alert tunes */,
   STAT_HELP /* help mode */,
   STAT_INFO /* info mode */,
+  STAT_AUTOREPEAT /* autorepeat */,
+  STAT_AUTOSPEAK /* autospeak */,
 
   StatusCellCount /* must be last */
 } StatusCell;

@@ -46,6 +46,8 @@ extern void writeBrailleText (BrailleDisplay *, const char *, int);
 extern void writeBrailleString (BrailleDisplay *, const char *);
 extern int allocateBrailleBuffer (BrailleDisplay *);
 extern int readBrailleCommand (BrailleDisplay *, DriverCommandContext);
+extern void clearStatusCells (BrailleDisplay *brl);
+extern void setStatusText (BrailleDisplay *brl, const char *text);
 
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure

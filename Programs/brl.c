@@ -181,6 +181,26 @@ readBrailleCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   return command;
 }
 
+void
+clearStatusCells (BrailleDisplay *brl) {
+   unsigned char status[StatusCellCount];        /* status cell buffer */
+   memset(status, 0, sizeof(status));
+   braille->writeStatus(brl, status);
+}
+
+void
+setStatusText (BrailleDisplay *brl, const char *text) {
+   unsigned char status[StatusCellCount];        /* status cell buffer */
+   int i;
+   memset(status, 0, sizeof(status));
+   for (i=0; i<sizeof(status); ++i) {
+      unsigned char character = text[i];
+      if (!character) break;
+      status[i] = textTable[character];
+   }
+   braille->writeStatus(brl, status);
+}
+
 #ifdef ENABLE_LEARN_MODE
 const CommandEntry commandTable[] = {
   #include "cmds.auto.h"
@@ -190,6 +210,7 @@ const CommandEntry commandTable[] = {
 void
 learnMode (BrailleDisplay *brl, int poll, int timeout) {
   int timer = 0;
+  setStatusText(brl, "lrn");
   message("command learn mode", MSG_NODELAY);
   while ((timer += drainBrailleOutput(brl, poll)) < timeout) {
     int key;

@@ -586,7 +586,7 @@ startBrailleDriver (void) {
          if (allocateBrailleBuffer(&brl)) {
             braille = brailleDriver;
 
-            clearStatusCells();
+            clearStatusCells(&brl);
             setHelpPageNumber(brl.helpPage);
             playTune(&tune_detected);
             return;
@@ -629,7 +629,7 @@ restartBrailleDriver (void) {
 
 static void
 exitBrailleDriver (void) {
-   clearStatusCells();
+   clearStatusCells(&brl);
    message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
    stopBrailleDriver();
 }
@@ -1209,7 +1209,7 @@ updatePreferences (void) {
     int key;                                /* readbrl() value */
 
     /* status cells */
-    setStatusText("prefs");
+    setStatusText(&brl, "prf");
     message("Preferences Menu", 0);
 
     while (1) {

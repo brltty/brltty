@@ -69,7 +69,6 @@ static int contractedOffsets[0X100];
 static int contractedTrack = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
 static unsigned int updateIntervals = 0;        /* incremented each main loop cycle */
 
 
@@ -143,115 +142,100 @@ switchto (unsigned int scrno) {
   setTranslationTable(p->showAttributes);
 }
 
-void
-clearStatusCells (void) {
-   memset(statusCells, 0, sizeof(statusCells));
-   braille->writeStatus(&brl, statusCells);
-}
-
 static void
 setStatusCells (void) {
-   memset(statusCells, 0, sizeof(statusCells));
+   unsigned char status[StatusCellCount];        /* status cell buffer */
+   memset(status, 0, sizeof(status));
    switch (prefs.statusStyle) {
       case ST_AlvaStyle:
          if ((dispmd & HELP_SCRN) == HELP_SCRN) {
-            statusCells[0] = textTable['h'];
-            statusCells[1] = textTable['l'];
-            statusCells[2] = textTable['p'];
+            status[0] = textTable['h'];
+            status[1] = textTable['l'];
+            status[2] = textTable['p'];
          } else {
             /* The coords are given with letters as the DOS tsr */
-            statusCells[0] = ((updateIntervals / 16) % (scr.posy / 25 + 1))? 0:
-                             textTable[scr.posy % 25 + 'a'] |
-                             ((scr.posx / brl.x) << 6);
-            statusCells[1] = ((updateIntervals / 16) % (p->winy / 25 + 1))? 0:
-                             textTable[p->winy % 25 + 'a'] |
-                             ((p->winx / brl.x) << 6);
-            statusCells[2] = textTable[(p->showAttributes)? 'a':
-                                        ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f':
-                                        p->trackCursor? 't':
-                                        ' '];
+            status[0] = ((updateIntervals / 16) % (scr.posy / 25 + 1))? 0:
+                        textTable[scr.posy % 25 + 'a'] |
+                        ((scr.posx / brl.x) << 6);
+            status[1] = ((updateIntervals / 16) % (p->winy / 25 + 1))? 0:
+                        textTable[p->winy % 25 + 'a'] |
+                        ((p->winx / brl.x) << 6);
+            status[2] = textTable[(p->showAttributes)? 'a':
+                                  ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f':
+                                  p->trackCursor? 't':
+                                  ' '];
          }
          break;
       case ST_TiemanStyle:
-         statusCells[0] = (portraitDigits[(p->winx / 10) % 10] << 4) |
-                          portraitDigits[(scr.posx / 10) % 10];
-         statusCells[1] = (portraitDigits[p->winx % 10] << 4) |
-                          portraitDigits[scr.posx % 10];
-         statusCells[2] = (portraitDigits[(p->winy / 10) % 10] << 4) |
-                          portraitDigits[(scr.posy / 10) % 10];
-         statusCells[3] = (portraitDigits[p->winy % 10] << 4) |
-                          portraitDigits[scr.posy % 10];
-         statusCells[4] = ((dispmd & FROZ_SCRN) == FROZ_SCRN? 1: 0) |
-                          (prefs.showCursor << 1) |
-                          (p->showAttributes << 2) |
-                          (prefs.cursorStyle << 3) |
-                          (prefs.alertTunes << 4) |
-                          (prefs.blinkingCursor << 5) |
-                          (p->trackCursor << 6) |
-                          (prefs.slidingWindow << 7);
+         status[0] = (portraitDigits[(p->winx / 10) % 10] << 4) |
+                     portraitDigits[(scr.posx / 10) % 10];
+         status[1] = (portraitDigits[p->winx % 10] << 4) |
+                     portraitDigits[scr.posx % 10];
+         status[2] = (portraitDigits[(p->winy / 10) % 10] << 4) |
+                     portraitDigits[(scr.posy / 10) % 10];
+         status[3] = (portraitDigits[p->winy % 10] << 4) |
+                     portraitDigits[scr.posy % 10];
+         status[4] = ((dispmd & FROZ_SCRN) == FROZ_SCRN? 1: 0) |
+                     (prefs.showCursor << 1) |
+                     (p->showAttributes << 2) |
+                     (prefs.cursorStyle << 3) |
+                     (prefs.alertTunes << 4) |
+                     (prefs.blinkingCursor << 5) |
+                     (p->trackCursor << 6) |
+                     (prefs.slidingWindow << 7);
          break;
       case ST_PB80Style:
-         statusCells[0] = (portraitDigits[(p->winy+1) % 10] << 4) |
-                          portraitDigits[((p->winy+1) / 10) % 10];
+         status[0] = (portraitDigits[(p->winy+1) % 10] << 4) |
+                     portraitDigits[((p->winy+1) / 10) % 10];
          break;
       case ST_Generic:
-         statusCells[FirstStatusCell] = FSC_GENERIC;
-         statusCells[STAT_BRLCOL] = p->winx+1;
-         statusCells[STAT_BRLROW] = p->winy+1;
-         statusCells[STAT_CSRCOL] = scr.posx+1;
-         statusCells[STAT_CSRROW] = scr.posy+1;
-         statusCells[STAT_SCRNUM] = scr.no;
-         statusCells[STAT_FREEZE] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
-         statusCells[STAT_DISPMD] = p->showAttributes;
-         statusCells[STAT_SIXDOTS] = prefs.textStyle;
-         statusCells[STAT_SLIDEWIN] = prefs.slidingWindow;
-         statusCells[STAT_SKPIDLNS] = prefs.skipIdenticalLines;
-         statusCells[STAT_SKPBLNKWINS] = prefs.skipBlankWindows;
-         statusCells[STAT_CSRVIS] = prefs.showCursor;
-         statusCells[STAT_CSRHIDE] = p->hideCursor;
-         statusCells[STAT_CSRTRK] = p->trackCursor;
-         statusCells[STAT_CSRSIZE] = prefs.cursorStyle;
-         statusCells[STAT_CSRBLINK] = prefs.blinkingCursor;
-         statusCells[STAT_ATTRVIS] = prefs.showAttributes;
-         statusCells[STAT_ATTRBLINK] = prefs.blinkingAttributes;
-         statusCells[STAT_CAPBLINK] = prefs.blinkingCapitals;
-         statusCells[STAT_TUNES] = prefs.alertTunes;
-         statusCells[STAT_HELP] = (dispmd & HELP_SCRN) != 0;
-         statusCells[STAT_INFO] = infmode;
+         status[FirstStatusCell] = FSC_GENERIC;
+         status[STAT_BRLCOL] = p->winx+1;
+         status[STAT_BRLROW] = p->winy+1;
+         status[STAT_CSRCOL] = scr.posx+1;
+         status[STAT_CSRROW] = scr.posy+1;
+         status[STAT_SCRNUM] = scr.no;
+         status[STAT_FREEZE] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
+         status[STAT_DISPMD] = p->showAttributes;
+         status[STAT_SIXDOTS] = prefs.textStyle;
+         status[STAT_SLIDEWIN] = prefs.slidingWindow;
+         status[STAT_SKPIDLNS] = prefs.skipIdenticalLines;
+         status[STAT_SKPBLNKWINS] = prefs.skipBlankWindows;
+         status[STAT_CSRVIS] = prefs.showCursor;
+         status[STAT_CSRHIDE] = p->hideCursor;
+         status[STAT_CSRTRK] = p->trackCursor;
+         status[STAT_CSRSIZE] = prefs.cursorStyle;
+         status[STAT_CSRBLINK] = prefs.blinkingCursor;
+         status[STAT_ATTRVIS] = prefs.showAttributes;
+         status[STAT_ATTRBLINK] = prefs.blinkingAttributes;
+         status[STAT_CAPBLINK] = prefs.blinkingCapitals;
+         status[STAT_TUNES] = prefs.alertTunes;
+         status[STAT_HELP] = (dispmd & HELP_SCRN) != 0;
+         status[STAT_INFO] = infmode;
+         status[STAT_AUTOREPEAT] = prefs.autorepeat;
+         status[STAT_AUTOSPEAK] = prefs.autospeak;
          break;
       case ST_MDVStyle:
-         statusCells[0] = portraitDigits[((p->winy+1) / 10) % 10] |
-                          (portraitDigits[((p->winx+1) / 10) % 10] << 4);
-         statusCells[1] = portraitDigits[(p->winy+1) % 10] |
-                          (portraitDigits[(p->winx+1) % 10] << 4);
+         status[0] = portraitDigits[((p->winy+1) / 10) % 10] |
+                     (portraitDigits[((p->winx+1) / 10) % 10] << 4);
+         status[1] = portraitDigits[(p->winy+1) % 10] |
+                     (portraitDigits[(p->winx+1) % 10] << 4);
          break;
-      case ST_VoyagerStyle: /* 3cells (+1 blank) */
-         statusCells[0] = (portraitDigits[p->winy % 10] << 4) |
-                          portraitDigits[(p->winy / 10) % 10];
-         statusCells[1] = (portraitDigits[scr.posy % 10] << 4) |
-                          portraitDigits[(scr.posy / 10) % 10];
+      case ST_VoyagerStyle: /* 3status (+1 blank) */
+         status[0] = (portraitDigits[p->winy % 10] << 4) |
+                     portraitDigits[(p->winy / 10) % 10];
+         status[1] = (portraitDigits[scr.posy % 10] << 4) |
+                     portraitDigits[(scr.posy / 10) % 10];
          if ((dispmd & FROZ_SCRN) == FROZ_SCRN)
-            statusCells[2] = textTable['F'];
+            status[2] = textTable['F'];
          else
-            statusCells[2] = (portraitDigits[scr.posx % 10] << 4) |
-                             portraitDigits[(scr.posx / 10) % 10];
+            status[2] = (portraitDigits[scr.posx % 10] << 4) |
+                        portraitDigits[(scr.posx / 10) % 10];
          break;
       default:
          break;
    }
-   braille->writeStatus(&brl, statusCells);
-}
-
-void
-setStatusText (const char *text) {
-   int i;
-   memset(statusCells, 0, sizeof(statusCells));
-   for (i=0; i<sizeof(statusCells); ++i) {
-      unsigned char character = text[i];
-      if (!character) break;
-      statusCells[i] = textTable[character];
-   }
-   braille->writeStatus(&brl, statusCells);
+   braille->writeStatus(&brl, status);
 }
 
 static void
@@ -260,7 +244,7 @@ showInfo (void) {
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
   unsigned char status[22];
-  setStatusText("info");
+  setStatusText(&brl, "info");
   if (brl.x*brl.y >= 21) {
     sprintf(status, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
             p->winx, p->winy, scr.posx, scr.posy, curscr, 
@@ -350,7 +334,7 @@ terminateProgram (int quickly) {
   if (speech == &noSpeech) silently = 1;
   if (silently) flags |= MSG_SILENT;
 #endif /* ENABLE_SPEECH_SUPPORT */
-  clearStatusCells();
+  clearStatusCells(&brl);
   message("BRLTTY exiting.", flags);
 #ifdef ENABLE_SPEECH_SUPPORT
   if (!silently) {
@@ -2114,9 +2098,10 @@ message (const char *text, short flags) {
 
 void
 showDotPattern (unsigned char dots, unsigned char duration) {
-  memset(statusCells, dots, sizeof(statusCells));
+   unsigned char status[StatusCellCount];        /* status cell buffer */
+  memset(status, dots, sizeof(status));
   memset(brl.buffer, dots, brl.x*brl.y);
-  braille->writeStatus(&brl, statusCells);
+  braille->writeStatus(&brl, status);
   braille->writeWindow(&brl);
   drainBrailleOutput(&brl, duration);
 }

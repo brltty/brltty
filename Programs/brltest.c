@@ -38,7 +38,6 @@
 
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static BrailleDisplay brl;
-static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
 
 BEGIN_OPTION_TABLE
   {'d', "device", "device", NULL, 0,
@@ -76,8 +75,7 @@ message (const char *string, short flags) {
   int length = strlen(string);
   int limit = brl.x * brl.y;
 
-  memset(statusCells, 0, sizeof(statusCells));
-  braille->writeStatus(&brl, statusCells);
+  clearStatusCells(&brl);
 
   memset(brl.buffer, ' ', brl.x*brl.y);
   while (length) {
