@@ -160,7 +160,7 @@ static void spk_open (char **parameters)
       long numfds = sysconf(_SC_OPEN_MAX);
       for(i=2; i<numfds; i++) close(i);
     }
-    execl(extProgPath, extProgPath, 0);
+    execl(extProgPath, extProgPath, (void *)NULL);
     myperror("Unable to execute external speech program '%s'", extProgPath);
     _exit(1);
   }
