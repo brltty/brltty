@@ -33,18 +33,34 @@ openPcmDevice (int errorLevel) {
   if ((pcm = malloc(sizeof(*pcm)))) {
     int result;
 
-    if ((result = snd_pcm_open(&pcm->handle, "plughw:0,0", SND_PCM_STREAM_PLAYBACK, 0)) >= 0) {
+    if ((result = snd_pcm_open(&pcm->handle, "hw:0,0", SND_PCM_STREAM_PLAYBACK, 0)) >= 0) {
       if ((result = snd_pcm_hw_params_malloc(&pcm->hwparams)) >= 0) {
 	int buffer_time = 1000000 / 4; /* usecs */
 	int dir;
 
-	snd_pcm_hw_params_any(pcm->handle, pcm->hwparams);
-	snd_pcm_hw_params_set_access(pcm->handle, pcm->hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
-	setPcmSampleRate(pcm, 44100);
-	snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hwparams, &buffer_time, &dir);
-	snd_pcm_hw_params(pcm->handle, pcm->hwparams);
+	if ((result = snd_pcm_hw_params_any(pcm->handle, pcm->hwparams)) == 0) {
+	  snd_pcm_hw_params_set_access(pcm->handle, pcm->hwparams,
+				       SND_PCM_ACCESS_RW_INTERLEAVED);
+	  {
+	    int rate;
+	    if ((result = snd_pcm_hw_params_get_rate_max(pcm->hwparams, &rate, 0)) == 0) {
+	      if ((result = snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hwparams, &rate, 0)) == 0) {
+		LogPrint(LOG_INFO, "Using maximum rate of %d.", rate);
+	      } else {
+		logAlsaError(errorLevel, "set rate near", result);
+	      }
+	    } else {
+	      logAlsaError(errorLevel, "get rate max", result);
+	    }
+	  }
+	  snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hwparams, &buffer_time, &dir);
+	  setPcmAmplitudeFormat(pcm, PCM_FMT_S16L);
+	  snd_pcm_hw_params(pcm->handle, pcm->hwparams);
 
-	return pcm;
+	  return pcm;
+	} else {
+	  logAlsaError(errorLevel, "getting hardware parameters", result);
+	}
       } else {
 	logAlsaError(errorLevel, "hardware parameters allocation", result);
       }
@@ -71,20 +87,24 @@ closePcmDevice (PcmDevice *pcm) {
 
 int
 writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
-  int samples = count / getPcmChannelCount(pcm);
-  int written;
-  written = snd_pcm_writei(pcm->handle, buffer, samples);
-  return written == samples;
+  int samples = count / (getPcmChannelCount(pcm) * (snd_pcm_hw_params_get_sbits(pcm->hwparams) / 8));
+
+  snd_pcm_prepare(pcm->handle);
+  return snd_pcm_writei(pcm->handle, buffer, samples) == samples;
 }
 
 int
 getPcmBlockSize (PcmDevice *pcm) {
   snd_pcm_sframes_t buffer_size;
-  if (snd_pcm_hw_params_get_buffer_size(pcm->hwparams, &buffer_size) < 0) {
-    return 65535;
+  int result, dir;
+
+  if ((result = snd_pcm_hw_params_get_period_size(pcm->hwparams, &buffer_size,
+						  &dir)) == 0) {
+    return buffer_size;
   } else {
-    return (int)buffer_size;
+    logAlsaError(LOG_ERR, "set rate near", result);
   }
+  return 65535;
 }
 
 int
@@ -169,6 +189,7 @@ setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
 
 void
 forcePcmOutput (PcmDevice *pcm) {
+  snd_pcm_drain(pcm->handle);
 }
 
 void
