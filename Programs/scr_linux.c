@@ -1256,21 +1256,17 @@ static const At2KeyTable at2KeysOriginal = {
   [0X7C] = KEY_KPASTERISK,
   [0X7B] = KEY_KPMINUS,
   [0X79] = KEY_KPPLUS,
-
-  [0X6C] = KEY_KP7,
-  [0X75] = KEY_KP8,
-  [0X7D] = KEY_KP9,
-
-  [0X6B] = KEY_KP4,
-  [0X73] = KEY_KP5,
-  [0X74] = KEY_KP6,
-
+  [0X71] = KEY_KPDOT,
+  [0X70] = KEY_KP0,
   [0X69] = KEY_KP1,
   [0X72] = KEY_KP2,
   [0X7A] = KEY_KP3,
-
-  [0X70] = KEY_KP0,
-  [0X71] = KEY_KPDOT,
+  [0X6B] = KEY_KP4,
+  [0X73] = KEY_KP5,
+  [0X74] = KEY_KP6,
+  [0X6C] = KEY_KP7,
+  [0X75] = KEY_KP8,
+  [0X7D] = KEY_KP9
 };
 
 static const At2KeyTable at2KeysE0 = {
