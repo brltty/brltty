@@ -30,8 +30,9 @@
 class vcsa_Screen:public RealScreen
 {
   int fd, cons_fd;
-  const unsigned char *translation_table;
-  void set_screen_translation_table (void);
+  unsigned char output_table[0X100];
+  unsigned char input_table[0X100];
+  int set_screen_translation_tables (int force);
     public:
   int open (int);		// called once to initialise screen reading
   void getstat (scrstat &);

@@ -59,6 +59,8 @@ Note: this file is in reversed chronological order (bottom to top).
       Redefined type 3 front key 13 from cut_beg to cut_end.
       Renamed environment variable BRLTTY_CONF to BRLTTY_PM_CONF.
       Key releases no longer interrupt message waits.
+      Remove conditional compiling for debugging.
+      Add driver parameters: configfile, debugreads, debugwrites, debugmodifiers
    TSI driver enhancements. (sd)
       Added bindings for go to beginning/end of current line.
    Cleaned up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>

@@ -38,7 +38,7 @@
 
 static int yylex(void);
 static int yyerror(char*);    
-int yyparse();
+static int yyparse();
 
 char* nameval = 0;
 int numval, keyindex, cmdval; 

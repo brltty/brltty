@@ -188,7 +188,8 @@ typedef enum {
    ST_TiemanStyle,
    ST_PB80Style,
    ST_Papenmeier,
-   ST_MDVStyle
+   ST_MDVStyle,
+   ST_VoyagerStyle
 } StatusCellStyles;
 
 /* Routines provided by the braille driver library */

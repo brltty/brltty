@@ -25,11 +25,14 @@ B6 + B5         next line with different attributes
 Other functions:
 B6              toggle attribute display
 B7              toggle cursor visible
+B7 + B6         toggle cursor size
+B7 + B1         toggle blinking captals
+B7 + B2         toggle blinking cursor
+B7 + B3         toggle configuration menu
 B8              toggle help display
 B8 + B5         toggle freeze mode
 B8 + B1         toggle cursor tracking
 B8 + B6         toggle six dot braille
-B7 + B6         toggle cursor size
 B8 + B3         toggle sliding window
 
 Functions of the 3 cursor routing buttons over the status cells:

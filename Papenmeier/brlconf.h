@@ -56,17 +56,6 @@
 /* additional offset - use internal table */
 #define offsetTable      512
 
-/* debug output */
-#undef WR_DEBUG
-#undef RD_DEBUG
-#undef MOD_DEBUG
-
-/*
-  #define MOD_DEBUG
-  #define WR_DEBUG
-  #define RD_DEBUG
-*/
-
 /* Define the preferred/default status cells mode. */
 #define PREFSTYLE ST_Papenmeier
 

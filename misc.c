@@ -60,6 +60,120 @@ unsigned char attribtrans[0X100] =
  */
 unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
 
+#ifdef USE_SYSLOG
+   #include <syslog.h>
+   static int syslogOpened = 0;
+#endif
+static int logLevel;
+static int stderrLevel;
+int ProblemCount = 0;
+
+void
+LogOpen(void)
+{
+#ifdef USE_SYSLOG
+  if (!syslogOpened) {
+    openlog("brltty", LOG_PID|LOG_CONS, LOG_DAEMON);
+    syslogOpened = 1;
+  }
+#endif
+  logLevel = LOG_INFO;
+  stderrLevel = LOG_NOTICE;
+}
+
+void
+LogClose(void)
+{
+#ifdef USE_SYSLOG
+  if (syslogOpened) {
+    syslogOpened = 0;
+    closelog();
+  }
+#endif
+}
+
+void
+LogPrint (int level, char *format, ...)
+{
+  va_list argp;
+  va_start(argp, format);
+
+  if (level <= LOG_ERR)
+    ++ProblemCount;
+
+  if (level <= logLevel) {
+#ifdef USE_SYSLOG
+    if (syslogOpened) {
+      vsyslog(level, format, argp);
+      goto done;
+    }
+#endif
+    level = stderrLevel;
+  }
+done:
+
+  if (level <= stderrLevel) {
+    vfprintf(stderr, format, argp);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+  }
+
+  va_end(argp);
+}
+
+void
+LogError (const char *action)
+{
+  LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
+}
+
+void
+SetLogLevel(int level)
+{
+  logLevel = level;
+}
+
+void
+SetStderrLevel(int level)
+{
+  stderrLevel = level;
+}
+
+void
+SetStderrOff(void)
+{
+  SetStderrLevel(-1);
+}
+
+static void
+noMemory (void)
+{
+   LogPrint(LOG_CRIT, "Insufficient memory: %s", strerror(errno));
+   exit(3);
+}
+
+void *
+mallocWrapper (size_t size) {
+   void *address = malloc(size);
+   if (!address)
+      noMemory();
+   return address;
+}
+
+void *
+reallocWrapper (void *address, size_t size) {
+   if (!(address = realloc(address, size)))
+      noMemory();
+   return address;
+}
+
+char *
+strdupWrapper (char *string) {
+   if (!(string = strdup(string)))
+      noMemory();
+   return string;
+}
+
 void
 setCloseOnExec (int fileDescriptor) {
    fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC);
@@ -254,116 +368,6 @@ timeout_yet (int msec)
   return 0;
 }
 
-#ifdef USE_SYSLOG
-   #include <syslog.h>
-   static int syslogOpened = 0;
-#endif
-static int logPriority;
-static int stderrPriority;
-int ProblemCount = 0;
-
-void
-LogOpen(void)
-{
-#ifdef USE_SYSLOG
-  if (!syslogOpened) {
-    static char name[0X20]; // Must be static as syslog points at it.
-    snprintf(name, sizeof(name), "brltty[%d]", getpid());
-    openlog(name, LOG_CONS, LOG_DAEMON);
-    syslogOpened = 1;
-  }
-#endif
-  logPriority = LOG_INFO;
-  stderrPriority = LOG_NOTICE;
-}
-
-void
-LogClose(void)
-{
-#ifdef USE_SYSLOG
-  if (syslogOpened) {
-    syslogOpened = 0;
-    closelog();
-  }
-#endif
-}
-
-void
-SetLogPriority(int priority)
-{
-  logPriority = priority;
-}
-
-void
-SetStderrPriority(int priority)
-{
-  stderrPriority = priority;
-}
-
-void
-SetStderrOff(void)
-{
-  SetStderrPriority(-1);
-}
-
-void
-LogPrint (int priority, char *format, ...)
-{
-  va_list argp;
-  va_start(argp, format);
-
-  if (priority <= LOG_ERR)
-    ++ProblemCount;
-
-  if (priority <= logPriority) {
-#ifdef USE_SYSLOG
-    if (syslogOpened) {
-      vsyslog(priority, format, argp);
-      goto done;
-    }
-#endif
-    priority = stderrPriority;
-  }
-done:
-
-  if (priority <= stderrPriority) {
-    vfprintf(stderr, format, argp);
-    fprintf(stderr, "\n");
-    fflush(stderr);
-  }
-
-  va_end(argp);
-}
-
-static void
-noMemory (void)
-{
-   LogPrint(LOG_CRIT, "Insufficient memory: %s", strerror(errno));
-   exit(3);
-}
-
-void *
-mallocWrapper (size_t size) {
-   void *address = malloc(size);
-   if (!address)
-      noMemory();
-   return address;
-}
-
-void *
-reallocWrapper (void *address, size_t size) {
-   if (!(address = realloc(address, size)))
-      noMemory();
-   return address;
-}
-
-char *
-strdupWrapper (char *string) {
-   if (!(string = strdup(string)))
-      noMemory();
-   return string;
-}
-
 int
 validateInteger (int *integer, char *description, char *value, int *minimum, int *maximum) {
    char *end;
@@ -545,9 +549,11 @@ validateChoice (unsigned int *choice, char *description, char *value, char **cho
 	 }
          ++index;
       }
+      LogPrint(LOG_ERR, "Unsupported %s: %s", description, value);
+      return 0;
    }
-   LogPrint(LOG_ERR, "Unsupported %s: %s", description, value);
-   return 0;
+   *choice = 0;
+   return 1;
 }
 
 int
@@ -658,7 +664,6 @@ int portrait_flag(int number, int on)
 void reverseTable(unsigned char *origtab, unsigned char *revtab)
 {
   int i;
-  memset(revtab, 0, 256);
-  for(i=255; i>=0; i--)
-    revtab[origtab[i]] = i;
+  memset(revtab, 0, 0X100);
+  for(i=0XFF; i>=0; i--) revtab[origtab[i]] = i;
 }

@@ -41,7 +41,7 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99t";
+char VERSION[] = "BRLTTY 2.99u";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 int cycleDelay = CYCLE_DELAY;
@@ -348,11 +348,14 @@ main (int argc, char *argv[])
   /* Setup everything required on startup */
   startup(argc, argv);
 
-  getstat (&scr);
-  /* I don't know if runtime screen resizing is something that can happen,
-     but we're not ready for it. */
-  switchto( scr.no );			/* allocate current screen params */
-  setwinxy (scr.posx, scr.posy);	/* set initial window position */
+  getstat(&scr);
+  /* NB: screen size can sometimes change, f.e. the video mode may be changed
+   * when installing a new font. Will be detected by another call to getstat
+   * in the main loop. Don't assume scr.rows and scr.cols are constants across
+   * loop iterations.
+   */
+  switchto(scr.no);			/* allocate current screen params */
+  setwinxy(scr.posx, scr.posy);	/* set initial window position */
   p->motx = p->winx; p->moty = p->winy;
   p->trkx = scr.posx; p->trky = scr.posy;
   oldwinx = p->winx; oldwiny = p->winy;
@@ -1172,6 +1175,12 @@ main (int argc, char *argv[])
       getstat(&scr);
       if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no)
 	switchto (scr.no);
+      /* NB: This should also accomplish screen resizing: scr.rows and
+       * scr.cols may have changed.
+       */
+      if (p->winy >= scr.rows || p->winx >= scr.cols)
+	/* just reset everything. */
+	*p = initparam;
 
       /* speech tracking */
       speech->processSpkTracking(); /* called continually even if we're not tracking
@@ -1301,6 +1310,18 @@ main (int argc, char *argv[])
 	      statcells [STAT_skip] = env.skpidlns;
 	      statcells [STAT_underline] = env.attrvis;
 	      statcells [STAT_blinkattr] = env.attrblink;
+	      break;
+	    case ST_VoyagerStyle: /* 3cells (+1 blank) */
+	      statcells[0] = (num[p->winy % 10] <<4)
+		| num[(p->winy / 10) % 10];
+	      statcells[1] = (num[scr.posy % 10] <<4)
+		| num[(scr.posy / 10) % 10];
+	      if((dispmd & FROZ_SCRN) == FROZ_SCRN)
+		statcells[2] = texttrans['F'];
+	      else
+		statcells[2] = (num[scr.posx % 10] <<4)
+		  | num[(scr.posx / 10) % 10];
+	      statcells[3] = 0;
 	      break;
 	    default:
 	      break;

@@ -69,14 +69,15 @@ extern int timeout_yet (int msec);	/* test timeout condition */
       LOG_NOTICE,
       LOG_INFO,
       LOG_DEBUG
-   } SyslogPriority;
+   } SyslogLevel;
 #endif
 extern void LogOpen(void);
 extern void LogClose(void);
-extern void SetLogPriority(int priority);
-extern void SetStderrPriority(int priority);
+extern void LogPrint(int level, char *format, ...);
+extern void LogError (const char *action);
+extern void SetLogLevel(int level);
+extern void SetStderrLevel(int level);
 extern void SetStderrOff(void);
-extern void LogPrint(int priority, char *format, ...);
 extern int ProblemCount;
 
 extern void *mallocWrapper (size_t size);
@@ -90,10 +91,6 @@ extern int validateChoice (unsigned int *choice, char *description, char *value,
 extern int validateFlag (unsigned int *flag, char *description, char *value, char *on, char *off);
 extern int validateOnOff (unsigned int *flag, char *description, char *value);
 extern int validateYesNo (unsigned int *flag, char *description, char *value);
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 /* Formatting of status cells. */
 extern int landscape_number(int x);
@@ -109,3 +106,7 @@ extern unsigned char texttrans[0X100];	 /* current text to braille translation t
 extern unsigned char untexttrans[0X100]; /* current braille to text translation table */
 extern void reverseTable(unsigned char *origtab, unsigned char *revtab);
 extern unsigned char attribtrans[0X100]; /* current attributes to braille translation table */
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */

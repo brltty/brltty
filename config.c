@@ -493,7 +493,7 @@ processOptions (int argc, char **argv)
 	    }
 	  }
 	}
-	LogPrint(LOG_ERR, "Invalid log priority: %s", optarg);
+	LogPrint(LOG_ERR, "Invalid log level: %s", optarg);
 	break;
       }
       case 'n':		/* don't go into the background */
@@ -851,7 +851,7 @@ updatePreferences (void)
   static char *booleanValues[] = {"No", "Yes"};
   static char *cursorStyles[] = {"Underline", "Block"};
   static char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
-  static char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Papenmeier", "MDV"};
+  static char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Papenmeier", "MDV", "Voyager"};
   static char *textStyles[] = {"8 dot", "6 dot"};
   static char *tuneDevices[] = {"PC Speaker", "Sound Card", "MIDI", "AdLib/OPL3/SB-FM"};
   typedef struct {
@@ -1103,13 +1103,13 @@ startup(int argc, char *argv[])
     exit(0);
   }
 
-  /* Set logging priority levels. */
+  /* Set logging levels. */
   if (opt_errors)
     LogClose();
-  SetLogPriority(opt_logLevel);
-  SetStderrPriority(opt_version?
-                       (opt_quiet? LOG_NOTICE: LOG_INFO):
-                       (opt_quiet? LOG_WARNING: LOG_NOTICE));
+  SetLogLevel(opt_logLevel);
+  SetStderrLevel(opt_version?
+		    (opt_quiet? LOG_NOTICE: LOG_INFO):
+		    (opt_quiet? LOG_WARNING: LOG_NOTICE));
 
   LogPrint(LOG_NOTICE, "%s", VERSION);
   LogPrint(LOG_INFO, "%s", COPYRIGHT);

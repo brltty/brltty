@@ -315,7 +315,7 @@ SEQ_DEFINEBUF(0X80);
 
 void seqbuf_dump (void) {
    if (_seqbufptr) {
-      if (write(fileDescriptor,_seqbuf, _seqbufptr) == -1) {
+      if (write(fileDescriptor, _seqbuf, _seqbufptr) == -1) {
          LogPrint(LOG_ERR, "Cannot write to sequencer: %s", strerror(errno));
       }
       _seqbufptr = 0;

@@ -144,12 +144,6 @@ const unsigned char inputTable[] = {
 };
 
 static void
-systemError (const char *action)
-{
-   LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
-}
-
-static void
 refreshCells (void)
 {
    unsigned char *output = outputBuffer;
@@ -165,7 +159,7 @@ refreshCells (void)
    }
 
    if (safe_write(fileDescriptor, outputBuffer, output-outputBuffer) == -1) {
-      systemError("BrailleNote write");
+      LogError("BrailleNote write");
    }
 }
 
@@ -273,10 +267,10 @@ setVirtualTerminal(int vt)
 	 if (ioctl(consoleDescriptor, VT_WAITACTIVE, vt) != -1) {
 	    LogPrint(LOG_INFO, "switched to virtual terminal %d", vt);
 	 } else {
-	    systemError("virtual console wait");
+	    LogError("virtual console wait");
 	 }
       } else {
-         systemError("virtual console activate");
+         LogError("virtual console activate");
       }
    }
 #endif
@@ -410,37 +404,37 @@ initbrl (char **parameters, brldim *brl, const char *device)
 			      }
 			      free(outputBuffer);
 			   } else {
-			      systemError("output buffer allocation");
+			      LogError("output buffer allocation");
 			   }
 			   free(cellBuffer);
 			} else {
-			   systemError("cell buffer allocation");
+			   LogError("cell buffer allocation");
 			}
 		     } else {
 			LogPrint(LOG_ERR, "Unexpected BrailleNote description: %2.2X %2.2X %2.2X",
 				 response[0], response[1], response[2]);
 		     }
 		  } else if (count == -1) {
-		     systemError("BrailleNote read");
+		     LogError("BrailleNote read");
 		  } else {
 		     LogPrint(LOG_ERR, "Unexpected BrailleNote description size: %d", count);
 		  }
 	       } else {
-		  systemError("BrailleNote write");
+		  LogError("BrailleNote write");
 	       }
 	    } else {
-	       systemError("BrailleNote flush");
+	       LogError("BrailleNote flush");
 	    }
 	    tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
 	 } else {
-	    systemError("BrailleNote attribute set");
+	    LogError("BrailleNote attribute set");
 	 }
       } else {
-	 systemError("BrailleNote attribute query");
+	 LogError("BrailleNote attribute query");
       }
       close(fileDescriptor);
    } else {
-      systemError("BrailleNote open");
+      LogError("BrailleNote open");
    }
    brl->x = -1;
    brl->y = -1;
@@ -919,7 +913,7 @@ readbrl (DriverCommandContext cmds)
 
    if (count != 1) {
       if (count == -1) {
-         systemError("BrailleNote read");
+         LogError("BrailleNote read");
       }
       return EOF;
    }

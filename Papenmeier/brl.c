@@ -52,11 +52,19 @@
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
+
+typedef enum {
+   PARM_CONFIGFILE,
+   PARM_DEBUGREADS,
+   PARM_DEBUGWRITES,
+   PARM_DEBUGMODIFIERS
+} DriverParameter;
+#define BRLPARMS "configfile", "debugreads", "debugwrites", "debugmodifiers"
 #include "../brl_driver.h"
 
 #ifdef READ_CONFIG
 #include "config.tab.c"
-static void read_config();
+static void read_config(char *path);
 int yyerror (char* s)  /* Called by yyparse on error */
 {
   LogPrint(LOG_CRIT, "Error: Zeile %d: %s", linenumber, s);
@@ -116,7 +124,10 @@ static unsigned char change_bits[] = {
   0xf4, 0xf5, 0xfc, 0xfd, 0xf6, 0xf7, 0xfe, 0xff
 };
 
-static int brl_fd = 0;			/* file descriptor for Braille display */
+static int brl_fd = -1;			/* file descriptor for Braille display */
+static unsigned int dbgrd = 0;
+static unsigned int dbgwr = 0;
+static unsigned int dbgmd = 0;
 static struct termios oldtio;		/* old terminal settings */
 
 static unsigned char prevline[PMSC] = "";
@@ -170,7 +181,7 @@ identify_terminal(brldim *brl)
     len = read(brl_fd,buf,sizeof(buf));
     if (len != sizeof(buf)) {	/* bad len */
       delay(100);
-      LogPrint(LOG_ERR,"len(%d) != size (%d)", len, sizeof(buf));
+      LogPrint(LOG_ERR,"len(%d) != size(%d)", len, sizeof(buf));
       continue;			/* try again */
     }
     LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
@@ -242,7 +253,6 @@ identify_terminal(brldim *brl)
 
 static void initbrlerror(brldim *brl)
 {
-
   /* printf replaced with LogPrint  (NP) */
   LogPrint(LOG_ERR, "Initbrl: failure at open");
 
@@ -306,6 +316,18 @@ try_init(brldim *brl, const char *dev, unsigned int baud)
 static void 
 initbrl (char **parameters, brldim *brl, const char *dev)
 {
+  validateYesNo(&dbgrd, "debug reads flag", parameters[PARM_DEBUGREADS]);
+  validateYesNo(&dbgwr, "debug writes flag", parameters[PARM_DEBUGWRITES]);
+  validateYesNo(&dbgmd, "debug modifiers flag", parameters[PARM_DEBUGMODIFIERS]);
+
+  /* read the config file for individual configurations */
+#ifdef READ_CONFIG
+  if (linenumber == 1) {
+    LogPrint(LOG_DEBUG, "look for config file");
+    read_config(parameters[PARM_CONFIGFILE]);
+  }
+#endif
+
   LogPrint(LOG_DEBUG,  "try 19200");
   try_init(brl, dev, B19200);
   if (the_terminal==NULL) {
@@ -336,24 +358,6 @@ identbrl (void)
   LogPrint(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team.");
   LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
   LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
-
-#ifdef RD_DEBUG
-  LogPrint(LOG_INFO, "   Input debugging enabled.");
-#endif
-
-#ifdef WR_DEBUG
-  LogPrint(LOG_INFO, "   Output debugging enabled.");
-#endif
-
-#ifdef MOD_DEBUG
-  LogPrint(LOG_INFO, "   Modifier Keys debugging enabled.");
-#endif
-
-  /* read the config file for individual configurations */
-#ifdef READ_CONFIG
-  LogPrint(LOG_DEBUG, "look for config file");
-  read_config();
-#endif
 }
 
 static void 
@@ -441,11 +445,18 @@ static void
 writebrl (brldim *brl)
 {
   int i;
-#ifdef WR_DEBUG
-  LogPrint(LOG_ERR, "write %2d %2d %*s", 
-	   brl->x, brl->y, curr_cols, brl->disp);
-#endif
 
+  if (dbgwr) {
+    char buf[curr_cols*2+1];
+    char *ptr = buf;
+    for (i=0; i<curr_cols; ++i) {
+      sprintf(ptr, "%2.2x", brl->disp[i]);
+      ptr += 2;
+    }
+    *ptr = 0;
+    LogPrint(LOG_DEBUG, "write %2d %2d %s", 
+	     brl->x, brl->y, buf);
+  }
   
   for(i=0; i < curr_cols; i++)
     brl->disp[i] = change_bits[brl->disp[i]];
@@ -477,17 +488,17 @@ handle_command(int cmd, int ispressed)
 
   case CMD_CUT_BEG:
     beg_pressed = ispressed;
-#ifdef MOD_DEBUG
-      LogPrint(LOG_ERR, "Cut Begin: %02x",beg_pressed );
-#endif      
+    if (dbgmd) {
+      LogPrint(LOG_DEBUG, "Cut Begin: %02x", beg_pressed);
+    }
     cmd=CMD_NOOP;
     break;
 
   case CMD_CUT_END:
     end_pressed = ispressed;
-#ifdef MOD_DEBUG
-      LogPrint(LOG_ERR, "Cut End: %02x",end_pressed );
-#endif      
+    if (dbgmd) {
+      LogPrint(LOG_DEBUG, "Cut End: %02x",end_pressed );
+    }
     cmd=CMD_NOOP;
     break;
 
@@ -514,9 +525,9 @@ handle_key(int code, int ispressed)
       else
 	pressed_modifiers &= ~(1<<i);
 
-#ifdef MOD_DEBUG
-      LogPrint(LOG_ERR, "Modifiers: %02x", pressed_modifiers);
-#endif      
+      if (dbgmd) {
+	LogPrint(LOG_DEBUG, "Modifiers: %02x", pressed_modifiers);
+      }
       return CMD_NOOP;
     }
 
@@ -585,15 +596,13 @@ readbrl (DriverCommandContext cmds)
   for(i = 6; i < l; i++)
     READ(i);			/* Data */
   
-# ifdef RD_DEBUG
-  {
+  if (dbgrd) {
     char dbg_buffer[256];
     sprintf(dbg_buffer, "read: ");
     for(i=0; i<l; i++)
       sprintf(dbg_buffer + 6 + 3*i, " %02x",buf[i]);
-    LogPrint(LOG_ERR, dbg_buffer);
+    LogPrint(LOG_DEBUG, dbg_buffer);
   }
-# endif
 
   if (buf[l-1] != cETX)		/* ETX - End */
     return CMD_ERR;
@@ -651,7 +660,7 @@ static void read_file(char* name)
   LogPrint(LOG_DEBUG, "open config file %s", name);
   configfile = fopen(name, "r");
   if (configfile == NULL) {
-    perror(name);
+    LogError("Papenmeier configuration file open");
     return;
   }
   LogPrint(LOG_DEBUG, "read config file %s", name);
@@ -659,19 +668,15 @@ static void read_file(char* name)
   fclose(configfile);
 }
 
-static void read_config()
+static void read_config(char *name)
 {
-  char* env;
-
-  /* 1. try environment BRLTTY_PM_CONF */
-  env = getenv(CONFIG_ENV);
-  if (env != NULL) {
-    read_file(env);
-    return;
+  if (!*name) {
+    if (!(name = getenv(CONFIG_ENV))) {
+      name = CONFIG_FILE;
+    }
   }
-
-  /* 2. try CONFIG_FILE */
-  read_file(CONFIG_FILE);
+  LogPrint(LOG_INFO, "Papenmeier Configuration File: %s", name);
+  read_file(name);
 }
 
 #endif

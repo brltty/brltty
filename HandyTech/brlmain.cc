@@ -208,7 +208,7 @@ void
 identbrl (void)
 {
   /* Hello display... */
-  LogPrint(LOG_NOTICE, "Handy Tech Driver, version 0.1");
+  LogPrint(LOG_NOTICE, "Handy Tech Driver, version 0.2");
   LogPrint(LOG_INFO, "  Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de>");
   LogPrint(LOG_INFO, "  - compiled for terminal autodetection");
 }
@@ -568,6 +568,18 @@ int readbrl (DriverCommandContext cmds)
       if (LastKeys[KEY_B8] && LastKeys[KEY_B4]) {
 	res = CMD_INFO;
 	goto end_switch;
+      }
+      if (LastKeys[KEY_B7] && LastKeys[KEY_B1]) {
+        res = CMD_CAPBLINK;
+        goto end_switch;
+      }
+      if (LastKeys[KEY_B7] && LastKeys[KEY_B2]) {
+        res = CMD_CSRBLINK;
+        goto end_switch;
+      }
+      if (LastKeys[KEY_B7] && LastKeys[KEY_B3]) {
+        res = CMD_PREFMENU;
+        goto end_switch;
       }
       /* 1KYES */
       if (LastKeys[KEY_ROUTING_S3]) {

@@ -41,7 +41,7 @@ static void initbrl(char **parameters, brldim *brl, const char *dev) {
     brl->x=40;
     brl->y=1;
     if (!(brl->disp=malloc(brl->x*brl->y))) {
-      perror(dev);
+      LogError("memory allocation");
       brl->x=-1;
     }
   }
