@@ -434,34 +434,34 @@ brl_writeWindow (BrailleDisplay *brl)
  * macros are expanded in a way that just drops the help-related
  * information.
  */
-#define KEY(v, c) case v: cmd = c; break;
+#define KEY(keys, command) case keys: cmd = command; break;
 #ifdef GENHLP
 /* To generate the help files we do gcc -DGENHLP -E (and heavily post-process
  * the result). So these macros expand to something that is easily
  * searched/grepped for and "easily" post-processed.
  */
-#define HLP(where, keys, help) <HLP> where: keys : help </HLP>
+#define HLP(where, keys, description) <HLP> where: keys : description </HLP>
 #else /* GENHLP */
-#define HLP(where, keys, help)
+#define HLP(where, keys, description)
 #endif /* GENHLP */
 
-#define HKEY(where, key, cmd, help) \
-  HLP(where, #key, help) \
-  KEY(key, cmd)
-#define PHKEY(where, prefix, key, cmd, help) \
-  HLP(where, prefix #key, help) \
-  KEY(key, cmd)
-#define CKEY(where, key, cmd, help) \
-  HLP(where, "Chord-" #key, help) \
-  KEY(key, cmd)
-#define HKEY2(where, key1, key2, cmd1, cmd2, help) \
-  HLP(where, #key1 / #key2, help) \
-  KEY(key1, cmd1); \
-  KEY(key2, cmd2)
-#define PHKEY2(where, prefix, key1, key2, cmd1, cmd2, help) \
-  HLP(where, prefix #key1 / #key2, help) \
-  KEY(key1, cmd1); \
-  KEY(key2, cmd2)
+#define HKEY(where, keys, command, description) \
+  HLP(where, #keys, description) \
+  KEY(keys, command)
+#define PHKEY(where, prefix, keys, command, description) \
+  HLP(where, prefix "+" #keys, description) \
+  KEY(keys, command)
+#define CKEY(where, dots, command, description) \
+  HLP(where, "Chord-" #dots, description) \
+  KEY(dots, command)
+#define HKEY2(where, keys1, keys2, command1, command2, description) \
+  HLP(where, #keys1 "/" #keys2, description) \
+  KEY(keys1, command1); \
+  KEY(keys2, command2)
+#define PHKEY2(where, prefix, keys1, keys2, command1, command2, description) \
+  HLP(where, prefix "+ " #keys1 "/" #keys2, description) \
+  KEY(keys1, command1); \
+  KEY(keys2, command2)
 
 static int 
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
@@ -574,15 +574,15 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       /* No routing keys, no dots, only front keys */
       if (cmds == CMDS_PREFS) {
 	switch (keystate) {
-          HKEY(910, K_A, CMD_PREFLOAD, "Discard changes");
-          HKEY(910, K_D, CMD_PREFLOAD, "Exit menu");
-          HKEY2(910, K_B, K_C,
+          HKEY(891, K_A, CMD_PREFLOAD, "Discard changes");
+          HKEY(891, K_D, CMD_PREFLOAD, "Exit menu");
+          HKEY2(895, K_B, K_C,
                 CMD_MENU_FIRST_ITEM, CMD_MENU_LAST_ITEM,
                 "Go to first/last item");
-          HKEY2(910, K_RL, K_RR,
+          HKEY2(895, K_RL, K_RR,
                 CMD_MENU_PREV_ITEM, CMD_MENU_NEXT_ITEM,
                 "Go to previous/next item");
-          HKEY2(910, K_UP, K_DOWN,
+          HKEY2(895, K_UP, K_DOWN,
                 CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING,
                 "Select previous/next setting");
 	}
@@ -592,36 +592,63 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	switch (keystate) {
 	  HKEY2(101, K_A, K_D,
                 CMD_FWINLT, CMD_FWINRT,
-                "Move backward/forward");
+                "Go backward/forward one window");
 	  HKEY2(101, K_B, K_C,
                 CMD_LNUP, CMD_LNDN,
-                "Move up/down");
+                "Go up/down one line");
 	  HKEY2(101, K_A|K_B, K_A|K_C,
                 CMD_TOP_LEFT, CMD_BOT_LEFT,
-                "Goto top-left / bottom-left");
-	  HKEY(101, K_RR, CMD_HOME, "Goto cursor");
-	  HKEY(101, K_RL, CMD_CSRTRK, "Cursor tracking toggle");
+                "Go to top-left/bottom-left corner");
+	  HKEY2(101, K_D|K_B, K_D|K_C,
+                CMD_TOP, CMD_BOT,
+                "Go to top/bottom line");
+	  HKEY(101, K_RR, CMD_HOME, "Go to cursor");
+	  HKEY(101, K_RL, CMD_BACK, 
+               "Go back to previous reading location"
+               " (undo cursor tracking motion).");
+	  HKEY(101, K_RL|K_RR, CMD_CSRTRK, "Cursor tracking (toggle)");
 	  HKEY2(101, K_UP, K_DOWN,
                 VAL_PASSKEY + VPK_CURSOR_UP,
                 VAL_PASSKEY + VPK_CURSOR_DOWN,
                 "Move cursor up/down (arrow keys)");
-	  HKEY(210, K_RL|K_RR, CMD_FREEZE, "Freeze screen (toggle)");
 	  HKEY(210, K_RL|K_UP, CMD_DISPMD, "Show attributes (toggle)");
+	  HKEY(210, K_RL|K_DOWN, CMD_SIXDOTS, "Six dots mode (toggle)");
 	  HKEY(201, K_RR|K_UP, CMD_INFO,
 	       "Show position and status info (toggle)");
+	  HKEY(210, K_RR|K_DOWN, CMD_FREEZE, "Freeze screen (toggle)");
 	  HKEY2(501, K_RL|K_B, K_RL|K_C,
                 CMD_ATTRUP, CMD_ATTRDN,
-		"Previous/next line with different attributes");
+		"Go to previous/next line with different attributes");
 	  HKEY2(501, K_RR|K_B, K_RR|K_C,
                 CMD_PRDIFLN, CMD_NXDIFLN,
-                "Previous/next different line");
+                "Go to previous/next different line");
+	  HKEY2(501, K_UP|K_B, K_UP|K_C,
+                CMD_PRPGRPH, CMD_NXPGRPH,
+                "Go to previous/next paragraph (blank line separation)");
+	  HKEY2(501, K_DOWN|K_B, K_DOWN|K_C,
+                CMD_PRPROMPT, CMD_NXPROMPT,
+                "Go to previous/next prompt (same prompt as current line)");
+	  HKEY2(501, K_RL|K_A, K_RL|K_D,
+                CMD_LNBEG, CMD_LNEND,
+                "Go to beginning/end of line");
 	  HKEY2(501, K_RR|K_A, K_RR|K_D,
+                CMD_CHRLT, CMD_CHRRT,
+                "Go left/right one character");
+	  HKEY2(501, K_UP|K_A, K_UP|K_D,
                 CMD_FWINLTSKIP, CMD_FWINRTSKIP,
-                "Previous/next non-blank window");
+                "Go to previous/next non-blank window");
+	  HKEY2(501, K_DOWN|K_A, K_DOWN|K_D,
+                CMD_PRSEARCH, CMD_NXSEARCH,
+                "Search screen backward/forward for cut text");
 
-	  /* typing */
-	  HLP(602, "B+C", "Space (spacebar)")
-	  case K_B|K_C: cmd = VAL_PASSDOTS +0; /* space: no dots */ break;
+	  HLP(601, "A+D", "Input mode (toggle)")
+          case K_A|K_D:
+            if (release) {
+              cmd = CMD_NOOP | ((brlinput = !brlinput)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
+            }
+            break;
+
+	  HKEY(602, K_B+K_C, VAL_PASSDOTS+0, "Space bar")
 	}
       }
     } else if (!(keystate & ~TOP_KEYS)) {
@@ -633,23 +660,21 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	 no other front key */
       /* This is a chorded character typed in braille */
       switch (keystate & TOP_KEYS) {
-        HLP(601, "Chord-1478", "Toggle braille input on/off")
-        case DOT1|DOT4|DOT7|DOT8:
-          if (release) {
-            brlinput ^= 1;
-            /* ouch! message() will recurse in here. */
-            keystate = 0;
-            message((brlinput) ? "Braille input on" : "Braille input off",
-                     MSG_SILENT);
-            return CMD_NOOP;
-          }
-          break;
-
-	CKEY(610, DOT4|DOT6, VAL_PASSKEY + VPK_RETURN, "Return");
-	CKEY(610, DOT2|DOT3|DOT4|DOT5, VAL_PASSKEY + VPK_TAB, "Tab");
-	CKEY(610, DOT1|DOT2, VAL_PASSKEY + VPK_BACKSPACE, "Backspace");
-	CKEY(610, DOT2|DOT4|DOT6, VAL_PASSKEY + VPK_ESCAPE, "Escape");
-	CKEY(610, DOT1|DOT4|DOT5, VAL_PASSKEY + VPK_DELETE, "Delete");
+	CKEY(205, DOT1|DOT2|DOT3|DOT4|DOT5|DOT6|DOT7|DOT8, CMD_PREFMENU, "Preferences menu (toggle)");
+	CKEY(610, DOT1|DOT2, VAL_PASSKEY + VPK_BACKSPACE, "Backspace key");
+	CKEY(610, DOT1|DOT4|DOT5, VAL_PASSKEY + VPK_DELETE, "Delete key");
+	CKEY(610, DOT1|DOT5, VAL_PASSKEY + VPK_ESCAPE, "Escape key");
+	CKEY(201, DOT1|DOT2|DOT5, CMD_HELP, "Help screen (toggle)");
+	CKEY(610, DOT2|DOT4, VAL_PASSKEY + VPK_INSERT, "Insert key");
+	CKEY(201, DOT1|DOT2|DOT3, CMD_LEARN, "Learn mode (toggle)");
+	CKEY(408, DOT1|DOT2|DOT3|DOT4, CMD_PASTE, "Paste cut text");
+	CKEY(201, DOT2|DOT3|DOT4, CMD_INFO, "Status line (toggle)");
+	CKEY(610, DOT2|DOT3|DOT4|DOT5, VAL_PASSKEY + VPK_TAB, "Tab key");
+	CKEY(610, DOT4|DOT6, VAL_PASSKEY + VPK_RETURN, "Return key");
+	CKEY(610, DOT2, VAL_PASSKEY+VPK_HOME, "Home key");
+	CKEY(610, DOT3, VAL_PASSKEY+VPK_END, "End key");
+	CKEY(610, DOT5, VAL_PASSKEY+VPK_PAGE_UP, "Page up");
+	CKEY(610, DOT6, VAL_PASSKEY+VPK_PAGE_DOWN, "Page down");
 	CKEY(610, DOT7, VAL_PASSKEY+VPK_CURSOR_LEFT, "Left arrow");
 	CKEY(610, DOT8, VAL_PASSKEY+VPK_CURSOR_RIGHT, "Right arrow");
       }
@@ -662,17 +687,16 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  HLP(301,"CRt#", "Route cursor to cell")
 	  cmd = CR_ROUTE + rtk_which[0] - textOffset;
         } else if (rtk_which[0] == statusOffset+0) {
-          HLP(201, "CRs1", "Help screen (toggle)")
+          HLP(881, "CRs1", "Help screen (toggle)")
           cmd = CMD_HELP;
         } else if (rtk_which[0] == statusOffset+1) {
-          HLP(205, "CRs2", "Preferences menu (and again to exit)")
+          HLP(882, "CRs2", "Preferences menu (toggle)")
           cmd = CMD_PREFMENU;
         } else if (rtk_which[0] == statusOffset+2) {
-          HLP(501, "CRs3", "Go back to previous reading location"
-                   " (undo cursor tracking motion).")
-          cmd = CMD_BACK;
+          HLP(883, "CRs3", "Learn mode (toggle)")
+          cmd = CMD_LEARN;
         } else if (rtk_which[0] == statusOffset+3) {
-          HLP(301, "CRs4", "Route cursor to current line")
+          HLP(884, "CRs4", "Route cursor to current line")
           cmd = CMD_CSRJMP_VERT;
         }
       } else if (howmanykeys == 3
@@ -681,22 +705,6 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	HLP(405, "CRtx + CRt(x+2) + CRty", "Cut text from x to y")
 	cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
         pending_cmd = CR_CUTRECT + rtk_which[2] - textOffset;
-      } else if (howmanykeys == 2	&& rtk_which[0] == textOffset+1
-	         && rtk_which[1] == textOffset+2) {
-	HLP(408, "CRt2+CRt3", "Paste cut text")
-	cmd = CMD_PASTE;
-      } else if (howmanykeys == 2 && rtk_which[0] == textOffset+0
-                 && rtk_which[1] == textOffset+1) {
-	HLP(501, "CRt1+CRt2 / CRt<COLS-1>+CRt<COLS>",
-            "Move window left/right one character")
-	cmd = CMD_CHRLT;
-      } else if (howmanykeys == 2 && rtk_which[0] == textOffset+textCells-2
-                 && rtk_which[1] == textOffset+textCells-1) {
-	cmd = CMD_CHRRT;
-      } else if (howmanykeys == 2 && rtk_which[0] == statusOffset+0
-                 && rtk_which[1] == statusOffset+1) {
-	HLP(201, "CRs1+CRs2", "Learn mode (key describer) (toggle)")
-	cmd = CMD_LEARN;
       }
     } else if (keystate & (K_UP|K_RL|K_RR)) {
     /* routing keys and other keys */
@@ -706,81 +714,45 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	 (counting the status cell keys) */
       if (howmanykeys == 1) {
 	switch (keystate) {
-	  PHKEY(220, "CRa#+", K_UP,
+	  PHKEY(691, "CRa#", K_UP,
                 CR_SWITCHVT + rtk_which[0],
                 "Switch to virtual console #");
-	  PHKEY(501,"CRa#+", K_RL,
+	  PHKEY(501,"CRa#", K_RL,
                 CR_SETMARK + rtk_which[0],
                 "Remember current position as mark #");
-	  PHKEY(501,"CRa#+", K_RR,
+	  PHKEY(501,"CRa#", K_RR,
                 CR_GOTOMARK + rtk_which[0],
-                "Goto mark #");
+                "Go to mark #");
 	}
       } else if (howmanykeys == 2 && rtk_which[0] == 0 && rtk_which[1] == 1) {
 	switch(keystate) {
-	  PHKEY2(221, "CRa1+CRa2+", K_RL, K_RR,
+	  PHKEY2(692, "CRa1+CRa2", K_RL, K_RR,
                  CMD_SWITCHVT_PREV, CMD_SWITCHVT_NEXT,
                  "Switch to previous/next virtual console");
 	}
       }
-    } else if (howmanykeys == 1 && keystate == (K_A|K_D)) {
-      /* One absolute routing key with A+D */
-      switch(rtk_which[0]) {
-	HLP(210, "A+D+CRa1", "Six dots mode (toggle)")
-	  KEY( 0, CMD_SIXDOTS );
-      };
     } else if (howmanykeys == 1 && IS_TEXT_KEY(rtk_which[0])) {
       /* one text routing key with some other keys */
-      switch(keystate){
-	PHKEY(501, "CRt#+", K_DOWN,
+      switch (keystate) {
+	PHKEY(501, "CRt#", K_DOWN,
               CR_SETLEFT + rtk_which[0] - textOffset,
-              "Move right # cells");
-	PHKEY(401, "CRt#+", K_D,
+              "Go right # cells");
+	PHKEY(401, "CRt#", K_D,
               CR_CUTBEGIN + rtk_which[0] - textOffset,
               "Mark beginning of region to cut");
-	PHKEY(401, "CRt#+", K_A,
-              CR_CUTRECT + rtk_which[0] - textOffset,
-              "Mark bottom-right of rectangular region and cut");
-	PHKEY2(501, "CRt#+", K_B, K_C,
-               CR_PRINDENT + rtk_which[0] - textOffset,
-               CR_NXINDENT + rtk_which[0] - textOffset,
-               "Move to previous/next line indented no more than #");
-      }
-    } else if (howmanykeys == 2 && (keystate & (K_A|K_D))
-	    && IS_TEXT_KEYS(rtk_which[0], rtk_which[1])
-	    && rtk_which[0]+1 == rtk_which[1]) {
-      /* two consecutive text routing keys combined with A or D */
-      switch (keystate) {
-	PHKEY(401, "CRt# + CRt(#+1) + ", K_D,
+	PHKEY(401, "CRt#", K_D|K_C,
               CR_CUTAPPEND + rtk_which[0] - textOffset,
               "Mark beginning of cut region for append");
-	PHKEY(401, "CRt# + CRt(#-1) + ", K_A,
-              CR_CUTLINE + rtk_which[1] - textOffset,
-	      "Mark end of linear region and cut");
-      }
-    } else if (howmanykeys == 2
-	    && rtk_which[0] == textOffset+0 && rtk_which[1] == textOffset+1) {
-      /* text routing keys 1 and 2, with B or C */
-      switch (keystate) {
-	PHKEY2(501, "CRt1+CRt2+", K_B, K_C,
-               CMD_PRPGRPH, CMD_NXPGRPH,
-               "Move to previous/next paragraph (blank line separation)");
-      }
-    } else if (howmanykeys == 2
-	    && rtk_which[0] == textOffset+0 && rtk_which[1] == textOffset+2) {
-      /* text routing keys 1 and 3, with some other keys */
-      switch(keystate){
-	PHKEY2(501, "CRt1+CRt3+", K_B, K_C,
-               CMD_PRSEARCH, CMD_NXSEARCH,
-               "Search screen backward/forward for cut text");
-      }
-    } else if (howmanykeys == 2
-	    && rtk_which[0] == textOffset+1 && rtk_which[1] == textOffset+2) {
-      /* text routing keys 2 and 3, with some other keys */
-      switch(keystate){
-	PHKEY2(501, "CRt2+CRt3+", K_B, K_C,
-               CMD_PRPROMPT, CMD_NXPROMPT,
-               "Previous/next prompt (same prompt as current line)");
+	PHKEY(401, "CRt#", K_A,
+              CR_CUTRECT + rtk_which[0] - textOffset,
+              "Mark bottom-right of rectangular region and cut");
+	PHKEY(401, "CRt#", K_A|K_B,
+              CR_CUTLINE + rtk_which[0] - textOffset,
+              "Mark end of linear region and cut");
+	PHKEY2(501, "CRt#", K_B, K_C,
+               CR_PRINDENT + rtk_which[0] - textOffset,
+               CR_NXINDENT + rtk_which[0] - textOffset,
+               "Go to previous/next line indented no more than #");
       }
     }
   }

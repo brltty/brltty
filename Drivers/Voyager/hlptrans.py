@@ -3,48 +3,51 @@
 import re
 import sys
 
-# haha!
-myre = re.compile('<HLP> (\w+):(?: "(.+?)")?? : "(.+?)" </HLP>')
-# \w is any alphanumeric, (?:...) contains stuff without forming a
-# match group, +? and ?? are non-greedy forms of + and ?.
-
-# To change '" / "' to ' / ' for HKEY2 and PHKEY2
-key_unq = re.compile('" / "')
+re_helpLine = re.compile('<HLP> (\w+):(?: "(.+?)")?? : "(.+?)" </HLP>')
+# \w is any alphanumeric
+# (?:...) contains stuff without forming a # match group
+# +? and ?? are non-greedy forms of + and ?
 
 # To change 'DOT1|DOT2' to 'DOT1DOT2'
-key_chord = re.compile('(DOT[1-6])\\|(?=DOT)')
-# (?=...) is a look-ahead assertion (does not consume the text).
+re_adjacentDots = re.compile('(DOT[1-8])\\|(?=DOT)')
+# (?=...) is a look-ahead assertion (does not consume the text)
 
-# To remove K_
-key_prfx = re.compile('K_|DOT')
+# To remove key name prefixes
+re_keyPrefixes = re.compile('K_|DOT')
 
 # To change '|' to '+'
-key_bar = re.compile('\\|')
+re_keyDelimiter = re.compile('\\|')
 
 # To change '" "' to ''
-unq = re.compile('" *"')
+re_adjacentStrings = re.compile('" *"')
 
-lines = sys.stdin.readlines()
+# To  find common prefixes in key pairs
+re_keyPair = re.compile('^((?P<prefix>.*) +)?((?P<common>.*\\+)(?P<first>.*))/(\\4(?P<second>.*))')
 
-def concat(a,b):
-    if a and a[-1] == '\n':
-        a = a[:-1]
-    if a and a[-1] == '\r':
-        a = a[:-1]
-    return a+b
+def concatenateLines(first, second):
+    if first and first[-1] == '\n':
+        first = first[:-1]
+    if first and first[-1] == '\r':
+        first = first[:-1]
+    return first + second
 
-txt = reduce(concat, lines, '')
-
-matches = myre.findall(txt)
-for n,k,d in matches:
-    if k:
-        k = key_unq.sub(' / ', k)
-        k = key_chord.sub('\\1', k)
-        k = key_prfx.sub('', k)
-        k = key_bar.sub('+', k)
-        k = unq.sub('', k)
-    d = unq.sub('', d)
-    if k:
-        sys.stdout.write(n+':'+k+': '+d+'\n')
+inputLines = sys.stdin.readlines()
+helpText = reduce(concatenateLines, inputLines, '')
+helpLines = re_helpLine.findall(helpText)
+for where,keys,description in helpLines:
+    if keys:
+        keys = re_adjacentDots.sub('\\1', keys)
+        keys = re_keyPrefixes.sub('', keys)
+        keys = re_keyDelimiter.sub('+', keys)
+        keys = re_adjacentStrings.sub('', keys)
+        pair = re_keyPair.search(keys)
+        if pair:
+            keys = pair.group('common') + ' ' + pair.group('first') + '/' + pair.group('second')
+            prefix = pair.group('prefix')
+            if prefix:
+                keys = prefix + keys
+    description = re_adjacentStrings.sub('', description)
+    if keys:
+        sys.stdout.write(where + ':' + keys + ': ' + description + '\n')
     else:
-        sys.stdout.write(n+':'+d+'\n')
+        sys.stdout.write(where + ':' + description + '\n')
