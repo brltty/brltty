@@ -211,7 +211,7 @@
 \XBC (  34  78)  # vulgar fraction one quarter
 \XBD (  34 678)  # vulgar fraction one half
 \XBE (  345678)  # vulgar fraction three quarters
-\XBF (  34   8)  # inverted question mark
+\XBF (  34   8)  #*inverted question mark
 \XC0 (123 5678)  # latin capital letter a with grave
 \XC1 ( 2    7 )  # latin capital letter a with acute
 \XC2 ( 2    78)  # latin capital letter a with circumflex
