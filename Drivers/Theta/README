@@ -1,0 +1,34 @@
+This directory contains the BRLTTY speech driver for the Theta text to speech
+engine from Cepstral [http://www.cepstral.com/]. It has been implemented, and
+is being maintained, by Dave Mielke <dave@mielke.cc>.
+
+BRLTTY's configure script automatically includes this driver if Theta has been
+installed. The default is to check the directories /usr, /usr/local, and
+/opt/theta. The actual location can be explicitly specified via --with-theta.
+
+This driver and that for the FestivalLite text to speech engine cannot be
+linked into BRLTTY's binary at the same time (via --enable-speech-driver)
+because their run-time libraries contain conflicting symbols.
+
+If this driver is built as a dynamically loaded shared object (the default),
+i.e. it isn't linked into BRLTTY's binary via --with-speech-driver, then the
+directory $THETA_HOME/lib must be added to the colon-delimited list of
+directories in the LD_LIBRARY_PATH environment variable before BRLTTY is
+started because Theta's own shared objects don't contain run-time search paths
+for their internal dependencies.
+
+This driver recognizes the following parameters:
+
+   Parameter Settings
+   age       1-99 (years)
+   gender    male, female, neuter
+   language  two-letter language code
+   name      name (human), /path/to/directory
+   pitch     -2.0-2.0 (octaves relative to default)
+   rate      0.1-10.0 (relative to default)
+   volume    0.0-10.0 (relative to default)
+
+If the human name of the voice is specified then the voice path is searched. 
+This path can be explicitly defined by storing a colon-delimited list of
+directories in the THETA_VOXPATH environment variable. The default is to look
+in $THETA_HOME/voices.
