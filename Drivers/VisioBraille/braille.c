@@ -51,19 +51,18 @@ typedef enum {
 static int brl_fd;
 static struct termios oldtio,newtio;
 #ifdef SendIdReq
-static struct TermInfo
-{
- unsigned char code; 
- unsigned char version[3];
- unsigned char f1;
- unsigned char size[2];
- unsigned char dongle;
- unsigned char clock;
- unsigned char routing;
- unsigned char flash;
- unsigned char prog;
- unsigned char lcd;
- unsigned char f2[11];
+static struct TermInfo {
+  unsigned char code; 
+  unsigned char version[3];
+  unsigned char f1;
+  unsigned char size[2];
+  unsigned char dongle;
+  unsigned char clock;
+  unsigned char routing;
+  unsigned char flash;
+  unsigned char prog;
+  unsigned char lcd;
+  unsigned char f2[11];
 } terminfo;
 #endif /* SendIdReq */
 
@@ -74,42 +73,38 @@ static int printcode = 0;
 /* Returns 0 if everything is right, -1 if an error occured while sending */
 static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t size)
 {
- int lgtho = 1;
- static unsigned char obuf[MAXPKTLEN] = { 02 };
- const unsigned char *x;
- unsigned char *y = obuf+1;
- unsigned char chksum=0;
- int i,res;
- for (x=p; (x-p) < size; x++) 
- {
-  chksum ^= *x;
-  if ((*x) <= 5)
-  {
-   *y = 01;
-   y++; lgtho++; 
-   *y = ( *x ) | 0x40;
-  } else *y = *x;
-  y++; lgtho++; 
- }
- if (chksum<=5)
- {
-  *y = 1; y++; lgtho++;  
-  chksum |= 0x40;
- }
- *y = chksum; y++; lgtho++; 
- *y = 3; y++; lgtho++; 
- for (i=1; i<=5; i++)
- {
-  if (write(brl_fd,obuf,lgtho) != lgtho) continue; /* write failed, retry */
-  tcdrain(brl_fd);
-  newtio.c_cc[VTIME]=10;
-  tcsetattr(brl_fd,TCSANOW,&newtio);
-  res = read(brl_fd,&chksum,1);
-  newtio.c_cc[VTIME] = 0;
-  tcsetattr(brl_fd,TCSANOW,&newtio);
-  if ((res==1) && (chksum == 0x04)) return 0;
- }
- return (-1);
+  int lgtho = 1;
+  static unsigned char obuf[MAXPKTLEN] = { 02 };
+  const unsigned char *x;
+  unsigned char *y = obuf+1;
+  unsigned char chksum=0;
+  int i,res;
+  for (x=p; (x-p) < size; x++) {
+    chksum ^= *x;
+    if ((*x) <= 5) {
+      *y = 01;
+      y++; lgtho++; 
+      *y = ( *x ) | 0x40;
+    } else *y = *x;
+    y++; lgtho++; 
+  }
+  if (chksum<=5) {
+    *y = 1; y++; lgtho++;  
+    chksum |= 0x40;
+  }
+  *y = chksum; y++; lgtho++; 
+  *y = 3; y++; lgtho++; 
+  for (i=1; i<=5; i++) {
+    if (write(brl_fd,obuf,lgtho) != lgtho) continue; /* write failed, retry */
+    tcdrain(brl_fd);
+    newtio.c_cc[VTIME]=10;
+    tcsetattr(brl_fd,TCSANOW,&newtio);
+    res = read(brl_fd,&chksum,1);
+    newtio.c_cc[VTIME] = 0;
+    tcsetattr(brl_fd,TCSANOW,&newtio);
+    if ((res==1) && (chksum == 0x04)) return 0;
+  }
+  return (-1);
 }
 
 /* Function : brl_readPacket */
@@ -122,64 +117,52 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
 /* "+" packets are silently discarded, since they are only disturbing us */
 static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size) 
 {
- int tmp = 0;
- static unsigned char ack = 04;
- static unsigned char nack = 05;
- static int apacket = 0;
- int res;
- static unsigned char prefix, checksum;
- unsigned char ch;
- static unsigned char buf[MAXPKTLEN]; 
- static unsigned char *q;
- if ((p==NULL) || (size<2) || (size>MAXPKTLEN)) return 0; 
- while ((res = readChunk(brl_fd,&ch,&tmp,1,0,1000))==1)
- {
-  if (ch==0x02) 
-  {
-   apacket = 1;
-   prefix = 0xff; 
-   checksum = 0;
-   q = &buf[0];
-  }
-  else if (apacket) 
-  {
-   if (ch==0x01) 
-   {
-    prefix &= ~(0x40); 
-   }
-   else if (ch==0x03)
-   {
-    if (checksum==0) 
-    {
-     write(brl_fd,&ack,1); 
-     apacket = 0; q--;
-     if (buf[0]!='+')
-     {
-      memcpy(p,buf,(q-buf));
-      return q-&buf[0]; 
-     }
-    } else {
-     write(brl_fd,&nack,1);
-     apacket = 0;
-     return 0;
+  int tmp = 0;
+  static unsigned char ack = 04;
+  static unsigned char nack = 05;
+  static int apacket = 0;
+  int res;
+  static unsigned char prefix, checksum;
+  unsigned char ch;
+  static unsigned char buf[MAXPKTLEN]; 
+  static unsigned char *q;
+  if ((p==NULL) || (size<2) || (size>MAXPKTLEN)) return 0; 
+  while ((res = readChunk(brl_fd,&ch,&tmp,1,0,1000))==1) {
+    if (ch==0x02) {
+      apacket = 1;
+      prefix = 0xff; 
+      checksum = 0;
+      q = &buf[0];
+    } else if (apacket) {
+      if (ch==0x01) {
+        prefix &= ~(0x40); 
+      } else if (ch==0x03) {
+        if (checksum==0) {
+          write(brl_fd,&ack,1); 
+          apacket = 0; q--;
+          if (buf[0]!='+') {
+            memcpy(p,buf,(q-buf));
+            return q-&buf[0]; 
+          }
+        } else {
+          write(brl_fd,&nack,1);
+          apacket = 0;
+          return 0;
+        }
+      } else {
+        if ((q-&buf[0])>=size) {
+          LogPrint(LOG_WARNING,"Packet too long: discarded");
+          apacket = 0;
+          return 0;
+        }
+        ch &= prefix; prefix |= 0x40;
+        checksum ^= ch;
+        (*q) = ch; q++;   
+      }
     }
-   }
-   else 
-   {
-    if ((q-&buf[0])>=size) 
-    {
-     LogPrint(LOG_WARNING,"Packet too long: discarded");
-     apacket = 0;
-     return 0;
-    }
-    ch &= prefix; prefix |= 0x40;
-    checksum ^= ch;
-    (*q) = ch; q++;   
-   }
-  }
-  tmp = 0;
- } 
- return 0;
+    tmp = 0;
+  } 
+  return 0;
 }
 
 /* Function : brl_reset */
@@ -188,17 +171,17 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size
 /* restoring a normal communication mode */
 static int brl_reset(BrailleDisplay *brl)
 {
- static unsigned char *RescuePacket = "#"; 
- brl_writePacket(brl,RescuePacket,strlen(RescuePacket));
- return 1;
+  static unsigned char *RescuePacket = "#"; 
+  brl_writePacket(brl,RescuePacket,strlen(RescuePacket));
+  return 1;
 }
 
 /* Function : brl_identify */
 /* Prints information about the driver in the system log and on stderr */
 static void brl_identify()
 {
- LogPrint(LOG_NOTICE, VERSION);
- LogPrint(LOG_INFO,   COPYRIGHT);
+  LogPrint(LOG_NOTICE, VERSION);
+  LogPrint(LOG_INFO,   COPYRIGHT);
 }
 
 /* Function : brl_open */
@@ -211,80 +194,71 @@ static void brl_identify()
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
 #ifdef SendIdReq
- unsigned char ch = '?';
- int i;
+  unsigned char ch = '?';
+  int i;
 #endif /* SendIdReq */
- int ds = BRAILLEDISPLAYSIZE;
- if (*parameters[PARM_DISPSIZE])
- {
-  int dsmin=20, dsmax=40;
-  validateInteger(&ds, "Size of braille display",parameters[PARM_DISPSIZE],&dsmin,&dsmax);
- }
+  int ds = BRAILLEDISPLAYSIZE;
+  if (*parameters[PARM_DISPSIZE]) {
+    int dsmin=20, dsmax=40;
+    validateInteger(&ds, "Size of braille display",parameters[PARM_DISPSIZE],&dsmin,&dsmax);
+  }
 
- if (!isSerialDevice(&device)) {
-  unsupportedDevice(device);
-  return 0;
- }
- if (!openSerialDevice(device, &brl_fd, &oldtio)) return 0;
- memset(&newtio, 0, sizeof(newtio)); 
- newtio.c_cflag = CS8 | PARENB | PARODD | CLOCAL | CREAD;
- newtio.c_iflag = IGNPAR;
- newtio.c_oflag = 0;
- newtio.c_lflag = 0;
- resetSerialDevice(brl_fd,&newtio,B57600); 
- #ifdef SendIdReq
- {
-  brl_writePacket(brl,(unsigned char *) &ch,1); 
-  i=5; 
-  while (i>0) 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+  if (!openSerialDevice(device, &brl_fd, &oldtio)) return 0;
+  memset(&newtio, 0, sizeof(newtio)); 
+  newtio.c_cflag = CS8 | PARENB | PARODD | CLOCAL | CREAD;
+  newtio.c_iflag = IGNPAR;
+  newtio.c_oflag = 0;
+  newtio.c_lflag = 0;
+  resetSerialDevice(brl_fd,&newtio,B57600); 
+#ifdef SendIdReq
   {
-   if (brl_readPacket(brl,(unsigned char *) &terminfo,sizeof(terminfo))!=0)
-   {
-    if (terminfo.code=='?') 
-    {
-     terminfo.f2[10] = '\0';
-     break;
+    brl_writePacket(brl,(unsigned char *) &ch,1); 
+    i=5; 
+    while (i>0) {
+      if (brl_readPacket(brl,(unsigned char *) &terminfo,sizeof(terminfo))!=0) {
+        if (terminfo.code=='?') {
+          terminfo.f2[10] = '\0';
+          break;
+        }
+      }
+      i--;
     }
-   }
-   i--;
-  }
-  if (i==0) 
-  {
-   LogPrint(LOG_WARNING,"Unable to identify terminal properly");  
-   if (brl->x<=0) brl->x = BRAILLEDISPLAYSIZE;  
-  } else {
-   LogPrint(LOG_INFO,"Braille terminal description:");
-   LogPrint(LOG_INFO,"   version=%c%c%c",terminfo.version[0],terminfo.version[1],terminfo.version[2]);
-   LogPrint(LOG_INFO,"   f1=%c",terminfo.f1);
-   LogPrint(LOG_INFO,"   size=%c%c",terminfo.size[0],terminfo.size[1]);
-   LogPrint(LOG_INFO,"   dongle=%c",terminfo.dongle);
-   LogPrint(LOG_INFO,"   clock=%c",terminfo.clock);
-   LogPrint(LOG_INFO,"   routing=%c",terminfo.routing);
-   LogPrint(LOG_INFO,"   flash=%c",terminfo.flash);
-   LogPrint(LOG_INFO,"   prog=%c",terminfo.prog);
-   LogPrint(LOG_INFO,"   lcd=%c",terminfo.lcd);
-   LogPrint(LOG_INFO,"   f2=%s",terminfo.f2);  
-   if (brl->x<=0) 
-   {
-    brl->x = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
-   }
-  }
- #else /* SendIdReq */
-  if (brl->x<=0) brl->x = ds;
- #endif /* SendIdReq */
- brl->y=1; 
- return 1;
+    if (i==0) {
+      LogPrint(LOG_WARNING,"Unable to identify terminal properly");  
+      if (brl->x<=0) brl->x = BRAILLEDISPLAYSIZE;  
+    } else {
+      LogPrint(LOG_INFO,"Braille terminal description:");
+      LogPrint(LOG_INFO,"   version=%c%c%c",terminfo.version[0],terminfo.version[1],terminfo.version[2]);
+      LogPrint(LOG_INFO,"   f1=%c",terminfo.f1);
+      LogPrint(LOG_INFO,"   size=%c%c",terminfo.size[0],terminfo.size[1]);
+      LogPrint(LOG_INFO,"   dongle=%c",terminfo.dongle);
+      LogPrint(LOG_INFO,"   clock=%c",terminfo.clock);
+      LogPrint(LOG_INFO,"   routing=%c",terminfo.routing);
+      LogPrint(LOG_INFO,"   flash=%c",terminfo.flash);
+      LogPrint(LOG_INFO,"   prog=%c",terminfo.prog);
+      LogPrint(LOG_INFO,"   lcd=%c",terminfo.lcd);
+      LogPrint(LOG_INFO,"   f2=%s",terminfo.f2);  
+      if (brl->x<=0) brl->x = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
+    }
+#else /* SendIdReq */
+    if (brl->x<=0) brl->x = ds;
+#endif /* SendIdReq */
+  brl->y=1; 
+  return 1;
 }
 
 /* Function : brl_close */
 /* Closes the braille device and deallocates dynamic structures */
 static void brl_close(BrailleDisplay *brl)
 {
- if (brl_fd>=0)
- {
-  tcsetattr(brl_fd,TCSADRAIN,&oldtio);
-  close(brl_fd);
- }
+  if (brl_fd>=0) {
+    tcsetattr(brl_fd,TCSADRAIN,&oldtio);
+    close(brl_fd);
+  }
 }
 
 /* function : brl_writeWindow */
@@ -292,35 +266,36 @@ static void brl_close(BrailleDisplay *brl)
 /* the one alreadz displayed */
 static void brl_writeWindow(BrailleDisplay *brl)
 {
- /* The following table defines how internal brltty format is converted to */
- /* VisioBraille format. Do *NOT* modify this table. */
- /* The table is declared static so that it is in data segment and not */
- /* in the stack */ 
- static unsigned char dotstable[256] = {
-  0x20,0x41,0x22,0x43,0x2C,0x42,0x49,0x46,0x5F,0x45,0x25,0x44,0x3A,0x48,0x4A,0x47,
-  0x27,0x4B,0x2A,0x4D,0x3B,0x4C,0x53,0x50,0x29,0x4F,0x26,0x4E,0x21,0x52,0x54,0x51,
-  0x28,0x31,0x23,0x33,0x3F,0x32,0x39,0x36,0x2B,0x35,0x24,0x34,0x2E,0x38,0x57,0x37,
-  0x2D,0x55,0x5E,0x58,0x3C,0x56,0x5C,0x40,0x3E,0x5A,0x30,0x59,0x3D,0x5b,0x5D,0x2F,
-  0xE0,0x01,0xE2,0x03,0xEC,0x02,0x09,0x06,0x1F,0x05,0xE5,0x04,0xFA,0x08,0x0A,0x07,
-  0xE7,0x0B,0xEA,0x0D,0xFB,0x0C,0x13,0x10,0xE9,0x0F,0xE6,0x0E,0xE1,0x12,0x14,0x11,
-  0xE8,0xF1,0xE3,0xF3,0xFF,0xF2,0xF9,0xF6,0xEB,0xF5,0xE4,0xF4,0xEE,0xF8,0x17,0xF7,
-  0xED,0x15,0x1E,0x18,0xFC,0x16,0x1C,0x00,0xFE,0x1A,0xF0,0x19,0xfd,0x1B,0x1D,0xEF,
-  0xA0,0xC1,0xA2,0xC3,0xAC,0xC2,0xC9,0xC6,0xDF,0xC5,0xA5,0xC4,0xBA,0xC8,0xCA,0xC7,
-  0xA7,0xCB,0xAA,0xCD,0xBB,0xCC,0xD3,0xD0,0xA9,0xCF,0xA6,0xCE,0xA1,0xD2,0xD4,0xD1,
-  0xA8,0xB1,0xA3,0xB3,0xBF,0xB2,0xB9,0xB6,0xAB,0xB5,0xA4,0xB4,0xAE,0xB8,0xD7,0xB7,
-  0xAD,0xD5,0xDE,0xD8,0xBC,0xD6,0xDC,0xC0,0xBE,0xDA,0xB0,0xD9,0xBD,0xDB,0xDD,0xAF,
-  0x60,0x81,0x62,0x83,0x6C,0x82,0x89,0x86,0x9F,0x85,0x65,0x84,0x7A,0x88,0x8A,0x87,
-  0x67,0x8B,0x6A,0x8D,0x7B,0x8C,0x93,0x90,0x69,0x8F,0x66,0x8E,0x61,0x92,0x94,0x91,
-  0x68,0x71,0x63,0x73,0x7F,0x72,0x79,0x76,0x6B,0x75,0x64,0x74,0x6E,0x78,0x97,0x77,
-  0x6D,0x95,0x9E,0x98,0x7C,0x96,0x9C,0x80,0x7E,0x9A,0x70,0x99,0x7D,0x9B,0x9D,0x6F
- };
- static unsigned char brailledisplay[81]= { 0x3e }; /* should be large enough for everyone */
- static unsigned char prevdata[80]; 
- int i;
- if (memcmp(&prevdata,brl->buffer,brl->x)==0) return;
- memcpy(&prevdata,brl->buffer,brl->x);
- for (i=0; i<brl->x; i++) brailledisplay[i+1] = dotstable[*(brl->buffer+i)];
- brl_writePacket(brl,(unsigned char *) &brailledisplay,brl->x+1);
+  /* The following table defines how internal brltty format is converted to */
+  /* VisioBraille format. Do *NOT* modify this table. */
+  /* The table is declared static so that it is in data segment and not */
+  /* in the stack */ 
+  static unsigned char dotsTable[256] = {
+    0x20,0x41,0x22,0x43,0x2C,0x42,0x49,0x46,0x5F,0x45,0x25,0x44,0x3A,0x48,0x4A,0x47,
+    0x27,0x4B,0x2A,0x4D,0x3B,0x4C,0x53,0x50,0x29,0x4F,0x26,0x4E,0x21,0x52,0x54,0x51,
+    0x28,0x31,0x23,0x33,0x3F,0x32,0x39,0x36,0x2B,0x35,0x24,0x34,0x2E,0x38,0x57,0x37,
+    0x2D,0x55,0x5E,0x58,0x3C,0x56,0x5C,0x40,0x3E,0x5A,0x30,0x59,0x3D,0x5b,0x5D,0x2F,
+    0xE0,0x01,0xE2,0x03,0xEC,0x02,0x09,0x06,0x1F,0x05,0xE5,0x04,0xFA,0x08,0x0A,0x07,
+    0xE7,0x0B,0xEA,0x0D,0xFB,0x0C,0x13,0x10,0xE9,0x0F,0xE6,0x0E,0xE1,0x12,0x14,0x11,
+    0xE8,0xF1,0xE3,0xF3,0xFF,0xF2,0xF9,0xF6,0xEB,0xF5,0xE4,0xF4,0xEE,0xF8,0x17,0xF7,
+    0xED,0x15,0x1E,0x18,0xFC,0x16,0x1C,0x00,0xFE,0x1A,0xF0,0x19,0xfd,0x1B,0x1D,0xEF,
+    0xA0,0xC1,0xA2,0xC3,0xAC,0xC2,0xC9,0xC6,0xDF,0xC5,0xA5,0xC4,0xBA,0xC8,0xCA,0xC7,
+    0xA7,0xCB,0xAA,0xCD,0xBB,0xCC,0xD3,0xD0,0xA9,0xCF,0xA6,0xCE,0xA1,0xD2,0xD4,0xD1,
+    0xA8,0xB1,0xA3,0xB3,0xBF,0xB2,0xB9,0xB6,0xAB,0xB5,0xA4,0xB4,0xAE,0xB8,0xD7,0xB7,
+    0xAD,0xD5,0xDE,0xD8,0xBC,0xD6,0xDC,0xC0,0xBE,0xDA,0xB0,0xD9,0xBD,0xDB,0xDD,0xAF,
+    0x60,0x81,0x62,0x83,0x6C,0x82,0x89,0x86,0x9F,0x85,0x65,0x84,0x7A,0x88,0x8A,0x87,
+    0x67,0x8B,0x6A,0x8D,0x7B,0x8C,0x93,0x90,0x69,0x8F,0x66,0x8E,0x61,0x92,0x94,0x91,
+    0x68,0x71,0x63,0x73,0x7F,0x72,0x79,0x76,0x6B,0x75,0x64,0x74,0x6E,0x78,0x97,0x77,
+    0x6D,0x95,0x9E,0x98,0x7C,0x96,0x9C,0x80,0x7E,0x9A,0x70,0x99,0x7D,0x9B,0x9D,0x6F
+  };
+  static unsigned char brailleDisplay[81]= { 0x3e }; /* should be large enough for everyone */
+  static unsigned char prevData[80];
+  int i;
+  if (memcmp(&prevData,brl->buffer,brl->x)==0) return;
+  for (i=0; i<brl->x; i++) brailleDisplay[i+1] = dotsTable[*(brl->buffer+i)];
+  if (brl_writePacket(brl,(unsigned char *) &brailleDisplay,brl->x+1)==0) {
+    memcpy(&prevData,brl->buffer,brl->x);
+  }
 }
 
 /* Function : brl_writeStatus */
@@ -334,100 +309,93 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 /* Converts a key code to a brltty command according to the context */
 int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int code)
 {
- static int ctrlpressed = 0; 
- static int altpressed = 0;
- static int cut = 0;
- static int descchar = 0;
-
- unsigned char ch;
- int type;
- ch = code & 0xff;
- type = code & (~ 0xff);
- if (code==0) return 0;
- if (code==EOF) return EOF;
- if (type==BRLKEY_CHAR)
-  return ch | BRL_BLK_PASSCHAR | altpressed | ctrlpressed | (altpressed = ctrlpressed = 0);
- else if (type==BRLKEY_ROUTING) {
-  ctrlpressed = altpressed = 0;
-  switch (cut)
-  {
-   case 0:
-    if (descchar) { descchar = 0; return ((int) ch) | BRL_BLK_DESCCHAR; }
-    else return ((int) ch) | BRL_BLK_ROUTE;
-   case 1: cut++; return ((int) ch) | BRL_BLK_CUTBEGIN;
-   case 2: cut = 0; return ((int) ch) | BRL_BLK_CUTLINE;
+  static int ctrlpressed = 0; 
+  static int altpressed = 0;
+  static int cut = 0;
+  static int descchar = 0;
+  unsigned char ch;
+  int type;
+  ch = code & 0xff;
+  type = code & (~ 0xff);
+  if (code==0) return 0;
+  if (code==EOF) return EOF;
+  if (type==BRL_VSMSK_CHAR) return ch | BRL_BLK_PASSCHAR | altpressed | ctrlpressed | (altpressed = ctrlpressed = 0);
+  else if (type==BRL_VSMSK_ROUTING) {
+    ctrlpressed = altpressed = 0;
+    switch (cut) {
+      case 0:
+        if (descchar) { descchar = 0; return ((int) ch) | BRL_BLK_DESCCHAR; }
+        else return ((int) ch) | BRL_BLK_ROUTE;
+      case 1: cut++; return ((int) ch) | BRL_BLK_CUTBEGIN;
+      case 2: cut = 0; return ((int) ch) | BRL_BLK_CUTLINE;
+    }
+    return EOF; /* Should not be reached */
+  } else if (type==BRL_VSMSK_FUNCTIONKEY) {
+    ctrlpressed = altpressed = 0;
+    switch (code) {
+      case BRL_VSKEY_A1: return BRL_BLK_SWITCHVT;
+      case BRL_VSKEY_A2: return BRL_BLK_SWITCHVT+1;
+      case BRL_VSKEY_A3: return BRL_BLK_SWITCHVT+2;
+      case BRL_VSKEY_A6: return BRL_BLK_SWITCHVT+3;
+      case BRL_VSKEY_A7: return BRL_BLK_SWITCHVT+4;
+      case BRL_VSKEY_A8: return BRL_BLK_SWITCHVT+5;
+      case BRL_VSKEY_B5: cut = 1; return EOF;
+      case BRL_VSKEY_B6: return BRL_CMD_TOP_LEFT; 
+      case BRL_VSKEY_D6: return BRL_CMD_BOT_LEFT;
+      case BRL_VSKEY_A4: return BRL_CMD_FWINLTSKIP;
+      case BRL_VSKEY_B8: return BRL_CMD_FWINLTSKIP;
+      case BRL_VSKEY_A5: return BRL_CMD_FWINRTSKIP;
+      case BRL_VSKEY_D8: return BRL_CMD_FWINRTSKIP;
+      case BRL_VSKEY_B7: return BRL_CMD_LNUP;
+      case BRL_VSKEY_D7: return BRL_CMD_LNDN;
+      case BRL_VSKEY_C8: return BRL_CMD_FWINRT;
+      case BRL_VSKEY_C6: return BRL_CMD_FWINLT;
+      case BRL_VSKEY_C7: return BRL_CMD_HOME;
+      case BRL_VSKEY_B2: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
+      case BRL_VSKEY_D2: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
+      case BRL_VSKEY_C3: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
+      case BRL_VSKEY_C1: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
+      case BRL_VSKEY_B3: return BRL_CMD_CSRVIS;
+      case BRL_VSKEY_D1: return BRL_BLK_PASSKEY + BRL_KEY_DELETE;  
+      case BRL_VSKEY_D3: return BRL_BLK_PASSKEY + BRL_KEY_INSERT;
+      case BRL_VSKEY_C5: return BRL_CMD_PASTE;
+      case BRL_VSKEY_D5: descchar = 1; return EOF;
+      case BRL_VSKEY_B4: printcode = 1; return EOF;
+      default: return EOF;
+    }
+  } else if (type==BRL_VSMSK_OTHER) {
+    /* ctrlpressed = 0; */
+    if ((ch>=0xe1) && (ch<=0xea)) {
+      ch-=0xe1;
+      if (altpressed) {
+        altpressed = 0;
+        return BRL_BLK_SWITCHVT + ch;
+      } else return BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+ch; 
+    }
+    /* altpressed = 0; */
+    switch (code) {
+      case BRL_VSKEY_PLOC_LT: return BRL_CMD_SIXDOTS;
+      case BRL_VSKEY_BACKSPACE: return BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
+      case BRL_VSKEY_TAB: return BRL_BLK_PASSKEY + BRL_KEY_TAB;
+      case BRL_VSKEY_RETURN: return BRL_BLK_PASSKEY + BRL_KEY_ENTER;
+      case BRL_VSKEY_PLOC_PLOC_A: return BRL_CMD_HELP;
+      case BRL_VSKEY_PLOC_PLOC_B: return BRL_CMD_TUNES; 
+      case BRL_VSKEY_PLOC_PLOC_C: return BRL_CMD_PREFMENU;
+      case BRL_VSKEY_PLOC_PLOC_D: return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
+      case BRL_VSKEY_PLOC_PLOC_E: return BRL_BLK_PASSKEY + BRL_KEY_END;
+      case BRL_VSKEY_PLOC_PLOC_F: return BRL_CMD_FREEZE;
+      case BRL_VSKEY_PLOC_PLOC_H: return BRL_BLK_PASSKEY + BRL_KEY_HOME;
+      case BRL_VSKEY_PLOC_PLOC_I: return BRL_CMD_INFO;
+      case BRL_VSKEY_PLOC_PLOC_R: return BRL_CMD_PREFLOAD;
+      case BRL_VSKEY_PLOC_PLOC_S: return BRL_CMD_PREFSAVE;
+      case BRL_VSKEY_PLOC_PLOC_T: return BRL_CMD_CSRTRK;
+      case BRL_VSKEY_PLOC_PLOC_U: return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
+      case BRL_VSKEY_CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; break; 
+      case BRL_VSKEY_ALT: altpressed = BRL_FLG_CHAR_META; break;   
+      case BRL_VSKEY_ESCAPE: return BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
+      default: return EOF;
+    }
   }
-  return EOF; /* Should not be reached */
- } else if (type==BRLKEY_FUNCTIONKEY) {
-  ctrlpressed = altpressed = 0;
-  switch (code)
-  {
-   case keyA1: return BRL_BLK_SWITCHVT;
-   case keyA2: return BRL_BLK_SWITCHVT+1;
-   case keyA3: return BRL_BLK_SWITCHVT+2;
-   case keyA6: return BRL_BLK_SWITCHVT+3;
-   case keyA7: return BRL_BLK_SWITCHVT+4;
-   case keyA8: return BRL_BLK_SWITCHVT+5;
-   case keyB5: cut = 1; return EOF;
-   case keyB6: return BRL_CMD_TOP_LEFT; 
-   case keyD6: return BRL_CMD_BOT_LEFT;
-   case keyA4: return BRL_CMD_FWINLTSKIP;
-   case keyB8: return BRL_CMD_FWINLTSKIP;
-   case keyA5: return BRL_CMD_FWINRTSKIP;
-   case keyD8: return BRL_CMD_FWINRTSKIP;
-   case keyB7: return BRL_CMD_LNUP;
-   case keyD7: return BRL_CMD_LNDN;
-   case keyC8: return BRL_CMD_FWINRT;
-   case keyC6: return BRL_CMD_FWINLT;
-   case keyC7: return BRL_CMD_HOME;
-   case keyB2: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
-   case keyD2: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
-   case keyC3: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
-   case keyC1: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
-   case keyB3: return BRL_CMD_CSRVIS;
-   case keyD1: return BRL_BLK_PASSKEY + BRL_KEY_DELETE;  
-   case keyD3: return BRL_BLK_PASSKEY + BRL_KEY_INSERT;
-   case keyC5: return BRL_CMD_PASTE;
-   case keyD5: descchar = 1; return EOF;
-   case keyB4: printcode = 1; return EOF;
-   default: return EOF;
-  }
- } else if (type==BRLKEY_OTHER) {
-  /* ctrlpressed = 0; */
-  if ((ch>=0xe1) && (ch<=0xea))
-  {
-   ch-=0xe1;
-   if (altpressed)
-   {
-    altpressed = 0;
-    return BRL_BLK_SWITCHVT + ch;
-   } else return BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+ch; 
-  }
-  /* altpressed = 0; */
-  switch (code)
-  {
-   case PLOC_LT: return BRL_CMD_SIXDOTS;
-   case BACKSPACE: return BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
-   case TAB: return BRL_BLK_PASSKEY + BRL_KEY_TAB;
-   case RETURN: return BRL_BLK_PASSKEY + BRL_KEY_ENTER;
-   case PLOC_PLOC_A: return BRL_CMD_HELP;
-   case PLOC_PLOC_B: return BRL_CMD_TUNES; 
-   case PLOC_PLOC_C: return BRL_CMD_PREFMENU;
-   case PLOC_PLOC_D: return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
-   case PLOC_PLOC_E: return BRL_BLK_PASSKEY + BRL_KEY_END;
-   case PLOC_PLOC_F: return BRL_CMD_FREEZE;
-   case PLOC_PLOC_H: return BRL_BLK_PASSKEY + BRL_KEY_HOME;
-   case PLOC_PLOC_I: return BRL_CMD_INFO;
-   case PLOC_PLOC_R: return BRL_CMD_PREFLOAD;
-   case PLOC_PLOC_S: return BRL_CMD_PREFSAVE;
-   case PLOC_PLOC_T: return BRL_CMD_CSRTRK;
-   case PLOC_PLOC_U: return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
-   case CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; break; 
-   case ALT: altpressed = BRL_FLG_CHAR_META; break;   
-   case ESCAPE: return BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
-   default: return EOF;
-  }
- }
  return EOF; 
 }
 
@@ -441,80 +409,71 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
 /* for BRL_ROUTING, the code is the ofset to route, starting from 0 */
 static int brl_readKey(BrailleDisplay *brl)
 {
- unsigned char ch, ibuf[MAXPKTLEN-1];
- static int routing = 0;
- ssize_t lgthi;
- readNextPacket:
- lgthi = brl_readPacket(brl,(unsigned char *) &ibuf,MAXPKTLEN-1);
- if (lgthi==0) return EOF;
- if (ibuf[0]=='%') 
- {
-  ibuf[lgthi] = '\0';
-  insertString(&ibuf[1]);
-  return EOF;
- }  
- if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23))
- {
-  char buf[100];
-  if (ibuf[0]==0x2b) return EOF;
-  sprintf(buf,"Unknown packet 0x%x",ibuf[0]);
-  message(buf,MSG_WAITKEY | MSG_NODELAY);
-  return EOF;
- }
- ch = ibuf[1];
- if (printcode)
- {
-  char buf [100];
-  sprintf(buf,"Keycode: 0x%x",ch);
-  printcode = 0; /* MUST BE DONE BEFORE THE CALL TO MESSAGE */
-  message(buf,MSG_WAITKEY | MSG_NODELAY);
-  return EOF;
- }
- if (routing)
- {
-  routing=0;
-  if (ch>=0xc0) 
-   return (ibuf[1]-0xc0) | BRLKEY_ROUTING;
-  return EOF;
- }
- if ((ch>=0xc0) && (ch<=0xdf)) 
-  return (ch-0xc0) | BRLKEY_FUNCTIONKEY;
- if (ch==0x91) 
- {
-  routing = 1;
-  goto readNextPacket;
- } 
- if ((ch>=0x20) && (ch<=0x9e))
- {
-  switch (ch)
-  {
-   case 0x80: ch = 0xc7; break;
-   case 0x81: ch = 0xfc; break;
-   case 0x82: ch = 0xe9; break;
-   case 0x83: ch = 0xe2; break;
-   case 0x84: ch = 0xe4; break;
-   case 0x85: ch = 0xe0; break;
-   case 0x87: ch = 0xe7; break;
-   case 0x88: ch = 0xea; break;
-   case 0x89: ch = 0xeb; break;
-   case 0x8a: ch = 0xe8; break; 
-   case 0x8b: ch = 0xef; break;
-   case 0x8c: ch = 0xee; break;
-   case 0x8f: ch = 0xc0; break;
-   case 0x93: ch = 0xf4; break;
-   case 0x94: ch = 0xf6; break;
-   case 0x96: ch = 0xfb; break; 
-   case 0x97: ch = 0xf9; break;
-   case 0x9e: ch = 0x60; break;
+  unsigned char ch, ibuf[MAXPKTLEN-1];
+  static int routing = 0;
+  ssize_t lgthi;
+  readNextPacket:
+  lgthi = brl_readPacket(brl,(unsigned char *) &ibuf,MAXPKTLEN-1);
+  if (lgthi==0) return EOF;
+  if (ibuf[0]=='%') {
+    ibuf[lgthi] = '\0';
+    insertString(&ibuf[1]);
+    return EOF;
+  }  
+  if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23)) {
+    char buf[100];
+    if (ibuf[0]==0x2b) return EOF;
+    sprintf(buf,"Unknown packet 0x%x",ibuf[0]);
+    message(buf,MSG_WAITKEY | MSG_NODELAY);
+    return EOF;
   }
-  return ch | BRLKEY_CHAR;
- }
- return ch | BRLKEY_OTHER;
+  ch = ibuf[1];
+  if (printcode) {
+    char buf [100];
+    sprintf(buf,"Keycode: 0x%x",ch);
+    printcode = 0; /* MUST BE DONE BEFORE THE CALL TO MESSAGE */
+    message(buf,MSG_WAITKEY | MSG_NODELAY);
+    return EOF;
+  }
+  if (routing) {
+    routing=0;
+    if (ch>=0xc0)  return (ibuf[1]-0xc0) | BRL_VSMSK_ROUTING;
+    return EOF;
+  }
+  if ((ch>=0xc0) && (ch<=0xdf)) return (ch-0xc0) | BRL_VSMSK_FUNCTIONKEY;
+  if (ch==0x91) {
+    routing = 1;
+    goto readNextPacket;
+  } 
+  if ((ch>=0x20) && (ch<=0x9e)) {
+    switch (ch) {
+      case 0x80: ch = 0xc7; break;
+      case 0x81: ch = 0xfc; break;
+      case 0x82: ch = 0xe9; break;
+      case 0x83: ch = 0xe2; break;
+      case 0x84: ch = 0xe4; break;
+      case 0x85: ch = 0xe0; break;
+      case 0x87: ch = 0xe7; break;
+      case 0x88: ch = 0xea; break;
+      case 0x89: ch = 0xeb; break;
+      case 0x8a: ch = 0xe8; break; 
+      case 0x8b: ch = 0xef; break;
+      case 0x8c: ch = 0xee; break;
+      case 0x8f: ch = 0xc0; break;
+      case 0x93: ch = 0xf4; break;
+      case 0x94: ch = 0xf6; break;
+      case 0x96: ch = 0xfb; break; 
+      case 0x97: ch = 0xf9; break;
+      case 0x9e: ch = 0x60; break;
+    }
+    return ch | BRL_VSMSK_CHAR;
+  }
+  return ch | BRL_VSMSK_OTHER;
 }
 
 /* Function : brl_readCommand */
 /* Reads a command from the braille keyboard */
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
- return brl_keyToCommand(brl,context,brl_readKey(brl));
+  return brl_keyToCommand(brl,context,brl_readKey(brl));
 }
