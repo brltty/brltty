@@ -32,13 +32,15 @@
 #include "Programs/message.h"
 
 #include <errno.h>
-#include <curses.h>
 #include <ctype.h>
 #include <locale.h>
 
+#include <stdarg.h>
+#include <curses.h>
+
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
-static iconv_t conv;
+static iconv_t conversionDescriptor;
 #endif /* HAVE_ICONV_H */
 
 typedef enum {
@@ -62,10 +64,9 @@ typedef enum {
 #include "Programs/serial.h"
 
 static int tty_fd=-1;
-#define MAXLINES 3
-#define MAXCOLS 80
-#define WHOLESIZE (MAXLINES * MAXCOLS)
-static int lines,cols;
+#define MAX_WINDOW_HEIGHT 3
+#define MAX_WINDOW_WIDTH 80
+#define MAX_WINDOW_SIZE (MAX_WINDOW_HEIGHT * MAX_WINDOW_WIDTH)
 static FILE *tty_ffd;
 static SCREEN *scr;
 static struct termios oldtio,newtio;
@@ -79,6 +80,7 @@ static void brl_identify()
 
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
+ int height,width;
  char *term="vt100";
 #ifdef HAVE_ICONV_H
  char *cset="ISO8859-1";
@@ -95,22 +97,22 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  if (*parameters[PARM_LOCALE])
   locale=parameters[PARM_LOCALE];
 
- lines=1;
+ height=1;
  if (*parameters[PARM_LINES]) {
   static const int minimum = 1;
-  static const int maximum = MAXLINES;
+  static const int maximum = MAX_WINDOW_HEIGHT;
   int value;
   if (validateInteger(&value, "lines", parameters[PARM_LINES], &minimum, &maximum))
-   lines=value;
+   height=value;
  }
 
- cols=40;
+ width=40;
  if (*parameters[PARM_COLS]) {
   static const int minimum = 1;
-  static const int maximum = MAXCOLS;
+  static const int maximum = MAX_WINDOW_WIDTH;
   int value;
   if (validateInteger(&value, "cols", parameters[PARM_COLS], &minimum, &maximum))
-   cols=value;
+   width=value;
  }
 
  if (!openSerialDevice(device, &tty_fd, &oldtio)) {
@@ -146,20 +148,20 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  fflush(tty_ffd);
 
 #ifdef HAVE_ICONV_H
- if ((conv=iconv_open(cset,"ISO8859-1"))==(iconv_t)-1) {
+ if ((conversionDescriptor=iconv_open(cset,"ISO8859-1"))==(iconv_t)-1) {
   LogPrint(LOG_ERR,"unable to open conversion");
   goto outcurses;
  }
 #endif /* HAVE_ICONV_H */
 
- brl->x=cols;
- brl->y=lines; 
+ brl->x=width;
+ brl->y=height; 
 
- LogPrint(LOG_INFO,"TTY: type=%s size=%dx%d",term,cols,lines);
+ LogPrint(LOG_INFO,"TTY: type=%s size=%dx%d",term,width,height);
  return 1;
 
 #ifdef HAVE_ICONV_H
- iconv_close(conv);
+ iconv_close(conversionDescriptor);
 outcurses:
 #endif /* HAVE_ICONV_H */
 
@@ -179,7 +181,7 @@ static void brl_close(BrailleDisplay *brl)
  if (tty_fd>=0)
  {
 #ifdef HAVE_ICONV_H
-  iconv_close(conv);
+  iconv_close(conversionDescriptor);
 #endif /* HAVE_ICONV_H */
 
   if (endwin()!=OK)
@@ -194,7 +196,7 @@ static void brl_close(BrailleDisplay *brl)
 
 static void brl_writeWindow(BrailleDisplay *brl)
 {
- static unsigned char prevdata[WHOLESIZE];
+ static unsigned char prevdata[MAX_WINDOW_SIZE];
  int i,j;
  char c,*pc,d,*pd;
  size_t sc,sd;
@@ -212,7 +214,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
    sc=1; sd=1;
    pc=&c; pd=&d;
 #ifdef HAVE_ICONV_H
-   if (iconv(conv,&pc,&sc,&pd,&sd)>=0)
+   if (iconv(conversionDescriptor,&pc,&sc,&pd,&sd)>=0)
     addch((unsigned char)d);
    else
 #endif /* HAVE_ICONV_H */
