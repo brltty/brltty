@@ -187,13 +187,13 @@ brlttyInstallRoot="${temporaryDirectory}/install"
    make -s -C Programs install-programs install-help install-tables
 ) || exit "${?}"
 
-set -- $(stat -c '%a %s' -f "${initrdRoot}")
-initrdAvailableBlocks="${1}"
-initrdBlockSize="${2}"
-set -- $(du -B "${initrdBlockSize}" -s "${brlttyInstallRoot}")
+set -- $(stat -f -- "${initrdRoot}" | grep '^ *Blocks:')
+initrdAvailableBlocks="${7}"
+initrdBlockSize="${9}"
+set -- $(du --block-size="${initrdBlockSize}" -s "${brlttyInstallRoot}")
 brlttyInstallBlocks="${1}"
-set -- $(stat -c '%s' "${initrdImage}")
-initrdImageBytes="${1}"
+set -- $(stat -- "${initrdImage}" | grep '^ *Size:')
+initrdImageBytes="${2}"
 initrdImageBlocks=$(( (initrdImageBytes + initrdBlockSize - 1) / initrdBlockSize ))
 initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
 (( (initrdPadBlocks += 100) > 0 )) && {
@@ -201,7 +201,7 @@ initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
    umount "${initrdRoot}"
 
    dd bs="${initrdBlockSize}" count="${initrdPadBlocks}" if="/dev/zero" of="${initrdImage}" seek="${initrdImageBlocks}"
-   e2fsck -f "${initrdImage}" && resize2fs "${initrdImage}" || {
+   e2fsck -y -f "${initrdImage}" && resize2fs "${initrdImage}" || {
       newImage="${temporaryDirectory}/new.ext2"
       cp -a -- "${initrdImage}" "${newImage}"
       mke2fs -q -b "${initrdBlockSize}" -F "${newImage}"
