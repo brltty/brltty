@@ -30,15 +30,21 @@
 #include "brldefs.h"
 #include "cmd.h"
 
+static brlapi_settings_t settings;
+
 BEGIN_OPTION_TABLE
   {'i', "identifier", NULL, NULL, 0,
    "Show the driver's identifier."},
+  {'k', "brlapi-key", "file", NULL, 0,
+   "Path to file containing BrlAPI's authentication key."},
   {'l', "learn", NULL, NULL, 0,
-   "Enter learn mode."},
+   "Enter interactive command learn mode."},
   {'n', "name", NULL, NULL, 0,
-   "Show the display's name."},
-  {'s', "size", NULL, NULL, 0,
-   "Show the display's size."},
+   "Show the driver's name."},
+  {'s', "brlapi-server", "[host][:port]", NULL, 0,
+   "Host name (or address) and port of the BrlAPI server."},
+  {'w', "window", NULL, NULL, 0,
+   "Show the braille window's size."},
 END_OPTION_TABLE
 
 static int opt_learnMode = 0;
@@ -54,6 +60,9 @@ handleOption (const int option) {
     case 'i':
       opt_showIdentifier = 1;
       break;
+    case 'k':
+      settings.authKey = optarg;
+      break;
     case 'l':
       opt_learnMode = 1;
       break;
@@ -61,6 +70,9 @@ handleOption (const int option) {
       opt_showName = 1;
       break;
     case 's':
+      settings.hostName = optarg;
+      break;
+    case 'w':
       opt_showSize = 1;
       break;
   }
@@ -127,13 +139,15 @@ int main(int argc, char *argv[])
 {
   int status = 0;
   int fd;
+  settings.hostName = NULL; settings.authKey = NULL;
 
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, "");
 
   fprintf(stderr, "Connecting to BrlAPI... ");
-  if ((fd=brlapi_initializeConnection(NULL, NULL)) >= 0) {
+  if ((fd=brlapi_initializeConnection(&settings, &settings)) >= 0) {
     fprintf(stderr, "done\n");
+    fprintf(stderr,"Connected to %s using key file %s\n", settings.hostName, settings.authKey);
 
     if (opt_showIdentifier) {
       showDriverIdentifier();
@@ -154,7 +168,8 @@ int main(int argc, char *argv[])
     brlapi_closeConnection();
     fprintf(stderr, "Disconnected\n"); 
   } else {
-    brlapi_perror("failed");
+    fprintf(stderr, "failed to connect to %s using key %s",settings.hostName, settings.authKey);
+    brlapi_perror("");
     status = 1;
   }
   return status;
