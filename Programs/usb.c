@@ -142,9 +142,9 @@ usbAddInputElement (
   if ((input = malloc(sizeof(*input)))) {
     memset(input, 0, sizeof(*input));
     if ((input->request = usbSubmitRequest(device, device->inputEndpoint,
-                                       USB_ENDPOINT_TRANSFER_BULK,
-                                       NULL, device->inputSize,
-                                       device->inputFlags, input))) {
+                                           USB_ENDPOINT_TRANSFER_BULK,
+                                           NULL, device->inputSize,
+                                           input))) {
       if (device->inputElements) {
         device->inputElements->previous = input;
         input->next = device->inputElements;
@@ -244,8 +244,20 @@ usbReapInput (
 void
 usbCloseDevice (UsbDevice *device) {
   if (device->inputRequest) free(device->inputRequest);
-  while (device->inputElements) usbDeleteInputElement(device, device->inputElements);
   close(device->file);
+
+  /* The URBs must be deallocated after the USBFS device file is closed
+   * because the kernel writes to them during the close. They can't be
+   * discarded before the close if the device has been disconnected
+   * because that operation, given that state, returns ENODEV.
+   */
+  while (device->inputElements) {
+    struct UsbInputElement *input = device->inputElements;
+    free(input->request);
+    input->request = NULL;
+    usbDeleteInputElement(device, input);
+  }
+
   free(device);
 }
 

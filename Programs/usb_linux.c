@@ -244,7 +244,6 @@ usbSubmitRequest (
   unsigned char transfer,
   void *buffer,
   int length,
-  unsigned int flags,
   void *data
 ) {
   struct usbdevfs_urb *urb;
@@ -267,11 +266,14 @@ usbSubmitRequest (
     }
     urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
     if (buffer) memcpy(urb->buffer, buffer, length);
-    urb->flags = flags;
+    urb->flags = 0;
     urb->signr = 0;
     urb->usercontext = data;
     if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
+
+    /* UHCI support returns ENXIO if a URB is already submitted. */
     if (errno != ENXIO) LogError("USB URB submit");
+
     free(urb);
   }
   return NULL;
@@ -283,6 +285,7 @@ usbCancelRequest (
   void *request
 ) {
   if (ioctl(device->file, USBDEVFS_DISCARDURB, request) == -1) {
+    /* EINVAL is returned if the URB is already complete. */
     if (errno != EINVAL) {
       LogError("USB URB discard");
       return 0;

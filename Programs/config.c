@@ -611,11 +611,11 @@ startBrailleDriver (void) {
             playTune(&tune_detected);
             return;
          } else {
-            LogPrint(LOG_WARNING, "Braille buffer allocation failed.");
+            LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
          }
          brailleDriver->close(&brl);
       } else {
-         LogPrint(LOG_WARNING, "Braille driver initialization failed.");
+         LogPrint(LOG_DEBUG, "Braille driver initialization failed.");
       }
 
       delay(5000);

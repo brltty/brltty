@@ -276,7 +276,6 @@ extern void *usbSubmitRequest (
   unsigned char transfer,
   void *buffer,
   int length,
-  unsigned int flags,
   void *context
 );
 extern int usbCancelRequest (

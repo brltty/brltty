@@ -503,7 +503,7 @@ openUsbPort (char **parameters, const char *device) {
     usbCloseDevice(usbDevice);
     usbDevice = NULL;
   } else {
-    LogPrint(LOG_WARNING, "USB device not found%s%s",
+    LogPrint(LOG_DEBUG, "USB device not found%s%s",
              (*device? ": ": "."),
              device);
   }
@@ -921,14 +921,8 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
   if (ProcessKey < 0) {
     /* An input error occurred (perhaps disconnect of USB device) */
-  restartDriver:
-    RoutingPos = 0;
-    CurrentKeys = LastKeys = ReleasedKeys = 0;
-    Typematic = 0;
-    return CMD_RESTARTBRL;
-  }
-
-  if (ProcessKey > 0) {
+    res = CMD_RESTARTBRL;
+  } else if (ProcessKey > 0) {
     if (Typematic) res = CMD_NOOP;
 
     if (CurrentKeys > LastKeys) {
@@ -1252,7 +1246,8 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                   res = CMD_LEARN;
                   break;
                 case KEY_BRL_F1 | KEY_BRL_F2:
-                  goto restartDriver;
+                  res = CMD_RESTARTBRL;
+                  break;
 
                 case KEY_SPK_F2:
                   res = CMD_SPKHOME;
@@ -1271,5 +1266,14 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     }
     Typematic = (res != EOF) && ((res & VAL_AUTOREPEAT) != 0);
   }
+
+  switch (res) {
+    case CMD_RESTARTBRL:
+      RoutingPos = 0;
+      CurrentKeys = LastKeys = ReleasedKeys = 0;
+      Typematic = 0;
+      break;
+  }
+
   return res;
 }
