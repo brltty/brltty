@@ -113,13 +113,12 @@
 #endif /* USE_ */
 
 typedef enum {
-  PARM_DISPLAY,
-  PARM_TERM,
+  PARM_XTPARMS,
   PARM_LINES,
   PARM_COLS,
   PARM_MODEL
 } DriverParameter;
-#define BRLPARMS "display", "term", "lines", "cols", "model"
+#define BRLPARMS "xtparms", "lines", "cols", "model"
 
 #include "Programs/brl_driver.h"
 #include "braille.h"
@@ -210,9 +209,9 @@ static void brl_identify()
 
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
- char *term;
  int argc = 1;
- char *argv[4] = { "brltty", NULL };
+ static char *defargv[]= { "brltty", NULL };
+ char **argv = defargv;
  char *disp;
  int y;
 
@@ -226,8 +225,6 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  }
 
  cols=40;
- lines=1;
-
  if (*parameters[PARM_COLS]) {
   static const int minimum = 1;
   static const int maximum = MAXCOLS;
@@ -239,9 +236,12 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  brl->x=cols;
  brl->y=lines;
 
- if (*parameters[PARM_DISPLAY]) {
-  argv[argc++]="-display";
-  argv[argc++]=parameters[PARM_DISPLAY];
+ if (*parameters[PARM_XTPARMS]) {
+  argv = splitString(parameters[PARM_XTPARMS],' ',&argc);
+  argv = (char **) reallocWrapper(argv, (argc+2) * sizeof(char *));
+  memmove(argv+1,argv,(argc+1) * sizeof(char *));
+  argv[0] = strdupWrapper(defargv[0]);
+  argc++;
  }
 
  if (*parameters[PARM_MODEL])
@@ -256,6 +256,9 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
    sessionShellWidgetClass,
    XtNallowShellResize, True,
    NULL);
+
+ if (argv != defargv)
+  deallocateStrings(argv);
 
  /* vertical separation */
  vbox = XtVaCreateManagedWidget("vbox",panedWidgetClass,toplevel,
@@ -309,9 +312,6 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 
  /* go go go */
  XtRealizeWidget(toplevel);
-
- if (*parameters[PARM_TERM])
-  term=parameters[PARM_TERM];
 
  return 1;
 }

@@ -3,12 +3,18 @@ real braille device, its cost excepted :)
 
 It is mostly intended for sighted developers who don't have access to a real
 device, but still want to have an idea of the result.
+It is most useful for writing BrlAPI applications.
 
-For now, it is most useful for writing BrlAPI applications.
-First launch brltty as root, but with X access:
-# export DISPLAY=:0.0
-# brltty -b xw -t identity
+Assuming you're under X, first launch brltty:
+$ brltty -b xw -t identity
+
+(note: to be able to run brltty as non-root user, give the
+--without-screen-driver option to ./configure before compiling)
 
 Then you can launch a BrlAPI application:
-$ export CONTROLVT=7                 # if X is running on VT 7
 $ ~/brltty/Programs/apitest
+
+You may give serveral parameters to the driver:
+$ brltty -b xw -t identity -B xtparms="-geometry -0+0",lines=2,cols=20,model=bare
+will set a 20x2 braille display appear in the upper right corner of the
+display, without any navigation key.
