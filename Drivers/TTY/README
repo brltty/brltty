@@ -9,7 +9,7 @@ ssh from machB to machA, and give the current tty as device to brltty:
 samy@machB$ ssh machA
 samy@machA$ su -
 Password:
-root@machA# brltty -b ty -t identity -d `tty` -B term=$TERM -n
+root@machA# brltty -b tt -t identity -d `tty` -B term=$TERM -n
 
 By using an Xterm
 -----------------
@@ -18,14 +18,14 @@ Just give the tty used by the xterm to brltty.
 
 $ su -
 Password:
-# brltty -b ty -t identity -d `tty` -B term=$TERM -n
+# brltty -b tt -t identity -d `tty` -B term=$TERM -n
 
 By using a real tty
 -------------------
 
 Just give the serial port on which it is connected to brltty:
 
-# brltty -b ty -t identity -d /dev/ttyS0 -B term=ampex232,cset=IBM850,locale=fr_FR.IBM850
+# brltty -b tt -t identity -d /dev/ttyS0 -B term=ampex232,cset=IBM850,locale=fr_FR.IBM850
 
 I here had to precise the type of terminal (I have an Ampex232, see somewhere
 like /usr/share/terminfo for your own's.

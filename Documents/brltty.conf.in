@@ -45,7 +45,7 @@
 #braille-driver	mn	# MiniBraille
 #braille-driver	pm	# Papenmeier
 #braille-driver	ts	# TSI
-#braille-driver	ty	# Tty
+#braille-driver	tt	# TTY
 #braille-driver	va	# Vario/RBT (emulation 1)
 #braille-driver	vd	# VideoBraille
 #braille-driver	vh	# Vario/RBT (emulation 2)
@@ -132,12 +132,12 @@
 #braille-parameters pm:DebugReads=no # [no,yes]
 #braille-parameters pm:DebugWrites=no # [no,yes]
 
-# Tty Braille Driver Parameters
-#braille-parameters ty:Cols=40 #  [1-80]
-#braille-parameters ty:CSet=ISO8859-1 # 
-#braille-parameters ty:Lines=1 #  [1-3]
-#braille-parameters ty:Locale= # 
-#braille-parameters ty:Term=vt100 # [terminfo]
+# TTY Braille Driver Parameters
+#braille-parameters tt:Cols=40 #  [1-80]
+#braille-parameters tt:CSet=ISO8859-1 # 
+#braille-parameters tt:Lines=1 #  [1-3]
+#braille-parameters tt:Locale= # 
+#braille-parameters tt:Term=vt100 # [terminfo]
 
 # VisioBraille Braille Driver Parameters
 #braille-parameters vs:DisplaySize=40 # [20-40]

@@ -14,7 +14,7 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION "BRLTTY driver for Tty, version 0.1, 2004"
+#define VERSION "BRLTTY driver for TTY, version 0.1, 2004"
 #define COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #ifdef HAVE_CONFIG_H
@@ -104,7 +104,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  }
 
  if (!openSerialDevice(device, &tty_fd, &oldtio)) {
-  LogPrint(LOG_ERR, "Tty open error: %s", strerror(errno));
+  LogPrint(LOG_ERR, "TTY open error: %s", strerror(errno));
   return 0;
  }
  memset(&newtio, 0, sizeof(newtio)); 
@@ -143,7 +143,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  brl->x=cols;
  brl->y=lines; 
 
- LogPrint(LOG_INFO,"Tty: type=%s size=%dx%d",term,cols,lines);
+ LogPrint(LOG_INFO,"TTY: type=%s size=%dx%d",term,cols,lines);
  return 1;
 
  iconv_close(conv);

@@ -19,13 +19,13 @@ include $(BLD_TOP)config.mk
 
 ###############################################################################
 #
-# Makefile for BRLTTY Tty driver
+# Makefile for BRLTTY TTY driver
 # All variables are defined in the main Makefile...
 #
 ###############################################################################
 
 DRIVER_CODE = ty
-DRIVER_NAME = Tty
+DRIVER_NAME = TTY
 BRAILLE_MODELS = terminfo
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = -lcurses
