@@ -203,6 +203,9 @@ sys_qnx.$O:
 sys_hurd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_hurd.c
 
+sys_darwin.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_darwin.c
+
 ###############################################################################
 
 usb.$O:

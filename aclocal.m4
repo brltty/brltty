@@ -550,6 +550,7 @@ AC_DEFUN([BRLTTY_PACKAGE_NAME], [patsubst([$1], [^ *\(\w+\).*], [\1])])
 
 AC_DEFUN([BRLTTY_OPTIONS_LD2CC], [dnl
 `echo "$1" | sed -e '
+/^$/d
 s/^ */-Wl /
 s/ *$//
 s/  */,/g

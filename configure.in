@@ -223,15 +223,19 @@ in
       brltty_ld_flag_shared="-shared"
       brltty_ld_flag_soname="-expect_unresolved '*' -soname"
       ;;
+   darwin*)
+      brltty_ld_flag_shared="-bundle -flat_namespace -undefined suppress"
+      brltty_gcc_flag_shared="-bundle -flat_namespace -undefined suppress"
+      ;;
    *)
       AC_MSG_ERROR([linkage editor shared object flags not configured for ${host_os}])
       ;;
 esac
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_mklib="\$(CC) -shared BRLTTY_OPTIONS_LD2CC([${brltty_ld_flag_soname} <soname>]) -o"
+   brltty_cv_prog_mklib="\$(CC) ${brltty_gcc_flag_shared=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_ld_flag_soname+${brltty_ld_flag_soname} <soname>}]) -o"
 else
-   brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname} <soname> -o"
+   brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname+${brltty_ld_flag_soname} <soname>} -o"
 fi])
 AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 
@@ -428,6 +432,9 @@ then
       cygwin*|mingw*)
          brltty_cv_prog_cc_libflags=""
          ;;
+      darwin*)
+         brltty_cv_prog_cc_libflags=""
+         ;;
       *)
          brltty_cv_prog_cc_libflags="-fPIC"
          ;;
@@ -463,6 +470,9 @@ case "${host_os}"
 in
    hpux*)
       brltty_cv_ext_lib="sl"
+      ;;
+   darwin*)
+      brltty_cv_ext_lib="bundle"
       ;;
    *)
       brltty_cv_ext_lib="so"
@@ -544,6 +554,9 @@ in
       ;;
    mingw*)
       system_object="windows"
+      ;;
+   darwin*)
+      system_object="darwin"
       ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
@@ -662,6 +675,9 @@ in
       ;;
    osf*)
       brltty_cv_prog_ld_flags="-rpath ${execute_root}${library_directory}"
+      ;;
+   darwin*)
+      brltty_cv_prog_ld_flags=""
       ;;
    *)
       AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])

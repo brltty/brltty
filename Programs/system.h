@@ -27,7 +27,7 @@ extern char *getProgramPath (void);
 extern char *getBootParameters (const char *name);
 
 extern void *loadSharedObject (const char *path);
-extern void unloadSharedObject (const void *object);
+extern void unloadSharedObject (void *object);
 extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);
 
 extern int canBeep (void);

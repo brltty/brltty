@@ -15,18 +15,30 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning shared object support not available on this platform
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 
-void *
-loadSharedObject (const char *path) {
-  return NULL;
-}
+#include <stdlib.h>
+#include <unistd.h>
 
-void 
-unloadSharedObject (void *object) {
-}
+#include "misc.h"
+#include "system.h"
 
-int 
-findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
-  return 0;
-}
+#include "sys_prog_none.h"
+
+#include "sys_boot_none.h"
+
+#include "sys_shlib_dyld.h"
+
+#include "sys_beep_none.h"
+
+#ifdef ENABLE_PCM_SUPPORT
+#include "sys_pcm_none.h"
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+#include "sys_midi_none.h"
+#endif /* ENABLE_MIDI_SUPPORT */
+
+#include "sys_ports_none.h"
