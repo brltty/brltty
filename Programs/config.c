@@ -1902,7 +1902,11 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (opt_version) exit(0);
-  if ((brailleDriver == &noBraille) && (speechDriver == &noSpeech)) exit(0);
+  if (brailleDriver == &noBraille)
+#ifdef ENABLE_SPEECH_SUPPORT
+    if (speechDriver == &noSpeech)
+#endif /* ENABLE_SPEECH_SUPPORT */
+      exit(0);
 
   /* Load preferences file */
   if (!loadPreferences(0)) {
