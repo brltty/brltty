@@ -41,33 +41,29 @@
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static BrailleDisplay brl;
 
+static char *opt_brailleDevice = NULL;
+static char *opt_libraryDirectory = LIBRARY_DIRECTORY;
+static char *opt_dataDirectory = DATA_DIRECTORY;
+
 BEGIN_OPTION_TABLE
-  {'d', "device", "device", NULL, 0,
+  {'d', "device", "device", 0,
+   &opt_brailleDevice, BRAILLE_DEVICE, NULL, -1,
    "Path to device for accessing braille display."},
-  {'D', "data-directory", "directory", NULL, 0,
+
+  {'D', "data-directory", "directory", 0,
+   &opt_dataDirectory, DATA_DIRECTORY, NULL, -1,
    "Path to directory for driver help and configuration files."},
-  {'L', "library-directory", "directory", NULL, 0,
+
+  {'L', "library-directory", "directory", 0,
+   &opt_libraryDirectory, LIBRARY_DIRECTORY, NULL, -1,
    "Path to directory for loading drivers."},
 END_OPTION_TABLE
-
-static const char *opt_brailleDevice = NULL;
-static const char *opt_libraryDirectory = LIBRARY_DIRECTORY;
-static const char *opt_dataDirectory = DATA_DIRECTORY;
 
 static int
 handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-    case 'd':
-      opt_brailleDevice = optarg;
-      break;
-    case 'D':
-      opt_dataDirectory = optarg;
-      break;
-    case 'L':
-      opt_libraryDirectory = optarg;
-      break;
   }
   return 1;
 }
@@ -108,7 +104,9 @@ main (int argc, char *argv[]) {
   int internal;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "[driver [parameter=value ...]]");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "[driver [parameter=value ...]]");
 
   if (argc) {
     driver = *argv++;

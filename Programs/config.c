@@ -72,17 +72,17 @@ static short opt_quiet = 0;
 static short opt_noDaemon = 0;
 static short opt_standardError = 0;
 static short opt_logLevel = LOG_NOTICE;
-static short opt_environmentVariables = 0;
+static int opt_environmentVariables = 0;
 
-static const char *opt_configurationFile = NULL;
-static const char *opt_pidFile = NULL;
-static const char *opt_dataDirectory = NULL;
-static const char *opt_libraryDirectory = NULL;
+static char *opt_configurationFile = NULL;
+static char *opt_pidFile = NULL;
+static char *opt_dataDirectory = NULL;
+static char *opt_libraryDirectory = NULL;
 
-static const char *opt_brailleDevice = NULL;
+static char *opt_brailleDevice = NULL;
 static char **brailleDevices;
 
-static const char *opt_brailleDriver = NULL;
+static char *opt_brailleDriver = NULL;
 static char **brailleDrivers;
 static const BrailleDriver *brailleDriver = NULL;
 static int brailleInternal;
@@ -90,13 +90,13 @@ static char *opt_brailleParameters = NULL;
 static char **brailleParameters = NULL;
 static char *preferencesFile = NULL;
 
-static const char *opt_tablesDirectory = NULL;
-static const char *opt_textTable = NULL;
-static const char *opt_attributesTable = NULL;
+static char *opt_tablesDirectory = NULL;
+static char *opt_textTable = NULL;
+static char *opt_attributesTable = NULL;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-static const char *opt_contractionsDirectory = NULL;
-static const char *opt_contractionTable = NULL;
+static char *opt_contractionsDirectory = NULL;
+static char *opt_contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_API
@@ -106,13 +106,13 @@ static int apiOpened;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static const char *opt_speechDriver = NULL;
+static char *opt_speechDriver = NULL;
 static char **speechDrivers = NULL;
 static const SpeechDriver *speechDriver = NULL;
 static int speechInternal;
 static char *opt_speechParameters = NULL;
 static char **speechParameters = NULL;
-static const char *opt_speechFifo = NULL;
+static char *opt_speechFifo = NULL;
 static short opt_noSpeech = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -120,312 +120,148 @@ static char *opt_screenParameters = NULL;
 static char **screenParameters = NULL;
 
 #ifdef ENABLE_PCM_SUPPORT
-const char *opt_pcmDevice = NULL;
+char *opt_pcmDevice = NULL;
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
-const char *opt_midiDevice = NULL;
-#endif /* ENABLE_MIDI_SUPPORT */
-
-static ConfigurationLineStatus
-getConfigurationOperand (char **operandAddress, const char *delimiters, int extend) {
-  char *operand = strtok(NULL, delimiters);
-
-  if (!operand) return CFG_NoValue;
-  if (strtok(NULL, delimiters)) return CFG_TooMany;
-
-  {
-    ConfigurationLineStatus status = CFG_OK;
-    if (*operandAddress && !extend) {
-      status = CFG_Duplicate;
-      free(*operandAddress);
-      *operandAddress = NULL;
-    }
-    if (*operandAddress) {
-      int size = strlen(*operandAddress) + strlen(operand) + 2;
-      char *buffer = mallocWrapper(size);
-      snprintf(buffer, size, "%s,%s", *operandAddress, operand);
-      free(*operandAddress);
-      *operandAddress = buffer;
-    } else {
-      *operandAddress = strdupWrapper(operand);
-    }
-    return status;
-  }
-}
-
-static char *cfg_tablesDirectory = NULL;
-static ConfigurationLineStatus
-configureTablesDirectory (const char *delimiters) {
-  return getConfigurationOperand(&cfg_tablesDirectory, delimiters, 0);
-}
-
-static char *cfg_textTable = NULL;
-static ConfigurationLineStatus
-configureTextTable (const char *delimiters) {
-  return getConfigurationOperand(&cfg_textTable, delimiters, 0);
-}
-
-static char *cfg_attributesTable = NULL;
-static ConfigurationLineStatus
-configureAttributesTable (const char *delimiters) {
-  return getConfigurationOperand(&cfg_attributesTable, delimiters, 0);
-}
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-static char *cfg_contractionsDirectory = NULL;
-static ConfigurationLineStatus
-configureContractionsDirectory (const char *delimiters) {
-  return getConfigurationOperand(&cfg_contractionsDirectory, delimiters, 0);
-}
-
-static char *cfg_contractionTable = NULL;
-static ConfigurationLineStatus
-configureContractionTable (const char *delimiters) {
-  return getConfigurationOperand(&cfg_contractionTable, delimiters, 0);
-}
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
-#ifdef ENABLE_API
-static char *cfg_apiParameters = NULL;
-static ConfigurationLineStatus
-configureApiParameters (const char *delimiters) {
-  return getConfigurationOperand(&cfg_apiParameters, delimiters, 1);
-}
-#endif /* ENABLE_API */
-
-static char *cfg_libraryDirectory = NULL;
-static ConfigurationLineStatus
-configureLibraryDirectory (const char *delimiters) {
-  return getConfigurationOperand(&cfg_libraryDirectory, delimiters, 0);
-}
-
-static char *cfg_dataDirectory = NULL;
-static ConfigurationLineStatus
-configureDataDirectory (const char *delimiters) {
-  return getConfigurationOperand(&cfg_dataDirectory, delimiters, 0);
-}
-
-static char *cfg_brailleDriver = NULL;
-static ConfigurationLineStatus
-configureBrailleDriver (const char *delimiters) {
-  return getConfigurationOperand(&cfg_brailleDriver, delimiters, 0);
-}
-
-static char *cfg_brailleDevice = NULL;
-static ConfigurationLineStatus
-configureBrailleDevice (const char *delimiters) {
-  return getConfigurationOperand(&cfg_brailleDevice, delimiters, 0);
-}
-
-static char *cfg_brailleParameters = NULL;
-static ConfigurationLineStatus
-configureBrailleParameters (const char *delimiters) {
-  return getConfigurationOperand(&cfg_brailleParameters, delimiters, 1);
-}
-
-#ifdef ENABLE_SPEECH_SUPPORT
-static char *cfg_speechDriver = NULL;
-static ConfigurationLineStatus
-configureSpeechDriver (const char *delimiters) {
-  return getConfigurationOperand(&cfg_speechDriver, delimiters, 0);
-}
-
-static char *cfg_speechParameters = NULL;
-static ConfigurationLineStatus
-configureSpeechParameters (const char *delimiters) {
-  return getConfigurationOperand(&cfg_speechParameters, delimiters, 1);
-}
-
-static char *cfg_speechFifo = NULL;
-static ConfigurationLineStatus
-configureSpeechFifo (const char *delimiters) {
-  return getConfigurationOperand(&cfg_speechFifo, delimiters, 0);
-}
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-static char *cfg_screenParameters = NULL;
-static ConfigurationLineStatus
-configureScreenParameters (const char *delimiters) {
-  return getConfigurationOperand(&cfg_screenParameters, delimiters, 1);
-}
-
-#ifdef ENABLE_PCM_SUPPORT
-static char *cfg_pcmDevice = NULL;
-static ConfigurationLineStatus
-configurePcmDevice (const char *delimiters) {
-  return getConfigurationOperand(&cfg_pcmDevice, delimiters, 0);
-}
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-static char *cfg_midiDevice = NULL;
-static ConfigurationLineStatus
-configureMidiDevice (const char *delimiters) {
-  return getConfigurationOperand(&cfg_midiDevice, delimiters, 0);
-}
+char *opt_midiDevice = NULL;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE
-  {'a', "attributes-table", "file", configureAttributesTable, 0,
+  {'a', "attributes-table", "file", OPT_Config,
+   &opt_attributesTable, NULL, "BRLTTY_ATTRIBUTES_TABLE", -1,
    "Path to attributes translation table file."},
-  {'b', "braille-driver", "driver", configureBrailleDriver, 0,
+
+  {'b', "braille-driver", "driver", OPT_Config,
+   &opt_brailleDriver, NULL, "BRLTTY_BRAILLE_DRIVER", 0,
    "Braille driver: one of {" BRAILLE_DRIVER_CODES "}"},
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {'c', "contraction-table", "file", configureContractionTable, 0,
+  {'c', "contraction-table", "file", OPT_Config,
+   &opt_contractionTable, NULL, "BRLTTY_CONTRACTION_TABLE", -1,
    "Path to contraction table file."},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  {'d', "braille-device", "device", configureBrailleDevice, 0,
+
+  {'d', "braille-device", "device", OPT_Config,
+   &opt_brailleDevice, BRAILLE_DEVICE, "BRLTTY_BRAILLE_DEVICE", 1,
    "Path to device for accessing braille display."},
-  {'e', "standard-error", NULL, NULL, 0,
+
+  {'e', "standard-error", NULL, 0,
+   NULL, NULL, NULL, -1,
    "Log to standard error rather than to syslog."},
-  {'f', "configuration-file", "file", NULL, 0,
+
+  {'f', "configuration-file", "file", 0,
+   &opt_configurationFile, CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE, "BRLTTY_CONFIGURATION_FILE", -1,
    "Path to default parameters file."},
-  {'l', "log-level", "level", NULL, 0,
+
+  {'l', "log-level", "level", 0,
+   NULL, NULL, NULL, -1,
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
+
 #ifdef ENABLE_MIDI_SUPPORT
-  {'m', "midi-device", "device", configureMidiDevice, 0,
+  {'m', "midi-device", "device", OPT_Config,
+   &opt_midiDevice, NULL, "BRLTTY_MIDI_DEVICE", -1,
    "Device specifier for the Musical Instrument Digital Interface."},
 #endif /* ENABLE_MIDI_SUPPORT */
-  {'n', "no-daemon", NULL, NULL, 0,
+
+  {'n', "no-daemon", NULL, 0,
+   NULL, NULL, NULL, -1,
    "Remain a foreground process."},
+
 #ifdef ENABLE_PCM_SUPPORT
-  {'p', "pcm-device", "device", configurePcmDevice, 0,
+  {'p', "pcm-device", "device", OPT_Config,
+   &opt_pcmDevice, NULL, "BRLTTY_PCM_DEVICE", -1,
    "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
-  {'q', "quiet", NULL, NULL, 0,
+
+  {'q', "quiet", NULL, 0,
+   NULL, NULL, NULL, -1,
    "Suppress start-up messages."},
+
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'s', "speech-driver", "driver", configureSpeechDriver, 0,
+  {'s', "speech-driver", "driver", OPT_Config,
+   &opt_speechDriver, NULL, "BRLTTY_SPEECH_DRIVER", -1,
    "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
 #endif /* ENABLE_SPEECH_SUPPORT */
-  {'t', "text-table", "file", configureTextTable, 0,
+
+  {'t', "text-table", "file", OPT_Config,
+   &opt_textTable, NULL, "BRLTTY_TEXT_TABLE", 2,
    "Path to text translation table file."},
-  {'v', "verify", NULL, NULL, 0,
+
+  {'v', "verify", NULL, 0,
+   NULL, NULL, NULL, -1,
    "Print start-up messages and exit."},
+
 #ifdef ENABLE_API
-  {'A', "api-parameters", "arg,...", configureApiParameters, 0,
+  {'A', "api-parameters", "arg,...", OPT_Extend | OPT_Config,
+   &opt_apiParameters, API_PARAMETERS, "BRLTTY_API_PARAMETERS", -1,
    "Parameters for the application programming interface."},
 #endif /* ENABLE_API */
-  {'B', "braille-parameters", "arg,...", configureBrailleParameters, 0,
+
+  {'B', "braille-parameters", "arg,...", OPT_Extend | OPT_Config,
+   &opt_brailleParameters, BRAILLE_PARAMETERS, "BRLTTY_BRAILLE_PARAMETERS", -1,
    "Parameters for the braille driver."},
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {'C', "contractions-directory", "directory", configureContractionsDirectory, OPT_Hidden,
+  {'C', "contractions-directory", "directory", OPT_Hidden | OPT_Config,
+   &opt_contractionsDirectory, DATA_DIRECTORY, "BRLTTY_CONTRACTIONS_DIRECTORY", -1,
    "Path to directory for contractions tables."},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  {'D', "data-directory", "directory", configureDataDirectory, OPT_Hidden,
+
+  {'D', "data-directory", "directory", OPT_Hidden | OPT_Config,
+   &opt_dataDirectory, DATA_DIRECTORY, "BRLTTY_DATA_DIRECTORY", -1,
    "Path to directory for driver help and configuration files."},
-  {'E', "environment-variables", NULL, NULL, 0,
+
+  {'E', "environment-variables", NULL, 0,
+   NULL, NULL, NULL, -1,
    "Recognize environment variables."},
+
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'F', "speech-fifo", "file", configureSpeechFifo, 0,
+  {'F', "speech-fifo", "file", OPT_Config,
+   &opt_speechFifo, NULL, "BRLTTY_SPEECH_FIFO", -1,
    "Path to speech pass-through FIFO."},
 #endif /* ENABLE_SPEECH_SUPPORT */
-  {'L', "library-directory", "directory", configureLibraryDirectory, OPT_Hidden,
+
+  {'L', "library-directory", "directory", OPT_Hidden | OPT_Config,
+   &opt_libraryDirectory, LIBRARY_DIRECTORY, "BRLTTY_LIBRARY_DIRECTORY", -1,
    "Path to directory for loading drivers."},
-  {'M', "message-delay", "csecs", NULL, 0,
+
+  {'M', "message-delay", "csecs", 0,
+   NULL, NULL, NULL, -1,
    "Message hold time [400]."},
+
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'N', "no-speech", NULL, NULL, 0,
+  {'N', "no-speech", NULL, 0,
+   NULL, NULL, NULL, -1,
    "Defer speech until restarted by command."},
 #endif /* ENABLE_SPEECH_SUPPORT */
-  {'P', "pid-file", "file", NULL, 0,
+
+  {'P', "pid-file", "file", 0,
+   &opt_pidFile, NULL, NULL, -1,
    "Path to process identifier file."},
+
 #ifdef ENABLE_SPEECH_SUPPORT
-  {'S', "speech-parameters", "arg,...", configureSpeechParameters, 0,
+  {'S', "speech-parameters", "arg,...", OPT_Extend | OPT_Config,
+   &opt_speechParameters, SPEECH_PARAMETERS, "BRLTTY_SPEECH_PARAMETERS", -1,
    "Parameters for the speech driver."},
 #endif /* ENABLE_SPEECH_SUPPORT */
-  {'T', "tables-directory", "directory", configureTablesDirectory, OPT_Hidden,
+
+  {'T', "tables-directory", "directory", OPT_Hidden | OPT_Config,
+   &opt_tablesDirectory, DATA_DIRECTORY, "BRLTTY_TABLES_DIRECTORY", -1,
    "Path to directory for text and attributes tables."},
-  {'U', "update-interval", "csecs", NULL, 0,
+
+  {'U', "update-interval", "csecs", 0,
+   NULL, NULL, NULL, -1,
    "Braille window update interval [4]."},
-  {'V', "version", NULL, NULL, 0,
+
+  {'V', "version", NULL, 0,
+   NULL, NULL, NULL, -1,
    "Print the versions of the core, API, and built-in drivers, and then exit."},
-  {'X', "screen-parameters", "arg,...", configureScreenParameters, 0,
+
+  {'X', "screen-parameters", "arg,...", OPT_Extend | OPT_Config,
+   &opt_screenParameters, SCREEN_PARAMETERS, "BRLTTY_SCREEN_PARAMETERS", -1,
    "Parameters for the screen driver."},
 END_OPTION_TABLE
-
-static const char **bootParameters = NULL;
-static int bootParameterCount = 0;
-static char *
-nextBootParameter (char **parameters) {
-  const char delimiter = ',';
-  char *parameter = *parameters;
-  char *next;
-  if (!*parameter) return NULL;
-  if ((next = strchr(parameter, delimiter))) {
-    *next = 0;
-    parameter = strdupWrapper(parameter);
-    *next = delimiter;
-    *parameters = next + 1;
-  } else {
-    parameter = strdupWrapper(parameter);
-    *parameters += strlen(parameter);
-  }
-  return parameter;
-}
-
-static void
-prepareBootParameters (void) {
-  char *string;
-  int allocated = 0;
-  if ((string = getBootParameters())) {
-    allocated = 1;
-  } else if (!(string = getenv("brltty"))) {
-    return;
-  }
-
-  {
-    int count = 0;
-    char *parameters = string;
-    char *parameter;
-    while ((parameter = nextBootParameter(&parameters))) {
-      ++count;
-      if (*parameter) bootParameterCount = count;
-      free(parameter);
-    }
-  }
-
-  if (bootParameterCount) {
-    int count = 0;
-    char *parameters = string;
-    char *parameter;
-    bootParameters = mallocWrapper(bootParameterCount * sizeof(*bootParameters));
-    while ((parameter = nextBootParameter(&parameters))) {
-      if (*parameter) {
-        bootParameters[count] = parameter;
-      } else {
-        bootParameters[count] = NULL;
-        free(parameter);
-      }
-      if (++count == bootParameterCount) break;
-    }
-  }
-
-  if (allocated) free(string);
-}
-
-static void
-ensureOptionSetting (const char **setting, const char *defaultSetting, const char *configuredSetting, const char *environmentVariable, int bootParameter) {
-  if (!*setting) {
-    if ((bootParameter >= 0) && (bootParameter < bootParameterCount)) *setting = bootParameters[bootParameter];
-    if (!*setting) {
-      if (opt_environmentVariables && environmentVariable) *setting = getenv(environmentVariable);
-      if (!*setting) *setting = configuredSetting? configuredSetting: defaultSetting;
-    }
-  }
-}
-
-static void
-extendParameters (char **parameters, char *operand) {
-  if (*parameters) {
-    size_t length = strlen(*parameters);
-    *parameters = reallocWrapper(*parameters, length+1+strlen(operand)+1);
-    sprintf((*parameters)+length, ",%s", operand);
-  } else {
-    *parameters = strdupWrapper(operand);
-  }
-}
 
 static void
 parseParameters (
@@ -509,10 +345,7 @@ processParameters (
   const char *const *names,
   const char *description,
   const char *qualifier,
-  const char *optionParameters,
-  const char *configuredParameters,
-  const char *environmentVariable,
-  const char *defaultParameters
+  const char *parameters
 ) {
   char **values;
 
@@ -529,12 +362,7 @@ processParameters (
     while (count--) values[count] = strdupWrapper("");
   }
 
-  parseParameters(values, names, description, qualifier, defaultParameters);
-  parseParameters(values, names, description, qualifier, configuredParameters);
-  if (opt_environmentVariables && environmentVariable) {
-    parseParameters(values, names, description, qualifier, getenv(environmentVariable));
-  }
-  parseParameters(values, names, description, qualifier, optionParameters);
+  parseParameters(values, names, description, qualifier, parameters);
   return values;
 }
 
@@ -581,7 +409,7 @@ replaceAttributesTable (const char *file) {
 }
 
 static void
-fixFilePath (const char **path, const char *extension, const char *prefix) {
+fixFilePath (char **path, const char *extension, const char *prefix) {
   const unsigned int prefixLength = strlen(prefix);
   const unsigned int pathLength = strlen(*path);
   const unsigned int extensionLength = strlen(extension);
@@ -615,7 +443,7 @@ fixFilePath (const char **path, const char *extension, const char *prefix) {
 }
 
 static void
-fixTranslationTablePath (const char **path, const char *prefix) {
+fixTranslationTablePath (char **path, const char *prefix) {
   fixFilePath(path, TRANSLATION_TABLE_EXTENSION, prefix);
 }
 
@@ -871,9 +699,9 @@ openBrailleDriver (int verify) {
       LogPrint(LOG_DEBUG, "Checking for '%s' braille display.", *identifier);
       if ((driver = loadBrailleDriver(*identifier, &internal, opt_libraryDirectory))) {
         char **parameters = processParameters(driver->parameters,
-                                              "braille driver", driver->identifier,
-                                              opt_brailleParameters, cfg_brailleParameters,
-                                              "BRLTTY_BRAILLE_PARAMETERS", BRAILLE_PARAMETERS);
+                                              "braille driver",
+                                              driver->identifier,
+                                              opt_brailleParameters);
         if (parameters) {
           int opened = verify;
 
@@ -1074,9 +902,9 @@ openSpeechDriver (int verify) {
     LogPrint(LOG_DEBUG, "Checking for '%s' speech synthesizer.", *identifier);
     if ((driver = loadSpeechDriver(*identifier, &internal, opt_libraryDirectory))) {
       char **parameters = processParameters(driver->parameters,
-                                            "speech driver", driver->identifier,
-                                            opt_speechParameters, cfg_speechParameters,
-                                            "BRLTTY_SPEECH_PARAMETERS", SPEECH_PARAMETERS);
+                                            "speech driver",
+                                            driver->identifier,
+                                            opt_speechParameters);
       if (parameters) {
         int opened = verify;
 
@@ -1885,18 +1713,23 @@ handleOption (const int option) {
     case 'V':	/* --version */
       opt_version = 1;
       break;
+
     case 'v':	/* --verify */
       opt_verify = 1;
       break;
+
     case 'q':	/* --quiet */
       opt_quiet = 1;
       break;
+
     case 'n':	/* --no-daemon */
       opt_noDaemon = 1;
       break;
+
     case 'e':	/* --standard-error */
       opt_standardError = 1;
       break;
+
     case 'l': {	/* --log-level */
       if (*optarg) {
         static char *valueTable[] = {
@@ -1931,92 +1764,15 @@ handleOption (const int option) {
       LogPrint(LOG_ERR, "Invalid log level: %s", optarg);
       break;
     }
+
     case 'E':	/* --environment-variables */
       opt_environmentVariables = 1;
       break;
 
-    case 'f':	/* --configuration-file */
-      opt_configurationFile = optarg;
-      break;
-    case 'P':	/* --pid-file */
-      opt_pidFile = optarg;
-      break;
-    case 'D':	/* --data-directory */
-      opt_dataDirectory = optarg;
-      break;
-    case 'L':	/* --library-directory */
-      opt_libraryDirectory = optarg;
-      break;
-
-    case 'b':	/* --braille-driver */
-      opt_brailleDriver = optarg;
-      break;
-    case 'B':	/* --braille-parameters */
-      extendParameters(&opt_brailleParameters, optarg);
-      break;
-    case 'd':	/* --braille-device */
-      opt_brailleDevice = optarg;
-      break;
-
-    case 'T':	/* --tables-directory */
-      opt_tablesDirectory = optarg;
-      break;
-    case 't':	/* --text-table */
-      opt_textTable = optarg;
-      break;
-    case 'a':	/* --attributes-table */
-      opt_attributesTable = optarg;
-      break;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-    case 'C':	/* --contractions-directory */
-      opt_contractionsDirectory = optarg;
-      break;
-    case 'c':	/* --contractgion-table */
-      opt_contractionTable = optarg;
-      break;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
-#ifdef ENABLE_API
-    case 'A':	/* --api-parameters */
-      extendParameters(&opt_apiParameters, optarg);
-      break;
-#endif /* ENABLE_API */
-
-#ifdef ENABLE_SPEECH_SUPPORT
-    case 's':	/* --speech-driver */
-      opt_speechDriver = optarg;
-      break;
-    case 'S':	/* --speech-parameters */
-      extendParameters(&opt_speechParameters, optarg);
-      break;
-    case 'F':	/* --speech-fifo */
-      opt_speechFifo = optarg;
-      break;
-    case 'N':	/* --no-speech */
-      opt_noSpeech = 1;
-      break;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-    case 'X':	/* --screen-parameters */
-      extendParameters(&opt_screenParameters, optarg);
-      break;
-
-#ifdef ENABLE_PCM_SUPPORT
-    case 'p':	/* --pcm-device */
-      opt_pcmDevice = optarg;
-      break;
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-    case 'm':	/* --midi-device */
-      opt_midiDevice = optarg;
-      break;
-#endif /* ENABLE_MIDI_SUPPORT */
-
     case 'U':	/* --update-interval */
       validateInterval(&updateInterval, "update interval", optarg);
       break;
+
     case 'M':	/* --message-delay */
       validateInterval(&messageDelay, "message delay", optarg);
       break;
@@ -2027,11 +1783,10 @@ handleOption (const int option) {
 void
 startup (int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, NULL);
+                 &argc, &argv,
+                 "brltty", &opt_environmentVariables, &opt_configurationFile,
+                 NULL);
   if (argc) LogPrint(LOG_ERR, "Excess parameter: %s", argv[0]);
-
-  prepareBootParameters();
-  initializeAllScreens();
 
   /* Set logging levels. */
   if (opt_standardError) LogClose();
@@ -2094,36 +1849,6 @@ startup (int argc, char *argv[]) {
                opt_pidFile, strerror(errno));
     }
   }
-
-  /* Process the configuration file. */
-  {
-    int optional = opt_configurationFile == NULL;
-    ensureOptionSetting(&opt_configurationFile,
-                        CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
-                        NULL, "BRLTTY_CONFIGURATION_FILE", -1);
-    processConfigurationFile(optionTable, optionCount, opt_configurationFile, optional);
-  }
-  ensureOptionSetting(&opt_dataDirectory, DATA_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
-  ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
-  ensureOptionSetting(&opt_tablesDirectory, DATA_DIRECTORY, cfg_tablesDirectory, "BRLTTY_TABLES_DIRECTORY", -1);
-  ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE", 2);
-  ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE", -1);
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  ensureOptionSetting(&opt_contractionsDirectory, DATA_DIRECTORY, cfg_contractionsDirectory, "BRLTTY_CONTRACTIONS_DIRECTORY", -1);
-  ensureOptionSetting(&opt_contractionTable, NULL, cfg_contractionTable, "BRLTTY_CONTRACTION_TABLE", -1);
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-  ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER", 0);
-  ensureOptionSetting(&opt_brailleDevice, BRAILLE_DEVICE, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
-#ifdef ENABLE_SPEECH_SUPPORT
-  ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER", -1);
-  ensureOptionSetting(&opt_speechFifo, NULL, cfg_speechFifo, "BRLTTY_SPEECH_FIFO", -1);
-#endif /* ENABLE_SPEECH_SUPPORT */
-#ifdef ENABLE_PCM_SUPPORT
-  ensureOptionSetting(&opt_pcmDevice, NULL, cfg_pcmDevice, "BRLTTY_PCM_DEVICE", -1);
-#endif /* ENABLE_PCM_SUPPORT */
-#ifdef ENABLE_MIDI_SUPPORT
-  ensureOptionSetting(&opt_midiDevice, NULL, cfg_midiDevice, "BRLTTY_MIDI_DEVICE", -1);
-#endif /* ENABLE_MIDI_SUPPORT */
 
   {
     const char *directories[] = {DATA_DIRECTORY, "/etc", "/", NULL};
@@ -2205,10 +1930,11 @@ startup (int argc, char *argv[]) {
   }
 
   /* initialize screen driver */
+  initializeAllScreens();
   screenParameters = processParameters(getScreenParameters(),
-                                       "screen driver", NULL,
-                                       opt_screenParameters, cfg_screenParameters,
-                                       "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
+                                       "screen driver",
+                                       NULL,
+                                       opt_screenParameters);
   logParameters(getScreenParameters(), screenParameters, "Screen");
   if (!opt_verify) {
     if (!openLiveScreen(screenParameters)) {                                
@@ -2264,9 +1990,9 @@ startup (int argc, char *argv[]) {
   /* Activate the application programming interface. */
   api_identify();
   apiParameters = processParameters(api_parameters,
-                                    "application programming interface", NULL,
-                                    opt_apiParameters, cfg_apiParameters,
-                                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
+                                    "application programming interface",
+                                    NULL,
+                                    opt_apiParameters);
   logParameters(api_parameters, apiParameters, "API");
   if (!opt_verify) {
     if ((apiOpened = api_open(&brl, apiParameters))) {

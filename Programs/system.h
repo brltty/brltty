@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern char *getBootParameters (void);
+extern char *getBootParameters (const char *name);
 
 extern void *loadSharedObject (const char *path);
 extern void unloadSharedObject (const void *object);

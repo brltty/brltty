@@ -18,6 +18,6 @@
 #warning boot parameter retrieval not available on this platform
 
 char *
-getBootParameters (void) {
+getBootParameters (const char *name) {
   return NULL;
 }

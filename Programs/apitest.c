@@ -32,46 +32,55 @@
 
 static brlapi_settings_t settings;
 
-BEGIN_OPTION_TABLE
-  {'i', "identifier", NULL, NULL, 0,
-   "Show the driver's identifier."},
-  {'k', "brlapi-key", "file", NULL, 0,
-   "Path to file containing BrlAPI's authentication key."},
-  {'l', "learn", NULL, NULL, 0,
-   "Enter interactive command learn mode."},
-  {'n', "name", NULL, NULL, 0,
-   "Show the driver's name."},
-  {'s', "brlapi-server", "[host][:port]", NULL, 0,
-   "Host name (or address) and port of the BrlAPI server."},
-  {'w', "window", NULL, NULL, 0,
-   "Show the braille window's size."},
-END_OPTION_TABLE
-
 static int opt_learnMode = 0;
 static int opt_showIdentifier = 0;
 static int opt_showName = 0;
 static int opt_showSize = 0;
+
+BEGIN_OPTION_TABLE
+  {'i', "identifier", NULL, 0,
+   NULL, NULL, NULL, -1,
+   "Show the driver's identifier."},
+
+  {'k', "brlapi-key", "file", 0,
+   &settings.authKey, NULL, NULL, -1,
+   "Path to file containing BrlAPI's authentication key."},
+
+  {'l', "learn", NULL, 0,
+   NULL, NULL, NULL, -1,
+   "Enter interactive command learn mode."},
+
+  {'n', "name", NULL, 0,
+   NULL, NULL, NULL, -1,
+   "Show the driver's name."},
+
+  {'s', "brlapi-server", "[host][:port]", 0,
+   &settings.hostName, NULL, NULL, -1,
+   "Host name (or address) and port of the BrlAPI server."},
+
+  {'w', "window", NULL, 0,
+   NULL, NULL, NULL, -1,
+   "Show the braille window's size."},
+END_OPTION_TABLE
 
 static int
 handleOption (const int option) {
   switch (option) {
     default:
       return 0;
+
     case 'i':
       opt_showIdentifier = 1;
       break;
-    case 'k':
-      settings.authKey = optarg;
-      break;
+
     case 'l':
       opt_learnMode = 1;
       break;
+
     case 'n':
       opt_showName = 1;
       break;
-    case 's':
-      settings.hostName = optarg;
-      break;
+
     case 'w':
       opt_showSize = 1;
       break;
@@ -142,7 +151,9 @@ int main(int argc, char *argv[])
   settings.hostName = NULL; settings.authKey = NULL;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "");
 
   fprintf(stderr, "Connecting to BrlAPI... ");
   if ((fd=brlapi_initializeConnection(&settings, &settings)) >= 0) {

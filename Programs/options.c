@@ -26,8 +26,9 @@
 #include <strings.h>
 #include <errno.h>
 
-#include "misc.h"
 #include "options.h"
+#include "misc.h"
+#include "system.h"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -35,6 +36,201 @@
 
 const char *programPath;
 const char *programName;
+
+static void
+extendSetting (char **setting, const char *operand, int prepend) {
+  if (operand && *operand) {
+    if (!*setting) {
+      *setting = strdupWrapper(operand);
+    } else if (prepend) {
+      char *area = mallocWrapper(strlen(operand) + 1 + strlen(*setting) + 1);
+      sprintf(area, "%s,%s", operand, *setting);
+      free(*setting);
+      *setting = area;
+    } else {
+      size_t length = strlen(*setting);
+      *setting = reallocWrapper(*setting, length+1+strlen(operand)+1);
+      sprintf((*setting)+length, ",%s", operand);
+    }
+  }
+}
+
+static void
+ensureSetting (const OptionEntry *option, const char *operand) {
+  if (operand) {
+    if (option->flags & OPT_Extend) {
+      extendSetting(option->setting, operand, 1);
+    } else if (!*option->setting) {
+      *option->setting = strdupWrapper(operand);
+    }
+  }
+}
+
+static void
+processBootParameters (
+  const OptionEntry *optionTable,
+  unsigned int optionCount,
+  const char *parameterName
+) {
+  char *parameterString;
+  int allocated = 0;
+
+  if ((parameterString = getBootParameters(parameterName))) {
+    allocated = 1;
+  } else if ((parameterString = getenv(parameterName))) {
+    allocated = 0;
+  } else {
+    return;
+  }
+
+  {
+    int count = 0;
+    char **parameters = splitString(parameterString, ',', &count);
+    int optionIndex;
+
+    for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
+      const OptionEntry *option = &optionTable[optionIndex];
+      if ((option->bootParameter >= 0) && (option->bootParameter < count)) {
+        char *parameter = parameters[option->bootParameter];
+        if (*parameter) ensureSetting(option, parameter);
+      }
+    }
+
+    deallocateStrings(parameters);
+  }
+
+  if (allocated) free(parameterString);
+}
+
+static void
+processEnvironmentVariables (
+  const OptionEntry *optionTable,
+  unsigned int optionCount
+) {
+  int optionIndex;
+  for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
+    const OptionEntry *option = &optionTable[optionIndex];
+    if (option->environmentVariable) {
+      ensureSetting(option, getenv(option->environmentVariable));
+    }
+  }
+}
+
+static void
+setDefaultOptions (
+  const OptionEntry *optionTable,
+  unsigned int optionCount,
+  int config
+) {
+  int optionIndex;
+  for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
+    const OptionEntry *option = &optionTable[optionIndex];
+    if (!(option->flags & OPT_Config) != !config) continue;
+    ensureSetting(option, option->defaultSetting);
+  }
+}
+
+typedef struct {
+  unsigned int count;
+  const OptionEntry *options;
+  char **settings;
+} ConfigurationFileProcessingData;
+
+static int
+processConfigurationLine (
+  char *line,
+  void *data
+) {
+  const ConfigurationFileProcessingData *conf = data;
+  static const char *delimiters = " \t"; /* Characters which separate words. */
+  char *directive; /* Points to first word of each line. */
+
+  /* Remove comment from end of line. */
+  {
+    char *comment = strchr(line, '#');
+    if (comment) *comment = 0;
+  }
+
+  if ((directive = strtok(line, delimiters))) {
+    int optionIndex;
+    for (optionIndex=0; optionIndex<conf->count; ++optionIndex) {
+      const OptionEntry *option = &conf->options[optionIndex];
+      if (option->flags & OPT_Config) {
+        if (strcasecmp(directive, option->word) == 0) {
+          const char *operand = strtok(NULL, delimiters);
+
+          if (!operand) {
+            LogPrint(LOG_ERR, "Operand not supplied for configuration directive: %s", line);
+          } else if (strtok(NULL, delimiters)) {
+            while (strtok(NULL, delimiters));
+            LogPrint(LOG_ERR, "Too many operands for configuration directive: %s", line);
+          } else {
+            char **setting = &conf->settings[optionIndex];
+
+            if (*setting && !(option->flags & OPT_Extend)) {
+              LogPrint(LOG_ERR, "Configuration directive specified more than once: %s", line);
+              free(*setting);
+              *setting = NULL;
+            }
+
+            if (*setting) {
+              extendSetting(setting, operand, 0);
+            } else {
+              *setting = strdupWrapper(operand);
+            }
+          }
+
+          return 1;
+        }
+      }
+    }
+    LogPrint(LOG_ERR, "Unknown configuration directive: %s", line);
+  }
+  return 1;
+}
+
+static int
+processConfigurationFile (
+  const OptionEntry *optionTable,
+  unsigned int optionCount,
+  const char *path,
+  int optional
+) {
+  FILE *file = fopen(path, "r");
+  if (file != NULL) { /* The configuration file has been successfully opened. */
+    int processed;
+
+    {
+      ConfigurationFileProcessingData conf;
+      int index;
+
+      conf.count = optionCount;
+      conf.options = optionTable;
+      conf.settings = mallocWrapper(optionCount * sizeof(*conf.settings));
+      for (index=0; index<optionCount; ++index) conf.settings[index] = NULL;
+
+      processed = processLines(file, processConfigurationLine, &conf);
+
+      for (index=0; index<optionCount; ++index) {
+        char *setting = conf.settings[index];
+        ensureSetting(&optionTable[index], setting);
+        free(setting);
+      }
+      free(conf.settings);
+    }
+
+    fclose(file);
+    if (processed) return 1;
+    LogPrint(LOG_ERR, "File '%s' processing error.", path);
+  } else {
+    int ok = optional && (errno == ENOENT);
+    LogPrint((ok? LOG_DEBUG: LOG_ERR),
+             "Cannot open configuration file: %s: %s",
+             path, strerror(errno));
+    if (ok) return 1;
+  }
+  return 0;
+}
 
 static void
 printHelp (
@@ -138,37 +334,45 @@ processOptions (
   OptionHandler handleOption,
   int *argc,
   char ***argv,
+  const char *bootParameter,
+  int *environmentVariables,
+  char **configurationFile,
   const char *argumentsSummary
 ) {
   short opt_help = 0;
   short opt_helpAll = 0;
   char shortOptions[1 + (optionCount * 2) + 1];
+  const OptionEntry *optionEntries[0X100];
+  int index;
 
 #ifdef HAVE_GETOPT_LONG
   struct option longOptions[optionCount + 1];
   {
     struct option *opt = longOptions;
-    int index;
     for (index=0; index<optionCount; ++index) {
-      const OptionEntry *option = &optionTable[index];
-      opt->name = option->word;
-      opt->has_arg = option->argument? required_argument: no_argument;
+      const OptionEntry *entry = &optionTable[index];
+      opt->name = entry->word;
+      opt->has_arg = entry->argument? required_argument: no_argument;
       opt->flag = NULL;
-      opt->val = option->letter;
+      opt->val = entry->letter;
       ++opt;
     }
     memset(opt, 0, sizeof(*opt));
   }
 #endif /* HAVE_GETOPT_LONG */
 
+  for (index=0; index<0X100; ++index) optionEntries[index] = NULL;
+
   {
     char *opt = shortOptions;
-    int index;
     *opt++ = '+';
     for (index=0; index<optionCount; ++index) {
-      const OptionEntry *option = &optionTable[index];
-      *opt++ = option->letter;
-      if (option->argument) *opt++ = ':';
+      const OptionEntry *entry = &optionTable[index];
+      *opt++ = entry->letter;
+      if (entry->argument) *opt++ = ':';
+
+      if (entry->setting) *entry->setting = NULL;
+      optionEntries[entry->letter] = entry;
     }
     *opt = 0;
   }
@@ -181,6 +385,7 @@ processOptions (
   opterr = 0;
   while (1) {
     int option;
+
 #ifdef HAVE_GETOPT_LONG
     option = getopt_long(*argc, *argv, shortOptions, longOptions, NULL);
 #else /* HAVE_GETOPT_LONG */
@@ -193,15 +398,29 @@ processOptions (
      */
     switch (option) {
       default:
-        if (!handleOption(option))
-          LogPrint(LOG_ERR, "Unimplemented option: -%c", option);
+        {
+          const OptionEntry *entry = optionEntries[option];
+          if (!entry->setting) {
+            /* We can't process it directly, let's defer to handleOption() */
+            if (!handleOption(option)) {
+              LogPrint(LOG_ERR, "Unhandled option: -%c", option);
+            }
+          } else if (entry->flags & OPT_Extend) {
+            extendSetting(entry->setting, optarg, 0);
+          } else {
+            *entry->setting = optarg;
+          }
+        }
         break;
+
       case '?':
         LogPrint(LOG_ERR, "Unknown option: -%c", optopt);
         return 0;
+
       case ':': /* An invalid option has been specified. */
         LogPrint(LOG_ERR, "Missing operand: -%c", optopt);
         return 0;
+
       case 'H':                /* help */
         opt_helpAll = 1;
       case 'h':                /* help */
@@ -209,6 +428,7 @@ processOptions (
         break;
     }
   }
+  *argv += optind, *argc -= optind;
 
   if (opt_help) {
     printHelp(optionTable, optionCount,
@@ -217,110 +437,22 @@ processOptions (
     exit(0);
   }
 
-  *argv += optind; *argc -= optind;
+  if (bootParameter) {
+    processBootParameters(optionTable, optionCount, bootParameter);
+  }
+
+  if (environmentVariables && *environmentVariables) {
+    processEnvironmentVariables(optionTable, optionCount);
+  }
+
+  setDefaultOptions(optionTable, optionCount, 0);
+  if (configurationFile) {
+    int optional = !*configurationFile;
+    processConfigurationFile(optionTable, optionCount, *configurationFile, optional);
+  }
+  setDefaultOptions(optionTable, optionCount, 1);
+
   return 1;
-}
-
-typedef struct {
-  const OptionEntry *optionTable;
-  unsigned int optionCount;
-} ConfigurationFileProcessingData;
-
-static int
-processConfigurationLine (
-  char *line,
-  void *data
-) {
-  const ConfigurationFileProcessingData *conf = data;
-  static const char *delimiters = " \t"; /* Characters which separate words. */
-  char *keyword; /* Points to first word of each line. */
-
-  /* Remove comment from end of line. */
-  {
-    char *comment = strchr(line, '#');
-    if (comment) *comment = 0;
-  }
-
-  if ((keyword = strtok(line, delimiters))) {
-    int optionIndex;
-    for (optionIndex=0; optionIndex<conf->optionCount; ++optionIndex) {
-      const OptionEntry *option = &conf->optionTable[optionIndex];
-      if (option->configure) {
-        if (strcasecmp(keyword, option->word) == 0) {
-          ConfigurationLineStatus status = option->configure(delimiters);
-          switch (status) {
-            case CFG_OK:
-              return 1;
-
-            case CFG_NoValue:
-              LogPrint(LOG_ERR,
-                       "Operand not supplied for configuration item '%s'.",
-                       keyword);
-              break;
-
-            case CFG_BadValue:
-              LogPrint(LOG_ERR,
-                       "Invalid operand specified"
-                       " for configuration item '%s'.",
-                        keyword);
-              break;
-
-            case CFG_TooMany:
-              LogPrint(LOG_ERR,
-                       "Too many operands supplied"
-                       " for configuration item '%s'.",
-                       keyword);
-              break;
-
-            case CFG_Duplicate:
-              LogPrint(LOG_ERR,
-                       "Configuration item '%s' specified more than once.",
-                       keyword);
-              break;
-
-            default:
-              LogPrint(LOG_ERR,
-                       "Internal error: unsupported configuration line status: %d",
-                       status);
-              break;
-          }
-          return 1;
-        }
-      }
-    }
-    LogPrint(LOG_ERR, "Unknown configuration item: '%s'.", keyword);
-    return 1;
-  }
-  return 1;
-}
-
-int
-processConfigurationFile (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
-  const char *path,
-  int optional
-) {
-  FILE *file = fopen(path, "r");
-  if (file != NULL) { /* The configuration file has been successfully opened. */
-    int processed;
-    {
-      ConfigurationFileProcessingData conf;
-      conf.optionTable = optionTable;
-      conf.optionCount = optionCount;
-      processed = processLines(file, processConfigurationLine, &conf);
-    }
-    fclose(file);
-    if (processed) return 1;
-    LogPrint(LOG_ERR, "File '%s' processing error.", path);
-  } else {
-    int ok = optional && (errno == ENOENT);
-    LogPrint((ok? LOG_DEBUG: LOG_ERR),
-             "Cannot open configuration file: %s: %s",
-             path, strerror(errno));
-    if (ok) return 1;
-  }
-  return 0;
 }
 
 short

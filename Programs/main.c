@@ -382,6 +382,7 @@ exitLog (void) {
    * be a "stopped" message to match the "starting" message.
    */
   LogOpen(0);
+  setPrintOff();
   LogPrint(LOG_INFO, "Terminated.");
   LogClose();
 }

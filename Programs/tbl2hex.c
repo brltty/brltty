@@ -55,7 +55,9 @@ main (int argc, char *argv[]) {
   TranslationTable table;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "translation-table");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "translation-table");
 
   if (argc == 0) {
     fprintf(stderr, "%s: missing translation table.\n", programName);

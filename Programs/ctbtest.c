@@ -34,12 +34,13 @@
 #include "ctb.h"
 #include "tbl.h"
 
+static char *opt_textTable = NULL;
+
 BEGIN_OPTION_TABLE
-  {'t', "text-table", "file", NULL, 0,
+  {'t', "text-table", "file", 0,
+   &opt_textTable, TEXT_TABLE, NULL, -1,
    "Text translation table."},
 END_OPTION_TABLE
-
-static const char *opt_textTable = TEXT_TABLE;
 
 TranslationTable textTable;
 TranslationTable untextTable;
@@ -50,9 +51,6 @@ handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-    case 't':
-      opt_textTable = optarg;
-      break;
   }
   return 1;
 }
@@ -99,7 +97,9 @@ main (int argc, char *argv[]) {
   char *contractionTablePath;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "contraction-table");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "contraction-table");
 
   if (argc == 0) {
     fprintf(stderr, "%s: missing contraction table.\n", programName);

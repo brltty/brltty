@@ -33,33 +33,29 @@
 #include "spk.h"
 #include "misc.h"
 
+static char *opt_textString = NULL;
+static char *opt_libraryDirectory = LIBRARY_DIRECTORY;
+static char *opt_dataDirectory = DATA_DIRECTORY;
+
 BEGIN_OPTION_TABLE
-  {'t', "text-string"   , "string"   , NULL, 0,
+  {'t', "text-string", "string", 0,
+   &opt_textString, NULL, NULL, -1,
    "Text to be spoken."},
-  {'D', "data-directory", "directory", NULL, 0,
+
+  {'D', "data-directory", "directory", 0,
+   &opt_dataDirectory, DATA_DIRECTORY, NULL, -1,
    "Path to directory for configuration files."},
-  {'L', "library-directory", "directory", NULL, 0,
+
+  {'L', "library-directory", "directory", 0,
+   &opt_libraryDirectory, LIBRARY_DIRECTORY, NULL, -1,
    "Path to directory for loading drivers."},
 END_OPTION_TABLE
-
-static const char *opt_textString = NULL;
-static const char *opt_libraryDirectory = LIBRARY_DIRECTORY;
-static const char *opt_dataDirectory = DATA_DIRECTORY;
 
 static int
 handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-    case 't':
-      opt_textString = optarg;
-      break;
-    case 'D':
-      opt_dataDirectory = optarg;
-      break;
-    case 'L':
-      opt_libraryDirectory = optarg;
-      break;
   }
   return 1;
 }
@@ -77,7 +73,9 @@ main (int argc, char *argv[]) {
   int internal;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "[driver [parameter=value ...]]");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "[driver [parameter=value ...]]");
 
   if (argc) {
     driver = *argv++;

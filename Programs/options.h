@@ -22,32 +22,35 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {
-  CFG_OK,              /* No error. */
-  CFG_NoValue,         /* Operand not specified. */
-  CFG_BadValue,        /* Bad operand specified. */
-  CFG_TooMany,         /* Too many operands. */
-  CFG_Duplicate        /* Directive specified more than once. */
-} ConfigurationLineStatus;
-
-#define OPT_Hidden 0X1
+#define OPT_Hidden	0X1
+#define OPT_Extend	0X2
+#define OPT_Config	0X4
 
 typedef struct {
-   char letter;
-   const char *word;
-   const char *argument;
-   ConfigurationLineStatus (*configure) (const char *delimiters); 
-   int flags;
-   const char *description;
+  unsigned char letter;
+  const char *word;
+  const char *argument;
+  int flags;
+
+  char **setting;
+  const char *defaultSetting;
+  const char *environmentVariable;
+  int bootParameter;
+
+  const char *description;
 } OptionEntry;
 
 #define BEGIN_OPTION_TABLE static const OptionEntry optionTable[] = {
 #define END_OPTION_TABLE \
-  {'h', "help", NULL, NULL, 0, \
+  {'h', "help", NULL, 0, \
+   NULL, NULL, NULL, -1, \
    "Print this usage summary and exit."}, \
-  {'H', "full-help", NULL, NULL, OPT_Hidden, \
+\
+  {'H', "full-help", NULL, OPT_Hidden, \
+   NULL, NULL, NULL, -1, \
    "Print this full usage summary and exit."} \
-}; static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
+}; \
+static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
 
 typedef int (*OptionHandler) (const int option);
 extern int processOptions (
@@ -56,14 +59,10 @@ extern int processOptions (
   OptionHandler handleOption,
   int *argc,
   char ***argv,
+  const char *bootParameter,
+  int *environmentVariables,
+  char **configurationFile,
   const char *argumentsSummary
-);
-
-extern int processConfigurationFile (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
-  const char *path,
-  int optional
 );
 
 extern const char *programPath;

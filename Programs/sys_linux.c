@@ -36,7 +36,8 @@
 #include "system.h"
 
 char *
-getBootParameters (void) {
+getBootParameters (const char *name) {
+  size_t nameLength = strlen(name);
   const char *path = "/proc/cmdline";
   FILE *file = fopen(path, "r");
   if (file) {
@@ -44,14 +45,13 @@ getBootParameters (void) {
     char buffer[0X1000];
     char *line = fgets(buffer, sizeof(buffer), file);
     if (line) {
-      const char *prefix = "brltty=";
-      const unsigned int prefixLength = strlen(prefix);
       char *token;
       while ((token = strtok(line, " \n"))) {
         line = NULL;
-        if (memcmp(token, prefix, prefixLength) == 0) {
+        if ((strncmp(token, name, nameLength) == 0) &&
+            (token[nameLength] == '=')) {
           free(parameters);
-          parameters = strdupWrapper(token + prefixLength);
+          parameters = strdupWrapper(token + nameLength + 1);
         }
       }
     }

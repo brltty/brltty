@@ -33,39 +33,34 @@
 #include "options.h"
 #include "scr.h"
 
+static char *opt_boxLeft = NULL;
+static char *opt_boxWidth = NULL;
+static char *opt_boxTop = NULL;
+static char *opt_boxHeight = NULL;
+
 BEGIN_OPTION_TABLE
-  {'l', "left", "column", NULL, 0,
+  {'l', "left", "column", 0,
+   &opt_boxLeft, NULL, NULL, -1,
    "Left edge of region (from 0)."},
-  {'c', "columns", "count", NULL, 0,
+
+  {'c', "columns", "count", 0,
+   &opt_boxWidth, NULL, NULL, -1,
    "Width of region."},
-  {'t', "top", "row", NULL, 0,
+
+  {'t', "top", "row", 0,
+   &opt_boxTop, NULL, NULL, -1,
    "Top edge of region (from 0)."},
-  {'r', "rows", "count", NULL, 0,
+
+  {'r', "rows", "count", 0,
+   &opt_boxHeight, NULL, NULL, -1,
    "Height of region."},
 END_OPTION_TABLE
-
-const char *opt_boxLeft = NULL;
-const char *opt_boxWidth = NULL;
-const char *opt_boxTop = NULL;
-const char *opt_boxHeight = NULL;
 
 static int
 handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-    case 'c':
-      opt_boxWidth = optarg;
-      break;
-    case 'l':
-      opt_boxLeft = optarg;
-      break;
-    case 'r':
-      opt_boxHeight = optarg;
-      break;
-    case 't':
-      opt_boxTop = optarg;
-      break;
   }
   return 1;
 }
@@ -98,7 +93,9 @@ main (int argc, char *argv[]) {
   char **parameterSettings;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "[parameter=value ...]");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "[parameter=value ...]");
 
   initializeAllScreens();
   if (!(parameterNames = getScreenParameters())) {

@@ -98,8 +98,8 @@ typedef struct {
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
 
-extern const char *opt_pcmDevice;
-extern const char *opt_midiDevice;
+extern char *opt_pcmDevice;
+extern char *opt_midiDevice;
 
 extern unsigned char cursorDots (void);
 

@@ -46,7 +46,9 @@ main (int argc, char *argv[]) {
   int status = 2;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "output-file input-file ...");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "output-file input-file ...");
 
   if (argc > 0) {
     const char *outputPath = *argv++; argc--;

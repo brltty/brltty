@@ -39,38 +39,47 @@
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 Preferences prefs;
 
-BEGIN_OPTION_TABLE
-  {'d', "device", "device", NULL, 0,
-   "Name of tune device."},
-#ifdef ENABLE_MIDI_SUPPORT
-  {'i', "instrument", "instrument", NULL, 0,
-   "Name of MIDI instrument."},
-#endif /* ENABLE_MIDI_SUPPORT */
-#ifdef ENABLE_MIDI_SUPPORT
-  {'m', "midi-device", "device", NULL, 0,
-   "Device specifier for the Musical Instrument Digital Interface."},
-#endif /* ENABLE_MIDI_SUPPORT */
-#ifdef ENABLE_PCM_SUPPORT
-  {'p', "pcm-device", "device", NULL, 0,
-   "Device specifier for soundcard digital audio."},
-#endif /* ENABLE_PCM_SUPPORT */
-  {'v', "level", "volume", NULL, 0,
-   "Output volume."},
-END_OPTION_TABLE
-
-static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
-
 static unsigned int opt_tuneDevice;
 static short opt_outputVolume = 50;
 
 #ifdef ENABLE_PCM_SUPPORT
-const char *opt_pcmDevice = NULL;
+char *opt_pcmDevice = NULL;
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
-const char *opt_midiDevice = NULL;
+char *opt_midiDevice = NULL;
 static unsigned char opt_midiInstrument = 0;
 #endif /* ENABLE_MIDI_SUPPORT */
+
+BEGIN_OPTION_TABLE
+  {'d', "device", "device", 0,
+   NULL, NULL, NULL, -1,
+   "Name of tune device."},
+
+#ifdef ENABLE_MIDI_SUPPORT
+  {'i', "instrument", "instrument", 0,
+   NULL, NULL, NULL, -1,
+   "Name of MIDI instrument."},
+#endif /* ENABLE_MIDI_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+  {'m', "midi-device", "device", 0,
+   &opt_midiDevice, NULL, NULL, -1,
+   "Device specifier for the Musical Instrument Digital Interface."},
+#endif /* ENABLE_MIDI_SUPPORT */
+
+#ifdef ENABLE_PCM_SUPPORT
+  {'p', "pcm-device", "device", 0,
+   &opt_pcmDevice, NULL, NULL, -1,
+   "Device specifier for soundcard digital audio."},
+#endif /* ENABLE_PCM_SUPPORT */
+
+  {'v', "level", "volume", 0,
+   NULL, NULL, NULL, -1,
+   "Output volume."},
+END_OPTION_TABLE
+
+static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
 #ifdef ENABLE_MIDI_SUPPORT
 static unsigned char
@@ -114,23 +123,16 @@ handleOption (const int option) {
   switch (option) {
     default:
       return 0;
+
     case 'd':
       opt_tuneDevice = wordArgument(optarg, deviceNames, "device");
       break;
+
     case 'v':
       opt_outputVolume = integerArgument(optarg, 0, 100, "level");
       break;
 
-#ifdef ENABLE_PCM_SUPPORT
-    case 'p':	/* --pcm-device */
-      opt_pcmDevice = optarg;
-      break;
-#endif /* ENABLE_PCM_SUPPORT */
-
 #ifdef ENABLE_MIDI_SUPPORT
-    case 'm':	/* --midi-device */
-      opt_midiDevice = optarg;
-      break;
     case 'i':
       opt_midiInstrument = instrumentArgument(optarg);
       break;
@@ -143,7 +145,9 @@ int
 main (int argc, char *argv[]) {
   opt_tuneDevice = getDefaultTuneDevice();
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "{note duration} ...");
+                 &argc, &argv,
+                 NULL, NULL, NULL,
+                 "{note duration} ...");
   if (!argc) {
     fprintf(stderr, "%s: Missing tune.\n", programName);
   } else if (argc % 2) {
