@@ -715,7 +715,7 @@ static int GetABTKey (unsigned int *Keys, unsigned int *Pos)
 }
 
 
-static int readbrl (int type)
+static int readbrl (DriverCommandContext cmds)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;

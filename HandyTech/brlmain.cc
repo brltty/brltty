@@ -397,7 +397,7 @@ int GetHandyKey (unsigned int *Pos)
 }
 
 
-int readbrl (int type)
+int readbrl (DriverCommandContext cmds)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;

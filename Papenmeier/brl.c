@@ -535,7 +535,7 @@ handle_key(int code, int ispressed)
       return EOF;                   \
 
 static int 
-readbrl (int xx)
+readbrl (DriverCommandContext cmds)
 {
   unsigned char buf [20];
   int i, l, code, num, action;

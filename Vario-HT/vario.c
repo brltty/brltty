@@ -88,7 +88,7 @@ setbrlstat (const unsigned char *st)
 }
 
 static int 
-readbrl (int type)
+readbrl (DriverCommandContext cmds)
 {
 	static int shift_button_down=0;
 	int	decoded=EOF;

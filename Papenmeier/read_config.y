@@ -341,7 +341,7 @@ static struct help_v hlptxt[]= {
 
 /* --------------------------------------------------------------- */
 
-static int yylex ()
+int yylex ()
 {
   int c;
   static char symbuf[40] = { 0 };

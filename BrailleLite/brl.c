@@ -348,7 +348,7 @@ writebrl (brldim * brl)
 
 
 static int
-readbrl (int type)
+readbrl (DriverCommandContext cmds)
 {
   static int kbemu = 0;		/* keyboard emulation flag */
   static int state = 0;		/* 0 = normal - transparent

@@ -34,7 +34,11 @@
 #include "../misc.h"
 #include "brlconf.h"
 #include "../brl_driver.h"
-#include "tables.h"		/* for keybindings */
+
+/* Command translation table: */
+static unsigned char cmdtrans[256] = {
+   #include "cmdtrans.h"		/* for keybindings */
+};
 
 static unsigned char combitrans[256];	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
@@ -262,7 +266,7 @@ writebrl (brldim *brl)
 
 
 static int
-readbrl (int type)
+readbrl (DriverCommandContext cmds)
 {
   int c;
   static short status = 0;	/* cursor routing keys mode */
@@ -270,7 +274,7 @@ readbrl (int type)
   c = getbrlkey ();
   if (c == EOF)
     return EOF;
-  c = type == TBL_CMD ? cmdtrans[c] : argtrans[c];
+  c = cmds != CMDS_MESSAGE ? cmdtrans[c] : CMD_NOOP;
   if (c == 1 || c == 2)
     {
       status = c;

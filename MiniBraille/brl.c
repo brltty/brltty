@@ -150,11 +150,12 @@ static void writebrl(brldim *brl)
 }
 
 
-static int readbrl(int type)
+static int readbrl(DriverCommandContext cmds)
 {
 	unsigned char znak;
 	int rv;
-	if (type != TBL_CMD) { LogPrint(LOG_ERR, "WARNING: type != 0"); return EOF; };
+	if (cmds == CMDS_MESSAGE)
+	  return EOF;
 	rv = read(brl_fd, &znak, 1);
 	switch (mode) {
 	case NORMAL_MODE:

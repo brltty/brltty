@@ -242,11 +242,16 @@ main (int argc, char *argv[])
    */
   while (keep_going)
     {
+      DriverCommandContext cmds =
+        infmode? CMDS_STATUS:
+	((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
+	CMDS_SCREEN;
+
       TickCount++;
       /*
        * Process any Braille input 
        */
-      while ((keypress = braille->read(TBL_CMD)) != EOF)
+      while ((keypress = braille->read(cmds)) != EOF)
 	switch (keypress & ~VAL_SWITCHMASK)
 	  {
 	  case CMD_NOOP:	/* do nothing but loop */
@@ -289,11 +294,12 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_FWINLT:
 	    if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
+	      int oldX = p->winx;
 	      if (p->winx > 0) {
 		p->winx = MAX(p->winx-fwinshift, 0);
 		if (env.skpblnkwins) {
 		  if (env.skpblnkwinsmode == sbwEndOfLine)
-		    goto wrappedUp;
+		    goto skipEndOfLine;
 		  if (!env.csrvis ||
 		      (scr.posy != p->winy) ||
 		      (scr.posx >= (p->winx + brl.x))) {
@@ -309,16 +315,18 @@ main (int argc, char *argv[])
 		      goto wrapUp;
 		  }
 		}
-	      } else if (p->winy == 0)
-		playTune(&tune_bounce);
-	      else
-	        goto wrapUp;
-	      break;
+		break;
+	      }
 	    wrapUp:
+	      if (p->winy == 0) {
+		p->winx = oldX;
+		playTune(&tune_bounce);
+		break;
+	      }
 	      p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
 	      p->winy--;
 	      playTune(&tune_wrap_up);
-	    wrappedUp:
+	    skipEndOfLine:
 	      if (env.skpblnkwins && (env.skpblnkwinsmode == sbwEndOfLine)) {
 		int charIndex;
 		char buffer[scr.cols];
@@ -430,6 +438,7 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_FWINRT:
 	    if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
+	      int oldX = p->winx;
 	      if (p->winx < (scr.cols - brl.x)) {
 		p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
 		if (env.skpblnkwins) {
@@ -448,12 +457,14 @@ main (int argc, char *argv[])
 		      goto wrapDown;
 		  }
 		}
-	      } else if (p->winy >= (scr.rows - brl.y))
-		playTune(&tune_bounce);
-	      else
-	        goto wrapDown;
-	      break;
+		break;
+	      }
 	    wrapDown:
+	      if (p->winy >= (scr.rows - brl.y)) {
+		p->winx = oldX;
+		playTune(&tune_bounce);
+		break;
+	      }
 	      p->winx = 0;
 	      p->winy++;
 	      playTune(&tune_wrap_down);
@@ -1343,7 +1354,7 @@ message (unsigned char *s, short flags)
       braille->write( &brl );
 
       if ( l || (flags & MSG_WAITKEY) )
-	while (braille->read(TBL_ARG) == EOF)
+	while (braille->read(CMDS_MESSAGE) == EOF)
 	  delay (KEYDEL);
       else if(!(flags & MSG_NODELAY))
 	delay(DISPDEL);

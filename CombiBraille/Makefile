@@ -28,7 +28,7 @@ BRAILLE_MODELS = 25/45/85
 SPEECH_MODELS = 
 include ../driver.mk
 
-brl.o: brl.c ../brl.h ../misc.h brlconf.h ../brl_driver.h tables.h
+brl.o: brl.c ../brl.h ../misc.h brlconf.h ../brl_driver.h cmdtrans.h
 	$(CC) $(BRL_CFLAGS) -c brl.c
 
 speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h brlconf.h

@@ -782,7 +782,7 @@ configmenu (void)
       delay (DELAY_TIME);
 
       /* Now process any user interaction */
-      while ((key = braille->read(TBL_CMD)) != EOF)
+      while ((key = braille->read(CMDS_CONFIG)) != EOF)
 	switch (key)
 	  {
 	  case CMD_NOOP:

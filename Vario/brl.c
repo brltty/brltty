@@ -396,7 +396,7 @@ static int is_repeat_cmd (int cmd) {
   return (0);
 }
 
-static int readbrl(int type) {
+static int readbrl(DriverCommandContext cmds) {
 #define TSP 0x22
 #define BUTTON 0x24
 #define KEY_TL1 (1<<0)
@@ -449,7 +449,7 @@ static int readbrl(int type) {
   struct timeval now;
 
   /* We have no need for command arguments... */
-  if (type != TBL_CMD)
+  if (cmds == CMDS_MESSAGE)
     return (EOF);
 
   if (pending_cmd != EOF) {

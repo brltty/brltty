@@ -903,7 +903,7 @@ do_battery_warn ()
 
 
 /* OK now about key inputs */
-int readbrl (int);
+int readbrl (DriverCommandContext);
 
 
 /* OK this one is pretty strange and ugly. readbrl() reads keys from
@@ -961,7 +961,7 @@ cut_cursor ()
       display_all (prevdata);
       prevdata[pos] = oldchar;
 
-      while ((key = readbrl (TBL_CMD)) == EOF) delay(1); /* just yield */
+      while ((key = readbrl (CMDS_SCREEN)) == EOF) delay(1); /* just yield */
       switch (key)
 	{
 	case CMD_FWINRT:
@@ -1050,7 +1050,7 @@ cut_cursor ()
 #define MAXREAD 10
 
 static int 
-readbrl (int type)
+readbrl (DriverCommandContext cmds)
 {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
@@ -1072,7 +1072,7 @@ readbrl (int type)
   int skip_this_cmd = 0;
 
   /* We have no need for command arguments... */
-  if (type != TBL_CMD)
+  if (cmds == CMDS_MESSAGE)
     return (EOF);
 
   gettimeofday (&now, &dum_tz);

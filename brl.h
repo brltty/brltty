@@ -21,15 +21,14 @@
 /* brl.h - Header file for the Braille display library
  */
 
-/* Arguments for readbrl() */
-#define TBL_CMD 0		/* Interpret as command */
-#define TBL_ARG 1		/* Interpret as argument */
-
-/* The following define argument codes: */
-#define ARG_YES 'y'		/* yes */
-#define ARG_NO 'n'		/* no */
-#define ARG_RET ' '		/* data entry terminator (space) */
-#define ARG_QUIT 'q'		/* cancel command */
+/* Argument for readbrl() */
+typedef enum {
+   CMDS_SCREEN,
+   CMDS_HELP,
+   CMDS_STATUS,
+   CMDS_CONFIG,
+   CMDS_MESSAGE
+} DriverCommandContext;
 
 
 /* The following define command codes, which are return values for
@@ -46,61 +45,100 @@
  * Please: comment all CMD_* - this info is used for the Papenmeier helpfile
  *
  */
+typedef enum {
+   /* special commands which must be first and remain in order */
+   CMD_NOOP /* do nothing */,
 
-#define CMD_NOOP '\0'		/* do nothing - a blank keystroke */
+   /* vertical motion */
+   CMD_LNUP /* go up one line */,
+   CMD_LNDN /* go down one line */,
+   CMD_WINUP /* go up several lines */,
+   CMD_WINDN /* go down several lines */,
+   CMD_PRDIFLN /* go up to line with different content */,
+   CMD_NXDIFLN /* go down to line with different content */,
+   CMD_ATTRUP /* go up to line with different attributes */,
+   CMD_ATTRDN /* go down to line with different attributes */,
+   CMD_PRBLNKLN /* go to last line of previous paragraph */,
+   CMD_NXBLNKLN /* go to first line of next paragraph */,
+   CMD_PRSEARCH /* search up for content of cut buffer */,
+   CMD_NXSEARCH /* search down for content of cut buffer */,
+   CMD_TOP /* go to top line */,
+   CMD_BOT /* go to bottom line */,
+   CMD_TOP_LEFT /* go to top-left corner */,
+   CMD_BOT_LEFT /* go to bottom-left corner */,
 
-/* braille window movement */
-#define CMD_LNUP 'u'		/* go up one line */
-#define CMD_PRDIFLN '-'		/* go to prev different screen line */
-#define CMD_LNDN 'd'		/* go down one line */
-#define CMD_NXDIFLN '+'		/* go to next different screen line */
-#define CMD_ATTRUP 3            /* go to previous line with differing attributes */
-#define CMD_ATTRDN 4            /* go to next line with differing attributes */
-#define CMD_NXBLNKLN 12		/* look for blank line, go to first non-blank
-				   line after that. */
-#define CMD_PRBLNKLN 13		/* look for previous blank line, go to first
-				   non-blank line before that. */
-#define CMD_NXSEARCH 14         /* search screen for cut_buffer */
-#define CMD_PRSEARCH 15
-#define CMD_WINUP '<'		/* go up one window */
-#define CMD_WINDN '>'		/* go down one window */
-#define CMD_TOP 't'		/* go to top of screen */
-#define CMD_BOT 'b'		/* go to bottom of screen */
-#define CMD_HWINLT '['		/* go left one half window */
-#define CMD_HWINRT ']'		/* go right one half window */
-#define CMD_FWINLT '{'		/* go left one full window */
-#define CMD_FWINLTSKIP 9	/* go left one full window, skipping blanks */
-#define CMD_FWINRT '}'		/* go right one full window */
-#define CMD_FWINRTSKIP 11	/* go right one full window, skipping blanks */
-#define CMD_LNBEG 's'		/* go to beginning (start) of line */
-#define CMD_LNEND 'e'		/* go to end of line */
-#define CMD_CHRLT '('		/* go left one character */
-#define CMD_CHRRT ')'		/* go right one character */
-#define CMD_TOP_LEFT 'T'	/* go to top of screen */
-#define CMD_BOT_LEFT 'B'	/* go to bottom of screen */
+   /* horizontal motion */
+   CMD_CHRLT /* go left one character */,
+   CMD_CHRRT /* go right one character */,
+   CMD_HWINLT /* go left one half window */,
+   CMD_HWINRT /* go right one half window */,
+   CMD_FWINLT /* go left one full window */,
+   CMD_FWINRT /* go right one full window */,
+   CMD_FWINLTSKIP /* go left to non-blank window */,
+   CMD_FWINRTSKIP /* go right to non-blank window */,
+   CMD_LNBEG /* go to beginning of line */,
+   CMD_LNEND /* go to end of line */,
 
-/* misc */
-#define CMD_HOME 'h'		/* go back to cursor */
-#define CMD_CSRTRK 'c'		/* toggle cursor tracking */
-#define CMD_DISPMD 'a'		/* Toggle attribute display */
-#define CMD_FREEZE 'f'		/* freeze the screen */
-#define CMD_HELP '?'		/* display help */
-#define CMD_INFO 'i'		/* get status information */
-#define CMD_RESTARTBRL 5        /* reinitialize braille display */
-#define CMD_RESTARTSPEECH 124   /* reinitialize speech driver */
-#define CMD_SWITCHVT_PREV 16 /* switch to previous VT */
-#define CMD_SWITCHVT_NEXT 17 /* switch to next VT */
+   /* cursor related */
+   CMD_HOME /* go to cursor */,
+   CMD_CSRJMP /* route cursor to top-left corner of braille window */,
+   CMD_CSRJMP_VERT /* route cursor to top line of window */,
 
-/* Cursor routing */
-#define CMD_CSRJMP 'j'		/* jump cursor to window (cursor routing) */
-#define CMD_CSRJMP_VERT ';'	/* jump cursor to window's line (routing) */
+   /* cut and paste */
+   CMD_CUT_BEG /* cut text from top-left corner of braille window */,
+   CMD_CUT_END /* cut text to bottom-right corner of braille window */,
+   CMD_PASTE /* insert cut buffer at cursor */,
+
+   /* driver options */
+   CMD_FREEZE /* freeze/unfreeze screen */,
+   CMD_DISPMD /* toggle display attributes/text */,
+   CMD_SIXDOTS /* toggle text style 6-dot/8-dot */,
+   CMD_SLIDEWIN /* toggle sliding window on/off */,
+   CMD_SKPIDLNS /* toggle skipping of identical lines on/off */,
+   CMD_SKPBLNKWINS /* toggle skipping of blank windows on/off */,
+   CMD_CSRVIS /* toggle cursor visibility on/off */,
+   CMD_CSRHIDE_QK /* toggle quick hide of cursor */,
+   CMD_CSRTRK /* toggle cursor tracking on/off */,
+   CMD_CSRSIZE /* toggle cursor style underline/block */,
+   CMD_CSRBLINK /* toggle cursor blinking on/off */,
+   CMD_ATTRVIS /* toggle attribute underlining on/off */,
+   CMD_ATTRBLINK /* toggle attribute blinking on/off */,
+   CMD_CAPBLINK /* toggle capital letter blinking on/off */,
+   CMD_SND /* toggle sound on/off */,
+
+   /* mode selection */
+   CMD_HELP /* display driver help */,
+   CMD_INFO /* display status summary */,
+   CMD_CONFMENU /* present configuration menu */,
+
+   /* persistent settings */
+   CMD_SAVECONF /* save current settings */,
+   CMD_RESET /* restore saved settings */,
+
+   /* key entry */
+   CMD_KEY_UP /* simulate up-arrow key */,
+   CMD_KEY_DOWN /* simulate down-arrow key */,
+   CMD_KEY_LEFT /* simulate left-arrow key */,
+   CMD_KEY_RIGHT /* simulate right-arrow key */,
+   CMD_KEY_RETURN /* simulate return key */,
+
+   /* speech control */
+   CMD_SAY /* speak current line */,
+   CMD_SAYALL /* speak rest of screen */,
+   CMD_MUTE /* stop speaking immediately */,
+   CMD_SPKHOME /* goto current/last speech position */,
+
+   /* virtual terminal selection */
+   CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
+   CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
+
+   /* general control */
+   CMD_RESTARTBRL /* reinitialize braille driver */,
+   CMD_RESTARTSPEECH /* reinitialize speech driver */,
+} DriverCommand;
+
 /* Cursor routing key offset values */
 #define	CR_ROUTEOFFSET 0x100	/* normal cursor routing */
-
-/* Cut and paste */
-#define CMD_CUT_BEG 'C'		/* cut text begin - use routing keys */
-#define CMD_CUT_END 'E'		/* cut text end - use routing keys */
-#define CMD_PASTE 'P'		/* insert text */
 /* Cursor routing key offset values to be used to define a block */
 #define	CR_BEGBLKOFFSET	0x200	/* to define the beginning of a block */
 #define	CR_ENDBLKOFFSET 0x300	/* to define the end of the block */
@@ -110,39 +148,6 @@
 #define	CR_NXINDENT 0x500	/* find next line not more indented
 				   than routing key indicates. */
 #define	CR_PRINDENT 0x600
-
-/* Configuration commands */
-#define CMD_CONFMENU 'x'	/* enter configuration menu */
-#define CMD_SAVECONF '='	/* save brltty configuration */
-#define CMD_RESET 'r'		/* restore saved (or default) settings */
-
-/* Configuration options */
-#define CMD_CSRVIS 'v'		/* toggle cursor visibility */
-#define CMD_CSRHIDE_QK 7		/* quick hide cursor (toggle) */
-#define CMD_CSRSIZE 'z'		/* toggle cursor size */
-#define CMD_CSRBLINK '#'	/* toggle cursor blink */
-#define CMD_CAPBLINK '*'	/* toggle capital letter blink */
-#define CMD_ATTRVIS 1           /* toggle attribute underlining */
-#define CMD_ATTRBLINK 2         /* toggle blinking of attribute underlining */
-#define CMD_SIXDOTS '6'		/* toggle six-dot mode */
-#define CMD_SLIDEWIN 'w'	/* toggle sliding window */
-#define CMD_SKPIDLNS 'I'	/* toggle skipping of identical lines */
-#define CMD_SKPBLNKWINS 8	/* toggle skipping of blank windows */
-#define CMD_SND 'S'		/* toggle sound on/off */
-
-/* Key mappings: keys on the braille device are mapped to keyboard keys */
-#define CMD_KEY_UP 'U'
-#define CMD_KEY_DOWN 'D'
-#define CMD_KEY_RIGHT 'R'
-#define CMD_KEY_LEFT 'L'
-#define CMD_KEY_RETURN 'N'
-
-
-/* For speech devices: */
-#define CMD_SAY 'Y'		/* speak current braille line */
-#define CMD_SAYALL 127		/* speak text continuously */
-#define CMD_SPKHOME 126		/* goto current/last speech position */
-#define CMD_MUTE 'm'		/* stop speech */
 
 /* For specifically turning on/off toggle commands */
 #define VAL_SWITCHMASK  0x30000
@@ -189,7 +194,7 @@ typedef struct
   void (*initialize) (brldim *, const char *);	/* initialise Braille display */
   void (*close) (brldim *);		/* close braille display */
   void (*write) (brldim *);		/* write to braille display */
-  int (*read) (int);		/* get key press from braille display */
+  int (*read) (DriverCommandContext);		/* get key press from braille display */
   void (*setstatus) (const unsigned char *);	/* set status cells */
 
 } braille_driver;

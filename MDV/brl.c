@@ -606,7 +606,7 @@ writebrl (brldim *brl)
 
 
 static int 
-readbrl (int type)
+readbrl (DriverCommandContext cmds)
 {
   static char
     ignore_next_release = 0; /* when a command is triggered by combining

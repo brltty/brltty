@@ -325,7 +325,7 @@ writeVisualDisplay(unsigned char c)
 }
 
 static int
-visualDisplay(unsigned char character)
+visualDisplay(unsigned char character, DriverCommandContext cmds)
 {
    int vt = getVirtualTerminal();
    const unsigned char end[] = {0X1B, 0};
@@ -597,7 +597,7 @@ enterFunctionKey(void)
 }
 
 static int
-interpretNavigation(unsigned char dots)
+interpretNavigation(unsigned char dots, DriverCommandContext cmds)
 {
    switch (dots) {
       default:
@@ -665,29 +665,32 @@ interpretNavigation(unsigned char dots)
 }
 
 static int
-interpretCharacter(unsigned char dots)
+interpretCharacter(unsigned char dots, DriverCommandContext cmds)
 {
-   int value = inputTable[dots];
+   int mask = 0X00;
+   if (cmds != CMDS_SCREEN) {
+      return interpretNavigation(dots, cmds);
+   }
    switch (currentKeyboardMode) {
       case KBM_NAVIGATE:
-         return interpretNavigation(dots);
+         return interpretNavigation(dots, cmds);
       case KBM_INPUT:
 	 break;
       case KBM_INPUT_7:
-	 value |= 0X40;
+	 mask |= 0X40;
 	 break;
       case KBM_INPUT_78:
-	 value |= 0XC0;
+	 mask |= 0XC0;
 	 break;
       case KBM_INPUT_8:
-	 value |= 0X80;
+	 mask |= 0X80;
 	 break;
    }
-   return VAL_BRLKEY + value;
+   return VAL_BRLKEY + (inputTable[dots] | mask);
 }
 
 static int
-interpretSpaceChord(unsigned char dots)
+interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
 {
    switch (dots) {
       default:
@@ -702,7 +705,7 @@ interpretSpaceChord(unsigned char dots)
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6): // go to main menu
 	 break;
       case BNC_SPACE:
-	 return interpretCharacter(dots);
+	 return interpretCharacter(dots, cmds);
       case BNC_C:
 	 return CMD_CONFMENU;
       case BNC_D:
@@ -807,7 +810,7 @@ interpretSpaceChord(unsigned char dots)
 }
 
 static int
-interpretBackspaceChord(unsigned char dots)
+interpretBackspaceChord(unsigned char dots, DriverCommandContext cmds)
 {
    switch (dots & 0X3F) {
       default:
@@ -844,7 +847,7 @@ interpretBackspaceChord(unsigned char dots)
 }
 
 static int
-interpretEnterChord(unsigned char dots)
+interpretEnterChord(unsigned char dots, DriverCommandContext cmds)
 {
    switch (dots) {
       default:
@@ -880,7 +883,7 @@ interpretEnterChord(unsigned char dots)
 }
 
 static int
-interpretThumbKeys(unsigned char keys)
+interpretThumbKeys(unsigned char keys, DriverCommandContext cmds)
 {
    switch (keys) {
       default:
@@ -910,16 +913,16 @@ interpretThumbKeys(unsigned char keys)
 }
 
 static int
-interpretRoutingKey(unsigned char key)
+interpretRoutingKey(unsigned char key, DriverCommandContext cmds)
 {
    return currentRoutingOperation + key;
 }
 
 static int
-readbrl (int type)
+readbrl (DriverCommandContext cmds)
 {
    unsigned char character;
-   int (*handler)(unsigned char);
+   int (*handler)(unsigned char, DriverCommandContext);
 
    if (read(fileDescriptor, &character, 1) != 1) {
       return EOF;
@@ -961,5 +964,5 @@ readbrl (int type)
    currentRoutingOperation = temporaryRoutingOperation;
    temporaryRoutingOperation = persistentRoutingOperation;
 
-   return handler(character);
+   return handler(character, cmds);
 }

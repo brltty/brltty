@@ -65,10 +65,10 @@ TuneDefinition tune_unlink = {
 };
 
 static ToneDefinition tones_wrap_down[] = {
-   {  148,  10},
-   {  297,   7},
-   {  595,   8},
-   { 1190,   6},
+   { 1200,   6},
+   {  600,   6},
+   {  300,   6},
+   {  150,  10},
    {    0,   0}
 };
 TuneDefinition tune_wrap_down = {
@@ -76,10 +76,10 @@ TuneDefinition tune_wrap_down = {
 };
 
 static ToneDefinition tones_wrap_up[] = {
-   {  148,  10},
-   {  297,   7},
-   {  595,   8},
-   { 1190,   6},
+   {  150,   6},
+   {  300,   6},
+   {  600,   6},
+   { 1200,  10},
    {    0,   0}
 };
 TuneDefinition tune_wrap_up = {
@@ -87,11 +87,11 @@ TuneDefinition tune_wrap_up = {
 };
 
 static ToneDefinition tones_bounce[] = {
-   { 2380,   5},
-   { 1190,   6},
-   {  595,   8},
-   {  297,   7},
-   {  148,  10},
+   { 2400,   6},
+   { 1200,   6},
+   {  600,   6},
+   {  300,   6},
+   {  150,  10},
    {    0,   0}
 };
 TuneDefinition tune_bounce = {

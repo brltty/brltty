@@ -186,7 +186,7 @@ static int sendpacket(void *p,int size)
  return (-1);
 }
 
-static int readbrl(int unused)
+static int readbrl(DriverCommandContext cmds)
 {
  unsigned char kbuf[20]; // Keyboard simulation
  int lgthk=0; // Length of keyboard buffer

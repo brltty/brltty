@@ -369,7 +369,7 @@ static void setbrlstat(const unsigned char *st)
 }
 
 
-static int readbrl(int type)
+static int readbrl(DriverCommandContext cmds)
 {
   int res = EOF;
   long bytes = 0;

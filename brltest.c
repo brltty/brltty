@@ -109,7 +109,7 @@ message (char *s)
 
       braille->write(&brl);
       if (l)
-	while (braille->read(TBL_ARG) == EOF)
+	while (braille->read(CMDS_MESSAGE) == EOF)
 	  delay (KEYDEL);
     }
 }

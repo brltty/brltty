@@ -308,7 +308,7 @@ static void writebrl (brldim *brl) {
 }
 
 
-static int readbrl (int type) {
+static int readbrl (DriverCommandContext cmds) {
 	static short status = 0;	/* cursor routing keys mode */
 	
 	KeyStroke keystroke;
@@ -321,9 +321,9 @@ static int readbrl (int type) {
 		// translate only 'T' and 'S' events
 		// I kicked argtrans[] (never ever needed) --> simply return 0x00
 		if (keystroke.block == 'T')
-			keystroke.key = (type == TBL_CMD) ? cmd_T_trans[keystroke.key] : 0x00;
+			keystroke.key = (cmds != CMDS_MESSAGE) ? cmd_T_trans[keystroke.key] : CMD_NOOP;
 		else
-			keystroke.key = (type == TBL_CMD) ? cmd_S_trans[keystroke.key] : 0x00;
+			keystroke.key = (cmds != CMDS_MESSAGE) ? cmd_S_trans[keystroke.key] : CMD_NOOP;
 		status = 0;
 		return keystroke.key;
 	} else { // directly process 'R' events

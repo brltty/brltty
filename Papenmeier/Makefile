@@ -46,14 +46,14 @@ serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c
 	$(CC) $(CFLAGS) serial.c -o serial -lncurses 
 
 cmd.h: $(BRL_H)
-	awk '/#define CMD_/ { \
-		print "{ \""$$2"\", KEYCODE, " $$2 "},";\
-		print "{ \""substr($$2,5)"\", KEYCODE, " $$2 "},";\
+	awk '/^ *CMD_/ { \
+		print "{ \""$$1"\", KEYCODE, " $$1 "},";\
+		print "{ \""substr($$1,5)"\", KEYCODE, " $$1 "},";\
 	}' < $(BRL_H) > cmd.h
 
 hlp.h:  $(BRL_H)
-	awk '/#define CMD_/  { OFS="";if (x=match($$0,"\/.*\/")) \
-	  print "{ ",$$2,", \"#", substr($$0, RSTART+2, RLENGTH-4),"\" },"; \
+	awk '/^ *CMD_/  { OFS="";if (x=match($$0,"\/.*\/")) \
+	  print "{ ",$$1,", \"#", substr($$0, RSTART+2, RLENGTH-4),"\" },"; \
 	} \
 	/#define STAT_/  { OFS="";if (x=match($$0,"\/.*\/")) \
 	  print "{ OFFS_STAT +",$$2,", \"#", substr($$0, RSTART+2, RLENGTH-4),"\" },"; \

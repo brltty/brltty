@@ -234,7 +234,7 @@ static void initbrl (brldim *brl, const char *dev)
 	while (!NbCols)
 	  {
 	     delay (100);
-	     readbrl (0);		/* to get the answer */
+	     readbrl (CMDS_SCREEN);		/* to get the answer */
 	     if (++i >= 10)
 	       break;
 	  }
@@ -676,7 +676,7 @@ static int ViewOn(void)
    return res2;
 }
 
-static int readbrl(int type)
+static int readbrl(DriverCommandContext cmds)
 {
    int result;
    result=readbrlkey(0);

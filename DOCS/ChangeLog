@@ -1,6 +1,9 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   Inform readbrl of the current command context. (dm)
+   Converted CMD_ defines to enum. (dm)
+      CombiBraille: tables.h converted to cmdtrans.h, argtrans removed
    Replaced CMD_SKPBLNKEOL with configurable skip blank windows mode. (dm)
    Rename -p option to -S. (dm)
    Added -n (--nodaemon) option to make debugging easier and to permit invocation from inittab. (dm)
