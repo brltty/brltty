@@ -146,6 +146,9 @@ sys_solaris.$O:
 sys_hpux.$O:
 	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
 
+sys_openbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_openbsd.c
+
 cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
 
