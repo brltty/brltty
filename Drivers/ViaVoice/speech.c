@@ -147,6 +147,7 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
    return ok;
 }
 
+static int rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) __attribute__((unused));
 static int
 rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) {
    int ok = 0;
