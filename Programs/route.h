@@ -24,7 +24,15 @@ extern "C" {
 
 extern int startCursorRouting (int column, int row, int screen);
 extern volatile pid_t routingProcess;
-extern volatile int routingFailed;
+extern volatile int routingStatus;
+
+typedef enum {
+  ROUTE_OK,
+  ROUTE_WRONG_COLUMN,
+  ROUTE_WRONG_ROW,
+  ROUTE_TIMEOUT,
+  ROUTE_ERROR
+} RoutingStatus;
 
 #ifdef __cplusplus
 }

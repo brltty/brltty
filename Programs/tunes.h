@@ -42,6 +42,7 @@ extern TuneDefinition tune_braille_on;
 extern TuneDefinition tune_braille_off;
 extern TuneDefinition tune_command_rejected;
 extern TuneDefinition tune_command_done;
+extern TuneDefinition tune_routing_succeeded;
 extern TuneDefinition tune_routing_failed;
 extern TuneDefinition tune_mark_set;
 extern TuneDefinition tune_cut_begin;

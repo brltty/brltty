@@ -431,9 +431,7 @@ childDeathHandler (int signalNumber) {
   while ((process = waitpid(-1, &status, WNOHANG)) > 0) {
     if (process == routingProcess) {
       routingProcess = 0;
-      if (WIFEXITED(status))
-        if (WEXITSTATUS(status))
-          routingFailed = 1;
+      routingStatus = WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
     }
   }
 }
@@ -914,9 +912,18 @@ main (int argc, char *argv[]) {
 
     closeTuneDevice(0);
 
-    if (routingFailed) {
-      playTune(&tune_routing_failed);
-      routingFailed = 0;
+    if (routingStatus >= 0) {
+      const TuneDefinition *tune;
+      switch (routingStatus) {
+        default:
+          tune = &tune_routing_failed;
+          break;
+        case ROUTE_OK:
+          tune = &tune_routing_succeeded;
+          break;
+      }
+      playTune(tune);
+      routingStatus = -1;
     }
 
     /*

@@ -71,12 +71,24 @@ TuneDefinition tune_command_done = {
    "Done", 0, elements_command_done
 };
 
+static TuneElement elements_routing_succeeded[] = {
+   TUNE_NOTE( 80,  64),
+   TUNE_NOTE( 60,  76),
+   TUNE_STOP()
+};
+TuneDefinition tune_routing_succeeded = {
+   NULL, 0, elements_routing_succeeded
+};
+
 static TuneElement elements_routing_failed[] = {
-   TUNE_NOTE(100,  70),
-   TUNE_REST( 50),
-   TUNE_NOTE(100,  70),
-   TUNE_REST( 50),
-   TUNE_NOTE(100,  70),
+   TUNE_NOTE( 80,  80),
+   TUNE_NOTE( 90,  79),
+   TUNE_NOTE(100,  78),
+   TUNE_NOTE(100,  77),
+   TUNE_REST( 20),
+   TUNE_NOTE(100,  77),
+   TUNE_REST( 20),
+   TUNE_NOTE(150,  77),
    TUNE_STOP()
 };
 TuneDefinition tune_routing_failed = {

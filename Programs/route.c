@@ -41,7 +41,7 @@
 #define CURSOR_ROUTING_SETTLE 400	/* grace period for temporary cursor relocation */
 
 volatile pid_t routingProcess = 0;
-volatile int routingFailed = 0;
+volatile int routingStatus = -1;
 
 static void
 insertCursorKey (unsigned short key, const sigset_t *mask) {
@@ -54,8 +54,7 @@ insertCursorKey (unsigned short key, const sigset_t *mask) {
 static int
 doCursorRouting (int column, int row, int screen) {
   ScreenDescription scr;		/* for screen state infos */
-  int oldx, oldy;		/* current cursor position */
-  int dif, timedOut;
+  int oldx, oldy, dif;
   sigset_t mask;		/* for blocking of SIGUSR1 */
 
   /* Configure the cursor routing subprocess. */
@@ -67,16 +66,14 @@ doCursorRouting (int column, int row, int screen) {
   sigprocmask(SIG_UNBLOCK, &mask, NULL);
 
   /* Initialise second thread of screen reading: */
-  if (!openRoutingScreen()) return 2;
+  if (!openRoutingScreen()) return ROUTE_ERROR;
   describeRoutingScreen(&scr);
 
   /* Deal with vertical movement first, ignoring horizontal jumping ... */
   while ((dif = row - scr.posy) && (scr.no == screen)) {
-    timeout_yet(0);		/* initialise stop-watch */
     insertCursorKey((dif > 0)? KEY_CURSOR_DOWN: KEY_CURSOR_UP, &mask);
-
-    timedOut = 0;
-    do {
+    timeout_yet(0);		/* initialise stop-watch */
+    while (1) {
       delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
 
       oldy = scr.posy;
@@ -84,9 +81,8 @@ doCursorRouting (int column, int row, int screen) {
       describeRoutingScreen(&scr);
       if ((scr.posy != oldy) || (scr.posx != oldx)) break;
 
-      if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) timedOut = 1;
-    } while (!timedOut);
-    if (timedOut) goto timeout;
+      if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_TIMEOUT;
+    }
 
     if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
         (scr.posy != oldy && (row - scr.posy) * (row - scr.posy) >= dif * dif)) {
@@ -108,20 +104,17 @@ doCursorRouting (int column, int row, int screen) {
   if (column >= 0) {	/* don't do this for vertical-only routing (column=-1) */
     /* Now horizontal movement, quitting if the vertical position is wrong: */
     while ((dif = column - scr.posx) && (scr.posy == row) && (scr.no == screen)) {
-      timeout_yet(0);	/* initialise stop-watch */
       insertCursorKey((dif > 0)? KEY_CURSOR_RIGHT: KEY_CURSOR_LEFT, &mask);
-
-      timedOut = 0;
-      do {
+      timeout_yet(0);	/* initialise stop-watch */
+      while (1) {
         delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
 
         oldx = scr.posx;
         describeRoutingScreen(&scr);
         if ((scr.posx != oldx) || (scr.posy != row)) break;
 
-        if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) timedOut = 1;
-      } while (!timedOut);
-      if (timedOut) goto timeout;
+        if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_TIMEOUT;
+      }
 
       if (scr.posy != row ||
           (column - scr.posx) * (column - scr.posx) >= dif * dif) {
@@ -143,11 +136,9 @@ doCursorRouting (int column, int row, int screen) {
   }
 
   closeRoutingScreen();		/* close second thread of screen reading */
-  return 0;
-
-timeout:
-  LogPrint(LOG_WARNING, "Cursor routing timed out.");
-  return 1;
+  if (scr.posy != row) return ROUTE_WRONG_ROW;
+  if ((column >= 0) && (scr.posx != column)) return ROUTE_WRONG_COLUMN;
+  return ROUTE_OK;
 }
 
 int
@@ -171,7 +162,7 @@ startCursorRouting (int column, int row, int screen) {
     do {
       sigsuspend(&oldMask);
     } while (routingProcess);
-    routingFailed = 0;
+    routingStatus = -1;
   }
 
   switch (routingProcess = fork()) {
