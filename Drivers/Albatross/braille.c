@@ -43,10 +43,19 @@ static struct termios oldSettings;
 static struct termios newSettings;
 
 static TranslationTable outputTable;
-static int cellCount;
 static unsigned char cellContent[80];
 static int lowerRoutingFunction;
 static int upperRoutingFunction;
+
+typedef struct {
+  unsigned char identifier;
+  unsigned char columns;
+} ModelEntry;
+static ModelEntry modelTable[] = {
+  {0X05, 46}
+};
+static unsigned int modelCount = sizeof(modelTable) / sizeof(modelTable[0]);
+static const ModelEntry *model;
 
 static int
 readByte (unsigned char *byte) {
@@ -73,24 +82,42 @@ writeBytes (unsigned char *bytes, int count) {
 
 static int
 acknowledgeDisplay (void) {
-  unsigned char attributes;
-  cellCount = 0;
+  model = NULL;
 
-  if (!awaitByte(&attributes)) return 0;
+  {
+    unsigned char identifier;
+    if (!awaitByte(&identifier)) return 0;
+
+    {
+      unsigned char byte;
+
+      if (!awaitByte(&byte)) return 0;
+      if (byte != 0XFF) return 0;
+
+      if (!awaitByte(&byte)) return 0;
+      if (byte != identifier) return 0;
+    }
+
+    model = modelTable + modelCount;
+    while ((--model)->identifier != identifier) {
+      if (model == modelTable) {
+        LogPrint(LOG_WARNING, "Detected unknown Albatross model: %02X", identifier);
+        model = NULL;
+        return 0;
+      }
+    }
+  }
+
   {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
     if (!writeBytes(acknowledgement, sizeof(acknowledgement))) return 0;
     tcflush(fileDescriptor, TCIFLUSH);
-    delay(500);
-    tcflush(fileDescriptor, TCIFLUSH);
   }
-  LogPrint(LOG_INFO, "Albatross attribute byte: %02X", attributes);
 
-  cellCount = (attributes & 0X80)? 80: 40;
   lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
   upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
-  LogPrint(LOG_INFO, "Albatross has %d columns.", cellCount);
+  LogPrint(LOG_INFO, "Albatross has %d columns.", model->columns);
   return 1;
 }
 
@@ -98,17 +125,17 @@ static int
 clearDisplay (void) {
   unsigned char bytes[] = {0XFA};
   int cleared = writeBytes(bytes, sizeof(bytes));
-  if (cleared) memset(cellContent, 0, cellCount);
+  if (cleared) memset(cellContent, 0, model->columns);
   return cleared;
 }
 
 static int
 updateDisplay (unsigned char *cells) {
-  unsigned char bytes[cellCount * 2 + 2];
+  unsigned char bytes[model->columns * 2 + 2];
   unsigned char *byte = bytes;
   int column;
   *byte++ = 0XFB;
-  for (column=0; column<cellCount; ++column) {
+  for (column=0; column<model->columns; ++column) {
     unsigned char cell;
     if (!cells) {
       cell = cellContent[column];
@@ -155,7 +182,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           LogPrint(LOG_INFO, "Albatross is at %d baud.", baud2integer(*speed));
           if (acknowledgeDisplay()) {
             clearDisplay();
-            brl->x = cellCount;
+            brl->x = model->columns;
             brl->y = 1;
             return 1;
           }
@@ -184,14 +211,14 @@ brl_close (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
-  if (cellCount) {
+  if (model) {
     updateDisplay(brl->buffer);
   }
 }
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  if (cellCount) {
+  if (model) {
   }
 }
 
@@ -207,7 +234,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       }
       continue;
     }
-    if (!cellCount) continue;
+    if (!model) continue;
 
     {
       int base;
@@ -233,7 +260,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       } else {
         goto notRouting;
       }
-      if ((offset >= 0) && (offset < cellCount)) return base + offset;
+      if ((offset >= 0) && (offset < model->columns)) return base + offset;
     }
   notRouting:
 
