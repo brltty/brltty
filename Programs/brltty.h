@@ -89,6 +89,8 @@ typedef struct {
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
 
+extern unsigned char cursorDots (void);
+
 extern BrailleDisplay brl;			/* braille driver reference */
 extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */

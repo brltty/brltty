@@ -765,6 +765,11 @@ getOffset (int arg, int end) {
   return arg;
 }
 
+unsigned char
+cursorDots (void) {
+  return prefs.cursorStyle?  (B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8): (B7 | B8);
+}
+
 static void
 setBlinkingState (int *state, int *timer, int visible, unsigned char invisibleTime, unsigned char visibleTime) {
   *timer = PREFERENCES_TIME((*state = visible)? visibleTime: invisibleTime);
@@ -2123,9 +2128,7 @@ main (int argc, char *argv[]) {
       }
       if (cursorLocation >= 0) {
         if (prefs.showCursor && !p->hideCursor && (!prefs.blinkingCursor || cursorState)) {
-          brl.buffer[cursorLocation] |= prefs.cursorStyle?
-                                        (B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8):
-                                        (B7 | B8);
+          brl.buffer[cursorLocation] |= cursorDots();
         }
       }
 

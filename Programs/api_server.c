@@ -405,7 +405,7 @@ void *ProcessConnection(void *arg)
         cursor = ntohl (ints[0]);
         if ((cursor>=1) && (cursor<=c->brl.x*c->brl.y)) {
           cursor--;
-          *(c->brl.buffer+cursor) |= prefs.cursorStyle ? (B1|B2|B3|B4|B5|B6|B7|B8) : (B7|B8);
+          *(c->brl.buffer+cursor) |= cursorDots();
         }
         c->brlbufstate = FULL;
         pthread_mutex_unlock(&c->brlmutex);
@@ -484,7 +484,7 @@ void *ProcessConnection(void *arg)
         /* Here all the packet has been processed. */
         /* We can now set the cursor if any, and update the actual buffer */
         /* with the new information to display */
-        if (cursor) buf[cursor-1] |= prefs.cursorStyle ? (B1|B2|B3|B4|B5|B6|B7|B8) : (B7|B8); 
+        if (cursor) buf[cursor-1] |= cursorDots(); 
         pthread_mutex_lock(&c->brlmutex);
         c->cursor = cursor;
         memcpy(c->brl.buffer, buf, dispSize);
