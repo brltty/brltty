@@ -114,7 +114,7 @@ int varioget(void)
 
 int variotranslate(const unsigned char *frombuff, unsigned char *tobuff,int count) 
 {
-	for(;count>=0;count--) {
+	for(;count>0;count--) {
 		tobuff[count-1]=outputTable[frombuff[count-1]];
 	}
 

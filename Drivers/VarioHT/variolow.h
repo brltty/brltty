@@ -19,9 +19,10 @@
 #define VARIO_LOW_INCLUDE 
 	/*	Doesnt really know what this one does, seems to have no effect on the
 	 *	display .. fishy! */ 
-#define VARIO_RESET		0xff
+#define VARIO_RESET		0XFF
+#define VARIO_MODEL_MODULAR40	0X89
 	/*	Sent back from the display after a data display call */ 
-#define VARIO_DISPLAY_DATA_ACK		0x7e
+#define VARIO_DISPLAY_DATA_ACK		0X7E
 	/*	Header (and length of header) for sending the 40 display bytes */ 
 #define VARIO_DISPLAY_DATA	"\001\000\000\000\000"
 #define VARIO_DISPLAY_DATA_LEN	5

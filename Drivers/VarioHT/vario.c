@@ -36,7 +36,7 @@
 static unsigned char lastWindow[40];
 
 static int pressedKeys;
-static int currentKeys;
+static int activeKeys;
 #define KEY_1 0X01
 #define KEY_2 0X02
 #define KEY_3 0X04
@@ -57,7 +57,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 	if(!varioinit((char*)dev)) {
 		memset(lastWindow, 0, 40);
 		pressedKeys = 0;
-		currentKeys = 0;
+		activeKeys = 0;
 
 		brl->x=40;
 		brl->y=1;
@@ -101,14 +101,14 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 int release;
                 int key;
 		if (code == VARIO_DISPLAY_DATA_ACK) continue;
-		if (code == 0X89) continue;
+		if (code == VARIO_MODEL_MODULAR40) continue;
                 if ((release = ((code & VARIO_RELEASE_FLAG) != 0)))
                 	code &= ~VARIO_RELEASE_FLAG;
 
 		if ((code >= VARIO_CURSOR_BASE) &&
 		    (code < (VARIO_CURSOR_BASE + VARIO_CURSOR_COUNT))) {
-			int keys = currentKeys;
-			currentKeys = 0;
+			int keys = activeKeys;
+			activeKeys = 0;
 			key = code - VARIO_CURSOR_BASE;
 			if (release) return EOF;
 			switch (keys) {
@@ -154,9 +154,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 				continue;
 		}
 		if (release) {
-			int keys = currentKeys;
+			int keys = activeKeys;
 			pressedKeys &= ~key;
-			currentKeys = 0;
+			activeKeys = 0;
 			switch (keys) {
 				case (KEY_1):
 					return CMD_LNUP;
@@ -183,7 +183,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 			}
 		} else {
 			pressedKeys |= key;
-			currentKeys = pressedKeys;
+			activeKeys = pressedKeys;
 		}
 	}
 	return EOF;
