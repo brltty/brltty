@@ -25,9 +25,10 @@ const CommandEntry commandTable[] = {
 
 static char* filename = "stdin";
 
-static int yyerror (char* s)  /* Called by yyparse on error */
+static int
+yyerror (char *problem)  /* Called by yyparse on error */
 {
-  fprintf(stderr, "%s[%d]: %s\n", filename, linenumber, s);
+  fprintf(stderr, "%s[%d]: %s\n", filename, lineNumber, problem);
   exit(99);
  return 0;
 }
@@ -89,39 +90,39 @@ static char* search_onoff(int cmd)
   return "";
 }
 
-static char* search_key(int code) {
+static char* search_key(int16_t key) {
   static char res[20];
 
-  if (code == ROUTINGKEY) {
+  if (key == ROUTINGKEY) {
     snprintf(res, sizeof(res), "%s",
              search_code(ROUTING, 0));
     return res;
   }
 
-  if (code >= OFFS_SWITCH) {
+  if (key >= OFFS_SWITCH) {
     static const unsigned char map[] = {0, 2, 3, 1};
-    code = code - OFFS_SWITCH - 1;
-    code = (map[code >> 1] << 1) | (code & 0X1);
+    key -= OFFS_SWITCH + 1;
+    key = (map[key >> 1] << 1) | (key & 0X1);
     snprintf(res, sizeof(res), "%s %s %s",
-             (code & 0X04)? "key": "switch",
-             (code & 0X02)? "right": "left",
-             (code & 0X01)? "front": "rear");
+             (key & 0X04)? "key": "switch",
+             (key & 0X02)? "right": "left",
+             (key & 0X01)? "front": "rear");
     return res;
   }
 
-  if (code >= OFFS_EASY) {
+  if (key >= OFFS_EASY) {
     snprintf(res, sizeof(res), "easy %s",
-             search_code(EASYCODE, code-OFFS_EASY));
+             search_code(EASYCODE, key-OFFS_EASY));
     return res;
   }
 
-  if (code >=  OFFS_STAT) {
-    snprintf(res, sizeof(res), "status %d", code-OFFS_STAT);
+  if (key >=  OFFS_STAT) {
+    snprintf(res, sizeof(res), "status %d", key-OFFS_STAT);
     return res;
   }
 
-  if (code >=  OFFS_FRONT) {
-    snprintf(res, sizeof(res), "front %d", code-OFFS_FRONT);
+  if (key >=  OFFS_FRONT) {
+    snprintf(res, sizeof(res), "front %d", key-OFFS_FRONT);
     return res;
   }
 
@@ -135,7 +136,7 @@ static char* search_key(int code) {
    big parameterfile via stdout                                    */
 
 static void
-printkeys (FILE *fh, const commands *cmd, const int *modifiers) {
+printkeys (FILE *fh, const CommandDefinition *cmd, const int16_t *modifiers) {
   const char *delimiter = "";
   int modifier;
 
@@ -146,8 +147,8 @@ printkeys (FILE *fh, const commands *cmd, const int *modifiers) {
     }
   }
 
-  if (cmd->keycode != NOKEY) {
-    fprintf(fh, "%s%s", delimiter, search_key(cmd->keycode));
+  if (cmd->key != NOKEY) {
+    fprintf(fh, "%s%s", delimiter, search_key(cmd->key));
   }
 }
 
@@ -161,16 +162,16 @@ void terminals(int help, int verbose)
   for(tn=0; tn < num_terminals; tn++) {
     if (pm_terminals[tn].name != 0) {
       if (help) {
-	fh = fopen(pm_terminals[tn].helpfile, "wa");
+	fh = fopen(pm_terminals[tn].helpFile, "wa");
 	if (!fh) {
 	  perror("fopen");
 	  fprintf(stderr, "read_config: Error creating help file %s for %s.\n", 
-		  pm_terminals[tn].helpfile, pm_terminals[tn].name);
+		  pm_terminals[tn].helpFile, pm_terminals[tn].name);
 	  continue;
 	}
 	if (verbose)
 	  fprintf(stderr, "read_config: Generating help file %s for %s.\n", 
-		  pm_terminals[tn].helpfile, pm_terminals[tn].name);
+		  pm_terminals[tn].helpFile, pm_terminals[tn].name);
       } else {
         if (verbose)
 	  fprintf(stderr, "read_config: Writing configuration records for %s.\n",
@@ -183,19 +184,19 @@ void terminals(int help, int verbose)
       fprintf(fh, "# Terminal Parameter:\n");
      
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(IDENT), pm_terminals[tn].ident);
+	      search_symbol(IDENT), pm_terminals[tn].identifier);
       fprintf(fh, "%s = \"%s\"\n", 
 	      search_symbol(NAME), pm_terminals[tn].name);
       fprintf(fh, "%s = \"%s\"\n", 
-	      search_symbol(HELPFILE), pm_terminals[tn].helpfile);
+	      search_symbol(HELPFILE), pm_terminals[tn].helpFile);
 
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(SIZE),      pm_terminals[tn].x);
+	      search_symbol(SIZE),      pm_terminals[tn].columns);
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(STATCELLS), pm_terminals[tn].statcells);
+	      search_symbol(STATCELLS), pm_terminals[tn].statusCells);
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(FRONTKEYS), pm_terminals[tn].frontkeys);
-      if (pm_terminals[tn].haseasybar)
+	      search_symbol(FRONTKEYS), pm_terminals[tn].frontKeys);
+      if (pm_terminals[tn].hasEasyBar)
 	fprintf(fh, "%s\n", search_symbol(EASYBAR));
 
       fprintf(fh, "# Terminal settings:\n");
@@ -240,18 +241,18 @@ void terminals(int help, int verbose)
 
       fprintf(fh, "# Commandkey settings:\n");    
       for(i=0; i < CMDMAX; i++) {
-	if (pm_terminals[tn].cmds[i].code != 0) {
+	if (pm_terminals[tn].commands[i].code != 0) {
 	  char* txtand = "";
 	  fprintf(fh, "%s",
-		  search_cmd(pm_terminals[tn].cmds[i].code & VAL_CMD_MASK));
-	  if (pm_terminals[tn].cmds[i].code & VAL_TOGGLE_MASK) 
-	    fprintf(fh, " %s", search_onoff(pm_terminals[tn].cmds[i].code) );
+		  search_cmd(pm_terminals[tn].commands[i].code & VAL_CMD_MASK));
+	  if (pm_terminals[tn].commands[i].code & VAL_TOGGLE_MASK) 
+	    fprintf(fh, " %s", search_onoff(pm_terminals[tn].commands[i].code) );
 	  fprintf(fh, " = ");
-	  printkeys(fh, &pm_terminals[tn].cmds[i], pm_terminals[tn].modifiers);
+	  printkeys(fh, &pm_terminals[tn].commands[i], pm_terminals[tn].modifiers);
 	  fprintf(fh, " # %s",
-		  get_command_description(pm_terminals[tn].cmds[i].code & VAL_CMD_MASK));
-	  if (pm_terminals[tn].cmds[i].code & VAL_TOGGLE_MASK) 
-	    fprintf(fh, " - set %s", search_onoff(pm_terminals[tn].cmds[i].code) );
+		  get_command_description(pm_terminals[tn].commands[i].code & VAL_CMD_MASK));
+	  if (pm_terminals[tn].commands[i].code & VAL_TOGGLE_MASK) 
+	    fprintf(fh, " - set %s", search_onoff(pm_terminals[tn].commands[i].code) );
 	  fprintf(fh, "\n");
 	}
       }
@@ -289,7 +290,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  configfile = stdin;
+  configurationFile = stdin;
   memset(&pm_terminals, 0, sizeof(pm_terminals));
   parse ();
   terminals(0, 1);

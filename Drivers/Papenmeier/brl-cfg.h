@@ -63,16 +63,12 @@ typedef enum {
 #define ROUTINGKEY      -9999  /* virtual routing key */
 #define NOKEY           -1
 
-#define KEYMAX 8
-
-#define  STATMAX   22
-#define  FRONTMAX  13
-#define  EASYMAX   8
-#define  NAMEMAX   80
-#define  MODMAX    16
-#define  CMDMAX    300
-#define  INPUTSPECMAX 20
-#define  HELPLEN   80
+#define NAMEMAX   80
+#define HELPLEN   80
+#define STATMAX   22
+#define MODMAX    16
+#define CMDMAX   300
+#define KEYMAX     8
 
 #define OFFS_EMPTY       0
 #define OFFS_HORIZ    1000	/* added to status show */
@@ -100,31 +96,31 @@ typedef enum {
 
 typedef struct {
   int code;		/* the code to sent */
-  int16_t keycode;	/* the key to press */
+  int16_t key;	/* the key to press */
   uint16_t modifiers;	/* modifiers (bitfield) */
-} commands;
+} CommandDefinition;
 
 typedef struct {
-  unsigned char ident;		/* identity of terminal */
+  unsigned char identifier;		/* identity of terminal */
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
   char name[NAMEMAX];		/* name of terminal */
-  char helpfile[HELPLEN];	/* filename of local helpfile */
+  char helpFile[HELPLEN];	/* filename of local helpfile */
 #else /* ENABLE_PM_CONFIGURATION_FILE */
   const char *name;		/* name of terminal */
-  const char *helpfile;		/* filename of local helpfile */
+  const char *helpFile;		/* filename of local helpfile */
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
 
-  int x, y;			/* size of display */
-  int statcells;		/* number of status cells */
-  int frontkeys;		/* number of frontkeys */
-  int haseasybar;		/* terminal has an easy bar */
+  uint8_t columns;		/* width of display */
+  uint8_t rows;			/* height of display */
+  uint8_t statusCells;		/* number of status cells */
+  uint8_t frontKeys;		/* number of frontkeys */
+  uint8_t hasEasyBar;		/* terminal has an easy bar */
 
-  int statshow[STATMAX];	/* status cells: info to show */
-  int modifiers[MODMAX];	/* keys used as modifier */
-  commands cmds[CMDMAX];
-
-} one_terminal; 
+  uint16_t statshow[STATMAX];	/* status cells: info to show */
+  int16_t modifiers[MODMAX];	/* keys used as modifier */
+  CommandDefinition commands[CMDMAX];
+} TerminalDefinition; 
 
 /* some macros for terminals with the same layout -
  * named after there usage
@@ -500,8 +496,7 @@ typedef struct {
               { CMD_PASTE      , OFFS_STAT + 22, 0X0000  }
 
 
-static one_terminal pm_terminals[] =
-{
+static TerminalDefinition pm_terminals[] = {
   {
     0,				/* identity */
     "BrailleX Compact 486",	/* name of terminal */

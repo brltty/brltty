@@ -77,18 +77,19 @@ typedef enum {
 int
 yyerror (char *problem)  /* Called by yyparse on error */
 {
-  LogPrint(LOG_CRIT, "Configuration file error: line %d: %s", linenumber, problem);
+  LogPrint(LOG_CRIT, "Configuration file error: line %d: %s",
+           lineNumber, problem);
   exit(99);
 }
 
 static void
 read_file (const char *name) {
   LogPrint(LOG_DEBUG, "Opening config file: %s", name);
-  if ((configfile = fopen(name, "r")) != NULL) {
+  if ((configurationFile = fopen(name, "r")) != NULL) {
     LogPrint(LOG_DEBUG, "Reading config file: %s", name);
     parse();
-    fclose(configfile);
-    configfile = NULL;
+    fclose(configurationFile);
+    configurationFile = NULL;
   } else {
     LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
              "Cannot open Papenmeier configuration file '%s': %s",
@@ -143,7 +144,7 @@ static unsigned char currentLine[BRLCOLSMAX];
 
 /* ------------------------------------------------------------ */
 
-static one_terminal* the_terminal = NULL;
+static const TerminalDefinition *the_terminal = NULL;
 
 static int curr_cols = -1;
 static int curr_stats = -1;
@@ -313,20 +314,20 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
            identity[3], identity[4], identity[5],
            identity[6], identity[7], identity[8]);
   for (tn=0; tn<num_terminals; tn++) {
-    if (pm_terminals[tn].ident == identity[2]) {
+    if (pm_terminals[tn].identifier == identity[2]) {
       the_terminal = &pm_terminals[tn];
       LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
                the_terminal->name,
-               the_terminal->x, the_terminal->y,
-               the_terminal->helpfile);
-      brl->x = the_terminal->x;
-      brl->y = the_terminal->y;
+               the_terminal->columns, the_terminal->rows,
+               the_terminal->helpFile);
+      brl->x = the_terminal->columns;
+      brl->y = the_terminal->rows;
 
-      curr_cols = the_terminal->x;
-      curr_stats = the_terminal->statcells;
+      curr_cols = the_terminal->columns;
+      curr_stats = the_terminal->statusCells;
 
       /* TODO: ?? HACK */
-      BRLSYMBOL.helpFile = the_terminal->helpfile;
+      BRLSYMBOL.helpFile = the_terminal->helpFile;
 
       /* key codes - starts at 0X300  */
       /* status keys - routing keys - step 3 */
@@ -338,15 +339,15 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
                code_status_first, code_status_last,
                code_route_first, code_route_last);
 
-      if (the_terminal->frontkeys > 0) {
+      if (the_terminal->frontKeys > 0) {
         code_front_first = RCV_KEYFUNC + 3;
-        code_front_last  = code_front_first + 3 * (the_terminal->frontkeys - 1);
+        code_front_last  = code_front_first + 3 * (the_terminal->frontKeys - 1);
         LogPrint(LOG_DEBUG, "Keys: front=%03X-%03X",
                  code_front_first, code_front_last);
       } else
         code_front_first = code_front_last  = -1;
 
-      if (the_terminal->haseasybar) {
+      if (the_terminal->hasEasyBar) {
         code_easy_first = RCV_KEYFUNC + 3;
         code_easy_last  = 0X18;
         code_switch_first = 0X1B;
@@ -359,7 +360,7 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
 
       /* address of display */
       addr_status = XMT_BRLDATA;
-      addr_display = addr_status + the_terminal->statcells;
+      addr_display = addr_status + the_terminal->statusCells;
       LogPrint(LOG_DEBUG, "Cells: status=%04X display=%04X",
                addr_status, addr_display);
 
@@ -423,7 +424,7 @@ initializeDisplay (BrailleDisplay *brl, const char *dev, speed_t baud) {
       /* HACK - used with serial.c - 2d screen */
       the_terminal = &pm_terminals[3];
       addr_status = XMT_BRLDATA;
-      addr_display = addr_status + the_terminal->statcells;
+      addr_display = addr_status + the_terminal->statusCells;
       if (1) {
 #else /* _SERIAL_C_ */
       if (identifyTerminal(brl)) {
@@ -604,15 +605,17 @@ handleModifier (int bit, int press) {
         LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
     } else {
       int i;
-      for (i=0; i<CMDMAX; i++)
-        if ((the_terminal->cmds[i].modifiers == modifiers) &&
-            (the_terminal->cmds[i].keycode == NOKEY)) {
-          command = the_terminal->cmds[i].code;
+      for (i=0; i<CMDMAX; i++) {
+        const CommandDefinition *cmd = &the_terminal->commands[i];
+        if ((cmd->modifiers == modifiers) &&
+            (cmd->key == NOKEY)) {
+          command = cmd->code;
           if (debug_keys)
             LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
                      modifiers, command); 
           break;
         }
+      }
     }
   }
 
@@ -635,12 +638,13 @@ handleKey (int code, int press, int offsroute) {
   if (press) {
     saved_modifiers = 0;
     for (i=0; i<CMDMAX; i++) {
-      if ((the_terminal->cmds[i].keycode == code) &&
-          (the_terminal->cmds[i].modifiers == pressed_modifiers)) {
+      const CommandDefinition *cmd = &the_terminal->commands[i];
+      if ((cmd->key == code) &&
+          (cmd->modifiers == pressed_modifiers)) {
         if (debug_keys)
           LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
-                   code, pressed_modifiers, the_terminal->cmds[i].code, offsroute); 
-        return handleCommand(the_terminal->cmds[i].code + offsroute,
+                   code, pressed_modifiers, cmd->code, offsroute); 
+        return handleCommand(cmd->code + offsroute,
                              VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY);
       }
     }

@@ -50,21 +50,20 @@ static char *nameval = NULL;
 static int numval, keyindex, cmdval; 
 
 static int numkeys = 0;
-static int keys[KEYMAX];
+static int16_t keys[KEYMAX];
 
-static int linenumber = 1;
-
-static FILE* configfile = NULL;
+static FILE *configurationFile = NULL;
+static int lineNumber = 1;
 
  /* --------------------------------------------------------------- */
  /* some functions set_*(): set the big table with the values read  */
  
  /* global var: the current entry (index) */
- static int set_current = -1;
+ static int currentTerminal = -1;
  /* the number of modifiers - last entry used */
- static int mod_current = 0;
+ static int currentModifier;
  /* the number of defined commands - last entry use*/
- static int cmd_current = 0;
+ static int currentCommand;
 
  static void
  assert_condition (int condition, char *problem, int line) {
@@ -75,7 +74,7 @@ static FILE* configfile = NULL;
 
  static void
  assert_started (int line) {
-  assert_condition((set_current >= 0), "terminal not being defined", line);
+  assert_condition((currentTerminal >= 0), "terminal not being defined", line);
  }
 
  static inline void set_modifier(int code);
@@ -83,106 +82,106 @@ static FILE* configfile = NULL;
  static inline void set_ident(int num)
   {
     int i;
+    TerminalDefinition *terminal = &pm_terminals[++currentTerminal];
+    assert_condition((currentTerminal < num_terminals), "too many terminals", __LINE__);
+    currentModifier = -1;
+    currentCommand = -1;
+    terminal->identifier = num;
 
-    set_current++;
-    assert_condition((set_current < num_terminals), "too many terminals", __LINE__);
-    mod_current = -1;
-    cmd_current = -1;
-    pm_terminals[set_current].ident = num;
+    terminal->columns = 0;
+    terminal->rows = 1;
 
-    pm_terminals[set_current].x = 0;
-    pm_terminals[set_current].y = 1;
-
-    pm_terminals[set_current].statcells = 0;
-    pm_terminals[set_current].frontkeys = 0;
-    pm_terminals[set_current].haseasybar = 0;
-
-    /* pm_terminals[set_current].inputoff = 0;
-     * for(i=0; i < 8; i++)
-     *   pm_terminals[set_current].inputdotskey[i] = 0;
-     */
+    terminal->statusCells = 0;
+    terminal->frontKeys = 0;
+    terminal->hasEasyBar = 0;
   }
 
  static inline void set_name(char* nameval)
   {
     assert_started(__LINE__);
-    strncpy(pm_terminals[set_current].name, nameval,
-    	    sizeof(pm_terminals[set_current].name));
+    strncpy(pm_terminals[currentTerminal].name, nameval,
+    	    sizeof(pm_terminals[currentTerminal].name));
   }
 
 
  static inline void set_help(char* name)
    {
      assert_started(__LINE__);
-     strncpy(pm_terminals[set_current].helpfile, name,
-     	     sizeof(pm_terminals[set_current].helpfile));
+     strncpy(pm_terminals[currentTerminal].helpFile, name,
+     	     sizeof(pm_terminals[currentTerminal].helpFile));
    }
 
  static inline void set_size(int code)
   {
     assert_started(__LINE__);
-    pm_terminals[set_current].x = code;
+    pm_terminals[currentTerminal].columns = code;
   }
 
  static inline void set_statcells(int code)
   {
     assert_started(__LINE__);
-    pm_terminals[set_current].statcells = code;
+    pm_terminals[currentTerminal].statusCells = code;
   }
 
  static inline void set_frontkeys(int code)
   {
     assert_started(__LINE__);
-    pm_terminals[set_current].frontkeys = code;
+    pm_terminals[currentTerminal].frontKeys = code;
   }
 
  static inline void set_haseasybar(int code)
   {
     assert_started(__LINE__);
-    pm_terminals[set_current].haseasybar = code;
+    pm_terminals[currentTerminal].hasEasyBar = code;
   }
 
  static inline void set_showstat(int pos, int code)
   {
     assert_started(__LINE__);
     assert_condition(((0 < pos) && (pos <= STATMAX)), "invalid status cell number", __LINE__);
-    pm_terminals[set_current].statshow[pos-1] = code;
+    pm_terminals[currentTerminal].statshow[pos-1] = code;
   }
 
  static inline void set_modifier(int code)
   {
     assert_started(__LINE__);
-    mod_current ++;
-    assert_condition((mod_current < MODMAX), "too many modifiers", __LINE__);
-    pm_terminals[set_current].modifiers[mod_current] = code;
+    currentModifier++;
+    assert_condition((currentModifier < MODMAX), "too many modifiers", __LINE__);
+    pm_terminals[currentTerminal].modifiers[currentModifier] = code;
   }
 
- static inline void set_keycode(int code, int numkeys, int keys[])
+ static inline void add_command(int code, int numkeys, int16_t keys[])
   {
+    TerminalDefinition *terminal;
+    CommandDefinition *cmd;
     int k, m;
-    commands* curr;
+
     assert_started(__LINE__);
-    cmd_current++;
-    assert_condition((cmd_current < CMDMAX), "too many commands", __LINE__);
-    curr = &(pm_terminals[set_current].cmds[cmd_current]);
-    curr->code = code;
-    curr->keycode = NOKEY;
-    curr->modifiers = 0;
+    terminal = &pm_terminals[currentTerminal];
+
+    currentCommand++;
+    assert_condition((currentCommand < CMDMAX), "too many commands", __LINE__);
+    cmd = &terminal->commands[currentCommand];
+    cmd->code = code;
+    cmd->key = NOKEY;
+    cmd->modifiers = 0;
+
     for (k=0; k<numkeys; k++) {
-      int key = keys[k];
+      int16_t key = keys[k];
       int found = 0;
-      for(m=0; m<=mod_current; m++) {
-	if (key == pm_terminals[set_current].modifiers[m]) {
+      for (m=0; m<=currentModifier; m++) {
+	if (key == terminal->modifiers[m]) {
           int bit = 1 << m;
-          assert_condition(!(curr->modifiers & bit), "duplicate modifier", __LINE__);
-          curr->modifiers |= bit;
+          assert_condition(!(cmd->modifiers & bit), "duplicate modifier", __LINE__);
+          cmd->modifiers |= bit;
           found = 1;
           break;
 	}
       }
+
       if (!found) {
-        assert_condition((curr->keycode == NOKEY), "more than one key", __LINE__);
-        curr->keycode = key;
+        assert_condition((cmd->key == NOKEY), "more than one key", __LINE__);
+        cmd->key = key;
       }
     }
   }
@@ -219,9 +218,9 @@ inputline:  '\n'
 
        | statdef eq statdisp '\n'  { set_showstat(keyindex, numval);  }
        | MODIFIER eq anykey '\n'   { set_modifier(keyindex); }
-       | keycode eq modifiers '\n' { set_keycode(cmdval, numkeys, keys); }
-       | keycode ON eq modifiers '\n' { set_keycode(cmdval | VAL_TOGGLE_ON, numkeys, keys); }
-       | keycode OFF eq modifiers '\n' { set_keycode(cmdval | VAL_TOGGLE_OFF, numkeys, keys); }
+       | keycode eq modifiers '\n' { add_command(cmdval, numkeys, keys); }
+       | keycode ON eq modifiers '\n' { add_command(cmdval | VAL_TOGGLE_ON, numkeys, keys); }
+       | keycode OFF eq modifiers '\n' { add_command(cmdval | VAL_TOGGLE_OFF, numkeys, keys); }
        ;
 
 eq:    '='
@@ -360,7 +359,7 @@ int yylex ()
   const int length = sizeof(symbuf)/sizeof(symbuf[0]);
 
   /* Ignore whitespace, get first nonwhite character.  */
-  while ((c = getc(configfile)) == ' ' || c == '\t')
+  while ((c = getc(configurationFile)) == ' ' || c == '\t')
     ;
 
   if (c == EOF)
@@ -368,30 +367,30 @@ int yylex ()
 
   if (c == '#') {		/* comment to end of line */
     do {
-      c = getc(configfile);
+      c = getc(configurationFile);
     } while (c != '\n' && c != EOF);
-    linenumber ++;
+    lineNumber++;
     return '\n';
   }
 
   /* Char starts a number => parse the number. */
   if (c == '.' || isdigit (c)) {
-    ungetc (c, configfile);
-    fscanf (configfile, "%d", &numval);
+    ungetc (c, configurationFile);
+    fscanf (configurationFile, "%d", &numval);
     return NUM;
   }
 
   if (c == '"') {		/* string */
     int i=0;
     symbuf[0] = '\0';
-    c = getc(configfile);
+    c = getc(configurationFile);
     while(c !='"' && c != EOF) {
       /* If buffer is full */
       if (i == length)
 	break;
       /* Add this character to the buffer. */
       symbuf[i++] = c;
-      c = getc(configfile);
+      c = getc(configurationFile);
     }
     symbuf[i] = 0;
     nameval = symbuf;
@@ -408,10 +407,10 @@ int yylex ()
       
       /* Add this character to the buffer. */
       symbuf[i++] = c;
-      c = getc(configfile);
+      c = getc(configurationFile);
     } while (c != EOF && (isalnum (c) || c=='_'));
      
-    ungetc (c, configfile);
+    ungetc (c, configurationFile);
     symbuf[i] = 0;
     for(i=0;symbols[i].sname; i++)
       if(strcasecmp(symbuf,symbols[i].sname) == 0) {
@@ -425,7 +424,7 @@ int yylex ()
      
   /* Any other character is a token by itself. */
   if (c == '\n')
-    linenumber++;
+    lineNumber++;
 
   return c;
 }
@@ -435,8 +434,8 @@ int yylex ()
 
 int
 parse (void) {
-  linenumber = 1;
-  set_current = -1;
+  lineNumber = 1;
+  currentTerminal = -1;
 
   nameval = NULL;
   numval = 0;
