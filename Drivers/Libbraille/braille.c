@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -17,7 +17,7 @@
 
 /* Libbraille/braille.c - Braille display driver using libbraille
  *
- * Written by Sebastien Sable <sable@users.sourceforge.net>
+ * Written by Sebastien Sablé <sable@users.sourceforge.net>
  *
  */
 
@@ -29,34 +29,32 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <fcntl.h>
-#include <sys/termios.h>
-#include <sys/time.h>
 
-#include "Programs/brl.h"
-#include "Programs/brltty.h"
 #include "Programs/misc.h"
 
 #include "braille.h"
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
+#include "Programs/tbl.h"
 
 static TranslationTable outputTable;
+static TranslationTable inputTable;
 
 static void
 brl_identify(void)
 {
   LogPrint(LOG_NOTICE, "BRLTTY wrapper for Libbraille");
-  LogPrint(LOG_INFO, "Copyright (C) 2004 by Sebastien Sable <sable@users.sourceforge.net>");
+  LogPrint(LOG_INFO, "   Copyright (C) 2004 by Sebastien Sablé <sable@users.sourceforge.net>");
 }
 
 static int
-brl_open(BrailleDisplay *brl, char **parameters, const char *dev)
+brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
     makeOutputTable(&dots, &outputTable);
+    reverseTranslationTable(&outputTable, &inputTable);
   }
   
   if(!braille_init())
@@ -100,7 +98,7 @@ brl_writeWindow(BrailleDisplay *brl)
 }
 
 static void
-brl_writeStatus(BrailleDisplay *brl, const unsigned char *st)
+brl_writeStatus(BrailleDisplay *brl, const unsigned char *status)
 {
 }
 
@@ -129,31 +127,31 @@ brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 	  switch(key.code)
 	    {
 	    case BRLK_UP:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_UP;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
 	      break;
 	    case BRLK_DOWN:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_DOWN;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
 	      break;
 	    case BRLK_RIGHT:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_RIGHT;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
 	      break;
 	    case BRLK_LEFT:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_LEFT;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
 	      break;
 	    case BRLK_INSERT:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_INSERT;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_INSERT;
 	      break;
 	    case BRLK_HOME:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_HOME;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_HOME;
 	      break;
 	    case BRLK_END:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_END;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_END;
 	      break;
 	    case BRLK_PAGEUP:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_PAGE_UP;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
 	      break;
 	    case BRLK_PAGEDOWN:
-	      res = BRL_BLK_PASSKEY | BRL_KEY_PAGE_DOWN;
+	      res = BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
 	      break;
 	    case BRLK_BACKWARD:
 	      res = BRL_CMD_FWINLT;
@@ -166,15 +164,7 @@ brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 	    }
 	  break;
 	case BRL_KEY:
-	  res = BRL_BLK_PASSDOTS |
-	    (((key.braille & 1)) |
-	     ((key.braille & 2) << 1) |
-	     ((key.braille & 4) << 2) |
-	     ((key.braille & 8)  >> 2) |
-	     ((key.braille & 16) >> 1) |
-	     ((key.braille & 32)) |
-	     ((key.braille & 64)) |
-	     ((key.braille & 128)));
+	  res = BRL_BLK_PASSDOTS | inputTable[key.braille];
 	  break;
 	default:
           break;
