@@ -159,7 +159,7 @@ saveBytes (FileData *data, ContractionTableOffset *offset, const BYTE *bytes, BY
 
 static int
 saveString (FileData *data, ContractionTableOffset *offset, const char *string) {
-  return saveBytes(data, offset, string, strlen(string));
+  return saveBytes(data, offset, (const unsigned char *)string, strlen(string));
 }
 
 static int
@@ -228,7 +228,7 @@ addRule (
 }
 
 static const struct CharacterClass *
-findCharacterClass (const char *name, int length) {
+findCharacterClass (const unsigned char *name, int length) {
   const struct CharacterClass *class = characterClasses;
   while (class) {
     if ((length == class->length) &&
@@ -240,7 +240,7 @@ findCharacterClass (const char *name, int length) {
 }
 
 static struct CharacterClass *
-addCharacterClass (FileData *data, const char *name, int length) {
+addCharacterClass (FileData *data, const unsigned char *name, int length) {
   struct CharacterClass *class;
   if (characterClassAttribute) {
     if ((class = malloc(sizeof(*class) + length - 1))) {
@@ -274,7 +274,7 @@ allocateCharacterClasses (void) {
   characterClasses = NULL;
   characterClassAttribute = 1;
   while (*name) {
-    if (!addCharacterClass(NULL, *name, strlen(*name))) {
+    if (!addCharacterClass(NULL, (const unsigned char *)*name, strlen(*name))) {
       deallocateCharacterClasses();
       return 0;
     }
@@ -284,7 +284,7 @@ allocateCharacterClasses (void) {
 }
 
 static ContractionTableOpcode
-getOpcode (FileData *data, const char *token, int length) {
+getOpcode (FileData *data, const unsigned char *token, int length) {
   ContractionTableOpcode opcode;
   for (opcode=0; opcode<CTO_None; ++opcode)
     if (length == opcodeLengths[opcode])
@@ -295,8 +295,8 @@ getOpcode (FileData *data, const char *token, int length) {
 }
 
 static int
-getToken (FileData *data, const char **token, int *length, const char *description) { /*find the next string of contiguous nonblank characters */
-  const char *start = *token + *length;
+getToken (FileData *data, const unsigned char **token, int *length, const char *description) { /*find the next string of contiguous nonblank characters */
+  const unsigned char *start = *token + *length;
   int count = 0;
 
   while (isspace(*start)) start++;
@@ -331,7 +331,7 @@ octalDigit (FileData *data, int *value, char digit) {
 }
 
 static int
-parseText (FileData *data, ByteString *result, const char *token, const int length) {	/*interpret find string */
+parseText (FileData *data, ByteString *result, const unsigned char *token, const int length) {	/*interpret find string */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
   for (index = 0; index < length; index++) {
@@ -407,7 +407,7 @@ parseText (FileData *data, ByteString *result, const char *token, const int leng
 }				/*find string interpreted */
 
 static int
-parseDots (FileData *data, ByteString *cells, const char *token, const int length) {	/*get dot patterns */
+parseDots (FileData *data, ByteString *cells, const unsigned char *token, const int length) {	/*get dot patterns */
   BYTE cell = 0;		/*assembly place for dots */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
@@ -480,7 +480,7 @@ parseDots (FileData *data, ByteString *cells, const char *token, const int lengt
 }				/*end of function parseDots */
 
 static int
-getCharacters (FileData *data, ByteString *characters, const char **token, int *length) {
+getCharacters (FileData *data, ByteString *characters, const unsigned char **token, int *length) {
   if (getToken(data, token, length, "characters"))
     if (parseText(data, characters, *token, *length))
       return 1;
@@ -488,7 +488,7 @@ getCharacters (FileData *data, ByteString *characters, const char **token, int *
 }
 
 static int
-getFindText (FileData *data, ByteString *find, const char **token, int *length) {
+getFindText (FileData *data, ByteString *find, const unsigned char **token, int *length) {
   if (getToken(data, token, length, "find text"))
     if (parseText(data, find, *token, *length))
       return 1;
@@ -496,7 +496,7 @@ getFindText (FileData *data, ByteString *find, const char **token, int *length) 
 }
 
 static int
-getReplaceText (FileData *data, ByteString *replace, const char **token, int *length) {
+getReplaceText (FileData *data, ByteString *replace, const unsigned char **token, int *length) {
   if (getToken(data, token, length, "replacement text"))
     if (parseText(data, replace, *token, *length))
       return 1;
@@ -504,7 +504,7 @@ getReplaceText (FileData *data, ByteString *replace, const char **token, int *le
 }
 
 static int
-getReplacePattern (FileData *data, ByteString *replace, const char **token, int *length) {
+getReplacePattern (FileData *data, ByteString *replace, const unsigned char **token, int *length) {
   if (getToken(data, token, length, "replacement pattern")) {
     if (*length == 1 && **token == '=') {
       replace->length = 0;
@@ -522,7 +522,7 @@ setLocale (const char *locale) {
 }
 
 static int
-getCharacterClass (FileData *data, const struct CharacterClass **class, const char **token, int *length) {
+getCharacterClass (FileData *data, const struct CharacterClass **class, const unsigned char **token, int *length) {
   if (getToken(data, token, length, "character class name")) {
     if ((*class = findCharacterClass(*token, *length))) return 1;
     compileError(data, "character class not defined: %.*s", *length, *token);
@@ -540,7 +540,7 @@ static int
 includeFile (FileData *data, ByteString *path) {
   const char *prefixAddress = data->fileName;
   int prefixLength = 0;
-  const char *suffixAddress = path->bytes;
+  const unsigned char *suffixAddress = path->bytes;
   int suffixLength = path->length;
   if (*suffixAddress != '/') {
     const char *ptr = strrchr(prefixAddress, '/');
@@ -557,7 +557,7 @@ includeFile (FileData *data, ByteString *path) {
 static int
 processLine (FileData *data, const char *line) {
   int ok = 0;
-  const char *token = line;
+  const unsigned char *token = (const unsigned char *)line;
   int length = 0;			/*length of token */
   ContractionTableOpcode opcode;
   ContractionTableCharacterAttributes after = 0;
