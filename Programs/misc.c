@@ -427,10 +427,10 @@ shortdelay (int milliseconds) {
   static int tickLength = 0;
   struct timeval start;
   gettimeofday(&start, NULL);
-  if (!tickLength) {
-    tickLength = 1000 / sysconf(_SC_CLK_TCK);
-  }
-  if (tickLength) {
+  if (!tickLength)
+    if (!(tickLength = 1000 / sysconf(_SC_CLK_TCK)))
+      tickLength = 1;
+  if (milliseconds >= tickLength) {
     delay(milliseconds / tickLength * tickLength);
   }
   while (1) {
