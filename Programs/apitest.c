@@ -102,6 +102,7 @@ void enterLearnMode(void)
   brl_keycode_t cmd;
   char buf[0X100];
 
+  fprintf(stderr,"Entering learn mode\n");
   if (brlapi_getTty(0, BRLCOMMANDS)<0) {
     brlapi_perror("getTty");
     exit(1);
@@ -115,7 +116,8 @@ void enterLearnMode(void)
   while ((res = brlapi_readKey(1, &cmd)) != -1) {
     describeCommand(cmd, buf, sizeof(buf));
     brlapi_writeText(0, buf);
-    if (cmd==BRL_CMD_LEARN) break;
+    fprintf(stderr, "%s\n", buf);
+    if (cmd==BRL_CMD_LEARN) return;
   }
   brlapi_perror("brlapi_readKey");
 }
