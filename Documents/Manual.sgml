@@ -520,6 +520,22 @@ for any additional display-specific instructions.
   <tag><tt/--with-flite-voice=/<em/voice/<label id="build-flite-voice"></tag>
     Specify the voice which the FestivalLite text to speech engine is to use.
     The default voice is <tt/cmu_us_kal16/.
+  <tag><tt/--with-mikropuhe=/<em/directory/<label id="build-mikropuhe"></tag>
+    Specify the installed location of the Mikropuhe text-to-speech package,
+    and build the Mikropuhe speech synthesizer driver
+    (see <ref id="restrictions-mikropuhe" name="Build Restrictions">).
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't build the driver.
+        This is equivalent to specifying <tt/--without-mikropuhe/.
+      <tag/yes/
+        Build the driver if the package can be found in
+        <tt>/usr</>,
+        <tt>/usr/local</>,
+        or <tt>/opt/mikropuhe</>.
+        This is equivalent to specifying <tt/--with-mikropuhe/.
+    </descrip>
   <tag><tt/--with-theta=/<em/directory/<label id="build-theta"></tag>
     Specify the installed location of the Theta text-to-speech package,
     and build the Theta speech synthesizer driver
@@ -1103,6 +1119,13 @@ and all that, you can run BRLTTY without root priviledge.
     cannot be simultaneously linked into the BRLTTY binary
     (see the <ref id="build-speech-driver" name="--with-speech-driver"> build option)
     because their run-time libraries contain conflicting symbols.
+  <tag/Mikropuhe Speech Synthesizer Driver/<label id="restrictions-mikropuhe">
+    The driver for the Mikropuhe text to speech engine
+    is only built if that package has been installed.
+
+    This driver cannot be included if the BRLTTY binary is statically linked
+    (see the <ref id="build-standalone-programs" name="--enable-standalone-programs"> build option)
+    because a static archive isn't included with the package.
   <tag/Theta Speech Synthesizer Driver/<label id="restrictions-theta">
     The driver for the Theta text to speech engine
     is only built if that package has been installed.
