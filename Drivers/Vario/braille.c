@@ -42,11 +42,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <sys/termios.h>
 #include <sys/ioctl.h>
 #include <string.h>
-#include <errno.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -206,19 +204,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
   brl->buffer = rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  brl_fd = open (tty, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0) {
-    LogPrint(LOG_ERR, "Open failed on port %s: %s", tty, strerror(errno));
-    goto failure;
-  }
-  if(!isatty(brl_fd)) {
-    LogPrint(LOG_ERR,"Opened device %s is not a tty!", tty);
-    goto failure;
-  }
-  LogPrint(LOG_DEBUG,"Tty %s opened", tty);
-
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
-  /* we don't check the return code. could only be EBADF or ENOTTY. */
+  if (!openSerialDevice(tty, &brl_fd, &oldtio)) goto failure;
 
   /* Construct new settings by working from current state */
   memcpy(&curtio, &oldtio, sizeof(struct termios));
@@ -228,7 +214,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
   /* control */
   curtio.c_cflag |= CLOCAL /* ignore status lines (carrier detect...) */
                   | CREAD; /* enable reading */
-  curtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
+  curtio.c_cflag = CS8 | CLOCAL | CREAD;
 #if 0
   curtio.c_cflag &= ~( CSTOPB /* 1 stop bit */
 		      | CRTSCTS /* disable hardware flow control */
@@ -244,19 +230,14 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
   curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars on input */
   curtio.c_cc[VMIN] = 0; /* no minimum input. */
 
-  /* Make the settings active and flush the input/output queues. This time we
-     check the return code in case somehow the settings are invalid. */
-  if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1) {
-    LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
-    goto failure;
-  }
+  if(!resetSerialDevice(brl_fd, &curtio, BAUDRATE)) goto failure;
 
   /* Try to detect display by sending query */
   while(1) {
     /* Reset serial port config, in case some other program interfered and
        BRLTTY is resetting... */
     if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1) {
-      LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
+      LogError("tcsetattr");
       goto failure;
     }
     LogPrint(LOG_DEBUG,"Sending query");
