@@ -455,16 +455,16 @@ ifelse(len([$1]), 0, [], [dnl
 
 AC_DEFUN([BRLTTY_PACKAGE_CHOOSE], [dnl
 BRLTTY_ARG_WITH(
-   [$1], [PACKAGE],
-   [which $1 package to use (]BRLTTY_PACKAGE_LIST(m4_shift($@))[)],
-   [$1_package], ["yes"]
+   [translit([$1], [_], [-])], [PACKAGE],
+   [which translit([$1], [_], [ ]) package to use (BRLTTY_PACKAGE_LIST(m4_shift($@)))],
+   [brltty_package_$1], ["yes"]
 )
-if test "${$1_package}" = "no"
+if test "${brltty_package_$1}" = "no"
 then
-   $1_package=""
-elif test "${$1_package}" = "yes"
+   brltty_package_$1=""
+elif test "${brltty_package_$1}" = "yes"
 then
-AC_CACHE_CHECK([which $1 package to use], [brltty_cv_package_$1], [dnl
+AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_package_$1], [dnl
    brltty_cv_package_$1=""
    brltty_packages=""
    BRLTTY_PACKAGE_DEFINE(m4_shift($@))
@@ -486,16 +486,15 @@ AC_CACHE_CHECK([which $1 package to use], [brltty_cv_package_$1], [dnl
          }
       }
    done
-])dnl
-   $1_package="${brltty_cv_package_$1}"
-fi
-AC_SUBST([$1_package])
-test -n "${$1_package}" && {
-   $1_package_uc="`echo "${$1_package}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
-   AC_DEFINE_UNQUOTED([HAVE_PKG_${$1_package_uc}])
-}
-BRLTTY_SUMMARY_ITEM([$1-package], [$1_package])
 ])
+   brltty_package_$1="${brltty_cv_package_$1}"
+fi
+AC_SUBST([brltty_package_$1])
+test -n "${brltty_package_$1}" && {
+   brltty_uc="`echo "${brltty_package_$1}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
+   AC_DEFINE_UNQUOTED([HAVE_PKG_${brltty_uc}])
+   BRLTTY_SUMMARY_ITEM([translit([$1], [_], [-])-package], [brltty_package_$1])
+}])
 AC_DEFUN([BRLTTY_PACKAGE_DEFINE], [dnl
 ifelse($#, 0, [], [dnl
 

@@ -43,7 +43,7 @@ BRLTTY_PACKAGE_CHOOSE([curses],
    [curses curses.h],
    [ncurses ncurses.h])
 
-BRLTTY_PACKAGE_CHOOSE([xaw],
+BRLTTY_PACKAGE_CHOOSE([xt_toolkit],
    [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
    [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
    [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
@@ -626,8 +626,8 @@ BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 if test "${no_x}" != "yes"
 then
-   test -n "${xaw_package}" && {
-      BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(X_LIBS) -l$(XAW_LIB) -lXt -lX11])
+   test -n "${brltty_package_xt_toolkit}" && {
+      BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(X_LIBS) -l$(XT_TOOLKIT_LIB) -lXt -lX11])
    }
 fi
 BRLTTY_ARG_DRIVER([braille])
