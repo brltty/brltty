@@ -223,6 +223,7 @@ static struct button buttons_vs[] = {
  //{ "C2", EOF,                1, 1, 3 },
  //{ "C4", EOF,                1, 3, 3 },
  //{ "D4", EOF,                1, 3, 4 },
+ { NULL,     0,              0, 0, 0},
 };
 
 static void createKeyButtons(struct button *buttons) {
