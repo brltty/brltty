@@ -673,7 +673,99 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
       case (KEY_THREE):
         *command = CMD_MENU_LAST_ITEM;
         return 1;
+      case (KEY_ZERO | KEY_SEVEN):
+        *command = VAL_PASSKEY + VPK_HOME;
+        return 1;
+      case (KEY_ZERO | KEY_EIGHT):
+        *command = VAL_PASSKEY + VPK_CURSOR_UP;
+        return 1;
+      case (KEY_ZERO | KEY_NINE):
+        *command = VAL_PASSKEY + VPK_PAGE_UP;
+        return 1;
+      case (KEY_ZERO | KEY_FOUR):
+        *command = VAL_PASSKEY + VPK_CURSOR_LEFT;
+        return 1;
+      case (KEY_ZERO | KEY_SIX):
+        *command = VAL_PASSKEY + VPK_CURSOR_RIGHT;
+        return 1;
+      case (KEY_ZERO | KEY_ONE):
+        *command = VAL_PASSKEY + VPK_END;
+        return 1;
+      case (KEY_ZERO | KEY_TWO):
+        *command = VAL_PASSKEY + VPK_CURSOR_DOWN;
+        return 1;
+      case (KEY_ZERO | KEY_THREE):
+        *command = VAL_PASSKEY + VPK_PAGE_DOWN;
+        return 1;
+      case (KEY_ZERO | KEY_B13):
+        *command = VAL_PASSKEY + VPK_INSERT;
+        return 1;
+      case (KEY_ZERO | KEY_B14):
+        *command = VAL_PASSKEY + VPK_DELETE;
+        return 1;
     }
+
+    {
+      int functionKeys = KEY_B9 | KEY_B10 | KEY_B11 | KEY_B12;
+      switch (keys->front & functionKeys) {
+        default:
+          break;
+        case (KEY_B9):
+          *command = CR_SETMARK;
+          goto addOffset;
+        case (KEY_B10):
+          *command = CR_GOTOMARK;
+          goto addOffset;
+        case (KEY_B11):
+          *command = CR_SWITCHVT;
+          goto addOffset;
+        case (KEY_B12):
+          *command = VAL_PASSKEY + VPK_FUNCTION;
+          goto addOffset;
+        addOffset:
+          switch (keys->front & ~functionKeys) {
+            default:
+              break;
+            case (KEY_ONE):
+              *command += 0;
+              return 1;
+            case (KEY_TWO):
+              *command += 1;
+              return 1;
+            case (KEY_THREE):
+              *command += 2;
+              return 1;
+            case (KEY_FOUR):
+              *command += 3;
+              return 1;
+            case (KEY_FIVE):
+              *command += 4;
+              return 1;
+            case (KEY_SIX):
+              *command += 5;
+              return 1;
+            case (KEY_SEVEN):
+              *command += 6;
+              return 1;
+            case (KEY_EIGHT):
+              *command += 7;
+              return 1;
+            case (KEY_NINE):
+              *command += 8;
+              return 1;
+            case (KEY_ZERO):
+              *command += 9;
+              return 1;
+            case (KEY_B13):
+              *command += 10;
+              return 1;
+            case (KEY_B14):
+              *command += 11;
+              return 1;
+          }
+      }
+    }
+
     if (inputMode) {
       const unsigned long int dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
       if (keys->front & dots) {

@@ -66,17 +66,32 @@ B10       say current line
 B11       speak below
 B12       stop speaking
 0         go to last speech position
-1         present preferences menu
-2         go to next item in menu
-3         go to last item in menu
-4         change value of current item in menu to previous choice
-5         save current preferences
-6         change value of current item in menu to next choice
+B13       switch to previous virtual console
+B14       switch to next virtual console
 7         toggle learn mode
 8         go to previous item in menu
 9         go to first item in menu
-B13       switch to previous virtual console
-B14       swith to next virtual console
+4         change value of current item in menu to previous choice
+5         save current preferences
+6         change value of current item in menu to next choice
+1         present preferences menu
+2         go to next item in menu
+3         go to last item in menu
+0 7       home key
+0 8       up arrow key
+0 9       page up key
+0 4       left arrow key
+0 6       right arrow key
+0 1       end key
+0 2       down arrow key
+0 3       page down key
+0 B13     insert key
+0 B14     delete key
+(for these: 0=10, B13=11, B14=12)
+B9 1-12   set mark
+B10 1-12  go to mark
+B11 1-12  switch to virtual console
+B12 1-12  function key
 
 Miscellaneous Commands:
 UP DN     paste cut buffer at cursor position
