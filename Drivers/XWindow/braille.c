@@ -155,7 +155,7 @@ static void KeyPressCB(Widget w, XtPointer closure, XtPointer callData) {
 static void route(Widget w, XEvent *event, String *params, Cardinal *num_params) {
  int index = atoi(params[0]);
  LogPrint(LOG_DEBUG,"route(%u)", index);
- keypressed = BRL_FLG_ROUTE | (index&BRL_MSK_ARG);
+ keypressed = BRL_BLK_ROUTE | (index&BRL_MSK_ARG);
 }
 
 static inline Widget crKeyBut(String name, long keycode, int repeat,
