@@ -139,7 +139,7 @@ void printkeys(FILE * fh, commands* cmd, int modifiers[])
   char* txtand = "";
   int j;
   if (cmd->keycode != NOKEY) {
-    fprintf(fh, "%s ", search_key(cmd->keycode));
+    fprintf(fh, "%s", search_key(cmd->keycode));
     txtand = " and ";
   }
   for(j=0; j < MODMAX; j++)
@@ -246,20 +246,6 @@ void terminals(int help, int verbose)
 	  if (pm_terminals[tn].cmds[i].code & VAL_TOGGLE_MASK) 
 	    fprintf(fh, " %s", search_onoff(pm_terminals[tn].cmds[i].code) );
 	  fprintf(fh, " = ");
-
-	  /*
-	  if (pm_terminals[tn].cmds[i].keycode != NOKEY) {
-	    fprintf(fh, "%s ", search_key(pm_terminals[tn].cmds[i].keycode));
-	    txtand = " and ";
-	  }
-	  for(j=0; j < MODMAX; j++)
-	    if ( ((1<<j) &pm_terminals[tn].cmds[i].modifiers)==(1<<j)) {
-	      fprintf(fh, "%s%s",
-		      txtand, search_key(pm_terminals[tn].modifiers[j])); 
-	      txtand = " and ";
-	    }
-	  */
-
 	  printkeys(fh, &pm_terminals[tn].cmds[i], pm_terminals[tn].modifiers);
 	  fprintf(fh, " # %s",
 		  get_command_description(pm_terminals[tn].cmds[i].code & VAL_CMD_MASK));
