@@ -1250,8 +1250,10 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
       char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
-      getText(&c->brailleWindow, buf);
-      trueBraille->writeVisual(brl);
+      if (trueBraille->writeVisual) {
+        getText(&c->brailleWindow, buf);
+        trueBraille->writeVisual(brl);
+      }
       getDots(&c->brailleWindow, buf);
       trueBraille->writeWindow(brl);
       disp->buffer = oldbuf;
