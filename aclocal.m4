@@ -125,19 +125,19 @@ BRLTTY_ARG_ITEM([$1], [driver])
 BRLTTY_SUMMARY_ITEM([$1-driver], [brltty_item_name_$1])
 if test "${brltty_enabled_$1_support}" != "no"
 then
-   if test -z "${brltty_item_name_$1}"
+   if test -n "${brltty_item_name_$1}"
    then
-      brltty_driver_targets_$1="dynamic-$1"
-      brltty_driver_objects_$1=""
-      install_drivers="install-drivers"
-   else
-      brltty_driver_targets_$1="static-$1"
-      brltty_driver_objects_$1='$(BLD_TOP)/Drivers/'"${brltty_item_name_$1}/$1.o"
+      $1_driver='$(BLD_TOP)Drivers/'"${brltty_item_name_$1}/$1.o"
       AC_DEFINE(translit([$1_builtin], [a-z], [A-Z]))
    fi
 fi
-AC_SUBST([brltty_driver_targets_$1])
-AC_SUBST([brltty_driver_objects_$1])])
+if test "${brltty_standalone_programs}" != "yes"
+then
+   $1_drivers="$1-drivers"
+   install_drivers="install-drivers"
+fi
+AC_SUBST([$1_driver])
+AC_SUBST([$1_drivers])])
 
 AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl
 define([brltty_tables_text], ifdef([brltty_tables_text], [brltty_tables_text])[

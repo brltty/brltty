@@ -70,11 +70,11 @@ extern "C" {
  * \code
  * brlapi_settings_t settings;
  *
- * settings.authKey="/etc/brltty/brlapi-key";
+ * settings.authKey="/etc/brlapi.key";
  * settings.hostName="foo";
  * \endcode
  *
- * \e libbrlapi will read authentication key from file \p /etc/brltty/brlapi-key
+ * \e libbrlapi will read authentication key from file \p /etc/brlapi.key
  * and connect to the machine called "foo", on the default TCP port.
  *
  * \code

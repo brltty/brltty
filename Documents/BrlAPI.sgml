@@ -44,7 +44,7 @@ of time and questions later.
 <descrip>
 
 <tag/Authentication key/
-A file containing arbitrary data, that have to be sent to the server by the
+A file containing arbitrary data, that has to be sent to the server by the
 client, to prove it is allowed to establish a connection and then control
 the braille terminal.
 

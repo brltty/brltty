@@ -114,11 +114,11 @@ SPK_TARGET = @brltty_item_name_speech@
 SPK_TARGETS = @brltty_item_names_speech@
 SPK_LIBS = @brltty_item_codes_speech@
 
-BRAILLE_TARGETS = @brltty_driver_targets_braille@
-BRAILLE_OBJECTS = @brltty_driver_objects_braille@
+BRAILLE_DRIVER = @braille_driver@
+BRAILLE_DRIVERS = @braille_drivers@
 
-SPEECH_TARGETS = @brltty_driver_targets_speech@
-SPEECH_OBJECTS = @brltty_driver_objects_speech@
+SPEECH_DRIVER = @speech_driver@
+SPEECH_DRIVERS = @speech_drivers@
 
 INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@

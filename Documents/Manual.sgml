@@ -346,22 +346,17 @@ for any additional display-specific instructions.
 <sect3>System Defaults<label id="build-defaults"><p>
 <descrip>
   <tag><tt/--with-braille-driver=/<em/driver/<label id="build-braille-driver"></tag>
-    Specify the braille display driver.
+    Specify the default braille display driver.
     Either a two-letter <ref id="drivers" name="driver identification code">
     or the proper name (full or abbreviated) of the driver
     may be used.
-    If this option isn't specified,
-    then all of the braille display drivers are built
-    as dynamically loadable shared objects,
-    and the needed one can be selected at run-time.
-    If it is specified,
-    then only that driver is compiled,
-    and statically linked into the BRLTTY binary.
+    If this option is specified, then the named driver
+    is statically linked into the BRLTTY binary.
     See the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive
     and the <ref id="options-braille-driver" name="-b"> command line option
     for run-time selection.
   <tag><tt/--with-braille-device=/<em/device/<label id="build-braille-device"></tag>
-    Specify the device to which the braille display is connected.
+    Specify the default device to which the braille display is connected.
     If a relative path is supplied, then it's anchored at <tt>/dev</>.
     If this option isn't specified,
     then an operating system appropriate path
@@ -370,7 +365,7 @@ for any additional display-specific instructions.
     and the <ref id="options-braille-device" name="-d"> command line option
     for run-time selection.
   <tag><tt/--with-text-table=/<em/file/<label id="build-text-table"></tag>
-    Specify the text translation table
+    Specify the default text translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--sysconfdir">
@@ -386,7 +381,7 @@ for any additional display-specific instructions.
     This setting can be changed with the
     <ref id="preference-text-table" name="Text Table"> preference.
   <tag><tt/--with-attributes-table=/<em/file/<label id="build-attributes-table"></tag>
-    Specify the attributes translation table
+    Specify the default attributes translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--sysconfdir">
@@ -401,17 +396,12 @@ for any additional display-specific instructions.
     This setting can be changed with the
     <ref id="preference-attributes-table" name="Attributes Table"> preference.
   <tag><tt/--with-speech-driver=/<em/driver/<label id="build-speech-driver"></tag>
-    Specify the speech synthesizer driver.
+    Specify the default speech synthesizer driver.
     Either a two-letter <ref id="drivers" name="driver identification code">
     or the proper name (full or abbreviated) of the driver
     may be used.
-    If this option isn't specified,
-    then all of the speech synthesizer drivers are built
-    as dynamically loadable shared objects,
-    and the needed one can be selected at run-time.
-    If it is specified,
-    then only that driver is compiled,
-    and statically linked into the BRLTTY binary.
+    If this option is specified, then the named driver
+    is statically linked into the BRLTTY binary.
     See the <ref id="configure-speech-driver" name="speech-driver"> configuration file directive
     and the <ref id="options-speech-driver" name="-s"> command line option
     for run-time selection.
@@ -542,6 +532,10 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--enable-standalone-programs/<label id="build-standalone-programs"></tag>
     Create statically linked, rather than dynamically linked, programs.
     This option removes all dependencies on shared objects at run-time.
+    Only the default drivers
+    (see the <ref id="build-braille-driver" name="--with-braille-driver">
+    and the <ref id="build-speech-driver" name="--with-speech-driver">
+    build options) are compiled.
   <tag><tt/--disable-tainted-components/<label id="build-tainted-components"></tag>
     Exclude those components which have a build-time dependency
     beyond what a standard system is expected to provide.

@@ -109,10 +109,10 @@ rangelist.o:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.o config.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+BRLTTY_OBJECTS = main.o config.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER) $(SPEECH_DRIVER)
 
-brltty: $(BRLTTY_OBJECTS) $(BRAILLE_TARGETS) $(SPEECH_TARGETS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(LDLIBS)
+brltty: $(BRLTTY_OBJECTS) $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(LDLIBS)
 
 main.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
@@ -151,8 +151,8 @@ spk.o:
 
 BRLTEST_OBJECTS = brltest.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) brl.o
 
-brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
+brltest: $(BRLTEST_OBJECTS) $(BRAILLE_DRIVERS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(LDLIBS)
 
 brltest.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c
@@ -179,25 +179,25 @@ tunetest.o:
 
 ###############################################################################
 
-dynamic-braille: txt2hlp
+braille-drivers: txt2hlp
 	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-brl.lst
 	for target in $(BRL_TARGETS); \
-	do (cd ../Drivers/$$target && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
+	do (cd $(BLD_TOP)Drivers/$$target && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
 	done
 
-static-braille: txt2hlp
-	cd ../Drivers/$(BRL_TARGET) && $(MAKE) braille.o braille-help
+$(BRAILLE_DRIVER): txt2hlp
+	cd $(@D) && $(MAKE) $(@F) braille-help
 
 ###############################################################################
 
-dynamic-speech:
+speech-drivers:
 	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
 	for target in $(SPK_TARGETS); \
-	do (cd ../Drivers/$$target && $(MAKE) speech-driver spk-lib-name) || exit 1; \
+	do (cd $(BLD_TOP)Drivers/$$target && $(MAKE) speech-driver spk-lib-name) || exit 1; \
 	done
 
-static-speech:
-	cd ../Drivers/$(SPK_TARGET) && $(MAKE) speech.o
+$(SPEECH_DRIVER):
+	cd $(@D) && $(MAKE) $(@F)
 
 ###############################################################################
 
@@ -276,7 +276,7 @@ install-programs: brltty brltty-install
 	$(INSTALL_PROGRAM) brltty $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
-install-help: $(BRAILLE_TARGETS) install-data-directory
+install-help: $(BRAILLE_DRIVERS) install-data-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(HLP_DIR)/* $(INSTALL_ROOT)$(DATA_DIR) 
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES)
@@ -307,12 +307,7 @@ install-manpages:
 	   $(INSTALL_DATA) $${page} $${directory}; \
 	done
 
-install-api: install-api-headers install-api-libraries install-api-key
-
-install-api-headers:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+install-api: install-api-libraries install-api-headers install-api-key
 
 install-api-libraries: $(API_LIB) $(API_ARC)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(API_DIRECTORY)
@@ -320,6 +315,11 @@ install-api-libraries: $(API_LIB) $(API_ARC)
 	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(API_DIRECTORY)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(API_DIRECTORY)
+
+install-api-headers:
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
 install-api-key:
 	file=$(sysconfdir)/$(API_KEYFILE) && \
