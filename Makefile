@@ -24,10 +24,11 @@
 
 # Specify your Braille display by uncommenting one and ONLY one of these
 # definitions of BRL_TARGET:
-#BRL_TARGET = Alva_ABT3
+BRL_TARGET = Alva_ABT3
 #BRL_TARGET = CombiBraille
 #BRL_TARGET = EuroBraille
 #BRL_TARGET = TSI
+#BRL_TARGET = Papenmeier
 
 # Specify your speech support option.
 # Uncomment one of these lines and comment out the NoSpeech line 
@@ -41,6 +42,7 @@ SPK_TARGET = NoSpeech
 # Specify the default, compiled-in text translation table.  This can be
 # overridden at run-time by giving brltty the -t option.
 # See the content of the BrailleTable directory for available tables.
+# The Papenmeier terminal driver ignores this entry.
 #TEXTTRANS = text.us.tbl
 TEXTTRANS = nico.tbl
 
@@ -210,7 +212,7 @@ brltty.o: brltty.c brl.h scr.h inskey.h misc.h config.h \
 	  text.auto.h attrib.auto.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' -c brltty.c
 
-beeps.o: beeps.c beeps.h beeps-songs.h
+beeps.o: beeps.c beeps.h
 	$(CC) $(CFLAGS) -c beeps.c
 
 cut-n-paste.o: cut-n-paste.c cut-n-paste.h beeps.h scr.h inskey.h
@@ -246,5 +248,6 @@ clean:
 distclean: clean
 	rm -f brltty txt2hlp comptable *test
 	rm -f *~ */*~ *orig */*orig \#*\# */\#*\#
+	rm -f Papenmeier/serial
 	cd BrailleTables; make distclean
 

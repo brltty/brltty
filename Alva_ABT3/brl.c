@@ -22,9 +22,17 @@
 /* Alva_ABT3/brl.c - Braille display library for Alva ABT3xx series
  * Copyright (C) 1995-1996 by Nicolas Pitre <nico@cam.org>
  * See the GNU Public license for details in the ../COPYING file
+ *
+ * $Id: brl.c,v 1.4 1996/10/03 08:08:13 nn201 Exp $
  */
 
 /* Changes:
+ *    apr 23, 1998:
+ *		- I finally had the chance to test with an ABT380... and
+ *		  corrected the ABT380 model ID for autodetection.
+ *		- Added a refresh delay to force redrawing the whole display
+ *		  in order to minimize garbage due to noise on the 
+ *		  serial line
  *    oct 02, 1996:
  *		- bound CMD_SAY and CMD_MUTE
  *    sep 22, 1996:
@@ -79,6 +87,7 @@
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
+#include "../config.h"
 
 
 static char StartupString[] =
@@ -115,15 +124,15 @@ BRLPARAMS Models[NB_MODEL] =
   ,
   {
     /* ID == 2 */
-    "ABT380",
-    80,
+    "ABT340 Desktop",
+    40,
     5
   }
   ,
   {
     /* ID == 3 */
-    "ABT340 Desktop",
-    40,
+    "ABT380",
+    80,
     5
   }
   ,
@@ -384,13 +393,14 @@ void
 writebrl (brldim brl)
 {
   int i, j, k;
+  static int Timeout = 0;
 
-  if (ReWrite)
+  if (ReWrite ||  ++Timeout > (REFRESH_RATE/DELAY_TIME))
     {
+      ReWrite = Timeout = 0;
       /* We rewrite the whole display */
       i = 0;
       j = model->Cols;
-      ReWrite = 0;
     }
   else
     {
@@ -563,16 +573,14 @@ readbrl (int type)
 	      Typematic = 1;
 	      break;
 	    case KEY_CURSOR | KEY_UP:
-	      res = CMD_WINUP;
-	      Typematic = 1;
+	      res = CMD_ATTRUP;
 	      break;
 	    case KEY_DOWN:
 	      res = CMD_LNDN;
 	      Typematic = 1;
 	      break;
 	    case KEY_CURSOR | KEY_DOWN:
-	      res = CMD_WINDN;
-	      Typematic = 1;
+	      res = CMD_ATTRDN;
 	      break;
 	    case KEY_LEFT:
 	      res = CMD_FWINLT;

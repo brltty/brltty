@@ -42,6 +42,8 @@
 #define CMD_PRDIFLN '-'		/* go to prev different screen line */
 #define CMD_LNDN 'd'		/* go down one line */
 #define CMD_NXDIFLN '+'		/* go to next different screen line */
+#define CMD_ATTRUP 3            /* previous line we differing attributes */
+#define CMD_ATTRDN 4
 #define CMD_WINUP '<'		/* go up one window */
 #define CMD_WINDN '>'		/* go down one window */
 #define CMD_TOP 't'		/* go to top of screen */
@@ -67,6 +69,7 @@
 
 /* Cursor routing */
 #define CMD_CSRJMP 'j'		/* jump cursor to window (cursor routing) */
+#define CMD_CSRJMP_VERT ';'	/* jump cursor to window's line (routing) */
 /* Cursor routing key offset values */
 #define	CR_ROUTEOFFSET 0x080	/* normal cursor routing */
 
@@ -88,11 +91,12 @@
 #define CMD_CSRSIZE 'z'		/* toggle cursor size */
 #define CMD_CSRBLINK '#'	/* toggle cursor blink */
 #define CMD_CAPBLINK '*'	/* toggle capital letter blink */
+#define CMD_ATTRVIS 1           /* toggle attribute underlining */
+#define CMD_ATTRBLINK 2         /* toggle blinking of attribute underlining */
 #define CMD_SIXDOTS '6'		/* toggle six-dot mode */
 #define CMD_SLIDEWIN 'w'	/* toggle sliding window */
 #define CMD_SKPIDLNS 'I'	/* toggle skipping of identical lines */
 #define CMD_SND 'S'		/* toggle sound on/off */
-
 
 /* Key mappings: keys on the braille device are mapped to keyboard keys */
 #define CMD_KEY_UP 'U'
@@ -110,7 +114,6 @@
 #define CMD_SAY 'Y'
 #define CMD_MUTE 'm'
 
-
 /* Braille information structure */
 typedef struct
   {
@@ -124,8 +127,9 @@ brldim;				/* used for writing to a braille display */
 #define ST_None 0
 #define ST_AlvaStyle 1
 #define ST_TiemanStyle 2
-#define NB_STCELLSTYLES 2
-
+#define ST_PB80Style 3
+#define ST_Papenmeier 4
+#define NB_STCELLSTYLES 4
 
 /* Routines provided by the braille driver library: */
 void identbrl (const char *);	/* print start-up messages */

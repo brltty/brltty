@@ -1,0 +1,535 @@
+<!doctype linuxdoc system>
+
+<!-- BRLTTY manual, SGML version -->
+
+<article>
+
+<title>BRLTTY
+<subtitle>Access Software for Unix for a Blind Person Using a Soft Braille Terminal
+<author>Nikhil Nair <tt>&lt;nn201@cus.cam.ac.uk&gt;</> &nl;
+Nicolas Pitre <tt>&lt;nico@cam.org&gt;</> &nl;
+Stephane Doyon <tt>&lt;s.doyon@videotron.ca&gt;</>
+<date>Version 1.9.1, Mai 1998
+<abstract>
+Copyright (C) 1995, 1996 by The BRLTTY Team, All Rights
+Reserved.  This is free software, placed under the terms of The
+GNU General Public License.  BRLTTY comes with ABSOLUTELY NO
+WARRANTY.
+</abstract>
+
+<toc>
+
+<sect>Einführung
+<p>BRLTTY soll einem BRAILLE-Leser  Zugang zur Konsole eines Unix-Systems geben. Früher konnte dies nur durch ein wirkungsvolles Terminal erreicht werden, das mit einem Hilfscomputer verbunden war. BRLTTY verwendet eine Soft-BRAILLE-Anzeige, die einen Te
+l des Bildschirmbildes  als BRAILLE-Punkte wiedergibt (in diesem Handbuch als "das Fenster" bezeichnet).
+
+<sect1>Kurzer Rückblick
+<p>Das BRLTTY-Projekt startete im Juli 1995, das Team 
+bestand damals aus Nikhil Nair  und James Bowden. Die erste Version arbeitete mit Blazie Engineering's BRAILLE Lite; dies war jedoch keine geeignete Soft- BRAILLE-Anzeige für einen Computer, da die Reaktionszeit viel zu lang war.  BRAILLE LITE wird nicht
+länger unterstützt, obwohl es in Zukunft wieder ins Auge gefaßt werden könnte. 
+
+Im September 1995 entstand die zweite Version, also 0.22 BETA; sie war  die erste, die veröffentlicht wurde. Sie unterstützte ebenso wie BRAILLE Lite die Tieman B.V. 's CombiBraille-Serie. 
+
+Seit damals hat sich viel geändert. James Bowden ist kein aktiver Entwickler mehr, obwohl seine Hilfe auf anderen Gebieten sehr geschätzt wird (einschließlich der Dokumentation).
+
+Das Projekt hat durch die Leistungen zweier neuer Mitglieder, nämlich durch die von Nicolas Pitre und Stephane Doyon, viel profitiert. Zusammen entwickelten sie zwei neue BRAILLE-Anzeigen, weiters hatten sie viele ausgezeichnete Ideen für das System als 
+anzes. 
+
+Siehe Abschnitt <ref id="support" name="Hilfe"> für Kontaktdetails des BRLTTY-Teams. 
+
+<sect1>Systemanforderungen
+<p>Um zu funktionieren, läuft BRLTTY nur unter Linux (sowohl PC  als auch DEC Alpha). Portierung  zu anderen unix-ähnlichen Betriebssystemen ist momentan nicht geplant, aber wir begrüßen jedes Interesse für solche Projekte. 
+
+Diese  Linux-Version von BRLTTY benützt, abgesehen von der standardmäßigen seriellen Schnittstelle, ein  spezielles  Gerät, das durch die Kernel-Version 1.1.92 zuerst verwendet wurde und leichten Zugang zum Inhalt der momentanen virtuellen Konsole gibt. 
+
+
+Dieser wird normalerweise mit <tt>/dev/vcsa</> oder  <tt>/dev/vcsa0</> aufgerufen (der Name ist konfigurierbar). Aus diesem Grund ist Kernel 1.1.92 oder eine neuere Version erforderlich.
+
+BRLTTY arbeitet nur mit Anwendungen, die auf Text basieren, daher wird jede Form von Graphik- einschließlich des X Window-Systems - kein Braille-Output erzeugen. 
+
+Sie müssen natürlich auch eine geeignete Soft- Braille-Anzeige besitzen. BRLTTY arbeitet momentan mit 
+<itemize>
+<item>TIEMAN B.V.: COMBIBRAILLE 25/45/85;
+<item>ALVA B.V.: ABT 3xx -Serie;
+<item>Telesensory Systems Inc.: PowerBraille 4o (nicht 65/8o);       	 	Navigator 20/40/80 (nur neueste Firmware-Version ?).
+</itemize>
+
+Wir hoffen, daß in Zukunft mit anderen Geräten gearbeitet werden kann, wenn Sie also irgendeine  vage technische Programmierinformation über ein Gerät haben, mit dem Sie gerne arbeiten würden, lassen Sie uns das bitte wissen (s. Abschnitt <ref id="suppor
+" name="Hilfe">). 
+
+<sect1>Anfangsinstallation und Testen
+
+<p>Bevor Sie BRLTTY zusammenstellen, müssen Sie es für Ihr System konfigurieren. Lesen Sie und editieren  Sie die Datei <tt/Makefile/ im obersten Verzeichnis, indem Sie den Instruktionen folgen. Lesen Sie dann die <tt/README/ -Datei im Verzeichnis, das d
+n Treiber für Ihre Braille-Anzeige enthält, und suchen Sie nach weiteren spezifischen Anzeigeinstruktionen. 
+
+Schreiben Sie 
+<tscreen><verb>
+   make clean; make
+</verb></tscreen>
+um BRLTTY, die Testprogramme und andere kleine Hilfsprogramme zusammenzustellen. Dann schreiben Sie als Administrator (root) 
+<tscreen><verb>
+make install 
+</verb></tscreen>um das ausführbare BRLTTY-Programm zu installieren, und zwar zusammen mit der Hilfe und den Tabellendateien für Ihre Braille -Anzeige am richtigen Platz. Dies führt auch zu <tt>/dev/vcsa0</> oder einem Äquivalent, falls es nicht schon ex
+stiert. 
+
+Sie müssen BRLTTY installieren, bevor Sie die Testprogramme benützen können. 
+
+BRLTTY wird wahrscheinlich mit Administratorrechten laufen müssen. Es muß auf  die virtuelle Konsolenschirminformation zugreifen, auf die gewählte serielle Verbindung und auf die Konsole (dies ist notwendig für die Anschlagsimulation während der Cursorbe
+egung, für die Ausschneid- und Einfügfunktion und für akustische Signale). Falls Sie es schaffen, BRLTTY ohne Root-Rechte laufen zu lassen, lassen Sie uns das bitte wissen (s. Abschnitt <ref id="support" name="Hilfe"> und Unterstützung).
+Die Programme <tt/brltest/ und <tt/scrtest/ können als Diagnosewerkzeuge benützt werden, falls etwas danebengeht. Beide müssen als Root laufen. 
+Falls Sie die Fehlermeldung `brltty: Cannot read screen' bekommen, versuchen Sie es mit scrtest. Dies sollte ein Rechteck aus der Mitte des Bildschirms herauslesen und nach dem Melden der Bildschirmdimensionen und der Cursorposition auf dem Schirm angebe
+.
+Falls BRLTTY lädt, die Braille-Anzeige aber nicht zu arbeiten scheint, versuche Sie es mit <tt/brltest/. Dieses Programm sollte eine kurze Botschaft auf der Anzeige drucken, eine Eingabe anfordern  und verschwinden. 
+Das Skript <tt/install-brltty/ kopiert ein funktionierendes, installiertes BRLTTY auf einen neuen Platz; dies kann benützt werden, um BRLTTY auf eine oder von einer Rootdiskette zu kopieren. Wenn z.B. die Rootfloppy-Disk auf <tt>/mnt</> montiert ist und 
+RLTTY gerade auf dem Hauptsystem arbeitet, dann kopiert das Schreiben von 
+<tscreen><verb>
+   install-brltty /mnt
+</verb></tscreen>
+BRLTTY, und zwar mit allen seinen Daten und Konfigurationsdateien, ebenso wie <tt>/dev/vcsa0</> oder das Äquivalent zur Rootdiskette. 
+
+Anwendung:
+<tscreen><verb>
+     install-brltty dest-prefix [source-prefix]
+</verb></tscreen>
+Beachten Sie: Es kam zu etlichen Problemen, als BRLTTY zwischen verschiedenen Systemen mit verschiedenen Versionen  der gemeinsamen C-Bibliothek bewegt wurde. Das ist es wert, erforscht zu werden, falls Sie Schwierigkeiten haben. 
+Weiters sind verschiedene kleinere Programme enthalten:
+<descrip>
+<tag/txt2hlp/
+ Dieses erzeugt Dateien im benötigten Format für die Hilfsfunktion von genormten ASCII - Dateien.  txt2hlp wird während der Installation automatisch zusammengestellt und benützt. 
+
+<tag/txt2tbl/
+Dieses Programm kann benützt werden, um neue Braille- Übersetzungstabellen aus genormten ASCII- Datenblöcken zu erzeugen. S.  für Instruktionen den Abschnitt Hilfsprogramme. 
+
+<tag/tbl2txt/
+Dieses Programm ist das Gegenteil von txt2tbl. Es kann benützt werden, wenn Sie nicht sicher sind, was eine besondere Punktkombination darstellt. 
+</descrip>
+
+<sect1>Installation für täglichen Gebrauch
+
+<p>Wenn einmal installiert, wird BRLTTY durch das einzige Kommando <tt/brltty/ aufgerufen. Kommandozeilenschalter erlauben, sich über die  Standard- Konfigurationsdatei, die serielle Verbindung  und die Braille-Übersetzungstabelle hinwegzusetzen - s. für
+weitere Details  <ref id="switches" name="Kommandozeilenoptionen">. 
+
+Wenn BRLTTY jedoch gerade durch einen Systemverwalter benützt wird, sollte es wahrscheinlich zur Startzeit geladen werden, also noch bevor die Dateisysteme überprüft werden, so daß, falls  während der Überprüfungen etwas danebengeht und das System in den
+Single-user-Mode geht, die Braille-Anzeige noch immer aktiv ist. 
+
+Die Art, in der dies erfolgt, variiert gemäß der Art des Systems, das benützt wird;   z.B. wurde auf einem Debian GNU/Linux 0.93R5  System der folgende  Code nahe dem Beginn von 
+<tt>/etc/init.d/boot</> eingeschoben:
+<tscreen><verb>
+   if  [ -x  /sbin/brltty ] 
+   then
+        /sbin/brltty
+    fi
+</verb></tscreen>
+Dies könnte zur weniger leserlichen Form verkürzt werden:
+<tscreen><verb>
+[ -x  /sbin/brltty ]  &&  /sbin/brltty
+</verb></tscreen>
+
+  (Auf einem Slackware-System ist die zu ändernde Datei <tt>/etc/rc.d/rc.S</>.)
+
+Eine mögliche Alternative ist es, BRLTTY von <tt>/etc/inittab</>  zu starten. 
+
+Beachte: Ein <tt/killall5 -15/ Kommando würde reichen, BRLTTY  zu unterbrechen: Falls solch ein Kommando von einem rc Script  
+bei Single-user-Mode  gegeben wird, mag das ein Problem sein, das Aufmerksamkeit verlangt. 
+
+<sect>Benützung von BRLTTY
+
+<p>Bevor Sie das System aktivieren, sollten Sie Ihr Braille-Anzeigegerät
+einrichten. In den meisten Fällen ist das einfach: Verbinden Sie es  bloß an eine geeignete serielle Schnittstelle  und drehen Sie die Anzeige auf, falls notwendig,  wählen Sie dabei die serielle Schnittstelle. 
+Nachdem Sie Ihre Anzeige eingerichtet haben, um mit BRLTTY zu arbeiten, 
+tippen Sie einfach das Kommando <tt/brltty/   bei einem Shellprompt ein (das muß als  Root  getan werden).  Das Programm wird laden, und eine Mitteilung, die den Programmnamen (BRLTTY) und die aktuelle Versionsnummer anzeigt, wird kurz auf dem Anzeigeger
+t erscheinen. Danach zeigt die Anzeige eine kleine Fläche des Konsolenschirms einschließlich eines Cursors. Als Standard wird der Cursor als Punkte 7 und 8 gezeigt, die das Zeichen überlagern, über dem er ist. 
+
+Jede Schirmaktivität spiegelt sich  in der Braille-Anzeige wider. Die Anzeige folgt auch dem Fortschreiten des Cursors auf dem Schirm. Diese Eigenschaft ist als Cursorverfolgung (<em/Cursor Tracking/)bekannt. 
+
+Ein bloßes Tippen und Lesen der Anzeige ist jedoch nicht genug: Versuchen Sie das Eingeben eines Kommandos, das einen Fehler verursacht, und drücken Sie <em/ENTER/. Der Fehler wird auf dem Schirm erscheinen, aber wenn Sie keine Mehrzeilenanzeige  haben, 
+ird alles, was Sie sehen, ein weiteres Shellprompt sein. Was dann benötigt  wird, ist ein Mittel, das Braille-<em/Fenster/ auf dem Schirm umherzubewegen.
+
+<sect1>Grundlegende Bewegungstasten
+
+<p>Alle BRLTTY-Kommandos werden dadurch gegeben, daß man die Braille-Tasten auf der Braille-Anzeige benützt. Unglücklicherweise scheint es keine genormte Steuerungsserie zu geben, die bei verschiedenen Steuerungsanzeigen verfügbar ist: einige haben Sechs
+unkttasten (wie z.B. eine Braille-Schreibmaschine), andere haben Daumentasten; einige haben sogar Knöpfe über jedem Zeichen in der Anzeige. Einige haben alle drei Typen. Da die Art und  die Anordnung solcher Tasten so verschieden ist, konsultieren Sie di
+ <tt/README/ - Datei für Ihre Anzeige hinsichtlich der Tasten,  die Sie für jeden Arbeitsgang drücken.
+
+Die Kommandos bestehen im allgemeinen aus einer einzelnen Braille-Taste oder aus einer Kombination von Braille-Tasten, die immer, wenn BRLTTY läuft, verwendet werden können. Die wichtigsten Kommandos sind jene, die das Braille-Fenster auf dem Konsolensch
+rm umherbewegen. Die meisten von ihnen beeinflussen den Konsolencursor oder irgendein Programm, das gerade läuft, nicht. 
+
+<descrip>
+<tag/Vertikales Bewegen:/
+<descrip>
+<tag/TOP/ Zeige die oberste Zeile  des Bildschirms
+
+<tag/BOT/ Zeige die unterste Zeile  des Bildschirms
+
+<tag/WINUP/ Gehe  einige Zeilen nach oben
+
+<tag/WINDN/ Gehe  einige Zeilen nach unten
+
+<tag/LNUP/  Gehe eine Zeile hinauf
+
+<tag/LNDN/  Gehe eine Zeile hinunter
+
+<tag/PRDIFLN/ Springe zur vorhergehenden verschiedenen Zeile
+
+<tag/NXDIFLN/ Springe zur nächsten verschiedenen Zeile
+
+</descrip>
+
+<tag/Horizontales Bewegen:/
+<descrip>
+<tag/LNBEG/ Gehe  zum Start der Zeile
+<tag/LNEND/ Gehe  zum Ende der Zeile
+<tag/HWINLT/ Bewege die Anzeige um ein halbes Fenster nach links
+<tag/HWINRT/ Bewege die Anzeige  um ein halbes Fenster nach rechts
+<tag/CHRLT/ Bewege die Anzeige um ein Zeichen nach links
+<tag/CHRRT/ Bewege die Anzeige um ein Zeichen nach rechts
+</descrip>
+<tag/Sowohl horizontales als auch vertikales Bewegen:/
+<descrip>
+<tag/TOP LEFT/ Bewege die Anzeige  nach ganz links oben auf dem Bildschirm
+<tag/BOT LEFT/ Bewege die Anzeige nach ganz links unten auf dem Bildschirm
+<tag/HOME/ Bewege das Fenster zum Cursor 
+<tag/FWINLT/ Bewege die Anzeige  um ein Fenster nach links
+<tag/FWINRT/ Bewege dich um ein Fenster nach rechts
+</descrip>
+</descrip>
+Die <em/FWINLT/ und <em/FWINRT/ Tasten können benützt werden, um nach
+hinten und nach vorne zu lesen, da sie zur vorhergehenden bzw. folgenden Zeile wechseln, falls vom Ende einer Zeile angerufen. Das macht die Kommandos besonders nützlich, wenn man Text liest. 
+
+Wenn Sie sich nicht an ein Kommando erinnern,  ist Hilfe  über das Kommando <em/HELP/ abrufbar. Benützen Sie die Bewegungstasten , wie oben erwähnt, um den Hilfebildschirm zu dirigieren, und betätigen Sie HELP wieder, um auszusteigen.
+
+Das Verhalten der <em/LNUP/ und <em/LNDN/ Tasten hängt davon ab, ob das Überspringen von identischen Zeilen durch das Konfigurationsmenü möglich gemacht wird  (s. Abschnitt Das Online- <ref id="confmenu" name="Konfigurationsmenü">). Falls das möglich ist
+ wirken diese Tasten wie <em/PRDIFLN/ und <em/NXDIFLN/ Tasten. (Beachten Sie, daß die Zeile, die den Cursor enthält, als von den anderen verschieden angesehen wird.) 
+
+<sect1>Andere Steuerungen
+
+<p>Zusätzlich zu den obigen Kommandos hat BRLTTY viele andere nützliche 
+Merkmale:
+
+<descrip>
+<tag><em/CSRTRK/: Umschalten der Cursorverfolgung</>
+Standard: eingeschaltet. Wenn die Cursorverfolgung eingeschaltet ist, stellt eine Bewegung des Konsolencursors automatisch die    Anzeigefensterposition ein, so daß der Cursor immer im Fenster ist. 
+Es ist manchmal nützlich, dieses Merkmal abzuschalten, so können Sie nämlich einen besonderen Abschnitt Ihres Bildschirms leicht überwachen. 
+
+<tag><em/DISPMD/: Umschalten der Attributanzeige</>
+Standard: ausgeschaltet. Falls die Merkmalanzeige eingeschaltet ist, werden eher die Merkmale (Farbinformation) jedes Zeichens, nicht die Zeichen selbst gezeigt. Es kann nützlich sein, die Merkmalanzeige aufzudrehen, um die Entdeckung hervorgehobener Pun
+te zu ermöglichen.   
+
+<tag><em/FREEZE/: Umschalten des Bildschirms und Einfrieren</>
+Standard: ausgeschaltet. Die Einfrierfunktion existiert, um leichtes Lesen eines wechselnden Bildschirms zu ermöglichen. Wenn Sie FREEZE aufdrehen, wird der momentane Bildschirminhalt für kurze Zeit gespeichert, und irgendeine neue Bildschirmaktivität wi
+d nicht in Braille wiedergegeben. Denken Sie daran, das Einfrieren abzuschalten, wenn Sie die normale Tätigkeit wieder aufnehmen wollen. 
+
+<tag><em/CSRBLINK/: Umschalten des blinkenden Cursors</>
+Standard: ausgeschaltet. Falls diese Funktion ermöglicht wird, blinkt der Bildschirmcursor auf der Anzeige, d.h., er ist nur einen Teil der Zeit dort.Wenn der Cursor weggeht, können Sie das Zeichen unter dem Cursor sehen. 
+
+<tag><em/CAPBLINK/:  Umschalten der blinkenden Großbuchstaben</>
+Standard: ausgeschaltet. Ähnlich wie bei der Cursorblinkfunktion, falls diese Funktion möglich ist, blinken Großbuchstaben auf der Anzeige. Dies ist höchst nützlich,  wenn man Sechspunkte-Braille benützt.
+
+<tag><em/CSRVIS/: Umschalten der Cursorsichtbarkeit</>
+Standard: eingeschaltet. Diese Funktion, wenn sie möglich ist, zeigt die Position des Cursors (entweder in Ruhe oder blinkend) auf der Anzeige. Es ist manchmal nützlich, diese Funktion auszuschalten, um Text zu überprüfen, in dem das Cursorsymbol nur daz
+ dient, das Lesen zu erschweren. 
+
+<tag><em/CSRSIZE/: Umschalten der Cursorform</>
+Standard: hebt den Cursor hervor. Diese Funktion schaltet die Cursorform: alle acht Punkte (Block) oder nur die unteren zwei (hervorheben). Wähle die Form, die du vorziehst. 
+
+<tag><em/BRLDOTS/: Braille-Darstellung</>
+Standard: 8punktig. Diese Funktion schaltet zwischen sechs- und achtpunktigen Braillecodes. Wenn die sechspunktige Art gewählt wird, werden die unteren Punkte (7 und 8) aller normalen Zeichen entfernt. 
+
+<tag><em/SND/: Umschalten der Audiosignale</>
+Standard: eingeschaltet. Wenn eingeschaltet, gibt BRLTTY, wenn bestimmte Ereignisse auftauchen (z.B. Bewegen  jenseits des Bildschirmrandes), ein akustisches Signal. Dieses Signal bestätigt auch die Einstellungen einiger Umschaltwahlmöglichkeiten. 
+
+<tag><em/SLIDEWIN/: Umschalten des Gleitfensters</>
+Standard: ausgeschaltet. Dieses Merkmal bewegt in Zusammenhang mit der Cursorverfolgung (Cursor Tracking) das Anzeigefenster sanfter, wenn sich der physische Cursor jenseits der rechten Kante des Fensters bewegt. Wenn sliding window ausgeschaltet ist und
+der Cursor sich  jenseits der rechten Kante des Fensters bewegt,  bewegt sich das Fenster um eine Fensterbreite. Wenn eingeschaltet, bewegt sich das Fenster um ein Viertel dieser Breite. 
+
+<tag><em/SKPIDLNS/:Umschalten des Überspringens von identischen 
+Zeilen</>
+Standard: ausgeschaltet. Dies ist eine alternative Möglichkeit des
+Umschaltens zum Überspringen von identischen Zeilen, so das Terminal die
+Tasten <em/PRDIFLN/ und <em/NXDIFLN/ nicht besitzt. Wenn aktiv,
+überspringen die Tasten <em/LNUP/ und <em/LNDN/ identische Zeilen.
+
+<tag><em/INFO/: Zustandsinformation</>
+Standard: ausgeschaltet.  Die Zustandsfunktion schaltet die Anzeige auf den Zustandsbildschirm. Dieser zeigt Informationen  einschließlich der physischen Cursorposition, der Position des Startes des Braille- Anzeigefensters und der Einstellungen. Einige 
+nzeigetypen lassen einige dieser Informationen andauernd in ihren <em/Status Cells/ aufscheinen. S. die <tt/README/ -Datei zwecks Information über Ihre Anzeige. 
+
+Die Fensterstartposition und die physische Cursorposition werden in der Form <sl/cc:rr/ gezeigt, wobei <sl/cc/ die aktuelle Säule und <sl/rr/ die aktuelle Reihe darstellt. Dann folgen die Einstellungen 
+<enum>
+<item>Cursorverfolgung (Cursor Tracking). Wenn eingeschaltet, wird <tt/t/ gezeigt; sonst ein Leerzeichen  
+<item>Cursorsichtbarkeit.
+<descrip>
+<tag><tt/v/</> Cursor ist sichbar, kein Blinken
+   
+<tag><tt/B/</> Cursor ist sichtbar und blinkt
+
+<TAG><tt/b/</> Cursor ist nicht sichtbar, aber er blinkt 
+<tag/space/  Leerzeichen (space) Cursor ist nicht sichtbar und das Blinken ist weg
+</descrip>
+<item> Anzeigeweise. <tt/a/ Attribut, <tt/t/ Text
+<item> Bildschirmzustand. <tt/f/ eingefroren,  Leerzeichen direkt
+<item> Braille-Darstellung, sechs-oder achtpunktig
+<item> Blinkende Großbuchstaben. <tt/B/ eingeschaltet, sonst ein Leerzeichen. 
+</enum>
+
+Im Zustandsbildschirm können alle Informationen mittels Konsolenschirmaktivität oder mittels BRLTTY-Kommandos auf den neuesten Stand gebracht werden. Durch betätigen von <em/INFO/ kehrt man in den Normalmodus zurück.
+</descrip>
+
+<sect1>Cursorbewegung
+
+<p>Es passiert oft, daß Sie das Anzeigefenster auf dem Bildschirm umherbewegen, da Sie den Text in einem Texteditor  überprüfen, und Sie wollen den physischen Cursor dorthin bewegen, wo die Fensteranzeige ist. Die  Cursorbewegung stellt eine ebensolche G
+legenheit  mittels  Simulieren Ihrer Anschläge bereit. 
+
+Tippen Sie <em/CSRJMP/, und Ihr Cursor bewegt sich zur Startposition Ihres Anzeigefensters. Einige Braille-Anzeigen haben Knöpfe über jeder Zelle: diese können auch benützt werden, um den Cursor in jene Position zu bringen. Andere binden Braille-Tasten a
+ die Cursortasten auf der Tastatur, um eine händische Form der Cursorbewegung zu ermöglichen.
+
+Beachten Sie: Die Cursorbewegung ist noch  nicht völlig verläßlich. Sie benützt
+im Moment "hardcoded" vt100 Cursortastencodes, um sich in die richtigen 
+Richtungen zu bewegen. Auch geht sie auf Systemen mit hoher Last nicht gut 
+(s. <tt/config.h/ für weitere Details). 
+
+Wenn Sie ein Cursorbewegungskommando geben, wird BRLTTY weiter
+versuchen den Cursor zu bewegen bis der Cursor entweder für zwei
+Sekunden an einer fixen Stelle verbleibt (in diesem Fall bricht es den Versuch ab),
+oder Sie geben ein anderes Cursorbewegungskommando (in diesem Fall
+beendet es die erste Bewegung und versucht die zweite).
+
+<sect1>Ausschneiden und Einfügen
+
+<p>Dieses Merkmal ermöglicht es Ihnen, auf einen Text zuzugreifen, der schon auf dem Bildschirm ist, und ihn beim Cursor wieder einzugeben, sodaß Zeit gespart wird. Das ist besonders nützlich bei langen Dateinamen oder komplizierten Kommandos. Markieren 
+ie zuerst die rechteckige Fläche auf dem Bildschirm, auf die zugegriffen werden soll (ausschneiden): Um die oberste linke Ecke zu markieren, drücken Sie <em/CUTBEG/. Die oberste linke Ecke der markierten Fläche wird in die äußerste linke Position des Fen
+ters verlegt, und der <em/Cut Buffer/ wird beseitigt. Um die unterste rechte Ecke zu markieren, drücken Sie <em/CUTEND/: die Fläche, die Sie festlegten, wird dann in  den <em/Cut Buffer/ hineinkopiert. BRLTTY  entfernt überflüssige Leerzeichen am Ende je
+er Zeile im <em/Cut Buffer/, sodaß Sie nach Ihrem  Ausschneidetext keinen überflüssigen Raum haben. Einige Anzeigen  unterstützen genaueres <em/Ausschneiden und Einfügen/, indem sie die Knöpfe über den Braille-Zellen benützen; s. die <tt/README/ -Datei f
+r Ihre Anzeige. 
+
+
+Um den Text einzufügen, d.h., ihn bei der Cursor-Position zu schreiben,  drücken Sie <em/PASTE/. Sie können den gespeicherten Test beliebig oft ohne Wiederausschneiden einfügen.
+
+
+<sect1>Das Online-Konfigurationsmenü<label id="confmenu">
+
+<p>BRLTTY hat ein einfaches Menü, von dem ausgehend Sie einige der Einstellungen ändern können. Das Menü wird durch Drücken von <em/CONFMENU/ aktiviert. Die Anzeige wird kurz den Menütitel zeigen und dann den aktuellen Parameter.
+
+Um das Menü umherzubewegen, benützen Sie die normalen Fensterbewegungstasten wie folgt: <em/LNUP/ und <em/LNDN/ bewegen das Menü hinauf und hinunter; <em/TOP/ und <em/HOME/ bewegen zum Start; <em/BOT/ bewegt zum Ende. Um die Einstellung eines Parameters 
+u ändern,  benützen Sie <em/FWINLT/ und <em/FWINRT/.  Um alle  Änderungen, die seit dem Einsteigen ins Menü gemacht wurden, ungeschehen zu machen, benützen Sie <em/RESET/.
+
+Viele der Parameter, die durch das Menü verfügbar sind, können auch durch Benützen einzelner Tasten, die sie umschalten, eingestellt werden (s. oben). Zusätzlich erlaubt Ihnen das Menü,  die  Geschwindigkeiten der Blinkmerkmale einzustellen. 
+
+Um das Menü zu verlassen und zur normalen Bedienung zurückzukehren, drücken Sie irgendeine Taste, die oben nicht erwähnt wird. Falls <em/save config/ eingeschaltet ist, werden aktuelle Einstellungen in die <em/Konfigurationsdatei/ geschrieben (s. unten).
+
+
+<sect1>Speichern der aktuellen Konfiguration
+
+<p>Wenn Sie BRLTTY  laden, wird eine <em/Konfigurationsdatei/ geladen, um die Einstellungen der Merkmale zu bestimmen, die durch das <em/Kongurationsmenü/ erhältlich sind. Sie können die aktuellen Einstellungen zurück zur <em/Konfigurationsdatei/ sichern
+ indem Sie <em/SAVECONF/ benützen; dies passiert automatisch, wenn Sie aus dem Menü aussteigen, falls in der Angabe <em/save config/ eingeschaltet ist. Die <em/Konfigurationsdatei/ ist eine Binärdatei. 
+
+Um die konfigurierbaren Einstellungen von der Konfigurationsdatei ausgehend wiederzuladen, drücken Sie <em/RESET/.
+
+<sect1>Befehl für Zeilenoptionen<label id="switches">
+
+<p>BRLTTY hat die folgenden Kommandozeilenoptionen. Benützen Sie diese,  um BRLTTY zu starten, wenn Sie andere Einstellungen als die Standards benützen.
+
+<descrip>
+<tag>-c <em/config-file/</> Benütze die Binärkonfigurationsdatei <em/config-file/ anstatt von <tt/brlttyconf.dat/.
+
+<tag>-d <em/serial-device/</> Benützen Sie <em/serial-device/, wenn  Sie 
+anstatt  auf den Standard auf  ein Braille-Terminal zugreifen (normalerweise <tt>/dev/ttySO</>)
+
+<tag>- t <em/text-trans-file/</> Benütze das Übersetzungsprogramm <em/text-trans-file/ anstatt des Standards. In der Version 1.0.1 ist der Standard bei der Übersetzung festgelegt;  in vorhergehenden Versionen wurde die Datei <tt/us.tbl/ geladen.
+
+<tag/-h, --help/ Drucke eine kurze Hilfemitteilung und steige aus
+
+<tag/-q, --quiet/ Unterdrücke Startmitteilungen
+
+<tag/-v, --version/ Drucke Startmitteilungen und steige aus
+
+</descrip>
+
+Sie können natürlich die Standardeinstellungen der ersten zwei Angaben bei der Übersetzung dauerhaft ändern (ebenso wie welches Textübersetzungsprogramm als Standard zu benützen ist) 
+
+<sect>Konfigurieren von BRLTTY
+
+
+<p>Die meisten, falls nicht alle Einstellungen von BRLTTY, sind durch das Konfigurationsmenü konfigurierbar. Jene, die es nicht sind (z.B. die  Cursorbewegungsleistung), können dauerhaft durch Modifizieren des Quellcodes  und durch Neuübersetzen geändert
+werden. 
+
+<sect1>Die Braille-Übersetzungstabellen
+
+<p>BRLTTY benützt zwei <em/Braille -Übersetzungstabellen/, um die Umsetzung von Zeichen und Attributen in die Punktkombination festzulegen. Die erste und wichtigste ist die Textübersetzungstabelle. 
+
+BRLTTY wird am Anfang so eingestellt,  daß es North American Braille Computer Code (NABCC) benützt.  BRLTTY hat jedoch, ebenso wie die Standard-Textübersetzungsdatei (<tt/us.tbl/), vier alternative Tabellen: <tt/french.tbl/, <tt/german.tbl/, <tt/simple.t
+l/ und <tt/uk.tbl/. S. Abschnitt <ref id="switches" name="Befehl für Zeilenoptionen"> für Details bei der Benützung von alternativen Übersetzungstabellen. 
+
+Die Attributübersetzungstabelle wird benützt, wenn sich BRLTTY im Attributanzeigemodus befindet. Derzeit gibt es nur die Standardtabelle, also <tt/attrib.tbl/. Diese wurde so entworfen, daß jeder Punkt ein Bit des Attributbytes wiedergibt, und zwar mit d
+r Vordergrundfarbe auf der rechten Seite (Punkte 4,5,6,8) und der Hintergrundfarbe auf der linken Seite. Ein Vordergrundbit, das eingeschaltet ist, oder ein Hintergrundbit, das ausgeschaltet ist, ruft den entsprechenden Punkt hervor: diese seltsame Logik
+verhilft in der Praxis zur Lesbarkeit der üblichsten Attribute.  
+
+Diese Übersetzungstabellen sind 256-byte Binärdateien. Der Zeichen-Attribut-Wert wird als Index in die Datei benützt, das Byte in jener Lage gibt die entsprechende Punktkombination. 
+
+Die Umsetzung von der Bit-Nummer in die physische Punktposition variiert von Anzeige zu Anzeige und kann ziemlich willkürlich sein. Es ist daher ein Standardisierungsversuch gemacht worden, wobei die Wirkung jedes Bits in einem Tabelleneintrag definiert 
+urde. Die Braille-Anzeigetreiber leisten dann jede für die Anzeige notwendige Einstellung. 
+
+<descrip>
+<tag/Bit 0/ Punkt 1 (oben links)
+<tag/Bit 1/ Punkt 4 (oben rechts)
+<tag/Bit 2/ Punkt 2 (unten 1)
+<tag/Bit 3/ Punkt 5 (unten 4)
+<tag/Bit 4/ Punkt 3 (unten 2)
+<tag/Bit 5/ Punkt 6 (unten 5)
+<tag/Bit 6/ Punkt 7 (unten links)
+<tag/Bit 7/ Punkt 8 (unten rechts)
+</descrip>
+
+In jedem Fall bedeutet ein gesetztes Bit, daß der entsprechende Punkt vorhanden ist.  
+
+Zwei kleine Hilfsprogramme, <tt/txt2tbl/ und <tt/tbl2txt/, werden für die leichte Handhabung dieser Übersetzungsdateien bereitgestellt. 
+
+Die Dateinamen der bei der Übersetzung festgelegten Tabellen werden in
+<tt/config.h/ definiert. Alle Änderungen, die Sie dabei machen, werden 
+einen Effekt auf die Neuübersetzung der Software ausüben.  Sie können
+jedoch eine alternative Textübersetzungstabelle benützen; s. Abschnitt <ref id="switches" name="Befehl für Zeilenoptionen">. 
+
+<sect1>Tabellenhilfsprogramme<label id="tbltools">
+
+<p><tt/txt2tbl/ und <tt/tbl2txt/ sind einfache Programme, um zwischen Binärtabellendateien und einer Textdarstellung zu übersetzen (wie von einigen DOS-Treibern benützt).  Sie können benützt werden, um Textübersetzungsdateien zu schaffen oder zu modifizi
+ren, und zwar ohne Notwendigkeit, in die Binäreditoren und die Hexadezimalzahlen zu gehen. 
+
+Um jedes dieser Programme zu benützen, schreiben Sie: 
+<tscreen><verb>
+     progname input output
+</verb></tscreen>
+Es gibt keine anderen Kommandozeilenoptionen. 
+
+In der Textdarstellung wird jeder Tabelleneintrag als eine Zeile geschrieben. Der aktive Teil der Zeile besteht aus allen Zeichen zwischen dem ersten Klammernpaar --- diese Hilfsprogramme ignorieren alle anderen Zeichen.  
+
+Zwischen den Klammern sind Zahlen, welche die Einstellung des entsprechenden Braille-Punkts wiedergeben (s. oben). Offsets in die Binärtabellendatei  werden der Reihe nach von 0 bis 255 zugewiesen. 
+
+Zum Beispiel könnte die 91zigste Zeile (ASCII 90 = `Z' ) in der Tabelle so ausschauen:
+<tscreen>
+     90   (1  3  567   )
+</tscreen>
+
+<tt/convtable/ ist ein Filter, um Braille-Tabellen zwischen verschiedenen Binärformaten zu übersetzen: BRLLTY-Norm; der Norm, die von Tieman B.V. benützt wird,  und derjenigen, die sowohl von Alva B.V. als auch von Telesensory Systems Inc. benützt wird. 
+
+Geben Sie z. B. ein: 
+<tscreen><verb>
+     convtable src dest  <   input  >  output
+</verb></tscreen>
+wo <em/src/ und <em/dest/  <em/s/ für Norm (BRLTTY)- , <em/t/ für Tieman- oder <em/a/ für Alva/TSI-Umsetzungen sein können.
+<sect>Anhang
+
+<sect1>Verzichterklärung und Lizenz
+
+<p>Dieses Programm ist "free software"; Sie können es verteilen und/oder
+modifizieren, und zwar unter den Bedingungen der <em/GNU General Public
+License/ (entweder die Version 2 der Lizenz oder (nach ihrer Wahl) jede spätere Version), wie durch die <em/Free Software Foundation/ veröffenlicht.
+
+Dieses Programm wird in der Hoffnung verteilt, daß es sich als nützlich
+erweisen wird, aber OHNE JEGLICHE GARANTIE; sogar ohne Folgegarantie
+hinsichtlich VERKÄUFLICHKEIT oder GEEIGNETHEIT FÜR EINEN BESTIMMTEN ZWECK.
+Für weitere Details s. die <em/GNU General License/. 
+
+Zusammen mit diesem Programm sollten Sie eine Kopie der <em/GNU General Public License/ erhalten haben; falls nicht, schreiben Sie an die Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+(Eine Kopie der GNU General Public License kann man in der Datei <tt/COPYING/ im obersten Verzeichnis finden.)
+
+<sect1>Hilfe und Unterstützung<label id="support">
+
+<p>Diese Software wird im Moment durch den ursprünglichen Autor, <htmlurl
+url="mailto:nn201@cus.cam.ac.uk" name="Nikhil
+Nair&lt;nn201@cus.cam.ac.uk&gt;">, gewartet.  Sie repräsentiert jetzt jedoch die Arbeit eines Teams, das auch folgende Personen einschließt:
+<itemize>
+<item><htmlurl url="mailto:nico@cam.org" name="Nicolas Pitre&lt;nico@cam.org&gt;">;
+<item><htmlurl url="mailto:s.doyon@videotron.ca" name="Stephane Doyon
+&lt;s.doyon@videotron.ca&gt;">;
+<item><htmlurl url="mailto:jrbowden@bcs.org.uk" name="James Bowden &lt;jrbowden@bcs.org.uk&gt;">(jetzt in beratender Funktion 
+     tätig).
+</itemize>
+
+<!::  Leider sieht es so aus als wäre Nikhil Nair zur
+Zeit nicht erreichbar ist......
+Der das Programm Wartende kann auch an folgender Adresse kontaktiert werden:  Nikhil Nair, Trinity College, CAMBRIDGE, CB2 1TQ, England; Tel. +44 1223 368353. ::>
+
+Kommentare und Kritik sind willkommen. Wir werden versuchen, schnell auf
+alle (vernünftige) Post zu antworten, geben aber keine Garantie. Im allgemeinen, so meinen wir, sollten Sie  Email-Botschaften eher  an alle drei aktiven Entwickler senden als an ein
+en; falls Sie nichts von uns hören, seien Sie bitte geduldig - aber
+versichern Sie sich, daß Sie die entsprechenden Adressen genau kopierten.
+
+Falls Sie eine Anfrage zu einer bestimmten Anzeigeart, die durch BRLTTY
+unterstützt wird, haben, wollen Sie vielleicht den Autor dieses besonderen
+Treibers kontaktieren. S. die <tt/README/-Datei im entsprechenden Unterverzeichnis für Kontaktdetails.
+
+<sect1>BRLTTY auf Installations- und Rettungsdisketten
+
+<p>Von der Version 1.0.1 kann BRLTTY als unabhängig ausführbares Programm
+laufen, also ohne jede Konfigurationsdatei. In diesem Fall werden die bei
+der Übersetzung festgelegten Standardwerte verwendet werden. Falls das Verzeichnis <tt>/etc/brltty</> nicht
+ existiert (benützt, um die Konfigurationsdatei, die Online-Hilfsdatei und
+die Tabellendateien zu speichern), sucht  BRLTTY in <tt>/etc</>  nach der Hilfsdatei <tt/brlttydev.hlp/ und der Konfigurationsdatei <tt/brlttyconf.dat/. Auch wenn diese nicht exis
+tieren, wird BRLTTY noch immer funktionieren! 
+
+Wenn man Floppy Rootdisks für Installations- oder Rettungszwecke baut, ist
+Raum oft das Wesentliche.  Diese neue Elastizität erlaubt es, BRLTTY  als
+einzeln ausführbares Programm auf solchen Disketten zu installieren,
+wodurch die Raumanforderung herabgesetzt wird.
+
+Beachten Sie: Das Script <tt/install-brltty/ nimmt an, daß eine
+vollständige Installation von BRLTTY kopiert werden muß.
+
+<sect1>Zukünftige Erweiterungen
+
+<p>Abgesehen von Fehlerkorrekturen und der Unterstützung weiterer
+Braille-Anzeigen, hoffen wir, Zeit vorausgesetzt, an einigen oder allen der folgenden Punkte weiterzuarbeiten:
+
+<descrip>
+<tag/Bessere Attributbehandlung/ Attributverfolgung, gemischter Text- und Attributmodus etc. 
+
+<tag/Neugestaltung von Ausschneiden und Einfügen/ (cut & paste) Linearer
+Ausschneidemodus (im Gegensatz zum Ausschneiden von Rechtecken).
+
+<tag/Neugestaltung der Tonausgabe/ Eine größere Variation von Tönen.
+
+<tag/Scrollverfolgung/ Einsperren des Braille-Fensters auf einer Zeile, sowie sie auf dem Schirm entlangwandert.
+
+<tag/Elementare Sprachunterstützung/ Gemischte Brailleschrift und
+Sprachausgabe zum schnelleren Lesen des Texts
+
+<tag/On-the-fly grade II Übersetzung/ Auch das würde ein schnelleres Lesen
+des Texts erlauben.
+</descrip>
+
+Zunächst planen wir jedoch, BRLTTY neu zu strukturieren,  und zwar durch
+Trennen der "Low-level" Braille-Anzeigebehandlung vom "high-level",
+gerätunabhängigen Teil; dies würde erlauben, daß BRLTTY gleichzeitig mit
+anderen Programmen existiert, die auf die
+ Braille-Anzeige zugreifen, z.B. mit irgendeiner zukünftigen, unbekannten
+Zugangssoftware.
+
+<sect1>Bekannte Fehler
+
+<p>Diese Software wurde getestet auf
+<itemize>
+<item>einer Anzahl von PCs: sowohl auf Laptops als auch Desktops; 
+     Prozessoren von 386SX20  bis Pentium mit verschiedensten
+     Speichergrößen;  Linux Distributionen einschließlich 
+     Debian und Slackware;  einer Anzahl von Linux kernels, 
+     einschließlich 1.2.13, 2.0.0 und 2.0.17.
+<item>einem DEC Alpha: nur einmal getestet, unter RedHat Alpha Linux auf 
+      einem "noname board", freundlicherweise geliehen dem Cambridge 
+      University Computer Laboratory von DEC in Reading, England.
+</itemize>
+
+Sie hat sich bis jetzt als stabil erwiesen, aber falls sie nicht auf Ihrem
+System ist oder falls Sie einen Fehler finden, der hier nicht erwähnt ist,
+lassen Sie uns das bitte wissen, sodaß wir versuchen können, das Problem
+zu lösen.
+
+Derzeit sind folgende Problem bekannt:
+<descrip>
+  <tag/Cursor routing Performace/ Routing ist durch eine Schleife in einen Subprozeß, der mit niedriger Priorität läuft, implementiert. Dadurch wird ein zu hoher Zeitverbaruch vermieden. Verschiedene Systembelastung erfordert aber eine andere Einstellung
+der Parameter. Der Standardwert arbeit in einem Standardeditor in einem System mit niedriger Last sehr gut, aber unter anderen Umständen, z.B. bei einer langsamen seriellen Verbindung sind die Ergebnisse schlecht.
+<tag/Verwendung mit DOS Emu/ Die Simulation von Tastatureingaben funktioniert nicht mit DOSEmus "raw" Tastaturmodus. In diesem Fall müßte die Simulation der Tasteneingabe auf eine andere Art geschehen, möglicherweise durch Scancodes. Dies beeinflußt das 
+ursor Routing und die Cut &amp Paste Funktion.
+<tag/Einfügen von nicht ASCII Zeichen/ Leider stimmt durch die Art, wie der Kernel diese Operationen behandelt, die Nummer des Zeichens z.B. bei Akzenten, das im Speicher der Grafikkarte abgelegt wird, nicht mit der Nummer im Tastaturpuffer überein. Dadu
+ch kann es beim Einfügen (cut &amp paste) zu merkwürdigen Ergebnissen kommen. BRLTTY sollte in diesem Fall eine interne Umsetzung der Zeichen vornehmen --- dieser Punkt sollte weiter untersucht werden.
+</descrip>
+</article>

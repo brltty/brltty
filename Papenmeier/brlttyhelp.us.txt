@@ -1,0 +1,55 @@
+HELP for Braillex, 2D Screen Papenmeier
+status display:
+line 1   current line number
+line 3   cursor position - row
+line 4   cursor position - column
+status cells: left half: line number    right half: no/all bits set
+line 6   cursor tracking
+line 7   dispmode (text / attribut)
+line 9   screen frozen
+line 13  cursor visible
+line 14  cursor size
+line 15  cursor blink
+line 16  capital letter blink
+line 17  6 or 8 dots
+line 18  sliding windows
+line 19  sound
+line 20  skip identical lines
+front keys are:
+front key  "up"  go up one line (LNUP) 
+front key  "1"   go to prev different screen line (PRDIFLN) 
+front key  "dwn" go down one line (LNDN)
+front key  "4"   go to next different screen line (NXDIFLN)
+front key  "2"   go up several lines (WINUP)
+front key  "5"   go down several lines (WINDN)
+front key  "H"   go to top of screen (TOP)
+front key  "E"   go to bottom of screen (BOT)
+front key  "S"   go back to cursor (HOME)     
+front key  "7" + routing key: cut begin (CUTBEG)
+front key  "3" + routing key: cut end (CUTEND)
+front key  "8"   paste (PASTE)
+routing key      cursor jump
+side keys (status column) are:
+status col "1"  display help (HELP)
+status col "2"  redisplay (UPDATE)
+status col "6"  toggle cursor tracking (CSRTRK) 
+status col "7"  toggle attribute display (DISPMD)
+status col "8"  get status information (INFO)
+status col "9"  freeze the screen (FREEZE)
+status col "10" enter configuration menu (CONFMENU)
+status col "11" save brltty configuration (SAVECONF)
+status col "12" restore saved (or default) settings (RESET)
+status col "13" toggle cursor visibility (CSRVIS)
+status col "14" toggle cursor size (CSRSIZE)
+status col "15" toggle cursor blink (CSRBLINK)
+status col "16" toggle capital letter blink (CAPBLINK)
+status col "17" toggle six-dot mode (BRLDOTS)
+status col "18" toggle sliding window (SLIDEWIN)
+status col "19" toggle sound on/off (SND)
+status col "20" toggle skip identical lines (SKPIDLNS)
+during configuration:
+front key  "up"  next entry
+front key  "dwn" previos entry
+front key  "2"   change (up)
+front key  "5"   change (down)
+

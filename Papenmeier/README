@@ -1,0 +1,64 @@
+README file for the Papenmeier Screen 2D
+
+Version 1.0 (Mai 1998)
+
+Copyright
+=========
+
+This driver is copyrighted under the GNU Public License.  It is free 
+software.  See the file '../COPYING' for more details.  Feel free to send 
+your comments and to report bugs (if any :)) to 
+me at hoerandl@elina.htlw1.ac.at
+
+This Driver was written as a project in the
+    HTL W1, Abteilung Elektrotechnik, Wien - Österreich
+    (Technical High School, Department for electrical engineering,
+      Vienna, Austria)
+  by
+    Tibor Becker
+    Michael Burger
+    Herbert Gruber
+    Heimo Schön
+  Teacher:
+    August Hörandl <hoerandl@elina.htlw1.ac.at>
+
+Translation of the manual: W. Schimann
+
+Supported Hardware
+==================
+This driver is supposed to work with the Papenmeier Screen 2D Terminal
+So far, there is only support the buildin table for character translation.
+
+Connection
+==========
+This driver supports serial communication only.
+
+Before compiling
+================
+Select the Papenmeier Terminal in the Makefile
+
+  BRL_TARGET = Papenmeier
+
+The Papenmeier Terminal does the translation ASCII to Braille Dots
+with an intern table - you don´t have to change the TEXTTRANS entry.
+
+There is also a german translation of the helpfile - create a symbolic link
+ ln -s brlttyhelp.ger.txt brlttydev.hlp
+
+Key Bindings and Status Cells
+=============================
+All the key definitions and Status Cells are listed in the file brlttyhlp.txt.
+
+There is one additional function
+
+UPDATE  update the the display - this is useful if the terminal is switched
+        on after the start of the driver. This key can also be used if the 
+        display isn´t updated after serial problems.
+  
+Running the Driver
+==================
+To compile and run BRLTTY, please refer to the documentation about 
+BRLTTY itself. One note though: when BRLTTY starts, it will display 
+on the screen some copyright stuff, current configuration (model and 
+firmware version setup) and the serial device in use.  That information 
+may be useful if nothing happens with the braille terminal.

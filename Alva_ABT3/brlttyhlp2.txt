@@ -1,4 +1,4 @@
-BRLTTY Help Screen (Alva ABT380)
+BRLTTY Help Screen (Alva ABT340 Desktop)
 From left to right, front keys are:
   PROG    HOME   CURSOR    UP     LEFT   RIGHT    DOWN  CURSOR2   HOME2  PROG2
 

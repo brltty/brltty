@@ -1,5 +1,8 @@
+  -  Incorporated Papenmeier braille terminal driver
+  -  Alva driver fixes
+
 07 April 1998: BRLTTY 1.9.0 pre-release.
-  -  Added Stephane's absolute toggles (ON/OFF) flags to function defines.
+  -  Added absolute toggles (ON/OFF) flags to function defines.
   -  Moved braille tables and tools to the BrailleTables directory.
   -  Added Eurobraille terminal series driver.
   -  Now BRLTTY knows which virtual console is active and preserves separate

@@ -44,7 +44,7 @@
 #include "cut-n-paste.h"
 #include "misc.h"
 
-#define VERSION "BRLTTY 1.9.0 (pre-release)"
+#define VERSION "BRLTTY 1.9.1 (pre-release)"
 #define COPYRIGHT "\
 Copyright (C) 1995-1998 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -56,7 +56,7 @@ Usage: %s [options]\n\
  -q, --quiet          suppress start-up messages\n\
  -v, --version        print start-up messages and exit\n"
 
-#define ENV_MAGICNUM 0x4003
+#define ENV_MAGICNUM 0x4004
 
 /*
  * Some useful macros: 
@@ -86,13 +86,17 @@ struct brltty_env
   {				
     short magicnum;
     short csrvis;
+    short attrvis;
     short csrblink;
     short capblink;
+    short attrblink;
     short csrsize;
     short csroncnt;
     short csroffcnt;
     short caponcnt;
     short capoffcnt;
+   short attroncnt;
+    short attroffcnt;
     short sixdots;
     short slidewin;
     short sound;
@@ -100,13 +104,18 @@ struct brltty_env
     short stcellstyle;
   }
 env, initenv = {
-    ENV_MAGICNUM, INIT_CSRVIS, INIT_CSRBLINK, INIT_CAPBLINK, INIT_CSRSIZE,
-    INIT_CSR_ON_CNT, INIT_CSR_OFF_CNT, INIT_CAP_ON_CNT, INIT_CAP_OFF_CNT,
+    ENV_MAGICNUM, INIT_CSRVIS, INIT_ATTRVIS, INIT_CSRBLINK, INIT_CAPBLINK,
+    INIT_ATTRBLINK, INIT_CSRSIZE, INIT_CSR_ON_CNT, INIT_CSR_OFF_CNT,
+    INIT_CAP_ON_CNT, INIT_CAP_OFF_CNT, INIT_ATTR_ON_CNT, INIT_ATTR_OFF_CNT,
     INIT_SIXDOTS, INIT_SLIDEWIN, INIT_BEEPSON, INIT_SKPIDLNS,
 #if defined (Alva_ABT3)
     ST_AlvaStyle
 #elif defined (CombiBraille)
     ST_TiemanStyle
+#elif defined (TSI)
+    ST_PB80Style
+#elif defined (Papenmeier)
+    ST_Papenmeier
 #else
     ST_None
 #endif
@@ -150,7 +159,12 @@ scrstat scr;			/* For screen statistics */
  */
 unsigned char texttrans[256] =
 {
-#include "text.auto.h"
+#if defined(Papenmeier)
+  /* the papenmeier terminal driver uses the internal table of the terminal */
+  #include "Papenmeier/one.one.h"
+#else
+  #include "text.auto.h"
+#endif
 };
 unsigned char attribtrans[256] =
 {
@@ -169,12 +183,16 @@ short homedir_found = 0;	/* CWD status */
 unsigned int TickCount = 0;	/* incremented each cycle */
 
 /*
- * status cells support 
+ * Status cells support 
+ * remark: the Papenmeier has a column with 22 cells, 
+ * all other terminals use up to 5 bytes
  */
-unsigned char statcells[5];	/* status cell buffer */
-unsigned char num[10] = {14, 1, 5, 3, 11, 9, 7, 15, 13, 6};	/*
-					 * number translation 
-					 */
+unsigned char statcells[22];	/* status cell buffer */
+
+/* 
+ * Number dot translation for status cells 
+ */
+const unsigned char num[10] = {14, 1, 5, 3, 11, 9, 7, 15, 13, 6};
 
 /*
  * for csrjmp subprocess 
@@ -202,6 +220,47 @@ void saveconfig (void);
 int nice (int);			/* should really be in a header file ... */
 
 
+#if defined (Papenmeier)
+
+void pm_notable();		/* only Papenmeier: don´t use internal table */
+/* spezial table for papenmeier */
+
+#define B1 1
+#define B2 2
+#define B3 4
+#define B4 8
+#define B5 16
+#define B6 32
+#define B7 64
+#define B8 128
+
+const unsigned char pm_ones[11] = { B1+B5+B4, B2, B2+B5, 
+				    B2+B1, B2+B1+B4, B2+B4, 
+				    B2+B5+B1, B2+B5+B4+B1, B2+B5+B4, 
+				    B5+B1, B1+B2+B4+B5 };
+const unsigned char pm_tens[11] = { B8+B6+B3, B7, B7+B8, 
+				    B7+B3, B7+B3+B6, B7+B6, 
+				    B7+B8+B3, B7+B8+B3+B6, B7+B8+B6,
+				    B8+B3, B3+B6+B7+B8};
+
+/* create bits for number 0..99 - special for papenmeier */
+int pm_num(int x)
+{
+  return pm_tens[(x / 10) % 10] | pm_ones[x % 10];  
+}
+
+/* status cell   tens: line number    ones: no/all bits set */
+int pm_stat(int line, int on)
+{
+  if (on)
+    return pm_tens[line%10] | pm_ones[10];
+  else
+    return pm_tens[line];
+}
+
+#endif
+
+
 int 
 main (int argc, char *argv[])
 {
@@ -211,6 +270,9 @@ main (int argc, char *argv[])
   short csrcntr = 1;
   short capon = 0;		/* display caps off (toggled during blink) */
   short capcntr = 1;
+  short attron = 0;
+  short attrcntr = 1;
+  short oldwinx, oldwiny;
 
   /* Parse command line using getopt(): */
   while ((i = getopt (argc, argv, "c:d:t:hqv-:")) != -1)
@@ -281,7 +343,12 @@ main (int argc, char *argv[])
       if ((tbl_fd = open (opt_t, O_RDONLY)) >= 0 && \
 	  (curtbl = (unsigned char *) malloc (256)) && \
 	  read (tbl_fd, curtbl, 256) == 256)
-	memcpy (texttrans, curtbl, 256);
+	{
+	  memcpy (texttrans, curtbl, 256);
+#if defined (Papenmeier)
+	  pm_notable();
+#endif
+	}
       else if (!opt_q)
 	fprintf (stderr, "%s: Failed to read %s\n", argv[0], opt_t);
       if (curtbl)
@@ -338,7 +405,6 @@ main (int argc, char *argv[])
     default:			/* parent returns to calling process: */
       return 0;
     }
-
   /*
    * Initialise Braille and set text display: 
    */
@@ -386,6 +452,7 @@ main (int argc, char *argv[])
   scr = getstat ();
   switchto( scr.no );			/* allocate current screen params */
   setwinxy (scr.posx, scr.posy);	/* set initial window position */
+  oldwinx = p->winx; oldwiny = p->winy;
   p->cox = scr.posx;
   p->coy = scr.posy;
 
@@ -438,29 +505,36 @@ main (int argc, char *argv[])
 	      }
 	    /* no break here */
 	  case CMD_PRDIFLN:
+	  case CMD_ATTRUP:
 	    if (p->winy == 0)
 	      play (snd_bounce);
 	    else
 	      {
 		char buffer1[scr.cols], buffer2[scr.cols];
+		int scrtype = (keypress == CMD_ATTRUP) ? SCR_ATTRIB : \
+			      p->dispmode ? SCR_ATTRIB : SCR_TEXT;
 		int skipped = 0;
 		getscr ((winpos)
 			{
 			0, p->winy, scr.cols, 1
 			}
-			,buffer1, p->dispmode ? SCR_ATTRIB : SCR_TEXT);
+			,buffer1, scrtype);
 		while (p->winy > 0)
 		  {
 		    getscr ((winpos)
 			    {
 			    0, --p->winy, scr.cols, 1
 			    }
-			    ,buffer2, p->dispmode ? SCR_ATTRIB : SCR_TEXT);
+			    ,buffer2, scrtype);
 		    if (memcmp (buffer1, buffer2, scr.cols) || \
 			p->winy == scr.posy)
 		      break;	/* lines are different */
+                    if(p->winy == 0){
+                      play(snd_bounce);
+                      break;
+                    }
 		    /* lines are identical */
-		    /* don't sound if it's the first time or we we have
+		    /* don't sound if it's the first time or we would have
 		       beeped too many times already... */
 		    if (skipped <= 4)
 		      play (snd_skip);
@@ -484,29 +558,36 @@ main (int argc, char *argv[])
 	      }
 	    /* no break here */
 	  case CMD_NXDIFLN:
+	  case CMD_ATTRDN:
 	    if (p->winy == scr.rows - brl.y)
 	      play (snd_bounce);
 	    else
 	      {
 		char buffer1[scr.cols], buffer2[scr.cols];
+		int scrtype = (keypress == CMD_ATTRDN) ? SCR_ATTRIB : \
+			      p->dispmode ? SCR_ATTRIB : SCR_TEXT;
 		int skipped = 0;
 		getscr ((winpos)
 			{
 			0, p->winy, scr.cols, 1
 			}
-			,buffer1, p->dispmode ? SCR_ATTRIB : SCR_TEXT);
+			,buffer1, scrtype);
 		while (p->winy < scr.rows - brl.y)
 		  {
 		    getscr ((winpos)
 			    {
 			    0, ++p->winy, scr.cols, 1
 			    }
-			    ,buffer2, p->dispmode ? SCR_ATTRIB : SCR_TEXT);
+			    ,buffer2, scrtype);
 		    if (memcmp (buffer1, buffer2, scr.cols) || \
 			p->winy == scr.posy)
 		      break;	/* lines are different */
+		    if(p->winy == scr.rows-brl.y){
+		      play(snd_bounce);
+		      break;
+		    }
 		    /* lines are identical */
-		    /* don't sound if it's the first time or we we have
+		    /* don't sound if it's the first time or we would have
 		       beeped too many times already... */
 		    if (skipped <= 4)
 		      play (snd_skip);
@@ -574,6 +655,10 @@ main (int argc, char *argv[])
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
 	      csrjmp (p->winx, p->winy);
 	    break;
+	  case CMD_CSRJMP_VERT:
+	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
+	      csrjmp (-1, p->winy);
+	    break;
 	  case CMD_KEY_UP:
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
 	      inskey (UP_CSR);
@@ -597,12 +682,17 @@ main (int argc, char *argv[])
 	  case CMD_CSRVIS:
 	    TOGGLEPLAY ( TOGGLE(env.csrvis) );
 	    break;
+	  case CMD_ATTRVIS:
+	    TOGGLEPLAY ( TOGGLE(env.attrvis) );
+	    break;
 	  case CMD_CSRBLINK:
 	    csron = 1;
 	    TOGGLEPLAY ( TOGGLE(env.csrblink) );
 	    if (env.csrblink)
 	      {
 		csrcntr = env.csroncnt;
+                attron = 1;
+                attrcntr = env.attroncnt;
 		capon = 0;
 		capcntr = env.capoffcnt;
 	      }
@@ -673,6 +763,20 @@ main (int argc, char *argv[])
 	    TOGGLEPLAY( TOGGLE(env.capblink) );
 	    if (env.capblink)
 	      {
+		capcntr = env.caponcnt;
+		attron = 0;
+		attrcntr = env.attroffcnt;
+		csron = 0;
+		csrcntr = env.csroffcnt;
+	      }
+	    break;
+	  case CMD_ATTRBLINK:
+	    attron = 1;
+	    TOGGLEPLAY( TOGGLE(env.attrblink) );
+	    if (env.attrblink)
+	      {
+		attrcntr = env.attroncnt;
+		capon = 1;
 		capcntr = env.caponcnt;
 		csron = 0;
 		csrcntr = env.csroffcnt;
@@ -749,6 +853,9 @@ main (int argc, char *argv[])
       if (env.capblink)
 	if (!--capcntr)
 	  capcntr = (capon ^= 1) ? env.caponcnt : env.capoffcnt;
+      if (env.attrblink)
+	if (!--attrcntr)
+	  attrcntr = (attron ^= 1) ? env.attroncnt : env.attroffcnt;
 
       /*
        * Update Braille display and screen information.  Switch screen 
@@ -785,6 +892,17 @@ main (int argc, char *argv[])
 	      p->coy = scr.posy;
 	    }
 	}
+      /* If attribute underlining is blinking during display movement */
+      if(env.attrvis && env.attrblink){
+	/* We could check that to see if we changed screen, but that doesn't
+	   really matter... this is mainly for when you are hunting up/down
+	   for the line with attributes. */
+	if(p->winx != oldwinx || p->winy != oldwiny){
+	  attron = 1;
+	  attrcntr = env.attroncnt;
+	}
+      }
+      oldwinx = p->winx; oldwiny = p->winy;
       /* If not in info mode, get screen image: */
       if (!infmode)
 	{
@@ -830,8 +948,37 @@ main (int argc, char *argv[])
 		env.sound << 4 | p->dispmode << 2;
 	      statcells[4] |= (dispmd & FROZ_SCRN) == FROZ_SCRN ? 1 : 0;
 	      break;
+	    case ST_PB80Style:
+	      statcells[0] = num[(p->winy+1) % 10] << 4 | \
+		num[((p->winy+1) / 10) % 10];
+	      break;
+	    case ST_Papenmeier:
+	      statcells [0] = pm_num(p->winy+1);
+	      statcells [1] = 0;  /* empty for easier reading */
+	      statcells [2] =  pm_num(scr.posy+1);
+
+	      statcells [3] =  pm_num(scr.posx+1);
+	      statcells [4] = 0;     /* empty for easier reading */
+	      statcells [5] = pm_stat(6, p->csrtrk);
+	      statcells [6] = pm_stat(7, p->dispmode);
+	      statcells [7] = 0;     /* empty for easier reading */
+	      statcells [8] = pm_stat(9, (dispmd & FROZ_SCRN) == FROZ_SCRN);
+	      statcells [9] = 0;
+	      statcells [10] = 0;
+	      statcells [11] = 0;
+	      statcells [12] = pm_stat(3, env.csrvis);
+	      statcells [13] = pm_stat(4, env.csrsize);
+	      statcells [14] = pm_stat(5, env.csrblink);
+	      statcells [15] = pm_stat(6, env.capblink);
+	      statcells [16] = pm_stat(7, env.sixdots);
+	      statcells [17] = pm_stat(8, env.slidewin);
+	      statcells [18] = pm_stat(9, env.sound);
+	      statcells [19] = pm_stat(0, env.skpidlns);
+	      statcells [20] = 0;
+              statcells [21] = 0;
+	      break;
 	    default:
-	      memset (statcells, 0, 5);
+	      memset (statcells, 0, sizeof(statcells));
 	      break;
 	    }
 	  setbrlstat (statcells);
@@ -857,10 +1004,38 @@ main (int argc, char *argv[])
 	    for (i = 0; i < brl.x * brl.y; brl.disp[i] = \
 		 curtbl[brl.disp[i]], i++);
 
+	  /* Attribute underlining: if viewing text (not attributes), attribute
+	     underlining is active and visible and we're not in help, then we
+	     get the attributes for the current region and OR the underline. */
+	  if (!p->dispmode && env.attrvis && (!env.attrblink || attron)
+	      && !(dispmd & HELP_SCRN)){
+	    unsigned char attrbuf[brl.x*brl.y];
+	    getscr ((winpos)
+		    {
+		    p->winx, p->winy, brl.x, brl.y
+		    }
+		    ,attrbuf, \
+		    SCR_ATTRIB);
+	    for (i = 0; i < brl.x * brl.y; i++)
+	      switch(attrbuf[i]){
+  	        case 0x07: 
+  	        case 0x17: 
+  	        case 0x30: 
+		  break;
+	        case 0x70:
+		  brl.disp[i] |= ATTR1CHAR;
+		  break;
+	        case 0x0F:
+	        default:
+		  brl.disp[i] |= ATTR2CHAR;
+		  break;
+	      };
+	  }
+
 	  /*
 	   * If the cursor is visible and in range, and help is off: 
 	   */
-	  if (env.csrvis && (!env.csrblink || csron) && scr.posx >= p->winx && \
+	  if (env.csrvis && (!env.csrblink || csron) && scr.posx >= p->winx &&\
 	      scr.posx < p->winx + brl.x && scr.posy >= p->winy && \
 	      scr.posy < p->winy + brl.y && !(dispmd & HELP_SCRN))
 	    brl.disp[(scr.posy - p->winy) * brl.x + scr.posx - p->winx] |= \
@@ -884,7 +1059,8 @@ main (int argc, char *argv[])
 	  /*
 	   * status cells 
 	   */
-	  statcells[0] = texttrans['i'];
+	  memset (statcells, 0, sizeof(statcells));
+	  statcells[0] = texttrans['I'];
 	  statcells[1] = texttrans['n'];
 	  statcells[2] = texttrans['f'];
 	  statcells[3] = texttrans['o'];
@@ -904,7 +1080,7 @@ main (int argc, char *argv[])
   /*
    * Hard-wired delay to try and stop us being killed prematurely ... 
    */
-  delay (3000);
+  delay (1000);
   closespk ();
   closebrl (brl);
   for (i = 0; i <= NBR_SCR; i++) 
@@ -975,16 +1151,17 @@ csrjmp (int x, int y)
     }
   signal (SIGCHLD, stop_child);	/* re-establish handler */
 
+  csr_active++;
   switch (csr_pid = fork ())
     {
     case -1:			/* fork failed */
+      csr_active--;
       break;
     case 0:			/* child, cursor routing process */
       nice (CSRJMP_NICENESS);	/* reduce scheduling priority */
       csrjmp_sub (x, y);
       exit (0);			/* terminate child process */
     default:			/* parent waits for child to return */
-      csr_active++;
       break;
     }
 }
@@ -1023,11 +1200,16 @@ csrjmp_sub (int x, int y)
 	  delay (CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
 	  cury = scr.posy;
+	  curx = scr.posx;
 	  scr = getstat_phys ();
 	}
-      while ((scr.posy - cury) * dify <= 0 && !timeout_yet (CSRJMP_TIMEOUT));
+      while ((scr.posy - cury) * dify <= 0
+	     && !((scr.posx - curx) * dify <= 0)
+	     && !timeout_yet (CSRJMP_TIMEOUT));
       sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
     }
+
+  if(x<0) return; /* vertical routing only */
 
   /* Now horizontal movement, quitting if the vertical position is wrong: */
   difx = x - scr.posx;
@@ -1094,7 +1276,7 @@ message (char *s, short silent)
 void 
 clrbrlstat (void)
 {
-  memset (statcells, 0, 5);
+  memset (statcells, 0, sizeof(statcells));
   setbrlstat (statcells);
 }
 
@@ -1135,7 +1317,7 @@ configmenu (void)
       short min;
       short max;
     }
-  menu[14] =
+  menu[18] =
   {
     {
       &savecfg, "save config   ", 1, 0, 1
@@ -1143,6 +1325,10 @@ configmenu (void)
     ,
     {
       &env.csrvis, "csr is visible", 1, 0, 1
+    }
+    ,
+    {
+      &env.csrsize, "block cursor  ", 1, 0, 1
     }
     ,
     {
@@ -1154,7 +1340,11 @@ configmenu (void)
     }
     ,
     {
-      &env.csrsize, "block cursor  ", 1, 0, 1
+      &env.attrvis, "attr visible  ", 1, 0, 1
+    }
+    ,
+    {
+      &env.attrblink, "attr blink    ", 1, 0, 1
     }
     ,
     {
@@ -1171,6 +1361,14 @@ configmenu (void)
     ,
     {
       &env.capoffcnt, "cap blink off ", 0, 1, 16
+    }
+    ,
+    {
+      &env.attroncnt, "attr blink on ", 0, 1, 16
+    }
+    ,
+    {
+      &env.attroffcnt, "attr blink off", 0, 1, 16
     }
     ,
     {
@@ -1196,11 +1394,12 @@ configmenu (void)
   struct brltty_env oldenv = env;
   int k;
   static short n = 0;
-  short maxn = 13;
+  short maxn = 17;
   char buffer[20];
 
   /* status cells */
-  statcells[0] = texttrans['c'];
+  memset (statcells, 0, sizeof(statcells));
+  statcells[0] = texttrans['C'];
   statcells[1] = texttrans['n'];
   statcells[2] = texttrans['f'];
   statcells[3] = texttrans['i'];
@@ -1229,16 +1428,21 @@ configmenu (void)
 	    if (++n > maxn)
 	      n = 0;
 	    break;
+	  case CMD_WINUP:
 	  case CMD_FWINLT:
 	    if (--*menu[n].ptr < menu[n].min)
 	      *menu[n].ptr = menu[n].max;
 	    break;
+	  case CMD_WINDN:
 	  case CMD_FWINRT:
 	    if (++*menu[n].ptr > menu[n].max)
 	      *menu[n].ptr = menu[n].min;
 	    break;
 	  case CMD_RESET:
 	    env = oldenv;
+	    break;
+	  case CMD_SAVECONF:
+	    savecfg |= 1;
 	    break;
 	  default:
 	    if (savecfg)

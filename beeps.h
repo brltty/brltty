@@ -1,4 +1,3 @@
-
 /*
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
@@ -21,12 +20,13 @@
  */
 
 /* beeps.h - console beeps used by the system
- * $Id: beeps.h,v 1.3 1996/09/24 01:04:24 nn201 Exp $
  */
 
 void soundstat (short);		/* set sound on/off */
 
 void play (int *);		/* make a specific beep */
+
+
 
 extern int snd_link[];
 extern int snd_unlink[];

@@ -1,0 +1,23 @@
+BRLTTY braille table format
+===========================
+
+Each table consists of a binary file made up of 256 bytes.  The byte
+offsets correspond to the value of any ASCII character to translate
+into braille dots.  Each bytes gives the braille dot pattern for each
+256 characters.  The bits are distributed as follows:
+
+	bit 0	bit 1		-->	dot 1	dot 4
+	bit 2	bit 3		-->	dot 2	dot 5
+	bit 4	bit 5		-->	dot 3	dot 6
+	bit 6	bit 7		-->	dot 7	dot 8
+
+This dot mapping was chosen because it makes programming prettier for
+underlining, cursor support or downshifting braille characters.
+
+This means that any braille terminal that accepts a direct mapping 
+bits 01234567 = dots 12345678 or any other dot mapping convention
+must translate the dot pattern into its own mapping in its driver.
+
+Also note that the byte offset which is the ASCII character value is 
+assumed to be from the ISO-8859-1 character set by BRLTTY.
+

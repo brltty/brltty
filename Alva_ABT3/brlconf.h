@@ -21,6 +21,7 @@
 
 /* Alva_ABT3/brlconf.h - Configurable definitions for the Alva ABT3xx series
  * Copyright (C) 1995-1996 by Nicolas Pitre <nico@cam.org>
+ * $Id: brlconf.h,v 1.2 1996/09/21 23:34:52 nn201 Exp $
  *
  * Edit as necessary for your system.
  */
@@ -31,8 +32,8 @@
 #define ABT_AUTO	-1	/* for new firmware only */
 #define ABT320          0
 #define ABT340          1
-#define ABT380          2
-#define ABT34D          3	/* ABT340 Desktop */
+#define ABT34D          2
+#define ABT380          3	/* ABT340 Desktop */
 #define ABT38D          4	/* ABT380 Twin Space */
 #define NB_MODEL        5
 
@@ -56,3 +57,9 @@
 /* typematic settings */
 #define TYPEMATIC_DELAY 10	/* nbr of cycles before a key is repeated */
 #define TYPEMATIC_REPEAT 2	/* nbr of cycles between each key repeat */
+
+/* Delay in miliseconds between forced full refresh of the display.
+ * This is to minimize garbage effects due to noise on the serial line.
+ */
+#define REFRESH_RATE 1000
+
