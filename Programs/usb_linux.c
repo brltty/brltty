@@ -169,6 +169,7 @@ usbGetSerialDevice (
   char *path = NULL;
   char *driver;
   if ((driver = usbGetDriver(device, interface))) {
+LogPrint(LOG_WARNING, "USB driver: %s", driver);
     if (strcmp(driver, "serial") == 0) {
       struct serial_struct serial;
       if (usbControlDriver(device, interface, TIOCGSERIAL, &serial) != -1) {
@@ -183,6 +184,8 @@ usbGetSerialDevice (
           }
           ++prefix;
         }
+      } else {
+        LogError("USB control driver");
       }
     }
     free(driver);

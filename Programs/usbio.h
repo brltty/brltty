@@ -69,11 +69,11 @@
 #define USB_RECIP_OTHER     0X03
 
 /* Control transfer types. */
-#define USB_TYPE_MASK     (0X03 << 5)
-#define USB_TYPE_STANDARD (0X00 << 5)
-#define USB_TYPE_CLASS    (0X01 << 5)
-#define USB_TYPE_VENDOR   (0X02 << 5)
-#define USB_TYPE_RESERVED (0X03 << 5)
+#define USB_TYPE_MASK     0X60
+#define USB_TYPE_STANDARD 0X00
+#define USB_TYPE_CLASS    0X20
+#define USB_TYPE_VENDOR   0X40
+#define USB_TYPE_RESERVED 0X60
 
 /* Transfer directions. */
 #define USB_DIR_OUT 0X00
