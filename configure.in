@@ -500,27 +500,33 @@ esac])
 brltty_link_flags="${brltty_cv_prog_ld_flags}"
 
 AC_CACHE_CHECK([for static linkage flag], [brltty_cv_prog_ld_static], [dnl
-case "${host_os}"
-in
-   linux*|openbsd*|freebsd*)
-      brltty_cv_prog_ld_static="-static"
-      ;;
-   solaris*)
-      brltty_cv_prog_ld_static="-dn"
-      ;;
-   hpux*)
-      brltty_cv_prog_ld_static="-Bstatic"
-      ;;
-   *)
-      brltty_cv_prog_ld_static=""
-      ;;
-esac])
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_ld_static="-static"
+else
+   case "${host_os}"
+   in
+      linux*|openbsd*|freebsd*)
+         brltty_cv_prog_ld_static="-static"
+         ;;
+      solaris*)
+         brltty_cv_prog_ld_static="-dn"
+         ;;
+      hpux*)
+         brltty_cv_prog_ld_static="-Bstatic"
+         ;;
+      *)
+         AC_MSG_ERROR([static linkage not supported by ${host_os}])
+         ;;
+   esac
+   brltty_cv_prog_ld_static="-Wl,${brltty_cv_prog_ld_static}"
+fi])
 brltty_static_flag="${brltty_cv_prog_ld_static}"
 BRLTTY_ARG_ENABLE(
    [standalone-programs],
    [statically linked executables], [dnl
    brltty_standalone_programs="yes"
-   brltty_link_flags="${brltty_link_flags} ${brltty_static_flag}"
+   LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
 ])
 
 LDFLAGS="${LDFLAGS} -Wl,`echo "${brltty_link_flags}" | sed -e '
