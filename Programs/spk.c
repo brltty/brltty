@@ -147,24 +147,23 @@ exitSpeechFifo (void) {
 
 int
 openSpeechFifo (const char *directory, const char *path) {
+  atexit(exitSpeechFifo);
   if ((speechFifoPath = makePath(directory, path))) {
-    if (mkfifo(path, 0) != -1) {
-      chmod(path, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
-      if ((speechFifoDescriptor = open(path, O_RDONLY|O_NDELAY)) != -1) {
-        atexit(exitSpeechFifo);
-
+    if (mkfifo(speechFifoPath, 0) != -1) {
+      chmod(speechFifoPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
+      if ((speechFifoDescriptor = open(speechFifoPath, O_RDONLY|O_NDELAY)) != -1) {
         LogPrint(LOG_DEBUG, "Speech FIFO created: %s: fd=%d",
                  speechFifoPath, speechFifoDescriptor);
         return 1;
       } else {
         LogPrint(LOG_ERR, "Cannot open speech FIFO: %s: %s",
-                 path, strerror(errno));
+                 speechFifoPath, strerror(errno));
       }
 
-      unlink(path);
+      unlink(speechFifoPath);
     } else {
       LogPrint(LOG_ERR, "Cannot create speech FIFO: %s: %s",
-               path, strerror(errno));
+               speechFifoPath, strerror(errno));
     }
 
     free(speechFifoPath);
