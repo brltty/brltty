@@ -779,6 +779,7 @@ AC_SUBST([bluetooth_objects])
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
+BRLTTY_BRAILLE_DRIVER([bd], [Braudi])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
 BRLTTY_BRAILLE_DRIVER([bn], [BrailleNote])
 BRLTTY_BRAILLE_DRIVER([cb], [CombiBraille])
