@@ -75,7 +75,7 @@ static int intoverride = 0;	/* internal override flag -
 				 * highly dubious behaviour ...
 				 */
 static int int_cursor = 0;	/* position of internal cursor: 0 = none */
-static int kbemu = 0; /* keyboard emulation (whether you can type) */
+static int kbemu = 1; /* keyboard emulation (whether you can type) */
 
 /* The input queue is only manipulated by the qput() and qget()
  * functions.
@@ -453,8 +453,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	    key.cmd += blitesz-1;
 
 	  if(key.spcbar && (key.cmd &VAL_BLK_MASK) == VAL_PASSKEY) {
+          /*
 	    if(!kbemu)
 	      return EOF;
+          */
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = meta = 0;
