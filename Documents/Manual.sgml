@@ -382,12 +382,31 @@ for any additional display-specific instructions.
 <sect3>System Defaults<label id="build-defaults"><p>
 <descrip>
   <tag><tt/--with-braille-driver=/<em/driver/<label id="build-braille-driver"></tag>
-    Specify the default braille display driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the proper name (full or abbreviated) of the driver
-    may be used.
-    If this option is specified, then the named driver
-    is linked into the BRLTTY binary.
+    Specify the braille display drivers
+    which are to be linked into the BRLTTY binary.
+    Each driver must be identified
+    either by its two-letter <ref id="drivers" name="driver identification code">
+    or by its proper name (full or abbreviated).
+    The driver identifiers and/or names must be
+    separated from one another by a single comma.
+    The first listed driver becomes the default driver.
+    There's no default driver if this option isn't used.
+    Those drivers which aren't listed via this option
+    are built as dynamically loadable shared objects
+    and can still be selected at run-time.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/all/
+        Link all of the drivers into the binary.
+        Don't build any of them as dynamically loadable shared objects.
+      <tag/no/
+        Don't build any drivers at all.
+        This is equivalent to specifying <tt/--without-braille-driver/.
+      <tag/yes/
+        Build all of the drivers as dynamically loadable shared objects.
+        Don't link any of them into the binary.
+        This is equivalent to specifying <tt/--with-braille-driver/.
+    </descrip>
     See the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive
     and the <ref id="options-braille-driver" name="-b"> command line option
     for run-time selection.
@@ -436,12 +455,31 @@ for any additional display-specific instructions.
     This setting can be changed with the
     <ref id="preference-attributes-table" name="Attributes Table"> preference.
   <tag><tt/--with-speech-driver=/<em/driver/<label id="build-speech-driver"></tag>
-    Specify the default speech synthesizer driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the proper name (full or abbreviated) of the driver
-    may be used.
-    If this option is specified, then the named driver
-    is linked into the BRLTTY binary.
+    Specify the speech synthesizer drivers
+    which are to be linked into the BRLTTY binary.
+    Each driver must be identified
+    either by its two-letter <ref id="drivers" name="driver identification code">
+    or by its proper name (full or abbreviated).
+    The driver identifiers and/or names must be
+    separated from one another by a single comma.
+    The first listed driver becomes the default driver.
+    There's no default driver if this option isn't used.
+    Those drivers which aren't listed via this option
+    are built as dynamically loadable shared objects
+    and can still be selected at run-time.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/all/
+        Link all of the drivers into the binary.
+        Don't build any of them as dynamically loadable shared objects.
+      <tag/no/
+        Don't build any drivers at all.
+        This is equivalent to specifying <tt/--without-speech-driver/.
+      <tag/yes/
+        Build all of the drivers as dynamically loadable shared objects.
+        Don't link any of them into the binary.
+        This is equivalent to specifying <tt/--with-speech-driver/.
+    </descrip>
     See the <ref id="configure-speech-driver" name="speech-driver"> configuration file directive
     and the <ref id="options-speech-driver" name="-s"> command line option
     for run-time selection.
