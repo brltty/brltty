@@ -121,6 +121,8 @@ BRAILLE_INTERNAL_DRIVER_NAMES = @brltty_internal_names_braille@
 BRAILLE_DRIVERS = @braille_drivers@
 BRAILLE_EXTERNAL_DRIVER_NAMES = @brltty_external_names_braille@
 
+LIBBRAILLE_ROOT = @libbraille_root@
+
 SPEECH_DRIVER_CODES = @brltty_item_codes_speech@
 SPEECH_DRIVER_OBJECTS = @speech_driver_objects@
 SPEECH_DRIVER_LIBRARIES = @speech_driver_libraries@
