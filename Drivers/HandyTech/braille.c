@@ -469,6 +469,19 @@ writeDescribe (BrailleDisplay *brl) {
   return writeBytes(brl, HandyDescribe, sizeof(HandyDescribe));
 }
 
+static void
+deallocateBuffers (void) {
+  if (rawData) {
+    free(rawData);
+    rawData = NULL;
+  }
+
+  if (prevData) {
+    free(prevData);
+    prevData = NULL;
+  }
+}
+
 static int
 reallocateBuffer (unsigned char **buffer, size_t size) {
   void *address = realloc(*buffer, size);
@@ -547,35 +560,34 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   charactersPerSecond = baud2integer(baud) / 10;
 
   if (io->openPort(parameters, device)) {
-    if (writeDescribe(brl)) {
-      if (io->awaitInput(1000)) {
-        unsigned char buffer[sizeof(HandyDescription) + 1];
-        if (readBytes(brl, buffer, sizeof(buffer)) == sizeof(buffer)) {
-          if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
-            if (identifyModel(brl, buffer[sizeof(HandyDescription)])) return 1;
+    int tries = 0;
+    while (writeDescribe(brl)) {
+      while (io->awaitInput(100)) {
+        unsigned char response[sizeof(HandyDescription) + 1];
+        if (readBytes(brl, response, sizeof(response)) == sizeof(response)) {
+          if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
+            if (identifyModel(brl, response[sizeof(HandyDescription)])) return 1;
+            deallocateBuffers();
           }
         }
       }
-    }
-  }
+      if (errno != EAGAIN) break;
 
-  brl_close(brl);
+      if (++tries == 5) {
+        LogPrint(LOG_WARNING, "No response from display.");
+        break;
+      }
+    }
+
+    io->closePort();
+  }
   return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
+  deallocateBuffers();
   io->closePort();
-
-  if (rawData) {
-    free(rawData);
-    rawData = NULL;
-  }
-
-  if (prevData) {
-    free(prevData);
-    prevData = NULL;
-  }
 }
 
 static int
