@@ -39,7 +39,7 @@ internalError()
 
 configurationFile=""
 requestedAction=create
-bootParameter=""
+requestedParameter=""
 OPTIND=1
 while getopts ":f:cup:h" option
 do
@@ -48,7 +48,7 @@ do
       f) configurationFile="${OPTARG}";;
       c) requestedAction=create;;
       u) requestedAction=update;;
-      p) bootParameter="${OPTARG}";;
+      p) requestedParameter="${OPTARG}";;
       h)
          cat <<EOF
 Usage: ${programName} [option ...]
@@ -109,7 +109,7 @@ ${1}"
          sedScript=""
          putSedCommand "1i\\
 `makeHeaderLine Updated`\\
-
+# Boot Parameter:${bootParameter}\\
 "
       }
       putConfigurationDirective()
@@ -139,8 +139,9 @@ putConfigurationFile()
    [ -n "${textTable}" ] && putConfigurationDirective "text-table" "${textTable}"
    finalizeConfigurationFile
 }
-parseBootOperands()
+parseBootParameter()
 {
+   bootParameter="${bootParameter} ${1}"
    number=1
    while [ "${number}" -le 3 ]
    do
@@ -159,9 +160,9 @@ parseBootOperands()
       number="`expr ${number} + 1`"
    done
 }
-parseBootParameter()
+putBootParameter()
 {
-   parseBootOperands "${1}"
+   parseBootParameter "${1}"
    putConfigurationFile
 }
 parseBootCommand()
@@ -173,7 +174,7 @@ parseBootCommand()
       in
          "brltty="*)
             found=true
-            parseBootOperands "${1#*=}"
+            parseBootParameter "${1#*=}"
             ;;
       esac
       shift
@@ -185,14 +186,14 @@ brailleDriver=""
 brailleDevice=""
 textTable=""
 bootCommandFile="/proc/cmdline"
-if [ -n "${bootParameter}" ]
+if [ -n "${requestedParameter}" ]
 then
-   parseBootParameter "${bootParameter}"
+   putBootParameter "${requestedParameter}"
 elif [ -f "${bootCommandFile}" ]
 then
    parseBootCommand `cat "${bootCommandFile}"`
 elif [ -n "${brltty}" ]
 then
-   parseBootParameter "${brltty}"
+   putBootParameter "${brltty}"
 fi
 exit 0
