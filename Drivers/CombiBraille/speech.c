@@ -100,8 +100,8 @@ spk_flush (void)
 static void
 spk_say (const unsigned char *buffer, int len)
 {
-  unsigned char *pre_speech = PRE_SPEECH;
-  unsigned char *post_speech = POST_SPEECH;
+  unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
+  unsigned char *post_speech = (unsigned char *)POST_SPEECH;
   int i;
 
   if (pre_speech[0]) spk_write(pre_speech+1, pre_speech[0]);
@@ -113,8 +113,9 @@ spk_say (const unsigned char *buffer, int len)
     if (byte < 33) {	/* space or control character */
       byte = ' ';
     } else if (byte <= MAX_TRANS) {
-      byte_address = vocab[byte - 33];
-      byte_count = strlen(byte_address);
+      const char *word = vocab[byte - 33];
+      byte_address = (unsigned char *)word;
+      byte_count = strlen(word);
     }
     spk_write(byte_address, byte_count);
   }
@@ -126,7 +127,7 @@ spk_say (const unsigned char *buffer, int len)
 static void
 spk_mute (void)
 {
-  unsigned char *mute_seq = MUTE_SEQ;
+  unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
 
   spk_write(mute_seq+1, mute_seq[0]);
   spk_flush();

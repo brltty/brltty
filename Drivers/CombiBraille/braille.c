@@ -67,8 +67,8 @@ static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   short n, success;		/* loop counters, flags, etc. */
-  unsigned char *init_seq = INIT_SEQ;	/* bytewise accessible copies */
-  unsigned char *init_ack = INIT_ACK;
+  unsigned char *init_seq = (unsigned char *)INIT_SEQ;	/* bytewise accessible copies */
+  unsigned char *init_ack = (unsigned char *)INIT_ACK;
   unsigned char c;
   char id = -1;
 
@@ -148,9 +148,9 @@ failure:
 static void
 brl_close (BrailleDisplay *brl)
 {
-  unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
-  unsigned char *post_data = POST_DATA;
-  unsigned char *close_seq = CLOSE_SEQ;
+  unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
+  unsigned char *post_data = (unsigned char *)POST_DATA;
+  unsigned char *close_seq = (unsigned char *)CLOSE_SEQ;
 
   rawlen = 0;
   if (pre_data[0])
@@ -196,8 +196,8 @@ static void
 brl_writeWindow (BrailleDisplay *brl)
 {
   short i;			/* loop counter */
-  unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
-  unsigned char *post_data = POST_DATA;
+  unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
+  unsigned char *post_data = (unsigned char *)POST_DATA;
 
   /* Only refresh display if the data has changed: */
   if (memcmp (brl->buffer, prevdata, brl->x * brl->y) || \
