@@ -36,9 +36,9 @@ F1 Left           toggle screen freeze mode
 F1 Right          toggle 6-dot braille mode
 F2 Left           paste cut buffer at cursor location
 F2 Right          bring cursor to line (no horizontal motion)
-Up/Down           search backward/forward for content of cut buffer
-F1 Up/Down        go to previous/next command prompt
-F2 Up/Down       go to last/first line of previous/next paragraph
+Up/Down           go to previous/next command prompt
+F1 Up/Down        go to last/first line of previous/next paragraph
+F2 Up/Down        search backward/forward for content of cut buffer
 F1 F2             restart braille driver
 
 Speech (left) Key Pad:

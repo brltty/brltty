@@ -1221,22 +1221,22 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               break;
 
             case KEY_BRL_UP:
-              res = CMD_PRSEARCH;
-              break;
-            case KEY_BRL_DOWN:
-              res = CMD_NXSEARCH;
-              break;
-            case KEY_BRL_F1 | KEY_BRL_UP:
               res = CMD_PRPROMPT;
               break;
-            case KEY_BRL_F1 | KEY_BRL_DOWN:
+            case KEY_BRL_DOWN:
               res = CMD_NXPROMPT;
               break;
-            case KEY_BRL_F2 | KEY_BRL_UP:
+            case KEY_BRL_F1 | KEY_BRL_UP:
               res = CMD_PRPGRPH;
               break;
-            case KEY_BRL_F2 | KEY_BRL_DOWN:
+            case KEY_BRL_F1 | KEY_BRL_DOWN:
               res = CMD_NXPGRPH;
+              break;
+            case KEY_BRL_F2 | KEY_BRL_UP:
+              res = CMD_PRSEARCH;
+              break;
+            case KEY_BRL_F2 | KEY_BRL_DOWN:
+              res = CMD_NXSEARCH;
               break;
 
             case KEY_SPK_LEFT:
