@@ -23,6 +23,8 @@
 #include "bindings.h"		/* for keybindings */
 
 
+#include "../brl_lib.h"
+
 #define QSZ 256			/* size of internal input queue in bytes */
 #define INT_CSR_SPEED 2		/* on/off time in cycles */
 #define ACK_TIMEOUT 3000	/* timeout in ms for an ACK to come back */

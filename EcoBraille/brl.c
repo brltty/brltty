@@ -47,6 +47,8 @@
 #include "../misc.h"
 #include "../config.h"
 
+#include "../brl_lib.h"
+
 static char StartupString[] =
 "  EcoBraille driver, version 1.00 \n"
 "  Copyright (C) 1999 by Oscar Fernandez <ofa@once.es> \n";

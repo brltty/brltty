@@ -114,11 +114,11 @@ extern "C"
 #include "alva_api.library/alva_api.h"
 #endif
 
+#include "../brl_lib.h"
 
 static char StartupString[] =
 "  Alva driver, version 2.0 \n"
 "  Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org> \n";
-
 
 
 /* Braille display parameters */

@@ -25,8 +25,26 @@
 # BRLDEV
 ###############################################################################
 
+HELP = cb
+HELPNAME = brltty-$(HELP).hlp
+
+help:
+	../txt2hlp $(HELPNAME) brlttyh*.txt
+
 brl.o: brl.c ../brl.h ../misc.h brlconf.h tables.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
+	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' \
+	'-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"' \
+	-c brl.c
 
 speech.o: speech.c ../speech.h brlconf.h speech.h
 	$(CC) $(CFLAGS) -c speech.c
+
+# shared library
+# name of library - 2 char
+LIB_DESC = cb
+LIB_NAME = $(LIB_SO_NAME)$(LIB_DESC).so.$(LIB_VER)
+
+lib: brl.o
+	$(CC) -g -shared -Wl,-soname,$(LIB_NAME) -o $(LIB_NAME) brl.o -lc
+	touch lib
+

@@ -74,12 +74,12 @@ class HelpScreen:public Screen
   unsigned char **page;
   unsigned char *buffer;
   short scrno;
-  int gethelp (void);
+  int gethelp (char*);
     public:
   HelpScreen ();
   void setscrno (short);
   short numscreens (void);
-  int open (void);		// called every time the help screen is opened
+  int open (char* helpfile);		// called every time the help screen is opened
   void getstat (scrstat &);
   unsigned char *getscr (winpos, unsigned char *, short);
   void close (void);		// called once to close the help screen

@@ -48,3 +48,8 @@
 #define PRE_DATA "\002\033B"	/* string to send to */
 				/*  Braille before dat */
 #define POST_DATA ""		/* string to send to Braille after data */
+
+
+
+/* prefered/default status cells mode */
+#define DEF_MODE    ST_TiemanStyle

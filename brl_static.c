@@ -17,10 +17,33 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-
-/* serial line baudrate... 
+/*
+ * brl_static.c - handling of dynamic drivers
+ *
+ *    simulates dynamic loading for static linked brlttty executeables
  */
-#define BAUDRATE B9600
 
-/* prefered/default status cells mode */
-#define DEF_MODE  ST_None
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dlfcn.h>
+
+#include "brl.h"
+#include "scr.h"
+#include "misc.h"
+
+extern driver brl_driver;
+
+driver *thedriver = NULL;	/* filled by dynamic libs */
+char* driver_libname = "static linked";	/* name of library */
+
+/* load driver from libray - simulated */
+/* return 0 on success */
+int driver_load()
+{
+  thedriver = &brl_driver; /* locate struct driver - filled with all the data */
+  return 0;
+}
+
+
+

@@ -40,6 +40,7 @@
 #include "../scr.h"
 #include "../misc.h"
 
+#include "../brl_lib.h"
 
 static char StartupString[] =
 "  EuroBraille driver, version 0.2 \n"

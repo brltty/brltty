@@ -44,18 +44,23 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.1"
-#define COPYRIGHT "\
-Copyright (C) 1995-1999 by The BRLTTY Team.  All rights reserved."
-#define USAGE "\
-Usage: %s [options] \n\
- -c config-file       use binary configuration file `config-file' \n\
- -d serial-device     use `serial-device' to access Braille terminal \n\
- -t text-trans-file   use translation table `text-trans-file' \n\
- -h, --help           print this usage message \n\
- -q, --quiet          suppress start-up messages \n\
- -l n                 debugging level for syslog (from 0 to 7, default 4) \n\
- -v, --version        print start-up messages and exit \n"
+#define VERSION "BRLTTY 2.1d"
+
+#define COPYRIGHT \
+"Copyright (C) 1995-1999 by The BRLTTY Team.  All rights reserved."
+
+#define USAGE \
+"Usage: %s [options] \n"\
+" -w driver            which driver to use\n"\
+"    full library name or a shortcut: "  LIBS "\n"\
+" -a                   ask for driver name (shortcut) after a beep\n"\
+" -c config-file       use binary configuration file `config-file' \n"\
+" -d serial-device     use `serial-device' to access Braille terminal \n"\
+" -t text-trans-file   use translation table `text-trans-file' \n"\
+" -h, --help           print this usage message \n"\
+" -q, --quiet          suppress start-up messages \n"\
+" -l n                 debugging level for syslog (from 0 to 7, default 4) \n"\
+" -v, --version        print start-up messages and exit \n"
 
 #define ENV_MAGICNUM 0x4004
 
@@ -109,17 +114,7 @@ env, initenv = {
     INIT_ATTRBLINK, INIT_CSRSIZE, INIT_CSR_ON_CNT, INIT_CSR_OFF_CNT,
     INIT_CAP_ON_CNT, INIT_CAP_OFF_CNT, INIT_ATTR_ON_CNT, INIT_ATTR_OFF_CNT,
     INIT_SIXDOTS, INIT_SLIDEWIN, INIT_BEEPSON, INIT_SKPIDLNS,
-#if defined (Alva_ABT3)
-    ST_AlvaStyle
-#elif defined (CombiBraille)
-    ST_TiemanStyle
-#elif defined (TSI)
-    ST_PB80Style
-#elif defined (Papenmeier)
-    ST_Papenmeier
-#else
     ST_None
-#endif
 };
 
 /* struct definition for volatile parameters */
@@ -214,14 +209,10 @@ void loadconfig (void);
 void saveconfig (void);
 int nice (int);			/* should really be in a header file ... */
 
-#if defined (Papenmeier)
+
+/* helper functions for papenmeier status display */
 int pm_num(int x);
 int pm_stat(int line, int on);
-#else
-int pm_num(int x) { return 0; }
-int pm_stat(int line, int on) { return 0; }
-#endif
-
 
 int 
 main (int argc, char *argv[])
@@ -235,13 +226,18 @@ main (int argc, char *argv[])
   short attron = 0;
   short attrcntr = 1;
   short oldwinx, oldwiny;
+  short opt_a = 0;		/* ask for driver */
+  char tmp_driver[] = "  ";	/* place to hold driver name */
 
   /* Parse command line using getopt(): */
-  while ((i = getopt (argc, argv, "c:d:t:hl:qv-:")) != -1)
+  while ((i = getopt (argc, argv, "ac:d:t:hl:qvw:-:")) != -1)
     /* This will complain if an incorrect option is given but will still
        proceed. I assume this is intended? SD */
     switch (i)
       {
+      case 'a':			/* ask for driver name */
+	opt_a = 1;
+	break;
       case 'c':		/* configuration filename */
 	opt_c = optarg;
 	break;
@@ -269,6 +265,9 @@ main (int argc, char *argv[])
       case 'v':		/* version */
 	opt_v = 1;
 	break;
+      case 'w':			/* name of driver */
+	driver_libname = optarg;
+	break;
       case '-':		/* long options */
 	if (strcmp (optarg, "help") == 0)
 	  opt_h = 1;
@@ -288,6 +287,31 @@ main (int argc, char *argv[])
   /* Open syslog */
   LogOpen(opt_l);
 
+  /* ask for driver name */
+  if (opt_a)
+    {
+      LogAndStderr(LOG_NOTICE, "get driver name from console");
+      driver_libname = tmp_driver;
+      printf("\a\a");
+      driver_libname[0] = getchar();
+      driver_libname[1] = getchar();
+    }
+
+  /* check for driver */
+  if (driver_libname == NULL)
+    {
+      LogAndStderr(LOG_ERR, "no driver specified - please use -w or -a");
+      exit(10);
+    }
+  if (driver_load() != 0)
+    {
+      LogAndStderr(LOG_ERR, "unable to load driver library: %s", driver_libname);
+      exit(10);
+    }
+
+  /* copy default mode for status display */
+  initenv.stcellstyle = thedriver->pref_style;
+
   /*
    * Print version and copyright information: 
    */
@@ -298,12 +322,15 @@ main (int argc, char *argv[])
       LogPrint(LOG_NOTICE, "%s starting", VERSION);
       puts (COPYRIGHT);
 
+      LogAndStderr(LOG_INFO, "library: %s", driver_libname);
+      LogAndStderr(LOG_INFO, "help file: %s", thedriver->helpfile);
+
       /*
        * Give the Braille library a chance to print start-up messages. * 
        * Pass the -d argument if present to override the default serial
        * device. 
        */
-      identbrl (opt_d);
+      thedriver->identbrl (opt_d);
       identspk ();
     }
   if (opt_v)
@@ -335,7 +362,7 @@ main (int argc, char *argv[])
   /*
    * Initialize screen library 
    */
-  if (initscr ())
+  if (initscr (thedriver->helpfile))
     {				
       /* initialise screen reading */
       if (!opt_q){
@@ -435,13 +462,13 @@ main (int argc, char *argv[])
       /*
        * Process any Braille input 
        */
-      while ((keypress = readbrl (TBL_CMD)) != EOF)
+      while ((keypress = thedriver->readbrl (TBL_CMD)) != EOF)
 	switch (keypress & ~VAL_SWITCHMASK)
 	  {
 	  case CMD_NOOP:	/* do nothing but loop */
 	    continue;
 	  case CMD_RESTARTBRL:
-	    closebrl(&brl);
+	    thedriver->closebrl(&brl);
 	    play(snd_brloff);
 	    LogPrint(LOG_INFO,"Reinitializing braille driver");
 	    startbrl();
@@ -974,7 +1001,7 @@ main (int argc, char *argv[])
 	      memset (statcells, 0, sizeof(statcells));
 	      break;
 	    }
-	  setbrlstat (statcells);
+	  thedriver->setbrlstat (statcells);
 
 	  getscr ((winpos)
 		  {
@@ -1034,7 +1061,7 @@ main (int argc, char *argv[])
 	      scr.posy < p->winy + brl.y && !(dispmd & HELP_SCRN))
 	    brl.disp[(scr.posy - p->winy) * brl.x + scr.posx - p->winx] |= \
 	      env.csrsize ? BIG_CSRCHAR : SMALL_CSRCHAR;
-	  writebrl (&brl);
+	  thedriver->writebrl (&brl);
 	}
       /*
        * If in info mode, send status information: 
@@ -1098,14 +1125,14 @@ main (int argc, char *argv[])
 	  statcells[2] = texttrans['f'];
 	  statcells[3] = texttrans['o'];
 	  statcells[4] = texttrans[' '];
-	  setbrlstat (statcells);
+	  thedriver->setbrlstat (statcells);
 
 	  if (brl.x * brl.y >= 21)
 	    message (infbuf, MSG_SILENT);
 	  else
 	    {
 	      memcpy (brl.disp, infbuf, brl.x * brl.y);
-	      writebrl (&brl);
+	      thedriver->writebrl (&brl);
 	    }
 	}
 
@@ -1121,7 +1148,7 @@ main (int argc, char *argv[])
    */
   delay (1000);
   closespk ();
-  closebrl (&brl);
+  thedriver->closebrl (&brl);
   play(snd_brloff);
   for (i = 0; i <= NBR_SCR; i++) 
     free (scrparam[i]);
@@ -1134,7 +1161,7 @@ main (int argc, char *argv[])
 void
 startbrl()
 {
-  initbrl (&brl, opt_d);
+  thedriver->initbrl (&brl, opt_d);
   if (brl.x == -1)
     {
       LogPrint(LOG_ERR,"Braille driver initialization failed");
@@ -1160,10 +1187,12 @@ switchto( unsigned int scrno )
   if (scrno > NBR_SCR)
       scrno = 0;
   if (!scrparam[scrno]) 	/* if not already allocated... */
-    if (!(scrparam[scrno] = malloc (sizeof (*p))))
-      scrno = 0; 	/* unable to allocate a new structure */
-    else
-      *scrparam[scrno] = initparam;
+    {
+      if (!(scrparam[scrno] = malloc (sizeof (*p))))
+	scrno = 0; 	/* unable to allocate a new structure */
+      else
+	*scrparam[scrno] = initparam;
+    }
   p = scrparam[scrno];
   usetable (p->dispmode ? TBL_ATTRIB : TBL_TEXT);
 }
@@ -1370,10 +1399,10 @@ message (unsigned char *s, short flags)
        * work ... 
        */
       for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], i++);
-      writebrl( &brl );
+      thedriver->writebrl( &brl );
 
       if ( l || (flags & MSG_WAITKEY) )
-	while (readbrl (TBL_ARG) == EOF)
+	while (thedriver->readbrl (TBL_ARG) == EOF)
 	  delay (KEYDEL);
     }
 }
@@ -1383,7 +1412,7 @@ void
 clrbrlstat (void)
 {
   memset (statcells, 0, sizeof(statcells));
-  setbrlstat (statcells);
+  thedriver->setbrlstat (statcells);
 }
 
 
@@ -1515,7 +1544,7 @@ configmenu (void)
   statcells[2] = texttrans['f'];
   statcells[3] = texttrans['i'];
   statcells[4] = texttrans['g'];
-  setbrlstat (statcells);
+  thedriver->setbrlstat (statcells);
 
   message ("Configuration menu", 0);
   delay (DISPDEL);
@@ -1545,11 +1574,11 @@ configmenu (void)
       memset (brl.disp, 0, brl.x * brl.y);
       for (i = 0; i < MIN(brl.x * brl.y, l - x); i++)
 	brl.disp[i] = texttrans[buffer[i+x]];
-      writebrl (&brl);
+      thedriver->writebrl (&brl);
       delay (DELAY_TIME);
 
       /* Now process any user interaction */
-      while ((k = readbrl (TBL_CMD)) != EOF)
+      while ((k = thedriver->readbrl (TBL_CMD)) != EOF)
 	switch (k)
 	  {
 	  case CMD_NOOP:

@@ -26,5 +26,22 @@
 #
 ###############################################################################
 
+HELP = ts
+HELPNAME = brltty-$(HELP).hlp
+
+help:
+	../txt2hlp $(HELPNAME) brlttyh*.txt
+
 brl.o: brl.c brlconf.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
+	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' \
+	'-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"' -c brl.c
+
+# shared library
+# name of library - 2 char
+LIB_DESC = ts
+LIB_NAME = $(LIB_SO_NAME)$(LIB_DESC).so.$(LIB_VER)
+
+lib: brl.o
+	$(CC) -g -shared -Wl,-soname,$(LIB_NAME) -o $(LIB_NAME) brl.o -lc
+	touch lib
+

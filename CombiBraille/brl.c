@@ -35,6 +35,8 @@
 #include "brlconf.h"
 #include "tables.h"		/* for keybindings */
 
+#include "../brl_lib.h"
+
 unsigned char combitrans[256];	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
 unsigned char *prevdata;	/* previously received data */

@@ -37,10 +37,13 @@
 #include <termios.h>
 #include <string.h>
 
-#include "brlconf.h"
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
+#include "brlconf.h"
+
+#include "../brl_lib.h"
+
 
 #define CMD_ERR	EOF
 
@@ -52,59 +55,14 @@ char DefDev[] = BRLDEV;		/* default braille device */
 int brl_fd = 0;			/* file descriptor for Braille display */
 struct termios oldtio;		/* old terminal settings */
 
-static FILE* dbg = NULL;
-static char dbg_buffer[256];
-
 static unsigned char prevline[PMSC] = "";
 static unsigned char prev[BRLCOLS+1]= "";
 
 void init_table();
 
-/* special table for papenmeier */
-#define B1 1
-#define B2 2
-#define B3 4
-#define B4 8
-#define B5 16
-#define B6 32
-#define B7 64
-#define B8 128
-
-const unsigned char pm_ones[11] = { B1+B5+B4, B2, B2+B5, 
-				    B2+B1, B2+B1+B4, B2+B4, 
-				    B2+B5+B1, B2+B5+B4+B1, B2+B5+B4, 
-				    B5+B1, B1+B2+B4+B5 };
-const unsigned char pm_tens[11] = { B8+B6+B3, B7, B7+B8, 
-				    B7+B3, B7+B3+B6, B7+B6, 
-				    B7+B8+B3, B7+B8+B3+B6, B7+B8+B6,
-				    B8+B3, B3+B6+B7+B8};
-
-/* create bits for number 0..99 - special for papenmeier */
-int pm_num(int x)
-{
-  return pm_tens[(x / 10) % 10] | pm_ones[x % 10];  
-}
-
-/* status cell   tens: line number    ones: no/all bits set */
-int pm_stat(int line, int on)
-{
-  if (on)
-    return pm_tens[line%10] | pm_ones[10];
-  else
-    return pm_tens[line];
-}
-
-void brl_debug(char * print_buffer)
-{
-  if (! dbg)
-    dbg =  fopen ("/tmp/brltty.log", "w");
-  fprintf(dbg, "%s\n", print_buffer);
-  fflush(dbg);
-}
-
 void initbrlerror(brldim *brl)
 {
-  printf("\nInitbrl: failure at open\n");
+  LogAndStderr(LOG_ERR, "Initbrl: failure at open");
   if (brl->disp)
     free (brl->disp);
   brl->x = -1;
@@ -167,7 +125,7 @@ void
 identbrl (const char *dev)
 {
   printf(BRLNAME " driver\n"
-	 "Copyright (C) 1998 HTL W1 <hoerandl@elina.htlw1.ac.at>\n"
+	 "Copyright (C) 1998-99 HTL W1 <hoerandl@elina.htlw1.ac.at>\n"
 	 "Device = %s\n", (dev) ? dev : DefDev);
 }
 
@@ -274,8 +232,7 @@ writebrl (brldim *brl)
   int i;
 
 #ifdef WR_DEBUG
-  sprintf(dbg_buffer, "write %2d %2d %80s", brl->x, brl->y, brl->disp);
-  brl_debug(dbg_buffer);
+  LogPrint(LOG_ERR, "write %2d %2d %80s", brl->x, brl->y, brl->disp);
 #endif
 
   for(i=0; i < BRLCOLS; i++)
@@ -306,7 +263,7 @@ writebrl (brldim *brl)
 
 #ifdef RD_DEBUG
 #define KEY(CODE, VAL) \
-     case CODE: brl_debug("readbrl: " #VAL); \
+     case CODE: LogPrint(LOG_ERR, "readbrl: " #VAL); \
        return VAL;
 #else
 #define KEY(CODE, VAL) \
@@ -323,8 +280,7 @@ int readbrl (int xx)
   static int end_pressed = 0;
 
   READ_CHK(0, cSTX);		/* STX - Start */
-  sprintf(dbg_buffer, "read: STX");
-  brl_debug(dbg_buffer);
+  LogPrint(LOG_DEBUG,  "read: STX");
 
   READ_CHK(1, cIdReceive);	/* 'K' */
   READ(2);			/* code - 2 bytes */
@@ -338,10 +294,13 @@ int readbrl (int xx)
     READ(i);			/* Data */
   
 # ifdef RD_DEBUG
+  {
+    char dbg_buffer[256];
     sprintf(dbg_buffer, "read: ");
     for(i=0; i<l; i++)
       sprintf(dbg_buffer + 6 + 3*i, " %02x",buf[i]);
-    brl_debug(dbg_buffer);
+    LogPrint(LOG_ERR, dbg_buffer);
+  }
 # endif
 
   if (buf[l-1] != cETX)		/* ETX - End */
@@ -424,8 +383,7 @@ int readbrl (int xx)
 	      return (Kod - 0x342)/3 + CR_ROUTEOFFSET;
 	  else
 	    {
-	      sprintf(dbg_buffer, "readbrl: Command Error - CmdKod:%d", Kod);
-	      brl_debug(dbg_buffer);
+	      LogPrint(LOG_ERR, "readbrl: Command Error - CmdKod:%d", Kod);
 	      return CMD_ERR;
 	    }
 	}

@@ -32,7 +32,7 @@ main (void)
   unsigned char buffer[2048], *res;
   short i, j, c;
 
-  if (initscr ())
+  if (initscr ("brltty-al.hlp"))
     {
       fprintf (stderr, "scrtest: can't initialise screen reading\n");
       exit (1);

@@ -50,6 +50,7 @@
 #include <curses.h>
 #include <signal.h>
 
+#define HELPNAME ""
 #define _SCR_H
 #include "brl.c"
 
@@ -157,8 +158,6 @@ void init_tables()
     numbers[pm_num(i)] = i;
 }
 
-
-
 int byte(unsigned int i)
 {
   return numbers[i]; 
@@ -168,7 +167,7 @@ void show_status(WINDOW* status, unsigned char* statcells)
 {
   unsigned char txt[200];
 
-#define IS_ON(i)     ((statcells[i] & B1) == B1)
+#define IS_ON(i)     ((statcells[i] & 1) == 1)
 
   sprintf(txt, "\nline: (0x%02x) %d csr: (0x%02x) %d / (0x%02x) %d\n"
 	  "%s %s %s %s %s %s %s %02x/%d %s %s %s",
@@ -240,15 +239,6 @@ void send_serial(int keycode, int pressed)
     timeval++;  
     write(brl_fd, puffer, sizeof(puffer));
   */
-}
-
-void delay (int msec)
-{
-  struct timeval del;
-
-  del.tv_sec = 0;
-  del.tv_usec = msec * 1000;
-  select (0, NULL, NULL, NULL, &del);
 }
 
 int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
@@ -364,7 +354,7 @@ int main(int argc, char* argv[])
   scrollok(debug_serial, TRUE);
 
   // open serial
-  dummy_brldim = initbrl(argv[1]);
+  initbrl(&dummy_brldim, argv[1]);
 
   if (! brl_fd)
     error("OOPS - cant open " BRLDEV);

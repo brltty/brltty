@@ -66,3 +66,9 @@
   #define WR_DEBUG
   #define RD_DEBUG
 */
+
+/* prefered/default status cells mode */
+#define DEF_MODE  ST_Papenmeier
+
+/* just for serial.c */
+void initbrl (brldim *, const char *); /* initialise Braille display */

@@ -53,7 +53,7 @@
  * Nothe that this requires the appropriate extra library and modification
  * in the Makefile.  See the README file for details.
  */
-#define USE_PARALLEL_PORT 0
+/* #define USE_PARALLEL_PORT 0 */
 
 
 /* If you defined USE_PARALLEL_PORT to 1, this is where you should define
@@ -79,3 +79,6 @@
  */
 #define REFRESH_RATE 1000
 
+
+/* prefered/default status cells mode */
+#define DEF_MODE  ST_AlvaStyle
