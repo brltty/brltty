@@ -56,7 +56,7 @@
 typedef enum {
 	PARM_HOST,
 	PARM_PORT,
-	PARM_KEYFILE,
+	PARM_KEYFILE
 } Parameters;
 
 const char *const api_parameters[] = { "host", "port", "keyfile", NULL };
@@ -288,7 +288,7 @@ void *ProcessConnection(void *arg)
 {
  int i, size, go_on = 0;
  Tconnection *c = (Tconnection *) arg;
- char packet[BRLAPI_MAXPACKETSIZE];
+ unsigned char packet[BRLAPI_MAXPACKETSIZE];
  uint32_t * ints = (uint32_t *) &packet[0];
  brl_type_t type;
  pthread_cleanup_push(EndThread, arg);
@@ -784,7 +784,7 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
  int i,tty,res,refresh = 0, masked;
  static int oldtty = 0;
  Tconnection *c = NULL;
- char packet[BRLAPI_MAXPACKETSIZE];
+ unsigned char packet[BRLAPI_MAXPACKETSIZE];
  brl_keycode_t keycode = 0;
 
  CleanUp(); /* destroys remaining connections if any */

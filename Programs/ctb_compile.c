@@ -225,8 +225,8 @@ addOpcode (FileData *data, const char *token, int length, ContractionTableOpcode
 }
 
 static int
-getToken (FileData *data, const BYTE **token, int *length, const char *description) { /*find the next string of contiguous nonblank characters */
-  const BYTE *start = *token + *length;
+getToken (FileData *data, const char **token, int *length, const char *description) { /*find the next string of contiguous nonblank characters */
+  const char *start = *token + *length;
   int count = 0;
 
   while (isspace(*start)) start++;
@@ -241,7 +241,7 @@ getToken (FileData *data, const BYTE **token, int *length, const char *descripti
 }				/*token obtained */
 
 static int
-hexadecimalDigit (FileData *data, int *value, BYTE digit) {
+hexadecimalDigit (FileData *data, int *value, char digit) {
   if (digit >= '0' && digit <= '9')
     *value = digit - '0';
   else if (digit >= 'a' && digit <= 'f')
@@ -254,32 +254,32 @@ hexadecimalDigit (FileData *data, int *value, BYTE digit) {
 }
 
 static int
-octalDigit (FileData *data, int *value, BYTE digit) {
+octalDigit (FileData *data, int *value, char digit) {
   if (digit < '0' || digit > '7') return 0;
   *value = digit - '0';
   return 1;
 }
 
 static int
-parseText (FileData *data, ByteString *result, const BYTE *token, const int length) {	/*interpret find string */
+parseText (FileData *data, ByteString *result, const char *token, const int length) {	/*interpret find string */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
   for (index = 0; index < length; index++) {
-    BYTE byte = token[index];
-    if (byte == '\\') { /* escape sequence */
+    char character = token[index];
+    if (character == '\\') { /* escape sequence */
       int ok = 0;
       int start = index;
       if (++index < length) {
-        switch (byte = token[index]) {
+        switch (character = token[index]) {
           case '\\':
             ok = 1;
             break;
           case 'f':
-            byte = '\f';
+            character = '\f';
             ok = 1;
             break;
           case 'n':
-            byte = '\n';
+            character = '\n';
             ok = 1;
             break;
           case 'o':
@@ -289,25 +289,25 @@ parseText (FileData *data, ByteString *result, const BYTE *token, const int leng
                 if (high < 04)
                   if (octalDigit(data, &middle, token[++index]))
                     if (octalDigit(data, &low, token[++index])) {
-                      byte = (high << 6) | (middle << 3) | low;
+                      character = (high << 6) | (middle << 3) | low;
                       ok = 1;
                     }
             }
             break;
           case 'r':
-            byte = '\r';
+            character = '\r';
             ok = 1;
             break;
           case 's':
-            byte = ' ';
+            character = ' ';
             ok = 1;
             break;
           case 't':
-            byte = '\t';
+            character = '\t';
             ok = 1;
             break;
           case 'v':
-            byte = '\v';
+            character = '\v';
             ok = 1;
             break;
           case 'x':
@@ -315,7 +315,7 @@ parseText (FileData *data, ByteString *result, const BYTE *token, const int leng
               int high, low;
               if (hexadecimalDigit(data, &high, token[++index]))
                 if (hexadecimalDigit(data, &low, token[++index])) {
-                  byte = (high << 4) | low;
+                  character = (high << 4) | low;
                   ok = 1;
                 }
             }
@@ -329,17 +329,15 @@ parseText (FileData *data, ByteString *result, const BYTE *token, const int leng
         return 0;
       }
     }
-    if (!byte) {
-      byte = ' ';
-    }
-    result->bytes[count++] = byte;
+    if (!character) character = ' ';
+    result->bytes[count++] = character;
   }
   result->length = count;
   return 1;
 }				/*find string interpreted */
 
 static int
-parseDots (FileData *data, ByteString *cells, const BYTE *token, const int length) {	/*get dot patterns */
+parseDots (FileData *data, ByteString *cells, const char *token, const int length) {	/*get dot patterns */
   BYTE cell = 0;		/*assembly place for dots */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
@@ -347,8 +345,8 @@ parseDots (FileData *data, ByteString *cells, const BYTE *token, const int lengt
 
   for (index = 0; index < length; index++) {
     int started = index != start;
-    BYTE byte = token[index];
-    switch (byte) { /*or dots to make up Braille cell */
+    char character = token[index];
+    switch (character) { /*or dots to make up Braille cell */
       {
         int dot;
       case '1':
@@ -377,7 +375,7 @@ parseDots (FileData *data, ByteString *cells, const BYTE *token, const int lengt
       haveDot:
         if (started && !cell) goto invalid;
         if (cell & dot) {
-          compileError(data, "dot specified more than once: %c", byte);
+          compileError(data, "dot specified more than once: %c", character);
           return 0;
         }
         cell |= dot;
@@ -398,7 +396,7 @@ parseDots (FileData *data, ByteString *cells, const BYTE *token, const int lengt
         break;
       default:
       invalid:
-        compileError(data, "invalid dot number: %c", byte);
+        compileError(data, "invalid dot number: %c", character);
         return 0;
     }
   }
@@ -412,7 +410,7 @@ parseDots (FileData *data, ByteString *cells, const BYTE *token, const int lengt
 }				/*end of function parseDots */
 
 static int
-getFindText (FileData *data, ByteString *find, const BYTE **token, int *length) {
+getFindText (FileData *data, ByteString *find, const char **token, int *length) {
   if (getToken(data, token, length, "find text"))
     if (parseText(data, find, *token, *length))
       return 1;
@@ -420,7 +418,7 @@ getFindText (FileData *data, ByteString *find, const BYTE **token, int *length) 
 }
 
 static int
-getReplaceText (FileData *data, ByteString *replace, const BYTE **token, int *length) {
+getReplaceText (FileData *data, ByteString *replace, const char **token, int *length) {
   if (getToken(data, token, length, "replacement text"))
     if (parseText(data, replace, *token, *length))
       return 1;
@@ -428,7 +426,7 @@ getReplaceText (FileData *data, ByteString *replace, const BYTE **token, int *le
 }
 
 static int
-getReplacePattern (FileData *data, ByteString *replace, const BYTE **token, int *length) {
+getReplacePattern (FileData *data, ByteString *replace, const char **token, int *length) {
   if (getToken(data, token, length, "replacement pattern")) {
     if (*length == 1 && **token == '=') {
       replace->length = 0;
@@ -487,7 +485,7 @@ static int
 includeFile (FileData *data, ByteString *path) {
   const char *prefixAddress = data->fileName;
   int prefixLength = 0;
-  const BYTE *suffixAddress = path->bytes;
+  const char *suffixAddress = path->bytes;
   int suffixLength = path->length;
   if (*suffixAddress != '/') {
     const char *ptr = strrchr(prefixAddress, '/');
@@ -502,9 +500,9 @@ includeFile (FileData *data, ByteString *path) {
 }
 
 static int
-processLine (FileData *data, const BYTE *line) {
+processLine (FileData *data, const char *line) {
   int ok = 0;
-  const BYTE *token = line;
+  const char *token = line;
   int length = 0;			/*length of token */
   ContractionTableOpcode opcode;
 
@@ -652,10 +650,10 @@ processFile (const char *fileName) {
 
   if ((stream = fopen(data.fileName, "r"))) {
     int size = 0X80;
-    BYTE *buffer = malloc(size);
+    char *buffer = malloc(size);
     if (buffer) {
       while (1) { /*Process lines in table */
-        BYTE *line = fgets(buffer, size, stream);
+        char *line = fgets(buffer, size, stream);
         int length;
         if (!line) {
           if (ferror(stream))
@@ -666,7 +664,7 @@ processFile (const char *fileName) {
 
         while (buffer[(length = strlen(line)) - 1] != '\n') {
           if (length + 1 == size) {
-            BYTE *newBuffer = realloc(buffer, size<<=1);
+            char *newBuffer = realloc(buffer, size<<=1);
             if (!newBuffer) {
               compileError(&data, "cannot extend input buffer.");
               ok = 0;

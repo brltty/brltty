@@ -147,7 +147,7 @@ insertKey (unsigned short key) {
 
 
 int
-insertString (const unsigned char *string) {
+insertString (const char *string) {
   while (*string) {
     if (!insertKey(*string++)) return 0;
   }

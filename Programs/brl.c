@@ -199,7 +199,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
       int blk = key & VAL_BLK_MASK;
       int arg = key & VAL_ARG_MASK;
       int cmd = blk | arg;
-      unsigned char buffer[0X100];
+      char buffer[0X100];
       const CommandEntry *candidate = NULL;
       const CommandEntry *last = NULL;
       const CommandEntry *command = commandTable;

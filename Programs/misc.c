@@ -112,8 +112,8 @@ LogError (const char *action)
 void
 LogBytes (const char *description, const unsigned char *data, unsigned int length) {
    if (length) {
-      unsigned char buffer[(length * 3) + 1];
-      unsigned char *out = buffer;
+      char buffer[(length * 3) + 1];
+      char *out = buffer;
       const unsigned char *in = data;
       while (length--) out += sprintf(out, " %2.2X", *in++);
       LogPrint(LOG_DEBUG, "%s:%s", description, buffer);

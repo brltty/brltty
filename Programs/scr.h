@@ -75,7 +75,7 @@ int selectDisplay (int);		/* select display page */
 void describeScreen (ScreenDescription *);		/* get screen status */
 unsigned char *readScreen (short, short, short, short, unsigned char *, ScreenMode);
 int insertKey (unsigned short);
-int insertString (const unsigned char *);
+int insertString (const char *);
 int routeCursor (int, int, int);
 int setPointer (int, int);
 int getPointer (int *, int *);
