@@ -43,7 +43,7 @@
 #include "cut-n-paste.h"
 #include "misc.h"
 
-#define VERSION "BRLTTY 1.9.8 (pre-release)"
+#define VERSION "BRLTTY version 2.0"
 #define COPYRIGHT "\
 Copyright (C) 1995-1998 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -1207,15 +1207,16 @@ csrjmp_sub (int x, int y)
       while (!(t = timeout_yet (CSRJMP_TIMEOUT)) &&
 	     scr.posy==cury && scr.posx==curx);
       if(t) break;
-      if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
-	 || (y-scr.posy)*(y-scr.posy) >= dif*dif){
+      if((scr.posy==cury && (scr.posx-curx)*dif <= 0) ||
+	 (scr.posy!=cury && (y-scr.posy)*(y-scr.posy) >= dif*dif))
+      {
 	delay(CSRJMP_SETTLE_DELAY);
 	getstat_phys (&scr);
-	if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
-	   || (y-scr.posy)*(y-scr.posy) >= dif*dif)
+	if((scr.posy==cury && (scr.posx-curx)*dif <= 0) ||
+	   (scr.posy!=cury && (y-scr.posy)*(y-scr.posy) >= dif*dif))
 	{
 	  /* We are getting farther from our target... Let's try to go back 
-	   * to the previous position wich is obviously the nearest ever 
+	   * to the previous position wich was obviously the nearest ever 
 	   * reached before gibing up.
 	   */
 	  sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
@@ -1253,7 +1254,7 @@ csrjmp_sub (int x, int y)
 	  if(scr.posy != y || (x-scr.posx)*(x-scr.posx) >= dif*dif){
 	    /* We probably wrapped on a short line... or are getting farther 
 	     * from our target. Try to get back to the previous position which
-	     * is obviously the nearest ever reached before we exit.
+	     * was obviously the nearest ever reached before we exit.
 	     */
 	    sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
 	    inskey (dif > 0 ? LT_CSR : RT_CSR);

@@ -1,7 +1,7 @@
 Note: this file should be read from bottom to top.
 
 
-  ...
+22 July 1998: BRLTTY 2.0 released!
   - Another fix to the cursor routing algorithm
   - Web pages online at http://www.cam.org/~nico/brltty
   - Fixes to compile with egcs and glibc (RH5.1)

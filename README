@@ -8,15 +8,16 @@ Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
 Nicolas Pitre <nico@cam.org>
 Stéphane Doyon <s.doyon@videotron.ca>
 Nikhil Nair <nn201@cus.cam.ac.uk>
+(and others)
 
-Web page: http://www.cam.org/~nico/brltty
+Home Page: http://www.cam.org/~nico/brltty
 
-If you have any interest in BRLTTY, please drop us a note. We are interested
-in knowing who BRLTTY users are and how many there are. Even if all goes well
-and you have no problems, please let us know you're there and tell us which
-brand of display you use. If you have problems, we will be happy to help.
-If you have suggestions, comments or if you wish to contribute, you are
-welcome!
+If you have any interest in BRLTTY, please drop us a note. We are
+interested in knowing who BRLTTY users are and how many there are. Even if
+all goes well and you have no problems with this package, please let us
+know you're there and tell us which brand of display you use. If you have
+problems, we will be happy to help.  If you have suggestions, comments or
+if you wish to contribute, you are welcome! 
 
 
 BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -28,6 +29,7 @@ Foundation.  Please see the file COPYING for details.
 This software is maintained by Nicolas Pitre <nico@cam.org>.
 
 -----------------------------------------------------------------------------
+
 
 INTRODUCTION FOR THOSE NEW TO SOFT BRAILLE
 ==========================================
@@ -63,16 +65,18 @@ enough utilised).
 INTRODUCTION TO BRLTTY
 ======================
 
-While soft Braille displays have been used for some years under MS-DOS, and 
-are even starting to be used under Windows, it seems that they have not 
-been used on Unix consoles.  This could well be because blind people have 
-been able to access Unix systems through accessible terminals.  With the 
-advent of PC-based Unix systems (such as Linux), the need becomes evident.
+While soft Braille displays have been used for some years under MS-DOS,
+and are even starting to be used under Windows, it seems that they have
+not been used on Unix consoles so much.  This could well be because blind
+people have been able to access Unix systems through accessible terminals. 
+With the advent of PC-based Unix systems (such as Linux), the need becomes
+evident. 
 
-BRLTTY attempts to fill this gap.  It runs as a daemon, possibly started at 
-boot-time, and allows a soft Braille user to access text mode applications.  
-Since BRLTTY is written as a daemon, it should allow a user a completely 
-free choice of application and development tools.
+BRLTTY attempts to fill this gap.  It runs as a daemon, possibly started
+at boot-time, and allows a soft Braille user to access text mode
+applications directly from the Linux's virtual consoles.  Since BRLTTY is
+written as a daemon, it should allow a user a completely free choice of
+application and development tools. 
 
 
 FEATURES
@@ -89,10 +93,12 @@ FEATURES
   -  A cut & paste function.  This is particularly useful for copying long
      filenames, complicated commands etc.
   -  An on-line help facility.
+  -  A configuration menu.
   -  Support for multiple Braille codes.
   -  Modular design allows relatively easy addition of drivers for other
      Braille displays, or even (hopefully) porting to other Unix-like
      platforms.
+  -  Basic speech complement support.
 
 
 CURRENTLY SUPPORTED HARDWARE
@@ -103,7 +109,7 @@ been tested on
   -  a variety of PCs: both laptops and desktops; processors from
      386SX20 to Pentium with a huge range of memory sizes; most
      Linux distributions including Debian, Slackware and Red Hat;
-     a number of Linux kernels, including both 1.2.13 and 2.0.x.
+  -  a number of Linux kernels, including both 1.2.13 and 2.0.x.
   -  a DEC Alpha: only tested once, under Red Hat Alpha Linux on a 
      noname board kindly lent to the Cambridge University Computer 
      Laboratory by DEC in Reading, England.

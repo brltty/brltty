@@ -17,6 +17,10 @@ Your help is welcome.
 - Better support for mixed text + attribute mode i.e. underlined and/or 
   flashing attributes.
 
+- Make all braille display drivers dynamically linkable at run time,
+  to be able to choose between all different drivers on a distribution
+  installation disk for example.
+
 - Keypress simulation within dosemu.  See comments in inskey_lnx.c.
 
 - Linux console charset translation (actually bolted in). See comments
@@ -44,5 +48,5 @@ Your help is welcome.
 - Port to other Unix platforms.  Since all Linux dependent functions are now
   modularized in separate source files, it would be easy to write other 
   modules to make BRLTTY usable with the screen package or such and then 
-  become available for any platform.  An experimental patch is available
-  in the Patches/ directory.
+  become available for any other Unix platform.  An experimental patch is 
+  available in the Patches/ directory.
