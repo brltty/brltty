@@ -219,7 +219,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for linkage editor shared object flags], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*|cygwin*)
+   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*|cygwin*|mingw*)
       brltty_ld_flag_shared="-shared"
       brltty_ld_flag_soname="-soname"
       ;;
@@ -383,7 +383,7 @@ if test "${GCC}" = "yes"
 then
    case "${host_os}"
    in
-      cygwin*|mingw32*)
+      cygwin*|mingw*)
          brltty_cv_prog_cc_libflags=""
          ;;
       *)
@@ -497,7 +497,7 @@ in
       system_object="qnx"
       AC_CHECK_LIB([asound], [snd_pcm_open])
       ;;
-   cygwin*)
+   cygwin*|mingw*)
       system_object="cygwin"
       ;;
    *)
@@ -625,7 +625,7 @@ BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*|cygwin*)
+   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*|cygwin*|mingw*)
       brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
       ;;
    solaris*)
@@ -650,7 +650,7 @@ then
 else
    case "${host_os}"
    in
-      linux*|openbsd*|freebsd*|*qnx*|gnu*|cygwin*)
+      linux*|gnu*|openbsd*|freebsd*|*qnx*|cygwin*|mingw*)
          brltty_cv_prog_ld_static="-static"
          ;;
       netbsd*)
@@ -684,7 +684,7 @@ LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 
 case "${host_os}"
 in
-   linux*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*|gnu*|cygwin*)
+   linux*|gnu*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -787,44 +787,59 @@ then
 fi
 BRLTTY_ARG_DRIVER([braille])
 
-AC_CACHE_CHECK([for default braille device], [brltty_cv_device_serial_first], [dnl
+AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl
+case "${host_os}"
+in
+   mingw*)
+      brltty_cv_device_directory=""
+      ;;
+   *)
+      brltty_cv_device_directory="/dev"
+      ;;
+esac])
+AC_DEFINE_UNQUOTED([DEVICE_DIRECTORY], ["${brltty_cv_device_directory}"])
+
+AC_CACHE_CHECK([for first serial device], [brltty_cv_device_serial_first], [dnl
 case "${host_os}"
 in
    linux*)
-      for brltty_device in "/dev/ttyS0" "/dev/tts/0"
+      for brltty_device in "ttyS0" "tts/0"
       do
-         test -c "${brltty_device}" && {
+         test -c "${brltty_cv_device_directory}/${brltty_device}" && {
             brltty_cv_device_serial_first="${brltty_device}"
             break
          }
       done
       ;;
    gnu*)
-      brltty_cv_device_serial_first="/dev/com0"
+      brltty_cv_device_serial_first="com0"
       ;;
    solaris*)
-      brltty_cv_device_serial_first="/dev/ttya"
+      brltty_cv_device_serial_first="ttya"
       ;;
    hpux*)
-      brltty_cv_device_serial_first="/dev/tty0p0"
+      brltty_cv_device_serial_first="tty0p0"
       ;;
    openbsd*)
-      brltty_cv_device_serial_first="/dev/cua00"
+      brltty_cv_device_serial_first="cua00"
       ;;
    freebsd*)
-      brltty_cv_device_serial_first="/dev/cuaa0"
+      brltty_cv_device_serial_first="cuaa0"
       ;;
    netbsd*)
-      brltty_cv_device_serial_first="/dev/dty00"
+      brltty_cv_device_serial_first="dty00"
       ;;
    osf*)
-      brltty_cv_device_serial_first="/dev/tty00"
+      brltty_cv_device_serial_first="tty00"
       ;;
    *qnx*)
-      brltty_cv_device_serial_first="/dev/ser1"
+      brltty_cv_device_serial_first="ser1"
       ;;
    cygwin*)
-      brltty_cv_device_serial_first="/dev/com1"
+      brltty_cv_device_serial_first="com1"
+      ;;
+   mingw*)
+      brltty_cv_device_serial_first="COM1"
       ;;
    *)
       brltty_cv_device_serial_first=""

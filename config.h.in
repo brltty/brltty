@@ -140,6 +140,9 @@ extern "C" {
 /* Define this to be a string containing the default braille driver parameters. */
 #undef BRAILLE_PARAMETERS
 
+/* Define this to be a string containing the path to the directory containing the devices. */
+#undef DEVICE_DIRECTORY
+
 /* Define this to be a string containing the path to the default braille device. */
 #undef BRAILLE_DEVICE
 
@@ -256,7 +259,6 @@ extern "C" {
 /* Define this if the unused attribute is supported. */
 #undef HAVE_ATTRIBUTE_UNUSED
 
-#define DEVICE_DIRECTORY "/dev"
 #define TRANSLATION_TABLE_EXTENSION ".tbl"
 #define TEXT_TABLE_PREFIX "text."
 #define ATTRIBUTES_TABLE_PREFIX ""
