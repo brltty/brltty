@@ -939,13 +939,13 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_BOT;
               break;
             case KEY_UP:
-              res = CMD_LNUP | VAL_AUTOREPEAT;
+              res = CMD_LNUP;
               break;
             case KEY_CURSOR | KEY_UP:
               res = CMD_ATTRUP;
               break;
             case KEY_DOWN:
-              res = CMD_LNDN | VAL_AUTOREPEAT;
+              res = CMD_LNDN;
               break;
             case KEY_CURSOR | KEY_DOWN:
               res = CMD_ATTRDN;
@@ -960,7 +960,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_HWINLT;
               break;
             case KEY_PROG | KEY_LEFT:
-              res = CMD_CHRLT | VAL_AUTOREPEAT;
+              res = CMD_CHRLT;
               break;
             case KEY_RIGHT:
               res = CMD_FWINRT;
@@ -969,7 +969,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_LNEND;
               break;
             case KEY_PROG | KEY_RIGHT:
-              res = CMD_CHRRT | VAL_AUTOREPEAT;
+              res = CMD_CHRRT;
               break;
             case KEY_CURSOR | KEY_RIGHT:
               res = CMD_HWINRT;
@@ -1047,10 +1047,10 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
         case 1: /* Satellite models */
           switch (CurrentKeys) {
             case KEY_UP:
-              res = CMD_LNUP | VAL_AUTOREPEAT;
+              res = CMD_LNUP;
               break;
             case KEY_DOWN:
-              res = CMD_LNDN | VAL_AUTOREPEAT;
+              res = CMD_LNDN;
               break;
             case KEY_HOME | KEY_UP:
               res = CMD_TOP_LEFT;
@@ -1084,10 +1084,10 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_HWINRT;
               break;
             case KEY_CURSOR | KEY_LEFT:
-              res = CMD_CHRLT | VAL_AUTOREPEAT;
+              res = CMD_CHRLT;
               break;
             case KEY_CURSOR | KEY_RIGHT:
-              res = CMD_CHRRT | VAL_AUTOREPEAT;
+              res = CMD_CHRRT;
               break;
             case KEY_HOME | KEY_CURSOR | KEY_LEFT:
               res = CMD_LNBEG;
@@ -1264,14 +1264,23 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       if (!CurrentKeys)
         ReleasedKeys = 0;
     }
-    Typematic = (res != EOF) && ((res & VAL_AUTOREPEAT) != 0);
   }
 
   switch (res) {
+    case CMD_LNUP:
+    case CMD_LNDN:
+    case CMD_CHRLT:
+    case CMD_CHRRT:
+      res |= VAL_AUTOREPEAT;
+      Typematic = 1;
+      break;
+
     case CMD_RESTARTBRL:
-      RoutingPos = 0;
       CurrentKeys = LastKeys = ReleasedKeys = 0;
+      RoutingPos = 0;
+    default:
       Typematic = 0;
+    case EOF:
       break;
   }
 
