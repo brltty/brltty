@@ -1472,9 +1472,9 @@ static void *server(void *arg)
   Connection *c;
   time_t currentTime;
   fd_set sockset;
-  int nbAlloc;
 #ifdef WINDOWS
   HANDLE *lpHandles;
+  int nbAlloc;
   int nbHandles = 0;
 #else /* WINDOWS */
   int fdmax;
@@ -1506,7 +1506,9 @@ static void *server(void *arg)
     LogPrint(LOG_INFO,"no hosts specified");
     pthread_exit(NULL);
   }
+#ifdef WINDOWS
   nbAlloc = numSockets;
+#endif /* WINDOWS */
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
