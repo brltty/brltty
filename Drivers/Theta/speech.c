@@ -96,7 +96,7 @@ spk_open (char **parameters) {
 
   if (*parameters[PARM_GENDER]) {
     const char *const choices[] = {"male", "female", "neuter", NULL};
-    int choice;
+    unsigned int choice;
     if (validateChoice(&choice, "gender", parameters[PARM_GENDER], choices))
       criteria.gender = (char *)choices[choice];
   }
