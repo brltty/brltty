@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <linux/compiler.h>
 #include <linux/usbdevice_fs.h>
 #include <linux/serial.h>
 
@@ -47,7 +48,7 @@ struct UsbDeviceStruct {
   struct UsbInputElement *inputElements;
   struct usbdevfs_urb *inputRequest;
   unsigned char inputEndpoint;
-  int inputLength;
+  int inputSize;
   unsigned int inputFlags;
   unsigned int stringLanguage;
 };
@@ -413,8 +414,8 @@ usbAddInputElement (
   if ((input = malloc(sizeof(*input)))) {
     memset(input, 0, sizeof(*input));
     if ((input->urb = usbSubmitRequest(device, device->inputEndpoint,
-                                       USBDEVFS_URB_TYPE_INTERRUPT,
-                                       NULL, device->inputLength,
+                                       USBDEVFS_URB_TYPE_BULK,
+                                       NULL, device->inputSize,
                                        device->inputFlags, input))) {
       if (device->inputElements) {
         device->inputElements->previous = input;
@@ -449,12 +450,12 @@ int
 usbBeginInput (
   UsbDevice *device,
   unsigned char endpoint,
-  int length,
+  int size,
   int count
 ) {
   device->inputRequest = NULL;
   device->inputEndpoint = endpoint | USB_DIR_IN;
-  device->inputLength = length;
+  device->inputSize = size;
   device->inputFlags = 0;
   while (count--) {
     if (!usbAddInputElement(device)) return -1;

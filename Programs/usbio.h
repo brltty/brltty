@@ -15,6 +15,13 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _USBIO_H
+#define _USBIO_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <stdint.h>
 
 /* Descriptor types. */
@@ -278,3 +285,22 @@ extern struct usbdevfs_urb *usbReapRequest (
   UsbDevice *device,
   int wait
 );
+
+extern int usbBeginInput (
+  UsbDevice *device,
+  unsigned char endpoint,
+  int size,
+  int count
+);
+extern int usbReapInput (
+  UsbDevice *device,
+  void *buffer,
+  int length,
+  int wait
+);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* _USBIO_H */
