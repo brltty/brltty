@@ -41,34 +41,52 @@ static iconv_t conversionDescriptor = NULL;
 #endif /* HAVE_ICONV_H */
 
 #if defined(HAVE_PKG_CURSES)
+#define USE_CURSES
 #include <stdarg.h>
 #include <curses.h>
 #elif defined(HAVE_PKG_NCURSES)
+#define USE_CURSES
 #include <ncurses.h>
 #elif defined(HAVE_PKG_NCURSESW)
+#define USE_CURSES
 #include <ncurses.h>
 #else /* HAVE_PKG_ */
-#error curses package either unspecified or unsupported
-#endif /* HAVE_PKG_ */
+#warning curses package either unspecified or unsupported
+#define addstr(string) puts(string)
+#define addch(character) putchar(character)
+#define getch() getchar()
+#endif /* HAVE_PKG_CURSES */
 
 #include "Programs/misc.h"
 
+#ifdef USE_CURSES
+#define BRLPARM_TERM "term",
+#else /* USE_CURSES */
+#define BRLPARM_TERM
+#endif /* USE_CURSES */
+
+#ifdef HAVE_ICONV_H
+#define BRLPARM_CHARSET "charset",
+#else /* HAVE_ICONV_H */
+#define BRLPARM_CHARSET
+#endif /* HAVE_ICONV_H */
+
 typedef enum {
-  PARM_TERM,
   PARM_BAUD,
+
+#ifdef USE_CURSES
+  PARM_TERM,
+#endif /* USE_CURSES */
   PARM_HEIGHT,
   PARM_WIDTH,
+
 #ifdef HAVE_ICONV_H
   PARM_CHARSET,
 #endif /* HAVE_ICONV_H */
+
   PARM_LOCALE
 } DriverParameter;
-
-#ifdef HAVE_ICONV_H
-#define BRLPARMS "term", "baud", "height", "width", "charset", "locale"
-#else /* HAVE_ICONV_H */
-#define BRLPARMS "term", "baud", "height", "width", "locale"
-#endif /* HAVE_ICONV_H */
+#define BRLPARMS "baud", BRLPARM_TERM "height", "width", BRLPARM_CHARSET "locale"
 
 #define BRL_HAVE_KEY_CODES
 #define BRL_HAVE_VISUAL_DISPLAY
@@ -82,8 +100,11 @@ typedef enum {
 
 static SerialDevice *ttyDevice = NULL;
 static FILE *ttyStream = NULL;
-static SCREEN *ttyScreen = NULL;
 static char *classificationLocale = NULL;
+
+#ifdef USE_CURSES
+static SCREEN *ttyScreen = NULL;
+#endif /* USE_CURSES */
 
 static void
 brl_identify (void) {
@@ -93,8 +114,8 @@ brl_identify (void) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  char *ttyType = "vt100";
   int ttyBaud = 9600;
+  char *ttyType = "vt100";
   int windowHeight = 1;
   int windowWidth = 40;
 
@@ -102,14 +123,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   char *characterSet = "ISO8859-1";
 #endif /* HAVE_ICONV_H */
 
-  if (*parameters[PARM_TERM])
-    ttyType = parameters[PARM_TERM];
-
   {
     int baud = ttyBaud;
     if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL))
       ttyBaud = baud;
   }
+
+#ifdef USE_CURSES
+  if (*parameters[PARM_TERM])
+    ttyType = parameters[PARM_TERM];
+#endif /* USE_CURSES */
 
   {
     static const int minimum = 1;
@@ -137,16 +160,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (*parameters[PARM_LOCALE])
     classificationLocale = parameters[PARM_LOCALE];
 
-  if (
 #ifdef HAVE_ICONV_H
-      (conversionDescriptor = iconv_open(characterSet, "ISO8859-1")) != (iconv_t)-1
-#else /* HAVE_ICONV_H */
-      1
+  if ((conversionDescriptor = iconv_open(characterSet, "ISO8859-1")) != (iconv_t)-1) {
 #endif /* HAVE_ICONV_H */
-      ) {
     if ((ttyDevice = serialOpenDevice(device))) {
       if (serialRestartDevice(ttyDevice, ttyBaud)) {
         if ((ttyStream = serialGetStream(ttyDevice))) {
+#ifdef USE_CURSES
           if ((ttyScreen = newterm(ttyType, ttyStream, ttyStream))) {
             cbreak();
             noecho();
@@ -158,6 +178,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
             clear();
             refresh();
+#endif /* USE_CURSES */
 
             brl->x = windowWidth;
             brl->y = windowHeight; 
@@ -165,9 +186,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             LogPrint(LOG_INFO, "TTY: type=%s baud=%d size=%dx%d",
                      ttyType, ttyBaud, windowWidth, windowHeight);
             return 1;
+#ifdef USE_CURSES
           } else {
             LogError("newterm");
           }
+#endif /* USE_CURSES */
 
           ttyStream = NULL;
         }
@@ -179,12 +202,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 #ifdef HAVE_ICONV_H
     iconv_close(conversionDescriptor);
-#endif /* HAVE_ICONV_H */
   } else {
     LogError("iconv_open");
   }
-
-#ifdef HAVE_ICONV_H
   conversionDescriptor = NULL;
 #endif /* HAVE_ICONV_H */
 
@@ -193,11 +213,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_close (BrailleDisplay *brl) {
+#ifdef USE_CURSES
   if (ttyScreen) {
     endwin();
     delscreen(ttyScreen);
     ttyScreen = NULL;
   }
+#endif /* USE_CURSES */
 
   if (ttyDevice) {
     ttyStream = NULL;
@@ -232,7 +254,9 @@ brl_writeVisual (BrailleDisplay *brl) {
     previousLocale = NULL;
   }
 
+#ifdef USE_CURSES
   clear();
+#endif /* USE_CURSES */
   {
     int row;
     for (row=0; row<brl->y; row++) {
@@ -258,8 +282,10 @@ brl_writeVisual (BrailleDisplay *brl) {
   }
 
   if (previousLocale) setlocale(LC_CTYPE, previousLocale);
+#ifdef USE_CURSES
 /*move(y,x);*/
   refresh();
+#endif /* USE_CURSES */
 }
 
 static void
@@ -276,6 +302,7 @@ brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key
       LogPrint(LOG_WARNING, "Unknown key: %d", key);
       return BRL_CMD_NOOP;
 
+#ifdef USE_CURSES
     KEY(KEY_LEFT, BRL_CMD_FWINLT);
     KEY(KEY_RIGHT, BRL_CMD_FWINRT);
     KEY(KEY_UP, BRL_CMD_LNUP);
@@ -309,6 +336,7 @@ brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key
     KEY(KEY_F(20), BRL_CMD_NXPGRPH);
 
     KEY(KEY_BACKSPACE, BRL_BLK_PASSKEY|BRL_KEY_BACKSPACE);
+#endif /* USE_CURSES */
   }
 #undef KEY
 }
@@ -316,7 +344,11 @@ brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key
 static int
 brl_readKey (BrailleDisplay *brl) {
   int key = getch();
+
+#ifdef USE_CURSES
   if (key == ERR) return EOF;
+#endif /* USE_CURSES */
+
   LogPrint(LOG_DEBUG, "key %d", key);
   return key;
 }
