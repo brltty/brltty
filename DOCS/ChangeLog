@@ -3,6 +3,15 @@ Note: this file should be read from bottom to top.
 
   ...
 
+28 March 2000:
+  - Released BRLTTY 2.30 (beta)
+  - Braille terminal drivers are now dynamically loadable.  This is a big
+    change. Credits go to:
+      Roger Butenuth <butenuth@uni-paderborn.de>
+        Original work
+      Dave Mielke <dave@mielke.cc>
+        Resynching with current BRLTTY version, cleanup, etc.
+
 01 January 2000:
   - Released BRLTTY 2.21 (beta)
 

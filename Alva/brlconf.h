@@ -23,7 +23,7 @@
  * Edit as necessary for your system.
  */
 
-
+#define BRLNAME	"Alva"
 
 /* Known Device Identification Numbers (not to be changed) */
 #define ABT_AUTO	-1	/* for new firmware only */
@@ -80,3 +80,5 @@
  */
 #define REFRESH_RATE 1000
 
+/* Define the preferred/default status cells mode. */
+#define PREFSTYLE ST_AlvaStyle

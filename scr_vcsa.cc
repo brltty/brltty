@@ -162,7 +162,7 @@ vcsa_Screen::getscr (winpos pos, unsigned char *buffer, short mode)
 	    *dst++ = *src;
 	  src += 2;
 	  #else
-	  *dst++ = *Src;
+	  *dst++ = *src;
 	  src += 2;
 	  #endif
 	}

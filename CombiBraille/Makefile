@@ -21,12 +21,14 @@
 # Makefile for the Tieman B.V. CombiBraille driver
 # $Id: Makefile,v 1.1 1996/09/25 00:26:28 nn201 Exp $
 #
-# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, LDLIBS and
-# BRLDEV
+# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, and LDLIBS
 ###############################################################################
 
-brl.o: brl.c ../brl.h ../misc.h brlconf.h tables.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
+DRIVER = cb
+include ../driver.mk
+
+brl.o: brl.c ../brl.h ../misc.h brlconf.h ../driver.h tables.h
+	$(CC) $(DRIVER_CFLAGS) -c brl.c
 
 speech.o: speech.c ../speech.h brlconf.h speech.h
-	$(CC) $(CFLAGS) -c speech.c
+	$(CC) $(DRIVER_CFLAGS) -c speech.c

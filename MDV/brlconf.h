@@ -17,11 +17,12 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-#define BRLNAME	"EuroBraille"
-
-/* serial line baudrate... 
+/* MDV/brlconf.h - Configurable definitions for the Eco Braille series
+ *
+ * Edit as necessary for your system.
  */
-#define BAUDRATE B9600
+
+#define BRLNAME	"MDV"
 
 /* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_None
+#define PREFSTYLE ST_MDVStyle

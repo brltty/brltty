@@ -26,5 +26,8 @@
 #
 ###############################################################################
 
-brl.o: brl.c ../brl.h ../misc.h ../scr.h ../config.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
+DRIVER = md
+include ../driver.mk
+
+brl.o: brl.c brlconf.h ../driver.h ../brl.h ../misc.h ../scr.h ../config.h
+	$(CC) $(DRIVER_CFLAGS) -c brl.c

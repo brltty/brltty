@@ -20,14 +20,16 @@
 # Makefile for the Papenmeier Terminal
 # This software is maintained by August Hörandl <hoerandl@elina.htlw1.ac.at>
 #
-# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, LDLIBS and
-# BRLDEV from the main Makefile
+# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS,
+# and LDLIBS from the main Makefile
 ###############################################################################
 
-brl.o: brl.c ../brl.h ../scr.h ../misc.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
+DRIVER = pm
+include ../driver.mk
+
+brl.o: brl.c brlconf.h ../driver.h ../brl.h ../scr.h ../misc.h
+	$(CC) $(DRIVER_CFLAGS) -c brl.c
 
 serial: serial.c ../brl.h brl.c ../text.auto.h
-	$(CC) $(CFLAGS) '-DBRLDEV="/dev/ttyS1"' serial.c -o serial -lncurses 
-
+	$(CC) $(DRIVER_CFLAGS) serial.c -o serial -lncurses 
 

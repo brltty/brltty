@@ -69,6 +69,7 @@
 #include "../brl.h"
 #include "../misc.h"
 #include "../scr.h"
+#include "../driver.h"
 
 
 /* Braille display parameters that do not change */
@@ -328,18 +329,11 @@ unsigned char *battery_msg;     /* low battery warning msg */
 
 
 void 
-identbrl (const char *tty)
+identbrl (void)
 {
   printf ("  %s\n", VERSION);
   LogPrint(LOG_NOTICE,"%s", VERSION);
   printf ("    %s\n", COPYRIGHT);
-  if (tty){
-    printf ("    Using serial port %s\n", tty);
-    LogPrint(LOG_NOTICE,"  Using serial port %s", tty);
-  }else{
-    printf ("    Defaulting to serial port %s\n", BRLDEV);
-    LogPrint(LOG_NOTICE,"  Defaulting to serial port %s", BRLDEV);
-  }
 }
 
 
@@ -435,8 +429,6 @@ void initbrl (brldim *brl, const char *tty)
   res.disp = rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  if (tty == NULL)
-    tty = BRLDEV;
   brl_fd = open (tty, O_RDWR | O_NOCTTY);
   if (brl_fd < 0){
     LogPrint(LOG_ERR, "Open failed on port %s: %s", tty, strerror(errno));

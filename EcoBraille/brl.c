@@ -46,6 +46,7 @@
 #include "../scr.h"
 #include "../misc.h"
 #include "../config.h"
+#include "../driver.h"
 
 static char StartupString[] =
 "  EcoBraille driver, version 1.00 \n"
@@ -122,7 +123,6 @@ char TransTable[256] ={
 };
 
 // Global variables
-char DefDev[]=BRLDEV;		// default braille device
 int brl_fd;			// file descriptor for Braille display
 struct termios oldtio;		// old terminal settings
 unsigned char *rawdata;		// translated data to send to Braille
@@ -205,11 +205,10 @@ return(0);
 }
 
 
-void identbrl(const char *dev)
+void identbrl(void)
 {
   // Hello display
   printf (StartupString);
-  printf ("Device = %s\n", (dev) ? dev : DefDev);
 }
 
 
@@ -223,10 +222,6 @@ void initbrl(brldim *brl, const char *dev)
   res.disp = rawdata = NULL;	// clear pointers
 
   // Open the Braille display device
-  if(!dev){
-     dev=DefDev;
-  }
-  
   brl_fd = open(dev, O_RDWR | O_NOCTTY);
   if(brl_fd < 0){
     goto failure;

@@ -111,6 +111,7 @@ extern "C"
 #include "../scr.h"
 #include "../misc.h"
 #include "../config.h"
+#include "../driver.h"
 }
 
 #if USE_PARALLEL_PORT
@@ -245,7 +246,6 @@ char TransTable[256] =
 
 /* Global variables */
 
-char DefDev[] = BRLDEV;		/* default braille device */
 int brl_fd;			/* file descriptor for Braille display */
 struct termios oldtio;		/* old terminal settings */
 unsigned char *rawdata;		/* translated data to send to Braille */
@@ -312,7 +312,7 @@ int StatusKeys[6] =
 
 
 void
-identbrl (const char *dev)
+identbrl (void)
 {
   /* Hello display... */
   printf (StartupString);
@@ -330,8 +330,6 @@ identbrl (const char *dev)
     );
 #if USE_PARALLEL_PORT
   printf ("  - device = LPT at 0x%03X\n", LPT_PORT );
-#else
-  printf ("  - device = %s\n", (dev) ? dev : DefDev);
 #endif
 }
 
@@ -388,8 +386,6 @@ void initbrl (brldim *brl, const char *dev)
 #else
 
   /* Open the Braille display device for random access */
-  if (!dev)
-    dev = DefDev;
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
     LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );

@@ -21,6 +21,7 @@
 #include "../inskey.h"
 #include "../message.h"
 #include "brlconf.h"
+#include "../driver.h"
 #include "bindings.h"		/* for keybindings */
 
 
@@ -76,14 +77,10 @@ static int qget (blkey *);	/* get a byte from the input queue */
 
 
 void
-identbrl (const char *brldev)
+identbrl (void)
 {
   printf ("  Braille Lite 18/40 driver (configured for %d)\n", BLITE_SIZE);
   printf ("  Copyright (C) 1998 by Nikhil Nair.\n");
-  if (brldev)
-    printf ("  Using device %s\n", brldev);
-  else
-    printf ("  Defaulting to device %s\n", BRLDEV);
 }
 
 
@@ -101,8 +98,6 @@ initbrl (brldim * brl, const char *brldev)
   res.disp = prevdata = rawdata = qbase = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-  if (brldev == NULL)
-    brldev = BRLDEV;
   blite_fd = open (brldev, O_RDWR | O_NOCTTY);
   if (blite_fd < 0)
     {

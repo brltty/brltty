@@ -23,6 +23,8 @@
  * Edit as necessary for your system.
  */
 
+#define BRLNAME	"CombiBraille"
+
 #define BRLCOLS(id) 	\
 	((id) == 0 ? 20 : \
 	((id) == 1 ? 40 : \
@@ -50,3 +52,6 @@
 #define PRE_DATA "\002\033B"	/* string to send to */
 				/*  Braille before dat */
 #define POST_DATA ""		/* string to send to Braille after data */
+
+/* Define the preferred/default status cells mode. */
+#define PREFSTYLE ST_TiemanStyle

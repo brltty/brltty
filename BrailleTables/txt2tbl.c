@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -93,11 +93,13 @@ main (int argc, char *argv[])
 	case '6':
 	case '7':
 	case '8':		/* Braille dots */
-	  if (flag == 1)	/* We are recording */
-	    if (chr < 256)
+	  if (flag == 1) {	/* We are recording */
+	    if (chr < 256) {
 	      dotarray[chr] |= dotpos[c - '1'];
-	    else
+	    } else {
 	      error = 1;
+	    }
+	  }
 	  break;
 	}
 

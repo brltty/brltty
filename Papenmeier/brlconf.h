@@ -33,13 +33,13 @@
  */
 
 /* So far, there is only support for serial communications, and
- * only the buildin table is used for character translation
+ * only the builtin table is used for character translation
  */
+
+#define BRLNAME	"Papenmeier"
 
 #define BRLCOLS	80
 #define BRLROWS	1
-
-#define BRLNAME	"Papenmeier Screen 2D"
 
 #define BAUDRATE B19200
 
@@ -66,3 +66,6 @@
   #define WR_DEBUG
   #define RD_DEBUG
 */
+
+/* Define the preferred/default status cells mode. */
+#define PREFSTYLE ST_Papenmeier

@@ -23,7 +23,7 @@
  * Edit as necessary for your system.
  */
 
-
+#define BRLNAME	"EcoBraille"
 
 /* Device Identification Numbers (not to be changed) */
 #define ECO_AUTO	-1
@@ -50,3 +50,5 @@
  */
 #define REFRESH_RATE 1000
 
+/* Define the preferred/default status cells mode. */
+#define PREFSTYLE ST_None

@@ -41,6 +41,7 @@
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
+#include "../driver.h"
 
 #define CMD_ERR	EOF
 
@@ -48,7 +49,6 @@
 /* see README for details */
 /* #define SEND_TWICE_HACK */
 
-char DefDev[] = BRLDEV;		/* default braille device */
 int brl_fd = 0;			/* file descriptor for Braille display */
 struct termios oldtio;		/* old terminal settings */
 
@@ -69,30 +69,6 @@ void init_table();
 #define B6 32
 #define B7 64
 #define B8 128
-
-const unsigned char pm_ones[11] = { B1+B5+B4, B2, B2+B5, 
-				    B2+B1, B2+B1+B4, B2+B4, 
-				    B2+B5+B1, B2+B5+B4+B1, B2+B5+B4, 
-				    B5+B1, B1+B2+B4+B5 };
-const unsigned char pm_tens[11] = { B8+B6+B3, B7, B7+B8, 
-				    B7+B3, B7+B3+B6, B7+B6, 
-				    B7+B8+B3, B7+B8+B3+B6, B7+B8+B6,
-				    B8+B3, B3+B6+B7+B8};
-
-/* create bits for number 0..99 - special for papenmeier */
-int pm_num(int x)
-{
-  return pm_tens[(x / 10) % 10] | pm_ones[x % 10];  
-}
-
-/* status cell   tens: line number    ones: no/all bits set */
-int pm_stat(int line, int on)
-{
-  if (on)
-    return pm_tens[line%10] | pm_ones[10];
-  else
-    return pm_tens[line];
-}
 
 void brl_debug(char * print_buffer)
 {
@@ -121,9 +97,6 @@ void initbrl (brldim *brl, const char *dev)
   res.disp = NULL;		/* clear pointers */
 
   /* Now open the Braille display device for random access */
-  if (!dev)
-    dev = DefDev;
-
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
     initbrlerror(brl);
@@ -164,11 +137,10 @@ closebrl (brldim *brl)
 }
 
 void
-identbrl (const char *dev)
+identbrl (void)
 {
   printf(BRLNAME " driver\n"
-	 "Copyright (C) 1998 HTL W1 <hoerandl@elina.htlw1.ac.at>\n"
-	 "Device = %s\n", (dev) ? dev : DefDev);
+	 "Copyright (C) 1998 HTL W1 <hoerandl@elina.htlw1.ac.at>\n");
 }
 
 void 

@@ -20,13 +20,34 @@
 ###############################################################################
 # Makefile for the BrailleLite driver
 #
-# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, LDLIBS and
-# BRLDEV
+# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, and LDLIBS
 ###############################################################################
 
-brl.o:	brl.c ../brl.h ../misc.h ../inskey.h ../message.h ../config.h \
-	brlconf.h bindings.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
+DRIVER = bl
+LIBNAME18 = $(LIB_SO_NAME)b1.so.$(LIB_VER)
+LIBFILE18 = $(LIBDIR)/$(LIBNAME18)
+LIBNAME40 = $(LIB_SO_NAME)b4.so.$(LIB_VER)
+LIBFILE40 = $(LIBDIR)/$(LIBNAME40)
+LIB_TARGETS = $(LIBFILE18) $(LIBFILE40)
+include ../driver.mk
+
+TARGETS = brl.c ../brl.h ../misc.h ../inskey.h ../message.h \
+	../config.h brlconf.h ../driver.h bindings.h
+
+brl.o: $(TARGETS)
+	$(CC) $(DRIVER_CFLAGS) -c brl.c
+
+brl18.o: $(TARGETS)
+	$(CC) $(DRIVER_CFLAGS) -DBLITE_SIZE=18 -o brl18.o -c brl.c
+
+$(LIBFILE18): brl18.o
+	$(CC) -shared -Wl,-soname,$(LIBNAME18) -o $(LIBFILE18) brl18.o -lc
+
+brl40.o: $(TARGETS)
+	$(CC) $(DRIVER_CFLAGS) -DBLITE_SIZE=40 -o brl40.o -c brl.c
+
+$(LIBFILE40): brl40.o
+	$(CC) -shared -Wl,-soname,$(LIBNAME40) -o $(LIBFILE40) brl40.o -lc
 
 speech.o: speech.c ../speech.h brlconf.h speech.h
-	$(CC) $(CFLAGS) -c speech.c
+	$(CC) $(DRIVER_CFLAGS) -c speech.c

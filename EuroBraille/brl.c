@@ -39,6 +39,7 @@
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
+#include "../driver.h"
 
 
 static char StartupString[] =
@@ -93,7 +94,6 @@ char TransTable[256] =
 
 /* Global variables */
 
-char DefDev[] = BRLDEV;		/* default braille device */
 int brl_fd;			/* file descriptor for Braille display */
 struct termios oldtio;		/* old terminal settings */
 unsigned char *rawdata;		/* translated data to send to Braille */
@@ -178,11 +178,10 @@ WriteToBrlDisplay (int len, char *data)
 
 
 void
-identbrl (const char *dev)
+identbrl (void)
 {
   /* Hello display... */
   printf (StartupString);
-  printf ("  - device = %s\n", (dev) ? dev : DefDev);
 }
 
 
@@ -194,8 +193,6 @@ void initbrl (brldim *brl, const char *dev)
   res.disp = rawdata = prevdata = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-  if (!dev)
-    dev = DefDev;
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
     LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );

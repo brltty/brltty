@@ -3,7 +3,7 @@
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+# Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
 #
 # Nicolas Pitre <nico@cam.org>
 # Stéphane Doyon <s.doyon@videotron.ca>
@@ -21,31 +21,31 @@
 
 ###############################################################################
 #
-# Makefile for BRLTTY Alva driver
+# Sub-makefile included by makefile for each BRLTTY device driver.
+# It defines the "help" and "lib" targets.
 # All variables are defined in the main Makefile...
 #
 ###############################################################################
 
+HELPNAME = brltty-$(DRIVER).hlp
+HELPDIR = ../help
+HELPFILE = $(HELPDIR)/$(HELPNAME)
+DRIVER_CFLAGS = $(LIB_CFLAGS) '-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
 
-# Uncomment next line if you want to use the parallel port interface
-# and you configured USE_PARALLEL_PORT to 1 in brlconf.h
-# Comment it out if you are compiling on a non-i386 architecture.
-# Note that this option uses an extra library.  See README for details.
-#ALVALIB = alva_api.library/alva_api.a
-ALVALIB =
+$(HELPFILE): brlttyh*.txt
+	../txt2hlp $(HELPFILE) brlttyh*.txt
 
+help: $(HELPFILE)
 
-LD = ld
+LIBNAME = $(LIB_SO_NAME)$(DRIVER).so.$(LIB_VER)
+LIBDIR = ../lib
+LIBFILE = $(LIBDIR)/$(LIBNAME)
 
-DRIVER = al
-include ../driver.mk
+$(LIBFILE): brl.o
+	$(CC) -shared -Wl,-soname,$(LIBNAME) -o $(LIBFILE) brl.o -lc
 
-brlmain.o: brlmain.cc brlconf.h ../driver.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(COMPCPP) $(DRIVER_CFLAGS) -c brlmain.cc
-
-brl.o: brlmain.o $(ALVALIB)
-	$(LD) -r -o brl.o brlmain.o $(ALVALIB)
-
-speech.o: speech.c ../speech.h brlconf.h speech.h
-	$(CC) $(DRIVER_CFLAGS) -c speech.c
+ifeq ($(LIB_TARGETS),)
+   LIB_TARGETS = $(LIBFILE)
+endif
+lib: $(LIB_TARGETS)
 

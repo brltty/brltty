@@ -33,6 +33,7 @@
 #include "../brl.h"
 #include "../misc.h"
 #include "brlconf.h"
+#include "../driver.h"
 #include "tables.h"		/* for keybindings */
 
 unsigned char combitrans[256];	/* dot mapping table (output) */
@@ -48,14 +49,10 @@ int getbrlkey (void);		/* get a keystroke from the CombiBraille */
 
 
 void
-identbrl (const char *brldev)
+identbrl (void)
 {
   printf ("\nTieman B.V. CombiBraille driver   ");
   printf ("Copyright (C) 1995, 1996 by Nikhil Nair.\n");
-  if (brldev)
-    printf ("Using device %s\n\n", brldev);
-  else
-    printf ("Defaulting to device %s\n\n", BRLDEV);
 }
 
 
@@ -80,10 +77,7 @@ void initbrl (brldim *brl, const char *brldev)
    */
 
   /* Now open the Braille display device for random access */
-  if (brldev != NULL)
-    brl_fd = open (brldev, O_RDWR | O_NOCTTY);
-  else
-    brl_fd = open (BRLDEV, O_RDWR | O_NOCTTY);
+  brl_fd = open (brldev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0)
     goto failure;
   tcgetattr (brl_fd, &oldtio);	/* save current settings */

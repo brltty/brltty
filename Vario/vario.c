@@ -3,16 +3,17 @@
 #include <string.h>
 #include "variolow.h"
 #include "brl.h"
+#include "brlconf.h"
+#include "../driver.h"
 
 
 static unsigned char lastbuff[40];
 
 void
-identbrl (const char *dev)
+identbrl (void)
 {
 		/*	Do nothing .. dumdidumm */ 
-	printf(	"HT Protocol driver\n"
-			"Using: %s\n",dev);
+	printf("HT Protocol driver\n");
 }
 
 void 
