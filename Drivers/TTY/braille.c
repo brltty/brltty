@@ -30,6 +30,11 @@
 #include <errno.h>
 #include <locale.h>
 
+#include <limits.h>
+#ifndef MB_MAX_LEN
+#define MB_MAX_LEN 16
+#endif /* MB_MAX_LEN */
+
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 static iconv_t conversionDescriptor = NULL;
@@ -230,12 +235,13 @@ brl_writeWindow (BrailleDisplay *brl) {
 #ifdef HAVE_ICONV_H
         char *pc = &c;
         size_t sc = 1;
-        char d;
-        char *pd = &d;
-        size_t sd = 1;
-        if (iconv(conversionDescriptor, &pc, &sc, &pd, &sd) >= 0)
-          addch(d);
-        else
+        char d[MB_MAX_LEN+1];
+        char *pd = d;
+        size_t sd = MB_MAX_LEN;
+        if (iconv(conversionDescriptor, &pc, &sc, &pd, &sd) >= 0) {
+          *pd = 0;
+          addstr(d);
+	} else
 #endif /* HAVE_ICONV_H */
           addch(c);
       }
