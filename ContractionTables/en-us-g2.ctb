@@ -1020,6 +1020,7 @@ literal .gov
 literal .mil
 literal .net
 literal .org
+include countries.cti
 
 literal .doc
 literal .htm
@@ -1045,7 +1046,6 @@ literal .zip
 # I would prefer to have all characters above 126 just show up as a 
 # backslash and two hex digits.
 
-# Add country suffixes, such as .cc .uk .fr etc. with the literal op-code
 # problems with quotation marks before and after dashes: "division"--a
 
 # when a decimal begins with a period, it should be translated with a 
