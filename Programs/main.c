@@ -425,6 +425,7 @@ showInfo (void) {
              prefs.blinkingCapitals? 'B': ' ');
     writeBrailleString(&brl, text);
   } else {
+    brl.cursor = -1;
     snprintf(text, sizeof(text), "xxxxx %02d %c%c%c%c%c%c     ",
              curscr,
              p->trackCursor? 't': ' ',
@@ -434,6 +435,7 @@ showInfo (void) {
              ((dispmd & FROZ_SCRN) == FROZ_SCRN) ?'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
+
     if (braille->writeVisual) {
       memcpy(brl.buffer, text, brl.x*brl.y);
       braille->writeVisual(&brl);
@@ -2077,13 +2079,14 @@ main (int argc, char *argv[]) {
     if (infmode) {
       showInfo();
     } else {
-      int cursorLocation = -1;
+      brl.cursor = -1;
       contracted = 0;
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
       if (prefs.textStyle && contractionTable) {
         int windowLength = brl.x * brl.y;
         while (1) {
-          int cursorOffset = cursorLocation;
+          int cursorOffset = brl.cursor;
           int inputLength = scr.cols - p->winx;
           int outputLength = windowLength;
           unsigned char inputBuffer[inputLength];
@@ -2136,7 +2139,7 @@ main (int argc, char *argv[]) {
           while (cursorOffset >= 0) {
             int offset = contractedOffsets[cursorOffset];
             if (offset >= 0) {
-              cursorLocation = offset;
+              brl.cursor = offset;
               break;
             }
             --cursorOffset;
@@ -2172,10 +2175,18 @@ main (int argc, char *argv[]) {
         }
       }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
       if (!contracted) {
         int winlen = MIN(brl.x, scr.cols-p->winx);
         readScreen(p->winx, p->winy, winlen, brl.y, brl.buffer,
                    p->showAttributes? SCR_ATTRIB: SCR_TEXT);
+        /*
+         * If the cursor is visible and in range, and help is off: 
+         */
+        if ((scr.posx >= p->winx) && (scr.posx < (p->winx + brl.x)) &&
+            (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.y)))
+          brl.cursor = (scr.posy - p->winy) * brl.x + scr.posx - p->winx;
+
         if (braille->writeVisual) braille->writeVisual(&brl);
 
         /* blank out capital letters if they're blinking and should be off */
@@ -2217,17 +2228,11 @@ main (int argc, char *argv[]) {
           readScreen(p->winx, p->winy, winlen, brl.y, attrbuf, SCR_ATTRIB);
           overlayAttributes(attrbuf, winlen, brl.y);
         }
-
-        /*
-         * If the cursor is visible and in range, and help is off: 
-         */
-        if ((scr.posx >= p->winx) && (scr.posx < (p->winx + brl.x)) &&
-            (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.y)))
-          cursorLocation = (scr.posy - p->winy) * brl.x + scr.posx - p->winx;
       }
-      if (cursorLocation >= 0) {
+
+      if (brl.cursor >= 0) {
         if (prefs.showCursor && !p->hideCursor && (!prefs.blinkingCursor || cursorState)) {
-          brl.buffer[cursorLocation] |= cursorDots();
+          brl.buffer[brl.cursor] |= cursorDots();
         }
       }
 

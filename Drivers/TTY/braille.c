@@ -257,6 +257,7 @@ brl_writeVisual (BrailleDisplay *brl) {
 #ifdef USE_CURSES
   clear();
 #endif /* USE_CURSES */
+
   {
     int row;
     for (row=0; row<brl->y; row++) {
@@ -281,11 +282,13 @@ brl_writeVisual (BrailleDisplay *brl) {
     }
   }
 
-  if (previousLocale) setlocale(LC_CTYPE, previousLocale);
 #ifdef USE_CURSES
-/*move(y,x);*/
+  if ((brl->cursor >= 0) && (brl->cursor < (brl->x * brl->y)))
+    move(brl->cursor/brl->x, brl->cursor%brl->x);
   refresh();
 #endif /* USE_CURSES */
+
+  if (previousLocale) setlocale(LC_CTYPE, previousLocale);
 }
 
 static void

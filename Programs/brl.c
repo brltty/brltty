@@ -142,6 +142,7 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 
 void
 writeBrailleBuffer (BrailleDisplay *brl) {
+  brl->cursor = -1;
   if (braille->writeVisual) braille->writeVisual(brl);
 
   {

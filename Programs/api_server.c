@@ -1517,6 +1517,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       disp->buffer = buf;
       if (trueBraille->writeVisual) {
         getText(&c->brailleWindow, buf);
+        brl->cursor = c->brailleWindow.cursor-1;
         trueBraille->writeVisual(brl);
       }
       getDots(&c->brailleWindow, buf);
