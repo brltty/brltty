@@ -522,7 +522,7 @@ y/ /,/
 
 case "${host_os}"
 in
-   linux*|solaris*|openbsd*)
+   linux*|solaris*|openbsd*|freebsd*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
