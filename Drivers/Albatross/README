@@ -5,8 +5,7 @@ by Dave Mielke <dave@mielke.cc> and Sami Haahtinen <ressu@ressukka.net>.
 
 
 The keys on the front of the display are named as depicted below within the
-documentation for this driver. See the help file for how this driver puts them
-to use.
+documentation for this driver. See the help file for what they do.
 
    +---+ +---+ +------+ +-----------+      +-----------+ +------+ +---+ +---+
    |Top| |Bak| |  Up  | |           |      |           | |  Up  | |Bak| |Top|
@@ -17,9 +16,8 @@ to use.
    +---+ +---+ +------+ +-----------+      +-----------+ +------+ +---+ +---+
 
 
-The keys on the top of the display are named F1 through F16, as depicted below,
-within the documentation for this driver. See the help file for how this driver
-puts them to use.
+The keys on the top of the display are named as depicted below within the
+documentation for this driver. See the help file for what they do.
 
    +---+       +-------+       +---+        +---+       +-------+       +---+
    |Hlp| +---+ | Paste | +---+ |Prf|        |PrU| +---+ | DifUp | +---+ |PgU|
