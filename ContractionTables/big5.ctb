@@ -23,6 +23,7 @@
 
 1 opcodes.cti
 include allchars.cti
+locale -
 
 always	\xA1\x40	0	¡@
 always	\xA1\x41	23-0	¡A

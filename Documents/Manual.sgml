@@ -3307,13 +3307,19 @@ They have no direct effect on the character translation.
   <tag>26 <em/locale/<label id="contraction-opcode-26"></tag>
     Define the locale for character interpretation
     (lowercase, uppercase, numeric, etc.).
-    The locale should be specified as
-    <em/language/[<tt/_/<em/country/][<tt/./<em/charset/][<tt/@/<em/modifier/].
-    The <em/language/ component is required and should be a two-letter <tt/ISO-639/ language code.
-    The <em/country/ component is optional and should be a two-letter <tt/ISO-3166/ country code.
-    The <em/charset/ component is optional and should be a character set name, e.g. <tt/ISO-8859-1/.
+    The locale may be specified as:
+    <descrip>
+      <tag><em/language/[<tt/_/<em/country/][<tt/./<em/charset/][<tt/@/<em/modifier/]</tag>
+        The <em/language/ component is required and should be a two-letter <tt/ISO-639/ language code.
+        The <em/country/ component is optional and should be a two-letter <tt/ISO-3166/ country code.
+        The <em/charset/ component is optional and should be a character set name, e.g. <tt/ISO-8859-1/.
+      <tag/C/
+        7-bit ASCII.
+      <tag/-/
+        No locale.
+    </descrip>
     The last locale specification applies to the entire table.
-    If this opcode isn't used then the <tt/C/ locale (7-bit ASCII) is assumed.
+    If this opcode isn't used then the <tt/C/ locale is assumed.
 </descrip>
 
 <sect3>Special Symbol Definition<p>

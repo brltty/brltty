@@ -257,11 +257,13 @@ contractText (void *contractionTable,
   previousOpcode = CTO_None;
 
   activeBegin = activeEnd = NULL;
-  if (cursorOffset >= 0 && cursorOffset < *inputLength &&
-      !CTC(inputBuffer[cursorOffset], CTC_Space)) {
-    activeBegin = activeEnd = srcmin + cursorOffset;
-    while (--activeBegin >= srcmin && !CTC(*activeBegin, CTC_Space));
-    while (++activeEnd < srcmax && !CTC(*activeEnd, CTC_Space));
+  if (table->locale) {
+    if (cursorOffset >= 0 && cursorOffset < *inputLength &&
+        !CTC(inputBuffer[cursorOffset], CTC_Space)) {
+      activeBegin = activeEnd = srcmin + cursorOffset;
+      while (--activeBegin >= srcmin && !CTC(*activeBegin, CTC_Space));
+      while (++activeEnd < srcmax && !CTC(*activeEnd, CTC_Space));
+    }
   }
 
   while (src < srcmax) { /*the main translation loop */

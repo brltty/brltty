@@ -50,6 +50,7 @@ static int opcodesSize;
 static int opcodesUsed;
 
 static const char *originalLocale;
+static int noLocale;
 
 typedef struct {
   const char *fileName;
@@ -88,6 +89,26 @@ allocateBytes (FileData *data, ContractionTableOffset *offset, int count, int al
   *offset = tableUsed;
   tableUsed += count;
   return 1;
+}
+
+static int
+saveBytes (FileData *data, ContractionTableOffset *offset, const BYTE *bytes, BYTE length) {
+  if (allocateBytes(data, offset, length+1, __alignof__(BYTE))) {
+    BYTE *address = CTA(tableHeader, *offset);
+    memcpy(address+1, bytes, (*address = length));
+    return 1;
+  }
+  return 0;
+}
+
+static int
+saveString (FileData *data, ContractionTableOffset *offset, const char *string) {
+  return saveBytes(data, offset, string, strlen(string));
+}
+
+static int
+saveByteString (FileData *data, ContractionTableOffset *offset, const ByteString *string) {
+  return saveBytes(data, offset, string->bytes, string->length);
 }
 
 static int
@@ -162,16 +183,6 @@ addRule (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteSt
       }
     }
 
-    return 1;
-  }
-  return 0;
-}
-
-static int
-addString (FileData *data, ContractionTableOffset *offset, ByteString *string) {
-  if (allocateBytes(data, offset, string->length+1, __alignof__(BYTE))) {
-    BYTE *address = CTA(tableHeader, *offset);
-    memcpy(address+1, string->bytes, (*address = string->length));
     return 1;
   }
   return 0;
@@ -521,10 +532,12 @@ processLine (FileData *data, const BYTE *line) {
         if (parseText(data, &locale, token, length)) {
           char string[locale.length + 1];
           snprintf(string, sizeof(string), "%.*s", locale.length, locale.bytes);
-          if (!setLocale(string))
+          if (strcmp(string, "-") == 0)
+            noLocale = 1;
+          else if (!setLocale(string))
             compileError(data, "locale not available: %s", string);
-          else if (!addString(data, &tableHeader->locale, &locale))
-            goto failure;
+          else
+            noLocale = 0;
         }
       break;
     }
@@ -581,7 +594,7 @@ processLine (FileData *data, const BYTE *line) {
       ByteString cells;
       if (getToken(data, &token, &length, "capital sign"))
         if (parseDots(data, &cells, token, length))
-          if (!addString(data, &tableHeader->capitalSign, &cells))
+          if (!saveByteString(data, &tableHeader->capitalSign, &cells))
             goto failure;
       break;
     }
@@ -589,7 +602,7 @@ processLine (FileData *data, const BYTE *line) {
       ByteString cells;
       if (getToken(data, &token, &length, "begin capital sign"))
         if (parseDots(data, &cells, token, length))
-          if (!addString(data, &tableHeader->beginCapitalSign, &cells))
+          if (!saveByteString(data, &tableHeader->beginCapitalSign, &cells))
             goto failure;
       break;
     }
@@ -597,7 +610,7 @@ processLine (FileData *data, const BYTE *line) {
       ByteString cells;
       if (getToken(data, &token, &length, "end capital sign"))
         if (parseDots(data, &cells, token, length))
-          if (!addString(data, &tableHeader->endCapitalSign, &cells))
+          if (!saveByteString(data, &tableHeader->endCapitalSign, &cells))
             goto failure;
       break;
     }
@@ -605,7 +618,7 @@ processLine (FileData *data, const BYTE *line) {
       ByteString cells;
       if (getToken(data, &token, &length, "letter sign"))
         if (parseDots(data, &cells, token, length))
-          if (!addString(data, &tableHeader->englishLetterSign, &cells))
+          if (!saveByteString(data, &tableHeader->englishLetterSign, &cells))
             goto failure;
       break;
     }
@@ -613,7 +626,7 @@ processLine (FileData *data, const BYTE *line) {
       ByteString cells;
       if (getToken(data, &token, &length, "number sign"))
         if (parseDots(data, &cells, token, length))
-          if (!addString(data, &tableHeader->numberSign, &cells))
+          if (!saveByteString(data, &tableHeader->numberSign, &cells))
             goto failure;
       break;
     }
@@ -768,6 +781,7 @@ auditTable (void) {
 
 void *
 compileContractionTable (const char *fileName) { /*compile source table into a table in memory */
+  int ok = 0;
   ContractionTableOffset headerOffset;
   errorCount = 0;
 
@@ -779,21 +793,28 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
   opcodesSize = 0;
   opcodesUsed = 0;
 
-  originalLocale = setLocale("C");
+  originalLocale = getLocale();
+  setLocale("C");
+  noLocale = 0;
 
   if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
     if (headerOffset == 0) {
-      if (processFile(fileName))
-        auditTable();
-      if (errorCount)
-        LogPrint(LOG_ERR, "%d %s in contraction table '%s'.",
-                 errorCount, ((errorCount == 1)? "error": "errors"), fileName);
+      if (processFile(fileName)) {
+        if (auditTable()) {
+          ok = 1;
+          if (!noLocale) {
+            if (saveString(NULL, &tableHeader->locale, getLocale()))
+              cacheCharacterAttributes();
+            else
+              ok = 0;
+          }
+        }
+      }
     } else {
       compileError(NULL, "contraction table header not allocated at offset 0.");
     }
   }
 
-  cacheCharacterAttributes();
   setLocale(originalLocale);
 
   if (opcodesTable) {
@@ -801,6 +822,14 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
     opcodesTable = NULL;
   }
 
+  if (!ok) {
+    free(tableHeader);
+    tableHeader = NULL;
+  }
+
+  if (errorCount)
+    LogPrint(LOG_ERR, "%d %s in contraction table '%s'.",
+             errorCount, ((errorCount == 1)? "error": "errors"), fileName);
   return (void *)tableHeader;
 }
 
