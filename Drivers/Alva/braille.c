@@ -452,7 +452,7 @@ writeSerialPacket (const unsigned char *buffer, int length) {
   return safe_write(serialDevice, buffer, length);
 }
 #ifdef ENABLE_USB
-#include "Programs/usbio.h"
+#include "Programs/usb.h"
 
 static UsbDevice *usbDevice = NULL;
 static unsigned char usbOutputEndpoint;

@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _USBIO_H
-#define _USBIO_H
+#ifndef _USB_H
+#define _USB_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -313,4 +313,4 @@ extern int usbReapInput (
 }
 #endif /* __cplusplus */
 
-#endif /* _USBIO_H */
+#endif /* _USB_H */

@@ -537,14 +537,14 @@ in
 esac
 if test -n "${usb_object}"
 then
-   usb_object="usb_${usb_object}."'$O'
+   usb_objects="usb."'$O'" usb_${usb_object}."'$O'
    BRLTTY_ARG_DISABLE(
       [usb],
       [support for the Universal Serial Bus], [dnl
       AC_DEFINE([ENABLE_USB])
    ])
 fi
-AC_SUBST([usb_object])
+AC_SUBST([usb_objects])
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])

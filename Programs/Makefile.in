@@ -121,7 +121,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECT) $(SPEECH_DRIVER_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS) $(SPEECH_DRIVER_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -138,6 +138,17 @@ misc.$O:
 sysmisc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sysmisc.c
 
+cut.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
+
+brl.$O: brl.auto.h text.auto.h attrib.auto.h cmds.auto.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
+
+spk.$O: spk.auto.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
+
+###############################################################################
+
 sys_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
 
@@ -150,21 +161,17 @@ sys_hpux.$O:
 sys_openbsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_openbsd.c
 
+###############################################################################
+
+usb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb.c
+
 usb_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_linux.c
 
-cut.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
-
-brl.$O: brl.auto.h text.auto.h attrib.auto.h cmds.auto.h
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
-
-spk.$O: spk.auto.h
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
-
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECT)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)

@@ -34,33 +34,8 @@
 #include <linux/serial.h>
 
 #include "misc.h"
-#include "usbio.h"
-
-struct UsbInputElement {
-  struct UsbInputElement *next;
-  struct UsbInputElement *previous;
-  struct usbdevfs_urb *urb;
-};
-
-struct UsbDeviceStruct {
-  UsbDeviceDescriptor descriptor;
-  int file;
-
-  unsigned char inputEndpoint;
-  int inputSize;
-  unsigned int inputFlags;
-  struct UsbInputElement *inputElements;
-  struct usbdevfs_urb *inputRequest;
-  unsigned char *inputBuffer;
-  int inputLength;
-
-  uint16_t stringLanguage;
-};
-
-const UsbDeviceDescriptor *
-usbDeviceDescriptor (UsbDevice *device) {
-  return &device->descriptor;
-}
+#include "usb.h"
+#include "usb_definitions.h"
 
 int
 usbResetDevice (UsbDevice *device) {
@@ -207,86 +182,6 @@ usbControlTransfer (
 }
 
 int
-usbGetDescriptor (
-  UsbDevice *device,
-  unsigned char type,
-  unsigned char number,
-  unsigned int index,
-  UsbDescriptor *descriptor,
-  int timeout
-) {
-  return usbControlTransfer(device, USB_RECIPIENT_DEVICE, USB_DIR_IN, USB_TYPE_STANDARD,
-                            USB_REQ_GET_DESCRIPTOR, (type << 8) | number, index,
-                            descriptor->bytes, sizeof(descriptor->bytes), timeout);
-}
-
-int
-usbGetLanguage (
-  UsbDevice *device,
-  uint16_t *language,
-  int timeout
-) {
-  UsbDescriptor descriptor;
-  int count;
-  if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
-                                0, 0, &descriptor, timeout)) != -1) {
-    if (count >= 4) {
-      *language = descriptor.string.wData[0];
-      return 1;
-    } else {
-      errno = ENODATA;
-    }
-  }
-  return 0;
-}
-
-char *
-usbGetString (
-  UsbDevice *device,
-  unsigned char number,
-  int timeout
-) {
-  UsbDescriptor descriptor;
-  int count;
-  unsigned char *string;
-
-  if (!device->stringLanguage)
-    if (!usbGetLanguage(device, &device->stringLanguage, timeout))
-      return NULL;
-
-  if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
-                                number, device->stringLanguage,
-                                &descriptor, timeout)) == -1)
-    return NULL;
-  count = (count - 2) / sizeof(descriptor.string.wData[0]);
-
-  if ((string = malloc(count+1))) {
-    string[count] = 0;
-    while (count--) {
-      uint16_t character = descriptor.string.wData[count];
-      if (character & 0XFF00) character = '?';
-      string[count] = character;
-    }
-  }
-  return string;
-}
-
-void
-usbLogString (
-  UsbDevice *device,
-  int index,
-  const char *description
-) {
-  if (index) {
-    char *string = usbGetString(device, index, 1000);
-    if (string) {
-      LogPrint(LOG_INFO, "USB: %s: %s", description, string);
-      free(string);
-    }
-  }
-}
-
-static int
 usbBulkTransfer (
   UsbDevice *device,
   unsigned char endpoint,
@@ -301,28 +196,6 @@ usbBulkTransfer (
   arg.len = length;
   arg.timeout = timeout;
   return ioctl(device->file, USBDEVFS_BULK, &arg);
-}
-
-int
-usbBulkRead (
-  UsbDevice *device,
-  unsigned char endpoint,
-  void *data,
-  int length,
-  int timeout
-) {
-  return usbBulkTransfer(device, endpoint|USB_DIR_IN, data, length, timeout);
-}
-
-int
-usbBulkWrite (
-  UsbDevice *device,
-  unsigned char endpoint,
-  const void *data,
-  int length,
-  int timeout
-) {
-  return usbBulkTransfer(device, endpoint|USB_DIR_OUT, (unsigned char *)data, length, timeout);
 }
 
 void *
@@ -390,145 +263,10 @@ usbReapResponse (
   return urb;
 }
 
-static struct UsbInputElement *
-usbAddInputElement (
-  UsbDevice *device
-) {
-  struct UsbInputElement *input;
-  if ((input = malloc(sizeof(*input)))) {
-    memset(input, 0, sizeof(*input));
-    if ((input->urb = usbSubmitRequest(device, device->inputEndpoint,
-                                       USB_ENDPOINT_TRANSFER_BULK,
-                                       NULL, device->inputSize,
-                                       device->inputFlags, input))) {
-      if (device->inputElements) {
-        device->inputElements->previous = input;
-        input->next = device->inputElements;
-      } else {
-        input->next = NULL;
-      }
-      input->previous = NULL;
-      device->inputElements = input;
-      return input;
-    }
-    free(input);
-  }
-  return NULL;
-}
-
-static void
-usbDeleteInputElement (
-  UsbDevice *device,
-  struct UsbInputElement *input
-) {
-  if (input->previous) {
-    input->previous->next = input->next;
-  } else {
-    device->inputElements = input->next;
-  }
-  if (input->next) input->next->previous = input->previous;
-  free(input);
-}
-
 int
-usbBeginInput (
-  UsbDevice *device,
-  unsigned char endpoint,
-  int size,
-  int count
-) {
-  device->inputRequest = NULL;
-  device->inputEndpoint = endpoint | USB_DIR_IN;
-  device->inputSize = size;
-  device->inputFlags = 0;
-  while (count--) {
-    if (!usbAddInputElement(device)) return -1;
-  }
-  return 0;
-}
-
-int
-usbReapInput (
-  UsbDevice *device,
-  void *buffer,
-  int length,
-  int wait
-) {
-  unsigned char *bytes = buffer;
-  unsigned char *target = bytes;
-  while (length > 0) {
-    if (!device->inputRequest) {
-      UsbResponse response;
-      if (!(device->inputRequest = usbReapResponse(device, &response, wait))) return -1;
-      usbAddInputElement(device);
-      usbDeleteInputElement(device, response.context);
-      device->inputBuffer = response.buffer;
-      device->inputLength = response.length;
-    }
-
-    {
-      unsigned char *source = device->inputBuffer;
-      int count = device->inputLength;
-      if (length < count) count = length;
-      memcpy(target, source, count);
-
-      if ((device->inputLength -= count)) {
-        device->inputBuffer = source + count;
-      } else {
-        free(device->inputRequest);
-        device->inputRequest = NULL;
-        device->inputBuffer = NULL;
-        device->inputLength = 0;
-      }
-
-      target += count;
-      length -= count;
-    }
-  }
-  return target - bytes;
-}
-
-void
-usbCloseDevice (UsbDevice *device) {
-  if (device->inputRequest) free(device->inputRequest);
-  while (device->inputElements) usbDeleteInputElement(device, device->inputElements);
-  close(device->file);
-  free(device);
-}
-
-UsbDevice *
-usbOpenDevice (const char *path) {
-  UsbDevice *device;
-  if ((device = malloc(sizeof(*device)))) {
-    memset(device, 0, sizeof(*device));
-    if ((device->file = open(path, O_RDWR)) != -1) {
-      if (read(device->file, &device->descriptor, USB_DESCRIPTOR_SIZE_DEVICE) == USB_DESCRIPTOR_SIZE_DEVICE)
-        if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
-          if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
-            return device;
-      close(device->file);
-    }
-    free(device);
-  }
-  return NULL;
-}
-
-static UsbDevice *
-usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
-  UsbDevice *device;
-  if ((device = usbOpenDevice(path))) {
-    LogPrint(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",
-             device->descriptor.idVendor,
-             device->descriptor.idProduct);
-    if (chooser(device, data)) {
-      usbLogString(device, device->descriptor.iManufacturer, "Manufacturer Name");
-      usbLogString(device, device->descriptor.iProduct, "Product Description");
-      usbLogString(device, device->descriptor.iSerialNumber, "Serial Number");
-      return device;
-    }
-    usbCloseDevice(device);
-  }
-  return NULL;
+usbReadDeviceDescriptor (UsbDevice *device) {
+  int count = read(device->file, &device->descriptor, USB_DESCRIPTOR_SIZE_DEVICE);
+  return count == USB_DESCRIPTOR_SIZE_DEVICE;
 }
 
 static UsbDevice *
