@@ -124,6 +124,17 @@ setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instru
 }
 
 int
+beginMidiBlock (MidiDevice *midi) {
+  midi->duration = 0;
+  return 1;
+}
+
+int
+endMidiBlock (MidiDevice *midi) {
+  return 1;
+}
+
+int
 startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
   snd_seq_event_t event;
 
