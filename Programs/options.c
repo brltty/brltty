@@ -38,8 +38,14 @@
 const char *programPath;
 const char *programName;
 
-#define STRING_SETTING(opt) char **setting = (opt)->setting
-#define FLAG_SETTING(opt) int *setting = (opt)->setting
+typedef char **StringSetting;
+typedef int *FlagSetting;
+
+typedef struct {
+  const OptionEntry *optionTable;
+  unsigned int optionCount;
+  unsigned char *ensuredSettings;
+} OptionProcessingInformation;
 
 static void
 extendSetting (char **setting, const char *value, int prepend) {
@@ -60,34 +66,40 @@ extendSetting (char **setting, const char *value, int prepend) {
 }
 
 static void
-ensureSetting (const OptionEntry *option, const char *value) {
+ensureSetting (
+  const OptionProcessingInformation *info,
+  const OptionEntry *option,
+  const char *value
+) {
   if (value) {
-    if (option->argument) {
-      STRING_SETTING(option);
-      if (option->flags & OPT_Extend) {
-        extendSetting(setting, value, 1);
-      } else if (!*setting) {
-        *setting = strdupWrapper(value);
-      }
-    } else {
-/*flag
-      FLAG_SETTING(option);
-      if (strcasecmp(value, "on") == 0) {
-        *setting = 1;
-      } else if (strcasecmp(value, "off") == 0) {
-        *setting = 0;
+    unsigned char *ensured = &info->ensuredSettings[option->letter];
+    if (!*ensured) {
+      *ensured = 1;
+
+      if (option->argument) {
+        StringSetting setting = option->setting;
+        if (option->flags & OPT_Extend) {
+          extendSetting(setting, value, 1);
+        } else {
+          *setting = strdupWrapper(value);
+        }
       } else {
-        LogPrint(LOG_ERR, "Invalid flag setting: %s", value);
+        FlagSetting setting = option->setting;
+        if (strcasecmp(value, "on") == 0) {
+          *setting = 1;
+        } else if (strcasecmp(value, "off") == 0) {
+          *setting = 0;
+        } else {
+          LogPrint(LOG_ERR, "Invalid flag setting: %s", value);
+        }
       }
-*/
     }
   }
 }
 
 static void
 processBootParameters (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
+  const OptionProcessingInformation *info,
   const char *parameterName
 ) {
   char *parameterString;
@@ -106,11 +118,11 @@ processBootParameters (
     char **parameters = splitString(parameterString, ',', &count);
     int optionIndex;
 
-    for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
-      const OptionEntry *option = &optionTable[optionIndex];
+    for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+      const OptionEntry *option = &info->optionTable[optionIndex];
       if ((option->bootParameter) && (option->bootParameter <= count)) {
         char *parameter = parameters[option->bootParameter-1];
-        if (*parameter) ensureSetting(option, parameter);
+        if (*parameter) ensureSetting(info, option, parameter);
       }
     }
 
@@ -122,14 +134,13 @@ processBootParameters (
 
 static void
 processEnvironmentVariables (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
+  const OptionProcessingInformation *info,
   const char *prefix
 ) {
   int prefixLength = strlen(prefix);
   int optionIndex;
-  for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
-    const OptionEntry *option = &optionTable[optionIndex];
+  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+    const OptionEntry *option = &info->optionTable[optionIndex];
     if (option->flags & OPT_Environ) {
       unsigned char name[prefixLength + 1 + strlen(option->word) + 1];
       sprintf(name, "%s_%s", prefix, option->word);
@@ -146,28 +157,26 @@ processEnvironmentVariables (
         }
       }
 
-      ensureSetting(option, getenv(name));
+      ensureSetting(info, option, getenv(name));
     }
   }
 }
 
 static void
 setDefaultOptions (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
+  const OptionProcessingInformation *info,
   int config
 ) {
   int optionIndex;
-  for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
-    const OptionEntry *option = &optionTable[optionIndex];
+  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+    const OptionEntry *option = &info->optionTable[optionIndex];
     if (!(option->flags & OPT_Config) != !config) continue;
-    ensureSetting(option, option->defaultSetting);
+    ensureSetting(info, option, option->defaultSetting);
   }
 }
 
 typedef struct {
-  unsigned int count;
-  const OptionEntry *options;
+  const OptionProcessingInformation *info;
   char **settings;
 } ConfigurationFileProcessingData;
 
@@ -188,8 +197,8 @@ processConfigurationLine (
 
   if ((directive = strtok(line, delimiters))) {
     int optionIndex;
-    for (optionIndex=0; optionIndex<conf->count; ++optionIndex) {
-      const OptionEntry *option = &conf->options[optionIndex];
+    for (optionIndex=0; optionIndex<conf->info->optionCount; ++optionIndex) {
+      const OptionEntry *option = &conf->info->optionTable[optionIndex];
       if (option->flags & OPT_Config) {
         if (strcasecmp(directive, option->word) == 0) {
           const char *operand = strtok(NULL, delimiters);
@@ -226,8 +235,7 @@ processConfigurationLine (
 
 static int
 processConfigurationFile (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
+  const OptionProcessingInformation *info,
   const char *path,
   int optional
 ) {
@@ -239,16 +247,15 @@ processConfigurationFile (
       ConfigurationFileProcessingData conf;
       int index;
 
-      conf.count = optionCount;
-      conf.options = optionTable;
-      conf.settings = mallocWrapper(optionCount * sizeof(*conf.settings));
-      for (index=0; index<optionCount; ++index) conf.settings[index] = NULL;
+      conf.info = info;
+      conf.settings = mallocWrapper(info->optionCount * sizeof(*conf.settings));
+      for (index=0; index<info->optionCount; ++index) conf.settings[index] = NULL;
 
       processed = processLines(file, processConfigurationLine, &conf);
 
-      for (index=0; index<optionCount; ++index) {
+      for (index=0; index<info->optionCount; ++index) {
         char *setting = conf.settings[index];
-        ensureSetting(&optionTable[index], setting);
+        ensureSetting(info, &info->optionTable[index], setting);
         free(setting);
       }
       free(conf.settings);
@@ -374,11 +381,15 @@ processOptions (
   char **configurationFile,
   const char *argumentsSummary
 ) {
-  short opt_help = 0;
-  short opt_helpAll = 0;
-  char shortOptions[1 + (optionCount * 2) + 1];
+  OptionProcessingInformation info;
   const OptionEntry *optionEntries[0X100];
+  unsigned char ensuredSettings[0X100];
   int index;
+
+  int opt_help = 0;
+  int opt_helpAll = 0;
+
+  char shortOptions[1 + (optionCount * 2) + 1];
 
 #ifdef HAVE_GETOPT_LONG
   struct option longOptions[(optionCount * 2) + 1];
@@ -394,7 +405,7 @@ processOptions (
       opt->val = entry->letter;
       ++opt;
 
-      if (!entry->argument) {
+      if (!entry->argument && entry->setting) {
         static const char *prefix = "no-";
         int length = strlen(prefix);
         if (strncasecmp(prefix, entry->word, length) == 0) {
@@ -414,7 +425,14 @@ processOptions (
   }
 #endif /* HAVE_GETOPT_LONG */
 
-  for (index=0; index<0X100; ++index) optionEntries[index] = NULL;
+  for (index=0; index<0X100; ++index) {
+    optionEntries[index] = NULL;
+    ensuredSettings[index] = 0;
+  }
+
+  info.optionTable = optionTable;
+  info.optionCount = optionCount;
+  info.ensuredSettings = ensuredSettings;
 
   {
     char *opt = shortOptions;
@@ -428,10 +446,10 @@ processOptions (
 
       if (entry->setting) {
         if (entry->argument) {
-          STRING_SETTING(entry);
+          StringSetting setting = entry->setting;
           *setting = NULL;
         } else {
-          FLAG_SETTING(entry);
+          FlagSetting setting = entry->setting;
           *setting = 0;
         }
       }
@@ -462,28 +480,30 @@ processOptions (
       default: {
         const OptionEntry *entry = optionEntries[option];
         if (entry->argument) {
-          STRING_SETTING(entry);
+          StringSetting setting = entry->setting;
           if (entry->flags & OPT_Extend) {
             extendSetting(setting, optarg, 0);
           } else {
             *setting = optarg;
           }
         } else {
-          FLAG_SETTING(entry);
+          FlagSetting setting = entry->setting;
           if (entry->flags & OPT_Extend) {
             ++*setting;
           } else {
             *setting = 1;
           }
         }
+        ensuredSettings[option] = 1;
         break;
       }
 
 #ifdef HAVE_GETOPT_LONG
       case 0: {
         const OptionEntry *entry = optionEntries[flagLetter];
-        FLAG_SETTING(entry);
+        FlagSetting setting = entry->setting;
         *setting = 0;
+        ensuredSettings[flagLetter] = 1;
         break;
       }
 #endif /* HAVE_GETOPT_LONG */
@@ -523,21 +543,21 @@ processOptions (
   }
 
   if (doBootParameters && *doBootParameters) {
-    processBootParameters(optionTable, optionCount, applicationName);
+    processBootParameters(&info, applicationName);
   }
 
   if (doEnvironmentVariables && *doEnvironmentVariables) {
-    processEnvironmentVariables(optionTable, optionCount, applicationName);
+    processEnvironmentVariables(&info, applicationName);
   }
 
   if (configurationFile) {
     int optional = !*configurationFile;
-    setDefaultOptions(optionTable, optionCount, 0);
-    processConfigurationFile(optionTable, optionCount, *configurationFile, optional);
+    setDefaultOptions(&info, 0);
+    processConfigurationFile(&info, *configurationFile, optional);
   } else {
-    setDefaultOptions(optionTable, optionCount, 0);
+    setDefaultOptions(&info, 0);
   }
-  setDefaultOptions(optionTable, optionCount, 1);
+  setDefaultOptions(&info, 1);
 
   return 1;
 }
