@@ -444,7 +444,7 @@ brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, int count) {
 
 static int
 readBytes (BrailleDisplay *brl, unsigned char *bytes, int count) {
-  return brl_readPacket(brl, bytes, count) == count;
+  return brl_readPacket(brl, bytes, count);
 }
 
 static int
@@ -558,7 +558,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     if (writeDescribe(brl)) {
       if (io->awaitInput(1000)) {
         unsigned char buffer[sizeof(HandyDescription) + 1];
-        if (readBytes(brl, buffer, sizeof(buffer))) {
+        if (readBytes(brl, buffer, sizeof(buffer)) == sizeof(buffer)) {
           if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
             if (identifyModel(brl, buffer[sizeof(HandyDescription)])) return 1;
             goto failure;
