@@ -46,16 +46,16 @@ static void
 discardElement (Element *element) {
   Queue *queue = element->queue;
 
+  if (element->item) {
+    if (queue->deallocate) queue->deallocate(element->item, queue->data);
+    element->item = NULL;
+  }
+
   element->queue = NULL;
   queue->size--;
 
   element->next = discardedElements;
   discardedElements = element;
-
-  if (element->item) {
-    if (queue->deallocate) queue->deallocate(element->item, queue->data);
-    element->item = NULL;
-  }
 }
 
 static Element *
@@ -75,11 +75,8 @@ newElement (Queue *queue, void *item) {
   Element *element;
 
   if (!(element = retrieveElement())) {
-    if ((element = malloc(sizeof(*element)))) {
-      element->previous = element->next = NULL;
-    } else {
-      return NULL;
-    }
+    if (!(element = malloc(sizeof(*element)))) return NULL;
+    element->previous = element->next = NULL;
   }
 
   element->queue = queue;
@@ -153,6 +150,7 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
   if ((queue = malloc(sizeof(*queue)))) {
     queue->head = NULL;
     queue->size = 0;
+    queue->data = NULL;
     queue->deallocate = deallocate;
     queue->compare = compare;
     return queue;
@@ -163,7 +161,6 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
 void
 deallocateQueue (Queue *queue) {
   while (queue->head) deleteElement(queue->head);
-  while (discardedElements) free(retrieveElement());
   free(queue);
 }
 

@@ -230,7 +230,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   if ((err=brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key))<0)
     return err;
 
-  auth->protocolVersion = BRLAPI_PROTOCOL_VERSION;
+  auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
 
   addrfamily=brlapi_splitHost(settings.hostName,&hostname,&port);
 
@@ -580,6 +580,7 @@ int brlapi_writeText(int cursor, const unsigned char *str)
     return -1;
   }
   send:
+  ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&brlapi_fd_mutex);
   res=brlapi_writePacket(fd,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
   pthread_mutex_unlock(&brlapi_fd_mutex);
@@ -663,6 +664,7 @@ int brlapi_write(const brlapi_writeStruct *s)
     p += sizeof(uint32_t);
   }
   send:
+  ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&brlapi_fd_mutex);
   res = brlapi_writePacket(fd,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
   pthread_mutex_unlock(&brlapi_fd_mutex);

@@ -464,7 +464,7 @@ static int processRequest(Connection *c)
     return 1;
   }
   if (c->auth==0) {
-    if (auth->protocolVersion!=BRLAPI_PROTOCOL_VERSION) {
+    if (ntohl(auth->protocolVersion)!=BRLAPI_PROTOCOL_VERSION) {
       writeError(c->fd, BRLERR_PROTOCOL_VERSION);
       return 1;
     }
@@ -652,6 +652,7 @@ static int processRequest(Connection *c)
       brailleWindow.text = x;
       brailleWindow.andAttr = y;
       brailleWindow.orAttr = z;
+      ws->flags = ntohl(ws->flags);
       pthread_mutex_lock(&c->brlMutex);
       if ((size==sizeof(ws->flags))&&(ws->flags==0)) {
         c->brlbufstate = EMPTY;

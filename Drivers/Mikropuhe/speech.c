@@ -213,13 +213,25 @@ synthesizeSpeech (const unsigned char *bytes, int length, int tags) {
   return 0;
 }
 
-static void *
-processSpeechSegments (void *data) {
-  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-  pthread_mutex_lock(&speechMutex);
-  while (synthesisThreadStarted) {
+static void
+synthesizeSpeechSegments (void) {
+  SpeechSegment *segment;
+  while ((segment = dequeueItem(speechQueue))) {
+    if (segment->tags) {
+      synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
+    } else if (synthesisThreadStarted && openSoundDevice()) {
+      pthread_mutex_unlock(&speechMutex);
+      synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
+      pthread_mutex_lock(&speechMutex);
+    }
+    deallocateSpeechSegment(segment);
+  }
+}
+
+static int
+awaitSpeechSegment (void) {
+  while (1) {
     int error;
-    SpeechSegment *segment;
 
     if (pcm) {
       struct timeval now;
@@ -231,28 +243,32 @@ processSpeechSegments (void *data) {
     } else {
       error = pthread_cond_wait(&speechConditional, &speechMutex);
     }
+
     switch (error) {
       case 0:
-        break;
+        return 1;
+
       case ETIMEDOUT:
         closeSoundDevice();
         continue;
+
       default:
         LogError("pthread_cond_timedwait");
-        break;
-    }
-
-    while ((segment = dequeueItem(speechQueue))) {
-      if (segment->tags) {
-        synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
-      } else if (synthesisThreadStarted && openSoundDevice()) {
-        pthread_mutex_unlock(&speechMutex);
-        synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
-        pthread_mutex_lock(&speechMutex);
-      }
-      deallocateSpeechSegment(segment);
+        return 0;
     }
   }
+}
+
+static void *
+doSynthesisThread (void *data) {
+  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+  pthread_mutex_lock(&speechMutex);
+
+  while (synthesisThreadStarted) {
+    synthesizeSpeechSegments();
+    awaitSpeechSegment();
+  }
+
   pthread_mutex_unlock(&speechMutex);
   return NULL;
 }
@@ -268,7 +284,7 @@ startSynthesisThread (void) {
       pthread_attr_t attributes;
       if (!(error = pthread_attr_init(&attributes))) {
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-        error = pthread_create(&synthesisThread, &attributes, processSpeechSegments, NULL);
+        error = pthread_create(&synthesisThread, &attributes, doSynthesisThread, NULL);
         pthread_attr_destroy(&attributes);
         if (!error) {
           return 1;
@@ -296,7 +312,9 @@ static void
 stopSynthesisThread (void) {
   if (synthesisThreadStarted) {
     synthesisThreadStarted = 0;
+    pthread_mutex_lock(&speechMutex);
     pthread_cond_signal(&speechConditional);
+    pthread_mutex_unlock(&speechMutex);
     pthread_join(synthesisThread, NULL);
     pthread_cond_destroy(&speechConditional);
     pthread_mutex_destroy(&speechMutex);
@@ -311,11 +329,12 @@ enqueueSpeech (const unsigned char *bytes, int length, int tags) {
       Element *element;
       pthread_mutex_lock(&speechMutex);
       element = enqueueItem(speechQueue, segment);
-      pthread_mutex_unlock(&speechMutex);
       if (element) {
         pthread_cond_signal(&speechConditional);
+        pthread_mutex_unlock(&speechMutex);
         return 1;
       }
+      pthread_mutex_unlock(&speechMutex);
       deallocateSpeechSegment(segment);
     }
   }

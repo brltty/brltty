@@ -106,8 +106,8 @@
         if (calctimeout)
   	timeoutev = calctimo();
         if (timeoutev)
-*** screen.c.orig	Mon Oct 13 12:29:04 2003
---- screen.c	Mon Oct 13 12:44:10 2003
+*** screen.c.orig	2003-09-08 10:26:41.000000000 -0400
+--- screen.c	2005-02-14 15:40:15.753735970 -0500
 ***************
 *** 71,76 ****
 --- 71,84 ----
@@ -156,31 +156,38 @@
    */
 ***************
 *** 461,466 ****
---- 480,516 ----
+--- 480,523 ----
     zmodem_recvcmd = SaveStr("!!! rz -vv -b -E");
   #endif
   
 + #ifdef IPC_EXPORT_IMAGE
 +   {
-+     key_t key = 0xBACD072F;     /* random static IPC key */
++     const char *path;
++     key_t key;
 +     int shmid;
++ 
++     path = getenv("HOME");
++     if (!path || !*path) path = "/";
++     if ((key = ftok(path, 'b')) == -1) key = 0XBACD072F;
 + 
 +     /* Allocation of shared mem for 18000 bytes (screen text and attributes
 +      * + few coord.).  We supose no screen will be wider than 132x66.
 +      * 0x1C0 = [rwx------].
 +      */
-+     shmid = shmget( key, 18000, IPC_CREAT | 0x1C0 );
++     shmid = shmget( key, 18000, IPC_CREAT | 0700 );
 +     if( shmid < 0 )
 +       {
 +         Panic( errno, "shmget" );
 +         /* NOTRECHED */
 +       }
++ 
 +     shm = shmat( shmid, 0, 0);
 +     if ( shm == (void*)-1 )
 +       {
 +         Panic( errno, "shmat" );
 +         /* NOTRECHED */
 +       }
++ 
 +     /* minimal initialisation just to have valid data */
 +     shm[0] = 80;   /* scrdim x */
 +     shm[1] = 1;    /* scrdim y */

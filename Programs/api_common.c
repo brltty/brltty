@@ -41,6 +41,7 @@
 
 #include "api.h"
 #include "api_protocol.h"
+#include "api_common.h"
 
 int brlapi_libcerrno;
 const char *brlapi_libcerrfun;

@@ -38,6 +38,10 @@ ssize_t brlapi_writeFile(int fd, const unsigned char *buf, size_t size);
 /* Exactly read a buffer from a file */
 ssize_t brlapi_readFile(int fd, unsigned char *buf, size_t size);
 
+#if !defined(PF_LOCAL) && defined(PF_UNIX)
+#define PF_LOCAL PF_UNIX
+#endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
+ 
 /* brlapi_libcerrno */
 /* saves the libc errno */
 int brlapi_libcerrno;

@@ -413,44 +413,6 @@ determineApplicationCharacterMap (int force) {
   return 1;
 }
 
-static int vgaCharacterCount;
-static int vgaLargeTable;
-static int
-setVgaCharacterCount (int force) {
-  struct console_font_op cfo;
-  int oldCount = vgaCharacterCount;
-  vgaCharacterCount = 0X100;
-  vgaLargeTable = 0;
-
-  memset(&cfo, 0, sizeof(cfo));
-  cfo.op = KD_FONT_OP_GET;
-  cfo.height = 32;
-  cfo.width = 16;
-
-  if (controlConsole(KDFONTOP, &cfo) != -1) {
-    switch (cfo.charcount) {
-      default:
-        LogPrint(LOG_WARNING, "Unexpected VGA character count: %d", cfo.charcount);
-      case 0X200:
-        vgaLargeTable = 1;
-      case 0X100:
-        vgaCharacterCount = cfo.charcount;
-      case 0X000:
-        break;
-    }
-  } else if (errno != EINVAL) {
-    LogPrint(LOG_WARNING, "ioctl KDFONTOP[GET]: %s", strerror(errno));
-  }
-
-  if (!force)
-    if (vgaCharacterCount == oldCount)
-      return 0;
-  LogPrint(LOG_INFO, "VGA Character Count: %d(%s)",
-           vgaCharacterCount,
-           vgaLargeTable? "large": "small");
-  return 1;
-}
-
 static struct unipair *screenFontMapTable;
 static unsigned short screenFontMapCount;
 static unsigned short screenFontMapSize;
@@ -503,6 +465,52 @@ setScreenFontMap (int force) {
                i, map->unicode, map->fontpos);
     }
   }
+  return 1;
+}
+
+static int vgaCharacterCount;
+static int vgaLargeTable;
+static int
+setVgaCharacterCount (int force) {
+  int oldCount = vgaCharacterCount;
+
+  {
+    struct console_font_op cfo;
+
+    memset(&cfo, 0, sizeof(cfo));
+    cfo.op = KD_FONT_OP_GET;
+    cfo.height = 32;
+    cfo.width = 16;
+
+    if (controlConsole(KDFONTOP, &cfo) != -1) {
+      vgaCharacterCount = cfo.charcount;
+    } else {
+      vgaCharacterCount = 0;
+
+      if (errno != EINVAL) {
+        LogPrint(LOG_WARNING, "ioctl KDFONTOP[GET]: %s", strerror(errno));
+      }
+    }
+  }
+
+  if (!vgaCharacterCount) {
+    int index;
+    for (index=0; index<screenFontMapCount; ++index) {
+      const struct unipair *map = &screenFontMapTable[index];
+      if (vgaCharacterCount <= map->fontpos) vgaCharacterCount = map->fontpos + 1;
+    }
+  }
+
+  vgaCharacterCount = ((vgaCharacterCount - 1) | 0XFF) + 1;
+  vgaLargeTable = vgaCharacterCount > 0X100;
+
+  if (!force)
+    if (vgaCharacterCount == oldCount)
+      return 0;
+
+  LogPrint(LOG_INFO, "VGA Character Count: %d(%s)",
+           vgaCharacterCount,
+           vgaLargeTable? "large": "small");
   return 1;
 }
 
@@ -581,7 +589,7 @@ static int
 setTranslationTable (int force) {
   int acmChanged = setApplicationCharacterMap && setApplicationCharacterMap(force);
   int sfmChanged = setScreenFontMap(force);
-  int vccChanged = setVgaCharacterCount(force);
+  int vccChanged = (sfmChanged || force)? setVgaCharacterCount(force): 0;
 
   if (acmChanged || sfmChanged || vccChanged) {
     unsigned short directPosition = 0XFF;

@@ -39,6 +39,10 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 
+#if !defined(PF_LOCAL) && defined(PF_UNIX)
+#define PF_LOCAL PF_UNIX
+#endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
+ 
 #include "Programs/misc.h"
 #include "Programs/cmd.h"
 

@@ -152,7 +152,7 @@
 \X81 (1      8)  # <control>
 \X82 (12     8)  # break permitted here
 \X83 ( 23 567 )  # no break here
-\X84 (  3  6 8)  # <control>
+\X84 (  3    8)  # <control>
 \X85 (  3 5  8)  # next line
 \X86 ( 23  6 8)  # start of selected area
 \X87 (12 45  8)  # end of selected area
@@ -173,7 +173,7 @@
 \X96 (123  6 8)  # start of guarded area
 \X97 ( 2 456 8)  # end of guarded area
 \X98 (1234 678)  # start of string
-\X99 (  345678)  # <control>
+\X99 (  3  6 8)  # <control>
 \X9A (1 3 56 8)  # single character introducer
 \X9B (   4 6 8)  # control sequence introducer
 \X9C (    5  8)  # string terminator
@@ -208,10 +208,10 @@
 \XB9 (   4  78)  # superscript one
 \XBA (1 34   8)  # masculine ordinal indicator
 \XBB (  3 5678)  # right-pointing double angle quotation mark
-\XBC (  34 67 )  # vulgar fraction one quarter
+\XBC (  34  78)  # vulgar fraction one quarter
 \XBD (  34 678)  # vulgar fraction one half
-\XBE (  34 6 8)  # vulgar fraction three quarters
-\XBF (  3    8)  # inverted question mark
+\XBE (  345678)  # vulgar fraction three quarters
+\XBF (  34   8)  #*inverted question mark
 \XC0 (123 5678)  # latin capital letter a with grave
 \XC1 ( 2    7 )  # latin capital letter a with acute
 \XC2 ( 2    78)  # latin capital letter a with circumflex
@@ -242,7 +242,7 @@
 \XDB ( 2   678)  # latin capital letter u with circumflex
 \XDC (12  567 )  #*latin capital letter u with diaeresis
 \XDD ( 23   7 )  # latin capital letter y with acute
-\XDE (  34  78)  # latin capital letter thorn
+\XDE (  34 67 )  # latin capital letter thorn
 \XDF ( 2 4 678)  # latin small letter sharp s
 \XE0 (123 56 8)  #*latin small letter a with grave
 \XE1 (1    67 )  #*latin small letter a with acute
@@ -274,5 +274,5 @@
 \XFB (1   5678)  #*latin small letter u with circumflex
 \XFC (12  56 8)  #*latin small letter u with diaeresis
 \XFD (12   67 )  # latin small letter y with acute
-\XFE (  34   8)  # latin small letter thorn
+\XFE (  34 6 8)  # latin small letter thorn
 \XFF (12  5678)  #*latin small letter y with diaeresis
