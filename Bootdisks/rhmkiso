@@ -1,10 +1,20 @@
 #!/bin/bash -p
-
-originalImage="boot.iso"
-modifiedImage="bootbrl.iso"
-loaderDirectory="isolinux"
-configurationFile="isolinux.cfg"
-brailleDrivers="all"
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
 
 programName="${0##*/}"
 programMessage() {
@@ -12,8 +22,54 @@ programMessage() {
 }
 programError() {
    [ -n "${1}" ] && programMessage "${1}"
-   exit "${2:-2}"
+   exit "${2:-3}"
 }
+syntaxError() {
+   programError "${1}" 2
+}
+
+originalImage="boot.iso"
+modifiedImage="brltty.iso"
+brailleDrivers="all"
+showUsage() {
+   cat <<EOF
+Usage: ${programName} [-option ...] [original-image [modified-image]]
+The original (input) image defaults to "${originalImage}".
+The modified (output) image defaults to "${modifiedImage}".
+The following options are supported:
+-b driver,...   The braille driver(s) to include (default: ${brailleDrivers}).
+-h              Display usage information for this command.
+EOF
+   exit 0
+}
+
+while getopts ":b:h" option
+do
+   case "${option}"
+   in
+      b) brailleDrivers="${OPTARG}";;
+      h) showUsage;;
+     \?) syntaxError "unknown option: -${OPTARG}";;
+      :) syntaxError "missing operand: -${OPTARG}";;
+      *) syntaxError "unimplemented option: -${option}";;
+   esac
+done
+shift $((OPTIND - 1))
+
+[ "${#}" -gt 0 ] && {
+   originalImage="${1}"
+   shift
+}
+
+[ "${#}" -gt 0 ] && {
+   modifiedImage="${1}"
+   shift
+}
+
+[ "${#}" -gt 0 ] && syntaxError "too many parameters."
+
+loaderDirectory="isolinux"
+configurationFile="isolinux.cfg"
 
 [ -f "${originalImage}" ] || programError "original image not found: ${originalImage}"
 
