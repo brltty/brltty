@@ -1,5 +1,4 @@
-###############################################################################
-# BRLTTY - A background process providing access to the console screen (when in
+# BRLTT - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
 # Copyright (C) 1995-2005 by The BRLTTY Team. All rights reserved.
@@ -400,15 +399,15 @@ xbrlapi.$O: $(SRC_DIR)/xbrlapi.c
 ###############################################################################
 
 check-braille: brltty braille-drivers
-	for lib in $(BRAILLE_DRIVER_CODES); \
-	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$lib.$(LIB_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b $$lib -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
+	for code in $(BRAILLE_DRIVER_CODES); \
+	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$code.$(MOD_EXT) || exit 10; \
+	   ./brltty -v -q -N -e -f /dev/null -b $$code -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
 	done
 
 check-speech: brltty speech-drivers
-	for lib in $(SPEECH_DRIVER_CODES); \
-	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$lib.$(LIB_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b no -s $$lib -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
+	for code in $(SPEECH_DRIVER_CODES); \
+	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$code.$(MOD_EXT) || exit 10; \
+	   ./brltty -v -q -N -e -f /dev/null -b no -s $$code -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
 	done
 
 ###############################################################################
@@ -441,7 +440,7 @@ install-data-directory:
 
 install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
-	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(LIB_EXT) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
+	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/*.lst $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 
 install-manpages:
