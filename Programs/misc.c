@@ -226,6 +226,22 @@ makePath (const char *directory, const char *file) {
   return path;
 }
 
+int
+makeDirectory (const char *path) {
+  struct stat status;
+  if (stat(path, &status) != -1) {
+    if (S_ISDIR(status.st_mode)) return 1;
+    LogPrint(LOG_ERR, "Not a directory: %s", path);
+  } else if (errno != ENOENT) {
+    LogPrint(LOG_ERR, "Directory status error: %s: %s", path, strerror(errno));
+  } else {
+    LogPrint(LOG_NOTICE, "Creating directory: %s", path);
+    if (mkdir(path, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) != -1) return 1;
+    LogPrint(LOG_ERR, "Directory creation error: %s: %s", path, strerror(errno));
+  }
+  return 0;
+}
+
 char *
 getDevicePath (const char *path) {
   const char *prefix = DEVICE_DIRECTORY;

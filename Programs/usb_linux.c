@@ -405,7 +405,7 @@ usbFindRoot (void) {
       }
     }
     endmntent(table);
-    if (!root) LogPrint(LOG_WARNING, "USBFS file system not mounted.");
+    if (!root) LogPrint(LOG_WARNING, "USBFS not mounted.");
   } else {
     LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
              "Mounted file system table open erorr: %s: %s",
@@ -416,32 +416,19 @@ usbFindRoot (void) {
 
 static char *
 usbMakeRoot (void) {
-  char *root = makePath(DATA_DIRECTORY, "usbfs");
-
-  if (access(root, F_OK) == -1) {
-    if (errno != ENOENT) {
-      LogPrint(LOG_ERR, "USBFS root access error: %s: %s", root, strerror(errno));
-      goto error;
+  const char *type = "usbfs";
+  const char *name = type;
+  char *directory = makePath(DATA_DIRECTORY, type);
+  if (directory) {
+    if (makeDirectory(directory)) {
+      if (usbTestPath(directory)) return directory;
+      LogPrint(LOG_NOTICE, "Mounting USBFS: %s", directory);
+      if (mount(name, directory, type, 0, NULL) != -1) return directory;
+      LogPrint(LOG_ERR, "USBFS mount error: %s: %s", directory, strerror(errno));
     }
-
-    LogPrint(LOG_NOTICE, "Creating USBFS root: %s", root);
-    if (mkdir(root, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) == -1) {
-      LogPrint(LOG_ERR, "USBFS root creation error: %s: %s", root, strerror(errno));
-      goto error;
-    }
+    free(directory);
   }
-
-  if (!usbTestPath(root)) {
-    LogPrint(LOG_NOTICE, "Mounting USBFS: %s", root);
-    if (mount("usbfs", root, "usbfs", 0, NULL) == -1) {
-      LogPrint(LOG_ERR, "USBFS mount error: %s: %s", root, strerror(errno));
-
-    error:
-      free(root);
-      root = NULL;
-    }
-  }
-  return root;
+  return NULL;
 }
 
 UsbDevice *

@@ -121,6 +121,7 @@ extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
 extern char *makePath (const char *directory, const char *file);
+extern int makeDirectory (const char *path);
 
 extern char *getDevicePath (const char *path);
 extern int isQualifiedDevice (const char **path, const char *qualifier);
