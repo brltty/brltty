@@ -135,8 +135,9 @@ typedef struct Tty {
   int focus;
   int number;
   struct Connection *connections;
+  struct Tty *father; /* father */
+  struct Tty **prevnext,*next; /* siblings */
   struct Tty *subttys; /* childs */
-  struct Tty *next; /* siblings */
 } Tty;
 #define MAXTTYRECUR 16
 
@@ -401,7 +402,10 @@ static inline Tty *newTty(Tty *father, int number)
   tty->connections->next = tty->connections->prev = tty->connections;
   tty->number = number;
   tty->focus = -1;
-  tty->next = father->subttys;
+  tty->father = father;
+  tty->prevnext = &father->subttys;
+  if ((tty->next = father->subttys))
+    tty->next->prevnext = &tty->next;
   father->subttys = tty;
   return tty;
   
@@ -413,10 +417,11 @@ out:
 
 /* Function: removeTty */
 /* removes an unused tty from the hierarchy */
-static inline void removeTty(Tty **toremovep)
+static inline void removeTty(Tty *toremove)
 {
-  Tty *toremove = *toremovep;
-  *toremovep = toremove->next;
+  if (toremove->next)
+    toremove->next->prevnext = toremove->prevnext;
+  *(toremove->prevnext) = toremove->next;
 }
 
 /* Function: freeTty */
@@ -436,6 +441,27 @@ static inline void freeTty(Tty *tty)
 static inline void LogPrintRequest(int type, int fd)
 {
   LogPrint(LOG_DEBUG, "Received %s request on fd %d", brlapi_packetType(type), fd);  
+}
+
+/* Function doLeaveTty */
+/* handles a connection leaving its tty */
+static void doLeaveTty(Connection *c) {
+  Tty *tty = c->tty;
+  LogPrint(LOG_DEBUG,"Releasing tty %#010x",tty->number);
+  c->tty = NULL;
+  pthread_mutex_lock(&connectionsMutex);
+  __removeConnection(c);
+  __addConnection(c,notty.connections);
+  for (;tty!=&ttys;tty=tty->father) {
+    if (tty->connections->next != tty->connections || tty->subttys)
+      break;
+    LogPrint(LOG_DEBUG,"freeing tty %#010x",tty->number);
+    removeTty(tty);
+    freeTty(tty);
+  }
+  pthread_mutex_unlock(&connectionsMutex);
+  freeRangeList(&c->unmaskedKeys);
+  freeBrailleWindow(&c->brailleWindow);
 }
 
 /* Function : processRequest */
@@ -468,11 +494,8 @@ static int processRequest(Connection *c)
       }
     }
     if (c->tty) {
-      LogPrint(LOG_WARNING,"Client on fd %d did not give up control of tty %#010x properly",c->fd,c->tty->number);
-      c->tty = NULL;
-      removeConnection(c);
-      addConnection(c,notty.connections);
-      freeRangeList(&c->unmaskedKeys);
+      LogPrint(LOG_DEBUG,"Client on fd %d did not give up control of tty %#010x properly",c->fd,c->tty->number);
+      doLeaveTty(c);
     }
     return 1;
   }
@@ -602,18 +625,9 @@ static int processRequest(Connection *c)
       return 0;
     }
     case BRLPACKET_LEAVETTY: {
-      Tty *tty;
       LogPrintRequest(type, c->fd);
       CHECKEXC(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
-      tty = c->tty;
-      CHECKEXC(tty,BRLERR_ILLEGAL_INSTRUCTION);
-      LogPrint(LOG_DEBUG,"Releasing tty %#010x",tty->number);
-      c->tty = NULL;
-      removeConnection(c);
-      addConnection(c,notty.connections);
-      /* TODO: cleanup ? */
-      freeRangeList(&c->unmaskedKeys);
-      freeBrailleWindow(&c->brailleWindow);
+      CHECKEXC(c->tty,BRLERR_ILLEGAL_INSTRUCTION);
       writeAck(c->fd);
       return 0;
     }
