@@ -30,8 +30,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <sys/termios.h>
 
 #include "Programs/brl.h"
@@ -409,13 +407,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
    rawdata = prevdata = lcd_data = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-   brl_fd = open (dev, O_RDWR | O_NOCTTY);
-   if (brl_fd < 0)
-     {
-	LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
-        return 0;
-     }
-   tcgetattr (brl_fd, &oldtio);	/* save current settings */
+   if (!openSerialDevice(dev, &brl_fd, &oldtio)) return 0;
 
   /* Set 8E1, enable reading, parity generation, etc. */
    newtio.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
@@ -427,9 +419,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 
   /* set speed */
    chars_per_sec = baud2integer(BAUDRATE) / 10;
-   cfsetispeed (&newtio, BAUDRATE);
-   cfsetospeed (&newtio, BAUDRATE);
-   tcsetattr (brl_fd, TCSANOW, &newtio);	   /* activate new settings */
+   setSerialDevice(brl_fd, &newtio, BAUDRATE);
 
   /* Set model params... */
    brl->helpPage = 0;
