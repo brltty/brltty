@@ -107,6 +107,7 @@ INCLUDE_DIRECTORY = @include_directory@
 
 BRAILLE_DRIVER_CODES = @brltty_item_codes_braille@
 BRAILLE_DRIVER_OBJECTS = @braille_driver_objects@
+BRAILLE_DRIVER_LIBRARIES = @braille_driver_libraries@
 BRAILLE_HELP = @braille_help@
 BRAILLE_INTERNAL_DRIVER_CODES = @brltty_internal_codes_braille@
 BRAILLE_INTERNAL_DRIVER_NAMES = @brltty_internal_names_braille@
@@ -115,6 +116,7 @@ BRAILLE_EXTERNAL_DRIVER_NAMES = @brltty_external_names_braille@
 
 SPEECH_DRIVER_CODES = @brltty_item_codes_speech@
 SPEECH_DRIVER_OBJECTS = @speech_driver_objects@
+SPEECH_DRIVER_LIBRARIES = @speech_driver_libraries@
 SPEECH_INTERNAL_DRIVER_CODES = @brltty_internal_codes_speech@
 SPEECH_INTERNAL_DRIVER_NAMES = @brltty_internal_names_speech@
 SPEECH_DRIVERS = @speech_drivers@

@@ -24,7 +24,7 @@ include $(BLD_TOP)config.mk
 DRIVER_CODE = vv
 DRIVER_NAME = ViaVoice Text to Speech System
 SPEECH_MODELS = 
-SPK_OBJS = -L$(VIAVOICE_ROOT)/lib -libmeci50
+SPK_OBJS = @speech_libraries_vv@
 
 include $(SRC_TOP)driver.mk
 

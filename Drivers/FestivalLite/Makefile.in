@@ -21,18 +21,18 @@ include $(BLD_TOP)config.mk
 # Makefile for BRLTTY Festival Lite speech driver
 ###############################################################################
 
-FLITE_LANG = usenglish
-FLITE_LEX = cmulex
-#FLITE_VOX = cmu_us_kal
-FLITE_VOX = cmu_us_kal16
+FLITE_LANGUAGE = usenglish
+FLITE_LEXICON = cmulex
+#FLITE_VOICE = cmu_us_kal
+FLITE_VOICE = cmu_us_kal16
 
 DRIVER_CODE = fl
 DRIVER_NAME = FestivalLite
 SPEECH_MODELS = 
-SPK_OBJS = -L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOX) -lflite_$(FLITE_LEX) -lflite_$(FLITE_LANG) -lflite
+SPK_OBJS = @speech_libraries_fl@
 
 include $(SRC_TOP)driver.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOX:16=) -DUNREGISTER_VOX=unregister_$(FLITE_VOX:16=) -c $(SRC_DIR)/speech.c
+	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOICE:16=) -DUNREGISTER_VOX=unregister_$(FLITE_VOICE:16=) -c $(SRC_DIR)/speech.c
 

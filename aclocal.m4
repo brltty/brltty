@@ -59,17 +59,46 @@ define([brltty_item_list_$1], ifdef([brltty_item_list_$1], [brltty_item_list_$1]
 m4_text_wrap([$3], [      ], [- $2  ], brltty_help_width)])dnl
 brltty_item_entries_$1="${brltty_item_entries_$1} $2-$3"
 brltty_item_codes_$1="${brltty_item_codes_$1} $2"
-brltty_item_names_$1="${brltty_item_names_$1} $3"])
+brltty_item_names_$1="${brltty_item_names_$1} $3"
+$1_libraries_$2='$4'
+if test "${brltty_standalone_programs}" != "yes"
+then
+   case "${host_os}"
+   in
+      linux*)
+         brltty_ld_runpath="-rpath"
+         ;;
+      *)
+         brltty_ld_runpath=""
+         ;;
+   esac
+changequote(, )dnl
+   if test -n "${brltty_ld_runpath}"
+   then
+      if test "${GCC}" = "yes"
+      then
+         $1_libraries_$2="`echo "${$1_libraries_$2}" | sed -e 's%\(-L *\)\([^ ]*\)%-Wl,'"${brltty_ld_runpath}"',\2 \1\2%g'`"
+      else
+         $1_libraries_$2="`echo "${$1_libraries_$2}" | sed -e 's%\(-L *\)\([^ ]*\)%'"${brltty_ld_runpath}"' \2 \1\2%g'`"
+      fi
+   fi
+changequote([, ])
+fi
+AC_SUBST([$1_libraries_$2])])
 
 AC_DEFUN([BRLTTY_BRAILLE_DRIVER], [dnl
-BRLTTY_ITEM([braille], [$1], [$2])])
+BRLTTY_ITEM([braille], [$1], [$2], [$3])])
 
 AC_DEFUN([BRLTTY_SPEECH_DRIVER], [dnl
-BRLTTY_ITEM([speech], [$1], [$2])])
+BRLTTY_ITEM([speech], [$1], [$2], [$3])])
 
 AC_DEFUN([BRLTTY_ARG_ITEM], [dnl
 BRLTTY_VAR_TRIM([brltty_item_codes_$1])
+AC_SUBST([brltty_item_codes_$1])
+
 BRLTTY_VAR_TRIM([brltty_item_names_$1])
+AC_SUBST([brltty_item_names_$1])
+
 BRLTTY_ARG_WITH(
    [$1-$2], translit([$2], [a-z], [A-Z]),
    [$1 $2(s) to build in]brltty_item_list_$1,
@@ -158,13 +187,27 @@ changequote([, ])dnl
    BRLTTY_VAR_TRIM([brltty_internal_codes_$1])
    BRLTTY_VAR_TRIM([brltty_internal_names_$1])
 fi
-AC_SUBST([brltty_item_codes_$1])
-AC_SUBST([brltty_item_names_$1])
 AC_SUBST([brltty_external_codes_$1])
 AC_SUBST([brltty_external_names_$1])
 AC_SUBST([brltty_internal_codes_$1])
 AC_SUBST([brltty_internal_names_$1])
-AC_DEFINE_UNQUOTED(translit([$1_$2_codes], [a-z], [A-Z]), ["${brltty_item_codes_$1}"])])
+AC_DEFINE_UNQUOTED(translit([$1_$2_codes], [a-z], [A-Z]), ["${brltty_item_codes_$1}"])
+
+$1_driver_libraries=""
+if test -n "${brltty_internal_codes_$1}"
+then
+   for brltty_driver in ${brltty_internal_codes_$1}
+   do
+      eval 'brltty_libraries="${$1_libraries_'"${brltty_driver}"'}"'
+      if test -n "${brltty_libraries}"
+      then
+         $1_driver_libraries="${$1_driver_libraries} ${brltty_libraries}"
+      fi
+   done
+fi
+BRLTTY_VAR_TRIM([$1_driver_libraries])
+AC_SUBST([$1_driver_libraries])
+])
 
 AC_DEFUN([BRLTTY_ARG_DRIVER], [dnl
 BRLTTY_ARG_ITEM([$1], [driver])
@@ -278,7 +321,7 @@ then
 elif test "${$2_root}" = "yes"
 then
    $2_root=""
-   roots="/usr /usr/local"
+   roots="/usr /usr/local /opt/$2"
    for root in ${roots}
    do
       if test -f "${root}/$3"

@@ -24,7 +24,7 @@ include $(BLD_TOP)config.mk
 DRIVER_CODE = th
 DRIVER_NAME = Theta Text to Speech System
 SPEECH_MODELS = 
-SPK_OBJS = -L$(THETA_ROOT)/lib -ltheta
+SPK_OBJS = @speech_libraries_th@
 
 include $(SRC_TOP)driver.mk
 

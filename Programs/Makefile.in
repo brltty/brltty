@@ -124,7 +124,7 @@ rangelist.$O:
 BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_DRIVER_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
 
 main.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
@@ -164,7 +164,7 @@ spk.$O: spk.auto.h
 BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) brl.$O $(BRAILLE_DRIVER_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
 
 brltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c
@@ -174,7 +174,7 @@ brltest.$O:
 SPKTEST_OBJECTS = spktest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) spk.$O $(SPEECH_DRIVER_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
 
 spktest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/spktest.c
