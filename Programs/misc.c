@@ -489,10 +489,18 @@ timeout_yet (int milliseconds) {
 }
 
 int
+isInteger (int *integer, const char *value) {
+  if (*value) {
+    char *end;
+    *integer = strtol(value, &end, 0);
+    if (!*end) return 1;
+  }
+  return 0;
+}
+
+int
 validateInteger (int *integer, const char *description, const char *value, const int *minimum, const int *maximum) {
-   char *end;
-   *integer = strtol(value, &end, 0);
-   if (*end) {
+   if (*value && !isInteger(integer, value)) {
       LogPrint(LOG_ERR, "The %s must be an integer: %s",
                description, value);
       return 0;
@@ -615,7 +623,7 @@ static BaudEntry baudTable[] = {
 int
 validateBaud (speed_t *baud, const char *description, const char *value, const unsigned int *choices) {
    int integer;
-   if (validateInteger(&integer, description, value, NULL, NULL)) {
+   if (!*value || isInteger(&integer, value)) {
       BaudEntry *entry = baudTable;
       while (entry->integer) {
          if (integer == entry->integer) {
@@ -637,9 +645,9 @@ validateBaud (speed_t *baud, const char *description, const char *value, const u
          }
          ++entry;
       }
-      LogPrint(LOG_ERR, "Invalid %s: %d",
-               description, integer);
    }
+   LogPrint(LOG_ERR, "Invalid %s: %d",
+            description, integer);
    return 0;
 }
 

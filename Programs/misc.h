@@ -106,6 +106,7 @@ extern int resetSerialDevice (int descriptor, struct termios *attributes, speed_
 extern int awaitInput (int descriptor, int milliseconds);
 extern int readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout);
 
+extern int isInteger (int *integer, const char *value);
 extern int validateInteger (int *integer, const char *description, const char *value, const int *minimum, const int *maximum);
 extern int validateBaud (speed_t *baud, const char *description, const char *value, const unsigned int *choices);
 extern int baud2integer (speed_t baud);

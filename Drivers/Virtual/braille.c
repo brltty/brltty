@@ -29,6 +29,7 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -39,9 +40,9 @@
 #define PREFSTYLE ST_Generic
 
 typedef enum {
-  PARM_PORT
+  PARM_SOCKET
 } DriverParameter;
-#define BRLPARMS "port"
+#define BRLPARMS "socket"
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
@@ -55,6 +56,10 @@ static int fileDescriptor = -1;
 static char inputBuffer[INPUT_SIZE];
 static int inputLength;
 
+#define OUTPUT_SIZE 0X200
+static char outputBuffer[OUTPUT_SIZE];
+static int outputLength;
+
 typedef struct {
   const CommandEntry *entry;
   unsigned int maximum;
@@ -67,13 +72,129 @@ static unsigned char *prevVisualData, *prevData; /* previously sent raw data */
 static unsigned char prevStatus[StatusCellCount]; /* to hold previous status */
 static int columns, statusCells = 0;
 
+static char *
+formatSocketAddress (const struct sockaddr *address) {
+  switch (address->sa_family) {
+    case AF_UNIX: {
+      const struct sockaddr_un *sa = (const struct sockaddr_un *)address;
+      return strdupWrapper(sa->sun_path);
+    }
+
+    case AF_INET: {
+      const struct sockaddr_in *sa = (const struct sockaddr_in *)address;
+      const char *host = inet_ntoa(sa->sin_addr);
+      unsigned short port = ntohs(sa->sin_port);
+      char buffer[strlen(host) + 7];
+      snprintf(buffer, sizeof(buffer), "%s:%u", host, port);
+      return strdupWrapper(buffer);
+    }
+
+    default:
+      return strdupWrapper("");
+  }
+}
+
 static int
-acceptConnection (unsigned short port, unsigned long address) {
+acceptConnection (
+  int queueSocket,
+  const struct sockaddr *localAddress, socklen_t localSize,
+  struct sockaddr *remoteAddress, socklen_t *remoteSize
+) {
+  int serverSocket = -1;
+
+  if (listen(queueSocket, 1) != -1) {
+    int attempts = 0;
+
+    {
+      char *address = formatSocketAddress(localAddress);
+      LogPrint(LOG_NOTICE, "Listening on: %s", address);
+      free(address);
+    }
+
+    while (1) {
+      fd_set readMask;
+      struct timeval timeout;
+
+      FD_ZERO(&readMask);
+      FD_SET(queueSocket, &readMask);
+
+      memset(&timeout, 0, sizeof(timeout));
+      timeout.tv_sec = 10;
+
+      ++attempts;
+      switch (select(queueSocket+1, &readMask, NULL, NULL, &timeout)) {
+        case -1:
+          if (errno == EINTR) continue;
+          LogError("select");
+          break;
+
+        case 0:
+          LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d).", attempts);
+          continue;
+
+        default: {
+          if (!FD_ISSET(queueSocket, &readMask)) continue;
+
+          if ((serverSocket = accept(queueSocket, remoteAddress, remoteSize)) != -1) {
+            char *address = formatSocketAddress(remoteAddress);
+            LogPrint(LOG_NOTICE, "Client is: %s", address);
+            free(address);
+          } else {
+            LogError("accept");
+          }
+        }
+      }
+      break;
+    }
+  } else {
+    LogError("listen");
+  }
+
+  return serverSocket;
+}
+
+static int
+acceptUnixConnection (const char *path) {
+  int serverSocket = -1;
+  int queueSocket;
+
+  if ((queueSocket = socket(PF_UNIX, SOCK_STREAM, 0)) != -1) {
+    struct sockaddr_un localAddress;
+    struct sockaddr_un remoteAddress;
+    socklen_t remoteSize = sizeof(remoteAddress);
+
+    memset(&localAddress, 0, sizeof(localAddress));
+    localAddress.sun_family = AF_UNIX;
+    strncpy(localAddress.sun_path, path, sizeof(localAddress.sun_path)-1);
+
+    if (bind(queueSocket, (struct sockaddr *)&localAddress, sizeof(localAddress)) != -1) {
+      serverSocket = acceptConnection(queueSocket,
+                                      (struct sockaddr *)&localAddress, sizeof(localAddress),
+                                      (struct sockaddr *)&remoteAddress, &remoteSize);
+      if (unlink(localAddress.sun_path) == -1) {
+        LogError("unlink");
+      }
+    } else {
+      LogError("bind");
+    }
+
+    close(queueSocket);
+  } else {
+    LogError("socket");
+  }
+
+  return serverSocket;
+}
+
+static int
+acceptInetConnection (unsigned short port, unsigned long address) {
   int serverSocket = -1;
   int queueSocket;
 
   if ((queueSocket = socket(PF_INET, SOCK_STREAM, 0)) != -1) {
     struct sockaddr_in localAddress;
+    struct sockaddr_in remoteAddress;
+    socklen_t remoteSize = sizeof(remoteAddress);
 
     /* lose the pesky "address already in use" error message */
     {
@@ -88,56 +209,11 @@ acceptConnection (unsigned short port, unsigned long address) {
     localAddress.sin_family = AF_INET;
     localAddress.sin_addr.s_addr = address;
     localAddress.sin_port = htons(port);
+
     if (bind(queueSocket, (struct sockaddr *)&localAddress, sizeof(localAddress)) != -1) {
-      if (listen(queueSocket, 1) != -1) {
-        int attempts = 0;
-        LogPrint(LOG_NOTICE, "Listening on %s:%u.",
-                 inet_ntoa(localAddress.sin_addr),
-                 ntohs(localAddress.sin_port));
-
-        while (1) {
-          fd_set readMask;
-          struct timeval timeout;
-
-          FD_ZERO(&readMask);
-          FD_SET(queueSocket, &readMask);
-
-          memset(&timeout, 0, sizeof(timeout));
-          timeout.tv_sec = 10;
-
-          ++attempts;
-          switch (select(queueSocket+1, &readMask, NULL, NULL, &timeout)) {
-            case -1:
-              if (errno == EINTR) continue;
-              LogError("select");
-              break;
-
-            case 0:
-              LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d).", attempts);
-              continue;
-
-            default: {
-              struct sockaddr_in remoteAddress;
-              int addressLength = sizeof(remoteAddress);
-
-              if (!FD_ISSET(queueSocket, &readMask)) continue;
-
-              if ((serverSocket = accept(queueSocket,
-                                         (struct sockaddr *)&remoteAddress,
-                                         &addressLength)) != -1) {
-                LogPrint(LOG_NOTICE, "Client is %s:%u.",
-                         inet_ntoa(remoteAddress.sin_addr),
-                         ntohs(remoteAddress.sin_port));
-              } else {
-                LogError("accept");
-              }
-            }
-          }
-          break;
-        }
-      } else {
-        LogError("listen");
-      }
+      serverSocket = acceptConnection(queueSocket,
+                                      (struct sockaddr *)&localAddress, sizeof(localAddress),
+                                      (struct sockaddr *)&remoteAddress, &remoteSize);
     } else {
       LogError("bind");
     }
@@ -213,33 +289,80 @@ readString (void) {
   return NULL;
 }
 
+static int
+flushOutput (void) {
+  const char *buffer = outputBuffer;
+  size_t length = outputLength;
+
+  while (length) {
+    int written = write(fileDescriptor, buffer, length);
+
+    if (written == -1) {
+      if (errno == EINTR) continue;
+      LogError("write");
+      memmove(outputBuffer, buffer, (outputLength = length));
+      return 0;
+    }
+
+    buffer += written;
+    length -= written;
+  }
+
+  outputLength = 0;
+  return 1;
+}
+
+static int
+writeBytes (const char *bytes, size_t length) {
+  while (length) {
+    size_t count = OUTPUT_SIZE - outputLength;
+    if (length < count) count = length;
+    memcpy(&outputBuffer[outputLength], bytes, count);
+    bytes += count;
+    length -= count;
+    if ((outputLength += count) == OUTPUT_SIZE)
+      if (!flushOutput())
+        return 0;
+  }
+
+  return 1;
+}
+
+static int
+writeString (const char *string) {
+  return writeBytes(string, strlen(string));
+}
+
 /* Print the dots in buf in a humanly readable form into a string.
  * Caller is responsible for freeing string
  */
-static char *
-printDots (const unsigned char *cells, int count) {
-  char *result = mallocWrapper((count*9)+1);
-  char *p = result;
+static int
+writeDots (const unsigned char *cells, int count) {
+  const unsigned char *cell = cells;
 
-  while (count-- > 0) {
-    unsigned char cell = *cells++;
-    if (p != result) *p++ = '|';
-    if (cell == 0) {
-      *p++ = ' ';
+  while (count--) {
+    char dots[9];
+    char *d = dots;
+
+    if (cell != cells) *d++ = '|';
+    if (*cell) {
+      if (*cell & B1) *d++ = '1';
+      if (*cell & B2) *d++ = '2';
+      if (*cell & B3) *d++ = '3';
+      if (*cell & B4) *d++ = '4';
+      if (*cell & B5) *d++ = '5';
+      if (*cell & B6) *d++ = '6';
+      if (*cell & B7) *d++ = '7';
+      if (*cell & B8) *d++ = '8';
     } else {
-      if (cell & B1) *p++ = '1';
-      if (cell & B2) *p++ = '2';
-      if (cell & B3) *p++ = '3';
-      if (cell & B4) *p++ = '4';
-      if (cell & B5) *p++ = '5';
-      if (cell & B6) *p++ = '6';
-      if (cell & B7) *p++ = '7';
-      if (cell & B8) *p++ = '8';
+      *d++ = ' ';
     }
-  }
-  *p = 0;
+    ++cell;
 
-  return result;
+    if (!writeBytes(dots, d-dots)) return 0;
+  }
+
+  return 1;
 }
 
 static size_t
@@ -343,20 +466,37 @@ brl_identify (void) {
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   char *str = NULL;
-  int port = -1;
-  unsigned long addr = INADDR_ANY;
 
   allocateCommandDescriptors();
-  if (*parameters[PARM_PORT]) {
-    port = atoi(parameters[PARM_PORT]);
-  } else {
-    port = 9999;
+
+  {
+    const char *socket = parameters[PARM_SOCKET];
+    int port;
+
+    if (!socket) socket = "";
+    if (!*socket) socket = "brltty-vr.socket";
+
+    if (isInteger(&port, socket)) {
+      if ((port > 0) && (port <= 0XFFFF)) {
+        fileDescriptor = acceptInetConnection(port, INADDR_ANY);
+      } else {
+        LogPrint(LOG_WARNING, "Invalid port: %d", port);
+      }
+    } else {
+      char *path = makePath(brl->dataDirectory, socket);
+      if (path) {
+        fileDescriptor = acceptUnixConnection(path);
+        free(path);
+      }
+    }
   }
 
-  if ((fileDescriptor = acceptConnection(port, addr)) <= 0)
+  if (fileDescriptor == -1)
     goto failure;
 
   inputLength = 0;
+  outputLength = 0;
+
   while (!str || (strcmp(str, "quit") != 0)) {
     if (str)
       free(str);
@@ -446,13 +586,11 @@ static void
 brl_writeWindow (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, prevData, columns) != 0) {
     int i;
-    char *dots = printDots(brl->buffer, columns);
-    char outbuf[(columns*9)+11];
 
-    sprintf(outbuf,"Braille=\"%s\"\n", dots);
-    free(dots);
-
-    write(fileDescriptor, (void *)outbuf, strlen(outbuf));
+    writeString("Braille=\"");
+    writeDots(brl->buffer, columns);
+    writeString("\"\n");
+    flushOutput();
 
     for (i=0; i<columns; ++i)
       prevData[i] = brl->buffer[i];
@@ -488,13 +626,10 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 	       st[STAT_BRLROW], st[STAT_BRLCOL]);
       write(fileDescriptor, printbuf, strlen(printbuf));
     } else {
-      char *dots = printDots(st, statusCells);
-      char outbuf[(statusCells*9)+10];
-
-      snprintf(outbuf,sizeof(outbuf),"StCells=\"%s\"\n", dots);
-      free(dots);
-
-      write(fileDescriptor, outbuf, strlen(outbuf));
+      writeString("Status=\"");
+      writeDots(st, statusCells);
+      writeString("\"\n");
+      flushOutput();
     }
   }
 }
@@ -541,9 +676,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
             }
 
             if (needsNumber && !numberSpecified) {
-              char *end;
-              long int number = strtol(word, &end, 0);
-              if (!*end) {
+              int number;
+              if (isInteger(&number, word)) {
                 if ((number > 0) && (number <= descriptor->maximum)) {
                   numberSpecified = 1;
                   command += number;
