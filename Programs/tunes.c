@@ -472,7 +472,7 @@ playTune (TuneDefinition *tune) {
 	 if (noteGenerator->open(openErrorLevel)) {
 	    TuneElement *element = tune->elements;
 	    tunePlayed = 1;
-	    closeTimer = 2000 / refreshInterval;
+	    closeTimer = 2000 / updateInterval;
 	    while (element->duration) {
 	       if (!noteGenerator->play(element->note, element->duration)) {
 		  tunePlayed = 0;

@@ -91,8 +91,10 @@ extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */
 
-extern int refreshInterval;
+extern int updateInterval;
 extern int messageDelay;
+extern int autorepeatDelay;
+extern int autorepeatInterval;
 
 extern void startup (int argc, char *argv[]);
 extern int loadPreferences (int change);

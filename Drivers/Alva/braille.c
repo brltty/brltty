@@ -748,7 +748,7 @@ static void brl_writeWindow (BrailleDisplay *brl)
   int i, j, k;
   static int Timeout = 0;
 
-  if (ReWrite ||  ++Timeout > (REFRESH_RATE/refreshInterval))
+  if (ReWrite ||  ++Timeout > (REFRESH_RATE/updateInterval))
     {
       ReWrite = Timeout = 0;
       /* We rewrite the whole display */

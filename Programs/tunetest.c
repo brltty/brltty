@@ -35,7 +35,7 @@
 #include "message.h"
 #include "brl.h"
 
-int refreshInterval = DEFAULT_REFRESH_INTERVAL;
+int updateInterval = DEFAULT_UPDATE_INTERVAL;
 Preferences prefs;
 
 BEGIN_OPTION_TABLE

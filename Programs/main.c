@@ -46,8 +46,10 @@
 #include "brltty.h"
 #include "defaults.h"
 
-int refreshInterval = DEFAULT_REFRESH_INTERVAL;
+int updateInterval = DEFAULT_UPDATE_INTERVAL;
 int messageDelay = DEFAULT_MESSAGE_DELAY;
+int autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+int autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
 
 /*
  * Misc param variables
@@ -361,8 +363,8 @@ terminateProgram (int quickly) {
   if (!silently) {
     int awaitSilence = speech->isSpeaking();
     int i;
-    for (i=0; i<messageDelay; i+=refreshInterval) {
-      delay(refreshInterval);
+    for (i=0; i<messageDelay; i+=updateInterval) {
+      delay(updateInterval);
       if (readBrailleCommand(&brl, CMDS_MESSAGE) != EOF) break;
       if (awaitSilence) {
         speech->doTrack();
@@ -835,12 +837,12 @@ main (int argc, char *argv[]) {
                                       ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
                                       CMDS_SCREEN);
         if (next != EOF) {
-          autorepeat = (next & VAL_AUTOREPEAT)? 10: 0;
+          autorepeat = (next & VAL_AUTOREPEAT)? autorepeatDelay: 0;
           command = next & ~VAL_AUTOREPEAT;
         } else {
           if (!autorepeat) break;
-          if (--autorepeat) break;
-          autorepeat = 2;
+          if ((autorepeat -= updateInterval) > 0) break;
+          autorepeat = autorepeatInterval;
         }
       }
 
@@ -1395,7 +1397,7 @@ main (int argc, char *argv[]) {
             break;
 #ifdef ENABLE_LEARN_MODE
           case CMD_LEARN:
-            learnMode(&brl, refreshInterval, 10000);
+            learnMode(&brl, updateInterval, 10000);
             break;
 #endif /* ENABLE_LEARN_MODE */
           default: {
@@ -1867,7 +1869,7 @@ main (int argc, char *argv[]) {
       setStatusCells();
       braille->writeWindow(&brl);
     }
-    drainBrailleOutput(&brl, refreshInterval);
+    drainBrailleOutput(&brl, updateInterval);
   }
 
   terminateProgram(0);
@@ -1919,8 +1921,8 @@ message (const char *text, short flags) {
             getBrailleCommand(CMDS_MESSAGE);
          else if (length || !(flags & MSG_NODELAY)) {
             int i;
-            for (i=0; i<messageDelay; i+=refreshInterval) {
-               delay(refreshInterval);
+            for (i=0; i<messageDelay; i+=updateInterval) {
+               delay(updateInterval);
                if (readBrailleCommand(&brl, CMDS_MESSAGE) != EOF) break;
             }
          }

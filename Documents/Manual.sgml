@@ -2182,6 +2182,12 @@ The <tt/brltty/ command accepts the following options:
     This option changes the log level
     (see the <ref id="options-log-level" name="-l"> option)
     to <tt/notice/.
+  <tag><tt/-r/<em/csecs/ <tt/--autorepeat-interval=/<em/csecs/<label id="options-autorepeat-interval"></tag>
+    Specify the interval (in hundredths of a second)
+    at which, after the initial delay
+    (see the <ref id="options-autorepeat-delay" name="-R"> command line option),
+    a command is autorepeated.
+    If not specified, then <tt/10/ (100 milliseconds) is assumed.
   <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
     Specify the speech synthesizer driver.
     The two-letter <ref id="drivers" name="driver identification code">
@@ -2284,10 +2290,9 @@ The <tt/brltty/ command accepts the following options:
         (see the <ref id="options-text-table" name="-a"> command line option).
     </descrip>
   <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
-    Specify the message hold time (in hundredths of a second).
+    Specify the amount of time (in hundredths of a second)
+    that BRLTTY keeps its own internally generated messages on the braille display.
     If not specified, then <tt/400/ (4 seconds) is assumed.
-    This is the amount of time that BRLTTY keeps its own
-    internally generated messages on the braille display.
   <tag><tt/-N/ <tt/--no-speech/<label id="options-no-speech"></tag>
     Don't automatically start the speech synthesizer driver.
     This option is unfortunately necessary on some systems when BRLTTY is
@@ -2295,9 +2300,11 @@ The <tt/brltty/ command accepts the following options:
   <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
     Specify the file wherein BRLTTY is to write its process identifier (pid).
     If not specified, BRLTTY doesn't write its process identifier anywhere.
-  <tag><tt/-R/<em/csecs/ <tt/--refresh-interval=/<em/csecs/<label id="options-refresh-interval"></tag>
-    Specify the braille window refresh internal (in hundredths of a second).
-    If not specified, then <tt/4/ (40 milliseconds) is assumed.
+  <tag><tt/-R/<em/csecs/ <tt/--autorepeat-delay=/<em/csecs/<label id="options-autorepeat-delay"></tag>
+    Specify the amount of time (in hundredths of a second)
+    which must pass before a command begins to autorepeat
+    (see the <ref id="options-autorepeat-interval" name="-r"> command line option).
+.   If not specified, then <tt/50/ (500 milliseconds) is assumed.
   <tag><tt/-S/<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
     Specify parameters for the speech synthesizer driver.
     If the same parameter is specified more than once,
@@ -2306,6 +2313,10 @@ The <tt/brltty/ command accepts the following options:
     please see the documentation for that driver.
     See the <ref id="configure-speech-parameters" name="speech-parameters">
     configuration file directive for the default run-time setting.
+  <tag><tt/-U/<em/csecs/ <tt/--update-interval=/<em/csecs/<label id="options-update-interval"></tag>
+    Specify the interval (in hundredths of a second)
+    at which the braille window is updated with new screen content.
+    If not specified, then <tt/4/ (40 milliseconds) is assumed.
   <tag><tt/-X/<em/name/<tt/=/<em/value/<tt/,/... <tt/--screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-screen-parameters"></tag>
     Specify parameters for the screen driver.
     If the same parameter is specified more than once,
@@ -3144,8 +3155,8 @@ Notes:
 Notes:
 <itemize>
   <item><label id="time-settings">
-    All time settings are in braille window refresh intervals
-    (see the <ref id="options-refresh-interval" name="-M"> command line option).
+    All time settings are in braille window update intervals
+    (see the <ref id="options-update-interval" name="-U"> command line option).
     They are integers within the range 1 through 16.
 </itemize>
 

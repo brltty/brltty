@@ -27,15 +27,17 @@ extern "C" {
  * Edit as necessary for your system.
  */
 
-/* Delay times, measured in milliseconds.
- * Note that I found a large error in timing - 40 is nearer 50 ms.
- */
-#define DEFAULT_REFRESH_INTERVAL 40	/* default sleep time per cycle - overall speed */
+/* Delay times, measured in milliseconds. */
+#define DEFAULT_UPDATE_INTERVAL 40	/* default sleep time per cycle - overall speed */
+
 #define DEFAULT_MESSAGE_DELAY 4000 /* Default time duration to display messages.
                             * Under 5 seconds (init's SIGTERM-SIGKILL delay
                             * during shutdown) is good as that allows "exiting" 
                             * to be replaced by "terminated" on the display.
                             */
+
+#define DEFAULT_AUTOREPEAT_DELAY 500
+#define DEFAULT_AUTOREPEAT_INTERVAL 100
 
 /* Initialisation of BRLTTY environment settings: */
 

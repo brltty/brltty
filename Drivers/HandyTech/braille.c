@@ -1160,7 +1160,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
   int timeout = 1;
   unsigned char byte;
 
-  stateTimer += refreshInterval;
+  stateTimer += updateInterval;
 
   while (readByte(brl, &byte)) {
     /* LogPrint(LOG_DEBUG, "Read: %02X", byte); */

@@ -36,7 +36,7 @@
 #include "scr.h"
 #include "defaults.h"
 
-int refreshInterval = DEFAULT_REFRESH_INTERVAL;
+int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static BrailleDisplay brl;
 static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
 
@@ -94,8 +94,8 @@ message (const char *string, short flags) {
       int timer = 0;
       while (braille->readCommand(&brl, CMDS_MESSAGE) == EOF) {
         if (timer > 4000) break;
-        delay(refreshInterval);
-        timer += refreshInterval;
+        delay(updateInterval);
+        timer += updateInterval;
       }
     }
   }
@@ -171,7 +171,7 @@ main (int argc, char *argv[]) {
       if (braille->open(&brl, parameterSettings, opt_brailleDevice)) {
         if (allocateBrailleBuffer(&brl)) {
 #ifdef ENABLE_LEARN_MODE
-          learnMode(&brl, refreshInterval, 10000);
+          learnMode(&brl, updateInterval, 10000);
 #else /* ENABLE_LEARN_MODE */
           message("braille test", 0);
 #endif /* ENABLE_LEARN_MODE */

@@ -259,6 +259,8 @@ BEGIN_OPTION_TABLE
    "Path to preferences file."},
   {'q', "quiet", NULL, NULL, 0,
    "Suppress start-up messages."},
+  {'r', "autorepeat-interval", "csecs", NULL, 0,
+   "Command autorepeat interval [10]."},
 #ifdef ENABLE_SPEECH_SUPPORT
   {'s', "speech-driver", "driver", configureSpeechDriver, 0,
    "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
@@ -291,14 +293,16 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_SPEECH_SUPPORT */
   {'P', "pid-file", "file", NULL, 0,
    "Path to process identifier file."},
-  {'R', "refresh-interval", "csecs", NULL, 0,
-   "Braille window refresh interval [4]."},
+  {'R', "autorepeat-delay", "csecs", NULL, 0,
+   "Command autorepeat delay [50]."},
 #ifdef ENABLE_SPEECH_SUPPORT
   {'S', "speech-parameters", "arg,...", configureSpeechParameters, 0,
    "Parameters for the speech driver."},
 #endif /* ENABLE_SPEECH_SUPPORT */
   {'T', "tables-directory", "directory", configureTablesDirectory, OPT_Hidden,
    "Path to directory for text and attributes tables."},
+  {'U', "update-interval", "csecs", NULL, 0,
+   "Braille window update interval [4]."},
   {'X', "screen-parameters", "arg,...", configureScreenParameters, 0,
    "Parameters for the screen driver."},
 END_OPTION_TABLE
@@ -591,7 +595,7 @@ getBrailleCommand (DriverCommandContext cmds) {
          if (key == CMD_NOOP) continue;
          return key;
       }
-      delay(refreshInterval);
+      delay(updateInterval);
       closeTuneDevice(0);
    }
 }
@@ -1210,7 +1214,7 @@ updatePreferences (void) {
 
       /* Then draw the braille window */
       writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent));
-      drainBrailleOutput(&brl, refreshInterval);
+      drainBrailleOutput(&brl, updateInterval);
 
       /* Now process any user interaction */
       switch (key = getBrailleCommand(CMDS_PREFS)) {
@@ -1417,6 +1421,14 @@ background (void) {
 }
 
 static int
+validateInterval (int *value, const char *description, const char *word) {
+  static const int minimum = 1;
+  int ok = validateInteger(value, description, word, &minimum, NULL);
+  if (ok) *value *= 10;
+  return ok;
+}
+
+static int
 handleOption (const int option) {
   switch (option) {
     default:
@@ -1484,6 +1496,9 @@ handleOption (const int option) {
     case 'q':                /* quiet */
       opt_quiet = 1;
       break;
+    case 'r':          /* autorepeat interval */
+      validateInterval(&autorepeatInterval, "autorepeat interval", optarg);
+      break;
 #ifdef ENABLE_SPEECH_SUPPORT
     case 's':                        /* name of speech driver */
       opt_speechDriver = optarg;
@@ -1517,13 +1532,9 @@ handleOption (const int option) {
     case 'L':                        /* path to drivers directory */
       opt_libraryDirectory = optarg;
       break;
-    case 'M': {        /* message delay */
-      int value;
-      int minimum = 1;
-      if (validateInteger(&value, "message delay", optarg, &minimum, NULL))
-        messageDelay = value * 10;
+    case 'M':                        /* message delay */
+      validateInterval(&messageDelay, "message delay", optarg);
       break;
-    }
 #ifdef ENABLE_SPEECH_SUPPORT
     case 'N':                /* defer speech until restarted by command */
       opt_noSpeech = 1;
@@ -1532,13 +1543,9 @@ handleOption (const int option) {
     case 'P':                /* process identifier file */
       opt_pidFile = optarg;
       break;
-    case 'R': {        /* read delay */
-      int value;
-      int minimum = 1;
-      if (validateInteger(&value, "read delay", optarg, &minimum, NULL))
-        refreshInterval = value * 10;
+    case 'R':          /* autorepeat delay */
+      validateInterval(&autorepeatDelay, "autorepeat delay", optarg);
       break;
-    }
 #ifdef ENABLE_SPEECH_SUPPORT
     case 'S':                        /* parameters for speech driver */
       extendParameters(&opt_speechParameters, optarg);
@@ -1546,6 +1553,9 @@ handleOption (const int option) {
 #endif /* ENABLE_SPEECH_SUPPORT */
     case 'T':                        /* path to text/attributes tables directory */
       opt_tablesDirectory = optarg;
+      break;
+    case 'U':          /* update interval */
+      validateInterval(&updateInterval, "update interval", optarg);
       break;
     case 'X':                        /* parameters for screen driver */
       extendParameters(&opt_screenParameters, optarg);
