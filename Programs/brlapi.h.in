@@ -395,6 +395,10 @@ typedef uint32_t brl_keycode_t;
  *
  * It can be called only if BRLKEYCODES was given to brlapi_getTty()
  *
+ * By default, all the keypresses will be passed to the client, none will go
+ * through brltty, so the application will have to handle console switching
+ * itself.
+ *
  * \param block tells whether the call should block until a key is pressed (1)
  *  or should only probe key presses (0),
  * \param code holds the key code if a key press is indeed read.
@@ -413,6 +417,11 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  * when no other option is possible.
  *
  * It can be called only if BRLCOMMANDS was given to brlapi_getTty()
+ *
+ * By default, only commands between CMD_LNUP and CMD_BACK, between CMD_HELP
+ * and CMD_MENU_NEXT_SETTING, and CR_ROUTE* are returned to the application
+ * and not to brltty. If the application needs other commands events, it
+ * should call brlapi_unignoreKeys()
  *
  * \param block tells whether the call should block until a key is pressed (1)
  *  or should only probe key presses (0).
