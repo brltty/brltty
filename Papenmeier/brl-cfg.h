@@ -215,26 +215,59 @@ typedef struct {
 	
 
 /* modifiers for switches */
-#define MOD_SWITCH \
-     OFFS_SWITCH + 1, \
-     OFFS_SWITCH + 2, \
-     OFFS_SWITCH + 7, \
+#define MOD_EASY \
+     OFFS_EASY   + EASY_UP, \
+     OFFS_EASY   + EASY_DO, \
+     OFFS_EASY   + EASY_LE, \
+     OFFS_EASY   + EASY_RI, \
+     OFFS_SWITCH + 1      , \
+     OFFS_SWITCH + 2      , \
+     OFFS_SWITCH + 7      , \
      OFFS_SWITCH + 8
 
 /* commands for easy bar + switches */
 #define CMD_EASY \
-     { CMD_LNUP,    OFFS_EASY + EASY_UP, 0 },  \
-     { CMD_TOP,     OFFS_EASY + EASY_UP2, 0 }, \
-     { CMD_LNDN,    OFFS_EASY + EASY_DO, 0 },  \
-     { CMD_BOT,     OFFS_EASY + EASY_DO2, 0 }, \
-     { CMD_PRDIFLN, OFFS_EASY + EASY_LE, 0 },  \
-     { CMD_NXDIFLN, OFFS_EASY + EASY_RI, 0 },  \
-     { CMD_BACK,    OFFS_EASY + EASY_LE2, 0 }, \
-     { CMD_HOME,    OFFS_EASY + EASY_RI2, 0 }, \
-     { CMD_PASTE,   OFFS_SWITCH + 6, 0 }, \
-     { CR_BEGBLKOFFSET, ROUTINGKEY, 4 },  \
-     { CR_ENDBLKOFFSET, ROUTINGKEY, 8 },  \
-     { CR_ROUTEOFFSET,  ROUTINGKEY, 0 }
+     { CMD_LNUP                    , NOKEY               , 0X01 }, \
+     { CMD_TOP                     , OFFS_EASY + EASY_UP2, 0X01 }, \
+     { CMD_LNDN                    , NOKEY               , 0X02 }, \
+     { CMD_BOT                     , OFFS_EASY + EASY_DO2, 0X02 }, \
+     { CMD_FWINLT                  , NOKEY               , 0X04 }, \
+     { CMD_LNBEG                   , OFFS_EASY + EASY_LE2, 0X04 }, \
+     { CMD_FWINRT                  , NOKEY               , 0X08 }, \
+     { CMD_LNEND                   , OFFS_EASY + EASY_RI2, 0X08 }, \
+     { CMD_BACK                    , OFFS_SWITCH + 3     , 0X00 }, \
+     { CMD_HOME                    , OFFS_SWITCH + 4     , 0X00 }, \
+     { CMD_CSRJMP_VERT             , OFFS_SWITCH + 5     , 0X00 }, \
+     { CMD_PASTE                   , OFFS_SWITCH + 6     , 0X00 }, \
+                                                                   \
+     { VAL_PASSKEY+VPK_CURSOR_UP   , NOKEY               , 0X11 }, \
+     { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_EASY + EASY_UP2, 0X11 }, \
+     { VAL_PASSKEY+VPK_CURSOR_DOWN , NOKEY               , 0X12 }, \
+     { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_EASY + EASY_DO2, 0X12 }, \
+                                                                   \
+     { VAL_PASSKEY+VPK_CURSOR_UP   , NOKEY               , 0X11 }, \
+     { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_EASY + EASY_UP2, 0X11 }, \
+     { VAL_PASSKEY+VPK_CURSOR_DOWN , NOKEY               , 0X12 }, \
+     { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_EASY + EASY_DO2, 0X12 }, \
+     { VAL_PASSKEY+VPK_CURSOR_LEFT , NOKEY               , 0X14 }, \
+     { VAL_PASSKEY+VPK_HOME        , OFFS_EASY + EASY_LE2, 0X14 }, \
+     { VAL_PASSKEY+VPK_CURSOR_RIGHT, NOKEY               , 0X18 }, \
+     { VAL_PASSKEY+VPK_END         , OFFS_EASY + EASY_RI2, 0X18 }, \
+                                                                   \
+     { CMD_PRDIFLN                 , NOKEY               , 0X21 }, \
+     { CMD_ATTRUP                  , OFFS_EASY + EASY_UP2, 0X21 }, \
+     { CMD_NXDIFLN                 , NOKEY               , 0X22 }, \
+     { CMD_ATTRDN                  , OFFS_EASY + EASY_DO2, 0X22 }, \
+     { CMD_CHRLT                   , NOKEY               , 0X24 }, \
+     { CMD_HWINLT                  , OFFS_EASY + EASY_LE2, 0X24 }, \
+     { CMD_CHRRT                   , NOKEY               , 0X28 }, \
+     { CMD_HWINRT                  , OFFS_EASY + EASY_RI2, 0X28 }, \
+                                                                   \
+     { CR_ROUTEOFFSET              , ROUTINGKEY          , 0X00 }, \
+     { CR_PRINDENT                 , ROUTINGKEY          , 0X01 }, \
+     { CR_NXINDENT                 , ROUTINGKEY          , 0X02 }, \
+     { CR_BEGBLKOFFSET             , ROUTINGKEY          , 0X04 }, \
+     { CR_ENDBLKOFFSET             , ROUTINGKEY          , 0X08 }
 
 
 /* what to show for 2 status cells */
@@ -250,10 +283,10 @@ typedef struct {
 
 /* what to show for 4 status cells */
 #define SHOW_STAT_4 \
-      OFFS_HORIZ + STAT_brlrow, \
-      OFFS_HORIZ + STAT_csrrow, \
-      OFFS_HORIZ + STAT_csrcol, \
-      OFFS_FLAG  + STAT_dispmode
+      OFFS_NUMBER + STAT_brlrow, \
+      OFFS_NUMBER + STAT_csrrow, \
+      OFFS_NUMBER + STAT_csrcol, \
+      OFFS_FLAG   + STAT_dispmode
 
 /* commands for 4 status keys */
 #define CMD_STAT_4 \
@@ -456,7 +489,7 @@ static one_terminal pm_terminals[] =
       SHOW_STAT_13
     },
     {				/* modifiers */
-      MOD_SWITCH
+      MOD_EASY
     },
     {				/* commands + keys */
       CMD_STAT_13,
@@ -476,7 +509,7 @@ static one_terminal pm_terminals[] =
       SHOW_STAT_13
     },
     {				/* modifiers */
-      MOD_SWITCH
+      MOD_EASY
     },
     {				/* commands + keys */
       CMD_STAT_13,
@@ -496,7 +529,7 @@ static one_terminal pm_terminals[] =
       SHOW_STAT_2
     },
     {				/* modifiers */
-      MOD_SWITCH
+      MOD_EASY
     },
     {				/* commands + keys */
       CMD_EASY,

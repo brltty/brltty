@@ -27,9 +27,12 @@
 /* Delay times, measured in milliseconds.
  * Note that I found a large error in timing - 40 is nearer 50 ms.
  */
-#define CYCLE_DELAY 40		/* default sleep time per cycle - overall speed */
-#define READ_DELAY 40		/* default sleep time when awaiting a keypress */
-#define MESSAGE_DELAY 5000	/* default time duration to display messages */
+#define REFRESH_INTERVAL 40	/* default sleep time per cycle - overall speed */
+#define MESSAGE_DELAY 4000	/* Default time duration to display messages.
+                            * Under 5 seconds (init's SIGTERM-SIGKILL delay
+                            * during shutdown) is good as that allows "exiting" 
+                            * to be replaced by "terminated" on the display.
+                            */
 
 
 /* Character cursor initialisation: */

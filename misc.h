@@ -83,6 +83,11 @@ extern void SetStderrLevel(int level);
 extern void SetStderrOff(void);
 extern int ProblemCount;
 
+extern int getConsole (void);
+extern int writeConsole (const unsigned char *address, size_t count);
+extern int ringBell (void);
+extern int timedBeep (unsigned short frequency, unsigned short milliseconds);
+
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);

@@ -21,7 +21,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "scr.h"
-#include "inskey.h"
 #include "tunes.h"
 
 
@@ -57,7 +56,7 @@ void cut_end (int x, int y)
 void cut_paste ()
 {
   if (cut_buffer)
-    inskey (cut_buffer);
+    insertString(cut_buffer);
 }
 
 static void cut (void)

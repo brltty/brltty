@@ -110,7 +110,7 @@ message (char *s)
       braille->write(&brl);
       if (l)
 	while (braille->read(CMDS_MESSAGE) == EOF)
-	  delay (READ_DELAY);
+	  delay (REFRESH_INTERVAL);
     }
 }
 
@@ -120,8 +120,3 @@ message (char *s)
 void sethlpscr (short x)
 {
 }
-
-void inskey( unsigned char *s, short f )
-{
-}
-

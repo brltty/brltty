@@ -28,13 +28,13 @@
 #include "config.h"
 
 
-/* The Live Screen type is instanciated elsewhere and choosen at link time
+/* The Live Screen type is instanciated elsewhere and chosen at link time
  * from all available screen source drivers.
  * It is defined as extern RealScreen *live;
  */
 
 // a frozen screen image
-FrozenScreen frozen;		
+FrozenScreen frozen;                
 
 // the (possibly multi-page) online help
 HelpScreen help;
@@ -43,12 +43,25 @@ HelpScreen help;
 Screen *current;
 
 
-int
-initscr (void)
+char **
+getScreenParameters (void)
 {
-  if (live->open (0))
-    return 1;
-  current = live;
+  return live->parameters();
+}
+
+
+int
+initializeScreen (char **parameters)
+{
+  if (live->prepare(parameters)) {
+    if (live->open()) {
+      if (live->setup()) {
+        current = live;
+        return 1;
+      }
+      live->close();
+    }
+  }
   return 0;
 }
 
@@ -61,104 +74,125 @@ initscr_phys (void)
    * in the main thread.  So we close and reopen the device.
    */
   live->close();
-  if (live->open (1))
-    return 1;
-  return 0;
+  return live->open();
 }
 
 
 void
-getstat (scrstat *stat)
+getScreenStatus (ScreenStatus *stat)
 {
-  current->getstat (*stat);
+  current->getstat(*stat);
 }
 
 
 void
-getstat_phys (scrstat *stat)
+getstat_phys (ScreenStatus *stat)
 {
-  live->getstat (*stat);
+  live->getstat(*stat);
 }
 
 
 unsigned char *
 getscr (winpos pos, unsigned char *buffer, short mode)
 {
-  return current->getscr (pos, buffer, mode);
+  return current->getscr(pos, buffer, mode);
+}
+
+
+int
+insertKey (unsigned short key)
+{
+  return live->insert(key);
+}
+
+int
+insertString (const unsigned char *string)
+{
+  while (*string)
+    if (!insertKey(*string++))
+      return 0;
+  return 1;
+}
+
+
+int
+switchVirtualTerminal (int vt)
+{
+  return live->switchvt(vt);
 }
 
 
 void
-closescr (void)
+closeScreen (void)
 {
-  live->close ();
-  frozen.close ();
-  help.close ();
+  live->close();
+  frozen.close();
+  help.close();
 }
 
 
 void
 closescr_phys (void)
 {
-  live->close ();
+  live->close();
 }
 
 
 int
 selectdisp (int disp)
 {
-  static int dismd = LIVE_SCRN;	/* current mode */
-  static int curscrn = LIVE_SCRN;	/* current display screen */
+  static int dismd = LIVE_SCRN;        /* current mode */
+  static int curscrn = LIVE_SCRN;        /* current display screen */
 
   if ((disp & HELP_SCRN) ^ (dismd & HELP_SCRN))
     {
       if (disp & HELP_SCRN)
-	/* set help mode: */
-	{
-	  if (!help.open ("??????"))
-	    {
-	      current = &help;
-	      curscrn = HELP_SCRN;
-	      return (dismd |= HELP_SCRN);
-	    }
-	  else
-	    return dismd;
-	}
+        /* set help mode: */
+        {
+          if (!help.open("??????"))
+            {
+              current = &help;
+              curscrn = HELP_SCRN;
+              return (dismd |= HELP_SCRN);
+            }
+          else
+            return dismd;
+        }
       else
-	/* clear help mode: */
-	{
-	  if (curscrn == HELP_SCRN)
-	    dismd & FROZ_SCRN ? (current = &frozen, curscrn = FROZ_SCRN) : \
-	      (current = live, curscrn = LIVE_SCRN);
-	  return (dismd &= ~HELP_SCRN);
-	}
+        /* clear help mode: */
+        {
+          if (curscrn == HELP_SCRN)
+            dismd & FROZ_SCRN ? (current = &frozen, curscrn = FROZ_SCRN) : \
+              (current = live, curscrn = LIVE_SCRN);
+          return (dismd &= ~HELP_SCRN);
+        }
     }
   if ((disp & FROZ_SCRN) ^ (dismd & FROZ_SCRN))
     {
       if (disp & FROZ_SCRN)
-	{
-	  if (!frozen.open (live))
-	    {
-	      if (curscrn == LIVE_SCRN)
-		{
-		  current = &frozen;
-		  curscrn = FROZ_SCRN;
-		}
-	      return (dismd |= FROZ_SCRN);
-	    }
-	  else
-	    return dismd;
-	}
+        {
+          if (!frozen.open(live))
+            {
+              if (curscrn == LIVE_SCRN)
+                {
+                  current = &frozen;
+                  curscrn = FROZ_SCRN;
+                }
+              return (dismd |= FROZ_SCRN);
+            }
+          else
+            return dismd;
+        }
       else
-	{
-	  if (curscrn == FROZ_SCRN)
-	    {
-	      frozen.close ();
-	      current = live;
-	      curscrn = LIVE_SCRN;
-	    }
-	  return (dismd &= ~FROZ_SCRN);
-	}
+        {
+          if (curscrn == FROZ_SCRN)
+            {
+              frozen.close();
+              current = live;
+              curscrn = LIVE_SCRN;
+            }
+          return (dismd &= ~FROZ_SCRN);
+        }
     }
   return dismd;
 }
@@ -167,19 +201,19 @@ selectdisp (int disp)
 int
 inithlpscr (char *helpfile)
 {
-  return help.open (helpfile);
+  return help.open(helpfile);
 }
 
 
 void
 sethlpscr (short x)
 {
-  help.setscrno (x);
+  help.setscrno(x);
 }
 
 
 short
 numhlpscr (void)
 {
-  return help.numscreens ();
+  return help.numscreens();
 }

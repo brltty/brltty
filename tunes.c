@@ -289,7 +289,7 @@ void playTune (TuneDefinition *tune) {
 	 if (toneGenerator->open()) {
 	    ToneDefinition *tone = tune->tones;
 	    tunePlayed = 1;
-	    closeTimer = 2000 / cycleDelay;
+	    closeTimer = 2000 / refreshInterval;
 	    while (tone->duration) {
 	       if (!toneGenerator->generate(tone->frequency, tone->duration)) {
 		  tunePlayed = 0;

@@ -28,7 +28,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/termios.h>
 
@@ -63,13 +65,14 @@ static DriverCommandContext currentContext;
 static unsigned char currentLine;
 static unsigned char cursorRow;
 static unsigned char cursorColumn;
+static unsigned char *selectedLine;
 
 static unsigned char inputTable[0X100] = {
    #include "input.h"
 };
 
 static unsigned char outputTable[0X100] = {
-   #include "output.oslash.h"
+   #include "output.h"
 };
 
 static void
@@ -129,12 +132,14 @@ closebrl (brldim *brl) {
 }
 
 static void
-logData (const unsigned char *data, unsigned int length) {
-   unsigned char buffer[(length * 3) + 1];
-   unsigned char *out = buffer;
-   const unsigned char *in = data;
-   while (length--) out += sprintf(out, " %2.2X", *in++);
-   LogPrint(LOG_DEBUG, "LogText write:%s", buffer);
+logData (const char *description, const unsigned char *data, unsigned int length) {
+   if (length) {
+      unsigned char buffer[(length * 3) + 1];
+      unsigned char *out = buffer;
+      const unsigned char *in = data;
+      while (length--) out += sprintf(out, " %2.2X", *in++);
+      LogPrint(LOG_DEBUG, "%s:%s", description, buffer);
+   }
 }
 
 static int
@@ -157,7 +162,16 @@ checkData (const unsigned char *data, unsigned int length) {
    return 0;
 }
 
-static void
+static int
+sendBytes (const unsigned char *bytes, size_t count) {
+   if (write(fileDescriptor, bytes, count) == -1) {
+      LogError("LogText write");
+      return 0;
+   }
+   return 1;
+}
+
+static int
 sendData (unsigned char line, unsigned char column, unsigned char count) {
    unsigned char data[5 + count];
    unsigned char *target = data;
@@ -167,17 +181,19 @@ sendData (unsigned char line, unsigned char column, unsigned char count) {
    *target++ = (line == cursorRow)? cursorColumn+1: 0;
    *target++ = column + 1;
    *target++ = count;
+   logData("Output dots", source, count);
    while (count--) *target++ = outputTable[*source++];
    count = target - data;
-   logData(data, count);
+   logData("LogText write", data, count);
    if (checkData(data, count)) {
-      if (write(fileDescriptor, data, count) == -1) {
-         LogError("LogText write");
+      if (sendBytes(data, count)) {
+         return 1;
       }
    }
+   return 0;
 }
 
-static void
+static int
 sendLine (unsigned char line, int force) {
    unsigned char *source = &sourceImage[line][0];
    unsigned char *target = &targetImage[line][0];
@@ -194,18 +210,33 @@ sendLine (unsigned char line, int force) {
    if ((count -= start) || force) {
       LogPrint(LOG_DEBUG, "LogText line: line=%d, column=%d, count=%d", line, start, count);
       memcpy(&target[start], &source[start], count);
-      sendData(line, start, count);
+      if (!sendData(line, start, count)) {
+         return 0;
+      }
    }
+   return 1;
 }
 
-static void
+static int
 sendCurrentLine (void) {
-   sendLine(currentLine, 0);
+   return sendLine(currentLine, 0);
 }
 
-static void
+static int
 sendCursorRow (void) {
-   sendLine(cursorRow, 1);
+   return sendLine(cursorRow, 1);
+}
+
+static int
+handleUpdate (unsigned char line) {
+   LogPrint(LOG_DEBUG, "Request line: (0X%2.2X) 0X%2.2X dec=%d", KEY_UPDATE, line, line);
+   if (!line) return sendCursorRow();
+   if (line <= screenHeight) {
+      currentLine = line - 1;
+      return sendCurrentLine();
+   }
+   LogPrint(LOG_WARNING, "Invalid line request: %d", line);
+   return 1;
 }
 
 static void
@@ -261,16 +292,219 @@ setbrlstat (const unsigned char *status) {
    }
 }
 
-static unsigned char
-readByte (void) {
-   unsigned char byte;
-   while (read(fileDescriptor, &byte, 1) != 1) delay(1);
-   return byte;
+static void
+replaceCharacters (const unsigned char *address, size_t count) {
+   while (*address) selectedLine[cursorColumn++] = inputTable[*address++];
+}
+
+static void
+insertCharacters (const unsigned char *address, size_t count) {
+   memmove(&selectedLine[cursorColumn+count], &selectedLine[cursorColumn], screenWidth-cursorColumn-count);
+   replaceCharacters(address, count);
+}
+
+static void
+deleteCharacters (size_t count) {
+   memmove(&selectedLine[cursorColumn], &selectedLine[cursorColumn+count], screenWidth-cursorColumn-count);
+   memset(&selectedLine[screenWidth-count], inputTable[' '], count);
+}
+
+static void
+clearCharacters (void) {
+   cursorColumn = 0;
+   deleteCharacters(screenWidth);
+}
+
+static void
+selectLine (unsigned char line) {
+   selectedLine = &sourceImage[cursorRow = line][0];
+   clearCharacters();
+   deviceStatus = DEV_ONLINE;
+}
+
+static int
+readKey (void) {
+   unsigned char key;
+   unsigned char arg;
+   if (read(fileDescriptor, &key, 1) != 1) return EOF;
+   switch (key) {
+      default:
+         arg = 0;
+         break;
+      case KEY_FUNCTION:
+      case KEY_FUNCTION2:
+      case KEY_UPDATE:
+         while (read(fileDescriptor, &arg, 1) != 1) delay(1);
+         break;
+   }
+   {
+      int result = COMPOUND_KEY(key, arg);
+      LogPrint(LOG_DEBUG, "Key read: %4.4X", result);
+      return result;
+   }
+}
+
+static unsigned char *
+askUser (const unsigned char *prompt) {
+   unsigned char from;
+   unsigned char to;
+   selectLine(screenHeight-1);
+   LogPrint(LOG_DEBUG, "Prompt: %s", prompt);
+   replaceCharacters(prompt, strlen(prompt));
+   from = to = ++cursorColumn;
+   sendCursorRow();
+   while (1) {
+      int key = readKey();
+      if (key == EOF) {
+         delay(1);
+         continue;
+      }
+      if ((key & KEY_MASK) == KEY_UPDATE) {
+         handleUpdate(key >> KEY_SHIFT);
+         continue;
+      }
+      if (isgraph(key)) {
+         if (to < screenWidth) {
+            unsigned char character = key & KEY_MASK;
+            insertCharacters(&character, 1);
+            ++to;
+         } else {
+            ringBell();
+         }
+      } else {
+         switch (key) {
+            case 0X0D:
+               if (to > from) {
+                  size_t length = to - from;
+                  unsigned char *response = malloc(length+1);
+                  if (response) {
+                     response[length] = 0;
+                     do {
+                        response[--length] = outputTable[selectedLine[--to]];
+                     } while (to > from);
+                     LogPrint(LOG_DEBUG, "Response: %s", response);
+                     return response;
+                  } else {
+                     LogError("Download file path allocation");
+                  }
+               }
+               return NULL;
+            case 0X08:
+               if (cursorColumn > from) {
+                  --cursorColumn;
+                  deleteCharacters(1);
+                  --to;
+               } else {
+                  ringBell();
+               }
+               break;
+            case 0X7F:
+               if (cursorColumn < to) {
+                  deleteCharacters(1);
+                  --to;
+               } else {
+                  ringBell();
+               }
+               break;
+            case KEY_FUNCTION_CURSOR_LEFT:
+               if (cursorColumn > from) {
+                  --cursorColumn;
+               } else {
+                  ringBell();
+               }
+               break;
+            case KEY_FUNCTION_CURSOR_LEFT_JUMP:
+               if (cursorColumn > from) {
+                  cursorColumn = from;
+               } else {
+                  ringBell();
+               }
+               break;
+            case KEY_FUNCTION_CURSOR_RIGHT:
+               if (cursorColumn < to) {
+                  ++cursorColumn;
+               } else {
+                  ringBell();
+               }
+               break;
+            case KEY_FUNCTION_CURSOR_RIGHT_JUMP:
+               if (cursorColumn < to) {
+                  cursorColumn = to;
+               } else {
+                  ringBell();
+               }
+               break;
+            default:
+               ringBell();
+               break;
+         }
+      }
+      sendCursorRow();
+   }
+}
+
+static void
+downloadFile (void) {
+   char *path = askUser("File to download?");
+   if (path) {
+      int file = open(path, O_RDONLY);
+      if (file != -1) {
+         struct stat status;
+         if (fstat(file, &status) != -1) {
+            const size_t size = status.st_size;
+            size_t sent = 0;
+            const unsigned short low = 400;
+            const unsigned short high = 1000;
+            unsigned char buffer[0X400];
+            const unsigned char *address = buffer;
+            int count = 0;
+            while (1) {
+               const unsigned char *newline;
+               if (!count) {
+                  count = read(file, buffer, sizeof(buffer));
+                  if (!count) {
+                     static const char fileTrailer[] = {0X1A};
+                     sendBytes(fileTrailer, sizeof(fileTrailer));
+                     break;
+                  }
+                  if (count == -1) {
+                     LogError("Download file read");
+                     break;
+                  }
+                  address = buffer;
+               }
+               timedBeep((low + (sent * (high - low) / size)), 125);
+               if ((newline = memchr(address, '\n', count))) {
+                  static const char lineTrailer[] = {0X0D, 0X0A};
+                  size_t length = newline - address;
+                  if (!sendBytes(address, length)) break;
+                  if (!sendBytes(lineTrailer, sizeof(lineTrailer))) break;
+                  sent += ++length;
+                  address += length;
+                  count -= length;
+               } else {
+                  if (!sendBytes(address, count)) break;
+                  sent += count;
+                  count = 0;
+               }
+            }
+            timedBeep(high, 1000);
+         } else {
+            LogError("Download file status");
+         }
+         if (close(file) == -1) {
+            LogError("Download file close");
+         }
+      } else {
+         LogError("Download file open");
+      }
+      free(path);
+   }
 }
 
 static int
 readbrl (DriverCommandContext cmds) {
-   unsigned char byte;
+   int key = readKey();
    if (cmds != currentContext) {
       LogPrint(LOG_DEBUG, "Context switch: %d -> %d", currentContext, cmds);
       switch (currentContext = cmds) {
@@ -281,12 +515,51 @@ readbrl (DriverCommandContext cmds) {
             break;
       }
    }
-   if (read(fileDescriptor, &byte, 1) == 1) {
-      switch (byte) {
-         case KEY_COMMAND:
-            byte = readByte();
-            LogPrint(LOG_DEBUG, "Received character: (0x%2.2X) 0x%2.2X dec=%d", KEY_COMMAND, byte, byte);
-            switch (byte) {
+   if (key != EOF) {
+      switch (key) {
+         case KEY_FUNCTION_ENTER:
+            return VAL_PASSKEY + VPK_RETURN;
+         case KEY_FUNCTION_TAB:
+            return VAL_PASSKEY + VPK_TAB;
+         case KEY_FUNCTION_CURSOR_UP:
+            return VAL_PASSKEY + VPK_CURSOR_UP;
+         case KEY_FUNCTION_CURSOR_DOWN:
+            return VAL_PASSKEY + VPK_CURSOR_DOWN;
+         case KEY_FUNCTION_CURSOR_LEFT:
+            return VAL_PASSKEY + VPK_CURSOR_LEFT;
+         case KEY_FUNCTION_CURSOR_RIGHT:
+            return VAL_PASSKEY + VPK_CURSOR_RIGHT;
+         case KEY_FUNCTION_CURSOR_UP_JUMP:
+            return VAL_PASSKEY + VPK_HOME;
+         case KEY_FUNCTION_CURSOR_DOWN_JUMP:
+            return VAL_PASSKEY + VPK_END;
+         case KEY_FUNCTION_CURSOR_LEFT_JUMP:
+            return VAL_PASSKEY + VPK_PAGE_UP;
+         case KEY_FUNCTION_CURSOR_RIGHT_JUMP:
+            return VAL_PASSKEY + VPK_PAGE_DOWN;
+         case KEY_FUNCTION_F1:
+            return VAL_PASSKEY + VPK_FUNCTION + 0;
+         case KEY_FUNCTION_F2:
+            return VAL_PASSKEY + VPK_FUNCTION + 1;
+         case KEY_FUNCTION_F3:
+            return VAL_PASSKEY + VPK_FUNCTION + 2;
+         case KEY_FUNCTION_F4:
+            return VAL_PASSKEY + VPK_FUNCTION + 3;
+         case KEY_FUNCTION_F5:
+            return VAL_PASSKEY + VPK_FUNCTION + 4;
+         case KEY_FUNCTION_F6:
+            return VAL_PASSKEY + VPK_FUNCTION + 5;
+         case KEY_FUNCTION_F7:
+            return VAL_PASSKEY + VPK_FUNCTION + 6;
+         case KEY_FUNCTION_F9:
+            return VAL_PASSKEY + VPK_FUNCTION + 8;
+         case KEY_FUNCTION_F10:
+            return VAL_PASSKEY + VPK_FUNCTION + 9;
+         case KEY_COMMAND: {
+            int command;
+            while ((command = readKey()) == EOF) delay(1);
+            LogPrint(LOG_DEBUG, "Received command: (0x%2.2X) 0x%4.4X", KEY_COMMAND, command);
+            switch (command) {
                case KEY_COMMAND:
                   /* pressing the escape command twice will pass it through */
                   return VAL_PASSDOTS + inputTable[KEY_COMMAND];
@@ -306,6 +579,14 @@ readbrl (DriverCommandContext cmds) {
                   return CR_SWITCHVT + 4;
                case KEY_COMMAND_SWITCHVT_6:
                   return CR_SWITCHVT + 5;
+               case KEY_COMMAND_SWITCHVT_7:
+                  return CR_SWITCHVT + 6;
+               case KEY_COMMAND_SWITCHVT_8:
+                  return CR_SWITCHVT + 7;
+               case KEY_COMMAND_SWITCHVT_9:
+                  return CR_SWITCHVT + 8;
+               case KEY_COMMAND_SWITCHVT_10:
+                  return CR_SWITCHVT + 9;
                case KEY_COMMAND_PAGE_UP:
                   return VAL_PASSKEY + VPK_PAGE_UP;
                case KEY_COMMAND_PAGE_DOWN:
@@ -332,68 +613,30 @@ readbrl (DriverCommandContext cmds) {
                   return CMD_FREEZE | VAL_SWITCHOFF;
                case KEY_COMMAND_RESTARTBRL:
                   return CMD_RESTARTBRL;
-               case KEY_FUNCTION:
-                  switch (byte = readByte()) {
-                     case KEY_FUNCTION_CURSOR_UP:
-                     case KEY_FUNCTION_CURSOR_LEFT:
-                     case KEY_FUNCTION_CURSOR_RIGHT:
-                     case KEY_FUNCTION_CURSOR_DOWN:
-                     default:
-                        LogPrint(LOG_WARNING, "Unknown function key: 0X%02X 0X%02X 0X%02X", KEY_COMMAND, KEY_FUNCTION, byte);
-                  }
+               case KEY_COMMAND_DOWNLOAD:
+                  downloadFile();
                   break;
                default:
-                  LogPrint(LOG_WARNING, "Not an escape command: (0X%2.2X) 0X%2.2X dec=%d", KEY_COMMAND, byte, byte);
-            }
-            break;
-         case KEY_FUNCTION:
-            byte = readByte();
-            LogPrint(LOG_DEBUG, "Function Key: (0X%2.2X) 0X%2.2X dec=%d", KEY_FUNCTION, byte, byte);
-            switch (byte) {
-               case KEY_FUNCTION_CURSOR_UP:
-                  return VAL_PASSKEY + VPK_CURSOR_UP;
-               case KEY_FUNCTION_CURSOR_DOWN:
-                  return VAL_PASSKEY + VPK_CURSOR_DOWN;
-               case KEY_FUNCTION_CURSOR_LEFT:
-                  return VAL_PASSKEY + VPK_CURSOR_LEFT;
-               case KEY_FUNCTION_CURSOR_RIGHT:
-                  return VAL_PASSKEY + VPK_CURSOR_RIGHT;
-               case KEY_FUNCTION_CURSOR_UP_JUMP:
-                  return VAL_PASSKEY + VPK_HOME;
-               case KEY_FUNCTION_CURSOR_DOWN_JUMP:
-                  return VAL_PASSKEY + VPK_END;
-               case KEY_FUNCTION_CURSOR_LEFT_JUMP:
-                  return VAL_PASSKEY + VPK_PAGE_UP;
-               case KEY_FUNCTION_CURSOR_RIGHT_JUMP:
-                  return VAL_PASSKEY + VPK_PAGE_DOWN;
-               default:
-                  LogPrint(LOG_WARNING, "Unknown function key: 0X%2.2X %2.2X", KEY_FUNCTION, byte);
+                  LogPrint(LOG_WARNING, "Unknown command: (0X%2.2X) 0X%4.4X", KEY_COMMAND, command);
                   break;
             }
             break;
-         case KEY_UPDATE:
-            byte = readByte();
-            LogPrint(LOG_DEBUG, "Request line: 0X%2.2X 0X%2.2X dec=%d", KEY_UPDATE, byte, byte);
-            if (!byte) {
-               sendCursorRow();
-            } else if (byte <= screenHeight) {
-               currentLine = byte - 1;
-               sendCurrentLine();
-            } else {
-               LogPrint(LOG_WARNING, "Request for update of line %d.", byte);
-            }
-            break;
-         case KEY_ESCAPE:
-            LogPrint(LOG_DEBUG, "KEY_ESCAPE");
-            return VAL_PASSKEY + VPK_ESCAPE;
-         case KEY_DELETE:
-            LogPrint(LOG_DEBUG, "KEY_DELETE");
-            return VAL_PASSKEY + VPK_DELETE;
-         default: {
-            unsigned char dots = inputTable[byte];
-            LogPrint(LOG_DEBUG, "Received character: 0X%2.2X dec=%d dots=%2.2X", byte, byte, dots);
-            return VAL_PASSDOTS + dots;
          }
+         default:
+            switch (key & KEY_MASK) {
+               case KEY_UPDATE:
+                  handleUpdate(key >> KEY_SHIFT);
+                  break;
+               case KEY_FUNCTION:
+                  LogPrint(LOG_WARNING, "Unknown function: (0X%2.2X) 0X%4.4X", KEY_COMMAND, key>>KEY_SHIFT);
+                  break;
+               default: {
+                  unsigned char dots = inputTable[key];
+                  LogPrint(LOG_DEBUG, "Received character: 0X%2.2X dec=%d dots=%2.2X", key, key, dots);
+                  return VAL_PASSDOTS + dots;
+               }
+            }
+            break;
       }
    }
    return EOF;

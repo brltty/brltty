@@ -31,7 +31,7 @@ MINOR := $(shell grep VOYAGER_DEFAULT_MINOR kernel/voyager.h |cut -f3 -d' ')
 #MINOR=144
 VOYAGERDEV=/dev/voyager
 
-brl.o: brl.c brlconf.h kernel/voyager.h ../brl.h ../misc.h ../inskey.h \
+brl.o: brl.c brlconf.h kernel/voyager.h ../brl.h ../misc.h \
 	../scr.h ../brl_driver.h
 	$(CC) $(BRL_CFLAGS) -c brl.c
 

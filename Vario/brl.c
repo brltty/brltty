@@ -54,7 +54,6 @@
 #include "../misc.h"
 #include "../scr.h"
 #include "../brl_driver.h"
-#include "../inskey.h"
 
 		  
 /* Braille display parameters that do not change */

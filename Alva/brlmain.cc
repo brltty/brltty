@@ -556,7 +556,7 @@ static void writebrl (brldim *brl)
   }
 #endif
 
-  if (ReWrite ||  ++Timeout > (REFRESH_RATE/cycleDelay))
+  if (ReWrite ||  ++Timeout > (REFRESH_RATE/refreshInterval))
     {
       ReWrite = Timeout = 0;
       /* We rewrite the whole display */

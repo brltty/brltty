@@ -40,7 +40,6 @@
 #include "../config.h"
 #include "../brl.h"
 #include "../misc.h"
-#include "../inskey.h"
 #include "../message.h"
 #include "../scr.h"
 
@@ -533,7 +532,7 @@ readbrl (DriverCommandContext cmds)
 	  case BLT_ESCAPE:
 	    outmsg[0] = 27;
 	    outmsg[1] = 0;
-	    inskey (outmsg);
+	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
@@ -545,7 +544,7 @@ readbrl (DriverCommandContext cmds)
 	  case BLT_TAB:
 	    outmsg[0] = '\t';
 	    outmsg[1] = 0;
-	    inskey (outmsg);
+	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
@@ -557,7 +556,7 @@ readbrl (DriverCommandContext cmds)
 	  case BLT_BACKSP:	/* remove backwards */
 	    outmsg[0] = 127;
 	    outmsg[1] = 0;
-	    inskey (outmsg);
+	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
@@ -572,7 +571,7 @@ readbrl (DriverCommandContext cmds)
 	    outmsg[2] = '3';
 	    outmsg[3] = '~';
 	    outmsg[4] = 0;
-	    inskey (outmsg);
+	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
@@ -585,7 +584,7 @@ readbrl (DriverCommandContext cmds)
 	    temp = outmsg[0] == 0 ? 0 : 1;
 	    outmsg[temp] = ctrl ? '\n' : '\r';
 	    outmsg[temp + 1] = 0;
-	    inskey (outmsg);
+	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
@@ -625,7 +624,7 @@ readbrl (DriverCommandContext cmds)
 			  (dot8shift) ? 0x80 : 0))];
 #endif
       outmsg[temp + 1] = 0;
-      inskey (outmsg);
+      insertString (outmsg);
       if (!shiftlck)
 	shift = 0;
       ctrl = 0;

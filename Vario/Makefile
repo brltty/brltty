@@ -27,6 +27,6 @@ DRIVER_NAME = Vario/RBT (emulation 1)
 BRAILLE_MODELS = 40/80
 include ../driver.mk
 
-brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../inskey.h ../config.h
+brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
 	$(CC) $(BRL_CFLAGS) -c brl.c
 

@@ -72,7 +72,7 @@ FrozenScreen::open (Screen *src)
 
 
 void
-FrozenScreen::getstat (scrstat &stat2)
+FrozenScreen::getstat (ScreenStatus &stat2)
 {
   stat2 = stat;
 }
@@ -203,7 +203,7 @@ HelpScreen::open (char *helpfile)
 
 
 void
-HelpScreen::getstat (scrstat &stat)
+HelpScreen::getstat (ScreenStatus &stat)
 {
   stat.posx = stat.posy = 0;
   stat.cols = psz[scrno].cols;

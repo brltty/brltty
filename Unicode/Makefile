@@ -22,10 +22,19 @@ LD = $(CC)
 LDFLAGS = -s
 
 
-all: unicode.o
+TOOLS = trcp
+
+all: $(TOOLS)
+
+trcp: trcp.o unicode.o
+
+trcp.o: trcp.c unicode.h
 
 unicode.o: unicode.c unicode.h unicode-table.h $(wildcard iso-*.h) $(wildcard cp-*.h)
 
 clean:
 	rm -f *.o *~
+
+DISTCLEAN: clean
+	rm -f $(TOOLS)
 

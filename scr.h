@@ -31,13 +31,11 @@
 #define FROZ_SCRN 1		/* read frozen screen image */
 #define HELP_SCRN 2		/* read help screen */
 
-typedef struct
-  {
-    short rows, cols;		/* screen dimentions */
-    short posx, posy;		/* cursor position */
-    short no;			/* screen number */
-  }
-scrstat;
+typedef struct {
+  short rows, cols;	/* screen dimentions */
+  short posx, posy;	/* cursor position */
+  short no;		      /* screen number */
+} ScreenStatus;
 
 typedef struct
   {
@@ -48,19 +46,41 @@ winpos;
 
 /* Functions provided by this library */
 
-int initscr (void);			/* initialise screen reading functions */
-void getstat (scrstat *);		/* get screen status */
+char **getScreenParameters (void);			/* initialise screen reading functions */
+int initializeScreen (char **parameters);			/* initialise screen reading functions */
+void getScreenStatus (ScreenStatus *);		/* get screen status */
 unsigned char *getscr (winpos, unsigned char *, short);
 		/* Read a rectangle from the screen - text or attributes: */
-void closescr (void);		/* close screen reading */
+void closeScreen (void);		/* close screen reading */
 int selectdisp (int);		/* select display page */
+
+typedef enum {
+   KEY_RETURN = 0X100,
+   KEY_TAB,
+   KEY_BACKSPACE,
+   KEY_ESCAPE,
+   KEY_CURSOR_LEFT,
+   KEY_CURSOR_RIGHT,
+   KEY_CURSOR_UP,
+   KEY_CURSOR_DOWN,
+   KEY_PAGE_UP,
+   KEY_PAGE_DOWN,
+   KEY_HOME,
+   KEY_END,
+   KEY_INSERT,
+   KEY_DELETE,
+   KEY_FUNCTION
+} InsertKey;
+int insertKey (unsigned short key);
+int insertString (const unsigned char *string);
+int switchVirtualTerminal (int);
 
 /* An extra `thread' for the cursor routing subprocess.
  * This is needed because the forked subprocess shares the parent's
  * filedescriptors.  A getscr equivalent is not needed, and so not provided.
  */
 int initscr_phys (void);
-void getstat_phys (scrstat *);
+void getstat_phys (ScreenStatus *);
 void closescr_phys (void);
 
 /* Manipulation of the help screen filename, help number, etc. */

@@ -22,23 +22,52 @@
 #ifndef _SCR_VCSA_H
 #define _SCR_VCSA_H
 
+#include <linux/kd.h>
 
 #include "scrdev.h"
 
-
-
-class vcsa_Screen:public RealScreen
+class VcsaScreen:public RealScreen
 {
-  int fd, cons_fd;
-  unsigned char output_table[0X100];
-  unsigned char input_table[0X100];
-  int set_screen_translation_tables (int force);
-    public:
-  int open (int);		// called once to initialise screen reading
-  void getstat (scrstat &);
-  unsigned char *getscr (winpos, unsigned char *, short);
-  void close (void);		// called once to close screen reading
-};
+  int setScreenDevice (void);
+  const char *screenDevice;
 
+  void closeScreen (void);
+  int screenDescriptor;
+
+  int setConsoleDevice (void);
+  const char *consoleDevice;
+
+  int rebindConsole(void);
+  void closeConsole (void);
+  int consoleDescriptor;
+
+  int insertCode (unsigned short key, int raw);
+  int insertMapped (unsigned short key, int (VcsaScreen::*byteInserter)(unsigned char byte));
+  int insertUtf8 (unsigned char byte);
+  int insertByte (unsigned char byte);
+
+  int setTranslationTable (int opening);
+  unsigned char translationTable[0X100];
+
+  unsigned short characterMap[0X100];
+  int (VcsaScreen::*setCharacterMap) (int opening);
+  int setApplicationCharacterMap (int opening);
+
+  int setScreenFontMap (int opening);
+  struct unipair *screenFontMapTable;
+  unsigned short screenFontMapCount;
+  unsigned short screenFontMapSize;
+
+public:
+  char **parameters (void);
+  int prepare (char **parameters);
+  int open (void);
+  int setup (void);
+  void getstat (ScreenStatus &);
+  unsigned char *getscr (winpos, unsigned char *, short);
+  int insert (unsigned short);
+  int switchvt (int);
+  void close (void);
+};
 
 #endif  /* _SCR_VCSA_H */

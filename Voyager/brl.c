@@ -47,7 +47,6 @@
 #include "../brl.h"
 #include "../misc.h"
 #include "../scr.h"
-#include "../inskey.h"
 
 #define BRLNAME "Voyager"
 #define PREFSTYLE ST_VoyagerStyle
@@ -430,7 +429,7 @@ insert(unsigned char c)
   unsigned char buf[2];
   buf[0] = untexttrans[voy2brlDotsTable[c]];
   buf[1] = 0;
-  inskey(buf);
+  insertString(buf);
 }
 
 static int 

@@ -15,11 +15,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* tbl2txt - translate Braille dot table file to a readable form
+/* tbl2txt - translate Braille dot-table file to a readable form
  * James Bowden
  * $Id: tbl2txt.c,v 1.2 1996/09/21 23:34:51 nn201 Exp $
  * March 1996
- * Version 1.0
+ * Reworked by Dave Mielke <dave@mielke.cc> (November 2001)
+ * Version 1.1
  */
 
 #include <stdlib.h>
@@ -301,7 +302,7 @@ main (int argc, char *argv[])
   const char *const shortOptions = ":c:";
   const struct option longOptions[] = {
     {"code-page", required_argument, NULL, 'c'},
-    {NULL       , 0                , NULL, 0  }
+    {NULL       , 0                , NULL,  0 }
   };
 
   opterr = 0;
@@ -311,16 +312,16 @@ main (int argc, char *argv[])
     switch (option) {
       default:
         fprintf(stderr, "tbl2txt: Unimplemented option: -%c\n", option);
-	exit(2);
+        exit(2);
       case '?':
         fprintf(stderr, "tbl2txt: Invalid option: -%c\n", optopt);
-	exit(2);
+        exit(2);
       case ':':
         fprintf(stderr, "tbl2txt: Missing operand: -%c\n", optopt);
-	exit(2);
+        exit(2);
       case 'c':
         codePageName = optarg;
-	break;
+        break;
     }
   }
   argv += optind; argc -= optind;
@@ -342,6 +343,7 @@ main (int argc, char *argv[])
 	int byte;			/* Current byte being processed */
 	for (byte=0; byte<0X100; ++byte) {
 	  int character = fgetc(inputStream);
+     const char *name = NULL;
 	  int dot;
 	  if (ferror(inputStream)) {
 	    fprintf(stderr, "tbl2txt: Cannot read input file '%s': %s",
@@ -353,16 +355,15 @@ main (int argc, char *argv[])
 	  for (dot=0; dot<sizeof(dotTable); ++dot) {
 	    fputc(((character & dotTable[dot])? dot+'1': ' '), outputStream);
 	  }
-	  fprintf(outputStream, ")");
-	  {
-	    const char *name = NULL;
-	    if (codePage) {
-	      const UnicodeEntry *unicode = getUnicodeEntry(codePage->table[byte]);
-	      if (unicode) name = unicode->name;
-	    }
-	    if (!name) name = characterNames[byte];
-	    fprintf(outputStream, " %s", name);
+	  fprintf(outputStream, ")%2.2X", character);
+	  if (codePage) {
+       unsigned short unicode = codePage->table[byte];
+	    const UnicodeEntry *uc = getUnicodeEntry(unicode);
+	    if (uc) name = uc->name;
+	    fprintf(outputStream, " U+%4.4X", unicode);
 	  }
+	  if (!name) name = characterNames[byte];
+	  fprintf(outputStream, " %s", name);
 	  fprintf(outputStream, "\n");
 	}
 
@@ -380,8 +381,9 @@ main (int argc, char *argv[])
       status = 3;
     }
   } else {
-    fprintf(stderr, "tbl2txt - Braille dot table to text.\n");
-    fprintf(stderr, "Usage: tbl2txt input_file output_file\n");
+    fprintf(stderr, "tbl2txt - Uncompile a braille dot-table.\n");
+    fprintf(stderr, "Usage: tbl2txt -option ... input_file output_file\n");
+    fprintf(stderr, "-c page  --code-page=  Code page to use for identifying characters.\n");
     status = 2;
   }
 

@@ -28,22 +28,22 @@
 int
 main (void)
 {
-  scrstat test;
+  ScreenStatus test;
   unsigned char buffer[2048], *res;
   short i, j, c;
 
-  if (initscr ())
+  if (!initializeScreen(NULL))
     {
       fprintf (stderr, "scrtest: can't initialise screen reading\n");
       exit (1);
     }
-  getstat (&test);
+  getScreenStatus(&test);
   res = getscr ((winpos)
 		{
 		5, 5, 70, 15
 		}
 		,buffer, SCR_TEXT);
-  closescr ();
+  closeScreen();
   printf ("rows == %d, cols == %d\n", test.rows, test.cols);
   printf ("posx == %d, posy == %d\n\n", test.posx, test.posy);
   if (res == NULL)

@@ -1,6 +1,7 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   Implement generic driver parameters facility. (dm,sd)
    Resolve conflict between .dat and .conf both being calledf configuration files. (dm)
       Default file extension .dat becomes .prefs.
       CMD_CONFMENU -> CMD_PREFMENU
@@ -31,11 +32,12 @@ Note: this file is in reversed chronological order (bottom to top).
       Introduce short option -a.
       Introduce long option --attributes-table=.
       Introduce brltty.conf directive attributes-table.
-   Add -C (--cycle-delay=) option. (dm)
    Add -M (--message-delay=) option. (dm)
-   Add -R (--read-delay=) option. (dm)
+   Add -N (--no-speech) option. (dm)
    Add -P (--pid-file=) option. (dm)
-   Implement generic driver parameters facility. (dm,sd)
+   Add -R (--refresh-interval=) option. (dm)
+   Add -X (--screen-parameters=) option. (dm)
+   Add the characterset= (latin1, vt100graphics, cp437, application) screen parameter. (dm)
    Implement BrailleNote driver. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
    Implement HandyTech driver. Andreas Gross <andi@andi-bika.de>
    Implement LogText driver. (dm) with help from Hans Schou <chlor@schou.dk>
@@ -131,6 +133,7 @@ Note: this file is in reversed chronological order (bottom to top).
    Add reverse text translation table for input from braille display. (dm,sd)
    Get font data from kernel rather than guess at it by probing. (sd)
    Handle font change and screen size change. (sd)
+   Make cursor routing work when keyboard is in raw mode. (dm)
    Search list of known screen device names (/dev/vcsa0 /dev/vcsa /dev/vcc/a)
       rather than just check for /dev/vcsa0. (dm)
    Don't use LOG_CONS option of syslog uhtil in the background. (dm)
@@ -150,7 +153,7 @@ Note: this file is in reversed chronological order (bottom to top).
    Disable speech tracking when CMD_SAY is used. (np)
    Merge LogAndStderr into LohPrint. (dm)
    Cleanly wrap long help (-h) output lines. (dm)
-   Increase default message delay from 2 to 5 seconds. (dm)
+   Increase default message delay from 2 to 4 seconds. (dm)
    Message delay is now interruptable by pressing key on braille display. (dm)
    Startup and exiting messages now fit within 18 characters. (dm,sd)
    Add message to alert user to presence of startup errors. (dm)

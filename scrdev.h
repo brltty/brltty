@@ -33,7 +33,7 @@ extern "C"
 class Screen			
 {
   public:
-  virtual void getstat (scrstat &) = 0;
+  virtual void getstat (ScreenStatus &) = 0;
   virtual unsigned char *getscr (winpos, unsigned char *, short) = 0;
 };
 
@@ -41,24 +41,29 @@ class Screen
 // abstract base class - useful for screen source driver pointers
 class RealScreen : public Screen
 {
-  public:
-  virtual int open (int) = 0;
+public:
+  virtual char **parameters (void) = 0;
+  virtual int prepare (char **parameters) = 0;
+  virtual int open (void) = 0;
+  virtual int setup (void) = 0;
   virtual void close (void) = 0;
-  virtual void getstat (scrstat &) = 0;
+  virtual void getstat (ScreenStatus &) = 0;
   virtual unsigned char *getscr (winpos, unsigned char *, short) = 0;
+  virtual int insert (unsigned short) = 0;
+  virtual int switchvt (int) = 0;
 };
 
 
 
 class FrozenScreen:public Screen
 {
-  scrstat stat;
+  ScreenStatus stat;
   unsigned char *text;
   unsigned char *attrib;
     public:
     FrozenScreen ();
   int open (Screen *);		// called every time the screen is frozen
-  void getstat (scrstat &);
+  void getstat (ScreenStatus &);
   unsigned char *getscr (winpos, unsigned char *, short);
   void close (void);		// called to discard frozen screen image
 };
@@ -78,7 +83,7 @@ class HelpScreen:public Screen
   void setscrno (short);
   short numscreens (void);
   int open (char *helpfile);		// called every time the help screen is opened
-  void getstat (scrstat &);
+  void getstat (ScreenStatus &);
   unsigned char *getscr (winpos, unsigned char *, short);
   void close (void);		// called once to close the help screen
 };

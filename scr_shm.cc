@@ -74,7 +74,7 @@ shm_Screen::open (int for_csr_routing)
 
 
 void
-shm_Screen::getstat (scrstat &stat)
+shm_Screen::getstat (ScreenStatus &stat)
 {
   stat.cols = shm[0];	/* scrdim x */
   stat.rows = shm[1];   /* scrdim y */
@@ -87,7 +87,7 @@ shm_Screen::getstat (scrstat &stat)
 unsigned char *
 shm_Screen::getscr (winpos pos, unsigned char *buffer, short mode)
 {
-  scrstat stat;                 /* screen statistics */
+  ScreenStatus stat;                 /* screen statistics */
   off_t start;                  /* start offset */
 
   getstat (stat);

@@ -32,7 +32,6 @@
 #include "spk.h"
 #include "scr.h"
 #include "csrjmp.h"
-#include "inskey.h"
 #include "tunes.h"
 #include "cut-n-paste.h"
 #include "misc.h"
@@ -41,28 +40,27 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99w";
+char VERSION[] = "BRLTTY 2.99x";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
-int cycleDelay = CYCLE_DELAY;
-int readDelay = READ_DELAY;
+int refreshInterval = REFRESH_INTERVAL;
 int messageDelay = MESSAGE_DELAY;
 
 /*
  * Misc param variables
  */
-short dispmd = LIVE_SCRN;	/* freeze screen on/off */
-short infmode = 0;		/* display screen image or info */
-short csr_offright;		/* used for sliding window */
-short hwinshift;		/* Half window horizontal distance */
+short dispmd = LIVE_SCRN;        /* freeze screen on/off */
+short infmode = 0;                /* display screen image or info */
+short csr_offright;                /* used for sliding window */
+short hwinshift;                /* Half window horizontal distance */
 short offr; /* How much of the display must be kept onto the screen when
-	       moving to the right. In other words, the display can move
-	       beyond the right edge of the screen by brl.x-offr. */
-short fwinshift;		/* Full window horizontal distance */
-short vwinshift;		/* Window vertical distance */
-brldim brl;			/* For the Braille routines */
-scrstat scr;			/* For screen state infos */
-unsigned int TickCount = 0;	/* incremented each main loop cycle */
+               moving to the right. In other words, the display can move
+               beyond the right edge of the screen by brl.x-offr. */
+short fwinshift;                /* Full window horizontal distance */
+short vwinshift;                /* Window vertical distance */
+brldim brl;                        /* For the Braille routines */
+ScreenStatus scr;                        /* For screen state infos */
+unsigned int TickCount = 0;        /* incremented each main loop cycle */
 
 
 /*
@@ -70,17 +68,17 @@ unsigned int TickCount = 0;	/* incremented each main loop cycle */
  */
 
 #define BRL_ISUPPER(c) \
-	(isupper (c) || (c) == '@' || (c) == '[' || (c) == '^' || \
-	 (c) == ']' || (c) == '\\')
+        (isupper (c) || (c) == '@' || (c) == '[' || (c) == '^' || \
+         (c) == ']' || (c) == '\\')
 
 #define TOGGLEPLAY(var)  playTune((var) ? &tune_toggle_on : &tune_toggle_off)
 #define TOGGLE(var) \
-	(var = (keypress & VAL_SWITCHON) \
-	       ? 1 : ((keypress & VAL_SWITCHOFF) \
-		      ? 0 : (!var)))
+        (var = (keypress & VAL_SWITCHON) \
+               ? 1 : ((keypress & VAL_SWITCHOFF) \
+                      ? 0 : (!var)))
 
 
-unsigned char *curtbl = texttrans;	/* active translation table */
+unsigned char *curtbl = texttrans;        /* active translation table */
 
 void 
 usetable (int tbl)
@@ -95,12 +93,12 @@ usetable (int tbl)
  * specific screen is used for the first time.
  * Screen 0 is reserved for help screen.
  */
-#define NBR_SCR 16		/* actual number of separate screens */
+#define NBR_SCR 16                /* actual number of separate screens */
 
-struct brltty_param scr0;	/* at least one is statically allocated */
+struct brltty_param scr0;        /* at least one is statically allocated */
 struct brltty_param *scrparam[NBR_SCR+1] = { &scr0, };
-struct brltty_param *p = &scr0;	/* pointer to current param structure */
-int curscr;			/* current screen number */
+struct brltty_param *p = &scr0;        /* pointer to current param structure */
+int curscr;                        /* current screen number */
 
 static void
 switchto (unsigned int scrno)
@@ -108,10 +106,10 @@ switchto (unsigned int scrno)
   curscr = scrno;
   if (scrno > NBR_SCR)
     scrno = 0;
-  if (!scrparam[scrno]) { 	/* if not already allocated... */
+  if (!scrparam[scrno]) {         /* if not already allocated... */
     {
       if (!(scrparam[scrno] = malloc(sizeof(*p))))
-        scrno = 0; 	/* unable to allocate a new structure */
+        scrno = 0;         /* unable to allocate a new structure */
       else
         *scrparam[scrno] = initparam;
     }
@@ -310,16 +308,16 @@ terminateProgram (int quickly) {
   int silently = quickly || (strcmp(speech->name, "NoSpeech") == 0);
   clearStatusCells();
   message("BRLTTY exiting.", 
-	  MSG_NODELAY | (silently? MSG_SILENT: 0));
+          MSG_NODELAY | (silently? MSG_SILENT: 0));
   if (!silently) {
     int awaitSilence = speech->isSpeaking();
     int i;
-    for (i=0; i<messageDelay; i+=readDelay) {
-      delay(readDelay);
+    for (i=0; i<messageDelay; i+=refreshInterval) {
+      delay(refreshInterval);
       if (braille->read(CMDS_MESSAGE) != EOF) break;
       if (awaitSilence) {
-	speech->processSpkTracking();
-	if (!speech->isSpeaking()) break;
+        speech->processSpkTracking();
+        if (!speech->isSpeaking()) break;
       }
     }
   }
@@ -361,16 +359,16 @@ setwinxy (int x, int y)
     {
       /* Change position only if the coordonates are not already displayed */
       if (x < p->winx || x >= p->winx + brl.x || 
-	  y < p->winy || y >= p->winy + brl.y)
-	{
-	  p->winy = y < brl.y - 1 ? 0 : y - (brl.y - 1);
-	  if (x < brl.x)
-	    p->winx = 0;
-	  else if (x >= scr.cols - csr_offright)
-	    p->winx = scr.cols - brl.x;
-	  else
-	    p->winx = x - (brl.x - csr_offright);
-	}
+          y < p->winy || y >= p->winy + brl.y)
+        {
+          p->winy = y < brl.y - 1 ? 0 : y - (brl.y - 1);
+          if (x < brl.x)
+            p->winx = 0;
+          else if (x >= scr.cols - csr_offright)
+            p->winx = scr.cols - brl.x;
+          else
+            p->winx = x - (brl.x - csr_offright);
+        }
     }
   else
     setwinabsxy(x,y);
@@ -384,22 +382,22 @@ upDifferentLine(short mode) {
       if (mode==SCR_TEXT && p->dispmode)
          mode = SCR_ATTRIB;
       getscr((winpos){0, p->winy, scr.cols, 1},
-	     buffer1, mode);
+             buffer1, mode);
       do {
-	 getscr((winpos){0, --p->winy, scr.cols, 1},
-		buffer2, mode);
-	 if (memcmp(buffer1, buffer2, scr.cols) ||
-	     (mode==SCR_TEXT && env.csrvis && p->winy==scr.posy))
-	    return 1;
+         getscr((winpos){0, --p->winy, scr.cols, 1},
+                buffer2, mode);
+         if (memcmp(buffer1, buffer2, scr.cols) ||
+             (mode==SCR_TEXT && env.csrvis && p->winy==scr.posy))
+            return 1;
 
-	 /* lines are identical */
-	 if (skipped == 0)
-	    playTune(&tune_skip_first);
-	 else if (skipped <= 4)
-	    playTune(&tune_skip);
-	 else if (skipped % 4 == 0)
-	    playTune(&tune_skip_more);
-	 skipped++;
+         /* lines are identical */
+         if (skipped == 0)
+            playTune(&tune_skip_first);
+         else if (skipped <= 4)
+            playTune(&tune_skip);
+         else if (skipped % 4 == 0)
+            playTune(&tune_skip_more);
+         skipped++;
       } while (p->winy > 0);
    }
 
@@ -415,22 +413,22 @@ downDifferentLine(short mode) {
       if (mode==SCR_TEXT && p->dispmode)
          mode = SCR_ATTRIB;
       getscr((winpos){0, p->winy, scr.cols, 1},
-	     buffer1, mode);
+             buffer1, mode);
       do {
-	 getscr((winpos){0, ++p->winy, scr.cols, 1},
-		buffer2, mode);
-	 if (memcmp(buffer1, buffer2, scr.cols) ||
-	     (mode==SCR_TEXT && env.csrvis && p->winy==scr.posy))
-	    return 1;
+         getscr((winpos){0, ++p->winy, scr.cols, 1},
+                buffer2, mode);
+         if (memcmp(buffer1, buffer2, scr.cols) ||
+             (mode==SCR_TEXT && env.csrvis && p->winy==scr.posy))
+            return 1;
 
-	 /* lines are identical */
-	 if (skipped == 0)
-	    playTune(&tune_skip_first);
-	 else if (skipped <= 4)
-	    playTune(&tune_skip);
-	 else if (skipped % 4 == 0)
-	    playTune(&tune_skip_more);
-	 skipped++;
+         /* lines are identical */
+         if (skipped == 0)
+            playTune(&tune_skip_first);
+         else if (skipped <= 4)
+            playTune(&tune_skip);
+         else if (skipped % 4 == 0)
+            playTune(&tune_skip_more);
+         skipped++;
       } while (p->winy < (scr.rows - brl.y));
    }
 
@@ -461,11 +459,11 @@ downLine(short mode) {
 int
 main (int argc, char *argv[])
 {
-  int keypress;			/* character received from braille display */
-  int i;			/* loop counter */
-  short csron = 1;		/* display cursor on (toggled during blink) */
+  int keypress;                        /* character received from braille display */
+  int i;                        /* loop counter */
+  short csron = 1;                /* display cursor on (toggled during blink) */
   short csrcntr = 1;
-  short capon = 0;		/* display caps off (toggled during blink) */
+  short capon = 0;                /* display caps off (toggled during blink) */
   short capcntr = 1;
   short attron = 0;
   short attrcntr = 1;
@@ -503,14 +501,15 @@ main (int argc, char *argv[])
   /* Setup everything required on startup */
   startup(argc, argv);
 
-  getstat(&scr);
+  getScreenStatus(&scr);
   /* NB: screen size can sometimes change, f.e. the video mode may be changed
-   * when installing a new font. Will be detected by another call to getstat
+   * when installing a new font. Will be detected by another call to
+   * getScreenStatus
    * in the main loop. Don't assume scr.rows and scr.cols are constants across
    * loop iterations.
    */
-  switchto(scr.no);			/* allocate current screen params */
-  setwinxy(scr.posx, scr.posy);	/* set initial window position */
+  switchto(scr.no);                        /* allocate current screen params */
+  setwinxy(scr.posx, scr.posy);        /* set initial window position */
   p->motx = p->winx; p->moty = p->winy;
   p->trkx = scr.posx; p->trky = scr.posy;
   oldwinx = p->winx; oldwiny = p->winy;
@@ -527,888 +526,828 @@ main (int argc, char *argv[])
        */
       while ((keypress = braille->read(infmode? CMDS_STATUS:
                                        ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
-				       CMDS_SCREEN)) != EOF) {
-	int oldmotx = p->winx;
-	int oldmoty = p->winy;
-	LogPrint(LOG_DEBUG, "Command: %5.5X", keypress);
-	switch (keypress & ~VAL_SWITCHMASK) {
-	  case CMD_NOOP:	/* do nothing but loop */
-	    continue;
-	  case CMD_RESTARTBRL:
-	    stopBrailleDriver();
-	    playTune(&tune_braille_off);
-	    LogPrint(LOG_INFO, "Reinitializing braille driver.");
-	    startBrailleDriver();
-	    break;
-	  case CMD_RESTARTSPEECH:
-	    stopSpeechDriver();
-	    LogPrint(LOG_INFO, "Reinitializing speech driver.");
-	    startSpeechDriver();
-	    break;
-	  case CMD_TOP:
-	    p->winy = 0;
-	    break;
-	  case CMD_TOP_LEFT:
-	    p->winy = 0;
-	    p->winx = 0;
-	    break;
-	  case CMD_BOT:
-	    p->winy = scr.rows - brl.y;
-	    break;
-	  case CMD_BOT_LEFT:
-	    p->winy = scr.rows - brl.y;
-	    p->winx = 0;
-	    break;
-	  case CMD_WINUP:
-	    if (p->winy == 0)
-	      playTune (&tune_bounce);
-	    p->winy = MAX (p->winy - vwinshift, 0);
-	    break;
-	  case CMD_WINDN:
-	    if (p->winy == scr.rows - brl.y)
-	      playTune (&tune_bounce);
-	    p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
-	    break;
-	  case CMD_FWINLT:
-	    if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
-	      int oldX = p->winx;
-	      if (p->winx > 0) {
-		p->winx = MAX(p->winx-fwinshift, 0);
-		if (env.skpblnkwins) {
-		  if (env.skpblnkwinsmode == sbwEndOfLine)
-		    goto skipEndOfLine;
-		  if (!env.csrvis ||
-		      (scr.posy != p->winy) ||
-		      (scr.posx >= (p->winx + brl.x))) {
-		    int charCount = MIN(scr.cols, p->winx+brl.x);
-		    int charIndex;
-		    char buffer[charCount];
-		    getscr((winpos){0, p->winy, charCount, 1},
-			   buffer, SCR_TEXT);
-		    for (charIndex=0; charIndex<charCount; ++charIndex)
-		      if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-			break;
-		    if (charIndex == charCount)
-		      goto wrapUp;
-		  }
-		}
-		break;
-	      }
-	    wrapUp:
-	      if (p->winy == 0) {
-		playTune(&tune_bounce);
-		p->winx = oldX;
-		break;
-	      }
-	      playTune(&tune_wrap_up);
-	      p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
-	      upLine(SCR_TEXT);
-	    skipEndOfLine:
-	      if (env.skpblnkwins && (env.skpblnkwinsmode == sbwEndOfLine)) {
-		int charIndex;
-		char buffer[scr.cols];
-		getscr((winpos){0, p->winy, scr.cols, 1},
-		       buffer, SCR_TEXT);
-		for (charIndex=scr.cols-1; charIndex>=0; --charIndex)
-		  if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-		    break;
-		if (env.csrvis && (scr.posy == p->winy))
-		  charIndex = MAX(charIndex, scr.posx);
-		charIndex = MAX(charIndex, 0);
-		if (charIndex < p->winx)
-		  p->winx = charIndex / fwinshift * fwinshift;
-	      }
-	      break;
-	    }
-	  case CMD_FWINLTSKIP: {
-	    int oldX = p->winx;
-	    int oldY = p->winy;
-	    int tuneLimit = 3;
-	    int charCount;
-	    int charIndex;
-	    char buffer[scr.cols];
-	    while (1) {
-	      if (p->winx > 0) {
-		p->winx = MAX(p->winx-fwinshift, 0);
-	      } else {
-		if (p->winy == 0) {
-		  playTune(&tune_bounce);
-		  p->winx = oldX;
-		  p->winy = oldY;
-		  break;
-		}
-		if (tuneLimit-- > 0)
-		  playTune(&tune_wrap_up);
-		p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
-		upLine(SCR_TEXT);
-	      }
-	      charCount = MIN(brl.x, scr.cols-p->winx);
-	      getscr((winpos){p->winx, p->winy, charCount, 1},
-		     buffer, SCR_TEXT);
-	      for (charIndex=(charCount-1); charIndex>=0; charIndex--)
-		if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-		  break;
-	      if (env.csrvis &&
-	          (scr.posy == p->winy) &&
-		  (scr.posx < (p->winx + charCount)))
-	        charIndex = MAX(charIndex, scr.posx-p->winx);
-	      if (charIndex >= 0) {
-		if (env.slidewin)
-		  p->winx = MAX(p->winx+charIndex-brl.x+1, 0);
-	        break;
-	      }
-	    }
-	    break;
-	  }
-	  case CMD_LNUP:
-	    upLine(SCR_TEXT);
-	    break;
-	  case CMD_PRDIFLN:
-	    upDifferentLine(SCR_TEXT);
-	    break;
-	  case CMD_ATTRUP:
-	    upDifferentLine(SCR_ATTRIB);
-	    break;
-	  case CMD_FWINRT:
-	    if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
-	      int oldX = p->winx;
-	      if (p->winx < (scr.cols - brl.x)) {
-		p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
-		if (env.skpblnkwins) {
-		  if (!env.csrvis ||
-		      (scr.posy != p->winy) ||
-		      (scr.posx < p->winx)) {
-		    int charCount = scr.cols - p->winx;
-		    int charIndex;
-		    char buffer[charCount];
-		    getscr((winpos){p->winx, p->winy, charCount, 1},
-			   buffer, SCR_TEXT);
-		    for (charIndex=0; charIndex<charCount; ++charIndex)
-		      if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-			break;
-		    if (charIndex == charCount)
-		      goto wrapDown;
-		  }
-		}
-		break;
-	      }
-	    wrapDown:
-	      if (p->winy >= (scr.rows - brl.y)) {
-		playTune(&tune_bounce);
-		p->winx = oldX;
-		break;
-	      }
-	      playTune(&tune_wrap_down);
-	      p->winx = 0;
-	      downLine(SCR_TEXT);
-	      break;
-	    }
-	  case CMD_FWINRTSKIP: {
-	    int oldX = p->winx;
-	    int oldY = p->winy;
-	    int tuneLimit = 3;
-	    int charCount;
-	    int charIndex;
-	    char buffer[scr.cols];
-	    while (1) {
-	      if (p->winx < (scr.cols - brl.x)) {
-		p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
-	      } else {
-		if (p->winy >= (scr.rows - brl.y)) {
-		  playTune(&tune_bounce);
-		  p->winx = oldX;
-		  p->winy = oldY;
-		  break;
-		}
-		if (tuneLimit-- > 0)
-		  playTune(&tune_wrap_down);
-		p->winx = 0;
-		downLine(SCR_TEXT);
-	      }
-	      charCount = MIN(brl.x, scr.cols-p->winx);
-	      getscr((winpos){p->winx, p->winy, charCount, 1},
-		     buffer, SCR_TEXT);
-	      for (charIndex=0; charIndex<charCount; charIndex++)
-		if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-		  break;
-	      if (env.csrvis &&
-	          (scr.posy == p->winy) &&
-		  (scr.posx >= p->winx))
-	        charIndex = MIN(charIndex, scr.posx-p->winx);
-	      if (charIndex < charCount) {
-		if (env.slidewin)
-		  p->winx = MIN(p->winx+charIndex, scr.cols-offr);
-	        break;
-	      }
-	    }
-	    break;
-	  }
-	  case CMD_LNDN:
-	    downLine(SCR_TEXT);
-	    break;
-	  case CMD_NXDIFLN:
-	    downDifferentLine(SCR_TEXT);
-	    break;
-	  case CMD_ATTRDN:
-	    downDifferentLine(SCR_ATTRIB);
-	    break;
-	  case CMD_NXBLNKLN:
-	  case CMD_PRBLNKLN: {
-	    int dir = (keypress == CMD_NXBLNKLN) ? +1 : -1;
-	    int i;
-	    int found = 0;
-	    int l = p->winy +dir;
-	    char buffer[scr.cols];
-	    /* look for a blank line */
-	    while(l>=0 && l <= scr.rows - brl.y) {
-		getscr ((winpos)
-			{0, l, scr.cols, 1}
-			,buffer, SCR_TEXT);
-		for(i=0; i<scr.cols; i++)
-		  if(buffer[i] != ' ' && buffer[i] != 0)
-		    break;
-		if(i==scr.cols){
-		  found = 1;
-		  break;
-		}
-		l += dir;
-	    }
-	    if(found) {
-	      /* look for a non-blank line */
-	      found = 0;
-	      while(l>=0 && l <= scr.rows - brl.y) {
-		getscr ((winpos)
-		        {0, l, scr.cols, 1}
-			,buffer, SCR_TEXT);
-		for(i=0; i<scr.cols; i++)
-		  if(buffer[i] != ' ' && buffer[i] != 0)
-		    break;
-		if(i<scr.cols){
-		  p->winy = l;
-		  p->winx = 0;
-		  found = 1;
-		  break;
-		}
-		l += dir;
-	      }
-	    }
-	    if(!found) {
-	      playTune (&tune_bounce);
-	      playTune (&tune_bounce);
-	    }
-	    break;
-	  }
-	  case CMD_NXSEARCH:
-	  case CMD_PRSEARCH: {
-	    int dir = (keypress == CMD_NXSEARCH) ? +1 : -1;
-	    int found = 0, caseSens = 0;
-	    int l = p->winy + dir;
-	    char buffer[scr.cols+1];
-	    char *ptr;
-	    if(!cut_buffer || strlen(cut_buffer) > scr.cols)
-	      break;
-	    ptr = cut_buffer;
-	    while(*ptr)
-	      if(isupper(*(ptr++))) {
-		caseSens = 1;
-		break;
-	      }
-	    while(l>=0 && l <= scr.rows - brl.y) {
-	      getscr ((winpos)
-			{0, l, scr.cols, 1}
-			,buffer, SCR_TEXT);
-	      buffer[scr.cols] = 0;
-	      if(!caseSens) {
-		ptr = buffer;
-		while(*ptr) {
-		  *ptr = tolower(*ptr);
-		  ptr++;
-		}
-	      }
-	      if((ptr = strstr(buffer, cut_buffer))) {
-		p->winy = l;
-		p->winx = (ptr-buffer) / brl.x * brl.x;
-		found = 1;
-		break;
-	      }
-	      l += dir;
-	    }
-	    if(!found) {
-	      playTune (&tune_bounce);
-	      playTune (&tune_bounce);
-	    }
-	    break;
-	  }
-	  case CMD_HOME:
-	    setwinxy (scr.posx, scr.posy);
-	    break;
-	  case CMD_BACK:
-	    p->winx = p->motx;
-	    p->winy = p->moty;
-	    break;
-	  case CMD_SPKHOME:
-	    if(scr.no == speaking_scrno) {
-	      int inx = speech->track();
-	      int y,x;
-	      y = inx / scr.cols + speaking_start_line;
-	      x = ((inx % scr.cols) / brl.x) * brl.x;
-	      setwinabsxy( x,y );
-	    } else {
-	      playTune(&tune_bad_command);
-	    }
-	    break;
-	  case CMD_LNBEG:
-	    p->winx = 0;
-	    break;
-	  case CMD_LNEND:
-	    p->winx = scr.cols - brl.x;
-	    break;
-	  case CMD_CHRLT:
-	    if (p->winx == 0)
-	      playTune (&tune_bounce);
-	    p->winx = MAX (p->winx - 1, 0);
-	    break;
-	  case CMD_CHRRT:
-	    if (p->winx >= scr.cols - offr)
-	      playTune (&tune_bounce);
-	    else p->winx++;
-	    break;
-	  case CMD_HWINLT:
-	    if (p->winx == 0)
-	      playTune (&tune_bounce);
-	    p->winx = MAX (p->winx - hwinshift, 0);
-	    break;
-	  case CMD_HWINRT:
-	    if (p->winx >= scr.cols - offr)
-	      playTune (&tune_bounce);
-	    p->winx = MIN (p->winx + hwinshift, scr.cols - offr);
-	    break;
-	  case CMD_CSRJMP:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      csrjmp(p->winx, p->winy, curscr);
-	    else
-	      playTune(&tune_bad_command);
-	    break;
-	  case CMD_CSRJMP_VERT:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      csrjmp(-1, p->winy, curscr);
-	    else
-	      playTune(&tune_bad_command);
-	    break;
-	  case CMD_CSRVIS:
-	    /* toggles the preferences option that decides whether cursor
-	       is shown at all */
-	    TOGGLEPLAY ( TOGGLE(env.csrvis) );
-	    break;
-	  case CMD_CSRHIDE_QK:
-	    /* This is for briefly hiding the cursor */
-	    TOGGLE(p->csrhide);
-	    /* no tune */
-	    break;
-	  case CMD_ATTRVIS:
-	    TOGGLEPLAY ( TOGGLE(env.attrvis) );
-	    break;
-	  case CMD_CSRBLINK:
-	    csron = 1;
-	    TOGGLEPLAY ( TOGGLE(env.csrblink) );
-	    if (env.csrblink)
-	      {
-		csrcntr = env.csroncnt;
+                                       CMDS_SCREEN)) != EOF) {
+        int oldmotx = p->winx;
+        int oldmoty = p->winy;
+        LogPrint(LOG_DEBUG, "Command: %5.5X", keypress);
+        switch (keypress & ~VAL_SWITCHMASK) {
+          case CMD_NOOP:        /* do nothing but loop */
+            continue;
+          case CMD_RESTARTBRL:
+            stopBrailleDriver();
+            playTune(&tune_braille_off);
+            LogPrint(LOG_INFO, "Reinitializing braille driver.");
+            startBrailleDriver();
+            break;
+          case CMD_RESTARTSPEECH:
+            stopSpeechDriver();
+            LogPrint(LOG_INFO, "Reinitializing speech driver.");
+            startSpeechDriver();
+            break;
+          case CMD_TOP:
+            p->winy = 0;
+            break;
+          case CMD_TOP_LEFT:
+            p->winy = 0;
+            p->winx = 0;
+            break;
+          case CMD_BOT:
+            p->winy = scr.rows - brl.y;
+            break;
+          case CMD_BOT_LEFT:
+            p->winy = scr.rows - brl.y;
+            p->winx = 0;
+            break;
+          case CMD_WINUP:
+            if (p->winy == 0)
+              playTune (&tune_bounce);
+            p->winy = MAX (p->winy - vwinshift, 0);
+            break;
+          case CMD_WINDN:
+            if (p->winy == scr.rows - brl.y)
+              playTune (&tune_bounce);
+            p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
+            break;
+          case CMD_FWINLT:
+            if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
+              int oldX = p->winx;
+              if (p->winx > 0) {
+                p->winx = MAX(p->winx-fwinshift, 0);
+                if (env.skpblnkwins) {
+                  if (env.skpblnkwinsmode == sbwEndOfLine)
+                    goto skipEndOfLine;
+                  if (!env.csrvis ||
+                      (scr.posy != p->winy) ||
+                      (scr.posx >= (p->winx + brl.x))) {
+                    int charCount = MIN(scr.cols, p->winx+brl.x);
+                    int charIndex;
+                    char buffer[charCount];
+                    getscr((winpos){0, p->winy, charCount, 1},
+                           buffer, SCR_TEXT);
+                    for (charIndex=0; charIndex<charCount; ++charIndex)
+                      if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+                        break;
+                    if (charIndex == charCount)
+                      goto wrapUp;
+                  }
+                }
+                break;
+              }
+            wrapUp:
+              if (p->winy == 0) {
+                playTune(&tune_bounce);
+                p->winx = oldX;
+                break;
+              }
+              playTune(&tune_wrap_up);
+              p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+              upLine(SCR_TEXT);
+            skipEndOfLine:
+              if (env.skpblnkwins && (env.skpblnkwinsmode == sbwEndOfLine)) {
+                int charIndex;
+                char buffer[scr.cols];
+                getscr((winpos){0, p->winy, scr.cols, 1},
+                       buffer, SCR_TEXT);
+                for (charIndex=scr.cols-1; charIndex>=0; --charIndex)
+                  if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+                    break;
+                if (env.csrvis && (scr.posy == p->winy))
+                  charIndex = MAX(charIndex, scr.posx);
+                charIndex = MAX(charIndex, 0);
+                if (charIndex < p->winx)
+                  p->winx = charIndex / fwinshift * fwinshift;
+              }
+              break;
+            }
+          case CMD_FWINLTSKIP: {
+            int oldX = p->winx;
+            int oldY = p->winy;
+            int tuneLimit = 3;
+            int charCount;
+            int charIndex;
+            char buffer[scr.cols];
+            while (1) {
+              if (p->winx > 0) {
+                p->winx = MAX(p->winx-fwinshift, 0);
+              } else {
+                if (p->winy == 0) {
+                  playTune(&tune_bounce);
+                  p->winx = oldX;
+                  p->winy = oldY;
+                  break;
+                }
+                if (tuneLimit-- > 0)
+                  playTune(&tune_wrap_up);
+                p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+                upLine(SCR_TEXT);
+              }
+              charCount = MIN(brl.x, scr.cols-p->winx);
+              getscr((winpos){p->winx, p->winy, charCount, 1},
+                     buffer, SCR_TEXT);
+              for (charIndex=(charCount-1); charIndex>=0; charIndex--)
+                if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+                  break;
+              if (env.csrvis &&
+                  (scr.posy == p->winy) &&
+                  (scr.posx < (p->winx + charCount)))
+                charIndex = MAX(charIndex, scr.posx-p->winx);
+              if (charIndex >= 0) {
+                if (env.slidewin)
+                  p->winx = MAX(p->winx+charIndex-brl.x+1, 0);
+                break;
+              }
+            }
+            break;
+          }
+          case CMD_LNUP:
+            upLine(SCR_TEXT);
+            break;
+          case CMD_PRDIFLN:
+            upDifferentLine(SCR_TEXT);
+            break;
+          case CMD_ATTRUP:
+            upDifferentLine(SCR_ATTRIB);
+            break;
+          case CMD_FWINRT:
+            if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
+              int oldX = p->winx;
+              if (p->winx < (scr.cols - brl.x)) {
+                p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
+                if (env.skpblnkwins) {
+                  if (!env.csrvis ||
+                      (scr.posy != p->winy) ||
+                      (scr.posx < p->winx)) {
+                    int charCount = scr.cols - p->winx;
+                    int charIndex;
+                    char buffer[charCount];
+                    getscr((winpos){p->winx, p->winy, charCount, 1},
+                           buffer, SCR_TEXT);
+                    for (charIndex=0; charIndex<charCount; ++charIndex)
+                      if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+                        break;
+                    if (charIndex == charCount)
+                      goto wrapDown;
+                  }
+                }
+                break;
+              }
+            wrapDown:
+              if (p->winy >= (scr.rows - brl.y)) {
+                playTune(&tune_bounce);
+                p->winx = oldX;
+                break;
+              }
+              playTune(&tune_wrap_down);
+              p->winx = 0;
+              downLine(SCR_TEXT);
+              break;
+            }
+          case CMD_FWINRTSKIP: {
+            int oldX = p->winx;
+            int oldY = p->winy;
+            int tuneLimit = 3;
+            int charCount;
+            int charIndex;
+            char buffer[scr.cols];
+            while (1) {
+              if (p->winx < (scr.cols - brl.x)) {
+                p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
+              } else {
+                if (p->winy >= (scr.rows - brl.y)) {
+                  playTune(&tune_bounce);
+                  p->winx = oldX;
+                  p->winy = oldY;
+                  break;
+                }
+                if (tuneLimit-- > 0)
+                  playTune(&tune_wrap_down);
+                p->winx = 0;
+                downLine(SCR_TEXT);
+              }
+              charCount = MIN(brl.x, scr.cols-p->winx);
+              getscr((winpos){p->winx, p->winy, charCount, 1},
+                     buffer, SCR_TEXT);
+              for (charIndex=0; charIndex<charCount; charIndex++)
+                if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+                  break;
+              if (env.csrvis &&
+                  (scr.posy == p->winy) &&
+                  (scr.posx >= p->winx))
+                charIndex = MIN(charIndex, scr.posx-p->winx);
+              if (charIndex < charCount) {
+                if (env.slidewin)
+                  p->winx = MIN(p->winx+charIndex, scr.cols-offr);
+                break;
+              }
+            }
+            break;
+          }
+          case CMD_LNDN:
+            downLine(SCR_TEXT);
+            break;
+          case CMD_NXDIFLN:
+            downDifferentLine(SCR_TEXT);
+            break;
+          case CMD_ATTRDN:
+            downDifferentLine(SCR_ATTRIB);
+            break;
+          case CMD_NXBLNKLN:
+          case CMD_PRBLNKLN: {
+            int dir = (keypress == CMD_NXBLNKLN) ? +1 : -1;
+            int i;
+            int found = 0;
+            int l = p->winy +dir;
+            char buffer[scr.cols];
+            /* look for a blank line */
+            while(l>=0 && l <= scr.rows - brl.y) {
+                getscr ((winpos)
+                        {0, l, scr.cols, 1}
+                        ,buffer, SCR_TEXT);
+                for(i=0; i<scr.cols; i++)
+                  if(buffer[i] != ' ' && buffer[i] != 0)
+                    break;
+                if(i==scr.cols){
+                  found = 1;
+                  break;
+                }
+                l += dir;
+            }
+            if(found) {
+              /* look for a non-blank line */
+              found = 0;
+              while(l>=0 && l <= scr.rows - brl.y) {
+                getscr ((winpos)
+                        {0, l, scr.cols, 1}
+                        ,buffer, SCR_TEXT);
+                for(i=0; i<scr.cols; i++)
+                  if(buffer[i] != ' ' && buffer[i] != 0)
+                    break;
+                if(i<scr.cols){
+                  p->winy = l;
+                  p->winx = 0;
+                  found = 1;
+                  break;
+                }
+                l += dir;
+              }
+            }
+            if(!found) {
+              playTune (&tune_bounce);
+              playTune (&tune_bounce);
+            }
+            break;
+          }
+          case CMD_NXSEARCH:
+          case CMD_PRSEARCH: {
+            int dir = (keypress == CMD_NXSEARCH) ? +1 : -1;
+            int found = 0, caseSens = 0;
+            int l = p->winy + dir;
+            char buffer[scr.cols+1];
+            char *ptr;
+            if(!cut_buffer || strlen(cut_buffer) > scr.cols)
+              break;
+            ptr = cut_buffer;
+            while(*ptr)
+              if(isupper(*(ptr++))) {
+                caseSens = 1;
+                break;
+              }
+            while(l>=0 && l <= scr.rows - brl.y) {
+              getscr ((winpos)
+                        {0, l, scr.cols, 1}
+                        ,buffer, SCR_TEXT);
+              buffer[scr.cols] = 0;
+              if(!caseSens) {
+                ptr = buffer;
+                while(*ptr) {
+                  *ptr = tolower(*ptr);
+                  ptr++;
+                }
+              }
+              if((ptr = strstr(buffer, cut_buffer))) {
+                p->winy = l;
+                p->winx = (ptr-buffer) / brl.x * brl.x;
+                found = 1;
+                break;
+              }
+              l += dir;
+            }
+            if(!found) {
+              playTune (&tune_bounce);
+              playTune (&tune_bounce);
+            }
+            break;
+          }
+          case CMD_HOME:
+            setwinxy (scr.posx, scr.posy);
+            break;
+          case CMD_BACK:
+            p->winx = p->motx;
+            p->winy = p->moty;
+            break;
+          case CMD_SPKHOME:
+            if(scr.no == speaking_scrno) {
+              int inx = speech->track();
+              int y,x;
+              y = inx / scr.cols + speaking_start_line;
+              x = ((inx % scr.cols) / brl.x) * brl.x;
+              setwinabsxy( x,y );
+            } else {
+              playTune(&tune_bad_command);
+            }
+            break;
+          case CMD_LNBEG:
+            p->winx = 0;
+            break;
+          case CMD_LNEND:
+            p->winx = scr.cols - brl.x;
+            break;
+          case CMD_CHRLT:
+            if (p->winx == 0)
+              playTune (&tune_bounce);
+            p->winx = MAX (p->winx - 1, 0);
+            break;
+          case CMD_CHRRT:
+            if (p->winx >= scr.cols - offr)
+              playTune (&tune_bounce);
+            else p->winx++;
+            break;
+          case CMD_HWINLT:
+            if (p->winx == 0)
+              playTune (&tune_bounce);
+            p->winx = MAX (p->winx - hwinshift, 0);
+            break;
+          case CMD_HWINRT:
+            if (p->winx >= scr.cols - offr)
+              playTune (&tune_bounce);
+            p->winx = MIN (p->winx + hwinshift, scr.cols - offr);
+            break;
+          case CMD_CSRJMP:
+            if ((dispmd & HELP_SCRN) != HELP_SCRN)
+              csrjmp(p->winx, p->winy, curscr);
+            else
+              playTune(&tune_bad_command);
+            break;
+          case CMD_CSRJMP_VERT:
+            if ((dispmd & HELP_SCRN) != HELP_SCRN)
+              csrjmp(-1, p->winy, curscr);
+            else
+              playTune(&tune_bad_command);
+            break;
+          case CMD_CSRVIS:
+            /* toggles the preferences option that decides whether cursor
+               is shown at all */
+            TOGGLEPLAY ( TOGGLE(env.csrvis) );
+            break;
+          case CMD_CSRHIDE_QK:
+            /* This is for briefly hiding the cursor */
+            TOGGLE(p->csrhide);
+            /* no tune */
+            break;
+          case CMD_ATTRVIS:
+            TOGGLEPLAY ( TOGGLE(env.attrvis) );
+            break;
+          case CMD_CSRBLINK:
+            csron = 1;
+            TOGGLEPLAY ( TOGGLE(env.csrblink) );
+            if (env.csrblink)
+              {
+                csrcntr = env.csroncnt;
                 attron = 1;
                 attrcntr = env.attroncnt;
-		capon = 0;
-		capcntr = env.capoffcnt;
-	      }
-	    break;
-	  case CMD_CSRTRK:
-	    TOGGLE(p->csrtrk);
-	    if (p->csrtrk)
-	      {
-		if(speech->isSpeaking())
-		  speaking_prev_inx = -1;
-		else setwinxy (scr.posx, scr.posy);
-		playTune (&tune_link);
-	      }
-	    else
-	      playTune (&tune_unlink);
-	    break;
-	  case CMD_CUT_BEG:
-	    cut_begin (p->winx, p->winy);
-	    break;
-	  case CMD_CUT_END:
-	    cut_end (MIN(p->winx + brl.x - 1, scr.cols-1), p->winy + brl.y - 1);
-	    break;
-	  case CMD_PASTE:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
-	      cut_paste();
-	    else
-	      playTune(&tune_bad_command);
-	    break;
-	  case CMD_SND:
-	    TOGGLEPLAY ( TOGGLE(env.sound) );	/* toggle sound on/off */
-	    break;
-	  case CMD_DISPMD:
-	    usetable ((TOGGLE(p->dispmode)) ? TBL_ATTRIB : TBL_TEXT);
-	    break;
-	  case CMD_FREEZE:
-	    { unsigned char v = (dispmd & FROZ_SCRN) ? 1 : 0;
-	      TOGGLE(v);
-	      if(v){
-		dispmd = selectdisp (dispmd | FROZ_SCRN);
-		playTune (&tune_freeze);
-	      }else{
-		dispmd = selectdisp (dispmd & ~FROZ_SCRN);
-		playTune (&tune_unfreeze);
-	      }
-	    }
-	    break;
-	  case CMD_HELP:
-	    { int v;
-	      infmode = 0;	/* ... and not in info mode */
-	      v = (dispmd & HELP_SCRN) ? 1 : 0;
-	      TOGGLE(v);
-	      if (v) {
-		dispmd = selectdisp (dispmd | HELP_SCRN);
-		if (dispmd & HELP_SCRN) /* help screen selection successful */
-		  {
-		    switchto(0);	/* screen 0 for help screen */
-		    *p = initparam;	/* reset params for help screen */
-		  }
-		else	/* help screen selection failed */
-		    message ("can't find help", 0);
-	      }else
-		dispmd = selectdisp(dispmd & ~HELP_SCRN);
-	    }
-	    break;
-	  case CMD_CAPBLINK:
-	    capon = 1;
-	    TOGGLEPLAY( TOGGLE(env.capblink) );
-	    if (env.capblink)
-	      {
-		capcntr = env.caponcnt;
-		attron = 0;
-		attrcntr = env.attroffcnt;
-		csron = 0;
-		csrcntr = env.csroffcnt;
-	      }
-	    break;
-	  case CMD_ATTRBLINK:
-	    attron = 1;
-	    TOGGLEPLAY( TOGGLE(env.attrblink) );
-	    if (env.attrblink)
-	      {
-		attrcntr = env.attroncnt;
-		capon = 1;
-		capcntr = env.caponcnt;
-		csron = 0;
-		csrcntr = env.csroffcnt;
-	      }
-	    break;
-	  case CMD_INFO:
-	    TOGGLE(infmode);
-	    break;
-	  case CMD_CSRSIZE:
-	    TOGGLEPLAY ( TOGGLE(env.csrsize) );
-	    break;
-	  case CMD_SIXDOTS:
-	    TOGGLEPLAY ( TOGGLE(env.sixdots) );
-	    break;
-	  case CMD_SLIDEWIN:
-	    TOGGLEPLAY ( TOGGLE(env.slidewin) );
-	    break;
-	  case CMD_SKPIDLNS:
-	    TOGGLEPLAY ( TOGGLE(env.skpidlns) );
-	    break;
-	  case CMD_SKPBLNKWINS:
-	    TOGGLEPLAY ( TOGGLE(env.skpblnkwins) );
-	    break;
-	  case CMD_PREFSAVE:
-	    if (savePreferences()) {
-	      playTune(&tune_done);
-	    }
-	    break;
-	  case CMD_PREFMENU:
-	    updatePreferences();
-	    break;
-	  case CMD_PREFLOAD:
-	    if (loadPreferences(1)) {
-	      csron = 1;
-	      capon = 0;
-	      csrcntr = capcntr = 1;
-	      playTune(&tune_done);
-	    }
-	    break;
-	  case CMD_SAY:
-	  case CMD_SAYALL:
-	    {
-	      /* OK heres a crazy idea: why not send the attributes with the
+                capon = 0;
+                capcntr = env.capoffcnt;
+              }
+            break;
+          case CMD_CSRTRK:
+            TOGGLE(p->csrtrk);
+            if (p->csrtrk)
+              {
+                if(speech->isSpeaking())
+                  speaking_prev_inx = -1;
+                else setwinxy (scr.posx, scr.posy);
+                playTune (&tune_link);
+              }
+            else
+              playTune (&tune_unlink);
+            break;
+          case CMD_CUT_BEG:
+            cut_begin (p->winx, p->winy);
+            break;
+          case CMD_CUT_END:
+            cut_end (MIN(p->winx + brl.x - 1, scr.cols-1), p->winy + brl.y - 1);
+            break;
+          case CMD_PASTE:
+            if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
+              cut_paste();
+            else
+              playTune(&tune_bad_command);
+            break;
+          case CMD_SND:
+            TOGGLEPLAY ( TOGGLE(env.sound) );        /* toggle sound on/off */
+            break;
+          case CMD_DISPMD:
+            usetable ((TOGGLE(p->dispmode)) ? TBL_ATTRIB : TBL_TEXT);
+            break;
+          case CMD_FREEZE:
+            { unsigned char v = (dispmd & FROZ_SCRN) ? 1 : 0;
+              TOGGLE(v);
+              if(v){
+                dispmd = selectdisp (dispmd | FROZ_SCRN);
+                playTune (&tune_freeze);
+              }else{
+                dispmd = selectdisp (dispmd & ~FROZ_SCRN);
+                playTune (&tune_unfreeze);
+              }
+            }
+            break;
+          case CMD_HELP:
+            { int v;
+              infmode = 0;        /* ... and not in info mode */
+              v = (dispmd & HELP_SCRN) ? 1 : 0;
+              TOGGLE(v);
+              if (v) {
+                dispmd = selectdisp (dispmd | HELP_SCRN);
+                if (dispmd & HELP_SCRN) /* help screen selection successful */
+                  {
+                    switchto(0);        /* screen 0 for help screen */
+                    *p = initparam;        /* reset params for help screen */
+                  }
+                else        /* help screen selection failed */
+                    message ("can't find help", 0);
+              }else
+                dispmd = selectdisp(dispmd & ~HELP_SCRN);
+            }
+            break;
+          case CMD_CAPBLINK:
+            capon = 1;
+            TOGGLEPLAY( TOGGLE(env.capblink) );
+            if (env.capblink)
+              {
+                capcntr = env.caponcnt;
+                attron = 0;
+                attrcntr = env.attroffcnt;
+                csron = 0;
+                csrcntr = env.csroffcnt;
+              }
+            break;
+          case CMD_ATTRBLINK:
+            attron = 1;
+            TOGGLEPLAY( TOGGLE(env.attrblink) );
+            if (env.attrblink)
+              {
+                attrcntr = env.attroncnt;
+                capon = 1;
+                capcntr = env.caponcnt;
+                csron = 0;
+                csrcntr = env.csroffcnt;
+              }
+            break;
+          case CMD_INFO:
+            TOGGLE(infmode);
+            break;
+          case CMD_CSRSIZE:
+            TOGGLEPLAY ( TOGGLE(env.csrsize) );
+            break;
+          case CMD_SIXDOTS:
+            TOGGLEPLAY ( TOGGLE(env.sixdots) );
+            break;
+          case CMD_SLIDEWIN:
+            TOGGLEPLAY ( TOGGLE(env.slidewin) );
+            break;
+          case CMD_SKPIDLNS:
+            TOGGLEPLAY ( TOGGLE(env.skpidlns) );
+            break;
+          case CMD_SKPBLNKWINS:
+            TOGGLEPLAY ( TOGGLE(env.skpblnkwins) );
+            break;
+          case CMD_PREFSAVE:
+            if (savePreferences()) {
+              playTune(&tune_done);
+            }
+            break;
+          case CMD_PREFMENU:
+            updatePreferences();
+            break;
+          case CMD_PREFLOAD:
+            if (loadPreferences(1)) {
+              csron = 1;
+              capon = 0;
+              csrcntr = capcntr = 1;
+              playTune(&tune_done);
+            }
+            break;
+          case CMD_SAY:
+          case CMD_SAYALL:
+            {
+              /* OK heres a crazy idea: why not send the attributes with the
                  text, in case some inflection or marking can be added...! The
                  speech driver's say function will receive a buffer of text
                  and a length, but in reality the buffer will contain twice
                  len bytes: the text followed by the video attribs data. */
-	      unsigned int i;
-	      unsigned r = (keypress == CMD_SAYALL) ? scr.rows - p->winy :1;
-	      unsigned char buffer[ 2*( r *scr.cols )];
-	      getscr ((winpos)
-		      {
-			0, p->winy, scr.cols, r
-		      }
-		      ,buffer, \
-		      SCR_TEXT);
-	      i = r*scr.cols;
-	      i--;
-	      while(i>=0 && buffer[i] == 0) i--;
-	      i++;
-	      if(i==0) break;
-	      if(speech->sayWithAttribs != NULL) {
-		getscr ((winpos)
-		{
-		  0, p->winy, scr.cols, r
-		    }
-			,buffer+i, \
-			SCR_ATTRIB);
-		speech->sayWithAttribs(buffer, i);
-	      }else speech->say(buffer, i);
-	      if ((keypress & ~VAL_SWITCHMASK) == CMD_SAYALL) {
-		speaking_scrno = scr.no;
-		speaking_start_line = p->winy;
-	      } else {
-		/* 
-		 * We don't want speech tracking to move the braille window 
-		 * for a single line reading.
-		 */ 
-		speaking_scrno = -1;
-	      }
-	    }
-	    break;
-	  case CMD_MUTE:
-	    speech->mute();
-	    break;
-	  case CMD_SWITCHVT_PREV:
-	    if (!switchvt(scr.no-1))
-	      playTune(&tune_bad_command);
-	    break;
-	  case CMD_SWITCHVT_NEXT:
-	    if (!switchvt(scr.no+1))
-	      playTune(&tune_bad_command);
-	    break;
-	  default: {
-	    int key = keypress & ~VAL_ARG_MASK;
-	    int arg = keypress & VAL_ARG_MASK;
-	    switch (key) {
-	      case VAL_PASSKEY: {
-		char *sequence;
-		switch (arg) {
-		  case VPK_RETURN:
-                    sequence = INS_RETURN;
+              unsigned int i;
+              unsigned r = (keypress == CMD_SAYALL) ? scr.rows - p->winy :1;
+              unsigned char buffer[ 2*( r *scr.cols )];
+              getscr ((winpos)
+                      {
+                        0, p->winy, scr.cols, r
+                      }
+                      ,buffer, \
+                      SCR_TEXT);
+              i = r*scr.cols;
+              i--;
+              while(i>=0 && buffer[i] == 0) i--;
+              i++;
+              if(i==0) break;
+              if(speech->sayWithAttribs != NULL) {
+                getscr ((winpos)
+                {
+                  0, p->winy, scr.cols, r
+                    }
+                        ,buffer+i, \
+                        SCR_ATTRIB);
+                speech->sayWithAttribs(buffer, i);
+              }else speech->say(buffer, i);
+              if ((keypress & ~VAL_SWITCHMASK) == CMD_SAYALL) {
+                speaking_scrno = scr.no;
+                speaking_start_line = p->winy;
+              } else {
+                /* 
+                 * We don't want speech tracking to move the braille window 
+                 * for a single line reading.
+                 */ 
+                speaking_scrno = -1;
+              }
+            }
+            break;
+          case CMD_MUTE:
+            speech->mute();
+            break;
+          case CMD_SWITCHVT_PREV:
+            if (!switchVirtualTerminal(scr.no-1))
+              playTune(&tune_bad_command);
+            break;
+          case CMD_SWITCHVT_NEXT:
+            if (!switchVirtualTerminal(scr.no+1))
+              playTune(&tune_bad_command);
+            break;
+          default: {
+            int key = keypress & ~VAL_ARG_MASK;
+            int arg = keypress & VAL_ARG_MASK;
+            switch (key) {
+              case VAL_PASSKEY: {
+                unsigned short key;
+                switch (arg) {
+                  case VPK_RETURN:
+                    key = KEY_RETURN;
                     break;
-		  case VPK_TAB:
-                    sequence = INS_TAB;
+                  case VPK_TAB:
+                    key = KEY_TAB;
                     break;
-		  case VPK_BACKSPACE:
-                    sequence = INS_BACKSPACE;
+                  case VPK_BACKSPACE:
+                    key = KEY_BACKSPACE;
                     break;
-		  case VPK_ESCAPE:
-                    sequence = INS_ESCAPE;
+                  case VPK_ESCAPE:
+                    key = KEY_ESCAPE;
                     break;
-		  case VPK_CURSOR_LEFT:
-                    sequence = INS_CURSOR_LEFT;
+                  case VPK_CURSOR_LEFT:
+                    key = KEY_CURSOR_LEFT;
                     break;
-		  case VPK_CURSOR_RIGHT:
-                    sequence = INS_CURSOR_RIGHT;
+                  case VPK_CURSOR_RIGHT:
+                    key = KEY_CURSOR_RIGHT;
                     break;
-		  case VPK_CURSOR_UP:
-                    sequence = INS_CURSOR_UP;
+                  case VPK_CURSOR_UP:
+                    key = KEY_CURSOR_UP;
                     break;
-		  case VPK_CURSOR_DOWN:
-                    sequence = INS_CURSOR_DOWN;
+                  case VPK_CURSOR_DOWN:
+                    key = KEY_CURSOR_DOWN;
                     break;
-		  case VPK_PAGE_UP:
-                    sequence = INS_PAGE_UP;
+                  case VPK_PAGE_UP:
+                    key = KEY_PAGE_UP;
                     break;
-		  case VPK_PAGE_DOWN:
-                    sequence = INS_PAGE_DOWN;
+                  case VPK_PAGE_DOWN:
+                    key = KEY_PAGE_DOWN;
                     break;
-		  case VPK_HOME:
-                    sequence = INS_HOME;
+                  case VPK_HOME:
+                    key = KEY_HOME;
                     break;
-		  case VPK_END:
-                    sequence = INS_END;
+                  case VPK_END:
+                    key = KEY_END;
                     break;
-		  case VPK_INSERT:
-                    sequence = INS_INSERT;
+                  case VPK_INSERT:
+                    key = KEY_INSERT;
                     break;
-		  case VPK_DELETE:
-                    sequence = INS_DELETE;
-                    break;
-                  case VPK_FUNCTION + 0:
-                    sequence = INS_F1;
-                    break;
-                  case VPK_FUNCTION + 1:
-                    sequence = INS_F2;
-                    break;
-                  case VPK_FUNCTION + 2:
-                    sequence = INS_F3;
-                    break;
-                  case VPK_FUNCTION + 3:
-                    sequence = INS_F4;
-                    break;
-                  case VPK_FUNCTION + 4:
-                    sequence = INS_F5;
-                    break;
-                  case VPK_FUNCTION + 5:
-                    sequence = INS_F6;
-                    break;
-                  case VPK_FUNCTION + 6:
-                    sequence = INS_F7;
-                    break;
-                  case VPK_FUNCTION + 7:
-                    sequence = INS_F8;
-                    break;
-                  case VPK_FUNCTION + 8:
-                    sequence = INS_F9;
-                    break;
-                  case VPK_FUNCTION + 9:
-                    sequence = INS_F10;
-                    break;
-                  case VPK_FUNCTION + 10:
-                    sequence = INS_F11;
-                    break;
-                  case VPK_FUNCTION + 11:
-                    sequence = INS_F12;
-                    break;
-                  case VPK_FUNCTION + 12:
-                    sequence = INS_F13;
-                    break;
-                  case VPK_FUNCTION + 13:
-                    sequence = INS_F14;
-                    break;
-                  case VPK_FUNCTION + 14:
-                    sequence = INS_F15;
-                    break;
-                  case VPK_FUNCTION + 15:
-                    sequence = INS_F16;
-                    break;
-                  case VPK_FUNCTION + 16:
-                    sequence = INS_F17;
-                    break;
-                  case VPK_FUNCTION + 17:
-                    sequence = INS_F18;
-                    break;
-                  case VPK_FUNCTION + 18:
-                    sequence = INS_F19;
-                    break;
-                  case VPK_FUNCTION + 19:
-                    sequence = INS_F20;
+                  case VPK_DELETE:
+                    key = KEY_DELETE;
                     break;
                   default:
-                    sequence = NULL;
+                    if (arg < VPK_FUNCTION) goto badKey;
+                    key = KEY_FUNCTION + (arg - VPK_FUNCTION);
                     break;
-		}
-		if (sequence)
-		  inskey(sequence);
-		else
-		  playTune(&tune_bad_command);
-	        break;
-	      }
-	      case VAL_PASSCHAR: {
-		char buf[] = {arg, 0};
-		inskey(buf);
-		break;
-	      }
-	      case VAL_PASSDOTS: {
-		char buf[] = {untexttrans[arg], 0};
-		inskey(buf);
-		break;
-	      }
-	      case CR_ROUTEOFFSET:
-		if (arg < brl.x && (dispmd & HELP_SCRN) != HELP_SCRN)
-		  csrjmp(MIN(p->winx+arg, scr.cols-1), p->winy, curscr);
-		else
-		  playTune(&tune_bad_command);
-		break;
-	      case CR_BEGBLKOFFSET:
-		if (arg < brl.x && p->winx+arg < scr.cols)
-		  cut_begin(p->winx+arg, p->winy);
-		else
-		  playTune(&tune_bad_command);
-		break;
-	      case CR_ENDBLKOFFSET:
-		if (arg < brl.x && p->winx+arg < scr.cols)
-		  cut_end(MIN(p->winx+arg, scr.cols-1), p->winy);
-		else
-		  playTune(&tune_bad_command);
-		break;
-	      case CR_MSGATTRIB:
-		if (arg < brl.x && p->winx+arg < scr.cols) {
-		  static char *colours[] = {
-		    "black",   "red",     "green",   "yellow",
-		    "blue",    "magenta", "cyan",    "white"
-		  };
-		  char buffer[0X40];
-		  unsigned char attributes;
-		  getscr((winpos){p->winx+arg, p->winy, 1, 1},
-		         &attributes, SCR_ATTRIB);
-		  sprintf(buffer, "%s on %s",
-		          colours[attributes&0X07],
-		          colours[(attributes&0X70)>>4]);
-		  if (attributes & 0X08)
-		    strcat(buffer, " bright");
-		  if (attributes & 0X80)
-		    strcat(buffer, " blink");
-		  message(buffer, 0);
-		} else
-		  playTune(&tune_bad_command);
-		break;
-	      case CR_SWITCHVT:
-		if (!switchvt(arg+1))
-		  playTune(&tune_bad_command);
-		break;
-	      {
-	        int increment;
-	      case CR_NXINDENT:
-	        increment = 1;
-		goto find;
-	      case CR_PRINDENT:
-	        increment = -1;
-	      find:
-	        {
-		  int count = MIN(p->winx+arg+1, scr.cols);
-		  int found = 0;
-		  int row = p->winy + increment;
-		  char buffer[scr.cols];
-		  while ((row >= 0) && (row <= scr.rows-brl.y)) {
-		    int column;
-		    getscr((winpos){0, row, count, 1},
-			   buffer, SCR_TEXT);
-		    for (column=0; column<count; column++)
-		      if ((buffer[column] != ' ') && (buffer[column] != 0))
-			break;
-		    if (column < count) {
-		      found = 1;
-		      p->winy = row;
-		      break;
-		    }
-		    row += increment;
-		  }
-		  if (!found) {
-		    playTune(&tune_bounce);
-		    playTune(&tune_bounce);
-		  }
-	        }
-		break;
-	      }
-	      default:
-		playTune(&tune_bad_command);
-		LogPrint(LOG_WARNING, "Driver sent unrecognized command: %X", keypress);
-	    }
-	    break;
-	  }
-	}
+                }
+                if (!insertKey(key))
+                badKey:
+                  playTune(&tune_bad_command);
+                break;
+              }
+              case VAL_PASSCHAR:
+                if (!insertKey(arg)) {
+                  playTune(&tune_bad_command);
+                }
+                break;
+              case VAL_PASSDOTS:
+                if (!insertKey(untexttrans[arg])) {
+                  playTune(&tune_bad_command);
+                }
+                break;
+              case CR_ROUTEOFFSET:
+                if (arg < brl.x && (dispmd & HELP_SCRN) != HELP_SCRN)
+                  csrjmp(MIN(p->winx+arg, scr.cols-1), p->winy, curscr);
+                else
+                  playTune(&tune_bad_command);
+                break;
+              case CR_BEGBLKOFFSET:
+                if (arg < brl.x && p->winx+arg < scr.cols)
+                  cut_begin(p->winx+arg, p->winy);
+                else
+                  playTune(&tune_bad_command);
+                break;
+              case CR_ENDBLKOFFSET:
+                if (arg < brl.x && p->winx+arg < scr.cols)
+                  cut_end(MIN(p->winx+arg, scr.cols-1), p->winy);
+                else
+                  playTune(&tune_bad_command);
+                break;
+              case CR_MSGATTRIB:
+                if (arg < brl.x && p->winx+arg < scr.cols) {
+                  static char *colours[] = {
+                    "black",   "red",     "green",   "yellow",
+                    "blue",    "magenta", "cyan",    "white"
+                  };
+                  char buffer[0X40];
+                  unsigned char attributes;
+                  getscr((winpos){p->winx+arg, p->winy, 1, 1},
+                         &attributes, SCR_ATTRIB);
+                  sprintf(buffer, "%s on %s",
+                          colours[attributes&0X07],
+                          colours[(attributes&0X70)>>4]);
+                  if (attributes & 0X08)
+                    strcat(buffer, " bright");
+                  if (attributes & 0X80)
+                    strcat(buffer, " blink");
+                  message(buffer, 0);
+                } else
+                  playTune(&tune_bad_command);
+                break;
+              case CR_SWITCHVT:
+                  if (!switchVirtualTerminal(arg+1))
+                       playTune(&tune_bad_command);
+                  break;
+              {
+                int increment;
+              case CR_NXINDENT:
+                increment = 1;
+                goto find;
+              case CR_PRINDENT:
+                increment = -1;
+              find:
+                {
+                  int count = MIN(p->winx+arg+1, scr.cols);
+                  int found = 0;
+                  int row = p->winy + increment;
+                  char buffer[scr.cols];
+                  while ((row >= 0) && (row <= scr.rows-brl.y)) {
+                    int column;
+                    getscr((winpos){0, row, count, 1},
+                           buffer, SCR_TEXT);
+                    for (column=0; column<count; column++)
+                      if ((buffer[column] != ' ') && (buffer[column] != 0))
+                        break;
+                    if (column < count) {
+                      found = 1;
+                      p->winy = row;
+                      break;
+                    }
+                    row += increment;
+                  }
+                  if (!found) {
+                    playTune(&tune_bounce);
+                    playTune(&tune_bounce);
+                  }
+                }
+                break;
+              }
+              default:
+                playTune(&tune_bad_command);
+                LogPrint(LOG_WARNING, "Driver sent unrecognized command: %X", keypress);
+            }
+            break;
+          }
+        }
 
-	if ((p->winx != oldmotx) || (p->winy != oldmoty))
-	  { // The window has been manually moved.
-	    p->motx = p->winx;
-	    p->moty = p->winy;
-	  }
+        if ((p->winx != oldmotx) || (p->winy != oldmoty))
+          { // The window has been manually moved.
+            p->motx = p->winx;
+            p->moty = p->winy;
+          }
       }
-	  
+          
       /*
        * Update blink counters: 
        */
       if (env.csrblink)
-	if (!--csrcntr)
-	  csrcntr = (csron ^= 1) ? env.csroncnt : env.csroffcnt;
+        if (!--csrcntr)
+          csrcntr = (csron ^= 1) ? env.csroncnt : env.csroffcnt;
       if (env.capblink)
-	if (!--capcntr)
-	  capcntr = (capon ^= 1) ? env.caponcnt : env.capoffcnt;
+        if (!--capcntr)
+          capcntr = (capon ^= 1) ? env.caponcnt : env.capoffcnt;
       if (env.attrblink)
-	if (!--attrcntr)
-	  attrcntr = (attron ^= 1) ? env.attroncnt : env.attroffcnt;
+        if (!--attrcntr)
+          attrcntr = (attron ^= 1) ? env.attroncnt : env.attroffcnt;
 
       /*
        * Update Braille display and screen information.  Switch screen 
        * params if screen numver has changed.
        */
-      getstat(&scr);
+      getScreenStatus(&scr);
       if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no)
-	switchto (scr.no);
+        switchto (scr.no);
       /* NB: This should also accomplish screen resizing: scr.rows and
        * scr.cols may have changed.
        */
       {
         short maximum = scr.rows - brl.y;
-	short *table[] = {&p->winy, &p->moty, NULL};
-	short **value = table;
-	while (*value) {
-	  if (**value > maximum) **value = maximum;
-	  ++value;
-	}
+        short *table[] = {&p->winy, &p->moty, NULL};
+        short **value = table;
+        while (*value) {
+          if (**value > maximum) **value = maximum;
+          ++value;
+        }
       }
       {
         short maximum = scr.cols - offr;
-	short *table[] = {&p->winx, &p->motx, NULL};
-	short **value = table;
-	while (*value) {
-	  if (**value > maximum) **value = maximum;
-	  ++value;
-	}
+        short *table[] = {&p->winx, &p->motx, NULL};
+        short **value = table;
+        while (*value) {
+          if (**value > maximum) **value = maximum;
+          ++value;
+        }
       }
 
       /* speech tracking */
       speech->processSpkTracking(); /* called continually even if we're not tracking
-			       so that the pipe doesn't fill up. */
+                               so that the pipe doesn't fill up. */
       if(p->csrtrk && speech->isSpeaking() && scr.no == speaking_scrno) {
-	int inx = speech->track();
-	if(inx != speaking_prev_inx) {
-	  int y,x;
-	  speaking_prev_inx = inx;
-	  y = inx / scr.cols + speaking_start_line;
-	  /* in case indexing data is wrong */
-	  y %= scr.rows;
-	  x = ((inx % scr.cols) / brl.x) * brl.x;
-	  setwinabsxy( x,y );
-	}
+        int inx = speech->track();
+        if(inx != speaking_prev_inx) {
+          int y,x;
+          speaking_prev_inx = inx;
+          y = inx / scr.cols + speaking_start_line;
+          /* in case indexing data is wrong */
+          y %= scr.rows;
+          x = ((inx % scr.cols) / brl.x) * brl.x;
+          setwinabsxy( x,y );
+        }
       }
       else /* cursor tracking */
       if (p->csrtrk)
-	{
-	  /* If cursor moves while blinking is on */
-	  if (env.csrblink)
-	    {
-	      if (scr.posy != p->trky)
-		{
-		  /* turn off cursor to see what's under it while changing lines */
-		  csron = 0;
-		  csrcntr = env.csroffcnt;
-		}
-	      else if (scr.posx != p->trkx)
-		{
-		  /* turn on cursor to see it moving on the line */
-		  csron = 1;
-		  csrcntr = env.csroncnt;
-		}
-	    }
-	  /* If the cursor moves in cursor tracking mode: */
-	  if (!csr_active && (scr.posx != p->trkx || scr.posy != p->trky))
-	    {
-	      setwinxy (scr.posx, scr.posy);
-	      p->trkx = scr.posx;
-	      p->trky = scr.posy;
-	    }
-	}
+        {
+          /* If cursor moves while blinking is on */
+          if (env.csrblink)
+            {
+              if (scr.posy != p->trky)
+                {
+                  /* turn off cursor to see what's under it while changing lines */
+                  csron = 0;
+                  csrcntr = env.csroffcnt;
+                }
+              else if (scr.posx != p->trkx)
+                {
+                  /* turn on cursor to see it moving on the line */
+                  csron = 1;
+                  csrcntr = env.csroncnt;
+                }
+            }
+          /* If the cursor moves in cursor tracking mode: */
+          if (!csr_active && (scr.posx != p->trkx || scr.posy != p->trky))
+            {
+              setwinxy (scr.posx, scr.posy);
+              p->trkx = scr.posx;
+              p->trky = scr.posy;
+            }
+        }
       /* If attribute underlining is blinking during display movement */
       if(env.attrvis && env.attrblink){
-	/* We could check to see if we changed screen, but that doesn't
-	   really matter... this is mainly for when you are hunting up/down
-	   for the line with attributes. */
-	if(p->winx != oldwinx || p->winy != oldwiny){
-	  attron = 1;
-	  attrcntr = env.attroncnt;
-	}
-	/* problem: this still doesn't help when the braille window is
-	   stationnary and the attributes themselves are moving
-	   (example: tin). */
+        /* We could check to see if we changed screen, but that doesn't
+           really matter... this is mainly for when you are hunting up/down
+           for the line with attributes. */
+        if(p->winx != oldwinx || p->winy != oldwiny){
+          attron = 1;
+          attrcntr = env.attroncnt;
+        }
+        /* problem: this still doesn't help when the braille window is
+           stationnary and the attributes themselves are moving
+           (example: tin). */
       }
       oldwinx = p->winx; oldwiny = p->winy;
       /* If not in info mode, get screen image: */
@@ -1492,7 +1431,7 @@ main (int argc, char *argv[])
         setStatusCells();
         braille->write(&brl);
       }
-      delay(cycleDelay);
+      delay(refreshInterval);
     }
 
   terminateProgram(0);
@@ -1510,44 +1449,44 @@ message (unsigned char *text, short flags) {
 
    if (braille && brl.disp) {
       while (length) {
-	 int count;
-	 int index;
+         int count;
+         int index;
 
-	 /* strip leading spaces */
-	 while (*text == ' ')  text++, length--;
+         /* strip leading spaces */
+         while (*text == ' ')  text++, length--;
 
-	 if (length <= brl.x*brl.y) {
-	    count = length; /* the whole message fits on the braille window */
-	 } else {
-	    /* split the message across multiple windows on space characters */
-	    for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
-	    if (!count) count = brl.x * brl.y - 1;
-	 }
+         if (length <= brl.x*brl.y) {
+            count = length; /* the whole message fits on the braille window */
+         } else {
+            /* split the message across multiple windows on space characters */
+            for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
+            if (!count) count = brl.x * brl.y - 1;
+         }
 
-	 memset(brl.disp, ' ', brl.x*brl.y);
-	 for (index=0; index<count; brl.disp[index++]=*text++);
-	 if (length -= count) {
-	    while (index < brl.x*brl.y) brl.disp[index++] = '-';
-	    brl.disp[brl.x*brl.y - 1] = '>';
-	 }
+         memset(brl.disp, ' ', brl.x*brl.y);
+         for (index=0; index<count; brl.disp[index++]=*text++);
+         if (length -= count) {
+            while (index < brl.x*brl.y) brl.disp[index++] = '-';
+            brl.disp[brl.x*brl.y - 1] = '>';
+         }
 
-	 /*
-	  * Do Braille translation using text table. * Six-dot mode is
-	  * ignored, since case can be important, and * blinking caps won't 
-	  * work ... 
-	  */
-	 for (index=0; index<brl.x*brl.y; ++index) brl.disp[index] = texttrans[brl.disp[index]];
-	 braille->write(&brl);
+         /*
+          * Do Braille translation using text table. * Six-dot mode is
+          * ignored, since case can be important, and * blinking caps won't 
+          * work ... 
+          */
+         for (index=0; index<brl.x*brl.y; ++index) brl.disp[index] = texttrans[brl.disp[index]];
+         braille->write(&brl);
 
-	 if (flags & MSG_WAITKEY)
-	    while (braille->read(CMDS_MESSAGE) == EOF) delay(readDelay);
-	 else if (length || !(flags & MSG_NODELAY)) {
-	    int i;
-	    for (i=0; i<messageDelay; i+=readDelay) {
-	       delay(readDelay);
-	       if (braille->read(CMDS_MESSAGE) != EOF) break;
-	    }
-	 }
+         if (flags & MSG_WAITKEY)
+            while (braille->read(CMDS_MESSAGE) == EOF) delay(refreshInterval);
+         else if (length || !(flags & MSG_NODELAY)) {
+            int i;
+            for (i=0; i<messageDelay; i+=refreshInterval) {
+               delay(refreshInterval);
+               if (braille->read(CMDS_MESSAGE) != EOF) break;
+            }
+         }
       }
    }
 }

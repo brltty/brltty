@@ -28,7 +28,7 @@ SPEECH_MODELS =
 HELPTARGETS = brlttyhelp0.txt brlttyhelp1.txt
 include ../driver.mk
 
-brl.o: brl.c ../brl.h ../misc.h ../inskey.h ../message.h \
+brl.o: brl.c ../brl.h ../misc.h ../scr.h ../message.h \
 	../config.h brlconf.h ../brl_driver.h bindings.h
 	$(CC) $(BRL_CFLAGS) -c brl.c
 

@@ -26,7 +26,6 @@
 
 #include "csrjmp.h"
 #include "scr.h"
-#include "inskey.h"
 #include "misc.h"
 
 
@@ -49,7 +48,7 @@ volatile pid_t csr_pid = 0;
 
 void csrjmp_sub(int x, int y, int curscr)
 {
-    scrstat scr;		/* for screen state infos */
+    ScreenStatus scr;		/* for screen state infos */
     int curx, cury;		/* current cursor position */
     int dif, t = 0;
     sigset_t mask;		/* for blocking of SIGUSR1 */
@@ -59,8 +58,7 @@ void csrjmp_sub(int x, int y, int curscr)
     sigaddset(&mask, SIGUSR1);
 
     /* Initialise second thread of screen reading: */
-    if (initscr_phys())
-	return;
+    if (!initscr_phys()) return;
 
     getstat_phys(&scr);
 
@@ -69,7 +67,7 @@ void csrjmp_sub(int x, int y, int curscr)
     while (dif != 0 && curscr == scr.no) {
 	timeout_yet(0);		/* initialise stop-watch */
 	sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-	inskey(dif > 0 ? INS_CURSOR_DOWN : INS_CURSOR_UP);
+	insertKey(dif > 0 ? KEY_CURSOR_DOWN : KEY_CURSOR_UP);
 	sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 	do {
 #if CSRJMP_LOOP_DELAY > 0
@@ -96,7 +94,7 @@ void csrjmp_sub(int x, int y, int curscr)
 		 * nearest ever reached to date before giving up.
 		 */
 		sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-		inskey(dif < 0 ? INS_CURSOR_DOWN : INS_CURSOR_UP);
+		insertKey(dif < 0 ? KEY_CURSOR_DOWN : KEY_CURSOR_UP);
 		sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 		break;
 	    }
@@ -110,7 +108,7 @@ void csrjmp_sub(int x, int y, int curscr)
 	while (dif != 0 && scr.posy == y && curscr == scr.no) {
 	    timeout_yet(0);	/* initialise stop-watch */
 	    sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-	    inskey(dif > 0 ? INS_CURSOR_RIGHT : INS_CURSOR_LEFT);
+	    insertKey(dif > 0 ? KEY_CURSOR_RIGHT : KEY_CURSOR_LEFT);
 	    sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 	    do {
 #if CSRJMP_LOOP_DELAY > 0
@@ -138,7 +136,7 @@ void csrjmp_sub(int x, int y, int curscr)
 		     * to date before we exit.
 		     */
 		    sigprocmask(SIG_BLOCK, &mask, NULL);  /* block SIGUSR1 */
-		    inskey(dif > 0 ? INS_CURSOR_LEFT : INS_CURSOR_RIGHT);
+		    insertKey(dif > 0 ? KEY_CURSOR_LEFT : KEY_CURSOR_RIGHT);
 		    sigprocmask(SIG_UNBLOCK, &mask, NULL);  /* unblock SIGUSR1 */
 		    break;
 		}

@@ -18,25 +18,27 @@
 /* misc.c - Miscellaneous all-purpose routines
  */
 
-#define __EXTENSIONS__	/* for time.h */
+#define __EXTENSIONS__        /* for time.h */
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/ioctl.h>
+#include <linux/kd.h>
 
 #include "misc.h"
 #include "config.h"
 #include "brl.h"
 #include "common.h"
 
-struct brltty_env env;		/* environment (i.e. global) parameters */
+struct brltty_env env;                /* environment (i.e. global) parameters */
 
 /*
  * Output braille translation tables.
@@ -58,7 +60,7 @@ unsigned char attribtrans[0X100] =
  * remark: the Papenmeier has a column with 22 cells, 
  * all other terminals use up to 5 bytes
  */
-unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
+unsigned char statcells[MAXNSTATCELLS];        /* status cell buffer */
 
 #ifdef USE_SYSLOG
    #include <syslog.h>
@@ -147,6 +149,47 @@ SetStderrOff(void)
   SetStderrLevel(-1);
 }
 
+int
+getConsole (void) {
+   static int console = -1;
+   if (console == -1) {
+      if ((console = open("/dev/tty0", O_WRONLY)) != -1) {
+         LogPrint(LOG_DEBUG, "Console opened: fd=%d", console);
+      } else {
+         LogError("Console open");
+      }
+   }
+   return console;
+}
+
+int
+writeConsole (const unsigned char *address, size_t count) {
+   int console = getConsole();
+   if (console != -1) {
+      if (write(console, address, count) != -1) {
+         return 1;
+      }
+      LogError("Console write");
+   }
+   return 0;
+}
+
+int
+ringBell (void) {
+   static unsigned char bellSequence[] = {0X07};
+   return writeConsole(bellSequence, sizeof(bellSequence));
+}
+
+int
+timedBeep (unsigned short frequency, unsigned short milliseconds) {
+   if (ioctl(getConsole(), KDMKTONE,
+             ((milliseconds << 0X10) | (1190000 / frequency))) == -1) {
+      LogError("ioctl KDMKTONE");
+      return 0;
+   }
+   return 1;
+}
+
 static void
 noMemory (void)
 {
@@ -201,21 +244,21 @@ processLines (FILE *file, void (*handler) (char *line, void *data), void *data) 
 
       // No trailing new-line means that the buffer isn't big enough.
       while (line[line_len-1] != '\n') {
-	// Extend the buffer, keeping track of its new size.
-	buff_addr = reallocWrapper(buff_addr, (buff_size <<= 1));
+        // Extend the buffer, keeping track of its new size.
+        buff_addr = reallocWrapper(buff_addr, (buff_size <<= 1));
 
-	// Read the rest of the line into the end of the buffer.
-	if (!(line = fgets(buff_addr+line_len, buff_size-line_len, file))) {
-	  if (ferror(file))
-	    LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
-	  else
-	    LogPrint(LOG_ERR, "Incomplete last line.");
-	  ok = 0;
-	  goto done;
-	}
+        // Read the rest of the line into the end of the buffer.
+        if (!(line = fgets(buff_addr+line_len, buff_size-line_len, file))) {
+          if (ferror(file))
+            LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
+          else
+            LogPrint(LOG_ERR, "Incomplete last line.");
+          ok = 0;
+          goto done;
+        }
 
-	line_len += strlen(line); // New total line length.
-	line = buff_addr; // Point to the beginning of the line.
+        line_len += strlen(line); // New total line length.
+        line = buff_addr; // Point to the beginning of the line.
       }
       line[--line_len] = 0; // Remove trailing new-line.
 
@@ -223,7 +266,7 @@ processLines (FILE *file, void (*handler) (char *line, void *data), void *data) 
     } else {
       if (ferror(file)) {
         LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
-	ok = 0;
+        ok = 0;
       }
       break;
     }
@@ -254,15 +297,15 @@ size_t safe_read (int fd, unsigned char *buffer, size_t length)
       // Handle errors.
       if (count == -1)
         {
-	  // If the system call was interrupted by a signal, then restart it.
-	  if (errno == EINTR)
-	    {
-	      continue;
-	    }
+          // If the system call was interrupted by a signal, then restart it.
+          if (errno == EINTR)
+            {
+              continue;
+            }
 
-	  // Return all other errors to the caller.
-	  return -1;
-	}
+          // Return all other errors to the caller.
+          return -1;
+        }
 
       // Stop looping if the end of the file has been reached.
       if (count == 0)
@@ -297,13 +340,13 @@ size_t safe_write (int fd, const unsigned char *buffer, size_t length)
       // Handle errors.
       if (count == -1)
         {
-	  // If the system call was interrupted by a signal, then restart it.
+          // If the system call was interrupted by a signal, then restart it.
           if (errno == EINTR)
-	    {
-	      continue;
-	    }
+            {
+              continue;
+            }
 
-	  // Return all other errors to the caller.
+          // Return all other errors to the caller.
           return -1;
         }
 
@@ -359,12 +402,12 @@ timeout_yet (int msec)
 {
   static struct timeval start = {0, 0};
 
-  if (msec)		/* initialiseation */
+  if (msec)                /* initialiseation */
     {
       struct timeval now;
       gettimeofday(&now, NULL);
       return (now.tv_sec * 1000000 + now.tv_usec) -
-	     (start.tv_sec * 1000000 + start.tv_usec) >= (msec * 1000);
+             (start.tv_sec * 1000000 + start.tv_usec) >= (msec * 1000);
     }
 
   gettimeofday(&start, NULL);
@@ -382,16 +425,16 @@ validateInteger (int *integer, const char *description, const char *value, const
    }
    if (minimum) {
       if (*integer < *minimum) {
-	 LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
-	          description, *minimum, *integer);
-	 return 0;
+         LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
+                  description, *minimum, *integer);
+         return 0;
       }
    }
    if (maximum) {
       if (*integer > *maximum) {
-	 LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
-	          description, *maximum, *integer);
-	 return 0;
+         LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
+                  description, *maximum, *integer);
+         return 0;
       }
    }
    return 1;
@@ -502,23 +545,23 @@ validateBaud (speed_t *baud, const char *description, const char *value, const u
       BaudEntry *entry = baudTable;
       while (entry->integer) {
          if (integer == entry->integer) {
-	    if (choices) {
-	       while (*choices) {
-		  if (integer == *choices) {
-		     break;
-		  }
-	          ++choices;
-	       }
-	       if (!*choices) {
-		  LogPrint(LOG_ERR, "Unsupported %s: %d",
-			   description, integer);
-	          return 0;
-	       }
-	    }
-	    *baud = entry->baud;
-	    return 1;
-	 }
-	 ++entry;
+            if (choices) {
+               while (*choices) {
+                  if (integer == *choices) {
+                     break;
+                  }
+                  ++choices;
+               }
+               if (!*choices) {
+                  LogPrint(LOG_ERR, "Unsupported %s: %d",
+                           description, integer);
+                  return 0;
+               }
+            }
+            *baud = entry->baud;
+            return 1;
+         }
+         ++entry;
       }
       LogPrint(LOG_ERR, "Invalid %s: %d",
                description, integer);
@@ -544,12 +587,12 @@ validateChoice (unsigned int *choice, const char *description, const char *value
    if (length) {
       int index = 0;
       while (choices[index]) {
-	 if (length <= strlen(choices[index])) {
-	    if (strncasecmp(value, choices[index], length) == 0) {
-	       *choice = index;
-	       return 1;
-	    }
-	 }
+         if (length <= strlen(choices[index])) {
+            if (strncasecmp(value, choices[index], length) == 0) {
+               *choice = index;
+               return 1;
+            }
+         }
          ++index;
       }
       LogPrint(LOG_ERR, "Unsupported %s: %s", description, value);

@@ -38,7 +38,6 @@
 #include "../message.h"
 #include "../scr.h"
 #include "../misc.h"
-#include "../inskey.h"
 #include "../config.h"
 #include "../brl_driver.h"
 
@@ -1075,607 +1074,607 @@ static int
 			    switch (keys)
 			      {
 			       case 0x001: /* braille 'a' */
-				 inskey("a");
+				 insertString("a");
 				 break;
 			       case 0x003: /* braille 'b' */
-				 inskey("b");
+				 insertString("b");
 				 break;
 			       case 0x009: /* braille 'c' */
-				 inskey("c");
+				 insertString("c");
 				 break;
 			       case 0x019: /* braille 'd' */
-				 inskey("d");
+				 insertString("d");
 				 break;
 			       case 0x011: /* braille 'e' */
-				 inskey("e");
+				 insertString("e");
 				 break;
 			       case 0x00b: /* braille 'f' */
-				 inskey("f");
+				 insertString("f");
 				 break;
 			       case 0x01b: /* braille 'g' */
-				 inskey("g");
+				 insertString("g");
 				 break;
 			       case 0x013: /* braille 'h' */
-				 inskey("h");
+				 insertString("h");
 				 break;
 			       case 0x00a: /* braille 'i' */
-				 inskey("i");
+				 insertString("i");
 				 break;
 			       case 0x01a: /* braille 'j' */
-				 inskey("j");
+				 insertString("j");
 				 break;
 			       case 0x005: /* braille 'k' */
-				 inskey("k");
+				 insertString("k");
 				 break;
 			       case 0x007: /* braille 'l' */
-				 inskey("l");
+				 insertString("l");
 				 break;
 			       case 0x00d: /* braille 'm' */
-				 inskey("m");
+				 insertString("m");
 				 break;
 			       case 0x01d: /* braille 'n' */
-				 inskey("n");
+				 insertString("n");
 				 break;
 			       case 0x015: /* braille 'o' */
-				 inskey("o");
+				 insertString("o");
 				 break;
 			       case 0x00f: /* braille 'p' */
-				 inskey("p");
+				 insertString("p");
 				 break;
 			       case 0x01f: /* braille 'q' */
-				 inskey("q");
+				 insertString("q");
 				 break;
 			       case 0x017: /* braille 'r' */
-				 inskey("r");
+				 insertString("r");
 				 break;
 			       case 0x00e: /* braille 's' */
-				 inskey("s");
+				 insertString("s");
 				 break;
 			       case 0x01e: /* braille 't' */
-				 inskey("t");
+				 insertString("t");
 				 break;
 			       case 0x025:	/* braille 'u' */
-				 inskey("u");
+				 insertString("u");
 				 break;
 			       case 0x027: /* braille 'v' */
-				 inskey("v");
+				 insertString("v");
 				 break;
 			       case 0x03a: /* braille 'w' */
-				 inskey("w");
+				 insertString("w");
 				 break;
 			       case 0x02d: /* braille 'x' */
-				 inskey("x");
+				 insertString("x");
 				 break;
 			       case 0x03d: /* braille 'y' */
-				 inskey("y");
+				 insertString("y");
 				 break;
 			       case 0x035: /* braille 'z' */
-				 inskey("z");
+				 insertString("z");
 				 break;
             /* Upperfase letters mapping */
 			       case 0x041: /* braille 'A' */
-				 inskey("A");
+				 insertString("A");
 				 break;
 			       case 0x043: /* braille 'B' */
-				 inskey("B");
+				 insertString("B");
 				 break;
 			       case 0x049: /* braille 'C' */
-				 inskey("C");
+				 insertString("C");
 				 break;
 			       case 0x059: /* braille 'D' */
-				 inskey("D");
+				 insertString("D");
 				 break;
 			       case 0x051: /* braille 'E' */
-				 inskey("E");
+				 insertString("E");
 				 break;
 			       case 0x04b: /* braille 'F' */
-				 inskey("F");
+				 insertString("F");
 				 break;
 			       case 0x05b: /* braille 'G' */
-				 inskey("G");
+				 insertString("G");
 				 break;
 			       case 0x053: /* braille 'H' */
-				 inskey("H");
+				 insertString("H");
 				 break;
 			       case 0x04a: /* braille 'I' */
-				 inskey("I");
+				 insertString("I");
 				 break;
 			       case 0x05a: /* braille 'J' */
-				 inskey("J");
+				 insertString("J");
 				 break;
 			       case 0x045: /* braille 'K' */
-				 inskey("K");
+				 insertString("K");
 				 break;
 			       case 0x047: /* braille 'L' */
-				 inskey("L");
+				 insertString("L");
 				 break;
 			       case 0x04d: /* braille 'M' */
-				 inskey("M");
+				 insertString("M");
 				 break;
 			       case 0x05d: /* braille 'N' */
-				 inskey("N");
+				 insertString("N");
 				 break;
 			       case 0x055: /* braille 'O' */
-				 inskey("O");
+				 insertString("O");
 				 break;
 			       case 0x04f: /* braille 'P' */
-				 inskey("P");
+				 insertString("P");
 				 break;
 			       case 0x05f: /* braille 'Q' */
-				 inskey("Q");
+				 insertString("Q");
 				 break;
 			       case 0x057: /* braille 'R' */
-				 inskey("R");
+				 insertString("R");
 				 break;
 			       case 0x04e: /* braille 'S' */
-				 inskey("S");
+				 insertString("S");
 				 break;
 			       case 0x05e: /* braille 'T' */
-				 inskey("T");
+				 insertString("T");
 				 break;
 			       case 0x065: /* braille 'U' */
-				 inskey("U");
+				 insertString("U");
 				 break;
 			       case 0x067: /* braille 'V' */
-				 inskey("V");
+				 insertString("V");
 				 break;
 			       case 0x07a: /* braille 'W' */
-				 inskey("W");
+				 insertString("W");
 				 break;
 			       case 0x06d: /* braille 'X' */
-				 inskey("X");
+				 insertString("X");
 				 break;
 			       case 0x07d: /* braille 'Y' */
-				 inskey("Y");
+				 insertString("Y");
 				 break;
 			       case 0x075: /* braille 'Z' */
-				 inskey("Z");
+				 insertString("Z");
 				 break;
             /* The following codes are depending of the table you use.
              * These are digits mapping for CBISF table.
             */
 			       case 0x03c: /* braille '0' */
-				 inskey("0");
+				 insertString("0");
 				 break;
 			       case 0x021: /* braille '1' */
-				 inskey("1");
+				 insertString("1");
 				 break;
 			       case 0x023: /* braille '2' */
-				 inskey("2");
+				 insertString("2");
 				 break;
 			       case 0x029: /* braille '3' */
-				 inskey("3");
+				 insertString("3");
 				 break;
 			       case 0x039: /* braille '4' */
-				 inskey("4");
+				 insertString("4");
 				 break;
 			       case 0x031: /* braille '5' */
-				 inskey("5");
+				 insertString("5");
 				 break;
 			       case 0x02b: /* braille '6' */
-				 inskey("6");
+				 insertString("6");
 				 break;
 			       case 0x03b: /* braille '7' */
-				 inskey("7");
+				 insertString("7");
 				 break;
 			       case 0x033: /* braille '8' */
-				 inskey("8");
+				 insertString("8");
 				 break;
 			       case 0x02a: /* braille '9' */
-				 inskey("9");
+				 insertString("9");
 				 break;
             /* other chars */
 			       case 0x016: /* braille '!' */
-				 inskey("!");
+				 insertString("!");
 				 break;
 			       case 0x022: /* braille '?' */
-				 inskey("?");
+				 insertString("?");
 				 break;
 			       case 0x02c: /* braille '#' */
-				 inskey("#");
+				 insertString("#");
 				 break;
 			       case 0x002: /* braille ',' */
-				 inskey(",");
+				 insertString(",");
 				 break;
 			       case 0x006: /* braille ';' */
-				 inskey(";");
+				 insertString(";");
 				 break;
 			       case 0x095: /* braille 'ø' */
-				 inskey("\xf8");
+				 insertString("\xf8");
 				 break;
 			       case 0x01c: /* braille '@' */
-				 inskey("@");
+				 insertString("@");
 				 break;
 			       case 0x014: /* braille '*' */
-				 inskey("*");
+				 insertString("*");
 				 break;
 			       case 0x032: /* braille '/' */
-				 inskey("/");
+				 insertString("/");
 				 break;
 			       case 0x0d6: /* braille '+' */
-				 inskey("+");
+				 insertString("+");
 				 break;
 			       case 0x024: /* braille '-' */
-				 inskey("-");
+				 insertString("-");
 				 break;
 			       case 0x012: /* braille ':' */
-				 inskey(":");
+				 insertString(":");
 				 break;
 			       case 0x004: /* braille '.' */
-				 inskey(".");
+				 insertString(".");
 				 break;
 			       case 0x026: /* braille '(' */
-				 inskey("(");
+				 insertString("(");
 				 break;
 			       case 0x034: /* braille ')' */
-				 inskey(")");
+				 insertString(")");
 				 break;
 			       case 0x036: /* braille '"' */
-				 inskey("\x22");
+				 insertString("\x22");
 				 break;
 			       case 0x037: /* braille '[' */
-				 inskey("[");
+				 insertString("[");
 				 break;
 			       case 0x03e: /* braille ']' */
-				 inskey("]");
+				 insertString("]");
 				 break;
 			       case 0x077: /* braille '{' */
-				 inskey("{");
+				 insertString("{");
 				 break;
 			       case 0x07e: /* braille '}' */
-				 inskey("}");
+				 insertString("}");
 				 break;
 			       case 0x00c: /* braille '^' */
-				 inskey("^");
+				 insertString("^");
 				 break;
 			       case 0x038: /* braille '$' */
-				 inskey("$");
+				 insertString("$");
 				 break;
 			       case 0x020: /* braille ['] */
-				 inskey("'");
+				 insertString("'");
 				 break;
 			       case 0x02e: /* braille '\' */
-				 inskey("\\");
+				 insertString("\\");
 				 break;
 			       case 0x02f: /* braille '%' */
-				 inskey("%");
+				 insertString("%");
 				 break;
 			       case 0x018: /* braille '>' */
-				 inskey(">");
+				 insertString(">");
 				 break;
 			       case 0x030: /* braille '<' */
-				 inskey("<");
+				 insertString("<");
 				 break;
 			       case 0x0f6: /* braille '=' */
-				 inskey("=");
+				 insertString("=");
 				 break;
 			       case 0x03f: /* braille '&' */
-				 inskey("&");
+				 insertString("&");
 				 break;
 			       case 0x05c: /* ascii code 96 */
-				 inskey("\x60");
+				 insertString("\x60");
 				 break;
 			       case 0x078: /* braille '_' */
-				 inskey("_");
+				 insertString("_");
 				 break;
 			       case 0x04c: /* braille '~' */
-				 inskey("~");
+				 insertString("~");
 				 break;
             /* char accents */
 			       case 0x0b7: /* braille '…' */
-				 inskey("…");
+				 insertString("…");
 				 break;
 			       case 0x0e1: /* braille 'ƒ' */
-				 inskey("ƒ");
+				 insertString("ƒ");
 				 break;
 			       case 0x0ae: /* braille 'Š' */
-				 inskey("Š");
+				 insertString("Š");
 				 break;
 			       case 0x0e3: /* braille 'ˆ' */
-				 inskey("ˆ");
+				 insertString("ˆ");
 				 break;
 			       case 0x0ab: /* braille '‰' */
-				 inskey("‰");
+				 insertString("‰");
 				 break;
 			       case 0x0bf: /* braille '‚' */
-				 inskey("\x82");
+				 insertString("\x82");
 				 break;
 			       case 0x0e9: /* braille 'Œ' */
-				 inskey("Œ");
+				 insertString("Œ");
 				 break;
 			       case 0x0f9: /* braille '“' */
-				 inskey("“");
+				 insertString("“");
 				 break;
 			       case 0x0f1: /* braille '–' */
-				 inskey("–");
+				 insertString("–");
 				 break;
 			       case 0x0be: /* braille '—' */
-				 inskey("—");
+				 insertString("—");
 				 break;
 			       case 0x0b3: /* braille '' */
-				 inskey("");
+				 insertString("");
 				 break;
 			       case 0x0af: /* braille '‡' */
-				 inskey("‡");
+				 insertString("‡");
 				 break;
 			       case 0x06e: /* braille '|' */
-				 inskey("|");
+				 insertString("|");
 				 break;
 			       case 0x200: /* braille ' ' */
-				 inskey(" ");
+				 insertString(" ");
 				 break;
 			       case 0x100: /* braille backspace */
-				 inskey("\x7f");
+				 insertString("\x7f");
 				 break;
 			       case 0x300: /* braille enter */
-				 inskey("\x0D");
+				 insertString("\x0D");
 				 break;
             /* the following codes define extended keys (ie. control, alt...)
              * The table used here is the eurobraille "!config.f" file.
             */
             /* braille mapping for functions keys */
 			       case 0x208: /* Braille up key */
-				 inskey("\33[A");
+				 insertString("\33[A");
 				 break;
 			       case 0x220: /* braille down key */
-				 inskey("\33[B");
+				 insertString("\33[B");
 				 break;
 			       case 0x202: /* braille left key */
-				 inskey("\33[D");
+				 insertString("\33[D");
 				 break;
 			       case 0x210: /* braille right key */
-				 inskey("\33[C");
+				 insertString("\33[C");
 				 break;
 			       case 0x101: /* braille f1 */
-				 inskey("\33[[A");
+				 insertString("\33[[A");
 				 break;
 			       case 0x103: /* braille f2 */
-				 inskey("\33[[B");
+				 insertString("\33[[B");
 				 break;
 			       case 0x109: /* braille f3 */
-				 inskey("\33[[C");
+				 insertString("\33[[C");
 				 break;
 			       case 0x119: /* braille f4 */
-				 inskey("\33[[D");
+				 insertString("\33[[D");
 				 break;
 			       case 0x111: /* braille f5 */
-				 inskey("\33[[E");
+				 insertString("\33[[E");
 				 break;
 			       case 0x10b: /* braille f6 */
-				 inskey("\33[17~");
+				 insertString("\33[17~");
 				 break;
 			       case 0x11b: /* braille f7 */
-				 inskey("\33[18~");
+				 insertString("\33[18~");
 				 break;
 			       case 0x112: /* braille f8 */
-				 inskey("\33[19~");
+				 insertString("\33[19~");
 				 break;
 			       case 0x10a: /* braille f9 */
-				 inskey("\33[20~");
+				 insertString("\33[20~");
 				 break;
 			       case 0x11a: /* braille f10 */
-				 inskey("\33[21~");
+				 insertString("\33[21~");
 				 break;
 			       case 0x105: /* braille f11 */
-				 inskey("\33[22~");
+				 insertString("\33[22~");
 				 break;
 			       case 0x107: /* braille f12 */
-				 inskey("\33[24~");
+				 insertString("\33[24~");
 				 break;
 			       case 0x3ff: /* braille ctrl+alt+del */
-				 inskey("reboot\x0d");
+				 insertString("reboot\x0d");
 				 break;
 			       case 0x207: /* home key */
-				 inskey("\33[1~");
+				 insertString("\33[1~");
 				 break;
 			       case 0x238: /* end key */
-				 inskey("\33[4~");
+				 insertString("\33[4~");
 				 break;
 			       case 0x205: /* braille page-up */
-				 inskey("\33[5~");
+				 insertString("\33[5~");
 				 break;
 			       case 0x232: /* braille tab */
-				 inskey("\x09");
+				 insertString("\x09");
 				 break;
 			       case 0x216: /* shift+tab key */
-				 inskey("\x09");
+				 insertString("\x09");
 				 break;
 			       case 0x21b: /* braille esc key */
-				 inskey("\x1b");
+				 insertString("\x1b");
 				 break;
 			       case 0x228: /* braille page-down */
-				 inskey("\33[6~");
+				 insertString("\33[6~");
 				 break;
 	    /* Control + char */
 			       case 0x0c1: /* ctrl+a */
-				 inskey("\x01");
+				 insertString("\x01");
 				 break;
 			       case 0x0c3: /* ctrl+b */
-				 inskey("\x02");
+				 insertString("\x02");
 				 break;
 			       case 0x0c9: /* ctlr+c */
-				 inskey("\x03");
+				 insertString("\x03");
 				 break;
 			       case 0x0d9: /* ctrl+d */
-				 inskey("\x04");
+				 insertString("\x04");
 				 break;
 			       case 0x0d1: /* ctrl+e */
-				 inskey("\x05");
+				 insertString("\x05");
 				 break;
 			       case 0x0cb: /* ctrl+f */
-				 inskey("\x06");
+				 insertString("\x06");
 				 break;
 			       case 0x0db: /* ctrl+g */
-				 inskey("\x07");
+				 insertString("\x07");
 				 break;
 			       case 0x0d3: /* ctrl+h */
-				 inskey("\x08");
+				 insertString("\x08");
 				 break;
 			       case 0x0ca: /* ctrl+i */
-				 inskey("\x09");
+				 insertString("\x09");
 				 break;
 			       case 0x0da: /* ctrl+j */
-				 inskey("\x0a");
+				 insertString("\x0a");
 				 break;
 			       case 0x0c5: /* ctrl+k */
-				 inskey("\x0b");
+				 insertString("\x0b");
 				 break;
 			       case 0x0c7: /* ctrl+l */
-				 inskey("\x0c");
+				 insertString("\x0c");
 				 break;
 			       case 0x0cd: /* ctrl+m */
-				 inskey("\x0d");
+				 insertString("\x0d");
 				 break;
 			       case 0x0dd: /* ctrl+n */
-				 inskey("\x0e");
+				 insertString("\x0e");
 				 break;
 			       case 0x0d5: /* ctrl+o */
-				 inskey("\x0f");
+				 insertString("\x0f");
 				 break;
 			       case 0x0cf: /* ctrl+p */
-				 inskey("\x10");
+				 insertString("\x10");
 				 break;
 			       case 0x0df: /* ctrl+q */
-				 inskey("\x11");
+				 insertString("\x11");
 				 break;
 			       case 0x0d7: /* ctrl+r */
-				 inskey("\x12");
+				 insertString("\x12");
 				 break;
 			       case 0x0ce: /* ctrl+s */
-				 inskey("\x13");
+				 insertString("\x13");
 				 break;
 			       case 0x0de: /* ctrl+t */
-				 inskey("\x14");
+				 insertString("\x14");
 				 break;
 			       case 0x0e5: /* ctrl+u */
-				 inskey("\x15");
+				 insertString("\x15");
 				 break;
 			       case 0x0e7: /* ctrl+v */
-				 inskey("\x16");
+				 insertString("\x16");
 				 break;
 			       case 0x0fa: /* ctrl+w */
-				 inskey("\x17");
+				 insertString("\x17");
 				 break;
 			       case 0x0ed: /* ctrl+x */
-				 inskey("\x18");
+				 insertString("\x18");
 				 break;
 			       case 0x0fd: /* ctrl+y */
-				 inskey("\x19");
+				 insertString("\x19");
 				 break;
 			       case 0x0f5: /* ctrl+z */
-				 inskey("\x1a");
+				 insertString("\x1a");
 				 break;
 	    /* alt + char */
 			       case 0x301: /* alt+a */
-				 inskey("\x1b\x61");
+				 insertString("\x1b\x61");
 				 break;
 			       case 0x303: /* alt+b */
-				 inskey("\x1b\x62");
+				 insertString("\x1b\x62");
 				 break;
 			       case 0x309: /* alt+c */
-				 inskey("\x1b\x63");
+				 insertString("\x1b\x63");
 				 break;
 			       case 0x319: /* alt+d */
-				 inskey("\x1b\x64");
+				 insertString("\x1b\x64");
 				 break;
 			       case 0x311: /* alt+e */
-				 inskey("\x1b\x65");
+				 insertString("\x1b\x65");
 				 break;
 			       case 0x30b: /* alt+f */
-				 inskey("\x1b\x66");
+				 insertString("\x1b\x66");
 				 break;
 			       case 0x31b: /* alt+g */
-				 inskey("\x1b\x67");
+				 insertString("\x1b\x67");
 				 break;
 			       case 0x313: /* alt+h */
-				 inskey("\x1b\x68");
+				 insertString("\x1b\x68");
 				 break;
 			       case 0x30a: /* alt+i */
-				 inskey("\x1b\x69");
+				 insertString("\x1b\x69");
 				 break;
 			       case 0x31a: /* alt+j */
-				 inskey("\x1b\x6a");
+				 insertString("\x1b\x6a");
 				 break;
 			       case 0x305: /* alt+k */
-				 inskey("\x1b\x6b");
+				 insertString("\x1b\x6b");
 				 break;
 			       case 0x307: /* alt+l */
-				 inskey("\x1b\x6c");
+				 insertString("\x1b\x6c");
 				 break;
 			       case 0x30d: /* alt+m */
-				 inskey("\x1b\x6d");
+				 insertString("\x1b\x6d");
 				 break;
 			       case 0x31d: /* alt+n */
-				 inskey("\x1b\x6e");
+				 insertString("\x1b\x6e");
 				 break;
 			       case 0x315: /* alt+o */
-				 inskey("\x1b\x6f");
+				 insertString("\x1b\x6f");
 				 break;
 			       case 0x30f: /* alt+p */
-				 inskey("\x1b\x70");
+				 insertString("\x1b\x70");
 				 break;
 			       case 0x31f: /* alt+q */
-				 inskey("\x1b\x71");
+				 insertString("\x1b\x71");
 				 break;
 			       case 0x317: /* alt+r */
-				 inskey("\x1b\x72");
+				 insertString("\x1b\x72");
 				 break;
 			       case 0x30e: /* alt+s */
-				 inskey("\x1b\x73");
+				 insertString("\x1b\x73");
 				 break;
 			       case 0x31e: /* alt+t */
-				 inskey("\x1b\x74");
+				 insertString("\x1b\x74");
 				 break;
 			       case 0x325: /* alt+u */
-				 inskey("\x1b\x75");
+				 insertString("\x1b\x75");
 				 break;
 			       case 0x327: /* alt+v */
-				 inskey("\x1b\x76");
+				 insertString("\x1b\x76");
 				 break;
 			       case 0x33a: /* alt+w */
-				 inskey("\x1b\x77");
+				 insertString("\x1b\x77");
 				 break;
 			       case 0x32d: /* alt+x */
-				 inskey("\x1b\x78");
+				 insertString("\x1b\x78");
 				 break;
 			       case 0x33d: /* alt+y */
-				 inskey("\x1b\x79");
+				 insertString("\x1b\x79");
 				 break;
 			       case 0x335: /* alt+z */
-				 inskey("\x1b\x7a");
+				 insertString("\x1b\x7a");
 				 break;
 			       case 0x321: /* alt+1 */
-				 inskey("\x1b\x31");
+				 insertString("\x1b\x31");
 				 break;
 			       case 0x323: /* alt+2 */
-				 inskey("\x1b\x32");
+				 insertString("\x1b\x32");
 				 break;
 			       case 0x329: /* alt+3 */
-				 inskey("\x1b\x33");
+				 insertString("\x1b\x33");
 				 break;
 			       case 0x339: /* alt+4 */
-				 inskey("\x1b\x34");
+				 insertString("\x1b\x34");
 				 break;
 			       case 0x331: /* alt+5 */
-				 inskey("\x1b\x35");
+				 insertString("\x1b\x35");
 				 break;
 			       case 0x32b: /* alt+6 */
-				 inskey("\x1b\x36");
+				 insertString("\x1b\x36");
 				 break;
 			       case 0x33b: /* alt+7 */
-				 inskey("\x1b\x37");
+				 insertString("\x1b\x37");
 				 break;
 			       case 0x333: /* alt+8 */
-				 inskey("\x1b\x38");
+				 insertString("\x1b\x38");
 				 break;
 			       case 0x32a: /* alt+9 */
-				 inskey("\x1b\x39");
+				 insertString("\x1b\x39");
 				 break;
 			       case 0x33c: /* alt+0 */
-				 inskey("\x1b\x30");
+				 insertString("\x1b\x30");
 				 break;
 			       case 0x224: /* del key */
-				 inskey("\33[3~");
+				 insertString("\33[3~");
 				 break;
 			       default:
 				 message("! Undef Braille key ", 0);

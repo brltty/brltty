@@ -31,7 +31,6 @@
 #include "../misc.h"
 #include "../scr.h"
 #include "../brl_driver.h"
-#include "../inskey.h"
 
 #define MAXPKTLEN 512
 
@@ -282,24 +281,24 @@ static int readbrl(DriverCommandContext cmds)
      kbuf[lgthk]=ibuf[1]; lgthk++; 
     }
     kbuf[lgthk]=0;
-    inskey(kbuf);
+    insertString(kbuf);
    } else switch (ibuf[1]) 
    {
     case 0x01: return CMD_SIXDOTS;
-    case 0x08: inskey("\x08"); break;
-    case 0x09: inskey("\x09"); break;
+    case 0x08: return VAL_PASSKEY + VPK_BACKSPACE;
+    case 0x09: return VAL_PASSKEY + VPK_TAB;
     case 0x0D: return VAL_PASSKEY + VPK_RETURN;
     case 0x91: routing=1; break;
     case 0xA1: return CMD_HELP;
     case 0xA2: return CMD_SND; // Toggle bips
     case 0xA3: return CMD_PREFMENU;
-    case 0xA4: inskey("\33[6~"); break;
-    case 0xA5: inskey("\33[4~"); break;
-    case 0xA8: inskey("\33[1~"); break;
+    case 0xA4: return VAL_PASSKEY + VPK_PAGE_DOWN;
+    case 0xA5: return VAL_PASSKEY + VPK_END;
+    case 0xA8: return VAL_PASSKEY + VPK_HOME;
     case 0xA9: return CMD_INFO;
     case 0xB2: return CMD_PREFLOAD;
     case 0xB3: return CMD_PREFSAVE;
-    case 0xB5: inskey("\33[5~"); break;
+    case 0xB5: return VAL_PASSKEY + VPK_PAGE_UP;
     case 0xBE: ctrlpressed=!ctrlpressed; break; // toggle ctrl-state
     case 0xBF: altpressed=!altpressed; break; // toggle alt-state
     case keyA1: return CR_SWITCHVT; // Active console 1
@@ -322,7 +321,7 @@ static int readbrl(DriverCommandContext cmds)
     case keyC3: return VAL_PASSKEY + VPK_CURSOR_RIGHT;
     case keyC1: return VAL_PASSKEY + VPK_CURSOR_LEFT;
     case keyB3: return CMD_CSRVIS;
-    case keyD1: inskey("\33[3~");
+    case keyD1: return VAL_PASSKEY + VPK_DELETE;
     default: return EOF;
    } // End of switch statement
   }

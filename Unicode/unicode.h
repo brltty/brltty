@@ -35,3 +35,6 @@ typedef struct {
 
 extern const UnicodeEntry *getUnicodeEntry (unsigned int unum);
 extern const CodePage *getCodePage (const char *name);
+
+extern const CodePage *const codePageTable[];
+extern const unsigned int codePageCount;

@@ -100,8 +100,7 @@ extern short csr_offright;		/* used for sliding window */
 extern short offr; /* Braille display can stick out by brl.x-offr from
 		      the right edge of the screen. */
 
-extern int cycleDelay;
-extern int readDelay;
+extern int refreshInterval;
 extern int messageDelay;
 
 /*

@@ -73,20 +73,21 @@
    #define SPKLIBS "???"
 #endif
 
-static char *opt_attributesTable = NULL;
-static char *opt_brailleDevice = NULL;
+static const char *opt_attributesTable = NULL;
+static const char *opt_brailleDevice = NULL;
 static char *opt_brailleParameters = NULL;
-static char *opt_configurationFile = NULL;
-static short opt_standardError = 0;
+static const char *opt_configurationFile = NULL;
+static char *opt_screenParameters = NULL;
 static short opt_help = 0;
 static short opt_logLevel = LOG_NOTICE;
 static short opt_noDaemon = 0;
 static short opt_noSpeech = 0;
-static char *opt_pidFile = NULL;
-static char *opt_preferencesFile = NULL;
+static const char *opt_pidFile = NULL;
+static const char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
 static char *opt_speechParameters = NULL;
-static char *opt_textTable = NULL;
+static short opt_standardError = 0;
+static const char *opt_textTable = NULL;
 static short opt_version = 0;
 
 static char *cfg_preferencesFile = NULL;
@@ -97,20 +98,22 @@ static char *cfg_brailleDriver = NULL;
 static char *cfg_brailleParameters = NULL;
 static char *cfg_speechDriver = NULL;
 static char *cfg_speechParameters = NULL;
+static char *cfg_screenParameters = NULL;
 
 // Define error codes for configuration file processing.
 typedef enum {
-   CFG_OK,		// No error.
-   CFG_NoValue,		// Operand not specified.
-   CFG_BadValue,	// Bad operand specified.
-   CFG_TooMany,		// Too many operands.
-   CFG_Duplicate	// Directive specified more than once.
+   CFG_OK,                // No error.
+   CFG_NoValue,                // Operand not specified.
+   CFG_BadValue,        // Bad operand specified.
+   CFG_TooMany,                // Too many operands.
+   CFG_Duplicate        // Directive specified more than once.
 } ConfigurationFileError;
 
 static char **brailleParameters = NULL;
 static char **speechParameters = NULL;
+static char **screenParameters = NULL;
 
-short homedir_found = 0;	/* CWD status */
+short homedir_found = 0;        /* CWD status */
 
 static int
 getToken (char **val, const char *delimiters)
@@ -173,6 +176,12 @@ configureSpeechParameters (const char *delimiters)
   return getToken(&cfg_speechParameters, delimiters);
 }
 
+static int
+configureScreenParameters (const char *delimiters)
+{
+  return getToken(&cfg_screenParameters, delimiters);
+}
+
 typedef struct {
    char letter;
    char *word;
@@ -209,18 +218,18 @@ static OptionEntry optionTable[] = {
     "Print start-up messages and exit."},
    {'B', "braille-parameters", "arg,...", configureBrailleParameters,
     "Parameters to braille driver."},
-   {'C', "cycle-delay", "csecs", NULL,
-    "Screen recheck interval [5]."},
    {'M', "message-delay", "csecs", NULL,
-    "Message hold time [500]."},
+    "Message hold time [400]."},
    {'N', "no-speech", NULL, NULL,
     "Defer speech until restarted by command."},
    {'P', "pid-file", "file", NULL,
     "Path to process identifier file."},
-   {'R', "read-delay", "csecs", NULL,
-    "Key poll interval [4]."},
+   {'R', "refresh-interval", "csecs", NULL,
+    "Braille window refresh interval [4]."},
    {'S', "speech-parameters", "arg,...", configureSpeechParameters,
-    "Parameters to speech driver."}
+    "Parameters to speech driver."},
+   {'X', "screen-parameters", "arg,...", configureScreenParameters,
+    "Parameters to screen driver."}
 };
 static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
 
@@ -242,58 +251,58 @@ processConfigurationLine (char *line, void *data)
       int optionIndex;
       for (optionIndex=0; optionIndex<optionCount; ++optionIndex)
         {
-	  OptionEntry *option = &optionTable[optionIndex];
-	  if (option->configure) {
-	    if (strcasecmp(keyword, option->word) == 0) {
-	      int code = option->configure(delimiters);
-	      switch (code)
-	        {
-		  case CFG_OK:
-		    break;
+          OptionEntry *option = &optionTable[optionIndex];
+          if (option->configure) {
+            if (strcasecmp(keyword, option->word) == 0) {
+              int code = option->configure(delimiters);
+              switch (code)
+                {
+                  case CFG_OK:
+                    break;
 
-		  case CFG_NoValue:
-		    LogPrint(LOG_ERR,
-		             "Operand not supplied for configuration item '%s'.",
-			     keyword);
-		    break;
+                  case CFG_NoValue:
+                    LogPrint(LOG_ERR,
+                             "Operand not supplied for configuration item '%s'.",
+                             keyword);
+                    break;
 
-		  case CFG_BadValue:
-		    LogPrint(LOG_ERR,
-		             "Invalid operand specified"
-			     " for configuration item '%s'.",
-			      keyword);
-		    break;
+                  case CFG_BadValue:
+                    LogPrint(LOG_ERR,
+                             "Invalid operand specified"
+                             " for configuration item '%s'.",
+                              keyword);
+                    break;
 
-		  case CFG_TooMany:
-		    LogPrint(LOG_ERR,
-		             "Too many operands supplied"
-			     " for configuration item '%s'.",
-			     keyword);
-		    break;
+                  case CFG_TooMany:
+                    LogPrint(LOG_ERR,
+                             "Too many operands supplied"
+                             " for configuration item '%s'.",
+                             keyword);
+                    break;
 
-		  case CFG_Duplicate:
-		    LogPrint(LOG_ERR,
-		             "Configuration item '%s' specified more than once.",
-			     keyword);
-		    break;
+                  case CFG_Duplicate:
+                    LogPrint(LOG_ERR,
+                             "Configuration item '%s' specified more than once.",
+                             keyword);
+                    break;
 
-		  default:
-		    LogPrint(LOG_ERR,
-		             "Internal error: unsupported"
-			     " configuration file error code: %d",
-			     code);
-		    break;
-		}
-	      return;
-	    }
-	  }
-	}
+                  default:
+                    LogPrint(LOG_ERR,
+                             "Internal error: unsupported"
+                             " configuration file error code: %d",
+                             code);
+                    break;
+                }
+              return;
+            }
+          }
+        }
       LogPrint(LOG_ERR, "Unknown configuration item: '%s'.", keyword);
     }
 }
 
 static int
-processConfigurationFile (char *path, int optional)
+processConfigurationFile (const char *path, int optional)
 {
    FILE *file = fopen(path, "r");
    if (file != NULL)
@@ -339,36 +348,36 @@ parseParameters (char ***values, char **names, char *parameters, char *descripti
    if (parameters && *parameters) {
       char *name = (parameters = strdupWrapper(parameters));
       while (1) {
-	 char *delimiter = strchr(name, ',');
-	 int done = delimiter == NULL;
-	 if (!done) *delimiter = 0;
-	 if (*name) {
-	    char *value = strchr(name, '=');
-	    if (!value) {
-	       LogPrint(LOG_ERR, "Missing %s parameter value: %s", description, name);
-	    } else if (value == name) {
-	       LogPrint(LOG_ERR, "Missing %s parameter name: %s", description, name);
-	    } else {
-	       unsigned int length = value - name;
-	       unsigned int index = 0;
-	       *value++ = 0;
-	       while (names[index]) {
-		  if (length <= strlen(names[index])) {
-		     if (strncasecmp(name, names[index], length) == 0) {
-			free((*values)[index]);
-			(*values)[index] = strdupWrapper(value);
-			break;
-		     }
-		  }
-		  ++index;
-	       }
-	       if (!names[index]) {
-		  LogPrint(LOG_ERR, "Unsupported %s parameter: %s", description, name);
-	       }
-	    }
-	 }
-	 if (done) break;
-	 name = delimiter + 1;
+         char *delimiter = strchr(name, ',');
+         int done = delimiter == NULL;
+         if (!done) *delimiter = 0;
+         if (*name) {
+            char *value = strchr(name, '=');
+            if (!value) {
+               LogPrint(LOG_ERR, "Missing %s parameter value: %s", description, name);
+            } else if (value == name) {
+               LogPrint(LOG_ERR, "Missing %s parameter name: %s", description, name);
+            } else {
+               unsigned int length = value - name;
+               unsigned int index = 0;
+               *value++ = 0;
+               while (names[index]) {
+                  if (length <= strlen(names[index])) {
+                     if (strncasecmp(name, names[index], length) == 0) {
+                        free((*values)[index]);
+                        (*values)[index] = strdupWrapper(value);
+                        break;
+                     }
+                  }
+                  ++index;
+               }
+               if (!names[index]) {
+                  LogPrint(LOG_ERR, "Unsupported %s parameter: %s", description, name);
+               }
+            }
+         }
+         if (done) break;
+         name = delimiter + 1;
       }
       free(parameters);
    }
@@ -385,12 +394,17 @@ parseSpeechParameters (char *parameters) {
 }
 
 static void
+parseScreenParameters (char *parameters) {
+   parseParameters(&screenParameters, getScreenParameters(), parameters, "screen driver");
+}
+
+static void
 logParameters (char **names, char **values, char *description) {
    if (names && values) {
       while (*names) {
          LogPrint(LOG_INFO, "%s Parameter: %s=%s", description, *names, *values);
-	 ++names;
-	 ++values;
+         ++names;
+         ++values;
       }
    }
 }
@@ -407,12 +421,12 @@ processOptions (int argc, char **argv)
       struct option *opt = long_options;
       int index;
       for (index=0; index<optionCount; ++index) {
-	OptionEntry *option = &optionTable[index];
+        OptionEntry *option = &optionTable[index];
         opt->name = option->word;
         opt->has_arg = option->argument? required_argument: no_argument;
         opt->flag = NULL;
         opt->val = option->letter;
-	++opt;
+        ++opt;
       }
       memset(opt, 0, sizeof(*opt));
     }
@@ -439,114 +453,110 @@ processOptions (int argc, char **argv)
        and won't even see the error message unless the display come up. */
     switch (option) {
       default:
-	LogPrint(LOG_ERR, "Unimplemented invocation option: -%c", option);
-	break;
+        LogPrint(LOG_ERR, "Unimplemented invocation option: -%c", option);
+        break;
       case '?': // An invalid option has been specified.
-	LogPrint(LOG_ERR, "Unknown invocation option: -%c", optopt);
-	return; /* not fatal */
-      case 'a':		/* text translation table file name */
-	opt_attributesTable = optarg;
-	break;
-      case 'b':			/* name of driver */
-	braille_libraryName = optarg;
-	break;
-      case 'd':		/* serial device path */
-	opt_brailleDevice = optarg;
-	break;
-      case 'e':		/* help */
-	opt_standardError = 1;
-	break;
-      case 'f':		/* configuration file path */
-	opt_configurationFile = optarg;
-	break;
-      case 'h':		/* help */
-	opt_help = 1;
-	break;
-      case 'l':	{  /* log level */
+        LogPrint(LOG_ERR, "Unknown invocation option: -%c", optopt);
+        return; /* not fatal */
+      case 'a':                /* text translation table file name */
+        opt_attributesTable = optarg;
+        break;
+      case 'b':                        /* name of driver */
+        braille_libraryName = optarg;
+        break;
+      case 'd':                /* serial device path */
+        opt_brailleDevice = optarg;
+        break;
+      case 'e':                /* help */
+        opt_standardError = 1;
+        break;
+      case 'f':                /* configuration file path */
+        opt_configurationFile = optarg;
+        break;
+      case 'h':                /* help */
+        opt_help = 1;
+        break;
+      case 'l':        {  /* log level */
         if (*optarg) {
-	  static char *valueTable[] = {
-	    "emergency", "alert", "critical", "error",
-	    "warning", "notice", "information", "debug"
-	  };
-	  static unsigned int valueCount = sizeof(valueTable) / sizeof(valueTable[0]);
-	  unsigned int valueLength = strlen(optarg);
-	  int value;
-	  for (value=0; value<valueCount; ++value) {
-	    char *word = valueTable[value];
-	    unsigned int wordLength = strlen(word);
-	    if (valueLength <= wordLength) {
-	      if (strncasecmp(optarg, word, valueLength) == 0) {
-		break;
-	      }
-	    }
-	  }
-	  if (value < valueCount) {
-	    opt_logLevel = value;
-	    break;
-	  }
-	  {
-	    char *endptr;
-	    value = strtol(optarg, &endptr, 0);
-	    if (!*endptr && value>=0 && value<valueCount) {
-	      opt_logLevel = value;
-	      break;
-	    }
-	  }
-	}
-	LogPrint(LOG_ERR, "Invalid log level: %s", optarg);
-	break;
+          static char *valueTable[] = {
+            "emergency", "alert", "critical", "error",
+            "warning", "notice", "information", "debug"
+          };
+          static unsigned int valueCount = sizeof(valueTable) / sizeof(valueTable[0]);
+          unsigned int valueLength = strlen(optarg);
+          int value;
+          for (value=0; value<valueCount; ++value) {
+            char *word = valueTable[value];
+            unsigned int wordLength = strlen(word);
+            if (valueLength <= wordLength) {
+              if (strncasecmp(optarg, word, valueLength) == 0) {
+                break;
+              }
+            }
+          }
+          if (value < valueCount) {
+            opt_logLevel = value;
+            break;
+          }
+          {
+            char *endptr;
+            value = strtol(optarg, &endptr, 0);
+            if (!*endptr && value>=0 && value<valueCount) {
+              opt_logLevel = value;
+              break;
+            }
+          }
+        }
+        LogPrint(LOG_ERR, "Invalid log level: %s", optarg);
+        break;
       }
-      case 'n':		/* don't go into the background */
-	opt_noDaemon = 1;
-	break;
-      case 'p':		/* preferences file path */
-	opt_preferencesFile = optarg;
-	break;
-      case 'q':		/* quiet */
-	opt_quiet = 1;
-	break;
-      case 's':			/* name of speech driver */
-	speech_libraryName = optarg;
-	break;
-      case 't':		/* text translation table file name */
-	opt_textTable = optarg;
-	break;
-      case 'v':		/* version */
-	opt_version = 1;
-	break;
-      case 'B':			/* parameter to speech driver */
-	extendParameters(&opt_brailleParameters, optarg);
-	break;
-      case 'C': {	/* cycle delay */
-	int value;
-	int minimum = 1;
-	if (validateInteger(&value, "cycle delay", optarg, &minimum, NULL))
-	  cycleDelay = value * 10;
-	break;
+      case 'n':                /* don't go into the background */
+        opt_noDaemon = 1;
+        break;
+      case 'p':                /* preferences file path */
+        opt_preferencesFile = optarg;
+        break;
+      case 'q':                /* quiet */
+        opt_quiet = 1;
+        break;
+      case 's':                        /* name of speech driver */
+        speech_libraryName = optarg;
+        break;
+      case 't':                /* text translation table file name */
+        opt_textTable = optarg;
+        break;
+      case 'v':                /* version */
+        opt_version = 1;
+        break;
+      case 'B':                        /* parameter to speech driver */
+        extendParameters(&opt_brailleParameters, optarg);
+        break;
+      case 'M': {        /* message delay */
+        int value;
+        int minimum = 1;
+        if (validateInteger(&value, "message delay", optarg, &minimum, NULL))
+          messageDelay = value * 10;
+        break;
       }
-      case 'M': {	/* message delay */
-	int value;
-	int minimum = 1;
-	if (validateInteger(&value, "message delay", optarg, &minimum, NULL))
-	  messageDelay = value * 10;
-	break;
-      }
-      case 'N':		/* don't go into the background */
-	opt_noSpeech = 1;
-	break;
-      case 'P':		/* process identifier file */
+      case 'N':                /* don't go into the background */
+        opt_noSpeech = 1;
+        break;
+      case 'P':                /* process identifier file */
         opt_pidFile = optarg;
-	break;
-      case 'R': {	/* read delay */
-	int value;
-	int minimum = 1;
-	if (validateInteger(&value, "read delay", optarg, &minimum, NULL))
-	  readDelay = value * 10;
-	break;
+        break;
+      case 'R': {        /* read delay */
+        int value;
+        int minimum = 1;
+        if (validateInteger(&value, "read delay", optarg, &minimum, NULL))
+          refreshInterval = value * 10;
+        break;
       }
-      case 'S':			/* parameter to speech driver */
-	extendParameters(&opt_speechParameters, optarg);
-	break;
+      case 'S':                        /* parameter to speech driver */
+        extendParameters(&opt_speechParameters, optarg);
+        break;
+      case 'X':                        /* parameter to speech driver */
+        extendParameters(&opt_screenParameters, optarg);
+        break;
     }
   }
   #undef get_option
@@ -579,56 +589,56 @@ printHelp (FILE *outputStream, unsigned int lineWidth, char *programPath) {
       line[lineLength++] = ' ';
 
       {
-	 unsigned int end = lineLength + argumentWidth;
-	 if (option->argument) {
-	    size_t argumentLength = strlen(option->argument);
-	    memcpy(line+lineLength, option->argument, argumentLength);
-	    lineLength += argumentLength;
-	 }
-	 while (lineLength < end) line[lineLength++] = ' ';
+         unsigned int end = lineLength + argumentWidth;
+         if (option->argument) {
+            size_t argumentLength = strlen(option->argument);
+            memcpy(line+lineLength, option->argument, argumentLength);
+            lineLength += argumentLength;
+         }
+         while (lineLength < end) line[lineLength++] = ' ';
       }
       line[lineLength++] = ' ';
 
       {
-	 unsigned int end = lineLength + 2 + wordWidth + 1;
-	 if (option->word) {
-	    size_t wordLength = strlen(option->word);
-	    line[lineLength++] = '-';
-	    line[lineLength++] = '-';
-	    memcpy(line+lineLength, option->word, wordLength);
-	    lineLength += wordLength;
-	    if (option->argument) line[lineLength++] = '=';
-	 }
-	 while (lineLength < end) line[lineLength++] = ' ';
+         unsigned int end = lineLength + 2 + wordWidth + 1;
+         if (option->word) {
+            size_t wordLength = strlen(option->word);
+            line[lineLength++] = '-';
+            line[lineLength++] = '-';
+            memcpy(line+lineLength, option->word, wordLength);
+            lineLength += wordLength;
+            if (option->argument) line[lineLength++] = '=';
+         }
+         while (lineLength < end) line[lineLength++] = ' ';
       }
       line[lineLength++] = ' ';
 
       {
-	 unsigned int headerWidth = lineLength;
-	 unsigned int descriptionWidth = lineWidth - headerWidth;
-	 char *description = option->description;
-	 unsigned int charsLeft = strlen(description);
-	 while (1) {
-	    unsigned int charCount = charsLeft;
-	    if (charCount > descriptionWidth) {
-	       charCount = descriptionWidth;
-	       while (description[charCount] != ' ') --charCount;
-	       while (description[charCount] == ' ') --charCount;
-	       ++charCount;
-	    }
-	    memcpy(line+lineLength, description, charCount);
-	    lineLength += charCount;
+         unsigned int headerWidth = lineLength;
+         unsigned int descriptionWidth = lineWidth - headerWidth;
+         char *description = option->description;
+         unsigned int charsLeft = strlen(description);
+         while (1) {
+            unsigned int charCount = charsLeft;
+            if (charCount > descriptionWidth) {
+               charCount = descriptionWidth;
+               while (description[charCount] != ' ') --charCount;
+               while (description[charCount] == ' ') --charCount;
+               ++charCount;
+            }
+            memcpy(line+lineLength, description, charCount);
+            lineLength += charCount;
 
-	    line[lineLength] = 0;
-	    fprintf(outputStream, "%s\n", line);
+            line[lineLength] = 0;
+            fprintf(outputStream, "%s\n", line);
 
-	    while (description[charCount] == ' ') ++charCount;
-	    if (!(charsLeft -= charCount)) break;
-	    description += charCount;
+            while (description[charCount] == ' ') ++charCount;
+            if (!(charsLeft -= charCount)) break;
+            description += charCount;
 
-	    lineLength = 0;
-	    while (lineLength < headerWidth) line[lineLength++] = ' ';
-	 }
+            lineLength = 0;
+            while (lineLength < headerWidth) line[lineLength++] = ' ';
+         }
       }
    }
 }
@@ -637,7 +647,7 @@ printHelp (FILE *outputStream, unsigned int lineWidth, char *programPath) {
  * Default definition for volatile parameters
  */
 struct brltty_param initparam = {
-	INIT_CSRTRK, INIT_CSRHIDE, TBL_TEXT, 0, 0, 0, 0, 0, 0
+        INIT_CSRTRK, INIT_CSRHIDE, TBL_TEXT, 0, 0, 0, 0, 0, 0
 };
 
 static void
@@ -732,27 +742,27 @@ readKey (DriverCommandContext cmds)
    while (1) {
       int key = braille->read(cmds);
       if (key != EOF) {
-	 LogPrint(LOG_DEBUG, "Command: %5.5X", key);
-	 if (key == CMD_NOOP) continue;
-	 return key;
+         LogPrint(LOG_DEBUG, "Command: %5.5X", key);
+         if (key == CMD_NOOP) continue;
+         return key;
       }
-      delay(readDelay);
+      delay(refreshInterval);
       closeTuneDevice(0);
    }
 }
 
 static void
-loadTranslationTable (char *table, char **path, char *name)
+loadTranslationTable (char *table, const char **path, const char *name)
 {
   if (*path) {
     int fd = open(*path, O_RDONLY);
     if (fd >= 0) {
       char buffer[0X100];
       if (read(fd, buffer, sizeof(buffer)) == sizeof(buffer)) {
-	memcpy(table, buffer, sizeof(buffer));
+        memcpy(table, buffer, sizeof(buffer));
       } else {
-	LogPrint(LOG_ERR, "Cannot read %s translation table: %s", name, *path);
-	*path = NULL;
+        LogPrint(LOG_ERR, "Cannot read %s translation table: %s", name, *path);
+        *path = NULL;
       }
       close(fd);
     } else {
@@ -802,7 +812,7 @@ savePreferences (void)
       ok = 1;
     } else {
       LogPrint(LOG_ERR, "Cannot write to preferences file: %s: %s",
-	       opt_preferencesFile, strerror(errno));
+               opt_preferencesFile, strerror(errno));
     }
     close(fd);
   } else {
@@ -857,7 +867,7 @@ testSoundMidi () {
 void
 updatePreferences (void)
 {
-  static unsigned char exitSave = 0;		/* 1 == save preferences on exit */
+  static unsigned char exitSave = 0;                /* 1 == save preferences on exit */
   static char *booleanValues[] = {"No", "Yes"};
   static char *cursorStyles[] = {"Underline", "Block"};
   static char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
@@ -865,13 +875,13 @@ updatePreferences (void)
   static char *textStyles[] = {"8 dot", "6 dot"};
   static char *tuneDevices[] = {"PC Speaker", "Sound Card", "MIDI", "AdLib/OPL3/SB-FM"};
   typedef struct {
-     unsigned char *setting;			/* pointer to the item value */
+     unsigned char *setting;                        /* pointer to the item value */
      void (*changed) (void);
      int (*test) (void);
-     char *description;			/* item description */
-     char **names;			/* 0 == numeric, 1 == bolean */
-     unsigned char minimum;			/* minimum range */
-     unsigned char maximum;			/* maximum range */
+     char *description;                        /* item description */
+     char **names;                        /* 0 == numeric, 1 == bolean */
+     unsigned char minimum;                        /* minimum range */
+     unsigned char maximum;                        /* maximum range */
   } MenuItem;
   #define MENU_ITEM(setting, changed, test, description, values, minimum, maximum) {&setting, changed, test, description, values, minimum, maximum}
   #define NUMERIC_ITEM(setting, changed, test, description, minimum, maximum) MENU_ITEM(setting, changed, test, description, NULL, minimum, maximum)
@@ -904,14 +914,14 @@ updatePreferences (void)
      SYMBOLIC_ITEM(env.stcellstyle, NULL, NULL, "Status Cells Style", statusStyles)
   };
   int menuSize = sizeof(menu) / sizeof(menu[0]);
-  static int menuIndex = 0;			/* current menu item */
+  static int menuIndex = 0;                        /* current menu item */
 
-  unsigned char line[0X40];		/* display buffer */
-  int lineIndent = 0;				/* braille window pos in buffer */
-  int settingChanged = 0;			/* 1 when item's value has changed */
+  unsigned char line[0X40];                /* display buffer */
+  int lineIndent = 0;                                /* braille window pos in buffer */
+  int settingChanged = 0;                        /* 1 when item's value has changed */
 
-  struct brltty_env oldEnvironment = env;	/* backup preferences */
-  int key;				/* readbrl() value */
+  struct brltty_env oldEnvironment = env;        /* backup preferences */
+  int key;                                /* readbrl() value */
 
   /* status cells */
   setStatusText("prefs");
@@ -919,8 +929,8 @@ updatePreferences (void)
 
   while (1)
     {
-      int lineLength;				/* current menu item length */
-      int settingIndent;				/* braille window pos in buffer */
+      int lineLength;                                /* current menu item length */
+      int settingIndent;                                /* braille window pos in buffer */
       MenuItem *item = &menu[menuIndex];
 
       closeTuneDevice(0);
@@ -938,134 +948,134 @@ updatePreferences (void)
        * This is intended for small displays... or long item descriptions 
        */
       if (settingChanged)
-	{
-	  settingChanged = 0;
-	  /* make sure the updated value is visible */
-	  if (lineLength-lineIndent > brl.x*brl.y)
-	    lineIndent = settingIndent;
-	}
+        {
+          settingChanged = 0;
+          /* make sure the updated value is visible */
+          if (lineLength-lineIndent > brl.x*brl.y)
+            lineIndent = settingIndent;
+        }
 
       /* Then draw the braille window */
       memset(brl.disp, 0, brl.x*brl.y);
       {
-	 int index;
-	 for (index=0; index<MIN(brl.x*brl.y, lineLength-lineIndent); index++)
+         int index;
+         for (index=0; index<MIN(brl.x*brl.y, lineLength-lineIndent); index++)
             brl.disp[index] = texttrans[line[lineIndent+index]];
       }
       braille->write(&brl);
-      delay(cycleDelay);
+      delay(refreshInterval);
 
       /* Now process any user interaction */
       switch (key = readKey(CMDS_PREFS)) {
-	case CMD_TOP:
-	case CMD_TOP_LEFT:
-	  menuIndex = lineIndent = 0;
-	  break;
-	case CMD_BOT:
-	case CMD_BOT_LEFT:
-	  menuIndex = menuSize - 1;
-	  lineIndent = 0;
-	  break;
-	case VAL_PASSKEY+VPK_CURSOR_UP:
-	case CMD_LNUP:
-	  do {
-	    if (menuIndex == 0)
-	      menuIndex = menuSize;
-	    --menuIndex;
-	  } while (menu[menuIndex].test && !menu[menuIndex].test());
-	  lineIndent = 0;
-	  break;
-	case VAL_PASSKEY+VPK_CURSOR_DOWN:
-	case CMD_LNDN:
-	  do {
-	    if (++menuIndex == menuSize)
-	      menuIndex = 0;
-	  } while (menu[menuIndex].test && !menu[menuIndex].test());
-	  lineIndent = 0;
-	  break;
-	case CMD_FWINLT:
-	  if (lineIndent > 0)
-	    lineIndent -= MIN(brl.x*brl.y, lineIndent);
-	  else
-	    playTune(&tune_bounce);
-	  break;
-	case CMD_FWINRT:
-	  if (lineLength-lineIndent > brl.x*brl.y)
-	    lineIndent += brl.x*brl.y;
-	  else
-	    playTune(&tune_bounce);
-	  break;
-	case CMD_WINUP:
-	case CMD_CHRLT:
-	case VAL_PASSKEY+VPK_CURSOR_LEFT:
-	  if ((*item->setting)-- <= item->minimum)
-	    *item->setting = item->maximum;
-	  settingChanged = 1;
-	  break;
-	case CMD_WINDN:
-	case CMD_CHRRT:
-	case VAL_PASSKEY+VPK_CURSOR_RIGHT:
-	case CMD_HOME:
-	case VAL_PASSKEY+VPK_RETURN:
-	  if ((*item->setting)++ >= item->maximum)
-	    *item->setting = item->minimum;
-	  settingChanged = 1;
-	  break;
-	case CMD_SAY:
-	  speech->say(line, lineLength);
-	  break;
-	case CMD_MUTE:
-	  speech->mute();
-	  break;
-	case CMD_HELP:
-	  /* This is quick and dirty... Something more intelligent 
-	   * and friendly need to be done here...
-	   */
-	  message( 
-	      "Press UP and DOWN to select an item, "
-	      "HOME to toggle the setting. "
-	      "Routing keys are available too! "
-	      "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
-	  break;
-	case CMD_PREFLOAD:
-	  env = oldEnvironment;
-	  changedPreferences();
-	  message("changes discarded", 0);
-	  break;
-	case CMD_PREFSAVE:
-	  exitSave = 1;
-	  goto exitMenu;
-	default:
-	  if (key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
-	     /* Why not setting a value with routing keys... */
-	     key -= CR_ROUTEOFFSET;
-	     if (item->names) {
-		*item->setting = key % (item->maximum + 1);
-	     } else {
-		*item->setting = key;
-		if (*item->setting > item->maximum)
-		   *item->setting = item->maximum;
-		if (*item->setting < item->minimum)
-		   *item->setting = item->minimum;
-	     }
-	     settingChanged = 1;
-	     break;
-	  }
+        case CMD_TOP:
+        case CMD_TOP_LEFT:
+          menuIndex = lineIndent = 0;
+          break;
+        case CMD_BOT:
+        case CMD_BOT_LEFT:
+          menuIndex = menuSize - 1;
+          lineIndent = 0;
+          break;
+        case VAL_PASSKEY+VPK_CURSOR_UP:
+        case CMD_LNUP:
+          do {
+            if (menuIndex == 0)
+              menuIndex = menuSize;
+            --menuIndex;
+          } while (menu[menuIndex].test && !menu[menuIndex].test());
+          lineIndent = 0;
+          break;
+        case VAL_PASSKEY+VPK_CURSOR_DOWN:
+        case CMD_LNDN:
+          do {
+            if (++menuIndex == menuSize)
+              menuIndex = 0;
+          } while (menu[menuIndex].test && !menu[menuIndex].test());
+          lineIndent = 0;
+          break;
+        case CMD_FWINLT:
+          if (lineIndent > 0)
+            lineIndent -= MIN(brl.x*brl.y, lineIndent);
+          else
+            playTune(&tune_bounce);
+          break;
+        case CMD_FWINRT:
+          if (lineLength-lineIndent > brl.x*brl.y)
+            lineIndent += brl.x*brl.y;
+          else
+            playTune(&tune_bounce);
+          break;
+        case CMD_WINUP:
+        case CMD_CHRLT:
+        case VAL_PASSKEY+VPK_CURSOR_LEFT:
+          if ((*item->setting)-- <= item->minimum)
+            *item->setting = item->maximum;
+          settingChanged = 1;
+          break;
+        case CMD_WINDN:
+        case CMD_CHRRT:
+        case VAL_PASSKEY+VPK_CURSOR_RIGHT:
+        case CMD_HOME:
+        case VAL_PASSKEY+VPK_RETURN:
+          if ((*item->setting)++ >= item->maximum)
+            *item->setting = item->minimum;
+          settingChanged = 1;
+          break;
+        case CMD_SAY:
+          speech->say(line, lineLength);
+          break;
+        case CMD_MUTE:
+          speech->mute();
+          break;
+        case CMD_HELP:
+          /* This is quick and dirty... Something more intelligent 
+           * and friendly need to be done here...
+           */
+          message( 
+              "Press UP and DOWN to select an item, "
+              "HOME to toggle the setting. "
+              "Routing keys are available too! "
+              "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
+          break;
+        case CMD_PREFLOAD:
+          env = oldEnvironment;
+          changedPreferences();
+          message("changes discarded", 0);
+          break;
+        case CMD_PREFSAVE:
+          exitSave = 1;
+          goto exitMenu;
+        default:
+          if (key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
+             /* Why not setting a value with routing keys... */
+             key -= CR_ROUTEOFFSET;
+             if (item->names) {
+                *item->setting = key % (item->maximum + 1);
+             } else {
+                *item->setting = key;
+                if (*item->setting > item->maximum)
+                   *item->setting = item->maximum;
+                if (*item->setting < item->minimum)
+                   *item->setting = item->minimum;
+             }
+             settingChanged = 1;
+             break;
+          }
 
-	  /* For any other keystroke, we exit */
-	exitMenu:
-	  if (exitSave)
-	    {
-	      if (savePreferences()) {
-		playTune(&tune_done);
-	      }
-	    }
-	  return;
+          /* For any other keystroke, we exit */
+        exitMenu:
+          if (exitSave)
+            {
+              if (savePreferences()) {
+                playTune(&tune_done);
+              }
+            }
+          return;
       }
 
       if (settingChanged)
-	if (item->changed)
-	  item->changed();
+        if (item->changed)
+          item->changed();
     }
 }
 
@@ -1076,7 +1086,7 @@ exitTunes (void) {
 
 static void
 exitScreen (void) {
-   closescr();
+   closeScreen();
 }
 
 static void
@@ -1116,8 +1126,8 @@ startup(int argc, char *argv[])
     LogClose();
   SetLogLevel(opt_logLevel);
   SetStderrLevel(opt_version?
-		    (opt_quiet? LOG_NOTICE: LOG_INFO):
-		    (opt_quiet? LOG_WARNING: LOG_NOTICE));
+                    (opt_quiet? LOG_NOTICE: LOG_INFO):
+                    (opt_quiet? LOG_WARNING: LOG_NOTICE));
 
   LogPrint(LOG_NOTICE, "%s", VERSION);
   LogPrint(LOG_INFO, "%s", COPYRIGHT);
@@ -1168,23 +1178,27 @@ startup(int argc, char *argv[])
   parseSpeechParameters(cfg_speechParameters);
   parseSpeechParameters(opt_speechParameters);
 
+  parseScreenParameters(cfg_screenParameters);
+  parseScreenParameters(opt_screenParameters);
+
   if (!opt_preferencesFile)
     {
       char *part1 = "brltty-";
       char *part2 = braille->identifier;
       char *part3 = ".prefs";
-      opt_preferencesFile = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-      sprintf(opt_preferencesFile, "%s%s%s", part1, part2, part3);
+      char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+      sprintf(path, "%s%s%s", part1, part2, part3);
+      opt_preferencesFile = path;
     }
 
-  if (chdir (HOME_DIR))		/* * change to directory containing data files  */
+  if (chdir(HOME_DIR))                /* * change to directory containing data files  */
     {
       char *backup_dir = "/etc";
       LogPrint(LOG_ERR, "Cannot change directory to '%s': %s",
                HOME_DIR, strerror(errno));
       LogPrint(LOG_WARNING, "Using backup directory '%s' instead.",
                backup_dir);
-      chdir (backup_dir);		/* home directory not found, use backup */
+      chdir (backup_dir);                /* home directory not found, use backup */
     }
 
   /*
@@ -1198,7 +1212,7 @@ startup(int argc, char *argv[])
     char buffer[0X100];
     char *path = getcwd(buffer, sizeof(buffer));
     LogPrint(LOG_INFO, "Working Directory: %s",
-	     path? path: "path-too-long");
+             path? path: "path-too-long");
   }
 
   LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
@@ -1214,6 +1228,7 @@ startup(int argc, char *argv[])
   LogPrint(LOG_INFO, "Speech Driver: %s (%s)",
            speech_libraryName, speech->name);
   logParameters(speech->parameters, speechParameters, "Speech");
+  logParameters(getScreenParameters(), screenParameters, "Screen");
 
   /*
    * Give braille and speech libraries a chance to introduce themselves.
@@ -1266,7 +1281,7 @@ startup(int argc, char *argv[])
   /*
    * Initialize screen library 
    */
-  if (initscr()) {				
+  if (!initializeScreen(screenParameters)) {                                
     LogPrint(LOG_CRIT, "Cannot read screen.");
     exit(7);
   }
@@ -1278,7 +1293,7 @@ startup(int argc, char *argv[])
     SetStderrOff();
 
     /* request a new session (job control) */
-    if (setsid() == -1) {			
+    if (setsid() == -1) {                        
       LogPrint(LOG_CRIT, "session creation error: %s", strerror(errno));
       exit(11);
     }
@@ -1288,9 +1303,9 @@ startup(int argc, char *argv[])
       freopen(nullDevice, "r", stdin);
       freopen(nullDevice, "a", stdout);
       if (opt_standardError) {
-	fflush(stderr);
+        fflush(stderr);
       } else {
-	freopen(nullDevice, "a", stderr);
+        freopen(nullDevice, "a", stderr);
       }
     }
 
@@ -1328,7 +1343,7 @@ startup(int argc, char *argv[])
     LogPrint(LOG_ERR, "Cannot open help screen file '%s'.", braille->help_file);
 
   if (!opt_quiet)
-    message(VERSION, 0);	/* display initialisation message */
+    message(VERSION, 0);        /* display initialisation message */
   if (ProblemCount) {
     char buffer[0X40];
     snprintf(buffer, sizeof(buffer), "%d startup problem%s",

@@ -419,7 +419,7 @@ static const CodePage cp_874 = {
   }
 };
 
-static const CodePage *const codePageTable[] = {
+const CodePage *const codePageTable[] = {
   &iso_8859_1,
   &iso_8859_2,
   &iso_8859_3,
@@ -451,7 +451,7 @@ static const CodePage *const codePageTable[] = {
   &cp_869,
   &cp_874
 };
-static const unsigned int codePageCount = sizeof(codePageTable) / sizeof(codePageTable[0]);
+const unsigned int codePageCount = sizeof(codePageTable) / sizeof(codePageTable[0]);
 
 const UnicodeEntry *getUnicodeEntry (unsigned int unum) {
   unsigned int first = 0;
