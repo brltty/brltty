@@ -564,14 +564,14 @@ validateFloat (double *value, const char *description, const char *word, const d
    }
    if (minimum) {
       if (*value < *minimum) {
-         LogPrint(LOG_ERR, "The %s must not be less than %f: %f",
+         LogPrint(LOG_ERR, "The %s must not be less than %g: %g",
                   description, *minimum, *value);
          return 0;
       }
    }
    if (maximum) {
       if (*value > *maximum) {
-         LogPrint(LOG_ERR, "The %s must not be greater than %f: %f",
+         LogPrint(LOG_ERR, "The %s must not be greater than %g: %g",
                   description, *maximum, *value);
          return 0;
       }
