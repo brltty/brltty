@@ -33,6 +33,7 @@ The <byte> operand specifies the byte being defined. It may be:
 *  Any single character other than a backslash or a white-space character.
 *  A backslash-prefixed special character. These are:
    -  \\    A literal backslash.
+   -  \#    A literal number sign.
    -  \x##  The two-digit hexadecimal representation of any character.
    -  \X##  ... (the case of the X and of the digits isn't significant)
 

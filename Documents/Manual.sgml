@@ -1511,9 +1511,31 @@ The text read from standard input is rewritten to standard output as contracted 
     The file system path to the text translation table to use.
     If it's relative then it's anchored at the directory configured via the
     <ref id="build-data-directory" name="--with-data-directory"> build option.
+    If this option isn't supplied then the table defined via the
+    <ref id="build-text-table" name="--with-text-table">
+    build option is assumed.
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
 </descrip>
+
+The text translation table is used:
+<itemize>
+  <item>
+    To define the output character set so that
+    the contracted braille will be displayed correctly.
+    The same table as will be used by BRLTTY when the output is read should be specified.
+  <item>
+    To define the braille representations of those characters
+    defined within the contraction table as <tt/=/
+    (see section <ref id="contraction-opcodes-translation" name="Character Translation">).
+</itemize>
+
+The <tt/text.brf.tbl/ text translation table is provided for use with this utility.
+It defines the format used within <tt/.brf/ files. 
+This is also the preferred format used
+by most braille printers
+and within electronically distributed braille documents.
+This table effectively allows this utility to be used as a text to braille translator.
 
 <sect2>tunetest<label id="utility-tunetest"><p>
 This utility tests the alert tunes facility,
@@ -3673,7 +3695,7 @@ The following operand types are supported:
 An opcode is a keyword which tells the translator how to interpret the operands.
 The opcodes are grouped here by function.
 
-<sect3>Table Administration<p>
+<sect3>Table Administration<label id="contraction-opcodes-administration"><p>
 These opcodes make it easier to write contraction tables.
 They have no direct effect on the character translation.
 <descrip>
@@ -3699,7 +3721,7 @@ They have no direct effect on the character translation.
     If this opcode isn't used then the <tt/C/ locale is assumed.
 </descrip>
 
-<sect3>Special Symbol Definition<p>
+<sect3>Special Symbol Definition<label id="contraction-opcodes-symbols"><p>
 These opcodes define special symbols which must be
 inserted into the braille text in order to clarify it.
 <descrip>
@@ -3715,7 +3737,7 @@ inserted into the braille text in order to clarify it.
     The symbol which marks the beginning of a number.
 </descrip>
 
-<sect3>Character Translation<p>
+<sect3>Character Translation<label id="contraction-opcodes-translation"><p>
 These opcodes define the braille representations for character sequences.
 Each of them defines an entry within the contraction table.
 These entries may be defined in any order except, as noted below,
@@ -3806,7 +3828,7 @@ Now, finally, here are the opcode descriptions themselves:
     Translate the characters if they're at the end of a number.
 </descrip>
 
-<sect3>Character Classes<p>
+<sect3>Character Classes<label id="contraction-opcodes-classes"><p>
 These opcodes define and use character classes.
 A character class associates a set of characters with a name.
 The name then refers to any character within the class.
@@ -3972,6 +3994,7 @@ The following directives are provided:
             These are:
             <descrip>
               <tag/\\/A literal backslash.
+              <tag/\&num;/A literal number sign.
               <tag/\x&num;&num;/The two-digit hexadecimal representation of any character.
               <tag/\X&num;&num;/... (the case of the X and of the digits isn't significant)
             </descrip>

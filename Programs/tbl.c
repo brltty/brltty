@@ -196,6 +196,7 @@ getByte (InputData *input, unsigned char *byte) {
         }
 
         case '\\':
+        case '#':
           *byte = *(location - 1);
           break;
       }
