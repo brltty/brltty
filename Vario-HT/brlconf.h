@@ -11,16 +11,16 @@
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
+ *
+ * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-/* ExternalSpeech/speech.h */
+/* Vario/brlconf.h - Configurable definitions
+ *
+ * Edit as necessary for your system.
+ */
 
-#define SPKNAME "ExternalSpeech"
+#define BRLNAME	"Vario"
 
-/* Specify the path of the external program that will handle speech.
-   This setting can be overridden through the -p command-line parameter
-   or speech-driverparm configuration option. */
-#define HELPER_PROG_PATH "/usr/local/bin/externalspeech"
-
-#define UID 501
-#define GID 501
+/* Define the preferred/default status cells mode. */
+#define PREFSTYLE ST_None

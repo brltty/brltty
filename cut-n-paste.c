@@ -18,6 +18,7 @@
 /* cut-n-paste.c - cut & paste functionality
  */
 
+#include <string.h>
 #include <stdlib.h>
 #include "scr.h"
 #include "inskey.h"

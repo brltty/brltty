@@ -1,6 +1,24 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+
+26 Nov 2000:
+ - version 2.96 (beta):
+ - Vario support updates from Mario Lang <mlang@home.delysid.org>
+ - ALVA Satellite 544 support from Kazunori MINATANI <99112004@gakushuin.ac.jp>
+ - Various pieces from Stéphane Doyon, most notably:
+   - cursor routing race fix that showed as a BRLTTY freeze with
+     latest 2.4.0-test* Linux kernels;
+   - BRLTTY now doesn't exit on startup when minor i.e. non-fatal
+     errors occur;
+   - loglevel lowered on less important messages to reduce noise;
+   - fixes to the module for external speech program support;
+   - MDV driver updates
+   - TSI driver updates
+   - multiple new command bindings for speech;
+   - speech tracking;
+   - various cleanup.
+
 16 Sep 2000:
  - version 2.95 (beta):
  - EcoBraille driver update from Oscar Fernandez <ofa@once.es>

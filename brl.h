@@ -79,6 +79,7 @@
 #define CMD_HELP '?'		/* display help */
 #define CMD_INFO 'i'		/* get status information */
 #define CMD_RESTARTBRL 5        /* reinitialize braille display */
+#define CMD_RESTARTSPEECH 124   /* reinitialize speech driver */
 
 /* Cursor routing */
 #define CMD_CSRJMP 'j'		/* jump cursor to window (cursor routing) */
@@ -120,6 +121,7 @@
 #define CMD_KEY_LEFT 'L'
 #define CMD_KEY_RETURN 'N'
 
+
 /* For speech devices: */
 #define CMD_SAY 'Y'		/* sound on */
 #define CMD_SAYALL 127 /* speak text continuously */
@@ -133,6 +135,9 @@
 
 /* For typing character -- pass through */
 #define	VAL_PASSTHRU	0x800
+
+/* For typing character -- Using current translation table */
+#define VAL_BRLKEY      0x1000
 
 /* Braille information structure */
 typedef struct

@@ -12,11 +12,12 @@
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  */
-
+#define VERSION "BRLTTY External Speech driver, version 0.5 (September 2000)"
+#define COPYRIGHT "Copyright (C) 2000 by Stéphane Doyon " \
+                  "<s.doyon@videotron.ca>"
 /* ExternalSpeech/speech.c - Speech library (driver)
  * For external programs, using my own protocol. Features indexing.
  * Stéphane Doyon <s.doyon@videotron.ca>
- * Version 0.4 beta, September 2000
  */
 
 #include <sys/types.h>
@@ -25,7 +26,7 @@
 #include <unistd.h>
 
 #include <errno.h>
-#include <limits.h>
+#include <linux/limits.h>
 #include <string.h>
 
 #define SPEECH_C 1
@@ -46,7 +47,8 @@ static char speaking = 0;
 
 static void identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, "Using External speech program.");
+  LogAndStderr(LOG_INFO, VERSION);
+  LogAndStderr(LOG_INFO, "   "COPYRIGHT);
 }
 
 static void myerror(char *msg)
@@ -90,10 +92,19 @@ static void initspk (char *parm)
     return;
   case 0: {
     int i;
+    if(setgid(GID) <0) {
+      myperror("setgid");
+      _exit(1);
+    }
+    if(setuid(UID) <0) {
+      myperror("setuid");
+      _exit(1);
+    }
+    LogPrint(LOG_DEBUG, "my uid is %u", getuid());
     if(dup2(fd2[0], 0) < 0 /* stdin */
        || dup2(fd1[1], 1) < 0){ /* stdout */
       myperror("dup2");
-      return;
+      _exit(1);
     }
     for(i=2; i<OPEN_MAX; i++) close(i);
     execl(extProgPath, HELPER_PROG_PATH, 0);
@@ -106,7 +117,8 @@ static void initspk (char *parm)
     helper_fd_out = fd2[1];
     close(fd1[1]);
     close(fd2[0]);
-    if(fcntl(helper_fd_in, F_SETFL,FNDELAY) < 0) {
+    if(fcntl(helper_fd_in, F_SETFL,FNDELAY) < 0
+       || fcntl(helper_fd_out, F_SETFL,FNDELAY) < 0) {
       myperror("fcntl F_SETFL FNDELAY");
       return;
     }
@@ -131,7 +143,7 @@ static void mywrite(int fd, void *buf, int len)
       return;
     }
     pos += w; len -= w;
-  } while(len && !timeout_yet(150));
+  } while(len && !timeout_yet(2000));
   if(len)
     myerror("ExternalSpeech: pipe to helper program: write timed out");
 }
@@ -149,16 +161,13 @@ static int myread(int fd, void *buf, int len)
       else if(errno == EAGAIN) {
 	if(firstTime) return 0;
 	else continue;
-      }else if(errno == EPIPE)
-	myperror("ExternalSpeech: pipe to helper program was broken");
-         /* try to reinit may be ?? */
-      else myperror("ExternalSpeech: pipe to helper program: read");
+      }else myperror("ExternalSpeech: pipe to helper program: read");
     }else if(r==0)
       myerror("ExternalSpeech: pipe to helper program: read: EOF!");
     if(r<=0) return 0;
     firstTime = 0;
     pos += r; len -= r;
-  } while(len && !timeout_yet(150));
+  } while(len && !timeout_yet(400));
   if(len) {
     myerror("ExternalSpeech: pipe to helper program: read timed out");
     return 0;
@@ -176,9 +185,9 @@ static void sayit(unsigned char *buffer, int len, int attriblen)
   l[2] = len & 0xFF;
   l[3] = attriblen>>8;
   l[4] = attriblen & 0xFF;
+  speaking = 1;
   mywrite(helper_fd_out, l, 5);
   mywrite(helper_fd_out, buffer, len+attriblen);
-  speaking = 1;
   lastIndex = 0;
   finalIndex = len;
 }
@@ -224,8 +233,8 @@ static void mutespk (void)
   unsigned char c = 1;
   if(helper_fd_out < 0) return;
   LogPrint(LOG_DEBUG,"mute");
-  mywrite(helper_fd_out, &c,1);
   speaking = 0;
+  mywrite(helper_fd_out, &c,1);
 }
 
 static void closespk (void)

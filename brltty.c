@@ -51,19 +51,19 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.95 (beta)"
+#define VERSION "BRLTTY 2.96 (beta)"
 #define COPYRIGHT "\
 Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
 Usage: %s [option ...]\n\
  -b driver  --braille=driver  Braille display driver to use: full library name\n\
-                                or shortcut ("##BRLLIBS##")\n\
+                                or shortcut (" BRLLIBS ")\n\
  -c file    --config=file     Path to configuration save/restore file.\n\
  -d device  --device=device   Path to device for accessing braille display.\n\
  -l n       --log=n           Syslog debugging level (from 0 to 7, default 5)\n\
  -q         --quiet           Suppress start-up messages.\n\
  -s driver  --speech=driver   Speech interface driver to use: full library name\n\
-                                or shortcut ("##SPKLIBS##")\n\
+                                or shortcut (" SPKLIBS ")\n\
  -p         --speechparm     Parameter to the speech driver
  -t file    --table=file      Path to dot translation table file.\n\
  -h         --help            Print this usage information.\n\
@@ -177,7 +177,7 @@ volatile sig_atomic_t keep_going = 1;	/*
 					 */
 int tbl_fd;			/* Translation table filedescriptor */
 /* -h, -l, -q and -v options */
-short opt_h = 0, opt_q = 0, opt_v = 0, opt_l = LOG_NOTICE;
+short opt_h = 0, opt_q = 0, opt_v = 0, opt_l = LOG_INFO;
 char *opt_c = NULL, *opt_d = NULL, *opt_t = NULL;	/* filename options */
 short homedir_found = 0;	/* CWD status */
 
@@ -199,7 +199,7 @@ const unsigned char num[10] = {14, 1, 5, 3, 11, 9, 7, 15, 13, 6};
  * for csrjmp subprocess 
  */
 volatile int csr_active = 0;
-pid_t csr_pid = 0;
+volatile pid_t csr_pid = 0;
 
 /*
  * Function prototypes: 
@@ -416,11 +416,13 @@ main (int argc, char *argv[])
 
   /* Parse command line using getopt(): */
   while ((i = get_option()) != -1)
+    /* continue on error as much as possible, as often we are typing blind
+       and won't even see the error message unless the display come up. */
     switch (i)
       {
       case '?': // An invalid option has been specified.
 	// An error message has already been displayed.
-        exit(2);
+	/* not fatal */
       case 'b':			/* name of driver */
 	braille_libname = optarg;
 	break;
@@ -430,10 +432,10 @@ main (int argc, char *argv[])
       case 'd':		/* serial device name */
 	opt_d = optarg;
 	break;
-      case 's':			/* name of driver */
+      case 's':			/* name of speech driver */
 	speech_libname = optarg;
 	break;
-      case 'p':			/* name of driver */
+      case 'p':			/* param to speech driver */
 	speech_drvparm = optarg;
 	break;
       case 't':		/* text translation table filename */
@@ -447,6 +449,7 @@ main (int argc, char *argv[])
 	opt_l = strtol(optarg,&endptr,0);
 	if(endptr==optarg || *endptr != 0 || opt_l<0 || opt_l>7){
 	  fprintf(stderr,"Invalid log level... ignored\n");
+	  /* not fatal */
 	  opt_l = 4;
 	}
       }
@@ -467,7 +470,7 @@ main (int argc, char *argv[])
 	else
 	  {
 	    fprintf(stderr, "Unknown option -- %s\n", optarg);
-	    exit(2);
+	    /* not fatal */
 	  }
 	break;
       }
@@ -488,6 +491,7 @@ main (int argc, char *argv[])
   if (*opt_d == 0)
     {
       LogAndStderr(LOG_ERR, "No braille device specified - use -d.");
+      /* this is fatal */
       exit(10);
     }
 
@@ -497,6 +501,7 @@ main (int argc, char *argv[])
               braille_libname ? "Bad" : "No");
       list_braille_drivers();
       fprintf( stderr, "\nUse '%s -h' for quick help.\n\n", argv[0] );
+      /* this is fatal */
       exit(10);
     }
 
@@ -515,7 +520,8 @@ main (int argc, char *argv[])
               speech_libname ? "Bad" : "No");
       list_speech_drivers();
       fprintf( stderr, "\nUse '%s -h' for quick help.\n\n", argv[0] );
-      exit(10);
+      LogAndStderr(LOG_NOTICE, "Falling back to built-in speech driver.");
+      /* not fatal */
     }
 
   /* copy default mode for status display */
@@ -575,18 +581,18 @@ main (int argc, char *argv[])
   {
     char buffer[0X100];
     char *path = getcwd(buffer, sizeof(buffer));
-    LogAndStderr(LOG_NOTICE, "Working Directory: %s",
+    LogAndStderr(LOG_INFO, "Working Directory: %s",
 	         path ? path : "path-too-long");
   }
 
-  LogAndStderr(LOG_NOTICE, "Dot Translation Table: %s",
+  LogAndStderr(LOG_INFO, "Dot Translation Table: %s",
                opt_t ? opt_t : "built-in");
-  LogAndStderr(LOG_NOTICE, "Braille Device: %s", opt_d);
-  LogAndStderr(LOG_NOTICE, "Braille Driver: %s (%s)",
+  LogAndStderr(LOG_INFO, "Braille Device: %s", opt_d);
+  LogAndStderr(LOG_INFO, "Braille Driver: %s (%s)",
                braille_libname, braille->name);
-  LogAndStderr(LOG_NOTICE, "Braille Help File: %s", braille->helpfile);
-  LogAndStderr(LOG_NOTICE, "Braille Configuration File: %s", opt_c);
-  LogAndStderr(LOG_NOTICE, "Speech Driver: %s (%s)",
+  LogAndStderr(LOG_INFO, "Braille Help File: %s", braille->helpfile);
+  LogAndStderr(LOG_INFO, "Braille Configuration File: %s", opt_c);
+  LogAndStderr(LOG_INFO, "Speech Driver: %s (%s)",
                speech_libname, speech->name);
 
   /*
@@ -726,6 +732,12 @@ main (int argc, char *argv[])
 	    play(snd_brloff);
 	    LogPrint(LOG_INFO,"Reinitializing braille driver.");
 	    startbrl();
+	    break;
+	  case CMD_RESTARTSPEECH:
+	    speech->mute();
+	    speech->close();
+	    LogPrint(LOG_INFO,"Reinitializing speech driver.");
+	    speech->initialize(speech_drvparm);
 	    break;
 	  case CMD_TOP:
 	    p->winy = 0;
@@ -1029,7 +1041,7 @@ main (int argc, char *argv[])
 	    cut_end (p->winx + brl.x - 1, p->winy + brl.y - 1);
 	    break;
 	  case CMD_PASTE:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
+	    if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
 	      cut_paste ();
 	    break;
 	  case CMD_SND:
@@ -1148,8 +1160,10 @@ main (int argc, char *argv[])
 		      ,buffer, \
 		      SCR_TEXT);
 	      i = r*scr.cols;
-	      while(buffer[--i] == 0);
+	      i--;
+	      while(i>=0 && buffer[i] == 0) i--;
 	      i++;
+	      if(i==0) break;
 	      if(speech->sayWithAttribs != NULL) {
 		getscr ((winpos)
 		{
@@ -1171,6 +1185,13 @@ main (int argc, char *argv[])
 	      {
 		char buf[2] = { keypress&0xFF, 0 };
 		inskey (buf);
+	      }
+	    else if (keypress & VAL_BRLKEY)
+	      {
+		char buf[2] = { keypress&0xFF, 0 };
+		int i;
+		for (i=0;i<256;i++) { if (texttrans[i]==(keypress&0xFF)) buf[0]=i; }
+		inskey(buf);
 	      }
 	    else if (keypress >= CR_ROUTEOFFSET && 
 		     keypress < CR_ROUTEOFFSET + brl.x && 
@@ -1586,22 +1607,26 @@ setwinxy (int x, int y)
 void 
 csrjmp (int x, int y)
 {
+  sigset_t mask;
   /*
    * Fork cursor routing subprocess. * First, we must check if a
    * subprocess is already running: if so, we * send it a SIGUSR1 and
    * wait for it to die. 
    */
-  signal (SIGCHLD, SIG_IGN);	/* ignore SIGCHLD for the moment */
+  /* NB According to man 2 wait, setting SIGCHLD handler to SIG_IGN may mean
+     that wait can't catch the dying child. */
   if (csr_active)
     {
       kill (csr_pid, SIGUSR1);
-      while (wait(NULL) != csr_pid);
-      csr_pid = 0;
-      csr_active--;
+      while(csr_active) pause();
     }
-  signal (SIGCHLD, stop_child);	/* re-establish handler */
+
+  sigemptyset (&mask);
+  sigaddset (&mask, SIGCHLD);
+  sigprocmask (SIG_BLOCK, &mask, NULL);     /* block SIGUSR1 */
 
   csr_active++;
+
   switch (csr_pid = fork ())
     {
     case -1:			/* fork failed */
@@ -1614,6 +1639,7 @@ csrjmp (int x, int y)
     default:			/* parent waits for child to return */
       break;
     }
+  sigprocmask (SIG_UNBLOCK, &mask, NULL);   /* unblock SIGUSR1 */
 }
 
 

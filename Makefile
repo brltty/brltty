@@ -34,6 +34,7 @@
 #BRL_TARGET = Papenmeier
 #BRL_TARGET = TSI
 #BRL_TARGET = Vario
+#BRL_TARGET = Vario-HT
 #BRL_TARGET = MultiBraille
 
 # If you would like the driver for your speech interface built into the
@@ -146,8 +147,8 @@ PREFIX =
 
 INSTALL_DRIVERS =
 
-BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario MultiBraille
-BRL_LIBS = al b1 b4 cb ec eu md pm ts va mb
+BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario Vario-HT MultiBraille
+BRL_LIBS = al b1 b4 cb ec eu md pm ts va vh mb
 
 SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival \
    GenericSay Televox

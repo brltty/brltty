@@ -19,18 +19,23 @@
 
 ###############################################################################
 #
-# Makefile for BRLTTY BAUM Vario Emulation 1 driver
+# Makefile for BRLTTY Vario-HT driver
 # All variables are defined in the main Makefile...
 #
 ###############################################################################
 
-DRIVER = va
+IFLAGS = -I..
+DRIVER = vh
 include ../driver.mk
 
-brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../inskey.h ../beeps.h ../config.h
-	$(CC) $(BRL_CFLAGS) -c brl.c
+variolow.o:	variolow.c variolow.h
+	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c variolow.c
+
+vario.o:	vario.c brlconf.h ../brl_driver.h ../misc.h
+	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c vario.c
+
+brl.o:	vario.o	variolow.o
+	$(LD) -r -o brl.o variolow.o vario.o 
 
 brl-lib-name:
-	echo -e "va\tVario Emul. 1 (40/80)" >> $(BRLNAMES)
-
-
+	echo -e "vh\tVario Emul. 2" >> $(BRLNAMES)

@@ -1,6 +1,6 @@
 ExternalSpeech
 by Stéphane Doyon <s.doyon@videotron.ca>
-Version 0.4 beta, September 2000
+Version 0.5 beta, September 2000
 
 This speech driver interfaces with an external program that will handle
 speech synthesis. The protocol for talking to the external program is

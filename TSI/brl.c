@@ -15,7 +15,7 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.5 (September 2000)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.52 (September 2000)"
 #define COPYRIGHT "Copyright (C) 1996-2000 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
@@ -23,9 +23,11 @@
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled into BRLTTY versions 2.91-3.0.
+ * It is designed to be compiled into BRLTTY versions 2.95-3.0.
  *
  * History:
+ * Version 2.52: Changed LOG_NOTICE to LOG_INFO. Was too noisy.
+ * Version 2.51: Added CMD_RESTARTSPEECH.
  * Version 2.5: Added CMD_SPKHOME, sacrificed LNBEG and LNEND.
  * Version 2.4: Refresh display even if unchanged after every now and then so
  *   that it will clear up if it was garbled. Added speech key bindings (had
@@ -342,7 +344,7 @@ static unsigned char *battery_msg;     /* low battery warning msg */
 static void 
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, VERSION);
+  LogAndStderr(LOG_INFO, VERSION);
   LogAndStderr(LOG_INFO, "   "COPYRIGHT);
 }
 
@@ -537,7 +539,7 @@ static void initbrl (brldim *brl, const char *tty)
     /* nav 20 */
     sethlpscr (0);
     has_sw = 0;
-    LogPrint(LOG_NOTICE, "Detected Navigator 20");
+    LogPrint(LOG_INFO, "Detected Navigator 20");
     break;
   case 40:
     if(disp_ver[1] > '3'){
@@ -547,13 +549,13 @@ static void initbrl (brldim *brl, const char *tty)
       sw_bcnt = SW_CNT40;
       sw_lastkey = 39;
       speed = 2;
-      LogPrint(LOG_NOTICE, "Detected PowerBraille 40");
+      LogPrint(LOG_INFO, "Detected PowerBraille 40");
     }else{
       /* nav 40 */
       has_sw = 0;
       sethlpscr (0);
       slow_update = 1;
-      LogPrint(LOG_NOTICE, "Detected Navigator 40");
+      LogPrint(LOG_INFO, "Detected Navigator 40");
     }
     break;
   case 80:
@@ -563,7 +565,7 @@ static void initbrl (brldim *brl, const char *tty)
     sw_bcnt = SW_CNT80;
     sw_lastkey = 79;
     slow_update = 2;
-    LogPrint(LOG_NOTICE, "Detected Navigator 80");
+    LogPrint(LOG_INFO, "Detected Navigator 80");
     break;
   case 65:
     /* pb65 */
@@ -573,7 +575,7 @@ static void initbrl (brldim *brl, const char *tty)
     sw_lastkey = 64;
     speed = 2;
     slow_update = 2;
-    LogPrint(LOG_NOTICE, "Detected PowerBraille 65");
+    LogPrint(LOG_INFO, "Detected PowerBraille 65");
     break;
   case 81:
     /* pb80 */
@@ -584,7 +586,7 @@ static void initbrl (brldim *brl, const char *tty)
     brl_cols = 80;
     speed = 2;
     slow_update = 2;
-    LogPrint(LOG_NOTICE, "Detected PowerBraille 80");
+    LogPrint(LOG_INFO, "Detected PowerBraille 80");
     break;
   default:
     LogPrint(LOG_ERR,"Unrecognized braille display");
@@ -627,7 +629,7 @@ static void initbrl (brldim *brl, const char *tty)
       delay(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(brl_fd,reply)) {
 	LogPrint(LOG_INFO,"Found display again at 9600bps.");
-	LogPrint(LOG_NOTICE, "Must be a TSI emulator.");
+	LogPrint(LOG_INFO, "Must be a TSI emulator.");
       }else{
 	LogPrint(LOG_ERR,"Display lost after baud switching");
 	goto failure;
@@ -1103,7 +1105,7 @@ readbrl (int type)
   curtio.c_cc[VMIN] = 0;
   tcsetattr (brl_fd, TCSANOW, &curtio);
   /* Check for first byte */
-  if (!read (brl_fd, buf, 1)){
+  if (read (brl_fd, buf, 1) < 1){
     if((i = elapsed_msec(&last_ping, &now) > PING_INTRVL)){
       int ping_due = (pings==0 || (elapsed_msec(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
@@ -1377,6 +1379,7 @@ readbrl (int type)
     KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SAYALL);
     KEY (KEY_BROUND | KEY_BRIGHT, CMD_SPKHOME);
     KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
+    KEY (KEY_BRIGHT | KEY_BUP | KEY_CUP | KEY_BLEFT, CMD_RESTARTSPEECH);
     
   /* config menu */
     KEYAND(KEY_BAR1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BRIGHT, CMD_CONFMENU);

@@ -187,6 +187,14 @@ static BRLPARAMS Models[] =
   }
   ,
   {
+    /* ID == 14 */
+    "Alva Satellite 40",
+    SAT540,
+    40,
+    3
+  }
+  ,
+  {
     0,
   }
 };
@@ -306,8 +314,8 @@ static int StatusKeys[6] =
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "Alva driver, version 2.0");
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org>.");
+  LogAndStderr(LOG_NOTICE, "Alva driver, version 2.1");
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1995-2000 by Nicolas Pitre <nico@cam.org>.");
   LogAndStderr(LOG_NOTICE, "   Compiled for %s with %s version.",
 #if MODEL == ABT_AUTO
 	  "terminal autodetection",

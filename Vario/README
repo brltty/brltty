@@ -1,68 +1,88 @@
-
 Introduction
 
-The driver for the BAUM Vario was made on a machine that also runs Windows98
-and Jaws for Windows. Since Jaws driver for Vario uses "Emulation Mode 2" we
-choose to do the same, the fact that the emulation was horribly simple to
-implement was an added benefit :-) This makes it simple to use both Windows
-and Linux without having to change the settings of the Vario.
+This directory contains the source code for a driver-module
+for the Baum Vario 40 and 80 braille displays.
+It is written for Emulation 1, which is the native Baum protocol.
 
-If you have a need for this driver to operate in native Baum-mode, feel free
-to contact the authors and we'll see what we can do.
-
-
-Setting up the Vario
-
-In order to use this driver you need to set your Vario to "Emulation Mode 2"
-as follows:
-
-1. Shut down any running software for the Vario, or the entire computer if
-   you feel that's easiest.
-2. Power off the Vario.
-3. Power up the Vario. It should now print some status information, starting
-   with the text "BAUM". Last in the display there should be information on
-   which emulation-mode is in use, memorize this so you'll be able to change
-   it back if necessary.
-4. Change the emulation using the upper and lower buttons beside the display.
-   Depending on the firmware-version the Vario can have 2-5 modes. The end
-   of the display should read "Emul. 2". For some reason the dot-patterns
-   doesn't seem to match real braille, so ignore the lower right dot in the
-   number.
-5. Save the setting by pressing the upper and lower button right or left
-   beside the display simultaneously about 3 seconds. The display will then
-   show "Saved".
-
-Upon receiving data the Vario will stop displaying the status-text and display
-the recieved information instead.
-
-The Vario speaks 19200/8/O/1 in this emulation mode, so it should work with
-virtually any serial-port found in a PC.
-
-About the implementation
-We managed to get hold of the protocol specifications for the Vario (Vario40
-03/19/98 from Baum Products GmbH). This documentation specifies a number of
-different protocols, we decided to use the "HT-Protocol", this seemed to have
-the desired functionality as well as beeing straightforward to implement.
-
-Since we lacked any real documentation of the brltty internal communication and
-structures we used the existing source as a rolemodel. If something is
-ill-working do tell us. 
-
-The implementation only resends data to the display when something actually
-changes in the data. This since the brltty main engine loop´s at a rapid rate
-and resending the same data has no effect but to wear out the machinera it
-seemed as a waste of serial signals to do so. 
-
-One feature we ignored in the implementation of the protocol is the usage of
-ACK/NAK´s for parity anity etc. This partly since we have no control of the main
-application loop. If this causes you any problem, let me know and i will fix it.
+Jason Fayre <jfayre@fayre.dhs.org> reported, that the module also works with
+the RBT-40 (which is the north american version of the Vario). Thanks for
+testing. If the RBT is really just another name for the same product,
+it should also run with RBT-80 (if something even exists).
 
 
-Since the brltty package missed a swedish translationtable we created one. 
+Credits go to Alexander Graffi <a.graffi@baum.at> of Baum Austria who
+organized that I could get a Vario 80, and later on a Vario 40
+to write the GPL driver for Linux.
 
-Authors
+Basic things:
+You can twiddle some variables in brlconf.h.
+e.g. the repeat time in ms, if you feel key repeation
+is too slow.
+Also, you can enable USE_PING there.
+Background of USE_PING is the following:
+I implemented the Device ID PING/PONG of Vario to
+be able to detect when the device gets turned off, or
+disconnected. This works pretty well for Vario 40 and 80,
+only problem is that the current Firmware of the Vario series
+is programmed in a way so that the sleeping mode of Varios only gets
+activated if there is no serial communication. IMHO this
+is a bad idea, because they could simply use key-presses for this.
+I talked to the firmware developer, and he told me he will eventually
+exclude device ID from this, so that Vario can go to sleep,
+even when it gets pinged every once in a while.
+This is not implemented yet, so I had to exclude the PINGING
+by default to avoid certain problems in conjunction with
+sleeping mode. E.g., the Vario 80 doesnt even have a on/off
+switch, so you would need to plug the cable out to
+get it to turn the display off :).
 
-This driver is written mainly by Per Lejontand <per@acc.umu.se> with some
-assistance from Niklas Edmundsson <nikke@acc.umu.se>. Testing was/is done by
-the owner of the Baum Vario used during development, Sabina Lundgren
-<mina@acc.umu.se>.
+If you use the device in conjunction with a switchbox and more than one computers
+I suggest you to turn USE_PING on. Otherwise the driver doesnt
+get reinitialized when the device comes back.
+
+
+Vario 40:
+See the brlttyhlp1.txt file for key-bindings.
+
+Vario 80:
+The Braille keyboard keys of the Vario 80 are implemented.
+You just have to press all 7 keys at once, and
+will here a sound played. This places you into typing mode,
+where you can type in braille and the chars will get placed into
+the terminal. dot 7 is generated when you combine with
+the space (chord) key.
+There are some basic commands in typing mode for easy correction:
+chord 2 = backspace
+chord 3 = cursor left
+chord 4 = return
+chord 5 = tab
+chord 6 = cursor right
+
+To leave typing mode, just hit all 7 keys again.
+
+See brlttyhlp0.txt for help about the other keys.
+
+
+TODO:
+Revise the way repeation and top-key combinations are handled.
+It looks like it works this way, but the code is a bit ugly.
+I also sometimes had some problems with the Vario 40 but
+I was unable to track the problem down.
+
+Author:
+The driver was written by Mario Lang <mlang@delysid.org>.
+I started to work on in late August 2000. When you
+read this file, I already had to give the devices back. If I am lucky,
+I'll get a Vario 80 sooner or later, but in the meantime, I'll
+not be able to update the code (at least, I will not be able to
+test any changes).
+If you like or dislike anything, e.g. the choice of key-combinations 
+and so on, please drop me a note. I am eager to get your feedback.
+
+
+Bugs:
+As above, Vario 40 sometimes behaves strange. I feel like
+this is a typing-prblem somewhere with a variable or something.
+Perhaps someone other finds it when looking at the code,
+This is pretty much the first useful C program I coded,
+so there may be things I didn't see.

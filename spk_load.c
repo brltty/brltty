@@ -54,8 +54,7 @@ int load_speech_driver(void)
 	return 1;
       }
   #else
-    if (speech_libname == NULL)
-      return 0;
+#error "No built-in speech driver: please provide at least NoSpeech driver!"
   #endif
 
   /* allow shortcuts */
@@ -73,7 +72,7 @@ int load_speech_driver(void)
     {
       LogAndStderr(LOG_ERR, "%s", dlerror());
       LogAndStderr(LOG_ERR, "Cannot open speech driver library: %s", speech_libname);
-      return 0;
+      goto liberror;
     }
 
   speech = dlsym(library, SPK_SYMBOL); /* locate struct driver - filled with all the data */
@@ -82,10 +81,16 @@ int load_speech_driver(void)
     {
       LogAndStderr(LOG_ERR, "%s", error);
       LogAndStderr(LOG_ERR, "Speech driver symbol not found: %s", SPK_SYMBOL);
-      exit(10);
+      goto liberror;
     }
 
   return 1;
+
+ liberror:
+  /* fall back to built-in */
+  speech = &spk_driver;
+  speech_libname = "built-in";
+  return 0;
 }
 
 

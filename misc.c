@@ -20,6 +20,7 @@
 
 #define __EXTENSIONS__	/* for time.h */
 
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

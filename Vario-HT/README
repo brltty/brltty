@@ -1,0 +1,68 @@
+
+Introduction
+
+The driver for the BAUM Vario was made on a machine that also runs Windows98
+and Jaws for Windows. Since Jaws driver for Vario uses "Emulation Mode 2" we
+choose to do the same, the fact that the emulation was horribly simple to
+implement was an added benefit :-) This makes it simple to use both Windows
+and Linux without having to change the settings of the Vario.
+
+If you have a need for this driver to operate in native Baum-mode, feel free
+to contact the authors and we'll see what we can do.
+
+
+Setting up the Vario
+
+In order to use this driver you need to set your Vario to "Emulation Mode 2"
+as follows:
+
+1. Shut down any running software for the Vario, or the entire computer if
+   you feel that's easiest.
+2. Power off the Vario.
+3. Power up the Vario. It should now print some status information, starting
+   with the text "BAUM". Last in the display there should be information on
+   which emulation-mode is in use, memorize this so you'll be able to change
+   it back if necessary.
+4. Change the emulation using the upper and lower buttons beside the display.
+   Depending on the firmware-version the Vario can have 2-5 modes. The end
+   of the display should read "Emul. 2". For some reason the dot-patterns
+   doesn't seem to match real braille, so ignore the lower right dot in the
+   number.
+5. Save the setting by pressing the upper and lower button right or left
+   beside the display simultaneously about 3 seconds. The display will then
+   show "Saved".
+
+Upon receiving data the Vario will stop displaying the status-text and display
+the recieved information instead.
+
+The Vario speaks 19200/8/O/1 in this emulation mode, so it should work with
+virtually any serial-port found in a PC.
+
+About the implementation
+We managed to get hold of the protocol specifications for the Vario (Vario40
+03/19/98 from Baum Products GmbH). This documentation specifies a number of
+different protocols, we decided to use the "HT-Protocol", this seemed to have
+the desired functionality as well as beeing straightforward to implement.
+
+Since we lacked any real documentation of the brltty internal communication and
+structures we used the existing source as a rolemodel. If something is
+ill-working do tell us. 
+
+The implementation only resends data to the display when something actually
+changes in the data. This since the brltty main engine loop´s at a rapid rate
+and resending the same data has no effect but to wear out the machinera it
+seemed as a waste of serial signals to do so. 
+
+One feature we ignored in the implementation of the protocol is the usage of
+ACK/NAK´s for parity anity etc. This partly since we have no control of the main
+application loop. If this causes you any problem, let me know and i will fix it.
+
+
+Since the brltty package missed a swedish translationtable we created one. 
+
+Authors
+
+This driver is written mainly by Per Lejontand <per@acc.umu.se> with some
+assistance from Niklas Edmundsson <nikke@acc.umu.se>. Testing was/is done by
+the owner of the Baum Vario used during development, Sabina Lundgren
+<mina@acc.umu.se>.
