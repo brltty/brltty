@@ -44,7 +44,7 @@ static ContractionTableHeader *tableHeader;
 static ContractionTableOffset tableSize;
 static ContractionTableOffset tableUsed;
 
-static const char *const groupNames[] = {
+static const char *const characterClassNames[] = {
   "space",
   "letter",
   "digit",
@@ -53,14 +53,14 @@ static const char *const groupNames[] = {
   "lowercase",
   NULL
 };
-struct GroupEntry {
-  struct GroupEntry *next;
+struct CharacterClass {
+  struct CharacterClass *next;
   ContractionTableCharacterAttributes attribute;
   BYTE length;
   char name[1];
 };
-static struct GroupEntry *groupList;
-static ContractionTableCharacterAttributes groupAttribute;
+static struct CharacterClass *characterClasses;
+static ContractionTableCharacterAttributes characterClassAttribute;
 
 static const char *const opcodeNames[CTO_None] = {
   "include",
@@ -98,7 +98,7 @@ static const char *const opcodeNames[CTO_None] = {
   "midnum",
   "endnum",
 
-  "group",
+  "class",
   "after",
   "before"
 };
@@ -252,53 +252,55 @@ addRule (
   return NULL;
 }
 
-static const struct GroupEntry *
-findGroupEntry (const char *name, int length) {
-  const struct GroupEntry *group = groupList;
-  while (group) {
-    if (memcmp(name, group->name, length) == 0) return group;
-    group = group->next;
+static const struct CharacterClass *
+findCharacterClass (const char *name, int length) {
+  const struct CharacterClass *class = characterClasses;
+  while (class) {
+    if ((length == class->length) &&
+        (memcmp(name, class->name, length) == 0))
+      return class;
+    class = class->next;
   }
   return NULL;
 }
 
-static struct GroupEntry *
-addGroupEntry (FileData *data, const char *name, int length) {
-  struct GroupEntry *group;
-  if (groupAttribute) {
-    if ((group = malloc(sizeof(*group) + length - 1))) {
-      memset(group, 0, sizeof(*group));
-      memcpy(group->name, name, (group->length = length));
+static struct CharacterClass *
+addCharacterClass (FileData *data, const char *name, int length) {
+  struct CharacterClass *class;
+  if (characterClassAttribute) {
+    if ((class = malloc(sizeof(*class) + length - 1))) {
+      memset(class, 0, sizeof(*class));
+      memcpy(class->name, name, (class->length = length));
 
-      group->attribute = groupAttribute;
-      groupAttribute <<= 1;
+      class->attribute = characterClassAttribute;
+      characterClassAttribute <<= 1;
 
-      group->next = groupList;
-      groupList = group;
-      return group;
+      class->next = characterClasses;
+      characterClasses = class;
+      return class;
     }
   }
-  compileError(data, "contraction table group list overflow: %.*s", length, name);
+  compileError(data, "character class table overflow: %.*s", length, name);
   return NULL;
 }
 
 static void
-deallocateGroupList (void) {
-  while (groupList) {
-    struct GroupEntry *group = groupList;
-    groupList = groupList->next;
-    free(group);
+deallocateCharacterClasses (void) {
+  while (characterClasses) {
+    struct CharacterClass *class = characterClasses;
+    characterClasses = characterClasses->next;
+    free(class);
   }
 }
 
 static int
-allocateGroupList (void) {
-  const char *const *name = groupNames;
-  groupList = NULL;
-  groupAttribute = 1;
+allocateCharacterClasses (void) {
+  const char *const *name = characterClassNames;
+  characterClasses = NULL;
+  characterClassAttribute = 1;
   while (*name) {
-    if (!addGroupEntry(NULL, *name, strlen(*name))) {
-      deallocateGroupList();
+    if (!addCharacterClass(NULL, *name, strlen(*name))) {
+      deallocateCharacterClasses();
       return 0;
     }
     ++name;
@@ -545,10 +547,10 @@ setLocale (const char *locale) {
 }
 
 static int
-getGroupEntry (FileData *data, const struct GroupEntry **group, const char **token, int *length) {
-  if (getToken(data, token, length, "group name")) {
-    if ((*group = findGroupEntry(*token, *length))) return 1;
-    compileError(data, "group not found: %.*s", *length, *token);
+getCharacterClass (FileData *data, const struct CharacterClass **class, const char **token, int *length) {
+  if (getToken(data, token, length, "character class name")) {
+    if ((*class = findCharacterClass(*token, *length))) return 1;
+    compileError(data, "character class not defined: %.*s", *length, *token);
   }
   return 0;
 }
@@ -710,18 +712,18 @@ doOpcode:
       break;
     }
 
-    case CTO_Group: {
-      const struct GroupEntry *group;
+    case CTO_Class: {
+      const struct CharacterClass *class;
       ByteString characters;
-      if (getToken(data, &token, &length, "group name")) {
-        if ((group = findGroupEntry(token, length))) {
-          compileError(data, "group already defined: %.*s", length, token);
-        } else if ((group = addGroupEntry(data, token, length))) {
+      if (getToken(data, &token, &length, "character class name")) {
+        if ((class = findCharacterClass(token, length))) {
+          compileError(data, "character class already defined: %.*s", length, token);
+        } else if ((class = addCharacterClass(data, token, length))) {
           if (getCharacters(data, &characters, &token, &length)) {
             int index;
             for (index=0; index<characters.length; ++index) {
               ContractionTableCharacter *character = &tableHeader->characters[characters.bytes[index]];
-              character->attributes |= group->attribute;
+              character->attributes |= class->attribute;
             }
           }
         }
@@ -731,17 +733,17 @@ doOpcode:
 
     {
       ContractionTableCharacterAttributes *attributes;
-      const struct GroupEntry *group;
+      const struct CharacterClass *class;
 
     case CTO_After:
       attributes = &after;
-      goto doGroup;
+      goto doClass;
     case CTO_Before:
       attributes = &before;
-    doGroup:
+    doClass:
 
-      if (getGroupEntry(data, &group, &token, &length)) {
-        *attributes |= group->attribute;
+      if (getCharacterClass(data, &class, &token, &length)) {
+        *attributes |= class->attribute;
         goto doOpcode;
       }
       break;
@@ -918,7 +920,7 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
 
   if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
     if (headerOffset == 0) {
-      if (allocateGroupList()) {
+      if (allocateCharacterClasses()) {
         if (processFile(fileName)) {
           if (auditTable()) {
             ok = 1;
@@ -930,7 +932,7 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
             }
           }
         }
-        deallocateGroupList();
+        deallocateCharacterClasses();
       }
     } else {
       compileError(NULL, "contraction table header not allocated at offset 0.");

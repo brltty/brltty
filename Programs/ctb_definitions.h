@@ -87,9 +87,9 @@ typedef enum { /*Op codes*/
   CTO_MidNum, /*middle of number, e.g., decimal point*/
   CTO_EndNum, /*end of number*/
 
-  CTO_Group, /*define a character group*/
-  CTO_After, /*only match if after character in gruop*/
-  CTO_Before, /*only match if before character in gruop*/
+  CTO_Class, /*define a character class*/
+  CTO_After, /*only match if after character in class*/
+  CTO_Before, /*only match if before character in class*/
 
   CTO_None /*For internal use only*/
 } ContractionTableOpcode;
