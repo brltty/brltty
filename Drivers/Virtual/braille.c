@@ -517,8 +517,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
         if (descriptor) {
           int needsNumber = descriptor->maximum > 0;
           int numberSpecified = 0;
-          int onSpecified = 0;
-          int offSpecified = 0;
+          int switchSpecified = 0;
           int block;
 
           command = descriptor->entry->code;
@@ -526,17 +525,15 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
 
           while ((word = strtok(NULL, delimiters))) {
             if (block == 0) {
-              if (!onSpecified) {
+              if (!switchSpecified) {
                 if (strcasecmp(word, "on") == 0) {
-                  onSpecified = 1;
+                  switchSpecified = 1;
                   command |= VAL_SWITCHON;
                   continue;
                 }
-              }
 
-              if (!offSpecified) {
                 if (strcasecmp(word, "off") == 0) {
-                  offSpecified = 1;
+                  switchSpecified = 1;
                   command |= VAL_SWITCHOFF;
                   continue;
                 }
@@ -547,13 +544,11 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
               char *end;
               long int number = strtol(word, &end, 0);
               if (!*end) {
-                numberSpecified = 1;
                 if ((number > 0) && (number <= descriptor->maximum)) {
+                  numberSpecified = 1;
                   command += number;
-                } else {
-                  LogPrint(LOG_WARNING, "Number out of range: %s", word);
+                  continue;
                 }
-                continue;
               }
             }
 
@@ -562,6 +557,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
 
           if (needsNumber && !numberSpecified) {
             LogPrint(LOG_WARNING, "Number not specified.");
+            command = EOF;
           }
         } else {
           LogPrint(LOG_WARNING, "Unknown command: %s", word);
