@@ -42,6 +42,7 @@
 static int fileDescriptor = -1;
 static struct termios oldSettings;
 static struct termios newSettings;
+static int charactersPerSecond;			/* file descriptor for Braille display */
 
 static TranslationTable inputMap;
 static const unsigned char topLeftKeys[]  = { 84,  83,  87,  85,  86,  88,  89,  90};
@@ -74,14 +75,15 @@ awaitByte (unsigned char *byte) {
 }
 
 static int
-writeBytes (unsigned char *bytes, int count) {
+writeBytes (BrailleDisplay *brl, unsigned char *bytes, int count) {
+  brl->writeDelay += count * 1000 / charactersPerSecond;
   if (safe_write(fileDescriptor, bytes, count) != -1) return 1;
   LogError("Albatross write");
   return 0;
 }
 
 static int
-acknowledgeDisplay (void) {
+acknowledgeDisplay (BrailleDisplay *brl) {
   unsigned char description;
   if (!awaitByte(&description)) return 0;
   if (description == 0XFF) return 0;
@@ -98,7 +100,7 @@ acknowledgeDisplay (void) {
 
   {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
-    if (!writeBytes(acknowledgement, sizeof(acknowledgement))) return 0;
+    if (!writeBytes(brl, acknowledgement, sizeof(acknowledgement))) return 0;
 
     tcflush(fileDescriptor, TCIFLUSH);
     delay(100);
@@ -169,15 +171,15 @@ acknowledgeDisplay (void) {
 }
 
 static int
-clearDisplay (void) {
+clearDisplay (BrailleDisplay *brl) {
   unsigned char bytes[] = {0XFA};
-  int cleared = writeBytes(bytes, sizeof(bytes));
+  int cleared = writeBytes(brl, bytes, sizeof(bytes));
   if (cleared) memset(displayContent, 0, displaySize);
   return cleared;
 }
 
 static int
-updateDisplay (const unsigned char *cells, int count, int start) {
+updateDisplay (BrailleDisplay *brl, const unsigned char *cells, int count, int start) {
   static time_t lastUpdate = 0;
   unsigned char bytes[count * 2 + 2];
   unsigned char *byte = bytes;
@@ -198,25 +200,25 @@ updateDisplay (const unsigned char *cells, int count, int start) {
 
   if (((byte - bytes) > 1) || (time(NULL) != lastUpdate)) {
     *byte++ = 0XFC;
-    if (!writeBytes(bytes, byte-bytes)) return 0;
+    if (!writeBytes(brl, bytes, byte-bytes)) return 0;
     lastUpdate = time(NULL);
   }
   return 1;
 }
 
 static int
-updateWindow (const unsigned char *cells) {
-  return updateDisplay(cells, windowWidth, windowStart);
+updateWindow (BrailleDisplay *brl, const unsigned char *cells) {
+  return updateDisplay(brl, cells, windowWidth, windowStart);
 }
 
 static int
-updateStatus (const unsigned char *cells) {
-  return updateDisplay(cells, statusCount, statusStart);
+updateStatus (BrailleDisplay *brl, const unsigned char *cells) {
+  return updateDisplay(brl, cells, statusCount, statusStart);
 }
 
 static int
-refreshDisplay (void) {
-  return updateDisplay(NULL, displaySize, 0);
+refreshDisplay (BrailleDisplay *brl) {
+  return updateDisplay(brl, NULL, displaySize, 0);
 }
 
 static void
@@ -246,6 +248,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     newSettings.c_iflag = IGNPAR | IGNBRK;
 
     while (resetSerialDevice(fileDescriptor, &newSettings, *speed)) {
+      charactersPerSecond = baud2integer(*speed) / 10;
       time_t start = time(NULL);
       int count = 0;
       unsigned char byte;
@@ -253,8 +256,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       LogPrint(LOG_DEBUG, "Trying Albatross at %d baud.", baud2integer(*speed));
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
-          if (!acknowledgeDisplay()) break;
-          clearDisplay();
+          if (!acknowledgeDisplay(brl)) break;
+          clearDisplay(brl);
           brl->x = windowWidth;
           brl->y = 1;
           return 1;
@@ -283,12 +286,12 @@ brl_close (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
-  updateWindow(brl->buffer);
+  updateWindow(brl, brl->buffer);
 }
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  updateStatus(status);
+  updateStatus(brl, status);
 }
 
 static int
@@ -297,8 +300,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
   while (readByte(&byte)) {
     if (byte == 0XFF) {
-      if (acknowledgeDisplay())  {
-        refreshDisplay();
+      if (acknowledgeDisplay(brl))  {
+        refreshDisplay(brl);
         brl->x = windowWidth;
         brl->y = 1;
         brl->resizeRequired = 1;
@@ -342,7 +345,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         break;
 
       case 0XFB:
-        refreshDisplay();
+        refreshDisplay(brl);
         continue;
 
       case  83: /* key: top left first lower */
