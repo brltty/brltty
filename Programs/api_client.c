@@ -175,7 +175,7 @@ static ssize_t brlapi_waitForPacket(brl_type_t expectedPacketType, void *packet,
 
 /* brlapi_waitForAck */
 /* Wait for an acknowledgement, must be called with brlapi_fd_mutex locked */
-static int brlapi_waitForAck()
+static int brlapi_waitForAck(void)
 {
   return brlapi_waitForPacket(BRLPACKET_ACK, NULL, 0);
 }
@@ -315,7 +315,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
 /* brlapi_closeConnection */
 /* Cleanly close the socket */
-void brlapi_closeConnection()
+void brlapi_closeConnection(void)
 {
   pthread_mutex_lock(&stateMutex);
   state = 0;
@@ -328,7 +328,7 @@ void brlapi_closeConnection()
 
 /* brlapi_getRaw */
 /* Switch to Raw mode */
-int brlapi_getRaw()
+int brlapi_getRaw(void)
 {
   int res;
   const uint32_t magic = htonl(BRLRAW_MAGIC);
@@ -343,7 +343,7 @@ int brlapi_getRaw()
 
 /* brlapi_leaveRaw */
 /* Leave Raw mode */
-int brlapi_leaveRaw()
+int brlapi_leaveRaw(void)
 {
   int res = brlapi_writePacketWaitForAck(fd, BRLPACKET_LEAVERAW, NULL, 0);
   pthread_mutex_lock(&stateMutex);
@@ -430,7 +430,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 /* Function : brlapi_getControllingTty */
 /* Returns the number of the caller's controlling terminal */
 /* -1 if error or unknown */
-static int brlapi_getControllingTty()
+static int brlapi_getControllingTty(void)
 {
   int tty;
   const char *env;
@@ -505,7 +505,7 @@ int brlapi_getTty(int tty, int how)
 
 /* Function : brlapi_leaveTty */
 /* Gives back control of our tty to brltty */
-int brlapi_leaveTty()
+int brlapi_leaveTty(void)
 {
   int res;
   brlx = 0; brly = 0;

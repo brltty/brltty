@@ -1119,7 +1119,7 @@ static void ttyTerminationHandler(Tty *tty)
 }
 /* Function : terminationHandler */
 /* Terminates driver */
-static void terminationHandler()
+static void terminationHandler(void)
 {
   int res;
   int i;
@@ -1152,7 +1152,7 @@ found:
   return c;
 }
 
-static inline void setCurrentRootTty() {
+static inline void setCurrentRootTty(void) {
   int tty;
   if ((tty = currentVirtualTerminal()))
     ttys.focus = tty;
