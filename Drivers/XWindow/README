@@ -1,0 +1,14 @@
+This driver lets use an X window as BrlTTY device: it behaves just like a
+real braille device, its cost excepted :)
+
+It is mostly intended for sighted developers who don't have access to a real
+device, but still want to have an idea of the result.
+
+For now, it is most useful for writing BrlAPI applications.
+First launch brltty as root, but with X access:
+# export DISPLAY=:0.0
+# brltty -b xw -t identity
+
+Then you can launch a BrlAPI application:
+$ export CONTROLVT=7                 # if X is running on VT 7
+$ ~/brltty/Programs/apitest

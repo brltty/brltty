@@ -166,6 +166,9 @@ extern "C" {
 /* Define this if GPM is to be used. */
 #undef HAVE_LIBGPM
 
+/* Define this if X is not available. */
+#undef X_DISPLAY_MISSING
+
 #define DEVICE_DIRECTORY "/dev"
 #define TRANSLATION_TABLE_EXTENSION ".tbl"
 #define TEXT_TABLE_PREFIX "text."

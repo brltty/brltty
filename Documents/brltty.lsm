@@ -52,6 +52,7 @@ Platforms: Linux (kernel 1.1.92 or later)
            - Virtual [TCP/Unix, client/server]
            - VisioBraille [20/40]
            - Voyager [44/70]
+           - XWindow [X11]
            Supported Speech Synthesizers:
            - Alva [Delphi(4nn)]
            - BrailleLite

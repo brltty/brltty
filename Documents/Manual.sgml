@@ -4334,6 +4334,8 @@ BRLTTY supports the following braille displays:
       |20/40@
     Voyager
       |44/70@
+    XWindow
+      |X11@
   </tabular>
 </table>
 
@@ -4399,6 +4401,7 @@ BRLTTY supports the following speech synthesizers:
     vr|Virtual@
     vs|VisioBraille@
     vv|ViaVoice@
+    xw|XWindow@
   </tabular>
 </table>
 

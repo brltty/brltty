@@ -143,6 +143,7 @@ The following braille displays are supported:
 -  Virtual [TCP/Unix, client/server]
 -  VisioBraille [20/40]
 -  Voyager [44/70]
+-  XWindow [X11]
 
 The following speech synthesizers are supported:
 

@@ -181,7 +181,7 @@ brlttyDirectory="${1}"
 	       --with-init-path="${initPath}" \
 	       --with-braille-driver="${brailleDrivers}" \
 	       --with-text-table="${textTable}" \
-	       --disable-speech-support \
+	       --disable-speech-support --without-x \
 	       --disable-pcm-tunes --disable-fm-tunes --disable-midi-tunes \
                --enable-standalone-programs --disable-api --disable-gpm
    make -s -C Programs all

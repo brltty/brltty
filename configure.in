@@ -243,6 +243,7 @@ in
 esac])
 AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 
+AC_PATH_XTRA
 AC_SEARCH_LIBS([socket], [socket])
 
 AC_CHECK_HEADERS([getopt.h syslog.h])
@@ -591,6 +592,10 @@ BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
+if test "${no_x}" != "yes"
+then
+   BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
+fi
 BRLTTY_ARG_DRIVER([braille])
 
 AC_CACHE_CHECK([for default braille device], [brltty_cv_default_braille_device], [dnl
