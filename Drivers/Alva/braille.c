@@ -629,9 +629,21 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   return 1;
 }
 
+static int
+getModelIdentifier (unsigned char *identifier) {
+  unsigned char packet[BRL_ID_SIZE];
+  if (readPacket(packet, sizeof(packet)) == sizeof(packet)) {
+    if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
+      *identifier = packet[BRL_ID_LENGTH];
+      return 1;
+    }
+  }
+  return 0;
+}
+
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
-  int ModelID = MODEL;
+  unsigned char ModelID = MODEL;
 
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
@@ -682,18 +694,12 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   /* autodetecting ABT model */
   do {
     if (!resetPort()) goto failure;
-    delay (1000);		/* delay before 2nd line drop */
-    /* This "if" statement can be commented out to try autodetect once anyway */
-    if (ModelID != ABT_AUTO) break;
+    delay(1000);		/* delay before 2nd line drop */
+    if (getModelIdentifier(&ModelID)) break;
 
     if (writeFunction(0X06) == -1) goto failure;
     delay(200);
-    {
-      unsigned char packet[BRL_ID_SIZE];
-      if (readPacket(packet, sizeof(packet)) != sizeof(packet)) continue;
-      if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0)
-        ModelID = packet[BRL_ID_LENGTH];
-    }
+    if (getModelIdentifier(&ModelID)) break;
   } while (ModelID == ABT_AUTO);
 
   if (!identifyModel(brl, ModelID)) goto failure;
@@ -857,7 +863,6 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
       switch (packet[1]) {
         case 0X07: { /* text/status cells reconfigured */
           int count = packet[3];
-          ReWrite = 1;
 
           if (count >= 3) {
             unsigned char cells = packet[9];
@@ -873,9 +878,11 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
               brl->x = columns;
               if (!reallocateBuffers(brl)) return -1;
               brl->resizeRequired = 1;
-              return 0;
             }
           }
+
+          ReWrite = 1;
+          return 0;
         }
       }
       break;

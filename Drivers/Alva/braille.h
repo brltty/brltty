@@ -21,7 +21,7 @@
  */
 
 /* Known Device Identification Numbers (not to be changed) */
-#define ABT_AUTO	-1	/* for new firmware only */
+#define ABT_AUTO	        0XFF	/* for new firmware only */
 #define ABT320		0X00	/* ABT 320 */
 #define ABT340		0X01	/* ABT 340 */
 #define ABT34D		0X02	/* ABT 340 Desktop */
