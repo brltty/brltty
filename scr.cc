@@ -67,7 +67,7 @@ initializeScreen (char **parameters)
 
 
 int
-initscr_phys (void)
+initializeRoutingScreen (void)
 {
   /* This function should be used in a forked process. Though we want to
    * have a separate file descriptor for the live screen from the one used
@@ -86,16 +86,16 @@ getScreenStatus (ScreenStatus *stat)
 
 
 void
-getstat_phys (ScreenStatus *stat)
+getRoutingScreenStatus (ScreenStatus *stat)
 {
   live->getstat(*stat);
 }
 
 
 unsigned char *
-getscr (winpos pos, unsigned char *buffer, short mode)
+getScreenContent (ScreenBox box, unsigned char *buffer, ScreenMode mode)
 {
-  return current->getscr(pos, buffer, mode);
+  return current->getscr(box, buffer, mode);
 }
 
 
@@ -116,6 +116,13 @@ insertString (const unsigned char *string)
 
 
 int
+selectVirtualTerminal (int vt)
+{
+  return live->selectvt(vt);
+}
+
+
+int
 switchVirtualTerminal (int vt)
 {
   return live->switchvt(vt);
@@ -132,14 +139,14 @@ closeScreen (void)
 
 
 void
-closescr_phys (void)
+closeRoutingScreen (void)
 {
   live->close();
 }
 
 
 int
-selectdisp (int disp)
+selectDisplay (int disp)
 {
   static int dismd = LIVE_SCRN;        /* current mode */
   static int curscrn = LIVE_SCRN;        /* current display screen */
@@ -199,21 +206,21 @@ selectdisp (int disp)
 
 
 int
-inithlpscr (char *helpfile)
+initializeHelpScreen (char *helpfile)
 {
   return help.open(helpfile);
 }
 
 
 void
-sethlpscr (short x)
+setHelpScreenNumber (short x)
 {
   help.setscrno(x);
 }
 
 
 short
-numhlpscr (void)
+getHelpScreenCount (void)
 {
   return help.numscreens();
 }

@@ -74,12 +74,8 @@ static void cut (void)
       if (srcbuf && dstbuf)
 	{
 	  /* grab it */
-	  getscr ((winpos)
-		  {
-		  cut_begx, cut_begy, cols, rows
-		  }
-		  ,srcbuf, \
-		  SCR_TEXT);
+	  getScreenContent((ScreenBox){cut_begx, cut_begy, cols, rows},
+		           srcbuf, SCR_TEXT);
 	  srcptr = srcbuf;
 	  dstptr = dstbuf;
 	  /* remove spaces at end of line, add return (except to last line),

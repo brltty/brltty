@@ -269,12 +269,12 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     brlcols = V80BRLCOLS;
     ncells = V80NCELLS;
     tspdatacnt = V80TSPDATACNT;
-    sethlpscr (0);
+    setHelpScreenNumber (0);
   } else if (reply[13] == '4') {
     brlcols = V40BRLCOLS;
     ncells = V40NCELLS;
     tspdatacnt = V40TSPDATACNT;
-    sethlpscr (1);
+    setHelpScreenNumber (1);
   } else { goto failure; };
 
   /* Mark time of last command to initialize typematic watch */

@@ -28,23 +28,22 @@
 
 class VcsaScreen:public RealScreen
 {
-  int setScreenDevice (void);
-  const char *screenDevice;
+  int setScreenPath (void);
+  const char *screenPath;
 
+  int openScreen (unsigned char vt);
   void closeScreen (void);
   int screenDescriptor;
+  unsigned char virtualTerminal;
 
-  int setConsoleDevice (void);
-  const char *consoleDevice;
+  int setConsolePath (void);
+  const char *consolePath;
 
-  int rebindConsole(void);
+  int openConsole (unsigned char vt);
   void closeConsole (void);
   int consoleDescriptor;
-
-  int insertCode (unsigned short key, int raw);
-  int insertMapped (unsigned short key, int (VcsaScreen::*byteInserter)(unsigned char byte));
-  int insertUtf8 (unsigned char byte);
-  int insertByte (unsigned char byte);
+  int rebindConsole(void);
+  int controlConsole(int operation, void *argument);
 
   int setTranslationTable (int opening);
   unsigned char translationTable[0X100];
@@ -58,14 +57,23 @@ class VcsaScreen:public RealScreen
   unsigned short screenFontMapCount;
   unsigned short screenFontMapSize;
 
+  void getScreenState (ScreenStatus &stat);
+  void getConsoleState (ScreenStatus &stat);
+
+  int insertCode (unsigned short key, int raw);
+  int insertMapped (unsigned short key, int (VcsaScreen::*byteInserter)(unsigned char byte));
+  int insertUtf8 (unsigned char byte);
+  int insertByte (unsigned char byte);
+
 public:
   char **parameters (void);
   int prepare (char **parameters);
   int open (void);
   int setup (void);
   void getstat (ScreenStatus &);
-  unsigned char *getscr (winpos, unsigned char *, short);
+  unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode);
   int insert (unsigned short);
+  int selectvt (int);
   int switchvt (int);
   void close (void);
 };

@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.60 (September 2001)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.61 (November 2001)"
 #define COPYRIGHT "Copyright (C) 1996-2001 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
@@ -26,6 +26,7 @@
  * It is designed to be compiled into BRLTTY versions 3.0.
  *
  * History:
+ * Version 2.61: Adjusted key bindings for preferences menu.
  * Version 2.60: Use TCSADRAIN when closing serial port. Slight API and
  *   name changes for BRLTTY 3.0. Argument to readbrl now ignore, instead
  *   of being validated. 
@@ -130,7 +131,9 @@ static struct timezone dum_tz;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
 {CMD_FWINRT, CMD_FWINLT, CMD_LNUP, CMD_LNDN, CMD_WINUP, CMD_WINDN,
- CMD_CHRLT, CMD_CHRRT, VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN,
+ CMD_CHRLT, CMD_CHRRT, VAL_PASSKEY+VPK_CURSOR_LEFT,
+ VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_CURSOR_UP,
+ VAL_PASSKEY+VPK_CURSOR_DOWN,
  CMD_CSRTRK, 0};
 
 /* Low battery warning */
@@ -548,14 +551,14 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
   switch(brl_cols){
   case 20:
     /* nav 20 */
-    sethlpscr (0);
+    setHelpScreenNumber (0);
     has_sw = 0;
     LogPrint(LOG_INFO, "Detected Navigator 20");
     break;
   case 40:
     if(disp_ver[1] > '3'){
       /* pb 40 */
-      sethlpscr (2);
+      setHelpScreenNumber (2);
       has_sw = 1;
       sw_bcnt = SW_CNT40;
       sw_lastkey = 39;
@@ -564,14 +567,14 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     }else{
       /* nav 40 */
       has_sw = 0;
-      sethlpscr (0);
+      setHelpScreenNumber (0);
       slow_update = 1;
       LogPrint(LOG_INFO, "Detected Navigator 40");
     }
     break;
   case 80:
     /* nav 80 */
-    sethlpscr (1);
+    setHelpScreenNumber (1);
     has_sw = 1;
     sw_bcnt = SW_CNT80;
     sw_lastkey = 79;
@@ -580,7 +583,7 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     break;
   case 65:
     /* pb65 */
-    sethlpscr (3);
+    setHelpScreenNumber (3);
     has_sw = 1;
     sw_bcnt = SW_CNT81;
     sw_lastkey = 64;
@@ -590,7 +593,7 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     break;
   case 81:
     /* pb80 */
-    sethlpscr (3);
+    setHelpScreenNumber (3);
     has_sw = 1;
     sw_bcnt = SW_CNT81;
     sw_lastkey = 79;
@@ -1341,7 +1344,7 @@ readbrl (DriverCommandContext cmds)
 
     KEYAND(KEY_CNCV) KEY (KEY_BROUND, CMD_HOME);
     KEYAND(KEY_CNCV | KEY_CUP) KEY(KEY_BROUND | KEY_CUP, CMD_BACK);
-    KEY (KEY_CROUND, CMD_CSRTRK);
+    KEY (KEY_CROUND, (cmds == CMDS_PREFS) ? CMD_CHRLT : CMD_CSRTRK);
 
     KEYAND(KEY_BUT1 | KEY_BAR1) KEY (KEY_BLEFT | KEY_BUP, CMD_TOP_LEFT);
     KEYAND(KEY_BUT1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BDOWN, CMD_BOT_LEFT);

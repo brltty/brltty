@@ -134,6 +134,8 @@ typedef enum {
    DriverCommandCount /* must be last */
 } DriverCommand;
 #define VAL_ARG_MASK 0XFF
+#define VAL_BLK_MASK 0XFF00
+#define VAL_FLG_MASK 0XFF0000
 
 /* For specifically turning on/off toggle commands */
 #define VAL_SWITCHON    0x10000
@@ -145,16 +147,16 @@ typedef enum {
  * Please comment all CR_* definitions. They are
  * used during automatic help file generation.
  */
-#define	CR_ROUTEOFFSET 0x100	/* route cursor to character */
-#define	CR_BEGBLKOFFSET	0x200	/* define the beginning of a block */
-#define	CR_ENDBLKOFFSET 0x300	/* define the end of a block */
-#define	CR_SWITCHVT 0x400	/* switch virtual terminal */
-#define	CR_NXINDENT 0x500	/* find next line not more indented than routing key indicates */
-#define	CR_PRINDENT 0x600       /* find previous line not more indented than routing key indicates */
-#define	CR_MSGATTRIB 0x700	/* message attributes of character */
+#define CR_ROUTEOFFSET 0x100	/* route cursor to character */
+#define CR_BEGBLKOFFSET	0x200	/* define the beginning of a block */
+#define CR_ENDBLKOFFSET 0x300	/* define the end of a block */
+#define CR_SWITCHVT 0x400	/* switch virtual terminal */
+#define CR_NXINDENT 0x500	/* find next line not more indented than routing key indicates */
+#define CR_PRINDENT 0x600       /* find previous line not more indented than routing key indicates */
+#define CR_MSGATTRIB 0x700	/* message attributes of character */
 
 /* For entering a special key. */
-#define	VAL_PASSKEY	0xD00
+#define VAL_PASSKEY	0xD00
 typedef enum {
    VPK_RETURN,
    VPK_TAB,
@@ -174,7 +176,12 @@ typedef enum {
 } Key;
 
 /* For typing a character -- pass through. */
-#define	VAL_PASSCHAR	0xE00
+#define VAL_PASSCHAR	0xE00
+#define VPC_CONTROL 0X010000
+#define VPC_META    0X020000
+#define VPC_ESCAPE  0X040000
+#define VPC_SHIFT   0X080000
+#define VPC_UPPER   0X100000
 
 /* For typing a character -- use current translation table. */
 #define VAL_PASSDOTS      0xF00
@@ -240,6 +247,7 @@ typedef enum {
    STAT_brlrow /* current line number */,
    STAT_csrcol /* cursor position - column */,
    STAT_csrrow /* cursor position - row */,
+   STAT_scrnum /* virtual screen number */,
 
    /* flags */
    STAT_tracking /* cursor tracking */,

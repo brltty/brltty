@@ -2,7 +2,6 @@ Possible improvements:
 -Get comments and possibly rework key bindings.
 -Add some more bindings: for toggling some environment settings
    for instance.
--Typematic (key repeat) on braille typing.
 -Find a way to somehow make the installation and insertion of the module
    more seemless.
 -Investigate the possibility of starting BRLTTY from the "hotplug" system.

@@ -58,9 +58,9 @@ void csrjmp_sub(int x, int y, int curscr)
     sigaddset(&mask, SIGUSR1);
 
     /* Initialise second thread of screen reading: */
-    if (!initscr_phys()) return;
+    if (!initializeRoutingScreen()) return;
 
-    getstat_phys(&scr);
+    getRoutingScreenStatus(&scr);
 
     /* Deal with vertical movement first, ignoring horizontal jumping ... */
     dif = y - scr.posy;
@@ -75,7 +75,7 @@ void csrjmp_sub(int x, int y, int curscr)
 #endif
 	    cury = scr.posy;
 	    curx = scr.posx;
-	    getstat_phys(&scr);
+	    getRoutingScreenStatus(&scr);
 	} while (!(t = timeout_yet(CSRJMP_TIMEOUT)) &&
 		 scr.posy == cury && scr.posx == curx);
 	if (t)
@@ -84,7 +84,7 @@ void csrjmp_sub(int x, int y, int curscr)
 	    (scr.posy != cury && (y - scr.posy) * (y - scr.posy) >= dif * dif))
 	{
 	    delay(CSRJMP_SETTLE_DELAY);
-	    getstat_phys(&scr);
+	    getRoutingScreenStatus(&scr);
 	    if ((scr.posy == cury && (scr.posx - curx) * dif <= 0) ||
 		(scr.posy != cury && (y - scr.posy) * (y - scr.posy) >= dif * dif))
 	    {
@@ -115,7 +115,7 @@ void csrjmp_sub(int x, int y, int curscr)
 		delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
 		curx = scr.posx;
-		getstat_phys(&scr);
+		getRoutingScreenStatus(&scr);
 	    }
 	    while (!(t = timeout_yet(CSRJMP_TIMEOUT)) &&
 		   scr.posx == curx && scr.posy == y);
@@ -125,7 +125,7 @@ void csrjmp_sub(int x, int y, int curscr)
 		(x - scr.posx) * (x - scr.posx) >= dif * dif)
 	    {
 		delay(CSRJMP_SETTLE_DELAY);
-		getstat_phys(&scr);
+		getRoutingScreenStatus(&scr);
 		if (scr.posy != y ||
 		    (x - scr.posx) * (x - scr.posx) >= dif * dif)
 		{
@@ -145,7 +145,7 @@ void csrjmp_sub(int x, int y, int curscr)
 	}
     }
 
-    closescr_phys();		/* close second thread of screen reading */
+    closeRoutingScreen();		/* close second thread of screen reading */
 }
 
 void csrjmp(int x, int y, int scrno)

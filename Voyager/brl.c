@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION \
-"BRLTTY driver for Tieman Voyager, version 0.4 (October 2001)"
+"BRLTTY driver for Tieman Voyager, version 0.4.1 (November 2001)"
 #define COPYRIGHT \
 "   Copyright (C) 2001 by Stéphane Doyon  <s.doyon@videotron.ca>\n" \
 "                     and Stéphane Dalton <sdalton@videotron.ca>"
@@ -53,9 +53,12 @@
 
 typedef enum {
   PARM_REPEAT_INIT_DELAY=0,
-  PARM_REPEAT_INTER_DELAY
+  PARM_REPEAT_INTER_DELAY,
+  PARM_DOTS_REPEAT_INIT_DELAY,
+  PARM_DOTS_REPEAT_INTER_DELAY
 } DriverParameter;
-#define BRLPARMS "repeat_init_delay", "repeat_inter_delay"
+#define BRLPARMS "repeat_init_delay", "repeat_inter_delay", \
+                 "dots_repeat_init_delay", "dots_repeat_inter_delay"
 
 #include "../brl_driver.h"
 
@@ -161,6 +164,8 @@ static unsigned brl_cols, /* Number of cells available for text */
                 ncells; /* total number of cells including status */
 static char readbrl_init; /* Flag to reinitialize readbrl function state. */
 static int repeat_init_delay, repeat_inter_delay; /* key repeat rate params */
+/* repeat rate params for braile dots being typed */
+static int dots_repeat_init_delay, dots_repeat_inter_delay;
 
 
 static void 
@@ -180,7 +185,8 @@ initbrl (char **parameters, brldim *brl, const char *dev)
   {
     int min = 0, max = 5000;
     if(!*parameters[PARM_REPEAT_INIT_DELAY]
-       || !validateInteger(&repeat_init_delay, "Delay before repeat begins",
+       || !validateInteger(&repeat_init_delay,
+			   "Delay before key repeat begins",
 			   parameters[PARM_REPEAT_INIT_DELAY], &min, &max))
       repeat_init_delay = DEFAULT_REPEAT_INIT_DELAY;
     if(!*parameters[PARM_REPEAT_INTER_DELAY]
@@ -188,6 +194,18 @@ initbrl (char **parameters, brldim *brl, const char *dev)
 			   "Delay between key repeatitions",
 			   parameters[PARM_REPEAT_INTER_DELAY], &min, &max))
       repeat_inter_delay = DEFAULT_REPEAT_INTER_DELAY;
+    if(!*parameters[PARM_DOTS_REPEAT_INIT_DELAY]
+       || !validateInteger(&dots_repeat_init_delay, 
+			   "Delay before typed dots repeat begins",
+			   parameters[PARM_DOTS_REPEAT_INIT_DELAY],
+			   &min, &max))
+      dots_repeat_init_delay = DEFAULT_DOTS_REPEAT_INIT_DELAY;
+    if(!*parameters[PARM_DOTS_REPEAT_INTER_DELAY]
+       || !validateInteger(&dots_repeat_inter_delay, 
+			   "Delay between typed dots repeatitions",
+			   parameters[PARM_DOTS_REPEAT_INTER_DELAY],
+			   &min, &max))
+      dots_repeat_inter_delay = DEFAULT_DOTS_REPEAT_INTER_DELAY;
   }
 
   res.disp = dispbuf = prevdata = NULL;
@@ -225,13 +243,13 @@ initbrl (char **parameters, brldim *brl, const char *dev)
   }
   LogPrint(LOG_INFO,"Display has %u cells", ncells);
   if(ncells == 44)
-    sethlpscr(0);
+    setHelpScreenNumber(0);
   else if(ncells == 70)
-    sethlpscr(1);
+    setHelpScreenNumber(1);
   else{
     LogPrint(LOG_NOTICE, "Unexpected display length, unknown model, "
 	     "using Voyager 44 help file.");
-    sethlpscr(0);
+    setHelpScreenNumber(0);
   }
 
   brl_cols = ncells -NRSTATCELLS;
@@ -422,16 +440,6 @@ writebrl (brldim *brl)
    <HLP> n: : hlptxt </HLP>
 #endif
 
-static void
-insert(unsigned char c)
-/* Put a typed braille character as console input. */
-{
-  unsigned char buf[2];
-  buf[0] = untexttrans[voy2brlDotsTable[c]];
-  buf[1] = 0;
-  insertString(buf);
-}
-
 static int 
 readbrl (DriverCommandContext cmds)
 {
@@ -439,7 +447,7 @@ readbrl (DriverCommandContext cmds)
   /* For a key binding that triggers two cmds */
   static int pending_cmd = EOF;
   /* OR of all display keys pressed since last time all keys were released. */
-  static int keystate = 0;
+  static unsigned keystate = 0;
   /* Reference time for fastkey (typematic / key repeat) */
   static struct timeval presstime;
   /* key repeat state: 0 not a fastkey (not a key that repeats), 
@@ -449,6 +457,10 @@ readbrl (DriverCommandContext cmds)
      3 during repeat another key was pressed, so lock up and do nothing
      until keys are released. */
   static int fastkey = 0;
+  /* type of key being repeated: valid when fastkey is 1 or 2. fastdots=0
+     means movement keys (fast), fastdots=1 means brialle dots or space
+     (longer delay and slower repeat). */
+  static int fastdots = 0;
   /* a flag for each routing key indicating if it was pressed since last time
      all keys were released. */
   static unsigned char rtk_pressed[MAXNRCELLS];
@@ -458,7 +470,7 @@ readbrl (DriverCommandContext cmds)
   unsigned char rtk_which[MAXNRCELLS];
   /* number of entries in rtk_which */
   int howmanykeys = 0;
-  /* read buffer: buf[0] for keys A B C D UP DOWN RL RR, buf[1] for DOT keys,
+  /* read buffer: buf[0] for DOT keys, buf[1] for keys A B C D UP DOWN RL RR,
      buf[2]-buf[7] list pressed routing keys by number, maximum 6 keys,
      list ends with 0.
      All 0s is sent when all keys released. */
@@ -518,9 +530,9 @@ readbrl (DriverCommandContext cmds)
       return EOF;
     gettimeofday(&now, NULL);
     if(!((fastkey == 1 && elapsed_msec(&presstime, &now)
-	  > repeat_init_delay)
+	  > ((fastdots) ? dots_repeat_init_delay : repeat_init_delay))
 	 || (fastkey > 1 && elapsed_msec(&presstime, &now)
-	     > repeat_inter_delay)))
+	     > ((fastdots) ? dots_repeat_inter_delay : repeat_inter_delay))))
       return EOF;
     fastkey = 2;
     memcpy(&presstime, &now, sizeof(presstime));
@@ -548,13 +560,17 @@ readbrl (DriverCommandContext cmds)
        rtk_which[0] to rtk_which[howmanykeys-1] lists
        the numbers of the keys that are pressed. */
 
-    /* Few keys trigger the repeat behavior: B, C, UP and DOWN. */
-    if(howmanykeys==0 && buf[1]
+    /* A few keys trigger the repeat behavior: B, C, UP and DOWN,
+       B+C (space bar), type dots patterns, or a dots pattern + B or C or both.
+    */
+    if(fastkey <= 1 && howmanykeys==0 && (buf[0] || buf[1] /*press event*/)
        && (keystate == K_B || keystate == K_C
-	   || keystate == K_UP || keystate == K_DOWN)) {
+	   || keystate == K_UP || keystate == K_DOWN
+	   || (keystate &(0xFF |K_B|K_C)) == keystate)) {
       /* Stand by to begin repeating */
       gettimeofday(&presstime, NULL);
       fastkey = 1;
+      fastdots = ((keystate & 0xFF) || keystate == (K_B|K_C));
       return EOF;
     }else{
       if(fastkey == 2 || fastkey == 3) {
@@ -608,13 +624,12 @@ readbrl (DriverCommandContext cmds)
 	      CMD_FWINLTSKIP, CMD_FWINRTSKIP);
 	/* typing */
 	HLP0(601, "B+C: Space (spacebar)")
-	  case K_B|K_C: insert(0); cmd = EOF; break;
+	  case K_B|K_C: cmd = VAL_PASSDOTS +0; /* space: no dots */ break;
       };
     }else if(!(keystate &~0xFF)) {
       /* no routing keys, some dots, no front keys */
       /* This is a character typed in braille */
-      insert(keystate);
-      cmd = EOF;
+      cmd = VAL_PASSDOTS | voy2brlDotsTable[keystate];
     }else if((keystate & (K_B|K_C)) && !(keystate & 0xFF00 & ~(K_B|K_C))) {
       /* no routing keys, some dots, combined with B or C or both but
 	 no other front keys. */

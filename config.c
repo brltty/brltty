@@ -538,7 +538,7 @@ processOptions (int argc, char **argv)
           messageDelay = value * 10;
         break;
       }
-      case 'N':                /* don't go into the background */
+      case 'N':                /* defer speech until restarted by command */
         opt_noSpeech = 1;
         break;
       case 'P':                /* process identifier file */
@@ -655,7 +655,6 @@ changedWindowAttributes (void)
 {
   fwinshift = MAX(brl.x-env.winovlp, 1);
   hwinshift = brl.x / 2;
-  csr_offright = brl.x / 4;
   vwinshift = 5;
 }
 
@@ -685,20 +684,12 @@ startBrailleDriver (void) {
       LogPrint(LOG_CRIT, "Braille driver initialization failed.");
       exit(6);
    }
-   playTune(&tune_detected);
-
-#ifdef ALLOW_OFFRIGHT_POSITIONS
-   /* The braille display is allowed to stick out the right side of the
-    * screen by brl.x-offr. This allows the feature:
-    */
-   offr = 1;
-#else
-   /* This disallows it, as it was before. */
-   offr = brl.x;
-#endif
-
    changedWindowAttributes();
-   LogPrint(LOG_DEBUG, "Braille display has %d rows of %d cells.", brl.y, brl.x);
+
+   playTune(&tune_detected);
+   LogPrint(LOG_DEBUG, "Braille display has %d %s of %d %s.",
+            brl.y, (brl.y == 1)? "row": "rows",
+            brl.x, (brl.x == 1)? "column": "columns");
    clearStatusCells();
 }
 
@@ -830,6 +821,11 @@ testSkipBlankWindows () {
 }
 
 static int
+testSlidingWindow () {
+   return env.slidewin;
+}
+
+static int
 testShowCursor () {
    return env.csrvis;
 }
@@ -895,6 +891,7 @@ updatePreferences (void)
      BOOLEAN_ITEM(env.skpblnkwins, NULL, NULL, "Skip Blank Windows"),
      SYMBOLIC_ITEM(env.skpblnkwinsmode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
      BOOLEAN_ITEM(env.slidewin, NULL, NULL, "Sliding Window"),
+     BOOLEAN_ITEM(env.eager_slidewin, NULL, testSlidingWindow, "Eager Sliding Window"),
      NUMERIC_ITEM(env.winovlp, changedWindowAttributes, NULL, "Window Overlap", 0, 20),
      BOOLEAN_ITEM(env.csrvis, NULL, NULL, "Show Cursor"),
      SYMBOLIC_ITEM(env.csrsize, NULL, testShowCursor, "Cursor Style", cursorStyles),
@@ -1264,6 +1261,7 @@ startup(int argc, char *argv[])
     env.sixdots = INIT_SIXDOTS;
     env.winovlp = INIT_WINOVLP;
     env.slidewin = INIT_SLIDEWIN;
+    env.eager_slidewin = INIT_EAGER_SLIDEWIN;
 
     env.skpidlns = INIT_SKPIDLNS;
     env.skpblnkwins = INIT_SKPBLNKWINS;
@@ -1339,7 +1337,7 @@ startup(int argc, char *argv[])
   atexit(exitSpeechDriver);
 
   /* Initialise help screen */
-  if (inithlpscr(braille->help_file))
+  if (initializeHelpScreen(braille->help_file))
     LogPrint(LOG_ERR, "Cannot open help screen file '%s'.", braille->help_file);
 
   if (!opt_quiet)

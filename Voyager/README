@@ -54,13 +54,16 @@ start BRLTTY automatically.
 
 Look in /var/log/messages for confirmation or error messages.
 
-This driver knows two parameters, which you can pass using the
+This driver knows four parameters, which you can pass using the
 braille-parameters clause in your BRLTTY configuration file. They control
 the repeat rate of some keys (only a few keys actually do repeat when
 they are held). They are:
--"repeat_init_delay": delay in milliseconds before key takes effect and
+-"repeat_init_delay": delay in milliseconds before some movement key
    starts to repeat.
--"repeat_inter_delay": Delay in milliseconds between each repetition.
+-"repeat_inter_delay": Delay in milliseconds between each repetition
+   of movement keys.
+-"dots_repeat_init_delay" and "dots_repeat_inter_delay": Same thing but
+   for typed braille dots.
 The default values (given in brlconf.h) seem fine, but if you want to
 change them, place a line like this in your brltty.conf:
 braille-parameters repeat_init_delay=300,repeat_inter_delay=150

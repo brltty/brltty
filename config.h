@@ -67,6 +67,7 @@ typedef enum {
 #define INIT_CSRSIZE 0		/* 1 for block, 0 for underline */
 #define INIT_SIXDOTS 0		/* 1 for six-dot mode, 0 for eight-dot */
 #define INIT_SLIDEWIN 0		/* 1 for sliding window on, 0 for off */
+#define INIT_EAGER_SLIDEWIN 0
 #define INIT_SOUND 1		/* 1 for sound, 0 for silence */
 #define INIT_TUNEDEV tdSpeaker
 #define INIT_SKPIDLNS 0		/* 1 = skip all identical lines after first */

@@ -238,7 +238,7 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
 	       break;
 	  }
      }
-   sethlpscr (0);
+   setHelpScreenNumber (0);
    res.x = NbCols;		/* initialise size of display */
    res.y = BRLROWS;
 

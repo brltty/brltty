@@ -34,7 +34,7 @@ class Screen
 {
   public:
   virtual void getstat (ScreenStatus &) = 0;
-  virtual unsigned char *getscr (winpos, unsigned char *, short) = 0;
+  virtual unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode) = 0;
 };
 
 
@@ -48,8 +48,9 @@ public:
   virtual int setup (void) = 0;
   virtual void close (void) = 0;
   virtual void getstat (ScreenStatus &) = 0;
-  virtual unsigned char *getscr (winpos, unsigned char *, short) = 0;
+  virtual unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode) = 0;
   virtual int insert (unsigned short) = 0;
+  virtual int selectvt (int) = 0;
   virtual int switchvt (int) = 0;
 };
 
@@ -64,7 +65,7 @@ class FrozenScreen:public Screen
     FrozenScreen ();
   int open (Screen *);		// called every time the screen is frozen
   void getstat (ScreenStatus &);
-  unsigned char *getscr (winpos, unsigned char *, short);
+  unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode);
   void close (void);		// called to discard frozen screen image
 };
 
@@ -84,7 +85,7 @@ class HelpScreen:public Screen
   short numscreens (void);
   int open (char *helpfile);		// called every time the help screen is opened
   void getstat (ScreenStatus &);
-  unsigned char *getscr (winpos, unsigned char *, short);
+  unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode);
   void close (void);		// called once to close the help screen
 };
 

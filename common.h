@@ -52,7 +52,7 @@ struct brltty_env {
 	unsigned char sixdots;
 	unsigned char spare13;
 	unsigned char slidewin;
-	unsigned char spare14;
+	unsigned char eager_slidewin;
 	unsigned char sound;
 	unsigned char tunedev;
 	unsigned char skpidlns;
@@ -96,9 +96,6 @@ extern brldim brl;			/* braille driver reference */
 extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */
-extern short csr_offright;		/* used for sliding window */
-extern short offr; /* Braille display can stick out by brl.x-offr from
-		      the right edge of the screen. */
 
 extern int refreshInterval;
 extern int messageDelay;

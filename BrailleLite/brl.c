@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.3 (September 2001)"
+"Braille Lite driver, version 0.5.4 (November 2001)"
 
 #define BRL_C
 
@@ -217,8 +217,8 @@ initbrl (char **parameters, brldim * brl, const char *brldev)
   if (waiting_ack) // no response, so it must be BLT40
   { // assuming BLT40 now
     BltLen=40;
-    sethlpscr(1);
-  }else sethlpscr(0);
+    setHelpScreenNumber(1);
+  }else setHelpScreenNumber(0);
   
   blitesz = res.x = BltLen;	/* initialise size of display - */
   res.y = 1;			/* Braille Lites are single line displays */
@@ -448,7 +448,6 @@ readbrl (DriverCommandContext cmds)
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
-	    outmsg[0] = 0;
 	    if(kbemu)
 	      message ("keyboard emu on", MSG_SILENT);
 	    else message ("keyboard emu off", MSG_SILENT);
@@ -497,8 +496,10 @@ readbrl (DriverCommandContext cmds)
 	  break;
 	case 0x80:		/* dot 8 */
 #ifndef USE_TEXTTRANS
+#if 0
 	  outmsg[0] = 27;
 	  outmsg[1] = 0;
+#endif
 #else
 	  dot8shift = 1;
 #endif
@@ -525,74 +526,52 @@ readbrl (DriverCommandContext cmds)
 	    dot8shift = 1;
 	    return CMD_NOOP;
 #endif
+#if 0
 	  case BLT_META:	/* meta next */
 	    outmsg[0] = 27;
 	    outmsg[1] = 0;
 	    return CMD_NOOP;
+#endif
 	  case BLT_ESCAPE:
-	    outmsg[0] = 27;
-	    outmsg[1] = 0;
-	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
-	    outmsg[0] = 0;
-	    return CMD_NOOP;
+	    return VAL_PASSKEY | VPK_ESCAPE;
 	  case BLT_TAB:
-	    outmsg[0] = '\t';
-	    outmsg[1] = 0;
-	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
-	    outmsg[0] = 0;
-	    return CMD_NOOP;
+	    return VAL_PASSKEY | VPK_TAB;
 	  case BLT_BACKSP:	/* remove backwards */
-	    outmsg[0] = 127;
-	    outmsg[1] = 0;
-	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
-	    outmsg[0] = 0;
-	    return CMD_NOOP;
-	  case BLT_DELETE:	/* remove forwards */
-	    outmsg[0] = 27;
-	    outmsg[1] = '[';
-	    outmsg[2] = '3';
-	    outmsg[3] = '~';
-	    outmsg[4] = 0;
-	    insertString (outmsg);
+	    return VAL_PASSKEY | VPK_BACKSPACE;
+	  case BLT_DELETE:	/* remove forward */
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
-	    outmsg[0] = 0;
-	    return CMD_NOOP;
+	    return VAL_PASSKEY | VPK_DELETE;
 	  case BLT_ENTER:	/* enter - do ^m, or ^j if control-enter */
-	    temp = outmsg[0] == 0 ? 0 : 1;
-	    outmsg[temp] = ctrl ? '\n' : '\r';
-	    outmsg[temp + 1] = 0;
-	    insertString (outmsg);
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
-	    outmsg[0] = 0;
-	    return CMD_NOOP;
+	    return VAL_PASSKEY | VPK_RETURN;
 	  case BLT_ABORT:	/* abort - quit keyboard emulation */
 	    kbemu = 0;
 	    message ("keyboard emu off", MSG_SILENT);
@@ -602,29 +581,24 @@ readbrl (DriverCommandContext cmds)
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
-	    outmsg[0] = 0;
 	    return CMD_NOOP;
 	  }
 
       /* OK, it's an ordinary (non-chorded) keystroke, and kbemu is on. */
-      temp = (outmsg[0] == 0) ? 0 : 1;	/* just checking for a meta character */
 #ifndef USE_TEXTTRANS
       if (ctrl && key.asc >= 96)
-	outmsg[temp] = key.asc & 0x1f;
+	return VAL_PASSCHAR | (key.asc & 0x1f);
       else if (shift && (key.asc & 0x40))
-	outmsg[temp] = key.asc & 0xdf;
+	return VAL_PASSCHAR | (key.asc & 0xdf);
       else
-	outmsg[temp] = key.asc;
+	return VAL_PASSCHAR | key.asc;
 #else
-      outmsg[temp]
-	= untexttrans[
-		      (keys_to_dots[key.raw]
-		       | ((ctrl) ? 0xC0 : 
-			  (shift) ? 0x40 : 
-			  (dot8shift) ? 0x80 : 0))];
+      return VAL_PASSDOTS |
+	(keys_to_dots[key.raw]
+	 | ((ctrl) ? 0xC0 : 
+	    (shift) ? 0x40 : 
+	    (dot8shift) ? 0x80 : 0));
 #endif
-      outmsg[temp + 1] = 0;
-      insertString (outmsg);
       if (!shiftlck)
 	shift = 0;
       ctrl = 0;

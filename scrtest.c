@@ -38,11 +38,8 @@ main (void)
       exit (1);
     }
   getScreenStatus(&test);
-  res = getscr ((winpos)
-		{
-		5, 5, 70, 15
-		}
-		,buffer, SCR_TEXT);
+  res = getScreenContent((ScreenBox){5, 5, 70, 15},
+	                 buffer, SCR_TEXT);
   closeScreen();
   printf ("rows == %d, cols == %d\n", test.rows, test.cols);
   printf ("posx == %d, posy == %d\n\n", test.posx, test.posy);

@@ -58,8 +58,8 @@ FrozenScreen::open (Screen *src)
       text = 0;
       return 1;
     }
-  if (!src->getscr ((winpos) { 0, 0, stat.cols, stat.rows }, text, SCR_TEXT) \
-      || !src->getscr ((winpos) { 0, 0, stat.cols, stat.rows }, attrib, \
+  if (!src->getscr((ScreenBox){0, 0, stat.cols, stat.rows}, text, SCR_TEXT) \
+      || !src->getscr((ScreenBox){0, 0, stat.cols, stat.rows}, attrib, \
 		       SCR_ATTRIB))
     {
       delete text;
@@ -79,18 +79,18 @@ FrozenScreen::getstat (ScreenStatus &stat2)
 
 
 unsigned char *
-FrozenScreen::getscr (winpos pos, unsigned char *buffer, short mode)
+FrozenScreen::getscr (ScreenBox box, unsigned char *buffer, ScreenMode mode)
 {
   unsigned char *scrn;
 
-  if (pos.left < 0 || pos.top < 0 || pos.width < 1 || pos.height < 1 \
-      || mode < 0 || mode > 1 || pos.left + pos.width > stat.cols \
-      || pos.top + pos.height > stat.rows)
+  if (box.left < 0 || box.top < 0 || box.width < 1 || box.height < 1 \
+      || mode < 0 || mode > 1 || box.left + box.width > stat.cols \
+      || box.top + box.height > stat.rows)
     return NULL;
   scrn = (mode == SCR_TEXT) ? text : attrib;
-  for (int i = 0; i < pos.height; i++)
-    memcpy (buffer + i * pos.width, scrn + (pos.top + i)* stat.cols + \
-	    pos.left, pos.width);
+  for (int i = 0; i < box.height; i++)
+    memcpy (buffer + i * box.width, scrn + (box.top + i)* stat.cols + \
+	    box.left, box.width);
   return buffer;
 }
 
@@ -213,20 +213,20 @@ HelpScreen::getstat (ScreenStatus &stat)
 
 
 unsigned char *
-HelpScreen::getscr (winpos pos, unsigned char *buffer, short mode)
+HelpScreen::getscr (ScreenBox box, unsigned char *buffer, ScreenMode mode)
 {
-  if (pos.left < 0 || pos.top < 0 || pos.width < 1 || pos.height < 1 \
-      || mode < 0 || mode > 1 || pos.left + pos.width > psz[scrno].cols \
-      || pos.top + pos.height > psz[scrno].rows)
+  if (box.left < 0 || box.top < 0 || box.width < 1 || box.height < 1 \
+      || mode < 0 || mode > 1 || box.left + box.width > psz[scrno].cols \
+      || box.top + box.height > psz[scrno].rows)
     return NULL;
   if (mode == SCR_ATTRIB)
     {
-      for (int i = 0; i < pos.width * pos.height; buffer[i++] = 0x07);
+      for (int i = 0; i < box.width * box.height; buffer[i++] = 0x07);
       return buffer;
     }
-  for (int i = 0; i < pos.height; i++)
-    memcpy (buffer + i * pos.width, page[scrno] + (pos.top + i) * \
-	    psz[scrno].cols + pos.left, pos.width);
+  for (int i = 0; i < box.height; i++)
+    memcpy (buffer + i * box.width, page[scrno] + (box.top + i) * \
+	    psz[scrno].cols + box.left, box.width);
   return buffer;
 }
 

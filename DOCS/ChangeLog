@@ -82,6 +82,7 @@ Note: this file is in reversed chronological order (bottom to top).
          Add many more commands.
       For displays with 22 status keys: (dm)
          Fix key assignments: 5-8 -> 6-9.
+         Display current virtual screen number in 11.
          Redefine 22 as input mode toggle.
       Define status key commands for displays with 4 status cells. (dm)
       Rename environment variable BRLTTY_CONF to BRLTTY_PM_CONF. (dm)
@@ -114,8 +115,12 @@ Note: this file is in reversed chronological order (bottom to top).
    Add support for tunes via sound card (/dev/dsp). (dm,np)
    Add support for tunes via MIDI (/dev/sequencer). (dm)
    Add support for tunes via AdLib/OPL3/SB-FM. (dm)
+   Sliding window enhancements. (sd)
    Replace skip blank end-of-lines with configurable skip blank windows mode. (dm)
    Implement horizontal window scroll overlap. (dm)
+      Full window right no longer does partial move to pick up end of line.
+      Single character right lets left end of window move to last column of line.
+      Wrap up at left of line goes to multiple of window width at right of previous line.
    Display message when sound is off for critical operations like freeze/unfreeze. (sd)
    Allow braille display to stick out to the right of the screen. (sd)
    Add commands to switch to the next and previous virtual terminals. (sd)
@@ -143,6 +148,8 @@ Note: this file is in reversed chronological order (bottom to top).
       BrailleLite cmdtrans[] and blkey.cmd changed from unsigned char to int.
    Rename VAL_PASSTHRU to VAL_PASSCHAR. (dm)
    Rename VAL_BRLKEY to VAL_PASSDOTS. (dm)
+   For VAL_PASSCHAR and VAL_PASSDOTS, add flags: (dm)
+      VAL_CONTROL, VAL_SHIFT, VAL_UPPER, VAL_META, VAL_ESCAPE
    Inform readbrl of the current command context. (dm)
    Remove TBL_CMD and TBL_ARG. (dm)
    Log command line syntax errors to syslog. (dm)

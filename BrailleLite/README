@@ -27,7 +27,11 @@ when the unit is in its internal notetaker mode.
 See brltty_genhelp.txt for a description of the key bindings.
 
 History:
-Stéphane Doyon and Dave Mielke, September 2001, version 0.5.2:
+Stéphane Doyon, November 2001, version 0.5.4:
+-Now using new generic VAL_PASS* mechanism for typing in keys, rather
+    than having the driver itself insert stuff into the console. We
+    no longer have the META function though, but we have ESCAPE.
+Stéphane Doyon and Dave Mielke, September 2001, version 0.5.3:
 -closebrl: don't clear display, use TCSADRAIN.
 -Slight API and name changes for BRLTTY 3.0. Commands can no longer be
     assumed to be chars, changed type of cmdtrans.

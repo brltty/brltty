@@ -57,7 +57,7 @@ Preferences:
   Preferences menu:
     Enter/exit preferences menu: lt+rt (sort of a toggle)
       In the menu:
-      Previous/next setting option for this item: Lup / Ldn or routing keys
+      Previous/next setting option for this item: cnvx / cncv or routing keys
       Previous/next menu item: Rup / Rdn
     Save preferences: lt+rt+cncv
     Load preferences: lt+rt+cncv+cnvx

@@ -36,9 +36,6 @@
    66, "BRAILLEX EL-80",	  '8', 80, 1,  2,  0,  1
  */
 
-#define STAT_empty     0
-/* other STAT_* moved to ../brl.h */
-
 #define OFFS_FRONT      0
 #define OFFS_STAT    1000
 #define OFFS_ROUTE   2000  
@@ -60,6 +57,7 @@
 #define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
+#define STAT_empty       0
 #define OFFS_HORIZ    1000	/* added to status show */
 #define OFFS_FLAG     2000
 #define OFFS_NUMBER   3000
@@ -341,7 +339,7 @@ typedef struct {
       STAT_empty                    , \
       OFFS_FLAG  + STAT_frozen      , \
       STAT_empty                    , \
-      STAT_empty                    , \
+      OFFS_HORIZ + STAT_scrnum      , \
       STAT_empty                    , \
       OFFS_FLAG  + STAT_visible     , \
       OFFS_FLAG  + STAT_size        , \

@@ -117,6 +117,6 @@ message (char *s)
 
 /* dummy function to allow brl.o to link... */
 
-void sethlpscr (short x)
+void setHelpScreenNumber(short x)
 {
 }

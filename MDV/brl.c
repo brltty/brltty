@@ -493,7 +493,7 @@ detected:
     goto failure;
   }
 
-  sethlpscr (0);
+  setHelpScreenNumber (0);
   res.x = brl_cols;		/* initialize size of display */
   res.y = BRLROWS;		/* always 1 */
 

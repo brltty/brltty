@@ -193,9 +193,9 @@ int VcsaScreen::prepare (char **parameters) {
       setCharacterMap = &VcsaScreen::setApplicationCharacterMap;
     }
   }
-  if (setScreenDevice()) {
+  if (setScreenPath()) {
     screenDescriptor = -1;
-    if (setConsoleDevice()) {
+    if (setConsolePath()) {
       consoleDescriptor = -1;
       return 1;
     }
@@ -236,11 +236,11 @@ static const char *findDevice (char *devices) {
   return current;
 }
 
-int VcsaScreen::setScreenDevice (void) {
+int VcsaScreen::setScreenPath (void) {
   char *devices = strdupWrapper(VCSADEV);
   LogPrint(LOG_DEBUG, "Screen device list: %s", devices);
-  if ((screenDevice = findDevice(devices))) {
-    LogPrint(LOG_INFO, "Screen Device: %s", screenDevice);
+  if ((screenPath = findDevice(devices))) {
+    LogPrint(LOG_INFO, "Screen Device: %s", screenPath);
     return 1;
   } else {
     LogPrint(LOG_ERR, "Screen device not specified.");
@@ -248,39 +248,81 @@ int VcsaScreen::setScreenDevice (void) {
   return 0;
 }
 
-int VcsaScreen::setConsoleDevice (void) {
-  consoleDevice = "/dev/tty0";
+int VcsaScreen::setConsolePath (void) {
+  consolePath = "/dev/tty0";
   return 1;
 }
 
 
 int VcsaScreen::open (void) {
-  int screen = ::open(screenDevice, O_RDWR);
-  if (screen != -1) {
-    if (rebindConsole()) {
-      closeScreen();
-      screenDescriptor = screen;
-      return 1;
+  return openScreen(0);
+}
+
+static char *makePath (const char *base, unsigned char vt) {
+  if (vt) {
+    size_t length = strlen(base);
+    char buffer[length+4];
+    if (base[length-1] == '0') --length;
+    strncpy(buffer, base, length);
+    sprintf(buffer+length,  "%u", vt);
+    return strdup(buffer);
+  }
+  return strdup(base);
+}
+
+int VcsaScreen::openScreen (unsigned char vt) {
+  char *path = makePath(screenPath, vt);
+  if (path) {
+    int screen = ::open(path, O_RDWR);
+    if (screen != -1) {
+      if (openConsole(vt)) {
+        closeScreen();
+        screenDescriptor = screen;
+        LogPrint(LOG_DEBUG, "Screen opened: %s: fd=%d", path, screenDescriptor);
+        free(path);
+        virtualTerminal = vt;
+        return 1;
+      }
+      ::close(screen);
+    } else {
+      LogPrint(LOG_ERR, "Cannot open screen device '%s': %s",
+               path, strerror(errno));
     }
-    ::close(screen);
-  } else {
-    LogPrint(LOG_ERR, "Cannot open screen device '%s': %s",
-             screenDevice, strerror(errno));
+    free(path);
+  }
+  return 0;
+}
+
+int VcsaScreen::openConsole (unsigned char vt) {
+  char *path = makePath(consolePath, vt);
+  if (path) {
+    int console = ::open(path, O_RDWR|O_NOCTTY);
+    if (console != -1) {
+      closeConsole();
+      consoleDescriptor = console;
+      LogPrint(LOG_DEBUG, "Console opened: %s: fd=%d", path, consoleDescriptor);
+      free(path);
+      return 1;
+    } else {
+      LogPrint(LOG_ERR, "Cannot open console device '%s': %s",
+               path, strerror(errno));
+    }
+    free(path);
   }
   return 0;
 }
 
 int VcsaScreen::rebindConsole (void) {
-  int console = ::open(consoleDevice, O_RDWR|O_NOCTTY);
-  if (console != -1) {
-    closeConsole();
-    consoleDescriptor = console;
-    return 1;
-  } else {
-    LogPrint(LOG_ERR, "Cannot open console device '%s': %s",
-             consoleDevice, strerror(errno));
-  }
-  return 0;
+  return virtualTerminal? 1: openConsole(0);
+}
+
+int VcsaScreen::controlConsole(int operation, void *argument) {
+  int result = ioctl(consoleDescriptor, operation, argument);
+  if (result == -1)
+    if (errno == EIO)
+      if (openConsole(virtualTerminal))
+        result = ioctl(consoleDescriptor, operation, argument);
+  return result;
 }
 
 
@@ -336,11 +378,11 @@ int VcsaScreen::setTranslationTable (int opening) {
         }
       }
       if (position < 0) {
-        LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
+      //LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
       } else {
         translationTable[position] = character;
-        LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
-                 character, unicode, position);
+      //LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
+      //         character, unicode, position);
       }
     }
     return 1;
@@ -350,7 +392,7 @@ int VcsaScreen::setTranslationTable (int opening) {
 
 int VcsaScreen::setApplicationCharacterMap (int opening) {
   unsigned short map[0X100];
-  if (ioctl(consoleDescriptor, GIO_UNISCRNMAP, &map) != -1) {
+  if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
     if (opening || (memcmp(characterMap, map, sizeof(characterMap)) != 0)) {
       memcpy(characterMap, map, sizeof(characterMap));
       LogPrint(LOG_DEBUG, "Character map changed.");
@@ -371,7 +413,7 @@ int VcsaScreen::setScreenFontMap (int opening) {
       LogError("Screen font map allocation");
       return 0;
     }
-    if (ioctl(consoleDescriptor, GIO_UNIMAP, &sfm) != -1) break;
+    if (controlConsole(GIO_UNIMAP, &sfm) != -1) break;
     free(sfm.entries);
     if (errno != ENOMEM) {
       LogError("ioctl GIO_UNIMAP");
@@ -407,26 +449,8 @@ int VcsaScreen::setScreenFontMap (int opening) {
 
 
 void VcsaScreen::getstat (ScreenStatus &stat) {
-  struct vt_stat state;
-  if (ioctl(consoleDescriptor, VT_GETSTATE, &state) != -1) {
-    stat.no = state.v_active;
-  } else {
-    LogError("ioctl VT_GETSTATE");
-  }
-
-  if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
-    unsigned char buffer[4];
-    if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
-      stat.rows = buffer[0];
-      stat.cols = buffer[1];
-      stat.posx = buffer[2];
-      stat.posy = buffer[3];
-    } else {
-      LogError("Screen read");
-    }
-  } else {
-    LogError("Screen seek");
-  }
+  getScreenState(stat);
+  getConsoleState(stat);
 
   /* Periodically recalculate font mapping. I don't know any way to be
    * notified when it changes, and the recalculation is not too
@@ -441,43 +465,70 @@ void VcsaScreen::getstat (ScreenStatus &stat) {
   }
 }
 
+void VcsaScreen::getScreenState (ScreenStatus &stat) {
+  if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
+    unsigned char buffer[4];
+    if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
+      stat.rows = buffer[0];
+      stat.cols = buffer[1];
+      stat.posx = buffer[2];
+      stat.posy = buffer[3];
+    } else {
+      LogError("Screen read");
+    }
+  } else {
+    LogError("Screen seek");
+  }
+}
 
-unsigned char *VcsaScreen::getscr (winpos pos, unsigned char *buffer, short mode) {
+void VcsaScreen::getConsoleState (ScreenStatus &stat) {
+  if (virtualTerminal) {
+    stat.no = virtualTerminal;
+  } else {
+    struct vt_stat state;
+    if (controlConsole(VT_GETSTATE, &state) != -1) {
+      stat.no = state.v_active;
+    } else {
+      LogError("ioctl VT_GETSTATE");
+    }
+  }
+}
+
+
+unsigned char *VcsaScreen::getscr (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenStatus stat;
-  getstat(stat);
-  if ((pos.left >= 0) && (pos.width > 0) && ((pos.left + pos.width) <= stat.cols) &&
-      (pos.top >= 0) && (pos.height > 0) && ((pos.top + pos.height) <= stat.rows) &&
-      (mode >= 0) && (mode <= 1)) {
-    off_t start = 4 + (pos.top * stat.cols + pos.left) * 2 + mode;
+  getScreenState(stat);
+  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= stat.cols) &&
+      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= stat.rows)) {
+    int text = mode == SCR_TEXT;
+    off_t start = 4 + (box.top * stat.cols + box.left) * 2 + (text? 0: 1);
     if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
-      size_t length = pos.width * 2 - 1;
+      size_t length = box.width * 2 - 1;
       unsigned char line[length];
       unsigned char *target = buffer;
       off_t increment = stat.cols * 2 - length;
       int i;
-      for (i=0; i<pos.height; ++i) {
+      for (i=0; i<box.height; ++i) {
         if (i) {
-           if (increment) {
-             if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
-               LogError("Screen seek");
-               return NULL;
-             }
-           }
+          if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
+            LogError("Screen seek");
+            return NULL;
+          }
         }
         if (read(screenDescriptor, line, length) == -1) {
           LogError("Screen read");
           return NULL;
         }
         unsigned char *source = line;
-        if (mode == SCR_TEXT) {
+        if (text) {
           int j;
-          for (j=0; j<pos.width; ++j) {
+          for (j=0; j<box.width; ++j) {
             *target++ = translationTable[*source];
             source += 2;
           }
         } else {
           int j;
-          for (j=0; j<pos.width; ++j) {
+          for (j=0; j<box.width; ++j) {
             *target++ = *source;
             source += 2;
           }
@@ -487,6 +538,9 @@ unsigned char *VcsaScreen::getscr (winpos pos, unsigned char *buffer, short mode
     } else {
       LogError("Screen seek");
     }
+  } else {
+    LogPrint(LOG_ERR, "Invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
+             stat.cols, box.left, box.width, stat.rows, box.top, box.height);
   }
   return NULL;
 }
@@ -497,7 +551,7 @@ int VcsaScreen::insert (unsigned short key) {
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   if (rebindConsole()) {
     long mode;
-    if (ioctl(consoleDescriptor, KDGKBMODE, &mode) != -1) {
+    if (controlConsole(KDGKBMODE, &mode) != -1) {
       switch (mode) {
         case K_RAW:
           if (insertCode(key, 1)) ok = 1;
@@ -772,7 +826,7 @@ int VcsaScreen::insertUtf8 (unsigned char byte) {
 }
 
 int VcsaScreen::insertByte (unsigned char byte) {
-  if (ioctl(consoleDescriptor, TIOCSTI, &byte) != -1) {
+  if (controlConsole(TIOCSTI, &byte) != -1) {
     return 1;
   } else {
     LogError("ioctl TIOCSTI");
@@ -781,16 +835,28 @@ int VcsaScreen::insertByte (unsigned char byte) {
 }
 
 
+static int validateVt (int vt) {
+  if ((vt >= 1) && (vt <= 0X3F)) return 1;
+  LogPrint(LOG_WARNING, "Virtual terminal %d is out of range.", vt);
+  return 0;
+}
+
+int VcsaScreen::selectvt (int vt) {
+  if (vt == virtualTerminal) return 1;
+  if (vt && !validateVt(vt)) return 0;
+  return openScreen(vt);
+}
+
 int VcsaScreen::switchvt (int vt) {
-  if ((vt >= 1) && (vt <= 0X3F)) {
-    if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
-      LogPrint(LOG_DEBUG, "Switched to virtual tertminal %d.", vt);
-      return 1;
-    } else {
-      LogError("ioctl VT_ACTIVATE");
+  if (validateVt(vt)) {
+    if (selectvt(0)) {
+      if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
+        LogPrint(LOG_DEBUG, "Switched to virtual tertminal %d.", vt);
+        return 1;
+      } else {
+        LogError("ioctl VT_ACTIVATE");
+      }
     }
-  } else {
-    LogPrint(LOG_WARNING, "Virtual termianl %d is out of range.", vt);
   }
   return 0;
 }
@@ -806,6 +872,7 @@ void VcsaScreen::closeScreen (void) {
     if (::close(screenDescriptor) == -1) {
       LogError("Screen close");
     }
+    LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
   }
 }
@@ -815,6 +882,7 @@ void VcsaScreen::closeConsole (void) {
     if (::close(consoleDescriptor) == -1) {
       LogError("Console close");
     }
+    LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
   }
 }

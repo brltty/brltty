@@ -291,7 +291,7 @@ static void initbrl(char **parameters, brldim *brl, const char *dev)
   
   // Set model params
   model = &Models[ModelID];
-  sethlpscr (ModelID);
+  setHelpScreenNumber (ModelID);
   res.x = model->Cols;		// initialise size of main display
   res.y = BRLROWS;		// ever is 1 in this type of braille lines
   
