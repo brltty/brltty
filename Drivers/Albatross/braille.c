@@ -107,15 +107,17 @@ acknowledgeDisplay (void) {
       }
     }
   }
+  lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
+  upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
   {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
     if (!writeBytes(acknowledgement, sizeof(acknowledgement))) return 0;
+
+    tcflush(fileDescriptor, TCIFLUSH);
+    delay(100);
     tcflush(fileDescriptor, TCIFLUSH);
   }
-
-  lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
-  upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
   LogPrint(LOG_INFO, "Albatross has %d columns.", model->columns);
   return 1;
@@ -177,9 +179,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       time_t start = time(NULL);
       int count = 0;
       unsigned char byte;
+
+      LogPrint(LOG_DEBUG, "Trying Albatross at %d baud.", baud2integer(*speed));
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
-          LogPrint(LOG_INFO, "Trying Albatross at %d baud.", baud2integer(*speed));
           if (!acknowledgeDisplay()) break;
           clearDisplay();
           brl->x = model->columns;
