@@ -3,19 +3,38 @@ Version: @PACKAGE_VERSION@
 Release: 1
 
 Group: System Environment/Daemons
-Copyright: GPL
+License: GPL
 Vendor: The BRLTTY Team
 Packager: Dave Mielke <dave@mielke.cc>
 URL: http://mielke.cc/brltty/
 Source: http://mielke.cc/brltty/releases/%{name}-%{version}.tar.gz
 
+BuildRequires: autoconf >= 2.53
+BuildRequires: make
+BuildRequires: gcc
+BuildRequires: /bin/sh
+BuildRequires: /bin/ln
+BuildRequires: /usr/bin/ld
+BuildRequires: /sbin/ldconfig
+BuildRequires: /usr/bin/ranlib
+BuildRequires: /usr/bin/ar
+BuildRequires: /usr/bin/awk
+BuildRequires: /usr/bin/bison
+BuildRequires: /usr/bin/install
+BuildRequires: glibc-devel
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
+%define _bindir /bin
+%define _sbindir /sbin
+%define _libdir /lib
+%define _sysconfdir /etc
 
 AutoProv: 0
 
 AutoReq: 0
-Requires: ld-linux.so.2
+Requires: /lib/ld-linux.so.2
 Requires: libc.so.6
+Requires: libpthread.so.0
 Requires: libdl.so.2
 Requires: libm.so.6
 Requires: /bin/sh
@@ -29,43 +48,95 @@ It drives the braille display,
 and provides complete screen review functionality.
 Some speech capability has also been incorporated.
 
+%package -n brlapi
+Version: @BRLAPI_RELEASE@
+Group: Applications/System
+
+AutoReq: 0
+Requires: /lib/ld-linux.so.2
+Requires: libc.so.6
+
+Summary: Appliation Programming Interface for BRLTTY.
+%description -n brlapi
+This package provides the run-time support
+for the Application Programming Interface to BRLTTY.
+
+Install this package if you have an application
+which directly accesses a refreshable braille display.
+
+%package -n brlapi-devel
+Version: @BRLAPI_RELEASE@
+Group: Development/System
+
+AutoReq: 0
+Requires: brlapi = @BRLAPI_RELEASE@
+
+Summary: Headers, static archive, and documentation for BrlAPI.
+%description -n brlapi-devel
+This package provides the
+header files,
+static archive,
+shared object linker reference,
+and documentation
+for BrlAPI (the Application Programming Interface to BRLTTY).
+It enables the implementation of applications which
+take direct advantage of a refreshable braille display in order to
+present information in ways which are more appropriate for blind users
+and to provide user interfaces which are more specifically atuned to their needs.
+
+Install this package if you're developing or maintaining an application
+which directly accesses a refreshable braille display.
+
 %prep
-%setup -n %{name}-%{version}
+# %setup -n %{name}-%{version}
+%setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-set -e
-
-./configure --with-install-root="${RPM_BUILD_ROOT}" --enable-api
+%configure --with-install-root="${RPM_BUILD_ROOT}" --enable-api
 make
 
 directory="doc"
 mkdir -p "${directory}"
-for file in `find . -path "./${directory}" -prune -o \( -name 'README*' -o -name '*.txt' -o -name '*.html' -o -name '*.sgml' -o \( -path "./Bootdisks/*" -type f -perm +ugo=x \) \) -print`
+for file in `find . \( -path "./${directory}" -o -path ./Documents \) -prune -o \( -name 'README*' -o -name '*.txt' -o -name '*.html' -o -name '*.sgml' -o \( -path "./Bootdisks/*" -type f -perm +ugo=x \) \) -print`
 do
    mkdir -p "${directory}/${file%/*}"
    cp -rp "${file}" "${directory}/${file}"
 done
-unset file directory
 
 %install
-set -e
-
 make install
-install Documents/brltty.conf "${RPM_BUILD_ROOT}/etc"
+install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
+
+%clean
+rm -fr "${RPM_BUILD_ROOT}"
 
 %files
 %defattr(-,root,root)
+%{_bindir}/brltty
+%{_bindir}/brltty-*
+%{_libdir}/brltty
+%{_sysconfdir}/brltty
+%doc %{_mandir}/man1/*
+%doc Documents/Manual.sgml Documents/Manual.txt Documents/Manual-HTML
 %doc COPYING
 %doc Documents/ChangeLog Documents/TODO
 %doc doc/*
-%config(noreplace) /etc/brltty.conf
-/bin/brltty
-/bin/brltty-*
-/etc/brltty
-/lib/brltty
-/usr/lib/libbrlapi.*
-/usr/include/brltty
-/usr/share/man/man?/*
+%config(noreplace) %{_sysconfdir}/brltty.conf
+%verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
+
+%files -n brlapi
+%defattr(-,root,root)
+%{_libdir}/libbrlapi.so.*
+
+%files -n brlapi-devel
+%defattr(-,root,root)
+%{_libdir}/libbrlapi.a
+%{_libdir}/libbrlapi.so
+%{_includedir}/brltty
+%doc %{_mandir}/man3/*
+%doc Documents/BrlAPI.sgml Documents/BrlAPI.txt Documents/BrlAPI-HTML
+%doc Documents/API-HTML
+%doc Documents/README.Gnopernicus
 
 %pre
 # The pre-install scriptlet.
@@ -77,7 +148,7 @@ install Documents/brltty.conf "${RPM_BUILD_ROOT}/etc"
 # There's no explicit way to tell if a configuration file has been installed
 # as itself or as a .rpmnew file. The way we'll figure it out, therefore, is by
 # erasing the .rpmnew file now so that we can see if it gets created later. 
-rm -f "@configuration_directory@/@configuration_file@.rpmnew"
+rm -f "%{_sysconfdir}/brltty.conf.rpmnew"
 
 %post
 # The post-install scriptlet.
@@ -87,7 +158,7 @@ rm -f "@configuration_directory@/@configuration_file@.rpmnew"
 
 # First, we need to determine which file to update. If there's a .rpmnew file
 # then update it since a previous configuration file must already have existed.
-file="@configuration_directory@/@configuration_file@"
+file="%{_sysconfdir}/brltty.conf"
 new="${file}.rpmnew"
 [ -f "${new}" ] && file="${new}"
 
