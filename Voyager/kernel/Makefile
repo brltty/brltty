@@ -13,18 +13,19 @@ CFLAGS := -D__KERNEL__ -DMODULE -O2 \
     -Wall -Wstrict-prototypes -Wno-trigraphs \
     -fomit-frame-pointer -fno-strict-aliasing -fno-common
 #CFLAGS += -march=xxx
+CFLAGS += -I.
 CFLAGS += -I$(KERNEL_INCLUDE)
 
-all: voyager.o
+all: brlvger.o
 
-voyager.o: voyager.c voyager.h
-	$(CC) $(CFLAGS) -c voyager.c
+brlvger.o: brlvger.c linux/brlvger.h
+	$(CC) $(CFLAGS) -c brlvger.c
 
-install: voyager.o
+install: brlvger.o
 	@if [ ! -d ${MODULE_PATH} ]; then \
 	  mkdir -m 755 ${MODULE_PATH} ; \
         fi
-	install -m 644 voyager.o ${MODULE_PATH}
+	install -m 644 brlvger.o ${MODULE_PATH}
 	depmod -a ${KERNEL_VERSION}
 
 vgertest: vgertest.c

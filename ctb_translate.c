@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -39,27 +39,28 @@ setAfter (int length) {
   after = (src + length < srcmax)? src[length]: ' ';
 }
 
+#define CTC(c,a) (table->characters[(c)].attributes & (a))
 static int
-selectRule (const int length) { /*check for valid contractions */
+selectRule (int length) { /*check for valid contractions */
   int bucket;			/*integer offset of talle entry */
 
-  if (length < 1)
-    return 0;
+  if (length < 1) return 0;
   if (length == 1) {
     bucket = table->cups[*src];
   } else {
     BYTE bytes[2];		//to hold lower-case letters
-    bytes[0] = tolower(src[0]);
-    bytes[1] = tolower(src[1]);
+    bytes[0] = table->characters[src[0]].lowercase;
+    bytes[1] = table->characters[src[1]].lowercase;
     bucket = table->buckets[hash(bytes)];
   }
-  setBefore();
   while (bucket) {
     curentry = CTE(table, bucket);
     curop = curentry->opcode;
     curfindlen = curentry->findlen;
-    if (src + curfindlen <= srcmax &&
-        (length == 1 || (strncasecmp(src, curentry->findrep, curfindlen) == 0))) { /*check this entry */
+    if (length == 1 ||
+        (curfindlen <= length &&
+         (strncasecmp(src, curentry->findrep, curfindlen) == 0))) {
+      /* check this entry */
       setAfter(curfindlen);
       switch (curop) { /*check validity of this contraction */
         case CTO_Always:
@@ -68,60 +69,70 @@ selectRule (const int length) { /*check for valid contractions */
         case CTO_Literal:
           return 1;
         case CTO_LargeSign:
-          if (isalpha(before) || isalpha(after))
+          if (CTC(before, CTC_Letter) || CTC(after, CTC_Letter))
             curop = CTO_Always;
           return 1;
         case CTO_WholeWord:
         case CTO_Contraction:
-          if ((isspace(before) || ispunct(before)) &&
-              (isspace(after) || ispunct(after)))
+          if (CTC(before, CTC_Space|CTC_Punctuation) &&
+              CTC(after, CTC_Space|CTC_Punctuation))
             return 1;
           break;
         case CTO_LowWord:
-          if (isspace(before) && isspace(after) && prevop != CTO_ToBy)
+          if (CTC(before, CTC_Space) && CTC(after, CTC_Space) &&
+              (prevop != CTO_JoinableWord))
             return 1;
           break;
-        case CTO_ToBy:
-          if ((isspace(before) || ispunct(before)) && isspace(after) &&
-              dest + curentry->replen < destmax) {
+        case CTO_JoinableWord:
+          if (CTC(before, CTC_Space|CTC_Punctuation) &&
+              CTC(after, CTC_Space) &&
+              (dest + curentry->replen < destmax)) {
             const BYTE *ptr = src + curfindlen + 1;
             while (ptr < srcmax) {
-              if (!isspace(*ptr)) {
-                if (isalpha(*ptr))
-                  return 1;
+              if (!CTC(*ptr, CTC_Space)) {
+                if (CTC(*ptr, CTC_Letter)) return 1;
                 break;
               }
               ptr++;
             }
           }
           break;
+        case CTO_SuffixableWord:
+          if (CTC(before, CTC_Space|CTC_Punctuation) &&
+              CTC(after, CTC_Space|CTC_Letter|CTC_Punctuation))
+            return 1;
+          break;
         case CTO_BegWord:
-          if ((isspace(before) || ispunct(before)) && isalpha(after))
+          if (CTC(before, CTC_Space|CTC_Punctuation) &&
+              CTC(after, CTC_Letter))
             return 1;
           break;
         case CTO_MidWord:
-          if (isalpha(before) && isalpha(after))
+          if (CTC(before, CTC_Letter) && CTC(after, CTC_Letter))
             return 1;
           break;
         case CTO_MidEndWord:
-          if (isalpha(before) &&
-              (isalpha(after) || isspace(after) || ispunct(after)))
+          if (CTC(before, CTC_Letter) &&
+              CTC(after, CTC_Letter|CTC_Space|CTC_Punctuation))
             return 1;
           break;
         case CTO_EndWord:
-          if (isalpha(before) && (isspace(after) || ispunct(after)))
+          if (CTC(before, CTC_Letter) &&
+              CTC(after, CTC_Space|CTC_Punctuation))
             return 1;
           break;
         case CTO_BegNum:
-          if ((isspace(before) || ispunct(before)) && isdigit(after))
+          if (CTC(before, CTC_Space|CTC_Punctuation) &&
+              CTC(after, CTC_Digit))
             return 1;
           break;
         case CTO_MidNum:
-          if (isdigit(before) && isdigit(after))
+          if (CTC(before, CTC_Digit) && CTC(after, CTC_Digit))
             return 1;
           break;
         case CTO_EndNum:
-          if (isdigit(before) && (isspace(after) || ispunct(after)))
+          if (CTC(before, CTC_Digit) &&
+              CTC(after, CTC_Space|CTC_Punctuation))
             return 1;
           break;
         {
@@ -132,24 +143,24 @@ selectRule (const int length) { /*check for valid contractions */
         case CTO_PostPunc:
           isPre = 0;
         doPunc:
-          if (ispunct(*src)) {
+          if (CTC(*src, CTC_Punctuation)) {
             const BYTE *pre = src;
             const BYTE *post = src + curfindlen;
             while (--pre >= srcmin)
-              if (!ispunct(*pre))
+              if (!CTC(*pre, CTC_Punctuation))
                 break;
             while (post < srcmax) {
-              if (!ispunct(*post))
+              if (!CTC(*post, CTC_Punctuation))
                 break;
               post++;
             }
             if (isPre) {
-              if (((pre < srcmin) || isspace(*pre)) &&
-                  ((post < srcmax) && !isspace(*post)))
+              if (((pre < srcmin) || CTC(*pre, CTC_Space)) &&
+                  ((post < srcmax) && !CTC(*post, CTC_Space)))
                 return 1;
             } else {
-              if (((pre >= srcmin) && !isspace(*pre)) &&
-                  ((post == srcmax) || isspace(*post)))
+              if (((pre >= srcmin) && !CTC(*pre, CTC_Space)) &&
+                  ((post == srcmax) || CTC(*post, CTC_Space)))
                 return 1;
             }
           }
@@ -165,21 +176,6 @@ selectRule (const int length) { /*check for valid contractions */
 }				/*done with validation */
 
 static int
-putUnknown (BYTE character) { // Convert unknown character to hexadecimal.
-  if (dest + 3 <= destmax) {
-    static const BYTE hexDigits[] = {
-      '0', '1', '2', '3', '4', '5', '6', '7',
-      '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-    };
-    *dest++ = textTable['\\'];
-    *dest++ = textTable[hexDigits[(character >> 4) & 0XF]];
-    *dest++ = textTable[hexDigits[character & 0XF]];
-    return 1;
-  }
-  return 0;
-}				// Done with translating char to hex
-
-static int
 putBytes (const BYTE *bytes, int count) {
   if (dest + count > destmax) return 0;
   memcpy(dest, bytes, count);
@@ -188,10 +184,24 @@ putBytes (const BYTE *bytes, int count) {
 }
 
 static int
-putCharacter (const ContractionTableHeader *table, BYTE character) { // Convert unknown character to hexadecimal.
-  ContractionTableOffset offset = table->characters[character];
+putUnknown (BYTE character) { // Convert unknown character to hexadecimal.
+  static const BYTE hexDigits[] = {
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+  };
+  BYTE buffer[3];
+  buffer[0] = textTable['\\'];
+  buffer[1] = textTable[hexDigits[(character >> 4) & 0XF]];
+  buffer[2] = textTable[hexDigits[character & 0XF]];
+  return putBytes(buffer, sizeof(buffer));
+}				// Done with translating char to hex
+
+static int
+putCharacter (BYTE character) { // Convert unknown character to hexadecimal.
+  ContractionTableOffset offset = table->characters[character].entry;
   if (offset) {
     const ContractionTableEntry *entry = CTE(table, offset);
+    if (!entry->replen) return putBytes(&textTable[character], 1);
     return putBytes(&entry->findrep[1], entry->replen);
   }
   if (putUnknown(character)) return 1;
@@ -199,7 +209,7 @@ putCharacter (const ContractionTableHeader *table, BYTE character) { // Convert 
 }
 
 static int
-putSequence (const ContractionTableHeader *table, ContractionTableOffset offset) {
+putSequence (ContractionTableOffset offset) {
   const BYTE *sequence = CTA(table, offset);
   return putBytes(sequence+1, *sequence);
 }
@@ -214,8 +224,7 @@ contractText (void *contractionTable,
   int computerBraille = 0;
   const BYTE *activeBegin, *activeEnd;
 
-  if (!(table = (ContractionTableHeader *) contractionTable))
-    return 0;
+  if (!(table = (ContractionTableHeader *) contractionTable)) return 0;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
   offsets = offsetsMap;
@@ -223,47 +232,52 @@ contractText (void *contractionTable,
 
   activeBegin = activeEnd = NULL;
   if (cursorOffset >= 0 && cursorOffset < *inputLength &&
-      !isspace(inputBuffer[cursorOffset])) {
+      !CTC(inputBuffer[cursorOffset], CTC_Space)) {
     activeBegin = activeEnd = srcmin + cursorOffset;
-    while (--activeBegin >= srcmin && !isspace(*activeBegin));
-    while (++activeEnd < srcmax && !isspace(*activeEnd));
+    while (--activeBegin >= srcmin && !CTC(*activeBegin, CTC_Space));
+    while (++activeEnd < srcmax && !CTC(*activeEnd, CTC_Space));
   }
 
-  while (src < srcmax && dest < destmax) { /*the main translation loop */
+  while (src < srcmax) { /*the main translation loop */
+    setOffset();
+    setBefore();
     if (computerBraille)
-      if (isspace(*src))
+      if (CTC(*src, CTC_Space))
         computerBraille = 0;
     if (computerBraille || (src > activeBegin && src < activeEnd)) {
-      curop = CTO_Literal;
-      setBefore();
       setAfter(1);
-      setOffset();
-      *dest++ = textTable[*src++];
+      curop = CTO_Literal;
+      if (!putBytes(&textTable[*src], 1)) break;
+      src++;
     } else if (selectRule(srcmax-src) || selectRule(1)) {
-      int curreplen = curentry->replen;
-
-      if (src + curfindlen > srcmax) break;			//don't overflow buffer!
-      setOffset();
       if (table->numberSign && prevop != CTO_MidNum &&
-          !isdigit(before) && isdigit(*src)) {
-        if (!putSequence(table, table->numberSign)) break;
-      } else if (table->letterSign) {
+          !CTC(before, CTC_Digit) && CTC(*src, CTC_Digit)) {
+        if (!putSequence(table->numberSign)) break;
+      } else if (table->englishLetterSign && CTC(*src, CTC_Letter)) {
         if ((curop == CTO_Contraction) ||
-            (curop != CTO_EndNum && isdigit(before) && isalpha(*src)) ||
-            (curop != CTO_WholeWord && curop != CTO_LowWord && curop != CTO_LargeSign &&
-             isspace(before) && isalpha(*src) &&
-             (src + curfindlen == srcmax || isspace(src[1]) || ispunct(src[1])))) {
-          if (!putSequence(table, table->letterSign)) break;
+            (curop != CTO_EndNum && CTC(before, CTC_Digit)) ||
+            (curop == CTO_Always && curfindlen == 1 && CTC(before, CTC_Space) &&
+             (src + 1 == srcmax || CTC(src[1], CTC_Space) ||
+              (CTC(src[1], CTC_Punctuation) &&
+              !(src + 2 < srcmax && src[1] == '.' && CTC(src[2], CTC_Letter)))))) {
+          if (!putSequence(table->englishLetterSign)) break;
         }
       }
-      if (table->allCapitalSign &&
-          !isupper(before) && isupper(*src) &&
-          src + 1 < srcmax && isupper(src[1])) {
-        if (!putSequence(table, table->allCapitalSign)) break;
-      } else if (table->capitalSign && !isupper(before) && isupper(*src)) {
-        if (!putSequence(table, table->capitalSign)) break;
+      if (CTC(*src, CTC_UpperCase)) {
+        if (!CTC(before, CTC_UpperCase)) {
+          if (table->beginCapitalSign &&
+              (src + 1 < srcmax) && CTC(src[1], CTC_UpperCase)) {
+            if (!putSequence(table->beginCapitalSign)) break;
+          } else if (table->capitalSign) {
+            if (!putSequence(table->capitalSign)) break;
+          }
+        }
+      } else if (CTC(*src, CTC_LowerCase)) {
+        if (table->endCapitalSign && (src - 2 >= srcmin) &&
+            CTC(src[-1], CTC_UpperCase) && CTC(src[-2], CTC_UpperCase)) {
+          if (!putSequence(table->endCapitalSign)) break;
+        }
       }
-      if (dest + curreplen > destmax) break;			//don't overflow buffer!
 
       // pre processing
       switch (curop) {
@@ -306,16 +320,15 @@ contractText (void *contractionTable,
           continue;
         }
         default:
-          if (curreplen) {
+          if (curentry->replen) {
+            if (!putBytes(&curentry->findrep[curfindlen], curentry->replen)) goto done;
             src += curfindlen;
-            memcpy(dest, &curentry->findrep[curfindlen], curreplen);
-            dest += curreplen;
           } else {
-            int index;
-            for (index = 0; index < curfindlen; index++) { //insert dot patterns from table
-              if (index) setOffset();
-              if (!putCharacter(table, *src)) break;
-              src++;
+            const BYTE *srclim = src + curfindlen;
+            while (1) {
+              if (!putCharacter(*src)) goto done;
+              if (++src == srclim) break;
+              setOffset();
             }
           }
       }
@@ -331,23 +344,20 @@ contractText (void *contractionTable,
           }
           break;
         }
-        case CTO_ToBy:
-          while ((src < srcmax) && isspace(*src)) {
-            src++;
-          }
+        case CTO_JoinableWord:
+          while ((src < srcmax) && CTC(*src, CTC_Space)) src++;
           break;
         default:
           break;
       }
     } else {
-      setOffset();
       if (!putUnknown(*src)) break;
       src++;
     }
 
     {
-      int space = dest > destmin && dest[-1] == 0; //blank Braille cell
-      if (space || (isspace(after) && curop != CTO_ToBy)) {
+      int space = src > srcmin && CTC(src[-1], CTC_Space);
+      if (space || (CTC(after, CTC_Space) && curop != CTO_JoinableWord)) {
         srcword = src;
         destword = dest;
       }
@@ -355,14 +365,15 @@ contractText (void *contractionTable,
         prevop = curop;
     }
   }				/*end of translation loop */
+done:
 
-  if (destword != NULL && src < srcmax && !isspace(*src)) {
+  if (destword != NULL && src < srcmax && !CTC(*src, CTC_Space)) {
     src = srcword;
     dest = destword;
   }
   if (src < srcmax) {
     setOffset();
-    while (isspace(*src))
+    while (CTC(*src, CTC_Space))
       if (++src == srcmax)
         break;
   }

@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <linux/types.h>
 
-#include "voyager.h"
+#include "brlvger.h"
 
 void read_display_keys(int fd);
 void display_formatted_braille_input(char *old, char *new);
@@ -157,7 +157,7 @@ void read_display_keys(int fd)
 		{
 			read(fdin, &keyb_key, 1);
 			if(keyb_key == 'b')
-				ioctl(fd, VOYAGER_BUZZ, &duration);
+				ioctl(fd, BRLVGER_BUZZ, &duration);
 			else if(keyb_key == 'q')
 				break;
 		}
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* display on */
-	if( ioctl(fd, VOYAGER_DISPLAY_ON, NULL) == -1 )
+	if( ioctl(fd, BRLVGER_DISPLAY_ON, NULL) == -1 )
 	{
 		perror( "ioctl: ");
 		exit( -1 );
@@ -280,16 +280,16 @@ int main(int argc, char *argv[])
 	  sleep(15);
 	  for(i=160; i<=220; i+=10) {
 	    voltage = i;
-	    if(ioctl(fd, VOYAGER_SET_VOLTAGE, &voltage) <0) {
-	      perror("ioctl VOYAGER_SET_VOLTAGE"); exit(1);
+	    if(ioctl(fd, BRLVGER_SET_VOLTAGE, &voltage) <0) {
+	      perror("ioctl BRLVGER_SET_VOLTAGE"); exit(1);
 	    }
 
 	    printf("%3d: ", i);
 	    for(j=0; j<20; j++) {
 	    again:
 	      voltage = 0;
-	      if(ioctl(fd, VOYAGER_GET_VOLTAGE, &voltage) <0) {
-		perror("ioctl VOYAGER_GET_VOLTAGE"); goto again;
+	      if(ioctl(fd, BRLVGER_GET_VOLTAGE, &voltage) <0) {
+		perror("ioctl BRLVGER_GET_VOLTAGE"); goto again;
 	      }
 	      sleep(1);
 	      printf("%3u ", voltage);
@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
 	fprintf(stdout, "\nBye!\n\n");
 
 	/* display off */
-	if( ioctl(fd, VOYAGER_DISPLAY_ON, NULL) == -1 )
+	if( ioctl(fd, BRLVGER_DISPLAY_ON, NULL) == -1 )
 	{
 		perror( "ioctl: ");
 		exit( -1 );

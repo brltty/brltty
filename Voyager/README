@@ -4,6 +4,12 @@ Authors:
 Stéphane Doyon  <s.doyon@videotron.ca>
 Stéphane Dalton <sdalton@videotron.ca>
 
+Note to users of previous versions: Starting with version 0.8, the
+character recommended device file name is changed to /dev/brlvger and its
+minor is changed to 128 (now officially assigned). Please run "make
+install-device" again and change your brltty.conf to indicate
+"braille-device /dev/brlvger".
+
 This driver supports the Tieman Voyager 44 and 70.
 
 Many thanks to the Tieman people: Corand van Strien, Ivar Illing, Daphne
@@ -16,11 +22,14 @@ projects and are so supportive.
 Thanks to Andor Demarteau <ademarte@students.cs.uu.nl> who got this whole
 project started and beta-tested all our early buggy attempts.
 
-This is the first release of this driver. It seems to work very well but
-it may still need some work. I have chosen the key bindings somewhat
-quickly, and also I have never used Tieman's software for the Voyager so
-I do not know what key bindings users may be used to. So key bindings may
-need to be reworked.
+The driver has been in heavy use for about six months now (as of April
+2002) by a very few users (about 3-4), who say it has worked very well
+for them.
+
+I have chosen the key bindings somewhat quickly, and also I have never
+used Tieman's software for the Voyager so I do not know what key bindings
+users may be used to. But I haven't received any comments about the
+bindings so they must not be all that bad.
 
 When BRLTTY will be running, press the leftmost routing key to bring up
 the help screen so you can read the details of the key bindings.
@@ -30,25 +39,39 @@ can just open a serial port and talk directly to the display. However the
 Voyager display connects through USB, so this driver must rely on a
 kernel module to talk to the display.
 
-Therefore you must also compile and install the kernel module found in
-the kernel/ subdirectory: see kernel/README.
+We are now getting our USB driver for the Voyager into the mainstream
+kernel. But unless you are living on the edge in terms of kernel
+versions, it may take several months for distributions to catch up to a
+kernel version where the Voyager driver (called brlvger) is already
+present. I am not certain yet in which kernel version the driver will
+appear, but it is no sooner than 2.4.19. You can determine if the driver
+is included by checking for the presence of the file
+/usr/include/linux/brlvger.h.
+
+For the very likely case in which the necessary kernel driver is not
+included in your kernel (or is not selecteded in the kernel
+configuration), we are providing the same driver in the form of a
+standalone module in the kernel/ directory. So you must also compile and
+install the kernel module found in the kernel/ subdirectory: see
+kernel/README.
 
 The kernel module implements a character device file which this driver
 uses to talk to the kernel module. Use "make install-device" from THIS
 directory to create that device file. Alternatively you can use mknod and
-create a character device file with major 180 and the minor indicated in
-kernel/voyager.h (currently 144). We suggest the name /dev/voyager.
+create a character device file with major 180 and minor 128. We suggest
+the name /dev/brlvger.
 
 You must tell BRLTTY to use that device file as the braille device. To do
 this, edit the top-level BRLTTY Makefile and change
 BRLDEV = /dev/ttyS0
 to
-BRLDEV = /dev/voyager
-(alternatively use the braille-device parameter in your BRLTTY
-configuration file).
+BRLDEV = /dev/brlvger
+Alternatively use the braille-device parameter in your BRLTTY
+configuration file: in /etc/brltty.conf, put a line like:
+braille-device /dev/brlvger
 
 Before you start BRLTTY, you will need to insert the kernel module. Do:
-/sbin/modprobe voyager
+/sbin/modprobe brlvger
 Do not forget this command if you intend to modify your boot scripts to
 start BRLTTY automatically.
 

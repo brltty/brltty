@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the Linux console (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -181,6 +181,23 @@ LDFLAGS = $(COMMONLDFLAGS) -s
 #LDFLAGS = $(COMMONLDFLAGS) -g
 LDLIBS = -ldl -lm -lc
 
+# Bootdisk hacking:
+# Uncomment next line for BRLTTY to be able to act as /sbin/init
+# replacement on a bootdisk.
+#INIT_HACK=1
+ifdef INIT_HACK
+  INIT_PATH = "/sbin/init_real"
+  INIT_PATH_FLAGS := '-DINIT_PATH=$(INIT_PATH)'
+else
+  INIT_PATH_FLAGS =
+endif
+
+# Uncomment next line to produce a statically linked executable.
+#LINKSTATIC = 1
+ifdef LINKSTATIC
+  LDFLAGS += -static -s
+endif
+
 MAKE = make
 
 ###############################################################################
@@ -284,14 +301,17 @@ brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 
 main.o: main.c brl.h spk.h scr.h contract.h tunes.h cut.h route.h \
 	misc.h message.h config.h common.h
-	$(CC) $(CFLAGS) -c main.c
+	$(CC) $(CFLAGS) $(INIT_PATH_FLAGS) -c main.c
 
 config.o: config.c config.h brl.h spk.h scr.h contract.h tunes.h message.h misc.h common.h
 	$(CC) $(CFLAGS) \
 		'-DHOME_DIR="$(PREFIX)$(DATA_DIR)"' \
 		'-DBRLLIBS="$(BRL_LIBS)"' \
 		'-DSPKLIBS="$(SPK_LIBS)"' \
-		'-DBRLDEV="$(BRLDEV)"' -c config.c
+		'-DBRLDEV="$(BRLDEV)"' \
+		'-DTEXTTRANS="$(TEXTTRANS)"' \
+		'-DATTRTRANS="$(ATTRTRANS)"' \
+                -c config.c
 
 route.o: route.c route.h scr.h misc.h
 	$(CC) $(CFLAGS) -c route.c
@@ -442,6 +462,7 @@ clean:
 
 distclean: clean
 	rm -f *test *-static *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
+	rm -f ? */? a.out */a.out
 	$(MAKE) -C BrailleLite distclean
 	$(MAKE) -C Papenmeier distclean
 	$(MAKE) -C Voyager distclean

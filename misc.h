@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -78,7 +78,9 @@ extern int timeout_yet (int msec);	/* test timeout condition */
 #endif
 extern void LogOpen(int toConsole);
 extern void LogClose(void);
-extern void LogPrint(int level, char *format, ...);
+extern void LogPrint
+       (int level, char *format, ...)
+       __attribute__((format(printf, 2, 3)));
 extern void LogError (const char *action);
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
 extern void SetLogLevel(int level);

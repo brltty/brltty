@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -109,4 +109,18 @@ unsigned char *ShmScreen::read (ScreenBox box, unsigned char *buffer, ScreenMode
 inline void ShmScreen::close (void) {
   shmdt(shm);
   shm = NULL;
+}
+
+
+int ShmScreen::insert (unsigned short) {
+  return 0;
+}
+
+
+int ShmScreen::selectvt (int vt) {
+  return 0;
+}
+
+int ShmScreen::switchvt (int vt) {
+  return 0;
 }

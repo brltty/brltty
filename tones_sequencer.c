@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -30,7 +30,7 @@ static int fileDescriptor = -1;
 static int deviceNumber = 1;
 static int channelNumber = 0;
 
-char *midiInstrumentTable[] = {
+const char *midiInstrumentTable[] = {
 /* Piano */
   /* 00 */ "Acoustic Grand Piano",
   /* 01 */ "Bright Acoustic Piano",

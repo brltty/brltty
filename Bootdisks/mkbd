@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+# Work on a copy of bootdisk image
+cp -f boot.img myboot.img
+mount myboot.img mnt1 -o loop -t ext2
+
+# Modify syslinux.cfg
+cat >cfg <<EOF
+label brltty
+  kernel vmlinuz
+  append root=/dev/fd0 load_ramdisk=1 prompt_ramdisk=1 lang= text devfs=nomount ramdisk_size=7168
+EOF
+cat mnt1/syslinux.cfg |sed 's/default linux/default brltty/' >>cfg
+mv -f cfg mnt1/syslinux.cfg
+umount mnt1

@@ -1,0 +1,290 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Multiple Blank, Tab, etc. Suppression Table
+
+# Define the needed opcodes.
+0 0 opcode
+opcode 6 char
+opcode 7 repeated
+
+# Sequences which should be represented by no dots.
+repeated \20 0 space
+repeated \09 0 tab
+
+# cut down lines of hyphens, underscores, etc.
+repeated --- =
+repeated ___ =
+repeated === =
+
+# Get each character's representation from the currently selected text translation table.
+char \00 =
+char \01 =
+char \02 =
+char \03 =
+char \04 =
+char \05 =
+char \06 =
+char \07 =
+char \08 =
+char \09 =
+char \0a =
+char \0b =
+char \0c =
+char \0d =
+char \0e =
+char \0f =
+char \10 =
+char \11 =
+char \12 =
+char \13 =
+char \14 =
+char \15 =
+char \16 =
+char \17 =
+char \18 =
+char \19 =
+char \1a =
+char \1b =
+char \1c =
+char \1d =
+char \1e =
+char \1f =
+char \20 =
+char \21 =
+char \22 =
+char \23 =
+char \24 =
+char \25 =
+char \26 =
+char \27 =
+char \28 =
+char \29 =
+char \2a =
+char \2b =
+char \2c =
+char \2d =
+char \2e =
+char \2f =
+char \30 =
+char \31 =
+char \32 =
+char \33 =
+char \34 =
+char \35 =
+char \36 =
+char \37 =
+char \38 =
+char \39 =
+char \3a =
+char \3b =
+char \3c =
+char \3d =
+char \3e =
+char \3f =
+char \40 =
+char \41 =
+char \42 =
+char \43 =
+char \44 =
+char \45 =
+char \46 =
+char \47 =
+char \48 =
+char \49 =
+char \4a =
+char \4b =
+char \4c =
+char \4d =
+char \4e =
+char \4f =
+char \50 =
+char \51 =
+char \52 =
+char \53 =
+char \54 =
+char \55 =
+char \56 =
+char \57 =
+char \58 =
+char \59 =
+char \5a =
+char \5b =
+char \5c =
+char \5d =
+char \5e =
+char \5f =
+char \60 =
+char \61 =
+char \62 =
+char \63 =
+char \64 =
+char \65 =
+char \66 =
+char \67 =
+char \68 =
+char \69 =
+char \6a =
+char \6b =
+char \6c =
+char \6d =
+char \6e =
+char \6f =
+char \70 =
+char \71 =
+char \72 =
+char \73 =
+char \74 =
+char \75 =
+char \76 =
+char \77 =
+char \78 =
+char \79 =
+char \7a =
+char \7b =
+char \7c =
+char \7d =
+char \7e =
+char \7f =
+char \80 =
+char \81 =
+char \82 =
+char \83 =
+char \84 =
+char \85 =
+char \86 =
+char \87 =
+char \88 =
+char \89 =
+char \8a =
+char \8b =
+char \8c =
+char \8d =
+char \8e =
+char \8f =
+char \90 =
+char \91 =
+char \92 =
+char \93 =
+char \94 =
+char \95 =
+char \96 =
+char \97 =
+char \98 =
+char \99 =
+char \9a =
+char \9b =
+char \9c =
+char \9d =
+char \9e =
+char \9f =
+char \a0 =
+char \a1 =
+char \a2 =
+char \a3 =
+char \a4 =
+char \a5 =
+char \a6 =
+char \a7 =
+char \a8 =
+char \a9 =
+char \aa =
+char \ab =
+char \ac =
+char \ad =
+char \ae =
+char \af =
+char \b0 =
+char \b1 =
+char \b2 =
+char \b3 =
+char \b4 =
+char \b5 =
+char \b6 =
+char \b7 =
+char \b8 =
+char \b9 =
+char \ba =
+char \bb =
+char \bc =
+char \bd =
+char \be =
+char \bf =
+char \c0 =
+char \c1 =
+char \c2 =
+char \c3 =
+char \c4 =
+char \c5 =
+char \c6 =
+char \c7 =
+char \c8 =
+char \c9 =
+char \ca =
+char \cb =
+char \cc =
+char \cd =
+char \ce =
+char \cf =
+char \d0 =
+char \d1 =
+char \d2 =
+char \d3 =
+char \d4 =
+char \d5 =
+char \d6 =
+char \d7 =
+char \d8 =
+char \d9 =
+char \da =
+char \db =
+char \dc =
+char \dd =
+char \de =
+char \df =
+char \e0 =
+char \e1 =
+char \e2 =
+char \e3 =
+char \e4 =
+char \e5 =
+char \e6 =
+char \e7 =
+char \e8 =
+char \e9 =
+char \ea =
+char \eb =
+char \ec =
+char \ed =
+char \ee =
+char \ef =
+char \f0 =
+char \f1 =
+char \f2 =
+char \f3 =
+char \f4 =
+char \f5 =
+char \f6 =
+char \f7 =
+char \f8 =
+char \f9 =
+char \fa =
+char \fb =
+char \fc =
+char \fd =
+char \fe =
+char \ff =

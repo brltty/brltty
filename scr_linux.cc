@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -56,7 +56,7 @@ static unsigned int debugScreenTextTranslation = 0;
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[0]
  * 8-bit Latin-1 mapped to Unicode -- trivial mapping
  */
-static const unsigned short iso01_map[0X100] = {
+static const ApplicationCharacterMap iso01Map = {
    0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
    0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x000f,
    0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x0017,
@@ -94,7 +94,7 @@ static const unsigned short iso01_map[0X100] = {
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[1]
  * VT100 graphics mapped to Unicode
  */
-static const unsigned short vt100_map[0X100] = {
+static const ApplicationCharacterMap vt100Map = {
    0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
    0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x000f,
    0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x0017,
@@ -132,7 +132,7 @@ static const unsigned short vt100_map[0X100] = {
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[2]
  * IBM Codepage 437 mapped to Unicode
  */
-static const unsigned short cp437_map[0X100] = {
+static const ApplicationCharacterMap cp437Map = {
    0x0000, 0x263a, 0x263b, 0x2665, 0x2666, 0x2663, 0x2660, 0x2022, 
    0x25d8, 0x25cb, 0x25d9, 0x2642, 0x2640, 0x266a, 0x266b, 0x263c,
    0x25b6, 0x25c0, 0x2195, 0x203c, 0x00b6, 0x00a7, 0x25ac, 0x21a8,
@@ -196,7 +196,7 @@ int LinuxScreen::prepare (char **parameters) {
     unsigned int choice;
     if (validateChoice(&choice, "character set", parameters[PARM_ACM], choices)) {
       if (choice) {
-        static const unsigned short *maps[] = {iso01_map, vt100_map, cp437_map, NULL};
+        static const unsigned short *maps[] = {iso01Map, vt100Map, cp437Map, NULL};
         const unsigned short *map = maps[choice-1];
         if (map) {
           memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
@@ -383,10 +383,9 @@ int LinuxScreen::setup (void) {
  * the expected character set.
  */
 int LinuxScreen::setTranslationTable (int force) {
-  int changed = 0;
-  if (setApplicationCharacterMap && (this->*setApplicationCharacterMap)(force)) changed = 1;
-  if (setScreenFontMap(force)) changed = 1;
-  if (changed) {
+  int acmChanged = setApplicationCharacterMap && (this->*setApplicationCharacterMap)(force);
+  int sfmChanged = setScreenFontMap(force);
+  if (acmChanged || sfmChanged) {
     int character;
     memset(translationTable, '?', sizeof(translationTable));
     for (character=0XFF; character>=0; --character) {
@@ -438,7 +437,7 @@ int LinuxScreen::setTranslationTable (int force) {
 }
 
 int LinuxScreen::getUserAcm (int force) {
-  unsigned short map[0X100];
+  ApplicationCharacterMap map;
   if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
     if (force || (memcmp(applicationCharacterMap, map, sizeof(applicationCharacterMap)) != 0)) {
       memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
@@ -463,12 +462,12 @@ int LinuxScreen::determineApplicationCharacterMap (int force) {
     }
   }
   if (!name) {
-    memcpy(applicationCharacterMap, iso01_map, sizeof(applicationCharacterMap));
+    memcpy(applicationCharacterMap, iso01Map, sizeof(applicationCharacterMap));
     setApplicationCharacterMap = NULL;
     logApplicationCharacterMap();
     name = "iso01";
   }
-  LogPrint(LOG_INFO, "Selected Application Character Map: %s", name);
+  LogPrint(LOG_INFO, "Selected application character map: %s", name);
   return 1;
 }
 
@@ -677,7 +676,7 @@ int LinuxScreen::insert (unsigned short key) {
           if (insertMapped(key, &LinuxScreen::insertUtf8)) ok = 1;
           break;
         default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %d", mode);
+          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %ld", mode);
           break;
       }
     } else {

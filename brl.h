@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -272,8 +272,8 @@ typedef struct {
   const char *name;			/* name of driver */
   const char *identifier;		/* name of driver */
   const char *const *parameters;		/* user-supplied driver parameters */
-  const char *help_file;		/* name of help file */
-  int status_style;		/* prefered status cells mode */
+  const char *helpFile;		/* name of help file */
+  int statusStyle;		/* prefered status cells mode */
 
   /* Routines provided by the braille driver library: */
   void (*identify) (void);	/* print start-up messages */
@@ -282,12 +282,12 @@ typedef struct {
   void (*writeWindow) (brldim *);		/* write to braille display */
   int (*read) (DriverCommandContext);		/* get key press from braille display */
   void (*writeStatus) (const unsigned char *);	/* set status cells */
-} braille_driver;
+} BrailleDriver;
 
-extern int loadBrailleDriver (const char **libraryName);
+extern const BrailleDriver *loadBrailleDriver (const char **libraryName);
 extern int listBrailleDrivers (void);
-extern braille_driver *braille;
-extern braille_driver noBraille;
+extern const BrailleDriver *braille;
+extern const BrailleDriver noBraille;
 
 extern unsigned char textTable[0X100];	 /* current text to braille translation table */
 extern unsigned char untextTable[0X100]; /* current braille to text translation table */

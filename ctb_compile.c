@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -55,8 +55,8 @@ compileError (FileData *data, char *format, ...) {
 }
 
 static int
-allocateBytes (FileData *data, ContractionTableOffset *offset, int count) {
-  int size = tableUsed + count;
+allocateBytes (FileData *data, ContractionTableOffset *offset, int count, int alignment) {
+  int size = (tableUsed = (tableUsed + (alignment - 1)) / alignment * alignment) + count;
   if (size > tableSize) {
     void *table = realloc(tableHeader, size|=0XFFF);
     if (!table) {
@@ -78,7 +78,7 @@ addEntry (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteS
   int entrySize = sizeof(ContractionTableEntry) - 1;
   if (find) entrySize += find->length;
   if (replace) entrySize += replace->length;
-  if (allocateBytes(data, &entryOffset, entrySize)) {
+  if (allocateBytes(data, &entryOffset, entrySize, __alignof__(ContractionTableEntry))) {
     ContractionTableEntry *newEntry = CTE(tableHeader, entryOffset);
     newEntry->opcode = opcode;
     if (find)
@@ -101,7 +101,7 @@ addEntry (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteS
       if (newEntry->findlen == 1) { /*it's a cup, not a bucket */
         BYTE character = newEntry->findrep[0];
         if (newEntry->opcode == CTO_Always) {
-          tableHeader->characters[character] = entryOffset;
+          tableHeader->characters[character].entry = entryOffset;
         }
         if ((bucket = tableHeader->cups[character])) {
           ContractionTableEntry *currentEntry = CTE(tableHeader, bucket);
@@ -151,7 +151,7 @@ addEntry (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteS
 
 static int
 addString (FileData *data, ContractionTableOffset *offset, ByteString *string) {
-  if (allocateBytes(data, offset, string->length+1)) {
+  if (allocateBytes(data, offset, string->length+1, __alignof__(BYTE))) {
     BYTE *address = CTA(tableHeader, *offset);
     memcpy(address+1, string->bytes, (*address = string->length));
     return 1;
@@ -451,8 +451,9 @@ processLine (FileData *data, const BYTE *line) {
     case CTO_Always:
     case CTO_WholeWord:
     case CTO_LowWord:
-    case CTO_ToBy:
+    case CTO_JoinableWord:
     case CTO_LargeSign:
+    case CTO_SuffixableWord:
     case CTO_BegWord:
     case CTO_MidWord:
     case CTO_MidEndWord:
@@ -488,19 +489,27 @@ processLine (FileData *data, const BYTE *line) {
             goto failure;
       break;
     }
-    case CTO_AllCapitalSign: {
+    case CTO_BeginCapitalSign: {
       ByteString cells;
-      if (getToken(data, &token, &length, "all capital sign"))
+      if (getToken(data, &token, &length, "begin capital sign"))
         if (parseDots(data, &cells, token, length))
-          if (!addString(data, &tableHeader->allCapitalSign, &cells))
+          if (!addString(data, &tableHeader->beginCapitalSign, &cells))
             goto failure;
       break;
     }
-    case CTO_LetterSign: {
+    case CTO_EndCapitalSign: {
+      ByteString cells;
+      if (getToken(data, &token, &length, "end capital sign"))
+        if (parseDots(data, &cells, token, length))
+          if (!addString(data, &tableHeader->endCapitalSign, &cells))
+            goto failure;
+      break;
+    }
+    case CTO_EnglishLetterSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "letter sign"))
         if (parseDots(data, &cells, token, length))
-          if (!addString(data, &tableHeader->letterSign, &cells))
+          if (!addString(data, &tableHeader->englishLetterSign, &cells))
             goto failure;
       break;
     }
@@ -588,6 +597,31 @@ processFile (const BYTE *fileName) {
   return ok;
 }				/*compilation completed */
 
+static void
+cacheCharacterAttributes (void) {
+  int character;
+  for (character = 0; character < 0X100; character++) {
+    ContractionTableCharacter *c = &tableHeader->characters[character];
+    c->uppercase = c->lowercase = character;
+    if (isspace(character))
+      c->attributes |= CTC_Space;
+    else if (isdigit(character))
+      c->attributes |= CTC_Digit;
+    else if (ispunct(character))
+      c->attributes |= CTC_Punctuation;
+    else if (isalpha(character)) {
+      c->attributes |= CTC_Letter;
+      if (isupper(character)) {
+        c->attributes |= CTC_UpperCase;
+        c->lowercase = tolower(character);
+      } else if (islower(character)) {
+        c->attributes |= CTC_LowerCase;
+        c->uppercase = toupper(character);
+      }
+    }
+  }
+}
+
 static int
 auditTable (void) {
   int ok = 1;
@@ -599,21 +633,21 @@ auditTable (void) {
     while (bucket) {
       const ContractionTableEntry *entry = CTE(tableHeader, bucket);
       switch (entry->opcode) {
-        case CTO_Contraction:
-        case CTO_Literal: {
-          int findIndex;
-          for (findIndex = 0; findIndex < entry->findlen; findIndex++) {
-            BYTE character = entry->findrep[findIndex];
-            if (!tableHeader->characters[character] && !characterEncountered[character]) {
-              characterEncountered[character] = 1;
-              compileError(NULL, "character representation not defined: %c (%.*s)",
-                           character, entry->findlen, entry->findrep);
-              ok = 0;
+        default:
+          if (!entry->replen) {
+            int findIndex;
+            for (findIndex = 0; findIndex < entry->findlen; findIndex++) {
+              BYTE character = entry->findrep[findIndex];
+              if (!tableHeader->characters[character].entry && !characterEncountered[character]) {
+                characterEncountered[character] = 1;
+                compileError(NULL, "character representation not defined: %c (%.*s)",
+                             character, entry->findlen, entry->findrep);
+                ok = 0;
+              }
             }
           }
-          break;
-        }
-        default:
+        case CTO_Ignore:
+        case CTO_Literal:
           break;
       }
       bucket = entry->next;
@@ -635,10 +669,11 @@ compileContractionTable (const BYTE *fileName) { /*compile source table into a t
   opcodesSize = 0;
   opcodesUsed = 0;
 
-  if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader))) {
+  if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
     if (headerOffset == 0) {
-      processFile(fileName);
-      if (tableHeader) auditTable();
+      cacheCharacterAttributes();
+      if (processFile(fileName))
+        auditTable();
       if (errorCount)
         LogPrint(LOG_ERR, "%d %s in contraction table '%s'.",
                  errorCount, ((errorCount == 1)? "error": "errors"), fileName);

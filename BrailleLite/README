@@ -27,6 +27,12 @@ when the unit is in its internal notetaker mode.
 See brltty_genhelp.txt for a description of the key bindings.
 
 History:
+Stéphane Doyon, April 2002, version 0.5.10:
+-Act as if kbemu was off in any context other than CMDS_SCREEN (in
+    particular typing a key won't throw you out of preferences menu
+    anymore).
+Stéphane Doyon, March 2002, version 0.5.9:
+-Added "kbemu" driver parameter, so can start with kbemu already active.
 Stéphane Doyon, February 2002, version 0.5.8:
 -Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and CMD_SIXDOTS. Several
     VAL_PASSKEY effects were done through special cases: moved them

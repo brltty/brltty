@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -43,7 +43,7 @@ static int brl_read (DriverCommandContext cmds) { return EOF; }
 
 static void *libraryHandle = NULL;	/* handle to driver */
 static const char *symbolName = "brl_driver";
-braille_driver *braille = NULL;	/* filled by dynamic libs */
+const BrailleDriver *braille = &noBraille;
 
 /*
  * Output braille translation tables.
@@ -67,29 +67,27 @@ const CommandEntry commandTable[] = {
 
 /* load driver from library */
 /* return true (nonzero) on success */
-int loadBrailleDriver (const char **driver) {
+const BrailleDriver *
+loadBrailleDriver (const char **driver) {
   if (*driver != NULL)
     if (strcmp(*driver, noBraille.identifier) == 0) {
-      braille = &noBraille;
       *driver = NULL;
-      return 1;
+      return &noBraille;
     }
 
   #ifdef BRL_BUILTIN
     {
-      extern braille_driver brl_driver;
+      extern BrailleDriver brl_driver;
       if (*driver != NULL)
         if (strcmp(*driver, brl_driver.identifier) == 0)
           *driver = NULL;
       if (*driver == NULL) {
-        braille = &brl_driver;
-        return 1;
+        return &brl_driver;
       }
     }
   #else
     if (*driver == NULL) {
-      braille = &noBraille;
-      return 1;
+      return &noBraille;
     }
   #endif
 
@@ -105,9 +103,9 @@ int loadBrailleDriver (const char **driver) {
 
     if ((libraryHandle = dlopen(libraryName, RTLD_NOW|RTLD_GLOBAL))) {
       const char *error;
-      braille = dlsym(libraryHandle, symbolName);
+      const void *address = dlsym(libraryHandle, symbolName);
       if (!(error = dlerror())) {
-        return 1;
+        return address;
       } else {
         LogPrint(LOG_ERR, "%s", error);
         LogPrint(LOG_ERR, "Braille driver symbol not found: %s", symbolName);
@@ -120,12 +118,12 @@ int loadBrailleDriver (const char **driver) {
     }
   }
 
-  braille = &noBraille;
-  return 0;
+  return NULL;
 }
 
 
-int listBrailleDrivers (void) {
+int
+listBrailleDrivers (void) {
   char buf[64];
   static const char *list_file = LIB_PATH "/brltty-brl.lst";
   int cnt, fd = open(list_file, O_RDONLY);

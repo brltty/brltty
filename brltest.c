@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -33,7 +33,6 @@
 #include "scr.h"
 #include "config.h"
 
-extern braille_driver *braille;
 int refreshInterval = REFRESH_INTERVAL;
 static brldim brl;
 static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
@@ -109,7 +108,7 @@ main (int argc, char *argv[]) {
   }
   if (!device) device = BRLDEV;
 
-  if (loadBrailleDriver(&driver)) {
+  if ((braille = loadBrailleDriver(&driver))) {
     const char *const *parameterNames = braille->parameters;
     char **parameterSettings;
     if (!parameterNames) {

@@ -11,4 +11,3 @@ Possible improvements:
 -The command to shut off the display is effective when you press ctrl-C
    from vgertest, but not when you kill BRLTTY. Why?
 -Official minor assignment.
--Inclusion in mainstream kernel.

@@ -27,13 +27,25 @@ DRIVER_NAME = Voyager
 BRAILLE_MODELS = 44/70 (USB)
 include ../driver.mk
 
-MINOR := $(shell grep VOYAGER_DEFAULT_MINOR kernel/voyager.h |cut -f3 -d' ')
-#MINOR=144
-VOYAGERDEV=/dev/voyager
+KERNEL_INCLUDES = /usr/include/linux
+ifneq (,$(wildcard $(KERNEL_INCLUDES)/brlvger.h))
+# The USB driver is in the kernel.
+VGERHDR = $(KERNEL_INCLUDES)/brlvger.h
+else
+# The USB driver is not in the kernel: we use the module in kernel/.
+VGERHDR = kernel/linux/brlvger.h
+endif
 
-brl.o: brl.c brlconf.h kernel/voyager.h ../brl.h ../misc.h \
+MINOR := $(shell grep BRLVGER_MINOR $(VGERHDR) | awk '{print $$3;}')
+VOYAGERDEV=/dev/brlvger
+
+.PHONY : brlvger.h
+brlvger.h:
+	ln -sf $(VGERHDR) brlvger.h
+
+brl.o: brlvger.h brl.c brlconf.h ../brl.h ../misc.h \
 	../scr.h ../brl_driver.h
-	$(CC) $(BRL_CFLAGS) -c brl.c
+	$(CC) $(BRL_CFLAGS) $(KDRIVER) -c brl.c
 
 #Let's not rebuild the help unless the user wants to as it requires python.
 remakehelp: brl.c brltty_helpmodel.txt mkhlp hlptrans.py
@@ -52,4 +64,5 @@ install-device:
         fi
 
 distclean:
+	rm -f brlvger.h
 	$(MAKE) -C kernel distclean

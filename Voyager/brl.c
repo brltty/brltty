@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION \
-"BRLTTY driver for Tieman Voyager, version 0.6 (February 2002)"
+"BRLTTY driver for Tieman Voyager, version 0.7 (April 2002)"
 #define COPYRIGHT \
 "   Copyright (C) 2001-2002 by Stéphane Doyon  <s.doyon@videotron.ca>\n" \
 "                          and Stéphane Dalton <sdalton@videotron.ca>"
@@ -29,6 +29,14 @@
  * It is designed to be compiled in BRLTTY version 3.0.
  *
  * History:
+ * 0.7, April 2002: The name of the kernel module changed from
+ *   voyager to brlvger, so some stuff (header file name, structure
+ *   name, constants...) were renamed. Note that the character device
+ *   file changed from /dev/voyager major 180 minor 144 to /dev/brlvger
+ *   major 180 minor 128 (now official). The kernel module is being
+ *   integrated into the mainstream kernel tree. The Makefile
+ *   causes us to use /usr/include/linux/brlvger.h if it exists,
+ *   and kernel/linux/brlvger.h otherwise.
  * 0.6, February 2002: Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and
  *   CMD_SIXDITS. Some key bindings identification cleanups.
  * 0.5, January 2002: Added key bindings for CR_CUTAPPEND, CR_CUTLINE,
@@ -70,8 +78,8 @@ typedef enum {
 
 #include "brlconf.h"
 
-/* Kernel driver interface */
-#include "kernel/voyager.h"
+/* Kernel driver interface (symlink produced by Makefile) */
+#include "brlvger.h"
 
 /* This defines the mapping from brltty coding to Voyager's dot coding. */
 static unsigned char brl2voyDotsTable[256] =
@@ -185,7 +193,7 @@ static void
 brl_initialize (char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
-  struct voyager_info vi;
+  struct brlvger_info vi;
 
   /* use user parameters */
   {
@@ -225,8 +233,8 @@ brl_initialize (char **parameters, brldim *brl, const char *dev)
   LogPrint(LOG_DEBUG,"Device %s opened", dev);
 
   /* Get display and USB kernel driver info */
-  if(ioctl(brl_fd, VOYAGER_GET_INFO, &vi) <0) {
-    LogPrint(LOG_ERR, "ioctl VOYAGER_GET_INFO failed on device %s: %s",
+  if(ioctl(brl_fd, BRLVGER_GET_INFO, &vi) <0) {
+    LogPrint(LOG_ERR, "ioctl BRLVGER_GET_INFO failed on device %s: %s",
 	     dev, strerror(errno));
     goto failure;
   }
@@ -263,8 +271,8 @@ brl_initialize (char **parameters, brldim *brl, const char *dev)
   /* cause the display to beep */
   {
     __u16 duration = 200;
-    if(ioctl(brl_fd, VOYAGER_BUZZ, &duration) <0) {
-      LogPrint(LOG_ERR, "ioctl VOYAGER_BUZZ: %s", strerror(errno));
+    if(ioctl(brl_fd, BRLVGER_BUZZ, &duration) <0) {
+      LogPrint(LOG_ERR, "ioctl BRLVGER_BUZZ: %s", strerror(errno));
       goto failure;
     }
   }
@@ -308,13 +316,15 @@ brl_close (brldim *brl)
   brl_fd = -1;
   free(dispbuf);
   free(prevdata);
+  dispbuf = prevdata = NULL;
 }
 
 
 static void
 brl_writeStatus (const unsigned char *s)
 {
-  memcpy(dispbuf, s, NRSTATCELLS);
+  if(dispbuf)
+    memcpy(dispbuf, s, NRSTATCELLS);
 }
 
 

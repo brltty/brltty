@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -319,7 +319,7 @@ identifyTerminal(brldim *brl) {
               curr_stats = the_terminal->statcells;
 
               // TODO: ?? HACK
-              braille->help_file = the_terminal->helpfile;
+              brl_driver.helpFile = the_terminal->helpfile;
 
               // key codes - starts at 0X300 
               // status keys - routing keys - step 3

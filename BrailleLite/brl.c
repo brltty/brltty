@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.8 (February 2002)"
+"Braille Lite driver, version 0.5.10 (April 2002)"
 
 #define BRL_C
 
@@ -47,8 +47,9 @@
 
 typedef enum {
   PARM_BAUDRATE=0,
+  PARM_KBEMU
 } DriverParameter;
-#define BRLPARMS "baudrate"
+#define BRLPARMS "baudrate", "kbemu"
 
 #include "../brl_driver.h"
 
@@ -73,6 +74,7 @@ static int intoverride = 0;	/* internal override flag -
 				 * highly dubious behaviour ...
 				 */
 static int int_cursor = 0;	/* position of internal cursor: 0 = none */
+static int kbemu = 0; /* keyboard emulation (whether you can type) */
 
 /* The input queue is only manipulated by the qput() and qget()
  * functions.
@@ -145,6 +147,10 @@ brl_initialize (char **parameters, brldim * brl, const char *brldev)
      || !validateBaud(&baudrate, "baud rate",
 		     parameters[PARM_BAUDRATE], good_baudrates))
     baudrate = BAUDRATE;
+  if(*parameters[PARM_KBEMU])
+    validateYesNo(&kbemu, "keyboard emulation initial state",
+		  parameters[PARM_KBEMU]);
+  kbemu = !!kbemu;
 
   /* Open the Braille display device for random access */
   LogPrint(LOG_DEBUG, "Opening serial port %s", brldev);
@@ -377,7 +383,6 @@ brl_writeWindow (brldim * brl)
 static int
 brl_read (DriverCommandContext cmds)
 {
-  static int kbemu = 0;		/* keyboard emulation flag */
   static int state = 0;		/* 0 = normal - transparent
 				 * 1 = positioning internal cursor
 				 * 2 = setting repeat count
@@ -443,7 +448,7 @@ brl_read (DriverCommandContext cmds)
 	    return key.cmd;
 
 	  /* kbemu could be on, then go on */
-	  if (kbemu)
+	  if (kbemu && cmds == CMDS_SCREEN)
 	    break;
 
 	  /* if it's a dangerous command it should have been chorded */
@@ -491,7 +496,7 @@ brl_read (DriverCommandContext cmds)
 	    return CMD_NOOP;
 	  case ' ':		/* practical exception for */
 	    /* If keyboard mode off, space bar == CMD_HOME */
-	    if (!kbemu)
+	    if (!kbemu || cmds != CMDS_SCREEN)
 	      return CMD_HOME;
 	  }
 

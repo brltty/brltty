@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -254,7 +254,7 @@ static void spk_doTrack(void)
     LogPrint(LOG_DEBUG, "spktrk: Received index %u", inx);
     if(inx >= finalIndex) {
       speaking = 0;
-      LogPrint(LOG_DEBUG, "spktrk: Done speaking", lastIndex);
+      LogPrint(LOG_DEBUG, "spktrk: Done speaking %d", lastIndex);
 	/* do not change last_inx: remain on position of last spoken words,
 	   not after them. */
     }else lastIndex = inx;

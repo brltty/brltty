@@ -9,9 +9,9 @@
 
   Dave Mielke <dave@mielke.cc>
 
-  Version 2.99.7, March 2002
+  Version 2.99.8, April 2002
 
-  Copyright © 1995-2001 by The BRLTTY Team - All Rights Reserved.  This
+  Copyright © 1995-2002 by The BRLTTY Team - All Rights Reserved.  This
   is free software, placed under the terms of TThhee GGNNUU GGeenneerraall PPuubblliicc
   LLiicceennssee.  BRLTTY comes with ABSOLUTELY NO WARRANTY.
 
@@ -1608,7 +1608,7 @@
   ·  invoke the ``CUTAPPEND'' command to append to the existing cut
      buffer
 
-     by holding down the key(s) associated with it and pressing the
+     by pressing the key(s) associated with it and then pressing the
      routing key associated with the character.
 
   2. Mark either the bottom-right corner of the rectangular area or the
@@ -1621,7 +1621,7 @@
 
   ·  invoke the ``CUTLINE'' command to cut a linear area
 
-     by holding down the key(s) associated with it and pressing the
+     by pressing the key(s) associated with it and then pressing the
      routing key associated with the character.  Marking the end of the
      cut area appends the selected screen content to the cut buffer.
      Excess white space is removed from the end of each line in the cut

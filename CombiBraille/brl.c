@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -83,13 +83,10 @@ brl_initialize (char **parameters, brldim *brl, const char *brldev)
    */
 
   /* Now open the Braille display device for random access */
-  brl_fd = open (brldev, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0)
-    goto failure;
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
+  if (!openSerialDevice(brldev, &brl_fd, &oldtio)) goto failure;
 
   /* Set bps, flow control and 8n1, enable reading */
-  newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
+  newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
 
   /* Ignore bytes with parity errors and make terminal raw and dumb */
   newtio.c_iflag = IGNPAR;
@@ -97,8 +94,7 @@ brl_initialize (char **parameters, brldim *brl, const char *brldev)
   newtio.c_lflag = 0;		/* don't echo or generate signals */
   newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
   newtio.c_cc[VTIME] = 0;
-  tcflush (brl_fd, TCIFLUSH);	/* clean line */
-  tcsetattr (brl_fd, TCSANOW, &newtio);		/* activate new settings */
+  resetSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
 
   /* CombiBraille initialisation procedure: */
   success = 0;

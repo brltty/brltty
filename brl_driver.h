@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -40,7 +40,7 @@ static void brl_writeStatus (const unsigned char *);	/* set status cells */
 #ifndef BRLSYMBOL
   #define BRLSYMBOL brl_driver
 #endif
-braille_driver BRLSYMBOL = {
+BrailleDriver BRLSYMBOL = {
   BRLNAME,
   BRLDRIVER,
 

@@ -12,9 +12,9 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 2.99.7, March 2002
+  <date>Version 2.99.8, April 2002
   <abstract>
-    Copyright &copy; 1995-2001 by The BRLTTY Team - All Rights Reserved.
+    Copyright &copy; 1995-2002 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
     <bf/The GNU General Public License/.
     BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -1441,8 +1441,8 @@ and URLs. Cutting and pasting text involves three simple steps:
         invoke the <ref id="command-CUTAPPEND" name="CUTAPPEND"> command
         to append to the existing cut buffer
     </itemize>
-    by holding down the key(s) associated with it
-    and pressing the routing key associated with the character.
+    by pressing the key(s) associated with it
+    and then pressing the routing key associated with the character.
   <item>
     Mark either the bottom-right corner of the rectangular area
     or the end of the linear area
@@ -1458,8 +1458,8 @@ and URLs. Cutting and pasting text involves three simple steps:
         invoke the <ref id="command-CUTLINE" name="CUTLINE"> command
         to cut a linear area
     </itemize>
-    by holding down the key(s) associated with it
-    and pressing the routing key associated with the character.
+    by pressing the key(s) associated with it
+    and then pressing the routing key associated with the character.
     Marking the end of the cut area
     appends the selected screen content to the cut buffer.
     Excess white space is removed from the end of each line in the cut buffer

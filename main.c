@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -653,7 +653,7 @@ main (int argc, char *argv[]) {
         fflush(stderr);
         exit(1);
       case 0: { /* child */
-        static char *arguments[] = {"brltty", "-E", "-linfo", "-v", NULL};
+        static char *arguments[] = {"brltty", "-E", "-n", "-e", "-linfo", NULL};
         argv = arguments;
         argc = (sizeof(arguments) / sizeof(arguments[0])) - 1;
         break;
@@ -1393,7 +1393,7 @@ main (int argc, char *argv[]) {
                   playTune(&tune_bad_command);
                 break;
               case CR_CUTRECT:
-                if (arg < brl.x && p->winx+arg < scr.cols) {
+                if (arg < brl.x) {
                   arg = getOffset(arg, 1);
                   if (cut_rectangle(MIN(p->winx+arg, scr.cols-1), p->winy))
                     break;
@@ -1401,7 +1401,7 @@ main (int argc, char *argv[]) {
                 playTune(&tune_bad_command);
                 break;
               case CR_CUTLINE:
-                if (arg < brl.x && p->winx+arg < scr.cols) {
+                if (arg < brl.x) {
                   arg = getOffset(arg, 1);
                   if (cut_line(MIN(p->winx+arg, scr.cols-1), p->winy))
                     break;
@@ -1597,21 +1597,19 @@ main (int argc, char *argv[]) {
                             contractedOffsets, cursorOffset))
             break;
 
-          if (contractedTrack &&
-              (((p->winx + inputLength) != scr.cols) ||
-               (outputLength == windowLength))) {
-            int inputOffset = inputLength;
-            {
-              int index = inputOffset;
-              while (index) {
-                int offset = contractedOffsets[--index];
+          if (contractedTrack) {
+            int inputEnd = inputLength;
+            if (outputLength == windowLength) {
+              int inputIndex = inputEnd;
+              while (inputIndex) {
+                int offset = contractedOffsets[--inputIndex];
                 if (offset != -1) {
                   if (offset != outputLength) break;
-                  inputOffset = index;
+                  inputEnd = inputIndex;
                 }
               }
             }
-            if (scr.posx >= (p->winx + inputOffset)) {
+            if (scr.posx >= (p->winx + inputEnd)) {
               int offset = 0;
               int onspace = 0;
               int length = scr.cols - p->winx;

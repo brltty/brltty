@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -23,6 +23,9 @@
  */
 
 #include <linux/kd.h>
+
+typedef unsigned short int UnicodeNumber;
+typedef UnicodeNumber ApplicationCharacterMap[0X100];
 
 class LinuxScreen:public RealScreen {
   int setScreenPath (void);
@@ -45,7 +48,7 @@ class LinuxScreen:public RealScreen {
   int setTranslationTable (int force);
   unsigned char translationTable[0X100];
 
-  unsigned short applicationCharacterMap[0X100];
+  ApplicationCharacterMap applicationCharacterMap;
   int (LinuxScreen::*setApplicationCharacterMap) (int force);
   int getUserAcm (int force);
   int determineApplicationCharacterMap (int force);

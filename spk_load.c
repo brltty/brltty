@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -39,33 +39,31 @@ static void spk_close (void) { }
 
 static void *libraryHandle = NULL;	/* handle to driver */
 static const char *symbolName = "spk_driver";
-speech_driver *speech = NULL;	/* filled by dynamic libs */
+const SpeechDriver *speech = &noSpeech;
 
 /* load driver from library */
 /* return true (nonzero) on success */
-int loadSpeechDriver (const char **driver) {
+const SpeechDriver *
+loadSpeechDriver (const char **driver) {
   if (*driver != NULL)
     if (strcmp(*driver, noSpeech.identifier) == 0) {
-      speech = &noSpeech;
       *driver = NULL;
-      return 1;
+      return &noSpeech;
     }
 
   #ifdef SPK_BUILTIN
     {
-      extern speech_driver spk_driver;
+      extern SpeechDriver spk_driver;
       if (*driver != NULL)
         if (strcmp(*driver, spk_driver.identifier) == 0)
           *driver = NULL;
       if (*driver == NULL) {
-        speech = &spk_driver;
-        return 1;
+        return &spk_driver;
       }
     }
   #else
     if (*driver == NULL) {
-      speech = &noSpeech;
-      return 1;
+      return &noSpeech;
     }
   #endif
 
@@ -81,9 +79,9 @@ int loadSpeechDriver (const char **driver) {
 
     if ((libraryHandle = dlopen(libraryName, RTLD_NOW|RTLD_GLOBAL))) {
       const char *error;
-      speech = dlsym(libraryHandle, symbolName);
+      const void *address = dlsym(libraryHandle, symbolName);
       if (!(error = dlerror())) {
-        return 1;
+        return address;
       } else {
         LogPrint(LOG_ERR, "%s", error);
         LogPrint(LOG_ERR, "Speech driver symbol not found: %s", symbolName);
@@ -96,12 +94,12 @@ int loadSpeechDriver (const char **driver) {
     }
   }
 
-  speech = &noSpeech;
-  return 0;
+  return NULL;
 }
 
 
-int listSpeechDrivers (void) {
+int
+listSpeechDrivers (void) {
   char buf[64];
   static const char *list_file = LIB_PATH "/brltty-spk.lst";
   int cnt, fd = open(list_file, O_RDONLY);

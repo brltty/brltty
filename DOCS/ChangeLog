@@ -1,6 +1,8 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   New Bootdisk Hacking Mini-HowTo. (sd)
+   Updated screen patch (for 3.9.11) provided. Rudolf Weeber <Rudolf.Weeber@gmx.de>
    Implement in-line contracted braille facility. John Boyer <director@chpi.org>
    Develop contraction table for grade 2 US English braille. John Boyer <director@chpi.org>
    Implement generic driver parameters facility. (dm,sd)
@@ -60,6 +62,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Fix k-chord to toggle off keyboard emulation.
       Fix day-one startup segfault bug.
       Add baudrate parameter.
+      Add kbemu parameter.
       Portability fixes.
    Papenmeier driver enhancements:
       Remove special-case code for routing keys. (ah)

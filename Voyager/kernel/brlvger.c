@@ -1,8 +1,9 @@
 /*
- *      Voyager braille display usb driver.
+ *      Tieman Voyager braille display USB driver.
  *
- *      Copyright 2001 Stephane Dalton <sdalton@videotron.ca>
- *                 and Stéphane Doyon <s.doyon@videotron.ca>
+ *      Copyright 2001-2002 Stephane Dalton <sdalton@videotron.ca>
+ *                      and Stéphane Doyon  <s.doyon@videotron.ca>
+ *            Maintained by Stéphane Doyon  <s.doyon@videotron.ca>.
  */
 /*
  *  This program is free software; you can redistribute it and/or modify
@@ -19,18 +20,23 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+/* History:
+ * 0.8 April 2002: Integration into the kernel tree.
+ * 0.7 October 2001: First public release as a module, distributed with
+ *     the BRLTTY package (beta versions around 2.99y).
+ */
 
-#define DRIVER_VERSION "v0.7"
-#define DATE "October 2001"
+#define DRIVER_VERSION "v0.8"
+#define DATE "April 2002"
 #define DRIVER_AUTHOR \
-    "Stephane Dalton <sdalton@videotron.ca> " \
-    "and Stéphane Doyon <s.doyon@videotron.ca>"
-#define DRIVER_DESC "Voyager braille display USB driver for Linux 2.4"
+	"Stephane Dalton <sdalton@videotron.ca> " \
+	"and Stéphane Doyon <s.doyon@videotron.ca>"
+#define DRIVER_DESC "Tieman Voyager braille display USB driver for Linux 2.4"
 #define DRIVER_SHORTDESC "Voyager"
 
 #define BANNER \
 	KERN_INFO DRIVER_SHORTDESC " " DRIVER_VERSION " (" DATE ")\n" \
-        KERN_INFO "   by " DRIVER_AUTHOR "\n"
+	KERN_INFO "   by " DRIVER_AUTHOR "\n"
 
 static const char longbanner[] = {
 	DRIVER_DESC ", " DRIVER_VERSION " (" DATE "), by " DRIVER_AUTHOR
@@ -45,14 +51,11 @@ static const char longbanner[] = {
 #include <asm/atomic.h>
 #include <linux/poll.h>
 #include <linux/devfs_fs_kernel.h>
-
-#include "voyager.h"
+#include <linux/brlvger.h>
 
 MODULE_AUTHOR( DRIVER_AUTHOR );
 MODULE_DESCRIPTION( DRIVER_DESC );
-#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-#endif
 
 /* Module parameters */
 
@@ -73,66 +76,63 @@ MODULE_PARM_DESC(stall_tries, "Hack: retransmits of stalled USB "
 		 "control messages");
                  /* broken early hardware versions? */
 
-#define VOYAGER_RAW_VOLTAGE 89
+#define BRLVGER_RAW_VOLTAGE 89
 /* from 0->300V to 255->200V, we are told 265V is normal operating voltage,
    but we don't know the scale. Assuming it is linear. */
-static int raw_voltage = VOYAGER_RAW_VOLTAGE;
+static int raw_voltage = BRLVGER_RAW_VOLTAGE;
 MODULE_PARM(raw_voltage, "i");
 MODULE_PARM_DESC(raw_voltage, "Parameter for the call to SET_DISPLAY_VOLTAGE");
 
-static int minor = VOYAGER_DEFAULT_MINOR;
-MODULE_PARM(minor, "i");
-MODULE_PARM_DESC(minor, "Base minor for char dev");
 
 /* protocol and display type defines */
-#define MAX_VOYAGER_CELLS 72
+#define MAX_BRLVGER_CELLS 72
 #define MAX_INTERRUPT_DATA 8
 /* control message request types */
-#define VOYAGER_READ_REQ 0xC2
-#define VOYAGER_WRITE_REQ 0x42
+#define BRLVGER_READ_REQ 0xC2
+#define BRLVGER_WRITE_REQ 0x42
 /* control message request codes */
-#define VOYAGER_SET_DISPLAY_ON 0
-#define VOYAGER_SET_DISPLAY_VOLTAGE 1
-#define VOYAGER_GET_SERIAL 3
-#define VOYAGER_GET_HWVERSION 4
-#define VOYAGER_GET_FWVERSION 5
-#define VOYAGER_GET_LENGTH 6
-#define VOYAGER_SEND_BRAILLE 7
-#define VOYAGER_BEEP 9
+#define BRLVGER_SET_DISPLAY_ON 0
+#define BRLVGER_SET_DISPLAY_VOLTAGE 1
+#define BRLVGER_GET_SERIAL 3
+#define BRLVGER_GET_HWVERSION 4
+#define BRLVGER_GET_FWVERSION 5
+#define BRLVGER_GET_LENGTH 6
+#define BRLVGER_SEND_BRAILLE 7
+#define BRLVGER_BEEP 9
 #if 0 /* not used and not sure they're working */
-#define VOYAGER_GET_DISPLAY_VOLTAGE 2
-#define VOYAGER_GET_CURRENT 8
+#define BRLVGER_GET_DISPLAY_VOLTAGE 2
+#define BRLVGER_GET_CURRENT 8
 #endif
 
 /* Prototypes */
-static void *voyager_probe (struct usb_device *dev, unsigned ifnum,
+static void *brlvger_probe (struct usb_device *dev, unsigned ifnum,
 			    const struct usb_device_id *id);
-static void voyager_disconnect(struct usb_device *dev, void *ptr);
-static int  voyager_open(struct inode *inode, struct file *file);
-static int  voyager_release(struct inode *inode, struct file *file);
-static ssize_t voyager_write(struct file *file, const char *buffer,
+static void brlvger_disconnect(struct usb_device *dev, void *ptr);
+static int brlvger_open(struct inode *inode, struct file *file);
+static int brlvger_release(struct inode *inode, struct file *file);
+static ssize_t brlvger_write(struct file *file, const char *buffer,
 			     size_t count, loff_t *pos);
-static ssize_t voyager_read(struct file *file, char *buffer,
+static ssize_t brlvger_read(struct file *file, char *buffer,
 			    size_t count, loff_t *unused_pos);
-static int voyager_ioctl(struct inode *inode, struct file *file,
+static int brlvger_ioctl(struct inode *inode, struct file *file,
 			 unsigned cmd, unsigned long arg);
-static unsigned voyager_poll(struct file *file, poll_table *wait);
-static loff_t voyager_llseek(struct file * file, loff_t offset, int orig);
+static unsigned brlvger_poll(struct file *file, poll_table *wait);
+static loff_t brlvger_llseek(struct file * file, loff_t offset, int orig);
 static void intr_callback(struct urb *urb);
-struct voyager_priv;
-static int voyager_get_hw_version(struct voyager_priv *priv,
+struct brlvger_priv;
+static int brlvger_get_hw_version(struct brlvger_priv *priv,
 				  unsigned char *verbuf);
-static int voyager_get_fw_version(struct voyager_priv *priv,
+static int brlvger_get_fw_version(struct brlvger_priv *priv,
 				  unsigned char *buf);
-static int voyager_get_serial(struct voyager_priv *priv,
+static int brlvger_get_serial(struct brlvger_priv *priv,
 			      unsigned char *buf);
-static int voyager_get_display_length(struct voyager_priv *priv);
-static int voyager_set_display_on_off(struct voyager_priv *priv, __u16 on);
-static int voyager_beep(struct voyager_priv *priv, __u16 duration);
-static int voyager_set_display_voltage(struct voyager_priv *priv,
+static int brlvger_get_display_length(struct brlvger_priv *priv);
+static int brlvger_set_display_on_off(struct brlvger_priv *priv, __u16 on);
+static int brlvger_beep(struct brlvger_priv *priv, __u16 duration);
+static int brlvger_set_display_voltage(struct brlvger_priv *priv,
 				       __u16 voltage);
 static int mycontrolmsg(const char *funcname,
-                        struct voyager_priv *priv, unsigned pipe_dir,
+                        struct brlvger_priv *priv, unsigned pipe_dir,
                         __u8 request, __u8 requesttype, __u16 value,
                         __u16 index, void *data, __u16 size);
 
@@ -154,22 +154,22 @@ extern devfs_handle_t usb_devfs_handle; /* /dev/usb dir. */
 #define MAX_INTERRUPT_BUFFER 10
 
 /* private state */
-struct voyager_priv {
+struct brlvger_priv {
 	struct usb_device   *dev; /* USB device handle */
 	struct usb_endpoint_descriptor *in_interrupt;
-	struct urb intr_urb;
+	struct urb *intr_urb;
 	devfs_handle_t devfs;
 
 	int subminor; /* which minor dev #? */
 
-	unsigned char hwver[VOYAGER_HWVER_SIZE]; /* hardware version */
-	unsigned char fwver[VOYAGER_FWVER_SIZE]; /* firmware version */
-	unsigned char serialnum[VOYAGER_SERIAL_SIZE];
+	unsigned char hwver[BRLVGER_HWVER_SIZE]; /* hardware version */
+	unsigned char fwver[BRLVGER_FWVER_SIZE]; /* firmware version */
+	unsigned char serialnum[BRLVGER_SERIAL_SIZE];
 
 	int llength; /* logical length */
 	int plength; /* physical length */
 
-	__u8 obuf[MAX_VOYAGER_CELLS];
+	__u8 obuf[MAX_BRLVGER_CELLS];
 	__u8 intr_buff[MAX_INTERRUPT_DATA];
 	__u8 event_queue[MAX_INTERRUPT_BUFFER][MAX_INTERRUPT_DATA];
 	atomic_t intr_idx, read_idx;
@@ -184,7 +184,7 @@ struct voyager_priv {
 /* Globals */
 
 /* Table of connected devices, a different minor for each. */
-static struct voyager_priv *display_table[ MAX_NR_VOYAGER_DEVS ];
+static struct brlvger_priv *display_table[ MAX_NR_BRLVGER_DEVS ];
 
 /* Mutex for the operation of removing a device from display_table */
 static DECLARE_MUTEX(disconnect_sem);
@@ -222,49 +222,45 @@ static DECLARE_WAIT_QUEUE_HEAD(open_wait);
 
 /* Driver registration */
 
-static struct usb_device_id voyager_ids [] = {
+static struct usb_device_id brlvger_ids [] = {
 	{ USB_DEVICE(0x0798, 0x0001) },
 	{ }                     /* Terminating entry */
 };
-MODULE_DEVICE_TABLE (usb, voyager_ids);
+MODULE_DEVICE_TABLE (usb, brlvger_ids);
 
-static struct file_operations voyager_fops =
+static struct file_operations brlvger_fops =
 {
-owner:      THIS_MODULE,
-llseek:     voyager_llseek,
-read:       voyager_read,
-write:		voyager_write,
-ioctl:      voyager_ioctl,
-open:       voyager_open,
-release:    voyager_release,
-poll:		voyager_poll,
+	owner:		THIS_MODULE,
+	llseek:		brlvger_llseek,
+	read:		brlvger_read,
+	write:		brlvger_write,
+	ioctl:		brlvger_ioctl,
+	open:		brlvger_open,
+	release:	brlvger_release,
+	poll:		brlvger_poll,
 };
 
-static struct usb_driver voyager_driver =
+static struct usb_driver brlvger_driver =
 {
-name:       "voyager",
-probe:      voyager_probe,
-disconnect: voyager_disconnect,
-fops:       &voyager_fops,
-id_table:   voyager_ids,
+	name:		"brlvger",
+	probe:		brlvger_probe,
+	disconnect:	brlvger_disconnect,
+	fops:		&brlvger_fops,
+	minor:		BRLVGER_MINOR,
+	id_table:	brlvger_ids,
 };
 
 static int
-__init voyager_init (void)
+__init brlvger_init (void)
 {
 	printk(BANNER);
 
 	if(stall_tries < 1 || write_repeats < 1)
 	  return -EINVAL;
-	if(minor <0 || minor > 255)
-	  return -EINVAL;
-
-	voyager_driver.minor = minor;
-	dbg("Using minor %d", minor);
 
 	memset(display_table, 0, sizeof(display_table));
 
-	if (usb_register(&voyager_driver)) {
+	if (usb_register(&brlvger_driver)) {
 		err("USB registration failed");
 		return -ENOSYS;
 	}
@@ -273,24 +269,24 @@ __init voyager_init (void)
 }
 
 static void
-__exit voyager_cleanup (void)
+__exit brlvger_cleanup (void)
 {
-	usb_deregister (&voyager_driver);
+	usb_deregister (&brlvger_driver);
 	dbg("Driver unregistered");
 }
 
-module_init (voyager_init);
-module_exit (voyager_cleanup);
+module_init (brlvger_init);
+module_exit (brlvger_cleanup);
 
 /* ----------------------------------------------------------------------- */
 
 /* Probe and disconnect functions */
 
 static void *
-voyager_probe (struct usb_device *dev, unsigned ifnum,
+brlvger_probe (struct usb_device *dev, unsigned ifnum,
 	       const struct usb_device_id *id)
 {
-	struct voyager_priv *priv = NULL;
+	struct brlvger_priv *priv = NULL;
 	int i;
 	struct usb_endpoint_descriptor *endpoint;
 	struct usb_interface_descriptor *actifsettings;
@@ -317,13 +313,13 @@ voyager_probe (struct usb_device *dev, unsigned ifnum,
 
 	down(&reserve_sem);
 
-	for( i = 0; i < MAX_NR_VOYAGER_DEVS; i++ )
+	for( i = 0; i < MAX_NR_BRLVGER_DEVS; i++ )
 		if( display_table[i] == NULL )
 			break;
 
-	if( i == MAX_NR_VOYAGER_DEVS ) {
+	if( i == MAX_NR_BRLVGER_DEVS ) {
 		err( "This driver cannot handle more than %d "
-				"braille displays", MAX_NR_VOYAGER_DEVS);
+				"braille displays", MAX_NR_BRLVGER_DEVS);
 		goto error;
 	}
 
@@ -348,24 +344,24 @@ voyager_probe (struct usb_device *dev, unsigned ifnum,
 
 	priv->dev = dev;
 
-	if(voyager_get_hw_version(priv, priv->hwver) <0) {
+	if(brlvger_get_hw_version(priv, priv->hwver) <0) {
 		err("Unable to get hardware version");
 		goto error;
 	}
 	dbg("Hw ver %d.%d", priv->hwver[0], priv->hwver[1]);
-	if(voyager_get_fw_version(priv, priv->fwver) <0) {
+	if(brlvger_get_fw_version(priv, priv->fwver) <0) {
 		err("Unable to get firmware version");
 		goto error;
 	}
 	dbg("Fw ver: %s", priv->fwver);
 
-	if(voyager_get_serial(priv, priv->serialnum) <0) {
+	if(brlvger_get_serial(priv, priv->serialnum) <0) {
 		err("Unable to get serial number");
 		goto error;
 	}
 	dbg("Serial number: %s", priv->serialnum);
 
-	if( (priv->llength = voyager_get_display_length(priv)) <0 ){
+	if( (priv->llength = brlvger_get_display_length(priv)) <0 ){
 		err("Unable to get display length");
 		goto error;
 	}
@@ -382,12 +378,12 @@ voyager_probe (struct usb_device *dev, unsigned ifnum,
 	};
 	dbg("Display length: %d", priv->plength);
 
-	sprintf(devfs_name, "voyager%d", priv->subminor);
+	sprintf(devfs_name, "brlvger%d", priv->subminor);
 	priv->devfs = devfs_register(usb_devfs_handle, devfs_name,
 				     DEVFS_FL_DEFAULT, USB_MAJOR,
-				     minor+priv->subminor,
+				     BRLVGER_MINOR+priv->subminor,
 				     S_IFCHR |S_IRUSR|S_IWUSR |S_IRGRP|S_IWGRP,
-				     &voyager_fops, NULL);
+				     &brlvger_fops, NULL);
 	if (!priv->devfs) {
 #ifdef CONFIG_DEVFS_FS
 		err("devfs node registration failed");
@@ -397,7 +393,7 @@ voyager_probe (struct usb_device *dev, unsigned ifnum,
 	display_table[i] = priv;
 
 	info( "Braille display %d is device major %d minor %d",
-				i, USB_MAJOR, i + minor);
+				i, USB_MAJOR, BRLVGER_MINOR + i);
 
 	/* Tell anyone waiting on a blocking open */
 	wake_up_interruptible(&open_wait);
@@ -416,9 +412,9 @@ voyager_probe (struct usb_device *dev, unsigned ifnum,
 }
 
 static void
-voyager_disconnect(struct usb_device *dev, void *ptr)
+brlvger_disconnect(struct usb_device *dev, void *ptr)
 {
-	struct voyager_priv *priv = (struct voyager_priv *)ptr;
+	struct brlvger_priv *priv = (struct brlvger_priv *)ptr;
 	int r;
 
 	if(priv){
@@ -434,8 +430,9 @@ voyager_disconnect(struct usb_device *dev, void *ptr)
 		down(&priv->dev_sem);
 		if(priv->opened) {
 			/* Disable interrupts */
-			if((r = usb_unlink_urb(&priv->intr_urb)) <0)
+			if((r = usb_unlink_urb(priv->intr_urb)) <0)
 				err("usb_unlink_urb returns %d", r);
+			usb_free_urb(priv->intr_urb);
 			/* mark device as dead and prevent control
 			   messages to it */
 			priv->dev = NULL;
@@ -455,16 +452,17 @@ voyager_disconnect(struct usb_device *dev, void *ptr)
 /* fops implementation */
 
 static int
-voyager_open(struct inode *inode, struct file *file)
+brlvger_open(struct inode *inode, struct file *file)
 {
 	int devnum = MINOR (inode->i_rdev);
-	struct voyager_priv *priv;
+	struct brlvger_priv *priv;
 	int n, ret;
 
-	if (devnum < minor || devnum >= (minor + MAX_NR_VOYAGER_DEVS))
+	if (devnum < BRLVGER_MINOR
+	    || devnum >= (BRLVGER_MINOR + MAX_NR_BRLVGER_DEVS))
 		return -ENXIO;
 
-	n = devnum - minor;
+	n = devnum - BRLVGER_MINOR;
 
 	MOD_INC_USE_COUNT;
 
@@ -508,24 +506,29 @@ voyager_open(struct inode *inode, struct file *file)
 	dbg("Opening display %d", priv->subminor);
 
 	/* Setup interrupt handler for receiving key input */
-	FILL_INT_URB( &priv->intr_urb, priv->dev,
+	priv->intr_urb = usb_alloc_urb(0);
+	if(!priv->intr_urb) {
+		err("Unable to allocate URB");
+		goto error;
+	}
+	FILL_INT_URB( priv->intr_urb, priv->dev,
 			usb_rcvintpipe(priv->dev,
 				       priv->in_interrupt->bEndpointAddress),
 			priv->intr_buff, sizeof(priv->intr_buff),
 			intr_callback, priv, priv->in_interrupt->bInterval);
-	if((ret = usb_submit_urb(&priv->intr_urb)) <0){
+	if((ret = usb_submit_urb(priv->intr_urb)) <0){
 		err("Error %d while submitting URB", ret);
 		goto error;
 	}
 
 	/* Set voltage */
-	if(voyager_set_display_voltage(priv, raw_voltage) <0) {
+	if(brlvger_set_display_voltage(priv, raw_voltage) <0) {
 		err("Unable to set voltage");
 		goto error;
 	}
 
 	/* Turn display on */
-	if((ret = voyager_set_display_on_off(priv, 1)) <0) {
+	if((ret = brlvger_set_display_on_off(priv, 1)) <0) {
 		err("Error %d while turning display on", ret);
 		goto error;
 	}
@@ -546,13 +549,13 @@ voyager_open(struct inode *inode, struct file *file)
 }
 
 static int
-voyager_release(struct inode *inode, struct file *file)
+brlvger_release(struct inode *inode, struct file *file)
 {
-	struct voyager_priv *priv = file->private_data;
+	struct brlvger_priv *priv = file->private_data;
 	int r;
 
 	/* Turn display off. Safe even if disconnected. */
-	voyager_set_display_on_off(priv, 0);
+	brlvger_set_display_on_off(priv, 0);
 
 	/* mutex with disconnect and with open */
 	down(&priv->open_sem);
@@ -564,8 +567,9 @@ voyager_release(struct inode *inode, struct file *file)
 	}else{
 		dbg("Closing display %d", priv->subminor);
 		/* Disable interrupts */
-		if((r = usb_unlink_urb(&priv->intr_urb)) <0)
+		if((r = usb_unlink_urb(priv->intr_urb)) <0)
 			err("usb_unlink_urb returns %d", r);
+		usb_free_urb(priv->intr_urb);
 		priv->opened = 0;
 		up(&priv->open_sem);
 	}
@@ -576,11 +580,11 @@ voyager_release(struct inode *inode, struct file *file)
 }
 
 static ssize_t
-voyager_write(struct file *file, const char *buffer,
+brlvger_write(struct file *file, const char *buffer,
 	      size_t count, loff_t *pos)
 {
-	struct voyager_priv *priv = file->private_data;
-	char buf[MAX_VOYAGER_CELLS];
+	struct brlvger_priv *priv = file->private_data;
+	char buf[MAX_BRLVGER_CELLS];
 	int ret;
 	int rs, off;
 	__u16 written;
@@ -660,7 +664,7 @@ voyager_write(struct file *file, const char *buffer,
 		   right themselves if the command is repeated. */
 		while(repeat--) {
 			ret = sndcontrolmsg(priv,
-				VOYAGER_SEND_BRAILLE, VOYAGER_WRITE_REQ, 0,
+				BRLVGER_SEND_BRAILLE, BRLVGER_WRITE_REQ, 0,
 				off, priv->obuf, written);
 			if(ret <0)
 				return ret;
@@ -671,7 +675,7 @@ voyager_write(struct file *file, const char *buffer,
 }
 
 static int
-read_index(struct voyager_priv *priv)
+read_index(struct brlvger_priv *priv)
 {
 	int intr_idx, read_idx;
 
@@ -684,10 +688,10 @@ read_index(struct voyager_priv *priv)
 }
 
 static ssize_t
-voyager_read(struct file *file, char *buffer,
+brlvger_read(struct file *file, char *buffer,
 	     size_t count, loff_t *unused_pos)
 {
-	struct voyager_priv *priv = file->private_data;
+	struct brlvger_priv *priv = file->private_data;
 	int read_idx;
 
 	if(count != MAX_INTERRUPT_DATA)
@@ -725,17 +729,17 @@ voyager_read(struct file *file, char *buffer,
 }
 
 static int
-voyager_ioctl(struct inode *inode, struct file *file,
+brlvger_ioctl(struct inode *inode, struct file *file,
 	      unsigned cmd, unsigned long arg)
 {
-	struct voyager_priv *priv = file->private_data;
+	struct brlvger_priv *priv = file->private_data;
 
 	if(!priv->dev)
 		return -ENOLINK;
 
 	switch(cmd) {
-	case VOYAGER_GET_INFO: {
-		struct voyager_info vi;
+	case BRLVGER_GET_INFO: {
+		struct brlvger_info vi;
 
 		strncpy(vi.driver_version, DRIVER_VERSION,
 			sizeof(vi.driver_version));
@@ -746,36 +750,36 @@ voyager_ioctl(struct inode *inode, struct file *file,
 
 		vi.display_length = priv->plength;
 		
-		memcpy(&vi.hwver, priv->hwver, VOYAGER_HWVER_SIZE);
-		memcpy(&vi.fwver, priv->fwver, VOYAGER_FWVER_SIZE);
-		memcpy(&vi.serialnum, priv->serialnum, VOYAGER_SERIAL_SIZE);
+		memcpy(&vi.hwver, priv->hwver, BRLVGER_HWVER_SIZE);
+		memcpy(&vi.fwver, priv->fwver, BRLVGER_FWVER_SIZE);
+		memcpy(&vi.serialnum, priv->serialnum, BRLVGER_SERIAL_SIZE);
 
 		if(copy_to_user((void *)arg, &vi, sizeof(vi)))
 			return -EFAULT;
 		return 0;
 	}
-	case VOYAGER_DISPLAY_ON:
-		return voyager_set_display_on_off(priv, 1);
-	case VOYAGER_DISPLAY_OFF:
-		return voyager_set_display_on_off(priv, 0);
-	case VOYAGER_BUZZ: {
+	case BRLVGER_DISPLAY_ON:
+		return brlvger_set_display_on_off(priv, 1);
+	case BRLVGER_DISPLAY_OFF:
+		return brlvger_set_display_on_off(priv, 0);
+	case BRLVGER_BUZZ: {
 		__u16 duration;
 		if(get_user(duration, (__u16 *)arg))
 			return -EFAULT;
-		return voyager_beep(priv, duration);
+		return brlvger_beep(priv, duration);
 	}
 
 #if 0 /* Underlying commands don't seem to work for some reason; not clear if
 	 we'd want to export these anyway. */
-	case VOYAGER_SET_VOLTAGE: {
+	case BRLVGER_SET_VOLTAGE: {
 		__u16 voltage;
 		if(get_user(voltage, (__u16 *)arg))
 			return -EFAULT;
-		return voyager_set_display_voltage(priv, voltage);
+		return brlvger_set_display_voltage(priv, voltage);
 	}
-	case VOYAGER_GET_VOLTAGE: {
+	case BRLVGER_GET_VOLTAGE: {
 		__u8 voltage;
-		int r = voyager_get_display_voltage(priv);
+		int r = brlvger_get_display_voltage(priv);
 		if(r <0)
 			return r;
 		voltage = r;
@@ -790,9 +794,9 @@ voyager_ioctl(struct inode *inode, struct file *file,
 }
 
 static loff_t
-voyager_llseek(struct file *file, loff_t offset, int orig)
+brlvger_llseek(struct file *file, loff_t offset, int orig)
 {
-	struct voyager_priv *priv = file->private_data;
+	struct brlvger_priv *priv = file->private_data;
 
 	if(!priv->dev)
 		return -ENOLINK;
@@ -817,9 +821,9 @@ voyager_llseek(struct file *file, loff_t offset, int orig)
 }
 
 static unsigned
-voyager_poll(struct file *file, poll_table *wait) 
+brlvger_poll(struct file *file, poll_table *wait) 
 {
-	struct voyager_priv *priv = file->private_data;
+	struct brlvger_priv *priv = file->private_data;
 
 	if(!priv->dev)
 		return POLLERR | POLLHUP;
@@ -837,14 +841,14 @@ voyager_poll(struct file *file, poll_table *wait)
 static void
 intr_callback(struct urb *urb)
 {
-	struct voyager_priv *priv = urb->context;
+	struct brlvger_priv *priv = urb->context;
 	int intr_idx, read_idx;
 
 	if( urb->status ) {
-		if(urb->status == USB_ST_NORESPONSE)
-			dbg2("Status USB_ST_NORESPONSE, "
+		if(urb->status == -ETIMEDOUT)
+			dbg2("Status -ETIMEDOUT, "
 			     "probably disconnected");
-		else if(urb->status != USB_ST_URB_KILLED)
+		else if(urb->status != -ENOENT)
 			err("Status: %d", urb->status);
 		return;
 	}
@@ -874,7 +878,7 @@ intr_callback(struct urb *urb)
 
 static int
 mycontrolmsg(const char *funcname,
-	     struct voyager_priv *priv, unsigned pipe_dir,
+	     struct brlvger_priv *priv, unsigned pipe_dir,
 	     __u8 request, __u8 requesttype, __u16 value,
 	     __u16 index, void *data, __u16 size)
 {
@@ -896,7 +900,7 @@ mycontrolmsg(const char *funcname,
 		    request, requesttype, value,
 		    index, data, size,
 		    HZ);
-		if(ret != USB_ST_STALL)
+		if(ret != -EPIPE)
 			break;
 		dbg2("Stalled, remaining %d tries", tries);
 	}
@@ -910,21 +914,21 @@ mycontrolmsg(const char *funcname,
 }
 
 static int
-voyager_get_hw_version(struct voyager_priv *priv, unsigned char *verbuf)
+brlvger_get_hw_version(struct brlvger_priv *priv, unsigned char *verbuf)
 {
 	return rcvcontrolmsg(priv,
-	    VOYAGER_GET_HWVERSION, VOYAGER_READ_REQ, 0,
-	    0, verbuf, VOYAGER_HWVER_SIZE);
+	    BRLVGER_GET_HWVERSION, BRLVGER_READ_REQ, 0,
+	    0, verbuf, BRLVGER_HWVER_SIZE);
 	/* verbuf should be 2 bytes */
 }
 
 static int
-voyager_get_fw_version(struct voyager_priv *priv, unsigned char *buf)
+brlvger_get_fw_version(struct brlvger_priv *priv, unsigned char *buf)
 {
-	unsigned char rawbuf[(VOYAGER_FWVER_SIZE-1)*2+2];
+	unsigned char rawbuf[(BRLVGER_FWVER_SIZE-1)*2+2];
 	int i, len;
 	int r = rcvcontrolmsg(priv,
-			      VOYAGER_GET_FWVERSION, VOYAGER_READ_REQ, 0,
+			      BRLVGER_GET_FWVERSION, BRLVGER_READ_REQ, 0,
 			      0, rawbuf, sizeof(rawbuf));
 	if(r<0)
 		return r;
@@ -936,8 +940,8 @@ voyager_get_fw_version(struct voyager_priv *priv, unsigned char *buf)
 	len = rawbuf[0]-2;
 	if(len<0)
 		len = 0;
-	else if(len+1 > VOYAGER_FWVER_SIZE)
-		len = VOYAGER_FWVER_SIZE-1;
+	else if(len+1 > BRLVGER_FWVER_SIZE)
+		len = BRLVGER_FWVER_SIZE-1;
 	for(i=0; i<len; i++)
 		buf[i] = rawbuf[2+2*i];
 	buf[i] = 0;
@@ -945,17 +949,17 @@ voyager_get_fw_version(struct voyager_priv *priv, unsigned char *buf)
 }
 
 static int
-voyager_get_serial(struct voyager_priv *priv, unsigned char *buf)
+brlvger_get_serial(struct brlvger_priv *priv, unsigned char *buf)
 {
-	unsigned char rawserial[VOYAGER_SERIAL_BIN_SIZE];
+	unsigned char rawserial[BRLVGER_SERIAL_BIN_SIZE];
 	int i;
 	int r = rcvcontrolmsg(priv,
-			      VOYAGER_GET_SERIAL, VOYAGER_READ_REQ, 0,
+			      BRLVGER_GET_SERIAL, BRLVGER_READ_REQ, 0,
 			      0, rawserial, sizeof(rawserial));
 	if(r<0)
 		return r;
 
-	for(i=0; i<VOYAGER_SERIAL_BIN_SIZE; i++) {
+	for(i=0; i<BRLVGER_SERIAL_BIN_SIZE; i++) {
 #define NUM_TO_HEX(n) (((n)>9) ? (n)+'A' : (n)+'0')
 		buf[2*i] = NUM_TO_HEX(rawserial[i] >>4);
 		buf[2*i+1] = NUM_TO_HEX(rawserial[i] &0xf);
@@ -965,11 +969,11 @@ voyager_get_serial(struct voyager_priv *priv, unsigned char *buf)
 }
 
 static int
-voyager_get_display_length(struct voyager_priv *priv)
+brlvger_get_display_length(struct brlvger_priv *priv)
 {
 	unsigned char data[2];
 	int ret = rcvcontrolmsg(priv,
-	    VOYAGER_GET_LENGTH, VOYAGER_READ_REQ, 0,
+	    BRLVGER_GET_LENGTH, BRLVGER_READ_REQ, 0,
 	    0, data, 2);
 	if(ret<0)
 		return ret;
@@ -977,39 +981,39 @@ voyager_get_display_length(struct voyager_priv *priv)
 }
 
 static int
-voyager_beep(struct voyager_priv *priv, __u16 duration)
+brlvger_beep(struct brlvger_priv *priv, __u16 duration)
 {
 	return sndcontrolmsg(priv,
-	    VOYAGER_BEEP, VOYAGER_WRITE_REQ, duration,
+	    BRLVGER_BEEP, BRLVGER_WRITE_REQ, duration,
 	    0, NULL, 0);
 }
 
 static int
-voyager_set_display_on_off(struct voyager_priv *priv, __u16 on)
+brlvger_set_display_on_off(struct brlvger_priv *priv, __u16 on)
 {
 	dbg2("Turning display %s", ((on) ? "on" : "off"));
 	return sndcontrolmsg(priv,
-	    VOYAGER_SET_DISPLAY_ON,	VOYAGER_WRITE_REQ, on,
+	    BRLVGER_SET_DISPLAY_ON,	BRLVGER_WRITE_REQ, on,
 	    0, NULL, 0);
 }
 
 static int
-voyager_set_display_voltage(struct voyager_priv *priv, __u16 voltage)
+brlvger_set_display_voltage(struct brlvger_priv *priv, __u16 voltage)
 {
 	dbg("SET_DISPLAY_VOLTAGE to %u", voltage);
         return sndcontrolmsg(priv,
-	     VOYAGER_SET_DISPLAY_VOLTAGE, VOYAGER_WRITE_REQ, voltage,
+	     BRLVGER_SET_DISPLAY_VOLTAGE, BRLVGER_WRITE_REQ, voltage,
 	     0, NULL, 0);
 }
 
 #if 0 /* Had problems testing these commands. Not particularly useful anyway.*/
 
 static int
-voyager_get_display_voltage(struct voyager_priv *priv)
+brlvger_get_display_voltage(struct brlvger_priv *priv)
 {
 	__u8 voltage = 0;
 	int ret = rcvcontrolmsg(priv,
-	    VOYAGER_GET_DISPLAY_VOLTAGE, VOYAGER_READ_REQ, 0,
+	    BRLVGER_GET_DISPLAY_VOLTAGE, BRLVGER_READ_REQ, 0,
 	    0, &voltage, 1);
 	if(ret<0)
 		return ret;
@@ -1017,11 +1021,11 @@ voyager_get_display_voltage(struct voyager_priv *priv)
 }
 
 static int
-voyager_get_current(struct voyager_priv *priv)
+brlvger_get_current(struct brlvger_priv *priv)
 {
 	unsigned char data;
 	int ret = rcvcontrolmsg(priv,
-	    VOYAGER_GET_CURRENT,	VOYAGER_READ_REQ,	0,
+	    BRLVGER_GET_CURRENT,	BRLVGER_READ_REQ,	0,
 	    0, &data, 1);
 	if(ret<0)
 		return ret;

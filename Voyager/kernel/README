@@ -4,18 +4,29 @@ Authors:
 Stéphane Dalton <sdalton@videotron.ca>
 Stéphane Doyon  <s.doyon@videotron.ca>
 
-This is the first release of this driver, so it has not been widely
-tested yet.
+Version 0.8, April 2002
+
+The brlvger driver supports a Braille display (aka Braille terminal)
+model Voyager from Tieman.
+
+The driver has been in heavy use for about six months now (as of April
+2002) by a very few users (about 3-4), who say it has worked very well
+for them.
 
 We have tested it with a Voyager 44, but it should also support
 the Voyager 70.
 
-This module requires kernel version 2.4.x. We tested 2.4.7 and 2.4.10.
+Starting with version 0.8, this driver is being integrated into the
+mainstream kernel tree. We will continue to distribute this driver as a
+module at least until distributions catch up with the kernel versions in
+which this driver is integrated. 
+
+This module requires kernel version 2.4.x. We tested 2.4.7, 2.4.10,
+2.4.18-pre5, and several others... If you are using kernel 2.5 then the
+driver is already in the kernel.
 
 The driver implements a character device. It uses the major number for
-USB devices (180) and a currently unassigned minor (as of 2.4.13): we
-chose 144. As this minor number is not officially reserved, there is
-always a risk that a new USB driver in a later kernel might use it.
+USB devices (180) and the minors 128-131.
 
 Many thanks to the Tieman people: Corand van Strien, Ivar Illing, Daphne
 Vogelaar and Ingrid Vogel. They provided us with a Braille display (as
@@ -38,7 +49,9 @@ either the OHCI or one of the UHCI modules, depending on the type of
 controller you have. Recent distributions should have all that already
 setup.
 
-You need the kernel sources to compile this module.
+You need the kernel sources to compile this module. (Note that you can't
+just unpack fresh kernel sources. The kernel must also be configured and
+make dep must have been run for the proper header files to be generated.)
 
 The Makefile assumes the kernel sources are in /usr/src/linux. It is also
 assumed that these sources are for the same version as the kernel you
@@ -49,10 +62,6 @@ Do "make" to compile.
 Do "make install" to copy the module to
 /lib/modules/<kernel_version>/misc and to run depmod -a.
 
-Insert the module with "modprobe voyager".
+Insert the module with "modprobe brlvger".
 
 Check /var/log/messages for a confirmation or error message.
-
-NB: This module is currently being distributed within BRLTTY for
-convenience but might later on be distributed separately and/or be
-integrated into the kernel.
