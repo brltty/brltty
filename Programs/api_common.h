@@ -47,8 +47,8 @@ int brlapi_libcerrno;
 const char *brlapi_libcerrfun;
 
 /* brlapi_splitHost */
-/* splits host into hostname & port */
-void brlapi_splitHost(const char *host, char **hostname, char **port);
+/* splits host into hostname & port, returns address family to use */
+int brlapi_splitHost(const char *host, char **hostname, char **port);
 
 #ifdef __cplusplus
 }

@@ -128,7 +128,17 @@ typedef struct Ttty {
 static int connectionsAllowed = 0;
 
 /* Pointer on the connection accepter thread */
+#define MAXSOCKETS 4 /* who knows what users want to do... */
 static pthread_t serverThread; /* server */
+static pthread_t socketThreads[MAXSOCKETS]; /* socket binding threads */
+static char **socketHosts; /* socket local hosts */
+static struct closeinfo {
+  int addrfamily;
+  int fd;
+  char *port;
+} socketClose[MAXSOCKETS]; /* information for cleaning sockets */
+static int sockets[MAXSOCKETS]; /* server sockets fds */
+static int numSockets; /* number of sockets */
 
 static pthread_mutex_t connections_mutex = PTHREAD_MUTEX_INITIALIZER;
 static Ttty notty;
@@ -354,7 +364,7 @@ static int processRequest(Tconnection *c)
   brl_type_t type;
   size = brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE);
   if (size<0) {
-    if (size==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(errno),c->fd);
+    if (size==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(brlapi_libcerrno),c->fd);
     else {
       LogPrint(LOG_DEBUG,"Closing connection on fd %d",c->fd);
     }
@@ -363,7 +373,7 @@ static int processRequest(Tconnection *c)
       rawConnection = NULL;
       LogPrint(LOG_WARNING,"Client on fd %d did not give up raw mode properly",c->fd);
       LogPrint(LOG_WARNING,"Trying to reset braille terminal");
-      if (!TrueBraille->reset(&c->brl)) {
+      if (TrueBraille->reset && !TrueBraille->reset(&c->brl)) {
         LogPrint(LOG_WARNING,"Reset failed. Restarting braille driver");
         restartBrailleDriver();
       }
@@ -683,36 +693,43 @@ static int processRequest(Tconnection *c)
 /** SOCKETS AND CONNECTIONS MANAGING                                       **/
 /****************************************************************************/
 
+/* Function: loopBind */
+/* tries binding while temporary errors occur */
+static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
+{
+  while (bind(fd, addr, len)<0) {
+    if (errno!=EADDRNOTAVAIL && errno!=EADDRINUSE && errno!=EROFS) {
+      return -1;
+    }
+    sleep(1);
+  }
+  return 0;
+}
+
 /* Function : initializeSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
-static int initializeSocket(const char *host)
+static int initializeTcpSocket(char *hostname, char *port)
 {
   int fd=-1, err, yes=1;
   struct addrinfo *res,*cur;
   struct addrinfo hints;
-  char *hostname,*port;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_flags = AI_PASSIVE;
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  brlapi_splitHost(host,&hostname,&port);
-
   err = getaddrinfo(hostname, port, &hints, &res);
-  if (hostname)
-    free(hostname);
-  free(port);
   if (err) {
-    LogPrint(LOG_WARNING,"getaddrinfo(%s:%s,%s) : %s",host,hostname,port,gai_strerror(err));
+    LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): %s",hostname,port,gai_strerror(err));
     return -1;
   }
   for (cur = res; cur; cur = cur->ai_next) {
     fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
     if (fd<0) {
       if (errno != EAFNOSUPPORT)
-        LogPrint(LOG_WARNING,"socket : %s",strerror(errno));
+        LogPrint(LOG_WARNING,"socket: %s",strerror(errno));
       continue;
     }
     /* Specifies that address can be reused */
@@ -721,28 +738,139 @@ static int initializeSocket(const char *host)
       close(fd);
        continue;
     }
-    if (bind(fd, cur->ai_addr, cur->ai_addrlen)<0) {
-      if (errno!=EADDRNOTAVAIL && errno!=EADDRINUSE) {
-        LogPrint(LOG_WARNING,"bind : %s",strerror(errno));
-        close(fd);
-        continue;
-      }
-      do {
-        sleep(1);
-        err = bind(fd, cur->ai_addr, cur->ai_addrlen);
-      } while ((err == -1) && (errno==EADDRNOTAVAIL));
+    if (loopBind(fd, cur->ai_addr, cur->ai_addrlen)<0) {
+      LogPrint(LOG_WARNING,"bind: %s",strerror(errno));
+      continue;
     }
     if (listen(fd,1)<0) {
-      LogPrint(LOG_WARNING,"listen : %s",strerror(errno));
+      LogPrint(LOG_WARNING,"listen: %s",strerror(errno));
       close(fd);
       continue;
     }
     break;
   }
   freeaddrinfo(res);
-  if (cur) return fd;
-  LogPrint(LOG_WARNING,"unable to find a local TCP port %s !",host);
+  if (cur) {
+    if (hostname)
+      free(hostname);
+    free(port);
+    return fd;
+  }
+  LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",hostname,port);
+  if (hostname)
+    free(hostname);
+  free(port);
   return -1;
+}
+
+/* Function : initializeSocket */
+/* Creates the listening socket for in-connections */
+/* Returns the descriptor, or -1 if an error occurred */
+static int initializeUnixSocket(const char *port)
+{
+  struct sockaddr_un sa;
+  int fd = socket(PF_LOCAL, SOCK_STREAM, 0);
+  int lpath=strlen(BRLAPI_SOCKETPATH),lport;
+  mode_t oldmode;
+  if (fd==-1) {
+    LogError("socket");
+    goto out;
+  }
+  sa.sun_family = AF_UNIX;
+  lport=strlen(port);
+  if (lpath+lport+1>sizeof(sa.sun_path)) {
+    LogError("Unix path too long");
+    goto outfd;
+  }
+
+  oldmode = umask(0);
+  while (mkdir(BRLAPI_SOCKETPATH,01777)<0) {
+    if (errno == EEXIST)
+      break;
+    if (errno != EROFS && errno != ENOENT) {
+      LogError("making socket directory");
+      goto outmode;
+    }
+    sleep(1);
+  }
+  memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
+  memcpy(sa.sun_path+lpath,port,lport+1);
+  /* hacky, TODO: find a better way to keep secure */
+  unlink(sa.sun_path);
+  if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
+    LogPrint(LOG_WARNING,"bind: %s",strerror(errno));
+    goto outmode;
+  }
+  umask(oldmode);
+  if (listen(fd,1)<0) {
+    LogError("listen");
+    goto outfd;
+  }
+  return fd;
+  
+outmode:
+  umask(oldmode);
+outfd:
+  close(fd);
+out:
+  return -1;
+}
+
+static void *establishSocket(void *arg)
+{
+  int num = (int) arg, res;
+  char *host = socketHosts[num];
+  sigset_t blockedSignals;
+  char *hostname;
+  struct closeinfo *cinfo = &socketClose[num];
+
+  sigemptyset(&blockedSignals);
+  sigaddset(&blockedSignals,SIGTERM);
+  sigaddset(&blockedSignals,SIGINT);
+  sigaddset(&blockedSignals,SIGPIPE);
+  sigaddset(&blockedSignals,SIGCHLD);
+  sigaddset(&blockedSignals,SIGUSR1);
+  if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
+    LogPrint(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
+    return NULL;
+  }
+
+  cinfo->addrfamily=brlapi_splitHost(host,&hostname,&cinfo->port);
+  if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd = initializeUnixSocket(cinfo->port))==-1) ||
+      (cinfo->addrfamily!=PF_LOCAL && (cinfo->fd = initializeTcpSocket(hostname,cinfo->port))==-1)) {
+    LogPrint(LOG_WARNING,"Error while initializing socket: %s",strerror(errno));
+    return NULL;
+  }
+  LogPrint(LOG_DEBUG,"socket %d established (fd %d)",num,cinfo->fd);
+  sockets[num]=cinfo->fd;
+  return NULL;
+}
+
+static void closeSockets(void *arg)
+{
+  int i;
+  struct closeinfo *info;
+  
+  for (i=0;i<numSockets;i++) {
+    pthread_cancel(socketThreads[i]);
+    info=&socketClose[i];
+    if (info->fd>=0) {
+      if (close(info->fd)<0)
+        LogError("closing socket");
+      info->fd=-1;
+    }
+    if (info->addrfamily==PF_LOCAL) {
+      char *path;
+      int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
+      if ((path=malloc(lpath+lport+1))) {
+        memcpy(path,BRLAPI_SOCKETPATH,lpath);
+        memcpy(path+lpath,info->port,lport+1);
+        if (unlink(path)<0)
+          LogError("unlinking socket");
+      }
+    }
+    free(info->port);
+  }
 }
 
 /* Function: addTtyFds */
@@ -788,15 +916,19 @@ static void handleTtyFds(fd_set *fds, long currentTime, Ttty *tty) {
 /* Returns NULL in any case */
 static void *server(void *arg)
 {
-  int res, entryPoint, fdmax;
-  fd_set sockets;
+  char *hosts = (char *)arg;
+  pthread_attr_t attr;
+  int i;
+  int res, fdmax;
+  fd_set sockset;
   struct sockaddr addr;
   socklen_t addrlen = sizeof(addr);
-  char *host = (char *) arg;
   Tconnection *c;
   sigset_t blockedSignals;
   long currentTime;
   struct timeval tv;
+  int n;
+
   sigemptyset(&blockedSignals);
   sigaddset(&blockedSignals,SIGTERM);
   sigaddset(&blockedSignals,SIGINT);
@@ -807,35 +939,56 @@ static void *server(void *arg)
     LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
     pthread_exit(NULL);
   }
-  if ((entryPoint = initializeSocket(host))==-1) {
-    LogPrint(LOG_WARNING,"Error while initializing socket : %s",strerror(errno));
-    return NULL;
+
+  socketHosts = splitString(hosts,';',&numSockets);
+  if (numSockets>MAXSOCKETS) {
+    LogPrint(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
+    pthread_exit(NULL);
   }
+
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
+
+  pthread_cleanup_push(closeSockets,NULL);
+  for (i=0;i<numSockets;i++) {
+    sockets[i]=-1;
+    if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *) i)) != 0) {
+      LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
+      for (;i>=0;i--)
+	pthread_cancel(socketThreads[i]);
+      return NULL;
+    }
+  }
+
   unauthConnections = 0; unauthConnLog = 0;
   while (1) {
     /* Compute sockets set and fdmax */
-    FD_ZERO(&sockets);
-    FD_SET(entryPoint, &sockets);
-    fdmax = entryPoint;
+    FD_ZERO(&sockset);
+    for (i=0;i<numSockets;i++)
+      if (sockets[i]>=0) {
+	FD_SET(sockets[i], &sockset);
+	if (sockets[i]>fdmax)
+	  fdmax = sockets[i];
+      }
     pthread_mutex_lock(&connections_mutex);
-    addTtyFds(&sockets, &fdmax, &notty);
-    addTtyFds(&sockets, &fdmax, &ttys);
+    addTtyFds(&sockset, &fdmax, &notty);
+    addTtyFds(&sockset, &fdmax, &ttys);
     pthread_mutex_unlock(&connections_mutex);
     tv.tv_sec = 1; tv.tv_usec = 0;
-    if (select(fdmax+1, &sockets, NULL, NULL, &tv)<0)
+    if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0)
     {
       LogPrint(LOG_WARNING,"select: %s",strerror(errno));
-      pthread_exit(NULL);
+      break;
     }
     gettimeofday(&tv, NULL); currentTime = tv.tv_sec;
-    if (FD_ISSET(entryPoint, &sockets)) {
+    for (i=0;i<numSockets;i++)
+    if (sockets[i]>=0 && FD_ISSET(sockets[i], &sockset)) {
       addrlen=sizeof(addr);
       LogPrint(LOG_DEBUG,"Incoming connection attempt detected");
-      res = accept(entryPoint, &addr, &addrlen);
+      res = accept(sockets[i], &addr, &addrlen);
       if (res<0) {
         LogPrint(LOG_WARNING,"accept: %s",strerror(errno));
-        close(entryPoint);
-        pthread_exit(NULL);
+	break;
       }
       LogPrint(LOG_DEBUG,"Connection accepted on fd %d",res);
       if (unauthConnections>=UNAUTH_MAX) {
@@ -853,9 +1006,10 @@ static void *server(void *arg)
 	addConnection(c, notty.connections);
       }
     }
-    handleTtyFds(&sockets,currentTime,&notty);
-    handleTtyFds(&sockets,currentTime,&ttys);
+    handleTtyFds(&sockset,currentTime,&notty);
+    handleTtyFds(&sockset,currentTime,&ttys);
   }
+  pthread_cleanup_pop(1);
   return NULL;
 }
 
@@ -894,12 +1048,12 @@ static void ttyTerminationHandler(Ttty *tty)
 static void terminationHandler()
 {
   int res;
+  int i;
   if (connectionsAllowed!=0) {
-    if ((res = pthread_cancel(serverThread))!=0) {
-      LogPrint(LOG_WARNING,"pthread_cancel (1) : %s",strerror(res));
-    } else if ((res = pthread_join(serverThread,NULL))!=0) {
-      LogPrint(LOG_WARNING,"pthread_join : %s",strerror(res));
-    }
+    for (i=0;i<numSockets;i++)
+      pthread_cancel(socketThreads[i]);
+    if ((res = pthread_cancel(serverThread)) != 0 )
+      LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
     ttyTerminationHandler(&notty);
     ttyTerminationHandler(&ttys);
     api_unlink();
@@ -1091,8 +1245,9 @@ void api_identify(void)
 /* Then one creates the communication socket */
 int api_open(BrailleDisplay *brl, char **parameters)
 {
-  static char *host;
-  int res;
+  int res,i;
+  char *hosts=":0;127.0.0.1:0";
+  pthread_attr_t attr;
 
   DisplaySize[0] = htonl(brl->x);
   DisplaySize[1] = htonl(brl->y);
@@ -1115,12 +1270,16 @@ int api_open(BrailleDisplay *brl, char **parameters)
   }
   ttys.connections->prev = ttys.connections->next = ttys.connections;
 
-  if (*parameters[PARM_HOST]) host = parameters[PARM_HOST];
-  else host = "127.0.0.1";
+  if (*parameters[PARM_HOST]) hosts = parameters[PARM_HOST];
+
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
 
   TrueBraille=braille;
-  if ((res = pthread_create(&serverThread,NULL,server,(void *) host)) != 0) {
-    LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
+  if ((res = pthread_create(&serverThread,&attr,server,hosts)) != 0) {
+    LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
+    for (i=0;i<numSockets;i++)
+      pthread_cancel(socketThreads[i]);
     goto outallocs;
   }
   api_link();

@@ -213,14 +213,13 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   authStruct *auth = (authStruct *) packet;
-  struct addrinfo *res,*cur;
-  struct addrinfo hints;
+  int addrfamily;
   char *hostname = NULL;
-  char *port = NULL;
-  int err;
+  char *port;
   size_t authKeyLength;
+  int err;
 
-  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, "127.0.0.1:" BRLAPI_SOCKETPORT };
+  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":0" };
   brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOSTNAME") };
 
   /* Here update settings with the parameters from misc sources (files, env...) */
@@ -233,36 +232,66 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
   auth->protocolVersion = BRLAPI_PROTOCOL_VERSION;
 
-  brlapi_splitHost(settings.hostName,&hostname,&port);
+  addrfamily=brlapi_splitHost(settings.hostName,&hostname,&port);
 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = PF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-
-  gai_error = getaddrinfo(hostname, port, &hints, &res);
-  free(hostname);
-  free(port);
-  if (gai_error) {
-    brlapi_errno=BRLERR_GAIERR;
-    return -1;
-  }
   pthread_mutex_lock(&brlapi_fd_mutex);
-  for(cur = res; cur; cur = cur->ai_next) {
-    fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
-    if (fd<0) continue;
-    if (connect(fd, cur->ai_addr, cur->ai_addrlen)<0) {
+
+  if (addrfamily == PF_LOCAL) {
+    struct sockaddr_un sa;
+    int lpath = strlen(BRLAPI_SOCKETPATH),lport;
+    lport = strlen(port);
+    if (lpath+lport+1>sizeof(sa.sun_path)) {
+      brlapi_libcerrno=ENAMETOOLONG;
+      brlapi_libcerrfun="brlapi_initializeConnection";
+      brlapi_errno = BRLERR_LIBCERR;
+      return -1;
+    }
+    if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+      brlapi_errno = BRLERR_LIBCERR;
+      return fd;
+    }
+    sa.sun_family = AF_UNIX;
+    memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
+    memcpy(sa.sun_path+lpath,port,lport+1);
+    if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
+      brlapi_errno = BRLERR_LIBCERR;
+      brlapi_libcerrno = errno;
       close(fd);
       fd = -1;
-      continue;
+      return -1;
     }
-    break;
+  } else {
+    struct addrinfo *res,*cur;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    gai_error = getaddrinfo(hostname, port, &hints, &res);
+    free(hostname);
+    free(port);
+    if (gai_error) {
+      brlapi_errno=BRLERR_GAIERR;
+      return -1;
+    }
+    for(cur = res; cur; cur = cur->ai_next) {
+      fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
+      if (fd<0) continue;
+      if (connect(fd, cur->ai_addr, cur->ai_addrlen)<0) {
+        close(fd);
+        fd = -1;
+        continue;
+      }
+      break;
+    }
+    freeaddrinfo(res);
+    if (!cur) {
+      pthread_mutex_unlock(&brlapi_fd_mutex);
+      brlapi_errno=BRLERR_CONNREFUSED;
+      return -1;
+    }
   }
-  freeaddrinfo(res);
-  if (!cur) {
-    pthread_mutex_unlock(&brlapi_fd_mutex);
-    brlapi_errno=BRLERR_CONNREFUSED;
-    return -1;
-  }
+
   if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, packet, sizeof(auth->protocolVersion)+authKeyLength))<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
     close(fd);

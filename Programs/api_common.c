@@ -191,23 +191,31 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth)
 
 /* Function: brlapi_splitHost
  * splits host into hostname & port */
-void brlapi_splitHost(const char *host, char **hostname, char **port) {
+int brlapi_splitHost(const char *host, char **hostname, char **port) {
   const char *c;
   if (!host || !*host) {
     *hostname=NULL;
-    *port=strdup(BRLAPI_SOCKETPORT);
-  } else if ((c = strchr(host,':'))) {
+    *port=strdup("0");
+    return PF_LOCAL;
+  } else if ((c = strrchr(host,':'))) {
     if (c != host) {
+      int porti = atoi(c+1);
+      if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
       *hostname = (char *)malloc(c-host+1);
       memcpy(*hostname, host, c-host);
       (*hostname)[c-host] = 0;
-    }
-    else
+      *port = (char *)malloc(6);
+      snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
+      return PF_UNSPEC;
+    } else {
       *hostname = NULL;
-    *port = strdup(c+1);
+      *port = strdup(c+1);
+      return PF_LOCAL;
+    }
   } else {
     *hostname = strdup(host);
     *port = strdup(BRLAPI_SOCKETPORT);
+    return PF_UNSPEC;
   }
 }
 

@@ -57,7 +57,11 @@ extern "C" {
  * @{ */
 
 /** Default port number on which connections to \e BrlAPI can be established */
+#define BRLAPI_SOCKETPORTNUM 35751
 #define BRLAPI_SOCKETPORT "35751"
+
+/** Default unix path on which connections to \e BrlAPI can be established */
+#define BRLAPI_SOCKETPATH "/var/lib/BrlAPI/"
 
 /** \e brltty 's settings directory
  *
@@ -75,8 +79,8 @@ extern "C" {
 
 /** \brief Settings structure for \e BrlAPI connection
  *
- * This structure holds every parameter needed to connect to \e BrlAPI: in which
- * file the authentication key can be found and to which computer to connect.
+ * This structure holds every parameter needed to connect to \e BrlAPI: which
+ * file the authentication key can be found in and which computer to connect to.
  *
  * \par Examples:
  * \code
@@ -112,7 +116,7 @@ typedef struct {
    * of the BRLAPI_AUTHPATH environment variable, if it exists. */
   char *authKey;
 
-  /** this tells where the \e BrlAPI server resides: it might be listening on
+  /** This tells where the \e BrlAPI server resides: it might be listening on
    * another computer, on any TCP port. It should look like "foo:1234", which
    * means TCP port number 1234 on computer called "foo".
    * \note Please check that resolving this name works before complaining
