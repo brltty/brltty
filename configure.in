@@ -584,13 +584,11 @@ BRLTTY_BRAILLE_DRIVER([md], [MDV])
 BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
+BRLTTY_BRAILLE_DRIVER([ty], [Tty])
 BRLTTY_BRAILLE_DRIVER([va], [Vario])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
-if test "${brltty_enabled_usb}" != "no"
-then
-   BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
-fi
+BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 if test "${brltty_enabled_learn_mode}" != "no"
 then
    BRLTTY_BRAILLE_DRIVER([vr], [Virtual])

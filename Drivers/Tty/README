@@ -1,0 +1,14 @@
+This driver allows to use any classical tty as peripheral for BrlTTY: for
+instance, for my Ampex 232, whose terminfo entry is in
+/usr/share/terminfo/a/ampex232 in debian, I just launch:
+
+brltty -b ty -B term=ampex232,cset=CP850 -t identity
+
+identity is necessary to really get characters and not dots. If a BrlAPI
+application writes dots, you'll get garbage though. CP850 is there because that
+ampex uses that code page. Actually, one might even launch it in a xterm:
+
+brltty -b ty -B term=$TERM -d /dev/pts/345 -t identity
+
+(where /dev/pts/345 is the pseudo-terminal of the xterm, see the output of the
+'who' command)

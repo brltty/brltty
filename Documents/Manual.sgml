@@ -4320,6 +4320,8 @@ BRLTTY supports the following braille displays:
     TSI
       |Navigator 20/40/80@
       |PowerBraille 40/65/80@
+    Tty
+      |terminfo@
     Vario
       |40/80 (native mode)@
     VarioHT
@@ -4389,6 +4391,7 @@ BRLTTY supports the following speech synthesizers:
     pm|Papenmeier@
     th|Theta@
     ts|Telesensory Systems Inc.@
+    ty|Tty@
     va|Vario/RBT (emulation 1)@
     vd|VideoBraille@
     vh|Vario/RBT (emulation 2)@
