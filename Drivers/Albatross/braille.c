@@ -101,7 +101,7 @@ acknowledgeDisplay (BrailleDisplay *brl) {
     if (!writeBytes(brl, acknowledgement, sizeof(acknowledgement))) return 0;
 
     serialDiscardInput(serialDevice);
-    delay(100);
+    approximateDelay(100);
     serialDiscardInput(serialDevice);
   }
   LogPrint(LOG_DEBUG, "Albatross description byte: %02X", description);

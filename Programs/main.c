@@ -412,7 +412,7 @@ terminateProgram (int quickly) {
     int awaitSilence = speech->isSpeaking();
     int i;
     for (i=0; i<messageDelay; i+=updateInterval) {
-      delay(updateInterval);
+      approximateDelay(updateInterval);
       if (readCommand(BRL_CTX_MESSAGE) != EOF) break;
       if (awaitSilence) {
         speech->doTrack();

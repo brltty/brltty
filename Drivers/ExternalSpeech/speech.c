@@ -184,7 +184,7 @@ static void mywrite(int fd, const void *buf, int len)
   char *pos = (char *)buf;
   int w;
   if(fd<0) return;
-  timeout_yet(0);
+  hasTimedOut(0);
   do {
     if((w = write(fd, pos, len)) < 0) {
       if(errno == EINTR || errno == EAGAIN) continue;
@@ -195,7 +195,7 @@ static void mywrite(int fd, const void *buf, int len)
       return;
     }
     pos += w; len -= w;
-  } while(len && !timeout_yet(2000));
+  } while(len && !hasTimedOut(2000));
   if(len)
     myerror("ExternalSpeech: pipe to helper program: write timed out");
 }
@@ -206,7 +206,7 @@ static int myread(int fd, void *buf, int len)
   int r;
   int firstTime = 1;
   if(fd<0) return 0;
-  timeout_yet(0);
+  hasTimedOut(0);
   do {
     if((r = read(fd, pos, len)) < 0) {
       if(errno == EINTR) continue;
@@ -219,7 +219,7 @@ static int myread(int fd, void *buf, int len)
     if(r<=0) return 0;
     firstTime = 0;
     pos += r; len -= r;
-  } while(len && !timeout_yet(400));
+  } while(len && !hasTimedOut(400));
   if(len) {
     myerror("ExternalSpeech: pipe to helper program: read timed out");
     return 0;

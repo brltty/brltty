@@ -475,7 +475,7 @@ serialRestartDevice (SerialDevice *serial, int baud) {
   if (!serialSetSpeed(serial, B0)) return 0;
   if (!serialFlushAttributes(serial)) return 0;
 
-  delay(500);
+  approximateDelay(500);
   if (!serialDiscardInput(serial)) return 0;
 
   if (!serialSetBaud(serial, baud)) return 0;

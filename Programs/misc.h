@@ -77,11 +77,11 @@ extern int processLines (FILE *file, /* The input file. */
 		         void *data); /* A pointer to caller-specific data. */
 extern int readLine (FILE *file, char **buffer, size_t *size);
 
-extern void delay (int milliseconds);		/* sleep for `msec' milliseconds */
-extern void shortdelay (int milliseconds);
+extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
+extern void accurateDelay (int milliseconds);
 extern long int millisecondsBetween (const struct timeval *from, const struct timeval *to);
 extern long int millisecondsSince (const struct timeval *from);
-extern int timeout_yet (int milliseconds);	/* test timeout condition */
+extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
 #ifdef HAVE_SYSLOG_H
 #  include <syslog.h>

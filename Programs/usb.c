@@ -551,7 +551,7 @@ usbAwaitInput (
 
       {
         const int interval = 10;
-        delay(interval);
+        approximateDelay(interval);
         timeout -= interval;
       }
     }

@@ -46,18 +46,18 @@ static int playBeeper (int note, int duration) {
                duration, note);
 
       if (!note) {
-         shortdelay(duration);
+         accurateDelay(duration);
 	 return 1;
       }
 
       if (asynchronousBeep((int)noteFrequencies[note], duration*4)) {
-         shortdelay(duration);
+         accurateDelay(duration);
 	 stopBeep();
          return 1;
       }
 
       if (startBeep((int)noteFrequencies[note])) {
-         shortdelay(duration);
+         accurateDelay(duration);
 	 stopBeep();
          return 1;
       }

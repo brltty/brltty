@@ -72,7 +72,7 @@ static void brl_writeWindow(BrailleDisplay *brl) {
       vbtranslate(brl->buffer, outbuff, 40);
       vbdisplay(outbuff);
       vbdisplay(outbuff);
-      shortdelay(VBREFRESHDELAY);
+      accurateDelay(VBREFRESHDELAY);
       break;
     }
   }

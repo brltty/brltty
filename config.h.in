@@ -64,8 +64,17 @@ extern "C" {
 /* Define this if the header file linux/uinput.h exists. */
 #undef HAVE_LINUX_UINPUT_H
 
+/* Define this if the function fchdir exists. */
+#undef HAVE_FCHDIR
+
 /* Define this if the function getopt_long exists. */
 #undef HAVE_GETOPT_LONG
+
+/* Define this if the function shmget exists. */
+#undef HAVE_SHMGET
+
+/* Define this if the function shm_open exists. */
+#undef HAVE_SHM_OPEN
 
 /* Define this if the function vsyslog exists. */
 #undef HAVE_VSYSLOG

@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 
 #include "options.h"
@@ -93,7 +94,7 @@ message (const char *string, short flags) {
       int timer = 0;
       while (braille->readCommand(&brl, BRL_CTX_MESSAGE) == EOF) {
         if (timer > 4000) break;
-        delay(updateInterval);
+        approximateDelay(updateInterval);
         timer += updateInterval;
       }
     }

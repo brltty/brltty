@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -390,7 +391,7 @@ processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
 }
 
 void
-delay (int milliseconds) {
+approximateDelay (int milliseconds) {
   if (milliseconds > 0) {
     struct timeval timeout;
     timeout.tv_sec = milliseconds / 1000;
@@ -412,19 +413,19 @@ millisecondsSince (const struct timeval *from) {
 }
 
 void
-shortdelay (int milliseconds) {
+accurateDelay (int milliseconds) {
   static int tickLength = 0;
   struct timeval start;
   gettimeofday(&start, NULL);
   if (!tickLength)
     if (!(tickLength = 1000 / sysconf(_SC_CLK_TCK)))
       tickLength = 1;
-  if (milliseconds >= tickLength) delay(milliseconds / tickLength * tickLength);
+  if (milliseconds >= tickLength) approximateDelay(milliseconds / tickLength * tickLength);
   while (millisecondsSince(&start) < milliseconds);
 }
 
 int
-timeout_yet (int milliseconds) {
+hasTimedOut (int milliseconds) {
   static struct timeval start = {0, 0};
 
   if (milliseconds) {

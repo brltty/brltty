@@ -72,21 +72,21 @@ doCursorRouting (int column, int row, int screen) {
   /* Deal with vertical movement first, ignoring horizontal jumping ... */
   while ((dif = row - scr.posy) && (scr.no == screen)) {
     insertCursorKey((dif > 0)? SCR_KEY_CURSOR_DOWN: SCR_KEY_CURSOR_UP, &mask);
-    timeout_yet(0);		/* initialise stop-watch */
+    hasTimedOut(0);		/* initialise stop-watch */
     while (1) {
-      delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
+      approximateDelay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
 
       oldy = scr.posy;
       oldx = scr.posx;
       describeRoutingScreen(&scr);
       if ((scr.posy != oldy) || (scr.posx != oldx)) break;
 
-      if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_WRONG_ROW;
+      if (hasTimedOut(CURSOR_ROUTING_TIMEOUT)) return ROUTE_WRONG_ROW;
     }
 
     if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
         (scr.posy != oldy && (row - scr.posy) * (row - scr.posy) >= dif * dif)) {
-      delay(CURSOR_ROUTING_SETTLE);
+      approximateDelay(CURSOR_ROUTING_SETTLE);
       describeRoutingScreen(&scr);
       if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
           (scr.posy != oldy && (row - scr.posy) * (row - scr.posy) >= dif * dif)) {
@@ -105,20 +105,20 @@ doCursorRouting (int column, int row, int screen) {
     /* Now horizontal movement, quitting if the vertical position is wrong: */
     while ((dif = column - scr.posx) && (scr.posy == row) && (scr.no == screen)) {
       insertCursorKey((dif > 0)? SCR_KEY_CURSOR_RIGHT: SCR_KEY_CURSOR_LEFT, &mask);
-      timeout_yet(0);	/* initialise stop-watch */
+      hasTimedOut(0);	/* initialise stop-watch */
       while (1) {
-        delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
+        approximateDelay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
 
         oldx = scr.posx;
         describeRoutingScreen(&scr);
         if ((scr.posx != oldx) || (scr.posy != row)) break;
 
-        if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_WRONG_COLUMN;
+        if (hasTimedOut(CURSOR_ROUTING_TIMEOUT)) return ROUTE_WRONG_COLUMN;
       }
 
       if (scr.posy != row ||
           (column - scr.posx) * (column - scr.posx) >= dif * dif) {
-        delay(CURSOR_ROUTING_SETTLE);
+        approximateDelay(CURSOR_ROUTING_SETTLE);
         describeRoutingScreen(&scr);
         if (scr.posy != row ||
             (column - scr.posx) * (column - scr.posx) >= dif * dif) {

@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -766,7 +767,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           }
         }
       } else {
-        delay(1000);
+        approximateDelay(1000);
       }
     }
     if (line) free(line);

@@ -276,13 +276,13 @@ brl_identify (void)
 
 static int
 await_ack (void) {
-  timeout_yet(0);
+  hasTimedOut(0);
   waiting_ack = 1;
   do {
-    delay(10);	/* sleep for 10 ms */
+    approximateDelay(10);	/* sleep for 10 ms */
     qfill();
     if (!waiting_ack) return 1;
-  } while (!timeout_yet(ACK_TIMEOUT));
+  } while (!hasTimedOut(ACK_TIMEOUT));
   return 0;
 }
 
@@ -339,7 +339,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
             memset(cells, 0, sizeof(cells));
             serialWriteData(BL_serialDevice, cells, sizeof(cells));
             waiting_ack = 1;
-            delay(400);
+            approximateDelay(400);
             qfill();
             if (waiting_ack) {
               /* no response, so it must be BLT40 */
@@ -353,11 +353,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
           {
             static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
-            delay(200);
+            approximateDelay(200);
             qflush();
             serialWriteData(BL_serialDevice, request, sizeof(request));
             waiting_ack = 0;
-            delay(200);
+            approximateDelay(200);
             qfill();
             if (qlen) {
               unsigned char response[qlen + 1];

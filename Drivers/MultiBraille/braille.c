@@ -137,10 +137,10 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 	if (init_seq[0])
 		if (serialWriteData (MB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
 			goto failure;
-	timeout_yet (0);		/* initialise timeout testing */
+	hasTimedOut (0);		/* initialise timeout testing */
 	n = 0;
 	do {
-		delay (20);
+		approximateDelay (20);
 		if (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 0)
 			continue;
 		if (n < init_ack[0] && c != init_ack[1 + n])
@@ -158,7 +158,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 		}
 		n++;
 	}
-	while (!timeout_yet (ACK_TIMEOUT) && n <= init_ack[0]);
+	while (!hasTimedOut (ACK_TIMEOUT) && n <= init_ack[0]);
 
 	if (!success) goto failure;
 	if (!serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;

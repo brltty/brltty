@@ -93,7 +93,7 @@ spk_write (const unsigned char *address, unsigned int count)
 static void
 spk_flush (void)
 {
-  delay(spk_written * 1000 / CB_charactersPerSecond);
+  approximateDelay(spk_written * 1000 / CB_charactersPerSecond);
   spk_written = 0;
 }
 

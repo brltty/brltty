@@ -339,7 +339,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
          } else {
             LogError("Write");
          }
-         delay(1000);
+         approximateDelay(1000);
       }
       serialCloseDevice(serialDevice);
       serialDevice = NULL;
@@ -850,7 +850,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 	 break;
    }
 
-   delay(1);
+   approximateDelay(1);
    if (serialReadData(serialDevice, &character, 1, 0, 0) != 1) {
       return EOF;
    }

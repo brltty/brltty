@@ -194,6 +194,9 @@ sys_netbsd.$O:
 sys_osf.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_osf.c
 
+sys_qnx.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_qnx.c
+
 ###############################################################################
 
 usb.$O:

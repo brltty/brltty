@@ -352,7 +352,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       else LogPrint(LOG_DEBUG,"Skipping invalid response to query");
     }
     LogPrint(LOG_DEBUG,"No response to query");
-    delay(DETECT_DELAY);
+    approximateDelay(DETECT_DELAY);
   }
 
 detected:

@@ -287,7 +287,7 @@ readKey (void) {
       case KEY_FUNCTION:
       case KEY_FUNCTION2:
       case KEY_UPDATE:
-         while (serialReadData(serialDevice, &arg, 1, 0, 0) != 1) delay(1);
+         while (serialReadData(serialDevice, &arg, 1, 0, 0) != 1) approximateDelay(1);
          break;
    }
    {
@@ -342,7 +342,7 @@ askUser (const unsigned char *prompt) {
    while (1) {
       int key = readKey();
       if (key == EOF) {
-         delay(1);
+         approximateDelay(1);
          continue;
       }
       if ((key & KEY_MASK) == KEY_UPDATE) {
@@ -536,7 +536,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
             return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 9;
          case KEY_COMMAND: {
             int command;
-            while ((command = readKey()) == EOF) delay(1);
+            while ((command = readKey()) == EOF) approximateDelay(1);
             LogPrint(LOG_DEBUG, "Received command: (0x%2.2X) 0x%4.4X", KEY_COMMAND, command);
             switch (command) {
                case KEY_COMMAND:

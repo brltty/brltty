@@ -136,7 +136,7 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
   int duration = brl->writeDelay + 1;
   if (duration < minimumDelay) duration = minimumDelay;
   brl->writeDelay = 0;
-  delay(duration);
+  approximateDelay(duration);
   return duration;
 }
 
@@ -238,7 +238,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
   setStatusText(brl, "lrn");
   message("command learn mode", MSG_NODELAY);
 
-  timeout_yet(0);
+  hasTimedOut(0);
   do {
     int command = readBrailleCommand(brl, BRL_CTX_SCREEN);
     if (command != EOF) {
@@ -258,11 +258,11 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         message(buffer, MSG_NODELAY|MSG_SILENT);
       }
 
-      timeout_yet(0);
+      hasTimedOut(0);
     }
 
     drainBrailleOutput(brl, poll);
-  } while (!timeout_yet(timeout));
+  } while (!hasTimedOut(timeout));
   message("done", 0);
 }
 #endif /* ENABLE_LEARN_MODE */

@@ -6,7 +6,14 @@ AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_FUNC_${brltty_uc})])])
 
 AC_DEFUN([BRLTTY_VAR_TRIM], [dnl
 changequote(, )dnl
-$1="`expr "${$1}" : ' *\(.*[^ ]\) *$'`"
+brltty_trimmed="`expr "${$1}" : ' *\(.*[^ ]\) *$'`"
+# QNX expr returns 0 if \(...\) doesn't match any characters.
+test "${brltty_trimmed}" = "0" && {
+   test "`expr "${$1}" : ' *[^ ]'`" -eq 0 && {
+      brltty_trimmed=""
+   }
+}
+$1="${brltty_trimmed}"
 changequote([, ])])
 
 AC_DEFUN([BRLTTY_VAR_EXPAND], [dnl

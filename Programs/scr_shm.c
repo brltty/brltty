@@ -26,39 +26,71 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#ifdef HAVE_SHMGET
 #include <sys/ipc.h>
 #include <sys/shm.h>
+static key_t shmKey;
+static int shmIdentifier;
+#endif /* HAVE_SHMGET */
 
+#ifdef HAVE_SHM_OPEN
+#include <sys/mman.h>
+static const char *shmPath = "/screen";
+static int shmFileDescriptor = -1;
+#endif /* HAVE_SHM_OPEN */
+
+#include "misc.h"
 #include "scr.h"
 #include "scr_real.h"
 #include "scr_shm.h"
 
-static key_t shmKey;
-static int shmIdentifier;
-static char *shmAddress;
+static char *shmAddress = NULL;
+static const mode_t shmMode = S_IRWXU;
+static const int shmSize = 4 + ((66 * 132) * 2);
 
 static int
 open_ShmScreen (void) {
+#ifdef HAVE_SHMGET
   /* this should be generated from ftok(), but... */
   shmKey = 0xBACD072F;     /* random static IPC key */
-  /* Allocation of shared mem for 18000 bytes (screen text and attributes
-   * + few coord.).  We supose no screen will be wider than 132x66.
-   * 0700 = [rwx------].
-   */
-  if ((shmIdentifier = shmget(shmKey, 18000, 0700)) != -1) {
-    if ((shmAddress = (char *)shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
+
+  if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
+    if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
       return 1;
+    } else {
+      LogError("shmat");
     }
+  } else {
+    LogError("shmget");
   }
+  shmIdentifier = -1;
+#endif /* HAVE_SHMGET */
+
+#ifdef HAVE_SHM_OPEN
+  if ((shmFileDescriptor = shm_open(shmPath, O_RDONLY, shmMode)) != -1) {
+    if ((shmAddress = mmap(0, shmSize, PROT_READ, MAP_SHARED, shmFileDescriptor, 0)) != MAP_FAILED) {
+      return 1;
+    } else {
+      LogError("mmap");
+    }
+
+    close(shmFileDescriptor);
+    shmFileDescriptor = -1;
+  } else {
+    LogError("shm_open");
+  }
+#endif /* HAVE_SHM_OPEN */
+
   return 0;
 }
 
 static void
 describe_ShmScreen (ScreenDescription *description) {
-  description->cols = shmAddress[0];	/* scrdim x */
-  description->rows = shmAddress[1];   /* scrdim y */
-  description->posx = shmAddress[2];   /* csrpos x */
-  description->posy = shmAddress[3];   /* csrpos y */
+  description->cols = shmAddress[0];
+  description->rows = shmAddress[1];
+  description->posx = shmAddress[2];
+  description->posy = shmAddress[3];
   description->no = 1;  /* not yet implemented */
 }
 
@@ -81,7 +113,20 @@ read_ShmScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 
 static void
 close_ShmScreen (void) {
-  shmdt(shmAddress);
+#ifdef HAVE_SHMGET
+  if (shmIdentifier != -1) {
+    shmdt(shmAddress);
+  }
+#endif /* HAVE_SHMGET */
+
+#ifdef HAVE_SHM_OPEN
+  if (shmFileDescriptor != -1) {
+    munmap(shmAddress, shmSize);
+    close(shmFileDescriptor);
+    shmFileDescriptor = -1;
+  }
+#endif /* HAVE_SHM_OPEN */
+
   shmAddress = NULL;
 }
 

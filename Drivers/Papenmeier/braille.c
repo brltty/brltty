@@ -741,7 +741,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         READ(2, length-2, RBF_ETX);
         if (debug_reads) LogBytes("Identity Packet", buf, length);
         if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
-        delay(200);
+        approximateDelay(200);
         restartTerminal1(brl);
         break;
       }

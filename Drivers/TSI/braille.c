@@ -478,7 +478,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
     serialWriteData (serialDevice, BRL_UART192, DIM_BRL_UART192);
     serialDrainOutput(serialDevice);
-    delay(BAUD_DELAY);
+    approximateDelay(BAUD_DELAY);
     if(!serialSetBaud(serialDevice, 19200)) goto failure;
     LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
     if(QueryDisplay(reply))
@@ -487,7 +487,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       LogPrint(LOG_INFO,"Display did not respond at 19200bps, "
 	       "falling back to 9600bps.");
       if(!serialSetBaud(serialDevice, 9600)) goto failure;
-      delay(BAUD_DELAY); /* just to be safe */
+      serialDrainOutput(serialDevice);
+      approximateDelay(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(reply)) {
 	LogPrint(LOG_INFO,"Found display again at 9600bps.");
 	LogPrint(LOG_INFO, "Must be a TSI emulator.");
@@ -612,9 +613,9 @@ display (const unsigned char *pattern,
      gives the display time to show what we're sending.
 
      I found experimentally that a delay of 30ms seems best (at least for
-     pb80). A longer delay, or using delay instead of shortdelay is too
-     much. This makes the pb a little bit sluggish, but prevents any
-     communication problems.  */
+     pb80). A longer delay, or using approximateDelay() instead of
+     accurateDelay() is too much. This makes the pb a little bit sluggish,
+     but prevents any communication problems. */
 
   switch(slow_update){
   /* 0 does nothing */
@@ -622,7 +623,7 @@ display (const unsigned char *pattern,
     serialDrainOutput(serialDevice); break;
   case 2: /* nav80, pb80, some emulators */
     serialDrainOutput(serialDevice);
-    shortdelay(SEND_DELAY);
+    accurateDelay(SEND_DELAY);
     break;
   };
 }
@@ -726,11 +727,11 @@ flicker ()
       memset (buf, FLICKER_CHAR, ncells);
 
       display_all (buf);
-      shortdelay (FLICKER_DELAY);
+      accurateDelay (FLICKER_DELAY);
       display_all (prevdata);
-      shortdelay (FLICKER_DELAY);
+      accurateDelay (FLICKER_DELAY);
       display_all (buf);
-      shortdelay (FLICKER_DELAY);
+      accurateDelay (FLICKER_DELAY);
       /* Note that we don't put prevdata back on the display, since flicker()
          normally preceeds the displaying of a special message. */
 
@@ -794,7 +795,7 @@ cut_cursor (BrailleDisplay *brl)
       display_all (prevdata);
       prevdata[pos] = oldchar;
 
-      while ((key = brl_readCommand (brl, BRL_CTX_SCREEN)) == EOF) delay(1); /* just yield */
+      while ((key = brl_readCommand (brl, BRL_CTX_SCREEN)) == EOF) approximateDelay(1); /* just yield */
       if((key &BRL_MSK_BLK) == BRL_BLK_CUTBEGIN)
 	  res = BRL_BLK_CUTBEGIN + pos;
       else if((key &BRL_MSK_BLK) == BRL_BLK_CUTAPPEND)
@@ -944,13 +945,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
       else if(ping_due){
 	LogPrint(LOG_DEBUG,"Display idle: sending query");
 	serialDrainOutput(serialDevice);
-	delay(2*SEND_DELAY);
+	approximateDelay(2*SEND_DELAY);
 	serialWriteData (serialDevice, BRL_QUERY, DIM_BRL_QUERY);
 	if(slow_update == 1)
 	  serialDrainOutput(serialDevice);
 	else if(slow_update == 2){
 	  serialDrainOutput(serialDevice);
-	  delay(SEND_DELAY);
+	  approximateDelay(SEND_DELAY);
 	}
 	pings++;
 	gettimeofday(&last_ping_sent, &dum_tz);
@@ -963,7 +964,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   pings=0;
 
 #ifdef RECV_DELAY
-  shortdelay(SEND_DELAY);
+  accurateDelay(SEND_DELAY);
 #endif /* RECV_DELAY */
 
   /* read bytes */

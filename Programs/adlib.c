@@ -155,6 +155,6 @@ void AL_playTone (int channel, int pitch, unsigned long int duration, int volume
 		     (AL_RELEASE_FAST << AL_RELEASE_SHIFT)));
       
    AL_startTone(channel, pitch);
-   shortdelay(duration);
+   accurateDelay(duration);
    AL_stopTone(channel);
 }

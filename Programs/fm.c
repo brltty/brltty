@@ -54,7 +54,7 @@ static int playFm (int note, int duration) {
    if (note)
       AL_playTone(channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);
    else
-      shortdelay(duration);
+      accurateDelay(duration);
    return 1;
 }
 

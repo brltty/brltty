@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -987,7 +988,7 @@ startBrailleDriver (void) {
       }
       closeBrailleDriver();
     }
-    delay(5000);
+    approximateDelay(5000);
   }
 }
 
@@ -1315,8 +1316,14 @@ globBegin (GlobData *data) {
   data->paths[data->count = data->glob.gl_offs] = NULL;
 
   {
+#ifdef HAVE_FCHDIR
     int originalDirectory = open(".", O_RDONLY);
     if (originalDirectory != -1) {
+#else /* HAVE_FCHDIR */
+    char originalDirectoryBuffer[PATH_MAX+1];
+    char *originalDirectory = getcwd(originalDirectoryBuffer, sizeof(originalDirectoryBuffer));
+    if (originalDirectory) {
+#endif /* HAVE_FCHDIR */
       if (chdir(data->directory) != -1) {
         if (glob(data->pattern, GLOB_DOOFFS, NULL, &data->glob) == 0) {
           data->paths = (const char **)data->glob.gl_pathv;
@@ -1327,7 +1334,11 @@ globBegin (GlobData *data) {
           while (data->paths[data->count]) ++data->count;
         }
 
+#ifdef HAVE_FCHDIR
         if (fchdir(originalDirectory) == -1) {
+#else /* HAVE_FCHDIR */
+        if (chdir(originalDirectory) == -1) {
+#endif /* HAVE_FCHDIR */
           LogError("working directory restore");
         }
       } else {
@@ -1335,7 +1346,10 @@ globBegin (GlobData *data) {
                  data->directory, strerror(errno));
       }
 
+#ifdef HAVE_FCHDIR
       close(originalDirectory);
+#else /* HAVE_FCHDIR */
+#endif /* HAVE_FCHDIR */
     } else {
       LogError("working directory open");
     }

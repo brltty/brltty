@@ -172,7 +172,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   while(1) {
     LogPrint(LOG_DEBUG,"Sending query");
     if(QueryDisplay(reply)) break;
-    delay(DETECT_DELAY);
+    approximateDelay(DETECT_DELAY);
   }
   LogPrint(LOG_DEBUG, "reply = '%s'", reply);
   if (reply[13] == '8') {

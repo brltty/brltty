@@ -665,11 +665,11 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   /* autodetecting ABT model */
   do {
     if (!io->resetPort()) goto failure;
-    delay(1000);		/* delay before 2nd line drop */
+    approximateDelay(1000);		/* delay before 2nd line drop */
     if (getModelIdentifier(&ModelID)) break;
 
     if (writeFunction(brl, 0X06) == -1) goto failure;
-    delay(200);
+    approximateDelay(200);
     if (getModelIdentifier(&ModelID)) break;
   } while (ModelID == ABT_AUTO);
 

@@ -135,7 +135,7 @@ writeData (int fileDescriptor, const void *buffer, size_t size) {
       address += count;
       size -= count;
     } else {
-      delay(100);
+      approximateDelay(100);
     }
   }
 
