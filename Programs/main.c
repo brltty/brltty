@@ -839,16 +839,7 @@ main (int argc, char *argv[]) {
               continue;
             break;
           case CMD_RESTARTBRL:
-#ifdef ENABLE_API
-            api_unlink();
-#endif /* ENABLE_API */
-            stopBrailleDriver();
-            playTune(&tune_braille_off);
-            LogPrint(LOG_INFO, "Reinitializing braille driver.");
-            startBrailleDriver();
-#ifdef ENABLE_API
-            api_link();
-#endif /* ENABLE_API */
+            restartBrailleDriver();
             break;
           case CMD_TOP:
             p->winy = 0;
@@ -1371,9 +1362,7 @@ main (int argc, char *argv[]) {
             }
             break;
           case CMD_RESTARTSPEECH:
-            stopSpeechDriver();
-            LogPrint(LOG_INFO, "Reinitializing speech driver.");
-            startSpeechDriver();
+            restartSpeechDriver();
             break;
 #endif /* ENABLE_SPEECH_SUPPORT */
           case CMD_SWITCHVT_PREV:

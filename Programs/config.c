@@ -616,7 +616,7 @@ getBrailleDriver (void) {
   if (!opt_brailleDriver) opt_brailleDriver = brailleDriver->identifier;
 }
 
-void
+static void
 startBrailleDriver (void) {
    while (1) {
       if (brailleDriver->open(&brl, brailleParameters, opt_brailleDevice)) {
@@ -639,12 +639,28 @@ startBrailleDriver (void) {
    }
 }
 
-void
+static void
 stopBrailleDriver (void) {
    braille = &noBraille;
    if (brl.isCoreBuffer) free(brl.buffer);
    brailleDriver->close(&brl);
    initializeBraille();
+}
+
+void
+restartBrailleDriver (void) {
+#ifdef ENABLE_API
+  api_unlink();
+#endif /* ENABLE_API */
+
+  stopBrailleDriver();
+  playTune(&tune_braille_off);
+  LogPrint(LOG_INFO, "Reinitializing braille driver.");
+  startBrailleDriver();
+
+#ifdef ENABLE_API
+  api_link();
+#endif /* ENABLE_API */
 }
 
 static void
@@ -683,7 +699,7 @@ getSpeechDriver (void) {
   if (!opt_speechDriver) opt_speechDriver = speechDriver->identifier;
 }
 
-void
+static void
 startSpeechDriver (void) {
    if (opt_noSpeech) {
       LogPrint(LOG_INFO, "Automatic speech driver initialization disabled.");
@@ -693,7 +709,7 @@ startSpeechDriver (void) {
    }
 }
 
-void
+static void
 stopSpeechDriver (void) {
    if (opt_noSpeech) {
       opt_noSpeech = 0;
@@ -703,6 +719,13 @@ stopSpeechDriver (void) {
       speechDriver->close();
       initializeSpeech();
    }
+}
+
+void
+restartSpeechDriver (void) {
+  stopSpeechDriver();
+  LogPrint(LOG_INFO, "Reinitializing speech driver.");
+  startSpeechDriver();
 }
 
 static void

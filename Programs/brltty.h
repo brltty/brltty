@@ -99,14 +99,12 @@ extern int loadPreferences (int change);
 extern int savePreferences (void);
 extern void updatePreferences (void);
 
-extern void startBrailleDriver (void);
-extern void stopBrailleDriver (void);
+extern void restartBrailleDriver (void);
 extern int getBrailleCommand (DriverCommandContext cmds);
 extern void clearStatusCells (void);
 extern void setStatusText (const char *text);
 
-extern void startSpeechDriver (void);
-extern void stopSpeechDriver (void);
+extern void restartSpeechDriver (void);
 
 extern void api_identify (void);
 extern void api_open (BrailleDisplay *brl, char **parameters);
