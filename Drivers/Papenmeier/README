@@ -7,7 +7,7 @@ Copyright
 =========
 
 This driver is copyrighted under the GNU Public License.  It is free 
-software.  See the file '../COPYING' for more details.  Feel free to send 
+software.  See the file '../../COPYING' for more details.  Feel free to send 
 your comments and to report bugs (if any :)) to us at
 august.hoerandl@gmx.at or heimo.schoen@gmx.at
 
@@ -18,14 +18,14 @@ The driver is able to autodetect the connected terminal.
 
 Connection
 ==========
-This driver supports serial communication only.
+This driver supports serial and USB communication.
 
 Running the Driver
 ==================
 To compile and run BRLTTY, please refer to the documentation about 
 BRLTTY itself. One note though: when BRLTTY starts, it will display 
 on the screen some copyright stuff, current configuration (model and 
-firmware version setup) and the serial device in use.  That information 
+firmware version setup) and the device in use.  That information 
 may be useful if nothing happens with the braille terminal.
 
 
@@ -37,33 +37,33 @@ can be fully programmed:
 The configuration can be done by
 - changing the default configuration in the source file brl-cfg.h
   any changes will be distributed to the online help during compile
-- edit the config file /etc/brltty/brltty.pm.conf; don't forget to supply 
+- edit the config file /etc/brltty/brltty-pm.conf; don't forget to supply 
   a fitting help file
 
-If you dont want to use the config file you can safely remove the
-config file /etc/brltty/brltty.pm.conf and use the compiled in
-defaults. On default the driver is compiled with the READ_CONFIG
+If you don't want to use the config file you can safely remove the
+config file /etc/brltty/brltty-pm.conf and use the compiled in
+defaults. By default the driver is compiled with the READ_CONFIG
 symbol defined.  Without this symbols the code to read the config file
-won't be compiled into the library which gives a library with a much
+won't be compiled into the driver which yields a driver with a much
 smaller size.
 
 Help File:
 ==========
-The online help is generated from the compiled in defaults - ist uses
-the same syntax of the config file to give the user a short overview of
+The online help is generated from the compiled in defaults - it uses
+the same syntax as the config file to give the user a short overview of
 the status cells and the keymapping.
-On default the help command is mapped to the key on the first status cell.
+By default the help command is mapped to the key on the first status cell.
 
 Config File
 ===========
-The configuration file may include the definition for several terminals.
-Look at Papenmeier/brltty.pm.conf and the Papenmeier/*.hlp files for 
+The configuration file may include the definitions for several terminals.
+Look at Papenmeier/brltty-pm.conf and the Papenmeier/*.hlp files for 
 examples.
 
 Syntax:
 #     Comment to the end of line
 name = value   you can use 'is' instead of '='; actually you don't have to
- write '=', 'is' and 'and' at all. The following lines are equal:
+ write '=', 'is' or 'and' at all. The following lines are equivalent:
 name = val
 name is val
 name val
@@ -71,7 +71,7 @@ name val
 Start a new terminal definition:
 identification = NUMBER
 the number is the code returned by the terminal on identification 
-request; this starts a new terminal defintion - no need to change this infos
+request; this starts a new terminal defintion - no need to change this info
 
 Info about the terminal - Name and size of the terminal:
 terminal = "String to describe the Terminal"
@@ -123,24 +123,22 @@ standard keyboard).
 
 Input mode:
 during inputmode the modifier keys are used to input the 8 dots of a 
-character. When you end the input mode, the driver will emulate
-a keystroke. Attention: the modifiers keys are used to simulate
+character. Attention: the modifiers keys are used to simulate
 the different dots, so INPUTMODE or INPUTMODE OFF should be
 mapped to a single key.
 
 Commandkey settings:
 list of definitions:
   command = key 
-  command = key and modifier
-The command will generated on keypress; if you specify only modifiers 
-the command will be stored and be generated when the last modifier is 
-released.
+  command = modifier and key
+The command is executed on keypress; if you specify only modifiers 
+the command is executed when the first modifier is released.
 For commands which toggle a setting it is possible to add ON or OFF to 
 the command to define a predictable state change
   command ON = <as above>
   command OFF = <as above>
 A list of the possible commands (the following list is sometimes out of 
-date - see brl.h and/or Papenmeier/hlp.auto.h for the actual values), the names 
+date - see brldefs.h and/or Papenmeier/hlp.auto.h for the actual values), the names 
 may be used with or without the leading CMD_:
 NOOP - do nothing
 LNUP - go up one line

@@ -171,6 +171,22 @@ findCommand (int *command, int key, int modifiers) {
   return 0;
 }
 
+static void
+logModifiers (void) {
+  if (debug_keys) {
+    LogPrint(LOG_DEBUG, "modifiers: %04X", pressed_modifiers);
+  }
+}
+
+static int
+changeModifiers (int remove, int add) {
+  pressed_modifiers &= ~remove;
+  pressed_modifiers |= add;
+  saved_modifiers = 0;
+  logModifiers();
+  return CMD_NOOP;
+}
+
 static int
 handleCommand (int cmd, int repeat) {
   if (cmd == CMD_INPUT) {
@@ -186,6 +202,7 @@ handleCommand (int cmd, int repeat) {
         LogPrint(LOG_DEBUG, "input mode on"); 
       }
       break;
+
     case CMD_INPUT | VAL_TOGGLE_OFF:
       input_mode = 0;
       cmd = VAL_TOGGLE_OFF;
@@ -193,6 +210,29 @@ handleCommand (int cmd, int repeat) {
         LogPrint(LOG_DEBUG, "input mode off"); 
       }
       break;
+
+    case CMD_SWSIM_LC:
+      return changeModifiers(0X3, 0X0);
+    case CMD_SWSIM_LR:
+      return changeModifiers(0X2, 0X1);
+    case CMD_SWSIM_LF:
+      return changeModifiers(0X1, 0X2);
+    case CMD_SWSIM_RC:
+      return changeModifiers(0XC, 0X0);
+    case CMD_SWSIM_RR:
+      return changeModifiers(0X8, 0X4);
+    case CMD_SWSIM_RF:
+      return changeModifiers(0X4, 0X8);
+    case CMD_SWSIM_BC:
+      return changeModifiers(0XF, 0X0);
+    case CMD_SWSIM_BQ: {
+      static const char *const states[] = {"centre", "rear", "front", "?"};
+      const char *left = states[pressed_modifiers & 0X3];
+      const char *right = states[(pressed_modifiers >> 2) & 0X3];
+      char buffer[20];
+      snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
+      return CMD_NOOP;
+    }
   }
 
   return cmd | repeat;
@@ -211,10 +251,7 @@ handleModifier (int bit, int press) {
     modifiers = saved_modifiers;
     saved_modifiers = 0;
   }
-
-  if (debug_keys) {
-    LogPrint(LOG_DEBUG, "modifiers: %04X", pressed_modifiers);
-  }
+  logModifiers();
 
   if (modifiers) {
     if (input_mode && !(modifiers & ~0XFF)) {

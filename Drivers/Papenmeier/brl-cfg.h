@@ -29,6 +29,14 @@
 #include "Programs/brl.h"
 typedef enum {
   CMD_INPUT = DriverCommandCount /* toggle input mode */,
+  CMD_SWSIM_LC /* simulate left switch centred */,
+  CMD_SWSIM_LR /* simulate left switch rear */,
+  CMD_SWSIM_LF /* simulate left switch front */,
+  CMD_SWSIM_RC /* simulate right switch centred */,
+  CMD_SWSIM_RR /* simulate right switch rear */,
+  CMD_SWSIM_RF /* simulate right switch front */,
+  CMD_SWSIM_BC /* simulate both switches centred */,
+  CMD_SWSIM_BQ /* show positions of both switches */,
   CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
 } InternalDriverCommands;
 
@@ -336,6 +344,10 @@ typedef struct {
   CMDS_EASY_K(NOKEY, 0X08, \
               CMD_MENU_PREV_ITEM, CMD_MENU_NEXT_ITEM, CMD_MENU_FIRST_ITEM, CMD_MENU_LAST_ITEM, \
               CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING, CMD_PREFLOAD, CMD_PREFSAVE)
+#define CMDS_EASY_SWSIM \
+  CMDS_EASY_K(NOKEY, 0XA0, \
+              CMD_SWSIM_LC, CMD_SWSIM_RC, CMD_SWSIM_BQ, CMD_SWSIM_BC, \
+              CMD_SWSIM_LF, CMD_SWSIM_RF, CMD_SWSIM_LR, CMD_SWSIM_RR)
 
 
 /* what to show for 2 status cells */
@@ -622,6 +634,7 @@ static int16_t pm_modifiers_el_40_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_40_s[] = {
+  CMDS_EASY_SWSIM,
   CMDS_EASY
 };
 
@@ -632,6 +645,7 @@ static int16_t pm_modifiers_el_80_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_80_s[] = {
+  CMDS_EASY_SWSIM,
   CMDS_EASY,
   CMDS_STAT_2
 };
@@ -642,6 +656,7 @@ static int16_t pm_modifiers_el_66_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_66_s[] = {
+  CMDS_EASY_SWSIM,
   CMDS_EASY
 };
 
