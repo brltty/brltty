@@ -63,6 +63,9 @@ extern "C" {
 #define _STRINGIFY(a) #a
 #define STRINGIFY(a) _STRINGIFY(a)
 
+extern char **splitString (const char *string, char delimiter);
+extern void deallocateStrings (char **array);
+
 /* Process each line of an input text file safely.
  * This routine handles the actual reading of the file,
  * insuring that the input buffer is always big enough,

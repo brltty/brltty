@@ -634,35 +634,46 @@ getBrailleDriver (void) {
 
 static void
 startBrailleDriver (void) {
-   while (1) {
-      if (brailleDriver->open(&brl, brailleParameters, opt_brailleDevice)) {
-         if (allocateBrailleBuffer(&brl)) {
-            braille = brailleDriver;
-            if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
+  char **devices;
+  if ((devices = splitString(opt_brailleDevice, ','))) {
+    char **device = devices;
 
-            clearStatusCells(&brl);
-            setHelpPageNumber(brl.helpPage);
-            playTune(&tune_braille_on);
-            return;
-         } else {
-            LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
-         }
-         brailleDriver->close(&brl);
+    while (1) {
+      LogPrint(LOG_DEBUG, "Starting braille driver: %s -> %s",
+               brailleDriver->identifier, *device);
+      if (brailleDriver->open(&brl, brailleParameters, *device)) {
+        if (allocateBrailleBuffer(&brl)) {
+          braille = brailleDriver;
+          if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
+
+          clearStatusCells(&brl);
+          setHelpPageNumber(brl.helpPage);
+          playTune(&tune_braille_on);
+          return;
+        } else {
+          LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
+        }
+        brailleDriver->close(&brl);
       } else {
-         LogPrint(LOG_DEBUG, "Braille driver initialization failed.");
+        LogPrint(LOG_DEBUG, "Braille driver initialization failed: %s -> %s",
+                 brailleDriver->identifier, *device);
       }
 
-      delay(5000);
       initializeBraille();
-   }
+      if (!*++device) {
+        device = devices;
+        delay(5000);
+      }
+    }
+  }
 }
 
 static void
 stopBrailleDriver (void) {
-   braille = &noBraille;
-   if (brl.isCoreBuffer) free(brl.buffer);
-   brailleDriver->close(&brl);
-   initializeBraille();
+  braille = &noBraille;
+  if (brl.isCoreBuffer) free(brl.buffer);
+  brailleDriver->close(&brl);
+  initializeBraille();
 }
 
 void

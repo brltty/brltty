@@ -15,9 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* misc.c - Miscellaneous all-purpose routines
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -34,6 +31,49 @@
 #include <sys/time.h>
 
 #include "misc.h"
+
+char **
+splitString (const char *string, char delimiter) {
+  char **array;
+
+  {
+    int count = 2;
+    const char *character = string;
+    while (*character)
+      if (*character++ == delimiter)
+        count++;
+    if (!(array = malloc(count * sizeof(*array)))) return NULL;
+  }
+
+  {
+    char **element = array;
+    while (1) {
+      const char *end = strchr(string, delimiter);
+      int length = end? end-string: strlen(string);
+
+      if (!(*element = malloc(length+1))) {
+        *element = NULL;
+        deallocateStrings(array);
+        return NULL;
+      }
+
+      memcpy(*element, string, length);
+      (*element++)[length] = 0;
+
+      if (!end) break;
+      string = end + 1;
+    }
+    *element = NULL;
+  }
+  return array;
+}
+
+void
+deallocateStrings (char **array) {
+  char **element = array;
+  while (*element) free(*element++);
+  free(array);
+}
 
 #ifdef HAVE_SYSLOG_H
    #include <syslog.h>
