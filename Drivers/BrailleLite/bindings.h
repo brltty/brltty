@@ -104,7 +104,8 @@ static const BarCmds bar2cmds =
 /* One advance bar commands. */
 static const BarCmds bar1cmds =
 {
-/* None  */ 0          , 0         , 0          , 0          ,
+/*          None         Left         Right        Both         */
+/* None  */ 0          , CMD_FWINLT , CMD_FWINRT , 0          ,
 /* Right */ CMD_FWINRT , 0          , 0          , 0          ,
 /* Left  */ CMD_FWINLT , 0          , 0          , 0          ,
 /* Both  */ 0          , 0          , 0          , 0
