@@ -388,25 +388,9 @@ setState (BrailleDisplayState state) {
   // LogPrint(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
 }
 
-static ssize_t
-brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, size_t count) {
-  return io->readBytes(bytes, count);
-}
-
-static int
-readBytes (BrailleDisplay *brl, unsigned char *bytes, int count) {
-  return brl_readPacket(brl, bytes, count);
-}
-
 static int
 readByte (BrailleDisplay *brl, unsigned char *byte) {
-  return readBytes(brl, byte, sizeof(*byte));
-}
-
-static ssize_t
-brl_writePacket (BrailleDisplay *brl, const unsigned char *data, size_t length) {
-  // LogBytes("Write", data, length);
-  return io->writeBytes(data, length, &brl->writeDelay);
+  return io->readBytes(byte, sizeof(*byte));
 }
 
 static int
@@ -415,13 +399,8 @@ brl_reset (BrailleDisplay *brl) {
 }
 
 static int
-writeBytes (BrailleDisplay *brl, unsigned char *data, int length) {
-  return brl_writePacket(brl, data, length) == length;
-}
-
-static int
 writeDescribe (BrailleDisplay *brl) {
-  return writeBytes(brl, HandyDescribe, sizeof(HandyDescribe));
+  return io->writeBytes(HandyDescribe, sizeof(HandyDescribe), &brl->writeDelay) != -1;
 }
 
 static void
@@ -519,7 +498,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     while (writeDescribe(brl)) {
       while (io->awaitInput(100)) {
         unsigned char response[sizeof(HandyDescription) + 1];
-        if (readBytes(brl, response, sizeof(response)) == sizeof(response)) {
+        if (io->readBytes(response, sizeof(response)) == sizeof(response)) {
           if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
             if (identifyModel(brl, response[sizeof(HandyDescription)])) return 1;
             deallocateBuffers();
@@ -571,7 +550,7 @@ updateBrailleCells (BrailleDisplay *brl) {
     }
 
     // LogBytes("Write", buffer, count);
-    if (!writeBytes(brl, buffer, count)) {
+    if (io->writeBytes(buffer, count, &brl->writeDelay) == -1) {
       setState(BDS_OFF);
       return 0;
     }
@@ -1368,4 +1347,14 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
   updateBrailleCells(brl);
 
   return EOF;
+}
+
+static ssize_t
+brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, size_t count) {
+  return io->readBytes(bytes, count);
+}
+
+static ssize_t
+brl_writePacket (BrailleDisplay *brl, const unsigned char *data, size_t length) {
+  return io->writeBytes(data, length, &brl->writeDelay);
 }
