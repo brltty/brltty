@@ -442,7 +442,7 @@ for any additional display-specific instructions.
     Specify the default text translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.tbl/ extension is optional.
@@ -461,7 +461,7 @@ for any additional display-specific instructions.
     Specify the default attributes translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.tbl/ extension is optional.
@@ -1125,7 +1125,7 @@ If you want to start BRLTTY before any file systems are mounted, then
 ensure that all of its components are installed within the root file system.
 See the <ref id="build-execute-root" name="--with-execute-root">,
 <ref id="build-program-directory" name="--bindir">,
-<ref id="build-data-directory" name="--sysconfdir">,
+<ref id="build-data-directory" name="--with-data-directory">,
 and <ref id="build-library-directory" name="--libdir">
 build options.
 
@@ -1373,7 +1373,7 @@ It should be run as root.
   <tag><tt/-D/<em/directory/ <tt/--data-directory=/<em/directory/</tag>
     The absolute path for the directory wherein the driver data files reside.
     If it's not specified, then the directory configured via the
-    <ref id="build-data-directory" name="--sysconfdir"> build option
+    <ref id="build-data-directory" name="--with-data-directory"> build option
     is assumed.
   <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
     The absolute path for the directory wherein the drivers reside.
@@ -1473,7 +1473,7 @@ It may need to be run as root.
   <tag><tt/-D/<em/directory/ <tt/--data-directory=/<em/directory/</tag>
     The absolute path for the directory wherein the driver data files reside.
     If it's not specified, then the directory configured via the
-    <ref id="build-data-directory" name="--sysconfdir"> build option
+    <ref id="build-data-directory" name="--with-data-directory"> build option
     is assumed.
   <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
     The absolute path for the directory wherein the drivers reside.
@@ -1492,6 +1492,11 @@ This utility tests a translation table
   <tag><em/table/</tag>
     The file system path to the table.
     If it's relative then it's anchored at the current working directory.
+  <tag><tt/-T/<em/directory/ <tt/--tables-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the translation tables reside.
+    If it's not specified, then the directory configured via the
+    <ref id="build-data-directory" name="--with-data-directory"> build option
+    is assumed.
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
 </descrip>
@@ -2085,7 +2090,7 @@ The following directives are recognized:
     Specify the attributes translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.tbl/ extension is optional.
@@ -2126,7 +2131,7 @@ The following directives are recognized:
     Specify the contraction table
     (see section <ref id="contraction" name="Contracted Braille"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ctb/ extension is optional.
@@ -2181,7 +2186,7 @@ The following directives are recognized:
     Specify the text translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.tbl/ extension is optional.
@@ -2200,7 +2205,7 @@ The <tt/brltty/ command accepts the following options:
     Specify the attributes translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.tbl/ extension is optional.
@@ -2218,7 +2223,7 @@ The <tt/brltty/ command accepts the following options:
     Specify the contraction table
     (see section <ref id="contraction" name="Contracted Braille"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ctb/ extension is optional.
@@ -2287,7 +2292,7 @@ The <tt/brltty/ command accepts the following options:
     Specify the text translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--sysconfdir">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.tbl/ extension is optional.
@@ -3715,6 +3720,52 @@ Now, finally, here are the opcode descriptions themselves:
     Translate the characters if they're at the end of a number.
 </descrip>
 
+<sect3>Character Classes<p>
+These opcodes define and use character classes.
+A character class associates a set of characters with a name.
+The name then refers to any character within the class.
+A character may belong to more than one class.
+
+The following character classes are automatically predefined
+basdd on the selected locale:
+<descrip>
+  <tag/digit/
+    Numeric characters.
+  <tag/letter/
+    Both uppercase and lowercase alphabetic characters.
+    Some locales have additional letters which are neither uppercase nor lowercase.
+  <tag/lowercase/
+    Lowercase alphabetic characters.
+  <tag/punctuation/
+    Printable characters which are neither white-space nor alphanumeric.
+  <tag/space/
+    White-space characters.
+    In the default locale these are:
+    space, horizontal tab, vertical tab, carriage return, new line, form feed.
+  <tag/uppercase/
+    Uppercase alphabetic characters.
+</descrip>
+
+The opcodes which define and use character classes are:
+<descrip>
+  <tag><tt/class/ <em/name/ <em/characters/<label id="contraction-opcode-class"></tag>
+    Define a new character class.
+    The <em/characters/ operand must be specified as a <em/string/.
+    A character class may not be used until it's been defined.
+  <tag><tt/after/ <em/class/ <em/opcode/ ...<label id="contraction-opcode-after"></tag>
+    The specified opcode is further constrained in that
+    the matched character sequence must be immediately preceded by
+    a character belonging to the specified class.
+    If this opcode is used more than once on the same line
+    then the union of the characters in all the classes is used.
+  <tag><tt/before/ <em/class/ <em/opcode/ ...<label id="contraction-opcode-before"></tag>
+    The specified opcode is further constrained in that
+    the matched character sequence must be immediately followed by
+    a character belonging to the specified class.
+    If this opcode is used more than once on the same line
+    then the union of the characters in all the classes is used.
+</descrip>
+
 <sect>Translation Tables<label id="translation"><p>
 BRLTTY uses two <bf/translation tables/ to govern
 the mapping from bytes to dot combinations.
@@ -3960,7 +4011,7 @@ BRLTTY can run as a stand-alone executable.
 Everything it needs to know can be explicitly configured at build-time
 (see <ref id="build" name="Build Options">).
 If the data directory
-(see the <ref id="build-data-directory" name="--sysconfdir">
+(see the <ref id="build-data-directory" name="--with-data-directory">
 and <ref id="build-execute-root" name="--with-execute-root"> build options)
 doesn't exist, then BRLTTY looks in <tt>/etc</> for the files it needs.
 Even if any of these files don't exist at all, BRLTTY still works!
