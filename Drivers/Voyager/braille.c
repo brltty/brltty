@@ -776,16 +776,16 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       PHKEY(501, "CRt#", K_DOWN,
             CR_SETLEFT + rtk_which[0] - textOffset,
             "Go right # cells");
-      PHKEY(401, "CRt#", K_D,
+      PHKEY(401, "CRt#", K_A,
             CR_CUTBEGIN + rtk_which[0] - textOffset,
             "Mark beginning of region to cut");
-      PHKEY(401, "CRt#", K_D|K_C,
+      PHKEY(401, "CRt#", K_A|K_B,
             CR_CUTAPPEND + rtk_which[0] - textOffset,
             "Mark beginning of cut region for append");
-      PHKEY(401, "CRt#", K_A,
+      PHKEY(401, "CRt#", K_D,
             CR_CUTRECT + rtk_which[0] - textOffset,
             "Mark bottom-right of rectangular region and cut");
-      PHKEY(401, "CRt#", K_A|K_B,
+      PHKEY(401, "CRt#", K_D|K_C,
             CR_CUTLINE + rtk_which[0] - textOffset,
             "Mark end of linear region and cut");
       PHKEY2(501, "CRt#", K_B, K_C,

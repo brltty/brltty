@@ -50,10 +50,10 @@ CRt#: Route cursor to cell
 A+D: Route cursor to current line
 
 Cut and Paste
-CRt#+D: Mark beginning of region to cut
-CRt#+D+C: Mark beginning of cut region for append
-CRt#+A: Mark bottom-right of rectangular region and cut
-CRt#+A+B: Mark end of linear region and cut
+CRt#+A: Mark beginning of region to cut
+CRt#+A+B: Mark beginning of cut region for append
+CRt#+D: Mark bottom-right of rectangular region and cut
+CRt#+D+C: Mark end of linear region and cut
 CRtx+CRty: Cut text from x through y
 Chord-1234: Paste cut text
 
