@@ -318,12 +318,10 @@ parseParameters (
           if (eligible) {
             unsigned int index = 0;
             while (names[index]) {
-              if (nameLength <= strlen(names[index])) {
-                if (strncasecmp(name, names[index], nameLength) == 0) {
-                  free(values[index]);
-                  values[index] = strdupWrapper(value);
-                  break;
-                }
+              if (strncasecmp(name, names[index], nameLength) == 0) {
+                free(values[index]);
+                values[index] = strdupWrapper(value);
+                break;
               }
               ++index;
             }
@@ -1771,8 +1769,7 @@ startup (int argc, char *argv[]) {
         int index;
         for (index=0; index<count; ++index) {
           const char *word = words[index];
-          if ((length <= strlen(word)) &&
-              (strncasecmp(opt_logLevel, word, length) == 0)) {
+          if (strncasecmp(opt_logLevel, word, length) == 0) {
             level = index;
             goto setLevel;
           }

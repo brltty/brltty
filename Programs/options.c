@@ -506,9 +506,7 @@ wordArgument (
   size_t length = strlen(argument);
   const char *const *choice = choices;
   while (*choice) {
-    if (strlen(*choice) >= length)
-      if (strncasecmp(*choice, argument, length) == 0)
-        return choice - choices;
+    if (strncasecmp(argument, *choice, length) == 0) return choice - choices;
     ++choice;
   }
   fprintf(stderr, "%s: Invalid %s: %s\n", programName, name, argument);

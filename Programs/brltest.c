@@ -147,12 +147,10 @@ main (int argc, char *argv[]) {
         size_t nameLength = delimiter - assignment;
         const char *const *name = parameterNames;
         while (*name) {
-          if (strlen(*name) >= nameLength) {
-            if (strncasecmp(*name, assignment, nameLength) == 0) {
-              parameterSettings[name - parameterNames] = delimiter + 1;
-              ok = 1;
-              break;
-            }
+          if (strncasecmp(assignment, *name, nameLength) == 0) {
+            parameterSettings[name - parameterNames] = delimiter + 1;
+            ok = 1;
+            break;
           }
           ++name;
         }

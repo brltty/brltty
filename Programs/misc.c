@@ -458,85 +458,89 @@ isFloat (float *value, const char *word) {
 
 int
 validateInteger (int *value, const char *description, const char *word, const int *minimum, const int *maximum) {
-   if (*word && !isInteger(value, word)) {
-      LogPrint(LOG_ERR, "The %s must be an integer: %s",
-               description, word);
+  if (*word && !isInteger(value, word)) {
+    LogPrint(LOG_ERR, "The %s must be an integer: %s",
+             description, word);
+    return 0;
+  }
+
+  if (minimum) {
+    if (*value < *minimum) {
+      LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
+               description, *minimum, *value);
       return 0;
-   }
-   if (minimum) {
-      if (*value < *minimum) {
-         LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
-                  description, *minimum, *value);
-         return 0;
-      }
-   }
-   if (maximum) {
-      if (*value > *maximum) {
-         LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
-                  description, *maximum, *value);
-         return 0;
-      }
-   }
-   return 1;
+    }
+  }
+
+  if (maximum) {
+    if (*value > *maximum) {
+      LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
+               description, *maximum, *value);
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 int
 validateFloat (float *value, const char *description, const char *word, const float *minimum, const float *maximum) {
-   if (*word && !isFloat(value, word)) {
-      LogPrint(LOG_ERR, "The %s must be a floating-point number: %s",
-               description, word);
+  if (*word && !isFloat(value, word)) {
+    LogPrint(LOG_ERR, "The %s must be a floating-point number: %s",
+             description, word);
+    return 0;
+  }
+
+  if (minimum) {
+    if (*value < *minimum) {
+      LogPrint(LOG_ERR, "The %s must not be less than %g: %g",
+               description, *minimum, *value);
       return 0;
-   }
-   if (minimum) {
-      if (*value < *minimum) {
-         LogPrint(LOG_ERR, "The %s must not be less than %g: %g",
-                  description, *minimum, *value);
-         return 0;
-      }
-   }
-   if (maximum) {
-      if (*value > *maximum) {
-         LogPrint(LOG_ERR, "The %s must not be greater than %g: %g",
-                  description, *maximum, *value);
-         return 0;
-      }
-   }
-   return 1;
+    }
+  }
+
+  if (maximum) {
+    if (*value > *maximum) {
+      LogPrint(LOG_ERR, "The %s must not be greater than %g: %g",
+               description, *maximum, *value);
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 int
 validateChoice (unsigned int *value, const char *description, const char *word, const char *const *choices) {
-   int length = strlen(word);
-   *value = 0;
-   if (length) {
-      int index = 0;
-      while (choices[index]) {
-         if (length <= strlen(choices[index])) {
-            if (strncasecmp(word, choices[index], length) == 0) {
-               *value = index;
-               return 1;
-            }
-         }
-         ++index;
+  int length = strlen(word);
+  *value = 0;
+  if (length) {
+    int index = 0;
+    while (choices[index]) {
+      if (strncasecmp(word, choices[index], length) == 0) {
+        *value = index;
+        return 1;
       }
-      LogPrint(LOG_ERR, "Unsupported %s: %s", description, word);
-      return 0;
-   }
-   return 1;
+      ++index;
+    }
+    LogPrint(LOG_ERR, "Unsupported %s: %s", description, word);
+    return 0;
+  }
+  return 1;
 }
 
 int
 validateFlag (unsigned int *value, const char *description, const char *word, const char *on, const char *off) {
-   const char *choices[] = {off, on, NULL};
-   return validateChoice(value, description, word, choices);
+  const char *choices[] = {off, on, NULL};
+  return validateChoice(value, description, word, choices);
 }
 
 int
 validateOnOff (unsigned int *value, const char *description, const char *word) {
-   return validateFlag(value, description, word, "on", "off");
+  return validateFlag(value, description, word, "on", "off");
 }
 
 int
 validateYesNo (unsigned int *value, const char *description, const char *word) {
-   return validateFlag(value, description, word, "yes", "no");
+  return validateFlag(value, description, word, "yes", "no");
 }

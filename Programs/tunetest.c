@@ -105,7 +105,6 @@ instrumentArgument (const char *argument) {
         const char *delimiter;
         if ((delimiter = memchr(word, '-', wordLeft))) wordLength = delimiter - word;
         if ((delimiter = memchr(component, ' ', componentLeft))) componentLength = delimiter - component;
-        if (wordLength > componentLength) break;
         if (strncasecmp(word, component, wordLength) != 0) break;
         word += wordLength; wordLeft -= wordLength;
         if (*word) word++, wordLeft--;
