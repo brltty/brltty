@@ -696,18 +696,20 @@ usbAwaitInput (
     return 0;
   }
 
+  if (timeout) hasTimedOut(0);
   while (1) {
     UsbResponse response;
     void *request;
+
     while (!(request = usbReapResponse(device,
                                        endpointNumber | UsbEndpointDirection_Input,
                                        &response, 0))) {
       if (errno != EAGAIN) return 0;
-      if (timeout <= 0) return 0;
-
+      if (!timeout) return 0;
+      if (hasTimedOut(timeout)) return 0;
       approximateDelay(interval);
-      timeout -= interval;
     }
+
     usbAddPendingInputRequest(endpoint);
     deleteItem(endpoint->direction.input.pending, request);
 
