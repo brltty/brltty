@@ -66,9 +66,7 @@ brltty_brl_send_dots (unsigned char 	*dots,
 {
     int 		i, 
 			len = dd.x * dd.y;
-    unsigned char 	dotsbuff[256];
-
-    brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    unsigned char 	sendbuff[256];
   
 			
     if (count > len) 
@@ -98,17 +96,14 @@ brltty_brl_send_dots (unsigned char 	*dots,
 	if (dots[i] & 0x80 ) 
 	    val = val|BRL_DOT8;
 	
-	dotsbuff[i] = val;
+	sendbuff[i] = val;
     }
     if (count < len) 
     {
-	memset (&dotsbuff[count], 0, len-count);
+	memset (&sendbuff[count], 0, len-count);
     }
 
-    ws.attrOr = dotsbuff;
-    ws.cursor = cursorPosition;
-
-    if (brlapi_write(&ws) == 0) 
+    if (brlapi_writeDots(sendbuff) == 0) 
 	return 1;
     else 
 	return 0;
@@ -156,7 +151,6 @@ brltty_brl_glib_cb (GIOChannel *source, GIOCondition condition, gpointer data)
     		break;
       
 	    case BRL_CMD_FWINLT:
-	    case BRL_CMD_FWINLTSKIP:
     		sprintf(&dd.key_codes[0], "DK03");
     		bec = bec_key_codes;
     		bed.KeyCodes = dd.key_codes;						
@@ -164,7 +158,6 @@ brltty_brl_glib_cb (GIOChannel *source, GIOCondition condition, gpointer data)
     		break;
       
 	    case BRL_CMD_FWINRT:
-	    case BRL_CMD_FWINRTSKIP:
     		sprintf(&dd.key_codes[0], "DK05");
         	bec = bec_key_codes;
     		bed.KeyCodes = dd.key_codes;						
