@@ -10,4 +10,12 @@ has since been extended, and is being maintained, by Dave Mielke
 <dave@mielke.cc>. Thanks to Mike Pedersen <mpedersen@mindspring.com> for his
 help with the design and testing of the Braille Star component. Thanks to Jill
 Clark <jill@handytech.com> of Handy Tech Elektronik for having graciously lent
-us a Bookworm so that its component could be tested.
+us a Bookworm so that its component could be tested. Thanks to Mario Lang 
+<mlang@delysid.org> for his help with the development of USB and bluetooth 
+support.
+
+A HandyTech display can be used via its serial, USB, or bluetooth interface. If
+you're using a serial connection then specify "serial:/path/to/device", e.g. 
+"serial:/dev/ttyS0". If you're using a USB connection then specify "usb:" (the
+trailing colon is important). If you're using a bluetooth connection then
+specify "bluez:address", e.g. "bluez:01:23:45:67:89:AB".
