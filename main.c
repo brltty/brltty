@@ -1317,7 +1317,7 @@ main (int argc, char *argv[])
     }
 
   clrbrlstat();
-  message("BRLTTY stopping.", 0);
+  message("BRLTTY exiting.", 0);
   closescr();
   speech->close();
   braille->close(&brl);

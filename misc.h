@@ -77,8 +77,12 @@ void SetStderrPriority(int priority);
 void LogPrint(int priority, char *format, ...);
 void LogAndStderr(int priority, char *format, ...);
 
-extern int validateInteger (long int *integer, char *description, char *value, long int *minimum, long int *maximum);
-extern int validateBaud (unsigned long int *baud, char *description, char *value);
+extern int validateInteger (int *integer, char *description, char *value, int *minimum, int *maximum);
+extern int validateBaud (unsigned int *baud, char *description, char *value, unsigned int *choices);
+extern int validateChoice (unsigned int *choice, char *description, char *value, char **choices);
+extern int validateFlag (unsigned int *flag, char *description, char *value, char *on, char *off);
+extern int validateOnOff (unsigned int *flag, char *description, char *value);
+extern int validateYesNo (unsigned int *flag, char *description, char *value);
 
 #ifdef __cplusplus
 }

@@ -76,32 +76,43 @@ void processLines (FILE *file,
 {
   size_t buff_size = 0X80; // Initial buffer size.
   char *buff_addr = malloc(buff_size); // Allocate the buffer.
-  char *line; // Will point to each line that is read.
 
-  // Keep looping, once per line, until end-of-file.
-  while ((line = fgets(buff_addr, buff_size, file)) != NULL)
+  if (buff_addr)
     {
-      size_t line_len = strlen(line); // Line length including new-line.
+      char *line; // Will point to each line that is read.
 
-      // No trailing new-line means that the buffer isn't big enough.
-      while (line[line_len-1] != '\n')
-        {
-          // Extend the buffer, keeping track of its new size.
-          buff_addr = realloc(buff_addr, (buff_size <<= 1));
+      // Keep looping, once per line, until end-of-file.
+      while ((line = fgets(buff_addr, buff_size, file)) != NULL)
+	{
+	  size_t line_len = strlen(line); // Line length including new-line.
 
-          // Read the rest of the line into the end of the buffer.
-          line = fgets(buff_addr+line_len, buff_size-line_len, file);
+	  // No trailing new-line means that the buffer isn't big enough.
+	  while (line[line_len-1] != '\n')
+	    {
+	      // Extend the buffer, keeping track of its new size.
+	      if ((buff_addr = realloc(buff_addr, (buff_size <<= 1))))
+	        {
+		  goto done;
+		}
 
-          line_len += strlen(line); // New total line length.
-          line = buff_addr; // Point to the beginning of the line.
-        }
-      line[line_len -= 1] = '\0'; // Remove trailing new-line.
+	      // Read the rest of the line into the end of the buffer.
+	      if ((line = fgets(buff_addr+line_len, buff_size-line_len, file)))
+	        {
+		  goto done;
+		}
 
-      handler(line, data);
+	      line_len += strlen(line); // New total line length.
+	      line = buff_addr; // Point to the beginning of the line.
+	    }
+	  line[line_len -= 1] = '\0'; // Remove trailing new-line.
+
+	  handler(line, data);
+	}
+    done:
+
+      // Deallocate the buffer.
+      free(buff_addr);
     }
-
-  // Deallocate the buffer.
-  free(buff_addr);
 }
 
 // Read data safely by continually retrying the read system call until all
@@ -326,25 +337,25 @@ done:
 }
 
 int
-validateInteger (long int *integer, char *description, char *value, long int *minimum, long int *maximum) {
+validateInteger (int *integer, char *description, char *value, int *minimum, int *maximum) {
    char *end;
    *integer = strtol(value, &end, 0);
    if (*end) {
-      LogPrint(LOG_ERR, "The %s is not an integer: %s",
+      LogPrint(LOG_ERR, "The %s must be an integer: %s",
                description, value);
       return 0;
    }
    if (minimum) {
       if (*integer < *minimum) {
-	 LogPrint(LOG_ERR, "The %s is too low: %ld < %ld",
-	          description, *integer, *minimum);
+	 LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
+	          description, *minimum, *integer);
 	 return 0;
       }
    }
    if (maximum) {
       if (*integer > *maximum) {
-	 LogPrint(LOG_ERR, "The %s is too high: %ld > %ld",
-	          description, *integer, *maximum);
+	 LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
+	          description, *maximum, *integer);
 	 return 0;
       }
    }
@@ -352,12 +363,12 @@ validateInteger (long int *integer, char *description, char *value, long int *mi
 }
 
 int
-validateBaud (unsigned long int *baud, char *description, char *value) {
-   long int integer;
+validateBaud (unsigned int *baud, char *description, char *value, unsigned int *choices) {
+   int integer;
    if (validateInteger(&integer, description, value, NULL, NULL)) {
       typedef struct {
-         long int integer;
-	 unsigned long int baud;
+         int integer;
+	 unsigned int baud;
       } BaudEntry;
       static BaudEntry baudTable[] = {
 	 #ifdef B50
@@ -455,15 +466,63 @@ validateBaud (unsigned long int *baud, char *description, char *value) {
       BaudEntry *entry = baudTable;
       while (entry->integer) {
          if (integer == entry->integer) {
+	    if (choices) {
+	       while (*choices) {
+		  if (integer == *choices) {
+		     break;
+		  }
+	          ++choices;
+	       }
+	       if (!*choices) {
+		  LogPrint(LOG_ERR, "Unsupported %s: %d",
+			   description, integer);
+	          return 0;
+	       }
+	    }
 	    *baud = entry->baud;
 	    return 1;
 	 }
 	 ++entry;
       }
-      LogPrint(LOG_ERR, "The %s is an invalid baud: %ld",
+      LogPrint(LOG_ERR, "Invalid %s: %d",
                description, integer);
    }
    return 0;
+}
+
+int
+validateChoice (unsigned int *choice, char *description, char *value, char **choices) {
+   int length = strlen(value);
+   if (length) {
+      int index = 0;
+      while (choices[index]) {
+	 if (length <= strlen(choices[index])) {
+	    if (strncasecmp(value, choices[index], length) == 0) {
+	       *choice = index;
+	       return 1;
+	    }
+	 }
+         ++index;
+      }
+   }
+   LogPrint(LOG_ERR, "Unsupported %s: %s", description, value);
+   return 0;
+}
+
+int
+validateFlag (unsigned int *flag, char *description, char *value, char *on, char *off) {
+   char *choices[] = {off, on, NULL};
+   return validateChoice(flag, description, value, choices);
+}
+
+int
+validateOnOff (unsigned int *flag, char *description, char *value) {
+   return validateFlag(flag, description, value, "on", "off");
+}
+
+int
+validateYesNo (unsigned int *flag, char *description, char *value) {
+   return validateFlag(flag, description, value, "yes", "no");
 }
 
 /* Functions which support horizontal status cells, e.g. Papenmeier. */

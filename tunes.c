@@ -38,7 +38,7 @@ TuneDefinition tune_detected = {
 
 static ToneDefinition tones_braille_off[] = {
    {  330,  60},
-   {  220, 100},
+   {  220,  60},
    {    0,   0}
 };
 TuneDefinition tune_braille_off = {
@@ -215,9 +215,11 @@ TuneDefinition tune_done = {
 };
 
 static ToneDefinition tones_skip_first[] = {
+   {    0,  40},
    {  297,   4},
    {  396,   6},
    {  595,   8},
+   {    0,  25},
    {    0,   0}
 };
 TuneDefinition tune_skip_first = {
@@ -225,8 +227,8 @@ TuneDefinition tune_skip_first = {
 };
 
 static ToneDefinition tones_skip[] = {
-   {    0,  18},
    {  595,  10},
+   {    0,  18},
    {    0,   0}
 };
 TuneDefinition tune_skip = {
@@ -234,8 +236,8 @@ TuneDefinition tune_skip = {
 };
 
 static ToneDefinition tones_skip_more[] = {
-   {    0,  18},
    {  566,  20},
+   {    0,   1},
    {    0,   0}
 };
 TuneDefinition tune_skip_more = {
