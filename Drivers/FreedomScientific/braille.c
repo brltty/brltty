@@ -428,6 +428,7 @@ handleWriteAcknowledgement (int ok) {
 typedef void (*AcknowledgementHandler) (int ok);
 static AcknowledgementHandler acknowledgementHandler;
 static struct timeval acknowledgementTime;
+static int acknowledgementsMissing;
 static void
 setAcknowledgementHandler (AcknowledgementHandler handler) {
   acknowledgementHandler = handler;
@@ -515,7 +516,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
 
       memcpy(packet, &inputBuffer, size);
       memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[size],
-             inputCount -= size);
+              inputCount -= size);
       return size;
     }
 
@@ -533,6 +534,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
         }
         return count;
       }
+      acknowledgementsMissing = 0;
 
       if (!inputCount) {
         static const unsigned char packets[] = {
@@ -607,8 +609,12 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
       }
     } else if ((count == 0) && acknowledgementHandler &&
                (millisecondsSince(&acknowledgementTime) > 500)) {
-      LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
-      goto handleNegativeAcknowledgement;
+      if (++acknowledgementsMissing < 5) {
+        LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
+        goto handleNegativeAcknowledgement;
+      }
+      LogPrint(LOG_WARNING, "Too many missing ACKs.");
+      count = -1;
     }
     return count;
   }
@@ -746,6 +752,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
               writeTo = model->totalCells - 1;
 
               acknowledgementHandler = NULL;
+              acknowledgementsMissing = 0;
               firmnessSetting = -1;
 
               realKeys = 0;
