@@ -42,7 +42,7 @@ class bmp bmpBMP
 endword able 45
 always ai 34
 endword ait 146
-before con begmidword an 2
+before con always an 2
 endword ant 1456
 before con always ar 4
 endword ar 4
@@ -70,9 +70,10 @@ before con midword er 236
 endword er 236
 begword es 156
 endword es 156
-begmidword eu 5
-endword eu 5
-always eur 46
+word eu 15-136
+always eu 5
+before con always eur 46
+endword eur 46
 before con always ex 1346
 endword ez 1356
 
@@ -97,7 +98,7 @@ before con always om 2456
 endword om 2456
 before con always on 346
 endword on 346
-begmidword or 56
+before con always or 56
 endword or 56
 always ou 1256
 before con always our 12346
