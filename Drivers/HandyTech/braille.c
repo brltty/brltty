@@ -313,48 +313,59 @@ static const InputOutputOperations usbOperations = {
 static int bluezSocket = -1;
 
 static int
-openBluezPort (char **parameters, const char *device) {
-  struct sockaddr_rc laddr, raddr;
-
-  laddr.rc_family = AF_BLUETOOTH;
-  bacpy(&laddr.rc_bdaddr, BDADDR_ANY);  /* Any HCI, no support for explicit
-					   interface specification yet. */
-  laddr.rc_channel = 0;
-
-  raddr.rc_family = AF_BLUETOOTH;
-  {
-    const char *ptr = device;
-    int i;
-    for (i=0; i<6; i++) {
-      raddr.rc_bdaddr.b[5-i]=(uint8_t) strtol(ptr, NULL, 16);
-      if (i != 5 && !(ptr = strchr(ptr, ':'))) ptr = ":00:00:00:00:00";
-      ptr++;
-    }
+parseBluezAddress (bdaddr_t *address, const char *string) {
+  const char *start = string;
+  int index = sizeof(address->b);
+  while (--index >= 0) {
+    char *end;
+    long int value = strtol(start, &end, 16);
+    if (end == start) return 0;
+    if (value < 0) return 0;
+    if (value > 0XFF) return 0;
+    address->b[index] = value;
+    if (!*end) break;
+    if (*end != ':') return 0;
+    start = end + 1;
   }
-  raddr.rc_channel = 1;
-
-  if (bacmp(&raddr.rc_bdaddr, BDADDR_ANY) == 0) {
-    LogPrint(LOG_INFO, "No Bluetooth Device Address specified");
-    return 0;
-  }
-    
-  if ((bluezSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0) {
-    LogError("Can't create RFCOMM socket");
-    return 0;
-  }
-  if (bind(bluezSocket, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
-    LogError("Can't bind RFCOMM socket");
-    close(bluezSocket);
-    bluezSocket = -1;
-    return 0;
-  }
-  if (connect(bluezSocket, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
-    LogError("Can't connect RFCOMM socket");
-    close(bluezSocket);
-    bluezSocket = -1;
-    return 0;
-  }
+  if (index < 0) return 0;
+  while (--index >= 0) address->b[index] = 0;
   return 1;
+}
+
+static int
+openBluezPort (char **parameters, const char *device) {
+  bdaddr_t address;
+  if (parseBluezAddress(&address, device)) {
+    if ((bluezSocket = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
+      struct sockaddr_rc local;
+      local.rc_family = AF_BLUETOOTH;
+      local.rc_channel = 0;
+      bacpy(&local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
+                                            * interface specification yet.
+                                            */
+      if (bind(bluezSocket, (struct sockaddr *)&local, sizeof(local)) != -1) {
+        struct sockaddr_rc remote;
+        remote.rc_family = AF_BLUETOOTH;
+        remote.rc_channel = 1;
+        bacpy(&remote.rc_bdaddr, &address);
+        if (connect(bluezSocket, (struct sockaddr *)&remote, sizeof(remote)) != -1) {
+          return 1;
+        } else {
+          LogError("RFCOMM socket connection");
+        }
+      } else {
+        LogError("RFCOMM socket bind");
+      }
+
+      close(bluezSocket);
+      bluezSocket = -1;
+    } else {
+      LogError("RFCOMM socket creation");
+    }
+  } else {
+    LogPrint(LOG_ERR, "Invalid Bluetooth address: %s", device);
+  }
+  return 0;
 }
 
 static int
