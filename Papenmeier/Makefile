@@ -25,7 +25,7 @@
 
 DRIVER_CODE = pm
 DRIVER_NAME = Papenmeier
-BRAILLE_MODELS = 
+BRAILLE_MODELS = Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80, Elba 20/32, IB 80
 include ../driver.mk
 
 PM_YACC_CFLAGS = -Wno-parentheses -Wno-unused
@@ -33,7 +33,7 @@ PM_YACC_CFLAGS = -Wno-parentheses -Wno-unused
 BRL_H = ../brl.h config.y
 
 brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../scr.h ../misc.h brl-cfg.h config.tab.c cmd.h hlp.h
-	$(CC) $(BRL_CFLAGS) $(PM_YACC_CFLAGS) -DREAD_CONFIG -o $@ -c $<
+	$(CC) $(BRL_CFLAGS) $(PM_YACC_CFLAGS) '-DHOME_DIR="$(PREFIX)$(DATA_DIR)"' -DREAD_CONFIG -o $@ -c $<
 
 config.tab.c: config.y
 	yacc -b config -v $<

@@ -1,7 +1,7 @@
-BRLTTY - A background process providing access to the Linux console (when in
-         text mode) for a blind person using a refreshable braille display.
+BRLTTY is a background process (daemon) providing access to the Linux console
+(when in text mode) for a blind person using a refreshable braille display.
 
-Version 2.99v, October 2001
+Version 3.0, July 2002
 
 Copyright (C) 1995-2002 by The BRLTTY Team, All rights reserved.
 
@@ -24,8 +24,8 @@ contribute, you're welcome!
 
 -------------------------------------------------------------------------------
 
-Introduction for Those New to Soft Braille
-==========================================
+Introduction for Those New to Refreshable Braille
+=================================================
 
 There are two common ways in which blind people access computers. 
 
@@ -112,22 +112,25 @@ BRLTTY requires Linux kernel 1.1.92 or later (for /dev/vcsa0 (also known as
 The following Braille displays are supported (serial communication only for
 most of them):
 
-*  Alva B.V.: ABT3xx, Delphi (serial and parallel ports), Satellite;
-*  Baum: Vario 40/80 (emulation 1/2);
-*  Blazie Engineering: BrailleLite 18/40;
-*  EuroBraille: Clio-noteBraille 40;
-*  Handialog: VisioBraille 2040
-*  Handy Tech Elektronik GmbH: BrailleWave, mod20, mod40, mod80;
-*  La O.N.C.E.: EcoBraille 20/40/80;
-*  MDV: MB208/MB408L/MB408S (protocol 5);
-*  Papenmeier: Tiny, Compact, Compact 486, 2D Lite, 2D Screen Soft,
-               EL-2D 40, EL-2D 66, EL 80, IB 80 CR Soft;
-*  Pulse Data International: BrailleNote 18/32
-*  Telesensory Systems Inc.: Navigator 20/40/80 (latest firmware version only),
-                             PowerBraille 40/65/80;
-*  Tieman B.V.: CombiBraille 25/45/85, MiniBraille 20,
-                MultiBraille MB125CR/MB145CR/MB185CR;
-*  Tiflosoft: VideoBraille 40;
+*  Alva [ABT3xx, Delphi, Satellite]
+*  BrailleLite [18/40]
+*  BrailleNote [18/32]
+*  CombiBraille [25/45/85]
+*  EcoBraille [20/40/80]
+*  EuroBraille [Clio-noteBraille 40]
+*  HandyTech [Modular 20/40/80, Wave 40, Star 40/80, Bookworm]
+*  LogText [32]
+*  MDV (protocol 5) [MB208/MB408L/MB408S]
+*  MiniBraille [20]
+*  MultiBraille [MB125CR/MB145CR/MB185CR]
+*  Papenmeier [Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80,
+               EL 40/80, Elba 20/32, IB 80]
+*  TSI [Navigator 20/40/80, PowerBraille 40/65/80]
+*  Vario/RBT (emulation 1) [40/80]
+*  Vario/RBT (emulation 2) [40/80]
+*  VideoBraille [40]
+*  VisioBraille [2040]
+*  Voyager [44/70 (USB)]
 
 The ability to add a new Braille display depends on the level of cooperation
 from its manufacturer in providing programming information.
@@ -139,12 +142,12 @@ Layout of the Archive
 
 BRLTTY is distributed as a single GNU compressed tar file named
 
-   brltty-<version>.tar.gz
+   brltty-<release>.tar.gz
 
-where `<version>' is the version number. When the archive is unpacked, there
+where `<release>' is the release number. When the archive is unpacked, there
 should be a subdirectory called `DOCS' which contains all of the general BRLTTY
 documentation including the manual in various formats, and the list of
-frequently asked questions (FAQ).
+Frequently Asked Questions (FAQ).
 
 The source files for the main, device-independent core of BRLTTY are in the
 top-level directory. There is one subdirectory for each Braille display type,
@@ -159,30 +162,54 @@ Building the Package
 ====================
 
 Simply invoking `make' will build BRLTTY and all driver libraries. To build
-BRLTTY with a specific built-in driver, just edit the main `Makefile' and
-uncomment the driver specification you want to see linked with the main
-executable before invoking `make'. Then, as root, `make install' will install
-all files into their proper locations.
+BRLTTY with a specific built-in driver (usually only necessary when preparing
+BRLTTY for use on a boot disk), just edit the main `Makefile' and uncomment the
+driver specification you want to see linked with the main executable before
+invoking `make'. Then, as root, `make install' will install all the files into
+their proper locations.
 
 For information specific to a particular driver, please see the `README' file
 in the corresponding subdirectory. Finally, see the `DOCS' subdirectory for
-BRLTTY manuals and miscelaneous information.
+BRLTTY manuals and miscellaneous information.
+
+-------------------------------------------------------------------------------
+
+RedHat Package Manager
+======================
+
+BRLTTY is also distributed in the RPM (RedHat Package Manager) format. The 
+following files are available:
+
+    brltty-<release>-<version>.src.rpm
+    brltty-<release>-<version>.i386.rpm
+
+To build and install BRLTTY from scratch:
+
+    Download the .src.rpm file.
+    Install the source with:   rpm -ivh brltty-<release>-<version>.src.rpm
+    Build and install it with: rpm -bi brltty-<release>-<version>
+
+If your system is an x86 then you don't need to be concerned with building
+BRLTTY since we provide prebuilt binaries for these platforms. Just do:
+
+    Download the .i386.rpm file.
+    Install or upgrade it with: rpm -Uvh brltty-<release>-<version>.i386.rpm
 
 -------------------------------------------------------------------------------
 
 Executing BRLTTY
 ================
 
-If you compiled BRLTTY with a braille driver built-in, simply invoking
-`brltty' should start BRLTTY with all defaults. Alternatively, you might
-need to specify a Braille driver with the -b option. Also, `brltty -h'
-will display a brief summary of all available options.
+If you compiled BRLTTY with a braille driver built-in, simply invoking `brltty'
+should start it with all defaults. Alternatively, you might need to specify a
+Braille driver with the `-b' option. `brltty -h' displays a brief summary of
+all available options.
 
 You may use a configuration file for most options as well. See the example
 configuration file `brltty.conf' in the `DOCS' subdirectory.
 
 And don't forget to review the notes for your Braille display. See the `README'
-file in the driver's subdirectory.
+file in its driver's subdirectory.
 
 -------------------------------------------------------------------------------
 

@@ -92,7 +92,7 @@
 /* Define the preferred/default status cells mode. */
 #define PREFSTYLE ST_Generic
 
-#define CONFIG_ENV   "BRLTTY_PM_CONF"
-//#define CONFIG_FILE  "/etc/brltty/brltty-pm.conf"
+#define PM_CONFIG_ENV   "BRLTTY_PM_CONF"
+#define PM_CONFIG_FILE  HOME_DIR "/brltty-pm.conf"
 
 #define MAXPATH  128

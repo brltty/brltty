@@ -1,6 +1,8 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+July 13, 2002:
+ - BRLTTY 3.0 released:
    New Bootdisk Hacking Mini-HowTo. (sd)
    Updated screen patch (for 3.9.11) provided. Rudolf Weeber <Rudolf.Weeber@gmx.de>
    Implement in-line contracted braille facility. John Boyer <director@chpi.org>
@@ -100,6 +102,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Key releases no longer interrupt message waits. (dm)
       Remove conditional compiling for debugging. (dm)
       Add driver parameters: configfile, debugreads, debugwrites, debugkeys. (dm)
+      Wait indefinitely for braille display to be connected. (dm)
    TSI driver enhancements. (sd)
       Add bindings for go to beginning/end of current line.
    Clean up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>

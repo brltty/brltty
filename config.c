@@ -49,7 +49,7 @@
 #include "misc.h"
 #include "common.h"
 
-char VERSION[] = "BRLTTY 2.99.8";
+char VERSION[] = "BRLTTY 3.0";
 char COPYRIGHT[] = "Copyright (C) 1995-2002 by The BRLTTY Team - all rights reserved.";
 
 /*
@@ -701,7 +701,7 @@ globBegin (GlobData *data) {
   memset(&data->glob, 0, sizeof(data->glob));
   data->glob.gl_offs = (sizeof(data->pathsArea) / sizeof(data->pathsArea[0])) - 1;
   if (glob(data->pattern, GLOB_DOOFFS, NULL, &data->glob) == 0) {
-    data->paths = data->glob.gl_pathv;
+    data->paths = (const char **)data->glob.gl_pathv;
     if (data->glob.gl_flags & GLOB_DOOFFS) {
       /* The behaviour of gl_pathc is inconsistent. Some implementations
        * include the leading NULL pointers and some don't. Let's just

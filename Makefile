@@ -373,7 +373,7 @@ brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
 brltest.o: brltest.c brl.h config.h
-	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DBRLDEV="$(BRLDEV)"' -c brltest.c
+	$(CC) $(CFLAGS) '-DHOME_DIR="$(PREFIX)$(DATA_DIR)"' '-DBRLDEV="$(BRLDEV)"' -c brltest.c
 
 SCRTEST_OBJECTS = scrtest.o misc.o route.o
 scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)

@@ -24,7 +24,7 @@
 
 DRIVER_CODE = ht
 DRIVER_NAME = HandyTech
-BRAILLE_MODELS = 
+BRAILLE_MODELS = Modular 20/40/80, Wave 40, Star 40/80, Bookworm
 include ../driver.mk
 
 

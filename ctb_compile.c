@@ -227,6 +227,13 @@ hexadecimalDigit (FileData *data, int *value, BYTE digit) {
 }
 
 static int
+octalDigit (FileData *data, int *value, BYTE digit) {
+  if (digit < '0' || digit > '7') return 0;
+  *value = digit - '0';
+  return 1;
+}
+
+static int
 parseText (FileData *data, ByteString *result, const BYTE *token, const int length) {	/*interpret find string */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
@@ -236,22 +243,56 @@ parseText (FileData *data, ByteString *result, const BYTE *token, const int leng
       int ok = 0;
       int start = index;
       if (++index < length) {
-        byte = token[index];
-        if (byte == '\\') {
-          ok = 1;
-        } else {
-          if (length - index >= 2)
-            if (token[index + 0] == '0' &&
-                (token[index + 1] == 'x' || token[index + 1] == 'X'))
-              index += 2;
-          if (length - index >= 2) {
-            int high, low;
-            if (hexadecimalDigit(data, &high, token[index]))
-              if (hexadecimalDigit(data, &low, token[++index])) {
-                byte = (high << 4) | low;
-                ok = 1;
-              }
-          }
+        switch (byte = token[index]) {
+          case '\\':
+            ok = 1;
+            break;
+          case 'f':
+            byte = '\f';
+            ok = 1;
+            break;
+          case 'n':
+            byte = '\n';
+            ok = 1;
+            break;
+          case 'o':
+            if (length - index > 3) {
+              int high, middle, low;
+              if (octalDigit(data, &high, token[++index]))
+                if (high < 04)
+                  if (octalDigit(data, &middle, token[++index]))
+                    if (octalDigit(data, &low, token[++index])) {
+                      byte = (high << 6) | (middle << 3) | low;
+                      ok = 1;
+                    }
+            }
+            break;
+          case 'r':
+            byte = '\r';
+            ok = 1;
+            break;
+          case 's':
+            byte = ' ';
+            ok = 1;
+            break;
+          case 't':
+            byte = '\t';
+            ok = 1;
+            break;
+          case 'v':
+            byte = '\v';
+            ok = 1;
+            break;
+          case 'x':
+            if (length - index > 2) {
+              int high, low;
+              if (hexadecimalDigit(data, &high, token[++index]))
+                if (hexadecimalDigit(data, &low, token[++index])) {
+                  byte = (high << 4) | low;
+                  ok = 1;
+                }
+            }
+            break;
         }
       }
       if (!ok) {

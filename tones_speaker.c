@@ -48,7 +48,7 @@ static int generateSpeaker (int note, int duration) {
          shortdelay(duration);
 	 return 1;
       }
-      if (ioctl(fileDescriptor, KIOCSOUND, (int)(1190000.0/noteFrequencies[note])) != -1) {
+      if (ioctl(fileDescriptor, KIOCSOUND, (int)(1193180.0/noteFrequencies[note])) != -1) {
          shortdelay(duration);
 	 if (ioctl(fileDescriptor, KDMKTONE, 0) != -1) {
 	    return 1;

@@ -281,94 +281,94 @@ writeStatus (void) {
 
 static int
 identifyTerminal(brldim *brl) {
-  int try;
+  static const unsigned char badPacket[] = { 
+    cSTX,
+    cIdSend,
+    0, 0,			/* position */
+    0, 0,			/* wrong number of bytes */
+    cETX
+  };
+
   flushOutput();
   delay(100);
-  for (try=1; try<=5; try++) {
-    static const unsigned char badPacket[] = { 
-      cSTX,
-      cIdSend,
-      0, 0,			/* position */
-      0, 0,			/* wrong number of bytes */
-      cETX
-    };
-    LogPrint(LOG_DEBUG, "Auto-indentify #%d.", try);
-    flushInput();
-    if (!writeBytes(badPacket, sizeof(badPacket))) break;
-    if (awaitInput(brl_fd, 200*try)) {
+  flushInput();
+
+  if (writeBytes(badPacket, sizeof(badPacket))) {
+    if (awaitInput(brl_fd, 1000)) {
       unsigned char identity[10];			/* answer has 10 chars */
-      if (readBytes(identity, 0, sizeof(identity), RBF_ETX)) {
-        if (identity[1] == cIdIdentify) {
-          int tn;
-          LogBytes("Identification packet", identity, sizeof(identity));
-          LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
-                   identity[2],
-                   identity[3], identity[4], identity[5],
-                   identity[6], identity[7], identity[8]);
-          for (tn=0; tn<num_terminals; tn++) {
-            if (pm_terminals[tn].ident == identity[2]) {
-              the_terminal = &pm_terminals[tn];
-              LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
-                       the_terminal->name,
-                       the_terminal->x, the_terminal->y,
-                       the_terminal->helpfile);
-              brl->x = the_terminal->x;
-              brl->y = the_terminal->y;
+      if (readBytes(identity, 0, 1, 0)) {
+        if (identity[0] == cSTX) {
+          if (readBytes(identity, 1, sizeof(identity)-1, RBF_ETX)) {
+            if (identity[1] == cIdIdentify) {
+              int tn;
+              LogBytes("Identification packet", identity, sizeof(identity));
+              LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
+                       identity[2],
+                       identity[3], identity[4], identity[5],
+                       identity[6], identity[7], identity[8]);
+              for (tn=0; tn<num_terminals; tn++) {
+                if (pm_terminals[tn].ident == identity[2]) {
+                  the_terminal = &pm_terminals[tn];
+                  LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
+                           the_terminal->name,
+                           the_terminal->x, the_terminal->y,
+                           the_terminal->helpfile);
+                  brl->x = the_terminal->x;
+                  brl->y = the_terminal->y;
 
-              curr_cols = the_terminal->x;
-              curr_stats = the_terminal->statcells;
+                  curr_cols = the_terminal->x;
+                  curr_stats = the_terminal->statcells;
 
-              // TODO: ?? HACK
-              brl_driver.helpFile = the_terminal->helpfile;
+                  // TODO: ?? HACK
+                  brl_driver.helpFile = the_terminal->helpfile;
 
-              // key codes - starts at 0X300 
-              // status keys - routing keys - step 3
-              code_status_first = RCV_KEYROUTE;
-              code_status_last  = code_status_first + 3 * (curr_stats - 1);
-              code_route_first = code_status_last + 3;
-              code_route_last  = code_route_first + 3 * (curr_cols - 1);
+                  // key codes - starts at 0X300 
+                  // status keys - routing keys - step 3
+                  code_status_first = RCV_KEYROUTE;
+                  code_status_last  = code_status_first + 3 * (curr_stats - 1);
+                  code_route_first = code_status_last + 3;
+                  code_route_last  = code_route_first + 3 * (curr_cols - 1);
 
-              if (the_terminal->frontkeys > 0) {
-                code_front_first = RCV_KEYFUNC + 3;
-                code_front_last  = code_front_first + 3 * (the_terminal->frontkeys - 1);
-              } else
-                code_front_first = code_front_last  = -1;
+                  if (the_terminal->frontkeys > 0) {
+                    code_front_first = RCV_KEYFUNC + 3;
+                    code_front_last  = code_front_first + 3 * (the_terminal->frontkeys - 1);
+                  } else
+                    code_front_first = code_front_last  = -1;
 
-              if (the_terminal->haseasybar) {
-                code_easy_first = RCV_KEYFUNC + 3;
-                code_easy_last  = 0X18;
-                code_switch_first = 0X1B;
-                code_switch_last = 0X30;
-              } else
-                code_easy_first = code_easy_last = code_switch_first = code_switch_last = -1;
+                  if (the_terminal->haseasybar) {
+                    code_easy_first = RCV_KEYFUNC + 3;
+                    code_easy_last  = 0X18;
+                    code_switch_first = 0X1B;
+                    code_switch_last = 0X30;
+                  } else
+                    code_easy_first = code_easy_last = code_switch_first = code_switch_last = -1;
 
-              LogPrint(LOG_DEBUG, "s=%03X-%03X r=%03X-%03X f=%03X-%03X e=%03X-%03X sw=%03X-%03X",
-                       code_status_first, code_status_last,
-                       code_route_first, code_route_last,
-                       code_front_first, code_front_last,
-                       code_easy_first, code_easy_last,
-                       code_switch_first, code_switch_last);
+                  LogPrint(LOG_DEBUG, "s=%03X-%03X r=%03X-%03X f=%03X-%03X e=%03X-%03X sw=%03X-%03X",
+                           code_status_first, code_status_last,
+                           code_route_first, code_route_last,
+                           code_front_first, code_front_last,
+                           code_easy_first, code_easy_last,
+                           code_switch_first, code_switch_last);
 
-              // address of display
-              addr_status = XMT_BRLDATA;
-              addr_display = addr_status + the_terminal->statcells;
-              LogPrint(LOG_DEBUG, "addr: s=%d d=%d",
-                       addr_status, addr_display);
+                  // address of display
+                  addr_status = XMT_BRLDATA;
+                  addr_display = addr_status + the_terminal->statcells;
+                  LogPrint(LOG_DEBUG, "addr: s=%d d=%d",
+                           addr_status, addr_display);
 
-              return 1;
+                  return 1;
+                }
+              }
+              LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", identity[2]);
+            } else {
+              LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
             }
+          } else {
+            LogPrint(LOG_WARNING, "Malformed identification packet.");
           }
-          LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", identity[2]);
-        } else {
-          LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
         }
-      } else {
-        LogPrint(LOG_WARNING, "Malformed identification packet.");
       }
-    } else {
-      LogPrint(LOG_WARNING, "Identification packet not received.");
     }
-    delay(1000);
   }
   return 0;
 }
@@ -376,8 +376,7 @@ identifyTerminal(brldim *brl) {
 /* ------------------------------------------------------------ */
 
 static int 
-initializeDisplay (brldim *brl, const char *dev, speed_t baud)
-{
+initializeDisplay (brldim *brl, const char *dev, speed_t baud) {
   if (openSerialDevice(dev, &brl_fd, &oldtio)) {
     struct termios newtio;	/* new terminal settings */
     memset(&newtio, 0, sizeof(newtio));
@@ -387,6 +386,7 @@ initializeDisplay (brldim *brl, const char *dev, speed_t baud)
     newtio.c_lflag = 0;		/* don't echo or generate signals */
     newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
     newtio.c_cc[VTIME] = 0;
+    LogPrint(LOG_DEBUG, "Trying %d baud.", baud2integer(baud));
     if (resetSerialDevice(brl_fd, &newtio, baud)) {
       brldim res;
       res.x = BRLCOLSMAX;		/* initialise size of display - unknownown yet */
@@ -424,25 +424,25 @@ initializeDisplay (brldim *brl, const char *dev, speed_t baud)
 }
 
 static void
-brl_initialize (char **parameters, brldim *brl, const char *dev)
-{
+brl_initialize (char **parameters, brldim *brl, const char *dev) {
   validateYesNo(&debug_keys, "debug keys flag", parameters[PARM_DEBUGKEYS]);
   validateYesNo(&debug_reads, "debug reads flag", parameters[PARM_DEBUGREADS]);
   validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
 
   /* read the config file for individual configurations */
 #ifdef READ_CONFIG
-  LogPrint(LOG_DEBUG, "look for config file");
+  LogPrint(LOG_DEBUG, "Loading config file.");
   read_config(parameters[PARM_CONFIGFILE]);
 #endif
 
-  LogPrint(LOG_DEBUG, "trying 19200 baud");
-  if (!initializeDisplay(brl, dev, B19200)) {
+  while (1) {
+    const static speed_t speeds[] = {B19200, B38400, B0};
+    const static speed_t *speed = speeds;
+    if (initializeDisplay(brl, dev, *speed)) break;
     brl_close(brl);
-    LogPrint(LOG_DEBUG, "trying 38400 baud");
-    if (!initializeDisplay(brl, dev, B38400)) {
-      brl_close(brl);
-      LogPrint(LOG_ERR, "Papenmeier driver initialization error.");
+    if (*++speed == B0) {
+      speed = speeds;
+      delay(1000);
     }
   }
 }
@@ -794,7 +794,7 @@ static void read_file(char* name)
 {
   LogPrint(LOG_DEBUG, "Opening config file: %s", name);
   if ((configfile = fopen(name, "r")) != NULL) {
-    LogPrint(LOG_DEBUG, "read config file %s", name);
+    LogPrint(LOG_DEBUG, "Reading config file: %s", name);
     parse();
     fclose(configfile);
     configfile = NULL;
@@ -808,8 +808,8 @@ static void read_file(char* name)
 static void read_config(char *name)
 {
   if (!*name) {
-    if (!(name = getenv(CONFIG_ENV))) {
-      name = CONFIG_FILE;
+    if (!(name = getenv(PM_CONFIG_ENV))) {
+      name = PM_CONFIG_FILE;
     }
   }
   LogPrint(LOG_INFO, "Papenmeier Configuration File: %s", name);

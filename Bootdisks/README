@@ -101,13 +101,13 @@ to boot.img.
 So now the current directory should contain boot.img, brltty, and
 etcbrltty.
 
-Now run the mkbd script. It will copy boot.img to myboot.img, and it will
-modify the syslinux.cfg: it will add a new boot entry called
-"brltty". That entry will have options to cause syslinux to load a
-ramdisk from a second floppy, instead of using the initrd.img on the
-first floppy. The BRLTTY entry has the "text" keyword parameter to
-trigger the text-mode install. mkbd also makes this new entry the default
-boot entry.
+Now run the mkbd script (which is located in the same directory as this
+README). It will copy boot.img to myboot.img, and it will modify the
+syslinux.cfg: it will add a new boot entry called "brltty". That entry will
+have options to cause syslinux to load a ramdisk from a second floppy, instead
+of using the initrd.img on the first floppy. The BRLTTY entry has the "text"
+keyword parameter to trigger the text-mode install. mkbd also makes this new
+entry the default boot entry.
 
 Now run the mkinit script. It will get initrd.img (the initial ramdisk)
 from boot.img and call it initrd.gz. It will modify that image:

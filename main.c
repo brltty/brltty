@@ -1030,9 +1030,13 @@ main (int argc, char *argv[]) {
               if (length <= scr.cols) {
                 int line = p->winy;
                 unsigned char buffer[scr.cols+1];
+                unsigned char string[length+1];
+                for (i=0; i<length; i++) string[i] = tolower(cut_buffer[i]);
+                string[length] = 0;
                 while ((line >= 0) && (line <= (scr.rows - brl.y))) {
                   unsigned char *address = buffer;
                   readScreen((ScreenBox){0, line, scr.cols, 1}, buffer, SCR_TEXT);
+                  for (i=0; i<scr.cols; i++) buffer[i] = tolower(buffer[i]);
                   buffer[scr.cols] = 0;
                   if (line == p->winy) {
                     if (increment < 0) {
@@ -1044,10 +1048,10 @@ main (int argc, char *argv[]) {
                       address = buffer + start;
                     }
                   }
-                  if ((address = strstr(address, cut_buffer))) {
+                  if ((address = strstr(address, string))) {
                     if (increment < 0) {
                       while (1) {
-                        unsigned char *next = strstr(address+1, cut_buffer);
+                        unsigned char *next = strstr(address+1, string);
                         if (!next) break;
                         address = next;
                       }

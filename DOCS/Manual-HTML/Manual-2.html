@@ -14,67 +14,22 @@
 <HR>
 <H2><A NAME="s2">2. The Build Procedure</A></H2>
 
-<P>Here's what to do if you trust that all of our defaults are correct,
-and just want to install BRLTTY as quickly as possible.
-<OL>
-<LI>Download the source from BRLTTY's web site
-(see 
-<A HREF="Manual-7.html#contact">Contact Information</A> for its location).
-You should end up with a file named <CODE>brltty-<EM>release</EM>.tar.gz</CODE>,
-e.g. <CODE>brltty-3.0.tar.gz</CODE>.</LI>
-<LI>Unpack the source into its native hierarchical structure.
-<BLOCKQUOTE><CODE>
-tar xzf brltty-<EM>release</EM>.tar.gz
-</CODE></BLOCKQUOTE>
-
-This should create the directory <CODE>brltty-</CODE><EM>release</EM>.</LI>
-<LI>Change to the source directory, and compile and install BRLTTY.
-<BLOCKQUOTE><CODE>
-cd brltty-<EM>release</EM><BR>
-make install
-</CODE></BLOCKQUOTE>
-
-This should be done as <B>rot</B>.</LI>
-<LI>Start BRLTTY.
-<BLOCKQUOTE><CODE>
-brltty -b<EM>driver</EM> -d<EM>device</EM>
-</CODE></BLOCKQUOTE>
-
-For <EM>driver</EM>, specify the
-two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>
-corresponding to your braille display.
-For <EM>device</EM>, specify the full path for the
-device to which your braille display is connected.</LI>
-</OL>
-<P>If you don't want to explicitly identify the driver and device
-each time you start BRLTTY, then you can take two approaches.
-You can establish system defaults
-via the 
-<A HREF="Manual-3.html#configure-braille-driver">braille-driver</A>
-and the 
-<A HREF="Manual-3.html#configure-braille-device">braille-device</A>
-configuration file directives,
-and/or compile your needs right into BRLTTY
-via the 
-<A HREF="#make-braille-driver">BRL_TARGET</A>
-and the 
-<A HREF="#make-braille-device">BRLDEV</A>
-make file variables.
-<P>That's all there's to it.
-If you'd like to uninstall BRLTTY, then just do:
-<BLOCKQUOTE><CODE>
-cd brltty-<EM>release</EM><BR>
-make uninstall
-</CODE></BLOCKQUOTE>
-<P>Now, for those who really want to know what's going on, here are the details.
+<P>BRLTTY can be downloaded from its web site
+(see section 
+<A HREF="Manual-8.html#contact">Contact Information</A> for its location).
+All releases are provided as compressed 
+<A HREF="#tar">tar balls</A>.
+Newer releases are also provided as 
+<A HREF="#rpm">RPM</A> (RedHat Package Manager) files.
+<P>That tidbit of information has probably peaked your curiosity,
+and now you just can't wait to get started.
+It's a good idea, though,
+to first become familiar with the files which will ultimately be installed.
 <P>
 <H2><A NAME="hierarchy"></A> <A NAME="ss2.1">2.1 Installed File Hierarchy</A>
 </H2>
 
-<P>It's probably helpful to start with a brief overview of what
-the result of the build procedure should be.
-It should install the following files:
+<P>The build procedure should result in the installation of the following files:
 <DL>
 <DT><B>/sbin/</B><DD><P>
 <DL>
@@ -92,12 +47,18 @@ They're only created as needed based on your customization of the make file
 <DT><B>*.conf</B><DD><P>Driver-specific configuration data.
 Their names look more or less like <CODE>brltty-</CODE><EM>driver</EM><CODE>.conf</CODE>,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.
+<DT><B>*.ctb</B><DD><P>Contraction tables
+(see section 
+<A HREF="Manual-5.html#contraction">Contraction Tables</A> for details).
+Their names look like <EM>language</EM><CODE>-</CODE><EM>country</EM><CODE>-</CODE><EM>level</EM><CODE>.ctb</CODE>.
 <DT><B>*.hlp</B><DD><P>Driver-specific help pages.
 Their names look more or less like <CODE>brltty-</CODE><EM>driver</EM><CODE>.hlp</CODE>,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>.
-<DT><B>*.tbl</B><DD><P>Dot translation tables.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.
+<DT><B>*.tbl</B><DD><P>Translation tables
+(see section 
+<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
 Their names look like <CODE>text.</CODE><EM>language</EM><CODE>.tbl</CODE>.
 Tables designed for use with character sets other than <CODE>iso-8859-1</CODE>
 have names which indicate this fact.
@@ -120,7 +81,7 @@ a tab character,
 and a description of the braille display which that driver is for.
 <DT><B>libbrlttyb<EM>driver</EM>.so.1</B><DD><P>The dynamically loadable driver for a braille display,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.
 <DT><B>brltty-spk.lst</B><DD><P>A list of the speech synthesizer drivers which have been built
 as dynamically loadable shared objects,
 and, therefore, which can be selected at run time.
@@ -130,24 +91,86 @@ a tab character,
 and a description of the speech synthesizer which that driver is for.
 <DT><B>libbrlttys<EM>driver</EM>.so.1</B><DD><P>The dynamically loadable driver for a speech synthesizer,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.
 </DL>
 </DL>
 <P>Some optional files which you should be aware of,
 although they aren't part of the installed file hierarchy, are:
 <DL>
 <DT><B>/etc/brltty.conf</B><DD><P>The system defaults configuration file.
+It's created by the system administrator.
 See 
 <A HREF="Manual-3.html#configure">The Configuration File</A> for details.
 <DT><B>/etc/brltty-<EM>driver</EM>.prefs</B><DD><P>The saved preferences settings file
 (<EM>driver</EM> is a two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>).
+<A HREF="Manual-7.html#drivers">driver identification code</A>).
+It's created by the 
+<A HREF="Manual-3.html#command-PREFSAVE">PREFSAVE</A> command.
 See 
 <A HREF="Manual-3.html#preferences">Preferences Settings</A> for details.
 </DL>
 <P>
-<H2><A NAME="make-customize"></A> <A NAME="ss2.2">2.2 Make File Customization</A>
+<H2><A NAME="rpm"></A> <A NAME="ss2.2">2.2 Installing from an RPM File</A>
 </H2>
+
+<P>To install BRLTTY from an RPM (RedHat Package Manager) file, do the following:
+<OL>
+<LI>Download the binary package which corresponds to your hardware.
+It'll be a file named
+<CODE>brltty-</CODE><EM>release</EM><CODE>-</CODE><EM>version</EM><CODE>.</CODE><EM>architecture</EM><CODE>.rpm</CODE>,
+e.g. <CODE>brltty-3.0-1.i386.rpm</CODE>.</LI>
+<LI>Install the package.
+<BLOCKQUOTE><CODE>
+rpm -Uvh brltty-<EM>release</EM>-<EM>version</EM>.<EM>architecture</EM>.rpm
+</CODE></BLOCKQUOTE>
+
+This should be done as <B>root</B>.
+Strictly speaking, the <CODE>-U</CODE> (update) option is the only one which is necessary.
+The <CODE>-v</CODE> (verbose) option displays the name of the package as it's being installed.
+The <CODE>-h</CODE> (hashes) option displays a progress meter (using hash signs).</LI>
+</OL>
+
+For the brave,
+we also provide the source RPM (<CODE>.src.rpm</CODE>) file,
+but that's beyond the scope of this document.
+<P>To uninstall BRLTTY, do:
+<BLOCKQUOTE><CODE>
+rpm -e brltty
+</CODE></BLOCKQUOTE>
+<P>
+<H2><A NAME="tar"></A> <A NAME="ss2.3">2.3 Installing from a TAR Ball</A>
+</H2>
+
+<P>Here's what to do if you just want to install BRLTTY as quickly as possible,
+trusting that all of our defaults are correct.
+<OL>
+<LI>Download the source.
+It'll be a file named
+<CODE>brltty-</CODE><EM>release</EM><CODE>.tar.gz</CODE>,
+e.g. <CODE>brltty-3.0.tar.gz</CODE>.</LI>
+<LI>Unpack the source into its native hierarchical structure.
+<BLOCKQUOTE><CODE>
+tar xzf brltty-<EM>release</EM>.tar.gz
+</CODE></BLOCKQUOTE>
+
+This should create the directory <CODE>brltty-</CODE><EM>release</EM>.</LI>
+<LI>Change to the source directory, and compile and install BRLTTY.
+<BLOCKQUOTE><CODE>
+cd brltty-<EM>release</EM><BR>
+make install
+</CODE></BLOCKQUOTE>
+
+This should be done as <B>root</B>.</LI>
+</OL>
+<P>To uninstall BRLTTY, do:
+<BLOCKQUOTE><CODE>
+cd brltty-<EM>release</EM><BR>
+make uninstall
+</CODE></BLOCKQUOTE>
+<P>That's all there's to it.
+Now, for those who really want to know what's going on, here are the details.
+<P>
+<H3><A NAME="make-customize"></A> Make File Customization</H3>
 
 <P>Before compiling BRLTTY, you should check to see if it requires
 any special configuration for your system and/or your needs.  
@@ -193,7 +216,7 @@ Don't uncomment more than one of them.
 for each provided text translation table.
 If you don't uncomment any of them,
 then a commonly (in North America) used 8-dot variant of the
-<A HREF="Manual-6.html#nabcc">North American Braille Computer Code</A>
+<A HREF="Manual-7.html#nabcc">North American Braille Computer Code</A>
 is assumed.
 Don't uncomment more than one of them.
 This specification only establishes a default text translation table;
@@ -269,8 +292,7 @@ the cross-compile suite for that architecrue have the same prefix,
 and this variable should be set to that common prefix.
 </DL>
 <P>
-<H2><A NAME="ss2.3">2.3 Make File Targets</A>
-</H2>
+<H3>Make File Targets</H3>
 
 <P>BRLTTY's make file supports most of the common application maintenance targets.
 They include:
@@ -298,7 +320,7 @@ This includes the removal of editor backup files, test case results,
 rejected patch hunks, and copies of original source files.
 </DL>
 <P>
-<H2><A NAME="ss2.4">2.4 Testing the Build</A>
+<H2><A NAME="ss2.4">2.4 Testing BRLTTY</A>
 </H2>
 
 <P>After compiling, linking, and installing BRLTTY,
@@ -309,12 +331,28 @@ brltty -b<EM>driver</EM> -d<EM>device</EM>
 </CODE></BLOCKQUOTE>
 
 For <EM>driver</EM>, specify the two-letter
-<A HREF="Manual-6.html#codes">driver identification code</A>
+<A HREF="Manual-7.html#drivers">driver identification code</A>
 corresponding to your braille display.
 For <EM>device</EM>, specify the full path
 for the device to which your braille display is connected.
+<P>If you don't want to explicitly identify the driver and device
+each time you start BRLTTY, then you can take two approaches.
+You can establish system defaults
+via the 
+<A HREF="Manual-3.html#configure-braille-driver">braille-driver</A>
+and the 
+<A HREF="Manual-3.html#configure-braille-device">braille-device</A>
+configuration file directives,
+and/or compile your needs right into BRLTTY
+via the 
+<A HREF="#make-braille-driver">BRL_TARGET</A>
+and the 
+<A HREF="#make-braille-device">BRLDEV</A>
+make file variables.
 <P>If all is well, BRLTTY's version identification message
-should appear on the braille display for a few seconds.
+should appear on the braille display for a few seconds
+(see the 
+<A HREF="Manual-3.html#options-message-delay">-M</A> command line option).
 After it goes away (which you can hasten by pressing any key on the display),
 the area of the screen where the cursor is should appear.
 This means that you should expect to see your shell's command prompt.
@@ -614,7 +652,7 @@ brltest -<EM>option</EM> ... [<EM>driver</EM> [<EM>name</EM>=<EM>value</EM>] ...
 <DT><B><EM>driver</EM></B><DD><P>The driver for the braille display.
 It may be
 either a two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>
+<A HREF="Manual-7.html#drivers">driver identification code</A>
 or the absolute path to a dynamically loadable shared object.
 If it's not specified, then the driver configured within the
 <A HREF="#make-braille-driver">make file</A> is assumed.
@@ -726,7 +764,7 @@ The device name may be abbreviated.
 <DT><B><CODE>-i</CODE><EM>instrument</EM> <CODE>--instrument=</CODE><EM>instrument</EM></B><DD><P>The instrument to use if the selected device is <CODE>midi</CODE>.
 For the complete list of instruments,
 see the 
-<A HREF="Manual-6.html#midi">MIDI Instrument Table</A>.
+<A HREF="Manual-7.html#midi">MIDI Instrument Table</A>.
 The default instrument is an <CODE>acoustic grand piano</CODE>.
 The words comprising the instrument name must be separated from one another
 by a single minus sign rather than by spaces,

@@ -162,6 +162,7 @@ of the character string within the cut buffer
 The search starts at the character immediately to the left of the braille window,
 proceeds from right to left,
 and, at the beginning of a line, wraps to the end of the previous line.
+The search isn't case sensitive.
 <DT><B>NXSEARCH
 <A NAME="command-NXSEARCH"></A> </B><DD><P>Search forward for the nearest occurrence
 of the character string within the cut buffer
@@ -170,6 +171,7 @@ of the character string within the cut buffer
 The search starts at the character immediately to the right of the braille window,
 proceeds from left to right,
 and, at the end of a line, wraps to the beginning of the next line.
+The search isn't case sensitive.
 </DL>
 <P>
 <H3><A NAME="horizontal"></A> Horizontal Motion</H3>
@@ -227,7 +229,7 @@ after an unexpected event (like cursor tracking)
 moves the braille window at an inopportune moment.
 </DL>
 <P>
-<H3>Feature Activation and Deactivation</H3>
+<H3>Feature Activation</H3>
 
 <P>Each of these commands has three forms:
 <B>activate</B> (turn the feature on),
@@ -270,7 +272,13 @@ This feature only affects the current virtual terminal.
 <DT><B>SIXDOTS
 <A NAME="command-SIXDOTS"></A> </B><DD><P>Show characters using 6-dot, rather than 8-dot, braille.
 Dots 7 and 8 are still used by other features
-like cursor representation and attribute underlining.
+like cursor representation and highlighted character underlining.
+If a contraction table has been selected
+(see the 
+<A HREF="#options-contraction-table">-c</A> command line option
+and the 
+<A HREF="#configure-contraction-table">contraction-table</A> configuration file directive),
+then it is used.
 This setting can also be changed with the
 <A HREF="#preference-text-style">Text Style</A> preference.
 <DT><B>SLIDEWIN
@@ -406,13 +414,13 @@ Invoke the <CODE>help</CODE> command again to return to the screen.
 the position of the cursor,
 the position of the braille window,
 and the states of a nmber of BRLTTY's features.
-See the section 
+See section 
 <A HREF="#status">The Status Display</A> for full details.
 Invoke the <CODE>info</CODE> command again to return to the screen.
 <DT><B>LEARN
 <A NAME="command-LEARN"></A> </B><DD><P>Switch to command learn mode,
 which is an interactive way to learn what the keys on the braille display do.
-See the section 
+See section 
 <A HREF="#learn">Command Learn Mode</A> for full details.
 Invoke the <CODE>learn</CODE> command again to return to the screen.
 </DL>
@@ -703,7 +711,7 @@ by pressing the key(s) associated with it
 and then pressing the routing key associated with the character.
 Marking the end of the cut area
 appends the selected screen content to the cut buffer.
-Excess white space is removed from the end of each line in the cut buffer
+Excess white-space is removed from the end of each line in the cut buffer
 so that unwanted trailing spaces won't be pasted back in.
 Control characters are replaced with blanks.</LI>
 <LI>Insert (paste) the text where it's needed.
@@ -1070,11 +1078,18 @@ Any command not recognized by the menu system also does these same things.</LI>
 The initial setting is <CODE>No</CODE>.
 <DT><B>Text Style
 <A NAME="preference-text-style"></A> </B><DD><P>When displaying screen content
-(see the id="options-DISPMD" name="DISPMD"> command),
+(see the 
+<A HREF="#command-DISPMD">DISPMD</A> command),
 show characters:
 <DL>
 <DT><B>8-dot</B><DD><P>With all eight dots.
 <DT><B>6-dot</B><DD><P>With only dots 1 through 6.
+If a contraction table has been selected
+(see the 
+<A HREF="#options-contraction-table">-c</A> command line option
+and the 
+<A HREF="#configure-contraction-table">contraction-table</A> configuration file directive),
+then it is used.
 </DL>
 
 This setting can also be changed with the
@@ -1164,7 +1179,8 @@ horizontally adjacent braille windows should overlap each other by.
 The initial setting is <CODE>0</CODE>.
 <DT><B>Show Cursor
 <A NAME="preference-show-cursor"></A> </B><DD><P>When displaying screen content
-(see the id="options-DISPMD" name="DISPMD"> command):
+(see the 
+<A HREF="#command-DISPMD">DISPMD</A> command):
 <DL>
 <DT><B>No</B><DD><P>Don't show the cursor.
 <DT><B>Yes</B><DD><P>Show the cursor.
@@ -1205,7 +1221,8 @@ during each cycle that it is to be invisible.
 The initial setting is <CODE>10</CODE>.
 <DT><B>Show Attributes
 <A NAME="preference-show-attributes"></A> </B><DD><P>When displaying screen content
-(see the id="options-DISPMD" name="DISPMD"> command):
+(see the 
+<A HREF="#command-DISPMD">DISPMD</A> command):
 <DL>
 <DT><B>No</B><DD><P>Don't underline highlighted characters.
 <DT><B>Yes</B><DD><P>Underline highlighted characters.
@@ -1239,7 +1256,8 @@ during each cycle that it is to be invisible.
 The initial setting is <CODE>12</CODE>.
 <DT><B>Blinking Capitals
 <A NAME="preference-blinking-capitals"></A> </B><DD><P>When displaying screen content
-(see the id="options-DISPMD" name="DISPMD"> command):
+(see the 
+<A HREF="#command-DISPMD">DISPMD</A> command):
 <DL>
 <DT><B>No</B><DD><P>Leave capital letters visible all the time.
 <DT><B>Yes</B><DD><P>Make capital letters alternately visible and invisible
@@ -1264,7 +1282,8 @@ during each cycle that they're to be invisible.
 The initial setting is <CODE>2</CODE>.
 <DT><B>Alert Tunes
 <A NAME="preference-alert-tunes"></A> </B><DD><P>Whenever a significant event with an associated tune occurs
-(see id="tunes" name="Alert Tunes">):
+(see 
+<A HREF="#tunes">Alert Tunes</A>):
 <DL>
 <DT><B>No</B><DD><P>Don't play the tune.
 <DT><B>Yes</B><DD><P>Play the tune.
@@ -1301,11 +1320,12 @@ The initial setting is <CODE>PC Speaker</CODE>.
 is being used to play the alert tunes,
 this setting specifies which instrument is to be used
 (see the 
-<A HREF="Manual-6.html#midi">MIDI Instrument Table</A>).
+<A HREF="Manual-7.html#midi">MIDI Instrument Table</A>).
 The initial setting is <CODE>Acoustic Grand Piano</CODE>.
 <DT><B>Alert Dots
 <A NAME="preference-alert-dots"></A> </B><DD><P>Whenever a significant event with an associated dot pattern occurs
-(see id="tunes" name="Alert Tunes">):
+(see 
+<A HREF="#tunes">Alert Tunes</A>):
 <DL>
 <DT><B>No</B><DD><P>Don't display the dot pattern.
 <DT><B>Yes</B><DD><P>Briefly display the dot pattern.
@@ -1435,6 +1455,27 @@ and the units digit is shown in the bottom half of the cell.
 </DL>
 
 It's initial setting is braille display driver dependent.
+<DT><B>Text Table
+<A NAME="preference-text-table"></A> </B><DD><P>Select the text translation table.
+See section 
+<A HREF="Manual-4.html#translation-text">Text Translation</A> for details.
+See the 
+<A HREF="#options-text-table">-t</A> command line option for the initial setting.
+This preference isn't saved.
+<DT><B>Attributesw Table
+<A NAME="preference-attributes-table"></A> </B><DD><P>Select the attributes translation table.
+See section 
+<A HREF="Manual-4.html#translation-attributes">Attributes Translation</A> for details.
+See the 
+<A HREF="#options-attributes-table">-a</A> command line option for the initial setting.
+This preference isn't saved.
+<DT><B>Contraction Table
+<A NAME="preference-contraction-table"></A> </B><DD><P>Select the contraction table.
+See section 
+<A HREF="Manual-5.html#contraction">Contraction Tables</A> for details.
+See the 
+<A HREF="#options-contraction-table">-c</A> command line option for the initial setting.
+This preference isn't saved.
 </DL>
 <P>Notes:
 <UL>
@@ -1462,8 +1503,8 @@ The following directives are recognized:
 <DL>
 <DT><B><CODE>attributes-table</CODE> <EM>file</EM>
 <A NAME="configure-attributes-table"></A> </B><DD><P>Specify the attributes translation table
-(see the section 
-<A HREF="Manual-4.html#tables">Translation Tables</A> for details).
+(see section 
+<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
 <A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
@@ -1478,7 +1519,7 @@ This directive can be overridden with the
 <DT><B><CODE>braille-driver</CODE> <EM>driver</EM>
 <A NAME="configure-braille-driver"></A> </B><DD><P>Specify the braille display driver.
 Either a two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>
+<A HREF="Manual-7.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
@@ -1502,11 +1543,29 @@ For a description of the parameters accepted by a specific driver,
 please see the documentation for that driver.
 This directive can be overridden with the
 <A HREF="#options-braille-parameters">-B</A> command line option.
+<DT><B><CODE>contraction-table</CODE> <EM>file</EM>
+<A NAME="configure-contraction-table"></A> </B><DD><P>Specify the contraction table
+(see section 
+<A HREF="Manual-5.html#contraction">Contraction Tables</A> for details).
+If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
+(see the 
+<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+and the 
+<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
+make file variables for more details).
+The contraction table is used when the 6-dot braille feature is activated
+(see the 
+<A HREF="#command-SIXDOTS">SIXDOTS</A> command
+and the 
+<A HREF="#preference-text-style">Text Style</A> preference).
+The default is to display uncontracted 6-dot braille.
+This directive can be overridden with the
+<A HREF="#options-contraction-table">-c</A> command line option.
 <DT><B><CODE>preferences-file</CODE> <EM>file</EM>
 <A NAME="configure-preferences-file"></A> </B><DD><P>Specify the location of the preferences file.
 If it's not specified, then <CODE>/etc/brltty-</CODE><EM>driver</EM><CODE>.prefs</CODE> is assumed,
 where <EM>driver</EM> is a two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.
 The preferences file doesn't need to exist.
 This directive can be overridden with the
 <A HREF="#options-preferences-file">-p</A> command line option.
@@ -1521,7 +1580,7 @@ This directive can be overridden with the
 <DT><B><CODE>speech-driver</CODE> <EM>driver</EM>
 <A NAME="configure-speech-driver"></A> </B><DD><P>Specify the speech synthesizer driver.
 Either a two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>
+<A HREF="Manual-7.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
@@ -1539,8 +1598,8 @@ This directive can be overridden with the
 <A HREF="#options-speech-parameters">-S</A> command line option.
 <DT><B><CODE>text-table</CODE> <EM>file</EM>
 <A NAME="configure-text-table"></A> </B><DD><P>Specify the text translation table
-(see the section 
-<A HREF="Manual-4.html#tables">Translation Tables</A> for details).
+(see section 
+<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
 <A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
@@ -1562,8 +1621,8 @@ The <CODE>brltty</CODE> command accepts the following options:
 <DL>
 <DT><B><CODE>-a</CODE><EM>file</EM> <CODE>--attributes-table=</CODE><EM>file</EM>
 <A NAME="options-attributes-table"></A> </B><DD><P>Specify the attributes translation table
-(see the section 
-<A HREF="Manual-4.html#tables">Translation Tables</A> for details).
+(see section 
+<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
 <A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
@@ -1573,15 +1632,37 @@ make file variables for more details).
 See the 
 <A HREF="#configure-attributes-table">attributes-table</A>
 configuration file directive for the default run-time setting.
+This setting can be changed with the
+<A HREF="#preference-attributes-table">Attributes Table</A> preference.
 <DT><B><CODE>-b</CODE><EM>driver</EM> <CODE>--braille-driver=</CODE><EM>driver</EM>
 <A NAME="options-braille-driver"></A> </B><DD><P>Specify the braille display driver.
 Either a two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>
+<A HREF="Manual-7.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
 <A HREF="#configure-braille-driver">braille-driver</A>
 configuration file variable for the default run-time setting.
+<DT><B><CODE>-c</CODE><EM>file</EM> <CODE>--contraction-table=</CODE><EM>file</EM>
+<A NAME="options-contraction-table"></A> </B><DD><P>Specify the contraction table
+(see section 
+<A HREF="Manual-5.html#contraction">Contraction Tables</A> for details).
+If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
+(see the 
+<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+and the 
+<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
+make file variables for more details).
+The contraction table is used when the 6-dot braille feature is activated
+(see the 
+<A HREF="#command-SIXDOTS">SIXDOTS</A> command
+and the 
+<A HREF="#preference-text-style">Text Style</A> preference).
+See the 
+<A HREF="#configure-contraction-table">contraction-table</A>
+configureation file directive for the default run-time setting.
+This setting can be changed with the
+<A HREF="#preference-contraction-table">Contraction Table</A> preference.
 <DT><B><CODE>-d</CODE><EM>device</EM> <CODE>--braille-device=</CODE><EM>device</EM>
 <A NAME="options-braille-device"></A> </B><DD><P>Specify the device to which the braille display is connected.
 The full path must be supplied.
@@ -1637,7 +1718,7 @@ to <CODE>notice</CODE>.
 <DT><B><CODE>-s</CODE><EM>driver</EM> <CODE>--speech-driver=</CODE><EM>driver</EM>
 <A NAME="options-speech-driver"></A> </B><DD><P>Specify the speech synthesizer driver.
 Either a two-letter 
-<A HREF="Manual-6.html#codes">driver identification code</A>
+<A HREF="Manual-7.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
@@ -1645,8 +1726,8 @@ See the
 configuration file directive for the default run-time setting.
 <DT><B><CODE>-t</CODE><EM>file</EM> <CODE>--text-table=</CODE><EM>file</EM>
 <A NAME="options-text-table"></A> </B><DD><P>Specify the text translation table
-(see the section 
-<A HREF="Manual-4.html#tables">Translation Tables</A> for details).
+(see section 
+<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
 <A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
@@ -1656,6 +1737,8 @@ make file variables for more details).
 See the 
 <A HREF="#configure-text-table">text-table</A>
 configureation file directive for the default run-time setting.
+This setting can be changed with the
+<A HREF="#preference-text-table">Text Table</A> preference.
 <DT><B><CODE>-v</CODE> <CODE>--version</CODE>
 <A NAME="options-version"></A> </B><DD><P>Display the current version of BRLTTY,
 identify the selected drivers,
@@ -1711,6 +1794,9 @@ The following environment variables are supported:
 <DT><B><CODE>BRLTTY_CONFIGURATION_FILE</CODE></B><DD><P>The configuration file
 (see the 
 <A HREF="#options-configuration-file">-f</A> command line option).
+<DT><B><CODE>BRLTTY_CONTRACTION_TABLE</CODE></B><DD><P>The contraction table
+(see the 
+<A HREF="#options-contraction-table">-c</A> command line option).
 <DT><B><CODE>BRLTTY_PREFERENCES_FILE</CODE></B><DD><P>The preferences file
 (see the 
 <A HREF="#options-preferences-file">-p</A> command line option).

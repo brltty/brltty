@@ -23,11 +23,7 @@ Your help is welcome.
   line you're on even when new text is printed and the screen scrolls up?
   Like in IRC for instance...
 
-- Better speech support
-
-- On-the-fly grade II translation: translating one window at a time into
-  grade II Braille would speed up reading.  It may be possible to use some
-  existing free translation software like nfbtrans.
+- Better speech support.
 
 - Support for more Braille displays.
 

@@ -2,9 +2,12 @@
 
 set -e
 
+# Make local mount points
+mkdir -p mnt1 mnt2
+
 # Work on a copy of bootdisk image
 cp -f boot.img myboot.img
-mount myboot.img mnt1 -o loop -t ext2
+mount myboot.img mnt1 -o loop -t msdos
 
 # Modify syslinux.cfg
 cat >cfg <<EOF

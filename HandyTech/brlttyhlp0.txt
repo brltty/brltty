@@ -70,8 +70,8 @@ B1 B8 DN  switch to input mode
 The front keys, when in input mode, are interpreted differently. The eight Bn
 keys are interpreted as the eight braille dots; pressing any combination of
 them inputs the corresponding character. The UP and DN bars are interpreted as
-space bars; pressing either one of them inputs a space. Key combinations
-involving both the Bn keys and the UP/DN bars, as well as those involving the
-routing and status keys, still function as described above. The Bn (front key)  
-to Dn (braille dot) mapping has been designed to represent the conventional
+space bars; pressing either of them inputs a space. Key combinations involving
+both the Bn keys and the UP/DN bars, as well as those involving the routing
+and/or status keys, still function as described above. The Bn (front key)  to
+Dn (braille dot) mapping has been designed to represent the conventional
 layout, and is as follows: B1=D7 B2=D3 B3=D2 B4=D1 B5=D4 B6=D5 B7=D6 B8=D8

@@ -69,7 +69,7 @@ selectRule (int length) { /*check for valid contractions */
         case CTO_Literal:
           return 1;
         case CTO_LargeSign:
-          if (CTC(before, CTC_Letter) || CTC(after, CTC_Letter))
+          if (!CTC(before, CTC_Space) || !CTC(after, CTC_Space))
             curop = CTO_Always;
           return 1;
         case CTO_WholeWord:
@@ -355,15 +355,12 @@ contractText (void *contractionTable,
       src++;
     }
 
-    {
-      int space = src > srcmin && CTC(src[-1], CTC_Space);
-      if (space || (CTC(after, CTC_Space) && curop != CTO_JoinableWord)) {
-        srcword = src;
-        destword = dest;
-      }
-      if (!space)
-        prevop = curop;
+    if (((src > srcmin) && CTC(src[-1], CTC_Space) && (curop != CTO_JoinableWord))) {
+      srcword = src;
+      destword = dest;
     }
+    if ((dest == destmin) || dest[-1])
+      prevop = curop;
   }				/*end of translation loop */
 done:
 
