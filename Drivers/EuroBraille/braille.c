@@ -39,7 +39,17 @@
 #define BRLNAME	"EuroBraille"
 #define PREFSTYLE ST_None
 
+/*
+** the next define controls whichever you want the LCD support or not.
+** Please do not use this define if you use an IRIS, this terminal doesn't have
+** any LCD screen.
+*/
 #define BRL_HAVE_VISUAL_DISPLAY
+/*
+** For debugging only
+** #define		LOG_IO
+*/
+
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 #include "braille.h"
@@ -460,16 +470,19 @@ static void brl_writeWindow (BrailleDisplay *brl)
 
    if (context) 
      return ;
-   /* We update the display only if it has changed */
-   if (memcmp(brl->buffer, prevdata, NbCols) != 0)
-     ReWrite = 1;
+   if (!ReWrite)
+     {
+      /* We update the display only if it has changed */
+	if (memcmp(brl->buffer, prevdata, NbCols) != 0)
+	  ReWrite = 1;
+     }
    if (ReWrite)
      {
       /* right end cells don't have to be transmitted if all dots down */
 	i = NbCols;
 
 	  {
-	     char OutBuf[i + 3];
+	     char OutBuf[2 * i + 6];
 	     char *p = OutBuf;
 
 	     *p++ = i + 2;
@@ -492,30 +505,27 @@ static void brl_writeWindow (BrailleDisplay *brl)
 
 static void	brl_writeVisual(BrailleDisplay *brl)
 {
-  /* The Iris doesn't have an LCD. */
-  if (model_ID != 5)
-    {
-      int		i = NbCols;
-      char		OutBuf[NbCols + 3];
-      char	        *p = OutBuf;
-      int		j;
+  int		i = NbCols;
+  char		OutBuf[2 * NbCols + 6];
+  char	        *p = OutBuf;
+  int		j;
 
-      if (memcmp(brl->buffer, lcd_data, NbCols) != 0)
-        {
-          ReWrite_LCD = 1;
-          memcpy(lcd_data, brl->buffer, NbCols);
-        }
-      if (ReWrite_LCD)
-        {
-          memset(OutBuf, 0, NbCols + 3);
-          *p++ = i + 2;
-          *p++ = 'D';
-          *p++ = 'L';
-          for (j = 0; j < i; j++)
-            *p++ = brl->buffer[j];
-          WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
-          ReWrite_LCD = 0;
-        }
+  if (ReWrite_LCD == 0)
+    if (memcmp(brl->buffer, lcd_data, NbCols) != 0)
+      {
+	ReWrite_LCD = 1;
+	memcpy(lcd_data, brl->buffer, NbCols);
+      }
+  if (ReWrite_LCD)
+    {
+      memset(OutBuf, 0, NbCols + 2);
+      *p++ = i + 2;
+      *p++ = 'D';
+      *p++ = 'L';
+      for (j = 0; j < i; j++)
+	*p++ = brl->buffer[j];
+      WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
+      ReWrite_LCD = 0;
     }
 }
 
@@ -693,8 +703,11 @@ static int routing(BrailleDisplay *brl, int routekey)
 	     res = CMD_NOOP;
 	     break;
 	   case 0x06: /* Console Switching */
-	     context = 0;
-	     message("switch:1 2 3 4 5 6 7 t", MSG_NODELAY);
+ 	     context = 0;
+	     if (NbCols == 20)
+	       message("switch:1 2 3 4 5 6 t", MSG_NODELAY);
+	     else
+	       message("switch:1 2 3 4 5 6 7 t", MSG_NODELAY);
 	     context = 2;
 	     ReWrite = 0;
 	     res = CMD_NOOP;
