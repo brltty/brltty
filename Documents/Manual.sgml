@@ -780,10 +780,18 @@ Again, exactly where it's best to do this is distribution-dependent.
 Here are the places we know about so far:
 <descrip>
   <tag>Debian</tag>
-    <tt>/etc/init.d/boot</> for older releases,
-    and <tt>/etc/init.d/rcS</> for newer releases.
+    <tt>/etc/init.d/boot</> (for older releases)
+    <newline>
+    <tt>/etc/init.d/rcS</> (for newer releases)
+    <newline>
+    A <tt/brltty/ package is provided
+    (see [<htmlurl url="http://packages.debian.org/brltty" name="http://packages.debian.org/brltty">])
+    as of release <tt/3.0/ (<tt/Woody/).
+    Since this package takes care of starting BRLTTY,
+    there's no need for user-supplied code to do so if it's installed.
   <tag>RedHat</tag>
     <tt>/etc/rc.d/rc.sysinit</>
+    <newline>
     Beware that later releases,
     in order to support a more user-oriented system initialization procedure,
     have this script reinvoke itself such that
@@ -4314,7 +4322,7 @@ Perhaps a picture will make this numbering convention easier to understand.
 
 <sect1>Contact Information<label id="contact"><p>
 For up-to-date information, see our web page at
-<htmlurl url="http://mielke.cc/brltty/" name="[http://mielke.cc/brltty/]">.
+[<htmlurl url="http://mielke.cc/brltty/" name="http://mielke.cc/brltty/">].
 
 BRLTTY represents the work of a team, which includes:
 <itemize>
