@@ -1419,8 +1419,9 @@ main (int argc, char *argv[]) {
             playTune(&tune_command_rejected);
             break;
           case CMD_CSRJMP_VERT:
-            if (!routeCursor(-1, p->winy, curscr))
-              playTune(&tune_command_rejected);
+            playTune(routeCursor(-1, p->winy, curscr)?
+                     &tune_routing_started:
+                     &tune_command_rejected);
             break;
 
           case CMD_CSRVIS:
@@ -1689,8 +1690,10 @@ main (int argc, char *argv[]) {
               case CR_ROUTE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 0);
-                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, curscr))
+                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, curscr)) {
+                    playTune(&tune_routing_started);
                     break;
+                  }
                 }
                 playTune(&tune_command_rejected);
                 break;

@@ -25,7 +25,6 @@
 #include <signal.h>
 
 #include "misc.h"
-#include "tunes.h"
 #include "scr.h"
 #include "route.h"
 
@@ -177,7 +176,6 @@ startCursorRouting (int column, int row, int screen) {
 
     default: /* parent: continue while cursor is being routed */
       started = 1;
-      playTune(&tune_routing_started);
       break;
   }
 
