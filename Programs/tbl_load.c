@@ -32,6 +32,7 @@
 #include "tbl_load.h"
 
 #define DOT_COUNT 8
+static const char noDots[] = {'0'};
 static const char dotNumbers[DOT_COUNT] = {'1', '2', '3', '4', '5', '6', '7', '8'};
 static const unsigned char dotBits[DOT_COUNT] = {B1, B2, B3, B4, B5, B6, B7, B8};
 #define DOT_BIT(dot) (dotBits[(dot)])
@@ -217,6 +218,7 @@ getByte (InputData *input, unsigned char *byte) {
 static int
 getCell (InputData *input, unsigned char *cell) {
   const char *location = input->location;
+  int none = 0;
   char enclosed = (*location == '(')? ')':
                   0;
   *cell = 0;
@@ -226,6 +228,9 @@ getCell (InputData *input, unsigned char *cell) {
   } else if (!*location) {
     syntaxError(input, "missing cell");
     return 0;
+  } else if (memchr(noDots, *location, sizeof(noDots))) {
+    ++location;
+    none = 1;
   }
 
   while (*location) {
@@ -245,7 +250,7 @@ getCell (InputData *input, unsigned char *cell) {
 
     {
       unsigned char dot;
-      if (!testDotNumber(character, &dot)) {
+      if (none || !testDotNumber(character, &dot)) {
         syntaxError(input, "invalid dot number");
         return 0;
       }
@@ -389,11 +394,14 @@ setTable (InputData *input, TranslationTable *table) {
       } else if (input->options & TBL_DUPLICATE) {
         char dotsBuffer[DOT_COUNT];
         int dotCount = 0;
-        int dotIndex;
-
-        for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex)
-          if (byte->cell & DOT_BIT(dotIndex))
-            dotsBuffer[dotCount++] = dotNumbers[dotIndex];
+        if (byte->cell) {
+          int dotIndex;
+          for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex)
+            if (byte->cell & DOT_BIT(dotIndex))
+              dotsBuffer[dotCount++] = dotNumbers[dotIndex];
+        } else {
+          dotsBuffer[dotCount++] = noDots[0];
+        }
         reportError(input, "duplicate dots: %.*s [\\X%02X]", dotCount, dotsBuffer, byteIndex);
       }
     } else {
