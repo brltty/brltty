@@ -1,0 +1,44 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+BRLTTY_VERSION="@PACKAGE_VERSION@"
+BRLTTY_EXECUTE_ROOT="@execute_root@"
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+sbindir="@sbindir@"
+libexecdir="@libexecdir@"
+datadir="@datadir@"
+sysconfdir="@sysconfdir@"
+sharedstatedir="@sharedstatedir@"
+localstatedir="@localstatedir@"
+libdir="@libdir@"
+includedir="@includedir@"
+oldincludedir="@oldincludedir@"
+infodir="@infodir@"
+mandir="@mandir@"
+
+BRLTTY_PROGRAM_DIRECTORY="@program_directory@"
+BRLTTY_LIBRARY_DIRECTORY="@library_directory@"
+BRLTTY_DATA_DIRECTORY="@data_directory@"
+BRLTTY_MANPAGE_DIRECTORY="@manpage_directory@"
+BRLTTY_INCLUDE_DIRECTORY="@include_directory@"
+
+BRLAPI_VERSION="@BRLAPI_VERSION@"
+BRLAPI_RELEASE="@BRLAPI_RELEASE@"
+BRLAPI_KEYFILE="@api_keyfile@"

@@ -69,6 +69,8 @@ copyFiles()
    done
 }
 
+. "`dirname "${0}"`/brltty-config" || exit "${?}"
+
 if [ "${#}" -eq 0 ]
 then
    syntaxError "missing destination directory."
@@ -78,7 +80,7 @@ shift
 
 if [ "${#}" -eq 0 ]
 then
-   from="=F"
+   from="${BRLTTY_EXECUTE_ROOT}"
 elif [ "${#}" -eq 1 ]
 then
    from="${1}"
@@ -100,25 +102,25 @@ then
 fi
 makeDirectory "${to}" "destination"
 
-makeDirectory "${to}=P" "executables"
-copyFiles "${from}=P" "${to}=P" "executable" "brltty brltty-install"
+makeDirectory "${to}${BRLTTY_PROGRAM_DIRECTORY}" "executables"
+copyFiles "${from}${BRLTTY_PROGRAM_DIRECTORY}" "${to}${BRLTTY_PROGRAM_DIRECTORY}" "executable" "brltty brltty-config brltty-install"
 
 conf="brltty.conf"
-if [ -f "${from}=C/${conf}" ]
+if [ -f "${from}${sysconfdir}/${conf}" ]
 then
-   makeDirectory "${to}=C" "configuration"
-   copyFiles "${from}=C" "${to}=C" "configuration file" "${conf}"
+   makeDirectory "${to}${sysconfdir}" "configuration"
+   copyFiles "${from}${sysconfdir}" "${to}${sysconfdir}" "configuration file" "${conf}"
 else
-   programMessage "no configuration file: ${from}=C/${conf}"
+   programMessage "no configuration file: ${from}${sysconfdir}/${conf}"
 fi
 
-makeDirectory "${to}=L" "library"
+makeDirectory "${to}${BRLTTY_LIBRARY_DIRECTORY}" "library"
 echo "Installing library files."
-copyContents "${from}=L" "${to}=L"
+copyContents "${from}${BRLTTY_LIBRARY_DIRECTORY}" "${to}${BRLTTY_LIBRARY_DIRECTORY}"
 
-makeDirectory "${to}=D" "data"
+makeDirectory "${to}${BRLTTY_DATA_DIRECTORY}" "data"
 echo "Installing data files."
-copyContents "${from}=D" "${to}=D"
+copyContents "${from}${BRLTTY_DATA_DIRECTORY}" "${to}${BRLTTY_DATA_DIRECTORY}"
 
 echo "Installation complete."
 exit 0

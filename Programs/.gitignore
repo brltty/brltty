@@ -5,7 +5,7 @@ brlapi.h
 *.a
 *.so
 brltty
-brltty-install
+brltty-config
 brltest
 scrtest
 tunetest

@@ -17,7 +17,7 @@
 
 include $(BLD_TOP)config.mk
 
-all: all-brltty brltty-install$X all-brltest scrtest$X tunetest$X $(BUILD_API)
+all: all-brltty all-brltest scrtest$X tunetest$X $(BUILD_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 
@@ -247,17 +247,6 @@ tbl2hex.$O:
 
 ###############################################################################
 
-brltty-install$X: $(SRC_DIR)/brltty-install.in
-	sed -e 's%=F%$(EXECUTE_ROOT)%g' \
-	    -e 's%=P%$(PROGRAM_DIRECTORY)%g' \
-            -e 's%=L%$(LIBRARY_DIRECTORY)%g' \
-	    -e 's%=D%$(DATA_DIRECTORY)%g' \
-	    -e 's%=C%$(sysconfdir)%g' \
-            $(SRC_DIR)/brltty-install.in >$@
-	chmod a+rx $@
-
-###############################################################################
-
 check-braille: brltty braille-drivers
 	for lib in $(BRL_LIBS); \
 	do test $$lib = no && continue; \
@@ -276,10 +265,11 @@ check-speech: brltty speech-drivers
 
 install:: install-programs install-help install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
-install-programs: brltty brltty-install
+install-programs: brltty$X
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-	$(INSTALL_SCRIPT) brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) brltty-config $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_SCRIPT) brltty-install$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_DRIVERS) $(BRAILLE_HELP) install-data-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIRECTORY) 
@@ -336,8 +326,9 @@ install-api-key:
 uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers
 
 uninstall-programs:
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty$X
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-config
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install$X
 
 uninstall-data:
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.tbl
