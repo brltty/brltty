@@ -104,7 +104,6 @@ mkdir "${modifiedRoot}"
 cp -a -- "${originalRoot}/." "${modifiedRoot}"
 
 loaderDirectory=""
-set +e
 for directory in boot/isolinux isolinux
 do
    [ -d "${originalRoot}/${directory}" ] && {
@@ -112,7 +111,6 @@ do
       break
    }
 done
-set -e
 
 configurationFile="isolinux.cfg"
 sed -n -e '
@@ -146,9 +144,7 @@ shopt -u nullglob
 for device in /dev/vcs*
 do
    deviceName="${device##*/}"
-   set +e
    [ -e "${deviceDirectory}/${deviceName}" ] && continue
-   set -e
    cp -a "${device}" "${deviceDirectory}"
 done
 
@@ -194,7 +190,8 @@ initrdAvailableBlocks="${1}"
 initrdBlockSize="${2}"
 set -- $(du -B "${initrdBlockSize}" -s "${brlttyInstallRoot}")
 brlttyInstallBlocks="${1}"
-initrdImageBytes="$(stat -c '%s' "${initrdImage}")"
+set -- $(stat -c '%s' "${initrdImage}")
+initrdImageBytes="${1}"
 initrdImageBlocks=$(( (initrdImageBytes + initrdBlockSize - 1) / initrdBlockSize ))
 initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
 (( (initrdPadBlocks += 100) > 0 )) && {
