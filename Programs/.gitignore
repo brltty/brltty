@@ -6,11 +6,12 @@ api.h
 *.so
 brltty
 brltty-config
+apitest
 brltest
-spktest
-scrtest
-tbltest
 ctbtest
+scrtest
+spktest
+tbltest
 tunetest
 tbl2hex
 txt2hlp

@@ -140,7 +140,7 @@ typedef struct {
  * \code
  * if (brlapi_initializeConnection(&settings,&settings)<0) {
  *  fprintf(stderr,"couldn't connect to BrlAPI at %s: %s\n",
- *   settings.hostName, brlapi_strerror());
+ *   settings.hostName, brlapi_strerror(brlapi_crrno));
  *  exit(1);
  * }
  * \endcode
@@ -560,19 +560,20 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_SUCCESS                  0  /**< Success */
 #define BRLERR_NOMEM                    1  /**< Not enough memory */
 #define BRLERR_TTYBUSY                  2  /**< Already a connection running in this tty */
-#define BRLERR_UNKNOWN_INSTRUCTION      3  /**< Not implemented in protocol */
-#define BRLERR_ILLEGAL_INSTRUCTION      4  /**< Forbiden in current mode */
-#define BRLERR_INVALID_PARAMETER        5  /**< Out of range or have no sense */
-#define BRLERR_INVALID_PACKET           6  /**< Invalid size */
-#define BRLERR_RAWNOTSUPP               7  /**< Raw mode not supported by loaded driver */
-#define BRLERR_KEYSNOTSUPP              8  /**< Reading of key codes not supported by loaded driver */
-#define BRLERR_CONNREFUSED              9  /**< Connection refused */
-#define BRLERR_OPNOTSUPP               10  /**< Operation not supported */
-#define BRLERR_GAIERR                  11  /**< Getaddrinfo error */
-#define BRLERR_LIBCERR                 12  /**< Libc error */
-#define BRLERR_UNKNOWNTTY              13  /**< Couldn't find out the tty number */
-#define BRLERR_PROTOCOL_VERSION        14  /**< Bad protocol version */
-#define BRLERR_EOF                     15  /**< Unexpected end of file */
+#define BRLERR_RAWMODEBUSY              3  /**< Already a connection running in this tty */
+#define BRLERR_UNKNOWN_INSTRUCTION      4  /**< Not implemented in protocol */
+#define BRLERR_ILLEGAL_INSTRUCTION      5  /**< Forbiden in current mode */
+#define BRLERR_INVALID_PARAMETER        6  /**< Out of range or have no sense */
+#define BRLERR_INVALID_PACKET           7  /**< Invalid size */
+#define BRLERR_RAWNOTSUPP               8  /**< Raw mode not supported by loaded driver */
+#define BRLERR_KEYSNOTSUPP              9  /**< Reading of key codes not supported by loaded driver */
+#define BRLERR_CONNREFUSED             10  /**< Connection refused */
+#define BRLERR_OPNOTSUPP               11  /**< Operation not supported */
+#define BRLERR_GAIERR                  12  /**< Getaddrinfo error */
+#define BRLERR_LIBCERR                 13  /**< Libc error */
+#define BRLERR_UNKNOWNTTY              14  /**< Couldn't find out the tty number */
+#define BRLERR_PROTOCOL_VERSION        15  /**< Bad protocol version */
+#define BRLERR_EOF                     16  /**< Unexpected end of file */
 
 /* brlapi_errlist */
 /** Error message list
@@ -614,10 +615,10 @@ extern int brlapi_errno;
 /* brlapi_strerror */
 /** Get plain error message
  *
- * brlapi_strerror reads brlapi_errno, and returns the corresponding plain
- * error message.
+ * brlapi_strerror returns the plain error message corresponding to its *
+ * argument.
  */
-extern const char *brlapi_strerror(void);
+extern const char *brlapi_strerror(int err);
 
 /** @} */
 
@@ -664,6 +665,16 @@ typedef struct {
  * brlapi_writePacket() or brlapi_readPacket(), and unlocked afterwards.
  */
 extern pthread_mutex_t brlapi_fd_mutex;
+
+/** type for packet type. Only unsigned can cross networks, 32bits */
+typedef uint32_t brl_type_t;
+
+const char *brlapi_packetType(brl_type_t ptype);
+
+typedef void (*brlapi_errorHandler_t)(int, brl_type_t, const void *, size_t);
+
+brlapi_errorHandler_t brlapi_setErrorHandler(brlapi_errorHandler_t);
+void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *buf, size_t size);
 
 #ifdef __cplusplus
 }

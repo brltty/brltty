@@ -45,32 +45,27 @@ extern "C" {
  *
  * @{ */
 
-/** type for packet type. Only unsigned can cross networks, 32bits */
-typedef uint32_t brl_type_t;
-
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 3) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 4) /** Communication protocol version */
 
 #define BRLPACKET_AUTHKEY           'K'    /**< Authentication key          */
-#define BRLPACKET_BYE               'B'    /**< Bye                         */
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDRIVERNAME     'n'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDISPLAYSIZE    's'    /**< Dimensions of brl display   */
 #define BRLPACKET_GETTTY            't'    /**< Asks for a specified tty    */
 #define BRLPACKET_LEAVETTY          'L'    /**< Release the tty             */
 #define BRLPACKET_KEY               'k'    /**< Braille key                 */
-#define BRLPACKET_COMMAND           'c'    /**< Braille command             */
 #define BRLPACKET_IGNOREKEYRANGE    'm'    /**< Mask key-range              */
 #define BRLPACKET_IGNOREKEYSET      'M'    /**< Mask key-set                */
 #define BRLPACKET_UNIGNOREKEYRANGE  'u'    /**< Unmask key range            */
 #define BRLPACKET_UNIGNOREKEYSET    'U'    /**< Unmask key set              */
-#define BRLPACKET_WRITEDOTS         'D'    /**< Write Dots On Braille Display */
 #define BRLPACKET_STATWRITE         'S'    /**< Write Status Cells          */
-#define BRLPACKET_EXTWRITE          'e'    /**< Extended Write              */
+#define BRLPACKET_EXTWRITE          'w'    /**< Extended Write              */
 #define BRLPACKET_GETRAW            '*'    /**< Enter in raw mode           */
 #define BRLPACKET_LEAVERAW          '#'    /**< Leave raw mode              */
 #define BRLPACKET_PACKET            'p'    /**< Raw packets                 */
 #define BRLPACKET_ACK               'A'    /**< Acknowledgement             */
-#define BRLPACKET_ERROR             'E'    /**< Error in protocol           */
+#define BRLPACKET_ERROR             'e'    /**< non-fatal error             */
+#define BRLPACKET_EXCEPTION         'E'    /**< Exception                   */
 
 /** Magic number to give when sending a BRLPACKET_GETRAW packet */
 #define BRLRAW_MAGIC (0xdeadbeefL)
@@ -79,6 +74,12 @@ typedef struct {
   uint32_t protocolVersion;
   unsigned char key;
 } authStruct;
+
+typedef struct {
+  uint32_t code;
+  brl_type_t type;
+  unsigned char packet;
+} errorPacket_t;
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server

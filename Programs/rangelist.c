@@ -25,28 +25,28 @@
 #include "rangelist.h"
 #include "misc.h"
 
-/* Function : CreateRange */
-Trangelist *CreateRange(Trangelist *p, uint32_t x, uint32_t y, Trangelist *n)
+/* Function : createRange */
+rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n)
 {
-  Trangelist *c = (Trangelist *) malloc(sizeof(Trangelist));
+  rangeList *c = (rangeList *) malloc(sizeof(rangeList));
   if (c==NULL) return NULL;
   c->x = x; c->y = y; c->next = n;
   if (p!=NULL) p->next = c;
   return c;
 }
 
-/* Function : FreeRange */
-void FreeRange(Trangelist *p, Trangelist *c)
+/* Function : freeRange */
+void freeRange(rangeList *p, rangeList *c)
 {
   if (c==NULL) return;
   if (p!=NULL) p->next = c->next;
   free(c);
 }
 
-/* Function : FreeRangeList */
-void FreeRangeList(Trangelist **l)
+/* Function : freeRangeList */
+void freeRangeList(rangeList **l)
 {
-  Trangelist *p1, *p2;
+  rangeList *p1, *p2;
   if (l==NULL) return;
   p2 = *l;
   while (p2!=NULL) {
@@ -58,9 +58,9 @@ void FreeRangeList(Trangelist **l)
 }
 
 /* Function : contains */
-Trangelist *contains(Trangelist *l, uint32_t n)
+rangeList *contains(rangeList *l, uint32_t n)
 {
-  Trangelist *c = l;
+  rangeList *c = l;
   while (c!=NULL) {
     if (c->x>n) return NULL; /* the list is sorted! */
     if (n<=c->y) return c;
@@ -70,11 +70,11 @@ Trangelist *contains(Trangelist *l, uint32_t n)
 }
 
 /* Function : DisplayRangeList */
-void DisplayRangeList(Trangelist *l)
+void DisplayRangeList(rangeList *l)
 {
   if (l==NULL) printf("emptyset");
   else {
-    Trangelist *c = l;
+    rangeList *c = l;
     while (1) {
       printf("[%u..%u]",c->x,c->y);
       if (c->next==NULL) break;
@@ -85,21 +85,21 @@ void DisplayRangeList(Trangelist *l)
   printf("\n");
 }
 
-/* Function : AddRange */
-int AddRange(uint32_t x0, uint32_t y0, Trangelist **l)
+/* Function : addRange */
+int addRange(uint32_t x0, uint32_t y0, rangeList **l)
 {
   uint32_t x,y;
-  Trangelist *p, *c, *tmp;
+  rangeList *p, *c, *tmp;
   x = MIN(x0,y0); y = MAX(x0,y0);
   if (*l == NULL) {
-    if ((*l = CreateRange(NULL,x,y,NULL)) == NULL) return -1;
+    if ((*l = createRange(NULL,x,y,NULL)) == NULL) return -1;
     return 0;
   }
   p = NULL; c = *l;
   while (1) {
     if (x<=c->x) {
       if (y<c->x-1) {
-        tmp = CreateRange(p,x,y,c);
+        tmp = createRange(p,x,y,c);
         if (tmp==NULL) return 0;
         if (p==NULL) *l = tmp;
         return 0;
@@ -115,7 +115,7 @@ int AddRange(uint32_t x0, uint32_t y0, Trangelist **l)
       if (x>c->y+1) {
         p = c; c = p->next;
         if (c==NULL) {
-          c = CreateRange(p,x,y,NULL);
+          c = createRange(p,x,y,NULL);
           if (c==NULL) return -1; else return 0;
         } else continue;
       } else {
@@ -132,10 +132,10 @@ int AddRange(uint32_t x0, uint32_t y0, Trangelist **l)
     if (p->y<c->x-1) return 0;
     if (p->y<=c->y) {
       p->y = c->y;
-      FreeRange(p,c);
+      freeRange(p,c);
       return 0;
     } else {
-      FreeRange(p,c);
+      freeRange(p,c);
       c = p->next;
       if (c==NULL) return 0;
       continue;
@@ -143,11 +143,11 @@ int AddRange(uint32_t x0, uint32_t y0, Trangelist **l)
   }
 }
 
-int RemoveRange(uint32_t x0, uint32_t y0, Trangelist **l)
+int removeRange(uint32_t x0, uint32_t y0, rangeList **l)
 {
   int z;
   uint32_t x, y;
-  Trangelist *p, *c, *tmp;
+  rangeList *p, *c, *tmp;
 
   if ((l==NULL) || (*l==NULL)) return 0;
 
@@ -167,7 +167,7 @@ int RemoveRange(uint32_t x0, uint32_t y0, Trangelist **l)
         } else {
           z = (y == c->y);
           tmp = c; c = c->next;
-          FreeRange(p,tmp);
+          freeRange(p,tmp);
           if (p==NULL) (*l) = c;
           if ((z) || (c==NULL)) return 0;
           continue;
@@ -185,7 +185,7 @@ int RemoveRange(uint32_t x0, uint32_t y0, Trangelist **l)
           } else {
             z = (y == c->y);
             tmp = c; c = c->next;
-            FreeRange(p,tmp);
+            freeRange(p,tmp);
             if (p==NULL) (*l) = c;
             if ((z) || (c==NULL)) return 0;
             continue;
@@ -193,7 +193,7 @@ int RemoveRange(uint32_t x0, uint32_t y0, Trangelist **l)
         } else {
           if (y<c->y) {
             p = c;
-            if ((c = CreateRange(p,c->x,c->y,p->next)) == NULL) return -1;
+            if ((c = createRange(p,c->x,c->y,p->next)) == NULL) return -1;
             p->y = x-1;
             c->x = y+1;
             return 0;

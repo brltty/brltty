@@ -15,13 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "Programs/cmd.h"
 #include "config.tab.c"
-
-/* taken from ../brl_load.c */
-const CommandEntry commandTable[] = {
-  #include "Programs/cmds.auto.h"
-  {EOF, NULL, NULL}
-};
 
 static char* filename = "stdin";
 

@@ -36,6 +36,7 @@
 #include <netdb.h>
 
 #include "Programs/misc.h"
+#include "Programs/cmd.h"
 #include "Programs/brl.h"
 
 #define BRLSTAT ST_Generic

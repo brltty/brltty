@@ -122,7 +122,6 @@ ssize_t brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
   /* if buf is NULL, let's use our fake buffer */
   if (buf == NULL) {
     if (n>BRLAPI_MAXPACKETSIZE) {
-      /* brlapi_writePacket(fd,PACKET_BYE,NULL,0); */
       brlapi_libcerrno=EFBIG;
       brlapi_libcerrfun="read in readPacket";
       brlapi_errno=BRLERR_LIBCERR;
@@ -132,7 +131,6 @@ ssize_t brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
   } else
     /* check that his buffer is large enough */
     if (n>size) {
-      /* brlapi_writePacket(fd,PACKET_BYE,NULL,0); */
       brlapi_libcerrno=EFBIG;
       brlapi_libcerrfun="read in readPacket";
       brlapi_errno=BRLERR_LIBCERR;
@@ -207,4 +205,39 @@ void brlapi_splitHost(const char *host, char **hostname, char **port) {
     *hostname = strdup(host);
     *port = strdup(BRLAPI_SOCKETPORT);
   }
+}
+
+typedef struct {
+  brl_type_t type;
+  char *name;
+} brlapi_packetType_t;
+
+brlapi_packetType_t brlapi_packetTypes[] = {
+  { BRLPACKET_AUTHKEY, "Auth" },
+  { BRLPACKET_GETDRIVERID, "GetDriverId" },
+  { BRLPACKET_GETDRIVERNAME, "GetDriverName" },
+  { BRLPACKET_GETDISPLAYSIZE, "GetDisplaySize" },
+  { BRLPACKET_GETTTY, "GetTty" },
+  { BRLPACKET_LEAVETTY, "LeaveTty" },
+  { BRLPACKET_KEY, "Key" },
+  { BRLPACKET_IGNOREKEYRANGE, "IgnoreKeyRange" },
+  { BRLPACKET_IGNOREKEYSET, "IggnoreKeySet" },
+  { BRLPACKET_UNIGNOREKEYRANGE, "UnignoreKeyRange" },
+  { BRLPACKET_UNIGNOREKEYSET, "UnignoreKeySet" },
+  { BRLPACKET_STATWRITE, "StatWrite" },
+  { BRLPACKET_EXTWRITE, "ExtWrite" },
+  { BRLPACKET_GETRAW, "GetRaw" },
+  { BRLPACKET_LEAVERAW, "LeaveRaw" },
+  { BRLPACKET_PACKET, "Packet" },
+  { BRLPACKET_ACK, "Ack" },
+  { BRLPACKET_ERROR, "Error" },
+  { 0, NULL }
+};
+
+const char *brlapi_packetType(brl_type_t ptype)
+{
+  brlapi_packetType_t *p;
+  for (p = brlapi_packetTypes; p->type; p++)
+    if (ptype==p->type) return p->name;
+  return "Unknown";
 }

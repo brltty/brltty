@@ -28,51 +28,50 @@ extern "C" {
 #include <stdio.h>
 #include <inttypes.h>
 
-typedef struct rangelist
-{
- uint32_t x,y;
- struct rangelist *next;
-} Trangelist;
+typedef struct rangeList {
+  uint32_t x, y;
+  struct rangeList *next;
+} rangeList;
 
-/* Function : CreateRange */
+/* Function : createRange */
 /* Creates an item of a range list */
 /* Specify the range, a pointer to previous and next item */
 /* Returns the adress of the newly created range, NULL if not enough memory */
-Trangelist *CreateRange(Trangelist *p, uint32_t x, uint32_t y, Trangelist *n);
+rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n);
 
-/* Function : FreeRange */
+/* Function : freeRange */
 /* Destroys an item of a range list */
 /* If provided, the previous item will be linked to the next item */
-void FreeRange(Trangelist *p, Trangelist *c);
+void freeRange(rangeList *p, rangeList *c);
 
-/* Function : FreeRangeList */
+/* Function : fHreeRangeList */
 /* Frees a whole list */
 /* If you wan to destroy a whole list, call this function, rather than */
-/* calling FreeRange on each element, since th latter cares about links */
+/* calling freeRange on each element, since th latter cares about links */
 /* and hence is slower */
-void FreeRangeList(Trangelist **l);
+void freeRangeList(rangeList **l);
 
 /* Function : contains */
 /* Determines if the range list l contains x */
 /* If yes, returns the adress of the cell [a..b] such that a<=x<=b */
 /* If no, returns NULL */
-Trangelist *contains(Trangelist *l, uint32_t n);
+rangeList *contains(rangeList *l, uint32_t n);
 
-/* Function : DisplayRangeList */
+/* Function : displayRangeList */
 /* Prints a range list on stdout */
 /* This is for debugging only */
-void DisplayRangeList(Trangelist *l);
+void displayRangeList(rangeList *l);
 
-/* Function : AddRange */
+/* Function : addRange */
 /* Adds a range to a range list */
 /* We have to keep a sorted list of [disjoints] ranges */
 /* Return 0 if success, -1 if an error occurs */
-int AddRange(uint32_t x0, uint32_t y0, Trangelist **l);
+int addRange(uint32_t x0, uint32_t y0, rangeList **l);
 
-/* Function : RemoveRange */
+/* Function : removeRange */
 /* Removes a range from a range list */
 /* Returns 0 if success, -1 if failure */
-int RemoveRange(uint32_t x0, uint32_t y0, Trangelist **l);
+int removeRange(uint32_t x0, uint32_t y0, rangeList **l);
 
 #ifdef __cplusplus
 }

@@ -122,13 +122,6 @@ extern const unsigned char portraitDigits[11];
 extern int portraitNumber (int x);
 extern int portraitFlag (int number, int on);
 
-typedef struct {
-  int code;
-  const char *name;
-  const char *description;
-} CommandEntry;
-extern const CommandEntry commandTable[];
-extern void describeCommand (int command, char *buffer, int size);
 extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern void showDotPattern (unsigned char dots, unsigned char duration);

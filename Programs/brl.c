@@ -31,6 +31,7 @@
 #include "message.h"
 #include "brl.h"
 #include "brl.auto.h"
+#include "cmd.h"
 
 #define BRLSYMBOL noBraille
 #define BRLNAME NoBraille
@@ -223,93 +224,6 @@ readBrailleCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 }
 
 #ifdef ENABLE_LEARN_MODE
-const CommandEntry commandTable[] = {
-  #include "cmds.auto.h"
-  {EOF, NULL, NULL}
-};
-
-void
-describeCommand (int command, char *buffer, int size) {
-  int blk = command & VAL_BLK_MASK;
-  int arg = command & VAL_ARG_MASK;
-  int cmd = blk | arg;
-  const CommandEntry *candidate = NULL;
-  const CommandEntry *last = NULL;
-
-  {
-    const CommandEntry *current = commandTable;
-    while (current->name) {
-      if ((current->code & VAL_BLK_MASK) == blk) {
-        if (!last || (last->code < current->code)) last = current;
-        if (!candidate || (candidate->code < cmd)) candidate = current;
-      }
-
-      ++current;
-    }
-  }
-  if (candidate)
-    if (candidate->code != cmd)
-      if ((blk == 0) || (candidate->code < last->code))
-        candidate = NULL;
-
-  if (!candidate) {
-    snprintf(buffer, size, "unknown: %06X", command);
-  } else if ((candidate == last) && (blk != 0)) {
-    unsigned int number;
-    switch (blk) {
-      default:
-        number = cmd - candidate->code + 1;
-        break;
-
-      case VAL_PASSCHAR:
-        number = cmd - candidate->code;
-        break;
-
-      case VAL_PASSDOTS: {
-        unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
-        int dot;
-        number = 0;
-        for (dot=0; dot<sizeof(dots); ++dot) {
-          if (arg & dots[dot]) {
-            number = (number * 10) + (dot + 1);
-          }
-        }
-        break;
-      }
-    }
-    snprintf(buffer, size, "%s[%d]: %s",
-             candidate->name, number, candidate->description);
-  } else {
-    int offset;
-    snprintf(buffer, size, "%s: %n%s",
-             candidate->name, &offset, candidate->description);
-
-    if ((blk == 0) && (command & VAL_TOGGLE_MASK)) {
-      char *description = buffer + offset;
-      const char *oldVerb = "toggle";
-      int oldLength = strlen(oldVerb);
-      if (strncmp(description, oldVerb, oldLength) == 0) {
-        const char *newVerb = "set";
-        int newLength = strlen(newVerb);
-        memmove(description+newLength, description+oldLength, strlen(description+oldLength)+1);
-        memcpy(description, newVerb, newLength);
-        if (command & VAL_TOGGLE_ON) {
-          char *end = strrchr(description, '/');
-          if (end) *end = 0;
-        } else {
-          char *target = strrchr(description, ' ');
-          if (target) {
-            const char *source = strchr(++target, '/');
-            if (source) {
-              memmove(target, source+1, strlen(source));
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 void
 learnMode (BrailleDisplay *brl, int poll, int timeout) {
   setStatusText(brl, "lrn");

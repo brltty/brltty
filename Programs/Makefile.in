@@ -126,7 +126,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O cut.$O route.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O cut.$O route.$O cmd.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -152,7 +152,10 @@ serial.$O:
 cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
 
-brl.$O: brl.auto.h text.auto.h attrib.auto.h cmds.auto.h
+cmd.$O: cmds.auto.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/cmd.c
+
+brl.$O: brl.auto.h text.auto.h attrib.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
 
 spk.$O: spk.auto.h
@@ -197,7 +200,7 @@ usb_freebsd.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O tbl.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O tbl.$O cmd.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -254,6 +257,16 @@ tunetest$X: $(TUNETEST_OBJECTS)
 
 tunetest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunetest.c
+
+###############################################################################
+
+APITEST_OBJECTS = apitest.$O cmd.$O
+
+apitest$X: $(APITEST_OBJECTS) api
+	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
+
+apitest.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/apitest.c
 
 ###############################################################################
 
