@@ -829,33 +829,32 @@ main (int argc, char *argv[]) {
      * Process any Braille input 
      */
     while (1) {
-      int oldmotx, oldmoty;
+      int oldmotx = p->winx;
+      int oldmoty = p->winy;
 
       {
         int next = readBrailleCommand(&brl,
                                       infmode? CMDS_STATUS:
                                       ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
                                       CMDS_SCREEN);
-        if (next != EOF) {
+        if (next == EOF) {
+          if (!autorepeat) break;
+          if ((autorepeat -= updateInterval) > 0) break;
+          autorepeat = autorepeatInterval;
+        } else {
+          LogPrint(LOG_DEBUG, "Command: %06X", next);
+
           command = next & ~VAL_REPEAT_MASK;
           if (next & VAL_REPEAT_DELAY) {
             autorepeat = autorepeatDelay;
-            if (!(next & VAL_REPEAT_INITIAL)) break;
+            if (!(next & VAL_REPEAT_INITIAL)) continue;
           } else if (next & VAL_REPEAT_INITIAL) {
             autorepeat = autorepeatInterval;
           } else {
             autorepeat = 0;
           }     
-        } else {
-          if (!autorepeat) break;
-          if ((autorepeat -= updateInterval) > 0) break;
-          autorepeat = autorepeatInterval;
         }
       }
-
-      LogPrint(LOG_DEBUG, "Command: %05X", command);
-      oldmotx = p->winx;
-      oldmoty = p->winy;
 
       if (!executeScreenCommand(command)) {
         switch (command & ~VAL_FLG_MASK) {
@@ -864,8 +863,6 @@ main (int argc, char *argv[]) {
               playTune(&tune_toggle_on);
             else if (command & VAL_TOGGLE_OFF)
               playTune(&tune_toggle_off);
-            else
-              continue;
             break;
           case CMD_RESTARTBRL:
             restartBrailleDriver();
@@ -1576,7 +1573,7 @@ main (int argc, char *argv[]) {
               }
               default:
                 playTune(&tune_bad_command);
-                LogPrint(LOG_WARNING, "Unrecognized command: %05X", command);
+                LogPrint(LOG_WARNING, "Unrecognized command: %04X", command);
             }
             break;
           }
