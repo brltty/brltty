@@ -477,6 +477,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
    * Updated immediately whenever a key is pressed.
    * Cleared after analysis whenever a key is released.
    */
+  static Keys activeKeys;
   static Keys pressedKeys;
   /* For a key binding that triggers two commands */
   static int pending_cmd;
@@ -500,6 +501,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   if (readbrl_init) {
     /* initialize state */
     readbrl_init = 0;
+    memset(&activeKeys, 0, sizeof(activeKeys));
     memset(&pressedKeys, 0, sizeof(pressedKeys));
     pending_cmd = EOF;
   }
@@ -511,12 +513,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   }
 
   {
-    int r = usbReapInput(usb->device, usb->definition.inputEndpoint,
-                         packet, sizeof(packet), 0, 0);
-    if (r < 0) {
+    int size = usbReapInput(usb->device, usb->definition.inputEndpoint,
+                            packet, sizeof(packet), 0, 0);
+    if (size < 0) {
       if (errno == EAGAIN) {
         /* no input */
-        r = 0;
+        size = 0;
       } else if (errno == ENODEV) {
         /* Display was disconnected */
         return CMD_RESTARTBRL;
@@ -525,14 +527,14 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         readbrl_init = 1;
         return EOF;
       }
-    } else if ((r > 0) && (r < sizeof(packet))) {
+    } else if ((size > 0) && (size < sizeof(packet))) {
       /* The display handles read requests of only and exactly 8bytes */
-      LogPrint(LOG_NOTICE, "Short read: %d", r);
+      LogPrint(LOG_NOTICE, "Short read: %d", size);
       readbrl_init = 1;
       return EOF;
     }
 
-    if (r == 0) {
+    if (size == 0) {
       /* no new key */
       return EOF;
     }
@@ -540,13 +542,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
   /* one or more keys were pressed or released */
   {
-    Keys currentKeys;
+    Keys keys;
     int i;
-    memset(&currentKeys, 0, sizeof(currentKeys));
+    memset(&keys, 0, sizeof(keys));
 
     /* We combine dot and front key info in keystate */
-    currentKeys.control = (packet[1] << 8) | packet[0];
-    if (currentKeys.control & ~pressedKeys.control) key_pressed = 1;
+    keys.control = (packet[1] << 8) | packet[0];
+    if (keys.control & ~pressedKeys.control) key_pressed = 1;
     
     for (i=2; i<8; i++) {
       unsigned char key = packet[i];
@@ -558,28 +560,29 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       }
       key--;
 
-      currentKeys.routing[key] = 1;
+      keys.routing[key] = 1;
       if (!pressedKeys.routing[key]) key_pressed = 1;
     }
 
-    if (key_pressed) pressedKeys = currentKeys;
+    pressedKeys = keys;
+    if (key_pressed) activeKeys = keys;
   }
 
   {
     int key;
     for (key=0; key<totalCells; key++)
-      if (pressedKeys.routing[key])
+      if (activeKeys.routing[key])
         rtk_which[rtk_count++] = key;
   }
 
   if (rtk_count == 0) {
     /* No routing keys */
 
-    if (!(pressedKeys.control & ~FRONT_KEYS)) {
+    if (!(activeKeys.control & ~FRONT_KEYS)) {
       /* Just front keys */
 
       if (cmds == CMDS_PREFS) {
-	switch (pressedKeys.control) {
+	switch (activeKeys.control) {
           HKEY2(891, K_DOWN, K_UP,
                 CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING,
                 "Select previous/next setting");
@@ -590,7 +593,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       }
 
       if (cmd == CMD_NOOP) {
-	switch (pressedKeys.control) {
+	switch (activeKeys.control) {
 	  HKEY2(101, K_A, K_D,
                 CMD_FWINLT, CMD_FWINRT,
                 "Go backward/forward one window");
@@ -648,12 +651,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 	       "Route cursor to current line");
 	}
       }
-    } else if ((!inputMode || (pressedKeys.control & SPACE_BAR)) &&
-               !(pressedKeys.control & FRONT_KEYS & ~SPACE_BAR)) {
+    } else if ((!inputMode || (activeKeys.control & SPACE_BAR)) &&
+               !(activeKeys.control & FRONT_KEYS & ~SPACE_BAR)) {
       /* Dots combined with B or C or both but no other front keys.
        * This is a chorded character typed in braille.
        */
-      switch (pressedKeys.control & DOT_KEYS) {
+      switch (activeKeys.control & DOT_KEYS) {
         HLP(601, "Chord-1478", "Input mode (toggle)")
         case DOT1|DOT4|DOT7|DOT8:
           if (!key_pressed) cmd = CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
@@ -683,20 +686,20 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 	CKEY(610, DOT7, VAL_PASSKEY+VPK_CURSOR_LEFT, "Left arrow");
 	CKEY(610, DOT8, VAL_PASSKEY+VPK_CURSOR_RIGHT, "Right arrow");
       }
-    } else if (!(pressedKeys.control & ~DOT_KEYS)) {
+    } else if (!(activeKeys.control & ~DOT_KEYS)) {
       /* Just dot keys */
       /* This is a character typed in braille */
       cmd = VAL_PASSDOTS;
-      if (pressedKeys.control & DOT1) cmd |= B1;
-      if (pressedKeys.control & DOT2) cmd |= B2;
-      if (pressedKeys.control & DOT3) cmd |= B3;
-      if (pressedKeys.control & DOT4) cmd |= B4;
-      if (pressedKeys.control & DOT5) cmd |= B5;
-      if (pressedKeys.control & DOT6) cmd |= B6;
-      if (pressedKeys.control & DOT7) cmd |= B7;
-      if (pressedKeys.control & DOT8) cmd |= B8;
+      if (activeKeys.control & DOT1) cmd |= B1;
+      if (activeKeys.control & DOT2) cmd |= B2;
+      if (activeKeys.control & DOT3) cmd |= B3;
+      if (activeKeys.control & DOT4) cmd |= B4;
+      if (activeKeys.control & DOT5) cmd |= B5;
+      if (activeKeys.control & DOT6) cmd |= B6;
+      if (activeKeys.control & DOT7) cmd |= B7;
+      if (activeKeys.control & DOT8) cmd |= B8;
     }
-  } else if (!pressedKeys.control) {
+  } else if (!activeKeys.control) {
     /* Just routing keys */
     if (rtk_count == 1) {
       if (IS_TEXT_KEY(rtk_which[0])) {
@@ -733,14 +736,14 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
       pending_cmd = CR_CUTLINE + rtk_which[1] - textOffset;
     }
-  } else if (pressedKeys.control & (K_UP|K_RL|K_RR)) {
+  } else if (activeKeys.control & (K_UP|K_RL|K_RR)) {
     /* Some routing keys combined with UP RL or RR (actually any key
      * combination that has at least one of those).
      * Treated special because we use absolute routing key numbers
      * (counting the status cell keys).
      */
     if (rtk_count == 1) {
-      switch (pressedKeys.control) {
+      switch (activeKeys.control) {
         case K_UP:
           HLP(692, "UP+ CRa<CELLS-1>/CRa<CELLS>",
               "Switch to previous/next virtual console")
@@ -764,7 +767,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     }
   } else if ((rtk_count == 1) && IS_TEXT_KEY(rtk_which[0])) {
     /* One text routing key with some other keys */
-    switch (pressedKeys.control) {
+    switch (activeKeys.control) {
       PHKEY(501, "CRt#", K_DOWN,
             CR_SETLEFT + rtk_which[0] - textOffset,
             "Go right # cells");
@@ -792,7 +795,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     cmd |= VAL_REPEAT_DELAY;
   } else {
     /* key was released, clear state */
-    memset(&pressedKeys, 0, sizeof(pressedKeys));
+    memset(&activeKeys, 0, sizeof(activeKeys));
   }
 
   return cmd;
