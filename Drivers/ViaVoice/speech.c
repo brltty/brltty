@@ -290,7 +290,7 @@ spk_close (void) {
 static int
 ensureSayBuffer (int size) {
    if (size > saySize) {
-      char *newBuffer = (char *)malloc(size |= 0XFF);
+      char *newBuffer = malloc(size |= 0XFF);
       if (!newBuffer) {
          LogError("speech buffer allocation");
 	 return 0;

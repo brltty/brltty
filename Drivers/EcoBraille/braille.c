@@ -251,7 +251,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   BrailleSize = brl->x + model->NbStCells + 1;
 
   /* Allocate space for buffers */
-  rawdata = (unsigned char *) malloc (BrailleSize); /* Phisical size */
+  rawdata = malloc(BrailleSize); /* Phisical size */
   if(!rawdata){
      goto failure;
   }    

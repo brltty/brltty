@@ -262,10 +262,10 @@ int brlapi_splitHost(const char *host, char **hostname, char **port) {
     if (c != host) {
       int porti = atoi(c+1);
       if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
-      *hostname = (char *)malloc(c-host+1);
+      *hostname = malloc(c-host+1);
       memcpy(*hostname, host, c-host);
       (*hostname)[c-host] = 0;
-      *port = (char *)malloc(6);
+      *port = malloc(6);
       snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
       return PF_UNSPEC;
     } else {
@@ -277,7 +277,7 @@ int brlapi_splitHost(const char *host, char **hostname, char **port) {
       int porti = atoi(c+1);
       if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
       *hostname = strdup("127.0.0.1");
-      *port = (char *)malloc(6);
+      *port = malloc(6);
       snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
       return PF_UNSPEC;
 #endif /* PF_LOCAL */

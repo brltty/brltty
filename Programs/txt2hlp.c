@@ -50,7 +50,7 @@ main (int argc, char *argv[]) {
       memset(&fileHeader, 0, sizeof(fileHeader));
       fileHeader.pages = argc;
 
-      if ((pageTable = (HelpPageEntry *)malloc(fileHeader.pages * sizeof(HelpPageEntry)))) {
+      if ((pageTable = malloc(fileHeader.pages * sizeof(HelpPageEntry)))) {
         FILE *outputStream = fopen(outputPath, "w+");
         if (outputStream) {
           unsigned char pageNumber;

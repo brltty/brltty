@@ -291,7 +291,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 
  if (*parameters[PARM_XTPARMS]) {
   argv = splitString(parameters[PARM_XTPARMS],' ',&argc);
-  argv = (char **) reallocWrapper(argv, (argc+2) * sizeof(char *));
+  argv = reallocWrapper(argv, (argc+2) * sizeof(char *));
   memmove(argv+1,argv,(argc+1) * sizeof(char *));
   argv[0] = strdupWrapper(defargv[0]);
   argc++;

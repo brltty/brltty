@@ -513,9 +513,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   brl->y = BRLROWS;		/* always 1 */
 
   /* Allocate space for buffers */
-  dispbuf = (unsigned char *) malloc (ncells);
-  prevdata = (unsigned char *) malloc (ncells);
-  rawdata = (unsigned char *) malloc (2 * ncells + DIM_BRL_SEND);
+  dispbuf = malloc(ncells);
+  prevdata = malloc(ncells);
+  rawdata = malloc(2 * ncells + DIM_BRL_SEND);
   /* 2* to insert 0s for attribute code when sending to the display */
   if (!dispbuf || !prevdata || !rawdata)
     goto failure;
@@ -733,7 +733,7 @@ flicker ()
   unsigned char *buf;
 
   /* Assumes BRLROWS == 1 */
-  buf = (unsigned char *) malloc (brl_cols);
+  buf = malloc(brl_cols);
   if (buf)
     {
       memset (buf, FLICKER_CHAR, ncells);

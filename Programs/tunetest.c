@@ -157,7 +157,7 @@ main (int argc, char *argv[]) {
     fprintf(stderr, "%s: Missing duration.\n", programName);
   } else {
     unsigned int count = argc / 2;
-    TuneElement *elements = (TuneElement *)mallocWrapper((sizeof(*elements) * count) + 1);
+    TuneElement *elements = mallocWrapper((sizeof(*elements) * count) + 1);
     TuneElement *element = elements;
 
     while (argc) {

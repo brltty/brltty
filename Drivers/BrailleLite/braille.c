@@ -321,7 +321,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     return 0;
   }
 
-  if ((qbase = (unsigned char *) malloc(QSZ))) {
+  if ((qbase = malloc(QSZ))) {
     /* Open the Braille display device for random access */
     LogPrint(LOG_DEBUG, "Opening serial port: %s", device);
     if ((BL_serialDevice = serialOpenDevice(device))) {

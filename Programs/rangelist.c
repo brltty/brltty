@@ -28,7 +28,7 @@
 /* Function : createRange */
 rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n)
 {
-  rangeList *c = (rangeList *) malloc(sizeof(rangeList));
+  rangeList *c = malloc(sizeof(rangeList));
   if (c==NULL) return NULL;
   c->x = x; c->y = y; c->next = n;
   if (p!=NULL) p->next = c;

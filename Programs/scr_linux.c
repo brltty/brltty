@@ -423,7 +423,7 @@ setScreenFontMap (int force) {
   if (!size) size = 0X100;
   while (1) {
     sfm.entry_ct = size;
-    if (!(sfm.entries = (struct unipair *)malloc(sfm.entry_ct * sizeof(*sfm.entries)))) {
+    if (!(sfm.entries = malloc(sfm.entry_ct * sizeof(*sfm.entries)))) {
       LogError("Screen font map allocation");
       return 0;
     }

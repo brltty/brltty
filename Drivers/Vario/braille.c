@@ -201,9 +201,9 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   brl->y = BRLROWS;		/* always 1 (I want a 5 line display!!) */
 
   /* Allocate space for buffers */
-  dispbuf = brl->buffer = (unsigned char *) malloc (ncells);
-  prevdata = (unsigned char *) malloc (ncells);
-  rawdata = (unsigned char *) malloc (2 * ncells + VARIO_DISPLAY_LEN);
+  dispbuf = brl->buffer = malloc(ncells);
+  prevdata = malloc(ncells);
+  rawdata = malloc(2 * ncells + VARIO_DISPLAY_LEN);
   /* 2* to insert ESCs if char is ESC */
   if (!brl->buffer || !prevdata || !rawdata)
     goto failure;
