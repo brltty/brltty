@@ -153,6 +153,126 @@ sortCommands (void) {
   qsort(the_terminal->commands, the_terminal->commandCount, sizeof(*the_terminal->commands), compareCommands);
 }
 
+static int
+findCommand (int *command, int key, int modifiers) {
+  int first = 0;
+  int last = the_terminal->commandCount - 1;
+  CommandDefinition ref;
+  ref.key = key;
+  ref.modifiers = modifiers;
+  while (first <= last) {
+    int current = (first + last) / 2;
+    CommandDefinition *cmd = &the_terminal->commands[current];
+    int relation = compareCommands(cmd, &ref);
+
+    if (!relation) {
+      *command = cmd->code;
+      return 1;
+    }
+
+    if (relation > 0) {
+      last = current - 1;
+    } else {
+      first = current + 1;
+    }
+  }
+  return 0;
+}
+
+static int
+handleCommand (int cmd, int repeat) {
+  if (cmd == CMD_INPUT) {
+    /* translate toggle -> ON/OFF */
+    cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
+  }
+
+  switch (cmd) {
+    case CMD_INPUT | VAL_TOGGLE_ON:
+      input_mode = 1;
+      cmd = VAL_TOGGLE_ON;
+      if (debug_keys) {
+        LogPrint(LOG_DEBUG, "input mode on"); 
+      }
+      break;
+    case CMD_INPUT | VAL_TOGGLE_OFF:
+      input_mode = 0;
+      cmd = VAL_TOGGLE_OFF;
+      if (debug_keys) {
+        LogPrint(LOG_DEBUG, "input mode off"); 
+      }
+      break;
+  }
+
+  return cmd | repeat;
+}
+
+static int
+handleModifier (int bit, int press) {
+  int command = CMD_NOOP;
+  int modifiers;
+
+  if (press) {
+    saved_modifiers = (pressed_modifiers |= bit);
+    modifiers = saved_modifiers;
+  } else {
+    pressed_modifiers &= ~bit;
+    modifiers = saved_modifiers;
+    saved_modifiers = 0;
+  }
+
+  if (debug_keys) {
+    LogPrint(LOG_DEBUG, "modifiers: %04X", pressed_modifiers);
+  }
+
+  if (modifiers) {
+    if (input_mode && !(modifiers & ~0XFF)) {
+      static const unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
+      const unsigned char *dot = dots;
+      int mod;
+      command = VAL_PASSDOTS;
+      for (mod=1; mod<0X100; ++dot, mod<<=1)
+        if (modifiers & mod)
+          command |= *dot;
+      if (debug_keys)
+        LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
+    } else if (findCommand(&command, NOKEY, modifiers)) {
+      if (debug_keys)
+        LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
+                 modifiers, command); 
+    }
+  }
+
+  return handleCommand(command, (press? VAL_REPEAT_DELAY: 0));
+}
+
+static int
+handleKey (int code, int press, int offsroute) {
+  int i;
+  int cmd;
+
+  /* look for modfier keys */
+  for (i=0; i<the_terminal->modifierCount; i++)
+    if (the_terminal->modifiers[i] == code)
+      return handleModifier(1<<i, press);
+
+  /* must be a "normal key" - search for cmd on key press */
+  if (press) {
+    int command;
+    saved_modifiers = 0;
+    if (findCommand(&command, code, pressed_modifiers)) {
+      if (debug_keys)
+        LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
+                 code, pressed_modifiers, command, offsroute); 
+      return handleCommand(command + offsroute,
+                           (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY));
+    }
+
+    /* no command found */
+    LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, pressed_modifiers); 
+  }
+  return CMD_NOOP;
+}
+
 /*--- Input/Output Operations ---*/
 
 typedef struct {
@@ -651,32 +771,6 @@ static unsigned char currentLine[BRLCOLSMAX];
 
 /* ------------------------------------------------------------ */
 
-static int
-findCommand (int *command, int key, int modifiers) {
-  int first = 0;
-  int last = the_terminal->commandCount - 1;
-  CommandDefinition ref;
-  ref.key = key;
-  ref.modifiers = modifiers;
-  while (first <= last) {
-    int current = (first + last) / 2;
-    CommandDefinition *cmd = &the_terminal->commands[current];
-    int relation = compareCommands(cmd, &ref);
-
-    if (!relation) {
-      *command = cmd->code;
-      return 1;
-    }
-
-    if (relation > 0) {
-      last = current - 1;
-    } else {
-      first = current + 1;
-    }
-  }
-  return 0;
-}
-
 static void
 updateData (BrailleDisplay *brl, unsigned char xmtOffset, int size, const unsigned char *data, unsigned char *buffer) {
   if (memcmp(buffer, data, size) != 0) {
@@ -869,102 +963,6 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 /* ------------------------------------------------------------ */
 
-/* found command - some actions to be done within the driver */
-static int
-handleCommand (int cmd, int repeat) {
-  if (cmd == CMD_INPUT) {
-    /* translate toggle -> ON/OFF */
-    cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
-  }
-
-  switch (cmd) {
-    case CMD_INPUT | VAL_TOGGLE_ON:
-      input_mode = 1;
-      cmd = VAL_TOGGLE_ON;
-      if (debug_keys) {
-        LogPrint(LOG_DEBUG, "input mode on"); 
-      }
-      break;
-    case CMD_INPUT | VAL_TOGGLE_OFF:
-      input_mode = 0;
-      cmd = VAL_TOGGLE_OFF;
-      if (debug_keys) {
-        LogPrint(LOG_DEBUG, "input mode off"); 
-      }
-      break;
-  }
-
-  return cmd | repeat;
-}
-
-static int
-handleModifier (int bit, int press) {
-  int command = CMD_NOOP;
-  int modifiers;
-
-  if (press) {
-    saved_modifiers = (pressed_modifiers |= bit);
-    modifiers = saved_modifiers;
-  } else {
-    pressed_modifiers &= ~bit;
-    modifiers = saved_modifiers;
-    saved_modifiers = 0;
-  }
-
-  if (debug_keys) {
-    LogPrint(LOG_DEBUG, "modifiers: %04X", pressed_modifiers);
-  }
-
-  if (modifiers) {
-    if (input_mode && !(modifiers & ~0XFF)) {
-      static const unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
-      const unsigned char *dot = dots;
-      int mod;
-      command = VAL_PASSDOTS;
-      for (mod=1; mod<0X100; ++dot, mod<<=1)
-        if (modifiers & mod)
-          command |= *dot;
-      if (debug_keys)
-        LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
-    } else if (findCommand(&command, NOKEY, modifiers)) {
-      if (debug_keys)
-        LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
-                 modifiers, command); 
-    }
-  }
-
-  return handleCommand(command, (press? VAL_REPEAT_DELAY: 0));
-}
-
-/* one key is pressed or released */
-static int
-handleKey (int code, int press, int offsroute) {
-  int i;
-  int cmd;
-
-  /* look for modfier keys */
-  for (i=0; i<the_terminal->modifierCount; i++)
-    if (the_terminal->modifiers[i] == code)
-      return handleModifier(1<<i, press);
-
-  /* must be a "normal key" - search for cmd on key press */
-  if (press) {
-    int command;
-    saved_modifiers = 0;
-    if (findCommand(&command, code, pressed_modifiers)) {
-      if (debug_keys)
-        LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
-                 code, pressed_modifiers, command, offsroute); 
-      return handleCommand(command + offsroute,
-                           (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY));
-    }
-
-    /* no command found */
-    LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, pressed_modifiers); 
-  }
-  return CMD_NOOP;
-}
-
 static int
 handleCode (int code, int press, int time) {
   /* which key -> translate to OFFS_* + number */
@@ -1004,8 +1002,6 @@ handleCode (int code, int press, int time) {
   LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
   return CMD_NOOP;
 }
-
-/* ------------------------------------------------------------ */
 
 #define READ(offset,count,flags) { if (!readBytes1(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
 static int 
