@@ -115,6 +115,7 @@ openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
     {0X0F4E, 0X0100, 1, 0, 0, 2, 1, 0}, /* Focus */
     {0X0F4E, 0X0111, 1, 0, 0, 2, 1, 0}, /* PAC Mate */
+    {0X0F4E, 0X0112, 1, 0, 0, 2, 1, 0}, /* Focus 2 */
     {0}
   };
 
@@ -231,6 +232,7 @@ static const DotsTable dots12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08,
 static const ModelEntry modelTable[] = {
   {"Focus 44"     , &dots12374568, 44, 3, -1},
   {"Focus 70"     , &dots12374568, 70, 3, -1},
+  {"Focus 80"     , &dots12345678, 80, 0, -1},
   {"Focus 84"     , &dots12374568, 84, 3, -1},
   {"pm display 20", &dots12345678, 20, 0,  1},
   {"pm display 40", &dots12345678, 40, 0,  1},
