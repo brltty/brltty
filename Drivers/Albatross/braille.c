@@ -41,6 +41,7 @@ static struct termios newSettings;
 static TranslationTable outputTable;
 static int cellCount;
 static unsigned char cellContent[80];
+static int cursorCommand;
 
 static int
 readByte (unsigned char *byte) {
@@ -76,6 +77,8 @@ acknowledgeDisplay (void) {
   }
 
   cellCount = (attributes & 0X80)? 80: 40;
+  cursorCommand = CR_ROUTE;
+
   LogPrint(LOG_INFO, "Albatross detected: %d columns",
            baud2integer(cellCount));
   return 1;
@@ -178,6 +181,8 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   unsigned char byte;
+  int cursorBase;
+
   while (readByte(&byte)) {
     if (byte == 0XFF) {
       if (acknowledgeDisplay())  {
@@ -188,10 +193,21 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     }
     if (!cellCount) continue;
 
+    cursorBase = cursorCommand;
+    cursorCommand = CR_ROUTE;
     switch (byte) {
       default:
-        if ((byte >= 2) && (byte <= 41)) return CR_ROUTE + (byte - 2);
-        if ((byte >= 111) && (byte <= 150)) return CR_ROUTE + (byte - 71);
+        {
+          int offset;
+          if ((byte >= 2) && (byte <= 41)) {
+            offset = byte - 2;
+          } else if ((byte >= 111) && (byte <= 150)) {
+            offset = byte - 71;
+          } else {
+            offset = -1;
+          }
+          if ((offset >= 0) && (offset < cellCount)) return cursorBase + offset;
+        }
         break;
 
       case 0XFB:
@@ -199,36 +215,56 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         continue;
 
       case  83: /* top left first lower */
-      case 193: /* top right first lower */
         return CMD_LEARN;
 
       case  84: /* top left first upper */
-      case 194: /* top right first upper */
         return CMD_HELP;
 
       case  85: /* top left third upper */
-      case 195: /* top right third upper */
-        return CMD_PRDIFLN;
-
-      case  86: /* top left third lower */
-      case 196: /* top right third lower */
-        return CMD_NXDIFLN;
-
-      case  87: /* top left second */
-      case 198: /* top right second */
         return CMD_CSRJMP_VERT;
 
+      case  86: /* top left third lower */
+        return CMD_CSRTRK;
+
+      case  87: /* top left second */
+        cursorCommand = CR_CUTBEGIN;
+        return CMD_NOOP;
+
       case  88: /* top left fourth */
-      case 197: /* top right fourth */
-        return CMD_BACK;
+        cursorCommand = CR_CUTAPPEND;
+        return CMD_NOOP;
 
       case  89: /* top left fifth upper */
-      case 199: /* top right fifth upper */
         return CMD_PREFMENU;
 
       case  90: /* top left fifth lower */
-      case 200: /* top right fifth lower */
         return CMD_INFO;
+
+      case 193: /* top right first lower */
+        return CMD_NXPROMPT;
+
+      case 194: /* top right first upper */
+        return CMD_PRPROMPT;
+
+      case 195: /* top right third upper */
+        return CMD_PRDIFLN;
+
+      case 196: /* top right third lower */
+        return CMD_NXDIFLN;
+
+      case 198: /* top right second */
+        cursorCommand = CR_CUTRECT;
+        return CMD_NOOP;
+
+      case 197: /* top right fourth */
+        cursorCommand = CR_CUTLINE;
+        return CMD_NOOP;
+
+      case 199: /* top right fifth upper */
+        return CMD_PRPGRPH;
+
+      case 200: /* top right fifth lower */
+        return CMD_NXPGRPH;
 
       /* home */
       case  91: /* front left first upper */
@@ -243,7 +279,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       /* cursor */
       case  93: /* front left second upper */
       case 203: /* front right second upper */
-        return CMD_CSRTRK;
+        return CMD_BACK;
 
       /* extra cursor */
       case  94: /* front left second lower */

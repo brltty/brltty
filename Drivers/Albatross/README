@@ -1,0 +1,32 @@
+This directory contains the BRLTTY driver for the Albatross
+[http://www.tivomatic.fi/html/albatross.html] braille display from Tivomatic
+[http://www.tivomatic.fi/]. It has been implemented, and is being maintained,
+by Dave Mielke <dave@mielke.cc> and Sami Haahtinen <ressu@ressukka.net>.
+
+
+The keys on the front of the display are named as depicted below within the
+documentation for this driver. See the help file for how this driver puts them
+to use.
+
+   +---+ +---+ +-------+ +-----------+    +-----------+ +-------+ +---+ +---+
+   |Top| |Bak| |  Up   | |           |    |           | |  Up   | |Bak| |Top|
+   +---+ +---+ +-------+ |           |    |           | +-------+ +---+ +---+
+                         |   Left    |    |   Right   |                      
+   +---+ +---+ +-------+ |           |    |           | +-------+ +---+ +---+
+   |Bot| |Hom| | Down  | |           |    |           | | Down  | |Hom| |Bot|
+   +---+ +---+ +-------+ +-----------+    +-----------+ +-------+ +---+ +---+
+
+
+The keys on the top of the display are named F1 through F16, as depicted below,
+within the documentation for this driver. See the help file for how this driver
+puts them to use.
+
+   +---+       +-------+       +---+        +---+       +-------+       +---+
+   |F1 | +---+ |  F3   | +---+ |F7 |        |F15| +---+ |  F11  | +---+ |F9 |
+   +---+ |   | +-------+ |   | +---+        +---+ |   | +-------+ |   | +---+
+         |F5 |           |F6 |                    |F14|           |F13|
+   +---+ |   | +-------+ |   | +---+        +---+ |   | +-------+ |   | +---+
+   |F2 | +---+ |  F4   | +---+ |F8 |        |F16| +---+ |  F12  | +---+ |F10|
+   +---+       +-------+       +---+        +---+       +-------+       +---+
+
+
