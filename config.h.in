@@ -158,7 +158,7 @@ extern "C" {
 #undef API_PARAMETERS
 
 /* Define this if Universal Serial Bus support is to be included. */
-#undef ENABLE_USB
+#undef ENABLE_USB_SUPPORT
 
 /* Define this to include Papenmeier configuration file support. */
 #undef ENABLE_PM_CONFIGURATION_FILE

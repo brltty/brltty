@@ -244,7 +244,7 @@ static const InputOutputOperations serialOperations = {
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
 /* USB IO */
 #include "Programs/usb.h"
 
@@ -299,7 +299,7 @@ static const InputOutputOperations usbOperations = {
   openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
 #ifdef HAVE_BLUETOOTH_BLUETOOTH_H
 /* Bluetooth IO */
@@ -575,10 +575,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
     io = &serialOperations;
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
   } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
 #ifdef HAVE_BLUETOOTH_BLUETOOTH_H
   } else if (isQualifiedDevice(&device, "bluez:")) {

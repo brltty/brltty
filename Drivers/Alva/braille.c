@@ -488,7 +488,7 @@ static const InputOutputOperations serialOperations = {
   readSerialPacket, writeSerialPacket
 };
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
 #include "Programs/usb.h"
 
 static UsbChannel *usb = NULL;
@@ -551,7 +551,7 @@ static const InputOutputOperations usbOperations = {
   openUsbPort, resetUsbPort, closeUsbPort,
   readUsbPacket, writeUsbPacket
 };
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
 static void
 brl_identify (void)
@@ -663,10 +663,10 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   if (isSerialDevice(&device)) {
     io = &serialOperations;
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
   } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
   } else {
     unsupportedDevice(device);

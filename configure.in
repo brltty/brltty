@@ -563,15 +563,15 @@ if test -n "${usb_object}"
 then
    usb_objects="usb."'$O'" usb_${usb_object}."'$O'
    BRLTTY_ARG_DISABLE(
-      [usb],
+      [usb-support],
       [support for the Universal Serial Bus], [dnl
-      AC_DEFINE([ENABLE_USB])
+      AC_DEFINE([ENABLE_USB_SUPPORT])
    ])
 fi
 AC_SUBST([usb_objects])
 
 BRLTTY_ARG_DISABLE(
-   [bluetooth],
+   [bluetooth-support],
    [support for bluetooth-capable devices], [dnl
    AC_CHECK_HEADERS([bluetooth/bluetooth.h])
 ])
@@ -671,7 +671,7 @@ BRLTTY_ARG_TABLE([attributes], [attributes], [])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],
-   [speech synthesizer support], [dnl
+   [support for speech synthesizers], [dnl
    AC_DEFINE([ENABLE_SPEECH_SUPPORT])
    speech_support_object='spk.$O'
 

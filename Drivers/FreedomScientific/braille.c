@@ -117,7 +117,7 @@ static const InputOutputOperations serialOperations = {
   awaitSerialInput, readSerialBytes, writeSerialPacket
 };
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
 #include "Programs/usb.h"
 
 static UsbChannel *usb = NULL;
@@ -168,7 +168,7 @@ static const InputOutputOperations usbOperations = {
   openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbPacket
 };
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
 typedef enum {
   PKT_QUERY  = 0X00, /* host->unit: request device information */
@@ -639,10 +639,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
     io = &serialOperations;
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
   } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
   } else {
     unsupportedDevice(device);

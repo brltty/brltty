@@ -360,7 +360,7 @@ static const InputOutputOperations serialOperations = {
 };
 
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
 #include "Programs/usb.h"
 
 /* Workarounds for control transfer flakiness (at least in this demo model) */
@@ -520,7 +520,7 @@ static const InputOutputOperations usbOperations = {
   setUsbDisplayState, writeUsbBraille,
   getUsbKeys, soundUsbBeep
 };
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
 
 /* Global variables */
@@ -551,10 +551,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
     io = &serialOperations;
 
-#ifdef ENABLE_USB
+#ifdef ENABLE_USB_SUPPORT
   } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-#endif /* ENABLE_USB */
+#endif /* ENABLE_USB_SUPPORT */
 
   } else {
     unsupportedDevice(device);
