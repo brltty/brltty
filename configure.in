@@ -497,8 +497,11 @@ in
       system_object="qnx"
       AC_CHECK_LIB([asound], [snd_pcm_open])
       ;;
-   cygwin*|mingw*)
+   cygwin*)
       system_object="cygwin"
+      ;;
+   mingw*)
+      system_object="windows"
       ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
