@@ -144,8 +144,6 @@ static int repeat_list[] =
 /* This defines the mapping between brltty and Navigator's dots coding. */
 static TranslationTable outputTable;
 
-/* delay between auto-detect attemps at initialization */
-#define DETECT_DELAY (2000)	/* msec */
 /* Stabilization delay after changing baud rate */
 #define BAUD_DELAY (100)
 
@@ -408,18 +406,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 			    indefinitly for the first char if VTIME != 0... */
 
   /* Try to detect display by sending query */
-  while(1){
-    LogPrint(LOG_DEBUG,"Sending query at 9600bps");
-    if(!restartSerialDevice(brl_fd, &curtio, 9600)) goto failure;
-    if(QueryDisplay(brl_fd,reply)) break;
+  LogPrint(LOG_DEBUG,"Sending query at 9600bps");
+  if(!restartSerialDevice(brl_fd, &curtio, 9600)) goto failure;
+  if(!QueryDisplay(brl_fd,reply)){
 #ifdef HIGHBAUD
     /* Then send the query at 19200bps, in case a PB was left ON
        at that speed */
     LogPrint(LOG_DEBUG,"Sending query at 19200bps");
     if(!putSerialBaud(brl_fd, 19200, &curtio)) goto failure;
-    if(QueryDisplay(brl_fd,reply)) break;
+    if(!QueryDisplay(brl_fd,reply)) goto failure;
 #endif /* HIGHBAUD */
-    delay(DETECT_DELAY);
   }
 
   memcpy (disp_ver, &reply[Q_OFFSET_VER], Q_VER_LENGTH);
