@@ -379,11 +379,11 @@ host_tbl.$O: tbl.$O
 
 XBRLAPI_OBJECTS = xbrlapi.$O
 
-xbrlapi: $(XBRLAPI_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L/usr/X11R6/lib -lbrlapi -lX11
+xbrlapi: $(XBRLAPI_OBJECTS) api
+	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(X_LIBS) -lX11
 
-xbrlapi.$O: xbrlapi.c
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/xbrlapi.c
+xbrlapi.$O: $(SRC_DIR)/xbrlapi.c
+	$(CC) $(CFLAGS) $(X_CFLAGS) -c $(SRC_DIR)/xbrlapi.c
 
 ###############################################################################
 

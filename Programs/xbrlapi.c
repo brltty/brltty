@@ -33,7 +33,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-#include <brltty/api.h>
+#include "api.h"
 
 #define _(s) (s)
 #define _n(s,sp,n) ((n)>1?(sp):(s))
@@ -41,9 +41,6 @@
  * error handling
  */
 
-void fatal_brlapi_errno(const char *msg, const char *fmt, ...) __attribute__ ((__noreturn__, __format__ (printf, 2, 3)));
-void fatal_errno(const char *msg, const char *fmt, ...) __attribute__ ((__noreturn__, __format__ (printf, 2, 3)));
-void fatal(const char *fmt, ...) __attribute__ ((__noreturn__, __format__ (printf, 1, 2)));
 void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
   brlapi_perror(msg);
   if (fmt) {
@@ -329,7 +326,6 @@ static void setFocus(Window win) {
   } else setName(window);
 }
 
-void toX_f(const char *display) __attribute__((__noreturn__));
 void toX_f(const char *display) {
   Window root;
   XEvent ev;
