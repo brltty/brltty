@@ -272,14 +272,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   {
     __u16 duration = 200;
     if(ioctl(brl_fd, BRLVGER_BUZZ, &duration) <0) {
-      LogPrint(LOG_ERR, "ioctl BRLVGER_BUZZ: %s", strerror(errno));
+      LogError("ioctl BRLVGER_BUZZ");
       goto failure;
     }
   }
 
   /* readbrl will want to do non-blocking reads. */
   if(fcntl(brl_fd, F_SETFL, O_NONBLOCK) <0) {
-    LogPrint(LOG_ERR, "fcntl F_SETFL O_NONBLOCK: %s", strerror(errno));
+    LogError("fcntl F_SETFL O_NONBLOCK");
     goto failure;
   }
 
