@@ -304,11 +304,14 @@ define([brltty_tables_attributes], ifdef([brltty_tables_attributes], [brltty_tab
 m4_text_wrap([$2], [             ], [- m4_format([%-10s ], [$1])], brltty_help_width)])])
 
 AC_DEFUN([BRLTTY_SUMMARY_BEGIN], [dnl
-brltty_summary_lines="
-Options Summary:"])
+brltty_summary_lines="Options Summary:"
+])
 
 AC_DEFUN([BRLTTY_SUMMARY_END], [dnl
-AC_OUTPUT_COMMANDS([echo "${brltty_summary_lines}"], [brltty_summary_lines="${brltty_summary_lines}"])])
+AC_CONFIG_COMMANDS([brltty-summary],
+   [AC_MSG_NOTICE([${brltty_summary_lines}])],
+   [brltty_summary_lines="${brltty_summary_lines}"]
+)])
 
 AC_DEFUN([BRLTTY_SUMMARY_ITEM], [dnl
 brltty_summary_lines="${brltty_summary_lines}
