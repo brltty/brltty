@@ -247,73 +247,18 @@ static const InputOutputOperations serialOperations = {
 /* USB IO */
 #include "Programs/usb.h"
 
-static UsbDevice *usbDevice = NULL;
-static unsigned char usbConfiguration;
-static unsigned char usbInterface;
-static unsigned char usbAlternative;
-static unsigned char usbInputEndpoint;
-static unsigned char usbOutputEndpoint;
-
-static const UsbSerialOperations *usbSerial;
-static speed_t usbBaud;
-static int usbFlowControl;
-static int usbDataBits;
-static int usbStopBits;
-static UsbSerialParity usbParity;
-
-static int
-chooseUsbDevice (UsbDevice *device, void *data) {
-  const char *serialNumber = data;
-  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-
-  if (USB_IS_PRODUCT(descriptor, 0X921, 0X1200)) {
-    usbConfiguration = 1;
-    usbInterface = 0;
-    usbAlternative = 0;
-    usbInputEndpoint = 1;
-    usbOutputEndpoint = 1;
-
-    usbBaud = baud;
-    usbFlowControl = 0;
-    usbDataBits = 8;
-    usbStopBits = 1;
-    usbParity = USB_SERIAL_PARITY_ODD;
-  } else if (USB_IS_PRODUCT(descriptor, 0X0403, 0X6001)) {
-    usbConfiguration = 1;
-    usbInterface = 0;
-    usbAlternative = 0;
-    usbInputEndpoint = 1;
-    usbOutputEndpoint = 2;
-
-    usbBaud = baud;
-    usbFlowControl = 0;
-    usbDataBits = 8;
-    usbStopBits = 1;
-    usbParity = USB_SERIAL_PARITY_ODD;
-  } else {
-    return 0;
-  }
-
-  if (!usbVerifySerialNumber(device, serialNumber)) return 0;
-  if (usbClaimInterface(device, usbInterface)) {
-    if (usbSetConfiguration(device, usbConfiguration)) {
-      if (usbSetAlternative(device, usbInterface, usbAlternative)) {
-        usbSerial = usbGetSerialOperations(device);
-        usbSerial->setBaud(device, baud2integer(usbBaud));
-        usbSerial->setFlowControl(device, usbFlowControl);
-        usbSerial->setDataFormat(device, usbDataBits, usbStopBits, usbParity);
-        return 1;
-      }
-    }
-    usbReleaseInterface(device, usbInterface);
-  }
-  return 0;
-}
+static UsbChannel *usb = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
-  if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    usbBeginInput(usbDevice, usbInputEndpoint, 8);
+  static const UsbChannelDefinition definitions[] = {
+    {0X0921, 0X1200, 1, 0, 0, 1, 1, 19200, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* GoHubs chip */
+    {0X0403, 0X6001, 1, 0, 0, 1, 2, 19200, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* FTDI chip */
+    {}
+  };
+
+  if ((usb = usbFindChannel(definitions, (void *)device))) {
+    usbBeginInput(usb->device, usb->definition->inputEndpoint, 8);
     return 1;
   } else {
     LogPrint(LOG_DEBUG, "USB device not found%s%s",
@@ -325,12 +270,12 @@ openUsbPort (char **parameters, const char *device) {
 
 static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbDevice, usbInputEndpoint, milliseconds);
+  return usbAwaitInput(usb->device, usb->definition->inputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (unsigned char *buffer, int length) {
-  int count = usbReapInput(usbDevice, usbInputEndpoint, buffer, length, 0, 100);
+  int count = usbReapInput(usb->device, usb->definition->inputEndpoint, buffer, length, 0, 100);
   if (count == -1) {
     if (errno == EAGAIN)
       count = 0;
@@ -341,15 +286,14 @@ readUsbBytes (unsigned char *buffer, int length) {
 static int
 writeUsbBytes (const unsigned char *buffer, int length, int *delay) {
   if (delay) *delay += length * 1000 / charactersPerSecond;
-  return usbWriteEndpoint(usbDevice, usbOutputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usb->device, usb->definition->outputEndpoint, buffer, length, 1000);
 }
 
 static void
 closeUsbPort (void) {
-  if (usbDevice) {
-    usbReleaseInterface(usbDevice, usbInterface);
-    usbCloseDevice(usbDevice);
-    usbDevice = NULL;
+  if (usb) {
+    usbCloseChannel(usb);
+    usb = NULL;
   }
 }
 

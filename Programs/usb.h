@@ -378,6 +378,27 @@ typedef struct {
 
 extern const UsbSerialOperations *usbGetSerialOperations (UsbDevice *device);
 
+typedef struct {
+  uint16_t vendor;
+  uint16_t product;
+  unsigned char configuration;
+  unsigned char interface;
+  unsigned char alternative;
+  unsigned char inputEndpoint;
+  unsigned char outputEndpoint;
+  int baud;
+  int flowControl;
+  int dataBits;
+  int stopBits;
+  UsbSerialParity parity;
+} UsbChannelDefinition;
+typedef struct {
+  const UsbChannelDefinition *definition;
+  UsbDevice *device;
+} UsbChannel;
+extern UsbChannel *usbFindChannel (const UsbChannelDefinition *definitions, const char *device);
+extern void usbCloseChannel (UsbChannel *channel);
+
 extern int isUsbDevice (const char **path);
 
 #ifdef __cplusplus

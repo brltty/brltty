@@ -95,18 +95,12 @@ static int brlinput = 1;
 */
 #define NRSTATCELLS 4
 
-#define USB_VENDOR_ID 0X0798
-#define USB_PRODUCT_ID 1
-
-#define USB_INPUT_ENDPOINT 1
-
 /* Global variables */
 
 /* Mappings between Voyager's dot coding and brltty's coding. */
 static TranslationTable inputTable, outputTable;
 
-static UsbDevice *usbDevice;
-static unsigned char usbInterface;
+static UsbChannel *usb = NULL;
 
 static unsigned char *prevdata, /* previous pattern displayed */
                      *dispbuf; /* buffer to prepare new pattern */
@@ -114,26 +108,6 @@ static unsigned brl_cols, /* Number of cells available for text */
                 ncells; /* total number of cells including status */
 static char readbrl_init; /* Flag to reinitialize readbrl function state. */
 
-
-static int
-chooseUsbDevice (UsbDevice *device, void *data)
-{
-  const char *serialNumber = data;
-  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-  if (USB_IS_PRODUCT(descriptor, USB_VENDOR_ID, USB_PRODUCT_ID)) {
-    if (!usbVerifySerialNumber(device, serialNumber))
-      return 0;
-
-    usbInterface = 0;
-    if (usbClaimInterface(device, usbInterface) != -1) {
-      if (usbSetConfiguration(device, 1) != -1)
-        if (usbSetAlternative(device, usbInterface, 0) != -1)
-          return 1;
-      usbReleaseInterface(device, usbInterface);
-    }
-  }
-  return 0;
-}
 
 static int
 _sndcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
@@ -146,7 +120,7 @@ _sndcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
     else
       LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
 	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usbDevice, USB_DIRECTION_OUTPUT, 
+    ret = usbControlTransfer(usb->device, USB_DIRECTION_OUTPUT, 
 			     USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                              request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
@@ -171,7 +145,7 @@ _rcvcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
     else
       LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
 	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usbDevice, USB_DIRECTION_INPUT, 
+    ret = usbControlTransfer(usb->device, USB_DIRECTION_INPUT, 
 			     USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                              request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
@@ -224,13 +198,20 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
     LogPrint(LOG_ERR,"Unsupported port type. Must be USB.");
     goto failure;
   }
+
   /* Open the Braille display device */
-  LogPrint(LOG_DEBUG,"Attempting open");
-  if (!(usbDevice = usbFindDevice(chooseUsbDevice, (void *)dev))) {
-    LogPrint(LOG_INFO, "USB device not found.");
-    goto failure;
+  {
+    static const UsbChannelDefinition definitions[] = {
+      {0X0798, 0X0001, 1, 0, 0, 1, 0, 0},
+      {}
+    };
+    LogPrint(LOG_DEBUG,"Attempting open");
+    if (!(usb = usbFindChannel(definitions, (void *)dev))) {
+      LogPrint(LOG_INFO, "USB device not found.");
+      goto failure;
+    }
+    LogPrint(LOG_DEBUG, "USB device opened.");
   }
-  LogPrint(LOG_DEBUG, "USB device opened.");
 
   {
     static const DotsTable dots
@@ -287,7 +268,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   /* cause the display to beep */
   ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
 
-  usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8);
+  usbBeginInput(usb->device, usb->definition->inputEndpoint, 8);
 
   if(!(dispbuf = malloc(ncells))
      || !(prevdata = malloc(ncells)))
@@ -314,10 +295,9 @@ failure:;
 static void 
 brl_close (BrailleDisplay *brl)
 {
-  if (usbDevice) {
-    usbReleaseInterface(usbDevice, usbInterface);
-    usbCloseDevice(usbDevice);
-    usbDevice = NULL;
+  if (usb) {
+    usbCloseChannel(usb);
+    usb = NULL;
   }
 
   free(dispbuf);
@@ -507,7 +487,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     return cmd;
   }
 
-  r = usbReapInput(usbDevice, USB_INPUT_ENDPOINT, buf, 8, 0, 0);
+  r = usbReapInput(usb->device, usb->definition->inputEndpoint, buf, 8, 0, 0);
   if(r<0) {
     if(errno == EAGAIN) {
       /* no input */

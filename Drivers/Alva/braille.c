@@ -491,39 +491,18 @@ static const InputOutputOperations serialOperations = {
 #ifdef ENABLE_USB
 #include "Programs/usb.h"
 
-static UsbDevice *usbDevice = NULL;
-static unsigned char usbInterface;
-static unsigned char usbOutputEndpoint;
-static unsigned char usbInputEndpoint;
-
-static int
-chooseUsbDevice (UsbDevice *device, void *data) {
-  const char *serialNumber = data;
-  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-  if (USB_IS_PRODUCT(descriptor, 0X6b0, 1)) {
-    if (!usbVerifySerialNumber(device, serialNumber)) return 0;
-
-    usbInterface = 0;
-    if (usbClaimInterface(device, usbInterface)) {
-      if (usbSetConfiguration(device, 1)) {
-        if (usbSetAlternative(device, usbInterface, 0)) {
-          usbInputEndpoint = 1;
-          usbOutputEndpoint = 2;
-          return 1;
-        }
-      }
-      usbReleaseInterface(device, usbInterface);
-    }
-  }
-  return 0;
-}
+static UsbChannel *usb = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
-  rewriteInterval = 0;
+  static const UsbChannelDefinition definitions[] = {
+    {0X06b0, 0X0001, 1, 0, 0, 1, 2, 0},
+    {}
+  };
 
-  if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    usbBeginInput(usbDevice, usbInputEndpoint, 8);
+  rewriteInterval = 0;
+  if ((usb = usbFindChannel(definitions, (void *)device))) {
+    usbBeginInput(usb->device, usb->definition->inputEndpoint, 8);
     return 1;
   } else {
     LogPrint(LOG_DEBUG, "USB device not found%s%s",
@@ -540,10 +519,9 @@ resetUsbPort (void) {
 
 static void
 closeUsbPort (void) {
-  if (usbDevice) {
-    usbReleaseInterface(usbDevice, usbInterface);
-    usbCloseDevice(usbDevice);
-    usbDevice = NULL;
+  if (usb) {
+    usbCloseChannel(usb);
+    usb = NULL;
   }
 }
 
@@ -551,7 +529,7 @@ static int
 readUsbPacket (unsigned char *buffer, int length) {
   while (1) {
     unsigned char bytes[2];
-    int count = usbReapInput(usbDevice, usbInputEndpoint, bytes, sizeof(bytes), 0, 0);
+    int count = usbReapInput(usb->device, usb->definition->inputEndpoint, bytes, sizeof(bytes), 0, 0);
     if (count == -1) {
       if (errno == EAGAIN) return 0;
       return count;
@@ -570,7 +548,7 @@ readUsbPacket (unsigned char *buffer, int length) {
 
 static int
 writeUsbPacket (const unsigned char *buffer, int length, int *delay) {
-  return usbWriteEndpoint(usbDevice, usbOutputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usb->device, usb->definition->outputEndpoint, buffer, length, 1000);
 }
 
 static const InputOutputOperations usbOperations = {

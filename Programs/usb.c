@@ -872,6 +872,82 @@ usbGetSerialOperations (UsbDevice *device) {
   return NULL;
 }
 
+typedef struct {
+  const UsbChannelDefinition *definition;
+  const char *serialNumber;
+} UsbChooseChannelData;
+
+static int
+usbChooseChannel (UsbDevice *device, void *data) {
+  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
+  UsbChooseChannelData *choose = data;
+  const UsbChannelDefinition *definition = choose->definition;
+
+  while (definition->vendor) {
+    if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
+      if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
+
+      if (usbClaimInterface(device, definition->interface)) {
+        if (usbSetConfiguration(device, definition->configuration)) {
+          if (usbSetAlternative(device, definition->interface, definition->alternative)) {
+            int ok = 1;
+
+            if (definition->baud) {
+              const UsbSerialOperations *serial = usbGetSerialOperations(device);
+              if (serial) {
+                if (!serial->setBaud(device, definition->baud)) ok = 0;
+                if (!serial->setFlowControl(device, definition->flowControl)) ok = 0;
+                if (!serial->setDataFormat(device, definition->dataBits, definition->stopBits, definition->parity)) ok = 0;
+              } else {
+                LogPrint(LOG_WARNING, "Unsupported serial adapter: vendor=%04X product=%04X",
+                         definition->vendor, definition->product);
+                ok = 0;
+              }
+            }
+
+            if (ok) {
+              choose->definition = definition;
+              return 1;
+            }
+          }
+        }
+        usbReleaseInterface(device, definition->interface);
+      }
+    }
+
+    ++definition;
+  }
+  return 0;
+}
+
+UsbChannel *
+usbFindChannel (const UsbChannelDefinition *definitions, const char *device) {
+  UsbChooseChannelData choose;
+  UsbChannel *channel;
+
+  choose.definition = definitions;
+  choose.serialNumber = device;
+
+  if ((channel = malloc(sizeof(*channel)))) {
+    memset(channel, 0, sizeof(*channel));
+
+    if ((channel->device = usbFindDevice(usbChooseChannel, &choose))) {
+      channel->definition = choose.definition;
+      return channel;
+    }
+
+    free(channel);
+  }
+  return NULL;
+}
+
+void
+usbCloseChannel (UsbChannel *channel) {
+  usbReleaseInterface(channel->device, channel->definition->interface);
+  usbCloseDevice(channel->device);
+  free(channel);
+}
+
 int
 isUsbDevice (const char **path) {
   return isQualifiedDevice(path, "usb");
