@@ -61,8 +61,8 @@ static	int		*const writefd	= &fds[1];
 static void
 spk_identify (void)
 {
-  LogPrint(LOG_NOTICE, "Using Festival Lite version %s-%s-%s %s.",
-	   FLITE_PROJECT_PREFIX, FLITE_PROJECT_VERSION, FLITE_PROJECT_STATE,
+  LogPrint(LOG_NOTICE, "Festival Lite [%s-%s %s] text to speech engine.",
+	   FLITE_PROJECT_VERSION, FLITE_PROJECT_STATE,
 	   FLITE_PROJECT_DATE);
 }
 

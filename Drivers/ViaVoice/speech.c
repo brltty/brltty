@@ -209,12 +209,10 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, EC
 
 static void
 spk_identify (void) {
-   LogPrint(LOG_NOTICE, "ViaVoice Text to Speech System");
-
    {
       char version[0X80];
       eciVersion(version);
-      LogPrint(LOG_INFO, "   Run Time Kit version %s", version);
+      LogPrint(LOG_INFO, "ViaVoice [%s] text to speech engine.", version);
    }
 }
 

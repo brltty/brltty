@@ -71,7 +71,7 @@ initializeTheta (void) {
 static void
 spk_identify (void) {
   initializeTheta();
-  LogPrint(LOG_NOTICE, "Theta version %s", theta_version);
+  LogPrint(LOG_NOTICE, "Theta [%s] text to speech engine.", theta_version);
 }
 
 static int
@@ -142,7 +142,7 @@ spk_open (char **parameters) {
 
         return 1;
       } else {
-        LogPrint(LOG_WARNING, "Voice load error: %s", voiceEntry->voxname);
+        LogPrint(LOG_WARNING, "Voice load error: %s", voiceEntry->human);
       }
     }
   } else {

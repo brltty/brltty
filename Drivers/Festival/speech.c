@@ -41,7 +41,7 @@ static FILE *festival;
 static void
 spk_identify (void)
 {
-  LogPrint(LOG_NOTICE, "Using the Festival text to speech package.");
+  LogPrint(LOG_NOTICE, "Festival text to speech engine.");
 }
 
 
