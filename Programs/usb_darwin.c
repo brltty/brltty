@@ -833,9 +833,9 @@ usbReadDeviceDescriptor (UsbDevice *device) {
     if ((result = (*devx->device)->GetDeviceSpeed(devx->device, &speed)) != kIOReturnSuccess) goto error;
     switch (speed) {
       default                 : device->descriptor.bcdUSB = 0X0000; break;
-      case kUSBDeviceSpeedLow : device->descriptor.bcdUSB = 0X0100; break;
-      case kUSBDeviceSpeedFull: device->descriptor.bcdUSB = 0X0110; break;
-      case kUSBDeviceSpeedHigh: device->descriptor.bcdUSB = 0X0200; break;
+      case kUSBDeviceSpeedLow : device->descriptor.bcdUSB = kUSBRel10; break;
+      case kUSBDeviceSpeedFull: device->descriptor.bcdUSB = kUSBRel11; break;
+      case kUSBDeviceSpeedHigh: device->descriptor.bcdUSB = kUSBRel20; break;
     }
   }
 
