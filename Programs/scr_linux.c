@@ -1337,7 +1337,7 @@ openUinputDevice (void) {
 }
 #endif /* HAVE_LINUX_UINPUT_H */
 
-int
+static int
 execute_LinuxScreen (int command) {
   int blk = command & VAL_BLK_MASK;
   int arg __attribute__((unused)) = command & VAL_ARG_MASK;
