@@ -483,7 +483,7 @@ accurateDelay (int milliseconds) {
 #elif defined(HZ)
     tickLength = 1000 / HZ;
 #else
-#error can't determine tick length
+#error cannot determine tick length
 #endif /* tick length */
     if (!tickLength) tickLength = 1;
   }
