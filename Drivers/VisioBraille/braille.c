@@ -381,7 +381,7 @@ int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
    default: return EOF;
   }
  } else if (type==BRLKEY_OTHER) {
-  ctrlpressed = 0;
+  /* ctrlpressed = 0; */
   if ((ch>=0xe1) && (ch<=0xea))
   {
    ch-=0xe1;
@@ -391,7 +391,7 @@ int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
     return CR_SWITCHVT + ch;
    } else return VAL_PASSKEY+VPK_FUNCTION+ch; 
   }
-  altpressed = 0;
+  /* altpressed = 0; */
   switch (code)
   {
    case PLOC_LT: return CMD_SIXDOTS;
@@ -441,7 +441,14 @@ static int brl_readKey(BrailleDisplay *brl)
   insertString(&ibuf[1]);
   return EOF;
  }  
- if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23)) return EOF;
+ if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23))
+ {
+  char buf[100];
+  if (ibuf[0]==0x2b) return EOF;
+  sprintf(buf,"Unknown packet 0x%x",ibuf[0]);
+  message(buf,MSG_WAITKEY | MSG_NODELAY);
+  return EOF;
+ }
  ch = ibuf[1];
  if (printcode)
  {
@@ -464,27 +471,28 @@ static int brl_readKey(BrailleDisplay *brl)
  {
   routing = 1;
   goto readNextPacket;
-  /* return CMD_NOOP; We want to be called again immediately */
  } 
  if ((ch>=0x20) && (ch<=0x9e))
  {
   switch (ch)
   {
+   case 0x80: ch = 0xc7; break;
+   case 0x81: ch = 0xfc; break;
    case 0x82: ch = 0xe9; break;
-   case 0x85: ch = 0xe0; break;
    case 0x83: ch = 0xe2; break;
    case 0x84: ch = 0xe4; break;
-   case 0x8a: ch = 0xe8; break; 
+   case 0x85: ch = 0xe0; break;
+   case 0x87: ch = 0xe7; break;
    case 0x88: ch = 0xea; break;
    case 0x89: ch = 0xeb; break;
+   case 0x8a: ch = 0xe8; break; 
    case 0x8b: ch = 0xef; break;
    case 0x8c: ch = 0xee; break;
+   case 0x8f: ch = 0xc0; break;
    case 0x93: ch = 0xf4; break;
-   case 0x94: ch = 0xf6; break; 
+   case 0x94: ch = 0xf6; break;
+   case 0x96: ch = 0xfb; break; 
    case 0x97: ch = 0xf9; break;
-   case 0x96 : ch = 0xfb; break;
-   case 0x81: ch = 0xfc; break;
-   case 0x87: ch = 0xe7; break;
    case 0x9e: ch = 0x60; break;
   }
   return ch | BRLKEY_CHAR;
