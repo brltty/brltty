@@ -934,10 +934,10 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
 }
 
 static int
-serialTestLines (SerialDevice *serial, SerialLines set, SerialLines clear) {
+serialTestLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   SerialLines lines;
   if (serialGetLines(serial, &lines))
-    if (((lines & set) == set) && ((~lines & clear) == clear))
+    if (((lines & high) == high) && ((~lines & low) == low))
       return 1;
   return 0;
 }
