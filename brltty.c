@@ -51,7 +51,7 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.90 (beta)"
+#define VERSION "BRLTTY 2.95 (beta)"
 #define COPYRIGHT "\
 Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -64,6 +64,7 @@ Usage: %s [option ...]\n\
  -q         --quiet           Suppress start-up messages.\n\
  -s driver  --speech=driver   Speech interface driver to use: full library name\n\
                                 or shortcut ("##SPKLIBS##")\n\
+ -p         --speechparm     Parameter to the speech driver
  -t file    --table=file      Path to dot translation table file.\n\
  -h         --help            Print this usage information.\n\
  -v         --version         Print start-up messages and exit.\n"
@@ -113,13 +114,14 @@ struct brltty_env
     short slidewin;
     short sound;
     short skpidlns;
+    short skpblnkeol;
     short stcellstyle;
   }
 env, initenv = {
     ENV_MAGICNUM, INIT_CSRVIS, INIT_ATTRVIS, INIT_CSRBLINK, INIT_CAPBLINK,
     INIT_ATTRBLINK, INIT_CSRSIZE, INIT_CSR_ON_CNT, INIT_CSR_OFF_CNT,
     INIT_CAP_ON_CNT, INIT_CAP_OFF_CNT, INIT_ATTR_ON_CNT, INIT_ATTR_OFF_CNT,
-    INIT_SIXDOTS, INIT_SLIDEWIN, INIT_BEEPSON, INIT_SKPIDLNS,
+    INIT_SIXDOTS, INIT_SLIDEWIN, INIT_BEEPSON, INIT_SKPIDLNS, INIT_SKPBLNKEOL,
     ST_None
 };
 
@@ -127,12 +129,13 @@ env, initenv = {
 struct brltty_param
   {
     short csrtrk;		/* tracking mode */
+    short csrhide;              /* For temporarily hiding cursor */
     short dispmode;		/* text or attributes display */
     short winx, winy;		/* Start row and column of Braille window */
     short cox, coy;		/* Old cursor position */
   }
 initparam = {
-    INIT_CSRTRK, TBL_TEXT, 0, 0, 0, 0
+    INIT_CSRTRK, INIT_CSRHIDE, TBL_TEXT, 0, 0, 0, 0
 };
 
 /* Array definition containing pointers to brltty_param structures for 
@@ -205,6 +208,7 @@ void startbrl();
 void switchto (unsigned int scrno); /* activate params for specified screen */
 void csrjmp (int x, int y);	/* move cursor to (x,y) */
 void csrjmp_sub (int x, int y);	/* cursor routing subprocess */
+void setwinabsxy (int x, int y);	/* move window to include (x,y) */
 void setwinxy (int x, int y);	/* move window to include (x,y) */
 void clrbrlstat (void);
 void termination_handler (int signum);	/* clean up before termination */
@@ -221,11 +225,11 @@ int nice (int);			/* should really be in a header file ... */
 #define CF_INVAL 2	// Bad operand specified.
 #define CF_EXTRA 3	// Too many operands.
 
-static int set_braille_configuration (const char *delims)
+static int get_token (char **val, const char *delims)
 {
-  char *path = strtok(NULL, delims);
+  char *v = strtok(NULL, delims);
 
-  if (path == NULL)
+  if (v == NULL)
     {
       return CF_NOVAL;
     }
@@ -235,80 +239,38 @@ static int set_braille_configuration (const char *delims)
       return CF_EXTRA;
     }
 
-  opt_c = strdup(path);
+  *val = strdup(v);
   return CF_OK;
+}
+
+static int set_braille_configuration (const char *delims)
+{
+  return get_token(&opt_c, delims);
 }
 
 static int set_braille_device (const char *delims)
 {
-  char *device = strtok(NULL, delims);
-
-  if (device == NULL)
-    {
-      return CF_NOVAL;
-    }
-    
-  if (strtok(NULL, delims) != NULL)
-    {
-      return CF_EXTRA;
-    }
-
-  opt_d = strdup(device);
-  return CF_OK;
+  return get_token(&opt_d, delims);
 }
 
 static int set_braille_driver (const char *delims)
 {
-  char *library = strtok(NULL, delims);
-
-  if (library == NULL)
-    {
-      return CF_NOVAL;
-    }
-    
-  if (strtok(NULL, delims) != NULL)
-    {
-      return CF_EXTRA;
-    }
-
-  braille_libname = strdup(library);
-  return CF_OK;
+  return get_token(&braille_libname, delims);
 }
 
 static int set_speech_driver (const char *delims)
 {
-  char *library = strtok(NULL, delims);
+  return get_token(&speech_libname, delims);
+}
 
-  if (library == NULL)
-    {
-      return CF_NOVAL;
-    }
-    
-  if (strtok(NULL, delims) != NULL)
-    {
-      return CF_EXTRA;
-    }
-
-  speech_libname = strdup(library);
-  return CF_OK;
+static int set_speech_driverparm (const char *delims)
+{
+  return get_token(&speech_drvparm, delims);
 }
 
 static int set_dot_translation (const char *delims)
 {
-  char *path = strtok(NULL, delims);
-
-  if (path == NULL)
-    {
-      return CF_NOVAL;
-    }
-    
-  if (strtok(NULL, delims) != NULL)
-    {
-      return CF_EXTRA;
-    }
-
-  opt_t = strdup(path);
-  return CF_OK;
+  return get_token(&opt_t, delims);
 }
 
 static void process_configuration_line (char *line, void *data)
@@ -328,6 +290,7 @@ static void process_configuration_line (char *line, void *data)
       {"braille-device",        set_braille_device},
       {"braille-driver",        set_braille_driver},
       {"speech-driver",         set_speech_driver},
+      {"speech-driverparm",         set_speech_driverparm},
       {"dot-translation",       set_dot_translation},
       {NULL,                    NULL}
     };
@@ -421,7 +384,9 @@ main (int argc, char *argv[])
   short attrcntr = 1;
   short oldwinx, oldwiny;
 
-  const char *short_options = "+b:c:d:hl:qs:t:v-:";
+  short speaking_scrno = -1, speaking_prev_inx = -1, speaking_start_line = 0;
+
+  const char *short_options = "+b:c:d:hl:qs:p:t:v-:";
   #ifdef no_argument
     const struct option long_options[] =
       {
@@ -432,6 +397,7 @@ main (int argc, char *argv[])
         {"log"    , required_argument, NULL, 'l'},
         {"quiet"  , no_argument      , NULL, 'q'},
         {"speech" , required_argument, NULL, 's'},
+        {"speechparm" , required_argument, NULL, 'p'},
         {"table"  , required_argument, NULL, 't'},
         {"version", no_argument      , NULL, 'v'},
         {NULL     , 0                , NULL, 0  }
@@ -450,8 +416,6 @@ main (int argc, char *argv[])
 
   /* Parse command line using getopt(): */
   while ((i = get_option()) != -1)
-    /* This will complain if an incorrect option is given but will still
-       proceed. I assume this is intended? SD */
     switch (i)
       {
       case '?': // An invalid option has been specified.
@@ -468,6 +432,9 @@ main (int argc, char *argv[])
 	break;
       case 's':			/* name of driver */
 	speech_libname = optarg;
+	break;
+      case 'p':			/* name of driver */
+	speech_drvparm = optarg;
 	break;
       case 't':		/* text translation table filename */
 	opt_t = optarg;
@@ -682,6 +649,20 @@ main (int argc, char *argv[])
 	  LogClose();
 	  exit (4);
 	}
+      /* I read somewhere that the correct thing to do here is to fork
+	 again, so we are not a group leader and then can never be associated
+	 a controlling tty. Well... No harm I suppose. */
+      switch(fork()) {
+      case -1:
+	LogAndStderr(LOG_ERR, "second fork: %s", strerror(errno));
+	closescr ();
+	LogClose();
+	exit (3);
+      case 0:
+	break;
+      default:
+	return 0;
+      };
       break;
     default:			/* parent returns to calling process: */
       return 0;
@@ -696,7 +677,7 @@ main (int argc, char *argv[])
   startbrl();
 
   /* Initialise speech */
-  speech->initialize();
+  speech->initialize(speech_drvparm);
 
   /* Initialise help screen */
   if (inithlpscr (braille->helpfile))
@@ -710,6 +691,7 @@ main (int argc, char *argv[])
   signal (SIGINT, SIG_IGN);
   signal (SIGHUP, SIG_IGN);
   signal (SIGCHLD, stop_child);
+  signal (SIGPIPE, SIG_IGN);
 
   usetable (TBL_TEXT);
   if (!opt_q)
@@ -769,6 +751,37 @@ main (int argc, char *argv[])
 	      play (snd_bounce);
 	    p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
 	    break;
+	  case CMD_FWINLT:
+	    if(env.skpblnkeol && p->winx == scr.cols-brl.x
+	       && p->winy > 0
+	       && (scr.posy != p->winy || scr.posx >= p->winx)) {
+	      char buffer[scr.cols];
+	      int i;
+	      getscr ((winpos)
+	      {
+		0, p->winy, scr.cols, 1
+		  }
+		      ,buffer, SCR_TEXT);
+
+	      for(i=0; i<p->winx; i++)
+		if(buffer[i] != ' ' && buffer[i] != 0)
+		  break;
+	      if(i == p->winx) {
+		play (snd_wrap_up);
+		goto skip_back;
+	      }
+	    }
+	    if (p->winx == 0){
+	      if(p->winy > 0){
+		p->winx = scr.cols - brl.x;
+		p->winy--;
+		play (snd_wrap_up);
+	      }else
+		play (snd_bounce);
+	    }else
+	      p->winx = MAX (p->winx - fwinshift, 0);
+	    break;
+	    skip_back: /* go on through */
 	  case CMD_LNUP:
 	    if (p->winy == 0)
 	      {
@@ -811,9 +824,9 @@ main (int argc, char *argv[])
                       break;
                     }
 		    /* lines are identical */
-		    /* don't sound if it's the first time or we have
-		       beeped too many times already... */
-		    if (skipped <= 4)
+		    if (skipped == 0)
+		      play (snd_skip_first);
+		    else if (skipped <= 4)
 		      play (snd_skip);
 		    else if (skipped % 4 == 0)
 		      play (snd_skipmore);
@@ -822,6 +835,37 @@ main (int argc, char *argv[])
 		  }
 	      }
 	    break;
+	  case CMD_FWINRT:
+	    if(env.skpblnkeol && p->winx == 0
+	       && p->winy < scr.rows - brl.y
+	       && (scr.posy != p->winy || scr.posx < brl.x)) {
+	      char buffer[scr.cols];
+	      int i;
+	      getscr ((winpos)
+	      {
+		0, p->winy, scr.cols, 1
+		  }
+		      ,buffer, SCR_TEXT);
+
+	      for(i=brl.x; i<scr.cols; i++)
+		if(buffer[i] != ' ' && buffer[i] != 0)
+		  break;
+	      if(i == scr.cols) {
+		play (snd_wrap_down);
+		goto skip_forw;
+	      }
+	    }
+	    if (p->winx >= scr.cols - brl.x){
+	      if (p->winy < scr.rows - brl.y){
+		p->winx = 0;
+		p->winy++;
+		play (snd_wrap_down);
+	      }else
+		  play (snd_bounce);
+	    }else
+	      p->winx = MIN (p->winx + fwinshift, scr.cols - brl.x);
+	    break;
+	    skip_forw: /* go on through */
 	  case CMD_LNDN:
 	    if (p->winy == scr.rows - brl.y)
 	      {
@@ -864,9 +908,9 @@ main (int argc, char *argv[])
 		      break;
 		    }
 		    /* lines are identical */
-		    /* don't sound if it's the first time or we have
-		       beeped too many times already... */
-		    if (skipped <= 4)
+		    if (skipped == 0)
+		      play (snd_skip_first);
+		    else if (skipped <= 4)
 		      play (snd_skip);
 		    else if (skipped % 4 == 0)
 		      play (snd_skipmore);
@@ -877,6 +921,15 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_HOME:
 	    setwinxy (scr.posx, scr.posy);
+	    break;
+	  case CMD_SPKHOME:
+	    if(scr.no == speaking_scrno) {
+	      int inx = speech->track();
+	      int y,x;
+	      y = inx / scr.cols + speaking_start_line;
+	      x = ((inx % scr.cols) / brl.x) * brl.x;
+	      setwinabsxy( x,y );
+	    }
 	    break;
 	  case CMD_LNBEG:
 	    p->winx = 0;
@@ -903,30 +956,6 @@ main (int argc, char *argv[])
 	    if (p->winx == scr.cols - brl.x)
 	      play (snd_bounce);
 	    p->winx = MIN (p->winx + hwinshift, scr.cols - brl.x);
-	    break;
-	  case CMD_FWINLT:
-	    if (p->winx == 0 && p->winy > 0)
-	      {
-		p->winx = scr.cols - brl.x;
-		p->winy--;
-		play (snd_wrap_up);
-	      }
-	    else if (p->winx == 0 && p->winy == 0)
-	      play (snd_bounce);
-	    else
-	      p->winx = MAX (p->winx - fwinshift, 0);
-	    break;
-	  case CMD_FWINRT:
-	    if (p->winx == scr.cols - brl.x && p->winy < scr.rows - brl.y)
-	      {
-		p->winx = 0;
-		p->winy++;
-		play (snd_wrap_down);
-	      }
-	    else if (p->winx == scr.cols - brl.x && p->winy == scr.rows - brl.y)
-	      play (snd_bounce);
-	    else
-	      p->winx = MIN (p->winx + fwinshift, scr.cols - brl.x);
 	    break;
 	  case CMD_CSRJMP:
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
@@ -957,7 +986,14 @@ main (int argc, char *argv[])
 	      inskey (KEY_RETURN);
 	    break;
 	  case CMD_CSRVIS:
+	    /* toggles the config option that decides whether cursor
+	       is shown at all */
 	    TOGGLEPLAY ( TOGGLE(env.csrvis) );
+	    break;
+	  case CMD_CSRHIDE_QK:
+	    /* This is for briefly hiding the cursor */
+	    TOGGLE(p->csrhide);
+	    /* no sound */
 	    break;
 	  case CMD_ATTRVIS:
 	    TOGGLEPLAY ( TOGGLE(env.attrvis) );
@@ -978,7 +1014,9 @@ main (int argc, char *argv[])
 	    TOGGLE(p->csrtrk);
 	    if (p->csrtrk)
 	      {
-		setwinxy (scr.posx, scr.posy);
+		if(speech->isSpeaking())
+		  speaking_prev_inx = -1;
+		else setwinxy (scr.posx, scr.posy);
 		play (snd_link);
 	      }
 	    else
@@ -1074,6 +1112,9 @@ main (int argc, char *argv[])
 	  case CMD_SKPIDLNS:
 	    TOGGLEPLAY ( TOGGLE(env.skpidlns) );
 	    break;
+	  case CMD_SKPBLNKEOL:
+	    TOGGLEPLAY ( TOGGLE(env.skpblnkeol) );
+	    break;
 	  case CMD_SAVECONF:
 	    saveconfig ();
 	    play (snd_done);
@@ -1090,15 +1131,36 @@ main (int argc, char *argv[])
 	    play (snd_done);
 	    break;
 	  case CMD_SAY:
+	  case CMD_SAYALL:
 	    {
-	      unsigned char buffer[scr.cols];
+	      /* OK heres a crazy idea: why not send the attributes with the
+                 text, in case some inflection or marking can be added...! The
+                 speech driver's say function will receive a buffer of text
+                 and a length, but in reality the buffer will contain twice
+                 len bytes: the text followed by the video attribs data. */
+	      unsigned int i;
+	      unsigned r = (keypress == CMD_SAYALL) ? scr.rows - p->winy :1;
+	      unsigned char buffer[ 2*( r *scr.cols )];
 	      getscr ((winpos)
 		      {
-		      0, p->winy, scr.cols, 1
+			0, p->winy, scr.cols, r
 		      }
 		      ,buffer, \
 		      SCR_TEXT);
-	      speech->say(buffer, scr.cols);
+	      i = r*scr.cols;
+	      while(buffer[--i] == 0);
+	      i++;
+	      if(speech->sayWithAttribs != NULL) {
+		getscr ((winpos)
+		{
+		  0, p->winy, scr.cols, r
+		    }
+			,buffer+i, \
+			SCR_ATTRIB);
+		speech->sayWithAttribs(buffer, i);
+	      }else speech->say(buffer, i);
+	      speaking_scrno = scr.no;
+	      speaking_start_line = p->winy;
 	    }
 	    break;
 	  case CMD_MUTE:
@@ -1155,7 +1217,20 @@ main (int argc, char *argv[])
       if( !(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no)
 	switchto (scr.no);
 
-      /* cursor tracking */
+      /* speech tracking */
+      speech->processSpkTracking(); /* called continually even if we're not tracking
+			       so that the pipe doesn't fill up. */
+      if(p->csrtrk && speech->isSpeaking() && scr.no == speaking_scrno) {
+	int inx = speech->track();
+	if(inx != speaking_prev_inx) {
+	  int y,x;
+	  speaking_prev_inx = inx;
+	  y = inx / scr.cols + speaking_start_line;
+	  x = ((inx % scr.cols) / brl.x) * brl.x;
+	  setwinabsxy( x,y );
+	}
+      }
+      else /* cursor tracking */
       if (p->csrtrk)
 	{
 	  /* If cursor moves while blinking is on */
@@ -1312,14 +1387,15 @@ main (int argc, char *argv[])
 	    for (i = 0; i < brl.x * brl.y; i++)
 	      switch(attrbuf[i]){
 		/* Experimental! Attribute values are hardcoded... */
-  	        case 0x07: 
-  	        case 0x17: 
-  	        case 0x30: 
+  	        case 0x08: /* dark-gray on black */
+  	        case 0x07: /* light-gray on black */
+  	        case 0x17: /* light-gray on blue */
+  	        case 0x30: /* black on cyan */
 		  break;
-	        case 0x70:
+	        case 0x70: /* black on light-gray */
 		  brl.disp[i] |= ATTR1CHAR;
 		  break;
-	        case 0x0F:
+	        case 0x0F: /* white on black */
 	        default:
 		  brl.disp[i] |= ATTR2CHAR;
 		  break;
@@ -1329,7 +1405,8 @@ main (int argc, char *argv[])
 	  /*
 	   * If the cursor is visible and in range, and help is off: 
 	   */
-	  if (env.csrvis && (!env.csrblink || csron) && scr.posx >= p->winx &&\
+	  if (env.csrvis && !p->csrhide
+	      && (!env.csrblink || csron) && scr.posx >= p->winx &&\
 	      scr.posx < p->winx + brl.x && scr.posy >= p->winy && \
 	      scr.posy < p->winy + brl.y && !(dispmd & HELP_SCRN))
 	    brl.disp[(scr.posy - p->winy) * brl.x + scr.posx - p->winx] |= \
@@ -1473,6 +1550,16 @@ switchto( unsigned int scrno )
 
 
 void 
+setwinabsxy (int x, int y)
+{
+  if (x < p->winx || x >= p->winx + brl.x)
+    p->winx = x >= (scr.cols / brl.x) * brl.x ? scr.cols - brl.x : \
+      (x / brl.x) * brl.x;
+  if (y < p->winy || y >= p->winy + brl.y)
+    p->winy = y < brl.y - 1 ? 0 : y - (brl.y - 1);
+}
+
+void 
 setwinxy (int x, int y)
 {
   if (env.slidewin)
@@ -1491,14 +1578,9 @@ setwinxy (int x, int y)
 	}
     }
   else
-    {
-      if (x < p->winx || x >= p->winx + brl.x)
-	p->winx = x >= (scr.cols / brl.x) * brl.x ? scr.cols - brl.x : \
-	  (x / brl.x) * brl.x;
-      if (y < p->winy || y >= p->winy + brl.y)
-	p->winy = y < brl.y - 1 ? 0 : y - (brl.y - 1);
-    }
+    setwinabsxy(x,y);
 }
+
 
 
 void 
@@ -1796,6 +1878,10 @@ configmenu (void)
     ,
     {
       &env.skpidlns, "skip identical lines", 1, 0, 1
+    }
+    ,
+    {
+      &env.skpblnkeol, "skip blank end-of-lines", 1, 0, 1
     }
     ,
     {

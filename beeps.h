@@ -38,5 +38,6 @@ extern int snd_cut_end[];
 extern int snd_toggleon[];
 extern int snd_toggleoff[];
 extern int snd_done[];
+extern int snd_skip_first[];
 extern int snd_skip[];
 extern int snd_skipmore[];

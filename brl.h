@@ -101,6 +101,7 @@
 
 /* Configuration options */
 #define CMD_CSRVIS 'v'		/* toggle cursor visibility */
+#define CMD_CSRHIDE_QK 7		/* quick hide cursor (toggle) */
 #define CMD_CSRSIZE 'z'		/* toggle cursor size */
 #define CMD_CSRBLINK '#'	/* toggle cursor blink */
 #define CMD_CAPBLINK '*'	/* toggle capital letter blink */
@@ -109,6 +110,7 @@
 #define CMD_SIXDOTS '6'		/* toggle six-dot mode */
 #define CMD_SLIDEWIN 'w'	/* toggle sliding window */
 #define CMD_SKPIDLNS 'I'	/* toggle skipping of identical lines */
+#define CMD_SKPBLNKEOL 8	/* toggle skipping of blank end-of-lines */
 #define CMD_SND 'S'		/* toggle sound on/off */
 
 /* Key mappings: keys on the braille device are mapped to keyboard keys */
@@ -120,6 +122,8 @@
 
 /* For speech devices: */
 #define CMD_SAY 'Y'		/* sound on */
+#define CMD_SAYALL 127 /* speak text continuously */
+#define CMD_SPKHOME 126 /* goto current/last speech position */
 #define CMD_MUTE 'm'		/* sound off */
 
 /* For specifically turning on/off toggle commands */

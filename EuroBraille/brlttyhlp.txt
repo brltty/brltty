@@ -4,7 +4,7 @@ Note: These key bindings can be improved a lot.  Feel free to help!!
       See brltty/EuroBraille/README file for details.
 
 Key     Action
-Fn E    Show this help screen
+Fn E    Move braille window left
 Fn F    Display the information status line
 Fn G    Enter the configuration menu
 Fn K    Next routing key will mark the beginning of a block
@@ -22,10 +22,10 @@ Kp 9    Move down to the next different screen line
 Kp 0    Toggle cursor tracking mode
 Kp *    Toggle attributes display mode
 Kp #    Toggle Freeze Screen
-
+Kp A    Show this help screen
 Some functions are bound to the braille keyboard:
-Braille u   Move up one line
-Braille d   MOve down one line
-Braille l   Move braille window left
-Braille r   Move braille window right
-Braille h   Move to cursor position
+Typing text on the braille keyboard will make the letter passed to the
+kernel, as if someone typed the letter on the keyboard.
+Note that the braille table implemented is the French Braille Table (CBIFS).
+I'll add other tables in the next versions of the driver.
+

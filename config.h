@@ -46,6 +46,7 @@
 /* Initialisation of BRLTTY environment settings: */
 #define INIT_CSRVIS 1		/* 1 for cursor display, 0 for no cursor */
 #define INIT_CSRTRK 1		/* 1 for cursor tracking on, 0 for off */
+#define INIT_CSRHIDE 0		/* 1 for hiding cursor, 0 for showing it */
 #define INIT_CSRBLINK 0		/* 1 for cursor blink on, 0 for off */
 #define INIT_CAPBLINK 0		/* 1 for capital blink on, 0 for off */
 #define INIT_ATTRVIS 0          /* 1 for attribute underlining */
@@ -55,6 +56,8 @@
 #define INIT_SLIDEWIN 0		/* 1 for sliding window on, 0 for off */
 #define INIT_BEEPSON 1		/* 1 for beeps, 0 for no beeps */
 #define INIT_SKPIDLNS 0		/* 1 = skip all identical lines after first */
+#define INIT_SKPBLNKEOL 0       /* 1 = when remaining of line is blank, skip
+				   to the next. */
 
 /* These control the speed of any blinking cursor or capital letters.
  * The numbers refer to cycles of the main program loop.

@@ -14,17 +14,28 @@
  *
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
-
+#define VERSION "BRLTTY driver for MDV MB408S, version 0.8 (August 2000)"
 /* MDV/brl.c - Braille display driver for MDV displays.
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca) in collaboration with
  * Simone Dal Maso <sdalmaso@protec.it>.
  *
- * This is version 0.5 (June 99) of this driver.
  * It is being tested on MB408S, should also support MB208 and MB408L.
- * It is designed to be compiled in BRLTTY version 2.14.
+ * It is designed to be compiled in BRLTTY version 2.91-3.0.
  *
  * History:
+ * 0.8: Stupid mistake processing keycode for SHIFT_PRESS/RELEASE. Swapped
+ *    bindings for ATTRVIS and DISPMD. Send ACK for packet_to_process packets.
+ *    Safety that forgets held routing keys when getting bad combination with
+ *    ordinary keys. Bugs reported about locking/crashing with paste with
+ *    routing keys, getting out of help, and getting out of freeze, are
+ *    probably not solved.
+ * 0.7: They have changed the protocol so that the SHIFT key pressed alone
+ *    sends a code. Added plenty of key bindings. Fixed help.
+ * 0.6: Added help file. Added hide/show cursor toggle on status cell
+ *    routing key 1.
+ * Unnumbered version: Fixes for dynmically loading drivers (declare all
+ *    non-exported functions and variables static, satized debugging vs print).
  * 0.5: When receiving response to identification query, read all that's
  *    available, because there is usually an ACK packet pending (perhaps it
  *    always sends ACK + the response). Fixed bug that caused combiknation
@@ -177,16 +188,25 @@ static char DotsTable[256] =
 
 /* Key codes */
 #define NRFKEYS 10 /* values 1-10 */
+/* Shift and Long modifiers for all F-keys, (except LONG-F10 and
+   SHIFT-LONG-F10, also SHIFT-F9 is only available in protocol 4 while
+   we need 5 for the SHIFT key to work alone I think) */
 #define SHIFT_MOD 0x10
 #define LONG_MOD 0x20
-#define MODIFIER_MASK 0x30
+#define MODIFIER_MASK 0x70
+  /* It should be 0x30, except that I want to avoid confusion with
+     SHIFT_RELEASE = 64d */
 #define KEY_MASK 0x0F
 /* For the folliwing, plain shift and shift-long combinations are defined
-   but apparently not lon? */
+   but apparently not long- alone. */
 #define LF 11
 #define UP 12
 #define RG 13
 #define DN 14
+/* Two special codes have been added afterwards and don't fit in the
+   scheme: */
+#define SHIFT_PRESS 63
+#define SHIFT_RELEASE 64
 
 /* Query reply */
 #define OFF_NRCONTENTCELLS PACKET_HDR_LEN /* + 0 */
@@ -226,8 +246,8 @@ static char packet_to_process = 1, /* flag: if a packet is received while
 static void 
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "BRLTTY driver for MDV MB408S, version 0.5 (June 99)");
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1996-99 by Stéphane Doyon <s.doyon@videotron.ca>.");
+  LogAndStderr(LOG_NOTICE, VERSION);
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1996-2000 by Stéphane Doyon <s.doyon@videotron.ca>.");
 }
 
 
@@ -273,6 +293,7 @@ receive_rest(unsigned char *packet)
     LogPrint(LOG_DEBUG,"receive_rest(): short read count");
     return 0;
   }
+#if 0
 {
   int i;
   char msgbuf[(MAXPACKETLEN+NRCKSUMBYTES)*3+1], hexbuf[4];
@@ -284,6 +305,7 @@ receive_rest(unsigned char *packet)
   LogPrint(LOG_DEBUG,"Received packet: code %u, body %s",
 	   packet[OFF_CODE],msgbuf);
 }
+#endif
   /* Verify checksum */
   cksum = calc_cksum(packet);
   if(packet[PACKET_HDR_LEN+len] != (unsigned char)(cksum & 0xFF)
@@ -565,6 +587,7 @@ writebrl (brldim *brl)
 
   write(brl_fd, sendpacket, PACKET_HDR_LEN+nrstatcells+brl_cols+NRCKSUMBYTES);
   tcdrain(brl_fd);
+
   if(expect_receive_packet(recvpacket)){
     if(memcmp(recvpacket, ackpacket, ACKPACKETLEN) == 0)
       return;
@@ -604,30 +627,54 @@ readbrl (int type)
   do {
     if(!packet_to_process){
       if(!peek_receive_packet(recvpacket)) return EOF;
-      write(brl_fd, ackpacket, ACKPACKETLEN);
     }else packet_to_process = 0;
+    if(memcmp(recvpacket, ackpacket, ACKPACKETLEN) != 0)
+      /* ACK it, unless it is itself an ACK */
+      write(brl_fd, ackpacket, ACKPACKETLEN);
     code = recvpacket[OFF_CODE];
   } while(code != REPORTKEYPRESS && code != REPORTROUTINGKEYPRESS
 	  && code != REPORTROUTINGKEYRELEASE);
   /* Note that we discard ACK packets */
   /* All these packets should have a length of 1 */
-  if(recvpacket[OFF_LEN] != 1) return EOF;
+  if(recvpacket[OFF_LEN] != 1){
+    LogPrint(LOG_NOTICE,"Received key code 0x%x with length %d",
+	       code, recvpacket[OFF_LEN]);
+    return EOF;
+  }
 
   switch(code) {
     case REPORTKEYPRESS: {
       int cmd = EOF;
       int keycode = recvpacket[PACKET_HDR_LEN];
+      /* SHIFT_PRESS and SHIFT_RELEASE are exceptions to the following */
       int key = keycode & KEY_MASK;
       int modifier = keycode & MODIFIER_MASK;
-/*      if((keycode & ~(KEY_MASK|MODIFIER_MASK)) != 0) return EOF;*/
+      LogPrint(LOG_DEBUG,"Received key code 0x%x with modifier 0x%x",
+	       key, modifier);
       if(nr_routing_cur_pressed > 0){
+	ignore_next_release = 1;
 	if(howmanykeys == 1 && modifier == 0){
-	  ignore_next_release = 1;
 	  switch(key){
 	    case RG: cmd = CR_BEGBLKOFFSET + which_routing_keys[0]; break;
 	    case LF: cmd = CR_ENDBLKOFFSET + which_routing_keys[0]; break;
 	  };
 	}
+	if(cmd == EOF){
+	  /* If the key is not recognized as a valid combination with the
+	     routing keys: as a safety we clear/forget all routing keys
+	     (pretend none are pressed). If we were fooled by repeat presses
+	     or missed a release, this ensures we don't stay locked thinking
+	     that some routing keys are held, and we return other keys to
+	     their normal functions. Following routing key releases will be
+	     ignored anyway. */
+	  nr_routing_cur_pressed = 0;
+	  memset(routing_were_pressed, 0, brl_cols);
+	  howmanykeys = 0;
+	}
+      }else if(keycode == SHIFT_PRESS) {
+	cmd = CMD_CSRHIDE_QK | VAL_SWITCHON;
+      }else if(keycode == SHIFT_RELEASE) {
+	cmd = CMD_CSRHIDE_QK | VAL_SWITCHOFF;
       }else if(modifier == 0){
 	switch(key) {
           case LF: cmd = CMD_FWINLT; break;
@@ -636,14 +683,36 @@ readbrl (int type)
           case DN: cmd = CMD_LNDN; break;
 	  case 1: cmd = CMD_TOP_LEFT; break;
 	  case 2: cmd = CMD_BOT_LEFT; break;
+	  case 3: cmd = CMD_CHRLT; break;
 	  case 4: cmd = CMD_HOME; break;
 	  case 5: cmd = CMD_CSRTRK; break;
 	  case 6: cmd = CMD_SKPIDLNS; break;
+	  case 7: cmd = CMD_SKPBLNKEOL; break;
+	  case 8: cmd = CMD_CHRRT; break;
 	  case 10: cmd = CMD_CONFMENU; break;
 	};
       }else if(modifier == SHIFT_MOD){
 	switch(key) {
-	  case 6: cmd = CMD_DISPMD; break;
+	case UP: cmd = CMD_KEY_UP; break;
+	case DN: cmd = CMD_KEY_DOWN; break;
+	case 1: cmd = CMD_FREEZE; break;
+	case 2: cmd = CMD_INFO; break;
+	case 3: cmd = CMD_HWINLT; break;
+	case 4: cmd = CMD_CSRSIZE; break;
+	case 5: cmd = CMD_CSRVIS; break;
+	case 6: cmd = CMD_DISPMD; break;
+	case 8: cmd = CMD_HWINRT; break;
+	case 10: cmd = CMD_PASTE; break;
+	};
+      }else if(modifier == LONG_MOD){
+	switch(key) {
+	case 4: cmd = CMD_CSRBLINK; break;
+	case 5: cmd = CMD_CAPBLINK; break;
+	case 6: cmd = CMD_ATTRBLINK; break;
+	};
+      }else if(modifier == (SHIFT_MOD|LONG_MOD)){
+	switch(key) {
+	case 6: cmd = CMD_ATTRVIS; break;
 	};
       }
       return cmd;
@@ -652,9 +721,18 @@ readbrl (int type)
     case REPORTROUTINGKEYPRESS:
     case REPORTROUTINGKEYRELEASE: {
       int whichkey = recvpacket[PACKET_HDR_LEN];
+      LogPrint(LOG_DEBUG,"Received routing key %s for key %d",
+	       ((code == REPORTROUTINGKEYPRESS) ? "press" : "release"),
+	       whichkey);
       if(whichkey < 1 || whichkey > brl_cols+nrstatcells) return EOF;
-      /* for now we'll discard routing keys over stat cells */
-      if(whichkey <= nrstatcells) return EOF;
+      if(whichkey <= nrstatcells){
+	/* special handling for routing keys over status cells: currently
+	   only key 1 is mapped. */
+	if(whichkey == 1)
+	  return CMD_CSRHIDE_QK 
+	    | ((code == REPORTROUTINGKEYPRESS) ? VAL_SWITCHOFF : VAL_SWITCHON);
+	else return EOF;
+      }
       whichkey -= nrstatcells;
       whichkey--;
       /* whichkey now ranges 0 - bro_cols-1 instead of 1 - brl_cols. */
@@ -672,6 +750,10 @@ readbrl (int type)
 	return EOF;
       }else{
 	int cmd = EOF;
+	if(nr_routing_cur_pressed == 0){
+	  ignore_next_release = 0;
+	  return EOF;
+	}
 	nr_routing_cur_pressed--;
 	if(nr_routing_cur_pressed > 0) return EOF;
 	/* We interpret the command when all keys have been released. */
@@ -692,18 +774,6 @@ readbrl (int type)
 		   && which_routing_keys[1] == 2))
 	  cmd = CMD_PASTE;
 	else if (howmanykeys == 2 && which_routing_keys[0] == 0
-		 && which_routing_keys[1] == 1)
-	  cmd = CMD_CHRLT;
-	else if (howmanykeys == 2 && which_routing_keys[0] == brl_cols-2
-		 && which_routing_keys[1] == brl_cols-1)
-	  cmd = CMD_CHRRT;
-	else if (howmanykeys == 2 && which_routing_keys[0] == 0
-		 && which_routing_keys[1] == 2)
-	  cmd = CMD_HWINLT;
-	else if (howmanykeys == 2 && which_routing_keys[0] == brl_cols-3
-		 && which_routing_keys[1] == brl_cols-1)
-	  cmd = CMD_HWINRT;
-	else if (howmanykeys == 2 && which_routing_keys[0] == 0
 		 && which_routing_keys[1] == brl_cols-1)
 	  cmd = CMD_HELP;
 	else if(howmanykeys == 3
@@ -714,10 +784,7 @@ readbrl (int type)
 	/* Reset to no keys pressed */
 	memset(routing_were_pressed, 0, brl_cols);
 	howmanykeys = 0;
-	if(ignore_next_release){
-	  ignore_next_release = 0;
-	  return EOF;
-	}
+	ignore_next_release = 0;
 	return cmd;
       }
     }

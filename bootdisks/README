@@ -113,7 +113,7 @@ replace "initrd=initrd.img" with:
 
 	"root=/dev/fd0 load_ramdisk=1 prompt_ramdisk=1".
 
-you can modify all "append" directives, or just the one you want to use,
+You can modify all "append" directives, or just the one you want to use,
 or leave the originals there and make a new one for yourself with a new
 label... 
 

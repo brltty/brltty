@@ -41,7 +41,7 @@ identspk (void)
 }
 
 static void
-initspk (void)
+initspk (char *parm)
 {
 }
 

@@ -1,6 +1,6 @@
 This is the BRLTTY driver for TSI braille displays,
-version 2.3 (April 2000)
-It is designed to be compiled into BRLTTY versions 2.41-3.0.
+version 2.5 (September 2000)
+It is designed to be compiled into BRLTTY versions 2.91-3.0.
 
 Author and maintainer:
         Stéphane Doyon

@@ -23,8 +23,8 @@
  */
 
 /* Changes:
- *      feb 11' 1999:
- *              - None.
+ *      mar 1' 2000:
+ *              - fix correct size of braille lines.
  */
 
 
@@ -257,7 +257,17 @@ static void initbrl(brldim *brl, const char *dev)
 	  if(!strncmp (buffer, BRL_ID, DIM_BRL_ID)){
 	  
 	    // Possible values; 0x20, 0x40, 0x80
-	    ModelID = (int) ((buffer[DIM_BRL_ID] / 0x20) - 1);
+	    int tmpModel=buffer[DIM_BRL_ID] / 0x20;
+
+	    switch(tmpModel){
+	     case 1: ModelID=0;
+	       break;
+	     case 2: ModelID=1;
+	       break;
+	     case 4: ModelID=2;
+	       break;
+	    default: ModelID=1;
+	    }
 	  }
       }
   }while(ModelID == ECO_AUTO);
@@ -275,7 +285,9 @@ static void initbrl(brldim *brl, const char *dev)
       }
       
       read(brl_fd, &buffer, DIM_BRL_READY + 6);
-  //}while(strncmp (buffer, BRL_READY, DIM_BRL_READY));
+      //}while(strncmp (buffer, BRL_READY, DIM_BRL_READY));
+      
+      printf("buffer is : %s\n",buffer);
   
   // Set model params
   model = &Models[ModelID];

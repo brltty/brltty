@@ -40,7 +40,7 @@ identspk (void)
 
 
 static void
-initspk (void)
+initspk (char *parm)
 {
   unsigned char init_speech[] = { INIT_SPEECH };
 

@@ -15,15 +15,21 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
+#define VERSION "BRLTTY driver for TSI displays, version 2.5 (September 2000)"
+#define COPYRIGHT "Copyright (C) 1996-2000 by Stéphane Doyon " \
+                  "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
- * This is version 2.3 (April 2000) of the TSI driver.
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled in BRLTTY versions 2.41-3.0.
+ * It is designed to be compiled into BRLTTY versions 2.91-3.0.
  *
  * History:
+ * Version 2.5: Added CMD_SPKHOME, sacrificed LNBEG and LNEND.
+ * Version 2.4: Refresh display even if unchanged after every now and then so
+ *   that it will clear up if it was garbled. Added speech key bindings (had
+ *   to change a few bindings to make room). Added SKPEOLBLNK key binding.
  * Version 2.3: Reset serial port attributes at each detection attempt in
  *   initbrl. This should help BRLTTY recover if another application (such
  *   as kudzu) scrambles the serial port while BRLTTY is running.
@@ -51,9 +57,6 @@
 
 #define BRL_C 1
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.3 (April 2000)"
-#define COPYRIGHT "Copyright (C) 1996-99 by Stéphane Doyon " \
-                  "<s.doyon@videotron.ca>"
 
 /* see identbrl() */
 
@@ -84,6 +87,11 @@ static int slow_update;
 
 /* Whether multiple packets can be sent for a single update. */
 static int no_multiple_updates;
+
+/* We periodicaly refresh the display even if nothing has changed, will clear
+   out any garble... */
+#define FULL_FRESHEN_EVERY 12 /* every 12 writebrl, do a full update. This
+				 should be a little over every 0.5secs. */
 
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. */
@@ -687,11 +695,10 @@ closebrl (brldim *brl)
 
 static void 
 display (const unsigned char *pattern, 
-	 unsigned start, unsigned stop, 
-	 unsigned brloffset)
+	 unsigned start, unsigned stop)
 /* display a given dot pattern. We process only part of the pattern, from
    byte (cell) start to byte stop. That pattern should be shown at position 
-   brloffset on the display. */
+   start on the display. */
 {
   int i, length;
 
@@ -699,7 +706,7 @@ display (const unsigned char *pattern,
   length = stop - start + 1;
 
   rawdata[BRL_SEND_LENGTH] = 2 * length;
-  rawdata[BRL_SEND_OFFSET] = brloffset;
+  rawdata[BRL_SEND_OFFSET] = start;
 
   for (i = 0; i < length; i++)
     rawdata[DIM_BRL_SEND + 2 * i + 1] = DotsTable[pattern[start + i]];
@@ -778,18 +785,26 @@ static void setbrlstat (const unsigned char *s)
 static void 
 display_all (unsigned char *pattern)
 {
-  display (pattern, 0, brl_cols - 1, 0);
+  display (pattern, 0, ncells - 1);
 }
 
 
 static void 
 writebrl (brldim *brl)
 {
-  if(no_multiple_updates){
+  static int count = 0;
+
+  if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
+    return;
+   
+  if (--count<=0) {
+    /* Force an update of the whole display every now and then to clear any
+       garble. */
+    count = FULL_FRESHEN_EVERY;
+    memcpy(prevdata, brl->disp, ncells);
+    display_all (brl->disp);
+  }else if(no_multiple_updates){
     int start, stop;
-    
-    if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
-      return;
     
     for(start=0; start<ncells; start++)
       if(brl->disp[start] != prevdata[start]) break;
@@ -798,12 +813,9 @@ writebrl (brldim *brl)
       if(brl->disp[stop] != prevdata[stop]) break;
     
     memcpy(prevdata+start, brl->disp+start, stop-start+1);
-    display (brl->disp, start, stop, start);
+    display (brl->disp, start, stop);
   }else{
     int base = 0, i = 0, collecting = 0, simil = 0;
-    
-    if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
-      return;
     
     while (i < ncells)
       if (brl->disp[i] == prevdata[i])
@@ -811,7 +823,7 @@ writebrl (brldim *brl)
 	  simil++;
 	  if (collecting && 2 * simil > DIM_BRL_SEND)
 	    {
-	      display (brl->disp, base, i - simil, base);
+	      display (brl->disp, base, i - simil);
 	      base = i;
 	      collecting = 0;
 	      simil = 0;
@@ -829,7 +841,7 @@ writebrl (brldim *brl)
 	}
     
     if (collecting)
-      display (brl->disp, base, i - simil - 1, base);
+      display (brl->disp, base, i - simil - 1);
   }
 }
 
@@ -854,7 +866,7 @@ flicker ()
   buf = (unsigned char *) malloc (brl_cols);
   if (buf)
     {
-      memset (buf, FLICKER_CHAR, brl_cols);
+      memset (buf, FLICKER_CHAR, ncells);
 
       display_all (buf);
       shortdelay (FLICKER_DELAY);
@@ -877,7 +889,7 @@ do_battery_warn ()
   flicker ();
   display_all (battery_msg);
   delay (BATTERY_DELAY);
-  memset(prevdata, 255, brl_cols); /* force refreshing of the display */
+  memset(prevdata, 255, ncells); /* force refreshing of the display */
 }
 #endif
 
@@ -1325,8 +1337,6 @@ readbrl (int type)
     KEY (KEY_CLEFT | KEY_CROUND, CMD_CHRLT);
     KEY (KEY_CRIGHT | KEY_CROUND, CMD_CHRRT);
 
-    KEYAND(KEY_BAR4 | KEY_BUT3) KEY (KEY_BROUND | KEY_BLEFT, CMD_LNBEG);
-    KEYAND(KEY_BAR4 | KEY_BUT4) KEY (KEY_BROUND | KEY_BRIGHT, CMD_LNEND);
     KEY (KEY_CLEFT | KEY_CUP, CMD_HWINLT);
     KEY (KEY_CRIGHT | KEY_CUP, CMD_HWINRT);
 
@@ -1362,13 +1372,20 @@ readbrl (int type)
   /* paste */
     KEY (KEY_CDOWN | KEY_BROUND, CMD_PASTE);
 
+  /* speech */
+    KEY (KEY_BRIGHT | KEY_BDOWN, CMD_SAY);
+    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SAYALL);
+    KEY (KEY_BROUND | KEY_BRIGHT, CMD_SPKHOME);
+    KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
+    
   /* config menu */
     KEYAND(KEY_BAR1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BRIGHT, CMD_CONFMENU);
     KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNCV) 
       KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_SAVECONF);
     KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNVX | KEY_CNCV) 
       KEY (KEY_CROUND | KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_RESET);
-    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SKPIDLNS);
+    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND | KEY_BDOWN, CMD_SKPIDLNS);
+    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_CROUND | KEY_BDOWN, CMD_SKPIDLNS);
     KEY (KEY_CLEFT | KEY_BLEFT | KEY_BRIGHT, CMD_SLIDEWIN);
     KEYAND(KEY_BUT2 | KEY_BAR1 | KEY_BAR2)
       KEY (KEY_CLEFT | KEY_CROUND | KEY_BLEFT | KEY_BRIGHT, CMD_SND);
@@ -1388,6 +1405,7 @@ readbrl (int type)
     KEYSW(KEY_S1UP | KEY_CNVX, KEY_S1DN | KEY_CNVX, CMD_ATTRBLINK);
     KEYSW(KEY_S2UP, KEY_S2DN, CMD_FREEZE);
     KEYSW(KEY_S3UP, KEY_S3DN, CMD_SKPIDLNS);
+    KEYSW(KEY_S3UP |KEY_BAR1, KEY_S3DN |KEY_BAR1, CMD_SKPIDLNS);
     KEYSW(KEY_S4UP, KEY_S4DN, CMD_DISPMD);
 
 #if 0

@@ -1,24 +1,31 @@
-This is the EuroBraille family driver for BRLTTY, version 0.2
+This is the EuroBraille family driver for BRLTTY, version 0.6
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
 This code is copyrighted under the GNU Public License.  See the file
 COPYING included with BRLTTY for details.
 
-This driver was developped and tested on a very short period of time on 
-the ClioBraille 40 from the EuroBraille family.  It should work with 
-other models too...  If you can confirm it, please tell me!  Since I 
-don't own such a terminal myself, I don't think I can maintain this 
-driver acurately.  If you are interrested in maintaining this PLEASE tell 
-the BRLTTY team and join us!
+This driver is currently maintained by Yannick Plassiard (me).
+It is currently tested on a Clio-noteBraille 40 with Linux Mandrake 6.0.
 
-There is only a basic key binding in the driver.  You can modify it very 
-easily in the brl.c file, near the end.  There is already a "case" 
-statement for each possible key.  You just have to insert function codes 
-from the ../brl.h file.  If you do so, please update the brlttyhlp.txt 
-file too!
+FIXES/ADDITIONS
+===============
+1. Added possibility to enter letters directly from the Braille Keyboard
+   Note that the table implemented is the CBIFS (Code Braille International
+   French Standard). Other tables will be included in other versions.
+   If you want me to implement a specific table, just E-mkil me and I'll do
+   it for you. :)
 
-Comments, suggestions or patches are welcome!
+2. Changed configuration of the linear and keypad keyboard, the E key  is
+   now used to move the braille display to the left and the C key is used
+   to display the help screen.
 
-Nicolas Pitre
-nico@cam.org
+3. Fix the "enter" bug ("\n" is now replaced by "\x0d").
+
+Comments are strongly welcomed, even if they are negatives :) because I
+don't know how many people use the EuroBraille version of BRLTTY in the world
+so if you use this driver, just e-mail me what are your suggestions for next
+versions.
+
+Yannick Plassiard <Yannick.Plassiard@free.fr>
+    Jully 19 2000

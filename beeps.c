@@ -51,6 +51,7 @@ snd (int freq, int del, int consolefd)
   shortdelay (del);
 }
 
+#if 0
 void
 snd_ndelay (int freq, int del, int consolefd)
 {
@@ -58,17 +59,17 @@ snd_ndelay (int freq, int del, int consolefd)
    work around the kernel 2.0.35 beep bug */
   (void) ioctl (consolefd, KDMKTONE, (del<<16) | freq );
 }
+#endif
 
-#if 0
 void
 nosnd (int consolefd)
 {
+/*
   (void) ioctl (consolefd, KIOCSOUND, 0);
-/* alternatively??
-  (void) ioctl (consolefd, KDMKTONE, 0);
 */
+  /* alternatively?? */
+  (void) ioctl (consolefd, KDMKTONE, 0);
 }
-#endif
 
 void
 play (int song[])
@@ -84,6 +85,8 @@ play (int song[])
 	  int freq, del;
 	  freq = *(song++);
 	  del = *(song++);
+	  snd (freq, del, consolefd);
+	  /*
 	  if(*song != 0)
 	    snd (freq, del, consolefd);
 	  else{
@@ -94,7 +97,9 @@ play (int song[])
 	      snd_ndelay(1, 10, consolefd);
 	    }
 	  }
+	  */
 	}
+      nosnd(consolefd);
       close (consolefd);
     }
 }
@@ -168,8 +173,12 @@ int snd_toggleoff[] =
 int snd_done[] =
 {2000, 40, 1, 30, 2000, 40, 1, 40, 2000, 140, 1, 20, 1500, 50, 0};
 
+int snd_skip_first[] =
+{1, 40, 4000, 4, 3000, 6, 2000, 8, 1, 25, 0};
+
 int snd_skip[] =
-{2000, 10, 1, 40, 0};
+{2000, 10, 1, 18, 0};
 
 int snd_skipmore[] =
-{2100, 30, 1, 20, 0};
+{2100, 20, 1, 1, 0};
+

@@ -16,7 +16,6 @@ Movement:
   Previous/next non-identical line: cncv+Rup / cncv+Rdn
   Previous/next line with different attributes: cnvx+Rup / cnvx+Rdn
   One character left/right: CR1+CR2 / CR39+CR40
-  Goto beginning/end of line: cncv+lt / cncv+rt
   Half-window left/right: CR1+CR3 / CR38+CR40
   Several lines up/down: cnvx+Lup / cnvx+Ldn
 
@@ -35,12 +34,17 @@ Cursor routing:
   Route cursor to cell #: CR#
 
 Cut & paste:
-  Mark that region to cut starts at cell #: CR#+CR39+CR40
-  Mark that end (bottom right) of region is at cell #: CR1+CR2+CR#
+  Mark that region to cut starts at cell #: CR#+rt or CR#+CR39+CR40
+  Mark that end (bottom right) of region is at cell #: CR#+lt or CR1+CR2+CR#
   Mark whole region (on one display) starting at cell #(n1) and ending at
     cell #(n2): CR#(n1) + CR#(n1+2) + CR#(n2)
     For example, a region from cell 10 to cell 20: CR10+CR12+CR20
   Paste cut region: CR2+CR3 or cncv+Ldn
+
+Speech:
+  Speak line: rt+Rdn
+  Speak from here to bottom of screen: lt+rt+Rdn
+  Stop speaking: rt+Rup
 
 Configuration:
   Configuration menu:
@@ -51,7 +55,8 @@ Configuration:
     Save current settings to config file: lt+rt+cncv
     Load settings from config file: lt+rt+cncv+cnvx
   Various options can be controlled directly (hotkeys):
-    Skip identical lines (on/off): lt+rt +Rdn (toggle)
+    Skip identical lines (on/off): lt+rt +cncv+Rdn (toggle)
+    Skip blank end-of-lines (on/off): lt+rt +cnvx+Rdn (toggle)
     Show/hide cursor: lt+rt +Lup (toggle)
     Cursor blinking (on/off): lt+rt +Lup+cnvx (toggle)
     Blink capital letters (on/off): lt+rt +Ldn+cnvx (toggle)

@@ -1,5 +1,21 @@
 Note: this file is in reversed chronological order (bottom to top).
 
+
+16 Sep 2000:
+ - version 2.95 (beta):
+ - EcoBraille driver update from Oscar Fernandez <ofa@once.es>
+ - Attribute tracking tuning by Dave Mielke <dave@mielke.cc>
+ - EuroBraille driver update from Yannick Plassiard <Yannick.Plassiard@free.fr>
+ - Added ExternalSpeech speech driver: for sending speech to an external
+   program with our custom protocol. Intended for a bit more sophisticated
+   speech features: speech tracking, and passing video attributes. 
+   First intended for use with IBM's Viavoice TTS AKA Viavoice OutLoud.
+   The external speech program will be released separately.
+ - Added support for speech tracking (for synths that provide word indexing).
+ - Added option to skip directly to next/prev line on FWINRT/LT when the
+   rest of the line is blank.
+ - MDV braille driver update.
+
 23 May 2000:
  - version 2.90 (beta):
  - Tieman MultiBraille driver, contributed by Wolfgang Astleitner

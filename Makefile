@@ -49,6 +49,7 @@
 #SPK_TARGET = Alva
 #SPK_TARGET = BrailleLite
 #SPK_TARGET = CombiBraille
+#SPK_TARGET = ExternalSpeech
 #SPK_TARGET = Festival
 #SPK_TARGET = GenericSay
 #SPK_TARGET = Televox
@@ -148,8 +149,9 @@ INSTALL_DRIVERS =
 BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario MultiBraille
 BRL_LIBS = al b1 b4 cb ec eu md pm ts va mb
 
-SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille Festival GenericSay Televox
-SPK_LIBS = no al bl cb fv gs tv
+SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival \
+   GenericSay Televox
+SPK_LIBS = no al bl cb es fv gs tv
 
 # ------------------------ DO NOT EDIT BELOW THIS LINE ------------------------
 

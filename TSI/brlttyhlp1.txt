@@ -16,7 +16,6 @@ Movement:
   Previous/next line with different attributes: Lrn+Rup / Lrn+Rdn
   One character left/right: CR1+CR2 / CR79+CR80 or Lrn+Llt / Lrn+Lrt
   Left/right one window (useful if line longer than 80chars): Rlt / Rrt
-  Goto beginning/end of line: Rrn+Rlt / Rrn+Rrt
   Half-window left/right: CR1+CR3 / CR78+CR80 or Lup+Llt / Lup+Lrt
   Several lines up/down: Lrn+Rup / Lrn+Rdn
 
@@ -42,6 +41,11 @@ Cut & paste:
     For example, a region from cell 10 to cell 20: CR10+CR12+CR20
   Paste cut region: CR2+CR3 or Rrn+Ldn
 
+Speech:
+  Speak line: Rrt+Rdn
+  Speak from here to bottom of screen: Rlt+Rrt+Rdn
+  Stop speaking: Rrt+Rup
+
 Configuration:
   Configuration menu:
     Enter/exit configuration menu: Rlt+Rrt (sort of a toggle)
@@ -51,7 +55,8 @@ Configuration:
     Save current settings to config file: Rlt+Rrt+Rrn
     Load settings from config file: Rlt+Rrt+Rrn+Lrn
   Various options can be controlled directly (hotkeys):
-    Skip identical lines (on/off): Rlt+Rrt +Rdn (toggle)
+    Skip identical lines (on/off): Rlt+Rrt +Rrn+Rdn (toggle)
+    Skip blank end-of-lines (on/off): Rlt+Rrt +Lrn+Rdn (toggle)
     Sliding braille window (on/off): Rlt+Rrt +Llt (toggle)
     Audio tones (enable/disable): Rlt+Rrt +Llt+Lrn (toggle)
     Show/hide cursor: Rlt+Rrt +Lup (toggle)
