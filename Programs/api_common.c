@@ -14,12 +14,14 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
- 
+
 /* api_common.c: communication via the socket */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
+
+#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -27,6 +29,7 @@
 #include <stddef.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -40,16 +43,16 @@ const char *brlapi_libcerrfun;
 
 /* brlapi_writeFile */
 /* Writes a buffer to a file */
-static int brlapi_writeFile(int fd, const void *buf, size_t size)
+static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
 {
-  int n;
-  int res=0;
+  size_t n;
+  ssize_t res=0;
   for (n=0;n<size;n+=res) {
     res=write(fd,buf+n,size-n);
-    if ((res<0) && (errno!=EINTR) && (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */ 
+    if ((res<0) && (errno!=EINTR) && (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       brlapi_libcerrno=errno;
       brlapi_libcerrfun="write in writeFile";
-      close(fd);    /* for safety */
+      brlapi_errno=BRLERR_LIBCERR;
       return res;
     }
   }
@@ -58,21 +61,19 @@ static int brlapi_writeFile(int fd, const void *buf, size_t size)
 
 /* brlapi_readFile */
 /* Reads a buffer from a file */
-static int brlapi_readFile(int fd, void *buf, size_t size)
+static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
 {
-  int n;
-  int res=0;
+  size_t n;
+  ssize_t res=0;
   for (n=0;n<size && res>=0;n+=res) {
     res=read(fd,buf+n,size-n);
-    if (res==0) {
+    if (res==0)
       /* Unexpected end of file ! */
-      close(fd);
       return n;
-    }
     if ((res<0) && (errno!=EINTR) && (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       brlapi_libcerrno=errno;
       brlapi_libcerrfun="read in readFile";
-      close(fd);    /* for safety */
+      brlapi_errno=BRLERR_LIBCERR;
       return -1;
     }
   }
@@ -81,11 +82,11 @@ static int brlapi_readFile(int fd, void *buf, size_t size)
 
 /* brlapi_writePacket */
 /* Write a packet on the socket */
-int brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size)
+ssize_t brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size)
 {
   uint32_t header[2] = { htonl(size), htonl(type) };
-  int res;
- 
+  ssize_t res;
+
   /* first send packet header (size+type) */
   if ((res=brlapi_writeFile(fd,&header[0],sizeof(header)))<0)
     return res;
@@ -101,10 +102,11 @@ int brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size)
 /* brlapi_readPacket */
 /* Read a packet */
 /* Returns packet's size, -2 if EOF, -1 on error */
-int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
+ssize_t brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
 {
-  uint32_t header[2]; 
-  int n,res;
+  uint32_t header[2];
+  size_t n;
+  ssize_t res;
   static unsigned char foo[BRLAPI_MAXPACKETSIZE];
 
   /* first read packet header (size+type) */
@@ -123,6 +125,7 @@ int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
       /* brlapi_writePacket(fd,PACKET_BYE,NULL,0); */
       brlapi_libcerrno=EFBIG;
       brlapi_libcerrfun="read in readPacket";
+      brlapi_errno=BRLERR_LIBCERR;
       return -1;
     }
     buf=foo;
@@ -132,6 +135,7 @@ int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
       /* brlapi_writePacket(fd,PACKET_BYE,NULL,0); */
       brlapi_libcerrno=EFBIG;
       brlapi_libcerrfun="read in readPacket";
+      brlapi_errno=BRLERR_LIBCERR;
       return -1;
     }
 
@@ -153,18 +157,21 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth)
   if (stat(filename, &statbuf)<0) {
     brlapi_libcerrno=errno;
     brlapi_libcerrfun="stat in loadAuthKey";
+    brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
 
   if ((res = statbuf.st_size)>BRLAPI_MAXPACKETSIZE) {
     brlapi_libcerrno=EFBIG;
     brlapi_libcerrfun="stat in loadAuthKey";
+    brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
 
   if ((fd = open(filename, O_RDONLY)) <0) {
     brlapi_libcerrno=errno;
     brlapi_libcerrfun="open in loadAuthKey";
+    brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
 
@@ -173,8 +180,27 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth)
   if (*authlength!=res) {
     close(fd);
     return -1;
-  } 
+  }
 
   close(fd);
   return 0;
+}
+
+/* Function: brlapi_splitHost
+ * splits host into hostname & port */
+void brlapi_splitHost(const char *host, char **hostname, char **port) {
+  char *c;
+  if (!host || !*host) {
+    *hostname=NULL;
+    *port=strdup(BRLAPI_SOCKETPORT);
+  } else if ((c = strchr(host,':'))) {
+    if (c != host)
+      *hostname = strndup(host,c-host);
+    else
+      *hostname = NULL;
+    *port = strdup(c+1);
+  } else {
+    *hostname = strdup(host);
+    *port = strdup(BRLAPI_SOCKETPORT);
+  }
 }

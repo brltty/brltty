@@ -14,7 +14,7 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
- 
+
 /* brlapi.c : Main file for BrlApi library */
 
 #ifdef HAVE_CONFIG_H
@@ -55,11 +55,10 @@
 
 typedef enum {
   PARM_HOST,
-  PARM_PORT,
   PARM_KEYFILE
 } Parameters;
 
-const char *const api_parameters[] = { "host", "port", "keyfile", NULL };
+const char *const api_parameters[] = { "host", "keyfile", NULL };
 
 #define RELEASE "BRLTTY API Library: release " BRLAPI_RELEASE
 #define COPYRIGHT "   Copyright Sebastien HINDERER <shindere@ens-lyon.fr> \
@@ -75,6 +74,13 @@ if (!( condition )) { \
   continue; \
 } else { }
 
+#ifdef brlapi_errno
+#undef brlapi_errno
+#endif
+
+int brlapi_errno;
+int *brlapi_errno_location(void) { return &brlapi_errno; }
+
 /****************************************************************************/
 /** GLOBAL TYPES AND VARIABLES                                              */
 /****************************************************************************/
@@ -88,13 +94,13 @@ typedef struct
 {
   pthread_t thread;
   int id;
-  int fd; 
+  int fd;
   int tty;
   int raw;
   uint32_t how; /* how keys must be delivered to clients */
   BrailleDisplay brl;
   unsigned int cursor;
-  TBrlBufState brlbufstate; 
+  TBrlBufState brlbufstate;
   pthread_mutex_t brlmutex;
   Trangelist *UnmaskedKeys;
   pthread_mutex_t maskmutex;
@@ -134,12 +140,6 @@ static BrailleDriver ApiBraille;
 
 /* Identication of the REAL braille driver currently used */
 static uint32_t DisplaySize[2] = { 0, 0 };
-
-/* connection binding */
-typedef struct {
-  const char *host;
-  const char *port;
-} Tbinding;
 
 static int authKeyLength = 0;
 static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
@@ -200,8 +200,8 @@ static void writeErrorPacket(int fd,unsigned long int err)
 static Tconnection *createConnection(int fd,int x, int y)
 {
   int i;
-  Tconnection *c; 
-  pthread_mutex_lock(&connections_mutex); 
+  Tconnection *c;
+  pthread_mutex_lock(&connections_mutex);
   for (i=0; i<CONNECTIONS; i++) if (connections[i]==NULL) {
     connections[i] = (Tconnection *) malloc(sizeof(Tconnection));
     if (connections[i]==NULL) {
@@ -212,16 +212,16 @@ static Tconnection *createConnection(int fd,int x, int y)
     }
     c = connections[i];
     if (x*y > 0) {
-      c->brl.buffer = (unsigned char *) malloc(x*y); 
+      c->brl.buffer = (unsigned char *) malloc(x*y);
       if (c->brl.buffer==NULL) {
         connections[i] = NULL;
-        pthread_mutex_unlock(&connections_mutex);   
+        pthread_mutex_unlock(&connections_mutex);
         writeErrorPacket(fd,BRLERR_NOMEM);
         close(fd);
         free(c);
         return NULL;
       }
-    } else c->brl.buffer = NULL;  
+    } else c->brl.buffer = NULL;
     /* From now on, nothing can prevent us from settling connection */
     /* That's why one can already release the mutex : one can assume one won't */
     /* have to modify connections for now... */
@@ -273,7 +273,7 @@ static void endThread(void *arg)
   LogPrint(LOG_DEBUG,"Ending thread associated to connection %d",c->id);
   close(c->fd); /* Pour libérer au plus vite les descripteurs */
   pthread_mutex_lock(&destroy_mutex);
-  while (ConnectionToDestroy!=NULL) 
+  while (ConnectionToDestroy!=NULL)
     pthread_cond_wait(&destroy_condition,&destroy_mutex);
   ConnectionToDestroy = c;
   pthread_cond_signal(&todestroy_condition);
@@ -389,7 +389,7 @@ static void *processConnection(void *arg)
         brl_keycode_t x,y;
         if (type==BRLPACKET_MASKKEYS) LogPrint(LOG_DEBUG,"Received MaskKeys request");
         else LogPrint(LOG_DEBUG,"Received UnmaskKeys request");
-        CHECK(( (!c->raw) && (c->tty!=-1) ),BRLERR_ILLEGAL_INSTRUCTION);   
+        CHECK(( (!c->raw) && (c->tty!=-1) ),BRLERR_ILLEGAL_INSTRUCTION);
         CHECK(size==2*sizeof(brl_keycode_t),BRLERR_INVALID_PACKET);
         x = ntohl(ints[0]);
         y = ntohl(ints[1]);
@@ -422,7 +422,7 @@ static void *processConnection(void *arg)
         extWriteStruct *ews = (extWriteStruct *) packet;
         uint32_t dispSize, cursor, rbeg, rend, strLen;
         unsigned char *p = &ews->data;
-        unsigned char buf[200]; /* dirty! */ 
+        unsigned char buf[200]; /* dirty! */
         LogPrint(LOG_DEBUG,"Received Extended Write request...");
         CHECK(size>=sizeof(ews->flags), BRLERR_INVALID_PACKET);
         CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
@@ -444,25 +444,25 @@ static void *processConnection(void *arg)
             && (rbeg<=rend), BRLERR_INVALID_PARAMETER);
         } else {
           rbeg = 1;
-          rend = dispSize; 
+          rend = dispSize;
         }
         strLen = (rend-rbeg) + 1;
         if (ews->flags & BRLAPI_EWF_TEXT) {
           CHECK(size>=strLen, BRLERR_INVALID_PACKET);
           for (i=rbeg-1; i<rend; i++)
-            buf[i] = textTable[*(p+i)];          
+            buf[i] = textTable[*(p+i)];
           p += strLen; size -= strLen; /* text */
         }
         if (ews->flags & BRLAPI_EWF_ATTR_AND) {
           CHECK(size>=strLen, BRLERR_INVALID_PACKET);
           for (i=rbeg-1; i<rend; i++)
-            buf[i] &= *(p+i);          
+            buf[i] &= *(p+i);
           p += strLen; size -= strLen; /* and attributes */
         }
         if (ews->flags & BRLAPI_EWF_ATTR_OR) {
           CHECK(size>=strLen, BRLERR_INVALID_PACKET);
           for (i=rbeg-1; i<rend; i++)
-            buf[i] |= *(p+i);          
+            buf[i] |= *(p+i);
           p += strLen; size -= strLen; /* or attributes */
         }
         if (ews->flags & BRLAPI_EWF_CURSOR) {
@@ -475,11 +475,11 @@ static void *processConnection(void *arg)
         /* Here all the packet has been processed. */
         /* We can now set the cursor if any, and update the actual buffer */
         /* with the new information to display */
-        if (cursor) buf[cursor-1] |= cursorDots(); 
+        if (cursor) buf[cursor-1] |= cursorDots();
         pthread_mutex_lock(&c->brlmutex);
         c->cursor = cursor;
         memcpy(c->brl.buffer, buf, dispSize);
-        c->brlbufstate = FULL; 
+        c->brlbufstate = FULL;
         pthread_mutex_unlock(&c->brlmutex);
         writeAckPacket(c->fd);
         continue;
@@ -523,17 +523,17 @@ static void *processConnection(void *arg)
       case BRLPACKET_GETDRIVERID: {
         CHECK(size==0,BRLERR_INVALID_PACKET);
         LogPrint(LOG_DEBUG,"Received GetDriverId request");
-        CHECK(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);    
+        CHECK(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
         brlapi_writePacket(c->fd,BRLPACKET_GETDRIVERID,braille->identifier,strlen(braille->identifier)+1);
         continue;
       }
       case BRLPACKET_GETDRIVERNAME: {
         CHECK(size==0,BRLERR_INVALID_PACKET);
         LogPrint(LOG_DEBUG,"Received GetDriverName request");
-        CHECK(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);    
+        CHECK(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
         brlapi_writePacket(c->fd,BRLPACKET_GETDRIVERNAME,braille->name,strlen(braille->name)+1);
         continue;
-      }   
+      }
       case BRLPACKET_GETDISPLAYSIZE: {
         CHECK(size==0,BRLERR_INVALID_PACKET);
         LogPrint(LOG_DEBUG,"GetDisplaySize request");
@@ -582,20 +582,26 @@ static void *processConnection(void *arg)
 /* Function : initializeSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
-static int initializeSocket(const Tbinding *binding)
+static int initializeSocket(const char *host)
 {
   int fd=-1, err, yes=1;
   struct addrinfo *res,*cur;
   struct addrinfo hints;
+  char *hostname,*port;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_flags = AI_PASSIVE;
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  err = getaddrinfo(binding->host, binding->port, &hints, &res);
+  brlapi_splitHost(host,&hostname,&port);
+
+  err = getaddrinfo(hostname, port, &hints, &res);
+  if (hostname)
+    free(hostname);
+  free(port);
   if (err) {
-    LogPrint(LOG_WARNING,"getaddrinfo : %s",gai_strerror(err));
+    LogPrint(LOG_WARNING,"getaddrinfo(%s:%s,%s) : %s",host,hostname,port,gai_strerror(err));
     return -1;
   }
   for (cur = res; cur; cur = cur->ai_next) {
@@ -631,7 +637,7 @@ static int initializeSocket(const Tbinding *binding)
   }
   freeaddrinfo(res);
   if (cur) return fd;
-  LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",binding->host,binding->port);
+  LogPrint(LOG_WARNING,"unable to find a local TCP port %s !",host);
   return -1;
 }
 
@@ -653,20 +659,20 @@ static void *connectionsManager(void *arg)
   int res, mainsock;
   struct sockaddr addr;
   socklen_t addrlen = sizeof(addr);
-  Tbinding *binding = (Tbinding *) arg;
+  char *host = (char *) arg;
   Tconnection *c;
   if ((res = pthread_sigmask(SIG_BLOCK,&BlockedSignals,NULL))!=0) {
     LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
     pthread_exit(NULL);
   }
-  if ((mainsock = initializeSocket(binding))==-1) {
+  if ((mainsock = initializeSocket(host))==-1) {
     LogPrint(LOG_WARNING,"Error while initializing socket : %s",strerror(errno));
     return NULL;
   }
   pthread_cleanup_push((void (*) (void *)) closeSocket,(void *) mainsock);
   for (; (res = accept(mainsock, &addr, &addrlen))>=0; addrlen=sizeof(addr)) {
     LogPrint(LOG_DEBUG,"Connection accepted on socket %d",res);
-    c = createConnection(res,ntohl(DisplaySize[0]),ntohl(DisplaySize[1])); 
+    c = createConnection(res,ntohl(DisplaySize[0]),ntohl(DisplaySize[1]));
     if (c==NULL) {
       LogPrint(LOG_WARNING,"Failed to create connection structure");
       continue;
@@ -702,7 +708,7 @@ static int initializeUnmaskedKeys(Tconnection *c)
   if (RemoveRange(CMD_SWITCHVT_PREV,CMD_SWITCHVT_NEXT,&c->UnmaskedKeys)==-1) return -1;
   if (RemoveRange(CMD_RESTARTBRL,CMD_RESTARTSPEECH,&c->UnmaskedKeys)==-1) return -1;
   if (RemoveRange(CR_SWITCHVT,CR_SWITCHVT|0XFF,&c->UnmaskedKeys)==-1) return -1;
-  return 0; 
+  return 0;
 }
 
 /* Function : cleanUp */
@@ -774,7 +780,7 @@ static void api_writeWindow(BrailleDisplay *brl)
   }
   pthread_mutex_unlock(&connections_mutex);
   TrueBraille->writeWindow(brl);
-} 
+}
 
 /* Function : api_readCommand */
 static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
@@ -793,7 +799,7 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
     if (res>0) {
       LogPrint(LOG_DEBUG,"Size: %d Contents: %c %c %c %x %x ",res,*packet,packet[1],packet[2],packet[3],packet[4]);
       brlapi_writePacket(RawConnection->fd,BRLPACKET_PACKET,packet,res);
-    } 
+    }
     return EOF;
   }
   pthread_mutex_lock(&connections_mutex);
@@ -830,9 +836,9 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
         LogPrint(LOG_DEBUG,"Transmitting unmasked command %u",keycode);
         keycode = htonl(keycode);
         brlapi_writePacket(c->fd,BRLPACKET_COMMAND,&keycode,sizeof(keycode));
-      }   
+      }
       return EOF;
-    }  
+    }
     if (c->how==BRLKEYCODES) keycode = TrueBraille->keyToCommand(&c->brl,caller,keycode);
   }
   if (keycode==0) {
@@ -880,10 +886,10 @@ void api_identify(void)
 /* Then one creates the communication socket */
 void api_open(BrailleDisplay *brl, char **parameters)
 {
-  static Tbinding binding;
+  static char *host;
   int res;
- 
-  DisplaySize[0] = htonl(brl->x); 
+
+  DisplaySize[0] = htonl(brl->x);
   DisplaySize[1] = htonl(brl->y);
 
   api_link();
@@ -898,12 +904,10 @@ void api_open(BrailleDisplay *brl, char **parameters)
   for (res=0; res<CONNECTIONS; res++) connections[res] = NULL;
   initBlockedSignals();
 
-  if (*parameters[PARM_HOST]) binding.host = parameters[PARM_HOST];
-  else binding.host = NULL;
-  if (*parameters[PARM_PORT]) binding.port = parameters[PARM_PORT];
-  else binding.port = BRLAPI_SOCKETPORT;
+  if (*parameters[PARM_HOST]) host = parameters[PARM_HOST];
+  else host = "127.0.0.1";
 
-  if ((res = pthread_create(&t,NULL,connectionsManager,(void *) &binding)) != 0) {
+  if ((res = pthread_create(&t,NULL,connectionsManager,(void *) host)) != 0) {
     LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
     return;
   } else connectionsAllowed = 1;

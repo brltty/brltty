@@ -14,7 +14,7 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
- 
+
 /* api_client.c handles connection with BrlApi */
 
 #ifdef HAVE_CONFIG_H
@@ -66,7 +66,7 @@
 #endif /* MIN */
 
 #ifndef MAX
-#define MAX(a, b) (((a) > (b))? (a): (b)) 
+#define MAX(a, b) (((a) > (b))? (a): (b))
 #endif /* MAX */
 
 /* for remembering getaddrinfo error code */
@@ -120,17 +120,17 @@ static int handle_keypress(brl_type_t type, uint32_t *code, int size) {
 static int brlapi_waitForAck()
 {
   brl_type_t type;
-  int res;
+  ssize_t res;
   uint32_t code;
   while (1) {
     if ((res=brlapi_readPacket(fd,&type,&code,sizeof(code)))<0) {
-      brlapi_errno=BRLERR_LIBCERR;
-      return res;
+      if (res==-2) brlapi_errno=BRLERR_EOF;
+      return -1;
     }
     if (handle_keypress(type,&code,res)) continue;
     switch (type) {
       case BRLPACKET_ACK: return 0;
-      case BRLPACKET_ERROR: { 
+      case BRLPACKET_ERROR: {
         brlapi_errno=ntohl(code);
         return -1;
       }
@@ -143,13 +143,12 @@ static int brlapi_waitForAck()
 
 /* brlapi_writePacketWaitForAck */
 /* write a packet and wait for an acknowledgement */
-static int brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf, size_t size)
+static ssize_t brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf, size_t size)
 {
-  int res;
+  ssize_t res;
   pthread_mutex_lock(&brlapi_fd_mutex);
   if ((res=brlapi_writePacket(fd,type,buf,size))<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
-    brlapi_errno=BRLERR_LIBCERR;
     return res;
   }
   res=brlapi_waitForAck();
@@ -187,32 +186,23 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   /* Here update settings with the parameters from misc sources (files, env...) */
   updateSettings(&settings, &envsettings);
   updateSettings(&settings, clientSettings);
-  if (usedSettings!=NULL) updateSettings(usedSettings, &settings); 
+  if (usedSettings!=NULL) updateSettings(usedSettings, &settings);
 
-  if ((err=brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key))<0) {
-    brlapi_errno=BRLERR_LIBCERR;
+  if ((err=brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key))<0)
     return err;
-  }
 
   auth->protocolVersion = BRLAPI_PROTOCOL_VERSION;
 
-  if ((port = strchr(settings.hostName,':'))) {
-    if (port != settings.hostName) {
-      hostname = alloca(port-settings.hostName+1);
-      strncpy(hostname,settings.hostName,port-settings.hostName);
-      hostname[port-settings.hostName]='\0';
-    }
-    port++;
-  } else {
-    port = BRLAPI_SOCKETPORT;
-    hostname = settings.hostName;
-  }
+  brlapi_splitHost(settings.hostName,&hostname,&port);
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
   gai_error = getaddrinfo(hostname, port, &hints, &res);
+  if (hostname)
+    free(hostname);
+  free(port);
   if (gai_error) {
     brlapi_errno=BRLERR_GAIERR;
     return -1;
@@ -236,7 +226,6 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   }
   if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, packet, sizeof(auth->protocolVersion)+authKeyLength))<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
-    brlapi_errno=BRLERR_LIBCERR;
     close(fd);
     fd = -1;
     return err;
@@ -281,30 +270,25 @@ int brlapi_leaveRaw()
 
 /* brlapi_sendRaw */
 /* Send a Raw Packet */
-int brlapi_sendRaw(const unsigned char *buf, size_t size)
+ssize_t brlapi_sendRaw(const unsigned char *buf, size_t size)
 {
-  int res;
+  ssize_t res;
   pthread_mutex_lock(&brlapi_fd_mutex);
   res=brlapi_writePacket(fd, BRLPACKET_PACKET, buf, size);
   pthread_mutex_unlock(&brlapi_fd_mutex);
-  if (res<0) {
-    brlapi_errno=BRLERR_LIBCERR;
-    return res;
-  }
-  return 0;
+  return res;
 }
 
 /* brlapi_recvRaw */
 /* Get a Raw packet */
-int brlapi_recvRaw(unsigned char *buf, size_t size)
+ssize_t brlapi_recvRaw(unsigned char *buf, size_t size)
 {
-  int res;
+  ssize_t res;
   brl_type_t type;
   pthread_mutex_lock(&brlapi_fd_mutex);
   while (1) {
     if ((res=brlapi_readPacket(fd, &type, buf, size))<0) {
       pthread_mutex_unlock(&brlapi_fd_mutex);
-      brlapi_errno=BRLERR_LIBCERR;
       return res;
     }
     if (type==BRLPACKET_PACKET) {
@@ -327,18 +311,17 @@ int brlapi_getDriverId(unsigned char *id, size_t n)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_type_t type;
-  int res;
+  ssize_t res;
   uint32_t *code = (uint32_t *) packet;
   pthread_mutex_lock(&brlapi_fd_mutex);
   if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERID, NULL, 0)<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
-    brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
   while (1) {
     if ((res=brlapi_readPacket(fd,&type, packet, sizeof(packet)))<0) {
+      if (res==-2) brlapi_errno=BRLERR_EOF;
       pthread_mutex_unlock(&brlapi_fd_mutex);
-      brlapi_errno=BRLERR_LIBCERR;
       return -1;
     }
     if (handle_keypress(type,code,res)) continue;
@@ -365,18 +348,17 @@ int brlapi_getDriverName(unsigned char *name, size_t n)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_type_t type;
-  int res;
+  ssize_t res;
   uint32_t *code = (uint32_t *) packet;
   pthread_mutex_lock(&brlapi_fd_mutex);
   if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERNAME, NULL, 0)<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
-    brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
   while (1) {
     if ((res=brlapi_readPacket(fd, &type, packet, sizeof(packet)))<0) {
+      if (res==-2) brlapi_errno=BRLERR_EOF;
       pthread_mutex_unlock(&brlapi_fd_mutex);
-      brlapi_errno=BRLERR_LIBCERR;
       return -1;
     }
     if (handle_keypress(type,code,res)) continue;
@@ -403,8 +385,8 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 {
   brl_type_t type;
   uint32_t DisplaySize[2];
-  int res;
- 
+  ssize_t res;
+
   if (brlx*brly) {
     *x = brlx;
     *y = brly;
@@ -413,14 +395,13 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
   pthread_mutex_lock(&brlapi_fd_mutex);
   if ((res=brlapi_writePacket(fd, BRLPACKET_GETDISPLAYSIZE, NULL, 0))<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
-    brlapi_errno=BRLERR_LIBCERR;
     return res;
   }
   while (1) {
     if ((res=brlapi_readPacket(fd,&type,&DisplaySize[0],sizeof(DisplaySize)))<0) {
+      if (res==-2) brlapi_errno=BRLERR_EOF;
       pthread_mutex_unlock(&brlapi_fd_mutex);
-      brlapi_errno=BRLERR_LIBCERR;
-      return res;
+      return -1;
     }
     if (handle_keypress(type,&DisplaySize[0],res)) continue;
     switch (type) {
@@ -447,16 +428,14 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 /* Function : brlapi_getControllingTty */
 /* Returns the number of the caller's controlling terminal */
 /* -1 if error or unknown */
-static uint32_t brlapi_getControllingTty()
+static int brlapi_getControllingTty()
 {
   int vt = 0;
   int tty;
   const char *env;
 
-  if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) vt = tty;
-  else if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) vt = tty;
-  else {
 #ifdef linux
+  {
     pid_t pid = getpid();
     while (pid != 1) {
       int ok = 0;
@@ -487,25 +466,23 @@ static uint32_t brlapi_getControllingTty()
 
       pid = parent;
     }
-#endif /* linux */
+    if ((vt >= 1) && (vt <= MAXIMUM_VIRTUAL_CONSOLE)) return vt;
   }
-
-  if ((vt < 1) || (vt > MAXIMUM_VIRTUAL_CONSOLE)) return -1;
-  return vt;
+#endif /* linux */
+  if ((env = getenv("WINDOW")) && sscanf(env, "%u", &tty) == 1) return tty;
+  if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;
+  if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
+  return -1;
 }
 
 /* Function : brlapi_getTty */
 /* Takes control of a tty */
-struct def {
-  brl_keycode_t code;
-  char *name;
-};
 int brlapi_getTty(int tty, int how)
 {
   int truetty = -1;
   uint32_t uints[2];
   int res;
- 
+
   /* Check if "how" is valid */
   if ((how!=BRLKEYCODES) && (how!=BRLCOMMANDS)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
@@ -514,25 +491,23 @@ int brlapi_getTty(int tty, int how)
 
   /* Get dimensions of braille display */
   if ((res=brlapi_getDisplaySize(&brlx,&brly))<0) return res; /* failed, we stop here */
- 
+
   /* Then determine of which tty to take control */
-  if (tty==0) truetty = brlapi_getControllingTty(); else truetty = tty;
+  if (tty<=0) truetty = brlapi_getControllingTty(); else truetty = tty;
   if (truetty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return truetty; }
- 
+
   /* OK, Now we know where we are, so get the effective control of the terminal! */
-  uints[0] = htonl(truetty); 
+  uints[0] = htonl(truetty);
   uints[1] = htonl(how);
-  if ((res=brlapi_writePacketWaitForAck(fd,BRLPACKET_GETTTY,&uints[0],sizeof(uints)))<0) {
-    brlapi_errno=BRLERR_LIBCERR;
+  if ((res=brlapi_writePacketWaitForAck(fd,BRLPACKET_GETTTY,&uints[0],sizeof(uints)))<0)
     return res;
-  }
- 
+
   deliver_mode = how;
   pthread_mutex_lock(&keybuf_mutex);
   keybuf_next = keybuf_nb = 0;
   pthread_mutex_unlock(&keybuf_mutex);
 
-  return 0;
+  return truetty;
 }
 
 /* Function : brlapi_leaveTty */
@@ -552,7 +527,7 @@ int brlapi_writeBrl(int cursor, const unsigned char *str)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   extWriteStruct *ews = (extWriteStruct *) packet;
   unsigned char *p = &ews->data;
-  if ((dispSize == 0) || (dispSize > 256)) {
+  if ((dispSize == 0) || (dispSize > BRLAPI_MAXPACKETSIZE/4)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
@@ -565,7 +540,7 @@ int brlapi_writeBrl(int cursor, const unsigned char *str)
     ews->flags |= BRLAPI_EWF_CURSOR;
     *((uint32_t *) p) = htonl(cursor);
     p += sizeof(cursor);
-  } 
+  }
   return brlapi_writePacketWaitForAck(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
 }
 
@@ -573,9 +548,9 @@ int brlapi_writeBrl(int cursor, const unsigned char *str)
 /* Writes dot-matrix to the braille display */
 int brlapi_writeBrlDots(const unsigned char *dots)
 {
-  unsigned char disp[256];
+  unsigned char disp[BRLAPI_MAXPACKETSIZE];
   uint32_t size = brlx * brly;
-  if ((size == 0) || (size > 256)) {
+  if ((size == 0) || (size > sizeof(disp))) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
@@ -670,19 +645,21 @@ int brlapi_readKey(int block, brl_keycode_t *code)
         return res;
       }
     }
-    if ((res=brlapi_readPacket(fd, &type, code, sizeof(*code)))<0) {
-      pthread_mutex_unlock(&brlapi_fd_mutex);
-      brlapi_errno=BRLERR_LIBCERR;
-      return res;
+    res=brlapi_readPacket(fd, &type, code, sizeof(*code));
+    pthread_mutex_unlock(&brlapi_fd_mutex);
+    if (res<0) {
+      if (res==-2) brlapi_errno=BRLERR_EOF;
+      return -1;
     }
     if (type==BRLPACKET_KEY) {
-      pthread_mutex_unlock(&brlapi_fd_mutex);
       *code = ntohl(*code);
       return 1;
     }
-    pthread_mutex_unlock(&brlapi_fd_mutex);
+    if (type==BRLPACKET_ERROR)
+      syslog(LOG_ERR,"(ReadKey) Received error %d\n",ntohl(*code));
+    else
     /* other packets are ignored, but logged */
-    syslog(LOG_ERR,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
+      syslog(LOG_ERR,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
   }
 }
 
@@ -716,19 +693,21 @@ int brlapi_readCommand(int block, brl_keycode_t *code)
         return res;
       }
     }
-    if ((res=brlapi_readPacket(fd, &type, code, sizeof(*code)))<0) {
-      pthread_mutex_unlock(&brlapi_fd_mutex);
-      brlapi_errno=BRLERR_LIBCERR;
-      return res;
+    res=brlapi_readPacket(fd, &type, code, sizeof(*code));
+    pthread_mutex_unlock(&brlapi_fd_mutex);
+    if (res<0) {
+      if (res==-2) brlapi_errno=BRLERR_EOF;
+      return -1;
     }
     if (type==BRLPACKET_COMMAND) {
-      pthread_mutex_unlock(&brlapi_fd_mutex);
       *code = ntohl(*code);
       return 1;
     }
-    pthread_mutex_unlock(&brlapi_fd_mutex);
+    if (type==BRLPACKET_ERROR)
+      syslog(LOG_ERR,"(ReadCommand) Received error %d\n",ntohl(*code));
+    else
     /* other packets are ignored, but logged */
-    syslog(LOG_ERR,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
+      syslog(LOG_ERR,"(ReadCommand) Received unknown packet of type %u and size %d\n",type,res);
   }
 }
 
@@ -758,21 +737,22 @@ int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y)
 
 /* brlapi_errlist: error messages */
 const char *brlapi_errlist[] = {
-  "Success",            /* BRLERR_SUCESS */
-  "Not enough memory",  /* BRLERR_NOMEM */
-  "Busy Tty",           /* BRLERR_TTYBUSY */
-  "Unknown instruction",        /* BRLERR_UNKNOWN_INSTRUCTION */
-  "Illegal instruction",        /* BRLERR_ILLEGAL_INSTRUCTION */
-  "Invalid parameter",  /* BRLERR_INVALID_PARAMETER */
-  "Invalid packet",     /* BRLERR_INVALID_PACKET */
+  "Success",                            /* BRLERR_SUCESS */
+  "Not enough memory",                  /* BRLERR_NOMEM */
+  "Busy Tty",                           /* BRLERR_TTYBUSY */
+  "Unknown instruction",                /* BRLERR_UNKNOWN_INSTRUCTION */
+  "Illegal instruction",                /* BRLERR_ILLEGAL_INSTRUCTION */
+  "Invalid parameter",                  /* BRLERR_INVALID_PARAMETER */
+  "Invalid packet",                     /* BRLERR_INVALID_PACKET */
   "Raw mode not supported by driver",   /* BRLERR_RAWNOTSUPP */
   "Key codes not supported by driver",  /* BRLERR_KEYSNOTSUPP */
-  "Connection refused", /* BRLERR_CONNREFUSED */
-  "Operation not supported",    /* BRLERR_OPNOTSUPP */
-  "getaddrinfo error",  /* BRLERR_GAIERR */
-  "libc error",         /* BRLERR_LIBCERR */
+  "Connection refused",                 /* BRLERR_CONNREFUSED */
+  "Operation not supported",            /* BRLERR_OPNOTSUPP */
+  "getaddrinfo error",                  /* BRLERR_GAIERR */
+  "libc error",                         /* BRLERR_LIBCERR */
   "couldn't find out tty number",       /* BRLERR_UNKNOWNTTY */
   "bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
+  "unexpected end of file",	        /* BRLERR_EOF */
 };
 
 /* brlapi_nerr: last error number */
@@ -805,6 +785,11 @@ void brlapi_perror(const char *s)
 int brlapi_errno;
 static int pthread_errno_ok;
 
+static void errno_key_free(void *key)
+{
+  free(key);
+}
+
 /* we need a per-thread errno variable, thanks to pthread_keys */
 static pthread_key_t errno_key;
 
@@ -818,7 +803,7 @@ extern int pthread_setspecific(pthread_key_t, const void *) __attribute__ ((weak
 
 static void errno_key_alloc(void)
 {
-  pthread_errno_ok=!pthread_key_create(&errno_key, NULL);
+  pthread_errno_ok=!pthread_key_create(&errno_key, errno_key_free);
 }
 
 /* how to get per-thread errno variable. This will be called by the macro
