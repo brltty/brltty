@@ -758,35 +758,33 @@ static void brl_writeWindow (BrailleDisplay *brl)
 {
   int from, to;
 
-  {
+  if (rewriteInterval) {
     struct timeval now;
     gettimeofday(&now, NULL);
-    if (rewriteRequired ||
-        ((rewriteInterval > 0) &&
-         (millisecondsBetween(&rewriteTime, &now) > rewriteInterval))) {
-      rewriteRequired = 0;
-      rewriteTime = now;
+    if (millisecondsBetween(&rewriteTime, &now) > rewriteInterval) rewriteRequired = 1;
+    if (rewriteRequired) rewriteTime = now;
+  }
 
-      /* We rewrite the whole display */
-      from = 0;
-      to = brl->x;
-    } else {
-      /* We update only the display part that has been changed */
+  if (rewriteRequired) {
+    /* We rewrite the whole display */
+    from = 0;
+    to = brl->x;
+    rewriteRequired = 0;
+  } else {
+    /* We update only the display part that has been changed */
+    from = 0;
+    while ((brl->buffer[from] == prevdata[from]) && (from < brl->x)) from++;
 
-      from = 0;
-      while ((brl->buffer[from] == prevdata[from]) && (from < brl->x)) from++;
-
-      to = brl->x - 1;
-      while ((brl->buffer[to] == prevdata[to]) && (to >= from)) to--;
-      to++;
-    }
+    to = brl->x - 1;
+    while ((brl->buffer[to] == prevdata[to]) && (to >= from)) to--;
+    to++;
   }
 
   if (from < to)			/* there is something different */ {
     int index;
     for (index=from; index<to; index++)
       rawdata[index - from] = outputTable[(prevdata[index] = brl->buffer[index])];
-    WriteToBrlDisplay (brl, NbStCells + from, to - from, rawdata);
+    WriteToBrlDisplay (brl, NbStCells+from, to-from, rawdata);
   }
 }
 
