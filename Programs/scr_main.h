@@ -15,11 +15,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_REAL_H
-#define _SCR_REAL_H
+#ifndef _SCR_MAIN_H
+#define _SCR_MAIN_H
 
-#include "scr_main.h"
+#include "scr_base.h"
 
-extern void initializeRealScreen (MainScreen *);
+typedef struct {
+  BaseScreen base;
+  const char *const * (*parameters) (void);
+  int (*prepare) (char **parameters);
+  int (*open) (void);
+  int (*setup) (void);
+  void (*close) (void);
+} MainScreen;
 
-#endif /* _SCR_REAL_H */
+extern void initializeMainScreen (MainScreen *);
+extern void initializeLiveScreen (MainScreen *);
+
+#endif /* _SCR_MAIN_H */

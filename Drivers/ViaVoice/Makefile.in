@@ -28,6 +28,6 @@ SPK_OBJS = -libmeci50
 
 include $(SRC_TOP)driver.mk
 
-speech.o:
+speech.$O:
 	$(CXX) $(SPK_CXXFLAGS) -c $(SRC_DIR)/speech.c
 

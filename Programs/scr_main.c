@@ -23,10 +23,41 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#include "misc.h"
 #include "scr.h"
 #include "scr_main.h"
 
+static const char *const screenParameters[] = {NULL};
+static const char *const *
+parameters_MainScreen (void) {
+  return screenParameters;
+}
+
+static int
+prepare_MainScreen (char **parameters) {
+  return 1;
+}
+
+static int
+open_MainScreen (void) {
+  return 1;
+}
+
+static int
+setup_MainScreen (void) {
+  return 1;
+}
+
+static void
+close_MainScreen (void) {
+}
+
 void
-initializeLiveScreen (MainScreen *main) {
-  initializeMainScreen(main);
+initializeMainScreen (MainScreen *main) {
+  initializeBaseScreen(&main->base);
+  main->parameters = parameters_MainScreen;
+  main->prepare = prepare_MainScreen;
+  main->open = open_MainScreen;
+  main->setup = setup_MainScreen;
+  main->close = close_MainScreen;
 }

@@ -24,6 +24,6 @@ HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk
 
-braille.o:
+braille.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 

@@ -27,6 +27,6 @@ SPEECH_MODELS =
 
 include $(SRC_TOP)driver.mk
 
-speech.o:
+speech.$O:
 	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
 

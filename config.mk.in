@@ -15,6 +15,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
 PGM_DIR = Programs
 DOC_DIR = Documents
 TBL_DIR = BrailleTables
@@ -22,9 +25,6 @@ UCD_DIR = Unicode
 CTB_DIR = ContractionTables
 DRV_DIR = lib
 HLP_DIR = help
-
-PACKAGE_NAME = @PACKAGE_NAME@
-PACKAGE_VERSION = @PACKAGE_VERSION@
 
 CROSSCOMP = @compiler_prefix@
 INSTALL_ROOT = @install_root@
@@ -128,7 +128,7 @@ INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
 INSTALL_DRIVERS = @install_drivers@
 CONFIGURED_DRIVERS = @brltty_driver_names@
 
-SCREEN_OBJECT = @screen_object@
+SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
 
 TEXTTRANS = @text_table@
 ATTRTRANS = @attributes_table@

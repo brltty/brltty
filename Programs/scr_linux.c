@@ -1120,17 +1120,17 @@ currentvt_LinuxScreen (void) {
 }
 
 void
-initializeLiveScreen (RealScreen *real) {
-  initializeRealScreen(real);
-  real->base.describe = describe_LinuxScreen;
-  real->base.read = read_LinuxScreen;
-  real->base.insert = insert_LinuxScreen;
-  real->base.selectvt = selectvt_LinuxScreen;
-  real->base.switchvt = switchvt_LinuxScreen;
-  real->base.currentvt = currentvt_LinuxScreen;
-  real->parameters = parameters_LinuxScreen;
-  real->prepare = prepare_LinuxScreen;
-  real->open = open_LinuxScreen;
-  real->setup = setup_LinuxScreen;
-  real->close = close_LinuxScreen;
+initializeLiveScreen (MainScreen *main) {
+  initializeRealScreen(main);
+  main->base.describe = describe_LinuxScreen;
+  main->base.read = read_LinuxScreen;
+  main->base.insert = insert_LinuxScreen;
+  main->base.selectvt = selectvt_LinuxScreen;
+  main->base.switchvt = switchvt_LinuxScreen;
+  main->base.currentvt = currentvt_LinuxScreen;
+  main->parameters = parameters_LinuxScreen;
+  main->prepare = prepare_LinuxScreen;
+  main->open = open_LinuxScreen;
+  main->setup = setup_LinuxScreen;
+  main->close = close_LinuxScreen;
 }

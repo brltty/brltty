@@ -120,42 +120,10 @@ pointer_RealScreen (int *column, int *row) {
   return 0;
 }
 
-static const char *const screenParameters[] = {
-  NULL
-};
-static const char *const *
-parameters_RealScreen (void) {
-  return screenParameters;
-}
-
-static int
-prepare_RealScreen (char **parameters) {
-  return 1;
-}
-
-static int
-open_RealScreen (void) {
-  return 1;
-}
-
-static int
-setup_RealScreen (void) {
-  return 1;
-}
-
-static void
-close_RealScreen (void) {
-}
-
 void
-initializeRealScreen (RealScreen *real) {
-  initializeBaseScreen(&real->base);
-  real->base.route = route_RealScreen;
-  real->base.point = point_RealScreen;
-  real->base.pointer = pointer_RealScreen;
-  real->parameters = parameters_RealScreen;
-  real->prepare = prepare_RealScreen;
-  real->open = open_RealScreen;
-  real->setup = setup_RealScreen;
-  real->close = close_RealScreen;
+initializeRealScreen (MainScreen *main) {
+  initializeMainScreen(main);
+  main->base.route = route_RealScreen;
+  main->base.point = point_RealScreen;
+  main->base.pointer = pointer_RealScreen;
 }

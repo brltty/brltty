@@ -345,7 +345,7 @@ in
       AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
 esac
-system_object="sys_${system_object}.o"
+system_object="sys_${system_object}.${OBJEXT}"
 AC_SUBST([system_object])
 
 BRLTTY_ARG_DISABLE(
@@ -376,7 +376,7 @@ BRLTTY_ARG_DISABLE(
    [contracted-braille],
    [in-line contracted braille], [dnl
    AC_DEFINE([ENABLE_CONTRACTED_BRAILLE])
-   contracted_braille_objects="ctb_compile.o ctb_translate.o"
+   contracted_braille_objects="ctb_compile.${OBJEXT} ctb_translate.${OBJEXT}"
    install_contraction_tables=install-contraction-tables
 ])
 AC_SUBST([contracted_braille_objects])
@@ -386,7 +386,7 @@ BRLTTY_ARG_DISABLE(
    [beeper-tunes],
    [tunes via beeper (console bell)], [dnl
    AC_DEFINE([ENABLE_BEEPER_TUNES])
-   beeper_tune_objects="beeper.o"
+   beeper_tune_objects="beeper.${OBJEXT}"
 ])
 AC_SUBST([beeper_tune_objects])
 
@@ -394,7 +394,7 @@ BRLTTY_ARG_DISABLE(
    [pcm-tunes],
    [tunes via PCM (soundcard digital audio)], [dnl
    AC_DEFINE([ENABLE_PCM_TUNES])
-   pcm_tune_objects="pcm.o"
+   pcm_tune_objects="pcm.${OBJEXT}"
 ])
 AC_SUBST([pcm_tune_objects])
 
@@ -402,7 +402,7 @@ BRLTTY_ARG_DISABLE(
    [midi-tunes],
    [tunes via MIDI (Musical Instrument Digital Interface)], [dnl
    AC_DEFINE([ENABLE_MIDI_TUNES])
-   midi_tune_objects="midi.o"
+   midi_tune_objects="midi.${OBJEXT}"
 ])
 AC_SUBST([midi_tune_objects])
 
@@ -410,7 +410,7 @@ BRLTTY_ARG_DISABLE(
    [fm-tunes],
    [tunes via FM (soundcard synthesizer)], [dnl
    AC_DEFINE([ENABLE_FM_TUNES])
-   fm_tune_objects="fm.o adlib.o"
+   fm_tune_objects="fm.${OBJEXT} adlib.${OBJEXT}"
 ])
 AC_SUBST([fm_tune_objects])
 
@@ -432,7 +432,7 @@ BRLTTY_ARG_ENABLE(
    [api],
    [the application programming interface], [dnl
    AC_DEFINE([ENABLE_API])
-   api_objects="api_server.o api_common.o rangelist.o"
+   api_objects="api_server.${OBJEXT} api_common.${OBJEXT} rangelist.${OBJEXT}"
    build_api="api"
    install_api="install-api"
    BRLTTY_SEARCH_LIBS([pthread_create], [pthread])
@@ -633,7 +633,7 @@ BRLTTY_ARG_DISABLE(
    [speech-support],
    [speech synthesizer support], [dnl
    AC_DEFINE([ENABLE_SPEECH_SUPPORT])
-   speech_support_object="spk.o"
+   speech_support_object="spk.${OBJEXT}"
 ])
 AC_SUBST([speech_support_object])
 
@@ -674,7 +674,14 @@ elif test "${screen_driver}" = "yes"
 then
    screen_driver="${brltty_cv_default_screen_driver}"
 fi
-AC_SUBST([screen_object], ["scr_${screen_driver}.${OBJEXT}"])
+screen_driver_objects="scr_${screen_driver}.${OBJEXT}"
+case "${screen_driver}"
+in
+   linux|shm)
+      screen_driver_objects="${screen_driver_objects} scr_real.${OBJEXT} route.${OBJEXT}"
+      ;;
+esac
+AC_SUBST([screen_driver_objects])
 BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 
 AC_SUBST([library_prefix], [lib])

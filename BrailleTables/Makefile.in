@@ -22,51 +22,51 @@ include $(BLD_TOP)config.mk
 # used by BRLTTY.
 ###############################################################################
 
-PROGRAMS = txt2tbl tbl2txt tbl2tbl tbl2jbt isotoibm437 ibm437toiso ibm850toiso
+PROGRAMS = txt2tbl$X tbl2txt$X tbl2tbl$X tbl2jbt$X isotoibm437$X ibm437toiso$X ibm850toiso$X
 all: $(PROGRAMS)
 
-OPTIONS_OBJECTS = $(BLD_TOP)$(PGM_DIR)/options.o $(BLD_TOP)$(PGM_DIR)/misc.o
+OPTIONS_OBJECTS = $(BLD_TOP)$(PGM_DIR)/options.$O $(BLD_TOP)$(PGM_DIR)/misc.$O
 
-TXT2TBL_OBJECTS = txt2tbl.o $(OPTIONS_OBJECTS)
-txt2tbl: $(TXT2TBL_OBJECTS)
+TXT2TBL_OBJECTS = txt2tbl.$O $(OPTIONS_OBJECTS)
+txt2tbl$X: $(TXT2TBL_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TXT2TBL_OBJECTS) $(LDLIBS)
-txt2tbl.o:
+txt2tbl.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/txt2tbl.c
 
-TBL2TXT_OBJECTS = tbl2txt.o $(OPTIONS_OBJECTS) $(BLD_TOP)$(UCD_DIR)/unicode.o
-tbl2txt: $(TBL2TXT_OBJECTS)
+TBL2TXT_OBJECTS = tbl2txt.$O $(OPTIONS_OBJECTS) $(BLD_TOP)$(UCD_DIR)/unicode.$O
+tbl2txt$X: $(TBL2TXT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBL2TXT_OBJECTS) $(LDLIBS)
-tbl2txt.o:
+tbl2txt.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl2txt.c
 
-TBL2TBL_OBJECTS = tbl2tbl.o $(OPTIONS_OBJECTS)
-tbl2tbl: $(TBL2TBL_OBJECTS)
+TBL2TBL_OBJECTS = tbl2tbl.$O $(OPTIONS_OBJECTS)
+tbl2tbl$X: $(TBL2TBL_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBL2TBL_OBJECTS) $(LDLIBS)
-tbl2tbl.o:
+tbl2tbl.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl2tbl.c
 
-TBL2JBT_OBJECTS = tbl2jbt.o $(OPTIONS_OBJECTS)
-tbl2jbt: $(TBL2JBT_OBJECTS)
+TBL2JBT_OBJECTS = tbl2jbt.$O $(OPTIONS_OBJECTS)
+tbl2jbt$X: $(TBL2JBT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBL2JBT_OBJECTS) $(LDLIBS)
-tbl2jbt.o:
+tbl2jbt.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl2jbt.c
 
-ISOTOIBM437_OBJECTS = isotoibm437.o
-isotoibm437: $(ISOTOIBM437_OBJECTS)
+ISOTOIBM437_OBJECTS = isotoibm437.$O
+isotoibm437$X: $(ISOTOIBM437_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(ISOTOIBM437_OBJECTS) $(LDLIBS)
-isotoibm437.o:
+isotoibm437.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/isotoibm437.c
 
-IBM437TOISO_OBJECTS = ibm437toiso.o
-ibm437toiso: $(IBM437TOISO_OBJECTS)
+IBM437TOISO_OBJECTS = ibm437toiso.$O
+ibm437toiso$X: $(IBM437TOISO_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(IBM437TOISO_OBJECTS) $(LDLIBS)
-ibm437toiso.o:
+ibm437toiso.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ibm437toiso.c
 
-IBM850TOISO_OBJECTS = ibm850toiso.o
-ibm850toiso: $(IBM850TOISO_OBJECTS)
+IBM850TOISO_OBJECTS = ibm850toiso.$O
+ibm850toiso$X: $(IBM850TOISO_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(IBM850TOISO_OBJECTS) $(LDLIBS)
-ibm850toiso.o:
+ibm850toiso.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ibm850toiso.c
 
 clean::

@@ -31,13 +31,13 @@ include $(SRC_TOP)driver.mk
 
 PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brldefs.h $(SRC_DIR)/brl-cfg.h
 
-braille.o:
+braille.$O:
 	$(CC) $(BRL_CFLAGS) $(YCFLAGS) -c $(SRC_DIR)/braille.c
 
-read_config: read_config.o
-	$(HOSTCC) $(HOSTLDFLAGS) -o $@ read_config.o
+read_config: read_config.$O
+	$(HOSTCC) $(HOSTLDFLAGS) -o $@ read_config.$O
 
-read_config.o: $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
+read_config.$O: $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
 	$(HOSTCC) $(HOSTCFLAGS) $(YCFLAGS) -c $(SRC_DIR)/read_config.c
 
 config.tab.c: cmd.auto.h hlp.auto.h
@@ -82,22 +82,22 @@ $(PM_CONFIG_FILE): read_config
 
 ###############################################################################
 
-dump-codes: dump-codes.o
-	$(CC) $(LDFLAGS) -o $@ dump-codes.o
+dump-codes: dump-codes.$O
+	$(CC) $(LDFLAGS) -o $@ dump-codes.$O
 
-dump-codes.o:
+dump-codes.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/dump-codes.c
 
-serial: serial.o
-	$(CC) $(LDFLAGS) -o $@ serial.o -lncurses 
+serial: serial.$O
+	$(CC) $(LDFLAGS) -o $@ serial.$O -lncurses 
 
-serial.o:
+serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
-simulate: simulate.o
-	$(CC) $(LDFLAGS) -o $@ simulate.o
+simulate: simulate.$O
+	$(CC) $(LDFLAGS) -o $@ simulate.$O
 
-simulate.o:
+simulate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/simulate.c
 
 ###############################################################################

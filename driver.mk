@@ -34,9 +34,9 @@ BRL_CXXFLAGS = $(LIBCXXFLAGS) $(BRL_DEFS)
 BRL_SO_NAME = $(LIB_NAME)b
 BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
 BRL_FILE = $(BLD_TOP)$(DRV_DIR)/$(BRL_NAME)
-$(BRL_FILE): braille.o
+$(BRL_FILE): braille.$O
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKLIB:SONAME=$(BRL_NAME)) $(@) braille.o $(BRL_OBJS)
+	$(MKLIB:SONAME=$(BRL_NAME)) $(@) braille.$O $(BRL_OBJS)
 braille-driver: $(BRL_FILE)
 
 brl-lib-name:
@@ -49,9 +49,9 @@ SPK_CXXFLAGS = $(LIBCXXFLAGS) $(SPK_DEFS)
 SPK_SO_NAME = $(LIB_NAME)s
 SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
 SPK_FILE = $(BLD_TOP)$(DRV_DIR)/$(SPK_NAME)
-$(SPK_FILE): speech.o
+$(SPK_FILE): speech.$O
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKLIB:SONAME=$(SPK_NAME)) $(@) speech.o $(SPK_OBJS)
+	$(MKLIB:SONAME=$(SPK_NAME)) $(@) speech.$O $(SPK_OBJS)
 speech-driver: $(SPK_FILE)
 
 spk-lib-name:

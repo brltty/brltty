@@ -31,12 +31,12 @@ HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk
 
-vblow.o:
+vblow.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/vblow.c
 
-vb.o:
+vb.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/vb.c
 	
-braille.o: vb.o vblow.o
-	$(MKOBJ) braille.o vblow.o vb.o 
+braille.$O: vb.$O vblow.$O
+	$(MKOBJ) braille.$O vblow.$O vb.$O 
 

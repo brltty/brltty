@@ -31,12 +31,12 @@ HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk
 
-variolow.o:
+variolow.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/variolow.c
 
-vario.o:
+vario.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/vario.c
 
-braille.o: vario.o variolow.o
-	$(MKOBJ) braille.o variolow.o vario.o 
+braille.$O: vario.$O variolow.$O
+	$(MKOBJ) braille.$O variolow.$O vario.$O 
 

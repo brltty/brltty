@@ -86,10 +86,10 @@ close_ShmScreen (void) {
 }
 
 void
-initializeLiveScreen (RealScreen *real) {
-  initializeRealScreen(real);
-  real->base.describe = describe_ShmScreen;
-  real->base.read = read_ShmScreen;
-  real->open = open_ShmScreen;
-  real->close = close_ShmScreen;
+initializeLiveScreen (MainScreen *main) {
+  initializeRealScreen(main);
+  main->base.describe = describe_ShmScreen;
+  main->base.read = read_ShmScreen;
+  main->open = open_ShmScreen;
+  main->close = close_ShmScreen;
 }

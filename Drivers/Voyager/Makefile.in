@@ -44,7 +44,7 @@ VOYAGERDEV=/dev/brlvger
 brlvger.auto.h:
 	ln -sf $(VGERHDR) $@
 
-braille.o: brlvger.auto.h
+braille.$O: brlvger.auto.h
 	$(CC) $(BRL_CFLAGS) $(KDRIVER) -c $(SRC_DIR)/braille.c
 
 #Let's not rebuild the help unless the user wants to as it requires python.

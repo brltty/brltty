@@ -21,7 +21,7 @@ include $(SRC_TOP)absdeps.mk
 include $(SRC_DIR)/reldeps.mk
 
 clean::
-	-rm -f *.o *.auto.h core
+	-rm -f *.$O *.auto.h core
 
 distclean::
 	-rm -f *~ *orig \#*\# *.rej ? a.out

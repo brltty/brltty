@@ -17,76 +17,82 @@
 
 include $(BLD_TOP)config.mk
 
-all: all-brltty brltty-install all-brltest scrtest tunetest $(BUILD_API)
-all-brltty: brltty $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
-all-brltest: brltest $(BRAILLE_DRIVERS)
+all: all-brltty brltty-install$X all-brltest scrtest$X tunetest$X $(BUILD_API)
+all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
+all-brltest: brltest$X $(BRAILLE_DRIVERS)
 
 ###############################################################################
 
-options.o:
+options.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/options.c
 
 ###############################################################################
 
-ctb_compile.o:
+ctb_compile.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctb_compile.c
 
-ctb_translate.o:
+ctb_translate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctb_translate.c
 
 ###############################################################################
 
-SCREEN_OBJECTS = scr.o scr_base.o scr_real.o scr_frozen.o scr_help.o $(SCREEN_OBJECT)
+SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_main.$O $(SCREEN_DRIVER_OBJECTS)
 
-scr.o:
+scr.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr.c
 
-scr_base.o:
+scr_base.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_base.c
 
-scr_real.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_real.c
-
-scr_frozen.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_frozen.c
-
-scr_help.o:
+scr_help.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_help.c
 
-scr_null.o:
+scr_frozen.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_frozen.c
+
+scr_main.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_main.c
+
+scr_null.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_null.c
 
-scr_linux.o:
+scr_real.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_real.c
+
+route.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/route.c
+
+scr_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_linux.c
 
-scr_shm.o:
+scr_shm.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_shm.c
 
 ###############################################################################
 
-TUNE_OBJECTS = tunes.o $(BEEPER_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
+TUNE_OBJECTS = tunes.$O $(BEEPER_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
 
-tunes.o:
+tunes.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunes.c
 
-beeper.o:
+beeper.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/beeper.c
 
-pcm.o:
+pcm.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/pcm.c
 
-midi.o:
+midi.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/midi.c
 
-fm.o:
+fm.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/fm.c
 
-adlib.o:
+adlib.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/adlib.c
 
 ###############################################################################
 
-API_LIB_OBJS = api_client.o api_common.o
+API_LIB_OBJS = api_client.$O api_common.$O
 API_NAME = $(LIB_PFX)brlapi
 API_LIB = $(API_NAME).$(LIB_EXT)
 API_ARC = $(API_NAME).$(ARC_EXT)
@@ -100,86 +106,83 @@ $(API_ARC): $(API_LIB_OBJS)
 	$(AR) rc $@ $(API_LIB_OBJS)
 	$(RANLIB) $@
 
-api_common.o:
+api_common.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_common.c
 
-api_client.o:
+api_client.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c
 
-api_server.o:
+api_server.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_server.c
 
-rangelist.o:
+rangelist.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/rangelist.c
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.o config.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECT) $(SPEECH_DRIVER_OBJECT)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECT) $(SPEECH_DRIVER_OBJECT)
 
-brltty: $(BRLTTY_OBJECTS)
+brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(LDLIBS)
 
-main.o:
+main.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
 
-config.o:
+config.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/config.c
 
-misc.o:
+misc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
 
-sysmisc.o:
+sysmisc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sysmisc.c
 
-sys_linux.o:
+sys_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
 
-sys_solaris.o:
+sys_solaris.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_solaris.c
 
-sys_hpux.o:
+sys_hpux.$O:
 	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
 
-route.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/route.c
-
-cut.o:
+cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
 
-brl.o: text.auto.h attrib.auto.h cmds.auto.h
+brl.$O: text.auto.h attrib.auto.h cmds.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
 
-spk.o:
+spk.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) brl.o $(BRAILLE_DRIVER_OBJECT)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) brl.$O $(BRAILLE_DRIVER_OBJECT)
 
-brltest: $(BRLTEST_OBJECTS)
+brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(LDLIBS)
 
-brltest.o:
+brltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.o options.o misc.o route.o
+SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SCREEN_OBJECTS)
 
-scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
+scrtest$X: $(SCRTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(LDLIBS)
 
-scrtest.o:
+scrtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scrtest.c
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.o options.o misc.o $(SYSTEM_OBJECT)
+TUNETEST_OBJECTS = tunetest.$O options.$O misc.$O $(SYSTEM_OBJECT) $(TUNE_OBJECTS)
 
-tunetest: $(TUNETEST_OBJECTS) $(TUNE_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(TUNE_OBJECTS) $(LDLIBS)
+tunetest$X: $(TUNETEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(LDLIBS)
 
-tunetest.o:
+tunetest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunetest.c
 
 ###############################################################################
@@ -214,37 +217,37 @@ cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/cmds.awk
 
 ###############################################################################
 
-HOSTOPTS_OBJECTS = host_misc.o hostopts.o
+HOSTOPTS_OBJECTS = host_misc.$O hostopts.$O
 
-hostopts.o:
+hostopts.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/options.c
 
-host_misc.o:
+host_misc.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/misc.c
 
 ###############################################################################
 
-TXT2HLP_OBJECTS = txt2hlp.o $(HOSTOPTS_OBJECTS)
+TXT2HLP_OBJECTS = txt2hlp.$O $(HOSTOPTS_OBJECTS)
 
 txt2hlp: $(TXT2HLP_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TXT2HLP_OBJECTS) $(LDLIBS)
 
-txt2hlp.o:
+txt2hlp.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/txt2hlp.c
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.o $(HOSTOPTS_OBJECTS)
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOSTOPTS_OBJECTS)
 
 tbl2hex: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)
 
-tbl2hex.o:
+tbl2hex.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
 
 ###############################################################################
 
-brltty-install: $(SRC_DIR)/brltty-install.in
+brltty-install$X: $(SRC_DIR)/brltty-install.in
 	sed -e 's%=F%$(EXECUTE_ROOT)%g' \
 	    -e 's%=P%$(PROGRAM_DIRECTORY)%g' \
             -e 's%=L%$(LIBRARY_DIRECTORY)%g' \

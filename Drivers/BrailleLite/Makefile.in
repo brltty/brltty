@@ -29,10 +29,10 @@ HELP_DEPS = $(SRC_DIR)/help0.txt $(SRC_DIR)/help1.txt
 
 include $(SRC_TOP)driver.mk
 
-braille.o:
+braille.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 
-speech.o:
+speech.$O:
 	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
 
 $(SRC_DIR)/help0.txt: $(SRC_DIR)/help.src

@@ -22,6 +22,9 @@ SRC_DIR = @srcdir@
 BLD_TOP = @top_builddir@
 BLD_DIR = @builddir@
 
+O = @OBJEXT@
+X = @EXEEXT@
+
 @SET_MAKE@
 include $(SRC_TOP)common.mk
 

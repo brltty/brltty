@@ -125,7 +125,7 @@ foreach buildDirectory [lsort $buildDirectories] {
                set objectExtension ".tab.c"
             }
             default {
-               set objectExtension ".o"
+               set objectExtension ".\$O"
             }
          }
          set objectFile "[file rootname $sourceFile]$objectExtension"

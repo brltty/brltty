@@ -34,16 +34,11 @@
 #include "scr.h"
 #include "scr_frozen.h"
 #include "scr_help.h"
-#include "scr_real.h"
-
-/* The Live Screen type is instanciated elsewhere and chosen at link time
- * from all available screen source drivers.
- * It is defined as extern RealScreen *live;
- */
+#include "scr_main.h"
 
 HelpScreen helpScreen;
 FrozenScreen frozenScreen;                
-RealScreen liveScreen;
+MainScreen liveScreen;
 BaseScreen *currentScreen;
 
 void
