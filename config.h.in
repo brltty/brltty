@@ -70,9 +70,6 @@ extern "C" {
 /* Define this if the function vsyslog exists. */
 #undef HAVE_VSYSLOG
 
-/* Define this if the header file bluetooth/bluetooth.h exists. */
-#undef HAVE_BLUETOOTH_BLUETOOTH_H
-
 /* Define this if the function dlopen is available. */
 #undef HAVE_FUNC_DLOPEN
 
@@ -188,6 +185,9 @@ extern "C" {
 
 /* Define this if Universal Serial Bus support is to be included. */
 #undef ENABLE_USB_SUPPORT
+
+/* Define this if bluetooth support is to be included. */
+#undef ENABLE_BLUETOOTH_SUPPORT
 
 /* Define this to include Papenmeier configuration file support. */
 #undef ENABLE_PM_CONFIGURATION_FILE

@@ -713,13 +713,30 @@ then
 fi
 AC_SUBST([usb_objects])
 
-BRLTTY_ARG_DISABLE(
-   [bluetooth-support],
-   [support for bluetooth-capable devices],
-   [],
+case "${host_os}"
+in
+   linux*)
+      bluetooth_object="linux"
+      ;;
+   *)
+      bluetooth_object=""
+      AC_MSG_WARN([no bluetooth support on ${host_os}])
+      ;;
+esac
+if test -n "${bluetooth_object}"
+then
+   bluetooth_objects="bluez."'$O'" bluez_${bluetooth_object}."'$O'
+   BRLTTY_ARG_DISABLE(
+      [bluetooth-support],
+      [support for bluetooth capable devices],
+      [],
 [dnl
-   AC_CHECK_HEADERS([bluetooth/bluetooth.h])
+      AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
+         AC_DEFINE([ENABLE_BLUETOOTH_SUPPORT])
 ])
+])
+fi
+AC_SUBST([bluetooth_objects])
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])

@@ -59,6 +59,10 @@
 #include "usb.h"
 #endif /* ENABLE_USB_SUPPORT */
 
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+#include "bluez.h"
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
 char COPYRIGHT[] = "Copyright (C) 1995-2004 by The BRLTTY Team - all rights reserved.";
 
 static short opt_version = 0;
@@ -654,6 +658,16 @@ findBrailleDriver (int *internal) {
       identifier = usbIdentifiers;
       type = "USB";
 #endif /* ENABLE_USB_SUPPORT */
+
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+    } else if (isBluetoothDevice(&device)) {
+      static const char *bluetoothIdentifiers[] = {
+        "ht",
+        NULL
+      };
+      identifier = bluetoothIdentifiers;
+      type = "bluetooth";
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
     } else {
       LogPrint(LOG_WARNING, "Braille display autodetection not supported for '%s'.",

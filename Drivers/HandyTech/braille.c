@@ -300,81 +300,28 @@ static const InputOutputOperations usbOperations = {
 };
 #endif /* ENABLE_USB_SUPPORT */
 
-#ifdef HAVE_BLUETOOTH_BLUETOOTH_H
+#ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
-#include <sys/socket.h>
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/rfcomm.h>
+#include "Programs/bluez.h"
 
-static int bluezSocket = -1;
-
-static int
-parseBluezAddress (bdaddr_t *address, const char *string) {
-  const char *start = string;
-  int index = sizeof(address->b);
-  while (--index >= 0) {
-    char *end;
-    long int value = strtol(start, &end, 16);
-    if (end == start) return 0;
-    if (value < 0) return 0;
-    if (value > 0XFF) return 0;
-    address->b[index] = value;
-    if (!*end) break;
-    if (*end != ':') return 0;
-    start = end + 1;
-  }
-  if (index < 0) return 0;
-  while (--index >= 0) address->b[index] = 0;
-  return 1;
-}
+static int bluezConnection = -1;
 
 static int
 openBluezPort (char **parameters, const char *device) {
-  bdaddr_t address;
-  if (parseBluezAddress(&address, device)) {
-    if ((bluezSocket = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
-      struct sockaddr_rc local;
-      local.rc_family = AF_BLUETOOTH;
-      local.rc_channel = 0;
-      bacpy(&local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
-                                            * interface specification yet.
-                                            */
-      if (bind(bluezSocket, (struct sockaddr *)&local, sizeof(local)) != -1) {
-        struct sockaddr_rc remote;
-        remote.rc_family = AF_BLUETOOTH;
-        remote.rc_channel = 1;
-        bacpy(&remote.rc_bdaddr, &address);
-        if (connect(bluezSocket, (struct sockaddr *)&remote, sizeof(remote)) != -1) {
-          return 1;
-        } else if (errno != EHOSTDOWN) {
-          LogError("RFCOMM socket connection");
-        }
-      } else {
-        LogError("RFCOMM socket bind");
-      }
-
-      close(bluezSocket);
-      bluezSocket = -1;
-    } else {
-      LogError("RFCOMM socket creation");
-    }
-  } else {
-    LogPrint(LOG_ERR, "Invalid Bluetooth address: %s", device);
-  }
-  return 0;
+  return (bluezConnection = openRfcommConnection(device, 1)) != -1;
 }
 
 static int
 awaitBluezInput (int milliseconds) {
-  return awaitInput(bluezSocket, milliseconds);
+  return awaitInput(bluezConnection, milliseconds);
 }
 
 static int
 readBluezBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
   int offset = 0;
-  if (awaitInput(bluezSocket, (wait? timeout: 0))) {
-    if (readChunk(bluezSocket, buffer, &offset, length, 0, timeout)) return offset;
+  if (awaitInput(bluezConnection, (wait? timeout: 0))) {
+    if (readChunk(bluezConnection, buffer, &offset, length, 0, timeout)) return offset;
     if (errno != EAGAIN) return -1;
   }
   return 0;
@@ -382,7 +329,7 @@ readBluezBytes (unsigned char *buffer, int length, int wait) {
 
 static int
 writeBluezBytes (const unsigned char *buffer, int length, int *delay) {
-  int count = safe_write(bluezSocket, buffer, length);
+  int count = safe_write(bluezConnection, buffer, length);
   if (delay) *delay += length * 1000 / charactersPerSecond;
   if (count != length) {
     if (count == -1) {
@@ -396,14 +343,15 @@ writeBluezBytes (const unsigned char *buffer, int length, int *delay) {
 
 static void
 closeBluezPort (void) {
-  close(bluezSocket);
+  close(bluezConnection);
+  bluezConnection = -1;
 }
 
 static const InputOutputOperations bluezOperations = {
   openBluezPort, closeBluezPort,
   awaitBluezInput, readBluezBytes, writeBluezBytes
 };
-#endif /* HAVE_BLUETOOTH_BLUETOOTH_H */
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 typedef enum {
   BDS_OFF,
@@ -594,10 +542,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     io = &usbOperations;
 #endif /* ENABLE_USB_SUPPORT */
 
-#ifdef HAVE_BLUETOOTH_BLUETOOTH_H
-  } else if (isQualifiedDevice(&device, "bluez:")) {
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+  } else if (isBluetoothDevice(&device)) {
     io = &bluezOperations;
-#endif /* HAVE_BLUETOOTH_BLUETOOTH_H */
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
   } else {
     unsupportedDevice(device);
