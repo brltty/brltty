@@ -72,7 +72,7 @@
 #include <Xm/Label.h>
 #include <Xm/PushB.h>
 #else /* HAVE_PKG_ */
-#error unknown xaw package
+#error unknown Xt toolkit
 #endif /* HAVE_PKG_ */
 
 #if defined(USE_XAW)
@@ -112,7 +112,7 @@
 #define NvertDistance       XmNtopOffset
 #define NhorizDistance      XmNleftOffset
 #else /* USE_ */
-#error unknown xaw prototype
+#error unknown Xt paradigm
 #endif /* USE_ */
 
 typedef enum {
