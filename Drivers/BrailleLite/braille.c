@@ -776,8 +776,7 @@ qget (blkey * kp)
     return EOF;
 
   memset (kp, 0, sizeof (*kp));
-  switch (how)
-    {
+  switch (how) {
     case 0: /* non-extended sequences (BL18) */
       /* We must deal with keyboard reversal here: */
       if (reverse_kbd)
@@ -815,8 +814,7 @@ qget (blkey * kp)
 	}
       break;
 
-    case 1: /* extended sequences (BL40) */
-    {
+    case 1: { /* extended sequences (BL40) */
       unsigned char c2 = qbase[((qoff + 1) % QSZ)];
       unsigned char c3 = qbase[((qoff + 2) % QSZ)];
 
@@ -861,14 +859,12 @@ qget (blkey * kp)
       break;
     }
 
-    case 2: /* extended sequences (millennium) */
-    {
+    case 2: { /* extended sequences (millennium) */
       unsigned char c3 = qbase[((qoff + 2) % QSZ)];
 
       /* We must deal with keyboard reversal here: */
       if (reverse_kbd)
-        c3 = ((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3) |
-             ((c3 & 0x30) << 2) | ((c3 & 0xc0) >> 2);
+        c3 = ((c3 & 0x11) << 3) | ((c3 & 0x22) << 1) | ((c3 & 0x44) >> 1) | ((c3 & 0x88) >> 3);
       kp->raw = c3;
 
       if (c3 & 0xf)
@@ -889,7 +885,7 @@ qget (blkey * kp)
     default:
       kp->cmd = 0;
       break;
-    }
+  }
 
   /* adjust queue variables for next member */
   qoff = (qoff + count) % QSZ;
