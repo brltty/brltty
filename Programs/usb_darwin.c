@@ -257,13 +257,20 @@ unsetInterface (UsbDevice *device) {
 
     if (devx->interfaceOpened) {
       if (devx->runloopSource) {
-        int pipe;
-        for (pipe=1; pipe<=devx->pipeCount; ++pipe) {
-          result = (*devx->interface)->AbortPipe(devx->interface, pipe);
-          if (result != kIOReturnSuccess) {
-            setErrno(result, "USB pipe abort");
+        {
+          int pipe;
+          for (pipe=1; pipe<=devx->pipeCount; ++pipe) {
+            result = (*devx->interface)->AbortPipe(devx->interface, pipe);
+            if (result != kIOReturnSuccess) {
+              setErrno(result, "USB pipe abort");
+            }
           }
         }
+
+        CFRunLoopRemoveSource(devx->runloopReference,
+                              devx->runloopSource,
+                              devx->runloopMode);
+        devx->runloopReference = NULL;
       }
 
       result = (*devx->interface)->USBInterfaceClose(devx->interface);
@@ -704,8 +711,13 @@ usbSubmitRequest (
     UsbAsynchronousRequest *request;
 
     if (!devx->runloopSource) {
-      devx->runloopReference = CFRunLoopGetCurrent();
-      devx->runloopMode = kCFRunLoopDefaultMode;
+      if (!devx->runloopReference) {
+        devx->runloopReference = CFRunLoopGetCurrent();
+      }
+
+      if (!devx->runloopMode) {
+        devx->runloopMode = kCFRunLoopDefaultMode;
+      }
 
       result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
                                                                    &devx->runloopSource);
@@ -858,12 +870,6 @@ void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   IOReturn result;
-
-  if (devx->runloopSource) {
-    CFRunLoopRemoveSource(devx->runloopReference,
-                          devx->runloopSource,
-                          devx->runloopMode);
-  }
 
   unsetInterface(device);
 
