@@ -428,7 +428,7 @@ BRLTTY_ARG_ENABLE(
    AC_CHECK_LIB([gpm], [Gpm_Open])
 ])
 
-BRLTTY_ARG_ENABLE(
+BRLTTY_ARG_DISABLE(
    [api],
    [the application programming interface], [dnl
    AC_DEFINE([ENABLE_API])
