@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
  
-/* api_client.c: handles connection with BrlApi */
+/* api_client.c handles connection with BrlApi */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -67,6 +67,36 @@ struct bind {
 static struct bind *bindings = NULL;
 static char *cmdnames;
 
+/* key presses buffer, for when key presses are received instead of
+ * acknowledgements for instance
+ *
+ * every function must hence be able to read at least sizeof(uint32_t) */
+
+static brl_keycode_t keybuf[BRL_KEYBUF_SIZE];
+static brl_keycode_t keybuf_next;
+static brl_keycode_t keybuf_nb;
+
+static int handle_keypress(brl_type_t type, uint32_t *code, int size) {
+ brl_keycode_t *keycode = (brl_keycode_t *) code;
+ /* if not a key press, let the caller get it */
+ if (type!=BRLPACKET_KEY && type!=BRLPACKET_COMMAND) return 0;
+
+ /* if a key press, but not of the expected type, ignore it */
+ if ((type==BRLPACKET_KEY && deliver_mode == BRLCOMMANDS)
+  || (type==BRLPACKET_COMMAND && deliver_mode == BRLKEYCODES)) return 1;
+
+ /* if size is not enough, ignore it */
+ if (size<sizeof(brl_keycode_t)) return 1;
+
+ if (keybuf_nb>=BRL_KEYBUF_SIZE) {
+  fprintf(stderr,"lost key 0x%x !\n",*keycode);
+  return 1;
+ }
+
+ keybuf[(keybuf_next+keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*keycode);
+ return 1;
+}
+
 /* brlapi_waitForAck */
 /* Wait for an acknowledgement */
 static int brlapi_waitForAck()
@@ -76,11 +106,12 @@ static int brlapi_waitForAck()
  uint32_t code;
  while (1)
  {
-  if ((res=brlapi_readPacket(fd,sizeof(code),&type, (unsigned char *) &code))<0)
+  if ((res=brlapi_readPacket(fd,&type,&code,sizeof(code)))<0)
   {
    if (res==-1) perror("waiting for ack");
    return -1;
   }
+  if (handle_keypress(type,&code,res)) continue;
   switch (type)
   {
    case BRLPACKET_ACK: return 0;
@@ -92,10 +123,7 @@ static int brlapi_waitForAck()
    }
    /* default is ignored, but logged */
    default:
-   {
     fprintf(stderr,"(brlapi_waitForAck) Received unknown packet of type %u and size %d\n",type,res);
-    break;
-   }
   }
  }
 }
@@ -103,7 +131,7 @@ static int brlapi_waitForAck()
 /* Function : updateSettings */
 /* Updates the content of a brlapi_settings_t structure according to */
 /* another structure of th same type */
-void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
+static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 {
   if (s2==NULL) return;
   if ((s2->authKey) && (*s2->authKey))
@@ -112,12 +140,8 @@ void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
     s1->hostName = s2->hostName;
 }
 
-/* brlapi_initializeConnection */
-/* Creates a socket to connect to BrlApi */
-/* Returns the file descriptor, or -1 if an error occured */
-/* Note: We return the file descriptor in case the client wants to */
-/* communicate with the server without using our routines, but, if he uses us, */
-/* He will not have to pass the fd later, since we keep a copy of it */
+/* Function: brlapi_initializeConnection
+ * Creates a socket to connect to BrlApi */
 int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
  struct addrinfo *res,*cur;
@@ -185,7 +209,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   fprintf(stderr,"Can't connect to BrlApi on %s !\n",settings.hostName);
   return -1;
  }
- if (brlapi_writePacket(fd, authlength, BRLPACKET_AUTHKEY,&auth[0])<0)
+ if (brlapi_writePacket(fd, BRLPACKET_AUTHKEY, &auth[0], authlength)<0)
  {
   close(fd);
   fd = -1;
@@ -205,7 +229,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 /* Cleanly close the socket */
 void brlapi_closeConnection()
 {
- brlapi_writePacket(fd, 0, BRLPACKET_BYE,NULL);
+ brlapi_writePacket(fd, BRLPACKET_BYE, NULL, 0);
  brlapi_waitForAck();
  close(fd);
  fd = -1;
@@ -213,13 +237,12 @@ void brlapi_closeConnection()
 
 /* brlapi_getRaw */
 /* Switch to Raw mode */
-/* Returns 1 if successfull, 0 if unavailable for the moment, -1 on error */
 int brlapi_getRaw()
 {
  static const unsigned char paquet[sizeof(uint32_t)];
  int res;
  *((uint32_t *)paquet) = htonl(BRLRAW_MAGIC);
- if ((res=brlapi_writePacket(fd, sizeof(uint32_t), BRLPACKET_GETRAW, paquet))<0)
+ if ((res=brlapi_writePacket(fd, BRLPACKET_GETRAW, paquet, sizeof(uint32_t)))<0)
  {
   perror("getting raw");
   return -1;
@@ -229,11 +252,10 @@ int brlapi_getRaw()
 
 /* brlapi_leaveRaw */
 /* Leave Raw mode */
-/* Return -1 on error, 0 else */
 int brlapi_leaveRaw()
 {
  int res;
- if ((res=brlapi_writePacket(fd, 0, BRLPACKET_LEAVERAW, NULL))<0)
+ if ((res=brlapi_writePacket(fd, BRLPACKET_LEAVERAW, NULL, 0))<0)
  {
   perror("leaving raw");
   return -1;
@@ -243,11 +265,10 @@ int brlapi_leaveRaw()
 
 /* brlapi_sendRaw */
 /* Send a Raw Packet */
-/* Return -1 on error, 0 else */
 int brlapi_sendRaw(const unsigned char *buf, size_t size)
 {
  int res;
- if ((res=brlapi_writePacket(fd, size, BRLPACKET_PACKET, buf))<0)
+ if ((res=brlapi_writePacket(fd, BRLPACKET_PACKET, buf, size))<0)
  {
   perror("writing raw packet");
   return -1;
@@ -257,14 +278,13 @@ int brlapi_sendRaw(const unsigned char *buf, size_t size)
 
 /* brlapi_recvRaw */
 /* Get a Raw packet */
-/* Returns its size, -1 on error, or -2 on EOF */
 int brlapi_recvRaw(unsigned char *buf, size_t size)
 {
  int res;
  brl_type_t type;
  while (1)
  {
-  if ((res=brlapi_readPacket(fd, size, &type, buf))<0)
+  if ((res=brlapi_readPacket(fd, &type, buf, size))<0)
   {
    if (res==-1) perror("reading raw packet");
    return res;
@@ -283,28 +303,33 @@ int brlapi_recvRaw(unsigned char *buf, size_t size)
 }
 
 /* Function : brlapi_getDriverId */
-/* Identify the driver BrlApi loaded */
+/* Identify the driver used by brltty */
 char *brlapi_getDriverId()
 {
  brl_type_t type;
  int res;
- static char id[4] = { '\0', '\0', '\0', '\0' };
+ static char id[3];
  uint32_t *code = (uint32_t *) &id[0];
- if (brlapi_writePacket(fd, 0, BRLPACKET_GETDRIVERID,NULL)<0)
+ if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERID, NULL, 0)<0)
  {
   perror("getting driver id");
   return NULL;
  }
  while (1)
  {
-  if ((res=brlapi_readPacket(fd,sizeof(id),&type, (unsigned char *) &id[0]))<0)
+  if ((res=brlapi_readPacket(fd,&type, &id[0],sizeof(id)))<0)
   {
    if (res==-1) perror("Getting driver id");
    return NULL;
   }
+  if (handle_keypress(type,code,res)) continue;
   switch (type)
   {
-   case BRLPACKET_GETDRIVERID: return &id[0];
+   case BRLPACKET_GETDRIVERID:
+   {
+    id[res]='\0';
+    return &id[0];
+   }
    case BRLPACKET_ERROR:
    {
     fprintf(stderr,"BrlApi error %d while getting driver id\n",ntohl(*code));
@@ -312,37 +337,39 @@ char *brlapi_getDriverId()
    }
    /* default is ignored, but logged */
    default:
-   {
     fprintf(stderr,"(brlapi_getDriverId) Received unknown packet of type %u and size %d\n",type,res);
-    break;
-   }
   }
  }
 }
 
 /* Function : brlapi_getDriverName */
-/* Name of the driver BrlApi loaded */
+/* Name of the driver used by brltty */
 char *brlapi_getDriverName()
 {
  brl_type_t type;
  int res;
  static char name[80]; /* should be enough */
  uint32_t *code = (uint32_t *) &name[0];
- if (brlapi_writePacket(fd, 0, BRLPACKET_GETDRIVERNAME,NULL)<0)
+ if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERNAME, NULL, 0)<0)
  {
   perror("getting driver name");
   return NULL;
  }
  while (1)
  {
-  if ((res=brlapi_readPacket(fd,sizeof(name),&type, (unsigned char *) &name[0]))<0)
+  if ((res=brlapi_readPacket(fd, &type, &name[0],sizeof(name)))<0)
   {
    if (res==-1) perror("Getting driver name");
    return NULL;
   }
+  if (handle_keypress(type,code,res)) continue;
   switch (type)
   {
-   case BRLPACKET_GETDRIVERNAME: return &name[0];
+   case BRLPACKET_GETDRIVERNAME:
+   {
+    name[res]='\0';
+    return &name[0];
+   }
    case BRLPACKET_ERROR:
    {
     fprintf(stderr,"BrlApi error %d while getting driver name\n",ntohl(*code));
@@ -350,10 +377,7 @@ char *brlapi_getDriverName()
    }
    /* default is ignored, but logged */
    default:
-   {
     fprintf(stderr,"(GetDriverName) Received unknown packet of type %u and size %d\n",type,res);
-    break;
-   }
   }
  }
 }
@@ -372,18 +396,19 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
   *y = brly;
   return 0;
  }
- if (brlapi_writePacket(fd, 0, BRLPACKET_GETDISPLAYSIZE,NULL)<0)
+ if (brlapi_writePacket(fd, BRLPACKET_GETDISPLAYSIZE, NULL, 0)<0)
  {
   perror("Getting braille display size");
   return -1;
  }
  while (1)
  {
-  if ((res=brlapi_readPacket(fd,sizeof(DisplaySize),&type,(unsigned char *) &DisplaySize[0]))<0)
+  if ((res=brlapi_readPacket(fd,&type,&DisplaySize[0],sizeof(DisplaySize)))<0)
   {
    if (res==-1) perror("getting display size");
    return -1;
   }
+  if (handle_keypress(type,&DisplaySize[0],res)) continue;
   switch (type)
   {
    case BRLPACKET_GETDISPLAYSIZE: 
@@ -401,10 +426,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
    }
    /* default is ignored, but logged */
    default:
-   {
     fprintf(stderr,"(brlapi_getDisplaySize) Received unknown packet of type %u and size %d\n",type,res);
-    break;
-   }
   }
  }
 }
@@ -435,12 +457,6 @@ int brlapi_getControllingTty()
 
 /* Function : brlapi_getTty */
 /* Takes control of a tty */
-/* If tty>0, we take control of the specified tty */
-/* if tty==0, we try to determine in wich tty we are running and */
-/* take control of this one */
-/* how tells whether we want ReadKey to return keycodes or brltty commands */
-/* client tells which file the library will open for name constants for ReadKeyCmd */
-/* Returns 0 if ok, -1 if an error occured */
 struct def {
  brl_keycode_t code;
  char *name;
@@ -479,10 +495,11 @@ int brlapi_getTty(uint32_t tty, uint32_t how, brlapi_keybinding_t *keybinding)
  /* OK, Now we know where we are, so get the effective control of the terminal! */
  uints[0] = htonl(truetty); 
  uints[1] = htonl(how);
- if (brlapi_writePacket(fd,sizeof(uints),BRLPACKET_GETTTY,(unsigned char *) &uints[0])<0) return -1;
- if (brlapi_waitForAck()!=1) return -1;
+ if (brlapi_writePacket(fd,BRLPACKET_GETTTY,&uints[0],sizeof(uints))<0) return -1;
+ if (brlapi_waitForAck()!=0) return -1;
  
  deliver_mode = how;
+ keybuf_next = keybuf_nb = 0;
 
  // ok, grabbed it, see if a key binding is required
  if (!keybinding) return 0;
@@ -740,14 +757,13 @@ int brlapi_getTty(uint32_t tty, uint32_t how, brlapi_keybinding_t *keybinding)
 int brlapi_leaveTty()
 {
  brlx = 0; brly = 0; deliver_mode = -1;
- if (brlapi_writePacket(fd,0,BRLPACKET_LEAVETTY,NULL)<0) return -1;
+ if (brlapi_writePacket(fd,BRLPACKET_LEAVETTY,NULL,0)<0) return -1;
  return brlapi_waitForAck();
 }
 
 /* Function : brlapi_writeBrl */
 /* Writes a string to the braille display */
-/* If the string is too long, it is cut. If it's to short, some spaces are added */
-int brlapi_writeBrl(uint32_t cursor,const unsigned char *str)
+int brlapi_writeBrl(uint32_t cursor, const char *str)
 {
  static unsigned char disp[sizeof(uint32_t)+256];
  uint32_t *csr = (uint32_t *) &disp[0];
@@ -758,23 +774,46 @@ int brlapi_writeBrl(uint32_t cursor,const unsigned char *str)
  min = MIN( strlen(str), tmp);
  strncpy(s,str,min);
  for (i = min; i<tmp; i++) *(s+i) = ' '; 
- if (brlapi_writePacket(fd,sizeof(uint32_t)+tmp,BRLPACKET_WRITE,disp)<0) return -1;
+ if (brlapi_writePacket(fd,BRLPACKET_WRITE,disp,sizeof(uint32_t)+tmp)<0) return -1;
  return brlapi_waitForAck();
-} 
+}
+
+/* Function : packetReady */
+/* Tests wether a packet is ready on file descriptor fd */
+/* Returns -1 if an error occurs, 0 if no packet is ready, 1 if there is a */
+/* packet ready to be read */
+static int packetReady(int fd)
+{
+ fd_set set;
+ struct timeval timeout;
+ memset(&timeout, 0, sizeof(timeout));
+ FD_ZERO(&set);
+ FD_SET(fd, &set);
+ return select(fd+1, &set, NULL, NULL, &timeout);
+}
 
 /* Function : brlapi_readKey */
 /* Reads a key from the braille keyboard */
-/* If the read is successfull, the keycode is put in code, and 0 is returned */
-/* If an error occurs, we return -1 and *code is undefined */
-int brlapi_readKey(brl_keycode_t *code)
+int brlapi_readKey(int block, brl_keycode_t *code)
 {
  int res;
  brl_type_t type;
 
  if (deliver_mode!=BRLKEYCODES) return -1;
-  while (1)
+ while (1)
  {
-  if ((res=brlapi_readPacket(fd, sizeof(*code), &type, (unsigned char *) code))<0)
+/* if a key press was already received, just return it */
+  if (keybuf_nb>0) {
+   *code=keybuf[keybuf_next++];
+   keybuf_nb--;
+   return 1;
+  }
+  if (!block)
+  {
+   res = packetReady(fd);
+   if (res<=0) return res;
+  }
+  if ((res=brlapi_readPacket(fd, &type, code, sizeof(*code)))<0)
   {
    if (res==-1) perror("reading braille key");
    return -1;
@@ -782,25 +821,16 @@ int brlapi_readKey(brl_keycode_t *code)
   if (type==BRLPACKET_KEY)
   {
    *code = ntohl(*code);
-   return 0;
-  }
-  if (type==BRLPACKET_ERROR)
-  {
-   fprintf(stderr,"BrlApi error %u !\n",ntohl(*code));
-   errno=0;
-   return -1;
+   return 1;
   }
   /* other packets are ignored, but logged */
   fprintf(stderr,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
  }
- return 0;
 }
 
 /* Function : brlapi_readCommand */
 /* Reads a command from the braille keyboard */
-/* If the read is successfull, the command is put in code, and 0 is returned */
-/* If an error occurs, we return -1 and *code is undefined */
-int brlapi_readCommand(brl_keycode_t *code)
+int brlapi_readCommand(int block, brl_keycode_t *code)
 {
  int res;
  brl_type_t type;
@@ -808,7 +838,18 @@ int brlapi_readCommand(brl_keycode_t *code)
  if (deliver_mode!=BRLCOMMANDS) return -1;
  while (1)
  {
-  if ((res=brlapi_readPacket(fd, sizeof(*code), &type, (unsigned char *) code))<0)
+/* if a key press was already received, just return it */
+  if (keybuf_nb>0) {
+   *code=keybuf[keybuf_next++];
+   keybuf_nb--;
+   return 1;
+  }
+  if (!block)
+  {
+   res = packetReady(fd);
+   if (res<=0) return res;
+  }
+  if ((res=brlapi_readPacket(fd, &type, code, sizeof(*code)))<0)
   {
    if (res==-1) perror("reading braille key");
    return -1;
@@ -816,37 +857,28 @@ int brlapi_readCommand(brl_keycode_t *code)
   if (type==BRLPACKET_COMMAND)
   {
    *code = ntohl(*code);
-   return 0;
-  }
-  if (type==BRLPACKET_ERROR)
-  {
-   fprintf(stderr,"BrlApi error %u !\n",ntohl(*code));
-   errno=0;
-   return -1;
+   return 1;
   }
   /* other packets are ignored, but logged */
   fprintf(stderr,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
  }
- return 0;
 }
 
 /* Function : brlapi_readBinding */
 /* Reads a key from the braille keyboard */
-/* If the read is successfull, a pointer on a string is returned : this is */
-/* the string defined in $HOME/.brlkeys/appli-xy.kbd for the key which was */
-/* read, else NULL is returned */
-const char *brlapi_readBinding(void)
+int brlapi_readBinding(int block, const char **code)
 {
- brl_keycode_t code;
+ brl_keycode_t keycode;
  struct bind *bindtmp;
- if (!bindings) return NULL;
+ int res;
+ if (!bindings) return -1;
  while (1) {
-  if (brlapi_readKey(&code)!=0)
-   return NULL;
+  if ((res=brlapi_readKey(block, &keycode))<=0)
+   return res;
   for(bindtmp = bindings; bindtmp->action; bindtmp++)
-   if (bindtmp->code == code && bindtmp->mods_state == mods_state) {
+   if (bindtmp->code == keycode && bindtmp->mods_state == mods_state) {
     switch (bindtmp->action) {
-     case STROKE: return bindtmp->modif.cmd;
+     case STROKE: *code=bindtmp->modif.cmd; return 1;
      case MOD: mods_state|=1<<bindtmp->modif.mod; break;
      case UNMOD: mods_state&=~(1<<bindtmp->modif.mod); break;
      default: break;
@@ -867,7 +899,7 @@ static int Mask_Unmask(int what, brl_keycode_t x, brl_keycode_t y)
  ints[0] = htonl(x);
  ints[1] = htonl(y);
 
- if (brlapi_writePacket(fd,sizeof(ints),(what ? BRLPACKET_UNMASKKEYS : BRLPACKET_MASKKEYS),(unsigned char *) &ints[0])<0) return -1;
+ if (brlapi_writePacket(fd,(what ? BRLPACKET_UNMASKKEYS : BRLPACKET_MASKKEYS),&ints[0],sizeof(ints))<0) return -1;
  return brlapi_waitForAck();
 }
 

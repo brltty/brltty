@@ -168,7 +168,7 @@ static inline void InitBlockedSignals()
 /* Sends an acknowledgement on the given socket */
 inline void WriteAckPacket(int fd)
 {
- brlapi_writePacket(fd,0,BRLPACKET_ACK,NULL);
+ brlapi_writePacket(fd,BRLPACKET_ACK,NULL,0);
 }
 
 /* Function : WriteErrorPacket */
@@ -176,7 +176,7 @@ inline void WriteAckPacket(int fd)
 void WriteErrorPacket(int fd,unsigned long int err)
 {
  uint32_t code = htonl(err);
- brlapi_writePacket(fd,sizeof(code),BRLPACKET_ERROR,(unsigned char *)&code);
+ brlapi_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
 }
 
 /****************************************************************************/
@@ -286,9 +286,9 @@ void *ProcessConnection(void *arg)
  brl_type_t type;
  pthread_cleanup_push(EndThread, arg);
  LogPrint(LOG_DEBUG,"Beginning to process connection %d",c->id);
- size = brlapi_readPacket(c->fd,BRLAPI_MAXPACKETSIZE,&type,packet);
+ size = brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE);
  LogPrint(LOG_DEBUG,"read packet of size %d and type %d",size,type);
- if ((type==BRLPACKET_AUTHKEY) && (size == authlength) && (!memcmp((void *) packet, (void *) auth, size))) 
+ if ((type==BRLPACKET_AUTHKEY) && (size == authlength) && (!memcmp(packet, auth, size))) 
  {
   WriteAckPacket(c->fd);
   go_on = 1;
@@ -298,7 +298,7 @@ void *ProcessConnection(void *arg)
  }
  while (go_on)
  {
-  if ((size=brlapi_readPacket(c->fd,BRLAPI_MAXPACKETSIZE,&type,packet))<0)
+  if ((size=brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE))<0)
   {
    if (size==-1) LogPrint(LOG_WARNING,"read : %s (connection %d)",strerror(errno),c->id);
    else LogPrint(LOG_WARNING,"Unexpected end of file");
@@ -308,7 +308,7 @@ void *ProcessConnection(void *arg)
   {
    case BRLPACKET_GETTTY:
    {
-    uint32_t tty, how, busy, n;
+    uint32_t tty, how, n;
     unsigned char *p = INITIAL_MESSAGE;
     LogPrint(LOG_DEBUG,"Received GetTty Request");
     CHECK((!c->raw),BRLERR_ILLEGAL_INSTRUCTION);
@@ -325,7 +325,7 @@ void *ProcessConnection(void *arg)
      } else {
       /* Here one is in the case where the client tries to change */
       /* from BRLKEYCODES to BRLCOMMANDS, or something like that */
-      /* For the moment this oferation is not supported */
+      /* For the moment this operation is not supported */
       /* A client that wants to do that should first LeaveTty() */
       /* and then get it again, risking to lose it */
       LogPrint(LOG_DEBUG,"Switching from BRLKEYCODES to BRLCOMMANDS not supported yet");
@@ -342,10 +342,9 @@ void *ProcessConnection(void *arg)
      }
     }
     pthread_mutex_lock(&connections_mutex);
-    busy = 0;
     for (i=0; i<CONNECTIONS; i++)
-     if ((connections[i]!=NULL) && (connections[i]->tty == tty)) busy = 1;
-    if (busy)
+     if ((connections[i]!=NULL) && (connections[i]->tty == tty)) break;
+    if (i<CONNECTIONS)
     {
      LogPrint(LOG_WARNING,"tty %d is already controled by someone else",tty);
      WriteErrorPacket(c->fd,BRLERR_TTYBUSY);
@@ -410,7 +409,7 @@ void *ProcessConnection(void *arg)
     CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
     CHECK(size==sizeof(uint32_t)+c->brl.x*c->brl.y,BRLERR_INVALID_PACKET);
     pthread_mutex_lock(&c->brlmutex);
-    memcpy((void *) c->brl.buffer, (void *) (packet+sizeof(uint32_t)),c->brl.x*c->brl.y);
+    memcpy(c->brl.buffer, packet+sizeof(uint32_t),c->brl.x*c->brl.y);
     for (i=0; i<c->brl.x*c->brl.y; i++)
      *(c->brl.buffer+i) = textTable[*(c->brl.buffer+i)];
     cursor = ntohl (ints[0]);
@@ -478,7 +477,7 @@ void *ProcessConnection(void *arg)
     CHECK(size==0,BRLERR_INVALID_PACKET);
     LogPrint(LOG_DEBUG,"Received GetDriverId request");
     CHECK(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);    
-    brlapi_writePacket(c->fd,strlen(braille->identifier)+1,BRLPACKET_GETDRIVERID,braille->identifier);
+    brlapi_writePacket(c->fd,BRLPACKET_GETDRIVERID,braille->identifier,strlen(braille->identifier)+1);
     continue;
    }
    case BRLPACKET_GETDRIVERNAME:
@@ -486,7 +485,7 @@ void *ProcessConnection(void *arg)
     CHECK(size==0,BRLERR_INVALID_PACKET);
     LogPrint(LOG_DEBUG,"Received GetDriverName request");
     CHECK(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);    
-    brlapi_writePacket(c->fd,strlen(braille->name)+1,BRLPACKET_GETDRIVERNAME,braille->name);
+    brlapi_writePacket(c->fd,BRLPACKET_GETDRIVERNAME,braille->name,strlen(braille->name)+1);
     continue;
    }   
    case BRLPACKET_GETDISPLAYSIZE:
@@ -494,7 +493,7 @@ void *ProcessConnection(void *arg)
     CHECK(size==0,BRLERR_INVALID_PACKET);
     LogPrint(LOG_DEBUG,"GetDisplaySize request");
     CHECK(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
-    brlapi_writePacket(c->fd,sizeof(DisplaySize),BRLPACKET_GETDISPLAYSIZE,(unsigned char *) &DisplaySize[0]);
+    brlapi_writePacket(c->fd,BRLPACKET_GETDISPLAYSIZE,&DisplaySize[0],sizeof(DisplaySize));
     continue;
    }
    case BRLPACKET_BYE:
@@ -565,7 +564,7 @@ int InitializeSocket(const char *socketport)
    continue;
   }
   /* Specifies that address can be reused */
-  if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void *) &yes,sizeof(yes))!=0)
+  if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes))!=0)
   {
    LogPrint(LOG_ERR,"setsockopt : %s",strerror(errno));
    close(fd);
@@ -777,7 +776,7 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
   if (res>0)
   {
    LogPrint(LOG_DEBUG,"Size: %d Contents: %c %c %c %x %x ",res,*packet,packet[1],packet[2],packet[3],packet[4]);
-   brlapi_writePacket(RawConnection->fd,res,BRLPACKET_PACKET,packet);
+   brlapi_writePacket(RawConnection->fd,BRLPACKET_PACKET,packet,res);
   } 
   return EOF;
  }
@@ -816,11 +815,11 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
    {
     LogPrint(LOG_DEBUG,"Transmitting unmasked key %u",keycode);
     keycode = htonl(keycode);
-    brlapi_writePacket(c->fd,sizeof(keycode),BRLPACKET_KEY,(char *) &keycode);
+    brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
    } else {
     LogPrint(LOG_DEBUG,"Transmitting unmasked command %u",keycode);
     keycode = htonl(keycode);
-    brlapi_writePacket(c->fd,sizeof(keycode),BRLPACKET_COMMAND,(char *) &keycode);
+    brlapi_writePacket(c->fd,BRLPACKET_COMMAND,&keycode,sizeof(keycode));
    }   
    return EOF;
   }  
@@ -881,7 +880,7 @@ void api_open(BrailleDisplay *brl, char **parameters)
  api_link();
 
  res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:API_KEYFILE),
-  &authlength,(void *) auth);
+  &authlength,auth);
  if (res==-1)
  {
   LogPrint(LOG_WARNING,"Unable to load API authentication key: no connections will be accepted.");
