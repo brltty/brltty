@@ -27,6 +27,13 @@ openPcmDevice (int errorLevel, const char *device) {
   if ((pcm = malloc(sizeof(*pcm)))) {
     if (!device) device = PCM_OSS_DEVICE_PATH;
     if ((pcm->fileDescriptor = open(device, O_WRONLY|O_NONBLOCK)) != -1) {
+      /* Nonblocking if snd_seq_oss is loaded with nonblock_open=1.
+       * There appears to be a bug in this case as write() always
+       * returns the full count even though large chunks of sound are
+       * missing. For now, therefore, force blocking output.
+       */
+      setBlockingIo(pcm->fileDescriptor, 1);
+
       return pcm;
     } else {
       LogPrint(errorLevel, "Cannot open PCM device: %s: %s", device, strerror(errno));
