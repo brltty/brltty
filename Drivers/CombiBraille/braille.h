@@ -23,6 +23,10 @@
  * Edit as necessary for your system.
  */
 
+/* used by speech.c */
+extern int CB_fileDescriptor;
+extern int CB_charactersPerSecond;			/* file descriptor for Braille display */
+
 #define BRLCOLS(id) 	\
 	((id) == 0 ? 20 : \
 	((id) == 1 ? 40 : \

@@ -35,9 +35,7 @@
 
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for BLite speech definitions */
-
-/* This is shared with BrailleLite/braille.c: */
-extern int blite_fd;
+#include "braille.h"		/* for BLite speech definitions */
 
 
 #if 0
@@ -86,10 +84,10 @@ spk_say (const unsigned char *buffer, int len)
 
   /* Keep it simple for now: */
   if (pre_speech[0])
-    write (blite_fd, pre_speech + 1, pre_speech[0]);
-  write (blite_fd, buffer, len);
+    write (BL_fileDescriptor, pre_speech + 1, pre_speech[0]);
+  write (BL_fileDescriptor, buffer, len);
   if (post_speech[0])
-    write (blite_fd, post_speech + 1, post_speech[0]);
+    write (BL_fileDescriptor, post_speech + 1, post_speech[0]);
 
 #if 0
   unsigned char c;
@@ -131,7 +129,7 @@ spk_mute (void)
 {
   unsigned char mute_seq[] = {MUTE_SEQ };
 
-  write (blite_fd, mute_seq + 1, mute_seq[0]);
+  write (BL_fileDescriptor, mute_seq + 1, mute_seq[0]);
 }
 
 

@@ -38,9 +38,6 @@
 #include "speech.h"		/* for speech definitions */
 #include "braille.h"
 
-/* These are shared with CombiBraille/braille.c: */
-extern int brl_fd;
-extern int chars_per_sec;			/* file descriptor for Braille display */
 static size_t spk_size = 0X1000;
 static unsigned char *spk_buffer = NULL;
 static int spk_fd = -1;
@@ -81,7 +78,7 @@ static int
 spk_open (char **parameters)
 {
   if ((spk_buffer = malloc(spk_size))) {
-    if ((spk_fd = dup(brl_fd)) != -1) {
+    if ((spk_fd = dup(CB_fileDescriptor)) != -1) {
       if ((spk_stream = fdopen(spk_fd, "a"))) {
         setvbuf(spk_stream, spk_buffer, _IOFBF, spk_size);
         return 1;
@@ -113,7 +110,7 @@ static void
 spk_flush (void)
 {
   fflush(spk_stream);
-  delay(spk_written * 1000 / chars_per_sec);
+  delay(spk_written * 1000 / CB_charactersPerSecond);
   spk_written = 0;
 }
 

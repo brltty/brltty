@@ -21,6 +21,9 @@
  * Edit as necessary for your system.
  */
 
+/* used by speech.c */
+extern int BL_fileDescriptor;
+
 /* We always expect 8 data bits, no parity, 1 stop bit. */
 /* Select baudrate to use */
 #define BAUDRATE 9600

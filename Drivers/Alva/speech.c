@@ -36,10 +36,6 @@
 #include "speech.h"		/* for speech definitions */
 #include "braille.h"
 
-/* This is shared with brlmain.c */
-int SendToAlva( char *data, int len );
-
-
 /* charset conversion table from iso latin-1 == iso 8859-1 to cp437==ibmpc
  * for chars >=128. 
  */
@@ -88,7 +84,7 @@ spk_say (const unsigned char *buffer, int len)
   if (pre_speech[0])
     {
       memcpy (buf, pre_speech + 1, pre_speech[0]);
-      SendToAlva (buf, pre_speech[0]);
+      AL_writeData (buf, pre_speech[0]);
     }
   for (i = 0; i < len; i++)
     {
@@ -97,20 +93,20 @@ spk_say (const unsigned char *buffer, int len)
       if (c < 33)	/* space or control character */
 	{
 	  buf[0] = ' ';
-	  SendToAlva (buf, 1);
+	  AL_writeData (buf, 1);
 	}
       else if (c > MAX_TRANS)
-	SendToAlva (&c, 1);
+	AL_writeData (&c, 1);
       else
 	{
 	  memcpy (buf, vocab[c - 33], strlen (vocab[c - 33]));
-	  SendToAlva (buf, strlen (vocab[c - 33]));
+	  AL_writeData (buf, strlen (vocab[c - 33]));
 	}
     }
   if (post_speech[0])
     {
       memcpy (buf, post_speech + 1, post_speech[0]);
-      SendToAlva (buf, post_speech[0]);
+      AL_writeData (buf, post_speech[0]);
     }
 }
 
@@ -123,7 +119,7 @@ spk_mute (void)
 
 return;
   memcpy (buffer, mute_seq + 1, mute_seq[0]);
-  SendToAlva (buffer, mute_seq[0]);
+  AL_writeData (buffer, mute_seq[0]);
 }
 
 

@@ -20,6 +20,9 @@
  *
  */
 
+/* used by speech.c */
+extern int AL_writeData( unsigned char *data, int len );
+
 /* Known Device Identification Numbers (not to be changed) */
 #define ABT_AUTO	        0XFF	/* for new firmware only */
 #define ABT320		0X00	/* ABT 320 */

@@ -44,9 +44,9 @@ static int cmdtrans[0X100] = {
 };
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
-int brl_fd;			/* file descriptor for Braille display */
+int CB_fileDescriptor;			/* file descriptor for Braille display */
 static int brl_cols;			/* file descriptor for Braille display */
-int chars_per_sec;			/* file descriptor for Braille display */
+int CB_charactersPerSecond;			/* file descriptor for Braille display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
@@ -92,14 +92,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    */
 
   /* Now open the Braille display device for random access */
-  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
+  if (!openSerialDevice(device, &CB_fileDescriptor, &oldtio)) goto failure;
 
   /* Set bps, flow control and 8n1, enable reading */
   initializeSerialAttributes(&newtio);
   setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
 
-  restartSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
-  chars_per_sec = BAUDRATE / 10;
+  restartSerialDevice(CB_fileDescriptor, &newtio, BAUDRATE);		/* activate new settings */
+  CB_charactersPerSecond = BAUDRATE / 10;
 
   /* CombiBraille initialisation procedure: */
   success = 0;
@@ -111,14 +111,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 #endif /* MAX_ATTEMPTS == 0 */
     {
       if (init_seq[0])
-	if (write (brl_fd, init_seq + 1, init_seq[0]) != init_seq[0])
+	if (write (CB_fileDescriptor, init_seq + 1, init_seq[0]) != init_seq[0])
 	  continue;
       timeout_yet (0);		/* initialise timeout testing */
       n = 0;
       do
 	{
 	  delay (20);
-	  if (read (brl_fd, &c, 1) == 0)
+	  if (read (CB_fileDescriptor, &c, 1) == 0)
 	    continue;
 	  if (n < init_ack[0] && c != init_ack[1 + n])
 	    continue;
@@ -130,7 +130,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     }
   if (!success)
     {
-      putSerialAttributes (brl_fd, &oldtio);
+      putSerialAttributes (CB_fileDescriptor, &oldtio);
       goto failure;
     }
 
@@ -150,8 +150,8 @@ failure:;
     free (prevdata);
   if (rawdata)
     free (rawdata);
-  if (brl_fd >= 0)
-    close (brl_fd);
+  if (CB_fileDescriptor >= 0)
+    close (CB_fileDescriptor);
   return 0;
 }
 
@@ -184,13 +184,13 @@ brl_close (BrailleDisplay *brl)
       memcpy (rawdata + rawlen, close_seq + 1, close_seq[0]);
       rawlen += close_seq[0];
     }
-  write (brl_fd, rawdata, rawlen);
+  write (CB_fileDescriptor, rawdata, rawlen);
 
   free (prevdata);
   free (rawdata);
 
-  putSerialAttributes (brl_fd, &oldtio);		/* restore terminal settings */
-  close (brl_fd);
+  putSerialAttributes (CB_fileDescriptor, &oldtio);		/* restore terminal settings */
+  close (CB_fileDescriptor);
 }
 
 
@@ -245,8 +245,8 @@ brl_writeWindow (BrailleDisplay *brl)
 	  memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
 	  rawlen += post_data[0];
 	}
-      write (brl_fd, rawdata, rawlen);
-      brl->writeDelay += rawlen * 1000 / chars_per_sec;
+      write (CB_fileDescriptor, rawdata, rawlen);
+      brl->writeDelay += rawlen * 1000 / CB_charactersPerSecond;
     }
 }
 
@@ -284,7 +284,7 @@ getbrlkey (void)
   static unsigned char q[4];	/* input queue */
   unsigned char c;		/* character buffer */
 
-  while (read (brl_fd, &c, 1))
+  while (read (CB_fileDescriptor, &c, 1))
     {
       if (ptr == 0 && c != 27)
 	continue;

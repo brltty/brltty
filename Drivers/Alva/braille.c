@@ -566,10 +566,7 @@ brl_identify (void)
 }
 
 
-/* SendToAlva() is shared with speech.c */
-extern int SendToAlva( unsigned char *data, int len );
-
-int SendToAlva( unsigned char *data, int len )
+int AL_writeData( unsigned char *data, int len )
 {
   if (io->writePacket(data, len, NULL) == len) return 1;
   return 0;
