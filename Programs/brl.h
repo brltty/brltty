@@ -109,7 +109,7 @@ typedef struct {
   void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);		/* mute speech */
 } BrailleDriver;
 
-extern const BrailleDriver *loadBrailleDriver (const char *identifier, int *internal, const char *driverDirectory);
+extern const BrailleDriver *loadBrailleDriver (const char *identifier, void **driverObject, const char *driverDirectory);
 extern void identifyBrailleDrivers (void);
 extern int listBrailleDrivers (const char *directory);
 extern const BrailleDriver *braille;

@@ -88,7 +88,7 @@ static char **brailleDevices;
 static char *opt_brailleDriver;
 static char **brailleDrivers;
 static const BrailleDriver *brailleDriver = NULL;
-static int brailleInternal;
+static void *brailleObject;
 static char *opt_brailleParameters;
 static char **brailleParameters = NULL;
 static char *preferencesFile = NULL;
@@ -112,7 +112,7 @@ static int apiOpened;
 static char *opt_speechDriver;
 static char **speechDrivers = NULL;
 static const SpeechDriver *speechDriver = NULL;
-static int speechInternal;
+static void *speechObject;
 static char *opt_speechParameters;
 static char **speechParameters = NULL;
 static char *opt_speechFifo;
@@ -696,9 +696,9 @@ openBrailleDriver (int verify) {
 
     while (*identifier) {
       const BrailleDriver *driver;
-      int internal;
+      void *object;
       LogPrint(LOG_DEBUG, "Checking for '%s' braille display.", *identifier);
-      if ((driver = loadBrailleDriver(*identifier, &internal, opt_libraryDirectory))) {
+      if ((driver = loadBrailleDriver(*identifier, &object, opt_libraryDirectory))) {
         char **parameters = processParameters(driver->parameters,
                                               "braille driver",
                                               driver->identifier,
@@ -713,7 +713,7 @@ openBrailleDriver (int verify) {
             if (driver->open(&brl, parameters, *device)) {
               opened = 1;
               brailleDriver = driver;
-              brailleInternal = internal;
+              brailleObject = object;
             }
           }
 
@@ -760,7 +760,7 @@ openBrailleDriver (int verify) {
           deallocateStrings(parameters);
         }
 
-        if (!internal) unloadSharedObject(driver);
+        if (object) unloadSharedObject(object);
       } else {
         LogPrint(LOG_ERR, "Braille driver not loadable: %s", *identifier);
       }
@@ -783,7 +783,7 @@ closeBrailleDriver (void) {
   if (brailleDriver) {
     drainBrailleOutput(&brl, 0);
     brailleDriver->close(&brl);
-    if (!brailleInternal) unloadSharedObject(brailleDriver);
+    if (brailleObject) unloadSharedObject(brailleObject);
     brailleDriver = NULL;
   }
 
@@ -888,9 +888,9 @@ openSpeechDriver (int verify) {
 
   while (*identifier) {
     const SpeechDriver *driver;
-    int internal;
+    void *object;
     LogPrint(LOG_DEBUG, "Checking for '%s' speech synthesizer.", *identifier);
-    if ((driver = loadSpeechDriver(*identifier, &internal, opt_libraryDirectory))) {
+    if ((driver = loadSpeechDriver(*identifier, &object, opt_libraryDirectory))) {
       char **parameters = processParameters(driver->parameters,
                                             "speech driver",
                                             driver->identifier,
@@ -905,7 +905,7 @@ openSpeechDriver (int verify) {
           if (driver->open(parameters)) {
             opened = 1;
             speechDriver = driver;
-            speechInternal = internal;
+            speechObject = object;
           }
         }
 
@@ -927,7 +927,7 @@ openSpeechDriver (int verify) {
         deallocateStrings(parameters);
       }
 
-      if (!internal) unloadSharedObject(driver);
+      if (object) unloadSharedObject(object);
     } else {
       LogPrint(LOG_ERR, "Speech driver not loadable: %s", *identifier);
     }
@@ -943,7 +943,7 @@ static void
 closeSpeechDriver (void) {
   if (speechDriver) {
     speechDriver->close();
-    if (!speechInternal) unloadSharedObject(speechDriver);
+    if (speechObject) unloadSharedObject(speechObject);
     speechDriver = NULL;
   }
 

@@ -72,8 +72,8 @@ float spkDurationStretchTable[] = {
 };
 
 const SpeechDriver *
-loadSpeechDriver (const char *identifier, int *internal, const char *driverDirectory) {
-  return loadDriver(identifier, internal,
+loadSpeechDriver (const char *identifier, void **driverObject, const char *driverDirectory) {
+  return loadDriver(identifier, driverObject,
                     driverDirectory, driverTable,
                     "speech", 's', "spk_driver",
                     &noSpeech, noSpeech.identifier);
