@@ -917,7 +917,7 @@ static Tconnection *whoFillsTty(Ttty *tty) {
   c = NULL;
 found:
   for (t = tty->subttys; t; t = t->next)
-    if (t->number == tty->focus) {
+    if (tty->focus==-1 || t->number == tty->focus) {
       Tconnection *recur_c = whoFillsTty(t);
       return recur_c ? recur_c : c;
     }
@@ -927,9 +927,13 @@ found:
 /* Function : api_writeWindow */
 static void api_writeWindow(BrailleDisplay *brl)
 {
+  int tty;
+  if ((tty = currentVirtualTerminal()))
+    ttys.focus = tty;
+  else
+    ttys.focus = -1;
   if (rawConnection!=NULL) return;
   pthread_mutex_lock(&connections_mutex);
-  ttys.focus = currentVirtualTerminal();
   if (whoFillsTty(&ttys)!=NULL) {
     pthread_mutex_unlock(&connections_mutex);
     return;
@@ -942,10 +946,14 @@ static void api_writeWindow(BrailleDisplay *brl)
 /* Function : api_writeVisual */
 static void api_writeVisual(BrailleDisplay *brl)
 {
+  int tty;
+  if ((tty = currentVirtualTerminal()))
+    ttys.focus = tty;
+  else
+    ttys.focus = -1;
   if (!TrueBraille->writeVisual) return;
   if (rawConnection!=NULL) return;
   pthread_mutex_lock(&connections_mutex);
-  ttys.focus = currentVirtualTerminal();
   if (whoFillsTty(&ttys)!=NULL) {
     pthread_mutex_unlock(&connections_mutex);
     return;
@@ -976,7 +984,7 @@ static Tconnection *whoGetsKey(Ttty *tty, brl_keycode_t command, brl_keycode_t k
   c = NULL;
 found:
   for (t = tty->subttys; t; t = t->next)
-    if (t->number == tty->focus) {
+    if (tty->focus==-1 || t->number == tty->focus) {
       Tconnection *recur_c = whoGetsKey(t, command, keycode);
       return recur_c ? recur_c : c;
     }
@@ -986,7 +994,7 @@ found:
 /* Function : api_readCommand */
 static int api_readCommand(BrailleDisplay *disp, BRL_DriverCommandContext caller)
 {
-  int res, refresh = 0;
+  int res, refresh = 0, tty;
   ssize_t size;
   Tconnection *c;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
@@ -1001,8 +1009,11 @@ static int api_readCommand(BrailleDisplay *disp, BRL_DriverCommandContext caller
     }
     return EOF;
   }
+  if ((tty = currentVirtualTerminal()))
+    ttys.focus = tty;
+  else
+    ttys.focus = -1;
   pthread_mutex_lock(&connections_mutex);
-  ttys.focus = currentVirtualTerminal();
   c = whoFillsTty(&ttys);
   if (c && last_conn_write!=c) {
     last_conn_write=c;
