@@ -365,7 +365,9 @@ install-api-headers:
 
 install-api-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3
-	$(INSTALL_DATA) $(SRC_TOP)$(DOC_DIR)/*.3 $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3
+	set -- $(SRC_TOP)$(DOC_DIR)/*.3 && [ -f $$1 ] && \
+	$(INSTALL_DATA) $$* $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3 || \
+	exit 0
 
 install-api-key:
 	file=$(sysconfdir)/$(API_KEYFILE) && \
