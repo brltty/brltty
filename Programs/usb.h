@@ -235,15 +235,25 @@ extern int usbClearEndpoint (
   unsigned char endpointAddress
 );
 
-extern int usbControlTransfer (
+extern int usbControlRead (
   UsbDevice *device,
-  unsigned char direction,
   unsigned char recipient,
   unsigned char type,
   unsigned char request,
   unsigned short value,
   unsigned short index,
   void *buffer,
+  int length,
+  int timeout
+);
+extern int usbControlWrite (
+  UsbDevice *device,
+  unsigned char recipient,
+  unsigned char type,
+  unsigned char request,
+  unsigned short value,
+  unsigned short index,
+  const void *buffer,
   int length,
   int timeout
 );

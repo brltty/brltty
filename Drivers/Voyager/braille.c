@@ -110,54 +110,50 @@ static char readbrl_init; /* Flag to reinitialize readbrl function state. */
 
 
 static int
-_sndcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
-	      unsigned char *buffer, uint16_t size)
+_sndcontrolmsg(const char *reqname, uint8_t request, uint16_t value, uint16_t index,
+	       const unsigned char *buffer, uint16_t size)
 {
   int ret, repeats = STALL_TRIES;
   do {
     if(repeats == STALL_TRIES)
-      LogPrint(LOG_DEBUG, "control req %s 0x%x", reqname, request);
+      LogPrint(LOG_DEBUG, "ctl req 0X%X [%s]", request, reqname);
     else
-      LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
-	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usb->device, USB_DIRECTION_OUTPUT, 
-			     USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
-                             request, value, index, buffer, size, 100);
+      LogPrint(LOG_DEBUG, "ctl req 0X%X (try %d) failed: %s",
+	       request, STALL_TRIES+1-repeats, strerror(errno));
+    ret = usbControlWrite(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+                          request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
+  if(ret<0)
+    LogPrint(LOG_ERR, "ctl req 0X%X error: %s",
+             request, strerror(errno));
   return ret;
 }
 
 #define sndcontrolmsg(request, value, index, buffer, size) \
-    ({ int ret = _sndcontrolmsg(#request, request, value, index, buffer, size); \
-       if(ret<0) LogPrint(LOG_ERR, "%s control op " \
-			  "got error %s", #request, strerror(errno)); \
-       ret; \
-    })
+  (_sndcontrolmsg(#request, request, value, index, buffer, size))
 
 static int
-_rcvcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
-	      unsigned char *buffer, uint16_t size)
+_rcvcontrolmsg(const char *reqname, uint8_t request, uint16_t value, uint16_t index,
+	       unsigned char *buffer, uint16_t size)
 {
   int ret, repeats = STALL_TRIES;
   do {
     if(repeats == STALL_TRIES)
-      LogPrint(LOG_DEBUG, "control req %s 0x%x", reqname, request);
+      LogPrint(LOG_DEBUG, "ctl req 0X%X [%s]", request, reqname);
     else
-      LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
-	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usb->device, USB_DIRECTION_INPUT, 
-			     USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
-                             request, value, index, buffer, size, 100);
+      LogPrint(LOG_DEBUG, "ctl req 0X%X (try %d) failed: %s",
+	       request, STALL_TRIES+1-repeats, strerror(errno));
+    ret = usbControlRead(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+                         request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
+  if(ret<0)
+    LogPrint(LOG_ERR, "ctl req 0X%X error: %s",
+             request, strerror(errno));
   return ret;
 }
 
 #define rcvcontrolmsg(request, value, index, buffer, size) \
-    ({ int ret = _rcvcontrolmsg(#request, request, value, index, buffer, size); \
-       if(ret<0) LogPrint(LOG_ERR, "%s query op " \
-			  "got error %s", #request, strerror(errno)); \
-       ret; \
-    })
+  (_rcvcontrolmsg(#request, request, value, index, buffer, size))
 
 #define RAW_STRING_SIZE 500
 #define STRING_SIZE (2*RAW_STRING_SIZE +1)
@@ -265,7 +261,19 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   /* cause the display to beep */
   ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
 
-  usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+  {
+    int ret, repeats = STALL_TRIES;
+    do {
+    if(repeats == STALL_TRIES)
+      LogPrint(LOG_DEBUG, "begin input");
+    else
+      LogPrint(LOG_DEBUG, "begin input (try %d) failed: %s",
+               STALL_TRIES+1-repeats, strerror(errno));
+      ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+    } while(ret==0 && errno==EPIPE && --repeats);
+    if(ret==0)
+      LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
+  }
 
   if(!(dispbuf = malloc(ncells))
      || !(prevdata = malloc(ncells)))

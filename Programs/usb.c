@@ -33,6 +33,38 @@
 #include "usb_internal.h"
 
 int
+usbControlRead (
+  UsbDevice *device,
+  unsigned char recipient,
+  unsigned char type,
+  unsigned char request,
+  unsigned short value,
+  unsigned short index,
+  void *buffer,
+  int length,
+  int timeout
+) {
+  return usbControlTransfer(device, USB_DIRECTION_INPUT, recipient, type,
+                            request, value, index, buffer, length, timeout);
+}
+
+int
+usbControlWrite (
+  UsbDevice *device,
+  unsigned char recipient,
+  unsigned char type,
+  unsigned char request,
+  unsigned short value,
+  unsigned short index,
+  const void *buffer,
+  int length,
+  int timeout
+) {
+  return usbControlTransfer(device, USB_DIRECTION_OUTPUT, recipient, type,
+                            request, value, index, (void *)buffer, length, timeout);
+}
+
+int
 usbGetDescriptor (
   UsbDevice *device,
   unsigned char type,
@@ -41,10 +73,9 @@ usbGetDescriptor (
   UsbDescriptor *descriptor,
   int timeout
 ) {
-  return usbControlTransfer(device, USB_DIRECTION_INPUT,
-                            USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
-                            USB_REQ_GET_DESCRIPTOR, (type << 8) | number, index,
-                            descriptor->bytes, sizeof(descriptor->bytes), timeout);
+  return usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
+                        USB_REQ_GET_DESCRIPTOR, (type << 8) | number, index,
+                        descriptor->bytes, sizeof(descriptor->bytes), timeout);
 }
 
 int
@@ -176,10 +207,9 @@ usbGetConfiguration (
   UsbDevice *device,
   unsigned char *number
 ) {
-  int size = usbControlTransfer(device, USB_DIRECTION_INPUT,
-                                USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
-                                USB_REQ_GET_CONFIGURATION, 0, 0,
-                                number, sizeof(*number), 1000);
+  int size = usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
+                            USB_REQ_GET_CONFIGURATION, 0, 0,
+                            number, sizeof(*number), 1000);
   return size;
 }
 
@@ -197,11 +227,10 @@ usbReadConfiguration (UsbDevice *device) {
         int length = getLittleEndian(descriptor.configuration.wTotalLength);
         UsbDescriptor *descriptors = malloc(length);
         if (descriptors) {
-          size = usbControlTransfer(device, USB_DIRECTION_INPUT,
-                                    USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
-                                    USB_REQ_GET_DESCRIPTOR,
-                                    (USB_DESCRIPTOR_TYPE_CONFIGURATION << 8) | configuration,
-                                    0, descriptors, length, 1000);
+          size = usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
+                                USB_REQ_GET_DESCRIPTOR,
+                                (USB_DESCRIPTOR_TYPE_CONFIGURATION << 8) | configuration,
+                                0, descriptors, length, 1000);
           if (size != -1) {
             device->configurationDescriptor = descriptors;
             device->configurationLength = length;
@@ -562,9 +591,8 @@ usbReapInput (
 
 static int
 usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
-  return usbControlTransfer(device, USB_DIRECTION_OUTPUT,
-                            USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR, 
-                            request, value, 0, NULL, 0, 1000) != -1;
+  return usbControlWrite(device, USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR,
+                         request, value, 0, NULL, 0, 1000) != -1;
 }
 static int
 usbSetBelkinBaud (UsbDevice *device, int rate) {
@@ -674,9 +702,8 @@ usbFtdiInputFilter (UsbInputFilterData *data) {
 }
 static int
 usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
-  return usbControlTransfer(device, USB_DIRECTION_OUTPUT,
-                            USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR, 
-                            request, value, index, NULL, 0, 1000) != -1;
+  return usbControlWrite(device, USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR,
+                         request, value, index, NULL, 0, 1000) != -1;
 }
 static int
 usbSetFtdiModemState (UsbDevice *device, int state, int shift, const char *name) {

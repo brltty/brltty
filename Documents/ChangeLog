@@ -237,7 +237,7 @@ February 3, 2003:
       Delphi 420, 440 Desktop; Satellite 584 Pro, 544 Traveller
    Move device creation from the make file to the Linux screen driver. (dm)
    Remove the --with-screen-device build option. (dm)
-   With devfs, /dev/tty0 is /dev/vc/0. (dm) + Tapio Kelloniemi <tappi@thack.org>
+   With devfs, /dev/tty0 is /dev/vc/0. (dm) + Tapio Kelloniemi
    Verify that /dev/vcsa (or equivalent) is character special. (dm)
    Version 1.2 of the EuroBraille driver. Yannick PLASSIARD <plassi_y@epitech.net>
       (code cleanup, new models, LCD display)
@@ -263,8 +263,8 @@ October 30, 2002:
    Implement attribute viewing and attribute underlining for contracted braille. (dm)
    Load drivers from background process. (dm)
       (ViaVoice wouldn't run when loaded in foreground but started in backgroun)
-   Support 512-character fonts. (dm) + Tapio Kelloniemi <tapio.kelloniemi@thack.org>
-   Fix colour array for CR_DESCCHAR. Tapio Kelloniemi <tapio.kelloniemi@thack.org>
+   Support 512-character fonts. (dm) + Tapio Kelloniemi
+   Fix colour array for CR_DESCCHAR. Tapio Kelloniemi
    Experimental gpm (mouse) support. (dm)
    HandyTech driver improvements. (dm) + Mario Lang <mlang@delysid.org>
       Merge Bookworm's status maintenance into main read loop.

@@ -58,6 +58,19 @@ struct UsbDeviceStruct {
   uint16_t language;
 };
 
+extern int usbControlTransfer (
+  UsbDevice *device,
+  unsigned char direction,
+  unsigned char recipient,
+  unsigned char type,
+  unsigned char request,
+  unsigned short value,
+  unsigned short index,
+  void *buffer,
+  int length,
+  int timeout
+);
+
 extern UsbDevice *usbTestDevice (
   const char *path,
   UsbDeviceChooser chooser,
