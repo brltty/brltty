@@ -554,7 +554,7 @@ in
       brltty_cv_default_braille_device="/dev/tty0p0"
       ;;
    openbsd*)
-      brltty_cv_default_braille_device="/dev/tty00"
+      brltty_cv_default_braille_device="/dev/cua00"
       ;;
    *)
       brltty_cv_default_braille_device=""
@@ -728,6 +728,7 @@ AC_OUTPUT([
    brltty.spec
    brltty.lsm
    Programs/brltty-config
+   Documents/brltty.conf
    Documents/BrlAPIref.doxy
    Drivers/Voyager/mkhlp
    ${brltty_setup_files}])

@@ -24,6 +24,9 @@ brltty/Patches into /usr/ports/misc/screen/patches.
 	OpenBSD 3.4 comes with screen-4.0.1.  You can
 check the screen version by reading /usr/ports/misc/screen/Makefile.
 
+	The patch file should be named with the prefix "patch-" so that the
+screen build process will find it.
+
 	Now change into /usr/ports/misc/screen and run
 
 $ make
@@ -47,6 +50,18 @@ m    65536 -1160968401 --rwa------     root     root
 If you see output which looks roughly like the above, 
 screen seems to be compiled with the IPC_SHARED_IMAGE feature.
 
+	Note that proper integration of the IPC_SHARED_IMAGE functionality
+via an additional FLAVOR for the screen port has recently been submitted
+to the OpenBSD ports mailing list.  If you are working with the CVS ports
+tree, it might be worthwhile checking if the shm flavor already has
+been checked in by invoking the following command in /usr/ports/misc/screen:
+
+	$ make show=FLAVORS
+
+	If you see "shm" listed as a possible flavor to choose, simply
+build screen with the FLAVOR environment variable set to shm, and do not
+bother copying the patch from BRLTTY sources.
+
 2. Compiling BRLTTY
 -------------------
 
@@ -59,37 +74,14 @@ $ sudo gmake install
 Note that 'gmake' needs to be used to avoid a problem
 related to BSD and GNU Make incompatibilities.
 
-3. Configuring the serial ports
--------------------------------
-
-By default, OpenBSD sets up terminals on the available
-serial ports.  This sort of prevents BRLTTY from working correclty.
-If your braille terminal is connected to the first serial port,
-this is called /dev/tty00 in OpenBSD.  You need to edit
-/etc/ttys and add the "local" flag to that device to make BRLTTY work.
-
-The default entry for tty00 in /etc/ttys looks like this:
-
-tty00   "/usr/libexec/getty std.9600"   unknown off
-
-And you need to change it to read:
-
-tty00   "/usr/libexec/getty std.9600"   unknown off local
-
-After editing /etc/ttys, run the command
-
-$ sudo ttyflags tty00
-
-to activate your changes.
-
-4. Running BRLTTY
+3. Running BRLTTY
 -----------------
 
 You need to have "screen" started before you try to run
 BRLTTY.  Inside screen, simply invoke BRLTTY as you would on
-other systems.  Note that the first serial port is /dev/tty00.
+other systems.  Note that the first serial port is /dev/cua00.
 So a typical invocation could look like this:
 
-# brltty -b ts -d /dev/tty00
+# brltty -b ts -d /dev/cua00
 
  -- Mario Lang <mlang@delysid.org>

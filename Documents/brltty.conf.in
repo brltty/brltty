@@ -2,7 +2,8 @@
 # Uncomment those entries which apply to your personal needs and system
 # requirements.
 
-# BRLTTY expects to find its configuration file in "/etc/brltty.conf"
+# BRLTTY expects to find its configuration file in
+# "@sysconfdir@/brltty.conf"
 # (can be overridden with the -f [--configuration-file=] option).
 # If it doesn't exist, then BRLTTY silently continues but may require
 # that certain command line options be explicitly supplied.
@@ -60,7 +61,7 @@
 #braille-device	tts/0	# Primary Linux serial port (devfs).
 #braille-device	ttya	# Primary Solaris serial port.
 #braille-device	tty0p0	# Primary HP-UX serial port.
-#braille-device	tty00	# Primary OpenBSD serial port.
+#braille-device	cua00	# Primary OpenBSD serial port.
 #braille-device	ttyUSB0	# Primary Linux USB serial converter (old-style).
 #braille-device	usb/tts/0	# Primary Linux USB serial converter (devfs).
 #braille-device	brlvger	# Primary Linux USB Voyager port (old-style).
@@ -205,27 +206,27 @@
 
 # The library-directory directive specifies the absolute path to the
 # directory which contains the dynamically loadable drivers. If not
-# specified, "/lib/brltty" will be used.
+# specified, @library_directory@ will be used.
 # (can be overridden with the -L [--library-directory=] option)
 #library-directory /lib/brltty
 
 # The data-directory directive specifies the absolute path to the directory
 # which contains driver data files (help files, configuration files, etc.). If
-# not specified, "/etc/brltty" will be used.
+# not specified, "@data_directory@" will be used.
 # (can be overridden with the -D [--data-directory=] option)
-#data-directory /etc/brltty
+#data-directory @data_directory@
 
 # The tables-directory directive specifies the absolute path to the directory
 # which contains the text and attributes tables. If not specified,
-# "/etc/brltty" will be used.
+# "@data_directory@" will be used.
 # (can be overridden with the -T [--tables-directory=] option)
-#tables-directory /etc/brltty
+#tables-directory @data_directory@
 
 # The contractions-directory directive specifies the absolute path to the
 # directory which contains the contraction tables. If not specified,
-# "/etc/brltty" will be used.
+# "@data_directory@" will be used.
 # (can be overridden with the -C [--contractions-directory=] option)
-#contractions-directory /etc/brltty
+#contractions-directory @data_directory@
 
 # The api-parameters directive passes parameters to the Application
 # Programming Interface.
