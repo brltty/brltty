@@ -158,7 +158,7 @@ usbSubmitRequest (
   void *data
 ) {
   errno = ENOSYS;
-  LogError("USB request submission");
+  LogError("USB request submit");
   return NULL;
 }
 
@@ -168,7 +168,7 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancellation");
+  LogError("USB request cancel");
   return 0;
 }
 

@@ -370,7 +370,7 @@ usbSubmitRequest (
 
       free(urb);
     } else {
-      LogError("USB URB allocation");
+      LogError("USB URB allocate");
     }
   }
   return NULL;

@@ -110,7 +110,7 @@ usbDecodeString (const UsbStringDescriptor *descriptor) {
       string[count] = character;
     }
   } else {
-    LogError("USB string allocation");
+    LogError("USB string allocate");
   }
   return string;
 }

@@ -253,7 +253,6 @@ usbSubmitRequest (
   void *data
 ) {
   errno = ENOSYS;
-  LogError("USB request submission");
   return NULL;
 }
 
@@ -263,7 +262,7 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancellation");
+  LogError("USB request cancel");
   return 0;
 }
 
@@ -332,7 +331,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
                 free(devx);
               } else {
-                LogError("USB device extension allocation");
+                LogError("USB device extension allocate");
               }
 
               if ((dev = dev->next) == dev0) dev = NULL;
