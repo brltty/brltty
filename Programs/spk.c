@@ -180,6 +180,11 @@ exitSpeechFifo (void) {
 int
 openSpeechFifo (const char *directory, const char *path) {
   atexit(exitSpeechFifo);
+
+#ifdef __MINGW32__
+  directory = "//./pipe";
+#endif /* __MINGW32__ */
+
   if ((speechFifoPath = makePath(directory, path))) {
 #ifdef __MINGW32__
     if ((speechFifoHandle = CreateNamedPipe(speechFifoPath, PIPE_ACCESS_INBOUND,
