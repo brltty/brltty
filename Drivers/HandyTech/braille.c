@@ -424,8 +424,8 @@ setState (BrailleDisplayState state) {
   // LogPrint(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
 }
 
-static int
-brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, int count) {
+static ssize_t
+brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, size_t count) {
   return io->readBytes(bytes, count);
 }
 
@@ -439,8 +439,8 @@ readByte (BrailleDisplay *brl, unsigned char *byte) {
   return readBytes(brl, byte, sizeof(*byte));
 }
 
-static int
-brl_writePacket (BrailleDisplay *brl, const unsigned char *data, int length) {
+static ssize_t
+brl_writePacket (BrailleDisplay *brl, const unsigned char *data, size_t length) {
   // LogBytes("Write", data, length);
   return io->writeBytes(data, length, &brl->writeDelay);
 }

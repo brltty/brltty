@@ -21,8 +21,6 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#define _GNU_SOURCE
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -150,9 +148,10 @@ ssize_t brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
 /* Loads an authentication key from the given file */
 /* It is stored in auth, and its size in authLength */
 /* If the file is too big, non-existant or unreadable, returns -1 */
-int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth)
+int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth)
 {
-  int res, fd;
+  int fd;
+  off_t stsize;
   struct stat statbuf;
   if (stat(filename, &statbuf)<0) {
     brlapi_libcerrno=errno;
@@ -161,7 +160,7 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth)
     return -1;
   }
 
-  if ((res = statbuf.st_size)>BRLAPI_MAXPACKETSIZE) {
+  if ((stsize = statbuf.st_size)>BRLAPI_MAXPACKETSIZE) {
     brlapi_libcerrno=EFBIG;
     brlapi_libcerrfun="stat in loadAuthKey";
     brlapi_errno=BRLERR_LIBCERR;
@@ -175,9 +174,9 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth)
     return -1;
   }
 
-  *authlength = brlapi_readFile(fd, auth, res);
+  *authlength = brlapi_readFile(fd, auth, stsize);
 
-  if (*authlength!=res) {
+  if (*authlength!=(size_t)stsize) {
     close(fd);
     return -1;
   }
@@ -189,7 +188,7 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth)
 /* Function: brlapi_splitHost
  * splits host into hostname & port */
 void brlapi_splitHost(const char *host, char **hostname, char **port) {
-  char *c;
+  const char *c;
   if (!host || !*host) {
     *hostname=NULL;
     *port=strdup(BRLAPI_SOCKETPORT);

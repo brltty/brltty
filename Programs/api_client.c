@@ -143,7 +143,7 @@ static int brlapi_waitForAck()
 
 /* brlapi_writePacketWaitForAck */
 /* write a packet and wait for an acknowledgement */
-static ssize_t brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf, size_t size)
+static int brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf, size_t size)
 {
   ssize_t res;
   pthread_mutex_lock(&brlapi_fd_mutex);
@@ -178,7 +178,8 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   struct addrinfo hints;
   char *hostname = NULL;
   char *port = NULL;
-  int err, authKeyLength;
+  int err;
+  size_t authKeyLength;
 
   brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, "127.0.0.1:" BRLAPI_SOCKETPORT };
   brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOSTNAME") };
@@ -778,6 +779,8 @@ void brlapi_perror(const char *s)
   fprintf(stderr,"%s: %s\n",s,brlapi_strerror());
 }
 
+/* XXX functions mustn't use brlapi_errno after this since it #undefs it XXX */
+
 #ifdef brlapi_errno
 #undef brlapi_errno
 #endif
@@ -790,6 +793,16 @@ static pthread_key_t errno_key;
 
 /* the key must be created at most once */
 static pthread_once_t errno_key_once = PTHREAD_ONCE_INIT;
+
+/* We need to declare these with __attribute__((weak)) to determine at runtime 
+ * whether libpthread is used or not. We can't rely on the functions prototypes,
+ * hence the use of typeof
+ */
+#define WEAK_REDEFINE(name) extern typeof(name) name __attribute__((weak))
+WEAK_REDEFINE(pthread_key_create);
+WEAK_REDEFINE(pthread_once);
+WEAK_REDEFINE(pthread_getspecific);
+WEAK_REDEFINE(pthread_setspecific);
 
 static void errno_key_free(void *key)
 {
@@ -821,5 +834,3 @@ int *brlapi_errno_location(void)
   /* fall-back: shared errno :/ */
   return &brlapi_errno;
 }
-
-/* XXX functions mustn't use brlapi_errno after this one since it was #undef'ed XXX */

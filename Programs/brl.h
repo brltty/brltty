@@ -74,8 +74,8 @@ typedef struct {
   void (*writeVisual) (BrailleDisplay *);		/* write to braille display */
 
   /* These require BRL_HAVE_PACKET_IO. */
-  int (*readPacket) (BrailleDisplay *, unsigned char *, int);
-  int (*writePacket) (BrailleDisplay *, const unsigned char *, int);
+  ssize_t (*readPacket) (BrailleDisplay *, unsigned char *, size_t);
+  ssize_t (*writePacket) (BrailleDisplay *, const unsigned char *, size_t);
   int (*reset) (BrailleDisplay *);
   
   /* These require BRL_HAVE_KEY_CODES. */

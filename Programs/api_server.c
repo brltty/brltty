@@ -141,7 +141,7 @@ static BrailleDriver ApiBraille;
 /* Identication of the REAL braille driver currently used */
 static uint32_t DisplaySize[2] = { 0, 0 };
 
-static int authKeyLength = 0;
+static size_t authKeyLength = 0;
 static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
 
 /****************************************************************************/
@@ -181,7 +181,7 @@ static inline void writeAckPacket(int fd)
 
 /* Function : writeErrorPacket */
 /* Sends the given error code on the given socket */
-static void writeErrorPacket(int fd,unsigned long int err)
+static void writeErrorPacket(int fd, uint32_t err)
 {
   uint32_t code = htonl(err);
   brlapi_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
@@ -797,6 +797,7 @@ static void api_writeWindow(BrailleDisplay *brl)
 static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
 {
   int i,tty,res,refresh = 0, masked;
+  ssize_t size;
   static int oldtty = 0;
   Tconnection *c = NULL;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
@@ -805,11 +806,11 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
   cleanUp(); /* destroys remaining connections if any */
   if (RawConnection!=NULL) {
     pthread_mutex_lock(&packet_mutex);
-    res = TrueBraille->readPacket(&c->brl,packet,BRLAPI_MAXPACKETSIZE);
+    size = TrueBraille->readPacket(&c->brl,packet,BRLAPI_MAXPACKETSIZE);
     pthread_mutex_unlock(&packet_mutex);
-    if (res>0) {
-      LogPrint(LOG_DEBUG,"Size: %d Contents: %c %c %c %x %x ",res,*packet,packet[1],packet[2],packet[3],packet[4]);
-      brlapi_writePacket(RawConnection->fd,BRLPACKET_PACKET,packet,res);
+    if (size>0) {
+      LogPrint(LOG_DEBUG,"Size: %d Contents: %c %c %c %x %x ",size,*packet,packet[1],packet[2],packet[3],packet[4]);
+      brlapi_writePacket(RawConnection->fd,BRLPACKET_PACKET,packet,size);
     }
     return EOF;
   }

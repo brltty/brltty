@@ -180,10 +180,10 @@ void brlapi_closeConnection(void);
  * \param authlength gives the size of the \e auth buffer ;
  * \param auth is a buffer where the function will store the authentication key
  *
- * \return the size of the key, -1 on error
+ * \return 0, -1 on error
  *
  * \sa brlapi_settings_t, brlapi_initializeConnection */
-int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth);
+int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth);
 
 /** @} */
 

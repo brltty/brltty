@@ -370,7 +370,7 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
    return (write(brl_fd, buf, p - buf));
 }
 
-static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
+static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t sz)
 {
   fd_set		fds;
   struct timeval	tv;
@@ -929,7 +929,7 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
 
 #ifdef		BRL_HAVE_PACKET_IO
 
-static int brl_readPacket(BrailleDisplay *brl, unsigned char *bp, int size)
+static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *bp, size_t size)
 {
   int			i,j;
   unsigned char		c;

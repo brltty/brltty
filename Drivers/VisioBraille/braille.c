@@ -72,7 +72,7 @@ static int printcode = 0;
 /* Function : brl_writePacket */ 
 /* Sends a packet of size bytes, stored at address p to the braille terminal */
 /* Returns 0 if everything is right, -1 if an error occured while sending */
-static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int size)
+static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t size)
 {
  int lgtho = 1;
  static unsigned char obuf[MAXPKTLEN] = { 02 };
@@ -120,7 +120,7 @@ static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int size
 /* The size of the packet is returned */
 /* If a packet is too long, it is discarded and a message sent to the syslog */
 /* "+" packets are silently discarded, since they are only disturbing us */
-static int brl_readPacket(BrailleDisplay *brl, unsigned char *p, int size) 
+static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size) 
 {
  int tmp = 0;
  static unsigned char ack = 04;
@@ -443,7 +443,7 @@ static int brl_readKey(BrailleDisplay *brl)
 {
  unsigned char ch, ibuf[MAXPKTLEN-1];
  static int routing = 0;
- int lgthi;
+ ssize_t lgthi;
  readNextPacket:
  lgthi = brl_readPacket(brl,(unsigned char *) &ibuf,MAXPKTLEN-1);
  if (lgthi==0) return EOF;

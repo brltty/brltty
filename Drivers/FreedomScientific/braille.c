@@ -1287,8 +1287,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   }
 }
 
-static int
-brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, int length) {
+static ssize_t
+brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t length) {
   Packet packet;
   int count = readPacket(brl, &packet);
   if (count > 0) {
@@ -1302,8 +1302,8 @@ brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, int length) {
   return count;
 }
 
-static int
-brl_writePacket (BrailleDisplay *brl, const unsigned char *buffer, int length) {
+static ssize_t
+brl_writePacket (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
   int size = 4;
   if (length >= size) {
     int hasPayload = 0;
