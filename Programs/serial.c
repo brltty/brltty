@@ -42,22 +42,14 @@ openSerialDevice (const char *path, int *descriptor, struct termios *attributes)
   if ((device = getDevicePath(path))) {
     if ((*descriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
       if (isatty(*descriptor)) {
-        int flags;
-        if ((flags = fcntl(*descriptor, F_GETFL)) != -1) {
-          flags &= ~O_NONBLOCK;
-          if (fcntl(*descriptor, F_SETFL, flags) != -1) {
-            if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
-              LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", device, *descriptor);
-              free(device);
-              return 1;
-            } else {
-              LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", device, strerror(errno));
-            }
+        if (setBlockingIo(*descriptor, 1)) {
+          if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
+            LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", device, *descriptor);
+            free(device);
+            return 1;
           } else {
-            LogError("F_SETFL");
+            LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", device, strerror(errno));
           }
-        } else {
-          LogError("F_GETFL");
         }
       } else {
         LogPrint(LOG_ERR, "Not a serial device: %s", device);

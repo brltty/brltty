@@ -84,7 +84,10 @@ extern int readLine (FILE *file, char **buffer, size_t *size);
  */
 size_t safe_write (int fd, const unsigned char *buffer, size_t length);
 
-extern void setCloseOnExec (int fileDescriptor);
+extern int changeOpenFlags (int fileDescriptor, int clear, int set);
+extern int setOpenFlags (int fileDescriptor, int state, int flags);
+extern int setBlockingIo (int fileDescriptor, int state);
+extern int setCloseOnExec (int fileDescriptor);
 
 extern void delay (int milliseconds);		/* sleep for `msec' milliseconds */
 extern void shortdelay (int milliseconds);

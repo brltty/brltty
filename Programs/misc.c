@@ -306,8 +306,9 @@ awaitInput (int descriptor, int milliseconds) {
 
       case 0:
         errno = EAGAIN;
-        LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
-                 milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+        if (milliseconds > 0)
+          LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
+                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
         return 0;
 
       default:
@@ -342,9 +343,40 @@ readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int ti
   return 1;
 }
 
-void
+int
+changeOpenFlags (int fileDescriptor, int clear, int set) {
+  int flags;
+  if ((flags = fcntl(fileDescriptor, F_GETFL)) != -1) {
+    flags &= ~clear;
+    flags |= set;
+    if (fcntl(fileDescriptor, F_SETFL, flags) != -1) {
+      return 1;
+    } else {
+      LogError("F_SETFL");
+    }
+  } else {
+    LogError("F_GETFL");
+  }
+  return 0;
+}
+
+int
+setOpenFlags (int fileDescriptor, int state, int flags) {
+  if (state) {
+    return changeOpenFlags(fileDescriptor, 0, flags);
+  } else {
+    return changeOpenFlags(fileDescriptor, flags, 0);
+  }
+}
+
+int
+setBlockingIo (int fileDescriptor, int state) {
+  return setOpenFlags(fileDescriptor, state, O_NONBLOCK);
+}
+
+int
 setCloseOnExec (int fileDescriptor) {
-   fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC);
+  return fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC) != -1;
 }
 
 int
