@@ -90,9 +90,17 @@ ensureSetting (
           *setting = 1;
         } else if (strcasecmp(value, "off") == 0) {
           *setting = 0;
-        } else {
+        } else if (!(option->flags & OPT_Extend)) {
           LogPrint(LOG_ERR, "Invalid flag setting: %s", value);
           info->errorCount++;
+        } else {
+          int count;
+          if (isInteger(&count, value) && (count >= 0)) {
+            *setting = count;
+          } else {
+            LogPrint(LOG_ERR, "Invalid counter setting: %s", value);
+            info->errorCount++;
+          }
         }
       }
     }
@@ -479,7 +487,7 @@ processConfigurationLine (
           } else {
             char **setting = &conf->settings[optionIndex];
 
-            if (*setting && !(option->flags & OPT_Extend)) {
+            if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
               LogPrint(LOG_ERR, "Configuration directive specified more than once: %s", line);
               conf->info->errorCount++;
               free(*setting);
