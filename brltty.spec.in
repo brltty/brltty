@@ -116,8 +116,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc COPYING
 %doc Documents/ChangeLog Documents/TODO
 %doc doc/*
-%config(noreplace) %{_sysconfdir}/brltty.conf
-%verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
+%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
 
 %files -n brlapi
 %defattr(-,root,root)
