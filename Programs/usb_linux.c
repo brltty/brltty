@@ -285,7 +285,12 @@ usbSubmitRequest (
     LogPrint(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
              urb, urb->type, urb->endpoint, urb->flags, urb->signr,
              urb->buffer, urb->buffer_length, urb->usercontext);
+  submit:
     if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
+    if ((errno == EINVAL) && (urb->type == USBDEVFS_URB_TYPE_BULK)) {
+      urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
+      goto submit;
+    }
 
     /* UHCI support returns ENXIO if a URB is already submitted. */
     if (errno != ENXIO) LogError("USB URB submit");
