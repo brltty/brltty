@@ -118,8 +118,8 @@
 /* Braille information structure */
 typedef struct
   {
-    short x, y;			/* size of display */
     unsigned char *disp;	/* contents of the display */
+    short x, y;			/* size of display */
   }
 brldim;				/* used for writing to a braille display */
 
@@ -134,7 +134,7 @@ brldim;				/* used for writing to a braille display */
 
 /* Routines provided by the braille driver library: */
 void identbrl (const char *);	/* print start-up messages */
-brldim initbrl (const char *);	/* initialise Braille display */
+void initbrl (brldim *, const char *);	/* initialise Braille display */
 void closebrl (brldim);		/* close braille display */
 void writebrl (brldim);		/* write to braille display */
 int readbrl (int);		/* get key press from braille display */

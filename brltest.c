@@ -68,7 +68,7 @@ main (int argc, char *argv[])
   else
     printf ("Changed to directory %s\n", HOME_DIR);
   identbrl (argc > 1 ? argv[1] : NULL);		/* start-up messages */
-  brl = initbrl (argc > 1 ? argv[1] : NULL);	/* initialise display */
+  initbrl (&brl, argc > 1 ? argv[1] : NULL);	/* initialise display */
   if (brl.x == -1)
     {
       fprintf (stderr, "Initialisation error\n");

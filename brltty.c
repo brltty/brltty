@@ -43,7 +43,7 @@
 #include "cut-n-paste.h"
 #include "misc.h"
 
-#define VERSION "BRLTTY 1.9.7 (pre-release)"
+#define VERSION "BRLTTY 1.9.8 (pre-release)"
 #define COPYRIGHT "\
 Copyright (C) 1995-1998 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -163,7 +163,7 @@ unsigned char texttrans[256] =
 };
 unsigned char attribtrans[256] =
 {
-#include "attrib.auto.h"
+  #include "attrib.auto.h"
 };
 unsigned char *curtbl = NULL;	/* currently active translation table */
 
@@ -1073,7 +1073,7 @@ main (int argc, char *argv[])
 void
 startbrl()
 {
-  brl = initbrl (opt_d);
+  initbrl (&brl, opt_d);
   if (brl.x == -1)
     {
       LogPrint(LOG_ERR,"Braille driver initialization failed");
@@ -1208,12 +1208,21 @@ csrjmp_sub (int x, int y)
 	     scr.posy==cury && scr.posx==curx);
       if(t) break;
       if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
-	 || (y-scr.posy)*dif > dif*dif){
+	 || (y-scr.posy)*(y-scr.posy) >= dif*dif){
 	delay(CSRJMP_SETTLE_DELAY);
 	getstat_phys (&scr);
 	if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
-	   || (y-scr.posy)*dif > dif*dif)
+	   || (y-scr.posy)*(y-scr.posy) >= dif*dif)
+	{
+	  /* We are getting farther from our target... Let's try to go back 
+	   * to the previous position wich is obviously the nearest ever 
+	   * reached before gibing up.
+	   */
+	  sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
+	  inskey (dif < 0 ? DN_CSR : UP_CSR);
+	  sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 	  break;
+	}
       }
       dif = y - scr.posy;
     }
@@ -1238,19 +1247,19 @@ csrjmp_sub (int x, int y)
 	while (!(t = timeout_yet (CSRJMP_TIMEOUT)) &&
 	       scr.posx==curx && scr.posy == y);
 	if(t) break;
-	if(scr.posy != y || (x-scr.posx)*dif > dif*dif){
+	if(scr.posy != y || (x-scr.posx)*(x-scr.posx) >= dif*dif){
 	  delay(CSRJMP_SETTLE_DELAY);
 	  getstat_phys (&scr);
-	  if(scr.posy != y){
-	    /* We probably wrapped on a short line... Try to get back
-	     * on the correct line going backward before exiting.
+	  if(scr.posy != y || (x-scr.posx)*(x-scr.posx) >= dif*dif){
+	    /* We probably wrapped on a short line... or are getting farther 
+	     * from our target. Try to get back to the previous position which
+	     * is obviously the nearest ever reached before we exit.
 	     */
 	    sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
 	    inskey (dif > 0 ? LT_CSR : RT_CSR);
 	    sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 	    break;
 	  }
-	  if((x-scr.posx)*dif > dif*dif) break;
 	}
 	dif = x - scr.posx;
       }

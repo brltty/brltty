@@ -100,17 +100,16 @@ void brl_debug(char * print_buffer)
   fflush(dbg);
 }
 
-brldim initbrlerror(brldim res)
+void initbrlerror(brldim *brl)
 {
   printf("\nInitbrl: failure at open\n");
-  if (res.disp)
-    free (res.disp);
-  res.x = -1;
-  return res;
+  if (brl->disp)
+    free (brl->disp);
+  brl->x = -1;
 }
 
 
-brldim initbrl (const char *dev)
+void initbrl (brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -125,8 +124,8 @@ brldim initbrl (const char *dev)
 
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
-    res = initbrlerror(res);
-    return res;
+    initbrlerror(brl);
+    return;
   }
 
   tcgetattr (brl_fd, &oldtio);	/* save current settings */
@@ -146,11 +145,12 @@ brldim initbrl (const char *dev)
   /* Allocate space for buffers */
   res.disp = (unsigned char *) malloc (res.x * res.y);
   if (!res.disp)
-    res = initbrlerror(res);
+    initbrlerror(&res);
 
   init_table();
 
-  return res;
+  *brl = res;
+  return;
 }
 
 void

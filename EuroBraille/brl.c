@@ -187,8 +187,7 @@ identbrl (const char *dev)
 }
 
 
-brldim
-initbrl (const char *dev)
+void initbrl (brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -245,7 +244,8 @@ initbrl (const char *dev)
 
   ReWrite = 1;			/* To write whole display at first time */
 
-  return res;
+  *brl = res;
+  return;
 
 failure:;
   if (res.disp)
@@ -254,8 +254,8 @@ failure:;
     free (rawdata);
   if (prevdata)
     free (prevdata);
-  res.x = -1;
-  return res;
+  brl->x = -1;
+  return;
 }
 
 

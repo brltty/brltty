@@ -405,8 +405,7 @@ ResetTypematic (void)
 }
 
 
-brldim
-initbrl (const char *tty)
+void initbrl (brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
   int i=0;
@@ -607,12 +606,13 @@ initbrl (const char *tty)
   /* Force rewrite of display on first writebrl */
   memset(prevdata, 0xFF, ncells);
 
-  return res;
+  *brl = res;
+  return;
 
 failure:;
   closebrl(res);
-  res.x = -1;
-  return res;
+  brl->x = -1;
+  return;
 }
 
 

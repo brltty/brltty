@@ -59,8 +59,7 @@ identbrl (const char *brldev)
 }
 
 
-brldim
-initbrl (const char *brldev)
+void initbrl (brldim *brl, const char *brldev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -136,8 +135,8 @@ initbrl (const char *brldev)
 
   res.x = BRLCOLS (id);		/* initialise size of display */
   res.y = BRLROWS;
-  if (res.x == -1)
-    return res;
+  if ((brl->x = res.x) == -1)
+    return;
 
   /* Allocate space for buffers */
   res.disp = (unsigned char *) malloc (res.x * res.y);
@@ -154,7 +153,8 @@ initbrl (const char *brldev)
     for (i = 0; i < 8; i++)
       if (n & 1 << standard[i])
 	combitrans[n] |= 1 << Tieman[i];
-  return res;
+  *brl = res;
+  return;
 
 failure:;
   if (res.disp)
@@ -165,8 +165,8 @@ failure:;
     free (rawdata);
   if (brl_fd >= 0)
     close (brl_fd);
-  res.x = -1;
-  return res;
+  brl->x = -1;
+  return;
 }
 
 
