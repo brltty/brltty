@@ -32,6 +32,6 @@ braille.$O:
 	$(CC) $(BRL_CFLAGS) $(KDRIVER) -c $(SRC_DIR)/braille.c
 
 #Let's not rebuild the help unless the user wants to as it requires python.
-remakehelp: mkhlp $(SRC_DIR)/hlptrans.py $(SRC_DIR)/braille.c $(SRC_DIR)/help.template
+remakehelp: mkhlp $(SRC_DIR)/trhlp $(SRC_DIR)/braille.c $(SRC_DIR)/help.template
 	chmod u+x mkhlp
 	./mkhlp

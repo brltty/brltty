@@ -24,30 +24,30 @@ A/D: Go backward/forward one window
 B/C: Go up/down one line
 A+ B/C: Go to top-left/bottom-left corner
 D+ B/C: Go to top/bottom line
-RL: Go back to previous reading location (undo cursor tracking motion).
+RL: Go back (undo unexpected cursor tracking motion)
 RR: Go to cursor
 RL+RR: Cursor tracking (toggle)
 UP/DOWN: Move cursor up/down (arrow keys)
 
 Modes and Functions
-RR+UP: Show position and status info (toggle)
 Chord-125: Help screen (toggle)
 Chord-123: Learn mode (toggle)
 Chord-234: Status line (toggle)
 Chord-12345678: Preferences menu (toggle)
 RL+UP: Show attributes (toggle)
-RL+DOWN: Six dots mode (toggle)
-RR+DOWN: Freeze screen (toggle)
+RL+DOWN: Six dots (toggle)
+RR+UP: Freeze screen (toggle)
 
 Cursor Routing
 CRt#: Route cursor to cell
+RR+DOWN: Route cursor to current line
 
 Cut and Paste
 CRt#+D: Mark beginning of region to cut
 CRt#+D+C: Mark beginning of cut region for append
 CRt#+A: Mark bottom-right of rectangular region and cut
 CRt#+A+B: Mark end of linear region and cut
-CRtx + CRt(x+2) + CRty: Cut text from x to y
+CRtx + CRt(x+2) + CRty: Cut text from x through y
 Chord-1234: Paste cut text
 
 Fancy Navigation
@@ -55,8 +55,8 @@ RL+ A/D: Go to beginning/end of line
 RR+ A/D: Go left/right one character
 UP+ A/D: Go to previous/next non-blank window
 DOWN+ A/D: Search screen backward/forward for cut text
-RL+ B/C: Go to previous/next line with different attributes
-RR+ B/C: Go to previous/next different line
+RL+ B/C: Go to previous/next line with different highlighting
+RR+ B/C: Go to previous/next line with different content
 UP+ B/C: Go to previous/next paragraph (blank line separation)
 DOWN+ B/C: Go to previous/next prompt (same prompt as current line)
 CRa#+RL: Remember current position as mark #
@@ -81,8 +81,8 @@ Chord-7: Left arrow
 Chord-8: Right arrow
 
 Virtual Console Selection
-CRa#+UP: Switch to virtual console #
-CRa1+CRa2+ RL/RR: Switch to previous/next virtual console
+UP+CRa#: Switch to virtual console #
+UP+ CRa43/CRa44: Switch to previous/next virtual console
 
 Status Key Shortcuts
 CRs1: Help screen (toggle)

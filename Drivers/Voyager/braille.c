@@ -618,10 +618,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 "Go to top/bottom line");
 	  HKEY2(501, K_RL|K_B, K_RL|K_C,
                 CMD_ATTRUP, CMD_ATTRDN,
-		"Go to previous/next line with different attributes");
+		"Go to previous/next line with different highlighting");
 	  HKEY2(501, K_RR|K_B, K_RR|K_C,
                 CMD_PRDIFLN, CMD_NXDIFLN,
-                "Go to previous/next different line");
+                "Go to previous/next line with different content");
 	  HKEY2(501, K_UP|K_B, K_UP|K_C,
                 CMD_PRPGRPH, CMD_NXPGRPH,
                 "Go to previous/next paragraph (blank line separation)");
@@ -630,8 +630,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 "Go to previous/next prompt (same prompt as current line)");
 
 	  HKEY(101, K_RL, CMD_BACK, 
-               "Go back to previous reading location"
-               " (undo cursor tracking motion).");
+               "Go back (undo unexpected cursor tracking motion)");
 	  HKEY(101, K_RR, CMD_HOME, "Go to cursor");
 	  HKEY(101, K_RL|K_RR, CMD_CSRTRK, "Cursor tracking (toggle)");
 
@@ -640,10 +639,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 VAL_PASSKEY + VPK_CURSOR_DOWN,
                 "Move cursor up/down (arrow keys)");
 	  HKEY(210, K_RL|K_UP, CMD_DISPMD, "Show attributes (toggle)");
-	  HKEY(210, K_RL|K_DOWN, CMD_SIXDOTS, "Six dots mode (toggle)");
-	  HKEY(201, K_RR|K_UP, CMD_INFO,
-	       "Show position and status info (toggle)");
-	  HKEY(210, K_RR|K_DOWN, CMD_FREEZE, "Freeze screen (toggle)");
+	  HKEY(210, K_RL|K_DOWN, CMD_SIXDOTS, "Six dots (toggle)");
+	  HKEY(210, K_RR|K_UP, CMD_FREEZE, "Freeze screen (toggle)");
+	  HKEY(302, K_RR|K_DOWN, CMD_CSRJMP_VERT,
+	       "Route cursor to current line");
 
 	  HLP(601, "A+D", "Input mode (toggle)")
           case K_A|K_D:
@@ -704,7 +703,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     } else if (howmanykeys == 3 &&
                IS_TEXT_KEYS(rtk_which[0], rtk_which[2]) &&
                rtk_which[0]+2 == rtk_which[1]) {
-      HLP(405, "CRtx + CRt(x+2) + CRty", "Cut text from x to y")
+      HLP(405, "CRtx + CRt(x+2) + CRty", "Cut text from x through y")
       cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
       pending_cmd = CR_CUTRECT + rtk_which[2] - textOffset;
     }
@@ -717,21 +716,25 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
      */
     if (howmanykeys == 1) {
       switch (keystate) {
-        PHKEY(691, "CRa#", K_UP,
-              CR_SWITCHVT + rtk_which[0],
-              "Switch to virtual console #");
+        case K_UP:
+          HLP(692, "UP+ CRa<CELLS-1>/CRa<CELLS>",
+              "Switch to previous/next virtual console")
+          if (rtk_which[0] == totalCells-1) {
+            cmd = CMD_SWITCHVT_NEXT;
+          } else if (rtk_which[0] == totalCells-2) {
+            cmd = CMD_SWITCHVT_PREV;
+          } else {
+            HLP(691, "UP+CRa#", "Switch to virtual console #")
+            cmd = CR_SWITCHVT + rtk_which[0];
+          }
+          break;
+
         PHKEY(501,"CRa#", K_RL,
               CR_SETMARK + rtk_which[0],
               "Remember current position as mark #");
         PHKEY(501,"CRa#", K_RR,
               CR_GOTOMARK + rtk_which[0],
               "Go to mark #");
-      }
-    } else if (howmanykeys == 2 && rtk_which[0] == 0 && rtk_which[1] == 1) {
-      switch (keystate) {
-        PHKEY2(692, "CRa1+CRa2", K_RL, K_RR,
-               CMD_SWITCHVT_PREV, CMD_SWITCHVT_NEXT,
-               "Switch to previous/next virtual console");
       }
     }
   } else if (howmanykeys == 1 && IS_TEXT_KEY(rtk_which[0])) {
