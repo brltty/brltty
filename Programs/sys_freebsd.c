@@ -38,27 +38,8 @@ getBootParameters (void) {
   return NULL;
 }
 
-void *
-loadSharedObject (const char *path) {
-  void *object = dlopen(path, RTLD_NOW|RTLD_GLOBAL);
-  if (object) return object;
-  LogPrint(LOG_ERR, "%s", dlerror());
-  return NULL;
-}
-
-void 
-unloadSharedObject (void *object) {
-  dlclose(object);
-}
-
-int 
-findSharedSymbol (void *object, const char *symbol, const void **address) {
-  const char *error;
-  *address = dlsym(object, symbol);
-  if (!(error = dlerror())) return 1;
-  LogPrint(LOG_ERR, "%s", error);
-  return 0;
-}
+#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
+#include "sys_shlib_dlfcn.h"
 
 #define BEEP_DIVIDEND 1193180
 

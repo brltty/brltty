@@ -41,37 +41,13 @@ getBootParameters (void) {
   return NULL;
 }
 
-void *
-loadSharedObject (const char *path) {
-#ifdef HAVE_FUNC_DLOPEN 
-  void *object = dlopen(path, DL_LAZY);
-  if (object) return object;
-  LogPrint(LOG_ERR, "%s", dlerror());
-#endif /* HAVE_FUNC_DLOPEN */
-  return NULL;
-}
-
-void 
-unloadSharedObject (void *object) {
-#ifdef HAVE_FUNC_DLOPEN 
-  dlclose(object);
-#endif /* HAVE_FUNC_DLOPEN */
-}
-
-int 
-findSharedSymbol (void *object, const char *symbol, const void **address) {
-#ifdef HAVE_FUNC_DLOPEN 
-  const char *error;
-  *address = dlsym(object, symbol);
-  if (!(error = dlerror())) return 1;
-  LogPrint(LOG_ERR, "%s", error);
-#endif /* HAVE_FUNC_DLOPEN */
-  return 0;
-}
+#define SHARED_OBJECT_LOAD_FLAGS (DL_LAZY)
+#include "sys_shlib_dlfcn.h"
 
 int
 canBeep (void) {
-  return 1;
+  if (getConsole() != -1) return 1;
+  return 0;
 }
 
 int
