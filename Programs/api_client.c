@@ -518,32 +518,34 @@ int brlapi_writeText(int cursor, const unsigned char *str)
   int dispSize = brlx * brly;
   uint32_t min, i;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  extWriteStruct *ews = (extWriteStruct *) packet;
-  unsigned char *p = &ews->data;
+  writeStruct *ws = (writeStruct *) packet;
+  unsigned char *p = &ws->data;
   int res;
   if ((dispSize == 0) || (dispSize > BRLAPI_MAXPACKETSIZE/4)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
+  ws->flags = 0;
   if (str==NULL) {
-    if (cursor==-1) return brlapi_extWriteBrl(NULL);
+    if (cursor==-1) goto send;
   } else {
-    ews->flags = BRLAPI_EWF_TEXT;
+    ws->flags |= BRLAPI_WF_TEXT;
     min = MIN( strlen(str), dispSize);
     strncpy(p,str,min);
     p += min;
     for (i = min; i<dispSize; i++,p++) *p = ' ';
   }
   if ((cursor>=0) && (cursor<=dispSize)) {
-    ews->flags |= BRLAPI_EWF_CURSOR;
+    ws->flags |= BRLAPI_WF_CURSOR;
     *((uint32_t *) p) = htonl(cursor);
     p += sizeof(cursor);
   } else {
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
+  send:
   pthread_mutex_lock(&brlapi_fd_mutex);
-  res=brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
+  res=brlapi_writePacket(fd,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
   pthread_mutex_unlock(&brlapi_fd_mutex);
   return res;
 }
@@ -554,50 +556,51 @@ int brlapi_writeDots(const unsigned char *dots)
 {
   int res;
   uint32_t size = brlx * brly;
-  brlapi_extWriteStruct ews;
+  brlapi_writeStruct ws;
   if (size == 0) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
-  ews.displayNumber = -1;
-  ews.regionBegin = 0; ews.regionEnd = 0;
-  ews.text = malloc(size);
-  if (ews.text==NULL) {
+  ws.displayNumber = -1;
+  ws.regionBegin = 0; ws.regionEnd = 0;
+  ws.text = malloc(size);
+  if (ws.text==NULL) {
     brlapi_errno = BRLERR_NOMEM;
     return -1;
   }
-  ews.attrOr = malloc(size);
-  if (ews.attrOr==NULL) {
-    free(ews.text);
+  ws.attrOr = malloc(size);
+  if (ws.attrOr==NULL) {
+    free(ws.text);
     brlapi_errno = BRLERR_NOMEM;
     return -1;
   }
-  memset(ews.text, 0, size);
-  memcpy(ews.attrOr, dots, size);
-  ews.attrAnd = NULL;
-  ews.cursor = 0;
-  res = brlapi_extWriteBrl(&ews);
-  free(ews.text);
-  free(ews.attrOr);
+  memset(ws.text, 0, size);
+  memcpy(ws.attrOr, dots, size);
+  ws.attrAnd = NULL;
+  ws.cursor = 0;
+  res = brlapi_write(&ws);
+  free(ws.text);
+  free(ws.attrOr);
   return res;
 }
 
-/* Function : brlapi_extWrite */
+/* Function : brlapi_write */
 /* Extended writes on braille displays */
-int brlapi_extWriteBrl(const brlapi_extWriteStruct *s)
+int brlapi_write(const brlapi_writeStruct *s)
 {
   int dispSize = brlx * brly;
   uint32_t rbeg, rend, strLen;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  extWriteStruct *ews = (extWriteStruct *) packet;
-  unsigned char *p = &ews->data;
+  writeStruct *ws = (writeStruct *) packet;
+  unsigned char *p = &ws->data;
   int res;
-  ews->flags = 0;
+  ws->flags = 0;
+  if (s==NULL) goto send;
   if (s==NULL) goto send;
   if ((1<=s->regionBegin) && (s->regionBegin<=dispSize) && (1<=s->regionEnd) && (s->regionEnd<=dispSize)) {
     if (s->regionBegin>s->regionEnd) return 0;
     rbeg = s->regionBegin; rend = s->regionEnd;
-    ews->flags |= BRLAPI_EWF_REGION;
+    ws->flags |= BRLAPI_WF_REGION;
     *((uint32_t *) p) = htonl(rbeg); p += sizeof(uint32_t);
     *((uint32_t *) p) = htonl(rend); p += sizeof(uint32_t);
   } else {
@@ -605,28 +608,28 @@ int brlapi_extWriteBrl(const brlapi_extWriteStruct *s)
   }
   strLen = (rend-rbeg) + 1;
   if (s->text) {
-    ews->flags |= BRLAPI_EWF_TEXT;
+    ws->flags |= BRLAPI_WF_TEXT;
     memcpy(p, s->text, strLen);
     p += strLen;
   }
   if (s->attrAnd) {
-    ews->flags |= BRLAPI_EWF_ATTR_AND;
+    ws->flags |= BRLAPI_WF_ATTR_AND;
     memcpy(p, s->attrAnd, strLen);
     p += strLen;
   }
   if (s->attrOr) {
-    ews->flags |= BRLAPI_EWF_ATTR_OR;
+    ws->flags |= BRLAPI_WF_ATTR_OR;
     memcpy(p, s->attrOr, strLen);
     p += strLen;
   }
   if ((s->cursor>=0) && (s->cursor<=dispSize)) {
-    ews->flags |= BRLAPI_EWF_CURSOR;
+    ws->flags |= BRLAPI_WF_CURSOR;
     *((uint32_t *) p) = htonl(s->cursor);
     p += sizeof(uint32_t);
   }
   send:
   pthread_mutex_lock(&brlapi_fd_mutex);
-  res = brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
+  res = brlapi_writePacket(fd,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
   pthread_mutex_unlock(&brlapi_fd_mutex);
   return res;
 }

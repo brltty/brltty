@@ -63,8 +63,7 @@ extern "C" {
 #define BRLPACKET_IGNOREKEYSET      'M'    /**< Mask key-set                */
 #define BRLPACKET_UNIGNOREKEYRANGE  'u'    /**< Unmask key range            */
 #define BRLPACKET_UNIGNOREKEYSET    'U'    /**< Unmask key set              */
-#define BRLPACKET_STATWRITE         'S'    /**< Write Status Cells          */
-#define BRLPACKET_EXTWRITE          'w'    /**< Extended Write              */
+#define BRLPACKET_WRITE             'w'    /**< Write                       */
 #define BRLPACKET_GETRAW            '*'    /**< Enter in raw mode           */
 #define BRLPACKET_LEAVERAW          '#'    /**< Leave raw mode              */
 #define BRLPACKET_PACKET            'p'    /**< Raw packets                 */
@@ -88,19 +87,19 @@ typedef struct {
   unsigned char packet;
 } errorPacket_t;
 
-/** Flags for extended write */
-#define BRLAPI_EWF_DISPLAYNUMBER 0X01   /**< Display number                 */
-#define BRLAPI_EWF_REGION        0X02   /**< Region parameter               */
-#define BRLAPI_EWF_TEXT          0X04   /**< Contains some text             */
-#define BRLAPI_EWF_ATTR_AND      0X08   /**< And attributes                 */
-#define BRLAPI_EWF_ATTR_OR       0X10   /**< Or attributes                  */
-#define BRLAPI_EWF_CURSOR        0X20   /**< Cursor position                */
+/** Flags for writing */
+#define BRLAPI_WF_DISPLAYNUMBER 0X01    /**< Display number                 */
+#define BRLAPI_WF_REGION        0X02    /**< Region parameter               */
+#define BRLAPI_WF_TEXT          0X04    /**< Contains some text             */
+#define BRLAPI_WF_ATTR_AND      0X08    /**< And attributes                 */
+#define BRLAPI_WF_ATTR_OR       0X10    /**< Or attributes                  */
+#define BRLAPI_WF_CURSOR        0X20    /**< Cursor position                */
 
 /** Structure of extended write packets */
 typedef struct {
   uint32_t flags; /** Flags to tell which fields are present */
   unsigned char data; /** Fields in the same order as flag weight */
-} extWriteStruct;
+} writeStruct;
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server

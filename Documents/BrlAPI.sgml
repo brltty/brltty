@@ -1053,7 +1053,7 @@ display and keypresses. For this, it can send either of these types of packet:
   <item><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
   <tt/BRLPACKET_IGNOREKEYSET/, <tt/BRLPACKET_UNIGNOREKEYSET/ to mask and unmask
   keys,
-  <item><tt/BRLPACKET_EXTWRITE/ to display text on this tty,
+  <item><tt/BRLPACKET_WRITE/ to display text on this tty,
   <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
   <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
   or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
@@ -1180,11 +1180,11 @@ For ranges, Data are 2 integers: the lower and the
 upper boundaries; lower and upper must be equal to tell one key, for instance.
 For Sets, Data simply consists of integers, one per key in the set.
 
-<sect2><tt/BRLPACKET_EXTWRITE/ (see <em/brlapi_extWriteBrl()/)
+<sect2><tt/BRLPACKET_WRITE/ (see <em/brlapi_write()/)
 <p>
 To display text on the braille terminal and set the position of the cursor,
-the client can send a <tt/BRLPACKET_EXTWRITE/ packet. This packet first
-holds an integer holding flags (see <tt/BRLAPI_EWF_*/). These flags indicate
+the client can send a <tt/BRLPACKET_WRITE/ packet. This packet first
+holds an integer holding flags (see <tt/BRLAPI_WF_*/). These flags indicate
 which data will then be available, in the following order (corresponding to
 flag weight):
 
