@@ -1,6 +1,42 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+August 21, 2004:
+ - BRLTTY 3.6pre2 released:
+   Default PCM and/or MIDI support on Linux to ALSA if that seems to make sense.
+   Add the -p [--pcm-device=] and the -m [--midi-device=] options.
+   splitString() can now optionally return the count.
+   Move the serial parity/flow constants to a common place (iodefs.h).
+   Move low-level I/O routines from misc.[ch] to iomisc.[ch].
+   Convert serial devices from file descriptors (ints) to an opaque type.
+   drainBrailleOutput() should allow for the driver to have rounded down.
+   Wait for all output to the braille display to be drained before closing the driver.
+   Replace the Display= and Term= parameters of the XWindow driver with XtParms=.
+   EuroBraille driver fix for entering/leaving PC mode.
+   HandyTech driver changes:
+      Simplify the bluetooth read routine.
+      Add the InputMode= parameter.
+   General driver changes:
+      Clean up include lsits.
+      Give standardized names to external symbols.
+   Autodetection changes:
+      Change the short form of the --version option to -V.
+      Change the -v option to --verify.
+      -b and -s both accept a comma-delimited list of drivers.
+      -s accepts "auto".
+      Only autodetect if more than one driver or device is specified.
+      Restarting a braille/speech driver re-autodetects.
+      Don't enable flow control until after successfully detecting the display.
+      Improve the order of the logs.
+      Remove the "driver giving up" warnings.
+   MIDI ALSA changes:
+      Ensure that "Midi" occurs in every routine name.
+      Simplify duration scheduling.
+      Support pauses between notes.
+   API changes:
+      Move the multiple settings of the root tty into setCurrentRootTty().
+      Fix problems which occur when the null screen driver is being used.
+
 August 12, 2004:
  - BRLTTY 3.6pre1 released:
    Clarify the copyright statement in the top-level README.
