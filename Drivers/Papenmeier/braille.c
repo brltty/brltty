@@ -1021,13 +1021,11 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
             unsigned char new = packet.data.bytes[byte];
 
             if (new != old) {
-              int index = byte * 8;
+              InputMapping2 *mapping = &inputMap2[byte * 8];
               unsigned char bit = 0X01;
 
               while (bit) {
                 if (!(new & bit) && (old & bit)) {
-                  InputMapping2 *mapping = &inputMap2[index];
-
                   if (mapping->code != NOKEY) {
                     int cmd = handleKey(mapping->code, 0, mapping->offset);
                     if (!release) {
@@ -1039,7 +1037,7 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
                   if ((inputState2[byte] &= ~bit) == new) break;
                 }
 
-                index++;
+                mapping++;
                 bit <<= 1;
               }
             }
@@ -1054,13 +1052,11 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
           unsigned char new = packet.data.bytes[byte];
 
           if (new != old) {
-            int index = byte * 8;
+            InputMapping2 *mapping = &inputMap2[byte * 8];
             unsigned char bit = 0X01;
 
             while (bit) {
               if ((new & bit) && !(old & bit)) {
-                InputMapping2 *mapping = &inputMap2[index];
-
                 if (mapping->code != NOKEY) {
                   command = handleKey(mapping->code, 1, mapping->offset);
                 }
@@ -1068,7 +1064,7 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
                 if ((inputState2[byte] |= bit) == new) break;
               }
 
-              index++;
+              mapping++;
               bit <<= 1;
             }
           }
