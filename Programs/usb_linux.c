@@ -227,7 +227,7 @@ usbControlTransfer (
   }
 }
 
-int
+static int
 usbBulkTransfer (
   UsbDevice *device,
   unsigned char endpoint,
@@ -247,6 +247,28 @@ usbBulkTransfer (
     if (count == -1) LogError("USB bulk transfer");
     return count;
   }
+}
+
+int
+usbBulkRead (
+  UsbDevice *device,
+  unsigned char endpoint,
+  void *data,
+  int length,
+  int timeout
+) {
+  return usbBulkTransfer(device, endpoint|USB_DIRECTION_INPUT, data, length, timeout);
+}
+
+int
+usbBulkWrite (
+  UsbDevice *device,
+  unsigned char endpoint,
+  const void *data,
+  int length,
+  int timeout
+) {
+  return usbBulkTransfer(device, endpoint|USB_DIRECTION_OUTPUT, (unsigned char *)data, length, timeout);
 }
 
 void *

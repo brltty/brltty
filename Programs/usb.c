@@ -115,28 +115,6 @@ usbLogString (
   }
 }
 
-int
-usbBulkRead (
-  UsbDevice *device,
-  unsigned char endpoint,
-  void *data,
-  int length,
-  int timeout
-) {
-  return usbBulkTransfer(device, endpoint|USB_DIRECTION_INPUT, data, length, timeout);
-}
-
-int
-usbBulkWrite (
-  UsbDevice *device,
-  unsigned char endpoint,
-  const void *data,
-  int length,
-  int timeout
-) {
-  return usbBulkTransfer(device, endpoint|USB_DIRECTION_OUTPUT, (unsigned char *)data, length, timeout);
-}
-
 static struct UsbInputElement *
 usbAddInputElement (
   UsbDevice *device

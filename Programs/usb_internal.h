@@ -53,14 +53,6 @@ extern int usbReadDeviceDescriptor (
   UsbDevice *device
 );
 
-extern int usbBulkTransfer (
-  UsbDevice *device,
-  unsigned char endpoint,
-  void *data,
-  int length,
-  int timeout
-);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
