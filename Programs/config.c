@@ -1089,7 +1089,7 @@ updatePreferences (void) {
       }
 
       /* Then draw the braille window */
-      writeBrailleText(&brl, &line[lineIndent], lineLength-lineIndent);
+      writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent));
       drainBrailleOutput(&brl, refreshInterval);
 
       /* Now process any user interaction */
