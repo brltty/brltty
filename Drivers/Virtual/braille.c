@@ -226,11 +226,7 @@ requestConnection (
 
 static int
 setReuseAddress (int socket) {
-#ifdef __MINGW32__
-  char yes = 1;
-#else /* __MINGW32__ */
   int yes = 1;
-#endif /* __MINGW32__ */
 
   if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) != -1) {
     return 1;

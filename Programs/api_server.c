@@ -811,12 +811,7 @@ static int initializeTcpSocket(char *hostname, char *port)
 {
   int fd=-1;
   const char *fun;
-
-#ifdef __MINGW32__
-  char yes=1;
-#else /* __MINGW32__ */
   int yes=1;
-#endif /* __MINGW32__ */
 
 #ifdef HAVE_GETADDRINFO
 
