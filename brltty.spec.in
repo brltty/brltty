@@ -170,383 +170,175 @@ new="${file}.rpmnew"
 )
 
 %changelog
-* Mon Jun 12 2004 Dave Mielke <dave@mielke.cc> 3.5-1
-+  BRLTTY 3.5 released:
--  Don't include the Mikropuhe speech driver in the RPM. (dm)
--  Fix up the lists of supported Papenmeier models. (dm)
--  Update brltty's LSM (Linux Software Map) for 3.5. (dm)
--  Documentation updates: (dm)
-      Move the last section ("Epilogue") to the beginning (as "Formalities").
-      Letter (rather than number) the appendices.
-      Convert some descriptive lists into tables.
-      Add some more alert tune events.
-      Describe the Braille Firmness feature.
-      Remove the mention of USB from the Voyager driver.
-      Routing keys now function as a scroll bar for numeric preferences.
--  Document the speech FIFO: (dm)
-      -F (--speech-fifo=) command line option
-      speech-fifo configuration file directive
-      BRLTTY_SPEECH_FIFO environment variable
--  Document the fact that identification by USB serial number may not work. (dm)
--  Restore the default status cell style for the HandyTech driver to "Alva". (dm)
--  Bring the change log up-to-date (3.4.1 to 3.5). (dm)
--  Only refer to libpthread if necessary. (dm)
-+  BRLTTY 3.5pre4 released:
--  Increase the Voyager driver's STALL_TRIES setting from 3 to 7. (sd)
--  Split usbControlTransfer() into usbControlRead() and usbControlWrite(). (dm)
--  Add retry logic to the Voyager driver's call to usbBeginInput(). (dm)
--  The USB serial adapter handlers should return a boolean success value. (ml,dm)
--  gcc 3.3 reports "-lgcc_s not found" when linking statically. (dm)
--  Remove the BrailleLite driver's detection loop since the core now loops. (dm)
--  Disabling speech support breaks the compile. (ml)
--  Log the USB language. (dm)
--  Move the USB device open algorithm into the core. (dm)
--  Introcuce USB_IS_PRODUCT(). (ml,dm)
--  Remove unreachable code. (ml)
--  Repack the Freedom Scientific model entry structure. (ml)
--  Improve the way the null braille and speech drivers work. (dm)
--  Fix a pointer error. (st).
--  Most of the previous/next setting code is common. (dm)
--  Fix the comments for and adjust the names of the fields of the MenuItem structure. (dm)
--  Change the routing keys in the preferences menu from a set of descrete values to a scroll bar. (dm,np)
--  Fix a buffer overflow problem in updatePreferences(). (np,dm)
--  Building the BrlAPI reference manual fails when not building in the source tree. (ml)
--  Add the firmness handler to the Alva driver for the Satellite displays. (dm)
--  Prepare for reading USB input on systems which don't support URBs. (dm)
--  Get rid of the illegal type-punning warning. (dm)
--  Prepare the Papenmeier driver for protocol-specific handlers. (dm)
--  Support the HandyTech FTDI USB<->serial adapter. (ml)
--  Add a USB input packet filtering mechanism and use it for FTDI USB<->serial adapters. (dm)
--  Add the base for Papenmeier USB support. (ml,dm)
--  Parse contraction table input with unsignee chars. (dm)
--  Parse translation tables with unsigned chars. (dm)
--  Fix some problems with Solaris and HP-UX builds. (dm)
--  --with-screen-driver=no needs route.o. (dm)
--  Solaris and OpenBSD share the same PCM code. (dm)
--  Include sys_..._none.h files where appropriate. (dm)
--  Solaris requires -lsocket. (dm)
--  Linux, Solaris, OpenBSD, and FreeBSD all use <dlfcn.h>. (dm)
--  Linux and FreeBSD use the same PCM code. (dm)
--  Make BRLTTY buildable on FreeBSD. (dm)
--  Rename usbBulk(Read|Write)() to usb(Read|Write)Endpoint(). (dm)
--  Add USB support for OpenBSD (incomplete). (dm)
--  The Mikropuhe driver's deallocateSpeechItem() routine needs the new data argument. (dm)
--  EuroBraille update: (yp)
-      More BrlAPI compliant.
-      Update logged version number.
--  Include <unistd.h> within each header file which uses size_t. (sd)
--  Use message() to report TSI low battery condition. (sd)
--  Use a queue to link the pending USB input requests. (dm)
--  Some more tidying up of the USB declarations. (dm)
--  HandyTech display identification via USB was unreliable on a fast machine. (dm)
--  Maintain endpoint-specific data. (dm)
--  The preferences menu crashes if the contraction tables directory is bad. (dm)
--  The "er" in "surgery" doesn't get contracted (en-us-g2). (jb)
--  brl_readPacket() and brl_writePacket() now use the size_t and ssize_t types. (st)
--  Correct the BrlAPI client run-time discovery of libpthread use. (st)
--  BrlAPI fixes: (ml)
-      Remove duplicate declarations already in pthread.h.
-      strndup() is a glibc specific GNU extension which isn't available on some platforms, e.g. OpenBSD.
-      "int vt" was declared outside the Linux specific block, causing a compiler warning about an unused variable.
--  brltty-install and brldefs.h didn't install correctly when not building in the source tree. (ml)
--  The Voyager driver should no longer be Linux-dependent. (ml)
--  Occasionally the rest of the line, rather than just the current word, becomes uncontracted. (dm)
--  Rearrange the public USB constants a bit. (dm)
--  Add the FTDI chip used by HandyTech. (ml)
--  Remove the reference to -lm. (dm)
--  Remove inclusion of <math.h>. (dm)
--  Change all doubles to floats. (np,dm)
--  Generate triangle (rather than sine) waves when playing tunes via the pcm. (np)
--  Implement the "Braille Firmness" preference. (dm)
--  Add "Braille Firmness" capability to the Voyager and FreedomScientific drivers. (dm)
--  Move usbBulk(Read|Write) out of the portable part of the USB core. (dm)
--  OpenBSD needs misc.c to include <sys/stat.yh>. (ml)
--  Ensure that all declarations are at the beginnings of their blocks. (ml)(
--  Remove double semicolons. (dm)
--  Add a "routing started" tune, change the "routing succeeded" tune. (sd)
--  Don't write the initial "application character map changed" log. (dm)
-+  BRLTTY 3.5pre3 released:
--  Rename the key/cell offset/address variables in the Papenmeier driver. (dm)
--  Remove adlib debug logs. (dm)
--  Updates to the Papenmeier initialization debug logs. (dm)
--  Voyager driver changes: (dm)
-      Remove failure on error for non-critical operations )the plus-box doesn't support them all).
-      Call usbControlTranfer() with proper constants.
--  Rearrange parameters to usbControlTransfer(). (dm)
--  Add the $X suffix to the executables in the Papenmeier make file: (dm)
--  Papenmeier configuration file processing changes: (dm)
-      Make parser errors more informative.
-      Add more error checking.
--  Add support for rescue images to rhmkiso. (dm)
--  Preferences menu binding changes: (dm)
-      The home/end keys are discard/exit.
-      The escape/return keys are exit/save.
-      The back command is previous setting.
--  Speed up the Papenmeier command resolution algorithm. (dm)
--  Papenmeier configuration file processing changes: (dm)
-      Remove command and modifier table size limits.
-      Allocate tables only as big as they need to be for each model.
-      Allow processing to continue when an error is encountered.
--  Improve the Papenmeier help descriptions. (dm)
--  Tidy up the Papenmeier configuration file parser declarations. (dm)
--  Fix descrepancies in the Papenmeier status key toggle commands. (dm)
--  Remove the padding of help page widths to multiples of 40. (dm)
--  Allow a help page to have more than 255 lines. (dm)
--  Papenmeier driver changes: (dm)
-      Remove the open retry loop.
-      Improve some configuration file error messagds.
-      Allow the key to be between or after the modifiers.
-      List the key after, rather than before, the modifiers.
-      Check for duplicate modifiers.
--  Report the use of a non-option argument when invoking brltty. (dm)
--  Log (debug) keys and commands in command learn mode. (dm)
--  Fix the learning of non-initial repeating commands. (dm)
--  Don't log Papenmeier non-modifier key releases. (dm)
--  Remove some double spaces within the Papenmeier configuration file. (dm)
--  Add a Papenmeier EL mode for the preferences menu. (dm)
--  Support the Papenmeier EL40 better as it has no right key. (dm)
--  Add the -a option to rhmkiso. (dm)
--  Change the rhmkiso image parameters into the -i and -o options. (dm)
--  Fix problems with HandyTech initialization after the loop was removed. (dm)
--  rhmkiso should look for the directory the same way isolinux does. (dm)
--  Add a README (README.RedHat.cd) for rhmkiso. (dm)
--  Rework the Papenmeier switch/key bindings. (dm)
--  Name the switches and keys correctly in the Papenmeier configuration file. (dm)
--  The short info display contains stray dots. (dm)
--  Remove the Televox driver. (np)
--  HandyTech driver changes: (dm)
-      Check for errors after awaitInput().
-      Only check for the display once when opening it.
--  awaitInput() should set EAGAIN on a timeout. (dm)
--  For BrlAPI: Remove the Vario driver's check that its internal buffer is being used. (mm)
--  Add forcePcmOutput() and awaitPcmOutput(). (dm)
--  Generate the dependencies before doing "make distclean". (dm)
--  Tidy up the Mikropuhe sample width setting code. (dm)
--  The Mikropuhe driver should close the sound device after a few seconds of inactivity. (dm)
--  The Mikropuhe mute function should stop the audio device immediately. (dm)
--  Mikropuhe driver enhancements: (dm)
-      Synthesize and speak in a separate thread.
-      Implement the mute function.
--  Core autorepeat support foiled leaving command learn mode for some displays. (dm)
--  Look for external packages in a few more places. (dm)
--  Rearrange code/declarations pertaining to command line options. (dm)
--  Add the speech pass-through FIFO. (np)
--  Don't call gettimeofday() if there's no rewrite interval. (np)
--  Use mallocWrapper() in the CombiBraille driver. (ml)
--  Fix the way in which the Alva driver calculates its rewrite interval. (dm)
--  Change the way the HandyTech driver detects timeouts. (dm)
--  Rewritten VisioBraille README. (sh)
--  Add the -t (built-in text table) option to rhmkiso. (np)
--  CMD_RETURN should behave just like CMD_HOME in the references menu. (np)
--  Add the displaysize= parameter to the VisioBraille driver. (sh)
--  big5 updates. (ck)
--  The English word "I" shouldn't have a letter sign in front of it. (dm)
--  Moved API authentication before any allocation or thread creation. (st)
--  Don't log an Alva display parameters packet as unexpected. (dm)
--  Set errno to EAGAIN if readChunk() times out. (dm)
--  Add usbAwaitInput(). (dm)
--  USB_DIR_(IN|OUT) have been renamed to USB_DIRECTION_(IN|OUT)PUT. (dm)
--  Make the settable ViaVoice rates and volumes more sensible. (dm)
--  Add serial adapter support to the USB core. (dm)
--  Allow --with-(text|attributes)-table= to take an absolute path. (dm)
--  Add USB support to the HandyTech driver. (ml)
--  Add the -s (start shell for inspection) option to rhmkiso. (dm)
--  Add rhmkiso command line argument parsing: (dm)
-      A parameter to specify the original (input) image.
-      A parameter to specify the modified (output) image.
-      An option to specify the braille driver(s).
-      An option to display command usage.
--  rhmkiso enhancements: (np)
-      Copy the entire file structure rather than just the isolinux directory.
-      Copy the volume and application identifiers.
-      Create the destination image with Joliet support.
-      Make it easier to configure a specific braille driver.
--  BrlAPI fixes: (stet
-      Some blanks removed.
-      brlapi_splitHost() now shared between server and client.
-      Server now defaults to listening on local interface only for security.
-      Read and write functions now return size_t.
-      Read and write functions now define brlapi_errno themselves on error.
-      brlapi_getTty() now returns the number of the tty it got.
--  Reverse the functions of the BrailleLite Millennium whiz wheels. (dm)
--  Rename mkrhiso to rhmkiso: (dm)
-      Use nofb rather than video=vc:13.
-      Strip the brltty executable before installing it.
-      Don't invoke the interactive shell.
--  Implement the FreedomScientific (fs) braille driver. (dm)
--  Allow the USB input transfer mode to be specified. (dm)
-+  BRLTTY 3.5pre2 released:
--  Bring device examples in brltty.conf template up-to-date. (dm)
--  Rework key bindings a bit for Alva 3nn and 4nn models. (np)
--  Add the RETURN command. (dm)
--  Add the prfword contraction table opcode. (dm)
--  BRLTTY Manual update: (np,dm)
-      Remove documentation for tbl2hex and txt2hlp.
-      Move "Contracted Braille" to its own top-level section.
-      Some minor corrections.
--  More fixes to fr-abrege.ctb. (np)
--  Fix the "er" contraction in the French table. (np)
--  Add a script (mkrhiso) to make a RedHat/Fedora boot CD. (dm)
--  Single character contraction table matches should be case insensitive. (dm)
--  Give the "always" contraction table opcode a lower priority for matching. (dm)
--  Allow a contracted braille match string to contain spaces. (dm)
--  Fix the dependencies for the host_... objects. (np)
--  Add entries for the French words a, à, and y. (np)
-+  BRLTTY 3.5pre1 released:
--  tbl2hex, tbltest and ctbtest should check for missing parameters. (np,dm)
--  Add text.brf.tbl. (np)
--  Fix the install-api-manpages make target to detect installation errors. (dm)
--  Add the fr-abrege contraction table. (np)
--  Add ctbtest. (dm)
--  Installing BRLTTY shouldn't require that BrlAPI's man pages be built. (dm)
--  Voyager driver enhancements: (sd)
-      Remove internal support for autorepeat and use the core's facility.
-      Add the brlinput= driver parameter.
--  Add the class, after and before contraction table opcodes. (dm)
--  Add the begmidword contraction table opcode. (dm)
--  Hard-code and logically group the contraction table opcode names. (dm)
--  Allow braille/speech driver parameters to be qualified with a driver identifier. (dm)
--  Add --with-(braille|speech|screen|api)-parameters=. (dm)
--  Add comment describing reason for selected dot-to-bit mapping. (np)
--  BrlAPI enhancements: (sh)
-      brlapi_getDriverId and brlapi_getDriverName now use snprintf().
-      Remove BRAPI_PACKETWRITE.
-      Rewrite brlapi_writeBrl() to use the new extended write packet.
-      Protocol version is now 2.
--  Enhance the description of the standard dot numbering convention. (dm)
--  Rename brlapi.h to api.h. (dm)
--  Document the --with-mikropuhe build option. (dm)
--  Correct the descriptions of the two supplied attributes translation tables. (dm)
--  Remove the documentation for tbl2tbl, tbl2txt, and txt2tbl. (dm)
--  BrlAPI enhancements: (sh)
-      Protocol:
-         Add protocol version to the authentication packet.
-         Add extra server-side verifications to recognize a packet containing a
-            valid authentication key but no protocol version (an old-style packet),
-            and to report an accurate error message in this situation.
-      api_server.c:
-         Lower-case first letter of function names to be closer to core's coding style.
-         Make all private fuoctions static.
--  VisioBraille driver enhancements: (sh)
-      Add support for typing upper-case c with cedilla and upper-case a with grave.
-      Key combinations of the form C-M-char can now be given from the braille keyboard.
-      Code clean-up and instruction reordering.
-      Add debug facilities for dealing with unknown PROMs.
--  Add tbltest. (dm)
--  BrlAPI enhancements: (sh)
-      Add more explanation to comments for fields of brlapi_extWriteStruct.
-      Check buffer size in brlapi_getDriverId() andbrlapi_getDriverName().
--  Add the fr-iso01 text translation table. (yp)
--  BrlAPI enhancements: (sh,st)
-      brlapi_extWrite() now takes only one argument (of type brlapi_exjWriteStruct).
-      BRLAPI_EXTWRITESTRUCT_INITIALIZER macro added (to initialize brlapi_extWriteStruct).
-      Fields in packet and corresponding bits in flags have been reordered.
-      Static variables inside client functions have been removed.
-      brlapi_writeDots() now accepts "unsigned char"s (rather than "char"s).
-      Return 0 and do nothing if region's begin exceeds its end.
-      Server refuses invalid cursor position.
--  EuroBraille driver version 1.3.2. (yp)
--  Add a description to the VisioBraille text translation table. (sh)
--  Add Finnish text translation tables. (tm,dm)
--  Remove personal text translation tables. (dm)
--  The text/attributes translation tables are now editable text rather than binary. (np,dm)
--  ViaVoice driver enhancements: (dm)
-      The speed= and volume= driver parameters are now handled by the preferences menu.
--  Add a skeleton setPcmAmplitudeFormat to the support for each non-Linux platform. (dm)
--  Add a table for uncontracted unified French braille. (np)
--  Introduce the user-space Voyager driver. (sd)
--  Map the Alva Satellite's tumbler keys. (dm)
--  Add the cursorDots() function. (sh,dm)
--  Add the extended write feature to BrlAPI. (sh)
--  Automatically turn off the Alva Satellite's PROG key simulation. (dm)
--  Add a routing succeeded tune. (sd)
--  Implement the Mikropuhe speech driver. (dm)
--  Normalize the tune names. (dm)
--  Fix the cursor routing timeout logic. (dm)
--  Play a tune when routing fails. (dm)
--  brlapi.h documentation enhancements: (sh)
-      Correct the example for brlapi_initializeConnection().
-      Illustrate the use of brlapi_strerror().
--  Tidy up the cursor routing code. (dm)
--  Clear all pending pids when a single SIGCHLD is received. (dm)
--  Modularize the status cell setting code. (dm)
--  Always recheck the VGA character count. (dm)
--  Fix ifdef placement errors for disabling speech support. (dm)
--  Don't install the API's man pages when API is disabled. (dm)
--  Configure's option summary output should be subject to the --quiet flag. (dm)
--  Include inttypes rather than stdint. (dm)
--  Add core-supported output overflow protection to Alva serial output. (dm)
--  Add support for the BrailleLite M20. (dm)
--  Increment BrlAPI's version number from 0.1.2 to 0.2.0. (dm)
--  Add -pipe to the gcc/g++ compile options. (dm)
--  BrlAPI fixes: (st)
-      Get rid of bindings, 4k freed from the library.
-      Remove brlapi_getControllingTty availability (getTty does it).
-      Add support for WINDOWID (for multiplexer when an application is running in an xterm).
-      "uint32_t" -> "int" for cursor (to allow -1 special value).
-      "unsigned char"s for writeBrlDots().
-      Add brlapi_strerror().
-      A small but important fix in brlapi_errno_location().
-      Rename BRLAPI_AUTHNAME to BRLAPI_AUTHPATH.
--  Document the BrailleNote key combination for command learn mode. (dm)
--  Add autorepeat to the Papenmeier driver. (dm)
--  Group the Papenmeier status keys more uniformly and conveniently. (dm)
--  Add the CMD_AUTOREPEAT command. (dm)
--  Don't include savePreferences if --disable-preferences-menu is specified. (dm)
--  When in learn mode write "lrn" to the status cells. (dm)
--  When in the preferences menu write "prf" rather than "prefs" to the status cells. (dm)
--  Enhance autospeak to respond to user input and cursor motion. (dm)
--  The mute functions of the FestivalLite and Theta drivers should wait till resources are freed. (dm)
--  Say speech rate/volume changes as they are made. (dm)
--  FestivalLite driver: replace wpm= with spk_rate(). (dm)
--  Theta driver: replace rate= with spk_rate(). (dm)
--  Add the Speech Volume preference. (dm)
--  Add the CMD_SAY_SOFTER and CMD_SAY_LOUDER commands. (dm)
--  Add spk_volume() to the Theta driver. (dm)
--  Fix key bindings for speech commands for PB80. (sd)
--  Add spk_rate() to the Festival driver. (dm)
--  Add the CMD_SAY_SLOWER and CMD_SAY_FASTER commands. (dm)
--  Add "Speech Rate" to the preferences menu. (dm)
--  BrlAPI fixes: (sh)
-      Add braces to clarify an ambiguous else clause.
-      Call the driver's reset() handler when raw mode is left improperly.
--  Correct the representation of 0XC7 (uppercase C with cedilla). (sh)
--  Remove the spurious #define of PREFSTYLE for the null braille driver. (dm)
--  brl_reset() should return a boolean. (dm)
--  EuroBraille driver version 1.3.2: (yp)
-      Remade brl_ReadPacket and brl_WritePacket to allow writting of low-level packets and error code retrieving.
-      Full Iris support.
-      Implement brl_reset.
--  Move the autorepeat settings from command line options to the preferences menu. (dm)
--  Convert blinking settings from update intervals to elapsed time. (dm)
--  Command learn mode shouldn't announce CMD_NOOP. (dm)
--  Centralize the knowledge of which commands can autorepeat. (dm)
--  Clean up the toggle code. (dm)
--  big5 enhancements (including Nemeth Codes). (ck)
--  The mode pointer in the virtual driver shouldn't be externally visible. (dm)
--  Log each command as soon as it's received from the driver. (dm)
--  Log unrecognized and truncated Alva input packets. (dm)
--  Ensure that all toggle descriptions are formatted correctly for learn mode. (dm)
--  Rename the "VAL_SWITCH..." constants to "VAL_TOGGLE_...". (dm)
--  Change the HandyTech driver to use the core's autorepeat facility. (dm)
--  Log the compilation date and time for each driver. (dm)
--  Change all drivers to recognize qualified devices (serial:, usb:, client:, server:). (dm)
--  BRLTTY command-line options changes: (dm)
-      Rename -R (--refresh-interval=) to -U (--update-interval=).
-      Add -R (--autorepeat-delay=).
-      Add -r (--autorepeat-interval=).
--  Change the Alva driver to use the core's autorepeat support. (dm)
--  Add autorepeat suport to the core. (dm)
--  Alvas automatically send an identification packet when DTR is ascerted. (dm)
--  Arbitrarily rewrite the Alva display whenever a configuration change occurs. (dm)
--  Log unexpected Alva input packets. (dm)
--  Alva Satellites can change dimensions on-the-fly. (dm)
--  Force the default choice when an invalid choice is made. (dm)
--  Reidentify an Alva display without restarting the driver. (dm)
--  Define front and top key bindings for the Alva Satellite models. (dm)
--  Define the alternate Alva routing and status keys. (dm)
--  Add USB support to the Alva driver. (dm)
--  Add USB support to the core. (dm)
--  Implement the Albatross driver. (dm)
--  Change the copyright end year from 2003 to 2004. (dm)
+* Sat Sep 4 2004 Dave Mielke <dave@mielke.cc> 3.6pre3
+-  Restarting drivers caused strange corruptions.
+-  Eliminate some compile warnings when many features are disabled.
+-  Make the entire options mechanism be wholly table driven.
+-  Specifying an invalid option yields a bogus excess parameter error.
+-  Automatically generate long options to set flags to 0.
+-  Abbreviation tests via strncasecmp() don't require an extra length check.
+-  findSharedSymbol() needs to accept the address of any kind of pointer.
+-  Go back to OSS being the default on Linux even if ALSA is available.
+-  Remove the link dependency on libasound from the PCM/MIDI ALSA code.
+-  Fix an Alva driver buffer indexing overflow.
+-  Prevent the ClioNoteBraille (EuroBraille driver) from reidentifying after each frame is sent.
+-  Add a HOWTO for reading Chinese big5.
+-  More Nemeth Code changes to the big5 contraction table.
+-  Move the preferences files from the data directory to the configuration directory to prevent loss.
+-  Implicitly disable autospeak during speech tracking.
+-  Protect serial port draining from system call interruptions.
+-  Initial changes to support QNX.
+* Sat Aug 21 2004 Dave Mielke <dave@mielke.cc> 3.6pre2
+-  Default PCM and/or MIDI support on Linux to ALSA if that seems to make sense.
+-  Add the -p [--pcm-device=] and the -m [--midi-device=] options.
+-  splitString() can now optionally return the count.
+-  Move the serial parity/flow constants to a common place (iodefs.h).
+-  Move low-level I/O routines from misc.[ch] to iomisc.[ch].
+-  Convert serial devices from file descriptors (ints) to an opaque type.
+-  drainBrailleOutput() should allow for the driver to have rounded down.
+-  Wait for all output to the braille display to be drained before closing the driver.
+-  Replace the Display= and Term= parameters of the XWindow driver with XtParms=.
+-  EuroBraille driver fix for entering/leaving PC mode.
+-  HandyTech driver changes:
+      Simplify the bluetooth read routine.
+      Add the InputMode= parameter.
+-  General driver changes:
+      Clean up include lsits.
+      Give standardized names to external symbols.
+-  Autodetection changes:
+      Change the short form of the --version option to -V.
+      Change the -v option to --verify.
+      -b and -s both accept a comma-delimited list of drivers.
+      -s accepts "auto".
+      Only autodetect if more than one driver or device is specified.
+      Restarting a braille/speech driver re-autodetects.
+      Don't enable flow control until after successfully detecting the display.
+      Improve the order of the logs.
+      Remove the "driver giving up" warnings.
+-  MIDI ALSA changes:
+      Ensure that "Midi" occurs in every routine name.
+      Simplify duration scheduling.
+      Support pauses between notes.
+-  API changes:
+      Move the multiple settings of the root tty into setCurrentRootTty().
+      Fix problems which occur when the null screen driver is being used.
+* Thu Aug 12 2004 Dave Mielke <dave@mielke.cc> 3.6pre1
+-  Clarify the copyright statement in the top-level README.
+-  Reorganize the startup logs.
+-  Add support for braille display autodetection (-b auto).
+-  Allow more than one braille device to be specified.
+-  Access the driver directly if the API fails to start.
+-  Convert PCM and MIDI devices from file descriptors into opaque types.
+-  Add ALSa support for PCM and MIDI devices.
+-  Introduce common serial device access routines.
+-  A va_list (stdarg) must be reset before being reused on some platforms.
+-  Use the type ScreenKey rather than unsigned short for screen key insertion.
+-  Fix the handling of control characters when using scan codes.
+-  Move the handling of meta character input entirely into the screen driver.
+-  Implement Linux-specific AT2 support.
+-  Failure to load the specified text table results in an uninitialized reverse text table.
+-  Add an initial timeout parameter to readChunk().
+-  Implement changeOpenFlags(), setOpenFlags(), and setBlockingIo().
+-  Convert learn mode to use a better timeout mechanism.
+-  Split describeCommand() out of learnMode().
+-  The vertical window shift should be the number of lines on the display if greater than 1.
+-  Add the TTY braille driver.
+-  Add the XWindow braille driver.
+-  Add ASCII characters 0X60,0X7B-0X7F to text.brf.tbl.
+-  Support \s (space) for translation tables.
+-  Update the Spanish text table to the O.N.C.E. standard.
+-  Updated big5 contraction table.
+-  Support FreeBSD installations which don't have speaker support.
+-  Add support for NetBSD.
+-  Support compilation on OSF.
+-  Add compile-time warnings for features which aren't available.
+-  Save our latest copy of Gnopernicus's brltty driver (ttybrl.c).
+-  API changes:
+      Update version to 0.3.0.
+      Increment protocol number.
+      Change the license for all client-side files to the LGPL.
+      Prefix definitions in brldefs.h with BRL_.
+      Remove from brldefs.h what shouldn't be in there.
+      Split protocol-specific definitions from api.h out into api_protocol.h.
+      Added two packet types for (un)ignoring key sets.
+      Renamed brlapi_(un)ignoreKeys to brlapi_(un)ignoreKeyRange.
+      Added the brlapi_(un)ifnoreKeySet functions.
+      For (un)ignore, only consider the blk and arg fields of a command.
+      Protocol enhancements (some packets removed, certain operations faster).
+      Error management is now partly asynchronous.
+      Server partially rewritten to use select() system call.
+      Now only two threads: one for brltty, one for incoming connections.
+      Default client error handler with capability to define another one.
+      Some functions renamed.
+      apitest added.
+      Don't look at $WINDOW to determine the tty (yet).
+      Add support for drivers with brl_writeVisual().
+      Implement recursive windows.
+      Deprecate brlapi_readCommand() and replace it with brlapi_readKey().
+      Replace uses of uint32_t with unsigned int where possible.
+      Rename BRLAPI_EXTWRITESTRUCT_INITIALIZER to BRLAPI_WRITESTRUCT_INITIALIZER.
+-  USB fixes:
+      Allow usbBeginInput() to be called more than once on the same endpoint.
+      Set the configuration before claiming the interface.
+      Configuration descriptors must be read by number rather than by value.
+      usbCancelRequest() shouldn't deallocate a completed request.
+      BSD systems only allow short transfer to be set for input endpoints.
+      OpenBSD endpoint read timeouts should be silent and non-fatal.
+-  HandyTech driver changes:
+      Remove the no longer needed (read|write)Bytes() routines.
+      Turn brl_(read|write)Packet() into standalone routines for later enhancement.
+      Add bluetooth support.
+      Add support for keyboard input.
+-  Papenmeier driver changes:
+      Change some BrailleX 2D Screen key bindings.
+      Implement simulated EL switches for those models which don't have them.
+      Simplify the EL command generation macros.
+      Reduce the volume of output logging.
+      Log the baud at which the driver is probing.
+      Make protocol I input packet logging more standard.
+      Fix the count for copying generic status cell data from the core-supplied buffer.
+      Remove unused definitions from the header.
+      Move protocol I definitions from the header into the protocol I section of the implementation.
+      Complete the implementation of protocol II.
+      Support the EL 40/66/80 Slimline models.
+      Remove out-of-date debugging utilities.
+-  TSI driver changes:
+      Remove CTS checking.
+      Remove the wait-for-connect loop.
+-  VisioBraille driver changes:
+      Prefix public constants with BRL_VS.
+      Reindent the source to core conventions.
+      Don't remember display content until successfully written.
+-  Voyager driver changes:
+      Fix an upper bound error in brl_writeWindow().
+      Remove the write retry loops.
+      Simplify the control request retry algorithm.
+      Act on first key release rather than after all keys are released.
+      Add support for the part232 serial interface.
+      Remove knowledge of USB string encoding.
+      Rename the BrlInput= parameter to InputMode=.
+      Change the default for InputMode= to no.
+      Change InputMode=no to mean don't require chording.
+      Add the StatusCells= parameter.
+      Simplify the help generation macros.
+      Reorganize the help template.
+-  Build changes:
+      Rename --disable-usb to --disable-usb-support.
+      Add --disable-bluetooth-support.
+      Rename --disable-...-tunes to --disable-...-support.
+      Add --with-curses=.
+      Add --with-xt-toolkit=.
+      Reorder the arguments to BRLTTY_ARG_ENABLE/DISABLE.
+      Detect if Linux-specific AT2 support can be used.
+      Check for iconv.h.
+      Check for <sys/select.h>.
+      Detect if __attribute__((format(printf))) is supported.
+      Detect if __attribute__((packed)) is supported.
+      Detect if __attribute__((unused)) is supported.
+      Detect if the __alignof__ operator is supported.
+      Abort the configure if ld flags aren't known.
+      Completely rewrite install-sh to support more than one source operand.
+      Hard-code "ar" in the make file since HP-UX doesn't set "$(AR)".
+      The FestivalLite driver needs -lm.
+      Don't build the API or the Mikropuhe driver if pthreads isn't available.
 

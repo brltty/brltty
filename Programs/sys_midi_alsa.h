@@ -54,7 +54,7 @@ MIDI_ALSA_SYMBOL(seq_set_client_name);
 #define snd_seq_control_queue my_snd_seq_control_queue
 
 static int
-findMidiDevice (MidiDevice *midi, int *client, int *port) {
+findMidiDevice (MidiDevice *midi, int errorLevel, int *client, int *port) {
   snd_seq_client_info_t *clientInformation = mallocWrapper(my_snd_seq_client_info_sizeof());
   memset(clientInformation, 0, my_snd_seq_client_info_sizeof());
   my_snd_seq_client_info_set_client(clientInformation, -1);
@@ -90,6 +90,7 @@ findMidiDevice (MidiDevice *midi, int *client, int *port) {
   }
 
   free(clientInformation);
+  LogPrint(errorLevel, "No MDII devices.");
   return 0;
 }
 
@@ -213,12 +214,12 @@ openMidiDevice (int errorLevel, const char *device) {
     int result;
 
     if ((result = my_snd_seq_open(&midi->sequencer, sequencerName,
-                               SND_SEQ_OPEN_OUTPUT, 0)) >= 0) {
+                                  SND_SEQ_OPEN_OUTPUT, 0)) >= 0) {
       my_snd_seq_set_client_name(midi->sequencer, PACKAGE_TITLE);
 
       if ((midi->port = my_snd_seq_create_simple_port(midi->sequencer, "out0",
-                                                   SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
-                                                   SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
+                                                      SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
+                                                      SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
         if ((midi->queue = my_snd_seq_alloc_queue(midi->sequencer)) >= 0) {
           int client;
           int port;
@@ -227,7 +228,7 @@ openMidiDevice (int errorLevel, const char *device) {
           if (device) {
             deviceOk = parseMidiDevice(midi, errorLevel, device, &client, &port);
           } else {
-            deviceOk = findMidiDevice(midi, &client, &port);
+            deviceOk = findMidiDevice(midi, errorLevel, &client, &port);
           }
 
           if (deviceOk) {

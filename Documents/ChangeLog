@@ -1,7 +1,7 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
-September 3, 2004:
+September 4, 2004:
  - BRLTTY 3.6pre3 released:
    Restarting drivers caused strange corruptions.
    Eliminate some compile warnings when many features are disabled.
