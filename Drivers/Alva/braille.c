@@ -290,17 +290,24 @@ static const char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define KEY_CURSOR2 	0x080	/* the CURSOR2 key */
 #define KEY_HOME2 	0x100	/* the HOME2 key */
 #define KEY_PROG2 	0x200	/* the PROG2 key */
-#define KEY_ROUTING	0x400	/* cursor routing key set */
+#define KEY_ROUTING1	0x400	/* lower cursor routing key set */
+#define KEY_ROUTING2	0x800	/* upper cursor routing key set */
 
 /* those keys are not supposed to be combined, so their corresponding 
  * values are not bit exclusive between them.
  */
-#define KEY_ROUTING_A	0x1000	/* first cur routing over status display */
-#define KEY_ROUTING_B	0x2000	/* second cur routing over status disp. */
-#define KEY_ROUTING_C	0x3000	/* ... */
-#define KEY_ROUTING_D	0x4000
-#define KEY_ROUTING_E	0x5000
-#define KEY_ROUTING_F	0x6000
+#define KEY_STATUS1_A	0x01000	/* first lower status key */
+#define KEY_STATUS1_B	0x02000	/* second lower status key */
+#define KEY_STATUS1_C	0x03000	/* third lower status key */
+#define KEY_STATUS1_D	0x04000	/* fourth lower status key */
+#define KEY_STATUS1_E	0x05000	/* fifth lower status key */
+#define KEY_STATUS1_F	0x06000	/* sixth lower status key */
+#define KEY_STATUS2_A	0x10000	/* first upper status key */
+#define KEY_STATUS2_B	0x20000	/* second upper status key */
+#define KEY_STATUS2_C	0x30000	/* third upper status key */
+#define KEY_STATUS2_D	0x40000	/* fourth upper status key */
+#define KEY_STATUS2_E	0x50000	/* fifth upper status key */
+#define KEY_STATUS2_F	0x60000	/* sixth upper status key */
 
 /* first cursor routing offset on main display (old firmware only) */
 #define KEY_ROUTING_OFFSET 168
@@ -313,9 +320,13 @@ static int OperatingKeys[10] =
  KEY_CURSOR2, KEY_HOME2, KEY_PROG2};
 #endif /* ! ABT3_OLD_FIRMWARE */
 
-static int StatusKeys[6] =
-{KEY_ROUTING_A, KEY_ROUTING_B, KEY_ROUTING_C,
- KEY_ROUTING_D, KEY_ROUTING_E, KEY_ROUTING_F};
+static int StatusKeys1[6] =
+{KEY_STATUS1_A, KEY_STATUS1_B, KEY_STATUS1_C,
+ KEY_STATUS1_D, KEY_STATUS1_E, KEY_STATUS1_F};
+
+static int StatusKeys2[6] =
+{KEY_STATUS2_A, KEY_STATUS2_B, KEY_STATUS2_C,
+ KEY_STATUS2_D, KEY_STATUS2_E, KEY_STATUS2_F};
 
 static int (*openPort) (char **parameters, const char *device);
 static int (*resetPort) (void);
@@ -791,9 +802,13 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
       } else if ((key >= 0X80) && (key <= 0X89)) {
         *Keys &= ~OperatingKeys[key - 0X80];
       } else if ((key >= 0X20) && (key <= 0X25)) {
-        *Keys |= StatusKeys[key - 0X20];
+        *Keys |= StatusKeys1[key - 0X20];
       } else if ((key >= 0XA0) && (key <= 0XA5)) {
-        *Keys &= ~StatusKeys[key - 0XA0];
+        *Keys &= ~StatusKeys1[key - 0XA0];
+      } else if ((key >= 0X30) && (key <= 0X35)) {
+        *Keys |= StatusKeys2[key - 0X30];
+      } else if ((key >= 0XB0) && (key <= 0XB5)) {
+        *Keys &= ~StatusKeys2[key - 0XB0];
       } else {
         *Keys = 0;
       }
@@ -804,9 +819,20 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
       unsigned char key = packet[1];
       if (key <= 0X5F) {			/* make */
         *Pos = key;
-        *Keys |= KEY_ROUTING;
+        *Keys |= KEY_ROUTING1;
       } else {
-        *Keys &= ~KEY_ROUTING;
+        *Keys &= ~KEY_ROUTING1;
+      }
+      return 1;
+    }
+
+    case 0X75: {
+      unsigned char key = packet[1];
+      if (key <= 0X5F) {			/* make */
+        *Pos = key;
+        *Keys |= KEY_ROUTING2;
+      } else {
+        *Keys &= ~KEY_ROUTING2;
       }
       return 1;
     }
@@ -831,7 +857,7 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
   if ((key >= (KEY_ROUTING_OFFSET + model->Cols)) &&
       (key < (KEY_ROUTING_OFFSET + model->Cols + 6))) {
     /* make for Status keys of Touch Cursor */
-    *Keys |= StatusKeys[key - (KEY_ROUTING_OFFSET + model->Cols)];
+    *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + model->Cols)];
   } else if (key >= KEY_ROUTING_OFFSET) {
     /* make for display keys of Touch cursor */
     *Pos = key - KEY_ROUTING_OFFSET;
@@ -961,22 +987,22 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	    case KEY_PROG | KEY_CURSOR | KEY_LEFT:
 	      res = CMD_BACK;
 	      break;
-	    case KEY_ROUTING_A:
+	    case KEY_STATUS1_A:
 	      res = CMD_CAPBLINK;
 	      break;
-	    case KEY_ROUTING_B:
+	    case KEY_STATUS1_B:
 	      res = CMD_CSRVIS;
 	      break;
-	    case KEY_ROUTING_C:
+	    case KEY_STATUS1_C:
 	      res = CMD_CSRBLINK;
 	      break;
-	    case KEY_CURSOR | KEY_ROUTING_A:
+	    case KEY_CURSOR | KEY_STATUS1_A:
 	      res = CMD_SIXDOTS;
 	      break;
-	    case KEY_CURSOR | KEY_ROUTING_B:
+	    case KEY_CURSOR | KEY_STATUS1_B:
 	      res = CMD_CSRSIZE;
 	      break;
-	    case KEY_CURSOR | KEY_ROUTING_C:
+	    case KEY_CURSOR | KEY_STATUS1_C:
 	      res = CMD_SLIDEWIN;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_UP:
@@ -988,22 +1014,22 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	    case KEY_PROG | KEY_HOME | KEY_RIGHT:
 	      res = CMD_SAY_BELOW;
 	      break;
-	    case KEY_ROUTING:
+	    case KEY_ROUTING1:
 	      /* normal Cursor routing keys */
 	      res = CR_ROUTE + RoutingPos;
 	      break;
-	    case KEY_PROG | KEY_ROUTING:
+	    case KEY_PROG | KEY_ROUTING1:
 	      /* marking beginning of block */
 	      res = CR_CUTBEGIN + RoutingPos;
 	      break;
-	    case KEY_HOME | KEY_ROUTING:
+	    case KEY_HOME | KEY_ROUTING1:
 	      /* marking end of block */
 	      res = CR_CUTRECT + RoutingPos;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_DOWN:
 	      res = CMD_PASTE;
 	      break;
-	    case KEY_PROG | KEY_HOME | KEY_ROUTING:
+	    case KEY_PROG | KEY_HOME | KEY_ROUTING1:
 	      /* attribute for pointed character */
 	      res = CR_DESCCHAR + RoutingPos;
 	      break;
