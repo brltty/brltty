@@ -341,121 +341,105 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
   if ((qbase = (unsigned char *) malloc(QSZ))) {
     /* Open the Braille display device for random access */
     LogPrint(LOG_DEBUG, "Opening serial port: %s", brldev);
-    if ((blite_fd = open(brldev, O_RDWR | O_NOCTTY)) != -1) {
-      tcflush(blite_fd, TCIFLUSH);	/* clean line */
+    if (openSerialDevice(brldev, &blite_fd, &oldtio)) {
+      struct termios newtio;	/* new terminal settings */
+      newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+      newtio.c_iflag = IGNPAR;
+      newtio.c_oflag = 0;		/* raw output */
+      newtio.c_lflag = 0;		/* don't echo or generate signals */
+      newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
+      newtio.c_cc[VTIME] = 0;
 
-      /* save current settings */
-      if (tcgetattr(blite_fd, &oldtio) != -1) {
-        struct termios newtio;	/* new terminal settings */
-        /* Set bps, flow control and 8n1, enable reading */
-        newtio.c_cflag = baudrate | CRTSCTS | CS8 | CLOCAL | CREAD;
-        LogPrint(LOG_DEBUG, "Selecting baudrate %d",
-                 baud2integer(baudrate));
-
-        /* Ignore bytes with parity errors and make terminal raw and dumb */
-        newtio.c_iflag = IGNPAR;
-        newtio.c_oflag = 0;		/* raw output */
-        newtio.c_lflag = 0;		/* don't echo or generate signals */
-        newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-        newtio.c_cc[VTIME] = 0;
-
-        /* activate new settings */
-        if (tcsetattr(blite_fd, TCSANOW, &newtio) != -1) {
+      /* activate new settings */
+      if (resetSerialDevice(blite_fd, &newtio, baudrate)) {
 #ifdef DETECT_FOREVER
-          /* wait forever method */
-          while (1) {
-            qflush();
-            write_prebrl();
-            waiting_ack = 1;
-            delay(100);
-            qfill();
-            if (!waiting_ack) break;
-            delay(2000);
-          }
-          if (1) {
-#else /* DETECT_FOREVER */
+        /* wait forever method */
+        while (1) {
           qflush();
           write_prebrl();
-          if (await_ack()) {
-#endif /* DETECT_FOREVER */
-            LogPrint(LOG_DEBUG, "Got response.");
-
-            /* Next, let's detect the BLT-Model (18 || 40). */
-            {
-              unsigned char cells[18];
-              memset(cells, 0, sizeof(cells));
-              write(blite_fd, cells, sizeof(cells));
-              waiting_ack = 1;
-              delay(400);
-              qfill();
-              if (waiting_ack) {
-                /* no response, so it must be BLT40 */
-                blitesz = 40;
-                brl->helpPage = 1;
-              } else {
-                blitesz = sizeof(cells);
-                brl->helpPage = 0;
-              }
-            }
-
-            {
-              static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
-              delay(200);
-              qflush();
-              write(blite_fd, request, sizeof(request));
-              waiting_ack = 0;
-              delay(200);
-              qfill();
-              if (qlen) {
-                unsigned char response[qlen + 1];
-                int length = 0;
-                do {
-                  unsigned char byte = qbase[qoff % QSZ];
-                  qoff = (qoff + 1) % QSZ, --qlen;
-                  if (!byte) break;
-                  response[length++] = byte;
-                } while (qlen);
-                response[length] = 0;
-                LogPrint(LOG_INFO, "Braille Lite identity: %s", response);
-              }
-            }
-
-            LogPrint(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
-            brl->x = blitesz;	/* initialise size of display - */
-            brl->y = 1;		/* Braille Lites are single line displays */
-
-            /* Allocate space for buffers */
-            if ((prevdata = (unsigned char *) malloc(brl->x))) {
-              memset(prevdata, 0, brl->x);
-              if ((rawdata = (unsigned char *) malloc(brl->x))) {
-                init_maps();
-                return 1;
-              /*
-                free(rawdata);
-                rawdata = NULL;
-              */
-              } else {
-                LogPrint(LOG_ERR, "Cannot allocate rawdata.");
-              }
-              free(prevdata);
-              prevdata = NULL;
-            } else {
-              LogPrint(LOG_ERR, "Cannot allocate prevdata.");
-            }
-          } else {
-            LogPrint(LOG_WARNING, "BLT doesn't seem to be connected, giving up!");
-          }
-          tcsetattr(blite_fd, TCSANOW, &oldtio);
-        } else {
-          LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
+          waiting_ack = 1;
+          delay(100);
+          qfill();
+          if (!waiting_ack) break;
+          delay(2000);
         }
-      } else {
-        LogPrint(LOG_ERR, "tcgetattr: %s", strerror(errno));
+        if (1) {
+#else /* DETECT_FOREVER */
+        qflush();
+        write_prebrl();
+        if (await_ack()) {
+#endif /* DETECT_FOREVER */
+          LogPrint(LOG_DEBUG, "Got response.");
+
+          /* Next, let's detect the BLT-Model (18 || 40). */
+          {
+            unsigned char cells[18];
+            memset(cells, 0, sizeof(cells));
+            write(blite_fd, cells, sizeof(cells));
+            waiting_ack = 1;
+            delay(400);
+            qfill();
+            if (waiting_ack) {
+              /* no response, so it must be BLT40 */
+              blitesz = 40;
+              brl->helpPage = 1;
+            } else {
+              blitesz = sizeof(cells);
+              brl->helpPage = 0;
+            }
+          }
+
+          {
+            static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
+            delay(200);
+            qflush();
+            write(blite_fd, request, sizeof(request));
+            waiting_ack = 0;
+            delay(200);
+            qfill();
+            if (qlen) {
+              unsigned char response[qlen + 1];
+              int length = 0;
+              do {
+                unsigned char byte = qbase[qoff % QSZ];
+                qoff = (qoff + 1) % QSZ, --qlen;
+                if (!byte) break;
+                response[length++] = byte;
+              } while (qlen);
+              response[length] = 0;
+              LogPrint(LOG_INFO, "Braille Lite identity: %s", response);
+            }
+          }
+
+          LogPrint(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
+          brl->x = blitesz;	/* initialise size of display - */
+          brl->y = 1;		/* Braille Lites are single line displays */
+
+          /* Allocate space for buffers */
+          if ((prevdata = (unsigned char *) malloc(brl->x))) {
+            memset(prevdata, 0, brl->x);
+            if ((rawdata = (unsigned char *) malloc(brl->x))) {
+              init_maps();
+              return 1;
+            /*
+              free(rawdata);
+              rawdata = NULL;
+            */
+            } else {
+              LogPrint(LOG_ERR, "Cannot allocate rawdata.");
+            }
+            free(prevdata);
+            prevdata = NULL;
+          } else {
+            LogPrint(LOG_ERR, "Cannot allocate prevdata.");
+          }
+        } else {
+          LogPrint(LOG_WARNING, "BLT doesn't seem to be connected, giving up!");
+        }
+        tcsetattr(blite_fd, TCSANOW, &oldtio);
       }
       close(blite_fd);
       blite_fd = -1;
-    } else {
-      LogPrint(LOG_ERR, "Open %s: %s", brldev, strerror(errno));
     }
     free(qbase);
     qbase = NULL;
