@@ -968,7 +968,7 @@ static Tconnection *whoGetsKey(Ttty *tty, brl_keycode_t command, brl_keycode_t k
       if (c->how==BRLKEYCODES)
         masked = (contains(c->unmaskedKeys,keycode) == NULL);
       else
-        masked = (contains(c->unmaskedKeys,command) == NULL);
+        masked = (contains(c->unmaskedKeys,command & BRL_MSK_CMD) == NULL);
       pthread_mutex_unlock(&c->maskmutex);
       if (!masked) goto found;
     }
