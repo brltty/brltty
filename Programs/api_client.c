@@ -913,7 +913,7 @@ static pthread_key_t errno_key;
 /* the key must be created at most once */
 static pthread_once_t errno_key_once = PTHREAD_ONCE_INIT;
 
-#ifndef __MINGW32__
+#ifndef WINDOWS
 /* We need to declare these with __attribute__((weak)) to determine at runtime 
  * whether libpthread is used or not. We can't rely on the functions prototypes,
  * hence the use of typeof
@@ -923,7 +923,7 @@ WEAK_REDEFINE(pthread_key_create);
 WEAK_REDEFINE(pthread_once);
 WEAK_REDEFINE(pthread_getspecific);
 WEAK_REDEFINE(pthread_setspecific);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 static void errno_key_free(void *key)
 {
