@@ -1,0 +1,11 @@
+Makefile
+*.auto.h
+*.a
+*.so
+brltty
+brltty-install
+brltest
+scrtest
+tunetest
+tbl2hex
+txt2hlp
