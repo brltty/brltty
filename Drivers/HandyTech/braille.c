@@ -1388,14 +1388,35 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
               default:
                 break;
             }
-          case BDS_READY: {
-            int command;
-            if (model->interpretByte(context, byte, &command)) {
-              updateBrailleCells(brl);
-              return command;
+          case BDS_READY:
+            switch (byte) {
+              case 0X79: {
+                unsigned char buf[2];
+                io->readBytes(buf, sizeof(buf));
+                if (buf[0] == model->identifier) {
+                  unsigned char codes[buf[1]+1];
+                  io->readBytes(codes, buf[1]+1);
+                  if (codes[buf[1]] == 0X16) {
+                    LogBytes("Key code", codes, buf[1]);
+                  } else {
+                    LogBytes("Malformed keycode packet", codes, buf[1]+1);
+                  }
+                } else {
+                  LogError("Keycode packet ID mismatch");
+                }
+                continue;
+              }
+
+              default: {
+                int command;
+                if (model->interpretByte(context, byte, &command)) {
+                  updateBrailleCells(brl);
+                  return command;
+                }
+                break;
+              }
             }
             break;
-          }
         }
         break;
     }
