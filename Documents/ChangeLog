@@ -2,10 +2,9 @@ Note: this file is in reversed chronological order (bottom to top).
 
 
  - BRLTTY 3.3.1 released:
+    Correct the description of which commands are unmasked by default. (st)
     Build fails with standalone-programs and braille-driver=vd,vh. (dm)
-       (reported by Osvaldo La Rosa <info@brlspeak.net>)
     Log "braille driver initialization failed" fills /var when display not connected. (dm)
-       (reported by Thomas Stivers <stivers_t@tomass.dyndns.org>)
 
 August 4, 2003:
  - BRLTTY 3.3 released:
