@@ -1419,7 +1419,7 @@ It may need to be run as root.
 
 <sect2>tbltest<label id="utility-tbltest"><p>
 This utility tests a translation table
-(see section <ref name="Translation Tables" id="translation">).
+(see section <ref id="translation" name="Translation Tables">).
 <tscreen>tbltest -<em/option/ ... <em/table/</tscreen>
 <descrip>
   <tag><em/table/</tag>
@@ -3488,7 +3488,7 @@ The following operand types are supported:
   <tag/dots/
     A braille symbol.
     The braille dots must be specified via their standard numbers
-    (see section <ref id="dots" name="Braille Dot Numbering Convention">),
+    (see section <ref id="dots" name="Standard Braille Dot Numbering Convention">),
     and, for a multi-cell symbol, the cell specifications
     must be separated from one another by a dash (<tt/-/).
     For example, the contraction for the English word <tt/lord/
@@ -3789,7 +3789,7 @@ for details regarding how to use an alternate attributes translation table.
 
 <sect1>Table Format<p>
 A translation table consists of a sequence of directives, one per line,
-which define how each byte is to be represented in braille.
+which define how each possible byte value is to be represented in braille.
 White-space (blanks, tabs) at the beginning of a line,
 as well as before and/or after any operand of any directive,
 is ignored.
@@ -3803,7 +3803,7 @@ The following directives are provided:
     Use the <tt/byte/ directive to specify
     how a byte (character) is to be represented in braille.
     See the text translation tables for examples of its use.
-    Since this is the most commonly used directive by far,
+    Since this is by far the most commonly used directive,
     the <tt/byte/ keyword itself is optional.
 
     <descrip>
@@ -3812,16 +3812,14 @@ The following directives are provided:
         It may be:
         <itemize>
           <item>
-            Any single character
-            other than a backslash
-            or a white-space character.
+            Any single character other than a backslash or a white-space character.
           <item>
-            A special character (prefixed by a backslash).
+            A backslash-prefixed special character.
             These are:
             <descrip>
               <tag/\\/A literal backslash.
               <tag/\x&num;&num;/The two-digit hexadecimal representation of any character.
-              <tag/\X&num;&num;/... (the case of the X and of the digits is ignored)
+              <tag/\X&num;&num;/... (the case of the X and of the digits isn't significant)
             </descrip>
         </itemize>
       <tag><em/dots/</tag>
@@ -3829,12 +3827,12 @@ The following directives are provided:
         It is a sequence of one to eight dot numbers.
         If the dot number sequence is enclosed within parentheses
         then the dot numbers may be separated from one another by white-space.
-        A dot number is a digit within the range <tt/1/-<tt/8/ as defined by the standard
-        <ref name="Braille Dot Numbering Convention" id="dots">.
+        A dot number is a digit within the range <tt/1/-<tt/8/ as defined by the
+        <ref id="dots" name="Standard Braille Dot Numbering Convention">.
         The special dot number <tt/0/ is recognized
         when not enclosed within parentheses,
         and means no dots;
-        it may not be used in combination with any other dot numbers.
+        it may not be used in conjunction with any other dot number.
     </descrip>
 
     Examples:
@@ -3848,14 +3846,15 @@ The following directives are provided:
     </itemize>
   <tag><tt/dot/ <em/dot/ <em/state/ &num; <em/comment/</tag>
     Use the <tt/dot/ directive to specify
-    how an undefined byte is to be represented in braille.
+    how the undefined bytes are to be represented in braille.
     See the attributes translation tables for examples of its use.
+    The default is that all dots are on.
 
     <descrip>
       <tag><em/dot/</tag>
         The dot being defined.
-        It is a single digit within the range <tt/1/-<tt/8/ as defined by the standard
-        <ref name="Braille Dot Numbering Convention" id="dots">.
+        It is a single digit within the range <tt/1/-<tt/8/ as defined by the
+        <ref id="dots" name="Standard Braille Dot Numbering Convention">.
       <tag><em/state/</tag>
         When the dot is raised.
         It may be:
@@ -3866,7 +3865,7 @@ The following directives are provided:
           <tag><tt/&tilde;/<em/bit/</tag>The dot is raised if the named bit is off (set to 0).
         </descrip>
 
-        The bit names are:
+        The names of the bits are:
         <descrip>
           <tag/0X01/fg-blue
           <tag/0X02/fg-green
@@ -4094,7 +4093,7 @@ BRLTTY supports the following speech synthesizers:
   <tag/vv/ViaVoice
 </descrip>
 
-<sect1>Braille Dot Numbering Convention<label id="dots"><p>
+<sect1>Standard Braille Dot Numbering Convention<label id="dots"><p>
 A standard braille cell consists of six dots
 arranged in two columns and three rows.
 Computer braille has introduced a fourth row at the bottom.
