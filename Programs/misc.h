@@ -113,9 +113,9 @@ extern void LogPrint
 #endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
        ;
 extern void LogError (const char *action);
-#ifdef __MINGW32__
+#ifdef WINDOWS
 extern void LogWindowsError (const char *action);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
 extern int setLogLevel (int level);
 extern int setPrintLevel (int level);

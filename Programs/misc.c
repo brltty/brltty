@@ -160,7 +160,7 @@ LogError (const char *action) {
   LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
 }
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
 void
 LogWindowsError (const char *action) {
   DWORD error = GetLastError();
@@ -171,7 +171,7 @@ LogWindowsError (const char *action) {
   LogPrint(LOG_ERR, "%s error %ld: %s", action, error, message);
   LocalFree(message);
 }
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 void
 LogBytes (const char *description, const unsigned char *data, unsigned int length) {
