@@ -156,7 +156,7 @@ const int max_data = sizeof(key_data)/sizeof(key_data[0]);
 int ispressed[sizeof(key_data)/sizeof(key_data[0])] = { 0 };
 
 // table to convert braille code to ascii
-// screen --> texttrans[] --> change_bits[] --> bits for display
+// screen --> textTable[] --> change_bits[] --> bits for display
 unsigned char conv_back[255] = { 0 };
 
 // table for status display - integers
@@ -166,7 +166,7 @@ void init_tables()
 { 
   int i;
   for(i=0; i < 256; i++) 
-    conv_back[change_bits[texttrans[i]]] = i;
+    conv_back[change_bits[textTable[i]]] = i;
    
   for(i=0; i<100; i++) {
     numbers[seascape_number(i)] = i;

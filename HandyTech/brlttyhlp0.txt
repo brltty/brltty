@@ -1,9 +1,9 @@
 BRLTTY Help for Handy Tech Modular Displays
 From left to right, the front keys are: B1 B2 B3 B4 UP DN B5 B6 B7 B8
 
-Movement Keys:
-UP        go one window left
-DN        go one window right
+Movement Commands:
+UP        go left one window
+DN        go right one window
 B1        go to cursor
 B1 UP     go to left end of line
 B1 DN     go to right end of line
@@ -47,20 +47,31 @@ B6 B1     toggle skip identical lines
 B6 B2     toggle skip blank windows
 B6 B3     toggle sliding window
 
-Speech Control:
+Routing Key Commands:
+Rn        bring cursor to character
+B1 Rn     bring left end of window to column
+B2 Rn     describe character
+B3 Rn     append to cut buffer from character
+B4 Rn     start new cut buffer from character
+UP Rn     go up to line not indented more than column
+DN Rn     go down to line not indented more than column
+B5 Rn     rectangular cut to character
+B6 Rn     linear cut to character
+B7 Rn     set mark
+B8 Rn     go to mark
+
+Miscellaneous Commands:
 B2 B3 UP  stop speaking
 B2 B3 DN  say current line
-
-Routing Key Functions:
-RK        bring cursor to character
-B1 RK     bring left end of window to column
-B2 RK     describe character
-B3 RK     append to cut buffer from character
-B4 RK     start new cut buffer from character
 B4 B5     paste cut buffer at cursor position
-UP RK     go up to line not indented more than column
-DN RK     go down to line not indented more than column
-B5 RK     rectangular cut to character
-B6 RK     linear cut to character
-B7 RK     set mark
-B8 RK     go to mark
+B1 B8 UP  switch to navigation mode (the default)
+B1 B8 DN  switch to input mode
+
+The front keys, when in input mode, are interpreted differently. The eight Bn
+keys are interpreted as the eight braille dots; pressing any combination of
+them inputs the corresponding character. The UP and DN bars are interpreted as
+space bars; pressing either one of them inputs a space. Key combinations
+involving both the Bn keys and the UP/DN bars, as well as those involving the
+routing and status keys, still function as described above. The Bn (front key)  
+to Dn (braille dot) mapping has been designed to represent the conventional
+layout, and is as follows: B1=D7 B2=D3 B3=D2 B4=D1 B5=D4 B6=D5 B7=D6 B8=D8

@@ -115,35 +115,25 @@ makeDownloadFifo (void) {
 static void
 brl_initialize (char **parameters, brldim *brl, const char *device) {
    makeDownloadFifo();
-   if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY)) != -1) {
-      if (tcgetattr(fileDescriptor, &oldSettings) != -1) {
-         memset(&newSettings, 0, sizeof(newSettings));
-         newSettings.c_cflag = CS8 | CLOCAL | CREAD;
-         newSettings.c_iflag = IGNPAR;
-         cfsetispeed(&newSettings, B9600);
-         cfsetospeed(&newSettings, B9600);
-         if (tcsetattr(fileDescriptor, TCSANOW, &newSettings) != -1) {
-            if (tcflush(fileDescriptor, TCIOFLUSH) != -1) {
-               brl->y = screenHeight;
-               brl->x = screenWidth;
-               brl->disp = &sourceImage[0][0];
-               memset(sourceImage, 0, sizeof(sourceImage));
-               deviceStatus = DEV_ONLINE;
-               return;
-            } else {
-               LogError("LogText flush");
-            }
-            tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
+   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
+      memset(&newSettings, 0, sizeof(newSettings));
+      newSettings.c_cflag = CS8 | CLOCAL | CREAD;
+      newSettings.c_iflag = IGNPAR;
+      if (resetSerialDevice(fileDescriptor, &newSettings, B9600)) {
+         if (tcflush(fileDescriptor, TCIOFLUSH) != -1) {
+            brl->y = screenHeight;
+            brl->x = screenWidth;
+            brl->disp = &sourceImage[0][0];
+            memset(sourceImage, 0, sizeof(sourceImage));
+            deviceStatus = DEV_ONLINE;
+            return;
          } else {
-            LogError("LogText attribute set");
+            LogError("LogText flush");
          }
-      } else {
-         LogError("LogText attribute query");
+         tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
       }
       close(fileDescriptor);
       fileDescriptor = -1;
-   } else {
-      LogError("LogText open");
    }
    clearbrl(brl);
 }
@@ -284,8 +274,8 @@ static void
 brl_writeStatus (const unsigned char *status) {
    if (isOnline()) {
       if (status[FirstStatusCell] == FSC_GENERIC) {
-         unsigned char row = status[STAT_CsrRow];
-         unsigned char column = status[STAT_CsrCol];
+         unsigned char row = status[STAT_CSRROW];
+         unsigned char column = status[STAT_CSRCOL];
          row = MAX(1, MIN(row, screenHeight)) - 1;
          column = MAX(1, MIN(column, screenWidth)) - 1;
          if (deviceStatus < DEV_READY) {

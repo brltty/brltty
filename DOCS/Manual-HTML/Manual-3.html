@@ -145,23 +145,31 @@ with different character highlighting (attributes).
 <DT><B>PRPGRPH
 <A NAME="command-PRPGRPH"></A> </B><DD><P>Go up to the last line of the previous paragraph
 (the first non-blank line beyond the nearest previous blank line).
+The current line is included when searching for the inter-paragraph space.
 <DT><B>NXPGRPH
 <A NAME="command-NXPGRPH"></A> </B><DD><P>Go down to the first line of the next paragraph
 (the first non-blank line beyond the nearest next blank line).
+The current line is included when searching for the inter-paragraph space.
 <DT><B>PRPROMPT
 <A NAME="command-PRPROMPT"></A> </B><DD><P>Go up to the previous command prompt.
 <DT><B>NXPROMPT
 <A NAME="command-NXPROMPT"></A> </B><DD><P>Go down to the next command prompt.
 <DT><B>PRSEARCH
-<A NAME="command-PRSEARCH"></A> </B><DD><P>Go up to the nearest previous line
-whereon the character string within the cut buffer can be found.
-See 
-<A HREF="#cut">Cut and Paste</A> for details.
+<A NAME="command-PRSEARCH"></A> </B><DD><P>Search backward for the nearest occurrence
+of the character string within the cut buffer
+(see 
+<A HREF="#cut">Cut and Paste</A>).
+The search starts at the character immediately to the left of the braille window,
+proceeds from right to left,
+and, at the beginning of a line, wraps to the end of the previous line.
 <DT><B>NXSEARCH
-<A NAME="command-NXSEARCH"></A> </B><DD><P>Go down to the nearest next line
-whereon the character string within the cut buffer can be found.
-See 
-<A HREF="#cut">Cut and Paste</A> for details.
+<A NAME="command-NXSEARCH"></A> </B><DD><P>Search forward for the nearest occurrence
+of the character string within the cut buffer
+(see 
+<A HREF="#cut">Cut and Paste</A>).
+The search starts at the character immediately to the right of the braille window,
+proceeds from left to right,
+and, at the end of a line, wraps to the beginning of the next line.
 </DL>
 <P>
 <H3><A NAME="horizontal"></A> Horizontal Motion</H3>
@@ -263,6 +271,8 @@ This feature only affects the current virtual terminal.
 <A NAME="command-SIXDOTS"></A> </B><DD><P>Show characters using 6-dot, rather than 8-dot, braille.
 Dots 7 and 8 are still used by other features
 like cursor representation and attribute underlining.
+This setting can also be changed with the
+<A HREF="#preference-text-style">Text Style</A> preference.
 <DT><B>SLIDEWIN
 <A NAME="command-SLIDEWIN"></A> </B><DD><P>If cursor tracking
 (see the 
@@ -275,6 +285,8 @@ while remaining on that side, is nearer the centre.
 If this feature is <B>off</B>,
 then the braille window is always positioned such that
 its left end is a multiple of its width from the left edge of the screen.
+This setting can also be changed with the
+<A HREF="#preference-sliding-window">Sliding Window</A> preference.
 <DT><B>SKPIDLNS
 <A NAME="command-SKPIDLNS"></A> </B><DD><P>Rather than explicitly moving exactly one line either up or down,
 skip passed lines which have the same content as the current line.
@@ -289,18 +301,24 @@ the
 <A HREF="#command-FWINLTSKIP">FWINLTSKIP</A>,
 and 
 <A HREF="#command-FWINRTSKIP">FWINRTSKIP</A> commands.
+This setting can also be changed with the
+<A HREF="#preference-skip-identical-lines">Skip Identical Lines</A> preference.
 <DT><B>SKPBLNKWINS
 <A NAME="command-SKPBLNKWINS"></A> </B><DD><P>Skip passed blank windows when reading either forward or backward.
 This feature affects the 
 <A HREF="#command-FWINLT">FWINLT</A>
 and 
 <A HREF="#command-FWINRT">FWINRT</A> commands.
+This setting can also be changed with the
+<A HREF="#preference-skip-blank-windows">Skip Blank Windows</A> preference.
 <DT><B>CSRVIS
 <A NAME="command-CSRVIS"></A> </B><DD><P>Show the cursor by superimposing a dot pattern
 (see the 
 <A HREF="#command-CSRSIZE">CSRSIZE</A> command)
 on top of the character where it is.
 This feature is initially <B>on</B>.
+This setting can also be changed with the
+<A HREF="#preference-show-cursor">Show Cursor</A> preference.
 <DT><B>CSRHIDE
 <A NAME="command-CSRHIDE"></A> </B><DD><P>Hide the cursor (see the 
 <A HREF="#command-CSRVIS">CSRVIS</A> command)
@@ -324,11 +342,15 @@ This feature only affects the current virtual terminal.
 <DT><B>CSRSIZE
 <A NAME="command-CSRSIZE"></A> </B><DD><P>Represent the cursor with all eight dots (a solid block),
 rather than with just dots 7 and 8 (an underline).
+This setting can also be changed with the
+<A HREF="#preference-cursor-style">Cursor Style</A> preference.
 <DT><B>CSRBLINK
 <A NAME="command-CSRBLINK"></A> </B><DD><P>Blink (turn on and off according to a predefined interval)
 the symbol representing the cursor
 (see the 
 <A HREF="#command-CSRVIS">CSRVIS</A> command).
+This setting can also be changed with the
+<A HREF="#preference-blinking-cursor">Blinking Cursor</A> preference.
 <DT><B>ATTRVIS
 <A NAME="command-ATTRVIS"></A> </B><DD><P>Underline (with combinations of dots 7 and 8) highlighted characters.
 <DL>
@@ -339,20 +361,29 @@ black on cyan.
 <DT><B>dots 7 and 8</B><DD><P>Black on white (reverse video).
 <DT><B>dot 8</B><DD><P>Everything else.
 </DL>
+
+This setting can also be changed with the
+<A HREF="#preference-show-attributes">Show Attributes</A> preference.
 <DT><B>ATTRBLINK
 <A NAME="command-ATTRBLINK"></A> </B><DD><P>Blink (turn on and off according to a predefined interval)
 the attribute underline
 (see the 
 <A HREF="#command-ATTRVIS">ATTRVIS</A> command).
 This feature is initially <B>on</B>.
+This setting can also be changed with the
+<A HREF="#preference-blinking-attributes">Blinking Attributes</A> preference.
 <DT><B>CAPBLINK
 <A NAME="command-CAPBLINK"></A> </B><DD><P>Blink (turn on and off according to a predefined interval)
 capital (uppercase) letters.
-<DT><B>SND
-<A NAME="command-SND"></A> </B><DD><P>Play a short predefined tune (see 
+This setting can also be changed with the
+<A HREF="#preference-blinking-capitals">Blinking Capitals</A> preference.
+<DT><B>TUNES
+<A NAME="command-TUNES"></A> </B><DD><P>Play a short predefined tune (see 
 <A HREF="#tunes">Alert Tunes</A>)
 whenever a significant event occurs.
 This feature is initially <B>on</B>.
+This setting can also be changed with the
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference.
 </DL>
 <P>
 <H3>Mode Selection</H3>
@@ -378,6 +409,12 @@ and the states of a nmber of BRLTTY's features.
 See the section 
 <A HREF="#status">The Status Display</A> for full details.
 Invoke the <CODE>info</CODE> command again to return to the screen.
+<DT><B>LEARN
+<A NAME="command-LEARN"></A> </B><DD><P>Switch to command learn mode,
+which is an interactive way to learn what the keys on the braille display do.
+See the section 
+<A HREF="#learn">Command Learn Mode</A> for full details.
+Invoke the <CODE>learn</CODE> command again to return to the screen.
 </DL>
 <P>
 <H3>Preferences Settings</H3>
@@ -689,9 +726,39 @@ and
 </H2>
 
 <P>BRLTTY alerts you to the occurrence of significant events
-by playing short predefined tunes on the PC speaker.
-Each such event has its own tune.
-These events include:
+by playing short predefined tunes.
+This feature can be activated and deactivated with
+either the (ref id="command-TUNES" name="TUNES"> command
+or the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference.
+The tunes are played on the PC speaker by default,
+but other options can be selected
+with the 
+<A HREF="#preference-tune-device">Tune Device</A> preference.
+<P>Each significant event is associated, from highest to lowest priority,
+with one or more of the following:
+<DL>
+<DT><B>a tune</B><DD><P>If this feature is active
+(see the (ref id="command-TUNES" name="TUNES"> command
+and the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference),
+if a tune has been associated with the event,
+and if the selected tune device
+(see the 
+<A HREF="#preference-tune-device">Tune Device</A> preference)
+can be opened,
+then the tune is played.
+<DT><B>a dot pattern</B><DD><P>If the (ref id="preference-alert-dots" name="Alert Dots"> preference is active,
+and if a dot pattern has been associated with the event,
+then the dot pattern is briefly displayed on every braille cell.
+Some braille displays don't respond quickly enough
+for this mechanism to work effectively.
+<DT><B>a message</B><DD><P>If a message has been associated with the event,
+then it is displayed within the braille window
+(see the 
+<A HREF="#options-message-delay">-M</A> command line option).
+</DL>
+<P>These events include:
 <UL>
 <LI>When the braille display driver starts or stops.</LI>
 <LI>When the start or end of the cut block is set.</LI>
@@ -812,7 +879,7 @@ A feature is turned on if its corresponding dot is raised.
 <A HREF="#command-DISPMD">DISPMD</A> command).
 <DT><B>Dot 3</B><DD><P>Alert tunes
 (see the 
-<A HREF="#command-SND">SND</A> command).
+<A HREF="#command-TUNES">TUNES</A> command).
 <DT><B>Dot 4</B><DD><P>Visible cursor
 (see the 
 <A HREF="#command-CSRVIS">CSRVIS</A> command).
@@ -878,7 +945,39 @@ and
 </DL>
 </DL>
 <P>
-<H2><A NAME="preferences"></A> <A NAME="ss3.6">3.6 Preferences Settings</A>
+<H2><A NAME="learn"></A> <A NAME="ss3.6">3.6 Command Learn Mode</A>
+</H2>
+
+<P>Command learn mode is an interactive way to learn
+what the keys on the braille display do.
+It can be accessed
+either by the 
+<A HREF="#command-LEARN">LEARN</A> command
+or via the 
+<A HREF="Manual-2.html#utility-brltest">brltest</A> utility.
+<P>When this mode is entered,
+the message <CODE>command learn mode</CODE> is written to the braille display.
+Then, as each key (or key combination) on the display is pressed,
+a short message describing its BRLTTY function is written.
+This mode exits immediately if the key (or key combination)
+for the 
+<A HREF="#command-LEARN">LEARN</A> command is pressed.
+It exits automatically, and the message <CODE>done</CODE> is written,
+if ten seconds elapse without any key on the display being pressed.
+Note that some displays don't signal the driver
+and/or some drivers don't signal BRLTTY
+until all the keys are released.
+<P>If a message is longer than the braille display is wide,
+then it's displayed in segments.
+The length of each segment but the last is one less than the display's width,
+with the rightmost character on the display being set to a minus sign.
+Each such segment remains on the display
+either for a few seconds
+(see the 
+<A HREF="#options-message-delay">-M</A> command line option)
+or until any key on the display is pressed.
+<P>
+<H2><A NAME="preferences"></A> <A NAME="ss3.7">3.7 Preferences Settings</A>
 </H2>
 
 <P>When BRLTTY starts, it loads a file which contains your preferences settings.
@@ -958,14 +1057,16 @@ Any command not recognized by the menu system also does these same things.</LI>
 
 <P>
 <DL>
-<DT><B>Save on Exit</B><DD><P>When exiting the preferences menu:
+<DT><B>Save on Exit
+<A NAME="preference-save-on-exit"></A> </B><DD><P>When exiting the preferences menu:
 <DL>
 <DT><B>No</B><DD><P>Don't automatically save the preferences settings.
 <DT><B>Yes</B><DD><P>Automatically save the preferences settings.
 </DL>
 
 The initial setting is <CODE>No</CODE>.
-<DT><B>Text Style</B><DD><P>When displaying screen content
+<DT><B>Text Style
+<A NAME="preference-text-style"></A> </B><DD><P>When displaying screen content
 (see the id="options-DISPMD" name="DISPMD"> command),
 show characters:
 <DL>
@@ -975,7 +1076,8 @@ show characters:
 
 This setting can also be changed with the
 <A HREF="#command-SIXDOTS">SIXDOTS</A> command.
-<DT><B>Meta Mode</B><DD><P>Enter a meta character by:
+<DT><B>Meta Mode
+<A NAME="preference-meta-mode"></A> </B><DD><P>Enter a meta character by:
 <DL>
 <DT><B>Escape Prefix</B><DD><P>Prefixing it with an <CODE>escape</CODE> byte.
 <DT><B>High-order Bit</B><DD><P>Setting its high-order bit.
@@ -983,7 +1085,8 @@ This setting can also be changed with the
 
 Use the <CODE>setmetamode</CODE> command to find out how your system has been configured.
 The initial setting is <CODE>Escape Prefix</CODE>.
-<DT><B>Skip Identical Lines</B><DD><P>When moving either up or down exactly one line with
+<DT><B>Skip Identical Lines
+<A NAME="preference-skip-identical-lines"></A> </B><DD><P>When moving either up or down exactly one line with
 the 
 <A HREF="#command-LNUP">LNUP</A>
 and 
@@ -1002,7 +1105,8 @@ and
 
 This setting can also be changed with the
 <A HREF="#command-SKPIDLNS">SKPIDLNS</A> command.
-<DT><B>Skip Blank Windows</B><DD><P>When moving either left or right with
+<DT><B>Skip Blank Windows
+<A NAME="preference-skip-blank-windows"></A> </B><DD><P>When moving either left or right with
 the 
 <A HREF="#command-FWINLT">FWINLT</A>
 and 
@@ -1014,7 +1118,8 @@ and
 
 This setting can also be changed with the
 <A HREF="#command-SKPBLNKWINS">SKPBLNKWINS</A> command.
-<DT><B>Which Blank Windows</B><DD><P>If blank windows are to be skipped:
+<DT><B>Which Blank Windows
+<A NAME="preference-which-blank-windows"></A> </B><DD><P>If blank windows are to be skipped:
 <DL>
 <DT><B>All</B><DD><P>Skip all of them.
 <DT><B>End of Line</B><DD><P>Only skip those which are at the end (on the right side) of a line.
@@ -1022,7 +1127,8 @@ This setting can also be changed with the
 at the end (on the right side) of a line when reading forward,
 and at the beginning (on the left side) of a line when reading backward.
 </DL>
-<DT><B>Sliding Window</B><DD><P>If the cursor is being tracked
+<DT><B>Sliding Window
+<A NAME="preference-sliding-window"></A> </B><DD><P>If the cursor is being tracked
 (see the 
 <A HREF="#command-CSRTRK">CSRTRK</A> command),
 and the cursor moves too close to (or beyond)
@@ -1036,14 +1142,16 @@ while remaining on that side of the window, is nearer the centre.
 
 This setting can also be changed with the
 <A HREF="#command-SLIDEWIN">SLIDEWIN</A> command.
-<DT><B>Eager Sliding Window</B><DD><P>If the braille window is to slide:
+<DT><B>Eager Sliding Window
+<A NAME="preference-eager-sliding-window"></A> </B><DD><P>If the braille window is to slide:
 <DL>
 <DT><B>No</B><DD><P>Reposition it whenever the cursor moves beyond either end.
 <DT><B>Yes</B><DD><P>Reposition it whenever the cursor moves too close to either end.
 </DL>
 
 The initial setting is <CODE>off</CODE>.
-<DT><B>Window Overlap</B><DD><P>When moving either left or right with
+<DT><B>Window Overlap
+<A NAME="preference-window-overlap"></A> </B><DD><P>When moving either left or right with
 the 
 <A HREF="#command-FWINLT">FWINLT</A>
 and 
@@ -1051,7 +1159,8 @@ and
 this setting specifies how many characters
 horizontally adjacent braille windows should overlap each other by.
 The initial setting is <CODE>0</CODE>.
-<DT><B>Show Cursor</B><DD><P>When displaying screen content
+<DT><B>Show Cursor
+<A NAME="preference-show-cursor"></A> </B><DD><P>When displaying screen content
 (see the id="options-DISPMD" name="DISPMD"> command):
 <DL>
 <DT><B>No</B><DD><P>Don't show the cursor.
@@ -1060,7 +1169,8 @@ The initial setting is <CODE>0</CODE>.
 
 This setting can also be changed with the
 <A HREF="#command-CSRVIS">CSRVIS</A> command.
-<DT><B>Cursor Style</B><DD><P>When showing the cursor, represent it:
+<DT><B>Cursor Style
+<A NAME="preference-cursor-style"></A> </B><DD><P>When showing the cursor, represent it:
 <DL>
 <DT><B>Underline</B><DD><P>With dots 7 and 8.
 <DT><B>Block</B><DD><P>With all eight dots.
@@ -1068,7 +1178,8 @@ This setting can also be changed with the
 
 This setting can also be changed with the
 <A HREF="#command-CSRSIZE">CSRSIZE</A> command.
-<DT><B>Blinking Cursor</B><DD><P>When the cursor is to be shown:
+<DT><B>Blinking Cursor
+<A NAME="preference-blinking-cursor"></A> </B><DD><P>When the cursor is to be shown:
 <DL>
 <DT><B>No</B><DD><P>Leave it visible all the time.
 <DT><B>Yes</B><DD><P>Make it alternately visible and invisible
@@ -1077,17 +1188,20 @@ according to a predefined interval.
 
 This setting can also be changed with the
 <A HREF="#command-CSRBLINK">CSRBLINK</A> command.
-<DT><B>Cursor Visible Period</B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
+<DT><B>Cursor Visible Period
+<A NAME="preference-cursor-visible-period"></A> </B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
 (see the note on 
 <A HREF="#time-settings">time settings</A> below)
 during each cycle that it is to be visible.
 The initial setting is <CODE>10</CODE>.
-<DT><B>Cursor Invisible Period</B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
+<DT><B>Cursor Invisible Period
+<A NAME="preference-cursor-invisible-period"></A> </B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
 (see the note on 
 <A HREF="#time-settings">time settings</A> below)
 during each cycle that it is to be invisible.
 The initial setting is <CODE>10</CODE>.
-<DT><B>Show Attributes</B><DD><P>When displaying screen content
+<DT><B>Show Attributes
+<A NAME="preference-show-attributes"></A> </B><DD><P>When displaying screen content
 (see the id="options-DISPMD" name="DISPMD"> command):
 <DL>
 <DT><B>No</B><DD><P>Don't underline highlighted characters.
@@ -1096,7 +1210,8 @@ The initial setting is <CODE>10</CODE>.
 
 This setting can also be changed with the
 <A HREF="#command-ATTRVIS">ATTRVIS</A> command.
-<DT><B>Blinking Attributes</B><DD><P>When highlighted characters are to be underlined:
+<DT><B>Blinking Attributes
+<A NAME="preference-blinking-attributes"></A> </B><DD><P>When highlighted characters are to be underlined:
 <DL>
 <DT><B>No</B><DD><P>Leave the indicator visible all the time.
 <DT><B>Yes</B><DD><P>Make the indicator alternately visible and invisible
@@ -1105,19 +1220,22 @@ according to a predefined interval.
 
 This setting can also be changed with the
 <A HREF="#command-ATTRBLINK">ATTRBLINK</A> command.
-<DT><B>Attributes Visible Period</B><DD><P>When the highlighted character underline is to be blinked,
+<DT><B>Attributes Visible Period
+<A NAME="preference-attributes-visible-period"></A> </B><DD><P>When the highlighted character underline is to be blinked,
 this setting specifies the length of time
 (see the note on 
 <A HREF="#time-settings">time settings</A> below)
 during each cycle that it is to be visible.
 The initial setting is <CODE>4</CODE>.
-<DT><B>Attributes Invisible Period</B><DD><P>When the highlighted character underline is to be blinked,
+<DT><B>Attributes Invisible Period
+<A NAME="preference-attributes-invisible-period"></A> </B><DD><P>When the highlighted character underline is to be blinked,
 this setting specifies the length of time
 (see the note on 
 <A HREF="#time-settings">time settings</A> below)
 during each cycle that it is to be invisible.
 The initial setting is <CODE>12</CODE>.
-<DT><B>Blinking Capitals</B><DD><P>When displaying screen content
+<DT><B>Blinking Capitals
+<A NAME="preference-blinking-capitals"></A> </B><DD><P>When displaying screen content
 (see the id="options-DISPMD" name="DISPMD"> command):
 <DL>
 <DT><B>No</B><DD><P>Leave capital letters visible all the time.
@@ -1127,29 +1245,34 @@ according to a predefined interval.
 
 This setting can also be changed with the
 <A HREF="#command-CAPBLINK">CAPBLINK</A> command.
-<DT><B>Capitals Visible Period</B><DD><P>When capital letters are to be blinked,
+<DT><B>Capitals Visible Period
+<A NAME="preference-capitals-visible-period"></A> </B><DD><P>When capital letters are to be blinked,
 this setting specifies the length of time
 (see the note on 
 <A HREF="#time-settings">time settings</A> below)
 during each cycle that they're to be visible.
 The initial setting is <CODE>4</CODE>.
-<DT><B>Capitals Invisible Period</B><DD><P>When capital letters are to be blinked,
+<DT><B>Capitals Invisible Period
+<A NAME="preference-capitals-invisible-period"></A> </B><DD><P>When capital letters are to be blinked,
 this setting specifies the length of time
 (see the note on 
 <A HREF="#time-settings">time settings</A> below)
 during each cycle that they're to be invisible.
 The initial setting is <CODE>2</CODE>.
-<DT><B>Alert Tunes</B><DD><P>Whenever a significant event occurs (see id="tunes" name="Alert Tunes">):
+<DT><B>Alert Tunes
+<A NAME="preference-alert-tunes"></A> </B><DD><P>Whenever a significant event with an associated tune occurs
+(see id="tunes" name="Alert Tunes">):
 <DL>
-<DT><B>No</B><DD><P>Don't play a short predefined tune.
-<DT><B>Yes</B><DD><P>Play a short predefined tune.
+<DT><B>No</B><DD><P>Don't play the tune.
+<DT><B>Yes</B><DD><P>Play the tune.
 </DL>
 
 This setting can also be changed with the
-<A HREF="#command-SND">SND</A> command.
-<DT><B>Tune Device</B><DD><P>Play alert tunes via:
+<A HREF="#command-TUNES">TUNES</A> command.
+<DT><B>Tune Device
+<A NAME="preference-tune-device"></A> </B><DD><P>Play alert tunes via:
 <DL>
-<DT><B>PC Speaker</B><DD><P>The PC speaker.
+<DT><B>PC Speaker</B><DD><P>The built-in PC speaker.
 This setting is always safe to use,
 although it may be a bit too soft.
 <DT><B>Sound Card</B><DD><P>The Digital to Analog Converter on the sound card
@@ -1170,13 +1293,31 @@ if you use it with a sound card which doesn't support this feature.
 </DL>
 
 The initial setting is <CODE>PC Speaker</CODE>.
-<DT><B>MIDI Instrument</B><DD><P>If the Musical Instrument Digital Interface of the sound card
+<DT><B>MIDI Instrument
+<A NAME="preference-midi-instrument"></A> </B><DD><P>If the Musical Instrument Digital Interface (MIDI) of the sound card
 is being used to play the alert tunes,
 this setting specifies which instrument is to be used
 (see the 
 <A HREF="Manual-6.html#midi">MIDI Instrument Table</A>).
 The initial setting is <CODE>Acoustic Grand Piano</CODE>.
-<DT><B>Status Cells Style</B><DD><P>This setting specifies the way that the status cells are to be used.
+<DT><B>Alert Dots
+<A NAME="preference-alert-dots"></A> </B><DD><P>Whenever a significant event with an associated dot pattern occurs
+(see id="tunes" name="Alert Tunes">):
+<DL>
+<DT><B>No</B><DD><P>Don't display the dot pattern.
+<DT><B>Yes</B><DD><P>Briefly display the dot pattern.
+</DL>
+
+If alert tunes are to be played
+(see the 
+<A HREF="#command-TUNES">TUNES</A> command
+and the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference),
+if a tune has been associated with the event,
+and if the selected tune device can be opened,
+then, regardless of the setting of this preference, the dot pattern isn't displayed.
+<DT><B>Status Cells Style
+<A NAME="preference-status-cells-style"></A> </B><DD><P>This setting specifies the way that the status cells are to be used.
 You shuldn't normally need to play with it.
 It enables BRLTTY's developers to test status cell configurations
 for braille displays which they don't actually have.
@@ -1239,7 +1380,7 @@ and the top-left corner of the braille window
 <A HREF="#command-DISPMD">DISPMD</A> command).
 <DT><B>Dot 3</B><DD><P>Alert tunes are being played
 (see the 
-<A HREF="#command-SND">SND</A> command).
+<A HREF="#command-TUNES">TUNES</A> command).
 <DT><B>Dot 4</B><DD><P>The cursor is being shown
 (see the 
 <A HREF="#command-CSRVIS">CSRVIS</A> command).
@@ -1302,7 +1443,7 @@ All time settings are in braille window refresh intervals
 They are integers within the range 1 through 16.</LI>
 </UL>
 <P>
-<H2><A NAME="configure"></A> <A NAME="ss3.7">3.7 The Configuration File</A>
+<H2><A NAME="configure"></A> <A NAME="ss3.8">3.8 The Configuration File</A>
 </H2>
 
 <P>System defaults for many settings may be established within a configuration file.
@@ -1410,7 +1551,7 @@ This directive can be overridden with the
 <A HREF="#options-text-table">-t</A> command line option.
 </DL>
 <P>
-<H2><A NAME="options"></A> <A NAME="ss3.8">3.8 Command Line Options</A>
+<H2><A NAME="options"></A> <A NAME="ss3.9">3.9 Command Line Options</A>
 </H2>
 
 <P>Many settings can be explicitly specified when invoking BRLTTY.

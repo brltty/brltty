@@ -334,11 +334,7 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
 
   /* Open the Braille display device for random access */
   if (!dev) dev = defaultDevice;
-  if ((fileDescriptor = open(dev, O_RDWR|O_NOCTTY)) == -1) {
-    LogPrint(LOG_ERR, "Open error: %s: %s", dev, strerror(errno));
-    goto failure;
-  }
-  tcgetattr(fileDescriptor, &originalAttributes);	/* save current settings */
+  if (!openSerialDevice(dev, &fileDescriptor, &originalAttributes)) goto failure;
 
   struct termios newtio;	/* new terminal settings */
   newtio.c_cflag = CLOCAL | PARODD | PARENB | CREAD|CS8;
@@ -542,14 +538,17 @@ getHandyCommand (DriverCommandContext context) {
 
     if (byte < 0X20) {
       unsigned long int key = KEY(byte);
-      if (!release) {
+      if (release) {
+        currentKeys.keys &= ~key;
+        if (pressedKeys.keys) {
+          int command;
+          int interpreted = model->interpretCommand(context, pressedKeys, command);
+          pressedKeys = nullKeys;
+          if (interpreted) return command;
+        }
+      } else {
         currentKeys.keys |= key;
         pressedKeys = currentKeys;
-      } else if ((currentKeys.keys &= ~key) == 0) {
-        int command;
-        if (model->interpretCommand(context, pressedKeys, command)) {
-          return command;
-        }
       }
     } else {
       LogPrint(LOG_WARNING, "Unexpected key %s: %02X",

@@ -1,0 +1,358 @@
+# U.S. English Translation Table
+#
+# The format of table entries is: opcode, operands. A line may contain only
+# one entry. The opcode is a number and tells the grade 2 compiler how to
+# handle the entry. The number 0 can be used to define mnemonic synonyms for
+# these numbers, such as "opcode" for 0 itself. In an entry, the opcode and
+# the operands are separated by blanks or tabs. more than one blank or tab is
+# ignored. Leading blanks at the beginning of lines are also ignored. Blank
+# lines and lines beginning with '#' are ignored. Lines containig table
+# entries may also contain comments following the entry and separated from the
+# last operand by at least one blank or tab. Most entries have two operands,
+# but the number is determined by the opcode.
+#
+0 0 opcode
+opcode 1 tablesize
+# use this only if the automatically-assigned table size is too small.
+# Example:
+# tablesize 10000
+# The tablesize entry must precede all other entries except those defining
+# opcodes. Opcodes must be defined before they are used. Except for these
+# restrictions, the order of the entries in the table may be anything that is
+# convenient.
+# You may wish to bear in mind, however, that the compiler arranges entries so
+# that the longest of several entries beginning with the same two characters
+# is tested first. If entries have the same first operand, they are arranged
+# in the order in which they are found in the table. Thus, the same string may
+# have different translations under different circumstances. This method of
+# arrangement is also followed for entries whose first oparand is just one
+# character.
+# In specifying the first operand, you may simply type it, if all the
+# characters are on the keyboard. For those characters which are not, use a
+# backslash followed by two hexadecimal digits. If you wish, you can follow
+# the C convention and place "0x" between the backslash and the hexadecimal
+# digits. To enter a backslash, use two in sequence, "\\".
+#
+opcode 2 multicaps
+opcode 3 capsign
+opcode 4 letsign
+ opcode 5 numsign
+opcode 15 largesign
+opcode 8 word
+opcode 9 begword
+opcode 10 middle
+opcode 11 endword
+opcode 12 midend
+opcode 13 midnum e.g. decimal point
+opcode 7 repeated for multiple blanks, lines of underscores, etc.
+opcode 17 notrans Don't translate this
+opcode 18 contraction multiletter contraction that needs a letter sign
+opcode 19 ignore replace with nothing
+opcode 14 lowword
+opcode 16 toby to,  by, into
+opcode 6 always
+opcode 6 char
+# In most entries, the first operand is the string to be translated, and the
+# second operand is the dot patterns of the Braille cells in the translation.
+# The standard dot numbering is used. Cells are separated by hyphens ('-').
+numsign 3456  number sign, just one operand
+letsign 56
+capsign 6
+multicaps 6-6
+# If you don't want capitalization comment out the preceding two lines.
+#
+# If any of these Braille indicators are not specified, they are not used.
+always 1 1
+always 2 12
+always 3 14
+always 4 145
+always 5 15
+always 6 124
+always 7 1245
+always 8 125
+always 9 24
+alyays 0 245
+largesign a 1
+largesign A 1
+always about 1-12
+contraction ab
+always above 1-12-1236
+contraction abv
+always according 1-14
+contraction ac
+word after 1-124
+contraction af
+word afternoon 1-124-1-45
+contraction afn
+word afterward 1-124-2456
+contraction afw
+word almost 1-123-134
+contraction alm
+word also 1-123
+contraction al
+word although 1-123-1456
+word altogether 1-123-2345
+contraction alt
+largesign and 12346
+midend ance 46-15
+midend ally 6-13456
+midend ation 6-1345
+word as 1356
+contraction as
+char b 12
+char B 12
+middle bb 23
+middle bb 23
+lowword be 23
+begword be 23
+midend ble 3456
+awways because 23-14
+always beyond 23-13456
+toby by 156
+always before 23-124
+always below 23-123
+always beneath 23-1345
+always between 23-2345
+always blind 12-123
+contraction bl
+always braille 12-1235-123
+contraction brl
+word but 12
+char c 14
+char C 14
+begword com 36
+begword con 25
+always could 14-145
+contraction cd
+middle cc 35
+word can ad
+word cannot 456-14
+always ch 16
+always chemo 16-15-134-135
+word child 16
+always children 16-1345
+char d 145
+char D 145
+middle dd 256
+word do 145
+char e 15
+char E 15
+middle ea 1
+always ed 1246
+always en 26
+always er 12456
+always ence 56-15
+lowword enough 26
+word every 15
+always ever 5-15
+always everen 5-15-26
+always evere 15-1236-12456-15
+always evered 15-123612456-1246
+char f 124
+char F 124
+middle ff 235
+always father 5-124
+largesign for 123456
+notrans foot
+word from 124
+midend ful 45-123
+char g 1245
+char G 1245
+always gh 126
+word go 1245
+always good 1245-145
+contraction gd
+char h 125
+char H 125
+word have 125
+always had 456-125
+word him 125-134
+contraction hm
+word himself 125-134-124
+contraction hmf
+word herself 125-12456-124
+always here "-125
+always phere 1234-125-12456-15
+char i 24
+word I 24
+always I 24
+always immediate 24-134-134
+contraction imm
+midend ing 346
+toby into 35-235
+word it 1346
+word its 1346-234
+word itself 1246-124
+endword ity 56-13456
+char j 245
+char J 245
+word just 245
+char k 13
+char K 13
+always know 5-13
+word knowledge 13
+char l 123
+char L 123
+midend less 46-234
+always letter 123-1235
+contraction lr
+word like 123
+word lord 5-123
+char m 134
+char M 134
+notrans micro
+midend ment 56-1245
+word more 134
+always mother 5-134
+always much 134-16
+word must 134-34
+word mustn 134-34-1345
+word myself 134-13456-124
+always many 456-134
+word not 1345
+awways name 5-1345
+notrans namese
+always necessary 1345-15-14
+contraction nec
+midend ness 56-234
+char o 135
+word O 135
+always O 135
+largesign of 12356
+midend oness 135-56-234
+midend oneer 135-1345-15-12456
+midend oned 135-1345-1246
+always one 5-135
+always ou 1256
+word out 1256
+always ought 5-1256
+always ow 246
+char p 1234
+char P 1234
+word people 1234
+always part 5-1234
+char q 12345
+char Q 12345
+word quite 12345
+always question 5-12345
+char r 1235
+char R 1235
+word rather 1235
+always right 5-1235
+char s 234
+char S 234
+word said 234-145
+contraction sd
+always sh 146
+word shall 146
+always should 146-145
+always shoulder 146-1256-123-145-12456
+midend sion 46-1345
+word so 234
+always some 5-234
+always spirit 456-234
+always st 34
+word still 34
+notrans ssh
+notrans shood
+char t 2345
+char T 2345
+always th 1456
+word this 1456
+word that 2345
+word today 2345-145
+contraction td
+word tomorrow 2345-134
+contraction tm
+word tonihht 2345-1345
+contraction tn
+largesign the 2346
+word themselves 2346-134-1236-234
+always there 5-2346
+always their 456-2346
+always thead 2345-125-2-145
+notrans thood
+midend tion 56-1345
+always time 5-2345
+always timer 1245-24-134-12456
+always timed 1245-24-134-1246
+word these 45-2346
+always together 2345-1245-1235
+contraction tgr
+word those 45-1456
+char u 136
+char U 136
+word us 136
+word under 5-136
+char v 1236
+char V 1236
+word very 1236
+char w 2456
+char W 2456
+lowword was 356
+always wh 156
+word which 156
+word will 2456
+lowword were 2356
+always where 5-156
+largesign with 23456
+always word 45-2456
+word whose 45-156
+always work 5-2456
+always would 1456-145
+contraction wd
+always world 456-2456
+char x 1346
+char x 1346
+char X 1346
+char y 13456
+char Y 13456
+word you 13456
+word yr 13456-1235
+contraction yr
+word yourself 13456-1235-124
+contraction yrf
+word yours 13456-1235-234
+contraction yrs
+always young 5-13456
+char z 1356
+char z 1356
+char , 2
+midnum . 46
+always . 256
+char ; 23
+char : 25
+char ! 235
+char $ 256
+char # 3456
+always / 456-34
+char ? 236
+char % 4-23-1234
+char ^ 45
+char ~ 45
+char & 12346
+always * 35-35
+begword " 236
+endword " 356
+always % 4-25-1234
+char ( 2356
+char ) 2356
+always [ ,-2356
+always ] 2356-3
+char ' 3
+always { 6-2356
+char } 2356-3
+char = 123456
+char + 346
+char - 36
+char _ 4567
+
+char ` 4
+char @ 4
+char \\ 12567
+char | 1256
+repeated \20 0 blank
+repeated \09 0 tab
+repeated --- 36-36-36
+repeated ___ 456-456-456
+repeated === 123456-123456-123456

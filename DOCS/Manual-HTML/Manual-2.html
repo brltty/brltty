@@ -256,7 +256,8 @@ It's initially set to <CODE>744</CODE>
 <A NAME="make-screen-driver"></A> </B><DD><P>This variable specifies which screen driver is to be used.
 It's initially set to <CODE>scr_linux.o</CODE>.
 Another screen driver, <CODE>scr_shm.o</CODE>, may also be used
-in conjunction with the patch we provide for the <CODE>screen</CODE> program.
+in conjunction with the patch we provide for the <CODE>screen</CODE> program
+(see the <CODE>Patches</CODE> subdirectory).
 <DT><B>VCSADEV
 <A NAME="make-screen-device"></A> </B><DD><P>This variable tells the Linux screen driver
 what all the possible paths to the screen content inspection device are.
@@ -606,7 +607,7 @@ and also provides an interactive way to learn
 what the keys on the braille display do.
 It must be run as root.
 <BLOCKQUOTE><CODE>
-brltest -<EM>optin</EM> ... [<EM>driver</EM> [<EM>name</EM>=<EM>value</EM>] ...]
+brltest -<EM>option</EM> ... [<EM>driver</EM> [<EM>name</EM>=<EM>value</EM>] ...]
 </CODE></BLOCKQUOTE>
 
 <DL>
@@ -624,21 +625,14 @@ please see the documentation for that driver.
 If it's not specified, then the device configured within the
 <A HREF="#make-braille-device">make file</A> is assumed.
 </DL>
-<P>The message ``This is BRLTTY!'' should appear on the braille display.
-Then, as each key (or key combination) on the display is pressed,
-a short message describing its BRLTTY function appears.
-This utility exits, and the message ``done'' appears,
-if ten seconds pass without any key on the display being pressed.
-Note that some displays don't signal the driver
-and/or some drivers don't signal BRLTTY
-until the keys are released.
-<P>If a message is longer than the braille display is wide,
-then it's displayed in segments.
-The length of each segment but the last is one less than the display's width,
-with the rightmost character on the display being set to a minus sign.
-Each such segment remains on the display
-either for four seconds
-or until a key on the display is pressed.
+<P>This utility uses BRLTTY's 
+<A HREF="Manual-3.html#learn">Command Learn Mode</A>.
+The key press timeout
+(after which this utility exits)
+is <CODE>10</CODE> seconds.
+The message hold time
+(used for non-final segments of long messages)
+is <CODE>4</CODE> seconds.
 <P>
 <H3><A NAME="utility-scrtest"></A> scrtest</H3>
 
@@ -697,6 +691,48 @@ Region: <EM>width</EM>x<EM>height</EM>@[<EM>column</EM>,<EM>row</EM>]
 <LI>The contents of the selected screen region.
 Unprintable characters are written as blanks.</LI>
 </OL>
+<P>
+<H3><A NAME="utility-tunetest"></A> tunetest</H3>
+
+<P>This utility tests the alert tunes facility,
+and also provides an easy way to compose new tunes.
+<BLOCKQUOTE><CODE>
+tunetest -<EM>option</EM> ... {<EM>note</EM> <EM>duration</EM>} ...
+</CODE></BLOCKQUOTE>
+
+<DL>
+<DT><B><EM>note</EM></B><DD><P>A standard <CODE>MIDI</CODE> note number.
+It must be an integer from <CODE>1</CODE> through <CODE>127</CODE>,
+with <CODE>60</CODE> representing <CODE>Middle C</CODE>.
+Each value represents a standard chromatic semi-tone,
+with the next lower and higher values
+representing, respectively, the next lower and higher notes.
+The lowest value (<CODE>1</CODE>) represents
+the fifth <CODE>C-Sharp</CODE> below <CODE>Middle C</CODE>,
+and the highest value (<CODE>127</CODE>) represents
+the sixth <CODE>G</CODE> above <CODE>Middle C</CODE>.
+<DT><B><EM>duration</EM></B><DD><P>The duration of the note in milliseconds.
+It must be an integer from <CODE>1</CODE> through <CODE>255</CODE>.
+<DT><B><CODE>-d</CODE><EM>device</EM> <CODE>--device=</CODE><EM>device</EM></B><DD><P>The device on which to play the tune.
+<DL>
+<DT><B>speaker</B><DD><P>The built-in PC speaker.
+<DT><B>dac</B><DD><P>The Digital to Analog Converter on the sound card.
+<DT><B>midi</B><DD><P>The Musical Instrument Digital Interface on the sound card.
+<DT><B>fm</B><DD><P>The FM synthesizer on an
+AdLib, OPL3, Sound Blaster, or equivalent sound card.
+</DL>
+
+The device name may be abbreviated.
+<DT><B><CODE>-i</CODE><EM>instrument</EM> <CODE>--instrument=</CODE><EM>instrument</EM></B><DD><P>The instrument to use if the selected device is <CODE>midi</CODE>.
+For the complete list of instruments,
+see the 
+<A HREF="Manual-6.html#midi">MIDI Instrument Table</A>.
+The default instrument is an <CODE>acoustic grand piano</CODE>.
+The words comprising the instrument name must be separated from one another
+by a single minus sign rather than by spaces,
+and any of the words may be abbreviated.
+An <CODE>acoustic grand piano</CODE>, for example, may be specified as <CODE>a-gra-pi</CODE>.
+</DL>
 <P>
 <HR>
 <A HREF="Manual-3.html">Next</A>

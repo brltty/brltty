@@ -36,14 +36,15 @@
 extern braille_driver *braille;
 int refreshInterval = REFRESH_INTERVAL;
 static brldim brl;
+static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
 
 void
 message (const unsigned char *string, short flags) {
   int length = strlen(string);
   int limit = brl.x * brl.y;
 
-  memset(statcells, 0, sizeof(statcells));
-  braille->writeStatus(statcells);
+  memset(statusCells, 0, sizeof(statusCells));
+  braille->writeStatus(statusCells);
 
   memset(brl.disp, ' ', brl.x*brl.y);
   while (length) {
@@ -57,7 +58,7 @@ message (const unsigned char *string, short flags) {
 
     /* Do Braille translation using text table: */
     for (index=0; index<limit; index++)
-      brl.disp[index] = texttrans[brl.disp[index]];
+      brl.disp[index] = textTable[brl.disp[index]];
     braille->writeWindow(&brl);
     if (length) {
       int timer = 0;
@@ -157,7 +158,7 @@ main (int argc, char *argv[]) {
     }
 
     if (chdir(HOME_DIR) != -1) {
-      reverseTable(texttrans, untexttrans);
+      reverseTable(textTable, untextTable);
       braille->identify();		/* start-up messages */
       braille->initialize(parameterSettings, &brl, device);
       if (brl.x > 0) {

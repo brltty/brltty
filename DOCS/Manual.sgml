@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 2.99.5, January 2002
+  <date>Version 2.99.6, February 2002
   <abstract>
     Copyright &copy; 1995-2001 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -117,7 +117,8 @@ This software has been tested on a variety of Linux systems:
 
 BRLTTY's main dependence on Linux is a special device (<tt/vcsa/)
 via which the screen contents and attributes can be read.
-An experimental patch for the <tt/screen/ program is provided.
+An experimental patch for the <tt/screen/ program is provided
+(see the <tt/Patches/ subdirectory).
 It allows BRLTTY to access <tt/screen/'s screen image via shared memory,
 and goes a long way toward making porting to other platforms possible
 (even to those which don't have their own screen content inspection facility).
@@ -404,7 +405,8 @@ The variables within the make file which you may wish to set and/or alter includ
     This variable specifies which screen driver is to be used.
     It's initially set to <tt/scr_linux.o/.
     Another screen driver, <tt/scr_shm.o/, may also be used
-    in conjunction with the patch we provide for the <tt/screen/ program.
+    in conjunction with the patch we provide for the <tt/screen/ program
+    (see the <tt/Patches/ subdirectory).
   <tag>VCSADEV<label id="make-screen-device"></tag>
     This variable tells the Linux screen driver
     what all the possible paths to the screen content inspection device are.
@@ -719,7 +721,7 @@ This utility tests the braille display driver,
 and also provides an interactive way to learn
 what the keys on the braille display do.
 It must be run as root.
-<tscreen>brltest -<em/optin/ ... [<em/driver/ [<em/name/=<em/value/] ...]</tscreen>
+<tscreen>brltest -<em/option/ ... [<em/driver/ [<em/name/=<em/value/] ...]</tscreen>
 <descrip>
   <tag><em/driver/</tag>
     The driver for the braille display.
@@ -738,22 +740,13 @@ It must be run as root.
     <ref id="make-braille-device" name="make file"> is assumed.
 </descrip>
 
-The message <tt/command learn mode/ should appear on the braille display.
-Then, as each key (or key combination) on the display is pressed,
-a short message describing its BRLTTY function appears.
-This utility exits, and the message <tt/done/ appears,
-if ten seconds pass without any key on the display being pressed.
-Note that some displays don't signal the driver
-and/or some drivers don't signal BRLTTY
-until the keys are released.
-
-If a message is longer than the braille display is wide,
-then it's displayed in segments.
-The length of each segment but the last is one less than the display's width,
-with the rightmost character on the display being set to a minus sign.
-Each such segment remains on the display
-either for four seconds
-or until a key on the display is pressed.
+This utility uses BRLTTY's <ref id="learn" name="Command Learn Mode">.
+The key press timeout
+(after which this utility exits)
+is <tt/10/ seconds.
+The message hold time
+(used for non-final segments of long messages)
+is <tt/4/ seconds.
 
 <sect2>scrtest<label id="utility-scrtest"><p>
 This utility tests the screen driver.
@@ -812,6 +805,50 @@ The following is written to standard output:
     The contents of the selected screen region.
     Unprintable characters are written as blanks.
 </enum>
+
+<sect2>tunetest<label id="utility-tunetest"><p>
+This utility tests the alert tunes facility,
+and also provides an easy way to compose new tunes.
+<tscreen>tunetest -<em/option/ ... {<em/note/ <em/duration/} ...</tscreen>
+<descrip>
+  <tag><em/note/</tag>
+    A standard <tt/MIDI/ note number.
+    It must be an integer from <tt/1/ through <tt/127/,
+    with <tt/60/ representing <tt/Middle C/.
+    Each value represents a standard chromatic semi-tone,
+    with the next lower and higher values
+    representing, respectively, the next lower and higher notes.
+    The lowest value (<tt/1/) represents
+    the fifth <tt/C-Sharp/ below <tt/Middle C/,
+    and the highest value (<tt/127/) represents
+    the sixth <tt/G/ above <tt/Middle C/.
+  <tag><em/duration/</tag>
+    The duration of the note in milliseconds.
+    It must be an integer from <tt/1/ through <tt/255/.
+  <tag><tt/-d/<em/device/ <tt/--device=/<em/device/</tag>
+    The device on which to play the tune.
+    <descrip>
+      <tag/speaker/
+        The built-in PC speaker.
+      <tag/dac/
+        The Digital to Analog Converter on the sound card.
+      <tag/midi/
+        The Musical Instrument Digital Interface on the sound card.
+      <tag/fm/
+        The FM synthesizer on an
+        AdLib, OPL3, Sound Blaster, or equivalent sound card.
+    </descrip>
+    The device name may be abbreviated.
+  <tag><tt/-i/<em/instrument/ <tt/--instrument=/<em/instrument/</tag>
+    The instrument to use if the selected device is <tt/midi/.
+    For the complete list of instruments,
+    see the <ref id="midi" name="MIDI Instrument Table">.
+    The default instrument is an <tt/acoustic grand piano/.
+    The words comprising the instrument name must be separated from one another
+    by a single minus sign rather than by spaces,
+    and any of the words may be abbreviated.
+    An <tt/acoustic grand piano/, for example, may be specified as <tt/a-gra-pi/.
+</descrip>
 
 <sect>Using BRLTTY<p>
 Before starting BRLTTY, you need to set up your braille display.
@@ -929,21 +966,29 @@ and the <ref id="command-PRINDENT" name="PRINDENT"> routing key commands.
   <tag>PRPGRPH<label id="command-PRPGRPH"></tag>
     Go up to the last line of the previous paragraph
     (the first non-blank line beyond the nearest previous blank line).
+    The current line is included when searching for the inter-paragraph space.
   <tag>NXPGRPH<label id="command-NXPGRPH"></tag>
     Go down to the first line of the next paragraph
     (the first non-blank line beyond the nearest next blank line).
+    The current line is included when searching for the inter-paragraph space.
   <tag>PRPROMPT<label id="command-PRPROMPT"></tag>
     Go up to the previous command prompt.
   <tag>NXPROMPT<label id="command-NXPROMPT"></tag>
     Go down to the next command prompt.
   <tag>PRSEARCH<label id="command-PRSEARCH"></tag>
-    Go up to the nearest previous line
-    whereon the character string within the cut buffer can be found.
-    See <ref id="cut" name="Cut and Paste"> for details.
+    Search backward for the nearest occurrence
+    of the character string within the cut buffer
+    (see <ref id="cut" name="Cut and Paste">).
+    The search starts at the character immediately to the left of the braille window,
+    proceeds from right to left,
+    and, at the beginning of a line, wraps to the end of the previous line.
   <tag>NXSEARCH<label id="command-NXSEARCH"></tag>
-    Go down to the nearest next line
-    whereon the character string within the cut buffer can be found.
-    See <ref id="cut" name="Cut and Paste"> for details.
+    Search forward for the nearest occurrence
+    of the character string within the cut buffer
+    (see <ref id="cut" name="Cut and Paste">).
+    The search starts at the character immediately to the right of the braille window,
+    proceeds from left to right,
+    and, at the end of a line, wraps to the beginning of the next line.
 </descrip>
 
 <sect2>Horizontal Motion<label id="horizontal"><p>
@@ -1031,6 +1076,8 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Show characters using 6-dot, rather than 8-dot, braille.
     Dots 7 and 8 are still used by other features
     like cursor representation and attribute underlining.
+    This setting can also be changed with the
+    <ref id="preference-text-style" name="Text Style"> preference.
   <tag>SLIDEWIN<label id="command-SLIDEWIN"></tag>
     If cursor tracking
     (see the <ref id="command-CSRTRK" name="CSRTRK"> command)
@@ -1042,6 +1089,8 @@ via the <ref id="preferences-menu" name="preferences menu">.
     If this feature is <bf/off/,
     then the braille window is always positioned such that
     its left end is a multiple of its width from the left edge of the screen.
+    This setting can also be changed with the
+    <ref id="preference-sliding-window" name="Sliding Window"> preference.
   <tag>SKPIDLNS<label id="command-SKPIDLNS"></tag>
     Rather than explicitly moving exactly one line either up or down,
     skip passed lines which have the same content as the current line.
@@ -1052,15 +1101,21 @@ via the <ref id="preferences-menu" name="preferences menu">.
     <ref id="command-FWINRT" name="FWINRT">,
     <ref id="command-FWINLTSKIP" name="FWINLTSKIP">,
     and <ref id="command-FWINRTSKIP" name="FWINRTSKIP"> commands.
+    This setting can also be changed with the
+    <ref id="preference-skip-identical-lines" name="Skip Identical Lines"> preference.
   <tag>SKPBLNKWINS<label id="command-SKPBLNKWINS"></tag>
     Skip passed blank windows when reading either forward or backward.
     This feature affects the <ref id="command-FWINLT" name="FWINLT">
     and <ref id="command-FWINRT" name="FWINRT"> commands.
+    This setting can also be changed with the
+    <ref id="preference-skip-blank-windows" name="Skip Blank Windows"> preference.
   <tag>CSRVIS<label id="command-CSRVIS"></tag>
     Show the cursor by superimposing a dot pattern
     (see the <ref id="command-CSRSIZE" name="CSRSIZE"> command)
     on top of the character where it is.
     This feature is initially <bf/on/.
+    This setting can also be changed with the
+    <ref id="preference-show-cursor" name="Show Cursor"> preference.
   <tag>CSRHIDE<label id="command-CSRHIDE"></tag>
     Hide the cursor (see the <ref id="command-CSRVIS" name="CSRVIS"> command)
     in order to accurately read the character beneath it.
@@ -1082,10 +1137,14 @@ via the <ref id="preferences-menu" name="preferences menu">.
   <tag>CSRSIZE<label id="command-CSRSIZE"></tag>
     Represent the cursor with all eight dots (a solid block),
     rather than with just dots 7 and 8 (an underline).
+    This setting can also be changed with the
+    <ref id="preference-cursor-style" name="Cursor Style"> preference.
   <tag>CSRBLINK<label id="command-CSRBLINK"></tag>
     Blink (turn on and off according to a predefined interval)
     the symbol representing the cursor
     (see the <ref id="command-CSRVIS" name="CSRVIS"> command).
+    This setting can also be changed with the
+    <ref id="preference-blinking-cursor" name="Blinking Cursor"> preference.
   <tag>ATTRVIS<label id="command-ATTRVIS"></tag>
     Underline (with combinations of dots 7 and 8) highlighted characters.
     <descrip>
@@ -1099,18 +1158,26 @@ via the <ref id="preferences-menu" name="preferences menu">.
       <tag/dot 8/
         Everything else.
     </descrip>
+    This setting can also be changed with the
+    <ref id="preference-show-attributes" name="Show Attributes"> preference.
   <tag>ATTRBLINK<label id="command-ATTRBLINK"></tag>
     Blink (turn on and off according to a predefined interval)
     the attribute underline
     (see the <ref id="command-ATTRVIS" name="ATTRVIS"> command).
     This feature is initially <bf/on/.
+    This setting can also be changed with the
+    <ref id="preference-blinking-attributes" name="Blinking Attributes"> preference.
   <tag>CAPBLINK<label id="command-CAPBLINK"></tag>
     Blink (turn on and off according to a predefined interval)
     capital (uppercase) letters.
+    This setting can also be changed with the
+    <ref id="preference-blinking-capitals" name="Blinking Capitals"> preference.
   <tag>TUNES<label id="command-TUNES"></tag>
     Play a short predefined tune (see <ref id="tunes" name="Alert Tunes">)
     whenever a significant event occurs.
     This feature is initially <bf/on/.
+    This setting can also be changed with the
+    <ref id="preference-alert-tunes" name="Alert Tunes"> preference.
 </descrip>
 
 <sect2>Mode Selection<p>
@@ -1131,6 +1198,11 @@ via the <ref id="preferences-menu" name="preferences menu">.
     and the states of a nmber of BRLTTY's features.
     See the section <ref id="status" name="The Status Display"> for full details.
     Invoke the <tt/info/ command again to return to the screen.
+  <tag>LEARN<label id="command-LEARN"></tag>
+    Switch to command learn mode,
+    which is an interactive way to learn what the keys on the braille display do.
+    See the section <ref id="learn" name="Command Learn Mode"> for full details.
+    Invoke the <tt/learn/ command again to return to the screen.
 </descrip>
 
 <sect2>Preferences Settings<p>
@@ -1410,8 +1482,38 @@ and <ref id="command-NXSEARCH" name="NXSEARCH"> commands.
 
 <sect1>Alert Tunes<label id="tunes"><p>
 BRLTTY alerts you to the occurrence of significant events
-by playing short predefined tunes on the PC speaker.
-Each such event has its own tune.
+by playing short predefined tunes.
+This feature can be activated and deactivated with
+either the (ref id="command-TUNES" name="TUNES"> command
+or the <ref id="preference-alert-tunes" name="Alert Tunes"> preference.
+The tunes are played on the PC speaker by default,
+but other options can be selected
+with the <ref id="preference-tune-device" name="Tune Device"> preference.
+
+Each significant event is associated, from highest to lowest priority,
+with one or more of the following:
+<descrip>
+  <tag/a tune/
+    If this feature is active
+    (see the (ref id="command-TUNES" name="TUNES"> command
+    and the <ref id="preference-alert-tunes" name="Alert Tunes"> preference),
+    if a tune has been associated with the event,
+    and if the selected tune device
+    (see the <ref id="preference-tune-device" name="Tune Device"> preference)
+    can be opened,
+    then the tune is played.
+  <tag/a dot pattern/
+    If the (ref id="preference-alert-dots" name="Alert Dots"> preference is active,
+    and if a dot pattern has been associated with the event,
+    then the dot pattern is briefly displayed on every braille cell.
+    Some braille displays don't respond quickly enough
+    for this mechanism to work effectively.
+  <tag/a message/
+    If a message has been associated with the event,
+    then it is displayed within the braille window
+    (see the <ref id="options-message-delay" name="-M"> command line option).
+</descrip>
+
 These events include:
 <itemize>
    <item>
@@ -1604,6 +1706,34 @@ in order to show the precise column layout.
     </descrip>
 </descrip>
 
+<sect1>Command Learn Mode<label id="learn"><p>
+Command learn mode is an interactive way to learn
+what the keys on the braille display do.
+It can be accessed
+either by the <ref id="command-LEARN" name="LEARN"> command
+or via the <ref id="utility-brltest" name="brltest"> utility.
+
+When this mode is entered,
+the message <tt/command learn mode/ is written to the braille display.
+Then, as each key (or key combination) on the display is pressed,
+a short message describing its BRLTTY function is written.
+This mode exits immediately if the key (or key combination)
+for the <ref id="command-LEARN" name="LEARN"> command is pressed.
+It exits automatically, and the message <tt/done/ is written,
+if ten seconds elapse without any key on the display being pressed.
+Note that some displays don't signal the driver
+and/or some drivers don't signal BRLTTY
+until all the keys are released.
+
+If a message is longer than the braille display is wide,
+then it's displayed in segments.
+The length of each segment but the last is one less than the display's width,
+with the rightmost character on the display being set to a minus sign.
+Each such segment remains on the display
+either for a few seconds
+(see the <ref id="options-message-delay" name="-M"> command line option)
+or until any key on the display is pressed.
+
 <sect1>Preferences Settings<label id="preferences"><p>
 When BRLTTY starts, it loads a file which contains your preferences settings.
 The file doesn't need to exist,
@@ -1676,7 +1806,7 @@ Notes:
 
 <sect3>The Menu Items<p>
 <descrip>
-  <tag/Save on Exit/
+  <tag>Save on Exit<label id="preference-save-on-exit"></tag>
     When exiting the preferences menu:
     <descrip>
       <tag/No/
@@ -1685,7 +1815,7 @@ Notes:
         Automatically save the preferences settings.
     </descrip>
     The initial setting is <tt/No/.
-  <tag/Text Style/
+  <tag>Text Style<label id="preference-text-style"></tag>
     When displaying screen content
     (see the id="options-DISPMD" name="DISPMD"> command),
     show characters:
@@ -1697,7 +1827,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-SIXDOTS" name="SIXDOTS"> command.
-  <tag/Meta Mode/
+  <tag>Meta Mode<label id="preference-meta-mode"></tag>
     Enter a meta character by:
     <descrip>
       <tag/Escape Prefix/
@@ -1707,7 +1837,7 @@ Notes:
     </descrip>
     Use the <tt/setmetamode/ command to find out how your system has been configured.
     The initial setting is <tt/Escape Prefix/.
-  <tag/Skip Identical Lines/
+  <tag>Skip Identical Lines<label id="preference-skip-identical-lines"></tag>
     When moving either up or down exactly one line with
     the <ref id="command-LNUP" name="LNUP">
     and <ref id="command-LNDN" name="LNDN"> commands,
@@ -1724,7 +1854,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-SKPIDLNS" name="SKPIDLNS"> command.
-  <tag/Skip Blank Windows/
+  <tag>Skip Blank Windows<label id="preference-skip-blank-windows"></tag>
     When moving either left or right with
     the <ref id="command-FWINLT" name="FWINLT">
     and <ref id="command-FWINRT" name="FWINRT"> commands:
@@ -1736,7 +1866,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command.
-  <tag/Which Blank Windows/
+  <tag>Which Blank Windows<label id="preference-which-blank-windows"></tag>
     If blank windows are to be skipped:
     <descrip>
       <tag/All/
@@ -1748,7 +1878,7 @@ Notes:
         at the end (on the right side) of a line when reading forward,
         and at the beginning (on the left side) of a line when reading backward.
     </descrip>
-  <tag/Sliding Window/
+  <tag>Sliding Window<label id="preference-sliding-window"></tag>
     If the cursor is being tracked
     (see the <ref id="command-CSRTRK" name="CSRTRK"> command),
     and the cursor moves too close to (or beyond)
@@ -1763,7 +1893,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-SLIDEWIN" name="SLIDEWIN"> command.
-  <tag/Eager Sliding Window/
+  <tag>Eager Sliding Window<label id="preference-eager-sliding-window"></tag>
     If the braille window is to slide:
     <descrip>
       <tag/No/
@@ -1772,14 +1902,14 @@ Notes:
         Reposition it whenever the cursor moves too close to either end.
     </descrip>
     The initial setting is <tt/off/.
-  <tag/Window Overlap/
+  <tag>Window Overlap<label id="preference-window-overlap"></tag>
     When moving either left or right with
     the <ref id="command-FWINLT" name="FWINLT">
     and <ref id="command-FWINRT" name="FWINRT"> commands,
     this setting specifies how many characters
     horizontally adjacent braille windows should overlap each other by.
     The initial setting is <tt/0/.
-  <tag/Show Cursor/
+  <tag>Show Cursor<label id="preference-show-cursor"></tag>
     When displaying screen content
     (see the id="options-DISPMD" name="DISPMD"> command):
     <descrip>
@@ -1790,7 +1920,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-CSRVIS" name="CSRVIS"> command.
-  <tag/Cursor Style/
+  <tag>Cursor Style<label id="preference-cursor-style"></tag>
     When showing the cursor, represent it:
     <descrip>
       <tag/Underline/
@@ -1800,7 +1930,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-CSRSIZE" name="CSRSIZE"> command.
-  <tag/Blinking Cursor/
+  <tag>Blinking Cursor<label id="preference-blinking-cursor"></tag>
     When the cursor is to be shown:
     <descrip>
       <tag/No/
@@ -1811,17 +1941,17 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-CSRBLINK" name="CSRBLINK"> command.
-  <tag/Cursor Visible Period/
+  <tag>Cursor Visible Period<label id="preference-cursor-visible-period"></tag>
     When the cursor is to be blinked, this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be visible.
     The initial setting is <tt/10/.
-  <tag/Cursor Invisible Period/
+  <tag>Cursor Invisible Period<label id="preference-cursor-invisible-period"></tag>
     When the cursor is to be blinked, this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be invisible.
     The initial setting is <tt/10/.
-  <tag/Show Attributes/
+  <tag>Show Attributes<label id="preference-show-attributes"></tag>
     When displaying screen content
     (see the id="options-DISPMD" name="DISPMD"> command):
     <descrip>
@@ -1832,7 +1962,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-ATTRVIS" name="ATTRVIS"> command.
-  <tag/Blinking Attributes/
+  <tag>Blinking Attributes<label id="preference-blinking-attributes"></tag>
     When highlighted characters are to be underlined:
     <descrip>
       <tag/No/
@@ -1843,19 +1973,19 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-ATTRBLINK" name="ATTRBLINK"> command.
-  <tag/Attributes Visible Period/
+  <tag>Attributes Visible Period<label id="preference-attributes-visible-period"></tag>
     When the highlighted character underline is to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be visible.
     The initial setting is <tt/4/.
-  <tag/Attributes Invisible Period/
+  <tag>Attributes Invisible Period<label id="preference-attributes-invisible-period"></tag>
     When the highlighted character underline is to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be invisible.
     The initial setting is <tt/12/.
-  <tag/Blinking Capitals/
+  <tag>Blinking Capitals<label id="preference-blinking-capitals"></tag>
     When displaying screen content
     (see the id="options-DISPMD" name="DISPMD"> command):
     <descrip>
@@ -1867,33 +1997,34 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-CAPBLINK" name="CAPBLINK"> command.
-  <tag/Capitals Visible Period/
+  <tag>Capitals Visible Period<label id="preference-capitals-visible-period"></tag>
     When capital letters are to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that they're to be visible.
     The initial setting is <tt/4/.
-  <tag/Capitals Invisible Period/
+  <tag>Capitals Invisible Period<label id="preference-capitals-invisible-period"></tag>
     When capital letters are to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that they're to be invisible.
     The initial setting is <tt/2/.
-  <tag/Alert Tunes/
-    Whenever a significant event occurs (see id="tunes" name="Alert Tunes">):
+  <tag>Alert Tunes<label id="preference-alert-tunes"></tag>
+    Whenever a significant event with an associated tune occurs
+    (see id="tunes" name="Alert Tunes">):
     <descrip>
       <tag/No/
-        Don't play a short predefined tune.
+        Don't play the tune.
       <tag/Yes/
-        Play a short predefined tune.
+        Play the tune.
     </descrip>
     This setting can also be changed with the
     <ref id="command-TUNES" name="TUNES"> command.
-  <tag/Tune Device/
+  <tag>Tune Device<label id="preference-tune-device"></tag>
     Play alert tunes via:
     <descrip>
       <tag/PC Speaker/
-        The PC speaker.
+        The built-in PC speaker.
         This setting is always safe to use,
         although it may be a bit too soft.
       <tag/Sound Card/
@@ -1915,13 +2046,28 @@ Notes:
         if you use it with a sound card which doesn't support this feature.
     </descrip>
     The initial setting is <tt/PC Speaker/.
-  <tag/MIDI Instrument/
-    If the Musical Instrument Digital Interface of the sound card
+  <tag>MIDI Instrument<label id="preference-midi-instrument"></tag>
+    If the Musical Instrument Digital Interface (MIDI) of the sound card
     is being used to play the alert tunes,
     this setting specifies which instrument is to be used
     (see the <ref id="midi" name="MIDI Instrument Table">).
     The initial setting is <tt/Acoustic Grand Piano/.
-  <tag/Status Cells Style/
+  <tag>Alert Dots<label id="preference-alert-dots"></tag>
+    Whenever a significant event with an associated dot pattern occurs
+    (see id="tunes" name="Alert Tunes">):
+    <descrip>
+      <tag/No/
+        Don't display the dot pattern.
+      <tag/Yes/
+        Briefly display the dot pattern.
+    </descrip>
+    If alert tunes are to be played
+    (see the <ref id="command-TUNES" name="TUNES"> command
+    and the <ref id="preference-alert-tunes" name="Alert Tunes"> preference),
+    if a tune has been associated with the event,
+    and if the selected tune device can be opened,
+    then, regardless of the setting of this preference, the dot pattern isn't displayed.
+  <tag>Status Cells Style<label id="preference-status-cells-style"></tag>
     This setting specifies the way that the status cells are to be used.
     You shuldn't normally need to play with it.
     It enables BRLTTY's developers to test status cell configurations
@@ -2751,7 +2897,11 @@ BRLTTY supports the following braille displays:
     2D Screen Soft,
     EL 2D-40,
     EL 2D-66,
-    EL-80,
+    EL 2D-80,
+    EL 40,
+    EL 80,
+    Elba 20,
+    Elba 32,
     IB 80 CR Soft
   <item>
     <htmlurl url="http://www.pulsedata.co.nz/" name="Pulse Data International">:
@@ -3121,7 +3271,7 @@ Perhaps a picture will make this numbering convention easier to understand.
     <newline>
     Electric Grand Piano
     <newline>
-    Honky-tonk Piano
+    Honkytonk Piano
     <newline>
     Electric Piano 1
     <newline>

@@ -203,7 +203,7 @@ void terminals(int help, int verbose)
 	      "# number: display two digits in one cell "
 	      "when status on horiz.display\n");
       for(i=0; i < STATMAX; i++) 
-	if(pm_terminals[tn].statshow[i] != STAT_Empty)
+	if(pm_terminals[tn].statshow[i] != STAT_EMPTY)
 	  {
 	    int val = pm_terminals[tn].statshow[i];
 

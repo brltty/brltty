@@ -39,7 +39,7 @@ typedef enum {
   CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
 } InternalDriverCommands;
 typedef enum {
-  STAT_InputMode = StatusCellCount /* input mode */,
+  STAT_INPUT = StatusCellCount /* input mode */,
   InternalStatusCellCount
 } InternalStatusCell;
 #include "brl-cfg.h"
@@ -194,7 +194,7 @@ FILE* configfile = NULL;
 
 %token STATCELLS FRONTKEYS EASYBAR SIZE
 %token STAT FRONT KEYCODE STATCODE
-%token STATCODE HORIZ FLAG
+%token HORIZ FLAG
 %token EASY EASYCODE
 %token SWITCH NUMBER
 %token ROUTING
@@ -298,10 +298,6 @@ static struct init_v symbols[]= {
   { "easy",        EASY, 0 },
   { "switch",      SWITCH, 0 },
 
-  { "s",           STAT, 0 },
-  { "f",           FRONT, 0 },
-  { "e",           EASY, 0 },
-
   { "horiz",       HORIZ, 0 },
   { "flag",        FLAG, 0 },
   { "number",      NUMBER, 0 },
@@ -321,7 +317,6 @@ static struct init_v symbols[]= {
 
   { "routing",     ROUTING, 0 },
   { "route",       ROUTING, 0 },
-  { "r",           ROUTING, 0 },
 
   { "on",          ON, 0 },
   { "off",         OFF, 0 },

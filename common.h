@@ -71,12 +71,12 @@ typedef struct {
   unsigned char metamode;
   unsigned char slidewin;
   unsigned char eager_slidewin;
-  unsigned char sound;
+  unsigned char tunes;
   unsigned char tunedev;
   unsigned char skpidlns;
   unsigned char spare15;
   unsigned char skpblnkwinsmode;
-  unsigned char spare16;
+  unsigned char dots;
   unsigned char skpblnkwins;
   unsigned char midiinstr;
   unsigned char stcellstyle;

@@ -362,6 +362,7 @@ spk_close (void) {
 static void
 spk_doTrack (void) {
    if (eci) {
+      eciSpeaking(eci);
    }
 }
 

@@ -80,7 +80,7 @@ static ToneDefinition tones_toggle_off[] = {
    TONE_WAIT( 30),
    TONE_NOTE( 30,  79),
    TONE_WAIT( 30),
-   TONE_NOTE( 30,  73),
+   TONE_NOTE( 30,  74),
    TONE_STOP()
 };
 TuneDefinition tune_toggle_off = {
@@ -430,7 +430,7 @@ void closeTuneDevice (int force) {
  
 void playTune (TuneDefinition *tune) {
    int tunePlayed = 0;
-   if (prefs.sound) {
+   if (prefs.tunes && tune->tones) {
       if (toneGenerator) {
 	 if (toneGenerator->open()) {
 	    ToneDefinition *tone = tune->tones;
@@ -448,12 +448,11 @@ void playTune (TuneDefinition *tune) {
       }
    }
    if (!tunePlayed) {
-      if (tune->tactile) {
+      if (prefs.dots && tune->tactile) {
 	 unsigned char dots = tune->tactile & 0XFF;
 	 unsigned char duration = tune->tactile >> 8;
          showDotPattern(dots, duration);
-      }
-      if (tune->message) {
+      } else if (tune->message) {
 	 message(tune->message, 0);
       }
    }

@@ -95,10 +95,11 @@ extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
 
-extern int setSerialDevice (int file, struct termios *attributes, speed_t baud);
-extern int resetSerialDevice (int file, struct termios *attributes, speed_t baud);
-extern int awaitInput (int file, int milliseconds);
-extern int readChunk (int file, unsigned char *buffer, int *offset, int count, int timeout);
+extern int openSerialDevice (const char *path, int *descriptor, struct termios *attributes);
+extern int setSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
+extern int resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
+extern int awaitInput (int descriptor, int milliseconds);
+extern int readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout);
 
 extern int validateInteger (int *integer, const char *description, const char *value, const int *minimum, const int *maximum);
 extern int validateBaud (speed_t *baud, const char *description, const char *value, const unsigned int *choices);

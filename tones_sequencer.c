@@ -35,7 +35,7 @@ char *midiInstrumentTable[] = {
   /* 00 */ "Acoustic Grand Piano",
   /* 01 */ "Bright Acoustic Piano",
   /* 02 */ "Electric Grand Piano",
-  /* 03 */ "Honky-tonk Piano",
+  /* 03 */ "Honkytonk Piano",
   /* 04 */ "Electric Piano 1",
   /* 05 */ "Electric Piano 2",
   /* 06 */ "Harpsichord",

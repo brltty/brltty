@@ -9,7 +9,7 @@
 
   Dave Mielke <dave@mielke.cc>
 
-  Version 2.99.5, January 2002
+  Version 2.99.6, February 2002
 
   Copyright © 1995-2001 by The BRLTTY Team - All Rights Reserved.  This
   is free software, placed under the terms of TThhee GGNNUU GGeenneerraall PPuubblliicc
@@ -83,6 +83,7 @@
         2.7.3 tbl2hex
         2.7.4 brltest
         2.7.5 scrtest
+        2.7.6 tunetest
 
   3. Using BRLTTY
 
@@ -104,12 +105,13 @@
      3.5 The Status Display
         3.5.1 Displays with 21 Cells or More
         3.5.2 Displays with 20 Cells or Less
-     3.6 Preferences Settings
-        3.6.1 The Preferences Menu
-           3.6.1.1 Navigating the Menu
-           3.6.1.2 The Menu Items
-     3.7 The Configuration File
-     3.8 Command Line Options
+     3.6 Command Learn Mode
+     3.7 Preferences Settings
+        3.7.1 The Preferences Menu
+           3.7.1.1 Navigating the Menu
+           3.7.1.2 The Menu Items
+     3.8 The Configuration File
+     3.9 Command Line Options
 
   4. Translation Tables
 
@@ -196,6 +198,7 @@
   (thanks to Oscar Fernandez), Alva Delphi (thanks to Terry Barnaby),
   and Braille Lite 18 (from Nikhil Nair), as well as Some small
   improvements and fixes.
+
   Dave Mielke began to submit fixes and enhancements during 2000, and
   joined the team as the next maintainer in June of 2001.  Thanks to
   Nicolas Pitre for his many years of service in this capacity.
@@ -232,12 +235,12 @@
 
   BRLTTY's main dependence on Linux is a special device (vcsa) via which
   the screen contents and attributes can be read.  An experimental patch
-  for the screen program is provided.  It allows BRLTTY to access
-  screen's screen image via shared memory, and goes a long way toward
-  making porting to other platforms possible (even to those which don't
-  have their own screen content inspection facility).  The main weakness
-  of the screen approach is that BRLTTY can't be started until the user
-  has logged in.
+  for the screen program is provided (see the Patches subdirectory).  It
+  allows BRLTTY to access screen's screen image via shared memory, and
+  goes a long way toward making porting to other platforms possible
+  (even to those which don't have their own screen content inspection
+  facility).  The main weakness of the screen approach is that BRLTTY
+  can't be started until the user has logged in.
 
   BRLTTY, as noted above, relies on a special device which provides easy
   access to the contents of the current virtual console.  This device
@@ -322,6 +325,7 @@
 
        cd brltty-_r_e_l_e_a_s_e
        make uninstall
+
 
 
   Now, for those who really want to know what's going on, here are the
@@ -521,8 +525,7 @@
         This variable specifies which screen driver is to be used.  It's
         initially set to scr_linux.o.  Another screen driver, scr_shm.o,
         may also be used in conjunction with the patch we provide for
-        the screen program.
-
+        the screen program (see the Patches subdirectory).
      VVCCSSAADDEEVV
         This variable tells the Linux screen driver what all the
         possible paths to the screen content inspection device are.
@@ -655,8 +658,10 @@
 
   This can usually be abbreviated to the somewhat less readable form:
 
+  [ -x /sbin/brltty ] && /sbin/brltty
 
-       [ -x /sbin/brltty ] && /sbin/brltty
+
+
 
   Don't add these lines before the first line (which usually looks like
   #!/bin/sh).
@@ -785,11 +790,6 @@
 
   Building BRLTTY also results in the building of a few small helper and
   diagnostic utilities.
-
-
-
-
-
   22..77..11..  iinnssttaallll--bbrrllttttyy
 
   This utility copies BRLTTY's ``installed file hierarchy'' from one
@@ -862,7 +862,7 @@
   interactive way to learn what the keys on the braille display do.  It
   must be run as root.
 
-       brltest -_o_p_t_i_n ... [_d_r_i_v_e_r [_n_a_m_e=_v_a_l_u_e] ...]
+       brltest -_o_p_t_i_o_n ... [_d_r_i_v_e_r [_n_a_m_e=_v_a_l_u_e] ...]
 
 
 
@@ -882,20 +882,9 @@
         connected.  If it's not specified, then the device configured
         within the ``make file'' is assumed.
 
-  The message ``This is BRLTTY!'' should appear on the braille display.
-  Then, as each key (or key combination) on the display is pressed, a
-  short message describing its BRLTTY function appears.  This utility
-  exits, and the message ``done'' appears, if ten seconds pass without
-  any key on the display being pressed.  Note that some displays don't
-  signal the driver and/or some drivers don't signal BRLTTY until the
-  keys are released.
-
-  If a message is longer than the braille display is wide, then it's
-  displayed in segments.  The length of each segment but the last is one
-  less than the display's width, with the rightmost character on the
-  display being set to a minus sign.  Each such segment remains on the
-  display either for four seconds or until a key on the display is
-  pressed.
+  This utility uses BRLTTY's ``Command Learn Mode''.  The key press
+  timeout (after which this utility exits) is 10 seconds.  The message
+  hold time (used for non-final segments of long messages) is 4 seconds.
 
 
   22..77..55..  ssccrrtteesstt
@@ -933,7 +922,6 @@
         isn't supplied, then a default value, based on the specified
         starting column, is selected such that the region is
         horizontally centred.
-
   Notes:
 
   ·  If neither a starting column nor a region width is specified, then
@@ -964,6 +952,54 @@
      are written as blanks.
 
 
+  22..77..66..  ttuunneetteesstt
+
+  This utility tests the alert tunes facility, and also provides an easy
+  way to compose new tunes.
+
+       tunetest -_o_p_t_i_o_n ... {_n_o_t_e _d_u_r_a_t_i_o_n} ...
+
+
+
+     _n_o_t_e
+        A standard MIDI note number.  It must be an integer from 1
+        through 127, with 60 representing Middle C.  Each value
+        represents a standard chromatic semi-tone, with the next lower
+        and higher values representing, respectively, the next lower and
+        higher notes.  The lowest value (1) represents the fifth C-Sharp
+        below Middle C, and the highest value (127) represents the sixth
+        G above Middle C.
+
+     _d_u_r_a_t_i_o_n
+        The duration of the note in milliseconds.  It must be an integer
+        from 1 through 255.
+
+     -d_d_e_v_i_c_e --device=_d_e_v_i_c_e
+        The device on which to play the tune.
+
+        ssppeeaakkeerr
+           The built-in PC speaker.
+
+        ddaacc
+           The Digital to Analog Converter on the sound card.
+
+        mmiiddii
+           The Musical Instrument Digital Interface on the sound card.
+
+        ffmm The FM synthesizer on an AdLib, OPL3, Sound Blaster, or
+           equivalent sound card.
+        The device name may be abbreviated.
+
+     -i_i_n_s_t_r_u_m_e_n_t --instrument=_i_n_s_t_r_u_m_e_n_t
+        The instrument to use if the selected device is midi.  For the
+        complete list of instruments, see the ``MIDI Instrument Table''.
+        The default instrument is an acoustic grand piano.  The words
+        comprising the instrument name must be separated from one
+        another by a single minus sign rather than by spaces, and any of
+        the words may be abbreviated.  An acoustic grand piano, for
+        example, may be specified as a-gra-pi.
+
+
   33..  UUssiinngg BBRRLLTTTTYY
 
   Before starting BRLTTY, you need to set up your braille display.  In
@@ -986,7 +1022,6 @@
   display.  The display will then show a small area of the screen
   including the cursor.  By default, the cursor is represented as dots 7
   and 8 superimposed on the character it is on.
-
 
   Any screen activity will be reflected on the braille display.  The
   display will also follow the progress of the cursor on the screen.
@@ -1079,11 +1114,13 @@
 
      PPRRPPGGRRPPHH
         Go up to the last line of the previous paragraph (the first non-
-        blank line beyond the nearest previous blank line).
+        blank line beyond the nearest previous blank line).  The current
+        line is included when searching for the inter-paragraph space.
 
      NNXXPPGGRRPPHH
         Go down to the first line of the next paragraph (the first non-
-        blank line beyond the nearest next blank line).
+        blank line beyond the nearest next blank line).  The current
+        line is included when searching for the inter-paragraph space.
 
      PPRRPPRROOMMPPTT
         Go up to the previous command prompt.
@@ -1092,14 +1129,18 @@
         Go down to the next command prompt.
 
      PPRRSSEEAARRCCHH
-        Go up to the nearest previous line whereon the character string
-        within the cut buffer can be found.  See ``Cut and Paste'' for
-        details.
+        Search backward for the nearest occurrence of the character
+        string within the cut buffer (see ``Cut and Paste'').  The
+        search starts at the character immediately to the left of the
+        braille window, proceeds from right to left, and, at the
+        beginning of a line, wraps to the end of the previous line.
 
      NNXXSSEEAARRCCHH
-        Go down to the nearest next line whereon the character string
-        within the cut buffer can be found.  See ``Cut and Paste'' for
-        details.
+        Search forward for the nearest occurrence of the character
+        string within the cut buffer (see ``Cut and Paste'').  The
+        search starts at the character immediately to the right of the
+        braille window, proceeds from left to right, and, at the end of
+        a line, wraps to the beginning of the next line.
 
 
   33..11..22..  HHoorriizzoonnttaall MMoottiioonn
@@ -1145,8 +1186,6 @@
 
      LLNNEENNDD
         Go to the end (right) of the line.
-
-
   33..11..33..  IImmpplliicciitt MMoottiioonn
 
   See also the ``GOTOMARK'' routing key command.
@@ -1195,7 +1234,8 @@
      SSIIXXDDOOTTSS
         Show characters using 6-dot, rather than 8-dot, braille.  Dots 7
         and 8 are still used by other features like cursor
-        representation and attribute underlining.
+        representation and attribute underlining.  This setting can also
+        be changed with the ``Text Style'' preference.
 
      SSLLIIDDEEWWIINN
         If cursor tracking (see the ``CSRTRK'' command) is oonn, then,
@@ -1204,7 +1244,8 @@
         the cursor, while remaining on that side, is nearer the centre.
         If this feature is ooffff, then the braille window is always
         positioned such that its left end is a multiple of its width
-        from the left edge of the screen.
+        from the left edge of the screen.  This setting can also be
+        changed with the ``Sliding Window'' preference.
 
      SSKKPPIIDDLLNNSS
         Rather than explicitly moving exactly one line either up or
@@ -1212,17 +1253,20 @@
         current line.  This feature affects the ``LNUP'' and ``LNDN''
         commands, as well as the line wrapping feature of the
         ``FWINLT'', ``FWINRT'', ``FWINLTSKIP'', and ``FWINRTSKIP''
-        commands.
+        commands.  This setting can also be changed with the ``Skip
+        Identical Lines'' preference.
 
      SSKKPPBBLLNNKKWWIINNSS
         Skip passed blank windows when reading either forward or
         backward.  This feature affects the ``FWINLT'' and ``FWINRT''
-        commands.
+        commands.  This setting can also be changed with the ``Skip
+        Blank Windows'' preference.
 
      CCSSRRVVIISS
         Show the cursor by superimposing a dot pattern (see the
         ``CSRSIZE'' command) on top of the character where it is.  This
-        feature is initially oonn.
+        feature is initially oonn.  This setting can also be changed with
+        the ``Show Cursor'' preference.
 
      CCSSRRHHIIDDEE
         Hide the cursor (see the ``CSRVIS'' command) in order to
@@ -1245,12 +1289,14 @@
 
      CCSSRRSSIIZZEE
         Represent the cursor with all eight dots (a solid block), rather
-        than with just dots 7 and 8 (an underline).
+        than with just dots 7 and 8 (an underline).  This setting can
+        also be changed with the ``Cursor Style'' preference.
 
      CCSSRRBBLLIINNKK
         Blink (turn on and off according to a predefined interval) the
         symbol representing the cursor (see the ``CSRVIS'' command).
-
+        This setting can also be changed with the ``Blinking Cursor''
+        preference.
 
      AATTTTRRVVIISS
         Underline (with combinations of dots 7 and 8) highlighted
@@ -1266,18 +1312,24 @@
         ddoott 88
            Everything else.
 
+        This setting can also be changed with the ``Show Attributes''
+        preference.
+
      AATTTTRRBBLLIINNKK
         Blink (turn on and off according to a predefined interval) the
         attribute underline (see the ``ATTRVIS'' command).  This feature
-        is initially oonn.
+        is initially oonn.  This setting can also be changed with the
+        ``Blinking Attributes'' preference.
 
      CCAAPPBBLLIINNKK
         Blink (turn on and off according to a predefined interval)
-        capital (uppercase) letters.
+        capital (uppercase) letters.  This setting can also be changed
+        with the ``Blinking Capitals'' preference.
 
-     SSNNDD
+     TTUUNNEESS
         Play a short predefined tune (see ``Alert Tunes'') whenever a
-        significant event occurs.  This feature is initially oonn.
+        significant event occurs.  This feature is initially oonn.  This
+        setting can also be changed with the ``Alert Tunes'' preference.
 
 
   33..11..55..  MMooddee SSeelleeccttiioonn
@@ -1298,6 +1350,12 @@
         ``The Status Display'' for full details.  Invoke the info
         command again to return to the screen.
 
+     LLEEAARRNN
+        Switch to command learn mode, which is an interactive way to
+        learn what the keys on the braille display do.  See the section
+        ``Command Learn Mode'' for full details.  Invoke the learn
+        command again to return to the screen.
+
 
   33..11..66..  PPrreeffeerreenncceess SSeettttiinnggss
 
@@ -1316,8 +1374,6 @@
         ``Preferences'' for full details).
 
 
-
-
   33..11..77..  MMeennuu NNaavviiggaattiioonn
 
 
@@ -1326,6 +1382,7 @@
 
      MMEENNUU__LLAASSTT__IITTEEMM
         Go to the last item in the menu.
+
 
      MMEENNUU__PPRREEVV__IITTEEMM
         Go to the previous item in the menu.
@@ -1582,11 +1639,38 @@
   The cut buffer is also used by the ``PRSEARCH'' and ``NXSEARCH''
   commands.
 
+
   33..44..  AAlleerrtt TTuunneess
 
   BRLTTY alerts you to the occurrence of significant events by playing
-  short predefined tunes on the PC speaker.  Each such event has its own
-  tune.  These events include:
+  short predefined tunes.  This feature can be activated and deactivated
+  with either the (ref id="command-TUNES" name="TUNES"> command or the
+  ``Alert Tunes'' preference.  The tunes are played on the PC speaker by
+  default, but other options can be selected with the ``Tune Device''
+  preference.
+  Each significant event is associated, from highest to lowest priority,
+  with one or more of the following:
+
+     aa ttuunnee
+        If this feature is active (see the (ref id="command-TUNES"
+        name="TUNES"> command and the ``Alert Tunes'' preference), if a
+        tune has been associated with the event, and if the selected
+        tune device (see the ``Tune Device'' preference) can be opened,
+        then the tune is played.
+
+     aa ddoott ppaatttteerrnn
+        If the (ref id="preference-alert-dots" name="Alert Dots">
+        preference is active, and if a dot pattern has been associated
+        with the event, then the dot pattern is briefly displayed on
+        every braille cell.  Some braille displays don't respond quickly
+        enough for this mechanism to work effectively.
+
+     aa mmeessssaaggee
+        If a message has been associated with the event, then it is
+        displayed within the braille window (see the ``-M'' command line
+        option).
+
+  These events include:
 
   ·  When the braille display driver starts or stops.
 
@@ -1629,7 +1713,8 @@
   Short pneumonics have been used, even though they're rather cryptic,
   in order to show the precise column layout.
 
-       _w_x:_w_y _c_x:_c_y _v_t _t_c_m_f_d_u
+
+  _w_x:_w_y _c_x:_c_y _v_t _t_c_m_f_d_u
 
 
 
@@ -1648,6 +1733,7 @@
 
         bbllaannkk
            Cursor tracking is off.
+
         t  Cursor tracking is on.
 
      _c  The state of the cursor visibility features (see the ``CSRVIS''
@@ -1692,6 +1778,8 @@
         B  Uppercase letters blink.
 
 
+
+
   33..55..22..  DDiissppllaayyss wwiitthh 2200 CCeellllss oorr LLeessss
 
   Short pneumonics have been used, even though they're rather cryptic,
@@ -1721,7 +1809,7 @@
            Display attributes (see the ``DISPMD'' command).
 
         DDoott 33
-           Alert tunes (see the ``SND'' command).
+           Alert tunes (see the ``TUNES'' command).
 
         DDoott 44
            Visible cursor (see the ``CSRVIS'' command).
@@ -1779,7 +1867,6 @@
 
         8  All eight dots are being used.
 
-
         6  Only dots 1 through 6 are being used.
 
      _u  The state of the uppercase (capital letter) display features
@@ -1791,7 +1878,31 @@
         B  Uppercase letters blink.
 
 
-  33..66..  PPrreeffeerreenncceess SSeettttiinnggss
+  33..66..  CCoommmmaanndd LLeeaarrnn MMooddee
+
+  Command learn mode is an interactive way to learn what the keys on the
+  braille display do.  It can be accessed either by the ``LEARN''
+  command or via the ``brltest'' utility.
+
+  When this mode is entered, the message command learn mode is written
+  to the braille display.  Then, as each key (or key combination) on the
+  display is pressed, a short message describing its BRLTTY function is
+  written.  This mode exits immediately if the key (or key combination)
+  for the ``LEARN'' command is pressed.  It exits automatically, and the
+  message done is written, if ten seconds elapse without any key on the
+  display being pressed.  Note that some displays don't signal the
+  driver and/or some drivers don't signal BRLTTY until all the keys are
+  released.
+
+  If a message is longer than the braille display is wide, then it's
+  displayed in segments.  The length of each segment but the last is one
+  less than the display's width, with the rightmost character on the
+  display being set to a minus sign.  Each such segment remains on the
+  display either for a few seconds (see the ``-M'' command line option)
+  or until any key on the display is pressed.
+
+
+  33..77..  PPrreeffeerreenncceess SSeettttiinnggss
 
   When BRLTTY starts, it loads a file which contains your preferences
   settings.  The file doesn't need to exist, and is created the first
@@ -1805,7 +1916,7 @@
   time with the ``-p'' command line option.
 
 
-  33..66..11..  TThhee PPrreeffeerreenncceess MMeennuu
+  33..77..11..  TThhee PPrreeffeerreenncceess MMeennuu
 
   The preferences settings are saved as binary data which, therefore,
   can't be edited by hand.  BRLTTY, however, has a simple menu from
@@ -1815,7 +1926,7 @@
   its current setting.
 
 
-  33..66..11..11..  NNaavviiggaattiinngg tthhee MMeennuu
+  33..77..11..11..  NNaavviiggaattiinngg tthhee MMeennuu
 
   See ``Menu Navigation Commands'' for the full list of commands which
   enable you to select items and change settings within the menu.  For
@@ -1845,7 +1956,6 @@
 
   Notes:
 
-
   ·  The routing keys can also be used to select a setting for the
      current item.  If the item has numeric settings, then each routing
      key represents an integer (starting from 0), and a selection which
@@ -1863,12 +1973,11 @@
      recognized by the menu system also does these same things.
 
 
-  33..66..11..22..  TThhee MMeennuu IItteemmss
+  33..77..11..22..  TThhee MMeennuu IItteemmss
 
 
      SSaavvee oonn EExxiitt
         When exiting the preferences menu:
-
         NNoo Don't automatically save the preferences settings.
 
         YYeess
@@ -1912,6 +2021,7 @@
         YYeess
            Skip passed lines which have the same content as the current
            line.
+
         This setting can also be changed with the ``SKPIDLNS'' command.
 
      SSkkiipp BBllaannkk WWiinnddoowwss
@@ -1976,7 +2086,6 @@
      SShhooww CCuurrssoorr
         When displaying screen content (see the id="options-DISPMD"
         name="DISPMD"> command):
-
 
         NNoo Don't show the cursor.
 
@@ -2077,22 +2186,22 @@
         setting is 2.
 
      AAlleerrtt TTuunneess
-        Whenever a significant event occurs (see id="tunes" name="Alert
-        Tunes">):
+        Whenever a significant event with an associated tune occurs (see
+        id="tunes" name="Alert Tunes">):
 
-        NNoo Don't play a short predefined tune.
+        NNoo Don't play the tune.
 
         YYeess
-           Play a short predefined tune.
+           Play the tune.
 
-        This setting can also be changed with the ``SND'' command.
+        This setting can also be changed with the ``TUNES'' command.
 
      TTuunnee DDeevviiccee
         Play alert tunes via:
 
         PPCC SSppeeaakkeerr
-           The PC speaker.  This setting is always safe to use, although
-           it may be a bit too soft.
+           The built-in PC speaker.  This setting is always safe to use,
+           although it may be a bit too soft.
 
         SSoouunndd CCaarrdd
            The Digital to Analog Converter on the sound card (via
@@ -2115,10 +2224,26 @@
         The initial setting is PC Speaker.
 
      MMIIDDII IInnssttrruummeenntt
-        If the Musical Instrument Digital Interface of the sound card is
-        being used to play the alert tunes, this setting specifies which
-        instrument is to be used (see the ``MIDI Instrument Table'').
-        The initial setting is Acoustic Grand Piano.
+        If the Musical Instrument Digital Interface (MIDI) of the sound
+        card is being used to play the alert tunes, this setting
+        specifies which instrument is to be used (see the ``MIDI
+        Instrument Table'').  The initial setting is Acoustic Grand
+        Piano.
+
+     AAlleerrtt DDoottss
+        Whenever a significant event with an associated dot pattern
+        occurs (see id="tunes" name="Alert Tunes">):
+
+        NNoo Don't display the dot pattern.
+
+        YYeess
+           Briefly display the dot pattern.
+
+        If alert tunes are to be played (see the ``TUNES'' command and
+        the ``Alert Tunes'' preference), if a tune has been associated
+        with the event, and if the selected tune device can be opened,
+        then, regardless of the setting of this preference, the dot pat­
+        tern isn't displayed.
 
      SSttaattuuss CCeellllss SSttyyllee
         This setting specifies the way that the status cells are to be
@@ -2175,7 +2300,6 @@
            the letter a, and the fifth horizontal braille window is rep­
            resented by no dots at the bottom.
 
-
         TTiieemmaann
            The status cells contain:
 
@@ -2200,7 +2324,8 @@
                  ``DISPMD'' command).
 
               DDoott 33
-                 Alert tunes are being played (see the ``SND'' command).
+                 Alert tunes are being played (see the ``TUNES''
+                 command).
 
               DDoott 44
                  The cursor is being shown (see the ``CSRVIS'' command).
@@ -2241,7 +2366,6 @@
               cells, and the column (counting from 1) is shown in the
               bottom half of the cells.
 
-
         VVooyyaaggeerr
            The status cells contain:
 
@@ -2250,7 +2374,6 @@
 
            22  The row (counting from 0) whereon the cursor is (see
               below).
-
            33  If the screen is frozen (see the ``FREEZE'' command), then
               the letter F.  If it isn't, then the column (counting from
               0) wherein the cursor is (see below).
@@ -2269,7 +2392,7 @@
      through 16.
 
 
-  33..77..  TThhee CCoonnffiigguurraattiioonn FFiillee
+  33..88..  TThhee CCoonnffiigguurraattiioonn FFiillee
 
   System defaults for many settings may be established within a
   configuration file.  The default name for this file is
@@ -2354,7 +2477,7 @@
         can be overridden with the ``-t'' command line option.
 
 
-  33..88..  CCoommmmaanndd LLiinnee OOppttiioonnss
+  33..99..  CCoommmmaanndd LLiinnee OOppttiioonnss
 
   Many settings can be explicitly specified when invoking BRLTTY.  The
   brltty command accepts the following options:
@@ -2514,6 +2637,7 @@
            Parameters for the speech synthesizer driver (see the ``-S''
            command line option).
 
+
         BRLTTY_TEXT_TABLE
            The text translation table (see the ``-a'' command line
            option).
@@ -2580,7 +2704,6 @@
 
      tteexxtt..ggeerrmmaann..ttbbll
         German
-
      tteexxtt..iitt..ttbbll
         Italian
 
@@ -2637,7 +2760,6 @@
 
         The righthand column represents the foreground colours:
 
-
         DDoott 44
            Red
 
@@ -2646,6 +2768,7 @@
 
         DDoott 66
            Blue
+
 
         DDoott 88
            Bright
@@ -2703,7 +2826,6 @@
   position contains the corresponding dot combination.  The mapping from
   bit to dot is as follows:
 
-
      BBiitt 00
         Dot 1
 
@@ -2712,6 +2834,7 @@
 
      BBiitt 22
         Dot 2
+
 
      BBiitt 33
         Dot 5
@@ -2769,7 +2892,6 @@
   into a translation table with the ``txt2tbl'' utility.  Each of its
   lines contains lots of interesting information.
 
-
   If the -c option isn't specified, each line looks like this:
 
        _c_c _x_x _d_d_d (73214568)_t_t B+_b_b_b_b _n_a_m_e
@@ -2778,7 +2900,6 @@
   If the -c option is specified, each line looks like this:
 
        _c_c _x_x _d_d_d (73214568)_t_t B+_b_b_b_b U+_u_u_u_u _d_e_s_c_r_i_p_t_i_o_n
-
 
 
      _c_c The character itself.  Unprintable characters are represented
@@ -2913,7 +3034,6 @@
 
         BBiitt 00
            Dot 1
-
         BBiitt 11
            Dot 2
 
@@ -2966,6 +3086,8 @@
 
        make PREFIX=/brltty-4.0 install
        /brltty-4.0/sbin/brltty
+
+
 
 
   So far, this paradigm is somewhat awkward for at least two reasons.
@@ -3029,7 +3151,6 @@
        mknod /dev/vcsa c 7 128
        chmod 660 /dev/vcsa
        chown root.tty /dev/vcsa
-
 
 
 
@@ -3109,6 +3230,8 @@
 
 
 
+
+
   66..11..  SSuuppppoorrtteedd BBrraaiillllee DDiissppllaayyss
 
   BRLTTY supports the following braille displays:
@@ -3131,7 +3254,8 @@
   ·  MDV: MB208/MB408L/MB408S (protocol 5)
 
   ·  Papenmeier: Tiny, Compact, Compact 486, 2D Lite, 2D Screen Soft, EL
-     2D-40, EL 2D-66, EL-80, IB 80 CR Soft
+     2D-40, EL 2D-66, EL 2D-80, EL 40, EL 80, Elba 20, Elba 32, IB 80 CR
+     Soft
 
   ·  Pulse Data International: BrailleNote 18/32
 
@@ -3164,8 +3288,6 @@
      Research): Festival
 
 
-
-
   66..33..  DDrriivveerr IIddeennttiiffiiccaattiioonn CCooddeess
 
 
@@ -3174,6 +3296,7 @@
      bbll BrailleLite
 
      bbnn BrailleNote
+
 
      ccbb CombiBraille
 
@@ -3231,7 +3354,6 @@
 
      33  Row 3 left.
 
-
      44  Row 1 (top) right.
 
      55  Row 2 right.
@@ -3256,6 +3378,16 @@
 
 
   66..55..  NNoorrtthh AAmmeerriiccaann BBrraaiillllee CCoommppuutteerr CCooddee
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3569,7 +3701,7 @@
         Acoustic Grand Piano
         Bright Acoustic Piano
         Electric Grand Piano
-        Honky-tonk Piano
+        Honkytonk Piano
         Electric Piano 1
         Electric Piano 2
         Harpsichord

@@ -31,6 +31,7 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
+#include "contract.h"
 #include "tunes.h"
 #include "cut.h"
 #include "misc.h"
@@ -53,7 +54,9 @@ short vwinshift;                /* Window vertical distance */
 Preferences prefs;                /* environment (i.e. global) parameters */
 brldim brl;                        /* For the Braille routines */
 ScreenDescription scr;                        /* For screen state infos */
-unsigned int TickCount = 0;        /* incremented each main loop cycle */
+
+static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
+static unsigned int TickCount = 0;        /* incremented each main loop cycle */
 
 
 /*
@@ -64,18 +67,18 @@ unsigned int TickCount = 0;        /* incremented each main loop cycle */
         (isupper (c) || (c) == '@' || (c) == '[' || (c) == '^' || \
          (c) == ']' || (c) == '\\')
 
-#define TOGGLEPLAY(var)  playTune((var) ? &tune_toggle_on : &tune_toggle_off)
+#define TOGGLEPLAY(var)  playTune((var)? &tune_toggle_on: &tune_toggle_off)
 #define TOGGLE(var) \
         (var = (keypress & VAL_SWITCHON) \
                ? 1 : ((keypress & VAL_SWITCHOFF) \
                       ? 0 : (!var)))
 
 
-unsigned char *curtbl = texttrans;        /* active translation table */
+unsigned char *curtbl = textTable;        /* active translation table */
 
 static void
 setTranslationTable (int attributes) {
-  curtbl = attributes? attribtrans: texttrans;
+  curtbl = attributes? attributesTable: textTable;
 }
 
 
@@ -132,108 +135,113 @@ switchto (unsigned int scrno) {
 
 void
 clearStatusCells (void) {
-   memset(statcells, 0, sizeof(statcells));
-   braille->writeStatus(statcells);
+   memset(statusCells, 0, sizeof(statusCells));
+   braille->writeStatus(statusCells);
 }
 
 static void
 setStatusCells (void) {
-   memset(statcells, 0, sizeof(statcells));
+   memset(statusCells, 0, sizeof(statusCells));
    switch (prefs.stcellstyle) {
       case ST_AlvaStyle:
          if ((dispmd & HELP_SCRN) == HELP_SCRN) {
-            statcells[0] = texttrans['h'];
-            statcells[1] = texttrans['l'];
-            statcells[2] = texttrans['p'];
+            statusCells[0] = textTable['h'];
+            statusCells[1] = textTable['l'];
+            statusCells[2] = textTable['p'];
          } else {
             /* The coords are given with letters as the DOS tsr */
-            statcells[0] = ((TickCount / 16) % (scr.posy / 25 + 1))? 0:
-                           texttrans[scr.posy % 25 + 'a'] |
-                           ((scr.posx / brl.x) << 6);
-            statcells[1] = ((TickCount / 16) % (p->winy / 25 + 1))? 0:
-                           texttrans[p->winy % 25 + 'a'] |
-                           ((p->winx / brl.x) << 6);
-            statcells[2] = texttrans[(p->showAttributes)? 'a':
-                                      ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f':
-                                      p->trackCursor? 't':
-                                      ' '];
+            statusCells[0] = ((TickCount / 16) % (scr.posy / 25 + 1))? 0:
+                             textTable[scr.posy % 25 + 'a'] |
+                             ((scr.posx / brl.x) << 6);
+            statusCells[1] = ((TickCount / 16) % (p->winy / 25 + 1))? 0:
+                             textTable[p->winy % 25 + 'a'] |
+                             ((p->winx / brl.x) << 6);
+            statusCells[2] = textTable[(p->showAttributes)? 'a':
+                                        ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f':
+                                        p->trackCursor? 't':
+                                        ' '];
          }
          break;
       case ST_TiemanStyle:
-         statcells[0] = (portraitDigits[(p->winx / 10) % 10] << 4) |
-                        portraitDigits[(scr.posx / 10) % 10];
-         statcells[1] = (portraitDigits[p->winx % 10] << 4) |
-                        portraitDigits[scr.posx % 10];
-         statcells[2] = (portraitDigits[(p->winy / 10) % 10] << 4) |
-                        portraitDigits[(scr.posy / 10) % 10];
-         statcells[3] = (portraitDigits[p->winy % 10] << 4) |
-                        portraitDigits[scr.posy % 10];
-         statcells[4] = ((dispmd & FROZ_SCRN) == FROZ_SCRN? 1: 0) |
-                        (prefs.csrvis << 1) |
-                        (p->showAttributes << 2) |
-                        (prefs.csrsize << 3) |
-                        (prefs.sound << 4) |
-                        (prefs.csrblink << 5) |
-                        (p->trackCursor << 6) |
-                        (prefs.slidewin << 7);
+         statusCells[0] = (portraitDigits[(p->winx / 10) % 10] << 4) |
+                          portraitDigits[(scr.posx / 10) % 10];
+         statusCells[1] = (portraitDigits[p->winx % 10] << 4) |
+                          portraitDigits[scr.posx % 10];
+         statusCells[2] = (portraitDigits[(p->winy / 10) % 10] << 4) |
+                          portraitDigits[(scr.posy / 10) % 10];
+         statusCells[3] = (portraitDigits[p->winy % 10] << 4) |
+                          portraitDigits[scr.posy % 10];
+         statusCells[4] = ((dispmd & FROZ_SCRN) == FROZ_SCRN? 1: 0) |
+                          (prefs.csrvis << 1) |
+                          (p->showAttributes << 2) |
+                          (prefs.csrsize << 3) |
+                          (prefs.tunes << 4) |
+                          (prefs.csrblink << 5) |
+                          (p->trackCursor << 6) |
+                          (prefs.slidewin << 7);
          break;
       case ST_PB80Style:
-         statcells[0] = (portraitDigits[(p->winy+1) % 10] << 4) |
-                        portraitDigits[((p->winy+1) / 10) % 10];
+         statusCells[0] = (portraitDigits[(p->winy+1) % 10] << 4) |
+                          portraitDigits[((p->winy+1) / 10) % 10];
          break;
       case ST_Generic:
-         statcells[FirstStatusCell] = FSC_GENERIC;
-         statcells[STAT_BrlCol] = p->winx+1;
-         statcells[STAT_BrlRow] = p->winy+1;
-         statcells[STAT_CsrCol] = scr.posx+1;
-         statcells[STAT_CsrRow] = scr.posy+1;
-         statcells[STAT_ScrNum] = scr.no;
-         statcells[STAT_TrkCsr] = p->trackCursor;
-         statcells[STAT_AttrDisp] = p->showAttributes;
-         statcells[STAT_FrzScr] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
-         statcells[STAT_VisCsr] = prefs.csrvis;
-         statcells[STAT_BlkCsr] = prefs.csrsize;
-         statcells[STAT_BlnkCsr] = prefs.csrblink;
-         statcells[STAT_BlnkCaps] = prefs.capblink;
-         statcells[STAT_SixDot] = prefs.sixdots;
-         statcells[STAT_AlertTunes] = prefs.sound;
-         statcells[STAT_IdentLines] = prefs.skpidlns;
-         statcells[STAT_VisAttr] = prefs.attrvis;
-         statcells[STAT_BlnkAttr] = prefs.attrblink;
+         statusCells[FirstStatusCell] = FSC_GENERIC;
+         statusCells[STAT_BRLCOL] = p->winx+1;
+         statusCells[STAT_BRLROW] = p->winy+1;
+         statusCells[STAT_CSRCOL] = scr.posx+1;
+         statusCells[STAT_CSRROW] = scr.posy+1;
+         statusCells[STAT_SCRNUM] = scr.no;
+         statusCells[STAT_FREEZE] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
+         statusCells[STAT_DISPMD] = p->showAttributes;
+         statusCells[STAT_SIXDOTS] = prefs.sixdots;
+         statusCells[STAT_SLIDEWIN] = prefs.slidewin;
+         statusCells[STAT_SKPIDLNS] = prefs.skpidlns;
+         statusCells[STAT_SKPBLNKWINS] = prefs.skpblnkwins;
+         statusCells[STAT_CSRVIS] = prefs.csrvis;
+         statusCells[STAT_CSRHIDE] = p->hideCursor;
+         statusCells[STAT_CSRTRK] = p->trackCursor;
+         statusCells[STAT_CSRSIZE] = prefs.csrsize;
+         statusCells[STAT_CSRBLINK] = prefs.csrblink;
+         statusCells[STAT_ATTRVIS] = prefs.attrvis;
+         statusCells[STAT_ATTRBLINK] = prefs.attrblink;
+         statusCells[STAT_CAPBLINK] = prefs.capblink;
+         statusCells[STAT_TUNES] = prefs.tunes;
+         statusCells[STAT_HELP] = (dispmd & HELP_SCRN) != 0;
+         statusCells[STAT_INFO] = infmode;
          break;
       case ST_MDVStyle:
-         statcells[0] = portraitDigits[((p->winy+1) / 10) % 10] |
-                        (portraitDigits[((p->winx+1) / 10) % 10] << 4);
-         statcells[1] = portraitDigits[(p->winy+1) % 10] |
-                        (portraitDigits[(p->winx+1) % 10] << 4);
+         statusCells[0] = portraitDigits[((p->winy+1) / 10) % 10] |
+                          (portraitDigits[((p->winx+1) / 10) % 10] << 4);
+         statusCells[1] = portraitDigits[(p->winy+1) % 10] |
+                          (portraitDigits[(p->winx+1) % 10] << 4);
          break;
       case ST_VoyagerStyle: /* 3cells (+1 blank) */
-         statcells[0] = (portraitDigits[p->winy % 10] << 4) |
-                        portraitDigits[(p->winy / 10) % 10];
-         statcells[1] = (portraitDigits[scr.posy % 10] << 4) |
-                        portraitDigits[(scr.posy / 10) % 10];
+         statusCells[0] = (portraitDigits[p->winy % 10] << 4) |
+                          portraitDigits[(p->winy / 10) % 10];
+         statusCells[1] = (portraitDigits[scr.posy % 10] << 4) |
+                          portraitDigits[(scr.posy / 10) % 10];
          if ((dispmd & FROZ_SCRN) == FROZ_SCRN)
-            statcells[2] = texttrans['F'];
+            statusCells[2] = textTable['F'];
          else
-            statcells[2] = (portraitDigits[scr.posx % 10] << 4) |
-                           portraitDigits[(scr.posx / 10) % 10];
+            statusCells[2] = (portraitDigits[scr.posx % 10] << 4) |
+                             portraitDigits[(scr.posx / 10) % 10];
          break;
       default:
          break;
    }
-   braille->writeStatus(statcells);
+   braille->writeStatus(statusCells);
 }
 
 void
 setStatusText (const unsigned char *text) {
    int i;
-   memset(statcells, 0, sizeof(statcells));
-   for (i=0; i<sizeof(statcells); ++i) {
+   memset(statusCells, 0, sizeof(statusCells));
+   for (i=0; i<sizeof(statusCells); ++i) {
       unsigned char character = text[i];
       if (!character) break;
-      statcells[i] = texttrans[character];
+      statusCells[i] = textTable[character];
    }
-   braille->writeStatus(statcells);
+   braille->writeStatus(statusCells);
 }
 
 static void
@@ -273,19 +281,19 @@ showInfo (void)
                 portraitDigits[(scr.posy / 10) % 10];
     infbuf[3] = portraitDigits[p->winy % 10] << 4 | portraitDigits[scr.posy % 10];
     infbuf[4] = (((dispmd & FROZ_SCRN) == FROZ_SCRN)? B1: 0) |
-                (p->showAttributes?    B2: 0) |
-                (prefs.sound?    B3: 0) |
-                (prefs.csrvis?   B4: 0) |
-                (prefs.csrsize?  B5: 0) |
-                (prefs.csrblink? B6: 0) |
-                (p->trackCursor?      B7: 0) |
-                (prefs.slidewin? B8: 0);
+                (p->showAttributes? B2: 0) |
+                (prefs.tunes?       B3: 0) |
+                (prefs.csrvis?      B4: 0) |
+                (prefs.csrsize?     B5: 0) |
+                (prefs.csrblink?    B6: 0) |
+                (p->trackCursor?    B7: 0) |
+                (prefs.slidewin?    B8: 0);
 
     /* We have to do the Braille translation ourselves, since
      * we don't want the first five characters translated ...
      */
     for (i=5; infbuf[i]; i++)
-      infbuf[i] = texttrans[infbuf[i]];
+      infbuf[i] = textTable[infbuf[i]];
 
     memcpy(brl.disp, infbuf, brl.x*brl.y);
     braille->writeWindow(&brl);
@@ -675,7 +683,13 @@ main (int argc, char *argv[]) {
       if (!executeScreenCommand(keypress)) {
         switch (keypress & ~VAL_SWITCHMASK) {
           case CMD_NOOP:        /* do nothing but loop */
-            continue;
+            if (keypress & VAL_SWITCHON)
+              playTune(&tune_toggle_on);
+            else if (keypress & VAL_SWITCHOFF)
+              playTune(&tune_toggle_off);
+            else
+              continue;
+            break;
           case CMD_RESTARTBRL:
             stopBrailleDriver();
             playTune(&tune_braille_off);
@@ -1100,7 +1114,7 @@ main (int argc, char *argv[]) {
             playTune(&tune_bad_command);
             break;
           case CMD_TUNES:
-            TOGGLEPLAY ( TOGGLE(prefs.sound) );        /* toggle sound on/off */
+            TOGGLEPLAY ( TOGGLE(prefs.tunes) );        /* toggle sound on/off */
             break;
           case CMD_DISPMD:
             setTranslationTable(TOGGLE(p->showAttributes));
@@ -1307,7 +1321,7 @@ main (int argc, char *argv[]) {
                 }
                 break;
               case VAL_PASSDOTS:
-                if (!insertCharacter(untexttrans[arg], flags)) {
+                if (!insertCharacter(untextTable[arg], flags)) {
                   playTune(&tune_bad_command);
                 }
                 break;
@@ -1459,31 +1473,25 @@ main (int argc, char *argv[]) {
     /* speech tracking */
     speech->doTrack(); /* called continually even if we're not tracking
                              so that the pipe doesn't fill up. */
-    if(p->trackCursor && speech->isSpeaking() && scr.no == speaking_scrno) {
-      int inx = speech->getTrack();
-      if(inx != speaking_prev_inx) {
-        trackSpeech(speaking_prev_inx = inx);
-      }
-    }
-    else /* cursor tracking */
-    if (p->trackCursor)
-      {
+    if (p->trackCursor) {
+      if (speech->isSpeaking() && scr.no == speaking_scrno) {
+        int inx = speech->getTrack();
+        if (inx != speaking_prev_inx) {
+          trackSpeech(speaking_prev_inx = inx);
+        }
+      } else {
         /* If cursor moves while blinking is on */
-        if (prefs.csrblink)
-          {
-            if (scr.posy != p->trky)
-              {
-                /* turn off cursor to see what's under it while changing lines */
-                csron = 0;
-                csrcntr = prefs.csroffcnt;
-              }
-            else if (scr.posx != p->trkx)
-              {
-                /* turn on cursor to see it moving on the line */
-                csron = 1;
-                csrcntr = prefs.csroncnt;
-              }
+        if (prefs.csrblink) {
+          if (scr.posy != p->trky) {
+            /* turn off cursor to see what's under it while changing lines */
+            csron = 0;
+            csrcntr = prefs.csroffcnt;
+          } else if (scr.posx != p->trkx) {
+            /* turn on cursor to see it moving on the line */
+            csron = 1;
+            csrcntr = prefs.csroncnt;
           }
+        }
         /* If the cursor moves in cursor tracking mode: */
         if (!csr_active && (scr.posx != p->trkx || scr.posy != p->trky)) {
           trackCursor(0);
@@ -1491,12 +1499,14 @@ main (int argc, char *argv[]) {
           p->trky = scr.posy;
         }
       }
+    }
+
     /* If attribute underlining is blinking during display movement */
-    if(prefs.attrvis && prefs.attrblink){
+    if (prefs.attrvis && prefs.attrblink) {
       /* We could check to see if we changed screen, but that doesn't
          really matter... this is mainly for when you are hunting up/down
          for the line with attributes. */
-      if(p->winx != oldwinx || p->winy != oldwiny){
+      if (p->winx != oldwinx || p->winy != oldwiny) {
         attron = 1;
         attrcntr = prefs.attroncnt;
       }
@@ -1504,38 +1514,61 @@ main (int argc, char *argv[]) {
          stationnary and the attributes themselves are moving
          (example: tin). */
     }
+
     oldwinx = p->winx; oldwiny = p->winy;
-    /* If not in info mode, get screen image: */
     if (infmode) {
       showInfo();
     } else {
-      int winlen = MIN(brl.x, scr.cols -p->winx);
+      int winlen = MIN(brl.x, scr.cols-p->winx);
       readScreen((ScreenBox){p->winx, p->winy, winlen, brl.y},
                  brl.disp,
-                       p->showAttributes? SCR_ATTRIB: SCR_TEXT);
+                 p->showAttributes? SCR_ATTRIB: SCR_TEXT);
+
+      /* blank out capital letters if they're blinking and should be off */
       if (prefs.capblink && !capon)
-        for (i = 0; i < winlen * brl.y; i++)
-          if (BRL_ISUPPER (brl.disp[i]))
+        for (i=0; i<winlen*brl.y; i++)
+          if (BRL_ISUPPER(brl.disp[i]))
             brl.disp[i] = ' ';
 
-      /*
-       * Do Braille translation using current table: 
-       */
-      if (prefs.sixdots && curtbl != attribtrans)
-        for (i = 0; i < winlen * brl.y; brl.disp[i] = \
-        curtbl[brl.disp[i]] & 0x3f, i++);
-      else
-        for (i = 0; i < winlen * brl.y; brl.disp[i] = \
-        curtbl[brl.disp[i]], i++);
+      /* convert to dots using the current translation table */
+      if ((curtbl == attributesTable) || !prefs.sixdots) {
+        for (
+          i = 0;
+          i < (winlen * brl.y);
+          brl.disp[i] = curtbl[brl.disp[i]], i++
+        );
+      } else if (contractionTable) {
+        for (i=0; i<brl.y; i++) {
+          int inlen = winlen;
+          int outlen = 0X100;
+          unsigned char outbuf[outlen];
+          int offsets[inlen];
+          int cursor = 0;
+          TranslateContracted(contractionTable,
+                              brl.disp, &inlen,
+                              outbuf, &outlen,
+                              offsets, cursor);
+LogPrint(LOG_WARNING, "wl=%d il=%d ol=%d", winlen, inlen, outlen);
+          if (outlen > winlen) outlen = winlen;
+          memcpy(brl.disp+i*winlen, outbuf, outlen);
+          memset(brl.disp+i*winlen+outlen, 0, winlen-outlen);
+        }
+      } else {
+        for (
+          i = 0;
+          i < (winlen * brl.y);
+          brl.disp[i] = curtbl[brl.disp[i]] & (B1 | B2 | B3 | B4 | B5 | B6), i++
+        );
+      }
 
-      if(winlen <brl.x) {
-        /* We got a rectangular piece of text with getscr. But the display
-           is in an off-right position, with some cells at the end blank.
-           So we'll insert these cells and blank them. */
-        for(i=brl.y-1; i>0; i--)
-          memmove(brl.disp +i*brl.x, brl.disp +i*winlen, winlen);
-        for(i=0; i<brl.y; i++)
-          memset(brl.disp +i*brl.x +winlen, 0, brl.x-winlen);
+      if (winlen < brl.x) {
+        /* We got a rectangular piece of text with readScreen but the display
+           is in an off-right position with some cells at the end blank
+           so we'll insert these cells and blank them. */
+        for (i=brl.y-1; i>0; i--)
+          memmove(brl.disp+i*brl.x, brl.disp+i*winlen, winlen);
+        for (i=0; i<brl.y; i++)
+          memset(brl.disp+i*brl.x+winlen, 0, brl.x-winlen);
       }
 
       /* Attribute underlining: if viewing text (not attributes), attribute
@@ -1589,7 +1622,7 @@ void
 message (const unsigned char *text, short flags) {
    int length = strlen(text);
 
-   if (prefs.sound && !(flags & MSG_SILENT)) {
+   if (prefs.tunes && !(flags & MSG_SILENT)) {
       speech->mute();
       speech->say(text, length);
    }
@@ -1622,7 +1655,7 @@ message (const unsigned char *text, short flags) {
           * ignored, since case can be important, and * blinking caps won't 
           * work ... 
           */
-         for (index=0; index<brl.x*brl.y; ++index) brl.disp[index] = texttrans[brl.disp[index]];
+         for (index=0; index<brl.x*brl.y; ++index) brl.disp[index] = textTable[brl.disp[index]];
          braille->writeWindow(&brl);
 
          if (flags & MSG_WAITKEY)
@@ -1640,9 +1673,9 @@ message (const unsigned char *text, short flags) {
 
 void
 showDotPattern (unsigned char dots, unsigned char duration) {
-  memset(statcells, dots, sizeof(statcells));
+  memset(statusCells, dots, sizeof(statusCells));
   memset(brl.disp, dots, brl.x*brl.y);
-  braille->writeStatus(statcells);
+  braille->writeStatus(statusCells);
   braille->writeWindow(&brl);
   shortdelay(duration);
 }

@@ -177,14 +177,15 @@ writeBytes (const unsigned char *bytes, int count) {
 }
 
 static void
-resetDisplay (void) {
+resetTerminal (void) {
   const unsigned char sequence[] = {cSTX, 0X01, cETX};
-  LogPrint(LOG_WARNING, "Resetting display.");
+  LogPrint(LOG_WARNING, "Resetting terminal.");
   flushOutput();
   delay(500);
   flushInput();
   if (writeBytes(sequence, sizeof(sequence))) {
     pressed_modifiers = 0;
+    saved_command = EOF;
     input_mode = 0;
     input_dots = 0;
   }
@@ -199,7 +200,7 @@ readBytes (unsigned char *buffer, int offset, int count, int flags) {
     if (*(buffer+offset-1) == cETX) return 1;
     LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
   }
-  if ((offset > 0) && (flags & RBF_RESET)) resetDisplay();
+  if ((offset > 0) && (flags & RBF_RESET)) resetTerminal();
   return 0;
 }
 
@@ -374,70 +375,52 @@ identifyTerminal(brldim *brl) {
 
 /* ------------------------------------------------------------ */
 
-static void initbrlerror(brldim *brl)
-{
-  LogPrint(LOG_ERR, "Initbrl: failure at open");
-
-  if (brl->disp) {
-    free(brl->disp);
-    brl->disp = NULL;
-  }
-  brl->x = brl->y = -1;
-}
-
 static int 
-try_init (brldim *brl, const char *dev, speed_t baud)
+initializeDisplay (brldim *brl, const char *dev, speed_t baud)
 {
-  brldim res;			/* return result */
-  struct termios newtio;	/* new terminal settings */
+  if (openSerialDevice(dev, &brl_fd, &oldtio)) {
+    struct termios newtio;	/* new terminal settings */
+    memset(&newtio, 0, sizeof(newtio));
+    newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+    newtio.c_iflag = IGNPAR;
+    newtio.c_oflag = 0;		/* raw output */
+    newtio.c_lflag = 0;		/* don't echo or generate signals */
+    newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
+    newtio.c_cc[VTIME] = 0;
+    if (resetSerialDevice(brl_fd, &newtio, baud)) {
+      brldim res;
+      res.x = BRLCOLSMAX;		/* initialise size of display - unknownown yet */
+      res.y = 1;
+      res.disp = NULL;		/* clear pointers */
 
-  res.x = BRLCOLSMAX;		/* initialise size of display - unknownown yet */
-  res.y = 1;
-  res.disp = NULL;		/* clear pointers */
-
-  /* Now open the Braille display device for random access */
-  brl_fd = open (dev, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0) {
-    initbrlerror(&res);
-    return 0;
-  }
-
-  tcgetattr(brl_fd, &oldtio);	/* save current settings */
-
-  memset(&newtio, 0, sizeof(newtio));
-  newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;		/* raw output */
-  newtio.c_lflag = 0;		/* don't echo or generate signals */
-  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-  newtio.c_cc[VTIME] = 0;
-  if (!resetSerialDevice(brl_fd, &newtio, baud)) return 0;		/* activate new settings */
-
-  /* HACK - used with serial.c */
+/* HACK - used with serial.c */
 #ifdef _SERIAL_C_
-  /* HACK - used with serial.c - 2d screen */
-  the_terminal = &pm_terminals[3];
-  addr_status = XMT_BRLDATA;
-  addr_display = addr_status + the_terminal->statcells;
+      /* HACK - used with serial.c - 2d screen */
+      the_terminal = &pm_terminals[3];
+      addr_status = XMT_BRLDATA;
+      addr_display = addr_status + the_terminal->statcells;
+      if (1) {
 #else
-  if (!identifyTerminal(&res)) return 0;
+      if (identifyTerminal(&res)) {
 #endif
+        if ((res.disp = (unsigned char *)malloc(res.x * res.y))) {
+          initializeTable();
 
-  /* Allocate space for buffers */
-  res.disp = (unsigned char *)malloc(res.x * res.y);
-  if (!res.disp) {
-    initbrlerror(&res);
-    return 0;
+          memset(currentStatus, change_bits[0], curr_stats);
+          writeStatus();
+
+          memset(currentLine, change_bits[0], curr_cols);
+          writeLine();
+
+          *brl = res;
+          return 1;
+        }
+      }
+    }
+    close(brl_fd);
+    brl_fd = -1;
   }
-
-  initializeTable();
-  memset(currentStatus, change_bits[0], curr_stats);
-  writeStatus();
-  memset(currentLine, change_bits[0], curr_cols);
-  writeLine();
-
-  *brl = res;
-  return 1;
+  return 0;
 }
 
 static void
@@ -454,10 +437,10 @@ brl_initialize (char **parameters, brldim *brl, const char *dev)
 #endif
 
   LogPrint(LOG_DEBUG, "trying 19200 baud");
-  if (!try_init(brl, dev, B19200)) {
+  if (!initializeDisplay(brl, dev, B19200)) {
     brl_close(brl);
     LogPrint(LOG_DEBUG, "trying 38400 baud");
-    if (!try_init(brl, dev, B38400)) {
+    if (!initializeDisplay(brl, dev, B38400)) {
       brl_close(brl);
       LogPrint(LOG_ERR, "Papenmeier driver initialization error.");
     }
@@ -501,11 +484,11 @@ brl_writeStatus(const unsigned char* s) {
 
       unsigned char values[InternalStatusCellCount];
       memcpy(values, s, sizeof(values));
-      values[STAT_InputMode] = input_mode;
+      values[STAT_INPUT] = input_mode;
 
       for (i=0; i < curr_stats; i++) {
 	int code = the_terminal->statshow[i];
-	if (code == STAT_Empty)
+	if (code == STAT_EMPTY)
 	  cells[i] = 0;
 	else if (code >= OFFS_NUMBER)
 	  cells[i] = change_bits[portraitNumber(values[code-OFFS_NUMBER])];
@@ -549,18 +532,18 @@ handle_command(int cmd)
     cmd |= input_mode? VAL_SWITCHOFF: VAL_SWITCHON;
   }
 
-  switch(cmd) {
+  switch (cmd) {
     case CMD_INPUT | VAL_SWITCHON:
       input_mode = 1;
       input_dots = 0;
-      cmd = EOF;
+      cmd = VAL_SWITCHON;
       if (debug_keys) {
         LogPrint(LOG_DEBUG, "input mode on"); 
       }
       break;
     case CMD_INPUT | VAL_SWITCHOFF:
       input_mode = 0;
-      cmd = EOF;
+      cmd = VAL_SWITCHOFF;
       if (debug_keys) {
         LogPrint(LOG_DEBUG, "input mode off"); 
       }
@@ -568,6 +551,7 @@ handle_command(int cmd)
   }
 
   saved_command = EOF;
+  input_dots = 0;
   return cmd;
 }
 
@@ -594,14 +578,14 @@ modifier_pressed(int bit)
 
   saved_command = EOF;
   if (input_mode && !(pressed_modifiers & ~0XFF)) {
-    input_dots |= pressed_modifiers;
+    input_dots = pressed_modifiers;
     if (debug_keys) {
       LogPrint(LOG_DEBUG, "input dots: %02x", input_dots); 
     }
   } else {
     int i;
     input_dots = 0;
-    for(i=0; i < CMDMAX; i++)
+    for (i=0; i<CMDMAX; i++)
       if ((the_terminal->cmds[i].modifiers == pressed_modifiers) &&
 	  (the_terminal->cmds[i].keycode == NOKEY)) {
 	saved_command = the_terminal->cmds[i].code;
@@ -619,28 +603,27 @@ modifier_released(int bit)
   pressed_modifiers &= ~bit;
   log_modifiers();
 
-  if (pressed_modifiers == 0) {
-    if (saved_command != EOF) {
-      if (debug_keys) {
-        LogPrint(LOG_DEBUG, "saved cmd: %d", saved_command); 
-      }
-      return handle_command(saved_command);
+  if (saved_command != EOF) {
+    if (debug_keys) {
+      LogPrint(LOG_DEBUG, "saved cmd: %d", saved_command); 
     }
-    if (input_mode && (input_dots != 0)) {
-      int cmd = VAL_PASSDOTS;
-      static unsigned char mod_to_dot[] = {B1, B2, B3, B4, B5, B6, B7, B8};
-      unsigned char *dot = mod_to_dot;
-      int mod;
-      for (mod=1; mod<0X100; ++dot, mod<<=1)
-        if (input_dots & mod)
-          cmd |= *dot;
-      if (debug_keys) {
-        LogPrint(LOG_DEBUG, "dots=%02X cmd=%04X", input_dots, cmd); 
-      }
-      input_dots = 0;
-      return handle_command(cmd);
-    }
+    return handle_command(saved_command);
   }
+
+  if (input_mode && (input_dots != 0)) {
+    int cmd = VAL_PASSDOTS;
+    static unsigned char mod_to_dot[] = {B1, B2, B3, B4, B5, B6, B7, B8};
+    unsigned char *dot = mod_to_dot;
+    int mod;
+    for (mod=1; mod<0X100; ++dot, mod<<=1)
+      if (input_dots & mod)
+        cmd |= *dot;
+    if (debug_keys) {
+      LogPrint(LOG_DEBUG, "dots=%02X cmd=%04X", input_dots, cmd); 
+    }
+    return handle_command(cmd);
+  }
+
   return EOF;
 }
 
@@ -652,30 +635,24 @@ handle_key (int code, int ispressed, int offsroute)
   int cmd;
 
   /* look for modfier keys */
-  for(i=0; i < MODMAX; i++) 
-    if( the_terminal->modifiers[i] == code) {
+  for (i=0; i<MODMAX; i++) 
+    if (the_terminal->modifiers[i] == code) {
       /* found modifier: update bitfield */
       int bit = 1 << i;
-      if (ispressed)
-	cmd = modifier_pressed(bit);
-      else
-	cmd = modifier_released(bit);
-      return cmd;
+      return ispressed? modifier_pressed(bit): modifier_released(bit);
     }
 
   /* must be a "normal key" - search for cmd on keypress */
-  if (!ispressed)
-    return EOF;
+  if (!ispressed) return EOF;
   input_dots = 0;
-  for(i=0; i < CMDMAX; i++)
-    if ( the_terminal->cmds[i].keycode == code && 
-	 the_terminal->cmds[i].modifiers == pressed_modifiers)
-      {
-	if (debug_keys)
-	  LogPrint(LOG_DEBUG, "cmd: %d->%d (+%d)", 
-		   code, the_terminal->cmds[i].code, offsroute); 
-	return handle_command( the_terminal->cmds[i].code + offsroute );
-      }
+  for (i=0; i<CMDMAX; i++)
+    if ((the_terminal->cmds[i].keycode == code) &&
+	(the_terminal->cmds[i].modifiers == pressed_modifiers)) {
+      if (debug_keys)
+        LogPrint(LOG_DEBUG, "cmd: %d->%d (+%d)", 
+                 code, the_terminal->cmds[i].code, offsroute); 
+      return handle_command(the_terminal->cmds[i].code + offsroute);
+    }
 
   /* no command found */
   LogPrint(LOG_DEBUG, "cmd: %d[%04x] ??", code, pressed_modifiers); 
@@ -764,7 +741,7 @@ brl_read (DriverCommandContext cmds) {
         length = (buf[4] << 8) | buf[5];	/* packet size */
         if (length != 10) {
           LogPrint(LOG_WARNING, "Unexpected input packet length: %d", length);
-          resetDisplay();
+          resetTerminal();
           return CMD_ERR;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
@@ -791,6 +768,9 @@ brl_read (DriverCommandContext cmds) {
         goto logError;
       case 0X06:
         message = "data extends beyond end of structure";
+        goto logError;
+      case 0X07:
+        message = "data framing error";
       logError:
         READ(2, 1, RBF_ETX);
         LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);

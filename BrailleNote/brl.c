@@ -182,7 +182,7 @@ writePrompt (const unsigned char *prompt) {
       length = dataCells;
    }
    while (index < length) {
-      dataArea[index] = texttrans[prompt[index]];
+      dataArea[index] = textTable[prompt[index]];
       ++index;
    }
    while (index < dataCells) {
@@ -209,7 +209,7 @@ getCharacter (void) {
          default:
 	    break;
 	 case BNI_CHARACTER:
-	    return untexttrans[inputTable[getByte()]];
+	    return untextTable[inputTable[getByte()]];
 	 case BNI_SPACE:
 	    switch (getByte()) {
 	       default:
@@ -364,7 +364,7 @@ static void
 adjustStatusCells (brldim *brl, const char *parameter) {
    if (*parameter) {
       const int minimum = 0;
-      const int maximum = MIN(MAXNSTATCELLS, brl->x-1);
+      const int maximum = MIN(StatusCellCount, brl->x-1);
       if (validateInteger(&statusCells, "status cell count", parameter, &minimum, &maximum)) {
          statusArea = dataArea;
 	 dataArea = statusArea + statusCells;
@@ -376,70 +376,64 @@ adjustStatusCells (brldim *brl, const char *parameter) {
 
 static void
 brl_initialize (char **parameters, brldim *brl, const char *device) {
-   if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
-      if (tcgetattr(fileDescriptor, &oldSettings) != -1) {
-	 memset(&newSettings, 0, sizeof(newSettings));
-	 newSettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
-	 newSettings.c_iflag = IGNPAR;
-	 while (resetSerialDevice(fileDescriptor, &newSettings, B38400)) {
-            unsigned char request[] = {BNO_BEGIN, BNO_DESCRIBE};
-            if (safe_write(fileDescriptor, request, sizeof(request)) != -1) {
-               if (awaitInput(fileDescriptor, 1000)) {
-                  unsigned char response[3];
-                  int offset = 0;
-                  if (readChunk(fileDescriptor, response, &offset, sizeof(response), 100)) {
-                     if (response[0] == BNI_DESCRIBE) {
-                        statusCells = response[1];
-                        brl->x = response[2];
-                        brl->y = 1;
-                        if ((statusCells == 5) && (brl->x == 30)) {
-                           statusCells -= 2;
-                           brl->x += 2;
-                        }
-                        dataCells = brl->x * brl->y;
-                        cellCount = statusCells + dataCells;
-                        if ((cellBuffer = malloc(cellCount))) {
-                           memset(cellBuffer, 0, cellCount);
-                           statusArea = cellBuffer;
-                           dataArea = statusArea + statusCells;
-                           if ((outputBuffer = malloc(2 + (cellCount * 2)))) {
-                              if ((brl->disp = malloc(dataCells))) {
-                                 memset(brl->disp, 0, dataCells);
-                                 refreshCells();
-                                 persistentKeyboardMode = KBM_NAVIGATE;
-                                 temporaryKeyboardMode = persistentKeyboardMode;
-                                 persistentRoutingOperation = CR_ROUTE;
-                                 temporaryRoutingOperation = persistentRoutingOperation;
-                                 adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
-                                 return;
-                              }
-                              free(outputBuffer);
-                           } else {
-                              LogError("Output buffer allocation");
-                           }
-                           free(cellBuffer);
-                        } else {
-                           LogError("Cell buffer allocation");
-                        }
-                     } else {
-                        LogPrint(LOG_ERR, "Unexpected BrailleNote description: %02X %02X %02X",
-                                 response[0], response[1], response[2]);
+   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
+      memset(&newSettings, 0, sizeof(newSettings));
+      newSettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
+      newSettings.c_iflag = IGNPAR;
+      while (resetSerialDevice(fileDescriptor, &newSettings, B38400)) {
+         unsigned char request[] = {BNO_BEGIN, BNO_DESCRIBE};
+         if (safe_write(fileDescriptor, request, sizeof(request)) != -1) {
+            if (awaitInput(fileDescriptor, 1000)) {
+               unsigned char response[3];
+               int offset = 0;
+               if (readChunk(fileDescriptor, response, &offset, sizeof(response), 100)) {
+                  if (response[0] == BNI_DESCRIBE) {
+                     statusCells = response[1];
+                     brl->x = response[2];
+                     brl->y = 1;
+                     if ((statusCells == 5) && (brl->x == 30)) {
+                        statusCells -= 2;
+                        brl->x += 2;
                      }
+                     dataCells = brl->x * brl->y;
+                     cellCount = statusCells + dataCells;
+                     if ((cellBuffer = malloc(cellCount))) {
+                        memset(cellBuffer, 0, cellCount);
+                        statusArea = cellBuffer;
+                        dataArea = statusArea + statusCells;
+                        if ((outputBuffer = malloc(2 + (cellCount * 2)))) {
+                           if ((brl->disp = malloc(dataCells))) {
+                              memset(brl->disp, 0, dataCells);
+                              refreshCells();
+                              persistentKeyboardMode = KBM_NAVIGATE;
+                              temporaryKeyboardMode = persistentKeyboardMode;
+                              persistentRoutingOperation = CR_ROUTE;
+                              temporaryRoutingOperation = persistentRoutingOperation;
+                              adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
+                              return;
+                           }
+                           free(outputBuffer);
+                        } else {
+                           LogError("Output buffer allocation");
+                        }
+                        free(cellBuffer);
+                     } else {
+                        LogError("Cell buffer allocation");
+                     }
+                  } else {
+                     LogPrint(LOG_ERR, "Unexpected BrailleNote description: %02X %02X %02X",
+                              response[0], response[1], response[2]);
                   }
                }
-            } else {
-               LogError("Write");
             }
-            delay(1000);
-	 }
-         tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
-      } else {
-	 LogError("BrailleNote attribute query");
+         } else {
+            LogError("Write");
+         }
+         delay(1000);
       }
+      tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
       close(fileDescriptor);
       fileDescriptor = -1;
-   } else {
-      LogError("BrailleNote open");
    }
    clearbrl(brl);
 }

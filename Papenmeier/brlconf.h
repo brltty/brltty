@@ -57,7 +57,8 @@
 
 /* offsets within input data structure */
 #define RCV_KEYFUNC  0X0000 /* physical and logical function keys */
-#define RCV_KEYROUTE 0X0300 /* routing keys and sensors */
+#define RCV_KEYROUTE 0X0300 /* routing keys */
+#define RCV_SENSOR   0X0600 /* sensors or secondary routing keys */
 
 /* offsets within output data structure */
 #define XMT_BRLDATA  0X0000 /* data for braille display */
@@ -81,11 +82,12 @@
 #define XMT_BRL2ASC  0X0503 /* braille to ASCII translation table */
 #define XMT_LENFBSEQ 0X0603 /* length of feedback sequence for speech synthesizer */
 #define XMT_LENKPSEQ 0X0604 /* length of keypad sequence */
-#define XMT_MSECK2   0X0605 /* maximum time after k1 */
-#define XMT_MSECK4   0X0606 /* maximum time after k3 */
-#define XMT_MSECK6   0X0607 /* maximum time after k5 */
-#define XMT_MSECK8   0X0608 /* maximum time after k7 */
-#define XMT_MSECDBNC 0X0609 /* maximum debounce time */
+#define XMT_TIMEK1K2 0X0605 /* key code suppression time for moving from K1 to K2 (left) */
+#define XMT_TIMEK3K4 0X0606 /* key code suppression time for moving from K3 to K4 (up) */
+#define XMT_TIMEK5K6 0X0607 /* key code suppression time for moving from K5 to K6 (right) */
+#define XMT_TIMEK7K8 0X0608 /* key code suppression time for moving from K7 to K8 (down) */
+#define XMT_TIMEROUT 0X0609 /* routing time interval */
+#define XMT_TIMEOPPO 0X060A /* key code suppression time for opposite movements */
 
 /* Define the preferred/default status cells mode. */
 #define PREFSTYLE ST_Generic

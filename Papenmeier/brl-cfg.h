@@ -33,7 +33,11 @@
     6, "BRAILLEX IB 80 cr soft",  '5', 80, 1,  4,  9,  0
    64, "BRAILLEX EL 2D-40",	  '6', 40, 1, 13,  0,  1
    65, "BRAILLEX EL 2D-66",	  '7', 66, 1, 13,  0,  1
-   66, "BRAILLEX EL-80",	  '8', 80, 1,  2,  0,  1
+   66, "BRAILLEX EL 80 (IB)",	  '8', 80, 1,  2,  0,  1
+   67, "BRAILLEX EL 2D-80",	  '8', 80, 1,  20, 0,  1
+   68, "BRAILLEX EL 40 P",	  '8', 40, 1,  0,  0,  1
+   69, "BRAILLEX Elba 32",	  '8', 32, 1,  0,  0,  1
+   70, "BRAILLEX Elba 20",	  '8', 20, 1,  0,  0,  1
  */
 
 #define OFFS_FRONT      0
@@ -57,7 +61,7 @@
 #define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
-#define STAT_Empty       0
+#define STAT_EMPTY       0
 #define OFFS_HORIZ    1000	/* added to status show */
 #define OFFS_FLAG     2000
 #define OFFS_NUMBER   3000
@@ -231,7 +235,6 @@ typedef struct {
       { CR_CUTAPPEND                , ROUTINGKEY     , 0004 }, \
       { CR_CUTLINE                  , ROUTINGKEY     , 0040 }, \
       { CR_CUTRECT                  , ROUTINGKEY     , 0200 }, \
-      { CMD_PASTE                   , NOKEY          , 0300 }, \
                                                                \
       { CR_ROUTE                    , ROUTINGKEY     , 0000 }
 	
@@ -294,8 +297,8 @@ typedef struct {
 
 /* what to show for 2 status cells */
 #define SHOW_STAT_2 \
-      OFFS_NUMBER + STAT_BrlRow, \
-      OFFS_NUMBER + STAT_CsrRow
+      OFFS_NUMBER + STAT_BRLROW, \
+      OFFS_NUMBER + STAT_CSRROW
 
 /* commands for 2 status keys */
 #define CMD_STAT_2 \
@@ -305,10 +308,10 @@ typedef struct {
 
 /* what to show for 4 status cells */
 #define SHOW_STAT_4 \
-      OFFS_NUMBER + STAT_BrlRow, \
-      OFFS_NUMBER + STAT_CsrRow, \
-      OFFS_NUMBER + STAT_CsrCol, \
-      OFFS_FLAG   + STAT_AttrDisp
+      OFFS_NUMBER + STAT_BRLROW, \
+      OFFS_NUMBER + STAT_CSRROW, \
+      OFFS_NUMBER + STAT_CSRCOL, \
+      OFFS_FLAG   + STAT_DISPMD
 
 /* commands for 4 status keys */
 #define CMD_STAT_4 \
@@ -320,71 +323,119 @@ typedef struct {
 
 /* what to show for 13 status cells */
 #define SHOW_STAT_13 \
-      OFFS_HORIZ + STAT_BrlRow  , \
-      STAT_Empty                , \
-      OFFS_HORIZ + STAT_CsrRow  , \
-      OFFS_HORIZ + STAT_CsrCol  , \
-      OFFS_FLAG  + STAT_TrkCsr  , \
-      OFFS_FLAG  + STAT_AttrDisp, \
-      STAT_Empty                , \
-      OFFS_FLAG  + STAT_FrzScr  , \
-      STAT_Empty                , \
-      STAT_Empty                , \
-      OFFS_FLAG  + STAT_VisCsr  , \
-      OFFS_FLAG  + STAT_BlkCsr  , \
-      STAT_Empty
+      OFFS_HORIZ + STAT_BRLROW  , \
+      STAT_EMPTY                , \
+      OFFS_HORIZ + STAT_CSRROW  , \
+      OFFS_HORIZ + STAT_CSRCOL  , \
+      STAT_EMPTY                , \
+      OFFS_FLAG  + STAT_CSRTRK  , \
+      OFFS_FLAG  + STAT_DISPMD  , \
+      OFFS_FLAG  + STAT_FREEZE  , \
+      STAT_EMPTY                , \
+      STAT_EMPTY                , \
+      OFFS_FLAG  + STAT_CSRVIS  , \
+      OFFS_FLAG  + STAT_ATTRVIS , \
+      STAT_EMPTY
 
 /* commands for 13 status keys */
 #define CMD_STAT_13 \
-              { CMD_HELP       , OFFS_STAT +  1, 0   }, \
+      CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 2, 1), \
               { CMD_RESTARTBRL , OFFS_STAT +  2, 0   }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0   }, \
               { CMD_BACK       , OFFS_STAT +  4, 0   }, \
-      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  5, 2, 1), \
-      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  6, 2, 1), \
-              { CMD_INFO       , OFFS_STAT +  7, 0   }, \
+      CHGONOFF( CMD_INFO       , OFFS_STAT +  5, 2, 1), \
+      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 2, 1), \
+      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 2, 1), \
       CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 2, 1), \
               { CMD_PREFMENU   , OFFS_STAT +  9, 0   }, \
               { CMD_PREFSAVE   , OFFS_STAT + 10, 0   }, \
       CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 11, 2, 1), \
-      CHGONOFF( CMD_CSRSIZE    , OFFS_STAT + 12, 2, 1), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 12, 2, 1), \
               { CMD_PASTE      , OFFS_STAT + 13, 0   }
 
 
-/* what to show for 22 status cells */
-#define SHOW_STAT_22 \
-      OFFS_HORIZ + STAT_BrlRow    , \
-      STAT_Empty                  , \
-      OFFS_HORIZ + STAT_CsrRow    , \
-      OFFS_HORIZ + STAT_CsrCol    , \
-      STAT_Empty                  , \
-      OFFS_FLAG  + STAT_TrkCsr    , \
-      OFFS_FLAG  + STAT_AttrDisp  , \
-      STAT_Empty                  , \
-      OFFS_FLAG  + STAT_FrzScr    , \
-      STAT_Empty                  , \
-      OFFS_HORIZ + STAT_ScrNum    , \
-      STAT_Empty                  , \
-      OFFS_FLAG  + STAT_VisCsr    , \
-      OFFS_FLAG  + STAT_BlkCsr    , \
-      OFFS_FLAG  + STAT_BlnkCsr   , \
-      OFFS_FLAG  + STAT_BlnkCaps  , \
-      OFFS_FLAG  + STAT_SixDot    , \
-      OFFS_FLAG  + STAT_AlertTunes, \
-      OFFS_FLAG  + STAT_IdentLines, \
-      OFFS_FLAG  + STAT_VisAttr   , \
-      OFFS_FLAG  + STAT_BlnkAttr  , \
-      OFFS_FLAG  + STAT_InputMode
+/* what to show for 20 status cells */
+#define SHOW_STAT_20 \
+      OFFS_HORIZ + STAT_BRLROW   , \
+      STAT_EMPTY                 , \
+      OFFS_HORIZ + STAT_CSRROW   , \
+      OFFS_HORIZ + STAT_CSRCOL   , \
+      STAT_EMPTY                 , \
+      OFFS_FLAG  + STAT_CSRTRK   , \
+      OFFS_FLAG  + STAT_DISPMD   , \
+      OFFS_FLAG  + STAT_FREEZE   , \
+      STAT_EMPTY                 , \
+      OFFS_HORIZ + STAT_SCRNUM   , \
+      STAT_EMPTY                 , \
+      OFFS_FLAG  + STAT_CSRVIS   , \
+      OFFS_FLAG  + STAT_CSRSIZE  , \
+      OFFS_FLAG  + STAT_CSRBLINK , \
+      OFFS_FLAG  + STAT_CAPBLINK , \
+      OFFS_FLAG  + STAT_SIXDOTS  , \
+      OFFS_FLAG  + STAT_TUNES    , \
+      OFFS_FLAG  + STAT_SKPIDLNS , \
+      OFFS_FLAG  + STAT_ATTRVIS  , \
+      OFFS_FLAG  + STAT_ATTRBLINK
 
-/* commands for 22 status keys */
-#define CMD_STAT_22 \
+/* commands for 20 status keys */
+#define CMD_STAT_20 \
               { CMD_HELP       , OFFS_STAT +  1, 0000       }, \
               { CMD_RESTARTBRL , OFFS_STAT +  2, 0000       }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
               { CMD_BACK       , OFFS_STAT +  4, 0000       }, \
+              { CMD_INFO       , OFFS_STAT +  5, 0000       }, \
       CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 0200, 0100 ), \
       CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 0200, 0100 ), \
-              { CMD_INFO       , OFFS_STAT +  8, 0000       }, \
+      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 0200, 0100 ), \
+              { CMD_PREFMENU   , OFFS_STAT +  9, 0000       }, \
+              { CMD_PREFSAVE   , OFFS_STAT + 10, 0000       }, \
+              { CMD_PREFLOAD   , OFFS_STAT + 11, 0000       }, \
+      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 12, 0200, 0100 ), \
+      CHGONOFF( CMD_CSRSIZE    , OFFS_STAT + 13, 0200, 0100 ), \
+      CHGONOFF( CMD_CSRBLINK   , OFFS_STAT + 14, 0200, 0100 ), \
+      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 15, 0200, 0100 ), \
+      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 16, 0200, 0100 ), \
+      CHGONOFF( CMD_TUNES      , OFFS_STAT + 17, 0200, 0100 ), \
+      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 18, 0200, 0100 ), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 19, 0200, 0100 ), \
+      CHGONOFF( CMD_ATTRBLINK  , OFFS_STAT + 20, 0200, 0100 )
+
+
+/* what to show for 22 status cells */
+#define SHOW_STAT_22 \
+      OFFS_HORIZ + STAT_BRLROW   , \
+      STAT_EMPTY                 , \
+      OFFS_HORIZ + STAT_CSRROW   , \
+      OFFS_HORIZ + STAT_CSRCOL   , \
+      STAT_EMPTY                 , \
+      OFFS_FLAG  + STAT_CSRTRK   , \
+      OFFS_FLAG  + STAT_DISPMD   , \
+      OFFS_FLAG  + STAT_INPUT    , \
+      OFFS_FLAG  + STAT_FREEZE   , \
+      STAT_EMPTY                 , \
+      OFFS_HORIZ + STAT_SCRNUM   , \
+      STAT_EMPTY                 , \
+      OFFS_FLAG  + STAT_CSRVIS   , \
+      OFFS_FLAG  + STAT_CSRSIZE  , \
+      OFFS_FLAG  + STAT_CSRBLINK , \
+      OFFS_FLAG  + STAT_CAPBLINK , \
+      OFFS_FLAG  + STAT_SIXDOTS  , \
+      OFFS_FLAG  + STAT_TUNES    , \
+      OFFS_FLAG  + STAT_SKPIDLNS , \
+      OFFS_FLAG  + STAT_ATTRVIS  , \
+      OFFS_FLAG  + STAT_ATTRBLINK, \
+      STAT_EMPTY
+
+/* commands for 22 status keys */
+#define CMD_STAT_22 \
+      CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 0200, 0100 ), \
+              { CMD_RESTARTBRL , OFFS_STAT +  2, 0000       }, \
+              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
+              { CMD_BACK       , OFFS_STAT +  4, 0000       }, \
+      CHGONOFF( CMD_INFO       , OFFS_STAT +  5, 0200, 0100 ), \
+      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 0200, 0100 ), \
+      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 0200, 0100 ), \
+      CHGONOFF( CMD_INPUT      , OFFS_STAT +  8, 0200, 0100 ), \
       CHGONOFF( CMD_FREEZE     , OFFS_STAT +  9, 0200, 0100 ), \
               { CMD_PREFMENU   , OFFS_STAT + 10, 0000       }, \
               { CMD_PREFSAVE   , OFFS_STAT + 11, 0000       }, \
@@ -398,7 +449,7 @@ typedef struct {
       CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 19, 0200, 0100 ), \
       CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 20, 0200, 0100 ), \
       CHGONOFF( CMD_ATTRBLINK  , OFFS_STAT + 21, 0200, 0100 ), \
-      CHGONOFF( CMD_INPUT      , OFFS_STAT + 22, 0200, 0100 )
+              { CMD_PASTE      , OFFS_STAT + 22, 0000       }
 
 
 static one_terminal pm_terminals[] =
@@ -541,7 +592,7 @@ static one_terminal pm_terminals[] =
 
   {
     66,				/* identity */
-    "BrailleX EL-80",		/* name of terminal */
+    "BrailleX EL 80",		/* name of terminal */
     "brltty-pm-el-80.hlp",		/* filename of local helpfile */
     80, 1,			/* size of display */
     2,				/* number of status cells */
@@ -556,6 +607,80 @@ static one_terminal pm_terminals[] =
     {				/* commands + keys */
       CMD_EASY,
       CMD_STAT_2
+    },
+  },
+
+  {
+    67,				/* identity */
+    "BrailleX EL 2D-80",		/* name of terminal */
+    "brltty-pm-el-2d-80.hlp",		/* filename of local helpfile */
+    80, 1,			/* size of display */
+    20,				/* number of status cells */
+    0,				/* number of frontkeys */
+    1,				/* terminal has an easy bar */
+    {				/* status cells: info to show */
+      SHOW_STAT_20
+    },
+    {				/* modifiers */
+      MOD_EASY
+    },
+    {				/* commands + keys */
+      CMD_EASY,
+      CMD_STAT_20
+    },
+  },
+
+  {
+    68,				/* identity */
+    "BrailleX EL 40 P",		/* name of terminal */
+    "brltty-pm-el-40-p.hlp",		/* filename of local helpfile */
+    40, 1,			/* size of display */
+    0,				/* number of status cells */
+    0,				/* number of frontkeys */
+    1,				/* terminal has an easy bar */
+    {				/* status cells: info to show */
+    },
+    {				/* modifiers */
+      MOD_EASY
+    },
+    {				/* commands + keys */
+      CMD_EASY
+    },
+  },
+
+  {
+    69,				/* identity */
+    "BrailleX Elba 32",		/* name of terminal */
+    "brltty-pm-elba-32.hlp",		/* filename of local helpfile */
+    32, 1,			/* size of display */
+    0,				/* number of status cells */
+    0,				/* number of frontkeys */
+    1,				/* terminal has an easy bar */
+    {				/* status cells: info to show */
+    },
+    {				/* modifiers */
+      MOD_EASY
+    },
+    {				/* commands + keys */
+      CMD_EASY
+    },
+  },
+
+  {
+    70,				/* identity */
+    "BrailleX Elba 20",		/* name of terminal */
+    "brltty-pm-elba-20.hlp",		/* filename of local helpfile */
+    20, 1,			/* size of display */
+    0,				/* number of status cells */
+    0,				/* number of frontkeys */
+    1,				/* terminal has an easy bar */
+    {				/* status cells: info to show */
+    },
+    {				/* modifiers */
+      MOD_EASY
+    },
+    {				/* commands + keys */
+      CMD_EASY
     },
   },
 };

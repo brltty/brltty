@@ -28,14 +28,14 @@
  */
 
 /* 0X00 */ CMD_NOOP,                       // no dots
-/* 0X01 */ CMD_FWINRT,                     // dots 6
-/* 0X02 */ CMD_CSRVIS,                     // dots 5
+/* 0X01 */ CMD_FWINRT,                     // dot 6
+/* 0X02 */ CMD_CSRVIS,                     // dot 5
 /* 0X03 */ CMD_LNEND,                      // dots 5,6
-/* 0X04 */ CMD_LNDN,                       // dots 4
+/* 0X04 */ CMD_LNDN,                       // dot 4
 /* 0X05 */ CMD_CHRRT,                      // dots 4,6
 /* 0X06 */ CMD_WINDN,                      // dots 4,5
 /* 0X07 */ CMD_BOT,                        // dots 4,5,6
-/* 0X08 */ CMD_LNUP,                       // dots 1
+/* 0X08 */ CMD_LNUP,                       // dot 1
 /* 0X09 */ CMD_MUTE,                       // dots 1,6
 /* 0X0A */ CMD_NOOP,                       // dots 1,5
 /* 0X0B */ CMD_SAY,                        // dots 1,5,6
@@ -43,7 +43,7 @@
 /* 0X0D */ CMD_CAPBLINK,                   // dots 1,4,6
 /* 0X0E */ CMD_NOOP,                       // dots 1,4,5
 /* 0X0F */ CMD_NOOP,                       // dots 1,4,5,6
-/* 0X10 */ CMD_CSRBLINK,                   // dots 2
+/* 0X10 */ CMD_CSRBLINK,                   // dot 2
 /* 0X11 */ CMD_NOOP,                       // dots 2,6
 /* 0X12 */ CMD_CSRSIZE,                    // dots 2,5
 /* 0X13 */ CMD_NOOP,                       // dots 2,5,6
@@ -59,7 +59,7 @@
 /* 0X1D */ CMD_NOOP,                       // dots 1,2,4,6
 /* 0X1E */ CR_ROUTE,                       // dots 1,2,4,5
 /* 0X1F */ CMD_NOOP,                       // dots 1,2,4,5,6
-/* 0X20 */ CMD_FWINLT,                     // dots 3
+/* 0X20 */ CMD_FWINLT,                     // dot 3
 /* 0X21 */ CMD_HOME,                       // dots 3,6
 /* 0X22 */ CMD_NOOP,                       // dots 3,5
 /* 0X23 */ CR_CUTRECT + VAL_ARG_MASK - 1,  // dots 3,5,6
@@ -124,14 +124,14 @@
 /* 0X5E */ CMD_NOOP,                       // unexpected
 /* 0X5F */ CMD_NOOP,                       // unexpected
 /* 0X60 */ CMD_NOOP,                       // no thumb keys
-/* 0X61 */ CMD_FWINLT,                     // thumb keys A
-/* 0X62 */ CMD_LNUP,                       // thumb keys B
+/* 0X61 */ CMD_FWINLT,                     // thumb key A
+/* 0X62 */ CMD_LNUP,                       // thumb key B
 /* 0X63 */ CMD_TOP_LEFT,                   // thumb keys A,B
-/* 0X64 */ CMD_CSRTRK,                     // thumb keys C
+/* 0X64 */ CMD_CSRTRK,                     // thumb key C
 /* 0X65 */ CMD_LNBEG,                      // thumb keys A,C
 /* 0X66 */ CMD_TOP,                        // thumb keys B,C
 /* 0X67 */ CMD_NOOP,                       // thumb keys A,B,C
-/* 0X68 */ CMD_LNDN,                       // thumb keys D
+/* 0X68 */ CMD_LNDN,                       // thumb key D
 /* 0X69 */ CMD_HWINLT,                     // thumb keys A,D
 /* 0X6A */ CMD_MUTE,                       // thumb keys B,D
 /* 0X6B */ CMD_NOOP,                       // thumb keys A,B,D
@@ -139,7 +139,7 @@
 /* 0X6D */ CMD_NOOP,                       // thumb keys A,C,D
 /* 0X6E */ CMD_NOOP,                       // thumb keys B,C,D
 /* 0X6F */ CMD_NOOP,                       // thumb keys A,B,C,D
-/* 0X70 */ CMD_FWINRT,                     // thumb keys E
+/* 0X70 */ CMD_FWINRT,                     // thumb key E
 /* 0X71 */ CMD_SAY,                        // thumb keys A,E
 /* 0X72 */ CMD_HWINRT,                     // thumb keys B,E
 /* 0X73 */ CMD_NOOP,                       // thumb keys A,B,E

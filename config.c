@@ -42,12 +42,13 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
+#include "contract.h"
 #include "tunes.h"
 #include "message.h"
 #include "misc.h"
 #include "common.h"
 
-char VERSION[] = "BRLTTY 2.99.5";
+char VERSION[] = "BRLTTY 2.99.6";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 /*
@@ -80,6 +81,7 @@ static const char *opt_brailleDevice = NULL;
 static const char *opt_brailleDriver = NULL;
 static char *opt_brailleParameters = NULL;
 static const char *opt_configurationFile = NULL;
+static const char *opt_contractionTable = NULL;
 static short opt_environmentVariables = 0;
 static short opt_help = 0;
 static short opt_logLevel = LOG_NOTICE;
@@ -98,6 +100,7 @@ static short opt_version = 0;
 static char *cfg_preferencesFile = NULL;
 static char *cfg_textTable = NULL;
 static char *cfg_attributesTable = NULL;
+static char *cfg_contractionTable = NULL;
 static char *cfg_brailleDevice = NULL;
 static char *cfg_brailleDriver = NULL;
 static char *cfg_brailleParameters = NULL;
@@ -121,8 +124,7 @@ static char **screenParameters = NULL;
 short homedir_found = 0;        /* CWD status */
 
 static int
-getToken (char **val, const char *delimiters)
-{
+getToken (char **val, const char *delimiters) {
   char *v = strtok(NULL, delimiters);
 
   if (!v) return CFG_NoValue;
@@ -134,56 +136,52 @@ getToken (char **val, const char *delimiters)
 }
 
 static int
-configurePreferencesFile (const char *delimiters)
-{
+configurePreferencesFile (const char *delimiters) {
   return getToken(&cfg_preferencesFile, delimiters);
 }
 
 static int
-configureTextTable (const char *delimiters)
-{
+configureTextTable (const char *delimiters) {
   return getToken(&cfg_textTable, delimiters);
 }
 
 static int
-configureAttributesTable (const char *delimiters)
-{
+configureAttributesTable (const char *delimiters) {
   return getToken(&cfg_attributesTable, delimiters);
 }
 
+int
+configureContractionTable (const char *delimiters) {
+  return getToken(&cfg_contractionTable, delimiters);
+}
+
 static int
-configureBrailleDevice (const char *delimiters)
-{
+configureBrailleDevice (const char *delimiters) {
   return getToken(&cfg_brailleDevice, delimiters);
 }
 
 static int
-configureBrailleDriver (const char *delimiters)
-{
+configureBrailleDriver (const char *delimiters) {
   return getToken(&cfg_brailleDriver, delimiters);
 }
 
 static int
-configureBrailleParameters (const char *delimiters)
-{
+configureBrailleParameters (const char *delimiters) {
   return getToken(&cfg_brailleParameters, delimiters);
 }
 
 static int
-configureSpeechDriver (const char *delimiters)
-{
+configureSpeechDriver (const char *delimiters) {
   return getToken(&cfg_speechDriver, delimiters);
 }
 
 static int
-configureSpeechParameters (const char *delimiters)
-{
+configureSpeechParameters (const char *delimiters) {
   return getToken(&cfg_speechParameters, delimiters);
 }
 
 static int
-configureScreenParameters (const char *delimiters)
-{
+configureScreenParameters (const char *delimiters) {
   return getToken(&cfg_screenParameters, delimiters);
 }
 
@@ -199,6 +197,10 @@ static OptionEntry optionTable[] = {
     "Path to attributes translation table file."},
    {'b', "braille-driver", "driver", configureBrailleDriver,
     "Braille driver: full library path, or one of {" BRLLIBS "}"},
+/*
+   {'c', "contraction-table", "file", configureContractionTable,
+    "Path to contraction table file."},
+*/
    {'d', "braille-device", "device", configureBrailleDevice,
     "Path to device for accessing braille display."},
    {'e', "standard-error", NULL, NULL,
@@ -473,6 +475,9 @@ processOptions (int argc, char **argv)
       case 'b':                        /* name of driver */
         opt_brailleDriver = optarg;
         break;
+      case 'c':                        /* name of driver */
+        opt_contractionTable = optarg;
+        break;
       case 'd':                /* serial device path */
         opt_brailleDevice = optarg;
         break;
@@ -716,6 +721,12 @@ stopBrailleDriver (void) {
 }
 
 static void
+exitContractionTable (void) {
+   DestroyContractionTable(contractionTable);
+   contractionTable = NULL;
+}
+
+static void
 exitBrailleDriver (void) {
    clearStatusCells();
    message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
@@ -778,8 +789,7 @@ readKey (DriverCommandContext cmds)
 }
 
 static void
-loadTranslationTable (char *table, const char **path, const char *name)
-{
+loadTranslationTable (char *table, const char **path, const char *name) {
   if (*path) {
     int fd = open(*path, O_RDONLY);
     if (fd >= 0) {
@@ -886,13 +896,13 @@ testBlinkingCapitals () {
 }
 
 static int
-testSound () {
-   return prefs.sound;
+testTunes () {
+   return prefs.tunes;
 }
 
 static int
-testSoundMidi () {
-   return testSound() && (prefs.tunedev == tdSequencer);
+testTunesMidi () {
+   return testTunes() && (prefs.tunedev == tdSequencer);
 }
 
 void
@@ -942,9 +952,10 @@ updatePreferences (void)
      BOOLEAN_ITEM(prefs.capblink, NULL, NULL, "Blinking Capitals"),
      TIMING_ITEM(prefs.caponcnt, NULL, testBlinkingCapitals, "Capitals Visible Period"),
      TIMING_ITEM(prefs.capoffcnt, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
-     BOOLEAN_ITEM(prefs.sound, NULL, NULL, "Alert Tunes"),
-     SYMBOLIC_ITEM(prefs.tunedev, changedTuneDevice, testSound, "Tune Device", tuneDevices),
-     MENU_ITEM(prefs.midiinstr, NULL, testSoundMidi, "MIDI Instrument", midiInstrumentTable, 0, midiInstrumentCount-1),
+     BOOLEAN_ITEM(prefs.tunes, NULL, NULL, "Alert Tunes"),
+     SYMBOLIC_ITEM(prefs.tunedev, changedTuneDevice, testTunes, "Tune Device", tuneDevices),
+     MENU_ITEM(prefs.midiinstr, NULL, testTunesMidi, "MIDI Instrument", midiInstrumentTable, 0, midiInstrumentCount-1),
+     BOOLEAN_ITEM(prefs.dots, NULL, NULL, "Alert Dots"),
      SYMBOLIC_ITEM(prefs.stcellstyle, NULL, NULL, "Status Cells Style", statusStyles)
   };
   int menuSize = sizeof(menu) / sizeof(menu[0]);
@@ -994,7 +1005,7 @@ updatePreferences (void)
       {
          int index;
          for (index=0; index<MIN(brl.x*brl.y, lineLength-lineIndent); index++)
-            brl.disp[index] = texttrans[line[lineIndent+index]];
+            brl.disp[index] = textTable[line[lineIndent+index]];
       }
       braille->writeWindow(&brl);
       delay(refreshInterval);
@@ -1181,6 +1192,7 @@ startup(int argc, char *argv[])
   ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE");
   ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE");
   ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE");
+  ensureOptionSetting(&opt_contractionTable, NULL, cfg_contractionTable, "BRLTTY_CONTRACTION_TABLE");
   ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE");
   ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER");
   ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER");
@@ -1224,9 +1236,17 @@ startup(int argc, char *argv[])
   /*
    * Load translation tables: 
    */
-  loadTranslationTable(attribtrans, &opt_attributesTable, "attributes");
-  loadTranslationTable(texttrans, &opt_textTable, "text");
-  reverseTable(texttrans, untexttrans);
+  loadTranslationTable(attributesTable, &opt_attributesTable, "attributes");
+  loadTranslationTable(textTable, &opt_textTable, "text");
+  reverseTable(textTable, untextTable);
+  if (opt_contractionTable) {
+    LogPrint(LOG_DEBUG, "Compiling contraction table: %s", opt_contractionTable);
+    if ((contractionTable = CompileContractionTable(opt_contractionTable))) {
+      atexit(exitContractionTable);
+    } else {
+      LogPrint(LOG_ERR, "Cannot compile contraction table.");
+    }
+  }
 
   {
     char buffer[0X100];
@@ -1291,9 +1311,10 @@ startup(int argc, char *argv[])
     prefs.skpblnkwins = INIT_SKPBLNKWINS;
     prefs.skpblnkwinsmode = INIT_SKPBLNKWINSMODE;
 
-    prefs.sound = INIT_SOUND;
+    prefs.tunes = INIT_TUNES;
     prefs.tunedev = INIT_TUNEDEV;
     prefs.midiinstr = 0;
+    prefs.dots = INIT_DOTS;
 
     prefs.stcellstyle = braille->status_style;
   }

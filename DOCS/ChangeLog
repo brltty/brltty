@@ -85,8 +85,10 @@ Note: this file is in reversed chronological order (bottom to top).
          Add many more commands.
       For displays with 22 status keys: (dm)
          Fix key assignments: 5-8 -> 6-9.
+         Define 4 as back.
+         Move info from 8 to 5.
+         Define 8 as input mode toggle.
          Display current virtual screen number in 11.
-         Redefine 22 as input mode toggle.
       Define status key commands for displays with 4 status cells. (dm)
       Rename environment variable BRLTTY_CONF to BRLTTY_PM_CONF. (dm)
       Key releases no longer interrupt message waits. (dm)
@@ -100,7 +102,7 @@ Note: this file is in reversed chronological order (bottom to top).
    Vario driver can now be statically linked. (dm)
    Add cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
    Add identification output to VisioBraille driver. (dm)
-   Add PROM version 5.0q-UK support to VisioBraille driver. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
+   Add support for 5.0 PROM family to VisioBraille driver. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
    Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
    Stop GenericSay from reannouncing BRLTTY version during cursor routing. (dm)
    Add command parameter to GenericSay driver. (dm)

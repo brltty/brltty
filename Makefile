@@ -244,6 +244,17 @@ else
    BUILTIN_BRAILLE = -DBRL_BUILTIN
 endif
 
+CONTRACT_OBJECTS = cont_compile.o cont_destroy.o cont_translate.o
+
+cont_compile.o: cont_compile.c cont_headers.h contract.h misc.h brl.h
+	$(CC) $(CFLAGS) -c cont_compile.c
+
+cont_destroy.o: cont_destroy.c cont_headers.h contract.h misc.h brl.h
+	$(CC) $(CFLAGS) -c cont_destroy.c
+
+cont_translate.o: cont_translate.c cont_headers.h contract.h misc.h brl.h
+	$(CC) $(CFLAGS) -c cont_translate.c
+
 TUNE_OBJECTS = tunes.o tones_speaker.o tones_soundcard.o tones_sequencer.o tones_adlib.o adlib.o
 
 tunes.o: tunes.c tunes.h tones.h common.h misc.h message.h brl.h
@@ -264,7 +275,7 @@ tones_adlib.o: tones_adlib.c tones.h adlib.h misc.h
 adlib.o: adlib.c adlib.h misc.h
 	$(CC) $(CFLAGS) -c adlib.c
 
-BRLTTY_OBJECTS = main.o config.o route.o misc.o $(TUNE_OBJECTS) cut.o spk_load.o brl_load.o
+BRLTTY_OBJECTS = main.o config.o route.o misc.o $(CONTRACT_OBJECTS) $(TUNE_OBJECTS) cut.o spk_load.o brl_load.o
 
 brltty-static: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -static -Wl,--export-dynamic,-rpath,$(LIB_DIR) -o $@ \
@@ -274,11 +285,11 @@ brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -Wl,-rpath,$(LIB_DIR) -o $@ \
 	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
-main.o: main.c brl.h spk.h scr.h tunes.h cut.h route.h \
+main.o: main.c brl.h spk.h scr.h contract.h tunes.h cut.h route.h \
 	misc.h message.h config.h common.h
 	$(CC) $(CFLAGS) -c main.c
 
-config.o: config.c config.h brl.h spk.h scr.h tunes.h message.h misc.h common.h
+config.o: config.c config.h brl.h spk.h scr.h contract.h tunes.h message.h misc.h common.h
 	$(CC) $(CFLAGS) \
 		'-DHOME_DIR="$(PREFIX)$(DATA_DIR)"' \
 		'-DBRLLIBS="$(BRL_LIBS)"' \

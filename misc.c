@@ -205,51 +205,64 @@ strdupWrapper (const char *string) {
 }
 
 int
-setSerialDevice (int file, struct termios *attributes, speed_t baud) {
+openSerialDevice (const char *path, int *descriptor, struct termios *attributes) {
+  if ((*descriptor = open(path, O_RDWR|O_NOCTTY)) != -1) {
+    if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) return 1;
+    LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", path, strerror(errno));
+    close(*descriptor);
+    *descriptor = -1;
+  } else {
+    LogPrint(LOG_ERR, "Cannot open '%s': %s", path, strerror(errno));
+  }
+  return 0;
+}
+
+int
+setSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
   if (cfsetispeed(attributes, baud) != -1) {
     if (cfsetospeed(attributes, baud) != -1) {
-      if (tcsetattr(file, TCSANOW, attributes) != -1) {
+      if (tcsetattr(descriptor, TCSANOW, attributes) != -1) {
         return 1;
       } else {
-        LogError("Attributes set");
+        LogError("Serial device attributes set");
       }
     } else {
-      LogError("Output speed set");
+      LogError("Serial device output speed set");
     }
   } else {
-    LogError("Input speed set");
+    LogError("Serial device input speed set");
   }
   return 0;
 }
 
 int
-resetSerialDevice (int file, struct termios *attributes, speed_t baud) {
-  if (setSerialDevice(file, attributes, B0)) {
-    if (tcflush(file, TCIOFLUSH) != -1) {
-      if (setSerialDevice(file, attributes, baud)) {
+resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
+  if (setSerialDevice(descriptor, attributes, B0)) {
+    if (tcflush(descriptor, TCIOFLUSH) != -1) {
+      if (setSerialDevice(descriptor, attributes, baud)) {
         return 1;
       }
     } else {
-      LogError("Flush");
+      LogError("Serial device flush");
     }
   }
   return 0;
 }
 
 int
-awaitInput (int file, int milliseconds) {
+awaitInput (int descriptor, int milliseconds) {
   fd_set mask;
   struct timeval timeout;
 
   FD_ZERO(&mask);
-  FD_SET(file, &mask);
+  FD_SET(descriptor, &mask);
 
   memset(&timeout, 0, sizeof(timeout));
   timeout.tv_sec = milliseconds / 1000;
   timeout.tv_usec = (milliseconds % 1000) * 1000;
 
   while (1) {
-    switch (select(file+1, &mask, NULL, NULL, &timeout)) {
+    switch (select(descriptor+1, &mask, NULL, NULL, &timeout)) {
       case -1:
         if (errno == EINTR) continue;
         LogError("Input wait");
@@ -265,9 +278,9 @@ awaitInput (int file, int milliseconds) {
 }
 
 int
-readChunk (int file, unsigned char *buffer, int *offset, int count, int timeout) {
+readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout) {
   while (count > 0) {
-    int amount = read(file, buffer+*offset, count);
+    int amount = read(descriptor, buffer+*offset, count);
     if (amount == -1) {
       if (errno == EINTR) continue;
       if (errno == EAGAIN) goto noInput;
@@ -278,7 +291,7 @@ readChunk (int file, unsigned char *buffer, int *offset, int count, int timeout)
     if (amount == 0) {
     noInput:
       if (*offset) {
-        if (awaitInput(file, timeout)) continue;
+        if (awaitInput(descriptor, timeout)) continue;
         LogPrint(LOG_WARNING, "Input byte missing at offset %d.", *offset);
       }
       return 0;

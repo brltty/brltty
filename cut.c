@@ -30,7 +30,7 @@ static short int beginColumn = 0, beginRow = 0;
 static unsigned int previousLength = 0;
 
 static unsigned char *
-cut (int fromColumn, int fromRow, int toColumn, int toRow, unsigned char delimiter) {
+cut (int fromColumn, int fromRow, int toColumn, int toRow) {
   unsigned char *newBuffer = NULL;
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
@@ -60,15 +60,16 @@ cut (int fromColumn, int fromRow, int toColumn, int toRow, unsigned char delimit
                 *(toAddress++) = *fromAddress;
               }
             }
-            if (delimiter)
-              if (row != toRow)
-                *(toAddress++) = delimiter;
+            if (row != toRow) *(toAddress++) = '\r';
           }
-          *toAddress = 0;
+          *toAddress++ = 0;
 
           /* make a new permanent buffer of just the right size */
-          if ((newBuffer = (unsigned char *)malloc(strlen(toBuffer) + 1))) {
-            strcpy(newBuffer, toBuffer);
+          {
+            int length = toAddress - toBuffer;
+            if ((newBuffer = (unsigned char *)malloc(length))) {
+              memcpy(newBuffer, toBuffer, length);
+            }
           }
         }
         free(toBuffer);
@@ -121,7 +122,7 @@ cut_append (int column, int row) {
 
 int
 cut_rectangle (int column, int row) {
-  unsigned char *buffer = cut(beginColumn, beginRow, column, row, '\r');
+  unsigned char *buffer = cut(beginColumn, beginRow, column, row);
   if (buffer) {
     if (append(buffer)) return 1;
     free(buffer);
@@ -131,51 +132,30 @@ cut_rectangle (int column, int row) {
 
 int
 cut_line (int column, int row) {
-  int ok = 0;
-  if (row == beginRow) {
-    unsigned char *buffer = cut(beginColumn, beginRow, column, row, 0);
+  ScreenDescription screen;
+  describeScreen(&screen);
+  {
+    int width = screen.cols;
+    int rightColumn = width - 1;
+    unsigned char *buffer = cut(0, beginRow, rightColumn, row);
     if (buffer) {
-      if (append(buffer)) {
-        ok = 1;
-      } else {
-        free(buffer);
+      if (column < rightColumn) {
+        int length = column + 1;
+        unsigned char *start = strrchr(buffer, '\r');
+        start = start? start+1: buffer;
+        if (length < strlen(start)) start[length] = 0;
       }
+      if (beginColumn) {
+        unsigned char *start = strchr(buffer, '\r');
+        if (!start) start = buffer + strlen(buffer);
+        if ((start - buffer) > beginColumn) start = buffer + beginColumn;
+        if (start != buffer) memmove(buffer, start, strlen(start)+1);
+      }
+      if (append(buffer)) return 1;
+      free(buffer);
     }
-  } else {
-    unsigned char *last = cut(0, row, column, row, 0);
-    if (last) {
-      unsigned char *first;
-      int rightColumn;
-      {
-        ScreenDescription screen;
-        describeScreen(&screen);
-        rightColumn = screen.cols - 1;
-      }
-      if ((first = cut(beginColumn, beginRow, rightColumn, beginRow, 0))) {
-        unsigned char *middle;
-        if ((beginRow + 1) == row) {
-          middle = strdup("");
-        } else {
-          middle = cut(0, beginRow+1, rightColumn, row-1, 0);
-        }
-        if (middle) {
-          unsigned char *buffer = (unsigned char *)malloc(strlen(first) + strlen(middle) + strlen(last) + 1);
-          if (buffer) {
-            sprintf(buffer, "%s%s%s", first, middle, last);
-            if (append(buffer)) {
-              ok = 1;
-            } else {
-              free(buffer);
-            }
-          }
-          free(middle);
-        }
-        free(first);
-      }
-      free(last);
-    }
+    return 0;
   }
-  return ok;
 }
 
 int

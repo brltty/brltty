@@ -94,7 +94,7 @@ typedef enum {
   CMD_CSRVIS /* toggle cursor visibility on/off */,
   CMD_CSRHIDE /* toggle hide of cursor on/off */,
   CMD_CSRTRK /* toggle cursor tracking on/off */,
-  CMD_CSRSIZE /* toggle cursor style underline/block */,
+  CMD_CSRSIZE /* toggle cursor style block/underline */,
   CMD_CSRBLINK /* toggle cursor blinking on/off */,
   CMD_ATTRVIS /* toggle attribute underlining on/off */,
   CMD_ATTRBLINK /* toggle attribute blinking on/off */,
@@ -102,8 +102,9 @@ typedef enum {
   CMD_TUNES /* toggle alert tunes on/off */,
  
   /* mode selection */
-  CMD_HELP /* toggle help mode */,
-  CMD_INFO /* toggle info mode */,
+  CMD_HELP /* toggle help mode on/off */,
+  CMD_INFO /* toggle info mode on/off */,
+  CMD_LEARN /* enter command learn mode */,
   
   /* preference setting */
   CMD_PREFMENU /* present preferences menu */,
@@ -131,7 +132,6 @@ typedef enum {
   /* miscellaneous */
   CMD_CSRJMP_VERT /* vertically route cursor to top line of window */,
   CMD_PASTE /* insert cut buffer at cursor */,
-  CMD_LEARN /* enter key learn mode */,
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
   
@@ -216,25 +216,30 @@ typedef enum {
   #define FSC_GENERIC 0XFF
 
   /* numbers */
-  STAT_BrlCol /* screen column where left of braille window is */,
-  STAT_BrlRow /* screen row where top of braille window is */,
-  STAT_CsrCol /* screen column where cursor is */,
-  STAT_CsrRow /* screen row where cursor is */,
-  STAT_ScrNum /* virtual screen number */,
+  STAT_BRLCOL /* screen column where left of braille window is */,
+  STAT_BRLROW /* screen row where top of braille window is */,
+  STAT_CSRCOL /* screen column where cursor is */,
+  STAT_CSRROW /* screen row where cursor is */,
+  STAT_SCRNUM /* virtual screen number */,
 
   /* flags */
-  STAT_TrkCsr /* cursor tracking */,
-  STAT_AttrDisp /* attributes display */,
-  STAT_FrzScr /* frozen screen */,
-  STAT_VisCsr /* visible cursor */,
-  STAT_BlkCsr /* block cursor */,
-  STAT_BlnkCsr /* blinking cursor */,
-  STAT_BlnkCaps /* blinking capital letters */,
-  STAT_SixDot /* six-dot braille */,
-  STAT_AlertTunes /* alert tunes */,
-  STAT_IdentLines /* skip identical lines */,
-  STAT_VisAttr /* visible attributes underline */,
-  STAT_BlnkAttr /* blinking attributes underline */,
+  STAT_FREEZE /* frozen screen */,
+  STAT_DISPMD /* attributes display */,
+  STAT_SIXDOTS /* six-dot braille */,
+  STAT_SLIDEWIN /* sliding window */,
+  STAT_SKPIDLNS /* skip identical lines */,
+  STAT_SKPBLNKWINS /* skip blank windows */,
+  STAT_CSRVIS /* visible cursor */,
+  STAT_CSRHIDE /* hidden cursor */,
+  STAT_CSRTRK /* cursor tracking */,
+  STAT_CSRSIZE /* block cursor */,
+  STAT_CSRBLINK /* blinking cursor */,
+  STAT_ATTRVIS /* visible attributes underline */,
+  STAT_ATTRBLINK /* blinking attributes underline */,
+  STAT_CAPBLINK /* blinking capital letters */,
+  STAT_TUNES /* alert tunes */,
+  STAT_HELP /* help mode */,
+  STAT_INFO /* info mode */,
 
   StatusCellCount /* must be last */
 } StatusCell;
@@ -287,12 +292,10 @@ extern int listBrailleDrivers (void);
 extern braille_driver *braille;
 extern braille_driver noBraille;
 
-extern unsigned char texttrans[0X100];	 /* current text to braille translation table */
-extern unsigned char untexttrans[0X100]; /* current braille to text translation table */
-extern unsigned char attribtrans[0X100]; /* current attributes to braille translation table */
-
-#define MAXNSTATCELLS 22
-extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
+extern unsigned char textTable[0X100];	 /* current text to braille translation table */
+extern unsigned char untextTable[0X100]; /* current braille to text translation table */
+extern unsigned char attributesTable[0X100]; /* current attributes to braille translation table */
+extern void *contractionTable; /* current braille contraction table */
 
 typedef struct {
   int code;

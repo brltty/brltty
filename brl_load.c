@@ -49,21 +49,16 @@ braille_driver *braille = NULL;	/* filled by dynamic libs */
  * Output braille translation tables.
  * The files *.auto.h (the default tables) are generated at compile-time.
  */
-unsigned char texttrans[0X100] = {
+unsigned char textTable[0X100] = {
   #include "text.auto.h"
 };
-unsigned char untexttrans[0X100];
+unsigned char untextTable[0X100];
 
-unsigned char attribtrans[0X100] = {
+unsigned char attributesTable[0X100] = {
   #include "attrib.auto.h"
 };
 
-/*
- * Status cells support 
- * remark: the Papenmeier has a column with 22 cells, 
- * all other terminals use up to 5 bytes
- */
-unsigned char statcells[MAXNSTATCELLS];        /* status cell buffer */
+void *contractionTable = NULL;
 
 const CommandEntry commandTable[] = {
   #include "cmds.auto.h"
@@ -179,7 +174,7 @@ learnCommands (int poll, int timeout) {
           candidate = NULL;
       if (!candidate) {
         snprintf(buffer, sizeof(buffer), "unknown: %06X", key);
-      } else if (candidate == last) {
+      } else if ((candidate == last) && (blk != 0)) {
         snprintf(buffer, sizeof(buffer), "%s[%d]: %s",
                  candidate->name, cmd-last->code+1, candidate->description);
       } else {

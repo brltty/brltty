@@ -51,7 +51,7 @@ integerArgument (const char *argument, short minimum, short maximum, const char 
 }
 
 static unsigned int
-stringArgument (const char *argument, const char *const *choices, const char *name) {
+wordArgument (const char *argument, const char *const *choices, const char *name) {
   size_t length = strlen(argument);
   const char *const *choice = choices;
   while (*choice) {
@@ -64,14 +64,51 @@ stringArgument (const char *argument, const char *const *choices, const char *na
   exit(2);
 }
 
+static unsigned char
+instrumentArgument (const char *argument) {
+  size_t argumentLength = strlen(argument);
+  unsigned char instrument;
+  for (instrument=0; instrument<midiInstrumentCount; ++instrument) {
+    const char *component = midiInstrumentTable[instrument];
+    size_t componentLeft = strlen(component);
+    const char *word = argument;
+    size_t wordLeft = argumentLength;
+    {
+      const char *delimiter = memchr(component, '(', componentLeft);
+      if (delimiter) componentLeft = delimiter - component;
+    }
+    while (1) {
+      while (*component == ' ') component++, componentLeft--;
+      if ((componentLeft == 0) != (wordLeft == 0)) break; 
+      if (!componentLeft) return instrument;
+      {
+        size_t wordLength = wordLeft;
+        size_t componentLength = componentLeft;
+        const char *delimiter;
+        if ((delimiter = memchr(word, '-', wordLeft))) wordLength = delimiter - word;
+        if ((delimiter = memchr(component, ' ', componentLeft))) componentLength = delimiter - component;
+        if (wordLength > componentLength) break;
+        if (strncasecmp(word, component, wordLength) != 0) break;
+        word += wordLength; wordLeft -= wordLength;
+        if (*word) word++, wordLeft--;
+        component += componentLength; componentLeft -= componentLength;
+      }
+    }
+  }
+  fprintf(stderr, "tunetest: Invalid instrument: %s\n", argument);
+  exit(2);
+}
+
 int
 main (int argc, char *argv[]) {
-  const char *const shortOptions = ":d:";
+  const char *const shortOptions = ":d:i:";
   const struct option longOptions[] = {
-    {"device"   , required_argument, NULL, 'd'},
-    {NULL       , 0                , NULL,  0 }
+    {"device"   ,  required_argument, NULL, 'd'},
+    {"instrument", required_argument, NULL, 'i'},
+    {NULL       ,  0                , NULL,  0 }
   };
   unsigned int device = tdSpeaker;
+  unsigned char instrument = 0;
 
   opterr = 0;
   while (1) {
@@ -88,10 +125,13 @@ main (int argc, char *argv[]) {
         fprintf(stderr, "tunetest: Missing operand: -%c\n", optopt);
         exit(2);
       case 'd': {
-        const char *devices[] = {"speaker", "dsp", "midi", "fm", NULL};
-        device = stringArgument(optarg, devices, "device");
+        const char *devices[] = {"speaker", "dac", "midi", "fm", NULL};
+        device = wordArgument(optarg, devices, "device");
         break;
       }
+      case 'i':
+        instrument = instrumentArgument(optarg);
+        break;
     }
   }
   argv += optind; argc -= optind;
@@ -113,7 +153,9 @@ main (int argc, char *argv[]) {
     *tone = (ToneDefinition)TONE_STOP();
 
     memset(&prefs, 0, sizeof(prefs));
-    prefs.sound = 1;
+    prefs.tunes = 1;
+    prefs.dots = 0;
+    prefs.midiinstr = instrument;
     setTuneDevice(device);
     {
       TuneDefinition tune = {NULL, 0, tones};
