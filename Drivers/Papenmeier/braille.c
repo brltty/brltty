@@ -966,8 +966,8 @@ flushCells2 (BrailleDisplay *brl) {
 
     /* Two dummy cells for each switch and key on the left side. */
     {
-      int modules = leftModules2;
-      while (modules-- > 0) {
+      int count = leftModules2;
+      while (count-- > 0) {
         buffer[size++] = 0;
         buffer[size++] = 0;
       }
@@ -983,8 +983,8 @@ flushCells2 (BrailleDisplay *brl) {
 
     /* Two dummy cells for each switch and key on the right side. */
     {
-      int modules = rightModules2;
-      while (modules-- > 0) {
+      int count = rightModules2;
+      while (count-- > 0) {
         buffer[size++] = 0;
         buffer[size++] = 0;
       }
@@ -1151,18 +1151,18 @@ mapInputModules2 (void) {
 
   {
     unsigned char column = terminal->columns;
-    do {
+    while (column) {
       nextInputModule2(&byte, &bit);
       addInputMapping2(byte, bit, ROUTINGKEY, --column);
-    } while (column);
+    }
   }
 
   {
     unsigned char cell = terminal->statusCount;
-    do {
+    while (cell) {
       nextInputModule2(&byte, &bit);
       addInputMapping2(byte, bit, OFFS_STAT+cell--, 0);
-    } while (cell);
+    }
   }
 
   mapSwitchKey2(terminal->leftKeys, &byte, &bit,
