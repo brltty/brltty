@@ -62,11 +62,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <sys/termios.h>
 #include <sys/ioctl.h>
 #include <string.h>
-#include <errno.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -384,19 +382,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
       = routing_were_pressed = which_routing_keys = NULL;
 
   /* Open the Braille display device for random access */
-  brl_fd = open (tty, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0){
-    LogPrint(LOG_ERR, "Open failed on port %s: %s", tty, strerror(errno));
-    goto failure;
-  }
-  if(!isatty(brl_fd)){
-    LogPrint(LOG_ERR,"Opened device %s is not a tty!", tty);
-    goto failure;
-  }
-  LogPrint(LOG_DEBUG,"Tty %s opened", tty);
-
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
-  /* we don't check the return code. could only be EBADF or ENOTTY. */
+  if (!openSerialDevice(tty, &brl_fd, &oldtio)) goto failure;
 
   /* Construct new settings by working from current state */
   memcpy(&curtio, &oldtio, sizeof(struct termios));
@@ -417,19 +403,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
 
   /* nonblocking input will be set in ..._receive_packet() functions */
 
-  /* baud rate */
-  if(cfsetispeed(&curtio,B19200) == -1
-     || cfsetospeed(&curtio,B19200) == -1){
-    LogPrint(LOG_ERR, "Failed to set baudrate");
-    goto failure;
-  }
-
-  /* Make the settings active and flush the input/output queues. This time we
-     check the return code in case somehow the settings are invalid. */
-  if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1){
-    LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
-    goto failure;
-  }
+  if(!resetSerialDevice(brl_fd, &curtio, B19200)) goto failure;
  
 /* Allocate and init static packet buffers */
   if((sendpacket = (unsigned char *)malloc(MAXTOTALPACKETLEN)) == NULL
