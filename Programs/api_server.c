@@ -1452,9 +1452,11 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       keycode = htonl(keycode);
       brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
     } else {
-      LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
-      keycode = htonl(command);
-      brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
+      if ((command!=BRL_CMD_NOOP) && (command!=EOF)) {
+        LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
+        keycode = htonl(command);
+        brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
+      }
     }
     return EOF;
   }
