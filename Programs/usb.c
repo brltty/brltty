@@ -527,6 +527,8 @@ usbAwaitInput (
           return 1;
         }
       }
+      if (errno == ETIMEDOUT) errno = EAGAIN;
+
       free(buffer);
     }
     return 0;

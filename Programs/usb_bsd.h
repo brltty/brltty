@@ -215,7 +215,7 @@ usbReadEndpoint (
           errno = EIO;
           count = -1;
         }
-      } else {
+      } else if (errno != ETIMEDOUT) {
         LogError("USB endpoint read");
       }
     }
