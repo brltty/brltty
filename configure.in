@@ -770,9 +770,7 @@ BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([tb], [TechniBraille])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
-test -n "${brltty_package_curses}" && {
-   BRLTTY_BRAILLE_DRIVER([tt], [TTY], [-l$(CURSES_LIB)])
-}
+BRLTTY_BRAILLE_DRIVER([tt], [TTY], [-l$(CURSES_LIB)])
 BRLTTY_BRAILLE_DRIVER([va], [Vario])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
