@@ -649,7 +649,7 @@ void *ConnectionsManager(void *arg)
  
  pthread_cleanup_push((void (*) (void *)) CloseSocket,(void *) mainsock);
 
- while ((res = accept(mainsock, &addr, &addrlen))>0)
+ for (; (res = accept(mainsock, &addr, &addrlen))>=0; addrlen=sizeof(addr))
  {
   LogPrint(LOG_DEBUG,"Connection accepted on socket %d",res);
   c = CreateConnection(res,ntohl(DisplaySize[0]),ntohl(DisplaySize[1])); 
