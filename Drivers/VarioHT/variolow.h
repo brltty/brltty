@@ -48,36 +48,17 @@
 #define VARIO_PUSHBUTTON_RELEASE_5	0x8b
 #define VARIO_PUSHBUTTON_RELEASE_6	0x8f
 
-/*
-		bit		orig dot - 1
-		0		0
-		1		3
-		2		1
-		3		4
-		4		2
-		5		5
-		6		6
-		7		7
-		
-*/
-#define CHAR_TO_VARIO_CHAR(a) (((a)&0xe1)|(((a)&0x02)<<2)|(((a)&0x04)>>1)|(((a)&0x08)<<1)|(((a)&0x10)>>2))
-
-
-
-
 	/*	Open and set the serial port right */ 
 int varioinit(char *dev) ;
 	/*	Close the serial comm and flush buffers */ 
 int varioclose();
 	/*	Send reset */ 
-int varioreset();
+int varioreset(void);
 	/*	Send the ready formatted display byuffer to the vario */ 
-int variodisplay(char *buff);
-	/*	Check if any data available in the input buffers */ 
-int variocheckwaiting();
+int variodisplay(const unsigned char *buff);
 	/*	Get data from the varrio, block until available  */ 
-int varioget();
+int varioget(void);
 	/*	Translates the given buffer into vario special chars */ 
-int variotranslate(char *frombuff, char *tobuff,int maxcnt);
+int variotranslate(const unsigned char *frombuff, unsigned char *tobuff,int maxcnt);
 
 #endif /* VARIO_LOW_INCLUDE */

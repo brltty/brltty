@@ -32,121 +32,90 @@
 
 #include "variolow.h"
 #include "Programs/misc.h"
+#include "Programs/brl.h"
 
 
 	/*	The filedescriptor of the open port, sorry to say, wee need a global
 	 *	one here */ 
-static int devfd=0;
+static int devfd=-1;
+static TranslationTable outputTable;
 
 int varioinit(char *dev) 
 {
 	struct 	termios		tiodata;
 
-		/*	Idiot check one */ 
-	if(!dev) {
-		return -1;
+	{
+		static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+		makeOutputTable(&dots, &outputTable);
 	}
-	devfd=open(dev,O_RDWR | O_NOCTTY);
-		/*	If we got it open, get the old attributed of the port */ 
-	if(devfd==-1 || tcgetattr(devfd, &tiodata)) {
-		LogPrint(LOG_ERR,"Port open failed: %s: %s",dev,strerror(errno));
-		if(devfd>0) {
-			close(devfd);
-		}
-		return -1;
-	}
-	tiodata.c_cflag=(CLOCAL|PARODD|PARENB|CREAD|CS8);
-	tiodata.c_iflag=IGNPAR;
-	tiodata.c_oflag=0;
-	tiodata.c_lflag=0;
-	tiodata.c_cc[VMIN]=0;
-	tiodata.c_cc[VTIME]=0;
-	
-		/*	Force down DTR, flush any pending data and then 
-		 *	the port to what we want it to be */ 
-	if(
-		cfsetispeed(&tiodata,B0) ||
-		cfsetospeed(&tiodata,B0) ||
-		tcsetattr(devfd,TCSANOW,&tiodata) ||
-		tcflush(devfd, TCIOFLUSH) ||
-		cfsetispeed(&tiodata,B19200) ||
-		cfsetospeed(&tiodata,B19200) ||
-		tcsetattr(devfd,TCSANOW,&tiodata) 
-	  ) {
-		LogPrint(LOG_ERR,"Port init failed: %s: %s",dev,strerror(errno));
-		return -1;
-	}
-		/*	Pause to let them take effect */ 
-	usleep(500);	
-	return 0;
-}
 
-int varioclose()
-{
-		/*	Flush all pending output and then close the port */
-	if(devfd>0) {
-		tcdrain(devfd);
+	if(openSerialDevice(dev, &devfd, &tiodata)) {
+		tiodata.c_cflag=(CLOCAL|PARODD|PARENB|CREAD|CS8);
+		tiodata.c_iflag=IGNPAR;
+		tiodata.c_oflag=0;
+		tiodata.c_lflag=0;
+		tiodata.c_cc[VMIN]=0;
+		tiodata.c_cc[VTIME]=0;
+		if (resetSerialDevice(devfd, &tiodata, B19200)) {
+			if (varioreset() == 0) return 0;
+		}
+
 		close(devfd);
-		return 0;
+		devfd=-1;
 	}
+
 	return -1;
 }
 
-int varioreset() 
+int varioclose(void)
 {
-	char c=VARIO_RESET;
+	if(devfd!=-1) {
+		close(devfd);
+		devfd=-1;
+		return 0;
+	}
+
+	return -1;
+}
+
+int varioreset(void) 
+{
+	if(devfd!=-1) {
+		char c=VARIO_RESET;
+		int n=write(devfd,&c,1);
+		if (n==1) return 0;
+	}
+
+	return -1;
+}
+
+int variodisplay(const unsigned char *buff)
+{
+	if (devfd!=-1) {
+		int n;
+		unsigned char outbuff[VARIO_DISPLAY_DATA_LEN + 40];
+		memcpy(outbuff,VARIO_DISPLAY_DATA,VARIO_DISPLAY_DATA_LEN);
+		memcpy(outbuff+VARIO_DISPLAY_DATA_LEN,buff,40);
+		if((n=write(devfd,outbuff,sizeof(outbuff)))==sizeof(outbuff)) return 0;
+	}
 	
-	if(devfd<=0) {
-		return -1;
-	}
-	return write(devfd,&c,sizeof(c))!=1;
+	return -1;
 }
 
-int variodisplay(char *buff)
+int varioget(void)
 {
-
-	if(!buff) {
-		return -1;
+	if(devfd!=-1) {
+		unsigned char c;
+		if(read(devfd,&c,1)==1) return c;
 	}
-		/*	Write header and then data ... */ 
-	write(devfd,VARIO_DISPLAY_DATA,VARIO_DISPLAY_DATA_LEN);
-	write(devfd,buff,40);
-	
-	return 0;
+
+	return -1;
 }
 
-int variocheckwaiting() 
+int variotranslate(const unsigned char *frombuff, unsigned char *tobuff,int count) 
 {
-	fd_set			checkset;
-	struct	timeval	tval;
-
-	tval.tv_sec=0;
-	tval.tv_usec=0;
-
-	FD_ZERO(&checkset);
-	FD_SET(devfd,&checkset);
-	return !select(devfd+1,&checkset,NULL,NULL,&tval);
-}
-
-int varioget()
-{
-	unsigned char 	data=0;
-		/*	And read a tiny little byte */ 	
-	if(read(devfd,&data,1)==1) {
-		return data;
-	}else {
-		return -1;
-	}
-}
-
-int variotranslate(char *frombuff, char *tobuff,int count) 
-{
-	if(!frombuff|!tobuff) {
-		return -1;
-	}
-		/*	Just apply the nify macro for all chars */ 
 	for(;count>=0;count--) {
-		tobuff[count-1]=CHAR_TO_VARIO_CHAR(frombuff[count-1]);
+		tobuff[count-1]=outputTable[frombuff[count-1]];
 	}
 
 	return 0;

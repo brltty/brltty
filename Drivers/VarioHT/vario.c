@@ -38,7 +38,7 @@ static unsigned char lastbuff[40];
 static void
 brl_identify (void)
 {
-  LogPrint(LOG_NOTICE, "HT Protocol driver");
+	LogPrint(LOG_NOTICE, "HT Protocol driver");
 }
 
 static int 
@@ -49,6 +49,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 			/*	Theese are pretty static */ 
 		brl->x=40;
 		brl->y=1;
+                brl->helpPage = 0;
 		return 1;
 	}
 	return 0;
@@ -63,25 +64,12 @@ brl_close (BrailleDisplay *brl)
 static void 
 brl_writeWindow (BrailleDisplay *brl)
 {
-	char		outbuff[40];
-	int			i;
-
-		/*	Idiot check one */ 
-	if(!brl) {
-		return;
-	}
-		/*	Only display something if the data actually differs, this 
-		 *	could most likely cause some problems in redraw situations etc
-		 *	but since the darn thing wants to redraw quite frequently otherwise 
-		 *	this still makes a better lookin result */ 
-	for(i=0;i<40;i++) {
-		if(lastbuff[i]!=brl->buffer[i]) {
-			memcpy(lastbuff,brl->buffer,40*sizeof(char));
-				/*	Redefine the given dot-pattern to match ours */
-			variotranslate(brl->buffer, outbuff, 40);
-			variodisplay(outbuff);
-			break;
-		}
+	if(memcmp(lastbuff,brl->buffer,40)!=0) {
+		char		outbuff[40];
+		memcpy(lastbuff,brl->buffer,40);
+			/*	Redefine the given dot-pattern to match ours */
+		variotranslate(brl->buffer,outbuff,40);
+		variodisplay(outbuff);
 	}
 }
 
