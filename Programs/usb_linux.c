@@ -52,6 +52,10 @@ typedef struct {
   int file;
 } UsbDeviceExtension;
 
+typedef struct {
+  Queue *completedRequests;
+} UsbEndpointExtension;
+
 int
 usbResetDevice (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
@@ -231,13 +235,35 @@ usbControlTransfer (
   }
 }
 
+static void
+usbDeallocateRequest (void *item, void *data) {
+  free(item);
+}
+
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
-  return 1;
+  UsbEndpointExtension *eptx;
+
+  if ((eptx = malloc(sizeof(*eptx)))) {
+    if ((eptx->completedRequests = newQueue(usbDeallocateRequest, NULL))) {
+      endpoint->extension = eptx;
+      return 1;
+    } else {
+      LogError("USB endpoint completed request queue allocate");
+    }
+  } else {
+    LogError("USB endpoint extension allocate");
+  }
+
+  return 0;
 }
 
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
+  UsbEndpointExtension *eptx = endpoint->extension;
+  deallocateQueue(eptx->completedRequests);
+  endpoint->extension = NULL;
+  free(eptx);
 }
 
 static int
@@ -391,6 +417,37 @@ usbCancelRequest (
   return 1;
 }
 
+static int
+usbReapUrb (
+  UsbDevice *device,
+  int wait
+) {
+  UsbDeviceExtension *devx = device->extension;
+  struct usbdevfs_urb *urb;
+
+  if (ioctl(devx->file,
+            wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
+            &urb) != -1) {
+    if (urb) {
+      UsbEndpoint *endpoint;
+
+      if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
+        UsbEndpointExtension *eptx = endpoint->extension;
+
+        if (enqueueItem(eptx->completedRequests, urb)) return 1;
+        LogError("USB completed request enqueue");
+        free(urb);
+      }
+    } else {
+      errno = EAGAIN;
+    }
+  } else {
+    if (wait || (errno != EAGAIN)) LogError("USB URB reap");
+  }
+
+  return 0;
+}
+
 void *
 usbReapResponse (
   UsbDevice *device,
@@ -398,36 +455,35 @@ usbReapResponse (
   UsbResponse *response,
   int wait
 ) {
-  UsbDeviceExtension *devx = device->extension;
-  struct usbdevfs_urb *urb;
+  UsbEndpoint *endpoint;
 
-  response->buffer = NULL;
-  response->length = 0;
-  response->context = NULL;
+  if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    struct usbdevfs_urb *urb;
 
-  if (ioctl(devx->file,
-            wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
-            &urb) == -1) {
-    if (wait || (errno != EAGAIN)) LogError("USB URB reap");
-    urb = NULL;
-  } else if (!urb) {
-    errno = EAGAIN;
-  } else if (urb->status) {
-    if ((errno = urb->status) < 0) errno = -errno;
-    LogError("USB URB status");
-  } else {
-    int length = urb->actual_length;
-    if (usbApplyInputFilters(device, urb->buffer, urb->buffer_length, &length)) {
-      response->buffer = urb->buffer;
-      response->length = length;
-      response->context = urb->usercontext;
-      return urb;
+    while (!(urb = dequeueItem(eptx->completedRequests))) {
+      if (!usbReapUrb(device, wait)) return NULL;
     }
 
-    errno = EIO;
+    if (urb->status) {
+      if ((errno = urb->status) < 0) errno = -errno;
+      LogError("USB URB status");
+    } else {
+      int length = urb->actual_length;
+
+      if (usbApplyInputFilters(device, urb->buffer, urb->buffer_length, &length)) {
+        response->buffer = urb->buffer;
+        response->length = length;
+        response->context = urb->usercontext;
+        return urb;
+      }
+
+      errno = EIO;
+    }
+
+    free(urb);
   }
 
-  if (urb) free(urb);
   return NULL;
 }
 
