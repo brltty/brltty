@@ -174,7 +174,7 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 10 */
-    "Delphi 20",
+    "Delphi 420",
     DEL420,
     20,
     3
@@ -182,7 +182,7 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 11 */
-    "Delphi 40",
+    "Delphi 440",
     DEL440,
     40,
     3
@@ -190,7 +190,7 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 12 */
-    "Delphi 40 Desktop",
+    "Delphi 440 Desktop",
     DEL44D,
     40,
     5
@@ -198,7 +198,7 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 13 */
-    "Delphi 80",
+    "Delphi 480",
     DEL480,
     80,
     5
