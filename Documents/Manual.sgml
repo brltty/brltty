@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.3, February 2003
+  <date>Version 3.3, August 2003
   <abstract>
     Copyright &copy; 1995-2003 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -85,6 +85,8 @@ BRLTTY provides the following capabilities:
   <item>
     Modular design allowing relatively easy addition of
     drivers for other braille displays and speech synthesizers.
+  <item>
+    An application programming interface.
 </itemize>
 
 <sect1>System Requirements<p>
@@ -1530,12 +1532,16 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Increment the current menu item's setting.
 </descrip>
 
-<sect2>Speech Controls<p>
+<sect2>Speech Controls<label id="speech"><p>
 <descrip>
-  <tag>SAY<label id="command-SAY"></tag>
+  <tag>SAY_LINE<label id="command-SAY_LINE"></tag>
     Speak the current line.
-  <tag>SAYALL<label id="command-SAYALL"></tag>
-    Speak the rest of the screen (starting with the current line).
+    The <ref id="preference-sayline-mode" name="Say-Line Mode"> preference
+    determines if pending speech is discarded first.
+  <tag>SAY_ABOVE<label id="command-SAY_ABOVE"></tag>
+    Speak the top portion of the screen (ending with the current line).
+  <tag>SAY_BELOW<label id="command-SAY_BELOW"></tag>
+    Speak the bottom portion of the screen (starting with the current line).
   <tag>MUTE<label id="command-MUTE"></tag>
     Stop speaking immediately.
   <tag>SPKHOME<label id="command-SPKHOME"></tag>
@@ -2630,6 +2636,22 @@ Notes:
     (see the <ref id="preference-alert-dots" name="Alert Dots"> preference)
     and if a dot pattern has been associated with the event,
     then, regardless of the setting of this preference, the message isn't displayed.
+  <tag>Say-Line Mode<label id="preference-sayline-mode"></tag>
+    When using the <ref id="command-SAY_LINE" name="SAY_LINE"> command:
+    <descrip>
+      <tag/Immediate/
+        Discard pending speech.
+      <tag/Enqueue/
+        Don't discard pending speech.
+    </descrip>
+  <tag>Autospeak<label id="preference-autospeak"></tag>
+    <descrip>
+      <tag/No/
+        Only speak when explicitly requested to do so
+        (see section <ref id="speech" name="Speech Controls">).
+      <tag/Yes/
+        This setting is experimental.
+    </descrip>
   <tag>Status Style<label id="preference-status-style"></tag>
     This setting specifies the way that the status cells are to be used.
     You shuldn't normally need to play with it.

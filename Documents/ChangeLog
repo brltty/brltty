@@ -1,7 +1,10 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+August 4, 2003:
  - BRLTTY 3.3 released:
+   Remove the use of sched_yield() to restore tone length accuracy. (np)
+   Add the "Say-Line Mode" (Immediate, Enqueue) preference. (np,dm)
    Rename the default for the Linux screen driver option acm from default to auto. (dm)
    No longer strip executables in the build tree. (dm)
    Compile all drivers even if built-in ones are configured. (dm)
