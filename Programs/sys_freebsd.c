@@ -38,43 +38,7 @@
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
 
-#define BEEP_DIVIDEND 1193180
-
-int
-canBeep (void) {
-  if (getConsole() != -1) return 1;
-  return 0;
-}
-
-int
-timedBeep (unsigned short frequency, unsigned short milliseconds) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KDMKTONE, ((milliseconds << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
-    LogError("ioctl KDMKTONE");
-  }
-  return 0;
-}
-
-int
-startBeep (unsigned short frequency) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KIOCSOUND, BEEP_DIVIDEND/frequency) != -1) return 1;
-    LogError("ioctl KIOCSOUND");
-  }
-  return 0;
-}
-
-int
-stopBeep (void) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KIOCSOUND, 0) != -1) return 1;
-    LogError("ioctl KIOCSOUND");
-  }
-  return 0;
-}
+#include "sys_beep_kd.h"
 
 #ifdef ENABLE_PCM_TUNES
 #include "sys_pcm_dsp.h"
