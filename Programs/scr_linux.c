@@ -816,7 +816,7 @@ insertCode (unsigned short key, int raw) {
       key = (key - 'A') + 'a';
       modShift = 1;
     } else if (!(key & 0XE0)) {
-      key |= 0X40;
+      key |= 0X60;
       modControl = 1;
     }
   }
