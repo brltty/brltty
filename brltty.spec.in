@@ -168,6 +168,12 @@ new="${file}.rpmnew"
 )
 
 %changelog
+* Thu Jan 15 2004 Dave Mielke <dave@mielke.cc> 3.4.1-1
+-  Fix an invalid address conversion. (dm)
+-  accept() can return 0. (st)
+-  Reset the address length before calling accept(). (st)
+-  Pasting accented characters doesn't work. (dm)
+-  Only remove brltty-config from Programs during distclean. (ah)
 * Wed Dec 31 2003 Dave Mielke <dave@mielke.cc> 3.4-1
 -  Remove duplicate files from screen-3.9.11 patch. (TK)
 -  Add more build options to specify directories. (dm)
