@@ -34,10 +34,6 @@
 #include <sys/time.h>
 #include <sys/ioctl.h>
 
-#ifdef HAVE_FUNC_SCHED_YIELD
-#include <sched.h>
-#endif /* HAVE_FUNC_SCHED_YIELD */
-
 #include "misc.h"
 #include "brl.h"
 
@@ -441,9 +437,6 @@ shortdelay (int milliseconds) {
     struct timeval now;
     gettimeofday(&now, NULL);
     if (elapsedMilliseconds(&start, &now) >= milliseconds) break;
-#ifdef HAVE_FUNC_SCHED_YIELD
-    sched_yield();
-#endif /* HAVE_FUNC_SCHED_YIELD */
   }
 }
 

@@ -49,9 +49,6 @@ extern "C" {
 /* Define this if the function shl_load is available. */
 #undef HAVE_FUNC_SHL_LOAD
 
-/* Define this if the function sched_yield is available. */
-#undef HAVE_FUNC_SCHED_YIELD
-
 /* Define this if the function sin is available. */
 #undef HAVE_FUNC_SIN
 
