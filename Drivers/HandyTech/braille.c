@@ -25,6 +25,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <termios.h>
 #include <sys/time.h>
 
 #include "Programs/brl.h"
@@ -170,7 +171,9 @@ typedef struct {
   int (*readPacket) (unsigned char *buffer, int length);
   int (*writePacket) (const unsigned char *buffer, int length, int *delay);
 } InputOutputOperations;
+
 static const InputOutputOperations *io;
+static const speed_t baud = B19200;
 
 static void
 writeStopSequence (void) {
@@ -189,7 +192,6 @@ static int serialCharactersPerSecond;			/* file descriptor for Braille display *
 static int
 openSerialPort (char **parameters, const char *device) {
   if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
-    speed_t baud = B19200;
     struct termios newSerialSettings;
 
     memset(&newSerialSettings, 0, sizeof(newSerialSettings));
@@ -257,6 +259,7 @@ static const InputOutputOperations serialOperations = {
 #include "Programs/usb.h"
 
 static UsbDevice *usbDevice = NULL;
+static const UsbSerialOperations *usbSerial;
 static unsigned char usbInterface;
 static unsigned char usbOutputEndpoint;
 static unsigned char usbInputEndpoint;
@@ -266,15 +269,21 @@ chooseUsbDevice (UsbDevice *device, void *data) {
   const char *serialNumber = data;
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
   if ((descriptor->idVendor == 0X921) &&
-      (descriptor->idProduct == 0X1200) &&
-      usbVerifyProduct(device, "HandyLink USB")) {
+      (descriptor->idProduct == 0X1200)) {
+    /* A true old generation HandyTech Braille Star 40 */
     if (!usbVerifySerialNumber(device, serialNumber)) return 0;
 
-    /* A true old generation HandyTech Braille Star 40 */
     usbInterface = 0;
     if (usbClaimInterface(device, usbInterface)) {
       if (usbSetConfiguration(device, 1)) {
         if (usbSetAlternative(device, usbInterface, 0)) {
+          usbSerial = usbGetSerialOperations(device);
+          usbSerial->setBaud(device, baud2integer(baud));
+          usbSerial->setFlowControl(device, 0);
+          usbSerial->setDataBits(device, 8);
+          usbSerial->setStopBits(device, 1);
+          usbSerial->setParity(device, USB_SERIAL_PARITY_ODD);
+
           usbOutputEndpoint = 1;
           usbInputEndpoint = 1;
           return 1;
