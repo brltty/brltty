@@ -117,7 +117,8 @@ endBeep (void) {
 #elif defined(USE_PCM_SUPPORT_ALSA)
 #include "sys_pcm_alsa.h"
 #else /* USE_PCM_SUPPORT_ */
-#error PCM interface either unspecified or unsupported
+#warning PCM interface either unspecified or unsupported
+#include "sys_pcm_none.h"
 #endif /* USE_PCM_SUPPORT_ */
 #endif /* ENABLE_PCM_SUPPORT */
 

@@ -154,7 +154,7 @@ extern "C" {
 /* Define this to include PCM (soundcard audio) support. */
 #undef ENABLE_PCM_SUPPORT
 
-/* Define only one of the following PCM interfaces. */
+/* If necessary, define only one of the following PCM interfaces. */
 #undef USE_PCM_SUPPORT_OSS
 #undef USE_PCM_SUPPORT_ALSA
 
