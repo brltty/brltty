@@ -26,14 +26,14 @@ Check the
 the 
 <A HREF="#configure-braille-device">braille-device</A> configuration file directive,
 and the 
-<A HREF="Manual-2.html#make-braille-device">BRLDEV</A> make file variable
+<A HREF="Manual-2.html#build-braille-device">--with-braille-device</A> build option
 for alternatives regarding how to tell BRLTTY which device your display is connected to.
 Check the
 <A HREF="#options-braille-driver">-b</A> command line option,
 the 
 <A HREF="#configure-braille-driver">braille-driver</A> configuration file directive,
 and the 
-<A HREF="Manual-2.html#make-braille-driver">BRL_TARGET</A> make file variable
+<A HREF="Manual-2.html#build-braille-driver">--with-braille-driver</A> build option
 for alternatives regarding how to tell BRLTTY which kind of braille display you have.
 Check the
 <A HREF="#options-braille-parameters">-B</A> command line option,
@@ -158,7 +158,7 @@ The current line is included when searching for the inter-paragraph space.
 <A NAME="command-PRSEARCH"></A> </B><DD><P>Search backward for the nearest occurrence
 of the character string within the cut buffer
 (see 
-<A HREF="#cut">Cut and Paste</A>).
+<A HREF="Manual-4.html#cut">Cut and Paste</A>).
 The search starts at the character immediately to the left of the braille window,
 proceeds from right to left,
 and, at the beginning of a line, wraps to the end of the previous line.
@@ -167,7 +167,7 @@ The search isn't case sensitive.
 <A NAME="command-NXSEARCH"></A> </B><DD><P>Search forward for the nearest occurrence
 of the character string within the cut buffer
 (see 
-<A HREF="#cut">Cut and Paste</A>).
+<A HREF="Manual-4.html#cut">Cut and Paste</A>).
 The search starts at the character immediately to the right of the braille window,
 proceeds from left to right,
 and, at the end of a line, wraps to the beginning of the next line.
@@ -239,7 +239,7 @@ Unless specifically noted, each of these features
 is initially <B>off</B>, and, when <B>on</B>, affects BRLTTY's operation as a whole.
 The initial setting of some of these features can be changed
 via the 
-<A HREF="#preferences-menu">preferences menu</A>.
+<A HREF="Manual-4.html#preferences-menu">preferences menu</A>.
 <DL>
 <DT><B>FREEZE
 <A NAME="command-FREEZE"></A> </B><DD><P>Freeze the screen image.
@@ -260,14 +260,14 @@ When showing screen content, the text translation table is used
 the 
 <A HREF="#configure-text-table">text-table</A> configuration file directive,
 and the 
-<A HREF="Manual-2.html#make-tables-text">TEXTTRANS</A> make file variable).
+<A HREF="Manual-2.html#build-text-table">--with-text-table</A> build option).
 When showing screen attributes, the attributes translation table is used
 (see the 
 <A HREF="#options-attributes-table">-a</A> command line option,
 the 
 <A HREF="#configure-attributes-table">attributes-table</A> configuration file directive,
 and the 
-<A HREF="Manual-2.html#make-tables-attributes">ATTRTRANS</A> make file variable).
+<A HREF="Manual-2.html#build-attributes-table">--with-attributes-table</A> build option).
 This feature only affects the current virtual terminal.
 <DT><B>SIXDOTS
 <A NAME="command-SIXDOTS"></A> </B><DD><P>Show characters using 6-dot, rather than 8-dot, braille.
@@ -280,7 +280,7 @@ and the
 <A HREF="#configure-contraction-table">contraction-table</A> configuration file directive),
 then it is used.
 This setting can also be changed with the
-<A HREF="#preference-text-style">Text Style</A> preference.
+<A HREF="Manual-4.html#preference-text-style">Text Style</A> preference.
 <DT><B>SLIDEWIN
 <A NAME="command-SLIDEWIN"></A> </B><DD><P>If cursor tracking
 (see the 
@@ -294,7 +294,7 @@ If this feature is <B>off</B>,
 then the braille window is always positioned such that
 its left end is a multiple of its width from the left edge of the screen.
 This setting can also be changed with the
-<A HREF="#preference-sliding-window">Sliding Window</A> preference.
+<A HREF="Manual-4.html#preference-sliding-window">Sliding Window</A> preference.
 <DT><B>SKPIDLNS
 <A NAME="command-SKPIDLNS"></A> </B><DD><P>Rather than explicitly moving exactly one line either up or down,
 skip passed lines which have the same content as the current line.
@@ -310,7 +310,7 @@ the
 and 
 <A HREF="#command-FWINRTSKIP">FWINRTSKIP</A> commands.
 This setting can also be changed with the
-<A HREF="#preference-skip-identical-lines">Skip Identical Lines</A> preference.
+<A HREF="Manual-4.html#preference-skip-identical-lines">Skip Identical Lines</A> preference.
 <DT><B>SKPBLNKWINS
 <A NAME="command-SKPBLNKWINS"></A> </B><DD><P>Skip passed blank windows when reading either forward or backward.
 This feature affects the 
@@ -318,7 +318,7 @@ This feature affects the
 and 
 <A HREF="#command-FWINRT">FWINRT</A> commands.
 This setting can also be changed with the
-<A HREF="#preference-skip-blank-windows">Skip Blank Windows</A> preference.
+<A HREF="Manual-4.html#preference-skip-blank-windows">Skip Blank Windows</A> preference.
 <DT><B>CSRVIS
 <A NAME="command-CSRVIS"></A> </B><DD><P>Show the cursor by superimposing a dot pattern
 (see the 
@@ -326,7 +326,7 @@ This setting can also be changed with the
 on top of the character where it is.
 This feature is initially <B>on</B>.
 This setting can also be changed with the
-<A HREF="#preference-show-cursor">Show Cursor</A> preference.
+<A HREF="Manual-4.html#preference-show-cursor">Show Cursor</A> preference.
 <DT><B>CSRHIDE
 <A NAME="command-CSRHIDE"></A> </B><DD><P>Hide the cursor (see the 
 <A HREF="#command-CSRVIS">CSRVIS</A> command)
@@ -351,14 +351,14 @@ This feature only affects the current virtual terminal.
 <A NAME="command-CSRSIZE"></A> </B><DD><P>Represent the cursor with all eight dots (a solid block),
 rather than with just dots 7 and 8 (an underline).
 This setting can also be changed with the
-<A HREF="#preference-cursor-style">Cursor Style</A> preference.
+<A HREF="Manual-4.html#preference-cursor-style">Cursor Style</A> preference.
 <DT><B>CSRBLINK
 <A NAME="command-CSRBLINK"></A> </B><DD><P>Blink (turn on and off according to a predefined interval)
 the symbol representing the cursor
 (see the 
 <A HREF="#command-CSRVIS">CSRVIS</A> command).
 This setting can also be changed with the
-<A HREF="#preference-blinking-cursor">Blinking Cursor</A> preference.
+<A HREF="Manual-4.html#preference-blinking-cursor">Blinking Cursor</A> preference.
 <DT><B>ATTRVIS
 <A NAME="command-ATTRVIS"></A> </B><DD><P>Underline (with combinations of dots 7 and 8) highlighted characters.
 <DL>
@@ -371,7 +371,7 @@ black on cyan.
 </DL>
 
 This setting can also be changed with the
-<A HREF="#preference-show-attributes">Show Attributes</A> preference.
+<A HREF="Manual-4.html#preference-show-attributes">Show Attributes</A> preference.
 <DT><B>ATTRBLINK
 <A NAME="command-ATTRBLINK"></A> </B><DD><P>Blink (turn on and off according to a predefined interval)
 the attribute underline
@@ -379,19 +379,19 @@ the attribute underline
 <A HREF="#command-ATTRVIS">ATTRVIS</A> command).
 This feature is initially <B>on</B>.
 This setting can also be changed with the
-<A HREF="#preference-blinking-attributes">Blinking Attributes</A> preference.
+<A HREF="Manual-4.html#preference-blinking-attributes">Blinking Attributes</A> preference.
 <DT><B>CAPBLINK
 <A NAME="command-CAPBLINK"></A> </B><DD><P>Blink (turn on and off according to a predefined interval)
 capital (uppercase) letters.
 This setting can also be changed with the
-<A HREF="#preference-blinking-capitals">Blinking Capitals</A> preference.
+<A HREF="Manual-4.html#preference-blinking-capitals">Blinking Capitals</A> preference.
 <DT><B>TUNES
 <A NAME="command-TUNES"></A> </B><DD><P>Play a short predefined tune (see 
-<A HREF="#tunes">Alert Tunes</A>)
+<A HREF="Manual-4.html#tunes">Alert Tunes</A>)
 whenever a significant event occurs.
 This feature is initially <B>on</B>.
 This setting can also be changed with the
-<A HREF="#preference-alert-tunes">Alert Tunes</A> preference.
+<A HREF="Manual-4.html#preference-alert-tunes">Alert Tunes</A> preference.
 </DL>
 <P>
 <H3>Mode Selection</H3>
@@ -410,38 +410,43 @@ and
 to navigate the help page.
 Invoke the <CODE>help</CODE> command again to return to the screen.
 <DT><B>INFO
-<A NAME="command-INFO"></A> </B><DD><P>Switch to the status display, which presents a summary including
+<A NAME="command-INFO"></A> </B><DD><P>Switch to the status display
+(see section 
+<A HREF="Manual-4.html#status">The Status Display</A> for full details).
+It presents a summary including
 the position of the cursor,
 the position of the braille window,
-and the states of a nmber of BRLTTY's features.
-See section 
-<A HREF="#status">The Status Display</A> for full details.
-Invoke the <CODE>info</CODE> command again to return to the screen.
+and the states of a number of BRLTTY's features.
+Invoke this command again to return to the screen.
 <DT><B>LEARN
-<A NAME="command-LEARN"></A> </B><DD><P>Switch to command learn mode,
-which is an interactive way to learn what the keys on the braille display do.
-See section 
-<A HREF="#learn">Command Learn Mode</A> for full details.
-Invoke the <CODE>learn</CODE> command again to return to the screen.
+<A NAME="command-LEARN"></A> </B><DD><P>Switch to command learn mode
+(see section 
+<A HREF="Manual-4.html#learn">Command Learn Mode</A> for full details).
+This is how you can interactively learn what your braille display's keys do.
+Invoke this command again to return to the screen.
+This command isn't available if the
+<A HREF="Manual-2.html#build-learn-mode">--disable-learn-mode</A> build option was specified.
 </DL>
 <P>
-<H3>Preferences Settings</H3>
+<H3>Preference Maintenance</H3>
 
 <P>
 <DL>
 <DT><B>PREFMENU
 <A NAME="command-PREFMENU"></A> </B><DD><P>Switch to the preferences menu
 (see 
-<A HREF="#preferences-menu">The Preferences Menu</A> for full details).
-Invoke the <CODE>PREFMENU</CODE> command again to return to normal operation.
+<A HREF="Manual-4.html#preferences-menu">The Preferences Menu</A> for full details).
+Invoke this command again to return to normal operation.
+This command isn't available if the
+<A HREF="Manual-2.html#build-preferences-menu">--disable-preferences-menu</A> build option was specified.
 <DT><B>PREFSAVE
 <A NAME="command-PREFSAVE"></A> </B><DD><P>Save the current preferences settings
 (see 
-<A HREF="#preferences">Preferences</A> for full details).
+<A HREF="Manual-4.html#preferences">Preferences</A> for full details).
 <DT><B>PREFLOAD
 <A NAME="command-PREFLOAD"></A> </B><DD><P>Restore the most recently saved preferences settings
 (see 
-<A HREF="#preferences">Preferences</A> for full details).
+<A HREF="Manual-4.html#preferences">Preferences</A> for full details).
 </DL>
 <P>
 <H3><A NAME="menu"></A> Menu Navigation</H3>
@@ -462,7 +467,7 @@ Invoke the <CODE>PREFMENU</CODE> command again to return to normal operation.
 <A NAME="command-MENU_NEXT_SETTING"></A> </B><DD><P>Increment the current menu item's setting.
 </DL>
 <P>
-<H3>Speech</H3>
+<H3>Speech Controls</H3>
 
 <P>
 <DL>
@@ -489,14 +494,14 @@ Invoke the <CODE>PREFMENU</CODE> command again to return to normal operation.
 (the one whose number is one greater than the current one).
 </DL>
 <P>
-<H3>Miscellaneous</H3>
+<H3>Other Commands</H3>
 
 <P>
 <DL>
 <DT><B>CSRJMP_VERT
 <A NAME="command-CSRJMP_VERT"></A> </B><DD><P>Route (bring) the cursor to anywhere on the top line of the braille window
 (see 
-<A HREF="#routing">Cursor Routing</A> for full details).
+<A HREF="Manual-4.html#routing">Cursor Routing</A> for full details).
 The cursor is moved by simulating vertical arrow-key presses.
 This command doesn't always work because some applications
 either move the cursor somewhat unpredictably
@@ -506,7 +511,7 @@ because it makes no attempt to simulate the left- and right-arrows.
 <DT><B>PASTE
 <A NAME="command-PASTE"></A> </B><DD><P>Insert the characters within the cut buffer at the current cursor location
 (see 
-<A HREF="#cut">Cut and Paste</A> for full details).
+<A HREF="Manual-4.html#cut">Cut and Paste</A> for full details).
 <DT><B>RESTARTBRL
 <A NAME="command-RESTARTBRL"></A> </B><DD><P>Stop, and then restart the braille display driver.
 <DT><B>RESTARTSPEECH
@@ -521,7 +526,7 @@ because it makes no attempt to simulate the left- and right-arrows.
 <A NAME="command-ROUTE"></A> </B><DD><P>Route (bring) the cursor to the character
 associated with the routing key
 (see 
-<A HREF="#routing">Cursor Routing</A> for full details).
+<A HREF="Manual-4.html#routing">Cursor Routing</A> for full details).
 The cursor is moved by simulating arrow-key presses.
 This command doesn't always work because some applications
 either move the cursor somewhat unpredictably
@@ -530,26 +535,26 @@ or use the arrow keys for purposes other than cursor motion.
 <A NAME="command-CUTBEGIN"></A> </B><DD><P>Anchor the start of the cut block at the character
 associated with the routing key
 (see 
-<A HREF="#cut">Cut and Paste</A> for full details).
+<A HREF="Manual-4.html#cut">Cut and Paste</A> for full details).
 This command clears the cut buffer.
 <DT><B>CUTAPPEND
 <A NAME="command-CUTAPPEND"></A> </B><DD><P>Anchor the start of the cut block at the character
 associated with the routing key
 (see 
-<A HREF="#cut">Cut and Paste</A> for full details).
+<A HREF="Manual-4.html#cut">Cut and Paste</A> for full details).
 This command doesn't clear the cut buffer.
 <DT><B>CUTRECT
 <A NAME="command-CUTRECT"></A> </B><DD><P>Anchor the end of the cut block at the character
 associated with the routing key,
 and append the rectangular region to the cut buffer
 (see 
-<A HREF="#cut">Cut and Paste</A> for full details).
+<A HREF="Manual-4.html#cut">Cut and Paste</A> for full details).
 <DT><B>CUTLINE
 <A NAME="command-CUTLINE"></A> </B><DD><P>Anchor the end of the cut block at the character
 associated with the routing key,
 and append the linear region to the cut buffer
 (see 
-<A HREF="#cut">Cut and Paste</A> for full details).
+<A HREF="Manual-4.html#cut">Cut and Paste</A> for full details).
 <DT><B>SWITCHVT
 <A NAME="command-SWITCHVT"></A> </B><DD><P>Switch to the virtual terminal whose number
 (counting from 1) matches that of the routing key.
@@ -597,897 +602,7 @@ with the same routing key.
 This feature only affects the current virtual terminal.
 </DL>
 <P>
-<H2><A NAME="routing"></A> <A NAME="ss3.2">3.2 Cursor Routing</A>
-</H2>
-
-<P>When moving the braille window around the screen
-while examining the text, say, in an editor,
-you often need to bring the cursor
-to a specific character within the braille window.
-You'll probably find this to be a rather difficult task for a number of reasons.
-One is that you may not know where the cursor is,
-and that you may lose your place while trying to find it.
-Another is that the cursor may move unrpedictably as the arrow keys are pressed
-(some editors, for example, don't allow the cursor to be
-more to the right than the end of the line it's on).
-Cursor routing provides just such a capability
-by knowing where the cursor is,
-by simulating the same arrow-key presses which you'd have to enter manually,
-and by monitoring the progress of the cursor as it moves.
-<P>Some braille displays have a button, known as a routing key, above each cell.
-These keys use the 
-<A HREF="#command-ROUTE">ROUTE</A> command
-to route the cursor right to the desired location.
-<P>Cursor routing, while very convenient and effective,
-is, strictly speaking, not completely reliable.
-One reason for this is that its current implementation assumes
-VT100 cursor key escape sequences.
-Another is that some applications do non-standard things
-in response to detecting that a cursor key has been pressed.
-A minor problem found within some editors (like <CODE>vi</CODE>),
-as already mentioned above,
-is that they throw in some unpredictable horizontal motion
-when vertical motion is requested
-because they don't allow the cursor to be to the right of the end of a line.
-A major problem found within some web browsers (like <CODE>lynx</CODE>)
-is that the up- and down-arrow keys are used to move among the links
-(which may skip lines and/or move the cursor horizontally,
-but which rarely just moves the cursor one line in the desired direction),
-and that the left- and right-arrow keys are used to select links
-(which has absolutely nothing to do with any form of cursor motion whatsoever,
-and which even totally changes the screen content).
-<P>Cursor routing may not work very well on a heavily loaded system,
-and definitely doesn't work very well when working on a remote system over a slow link.
-This is so because of all of the checks which must be made along the way
-in order to deal with unpredictable cursor motion
-and in order to ensure that any mistake has at least a fighting chance to be undone.
-Even  though BRLTTY tries to be fairly clever,
-it must still essentially wait to see what happens after each simulated arrow-key press.
-<P>Once a cursor routing request has been made,
-BRLTTY keeps trying to route the cursor to the desired location until
-a timeout expires before the cursor reaches that location,
-the cursor seems to be moving in the wrong direction,
-or you switch to a different virtual terminal.
-An attempt is first made to use virtical motion
-to bring the cursor to the right line,
-and, only if that succeeds, an attempt is then made
-to use horizontal motion to bring the cursor to the right column.
-If another request is made while one is still in progress,
-then the first one is aborted and the second one is initiated.
-<P>A safer but less powerful cursor routing command,
-<A HREF="#command-CSRJMP_VERT">CSRJMP_VERT</A>,
-uses just vertical motion to bring the cursor
-to anywhere on the top line of the braille window.
-It's especially useful in conjunction with applications (like <CODE>lynx</CODE>)
-wherein horizontal cursor motion must never be attempted.
-<P>
-<H2><A NAME="cut"></A> <A NAME="ss3.3">3.3 Cut and Paste</A>
-</H2>
-
-<P>This feature enables you to grab some text which is already on the screen 
-and re-enter it at the current cursor position.
-Using it saves time and avoids errors
-when a long and/or complicated piece of text needs to be copied,
-and even when the same short and simple piece of text needs to be copied many times.
-It's particularly useful for things like
-long file names,
-complicated command lines,
-E-mail addresses,
-and URLs. Cutting and pasting text involves three simple steps:
-<OL>
-<LI>Mark either the top-left corner of the rectangular area
-or the beginning of the linear area
-on the screen which is to be grabbed (cut).
-If your display has routing keys,
-then move the braille window so that
-the first character to be cut appears anywhere within it, and then:
-<UL>
-<LI>invoke the 
-<A HREF="#command-CUTBEGIN">CUTBEGIN</A> command
-to start a new cut buffer</LI>
-<LI>invoke the 
-<A HREF="#command-CUTAPPEND">CUTAPPEND</A> command
-to append to the existing cut buffer</LI>
-</UL>
-
-by pressing the key(s) associated with it
-and then pressing the routing key associated with the character.</LI>
-<LI>Mark either the bottom-right corner of the rectangular area
-or the end of the linear area
-on the screen which is to be grabbed (cut).
-If your display has routing keys,
-then move the braille window so that
-the last character to be cut appears anywhere within it, and then
-<UL>
-<LI>invoke the 
-<A HREF="#command-CUTRECT">CUTRECT</A> command
-to cut a rectangular area</LI>
-<LI>invoke the 
-<A HREF="#command-CUTLINE">CUTLINE</A> command
-to cut a linear area</LI>
-</UL>
-
-by pressing the key(s) associated with it
-and then pressing the routing key associated with the character.
-Marking the end of the cut area
-appends the selected screen content to the cut buffer.
-Excess white-space is removed from the end of each line in the cut buffer
-so that unwanted trailing spaces won't be pasted back in.
-Control characters are replaced with blanks.</LI>
-<LI>Insert (paste) the text where it's needed.
-Place the cursor over the character where the text is to be pasted,
-and invoke the 
-<A HREF="#command-PASTE">PASTE</A> command.
-You can paste the same text any number of times without recutting it.
-This description assumes that you're already in some sort of input mode.
-If you paste when you're in some other kind of mode
-(like <CODE>vi</CODE>'s command mode),
-then you'd better be aware of what the characters in the cut buffer will do.</LI>
-</OL>
-<P>The cut buffer is also used by
-the 
-<A HREF="#command-PRSEARCH">PRSEARCH</A>
-and 
-<A HREF="#command-NXSEARCH">NXSEARCH</A> commands.
-<P>
-<H2><A NAME="tunes"></A> <A NAME="ss3.4">3.4 Alert Tunes</A>
-</H2>
-
-<P>BRLTTY alerts you to the occurrence of significant events
-by playing short predefined tunes.
-This feature can be activated and deactivated with
-either the 
-<A HREF="#command-TUNES">TUNES</A> command
-or the 
-<A HREF="#preference-alert-tunes">Alert Tunes</A> preference.
-The tunes are played on the PC speaker by default,
-but other alternatives can be selected
-with the 
-<A HREF="#preference-tune-device">Tune Device</A> preference.
-<P>Each significant event is associated, from highest to lowest priority,
-with one or more of the following:
-<DL>
-<DT><B>a tune</B><DD><P>If a tune has been associated with the event,
-if the 
-<A HREF="#preference-alert-tunes">Alert Tunes</A> preference
-(see also the 
-<A HREF="#command-TUNES">TUNES</A> command)
-is active,
-and if the selected tune device
-(see the 
-<A HREF="#preference-tune-device">Tune Device</A> preference)
-can be opened,
-then the tune is played.
-<DT><B>a dot pattern</B><DD><P>If a dot pattern has been associated with the event,
-and if the 
-<A HREF="#preference-alert-dots">Alert Dots</A> preference is active,
-then the dot pattern is briefly displayed on every braille cell.
-Some braille displays don't respond quickly enough
-for this mechanism to work effectively.
-<DT><B>a message</B><DD><P>If a message has been associated with the event,
-then it is displayed for a few seconds
-(see the 
-<A HREF="#options-message-delay">-M</A> command line option).
-</DL>
-<P>These events include:
-<UL>
-<LI>When the braille display driver starts or stops.</LI>
-<LI>When the start or end of the cut block is set.</LI>
-<LI>When a feature is activated or deactivated.</LI>
-<LI>When cursor tracking is turned on or off.</LI>
-<LI>When the screen image is frozen or unfrozen.</LI>
-<LI>When identical lines are skipped.</LI>
-<LI>When the braille window wraps
-either down to the beginning of the next line
-or up to the end of the previous line.</LI>
-<LI>When a requested motion cannot be performed.</LI>
-<LI>When a command cannot be executed.</LI>
-<LI>When a lengthy command completes.</LI>
-</UL>
-<P>
-<H2><A NAME="status"></A> <A NAME="ss3.5">3.5 The Status Display</A>
-</H2>
-
-<P>The status display is a summary of BRLTTY's current state
-which fits completely within the braille window.
-Some braille displays have a set of status cells
-which are used to permanently display some of this information as well
-(see the documentation for your display's driver).
-The data presented by this display isn't static, and may change at any time
-in response to screen updates and/or BRLTTY commands.
-<P>Use the 
-<A HREF="#command-INFO">INFO</A> command
-to switch to the status display,
-and use it again to return to the screen.
-The layout of the information contained therein
-is dependent on the size of the braille window.
-<P>
-<H3>Displays with 21 Cells or More</H3>
-
-<P>Short pneumonics have been used, even though they're rather cryptic,
-in order to show the precise column layout.
-<BLOCKQUOTE><CODE>
-<EM>wx</EM>:<EM>wy</EM> <EM>cx</EM>:<EM>cy</EM> <EM>vt</EM> <EM>tcmfdu</EM>
-</CODE></BLOCKQUOTE>
-
-<DL>
-<DT><B><EM>wx</EM><CODE>:</CODE><EM>wy</EM></B><DD><P>The column and row (counting from 0) on the screen corresponding
-to the top-left corner of the braille window.
-<DT><B><EM>cx</EM><CODE>:</CODE><EM>cy</EM></B><DD><P>The column and row (counting from 0) on the screen corresponding
-to the position of the cursor.
-<DT><B><EM>vt</EM></B><DD><P>The number (counting from 1) of the current virtual terminal.
-<DT><B><EM>t</EM></B><DD><P>The state of the cursor tracking feature
-(see the 
-<A HREF="#command-CSRTRK">CSRTRK</A> command).
-<DL>
-<DT><B>blank</B><DD><P>Cursor tracking is off.
-<DT><B><CODE>t</CODE></B><DD><P>Cursor tracking is on.
-</DL>
-<DT><B><EM>c</EM></B><DD><P>The state of the cursor visibility features
-(see the 
-<A HREF="#command-CSRVIS">CSRVIS</A>
-and 
-<A HREF="#command-CSRBLINK">CSRBLINK</A> commands).
-<DL>
-<DT><B>blank</B><DD><P>The cursor isn't visible, and won't blink when made visible.
-<DT><B><CODE>b</CODE></B><DD><P>The cursor isn't visible, and will blink when made visible.
-<DT><B><CODE>v</CODE></B><DD><P>The cursor is visible, and isn't blinking.
-<DT><B><CODE>B</CODE></B><DD><P>The cursor is visible, and is blinking.
-</DL>
-<DT><B><EM>m</EM></B><DD><P>The current display mode
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command).
-<DL>
-<DT><B><CODE>t</CODE></B><DD><P>Screen content (text) is being displayed.
-<DT><B><CODE>a</CODE></B><DD><P>Screen highlighting (attributes) is being displayed.
-</DL>
-<DT><B><EM>f</EM></B><DD><P>The state of the frozen screen feature
-(see the 
-<A HREF="#command-FREEZE">FREEZE</A> command).
-<DL>
-<DT><B>blank</B><DD><P>The screen isn't frozen.
-<DT><B><CODE>f</CODE></B><DD><P>The screen is frozen.
-</DL>
-<DT><B><EM>d</EM></B><DD><P>The number of braille dots being used to display each character
-(see the 
-<A HREF="#command-SIXDOTS">SIXDOTS</A> command).
-<DL>
-<DT><B><CODE>8</CODE></B><DD><P>All eight dots are being used.
-<DT><B><CODE>6</CODE></B><DD><P>Only dots 1 through 6 are being used.
-</DL>
-<DT><B><EM>u</EM></B><DD><P>The state of the uppercase (capital letter) display features
-(see the 
-<A HREF="#command-CAPBLINK">CAPBLINK</A> command).
-<DL>
-<DT><B>blank</B><DD><P>Uppercase letters don't blink.
-<DT><B><CODE>B</CODE></B><DD><P>Uppercase letters blink.
-</DL>
-</DL>
-<P>
-<H3>Displays with 20 Cells or Less</H3>
-
-<P>Short pneumonics have been used, even though they're rather cryptic,
-in order to show the precise column layout.
-<BLOCKQUOTE><CODE>
-<EM>xx</EM><EM>yy</EM><EM>s</EM> <EM>vt</EM> <EM>tcmfdu</EM>
-</CODE></BLOCKQUOTE>
-
-<DL>
-<DT><B><EM>xx</EM></B><DD><P>The columns (counting from 0) on the screen corresponding
-to the position of the cursor (shown in the top half of the cells)
-and to the top-left corner of the braille window (shown in the bottom half of the cells).
-<DT><B><EM>yy</EM></B><DD><P>The rows (counting from 0) on the screen corresponding
-to the position of the cursor (shown in the top half of the cells)
-and to the top-left corner of the braille window (shown in the bottom half of the cells).
-<DT><B><EM>s</EM></B><DD><P>The settings of some of BRLTTY's features.
-A feature is turned on if its corresponding dot is raised.
-<DL>
-<DT><B>Dot 1</B><DD><P>Frozen screen image
-(see the 
-<A HREF="#command-FREEZE">FREEZE</A> command).
-<DT><B>Dot 2</B><DD><P>Display attributes
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command).
-<DT><B>Dot 3</B><DD><P>Alert tunes
-(see the 
-<A HREF="#command-TUNES">TUNES</A> command).
-<DT><B>Dot 4</B><DD><P>Visible cursor
-(see the 
-<A HREF="#command-CSRVIS">CSRVIS</A> command).
-<DT><B>Dot 5</B><DD><P>Block cursor
-(see the 
-<A HREF="#command-CSRSIZE">CSRSIZE</A> command).
-<DT><B>Dot 6</B><DD><P>Blinking cursor
-(see the 
-<A HREF="#command-CSRBLINK">CSRBLINK</A> command).
-<DT><B>Dot 7</B><DD><P>Cursor tracking
-(see the 
-<A HREF="#command-CSRTRK">CSRTRK</A> command).
-<DT><B>Dot 8</B><DD><P>Sliding window
-(see the 
-<A HREF="#command-SLIDEWIN">SLIDEWIN</A> command).
-</DL>
-<DT><B><EM>vt</EM></B><DD><P>The number (counting from 1) of the current virtual terminal.
-<DT><B><EM>t</EM></B><DD><P>The state of the cursor tracking feature
-(see the 
-<A HREF="#command-CSRTRK">CSRTRK</A> command).
-<DL>
-<DT><B>blank</B><DD><P>Cursor tracking is off.
-<DT><B><CODE>t</CODE></B><DD><P>Cursor tracking is on.
-</DL>
-<DT><B><EM>c</EM></B><DD><P>The state of the cursor visibility features
-(see the 
-<A HREF="#command-CSRVIS">CSRVIS</A>
-and 
-<A HREF="#command-CSRBLINK">CSRBLINK</A> commands).
-<DL>
-<DT><B>blank</B><DD><P>The cursor isn't visible, and won't blink when made visible.
-<DT><B><CODE>b</CODE></B><DD><P>The cursor isn't visible, and will blink when made visible.
-<DT><B><CODE>v</CODE></B><DD><P>The cursor is visible, and isn't blinking.
-<DT><B><CODE>B</CODE></B><DD><P>The cursor is visible, and is blinking.
-</DL>
-<DT><B><EM>m</EM></B><DD><P>The current display mode
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command).
-<DL>
-<DT><B><CODE>t</CODE></B><DD><P>Screen content (text) is being displayed.
-<DT><B><CODE>a</CODE></B><DD><P>Screen highlighting (attributes) is being displayed.
-</DL>
-<DT><B><EM>f</EM></B><DD><P>The state of the frozen screen feature
-(see the 
-<A HREF="#command-FREEZE">FREEZE</A> command).
-<DL>
-<DT><B>blank</B><DD><P>The screen isn't frozen.
-<DT><B><CODE>f</CODE></B><DD><P>The screen is frozen.
-</DL>
-<DT><B><EM>d</EM></B><DD><P>The number of braille dots being used to display each character
-(see the 
-<A HREF="#command-SIXDOTS">SIXDOTS</A> command).
-<DL>
-<DT><B><CODE>8</CODE></B><DD><P>All eight dots are being used.
-<DT><B><CODE>6</CODE></B><DD><P>Only dots 1 through 6 are being used.
-</DL>
-<DT><B><EM>u</EM></B><DD><P>The state of the uppercase (capital letter) display features
-(see the 
-<A HREF="#command-CAPBLINK">CAPBLINK</A> command).
-<DL>
-<DT><B>blank</B><DD><P>Uppercase letters don't blink.
-<DT><B><CODE>B</CODE></B><DD><P>Uppercase letters blink.
-</DL>
-</DL>
-<P>
-<H2><A NAME="learn"></A> <A NAME="ss3.6">3.6 Command Learn Mode</A>
-</H2>
-
-<P>Command learn mode is an interactive way to learn
-what the keys on the braille display do.
-It can be accessed
-either by the 
-<A HREF="#command-LEARN">LEARN</A> command
-or via the 
-<A HREF="Manual-2.html#utility-brltest">brltest</A> utility.
-<P>When this mode is entered,
-the message <CODE>command learn mode</CODE> is written to the braille display.
-Then, as each key (or key combination) on the display is pressed,
-a short message describing its BRLTTY function is written.
-This mode exits immediately if the key (or key combination)
-for the 
-<A HREF="#command-LEARN">LEARN</A> command is pressed.
-It exits automatically, and the message <CODE>done</CODE> is written,
-if ten seconds elapse without any key on the display being pressed.
-Note that some displays don't signal the driver
-and/or some drivers don't signal BRLTTY
-until all the keys are released.
-<P>If a message is longer than the braille display is wide,
-then it's displayed in segments.
-The length of each segment but the last is one less than the display's width,
-with the rightmost character on the display being set to a minus sign.
-Each such segment remains on the display
-either for a few seconds
-(see the 
-<A HREF="#options-message-delay">-M</A> command line option)
-or until any key on the display is pressed.
-<P>
-<H2><A NAME="preferences"></A> <A NAME="ss3.7">3.7 Preferences Settings</A>
-</H2>
-
-<P>When BRLTTY starts, it loads a file which contains your preferences settings.
-The file doesn't need to exist,
-and is created the first time the settings are saved
-with the 
-<A HREF="#command-PREFSAVE">PREFSAVE</A> command.
-The most recently saved settings can be restored at any time
-with the 
-<A HREF="#command-PREFLOAD">PREFLOAD</A> command.
-<P>The default name for this file is <CODE>/etc/brltty.conf</CODE>.
-A system default for its name can be established with
-the 
-<A HREF="#configure-preferences-file">preferences-file</A> configuration file directive.
-Its name can be explicitly set at run-time with
-the 
-<A HREF="#options-preferences-file">-p</A> command line option.
-<P>
-<H3><A NAME="preferences-menu"></A> The Preferences Menu</H3>
-
-<P>The preferences settings are saved as binary data
-which, therefore, can't be edited by hand.
-BRLTTY, however, has a simple menu from which you can easily change them.
-It's activated by the 
-<A HREF="#command-PREFMENU">PREFMENU</A> command.
-The braille display briefly
-(see the 
-<A HREF="#options-message-delay">-M</A> command line option)
-shows the menu title,
-and then presents the current item and its current setting.
-<P>
-<H3>Navigating the Menu</H3>
-
-<P>See 
-<A HREF="#menu">Menu Navigation Commands</A> for the full list of
-commands which enable you to select items and change settings within the menu.
-For backward compatibility with old drivers, the window motion commands,
-which have modified meanings in this context, can also be used.
-<DL>
-<DT><B><CODE>TOP</CODE>, <CODE>TOP_LEFT</CODE></B><DD><P>Go to the first item in the menu
-(same as 
-<A HREF="#command-MENU_FIRST_ITEM">MENU_FIRST_ITEM</A>).
-<DT><B><CODE>BOT</CODE>, <CODE>BOT_LEFT</CODE></B><DD><P>Go to the last item in the menu
-(same as 
-<A HREF="#command-MENU_LAST_ITEM">MENU_LAST_ITEM</A>).
-<DT><B><CODE>LNUP</CODE>, <CODE>CURSOR_UP</CODE></B><DD><P>Go to the previous item in the menu
-(same as 
-<A HREF="#command-MENU_PREV_ITEM">MENU_PREV_ITEM</A>).
-<DT><B><CODE>LNDN</CODE>, <CODE>CURSOR_DOWN</CODE></B><DD><P>Go to the next item in the menu
-(same as 
-<A HREF="#command-MENU_NEXT_ITEM">MENU_NEXT_ITEM</A>).
-<DT><B><CODE>WINUP</CODE>, <CODE>CHRLT</CODE>, <CODE>CURSOR_LEFT</CODE></B><DD><P>Decrement the current menu item's setting
-(same as 
-<A HREF="#command-MENU_PREV_SETTING">MENU_PREV_SETTING</A>).
-<DT><B><CODE>WINDN</CODE>, <CODE>CHRRT</CODE>, <CODE>CURSOR_RIGHT</CODE>, <CODE>HOME</CODE>, <CODE>RETURN</CODE></B><DD><P>Increment the current menu item's setting
-(same as 
-<A HREF="#command-MENU_NEXT_SETTING">MENU_NEXT_SETTING</A>).
-</DL>
-<P>Notes:
-<UL>
-<LI>The routing keys can also be used to select a setting for the current item.
-If the item has numeric settings,
-then each routing key represents an integer (starting from 0),
-and a selection which is out of range is silently brought into range.
-If the item has named settings,
-then the routing keys correspond ordinally with the settings.</LI>
-<LI>Use the <CODE>PREFLOAD</CODE> command to undo all of the changes
-which were made since entering the menu.</LI>
-<LI>Use the <CODE>PREFMENU</CODE> command (again) to leave the new settings in effect,
-exit the menu, and resume normal operation.
-If the "Save Settings on Exit" item is set, then, in addition,
-the new settings are written to the preferences settings file.
-Any command not recognized by the menu system also does these same things.</LI>
-</UL>
-<P>
-<H3>The Menu Items</H3>
-
-<P>
-<DL>
-<DT><B>Save on Exit
-<A NAME="preference-save-on-exit"></A> </B><DD><P>When exiting the preferences menu:
-<DL>
-<DT><B>No</B><DD><P>Don't automatically save the preferences settings.
-<DT><B>Yes</B><DD><P>Automatically save the preferences settings.
-</DL>
-
-The initial setting is <CODE>No</CODE>.
-<DT><B>Text Style
-<A NAME="preference-text-style"></A> </B><DD><P>When displaying screen content
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command),
-show characters:
-<DL>
-<DT><B>8-dot</B><DD><P>With all eight dots.
-<DT><B>6-dot</B><DD><P>With only dots 1 through 6.
-If a contraction table has been selected
-(see the 
-<A HREF="#options-contraction-table">-c</A> command line option
-and the 
-<A HREF="#configure-contraction-table">contraction-table</A> configuration file directive),
-then it is used.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-SIXDOTS">SIXDOTS</A> command.
-<DT><B>Meta Mode
-<A NAME="preference-meta-mode"></A> </B><DD><P>Enter a meta character by:
-<DL>
-<DT><B>Escape Prefix</B><DD><P>Prefixing it with an <CODE>escape</CODE> byte.
-<DT><B>High-order Bit</B><DD><P>Setting its high-order bit.
-</DL>
-
-Use the <CODE>setmetamode</CODE> command to find out how your system has been configured.
-The initial setting is <CODE>Escape Prefix</CODE>.
-<DT><B>Skip Identical Lines
-<A NAME="preference-skip-identical-lines"></A> </B><DD><P>When moving either up or down exactly one line with
-the 
-<A HREF="#command-LNUP">LNUP</A>
-and 
-<A HREF="#command-LNDN">LNDN</A> commands,
-as well as the line wrapping feature of
-the 
-<A HREF="#command-FWINLT">FWINLT</A>,
-<A HREF="#command-FWINRT">FWINRT</A>,
-<A HREF="#command-FWINLTSKIP">FWINLTSKIP</A>,
-and 
-<A HREF="#command-FWINRTSKIP">FWINRTSKIP</A> commands:
-<DL>
-<DT><B>No</B><DD><P>Don't skip passed lines which have the same content as the current line.
-<DT><B>Yes</B><DD><P>Skip passed lines which have the same content as the current line.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-SKPIDLNS">SKPIDLNS</A> command.
-<DT><B>Skip Blank Windows
-<A NAME="preference-skip-blank-windows"></A> </B><DD><P>When moving either left or right with
-the 
-<A HREF="#command-FWINLT">FWINLT</A>
-and 
-<A HREF="#command-FWINRT">FWINRT</A> commands:
-<DL>
-<DT><B>No</B><DD><P>Don't skip passed blank windows.
-<DT><B>Yes</B><DD><P>Skip passed blank windows.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-SKPBLNKWINS">SKPBLNKWINS</A> command.
-<DT><B>Which Blank Windows
-<A NAME="preference-which-blank-windows"></A> </B><DD><P>If blank windows are to be skipped:
-<DL>
-<DT><B>All</B><DD><P>Skip all of them.
-<DT><B>End of Line</B><DD><P>Only skip those which are at the end (on the right side) of a line.
-<DT><B>Rest of Line</B><DD><P>Only skip those which are
-at the end (on the right side) of a line when reading forward,
-and at the beginning (on the left side) of a line when reading backward.
-</DL>
-<DT><B>Sliding Window
-<A NAME="preference-sliding-window"></A> </B><DD><P>If the cursor is being tracked
-(see the 
-<A HREF="#command-CSRTRK">CSRTRK</A> command),
-and the cursor moves too close to (or beyond)
-either end of the braille window:
-<DL>
-<DT><B>No</B><DD><P>Horizontally reposition the window such that its left end
-is a multiple of its width from the left edge of the screen.
-<DT><B>Yes</B><DD><P>Horizontally reposition the window such that the cursor,
-while remaining on that side of the window, is nearer the centre.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-SLIDEWIN">SLIDEWIN</A> command.
-<DT><B>Eager Sliding Window
-<A NAME="preference-eager-sliding-window"></A> </B><DD><P>If the braille window is to slide:
-<DL>
-<DT><B>No</B><DD><P>Reposition it whenever the cursor moves beyond either end.
-<DT><B>Yes</B><DD><P>Reposition it whenever the cursor moves too close to either end.
-</DL>
-
-The initial setting is <CODE>off</CODE>.
-<DT><B>Window Overlap
-<A NAME="preference-window-overlap"></A> </B><DD><P>When moving either left or right with
-the 
-<A HREF="#command-FWINLT">FWINLT</A>
-and 
-<A HREF="#command-FWINRT">FWINRT</A> commands,
-this setting specifies how many characters
-horizontally adjacent braille windows should overlap each other by.
-The initial setting is <CODE>0</CODE>.
-<DT><B>Show Cursor
-<A NAME="preference-show-cursor"></A> </B><DD><P>When displaying screen content
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command):
-<DL>
-<DT><B>No</B><DD><P>Don't show the cursor.
-<DT><B>Yes</B><DD><P>Show the cursor.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-CSRVIS">CSRVIS</A> command.
-<DT><B>Cursor Style
-<A NAME="preference-cursor-style"></A> </B><DD><P>When showing the cursor, represent it:
-<DL>
-<DT><B>Underline</B><DD><P>With dots 7 and 8.
-<DT><B>Block</B><DD><P>With all eight dots.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-CSRSIZE">CSRSIZE</A> command.
-<DT><B>Blinking Cursor
-<A NAME="preference-blinking-cursor"></A> </B><DD><P>When the cursor is to be shown:
-<DL>
-<DT><B>No</B><DD><P>Leave it visible all the time.
-<DT><B>Yes</B><DD><P>Make it alternately visible and invisible
-according to a predefined interval.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-CSRBLINK">CSRBLINK</A> command.
-<DT><B>Cursor Visible Period
-<A NAME="preference-cursor-visible-period"></A> </B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
-(see the note on 
-<A HREF="#time-settings">time settings</A> below)
-during each cycle that it is to be visible.
-The initial setting is <CODE>10</CODE>.
-<DT><B>Cursor Invisible Period
-<A NAME="preference-cursor-invisible-period"></A> </B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
-(see the note on 
-<A HREF="#time-settings">time settings</A> below)
-during each cycle that it is to be invisible.
-The initial setting is <CODE>10</CODE>.
-<DT><B>Show Attributes
-<A NAME="preference-show-attributes"></A> </B><DD><P>When displaying screen content
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command):
-<DL>
-<DT><B>No</B><DD><P>Don't underline highlighted characters.
-<DT><B>Yes</B><DD><P>Underline highlighted characters.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-ATTRVIS">ATTRVIS</A> command.
-<DT><B>Blinking Attributes
-<A NAME="preference-blinking-attributes"></A> </B><DD><P>When highlighted characters are to be underlined:
-<DL>
-<DT><B>No</B><DD><P>Leave the indicator visible all the time.
-<DT><B>Yes</B><DD><P>Make the indicator alternately visible and invisible
-according to a predefined interval.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-ATTRBLINK">ATTRBLINK</A> command.
-<DT><B>Attributes Visible Period
-<A NAME="preference-attributes-visible-period"></A> </B><DD><P>When the highlighted character underline is to be blinked,
-this setting specifies the length of time
-(see the note on 
-<A HREF="#time-settings">time settings</A> below)
-during each cycle that it is to be visible.
-The initial setting is <CODE>4</CODE>.
-<DT><B>Attributes Invisible Period
-<A NAME="preference-attributes-invisible-period"></A> </B><DD><P>When the highlighted character underline is to be blinked,
-this setting specifies the length of time
-(see the note on 
-<A HREF="#time-settings">time settings</A> below)
-during each cycle that it is to be invisible.
-The initial setting is <CODE>12</CODE>.
-<DT><B>Blinking Capitals
-<A NAME="preference-blinking-capitals"></A> </B><DD><P>When displaying screen content
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command):
-<DL>
-<DT><B>No</B><DD><P>Leave capital letters visible all the time.
-<DT><B>Yes</B><DD><P>Make capital letters alternately visible and invisible
-according to a predefined interval.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-CAPBLINK">CAPBLINK</A> command.
-<DT><B>Capitals Visible Period
-<A NAME="preference-capitals-visible-period"></A> </B><DD><P>When capital letters are to be blinked,
-this setting specifies the length of time
-(see the note on 
-<A HREF="#time-settings">time settings</A> below)
-during each cycle that they're to be visible.
-The initial setting is <CODE>4</CODE>.
-<DT><B>Capitals Invisible Period
-<A NAME="preference-capitals-invisible-period"></A> </B><DD><P>When capital letters are to be blinked,
-this setting specifies the length of time
-(see the note on 
-<A HREF="#time-settings">time settings</A> below)
-during each cycle that they're to be invisible.
-The initial setting is <CODE>2</CODE>.
-<DT><B>Alert Tunes
-<A NAME="preference-alert-tunes"></A> </B><DD><P>Whenever a significant event with an associated tune occurs
-(see 
-<A HREF="#tunes">Alert Tunes</A>):
-<DL>
-<DT><B>No</B><DD><P>Don't play the tune.
-<DT><B>Yes</B><DD><P>Play the tune.
-</DL>
-
-This setting can also be changed with the
-<A HREF="#command-TUNES">TUNES</A> command.
-<DT><B>Tune Device
-<A NAME="preference-tune-device"></A> </B><DD><P>Play alert tunes via:
-<DL>
-<DT><B>PC Speaker</B><DD><P>The built-in PC speaker.
-This setting is always safe to use,
-although it may be a bit too soft.
-<DT><B>Sound Card</B><DD><P>The Digital to Analog Converter on the sound card
-(via <CODE>/dev/dsp</CODE>).
-This setting doesn't work when the DAC is already being used
-by another application.
-<DT><B>MIDI</B><DD><P>The Musical Instrument Digital Interface on the sound card
-(via <CODE>/dev/sequencer</CODE>).
-This setting doesn't work when the MIDI is already being used
-by another application.
-<DT><B>AdLib</B><DD><P>OPL3/SB-FM/
-The FM synthesizer on an
-AdLib, OPL3, Sound Blaster, or equivalent sound card.
-This setting works even if the FM synthesizer
-is already being used by another application.
-The results are unpredictable, and potentially not very good,
-if you use it with a sound card which doesn't support this feature.
-</DL>
-
-The initial setting is <CODE>PC Speaker</CODE>.
-<DT><B>MIDI Instrument
-<A NAME="preference-midi-instrument"></A> </B><DD><P>If the Musical Instrument Digital Interface (MIDI) of the sound card
-is being used to play the alert tunes,
-this setting specifies which instrument is to be used
-(see the 
-<A HREF="Manual-7.html#midi">MIDI Instrument Table</A>).
-The initial setting is <CODE>Acoustic Grand Piano</CODE>.
-<DT><B>Alert Dots
-<A NAME="preference-alert-dots"></A> </B><DD><P>Whenever a significant event with an associated dot pattern occurs
-(see 
-<A HREF="#tunes">Alert Tunes</A>):
-<DL>
-<DT><B>No</B><DD><P>Don't display the dot pattern.
-<DT><B>Yes</B><DD><P>Briefly display the dot pattern.
-</DL>
-
-If alert tunes are to be played
-(see the 
-<A HREF="#command-TUNES">TUNES</A> command
-and the 
-<A HREF="#preference-alert-tunes">Alert Tunes</A> preference),
-if a tune has been associated with the event,
-and if the selected tune device can be opened,
-then, regardless of the setting of this preference, the dot pattern isn't displayed.
-<DT><B>Status Cells Style
-<A NAME="preference-status-cells-style"></A> </B><DD><P>This setting specifies the way that the status cells are to be used.
-You shuldn't normally need to play with it.
-It enables BRLTTY's developers to test status cell configurations
-for braille displays which they don't actually have.
-<DL>
-<DT><B>None</B><DD><P>Don't use the status cells.
-This setting is always safe, but it's also quite useless.
-<DT><B>Alva</B><DD><P>The status cells contain:
-<DL>
-<DT><B>1</B><DD><P>The location of the cursor (see below).
-<DT><B>2</B><DD><P>The location of the top-left corner of the braille window (see below).
-<DT><B>3</B><DD><P>A letter indicating BRLTTY's state.
-In order of precedence:
-<DL>
-<DT><B>a</B><DD><P>Screen attributes are being shown
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command).
-<DT><B>f</B><DD><P>The screen image is frozen
-(see the 
-<A HREF="#command-FREEZE">FREEZE</A> command).
-<DT><B>f</B><DD><P>The cursor is being tracked
-(see the 
-<A HREF="#command-CSRTRK">CSRTRK</A> command).
-<DT><B><EM>blank</EM></B><DD><P>Nothing special.
-</DL>
-</DL>
-
-The locations of the cursor and the braille window
-are presented in an interesting way.
-Dots 1 through 6 represent the line number with a letter
-from <CODE>a</CODE> (for 1) through <CODE>y</CODE> (for 25).
-Dots 7 and 8 (the extra two at the bottom)
-represent the horizontal braille window number as follows:
-<DL>
-<DT><B>No Dots</B><DD><P>The first (leftmost) window.
-<DT><B>Dot 7</B><DD><P>The second window.
-<DT><B>Dot 8</B><DD><P>The third window.
-<DT><B>Dots 7 and 8</B><DD><P>The fourth window.
-</DL>
-
-In both cases, the indicators wrap:
-line 26 is represented by the letter <CODE>a</CODE>, and the fifth horizontal
-braille window is represented by no dots at the bottom.
-<DT><B>Tieman</B><DD><P>The status cells contain:
-<DL>
-<DT><B>1-2</B><DD><P>The columns (counting from zero) of the cursor
-(shown in the top half of the cells)
-and the top-left corner of the braille window
-(shown in the bottom half of the cells).
-<DT><B>3-4</B><DD><P>The rows (counting from zero) of the cursor
-(shown in the top half of the cells)
-and the top-left corner of the braille window
-(shown in the bottom half of the cells).
-<DT><B>5</B><DD><P>Each dot indicates if a feature is turned on as follows:
-<DL>
-<DT><B>Dot 1</B><DD><P>The screen image is frozen
-(see the 
-<A HREF="#command-FREEZE">FREEZE</A> command).
-<DT><B>Dot 2</B><DD><P>Screen attributes are being displayed
-(see the 
-<A HREF="#command-DISPMD">DISPMD</A> command).
-<DT><B>Dot 3</B><DD><P>Alert tunes are being played
-(see the 
-<A HREF="#command-TUNES">TUNES</A> command).
-<DT><B>Dot 4</B><DD><P>The cursor is being shown
-(see the 
-<A HREF="#command-CSRVIS">CSRVIS</A> command).
-<DT><B>Dot 5</B><DD><P>The cursor is a solid block
-(see the 
-<A HREF="#command-CSRSIZE">CSRSIZE</A> command).
-<DT><B>Dot 6</B><DD><P>The cursor is blinking
-(see the 
-<A HREF="#command-CSRBLINK">CSRBLINK</A> command).
-<DT><B>Dot 7</B><DD><P>The cursor is being tracked
-(see the 
-<A HREF="#command-CSRTRK">CSRTRK</A> command).
-<DT><B>Dot 8</B><DD><P>The braille window will slide
-(see the 
-<A HREF="#command-SLIDEWIN">SLIDEWIN</A> command).
-</DL>
-</DL>
-<DT><B>PowerBraille 80</B><DD><P>The status cells contain:
-<DL>
-<DT><B>1</B><DD><P>The row (counting from 1) corresponding
-to the top of the braille window.
-The tens digit is shown in the top half of the cell,
-and the units digit is shown in the bottom half of the cell.
-</DL>
-<DT><B>Generic</B><DD><P>This setting passes a lot of information to the braille driver,
-and the driver itself decides how to present it.
-<DT><B>MDV</B><DD><P>The status cells contain:
-<DL>
-<DT><B>1-2</B><DD><P>The location of the top-left corner of the braille window.
-The row (counting from 1) is shown in the top half of the cells,
-and the column (counting from 1) is shown in the bottom half of the cells.
-</DL>
-<DT><B>Voyager</B><DD><P>The status cells contain:
-<DL>
-<DT><B>1</B><DD><P>The row (counting from 0) corresponding to
-the top of the braille window (see below).
-<DT><B>2</B><DD><P>The row (counting from 0) whereon the cursor is (see below).
-<DT><B>3</B><DD><P>If the screen is frozen
-(see the 
-<A HREF="#command-FREEZE">FREEZE</A> command),
-then the letter <CODE>F</CODE>.
-If it isn't, then
-the column (counting from 0) wherein the cursor is (see below).
-</DL>
-
-Row and column numbers are shown as two digits within a single cell.
-The tens digit is shown in the top half of the cell,
-and the units digit is shown in the bottom half of the cell.
-</DL>
-
-It's initial setting is braille display driver dependent.
-<DT><B>Text Table
-<A NAME="preference-text-table"></A> </B><DD><P>Select the text translation table.
-See section 
-<A HREF="Manual-4.html#translation-text">Text Translation</A> for details.
-See the 
-<A HREF="#options-text-table">-t</A> command line option for the initial setting.
-This preference isn't saved.
-<DT><B>Attributesw Table
-<A NAME="preference-attributes-table"></A> </B><DD><P>Select the attributes translation table.
-See section 
-<A HREF="Manual-4.html#translation-attributes">Attributes Translation</A> for details.
-See the 
-<A HREF="#options-attributes-table">-a</A> command line option for the initial setting.
-This preference isn't saved.
-<DT><B>Contraction Table
-<A NAME="preference-contraction-table"></A> </B><DD><P>Select the contraction table.
-See section 
-<A HREF="Manual-5.html#contraction">Contraction Tables</A> for details.
-See the 
-<A HREF="#options-contraction-table">-c</A> command line option for the initial setting.
-This preference isn't saved.
-</DL>
-<P>Notes:
-<UL>
-<LI>
-<A NAME="time-settings"></A> 
-All time settings are in braille window refresh intervals
-(see the 
-<A HREF="#options-refresh-interval">-M</A> command line option).
-They are integers within the range 1 through 16.</LI>
-</UL>
-<P>
-<H2><A NAME="configure"></A> <A NAME="ss3.8">3.8 The Configuration File</A>
+<H2><A NAME="configure"></A> <A NAME="ss3.2">3.2 The Configuration File</A>
 </H2>
 
 <P>System defaults for many settings may be established within a configuration file.
@@ -1504,16 +619,16 @@ The following directives are recognized:
 <DT><B><CODE>attributes-table</CODE> <EM>file</EM>
 <A NAME="configure-attributes-table"></A> </B><DD><P>Specify the attributes translation table
 (see section 
-<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
+<A HREF="Manual-5.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
-<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+<A HREF="Manual-2.html#build-data-directory">--sysconfdir</A>
 and the 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
-make file variables for more details).
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A>
+build options for more details).
 See the 
-<A HREF="Manual-2.html#make-tables-attributes">ATTRTRANS</A>
-make file variable for the default established during the build procedure.
+<A HREF="Manual-2.html#build-attributes-table">--with-attributes-table</A>
+build option for the default established during the build procedure.
 This directive can be overridden with the
 <A HREF="#options-attributes-table">-a</A> command line option.
 <DT><B><CODE>braille-driver</CODE> <EM>driver</EM>
@@ -1523,16 +638,16 @@ Either a two-letter
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
-<A HREF="Manual-2.html#make-braille-driver">BRL_TARGET</A>
-make file variable for the default established during the build procedure.
+<A HREF="Manual-2.html#build-braille-driver">--with-braille-driver</A>
+build option for the default established during the build procedure.
 This directive can be overridden with the
-<A HREF="#options-attributes-table">-a</A> command line option.
+<A HREF="#options-braille-driver">-b</A> command line option.
 <DT><B><CODE>braille-device</CODE> <EM>device</EM>
 <A NAME="configure-braille-device"></A> </B><DD><P>Specify the device to which the braille display is connected.
 The full path must be supplied.
 See the 
-<A HREF="Manual-2.html#make-braille-device">BRLDEV</A>
-make file variable for the default established during the build procedure.
+<A HREF="Manual-2.html#build-braille-device">--with-braille-device</A>
+build option for the default established during the build procedure.
 This directive can be overridden with the
 <A HREF="#options-braille-device">-d</A> command line option.
 <DT><B><CODE>braille-parameters</CODE> <EM>name</EM><CODE>=</CODE><EM>value</EM><CODE>,</CODE>...
@@ -1546,21 +661,23 @@ This directive can be overridden with the
 <DT><B><CODE>contraction-table</CODE> <EM>file</EM>
 <A NAME="configure-contraction-table"></A> </B><DD><P>Specify the contraction table
 (see section 
-<A HREF="Manual-5.html#contraction">Contraction Tables</A> for details).
+<A HREF="Manual-4.html#contraction">Contracted Braille</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
-<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+<A HREF="Manual-2.html#build-data-directory">--sysconfdir</A>
 and the 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
-make file variables for more details).
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A>
+build options for more details).
 The contraction table is used when the 6-dot braille feature is activated
 (see the 
 <A HREF="#command-SIXDOTS">SIXDOTS</A> command
 and the 
-<A HREF="#preference-text-style">Text Style</A> preference).
+<A HREF="Manual-4.html#preference-text-style">Text Style</A> preference).
 The default is to display uncontracted 6-dot braille.
 This directive can be overridden with the
 <A HREF="#options-contraction-table">-c</A> command line option.
+It isn't available if the
+<A HREF="Manual-2.html#build-contracted-braille">--disable-contracted-braille</A> build option was specified.
 <DT><B><CODE>preferences-file</CODE> <EM>file</EM>
 <A NAME="configure-preferences-file"></A> </B><DD><P>Specify the location of the preferences file.
 If it's not specified, then <CODE>/etc/brltty-</CODE><EM>driver</EM><CODE>.prefs</CODE> is assumed,
@@ -1584,8 +701,8 @@ Either a two-letter
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
-<A HREF="Manual-2.html#make-speech-driver">SPK_TARGET</A>
-make file variable for the default established during the build procedure.
+<A HREF="Manual-2.html#build-speech-driver">--with-speech-driver</A>
+build option for the default established during the build procedure.
 This directive can be overridden with the
 <A HREF="#options-speech-driver">-s</A> command line option.
 <DT><B><CODE>speech-parameters</CODE> <EM>name</EM><CODE>=</CODE><EM>value</EM><CODE>,</CODE>...
@@ -1599,21 +716,21 @@ This directive can be overridden with the
 <DT><B><CODE>text-table</CODE> <EM>file</EM>
 <A NAME="configure-text-table"></A> </B><DD><P>Specify the text translation table
 (see section 
-<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
+<A HREF="Manual-5.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
-<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+<A HREF="Manual-2.html#build-data-directory">--sysconfdir</A>
 and the 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
-make file variables for more details).
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A>
+build options for more details).
 See the 
-<A HREF="Manual-2.html#make-tables-text">TEXTTRANS</A>
-make file variable for the default established during the build procedure.
+<A HREF="Manual-2.html#build-text-table">--with-text-table</A>
+build option for the default established during the build procedure.
 This directive can be overridden with the
 <A HREF="#options-text-table">-t</A> command line option.
 </DL>
 <P>
-<H2><A NAME="options"></A> <A NAME="ss3.9">3.9 Command Line Options</A>
+<H2><A NAME="options"></A> <A NAME="ss3.3">3.3 Command Line Options</A>
 </H2>
 
 <P>Many settings can be explicitly specified when invoking BRLTTY.
@@ -1622,18 +739,18 @@ The <CODE>brltty</CODE> command accepts the following options:
 <DT><B><CODE>-a</CODE><EM>file</EM> <CODE>--attributes-table=</CODE><EM>file</EM>
 <A NAME="options-attributes-table"></A> </B><DD><P>Specify the attributes translation table
 (see section 
-<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
+<A HREF="Manual-5.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
-<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+<A HREF="Manual-2.html#build-data-directory">--sysconfdir</A>
 and the 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
-make file variables for more details).
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A>
+build options for more details).
 See the 
 <A HREF="#configure-attributes-table">attributes-table</A>
 configuration file directive for the default run-time setting.
 This setting can be changed with the
-<A HREF="#preference-attributes-table">Attributes Table</A> preference.
+<A HREF="Manual-4.html#preference-attributes-table">Attributes Table</A> preference.
 <DT><B><CODE>-b</CODE><EM>driver</EM> <CODE>--braille-driver=</CODE><EM>driver</EM>
 <A NAME="options-braille-driver"></A> </B><DD><P>Specify the braille display driver.
 Either a two-letter 
@@ -1642,27 +759,29 @@ or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
 <A HREF="#configure-braille-driver">braille-driver</A>
-configuration file variable for the default run-time setting.
+configuration file directive for the default run-time setting.
 <DT><B><CODE>-c</CODE><EM>file</EM> <CODE>--contraction-table=</CODE><EM>file</EM>
 <A NAME="options-contraction-table"></A> </B><DD><P>Specify the contraction table
 (see section 
-<A HREF="Manual-5.html#contraction">Contraction Tables</A> for details).
+<A HREF="Manual-4.html#contraction">Contracted Braille</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
-<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+<A HREF="Manual-2.html#build-data-directory">--sysconfdir</A>
 and the 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
-make file variables for more details).
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A>
+build options for more details).
 The contraction table is used when the 6-dot braille feature is activated
 (see the 
 <A HREF="#command-SIXDOTS">SIXDOTS</A> command
 and the 
-<A HREF="#preference-text-style">Text Style</A> preference).
+<A HREF="Manual-4.html#preference-text-style">Text Style</A> preference).
 See the 
 <A HREF="#configure-contraction-table">contraction-table</A>
 configureation file directive for the default run-time setting.
 This setting can be changed with the
-<A HREF="#preference-contraction-table">Contraction Table</A> preference.
+<A HREF="Manual-4.html#preference-contraction-table">Contraction Table</A> preference.
+This option isn't available if the
+<A HREF="Manual-2.html#build-contracted-braille">--disable-contracted-braille</A> build option was specified.
 <DT><B><CODE>-d</CODE><EM>device</EM> <CODE>--braille-device=</CODE><EM>device</EM>
 <A NAME="options-braille-device"></A> </B><DD><P>Specify the device to which the braille display is connected.
 The full path must be supplied.
@@ -1727,18 +846,18 @@ configuration file directive for the default run-time setting.
 <DT><B><CODE>-t</CODE><EM>file</EM> <CODE>--text-table=</CODE><EM>file</EM>
 <A NAME="options-text-table"></A> </B><DD><P>Specify the text translation table
 (see section 
-<A HREF="Manual-4.html#translation">Translation Tables</A> for details).
+<A HREF="Manual-5.html#translation">Translation Tables</A> for details).
 If a relative path is supplied, then it's anchored at <CODE>/etc/brltty</CODE>
 (see the 
-<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+<A HREF="Manual-2.html#build-data-directory">--sysconfdir</A>
 and the 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A>
-make file variables for more details).
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A>
+build options for more details).
 See the 
 <A HREF="#configure-text-table">text-table</A>
 configureation file directive for the default run-time setting.
 This setting can be changed with the
-<A HREF="#preference-text-table">Text Table</A> preference.
+<A HREF="Manual-4.html#preference-text-table">Text Table</A> preference.
 <DT><B><CODE>-v</CODE> <CODE>--version</CODE>
 <A NAME="options-version"></A> </B><DD><P>Display the current version of BRLTTY,
 identify the selected drivers,
@@ -1776,7 +895,8 @@ the long names of the options they correspond to:
 <LI>The prefix <CODE>BRLTTY_</CODE> is added.</LI>
 </UL>
    
-This option allows BRLTTY to be configured via Linux boot parameters.
+This option is particularly useful on the Linux operating system
+as it allows default settings to be passed to BRLTTY via boot parameters.
 The following environment variables are supported:
 <DL>
 <DT><B><CODE>BRLTTY_ATTRIBUTES_TABLE</CODE></B><DD><P>The attributes translation table

@@ -22,4 +22,4 @@
 
 #ifndef SAY_CMD
    #define SAY_CMD "/usr/local/bin/say"
-#endif
+#endif /* SAY_CMD */

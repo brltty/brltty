@@ -16,35 +16,38 @@
 
 <P>
 <P>
-<H2><A NAME="ss6.1">6.1 Installing Multiple Versions</A>
+<H2><A NAME="multiple"></A> <A NAME="ss6.1">6.1 Installing Multiple Versions</A>
 </H2>
 
 <P>It's easy to have more than one version of BRLTTY
 installed on the same system at the same time.
 This capability allows you to test a new version before removing the old one.
-<P>As of version 3.0 of BRLTTY,
-the 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A> make file variable allows you
+<P>The 
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A> build option allows you
 to install the complete 
 <A HREF="Manual-2.html#hierarchy">installed file hierarchy</A>
 anywhere you want such that it's entirely self-contained.
 Remembering that it's best to keep all of BRLTTY's components
 within the root file system, you can build it like this:
 <BLOCKQUOTE><CODE>
-make PREFIX=/brltty-3.0 install
+<PRE>
+./configure --with-execute-root=/brltty-3.1
+make install
+</PRE>
 </CODE></BLOCKQUOTE>
 
 You can then run it like this:
 <BLOCKQUOTE><CODE>
-/brltty-3.0/sbin/brltty
+/brltty-3.1/bin/brltty
 </CODE></BLOCKQUOTE>
 
-When version 4.0 is released, just install it in a different location
+When version 3.2 is released, just install it in a different location
 and run the new executable from there.
 <BLOCKQUOTE><CODE>
 <PRE>
-make PREFIX=/brltty-4.0 install
-/brltty-4.0/sbin/brltty
+./configure --with-execute-root=/brltty-3.2
+make install
+/brltty-3.2/bin/brltty
 </PRE>
 </CODE></BLOCKQUOTE>
 <P>So far, this paradigm is somewhat awkward for at least two reasons.
@@ -53,12 +56,12 @@ and the other is that you don't want to fiddle with your system's boot sequence
 each time you want to switch to a different version of BRLTTY.
 These problems are easily solved by adding a symbolic link for the executable.
 <BLOCKQUOTE><CODE>
-ln -s /brltty-3.0/sbin/brltty /sbin/brltty
+ln -s /brltty-3.1/bin/brltty /bin/brltty
 </CODE></BLOCKQUOTE>
 
 When it's time to switch to the newer version, just repoint the symbolc link.
 <BLOCKQUOTE><CODE>
-ln -sf /brltty-4.0/sbin/brltty /sbin/brltty
+ln -s /brltty-3.2/bin/brltty /bin/brltty
 </CODE></BLOCKQUOTE>
 <P>If you'd like to get really fancy, then introduce another level of indirection
 in order to make all of BRLTTY's files for any given version
@@ -67,7 +70,7 @@ First, create a symbolic link through a common repointable location
 from each of BRLTTY's standard locations.
 <BLOCKQUOTE><CODE>
 <PRE>
-ln -s /brltty/sbin/brltty /sbin/brltty
+ln -s /brltty/bin/brltty /bin/brltty
 ln -s /brltty/etc/brltty /etc/brltty
 ln -s /brltty/lib/brltty /lib/brltty
 </PRE>
@@ -75,21 +78,21 @@ ln -s /brltty/lib/brltty /lib/brltty
 
 Then all you need to do is to point <CODE>/brltty</CODE> to the desired version.
 <BLOCKQUOTE><CODE>
-ln -s /brltty-3.0 /brltty
+ln -s /brltty-3.1 /brltty
 </CODE></BLOCKQUOTE>
 <P>
-<H2><A NAME="ss6.2">6.2 Installation/Rescue Root Disks</A>
+<H2><A NAME="ss6.2">6.2 Installation/Rescue Root Disks for Linux</A>
 </H2>
 
-<P>As of version 1.0.1, BRLTTY can run as a stand-alone executable.
-Everything it needs to know can be explicitly configured within its make file
+<P>BRLTTY can run as a stand-alone executable.
+Everything it needs to know can be explicitly configured at build-time
 (see 
-<A HREF="Manual-2.html#make-customize">Make File Customization</A>).
+<A HREF="Manual-2.html#build">Build Options</A>).
 If the data directory
 (see the 
-<A HREF="Manual-2.html#make-install-data">DATA_DIR</A>
+<A HREF="Manual-2.html#build-data-directory">--sysconfdir</A>
 and 
-<A HREF="Manual-2.html#make-install-prefix">PREFIX</A> make file variables)
+<A HREF="Manual-2.html#build-execute-root">--with-execute-root</A> build options)
 doesn't exist, then BRLTTY looks in <CODE>/etc</CODE> for the files it needs.
 Even if any of these files don't exist at all, BRLTTY still works!
 <P>If, for some reason, you ever create the data directory
@@ -100,7 +103,7 @@ chmod 755 /etc/brltty
 </CODE></BLOCKQUOTE>
 <P>The screen content inspection device (usually <CODE>/dev/vcsa</CODE>) is required
 (see the 
-<A HREF="Manual-2.html#make-screen-device">VCSADEV</A> make file variable).
+<A HREF="Manual-2.html#build-screen-device">--with-screen-device</A> build option).
 It should already exist unless your Linux distribution is quite old.
 If necessary, you can create it with:
 <BLOCKQUOTE><CODE>
@@ -115,11 +118,17 @@ in an uncertain environment like a root disk or an incomplete system is
 that it might not find the shared libraries (or parts thereof) which it needs.
 Root disks often use subset and/or outdated versions of the libraries
 which may be inadequate.
-The solution is to link BRLTTY with the <CODE>-static</CODE> flag
-(see the file <CODE>Makefile</CODE> in the top-level directory).
+The solution is to configure BRLTTY with the
+<A HREF="Manual-2.html#build-standalone-programs">--enable-standalone-programs</A> build option.
 This removes all dependencies on shared libraries,
 but, unfortunately, also creates a larger executable.
-<P>The executable is stripped during the <CODE>make install</CODE>.
+There are a number of build options which can be used
+to selectively remove unneeded features from BRLTTY
+in order to somewhat mitigate this problem
+(see section 
+<A HREF="Manual-2.html#build-features">Build Features</A>).
+<P>The executable is stripped during the 
+<A HREF="Manual-2.html#make-install">make install</A>.
 This significantly reduces its size by removing its symbol table.
 You'll get a much smaller executable, therefore,
 if you complete the full build procedure,

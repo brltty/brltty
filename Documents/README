@@ -1,10 +1,11 @@
 The english manual in plain text format is in Manual.txt.
-It is also available in html: start at Manual-HTML/Manual.html.
-The sgml source is in Manual.sgml.
+It's also available in html: start at Manual-HTML/Manual.html.
+It's sgml source is in Manual.sgml.
 
 A german translation is also available:
-in plain text: Manual-ger.txt
-In html: start at Manual-ger-HTML/Manual.html.
-sgml source: Manual-ger.sgml.
+plain text in Manual-ger.txt,
+html starting at Manual-ger-HTML/Manual.html,
+and sgml source in Manual-ger.sgml.
+This translation is, at this point, quite a bit out-of-date.
 
-Also, we have a web page at http://www.cam.org/~nico/brltty.
+We have a web page at: http://mielke.cc/brltty/

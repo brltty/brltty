@@ -80,4 +80,4 @@ int varioget();
 	/*	Translates the given buffer into vario special chars */ 
 int variotranslate(char *frombuff, char *tobuff,int maxcnt);
 
-#endif
+#endif /* VARIO_LOW_INCLUDE */

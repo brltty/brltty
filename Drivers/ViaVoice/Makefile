@@ -17,17 +17,16 @@
 
 ###############################################################################
 # Makefile for BRLTTY general speech drivers
-#
-# It is passed the variables CC, CFLAGS, LD, LDFLAGS, LDLIBS and BRLDEV
-# from the main Makefile...
 ###############################################################################
 
 DRIVER_CODE = vv
 DRIVER_NAME = ViaVoice Text to Speech System
 SPEECH_MODELS = 
-include ../driver.mk
 SPK_OBJS = -libmeci50
 
-speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h ../config.h
-	$(COMPCPP) $(SPK_CFLAGS) -c speech.c
+include setup.mk
+include $(TOP_DIR)/driver.mk
+
+speech.o:
+	$(CXX) $(SPK_CXXFLAGS) -c speech.c
 

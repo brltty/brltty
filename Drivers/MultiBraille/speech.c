@@ -23,18 +23,22 @@
 
 #define SPEECH_C 1
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
 
 #include "brlconf.h"
 #include "speech.h"		/* for speech definitions */
-#include "../spk.h"
-#include "../spk_driver.h"
+#include "Programs/spk.h"
+#include "Programs/spk_driver.h"
 
-/* These are shared with CombiBraille/brl.c: */
+/* These are shared with CombiBraille/braille.c: */
 extern int brl_fd;
 extern unsigned char *rawdata;
 

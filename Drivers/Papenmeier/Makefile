@@ -18,103 +18,99 @@
 ###############################################################################
 # Makefile for the Papenmeier Terminal
 # This software is maintained by August Hörandl <august.hoerandl@gmx.at>
-#
-# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS,
-# and LDLIBS from the main Makefile
 ###############################################################################
 
 DRIVER_CODE = pm
 DRIVER_NAME = Papenmeier
 BRAILLE_MODELS = Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80, Elba 20/32, IB 80
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-PM_YACC_CFLAGS = -Wno-parentheses -Wno-unused
+include setup.mk
+include $(TOP_DIR)/driver.mk
 
-BRL_H = ../brl.h config.y
+PM_CMD_SOURCES = $(PGM_DIR)/brl.h config.y
+PM_CONFIG_FILE = brltty-$(DRIVER_CODE).conf
 
-brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../scr.h ../misc.h brl-cfg.h config.tab.c cmd.h hlp.h
-	$(CC) $(BRL_CFLAGS) $(PM_YACC_CFLAGS) '-DHOME_DIR="$(PREFIX)$(DATA_DIR)"' -DREAD_CONFIG -o $@ -c $<
-
-config.tab.c: config.y
-	yacc -b config -v $<
-
-read_config.o: read_config.c config.tab.c cmd.h hlp.h ../cmds.auto.h brl-cfg.h
-	$(HOSTCC) $(HOSTCFLAGS) $(PM_YACC_CFLAGS) -o $@ -c $<
+braille.o:
+	$(CC) $(BRL_CFLAGS) $(YCFLAGS) -DREAD_CONFIG -c braille.c
 
 read_config: read_config.o
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ $<
+	$(HOSTCC) $(HOSTLDFLAGS) -o $@ read_config.o
 
-serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c config.tab.c brl-cfg.h cmd.h hlp.h
-	$(HOSTCC) $(CFLAGS) serial.c -o serial -lncurses 
+read_config.o: $(PGM_DIR)/cmds.auto.h
+	$(HOSTCC) $(HOSTCFLAGS) $(YCFLAGS) -c read_config.c
 
-simulate: simulate.c ../brl.h brl.c ../text.auto.h ../misc.c config.tab.c brl-cfg.h cmd.h hlp.h
-	$(HOSTCC) $(CFLAGS) simulate.c -o simulate 
+config.tab.c: cmd.auto.h hlp.auto.h
+	$(YACC) -b config -v config.y
 
+cmd.auto.h: $(PM_CMD_SOURCES) cmd.awk
+	$(AWK) -f cmd.awk $(PM_CMD_SOURCES) >cmd.auto.h
 
-cmd.h: $(BRL_H) cmd.awk
-	awk >cmd.h -f cmd.awk $(BRL_H)
+hlp.auto.h: $(PM_CMD_SOURCES) hlp.awk
+	$(AWK) -f hlp.awk $(PM_CMD_SOURCES) >hlp.auto.h
 
-hlp.h: $(BRL_H) hlp.awk
-	awk >hlp.h -f hlp.awk $(BRL_H)
+$(PGM_DIR)/cmds.auto.h:
+	cd $(@D) && make $(@F)
 
-ifneq (,$(findstring s,$(MAKEFLAGS)))
-   READ_CONFIG_D = d
-   READ_CONFIG_H = h
-else
-   READ_CONFIG_D = D
-   READ_CONFIG_H = H
-endif
-brltty-$(DRIVER_CODE).conf: read_config
-	./read_config $(READ_CONFIG_H)
-	./read_config $(READ_CONFIG_D) >$@
+braille-help: $(HLP_DIR)/$(PM_CONFIG_FILE)
 
-braille-help: brltty-$(DRIVER_CODE).conf
-	for target in brltty-$(DRIVER_CODE)*.hlp; \
-	do ../txt2hlp $(HELPDIR)/$$target $$target; \
-	done
-	cp brltty-$(DRIVER_CODE).conf $(HELPDIR)/
+$(HLP_DIR)/$(PM_CONFIG_FILE): $(PM_CONFIG_FILE) $(TXT2HLP)
+	for file in brltty-$(DRIVER_CODE)-*.hlp; do $(TXT2HLP) $(HLP_DIR)/$$file $$file; done
+	cp $(PM_CONFIG_FILE) $(HLP_DIR)/
 
-distclean:
-	rm -f serial simulate read_config dump-codes \
-		config.tab.c config.output cmd.h hlp.h \
-		brltty-$(DRIVER_CODE)*.hlp brltty-$(DRIVER_CODE).conf \
-		*.good *.diff *.out
+$(PM_CONFIG_FILE): read_config
+	./read_config h
+	./read_config d >$@
 
-###############################################################
-# 
-# stuff related to read_config
-#  used for tests only
-#
-# call whitch HOSTCC=... set - like
-#  make HOSTCC="gcc" diff 
-#
+###############################################################################
 
-TEST_CASES := $(wildcard test*.in)
+dump-codes: dump-codes.o
+	$(CC) $(LDFLAGS) -o $@ dump-codes.o
 
-TEST_RESULT := $(patsubst %.in,%.out,$(TEST_CASES))
-TEST_OK := $(patsubst %.in,%.good,$(TEST_CASES))
-TEST_DIFF := $(patsubst %.in,%.diff,$(TEST_CASES))
+dump-codes.o:
+	$(CC) $(CFLAGS) -c dump-codes.c
 
-test: read_config $(TEST_RESULT) 
-	read_config D test > test.99.out
-	read_config D test | read_config test | read_config test | read_config test | diff -b - test.99.out
+serial: serial.o
+	$(CC) $(LDFLAGS) -o $@ serial.o -lncurses 
 
-diff: read_config $(TEST_DIFF)
+serial.o:
+	$(CC) $(CFLAGS) -c serial.c
 
-good: $(TEST_OK) read_config
+simulate: simulate.o
+	$(CC) $(LDFLAGS) -o $@ simulate.o
+
+simulate.o:
+	$(CC) $(CFLAGS) -c simulate.c
+
+###############################################################################
+
+clean::
+	-rm -f read_config config.tab.c config.output
+	-rm -f brltty-$(DRIVER_CODE)-*.hlp $(PM_CONFIG_FILE)
+	-rm -f serial simulate dump-codes
+
+distclean::
+	-rm -f *.good *.diff *.out
+
+###############################################################################
+
+TEST_CASES = test.1.in test.2.in
+
+TEST_RESULT = $(TEST_CASES:.in=.out)
+TEST_OK = $(TEST_CASES:.in=.good)
+TEST_DIFF = $(TEST_CASES:.in=.diff)
 
 dump: read_config
-	read_config 
+	read_config d
 
-%.out: %.in read_config
-	read_config  $< < $<
-	read_config  $< < $<  > $@
-	read_config  $< < $< | read_config $< | diff -b - $@
+good: $(TEST_OK)
+%.good: %.in read_config
+	./read_config d $< <$< >$@
 
-%.diff: %.out read_config
-	echo "diff: "
-	-diff -b $*.good $<
-	diff -b $*.good $< > $*.diff
+diff: $(TEST_DIFF)
+%.diff: %.in good
+	-diff -b $< $*.good >$@
 
-%.good: %.in
-	read_config $< < $<  > $@
+out: $(TEST_RESULT)
+%.out: %.in good read_config
+	./read_config d $< <$< | ./read_config d $< | diff -b $*.good - >$@

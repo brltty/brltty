@@ -4,11 +4,11 @@ Authors:
 Stéphane Doyon  <s.doyon@videotron.ca>
 Stéphane Dalton <sdalton@videotron.ca>
 
-Note to users of previous versions: Starting with version 0.8, the
-character recommended device file name is changed to /dev/brlvger and its
-minor is changed to 128 (now officially assigned). Please run "make
-install-device" again and change your brltty.conf to indicate
-"braille-device /dev/brlvger".
+Note to users of previous versions: Starting with version 0.8 of the
+kernel module, the character device recommended file name is changed to
+/dev/brlvger and its minor is changed to 128 (now officially
+assigned). Please run "make install-device" again and change your
+brltty.conf to indicate "braille-device /dev/brlvger".
 
 This driver supports the Tieman Voyager 44 and 70.
 
@@ -39,16 +39,15 @@ can just open a serial port and talk directly to the display. However the
 Voyager display connects through USB, so this driver must rely on a
 kernel module to talk to the display.
 
-We are now getting our USB driver for the Voyager into the mainstream
-kernel. But unless you are living on the edge in terms of kernel
-versions, it may take several months for distributions to catch up to a
-kernel version where the Voyager driver (called brlvger) is already
-present. I am not certain yet in which kernel version the driver will
-appear, but it is no sooner than 2.4.19. You can determine if the driver
-is included by checking for the presence of the file
+The kernel part of our USB driver for the Voyager has been included into
+the mainstream kernel starting on version 2.4.19. Unless you are living
+on the edge in terms of kernel versions, it may take a few months for
+distributions to catch up to a kernel version where the Voyager driver
+(called brlvger) is already present. You can determine if the driver is
+included by checking for the presence of the file
 /usr/include/linux/brlvger.h.
 
-For the very likely case in which the necessary kernel driver is not
+For the likely case in which the necessary kernel driver is not
 included in your kernel (or is not selecteded in the kernel
 configuration), we are providing the same driver in the form of a
 standalone module in the kernel/ directory. So you must also compile and

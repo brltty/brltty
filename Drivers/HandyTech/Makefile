@@ -25,12 +25,11 @@
 DRIVER_CODE = ht
 DRIVER_NAME = HandyTech
 BRAILLE_MODELS = Modular 20/40/80, Wave 40, Star 40/80, Bookworm
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
+include setup.mk
+include $(TOP_DIR)/driver.mk
 
-brlmain.o: brlmain.cc brlconf.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(COMPCPP) $(BRL_CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brlmain.cc
-
-brl.o: brlmain.o
-	$(LD) -r -o brl.o brlmain.o
+braille.o:
+	$(CC) $(BRL_CFLAGS) -c braille.c
 

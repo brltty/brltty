@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
  <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
- <TITLE>BRLTTY: Contraction Tables</TITLE>
+ <TITLE>BRLTTY: Translation Tables</TITLE>
  <LINK HREF="Manual-6.html" REL=next>
  <LINK HREF="Manual-4.html" REL=previous>
  <LINK HREF="Manual.html#toc5" REL=contents>
@@ -12,291 +12,274 @@
 <A HREF="Manual-4.html">Previous</A>
 <A HREF="Manual.html#toc5">Contents</A>
 <HR>
-<H2><A NAME="contraction"></A> <A NAME="s5">5. Contraction Tables</A></H2>
+<H2><A NAME="translation"></A> <A NAME="s5">5. Translation Tables</A></H2>
 
-<P>BRLTTY can display in-line contracted braille.
-It does this if:
-<UL>
-<LI>A contraction table has been selected.
-See the 
-<A HREF="Manual-3.html#options-contraction-table">-c</A> command line option
-and the 
-<A HREF="Manual-3.html#configure-contraction-table">contraction-table</A> configuration file directive
-for details.</LI>
-<LI>The 6-dot braille feature has been activated.
-See the 
-<A HREF="Manual-3.html#command-SIXDOTS">SIXDOTS</A> command
-and the 
-<A HREF="Manual-3.html#preference-text-style">Text Style</A> preference
-for details.</LI>
-</UL>
-<P>The following contraction tables are provided:
-<DL>
-<DT><B>compress.ctb</B><DD><P>Remove excessive white-space.
-<DT><B>en-us-g2.ctb</B><DD><P>Grade 2 American English
-</DL>
+<P>BRLTTY uses two <B>translation tables</B> to govern
+the mapping from bytes to dot combinations.
 <P>
-<H2><A NAME="ss5.1">5.1 File Format</A>
+<H2><A NAME="translation-text"></A> <A NAME="ss5.1">5.1 Text Translation</A>
 </H2>
 
-<P>Blank lines are ignored.
-Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
-Lines which begin with a number sign (<CODE>#</CODE>) are ignored,
-i.e. they're comments.
-<BLOCKQUOTE><CODE>
-# This is a comment.
-</CODE></BLOCKQUOTE>
-
-All other lines define table entries.
-<P>The general form of a table entry is an opcode followed by its operands.
-The opcode and its operands are separated from one another by white-space.
-Each opcode has a specific number of operands,
-and any text following its last operand is treated as a comment.
-<BLOCKQUOTE><CODE>
-<EM>opcode</EM> <EM>operand</EM> ... <EM>comment</EM>
-</CODE></BLOCKQUOTE>
-<P>The opcode is a number which tells the translator how to interpret the operands.
-Opcode <CODE>0</CODE> can be used to assign a meaningful name to each needed opcode,
-e.g. <CODE>opcode</CODE> for <CODE>0</CODE> itself.
-If, for example, a table begins with:
-<BLOCKQUOTE><CODE>
-0 0 opcode
-</CODE></BLOCKQUOTE>
-
-then all the rest of the opcodes it needs can be defined like this:
-<BLOCKQUOTE><CODE>
-opcode 1 include
-</CODE></BLOCKQUOTE>
-
-This scheme, i.e. no built-in opcode names, was chosen in order to allow
-a table for some language's braille to be written solely in that language itself.
-<P>The following operand types are supported:
+<P>The first, and most important, is the text translation table.
+BRLTTY is initially configured to use the
+<A HREF="Manual-7.html#nabcc">North American Braille Computer Code</A> (NABCC).
+In addition to this default text translation table,
+several alternatives are provided:
 <DL>
-<DT><B>string</B><DD><P>A sequence of characters other than
-white-space (which terminates the string)
-and backslashes (<CODE>\</CODE>).
-The following special representations are also supported:
-<DL>
-<DT><B><CODE>\\</CODE></B><DD><P>backslash
-<DT><B><CODE>\f</CODE></B><DD><P>form feed
-<DT><B><CODE>\n</CODE></B><DD><P>new line
-<DT><B><CODE>\o</CODE><EM>ooo</EM></B><DD><P>3-digit octal value
-<DT><B><CODE>\r</CODE></B><DD><P>carriage return
-<DT><B><CODE>\s</CODE></B><DD><P>blank (space)
-<DT><B><CODE>\t</CODE></B><DD><P>horizontal tab
-<DT><B><CODE>\v</CODE></B><DD><P>vertical tab
-<DT><B><CODE>\x</CODE><EM>xx</EM></B><DD><P>2-digit hexadecimal value
+<DT><B>text.danish.tbl</B><DD><P>Danish
+<DT><B>text.es.tbl</B><DD><P>Spanish
+<DT><B>text.french.tbl</B><DD><P>French
+<DT><B>text.german.tbl</B><DD><P>German
+<DT><B>text.it.tbl</B><DD><P>Italian
+<DT><B>text.no-h.tbl</B><DD><P>Norwegian and German
+<DT><B>text.no-p.tbl</B><DD><P>Norwegian
+<DT><B>text.pl-iso02.tbl</B><DD><P>Polish (iso-8859-2)
+<DT><B>text.simple.tbl</B><DD><P>American English
+<DT><B>text.sweden.tbl</B><DD><P>Swedish
+<DT><B>text.swedish.tbl</B><DD><P>Swedish
+<DT><B>text.uk.tbl</B><DD><P>United Kingdom English
+<DT><B>text.us.tbl</B><DD><P>American English
 </DL>
-<DT><B>number</B><DD><P>An integer.
-It may be specified in any of the following ways:
+
+See the 
+<A HREF="Manual-3.html#options-text-table">-t</A> command line option,
+the 
+<A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive,
+and the 
+<A HREF="Manual-2.html#build-text-table">--with-text-table</A> build option
+for details regarding how to use an alternate text translation table.
+<P>
+<H2><A NAME="translation-attributes"></A> <A NAME="ss5.2">5.2 Attributes Translation</A>
+</H2>
+
+<P>The attributes translation table is used when BRLTTY
+is displaying screen attributes rather than screen content
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command).
+Each of the eight braille dots represents one of the eight attribute bits.
+Two attributes translation tables are provided:
 <DL>
-<DT><B>decimal</B><DD><P>A sequence of decimal digits (<CODE>0</CODE>-<CODE>9</CODE>),
-with the first digit being nonzero (<CODE>1</CODE>-<CODE>9</CODE>).
-<DT><B>hexadecimal</B><DD><P>A sequence of hexadecimal digits (<CODE>0</CODE>-<CODE>9</CODE>, and either <CODE>a</CODE>-<CODE>f</CODE> or <CODE>A</CODE>-<CODE>F</CODE>),
-preceded by either <CODE>0x</CODE> or <CODE>0X</CODE>.
-<DT><B>octal</B><DD><P>A sequence of octal digits (<CODE>0</CODE>-<CODE>7</CODE>),
-with the first digit being zero (<CODE>0</CODE>).
+<DT><B>attributes.tbl</B><DD><P>The lefthand column represents the background colours:
+<DL>
+<DT><B>Dot 1</B><DD><P>Red
+<DT><B>Dot 2</B><DD><P>Green
+<DT><B>Dot 3</B><DD><P>Blue
+<DT><B>Dot 7</B><DD><P>Blink
 </DL>
-<DT><B>dots</B><DD><P>A braille symbol.
-The braille dots must be specified via their standard numbers
+
+The righthand column represents the foreground colours:
+<DL>
+<DT><B>Dot 4</B><DD><P>Red
+<DT><B>Dot 5</B><DD><P>Green
+<DT><B>Dot 6</B><DD><P>Blue
+<DT><B>Dot 8</B><DD><P>Bright
+</DL>
+
+A dot is raised when its corresponding attribute bit is on.
+This is the default attributes translation table
+because it's the most intuitive.
+One of its problems, though, is that it's difficult to discern
+the difference between normal (white on black)
+and reverse (black on white) video.
+<DT><B>attrib.tbl</B><DD><P>The lefthand column represents the background colours:
+<DL>
+<DT><B>Dot 1</B><DD><P>Red
+<DT><B>Dot 2</B><DD><P>Green
+<DT><B>Dot 3</B><DD><P>Blue
+<DT><B>Dot 7</B><DD><P>Blink
+</DL>
+
+The righthand column represents the foreground colours:
+<DL>
+<DT><B>Dot 4</B><DD><P>Red
+<DT><B>Dot 5</B><DD><P>Green
+<DT><B>Dot 6</B><DD><P>Blue
+<DT><B>Dot 8</B><DD><P>Bright
+</DL>
+
+A foreground bit being on triggers its corresponding dot,
+whereas a background bit being off triggers its corresponding dot.
+This unintuitive logic actually makes it easier
+to read the most commonly used attribute combinations.
+</DL>
+
+See the 
+<A HREF="Manual-3.html#options-attributes-table">-a</A> command line option,
+the 
+<A HREF="Manual-3.html#configure-attributes-table">attributes-table</A> configuration file directive,
+and the 
+<A HREF="Manual-2.html#build-attributes-table">--with-attributes-table</A> build option
+for details regarding how to use an alternate attributes translation table.
+<P>
+<H2><A NAME="ss5.3">5.3 Table Format</A>
+</H2>
+
+<P>A translation table is a 256-byte binary file.
+It's indexed with either a character or an attributes byte,
+and the byte at that position contains the corresponding dot combination.
+The mapping from bit to dot is as follows:
+<DL>
+<DT><B>Bit 0</B><DD><P>Dot 1
+<DT><B>Bit 1</B><DD><P>Dot 4
+<DT><B>Bit 2</B><DD><P>Dot 2
+<DT><B>Bit 3</B><DD><P>Dot 5
+<DT><B>Bit 4</B><DD><P>Dot 3
+<DT><B>Bit 5</B><DD><P>Dot 6
+<DT><B>Bit 6</B><DD><P>Dot 7
+<DT><B>Bit 7</B><DD><P>Dot 8
+</DL>
+
+This particular mapping makes it easy and efficient for BRLTTY
+to vertically shift a dot pattern.
+<P>
+<H2><A NAME="ss5.4">5.4 Table Utilities</A>
+</H2>
+
+<P>These utilities reside within the <CODE>BrailleTables</CODE> subdirectory,
+and aren't built as part of the regular procedure.
+To build them,
+first ensure that BRLTTY has been configured
 (see section 
-<A HREF="Manual-7.html#dots">Braille Dot Numbering Convention</A>),
-and, for a multi-cell symbol, the cell specifications
-must be separated from one another by a dash (<CODE>-</CODE>).
-For example, the contraction for the English word <CODE>lord</CODE>
-(the letter <CODE>l</CODE> prefixed with dot 5)
-would be specified as <CODE>5-123</CODE>.
-A space may be specified via the special dot number <CODE>0</CODE>.
+<A HREF="Manual-2.html#build">Build Options</A>),
+and then run <CODE>make</CODE> within the <CODE>BrailleTables</CODE> subdirectory.
+<BLOCKQUOTE><CODE>
+<PRE>
+cd BrailleTables
+make
+</PRE>
+</CODE></BLOCKQUOTE>
+<P>
+<H3><A NAME="utility-tbl2txt"></A> tbl2txt</H3>
+
+<P>This utility converts (uncompiles) a translation table into a text file
+for readability and/or modification.
+<BLOCKQUOTE><CODE>
+tbl2txt -<EM>option</EM> ... <EM>table-file</EM> <EM>text-file</EM>
+</CODE></BLOCKQUOTE>
+
+<DL>
+<DT><B><EM>table-file</EM></B><DD><P>The translation table which is to be converted.
+<DT><B><EM>text-file</EM></B><DD><P>The file into which the text representing the table content is to be written.
+<DT><B><CODE>-c</CODE><EM>name</EM> <CODE>--code-page=</CODE><EM>name</EM></B><DD><P>The character set used to annotate each line of the text file.
+</DL>
+<P>The generated text file can, without modification, be recompiled back into a
+translation table with the 
+<A HREF="#utility-txt2tbl">txt2tbl</A> utility.
+Each of its lines contains lots of interesting information.
+<P>If the <CODE>-c</CODE> option isn't specified, each line looks like this:
+<BLOCKQUOTE><CODE>
+<EM>cc</EM> <EM>xx</EM> <EM>ddd</EM> (73214568)<EM>tt</EM> B+<EM>bbbb</EM> <EM>name</EM>
+</CODE></BLOCKQUOTE>
+
+If the <CODE>-c</CODE> option is specified, each line looks like this:
+<BLOCKQUOTE><CODE>
+<EM>cc</EM> <EM>xx</EM> <EM>ddd</EM> (73214568)<EM>tt</EM> B+<EM>bbbb</EM> U+<EM>uuuu</EM> <EM>description</EM>
+</CODE></BLOCKQUOTE>
+
+<DL>
+<DT><B><EM>cc</EM></B><DD><P>The character itself.
+Unprintable characters are represented canonically.
+Control characters are flagged with a circumflex,
+e.g. Control-A (character 1) is <CODE>^A</CODE>. 
+Meta control characters are flagged with a tilde,
+e.g. Meta-Control-A (character 129) is <CODE>~A</CODE>. 
+<DT><B><EM>xx</EM></B><DD><P>The hexadecimal value of the character.
+<DT><B><EM>ddd</EM></B><DD><P>The decimal value of the character.
+<DT><B><CODE>(73214568)</CODE></B><DD><P>The braille dot numbers.
+If a dot isn't to be raised,
+then its number is replaced with a blank.
+The English letter <CODE>y</CODE>, for example, would be
+<CODE>(&nbsp;3&nbsp;1456&nbsp;)</CODE>.
+The dot numbers appear in the same order
+as on a standard braille keyboard
+so as to make it easier to visualize the braille character.
+<DT><B><EM>tt</EM></B><DD><P>The hexadecimal value of the byte representing the dot combination
+which is in the translation table.
+<DT><B><EM>bbbb</EM></B><DD><P>The hexadecimal value of the unicode number
+corresponding to the dot combination.
+<DT><B><EM>name</EM></B><DD><P>The ASCII name of the character
+(only shown if the <CODE>-c</CODE> option isn't specified).
+<DT><B><EM>uuuu</EM></B><DD><P>The hexadecimal value of the unicode number
+corresponding to the character
+(only shown if the <CODE>-c</CODE> option is specified).
+<DT><B><EM>description</EM></B><DD><P>The formal unicode description for the character
+(only shown if the <CODE>-c</CODE> option is specified).
 </DL>
 <P>
-<H2><A NAME="contraction-opcode-number"></A> <A NAME="ss5.2">5.2 Opcode Summary by Number</A>
-</H2>
+<H3><A NAME="utility-txt2tbl"></A> txt2tbl</H3>
 
-<P>First, here's a quick summary of all of the contraction table opcodes.
-For the details, see section
-<A HREF="#contraction-opcode-function">Opcodes by Function</A>.
+<P>This utility compiles a translation table.
+<BLOCKQUOTE><CODE>
+txt2tbl -<EM>option</EM> ... <EM>text-file</EM> <EM>table-file</EM>
+</CODE></BLOCKQUOTE>
+
 <DL>
-<DT><B>
-<A HREF="#contraction-opcode-0">0</A> <EM>opcode</EM> <EM>name</EM></B><DD><P>Name opcode.
-<DT><B>
-<A HREF="#contraction-opcode-1">1</A> <EM>path</EM></B><DD><P>Include file.
-<DT><B>
-<A HREF="#contraction-opcode-2">2</A> <EM>dots</EM></B><DD><P>Define capital sign.
-<DT><B>
-<A HREF="#contraction-opcode-3">3</A> <EM>dots</EM></B><DD><P>Define begin capitals sign.
-<DT><B>
-<A HREF="#contraction-opcode-4">4</A> <EM>dots</EM></B><DD><P>Define letter sign.
-<DT><B>
-<A HREF="#contraction-opcode-5">5</A> <EM>dots</EM></B><DD><P>Define number sign.
-<DT><B>
-<A HREF="#contraction-opcode-6">6</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate unconditionally.
-<DT><B>
-<A HREF="#contraction-opcode-7">7</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate unconditionally, remove repetitions.
-<DT><B>
-<A HREF="#contraction-opcode-8">8</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if word.
-<DT><B>
-<A HREF="#contraction-opcode-9">9</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at beginning of word.
-<DT><B>
-<A HREF="#contraction-opcode-10">10</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if in middle of word.
-<DT><B>
-<A HREF="#contraction-opcode-11">11</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at end of word.
-<DT><B>
-<A HREF="#contraction-opcode-12">12</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if in middle or at end of word.
-<DT><B>
-<A HREF="#contraction-opcode-13">13</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if in middle of number.
-<DT><B>
-<A HREF="#contraction-opcode-14">14</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if white-space-bounded word.
-<DT><B>
-<A HREF="#contraction-opcode-15">15</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate unconditionally, join consecutive words of this type.
-<DT><B>
-<A HREF="#contraction-opcode-16">16</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if word, join to next word.
-<DT><B>
-<A HREF="#contraction-opcode-17">17</A> <EM>characters</EM></B><DD><P>Translate whole white-space-bounded sequence unconditionally into computer braille.
-<DT><B>
-<A HREF="#contraction-opcode-18">18</A> <EM>characters</EM></B><DD><P>Prefix with letter sign if word.
-<DT><B>
-<A HREF="#contraction-opcode-19">19</A> <EM>characters</EM></B><DD><P>Ignore unconditionally.
-<DT><B>
-<A HREF="#contraction-opcode-20">20</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at end of number.
-<DT><B>
-<A HREF="#contraction-opcode-21">21</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at beginning of number.
-<DT><B>
-<A HREF="#contraction-opcode-22">22</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if part of leading punctuation.
-<DT><B>
-<A HREF="#contraction-opcode-23">23</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if part of trailing punctuation.
-<DT><B>
-<A HREF="#contraction-opcode-24">24</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if word or at beginning of word.
-<DT><B>
-<A HREF="#contraction-opcode-25">25</A> <EM>dots</EM></B><DD><P>Define end capitals sign.
+<DT><B><EM>text-file</EM></B><DD><P>The source file describing the table content.
+<DT><B><EM>table-file</EM></B><DD><P>The file into which the translation table is to be written.
+<DT><B><CODE>-d</CODE> <CODE>--duplicates</CODE></B><DD><P>Display a warning for each dot combination which has been used more than once.
+<DT><B><CODE>-m</CODE> <CODE>--missing</CODE></B><DD><P>Display a warning for each dot combination which hasn't been used.
 </DL>
+<P>A line which assigns a dot combination to a character
+must contain that dot combination within parenthesis, e.g. <CODE>(12)</CODE>.
+The text file must contain exactly 256 such lines, each one, in order,
+defining the braille representation for its corresponding character.
+The dot numbers may be specified in any order,
+but each must only be specified once.
+It's valid to specify no number at all, e.g. <CODE>()</CODE> (for a space).
+Any number of spaces may occur any number of times anywhere between the parentheses.
+All characters before the left parenthesis and after the right parenthesis are ignored.
+All lines which don't contain a left parenthesis are ignored.
+<P>The algorithm for locating the dot numbers is actually a bit more complicated
+because a line may contain more than one left and/or right parenthesis
+(the 
+<A HREF="#utility-tbl2txt">tbl2txt</A> utility does this).
+The first right parenthesis which is preceded by at least one left parenthesis is used.
+The nearest left parenthesis to the left of that right parenthesis is used.
+The line <CODE>)((12)</CODE>, for example, is valid.
 <P>
-<H2><A NAME="contraction-opcode-function"></A> <A NAME="ss5.3">5.3 Opcodes by Function</A>
-</H2>
+<H3><A NAME="utility-tbl2tbl"></A> tbl2tbl</H3>
 
-<P>Now for all of the details.
-The opcodes here are grouped by function rather than sorted by number.
-For a numerically sorted list, see section
-<A HREF="#contraction-opcode-number">Opcode Summary by Number</A>.
-<P>
-<H3>Table Administration</H3>
+<P>This utility converts a binary translation table from one dot mapping to another.
+<BLOCKQUOTE><CODE>
+tbl2tbl <EM>input-mapping</EM> <EM>output-mapping</EM>
+</CODE></BLOCKQUOTE>
 
-<P>These opcodes make it easier to write contraction tables.
-They have no direct effect on the character translation.
 <DL>
-<DT><B>0 <EM>opcode</EM> <EM>name</EM>
-<A NAME="contraction-opcode-0"></A> </B><DD><P>Assign a name to an opcode.
-The name must be defined before it's used.
-<DT><B>1 <EM>path</EM>
-<A NAME="contraction-opcode-1"></A> </B><DD><P>Include the contents of another file.
-Nesting can be to any depth.
-Relative paths are anchored at the directory of the including file.
+<DT><B><EM>input-mapping</EM></B><DD><P>The dot mapping used within the source table.
+<DT><B><EM>output-mapping</EM></B><DD><P>The dot mapping to be used within the table being generated.
 </DL>
-<P>
-<H3>Special Symbol Definition</H3>
 
-<P>These opcodes define special symbols which must be
-inserted into the braille text in order to clarify it.
+The source table is read from standard input,
+and the converted table is written to standard output.
+The following dot mappings are supported:
 <DL>
-<DT><B>2 <EM>dots</EM>
-<A NAME="contraction-opcode-2"></A> </B><DD><P>The symbol which capitalizes a single letter.
-<DT><B>3 <EM>dots</EM>
-<A NAME="contraction-opcode-3"></A> </B><DD><P>The symbol which begins a block of capital letters within a word.
-<DT><B>25 <EM>dots</EM>
-<A NAME="contraction-opcode-25"></A> </B><DD><P>The symbol which ends a block of capital letters within a word.
-<DT><B>4 <EM>dots</EM>
-<A NAME="contraction-opcode-4"></A> </B><DD><P>The symbol which marks a letter which isn't part of a word.
-<DT><B>5 <EM>dots</EM>
-<A NAME="contraction-opcode-5"></A> </B><DD><P>The symbol which marks the beginning of a number.
+<DT><B>standard</B><DD><P>BRLTTY's native mapping (described above).
+<DT><B>tieman</B><DD><P>The mapping used by 
+<A HREF="http://www.braillevoyager.nl/uk/index.html">Tieman B.V.</A>.
+<DL>
+<DT><B>Bit 0</B><DD><P>Dot 1
+<DT><B>Bit 1</B><DD><P>Dot 2
+<DT><B>Bit 2</B><DD><P>Dot 3
+<DT><B>Bit 3</B><DD><P>Dot 7
+<DT><B>Bit 4</B><DD><P>Dot 8
+<DT><B>Bit 5</B><DD><P>Dot 6
+<DT><B>Bit 6</B><DD><P>Dot 5
+<DT><B>Bit 7</B><DD><P>Dot 4
 </DL>
-<P>
-<H3>Character Translation</H3>
-
-<P>These opcodes define the braille representations for character sequences.
-Each of them defines an entry within the contraction table.
-These entries may be defined in any order except, as noted below,
-when they define alternate representations for the same character sequence.
-<P>Each of these opcodes has
-a <EM>characters</EM> operand (which must be specified as a <EM>string</EM>),
-and a built-in condition governing its eligibility for use.
-The text is processed strictly from left to right, character by character,
-with the most eligible entry for each position being used.
-If there's more than one eligible entry for a given position,
-then the one with the longest character string is used.
-If there's more than one eligible entry for the same character string,
-then the one defined nearest to the beginning of the table is used
-(this is the only order dependency).
-<P>Many of these opcodes have a <EM>dots</EM> operand
-which defines the braille representation for its <EM>characters</EM> operand.
-It may also be specified as an equals sign (<CODE>=</CODE>),
-in which case it means one of two things.
-If the entry is for a single character,
-then it means that the currently selected computer braille representation
-(see the 
-<A HREF="Manual-3.html#options-text-table">-t</A> command line option
-and the 
-<A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive)
-for that character is to be used.
-If it's for a multi-character sequence,
-then the default representation for each character
-(see 
-<A HREF="#contraction-opcode-6">opcode 6</A>)
-within the sequence is to be used.
-<P>Some special terms are used within the descriptions of these opcodes.
+<DT><B>alva</B><DD><P>The mapping used by 
+<A HREF="http://www.alva-bv.nl/alvacorp/alva_corp_home.html">Alva B.V.</A>
+and 
+<A HREF="http://www.telesensory.com">Telesensory Systems Inc.</A>.
 <DL>
-<DT><B>word</B><DD><P>A maximal sequence of one or more consecutive letters.
+<DT><B>Bit 0</B><DD><P>Dot 1
+<DT><B>Bit 1</B><DD><P>Dot 2
+<DT><B>Bit 2</B><DD><P>Dot 3
+<DT><B>Bit 3</B><DD><P>Dot 4
+<DT><B>Bit 4</B><DD><P>Dot 5
+<DT><B>Bit 5</B><DD><P>Dot 6
+<DT><B>Bit 6</B><DD><P>Dot 7
+<DT><B>Bit 7</B><DD><P>Dot 8
 </DL>
-<P>Now, finally, here are the opcode descriptions themselves:
-<DL>
-<DT><B>17 <EM>characters</EM>
-<A NAME="contraction-opcode-17"></A> </B><DD><P>Translate the entire white-space-bounded containing character sequence into computer braille
-(see the 
-<A HREF="Manual-3.html#options-text-table">-t</A> command line option
-and the 
-<A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive).
-<DT><B>19 <EM>characters</EM>
-<A NAME="contraction-opcode-19"></A> </B><DD><P>Ignore the characters no matter where they appear.
-<DT><B>6 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-6"></A> </B><DD><P>Translate the characters no matter where they appear.
-If there's only one character, then, in addition,
-define the default representation for that character.
-<DT><B>7 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-7"></A> </B><DD><P>Translate the characters no matter where they appear.
-Ignore any consecutive repetitions of the same sequence.
-<DT><B>15 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-15"></A> </B><DD><P>Translate the characters no matter where they appear.
-Remove white-space between consecutive words matched by this opcode.
-<DT><B>8 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-8"></A> </B><DD><P>Translate the characters if they're a word.
-<DT><B>16 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-16"></A> </B><DD><P>Translate the characters if they're a word.
-Remove the following white-space if the first character after it is a letter.
-<DT><B>14 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-14"></A> </B><DD><P>Translate the characters if they're a white-space-bounded word.
-<DT><B>18 <EM>characters</EM>
-<A NAME="contraction-opcode-18"></A> </B><DD><P>Prefix the characters with a letter sign
-(see 
-<A HREF="#contraction-opcode-4">opcode 4</A>)
-if they're a word.
-<DT><B>24 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-24"></A> </B><DD><P>Translate the characters if they're either a word or at the beginning of a word.
-<DT><B>9 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-9"></A> </B><DD><P>Translate the characters if they're at the beginning of a word.
-<DT><B>10 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-10"></A> </B><DD><P>Translate the characters if they're in the middle of a word.
-<DT><B>12 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-12"></A> </B><DD><P>Translate the characters if they're either in the middle or at the end of a word.
-<DT><B>11 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-11"></A> </B><DD><P>Translate the characters if they're at the end of a word.
-<DT><B>22 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-22"></A> </B><DD><P>Translate the characters if they're part of punctuation at the beginning of a word.
-<DT><B>23 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-23"></A> </B><DD><P>Translate the characters if they're part of punctuation at the end of a word.
-<DT><B>21 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-21"></A> </B><DD><P>Translate the characters if they're at the beginning of a number.
-<DT><B>13 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-13"></A> </B><DD><P>Translate the characters if they're in the middle of a number.
-<DT><B>20 <EM>characters</EM> <EM>dots</EM>
-<A NAME="contraction-opcode-20"></A> </B><DD><P>Translate the characters if they're at the end of a number.
 </DL>
 <P>
 <HR>

@@ -15,11 +15,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#include <stdlib.h>
 #include <unistd.h>
-#include <sys/io.h>
 #include "brlconf.h"
 #include "vblow.h"
-#include "../misc.h"
+#include "Programs/misc.h"
+#include "Programs/system.h"
 
 #define LPTSTATUSPORT LPTPORT+1
 #define LPTCONTROLPORT LPTPORT+2
@@ -27,7 +32,7 @@
 int vbinit() {
   char alldots[40];
   int i;
-  if (ioperm(LPTPORT,3,1)!=0 || ioperm(0x80,1,1)!=0) {
+  if (!(enablePorts(LPTPORT,3) && enablePorts(0x80,1))) {
     LogPrint(LOG_ERR,"Error: must be superuser");
     return -1;
   }
@@ -40,7 +45,7 @@ int vbinit() {
 
 void vbsleep(long x) {
   int i;
-  for (i = 0; i<x; i++) outb(1,0x80);
+  for (i = 0; i<x; i++) writePort1(0x80, 1);
 }
 
 void vbclockpause() {
@@ -54,19 +59,19 @@ void vbdisplay(char *vbBuf) {
   for (j = 0; j<VBSIZE; j++) {
     for (i = 7; i>=0; i--) {
       b = (vbBuf[j] << i) & VBLPTDATA;
-      outb(b,LPTPORT);
+      writePort1(LPTPORT, b);
       vbclockpause();
-      outb(b | VBLPTCLOCK,LPTPORT);
+      writePort1(LPTPORT, b | VBLPTCLOCK);
       vbclockpause();
     }
   }
-  outb(b | VBLPTCLOCK,LPTPORT);
+  writePort1(LPTPORT, b | VBLPTCLOCK);
   for (i = 0; i<=7; i++) vbclockpause();
-  outb(0,LPTPORT);
+  writePort1(LPTPORT, 0);
   for (i = 0; i<=7; i++) vbclockpause();
-  outb(VBLPTSTROBE,LPTPORT);
+  writePort1(LPTPORT, VBLPTSTROBE);
   for (i = 0; i<=7; i++) vbclockpause();
-  outb(0,LPTPORT);
+  writePort1(LPTPORT, 0);
   vbclockpause();
 }
 
@@ -87,18 +92,18 @@ void BrButtons(vbButtons *dest) {
   dest->bigbuttons = 0;
   dest->keypressed = 0;
   for (i = 47; i>=40; i--) {
-    outb(i,LPTPORT);
+    writePort1(LPTPORT, i);
     vbsleep(VBDELAY);
-    if ((inb(LPTSTATUSPORT) & 0x08)==0) {
+    if ((readPort1(LPTSTATUSPORT) & 0x08)==0) {
       dest->bigbuttons |= (1 << (i-40));
       dest->keypressed = 1;
     }
   }
   dest->routingkey = 0;
   for (i = 39; i>=0; i--) {
-    outb(i,LPTPORT);
+    writePort1(LPTPORT, i);
     vbsleep(VBDELAY);
-    if ((inb(LPTSTATUSPORT) & 0x08)==0) {
+    if ((readPort1(LPTSTATUSPORT) & 0x08)==0) {
       dest->routingkey = i+1;
       dest->keypressed = 1;
       break;

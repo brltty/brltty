@@ -22,8 +22,13 @@
  * Version 1.0
  */
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
 
 /* I use the reverse of the conversion table for ibm437 -> ISO. As
    ibm437 -> ISO is not complete, there are discrepancies in my reverse

@@ -15,64 +15,45 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-###############################################################################
-#
-# Sub-makefile included by makefile for each BRLTTY device driver.
-# It defines the "help" and "lib" targets.
-# All variables are defined in the main Makefile...
-#
-###############################################################################
+TXT2HLP = $(PGM_DIR)/txt2hlp
+$(TXT2HLP):
+	cd $(@D) && $(MAKE) $(@F)
 
-HELPDIR = ../help
-LIBDIR = ../lib
-BRLNAMES = $(LIBDIR)/brltty-brl.lst
-SPKNAMES = $(LIBDIR)/brltty-spk.lst
+HELP_NAME = brltty-$(DRIVER_CODE).hlp
+HELP_FILE = $(HLP_DIR)/$(HELP_NAME)
+HELP_TEXT = brlttyh*.txt
+$(HELP_FILE): $(HELP_DEPS) $(TXT2HLP)
+	$(TXT2HLP) $(HELP_FILE) $(HELP_TEXT)
+braille-help: $(HELP_FILE)
 
-HELPNAME = brltty-$(DRIVER_CODE).hlp
-HELPFILE = $(HELPDIR)/$(HELPNAME)
-ifeq ($(HELPTARGETS),)
-   HELPTARGETS = brlttyh*.txt
-endif
-$(HELPFILE): $(HELPTARGETS)
-	../txt2hlp $(HELPFILE) brlttyh*.txt
-
-braille-help: $(HELPFILE)
-
-BRL_CFLAGS = $(LIB_CFLAGS) '-DBRLDRIVER="$(DRIVER_CODE)"' '-DBRLHELP="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
-BRL_LFLAGS = -shared
-BRL_SO_NAME = $(LIB_SO_NAME)b
-BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).so.$(LIB_VER)
-BRL_FILE = $(LIBDIR)/$(BRL_NAME)
-BRL_OBJS =
-$(BRL_FILE): brl.o
-	$(LD) $(BRL_LFLAGS) -soname $(BRL_NAME) -o $(BRL_FILE) brl.o $(BRL_OBJS) -lc
-
+BRLNAMES = $(DRV_DIR)/brltty-brl.lst
+BRL_DEFS = '-DBRLDRIVER="$(DRIVER_CODE)"' '-DBRLHELP="$(EXECUTE_ROOT)$(DATA_DIR)/$(HELP_NAME)"'
+BRL_CFLAGS = $(LIBCFLAGS) $(BRL_DEFS)
+BRL_CXXFLAGS = $(LIBCXXFLAGS) $(BRL_DEFS)
+BRL_SO_NAME = $(LIB_NAME)b
+BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
+BRL_FILE = $(DRV_DIR)/$(BRL_NAME)
+$(BRL_FILE): braille.o
+	$(MKLIB) $(BRL_FILE) braille.o $(BRL_OBJS)
 braille-driver: $(BRL_FILE)
 
-SPK_CFLAGS = $(LIB_CFLAGS) '-DSPKDRIVER="$(DRIVER_CODE)"'
-SPK_LFLAGS = -shared
-SPK_SO_NAME = $(LIB_SO_NAME)s
-SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).so.$(LIB_VER)
-SPK_FILE = $(LIBDIR)/$(SPK_NAME)
-SPK_OBJS =
-$(SPK_FILE): speech.o
-	$(LD) $(SPK_LFLAGS) -soname $(SPK_NAME) -o $(SPK_FILE) speech.o $(SPK_OBJS) -lc
+brl-lib-name:
+	echo "$(DRIVER_CODE)  $(DRIVER_NAME) [$(BRAILLE_MODELS)]" >>$(BRLNAMES)
 
+SPKNAMES = $(DRV_DIR)/brltty-spk.lst
+SPK_DEFS = '-DSPKDRIVER="$(DRIVER_CODE)"'
+SPK_CFLAGS = $(LIBCFLAGS) $(SPK_DEFS)
+SPK_CXXFLAGS = $(LIBCXXFLAGS) $(SPK_DEFS)
+SPK_SO_NAME = $(LIB_NAME)s
+SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
+SPK_FILE = $(DRV_DIR)/$(SPK_NAME)
+$(SPK_FILE): speech.o
+	$(MKLIB) $(SPK_FILE) speech.o $(SPK_OBJS)
 speech-driver: $(SPK_FILE)
 
-ifeq ($(BRAILLE_MODELS),)
-   BRAILLE_DESCRIPTION = $(DRIVER_NAME)
-else
-   BRAILLE_DESCRIPTION = $(DRIVER_NAME) [$(BRAILLE_MODELS)]
-endif
-brl-lib-name:
-	echo -e "$(DRIVER_CODE)\t$(BRAILLE_DESCRIPTION)" >>$(BRLNAMES)
-
-ifeq ($(SPEECH_MODELS),)
-   SPEECH_DESCRIPTION = $(DRIVER_NAME)
-else
-   SPEECH_DESCRIPTION = $(DRIVER_NAME) [$(SPEECH_MODELS)]
-endif
 spk-lib-name:
-	echo -e "$(DRIVER_CODE)\t$(SPEECH_DESCRIPTION)" >>$(SPKNAMES)
+	echo "$(DRIVER_CODE)  $(DRIVER_NAME) [$(SPEECH_MODELS)]" >>$(SPKNAMES)
 
+clean::
+	-rm -f $(DRV_DIR)/$(LIB_NAME)?$(DRIVER_CODE).*
+	-rm -f $(HLP_DIR)/brltty-$(DRIVER_CODE)[-.]*

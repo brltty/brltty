@@ -25,69 +25,81 @@
  * Version 1.0
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 
-unsigned char dot[8] =
-{1, 4, 16, 2, 8, 32, 64, 128};	/* Dot values */
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+#include "Programs/options.h"
+#include "Programs/brl.h"
+
+BEGIN_OPTION_TABLE
+END_OPTION_TABLE
+
+static int
+handleOption (const int option) {
+  switch (option) {
+    default:
+      return 0;
+  }
+  return 1;
+}
+
+unsigned char dotTable[] = {B1, B2, B3, B4, B5, B6, B7, B8};
 
 int
-main (int argc, char *argv[])
-{
-  FILE *fi, *fo;		/* Input and output file structures */
-  int chr;			/* Current character being processed */
-  int c;			/* Character read from input */
-  int error = 0;		/* error flag */
-  int res = 0;			/* Return result, 0=success */
-  int i;			/* for loops */
+main (int argc, char *argv[]) {
+  int status = 2;
 
-  if (argc != 3)
-    {
-      fprintf (stderr, "tbl2jbt - Braille dot table to JAWS table\n");
-      fprintf (stderr, "  warning: JFW expects a table for IBM 437 table charset, while BRLTTY uses tables for ISO-8859-1. Use isotoibm437 before passing through tbl2jbt.\n");
-      fprintf (stderr, "Usage: tbl2txt input_file output_file\n");
-      exit (2);
+  if (processOptions(optionTable, optionCount, handleOption,
+                     &argc, &argv, "input-file output-file")) {
+    if (argc > 0) {
+      const char *inputPath = *argv++; --argc;
+      if (argc > 0) {
+        const char *outputPath = *argv++; --argc;
+        if (argc == 0) {
+          FILE *inputStream = fopen(inputPath, "r");
+          if (inputStream) {
+            FILE *outputStream = fopen(outputPath, "wb");
+            if (outputStream) {
+              int character;
+              fputs("[OEM]\r\n", outputStream);
+              for (character=0; character<0X100; character++) {
+                unsigned char dots = fgetc(inputStream);
+                unsigned char dot;
+                fprintf(outputStream, "\\%u=", character);
+                for (dot=0; dot<8; dot++)
+                  if (dots & dotTable[dot])
+                    fputc(dot+'1', outputStream);
+                fputs("\r\n", outputStream);
+              }
+              fclose(outputStream);
+            } else {
+              fprintf(stderr, "%s: Cannot open output file '%s': %s\n",
+                      programName, outputPath, strerror(errno));
+              status = 4;
+            }
+            fclose(inputStream);
+          } else {
+            fprintf(stderr, "%s: Cannot open input file '%s': %s\n",
+                    programName, inputPath, strerror(errno));
+            status = 3;
+          }
+        } else {
+          fprintf(stderr, "%s: Too many parameters.\n", programName);
+        }
+      } else {
+        fprintf(stderr, "%s: Missing output file name.\n", programName);
+      }
+    } else {
+      fprintf(stderr, "%s: Missing input file name.\n", programName);
     }
+  }
 
-  /* Attempt to open input file */
-  if (!(fi = fopen (argv[1], "rb")))
-    {
-      fprintf (stderr, "tbl2jbt: Cannot open input file\n");
-      exit (1);
-    }
-
-  /* Attempt to open output file */
-  if (!(fo = fopen (argv[2], "w")))
-    {
-      fprintf (stderr, "tbl2jbt: Cannot open output file\n");
-      fclose (fi);
-      exit (1);
-    }
-
-  fprintf (fo, "[OEM]\r\n");
-  for (chr = 0; chr < 256 && !error; chr++)
-    {
-      c = fgetc (fi);
-      if (c == EOF)
-	{
-	  error = 1;
-	  continue;
-	}
-      fprintf (fo, "\\%d=", chr);
-      for (i = 0; i < 8; i++)
-	if(c & dot[i])
-	  fputc (i + '1', fo);
-      fputs ("\r\n", fo);
-
-    }
-
-  if (error == 1)
-    {
-      fprintf (stderr, "tbl2jbt: Table not complete\n");
-      res = 1;
-    }
-
-  fclose (fi);
-  fclose (fo);
-  return res;
+  return status;
 }

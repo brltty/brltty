@@ -1,0 +1,88 @@
+Name: @PACKAGE_NAME@
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Copyright: GPL
+Packager: Dave Mielke <dave@mielke.cc>
+Group: System Environment/Daemons
+URL: http://mielke.cc/brltty/
+Source: http://mielke.cc/brltty/releases/%{name}-%{version}.tar.gz
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
+
+AutoProv: 0
+
+AutoReq: 0
+Requires: ld-linux.so.2
+Requires: libc.so.6
+Requires: libdl.so.2
+Requires: libm.so.6
+Requires: /bin/sh
+
+Summary: Braille display driver for Linux/Unix.
+%description
+BRLTTY is a background process (daemon) which provides
+access to the Linux/Unix console (when in text mode)
+for a blind person using a refreshable braille display.
+It drives the braille display,
+and provides complete screen review functionality.
+Some speech capability has also been incorporated.
+
+%prep
+%setup -n %{name}-%{version}
+
+%build
+set -e
+
+./configure --with-install-root="${RPM_BUILD_ROOT}"
+make
+
+directory="doc"
+mkdir -p "${directory}"
+for file in `find . -path "./${directory}" -prune -o \( -name 'README*' -o -name '*.txt' -o -name '*.html' -o -name '*.sgml' \) -print`
+do
+   mkdir -p "${directory}/${file%/*}"
+   cp -rp "${file}" "${directory}/${file}"
+done
+unset file directory
+
+%install
+set -e
+
+make install-programs install-help install-tables install-drivers
+install Documents/brltty.conf "${RPM_BUILD_ROOT}/etc"
+
+%post
+set -e
+
+devices="/dev/vcsa /dev/vcsa0 /dev/vcc/a"
+install=true
+for device in ${devices}
+do
+   if [ -c "${device}" ]
+   then
+      install=false
+      break
+   fi
+done
+if $install
+then
+   device="`set -- ${devices} && echo "${1}"`"
+   echo -n "Creating screen inspection device ${device}..."
+   mkdir -p "${device%/*}"
+   mknod -m o= "${device}" c 7 128
+   chmod 660 "${device}"
+   chown root.tty "${device}"
+   echo "done."
+fi
+unset device install devices
+
+%files
+%doc COPYING
+%doc Documents/ChangeLog Documents/TODO
+%doc doc/*
+%config(noreplace) /etc/brltty.conf
+/bin/brltty
+/bin/install-brltty
+/etc/brltty
+/lib/brltty

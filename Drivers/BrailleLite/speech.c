@@ -22,18 +22,22 @@
 
 #define SPEECH_C 1
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
 
 #include "speech.h"		/* for BLite speech definitions */
-#include "../spk.h"
-#include "../spk_driver.h"
-#include "../misc.h"
+#include "Programs/spk.h"
+#include "Programs/spk_driver.h"
+#include "Programs/misc.h"
 
-/* This is shared with BrailleLite/brl.c: */
+/* This is shared with BrailleLite/braille.c: */
 extern int blite_fd;
 
 
@@ -58,7 +62,7 @@ static unsigned char latin2cp437[128] =
    138, 130, 136, 137, 141, 161, 140, 139,
    240, 164, 149, 162, 147, 245, 148, 246,
    176, 151, 163, 150, 129, 178, 254, 152};
-#endif
+#endif /* 0 */
 
 
 static void
@@ -118,7 +122,7 @@ spk_say (const unsigned char *buffer, int len)
       memcpy (rawdata, post_speech + 1, post_speech[0]);
       write (brl_fd, rawdata, post_speech[0]);
     }
-#endif
+#endif /* 0 */
 }
 
 

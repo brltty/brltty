@@ -21,19 +21,23 @@
 
 #define SPEECH_C 1
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "speech.h"
-#include "../spk.h"
-#include "../misc.h"
+#include "Programs/spk.h"
+#include "Programs/misc.h"
 
 typedef enum {
    PARM_COMMAND
 } DriverParameter;
 #define SPKPARMS "command"
-#include "../spk_driver.h"
+#include "Programs/spk_driver.h"
 
 static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;

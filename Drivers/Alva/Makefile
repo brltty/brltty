@@ -22,26 +22,18 @@
 #
 ###############################################################################
 
-
-# Uncomment next line if you want to use the parallel port interface
-# and you configured USE_PARALLEL_PORT to 1 in brlconf.h
-# Comment it out if you are compiling on a non-i386 architecture.
-# Note that this option uses an extra library.  See README for details.
-#ALVALIB = alva_api.library/alva_api.a
-ALVALIB =
-
 DRIVER_CODE = al
 DRIVER_NAME = Alva
 BRAILLE_MODELS = ABT3xx, Delphi, Satellite
 SPEECH_MODELS = Delphi
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-brlmain.o: brlmain.cc brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h ../common.h
-	$(COMPCPP) $(BRL_CFLAGS) -c brlmain.cc
+include setup.mk
+include $(TOP_DIR)/driver.mk
 
-brl.o: brlmain.o $(ALVALIB)
-	$(LD) -r -o brl.o brlmain.o $(ALVALIB)
+braille.o:
+	$(CC) $(BRL_CFLAGS) -c braille.c
 
-speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h brlconf.h
+speech.o:
 	$(CC) $(SPK_CFLAGS) -c speech.c
 

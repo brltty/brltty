@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <linux/types.h>
 
-#include "brlvger.h"
+#include "linux/brlvger.h"
 
 void read_display_keys(int fd);
 void display_formatted_braille_input(char *old, char *new);

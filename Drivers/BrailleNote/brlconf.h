@@ -21,7 +21,7 @@
  * Edit as necessary for your system.
  */
 
-// The braille dots.
+/* The braille dots. */
 #define BND_0 0000
 #define BND_1 0001
 #define BND_2 0002
@@ -30,7 +30,7 @@
 #define BND_5 0020
 #define BND_6 0040
 
-// The braille characters.
+/* The braille characters. */
 #define BNC_A (BND_1)
 #define BNC_B (BND_1 | BND_2)
 #define BNC_C (BND_1 | BND_4)
@@ -96,13 +96,13 @@
 #define BNC_COMMA (BND_6)
 #define BNC_SPACE 0
 
-// The thumb keys.
+/* The thumb keys. */
 #define BNT_PREVIOUS 0X01
 #define BNT_BACK 0X02
 #define BNT_ADVANCE 0X04
 #define BNT_NEXT 0X08
 
-// Input commands.
+/* Input commands. */
 #define BNI_CHARACTER 0X80
 #define BNI_SPACE 0X81
 #define BNI_BACKSPACE 0X82
@@ -112,7 +112,7 @@
 #define BNI_DESCRIBE 0X86
 #define BNI_DISPLAY 0X1B
 
-// Output commands.
+/* Output commands. */
 #define BNO_BEGIN 0X1B
 #define BNO_DESCRIBE '?'
 #define BNO_WRITE 'B'

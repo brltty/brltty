@@ -208,8 +208,8 @@ static DECLARE_WAIT_QUEUE_HEAD(open_wait);
 #define err(args...) \
     ({ printk(KERN_ERR "Voyager: " args); \
        printk("\n"); })
-#define dbgprint(args...) \
-    ({ printk(KERN_DEBUG "Voyager: " __FUNCTION__ ": " args); \
+#define dbgprint(fmt, args...) \
+    ({ printk(KERN_DEBUG "Voyager: %s: " fmt, __FUNCTION__ , ##args); \
        printk("\n"); })
 #define dbg(args...) \
     ({ if(debug >= 1) dbgprint(args); })
@@ -586,7 +586,9 @@ brlvger_write(struct file *file, const char *buffer,
 	struct brlvger_priv *priv = file->private_data;
 	char buf[MAX_BRLVGER_CELLS];
 	int ret;
-	int rs, off;
+	size_t rs;
+	loff_t off;
+
 	__u16 written;
 
 	if(!priv->dev)

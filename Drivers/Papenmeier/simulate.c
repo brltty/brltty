@@ -17,19 +17,19 @@
 
 /*
  * papenmeier/simulate.c - Braille display test program
- * the file brl.c is included - HACK, but this allows easier testing
+ * the file braille.c is included - HACK, but this allows easier testing
  * 
  *  This program simulates input to papenmeier screen 2d terminal
  *  by calling handle_keys - just for debug and test usage
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <signal.h>
 
-/* HACK - include brl.c - with little adjustments */
+/* HACK - include braille.c - with little adjustments */
 
 #define  BRLDRIVER   NULL
 #define  BRLHELP "nohelp" 
@@ -38,22 +38,17 @@
 #define _SCR_H
 #define READ_CONFIG
 
-#include "brl.c"
-#include "../misc.c"
+#include "braille.c"
+#include "Programs/misc.c"
 
 #define BRLCOLS   80
 
-braille_driver dummybraille;
-braille_driver *braille = &dummybraille;
-
 char* parameters[] = { "file", "y", "y", "y" };
 
-brldim dummy_brldim;		// unused
+brldim dummy_brldim;		/* unused */
 
 static void finish(int sig);
 static void error(char* txt);
-
-static char **brailleParameters = NULL;
 
 char* search_code(int code, int cmd)
 {
@@ -94,10 +89,10 @@ int main(int argc, char* argv[])
 
   signal(SIGINT, finish);
 
-  // open serial
-  // initbrl(parameters, &dummy_brldim, argv[1]);
+  /* open serial */
+  /* brl_initialize(parameters, &dummy_brldim, argv[1]); */
 
-  LogOpen();
+  LogOpen(0);
   SetLogLevel(999);
   SetStderrLevel(999);
   /* HACK - used with serial.c - 2d screen */
@@ -149,7 +144,7 @@ int main(int argc, char* argv[])
 
 static void finish(int sig)
 {
-  closebrl (&dummy_brldim);
+  brl_close (&dummy_brldim);
   exit(sig);
 }
 

@@ -19,10 +19,28 @@
  * $Id: tbl2tbl.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "Programs/options.h"
+
+BEGIN_OPTION_TABLE
+END_OPTION_TABLE
+
+static int
+handleOption (const int option) {
+  switch (option) {
+    default:
+      return 0;
+  }
+  return 1;
+}
 
 typedef struct {
   const char *name;
@@ -43,7 +61,7 @@ static const unsigned char *
 mappingArgument (const char *argument) {
   size_t length = strlen(argument);
   const MappingEntry *mapping = mappingTable;
-  while (mappingTable->name) {
+  while (mapping->name) {
     if (strlen(mapping->name) >= length) {
       if (strncasecmp(mapping->name, argument, length) == 0) {
         return mapping->table;
@@ -51,40 +69,42 @@ mappingArgument (const char *argument) {
     }
     ++mapping;
   }
-  fprintf(stderr, "tbl2tbl: Unknown dot mapping: %s\n", argument);
+  fprintf(stderr, "%s: Unknown dot mapping: %s\n", programName, argument);
   exit(2);
 }
 
 int
 main (int argc, char *argv[]) {
   int status = 2;
-  ++argv, --argc;
-  if (argc > 0) {
-    const unsigned char *inputMapping = mappingArgument(*argv++);
-    --argc;
+
+  if (processOptions(optionTable, optionCount, handleOption,
+                     &argc, &argv, "input-mapping output-mapping")) {
     if (argc > 0) {
-      const unsigned char *outputMapping = mappingArgument(*argv++);
-      --argc;
-      if (argc == 0) {
-        status = 0;
-        while (1) {
-          int inputCharacter = getchar();
-          unsigned char outputCharacter = 0;
-          int i;
-          if (inputCharacter == EOF) break;
-          for (i=0; i<8; i++)
-            if (inputCharacter & (1 << inputMapping[i]))
-              outputCharacter |= 1 << outputMapping[i];
-          putchar(outputCharacter);
+      const unsigned char *inputMapping = mappingArgument(*argv++); --argc;
+      if (argc > 0) {
+        const unsigned char *outputMapping = mappingArgument(*argv++); --argc;
+        if (argc == 0) {
+          status = 0;
+          while (1) {
+            int inputCharacter = getchar();
+            unsigned char outputCharacter = 0;
+            int i;
+            if (inputCharacter == EOF) break;
+            for (i=0; i<8; i++)
+              if (inputCharacter & (1 << inputMapping[i]))
+                outputCharacter |= 1 << outputMapping[i];
+            putchar(outputCharacter);
+          }
+        } else {
+          fprintf(stderr, "%s: Too many parameters.\n", programName);
         }
       } else {
-        fprintf(stderr, "tbl2tbl: Too many parameters.\n");
+        fprintf(stderr, "%s: Missing output dot mapping.\n", programName);
       }
     } else {
-      fprintf(stderr, "tbl2tbl: Missing output dot mapping.\n");
+      fprintf(stderr, "%s: Missing input dot mapping.\n", programName);
     }
-  } else {
-    fprintf(stderr, "tbl2tbl: Missing input dot mapping.\n");
   }
+
   return status;
 }

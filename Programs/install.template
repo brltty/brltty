@@ -1,0 +1,131 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Installation script for binary BRLTTY distributions.
+# Usage: install-brltty dest-prefix [source-prefix]
+
+programName="${0##*/}"
+programMessage()
+{
+   echo "${programName}: ${1}"
+}
+syntaxError()
+{
+   programMessage "${1}"
+   exit 2
+}
+
+execute()
+{
+   "${@}"
+   returnCode="${?}"
+   if [ "${returnCode}" -ne 0 ]
+   then
+      exit "${returnCode}"
+   fi
+   return 0
+}
+makeDirectory()
+{
+   if [ ! -a "${1}" ]
+   then
+      echo -n "Creating ${2} directory..."
+      execute mkdir -p -- "${1}"
+      echo "done."
+   elif [ ! -d "${1}" ]
+   then
+      syntaxError "not a directory: ${1}"
+   fi
+}
+
+if [ "${#}" -eq 0 ]
+then
+   syntaxError "missing destination directory."
+fi
+to="${1}"
+shift
+
+if [ "${#}" -eq 0 ]
+then
+   from="=F"
+elif [ "${#}" -eq 1 ]
+then
+   from="${1}"
+   if [ ! -a "${from}" ]
+   then
+      syntaxError "source does not exist."
+   fi
+   if [ ! -d "${from}" ]
+   then
+      syntaxError "source is not a directory."
+   fi
+else
+   syntaxError "too many parameters."
+fi
+
+if [ "${to}" = "${from}" ]
+then
+   syntaxError "source and destination are the same."
+fi
+makeDirectory "${to}" "destination"
+
+makeDirectory "${to}=P" "executables"
+echo -n "Installing executables..."
+for executable in brltty install-brltty
+do
+   execute cp -p -- "${from}=P/${executable}" "${to}=P"
+done
+unset executable
+echo "done."
+
+makeDirectory "${to}=L" "library"
+echo -n "Installing library files..."
+execute cp -pR "${from}=L" "${to}=L"
+echo "done."
+
+makeDirectory "${to}=D" "data"
+echo -n "Installing data files..."
+cp -pR "${from}=D" "${to}=D"
+echo "done."
+
+if [ -n "=S" ]
+then
+   install=true
+   for device in =S
+   do
+      if [ -c "${to}${device}" ]
+      then
+         install=false
+         break
+      fi
+   done
+   if $install
+   then
+      device="`set -- =S && echo "${1}"`"
+      makeDirectory "${to}${device%/*}" "device"
+      echo -n "Creating screen access device..."
+      execute mknod -m o= "${to}${device}" c 7 128
+      execute chmod 660 "${to}${device}"
+      execute chown root.tty "${to}${device}"
+      echo "done."
+   fi
+   unset device install
+fi
+
+echo "Installation complete."
+exit 0

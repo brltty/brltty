@@ -1,0 +1,146 @@
+#!/usr/bin/tcl
+# #############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+# #############################################################################
+
+proc getProgramName {} {
+   global argv0
+   return [file tail $argv0]
+}
+proc writeProgramMessage {message} {
+   puts stderr "[getProgramName]: $message"
+   flush stderr
+}
+
+proc getBuildDirectories {{root ""}} {
+   set directories [list]
+   if {[clength $root] == 0} {
+      set root .
+      set setPath {
+         set path $name
+      }
+   } else {
+      set setPath {
+         set path [file join $root $name]
+      }
+   }
+   if {[file exists [file join $root Makefile]]} {
+      lappend directories $root
+   }
+   foreach name [readdir $root] {
+      eval $setPath
+      if {[file isdirectory $path]} {
+         lvarcat directories [getBuildDirectories $path]
+      }
+   }
+   return $directories
+}
+
+proc skipFile {path} {
+   if {[string match *.tab.c $path]} {
+      return 1
+   }
+   return 0
+}
+proc dependencyExists {path} {
+   if {[file exists $path]} {
+      return 1
+   }
+   if {[regexp {^(.*)\.tab\.c$} $path x name]} {
+      if {[file exists $name.y]} {
+         return 1
+      }
+   } elseif {[file exists $path.in]} {
+      return 1
+   }
+   return 0
+}
+proc getDependencies {file} {
+   upvar #0 dependencies($file) dependencies
+   if {![info exists dependencies]} {
+      lappend dependencies $file
+      if {[file exists $file] && ![skipFile $file]} {
+         global sourceContext
+         set includes [list]
+         set stream [open $file {RDONLY}]
+         scanfile $sourceContext $stream
+         close $stream; unset stream
+         set directory [file dirname $file]
+         foreach include $includes {
+            if {[cequal [file extension [file rootname $include]] .auto]} continue
+            if {[dependencyExists [set path [file join $directory $include]]]} {
+               set include $path
+            } elseif {![dependencyExists $include]} {
+               writeProgramMessage "missing dependency: $file includes $include"
+               continue
+            }
+            lvarcat dependencies [lindex [intersect3 $dependencies [getDependencies $include]] 2]
+         }
+      }
+   }
+   return $dependencies
+}
+set sourceExtensions {c cc y}
+set sourceExtensionsGlob "{[join $sourceExtensions ,]}"
+set sourceContext [scancontext create]
+scanmatch $sourceContext {^ *# *include *"([^"]*)"} {
+   lappend includes $matchInfo(submatch0)
+}
+foreach buildDirectory [set buildDirectories [getBuildDirectories]] {
+   foreach sourceFile [glob -nocomplain [file join $buildDirectory "*.$sourceExtensionsGlob"]] {
+      regsub {^(\./)+} $sourceFile {} sourceFile
+      if {[skipFile $sourceFile]} continue
+      lappend sourceFiles($buildDirectory) $sourceFile
+      getDependencies $sourceFile
+   }
+}
+
+set absoluteStream [open absdeps.mk {WRONLY CREAT TRUNC}]
+foreach buildDirectory [lsort $buildDirectories] {
+   set relativeStream [open [file join $buildDirectory reldeps.mk] {WRONLY CREAT TRUNC}]
+   if {[info exists sourceFiles($buildDirectory)]} {
+      foreach sourceFile [lsort $sourceFiles($buildDirectory)] {
+         switch -exact -- [file extension $sourceFile] {
+            ".y" {
+               set objectExtension ".tab.c"
+            }
+            default {
+               set objectExtension ".o"
+            }
+         }
+         set objectFile "[file rootname $sourceFile]$objectExtension"
+         set objectName [file tail $objectFile]
+         puts $absoluteStream "# Dependencies for $objectFile:"
+         puts $relativeStream "# Dependencies for $objectName:"
+         foreach dependency $dependencies($sourceFile) {
+            puts $absoluteStream "\$(TOP_DIR)/$objectFile: \$(TOP_DIR)/$dependency"
+            puts -nonewline $relativeStream "$objectName: "
+            if {[cequal $buildDirectory [file dirname $dependency]]} {
+               puts $relativeStream [file tail $dependency]
+            } else {
+               puts $relativeStream "\$(TOP_DIR)/$dependency"
+            }
+         }
+         puts $absoluteStream "\tcd \$(@D) && \$(MAKE) \$(@F)"
+         puts $absoluteStream ""
+         puts $relativeStream ""
+      }
+   }
+   close $relativeStream; unset relativeStream
+}
+close $absoluteStream; unset absoluteStream
+
+exit 0

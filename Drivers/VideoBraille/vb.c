@@ -16,16 +16,22 @@
  */
 
 /* Thanks to the authors of the Vario-HT driver: the implementation of this
-   driver is similar to the Vario-HT one. */
-#include <stdio.h>
+ * driver is similar to the Vario-HT one.
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 #include "vblow.h"
-#include "brl.h"
+#include "Programs/brl.h"
 #include "brlconf.h"
-#include "../brl_driver.h"
-#include "../misc.h"
+#include "Programs/brl_driver.h"
+#include "Programs/misc.h"
 
 static unsigned char lastbuff[40];
 
@@ -65,7 +71,7 @@ static void brl_writeWindow(brldim *brl) {
   for (i = 0; i<40; i++) {
     if (lastbuff[i]!=brl->disp[i]) {
       memcpy(lastbuff,brl->disp,40*sizeof(char));
-      //  Redefine the given dot-pattern to match ours
+      /*  Redefine the given dot-pattern to match ours */
       vbtranslate(brl->disp, outbuff, 40);
       vbdisplay(outbuff);
       vbdisplay(outbuff);
@@ -76,7 +82,7 @@ static void brl_writeWindow(brldim *brl) {
 }
 
 static void brl_writeStatus (const unsigned char *st) {
-// The VideoBraille display has no status cells
+/* The VideoBraille display has no status cells */
 }
 
 static int brl_read(DriverCommandContext cmds) {
@@ -91,7 +97,7 @@ static int brl_read(DriverCommandContext cmds) {
       buttons.bigbuttons |= b.bigbuttons;
       usleep(1);
     } while (b.keypressed);
-    // Test which buttons has been pressed
+    /* Test which buttons has been pressed */
     if (buttons.bigbuttons==KEY_UP) return CMD_LNUP;
     else if (buttons.bigbuttons==KEY_LEFT) return CMD_FWINLT;
     else if (buttons.bigbuttons==KEY_RIGHT) return CMD_FWINRT;
@@ -116,7 +122,7 @@ static int brl_read(DriverCommandContext cmds) {
     else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_DOWN)) return CMD_HELP;
     else if (buttons.bigbuttons==(KEY_MENU | KEY_CURSOR)) return CMD_INFO;
     else if (buttons.bigbuttons==0) {
-      // A cursor routing key has been pressed
+      /* A cursor routing key has been pressed */
       if (buttons.routingkey>0) {
         usleep(5);
         return CR_ROUTE+buttons.routingkey-1;

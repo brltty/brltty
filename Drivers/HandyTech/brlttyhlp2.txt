@@ -4,11 +4,13 @@ There are two navigation keys, one at the left end and one at the right end of
 the braille line. Each has a top, middle, and bottom position. These six
 positions are called: LT LM LB RT RM RB
 
-LT or RT  Go up one line.
-LB or RB  Go down one line.
 LM        Go left one window.
 RM        Go right one window.
 LM RM     Go to the cursor.
+LT        Move cursor up one line.
+LB        Move cursor down one line.
+RT        Go up one line.
+RB        Go down one line.
 RM LT     Go to the top-left corner.
 RM LB     Go to the bottom-left corner.
 LM RT     Go up to the top line.
@@ -18,17 +20,28 @@ LT RB     Go down to the nearest line with different content.
 LB RT     Go up to the nearest line with different highlighting.
 LB RB     Go down to the nearest line with different highlighting.
 
-In input mode (the default), the ten front keys, from left to right, are:
+These keys may also be used in conjunction with the routing keys as follows:
+
+LT Rn     Start new cut buffer from character.
+LM Rn     Enter function key.
+LB Rn     Append to cut buffer from character.
+RT Rn     Linear cut to character.
+RM Rn     Switch to virtual terminal.
+RB Rn     Rectangular cut to character.
+
+In input mode, the ten front keys, from left to right, are:
 
     D7 D3 D2 D1 LS RS D4 D5 D6 D8
 
-The Bn keys are the eight braille dots; pressing any combination of them inputs
-the corresponding character. The LS and RS keys are the left and right space
-bars; pressing either of them inputs a space. Key combinations involving both
-the dot keys and the space bars, as well as those involving the routing and/or
-status keys, function exactly as they do in navigation mode (see below).
+The Dn keys are the eight braille dots numbered according to their conventional
+layout. Pressing any combination of them inputs the corresponding character.
 
-In navigation mode, the ten front keys, from left to right, are:
+The LS and RS keys are the left and right spacebars. Pressing just the left
+spacebar inputs a space, and pressing just the right spacebar enters a return.  
+When pressed together with any combination of the dot keys, the left spacebar
+represents the control key, and the right spacebar represents the meta key.
+
+In navigation mode (the default), the ten front keys, from left to right, are:
 
     B1 B2 B3 B4 UP DN B5 B6 B7 B8
 
@@ -92,8 +105,8 @@ B7 Rn     set mark
 B8 Rn     go to mark
 
 Miscellaneous Commands:
+UP DN     paste cut buffer at cursor position
 B2 B3 UP  stop speaking
 B2 B3 DN  say current line
-B4 B5     paste cut buffer at cursor position
 B1 B8 UP  switch to navigation mode (the default)
 B1 B8 DN  switch to input mode

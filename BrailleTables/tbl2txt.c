@@ -23,16 +23,42 @@
  * Version 1.1
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
-#include <getopt.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include "../Unicode/unicode.h"
+
+#include "Programs/options.h"
+#include "Programs/brl.h"
+#include "Unicode/unicode.h"
+
+BEGIN_OPTION_TABLE
+  {'c', "code-page", "name", NULL, 0,
+   "Code page to use for identifying characters."},
+END_OPTION_TABLE
+
+static const char *opt_codePageName = NULL;
+
+static int
+handleOption (const int option) {
+  switch (option) {
+    default:
+      return 0;
+    case 'c':
+      opt_codePageName = optarg;
+      break;
+  }
+  return 1;
+}
 
 /* Dot values for each byte in the table. */
-static unsigned char dotTable[8] = {0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80};
+static unsigned char dotTable[] = {B1, B2, B3, B4, B5, B6, B7, B8};
 static unsigned char dotOrder[8] = {6, 2, 1, 0, 3, 4, 5, 7};
 
 static char *characterNames[0X100] = {
@@ -295,118 +321,99 @@ static char *characterNames[0X100] = {
 };
 
 int
-main (int argc, char *argv[])
-{
-  int status = 0;			/* Return result, 0=success */
-  const char *codePageName = NULL;
-  const CodePage *codePage = NULL;
+main (int argc, char *argv[]) {
+  int status = 2;			/* Return result, 0=success */
 
-  const char *const shortOptions = ":c:";
-  const struct option longOptions[] = {
-    {"code-page", required_argument, NULL, 'c'},
-    {NULL       , 0                , NULL,  0 }
-  };
-
-  opterr = 0;
-  while (1) {
-    int option = getopt_long(argc, argv, shortOptions, longOptions, NULL);
-    if (option == -1) break;
-    switch (option) {
-      default:
-        fprintf(stderr, "tbl2txt: Unimplemented option: -%c\n", option);
-        exit(2);
-      case '?':
-        fprintf(stderr, "tbl2txt: Invalid option: -%c\n", optopt);
-        exit(2);
-      case ':':
-        fprintf(stderr, "tbl2txt: Missing operand: -%c\n", optopt);
-        exit(2);
-      case 'c':
-        codePageName = optarg;
-        break;
-    }
-  }
-  argv += optind; argc -= optind;
-
-  if (codePageName) {
-    if (!(codePage = getCodePage(codePageName))) {
-      fprintf(stderr, "tbl2txt: Unknown code page: %s\n", codePageName);
-      exit(2);
-    }
-  }
-
-  if (argc == 2) {
-    const char *inputPath = argv[0];
-    FILE *inputStream = fopen(inputPath, "rb");
-    if (inputStream) {
-      const char *outputPath = argv[1];
-      FILE *outputStream = fopen(outputPath, "w");
-      if (outputStream) {
-	int byte;			/* Current byte being processed */
-	for (byte=0; byte<0X100; ++byte) {
-	  int dots = fgetc(inputStream);
-          const char *name = NULL;
-	  int dotIndex;
-          unsigned short ubrl = 0X2800;
-	  if (ferror(inputStream)) {
-	    fprintf(stderr, "tbl2txt: Cannot read input file '%s': %s",
-	            inputPath, strerror(errno));
-	    status = 5;
-	    break;
-	  }
-          {
-            unsigned char character = byte;
-            unsigned char prefix;
-            if (!(character & 0X60) || (character == 0X7F) || (character == 0XA0)) {
-              if (character & 0X80) {
-                prefix = '~';
-                character &= 0X7F;
-              } else {
-                prefix = '^';
-              }
-              if (character != ' ') character ^= 0X40;
-            } else {
-              prefix = ' ';
-            }
-            fprintf(outputStream, "%c%c", prefix, character);
-          }
-	  fprintf(outputStream, " %02X %3d (", byte, byte);
-	  for (dotIndex=0; dotIndex<sizeof(dotOrder); ++dotIndex) {
-            unsigned char dot = dotOrder[dotIndex];
-            unsigned char bit = dots & dotTable[dot];
-	    fputc((bit? dot+'1': ' '), outputStream);
-            if (bit) ubrl |= 1 << dot;
-	  }
-	  fprintf(outputStream, ")%02X B+%04X", dots, ubrl);
-	  if (codePage) {
-            unsigned short unicode = codePage->table[byte];
-	    const UnicodeEntry *uc = getUnicodeEntry(unicode);
-	    if (uc) name = uc->name;
-	    fprintf(outputStream, " U+%4.4X", unicode);
-	  }
-	  if (!name) name = characterNames[byte];
-	  fprintf(outputStream, " %s", name);
-	  fprintf(outputStream, "\n");
-	}
-
-	fclose(outputStream);
-      } else {
-	fprintf(stderr, "tbl2txt: Cannot open output file '%s': %s\n",
-		outputPath, strerror(errno));
-	status = 4;
+  if (processOptions(optionTable, optionCount, handleOption,
+                     &argc, &argv, "input-file output-file")) {
+    const CodePage *codePage = NULL;
+    if (opt_codePageName) {
+      if (!(codePage = getCodePage(opt_codePageName))) {
+        fprintf(stderr, "%s: Unknown code page: %s\n",
+                programName, opt_codePageName);
+        exit(status);
       }
-
-      fclose(inputStream);
-    } else {
-      fprintf(stderr, "tbl2txt: Cannot open input file '%s': %s\n",
-	      inputPath, strerror(errno));
-      status = 3;
     }
-  } else {
-    fprintf(stderr, "tbl2txt - Uncompile a braille dot-table.\n");
-    fprintf(stderr, "Usage: tbl2txt -option ... input_file output_file\n");
-    fprintf(stderr, "-c page  --code-page=  Code page to use for identifying characters.\n");
-    status = 2;
+
+    if (argc > 0) {
+      const char *inputPath = *argv++; --argc;
+      if (argc > 0) {
+        const char *outputPath = *argv++; --argc;
+        if (argc == 0) {
+          FILE *inputStream = fopen(inputPath, "rb");
+          if (inputStream) {
+            FILE *outputStream = fopen(outputPath, "w");
+            if (outputStream) {
+              int byte;			/* Current byte being processed */
+              status = 0;
+              for (byte=0; byte<0X100; ++byte) {
+                int dots = fgetc(inputStream);
+                const char *name = NULL;
+                int dotIndex;
+                unsigned short ubrl = 0X2800;
+                if (ferror(inputStream)) {
+                  fprintf(stderr, "%s: Cannot read input file '%s': %s",
+                          programName, inputPath, strerror(errno));
+                  status = 5;
+                  break;
+                }
+                {
+                  unsigned char character = byte;
+                  unsigned char prefix;
+                  if (!(character & 0X60) || (character == 0X7F) || (character == 0XA0)) {
+                    if (character & 0X80) {
+                      prefix = '~';
+                      character &= 0X7F;
+                    } else {
+                      prefix = '^';
+                    }
+                    if (character != ' ') character ^= 0X40;
+                  } else {
+                    prefix = ' ';
+                  }
+                  fprintf(outputStream, "%c%c", prefix, character);
+                }
+                fprintf(outputStream, " %02X %3d (", byte, byte);
+                for (dotIndex=0; dotIndex<sizeof(dotOrder); ++dotIndex) {
+                  unsigned char dot = dotOrder[dotIndex];
+                  unsigned char bit = dots & dotTable[dot];
+                  fputc((bit? dot+'1': ' '), outputStream);
+                  if (bit) ubrl |= 1 << dot;
+                }
+                fprintf(outputStream, ")%02X B+%04X", dots, ubrl);
+                if (codePage) {
+                  unsigned short unicode = codePage->table[byte];
+                  const UnicodeEntry *uc = getUnicodeEntry(unicode);
+                  if (uc) name = uc->name;
+                  fprintf(outputStream, " U+%4.4X", unicode);
+                }
+                if (!name) name = characterNames[byte];
+                fprintf(outputStream, " %s", name);
+                fprintf(outputStream, "\n");
+              }
+
+              fclose(outputStream);
+            } else {
+              fprintf(stderr, "%s: Cannot open output file '%s': %s\n",
+                      programName, outputPath, strerror(errno));
+              status = 4;
+            }
+
+            fclose(inputStream);
+          } else {
+            fprintf(stderr, "%s: Cannot open input file '%s': %s\n",
+                    programName, inputPath, strerror(errno));
+            status = 3;
+          }
+        } else {
+          fprintf(stderr, "%s: Too many parameters.\n", programName);
+        }
+      } else {
+        fprintf(stderr, "%s: Missing output file name.\n", programName);
+      }
+    } else {
+      fprintf(stderr, "%s: Missing input file name.\n", programName);
+    }
   }
 
   return status;

@@ -22,22 +22,25 @@
  * Stéphane Doyon <s.doyon@videotron.ca>
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include <errno.h>
-#include <linux/limits.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
 #define SPEECH_C 1
 
-#include "../misc.h"
+#include "Programs/misc.h"
 #include "speech.h"
-#include "../spk.h"
+#include "Programs/spk.h"
 
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_EXPRESS
@@ -48,7 +51,7 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "program", "uid", "gid"
 
-#include "../spk_driver.h"
+#include "Programs/spk_driver.h"
 
 static int helper_fd_in = -1, helper_fd_out = -1;
 static unsigned short lastIndex, finalIndex;
@@ -142,14 +145,22 @@ static void spk_initialize (char **parameters)
       myperror("setuid to %u", uid);
       _exit(1);
     }
-    LogPrint(LOG_INFO, "ExternalSpeech program uid is %u, gid is %u",
-	     getuid(), getgid());
+
+    {
+      unsigned long uid = getuid();
+      unsigned long gid = getgid();
+      LogPrint(LOG_INFO, "ExternalSpeech program uid is %lu, gid is %lu", uid, gid);
+    }
+
     if(dup2(fd2[0], 0) < 0 /* stdin */
        || dup2(fd1[1], 1) < 0){ /* stdout */
       myperror("dup2");
       _exit(1);
     }
-    for(i=2; i<OPEN_MAX; i++) close(i);
+    {
+      long numfds = sysconf(_SC_OPEN_MAX);
+      for(i=2; i<numfds; i++) close(i);
+    }
     execl(extProgPath, extProgPath, 0);
     myperror("Unable to execute external speech program '%s'", extProgPath);
     _exit(1);
@@ -159,9 +170,9 @@ static void spk_initialize (char **parameters)
     helper_fd_out = fd2[1];
     close(fd1[1]);
     close(fd2[0]);
-    if(fcntl(helper_fd_in, F_SETFL,FNDELAY) < 0
-       || fcntl(helper_fd_out, F_SETFL,FNDELAY) < 0) {
-      myperror("fcntl F_SETFL FNDELAY");
+    if(fcntl(helper_fd_in, F_SETFL,O_NDELAY) < 0
+       || fcntl(helper_fd_out, F_SETFL,O_NDELAY) < 0) {
+      myperror("fcntl F_SETFL O_NDELAY");
       return;
     }
   };

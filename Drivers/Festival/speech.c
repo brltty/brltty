@@ -22,13 +22,17 @@
 
 #define SPEECH_C 1
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdio.h>
 #include <string.h>
 
 #include "speech.h"		/* for speech definitions */
-#include "../spk.h"
-#include "../spk_driver.h"
-#include "../misc.h"
+#include "Programs/spk.h"
+#include "Programs/spk_driver.h"
+#include "Programs/misc.h"
 
 
 static FILE *festival;

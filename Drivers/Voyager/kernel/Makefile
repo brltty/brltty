@@ -31,7 +31,7 @@ install: brlvger.o
 vgertest: vgertest.c
 	gcc vgertest.c -o vgertest
 
-clean:
-	rm -f *.o vgertest
+clean::
+	-rm -f *.o vgertest
 
-distclean: clean
+distclean::

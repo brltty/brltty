@@ -1,0 +1,134 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+@SET_MAKE@
+include $(TOP_DIR)/absdeps.mk
+include reldeps.mk
+
+PGM_DIR = $(TOP_DIR)/Programs
+DOC_DIR = $(TOP_DIR)/Documents
+TBL_DIR = $(TOP_DIR)/BrailleTables
+UCD_DIR = $(TOP_DIR)/Unicode
+CTB_DIR = $(TOP_DIR)/ContractionTables
+DRV_DIR = $(TOP_DIR)/lib
+HLP_DIR = $(TOP_DIR)/help
+
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
+CROSSCOMP = @compiler_prefix@
+INSTALL_ROOT = @install_root@
+EXECUTE_ROOT = @execute_root@
+
+EXTRACFLAGS = -I$(TOP_DIR) @SYSCFLAGS@ @DEFS@
+YCFLAGS = @YCFLAGS@
+
+HOSTCC = @CC@
+CC = $(CROSSCOMP)$(HOSTCC)
+COMMONCFLAGS = @CFLAGS@ $(EXTRACFLAGS)
+HOSTCFLAGS = $(COMMONCFLAGS)
+CFLAGS = $(COMMONCFLAGS)
+LIBCFLAGS = $(CFLAGS) @LIBCFLAGS@
+
+HOSTCXX = @CXX@
+CXX = $(CROSSCOMP)$(HOSTCXX)
+COMMONCXXFLAGS = @CXXFLAGS@ $(EXTRACFLAGS)
+HOSTCXXFLAGS = $(COMMONCXXFLAGS)
+CXXFLAGS = $(COMMONCXXFLAGS)
+LIBCXXFLAGS = $(CXXFLAGS) @LIBCXXFLAGS@
+
+COMMONLDFLAGS = @LDFLAGS@
+HOSTLDFLAGS = $(COMMONLDFLAGS)
+LDFLAGS = $(COMMONLDFLAGS)
+LDLIBS = @LIBS@
+
+LD = $(CROSSCOMP)@LD@
+
+HOSTMKOBJ = @MKOBJ@
+MKOBJ = $(CROSSCOMP)$(HOSTMKOBJ)
+
+HOSTMKLIB = @MKLIB@
+MKLIB = $(CROSSCOMP)$(HOSTMKLIB)
+
+AWK = @AWK@
+
+YACC = @YACC@
+
+INSTALL = @INSTALL@
+INSTALL_SCRIPT = $(INSTALL)
+INSTALL_PROGRAM = $(INSTALL_SCRIPT) -s
+INSTALL_DATA = $(INSTALL) -m 644
+INSTALL_DIRECTORY = $(INSTALL) -d
+
+LIB_NAME = @library_name@
+LIB_EXT = @library_extension@
+LIB_VAR = @libsearch_variable@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+includedir = @includedir@
+oldincludedir = @oldincludedir@
+infodir = @infodir@
+mandir = @mandir@
+
+PROG_DIR = @program_directory@
+LIB_DIR = @library_directory@
+DATA_DIR = @data_directory@
+
+BRL_TARGET = @brltty_item_name_braille@
+BRL_TARGETS = @brltty_item_names_braille@
+BRL_LIBS = @brltty_item_codes_braille@
+
+SPK_TARGET = @brltty_item_name_speech@
+SPK_TARGETS = @brltty_item_names_speech@
+SPK_LIBS = @brltty_item_codes_speech@
+
+BRAILLE_TARGETS = @brltty_driver_targets_braille@
+BRAILLE_OBJECTS = @brltty_driver_objects_braille@
+SPEECH_TARGETS = @brltty_driver_targets_speech@
+SPEECH_OBJECTS = @brltty_driver_objects_speech@
+INSTALL_DRIVERS = @install_drivers@
+CONFIGURED_DRIVERS = @brltty_driver_names@
+
+SCR_OBJ = @screen_object@
+SCR_DEV = @screen_device@
+
+TEXTTRANS = @text_table@
+ATTRTRANS = @attributes_table@
+
+SYS_OBJ = @system_object@
+CTB_OBJS = @contracted_braille_objects@
+SPKR_OBJS = @speaker_tune_objects@
+DAC_OBJS = @dac_tune_objects@
+MIDI_OBJS = @midi_tune_objects@
+ADLIB_OBJS = @adlib_tune_objects@
+
+clean::
+	-rm -f *.o *.auto.h core
+
+distclean::
+	-rm -f *~ *orig \#*\# *.rej ? a.out
+	-rm -f setup.mk
+

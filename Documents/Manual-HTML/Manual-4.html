@@ -2,7 +2,7 @@
 <HTML>
 <HEAD>
  <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
- <TITLE>BRLTTY: Translation Tables</TITLE>
+ <TITLE>BRLTTY: Feature Descriptions</TITLE>
  <LINK HREF="Manual-5.html" REL=next>
  <LINK HREF="Manual-3.html" REL=previous>
  <LINK HREF="Manual.html#toc4" REL=contents>
@@ -12,270 +12,1291 @@
 <A HREF="Manual-3.html">Previous</A>
 <A HREF="Manual.html#toc4">Contents</A>
 <HR>
-<H2><A NAME="translation"></A> <A NAME="s4">4. Translation Tables</A></H2>
+<H2><A NAME="s4">4. Feature Descriptions</A></H2>
 
-<P>BRLTTY uses two <B>translation tables</B> to govern
-the mapping from bytes to dot combinations.
 <P>
-<H2><A NAME="translation-text"></A> <A NAME="ss4.1">4.1 Text Translation</A>
+<P>
+<H2><A NAME="routing"></A> <A NAME="ss4.1">4.1 Cursor Routing</A>
 </H2>
 
-<P>The first, and most important, is the text translation table.
-BRLTTY is initially configured to use the
-<A HREF="Manual-7.html#nabcc">North American Braille Computer Code</A> (NABCC).
-In addition to this default text translation table,
-several alternatives are provided:
+<P>When moving the braille window around the screen
+while examining the text, say, in an editor,
+you often need to bring the cursor
+to a specific character within the braille window.
+You'll probably find this to be a rather difficult task for a number of reasons.
+One is that you may not know where the cursor is,
+and that you may lose your place while trying to find it.
+Another is that the cursor may move unrpedictably as the arrow keys are pressed
+(some editors, for example, don't allow the cursor to be
+more to the right than the end of the line it's on).
+Cursor routing provides just such a capability
+by knowing where the cursor is,
+by simulating the same arrow-key presses which you'd have to enter manually,
+and by monitoring the progress of the cursor as it moves.
+<P>Some braille displays have a button, known as a routing key, above each cell.
+These keys use the 
+<A HREF="Manual-3.html#command-ROUTE">ROUTE</A> command
+to route the cursor right to the desired location.
+<P>Cursor routing, while very convenient and effective,
+is, strictly speaking, not completely reliable.
+One reason for this is that its current implementation assumes
+VT100 cursor key escape sequences.
+Another is that some applications do non-standard things
+in response to detecting that a cursor key has been pressed.
+A minor problem found within some editors (like <CODE>vi</CODE>),
+as already mentioned above,
+is that they throw in some unpredictable horizontal motion
+when vertical motion is requested
+because they don't allow the cursor to be to the right of the end of a line.
+A major problem found within some web browsers (like <CODE>lynx</CODE>)
+is that the up- and down-arrow keys are used to move among the links
+(which may skip lines and/or move the cursor horizontally,
+but which rarely just moves the cursor one line in the desired direction),
+and that the left- and right-arrow keys are used to select links
+(which has absolutely nothing to do with any form of cursor motion whatsoever,
+and which even totally changes the screen content).
+<P>Cursor routing may not work very well on a heavily loaded system,
+and definitely doesn't work very well when working on a remote system over a slow link.
+This is so because of all of the checks which must be made along the way
+in order to deal with unpredictable cursor motion
+and in order to ensure that any mistake has at least a fighting chance to be undone.
+Even  though BRLTTY tries to be fairly clever,
+it must still essentially wait to see what happens after each simulated arrow-key press.
+<P>Once a cursor routing request has been made,
+BRLTTY keeps trying to route the cursor to the desired location until
+a timeout expires before the cursor reaches that location,
+the cursor seems to be moving in the wrong direction,
+or you switch to a different virtual terminal.
+An attempt is first made to use virtical motion
+to bring the cursor to the right line,
+and, only if that succeeds, an attempt is then made
+to use horizontal motion to bring the cursor to the right column.
+If another request is made while one is still in progress,
+then the first one is aborted and the second one is initiated.
+<P>A safer but less powerful cursor routing command,
+<A HREF="Manual-3.html#command-CSRJMP_VERT">CSRJMP_VERT</A>,
+uses just vertical motion to bring the cursor
+to anywhere on the top line of the braille window.
+It's especially useful in conjunction with applications (like <CODE>lynx</CODE>)
+wherein horizontal cursor motion must never be attempted.
+<P>
+<H2><A NAME="cut"></A> <A NAME="ss4.2">4.2 Cut and Paste</A>
+</H2>
+
+<P>This feature enables you to grab some text which is already on the screen 
+and re-enter it at the current cursor position.
+Using it saves time and avoids errors
+when a long and/or complicated piece of text needs to be copied,
+and even when the same short and simple piece of text needs to be copied many times.
+It's particularly useful for things like
+long file names,
+complicated command lines,
+E-mail addresses,
+and URLs. Cutting and pasting text involves three simple steps:
+<OL>
+<LI>Mark either the top-left corner of the rectangular area
+or the beginning of the linear area
+on the screen which is to be grabbed (cut).
+If your display has routing keys,
+then move the braille window so that
+the first character to be cut appears anywhere within it, and then:
+<UL>
+<LI>invoke the 
+<A HREF="Manual-3.html#command-CUTBEGIN">CUTBEGIN</A> command
+to start a new cut buffer</LI>
+<LI>invoke the 
+<A HREF="Manual-3.html#command-CUTAPPEND">CUTAPPEND</A> command
+to append to the existing cut buffer</LI>
+</UL>
+
+by pressing the key(s) associated with it
+and then pressing the routing key associated with the character.</LI>
+<LI>Mark either the bottom-right corner of the rectangular area
+or the end of the linear area
+on the screen which is to be grabbed (cut).
+If your display has routing keys,
+then move the braille window so that
+the last character to be cut appears anywhere within it, and then
+<UL>
+<LI>invoke the 
+<A HREF="Manual-3.html#command-CUTRECT">CUTRECT</A> command
+to cut a rectangular area</LI>
+<LI>invoke the 
+<A HREF="Manual-3.html#command-CUTLINE">CUTLINE</A> command
+to cut a linear area</LI>
+</UL>
+
+by pressing the key(s) associated with it
+and then pressing the routing key associated with the character.
+Marking the end of the cut area
+appends the selected screen content to the cut buffer.
+Excess white-space is removed from the end of each line in the cut buffer
+so that unwanted trailing spaces won't be pasted back in.
+Control characters are replaced with blanks.</LI>
+<LI>Insert (paste) the text where it's needed.
+Place the cursor over the character where the text is to be pasted,
+and invoke the 
+<A HREF="Manual-3.html#command-PASTE">PASTE</A> command.
+You can paste the same text any number of times without recutting it.
+This description assumes that you're already in some sort of input mode.
+If you paste when you're in some other kind of mode
+(like <CODE>vi</CODE>'s command mode),
+then you'd better be aware of what the characters in the cut buffer will do.</LI>
+</OL>
+<P>The cut buffer is also used by
+the 
+<A HREF="Manual-3.html#command-PRSEARCH">PRSEARCH</A>
+and 
+<A HREF="Manual-3.html#command-NXSEARCH">NXSEARCH</A> commands.
+<P>
+<H2><A NAME="gpm"></A> <A NAME="ss4.3">4.3 Pointer (Mouse) Support via GPM</A>
+</H2>
+
+<P>If BRLTTY is configured with the 
+<A HREF="Manual-2.html#build-gpm">--enable-gpm</A> build option
+on a system where the <CODE>gpm</CODE> application has been installed,
+then it'll interact with the pointer (mouse).
+<P>Moving the braille window moves the pointer
+(see the 
+<A HREF="#preference-pointer-follows-window">Pointer Follows Window</A> preference).
+Any motion of the braille window (manual, cursor tracking, etc.),
+other than when it moves in response to pointer motion,
+moves the pointer to the character on the screen
+which corresponds to the upper-left corner of the braille window.
+This enables a sighted observer to see where the braille window is,
+and, therefore, to know what the braille user is reading.
+It also keeps the pointer within the braille window
+so that it can be found easily,
+and so that the pointer device can always be readily used
+as another way to move the braille window.
+<P>Moving the pointer drags the braille window
+(see the 
+<A HREF="#preference-window-follows-pointer">Window Follows Pointer</A> preference).
+Whenever the pointer is moved beyond the edge of the braille window,
+the braille window is dragged along (one character at a time).
+This gives the braille user another two-dimensional way
+to inspect the screen content
+or to quickly move the braille window to a desired location.
+It also gives a sighted observer an easy way to move the braille window
+to something he'd like the braille user to read.
+<P><CODE>gpm</CODE> uses reverse video to show where the pointer is.
+Underlining of highlighted characters
+(see the 
+<A HREF="Manual-3.html#command-ATTRVIS">ATTRVIS</A> command for details)
+should be turned on, therefore, when the braille user wishes to use the pointer.
+<P>This feature also gives the braille user access to <CODE>gpm</CODE>'s cut-and-paste capability.
+Although you should read <CODE>gpm</CODE>'s own documentation,
+here are some notes on how it works.
+<UL>
+<LI>Copy the current character to the cut buffer
+by single-clicking the left button.</LI>
+<LI>Copy the current word (space-delimited) to the cut buffer
+by double-clicking the left button.</LI>
+<LI>Copy the current line to the cut buffer
+by tripple-clicking the left button.</LI>
+<LI>Copy a linear region to the cut buffer as follows:
+<OL>
+<LI>Place the pointer on the first character of the region.</LI>
+<LI>Press (and hold) the left button.</LI>
+<LI>Move the pointer to the last character of the region
+(all currently selected characters are highlighted).</LI>
+<LI>Release the left button.</LI>
+</OL>
+</LI>
+<LI>Paste (input) the current contents of the cut buffer
+by clicking the middle button of a three-button mouse
+or by clicking the right button of a two-button mouse.</LI>
+<LI>Append to the cut buffer
+by using the right button of a three-button mouse.</LI>
+</UL>
+<P>
+<H2><A NAME="tunes"></A> <A NAME="ss4.4">4.4 Alert Tunes</A>
+</H2>
+
+<P>BRLTTY alerts you to the occurrence of significant events
+by playing short predefined tunes.
+This feature can be activated and deactivated with
+either the 
+<A HREF="Manual-3.html#command-TUNES">TUNES</A> command
+or the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference.
+The tunes are played on the PC speaker by default,
+but other alternatives can be selected
+with the 
+<A HREF="#preference-tune-device">Tune Device</A> preference.
+<P>Each significant event is associated, from highest to lowest priority,
+with one or more of the following:
 <DL>
-<DT><B>text.danish.tbl</B><DD><P>Danish
-<DT><B>text.es.tbl</B><DD><P>Spanish
-<DT><B>text.french.tbl</B><DD><P>French
-<DT><B>text.german.tbl</B><DD><P>German
-<DT><B>text.it.tbl</B><DD><P>Italian
-<DT><B>text.no-h.tbl</B><DD><P>Norwegian and German
-<DT><B>text.no-p.tbl</B><DD><P>Norwegian
-<DT><B>text.pl-iso02.tbl</B><DD><P>Polish (iso-8859-2)
-<DT><B>text.simple.tbl</B><DD><P>American English
-<DT><B>text.sweden.tbl</B><DD><P>Swedish
-<DT><B>text.swedish.tbl</B><DD><P>Swedish
-<DT><B>text.uk.tbl</B><DD><P>United Kingdom English
-<DT><B>text.us.tbl</B><DD><P>American English
+<DT><B>a tune</B><DD><P>If a tune has been associated with the event,
+if the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference
+(see also the 
+<A HREF="Manual-3.html#command-TUNES">TUNES</A> command)
+is active,
+and if the selected tune device
+(see the 
+<A HREF="#preference-tune-device">Tune Device</A> preference)
+can be opened,
+then the tune is played.
+<DT><B>a dot pattern</B><DD><P>If a dot pattern has been associated with the event,
+and if the 
+<A HREF="#preference-alert-dots">Alert Dots</A> preference is active,
+then the dot pattern is briefly displayed on every braille cell.
+Some braille displays don't respond quickly enough
+for this mechanism to work effectively.
+<DT><B>a message</B><DD><P>If a message has been associated with the event,
+then it is displayed for a few seconds
+(see the 
+<A HREF="Manual-3.html#options-message-delay">-M</A> command line option).
+</DL>
+<P>These events include:
+<UL>
+<LI>When the braille display driver starts or stops.</LI>
+<LI>When the start or end of the cut block is set.</LI>
+<LI>When a feature is activated or deactivated.</LI>
+<LI>When cursor tracking is turned on or off.</LI>
+<LI>When the screen image is frozen or unfrozen.</LI>
+<LI>When identical lines are skipped.</LI>
+<LI>When the braille window wraps
+either down to the beginning of the next line
+or up to the end of the previous line.</LI>
+<LI>When a requested motion cannot be performed.</LI>
+<LI>When a command cannot be executed.</LI>
+<LI>When a lengthy command completes.</LI>
+</UL>
+<P>
+<H2><A NAME="preferences"></A> <A NAME="ss4.5">4.5 Preferences Settings</A>
+</H2>
+
+<P>When BRLTTY starts, it loads a file which contains your preferences settings.
+The file doesn't need to exist,
+and is created the first time the settings are saved
+with the 
+<A HREF="Manual-3.html#command-PREFSAVE">PREFSAVE</A> command.
+The most recently saved settings can be restored at any time
+with the 
+<A HREF="Manual-3.html#command-PREFLOAD">PREFLOAD</A> command.
+<P>The default name for this file is <CODE>/etc/brltty.conf</CODE>.
+A system default for its name can be established with
+the 
+<A HREF="Manual-3.html#configure-preferences-file">preferences-file</A> configuration file directive.
+Its name can be explicitly set at run-time with
+the 
+<A HREF="Manual-3.html#options-preferences-file">-p</A> command line option.
+<P>
+<H3><A NAME="preferences-menu"></A> The Preferences Menu</H3>
+
+<P>The preferences settings are saved as binary data
+which, therefore, can't be edited by hand.
+BRLTTY, however, has a simple menu from which you can easily change them.
+This feature isn't available if the
+<A HREF="Manual-2.html#build-preferences-menu">--disable-preferences-menu</A> build option was specified.
+<P>The meny is activated by the 
+<A HREF="Manual-3.html#command-PREFMENU">PREFMENU</A> command.
+The braille display briefly
+(see the 
+<A HREF="Manual-3.html#options-message-delay">-M</A> command line option)
+shows the menu title,
+and then presents the current item and its current setting.
+<P>
+<H3>Navigating the Menu</H3>
+
+<P>See 
+<A HREF="Manual-3.html#menu">Menu Navigation Commands</A> for the full list of
+commands which enable you to select items and change settings within the menu.
+For backward compatibility with old drivers, the window motion commands,
+which have modified meanings in this context, can also be used.
+<DL>
+<DT><B><CODE>TOP</CODE>, <CODE>TOP_LEFT</CODE></B><DD><P>Go to the first item in the menu
+(same as 
+<A HREF="Manual-3.html#command-MENU_FIRST_ITEM">MENU_FIRST_ITEM</A>).
+<DT><B><CODE>BOT</CODE>, <CODE>BOT_LEFT</CODE></B><DD><P>Go to the last item in the menu
+(same as 
+<A HREF="Manual-3.html#command-MENU_LAST_ITEM">MENU_LAST_ITEM</A>).
+<DT><B><CODE>LNUP</CODE>, <CODE>CURSOR_UP</CODE></B><DD><P>Go to the previous item in the menu
+(same as 
+<A HREF="Manual-3.html#command-MENU_PREV_ITEM">MENU_PREV_ITEM</A>).
+<DT><B><CODE>LNDN</CODE>, <CODE>CURSOR_DOWN</CODE></B><DD><P>Go to the next item in the menu
+(same as 
+<A HREF="Manual-3.html#command-MENU_NEXT_ITEM">MENU_NEXT_ITEM</A>).
+<DT><B><CODE>WINUP</CODE>, <CODE>CHRLT</CODE>, <CODE>CURSOR_LEFT</CODE></B><DD><P>Decrement the current menu item's setting
+(same as 
+<A HREF="Manual-3.html#command-MENU_PREV_SETTING">MENU_PREV_SETTING</A>).
+<DT><B><CODE>WINDN</CODE>, <CODE>CHRRT</CODE>, <CODE>CURSOR_RIGHT</CODE>, <CODE>HOME</CODE>, <CODE>RETURN</CODE></B><DD><P>Increment the current menu item's setting
+(same as 
+<A HREF="Manual-3.html#command-MENU_NEXT_SETTING">MENU_NEXT_SETTING</A>).
+</DL>
+<P>Notes:
+<UL>
+<LI>The routing keys can also be used to select a setting for the current item.
+If the item has numeric settings,
+then each routing key represents an integer (starting from 0),
+and a selection which is out of range is silently brought into range.
+If the item has named settings,
+then the routing keys correspond ordinally with the settings.</LI>
+<LI>Use the <CODE>PREFLOAD</CODE> command to undo all of the changes
+which were made since entering the menu.</LI>
+<LI>Use the <CODE>PREFMENU</CODE> command (again) to leave the new settings in effect,
+exit the menu, and resume normal operation.
+If the "Save Settings on Exit" item is set, then, in addition,
+the new settings are written to the preferences settings file.
+Any command not recognized by the menu system also does these same things.</LI>
+</UL>
+<P>
+<H3>The Menu Items</H3>
+
+<P>
+<DL>
+<DT><B>Save on Exit
+<A NAME="preference-save-on-exit"></A> </B><DD><P>When exiting the preferences menu:
+<DL>
+<DT><B>No</B><DD><P>Don't automatically save the preferences settings.
+<DT><B>Yes</B><DD><P>Automatically save the preferences settings.
 </DL>
 
-See the 
-<A HREF="Manual-3.html#options-text-table">-t</A> command line option,
-the 
-<A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive,
+The initial setting is <CODE>No</CODE>.
+<DT><B>Text Style
+<A NAME="preference-text-style"></A> </B><DD><P>When displaying screen content
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command),
+show characters:
+<DL>
+<DT><B>8-dot</B><DD><P>With all eight dots.
+<DT><B>6-dot</B><DD><P>With only dots 1 through 6.
+If a contraction table has been selected
+(see the 
+<A HREF="Manual-3.html#options-contraction-table">-c</A> command line option
 and the 
-<A HREF="Manual-2.html#make-tables-text">TEXTTRANS</A> make file variable
-for details regarding how to use an alternate text translation table.
-<P>
-<H2><A NAME="translation-attributes"></A> <A NAME="ss4.2">4.2 Attributes Translation</A>
-</H2>
+<A HREF="Manual-3.html#configure-contraction-table">contraction-table</A> configuration file directive),
+then it is used.
+</DL>
 
-<P>The attributes translation table is used when BRLTTY
-is displaying screen attributes rather than screen content
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-SIXDOTS">SIXDOTS</A> command.
+<DT><B>Meta Mode
+<A NAME="preference-meta-mode"></A> </B><DD><P>Enter a meta character by:
+<DL>
+<DT><B>Escape Prefix</B><DD><P>Prefixing it with an <CODE>escape</CODE> byte.
+<DT><B>High-order Bit</B><DD><P>Setting its high-order bit.
+</DL>
+
+Use the <CODE>setmetamode</CODE> command to find out how your system has been configured.
+The initial setting is <CODE>Escape Prefix</CODE>.
+<DT><B>Skip Identical Lines
+<A NAME="preference-skip-identical-lines"></A> </B><DD><P>When moving either up or down exactly one line with
+the 
+<A HREF="Manual-3.html#command-LNUP">LNUP</A>
+and 
+<A HREF="Manual-3.html#command-LNDN">LNDN</A> commands,
+as well as the line wrapping feature of
+the 
+<A HREF="Manual-3.html#command-FWINLT">FWINLT</A>,
+<A HREF="Manual-3.html#command-FWINRT">FWINRT</A>,
+<A HREF="Manual-3.html#command-FWINLTSKIP">FWINLTSKIP</A>,
+and 
+<A HREF="Manual-3.html#command-FWINRTSKIP">FWINRTSKIP</A> commands:
+<DL>
+<DT><B>No</B><DD><P>Don't skip passed lines which have the same content as the current line.
+<DT><B>Yes</B><DD><P>Skip passed lines which have the same content as the current line.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-SKPIDLNS">SKPIDLNS</A> command.
+<DT><B>Skip Blank Windows
+<A NAME="preference-skip-blank-windows"></A> </B><DD><P>When moving either left or right with
+the 
+<A HREF="Manual-3.html#command-FWINLT">FWINLT</A>
+and 
+<A HREF="Manual-3.html#command-FWINRT">FWINRT</A> commands:
+<DL>
+<DT><B>No</B><DD><P>Don't skip passed blank windows.
+<DT><B>Yes</B><DD><P>Skip passed blank windows.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-SKPBLNKWINS">SKPBLNKWINS</A> command.
+<DT><B>Which Blank Windows
+<A NAME="preference-which-blank-windows"></A> </B><DD><P>If blank windows are to be skipped:
+<DL>
+<DT><B>All</B><DD><P>Skip all of them.
+<DT><B>End of Line</B><DD><P>Only skip those which are at the end (on the right side) of a line.
+<DT><B>Rest of Line</B><DD><P>Only skip those which are
+at the end (on the right side) of a line when reading forward,
+and at the beginning (on the left side) of a line when reading backward.
+</DL>
+<DT><B>Sliding Window
+<A NAME="preference-sliding-window"></A> </B><DD><P>If the cursor is being tracked
+(see the 
+<A HREF="Manual-3.html#command-CSRTRK">CSRTRK</A> command),
+and the cursor moves too close to (or beyond)
+either end of the braille window:
+<DL>
+<DT><B>No</B><DD><P>Horizontally reposition the window such that its left end
+is a multiple of its width from the left edge of the screen.
+<DT><B>Yes</B><DD><P>Horizontally reposition the window such that the cursor,
+while remaining on that side of the window, is nearer the centre.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-SLIDEWIN">SLIDEWIN</A> command.
+<DT><B>Eager Sliding Window
+<A NAME="preference-eager-sliding-window"></A> </B><DD><P>If the braille window is to slide:
+<DL>
+<DT><B>No</B><DD><P>Reposition it whenever the cursor moves beyond either end.
+<DT><B>Yes</B><DD><P>Reposition it whenever the cursor moves too close to either end.
+</DL>
+
+The initial setting is <CODE>off</CODE>.
+<DT><B>Window Overlap
+<A NAME="preference-window-overlap"></A> </B><DD><P>When moving either left or right with
+the 
+<A HREF="Manual-3.html#command-FWINLT">FWINLT</A>
+and 
+<A HREF="Manual-3.html#command-FWINRT">FWINRT</A> commands,
+this setting specifies how many characters
+horizontally adjacent braille windows should overlap each other by.
+The initial setting is <CODE>0</CODE>.
+<DT><B>Show Cursor
+<A NAME="preference-show-cursor"></A> </B><DD><P>When displaying screen content
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command):
+<DL>
+<DT><B>No</B><DD><P>Don't show the cursor.
+<DT><B>Yes</B><DD><P>Show the cursor.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-CSRVIS">CSRVIS</A> command.
+<DT><B>Cursor Style
+<A NAME="preference-cursor-style"></A> </B><DD><P>When showing the cursor, represent it:
+<DL>
+<DT><B>Underline</B><DD><P>With dots 7 and 8.
+<DT><B>Block</B><DD><P>With all eight dots.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-CSRSIZE">CSRSIZE</A> command.
+<DT><B>Blinking Cursor
+<A NAME="preference-blinking-cursor"></A> </B><DD><P>When the cursor is to be shown:
+<DL>
+<DT><B>No</B><DD><P>Leave it visible all the time.
+<DT><B>Yes</B><DD><P>Make it alternately visible and invisible
+according to a predefined interval.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-CSRBLINK">CSRBLINK</A> command.
+<DT><B>Cursor Visible Period
+<A NAME="preference-cursor-visible-period"></A> </B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
+(see the note on 
+<A HREF="#time-settings">time settings</A> below)
+during each cycle that it is to be visible.
+The initial setting is <CODE>10</CODE>.
+<DT><B>Cursor Invisible Period
+<A NAME="preference-cursor-invisible-period"></A> </B><DD><P>When the cursor is to be blinked, this setting specifies the length of time
+(see the note on 
+<A HREF="#time-settings">time settings</A> below)
+during each cycle that it is to be invisible.
+The initial setting is <CODE>10</CODE>.
+<DT><B>Show Attributes
+<A NAME="preference-show-attributes"></A> </B><DD><P>When displaying screen content
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command):
+<DL>
+<DT><B>No</B><DD><P>Don't underline highlighted characters.
+<DT><B>Yes</B><DD><P>Underline highlighted characters.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-ATTRVIS">ATTRVIS</A> command.
+<DT><B>Blinking Attributes
+<A NAME="preference-blinking-attributes"></A> </B><DD><P>When highlighted characters are to be underlined:
+<DL>
+<DT><B>No</B><DD><P>Leave the indicator visible all the time.
+<DT><B>Yes</B><DD><P>Make the indicator alternately visible and invisible
+according to a predefined interval.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-ATTRBLINK">ATTRBLINK</A> command.
+<DT><B>Attributes Visible Period
+<A NAME="preference-attributes-visible-period"></A> </B><DD><P>When the highlighted character underline is to be blinked,
+this setting specifies the length of time
+(see the note on 
+<A HREF="#time-settings">time settings</A> below)
+during each cycle that it is to be visible.
+The initial setting is <CODE>4</CODE>.
+<DT><B>Attributes Invisible Period
+<A NAME="preference-attributes-invisible-period"></A> </B><DD><P>When the highlighted character underline is to be blinked,
+this setting specifies the length of time
+(see the note on 
+<A HREF="#time-settings">time settings</A> below)
+during each cycle that it is to be invisible.
+The initial setting is <CODE>12</CODE>.
+<DT><B>Blinking Capitals
+<A NAME="preference-blinking-capitals"></A> </B><DD><P>When displaying screen content
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command):
+<DL>
+<DT><B>No</B><DD><P>Leave capital letters visible all the time.
+<DT><B>Yes</B><DD><P>Make capital letters alternately visible and invisible
+according to a predefined interval.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-CAPBLINK">CAPBLINK</A> command.
+<DT><B>Capitals Visible Period
+<A NAME="preference-capitals-visible-period"></A> </B><DD><P>When capital letters are to be blinked,
+this setting specifies the length of time
+(see the note on 
+<A HREF="#time-settings">time settings</A> below)
+during each cycle that they're to be visible.
+The initial setting is <CODE>4</CODE>.
+<DT><B>Capitals Invisible Period
+<A NAME="preference-capitals-invisible-period"></A> </B><DD><P>When capital letters are to be blinked,
+this setting specifies the length of time
+(see the note on 
+<A HREF="#time-settings">time settings</A> below)
+during each cycle that they're to be invisible.
+The initial setting is <CODE>2</CODE>.
+<DT><B>Window Follows Pointer
+<A NAME="preference-window-follows-pointer"></A> </B><DD><P>When moving the pointer device (mouse):
+<DL>
+<DT><B>No</B><DD><P>Don't drag the braille window.
+<DT><B>Yes</B><DD><P>Drag the braille window.
+</DL>
+
+This preference is only presented if the
+<A HREF="Manual-2.html#build-gpm">--enable-gpm</A> build option was specified.
+<DT><B>Pointer Follows Window
+<A NAME="preference-pointer-follows-window"></A> </B><DD><P>When moving the braille window:
+<DL>
+<DT><B>No</B><DD><P>Don't move the pointer (mouse).
+<DT><B>Yes</B><DD><P>Move the pointer (mouse) to the character on the screen
+corresponding to the top-left corner of the braille window.
+</DL>
+
+This preference is only presented if the
+<A HREF="Manual-2.html#build-gpm">--enable-gpm</A> build option was specified.
+<DT><B>Alert Tunes
+<A NAME="preference-alert-tunes"></A> </B><DD><P>Whenever a significant event with an associated tune occurs
+(see 
+<A HREF="#tunes">Alert Tunes</A>):
+<DL>
+<DT><B>No</B><DD><P>Don't play the tune.
+<DT><B>Yes</B><DD><P>Play the tune.
+</DL>
+
+This setting can also be changed with the
+<A HREF="Manual-3.html#command-TUNES">TUNES</A> command.
+<DT><B>Tune Device
+<A NAME="preference-tune-device"></A> </B><DD><P>Play alert tunes via:
+<DL>
+<DT><B>PC Speaker</B><DD><P>The built-in PC speaker.
+This setting is supported on Linux.
+It's always safe to use,
+although it may be somewhat soft.
+This device isn't available if the
+<A HREF="Manual-2.html#build-speaker-tunes">--disable-speaker-tunes</A> build option was specified.
+<DT><B>Sound Card</B><DD><P>The Digital to Analog Converter on the sound card.
+This setting is supported on Linux (via <CODE>/dev/dsp</CODE>),
+and on Solaris (via <CODE>/dev/audio</CODE>).
+It doesn't work when the DAC is already being used
+by another application.
+This device isn't available if the
+<A HREF="Manual-2.html#build-dac-tunes">--disable-dac-tunes</A> build option was specified.
+<DT><B>MIDI</B><DD><P>The Musical Instrument Digital Interface on the sound card
+This setting is supported on Linux (via <CODE>/dev/sequencer</CODE>).
+It doesn't work when the MIDI is already being used
+by another application.
+This device isn't available if the
+<A HREF="Manual-2.html#build-midi-tunes">--disable-midi-tunes</A> build option was specified.
+<DT><B>AdLib</B><DD><P>OPL3/SB-FM/
+The FM synthesizer on an
+AdLib, OPL3, Sound Blaster, or equivalent sound card.
+This setting is supported on Linux.
+It works even if the FM synthesizer
+is already being used by another application.
+The results are unpredictable, and potentially not very good,
+if it's used with a sound card which doesn't support this feature.
+This device isn't available if the
+<A HREF="Manual-2.html#build-adlib-tunes">--disable-adlib-tunes</A> build option was specified.
+</DL>
+
+The initial setting is <CODE>PC Speaker</CODE> on those platforms which support it,
+and <CODE>Sound Card</CODE> on those platforms which don't.
+If the selected device isn't available
+because it was excluded at build-time,
+then the first device which is available is used instead.
+<DT><B>MIDI Instrument
+<A NAME="preference-midi-instrument"></A> </B><DD><P>If the Musical Instrument Digital Interface (MIDI) of the sound card
+is being used to play the alert tunes,
+this setting specifies which instrument is to be used
+(see the 
+<A HREF="Manual-7.html#midi">MIDI Instrument Table</A>).
+The initial setting is <CODE>Acoustic Grand Piano</CODE>.
+<DT><B>Alert Dots
+<A NAME="preference-alert-dots"></A> </B><DD><P>Whenever a significant event with an associated dot pattern occurs
+(see 
+<A HREF="#tunes">Alert Tunes</A>):
+<DL>
+<DT><B>No</B><DD><P>Don't display the dot pattern.
+<DT><B>Yes</B><DD><P>Briefly display the dot pattern.
+</DL>
+
+If alert tunes are to be played
+(see the 
+<A HREF="Manual-3.html#command-TUNES">TUNES</A> command
+and the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference),
+if a tune has been associated with the event,
+and if the selected tune device can be opened,
+then, regardless of the setting of this preference, the dot pattern isn't displayed.
+<DT><B>Status Cells Style
+<A NAME="preference-status-cells-style"></A> </B><DD><P>This setting specifies the way that the status cells are to be used.
+You shuldn't normally need to play with it.
+It enables BRLTTY's developers to test status cell configurations
+for braille displays which they don't actually have.
+<DL>
+<DT><B>None</B><DD><P>Don't use the status cells.
+This setting is always safe, but it's also quite useless.
+<DT><B>Alva</B><DD><P>The status cells contain:
+<DL>
+<DT><B>1</B><DD><P>The location of the cursor (see below).
+<DT><B>2</B><DD><P>The location of the top-left corner of the braille window (see below).
+<DT><B>3</B><DD><P>A letter indicating BRLTTY's state.
+In order of precedence:
+<DL>
+<DT><B>a</B><DD><P>Screen attributes are being shown
 (see the 
 <A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command).
-Each of the eight braille dots represents one of the eight attribute bits.
-Two attributes translation tables are provided:
-<DL>
-<DT><B>attributes.tbl</B><DD><P>The lefthand column represents the background colours:
-<DL>
-<DT><B>Dot 1</B><DD><P>Red
-<DT><B>Dot 2</B><DD><P>Green
-<DT><B>Dot 3</B><DD><P>Blue
-<DT><B>Dot 7</B><DD><P>Blink
+<DT><B>f</B><DD><P>The screen image is frozen
+(see the 
+<A HREF="Manual-3.html#command-FREEZE">FREEZE</A> command).
+<DT><B>f</B><DD><P>The cursor is being tracked
+(see the 
+<A HREF="Manual-3.html#command-CSRTRK">CSRTRK</A> command).
+<DT><B><EM>blank</EM></B><DD><P>Nothing special.
+</DL>
 </DL>
 
-The righthand column represents the foreground colours:
+The locations of the cursor and the braille window
+are presented in an interesting way.
+Dots 1 through 6 represent the line number with a letter
+from <CODE>a</CODE> (for 1) through <CODE>y</CODE> (for 25).
+Dots 7 and 8 (the extra two at the bottom)
+represent the horizontal braille window number as follows:
 <DL>
-<DT><B>Dot 4</B><DD><P>Red
-<DT><B>Dot 5</B><DD><P>Green
-<DT><B>Dot 6</B><DD><P>Blue
-<DT><B>Dot 8</B><DD><P>Bright
+<DT><B>No Dots</B><DD><P>The first (leftmost) window.
+<DT><B>Dot 7</B><DD><P>The second window.
+<DT><B>Dot 8</B><DD><P>The third window.
+<DT><B>Dots 7 and 8</B><DD><P>The fourth window.
 </DL>
 
-A dot is raised when its corresponding attribute bit is on.
-This is the default attributes translation table
-because it's the most intuitive.
-One of its problems, though, is that it's difficult to discern
-the difference between normal (white on black)
-and reverse (black on white) video.
-<DT><B>attrib.tbl</B><DD><P>The lefthand column represents the background colours:
+In both cases, the indicators wrap:
+line 26 is represented by the letter <CODE>a</CODE>, and the fifth horizontal
+braille window is represented by no dots at the bottom.
+<DT><B>Tieman</B><DD><P>The status cells contain:
 <DL>
-<DT><B>Dot 1</B><DD><P>Red
-<DT><B>Dot 2</B><DD><P>Green
-<DT><B>Dot 3</B><DD><P>Blue
-<DT><B>Dot 7</B><DD><P>Blink
-</DL>
-
-The righthand column represents the foreground colours:
+<DT><B>1-2</B><DD><P>The columns (counting from zero) of the cursor
+(shown in the top half of the cells)
+and the top-left corner of the braille window
+(shown in the bottom half of the cells).
+<DT><B>3-4</B><DD><P>The rows (counting from zero) of the cursor
+(shown in the top half of the cells)
+and the top-left corner of the braille window
+(shown in the bottom half of the cells).
+<DT><B>5</B><DD><P>Each dot indicates if a feature is turned on as follows:
 <DL>
-<DT><B>Dot 4</B><DD><P>Red
-<DT><B>Dot 5</B><DD><P>Green
-<DT><B>Dot 6</B><DD><P>Blue
-<DT><B>Dot 8</B><DD><P>Bright
+<DT><B>Dot 1</B><DD><P>The screen image is frozen
+(see the 
+<A HREF="Manual-3.html#command-FREEZE">FREEZE</A> command).
+<DT><B>Dot 2</B><DD><P>Screen attributes are being displayed
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command).
+<DT><B>Dot 3</B><DD><P>Alert tunes are being played
+(see the 
+<A HREF="Manual-3.html#command-TUNES">TUNES</A> command).
+<DT><B>Dot 4</B><DD><P>The cursor is being shown
+(see the 
+<A HREF="Manual-3.html#command-CSRVIS">CSRVIS</A> command).
+<DT><B>Dot 5</B><DD><P>The cursor is a solid block
+(see the 
+<A HREF="Manual-3.html#command-CSRSIZE">CSRSIZE</A> command).
+<DT><B>Dot 6</B><DD><P>The cursor is blinking
+(see the 
+<A HREF="Manual-3.html#command-CSRBLINK">CSRBLINK</A> command).
+<DT><B>Dot 7</B><DD><P>The cursor is being tracked
+(see the 
+<A HREF="Manual-3.html#command-CSRTRK">CSRTRK</A> command).
+<DT><B>Dot 8</B><DD><P>The braille window will slide
+(see the 
+<A HREF="Manual-3.html#command-SLIDEWIN">SLIDEWIN</A> command).
+</DL>
+</DL>
+<DT><B>PowerBraille 80</B><DD><P>The status cells contain:
+<DL>
+<DT><B>1</B><DD><P>The row (counting from 1) corresponding
+to the top of the braille window.
+The tens digit is shown in the top half of the cell,
+and the units digit is shown in the bottom half of the cell.
+</DL>
+<DT><B>Generic</B><DD><P>This setting passes a lot of information to the braille driver,
+and the driver itself decides how to present it.
+<DT><B>MDV</B><DD><P>The status cells contain:
+<DL>
+<DT><B>1-2</B><DD><P>The location of the top-left corner of the braille window.
+The row (counting from 1) is shown in the top half of the cells,
+and the column (counting from 1) is shown in the bottom half of the cells.
+</DL>
+<DT><B>Voyager</B><DD><P>The status cells contain:
+<DL>
+<DT><B>1</B><DD><P>The row (counting from 0) corresponding to
+the top of the braille window (see below).
+<DT><B>2</B><DD><P>The row (counting from 0) whereon the cursor is (see below).
+<DT><B>3</B><DD><P>If the screen is frozen
+(see the 
+<A HREF="Manual-3.html#command-FREEZE">FREEZE</A> command),
+then the letter <CODE>F</CODE>.
+If it isn't, then
+the column (counting from 0) wherein the cursor is (see below).
 </DL>
 
-A foreground bit being on triggers its corresponding dot,
-whereas a background bit being off triggers its corresponding dot.
-This unintuitive logic actually makes it easier
-to read the most commonly used attribute combinations.
+Row and column numbers are shown as two digits within a single cell.
+The tens digit is shown in the top half of the cell,
+and the units digit is shown in the bottom half of the cell.
 </DL>
 
+It's initial setting is braille display driver dependent.
+<DT><B>Text Table
+<A NAME="preference-text-table"></A> </B><DD><P>Select the text translation table.
+See section 
+<A HREF="Manual-5.html#translation-text">Text Translation</A> for details.
 See the 
-<A HREF="Manual-3.html#options-attributes-table">-a</A> command line option,
-the 
-<A HREF="Manual-3.html#configure-attributes-table">attributes-table</A> configuration file directive,
-and the 
-<A HREF="Manual-2.html#make-tables-attributes">ATTRTRANS</A> make file variable
-for details regarding how to use an alternate attributes translation table.
+<A HREF="Manual-3.html#options-text-table">-t</A> command line option for the initial setting.
+This preference isn't saved.
+It isn't presented if the
+<A HREF="Manual-2.html#build-table-selection">--disable-table-selection</A> build option was specified.
+<DT><B>Attributesw Table
+<A NAME="preference-attributes-table"></A> </B><DD><P>Select the attributes translation table.
+See section 
+<A HREF="Manual-5.html#translation-attributes">Attributes Translation</A> for details.
+See the 
+<A HREF="Manual-3.html#options-attributes-table">-a</A> command line option for the initial setting.
+This preference isn't saved.
+It isn't presented if the
+<A HREF="Manual-2.html#build-table-selection">--disable-table-selection</A> build option was specified.
+<DT><B>Contraction Table
+<A NAME="preference-contraction-table"></A> </B><DD><P>Select the contraction table.
+See section 
+<A HREF="#contraction">Contracted Braille</A> for details.
+See the 
+<A HREF="Manual-3.html#options-contraction-table">-c</A> command line option for the initial setting.
+This preference isn't saved.
+It isn't presented if the
+<A HREF="Manual-2.html#build-table-selection">--disable-table-selection</A> build option was specified.
+</DL>
+<P>Notes:
+<UL>
+<LI>
+<A NAME="time-settings"></A> 
+All time settings are in braille window refresh intervals
+(see the 
+<A HREF="Manual-3.html#options-refresh-interval">-M</A> command line option).
+They are integers within the range 1 through 16.</LI>
+</UL>
 <P>
-<H2><A NAME="ss4.3">4.3 Table Format</A>
+<H2><A NAME="status"></A> <A NAME="ss4.6">4.6 The Status Display</A>
 </H2>
 
-<P>A translation table is a 256-byte binary file.
-It's indexed with either a character or an attributes byte,
-and the byte at that position contains the corresponding dot combination.
-The mapping from bit to dot is as follows:
-<DL>
-<DT><B>Bit 0</B><DD><P>Dot 1
-<DT><B>Bit 1</B><DD><P>Dot 4
-<DT><B>Bit 2</B><DD><P>Dot 2
-<DT><B>Bit 3</B><DD><P>Dot 5
-<DT><B>Bit 4</B><DD><P>Dot 3
-<DT><B>Bit 5</B><DD><P>Dot 6
-<DT><B>Bit 6</B><DD><P>Dot 7
-<DT><B>Bit 7</B><DD><P>Dot 8
-</DL>
-
-This particular mapping makes it easy and efficient for BRLTTY
-to vertically shift a dot pattern.
+<P>The status display is a summary of BRLTTY's current state
+which fits completely within the braille window.
+Some braille displays have a set of status cells
+which are used to permanently display some of this information as well
+(see the documentation for your display's driver).
+The data presented by this display isn't static, and may change at any time
+in response to screen updates and/or BRLTTY commands.
+<P>Use the 
+<A HREF="Manual-3.html#command-INFO">INFO</A> command
+to switch to the status display,
+and use it again to return to the screen.
+The layout of the information contained therein
+is dependent on the size of the braille window.
 <P>
-<H2><A NAME="ss4.4">4.4 Table Utilities</A>
-</H2>
+<H3>Displays with 21 Cells or More</H3>
 
-<P>These utilities reside within the <CODE>BrailleTables</CODE> subdirectory,
-and aren't built as part of the regular procedure.
-To build them, run <CODE>make</CODE> within the <CODE>BrailleTables</CODE> subdirectory.
+<P>Short pneumonics have been used, even though they're rather cryptic,
+in order to show the precise column layout.
 <BLOCKQUOTE><CODE>
-<PRE>
-cd BrailleTables
-make
-</PRE>
-</CODE></BLOCKQUOTE>
-<P>
-<H3><A NAME="utility-tbl2txt"></A> tbl2txt</H3>
-
-<P>This utility converts (uncompiles) a translation table into a text file
-for readability and/or modification.
-<BLOCKQUOTE><CODE>
-tbl2txt -<EM>option</EM> ... <EM>table-file</EM> <EM>text-file</EM>
+<EM>wx</EM>:<EM>wy</EM> <EM>cx</EM>:<EM>cy</EM> <EM>vt</EM> <EM>tcmfdu</EM>
 </CODE></BLOCKQUOTE>
 
 <DL>
-<DT><B><EM>table-file</EM></B><DD><P>The translation table which is to be converted.
-<DT><B><EM>text-file</EM></B><DD><P>The file into which the text representing the table content is to be written.
-<DT><B><CODE>-c</CODE><EM>name</EM> <CODE>--code-page=</CODE><EM>name</EM></B><DD><P>The character set used to annotate each line of the text file.
+<DT><B><EM>wx</EM><CODE>:</CODE><EM>wy</EM></B><DD><P>The column and row (counting from 0) on the screen corresponding
+to the top-left corner of the braille window.
+<DT><B><EM>cx</EM><CODE>:</CODE><EM>cy</EM></B><DD><P>The column and row (counting from 0) on the screen corresponding
+to the position of the cursor.
+<DT><B><EM>vt</EM></B><DD><P>The number (counting from 1) of the current virtual terminal.
+<DT><B><EM>t</EM></B><DD><P>The state of the cursor tracking feature
+(see the 
+<A HREF="Manual-3.html#command-CSRTRK">CSRTRK</A> command).
+<DL>
+<DT><B>blank</B><DD><P>Cursor tracking is off.
+<DT><B><CODE>t</CODE></B><DD><P>Cursor tracking is on.
 </DL>
-<P>The generated text file can, without modification, be recompiled back into a
-translation table with the 
-<A HREF="#utility-txt2tbl">txt2tbl</A> utility.
-Each of its lines contains lots of interesting information.
-<P>If the <CODE>-c</CODE> option isn't specified, each line looks like this:
-<BLOCKQUOTE><CODE>
-<EM>cc</EM> <EM>xx</EM> <EM>ddd</EM> (73214568)<EM>tt</EM> B+<EM>bbbb</EM> <EM>name</EM>
-</CODE></BLOCKQUOTE>
-
-If the <CODE>-c</CODE> option is specified, each line looks like this:
-<BLOCKQUOTE><CODE>
-<EM>cc</EM> <EM>xx</EM> <EM>ddd</EM> (73214568)<EM>tt</EM> B+<EM>bbbb</EM> U+<EM>uuuu</EM> <EM>description</EM>
-</CODE></BLOCKQUOTE>
-
-<DL>
-<DT><B><EM>cc</EM></B><DD><P>The character itself.
-Unprintable characters are represented canonically.
-Control characters are flagged with a circumflex,
-e.g. Control-A (character 1) is <CODE>^A</CODE>. 
-Meta control characters are flagged with a tilde,
-e.g. Meta-Control-A (character 129) is <CODE>~A</CODE>. 
-<DT><B><EM>xx</EM></B><DD><P>The hexadecimal value of the character.
-<DT><B><EM>ddd</EM></B><DD><P>The decimal value of the character.
-<DT><B><CODE>(73214568)</CODE></B><DD><P>The braille dot numbers.
-If a dot isn't to be raised,
-then its number is replaced with a blank.
-The English letter <CODE>y</CODE>, for example, would be
-<CODE>(&nbsp;3&nbsp;1456&nbsp;)</CODE>.
-The dot numbers appear in the same order
-as on a standard braille keyboard
-so as to make it easier to visualize the braille character.
-<DT><B><EM>tt</EM></B><DD><P>The hexadecimal value of the byte representing the dot combination
-which is in the translation table.
-<DT><B><EM>bbbb</EM></B><DD><P>The hexadecimal value of the unicode number
-corresponding to the dot combination.
-<DT><B><EM>name</EM></B><DD><P>The ASCII name of the character
-(only shown if the <CODE>-c</CODE> option isn't specified).
-<DT><B><EM>uuuu</EM></B><DD><P>The hexadecimal value of the unicode number
-corresponding to the character
-(only shown if the <CODE>-c</CODE> option is specified).
-<DT><B><EM>description</EM></B><DD><P>The formal unicode description for the character
-(only shown if the <CODE>-c</CODE> option is specified).
-</DL>
-<P>
-<H3><A NAME="utility-txt2tbl"></A> txt2tbl</H3>
-
-<P>This utility compiles a translation table.
-<BLOCKQUOTE><CODE>
-txt2tbl -<EM>option</EM> ... <EM>text-file</EM> <EM>table-file</EM>
-</CODE></BLOCKQUOTE>
-
-<DL>
-<DT><B><EM>text-file</EM></B><DD><P>The source file describing the table content.
-<DT><B><EM>table-file</EM></B><DD><P>The file into which the translation table is to be written.
-<DT><B><CODE>-d</CODE> <CODE>--duplicates</CODE></B><DD><P>Display a warning for each dot combination which has been used more than once.
-<DT><B><CODE>-m</CODE> <CODE>--missing</CODE></B><DD><P>Display a warning for each dot combination which hasn't been used.
-</DL>
-<P>A line which assigns a dot combination to a character
-must contain that dot combination within parenthesis, e.g. <CODE>(12)</CODE>.
-The text file must contain exactly 256 such lines, each one, in order,
-defining the braille representation for its corresponding character.
-The dot numbers may be specified in any order,
-but each must only be specified once.
-It's valid to specify no number at all, e.g. <CODE>()</CODE> (for a space).
-Any number of spaces may occur any number of times anywhere between the parentheses.
-All characters before the left parenthesis and after the right parenthesis are ignored.
-All lines which don't contain a left parenthesis are ignored.
-<P>The algorithm for locating the dot numbers is actually a bit more complicated
-because a line may contain more than one left and/or right parenthesis
-(the 
-<A HREF="#utility-tbl2txt">tbl2txt</A> utility does this).
-The first right parenthesis which is preceded by at least one left parenthesis is used.
-The nearest left parenthesis to the left of that right parenthesis is used.
-The line <CODE>)((12)</CODE>, for example, is valid.
-<P>
-<H3><A NAME="utility-tbl2tbl"></A> tbl2tbl</H3>
-
-<P>This utility converts a binary translation table from one dot mapping to another.
-<BLOCKQUOTE><CODE>
-tbl2tbl <EM>input-mapping</EM> <EM>output-mapping</EM>
-</CODE></BLOCKQUOTE>
-
-<DL>
-<DT><B><EM>input-mapping</EM></B><DD><P>The dot mapping used within the source table.
-<DT><B><EM>output-mapping</EM></B><DD><P>The dot mapping to be used within the table being generated.
-</DL>
-
-The source table is read from standard input,
-and the converted table is written to standard output.
-The following dot mappings are supported:
-<DL>
-<DT><B>standard</B><DD><P>BRLTTY's native mapping (described above).
-<DT><B>tieman</B><DD><P>The mapping used by 
-<A HREF="http://www.braillevoyager.nl/uk/index.html">Tieman B.V.</A>.
-<DL>
-<DT><B>Bit 0</B><DD><P>Dot 1
-<DT><B>Bit 1</B><DD><P>Dot 2
-<DT><B>Bit 2</B><DD><P>Dot 3
-<DT><B>Bit 3</B><DD><P>Dot 7
-<DT><B>Bit 4</B><DD><P>Dot 8
-<DT><B>Bit 5</B><DD><P>Dot 6
-<DT><B>Bit 6</B><DD><P>Dot 5
-<DT><B>Bit 7</B><DD><P>Dot 4
-</DL>
-<DT><B>alva</B><DD><P>The mapping used by 
-<A HREF="http://www.alva-bv.nl/alvacorp/alva_corp_home.html">Alva B.V.</A>
+<DT><B><EM>c</EM></B><DD><P>The state of the cursor visibility features
+(see the 
+<A HREF="Manual-3.html#command-CSRVIS">CSRVIS</A>
 and 
-<A HREF="http://www.telesensory.com">Telesensory Systems Inc.</A>.
+<A HREF="Manual-3.html#command-CSRBLINK">CSRBLINK</A> commands).
 <DL>
-<DT><B>Bit 0</B><DD><P>Dot 1
-<DT><B>Bit 1</B><DD><P>Dot 2
-<DT><B>Bit 2</B><DD><P>Dot 3
-<DT><B>Bit 3</B><DD><P>Dot 4
-<DT><B>Bit 4</B><DD><P>Dot 5
-<DT><B>Bit 5</B><DD><P>Dot 6
-<DT><B>Bit 6</B><DD><P>Dot 7
-<DT><B>Bit 7</B><DD><P>Dot 8
+<DT><B>blank</B><DD><P>The cursor isn't visible, and won't blink when made visible.
+<DT><B><CODE>b</CODE></B><DD><P>The cursor isn't visible, and will blink when made visible.
+<DT><B><CODE>v</CODE></B><DD><P>The cursor is visible, and isn't blinking.
+<DT><B><CODE>B</CODE></B><DD><P>The cursor is visible, and is blinking.
 </DL>
+<DT><B><EM>m</EM></B><DD><P>The current display mode
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command).
+<DL>
+<DT><B><CODE>t</CODE></B><DD><P>Screen content (text) is being displayed.
+<DT><B><CODE>a</CODE></B><DD><P>Screen highlighting (attributes) is being displayed.
+</DL>
+<DT><B><EM>f</EM></B><DD><P>The state of the frozen screen feature
+(see the 
+<A HREF="Manual-3.html#command-FREEZE">FREEZE</A> command).
+<DL>
+<DT><B>blank</B><DD><P>The screen isn't frozen.
+<DT><B><CODE>f</CODE></B><DD><P>The screen is frozen.
+</DL>
+<DT><B><EM>d</EM></B><DD><P>The number of braille dots being used to display each character
+(see the 
+<A HREF="Manual-3.html#command-SIXDOTS">SIXDOTS</A> command).
+<DL>
+<DT><B><CODE>8</CODE></B><DD><P>All eight dots are being used.
+<DT><B><CODE>6</CODE></B><DD><P>Only dots 1 through 6 are being used.
+</DL>
+<DT><B><EM>u</EM></B><DD><P>The state of the uppercase (capital letter) display features
+(see the 
+<A HREF="Manual-3.html#command-CAPBLINK">CAPBLINK</A> command).
+<DL>
+<DT><B>blank</B><DD><P>Uppercase letters don't blink.
+<DT><B><CODE>B</CODE></B><DD><P>Uppercase letters blink.
+</DL>
+</DL>
+<P>
+<H3>Displays with 20 Cells or Less</H3>
+
+<P>Short pneumonics have been used, even though they're rather cryptic,
+in order to show the precise column layout.
+<BLOCKQUOTE><CODE>
+<EM>xx</EM><EM>yy</EM><EM>s</EM> <EM>vt</EM> <EM>tcmfdu</EM>
+</CODE></BLOCKQUOTE>
+
+<DL>
+<DT><B><EM>xx</EM></B><DD><P>The columns (counting from 0) on the screen corresponding
+to the position of the cursor (shown in the top half of the cells)
+and to the top-left corner of the braille window (shown in the bottom half of the cells).
+<DT><B><EM>yy</EM></B><DD><P>The rows (counting from 0) on the screen corresponding
+to the position of the cursor (shown in the top half of the cells)
+and to the top-left corner of the braille window (shown in the bottom half of the cells).
+<DT><B><EM>s</EM></B><DD><P>The settings of some of BRLTTY's features.
+A feature is turned on if its corresponding dot is raised.
+<DL>
+<DT><B>Dot 1</B><DD><P>Frozen screen image
+(see the 
+<A HREF="Manual-3.html#command-FREEZE">FREEZE</A> command).
+<DT><B>Dot 2</B><DD><P>Display attributes
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command).
+<DT><B>Dot 3</B><DD><P>Alert tunes
+(see the 
+<A HREF="Manual-3.html#command-TUNES">TUNES</A> command).
+<DT><B>Dot 4</B><DD><P>Visible cursor
+(see the 
+<A HREF="Manual-3.html#command-CSRVIS">CSRVIS</A> command).
+<DT><B>Dot 5</B><DD><P>Block cursor
+(see the 
+<A HREF="Manual-3.html#command-CSRSIZE">CSRSIZE</A> command).
+<DT><B>Dot 6</B><DD><P>Blinking cursor
+(see the 
+<A HREF="Manual-3.html#command-CSRBLINK">CSRBLINK</A> command).
+<DT><B>Dot 7</B><DD><P>Cursor tracking
+(see the 
+<A HREF="Manual-3.html#command-CSRTRK">CSRTRK</A> command).
+<DT><B>Dot 8</B><DD><P>Sliding window
+(see the 
+<A HREF="Manual-3.html#command-SLIDEWIN">SLIDEWIN</A> command).
+</DL>
+<DT><B><EM>vt</EM></B><DD><P>The number (counting from 1) of the current virtual terminal.
+<DT><B><EM>t</EM></B><DD><P>The state of the cursor tracking feature
+(see the 
+<A HREF="Manual-3.html#command-CSRTRK">CSRTRK</A> command).
+<DL>
+<DT><B>blank</B><DD><P>Cursor tracking is off.
+<DT><B><CODE>t</CODE></B><DD><P>Cursor tracking is on.
+</DL>
+<DT><B><EM>c</EM></B><DD><P>The state of the cursor visibility features
+(see the 
+<A HREF="Manual-3.html#command-CSRVIS">CSRVIS</A>
+and 
+<A HREF="Manual-3.html#command-CSRBLINK">CSRBLINK</A> commands).
+<DL>
+<DT><B>blank</B><DD><P>The cursor isn't visible, and won't blink when made visible.
+<DT><B><CODE>b</CODE></B><DD><P>The cursor isn't visible, and will blink when made visible.
+<DT><B><CODE>v</CODE></B><DD><P>The cursor is visible, and isn't blinking.
+<DT><B><CODE>B</CODE></B><DD><P>The cursor is visible, and is blinking.
+</DL>
+<DT><B><EM>m</EM></B><DD><P>The current display mode
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command).
+<DL>
+<DT><B><CODE>t</CODE></B><DD><P>Screen content (text) is being displayed.
+<DT><B><CODE>a</CODE></B><DD><P>Screen highlighting (attributes) is being displayed.
+</DL>
+<DT><B><EM>f</EM></B><DD><P>The state of the frozen screen feature
+(see the 
+<A HREF="Manual-3.html#command-FREEZE">FREEZE</A> command).
+<DL>
+<DT><B>blank</B><DD><P>The screen isn't frozen.
+<DT><B><CODE>f</CODE></B><DD><P>The screen is frozen.
+</DL>
+<DT><B><EM>d</EM></B><DD><P>The number of braille dots being used to display each character
+(see the 
+<A HREF="Manual-3.html#command-SIXDOTS">SIXDOTS</A> command).
+<DL>
+<DT><B><CODE>8</CODE></B><DD><P>All eight dots are being used.
+<DT><B><CODE>6</CODE></B><DD><P>Only dots 1 through 6 are being used.
+</DL>
+<DT><B><EM>u</EM></B><DD><P>The state of the uppercase (capital letter) display features
+(see the 
+<A HREF="Manual-3.html#command-CAPBLINK">CAPBLINK</A> command).
+<DL>
+<DT><B>blank</B><DD><P>Uppercase letters don't blink.
+<DT><B><CODE>B</CODE></B><DD><P>Uppercase letters blink.
+</DL>
+</DL>
+<P>
+<H2><A NAME="learn"></A> <A NAME="ss4.7">4.7 Command Learn Mode</A>
+</H2>
+
+<P>Command learn mode is an interactive way to learn
+what the keys on the braille display do.
+It can be accessed
+either by the 
+<A HREF="Manual-3.html#command-LEARN">LEARN</A> command
+or via the 
+<A HREF="Manual-2.html#utility-brltest">brltest</A> utility.
+This feature isn't available if the
+<A HREF="Manual-2.html#build-learn-mode">--disable-learn-mode</A> build option was specified.
+<P>When this mode is entered,
+the message <CODE>command learn mode</CODE> is written to the braille display.
+Then, as each key (or key combination) on the display is pressed,
+a short message describing its BRLTTY function is written.
+This mode exits immediately if the key (or key combination)
+for the 
+<A HREF="Manual-3.html#command-LEARN">LEARN</A> command is pressed.
+It exits automatically, and the message <CODE>done</CODE> is written,
+if ten seconds elapse without any key on the display being pressed.
+Note that some displays don't signal the driver
+and/or some drivers don't signal BRLTTY
+until all the keys are released.
+<P>If a message is longer than the braille display is wide,
+then it's displayed in segments.
+The length of each segment but the last is one less than the display's width,
+with the rightmost character on the display being set to a minus sign.
+Each such segment remains on the display
+either for a few seconds
+(see the 
+<A HREF="Manual-3.html#options-message-delay">-M</A> command line option)
+or until any key on the display is pressed.
+<P>
+<H2><A NAME="contraction"></A> <A NAME="ss4.8">4.8 Contracted Braille</A>
+</H2>
+
+<P>BRLTTY can display in-line contracted braille.
+It does this if:
+<UL>
+<LI>A contraction table has been selected.
+See the 
+<A HREF="Manual-3.html#options-contraction-table">-c</A> command line option
+and the 
+<A HREF="Manual-3.html#configure-contraction-table">contraction-table</A> configuration file directive
+for details.</LI>
+<LI>The 6-dot braille feature has been activated.
+See the 
+<A HREF="Manual-3.html#command-SIXDOTS">SIXDOTS</A> command
+and the 
+<A HREF="#preference-text-style">Text Style</A> preference
+for details.</LI>
+</UL>
+
+This feature isn't available if the
+<A HREF="Manual-2.html#build-contracted-braille">--disable-contracted-braille</A> build option was specified.
+<P>The following contraction tables are provided:
+<DL>
+<DT><B>compress.ctb</B><DD><P>Remove excessive white-space.
+<DT><B>en-us-g2.ctb</B><DD><P>Grade 2 American English.
+</DL>
+<P>
+<H3>File Format</H3>
+
+<P>Blank lines are ignored.
+Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
+Lines which begin with a number sign (<CODE>#</CODE>) are ignored,
+i.e. they're comments.
+<BLOCKQUOTE><CODE>
+# This is a comment.
+</CODE></BLOCKQUOTE>
+
+All other lines define table entries.
+<P>The general form of a table entry is an opcode followed by its operands.
+The opcode and its operands are separated from one another by white-space.
+Each opcode has a specific number of operands,
+and any text following its last operand is treated as a comment.
+<BLOCKQUOTE><CODE>
+<EM>opcode</EM> <EM>operand</EM> ... <EM>comment</EM>
+</CODE></BLOCKQUOTE>
+<P>The opcode is a number which tells the translator how to interpret the operands.
+Opcode <CODE>0</CODE> can be used to assign a meaningful name to each needed opcode,
+e.g. <CODE>opcode</CODE> for <CODE>0</CODE> itself.
+If, for example, a table begins with:
+<BLOCKQUOTE><CODE>
+0 0 opcode
+</CODE></BLOCKQUOTE>
+
+then all the rest of the opcodes it needs can be defined like this:
+<BLOCKQUOTE><CODE>
+opcode 1 include
+</CODE></BLOCKQUOTE>
+
+This scheme, i.e. no built-in opcode names, was chosen in order to allow
+a table for some language's braille to be written solely in that language itself.
+<P>The following operand types are supported:
+<DL>
+<DT><B>string</B><DD><P>A sequence of characters other than
+white-space (which terminates the string)
+and backslashes (<CODE>\</CODE>).
+The following special representations are also supported:
+<DL>
+<DT><B><CODE>\\</CODE></B><DD><P>backslash
+<DT><B><CODE>\f</CODE></B><DD><P>form feed
+<DT><B><CODE>\n</CODE></B><DD><P>new line
+<DT><B><CODE>\o</CODE><EM>ooo</EM></B><DD><P>3-digit octal value
+<DT><B><CODE>\r</CODE></B><DD><P>carriage return
+<DT><B><CODE>\s</CODE></B><DD><P>blank (space)
+<DT><B><CODE>\t</CODE></B><DD><P>horizontal tab
+<DT><B><CODE>\v</CODE></B><DD><P>vertical tab
+<DT><B><CODE>\x</CODE><EM>xx</EM></B><DD><P>2-digit hexadecimal value
+</DL>
+<DT><B>number</B><DD><P>An integer.
+It may be specified in any of the following ways:
+<DL>
+<DT><B>decimal</B><DD><P>A sequence of decimal digits (<CODE>0</CODE>-<CODE>9</CODE>),
+with the first digit being nonzero (<CODE>1</CODE>-<CODE>9</CODE>).
+<DT><B>hexadecimal</B><DD><P>A sequence of hexadecimal digits (<CODE>0</CODE>-<CODE>9</CODE>, and either <CODE>a</CODE>-<CODE>f</CODE> or <CODE>A</CODE>-<CODE>F</CODE>),
+preceded by either <CODE>0x</CODE> or <CODE>0X</CODE>.
+<DT><B>octal</B><DD><P>A sequence of octal digits (<CODE>0</CODE>-<CODE>7</CODE>),
+with the first digit being zero (<CODE>0</CODE>).
+</DL>
+<DT><B>dots</B><DD><P>A braille symbol.
+The braille dots must be specified via their standard numbers
+(see section 
+<A HREF="Manual-7.html#dots">Braille Dot Numbering Convention</A>),
+and, for a multi-cell symbol, the cell specifications
+must be separated from one another by a dash (<CODE>-</CODE>).
+For example, the contraction for the English word <CODE>lord</CODE>
+(the letter <CODE>l</CODE> prefixed with dot 5)
+would be specified as <CODE>5-123</CODE>.
+A space may be specified via the special dot number <CODE>0</CODE>.
+</DL>
+<P>
+<H3><A NAME="contraction-opcode-number"></A> Opcode Summary by Number</H3>
+
+<P>First, here's a quick summary of all of the contraction table opcodes.
+For the details, see section
+<A HREF="#contraction-opcode-function">Opcodes by Function</A>.
+<DL>
+<DT><B>
+<A HREF="#contraction-opcode-0">0</A> <EM>opcode</EM> <EM>name</EM></B><DD><P>Name opcode.
+<DT><B>
+<A HREF="#contraction-opcode-1">1</A> <EM>path</EM></B><DD><P>Include file.
+<DT><B>
+<A HREF="#contraction-opcode-2">2</A> <EM>dots</EM></B><DD><P>Define capital sign.
+<DT><B>
+<A HREF="#contraction-opcode-3">3</A> <EM>dots</EM></B><DD><P>Define begin capitals sign.
+<DT><B>
+<A HREF="#contraction-opcode-4">4</A> <EM>dots</EM></B><DD><P>Define letter sign.
+<DT><B>
+<A HREF="#contraction-opcode-5">5</A> <EM>dots</EM></B><DD><P>Define number sign.
+<DT><B>
+<A HREF="#contraction-opcode-6">6</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate unconditionally.
+<DT><B>
+<A HREF="#contraction-opcode-7">7</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate unconditionally, remove repetitions.
+<DT><B>
+<A HREF="#contraction-opcode-8">8</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if word.
+<DT><B>
+<A HREF="#contraction-opcode-9">9</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at beginning of word.
+<DT><B>
+<A HREF="#contraction-opcode-10">10</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if in middle of word.
+<DT><B>
+<A HREF="#contraction-opcode-11">11</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at end of word.
+<DT><B>
+<A HREF="#contraction-opcode-12">12</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if in middle or at end of word.
+<DT><B>
+<A HREF="#contraction-opcode-13">13</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if in middle of number.
+<DT><B>
+<A HREF="#contraction-opcode-14">14</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if white-space-bounded word.
+<DT><B>
+<A HREF="#contraction-opcode-15">15</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate unconditionally, join consecutive words of this type.
+<DT><B>
+<A HREF="#contraction-opcode-16">16</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if word, join to next word.
+<DT><B>
+<A HREF="#contraction-opcode-17">17</A> <EM>characters</EM></B><DD><P>Translate whole white-space-bounded sequence unconditionally into computer braille.
+<DT><B>
+<A HREF="#contraction-opcode-18">18</A> <EM>characters</EM></B><DD><P>Prefix with letter sign if word.
+<DT><B>
+<A HREF="#contraction-opcode-19">19</A> <EM>characters</EM></B><DD><P>Ignore unconditionally.
+<DT><B>
+<A HREF="#contraction-opcode-20">20</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at end of number.
+<DT><B>
+<A HREF="#contraction-opcode-21">21</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at beginning of number.
+<DT><B>
+<A HREF="#contraction-opcode-22">22</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if part of leading punctuation.
+<DT><B>
+<A HREF="#contraction-opcode-23">23</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if part of trailing punctuation.
+<DT><B>
+<A HREF="#contraction-opcode-24">24</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if word or at beginning of word.
+<DT><B>
+<A HREF="#contraction-opcode-25">25</A> <EM>dots</EM></B><DD><P>Define end capitals sign.
+</DL>
+<P>
+<H3><A NAME="contraction-opcode-function"></A> Opcodes by Function</H3>
+
+<P>Now for all of the details.
+The opcodes here are grouped by function rather than sorted by number.
+For a numerically sorted list, see section
+<A HREF="#contraction-opcode-number">Opcode Summary by Number</A>.
+<P>
+<H3>Table Administration</H3>
+
+<P>These opcodes make it easier to write contraction tables.
+They have no direct effect on the character translation.
+<DL>
+<DT><B>0 <EM>opcode</EM> <EM>name</EM>
+<A NAME="contraction-opcode-0"></A> </B><DD><P>Assign a name to an opcode.
+The name must be defined before it's used.
+<DT><B>1 <EM>path</EM>
+<A NAME="contraction-opcode-1"></A> </B><DD><P>Include the contents of another file.
+Nesting can be to any depth.
+Relative paths are anchored at the directory of the including file.
+</DL>
+<P>
+<H3>Special Symbol Definition</H3>
+
+<P>These opcodes define special symbols which must be
+inserted into the braille text in order to clarify it.
+<DL>
+<DT><B>2 <EM>dots</EM>
+<A NAME="contraction-opcode-2"></A> </B><DD><P>The symbol which capitalizes a single letter.
+<DT><B>3 <EM>dots</EM>
+<A NAME="contraction-opcode-3"></A> </B><DD><P>The symbol which begins a block of capital letters within a word.
+<DT><B>25 <EM>dots</EM>
+<A NAME="contraction-opcode-25"></A> </B><DD><P>The symbol which ends a block of capital letters within a word.
+<DT><B>4 <EM>dots</EM>
+<A NAME="contraction-opcode-4"></A> </B><DD><P>The symbol which marks a letter which isn't part of a word.
+<DT><B>5 <EM>dots</EM>
+<A NAME="contraction-opcode-5"></A> </B><DD><P>The symbol which marks the beginning of a number.
+</DL>
+<P>
+<H3>Character Translation</H3>
+
+<P>These opcodes define the braille representations for character sequences.
+Each of them defines an entry within the contraction table.
+These entries may be defined in any order except, as noted below,
+when they define alternate representations for the same character sequence.
+<P>Each of these opcodes has
+a <EM>characters</EM> operand (which must be specified as a <EM>string</EM>),
+and a built-in condition governing its eligibility for use.
+The text is processed strictly from left to right, character by character,
+with the most eligible entry for each position being used.
+If there's more than one eligible entry for a given position,
+then the one with the longest character string is used.
+If there's more than one eligible entry for the same character string,
+then the one defined nearest to the beginning of the table is used
+(this is the only order dependency).
+<P>Many of these opcodes have a <EM>dots</EM> operand
+which defines the braille representation for its <EM>characters</EM> operand.
+It may also be specified as an equals sign (<CODE>=</CODE>),
+in which case it means one of two things.
+If the entry is for a single character,
+then it means that the currently selected computer braille representation
+(see the 
+<A HREF="Manual-3.html#options-text-table">-t</A> command line option
+and the 
+<A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive)
+for that character is to be used.
+If it's for a multi-character sequence,
+then the default representation for each character
+(see 
+<A HREF="#contraction-opcode-6">opcode 6</A>)
+within the sequence is to be used.
+<P>Some special terms are used within the descriptions of these opcodes.
+<DL>
+<DT><B>word</B><DD><P>A maximal sequence of one or more consecutive letters.
+</DL>
+<P>Now, finally, here are the opcode descriptions themselves:
+<DL>
+<DT><B>17 <EM>characters</EM>
+<A NAME="contraction-opcode-17"></A> </B><DD><P>Translate the entire white-space-bounded containing character sequence into computer braille
+(see the 
+<A HREF="Manual-3.html#options-text-table">-t</A> command line option
+and the 
+<A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive).
+<DT><B>19 <EM>characters</EM>
+<A NAME="contraction-opcode-19"></A> </B><DD><P>Ignore the characters no matter where they appear.
+<DT><B>6 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-6"></A> </B><DD><P>Translate the characters no matter where they appear.
+If there's only one character, then, in addition,
+define the default representation for that character.
+<DT><B>7 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-7"></A> </B><DD><P>Translate the characters no matter where they appear.
+Ignore any consecutive repetitions of the same sequence.
+<DT><B>15 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-15"></A> </B><DD><P>Translate the characters no matter where they appear.
+Remove white-space between consecutive words matched by this opcode.
+<DT><B>8 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-8"></A> </B><DD><P>Translate the characters if they're a word.
+<DT><B>16 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-16"></A> </B><DD><P>Translate the characters if they're a word.
+Remove the following white-space if the first character after it is a letter.
+<DT><B>14 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-14"></A> </B><DD><P>Translate the characters if they're a white-space-bounded word.
+<DT><B>18 <EM>characters</EM>
+<A NAME="contraction-opcode-18"></A> </B><DD><P>Prefix the characters with a letter sign
+(see 
+<A HREF="#contraction-opcode-4">opcode 4</A>)
+if they're a word.
+<DT><B>24 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-24"></A> </B><DD><P>Translate the characters if they're either a word or at the beginning of a word.
+<DT><B>9 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-9"></A> </B><DD><P>Translate the characters if they're at the beginning of a word.
+<DT><B>10 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-10"></A> </B><DD><P>Translate the characters if they're in the middle of a word.
+<DT><B>12 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-12"></A> </B><DD><P>Translate the characters if they're either in the middle or at the end of a word.
+<DT><B>11 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-11"></A> </B><DD><P>Translate the characters if they're at the end of a word.
+<DT><B>22 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-22"></A> </B><DD><P>Translate the characters if they're part of punctuation at the beginning of a word.
+<DT><B>23 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-23"></A> </B><DD><P>Translate the characters if they're part of punctuation at the end of a word.
+<DT><B>21 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-21"></A> </B><DD><P>Translate the characters if they're at the beginning of a number.
+<DT><B>13 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-13"></A> </B><DD><P>Translate the characters if they're in the middle of a number.
+<DT><B>20 <EM>characters</EM> <EM>dots</EM>
+<A NAME="contraction-opcode-20"></A> </B><DD><P>Translate the characters if they're at the end of a number.
 </DL>
 <P>
 <HR>

@@ -22,9 +22,13 @@
  * Version 1.0
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
 
 static int convtable[128] =
 {199, 252, 233, 226, 228, 224, 229, 231,        /* 128 - 135 */

@@ -15,26 +15,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+PROGRAMS = trcp
+all: $(PROGRAMS)
 
-CC = gcc
-CFLAGS = -O2 -Wall
-LD = $(CC)
-LDFLAGS = -s
+include setup.mk
 
+TRCP_OBJECTS = trcp.o unicode.o $(PGM_DIR)/options.o $(PGM_DIR)/misc.o
+trcp: $(TRCP_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TRCP_OBJECTS) $(LDLIBS)
+trcp.o:
+	$(CC) $(CFLAGS) -c trcp.c
+unicode.o:
+	$(CC) $(CFLAGS) -c unicode.c
 
-TOOLS = trcp
-
-all: $(TOOLS)
-
-trcp: trcp.o unicode.o
-
-trcp.o: trcp.c unicode.h
-
-unicode.o: unicode.c unicode.h unicode-table.h $(wildcard iso-*.h) $(wildcard cp-*.h)
-
-clean:
-	rm -f *.o *~
-
-DISTCLEAN: clean
-	rm -f $(TOOLS)
+clean::
+	rm -f $(PROGRAMS)
 

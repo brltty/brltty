@@ -5,7 +5,7 @@ set -e
 # Make local mount points
 mkdir -p mnt1 mnt2
 # Mount bootdisk image read-only
-mount boot.img mnt1 -o loop,ro
+mount boot.img mnt1 -o loop,ro -t msdos
 # Get the initial ramdisk it contains
 cp mnt1/initrd.img .
 # Finished with boot image for now.

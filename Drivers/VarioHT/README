@@ -62,7 +62,7 @@ Since the brltty package missed a swedish translationtable we created one.
 
 Authors
 
-This driver is written mainly by Per Lejontand <per@acc.umu.se> with some
+This driver is written mainly by Per Lejontand <pele@acc.umu.se> with some
 assistance from Niklas Edmundsson <nikke@acc.umu.se>. Testing was/is done by
 the owner of the Baum Vario used during development, Sabina Lundgren
 <mina@acc.umu.se>.

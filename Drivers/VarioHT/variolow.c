@@ -15,17 +15,23 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <stdio.h>
-#include <termios.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <termios.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include <string.h>
 
 #include "variolow.h"
-#include "misc.h"
+#include "Programs/misc.h"
 
 
 	/*	The filedescriptor of the open port, sorry to say, wee need a global

@@ -28,7 +28,7 @@
  *   August Hörandl <hoerandl@elina.htlw1.ac.at>
  *
  * papenmeier/serial.c - Braille display test program
- * the file brl.c is included - HACK, but this allows easier testing
+ * the file braille.c is included - HACK, but this allows easier testing
  * 
  *  This program simulates a papenmeier screen 2d terminal
  *  Start it on a second pc (connected via a serial line)
@@ -43,23 +43,24 @@
  *   dont't forget: no CRTSCTS for testing !
  */
 
+#include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <curses.h>
 #include <signal.h>
 
-/* HACK - include brl.c - with little adjustments */
+/* HACK - include braille.c - with little adjustments */
 
 #define  BRLDRIVER   NULL
 #define  BRLHELP "nohelp" 
 
 #define _SERIAL_C_
 #define _SCR_H
-#include "brl.c"
-#include "../misc.c"
+#include "braille.c"
+#include "Programs/misc.c"
 
 #define BRLCOLS   80
 
@@ -68,7 +69,7 @@ braille_driver *braille = &dummybraille;
 
 char* parameters[] = { "file", "y", "y", "y" };
 
-brldim dummy_brldim;		// unused
+brldim dummy_brldim;		/* unused */
 
 static void finish(int sig);
 static void error(char* txt);
@@ -76,13 +77,13 @@ static void error(char* txt);
 static char **brailleParameters = NULL;
 
 struct {
-  int key;			// curses keycode 
-  int code;			// code to send
-  char* txt;			// debug output 
+  int key;			/* curses keycode  */
+  int code;			/* code to send */
+  char* txt;			/* debug output  */
 } key_data[] = {
   { -1, -1, "??" },
-  // left column
-  // linke Spalte - wert 768 - 831, delta 3, 22 tasten
+  /* left column */
+  /* linke Spalte - wert 768 - 831, delta 3, 22 tasten */
   { KEY_F(1),  768, "L1" },
   { KEY_F(2),  771, "L2" },
   { KEY_F(3),  774, "L3" },
@@ -106,8 +107,8 @@ struct {
   { KEY_F(21), 828, "L21" },
   { KEY_F(22), 831, "L22" },
 
-  // bottom line
-  // untere Zeile - wert 3 - 39, delta 3, 13 tasten
+  /* bottom line */
+  /* untere Zeile - wert 3 - 39, delta 3, 13 tasten */
   { '1', 3, "1" },
   { '2', 6, "2" },
   { '3', 9, "3" },
@@ -122,8 +123,8 @@ struct {
   { '6', 36, "6" },
   { '8', 39, "8" },
 
-  // routing keys
-  // Zeile  - wert 834 - 1071, delta 3, 80 tasten
+  /* routing keys */
+  /* Zeile  - wert 834 - 1071, delta 3, 80 tasten */
   { 'q', 834, "POS1" },
   { 'w', 837, "POS2" },
   { 'e', 840, "POS3" },
@@ -152,14 +153,14 @@ struct {
 
 const int max_data = sizeof(key_data)/sizeof(key_data[0]);
 
-// array to hold key state: released=0, pressed=1
+/* array to hold key state: released=0, pressed=1 */
 int ispressed[sizeof(key_data)/sizeof(key_data[0])] = { 0 };
 
-// table to convert braille code to ascii
-// screen --> textTable[] --> change_bits[] --> bits for display
+/* table to convert braille code to ascii */
+/* screen --> textTable[] --> change_bits[] --> bits for display */
 unsigned char conv_back[255] = { 0 };
 
-// table for status display - integers
+/* table for status display - integers */
 int numbers[255] = { 0 }; 
 
 void init_tables()
@@ -212,7 +213,7 @@ void show_status(WINDOW* status, unsigned char* statcells)
   wrefresh(status);
 }
 
-// ----------------------------------------------------------
+/* ---------------------------------------------------------- */
 
 void show_line(WINDOW* zeile, unsigned char* txt)
 {
@@ -225,7 +226,7 @@ void show_line(WINDOW* zeile, unsigned char* txt)
   wrefresh(zeile);
 }
 
-// search for key c in the key_data table
+/* search for key c in the key_data table */
 int searchk(int c)
 {
   int i;
@@ -238,21 +239,21 @@ int searchk(int c)
 
 void send_serial(int keycode, int pressed)
 {
-  // simulate time tick
+  /* simulate time tick */
   static int timeval = 0;
 
   unsigned char puffer[10];
 
-  puffer[0] = 2;		// STX - Begin
-  puffer[1] = 'K';		// 'K' 
+  puffer[0] = 2;		/* STX - Begin */
+  puffer[1] = 'K';		/* 'K'  */
   puffer[2] = keycode / 256;	
   puffer[3] = keycode % 256;
-  puffer[4] = 0;		// length
+  puffer[4] = 0;		/* length */
   puffer[5] = 10;
-  puffer[6] = pressed;		// 1 - pressed, 0 - release
+  puffer[6] = pressed;		/* 1 - pressed, 0 - release */
   puffer[7] = timeval / 256;
   puffer[8] = timeval % 256;
-  puffer[9] = 3;		// ETX - End
+  puffer[9] = 3;		/* ETX - End */
 
   timeval++;  
   write(brl_fd, puffer, sizeof(puffer));
@@ -312,10 +313,10 @@ int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
     }
   else
     {
-      //      waddstr(debug, "READ");
+      /*      waddstr(debug, "READ"); */
       for(i = 6; i < l; i++) 
 	read(brl_fd,buf+i,1);
-      //      waddstr(debug, "DONE");
+      /*      waddstr(debug, "DONE"); */
   
       if (buf[l-1] != cETX) {		/* ETX - End */
 	sprintf(txt, "data: ");
@@ -387,7 +388,7 @@ int main(int argc, char* argv[])
   debug_key    = subwin(stdscr, h4-1, 0, 2*h4+1, 0);
   debug_serial = subwin(stdscr, h4-1, 0, 3*h4+1, 0);
 
-  //debug_serial = debug_key;
+  /* debug_serial = debug_key; */
   if (! (zeile && status && debug_key && debug_serial)) 
     error("OOPS - cant open windows");
 
@@ -397,7 +398,7 @@ int main(int argc, char* argv[])
   scrollok(debug_key, TRUE);
   scrollok(debug_serial, TRUE);
 
-  // open serial
+  /* open serial */
 
   initbrl(parameters, &dummy_brldim, argv[1]);
 
@@ -414,7 +415,7 @@ int main(int argc, char* argv[])
 
       /* Watch stdin (fd 0) and brl_fd to see when it has input. */
       FD_ZERO(&rfds);
-      FD_SET(0, &rfds); // Tastatur
+      FD_SET(0, &rfds); /* Tastatur */
       FD_SET(brl_fd, &rfds);
 
       retval = select(brl_fd+1, &rfds, NULL, NULL, NULL);
@@ -423,7 +424,7 @@ int main(int argc, char* argv[])
 	perror("select");
 	c = '#';
       } else 
-	if (FD_ISSET(0, &rfds)) { // key pressed
+	if (FD_ISSET(0, &rfds)) { /* key pressed */
 	  c = wgetch(debug_key);
 	  
 	  i = searchk(c); 
@@ -432,14 +433,14 @@ int main(int argc, char* argv[])
 	    ispressed[i] ^= 1;
 	    sprintf(buffer, "%s (%s) ", key_data[i].txt, action ? "press":"release");
 	    waddstr(debug_key, buffer);
-	    //	  if (i)
-	    send_serial(key_data[i].code, action); // key pressed
-	    //	  else
-	    //	    send_serial(0,0); // dummy key release 
+	    /* if (i) */
+	    send_serial(key_data[i].code, action); /* key pressed */
+	    /* else */
+	      /* send_serial(0,0); */ /* dummy key release  */
 	  }
 	  wrefresh(debug_key);
 	} 
-        if (FD_ISSET(brl_fd, &rfds)) // data from brl_fd
+        if (FD_ISSET(brl_fd, &rfds)) /* data from brl_fd */
 	  read_serial(zeile, debug_serial, status);
 	wrefresh(debug_serial);
 	wrefresh(zeile);

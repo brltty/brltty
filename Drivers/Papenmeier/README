@@ -91,7 +91,7 @@ there are different display modes:
 example: 
 status 4 = horiz cursorcol
 status 6 = flag tracking
-a list of the possible info to display (see brl.h and/or Papenmeier/hlp.h)
+a list of the possible info to display (see brl.h and/or Papenmeier/hlp.auto.h)
 current - current line number
 row - cursor position - row
 col - cursor position - column
@@ -140,7 +140,7 @@ the command to define a predictable state change
   command ON = <as above>
   command OFF = <as above>
 A list of the possible commands (the following list is sometimes out of 
-date - see brl.h and/or Papenmeier/hlp.h for the actual values), the names 
+date - see brl.h and/or Papenmeier/hlp.auto.h for the actual values), the names 
 may be used with or without the leading CMD_:
 NOOP - do nothing
 LNUP - go up one line

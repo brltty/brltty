@@ -15,14 +15,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "variolow.h"
-#include "brl.h"
+#include "Programs/brl.h"
 #include "brlconf.h"
-#include "../brl_driver.h"
-#include "../misc.h"
+#include "Programs/brl_driver.h"
+#include "Programs/misc.h"
 
 
 static unsigned char lastbuff[40];

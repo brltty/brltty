@@ -15,14 +15,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: faq en ger
+all: english german
 
-faq: FAQ.txt
-
-FAQ.txt: FAQ.html
-	lynx -dump -width=79 $< >$@
-
-en: en_txt en_html
+english: en_txt en_html
 
 en_txt: Manual.txt
 
@@ -33,18 +28,19 @@ Manual.txt: Manual.sgml
 	sgml2txt -l english -c latin Manual.sgml
 
 en_html: Manual.sgml
-	cd Manual-HTML; \
-	sgml2html -l english -c ascii ../Manual.sgml
+	cd Manual-HTML && sgml2html -l english -c ascii ../Manual.sgml
 
-ger: ger_txt ger_html
+german: de_txt de_html
 
-ger_txt: Manual.sgml
+de_txt: Manual-ger.txt
+
+Manual-ger.txt: Manual-ger.sgml
 	sgml2txt -l german -c latin Manual-ger.sgml
 
-ger_html: Manual-ger.sgml
-	cd Manual-ger-HTML; \
-	sgml2html -l german -c ascii ../Manual-ger.sgml
+de_html: Manual-ger.sgml
+	cd Manual-ger-HTML && sgml2html -l german -c ascii ../Manual-ger.sgml
 
-clean:
-	rm -f Manual.txt Manual-ger.txt Manual-HTML/* Manual-ger-HTML/*
+clean::
+	-rm -f Manual.txt Manual-HTML/*
+	-rm -f Manual-ger.txt Manual-ger-HTML/*
 

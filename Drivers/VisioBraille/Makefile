@@ -25,8 +25,11 @@
 DRIVER_CODE = vs
 DRIVER_NAME = VisioBraille
 BRAILLE_MODELS =  2040
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(CC) $(BRL_CFLAGS) -c brl.c
+include setup.mk
+include $(TOP_DIR)/driver.mk
+
+braille.o: braille.c brlconf.h $(PGM_DIR)/brl_driver.h $(PGM_DIR)/brl.h $(PGM_DIR)/misc.h $(PGM_DIR)/scr.h
+	$(CC) $(BRL_CFLAGS) -c braille.c
 

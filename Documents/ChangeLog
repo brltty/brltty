@@ -1,6 +1,52 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+October 30, 2002:
+ - BRLTTY 3.1 released (note move from /sbin to /bin):
+   Significantly reduced screen-3.9.11 patch size. Rich Burridge <Rich.Burridge@Sun.COM>
+   Use (int) instead of rint() to eliminate the need for DO_C99_MATH
+      when building against uClibc. (np) + (dm)
+   Horizontal window placement during cursor tracking with sliding window off
+      should be relative rather than absolute. (dm)
+   Add text translation table for vni (Vietnamese). Thu Trang <phamtrang2002@softhome.net>
+   Implement attribute viewing and attribute underlining for contracted braille. (dm)
+   Load drivers from background process. (dm)
+      (ViaVoice wouldn't run when loaded in foreground but started in backgroun)
+   Support 512-character fonts. (dm) + Tapio Kelloniemi <tapio.kelloniemi@thack.org>
+   Fix colour array for CR_DESCCHAR. Tapio Kelloniemi <tapio.kelloniemi@thack.org>
+   Experimental gpm (mouse) support. (dm)
+   HandyTech driver improvements. (dm) + Mario Lang <mlang@delysid.org>
+      Merge Bookworm's status maintenance into main read loop.
+      Paste changed from B4+B5 to UP+DN (now accessible from input mode).
+      Control and meta modifiers added to input mode.
+      BrailleStar command enhancements.
+      BrailleStar USB IDs added into Linux kernel (2.4.20).
+   Conversion of Alva and HandyTech drivers from C++ to C. (dm)
+   Removal of closed source library for Alva parallel port support. (dm,np)
+   Introduce --disable-... options to reduce the size of the executable. (dm)
+      preferences-menu learn-mode contracted-braille
+      speaker-tunes dac-tunes midi-tunes adlib-tunes
+   Yield during busy loops. (dm)
+   Help file code made endianism-independent. (dm)
+   All core header files made C++ includable. (dm)
+   Install programs in /bin instead of in /sbin. (dm)
+   Solaris support. (dm) + Rich Burridge <Rich.Burridge@Sun.COM>
+   Changes to scrtest syntax. (dm)
+   Help option (-h, --help) added to test and utility programs. (dm)
+   Vario-HT renamed to VarioHT. (dm)
+   Autoconf support and portabilization. (dm)
+   Driver loading no longer relies on static data. (dm)
+   Use cp rather than mv in mkbd so as to not alter the file table layout. (dm)
+   Debian botdisk notes. Boris Daix <Boris.Daix@insa-lyon.fr>
+   Changes to support gcc 3. (dm) + Mark Mielke <mark@mielke.cc> + Mario Lang <mlang@delysid.org>
+      Use -lsupc++ when linking with gcc3.
+      Use the C++ linker if the C linker can't do the job
+         (brltty,brltest,scrtest gain a run-time dependency on libstdc++).
+      Remove inline attribute from all .cc implementations (scr_base, scr_shm).
+      Extern const (brl.h[noBraille], spk.h[noSpeech]) followed by non-const
+         declaration (brl_driver, spk_driver) no longer allowed.
+   Enhancements to en-us-g2 contraction table. John Boyer <director@chpi.org>
+
 July 13, 2002:
  - BRLTTY 3.0 released:
    New Bootdisk Hacking Mini-HowTo. (sd)

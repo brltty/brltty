@@ -17,15 +17,16 @@
 
 ###############################################################################
 # Makefile for BRLTTY's driver for Tactilog's LogText.
-#
-# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, and LDLIBS
 ###############################################################################
 
 DRIVER_CODE = lt
 DRIVER_NAME = LogText
 BRAILLE_MODELS = 32
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-brl.o: brl.c brlconf.h input.h output.h ../brl.h ../misc.h ../brl_driver.h
-	$(CC) $(BRL_CFLAGS) -c brl.c
+include setup.mk
+include $(TOP_DIR)/driver.mk
+
+braille.o:
+	$(CC) $(BRL_CFLAGS) -c braille.c
 

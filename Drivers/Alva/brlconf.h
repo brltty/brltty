@@ -49,28 +49,7 @@
 #define MODEL   ABT_AUTO
 
 
-/* Define next line to 1 to use parallel port interface.
- * Nothe that this requires the appropriate extra library and modification
- * in the Makefile.  See the README file for details.
- */
-#ifndef USE_PARALLEL_PORT
-   #define USE_PARALLEL_PORT 0
-#endif
-
-#if USE_PARALLEL_PORT == 0
-   /* If you defined USE_PARALLEL_PORT to 0, then the serial line baudrate
-    * is defined here.  Note that default braille serial device is defined 
-    * in ../Makefile
-    */
-   #define BAUDRATE B9600
-#endif
-
-#if USE_PARALLEL_PORT == 1
-   /* If you defined USE_PARALLEL_PORT to 1, this is where you should define
-    * the address of the parallel port your ABT will be connected to.
-    */
-   #define LPT_PORT 0x378
-#endif
+#define BAUDRATE B9600
 
 
 /* typematic settings */

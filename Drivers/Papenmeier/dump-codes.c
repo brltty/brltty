@@ -21,10 +21,14 @@
  * 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#include <unistd.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <curses.h>
 #include <signal.h>
@@ -74,7 +78,7 @@ int main(int argc, char* argv[])
       struct timeval tv;
 
       try_init(argv[1], B19200);
-      //try_init(argv[1], B38400);
+      /* try_init(argv[1], B38400); */
 
       while (1) {
 	/* Wait up to 10 seconds. */
@@ -88,7 +92,7 @@ int main(int argc, char* argv[])
 	  perror("select");
 	  break;
 	} else 
-	  if (FD_ISSET(brl_fd, &rfds)) { // data from brl_fd     
+	  if (FD_ISSET(brl_fd, &rfds)) { /* data from brl_fd */
 	    char c;
 	    read(brl_fd,&c,1);
 	    printf("%02x ", c);

@@ -19,7 +19,7 @@
 
 /* taken from ../brl_load.c */
 const CommandEntry commandTable[] = {
-  #include "../cmds.auto.h"
+  #include "Programs/cmds.auto.h"
   {EOF, NULL, NULL}
 };
 
@@ -27,7 +27,7 @@ static char* filename = "stdin";
 
 static int yyerror (char* s)  /* Called by yyparse on error */
 {
-  printf("%s:%d: %s\n", filename, linenumber, s);
+  fprintf(stderr, "%s[%d]: %s\n", filename, linenumber, s);
   exit(99);
  return 0;
 }
@@ -150,7 +150,7 @@ void terminals(int help, int verbose)
   int tn, i, j;
   FILE * fh = stdout;
 
-  // TODO: Comment/Help for status display
+  /* TODO: Comment/Help for status display */
 
 #define CMDMASK    (VAL_SWITCHON-1)
 
@@ -274,27 +274,29 @@ void terminals(int help, int verbose)
 int main(int argc, char* argv[])
 {
   if (argc > 1) {
-    if (argv[1][0]=='d') {
-      terminals(0, 0);
-      return 0;
-    }
-
-    if (argv[1][0]=='D') {
-      terminals(0, 1);
-      return 0;
-    }
-
-    if (argv[1][0]=='h') {
-      terminals(1, 0);
-      return 0;
-    }
-
-    if (argv[1][0]=='H') {
-      terminals(1, 1);
-      return 0;
-    }
-
     filename = argv[1];
+
+    if (strlen(filename) == 1) {
+      if (*filename=='d') {
+        terminals(0, 0);
+        return 0;
+      }
+
+      if (*filename=='D') {
+        terminals(0, 1);
+        return 0;
+      }
+
+      if (*filename=='h') {
+        terminals(1, 0);
+        return 0;
+      }
+
+      if (*filename=='H') {
+        terminals(1, 1);
+        return 0;
+      }
+    }
   }
 
   configfile = stdin;

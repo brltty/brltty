@@ -3,7 +3,7 @@
 
 <titlepag>
   <title>BRLTTY
-    <subtitle>Access to the Linux Console for Blind Persons using Refreshable Braille Displays
+    <subtitle>Access to the Linux/Unix Console for Blind Persons using Refreshable Braille Displays
   <author>
     <name>Nikhil Nair <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
   <and>
@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.0, July 2002
+  <date>Version 3.1, October 2002
   <abstract>
     Copyright &copy; 1995-2002 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -25,7 +25,7 @@
 <lot>
 
 <sect>Introduction<p>
-BRLTTY gives a braille user access to the text consoles of a Linux system.
+BRLTTY gives a braille user access to the text consoles of a Linux/Unix system.
 It runs as a background process (daemon)
 which operates a refreshable braille display,
 and can be started very early in the system boot sequence.
@@ -44,105 +44,136 @@ move the window around on the screen,
 to enable and disable various viewing options,
 and to perform special functions.
 
-<sect1>A Brief History<p>
-The BRLTTY project started in July, 1995.
-The initial team consisted of Nikhil Nair and James Bowden.
-The first version ran with Blazie Engineering's Braille Lite.
-Since, at that time, the Braille Lite hadn't been designed to be
-a dedicated refreshable braille display for a computer,
-its response time was far too slow.
-This situation has now been corrected.
-
-The second version, BRLTTY 0.22 BETA, was released in September of 1995.
-It was the first to be released publicly.
-As well as the Braille Lite, it also supported
-Tieman B.V.'s CombiBraille series.
-
-James Bowden stopped being an active developer,
-although his continued help in other areas (including documentation)
-was much appreciated.
-Two new members, Nicolas Pitre and Stéphane Doyon, joined the team.
-They added support for Alva and Telesensory Systems Inc. displays,
-as well as many excellent features for the system as a whole.
-A stable version (1.0) was released sometime around the end of 1996.
-
-Support for Papenmeier displays has been contributed by a team from
-The Technical High School, Department of Electrical Engineering, Vienna, Austria.
-Support for the TSI displays was completed,
-and support for the EuroBraille brand was added.
-New features were also continually being added to the system.
-Regretably, Nikhil Nair stopped working on the BRLTTY project.
-Nicolas Pitre assumed the job of maintainer.
-
-Version 2.0 was released during the summer of 1998,
-and version 2.1 was released in March of 1999.
-It added support for
-EcoBraille (thanks to Oscar Fernandez),
-Alva Delphi (thanks to Terry Barnaby),
-and Braille Lite 18 (from Nikhil Nair),
-as well as Some small improvements and fixes.
-
-Dave Mielke began to submit fixes and enhancements during 2000,
-and joined the team as the next maintainer in June of 2001.
-Thanks to Nicolas Pitre for his many years of service in this capacity.
-
-BRLTTY now supports many braille displays
-(see section <ref id="displays" name="Supported Braille Displays"> for the full list),
-as well as some speech synthesizers
-(see section <ref id="synthesizers" name="Supported Speech Synthesizers"> for the full list).
-See section <ref id="contact" name="Contact Information"> for details regarding how to contact the BRLTTY team.
+<sect1>Feature Summary<p>
+BRLTTY provides the following capabilities:
+<itemize>
+  <item>
+    Full implementation of the usual screen review facilities.
+  <item>
+    Choice between <tt/block/, <tt/underline/, or <tt/no/ cursor.
+  <item>
+    Optional <tt/underline/ to indicate specially highlighted text.
+  <item>
+    Optional use of <tt/blinking/ (rates individually settable) for
+    cursor, special highlighting underline, and/or capital letters.
+  <item>
+    Screen freezing for leisurely review.
+  <item>
+    Intelligent cursor routing, allowing easy fetching of cursor within
+    text editors, web browsers, etc.,
+    without moving ones hands from the braille display.
+  <item>
+    A cut-and-paste function (linear or rectangular) which is particularly useful for
+    copying long file names,
+    copying text between virtual terminals,
+    entering complicated commands,
+    etc.
+  <item>
+    Table driven in-line contracted braille (english grade 2 provided).
+  <item>
+    Support for multiple braille codes.
+  <item>
+    Ability to identify an unknown character.
+  <item>
+    Ability to inspect character highlighting.
+  <item>
+    An on-line help facility for braille display commands.
+  <item>
+    A preferences menu.
+  <item>
+    Basic speech support.
+  <item>
+    Modular design allowing relatively easy addition of
+    drivers for other braille displays and speech synthesizers.
+</itemize>
 
 <sect1>System Requirements<p>
-To date, BRLTTY only runs under Linux.
+To date, BRLTTY runs under Linux and Solaris.
 While ports to other Unix-like operating systems aren't currently planned,
 we do welcome any interest in such projects.
 
-This software has been tested on a variety of Linux systems:
-<itemize>
-  <item>
-    Desktops, laptops, and some PDAs.
-  <item>
-    Processors from a 386SX20 to a Pentium.
-  <item>
-    A huge range of memory sizes.
-  <item>
-    Several distributions including Debian, Red Hat, Slackware, and SuSE.
-  <item>
-    Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
-  <item>
-    A DEC Alpha
-    (only tested once under Red Hat Alpha Linux on a noname board kindly lent
-    to the Cambridge University Computer Laboratory by DEC in Reading, England).
-</itemize>
+<descrip>
+  <tag/Linux/
+    This software has been tested on a variety of Linux systems:
+    <itemize>
+      <item>
+        Desktops, laptops, and some PDAs.
+      <item>
+        Processors from a 386SX20 to a Pentium.
+      <item>
+        A huge range of memory sizes.
+      <item>
+        Several distributions including Debian, Red Hat, Slackware, and SuSE.
+      <item>
+        Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
+      <item>
+        A DEC Alpha
+        (only tested once under Red Hat Alpha Linux on a noname board kindly lent
+        to the Cambridge University Computer Laboratory by DEC in Reading, England).
+    </itemize>
+  <tag/Solaris/
+    This software has been tested on the following Solaris systems:
+    <itemize>
+      <item>
+        The Sparc architecture.
+      <item>
+        Releases 7, 8, and 9.
+    </itemize>
+</descrip>
 
-BRLTTY's main dependence on Linux is a special device (<tt/vcsa/)
-via which the screen contents and attributes can be read.
-An experimental patch for the <tt/screen/ program is provided
-(see the <tt/Patches/ subdirectory).
-It allows BRLTTY to access <tt/screen/'s screen image via shared memory,
-and goes a long way toward making porting to other platforms possible
-(even to those which don't have their own screen content inspection facility).
-The main weakness of the <tt/screen/ approach is that 
-BRLTTY can't be started until the user has logged in.
-
-BRLTTY, as noted above, relies on a special device
+On Linux, BRLTTY can inspect the content of the screen
+completely independently of any logged in user.
+It does this by using a special device
 which provides easy access to the contents of the current virtual console.  
 This device was introduced in version 1.1.92 of the Linux kernel,
 and is normally called either <tt>/dev/vcsa</> or <tt>/dev/vcsa0</>
 (on systems with <tt/devfs/ it's called <tt>/dev/vcc/a</>).
-For this reason, Linux kernel 1.1.92 or later is required.
+For this reason, Linux kernel 1.1.92 or later is required
+if BRLTTY is to be used in this way.
+This capability:
+<itemize>
+  <item>
+    Allows BRLTTY to be started very early in the system boot sequence.
+  <item>
+    Enables the braille display to be fully operational during the login prompt.
+  <item>
+    Makes it much easier for a braille user to perform boot-time system administration tasks.
+</itemize>
+
+A patch for the <tt/screen/ program is provide
+(see the <tt/Patches/ subdirectory).
+It allows BRLTTY to access <tt/screen/'s screen image via shared memory,
+and, therefore, allows BRLTTY to be used quite effectively on platforms
+which don't have their own screen content inspection facility.
+The main weakness of the <tt/screen/ approach is that 
+BRLTTY can't be started until the user has logged in.
 
 In order for BRLTTY to successfully communicate with the refreshable braille display,
-the correct Linux driver (serial, parallel, USB) must be configured into the kernel.
+the correct driver (serial, parallel, USB) must be configured into the kernel.
 If the driver requires special options, then they must be supplied.
-If it's built into the kernel, then its options must be
-set during the kernel configuration procedure,
-supplied at the LILO boot prompt,
-or specified on an <tt/append/ directive in <tt>/etc/lilo.conf</>.
-If it's a module, then its options must be
-supplied as options to the <tt/modprobe/ (or <tt/insmod/) command,
-or specified on an <tt/options/ directive in <tt>/etc/modules.conf</>
-(called <tt>/etc/conf.modules</> by some older distributions).
+If it's built into the kernel, then its options must be:
+<descrip>
+  <tag/Linux/
+    <itemize>
+      <item>
+        Set during the kernel configuration procedure.
+      <item>
+        Supplied at the LILO boot prompt.
+      <item>
+        Specified on an <tt/append/ directive in <tt>/etc/lilo.conf</>.
+    </itemize>
+</descrip>
+If the driver is a module, then its options must be:
+<descrip>
+  <tag/Linux/
+    <itemize>
+      <item>
+        Supplied as options to the <tt/modprobe/ (or <tt/insmod/) command.
+      <item>
+        Specified on an <tt/options/ directive in <tt>/etc/modules.conf</>
+        (called <tt>/etc/conf.modules</> by some older distributions).
+    </itemize>
+</descrip>
 
 BRLTTY only works with text-based consoles and applications.
 It can be used with <tt/curses/-based applications,
@@ -158,10 +189,8 @@ for a device which you'd like to see supported,
 then please let us know (see section <ref id="contact" name="Contact Information">).
 
 Finally, you need tools to build the executable from its source:
-<tt/make/, <tt/C/ and <tt/C++/ compiler, <tt/yacc/, <tt/awk/, etc.
-The development tools provided with standard Linux distributions should suffice.
-BRLTTY has been tested on many distributions,
-including Slackware, Debian, and Red Hat.
+<tt/make/, <tt/C/ and <tt/C++/ compilers, <tt/yacc/, <tt/awk/, etc.
+The development tools provided with standard Unix distributions should suffice.
 If you have problems,
 then contact us and we'll compile a binary for you.
 
@@ -179,19 +208,19 @@ to first become familiar with the files which will ultimately be installed.
 <sect1>Installed File Hierarchy<label id="hierarchy"><p>
 The build procedure should result in the installation of the following files:
 <descrip>
-  <tag>/sbin/</>
+  <tag>/bin/</>
     <descrip>
-      <tag/brltty/
+      <tag>brltty</tag>
         The BRLTTY program.
-      <tag/install-brltty/
+      <tag><ref id="utility-install-brltty" name="install-brltty"></tag>
         A <ref id="utility-install-brltty" name="utility"> for copying BRLTTY's
         <ref id="hierarchy" name="installed file hierarchy">
         from one location to another.
     </descrip>
   <tag>/etc/brltty/</>
     Your installation of BRLTTY may not have all of the following types of files.
-    They're only created as needed based on your customization of the make file
-    (see <ref id="make-customize" name="Make File Customization">).
+    They're only created as needed based on the build options you select
+    (see <ref id="build" name="Build Options">).
     <descrip>
       <tag/*.conf/
         Driver-specific configuration data.
@@ -199,7 +228,7 @@ The build procedure should result in the installation of the following files:
         where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
       <tag/*.ctb/
         Contraction tables
-        (see section <ref id="contraction" name="Contraction Tables"> for details).
+        (see section <ref id="contraction" name="Contracted Braille"> for details).
         Their names look like <em/language/<tt/-/<em/country/<tt/-/<em/level/<tt/.ctb/.
       <tag/*.hlp/
         Driver-specific help pages.
@@ -218,13 +247,13 @@ The build procedure should result in the installation of the following files:
     </descrip>
   <tag>/lib/brltty/</>
     Your installation of BRLTTY may not have all of the following types of files.
-    They're only created as needed based on your customization of the make file
-    (see <ref id="make-customize" name="Make File Customization">).
+    They're only created as needed based on the build options you select
+    (see <ref id="build" name="Build Options">).
     <descrip>
       <tag/brltty-brl.lst/
         A list of the braille display drivers which have been built
         as dynamically loadable shared objects,
-        and, therefore, which can be selected at run time.
+        and, therefore, which can be selected at run-time.
         Each line consists of
         the two-letter identification code for a driver,
         a tab character,
@@ -235,7 +264,7 @@ The build procedure should result in the installation of the following files:
       <tag/brltty-spk.lst/
         A list of the speech synthesizer drivers which have been built
         as dynamically loadable shared objects,
-        and, therefore, which can be selected at run time.
+        and, therefore, which can be selected at run-time.
         Each line consists of
         the two-letter identification code for a driver,
         a tab character,
@@ -260,29 +289,6 @@ although they aren't part of the installed file hierarchy, are:
     See <ref id="preferences" name="Preferences Settings"> for details.
 </descrip>
 
-<sect1>Installing from an RPM File<label id="rpm"><p>
-To install BRLTTY from an RPM (RedHat Package Manager) file, do the following:
-<enum>
-  <item>
-    Download the binary package which corresponds to your hardware.
-    It'll be a file named
-    <tt/brltty-/<em/release/<tt/-/<em/version/<tt/./<em/architecture/<tt/.rpm/,
-    e.g. <tt/brltty-3.0-1.i386.rpm/.
-  <item>
-    Install the package.
-    <tscreen>rpm -Uvh brltty-<em/release/-<em/version/.<em/architecture/.rpm</tscreen>
-    This should be done as <bf/root/.
-    Strictly speaking, the <tt/-U/ (update) option is the only one which is necessary.
-    The <tt/-v/ (verbose) option displays the name of the package as it's being installed.
-    The <tt/-h/ (hashes) option displays a progress meter (using hash signs).
-</enum>
-For the brave,
-we also provide the source RPM (<tt/.src.rpm/) file,
-but that's beyond the scope of this document.
-
-To uninstall BRLTTY, do:
-<tscreen>rpm -e brltty</tscreen>
-
 <sect1>Installing from a TAR Ball<label id="tar"><p>
 Here's what to do if you just want to install BRLTTY as quickly as possible,
 trusting that all of our defaults are correct.
@@ -297,9 +303,11 @@ trusting that all of our defaults are correct.
     <tscreen>tar xzf brltty-<em/release/.tar.gz</tscreen>
     This should create the directory <tt/brltty-/<em/release/.
   <item>
-    Change to the source directory, and compile and install BRLTTY.
+    Change to the source directory, configure, compile, and install BRLTTY.
     <tscreen>
       cd brltty-<em/release/
+      <newline>
+      ./configure
       <newline>
       make install
     </tscreen>
@@ -316,159 +324,347 @@ To uninstall BRLTTY, do:
 That's all there's to it.
 Now, for those who really want to know what's going on, here are the details.
 
-<sect2>Make File Customization<label id="make-customize"><p>
-Before compiling BRLTTY, you should check to see if it requires
-any special configuration for your system and/or your needs.  
-To do this,
-read the comments at the top of the file <tt/Makefile/ in the top-level directory,
-and, following the instructions contained therein, make any needed changes.
-Then read the <tt/README/ file in the subdirectory
-containing the driver for your braille display
-to check for any additional display-specific instructions.
+<sect2>Build Options<label id="build"><p>
+The first step in building BRLTTY is to configure it
+for your system and/or for your personal needs.
+This is done by running the <tt/configure/ script in BRLTTY's top-level directory.
 We've tried to make the defaults fit the most common case, so,
 assuming that you're not attempting to do anything out of the ordinary,
-you may not need to make any changes at all.
+you may not need to do anything more complicated than
+invoke this script without specifying any options at all.
+<tscreen>./configure</tscreen>
+If, however, you have some special requirements,
+or even if you're just adventurous,
+you should find out what your choices are.
+<tscreen>./configure --help</tscreen>
+You should also check out the <tt/README/ file in the subdirectory
+containing the driver for your braille display
+for any additional display-specific instructions.
 
-The variables within the make file which you may wish to set and/or alter include:
+<sect3>System Defaults<label id="build-defaults"><p>
 <descrip>
-  <tag>BRL_TARGET<label id="make-braille-driver"></tag>
-    There's one commented out assignment to this variable
-    for each supported braille display.
-    If you don't uncomment any of them,
+  <tag><tt/--with-braille-driver=/<em/driver/<label id="build-braille-driver"></tag>
+    Specify the braille display driver.
+    Either a two-letter <ref id="drivers" name="driver identification code">
+    or the proper name (full or abbreviated) of the driver
+    may be used.
+    If this option isn't specified,
     then all of the braille display drivers are built
     as dynamically loadable shared objects,
-    and the needed one can be selected at run time.
-    If you do uncomment one of them,
-    then ohly that driver is compiled,
+    and the needed one can be selected at run-time.
+    If it is specified,
+    then only that driver is compiled,
     and statically linked into the BRLTTY binary.
-    Don't uncomment more than one of them.
-  <tag>BRLDEV<label id="make-braille-device"></tag>
-    This variable specifies the path to the special file
-    for the device to which the braille display is connected.
-    It's initially set to <tt>/dev/ttyS0</> (the primary serial port).
-  <tag>SPK_TARGET<label id="make-speech-driver"></tag>
-    There's one commented out assignment to this variable
-    for each supported speech synthesizer.
-    If you don't uncomment any of them,
-    then all of the speech synthesizer drivers are built
-    as dynamically loadable shared objects,
-    and the needed one can be selected at run time.
-    If you do uncomment one of them,
-    then ohly that driver is compiled,
-    and statically linked into the BRLTTY binary.
-    Don't uncomment more than one of them.
-  <tag>TEXTTRANS<label id="make-tables-text"></tag>
-    There's one commented out assignment to this variable
-    for each provided text translation table.
-    If you don't uncomment any of them,
+    See the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive
+    and the <ref id="options-braille-driver" name="-b"> command line option
+    for run-time selection.
+  <tag><tt/--with-braille-device=/<em/device/<label id="build-braille-device"></tag>
+    Specify the device to which the braille display is connected.
+    If a relative path is supplied, then it's anchored at <tt>/dev</>.
+    If this option isn't specified,
+    then an operating system appropriate path
+    for the primary serial port is assumed.
+    See the <ref id="configure-braille-device" name="braille-device"> configuration file directive
+    and the <ref id="options-braille-device" name="-d"> command line option
+    for run-time selection.
+  <tag><tt/--with-text-table=/<em/file/<label id="build-text-table"></tag>
+    Specify the text translation table
+    (see section <ref id="translation" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    If this option isn't specified,
     then a commonly (in North America) used 8-dot variant of the
     <ref id="nabcc" name="North American Braille Computer Code">
     is assumed.
-    Don't uncomment more than one of them.
-    This specification only establishes a default text translation table;
-    the needed one can always be selected at run time.
-  <tag>ATTRTRANS<label id="make-tables-attributes"></tag>
-    This variable specifies the attributes translation table which is to be used.
-    It's initially set to <tt/attributes.tbl/.
+    See the <ref id="configure-text-table" name="text-table"> configuration file directive
+    and the <ref id="options-text-table" name="-t"> command line option
+    for run-time selection.
+    This setting can be changed with the
+    <ref id="preference-text-table" name="Text Table"> preference.
+  <tag><tt/--with-attributes-table=/<em/file/<label id="build-attributes-table"></tag>
+    Specify the attributes translation table
+    (see section <ref id="translation" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    If this option isn't specified,
+    then <tt/attributes.tbl/ is assumed.
     Change it to <tt/attrib.tbl/ if you'd like it done the old way.
-    This specification only establishes a default attributes translation table;
-    the needed one can always be selected at run time.
-  <tag>INSTALL_ROOT<label id="make-install-root"></tag>
-    Set this variable if you need to install BRLTTY in a different location
-    than the one from which it'll ultimately be used.
-    You need to use this feature, for example,
-    if you're building BRLTTY on one system for use on another.
-    If this variable is set, then the installed file hierarchy
-    is anchored at the directory which it specifies.
-    If it isn't set, then the installed file hierarchy
-    is anchored at the system's root directory.
-    It only applies to <tt/make install/ and <tt/make uninstall/.
-  <tag>PREFIX<label id="make-install-prefix"></tag>
-    Set this variable if you need to install
-    BRLTTY's run-time files in a non-standard location.
-    You need to use this feature, for example, if you'd like to have
-    more than one release of BRLTTY installed at the same time.
-    If this variable is set, then the installed file hierarchy
-    is anchored at the directory which it specifies.
-    If it isn't set, then the installed file hierarchy
-    is anchored at the system's root directory.
-    Even though its sole purpose is to determine
-    where the run-time files are to be installed,
-    it must be set (or not set) throughout the whole build process since
-    certain components of BRLTTY need to know exactly where to find others.
-  <tag>PROG_DIR<label id="make-install-program"></tag>
-    This variable specifies the directory
-    into which the binaries are installed.
-    It's initially set to <tt>/sbin</>.
-  <tag>DATA_DIR<label id="make-install-data"></tag>
-    This variable specifies the directory
-    into which the tables, help pages, and other data files are installed.
-    It's initially set to <tt>/etc/brltty</>.
-  <tag>LIB_DIR<label id="make-install-library"></tag>
-    This variable specifies the directory
-    into which the drivers and other architecture-dependent files are installed.
-    It's initially set to <tt>/lib/brltty</>.
-  <tag>INSTALL_USER<label id="make-install-user"></tag>
-    This variable specifies the user which is to own
-    the binaries and the drivers.
-    It's initially set to <tt/root/.
-  <tag>INSTALL_GRUOP<label id="make-install-group"></tag>
-    This variable specifies the group which is to own
-    the binaries and the drivers.
-    It's initially set to <tt/root/.
-  <tag>INSTALL_MODE<label id="make-install-mode"></tag>
-    This variable specifies the file permissions for
-    the binaries and the drivers.
-    It's initially set to <tt/744/
-    (see the man page for <tt/chmod(1)/).
-  <tag>SCR_O<label id="make-screen-driver"></tag>
-    This variable specifies which screen driver is to be used.
-    It's initially set to <tt/scr_linux.o/.
-    Another screen driver, <tt/scr_shm.o/, may also be used
-    in conjunction with the patch we provide for the <tt/screen/ program
-    (see the <tt/Patches/ subdirectory).
-  <tag>VCSADEV<label id="make-screen-device"></tag>
-    This variable tells the Linux screen driver
-    what all the possible paths to the screen content inspection device are.
-    It's initially set to <tt>/dev/vcsa /dev/vcsa0 /dev/vcc/a</>.
-  <tag>CROSSCOMP<label id="make-compile-cross"></tag>
-    Set this variable if you're cross-compiling for a different architecture.
-    This feature assumes that all of the commands within
-    the cross-compile suite for that architecrue have the same prefix,
-    and this variable should be set to that common prefix.
+    See the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive
+    and the <ref id="options-attributes-table" name="-a"> command line option
+    for run-time selection.
+    This setting can be changed with the
+    <ref id="preference-attributes-table" name="Attributes Table"> preference.
+  <tag><tt/--with-speech-driver=/<em/driver/<label id="build-speech-driver"></tag>
+    Specify the speech synthesizer driver.
+    Either a two-letter <ref id="drivers" name="driver identification code">
+    or the proper name (full or abbreviated) of the driver
+    may be used.
+    If this option isn't specified,
+    then all of the speech synthesizer drivers are built
+    as dynamically loadable shared objects,
+    and the needed one can be selected at run-time.
+    If it is specified,
+    then only that driver is compiled,
+    and statically linked into the BRLTTY binary.
+    See the <ref id="configure-speech-driver" name="speech-driver"> configuration file directive
+    and the <ref id="options-speech-driver" name="-s"> command line option
+    for run-time selection.
+  <tag><tt/--with-screen-driver=/<em/driver/<label id="build-screen-driver"></tag>
+    Specify the screen driver.
+    It may be one of the following:
+    <descrip>
+      <tag/linux/
+        This driver provides direct access to the Linux console screen.
+        It's only selectable, and is the default, on Linux systems.
+        It's default screen content inspection device list is
+        <tt>/dev/vcsa /dev/vcsa0 /dev/vcc/a</>.
+      <tag/shm/
+        This driver provides access to the <tt/screen/ program.
+        It's selectable on all systems,
+        and is the default on most.
+        It has no default screen content inspection device list.
+        The patch for <tt/screen/ which we provide
+        (see the <tt/Patches/ subdirectory)
+        must be applied.
+        Use of this driver,
+        due to the fact that <tt/screen/ must be concurrently running,
+        makes BRLTTY effectively useful only after the user has logged in.
+    </descrip>
+    If this option isn't specified,
+    then an operating system appropriate selection is made.
+    If a specific driver for the current operating system is available,
+    then it's used.
+    If not, then <tt/shm/ is used.
+  <tag><tt/--with-screen-device=/<em/device/<label id="build-screen-device"></tag>
+    Specify the devices which may be used to inspect the screen content.
+    If this option isn't specified,
+    then a driver appropriate list of devices is assumed.
 </descrip>
 
-<sect2>Make File Targets<p>
+<sect3>Directory Specification<label id="build-directoreis"><p>
+<descrip>
+  <tag><tt/--with-install-root=/<em/directory/<label id="build-install-root"></tag>
+    Specify the directory at which
+    the root file system of the
+    <ref id="hierarchy" name="installed file hierarchy">
+    (or a partial image thereof) is rooted.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the local system's root directory is assumed.
+    This directory is only used by
+    <ref id="make-install" name="make install">
+    and <ref id="make-uninstall" name="make uninstall">.
+    Use this option if you need to install BRLTTY in a different location
+    than the one from which it'll ultimately be executed.
+    You need to use this feature, for example,
+    if you're building BRLTTY on one system for use on another.
+  <tag><tt/--with-execute-root=/<em/directory/<label id="build-execute-root"></tag>
+    Specify the directory at which the
+    <ref id="hierarchy" name="installed file hierarchy">
+    is to be rooted.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the system's root directory is assumed.
+    This directory is normally rooted at the system's root directory, but
+    during <ref id="make-install" name="make install">
+    and <ref id="make-uninstall" name="make uninstall">
+    it's rooted at the directory specified by the
+    <ref id="build-install-root" name="--with-install-root"> build option.
+    Use this option if you need to install any of
+    BRLTTY's run-time files in non-standard locations.
+    You need to use this feature, for example, if you'd like to have
+    more than one version of BRLTTY installed at the same time
+    (see section <ref id="multiple" name="Installing Multiple Versions">
+    for an example of how to do this).
+  <tag><tt/--prefix=/<em/directory/<label id="build-portable-root"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the default directories for the architecture-independent files
+    are to be rooted.
+    These directories include:
+    <itemize>
+      <item>the <ref id="build-data-directory" name="data directory">
+    </itemize>
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the system's root directory is assumed.
+    This directory is rooted at the directory specified by the
+    <ref id="build-execute-root" name="--with-execute-root"> build option.
+  <tag><tt/--exec-prefix=/<em/directory/<label id="build-architecture-root"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the default directories for the architecture-dependent files
+    are to be rooted.
+    These directories include:
+    <itemize>
+      <item>the <ref id="build-program-directory" name="program directory">
+      <item>the <ref id="build-library-directory" name="library directory">
+    </itemize>
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the directory specified via the
+    <ref id="build-portable-root" name="--prefix">
+    build option is assumed.
+    This directory is rooted at the directory specified by the
+    <ref id="build-execute-root" name="--with-execute-root"> build option.
+  <tag><tt/--bindir=/<em/directory/<label id="build-program-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the runnable programs (binaries, executables) are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then <tt>/bin</>, rooted at the directory specified by the
+    <ref id="build-architecture-root" name="--exec-prefix">
+    build option, is assumed.
+  <tag><tt/--libdir=/<em/directory/<label id="build-library-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the drivers and other architecture-dependent files are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then <tt>/lib</>, rooted at the directory specified by the
+    <ref id="build-architecture-root" name="--exec-prefix">
+    build option, is assumed.
+    The files themselves are installed within this directory's <tt/brltty/ subdirectory
+    (which is created if necessary).
+  <tag><tt/--sysconfdir=/<em/directory/<label id="build-data-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the configuration files, tables, help pages,
+    and other architecture-dependent files are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then <tt>/etc</>, rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix">
+    build option, is assumed.
+    The files themselves are installed within this directory's <tt/brltty/ subdirectory
+    (which is created if necessary).
+</descrip>
+
+<sect3>Build Features<label id="build-features"><p>
+These options are primarily useful when building BRLTTY for use on a boot disk.
+<descrip>
+  <tag><tt/--enable-standalone-programs/<label id="build-standalone-programs"></tag>
+    Create statically linked, rather than dynamically linked, programs.
+    This option removes all dependencies on shared objects at run-time.
+  <tag><tt/--disable-preferences-menu/<label id="build-preferences-menu"></tag>
+    Reduce program size by excluding the preferences menu
+    (see section <ref id="preferences-menu" name="The Preferences Menu">).
+  <tag><tt/--disable-table-selection/<label id="build-table-selection"></tag>
+    Reduce program size by excluding
+    the table selection entries from the preferences menu
+    (see the <ref id="preference-text-table" name="Text Table">,
+    <ref id="preference-attributes-table" name="Attributes Table">,
+    and <ref id="preference-contraction-table" name="Contraction Table"> preferences).
+  <tag><tt/--disable-learn-mode/<label id="build-learn-mode"></tag>
+    Reduce program size by excluding command learn mode
+    (see section <ref id="learn" name="Command Learn Mode">).
+  <tag><tt/--disable-contracted-braille/<label id="build-contracted-braille"></tag>
+    Reduce program size by excluding support for contracted braille
+    (see section <ref id="contraction" name="Contracted Braille">).
+  <tag><tt/--disable-speaker-tunes/<label id="build-speaker-tunes"></tag>
+    Reduce program size by excluding support for the playing of alert tunes
+    via the built-in PC speaker
+    (see section <ref id="tunes" name="Alert Tunes">).
+  <tag><tt/--disable-dac-tunes/<label id="build-dac-tunes"></tag>
+    Reduce program size by excluding support for the playing of alert tunes
+    via the Digital to Analog Converter on the sound card
+    (see section <ref id="tunes" name="Alert Tunes">).
+  <tag><tt/--disable-midi-tunes/<label id="build-midi-tunes"></tag>
+    Reduce program size by excluding support for the playing of alert tunes
+    via the Musical Instrument Digital Interface on the sound card
+    (see section <ref id="tunes" name="Alert Tunes">).
+  <tag><tt/--disable-adlib-tunes/<label id="build-adlib-tunes"></tag>
+    Reduce program size by excluding support for the playing of alert tunes
+    via the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card
+    (see section <ref id="tunes" name="Alert Tunes">).
+  <tag><tt/--enable-gpm/<label id="build-gpm"></tag>
+    Include an interface to the <tt/gpm/ application
+    so that, on systems which support it,
+    BRLTTY will interact with the pointer (mouse) device
+    (see section <ref id="gpm" name="Pointer (Mouse) Support via GPM">).
+</descrip>
+
+<sect3>Miscellaneous Options<label id="build-miscellaneous"><p>
+<descrip>
+  <tag><tt/--with-compiler-prefix=/<em/prefix/<label id="build-compiler-prefix"></tag>
+    Specify the prefix (path and beginning of program name)
+    for the suite of compile and link tools which are to be used.
+    You may need to use this option if, for example,
+    you're cross-compiling for a different architecture.
+  <tag><tt/--with-init-path=/<em/path/<label id="build-init-path"></tag>
+    Specify the path to the real <tt/init/ program for the system.
+    The absolute path should be supplied.
+    If this option is specified, then:
+    <enum>
+      <item>
+        The <tt/init/ program should be moved to a new location.
+      <item>
+        <tt/brltty/ should be moved to the <tt/init/ program's original location.
+      <item>
+        When the system runs <tt/init/ at startup,
+        <tt/brltty/ is actually run.
+        It puts itself into the background,
+        and runs the real <tt/init/ in the foreground.
+        This is one (somewhat sneaky) way to have braille right at the outset.
+        It's especially useful for some install/rescue disks.
+    </enum>
+    If this option isn't specified, then this feature isn't activated.
+</descrip>
+
+<sect2>Make File Targets<label id="make"><p>
+Once BRLTTY has been configured,
+the next steps are to compile and to install it.
+These are done by applying the system's <tt/make/ command
+to BRLTTY's main make file (<tt/Makefile/ in the top-level directory).
 BRLTTY's make file supports most of the common application maintenance targets.
 They include:
 <descrip>
   <tag/make/
     A shortcut for <tt/make all/.
-  <tag/make all/
+  <tag>make all<label id="make-all"></tag>
     Compile and link the BRLTTY executable, its drivers and their help pages,
     its test programs, and a few other small utilities.
-  <tag/make install/
-    Complete the compile and link phase (see <tt/make all/), and then install
-    the BRLTTY executable, its data files, drivers, and help pages,
+  <tag>make install<label id="make-install"></tag>
+    Complete the compile and link phase
+    (see <ref id="make-all" name="make all">),
+    and then install the BRLTTY executable, its data files, drivers, and help pages,
     in the correct places and with the correct permissions.
-    The screen content inspection device (<tt>/dev/vcsa</> or equivalent)
-    is created if it doesn't already exist.
-  <tag/make uninstall/
+    The screen content inspection device
+    (see the <ref id="build-screen-device" name="--with-screen-device"> build option)
+    is, if applicable, created if it doesn't already exist.
+  <tag>make uninstall<label id="make-uninstall"></tag>
     Remove the BRLTTY executable, its data files, drivers, and help pages,
     from the system.
-  <tag/make clean/
-    Ensure that the next compile and link (see <tt/make all/)
+  <tag>make clean<label id="make-clean"></tag>
+    Ensure that the next compile and link
+    (see <ref id="make-all" name="make all">)
     will be done from scratch by removing the results of
     compiling, linking, and testing from the source directory structure.
     This includes the removal of object files, executables,
     dynamically loadable shared objects, driver lists, help pages,
     temporary header files, and core files.
-  <tag/make distclean/
-    In addition to removing the results of a build (see <tt/make clean/),
-    also remove other files from the source directory structure
-    which tend to accumulate over time but which don't belong there.
-    This includes the removal of editor backup files, test case results,
-    rejected patch hunks, and copies of original source files.
+  <tag>make distclean<label id="make-distclean"></tag>
+    In addition to removing the results of compiling and linking
+    (see <ref id="make-clean" name="make clean">):
+    <itemize>
+      <item>
+        Remove the results of BRLTTY configuration
+        (see <ref id="build" name="Build Options">).
+        This includes the removal of
+        <tt/config.mk/, <tt/config.h/,
+        <tt/config.cache/, <tt/config.status/, and <tt/config.log/.
+      <item>
+        Remove other files from the source directory structure
+        which tend to accumulate over time but which don't belong there.
+        This includes the removal of
+        editor backup files, test case results,
+        rejected patch hunks, and copies of original source files.
+    </itemize>
 </descrip>
 
 <sect1>Testing BRLTTY<p>
@@ -489,9 +685,9 @@ via the <ref id="configure-braille-driver" name="braille-driver">
 and the <ref id="configure-braille-device" name="braille-device">
 configuration file directives,
 and/or compile your needs right into BRLTTY
-via the <ref id="make-braille-driver" name="BRL_TARGET">
-and the <ref id="make-braille-device" name="BRLDEV">
-make file variables.
+via the <ref id="build-braille-driver" name="--with-braille-driver">
+and the <ref id="build-braille-device" name="--with-braille-device">
+build options.
 
 If all is well, BRLTTY's version identification message
 should appear on the braille display for a few seconds
@@ -559,14 +755,14 @@ Here are the ones we know about so far:
 Starting BRLTTY from this script is a good approach (especially for new users).
 Just add a set of lines like these:
 <tscreen><verb>
-if [ -x /sbin/brltty ]
+if [ -x /bin/brltty ]
 then
-   /sbin/brltty
+   /bin/brltty
 fi
 </verb></tscreen>
 This can usually be abbreviated to the somewhat less readable form:
 <tscreen><verb>
-[ -x /sbin/brltty ] && /sbin/brltty
+[ -x /bin/brltty ] && /bin/brltty
 </verb></tscreen>
 Don't add these lines before the first line
 (which usually looks like <tt>&num;!/bin/sh</>).
@@ -593,7 +789,7 @@ Here are the places we know about so far:
     <tscreen><verb>
     # Rerun ourselves through initlog
     if [ -z "$IN_INITLOG" ]; then
-     [ -f /sbin/initlog ] && exec /sbin/initlog $INITLOG_ARGS -r /etc/rc.sysinit
+      [ -f /sbin/initlog ] && exec /sbin/initlog $INITLOG_ARGS -r /etc/rc.sysinit
     fi
     </verb></tscreen>
     Starting BRLTTY before this reinvocation
@@ -614,12 +810,12 @@ You have two choices if you choose this route.
     If you want it to be started really early
     but don't need it to be automatially restarted if it dies,
     then add a line like this before the first <tt/:sysinit:/ line which is already in there.
-    <tscreen>bt::sysinit:/sbin/brltty</tscreen>
+    <tscreen>brl::sysinit:/bin/brltty</tscreen>
   <item>
     If you don't mind it being started later
     but do want it to be automatially restarted if it dies,
     then add a line like this anywhere within the file.
-    <tscreen>bt:12345:respawn:/sbin/brltty -n</tscreen>
+    <tscreen>brl:12345:respawn:/bin/brltty -n</tscreen>
     The <ref id="options-no-daemon" name="-n"> (<tt/--nodaemon/) option is very
     important when running BRLTTY with <bf/init/'s <tt/respawn/ facility.
     You'll end up with hundreds of BRLTTY processes all running at the same time
@@ -661,11 +857,12 @@ Here's what we know so far about how to do this:
 
 If you want to start BRLTTY before any file systems are mounted, then
 ensure that all of its components are installed within the root file system.
-See the <ref id="make-install-prefix" name="PREFIX">,
-<ref id="make-install-program" name="PROG_DIR">,
-<ref id="make-install-data" name="DATA_DIR">,
-<ref id="make-install-library" name="LIB_DIR">,
-and <ref id="make-screen-device" name="VCSADEV"> make file variables.
+See the <ref id="build-execute-root" name="--with-execute-root">,
+<ref id="build-program-directory" name="--bindir">,
+<ref id="build-data-directory" name="--sysconfdir">,
+<ref id="build-library-directory" name="--libdir">,
+and <ref id="build-screen-device" name="--with-screen-device">
+build options.
 
 <sect1>Security Considerations<p>
 BRLTTY needs to run with root privileges because it needs
@@ -685,6 +882,46 @@ Merely having access to the console, however, isn't enough because
 making the speaker beep and simulating key strokes still require root privilege.
 So, if you're willing to give up cursor routing, cut&amp;paste, beeps,
 and all that, you can run BRLTTY without root priviledge.
+
+<sect1>Build and Run-Time Restrictions<p>
+<descrip>
+  <tag/Alert Tunes/
+    Some platforms don't support all of the tune devices.
+    See the <ref id="preference-tune-device" name="Tune Device">
+    preference for details.
+  <tag/ViaVoice Driver/
+    The driver for the ViaVoice software speech synthesizer
+    is only built if that package has been installed.
+  <tag/VideoBraille Driver/
+    The driver for the VideoBraille braille display is built on all systems,
+    but only works on Linux.
+  <tag/Voyager Driver/
+    The driver for the Voyager braille display is only built
+    on the Linux operating system.
+</descrip>
+
+<sect1>Installing from an RPM File<label id="rpm"><p>
+To install BRLTTY from an RPM (RedHat Package Manager) file, do the following:
+<enum>
+  <item>
+    Download the binary package which corresponds to your hardware.
+    It'll be a file named
+    <tt/brltty-/<em/release/<tt/-/<em/version/<tt/./<em/architecture/<tt/.rpm/,
+    e.g. <tt/brltty-3.0-1.i386.rpm/.
+  <item>
+    Install the package.
+    <tscreen>rpm -Uvh brltty-<em/release/-<em/version/.<em/architecture/.rpm</tscreen>
+    This should be done as <bf/root/.
+    Strictly speaking, the <tt/-U/ (update) option is the only one which is necessary.
+    The <tt/-v/ (verbose) option displays the name of the package as it's being installed.
+    The <tt/-h/ (hashes) option displays a progress meter (using hash signs).
+</enum>
+For the brave,
+we also provide the source RPM (<tt/.src.rpm/) file,
+but that's beyond the scope of this document.
+
+To uninstall BRLTTY, do:
+<tscreen>rpm -e brltty</tscreen>
 
 <sect1>Other Utilities<p>
 Building BRLTTY also results in the building of
@@ -753,23 +990,27 @@ This utility tests the braille display driver,
 and also provides an interactive way to learn
 what the keys on the braille display do.
 It must be run as root.
-<tscreen>brltest -<em/option/ ... [<em/driver/ [<em/name/=<em/value/] ...]</tscreen>
+<tscreen>brltest -<em/option/ ... [<em/driver/ [<em/name/=<em/value/ ...]]</tscreen>
 <descrip>
   <tag><em/driver/</tag>
     The driver for the braille display.
     It may be
     either a two-letter <ref id="drivers" name="driver identification code">
     or the absolute path to a dynamically loadable shared object.
-    If it's not specified, then the driver configured within the
-    <ref id="make-braille-driver" name="make file"> is assumed.
+    If it's not specified, then the driver configured via the
+    <ref id="build-braille-driver" name="--with-braille-driver"> build option
+    is assumed.
   <tag><em/name/<tt/=/<em/value/</tag>
     Set a braille display driver parameter.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
   <tag><tt/-d/<em/device/ <tt/--device=/<em/device/</tag>
     The absolute path for the device to which the braille display is connected.
-    If it's not specified, then the device configured within the
-    <ref id="make-braille-device" name="make file"> is assumed.
+    If it's not specified, then the device configured via the
+    <ref id="build-braille-device" name="--with-braille-device"> build option
+    is assumed.
+  <tag><tt/-h/ <tt/--help/</tag>
+    Display a summary of the command line options, and then exit.
 </descrip>
 
 This utility uses BRLTTY's <ref id="learn" name="Command Learn Mode">.
@@ -783,32 +1024,34 @@ is <tt/4/ seconds.
 <sect2>scrtest<label id="utility-scrtest"><p>
 This utility tests the screen driver.
 It must be run as root.
-<tscreen>scrtest -<em/option/ ...</tscreen>
+<tscreen>scrtest -<em/option/ ... [<em/name/=<em/value/ ...]</tscreen>
 <descrip>
-  <tag><tt/-c/<em/column/ <tt/--column=/<em/column/</tag>
+  <tag><em/name/<tt/=/<em/value/</tag>
+    Set a screen driver parameter.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+  <tag><tt/-l/<em/column/ <tt/--left=/<em/column/</tag>
     Specify the starting (left) column (zero-origin) of the region.
     If this value isn't supplied,
     then a default value, based on the specified width,
     is selected such that the region is horizontally centred.
-  <tag><tt/-h/<em/rows/ <tt/--height=/<em/rows/</tag>
-    Specify the height of the region (in rows).
-    If this value isn't supplied,
-    then a default value, based on the specified starting row,
-    is selected such that the region is vertically centred.
-  <tag><tt/-p/<em/name/<tt/=/<em/value/ <tt/--parameter=/<em/name/<tt/=/<em/value/</tag>
-    Set a screen driver parameter.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-  <tag><tt/-r/<em/row/ <tt/--row=/<em/row/</tag>
-    Specify the starting (top) row (zero-origin) of the region.
-    If this value isn't supplied,
-    then a default value, based on the specified height,
-    is selected such that the region is vertically centred.
-  <tag><tt/-w/<em/columns/ <tt/--width=/<em/columns/</tag>
+  <tag><tt/-c/<em/count/ <tt/--columns=/<em/count/</tag>
     Specify the width of the region (in columns).
     If this value isn't supplied,
     then a default value, based on the specified starting column,
     is selected such that the region is horizontally centred.
+  <tag><tt/-t/<em/row/ <tt/--top=/<em/row/</tag>
+    Specify the starting (top) row (zero-origin) of the region.
+    If this value isn't supplied,
+    then a default value, based on the specified height,
+    is selected such that the region is vertically centred.
+  <tag><tt/-r/<em/count/ <tt/--rows=/<em/count/</tag>
+    Specify the height of the region (in rows).
+    If this value isn't supplied,
+    then a default value, based on the specified starting row,
+    is selected such that the region is vertically centred.
+  <tag><tt/-h/ <tt/--help/</tag>
+    Display a summary of the command line options, and then exit.
 </descrip>
 
 Notes:
@@ -871,6 +1114,8 @@ and also provides an easy way to compose new tunes.
         AdLib, OPL3, Sound Blaster, or equivalent sound card.
     </descrip>
     The device name may be abbreviated.
+    See the <ref id="preference-tune-device" name="Tune Device"> preference
+    for details regarding the default device and platform restrictions.
   <tag><tt/-i/<em/instrument/ <tt/--instrument=/<em/instrument/</tag>
     The instrument to use if the selected device is <tt/midi/.
     For the complete list of instruments,
@@ -880,6 +1125,8 @@ and also provides an easy way to compose new tunes.
     by a single minus sign rather than by spaces,
     and any of the words may be abbreviated.
     An <tt/acoustic grand piano/, for example, may be specified as <tt/a-gra-pi/.
+  <tag><tt/-h/ <tt/--help/</tag>
+    Display a summary of the command line options, and then exit.
 </descrip>
 
 <sect>Using BRLTTY<p>
@@ -893,12 +1140,12 @@ run BRLTTY simply by typing the command <tt/brltty/ at a shell prompt
 Check the
 <ref id="options-braille-device" name="-d"> command line option,
 the <ref id="configure-braille-device" name="braille-device"> configuration file directive,
-and the <ref id="make-braille-device" name="BRLDEV"> make file variable
+and the <ref id="build-braille-device" name="--with-braille-device"> build option
 for alternatives regarding how to tell BRLTTY which device your display is connected to.
 Check the
 <ref id="options-braille-driver" name="-b"> command line option,
 the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive,
-and the <ref id="make-braille-driver" name="BRL_TARGET"> make file variable
+and the <ref id="build-braille-driver" name="--with-braille-driver"> build option
 for alternatives regarding how to tell BRLTTY which kind of braille display you have.
 Check the
 <ref id="options-braille-parameters" name="-B"> command line option,
@@ -1100,11 +1347,11 @@ via the <ref id="preferences-menu" name="preferences menu">.
     When showing screen content, the text translation table is used
     (see the <ref id="options-text-table" name="-t"> command line option,
     the <ref id="configure-text-table" name="text-table"> configuration file directive,
-    and the <ref id="make-tables-text" name="TEXTTRANS"> make file variable).
+    and the <ref id="build-text-table" name="--with-text-table"> build option).
     When showing screen attributes, the attributes translation table is used
     (see the <ref id="options-attributes-table" name="-a"> command line option,
     the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,
-    and the <ref id="make-tables-attributes" name="ATTRTRANS"> make file variable).
+    and the <ref id="build-attributes-table" name="--with-attributes-table"> build option).
     This feature only affects the current virtual terminal.
   <tag>SIXDOTS<label id="command-SIXDOTS"></tag>
     Show characters using 6-dot, rather than 8-dot, braille.
@@ -1230,25 +1477,30 @@ via the <ref id="preferences-menu" name="preferences menu">.
     to navigate the help page.
     Invoke the <tt/help/ command again to return to the screen.
   <tag>INFO<label id="command-INFO"></tag>
-    Switch to the status display, which presents a summary including
+    Switch to the status display
+    (see section <ref id="status" name="The Status Display"> for full details).
+    It presents a summary including
     the position of the cursor,
     the position of the braille window,
-    and the states of a nmber of BRLTTY's features.
-    See section <ref id="status" name="The Status Display"> for full details.
-    Invoke the <tt/info/ command again to return to the screen.
+    and the states of a number of BRLTTY's features.
+    Invoke this command again to return to the screen.
   <tag>LEARN<label id="command-LEARN"></tag>
-    Switch to command learn mode,
-    which is an interactive way to learn what the keys on the braille display do.
-    See section <ref id="learn" name="Command Learn Mode"> for full details.
-    Invoke the <tt/learn/ command again to return to the screen.
+    Switch to command learn mode
+    (see section <ref id="learn" name="Command Learn Mode"> for full details).
+    This is how you can interactively learn what your braille display's keys do.
+    Invoke this command again to return to the screen.
+    This command isn't available if the
+    <ref id="build-learn-mode" name="--disable-learn-mode"> build option was specified.
 </descrip>
 
-<sect2>Preferences Settings<p>
+<sect2>Preference Maintenance<p>
 <descrip>
   <tag>PREFMENU<label id="command-PREFMENU"></tag>
     Switch to the preferences menu
     (see <ref id="preferences-menu" name="The Preferences Menu"> for full details).
-    Invoke the <tt/PREFMENU/ command again to return to normal operation.
+    Invoke this command again to return to normal operation.
+    This command isn't available if the
+    <ref id="build-preferences-menu" name="--disable-preferences-menu"> build option was specified.
   <tag>PREFSAVE<label id="command-PREFSAVE"></tag>
     Save the current preferences settings
     (see <ref id="preferences" name="Preferences"> for full details).
@@ -1273,7 +1525,7 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Increment the current menu item's setting.
 </descrip>
 
-<sect2>Speech<p>
+<sect2>Speech Controls<p>
 <descrip>
   <tag>SAY<label id="command-SAY"></tag>
     Speak the current line.
@@ -1296,7 +1548,7 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     (the one whose number is one greater than the current one).
 </descrip>
 
-<sect2>Miscellaneous<p>
+<sect2>Other Commands<p>
 <descrip>
   <tag>CSRJMP_VERT<label id="command-CSRJMP_VERT"></tag>
     Route (bring) the cursor to anywhere on the top line of the braille window
@@ -1385,6 +1637,322 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     with the same routing key.
     This feature only affects the current virtual terminal.
 </descrip>
+
+<sect1>The Configuration File<label id="configure"><p>
+System defaults for many settings may be established within a configuration file.
+The default name for this file is <tt>/etc/brltty.conf</tt>,
+although it may be overridden with the
+<ref id="options-configuration-file" name="-f"> command line option.
+It doesn't need to exist.
+A template for it can be found within the <tt/DOCS/ subdirectory.
+
+Blank lines are ignored.
+A comment begin with a number sign (<tt/&num;/),
+and continues to the end of the line.
+The following directives are recognized:
+<descrip>
+  <tag><tt/attributes-table/ <em/file/<label id="configure-attributes-table"></tag>
+    Specify the attributes translation table
+    (see section <ref id="translation" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    See the <ref id="build-attributes-table" name="--with-attributes-table">
+    build option for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-attributes-table" name="-a"> command line option.
+  <tag><tt/braille-driver/ <em/driver/<label id="configure-braille-driver"></tag>
+    Specify the braille display driver.
+    Either a two-letter <ref id="drivers" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="build-braille-driver" name="--with-braille-driver">
+    build option for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-braille-driver" name="-b"> command line option.
+  <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
+    Specify the device to which the braille display is connected.
+    The full path must be supplied.
+    See the <ref id="build-braille-device" name="--with-braille-device">
+    build option for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-braille-device" name="-d"> command line option.
+  <tag><tt/braille-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-braille-parameters"></tag>
+    Specify parameters for the braille display driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    This directive can be overridden with the
+    <ref id="options-braille-parameters" name="-B"> command line option.
+  <tag><tt/contraction-table/ <em/file/<label id="configure-contraction-table"></tag>
+    Specify the contraction table
+    (see section <ref id="contraction" name="Contracted Braille"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    The contraction table is used when the 6-dot braille feature is activated
+    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command
+    and the <ref id="preference-text-style" name="Text Style"> preference).
+    The default is to display uncontracted 6-dot braille.
+    This directive can be overridden with the
+    <ref id="options-contraction-table" name="-c"> command line option.
+    It isn't available if the
+    <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
+  <tag><tt/preferences-file/ <em/file/<label id="configure-preferences-file"></tag>
+    Specify the location of the preferences file.
+    If it's not specified, then <tt>/etc/brltty-</tt><em/driver/<tt/.prefs/ is assumed,
+    where <em/driver/ is a two-letter <ref id="drivers" name="driver identification code">.
+    The preferences file doesn't need to exist.
+    This directive can be overridden with the
+    <ref id="options-preferences-file" name="-p"> command line option.
+  <tag><tt/screen-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-screen-parameters"></tag>
+    Specify parameters for the screen driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    This directive can be overridden with the
+    <ref id="options-screen-parameters" name="-X"> command line option.
+  <tag><tt/speech-driver/ <em/driver/<label id="configure-speech-driver"></tag>
+    Specify the speech synthesizer driver.
+    Either a two-letter <ref id="drivers" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="build-speech-driver" name="--with-speech-driver">
+    build option for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-speech-driver" name="-s"> command line option.
+  <tag><tt/speech-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
+    Specify parameters for the speech synthesizer driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    This directive can be overridden with the
+    <ref id="options-speech-parameters" name="-S"> command line option.
+  <tag><tt/text-table/ <em/file/<label id="configure-text-table"></tag>
+    Specify the text translation table
+    (see section <ref id="translation" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    See the <ref id="build-text-table" name="--with-text-table">
+    build option for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-text-table" name="-t"> command line option.
+</descrip>
+
+<sect1>Command Line Options<label id="options"><p>
+Many settings can be explicitly specified when invoking BRLTTY.
+The <tt/brltty/ command accepts the following options:
+<descrip>
+  <tag><tt/-a/<em/file/ <tt/--attributes-table=/<em/file/<label id="options-attributes-table"></tag>
+    Specify the attributes translation table
+    (see section <ref id="translation" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    See the <ref id="configure-attributes-table" name="attributes-table">
+    configuration file directive for the default run-time setting.
+    This setting can be changed with the
+    <ref id="preference-attributes-table" name="Attributes Table"> preference.
+  <tag><tt/-b/<em/driver/ <tt/--braille-driver=/<em/driver/<label id="options-braille-driver"></tag>
+    Specify the braille display driver.
+    Either a two-letter <ref id="drivers" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="configure-braille-driver" name="braille-driver">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-c/<em/file/ <tt/--contraction-table=/<em/file/<label id="options-contraction-table"></tag>
+    Specify the contraction table
+    (see section <ref id="contraction" name="Contracted Braille"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    The contraction table is used when the 6-dot braille feature is activated
+    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command
+    and the <ref id="preference-text-style" name="Text Style"> preference).
+    See the <ref id="configure-contraction-table" name="contraction-table">
+    configureation file directive for the default run-time setting.
+    This setting can be changed with the
+    <ref id="preference-contraction-table" name="Contraction Table"> preference.
+    This option isn't available if the
+    <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
+  <tag><tt/-d/<em/device/ <tt/--braille-device=/<em/device/<label id="options-braille-device"></tag>
+    Specify the device to which the braille display is connected.
+    The full path must be supplied.
+    See the <ref id="configure-braille-device" name="braille-device">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-e/ <tt/--standard-error/<label id="options-standard-error"></tag>
+    Write diagnostic messages to standard error.
+    The default is to record them via <tt/syslog/.
+  <tag><tt/-f/<em/file/ <tt/--configuration-file=/<em/file/<label id="options-configuration-file"></tag>
+    Specify the location of the <ref id="configure" name="configuration file">
+    which is to be used for the establishing of default run-time settings.
+  <tag><tt/-h/ <tt/--help/<label id="options-help"></tag>
+    Display a summary of the command line options accepted by BRLTTY,
+    and then exit.
+  <tag><tt/-l/<em/level/ <tt/--log-level=/<em/level/<label id="options-log-level"></tag>
+    Specify the severity threshold for diagnostic message generation.
+    The following levels are recognized.
+    <descrip>
+      <tag/0/emergency
+      <tag/1/alert
+      <tag/2/critical
+      <tag/3/error
+      <tag/4/warning
+      <tag/5/notice
+      <tag/6/information
+      <tag/7/debug
+    </descrip>
+    Either the number or the name may be supplied,
+    and the name may be abbreviated.
+    If not specified,
+    then <tt/information/ is assumed
+    (see the <ref id="options-quiet" name="-q"> option for more details).
+  <tag><tt/-n/ <tt/--no-daemon/<label id="options-no-daemon"></tag>
+    Specify that BRLTTY is to remain in the foreground.
+    If not specified, then BRLTTY becomes a background process (daemon)
+    after initializing itself but before starting any of the selected drivers.
+  <tag><tt/-p/<em/file/ <tt/--preferences-file=/<em/file/<label id="options-preferences-file"></tag>
+    Specify the location of the preferences file.
+    The preferences file doesn't need to exist.
+    See the <ref id="configure-preferences-file" name="preferences-file">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-q/ <tt/--quiet/<label id="options-quiet"></tag>
+    Log less information.
+    This option changes the log level
+    (see the <ref id="options-log-level" name="-l"> option)
+    to <tt/notice/.
+  <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
+    Specify the speech synthesizer driver.
+    Either a two-letter <ref id="drivers" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="configure-speech-driver" name="speech-driver">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/<label id="options-text-table"></tag>
+    Specify the text translation table
+    (see section <ref id="translation" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--sysconfdir">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    See the <ref id="configure-text-table" name="text-table">
+    configureation file directive for the default run-time setting.
+    This setting can be changed with the
+    <ref id="preference-text-table" name="Text Table"> preference.
+  <tag><tt/-v/ <tt/--version/<label id="options-version"></tag>
+    Display the current version of BRLTTY,
+    identify the selected drivers,
+    and then exit.
+    If the <ref id="options-quiet" name="-q"> option isn't specified, then
+    copyright information,
+    and the parameter settings for each of the selected drivers
+    are also displayed,
+    and the working directory, the preferences file,
+    the text and attributes translation tables,
+    and the braille display device and help file are identified.
+  <tag><tt/-B/<em/name/<tt/=/<em/value/<tt/,/... <tt/--braille-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-braille-parameters"></tag>
+    Specify parameters for the braille display driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-braille-parameters" name="braille-parameters">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-E/ <tt/--environment-variables/<label id="options-environment-variables"></tag>
+    Recognize environment variables when determining
+    the default settings for unspecified command line options
+    (see section <ref id="options" name="Command Line Options">).
+    If this option is specified, 
+    and if the environment variable associated with an unspecified option is defined,
+    then the value of that environment variable is used.
+    The names of these environment variables are based on
+    the long names of the options they correspond to:
+    <itemize>   
+      <item>All letters are in upper case.
+      <item>Underscores (<tt/_/) are used instead of minus signs (<tt/-/).
+      <item>The prefix <tt/BRLTTY_/ is added.
+    </itemize>   
+    This option is particularly useful on the Linux operating system
+    as it allows default settings to be passed to BRLTTY via boot parameters.
+    The following environment variables are supported:
+    <descrip>
+      <tag><tt/BRLTTY_ATTRIBUTES_TABLE/</tag>
+        The attributes translation table
+        (see the <ref id="options-attributes-table" name="-a"> command line option).
+      <tag><tt/BRLTTY_BRAILLE_DEVICE/</tag>
+        The braille display device
+        (see the <ref id="options-braille-device" name="-d"> command line option).
+      <tag><tt/BRLTTY_BRAILLE_DRIVER/</tag>
+        The braille display driver
+        (see the <ref id="options-braille-driver" name="-b"> command line option).
+      <tag><tt/BRLTTY_BRAILLE_PARAMETERS/</tag>
+        Parameters for the braille display driver
+        (see the <ref id="options-braille-parameters" name="-B"> command line option).
+      <tag><tt/BRLTTY_CONFIGURATION_FILE/</tag>
+        The configuration file
+        (see the <ref id="options-configuration-file" name="-f"> command line option).
+      <tag><tt/BRLTTY_CONTRACTION_TABLE/</tag>
+        The contraction table
+        (see the <ref id="options-contraction-table" name="-c"> command line option).
+      <tag><tt/BRLTTY_PREFERENCES_FILE/</tag>
+        The preferences file
+        (see the <ref id="options-preferences-file" name="-p"> command line option).
+      <tag><tt/BRLTTY_SCREEN_PARAMETERS/</tag>
+        Parameters for the screen driver
+        (see the <ref id="options-screen-parameters" name="-X"> command line option).
+      <tag><tt/BRLTTY_SPEECH_DRIVER/</tag>
+        The speech synthesizer driver
+        (see the <ref id="options-speech-driver" name="-s"> command line option).
+      <tag><tt/BRLTTY_SPEECH_PARAMETERS/</tag>
+        Parameters for the speech synthesizer driver
+        (see the <ref id="options-speech-parameters" name="-S"> command line option).
+      <tag><tt/BRLTTY_TEXT_TABLE/</tag>
+        The text translation table
+        (see the <ref id="options-text-table" name="-a"> command line option).
+    </descrip>
+  <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
+    Specify the message hold time (in hundredths of a second).
+    If not specified, then <tt/400/ (4 seconds) is assumed.
+    This is the amount of time that BRLTTY keeps its own
+    internally generated messages on the braille display.
+  <tag><tt/-N/ <tt/--no-speech/<label id="options-no-speech"></tag>
+    Don't automatically start the speech synthesizer driver.
+    This option is unfortunately necessary on some systems when BRLTTY is
+    started before the sound subsystem within the kernel has been initialized.
+  <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
+    Specify the file wherein BRLTTY is to write its process identifier (pid).
+    If not specified, BRLTTY doesn't write its process identifier anywhere.
+  <tag><tt/-R/<em/csecs/ <tt/--refresh-interval=/<em/csecs/<label id="options-refresh-interval"></tag>
+    Specify the braille window refresh internal (in hundredths of a second).
+    If not specified, then <tt/4/ (40 milliseconds) is assumed.
+  <tag><tt/-S/<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
+    Specify parameters for the speech synthesizer driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-speech-parameters" name="speech-parameters">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-X/<em/name/<tt/=/<em/value/<tt/,/... <tt/--screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-screen-parameters"></tag>
+    Specify parameters for the screen driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-screen-parameters" name="screen-parameters">
+    configuration file directive for the default run-time setting.
+</descrip>
+
+<sect>Feature Descriptions<p>
 
 <sect1>Cursor Routing<label id="routing"><p>
 When moving the braille window around the screen
@@ -1518,6 +2086,74 @@ The cut buffer is also used by
 the <ref id="command-PRSEARCH" name="PRSEARCH">
 and <ref id="command-NXSEARCH" name="NXSEARCH"> commands.
 
+<sect1>Pointer (Mouse) Support via GPM<label id="gpm"><p>
+If BRLTTY is configured with the <ref id="build-gpm" name="--enable-gpm"> build option
+on a system where the <tt/gpm/ application has been installed,
+then it'll interact with the pointer (mouse).
+
+Moving the braille window moves the pointer
+(see the <ref id="preference-pointer-follows-window" name="Pointer Follows Window"> preference).
+Any motion of the braille window (manual, cursor tracking, etc.),
+other than when it moves in response to pointer motion,
+moves the pointer to the character on the screen
+which corresponds to the upper-left corner of the braille window.
+This enables a sighted observer to see where the braille window is,
+and, therefore, to know what the braille user is reading.
+It also keeps the pointer within the braille window
+so that it can be found easily,
+and so that the pointer device can always be readily used
+as another way to move the braille window.
+
+Moving the pointer drags the braille window
+(see the <ref id="preference-window-follows-pointer" name="Window Follows Pointer"> preference).
+Whenever the pointer is moved beyond the edge of the braille window,
+the braille window is dragged along (one character at a time).
+This gives the braille user another two-dimensional way
+to inspect the screen content
+or to quickly move the braille window to a desired location.
+It also gives a sighted observer an easy way to move the braille window
+to something he'd like the braille user to read.
+
+<tt/gpm/ uses reverse video to show where the pointer is.
+Underlining of highlighted characters
+(see the <ref id="command-ATTRVIS" name="ATTRVIS"> command for details)
+should be turned on, therefore, when the braille user wishes to use the pointer.
+
+This feature also gives the braille user access to <tt/gpm/'s cut-and-paste capability.
+Although you should read <tt/gpm/'s own documentation,
+here are some notes on how it works.
+<itemize>
+  <item>
+    Copy the current character to the cut buffer
+    by single-clicking the left button.
+  <item>
+    Copy the current word (space-delimited) to the cut buffer
+    by double-clicking the left button.
+  <item>
+    Copy the current line to the cut buffer
+    by tripple-clicking the left button.
+  <item>
+    Copy a linear region to the cut buffer as follows:
+    <enum>
+      <item>
+        Place the pointer on the first character of the region.
+      <item>
+        Press (and hold) the left button.
+      <item>
+        Move the pointer to the last character of the region
+        (all currently selected characters are highlighted).
+      <item>
+        Release the left button.
+    </enum>
+  <item>
+    Paste (input) the current contents of the cut buffer
+    by clicking the middle button of a three-button mouse
+    or by clicking the right button of a two-button mouse.
+  <item>
+    Append to the cut buffer
+    by using the right button of a three-button mouse.
+</itemize>
+
 <sect1>Alert Tunes<label id="tunes"><p>
 BRLTTY alerts you to the occurrence of significant events
 by playing short predefined tunes.
@@ -1578,200 +2214,6 @@ These events include:
      When a lengthy command completes.
 </itemize>
 
-<sect1>The Status Display<label id="status"><p>
-The status display is a summary of BRLTTY's current state
-which fits completely within the braille window.
-Some braille displays have a set of status cells
-which are used to permanently display some of this information as well
-(see the documentation for your display's driver).
-The data presented by this display isn't static, and may change at any time
-in response to screen updates and/or BRLTTY commands.
-
-Use the <ref id="command-INFO" name="INFO"> command
-to switch to the status display,
-and use it again to return to the screen.
-The layout of the information contained therein
-is dependent on the size of the braille window.
-
-<sect2>Displays with 21 Cells or More<p>
-Short pneumonics have been used, even though they're rather cryptic,
-in order to show the precise column layout.
-<tscreen><em/wx/:<em/wy/ <em/cx/:<em/cy/ <em/vt/ <em/tcmfdu/</tscreen>
-<descrip>
-  <tag><em/wx/<tt/:/<em/wy/</tag>
-    The column and row (counting from 0) on the screen corresponding
-    to the top-left corner of the braille window.
-  <tag><em/cx/<tt/:/<em/cy/</tag>
-    The column and row (counting from 0) on the screen corresponding
-    to the position of the cursor.
-  <tag><em/vt/</tag>
-    The number (counting from 1) of the current virtual terminal.
-  <tag><em/t/</tag>
-    The state of the cursor tracking feature
-    (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
-    <descrip>
-      <tag>blank</tag>Cursor tracking is off.
-      <tag><tt/t/</tag>Cursor tracking is on.
-    </descrip>
-  <tag><em/c/</tag>
-    The state of the cursor visibility features
-    (see the <ref id="command-CSRVIS" name="CSRVIS">
-    and <ref id="command-CSRBLINK" name="CSRBLINK"> commands).
-    <descrip>
-      <tag>blank</tag>The cursor isn't visible, and won't blink when made visible.
-      <tag><tt/b/</tag>The cursor isn't visible, and will blink when made visible.
-      <tag><tt/v/</tag>The cursor is visible, and isn't blinking.
-      <tag><tt/B/</tag>The cursor is visible, and is blinking.
-    </descrip>
-  <tag><em/m/</tag>
-    The current display mode
-    (see the <ref id="command-DISPMD" name="DISPMD"> command).
-    <descrip>
-      <tag><tt/t/</tag>Screen content (text) is being displayed.
-      <tag><tt/a/</tag>Screen highlighting (attributes) is being displayed.
-    </descrip>
-  <tag><em/f/</tag>
-    The state of the frozen screen feature
-    (see the <ref id="command-FREEZE" name="FREEZE"> command).
-    <descrip>
-      <tag>blank</tag>The screen isn't frozen.
-      <tag><tt/f/</tag>The screen is frozen.
-    </descrip>
-  <tag><em/d/</tag>
-    The number of braille dots being used to display each character
-    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command).
-    <descrip>
-      <tag><tt/8/</tag>All eight dots are being used.
-      <tag><tt/6/</tag>Only dots 1 through 6 are being used.
-    </descrip>
-  <tag><em/u/</tag>
-    The state of the uppercase (capital letter) display features
-    (see the <ref id="command-CAPBLINK" name="CAPBLINK"> command).
-    <descrip>
-      <tag>blank</tag>Uppercase letters don't blink.
-      <tag><tt/B/</tag>Uppercase letters blink.
-    </descrip>
-</descrip>
-
-<sect2>Displays with 20 Cells or Less<p>
-Short pneumonics have been used, even though they're rather cryptic,
-in order to show the precise column layout.
-<tscreen><em/xx/<em/yy/<em/s/ <em/vt/ <em/tcmfdu/</tscreen>
-<descrip>
-  <tag><em/xx/</tag>
-    The columns (counting from 0) on the screen corresponding
-    to the position of the cursor (shown in the top half of the cells)
-    and to the top-left corner of the braille window (shown in the bottom half of the cells).
-  <tag><em/yy/</tag>
-    The rows (counting from 0) on the screen corresponding
-    to the position of the cursor (shown in the top half of the cells)
-    and to the top-left corner of the braille window (shown in the bottom half of the cells).
-  <tag><em/s/</tag>
-    The settings of some of BRLTTY's features.
-    A feature is turned on if its corresponding dot is raised.
-    <descrip>
-      <tag/Dot 1/
-        Frozen screen image
-        (see the <ref id="command-FREEZE" name="FREEZE"> command).
-      <tag/Dot 2/
-        Display attributes
-        (see the <ref id="command-DISPMD" name="DISPMD"> command).
-      <tag/Dot 3/
-        Alert tunes
-        (see the <ref id="command-TUNES" name="TUNES"> command).
-      <tag/Dot 4/
-        Visible cursor
-        (see the <ref id="command-CSRVIS" name="CSRVIS"> command).
-      <tag/Dot 5/
-        Block cursor
-        (see the <ref id="command-CSRSIZE" name="CSRSIZE"> command).
-      <tag/Dot 6/
-        Blinking cursor
-        (see the <ref id="command-CSRBLINK" name="CSRBLINK"> command).
-      <tag/Dot 7/
-        Cursor tracking
-        (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
-      <tag/Dot 8/
-        Sliding window
-        (see the <ref id="command-SLIDEWIN" name="SLIDEWIN"> command).
-    </descrip>
-  <tag><em/vt/</tag>
-    The number (counting from 1) of the current virtual terminal.
-  <tag><em/t/</tag>
-    The state of the cursor tracking feature
-    (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
-    <descrip>
-      <tag>blank</tag>Cursor tracking is off.
-      <tag><tt/t/</tag>Cursor tracking is on.
-    </descrip>
-  <tag><em/c/</tag>
-    The state of the cursor visibility features
-    (see the <ref id="command-CSRVIS" name="CSRVIS">
-    and <ref id="command-CSRBLINK" name="CSRBLINK"> commands).
-    <descrip>
-      <tag>blank</tag>The cursor isn't visible, and won't blink when made visible.
-      <tag><tt/b/</tag>The cursor isn't visible, and will blink when made visible.
-      <tag><tt/v/</tag>The cursor is visible, and isn't blinking.
-      <tag><tt/B/</tag>The cursor is visible, and is blinking.
-    </descrip>
-  <tag><em/m/</tag>
-    The current display mode
-    (see the <ref id="command-DISPMD" name="DISPMD"> command).
-    <descrip>
-      <tag><tt/t/</tag>Screen content (text) is being displayed.
-      <tag><tt/a/</tag>Screen highlighting (attributes) is being displayed.
-    </descrip>
-  <tag><em/f/</tag>
-    The state of the frozen screen feature
-    (see the <ref id="command-FREEZE" name="FREEZE"> command).
-    <descrip>
-      <tag>blank</tag>The screen isn't frozen.
-      <tag><tt/f/</tag>The screen is frozen.
-    </descrip>
-  <tag><em/d/</tag>
-    The number of braille dots being used to display each character
-    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command).
-    <descrip>
-      <tag><tt/8/</tag>All eight dots are being used.
-      <tag><tt/6/</tag>Only dots 1 through 6 are being used.
-    </descrip>
-  <tag><em/u/</tag>
-    The state of the uppercase (capital letter) display features
-    (see the <ref id="command-CAPBLINK" name="CAPBLINK"> command).
-    <descrip>
-      <tag>blank</tag>Uppercase letters don't blink.
-      <tag><tt/B/</tag>Uppercase letters blink.
-    </descrip>
-</descrip>
-
-<sect1>Command Learn Mode<label id="learn"><p>
-Command learn mode is an interactive way to learn
-what the keys on the braille display do.
-It can be accessed
-either by the <ref id="command-LEARN" name="LEARN"> command
-or via the <ref id="utility-brltest" name="brltest"> utility.
-
-When this mode is entered,
-the message <tt/command learn mode/ is written to the braille display.
-Then, as each key (or key combination) on the display is pressed,
-a short message describing its BRLTTY function is written.
-This mode exits immediately if the key (or key combination)
-for the <ref id="command-LEARN" name="LEARN"> command is pressed.
-It exits automatically, and the message <tt/done/ is written,
-if ten seconds elapse without any key on the display being pressed.
-Note that some displays don't signal the driver
-and/or some drivers don't signal BRLTTY
-until all the keys are released.
-
-If a message is longer than the braille display is wide,
-then it's displayed in segments.
-The length of each segment but the last is one less than the display's width,
-with the rightmost character on the display being set to a minus sign.
-Each such segment remains on the display
-either for a few seconds
-(see the <ref id="options-message-delay" name="-M"> command line option)
-or until any key on the display is pressed.
-
 <sect1>Preferences Settings<label id="preferences"><p>
 When BRLTTY starts, it loads a file which contains your preferences settings.
 The file doesn't need to exist,
@@ -1790,7 +2232,10 @@ the <ref id="options-preferences-file" name="-p"> command line option.
 The preferences settings are saved as binary data
 which, therefore, can't be edited by hand.
 BRLTTY, however, has a simple menu from which you can easily change them.
-It's activated by the <ref id="command-PREFMENU" name="PREFMENU"> command.
+This feature isn't available if the
+<ref id="build-preferences-menu" name="--disable-preferences-menu"> build option was specified.
+
+The meny is activated by the <ref id="command-PREFMENU" name="PREFMENU"> command.
 The braille display briefly
 (see the <ref id="options-message-delay" name="-M"> command line option)
 shows the menu title,
@@ -2051,6 +2496,27 @@ Notes:
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that they're to be invisible.
     The initial setting is <tt/2/.
+  <tag>Window Follows Pointer<label id="preference-window-follows-pointer"></tag>
+    When moving the pointer device (mouse):
+    <descrip>
+      <tag/No/
+        Don't drag the braille window.
+      <tag/Yes/
+        Drag the braille window.
+    </descrip>
+    This preference is only presented if the
+    <ref id="build-gpm" name="--enable-gpm"> build option was specified.
+  <tag>Pointer Follows Window<label id="preference-pointer-follows-window"></tag>
+    When moving the braille window:
+    <descrip>
+      <tag/No/
+        Don't move the pointer (mouse).
+      <tag/Yes/
+        Move the pointer (mouse) to the character on the screen
+        corresponding to the top-left corner of the braille window.
+    </descrip>
+    This preference is only presented if the
+    <ref id="build-gpm" name="--enable-gpm"> build option was specified.
   <tag>Alert Tunes<label id="preference-alert-tunes"></tag>
     Whenever a significant event with an associated tune occurs
     (see <ref id="tunes" name="Alert Tunes">):
@@ -2067,27 +2533,42 @@ Notes:
     <descrip>
       <tag/PC Speaker/
         The built-in PC speaker.
-        This setting is always safe to use,
-        although it may be a bit too soft.
+        This setting is supported on Linux.
+        It's always safe to use,
+        although it may be somewhat soft.
+        This device isn't available if the
+        <ref id="build-speaker-tunes" name="--disable-speaker-tunes"> build option was specified.
       <tag/Sound Card/
-        The Digital to Analog Converter on the sound card
-        (via <tt>/dev/dsp</>).
-        This setting doesn't work when the DAC is already being used
+        The Digital to Analog Converter on the sound card.
+        This setting is supported on Linux (via <tt>/dev/dsp</>),
+        and on Solaris (via <tt>/dev/audio</>).
+        It doesn't work when the DAC is already being used
         by another application.
+        This device isn't available if the
+        <ref id="build-dac-tunes" name="--disable-dac-tunes"> build option was specified.
       <tag/MIDI/
         The Musical Instrument Digital Interface on the sound card
-        (via <tt>/dev/sequencer</>).
-        This setting doesn't work when the MIDI is already being used
+        This setting is supported on Linux (via <tt>/dev/sequencer</>).
+        It doesn't work when the MIDI is already being used
         by another application.
+        This device isn't available if the
+        <ref id="build-midi-tunes" name="--disable-midi-tunes"> build option was specified.
       <tag/AdLib/OPL3/SB-FM/
         The FM synthesizer on an
         AdLib, OPL3, Sound Blaster, or equivalent sound card.
-        This setting works even if the FM synthesizer
+        This setting is supported on Linux.
+        It works even if the FM synthesizer
         is already being used by another application.
         The results are unpredictable, and potentially not very good,
-        if you use it with a sound card which doesn't support this feature.
+        if it's used with a sound card which doesn't support this feature.
+        This device isn't available if the
+        <ref id="build-adlib-tunes" name="--disable-adlib-tunes"> build option was specified.
     </descrip>
-    The initial setting is <tt/PC Speaker/.
+    The initial setting is <tt/PC Speaker/ on those platforms which support it,
+    and <tt/Sound Card/ on those platforms which don't.
+    If the selected device isn't available
+    because it was excluded at build-time,
+    then the first device which is available is used instead.
   <tag>MIDI Instrument<label id="preference-midi-instrument"></tag>
     If the Musical Instrument Digital Interface (MIDI) of the sound card
     is being used to play the alert tunes,
@@ -2244,16 +2725,22 @@ Notes:
     See section <ref id="translation-text" name="Text Translation"> for details.
     See the <ref id="options-text-table" name="-t"> command line option for the initial setting.
     This preference isn't saved.
+    It isn't presented if the
+    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
   <tag>Attributesw Table<label id="preference-attributes-table"></tag>
     Select the attributes translation table.
     See section <ref id="translation-attributes" name="Attributes Translation"> for details.
     See the <ref id="options-attributes-table" name="-a"> command line option for the initial setting.
     This preference isn't saved.
+    It isn't presented if the
+    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
   <tag>Contraction Table<label id="preference-contraction-table"></tag>
     Select the contraction table.
-    See section <ref id="contraction" name="Contraction Tables"> for details.
+    See section <ref id="contraction" name="Contracted Braille"> for details.
     See the <ref id="options-contraction-table" name="-c"> command line option for the initial setting.
     This preference isn't saved.
+    It isn't presented if the
+    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
 </descrip>
 
 Notes:
@@ -2264,313 +2751,474 @@ Notes:
     They are integers within the range 1 through 16.
 </itemize>
 
-<sect1>The Configuration File<label id="configure"><p>
-System defaults for many settings may be established within a configuration file.
-The default name for this file is <tt>/etc/brltty.conf</tt>,
-although it may be overridden with the
-<ref id="options-configuration-file" name="-f"> command line option.
-It doesn't need to exist.
-A template for it can be found within the <tt/DOCS/ subdirectory.
+<sect1>The Status Display<label id="status"><p>
+The status display is a summary of BRLTTY's current state
+which fits completely within the braille window.
+Some braille displays have a set of status cells
+which are used to permanently display some of this information as well
+(see the documentation for your display's driver).
+The data presented by this display isn't static, and may change at any time
+in response to screen updates and/or BRLTTY commands.
 
-Blank lines are ignored.
-A comment begin with a number sign (<tt/&num;/),
-and continues to the end of the line.
-The following directives are recognized:
+Use the <ref id="command-INFO" name="INFO"> command
+to switch to the status display,
+and use it again to return to the screen.
+The layout of the information contained therein
+is dependent on the size of the braille window.
+
+<sect2>Displays with 21 Cells or More<p>
+Short pneumonics have been used, even though they're rather cryptic,
+in order to show the precise column layout.
+<tscreen><em/wx/:<em/wy/ <em/cx/:<em/cy/ <em/vt/ <em/tcmfdu/</tscreen>
 <descrip>
-  <tag><tt/attributes-table/ <em/file/<label id="configure-attributes-table"></tag>
-    Specify the attributes translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="make-install-data" name="DATA_DIR">
-    and the <ref id="make-install-prefix" name="PREFIX">
-    make file variables for more details).
-    See the <ref id="make-tables-attributes" name="ATTRTRANS">
-    make file variable for the default established during the build procedure.
-    This directive can be overridden with the
-    <ref id="options-attributes-table" name="-a"> command line option.
-  <tag><tt/braille-driver/ <em/driver/<label id="configure-braille-driver"></tag>
-    Specify the braille display driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
-    See the <ref id="make-braille-driver" name="BRL_TARGET">
-    make file variable for the default established during the build procedure.
-    This directive can be overridden with the
-    <ref id="options-attributes-table" name="-a"> command line option.
-  <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
-    Specify the device to which the braille display is connected.
-    The full path must be supplied.
-    See the <ref id="make-braille-device" name="BRLDEV">
-    make file variable for the default established during the build procedure.
-    This directive can be overridden with the
-    <ref id="options-braille-device" name="-d"> command line option.
-  <tag><tt/braille-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-braille-parameters"></tag>
-    Specify parameters for the braille display driver.
-    If the same parameter is specified more than once,
-    then its rightmost assignment is used.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-    This directive can be overridden with the
-    <ref id="options-braille-parameters" name="-B"> command line option.
-  <tag><tt/contraction-table/ <em/file/<label id="configure-contraction-table"></tag>
-    Specify the contraction table
-    (see section <ref id="contraction" name="Contraction Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="make-install-data" name="DATA_DIR">
-    and the <ref id="make-install-prefix" name="PREFIX">
-    make file variables for more details).
-    The contraction table is used when the 6-dot braille feature is activated
-    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command
-    and the <ref id="preference-text-style" name="Text Style"> preference).
-    The default is to display uncontracted 6-dot braille.
-    This directive can be overridden with the
-    <ref id="options-contraction-table" name="-c"> command line option.
-  <tag><tt/preferences-file/ <em/file/<label id="configure-preferences-file"></tag>
-    Specify the location of the preferences file.
-    If it's not specified, then <tt>/etc/brltty-</tt><em/driver/<tt/.prefs/ is assumed,
-    where <em/driver/ is a two-letter <ref id="drivers" name="driver identification code">.
-    The preferences file doesn't need to exist.
-    This directive can be overridden with the
-    <ref id="options-preferences-file" name="-p"> command line option.
-  <tag><tt/screen-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-screen-parameters"></tag>
-    Specify parameters for the screen driver.
-    If the same parameter is specified more than once,
-    then its rightmost assignment is used.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-    This directive can be overridden with the
-    <ref id="options-screen-parameters" name="-X"> command line option.
-  <tag><tt/speech-driver/ <em/driver/<label id="configure-speech-driver"></tag>
-    Specify the speech synthesizer driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
-    See the <ref id="make-speech-driver" name="SPK_TARGET">
-    make file variable for the default established during the build procedure.
-    This directive can be overridden with the
-    <ref id="options-speech-driver" name="-s"> command line option.
-  <tag><tt/speech-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
-    Specify parameters for the speech synthesizer driver.
-    If the same parameter is specified more than once,
-    then its rightmost assignment is used.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-    This directive can be overridden with the
-    <ref id="options-speech-parameters" name="-S"> command line option.
-  <tag><tt/text-table/ <em/file/<label id="configure-text-table"></tag>
-    Specify the text translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="make-install-data" name="DATA_DIR">
-    and the <ref id="make-install-prefix" name="PREFIX">
-    make file variables for more details).
-    See the <ref id="make-tables-text" name="TEXTTRANS">
-    make file variable for the default established during the build procedure.
-    This directive can be overridden with the
-    <ref id="options-text-table" name="-t"> command line option.
+  <tag><em/wx/<tt/:/<em/wy/</tag>
+    The column and row (counting from 0) on the screen corresponding
+    to the top-left corner of the braille window.
+  <tag><em/cx/<tt/:/<em/cy/</tag>
+    The column and row (counting from 0) on the screen corresponding
+    to the position of the cursor.
+  <tag><em/vt/</tag>
+    The number (counting from 1) of the current virtual terminal.
+  <tag><em/t/</tag>
+    The state of the cursor tracking feature
+    (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
+    <descrip>
+      <tag>blank</tag>Cursor tracking is off.
+      <tag><tt/t/</tag>Cursor tracking is on.
+    </descrip>
+  <tag><em/c/</tag>
+    The state of the cursor visibility features
+    (see the <ref id="command-CSRVIS" name="CSRVIS">
+    and <ref id="command-CSRBLINK" name="CSRBLINK"> commands).
+    <descrip>
+      <tag>blank</tag>The cursor isn't visible, and won't blink when made visible.
+      <tag><tt/b/</tag>The cursor isn't visible, and will blink when made visible.
+      <tag><tt/v/</tag>The cursor is visible, and isn't blinking.
+      <tag><tt/B/</tag>The cursor is visible, and is blinking.
+    </descrip>
+  <tag><em/m/</tag>
+    The current display mode
+    (see the <ref id="command-DISPMD" name="DISPMD"> command).
+    <descrip>
+      <tag><tt/t/</tag>Screen content (text) is being displayed.
+      <tag><tt/a/</tag>Screen highlighting (attributes) is being displayed.
+    </descrip>
+  <tag><em/f/</tag>
+    The state of the frozen screen feature
+    (see the <ref id="command-FREEZE" name="FREEZE"> command).
+    <descrip>
+      <tag>blank</tag>The screen isn't frozen.
+      <tag><tt/f/</tag>The screen is frozen.
+    </descrip>
+  <tag><em/d/</tag>
+    The number of braille dots being used to display each character
+    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command).
+    <descrip>
+      <tag><tt/8/</tag>All eight dots are being used.
+      <tag><tt/6/</tag>Only dots 1 through 6 are being used.
+    </descrip>
+  <tag><em/u/</tag>
+    The state of the uppercase (capital letter) display features
+    (see the <ref id="command-CAPBLINK" name="CAPBLINK"> command).
+    <descrip>
+      <tag>blank</tag>Uppercase letters don't blink.
+      <tag><tt/B/</tag>Uppercase letters blink.
+    </descrip>
 </descrip>
 
-<sect1>Command Line Options<label id="options"><p>
-Many settings can be explicitly specified when invoking BRLTTY.
-The <tt/brltty/ command accepts the following options:
+<sect2>Displays with 20 Cells or Less<p>
+Short pneumonics have been used, even though they're rather cryptic,
+in order to show the precise column layout.
+<tscreen><em/xx/<em/yy/<em/s/ <em/vt/ <em/tcmfdu/</tscreen>
 <descrip>
-  <tag><tt/-a/<em/file/ <tt/--attributes-table=/<em/file/<label id="options-attributes-table"></tag>
-    Specify the attributes translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="make-install-data" name="DATA_DIR">
-    and the <ref id="make-install-prefix" name="PREFIX">
-    make file variables for more details).
-    See the <ref id="configure-attributes-table" name="attributes-table">
-    configuration file directive for the default run-time setting.
-    This setting can be changed with the
-    <ref id="preference-attributes-table" name="Attributes Table"> preference.
-  <tag><tt/-b/<em/driver/ <tt/--braille-driver=/<em/driver/<label id="options-braille-driver"></tag>
-    Specify the braille display driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
-    See the <ref id="configure-braille-driver" name="braille-driver">
-    configuration file variable for the default run-time setting.
-  <tag><tt/-c/<em/file/ <tt/--contraction-table=/<em/file/<label id="options-contraction-table"></tag>
-    Specify the contraction table
-    (see section <ref id="contraction" name="Contraction Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="make-install-data" name="DATA_DIR">
-    and the <ref id="make-install-prefix" name="PREFIX">
-    make file variables for more details).
-    The contraction table is used when the 6-dot braille feature is activated
-    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command
-    and the <ref id="preference-text-style" name="Text Style"> preference).
-    See the <ref id="configure-contraction-table" name="contraction-table">
-    configureation file directive for the default run-time setting.
-    This setting can be changed with the
-    <ref id="preference-contraction-table" name="Contraction Table"> preference.
-  <tag><tt/-d/<em/device/ <tt/--braille-device=/<em/device/<label id="options-braille-device"></tag>
-    Specify the device to which the braille display is connected.
-    The full path must be supplied.
-    See the <ref id="configure-braille-device" name="braille-device">
-    configuration file directive for the default run-time setting.
-  <tag><tt/-e/ <tt/--standard-error/<label id="options-standard-error"></tag>
-    Write diagnostic messages to standard error.
-    The default is to record them via <tt/syslog/.
-  <tag><tt/-f/<em/file/ <tt/--configuration-file=/<em/file/<label id="options-configuration-file"></tag>
-    Specify the location of the <ref id="configure" name="configuration file">
-    which is to be used for the establishing of default run-time settings.
-  <tag><tt/-h/ <tt/--help/<label id="options-help"></tag>
-    Display a summary of the command line options accepted by BRLTTY,
-    and then exit.
-  <tag><tt/-l/<em/level/ <tt/--log-level=/<em/level/<label id="options-log-level"></tag>
-    Specify the severity threshold for diagnostic message generation.
-    The following levels are recognized.
+  <tag><em/xx/</tag>
+    The columns (counting from 0) on the screen corresponding
+    to the position of the cursor (shown in the top half of the cells)
+    and to the top-left corner of the braille window (shown in the bottom half of the cells).
+  <tag><em/yy/</tag>
+    The rows (counting from 0) on the screen corresponding
+    to the position of the cursor (shown in the top half of the cells)
+    and to the top-left corner of the braille window (shown in the bottom half of the cells).
+  <tag><em/s/</tag>
+    The settings of some of BRLTTY's features.
+    A feature is turned on if its corresponding dot is raised.
     <descrip>
-      <tag/0/emergency
-      <tag/1/alert
-      <tag/2/critical
-      <tag/3/error
-      <tag/4/warning
-      <tag/5/notice
-      <tag/6/information
-      <tag/7/debug
+      <tag/Dot 1/
+        Frozen screen image
+        (see the <ref id="command-FREEZE" name="FREEZE"> command).
+      <tag/Dot 2/
+        Display attributes
+        (see the <ref id="command-DISPMD" name="DISPMD"> command).
+      <tag/Dot 3/
+        Alert tunes
+        (see the <ref id="command-TUNES" name="TUNES"> command).
+      <tag/Dot 4/
+        Visible cursor
+        (see the <ref id="command-CSRVIS" name="CSRVIS"> command).
+      <tag/Dot 5/
+        Block cursor
+        (see the <ref id="command-CSRSIZE" name="CSRSIZE"> command).
+      <tag/Dot 6/
+        Blinking cursor
+        (see the <ref id="command-CSRBLINK" name="CSRBLINK"> command).
+      <tag/Dot 7/
+        Cursor tracking
+        (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
+      <tag/Dot 8/
+        Sliding window
+        (see the <ref id="command-SLIDEWIN" name="SLIDEWIN"> command).
     </descrip>
-    Either the number or the name may be supplied,
-    and the name may be abbreviated.
-    If not specified,
-    then <tt/information/ is assumed
-    (see the <ref id="options-quiet" name="-q"> option for more details).
-  <tag><tt/-n/ <tt/--no-daemon/<label id="options-no-daemon"></tag>
-    Specify that BRLTTY is to remain in the foreground.
-    If not specified, then BRLTTY becomes a background process (daemon)
-    after initializing itself but before starting any of the selected drivers.
-  <tag><tt/-p/<em/file/ <tt/--preferences-file=/<em/file/<label id="options-preferences-file"></tag>
-    Specify the location of the preferences file.
-    The preferences file doesn't need to exist.
-    See the <ref id="configure-preferences-file" name="preferences-file">
-    configuration file directive for the default run-time setting.
-  <tag><tt/-q/ <tt/--quiet/<label id="options-quiet"></tag>
-    Log less information.
-    This option changes the log level
-    (see the <ref id="options-log-level" name="-l"> option)
-    to <tt/notice/.
-  <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
-    Specify the speech synthesizer driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
-    See the <ref id="configure-speech-driver" name="speech-driver">
-    configuration file directive for the default run-time setting.
-  <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/<label id="options-text-table"></tag>
-    Specify the text translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="make-install-data" name="DATA_DIR">
-    and the <ref id="make-install-prefix" name="PREFIX">
-    make file variables for more details).
-    See the <ref id="configure-text-table" name="text-table">
-    configureation file directive for the default run-time setting.
-    This setting can be changed with the
-    <ref id="preference-text-table" name="Text Table"> preference.
-  <tag><tt/-v/ <tt/--version/<label id="options-version"></tag>
-    Display the current version of BRLTTY,
-    identify the selected drivers,
-    and then exit.
-    If the <ref id="options-quiet" name="-q"> option isn't specified, then
-    copyright information,
-    and the parameter settings for each of the selected drivers
-    are also displayed,
-    and the working directory, the preferences file,
-    the text and attributes translation tables,
-    and the braille display device and help file are identified.
-  <tag><tt/-B/<em/name/<tt/=/<em/value/<tt/,/... <tt/--braille-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-braille-parameters"></tag>
-    Specify parameters for the braille display driver.
-    If the same parameter is specified more than once,
-    then its rightmost assignment is used.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-    See the <ref id="configure-braille-parameters" name="braille-parameters">
-    configuration file directive for the default run-time setting.
-  <tag><tt/-E/ <tt/--environment-variables/<label id="options-environment-variables"></tag>
-    Recognize environment variables when determining
-    the default settings for unspecified command line options
-    (see section <ref id="options" name="Command Line Options">).
-    If this option is specified, 
-    and if the environment variable associated with an unspecified option is defined,
-    then the value of that environment variable is used.
-    The names of these environment variables are based on
-    the long names of the options they correspond to:
-    <itemize>   
-      <item>All letters are in upper case.
-      <item>Underscores (<tt/_/) are used instead of minus signs (<tt/-/).
-      <item>The prefix <tt/BRLTTY_/ is added.
-    </itemize>   
-    This option allows BRLTTY to be configured via Linux boot parameters.
-    The following environment variables are supported:
+  <tag><em/vt/</tag>
+    The number (counting from 1) of the current virtual terminal.
+  <tag><em/t/</tag>
+    The state of the cursor tracking feature
+    (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
     <descrip>
-      <tag><tt/BRLTTY_ATTRIBUTES_TABLE/</tag>
-        The attributes translation table
-        (see the <ref id="options-attributes-table" name="-a"> command line option).
-      <tag><tt/BRLTTY_BRAILLE_DEVICE/</tag>
-        The braille display device
-        (see the <ref id="options-braille-device" name="-d"> command line option).
-      <tag><tt/BRLTTY_BRAILLE_DRIVER/</tag>
-        The braille display driver
-        (see the <ref id="options-braille-driver" name="-b"> command line option).
-      <tag><tt/BRLTTY_BRAILLE_PARAMETERS/</tag>
-        Parameters for the braille display driver
-        (see the <ref id="options-braille-parameters" name="-B"> command line option).
-      <tag><tt/BRLTTY_CONFIGURATION_FILE/</tag>
-        The configuration file
-        (see the <ref id="options-configuration-file" name="-f"> command line option).
-      <tag><tt/BRLTTY_CONTRACTION_TABLE/</tag>
-        The contraction table
-        (see the <ref id="options-contraction-table" name="-c"> command line option).
-      <tag><tt/BRLTTY_PREFERENCES_FILE/</tag>
-        The preferences file
-        (see the <ref id="options-preferences-file" name="-p"> command line option).
-      <tag><tt/BRLTTY_SCREEN_PARAMETERS/</tag>
-        Parameters for the screen driver
-        (see the <ref id="options-screen-parameters" name="-X"> command line option).
-      <tag><tt/BRLTTY_SPEECH_DRIVER/</tag>
-        The speech synthesizer driver
-        (see the <ref id="options-speech-driver" name="-s"> command line option).
-      <tag><tt/BRLTTY_SPEECH_PARAMETERS/</tag>
-        Parameters for the speech synthesizer driver
-        (see the <ref id="options-speech-parameters" name="-S"> command line option).
-      <tag><tt/BRLTTY_TEXT_TABLE/</tag>
-        The text translation table
-        (see the <ref id="options-text-table" name="-a"> command line option).
+      <tag>blank</tag>Cursor tracking is off.
+      <tag><tt/t/</tag>Cursor tracking is on.
     </descrip>
-  <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
-    Specify the message hold time (in hundredths of a second).
-    If not specified, then <tt/400/ (4 seconds) is assumed.
-    This is the amount of time that BRLTTY keeps its own
-    internally generated messages on the braille display.
-  <tag><tt/-N/ <tt/--no-speech/<label id="options-no-speech"></tag>
-    Don't automatically start the speech synthesizer driver.
-    This option is unfortunately necessary on some systems when BRLTTY is
-    started before the sound subsystem within the kernel has been initialized.
-  <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
-    Specify the file wherein BRLTTY is to write its process identifier (pid).
-    If not specified, BRLTTY doesn't write its process identifier anywhere.
-  <tag><tt/-R/<em/csecs/ <tt/--refresh-interval=/<em/csecs/<label id="options-refresh-interval"></tag>
-    Specify the braille window refresh internal (in hundredths of a second).
-    If not specified, then <tt/4/ (40 milliseconds) is assumed.
-  <tag><tt/-S/<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
-    Specify parameters for the speech synthesizer driver.
-    If the same parameter is specified more than once,
-    then its rightmost assignment is used.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-    See the <ref id="configure-speech-parameters" name="speech-parameters">
-    configuration file directive for the default run-time setting.
-  <tag><tt/-X/<em/name/<tt/=/<em/value/<tt/,/... <tt/--screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-screen-parameters"></tag>
-    Specify parameters for the screen driver.
-    If the same parameter is specified more than once,
-    then its rightmost assignment is used.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-    See the <ref id="configure-screen-parameters" name="screen-parameters">
-    configuration file directive for the default run-time setting.
+  <tag><em/c/</tag>
+    The state of the cursor visibility features
+    (see the <ref id="command-CSRVIS" name="CSRVIS">
+    and <ref id="command-CSRBLINK" name="CSRBLINK"> commands).
+    <descrip>
+      <tag>blank</tag>The cursor isn't visible, and won't blink when made visible.
+      <tag><tt/b/</tag>The cursor isn't visible, and will blink when made visible.
+      <tag><tt/v/</tag>The cursor is visible, and isn't blinking.
+      <tag><tt/B/</tag>The cursor is visible, and is blinking.
+    </descrip>
+  <tag><em/m/</tag>
+    The current display mode
+    (see the <ref id="command-DISPMD" name="DISPMD"> command).
+    <descrip>
+      <tag><tt/t/</tag>Screen content (text) is being displayed.
+      <tag><tt/a/</tag>Screen highlighting (attributes) is being displayed.
+    </descrip>
+  <tag><em/f/</tag>
+    The state of the frozen screen feature
+    (see the <ref id="command-FREEZE" name="FREEZE"> command).
+    <descrip>
+      <tag>blank</tag>The screen isn't frozen.
+      <tag><tt/f/</tag>The screen is frozen.
+    </descrip>
+  <tag><em/d/</tag>
+    The number of braille dots being used to display each character
+    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command).
+    <descrip>
+      <tag><tt/8/</tag>All eight dots are being used.
+      <tag><tt/6/</tag>Only dots 1 through 6 are being used.
+    </descrip>
+  <tag><em/u/</tag>
+    The state of the uppercase (capital letter) display features
+    (see the <ref id="command-CAPBLINK" name="CAPBLINK"> command).
+    <descrip>
+      <tag>blank</tag>Uppercase letters don't blink.
+      <tag><tt/B/</tag>Uppercase letters blink.
+    </descrip>
+</descrip>
+
+<sect1>Command Learn Mode<label id="learn"><p>
+Command learn mode is an interactive way to learn
+what the keys on the braille display do.
+It can be accessed
+either by the <ref id="command-LEARN" name="LEARN"> command
+or via the <ref id="utility-brltest" name="brltest"> utility.
+This feature isn't available if the
+<ref id="build-learn-mode" name="--disable-learn-mode"> build option was specified.
+
+When this mode is entered,
+the message <tt/command learn mode/ is written to the braille display.
+Then, as each key (or key combination) on the display is pressed,
+a short message describing its BRLTTY function is written.
+This mode exits immediately if the key (or key combination)
+for the <ref id="command-LEARN" name="LEARN"> command is pressed.
+It exits automatically, and the message <tt/done/ is written,
+if ten seconds elapse without any key on the display being pressed.
+Note that some displays don't signal the driver
+and/or some drivers don't signal BRLTTY
+until all the keys are released.
+
+If a message is longer than the braille display is wide,
+then it's displayed in segments.
+The length of each segment but the last is one less than the display's width,
+with the rightmost character on the display being set to a minus sign.
+Each such segment remains on the display
+either for a few seconds
+(see the <ref id="options-message-delay" name="-M"> command line option)
+or until any key on the display is pressed.
+
+<sect1>Contracted Braille<label id="contraction"><p>
+BRLTTY can display in-line contracted braille.
+It does this if:
+<itemize>
+  <item>
+    A contraction table has been selected.
+    See the <ref id="options-contraction-table" name="-c"> command line option
+    and the <ref id="configure-contraction-table" name="contraction-table"> configuration file directive
+    for details.
+  <item>
+    The 6-dot braille feature has been activated.
+    See the <ref id="command-SIXDOTS" name="SIXDOTS"> command
+    and the <ref id="preference-text-style" name="Text Style"> preference
+    for details.
+</itemize>
+This feature isn't available if the
+<ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
+
+The following contraction tables are provided:
+<descrip>
+  <tag/compress.ctb/Remove excessive white-space.
+  <tag/en-us-g2.ctb/Grade 2 American English.
+</descrip>
+
+<sect2>File Format<p>
+Blank lines are ignored.
+Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
+Lines which begin with a number sign (<tt/&num;/) are ignored,
+i.e. they're comments.
+<tscreen>&num; This is a comment.</tscreen>
+All other lines define table entries.
+
+The general form of a table entry is an opcode followed by its operands.
+The opcode and its operands are separated from one another by white-space.
+Each opcode has a specific number of operands,
+and any text following its last operand is treated as a comment.
+<tscreen><em/opcode/ <em/operand/ ... <em/comment/</tscreen>
+
+The opcode is a number which tells the translator how to interpret the operands.
+Opcode <tt/0/ can be used to assign a meaningful name to each needed opcode,
+e.g. <tt/opcode/ for <tt/0/ itself.
+If, for example, a table begins with:
+<tscreen>0 0 opcode</tscreen>
+then all the rest of the opcodes it needs can be defined like this:
+<tscreen>opcode 1 include</tscreen>
+This scheme, i.e. no built-in opcode names, was chosen in order to allow
+a table for some language's braille to be written solely in that language itself.
+
+The following operand types are supported:
+<descrip>
+  <tag/string/
+    A sequence of characters other than
+    white-space (which terminates the string)
+    and backslashes (<tt/&bsol;/).
+    The following special representations are also supported:
+    <descrip>
+      <tag><tt/&bsol;&bsol;/</tag>backslash
+      <tag><tt/&bsol;f/</tag>form feed
+      <tag><tt/&bsol;n/</tag>new line
+      <tag><tt/&bsol;o/<em/ooo/</tag>3-digit octal value
+      <tag><tt/&bsol;r/</tag>carriage return
+      <tag><tt/&bsol;s/</tag>blank (space)
+      <tag><tt/&bsol;t/</tag>horizontal tab
+      <tag><tt/&bsol;v/</tag>vertical tab
+      <tag><tt/&bsol;x/<em/xx/</tag>2-digit hexadecimal value
+    </descrip>
+  <tag/number/
+    An integer.
+    It may be specified in any of the following ways:
+    <descrip>
+      <tag/decimal/
+        A sequence of decimal digits (<tt/0/-<tt/9/),
+        with the first digit being nonzero (<tt/1/-<tt/9/).
+      <tag/hexadecimal/
+        A sequence of hexadecimal digits (<tt/0/-<tt/9/, and either <tt/a/-<tt/f/ or <tt/A/-<tt/F/),
+        preceded by either <tt/0x/ or <tt/0X/.
+      <tag/octal/
+        A sequence of octal digits (<tt/0/-<tt/7/),
+        with the first digit being zero (<tt/0/).
+    </descrip>
+  <tag/dots/
+    A braille symbol.
+    The braille dots must be specified via their standard numbers
+    (see section <ref id="dots" name="Braille Dot Numbering Convention">),
+    and, for a multi-cell symbol, the cell specifications
+    must be separated from one another by a dash (<tt/-/).
+    For example, the contraction for the English word <tt/lord/
+    (the letter <tt/l/ prefixed with dot 5)
+    would be specified as <tt/5-123/.
+    A space may be specified via the special dot number <tt/0/.
+</descrip>
+
+<sect2>Opcode Summary by Number<label id="contraction-opcode-number"><p>
+First, here's a quick summary of all of the contraction table opcodes.
+For the details, see section
+<ref id="contraction-opcode-function" name="Opcodes by Function">.
+<descrip>
+  <tag><ref id="contraction-opcode-0" name="0"> <em/opcode/ <em/name/</tag>
+    Name opcode.
+  <tag><ref id="contraction-opcode-1" name="1"> <em/path/</tag>
+    Include file.
+  <tag><ref id="contraction-opcode-2" name="2"> <em/dots/</tag>
+    Define capital sign.
+  <tag><ref id="contraction-opcode-3" name="3"> <em/dots/</tag>
+    Define begin capitals sign.
+  <tag><ref id="contraction-opcode-4" name="4"> <em/dots/</tag>
+    Define letter sign.
+  <tag><ref id="contraction-opcode-5" name="5"> <em/dots/</tag>
+    Define number sign.
+  <tag><ref id="contraction-opcode-6" name="6"> <em/characters/ <em/dots/</tag>
+    Translate unconditionally.
+  <tag><ref id="contraction-opcode-7" name="7"> <em/characters/ <em/dots/</tag>
+    Translate unconditionally, remove repetitions.
+  <tag><ref id="contraction-opcode-8" name="8"> <em/characters/ <em/dots/</tag>
+    Translate if word.
+  <tag><ref id="contraction-opcode-9" name="9"> <em/characters/ <em/dots/</tag>
+    Translate if at beginning of word.
+  <tag><ref id="contraction-opcode-10" name="10"> <em/characters/ <em/dots/</tag>
+    Translate if in middle of word.
+  <tag><ref id="contraction-opcode-11" name="11"> <em/characters/ <em/dots/</tag>
+    Translate if at end of word.
+  <tag><ref id="contraction-opcode-12" name="12"> <em/characters/ <em/dots/</tag>
+    Translate if in middle or at end of word.
+  <tag><ref id="contraction-opcode-13" name="13"> <em/characters/ <em/dots/</tag>
+    Translate if in middle of number.
+  <tag><ref id="contraction-opcode-14" name="14"> <em/characters/ <em/dots/</tag>
+    Translate if white-space-bounded word.
+  <tag><ref id="contraction-opcode-15" name="15"> <em/characters/ <em/dots/</tag>
+    Translate unconditionally, join consecutive words of this type.
+  <tag><ref id="contraction-opcode-16" name="16"> <em/characters/ <em/dots/</tag>
+    Translate if word, join to next word.
+  <tag><ref id="contraction-opcode-17" name="17"> <em/characters/</tag>
+    Translate whole white-space-bounded sequence unconditionally into computer braille.
+  <tag><ref id="contraction-opcode-18" name="18"> <em/characters/</tag>
+    Prefix with letter sign if word.
+  <tag><ref id="contraction-opcode-19" name="19"> <em/characters/</tag>
+    Ignore unconditionally.
+  <tag><ref id="contraction-opcode-20" name="20"> <em/characters/ <em/dots/</tag>
+    Translate if at end of number.
+  <tag><ref id="contraction-opcode-21" name="21"> <em/characters/ <em/dots/</tag>
+    Translate if at beginning of number.
+  <tag><ref id="contraction-opcode-22" name="22"> <em/characters/ <em/dots/</tag>
+    Translate if part of leading punctuation.
+  <tag><ref id="contraction-opcode-23" name="23"> <em/characters/ <em/dots/</tag>
+    Translate if part of trailing punctuation.
+  <tag><ref id="contraction-opcode-24" name="24"> <em/characters/ <em/dots/</tag>
+    Translate if word or at beginning of word.
+  <tag><ref id="contraction-opcode-25" name="25"> <em/dots/</tag>
+    Define end capitals sign.
+</descrip>
+
+<sect2>Opcodes by Function<label id="contraction-opcode-function"><p>
+Now for all of the details.
+The opcodes here are grouped by function rather than sorted by number.
+For a numerically sorted list, see section
+<ref id="contraction-opcode-number" name="Opcode Summary by Number">.
+
+<sect3>Table Administration<p>
+These opcodes make it easier to write contraction tables.
+They have no direct effect on the character translation.
+<descrip>
+  <tag>0 <em/opcode/ <em/name/<label id="contraction-opcode-0"></tag>
+    Assign a name to an opcode.
+    The name must be defined before it's used.
+  <tag>1 <em/path/<label id="contraction-opcode-1"></tag>
+    Include the contents of another file.
+    Nesting can be to any depth.
+    Relative paths are anchored at the directory of the including file.
+</descrip>
+
+<sect3>Special Symbol Definition<p>
+These opcodes define special symbols which must be
+inserted into the braille text in order to clarify it.
+<descrip>
+  <tag>2 <em/dots/<label id="contraction-opcode-2"></tag>
+    The symbol which capitalizes a single letter.
+  <tag>3 <em/dots/<label id="contraction-opcode-3"></tag>
+    The symbol which begins a block of capital letters within a word.
+  <tag>25 <em/dots/<label id="contraction-opcode-25"></tag>
+    The symbol which ends a block of capital letters within a word.
+  <tag>4 <em/dots/<label id="contraction-opcode-4"></tag>
+    The symbol which marks a letter which isn't part of a word.
+  <tag>5 <em/dots/<label id="contraction-opcode-5"></tag>
+    The symbol which marks the beginning of a number.
+</descrip>
+
+<sect3>Character Translation<p>
+These opcodes define the braille representations for character sequences.
+Each of them defines an entry within the contraction table.
+These entries may be defined in any order except, as noted below,
+when they define alternate representations for the same character sequence.
+
+Each of these opcodes has
+a <em/characters/ operand (which must be specified as a <em/string/),
+and a built-in condition governing its eligibility for use.
+The text is processed strictly from left to right, character by character,
+with the most eligible entry for each position being used.
+If there's more than one eligible entry for a given position,
+then the one with the longest character string is used.
+If there's more than one eligible entry for the same character string,
+then the one defined nearest to the beginning of the table is used
+(this is the only order dependency).
+
+Many of these opcodes have a <em/dots/ operand
+which defines the braille representation for its <em/characters/ operand.
+It may also be specified as an equals sign (<tt/=/),
+in which case it means one of two things.
+If the entry is for a single character,
+then it means that the currently selected computer braille representation
+(see the <ref id="options-text-table" name="-t"> command line option
+and the <ref id="configure-text-table" name="text-table"> configuration file directive)
+for that character is to be used.
+If it's for a multi-character sequence,
+then the default representation for each character
+(see <ref id="contraction-opcode-6" name="opcode 6">)
+within the sequence is to be used.
+
+Some special terms are used within the descriptions of these opcodes.
+<descrip>
+  <tag/word/
+    A maximal sequence of one or more consecutive letters.
+</descrip>
+
+Now, finally, here are the opcode descriptions themselves:
+<descrip>
+  <tag>17 <em/characters/<label id="contraction-opcode-17"></tag>
+    Translate the entire white-space-bounded containing character sequence into computer braille
+    (see the <ref id="options-text-table" name="-t"> command line option
+    and the <ref id="configure-text-table" name="text-table"> configuration file directive).
+  <tag>19 <em/characters/<label id="contraction-opcode-19"></tag>
+    Ignore the characters no matter where they appear.
+  <tag>6 <em/characters/ <em/dots/<label id="contraction-opcode-6"></tag>
+    Translate the characters no matter where they appear.
+    If there's only one character, then, in addition,
+    define the default representation for that character.
+  <tag>7 <em/characters/ <em/dots/<label id="contraction-opcode-7"></tag>
+    Translate the characters no matter where they appear.
+    Ignore any consecutive repetitions of the same sequence.
+  <tag>15 <em/characters/ <em/dots/<label id="contraction-opcode-15"></tag>
+    Translate the characters no matter where they appear.
+    Remove white-space between consecutive words matched by this opcode.
+  <tag>8 <em/characters/ <em/dots/<label id="contraction-opcode-8"></tag>
+    Translate the characters if they're a word.
+  <tag>16 <em/characters/ <em/dots/<label id="contraction-opcode-16"></tag>
+    Translate the characters if they're a word.
+    Remove the following white-space if the first character after it is a letter.
+  <tag>14 <em/characters/ <em/dots/<label id="contraction-opcode-14"></tag>
+    Translate the characters if they're a white-space-bounded word.
+  <tag>18 <em/characters/<label id="contraction-opcode-18"></tag>
+    Prefix the characters with a letter sign
+    (see <ref id="contraction-opcode-4" name="opcode 4">)
+    if they're a word.
+  <tag>24 <em/characters/ <em/dots/<label id="contraction-opcode-24"></tag>
+    Translate the characters if they're either a word or at the beginning of a word.
+  <tag>9 <em/characters/ <em/dots/<label id="contraction-opcode-9"></tag>
+    Translate the characters if they're at the beginning of a word.
+  <tag>10 <em/characters/ <em/dots/<label id="contraction-opcode-10"></tag>
+    Translate the characters if they're in the middle of a word.
+  <tag>12 <em/characters/ <em/dots/<label id="contraction-opcode-12"></tag>
+    Translate the characters if they're either in the middle or at the end of a word.
+  <tag>11 <em/characters/ <em/dots/<label id="contraction-opcode-11"></tag>
+    Translate the characters if they're at the end of a word.
+  <tag>22 <em/characters/ <em/dots/<label id="contraction-opcode-22"></tag>
+    Translate the characters if they're part of punctuation at the beginning of a word.
+  <tag>23 <em/characters/ <em/dots/<label id="contraction-opcode-23"></tag>
+    Translate the characters if they're part of punctuation at the end of a word.
+  <tag>21 <em/characters/ <em/dots/<label id="contraction-opcode-21"></tag>
+    Translate the characters if they're at the beginning of a number.
+  <tag>13 <em/characters/ <em/dots/<label id="contraction-opcode-13"></tag>
+    Translate the characters if they're in the middle of a number.
+  <tag>20 <em/characters/ <em/dots/<label id="contraction-opcode-20"></tag>
+    Translate the characters if they're at the end of a number.
 </descrip>
 
 <sect>Translation Tables<label id="translation"><p>
@@ -2600,7 +3248,7 @@ several alternatives are provided:
 </descrip>
 See the <ref id="options-text-table" name="-t"> command line option,
 the <ref id="configure-text-table" name="text-table"> configuration file directive,
-and the <ref id="make-tables-text" name="TEXTTRANS"> make file variable
+and the <ref id="build-text-table" name="--with-text-table"> build option
 for details regarding how to use an alternate text translation table.
 
 <sect1>Attributes Translation<label id="translation-attributes"><p>
@@ -2653,7 +3301,7 @@ Two attributes translation tables are provided:
 </descrip>
 See the <ref id="options-attributes-table" name="-a"> command line option,
 the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,
-and the <ref id="make-tables-attributes" name="ATTRTRANS"> make file variable
+and the <ref id="build-attributes-table" name="--with-attributes-table"> build option
 for details regarding how to use an alternate attributes translation table.
 
 <sect1>Table Format<p>
@@ -2677,7 +3325,10 @@ to vertically shift a dot pattern.
 <sect1>Table Utilities<p>
 These utilities reside within the <tt/BrailleTables/ subdirectory,
 and aren't built as part of the regular procedure.
-To build them, run <tt/make/ within the <tt/BrailleTables/ subdirectory.
+To build them,
+first ensure that BRLTTY has been configured
+(see section <ref id="build" name="Build Options">),
+and then run <tt/make/ within the <tt/BrailleTables/ subdirectory.
 <tscreen><verb>
 cd BrailleTables
 make
@@ -2817,299 +3468,30 @@ The following dot mappings are supported:
     </descrip>
 </descrip>
 
-<sect>Contraction Tables<label id="contraction"><p>
-BRLTTY can display in-line contracted braille.
-It does this if:
-<itemize>
-  <item>
-    A contraction table has been selected.
-    See the <ref id="options-contraction-table" name="-c"> command line option
-    and the <ref id="configure-contraction-table" name="contraction-table"> configuration file directive
-    for details.
-  <item>
-    The 6-dot braille feature has been activated.
-    See the <ref id="command-SIXDOTS" name="SIXDOTS"> command
-    and the <ref id="preference-text-style" name="Text Style"> preference
-    for details.
-</itemize>
-
-The following contraction tables are provided:
-<descrip>
-  <tag/compress.ctb/Remove excessive white-space.
-  <tag/en-us-g2.ctb/Grade 2 American English
-</descrip>
-
-<sect1>File Format<p>
-Blank lines are ignored.
-Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
-Lines which begin with a number sign (<tt/&num;/) are ignored,
-i.e. they're comments.
-<tscreen>&num; This is a comment.</tscreen>
-All other lines define table entries.
-
-The general form of a table entry is an opcode followed by its operands.
-The opcode and its operands are separated from one another by white-space.
-Each opcode has a specific number of operands,
-and any text following its last operand is treated as a comment.
-<tscreen><em/opcode/ <em/operand/ ... <em/comment/</tscreen>
-
-The opcode is a number which tells the translator how to interpret the operands.
-Opcode <tt/0/ can be used to assign a meaningful name to each needed opcode,
-e.g. <tt/opcode/ for <tt/0/ itself.
-If, for example, a table begins with:
-<tscreen>0 0 opcode</tscreen>
-then all the rest of the opcodes it needs can be defined like this:
-<tscreen>opcode 1 include</tscreen>
-This scheme, i.e. no built-in opcode names, was chosen in order to allow
-a table for some language's braille to be written solely in that language itself.
-
-The following operand types are supported:
-<descrip>
-  <tag/string/
-    A sequence of characters other than
-    white-space (which terminates the string)
-    and backslashes (<tt/&bsol;/).
-    The following special representations are also supported:
-    <descrip>
-      <tag><tt/&bsol;&bsol;/</tag>backslash
-      <tag><tt/&bsol;f/</tag>form feed
-      <tag><tt/&bsol;n/</tag>new line
-      <tag><tt/&bsol;o/<em/ooo/</tag>3-digit octal value
-      <tag><tt/&bsol;r/</tag>carriage return
-      <tag><tt/&bsol;s/</tag>blank (space)
-      <tag><tt/&bsol;t/</tag>horizontal tab
-      <tag><tt/&bsol;v/</tag>vertical tab
-      <tag><tt/&bsol;x/<em/xx/</tag>2-digit hexadecimal value
-    </descrip>
-  <tag/number/
-    An integer.
-    It may be specified in any of the following ways:
-    <descrip>
-      <tag/decimal/
-        A sequence of decimal digits (<tt/0/-<tt/9/),
-        with the first digit being nonzero (<tt/1/-<tt/9/).
-      <tag/hexadecimal/
-        A sequence of hexadecimal digits (<tt/0/-<tt/9/, and either <tt/a/-<tt/f/ or <tt/A/-<tt/F/),
-        preceded by either <tt/0x/ or <tt/0X/.
-      <tag/octal/
-        A sequence of octal digits (<tt/0/-<tt/7/),
-        with the first digit being zero (<tt/0/).
-    </descrip>
-  <tag/dots/
-    A braille symbol.
-    The braille dots must be specified via their standard numbers
-    (see section <ref id="dots" name="Braille Dot Numbering Convention">),
-    and, for a multi-cell symbol, the cell specifications
-    must be separated from one another by a dash (<tt/-/).
-    For example, the contraction for the English word <tt/lord/
-    (the letter <tt/l/ prefixed with dot 5)
-    would be specified as <tt/5-123/.
-    A space may be specified via the special dot number <tt/0/.
-</descrip>
-
-<sect1>Opcode Summary by Number<label id="contraction-opcode-number"><p>
-First, here's a quick summary of all of the contraction table opcodes.
-For the details, see section
-<ref id="contraction-opcode-function" name="Opcodes by Function">.
-<descrip>
-  <tag><ref id="contraction-opcode-0" name="0"> <em/opcode/ <em/name/</tag>
-    Name opcode.
-  <tag><ref id="contraction-opcode-1" name="1"> <em/path/</tag>
-    Include file.
-  <tag><ref id="contraction-opcode-2" name="2"> <em/dots/</tag>
-    Define capital sign.
-  <tag><ref id="contraction-opcode-3" name="3"> <em/dots/</tag>
-    Define begin capitals sign.
-  <tag><ref id="contraction-opcode-4" name="4"> <em/dots/</tag>
-    Define letter sign.
-  <tag><ref id="contraction-opcode-5" name="5"> <em/dots/</tag>
-    Define number sign.
-  <tag><ref id="contraction-opcode-6" name="6"> <em/characters/ <em/dots/</tag>
-    Translate unconditionally.
-  <tag><ref id="contraction-opcode-7" name="7"> <em/characters/ <em/dots/</tag>
-    Translate unconditionally, remove repetitions.
-  <tag><ref id="contraction-opcode-8" name="8"> <em/characters/ <em/dots/</tag>
-    Translate if word.
-  <tag><ref id="contraction-opcode-9" name="9"> <em/characters/ <em/dots/</tag>
-    Translate if at beginning of word.
-  <tag><ref id="contraction-opcode-10" name="10"> <em/characters/ <em/dots/</tag>
-    Translate if in middle of word.
-  <tag><ref id="contraction-opcode-11" name="11"> <em/characters/ <em/dots/</tag>
-    Translate if at end of word.
-  <tag><ref id="contraction-opcode-12" name="12"> <em/characters/ <em/dots/</tag>
-    Translate if in middle or at end of word.
-  <tag><ref id="contraction-opcode-13" name="13"> <em/characters/ <em/dots/</tag>
-    Translate if in middle of number.
-  <tag><ref id="contraction-opcode-14" name="14"> <em/characters/ <em/dots/</tag>
-    Translate if white-space-bounded word.
-  <tag><ref id="contraction-opcode-15" name="15"> <em/characters/ <em/dots/</tag>
-    Translate unconditionally, join consecutive words of this type.
-  <tag><ref id="contraction-opcode-16" name="16"> <em/characters/ <em/dots/</tag>
-    Translate if word, join to next word.
-  <tag><ref id="contraction-opcode-17" name="17"> <em/characters/</tag>
-    Translate whole white-space-bounded sequence unconditionally into computer braille.
-  <tag><ref id="contraction-opcode-18" name="18"> <em/characters/</tag>
-    Prefix with letter sign if word.
-  <tag><ref id="contraction-opcode-19" name="19"> <em/characters/</tag>
-    Ignore unconditionally.
-  <tag><ref id="contraction-opcode-20" name="20"> <em/characters/ <em/dots/</tag>
-    Translate if at end of number.
-  <tag><ref id="contraction-opcode-21" name="21"> <em/characters/ <em/dots/</tag>
-    Translate if at beginning of number.
-  <tag><ref id="contraction-opcode-22" name="22"> <em/characters/ <em/dots/</tag>
-    Translate if part of leading punctuation.
-  <tag><ref id="contraction-opcode-23" name="23"> <em/characters/ <em/dots/</tag>
-    Translate if part of trailing punctuation.
-  <tag><ref id="contraction-opcode-24" name="24"> <em/characters/ <em/dots/</tag>
-    Translate if word or at beginning of word.
-  <tag><ref id="contraction-opcode-25" name="25"> <em/dots/</tag>
-    Define end capitals sign.
-</descrip>
-
-<sect1>Opcodes by Function<label id="contraction-opcode-function"><p>
-Now for all of the details.
-The opcodes here are grouped by function rather than sorted by number.
-For a numerically sorted list, see section
-<ref id="contraction-opcode-number" name="Opcode Summary by Number">.
-
-<sect2>Table Administration<p>
-These opcodes make it easier to write contraction tables.
-They have no direct effect on the character translation.
-<descrip>
-  <tag>0 <em/opcode/ <em/name/<label id="contraction-opcode-0"></tag>
-    Assign a name to an opcode.
-    The name must be defined before it's used.
-  <tag>1 <em/path/<label id="contraction-opcode-1"></tag>
-    Include the contents of another file.
-    Nesting can be to any depth.
-    Relative paths are anchored at the directory of the including file.
-</descrip>
-
-<sect2>Special Symbol Definition<p>
-These opcodes define special symbols which must be
-inserted into the braille text in order to clarify it.
-<descrip>
-  <tag>2 <em/dots/<label id="contraction-opcode-2"></tag>
-    The symbol which capitalizes a single letter.
-  <tag>3 <em/dots/<label id="contraction-opcode-3"></tag>
-    The symbol which begins a block of capital letters within a word.
-  <tag>25 <em/dots/<label id="contraction-opcode-25"></tag>
-    The symbol which ends a block of capital letters within a word.
-  <tag>4 <em/dots/<label id="contraction-opcode-4"></tag>
-    The symbol which marks a letter which isn't part of a word.
-  <tag>5 <em/dots/<label id="contraction-opcode-5"></tag>
-    The symbol which marks the beginning of a number.
-</descrip>
-
-<sect2>Character Translation<p>
-These opcodes define the braille representations for character sequences.
-Each of them defines an entry within the contraction table.
-These entries may be defined in any order except, as noted below,
-when they define alternate representations for the same character sequence.
-
-Each of these opcodes has
-a <em/characters/ operand (which must be specified as a <em/string/),
-and a built-in condition governing its eligibility for use.
-The text is processed strictly from left to right, character by character,
-with the most eligible entry for each position being used.
-If there's more than one eligible entry for a given position,
-then the one with the longest character string is used.
-If there's more than one eligible entry for the same character string,
-then the one defined nearest to the beginning of the table is used
-(this is the only order dependency).
-
-Many of these opcodes have a <em/dots/ operand
-which defines the braille representation for its <em/characters/ operand.
-It may also be specified as an equals sign (<tt/=/),
-in which case it means one of two things.
-If the entry is for a single character,
-then it means that the currently selected computer braille representation
-(see the <ref id="options-text-table" name="-t"> command line option
-and the <ref id="configure-text-table" name="text-table"> configuration file directive)
-for that character is to be used.
-If it's for a multi-character sequence,
-then the default representation for each character
-(see <ref id="contraction-opcode-6" name="opcode 6">)
-within the sequence is to be used.
-
-Some special terms are used within the descriptions of these opcodes.
-<descrip>
-  <tag/word/
-    A maximal sequence of one or more consecutive letters.
-</descrip>
-
-Now, finally, here are the opcode descriptions themselves:
-<descrip>
-  <tag>17 <em/characters/<label id="contraction-opcode-17"></tag>
-    Translate the entire white-space-bounded containing character sequence into computer braille
-    (see the <ref id="options-text-table" name="-t"> command line option
-    and the <ref id="configure-text-table" name="text-table"> configuration file directive).
-  <tag>19 <em/characters/<label id="contraction-opcode-19"></tag>
-    Ignore the characters no matter where they appear.
-  <tag>6 <em/characters/ <em/dots/<label id="contraction-opcode-6"></tag>
-    Translate the characters no matter where they appear.
-    If there's only one character, then, in addition,
-    define the default representation for that character.
-  <tag>7 <em/characters/ <em/dots/<label id="contraction-opcode-7"></tag>
-    Translate the characters no matter where they appear.
-    Ignore any consecutive repetitions of the same sequence.
-  <tag>15 <em/characters/ <em/dots/<label id="contraction-opcode-15"></tag>
-    Translate the characters no matter where they appear.
-    Remove white-space between consecutive words matched by this opcode.
-  <tag>8 <em/characters/ <em/dots/<label id="contraction-opcode-8"></tag>
-    Translate the characters if they're a word.
-  <tag>16 <em/characters/ <em/dots/<label id="contraction-opcode-16"></tag>
-    Translate the characters if they're a word.
-    Remove the following white-space if the first character after it is a letter.
-  <tag>14 <em/characters/ <em/dots/<label id="contraction-opcode-14"></tag>
-    Translate the characters if they're a white-space-bounded word.
-  <tag>18 <em/characters/<label id="contraction-opcode-18"></tag>
-    Prefix the characters with a letter sign
-    (see <ref id="contraction-opcode-4" name="opcode 4">)
-    if they're a word.
-  <tag>24 <em/characters/ <em/dots/<label id="contraction-opcode-24"></tag>
-    Translate the characters if they're either a word or at the beginning of a word.
-  <tag>9 <em/characters/ <em/dots/<label id="contraction-opcode-9"></tag>
-    Translate the characters if they're at the beginning of a word.
-  <tag>10 <em/characters/ <em/dots/<label id="contraction-opcode-10"></tag>
-    Translate the characters if they're in the middle of a word.
-  <tag>12 <em/characters/ <em/dots/<label id="contraction-opcode-12"></tag>
-    Translate the characters if they're either in the middle or at the end of a word.
-  <tag>11 <em/characters/ <em/dots/<label id="contraction-opcode-11"></tag>
-    Translate the characters if they're at the end of a word.
-  <tag>22 <em/characters/ <em/dots/<label id="contraction-opcode-22"></tag>
-    Translate the characters if they're part of punctuation at the beginning of a word.
-  <tag>23 <em/characters/ <em/dots/<label id="contraction-opcode-23"></tag>
-    Translate the characters if they're part of punctuation at the end of a word.
-  <tag>21 <em/characters/ <em/dots/<label id="contraction-opcode-21"></tag>
-    Translate the characters if they're at the beginning of a number.
-  <tag>13 <em/characters/ <em/dots/<label id="contraction-opcode-13"></tag>
-    Translate the characters if they're in the middle of a number.
-  <tag>20 <em/characters/ <em/dots/<label id="contraction-opcode-20"></tag>
-    Translate the characters if they're at the end of a number.
-</descrip>
-
 <sect>Advanced Topics<p>
 
-<sect1>Installing Multiple Versions<p>
+<sect1>Installing Multiple Versions<label id="multiple"><p>
 It's easy to have more than one version of BRLTTY
 installed on the same system at the same time.
 This capability allows you to test a new version before removing the old one.
 
-As of version 3.0 of BRLTTY,
-the <ref id="make-install-prefix" name="PREFIX"> make file variable allows you
+The <ref id="build-execute-root" name="--with-execute-root"> build option allows you
 to install the complete <ref id="hierarchy" name="installed file hierarchy">
 anywhere you want such that it's entirely self-contained.
 Remembering that it's best to keep all of BRLTTY's components
 within the root file system, you can build it like this:
-<tscreen>make PREFIX=/brltty-3.0 install</tscreen>
+<tscreen><verb>
+./configure --with-execute-root=/brltty-3.1
+make install
+</verb></tscreen>
 You can then run it like this:
-<tscreen>/brltty-3.0/sbin/brltty</tscreen>
-When version 4.0 is released, just install it in a different location
+<tscreen>/brltty-3.1/bin/brltty</tscreen>
+When version 3.2 is released, just install it in a different location
 and run the new executable from there.
 <tscreen><verb>
-make PREFIX=/brltty-4.0 install
-/brltty-4.0/sbin/brltty
+./configure --with-execute-root=/brltty-3.2
+make install
+/brltty-3.2/bin/brltty
 </verb></tscreen>
 
 So far, this paradigm is somewhat awkward for at least two reasons.
@@ -3117,9 +3499,9 @@ One is that these long path names are too hard to type,
 and the other is that you don't want to fiddle with your system's boot sequence
 each time you want to switch to a different version of BRLTTY.
 These problems are easily solved by adding a symbolic link for the executable.
-<tscreen>ln -s /brltty-3.0/sbin/brltty /sbin/brltty</tscreen>
+<tscreen>ln -s /brltty-3.1/bin/brltty /bin/brltty</tscreen>
 When it's time to switch to the newer version, just repoint the symbolc link.
-<tscreen>ln -sf /brltty-4.0/sbin/brltty /sbin/brltty</tscreen>
+<tscreen>ln -s /brltty-3.2/bin/brltty /bin/brltty</tscreen>
 
 If you'd like to get really fancy, then introduce another level of indirection
 in order to make all of BRLTTY's files for any given version
@@ -3127,20 +3509,20 @@ look like they're in all of the standard places.
 First, create a symbolic link through a common repointable location
 from each of BRLTTY's standard locations.
 <tscreen><verb>
-ln -s /brltty/sbin/brltty /sbin/brltty
+ln -s /brltty/bin/brltty /bin/brltty
 ln -s /brltty/etc/brltty /etc/brltty
 ln -s /brltty/lib/brltty /lib/brltty
 </verb></tscreen>
 Then all you need to do is to point <tt>/brltty</> to the desired version.
-<tscreen>ln -s /brltty-3.0 /brltty</tscreen>
+<tscreen>ln -s /brltty-3.1 /brltty</tscreen>
 
-<sect1>Installation/Rescue Root Disks<p>
-As of version 1.0.1, BRLTTY can run as a stand-alone executable.
-Everything it needs to know can be explicitly configured within its make file
-(see <ref id="make-customize" name="Make File Customization">).
+<sect1>Installation/Rescue Root Disks for Linux<p>
+BRLTTY can run as a stand-alone executable.
+Everything it needs to know can be explicitly configured at build-time
+(see <ref id="build" name="Build Options">).
 If the data directory
-(see the <ref id="make-install-data" name="DATA_DIR">
-and <ref id="make-install-prefix" name="PREFIX"> make file variables)
+(see the <ref id="build-data-directory" name="--sysconfdir">
+and <ref id="build-execute-root" name="--with-execute-root"> build options)
 doesn't exist, then BRLTTY looks in <tt>/etc</> for the files it needs.
 Even if any of these files don't exist at all, BRLTTY still works!
 
@@ -3150,7 +3532,7 @@ to set its permissions so that only root can create files within it.
 <tscreen>chmod 755 /etc/brltty</tscreen>
 
 The screen content inspection device (usually <tt>/dev/vcsa</>) is required
-(see the <ref id="make-screen-device" name="VCSADEV"> make file variable).
+(see the <ref id="build-screen-device" name="--with-screen-device"> build option).
 It should already exist unless your Linux distribution is quite old.
 If necessary, you can create it with:
 <tscreen><verb>
@@ -3164,12 +3546,16 @@ in an uncertain environment like a root disk or an incomplete system is
 that it might not find the shared libraries (or parts thereof) which it needs.
 Root disks often use subset and/or outdated versions of the libraries
 which may be inadequate.
-The solution is to link BRLTTY with the <tt/-static/ flag
-(see the file <tt/Makefile/ in the top-level directory).
+The solution is to configure BRLTTY with the
+<ref id="build-standalone-programs" name="--enable-standalone-programs"> build option.
 This removes all dependencies on shared libraries,
 but, unfortunately, also creates a larger executable.
+There are a number of build options which can be used
+to selectively remove unneeded features from BRLTTY
+in order to somewhat mitigate this problem
+(see section <ref id="build-features" name="Build Features">).
 
-The executable is stripped during the <tt/make install/.
+The executable is stripped during the <ref id="make-install" name="make install">.
 This significantly reduces its size by removing its symbol table.
 You'll get a much smaller executable, therefore,
 if you complete the full build procedure,

@@ -19,14 +19,18 @@
 
 #define SPEECH_C 1
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
 #include "speech.h"
-#include "../spk.h"
-#include "../misc.h"
+#include "Programs/spk.h"
+#include "Programs/misc.h"
 
 typedef enum {
    PARM_IniFile,
@@ -48,12 +52,12 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "vocaltract", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "speed", "volume"
 #define SPK_HAVE_TRACK
-#include "../spk_driver.h"
+#include "Programs/spk_driver.h"
 
 #include <eci.h>
 static ECIHand eci = NULL_ECI_HAND;
 
-static unsigned char *sayBuffer = NULL;
+static char *sayBuffer = NULL;
 static int saySize = 0;
 
 static const int languageMap[] = {
@@ -112,13 +116,13 @@ reportParameter (const char *description, int setting, const char *const *choice
 }
 
 static void
-reportEnvironmentParameter (ECIHand eci, const char *description, int parameter, int setting, const char *const *choices, const int *map) {
+reportEnvironmentParameter (ECIHand eci, const char *description, ECIParam parameter, int setting, const char *const *choices, const int *map) {
    if (parameter != eciNumParams) setting = eciGetParam(eci, parameter);
    reportParameter(description, setting, choices, map);
 }
 
 static int
-setEnvironmentParameter (ECIHand eci, const char *description, int parameter, int setting) {
+setEnvironmentParameter (ECIHand eci, const char *description, ECIParam parameter, int setting) {
    if (parameter == eciNumParams) {
       int ok = eciCopyVoice(eci, setting, 0);
       if (!ok) reportError(eci, "eciCopyVoice");
@@ -128,11 +132,11 @@ setEnvironmentParameter (ECIHand eci, const char *description, int parameter, in
 }
 
 static int
-choiceEnvironmentParameter (ECIHand eci, const char *description, const char *value, int parameter, const char *const *choices, const int *map) {
+choiceEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, const char *const *choices, const int *map) {
    int ok = 0;
    int assume = 1;
    if (*value) {
-      int setting;
+      unsigned int setting;
       if (validateChoice(&setting, description, value, choices)) {
 	 if (map) setting = map[setting];
          if (setEnvironmentParameter(eci, description, parameter, setting)) {
@@ -146,7 +150,7 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
 }
 
 /*static*/ int
-rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, int parameter, int minimum, int maximum) {
+rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) {
    int ok = 0;
    int assume = 1;
    if (*value) {
@@ -163,20 +167,20 @@ rangeEnvironmentParameter (ECIHand eci, const char *description, const char *val
 }
 
 static void
-reportVoiceParameter (ECIHand eci, const char *description, int parameter, const char *const *choices, const int *map) {
+reportVoiceParameter (ECIHand eci, const char *description, ECIVoiceParam parameter, const char *const *choices, const int *map) {
    reportParameter(description, eciGetVoiceParam(eci, 0, parameter), choices, map);
 }
 
 static int
-setVoiceParameter (ECIHand eci, const char *description, int parameter, int setting) {
+setVoiceParameter (ECIHand eci, const char *description, ECIVoiceParam parameter, int setting) {
    return eciSetVoiceParam(eci, 0, parameter, setting) >= 0;
 }
 
 static int
-choiceVoiceParameter (ECIHand eci, const char *description, const char *value, int parameter, const char *const *choices, const int *map) {
+choiceVoiceParameter (ECIHand eci, const char *description, const char *value, ECIVoiceParam parameter, const char *const *choices, const int *map) {
    int ok = 0;
    if (*value) {
-      int setting;
+      unsigned int setting;
       if (validateChoice(&setting, description, value, choices)) {
 	 if (map) setting = map[setting];
          if (setVoiceParameter(eci, description, parameter, setting)) {
@@ -189,7 +193,7 @@ choiceVoiceParameter (ECIHand eci, const char *description, const char *value, i
 }
 
 static int
-rangeVoiceParameter (ECIHand eci, const char *description, const char *value, int parameter, int minimum, int maximum) {
+rangeVoiceParameter (ECIHand eci, const char *description, const char *value, ECIVoiceParam parameter, int minimum, int maximum) {
    int ok = 0;
    if (*value) {
       int setting;
@@ -265,9 +269,12 @@ spk_initialize (char **parameters) {
 	       rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
 	       rangeVoiceParameter(eci, "speed", parameters[PARM_Speed], eciSpeed, 0, 250);
 	       rangeVoiceParameter(eci, "volume", parameters[PARM_Volume], eciVolume, 0, 100);
+               return;
 	    } else {
 	       reportError(eci, "eciSetOutputDevice");
 	    }
+            eciDelete(eci);
+            eci = NULL_ECI_HAND;
 	 } else {
 	    LogPrint(LOG_ERR, "ViaVoice initialization error.");
 	 }
@@ -276,9 +283,9 @@ spk_initialize (char **parameters) {
 }
 
 static int
-insureSayBuffer (int size) {
+ensureSayBuffer (int size) {
    if (size > saySize) {
-      unsigned char *newBuffer = malloc(size |= 0XFF);
+      char *newBuffer = (char *)malloc(size |= 0XFF);
       if (!newBuffer) {
          LogError("speech buffer allocation");
 	 return 0;
@@ -294,7 +301,7 @@ static int
 saySegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
    int length = to - from;
    if (!length) return 1;
-   if (insureSayBuffer(length+1)) {
+   if (ensureSayBuffer(length+1)) {
       memcpy(sayBuffer, &buffer[from], length);
       sayBuffer[length] = 0;
       if (eciAddText(eci, sayBuffer)) {

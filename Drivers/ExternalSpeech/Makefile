@@ -17,16 +17,15 @@
 
 ###############################################################################
 # Makefile for BRLTTY driver for Viavoice text-to-speech library
-#
-# It is passed the variables CC, CFLAGS, LD, LDFLAGS, LDLIBS and BRLDEV
-# from the main Makefile...
 ###############################################################################
 
 DRIVER_CODE = es
 DRIVER_NAME = External Speech
 SPEECH_MODELS = 
-include ../driver.mk
 
-speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h ../config.h
+include setup.mk
+include $(TOP_DIR)/driver.mk
+
+speech.o:
 	$(CC) $(SPK_CFLAGS) -c speech.c
 

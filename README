@@ -1,7 +1,8 @@
-BRLTTY is a background process (daemon) providing access to the Linux console
-(when in text mode) for a blind person using a refreshable braille display.
+BRLTTY is a background process (daemon) providing access to the Linux/Unix
+console (when in text mode) for a blind person using a refreshable braille
+display.
 
-Version 3.0, July 2002
+Version 3.1, October 2002
 
 Copyright (C) 1995-2002 by The BRLTTY Team, All rights reserved.
 
@@ -66,10 +67,10 @@ access Unix systems through accessible terminals. With the advent of PC-based
 Unix systems, e.g. Linux, the need has become evident.
 
 BRLTTY attempts to fill this gap. It runs as a background process, possibly
-started at boot-time, and allows a soft Braille user to access text mode
-applications directly from Linux's virtual consoles. Since BRLTTY runs as a
-background process, it gives the user complete freedom of choice regarding
-applications and development tools.
+started at boot-time, and allows a refreshable Braille user to access text mode
+applications directly from a Unix console. Since BRLTTY runs as a background
+process, it gives the user complete freedom of choice regarding applications
+and development tools.
 
 -------------------------------------------------------------------------------
 
@@ -100,14 +101,14 @@ Features
 Currently Supported Hardware
 ============================
 
-BRLTTY requires Linux kernel 1.1.92 or later (for /dev/vcsa0 (also known as
-/dev/vcsa and /dev/vcc/a)). It has been tested on
+BRLTTY has been tested on:
 
-*  a variety of Intel based PCs: both laptops and desktops; 
-*  an Alpha workstation;
-*  a StrongARM based Netwinder;
-*  a number of Linux kernels, from 1.2.13 to 2.2.x;
-*  all major distributions, including Red Hat, Debian, Slackware;
+*  a variety of Intel-based PCs (desktops, servers, laptops, PDAs) 
+*  an Alpha workstation
+*  a StrongARM based Netwinder
+*  several Linux kernels (1.2.13 and beyond)
+*  all major Linux distributions (including Red Hat, Debian, Slackware, SuSE)
+*  Solaris/Sparc (release 7 and beyond)
 
 The following Braille displays are supported (serial communication only for
 most of them):
@@ -161,16 +162,29 @@ are available in the `BrailleTables' subdirectory.
 Building the Package
 ====================
 
-Simply invoking `make' will build BRLTTY and all driver libraries. To build
-BRLTTY with a specific built-in driver (usually only necessary when preparing
-BRLTTY for use on a boot disk), just edit the main `Makefile' and uncomment the
-driver specification you want to see linked with the main executable before
-invoking `make'. Then, as root, `make install' will install all the files into
-their proper locations.
+Building BRLTTY is a three step process. The first is to invoke `./configure'
+to prepare the build environment for your operating system, and to customize it
+for your particular requirement. The second is to invoke `make' to compile and
+link BRLTTY and its drivers. The third is to invoke `make install' to copy all
+the needed files into their proper locations.
+
+    ./configure
+    make
+    make install
+
+Before configuring BRLTTY, you may wish to check out what choices you have
+regarding its customization. Invoking `./configure --help' will show you what
+options are available. Although the defaults are adequate for most environments
+and requirements, and although many things can be specified at run-time, there
+are a couple of configuration options worth mentioning here. To build BRLTTY
+with a specific driver built-in (usually only necessary when preparing BRLTTY
+for use on a boot disk), use the `--with-braille-driver=' option. To set the
+default device to the one which your display is usually connected to, use the
+`--with-braille-device=' option.
 
 For information specific to a particular driver, please see the `README' file
-in the corresponding subdirectory. Finally, see the `DOCS' subdirectory for
-BRLTTY manuals and miscellaneous information.
+in the corresponding subdirectory. Finally, see the `Documents' subdirectory
+for the manual as well as a few other interesting literary creations.
 
 -------------------------------------------------------------------------------
 

@@ -171,7 +171,13 @@
  *    unum:0x0041, name:"latin capital letter a"
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include <stdlib.h>
+#include <string.h>
+
 #include "unicode.h"
 
 UnicodeEntry unicodeTable[] = {

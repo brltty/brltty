@@ -1,0 +1,57 @@
+Begin4
+Title: @package_name@
+Version: @package_version@
+Entered-date: @package_date@
+Description: Braille Display Driver for Linux/Unix
+             BRLTTY is a background process (daemon) which provides access to
+             the Linux/Unix console (when in text mode) for a blind person
+             using arefreshable braille display.  It drives the braille
+             display, and provides complete screen review functionality.  Some
+             speech capability has also been incorporated.
+Keywords: refreshable braille display console access visually impaired blind unix linux solaris
+Author: dave@mielke.cc (Dave Mielke)
+        nico@cam.org (Nicolas Pitre)
+        s.doyon@videotron.ca (Stéphane Doyon)
+        nn201@cus.cam.ac.uk (Nikhil Nair)
+Maintained-by: dave@mielke.cc (Dave Mielke)
+Primary-site: ftp.ibiblio.org /pub/Linux/system/access
+              807kb brltty-3.0.tar.gz
+              546kb brltty-3.0-1.i386.rpm
+              799kb brltty-3.0-1.src.rpm
+               10kb brltty-3.0.README
+                2kb brltty-3.0.lsm
+Alternate-site: ftp://leb.net /pub/blinux/brltty
+Original-site:
+Platforms: Linux (kernel 1.1.92 or later)
+           Solaris (release 7 or later)
+           Supported Braille Displays:
+           - Alva [ABT3xx, Delphi, Satellite]
+           - BrailleLite [18/40]
+           - BrailleNote [18/32]
+           - CombiBraille [25/45/85]
+           - EcoBraille [20/40/80]
+           - EuroBraille [Clio-noteBraille 40]
+           - HandyTech [Modular 20/40/80, Wave 40, Star 40/80, Bookworm]
+           - LogText [32]
+           - MDV (protocol 5) [MB208/MB408L/MB408S]
+           - MiniBraille [20]
+           - MultiBraille [MB125CR/MB145CR/MB185CR]
+           - Papenmeier [Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80,
+                         EL 40/80, Elba 20/32, IB 80]
+           - TSI [Navigator 20/40/80, PowerBraille 40/65/80]
+           - Vario/RBT (emulation 1) [40/80]
+           - Vario/RBT (emulation 2) [40/80]
+           - VideoBraille [40]
+           - VisioBraille [2040]
+           - Voyager [44/70 (USB)]
+           Supported Speech Synthesizers:
+           - Alva [Delphi]
+           - BrailleLite
+           - CombiBraille
+           - External Speech
+           - Festival Text to Speech Package
+           - Generic Say (pipes to /usr/local/bin/say)
+           - Televox
+           - ViaVoice Text to Speech System
+Copying-policy: GPL
+End

@@ -1,0 +1,143 @@
+/*
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ *
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation.  Please see the file COPYING for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
+
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+/* Define this if the compiler doesn't fully support the const keyword. */
+#undef const
+
+/* Define this if the compiler doesn't fully support the inline keyword. */
+#undef inline
+
+/* Define this if the header file getopt.h exists. */
+#undef HAVE_GETOPT_H
+
+/* Define this if the header file syslog.h exists. */
+#undef HAVE_SYSLOG_H
+
+/* Define this if the function vsyslog exists. */
+#undef HAVE_VSYSLOG
+
+/* Define this if the header file sys/io.h exists. */
+#undef HAVE_SYS_IO_H
+
+/* Define this if the header file linux/vt.h exists. */
+#undef HAVE_LINUX_VT_H
+
+/* Define this if the function dlopen is available. */
+#undef HAVE_FUNC_DLOPEN
+
+/* Define this if the function shl_load is available. */
+#undef HAVE_FUNC_SHL_LOAD
+
+/* Define this if the function sched_yield is available. */
+#undef HAVE_FUNC_SCHED_YIELD
+
+/* Define this if the function sin is available. */
+#undef HAVE_FUNC_SIN
+
+/* Define this to be a string containing the package name. */
+#undef PACKAGE_NAME
+
+/* Define this to be a string containing the package title. */
+#undef PACKAGE_TITLE
+
+/* Define this to be a string containing the package version. */
+#undef PACKAGE_VERSION
+
+/* Define this if BRLTTY is to be run as init. */
+#undef INIT_PATH
+
+/* Define this to be a string containing the desired working directory. */
+#undef HOME_DIRECTORY
+
+/* Define this to be a string containing the path to the configuration directory. */
+#undef CONFIGURATION_DIRECTORY
+
+/* Define this to be a string containing the path to the library directory. */
+#undef LIBRARY_DIRECTORY
+
+/* Define this to be a string containing the base library name. */
+#undef LIBRARY_NAME
+
+/* Define this to be a string containing the library extension. */
+#undef LIBRARY_EXTENSION
+
+/* Define this if the braille driver is built in. */
+#undef BRAILLE_BUILTIN
+
+/* Define this to be a string containing a list of the braille driver codes. */
+#undef BRAILLE_DRIVERS
+
+/* Define this to be a string containing the path to the default braille device. */
+#undef BRAILLE_DEVICE
+
+/* Define this if the speech driver is built in. */
+#undef SPEECH_BUILTIN
+
+/* Define this to be a string containing a list of the speech driver codes. */
+#undef SPEECH_DRIVERS
+
+/* Define this to be a string containing the path to the default text table. */
+#undef TEXT_TABLE
+
+/* Define this to be a string containing the path to the default attributes table. */
+#undef ATTRIBUTES_TABLE
+
+/* Define this to be a string containing the screen device. */
+#undef SCREEN_DEVICE
+
+/* Define this to include the preferences menu. */
+#undef ENABLE_PREFERENCES_MENU
+
+/* Define this to include table selection within the preferences menu. */
+#undef ENABLE_TABLE_SELECTION
+
+/* Define this to include command learn mode. */
+#undef ENABLE_LEARN_MODE
+
+/* Define this to include contraction table support. */
+#undef ENABLE_CONTRACTED_BRAILLE
+
+/* Define this to include PC internal speaker alert tunes support. */
+#undef ENABLE_SPEAKER_TUNES
+
+/* Define this to include Digital to Analog Converter alert tunes support. */
+#undef ENABLE_DAC_TUNES
+
+/* Define this to include Musical Instrument Digital Interface alert tunes support. */
+#undef ENABLE_MIDI_TUNES
+
+/* Define this to include Adlib/OPL3/SB-FM alert tunes support. */
+#undef ENABLE_ADLIB_TUNES
+
+/* Define this if HP-UX audio support is available. */
+#undef HAVE_HPUX_AUDIO
+
+/* Define this if GPM is to be used. */
+#undef HAVE_LIBGPM
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* _CONFIG_H */

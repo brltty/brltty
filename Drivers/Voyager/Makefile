@@ -16,16 +16,16 @@
 ###############################################################################
 
 ###############################################################################
-#
 # Makefile for BRLTTY Voyager driver
-#
-# This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, and LDLIBS
 ###############################################################################
 
 DRIVER_CODE = vo
 DRIVER_NAME = Voyager
 BRAILLE_MODELS = 44/70 (USB)
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
+
+include setup.mk
+include $(TOP_DIR)/driver.mk
 
 KERNEL_INCLUDES = /usr/include/linux
 ifneq (,$(wildcard $(KERNEL_INCLUDES)/brlvger.h))
@@ -36,33 +36,34 @@ else
 VGERHDR = kernel/linux/brlvger.h
 endif
 
-MINOR := $(shell grep BRLVGER_MINOR $(VGERHDR) | awk '{print $$3;}')
+MINOR := $(shell grep BRLVGER_MINOR $(VGERHDR) | ${AWK} '{print $$3;}')
 VOYAGERDEV=/dev/brlvger
 
 .PHONY : brlvger.h
-brlvger.h:
-	ln -sf $(VGERHDR) brlvger.h
+brlvger.auto.h:
+	ln -sf $(VGERHDR) $@
 
-brl.o: brlvger.h brl.c brlconf.h ../brl.h ../misc.h \
-	../scr.h ../brl_driver.h
-	$(CC) $(BRL_CFLAGS) $(KDRIVER) -c brl.c
+braille.o: brlvger.auto.h
+	$(CC) $(BRL_CFLAGS) $(KDRIVER) -c braille.c
 
 #Let's not rebuild the help unless the user wants to as it requires python.
-remakehelp: brl.c brltty_helpmodel.txt mkhlp hlptrans.py
+remakehelp: braille.c brltty_helpmodel.txt mkhlp hlptrans.py
 	./mkhlp
 
 install-device:
-	@if [ -c ${INSTALL_ROOT}${PREFIX}${VOYAGERDEV} ]; \
+	@if [ -c ${INSTALL_ROOT}${VOYAGERDEV} ]; \
         then \
-          echo "Voyager device ${INSTALL_ROOT}${PREFIX}${VOYAGERDEV}" \
+          echo "Voyager device ${INSTALL_ROOT}${VOYAGERDEV}" \
              "already exists." ; \
         else \
           echo "Creating character device" \
-            "${INSTALL_ROOT}${PREFIX}${VOYAGERDEV}" \
+            "${INSTALL_ROOT}${VOYAGERDEV}" \
             "with major 180 and minor ${MINOR}" ; \
-          mknod -m 0660 ${INSTALL_ROOT}${PREFIX}${VOYAGERDEV} c 180 ${MINOR}; \
+          mknod -m 0660 ${INSTALL_ROOT}${VOYAGERDEV} c 180 ${MINOR}; \
         fi
 
-distclean:
-	rm -f brlvger.h
-	$(MAKE) -C kernel distclean
+clean::
+	-rm -f brlvger.auto.h
+
+distclean::
+	-cd kernel && $(MAKE) clean distclean

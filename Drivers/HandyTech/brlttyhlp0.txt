@@ -61,9 +61,9 @@ B7 Rn     set mark
 B8 Rn     go to mark
 
 Miscellaneous Commands:
+UP DN     paste cut buffer at cursor position
 B2 B3 UP  stop speaking
 B2 B3 DN  say current line
-B4 B5     paste cut buffer at cursor position
 B1 B8 UP  switch to navigation mode (the default)
 B1 B8 DN  switch to input mode
 

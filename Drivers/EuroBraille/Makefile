@@ -25,8 +25,11 @@
 DRIVER_CODE = eu
 DRIVER_NAME = EuroBraille
 BRAILLE_MODELS = Clio-noteBraille 40
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(CC) $(BRL_CFLAGS) -c brl.c
+include setup.mk
+include $(TOP_DIR)/driver.mk
+
+braille.o:
+	$(CC) $(BRL_CFLAGS) -c braille.c
 

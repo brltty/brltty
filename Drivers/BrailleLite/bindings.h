@@ -22,7 +22,7 @@
 #ifndef _BINDINGS_H
 #define _BINDINGS_H
 
-#include "../brl.h"		/* for CMD_* codes */
+#include "Programs/brl.h"		/* for CMD_* codes */
 
 /* When the Braille Lite sends braille key information, bits 0-5 represent
  * dots 1-6 and bit 6 represents the space bar.  For now, we mask out bit 6
@@ -59,7 +59,7 @@ static unsigned char keys_to_dots[64] =
   0x28, 0x29, 0x2c, 0x2d, 0x38, 0x39, 0x3c, 0x3d,
   0x2a, 0x2b, 0x2e, 0x2f, 0x3a, 0x3b, 0x3e, 0x3f
 };
-#endif
+#endif /* USE_TEXTTRANS */
 
 /* This table is for global BRLTTY commands, to be passed straight back to
  * the main module.  If keyboard emulation is off, they will work with or
@@ -88,7 +88,7 @@ static int cmdtrans[64] =
 static unsigned char dangcmd[8] =
 { 0x00, 0x88, 0x80, 0x05, 0x40, 0x00, 0x10, 0x00 };
 
-#endif /* defined(BRL_C) */
+#endif /* BRL_C */
 
 
 /*
@@ -133,7 +133,7 @@ static unsigned char dangcmd[8] =
 #define BLT_CTRL 'x'
 #ifdef USE_TEXTTRANS
 #define BLT_DOT8SHIFT '5'
-#endif
+#endif /* USE_TEXTTRANS */
 #define BLT_META '9'
 
-#endif /* !defined(_BINDINGS_H) */
+#endif /* _BINDINGS_H */

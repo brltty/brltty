@@ -15,43 +15,58 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+###############################################################################
 # This Makefile produces some tools to manipulate braille definition tables
 # used by BRLTTY.
 ###############################################################################
 
+PROGRAMS = txt2tbl tbl2txt tbl2tbl tbl2jbt isotoibm437 ibm437toiso ibm850toiso
+all: $(PROGRAMS)
 
-TOOLS = tbl2txt txt2tbl tbl2tbl ibm437toiso ibm850toiso
+include setup.mk
 
-UCDIR = ../Unicode
-UCOBJ = $(UCDIR)/unicode.o
-UCHDR = $(UCDIR)/unicode.h
+TXT2TBL_OBJECTS = txt2tbl.o $(PGM_DIR)/options.o $(PGM_DIR)/misc.o
+txt2tbl: $(TXT2TBL_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TXT2TBL_OBJECTS) $(LDLIBS)
+txt2tbl.o:
+	$(CC) $(CFLAGS) -c txt2tbl.c
 
-CC = gcc
-CFLAGS = -O2 -Wall
-LD = $(CC)
-LDFLAGS = -s
+TBL2TXT_OBJECTS = tbl2txt.o $(PGM_DIR)/options.o $(PGM_DIR)/misc.o $(UCD_DIR)/unicode.o
+tbl2txt: $(TBL2TXT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TBL2TXT_OBJECTS) $(LDLIBS)
+tbl2txt.o:
+	$(CC) $(CFLAGS) -c tbl2txt.c
 
+TBL2TBL_OBJECTS = tbl2tbl.o $(PGM_DIR)/options.o $(PGM_DIR)/misc.o
+tbl2tbl: $(TBL2TBL_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TBL2TBL_OBJECTS) $(LDLIBS)
+tbl2tbl.o:
+	$(CC) $(CFLAGS) -c tbl2tbl.c
 
-all: $(TOOLS)
+TBL2JBT_OBJECTS = tbl2jbt.o $(PGM_DIR)/options.o $(PGM_DIR)/misc.o
+tbl2jbt: $(TBL2JBT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TBL2JBT_OBJECTS) $(LDLIBS)
+tbl2jbt.o:
+	$(CC) $(CFLAGS) -c tbl2jbt.c
 
-tbl2txt: tbl2txt.o $(UCOBJ)
+ISOTOIBM437_OBJECTS = isotoibm437.o
+isotoibm437: $(ISOTOIBM437_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(ISOTOIBM437_OBJECTS) $(LDLIBS)
+isotoibm437.o:
+	$(CC) $(CFLAGS) -c isotoibm437.c
 
-tbl2txt.o: tbl2txt.c $(UCHDR)
+IBM437TOISO_OBJECTS = ibm437toiso.o
+ibm437toiso: $(IBM437TOISO_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(IBM437TOISO_OBJECTS) $(LDLIBS)
+ibm437toiso.o:
+	$(CC) $(CFLAGS) -c ibm437toiso.c
 
-txt2tbl: txt2tbl.c
+IBM850TOISO_OBJECTS = ibm850toiso.o
+ibm850toiso: $(IBM850TOISO_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(IBM850TOISO_OBJECTS) $(LDLIBS)
+ibm850toiso.o:
+	$(CC) $(CFLAGS) -c ibm850toiso.c
 
-tbl2tbl: tbl2tbl.c
-
-ibm437toiso: ibm437toiso.c
-
-ibm850toiso: ibm850toiso.c
-
-$(UCOBJ):
-	$(MAKE) -C $(UCDIR)
-
-clean:
-	rm -f *.o *~
-
-distclean: clean
-	rm -f $(TOOLS)
+clean::
+	-rm -f $(PROGRAMS)
 

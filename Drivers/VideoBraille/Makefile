@@ -22,18 +22,20 @@
 #
 ###############################################################################
 
-IFLAGS = -I..
 DRIVER_CODE = vd
 DRIVER_NAME = VideoBraille
 BRAILLE_MODELS =  40
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-vblow.o:	vblow.c
-	$(CC) $(BRL_CFLAGS) $(IFLAGS) -O2 -c vblow.c
+include setup.mk
+include $(TOP_DIR)/driver.mk
 
-vb.o:	vb.c brlconf.h ../brl_driver.h ../misc.h
-	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c vb.c
+vblow.o:
+	$(CC) $(BRL_CFLAGS) -c vblow.c
+
+vb.o:
+	$(CC) $(BRL_CFLAGS) -c vb.c
 	
-brl.o:	vb.o	vblow.o
-	$(LD) -r -O2 -o brl.o vblow.o vb.o 
+braille.o: vb.o vblow.o
+	$(MKOBJ) braille.o vblow.o vb.o 
 

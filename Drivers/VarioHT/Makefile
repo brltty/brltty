@@ -17,23 +17,25 @@
 
 ###############################################################################
 #
-# Makefile for BRLTTY Vario-HT driver
+# Makefile for BRLTTY VarioHT driver
 # All variables are defined in the main Makefile...
 #
 ###############################################################################
 
-IFLAGS = -I..
 DRIVER_CODE = vh
 DRIVER_NAME = Vario/RBT (emulation 2)
 BRAILLE_MODELS =  40/80
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-variolow.o:	variolow.c variolow.h
-	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c variolow.c
+include setup.mk
+include $(TOP_DIR)/driver.mk
 
-vario.o:	vario.c brlconf.h ../brl_driver.h ../misc.h
-	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c vario.c
+variolow.o:
+	$(CC) $(BRL_CFLAGS) -c variolow.c
 
-brl.o:	vario.o	variolow.o
-	$(LD) -r -o brl.o variolow.o vario.o 
+vario.o:
+	$(CC) $(BRL_CFLAGS) -c vario.c
+
+braille.o: vario.o variolow.o
+	$(MKOBJ) braille.o variolow.o vario.o 
 

@@ -1,0 +1,33 @@
+Begin3
+Title:          BRLTTY - A daemon providing access to the Linux console (when in text
+		         mode) for a blind person using a refreshable braille display.
+Version:        2.1
+Entered-date:   23MAR99
+Description:    BRLTTY is a daemon which provides access to a Unix console
+		for a blind person using a soft Braille display.
+		BRLTTY only works with text-mode applications. 
+		See http://www.cam.org/~nico/brltty
+Keywords:       Braille console access visually impaired blind
+Author:         dave@mielke.cc (Dave Mielke)
+                nico@cam.org (Nicolas Pitre)
+		s.doyon@videotron.ca (Stéphane Doyon)
+		nn201@cus.cam.ac.uk (Nikhil Nair)
+Maintained-by:  dave@mielke.cc (Dave Mielke)
+Primary-site:   sunsite.unc.edu /pub/Linux/system/access
+		225kb brltty-2.1.tar.gz
+		  8kb brltty-2.1.README
+		  1kb brltty-2.1.lsm
+Alternate-site:	ftp.leb.net /pub/blinux
+Platforms:      Linux (kernel 1.1.92 or later)
+		Not X/graphics.
+		Supported Braille displays (serial communication only):
+		  - Tieman B.V.: CombiBraille 25/45/85;
+		  - Alva B.V.: ABT3xx and Delphi series
+		    (parallel port communication also available);
+		  - Telesensory Systems Inc.: PowerBraille and Navigator;
+		  - EuroBraille series;
+                  - Papenmeier Screen 2D Terminal;
+		  - Blazie Engineering's BrailleLite;
+		  - EcoBraille;
+Copying-policy: GPL
+End

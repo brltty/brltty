@@ -25,8 +25,11 @@
 DRIVER_CODE = md
 DRIVER_NAME = MDV (protocol 5)
 BRAILLE_MODELS = MB208/MB408L/MB408S
-include ../driver.mk
+HELP_DEPS = $(HELP_TEXT)
 
-brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(CC) $(BRL_CFLAGS) -c brl.c
+include setup.mk
+include $(TOP_DIR)/driver.mk
+
+braille.o:
+	$(CC) $(BRL_CFLAGS) -c braille.c
 
