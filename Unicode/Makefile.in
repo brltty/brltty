@@ -18,7 +18,7 @@
 include $(BLD_TOP)config.mk
 
 PROGRAMS = trcp
-programs: $(PROGRAMS)
+all: $(PROGRAMS)
 
 TRCP_OBJECTS = trcp.o unicode.o $(BLD_TOP)$(PGM_DIR)/options.o $(BLD_TOP)$(PGM_DIR)/misc.o
 trcp: $(TRCP_OBJECTS)

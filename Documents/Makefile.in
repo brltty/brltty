@@ -18,7 +18,7 @@
 include $(BLD_TOP)/config.mk
 ABS_SRC_DIR = @abs_srcdir@
 
-programs: Manual BrlAPI $(BUILD_API)
+all: Manual BrlAPI $(BUILD_API)
 
 LOCALE = C
 SETLOCALE = LC_ALL=$(LOCALE)

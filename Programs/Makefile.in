@@ -17,7 +17,9 @@
 
 include $(BLD_TOP)config.mk
 
-programs: brltty $(BUILD_API) brltty-install brltest scrtest tunetest
+all: all-brltty $(BUILD_API) brltty-install all-brltest scrtest tunetest
+all-brltty: brltty $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
+all-brltest: brltest $(BRAILLE_DRIVERS)
 
 ###############################################################################
 
@@ -111,7 +113,7 @@ rangelist.o:
 
 BRLTTY_OBJECTS = main.o config.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECT) $(SPEECH_DRIVER_OBJECT)
 
-brltty: $(BRLTTY_OBJECTS) $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
+brltty: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(LDLIBS)
 
 main.o:
@@ -151,7 +153,7 @@ spk.o:
 
 BRLTEST_OBJECTS = brltest.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) brl.o $(BRAILLE_DRIVER_OBJECT)
 
-brltest: $(BRLTEST_OBJECTS) $(BRAILLE_DRIVERS)
+brltest: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(LDLIBS)
 
 brltest.o:

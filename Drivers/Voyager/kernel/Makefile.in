@@ -16,7 +16,7 @@ CFLAGS := -D__KERNEL__ -DMODULE -O2 \
 CFLAGS += -I$(SRC_DIR)
 CFLAGS += -I$(KERNEL_INCLUDE)
 
-programs: brlvger.o
+all: brlvger.o
 
 brlvger.o: $(SRC_DIR)/brlvger.c $(SRC_DIR)/linux/brlvger.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brlvger.c

@@ -17,7 +17,7 @@
 
 include $(BLD_TOP)config.mk
 
-programs install uninstall install-programs install-help install-tables install-drivers:
+all install uninstall install-programs install-help install-tables install-drivers:
 	cd $(PGM_DIR) && $(MAKE) $@
 
 ITERATE = -for directory in $(PGM_DIR) $(TBL_DIR) $(UCD_DIR); do (cd $$directory && $(MAKE) $@); done

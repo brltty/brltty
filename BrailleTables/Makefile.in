@@ -23,7 +23,7 @@ include $(BLD_TOP)config.mk
 ###############################################################################
 
 PROGRAMS = txt2tbl tbl2txt tbl2tbl tbl2jbt isotoibm437 ibm437toiso ibm850toiso
-programs: $(PROGRAMS)
+all: $(PROGRAMS)
 
 OPTIONS_OBJECTS = $(BLD_TOP)$(PGM_DIR)/options.o $(BLD_TOP)$(PGM_DIR)/misc.o
 

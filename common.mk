@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: programs
+default: all
 
 include $(SRC_TOP)absdeps.mk
 include $(SRC_DIR)/reldeps.mk
