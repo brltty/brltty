@@ -23,8 +23,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <fcntl.h>
-#include <sys/termios.h>
 #include <sys/time.h>
 
 #include "Programs/brl.h"
@@ -34,7 +34,6 @@
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 #include "braille.h"
-#include "Programs/serial.h"
 
 /* Communication codes */
 static unsigned char HandyDescribe[] = {0XFF};
@@ -158,13 +157,190 @@ static const ModelDescription Models[] = {
 static TranslationTable outputTable;
 
 /* Global variables */
-static int fileDescriptor;			/* file descriptor for Braille display */
-static struct termios originalAttributes;		/* old terminal settings */
 static unsigned char *rawData = NULL;		/* translated data to send to Braille */
 static unsigned char *prevData = NULL;	/* previously sent raw data */
 static unsigned char rawStatus[MAX_STCELLS];		/* to hold status info */
 static unsigned char prevStatus[MAX_STCELLS];	/* to hold previous status */
 static const ModelDescription *model;		/* points to terminal model config struct */
+
+typedef struct {
+  int (*openPort) (char **parameters, const char *device);
+  void (*closePort) ();
+  int (*awaitData) (int milliseconds);
+  int (*readPacket) (unsigned char *buffer, int length);
+  int (*writePacket) (const unsigned char *buffer, int length, int *delay);
+} InputOutputOperations;
+static const InputOutputOperations *io;
+
+static void
+writeStopSequence (void) {
+  if (model->stopLength) {
+    io->writePacket(model->stopAddress, model->stopLength, NULL);
+  }
+}
+
+/* Serial IO */
+#include "Programs/serial.h"
+
+static int serialDevice = -1;			/* file descriptor for Braille display */
+static struct termios oldSerialSettings;		/* old terminal settings */
+static int serialCharactersPerSecond;			/* file descriptor for Braille display */
+
+static int
+openSerialPort (char **parameters, const char *device) {
+  if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
+    speed_t baud = B19200;
+    struct termios newSerialSettings;
+
+    memset(&newSerialSettings, 0, sizeof(newSerialSettings));
+    newSerialSettings.c_cflag = CLOCAL | PARODD | PARENB | CREAD | CS8;
+    newSerialSettings.c_iflag = IGNPAR; 
+    newSerialSettings.c_oflag = 0;
+    newSerialSettings.c_lflag = 0;
+    newSerialSettings.c_cc[VMIN] = 0;
+    newSerialSettings.c_cc[VTIME] = 0;
+
+    if (resetSerialDevice(serialDevice, &newSerialSettings, baud)) {
+      serialCharactersPerSecond = baud2integer(baud) / 10;
+      return 1;
+    }
+
+    close(serialDevice);
+    serialDevice = -1;
+  }
+  return 0;
+}
+
+static int
+awaitSerialData (int milliseconds) {
+  return awaitInput(serialDevice, milliseconds);
+}
+
+static int
+readSerialPacket (unsigned char *buffer, int count) {
+  int offset = 0;
+  readChunk(serialDevice, buffer, &offset, count, 100);
+  return offset;
+}
+
+static int
+writeSerialPacket (const unsigned char *buffer, int length, int *delay) {
+  int count = safe_write(serialDevice, buffer, length);
+  if (delay) *delay += length * 1000 / serialCharactersPerSecond;
+  if (count != length) {
+    if (count == -1) {
+      LogError("HandyTech serial write");
+    } else {
+      LogPrint(LOG_WARNING, "Trunccated serial write: %d < %d", count, length);
+    }
+  }
+  return count;
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice != -1) {
+    writeStopSequence();
+    tcsetattr(serialDevice, TCSADRAIN, &oldSerialSettings);
+    close(serialDevice);
+    serialDevice = -1;
+  }
+}
+
+static const InputOutputOperations serialOperations = {
+  openSerialPort, closeSerialPort, awaitSerialData,
+  readSerialPacket, writeSerialPacket
+};
+
+#ifdef ENABLE_USB
+/* USB IO */
+#include "Programs/usb.h"
+
+static UsbDevice *usbDevice = NULL;
+static unsigned char usbInterface;
+static unsigned char usbOutputEndpoint;
+static unsigned char usbInputEndpoint;
+
+static int
+chooseUsbDevice (UsbDevice *device, void *data) {
+  const char *serialNumber = data;
+  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
+  if ((descriptor->idVendor == 0X921) &&
+      (descriptor->idProduct == 0X1200) &&
+      usbVerifyProduct(device, "HandyLink USB")) {
+    if (!usbVerifySerialNumber(device, serialNumber)) return 0;
+
+    /* A true old generation HandyTech Braille Star 40 */
+    usbInterface = 0;
+    if (usbClaimInterface(device, usbInterface)) {
+      if (usbSetConfiguration(device, 1)) {
+        if (usbSetAlternative(device, usbInterface, 0)) {
+          usbOutputEndpoint = 1;
+          usbInputEndpoint = 1;
+          return 1;
+        }
+      }
+      usbReleaseInterface(device, usbInterface);
+    }
+  }
+  return 0;
+}
+
+static int
+openUsbPort (char **parameters, const char *device) {
+  if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
+    if (usbBeginInput(usbDevice,
+		      usbInputEndpoint, USB_ENDPOINT_TRANSFER_BULK, 0X40, 8)) {
+      return 1;
+    } else {
+      LogError("USB Begin Input");
+    }
+    usbCloseDevice(usbDevice);
+    usbDevice = NULL;
+  } else {
+    LogPrint(LOG_DEBUG, "USB device not found%s%s",
+             (*device? ": ": "."),
+             device);
+  }
+  return 0;
+}
+
+static int
+awaitUsbData (int milliseconds) {
+  delay(milliseconds);
+  return 1; /* What to do here?  Can we do a select on a USB device? */
+}
+
+static int
+readUsbPacket (unsigned char *buffer, int length) {
+  int count = usbReapInput(usbDevice, buffer, length, 0);
+  if (count == -1) {
+    if (errno == EAGAIN)
+      count = 0;
+  }
+  return count;
+}
+
+static int
+writeUsbPacket (const unsigned char *buffer, int length, int *delay) {
+  return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
+}
+
+static void
+closeUsbPort (void) {
+  if (usbDevice) {
+    writeStopSequence();
+    usbReleaseInterface(usbDevice, usbInterface);
+    usbCloseDevice(usbDevice);
+    usbDevice = NULL;
+  }
+}
+
+static const InputOutputOperations usbOperations = {
+  openUsbPort, closeUsbPort, awaitUsbData,
+  readUsbPacket, writeUsbPacket
+};
+#endif /* ENABLE_USB */
 
 typedef enum {
   BDS_OFF,
@@ -254,27 +430,8 @@ setState (BrailleDisplayState state) {
 }
 
 static int
-awaitData (int milliseconds) {
-  fd_set mask;
-  struct timeval timeout;
-
-  FD_ZERO(&mask);
-  FD_SET(fileDescriptor, &mask);
-
-  memset(&timeout, 0, sizeof(timeout));
-  timeout.tv_sec = milliseconds / 1000;
-  timeout.tv_usec = (milliseconds % 1000) * 1000;
-
-  if (select(fileDescriptor+1, &mask, NULL, NULL, &timeout) > 0) return 1;
-
-  return 0;
-}
-
-static int
 brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, int count) {
-  int offset = 0;
-  readChunk(fileDescriptor, bytes, &offset, count, 100);
-  return offset;
+  return io->readPacket(bytes, count);
 }
 
 static int
@@ -290,15 +447,7 @@ readByte (BrailleDisplay *brl, unsigned char *byte) {
 static int
 brl_writePacket (BrailleDisplay *brl, const unsigned char *data, int length) {
   // LogBytes("Write", data, length);
-  int count = safe_write(fileDescriptor, data, length);
-  if (count != length) {
-    if (count == -1) {
-      LogError("HandyTech write");
-    } else {
-      LogPrint(LOG_WARNING, "Trunccated write: %d < %d", count, length);
-    }
-  }
-  return count;
+  return io->writePacket(data, length, &brl->writeDelay);
 }
 
 static int
@@ -373,14 +522,20 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  struct termios newtio;	/* new terminal settings */
-
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
     makeOutputTable(&dots, &outputTable);
   }
 
-  if (!isSerialDevice(&device)) {
+  if (isSerialDevice(&device)) {
+    io = &serialOperations;
+
+#ifdef ENABLE_USB
+  } else if (isUsbDevice(&device)) {
+    io = &usbOperations;
+#endif /* ENABLE_USB */
+
+  } else {
     unsupportedDevice(device);
     return 0;
   }
@@ -388,20 +543,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   rawData = prevData = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(device, &fileDescriptor, &originalAttributes)) goto failure;
-
-  newtio.c_cflag = CLOCAL | PARODD | PARENB | CREAD|CS8;
-  newtio.c_iflag = IGNPAR; 
-  newtio.c_oflag = 0;
-  newtio.c_lflag = 0;
-  newtio.c_cc[VMIN] = 0;
-  newtio.c_cc[VTIME] = 0;
+  if (!io->openPort(parameters, device)) goto failure;
 
   while (1) {
-    if (!resetSerialDevice(fileDescriptor, &newtio, B19200)) goto failure;
     /* autodetecting MODEL */
     if (writeDescribe(brl)) {
-      if (awaitInput(fileDescriptor, 1000)) {
+      if (io->awaitData(1000)) {
         unsigned char buffer[sizeof(HandyDescription) + 1];
         if (readBytes(brl, buffer, sizeof(buffer))) {
           if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
@@ -421,14 +568,7 @@ failure:
 
 static void
 brl_close (BrailleDisplay *brl) {
-  if (fileDescriptor != -1) {
-    if (model->stopLength) {
-      writeBytes(brl, model->stopAddress, model->stopLength);
-    }
-    tcsetattr(fileDescriptor, TCSADRAIN, &originalAttributes);  /* restore terminal settings */
-    close(fileDescriptor);
-    fileDescriptor = -1;
-  }
+  io->closePort();
 
   if (rawData) {
     free(rawData);
@@ -1163,7 +1303,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
 
     if (byte == 0X06) {
       if (currentState != BDS_OFF) {
-        if (awaitData(10)) {
+        if (io->awaitData(10)) {
           setState(BDS_OFF);
           continue;
         }
