@@ -84,21 +84,33 @@ flushMidiDevice (MidiDevice *midi) {
   return 1;
 }
 
-int
-setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument) {
-  snd_seq_event_t ev;
+static void
+setupEvent (MidiDevice *midi, snd_seq_event_t *ev) {
+  snd_seq_ev_clear(ev);
+  snd_seq_ev_set_source(ev, midi->port);
+  snd_seq_ev_set_subs(ev);
+}
+
+static int
+sendEvent (MidiDevice *midi, snd_seq_event_t *ev) {
   int result;
 
-  snd_seq_ev_set_source(&ev, midi->port);
-  snd_seq_ev_set_subs(&ev);
-  snd_seq_ev_set_pgmchange(&ev, channel, instrument);
-  if ((result = snd_seq_event_output(midi->handle, &ev)) >= 0) {
+  if ((result = snd_seq_event_output(midi->handle, ev)) >= 0) {
     snd_seq_drain_output(midi->handle);
     return 1;
   } else {
-    LogPrint(LOG_DEBUG, "Write error: %s", snd_strerror(result));
+    LogPrint(LOG_ERR, "ALSA MIDI write error: %s", snd_strerror(result));
   }
   return 0;
+}
+
+int
+setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument) {
+  snd_seq_event_t ev;
+
+  setupEvent(midi, &ev);
+  snd_seq_ev_set_pgmchange(&ev, channel, instrument);
+  return sendEvent(midi, &ev);
 }
 
 int
@@ -116,10 +128,8 @@ endMidiBlock (MidiDevice *midi) {
 int
 startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
   snd_seq_event_t ev;
-  int result;
 
-  snd_seq_ev_set_source(&ev, midi->port);
-  snd_seq_ev_set_subs(&ev);
+  setupEvent(midi, &ev);
   snd_seq_ev_set_noteon(&ev, channel, note, volume);
   midi->notePlaying = note;
   if (midi->noteon_duration) {
@@ -129,22 +139,14 @@ startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsi
     snd_seq_ev_schedule_real(&ev, midi->queue, 1, &time);
     midi->noteon_duration = 0;
   }
-  if ((result = snd_seq_event_output(midi->handle, &ev)) == 0) {
-    snd_seq_drain_output(midi->handle);
-    return 1;
-  } else {
-    LogPrint(LOG_DEBUG, "Write error: %s", snd_strerror(result));
-  }
-  return 0;
+  return sendEvent(midi, &ev);
 }
 
 int
 stopMidiNote (MidiDevice *midi, unsigned char channel) {
   snd_seq_event_t ev;
-  int result;
 
-  snd_seq_ev_set_source(&ev, midi->port);
-  snd_seq_ev_set_subs(&ev);
+  setupEvent(midi, &ev);
   snd_seq_ev_set_noteoff(&ev, channel, midi->notePlaying, 0);
   midi->notePlaying = 0;
   if (midi->noteoff_duration) {
@@ -154,13 +156,7 @@ stopMidiNote (MidiDevice *midi, unsigned char channel) {
     snd_seq_ev_schedule_real(&ev, midi->queue, 1, &time);
     midi->noteoff_duration = 0;
   }
-  if ((result = snd_seq_event_output(midi->handle, &ev)) == 0) {
-    snd_seq_drain_output(midi->handle);
-    return 1;
-  } else {
-    LogPrint(LOG_DEBUG, "Write error: %s", snd_strerror(result));
-  }
-  return 0;
+  return sendEvent(midi, &ev);
 }
 
 int
