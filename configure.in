@@ -1072,24 +1072,29 @@ in
 esac
 AC_SUBST([screen_driver_objects])
 
-screen_driver_libraries=""
+cspi_found=false
 cspi_includes=""
+cspi_libdirs=""
+cspi_libraries=""
+for package in cspi-1.0
+do
+   pkg-config --exists "${package}" && {
+      cspi_includes="`pkg-config --cflags-only-I "${package}"`"
+      cspi_libdirs="`pkg-config --libs-only-L "${package}"`"
+      cspi_libraries="`pkg-config --libs-only-l "${package}"`"
+      cspi_found=true
+      break
+   }
+done
+AC_SUBST([cspi_includes])
+AC_SUBST([cspi_libdirs])
+AC_SUBST([cspi_libraries])
+
+screen_driver_libraries=""
 case "${screen_driver}"
 in
    atspi)
-      found=false
-      for package in cspi-1.0
-      do
-         pkg-config --exists "${package}" && {
-            cspi_libdirs="`pkg-config --libs-only-L "${package}"`"
-            cspi_libraries="`pkg-config --libs-only-l "${package}"`"
-            cspi_includes="`pkg-config --cflags-only-I "${package}"`"
-            found=true
-            break
-         }
-      done
-
-      "${found}" || {
+      "${cspi_found}" || {
          AC_MSG_ERROR([cspi not found.])
       }
 
@@ -1097,7 +1102,6 @@ in
       ;;
 esac
 AC_SUBST([screen_driver_libraries])
-AC_SUBST([cspi_includes])
 
 BRLTTY_ARG_PARAMETERS([screen])
 
