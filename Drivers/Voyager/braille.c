@@ -211,7 +211,6 @@ openSerialPort (char **parameters, const char *device) {
     newSerialSettings.c_cc[VTIME] = 0;
 
     if (resetSerialDevice(serialDevice, &newSerialSettings, B38400)) {
-      flushSerialInput(serialDevice);
       return 1;
     }
 
