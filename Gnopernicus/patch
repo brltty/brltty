@@ -1,0 +1,53 @@
+Index: Makefile.am
+===================================================================
+RCS file: /cvs/gnome/gnopernicus/braille/libbrl/Makefile.am,v
+retrieving revision 1.10
+diff -u -r1.10 Makefile.am
+--- Makefile.am	11 Apr 2003 13:11:39 -0000	1.10
++++ Makefile.am	26 May 2003 12:40:23 -0000
+@@ -19,6 +19,8 @@
+ libbrlincludedir =$(includedir)/gnopernicus-1.0/libbrl
+ libbrldir=$(libdir)/gnopernicus-1.0
+ 
++libbrl_la_LIBADD = -lbrlapi
++
+ libbrlinclude_HEADERS = brlxmlapi.h  
+ 
+ libbrl_la_SOURCES = baumbrl.h    \
+@@ -30,6 +32,7 @@
+ 		    sercomm.c    \
+ 		    baumbrl.c    \
+ 		    alvabrl.c	 \
++		    ttybrl.c 	 \
+ 		    braille.c    \
+ 		    brlxml.c      
+ 
+Index: braille.c
+===================================================================
+RCS file: /cvs/gnome/gnopernicus/braille/libbrl/braille.c,v
+retrieving revision 1.15
+diff -u -r1.15 braille.c
+--- braille.c	5 May 2003 14:21:20 -0000	1.15
++++ braille.c	26 May 2003 12:40:24 -0000
+@@ -48,7 +48,8 @@
+   {"DM80P", "BAUM DM80 - 80 cells"},
+   {"ALVA380", "ALVABRAILLE 380"},
+   {"ALVA544", "ALVABRAILLE 544"},
+-  {"ALVA570", "ALVABRAILLE 570"}
++  {"ALVA570", "ALVABRAILLE 570"},
++  {"BRLTTY", "BRLTTY's BrlAPI"}
+ 
+  };
+ 
+@@ -203,6 +204,11 @@
+ 							strcmp("ALVA570", DeviceName) == 0 )
+ 		{			
+ 			rv = alva_brl_open_device (DeviceName, Port, DeviceCallback, CurrentDevice);			
++		}
++		
++		else if (	strcmp("BRLTTY", DeviceName) == 0 )
++		{			
++			rv = brltty_brl_open_device (DeviceName, Port, DeviceCallback, CurrentDevice);			
+ 		}
+ 		
+ 		else if (strcmp("PB40", DeviceName) == 0)

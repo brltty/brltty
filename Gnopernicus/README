@@ -1,0 +1,72 @@
+Introduction
+============
+
+This subdirectory contains what's necessary to integrate BRLTTY's BrlAPI as a
+"braille device" into Gnopernicus. YOu can now use Gnopernicus via this new
+driver with every braille display that is supported by BRLTTY. Be forewarned
+that it is far from finished, but basic braille displaying, and key
+transmission work fine. I'd love to receive comments.  If someone would take
+the time to integrate this code into the Gnopernicus cvs, that would be great!  
+Thanks.
+
+
+Building BRLTTY
+===============
+
+Compile BRLTTY with ./configure --enable-api in order to enable the compilation
+and installation of libbrlapi and the necessary header files. After
+installation, but *before* launching the new BRLTTY, you need to generate an
+authentication key. The easiest way to do this is:
+
+    echo some-string >/etc/brltty/brlapi-key
+
+
+Building Gnopernicus
+====================
+
+Gnopernicus must be modified with two files which can both be found within this
+subdirectory. The first is "patch", which needs to be applied in
+"Gnopernicus/braille/libbrl/" and modifies "braille.c" and "Makefile.am". The
+second is "ttybrl.c", which is a new file that needs to be copied into
+"Gnopernicus/braille/libbrl/".
+
+
+Configuring Gnopernicus
+=======================
+
+You need to activate Braille Support, and to change the Braille Device Type to
+"BRLTTY".
+
+This driver assumes that Gnopernicus key bindings remain at their default
+settings. BRLTTY commands are mapped to Gnopernicus key bindings as follows:
+
+   BRLTTY       Gnopernicus
+   Command      Binding      Description
+   ----------   -----------  -----------
+   CMD_LNUP     DK00         Go To Parent
+   CMD_HOME     DK01         Go To Focus
+   CMD_LNDN     DK02         Go To Child
+   CMD_FWINLT   DK03         Go To Previous
+                DK04         Repeat Last
+   CMD_FWINRT   DK05         Go To Next
+                DK01DK02     Do Default Action
+   CR_ROUTE     HMSnn        Route Cursor
+
+
+What's Left
+===========
+
+What's left is to write some autoconf magic to allow for auto-detection of the
+existence of BrlAPI on the build machine. This patch currently adds an
+unconditional build-time dependency on BRLTTY.
+
+Also, we still need some way to figure out the tty on which the X server is
+currently running. Some investigation didn't really show any way to get this
+information via the X protocol. We will probably need to add a BrlAPI-specific
+configuration entry which at least lets the user set this. The downside would
+be that this would make it very hard to use Gnopernicus for more than one X
+server concurrently.
+
+Any input on these issues would be highly appreciated.
+
+
