@@ -134,12 +134,15 @@ static char *model;
 #define BUTWIDTH 48
 #define BUTHEIGHT 32
 
-static Widget toplevel,vbox,hbox,keybox,display[WHOLESIZE],displayb[WHOLESIZE];
+static Widget toplevel,vbox,hbox,keybox,display[WHOLESIZE];
+#ifdef USE_XAW
+static Widget displayb[WHOLESIZE];
+static XFontSet fontset;
+#endif
 static XtAppContext app_con;
 #ifdef USE_XM
-static XmString display_cs,displayb_cs;
+static XmString display_cs;
 #endif
-static XFontSet fontset;
 
 static long keypressed;
 
@@ -259,9 +262,11 @@ static XrmOptionDescRec optionDescList[] = { };
 static char *fallback_resources[] = {
  "*display.font: -*-fixed-*-*-*-*-24-*-*-*-*-*-*-*",
  "*display.background: lightgreen",
- "*keybox.background: lightgrey",
+#ifdef USE_XAW
  "*displayb.background: black",
  "*displayb.foreground: white",
+#endif
+ "*keybox.background: lightgrey",
  NULL
 };
 
@@ -311,7 +316,6 @@ static void brl_display() {
 
 #ifdef USE_XM
  display_cs = XmStringCreateLocalized(disp);
- displayb_cs = XmStringCreateLocalized(dispb);
 #endif
 
  for (x=0;x<cols;x++) {
@@ -355,25 +359,17 @@ static void brl_display() {
 #endif
     NULL);
 
+#ifdef USE_XAW
    if (fontset) {
     displayb[y*cols+x] = XtVaCreateManagedWidget("displayb",labelWidgetClass,tmp_vbox,
     XtNtranslations, transl,
     XtNinternational, True,
     XNFontSet, fontset,
-#ifdef USE_XAW
     XtNshowGrip,False,
-#else
-    XmNpaneMaximum,20,
-    XmNpaneMinimum,20,
-    XmNskipAdjust, True,
-#endif
-#ifdef USE_XAW
     XtNlabel, dispb,
-#else
-    XmNlabelString, displayb_cs,
-#endif
     NULL);
    }
+#endif
   }
  }
 #ifdef USE_XM
@@ -388,9 +384,11 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  int argc = 1;
  static char *defargv[]= { "brltty", NULL };
  char **argv = defargv;
+#ifdef USE_XAW
  char *def_string_return;
  char **missing_charset_list_return;
  int missing_charset_count_return;
+#endif
  XtActionsRec routeAction = { "route", route };
 
  lines=1;
@@ -450,8 +448,10 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
    XtNresize, True,
    NULL);
 
+#ifdef USE_XAW
  if (!(fontset = XCreateFontSet(XtDisplay(toplevel),"-*-clearlyu-*-*-*-*-17-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
   LogPrint(LOG_ERR,"Error while loading braille font");
+#endif
  
  brl_display();
 
@@ -476,13 +476,16 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 
 static void brl_close(BrailleDisplay *brl)
 {
+#ifdef USE_XAW
  if (fontset)
   XFreeFontSet(XtDisplay(toplevel),fontset);
+#endif
  XtDestroyApplicationContext(app_con);
 }
 
 static void brl_writeWindow(BrailleDisplay *brl)
 {
+#ifdef USE_XAW
  static unsigned char displayed[WHOLESIZE];
  int i;
  unsigned char data[4];
@@ -507,20 +510,11 @@ static void brl_writeWindow(BrailleDisplay *brl)
   data[2]=0x80                 |(brl->buffer[i]&0x3f);
   data[3]=0;
 
-#ifdef USE_XM
-  display_cs = XmStringCreateLocalized(data);
-#endif
   XtVaSetValues(displayb[i],
-#ifdef USE_XAW
    XtNlabel, data,
-#else
-   XmNlabelString, display_cs,
-#endif
    NULL);
-#ifdef USE_XM
-  XmStringFree(display_cs);
-#endif
  }
+#endif
 }
 
 static void brl_writeVisual(BrailleDisplay *brl)
@@ -529,7 +523,7 @@ static void brl_writeVisual(BrailleDisplay *brl)
  int i;
  unsigned char data[2];
 
- if (!displayb || !memcmp(brl->buffer,displayed,brl->y*brl->x)) return;
+ if (!memcmp(brl->buffer,displayed,brl->y*brl->x)) return;
  memcpy(displayed,brl->buffer,brl->y*brl->x);
 
  for (i=0;i<brl->y*brl->x;i++) {
