@@ -90,7 +90,7 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
             if (strstr(name, clientSpecifier)) {
               clientIdentifier = snd_seq_client_info_get_client(info);
               clientOk = 1;
-              LogPrint(LOG_WARNING, "Using ALSA MIDI client: %d[%s]",
+              LogPrint(LOG_INFO, "Using ALSA MIDI client: %d[%s]",
                        clientIdentifier, name);
             }
           }
@@ -103,6 +103,21 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
 
           if (isInteger(&portIdentifier, portSpecifier)) {
             if ((portIdentifier >= 0) && (portIdentifier <= 0XFFFF)) portOk = 1;
+          } else {
+            snd_seq_port_info_t *info = mallocWrapper(snd_seq_port_info_sizeof());
+            memset(info, 0, snd_seq_port_info_sizeof());
+            snd_seq_port_info_set_client(info, clientIdentifier);
+            snd_seq_port_info_set_port(info, -1);
+            while (snd_seq_query_next_port(midi->sequencer, info) >= 0) {
+              const char *name = snd_seq_port_info_get_name(info);
+              if (strstr(name, portSpecifier)) {
+                portIdentifier = snd_seq_port_info_get_port(info);
+                portOk = 1;
+                LogPrint(LOG_INFO, "Using ALSA MIDI port: %d[%s]",
+                         portIdentifier, name);
+              }
+            }
+            free(info);
           }
 
           if (portOk) {
