@@ -435,45 +435,27 @@ static int brlapi_getControllingTty()
   int tty;
   const char *env;
 
-#ifdef linux
-  {
-    int vt = 0;
-    pid_t pid = getpid();
-    while (pid != 1) {
-      int ok = 0;
-      char path[0X40];
-      FILE *stream;
-
-      int process;
-      char command[0X200];
-      char status;
-      int parent;
-      int group;
-      int session;
-      int tty;
-
-      snprintf(path, sizeof(path), "/proc/%d/stat", pid);
-      if ((stream = fopen(path, "r"))) {
-        if (fscanf(stream, "%d %s %c %d %d %d %d", &process, command, &status, &parent, &group, &session, &tty) >= 7)
-          if (process == pid)
-            ok = 1;
-        fclose(stream);
-      }
-      if (!ok) break;
-
-      if (major(tty) == TTY_MAJOR) {
-        vt = minor(tty);
-        break;
-      }
-
-      pid = parent;
-    }
-    if ((vt >= 1) && (vt <= MAXIMUM_VIRTUAL_CONSOLE)) return vt;
-  }
-#endif /* linux */
   /*if ((env = getenv("WINDOW")) && sscanf(env, "%u", &tty) == 1) return tty;*/
   if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
+
+#ifdef linux
+  {
+    FILE *stream;
+
+    if ((stream = fopen("/proc/self/stat", "r"))) {
+      int vt;
+      int ok = fscanf(stream, "%*d %*s %*c %*d %*d %*d %d", &tty) == 1;
+      fclose(stream);
+
+      if (ok && (major(tty) == TTY_MAJOR)) {
+        vt = minor(tty);
+        if ((vt >= 1) && (vt <= MAXIMUM_VIRTUAL_CONSOLE)) return vt;
+      }
+    }
+  }
+#endif /* linux */
+
   return -1;
 }
 
