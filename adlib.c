@@ -27,10 +27,10 @@
 
 #include <stdlib.h>
 #include <unistd.h>  
-#include <stdio.h>  
 #include <sys/io.h>
 #include <math.h>
 
+#include "misc.h"
 #include "adlib.h"
 
 unsigned char AL_channelOffsets[] = {
@@ -67,9 +67,7 @@ static void AL_writeDelay (int delay) {
 }
 
 void AL_writeRegister (int number, unsigned char data) {
-#ifdef DEBUG_ADLIB
-   fprintf(stderr, "AL_writeRegister: %2.2X=%2.2X\n", number, data);
-#endif
+   LogPrint(LOG_DEBUG, "AL_writeRegister: %2.2X=%2.2X", number, data);
    outb(number, ALP_REGISTER);
    AL_writeDelay(6);
    outb(data, ALP_DATA);
@@ -111,9 +109,7 @@ void AL_evaluatePitch (int pitch, int *exponent, int *mantissa) {
 }
 
 void AL_initiateTone (int channel, int exponent, int mantissa) {
-#ifdef DEBUG_ADLIB
-   fprintf(stderr, "AL_initiateTone: %1.1X[%3.3X]\n", exponent, mantissa);
-#endif
+   LogPrint(LOG_DEBUG, "AL_initiateTone: %1.1X[%3.3X]", exponent, mantissa);
    AL_writeRegister(ALR_FREQUENCY_LSB(channel),
                     (mantissa & 0XFF));
    AL_writeRegister(ALR_FREQUENCY_MSB(channel),
@@ -126,9 +122,7 @@ void AL_startTone (int channel, int pitch) {
    int exponent;
    int mantissa;
    AL_evaluatePitch(pitch, &exponent, &mantissa);
-#ifdef DEBUG_FREQ
-   printf("octave = %1d    frequency = %4d\n", octave, frequency);
-#endif
+   LogPrint(LOG_DEBUG, "AL_startTone: %d", pitch);
    AL_initiateTone(channel, exponent, mantissa);
 }
 

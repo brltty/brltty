@@ -14,7 +14,7 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION "BRLTTY External Speech driver, version 0.6 (March 2001)"
+#define VERSION "BRLTTY External Speech driver, version 0.7 (September 2001)"
 #define COPYRIGHT "Copyright (C) 2000-2001 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* ExternalSpeech/speech.c - Speech library (driver)
@@ -31,6 +31,7 @@
 #include <linux/limits.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #define SPEECH_C 1
 
@@ -41,10 +42,9 @@
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_SAYATTRIBS
 
+#define SPKPARMS "program", "uid", "gid"
 #include "../spk_driver.h"
 
-static char *extProgPath = NULL;
-static uid_t uid, gid;
 static int helper_fd_in = -1, helper_fd_out = -1;
 static unsigned short lastIndex, finalIndex;
 static char speaking = 0;
@@ -55,87 +55,73 @@ static void identspk (void)
   LogAndStderr(LOG_INFO, "   "COPYRIGHT);
 }
 
-static void myerror(char *msg)
+#define ERRBUFLEN 200
+static void myerror(char *fmt, ...)
 {
-  LogPrint(LOG_ERR, msg);
+  char buf[ERRBUFLEN];
+  int offs;
+  va_list argp;
+  va_start(argp, fmt);
+  offs = snprintf(buf, ERRBUFLEN, "ExternalSpeech: ");
+  if(offs < ERRBUFLEN) {
+    offs += vsnprintf(buf+offs, ERRBUFLEN-offs, fmt, argp);
+  }
+  buf[ERRBUFLEN-1] = 0;
+  va_end(argp);
+  LogPrint(LOG_ERR, "%s", buf);
   closespk();
 }
-static void myperror(char *msg)
+static void myperror(char *fmt, ...)
 {
-  char buf[200];
-  if(strlen(msg) > 190)
-    msg = "...ERROR MESSAGE TOO LONG!!!";
-  strcpy(buf, msg);
-  strcat(buf, ": %s");
-  LogPrint(LOG_ERR, buf, strerror(errno));
-  closespk();
-}
-static void myperror2(char *msg, void *str1)
-{
-  char buf[200];
-  if(strlen(msg) > 190)
-    msg = "...ERROR MESSAGE TOO LONG!!!";
-  strcpy(buf, msg);
-  strcat(buf, ": %s");
-  LogPrint(LOG_ERR, buf, str1, strerror(errno));
+  char buf[ERRBUFLEN];
+  int offs;
+  va_list argp;
+  va_start(argp, fmt);
+  offs = snprintf(buf, ERRBUFLEN, "ExternalSpeech: ");
+  if(offs < ERRBUFLEN) {
+    offs += vsnprintf(buf+offs, ERRBUFLEN-offs, fmt, argp);
+    if(offs < ERRBUFLEN)
+      snprintf(buf+offs, ERRBUFLEN-offs, ": %s", strerror(errno));
+  }
+  buf[ERRBUFLEN-1] = 0;
+  va_end(argp);
+  LogPrint(LOG_ERR, "%s", buf);
   closespk();
 }
 
 static void initspk (char **parameters)
 {
-char *speechparm = parameters[0];
   int fd1[2], fd2[2];
-  char *ptr, *s_uid, *s_gid;
-  char *parm = NULL;
-  if(speechparm){
-    /* We don't want to modify speechparm, in particular if we are ever
-       to reinit this driver... */
-    parm = strdup(speechparm);
-    if(!parm){
-      myperror("strdup -> out of memory");
-      return;
-    }
-    /* but now we must not forget to free parm! */
-    extProgPath = strtok_r(parm, ",", &ptr);
-    s_uid = strtok_r(NULL, ",", &ptr);
-    s_gid = strtok_r(NULL, ",", &ptr);
-    if(s_uid) {
-      uid = strtol(s_uid, &ptr, 0);
-      if(*ptr != 0)
-	s_gid = NULL;
-    }
-    if(s_gid) {
-      gid = strtol(s_gid, &ptr, 0);
-      if(*ptr != 0)
-	s_gid = NULL;
-    }
-    if(s_uid && !s_gid) {
-      myperror2("Unable to parse parameter to ExternalSpeech driver. "
-		"Expected format is '<extProgramPath>' or "
-		"'<extProgramPath>,<numerical_uid>,<numerical_gid>'. "
-		"Got parameter '%s'", speechparm);
-      free(parm);
-      extProgPath = NULL;
-      return;
-    }
-  }else extProgPath = s_uid = s_gid = NULL;
+  uid_t uid, gid;
+  char
+    *extProgPath = parameters[0],
+    *s_uid = parameters[1],
+    *s_gid = parameters[2];
+
   if(!extProgPath) extProgPath = HELPER_PROG_PATH;
-  extProgPath = strdup(extProgPath);
-  if(!extProgPath) {
-    myperror("strdup -> out of memory");
-    if(parm) free(parm);
-    return;
-  }
-  if(!s_uid) uid = UID;
-  if(!s_gid) gid = GID;
-  if(parm) free(parm);
+  if(s_uid) {
+    char *ptr;
+    uid = strtol(s_uid, &ptr, 0);
+    if(*ptr != 0) {
+      myerror("Unable to parse uid value '%s'", s_uid);
+      return;
+    }
+  }else uid = UID;
+  if(s_gid) {
+    char *ptr;
+    gid = strtol(s_gid, &ptr, 0);
+    if(*ptr != 0) {
+      myerror("Unable to parse gid value '%s'", s_uid);
+      return;
+    }
+  }else gid = GID;
 
   if(pipe(fd1) < 0
      || pipe(fd2) < 0) {
     myperror("pipe");
     return;
   }
-  LogPrint(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d\n",
+  LogPrint(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d",
 	   fd1[0],fd1[1], fd2[0],fd2[1]);
   switch(fork()) {
   case -1:
@@ -144,11 +130,11 @@ char *speechparm = parameters[0];
   case 0: {
     int i;
     if(setgid(gid) <0) {
-      myperror2("setgid to %u", (void *)gid);
+      myperror("setgid to %u", gid);
       _exit(1);
     }
     if(setuid(uid) <0) {
-      myperror2("setuid to %u", (void *)uid);
+      myperror("setuid to %u", uid);
       _exit(1);
     }
     LogPrint(LOG_INFO, "ExternalSpeech program uid is %u, gid is %u",
@@ -160,8 +146,7 @@ char *speechparm = parameters[0];
     }
     for(i=2; i<OPEN_MAX; i++) close(i);
     execl(extProgPath, extProgPath, 0);
-    myperror2("Unable to execute external speech program %s: exec",
-	     HELPER_PROG_PATH);
+    myperror("Unable to execute external speech program '%s'", extProgPath);
     _exit(1);
   }
   default:
@@ -190,7 +175,7 @@ static void mywrite(int fd, void *buf, int len)
     if((w = write(fd, pos, len)) < 0) {
       if(errno == EINTR || errno == EAGAIN) continue;
       else if(errno == EPIPE)
-	myperror("ExternalSpeech: pipe to helper program was broken");
+	myerror("ExternalSpeech: pipe to helper program was broken");
          /* try to reinit may be ??? */
       else myperror("ExternalSpeech: pipe to helper program: write");
       return;
@@ -292,8 +277,6 @@ static void mutespk (void)
 
 static void closespk (void)
 {
-  if(extProgPath) free(extProgPath);
-  extProgPath = NULL;
   if(helper_fd_in >= 0)
     close(helper_fd_in);
   if(helper_fd_out >= 0)

@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <termios.h>
 
 #include "misc.h"
 #include "config.h"
@@ -41,13 +42,13 @@ struct brltty_env env;		/* environment (i.e. global) parameters */
  * Output braille translation tables.
  * The files *.auto.h (the default tables) are generated at compile-time.
  */
-unsigned char texttrans[256] =
+unsigned char texttrans[0X100] =
 {
   #include "text.auto.h"
 };
-unsigned char untexttrans[256];
+unsigned char untexttrans[0X100];
 
-unsigned char attribtrans[256] =
+unsigned char attribtrans[0X100] =
 {
   #include "attrib.auto.h"
 };
@@ -59,7 +60,8 @@ unsigned char attribtrans[256] =
  */
 unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
 
-void setCloseOnExec (int fileDescriptor) {
+void
+setCloseOnExec (int fileDescriptor) {
    fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC);
 }
 
@@ -70,7 +72,7 @@ void setCloseOnExec (int fileDescriptor) {
 // The caller-supplied data pointer is passed straight through to the handler.
 void processLines (FILE *file,
                    void (*handler) (char *line, void *data),
-		    void *data)
+		   void *data)
 {
   size_t buff_size = 0X80; // Initial buffer size.
   char *buff_addr = malloc(buff_size); // Allocate the buffer.
@@ -197,7 +199,6 @@ elapsed_msec (struct timeval *t1, struct timeval *t2)
   return (diff);
 }
 
-
 void
 shortdelay (unsigned msec)
 {
@@ -211,7 +212,6 @@ shortdelay (unsigned msec)
   while (elapsed_msec (&start, &now) < msec);
 }
 
-
 void
 delay (int msec)
 {
@@ -221,7 +221,6 @@ delay (int msec)
   del.tv_usec = msec * 1000;
   select (0, NULL, NULL, NULL, &del);
 }
-
 
 int
 timeout_yet (int msec)
@@ -326,6 +325,146 @@ done:
   va_end(argp);
 }
 
+int
+validateInteger (long int *integer, char *description, char *value, long int *minimum, long int *maximum) {
+   char *end;
+   *integer = strtol(value, &end, 0);
+   if (*end) {
+      LogPrint(LOG_ERR, "The %s is not an integer: %s",
+               description, value);
+      return 0;
+   }
+   if (minimum) {
+      if (*integer < *minimum) {
+	 LogPrint(LOG_ERR, "The %s is too low: %ld < %ld",
+	          description, *integer, *minimum);
+	 return 0;
+      }
+   }
+   if (maximum) {
+      if (*integer > *maximum) {
+	 LogPrint(LOG_ERR, "The %s is too high: %ld > %ld",
+	          description, *integer, *maximum);
+	 return 0;
+      }
+   }
+   return 1;
+}
+
+int
+validateBaud (unsigned long int *baud, char *description, char *value) {
+   long int integer;
+   if (validateInteger(&integer, description, value, NULL, NULL)) {
+      typedef struct {
+         long int integer;
+	 unsigned long int baud;
+      } BaudEntry;
+      static BaudEntry baudTable[] = {
+	 #ifdef B50
+	 {     50, B50},
+	 #endif
+	 #ifdef B75
+	 {     75, B75},
+	 #endif
+	 #ifdef B110
+	 {    110, B110},
+	 #endif
+	 #ifdef B134
+	 {    134, B134},
+	 #endif
+	 #ifdef B150
+	 {    150, B150},
+	 #endif
+	 #ifdef B200
+	 {    200, B200},
+	 #endif
+	 #ifdef B300
+	 {    300, B300},
+	 #endif
+	 #ifdef B600
+	 {    600, B600},
+	 #endif
+	 #ifdef B1200
+	 {   1200, B1200},
+	 #endif
+	 #ifdef B1800
+	 {   1800, B1800},
+	 #endif
+	 #ifdef B2400
+	 {   2400, B2400},
+	 #endif
+	 #ifdef B4800
+	 {   4800, B4800},
+	 #endif
+	 #ifdef B9600
+	 {   9600, B9600},
+	 #endif
+	 #ifdef B19200
+	 {  19200, B19200},
+	 #endif
+	 #ifdef B38400
+	 {  38400, B38400},
+	 #endif
+	 #ifdef B57600
+	 {  57600, B57600},
+	 #endif
+	 #ifdef B115200
+	 { 115200, B115200},
+	 #endif
+	 #ifdef B230400
+	 { 230400, B230400},
+	 #endif
+	 #ifdef B460800
+	 { 460800, B460800},
+	 #endif
+	 #ifdef B500000
+	 { 500000, B500000},
+	 #endif
+	 #ifdef B576000
+	 { 576000, B576000},
+	 #endif
+	 #ifdef B921600
+	 { 921600, B921600},
+	 #endif
+	 #ifdef B1000000
+	 {1000000, B1000000},
+	 #endif
+	 #ifdef B1152000
+	 {1152000, B1152000},
+	 #endif
+	 #ifdef B1500000
+	 {1500000, B1500000},
+	 #endif
+	 #ifdef B2000000
+	 {2000000, B2000000},
+	 #endif
+	 #ifdef B2500000
+	 {2500000, B2500000},
+	 #endif
+	 #ifdef B3000000
+	 {3000000, B3000000},
+	 #endif
+	 #ifdef B3500000
+	 {3500000, B3500000},
+	 #endif
+	 #ifdef B4000000
+	 {4000000, B4000000},
+	 #endif
+	 {      0, B0}
+      };
+      BaudEntry *entry = baudTable;
+      while (entry->integer) {
+         if (integer == entry->integer) {
+	    *baud = entry->baud;
+	    return 1;
+	 }
+	 ++entry;
+      }
+      LogPrint(LOG_ERR, "The %s is an invalid baud: %ld",
+               description, integer);
+   }
+   return 0;
+}
 
 /* Functions which support horizontal status cells, e.g. Papenmeier. */
 /* this stuff is real wired - dont try to understand */

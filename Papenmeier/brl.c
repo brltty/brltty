@@ -239,7 +239,7 @@ static void initbrlerror(brldim *brl)
 {
 
   /* printf replaced with LogPrint  (NP) */
-  LogPrint(LOG_ERR, "Initbrl: failure at open\n");
+  LogPrint(LOG_ERR, "Initbrl: failure at open");
 
   if (brl->disp)
     free (brl->disp);

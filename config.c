@@ -76,37 +76,42 @@
 
 char USAGE[] = "\
 Usage: %s [option ...]\n\
- -a file    --attribs=file    Path to attributes translation table file.\n\
- -b driver  --braille=driver  Braille display driver to use: full library path\n\
-                                or shortcut (" BRLLIBS ").\n\
- -B         --brailleparm=arg Parameter to braille driver.\n\
- -d device  --device=device   Path to device for accessing braille display.\n\
- -e         --errors          Log to standard error instead of via syslog.\n\
- -f file    --file=file       Path to default parameters file.\n\
- -h         --help            Print this usage summary and exit.\n\
- -l n       --log=n           Syslog reporting level (0-7, default 5).\n\
- -n         --nodaemon        Remain a foreground process.\n\
- -p file    --prefs=file      Path to preferences file.\n\
- -q         --quiet           Suppress start-up messages.\n\
- -s driver  --speech=driver   Speech interface driver to use: full library path\n\
-                                or shortcut (" SPKLIBS ").\n\
- -S         --speechparm=arg  Parameter to speech driver.\n\
- -t file    --text=file       Path to text translation table file.\n\
- -v         --version         Print start-up messages and exit.\n";
+-a file    --attributes-table=   Path to attributes translation table file.\n\
+-b driver  --braille-driver=     Braille driver: full library path, or one of\n\
+                                 {" BRLLIBS "}\n\
+-B arg,... --braille-parameters= Parameters to braille driver.\n\
+-d device  --braille-device=     Path to device for accessing braille display.\n\
+-e         --errors              Log to standard error instead of via syslog.\n\
+-f file    --configuration-file= Path to default parameters file.\n\
+-h         --help                Print this usage summary and exit.\n\
+-l level   --log-level=          Diagnostic logging level: 0-7 [5], or one of\n\
+				 {emergency alert critical error warning\n\
+				 [notice] information debug}\n\
+-n         --no-daemon           Remain a foreground process.\n\
+-p file    --preferences-file=   Path to preferences file.\n\
+-q         --quiet               Suppress start-up messages.\n\
+-s driver  --speech-driver=      Speech driver: full library path, or one of\n\
+                                 {" SPKLIBS "}\n\
+-S arg,... --speech-parameters=  Parameters to speech driver.\n\
+-t file    --text-table=         Path to text translation table file.\n\
+-v         --version             Print start-up messages and exit.\n";
 
 static char *opt_attributesTable = NULL;
 static char *opt_brailleDevice = NULL;
-static char *opt_brailleParameter = "";
+static char *opt_brailleParameters = NULL;
 static char *opt_configurationFile = NULL;
 static short opt_errors = 0;
 static short opt_help = 0;
-static short opt_log = LOG_NOTICE;
+static short opt_logLevel = LOG_NOTICE;
 static short opt_noDaemon = 0;
 static char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
-static char *opt_speechParameter = "";
+static char *opt_speechParameters = NULL;
 static char *opt_textTable = NULL;
 static short opt_version = 0;
+
+static char *cfg_brailleParameters = NULL;
+static char *cfg_speechParameters = NULL;
 
 static char **brailleParameters = NULL;
 static char **speechParameters = NULL;
@@ -127,22 +132,22 @@ static void processOptions (int argc, char **argv)
   #ifdef no_argument
     const struct option long_options[] =
       {
-        {"attribs"    , required_argument, NULL, 'a'},
-        {"braille"    , required_argument, NULL, 'b'},
-        {"brailleparm", required_argument, NULL, 'B'},
-        {"device"     , required_argument, NULL, 'd'},
-        {"errors"     , no_argument      , NULL, 'e'},
-        {"file"       , required_argument, NULL, 'f'},
-        {"help"       , no_argument      , NULL, 'h'},
-        {"log"        , required_argument, NULL, 'l'},
-        {"nodaemon"   , no_argument      , NULL, 'n'},
-        {"prefs"      , required_argument, NULL, 'p'},
-        {"quiet"      , no_argument      , NULL, 'q'},
-        {"speech"     , required_argument, NULL, 's'},
-        {"speechparm" , required_argument, NULL, 'S'},
-        {"text"       , required_argument, NULL, 't'},
-        {"version"    , no_argument      , NULL, 'v'},
-        {NULL         , 0                , NULL, ' '}
+        {"attributes-table"  , required_argument, NULL, 'a'},
+        {"braille-driver"    , required_argument, NULL, 'b'},
+        {"braille-parameters", required_argument, NULL, 'B'},
+        {"braille-device"    , required_argument, NULL, 'd'},
+        {"errors"            , no_argument      , NULL, 'e'},
+        {"configuration-file", required_argument, NULL, 'f'},
+        {"help"              , no_argument      , NULL, 'h'},
+        {"log-level"         , required_argument, NULL, 'l'},
+        {"no-daemon"         , no_argument      , NULL, 'n'},
+        {"preferences-file"  , required_argument, NULL, 'p'},
+        {"quiet"             , no_argument      , NULL, 'q'},
+        {"speech-driver"     , required_argument, NULL, 's'},
+        {"speech-parameters" , required_argument, NULL, 'S'},
+        {"text-table"        , required_argument, NULL, 't'},
+        {"version"           , no_argument      , NULL, 'v'},
+        {NULL                , 0                , NULL, ' '}
       };
     #define get_option() getopt_long(argc, argv, short_options, long_options, NULL)
   #else
@@ -169,7 +174,7 @@ static void processOptions (int argc, char **argv)
 	braille_libname = optarg;
 	break;
       case 'B':			/* parameter to speech driver */
-	opt_brailleParameter = optarg;
+	opt_brailleParameters = optarg;
 	break;
       case 'd':		/* serial device path */
 	opt_brailleDevice = optarg;
@@ -202,14 +207,14 @@ static void processOptions (int argc, char **argv)
 	    }
 	  }
 	  if (value < valueCount) {
-	    opt_log = value;
+	    opt_logLevel = value;
 	    break;
 	  }
 	  {
 	    char *endptr;
 	    value = strtol(optarg, &endptr, 0);
 	    if (!*endptr && value>=0 && value<valueCount) {
-	      opt_log = value;
+	      opt_logLevel = value;
 	      break;
 	    }
 	  }
@@ -230,7 +235,7 @@ static void processOptions (int argc, char **argv)
 	speech_libname = optarg;
 	break;
       case 'S':			/* parameter to speech driver */
-	opt_speechParameter = optarg;
+	opt_speechParameters = optarg;
 	break;
       case 't':		/* text translation table file name */
 	opt_textTable = optarg;
@@ -279,9 +284,9 @@ static int setBrailleDriver (const char *delims)
   return getToken(&braille_libname, delims);
 }
 
-static int setBrailleParameter (const char *delims)
+static int setBrailleParameters (const char *delims)
 {
-  return getToken(&opt_brailleParameter, delims);
+  return getToken(&cfg_brailleParameters, delims);
 }
 
 static int setSpeechDriver (const char *delims)
@@ -289,9 +294,9 @@ static int setSpeechDriver (const char *delims)
   return getToken(&speech_libname, delims);
 }
 
-static int setSpeechParameter (const char *delims)
+static int setSpeechParameters (const char *delims)
 {
-  return getToken(&opt_speechParameter, delims);
+  return getToken(&cfg_speechParameters, delims);
 }
 
 static int setTextTable (const char *delims)
@@ -324,9 +329,9 @@ static void processConfigurationLine (char *line, void *data)
     {
       {"braille-device",        setBrailleDevice},
       {"braille-driver",        setBrailleDriver},
-      {"braille-parameter",     setBrailleParameter},
+      {"braille-parameters",    setBrailleParameters},
       {"speech-driver",         setSpeechDriver},
-      {"speech-parameter",      setSpeechParameter},
+      {"speech-parameters",     setSpeechParameters},
       {"text-table",            setTextTable},
       {"attributes-table",      setAttributesTable},
       {"preferences-file",      setPreferencesFile},
@@ -562,152 +567,6 @@ updatePreferences (void)
   static char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Papenmeier", "MDV"};
   static char *textStyles[] = {"8 dot", "6 dot"};
   static char *tuneDevices[] = {"PC Speaker", "Sound Card", "MIDI", "AdLib/OPL3/SB-FM"};
-  static char *midiInstruments[] = {
-  /* Piano */
-     /* 00 */ "Acoustic Grand Piano",
-     /* 01 */ "Bright Acoustic Piano",
-     /* 02 */ "Electric Grand Piano",
-     /* 03 */ "Honky-tonk Piano",
-     /* 04 */ "Electric Piano 1",
-     /* 05 */ "Electric Piano 2",
-     /* 06 */ "Harpsichord",
-     /* 07 */ "Clavi",
-  /* Chromatic Percussion */
-     /* 08 */ "Celesta",
-     /* 09 */ "Glockenspiel",
-     /* 0A */ "Music Box",
-     /* 0B */ "Vibraphone",
-     /* 0C */ "Marimba",
-     /* 0D */ "Xylophone",
-     /* 0E */ "Tubular Bells",
-     /* 0F */ "Dulcimer",
-  /* Organ */
-     /* 10 */ "Drawbar Organ",
-     /* 11 */ "Percussive Organ",
-     /* 12 */ "Rock Organ",
-     /* 13 */ "Church Organ",
-     /* 14 */ "Reed Organ",
-     /* 15 */ "Accordion",
-     /* 16 */ "Harmonica",
-     /* 17 */ "Tango Accordion",
-  /* Guitar */
-     /* 18 */ "Acoustic Guitar (nylon)",
-     /* 19 */ "Acoustic Guitar (steel)",
-     /* 1A */ "Electric Guitar (jazz)",
-     /* 1B */ "Electric Guitar (clean)",
-     /* 1C */ "Electric Guitar (muted)",
-     /* 1D */ "Overdriven Guitar",
-     /* 1E */ "Distortion Guitar",
-     /* 1F */ "Guitar harmonics",
-  /* Bass */
-     /* 20 */ "Acoustic Bass",
-     /* 21 */ "Electric Bass (finger)",
-     /* 22 */ "Electric Bass (pick)",
-     /* 23 */ "Fretless Bass",
-     /* 24 */ "Slap Bass 1",
-     /* 25 */ "Slap Bass 2",
-     /* 26 */ "Synth Bass 1",
-     /* 27 */ "Synth Bass 2",
-  /* Strings */
-     /* 28 */ "Violin",
-     /* 29 */ "Viola",
-     /* 2A */ "Cello",
-     /* 2B */ "Contrabass",
-     /* 2C */ "Tremolo Strings",
-     /* 2D */ "Pizzicato Strings",
-     /* 2E */ "Orchestral Harp",
-     /* 2F */ "Timpani",
-  /* Ensemble */
-     /* 30 */ "String Ensemble 1",
-     /* 31 */ "String Ensemble 2",
-     /* 32 */ "SynthStrings 1",
-     /* 33 */ "SynthStrings 2",
-     /* 34 */ "Choir Aahs",
-     /* 35 */ "Voice Oohs",
-     /* 36 */ "Synth Voice",
-     /* 37 */ "Orchestra Hit",
-  /* Brass */
-     /* 38 */ "Trumpet",
-     /* 39 */ "Trombone",
-     /* 3A */ "Tuba",
-     /* 3B */ "Muted Trumpet",
-     /* 3C */ "French Horn",
-     /* 3D */ "Brass Section",
-     /* 3E */ "SynthBrass 1",
-     /* 3F */ "SynthBrass 2",
-  /* Reed */
-     /* 40 */ "Soprano Sax",
-     /* 41 */ "Alto Sax",
-     /* 42 */ "Tenor Sax",
-     /* 43 */ "Baritone Sax",
-     /* 44 */ "Oboe",
-     /* 45 */ "English Horn",
-     /* 46 */ "Bassoon",
-     /* 47 */ "Clarinet",
-  /* Pipe */
-     /* 48 */ "Piccolo",
-     /* 49 */ "Flute",
-     /* 4A */ "Recorder",
-     /* 4B */ "Pan Flute",
-     /* 4C */ "Blown Bottle",
-     /* 4D */ "Shakuhachi",
-     /* 4E */ "Whistle",
-     /* 4F */ "Ocarina",
-  /* Synth Lead */
-     /* 50 */ "Lead 1 (square)",
-     /* 51 */ "Lead 2 (sawtooth)",
-     /* 52 */ "Lead 3 (calliope)",
-     /* 53 */ "Lead 4 (chiff)",
-     /* 54 */ "Lead 5 (charang)",
-     /* 55 */ "Lead 6 (voice)",
-     /* 56 */ "Lead 7 (fifths)",
-     /* 57 */ "Lead 8 (bass + lead)",
-  /* Synth Pad */
-     /* 58 */ "Pad 1 (new age)",
-     /* 59 */ "Pad 2 (warm)",
-     /* 5A */ "Pad 3 (polysynth)",
-     /* 5B */ "Pad 4 (choir)",
-     /* 5C */ "Pad 5 (bowed)",
-     /* 5D */ "Pad 6 (metallic)",
-     /* 5E */ "Pad 7 (halo)",
-     /* 5F */ "Pad 8 (sweep)",
-  /* Synth FM */
-     /* 60 */ "FX 1 (rain)",
-     /* 61 */ "FX 2 (soundtrack)",
-     /* 62 */ "FX 3 (crystal)",
-     /* 63 */ "FX 4 (atmosphere)",
-     /* 64 */ "FX 5 (brightness)",
-     /* 65 */ "FX 6 (goblins)",
-     /* 66 */ "FX 7 (echoes)",
-     /* 67 */ "FX 8 (sci-fi)",
-  /* Ethnic Instruments */
-     /* 68 */ "Sitar",
-     /* 69 */ "Banjo",
-     /* 6A */ "Shamisen",
-     /* 6B */ "Koto",
-     /* 6C */ "Kalimba",
-     /* 6D */ "Bag pipe",
-     /* 6E */ "Fiddle",
-     /* 6F */ "Shanai",
-  /* Percussive Instruments */
-     /* 70 */ "Tinkle Bell",
-     /* 71 */ "Agogo",
-     /* 72 */ "Steel Drums",
-     /* 73 */ "Woodblock",
-     /* 74 */ "Taiko Drum",
-     /* 75 */ "Melodic Tom",
-     /* 76 */ "Synth Drum",
-     /* 77 */ "Reverse Cymbal",
-  /* Sound Effects */
-     /* 78 */ "Guitar Fret Noise",
-     /* 79 */ "Breath Noise",
-     /* 7A */ "Seashore",
-     /* 7B */ "Bird Tweet",
-     /* 7C */ "Telephone Ring",
-     /* 7D */ "Helicopter",
-     /* 7E */ "Applause",
-     /* 7F */ "Gunshot"
-  };
   typedef struct {
      unsigned char *setting;			/* pointer to the item value */
      void (*changed) (void);
@@ -722,7 +581,7 @@ updatePreferences (void)
   #define TIMING_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 1, 16)
   #define SYMBOLIC_ITEM(setting, changed, test, description, names) MENU_ITEM(setting, changed, test, description, names, 0, ((sizeof(names) / sizeof(names[0])) - 1))
   #define BOOLEAN_ITEM(setting, changed, test, description) SYMBOLIC_ITEM(setting, changed, test, description, booleanValues)
-  static MenuItem menu[] = {
+  MenuItem menu[] = {
      BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
      SYMBOLIC_ITEM(env.sixdots, NULL, NULL, "Text Style", textStyles),
      BOOLEAN_ITEM(env.skpidlns, NULL, NULL, "Skip Identical Lines"),
@@ -744,7 +603,7 @@ updatePreferences (void)
      TIMING_ITEM(env.capoffcnt, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
      BOOLEAN_ITEM(env.sound, NULL, NULL, "Sound"),
      SYMBOLIC_ITEM(env.tunedev, changedTuneDevice, testSound, "Tune Device", tuneDevices),
-     SYMBOLIC_ITEM(env.midiinstr, NULL, testSoundMidi, "MIDI Instrument", midiInstruments),
+     MENU_ITEM(env.midiinstr, NULL, testSoundMidi, "MIDI Instrument", midiInstrumentTable, 0, midiInstrumentCount-1),
      SYMBOLIC_ITEM(env.stcellstyle, NULL, NULL, "Status Cells Style", statusStyles)
   };
   int menuSize = sizeof(menu) / sizeof(menu[0]);
@@ -773,7 +632,7 @@ updatePreferences (void)
       int settingIndent;				/* braille window pos in buffer */
       MenuItem *item = &menu[menuIndex];
 
-      closeTuneDevice(1);
+      closeTuneDevice();
 
       /* First we draw the current menu item in the buffer */
       sprintf(line, "%s: ", item->description);
@@ -973,32 +832,40 @@ loadTranslationTable (char *table, char **path, char *name)
   }
 }
 
-static char **parseDriverParameter (char *parameter, char **names) {
-   char **values;
+static int
+parseParameters (char ***values, char **names, char *parameters, char *description) {
    if (!names) {
       static char *noNames[] = {NULL};
       names = noNames;
    }
-   {
+   if (!*values) {
       unsigned int count = 0;
       unsigned int index = 0;
-      while (names[count]) ++count;
-      values = malloc((count + 1) * sizeof(*values));
-      while (index < count) values[index++] = strdup("");
-      values[index] = NULL;
+      while (names[count])
+         ++count;
+      if (!(*values = malloc((count + 1) * sizeof(**values))))
+         goto noMemory;
+      while (index <= count)
+         (*values)[index++] = NULL;
+      for (index=0; index<count; ++index)
+         if (!((*values)[index] = strdup("")))
+	    goto noMemory;
    }
-   if (parameter && *parameter) {
-      char *name = (parameter = strdup(parameter));
+   if (parameters && *parameters) {
+      char *name = (parameters = strdup(parameters));
+      if (!parameters)
+         goto noMemory;
       while (1) {
 	 char *delimiter = strchr(name, ',');
 	 int done = delimiter == NULL;
-	 if (!done) *delimiter = 0;
+	 if (!done)
+	    *delimiter = 0;
 	 if (*name) {
 	    char *value = strchr(name, '=');
 	    if (!value) {
-	       LogAndStderr(LOG_WARNING, "Missing driver parameter value: %s", name);
+	       LogAndStderr(LOG_WARNING, "Missing %s parameter value: %s", description, name);
 	    } else if (value == name) {
-	       LogAndStderr(LOG_WARNING, "Missing driver parameter name: %s", name);
+	       LogAndStderr(LOG_WARNING, "Missing %s parameter name: %s", description, name);
 	    } else {
 	       unsigned int length = value - name;
 	       unsigned int index = 0;
@@ -1006,24 +873,58 @@ static char **parseDriverParameter (char *parameter, char **names) {
 	       while (names[index]) {
 		  if (length <= strlen(names[index])) {
 		     if (strncasecmp(name, names[index], length) == 0) {
-			free(values[index]);
-			values[index] = strdup(value);
+			if (!(value = strdup(value)))
+			   goto noMemory;
+			free((*values)[index]);
+			(*values)[index] = value;
 			break;
 		     }
 		  }
 		  ++index;
 	       }
 	       if (!names[index]) {
-		  LogAndStderr(LOG_WARNING, "Unsupported driver parameter: %s", name);
+		  LogAndStderr(LOG_WARNING, "Unsupported %s parameter: %s", description, name);
 	       }
 	    }
 	 }
-	 if (done) break;
+	 if (done)
+	    break;
 	 name = delimiter + 1;
       }
-      free(parameter);
+      free(parameters);
    }
-   return values;
+   return 1;
+noMemory:
+   LogAndStderr(LOG_WARNING, "Unable to allocate %s parameter values.", description);
+   if (*values) {
+      char **value = *values;
+      while (*value)
+         free(*value++);
+      free(*values);
+      *values = NULL;
+   }
+   return 0;
+}
+
+static int
+parseBrailleParameters (char *parameters) {
+   return parseParameters(&brailleParameters, braille->parameters, parameters, "braille driver");
+}
+
+static int
+parseSpeechParameters (char *parameters) {
+   return parseParameters(&speechParameters, speech->parameters, parameters, "speech driver");
+}
+
+static void
+logParameters (char **names, char **values, char *description) {
+   if (names && values) {
+      while (*names) {
+         LogAndStderr(LOG_INFO, "%s Parameter: %s=%s", description, *names, *values);
+	 ++names;
+	 ++values;
+      }
+   }
 }
 
 void startup(int argc, char *argv[])
@@ -1042,10 +943,10 @@ void startup(int argc, char *argv[])
   /* Set logging priority levels. */
   if (opt_errors)
     LogClose();
-  SetLogPriority(opt_log);
-  SetStderrPriority(opt_quiet? LOG_WARNING: LOG_NOTICE);
-
-  LogPrint(LOG_NOTICE, "%s starting.", VERSION);
+  SetLogPriority(opt_logLevel);
+  SetStderrPriority(opt_version?
+                       (opt_quiet? LOG_NOTICE: LOG_INFO):
+                       (opt_quiet? LOG_WARNING: LOG_NOTICE));
 
   /* Process the configuration file. */
   if (opt_configurationFile)
@@ -1073,7 +974,8 @@ void startup(int argc, char *argv[])
       /* this is fatal */
       exit(10);
     }
-  brailleParameters = parseDriverParameter(opt_brailleParameter, braille->parameters);
+  if (parseBrailleParameters(cfg_brailleParameters))
+    parseBrailleParameters(opt_brailleParameters);
 
   if (!load_speech_driver())
     {
@@ -1085,7 +987,8 @@ void startup(int argc, char *argv[])
       LogAndStderr(LOG_WARNING, "Falling back to built-in speech driver.");
       /* not fatal */
     }
-  speechParameters = parseDriverParameter(opt_speechParameter, speech->parameters);
+  if (parseSpeechParameters(cfg_speechParameters))
+    parseSpeechParameters(opt_speechParameters);
 
   if (!opt_preferencesFile)
     {
@@ -1134,10 +1037,10 @@ void startup(int argc, char *argv[])
   LogAndStderr(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
   LogAndStderr(LOG_INFO, "Braille Driver: %s (%s)",
                braille_libname, braille->name);
-  LogAndStderr(LOG_INFO, "Braille Parameter: %s", opt_brailleParameter);
+  logParameters(braille->parameters, brailleParameters, "Braille");
   LogAndStderr(LOG_INFO, "Speech Driver: %s (%s)",
                speech_libname, speech->name);
-  LogAndStderr(LOG_INFO, "Speech Parameter: %s", opt_speechParameter);
+  logParameters(speech->parameters, speechParameters, "Speech");
 
   /*
    * Give braille and speech libraries a chance to introduce themselves.
@@ -1220,10 +1123,16 @@ void startup(int argc, char *argv[])
    */
 
   /* Initialise Braille display: */
-  startBrailleDriver();
+  if (brailleParameters)
+    startBrailleDriver();
+  else
+    LogPrint(LOG_ERR, "Braille driver not started.");
 
   /* Initialise speech */
-  startSpeechDriver();
+  if (speechParameters)
+    startSpeechDriver();
+  else
+    LogPrint(LOG_ERR, "Speech driver not started.");
 
   /* Initialise help screen */
   if (inithlpscr (braille->help_file))

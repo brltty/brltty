@@ -18,7 +18,7 @@
 typedef struct {
    int (*open) (void);
    int (*generate) (int frequency, int duration);
-   void (*close) (int immediate);
+   void (*close) (void);
 } ToneGenerator;
 
 typedef ToneGenerator *(ToneProcedure) (void);

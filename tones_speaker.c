@@ -53,7 +53,7 @@ static int generateSpeaker (int frequency, int duration) {
    return 0;
 }
 
-static void closeSpeaker (int immediate) {
+static void closeSpeaker (void) {
    if (fileDescriptor != -1) {
       close(fileDescriptor);
       LogPrint(LOG_DEBUG, "Speaker closed.");

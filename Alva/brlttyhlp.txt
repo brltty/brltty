@@ -1,4 +1,4 @@
-BRLTTY Help Screen (Alva Delphi 40)
+BRLTTY Help Screen for Alva models
 From left to right, front keys are:
 PROG  HOME CURSOR  UP  LEFT  RIGHT  DOWN
 
@@ -21,10 +21,12 @@ CURSOR + UP     up to previous line with different attributes
 CURSOR + DOWN   down to next line with different attributes
 HOME + CURSOR + UP   skip to previous different screen line
 HOME + CURSOR + DOWN skip to next different screen line
+PROG + CURSOR + LEFT back to last position before the cursor moved the display
 
 Other functions:
 PROG            toggle help display
 PROG + HOME     toggle attribute display
+PROG + HOME + cursor routing button     show color attributes of pointed char
 PROG + CURSOR   activate preferences menu
 PROG + UP       toggle status mode
 PROG + DOWN     toggle freeze mode
@@ -45,3 +47,7 @@ PROG + HOME + DOWN               paste the block at cursor position
 Speech complement functions (if available):
 HOME + CURSOR + RIGHT   say the text from the current screen line
 HOME + CURSOR + LEFT    mute speech device
+
+Note: Some Alva models have extra keys called CURSOR2, HOME2 and PROG2.
+Those keys are not bound to any function yet.
+If you have suggestions for them, please send me an e-mail to nico@cam.org.

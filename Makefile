@@ -230,7 +230,7 @@ tones_sequencer.o: tones_sequencer.c tones.h misc.h
 tones_adlib.o: tones_adlib.c tones.h adlib.h misc.h
 	$(CC) $(CFLAGS) -c tones_adlib.c
 
-adlib.o: adlib.c
+adlib.o: adlib.c adlib.h misc.h
 	$(CC) $(CFLAGS) -c adlib.c
 
 BRLTTY_OBJECTS = main.o config.o csrjmp.o misc.o $(TUNE_OBJECTS) cut-n-paste.o $(INSKEY_O) spk_load.o brl_load.o

@@ -1,26 +1,36 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
-   Added -e (--errors) option to log to standard error rather than via syslog. (dm,sd)
-   Added -f (--file=) option to specify default parameters file (brltty.conf). (dm)
-   Recognize priority names (and abbreviations thereof) for -l (--log=) option. (dm)
-      (emergency, alert, critical, error, warning, notice, information, debug)
-   Added -n (--nodaemon) option to make debugging easier and to permit invocation from inittab. (dm,sd)
-   Added -B (--brailleparm=) option, and the braille-parameter brltty.conf directive. (dm)
-   Renamed -p option to -S. (dm)
-   Rename speech-driverparm directive (brltty.conf) to speech-parameter. (dm)
-   Implemented user-settable attributes translation table. (dm)
-      Introduce short option -a, long option --attribs=, and brltty.conf directive attributes-table.
-      Change long option --table= to --text=.
-      Change brltty.conf directive dot-translation to text-table.
    Resolved conflict between .dat and .conf both being calledf configuration files. (dm)
-      Short option -c becomes -p.
-      Long option --config= becomes --prefs=.
-      brltty.conf directive braille-configuration becomes preferences-file.
       Default file extension .dat becomes .prefs.
       CMD_CONFMENU -> CMD_PREFMENU
       CMD_SAVECONF -> CMD_PREFSAVE
       CMD_RESET -> CMD_PREFLOAD
+   Normalize short options. (dm)
+      -p becomes -S
+      -c becomes -p
+   Normalize long options. (dm)
+      --braille becomes --braille-driver
+      --config becomes --preferences-file
+      --device becomes --braille-device
+      --log becomes --log-level
+      --speech becomes --speech-driver
+      --speechparm becomes --speech-parameters
+      --table becomes --text-table
+   normalized brltty.conf directives. (dm)
+      braille-configuration becomes preferences-file
+      dot-translation becomes text-table
+      speech-driverparm becomes speech-parameters
+   Added -e (--errors) option to log to standard error rather than via syslog. (dm,sd)
+   Added -f (--configuration-file=) option to specify default parameters file (brltty.conf). (dm)
+   Recognize level names (and abbreviations thereof) for -l (--log-level=) option. (dm)
+      (emergency, alert, critical, error, warning, notice, information, debug)
+   Added -n (--no-daemon) option to make debugging easier and to permit invocation from inittab. (dm,sd)
+   Added -B (--braille-parameters=) option, and the braille-parameters brltty.conf directive. (dm)
+   Implemented user-settable attributes translation table. (dm)
+      Introduce short option -a.
+      Introduce long option --attributes-table=.
+      Introduce brltty.conf directive attributes-table.
    BrailleNote driver added. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
    HandyTech driver added. Andreas Gross <andi@andi-bika.de>
    BrailleLite driver enhancements. (sd)
@@ -84,10 +94,12 @@ Note: this file is in reversed chronological order (bottom to top).
    Change directory to right place if PREFIX is set. (dm)
    Disable speech tracking when CMD_SAY is used. (np)
    Audit all braille and speech drivers. (dm)
+      Remove printing via stdio.
       Ensure that first line of identification output uses LOG_NOTICE.
       Ensure that subsequent lines of identification output use LOG_INFO.
       Ensure that all driver identification lines use LogAndStderr.
       Ensure that all driver execution reporting uses LogPrint.
+      Remove new-lines from logged messages.
 
 June 26, 2001:
  - BRLTTY 2.98 released:

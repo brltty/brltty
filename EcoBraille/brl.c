@@ -287,7 +287,7 @@ static void initbrl(char **parameters, brldim *brl, const char *dev)
       read(brl_fd, &buffer, DIM_BRL_READY + 6);
       //}while(strncmp (buffer, BRL_READY, DIM_BRL_READY));
       
-      printf("buffer is : %s\n",buffer);
+      LogPrint(LOG_DEBUG, "buffer is: %s",buffer);
   
   // Set model params
   model = &Models[ModelID];

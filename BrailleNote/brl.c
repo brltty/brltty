@@ -382,7 +382,7 @@ initbrl (char **parameters, brldim *brl, const char *device)
 		  unsigned char response[3];
 		  int count;
 		  delay(500);
-		  if ((count = safe_read(fileDescriptor, response, sizeof(response))) != -1) {
+		  if ((count = safe_read(fileDescriptor, response, sizeof(response))) == sizeof(response)) {
 		     if (response[0] == 0X86) {
 			statusCells = response[1];
 			brl->x = response[2];
@@ -416,11 +416,13 @@ initbrl (char **parameters, brldim *brl, const char *device)
 			   systemError("cell buffer allocation");
 			}
 		     } else {
-			LogPrint(LOG_ERR, "unexpected response: %2.2X %2.2X %2.2X",
-				     response[0], response[1], response[2]);
+			LogPrint(LOG_ERR, "unexpected description: %2.2X %2.2X %2.2X",
+				 response[0], response[1], response[2]);
 		     }
-		  } else {
+		  } else if (count == -1) {
 		     systemError("device read");
+		  } else {
+		     LogPrint(LOG_ERR, "unexpected description size: %d", count);
 		  }
 	       } else {
 		  systemError("device write");

@@ -288,6 +288,7 @@ main (int argc, char *argv[])
 
   /* open syslog (or output to stderr in -n) */
   LogOpen();
+  LogPrint(LOG_NOTICE, "%s starting.", VERSION);
 
   /*
    * Establish signal handler to clean up before termination:
@@ -324,7 +325,7 @@ main (int argc, char *argv[])
    */
   while (keep_going)
     {
-      closeTuneDevice(1);
+      closeTuneDevice();
       TickCount++;
       /*
        * Process any Braille input 
@@ -1321,12 +1322,19 @@ main (int argc, char *argv[])
   speech->close();
   braille->close(&brl);
   playTune(&tune_braille_off);
+  closeTuneDevice();
+
   /* don't forget that scrparam[0] is staticaly allocated */
   for (i = 1; i <= NBR_SCR; i++) 
     free(scrparam[i]);
-  closeTuneDevice(0);
-  LogPrint(LOG_NOTICE, "Stopped.");
+
+  /* Reopen syslog (in case -e closed it) so that there will
+   * be a "stopped" message to match the "starting" message.
+   */
+  LogOpen();
+  LogPrint(LOG_NOTICE, "%s stopped.", VERSION);
   LogClose();
+
   return 0;
 }
 

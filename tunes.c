@@ -38,7 +38,7 @@ TuneDefinition tune_detected = {
 
 static ToneDefinition tones_braille_off[] = {
    {  330,  60},
-   {  220,  60},
+   {  220, 100},
    {    0,   0}
 };
 TuneDefinition tune_braille_off = {
@@ -215,11 +215,9 @@ TuneDefinition tune_done = {
 };
 
 static ToneDefinition tones_skip_first[] = {
-   {    0,  40},
    {  297,   4},
    {  396,   6},
    {  595,   8},
-   {    0,  25},
    {    0,   0}
 };
 TuneDefinition tune_skip_first = {
@@ -227,8 +225,8 @@ TuneDefinition tune_skip_first = {
 };
 
 static ToneDefinition tones_skip[] = {
-   {  595,  10},
    {    0,  18},
+   {  595,  10},
    {    0,   0}
 };
 TuneDefinition tune_skip = {
@@ -236,18 +234,21 @@ TuneDefinition tune_skip = {
 };
 
 static ToneDefinition tones_skip_more[] = {
+   {    0,  18},
    {  566,  20},
-   {    0,   1},
    {    0,   0}
 };
 TuneDefinition tune_skip_more = {
    NULL, 0X0000, tones_skip_more
 };
 
+static unsigned int closeTimer = 0;
+
 static ToneGenerator *toneGenerator = NULL;
 void setTuneDevice (unsigned char device) {
    if (toneGenerator)
-      toneGenerator->close(1);
+      toneGenerator->close();
+   closeTimer = 0;
    switch (device) {
       case tdSpeaker:
          toneGenerator = toneSpeaker();
@@ -264,8 +265,9 @@ void setTuneDevice (unsigned char device) {
    }
 }
 
-void closeTuneDevice (int immediate) {
-   toneGenerator->close(immediate);
+void closeTuneDevice (void) {
+   if (!--closeTimer)
+      toneGenerator->close();
 }
  
 void playTune (TuneDefinition *tune) {
@@ -274,6 +276,7 @@ void playTune (TuneDefinition *tune) {
       if (toneGenerator->open()) {
          ToneDefinition *tone = tune->tones;
 	 tunePlayed = 1;
+	 closeTimer = 2000 / DELAY_TIME;
 	 while (tone->duration) {
 	    if (!toneGenerator->generate(tone->frequency, tone->duration)) {
 	       tunePlayed = 0;
@@ -281,7 +284,6 @@ void playTune (TuneDefinition *tune) {
 	    }
 	    ++tone;
 	 }
-      // toneGenerator->close(1);
       }
    }
    if (!tunePlayed) {

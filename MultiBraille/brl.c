@@ -164,7 +164,7 @@ static void initbrl (char **parameters, brldim *brl, const char *brldev) {
 					// reading version-info
 					// firmware version == [Software Version] / 10.0
 					read (brl_fd, &c, 1);
-					printf ("MultiBraille: Version: %2.1f\n", c/10.0);
+					LogPrint (LOG_INFO, "MultiBraille: Version: %2.1f", c/10.0);
 					// read trailing [CR]
 					read (brl_fd, &c, 1);
 				}
@@ -374,14 +374,14 @@ static struct KeyStroke getbrlkey (void) {
 				read (brl_fd, &c, 1);		// read keynumber
 				keystroke.key = c;
 				read (brl_fd, &c, 1);		// read trailing [CR]				
-//				LogPrint(LOG_NOTICE, "MultiBraille.o: Receiving: Key=%d, Block=%c\n", keystroke.key, keystroke.block);
+//				LogPrint(LOG_NOTICE, "MultiBraille.o: Receiving: Key=%d, Block=%c", keystroke.key, keystroke.block);
 				return keystroke;
 			default:			/* not supported command --> ignore */
 				c_temp = c;
 				keystroke.block = EOF;	// invalid / not supported keystroke
 				read (brl_fd, &c, 1);		// read keynumber
 //				keystroke.key = c;
-//				LogPrint(LOG_NOTICE, "MultiBraille.o: Ignored: Key=%d, Block=%c\n", keystroke.key, c_temp);
+//				LogPrint(LOG_NOTICE, "MultiBraille.o: Ignored: Key=%d, Block=%c", keystroke.key, c_temp);
 				return keystroke;
 		}
 	}

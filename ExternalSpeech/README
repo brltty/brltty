@@ -1,6 +1,6 @@
 ExternalSpeech
 by Stéphane Doyon <s.doyon@videotron.ca>
-Version 0.6 beta, March 2001
+Version 0.7 beta, September 2001
 
 This speech driver interfaces with an external program that will handle
 speech synthesis. The protocol for talking to the external program is
@@ -40,14 +40,14 @@ The path to the external program, and the uid and gid under which it is
 executed, can be either:
 -hard-coded in speech.h
 -specified in the BRLTTY configuration file through
-   the speech-driverparm keyword.
--Specified on the command-line using the -p or --speechparm option.
+   the speech-parameter keyword.
+-Specified on the command-line using the -S option.
 
 In the last two cases, the format is:
-   <extProgPath>[,<numerical_uid>,<numerical_gid>]
+   program=<extProgPath>[,uid=<numerical_uid>][,gid=<numerical_gid>]
 without space.
 As in:
-speech-driverparm /home/steph/via-0.3/via_wrapper,501,501
+speech-parameter program=/home/steph/via-0.3/via_wrapper,uid=501,gid=501
 
 Avoid executing the external program as root if at all possible. The
 account you choose may require some rights such as access to the

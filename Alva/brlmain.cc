@@ -463,7 +463,8 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
   }
 
   /* Set model params... */
-  sethlpscr( model - Models );		/* position in the model list */
+  // too many help screens, too little difference between them, so for now...
+  //sethlpscr( model - Models );		/* position in the model list */
   res.x = model->Cols;			/* initialise size of display */
   res.y = BRLROWS;
 

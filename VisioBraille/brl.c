@@ -129,7 +129,7 @@ static void identbrl(void)
 static void initbrl(char **parameters, brldim *brl,const char *tty)
 {
  brl_fd = open(tty, O_RDWR | O_NOCTTY );
- if (brl_fd <0) {fprintf(stderr,"impossible d'ouvrir le port serie : %s",tty);perror("dev/ttyS0"); exit(-1); }
+ if (brl_fd <0) {LogPrint(LOG_ERR,"impossible d'ouvrir le port serie: %s: %s",tty,strerror(errno)); exit(-1); }
  tcgetattr(brl_fd,&oldtio); /* sauvegarde les parametres actuels du port serie */
  bzero(&newtio, sizeof(newtio)); /*supprime les parametre du port serie pour en mettre des nouveaux */
  newtio.c_cflag = B57600 |  CS8 | PARENB | PARODD | CLOCAL | CREAD;

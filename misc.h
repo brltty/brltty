@@ -77,6 +77,9 @@ void SetStderrPriority(int priority);
 void LogPrint(int priority, char *format, ...);
 void LogAndStderr(int priority, char *format, ...);
 
+extern int validateInteger (long int *integer, char *description, char *value, long int *minimum, long int *maximum);
+extern int validateBaud (unsigned long int *baud, char *description, char *value);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -91,7 +94,7 @@ extern int portrait_flag(int number, int on);
 
 #define MAXNSTATCELLS 22
 extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
-extern unsigned char texttrans[256];	/* current text to braille translation table */
-extern unsigned char untexttrans[256];	/* current braille to text translation table */
+extern unsigned char texttrans[0X100];	 /* current text to braille translation table */
+extern unsigned char untexttrans[0X100]; /* current braille to text translation table */
 extern void reverseTable(unsigned char *origtab, unsigned char *revtab);
-extern unsigned char attribtrans[256];  /* current attributes to braille translation table */
+extern unsigned char attribtrans[0X100]; /* current attributes to braille translation table */

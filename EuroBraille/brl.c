@@ -205,7 +205,7 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
    brl_fd = open (dev, O_RDWR | O_NOCTTY);
    if (brl_fd < 0)
      {
-	LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );
+	LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
 	goto failure;
      }
    tcgetattr (brl_fd, &oldtio);	/* save current settings */
@@ -249,7 +249,7 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
    prevdata = (unsigned char *) malloc (res.x * res.y);
    if (!res.disp || !rawdata || !prevdata)
      {
-	LogPrint( LOG_ERR, "can't allocate braille buffers\n" );
+	LogPrint( LOG_ERR, "can't allocate braille buffers" );
 	goto failure;
      }
 

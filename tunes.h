@@ -45,5 +45,8 @@ extern TuneDefinition tune_skip;
 extern TuneDefinition tune_skip_more;
 
 extern void setTuneDevice (unsigned char device);
-extern void closeTuneDevice (int immediate);
+extern void closeTuneDevice (void);
 extern void playTune (TuneDefinition *tune);
+
+extern char *midiInstrumentTable[];
+extern unsigned int midiInstrumentCount;

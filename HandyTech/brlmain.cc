@@ -222,7 +222,7 @@ void initbrl (char **parameters, brldim *brl, const char *dev)
     dev = DefDev;
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
-    LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );
+    LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
     goto failure;
   }
 
@@ -266,8 +266,8 @@ void initbrl (char **parameters, brldim *brl, const char *dev)
        model++ );
   if( !model->Name ) {
     /* Unknown model */
-    LogPrint( LOG_CRIT, "*** Detected unknown HandyTech model which ID is %d.\n", ModelID );
-    LogPrint( LOG_CRIT, "*** Please fix Models[] in HandyTech/brlmain.cc and mail the maintainer\n" );
+    LogPrint( LOG_CRIT, "*** Detected unknown HandyTech model with ID %d.", ModelID );
+    LogPrint( LOG_CRIT, "*** Please fix Models[] in HandyTech/brlmain.cc and mail the maintainer." );
     goto failure;
   }
 
@@ -281,7 +281,7 @@ void initbrl (char **parameters, brldim *brl, const char *dev)
   rawdata = (unsigned char *) malloc (res.x * res.y);
   prevdata = (unsigned char *) malloc (res.x * res.y);
   if (!res.disp || !rawdata || !prevdata) {
-    LogPrint( LOG_ERR, "can't allocate braille buffers\n" );
+    LogPrint( LOG_ERR, "can't allocate braille buffers" );
     goto failure;
   }
 
