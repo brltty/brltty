@@ -175,7 +175,7 @@ typedef struct {
   void (*closePort) ();
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writeBytes) (const unsigned char *buffer, int length, int *delay);
+  int (*writeBytes) (const unsigned char *buffer, int length, unsigned int *delay);
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
@@ -215,7 +215,7 @@ readSerialBytes (unsigned char *buffer, int count, int wait) {
 }
 
 static int
-writeSerialBytes (const unsigned char *buffer, int length, int *delay) {
+writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   int count = serialWriteData(serialDevice, buffer, length);
   if (delay && (count != -1)) *delay += length * 1000 / charactersPerSecond;
   return count;
@@ -271,7 +271,7 @@ readUsbBytes (unsigned char *buffer, int length, int wait) {
 }
 
 static int
-writeUsbBytes (const unsigned char *buffer, int length, int *delay) {
+writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   if (delay) *delay += length * 1000 / charactersPerSecond;
   return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
@@ -316,7 +316,7 @@ readBluezBytes (unsigned char *buffer, int length, int wait) {
 }
 
 static int
-writeBluezBytes (const unsigned char *buffer, int length, int *delay) {
+writeBluezBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   int count = writeData(bluezConnection, buffer, length);
   if (delay) *delay += length * 1000 / charactersPerSecond;
   if (count != length) {
@@ -1366,7 +1366,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   unsigned char data[length+1];
                   io->readBytes(data, sizeof(data), 1);
                   if (data[length] == 0X16) {
-                    const char *bytes = data + 1;
+                    const unsigned char *bytes = data + 1;
                     length--;
 
                     switch (data[0]) {
