@@ -1,0 +1,70 @@
+This directory contains the BRLTTY driver for the BrailleNote
+[http://www.braillenote.com], which is manufactured by Pulse Data International
+[http://www.pulsedata.co.nz] of New Zealand. As a component of BRLTTY, this
+driver is released under the terms of the GNU Public License. It has been
+tested with BraillNotes 18 and 32.
+
+It was implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
+Thanks to Mike Pedersen <mpedersen@mindspring.com> for his help and advice.
+
+There are a number of ways to put the BrailleNote into its Braille Terminal
+Mode. The quickest way is to use the direct keyboard shortcut
+backspace+enter+[2345]. Another way is to go to the Main Menu by pressing
+space+[123456], and then selecting Braille Terminal Mode by pressing the letter
+"t" [2345]. Yet another way is to go to the Options Menu by pressing
+space+[135], then going to the Task Menu by pressing the letter "c" [14], and
+then selecting Braille Terminal Mode by pressing the letter "t" [2345].
+
+The BrailleNote does not inform the computer that it has been switched into its
+Braille Terminal Mode. This means that it's display will not automatically
+refresh with the contents of the computer screen until something happens which
+requires an updating of the state of its braille cells, e.g. when content
+within the text window changes, or, on those models which have them, when the
+information represented by its status cells changes. This could be caused by
+such things as new output from the computer, cursor motion, or window motion.
+One brutal but benign way to force a refresh of the braille cells is to
+manually restart the braille driver by pressing space+enter+[123456].
+
+*  For a list of commands by function, see "help-cmds.txt".
+*  For a list of commands by key combination, see "help-keys.txt".
+
+The thumb keys provide access to the most commonly used screen navigation
+commands. Combinations of dots 1 through 6 either provide access to the full
+set of screen navigation commands (including those which are accessible via the
+thumb keys) or, if one of the input modes has been selected, are a keyboard for
+the current virtual terminal. Combinations of dots 1 through 6, together with
+the space bar, provide access to commands which control, and make special
+requests of, the driver. Driver options can be enabled via combinations of dots
+1 through 6 together with the space bar and the enter key, and can be disabled
+via combinations of dots 1 through 6 together with the space bar and the
+backspace key. Some special commands, due to the need to assign logical key
+combinations, and aggravated because the BrailleNote itself intercepts certain
+key combinations for its own purposes, violate these conventions.
+
+The BrailleNote, at least as of the time of this writing, doesn't signal the
+pressing of dot 7 (backspace) and/or dot 8 (enter) unless the space bar is also
+simultaneously pressed. This makes the straightforward entry of 8-dot computer
+braille impossible. A scheme has been implemented, therefore, to get around
+this limitation. It allows the states (on or off) of both dot 7 and dot 8 to be
+either temporarily (just for the next character) or permanently changed. It
+uses the chord of dot 4 and the space bar, together with all possible
+combinations of dots 3, 5, and 6.
+
+Dot 5 requests a permanent state change, dot 3 represents dot 7, and dot 6
+represents dot 8. Pressing dot 4 together with the space bar indicates that you
+wish to enter one character; if an input mode has already been selected, then
+it indicates that you wish to temporarily change the states of dots 7 and 8.
+Pressing both dots 4 and 5 together with the space bar indicates that you wish
+to permanently switch to an input mode; if one has already been selected, then
+it indicates that you wish to permanently change the states of dots 7 and 8. In
+conjunction with either of the fore-going: pressing dot 3 turns dot 7 on, and
+pressing dot 6 turns dot 8 on. The braille keyboard can be returned to screen
+navigation mode by pressing the letter "n" (dots 1, 3, 4, ane 5) together with
+the space bar.
+
+When the BrailleNote's Visual Display is assigned to the serial port, then a
+free virtual terminal is activated and becomes that display. When the Visual
+Display is subsequently either turned off or reassigned to a different port,
+then this virtual terminal is released, and, if it is active, then the virtual
+terminal which was active when the display was assigned to the serial port is
+reactivated.

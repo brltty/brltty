@@ -1,0 +1,358 @@
+#!/usr/bin/tclsh
+# BrlTTY GenericSay helper script for the Accent/SA Speech Synthesizer
+# It should be installed as "/usr/local/bin/say".
+
+# Return the name of this script.
+proc programName {} {
+   global argv0
+   return [file tail $argv0]
+}
+
+# Write a message, prefixed with the name of this script, to standard error.
+proc programMessage {message} {
+   global argv0
+   puts stderr "[programName]: $message"
+}
+
+# Display an error message, and exit with the specified return code.
+proc programError {code {message ""}} {
+   if {[string length $message] > 0} {
+      programMessage $message
+   }
+   exit $code
+}
+
+# Standard exit routine when command line errors are detected.
+proc syntaxError {message} {
+   programError 2 $message
+}
+
+# Standard exit routine when something is wrong with the parameter values.
+proc semanticError {message} {
+   programError 3 $message
+}
+
+# Close the speech synthesizer device.
+proc closeDevice {} {
+   global deviceStream
+   close $deviceStream; unset deviceStream
+}
+
+# Maintain an event which automatically closes the speech synthesizer
+# device if no new data has arrived for a while.
+proc scheduleClose {} {
+   global closeEvent closeTimeout
+   if {[info exists closeEvent]} {
+      after cancel $closeEvent; unset closeEvent
+   }
+   set closeEvent [after $closeTimeout {unset closeEvent; closeDevice}]
+}
+
+# Send data to the speech synthesizer.
+proc sendData {data} {
+   global deviceStream
+   puts -nonewline $deviceStream $data
+   flush $deviceStream
+}
+
+# Send a command to the speech synthesizer.
+proc sendCommand {command} {
+   sendData "\x1b$command"
+}
+
+# Configure a speech synthesizer setting.
+proc configureParameter {settingVariable command} {
+   upvar #0 $settingVariable setting
+   if {[info exists setting]} {
+      if {[llength $command] == 1} {
+	 sendCommand "$command$setting"
+      } else {
+         foreach sequence [lindex $command $setting] {
+	    sendCommand $sequence
+	 }
+      }
+   }
+}
+
+# Open and configure the speech synthesizer device.
+# If it's already open, then don't do anything.
+# If it can't be opened, then silently exit with a non-zero return code.
+proc openDevice {} {
+   global devicePath deviceStream
+   if {![info exists deviceStream]} {
+      if {[catch [list open $devicePath {WRONLY NOCTTY}] response] != 0} {
+         exit 10
+      }
+      set deviceStream $response
+      sendCommand "=F"
+      sendCommand "=B"
+      sendCommand "Oi"
+      configureParameter speechVolume "A"
+      configureParameter speechRate "R"
+      configureParameter voicePitch "P"
+      configureParameter voiceType "V"
+      configureParameter spacePause "S"
+      configureParameter sentenceIntonation "M"
+      configureParameter punctuationMode {Op {OP Or} {OP OR}}
+      configureParameter hyphenMode {Om OM ON}
+   }
+}
+
+# Insure that the speech synthesizer device is open, and then
+# instruct it to speak the content of the supplied string.
+# Arrange for the device to be automatically closed if nothing more
+# needs to be spoken for a reasonable amount of time.
+proc sayString {string} {
+   openDevice
+   scheduleClose
+   sendData "$string\r"
+}
+
+# Tell the speech synthesizer to stop speaking immediately,
+# and to flush its input buffer.
+proc flushSynthesizer {} {
+   sendCommand "=x"
+}
+
+# Check a device path.
+proc checkDevice {description path} {
+   if {![file exists $path]} {
+      semanticError "$description not found: $path"
+   }
+   if {[string compare [set type [file type $path]] characterSpecial] != 0} {
+      semanticError "incorrect $description type: $type: $path"
+   }
+   if {![file writable $path]} {
+      semanticError "$description not writable: $path"
+   }
+}
+
+# Check a keyword value.
+proc checkKeyword {description value keywords} {
+   if {[regexp -nocase {^[a-z]+$} $value]} {
+      if {[set index [lsearch -glob $keywords [set value [string tolower $value]]*]] >= 0} {
+	 if {[lsearch -glob [lreplace $keywords $index $index] $value*] >= 0} {
+	    syntaxError "ambiguous $description: $value"
+	 }
+	 return [lsearch -glob $keywords $value*]
+      }
+   }
+   syntaxError "invalid $description: $value"
+}
+
+# Check an integer value.
+proc checkInteger {description value {minimum ""} {maximum ""}} {
+   if {![regexp {^(0|-?[1-9][0-9]*)$} $value]} {
+      syntaxError "invalid $description: $value"
+   }
+   if {[string length $minimum] > 0} {
+      if {$value < $minimum} {
+         syntaxError "$description less than $minimum: $value"
+      }
+   }
+   if {[string length $maximum] > 0} {
+      if {$value > $maximum} {
+         syntaxError "$description greater than $maximum: $value"
+      }
+   }
+}
+
+# Set the "device" parameter.
+# It must be either the absolute or the relative path to the speech synthesizer device.
+proc set-device {path} {
+   global devicePath
+   set devicePath $path
+}
+
+# Set the "close" parameter.
+# It must be a non-negative integral number of seconds.
+proc set-close {close} {
+   global closeTimeout
+   checkInteger "close timeout" $close 0
+   set closeTimeout $close
+}
+
+# Set the "volume" parameter.
+# It must be an integer from 0 through 9.
+proc set-volume {volume} {
+   global speechVolume
+   checkInteger "speech volume" $volume 0 9
+   set speechVolume $volume
+}
+
+# Set the "rate" parameter.
+# It must be an integer from 0 through 17.
+proc set-rate {rate} {
+   global speechRate
+   set rates "0123456789ABCDEFGH"
+   checkInteger "speech rate" $rate 0 [expr {[string length $rates] - 1}]
+   set speechRate [string index $rates $rate]
+}
+
+# Set the "pitch" parameter.
+# It must be an integer from 0 through 9.
+proc set-pitch {pitch} {
+   global voicePitch
+   checkInteger "voice pitch" $pitch 0 9
+   set voicePitch $pitch
+}
+
+# Set the "voice" parameter.
+# It must be an integer from 0 through 9.
+proc set-voice {voice} {
+   global voiceType
+   checkInteger "voice type" $voice 0 9
+   set voiceType $voice
+}
+
+# Set the "pause" parameter.
+# It must be an integer from 0 through 9.
+proc set-pause {pause} {
+   global spacePause
+   checkInteger "space pause" $pause 0 9
+   set spacePause $pause
+}
+
+# Set the "intonation" parameter.
+# It must be an integer from 0 through 4.
+proc set-intonation {intonation} {
+   global sentenceIntonation
+   checkInteger "sentence intonation" $intonation 0 4
+   set sentenceIntonation [expr {($intonation + 1) % 5}]
+}
+
+# Set the "punctuation" parameter.
+# It must be one of none, common, all.
+proc set-punctuation {punctuation} {
+   global punctuationMode
+   set punctuationMode [checkKeyword "punctuation mode" $punctuation {none common all}]
+}
+
+# Set the "hyphen" parameter.
+# It must be one of no, dash, minus.
+proc set-hyphen {hyphen} {
+   global hyphenMode
+   set hyphenMode [checkKeyword "hyphen mode" $hyphen {no dash minus}]
+}
+
+# Set a parameter.
+# For the list of settable parameters, see the set-... handlers.
+# They may be specified within the system configuration file,
+# within the user configuration file, or as command line options.
+proc setParameter {name value} {
+   if {[set count [llength [set handlers [info procs "set-[string tolower $name]*"]]]] == 0} {
+      syntaxError "invalid parameter name: $name"
+   } elseif {$count > 1} {
+      syntaxError "ambiguous parameter name: $name"
+   } elseif {[string length $value] == 0} {
+      syntaxError "missing parameter value: $name"
+   } else {
+      eval [lindex $handlers 0] [list $value]
+   }
+}
+
+# Process the configuration file.
+# If it does not exist, then silently continue.
+# If it does exist but cannot be opened, then display a warning.
+proc setParameters {path} {
+   if {[catch [list open $path {RDONLY}] response] != 0} {
+      global errorCode
+      set type [lindex $errorCode 0]
+      set code [lindex $errorCode 1]
+      set warn 1
+      if {[string compare $type POSIX] == 0} {
+         if {[lsearch -exact {ENOENT} $code] >= 0} {
+	    set warn 0
+	 }
+      }
+      if {$warn} {
+	 programMessage $response
+      }
+   } else {
+      set file $response
+      while {[gets $file line] >= 0} {
+         if {[set length [string length [set line [string trim $line]]]] == 0} {
+	    continue
+	 }
+	 if {[string compare [string index $line 0] #] == 0} {
+	    continue
+	 }
+	 regexp {^([^ ]+)(.*)$} $line x name value
+	 setParameter $name [string trim $value]
+      }
+      close $file; unset file
+   }
+}
+
+# Process the command line options, and remove them from the argument list.
+proc processOptions {} {
+   global argv
+   while {[llength $argv] > 0} {
+      set name [lindex $argv 0]
+      if {[string length $name] == 0} {
+         break
+      }
+      if {[string compare [set character [string index $name 0]] -] != 0} {
+         break
+      }
+      set argv [lrange $argv 1 end]
+      if {[string length [set name [string trimleft $name $character]]] == 0} {
+         break
+      }
+      if {[llength $argv] == 0} {
+	 set value ""
+      } else {
+	 set value [lindex $argv 0]
+	 set argv [lrange $argv 1 end]
+      }
+      setParameter $name $value
+   }
+}
+
+proc prepareParameters {} {
+   global devicePath closeTimeout
+   checkDevice "synthesizer device" $devicePath
+   set closeTimeout [expr {$closeTimeout * 1000}]; # After wants milliseconds.
+}
+
+# Assign defaults to the parameters.
+setParameter device "/dev/ttyS0"
+setParameter close 5
+
+# Process the system configuration file.
+setParameters "/usr/local/etc/[programName].conf"
+
+# Process the user configuration file.
+set variable env(HOME)
+if {[info exists $variable]} {
+   if {[string length [set directory [set $variable]]] > 0} {
+      setParameters [file join $directory ".[programName]rc"]
+   }
+}
+
+# If no arguments have been supplied, then be a brltty GenericSay helper command. 
+if {[llength $argv] == 0} {
+   prepareParameters
+   set inputStream stdin
+   fconfigure $inputStream -blocking 0
+   fileevent $inputStream readable {
+      if {[eof $inputStream]} {
+	 if {[info exists deviceStream]} {
+	    flushSynthesizer
+	 }
+	 set returnCode 0
+      } else {
+	 sayString [read $inputStream]
+      }
+   }
+   vwait returnCode
+   exit $returnCode
+}
+
+# Process the command line options.
+processOptions
+prepareParameters
+
+# Speak the positional arguments as a sequence of words.
+sayString [join $argv " "]
+exit 0

@@ -1,0 +1,191 @@
+README for the Alva Driver
+
+Version 2.2 (March 4, 2004)
+
+
+Copyright
+=========
+
+This driver is copyrighted under the GNU Public License. It is free software.
+See the file 'COPYING' for more details. Feel free to send your comments and to
+report bugs (if any) to me at <nico@cam.org>.
+
+
+Supported Hardware
+==================
+
+This driver is supposed to work with any Alva braille display from the ABT3
+(3nn), Delphi (4nn), and Satellite (5nn) series. It recognizes the 320, 340,
+34d, 380, 382, 38D, 420, 440, 44d, 480, 544, 544t, 570p, and 584p; other models
+can be easily added. The serial and USB ports are supported; the Parallel port
+is not. This driver even supports the old (single byte) protocol for ABT3nn
+models. Keypad and spacepad support are not implemented since I don't have them
+and have no idea regarding their use.
+
+Since I have an ABT340, I've personally tested the driver on that model only,
+with both the old (single byte) and the new (double byte) protocols. The
+instructions provided in this file might, therefore, not necessarily be
+accurate for all supported models.
+
+If you want any information about Alva B.V. and its products, you should look
+at the web site of the Alva Access Group [http://www.aagi.com/].
+
+
+ABT Connection
+==============
+
+This driver supports serial and USB communication only. Some parallel port
+communication was previously supported, but, since that support was based on a
+non-GPL compatible and binary only library, it has been removed.  When/if
+someone can help with providing us with the proper protocol information, we'll
+be pleased to write an open source parallel port driver in conformance with
+BRLTTY's license.
+
+With serial communication, the ABT serial port must be set to alva-mode
+(the default); see the description of 'Local Mode' in the ABT manual. The ABT
+serial port has the same connections as the standard 9-pin serial port of
+an IBM PC. Therefore, a cable connecting the ABT with a PC must have the
+following wires: 
+
+9 pin (ABT)        9 pin (PC)   or    25 pin (PC)
+
+1                  1                  8 (CD)
+2                  3                  2 (TD)
+3                  2                  3 (RD)
+4                  6                  6 (DSR)
+5                  5                  7 (GND)
+6                  4                  20 (DTR)
+7                  8                  5 (CTS)
+8                  7                  4 (RTS)
+9                  9                  22 (RI)
+
+This kind of cable is called a "null modem" (or "cross over") cable. All
+connectors are female D connectors.
+
+NOTE: I experienced some problems using the serial port while the computer was
+connected to the parallel port on the ABT. If BRLTTY seems to work but exhibits
+strange behaviour, just make sure there's nothing plugged into the parallel
+port connector. At least give it a try ... it might help.
+
+
+Before Compiling
+================
+
+Firmware Version 
+---------------- 
+
+Look in the file braille.h for a section identified as "User Settings".  You
+have to define ABT3_OLD_FIRMWARE to 1 (0 by default) if your firmware version
+is older than 010495. To get your firmware version, simply turn your ABT on
+while not connected to your computer. The last digits that will appear on the
+braille display are the firmware version. If the wrong firmware version support
+is compiled in, you won't have access to your ABT control keys. If you have a
+firmware version dated 010495 or later, you normally don't have to edit
+braille.h since support for the new firmware is the default.
+
+ABT Model
+---------
+
+Because new firmware is assumed, the terminal model is set to "autodetect" by
+default. Specific model selection is optional with the new firmware version. If
+you have the old firmware version use the line "#define MODEL" with either
+ABT320, ABT340, ABT380, ABT34D or ABT38D.  ABT_AUTO is for autodetection (use
+only with the new firmware version).
+
+Port Specification
+------------------
+
+There are a number of ways to specify the port on the PC to which the display
+is connected. Here's a summary, although you should check BRLTTY's manual for
+all of the details.
+
+The default port is the primary serial port (/dev/ttyS0 on Linux). If you'd
+like your brltty executable to have its own unique default port then use the
+--with-braille-device= option of the configure script in BRLTTY's top-level
+directory at build-time. If you'd like your system to have its own unique
+default port regardless of which brltty executable is being used then use the
+braille-device directive of BRLTTY's configuration file (usually
+"/etc/brltty.conf"). If you'd like to specify a specific port when invoking
+brltty then use the -d (or --braille-device=) command line option.
+
+For a serial port, specify "serial:/path/to/device". The "serial:" qualifier is
+optional (for backward compatibility). If a relative path is given then it's
+anchored at "/dev" (the usual place that devices are found on a Unix-based
+system). The following device specifications all refer to the primary serial
+port on Linux:
+
+   serial:/dev/ttyS0
+   serial:ttyS0
+   /dev/ttyS0
+   ttyS0
+
+For a USB port, specify "usb:". BRLTTY will search for the first USB device
+which matches the braille display driver being used. If this is inadequate,
+e.g. if you have more than one USB braille display which require the same
+driver, then you can refine the device specification by appending the serial
+number of the display to it, e.g. "usb:12345".
+
+Serial Port Settings
+--------------------
+
+The serial port configuration is defined in the braille.h header file.
+
+By default, the ABT communicates at 9600 baud. Although I've run it at a higher
+rate, the possibility of getting communication errors increases. If you change
+the rate in braille.h, you must also change it in the local menu of your ABT.
+
+
+Running the Driver
+==================
+
+Please refer to BRLTTY's documentation for instructions on compiling and
+selecting the Alva driver. When BRLTTY starts, the driver should display on the
+computer screen some copyright stuff, its current configuration (model and
+firmware version), and the port being used. This information may be helpful if
+nothing happens with the braille terminal. Remember that the ABT keys won't
+work if you have the wrong firmware version set up (although some braille
+should be displayed anyway). You may run BRLTTY even if no ABT is plugged into
+the appropriate port. BRLTTY will wait for it.
+
+
+Key Bindings
+============
+
+All the key definitions are listed in the files help*.txt. Each file
+corresponds to an ABT model. For more information on the functions listed, see
+the BRLTTY manual. Basic keys are nearly the same as with the DOS software. For
+a quick start, enter the help screen by:
+
+   For 3nn and 4nn models, press the PROG key.
+   For 5nn models, press the left outer key of the right satellite keypad.
+
+On the 5nn models, you can also enter interactive command learn mode by
+pressing the right outer key of the right satellite keypad.
+
+Some keys found on the ABT34D, ABT380, and ABT38D are not currently bound to
+any functions (because I don't have those keys). However, it is pretty easy to
+add them in the code. See the function brl_readCommand() and/or send me your
+suggestions.
+
+
+Status Cells
+============
+
+The first three cells are used for status information as with the DOS software,
+except for the third one which has the following meanings:
+
+	t = cursor tracking active
+	f = screen is frozen
+	a = the display is in attribute mode
+
+All three status cells display "hlp" when the help screen is active, "lrn" when
+interactive command learn mode is active, "prf" when the preferences menu is
+active, and "inf" when info mode is active.
+
+Some models have five status cells rather than three. On these, the last two
+cells are currently not used.
+
+
+Nicolas Pitre
+nico@cam.org
+March 4, 2004

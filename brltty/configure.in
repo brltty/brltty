@@ -1,0 +1,961 @@
+dnl Process this file with autoconf 2.53 to produce a configure script.
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+AC_PREREQ([2.53])
+AC_INIT([brltty], [3.6], [http://mielke.cc/brltty/])
+AC_CONFIG_SRCDIR([Programs/brltty.h])
+BRLTTY_SUMMARY_BEGIN
+
+AC_SUBST([BRLAPI_MAJOR], [0])
+AC_SUBST([BRLAPI_MINOR], [3])
+AC_SUBST([BRLAPI_REVISION], [0])
+AC_SUBST([BRLAPI_VERSION], [${BRLAPI_MAJOR}.${BRLAPI_MINOR}])
+AC_SUBST([BRLAPI_RELEASE], [${BRLAPI_VERSION}.${BRLAPI_REVISION}])
+AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${BRLAPI_RELEASE}"])
+
+AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
+AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
+
+AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
+
+AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADER([Programs/api.h])
+AC_PREFIX_DEFAULT([])
+AC_CONFIG_AUX_DIR([aux])
+AC_CANONICAL_SYSTEM
+
+BRLTTY_PACKAGE_CHOOSE([curses],
+   [curses curses.h],
+   [ncurses ncurses.h])
+
+BRLTTY_PACKAGE_CHOOSE([xt_toolkit],
+   [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
+   [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
+   [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
+   [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
+   [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
+
+brltty_default_execute_root="/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+BRLTTY_ARG_WITH(
+   [execute-root], [DIRECTORY],
+   [where the package is to be anchored at run-time],
+   [execute_root], [""]
+)
+if test "${execute_root}" = "no"
+then
+   execute_root=""
+elif test "${execute_root}" = "yes"
+then
+   execute_root="${brltty_default_execute_root}"
+fi
+AC_SUBST([execute_root])
+BRLTTY_SUMMARY_ITEM([execute-root], [execute_root])
+
+brltty_default_install_root="/tmp/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+BRLTTY_ARG_WITH(
+   [install-root], [DIRECTORY],
+   [where to install the package],
+   [install_root], ["${execute_root}"]
+)
+if test "${install_root}" = "no"
+then
+   install_root="${execute_root}"
+elif test "${install_root}" = "yes"
+then
+   install_root="${brltty_default_install_root}"
+fi
+AC_SUBST([install_root])
+BRLTTY_SUMMARY_ITEM([install-root], [install_root])
+
+AC_SUBST([configuration_file], ["${PACKAGE_NAME}.conf"])
+BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"])
+
+BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
+BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
+
+BRLTTY_SUMMARY_ITEM([libdir], [libdir])
+BRLTTY_SUMMARY_ITEM([sysconfdir], [sysconfdir])
+
+BRLTTY_ARG_REQUIRED(
+   [program-directory], [DIRECTORY],
+   [path to directory containing executables],
+   [program_directory], ["${bindir}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [library-directory], [DIRECTORY],
+   [path to directory containing drivers],
+   [library_directory], ["${libdir}/${PACKAGE_NAME}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [data-directory], [DIRECTORY],
+   [path to directory containing tables and help pages],
+   [data_directory], ["${sysconfdir}/${PACKAGE_NAME}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [manpage-directory], [DIRECTORY],
+   [path to directory containing manual pages],
+   [manpage_directory], ["${mandir}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [include-directory], [DIRECTORY],
+   [path to directory containing header files],
+   [include_directory], ["${includedir}/${PACKAGE_NAME}"]
+)
+
+original_prefix="${prefix}"
+test "${prefix}" = "NONE" && prefix=""
+original_exec_prefix="${exec_prefix}"
+test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
+BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}])
+BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}])
+BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"])
+prefix="${original_prefix}"
+exec_prefix="${original_exec_prefix}"
+
+brltty_default_compiler_prefix="${host_os}-"
+BRLTTY_ARG_WITH(
+   [compiler-prefix], [PREFIX],
+   [prefix for compiler programs],
+   [compiler_prefix], [""]
+)
+if test "${compiler_prefix}" = "no"
+then
+   compiler_prefix=""
+elif test "${compiler_prefix}" = "yes"
+then
+   compiler_prefix="${brltty_default_compiler_prefix}"
+fi
+AC_SUBST([compiler_prefix])
+BRLTTY_SUMMARY_ITEM([compiler-prefix], [compiler_prefix])
+
+brltty_default_init_path=/sbin/init_real
+BRLTTY_ARG_WITH(
+   [init-path], [FILE],
+   [path to real init program],
+   [init_path], [""]
+)
+if test "${init_path}" = "no"
+then
+   init_path=""
+elif test "${init_path}" = "yes"
+then
+   init_path="${brltty_default_init_path}"
+fi
+if test -n "${init_path}"
+then
+   AC_DEFINE_UNQUOTED([INIT_PATH], ["${init_path}"])
+fi
+BRLTTY_SUMMARY_ITEM([init-path], [init_path])
+
+AC_PROG_MAKE_SET
+
+AC_PROG_CC
+if test "${GCC}" = "yes"
+then
+   CFLAGS="${CFLAGS} -Wall"
+fi
+
+if test -z "${CXX}"
+then
+   if test "${GCC}" = "yes"
+   then
+      AC_SEARCH_LIBS([__cxa_pure_virtual], [supc++])
+      AC_CACHE_CHECK([if the C compiler can compile C++], [brltty_cv_prog_cc_cxx], [dnl
+      brltty_save_ac_ext="${ac_ext}"
+      ac_ext="cc"
+      AC_TRY_LINK([], [class c {};],
+                  [brltty_cv_prog_cc_cxx="yes"],
+                  [brltty_cv_prog_cc_cxx="no"])
+      ac_ext="${brltty_save_ac_ext}"])
+      test "${brltty_cv_prog_cc_cxx}" = "yes" && CXX="${CC}"
+   fi
+fi
+AC_PROG_CXX
+if test "$GXX" = "yes"
+then
+   CXXFLAGS="${CXXFLAGS} -Wall -pipe"
+fi
+
+AC_CHECK_PROGS([LD], [ld], [ld])
+AC_PROG_RANLIB
+AC_PROG_YACC
+AC_PROG_AWK
+AC_PROG_LN_S
+
+AC_PROG_INSTALL
+BRLTTY_EXECUTABLE_PATH([INSTALL])
+
+AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_mkobj], [dnl
+case "${host_os}"
+in
+   *)
+      brltty_cv_prog_mkobj="\$(LD) -r -o"
+      ;;
+esac])
+MKOBJ="${brltty_cv_prog_mkobj}"
+AC_SUBST([MKOBJ])
+
+AC_CACHE_CHECK([for linkage editor shared object flags], [brltty_cv_prog_mklib], [dnl
+case "${host_os}"
+in
+   linux*|openbsd*|freebsd*|netbsd*|*qnx*)
+      brltty_ld_flag_shared="-shared"
+      brltty_ld_flag_soname="-soname"
+      ;;
+   solaris*)
+      brltty_ld_flag_shared="-G"
+      brltty_ld_flag_soname="-h"
+      ;;
+   hpux*)
+      brltty_ld_flag_shared="-b"
+      brltty_ld_flag_soname="+h"
+      ;;
+   osf*)
+      brltty_ld_flag_shared="-shared"
+      brltty_ld_flag_soname="-expect_unresolved '*' -soname"
+      ;;
+   *)
+      AC_MSG_ERROR([linkage editor shared object flags not configured for ${host_os}])
+      ;;
+esac
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_mklib="\$(CC) -shared BRLTTY_OPTIONS_LD2CC([${brltty_ld_flag_soname} <soname>]) -o"
+else
+   brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname} <soname> -o"
+fi])
+AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
+
+AC_CACHE_CHECK([for configure shared object directory command], [brltty_cv_prog_conflibdir], [dnl
+case "${host_os}"
+in
+   linux*)
+      brltty_cv_prog_conflibdir="/sbin/ldconfig -n"
+      ;;
+   *)
+      brltty_cv_prog_conflibdir=":"
+      ;;
+esac])
+AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
+
+AC_PATH_XTRA
+AC_SEARCH_LIBS([socket], [socket])
+
+AC_CHECK_HEADERS([alloca.h getopt.h iconv.h sys/select.h syslog.h])
+AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h linux/input.h])
+AC_CHECK_HEADERS([linux/uinput.h], [], [], [
+#include <linux/input.h>
+])
+
+AC_CHECK_FUNCS([fchdir getopt_long shmget shm_open vsyslog])
+
+AC_C_BIGENDIAN
+AC_C_CONST
+AC_C_INLINE
+AC_OBJEXT
+AC_EXEEXT
+
+AC_CACHE_CHECK(
+   [if the compiler understands the __alignof__ operator],
+   [brltty_cv_c_operator_alignof],
+   [AC_TRY_COMPILE([
+int a;
+int b = __alignof__(a);
+],
+[],
+[brltty_cv_c_operator_alignof=yes],
+[brltty_cv_c_operator_alignof=no])])
+if test "${brltty_cv_c_operator_alignof}" = "yes"
+then
+   AC_DEFINE([HAVE_OPERATOR_ALIGNOF])
+fi
+
+AC_CACHE_CHECK(
+   [if the compiler understands __attribute__((format(printf)))],
+   [brltty_cv_c_attribute_format_printf],
+   [AC_TRY_COMPILE([
+extern void conf_attribute_format_printf(const char *format, ...)
+       __attribute__((format(printf, 1, 2)));
+],
+[],
+[brltty_cv_c_attribute_format_printf=yes],
+[brltty_cv_c_attribute_format_printf=no])])
+if test "${brltty_cv_c_attribute_format_printf}" = "yes"
+then
+   AC_DEFINE([HAVE_ATTRIBUTE_FORMAT_PRINTF])
+fi
+
+AC_CACHE_CHECK(
+   [if the compiler understands __attribute__((packed))],
+   [brltty_cv_c_attribute_packed],
+   [AC_TRY_COMPILE([
+typedef struct {
+  char c;
+  int i;
+} __attribute__((packed)) conf_attribute_packed;
+],
+[],
+[brltty_cv_c_attribute_packed=yes],
+[brltty_cv_c_attribute_packed=no])])
+if test "${brltty_cv_c_attribute_packed}" = "yes"
+then
+   AC_DEFINE([HAVE_ATTRIBUTE_PACKED])
+fi
+
+AC_CACHE_CHECK(
+   [if the compiler understands __attribute__((unused))],
+   [brltty_cv_c_attribute_unused],
+   [AC_TRY_COMPILE([
+static void conf_attribute_unused (void)
+       __attribute__((unused));
+],
+[],
+[brltty_cv_c_attribute_unused=yes],
+[brltty_cv_c_attribute_unused=no])])
+if test "${brltty_cv_c_attribute_unused}" = "yes"
+then
+   AC_DEFINE([HAVE_ATTRIBUTE_UNUSED])
+fi
+
+AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
+case "${host_os}"
+in
+   linux*)
+      brltty_cv_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE"
+      ;;
+   hpux*)
+      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED -D_HPUX_SOURCE"
+      ;;
+   osf*)
+      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE -D_OSF_SOURCE"
+      ;;
+   *)
+      brltty_cv_prog_cc_sysflags=""
+      ;;
+esac])
+SYSCFLAGS="${brltty_cv_prog_cc_sysflags}"
+AC_SUBST([SYSCFLAGS])
+
+AC_CACHE_CHECK([for c compiler yacc source flags], [brltty_cv_prog_cc_yaccflags], [dnl
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_cc_yaccflags="-Wno-parentheses -Wno-unused -Wno-uninitialized -Wno-unknown-pragmas"
+else
+   case "${host_os}"
+   in
+      *)
+         brltty_cv_prog_cc_yaccflags=""
+         ;;
+   esac
+fi])
+YCFLAGS="${brltty_cv_prog_cc_yaccflags}"
+AC_SUBST([YCFLAGS])
+
+AC_CACHE_CHECK([for c compiler shared object flags], [brltty_cv_prog_cc_libflags], [dnl
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_cc_libflags="-fPIC"
+else
+   case "${host_os}"
+   in
+      *)
+         brltty_cv_prog_cc_libflags=""
+         ;;
+   esac
+fi])
+LIBCFLAGS="${brltty_cv_prog_cc_libflags}"
+AC_SUBST([LIBCFLAGS])
+
+AC_CACHE_CHECK([for c++ compiler shared object flags], [brltty_cv_prog_cxx_libflags], [dnl
+if test "$GXX" = "yes"
+then
+   brltty_cv_prog_cxx_libflags="-fPIC"
+else
+   case "${host_os}"
+   in
+      *)
+         brltty_cv_prog_cxx_libflags=""
+         ;;
+   esac
+fi])
+LIBCXXFLAGS="${brltty_cv_prog_cxx_libflags}"
+AC_SUBST([LIBCXXFLAGS])
+
+AC_CACHE_CHECK([for shared object extension], [brltty_cv_ext_lib], [dnl
+case "${host_os}"
+in
+   hpux*)
+      brltty_cv_ext_lib="sl"
+      ;;
+   *)
+      brltty_cv_ext_lib="so"
+      ;;
+esac])
+library_extension="${brltty_cv_ext_lib}"
+AC_SUBST([library_extension])
+AC_DEFINE_UNQUOTED([LIBRARY_EXTENSION], ["${library_extension}"])
+
+AC_CACHE_CHECK([for static archive extension], [brltty_cv_ext_arc], [dnl
+case "${host_os}"
+in
+   *)
+      brltty_cv_ext_arc="a"
+      ;;
+esac])
+archive_extension="${brltty_cv_ext_arc}"
+AC_SUBST([archive_extension])
+
+AC_CACHE_CHECK([for shared object run-time search path environment variable], [brltty_cv_env_libsearch], [dnl
+case "${host_os}"
+in
+   hpux*)
+      brltty_cv_env_libsearch="SHLIB_PATH"
+      ;;
+   *)
+      brltty_cv_env_libsearch="LD_LIBRARY_PATH"
+      ;;
+esac])
+libsearch_variable="${brltty_cv_env_libsearch}"
+AC_SUBST([libsearch_variable])
+
+brltty_pcm_interfaces=""
+brltty_midi_interfaces=""
+case "${host_os}"
+in
+   linux*)
+      system_object="linux"
+      brltty_pcm_interfaces="oss"
+      brltty_midi_interfaces="oss"
+      AC_CHECK_HEADER([alsa/asoundlib.h], [dnl
+         brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"
+         brltty_midi_interfaces="${brltty_midi_interfaces} alsa"
+])
+      ;;
+   solaris*)
+      system_object="solaris"
+      ;;
+   hpux*)
+      system_object="hpux"
+      if test -d /opt/audio/include
+      then
+         SYSCFLAGS="${SYSCFLAGS} -I/opt/audio/include"
+         LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
+         AC_DEFINE([HAVE_HPUX_AUDIO])
+      fi
+      ;;
+   openbsd*)
+      system_object="openbsd"
+      ;;
+   freebsd*)
+      system_object="freebsd"
+      ;;
+   netbsd*)
+      system_object="netbsd"
+      ;;
+   osf*)
+      system_object="osf"
+      ;;
+   *qnx*)
+      system_object="qnx"
+      AC_CHECK_LIB([asound], [snd_pcm_open])
+      ;;
+   *)
+      AC_MSG_ERROR([no system object available for ${host_os}])
+      ;;
+esac
+system_object="sys_${system_object}."'$O'
+AC_SUBST([system_object])
+
+BRLTTY_ARG_DISABLE(
+   [preferences-menu],
+   [the preferences menu],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_PREFERENCES_MENU])
+])
+
+BRLTTY_ARG_DISABLE(
+   [table-selection],
+   [text/attribute/contraction table selection in preferences menu],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_TABLE_SELECTION])
+])
+translation_table_objects='tbl.$O'
+AC_SUBST([translation_table_objects])
+
+BRLTTY_ARG_DISABLE(
+   [learn-mode],
+   [interactive command learn mode],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_LEARN_MODE])
+])
+
+BRLTTY_ARG_DISABLE(
+   [contracted-braille],
+   [in-line contracted braille],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_CONTRACTED_BRAILLE])
+   contracted_braille_objects='ctb_compile.$O ctb_translate.$O'
+   install_contraction_tables=install-contraction-tables
+])
+AC_SUBST([contracted_braille_objects])
+AC_SUBST([install_contraction_tables])
+
+BRLTTY_ARG_DISABLE(
+   [beeper-support],
+   [support for the console tone generator],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_BEEPER_SUPPORT])
+   beeper_tune_objects='beeper.$O'
+])
+AC_SUBST([beeper_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [pcm-support],
+   [support for soundcard digital audio],
+   [${brltty_pcm_interfaces}],
+[dnl
+   AC_DEFINE([ENABLE_PCM_SUPPORT])
+   pcm_tune_objects='pcm.$O'
+])
+AC_SUBST([pcm_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [midi-support],
+   [support for the Musical Instrument Digital Interface],
+   [${brltty_midi_interfaces}],
+[dnl
+   AC_DEFINE([ENABLE_MIDI_SUPPORT])
+   midi_tune_objects='midi.$O'
+])
+AC_SUBST([midi_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [fm-support],
+   [support for the soundcard synthesizer],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_FM_SUPPORT])
+   fm_tune_objects='fm.$O adlib.$O'
+])
+AC_SUBST([fm_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [pm-configfile],
+   [user customization of Papenmeier driver],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_PM_CONFIGURATION_FILE])
+   PM_CONFIGFILE_DEPENDENCY=configuration-file
+])
+AC_SUBST([PM_CONFIGFILE_DEPENDENCY])
+
+BRLTTY_ARG_ENABLE(
+   [gpm],
+   [mouse tracking via GPM],
+   [],
+[dnl
+   AC_CHECK_LIB([gpm], [Gpm_Open])
+])
+
+BRLTTY_ARG_DISABLE(
+   [api],
+   [the application programming interface],
+   [],
+[dnl
+   BRLTTY_CAP_PTHREADS([dnl
+      AC_DEFINE([ENABLE_API])
+      api_objects='api_server.$O api_common.$O rangelist.$O'
+      all_api="all-api"
+      install_api="install-api"
+      BRLTTY_ARG_PARAMETERS([api])
+   ])
+])
+AC_SUBST([api_objects])
+AC_SUBST([all_api])
+AC_SUBST([install_api])
+AC_SUBST([api_keyfile], [brlapi.key])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
+
+AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
+case "${host_os}"
+in
+   linux*|openbsd*|freebsd*|netbsd*|*qnx*)
+      brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
+      ;;
+   solaris*)
+      brltty_cv_prog_ld_flags="-R ${execute_root}${library_directory}"
+      ;;
+   hpux*)
+      brltty_cv_prog_ld_flags="-E +s +b ${execute_root}${library_directory}"
+      ;;
+   osf*)
+      brltty_cv_prog_ld_flags="-rpath ${execute_root}${library_directory}"
+      ;;
+   *)
+      AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
+      ;;
+esac])
+brltty_link_flags="${brltty_cv_prog_ld_flags}"
+
+AC_CACHE_CHECK([for static linkage flag], [brltty_cv_prog_ld_static], [dnl
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_ld_static="-static"
+else
+   case "${host_os}"
+   in
+      linux*|openbsd*|freebsd*|*qnx*)
+         brltty_cv_prog_ld_static="-static"
+         ;;
+      netbsd*)
+         brltty_cv_prog_ld_static="-Bstatic"
+         ;;
+      solaris*)
+         brltty_cv_prog_ld_static="-dn"
+         ;;
+      hpux*)
+         brltty_cv_prog_ld_static="-Bstatic"
+         ;;
+      osf*)
+         brltty_cv_prog_ld_static="-non_shared"
+         ;;
+      *)
+         AC_MSG_ERROR([static linkage not supported by ${host_os}])
+         ;;
+   esac
+   brltty_cv_prog_ld_static="BRLTTY_OPTIONS_LD2CC([${brltty_cv_prog_ld_static}])"
+fi])
+brltty_static_flag="${brltty_cv_prog_ld_static}"
+BRLTTY_ARG_ENABLE(
+   [standalone-programs],
+   [statically linked executables],
+   [],
+[dnl
+   brltty_standalone_programs="yes"
+   LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
+])
+LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
+
+case "${host_os}"
+in
+   linux*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*)
+      BRLTTY_SEARCH_LIBS([dlopen], [dl])
+      ;;
+   hpux*)
+      BRLTTY_SEARCH_LIBS([shl_load], [dld])
+      ;;
+   *)
+      ;;
+esac
+
+case "${host_os}"
+in
+   linux*)
+      usb_object="linux"
+      ;;
+   openbsd*)
+      usb_object="openbsd"
+      ;;
+   freebsd*)
+      usb_object="freebsd"
+      ;;
+   netbsd*)
+      usb_object="netbsd"
+      ;;
+   *)
+      usb_object=""
+      AC_MSG_WARN([no USB support on ${host_os}])
+      ;;
+esac
+if test -n "${usb_object}"
+then
+   BRLTTY_ARG_DISABLE(
+      [usb-support],
+      [support for the Universal Serial Bus],
+      [],
+[dnl
+      AC_DEFINE([ENABLE_USB_SUPPORT])
+      usb_objects="usb."'$O'" usb_${usb_object}."'$O'
+])
+fi
+AC_SUBST([usb_objects])
+
+case "${host_os}"
+in
+   linux*)
+      bluetooth_object="linux"
+      ;;
+   *)
+      bluetooth_object=""
+      AC_MSG_WARN([no bluetooth support on ${host_os}])
+      ;;
+esac
+if test -n "${bluetooth_object}"
+then
+   AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
+      BRLTTY_ARG_DISABLE(
+         [bluetooth-support],
+         [support for bluetooth capable devices],
+         [],
+[dnl
+         AC_DEFINE([ENABLE_BLUETOOTH_SUPPORT])
+         bluetooth_objects="bluez."'$O'" bluez_${bluetooth_object}."'$O'
+])
+])
+fi
+AC_SUBST([bluetooth_objects])
+
+BRLTTY_BRAILLE_DRIVER([al], [Alva])
+BRLTTY_BRAILLE_DRIVER([at], [Albatross])
+BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
+BRLTTY_BRAILLE_DRIVER([bn], [BrailleNote])
+BRLTTY_BRAILLE_DRIVER([cb], [CombiBraille])
+BRLTTY_BRAILLE_DRIVER([ec], [EcoBraille])
+BRLTTY_BRAILLE_DRIVER([eu], [EuroBraille])
+BRLTTY_BRAILLE_DRIVER([fs], [FreedomScientific])
+BRLTTY_BRAILLE_DRIVER([ht], [HandyTech])
+BRLTTY_BRAILLE_DRIVER([lt], [LogText])
+BRLTTY_BRAILLE_DRIVER([mb], [MultiBraille])
+BRLTTY_BRAILLE_DRIVER([md], [MDV])
+BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
+BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
+BRLTTY_BRAILLE_DRIVER([ts], [TSI])
+test -n "${brltty_package_curses}" && {
+   BRLTTY_BRAILLE_DRIVER([tt], [TTY], [-l$(CURSES_LIB)])
+}
+BRLTTY_BRAILLE_DRIVER([va], [Vario])
+BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
+BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
+BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
+BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
+BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
+if test "${no_x}" != "yes"
+then
+   test -n "${brltty_package_xt_toolkit}" && {
+      BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(X_LIBS) -l$(XT_TOOLKIT_LIB) -lXt -lX11])
+   }
+fi
+BRLTTY_ARG_DRIVER([braille])
+
+AC_CACHE_CHECK([for default braille device], [brltty_cv_device_serial_first], [dnl
+case "${host_os}"
+in
+   linux*)
+      for brltty_device in "/dev/ttyS0" "/dev/tts/0"
+      do
+         test -c "${brltty_device}" && {
+            brltty_cv_device_serial_first="${brltty_device}"
+            break
+         }
+      done
+      ;;
+   solaris*)
+      brltty_cv_device_serial_first="/dev/ttya"
+      ;;
+   hpux*)
+      brltty_cv_device_serial_first="/dev/tty0p0"
+      ;;
+   openbsd*)
+      brltty_cv_device_serial_first="/dev/cua00"
+      ;;
+   freebsd*)
+      brltty_cv_device_serial_first="/dev/cuaa0"
+      ;;
+   netbsd*)
+      brltty_cv_device_serial_first="/dev/dty00"
+      ;;
+   osf*)
+      brltty_cv_device_serial_first="/dev/tty00"
+      ;;
+   *qnx*)
+      brltty_cv_device_serial_first="/dev/ser1"
+      ;;
+   *)
+      brltty_cv_device_serial_first=""
+      AC_MSG_WARN([no default braille device])
+      ;;
+esac])
+AC_SUBST([first_serial_device], [${brltty_cv_device_serial_first}])
+
+BRLTTY_ARG_WITH(
+   [braille-device], [DEVICE],
+   [default braille display device],
+   [braille_device], ["${brltty_cv_device_serial_first}"]
+)
+if test "${braille_device}" = "no"
+then
+   braille_device=""
+elif test "${braille_device}" = "yes"
+then
+   braille_device="${brltty_cv_device_serial_first}"
+fi
+AC_SUBST([braille_device])
+AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"])
+BRLTTY_SUMMARY_ITEM([braille-device], [braille_device])
+
+BRLTTY_TEXT_TABLE([cz], [Czech (iso-8859-2)])
+BRLTTY_TEXT_TABLE([da], [Danish (iso-8859-1)])
+BRLTTY_TEXT_TABLE([de], [German (iso-8859-1)])
+BRLTTY_TEXT_TABLE([es], [Spanish (iso-8859-1)])
+BRLTTY_TEXT_TABLE([fi1], [Finnish (iso-8859-1)])
+BRLTTY_TEXT_TABLE([fi2], [Finnish (iso-8859-1)])
+BRLTTY_TEXT_TABLE([fr], [French (iso-8859-1)])
+BRLTTY_TEXT_TABLE([fr-cbifs], [Code Braille Informatique Français Standard (iso-8859-1)])
+BRLTTY_TEXT_TABLE([it], [Italian (iso-8859-1)])
+BRLTTY_TEXT_TABLE([nabcc], [North American Braille Computer Code (iso-8859-1)])
+BRLTTY_TEXT_TABLE([no-h], [Norwegian and German (iso-8859-1)])
+BRLTTY_TEXT_TABLE([no-p], [Norwegian (iso-8859-1)])
+BRLTTY_TEXT_TABLE([pl], [Polish (iso-8859-2)])
+BRLTTY_TEXT_TABLE([ru], [Russian (koi8-r)])
+BRLTTY_TEXT_TABLE([se1], [Swedish (iso-8859-1)])
+BRLTTY_TEXT_TABLE([se2], [Swedish (iso-8859-1)])
+BRLTTY_TEXT_TABLE([uk], [United Kingdom English (iso-8859-1)])
+BRLTTY_TEXT_TABLE([us], [American English (iso-8859-1)])
+BRLTTY_TEXT_TABLE([vni], [Vietnamese (iso-8859-1)])
+BRLTTY_ARG_TABLE([text], [nabcc], [text])
+
+BRLTTY_ATTRIBUTES_TABLE([attributes], [])
+BRLTTY_ATTRIBUTES_TABLE([attrib], [])
+BRLTTY_ARG_TABLE([attributes], [attributes], [])
+
+BRLTTY_ARG_DISABLE(
+   [speech-support],
+   [support for speech synthesizers],
+   [],
+[dnl
+   AC_DEFINE([ENABLE_SPEECH_SUPPORT])
+   speech_support_object='spk.$O'
+
+   BRLTTY_SPEECH_DRIVER([al], [Alva])
+   BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
+   BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
+   BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
+   BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
+      BRLTTY_ARG_REQUIRED(
+         [flite-language], [LANGUAGE],
+         [the FestivalLite language to use],
+         [flite_language], ["usenglish"]
+      )
+
+      BRLTTY_ARG_REQUIRED(
+         [flite-lexicon], [LEXICON],
+         [the FestivalLite lexicon to use],
+         [flite_lexicon], ["cmulex"]
+      )
+
+      BRLTTY_ARG_REQUIRED(
+         [flite-voice], [VOICE],
+         [the FestivalLite voice to use],
+         [flite_voice], ["cmu_us_kal16"]
+      )
+
+      BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite -lm])
+   ])
+   BRLTTY_SPEECH_DRIVER([fv], [Festival])
+   BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
+   BRLTTY_IF_PACKAGE([Mikropuhe], [mikropuhe], [mpwrfile.h], [BRLTTY_CAP_PTHREADS([BRLTTY_SPEECH_DRIVER([mp], [Mikropuhe], [-L$(MPLINUX_ROOT) -lmplinux])])])
+   BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
+   BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
+])
+AC_SUBST([speech_support_object])
+BRLTTY_ARG_DRIVER([speech])
+
+AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
+case "${host_os}"
+in
+   linux*)
+      brltty_cv_default_screen_driver="linux"
+      ;;
+   *)
+      brltty_cv_default_screen_driver="shm"
+      AC_MSG_WARN([no default screen driver - using ${brltty_cv_default_screen_driver}])
+      ;;
+esac])
+
+BRLTTY_ARG_WITH(
+   [screen-driver], [DRIVER],
+   [screen driver],
+   [screen_driver], ["${brltty_cv_default_screen_driver}"]
+)
+if test "${screen_driver}" = "no"
+then
+   screen_driver="null"
+elif test "${screen_driver}" = "yes"
+then
+   screen_driver="${brltty_cv_default_screen_driver}"
+fi
+screen_driver_objects="scr_${screen_driver}."'$O'
+case "${screen_driver}"
+in
+   linux|shm)
+      screen_driver_objects="${screen_driver_objects} "'scr_real.$O'
+      ;;
+esac
+AC_SUBST([screen_driver_objects])
+BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
+
+BRLTTY_ARG_PARAMETERS([screen])
+
+AC_SUBST([library_prefix], [lib])
+AC_SUBST([library_name], ["${library_prefix}${PACKAGE_NAME}"])
+AC_DEFINE_UNQUOTED([LIBRARY_NAME], ["${library_name}"])
+
+brltty_driver_names=
+for brltty_driver in ${brltty_item_names_braille} ${brltty_item_names_speech}
+do
+   if test `expr "${brltty_driver_names} " : ".* ${brltty_driver} "` -eq 0
+   then
+      brltty_driver_names="${brltty_driver_names} ${brltty_driver} "
+   fi
+done
+changequote(, )dnl
+brltty_setup_files="`echo "${brltty_driver_names}" | sed -e '
+s%  *% %g
+s% \([^ ][^ ]*\)% Drivers/\1%g
+s%^%. Programs Documents%
+s%\([^ ][^ ]*\) %\1/Makefile:setup.mk.in:\1/Makefile.in %g
+s% *$%%
+'`"
+changequote([, ])dnl
+BRLTTY_VAR_TRIM([brltty_driver_names])
+AC_SUBST([brltty_driver_names])
+
+configuration_file_customization_script="Bootdisks/bp2cf"
+AC_SUBST_FILE([configuration_file_customization_script])
+
+AC_SUBST([install_drivers])
+BRLTTY_SUMMARY_END
+AC_OUTPUT([
+   config.mk
+   brltty.spec
+   brltty.lsm
+   Programs/brltty-config
+   Documents/brltty.conf
+   Documents/BrlAPIref.doxy
+   Drivers/Voyager/mkhlp
+   ${brltty_setup_files}])

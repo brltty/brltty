@@ -1,0 +1,13 @@
+Makefile
+absdeps.mk
+reldeps.mk
+config.status
+config.log
+autom4te*.cache
+config.mk
+config.h
+brltty.spec
+brltty.lsm
+configure
+data
+lib

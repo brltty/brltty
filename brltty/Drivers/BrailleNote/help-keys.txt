@@ -1,0 +1,132 @@
+Braille Note Keys
+
+Thumb Keys:
+Keys      Description
+prv       Move left one window (wrap to end of previous line).
+nxt       Move right one window (wrap to start of next line).
+bak       Move up one line.
+adv       Move down one line.
+prv+bak   Move to left end of line.
+nxt+adv   Move to right end of line.
+prv+adv   Move to top-left corner of screen.
+prv+nxt   Move to bottom-left corner of screen.
+bak+adv   Move to previously selected location (undo cursor tracking motion).
+bak+nxt   Toggle cursor tracking on/off.
+
+Dots 1-6 with No Modifiers (when in navigation mode):
+   Dots   Description
+   space  Move to cursor.
+a  1      Move left one column.
+`  4      Move right one column.
+b  12     Move left half a window.
+~  45     Move right half a window.
+1  2      Move left one window.
+"  5      Move right one window.
+2  23     Move left to next non-blank window.
+;  56     Move right to next non-blank window.
+'  3      Move to left end of line.
+,  6      Move to right end of line.
+k  13     Move up one line.
+.  46     Move down one line.
+l  123    Move to top-left corner.
+_  456    Move to bottom-left corner.
+c  14     Move to top line.
+-  36     Move to bottom line.
+d  145    Move to previous line with different content.
+4  256    Move to next line with different content.
+f  124    Find previous match.
+6  235    Find next match.
+h  125    Move to previous line with different highlighting.
+8  236    Move to next line with different highlighting.
+i+ 24     Move to previous line with no more than specified indent.
+9+ 35     Move to next line with no more than specified indent.
+j  245    Jump up a few lines.
+0  356    Jump down a few lines.
+
+Dots 1-6 with Space:
+   Dots   Description
+c  14     Change current preferences.
+d  145    Default preferences (restore from disk).
+e* 15     Exit braille terminal mode (Braille Note function).
+f? 124    Enter function key.
+h* 125    Help for braille terminal mode (Braille Note function).
+l+ 123    Position left edge of braille window.
+m  134    Mute speech.
+n  1345   Switch to navigate mode.
+o* 135    Go to options menu (Braille Note function).
+p  1234   Paste from cut buffer.
+r* 1235   Repeat last prompt (Braille Note function).
+s  234    Say contents of current line.
+u* 136    Uppercase for computer braille (Braille Note function).
+v? 1236   Switch virtual terminal.
+w  2456   Write current preferences to disk.
+x? 1346   Enter character by hexadecimal value.
+z* 1356   Go to main menu (Braille Note function).
+%* 146    Acknowledge alarm (Braille Note function).
+6* 235    Go to task menu (Braille Note function).
+=* 123456 Go to main menu (Braille Note function).
+|  1256   Route cursor to current line without horizontal motion.
+(+ 12356  Set start of cut area and clear cut buffer.
+{+ 246    Set start of cut area without clearing cut buffer.
+)+ 23456  Append rectangular area to cut buffer.
+}+ 12456  Append linear area to cut buffer.
+?  1456   Enter command learn mode.
+7  2356   Tab key.
+2  23     Left arrow key.
+;  56     Right arrow key.
+3  25     Up arrow key.
+-  36     Down arrow key.
+1  2      Home key.
+'  3      End key.
+"  5      Page up key.
+,  6      Page down key.
+9  35     Insert key.
+4  256    Delete key.
+5  26     Escape key.
+`  4      Enter one character with dots 7 and 8 off.
+/  34     Enter one character with dot 7 on and dot 8 off.
++  346    Enter one character with dots 7 and 8 on.
+.  46     Enter one character with dot 7 off and dot 8 on.
+~  45     Switch to input mode with dots 7 and 8 off.
+>  345    Switch to input mode with dot 7 on and dot 8 off.
+#  3456   Switch to input mode with dots 7 and 8 on.
+_  456    Switch to input mode with dot 7 off and dot 8 on.
+
+Dots 1-6 with Space and Backspace:
+   Dots   Description
+   <none> Backspace key.
+a  1      View attributes (window highlighting).
+b  12     Turn off skipping of blank windows.
+d+ 145    Describe character.
+f  124    Unfreeze screen.
+h  125    Enter/leave help screen.
+i  24     Turn off skipping of identical lines.
+m+ 134    Mark current window position.
+s  234    Enter/leave settings summary screen.
+t  2345   View text (window contents).
+v  1236   Switch to previous virtual terminal.
+w  2456   Turn off sliding window.
+=  123456 Restart speech driver.
+6  235    View text with 6-dot braille.
+8  236    View text with 8-dot braille.
+
+Dots 1-6 with Space and Enter:
+   Dots   Description
+   <none> Return key.
+a* 1      Decrease speech volume (Braille Note function).
+`* 4      Increase speech volume (Braille Note function).
+1* 2      Decrease speech pitch (Braille Note function).
+"* 5      Increase speech pitch (Braille Note function).
+'* 3      Decrease speech speed (Braille Note function).
+,* 6      Increase speech speed (Braille Note function).
+b  12     Turn on skipping of blank windows.
+d* 145    Display the date (Braille Note function).
+f  124    Freeze screen.
+h* 125    Hear punctuation in current prompt (Braille Note function).
+i  24     Turn on skipping of identical lines.
+m+ 134    Go to marked window position.
+s* 234    Spell name in current prompt (Braille Note function).
+t* 2345   Display the time (Braille Note function).
+v  1236   Switch to next virtual terminal.
+w  2456   Turn on sliding window.
+=  123456 Restart braille driver.

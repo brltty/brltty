@@ -1,0 +1,9 @@
+Makefile
+reldeps.mk
+*.made
+brltty.conf
+BrlAPIref.doxy
+man?
+brlapi_*.3
+*.txt
+*-HTML

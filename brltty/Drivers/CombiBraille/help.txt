@@ -1,0 +1,44 @@
+BRLTTY Help Screen (CombiBraille)
+
+Movement keys:
+321     (BC) top of screen
+    456 (CD) bottom of screen
+ 21          up several lines
+    45       down several lines
+  1     (B)  up one line
+    4   (D)  down one line
+3     6 (CC) cursor position
+32      (AC) beginning of line
+     56 (CE) end of line
+3 1          left one character
+    4 6      right one character
+ 2  4 6 (AD) left one half window
+3 1  5  (BE) right one half window
+3       (A)  left one full window
+      6 (E)  right one full window
+
+Other functions:
+  1  56 (AE) speak current line
+  1   6 (BD) mute speech
+ 21 45       route cursor to start of window
+32    6      cut start
+3    56      cut end
+321 4        paste
+     5       cursor visibility on/off
+  1 4   (C)  cursor tracking on/off
+ 2           cursor blink on/off
+  1 4 6      capital letter blink on/off
+ 2   5       block/underline cursor
+32   5       six/eight dot braille text
+ 2  456      sliding window on/off
+ 2  45       skip identical lines on/off
+32  4        audio signals on/off
+3 1 4        attribute display on/off
+ 21 4        freeze mode on/off
+ 21  5       help display on/off
+3   4        status mode on/off
+
+Preferences control:
+321 456      save current preferences
+3 1 4 6      enter preferences menu
+321  5       restore default preferences

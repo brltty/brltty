@@ -1,0 +1,288 @@
+Introduction
+============
+
+As of version 0.3.4 (released in July of 2003), Gnopernicus contains a braille
+driver for BRLTTY. This means that you can now use Gnopernicus with any braille
+display that is supported by BRLTTY. Although support is far from complete,
+basic braille displaying, as well as key transmission, work fine.
+
+
+Building BRLTTY
+===============
+
+Gnopernicus uses BrlAPI (BRLTTY's application programming interface).  When
+building BRLTTY, therefore, configure it with --enable-api in order to enable
+the compilation and installation of libbrlapi and its header files.
+
+    ./configure --enable-api
+    make
+    make install
+
+After installation, but *before* launching the new BRLTTY, you need to generate
+an authentication key for its API. The easiest way to do this is:
+
+    echo some-string >/etc/brlapi.key
+
+Easiest, of course and as usual, doesn't necessarily mean best. It's much
+better for this kind of data to be unpredictable. If, therefore, a random data
+source is available then it should be used.
+
+If you have the mcookie command then you can do:
+
+    mcookie >/etc/brlapi.key
+
+If you have the dd command and the /dev/random device then you can do:
+
+    dd if=/dev/random of=/etc/brlapi.key bs=32 count=1
+
+If there's the slightest possibility that even just one untrustworthy user can
+access your system then you should seriously consider ensuring that the fiLe
+containing the authentication key for BrlAPI can only be accessed by those
+users who actually need to use the braille display. If there's only one braille
+user then it's easy.  Just make him the owner of the file and ensure that noone
+else can access it.
+
+    chown whoever /etc/brlapi.key
+    chmod 600 /etc/brlapi.key
+
+If there's more than one braille user then it's a little more complicated.  
+Create a new group with a meaningful name (like, say, brlapi), make the file
+readable to that group but not to anyone else, and ensure that each braille
+user is a member of that group.
+
+    groupadd brlapi
+    chgrp brlapi /etc/brlapi.key
+    chmod 640 /etc/brlapi.key
+    usermod -G brlapi user1
+    usermod -G brlapi user2
+    ...
+
+
+Configuring Gnopernicus
+=======================
+
+You need to ensure that the braille-related accessibility features of Gnome are
+set correctly, i.e. that Accessibility is enabled, that Braille Support is
+enabled, and that the Braille Device is set to "BRLTTY". Gnopernicus, at start
+time, automatically checks these settings, and, for each feature which isn't
+enabled, displays a dialogue which asks the user if it should be. Since a blind
+user can't see these dialogues, and, therefore, may experience what he believes
+to be an unexpected hang when starting Gnopernicus, other means have been
+provided so that he can ensure that they're correct ahead of time. They may be
+preconfigured via Gnopernicus command-line options, via the generic Gnome
+command-line configuration tool, or, if sighted assistance is available, from
+the Gnome desktop. All of these methods, in that order, are described below.
+
+
+Gnopernicus Command-line Options
+--------------------------------
+
+As of Gnopernicus 0.7, the following command-line options are supported. 
+
+   -b  --enable-braille           Enable the Braille service.
+   -B  --disable-braille          Disable the Braille service.
+   -s  --enable-speech            Enable the Speech service.
+   -S  --disable-speech           Disable the Speech service.
+   -m  --enable-magnifier         Enable the Magnifier service.
+   -M  --disable-magnifier        Disable the Magnifier service.
+   -o  --enable-braille-monitor   Enable the on-screen Braille Monitor.
+   -O  --disable-braille-monitor  Disable the on-screen Braille Monitor.
+   -e  --braille-device=<type>    The braille device type (should be BRLTTY).
+   -p  --braille-port=ttyS<n>     The serial port (not relevant for BRLTTY).
+
+To get Gnopernicus to operate your braille display via BRLTTY, the minimum set 
+of options you must specify is:
+
+   -b -e BRLTTY
+
+These options make permanent changes to the Gnome Accessibility settings so you
+only need to specify them when you invoke Gnopernicus for the first time.
+Specifying them on every invocation isn't wrong, but you should be aware that
+this approach will undo any subsequent changes to the settings made via the
+Gnome Desktop.
+
+
+The Generic Gnome Command-line Configuration Tool
+-------------------------------------------------
+
+There's a command-line interface to the Gnome configuration system (gconf)
+called "gconftool-2". You can get verbose help for it with "gconftool-2 --help"
+or something shorter with "gconftool-2 --usage".
+
+You can check the current setting of any key with: 
+
+   gconftool-2 --get <key> 
+
+You can change the setting of any key with:
+
+   gconftool-2 --type <type> --set <key> <value>
+
+To check if Assistive Technology Support (Accessibility) is enabled, for
+example, do:
+
+   gconftool-2 --get /desktop/gnome/interface/accessibility
+
+If it's disabled (set to false) and you'd like to permanently enable it, set it
+to true as follows:
+
+   gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
+
+There's also a way to temporarily (for a single session) enable Accessibility.  
+This is done by setting the environment variable GNOME_ACCESSIBILITY to 1.
+
+    sh: GNOME_ACCESSIBILITY=1; export GNOME_ACCESSIBILITY
+   ksh: export GNOME_ACCESSIBILITY=1
+   csh: setenv GNOME_ACCESSIBILITY 1
+
+The relevant gconf keys are:
+
+[turn Accessibility on (as just described above)]
+   gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
+
+[turn Braille on]
+   gconftool-2 --type bool --set /apps/gnopernicus/srcore/br_active true
+
+[set Braille Device to BRLTTY's BrlAPI]
+   gconftool-2 --type string --set /apps/gnopernicus/braille/device BRLTTY
+
+[set Braille Translation Table to your preferred language]
+   gconftool-2 --type string --set /apps/gnopernicus/braille/translation_table
+      English: en_US (American)
+       German: de
+      Spanish: es
+      Swedish: sv
+
+[turn the on-screen Braille Monitor (for sighted users) off]
+   gconftool-2 --type bool --set /apps/gnopernicus/srcore/bm_active false
+
+[turn Speech off]
+   gconftool-2 --type bool --set /apps/gnopernicus/srcore/sp_active false
+
+
+Configuration via the Gnome Desktop
+-----------------------------------
+
+To enable Assistive Technologies Support (Accessibility), do: Alt-F1 ->
+"Desktop Preferences" -> "Accessibility" -> "Assistive Technology Support"
+
+If "Enable Assistive Technologies" isn't checked, then check it, log out, and
+log back in again.
+
+If the main Gnopernicus window isn't visible, do: Alt-F1 -> "Accessibility" -> 
+"Screen Reader"
+
+From the main Gnopernicus window, select: "Startup Mode"
+
+In this menu, check the checkbox with the label "Active Components Braille".  
+This activates braille support, and makes the "Braille Preferences" window
+available.
+
+Now click "OK" to apply the change and close the window.
+
+From the main Gnopernicus window again, select: "Preferences" -> "Braille"
+
+Select "Braille Device", set it to "BRLTTY's BrlAPI", and click "OK" to apply
+the change.
+
+Select "Translation Table", set it to your preferred language, and click "OK"  
+to apply the change.
+
+Make any other changes which more accurately taylour Gnopernicus's braille
+support to your own personal needs, then "Close" the "Braille Preferences"
+window, and, finally, "Close" the "Preferences" window.
+
+Braille should start working as soon as all needed configuration changes have
+been made.
+
+
+Starting Gnome
+==============
+
+Here's a sample .xinitrc file for starting Gnome under the Garnome
+distribution. The accessibility key is set in the file to ensure that it is
+true. The environment variable GTK_MODULES seems to be necessary to make
+everything accessible. The .xinitrc file must be placed in your home directory
+and is used when you type "startx" to start the X-server.
+
+ ------------------------------------------------------------------------------
+ #!/bin/sh
+
+ # Define environment variables.
+ GARNOME=$HOME/garnome
+ PATH=$GARNOME/bin:$PATH
+ LD_LIBRARY_PATH=$GARNOME/lib:$LD_LIBRARY_PATH
+ PYTHONPATH=$GARNOME/lib/python2.2/site-packages
+ PKG_CONFIG_PATH=$GARNOME/lib/pkgconfig:/usr/lib/pkgconfig
+ GDK_USE_XFT=1
+ GTK_MODULES=gail:atk-bridge
+ export PATH LD_LIBRARY_PATH PYTHONPATH PKG_CONFIG_PATH GDK_USE_XFT GTK_MODULES
+
+ # Configure Gnome.
+ gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
+
+ # Tell Gnopernicus which virtual terminal is being used by the X display.
+ # This is a bit complicated so cut-and-paste (rather than retype) it.
+ CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
+ export CONTROLVT
+
+ # Start the Gnome session.
+ exec $GARNOME/bin/gnome-session
+ ------------------------------------------------------------------------------
+
+
+Starting Gnopernicus
+====================
+
+Gnopernicus is started from a file in your home directory which Gnome reads
+when it starts up. While Gnome provides a GUI for adding startup programs,
+there's no proper command-line or script way to do so yet. You can, however,
+manually edit the session file as follows:
+
+1) Create the directory "~/.gnome2" if it doesn't exist yet.
+2) Create the file "~/.gnome2/session-manual" if it doesn't exist yet.
+3) Contents of the "session-manual" file (without the indentation):
+
+   <blank line>
+   [Default]
+   num_clients=1
+   0,RestartStyleHint=3
+   0,Priority=60
+   0,RestartCommand=gnopernicus
+
+
+Key Bindings
+============
+
+This driver assumes that Gnopernicus key bindings remain at their default
+settings. BRLTTY commands are mapped to Gnopernicus key bindings as follows:
+
+   BRLTTY       Gnopernicus
+   Command         Binding   Description
+   --------------  --------  -----------
+   BRL_CMD_LNUP    DK00      Go To Parent
+   BRL_CMD_HOME    DK01      Go To Focus
+   BRL_CMD_LNDN    DK02      Go To Child
+   BRL_CMD_FWINLT  DK03      Go To Previous
+                   DK04      Repeat Last
+   BRL_CMD_FWINRT  DK05      Go To Next
+                   DK01DK02  Do Default Action
+   BRL_CMD_CHRLT   L09K01    Left One Character
+   BRL_CMD_CHRRT   L09K03    Right One Character
+   BRL_CMD_HWINLT  L09K04    Left One Display Width
+   BRL_CMD_HWINRT  L09K06    Right One Display Width
+   BRL_BLK_ROUTE   HMSnn     Route Cursor
+
+
+What's Left
+===========
+
+We need some way to figure out the tty on which the X server is currently
+running. Some investigation didn't really show any way to get this information
+via the X protocol. We'll probably need to add a BrlAPI-specific configuration
+entry which at least lets the user set this. The downside would be that this
+would make it very hard to use Gnopernicus for more than one X server
+concurrently.
+
+Any input on these issues would be highly appreciated.
+
+

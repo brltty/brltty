@@ -1,0 +1,121 @@
+Braille Lite Driver for BRLTTY
+
+This is a beta driver for the Blazie Engineering Braille Lite.
+written by Nikhil Nair,
+with additions from Nicolas Pitre Nicolas Pitre <nico@cam.org>
+and Pete De Vasto,
+further modifications by Stéphane Doyon <s.doyon@videotron.ca>,
+    starting August 2001.
+
+Both BrailleLite 18 and 40 should work, and there is now code that should
+auto-detect the display type.
+
+Edit braille.h to select baudrate and some features.
+
+On the BrailleLite, you should type 345-chord and p-chord to enter the 
+"speech box mode" required by BRLTTY.  You should type the same sequence 
+to exit that mode whenever you wish to return to the BrailleLite internal
+functions.
+
+Be sure your BrailleLite's serial port baudrate and the value configured
+in the braille.h file are the same.
+
+The Braille Lite 40 has two advance bars on it.  Brltty has been set up
+so that moving the display left or right works the same as it does
+when the unit is in its internal notetaker mode.
+
+See help.src for a description of the key bindings.
+
+History:
+Stéphane Doyon, April 2002, version 0.5.10:
+-Act as if kbemu was off in any context other than CMDS_SCREEN (in
+    particular typing a key won't throw you out of preferences menu
+    anymore).
+Stéphane Doyon, March 2002, version 0.5.9:
+-Added "kbemu" driver parameter, so can start with kbemu already active.
+Stéphane Doyon, February 2002, version 0.5.8:
+-Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and CMD_SIXDOTS. Several
+    VAL_PASSKEY effects were done through special cases: moved them
+    back into cmdtrans. Identified special/reserved and free bindings.
+    Cleaned out some #if 0s.
+Stéphane Doyon, January 2002, version 0.5.7:
+-Added bindings for CR_CUTAPPEND and CR_CUTLINE. Replaced CMD_CUT_BEG,
+    CMD_CUT_END and CMD_CSRJMP by CR_ equivalents. Added CR_SETMARK and
+    CR_GOTOMARK. These are a bit nasty: they reuse existing command dot
+    patterns from within o-chord. Well practically all the patterns are
+    taken!
+Stéphane Doyon, January 2002, version 0.5.6:
+-Fixed dot combinations with dots 7-8 on BL40 (for typing caps and ctrl).
+Stéphane Doyon, December 2001, version 0.5.5:
+-META is back. Now use VPC modifiers on VALPASSCHAR when TEXTTRANS
+    not defined. Fixed uppercase that always locked active. Sub-commands
+    of 35-chord no longer need to be chorded.
+Stéphane Doyon, November 2001, version 0.5.4:
+-Now using new generic VAL_PASS* mechanism for typing in keys, rather
+    than having the driver itself insert stuff into the console. We
+    no longer have the META function though, but we have ESCAPE.
+Stéphane Doyon and Dave Mielke, September 2001, version 0.5.3:
+-closebrl: don't clear display, use TCSADRAIN.
+-Slight API and name changes for BRLTTY 3.0. Commands can no longer be
+    assumed to be chars, changed type of cmdtrans.
+-Fixed binding for switching virtual terminal with o-chord... it was wrong.
+Stéphane Doyon, September 2001, version 0.5.2:
+-Added baudrate parameter. Fixed up initialization, in particular a bug
+    with use of qbase buffer unitialized.
+Stéphane Doyon, September 2001, version 0.5.1:
+-Added bindings for CMD_BACK and CR_MSGATTRIB.
+Stéphane Doyon, August 2001
+-Added a version number, as many people have been playing with this
+   driver. Arbitrarily started at 0.5.
+-Made the help more compact, and remove the duplication of the key
+   bindings list from README.
+-Use separate help files for BL18 and BL40, automatically generated from
+   brltty_genhelp.txt.
+-Option USE_TEXTTRANS in braille.h, allows mapping of braille keyboard
+   input to characters to be performed using the output text translation
+   table (use definable) instead of the hardcoded US table. Useful if you
+   don't use the US table or if you want to enter characters numbered
+   >127 (such as accents for me). Obviously your output dot translation
+   table must not have duplicate representations for characters you want
+   to type. If that option is selected, dot 8 no longer generates a META
+   key.
+-Added DOT8SHIFT for use with USE_TEXTTRANS: 26-chord means the next
+   input char should be looked up with dot8 added.
+-Added bindings for search forward/backward (NXSEARCH), move by
+   paragraphs (NXBLNKLN), switch to next/previous virtual terminal
+   (SWITCHVT_NEXT).
+-Added a binding (246) for escape. Sometimes you want escape alone, or
+   followed by delete... and the META key doesn't do it as it expects a
+   character to combine the META to.
+-Made the "restart driver" command dangerous (required chord), as it
+   tended to kill the driver for me if I continued typing while it
+   resets...
+-Modified repeat count so that you can give the command right away, no
+   need to do e-chord. You can do a one-digit repeat of a movement key in
+   three strokes now.
+-Abused the repeat count function to allow switching directly to a VT
+   given it's number: o-chord then VT number then s-chord or :-chord.
+   NB: Changed to v-chord / #-chord.
+-Fixed a very nice little bug that caused the internal cursor to go off
+   the display during g-chord with advance bar left.
+-Fixed a statement that caused a portability problem.
+-Fixed k-chord which activated but did not toggle off keyboard emulation.
+-Renamed brltty_genhelp.txt to help.src and brlttyhelp?.txt to help?.txt.
+
+Anecdotes on weird bugs:
+
+The code:
+    for (i = 0; i < blitesz; rawdata[i++] = blitetrans[rawdata[i]]);
+can, in some (not yet quite clear) circumstances and under other
+processor architectures, not have the desired effect: all the text
+appears shifted by one cell. Supposedly the behavior for such a construct
+is undefined with gcc. So we put the i++ outside the assignment
+statement.
+
+The code:
+   int_cursor = MAX (int_cursor - blitesz / 4, 1);
+did not have the intended effect. int_cursor was signed and blitesz
+unsigned. The compiler somehow decided to evaluate the comparison as if
+the first argument was unsigned, which caused the MAX strategy to fail
+and the cursor to go off the display. Declaring blitesz as signed fixed
+it.

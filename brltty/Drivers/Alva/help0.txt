@@ -1,0 +1,57 @@
+Help Screen for Alva ABT and Delphi models
+From left to right, front keys are:
+PROG HOME CURSOR   UP  LEFT  RIGHT  DOWN
+
+Movement keys:
+UP              up one line
+LEFT            left one full window
+RIGHT           right one full window
+DOWN            down one line
+CURSOR          go back to cursor, or to window location before cursor moved
+CURSOR + LEFT   left one half window
+CURSOR + RIGHT  right one half window
+HOME            top left of screen
+HOME + UP       top of screen
+HOME + DOWN     bottom of screen
+HOME + LEFT     beginning of line
+HOME + RIGHT    end of line
+PROG + LEFT     left one character
+PROG + RIGHR    right one character
+CURSOR + UP     up to previous line with different attributes
+CURSOR + DOWN   down to next line with different attributes
+HOME + CURSOR + UP    skip to previous different screen line
+HOME + CURSOR + DOWN  skip to next different screen line
+PROG + HOME + UP      go up to previous command prompt
+HOME + CURSOR + cursor routing button  position left end of window
+
+Other functions:
+PROG            toggle help display
+PROG + HOME     toggle attribute display
+PROG + HOME + cursor routing button  show color attributes of pointed char
+PROG + CURSOR   activate preferences menu
+PROG + UP       toggle status mode
+PROG + DOWN     toggle freeze mode
+HOME + CURSOR   toggle cursor tracking
+
+Cut & Paste function keys:
+PROG + cursor routing button     defines the beginning of a block
+HOME + cursor routing button     defines the end of that block
+PROG + HOME + DOWN               paste the block at cursor position
+
+Speech complement functions (if available):
+HOME + CURSOR + RIGHT   say the text from the current screen line
+HOME + CURSOR + LEFT    mute speech device
+PROG + HOME + RIGHT     speak from current line through bottom of screen
+PROG + HOME + LEFT      reinitialize speech driver
+
+Functions with the 3 cursor routing buttons over the status cells:
+Button 1              toggle capital letter blink
+Button 2              toggle cursor visibility
+Button 3              toggle cursor blink
+CURSOR + Button 1     toggle text style 6-dot/8-dot
+CURSOR + Button 2     toggle cursor style block/underline
+CURSOR + Button 3     toggle sliding window on/off
+
+Note: Some Alva models have extra keys called CURSOR2, HOME2 and PROG2.
+Those keys are not bound to any function yet.
+If you have suggestions for them, please send me an e-mail to nico@cam.org.

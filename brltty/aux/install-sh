@@ -1,0 +1,187 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+umask 077
+
+programName="`echo "${0}" | sed -e 's%^.*/%%'`"
+programMessage() {
+   echo >&2 "${programName}: ${1}"
+}
+
+syntaxError() {
+   programMessage "${1}"
+   exit 2
+}
+
+copyCommand="cp"
+directoryCommand="mkdir"
+groupCommand="chgrp"
+modeCommand="chmod"
+ownerCommand="chown"
+stripCommand="strip"
+
+defaultMode="0755"
+
+createDirectories=false
+newGroup=""
+newMode="${defaultMode}"
+newOwner=""
+showActions=false
+showUsage=false
+stripSymbols=false
+
+while [ "${#}" -gt 0 ]
+do
+   option="${1}"
+   operand=""
+
+   case "${option}"
+   in
+      -c) ;;
+      -d) createDirectories=true;;
+      -g) operand=newGroup;;
+      -h) showUsage=true;;
+      -m) operand=newMode;;
+      -o) operand=newOwner;;
+      -s) stripSymbols=true;;
+      -v) showActions=true;;
+      -*) syntaxError "unknown option: ${option}";;
+      *) break;;
+   esac
+
+   shift
+   [ -z "${operand}" ] && continue
+   [ "${#}" -eq 0 ] && syntaxError "missing operand: ${option}";
+   eval "${operand}"'="${1}"'
+   shift
+done
+
+"${showUsage}" && {
+   cat <<END_OF_USAGE
+Usage:
+   ${programName} [-option ...] source destination
+   ${programName} [-option ...] source ... directory
+   ${programName} -d [-option ...] directory ...
+
+Options:
+   -c        (ignored for backward compatibility)
+   -d        Create all components of each directory (${directoryCommand}).
+   -g group  Set owning group (${groupCommand}).
+   -h        Display usage summary (this text) and exit.
+   -m mode   Set permission modes (${modeCommand}) instead of ${defaultMode}.
+   -o owner  Set owning user (${ownerCommand}).
+   -s        Strip symbols from executable (${stripCommand}).
+   -v        Display each successful action.
+END_OF_USAGE
+
+   exit 0
+}
+
+changeAttributes='
+   [ "${newMode}" != "" ] && {
+      ${modeCommand} "${newMode}" "${path}" || exit 3
+      "${showActions}" && programMessage "mode changed: ${path}"
+   }
+
+   [ "${newGroup}" != "" ] && {
+      ${groupCommand} "${newGroup}" "${path}" || exit 3
+      "${showActions}" && programMessage "group changed: ${path}"
+   }
+
+   [ "${newOwner}" != "" ] && {
+      ${ownerCommand} "${newOwner}" "${path}" || exit 3
+      "${showActions}" && programMessage "owner changed: ${path}"
+   }
+'
+
+"${createDirectories}" && {
+   "${stripSymbols}" && syntaxError "cannot strip a directory."
+   [ "${#}" -eq 0 ] && syntaxError "directory not specified."
+
+   for destination
+   do
+      [ "${destination}" = "" ] && {
+         programMessage "null directory."
+         continue
+      }
+
+      directory=""
+      paths=""
+      for component in `echo "${destination}" | sed -e 's%/% %g' -e 's%^ %/ %'  -e 's% *$%%' -e 's%  *% %g'`
+      do
+         directory="${directory}${component}"
+         [ "${component}" = "/" ] || directory="${directory}/"
+
+         [ -d "${directory}" ] || {
+            ${directoryCommand} "${directory}" || exit 3
+            "${showActions}" && programMessage "directory created: ${directory}"
+            paths="${directory} ${paths}"
+         }
+      done
+
+      [ -n "${paths}" ] && {
+         for path in $paths
+         do
+            eval "${changeAttributes}"
+         done
+      }
+   done
+
+   exit 0
+}
+
+[ "${#}" -eq 0 ] && syntaxError "source not specified."
+[ "${#}" -eq 1 ] && syntaxError "destination not specified."
+
+count="`expr "${#}" - 1`"
+destination="`( shift "${count}"; echo "${1}" )`"
+
+if [ -d "${destination}" ]
+then
+   toDirectory=true
+else
+   [ "${#}" -eq 2 ] || syntaxError "more than one source - destination not a directory: ${destination}"
+   toDirectory=false
+fi
+
+while [ "${#}" -gt 1 ]
+do
+   source="${1}"
+   shift
+
+   if [ -f "${source}" ]
+   then
+      type=file
+   else
+      syntaxError "source not a file: ${source}"
+   fi
+
+   path="${destination}"
+   "${toDirectory}" && path="${path}/`basename ${source}`"
+   ${copyCommand} "${source}" "${path}" || exit 3
+   "${showActions}" && programMessage "${type} copied: ${source} -> ${path}"
+
+   "${stripSymbols}" && {
+      ${stripCommand} "${path}" || exit 3
+      "${showActions}" && programMessage "symbols stripped: ${path}"
+   }
+
+   eval "${changeAttributes}"
+done
+
+exit 0

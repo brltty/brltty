@@ -1,0 +1,104 @@
+This is the EuroBraille family driver for BRLTTY, version 1.3.2
+
+Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
+
+This code is copyrighted under the GNU Public License.  See the file
+COPYING included with BRLTTY for details.
+
+This driver is currently maintained by Yannick Plassiard 
+	<yan@mistigri.org>
+
+SUPPORTED HARDWARE
+==================
+All EuroBraille's displays should be supported here. However it has been tested
+on the following hardware:
+   - a Clio-Notebraille display (20 40 and 80 cells);
+   - a Scriba display (20 and 40);
+   - an Azerbraille 40 and 80 display;
+   - a Clio-PupiBraille display (80 cells)
+   - an IRIS display (Iris-S20, Iris-S32 and Iris-40).
+   - The driver is although tested with a NoteBraille display in order to 
+     maintain backward compatibility.
+
+
+FIXES/ADDITIONS
+===============
+Version 1.3.2:
+	- Remade the brl_ReadPacket and brl_WritePacket, to allow writting of 
+	  low-level packets and error code retrieving;
+	- Full Iris support;
+
+Version 1.3.1:
+	- Many code cleanups;
+	- Corrected AzerBraille 40 Programming keys bugs;
+	- Added a LOG_IO define to log in/out packets to a file;
+	- Started to debug the Iris identification failures, still not work
+	  perfectly;
+
+Version 1.3 :
+	- Made the driver BrlAPI compatible
+	- The transfer code has been removed: it will be now in a separate 
+	  program, called `tp' (in progress).
+	- code cleanups;
+
+Version 1.2 :
+	- Significantly reduced the size of the sourcecode: propper and easier
+	  to understand/customize;
+	- Added LCD support;
+	- Beta new Iris 20/32/40 support, not tested yet;
+	- Re-added Cut-n-paste routines: it was disabled, don't know why...
+
+Version 1.1a :
+	- Minor changes to function-keys to make the program easier to 
+	  undepstand. 
+	- The on-line help function disappeared, and is replaced by the 
+	  CMD_LEARN (learn mode) function directly implemented within BrlTty.
+
+
+Version 1.1:
+	- Fixed bugs due to changes of brltty core functions
+	- Changed keys' insertion: We now use sequencial mode for meta and
+	  control keys, to allow more combinations. Moreover the input table is
+	  now attached to the output table. 
+
+Version 1.0 :
+   	- added an internal menu to allow console switching or to enter in the
+	  help menu. 
+     	  Here, a Scriba-like interface was implemented. Read the "README.menu"
+     	  file if you didn't use a Scriba (or the Draculawin program) before to
+     	  learn more about this menu.
+   	- When the drivers starts, it now plays a melody on the terminal's 
+	  internal speaker. 
+	  This was made to ensure the user that the driver is loaded and is
+       	  ready to be used.
+
+Version 0.9: 
+   	- You can now view the internal date/time of your display, typing "#M" 
+	  (or "Alpha+L9" on a Scriba). This doesn't work very well - don't know 
+	  why...
+
+Version 0.8:
+   	- Minor changes were made in the use of the "inskey()" function.
+   	- Fixed bugs in the ViewOn() and the Program() functions.
+
+Version 0.7: 
+   	- Added the "Programming" and the "View on" functions. Their respective 
+     	  behaviors are as in the DOS program (ReadBraille). See the 
+	  "README.model" file where "Model" is the name of your display. 
+	  Actually, files are written for the Clio-Notebraille and the Scriba 
+	  displays.
+
+Version 0.6:
+   	- Fixed the "enter bug": The "\n" inserted code is now replaced by 
+	  "\x0D".
+
+Version 0.5: 
+   	- Added the ability for the user to type letters directly from his/her
+     	  terminal. The table implemented is the CBIFS (French) table.
+
+Comments are strongly welcomed, because I don't know how many people use the 
+EuroBraille version of BRLTTY in the world so if you use this driver, just 
+e-mail me what are your suggestions for next versions.
+
+Yannick Plassiard <yan@mistigri.org>
+    November 02 2003

@@ -1,0 +1,92 @@
+BRLTTY Driver for the Tieman Voyager Braille Display
+This is the user-space-only version of the driver.
+Version 0.10 (March 2004)
+
+Copyright 2004 by Stéphane Doyon  <s.doyon@videotron.ca>
+
+This is a partial rewrite of the driver which functions entirely from
+user-space (whereas the previous driver depended on a kernel driver for
+the USB communication with the Voyager display).
+
+This driver supports the Tieman Voyager 44 and 70.
+
+The driver works with later 2.4.x kernels and with at least some versions
+in the 2.6.x series.
+Note that the kernel brlvger driver used with the old BRLTTY driver does
+not work properly with 2.6.x kernels.
+
+Many thanks to the Tieman people: Corand van Strien, Ivar Illing, Daphne
+Vogelaar and Ingrid Vogel. They provided us with a Braille display (as
+well as programming information) so that we could write this driver. They
+replaced the display when it broke and they answered our technical
+questions. It is very motivating when companies take an interest in such
+projects and are so supportive.
+
+Thanks to Andor Demarteau <ademarte@students.cs.uu.nl> who got this whole
+project started and beta-tested all our early buggy attempts.
+
+Thanks to Stéphane Dalton who wrote the initial version of the old kernel
+driver. Without his initiative this project would not have been a success.
+
+This rewrite of the driver should allow more flexibility, but is as of yet
+very young and not thoroughly tested.
+
+When BRLTTY will be running, press the leftmost routing key to bring up
+the help screen so you can read the details of the key bindings.
+
+Users of the 2.6.x kernel may experience some difficulties.  The old
+kernel driver, which is included in the official kernels, will actually
+get in the way of this driver as it will claim the USB interface to the
+display, and I've seen some hangs occur when BRLTTY asks to disconnect
+the kernel driver. If you have this problem you should make sure the
+kernel module called brlvger is not inserted into your kernel. One simple
+way to prevent that module from auto-loading is to rename the module file
+so it isn't found.
+cd /lib/modules/`uname -r`/kernel/drivers/usb/
+mv brlvger.o brlvger.o.hold
+If lsmod shows the brlvger module as already loaded then do
+rmmod brlvger
+
+The old kernel driver will soon be pulled out of 2.6.x kernels.
+
+BRLTTY currently assumes the default braille device to be a serial port,
+so you must tell it that it is in fact USB.
+Either provide the "--with-braille-device=usb:" option when running the
+BRLTTY top-level ./configure command, or use the braille-device parameter
+in your BRLTTY configuration file (/etc/brltty.conf):
+braille-device usb:
+
+If you actually have more than one Voyager display connected at the same
+time, you can also specify the serial number of the device that you want
+to use.
+
+This driver knows a number of driver parameters which you can pass via
+the braille-parameters clause in your BRLTTY configuration file
+(/etc/brltty.conf) or via brltty's -B (--braille-parameters=) command
+line option.
+
+InputMode: This parameter specifies whether or not the eight top keys
+function as a braille keyboard. When set to "no" (the default), top
+key combinations perform various navigational and operational
+functions. When set to yes", they function as an 8-dot braille
+keyboard. If B, C, or B+C is pressed along with any top key
+combination then it's as if this parameter were set to "no".
+
+StatusCells: This parameter specifies how many cells are to be 
+reserved
+for status indicators. It may be an integer with an absolute value no
+greater than half the size of the display. If it's positive then the
+status cells are on the left, if it's negative then they're on the
+right, and if it's 0 then there are no status cells. The default is 3,
+i.e. three status cells on the left. If there's at least one status cell
+then an additional blank cell is reserved between the status and the
+text cells.
+
+There are only a handful of BRLTTY users, so if you are trying out this
+driver, please drop us a note, even if you have no problems!
+
+Note to BRLTTY developers: This is my first attempt at combining the key
+binding definitions with the help file text in one place, through
+annotations in the braille.c file. If you change the key bindings,
+currently you need python installed to be able to rebuild the help
+files.

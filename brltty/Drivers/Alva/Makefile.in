@@ -1,0 +1,40 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+include $(BLD_TOP)config.mk
+
+###############################################################################
+#
+# Makefile for BRLTTY Alva driver
+# All variables are defined in the main Makefile...
+#
+###############################################################################
+
+DRIVER_CODE = al
+DRIVER_NAME = Alva
+BRAILLE_MODELS = ABT(3nn), Delphi(4nn), Satellite(5nn)
+SPEECH_MODELS = Delphi(4nn)
+HELP_DEPS = $(HELP_TEXT)
+
+include $(SRC_TOP)driver.mk
+
+braille.$O:
+	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+
+speech.$O:
+	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
+

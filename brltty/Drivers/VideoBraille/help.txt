@@ -1,0 +1,26 @@
+BRLTTY Help Screen (VideoBraille)
+
+Movement keys:
+    Up  Up one line
+    Left+Up  Top left corner of screen
+    Left  Go left one window
+    Down  Down one line
+    Right+Down  Bottom left corner of screen
+    Right  Go right one window
+    Edit  Go back to cursor
+    Left+Curs  One character left
+    Right+Edit  One character right
+
+Other functions:
+    Curs  Toggle cursor tracking
+    Menu  Enter preferences menu
+    Attr  Toggle attributes
+    Menu+Curs  View info
+    Attr+Down  View help
+
+Cut & Paste
+    Small button+Edit  Mark beginning of block
+    Small button+Menu  Mark the end of block
+    Attr+Menu  Paste
+Warning: small button stands for one of the 40 small buttons on the display.
+Warning: don't press Edit or Menu before the small button.

@@ -1,0 +1,57 @@
+BRLTTY Help Screen for Albatross models
+
+Front Keys:
+Top     go to top-left corner
+Bottom  go to bottom-left corner
+Back    go back (undo cursor tracking motion)
+Cursor  go to cursor
+Up      go up one line
+Down    go down one line
+Left    go left one window
+Right   go right one window
+
+Top Keys:
+Hlp    enter/leave help screen
+Lrn    enter/leave learn mode
+Paste  paste from cut buffer
+Track  toggle cursor tracking mode
+Prf    enter/leave preferences menu
+Stt    enter/leave status display
+PrU    go up to previous command prompt
+PrD    go down to next command prompt
+DifUp  go up to nearest line with different content
+DifDn  go down to nearest line with different content
+PgU    go up to last line of previous paragraph
+PgD    go down to first line of next paragraph
+RF1    first alternate routing key function
+RF2    second alternate routing key function
+RF3    third alternate routing key function
+RF4    fourth alternate routing key function
+
+Lower Routing Keys:
+RF0       bring cursor to character
+RF1  ctn  start new cut buffer
+RF2  cta  append to current cut buffer
+RF3  ctl  linear cut
+RF4  ctr  rectangular cut
+
+Upper Routing Keys:
+RF0       describe character
+RF1  mwp  mark current window position
+RF2  gwp  go to previously marked window position
+RF3  iup  go up to nearest line without greater indent
+RF4  idn  go down to nearest line without greater indent
+
+Left Attribute Keys:
+   upper: toggle screen freeze mode
+   lower: toggle text/attributes display mode
+Right Attribute Keys:
+   upper: go up to nearest line with different highlighting
+   lower: go down to nearest line with different highlighting
+
+Side Wheels:
+   backward: move up by lines
+   forward:  move down by lines
+Front Wheels:
+   left:     move left by characters
+   right:    move right by characters

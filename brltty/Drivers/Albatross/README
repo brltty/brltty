@@ -1,0 +1,30 @@
+This directory contains the BRLTTY driver for the Albatross
+[http://www.tivomatic.fi/html/albatross.html] braille display from Tivomatic
+[http://www.tivomatic.fi/]. It has been implemented, and is being maintained,
+by Dave Mielke <dave@mielke.cc> and Sami Haahtinen <ressu@ressukka.net>.
+
+
+The keys on the front of the display are named as depicted below within the
+documentation for this driver. See the help file for what they do.
+
+   +---+ +---+ +------+ +-----------+      +-----------+ +------+ +---+ +---+
+   |Top| |Bak| |  Up  | |           |      |           | |  Up  | |Bak| |Top|
+   +---+ +---+ +------+ |           |      |           | +------+ +---+ +---+
+                        |   Left    |      |   Right   |
+   +---+ +---+ +------+ |           |      |           | +------+ +---+ +---+
+   |Bot| |Csr| | Down | |           |      |           | | Down | |Csr| |Bot|
+   +---+ +---+ +------+ +-----------+      +-----------+ +------+ +---+ +---+
+
+
+The keys on the top of the display are named as depicted below within the
+documentation for this driver. See the help file for what they do.
+
+   +---+       +-------+       +---+        +---+       +-------+       +---+
+   |Hlp| +---+ | Paste | +---+ |Prf|        |PrU| +---+ | DifUp | +---+ |PgU|
+   +---+ |mwp| +-------+ |gwp| +---+        +---+ |iup| +-------+ |idn| +---+
+         |RF1|           |RF2|                    |RF3|           |RF4|
+   +---+ |ctn| +-------+ |cta| +---+        +---+ |ctl| +-------+ |ctr| +---+
+   |Lrn| +---+ | Track | +---+ |Stt|        |PrD| +---+ | DifDn | +---+ |PgD|
+   +---+       +-------+       +---+        +---+       +-------+       +---+
+
+

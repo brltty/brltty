@@ -1,0 +1,99 @@
+		  Managing BRLTTY with Stow utility
+		 -+===============================+-
+
+		Written by B. Daix (Wed Sep 10, 2003)
+
+
+Purpose
+=======
+
+BRLTTY is a critical software for those who rely on it to access their
+box : upgrading such a tool can't be done without paying some special
+attention.
+
+What will be explained here is how to keep /usr/local/bin/brltty up to
+date without removing old versions.  We decide to put BRLTTY in
+/usr/local as we don't want to break filesystem root distribution
+(i.e. /bin/brltty should only come from a packaged version of BRLTTY
+for your distribution : if you install software in respect with this
+rule, you'd install it in /usr/local).  Also, we want not to have to
+keep source files to be able to remove things cleanly : after
+installing a software, you shouldn't have to rely on a by-software
+uninstallation suite.
+
+You should install Stow to be able to run it and to find more details
+about it.  It's a common utility : "apt-get install stow" for Debian, and
+probably equivalents for other distributions.
+
+
+Why Stow can help
+=================
+
+Stow allows to manage files like if they were packaged, by creating
+symlinks from by-directory grouped sets of files instead of copying
+them directly.
+
+We recommend to attentively read Stow Info files, to realize what it
+can do, how, and specially why it is so useful when you have to manage
+personally compiled software you rely on.
+
+
+The procedure
+=============
+
+So we want to run a BRLTTY version, taken from a set of personally
+compiled ones, and safely keep all of them around.  Current working
+release will be run from /usr/local root, while all releases files
+will be kept in the "safe place", the "Stow directory"
+/usr/local/stow/. For example, releases (bins/configs/libs/mans, not
+source trees) will be stored there like this :
+/usr/local/stow/brltty-3.2/, /usr/local/stow/brltty-3.3-with-api/,
+/usr/local/stow/brltty-3.3/, and so on.
+
+Compiling/installing BRLTTY for Stow file management
+
+We have to use "configure" flags to indicate we want BRLTTY to be run
+From /usr/local root, and installed in /usr/local/stow/brltty-3.2/
+root : Stow will do symlinks for us then.  The distinction between
+execution root and installation root is critical (c.f. Stow Info) :
+"./configure --with-execute-root=/usr/local
+--with-install-root=/usr/local/stow/brltty-3.2 [...]". You may add
+whatever flags then, except those which change directories as we
+already managed this.
+
+Then, simply, "make" and "make install" : "ls
+/usr/local/stow/brltty-3.2/" should show you all what would have been
+put in /usr/local if we haven't managed files with Stow.
+
+Reproduce this for each version you want to install, for example, we
+built a brltty-3.3-with-api directory by applying above principles and
+adding dedicated flag for enabling API to "configure" command line.
+We did the same for a standard brltty-3.3 too, and so on, all stored
+in /usr/local/stow/. As you see, we cleanly separate things : one
+directory per version on one hand, building vs. using on the other.
+Testing is now far lighter.
+
+Managing safely kept versions with Stow
+
+Before asking for Stow to create symlinks, we have to be sure we won't
+get any conflicts, i.e., we haven't already asked for Stow to create
+symlinks on the same software without removing them first, or we don't
+forget we have already installed BRLTTY directly.  "ls
+/usr/local/{bin,sbin}" should be enough to see if we have to clean
+things up before going any further. Note we'll see how to use Stow to
+remove created symlinks just after explaining how to ask for it to
+create them (we hope you read from up to below...).
+
+"cd /usr/local/stow ; stow brltty-3.2" will create the symlinks, in
+parent dir (i.e. "ln -s brltty-3.2/bin ../bin" if ../bin didn't exist,
+"ln -s brltty-3.2/bin/brltty ../bin/brltty" otherwise, and so on :
+c.f. Stow Info for more details).
+
+Now, running /usr/local/bin/brltty will work perfectly, looking for
+its config files in /usr/local/etc/brltty/" and so on, even if it's
+all symlinks : as if BRLTTY-3.2 was installed there.
+
+When you want to switch to another version, you simply have to ask for
+Stow to remove symlinks it created : "cd /usr/local/stow/ ; stow -D
+brltty-3.2" (if current release points to this version) and then "stow
+brltty-3.3-with-api". Doesn't it taste powerful ?!

@@ -1,0 +1,385 @@
+Name: @PACKAGE_NAME@
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+Vendor: The BRLTTY Team
+Packager: Dave Mielke <dave@mielke.cc>
+URL: http://mielke.cc/brltty/
+Source: http://mielke.cc/brltty/releases/%{name}-%{version}.tar.gz
+
+BuildRequires: autoconf >= 2.53
+BuildRequires: make
+BuildRequires: gcc
+BuildRequires: /bin/sh
+BuildRequires: /bin/ln
+BuildRequires: /usr/bin/ld
+BuildRequires: /sbin/ldconfig
+BuildRequires: /usr/bin/ranlib
+BuildRequires: /usr/bin/ar
+BuildRequires: /usr/bin/awk
+BuildRequires: /usr/bin/bison
+BuildRequires: /usr/bin/install
+BuildRequires: glibc-devel
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
+%define _bindir /bin
+%define _sbindir /sbin
+%define _libdir /lib
+%define _sysconfdir /etc
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: /bin/sh
+
+Summary: Braille display driver for Linux/Unix.
+%description
+BRLTTY is a background process (daemon) which provides access to the
+Linux/Unix console (when in text mode) for a blind person using a
+refreshable braille display.  It drives the braille display, and
+provides complete screen review functionality.  Some speech capability
+has also been incorporated.
+
+Install this package if you use a refreshable braille display.
+
+%package -n brlapi
+Version: @BRLAPI_RELEASE@
+Group: Applications/System
+License: LGPL
+
+AutoProv: 1
+
+AutoReq: 1
+
+Summary: Appliation Programming Interface for BRLTTY.
+%description -n brlapi
+This package provides the run-time support for the Application
+Programming Interface to BRLTTY.
+
+Install this package if you have an application which directly accesses
+a refreshable braille display.
+
+%package -n brlapi-devel
+Version: @BRLAPI_RELEASE@
+Group: Development/System
+License: LGPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: brlapi = @BRLAPI_RELEASE@
+
+Summary: Headers, static archive, and documentation for BrlAPI.
+%description -n brlapi-devel
+This package provides the header files, static archive, shared object
+linker reference, and reference documentation for BrlAPI (the
+Application Programming Interface to BRLTTY).  It enables the
+implementation of applications which take direct advantage of a
+refreshable braille display in order to present information in ways
+which are more appropriate for blind users and/or to provide user
+interfaces which are more specifically atuned to their needs.
+
+Install this package if you're developing or maintaining an application
+which directly accesses a refreshable braille display.
+
+%prep
+# %setup -n %{name}-%{version}
+%setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
+
+%build
+%configure --with-install-root="${RPM_BUILD_ROOT}" --without-flite --without-mikropuhe --without-theta --without-viavoice --without-curses --without-x
+make
+
+directory="doc"
+mkdir -p "${directory}"
+for file in `find . \( -path "./${directory}" -o -path ./Documents \) -prune -o \( -name 'README*' -o -name '*.patch' -o -name '*.txt' -o -name '*.html' -o -name '*.sgml' -o \( -path "./Bootdisks/*" -type f -perm +ugo=x \) \) -print`
+do
+   mkdir -p "${directory}/${file%/*}"
+   cp -rp "${file}" "${directory}/${file}"
+done
+
+%install
+make install
+install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
+
+%clean
+rm -fr "${RPM_BUILD_ROOT}"
+
+%files
+%defattr(-,root,root)
+%{_bindir}/brltty
+%{_bindir}/brltty-*
+%{_libdir}/brltty
+%{_sysconfdir}/brltty
+%doc %{_mandir}/man1/*
+%doc Documents/Manual.sgml Documents/Manual.txt Documents/Manual-HTML
+%doc COPYING
+%doc Documents/ChangeLog Documents/TODO
+%doc doc/*
+%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
+
+%files -n brlapi
+%defattr(-,root,root)
+%{_libdir}/libbrlapi.so.*
+%doc Documents/BrlAPI.sgml Documents/BrlAPI.txt Documents/BrlAPI-HTML
+%doc Documents/README.Gnopernicus
+
+%files -n brlapi-devel
+%defattr(-,root,root)
+%{_libdir}/libbrlapi.a
+%{_libdir}/libbrlapi.so
+%{_includedir}/brltty
+%doc %{_mandir}/man3/*
+%doc Documents/BrlAPIref-HTML
+
+%pre
+# The pre-install scriptlet.
+
+# If a configuration file already exists then rpm installs the new one as
+# <path>.rpmnew. If this is done then the .rpmnew file is overwritten if it
+# already exists.
+
+# There's no explicit way to tell if a configuration file has been installed
+# as itself or as a .rpmnew file. The way we'll figure it out, therefore, is by
+# erasing the .rpmnew file now so that we can see if it gets created later. 
+rm -f "%{_sysconfdir}/brltty.conf.rpmnew"
+
+%post
+# The post-install scriptlet.
+
+# If BRLTTY's boot parameter has been specified then update the just installed
+# configuration file template to reflect the options supplied thereby.
+
+# First, we need to determine which file to update. If there's a .rpmnew file
+# then update it since a previous configuration file must already have existed.
+file="%{_sysconfdir}/brltty.conf"
+new="${file}.rpmnew"
+[ -f "${new}" ] && file="${new}"
+
+# Update the configuration file template via the Bootdisks/bp2cf script.
+# Include it right within this scriptlet so that it needn't be installed.
+# Imbed it within a subshell to ensure that it won't impact this scriptlet.
+(
+   # First, set bp2cf's command line arguments.
+   set -- -u -f "${file}"
+
+   # Now run it by simply imbedding it right here.
+   @configuration_file_customization_script@
+)
+
+%changelog
+* Mon Oct 11 2004 Dave Mielke <dave@mielke.cc> 3.6
++  Add support for old VisioBraille input flow control (PROM version < 4).
++  Add rate setting to the ExternalSpeech driver.
++  Remove type-punning warnings from the Mikropuhe driver.
++  Add support for multi-byte character sets to the TTY driver.
++  Remove the need for -t identity from the TTY and XWindow drivers.
++  Correctly determine the optionality of the configuration file.
++  Always change the menu setting even if a routing key doesn't evaluate to a new one.
++  PCM ALSA fixes.
++  Add xbrlapi (not installed yet).
++  Update our copy of Gnopernicus's ttybrl.c.
++  Alva workaround for bug exhibited by at least one ABT340:
+      A bogus routing key press event is generated for routing keys 25-29
+      when at least two front keys are already pressed.
++  Papenmeier driver updates:
+      The "query switches" command should show "both" rather than "?".
+      Add bindings for bar motion with the right front key pressed.
+      Resynchronize the switches and keys whenever the bar is moved.
++  API updates:
+      Add proper support for brl_writeVisual().
+      Correct a bug which occurs when the display is only partially updated.
+      Add a missing brlapi_libcerrno assignment to the client code.
+      Add support for Unix domain sockets.
++  Build updates:
+      Make clean shouldn't remove the text copy of the BrailleLite help files.
+      The text copy of the Voyager help files should be created in the source tree.
++  Documentation updates:
+      Bring the documentation up-to-date.
+      Merge the documentation of reciprocal commands, e.g. LNUP/LNDN.
+      Fix e-mail addresses and some examples in BrlAPI's manual.
+      Remove old screen patches.
++  Code updates:
+      Move a few routines to more logical places.
+      Share the common code for moving up/down to a line with different content.
+      Reindent the rest of config.c and main.c according to conventions.
+      Use our own delay mechanism rather than sleep().
+      Redo splitString() to allow for the easy adding of options.
+      Split command line option processing into a separate routine.
++  Fixes to the handling of counter (extendable flag) options:
+      Warn if the same option is specified more than once in the configuration file.
+      Allow a non-negative integer for non-command-line specifications.
+* Sat Sep 4 2004 Dave Mielke <dave@mielke.cc> 3.6pre3
+-  Restarting drivers caused strange corruptions.
+-  Eliminate some compile warnings when many features are disabled.
+-  Make the entire options mechanism be wholly table driven.
+-  Specifying an invalid option yields a bogus excess parameter error.
+-  Automatically generate long options to set flags to 0.
+-  Abbreviation tests via strncasecmp() don't require an extra length check.
+-  findSharedSymbol() needs to accept the address of any kind of pointer.
+-  Go back to OSS being the default on Linux even if ALSA is available.
+-  Remove the link dependency on libasound from the PCM/MIDI ALSA code.
+-  Fix an Alva driver buffer indexing overflow.
+-  Prevent the ClioNoteBraille (EuroBraille driver) from reidentifying after each frame is sent.
+-  Add a HOWTO for reading Chinese big5.
+-  More Nemeth Code changes to the big5 contraction table.
+-  Move the preferences files from the data directory to the configuration directory to prevent loss.
+-  Implicitly disable autospeak during speech tracking.
+-  Protect serial port draining from system call interruptions.
+-  Initial changes to support QNX.
+* Sat Aug 21 2004 Dave Mielke <dave@mielke.cc> 3.6pre2
+-  Default PCM and/or MIDI support on Linux to ALSA if that seems to make sense.
+-  Add the -p [--pcm-device=] and the -m [--midi-device=] options.
+-  splitString() can now optionally return the count.
+-  Move the serial parity/flow constants to a common place (iodefs.h).
+-  Move low-level I/O routines from misc.[ch] to iomisc.[ch].
+-  Convert serial devices from file descriptors (ints) to an opaque type.
+-  drainBrailleOutput() should allow for the driver to have rounded down.
+-  Wait for all output to the braille display to be drained before closing the driver.
+-  Replace the Display= and Term= parameters of the XWindow driver with XtParms=.
+-  EuroBraille driver fix for entering/leaving PC mode.
+-  HandyTech driver changes:
+      Simplify the bluetooth read routine.
+      Add the InputMode= parameter.
+-  General driver changes:
+      Clean up include lsits.
+      Give standardized names to external symbols.
+-  Autodetection changes:
+      Change the short form of the --version option to -V.
+      Change the -v option to --verify.
+      -b and -s both accept a comma-delimited list of drivers.
+      -s accepts "auto".
+      Only autodetect if more than one driver or device is specified.
+      Restarting a braille/speech driver re-autodetects.
+      Don't enable flow control until after successfully detecting the display.
+      Improve the order of the logs.
+      Remove the "driver giving up" warnings.
+-  MIDI ALSA changes:
+      Ensure that "Midi" occurs in every routine name.
+      Simplify duration scheduling.
+      Support pauses between notes.
+-  API changes:
+      Move the multiple settings of the root tty into setCurrentRootTty().
+      Fix problems which occur when the null screen driver is being used.
+* Thu Aug 12 2004 Dave Mielke <dave@mielke.cc> 3.6pre1
+-  Clarify the copyright statement in the top-level README.
+-  Reorganize the startup logs.
+-  Add support for braille display autodetection (-b auto).
+-  Allow more than one braille device to be specified.
+-  Access the driver directly if the API fails to start.
+-  Convert PCM and MIDI devices from file descriptors into opaque types.
+-  Add ALSa support for PCM and MIDI devices.
+-  Introduce common serial device access routines.
+-  A va_list (stdarg) must be reset before being reused on some platforms.
+-  Use the type ScreenKey rather than unsigned short for screen key insertion.
+-  Fix the handling of control characters when using scan codes.
+-  Move the handling of meta character input entirely into the screen driver.
+-  Implement Linux-specific AT2 support.
+-  Failure to load the specified text table results in an uninitialized reverse text table.
+-  Add an initial timeout parameter to readChunk().
+-  Implement changeOpenFlags(), setOpenFlags(), and setBlockingIo().
+-  Convert learn mode to use a better timeout mechanism.
+-  Split describeCommand() out of learnMode().
+-  The vertical window shift should be the number of lines on the display if greater than 1.
+-  Add the TTY braille driver.
+-  Add the XWindow braille driver.
+-  Add ASCII characters 0X60,0X7B-0X7F to text.brf.tbl.
+-  Support \s (space) for translation tables.
+-  Update the Spanish text table to the O.N.C.E. standard.
+-  Updated big5 contraction table.
+-  Support FreeBSD installations which don't have speaker support.
+-  Add support for NetBSD.
+-  Support compilation on OSF.
+-  Add compile-time warnings for features which aren't available.
+-  Save our latest copy of Gnopernicus's brltty driver (ttybrl.c).
+-  API changes:
+      Update version to 0.3.0.
+      Increment protocol number.
+      Change the license for all client-side files to the LGPL.
+      Prefix definitions in brldefs.h with BRL_.
+      Remove from brldefs.h what shouldn't be in there.
+      Split protocol-specific definitions from api.h out into api_protocol.h.
+      Added two packet types for (un)ignoring key sets.
+      Renamed brlapi_(un)ignoreKeys to brlapi_(un)ignoreKeyRange.
+      Added the brlapi_(un)ifnoreKeySet functions.
+      For (un)ignore, only consider the blk and arg fields of a command.
+      Protocol enhancements (some packets removed, certain operations faster).
+      Error management is now partly asynchronous.
+      Server partially rewritten to use select() system call.
+      Now only two threads: one for brltty, one for incoming connections.
+      Default client error handler with capability to define another one.
+      Some functions renamed.
+      apitest added.
+      Don't look at $WINDOW to determine the tty (yet).
+      Add support for drivers with brl_writeVisual().
+      Implement recursive windows.
+      Deprecate brlapi_readCommand() and replace it with brlapi_readKey().
+      Replace uses of uint32_t with unsigned int where possible.
+      Rename BRLAPI_EXTWRITESTRUCT_INITIALIZER to BRLAPI_WRITESTRUCT_INITIALIZER.
+-  USB fixes:
+      Allow usbBeginInput() to be called more than once on the same endpoint.
+      Set the configuration before claiming the interface.
+      Configuration descriptors must be read by number rather than by value.
+      usbCancelRequest() shouldn't deallocate a completed request.
+      BSD systems only allow short transfer to be set for input endpoints.
+      OpenBSD endpoint read timeouts should be silent and non-fatal.
+-  HandyTech driver changes:
+      Remove the no longer needed (read|write)Bytes() routines.
+      Turn brl_(read|write)Packet() into standalone routines for later enhancement.
+      Add bluetooth support.
+      Add support for keyboard input.
+-  Papenmeier driver changes:
+      Change some BrailleX 2D Screen key bindings.
+      Implement simulated EL switches for those models which don't have them.
+      Simplify the EL command generation macros.
+      Reduce the volume of output logging.
+      Log the baud at which the driver is probing.
+      Make protocol I input packet logging more standard.
+      Fix the count for copying generic status cell data from the core-supplied buffer.
+      Remove unused definitions from the header.
+      Move protocol I definitions from the header into the protocol I section of the implementation.
+      Complete the implementation of protocol II.
+      Support the EL 40/66/80 Slimline models.
+      Remove out-of-date debugging utilities.
+-  TSI driver changes:
+      Remove CTS checking.
+      Remove the wait-for-connect loop.
+-  VisioBraille driver changes:
+      Prefix public constants with BRL_VS.
+      Reindent the source to core conventions.
+      Don't remember display content until successfully written.
+-  Voyager driver changes:
+      Fix an upper bound error in brl_writeWindow().
+      Remove the write retry loops.
+      Simplify the control request retry algorithm.
+      Act on first key release rather than after all keys are released.
+      Add support for the part232 serial interface.
+      Remove knowledge of USB string encoding.
+      Rename the BrlInput= parameter to InputMode=.
+      Change the default for InputMode= to no.
+      Change InputMode=no to mean don't require chording.
+      Add the StatusCells= parameter.
+      Simplify the help generation macros.
+      Reorganize the help template.
+-  Build changes:
+      Rename --disable-usb to --disable-usb-support.
+      Add --disable-bluetooth-support.
+      Rename --disable-...-tunes to --disable-...-support.
+      Add --with-curses=.
+      Add --with-xt-toolkit=.
+      Reorder the arguments to BRLTTY_ARG_ENABLE/DISABLE.
+      Detect if Linux-specific AT2 support can be used.
+      Check for iconv.h.
+      Check for <sys/select.h>.
+      Detect if __attribute__((format(printf))) is supported.
+      Detect if __attribute__((packed)) is supported.
+      Detect if __attribute__((unused)) is supported.
+      Detect if the __alignof__ operator is supported.
+      Abort the configure if ld flags aren't known.
+      Completely rewrite install-sh to support more than one source operand.
+      Hard-code "ar" in the make file since HP-UX doesn't set "$(AR)".
+      The FestivalLite driver needs -lm.
+      Don't build the API or the Mikropuhe driver if pthreads isn't available.
+

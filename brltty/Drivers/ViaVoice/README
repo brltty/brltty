@@ -1,0 +1,42 @@
+This directory contains the BRLTTY speech synthesizer driver for the ViaVoice
+[http://www.ibm.com/software/speech/dev/ttssdk_linux.html] text to speech
+engine from International Business Machines (IBM) [http://www.ibm.com]. It was
+implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
+
+BRLTTY's configure script automatically includes this driver if ViaVoice's
+software development kit has been installed. The default is to check the
+directories /usr, /usr/local, and /opt/viavoice. The actual location can be
+explicitly specified via --with-viavoice.
+
+This driver can be either dynamically loaded (at run time) or built directly
+into a dynamically linked BRLTTY binary (via --with-speech-driver), but it
+cannot be built into a statically linked BRLTTY binary (via
+--enable-standalone-programs) because ViaVoice's run time kit doesn't contain a
+static archive. 
+
+The path to the ini file is determined via the following huristic. If the
+driver parameter "inifile" is set, then that value is used. If it isn't, but if
+the environment variable "ECIINI" is set, then that value is used. If neither
+is set, then the default (/usr/lib/ViaVoiceTTS/eci.ini) is used.
+
+This driver recognizes the following additional parameters (see the file
+tts.pdf in the ViaVoice documentation directory for details):
+
+   Parameter         Settings
+   samplerate        8000, 11025, 22050
+   abbreviationmode  on, off
+   numbermode        word, year
+   synthmode         sentence, none
+   textmode          talk, spell, literal, phonetic
+   language          AmericanEnglish, BritishEnglish, CastilianSpanish,
+			MexicanSpanish, StandardFrench, CanadianFrench,
+			StandardGerman, StandardItalian,
+			SimplifiedChinese, BrazilianPortuguese
+   voice             AdultMale, AdultFemale, Child, ElderlyFemale,
+                        ElderlyMale
+   vocaltract        male, female
+   breathiness       0-100
+   headsize          0-100
+   pitchbaseline     0-100
+   pitchfluctuation  0-100
+   roughness         0-100

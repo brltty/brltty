@@ -1,0 +1,54 @@
+README file for the EcoBraille driver
+
+Version 1.01 (March 1, 2000)
+
+
+Copyright
+=========
+
+This driver is copyrighted under the GNU Public License.  It is free 
+software.  See the file '../COPYING' for more details.  Feel free to send 
+your comments and to report bugs to me at ofa@once.es
+
+Can you write me in Spanish, catalonian or english.
+
+Can get the latest version in ftp://ftp.once.es/pub/accessibility
+
+
+Supported Hardware
+==================
+
+This driver is supposed to work with any spanish ECO braille display from the 
+ECO xx series, including the ECO 20, the ECO 40 and the ECO 80.
+
+If you want any information about ECO and its products, you can look
+at http://www.once.es/.
+
+Port Settings
+-------------
+In the file 'Makefile' located in the BRLTTY home directory, there is a 
+line where you can define the default (i.e. when not given on the command 
+line) serial port device (such as /dev/ttyS0).  The baudrate setup is 
+however defined in the braille.h file.
+
+By default, the ECO communicates at 19200 Baud. 
+
+
+Running the Driver
+==================
+
+To compile and run BRLTTY, please refer to the documentation about 
+BRLTTY itself.  One note though: when BRLTTY starts, it will display 
+on the screen some copyright stuff, current configuration (model and 
+firmware version setup) and the serial device in use.  That information 
+may be useful if nothing happens with the braille terminal.
+
+You may run BRLTTY even if no ECO is plugged to the appropriate serial
+port.  BRLTTY will wait for it.
+
+You need power on the eco braille line before to use.
+
+
+Oscar Fernandez
+ofa@once.es
+January,29 1999

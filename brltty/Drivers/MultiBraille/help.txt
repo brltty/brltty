@@ -1,0 +1,55 @@
+BRLTTY Help Screen (MultiBraille)
+
+Movement keys:
+321          top of screen
+    456      bottom of screen
+ 21          up several lines
+    45       down several lines
+  1     (B)  up one line
+    4   (D)  down one line
+3     6 (CC) cursor position
+32           beginning of line
+     56      end of line
+3 1          left one character
+    4 6      right one character
+ 2  4 6      left one half window
+3 1  5       right one half window
+3       (A)  left one full window
+      6 (E)  right one full window
+
+Other functions:
+  1  56      speak current line
+  1   6       mute speech
+ 21 45       route cursor to start of window
+32    6      cut start
+3    56      cut end
+321 4        paste
+     5       cursor visibility on/off
+  1 4   (C)  cursor tracking on/off
+ 2           cursor blink on/off
+  1 4 6      capital letter blink on/off
+ 2   5       block/underline cursor
+32   5       six/eight dot braille text
+ 2  456      sliding window on/off
+ 2  45       skip identical lines on/off
+32  4        audio signals on/off
+3 1 4        attribute display on/off
+ 21 4        freeze mode on/off
+ 21  5       help display on/off
+3   4        status mode on/off
+
+Preferences control:
+321 456      save preferences
+3 1 4 6      enter preferences menu
+321  5       restore preferences
+
+Status information (cell 5):
+Dot Number   Dot Present Means
+    1        The screen is frozen
+    2        Attribute display is on
+    3        Audio signals are on
+    4        The cursor is visible
+    5        Cursor shape is block
+    6        Cursor blink is on
+    7        Cursor tracking is on
+    8        Sliding window is on

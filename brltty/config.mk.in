@@ -1,0 +1,168 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
+PGM_DIR = Programs
+DOC_DIR = Documents
+TBL_DIR = BrailleTables
+CTB_DIR = ContractionTables
+DRV_DIR = lib
+DAT_DIR = data
+
+CROSSCOMP = @compiler_prefix@
+INSTALL_ROOT = @install_root@
+EXECUTE_ROOT = @execute_root@
+
+EXTRACFLAGS = -I$(BLD_DIR) -I$(BLD_TOP) -I$(SRC_DIR) -I$(SRC_TOP) @SYSCFLAGS@ @DEFS@
+YCFLAGS = @YCFLAGS@
+
+HOSTCC = @CC@
+CC = $(CROSSCOMP)$(HOSTCC)
+COMMONCFLAGS = @CFLAGS@ $(EXTRACFLAGS)
+HOSTCFLAGS = $(COMMONCFLAGS)
+CFLAGS = $(COMMONCFLAGS)
+LIBCFLAGS = $(CFLAGS) @LIBCFLAGS@
+
+HOSTCXX = @CXX@
+CXX = $(CROSSCOMP)$(HOSTCXX)
+COMMONCXXFLAGS = @CXXFLAGS@ $(EXTRACFLAGS)
+HOSTCXXFLAGS = $(COMMONCXXFLAGS)
+CXXFLAGS = $(COMMONCXXFLAGS)
+LIBCXXFLAGS = $(CXXFLAGS) @LIBCXXFLAGS@
+
+COMMONLDFLAGS = @LDFLAGS@
+HOSTLDFLAGS = $(COMMONLDFLAGS)
+LDFLAGS = $(COMMONLDFLAGS)
+LDLIBS = @LIBS@
+
+LD = $(CROSSCOMP)@LD@
+
+HOSTMKOBJ = @MKOBJ@
+MKOBJ = $(CROSSCOMP)$(HOSTMKOBJ)
+
+HOSTMKLIB = @MKLIB@
+MKLIB = $(CROSSCOMP)$(HOSTMKLIB)
+
+HOSTCONFLIBDIR = @CONFLIBDIR@
+CONFLIBDIR = $(CROSSCOMP)$(HOSTCONFLIBDIR)
+
+HOSTRANLIB = @RANLIB@
+RANLIB = $(CROSSCOMP)$(HOSTRANLIB)
+
+YACC = @YACC@
+
+AWK = @AWK@
+
+SYMLINK = @LN_S@
+
+X_CFLAGS = @X_CFLAGS@
+X_LIBS = @X_LIBS@
+X_PRE_LIBS = @X_PRE_LIBS@
+X_EXTRA_LIBS = @X_EXTRA_LIBS@
+
+CURSES_LIB = @brltty_package_curses@
+XT_TOOLKIT_LIB = @brltty_package_xt_toolkit@
+
+INSTALL = @INSTALL@
+INSTALL_SCRIPT = $(INSTALL)
+INSTALL_PROGRAM = $(INSTALL_SCRIPT) -s
+INSTALL_DATA = $(INSTALL) -m 644
+INSTALL_DIRECTORY = $(INSTALL) -d
+
+LIB_PFX = @library_prefix@
+LIB_NAME = @library_name@
+LIB_EXT = @library_extension@
+LIB_VAR = @libsearch_variable@
+ARC_EXT = @archive_extension@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+includedir = @includedir@
+oldincludedir = @oldincludedir@
+infodir = @infodir@
+mandir = @mandir@
+
+PROGRAM_DIRECTORY = @program_directory@
+LIBRARY_DIRECTORY = @library_directory@
+DATA_DIRECTORY = @data_directory@
+MANPAGE_DIRECTORY = @manpage_directory@
+INCLUDE_DIRECTORY = @include_directory@
+
+BRAILLE_DRIVER_CODES = @brltty_item_codes_braille@
+BRAILLE_DRIVER_OBJECTS = @braille_driver_objects@
+BRAILLE_DRIVER_LIBRARIES = @braille_driver_libraries@
+BRAILLE_HELP = @braille_help@
+BRAILLE_INTERNAL_DRIVER_CODES = @brltty_internal_codes_braille@
+BRAILLE_INTERNAL_DRIVER_NAMES = @brltty_internal_names_braille@
+BRAILLE_DRIVERS = @braille_drivers@
+BRAILLE_EXTERNAL_DRIVER_NAMES = @brltty_external_names_braille@
+
+SPEECH_DRIVER_CODES = @brltty_item_codes_speech@
+SPEECH_DRIVER_OBJECTS = @speech_driver_objects@
+SPEECH_DRIVER_LIBRARIES = @speech_driver_libraries@
+SPEECH_INTERNAL_DRIVER_CODES = @brltty_internal_codes_speech@
+SPEECH_INTERNAL_DRIVER_NAMES = @brltty_internal_names_speech@
+SPEECH_DRIVERS = @speech_drivers@
+SPEECH_EXTERNAL_DRIVER_NAMES = @brltty_external_names_speech@
+
+FLITE_ROOT = @flite_root@
+FLITE_LANGUAGE = @flite_language@
+FLITE_LEXICON = @flite_lexicon@
+FLITE_VOICE = @flite_voice@
+MIKROPUHE_ROOT = @mikropuhe_root@
+THETA_ROOT = @theta_root@
+VIAVOICE_ROOT = @viavoice_root@
+
+INSTALL_TEXT_TABLES = @install_text_tables@
+INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@
+INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
+INSTALL_DRIVERS = @install_drivers@
+CONFIGURED_DRIVERS = @brltty_driver_names@
+
+SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
+
+TEXT_TABLE = @text_table@
+ATTRIBUTES_TABLE = @attributes_table@
+
+SYSTEM_OBJECT = @system_object@
+USB_OBJECTS = @usb_objects@
+BLUETOOTH_OBJECTS = @bluetooth_objects@
+TBL_OBJECTS = @translation_table_objects@
+CTB_OBJECTS = @contracted_braille_objects@
+SPEECH_OBJECT = @speech_support_object@
+BEEPER_OBJECTS = @beeper_tune_objects@
+PCM_OBJECTS = @pcm_tune_objects@
+MIDI_OBJECTS = @midi_tune_objects@
+FM_OBJECTS = @fm_tune_objects@
+
+API_VERSION = @BRLAPI_VERSION@
+API_RELEASE = @BRLAPI_RELEASE@
+API_OBJECTS = @api_objects@
+API_KEYFILE = @api_keyfile@
+ALL_API = @all_api@
+INSTALL_API = @install_api@
+

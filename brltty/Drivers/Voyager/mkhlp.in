@@ -1,0 +1,44 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+SRC_DIR='@srcdir@'
+SRC_TOP='@top_srcdir@/'
+BLD_DIR='@builddir@'
+BLD_TOP='@top_builddir@'
+
+mkhlpfile()
+{
+   fno=$1
+   cols=$2
+   cells=$3
+   cells_m_1=`expr $cells - 1`
+
+   gcc -DHAVE_CONFIG_H -DGENHLP -I${SRC_DIR} -I${BLD_DIR} -I${SRC_TOP} -I${BLD_TOP} -E ${SRC_DIR}/braille.c |
+      ${SRC_DIR}/trhlp |
+      cat "${SRC_DIR}/help.template" - |
+      sort -t: -s -k 1,1 |
+      cut -d: -f 2- |
+      sed \
+         -e "s/<COLS>/${cols}/g" \
+         -e "s/<CELLS-1>/${cells_m_1}/g" \
+         -e "s/<CELLS>/${cells}/g" \
+         >${SRC_DIR}/help${fno}.txt
+}
+
+mkhlpfile 0 40 44
+mkhlpfile 1 66 70

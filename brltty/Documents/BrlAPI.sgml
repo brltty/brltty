@@ -1,0 +1,1242 @@
+<!doctype linuxdoc system>
+<article>
+<title>BrlAPI Reference manual
+<author>
+<name>Sébastien Hinderer <tt><htmlurl
+url="mailto:Sebastien.Hinderer@ens-lyon.org"
+name="&lt;Sebastien.Hinderer@ens-lyon.org&gt;"></tt><newline></name>
+<and>
+<name>Samuel Thibault <tt><htmlurl url="mailto:Samuel.Thibault@ens-lyon.org"
+name="&lt;Samuel.Thibault@ens-lyon.org&gt;"></tt><newline></name>
+</author>
+<date>V1.2, July 2004
+<abstract>
+This document describes how to use <tt>BrlAPI</tt>.
+</abstract>
+<toc>
+
+<!-- rappel des attributs:
+<bf/gras/ <em/mis en valeur/ <sf/sans serif/ <sl/slanted/ <tt/machine à écrire
+<it/italique
+-->
+
+<!---->
+<sect>Introduction
+<!---->
+<!-- Seb -->
+<!-- an introduction explaining very briefly what BrlAPI does, the
+vocabulary it uses, and how to read this documentation -->
+<p><em/BrlAPI/ is a service provided by the <em/brltty/ daemon.
+
+Its purpose is to allow programmers to write applications that take advantage
+of a braille terminal in order to deliver a blind user suitable information
+for his/her specific needs.
+
+While an application communicates with the braille terminal, everything
+<em/brltty/ sends to the braille terminal in the application's console is
+ignored, whereas each piece of data coming from the braille terminal is sent to
+the application, rather than to <em/brltty/.
+
+<sect1>Concepts
+
+<p> All throughout this manual, a few terms will be used which are either
+specific to braille terminals, or introduced because of <em/BrlAPI/. They are defined
+below. Taking a few minutes to go through this glossary will save a lot
+of time and questions later.
+
+<descrip>
+
+<tag/Authentication key/
+A file containing arbitrary data, that has to be sent to the server by the
+client, to prove it is allowed to establish a connection and then control
+the braille terminal.
+
+<tag/Braille display/
+The small screen on the braille terminal that is able to display braille text.
+
+<tag/Braille keyboard/
+The keyboard of the braille terminal.
+
+<tag/Braille terminal/
+A computer designed to display text in braille. In this case, the text is
+supposed to come from another computer running Linux or any other Unix system.
+
+<tag/Brltty/
+The background process that gives a blind person access to the Linux console
+thanks to a braille terminal or speech synthetizer.
+
+<tag/Client/
+An application designed to handle a braille terminal thanks to <em/BrlAPI/.
+
+<tag/Command/
+A code returned by the driver, indicating an action to do, for instance
+"go to previous line", "go to next line", etc.
+
+<tag/Driver/
+A library that has functions to communicate with a braille terminal.
+Basically, a driver has functions to open communication with the
+braille terminal, close the communication, write on the braille
+display, and read keypresses from the braille keyboard, plus some special
+functions that will be described in detail in this manual.
+
+<tag/Key/
+A code that is returned by the driver when a key is pressed. This is
+different from a command, because the command concept is driver-independent
+(all drivers use the same command codes - those defined by <em/brltty/), whereas
+codes used for returning keypresses may vary between drivers.
+
+<tag/BrlAPI's Library/
+This library helps clients to connect and use <em/BrlAPI/'s
+server thanks to a series of <tt/brlapi_/-prefixed functions.
+
+<tag/Packet/
+A sequence of bytes making up the atomic unit in communications, either between
+braille drivers and braille terminals or between the server and clients.
+
+<tag/Raw mode/
+Mode in which the client application exchanges packets with the driver.
+Normal operations like sending text for display or reading keypresses are
+not available in this mode. It lets applications take advantage of advanced
+functionalities of the driver's communication protocol.
+
+<tag/Server/
+The part of <em/brltty/ that controls incoming connections and communication
+between clients and braille drivers.
+
+</descrip>
+
+<sect1>How to read this manual
+
+<p>This manual is split in five parts.
+
+<descrip>
+
+<tag/General description/
+Describes more precisely what <em/BrlAPI/
+is and how it works in collaboration with <em/brltty/'s core, the braille driver
+and clients. In this part, a "connection-use-disconnection" scenario
+will be described step by step, explaining for each step what <em/BrlAPI/ does in
+reaction to client instructions. These explanations will take place at a
+user level.
+
+<tag/Installation and configuration/
+This part explains in detail how to install and configure the API. For
+instructions on how to install and configure <em/brltty/, please report to
+the <em/brltty/ documentation.
+
+<tag/Library description/
+This part describes how client applications
+can communicate with the server using the <em/BrlAPI/ library that
+comes with <em/brltty/. Each function will be briefly described,
+classified by categories. More exhaustive descriptions of every
+function are available in the corresponding online manual pages.
+
+<tag/Writing braille drivers/
+This part describes how the braille drivers included in <em/brltty/ should be
+written in order to take advantage of <em/BrlAPI/'s services.
+
+<tag/Protocol reference/
+This part describes in detail the communication
+protocol that is used to communicate between server and clients.
+
+</descrip>
+
+What should be read probably depends on what should be done by applications with
+<em/BrlAPI/.
+
+Reading chapters 2 and 3 is recommended, since they provide useful
+information and (hopefully) lead to a good understanding of <em/BrlAPI/,
+for an efficient use.
+
+Chapter 4 concerns writing applications that take advantage of
+braille terminals so as to bring specific (and more useful) information to 
+blind people.
+
+Chapter 5 is for braille driver implementation: either adding a braille driver
+to <em/brltty/ or modifying an existing one so that it can benefit from
+<em/BrlAPI/'s features, this chapter will be of interest, since it describes
+exactly what is needed to write a driver for <em/brltty/: the core
+of drivers interface for instance.
+
+Finally, Chapter 6 is for <em/not using/ the library, but using the <em/BrlAPI/
+server directly, when the library might not be sufficient: it describes the
+underlying protocol that will have to be used to do so.
+
+<!---->
+<sect>General description of <em/BrlAPI/
+<!---->
+<!-- a general documentation, which explains the issue and the design we
+chose to handle it -->
+
+<p>Here is explained what <em/BrlAPI/ is, and what it precisely does.
+These explanations should be simple enough to be accessible to every user.
+For a more technical review of <em/BrlAPI/'s functionalities, please see chapter
+4.
+
+<sect1>Historical notes.
+
+<p>Originally, <em/brltty/ was designed to give access to the Linux
+console to visually impaired people, through a braille terminal
+or a speech synthetizer. At that time, applications running in the
+console were not taking care of the presence of a braille
+terminal (most applications didn't even know what a braille
+terminal was).
+
+This situation where applications are not aware of the presence of a
+special device is elegant of course, since it lets use an
+unlimited number of applications which don't need to be specially
+designed for visually impaired people.
+
+However, it appeared that applications specially designed to take
+advantage of a braille terminal could be wanted, to
+provide the suitable information to blind users, for instance.
+The idea of <em/BrlAPI/ is to propose an efficient communication
+mechanism, to control the braille display, read keys from the
+braille keyboard, or to exchange data with the braille terminal at
+a lower level (e.g. to write file transfer protocols between
+braille terminals and Linux systems).
+
+<sect1>Why <em/BrlAPI/ is part of <em/brltty/.
+
+<p>Instead of rewriting a whole communication program from
+scratch, we chose to add communication
+mechanisms to <em/brltty/. This choice has two main justifications.
+
+On the one hand, integration to <em/brltty/ allows us to use the
+increasing number of drivers written for <em/brltty/, thus handling
+a large number of braille terminals without having to rewrite any
+piece of existing code.
+
+On the other hand, if an application chooses to send its own
+information to the braille display, and to process braille keys,
+<em/brltty/ has to be warned, so that it won't try to communicate
+with the braille terminal while the application already does.
+To make this synchronzation between <em/brltty/
+and client applications possible, it seemed easier to add the
+communication mechanisms to <em/brltty/'s core, instead of writing an
+external program providing them.
+
+<sect1>How it works.
+
+<p>We are now going to describe the steps an application should
+go through to get control of the braille terminal, and what
+happens on <em/brltty/'s side at each step. This step-by-step
+description will let us introduce more precisely some
+concepts that are useful for every <em/BrlAPI/ user.
+
+<sect2>Connection.
+
+<p>The first thing any client application has to do is to
+connect (in the Unix sense of the word) to <em/BrlAPI/ which is
+an mere application server. If this is not
+clear, the only thing to be remembered is that this
+step allows the client application to let the server know about its
+presence. At this stage, nothing special is done on <em/brltty/'s
+side.
+
+<sect2>Authentication.
+
+<p>Since Unix is designed to allow many users to work on the
+same machine, it's quite possible that there are more than one
+user accounts on the system. Most probably, one doesn't want
+any user with an account on the machine to be able to communicate
+with the braille terminal (just imagine what would happen if,
+while somebody was working with the braille terminal, another user
+connected to the system began to communicate with it,
+preventing the first one from doing his job...). That's why <em/BrlAPI/ has to
+provide a way to determine whether a user who established a
+connection is really allowed to communicate with the braille
+terminal. To achieve this, <em/BrlAPI/ requires that each
+application that wants to control a braille terminal sends an
+authentication key before doing anything else. The control of
+the braille terminal will only be possible for the client once
+it has sent the proper authentication key. What is called
+authentication key is in fact a Unix file containing data (it
+must be non-empty) on your system. All the things you have to do is to give
+read permissions on this file to users that are allowed to
+communicate with the braille terminal, and only to them. This
+way, only authorized users will have access to the
+authentication key and then be able to send it to <em/BrlAPI/.
+To see how to do that, please see chapter 3.
+
+At the end of this step, the user is authorized to take
+control of the braille terminal. On <em/brltty/'s side, some data
+structures are allocated to store information on the client,
+but this has no user-level side-effect.
+
+<sect2>Real use of the braille terminal.
+
+<p>Once the client is properly connected and authenticated,
+there are two possible types of communication with the braille
+terminal. The chosen type of communication depends on what the
+client plans to do. If its purpose is to display information on
+the braille display or to process braille keys, it will have to
+take control of the Linux tty on which it is running. If its
+purpose is to exchange data with the braille terminal (e.g. for
+file transfer), it will enter what is called "raw mode".
+
+<sect3>Braille display and braille key presses processing.
+
+<p>If the client wants to display something on the braille
+display or to process braille keys itself, rather than letting
+<em/brltty/ process them, it has to take control of the Linux
+terminal it is running on.
+
+Each Linux terminal (tty) can be controlled by at most one
+application at a time,
+that's why <em/BrlAPI/ will honnor a valid tty control request if
+and only if no other application already controls this tty.
+
+Once a client has obtained the control of his tty, <em/BrlAPI/
+will completely discard <em/brltty/'s display on this tty (and only
+this one), leaving the braille display free for the client.
+
+At the same time, if a key is pressed on the braille
+keyboard, <em/BrlAPI/ checks whether the client application is
+interested in this key or not. If it is, the key is passed to
+it, either as a key code or as a <em/brltty/ command. If it is not, the
+key code is converted into a <em/brltty/ command and returned to
+<em/brltty/.
+
+Once the client is not interested in displaying text
+or reading braille keys any more, it has to leave the tty, so
+that either <em/brltty/ can continue its job, or another client can
+take control of it.
+
+<sect3>Raw mode.
+
+<p>Only one client can be in raw mode at the same time. In
+this mode, data coming from the braille terminal are checked
+by the driver (to ensure they are valid), but instead of being processed,
+they are delivered "as-is" to the client that is in raw mode.
+
+In the other direction, packets sent to <em/BrlAPI/ by the
+client that is in raw mode are passed to the driver which is
+expected to deliver them to the braille terminal without any
+modification.
+
+<sect3>Remarks.
+
+<p>
+
+<itemize>
+
+<item>The operations described in the two previous
+subsections are not completely mutually exclusive. An
+application that controls its current tty can enter raw
+mode, provided that no other application already is in this
+mode. However, the contrary is not possible: an application
+which has entered raw mode cannot take control of its tty
+before having left raw mode. Indeed, it would make no sense
+to take control of a tty during raw mode since in this mode,
+braille display and reading of braille keys are impossible.
+
+<item>Not every braille driver supports raw mode. It has
+to be specially (re)written to support it, since it has
+to provide special functions to process incoming and outgoing
+packets. The same restriction is true (but less strong)
+concerning the ability to deliver/convert keycodes into
+commands: not every driver has this ability, it has to be
+modified to get it.
+
+<item>Operations described in 3.1 and 3.2 can be repeated.
+You can, for instance, use raw mode to transfer data onto
+your braille terminal, display text in braille, return to raw
+mode..., all that without having to reconnect to <em/BrlAPI/ before
+each operation.
+
+</itemize>
+
+<sect2>Disconnection.
+
+<p>Once the client has finished using the braille terminal, it
+has to disconnect from the API, so that the memory structures
+allocated for the connection can be freed and eventually used by
+another client. This step is transparent for the user, in the
+sense that it involves no change on the braille display.
+
+
+
+<!---->
+<sect>Installation and configuration <em/BrlAPI/
+<!---->
+<!-- Seb -->
+<!-- an installation and configuration documentation -->
+<p>
+<tt/make install/ will install libbrlapi.so in /lib, and include files in
+/usr/include/brltty. An authentication key will also typically be set in
+/etc/brlapi.key, but won't be readable by anybody else than root. It is up
+to you to define a group of users who will have the right to read it and hence
+be able to connect to the server. For instance, you may want to do:
+
+<tscreen><code>
+# addgroup brlapi
+# chgrp brlapi /etc/brlapi.key
+# chmod g+r /etc/brlapi.key
+# addgroup user1 brlapi
+# addgroup user2 brlapi
+...
+</code></tscreen>
+
+
+<!---->
+<sect>Library description
+<!---->
+<!-- the library documentation, for those who want to write
+applications which use it, it should be split in: -->
+
+<p>
+Let's now see how one can write dedicated applications. Basic notions will be
+seen, along with a very simple client. Greater details are given as online
+manual pages.
+
+<!-- a basic documentation, which briefly shows
+how one is supposed to use our library, with trivial examples -->
+
+<p>
+The historical test program for <em/BrlAPI/ was something like:
+<itemize>
+<item>connect to <em/BrlAPI/
+<item>get driver id
+<item>get driver name
+<item>get display size
+<item>try entering raw mode, immediately leave raw mode.
+<item>get tty control
+<item>write something on the display
+<item>wait for a key press
+<item>leave tty control
+<item>disconnect from <em/BrlAPI/
+</itemize>
+
+It is here rewritten, its working briefly explained.
+
+<sect1>Connecting to <em/BrlAPI/
+
+<p>Connection to <em/BrlAPI/ is needed first, thanks to the
+<tt>brlapi_initializeConnection</tt> call. For this, a
+<tt>brlapi_settings_t</tt> variable must be filled which will hold the
+settings the library needs to connect to the server. Just giving <tt/NULL/
+will work for local use. The other parameter lets you get back the parameters
+which were actually used to initialize connection. <tt/NULL/ will also be nice
+for now.
+
+<tscreen><code>
+ if (brlapi_initializeConnection(NULL,NULL)<0)
+ {
+  brlapi_perror("brlapi_initializeConnection");
+  exit(1);
+ }
+</code></tscreen>
+
+The connection might fail, so testing is needed.
+
+<sect1>Getting driver id and name
+
+<p>Knowing the type of the braille device might be useful:
+
+<tscreen><code>
+ unsigned char id[3], name[21];
+ if (brlapi_getDriverId(id, sizeof(id))<0) {
+   brlapi_perror("getDriverId");
+ } else printf("Driver id: %s\n",id);
+ if (brlapi_getDriverName(name, sizeof(name))<0) {
+   brlapi_perror("getDriverName");
+</code></tscreen>
+
+This is particularly useful before entering raw mode to achieve file
+transfers for instance, just to check that the device is really the one
+expected.
+
+<sect1>Getting display size
+
+<p>Before writing on the braille display, the size should be always first
+checked to be sure everything will hold on it:
+
+<tscreen><code>
+ if (brlapi_getDisplaySize(&amp;x, &amp;y)<0)
+  brlapi_perror("brlapi_getDisplaySize");
+ else
+  printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
+</code></tscreen>
+
+<sect1>Entering raw mode, immediately leaving raw mode.
+
+<p>Entering raw mode is very simple:
+
+<tscreen><code>
+ fprintf(stderr,"Trying to enter in raw mode... ");
+ if (brlapi_getRaw()<0)
+  brlapi_perror("brlapi_getRaw");
+ else {
+  fprintf(stderr,"Ok, leaving raw mode immediately\n");
+  brlapi_leaveRaw();
+ }
+</code></tscreen>
+
+Not every driver supports raw mode (actually only one does for the moment ;-),
+so testing is needed.
+
+While in raw mode, <tt>brlapi_sendRaw</tt> and <tt>brlapi_recvRaw</tt>
+can be used to send and get data directly to and from the device.
+It should be used with care, improper use might completely thrash the device !
+
+<sect1>Getting tty control
+
+<p>Let's now display something on the device. control of the tty must be get
+first:
+
+<tscreen><code>
+ fprintf(stderr,"Taking control of the tty... ");
+ if (brlapi_getTty(0,BRLCOMMANDS)>=0)
+ {
+  printf("Ok\n");
+</code></tscreen>
+
+The first parameter tells the server the number of the tty to take
+control of. Setting 0 lets the library determine it for us.
+
+<p>The server is asked to send <em/brltty/ commands, which are device-independent.
+
+<p>Getting control might fail if, for instance, another application already took
+control of this tty, so testing is needed.
+
+<p>From now on, the braille display is detached from the screen.
+
+<sect1>Writing something on the display
+
+<p>The application can now write things on the braille display without
+altering the screen display:
+
+<tscreen><code>
+  fprintf(stderr,"Writing to braille display... ");
+  if (brlapi_writeText(0,"Press a braille key to continue...")>=0)
+  {
+   fprintf(stderr,"Ok\n");
+</code></tscreen>
+
+The cursor is also asked <em/not/ to be shown: its position is set to 0.
+
+<p>"Writing to braille display... Ok" is now displayed on the screen, and
+"Press a braille key to continue..." on the braille display.
+
+<sect1>Waiting for a key press
+
+<p>To have a break for the user to be able to read these messages,
+a key press (a command here, which is driver-independent) may be waited for:
+
+<tscreen><code>
+   fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
+   if (brlapi_readKey(1,&amp;key)>0)
+    fprintf(stderr,"got it! (code=%d)\n",key);
+</code></tscreen>
+
+The command code is returned, as described in <tt>&lt;brltty/brldefs.h></tt>.
+It is not transmitted to <em/brltty/: it is up to the application to define
+the behavior, here cleanly exitting, as described below.
+
+The first parameter tells the lib to block until a key press is indeed read.
+
+<sect1>Leaving tty control
+
+<p>Let's now leave the tty:
+
+<tscreen><code>
+  fprintf(stderr,"Leaving tty... ");
+  if (brlapi_leaveTty()>=0)
+   fprintf(stderr,"Ok\n");
+</code></tscreen>
+
+But control of another tty can still be get for instance, by calling
+<tt>brlapi_getTty()</tt> again...
+
+<sect1>Disconnecting from <em/BrlAPI/
+
+<p>Let's disconnect from <em/BrlAPI/:
+
+<tscreen><code>
+ brlapi_closeConnection();
+</code></tscreen>
+
+The application can as well still need to connect to another server on another
+computer for instance, by calling <tt>brlapi_initializeConnection()</tt>
+again...
+
+<sect1>Putting everything together...
+
+<p>
+<tscreen><code>
+#include <stdio.h>
+#include <stdlib.h>
+#include <brltty/api.h>
+
+int main()
+{
+ brl_keycode_t key;
+ char *p,*c;
+ int x, y;
+
+/* Connect to BrlAPI */
+  if (brlapi_initializeConnection(NULL,NULL)<0)
+  {
+   brlapi_perror("brlapi_initializeConnection");
+   exit(1);
+  }
+
+/* Get driver id & name */
+ p = brlapi_getDriverId();
+ if (!p)
+  brlapi_perror("brlapi_getDriverId");
+ else
+  printf("Driver id: %s\n",p);
+ 
+ p = brlapi_getDriverName();
+ if (!p)
+  brlapi_perror("brlapi_getDriverName");
+ else
+  printf("Driver name: %s\n",p);
+
+/* Get display size */
+ if (brlapi_getDisplaySize(&amp;x, &amp;y)<0)
+  brlapi_perror("brlapi_getDisplaySize");
+ else
+  printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
+
+/* Try entering raw mode, immediately go out from raw mode */
+ printf("Trying to enter in raw mode... ");
+ if (brlapi_getRaw()<0)
+  brlapi_perror("brlapi_getRaw");
+ else {
+  printf("Ok, leaving raw mode immediately\n");
+  brlapi_leaveRaw();
+ }
+
+/* Get tty control */
+ printf("Taking control of the tty... ");
+ if (brlapi_getTty(0,BRLCOMMANDS)>=0)
+ {
+  printf("Ok\n");
+
+/* Write something on the display */
+  fprintf(stderr,"Writing to braille display... ");
+  if (brlapi_writeText(0,"Press a braille key to continue...")>=0)
+  {
+   fprintf(stderr,"Ok\n");
+
+/* Wait for a key press */
+   fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
+   if (brlapi_readKey(1,&amp;key)>0)
+    fprintf(stderr,"got it! (code=%d)\n",key);
+   else brlapi_perror("brlapi_readKey");
+
+  } else brlapi_perror("brlapi_writeText");
+
+/* Leave tty control */
+  fprintf(stderr,"Leaving tty... ");
+  if (brlapi_leaveTty()>=0)
+   fprintf(stderr,"Ok\n");
+  else brlapi_perror("brlapi_leaveTty");
+
+ } else brlapi_perror("brlapi_getTty");
+
+/* Disconnect from BrlAPI */
+ brlapi_closeConnection();
+ return 0;
+}
+</code></tscreen>
+
+This should compile well thanks to
+<tt>gcc apiclient.c -o apiclient -lbrlapi</tt>
+
+<!---->
+<sect>Writing (<em/BrlAPI/-compliant) drivers for <em/brltty/
+<!---->
+<!-- Seb -->
+
+<p>In this chapter, we will describe in details how to write a
+driver for <em/brltty/. We begin with a general description of the
+structure the driver should have, before explaining more precisely
+what each function is supposed to do.
+
+<sect1>Overview of the driver's structure
+
+<p>A braille driver is in fact a library that is either
+dynamically loaded by <em/brltty/ at startup, or statically linked to
+it during the compilation, depending on the options given to the
+<tt>./configure</tt> script.
+
+This library has to provide every function needed by the core,
+plus some additional functions, that are not mandatory, but which
+improve communication with <em/BrlAPI/ and the service level provided
+to client applications.
+
+Basically, a driver library needs to provide a function to open
+the communication with the braille terminal, one to close this
+communication, one to read key codes from the braille keyboard, and
+one to write text on the braille display. As we will see in a
+moment, other functions are required.
+
+Moreover, a driver can provide additional functionalities, by
+defining some macros asserting that it has these functionalities,
+and by defining associated functions.
+
+<sect1>Basic driver structure
+
+<p><em>Every</em> <em/brltty/ driver <em>must</em> consist in at least
+a file called braille.c, located in an appropriate subdirectory of
+the Drivers subdirectory. This braille.c file must have the
+following layout
+
+<verb>
+    #ifdef HAVE_CONFIG_H
+    #include "config.h"
+    #endif /* HAVE_CONFIG_H */
+    /* Include standard C headers */
+    #include "Programs/brl.h"
+    #include "Programs/misc.h"
+    #include "Programs/scr.h"
+    #include "Programs/message.h"
+    /* Include other files */
+
+    static void brl_identify() { }
+
+    static int brl_open(BrailleDisplay *brl, char **parameters, const char *tty) { ... }
+
+    static void brl_close(BrailleDisplay *brl) { ... }
+
+    static void brl_writeWindow(BrailleDisplay *brl) { ... }
+
+    static void brl_writeStatus(BrailleDisplay *brl) { ... }
+
+    static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext context) { ... }
+</verb>
+
+Before giving a detailed description of what each function is
+supposed to do, we define the <tt>BrailleDisplay</tt> structure,
+since each function has an argument of type <tt>BrailleDisplay
+*</tt>. The <tt>BrailleDisplay</tt> structure is defined like this:
+
+<verb>
+    typedef struct {
+
+      int x, y; /* The dimensions of the display */
+
+      int helpPage; /* The page number within the help file */
+
+      unsigned char *buffer; /* The contents of the display */
+
+      unsigned isCoreBuffer:1; /* The core allocated the buffer */
+
+      unsigned resizeRequired:1; /* The display size has changed */
+
+      unsigned int writeDelay;
+
+      void (*bufferResized)(int rows, int columns);
+
+    } BrailleDisplay;
+</verb>
+
+We now describe each function's semantics and calling
+convention.
+
+The <tt/brl_identify()/ function takes no argument and returns
+nothing. It is called as soon as the driver is loaded, and its
+purpose is to print some information about the driver in the system
+log. To achieve this, the only thing this function has to do is to
+call LOG_PRINT with appropriate arguments (log level and string to
+put in the syslog).
+
+The <tt/brl_open()/ function takes 3 arguments and returns an int. Its
+purpose is to initialize the communication with the braille
+terminal. Generally, this function has to open the file referred to by
+the <tt/tty/ argument, and to configure the associated communication
+port. The <tt/parameters/ argument contains parameters passed to the
+driver with the -B command-line option. It's up to the driver's
+author to decide wether or not he/she wants to use this argument,
+and what for. The function can perform some additional tasks such
+as trying to identify precisely which braille terminal model is
+connected to the computer, by sending it a request and analyzing its
+answer. The value that is finally returned depends on the success of
+the initialization process. If it fails, th function has to return
+-1. The function returns 0 on success.
+
+The <tt/brl_close()/ function takes just one argument, and returns
+nothing. The name of this function should be self-explanatory; it's
+goal is to close (finish) the communication between the computer and
+the braille terminal. In general, the only thing this function has
+to do is to close the file descriptor associated to the braille
+terminal's communication port.
+
+The <tt/brl_writeWindow()/ function takes just one argument of type
+BrailleDisplay, and returns nothing. This function displays the
+specified text on the braille window. This routine is the right
+place to check if the text that has to be displayed is not already
+on the braille display, to send it only if necessary. More
+generally, if the braille terminal supports partial refresh of the
+display, the calculus of what exactly has to be sent to the braille
+display to have a proper display, according to what was previously
+displayed should be done in this function.
+
+The <tt/brl_writeStatus()/ function is very similar to <tt/brl_writeWindow()/.
+The only difference is that whereas <tt/brl_writeWindow()/ writes on the
+main braille display, <tt/brl_writeStatus()/ writes on an auxiliary braille
+display, which occasionaly appears on some braille terminals. The
+remarks that have been done concerning optimizations for refreshing
+the display still apply here.
+
+The <tt/brl_readCommand()/ function takes two arguments, and returns an
+integer. Its purpose is to read commands from the braille keyboard
+and to pass them to <em/brltty/'s core, which in turn will process them.
+The first argument, of type <tt/BrailleDisplay/, is for future use, and
+can safely be ignored for the moment. The second argument indicates
+in which context (state) <em/brltty/ is. For instance, it specifies if
+<em/brltty/ is in a menu, displays a help screen, etc. This information
+can indeed be of some interest when translating a key into a
+command, especially if the keys can have different meanings,
+depending on the context. So, this function has to read keypresses
+from the braille keyboard, and to convert them into commands,
+according to the given context, these commands then being returned
+to <em/brltty/. For a complete list of available command codes, please
+have a look at <tt/brl.h/ in the Programs subdirectory. Two codes have special
+meanings:
+
+<descrip>
+
+<tag/eof/ specifies that no command is available now, and that
+no key is waiting to be converted into command in a near future.
+
+<tag/CMD_NOOP/ specifies that no command is available, but
+that one will be, soon. As a consequence, brl_readCommand will be
+called again immediately. Returning CMD_NOOP is appropriate for
+instance when a key is composed of two consecutive data packets.
+When the first of them is received, one can expect that the second
+will arrive quickly, so that trying to read it as soon as possible
+is a good idea.
+
+</descrip>
+
+<sect1>Enhancements for <em/BrlAPI/
+
+<p>To improve the level of service provided to client
+applications communicating with braille drivers through <em/BrlAPI/, the
+drivers should declare some additional functions that will then be
+called by the API when needed.
+
+For each additional feature that has to be implemented in a
+driver, a specific macro must be defined, in addition to the
+functions implementing that feature. For the moment, two features
+are supported by <em/BrlAPI/:
+
+<itemize>
+<item>reading braille terminal specific key codes,
+
+<item>exchanging raw data packets between the braille
+terminal and a client application running on the PC.
+</itemize>
+
+For each feature presented below, only a short description of each
+concerned macro and function will be given. For a more complete description
+of concepts used here, please refer to previous chapters.
+
+<sect2>Reading braille key codes
+
+<p>
+When a client takes control of a tty and asks for getting raw key codes, it
+has, like in command mode, the possibility to mask some keys. The masked
+keys will then be passed to <em/brltty/. This assumes the existence of a
+conversion mechanism from key codes to <em/brltty/ commands.
+This conversion mechanism can only be implemented by the braille driver,
+since 
+it is the only piece of code that knows about braille terminal specific key
+codes. So, to make it possible for client applications to read raw key
+codes, the driver has to define the following macro:
+<verb>
+#define BRL_HAVE_KEY_CODES
+</verb>
+and the following functions:
+<verb>
+static int brl_readKey(BrailleDisplay *)
+int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
+</verb>
+
+The semantics of <tt>brl_readKey()</tt> is very similar to
+<tt>brl_readCommand()</tt>'s, with one essential difference: a key code
+is not context-dependant, so no context argument needs to be given to this
+function. Moreover, the code this function returns is driver-specific, and
+has to be properly defined by the driver's author so that client applications
+can rely on it.
+
+The <tt>brl_keyToCommand()</tt> function's purpose is to convert a key code
+as delivered by <tt>brl_readKey()</tt> into a <em/brltty/ command. As explained
+above, this function is called by brlapi when a key is pressed on the
+braille keyboard that is ignored by the client application. The
+corresponding command is then returned to <em/brltty/.
+
+<sect3>Remarks
+
+<p>When these two functions are present, the only thing
+<tt>brl_readCommand()</tt> has to do is to call <tt>brl_readKey()</tt> and then
+call <tt>brl_keyToCommand()</tt> with the value returned by the first function
+as argument.
+
+<sect2>Exchanging raw data packets
+
+<p>Under some circumstances, an application running on the PC
+can be interested in a raw level communication with the braille
+terminal. For instance, to implement a file transfer protocol,
+commands to display braille or to read keys are not enough. In
+such a case, one must have a way to send raw data to the
+terminal, and to receive them from it.
+
+A driver that wants to provide such a mechanism has to define
+three functions: one to send packets, another one to receive them,
+and the last one to reset the communication when problems occur.
+
+The macro that declares that a driver is able to transmit packets
+is:
+
+<verb>
+#define BRL_HAVE_PACKET_IO
+</verb>
+
+The prototypes of the functions the driver should define are:
+
+<verb>
+static int brl_writePacket(BrailleDisplay *brl, const unsigned char *packet, int size);
+static int brl_readPacket(BrailleDisplay *brl, unsigned char *p, int size);
+static void brl_rescue(BrailleDisplay *brl)
+</verb>
+
+<tt>brl_writePacket()</tt> sends a packet of <tt/size/ bytes, stored
+at <tt/packet/, to the braille terminal. If the communication protocol
+allows to determined if a packet has been send properly (e.g. the
+terminal sends back an acknowledgement for each packet he
+receives), then this function should wait the acknowledgement,
+and, if it is not received, retransmission of the packet should take
+place.
+
+<tt>brl_readPacket()</tt> reads a packet of at most <tt/size/ bytes, and
+stores it at the specified address. The read must not block. I.e.,
+if no packet is available, the function should return immediately,
+returning 0.
+
+<tt>brl_rescue()</tt> is called by <em/BrlAPI/ when a client
+application terminates without properly leaving the raw mode. This
+function should restore the terminal's state, so that it is
+able to display text in braille again.
+
+<sect3>Remarks.
+
+<p>
+<itemize>
+<item> If the driver provides such functions, every other
+functions should use them, instead of trying to communicate
+directly with the braille terminal. For instance, <tt/readCommand()/
+should call <tt/readPacket()/, and then extract a key from the packet,
+rather than reading directly from the communication port's file
+descriptor. The same applies for <tt/brl_writeWindow()/, which should
+use <tt/brl_writePacket()/, rather than writing on the communication
+port's file descriptor.
+
+<item> For the moment, the argument of type BrailleDisplay
+can safely be ignored by the functions described here.
+
+</itemize>
+
+<!---->
+<sect>Protocol reference
+<!---->
+<!-- a boring documentation, explaining the underlying protocol of the api
+in detail -->
+<p>
+Under some circumstances, it may be preferable to communicate directly with
+<em/BrlAPI/'s server rather than using <em/BrlAPI/'s
+library. Here are the needed details to be able
+to do this. This chapter is also of interest if a precise understanding of
+how the communication stuff works is desired, to be sure to understand how
+to write multithreaded clients, for instance.
+
+<p>
+In all the following, <em/integer/ will mean an unsigned 32 bits integer in
+network byte order (ie most significant bytes first).
+
+<sect1>Reliable packet transmission channel
+
+<p>
+The protocol between <em/BrlAPI/'s server and clients is based on exchanges
+of packets. So as to avoid locks due to packet loss, these exchanges are
+supposed reliable, and ordering must be preserved, thus <em/BrlAPI/ needs
+a reliable packet transmission channel.
+
+<p>
+To achieve this, <em/BrlAPI/ uses a TCP-based connection, on which packets
+are transmitted this way:
+
+<itemize>
+<item>the size in bytes of the packet is transmitted first as an integer,
+<item>then the type of the packet, as an integer,
+<item>and finally the packet data.
+</itemize>
+
+<p>
+The size does not include the { size, type } header, so that packets which
+don't need any data have a size of 0 byte. The type of the packet can be
+either of <tt/BRLPACKET_*/ constants defined in <tt/api.h/. Each type of
+packet will be further discussed below.
+
+<p>
+<em/BrlAPI/'s library ships two functions to achieve packets sending and receiving
+using this protocol: <tt/brlapi_writePacket/ and <tt/brlapi_readPacket/. It
+is a good idea to use these functions rather than rewriting them, since this protocol
+might change one day in favor of a real reliable packet transmission protocol
+such as the experimental RDP.
+
+<sect1>Responses from the server
+
+<p>
+As described below, many packets are `acknowledged'. It means that upon
+reception, the server sends either:
+
+<itemize>
+<item>a <tt/BRLPACKET_ACK/ packet, with no data, which means the operation
+corresponding to the received packet was successful,
+<item>or a <tt/BRLPACKET_ERROR/ packet, the data being an integer
+which should be one of <tt/BRLERR_*/ constants. This
+means the operation corresponding to the received packet failed.
+</itemize>
+
+<p>
+Some other packets need some information as a response.
+Upon reception, the server will send either:
+
+<itemize>
+<item>a packet of the same type, its data being the response,
+<item>or a <tt/BRLPACKET_ERROR/ packet.
+</itemize>
+
+<p>
+If at some point an ill-formed or non-sense packet is received by the server,
+and <tt/BRLPACKET_EXCEPTION/ is returned, holding the guilty packet for
+further analysis.
+
+<sect1>Operating modes
+<p>
+The connection between the client and the server can be in either of the 
+four following modes:
+
+<itemize>
+<item>authentication mode: this is the initial mode, when the client hasn't
+authenticated itself to the server yet. Only one <tt/BRLPACKET_AUTHKEY/ packet
+will be accepted, which makes the connection enter normal mode.
+
+
+<item>normal mode: the client is authenticated, but didn't ask for a tty
+or raw mode. The client can send either of these types of packet:
+  <itemize>
+  <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
+  or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
+  <item><tt/BRLPACKET_GETTTY/ to enter tty handling mode,
+  <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
+  </itemize>
+
+
+<item>tty handling mode: the client holds the control of a tty: <em/brltty/ has
+no power on it any more, masked keys excepted. It's up to the client to manage
+display and keypresses. For this, it can send either of these types of packet:
+  <itemize>
+  <item><tt/BRLPACKET_GETTTY/ to switch to another tty, but how key presses
+  should be sent mustn't change,
+  <item><tt/BRLPACKET_LEAVETTY/ to leave tty handling mode and go back to
+  normal mode,
+  <item><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
+  <tt/BRLPACKET_IGNOREKEYSET/, <tt/BRLPACKET_UNIGNOREKEYSET/ to mask and unmask
+  keys,
+  <item><tt/BRLPACKET_WRITE/ to display text on this tty,
+  <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
+  <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
+  or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
+  </itemize>
+And the server might send <tt/BRLPACKET_KEY/ packets to signal key presses.
+
+
+<item>raw mode: the client wants to exchange packets directly with the braille
+terminal. Only these types of packet will be accepted.
+  <itemize>
+  <item><tt/BRLPACKET_LEAVERAW/ to get back to previous mode, either normal or
+  tty handling mode.
+  <item><tt/BRLPACKET_PACKET/ to send a packet to the braille terminal.
+  </itemize>
+And the server might send <tt/BRLPACKET_PACKET/ packets to give received packets
+from the terminal to the client.
+</itemize>
+
+Termination of the connection is initiated by the client in normal mode by
+simply closing its side of the socket. The server will then close the
+connection.
+
+
+<sect1>Details for each type of packet
+
+<p>
+Here is described the semantics of each type of packet. Most of them are
+directly linked to some of <em/BrlAPI/'s library's functions. Reading their
+online manual page as well will hence be of good help for understanding.
+
+<sect2><tt/BRLPACKET_AUTHKEY/ (see <em/brlapi_loadAuthKey()/)
+<p>
+This must be the first packet ever transmitted from the client to the
+server. It lets the client authenticate itself to the server. Data is
+first an integer indicating a protocol version, then comes the authentication
+key itself.
+
+If the protocol version is not the same as the server's, a 
+<tt/BRLERR_PROTOCOL_VERSION/ error packet is returned and the connection is
+closed.
+
+If the authentication key matches the servers', it is acknowledged, and
+other types of packets might be used, other <tt/BRLPACKET_AUTHKEY/ shouldn't
+be sent by the client.
+
+If the authentication key doesn't match, the server sends a
+<tt/BRLERR_CONNREFUSED/ and closes the connection.
+
+<sect2><tt/BRLPACKET_GETDRIVERID/ (see <em/brlapi_getDriverId()/)
+<p>
+This should be sent by the client when it needs the 2-char identifier of
+the current <tt/brltty/ driver. The returned string is \0 terminated.
+
+<sect2><tt/BRLPACKET_GETDRIVERNAME/ (see <em/brlapi_getDriverName()/)
+<p>
+This should be sent by the client when it needs the full name of
+the current <tt/brltty/ driver. The returned string is \0 terminated.
+
+<sect2><tt/BRLPACKET_GETDISPLAYSIZE/ (see <em/brlapi_getDisplaySize()/)
+<p>
+This should be sent by the client when it needs to know the braille display
+size. The returned data are two integers: width and then height.
+
+<sect2><tt/BRLPACKET_GETTTY/ (see <em/brlapi_getTty()/)
+<p>
+This should be sent by the client to get control of a tty. Sent data are
+first a series of integers: the numbers of ttys that leads to the tty that
+the application wants to take control of (it can be empty if the tty is 
+one of the machine's VT). Then comes an integer telling the number of the tty
+to get control of, and finaly
+how key presses should be sent: either <tt/BRLKEYCODES/ or <tt/BRLCOMMANDS/.
+This packet is then acknowledged by the server.
+
+<sect2><tt/BRLPACKET_KEY/ (see <em/brlapi_readKey()/)
+<p>
+As soon as the client gets a tty, it must be prepared to handle
+<tt/BRLPACKET_KEY/ incoming packets
+at any time (as soon as the key
+was pressed on the braille terminal, hopefuly).
+The data holds the key or command code
+as an integer, depending on what has been request in the
+<tt/BRLPACKET_GETTTY/ packet.
+
+<sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
+
+<p>
+For the server to know which tty is active, one particular client is responsible
+for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
+the new current tty. For instance, when running an X server on VT7, the
+<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_GETTTY(7)/ and will send
+window IDs whenever X focus changes, allowing display and keypresses switching
+between xterms.
+
+<sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
+
+<p>
+For the server to know which tty is active, one particular client is responsible
+for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
+the new current tty. For instance, when running an X server on VT7, the
+<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_GETTTY(7)/ and will send
+window IDs whenever X focus changes, allowing display and keypresses switching
+between xterms.
+
+<sect2><tt/BRLPACKET_LEAVETTY/ (see <em/brlapi_leaveTty()/)
+<p>
+This should be sent to free the tty and masked keys lists.
+This is acknowledged by the server.
+
+<sect2><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
+<tt/BRLPACKET_IGNOREKEYSET/ and <tt/BRLPACKET_UNIGNOREKEYSET/ (see
+<em/brlapi_ignoreKeyRange()/, <em/brlapi_unignoreKeyRange/,
+<em/brlapi_ignoreKeySet()/, and <em/brlapi_unignoreKeySet()/)
+<p>
+If the client doesn't want every key press to be signaled to it, but some of
+them to be given to <tt/brltty/ for normal processing, it can send
+<tt/BRLPACKET_IGNOREKEYRANGE/ (resp. <tt/BRLPACKET_IGNOREKEYSET/) packets to
+tell ranges (resp. sets) of key codes which shouldn't be
+sent to it, but given to <tt/brltty/, and <tt/BRLPACKET_UNIGNOREKEYRANGE/
+(resp. <tt/BRLPACKET_UNIGNOREKEYSET/) packets to tell ranges (resp. sets)
+of key codes which should be sent to it, and not given to
+<tt/brltty/. The server keeps a dynamic list of ranges, so that arbitrary
+sequences of such packets can be sent.
+For ranges, Data are 2 integers: the lower and the
+upper boundaries; lower and upper must be equal to tell one key, for instance.
+For Sets, Data simply consists of integers, one per key in the set.
+
+<sect2><tt/BRLPACKET_WRITE/ (see <em/brlapi_write()/)
+<p>
+To display text on the braille terminal and set the position of the cursor,
+the client can send a <tt/BRLPACKET_WRITE/ packet. The packet begins
+with an integer holding flags (see <tt/BRLAPI_WF_*/). These flags indicate
+which data will then be available, in the following order (corresponding to
+flag weight):
+
+<itemize>
+<item> A display number can be given as a integer, in case the braille
+display has several. If not given, usual display is used.
+<item> A region can be given as two integers indicating the beginning and the
+end of the part of the braille display which is to be updated (included),
+the first cell of the display being numberd 1. If not given, the whole display
+is considered to be updated (and hence the following three fields should exactly
+fit the braille display ie hold <em/height/*<em/width/
+bytes, where <em/height/ and <em/width/ must be get by sending a
+<tt/BRLPACKET_GETDISPLAYSIZE/ packet.
+<item> The text to display can then be given, one byte per caracter, expected to
+be encoded in latin-1 (an extension to the bitfield may set other encodings
+some day).
+<item> Then an AND field can be given, one byte per character: the 8-dot
+representation of the above text will be AND-ed with this field, hence allowing
+to erase some unwanted parts of characters.
+<item> As well, an OR field may be given, one byte per character: the 8-dot
+result of the AND operation above (or the 8-dot representation of the text if
+no AND operation was performed) is OR-ed with this field, hence allowing
+to set some dots, to underline characters for instance.
+<item> Last but not least, a cursor position can be specified. 1 representing
+the first character of the display, 0 turning the cursor off. If not given,
+the cursor (if any) is left unmodified.
+</itemize>
+
+<sect2><tt/BRLPACKET_GETRAW/ (see <em/brlapi_getRaw()/)
+<p>
+To enter raw mode, the client must send a <tt/BRLPACKET_GETRAW/ packet,
+which is acknowledged. Once in raw mode, no other packet than
+<tt/BRLPACKET_LEAVERAW/ or <tt/BRLPACKET_PACKET/ will be accepted. The data must
+hold the special value <tt/BRLRAW_MAGIC/: <tt/0xdeadbeef/, to avoid erroneous
+raw mode activating.
+
+<sect2><tt/BRLPACKET_LEAVERAW/ (see <em/brlapi_leaveRaw()/)
+<p>
+To leave raw mode, the client must send a <tt/BRLPACKET_LEAVERAW/ packet, which
+is acknowledged.
+
+<sect2><tt/BRLPACKET_PACKET/ (see <em/brlapi_sendRaw()/ and
+<em/brlapi_recvRaw()/)
+<p>
+While in raw mode, only <tt/BRLPACKET_PACKET/ packets can be exchanged between
+the client and the server: to send a packet to the braille terminal, the
+client merely sends a <tt/BRLPACKET_PACKET/ packet, its data being the packet to
+send to the terminal. Whenever its receives a packet from the terminal, the
+server does exactly the same, so that packet exchanges between the terminal and
+the server are exactly reproduced between the server and the client.
+
+Packets' content depends on the braille driver, so that the client should
+check for its id or name thanks to a <tt/BRLPACKET_GETDRIVERID/ packet or
+a <tt/BRLPACKET_GETDRIVERNAME/ packet, prior to sending any
+<tt/BRLPACKET_GETRAW/ packet.
+
+
+</article>

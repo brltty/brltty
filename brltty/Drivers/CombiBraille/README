@@ -1,0 +1,138 @@
+Driver for Tieman B.V.'s CombiBraille series
+
+Copyright (C) 1995, 1996 by Nikhil Nair.  All rights reserved.
+
+This driver is part of BRLTTY, and as such it is placed under the
+terms of the GNU General Public License, as published by the Free
+Software Foundation.  Please see the file COPYING in the top-level
+directory for details.
+
+This driver was maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+
+-----------------------------------------------------------------------------
+
+SUPPORTED HARDWARE
+==================
+
+This driver has only been used on a CombiBraille 40, although,
+according to technical specifications provided by Tieman
+B.V. <tieman@xs4all.nl>, it should work on the 20 and 80 cell models
+as well.  There is no support for the parallel interface, and so no
+possibility of a 2-dimensional setup using a second display.
+
+There is now some very rudimentary support for the internal speech
+synthesiser.  This, however, leaves much to be desired: there are only
+`speak line' and `mute' functions, and the speed and pitch of the
+speech is not yet configurable.
+
+
+CONFIGURATION AND COMPILATION
+=============================
+
+For general information about configuring and compiling BRLTTY, please
+see the BRLTTY manual.
+
+Any CombiBraille-specific configuration is done by editing the
+braille.h file in this directory.  However, such configuration is
+probably unnecessary as the display size is autodetected during
+initialisation at run-time.
+
+By default, BRLTTY can be started even if the CombiBraille is switched
+off or not connected - it will wait in the background, checking every
+five seconds for a display.  This behaviour can be changed by
+adjusting the values of ACK_TIMEOUT and MAX_ATTEMPTS.
+
+The driver should probably set the autorepeat delay and rate of the
+Braille display's keys during initialisation.  This is yet to be
+implemented.
+
+
+GETTING STARTED
+===============
+
+The CombiBraille must be connected to the serial device you chose
+during configuration, unless of course you use the -d option to
+BRLTTY.  The serial interface must be selected; this is done by
+holding the left-most thumb key while turning on the display.  BRLTTY
+should then display its startup message before starting to echo the
+screen.
+
+
+KEY BINDINGS
+============
+
+The key bindings - particularly with regard to the Braille dot keys -
+have been redesigned from the DOS driver provided with the
+CombiBraille.  However, the five thumb keys work similarly.  If we
+label them A to E from left to right, then A is FWINLT (go left one
+full window width), B is LNUP (go up one line), D is LNDN (go down one
+line) and E is FWINRT (go right one full window width).  C toggles
+cursor tracking, so C twice moves the window to the cursor position.
+
+The extra cursor routing key (over the gap between the status cells
+and the main display) is used to bring up the help screen.  Pressing
+this key again goes back to normal operation.  The help screen has a
+full list of key bindings (apart from the cursor routing keys); it can
+be found in plain text format in the file help.txt in this
+directory.  The dot keys have been numbered (from left to right): 3,
+2, 1, 4, 5, 6; capital letters in brackets refer to thumb keys,
+e.g. (A) means A alone, (BD) means B and D pressed together and (CC)
+means C, alone, twice.
+
+All functions bound to the thumb keys can also be executed by using
+the Braille dot keys.  The converse, however, is not the case, as
+there are far more available combinations of Braille dot keys than of
+thumb keys (using not more than two at once).
+
+Cursor Routing Keys
+-------------------
+
+The keys above the 20/40/80 cells of the main display can be used for
+a more accurate form of cursor routing, specifying that particular
+position rather than the start of the Braille window.
+
+The extra six cursor routing keys have special meanings.  The sixth
+from the left toggles help mode; the fifth toggles freeze mode; the
+fourth is the RESET button and the third is the CONFMENU button.
+
+Special Cut Function
+--------------------
+
+The main cursor routing keys, together with the leftmost two of the
+extra ones, can be used for a more advanced form of cutting.
+
+To mark the top left corner of the rectangle to be cut, press the
+leftmost cursor routing key followed immediately by the one over the
+appropriate cell.  Then, to mark the bottom right corner, press the
+second cursor routing key followed immediately by the one over the
+appropriate cell.
+
+
+THE STATUS CELLS
+================
+
+The status cells are used slightly differently from the DOS driver.
+The first four cells are used to denote the positions of the cursor
+and the Braille window, and form two lines of four numbers.  The top
+line is the cursor position in the format CCRR where CC is the column
+number and RR is the row number.  The second line is the window
+position in the same format.  The top left corner of the screen is
+0000, in this notation.
+
+The fifth status cell is a set of flags, as follows:
+
+Dot Number      Dot Present Means
+     1          The screen is frozen
+     2          Attribute display is on
+     3          Audio signals are on
+     4          The cursor is visible
+     5          Cursor shape is block
+     6          Cursor blink is on
+     7          Cursor tracking is on
+     8          Sliding window is on
+
+
+Nikhil Nair
+Trinity College, CAMBRIDGE, CB2 1TQ, England
+Tel.: +44 1223 368353
+Email: nn201@cus.cam.ac.uk

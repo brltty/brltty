@@ -1,0 +1,25 @@
+BRLTTY speech driver for "GEnericSay"
+
+This driver is intended to be used with any speech synthesis program
+like the rsynth package.
+
+This is preliminary code, still experimental.  Need improovements...
+
+From the perspective of brltty: The command "/usr/local/bin/say" is
+invoked with no arguments, and each text string which is to be spoken is
+written to the standard input of that command. A period and a new-line (in
+that order), i.e. ".\n", are appended to each text string as this is a
+reasonably standard way to instruct a speech synthesizer to start speaking
+right away. When the speech is to be stopped, i.e. interrupted and
+flushed, then the standard input of the command is closed. The command is
+restarted the next time there is something else to speak.
+
+From the perspective of the command which must be supplied by the user: It
+must be called "/usr/local/bin/say". It is invoked without any arguments.
+It must first send any required initialization sequences, and then copy
+its standard input, to the speech synthesizer. Upon detecting end-of-file
+on its standard input, it should send the "shut up" sequence, followed by
+any required shut down sequences, to the synthesizer.
+
+The subdirectory "commands" of this directory contains examples of
+"/usr/local/bin/say" scripts for various speech synthesizers.

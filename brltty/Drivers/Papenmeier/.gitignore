@@ -1,0 +1,11 @@
+Makefile
+reldeps.mk
+*.auto.h
+*.tab.c
+*.output
+read_config
+brltty-pm.conf
+*.hlp
+dump-codes
+simulate
+serial

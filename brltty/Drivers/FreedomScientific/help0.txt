@@ -1,0 +1,91 @@
+Help Screen for Freedom Scientific Displays
+
+Whiz Wheel Navigation:
+Left Wheel Away/Toward:
+  Alone: go up/down one line
+  While Pressed: go up/down to nearest line with different content
+  With Left Advance: go to previous/next command prompt
+  With Right Advance: go to nearest line of previous/next paragraph
+  With Left GDF: go to previous/next line with different highlighting
+  With Right GDF: search backward/forward for content of cut buffer
+Right Wheel Away/Toward:
+  Alone: go left/right one window
+  While Pressed: go left/right one character
+
+Common Keys:
+Left/Right Wheel: go to beginning/end of line
+Left GDF: go back (undo cursor tracking)
+Right GDF: go to cursor
+Left and Right GDF: paste cut buffer at cursor location
+Left/Right Advance: go left/right one window
+Left/Right Advance with Left GDF: go to top-left/bottom-left corner
+Left/Right Advance with Right GDF: go to top/bottom line
+
+Lower Routing Buttons:
+Alone: bring cursor to character
+With Left Advance: start new cut buffer at character
+With Left GDF: append to existing cut buffer from character
+With Right GDF: linear cut to character
+With Right Advance: rectangular cut to character
+
+Upper Routing Buttons (Focus only):
+Alone: describe character
+With Left/Right Advance: go up/down to nearest line without greater indent
+With Left GDF: position left end of window at character
+
+PAC Mate Hot Keys:
+     Alone                    With Right GDF
+HK1: toggle skip ident lines  toggle skip blank wins
+HK2: toggle attr display      toggle attr underlining
+HK3: toggle cursor tracking   toggle show cursor
+HK4: toggle 6-dot braille     toggle autorepeat
+HK5: enter/leave help screen  toggle screen freeze
+HK6: enter/leave learn mode   reload prefs from disk
+HK7: enter/leave prefs menu   save prefs to disk
+HK8: enter/leave status line  bring cursor to line
+
+Focus Chords (with space bar):
+a [1]: toggle (a)ttributes display
+b [12]: toggle skip (b)lank windows
+c [14]: toggle show (c)ursor
+f [124]: toggle screen (f)reeze
+h [125]: enter/leave (h)elp screen
+i [24]: toggle skip (i)dentical lines
+l [123]: enter/leave (l)earn mode
+p [1234]: enter/leave (p)references menu
+p [1234] with left shift: reload (p)references from disk
+p [1234] with right shift: save (p)references to disk
+r [1235]: toggle auto(r)epeat
+s [234]: enter/leave (s)tatus line
+t [2345]: toggle cursor (t)racking
+u [136]: toggle attributes (u)nderlining
+v [1236]: bring cursor (v)ertically to current line
+v [1236] with left shift: switch to previous (v)irtual console
+v [1236] with right shift: switch to next (v)irtual console
+6 [235]: switch to (6)-dot braille
+8 [236]: switch to (8)-dot braille
+
+Keyboard Entry:
+Pressing any combination of dots 1 through 8 enters the character represented
+by that dot combination. In combination with these keys: the left shift key
+is the uppercase key, and the right shift key is the control key. Pressing the
+space bar by itself enters a space. The following chords (with space bar)
+emulate the non-character keys on a standard keyboard:
+left shift: backspace
+right shift: return
+[2356]: tab
+[23]: cursor left
+[56]: cursor right
+[25]: cursor up
+[36]: cursor down
+[5]: page up
+[6]: page down
+[2]: home
+[3]: end
+[35]: insert
+[256]: delete
+[26]: escape
+routing key: function key
+
+Special Focus Commands:
+routing key with right shift: switch to specific virtual console
