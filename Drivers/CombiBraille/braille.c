@@ -146,13 +146,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     return 0;
 
   /* Allocate space for buffers */
-  prevdata = (unsigned char *) malloc (brl->x * brl->y);
+  prevdata = (unsigned char *) mallocWrapper (brl->x * brl->y);
   /* rawdata has to have room for the pre- and post-data sequences,
    * the status cells, and escaped 0x1b's: */
-  rawdata = (unsigned char *) malloc (20 + brl->x * brl->y * 2);
-  if (!prevdata || !rawdata)
-    goto failure;
-
+  rawdata = (unsigned char *) mallocWrapper (20 + brl->x * brl->y * 2);
   return 1;
 
 failure:;

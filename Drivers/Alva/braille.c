@@ -239,7 +239,7 @@ static unsigned char NbStCells;	/* number of status cells */
 static BRLPARAMS *model;		/* points to terminal model config struct */
 static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
 static int rewriteInterval;
-static struct timeval rewriteTime;		/* 1 if display need to be rewritten */
+static struct timeval rewriteTime;
 
 
 
@@ -426,7 +426,7 @@ writeParameter (BrailleDisplay *brl, unsigned char parameter, unsigned char sett
 static int serialDevice = -1;
 static struct termios oldSerialSettings;
 static struct termios newSerialSettings;
-static int serialCharactersPerSecond;			/* file descriptor for Braille display */
+static int serialCharactersPerSecond;
 
 static int
 openSerialPort (char **parameters, const char *device) {

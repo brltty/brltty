@@ -42,7 +42,7 @@
 static int fileDescriptor = -1;
 static struct termios oldSettings;
 static struct termios newSettings;
-static int charactersPerSecond;			/* file descriptor for Braille display */
+static int charactersPerSecond;
 
 static TranslationTable inputMap;
 static const unsigned char topLeftKeys[]  = { 84,  83,  87,  85,  86,  88,  89,  90};

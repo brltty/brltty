@@ -172,7 +172,7 @@ typedef struct {
 
 static const InputOutputOperations *io;
 static const speed_t baud = B19200;
-static int charactersPerSecond;			/* file descriptor for Braille display */
+static int charactersPerSecond;
 
 static void
 writeStopSequence (void) {
@@ -185,7 +185,7 @@ writeStopSequence (void) {
 #include "Programs/serial.h"
 
 static int serialDevice = -1;			/* file descriptor for Braille display */
-static struct termios oldSerialSettings;		/* old terminal settings */
+static struct termios oldSerialSettings;	/* old terminal settings */
 
 static int
 openSerialPort (char **parameters, const char *device) {

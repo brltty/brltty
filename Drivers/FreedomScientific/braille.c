@@ -46,7 +46,7 @@ typedef struct {
 #include "Programs/serial.h"
 static int serialDevice = -1;
 static struct termios oldSerialSettings;
-static int serialCharactersPerSecond;			/* file descriptor for Braille display */
+static int serialCharactersPerSecond;
 
 static int
 openSerialPort (char **parameters, const char *device) {
