@@ -130,7 +130,7 @@ typedef struct {
   unsigned char NbStCells;
   unsigned char HelpPage;
 } BRLPARAMS;
-#define BPF_QUERIABLE_DIMENSIONS 0X01
+#define BPF_CONFIGURABLE 0X01
 
 static BRLPARAMS Models[] =
 {
@@ -190,25 +190,25 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 14 */
-    "Satellite 544", SAT544, BPF_QUERIABLE_DIMENSIONS,
+    "Satellite 544", SAT544, BPF_CONFIGURABLE,
     40, 3, 1
   }
   ,
   {
     /* ID == 15 */
-    "Satellite 570 Pro", SAT570P, BPF_QUERIABLE_DIMENSIONS,
+    "Satellite 570 Pro", SAT570P, BPF_CONFIGURABLE,
     66, 3, 1
   }
   ,
   {
     /* ID == 16 */
-    "Satellite 584 Pro", SAT584P, BPF_QUERIABLE_DIMENSIONS,
+    "Satellite 584 Pro", SAT584P, BPF_CONFIGURABLE,
     80, 3, 1
   }
   ,
   {
     /* ID == 17 */
-    "Satellite 544 Traveller", SAT544T, BPF_QUERIABLE_DIMENSIONS,
+    "Satellite 544 Traveller", SAT544T, BPF_CONFIGURABLE,
     40, 3, 1
   }
   ,
@@ -244,11 +244,15 @@ static int ReWrite = 0;		/* 1 if display need to be rewritten */
 
 /* Communication codes */
 
-static char BRL_START[] = "\r\033B";	/* escape code to display braille */
-#define DIM_BRL_START 3
-static char BRL_END[] = "\r";		/* to send after the braille sequence */
-#define DIM_BRL_END 1
-static const char BRL_ID[] = {0X1B, 'I', 'D', '='};
+static const unsigned char BRL_START[] = {'\r', 0X1B, 'B'};	/* escape code to display braille */
+#define BRL_START_LENGTH (sizeof(BRL_START)) 
+
+static const unsigned char BRL_END[] = {'\r'};		/* to send after the braille sequence */
+#define BRL_END_LENGTH (sizeof(BRL_END))
+
+static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
+#define BRL_ID_LENGTH (sizeof(BRL_ID))
+#define BRL_ID_SIZE (BRL_ID_LENGTH + 1)
 
 
 /* Key values */
@@ -369,10 +373,10 @@ verifyInputPacket (unsigned char *buffer, int *length) {
     }
 
     {
-      int count = sizeof(BRL_ID);
+      int count = BRL_ID_LENGTH;
       if (inputUsed < count) count = inputUsed;
       if (memcmp(&inputBuffer[0], BRL_ID, count) != 0) goto corrupt;
-      if (inputUsed >= sizeof(BRL_ID)+1) size = sizeof(BRL_ID)+1;
+      if (inputUsed >= BRL_ID_SIZE) size = BRL_ID_SIZE;
       break;
     }
 
@@ -467,17 +471,7 @@ chooseUsbDevice (UsbDevice *device, void *data) {
   if ((descriptor->idVendor == 0X6b0) && (descriptor->idProduct == 1)) {
     const unsigned int interface = 0;
 
-    if (parameters[PARM_SERIALNUMBER] && *parameters[PARM_SERIALNUMBER]) {
-      int ok = 0;
-      if (descriptor->iSerialNumber) {
-        char *serialNumber;
-        if ((serialNumber = usbGetString(device, descriptor->iSerialNumber, 1000))) {
-          if (strcmp(serialNumber, parameters[PARM_SERIALNUMBER]) == 0) ok = 1;
-          free(serialNumber);
-        }
-      }
-      if (!ok) return 0;
-    }
+    if (!usbVerifySerialNumber(device, parameters[PARM_SERIALNUMBER])) return 0;
 
     if (usbClaimInterface(device, interface) != -1) {
       if (usbSetConfiguration(device, 1) != -1) {
@@ -631,7 +625,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   if (!reallocateBuffers(brl)) return 0;
   ReWrite = 1;			/* To write whole display at first time */
 
-  if (model->Flags & BPF_QUERIABLE_DIMENSIONS) writeFunction(0X07);
+  if (model->Flags & BPF_CONFIGURABLE) writeFunction(0X07);
   return 1;
 }
 
@@ -695,10 +689,10 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
     if (writeFunction(0X06) == -1) goto failure;
     delay(200);
     {
-      unsigned char packet[sizeof(BRL_ID)+1];
+      unsigned char packet[BRL_ID_SIZE];
       if (readPacket(packet, sizeof(packet)) != sizeof(packet)) continue;
-      if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0)
-        ModelID = packet[sizeof(BRL_ID)];
+      if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0)
+        ModelID = packet[BRL_ID_LENGTH];
     }
   } while (ModelID == ABT_AUTO);
 
@@ -729,17 +723,17 @@ static void brl_close (BrailleDisplay *brl)
 
 static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
 {
-  unsigned char outbuf[ DIM_BRL_START + 2 + Len + DIM_BRL_END ];
+  unsigned char outbuf[ BRL_START_LENGTH + 2 + Len + BRL_END_LENGTH ];
   int outsz = 0;
 
-  memcpy( outbuf, BRL_START, DIM_BRL_START );
-  outsz += DIM_BRL_START;
+  memcpy( outbuf, BRL_START, BRL_START_LENGTH );
+  outsz += BRL_START_LENGTH;
   outbuf[outsz++] = (char)Start;
   outbuf[outsz++] = (char)Len;
   memcpy( outbuf+outsz, Data, Len );
   outsz += Len;
-  memcpy( outbuf+outsz, BRL_END, DIM_BRL_END );
-  outsz += DIM_BRL_END;
+  memcpy( outbuf+outsz, BRL_END, BRL_END_LENGTH );
+  outsz += BRL_END_LENGTH;
   return writePacket(outbuf, outsz);
 }
 
@@ -861,8 +855,9 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 
     case 0X7F:
       switch (packet[1]) {
-        case 0X07: {
+        case 0X07: { /* text/status cells reconfigured */
           int count = packet[3];
+          ReWrite = 1;
 
           if (count >= 3) {
             unsigned char cells = packet[9];
@@ -886,10 +881,10 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
       break;
 
     default:
-      if (length > sizeof(BRL_ID)) {
-        if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0) {
+      if (length >= BRL_ID_SIZE) {
+        if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
           /* The terminal has been turned off and back on. */
-          if (!identifyModel(brl, packet[sizeof(BRL_ID)])) return -1;
+          if (!identifyModel(brl, packet[BRL_ID_LENGTH])) return -1;
           brl->resizeRequired = 1;
           return 0;
         }
@@ -901,24 +896,25 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 #else /* ABT3_OLD_FIRMWARE */
 
   int key = packet[0];
-  if ((key >= (KEY_ROUTING_OFFSET + brl->x)) &&
-      (key < (KEY_ROUTING_OFFSET + brl->x + 6))) {
-    /* make for Status keys of Touch Cursor */
-    *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->x)];
-    return 1;
-  }
+  if (key < (KEY_ROUTING_OFFSET + brl->x + NbStCells)) {
+    if (key >= (KEY_ROUTING_OFFSET + brl->x)) {
+      /* status key */
+      *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->x)];
+      return 1;
+    }
 
-  if ((key >= KEY_ROUTING_OFFSET) &&
-      (key < (KEY_ROUTING_OFFSET + brl->x))) {
-    /* make for display keys of Touch cursor */
-    *Pos = key - KEY_ROUTING_OFFSET;
-    *Keys |= KEY_ROUTING;
-    return 1;
-  }
+    if (key >= KEY_ROUTING_OFFSET) {
+      /* routing key */
+      *Pos = key - KEY_ROUTING_OFFSET;
+      *Keys |= KEY_ROUTING1;
+      return 1;
+    }
 
-  if (!(key & 0X80)) {
-    *Keys = key;		/* check comments where KEY_xxxx are defined */
-    return 1;
+    if (!(key & 0X80)) {
+      /* operating key */
+      *Keys = key;		/* check comments where KEY_xxxx are defined */
+      return 1;
+    }
   }
 
 #endif /* ! ABT3_OLD_FIRMWARE */

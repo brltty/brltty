@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <regex.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
@@ -282,4 +283,57 @@ usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
 const UsbDeviceDescriptor *
 usbDeviceDescriptor (UsbDevice *device) {
   return &device->descriptor;
+}
+
+int
+usbStringEquals (const char *reference, const char *string) {
+  return strcmp(reference, string) == 0;
+}
+
+int
+usbStringMatches (const char *reference, const char *string) {
+  int ok = 0;
+  regex_t expression;
+  if (regcomp(&expression, string, REG_EXTENDED|REG_NOSUB) == 0) {
+    if (regexec(&expression, reference, 0, NULL, 0) == 0) {
+      ok = 1;
+    }
+    regfree(&expression);
+  }
+  return ok;
+}
+
+int
+usbVerifyString (
+  UsbDevice *device,
+  const char *value,
+  unsigned char index,
+  UsbStringVerifier verify
+) {
+  int ok = 0;
+  if (!(value && *value)) return 1;
+
+  if (index) {
+    char *string = usbGetString(device, index, 1000);
+    if (string) {
+      if (verify(string, value)) ok = 1;
+      free(string);
+    }
+  }
+  return ok;
+}
+
+int
+usbVerifyManufacturer (UsbDevice *device, const char *value) {
+  return usbVerifyString(device, value, device->descriptor.iManufacturer, usbStringMatches);
+}
+
+int
+usbVerifyProduct (UsbDevice *device, const char *value) {
+  return usbVerifyString(device, value, device->descriptor.iProduct, usbStringMatches);
+}
+
+int
+usbVerifySerialNumber (UsbDevice *device, const char *value) {
+  return usbVerifyString(device, value, device->descriptor.iSerialNumber, usbStringEquals);
 }

@@ -309,6 +309,19 @@ extern int usbReapInput (
   int wait
 );
 
+typedef int (UsbStringVerifier) (const char *reference, const char *string);
+extern UsbStringVerifier usbStringEquals;
+extern UsbStringVerifier usbStringMatches;
+extern int usbVerifyString (
+  UsbDevice *device,
+  const char *value,
+  unsigned char index,
+  UsbStringVerifier verify
+);
+extern int usbVerifyManufacturer (UsbDevice *device, const char *value);
+extern int usbVerifyProduct (UsbDevice *device, const char *value);
+extern int usbVerifySerialNumber (UsbDevice *device, const char *value);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

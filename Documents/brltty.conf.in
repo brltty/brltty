@@ -114,6 +114,10 @@
 # (can be overridden with the -B [--braille-parameters=] option)
 #braille-parameters parameter=setting,...
 
+# Alva Braille Driver Parameters
+#braille-parameters Port=serial # [serial,usb]
+#braille-parameters SerialNumber=
+
 # BrailleLite Braille Driver Parameters
 #braille-parameters BaudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
 #braille-parameters KbEmu=yes # [yes,no]
@@ -246,9 +250,9 @@
 # Programming Interface.
 # (can be overridden with the -A [--api-parameters=] option)
 #api-parameters parameter=setting,...
-#api-parameters host=
-#api-parameters port=35751
-#api-parameters keyfile=@CONFIGURATION_DIRECTORY@/@api_keyfile@
+#api-parameters Host=
+#api-parameters Port=35751
+#api-parameters KeyFile=@CONFIGURATION_DIRECTORY@/@api_keyfile@
 
 
 ############################
