@@ -47,6 +47,7 @@ Install this package if you use a refreshable braille display.
 %package -n brlapi
 Version: @BRLAPI_RELEASE@
 Group: Applications/System
+License: LGPL
 
 AutoProv: 1
 
@@ -63,6 +64,7 @@ a refreshable braille display.
 %package -n brlapi-devel
 Version: @BRLAPI_RELEASE@
 Group: Development/System
+License: LGPL
 
 AutoProv: 1
 
