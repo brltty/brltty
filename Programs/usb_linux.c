@@ -59,7 +59,7 @@ usbSetConfiguration (
   UsbDevice *device,
   unsigned int configuration
 ) {
-  if (ioctl(device->file, USBDEVFS_SETCONFIGURATION, &configuration) != -1) return 1;;
+  if (ioctl(device->file, USBDEVFS_SETCONFIGURATION, &configuration) != -1) return 1;
   LogError("USB configuration set");
   return 0;
 }

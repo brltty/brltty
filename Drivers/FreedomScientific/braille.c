@@ -105,9 +105,9 @@ readSerialBytes (void *buffer, int length) {
 
 static int
 writeSerialPacket (const void *buffer, int length, int *delay) {
-  if (delay) *delay += length * 1000 / serialCharactersPerSecond;
   int written = safe_write(serialDevice, buffer, length);
   if (written == -1) LogError("Serial write");
+  if (delay) *delay += length * 1000 / serialCharactersPerSecond;
   return written;
 }
 

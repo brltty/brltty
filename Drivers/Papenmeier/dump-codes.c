@@ -49,7 +49,7 @@ void try_init(const char *dev, unsigned int baud)
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
     perror("open failed");
-    exit(99);;
+    exit(99);
   }
 
   tcgetattr (brl_fd, &oldtio);	/* save current settings */

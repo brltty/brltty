@@ -301,7 +301,7 @@ addCommand (int code) {
   if (terminal) {
     if (ensureTableSize((void **)&terminal->commands, sizeof(*terminal->commands),
                         terminal->commandCount, &commandsSize, 0X20)) {
-      CommandDefinition *cmd = &terminal->commands[terminal->commandCount++];;
+      CommandDefinition *cmd = &terminal->commands[terminal->commandCount++];
       int k;
 
       cmd->code = code;
