@@ -171,8 +171,8 @@
 #speech-parameters Gid=65534
 
 # FestivalLite Speech Driver Parameters
-#speech-parameters pitch= # [50-200]
-#speech-parameters wpm= # [50-400]
+#speech-parameters pitch=100 # [50-200]
+#speech-parameters wpm=175 # [50-400]
 
 # GenericSay Speech Driver Parameters
 #speech-parameters Command=/usr/local/bin/say
