@@ -103,7 +103,7 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   if (!(buf = malloc(box.width*size)))
     return NULL;
 
-  for (y = 0; y < box.height; y++) {
+  for (y = 0; y < box.height; y++, coord.Y++) {
     if (!fun(consoleOutput, buf, box.width, coord, &read) || read != box.width) {
       LogWindowsError("ReadConsoleOutput");
       exit(0);
