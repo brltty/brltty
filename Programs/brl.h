@@ -36,6 +36,7 @@ typedef struct {
   unsigned resizeRequired:1;	/* the display size has changed */
   unsigned int writeDelay;
   void (*bufferResized) (int rows, int columns);
+  const char *dataDirectory;
 } BrailleDisplay;				/* used for writing to a braille display */
 
 extern void initializeBrailleDisplay (BrailleDisplay *);

@@ -211,8 +211,10 @@ makePath (const char *directory, const char *file) {
   char *path;
   components[last] = file;
   if (file[0] != '/') {
-    if (directory[strlen(directory)-1] != '/') components[--first] = "/";
-    components[--first] = directory;
+    if (directory && *directory) {
+      if (directory[strlen(directory)-1] != '/') components[--first] = "/";
+      components[--first] = directory;
+    }
   }
   for (index=first; index<=last; ++index) {
     length += lengths[index] = strlen(components[index]);

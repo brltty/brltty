@@ -92,15 +92,21 @@ static void read_file(char* name)
   }
 }
 
-static void read_config(char *name)
-{
+static void
+read_config (const char *directory, const char *name) {
   if (!*name) {
     if (!(name = getenv(PM_CONFIG_ENV))) {
       name = PM_CONFIG_FILE;
     }
   }
-  LogPrint(LOG_INFO, "Papenmeier Configuration File: %s", name);
-  read_file(name);
+  {
+    char *path = makePath(directory, name);
+    if (path) {
+      LogPrint(LOG_INFO, "Papenmeier Configuration File: %s", path);
+      read_file(path);
+      free(path);
+    }
+  }
 }
 #else /* ENABLE_PM_CONFIGURATION_FILE */
 #include "brl-cfg.h"
@@ -475,7 +481,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   /* read the config file for individual configurations */
 #ifdef ENABLE_PM_CONFIGURATION_FILE
   LogPrint(LOG_DEBUG, "Loading config file.");
-  read_config(parameters[PARM_CONFIGFILE]);
+  read_config(brl->dataDirectory, parameters[PARM_CONFIGFILE]);
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
 
   while (1) {

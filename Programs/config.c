@@ -570,6 +570,7 @@ void
 initializeBraille (void) {
    initializeBrailleDisplay(&brl);
    brl.bufferResized = &dimensionsChanged;
+   brl.dataDirectory = opt_dataDirectory;
 }
 
 static void
@@ -1658,7 +1659,7 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "Tables Directory: %s", opt_tablesDirectory);
   LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
   LogPrint(LOG_INFO, "Attributes Table: %s", opt_attributesTable);
-#ifdef ENABLE_CONTRACTED_BRAILLEtable
+#ifdef ENABLE_CONTRACTED_BRAILLE
   LogPrint(LOG_INFO, "Contractions Directory: %s", opt_contractionsDirectory);
   LogPrint(LOG_INFO, "Contraction Table: %s",
            opt_contractionTable? opt_contractionTable: "none");
@@ -1668,7 +1669,7 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_API */
   LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
   LogPrint(LOG_INFO, "Data Directory: %s", opt_dataDirectory);
-  LogPrint(LOG_INFO, "Help Page: %s[%d]", brailleDriver->helpFile, getHelpPageNumber());
+  LogPrint(LOG_INFO, "Help File: %s", brailleDriver->helpFile);
   LogPrint(LOG_INFO, "Braille Driver: %s (%s)",
            opt_brailleDriver, brailleDriver->name);
   LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
@@ -1786,6 +1787,7 @@ startup (int argc, char *argv[]) {
    */
 
   /* Activate the braille display. */
+  initializeBraille();
   startBrailleDriver();
   atexit(exitBrailleDriver);
 
@@ -1797,6 +1799,7 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */
+  initializeSpeech();
   startSpeechDriver();
   atexit(exitSpeechDriver);
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -1805,8 +1808,10 @@ startup (int argc, char *argv[]) {
   {
     char *path = makePath(opt_dataDirectory, brailleDriver->helpFile);
     if (path) {
-      if (!openHelpScreen(path))
-        LogPrint(LOG_WARNING, "Cannot open help screen file: %s", brailleDriver->helpFile);
+      if (openHelpScreen(path))
+        LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
+      else
+        LogPrint(LOG_WARNING, "Cannot open help file: %s", path);
       free(path);
     }
   }

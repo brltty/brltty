@@ -114,6 +114,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
    brl->buffer = NULL;
    brl->writeDelay = 0;
    brl->bufferResized = NULL;
+   brl->dataDirectory = NULL;
 }
 
 unsigned int
@@ -149,7 +150,7 @@ writeBrailleString (BrailleDisplay *brl, const char *string) {
 static void
 brailleBufferResized (BrailleDisplay *brl) {
   memset(brl->buffer, 0, brl->x*brl->y);
-  LogPrint(LOG_INFO, "Braille display has %d %s of %d %s.",
+  LogPrint(LOG_INFO, "Braille Display Dimensions: %d %s, %d %s",
            brl->y, (brl->y == 1)? "row": "rows",
            brl->x, (brl->x == 1)? "column": "columns");
   if (brl->bufferResized) brl->bufferResized(brl->y, brl->x);

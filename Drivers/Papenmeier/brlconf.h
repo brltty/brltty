@@ -92,6 +92,6 @@
 #define PREFSTYLE ST_Generic
 
 #define PM_CONFIG_ENV   "BRLTTY_PM_CONF"
-#define PM_CONFIG_FILE  DATA_DIRECTORY "/brltty-pm.conf"
+#define PM_CONFIG_FILE  "brltty-pm.conf"
 
 #define MAXPATH  128

@@ -166,6 +166,7 @@ main (int argc, char *argv[]) {
     if (chdir(opt_dataDirectory) != -1) {
       reverseTable(&textTable, &untextTable);
       initializeBrailleDisplay(&brl);
+      brl.dataDirectory = opt_dataDirectory;
       braille->identify();		/* start-up messages */
       if (braille->open(&brl, parameterSettings, opt_brailleDevice)) {
         if (allocateBrailleBuffer(&brl)) {

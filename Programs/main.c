@@ -766,11 +766,6 @@ main (int argc, char *argv[]) {
   curscr = 0;
   atexit(exitScreenParameters);
   
-  initializeBraille();
-#ifdef ENABLE_SPEECH_SUPPORT
-  initializeSpeech();
-#endif /* ENABLE_SPEECH_SUPPORT */
-
   /* We install SIGPIPE handler before startup() so that drivers which
    * use pipes can't cause program termination (the call to message() in
    * startup() in particular).
