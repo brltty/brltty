@@ -157,7 +157,7 @@ _sndcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
     else
       LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
 	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usbDevice, 0, USB_DIR_OUT, 
+    ret = usbControlTransfer(usbDevice, 0, USB_DIRECTION_OUTPUT, 
 			     BRLVGER_WRITE_REQ,
 			     request, value, index, buffer, size,
 			     100);
@@ -183,7 +183,7 @@ _rcvcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
     else
       LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
 	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usbDevice, 0, USB_DIR_IN, 
+    ret = usbControlTransfer(usbDevice, 0, USB_DIRECTION_INPUT, 
 			     BRLVGER_READ_REQ,
 			     request, value, index, buffer, size,
 			     100);
