@@ -54,8 +54,10 @@ typedef enum {
 
 static int tty_fd=-1;
 static iconv_t conv;
-#define WHOLESIZE 80
-static int lines=1,cols=40;
+#define MAXLINES 3
+#define MAXCOLS 80
+#define WHOLESIZE (MAXLINES * MAXCOLS)
+static int lines,cols;
 static FILE *tty_ffd;
 static SCREEN *scr;
 static struct termios oldtio,newtio;
@@ -77,21 +79,26 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  if (*parameters[PARM_CSET])
   cset=parameters[PARM_CSET];
 
- if (*parameters[PARM_LINES])
-  lines=atoi(parameters[PARM_LINES]);
-
- if (*parameters[PARM_COLS])
-  cols=atoi(parameters[PARM_COLS]);
-
- if (lines*cols>=WHOLESIZE) {
-  LogPrint(LOG_ERR,"too expensive a braille display, sorry");
-  return 0;
+ lines=1;
+ if (*parameters[PARM_LINES]) {
+  static const int minimum = 1;
+  static const int maximum = MAXLINES;
+  int value;
+  if (validateInteger(&value, "lines", parameters[PARM_LINES], &minimum, &maximum))
+   lines=value;
  }
 
- LogPrint(LOG_NOTICE,"tty type: %s",term);
+ cols=40;
+ if (*parameters[PARM_COLS]) {
+  static const int minimum = 1;
+  static const int maximum = MAXCOLS;
+  int value;
+  if (validateInteger(&value, "cols", parameters[PARM_COLS], &minimum, &maximum))
+   cols=value;
+ }
 
  if (!openSerialDevice(device, &tty_fd, &oldtio)) {
-  LogPrint(LOG_ERR, "open error:%s", strerror(errno));
+  LogPrint(LOG_ERR, "Tty open error: %s", strerror(errno));
   return 0;
  }
  memset(&newtio, 0, sizeof(newtio)); 
@@ -102,12 +109,12 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  resetSerialDevice(tty_fd,&newtio,B19200); 
 
  if (!(tty_ffd=fdopen(tty_fd,"a+"))) {
-  LogPrint(LOG_ERR, "fdopen error:%s", strerror(errno));
+  LogError("fdopen");
   goto outfd;
  }
 
  if (!(scr=newterm(term,tty_ffd,tty_ffd))) {
-  LogPrint(LOG_ERR, "newterm error");
+  LogError("newterm");
   goto outffd;
  }
 
@@ -122,14 +129,15 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  refresh();
  fflush(tty_ffd);
 
- LogPrint(LOG_NOTICE,"%dx%d display",cols,lines);
- brl->x=cols;
- brl->y=lines; 
-
  if ((conv=iconv_open(cset,"ISO8859-1"))==(iconv_t)-1) {
   LogPrint(LOG_ERR,"unable to open conversion");
   goto outcurses;
  }
+
+ brl->x=cols;
+ brl->y=lines; 
+
+ LogPrint(LOG_INFO,"Tty: type=%s size=%dx%d",term,cols,lines);
  return 1;
 
  iconv_close(conv);

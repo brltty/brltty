@@ -133,9 +133,9 @@
 #braille-parameters pm:DebugWrites=no # [no,yes]
 
 # Tty Braille Driver Parameters
-#braille-parameters ty:Cols=40 # 
+#braille-parameters ty:Cols=40 #  [1-80]
 #braille-parameters ty:CSet=ISO8859-1 # 
-#braille-parameters ty:Lines=1 # 
+#braille-parameters ty:Lines=1 #  [1-3]
 #braille-parameters ty:Term=vt100 # [terminfo]
 
 # VisioBraille Braille Driver Parameters
