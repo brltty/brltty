@@ -31,97 +31,124 @@ extern "C" {
 #include "iodefs.h"
 
 /* Descriptor types. */
-#define USB_DESCRIPTOR_TYPE_DEVICE        0x01
-#define USB_DESCRIPTOR_TYPE_CONFIGURATION 0x02
-#define USB_DESCRIPTOR_TYPE_STRING        0x03
-#define USB_DESCRIPTOR_TYPE_INTERFACE     0x04
-#define USB_DESCRIPTOR_TYPE_ENDPOINT      0x05
+typedef enum {
+  UsbDescriptorType_Device        = 0X01,
+  UsbDescriptorType_Configuration = 0X02,
+  UsbDescriptorType_String        = 0X03,
+  UsbDescriptorType_Interface     = 0X04,
+  UsbDescriptorType_Endpoint      = 0X05
+} UsbDescriptorType;
 
 /* Descriptor sizes. */
-#define USB_DESCRIPTOR_SIZE_DEVICE        18
-#define USB_DESCRIPTOR_SIZE_CONFIGURATION  9
-#define USB_DESCRIPTOR_SIZE_STRING         2
-#define USB_DESCRIPTOR_SIZE_INTERFACE      9
-#define USB_DESCRIPTOR_SIZE_ENDPOINT       7
+typedef enum {
+  UsbDescriptorSize_Device        = 18,
+  UsbDescriptorSize_Configuration =  9,
+  UsbDescriptorSize_String        =  2,
+  UsbDescriptorSize_Interface     =  9,
+  UsbDescriptorSize_Endpoint      =  7
+} UsbDescriptorSize;
 
 /* Configuration attributes (bmAttributes). */
-#define USB_ATTRIBUTE_BUS_POWERED   0X80
-#define USB_ATTRIBUTE_SELF_POWERED  0X40
-#define USB_ATTRIBUTE_REMOTE_WAKEUP 0X20
+typedef enum {
+  UsbConfigurationAttribute_BusPowered   = 0X80,
+  UsbConfigurationAttribute_SelfPowered  = 0X40,
+  UsbConfigurationAttribute_RemoteWakeup = 0X20
+} UsbConfigurationAttribute;
 
 /* Device and interface classes (bDeviceClass, bInterfaceClass). */
-#define USB_CLASS_PER_INTERFACE 0X00
-#define USB_CLASS_AUDIO         0X01
-#define USB_CLASS_COMM          0X02
-#define USB_CLASS_HID           0X03
-#define USB_CLASS_PHYSICAL      0X05
-#define USB_CLASS_PRINTER       0X07
-#define USB_CLASS_MASS_STORAGE  0X08
-#define USB_CLASS_HUB           0X09
-#define USB_CLASS_DATA          0X0A
-#define USB_CLASS_APP_SPEC      0XFE
-#define USB_CLASS_VENDOR_SPEC   0XFF
+typedef enum {
+  UsbClass_PerInterface = 0X00,
+  UsbClass_Audio        = 0X01,
+  UsbClass_Comm         = 0X02,
+  UsbClass_Hid          = 0X03,
+  UsbClass_Physical     = 0X05,
+  UsbClass_Printer      = 0X07,
+  UsbClass_MassStorage  = 0X08,
+  UsbClass_Hub          = 0X09,
+  UsbClass_Data         = 0X0A,
+  UsbClass_AppSpec      = 0XFE,
+  UsbClass_VendorSpec   = 0XFF
+} UsbClass;
 
 /* Endpoint numbers (bEndpointAddress). */
-#define USB_ENDPOINT_NUMBER_MASK 0X0F
-#define USB_ENDPOINT_NUMBER(endpoint) ((endpoint)->bEndpointAddress & USB_ENDPOINT_NUMBER_MASK)
+typedef enum {
+  UsbEndpointNumber_Mask = 0X0F
+} UsbEndpointNumber;
+#define USB_ENDPOINT_NUMBER(descriptor) ((descriptor)->bEndpointAddress & UsbEndpointNumber_Mask)
 
 /* Endpoint directions (bEndpointAddress). */
-#define USB_ENDPOINT_DIRECTION_MASK   0X80
-#define USB_ENDPOINT_DIRECTION_OUTPUT 0X00
-#define USB_ENDPOINT_DIRECTION_INPUT  0X80
-#define USB_ENDPOINT_DIRECTION(endpoint) ((endpoint)->bEndpointAddress & USB_ENDPOINT_DIRECTION_MASK)
+typedef enum {
+  UsbEndpointDirection_Output = 0X00,
+  UsbEndpointDirection_Input  = 0X80,
+  UsbEndpointDirection_Mask   = 0X80
+} UsbEndpointDirection;
+#define USB_ENDPOINT_DIRECTION(descriptor) ((descriptor)->bEndpointAddress & UsbEndpointDirection_Mask)
 
 /* Endpoint transfer types (bmAttributes). */
-#define USB_ENDPOINT_TRANSFER_MASK        0X03
-#define USB_ENDPOINT_TRANSFER_CONTROL     0X00
-#define USB_ENDPOINT_TRANSFER_ISOCHRONOUS 0X01
-#define USB_ENDPOINT_TRANSFER_BULK        0X02
-#define USB_ENDPOINT_TRANSFER_INTERRUPT   0X03
-#define USB_ENDPOINT_TRANSFER(endpoint) ((endpoint)->bmAttributes & USB_ENDPOINT_TRANSFER_MASK)
+typedef enum {
+  UsbEndpointTransfer_Control     = 0X00,
+  UsbEndpointTransfer_Isochronous = 0X01,
+  UsbEndpointTransfer_Bulk        = 0X02,
+  UsbEndpointTransfer_Interrupt   = 0X03,
+  UsbEndpointTransfer_Mask        = 0X03
+} UsbEndpointTransfer;
+#define USB_ENDPOINT_TRANSFER(descriptor) ((descriptor)->bmAttributes & UsbEndpointTransfer_Mask)
 
 /* Endpoint isochronous types (bmAttributes). */
-#define USB_ENDPOINT_ISOCHRONOUS_MASK          0X0C
-#define USB_ENDPOINT_ISOCHRONOUS_aSYNOCHRONOUS 0X04
-#define USB_ENDPOINT_ISOCHRONOUS_ADAPTABLE     0X08
-#define USB_ENDPOINT_ISOCHRONOUS_SYNCHRONOUS   0X0C
-#define USB_ENDPOINT_ISOCHRONOUS(endpoint) ((endpoint)->bmAttributes & USB_ENDPOINT_ISOCHRONOUS_MASK)
+typedef enum {
+  UsbEndpointIsochronous_Asynchronous = 0X04,
+  UsbEndpointIsochronous_Adaptable    = 0X08,
+  UsbEndpointIsochronous_Synchronous  = 0X0C,
+  UsbEndpointIsochronous_Mask         = 0X0C
+} UsbEndpointIsochronous;
+#define USB_ENDPOINT_ISOCHRONOUS(descriptor) ((descriptor)->bmAttributes & UsbEndpointIsochronous_Mask)
 
 /* Control transfer recipients. */
-#define USB_RECIPIENT_MASK      0X1F
-#define USB_RECIPIENT_DEVICE    0X00
-#define USB_RECIPIENT_INTERFACE 0X01
-#define USB_RECIPIENT_ENDPOINT  0X02
-#define USB_RECIPIENT_OTHER     0X03
+typedef enum {
+  UsbControlRecipient_Device    = 0X00,
+  UsbControlRecipient_Interface = 0X01,
+  UsbControlRecipient_Endpoint  = 0X02,
+  UsbControlRecipient_Other     = 0X03,
+  UsbControlRecipient_Mask      = 0X1F
+} UsbControlRecipient;
 
 /* Control transfer types. */
-#define USB_TYPE_MASK     0X60
-#define USB_TYPE_STANDARD 0X00
-#define USB_TYPE_CLASS    0X20
-#define USB_TYPE_VENDOR   0X40
-#define USB_TYPE_RESERVED 0X60
+typedef enum {
+  UsbControlType_Standard = 0X00,
+  UsbControlType_Class    = 0X20,
+  UsbControlType_Vendor   = 0X40,
+  UsbControlType_Reserved = 0X60,
+  UsbControlType_Mask     = 0X60
+} UsbControlType;
 
 /* Transfer directions. */
-#define USB_DIRECTION_OUTPUT 0X00
-#define USB_DIRECTION_INPUT  0X80
+typedef enum {
+  UsbControlDirection_Output = 0X00,
+  UsbControlDirection_Input  = 0X80,
+  UsbControlDirection_Mask   = 0X80
+} UsbControlDirection;
 
 /* Standard control requests. */
-#define USB_REQ_GET_STATUS        0X00
-#define USB_REQ_CLEAR_FEATURE     0X01
-#define USB_REQ_GET_STATE         0X02
-#define USB_REQ_SET_FEATURE       0X03
-#define USB_REQ_SET_ADDRESS       0X05
-#define USB_REQ_GET_DESCRIPTOR    0X06
-#define USB_REQ_SET_DESCRIPTOR    0X07
-#define USB_REQ_GET_CONFIGURATION 0X08
-#define USB_REQ_SET_CONFIGURATION 0X09
-#define USB_REQ_GET_INTERFACE     0X0A
-#define USB_REQ_SET_INTERFACE     0X0B
-#define USB_REQ_SYNCH_FRAME       0X0C
+typedef enum {
+  UsbStandardRequest_GetStatus        = 0X00,
+  UsbStandardRequest_ClearFeature     = 0X01,
+  UsbStandardRequest_GetState         = 0X02,
+  UsbStandardRequest_SetFeature       = 0X03,
+  UsbStandardRequest_SetAddress       = 0X05,
+  UsbStandardRequest_GetDescriptor    = 0X06,
+  UsbStandardRequest_SetDescriptor    = 0X07,
+  UsbStandardRequest_GetConfiguration = 0X08,
+  UsbStandardRequest_SetConfiguration = 0X09,
+  UsbStandardRequest_GetInterface     = 0X0A,
+  UsbStandardRequest_SetInterface     = 0X0B,
+  UsbStandardRequest_SynchFrame       = 0X0C
+} UsbStandardRequest;
 
 /* Standard features. */
-#define USB_FEATURE_ENDPOINT_STALL       0X00
-#define USB_FEATURE_DEVICE_REMOTE_WAKEUP 0X01
+typedef enum {
+  UsbFeature_Endpoint_Stall      = 0X00,
+  UsbFeature_Device_RemoteWakeup = 0X01
+} UsbFeature;
 
 typedef struct {
   uint8_t bLength;         /* Descriptor size in bytes. */

@@ -570,8 +570,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
                                                        &eptx->transferMode, &eptx->packetSize, &eptx->pollInterval);
         if (result == kIOReturnSuccess) {
           if ((eptx->endpointNumber == number) &&
-              (((eptx->transferDirection == kUSBIn) && (direction == USB_ENDPOINT_DIRECTION_INPUT)) ||
-               ((eptx->transferDirection == kUSBOut) && (direction == USB_ENDPOINT_DIRECTION_OUTPUT)))) {
+              (((eptx->transferDirection == kUSBIn) && (direction == UsbEndpointDirection_Input)) ||
+               ((eptx->transferDirection == kUSBOut) && (direction == UsbEndpointDirection_Output)))) {
             LogPrint(LOG_DEBUG, "USB: ept=%02X -> pip=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
                      endpoint->descriptor->bEndpointAddress, eptx->pipeNumber,
                      eptx->endpointNumber, eptx->transferDirection, eptx->transferMode,
@@ -854,8 +854,8 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   if ((result = (*devx->device)->GetNumberOfConfigurations(devx->device, &device->descriptor.bNumConfigurations)) != kIOReturnSuccess) goto error;
   device->descriptor.bMaxPacketSize0 = 0;
 
-  device->descriptor.bLength = USB_DESCRIPTOR_SIZE_DEVICE;
-  device->descriptor.bDescriptorType = USB_DESCRIPTOR_TYPE_DEVICE;
+  device->descriptor.bLength = UsbDescriptorSize_Device;
+  device->descriptor.bDescriptorType = UsbDescriptorType_Device;
   return 1;
 
 error:

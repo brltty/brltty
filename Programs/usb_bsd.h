@@ -173,8 +173,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
              length, prefix, USB_ENDPOINT_NUMBER(endpoint->descriptor));
 
     switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
-      case USB_ENDPOINT_DIRECTION_INPUT : flags = O_RDONLY; break;
-      case USB_ENDPOINT_DIRECTION_OUTPUT: flags = O_WRONLY; break;
+      case UsbEndpointDirection_Input : flags = O_RDONLY; break;
+      case UsbEndpointDirection_Output: flags = O_WRONLY; break;
     }
 
     if ((eptx->file = open(path, flags)) != -1) {

@@ -44,7 +44,7 @@ usbControlRead (
   int length,
   int timeout
 ) {
-  return usbControlTransfer(device, USB_DIRECTION_INPUT, recipient, type,
+  return usbControlTransfer(device, UsbControlDirection_Input, recipient, type,
                             request, value, index, buffer, length, timeout);
 }
 
@@ -60,7 +60,7 @@ usbControlWrite (
   int length,
   int timeout
 ) {
-  return usbControlTransfer(device, USB_DIRECTION_OUTPUT, recipient, type,
+  return usbControlTransfer(device, UsbControlDirection_Output, recipient, type,
                             request, value, index, (void *)buffer, length, timeout);
 }
 
@@ -73,8 +73,8 @@ usbGetDescriptor (
   UsbDescriptor *descriptor,
   int timeout
 ) {
-  return usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
-                        USB_REQ_GET_DESCRIPTOR, (type << 8) | number, index,
+  return usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
+                        UsbStandardRequest_GetDescriptor, (type << 8) | number, index,
                         descriptor->bytes, sizeof(descriptor->bytes), timeout);
 }
 
@@ -85,7 +85,7 @@ usbGetLanguage (
   int timeout
 ) {
   UsbDescriptor descriptor;
-  int size = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
+  int size = usbGetDescriptor(device, UsbDescriptorType_String,
                               0, 0, &descriptor, timeout);
   if (size != -1) {
     if (size >= 4) {
@@ -127,7 +127,7 @@ usbGetString (
     if (!usbGetLanguage(device, &device->language, timeout))
       return NULL;
 
-  if (usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
+  if (usbGetDescriptor(device, UsbDescriptorType_String,
                        number, device->language,
                        &descriptor, timeout) == -1)
     return NULL;
@@ -211,8 +211,8 @@ usbGetConfiguration (
   UsbDevice *device,
   unsigned char *number
 ) {
-  int size = usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
-                            USB_REQ_GET_CONFIGURATION, 0, 0,
+  int size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
+                            UsbStandardRequest_GetConfiguration, 0, 0,
                             number, sizeof(*number), 1000);
   return size;
 }
@@ -227,7 +227,7 @@ usbReadConfiguration (UsbDevice *device) {
       UsbDescriptor descriptor;
       unsigned char number;
       for (number=0; number<device->descriptor.bNumConfigurations; number++) {
-        int size = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_CONFIGURATION,
+        int size = usbGetDescriptor(device, UsbDescriptorType_Configuration,
                                     number, 0, &descriptor, 1000);
         if (size == -1) {
           LogPrint(LOG_WARNING, "USB configuration descriptor not readable: %d", number);
@@ -240,9 +240,9 @@ usbReadConfiguration (UsbDevice *device) {
         int length = getLittleEndian(descriptor.configuration.wTotalLength);
         UsbDescriptor *descriptors = malloc(length);
         if (descriptors) {
-          int size = usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
-                                    USB_REQ_GET_DESCRIPTOR,
-                                    (USB_DESCRIPTOR_TYPE_CONFIGURATION << 8) | number,
+          int size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
+                                    UsbStandardRequest_GetDescriptor,
+                                    (UsbDescriptorType_Configuration << 8) | number,
                                     0, descriptors, length, 1000);
           if (size != -1) {
             device->configurationDescriptor = descriptors;
@@ -262,7 +262,7 @@ usbDeallocateEndpoint (void *item, void *data) {
   UsbEndpoint *endpoint = item;
 
   switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
-    case USB_ENDPOINT_DIRECTION_INPUT:
+    case UsbEndpointDirection_Input:
       if (endpoint->direction.input.pending)
         deallocateQueue(endpoint->direction.input.pending);
       if (endpoint->direction.input.completed)
@@ -292,7 +292,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
     while (offset < device->configurationLength) {
       UsbEndpointDescriptor *descriptor = (UsbEndpointDescriptor *)((unsigned char *)device->configurationDescriptor + offset);
       offset += descriptor->bLength;
-      if (descriptor->bDescriptorType != USB_DESCRIPTOR_TYPE_ENDPOINT) continue;
+      if (descriptor->bDescriptorType != UsbDescriptorType_Endpoint) continue;
       if (descriptor->bEndpointAddress != endpointAddress) continue;
       found = 1;
 
@@ -302,16 +302,16 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
 
         switch (USB_ENDPOINT_DIRECTION(descriptor)) {
           default:                            direction = "?";   break;
-          case USB_ENDPOINT_DIRECTION_INPUT:  direction = "in";  break;
-          case USB_ENDPOINT_DIRECTION_OUTPUT: direction = "out"; break;
+          case UsbEndpointDirection_Input:  direction = "in";  break;
+          case UsbEndpointDirection_Output: direction = "out"; break;
         }
 
         switch (USB_ENDPOINT_TRANSFER(descriptor)) {
           default:                                transfer = "?";   break;
-          case USB_ENDPOINT_TRANSFER_CONTROL:     transfer = "ctl"; break;
-          case USB_ENDPOINT_TRANSFER_ISOCHRONOUS: transfer = "iso"; break;
-          case USB_ENDPOINT_TRANSFER_BULK:        transfer = "blk"; break;
-          case USB_ENDPOINT_TRANSFER_INTERRUPT:   transfer = "int"; break;
+          case UsbEndpointTransfer_Control:     transfer = "ctl"; break;
+          case UsbEndpointTransfer_Isochronous: transfer = "iso"; break;
+          case UsbEndpointTransfer_Bulk:        transfer = "blk"; break;
+          case UsbEndpointTransfer_Interrupt:   transfer = "int"; break;
         }
 
         LogPrint(LOG_DEBUG, "USB: ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
@@ -326,7 +326,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         endpoint->descriptor = descriptor;
 
         switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
-          case USB_ENDPOINT_DIRECTION_INPUT:
+          case UsbEndpointDirection_Input:
             endpoint->direction.input.pending = NULL;
             endpoint->direction.input.completed = NULL;
             endpoint->direction.input.buffer = NULL;
@@ -353,12 +353,12 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
 
 UsbEndpoint *
 usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber) {
-  return usbGetEndpoint(device, endpointNumber|USB_ENDPOINT_DIRECTION_INPUT);
+  return usbGetEndpoint(device, endpointNumber|UsbEndpointDirection_Input);
 }
 
 UsbEndpoint *
 usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber) {
-  return usbGetEndpoint(device, endpointNumber|USB_ENDPOINT_DIRECTION_OUTPUT);
+  return usbGetEndpoint(device, endpointNumber|UsbEndpointDirection_Output);
 }
 
 static void
@@ -414,8 +414,8 @@ usbOpenDevice (void *extension) {
     if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
       if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
         if (usbReadDeviceDescriptor(device))
-          if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
-            if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
+          if (device->descriptor.bDescriptorType == UsbDescriptorType_Device)
+            if (device->descriptor.bLength == UsbDescriptorSize_Device)
               return device;
         deallocateQueue(device->inputFilters);
       }
@@ -536,7 +536,7 @@ usbAwaitInput (
     UsbResponse response;
     void *request;
     while (!(request = usbReapResponse(device,
-                                       endpointNumber | USB_ENDPOINT_DIRECTION_INPUT,
+                                       endpointNumber | UsbEndpointDirection_Input,
                                        &response, 0))) {
       if (errno != EAGAIN) return 0;
       if (timeout <= 0) return 0;
@@ -602,7 +602,7 @@ usbReapInput (
 
 static int
 usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
-  return usbControlWrite(device, USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR,
+  return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, 0, NULL, 0, 1000) != -1;
 }
 static int
@@ -713,7 +713,7 @@ usbFtdiInputFilter (UsbInputFilterData *data) {
 }
 static int
 usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
-  return usbControlWrite(device, USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR,
+  return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
 static int

@@ -365,7 +365,7 @@ writeUsbData (uint8_t request, uint16_t value, uint16_t index,
 	      const unsigned char *buffer, uint16_t size) {
   int retry = 0;
   while (1) {
-    int ret = usbControlWrite(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+    int ret = usbControlWrite(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                               request, value, index, buffer, size, 100);
     if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
     LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
@@ -377,7 +377,7 @@ readUsbData (uint8_t request, uint16_t value, uint16_t index,
 	     unsigned char *buffer, uint16_t size) {
   int retry = 0;
   while (1) {
-    int ret = usbControlRead(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+    int ret = usbControlRead(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                              request, value, index, buffer, size, 100);
     if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
     LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);

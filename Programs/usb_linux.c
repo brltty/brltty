@@ -275,7 +275,7 @@ usbReadEndpoint (
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
     switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
-      case USB_ENDPOINT_TRANSFER_BULK:
+      case UsbEndpointTransfer_Bulk:
         count = usbBulkTransfer(endpoint, buffer, length, timeout);
         break;
 
@@ -305,7 +305,7 @@ usbWriteEndpoint (
   UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
   if (endpoint) {
     switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
-      case USB_ENDPOINT_TRANSFER_BULK:
+      case UsbEndpointTransfer_Bulk:
         return usbBulkTransfer(endpoint, (void *)buffer, length, timeout);
 
       default:
@@ -332,20 +332,20 @@ usbSubmitRequest (
       memset(urb, 0, sizeof(*urb));
       urb->endpoint = endpointAddress;
       switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
-        case USB_ENDPOINT_TRANSFER_CONTROL:
+        case UsbEndpointTransfer_Control:
           urb->type = USBDEVFS_URB_TYPE_CONTROL;
           break;
-        case USB_ENDPOINT_TRANSFER_ISOCHRONOUS:
+        case UsbEndpointTransfer_Isochronous:
           urb->type = USBDEVFS_URB_TYPE_ISO;
           break;
-        case USB_ENDPOINT_TRANSFER_INTERRUPT:
-        case USB_ENDPOINT_TRANSFER_BULK:
+        case UsbEndpointTransfer_Interrupt:
+        case UsbEndpointTransfer_Bulk:
           urb->type = USBDEVFS_URB_TYPE_BULK;
           break;
       }
       urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
       if (buffer)
-        if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT)
+        if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == UsbEndpointDirection_Output)
           memcpy(urb->buffer, buffer, length);
       urb->flags = 0;
       urb->signr = 0;
@@ -359,7 +359,7 @@ usbSubmitRequest (
     submit:
       if (ioctl(devx->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
       if ((errno == EINVAL) &&
-          (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == USB_ENDPOINT_TRANSFER_INTERRUPT) &&
+          (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) &&
           (urb->type == USBDEVFS_URB_TYPE_BULK)) {
         urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
         goto submit;
@@ -434,10 +434,10 @@ usbReapResponse (
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  int count = read(devx->file, &device->descriptor, USB_DESCRIPTOR_SIZE_DEVICE);
+  int count = read(devx->file, &device->descriptor, UsbDescriptorSize_Device);
   if (count == -1) {
     LogError("USB device descriptor read");
-  } else if (count != USB_DESCRIPTOR_SIZE_DEVICE) {
+  } else if (count != UsbDescriptorSize_Device) {
     LogPrint(LOG_ERR, "USB short device descriptor (%d).", count);
   } else {
     return 1;
