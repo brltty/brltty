@@ -353,7 +353,7 @@ enqueueText (const unsigned char *bytes, int length) {
 
 static int
 enqueueTag (const char *tag) {
-  return enqueueSpeech(tag, strlen(tag), MPINT_TAGS_OWN|MPINT_TAGS_SAPI5);
+  return enqueueSpeech((unsigned char *)tag, strlen(tag), MPINT_TAGS_OWN|MPINT_TAGS_SAPI5);
 }
 
 static void
