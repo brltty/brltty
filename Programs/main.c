@@ -1983,6 +1983,8 @@ main (int argc, char *argv[]) {
       oldX = newX;
       oldY = newY;
     }
+
+    processSpeechFifo();
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     /* There are a few things to take care of if the display has moved. */

@@ -69,6 +69,9 @@ extern double spkDurationStretchTable[];
 #define SPK_DEFAULT_VOLUME 10
 #define SPK_MAXIMUM_VOLUME (SPK_DEFAULT_VOLUME * 2)
 
+extern int openSpeechFifo (const char *directory, const char *path);
+extern void processSpeechFifo (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

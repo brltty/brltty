@@ -127,3 +127,57 @@ setSpeechVolume (int setting) {
   speech->volume(setting);
   saySpeechSetting(setting, "volume");
 }
+
+static char *speechFifoPath = NULL;
+static int speechFifoDescriptor = -1;
+
+static void
+exitSpeechFifo (void) {
+  if (speechFifoDescriptor != -1) {
+    close(speechFifoDescriptor);
+    speechFifoDescriptor = -1;
+  }
+
+  if (speechFifoPath) {
+    unlink(speechFifoPath);
+    free(speechFifoPath);
+    speechFifoPath = NULL;
+  }
+}
+
+int
+openSpeechFifo (const char *directory, const char *path) {
+  if ((speechFifoPath = makePath(directory, path))) {
+    if (mkfifo(path, 0) != -1) {
+      chmod(path, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
+      if ((speechFifoDescriptor = open(path, O_RDONLY|O_NDELAY)) != -1) {
+        atexit(exitSpeechFifo);
+
+        LogPrint(LOG_DEBUG, "Speech FIFO created: %s: fd=%d",
+                 speechFifoPath, speechFifoDescriptor);
+        return 1;
+      } else {
+        LogPrint(LOG_ERR, "Cannot open speech FIFO: %s: %s",
+                 path, strerror(errno));
+      }
+
+      unlink(path);
+    } else {
+      LogPrint(LOG_ERR, "Cannot create speech FIFO: %s: %s",
+               path, strerror(errno));
+    }
+
+    free(speechFifoPath);
+    speechFifoPath = NULL;
+  }
+  return 0;
+}
+
+void
+processSpeechFifo (void) {
+  if (speechFifoDescriptor != -1) {
+    unsigned char buffer[0X1000];
+    int count = read(speechFifoDescriptor, buffer, sizeof(buffer));
+    if (count > 0) speech->say(buffer, count);
+  }
+}

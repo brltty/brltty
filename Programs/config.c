@@ -74,16 +74,19 @@ static const char *opt_libraryDirectory = NULL;
 static short opt_logLevel = LOG_NOTICE;
 static short opt_noDaemon = 0;
 #ifdef ENABLE_SPEECH_SUPPORT
-static short opt_noSpeech = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
 static const char *opt_pidFile = NULL;
 static const char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
 static char *opt_screenParameters = NULL;
+
 #ifdef ENABLE_SPEECH_SUPPORT
 static const char *opt_speechDriver = NULL;
 static char *opt_speechParameters = NULL;
+static const char *opt_speechFifo = NULL;
+static short opt_noSpeech = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
+
 static short opt_standardError = 0;
 static const char *opt_tablesDirectory = NULL;
 static const char *opt_textTable = NULL;
@@ -105,10 +108,13 @@ static char *cfg_dataDirectory = NULL;
 static char *cfg_brailleDriver = NULL;
 static char *cfg_brailleDevice = NULL;
 static char *cfg_brailleParameters = NULL;
+
 #ifdef ENABLE_SPEECH_SUPPORT
 static char *cfg_speechDriver = NULL;
 static char *cfg_speechParameters = NULL;
+static char *cfg_speechFifo = NULL;
 #endif /* ENABLE_SPEECH_SUPPORT */
+
 static char *cfg_screenParameters = NULL;
 
 static const BrailleDriver *brailleDriver;
@@ -228,6 +234,11 @@ static ConfigurationLineStatus
 configureSpeechParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_speechParameters, delimiters, 1);
 }
+
+static ConfigurationLineStatus
+configureSpeechFifo (const char *delimiters) {
+  return getConfigurationOperand(&cfg_speechFifo, delimiters, 0);
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static ConfigurationLineStatus
@@ -280,6 +291,10 @@ BEGIN_OPTION_TABLE
    "Path to directory for driver help and configuration files."},
   {'E', "environment-variables", NULL, NULL, 0,
    "Recognize environment variables."},
+#ifdef ENABLE_SPEECH_SUPPORT
+  {'F', "speech-fifo", "file", configureSpeechFifo, 0,
+   "Path to speech pass-through FIFO."},
+#endif /* ENABLE_SPEECH_SUPPORT */
   {'L', "library-directory", "directory", configureLibraryDirectory, OPT_Hidden,
    "Path to directory for loading drivers."},
   {'M', "message-delay", "csecs", NULL, 0,
@@ -1616,6 +1631,11 @@ handleOption (const int option) {
     case 'E':                        /* parameter to speech driver */
       opt_environmentVariables = 1;
       break;
+#ifdef ENABLE_SPEECH_SUPPORT
+    case 'F':                        /* name of speech driver */
+      opt_speechFifo = optarg;
+      break;
+#endif /* ENABLE_SPEECH_SUPPORT */
     case 'L':                        /* path to drivers directory */
       opt_libraryDirectory = optarg;
       break;
@@ -1974,6 +1994,9 @@ startup (int argc, char *argv[]) {
   initializeSpeech();
   startSpeechDriver();
   atexit(exitSpeechDriver);
+
+  /* Create the speech pass-through FIFO. */
+  if (opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   /* Initialize the braille driver help screen. */
