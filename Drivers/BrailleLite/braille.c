@@ -139,11 +139,11 @@ init_maps (void) {
 
 static int
 send_prebrl (int forever) {
-  static unsigned char prebrl[] = {0X05, 0X44};			/* code to send before Braille */
+  static unsigned char request[] = {0X05, 0X44};			/* code to send before Braille */
   if (forever) {
     /* wait forever method */
     while (1) {
-      write(blite_fd, prebrl, sizeof(prebrl));
+      write(blite_fd, request, sizeof(request));
       waiting_ack = 1;
       delay(100);
       getbrlkeys();
@@ -152,7 +152,7 @@ send_prebrl (int forever) {
     }
   } else {
     int timeout = ACK_TIMEOUT / 10;
-    write(blite_fd, prebrl, sizeof(prebrl));
+    write(blite_fd, request, sizeof(request));
     waiting_ack = 1;
     while (1) {
       delay(10);	/* sleep for 10 ms */
@@ -186,6 +186,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
     /* Open the Braille display device for random access */
     LogPrint(LOG_DEBUG, "Opening serial port: %s", brldev);
     if ((blite_fd = open(brldev, O_RDWR | O_NOCTTY)) != -1) {
+      tcflush(blite_fd, TCIFLUSH);	/* clean line */
+
       /* save current settings */
       if (tcgetattr(blite_fd, &oldtio) != -1) {
         struct termios newtio;	/* new terminal settings */
@@ -202,7 +204,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
         newtio.c_cc[VTIME] = 0;
 
         /* activate new settings */
-        tcflush(blite_fd, TCIFLUSH);	/* clean line */
         if (tcsetattr(blite_fd, TCSANOW, &newtio) != -1) {
 #ifdef DETECT_FOREVER
           if (send_prebrl(1)) {
@@ -227,9 +228,31 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
               } else {
                 brl->helpPage = 0;
               }
+              LogPrint(LOG_NOTICE, "Braille Lite %d detected.", BltLen);
+
               brl->x = blitesz = BltLen;	/* initialise size of display - */
               brl->y = 1;			/* Braille Lites are single line displays */
-              LogPrint(LOG_NOTICE, "Braille Lite %d detected.", BltLen);
+            }
+
+            {
+              static unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
+              delay(200);
+              write(blite_fd, request, sizeof(request));
+              waiting_ack = 0;
+              delay(200);
+              getbrlkeys();
+              if (qlen) {
+                unsigned char response[qlen + 1];
+                int length = 0;
+                do {
+                  unsigned char byte = qbase[qoff % QSZ];
+                  qoff = (qoff + 1) % QSZ, --qlen;
+                  if (!byte) break;
+                  response[length++] = byte;
+                } while (qlen);
+                response[length] = 0;
+                LogPrint(LOG_NOTICE, "Braille Lite identity: %s", response);
+              }
             }
 
             /* Allocate space for buffers */
