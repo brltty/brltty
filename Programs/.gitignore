@@ -1,4 +1,5 @@
 Makefile
+reldeps.mk
 *.auto.h
 *.a
 *.so

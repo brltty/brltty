@@ -1,4 +1,6 @@
 Makefile
+absdeps.mk
+reldeps.mk
 config.status
 config.log
 autom4te*.cache
