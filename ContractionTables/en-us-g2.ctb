@@ -264,6 +264,7 @@ begword dishear 256-125-15-345 disheartened
 begword disho 256-125-135 dishonor
 begword dishone 256-125-5-135 dishonest
 sufword disk =
+sufword dispirit 145-24-456-234 dispirited
 begword disul = disulfide
 word do 145
 
@@ -394,6 +395,7 @@ begword immuno = immunofluorescence
 lowword in 35
 word in =
 always in 35
+begword incon 35-14-135-1345 incongruous
 always iness 24-56-234
 midendword ing 346
 midword inga 35-1245-1 nightingale
@@ -440,6 +442,7 @@ always many 456-134
 begword mc =
 always medic 134-1246-24-14 medicare
 midendword ment 56-2345
+midword menth 134-26-1456 Blumenthal
 always mideast 134-24-145-15-1-34
 word milling 134-24-123-123-346
 begword mishand 134-24-234-125-12346 mishandled
@@ -447,6 +450,7 @@ always mishap =
 sufword mishear 134-24-234-125-15-345 misheard
 begword missh 134-24-234-146 misshapen
 word mistook =
+begword mistran = mistranslation
 sufword mistreat 134-24-234-2345-1235-2-2345
 begword mistru = mistrust
 begword misty = mistyped
@@ -532,6 +536,9 @@ always p 1234
 always P 1234
 always paid 1234-145
 contraction pd
+always part 5-1234
+begword parta 1234-345-2345-1 partake
+begword parto 1234-345-2345-135
 word people 1234
 always perceive 1234-12456-14-1236
 word percv =
@@ -545,9 +552,7 @@ word percvg =
 always perhaps 1234-12456-125
 word perh =
 always pher 1234-125-12456 cyphered
-always part 5-1234
-begword parta 1234-345-2345-1 partake
-begword parto 1234-345-2345-135
+begword potho = pothole pothook
 begword pre =
 always preach 1234-1235-2-16
 sufword predator 1234-1235-1246-1-2345-135-1235
@@ -664,7 +669,7 @@ always sthood 34-125-135-135-145 priesthood
 word still 34
 always stime 234-5-2345
 midendword stown 234-2345-246-1345 Pickstown
-always stringent 24-1235-346-26-2345 astringent
+begword stringen 34-1235-35-1245-26 stringent stringency
 begword styro 34-13456-1235-135 styrofoam
 always shead 234-125-2-145
 always sheart 124-125-15-345-2345

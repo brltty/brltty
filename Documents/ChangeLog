@@ -2,6 +2,7 @@ Note: this file is in reversed chronological order (bottom to top).
 
 
  - BRLTTY 3.3 released:
+   Enhancements to en-us-g2 contraction table. (jb)
    Some Braille Lite driver initialization failures gobble resources. (dm)
    Add Braille Lite Millennium support (wheels, advance bar combinations). (dm)
    Check for the pow() function during autoconf. (dm)
