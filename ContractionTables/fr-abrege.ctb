@@ -164,6 +164,8 @@ word (la 236-123-1
 ### 2. Mots représentés par un seul symbole
 ###
 
+word a 1
+word à 12356
 word ai 34
 word au 13
 word aux 13-1346
@@ -223,6 +225,7 @@ word tout 16
 word un 136
 word uns 136-234
 word vous 1236
+word y 13456
 
 begword c' 14-3
 begword d' 145-3
