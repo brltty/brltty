@@ -29,8 +29,11 @@
 #include <ctype.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <errno.h>
+
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif /* HAVE_SYS_WAIT_H */
 
 #include "misc.h"
 #include "message.h"

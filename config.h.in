@@ -37,11 +37,17 @@ extern "C" {
 /* Define this if the header file getopt.h exists. */
 #undef HAVE_GETOPT_H
 
+/* Define this if the header file glob.h exists. */
+#undef HAVE_GLOB_H
+
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
+
+/* Define this if the header file sys/wait.h exists. */
+#undef HAVE_SYS_WAIT_H
 
 /* Define this if the header file syslog.h exists. */
 #undef HAVE_SYSLOG_H

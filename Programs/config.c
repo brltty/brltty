@@ -33,12 +33,17 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <limits.h>
+
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif /* HAVE_SYS_WAIT_H */
 
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
+#ifdef HAVE_GLOB_H
 #include <glob.h>
+#endif /* HAVE_GLOB_H */
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
@@ -1122,7 +1127,9 @@ typedef struct {
   const char *initial;
   char *current;
   unsigned none:1;
+#ifdef HAVE_GLOB_H
   glob_t glob;
+#endif /* HAVE_GLOB_H */
   const char **paths;
   int count;
   unsigned char setting;
@@ -1145,10 +1152,15 @@ static void
 globBegin (GlobData *data) {
   int index;
 
-  memset(&data->glob, 0, sizeof(data->glob));
-  data->glob.gl_offs = (sizeof(data->pathsArea) / sizeof(data->pathsArea[0])) - 1;
   data->paths = data->pathsArea;
-  data->paths[data->count = data->glob.gl_offs] = NULL;
+  data->count = (sizeof(data->pathsArea) / sizeof(data->pathsArea[0])) - 1;
+  data->paths[data->count] = NULL;
+  index = data->count;
+
+#ifdef HAVE_GLOB_H
+  memset(&data->glob, 0, sizeof(data->glob));
+  data->glob.gl_offs = data->count;
+#endif /* HAVE_GLOB_H */
 
   {
 #ifdef HAVE_FCHDIR
@@ -1159,6 +1171,7 @@ globBegin (GlobData *data) {
     if (originalDirectory) {
 #endif /* HAVE_FCHDIR */
       if (chdir(data->directory) != -1) {
+#ifdef HAVE_GLOB_H
         if (glob(data->pattern, GLOB_DOOFFS, NULL, &data->glob) == 0) {
           data->paths = (const char **)data->glob.gl_pathv;
           /* The behaviour of gl_pathc is inconsistent. Some implementations
@@ -1167,6 +1180,7 @@ globBegin (GlobData *data) {
            */
           while (data->paths[data->count]) ++data->count;
         }
+#endif /* HAVE_GLOB_H */
 
 #ifdef HAVE_FCHDIR
         if (fchdir(originalDirectory) == -1) {
@@ -1194,7 +1208,6 @@ globBegin (GlobData *data) {
     }
   }
 
-  index = data->glob.gl_offs;
   if (data->none) data->paths[--index] = "";
   data->paths[--index] = data->initial;
   data->paths += index;
@@ -1208,6 +1221,7 @@ globBegin (GlobData *data) {
       break;
     }
   }
+
   for (index=0; index<data->count; ++index) {
     if (strcmp(data->paths[index], data->current) == 0) {
       data->setting = index;
@@ -1218,12 +1232,14 @@ globBegin (GlobData *data) {
 
 static void
 globEnd (GlobData *data) {
+#ifdef HAVE_GLOB_H
   if (data->glob.gl_pathc) {
     int index;
     for (index=0; index<data->glob.gl_offs; ++index)
       data->glob.gl_pathv[index] = NULL;
     globfree(&data->glob);
   }
+#endif /* HAVE_GLOB_H */
 }
 
 static const char *
@@ -1671,6 +1687,7 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
+#ifdef HAVE_SYS_WAIT_H
 static void
 parentExit0 (int signalNumber) {
   _exit(0);
@@ -1710,6 +1727,7 @@ background (void) {
     LogOpen(1);
   }
 }
+#endif /* HAVE_SYS_WAIT_H */
 
 static int
 validateInterval (int *value, const char *description, const char *word) {
@@ -1794,6 +1812,7 @@ startup (int argc, char *argv[]) {
     exit(0);
   }
 
+#ifdef HAVE_SYS_WAIT_H
   if (!opt_noDaemon) {
     const int signalNumber = SIGUSR1;
     struct sigaction newAction, oldAction;
@@ -1816,6 +1835,9 @@ startup (int argc, char *argv[]) {
       opt_noDaemon = 1;
     }
   }
+#else /* HAVE_SYS_WAIT_H */
+  opt_noDaemon = 1;
+#endif /* HAVE_SYS_WAIT_H */
 
   /* Create the process identifier file. */
   if (opt_pidFile) {
