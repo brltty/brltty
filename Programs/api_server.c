@@ -759,6 +759,23 @@ static void api_writeWindow(BrailleDisplay *brl)
   TrueBraille->writeWindow(brl);
 }
 
+/* Function : api_writeVisual */
+static void api_writeVisual(BrailleDisplay *brl)
+{
+  int tty;
+  Tconnection *c;
+  if (!TrueBraille->writeVisual) return;
+  if (rawConnection!=NULL) return;
+  pthread_mutex_lock(&connections_mutex);
+  tty = currentVirtualTerminal();
+  for (c=connections->next; c!=connections; c=c->next) if (c->tty==tty) {
+    pthread_mutex_unlock(&connections_mutex);
+    return;
+  }
+  pthread_mutex_unlock(&connections_mutex);
+  TrueBraille->writeVisual(brl);
+}
+
 /* Function : api_readCommand */
 static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
 {
@@ -830,6 +847,7 @@ void api_link(void)
   TrueBraille=braille;
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
   ApiBraille.writeWindow=api_writeWindow;
+  ApiBraille.writeVisual=api_writeVisual;
   ApiBraille.readCommand=api_readCommand;
   ApiBraille.readKey = NULL;
   ApiBraille.keyToCommand = NULL;
