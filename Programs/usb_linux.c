@@ -364,10 +364,8 @@ usbCancelRequest (
 ) {
   if (ioctl(device->file, USBDEVFS_DISCARDURB, request) == -1) {
     /* EINVAL is returned if the URB is already complete. */
-    if (errno != EINVAL) {
-      LogError("USB URB discard");
-      return 0;
-    }
+    if (errno != EINVAL) LogError("USB URB discard");
+    return 0;
   }
   free(request);
   return 1;
