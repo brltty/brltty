@@ -91,7 +91,7 @@ static unsigned keybuf_next;
 static unsigned keybuf_nb;
 static pthread_mutex_t keybuf_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concurrent key buffering */
 
-static int handle_keypress(brl_type_t type, uint32_t *code, int size) {
+static int handle_keypress(brl_type_t type, uint32_t *code, size_t size) {
   brl_keycode_t *keycode = (brl_keycode_t *) code;
   /* if not a key press, let the caller get it */
   if (type!=BRLPACKET_KEY && type!=BRLPACKET_COMMAND) return 0;
@@ -180,7 +180,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   char *port = NULL;
   int err, authKeyLength;
 
-  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":" BRLAPI_SOCKETPORT };
+  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, "127.0.0.1:" BRLAPI_SOCKETPORT };
   brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOSTNAME") };
 
   /* Here update settings with the parameters from misc sources (files, env...) */
@@ -752,7 +752,7 @@ const char *brlapi_errlist[] = {
   "libc error",                         /* BRLERR_LIBCERR */
   "couldn't find out tty number",       /* BRLERR_UNKNOWNTTY */
   "bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
-  "unexpected end of file",	        /* BRLERR_EOF */
+  "unexpected end of file",             /* BRLERR_EOF */
 };
 
 /* brlapi_nerr: last error number */
@@ -785,11 +785,6 @@ void brlapi_perror(const char *s)
 int brlapi_errno;
 static int pthread_errno_ok;
 
-static void errno_key_free(void *key)
-{
-  free(key);
-}
-
 /* we need a per-thread errno variable, thanks to pthread_keys */
 static pthread_key_t errno_key;
 
@@ -800,6 +795,11 @@ extern int pthread_key_create(pthread_key_t *, void (*) (void *)) __attribute__ 
 extern int pthread_once(pthread_once_t *, void (*) (void)) __attribute__ ((weak));
 extern void *pthread_getspecific(pthread_key_t) __attribute__ ((weak));
 extern int pthread_setspecific(pthread_key_t, const void *) __attribute__ ((weak));
+
+static void errno_key_free(void *key)
+{
+  free(key);
+}
 
 static void errno_key_alloc(void)
 {

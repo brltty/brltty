@@ -284,31 +284,14 @@ static void endThread(void *arg)
 /* Root function for connection manager threads */
 static void *processConnection(void *arg)
 {
-  int i, size, go_on = 0;
+  int i, go_on = 1;
+  ssize_t size;
   Tconnection *c = (Tconnection *) arg;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  authStruct *auth = (authStruct *) packet;
   uint32_t * ints = (uint32_t *) &packet[0];
   brl_type_t type;
   pthread_cleanup_push(endThread, arg);
   LogPrint(LOG_DEBUG,"Beginning to process connection %d",c->id);
-  size = brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE);
-  LogPrint(LOG_DEBUG,"read packet of size %d and type %d",size,type);
-  if (type==BRLPACKET_AUTHKEY) {
-    if ((size == authKeyLength) && (!memcmp(packet, authKey, size)))
-      writeErrorPacket(c->fd, BRLERR_PROTOCOL_VERSION);
-    else {
-      if (size==sizeof(auth->protocolVersion)+authKeyLength) {
-        if (auth->protocolVersion==BRLAPI_PROTOCOL_VERSION) {
-          if (!memcmp(&auth->key, authKey, authKeyLength)) {
-            writeAckPacket(c->fd);
-            go_on = 1;
-          } else writeErrorPacket(c->fd, BRLERR_CONNREFUSED);
-        } else writeErrorPacket(c->fd, BRLERR_PROTOCOL_VERSION);
-      } else writeErrorPacket(c->fd, BRLERR_CONNREFUSED);
-    }
-  } else writeErrorPacket(c->fd, BRLERR_CONNREFUSED);
-  writeAckPacket(c->fd); go_on = 1;
   while (go_on) {
     if ((size=brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE))<0) {
       if (size==-1) LogPrint(LOG_WARNING,"read : %s (connection %d)",strerror(errno),c->id);
@@ -661,6 +644,12 @@ static void *connectionsManager(void *arg)
   socklen_t addrlen = sizeof(addr);
   char *host = (char *) arg;
   Tconnection *c;
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  authStruct *auth = (authStruct *) packet;
+  brl_type_t type;
+  ssize_t size;
+  int ok;
+
   if ((res = pthread_sigmask(SIG_BLOCK,&BlockedSignals,NULL))!=0) {
     LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
     pthread_exit(NULL);
@@ -672,14 +661,36 @@ static void *connectionsManager(void *arg)
   pthread_cleanup_push((void (*) (void *)) closeSocket,(void *) mainsock);
   for (; (res = accept(mainsock, &addr, &addrlen))>=0; addrlen=sizeof(addr)) {
     LogPrint(LOG_DEBUG,"Connection accepted on socket %d",res);
+    ok=0;
+    size = brlapi_readPacket(res,&type,packet,BRLAPI_MAXPACKETSIZE);
+    LogPrint(LOG_DEBUG,"read packet of size %d and type %d",size,type);
+    if (type==BRLPACKET_AUTHKEY) {
+      if ((size == authKeyLength) && (!memcmp(packet, authKey, size)))
+        writeErrorPacket(res, BRLERR_PROTOCOL_VERSION);
+      else {
+        if (size==sizeof(auth->protocolVersion)+authKeyLength) {
+          if (auth->protocolVersion==BRLAPI_PROTOCOL_VERSION) {
+            if (!memcmp(&auth->key, authKey, authKeyLength)) {
+              writeAckPacket(res);
+              ok = 1;
+            } else writeErrorPacket(res, BRLERR_CONNREFUSED);
+          } else writeErrorPacket(res, BRLERR_PROTOCOL_VERSION);
+        } else writeErrorPacket(res, BRLERR_CONNREFUSED);
+      }
+    } else writeErrorPacket(res, BRLERR_CONNREFUSED);
+    if (!ok) { close(res); continue; }
     c = createConnection(res,ntohl(DisplaySize[0]),ntohl(DisplaySize[1]));
     if (c==NULL) {
       LogPrint(LOG_WARNING,"Failed to create connection structure");
+      /* send a BRLPACKET_BYE, or ERROR ? */
+      close(res);
       continue;
     }
     LogPrint(LOG_DEBUG,"Connection on socket %d has identifier %d",c->fd,c->id);
     if ((res = pthread_create(&(c->thread),NULL,processConnection,(void *) c))!=0) {
       LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
+      /* send a BRLPACKET_BYE, or ERROR ? */
+      close(c->fd);
       freeConnection(c);
       continue;
     }

@@ -544,7 +544,7 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_LIBCERR                 12  /**< Libc error */
 #define BRLERR_UNKNOWNTTY              13  /**< Couldn't find out the tty number */
 #define BRLERR_PROTOCOL_VERSION        14  /**< Bad protocol version */
-#define BRLERR_EOF                     15  /**< Unexpected enf of file */
+#define BRLERR_EOF                     15  /**< Unexpected end of file */
 
 /* brlapi_errlist */
 /** Error message list
@@ -623,7 +623,7 @@ typedef uint32_t brl_type_t;
 #define BRLPACKET_COMMAND           'c'    /**< Braille command             */
 #define BRLPACKET_MASKKEYS          'm'    /**< Mask a key-range            */
 #define BRLPACKET_UNMASKKEYS        'u'    /**< Unmask key range            */
-#define BRLPACKET_WRITEDOTS         'D'    /**< Write Dots On Braille Display  */
+#define BRLPACKET_WRITEDOTS         'D'    /**< Write Dots On Braille Display */
 #define BRLPACKET_STATWRITE         'S'    /**< Write Status Cells          */
 #define BRLPACKET_EXTWRITE          'e'    /**< Extended Write              */
 #define BRLPACKET_GETRAW            '*'    /**< Enter in raw mode           */
