@@ -79,6 +79,21 @@ usbGetDescriptor (
 }
 
 int
+usbGetDeviceDescriptor (
+  UsbDevice *device,
+  UsbDeviceDescriptor *descriptor
+) {
+  UsbDescriptor desc;
+  int size = usbGetDescriptor(device, UsbDescriptorType_Device, 0, 0, &desc, 1000);
+
+  if (size != -1) {
+    *descriptor = desc.device;
+  }
+
+  return size;
+}
+
+int
 usbGetLanguage (
   UsbDevice *device,
   uint16_t *language,
@@ -206,29 +221,19 @@ usbVerifySerialNumber (UsbDevice *device, const char *string) {
                          device->descriptor.iSerialNumber, string);
 }
 
-int
-usbGetDeviceDescriptor (
-  UsbDevice *device,
-  UsbDeviceDescriptor *descriptor
-) {
-  UsbDescriptor desc;
-  int size = usbGetDescriptor(device, UsbDescriptorType_Device, 0, 0, &desc, 1000);
-
-  if (size != -1) {
-    *descriptor = desc.device;
-  }
-
-  return size;
+const UsbDeviceDescriptor *
+usbDeviceDescriptor (UsbDevice *device) {
+  return &device->descriptor;
 }
 
 int
 usbGetConfiguration (
   UsbDevice *device,
-  unsigned char *number
+  unsigned char *configuration
 ) {
   int size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
                             UsbStandardRequest_GetConfiguration, 0, 0,
-                            number, sizeof(*number), 1000);
+                            configuration, sizeof(*configuration), 1000);
   return size;
 }
 
@@ -284,6 +289,21 @@ usbConfigurationDescriptor (
   }
 
   return device->configuration;
+}
+
+int
+usbConfigureDevice (
+  UsbDevice *device,
+  unsigned char configuration
+) {
+  if (!usbSetConfiguration(device, configuration)) return 0;
+
+  if (device->configuration) {
+    free(device->configuration);
+    device->configuration = NULL;
+  }
+
+  return 1;
 }
 
 int
@@ -590,11 +610,6 @@ usbTestDevice (void *extension, UsbDeviceChooser chooser, void *data) {
     usbCloseDevice(device);
   }
   return NULL;
-}
-
-const UsbDeviceDescriptor *
-usbDeviceDescriptor (UsbDevice *device) {
-  return &device->descriptor;
 }
 
 static void
@@ -1072,7 +1087,7 @@ usbChooseChannel (UsbDevice *device, void *data) {
     if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
       if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
 
-      if (usbSetConfiguration(device, definition->configuration)) {
+      if (usbConfigureDevice(device, definition->configuration)) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
           int ok = 1;
 

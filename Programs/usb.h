@@ -284,13 +284,13 @@ extern const UsbEndpointDescriptor *usbEndpointDescriptor (
   unsigned char endpointAddress
 );
 
-extern int usbSetConfiguration (
+extern int usbConfigureDevice (
   UsbDevice *device,
   unsigned char configuration
 );
 extern int usbGetConfiguration (
   UsbDevice *device,
-  unsigned char *number
+  unsigned char *configuration
 );
 
 extern int usbOpenInterface (

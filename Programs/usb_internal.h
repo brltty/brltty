@@ -77,6 +77,11 @@ extern UsbDevice *usbTestDevice (
 extern int usbReadDeviceDescriptor (UsbDevice *device);
 extern void usbDeallocateDeviceExtension (UsbDevice *device);
 
+extern int usbSetConfiguration (
+  UsbDevice *device,
+  unsigned char configuration
+);
+
 extern int usbClaimInterface (
   UsbDevice *device,
   unsigned char interface
