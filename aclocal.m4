@@ -220,15 +220,15 @@ changequote(, )dnl
 changequote([, ])dnl
       $1_help="$1-help"
    fi
-   if test -n "${brltty_external_codes_$1}"
+   if test "${brltty_standalone_programs}" != "yes"
    then
-      if test "${brltty_standalone_programs}" != "yes"
+      if test -n "${brltty_external_codes_$1}"
       then
          $1_drivers="$1-drivers"
          install_drivers="install-drivers"
       fi
+      BRLTTY_SUMMARY_ITEM([external-$1-drivers], [brltty_external_codes_$1])
    fi
-   BRLTTY_SUMMARY_ITEM([external-$1-drivers], [brltty_external_codes_$1])
    BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
 fi
 AC_SUBST([$1_driver_objects])
