@@ -181,6 +181,7 @@ addRule (
   if (replace) ruleSize += replace->length;
   if (allocateBytes(data, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
     ContractionTableRule *newRule = CTR(tableHeader, ruleOffset);
+
     newRule->opcode = opcode;
     newRule->after = after;
     newRule->before = before;
@@ -194,57 +195,30 @@ addRule (
              (newRule->replen = replace->length));
     else
       newRule->replen = 0;
-    newRule->next = 0;
 
     /*link new rule into table.*/
-    if (newRule->findlen) {
-      ContractionTableOffset bucket;
+    {
+      ContractionTableOffset *offsetAddress;
 
-      /* first, handle single-character find strings. */
       if (newRule->findlen == 1) {
         ContractionTableCharacter *character = &tableHeader->characters[newRule->findrep[0]];
-        if (newRule->opcode == CTO_Always) {
-          character->always = ruleOffset;
-        }
-        if ((bucket = character->rules)) {
-          ContractionTableRule *currentRule = CTR(tableHeader, bucket);
-          while (currentRule->next)
-            currentRule = CTR(tableHeader, currentRule->next);
-          currentRule->next = ruleOffset;
-        } else {
-          character->rules = ruleOffset;
-        }
+        if (newRule->opcode == CTO_Always) character->always = ruleOffset;
+        offsetAddress = &character->rules;
       } else {
-        /* Now, work through the various cases for multi-byte find strings. */
-        bucket = hash(newRule->findrep);
-
-        /* case 1, start new hash chain. */
-        if (!tableHeader->rules[bucket]) {
-          tableHeader->rules[bucket] = ruleOffset;
-        } else {
-          /* Case 2, longest find string goes at head of chain. */
-          ContractionTableRule *currentRule = CTR(tableHeader, tableHeader->rules[bucket]);
-          if (newRule->findlen > currentRule->findlen) {
-            newRule->next = tableHeader->rules[bucket];
-            tableHeader->rules[bucket] = ruleOffset;
-          } else {
-            /* Case 3, new rule goes somewhere in chain. */
-            while (currentRule->next) { /*loop through chain */
-              ContractionTableRule *previousRule = currentRule;
-              currentRule = CTR(tableHeader, currentRule->next);
-              if (newRule->findlen > currentRule->findlen) {
-                newRule->next = previousRule->next;
-                previousRule->next = ruleOffset;
-                break;
-              }
-            }
-            if (!newRule->next) {
-              /* Case 4, new rule goes at end of chain*/
-              currentRule->next = ruleOffset;
-            }
-          }
-        }
+        offsetAddress = &tableHeader->rules[hash(newRule->findrep)];
       }
+
+      while (*offsetAddress) {
+        ContractionTableRule *currentRule = CTR(tableHeader, *offsetAddress);
+        if (newRule->findlen > currentRule->findlen) break;
+        if (newRule->findlen == currentRule->findlen) {
+          if ((currentRule->opcode == CTO_Always) && (newRule->opcode != CTO_Always)) break;
+        }
+        offsetAddress = &currentRule->next;
+      }
+
+      newRule->next = *offsetAddress;
+      *offsetAddress = ruleOffset;
     }
 
     return newRule;
