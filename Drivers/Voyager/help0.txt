@@ -73,10 +73,10 @@ Chord-15: Escape key
 Chord-24: Insert key
 Chord-2345: Tab key
 Chord-46: Return key
-Chord-2: Home key
-Chord-3: End key
-Chord-5: Page up
-Chord-6: Page down
+Chord-2: Page up
+Chord-5: Page down
+Chord-3: Home key
+Chord-6: End key
 Chord-7: Left arrow
 Chord-8: Right arrow
 

@@ -490,9 +490,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   int cmd = CMD_NOOP;
   int key_pressed = 0;
 
-  /* read buffer: buf[0] for DOT keys, buf[1] for keys A B C D UP DOWN RL RR,
-   * buf[2]-buf[7] list pressed routing keys by number, maximum 6 keys,
-   * list ends with 0.
+  /* read buffer: packet[0] for DOT keys, packet[1] for keys A B C D UP DOWN
+   * RL RR, packet[2]-packet[7] list pressed routing keys by number, maximum
+   * 6 keys, list ends with 0.
    * All 0s is sent when all keys released.
    */
   unsigned char packet[8];
@@ -663,10 +663,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	CKEY(201, DOT2|DOT3|DOT4, CMD_INFO, "Status line (toggle)");
 	CKEY(610, DOT2|DOT3|DOT4|DOT5, VAL_PASSKEY + VPK_TAB, "Tab key");
 	CKEY(610, DOT4|DOT6, VAL_PASSKEY + VPK_RETURN, "Return key");
-	CKEY(610, DOT2, VAL_PASSKEY+VPK_HOME, "Home key");
-	CKEY(610, DOT3, VAL_PASSKEY+VPK_END, "End key");
-	CKEY(610, DOT5, VAL_PASSKEY+VPK_PAGE_UP, "Page up");
-	CKEY(610, DOT6, VAL_PASSKEY+VPK_PAGE_DOWN, "Page down");
+	CKEY(610, DOT2, VAL_PASSKEY+VPK_PAGE_UP, "Page up");
+	CKEY(610, DOT5, VAL_PASSKEY+VPK_PAGE_DOWN, "Page down");
+	CKEY(610, DOT3, VAL_PASSKEY+VPK_HOME, "Home key");
+	CKEY(610, DOT6, VAL_PASSKEY+VPK_END, "End key");
 	CKEY(610, DOT7, VAL_PASSKEY+VPK_CURSOR_LEFT, "Left arrow");
 	CKEY(610, DOT8, VAL_PASSKEY+VPK_CURSOR_RIGHT, "Right arrow");
       }
