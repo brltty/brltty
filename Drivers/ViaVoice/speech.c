@@ -70,7 +70,6 @@ static const int languageMap[] = {
    eciSimplifiedChinese,
    eciBrazilianPortuguese
 };
-static const unsigned int languageCount = sizeof(languageMap) / sizeof(languageMap[0]);
 static const char *const languageNames[] = {
    "AmericanEnglish",
    "BritishEnglish",
