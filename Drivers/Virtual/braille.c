@@ -73,8 +73,6 @@ static int brailleRows;
 static int brailleCells;
 static unsigned char *previousBraille = NULL;
 static unsigned char *previousVisual = NULL;
-
-static int statusCells = 0;
 static unsigned char previousStatus[StatusCellCount];
 
 static char *
@@ -294,6 +292,21 @@ readCommandLine (void) {
   return NULL;
 }
 
+static const char *
+nextWord (void) {
+  return strtok(NULL, inputDelimiters);
+}
+
+static int
+compareWords (const char *word1, const char *word2) {
+  return strcasecmp(word1, word2);
+}
+
+static int
+testWord (const char *suppliedWord, const char *desiredWord) {
+  return compareWords(suppliedWord, desiredWord) == 0;
+}
+
 static int
 flushOutput (void) {
   const char *buffer = outputBuffer;
@@ -456,15 +469,77 @@ allocateCommandDescriptors (void) {
 }
 
 static int
-testCommandName (const void *key, const void *item) {
+compareCommandName (const void *key, const void *item) {
   const char *name = key;
   const CommandDescriptor *descriptor = item;
-  return strcasecmp(name, descriptor->entry->name);
+  return compareWords(name, descriptor->entry->name);
 }
 
 static const CommandDescriptor *
 findCommand (const char *name) {
-  return bsearch(name, commandDescriptors, commandCount, commandSize, testCommandName);
+  return bsearch(name, commandDescriptors, commandCount, commandSize, compareCommandName);
+}
+
+static int
+dimensionsChanged (BrailleDisplay *brl) {
+  int ok = 0;
+  int columns;
+  int rows;
+  const char *word;
+
+  if ((word = nextWord())) {
+    if (isInteger(&columns, word) && (columns > 0)) {
+      ok = 1;
+
+      if ((word = nextWord())) {
+        if (!isInteger(&rows, word) || (rows < 1)) {
+          LogPrint(LOG_WARNING, "Invalid row count.");
+          ok = 0;
+        }
+      } else {
+        rows = 1;
+      }
+    } else {
+      LogPrint(LOG_WARNING, "Invalid column count.");
+    }
+  } else {
+    LogPrint(LOG_WARNING, "Missing column count.");
+  }
+
+  if (ok) {
+    int cells = columns * rows;
+    unsigned char *braille;
+    unsigned char *visual;
+
+    if ((braille = malloc(cells))) {
+      if ((visual = malloc(cells))) {
+        brailleColumns = columns;
+        brailleRows = rows;
+        brailleCells = cells;
+
+        memset(braille, 0, cells);
+        if (previousBraille) free(previousBraille);
+        previousBraille = braille;
+
+        memset(visual, ' ', cells);
+        if (previousVisual) free(previousVisual);
+        previousVisual = visual;
+
+        memset(previousStatus, 0, sizeof(previousStatus));
+
+        brl->x = columns;
+        brl->y = rows;
+        brl->helpPage = 0;
+        return 1;
+
+        free(visual);
+      }
+
+      free(braille);
+    }
+  }
+
+  return 0;
 }
 
 static void
@@ -511,54 +586,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         LogPrint(LOG_DEBUG, "Command received: %s", line);
 
         word = strtok(line, inputDelimiters);
-        if (strcasecmp(word, "cells") == 0) {
-          int ok = 0;
-
-          if ((word = strtok(NULL, inputDelimiters))) {
-            if (isInteger(&brailleColumns, word) && (brailleColumns > 0)) {
-              ok = 1;
-
-              if ((word = strtok(NULL, inputDelimiters))) {
-                if (!isInteger(&brailleRows, word) || (brailleRows < 1)) {
-                  LogPrint(LOG_WARNING, "Invalid row count.");
-                  ok = 0;
-                }
-              } else {
-                brailleRows = 1;
-              }
-            } else {
-              LogPrint(LOG_WARNING, "Invalid column count.");
-            }
-          } else {
-            LogPrint(LOG_WARNING, "Missing column count.");
+        if (testWord(word, "cells")) {
+          if (dimensionsChanged(brl)) {
+            free(line);
+            return 1;
           }
-
-          if (ok) {
-            brailleCells = brailleColumns * brailleRows;
-
-            if ((previousBraille = mallocWrapper(brailleCells))) {
-              memset(previousBraille, 0, brailleCells);
-
-              if ((previousVisual = mallocWrapper(brailleCells))) {
-                memset(previousVisual, ' ', brailleCells);
-
-                brl->x = brailleColumns;
-                brl->y = brailleRows;
-                brl->helpPage = 0;
-
-                memset(previousStatus, 0, sizeof(previousStatus));
-                free(line);
-                return 1;
-
-                free(previousVisual);
-                previousVisual = NULL;
-              }
-
-              free(previousBraille);
-              previousBraille = NULL;
-            }
-          }
-        } else if (strcasecmp(word, "quit") == 0) {
+        } else if (testWord(word, "quit")) {
           LogPrint(LOG_NOTICE, "Client requested termination.");
           break;
         } else {
@@ -598,7 +631,7 @@ brl_close (BrailleDisplay *brl) {
 static void
 brl_writeWindow (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, previousBraille, brailleCells) != 0) {
-    writeString("Braille=\"");
+    writeString("Braille \"");
     writeDots(brl->buffer, brailleCells);
     writeString("\"\n");
     flushOutput();
@@ -610,7 +643,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 static void
 brl_writeVisual (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, previousVisual, brailleCells) != 0) {
-    writeString("Visual=\"");
+    writeString("Visual \"");
     {
       const unsigned char *address = brl->buffer;
       int cells = brailleCells;
@@ -642,7 +675,7 @@ brl_writeVisual (BrailleDisplay *brl) {
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
   int generic = *st == FSC_GENERIC;
-  int cells = generic? StatusCellCount: statusCells;
+  int cells = StatusCellCount;
 
   if (memcmp(st, previousStatus, cells) != 0) {
     if (generic) {
@@ -678,6 +711,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
             [STAT_INFO]="INFO"
           };
           const char *name = names[i];
+
           if (name) {
             char buffer[0X40];
             snprintf(buffer, sizeof(buffer), "%s %d\n", name, value);
@@ -687,7 +721,14 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
         }
       }
     } else {
-      writeString("Status=\"");
+      while (cells) {
+        if (st[--cells]) {
+          ++cells;
+          break;
+        }
+      }
+
+      writeString("Status \"");
       writeDots(st, cells);
       writeString("\"\n");
       flushOutput();
@@ -707,7 +748,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
     LogPrint(LOG_DEBUG, "Command received: %s", line);
 
     if ((word = strtok(line, inputDelimiters))) {
-      if (strcasecmp(word, "quit") == 0) {
+      if (testWord(word, "cells")) {
+        if (dimensionsChanged(brl)) brl->resizeRequired = 1;
+      } else if (testWord(word, "quit")) {
         command = CMD_RESTARTBRL;
       } else {
         const CommandDescriptor *descriptor = findCommand(word);
@@ -720,16 +763,16 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
           command = descriptor->entry->code;
           block = command & VAL_BLK_MASK;
 
-          while ((word = strtok(NULL, inputDelimiters))) {
+          while ((word = nextWord())) {
             if (block == 0) {
               if (!switchSpecified) {
-                if (strcasecmp(word, "on") == 0) {
+                if (testWord(word, "on")) {
                   switchSpecified = 1;
                   command |= VAL_SWITCHON;
                   continue;
                 }
 
-                if (strcasecmp(word, "off") == 0) {
+                if (testWord(word, "off")) {
                   switchSpecified = 1;
                   command |= VAL_SWITCHOFF;
                   continue;
