@@ -57,19 +57,17 @@ brl_open(BrailleDisplay *brl, char **parameters, const char *device)
     reverseTranslationTable(&outputTable, &inputTable);
   }
   
-  if(!braille_init())
-    goto failure;
-  
-  brl->helpPage = 0;
-  brl->x = braille_size();  /* initialise size of display */
-  brl->y = 1;
+  if(braille_init())
+    {
+      brl->x = braille_size();  /* initialise size of display */
+      brl->y = 1;
+      brl->helpPage = 0;
 
-  braille_timeout(100);
+      braille_timeout(100);
 
-  return 1;
+      return 1;
+    }
   
- failure:
-  brl_close(brl);
   return 0;
 }
 
