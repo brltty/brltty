@@ -556,7 +556,7 @@ static int processRequest(Connection *c)
   res = readPacket(c);
   if (res==0) return 0; /* No packet ready */
   if (res<0) {
-    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(brlapi_libcerrno),c->fd);
+    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(errno),c->fd);
     else {
       LogPrint(LOG_DEBUG,"Closing connection on fd %d",c->fd);
     }
