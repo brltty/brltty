@@ -1337,7 +1337,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
   res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH),
                            &authKeyLength,authKey);
   if (res==-1) {
-    LogPrint(LOG_WARNING,"Unable to load API authentication key: no connections will be accepted.");
+    LogPrint(LOG_WARNING,"Unable to load API authentication key (%s): no connections will be accepted.", strerror(errno));
     goto out;
   }
   LogPrint(LOG_DEBUG, "Authentication key loaded");
