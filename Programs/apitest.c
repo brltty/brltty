@@ -117,6 +117,7 @@ void enterLearnMode(void)
     brlapi_writeText(0, buf);
     if (cmd==BRL_CMD_LEARN) break;
   }
+  brlapi_perror("brlapi_readKey");
 }
 
 int main(int argc, char *argv[])
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
 
   fprintf(stderr, "Connecting to BrlAPI... ");
   if ((fd=brlapi_initializeConnection(&settings, &settings)) >= 0) {
-    fprintf(stderr, "done\n");
+    fprintf(stderr, "done (fd=%d)\n", fd);
     fprintf(stderr,"Connected to %s using key file %s\n", settings.hostName, settings.authKey);
 
     if (opt_showIdentifier) {
