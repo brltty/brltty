@@ -33,7 +33,7 @@
 #ifdef BL_NEED_ARRAYS
 #undef BL_NEED_ARRAYS
 
-static unsigned char brltrans[64] =
+static const unsigned char brltrans[64] =
 {
   ' ', 'a', '1', 'b', '\'', 'k', '2', 'l',
   '`', 'c', 'i', 'f', '/', 'm', 's', 'p',
@@ -48,7 +48,7 @@ static unsigned char brltrans[64] =
 #ifdef USE_TEXTTRANS
 /* Map from key representations (bits 0-5 for dots 1-6) to BRLTTY dot
    pattern representation (dot 1 bit 0, dot 4 bit 1, dot 2 bit 2, etc) */
-static unsigned char keys_to_dots[64] =
+static const unsigned char keys_to_dots[64] =
 {
   0x0, 0x1, 0x4, 0x5, 0x10, 0x11, 0x14, 0x15,
   0x2, 0x3, 0x6, 0x7, 0x12, 0x13, 0x16, 0x17,
@@ -85,17 +85,17 @@ static const int cmdtrans[64] =
  * the corresponding command is dangerous.
  */
 
-static unsigned char dangcmd[8] =
+static const unsigned char dangcmd[8] =
 { 0x00, 0x88, 0x80, 0x05, 0x40, 0x00, 0x10, 0x00 };
 
 /* Advance bar commands. */
 static const int barcmds[16] =
 {
-/* Left Bar\  Right Bar> None         Right        Left         Both         */
-/*         None       */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
-/*         Right      */ CMD_LNUP   , CMD_ATTRDN , CMD_ATTRUP , 0          ,
-/*         Left       */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
-/*         Both       */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
+/* LeftBar\ RightBar> None         Right        Left         Both         */
+/*         None    */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
+/*         Right   */ CMD_LNUP   , CMD_ATTRDN , CMD_ATTRUP , 0          ,
+/*         Left    */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
+/*         Both    */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
 };
 
 /* Left whiz wheel commands. */

@@ -31,9 +31,9 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/termios.h>
@@ -65,8 +65,8 @@ int blite_fd = -1;		/* file descriptor for Braille display */
 
 static unsigned char blitetrans[256];	/* dot mapping table (output) */
 static unsigned char revtrans[256];	/* mapping for reversed display */
-static unsigned char *prevdata;	/* previously received data */
-static unsigned char *rawdata;	/* writebrl() buffer for raw Braille data */
+static unsigned char *prevdata = NULL;	/* previously received data */
+static unsigned char *rawdata = NULL;	/* writebrl() buffer for raw Braille data */
 static struct termios oldtio;	/* old terminal settings */
 static int blitesz;	/* set to 18 or 40 */
 static int waiting_ack = 0;	/* waiting acknowledgement flag */
@@ -80,7 +80,7 @@ static int kbemu = 0; /* keyboard emulation (whether you can type) */
 /* The input queue is only manipulated by the qput() and qget()
  * functions.
  */
-static unsigned char *qbase;	/* start of queue in memory */
+static unsigned char *qbase = NULL;	/* start of queue in memory */
 static int qoff = 0;		/* offset of first byte */
 static int qlen = 0;		/* number of items in the queue */
 
@@ -167,7 +167,7 @@ send_prebrl (int forever) {
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 {
-  static unsigned good_baudrates[] =
+  static const unsigned good_baudrates[] =
     {300,600,1200,2400,4800,9600,19200,38400, 0};
   speed_t baudrate;
   /* Init string for Model detection */
@@ -214,24 +214,20 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 
             /* Next, let's detect the BLT-Model (18 || 40). */
             {
-              unsigned char BltLen = 18;
-              unsigned char cells[BltLen];
-              memset(cells, 0, BltLen);
-              write(blite_fd, cells, BltLen);
+              unsigned char cells[18];
+              memset(cells, 0, sizeof(cells));
+              write(blite_fd, cells, sizeof(cells));
               waiting_ack = 1;
               delay(400);
               getbrlkeys();
               if (waiting_ack) {
                 /* no response, so it must be BLT40 */
-                BltLen = 40;
+                blitesz = 40;
                 brl->helpPage = 1;
               } else {
+                blitesz = sizeof(cells);
                 brl->helpPage = 0;
               }
-              LogPrint(LOG_NOTICE, "Braille Lite %d detected.", BltLen);
-
-              brl->x = blitesz = BltLen;	/* initialise size of display - */
-              brl->y = 1;			/* Braille Lites are single line displays */
             }
 
             {
@@ -255,17 +251,25 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
               }
             }
 
+            LogPrint(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
+            brl->x = blitesz;	/* initialise size of display - */
+            brl->y = 1;		/* Braille Lites are single line displays */
+
             /* Allocate space for buffers */
             if ((prevdata = (unsigned char *) malloc(brl->x))) {
               memset(prevdata, 0, brl->x);
               if ((rawdata = (unsigned char *) malloc(brl->x))) {
                 init_maps();
                 return 1;
+              /*
                 free(rawdata);
+                rawdata = NULL;
+              */
               } else {
                 LogPrint(LOG_ERR, "Cannot allocate rawdata.");
               }
               free(prevdata);
+              prevdata = NULL;
             } else {
               LogPrint(LOG_ERR, "Cannot allocate prevdata.");
             }
@@ -280,10 +284,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
         LogPrint(LOG_ERR, "tcgetattr: %s", strerror(errno));
       }
       close(blite_fd);
+      blite_fd = -1;
     } else {
       LogPrint(LOG_ERR, "Open %s: %s", brldev, strerror(errno));
     }
     free(qbase);
+    qbase = NULL;
   } else {
     LogPrint(LOG_ERR, "Cannot allocate qbase.");
   }
@@ -294,19 +300,25 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 static void
 brl_close (BrailleDisplay * brl)
 {
-#if 0 /* SDo: Let's leave the BRLTTY exit message there. */
-  /* We just clear the display, using writebrl(): */
-  memset (brl->buffer, 0, brl->x);
-  brl_writeWindow (brl);
-#endif /* 0 */
+  if (rawdata) {
+    free(rawdata);
+    rawdata = NULL;
+  }
 
-  free (prevdata);
-  free (rawdata);
-  free (qbase);
+  if (prevdata) {
+    free(prevdata);
+    prevdata = NULL;
+  }
 
-  if(blite_fd >= 0) {
-    tcsetattr (blite_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
-    close (blite_fd);
+  if (qbase) {
+    free(qbase);
+    qbase = NULL;
+  }
+
+  if (blite_fd != -1) {
+    tcsetattr(blite_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
+    close(blite_fd);
+    blite_fd = -1;
   }
 }
 
@@ -335,10 +347,9 @@ brl_writeWindow (BrailleDisplay * brl)
   if (int_cursor)
     {
       timer = (timer + 1) % (INT_CSR_SPEED * 2);
-      if (timer < INT_CSR_SPEED)
-	brl->buffer[int_cursor - 1] = 0x55;
-      else
-	brl->buffer[int_cursor - 1] = 0xaa;
+      brl->buffer[int_cursor - 1] = (timer < INT_CSR_SPEED)?
+                                      (B1 | B2 | B3 | B7):
+                                      (B4 | B5 | B6 | B8);
     }
 
   /* Next we must handle display reversal: */
@@ -760,7 +771,7 @@ qget (blkey * kp)
 {
   unsigned char c;
   int how;
-  static unsigned char counts[] = {1, 3, 3};
+  static const unsigned char counts[] = {1, 3, 3};
   unsigned char count;
 
   if (qlen == 0)
@@ -791,18 +802,19 @@ qget (blkey * kp)
       if (c >= 0x80)		/* advance bar */
 	{
 	  kp->raw = c;
-	  switch (c)
-	    {
+	  switch (c) {
 	    case 0x83:		/* left */
 	      kp->cmd = BLT_BARLT;
 	      break;
+
 	    case 0x80:		/* right */
 	      kp->cmd = BLT_BARRT;
 	      break;
+
 	    default:		/* unrecognised keypress */
 	      kp->cmd = 0;
               break;
-	    }
+	  }
 	}
       else
 	{
