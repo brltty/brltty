@@ -477,6 +477,7 @@ in
       ;;
    *qnx*)
       system_object="qnx"
+      AC_CHECK_LIB([asound], [snd_pcm_open])
       ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])

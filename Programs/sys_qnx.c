@@ -33,7 +33,7 @@
 #include "sys_beep_none.h"
 
 #ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
+#include "sys_pcm_qsa.h"
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
