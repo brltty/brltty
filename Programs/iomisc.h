@@ -36,10 +36,12 @@ extern ssize_t readData (
 extern int awaitOutput (int fileDescriptor, int milliseconds);
 extern ssize_t writeData (int fileDescriptor, const void *buffer, size_t size);
 
+#ifndef __MINGW32__
 extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);
 extern int setOpenFlags (int fileDescriptor, int state, int flags);
 extern int setBlockingIo (int fileDescriptor, int state);
 extern int setCloseOnExec (int fileDescriptor, int state);
+#endif /* __MINGW32__ */
 
 #ifdef __cplusplus
 }

@@ -26,6 +26,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#ifdef __MINGW32__
+#include <windows.h>
+#endif /* __MINGW32__ */
+
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
@@ -188,6 +192,7 @@ writeData (int fileDescriptor, const void *buffer, size_t size) {
   }
 }
 
+#ifndef __MINGW32__
 int
 changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
   int flags;
@@ -223,3 +228,4 @@ int
 setCloseOnExec (int fileDescriptor, int state) {
   return fcntl(fileDescriptor, F_SETFD, (state? FD_CLOEXEC: 0)) != -1;
 }
+#endif /* __MINGW32__ */
