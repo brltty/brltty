@@ -6,9 +6,6 @@ drivers may have their own TODO lists.)
 
 Your help is welcome.
 
-- Socket interface so external programs (such as Ultrasonix) could make 
-  use of all braille terminals supported by BRLTTY.
-
 - Defining smaller regions of the screen to be concentrated on.  Cursor
   movement outside the current region would be ignored.  This would be
   useful if the screen was split into multiple `windows' (e.g. in ytalk).
