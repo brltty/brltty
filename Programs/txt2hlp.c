@@ -99,7 +99,7 @@ main (int argc, char *argv[]) {
               HelpPageEntry *page = &pageTable[pageNumber];
               memset(page, 0, sizeof(*page));
               putBigEndian(&page->height, rows);
-              putBigEndian(&page->width, (((columns - 1) / 40) + 1) * 40);
+              putBigEndian(&page->width, columns);
             }
           }
 
