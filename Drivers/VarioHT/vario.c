@@ -74,7 +74,7 @@ static void
 brl_writeWindow (BrailleDisplay *brl)
 {
 	if(memcmp(lastWindow,brl->buffer,40)!=0) {
-		char		outbuff[40];
+		unsigned char outbuff[40];
 		memcpy(lastWindow,brl->buffer,40);
 			/*	Redefine the given dot-pattern to match ours */
 		variotranslate(brl->buffer,outbuff,40);
