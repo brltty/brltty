@@ -79,30 +79,9 @@ $(PM_CONFIG_FILE): read_config$X
 
 ###############################################################################
 
-dump-codes$X: dump-codes.$O
-	$(CC) $(LDFLAGS) -o $@ dump-codes.$O
-
-dump-codes.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/dump-codes.c
-
-serial$X: serial.$O
-	$(CC) $(LDFLAGS) -o $@ serial.$O -lncurses 
-
-serial.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
-
-simulate$X: simulate.$O
-	$(CC) $(LDFLAGS) -o $@ simulate.$O
-
-simulate.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/simulate.c
-
-###############################################################################
-
 clean::
 	-rm -f read_config$X config.tab.c config.output
 	-rm -f brltty-$(DRIVER_CODE)-*.hlp $(PM_CONFIG_FILE)
-	-rm -f serial$X simulate$X dump-codes$X
 
 distclean::
 	-rm -f *.good *.diff *.out
