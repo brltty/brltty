@@ -197,6 +197,9 @@ sys_osf.$O:
 sys_qnx.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_qnx.c
 
+sys_hurd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_hurd.c
+
 ###############################################################################
 
 usb.$O:

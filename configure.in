@@ -218,7 +218,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for linkage editor shared object flags], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*|netbsd*|*qnx*)
+   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*)
       brltty_ld_flag_shared="-shared"
       brltty_ld_flag_soname="-soname"
       ;;
@@ -249,7 +249,7 @@ AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 AC_CACHE_CHECK([for configure shared object directory command], [brltty_cv_prog_conflibdir], [dnl
 case "${host_os}"
 in
-   linux*)
+   linux*|gnu*)
       brltty_cv_prog_conflibdir="/sbin/ldconfig -n"
       ;;
    *)
@@ -340,7 +340,7 @@ fi
 AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
 case "${host_os}"
 in
-   linux*)
+   linux*|gnu*)
       brltty_cv_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE"
       ;;
    hpux*)
@@ -450,6 +450,9 @@ in
          brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"
          brltty_midi_interfaces="${brltty_midi_interfaces} alsa"
 ])
+      ;;
+   gnu*)
+      system_object="hurd"
       ;;
    solaris*)
       system_object="solaris"
@@ -604,8 +607,11 @@ BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*|netbsd*|*qnx*)
+   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*)
       brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
+      ;;
+   gnu*)
+      brltty_cv_prog_ld_flags=""
       ;;
    solaris*)
       brltty_cv_prog_ld_flags="-R ${execute_root}${library_directory}"
@@ -629,7 +635,7 @@ then
 else
    case "${host_os}"
    in
-      linux*|openbsd*|freebsd*|*qnx*)
+      linux*|openbsd*|freebsd*|*qnx*|gnu*)
          brltty_cv_prog_ld_static="-static"
          ;;
       netbsd*)
@@ -663,7 +669,7 @@ LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 
 case "${host_os}"
 in
-   linux*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*)
+   linux*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*|gnu*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -773,6 +779,9 @@ in
             break
          }
       done
+      ;;
+   gnu*)
+      brltty_cv_device_serial_first="/dev/com0"
       ;;
    solaris*)
       brltty_cv_device_serial_first="/dev/ttya"
