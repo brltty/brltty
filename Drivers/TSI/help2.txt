@@ -59,6 +59,7 @@ Speech:
   Speak line: rt+Rdn
   Speak from here to bottom of screen: lt+rt+Rdn
   Stop speaking: rt+Rup
+  Goto speech position: cncv + rt
 
 Preferences:
   Preferences menu:

@@ -66,6 +66,7 @@ Speech:
   Speak line: bar2+Rdn
   Speak from here to bottom of screen: bar1+bar2+Rdn
   Stop speaking: bar2+Rup
+  Goto speech position: cncv + bar2
 
 Preferences:
   Preferences menu:

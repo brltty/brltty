@@ -15,17 +15,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.72 (January 2003)"
-#define COPYRIGHT "Copyright (C) 1996-2003 by Stéphane Doyon " \
+#define VERSION "BRLTTY driver for TSI displays, version 2.73 (January 2004)"
+#define COPYRIGHT "Copyright (C) 1996-2004 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/braille.c - Braille display driver for TSI displays
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled into BRLTTY version 3.2.
+ * It is designed to be compiled into BRLTTY version 3.4.
  *
  * History:
+ * Version 2.73 jan2004: Fix key bindings for speech commands for PB80.
+ *   Add CMD_SPKHOME to help.
  * Version 2.72 jan2003: brl->buffer now allocated by core.
  * Version 2.71: Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and CMD_SIXDOTS.
  * Version 2.70: Added CR_CUTAPPEND, CR_CUTLINE, CR_SETMARK, CR_GOTOMARK
@@ -1366,12 +1368,15 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
   /* speech */
   /* experimental speech support */
-    KEYAND(KEY_CRIGHT | KEY_BLEFT) KEY (KEY_BRIGHT | KEY_BDOWN, CMD_SAY_LINE);
-    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SAY_BELOW);
-    KEY (KEY_BROUND | KEY_BRIGHT, CMD_SPKHOME);
+    KEYAND(KEY_CRIGHT | KEY_BLEFT) KEYAND(KEY_BAR2 | KEY_R2DN)
+      KEY (KEY_BRIGHT | KEY_BDOWN, CMD_SAY_LINE);
+    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_R2DN) 
+      KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SAY_BELOW);
+    KEYAND(KEY_BROUND | KEY_BAR2) KEY (KEY_BROUND | KEY_BRIGHT, CMD_SPKHOME);
     KEYAND(KEY_CRIGHT | KEY_CUP | KEY_BLEFT | KEY_BUP)
-      KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
-    KEY (KEY_BRIGHT | KEY_BUP | KEY_CUP | KEY_BLEFT, CMD_RESTARTSPEECH);
+      KEYAND(KEY_BAR2 | KEY_R2UP) KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
+    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_R1UP | KEY_R2UP)
+      KEY (KEY_BRIGHT | KEY_BUP | KEY_CUP | KEY_BLEFT, CMD_RESTARTSPEECH);
     
   /* preferences menu */
     KEYAND(KEY_BAR1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BRIGHT, CMD_PREFMENU);

@@ -64,6 +64,7 @@ Speech:
   Speak line: dRt+dDn
   Speak from here to bottom of screen: dLt+dRt+dDn
   Stop speaking: dRt+dUp
+  Goto speech position: Rx + dRt
 
 Preferences:
   Preferences menu:
