@@ -55,137 +55,238 @@ static int16_t keys[KEYMAX];
 static FILE *configurationFile = NULL;
 static int lineNumber = 1;
 
- /* --------------------------------------------------------------- */
- /* some functions set_*(): set the big table with the values read  */
- 
- /* global var: the current entry (index) */
- static int currentTerminal = -1;
- /* the number of modifiers - last entry used */
- static int currentModifier;
- /* the number of defined commands - last entry use*/
- static int currentCommand;
+static int terminalsSize;
+static int commandsSize;
 
- static void
- assert_condition (int condition, char *problem, int line) {
-   if (!condition) {
-     yyerror(problem);
-   }
- }
-
- static void
- assert_started (int line) {
-  assert_condition((currentTerminal >= 0), "terminal not being defined", line);
- }
-
- static inline void set_modifier(int code);
-
- static inline void set_ident(int num)
-  {
-    int i;
-    TerminalDefinition *terminal = &pm_terminals[++currentTerminal];
-    assert_condition((currentTerminal < num_terminals), "too many terminals", __LINE__);
-    currentModifier = -1;
-    currentCommand = -1;
-    terminal->identifier = num;
-
-    terminal->columns = 0;
-    terminal->rows = 1;
-
-    terminal->statusCells = 0;
-    terminal->frontKeys = 0;
-    terminal->hasEasyBar = 0;
+static int
+reallocateTable (void **address, int size, int count) {
+  void *newAddress = realloc(*address, (count * size));
+  if (!count || (newAddress != NULL)) {
+    *address = newAddress;
+    return 1;
+  } else {
+    yyerror("insufficient memory");
   }
+  return 0;
+}
 
- static inline void set_name(char* nameval)
-  {
-    assert_started(__LINE__);
-    strncpy(pm_terminals[currentTerminal].name, nameval,
-    	    sizeof(pm_terminals[currentTerminal].name));
+static int
+ensureTableSize (void **address, int size, int count, int *limit, int increment) {
+  if (count == *limit) {
+    int newLimit = *limit + increment;
+    if (!reallocateTable(address, size, newLimit)) return 0;
+    *limit = newLimit;
   }
+  return 1;
+}
 
+static TerminalDefinition *
+getCurrentTerminal (void) {
+  if (pmTerminalCount > 0) return &pmTerminals[pmTerminalCount - 1];
+  yyerror("terminal not being defined");
+  return NULL;
+}
 
- static inline void set_help(char* name)
-   {
-     assert_started(__LINE__);
-     strncpy(pm_terminals[currentTerminal].helpFile, name,
-     	     sizeof(pm_terminals[currentTerminal].helpFile));
-   }
-
- static inline void set_size(int code)
-  {
-    assert_started(__LINE__);
-    pm_terminals[currentTerminal].columns = code;
+static int
+finishCurrentTerminal (void) {
+  if (pmTerminalCount) {
+    TerminalDefinition *terminal = &pmTerminals[pmTerminalCount - 1];
+    if (!reallocateTable((void **)&terminal->statshow, sizeof(*terminal->statshow), terminal->statusCount)) return 0;
+    if (!reallocateTable((void **)&terminal->modifiers, sizeof(*terminal->modifiers), terminal->modifierCount)) return 0;
+    if (!reallocateTable((void **)&terminal->commands, sizeof(*terminal->commands), terminal->commandCount)) return 0;
   }
+  return 1;
+}
 
- static inline void set_statcells(int code)
-  {
-    assert_started(__LINE__);
-    pm_terminals[currentTerminal].statusCells = code;
-  }
+static TerminalDefinition *
+addTerminal (int identifier) {
+  if (finishCurrentTerminal()) {
+    if (ensureTableSize((void **)&pmTerminals, sizeof(*pmTerminals),
+                        pmTerminalCount, &terminalsSize, 4)) {
+      TerminalDefinition *terminal = &pmTerminals[pmTerminalCount++];
+      terminal->identifier = identifier;
+      terminal->name = NULL;
+      terminal->helpFile = NULL;
 
- static inline void set_frontkeys(int code)
-  {
-    assert_started(__LINE__);
-    pm_terminals[currentTerminal].frontKeys = code;
-  }
+      terminal->columns = 0;
+      terminal->rows = 1;
 
- static inline void set_haseasybar(int code)
-  {
-    assert_started(__LINE__);
-    pm_terminals[currentTerminal].hasEasyBar = code;
-  }
+      terminal->frontKeys = 0;
+      terminal->hasEasyBar = 0;
 
- static inline void set_showstat(int pos, int code)
-  {
-    assert_started(__LINE__);
-    assert_condition(((0 < pos) && (pos <= STATMAX)), "invalid status cell number", __LINE__);
-    pm_terminals[currentTerminal].statshow[pos-1] = code;
-  }
+      terminal->statusCount = 0;
+      terminal->modifierCount = 0;
+      terminal->commandCount = 0;
 
- static inline void set_modifier(int code)
-  {
-    assert_started(__LINE__);
-    currentModifier++;
-    assert_condition((currentModifier < MODMAX), "too many modifiers", __LINE__);
-    pm_terminals[currentTerminal].modifiers[currentModifier] = code;
-  }
+      terminal->statshow = NULL;
+      terminal->modifiers = NULL;
+      terminal->commands = NULL;
 
- static inline void add_command(int code, int numkeys, int16_t keys[])
-  {
-    TerminalDefinition *terminal;
-    CommandDefinition *cmd;
-    int k, m;
-
-    assert_started(__LINE__);
-    terminal = &pm_terminals[currentTerminal];
-
-    currentCommand++;
-    assert_condition((currentCommand < CMDMAX), "too many commands", __LINE__);
-    cmd = &terminal->commands[currentCommand];
-    cmd->code = code;
-    cmd->key = NOKEY;
-    cmd->modifiers = 0;
-
-    for (k=0; k<numkeys; k++) {
-      int16_t key = keys[k];
-      int found = 0;
-      for (m=0; m<=currentModifier; m++) {
-	if (key == terminal->modifiers[m]) {
-          int bit = 1 << m;
-          assert_condition(!(cmd->modifiers & bit), "duplicate modifier", __LINE__);
-          cmd->modifiers |= bit;
-          found = 1;
-          break;
-	}
-      }
-
-      if (!found) {
-        assert_condition((cmd->key == NOKEY), "more than one key", __LINE__);
-        cmd->key = key;
-      }
+      commandsSize = 0;
+      return terminal;
     }
   }
+  return NULL;
+}
 
+static int
+setName (char *name) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    if (!terminal->name) {
+      terminal->name = strdup(name);
+      return 1;
+    } else {
+      yyerror("duplicate name");
+    }
+  }
+  return 0;
+}
+
+static int
+setHelp (char *file) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    if (!terminal->helpFile) {
+      terminal->helpFile = strdup(file);
+      return 1;
+    } else {
+      yyerror("duplicate help file");
+    }
+  }
+  return 0;
+}
+
+static int
+setColumns (int columns) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    terminal->columns = columns;
+    return 1;
+  }
+  return 0;
+}
+
+static int
+setStatusCells (int count) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    terminal->statusCount = count;
+    terminal->statshow = malloc(count * sizeof(terminal->statshow[0]));
+
+    {
+      int s;
+      for (s=0; s<count; s++) terminal->statshow[s] = OFFS_EMPTY;
+    }
+
+    return 1;
+  }
+  return 0;
+}
+
+static int
+setFrontKeys (int count) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    terminal->frontKeys = count;
+    return 1;
+  }
+  return 0;
+}
+
+static int
+setHasEasyBar (int yes) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    terminal->hasEasyBar = yes;
+    return 1;
+  }
+  return 0;
+}
+
+static int
+setStatusCell (int number, int format) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    if ((0 < number) && (number <= terminal->statusCount)) {
+      uint16_t *cell = &terminal->statshow[number-1];
+      if (*cell == OFFS_EMPTY) {
+        *cell = format;
+        return 1;
+      } else {
+        yyerror("duplicate status cell");
+      }
+    } else {
+      yyerror("invalid status cell number");
+    }
+  }
+  return 0;
+}
+
+static int
+addModifier (int key) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    if (terminal->modifierCount < MODMAX) {
+      if (!terminal->modifiers)
+        terminal->modifiers = malloc(MODMAX * sizeof(terminal->modifiers[0]));
+      if (terminal->modifiers) {
+        terminal->modifiers[terminal->modifierCount++] = key;
+        return 1;
+      }
+    } else {
+      yyerror("too many modifiers");
+    }
+  }
+  return 0;
+}
+
+static CommandDefinition *
+addCommand (int code) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    if (ensureTableSize((void **)&terminal->commands, sizeof(*terminal->commands),
+                        terminal->commandCount, &commandsSize, 0X20)) {
+      CommandDefinition *cmd = &terminal->commands[terminal->commandCount++];;
+      int k;
+
+      cmd->code = code;
+      cmd->key = NOKEY;
+      cmd->modifiers = 0;
+
+      for (k=0; k<numkeys; k++) {
+        int16_t key = keys[k];
+        int found = 0;
+        int m;
+        for (m=0; m<terminal->modifierCount; m++) {
+          if (key == terminal->modifiers[m]) {
+            int bit = 1 << m;
+            if (cmd->modifiers & bit) {
+              yyerror("duplicate modifier");
+              goto removeCommand;
+            }
+            cmd->modifiers |= bit;
+            found = 1;
+            break;
+          }
+        }
+
+        if (!found) {
+          if (cmd->key != NOKEY) {
+            yyerror("more than one nonmodifier key");
+            goto removeCommand;
+          }
+          cmd->key = key;
+        }
+      }
+      return cmd;
+
+    removeCommand:
+      terminal->commandCount--;
+    }
+  }
+  return NULL;
+}
 %}
 
 %start input
@@ -207,20 +308,20 @@ input:    /* empty */
 
 inputline:  '\n'
        | error '\n'                 { yyerrok;  }
-       | IDENT eq NUM '\n'          { set_ident(numval); }
-       | NAME eq STRING '\n'        { set_name(nameval); }
-       | HELPFILE eq STRING '\n'    { set_help(nameval); }
-       | SIZE eq NUM '\n'           { set_size(numval); }
-       | STATCELLS eq NUM '\n'      { set_statcells(numval); }
-       | FRONTKEYS eq NUM '\n'      { set_frontkeys(numval); }
-       | EASYBAR '\n'               { set_haseasybar(1); }
-       | EASYBAR eq NUM '\n'        { set_haseasybar(numval != 0); }
+       | IDENT eq NUM '\n'          { addTerminal(numval); }
+       | NAME eq STRING '\n'        { setName(nameval); }
+       | HELPFILE eq STRING '\n'    { setHelp(nameval); }
+       | SIZE eq NUM '\n'           { setColumns(numval); }
+       | STATCELLS eq NUM '\n'      { setStatusCells(numval); }
+       | FRONTKEYS eq NUM '\n'      { setFrontKeys(numval); }
+       | EASYBAR '\n'               { setHasEasyBar(1); }
+       | EASYBAR eq NUM '\n'        { setHasEasyBar(numval != 0); }
 
-       | statdef eq statdisp '\n'  { set_showstat(keyindex, numval);  }
-       | MODIFIER eq anykey '\n'   { set_modifier(keyindex); }
-       | keycode eq modifiers '\n' { add_command(cmdval, numkeys, keys); }
-       | keycode ON eq modifiers '\n' { add_command(cmdval | VAL_TOGGLE_ON, numkeys, keys); }
-       | keycode OFF eq modifiers '\n' { add_command(cmdval | VAL_TOGGLE_OFF, numkeys, keys); }
+       | statdef eq statdisp '\n'  { setStatusCell(keyindex, numval);  }
+       | MODIFIER eq anykey '\n'   { addModifier(keyindex); }
+       | keycode eq modifiers '\n' { addCommand(cmdval); }
+       | keycode ON eq modifiers '\n' { addCommand(cmdval | VAL_TOGGLE_ON); }
+       | keycode OFF eq modifiers '\n' { addCommand(cmdval | VAL_TOGGLE_OFF); }
        ;
 
 eq:    '='
@@ -434,14 +535,38 @@ int yylex ()
 
 int
 parse (void) {
+  if (pmTerminalsAllocated) {
+    while (pmTerminalCount) {
+      TerminalDefinition *terminal = &pmTerminals[--pmTerminalCount];
+      if (terminal->name) free(terminal->name);
+      if (terminal->helpFile) free(terminal->helpFile);
+      if (terminal->statshow) free(terminal->statshow);
+      if (terminal->modifiers) free(terminal->modifiers);
+      if (terminal->commands) free(terminal->commands);
+    }
+
+    if (pmTerminals) {
+      free(pmTerminals);
+      pmTerminals = NULL;
+    }
+  } else {
+    pmTerminalCount = 0;
+    pmTerminals = NULL;
+    pmTerminalsAllocated = 1;
+  }
+
   lineNumber = 1;
-  currentTerminal = -1;
+  terminalsSize = 0;
 
   nameval = NULL;
   numval = 0;
   keyindex = 0;
-  cmdval = 0; 
+  cmdval = 0;
   numkeys = 0;
 
-  return yyparse ();
+  {
+    int result = yyparse();
+    finishCurrentTerminal();
+    return result;
+  }
 }

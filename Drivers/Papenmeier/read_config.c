@@ -29,8 +29,7 @@ static int
 yyerror (char *problem)  /* Called by yyparse on error */
 {
   fprintf(stderr, "%s[%d]: %s\n", filename, lineNumber, problem);
-  exit(99);
- return 0;
+  return 1;
 }
 
 /* --------------------------------------------------------------- */
@@ -136,13 +135,13 @@ static char* search_key(int16_t key) {
    big parameterfile via stdout                                    */
 
 static void
-printkeys (FILE *fh, const CommandDefinition *cmd, const int16_t *modifiers) {
+printkeys (FILE *fh, const TerminalDefinition *terminal, const CommandDefinition *cmd) {
   const char *delimiter = "";
-  int modifier;
+  int m;
 
-  for (modifier=0; modifier<MODMAX; modifier++) {
-    if (cmd->modifiers & (1 << modifier)) {
-      fprintf(fh, "%s%s", delimiter, search_key(modifiers[modifier])); 
+  for (m=0; m<terminal->modifierCount; m++) {
+    if (cmd->modifiers & (1 << m)) {
+      fprintf(fh, "%s%s", delimiter, search_key(terminal->modifiers[m])); 
       delimiter = " and ";
     }
   }
@@ -159,8 +158,8 @@ void terminals(int help, int verbose)
 
   /* TODO: Comment/Help for status display */
 
-  for (t=0; t<num_terminals; t++) {
-    const TerminalDefinition *terminal = &pm_terminals[t];
+  for (t=0; t<pmTerminalCount; t++) {
+    const TerminalDefinition *terminal = &pmTerminals[t];
 
     if (terminal->name) {
       if (help) {
@@ -195,7 +194,7 @@ void terminals(int help, int verbose)
       fprintf(fh, "%s = %d\n", 
 	      search_symbol(SIZE),      terminal->columns);
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(STATCELLS), terminal->statusCells);
+	      search_symbol(STATCELLS), terminal->statusCount);
       fprintf(fh, "%s = %d\n", 
 	      search_symbol(FRONTKEYS), terminal->frontKeys);
       if (terminal->hasEasyBar)
@@ -204,7 +203,7 @@ void terminals(int help, int verbose)
       {
         int first = 1;
         int s;
-        for (s=0; s<STATMAX; s++) {
+        for (s=0; s<terminal->statusCount; s++) {
           uint16_t show = terminal->statshow[s];
           if (show != OFFS_EMPTY) {
             if (first) {
@@ -238,7 +237,7 @@ void terminals(int help, int verbose)
       {
         int first = 1;
         int m;
-        for (m=0; m<MODMAX; m++)  {
+        for (m=0; m<terminal->modifierCount; m++)  {
           uint16_t key = terminal->modifiers[m];
           if (key) {
             if (first) {
@@ -254,14 +253,14 @@ void terminals(int help, int verbose)
       fprintf(fh, "# Command Definitions:\n");    
       {
         int c;
-        for (c=0; c<CMDMAX; c++) {
+        for (c=0; c<terminal->commandCount; c++) {
           const CommandDefinition *command = &terminal->commands[c];
           if (command->code) {
             fprintf(fh, "%s", search_cmd(command->code & VAL_CMD_MASK));
             if (command->code & VAL_TOGGLE_MASK) 
               fprintf(fh, " %s", search_onoff(command->code));
             fprintf(fh, " = ");
-            printkeys(fh, command, terminal->modifiers);
+            printkeys(fh, terminal, command);
             fprintf(fh, " # ");
             {
               const char *description = get_command_description(command->code & VAL_CMD_MASK);
@@ -354,7 +353,7 @@ int main(int argc, char* argv[])
   }
 
   configurationFile = stdin;
-  memset(&pm_terminals, 0, sizeof(pm_terminals));
+  memset(pmTerminalTable, 0, sizeof(pmTerminalTable));
   parse ();
   terminals(0, 1);
   return 0;

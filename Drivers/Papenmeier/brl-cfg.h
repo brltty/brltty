@@ -63,11 +63,7 @@ typedef enum {
 #define ROUTINGKEY      -9999  /* virtual routing key */
 #define NOKEY           -1
 
-#define NAMEMAX   80
-#define HELPLEN   80
-#define STATMAX   22
 #define MODMAX    16
-#define CMDMAX   300
 #define KEYMAX     8
 
 #define OFFS_EMPTY       0
@@ -102,25 +98,34 @@ typedef struct {
 
 typedef struct {
   unsigned char identifier;		/* identity of terminal */
-
-#ifdef ENABLE_PM_CONFIGURATION_FILE
-  char name[NAMEMAX];		/* name of terminal */
-  char helpFile[HELPLEN];	/* filename of local helpfile */
-#else /* ENABLE_PM_CONFIGURATION_FILE */
-  const char *name;		/* name of terminal */
-  const char *helpFile;		/* filename of local helpfile */
-#endif /* ENABLE_PM_CONFIGURATION_FILE */
+  char *name;		/* name of terminal */
+  char *helpFile;		/* filename of local helpfile */
 
   uint8_t columns;		/* width of display */
   uint8_t rows;			/* height of display */
-  uint8_t statusCells;		/* number of status cells */
-  uint8_t frontKeys;		/* number of frontkeys */
+  uint8_t frontKeys;		/* number of front keys */
   uint8_t hasEasyBar;		/* terminal has an easy bar */
+  uint8_t statusCount;		/* number of status cells */
+  uint8_t modifierCount;		/* number of modifier keys */
+  uint16_t commandCount;		/* number of commands */
 
-  uint16_t statshow[STATMAX];	/* status cells: info to show */
-  int16_t modifiers[MODMAX];	/* keys used as modifier */
-  CommandDefinition commands[CMDMAX];
+  uint16_t *statshow;	/* status cells: info to show */
+  int16_t *modifiers;	/* keys used as modifier */
+  CommandDefinition *commands;
 } TerminalDefinition; 
+
+#define PM_COUNT(array) (sizeof((array)) / sizeof((array)[0]))
+#define PM_TERMINAL(identifier, signature, name, columns, rows, front, easy) \
+{ \
+  identifier, name, "brltty-pm-" #signature ".hlp", \
+  columns, rows, front, easy, \
+  PM_COUNT(pm_status_##signature), \
+  PM_COUNT(pm_modifiers_##signature), \
+  PM_COUNT(pm_commands_##signature), \
+  pm_status_##signature, \
+  pm_modifiers_##signature, \
+  pm_commands_##signature \
+}
 
 /* some macros for terminals with the same layout -
  * named after there usage
@@ -495,237 +500,239 @@ typedef struct {
       CHGONOFF( CMD_AUTOREPEAT , OFFS_STAT + 21, on, off ), \
               { CMD_PASTE      , OFFS_STAT + 22, 0X0000  }
 
-
-static TerminalDefinition pm_terminals[] = {
-  {
-    0,				/* identity */
-    "BrailleX Compact 486",	/* name of terminal */
-    "brltty-pm-c-486.hlp",		/* filename of local helpfile */
-    40, 1,			/* size of display */
-    0,				/* number of status cells */
-    9,				/* number of frontkeys */
-    0,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-    },
-    {				/* modifiers */
-      MOD_FRONT_9
-    },
-    {				/* commands + keys */
-      CMDS_FRONT_9
-    },
-  },
-
-  {
-    1,				/* identity */
-    "BrailleX 2D Lite (plus)",	/* name of terminal */
-    "brltty-pm-2d-l.hlp",		/* filename of local helpfile */
-    40, 1,			/* size of display */
-    13,				/* number of status cells */
-    9,				/* number of frontkeys */
-    0,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-      SHOW_STAT_13,
-    },
-    {				/* modifiers */
-      MOD_FRONT_9
-    },
-    {				/* commands + keys */
-      CMDS_FRONT_9,
-      CMDS_STAT_13(0X2, 0X1)
-    },
-  },
-
-  {
-    2,				/* identity */
-    "BrailleX Compact/Tiny",	/* name of terminal */
-    "brltty-pm-c.hlp",		/* filename of local helpfile */
-    40, 1,			/* size of display */
-    0,				/* number of status cells */
-    9,				/* number of frontkeys */
-    0,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-    },
-    {				/* modifiers */
-      MOD_FRONT_9
-    },
-    {				/* commands + keys */
-      CMDS_FRONT_9
-    },
-  },
-
-  {
-    3,				/* identity */
-    "BrailleX 2D Screen Soft", /* name of terminal */
-    "brltty-pm-2d-s.hlp",		/* filename of local helpfile */
-    80, 1,			/* size of display */
-    22,				/* number of status cells */
-    13,				/* number of frontkeys */
-    0,				/* terminal has an easy bar */
-    {
-      SHOW_STAT_22
-    },
-    {				/* modifiers */
-      MOD_FRONT_13
-    },
-    {				/* commands + keys */
-      CMDS_FRONT_13,
-      CMDS_STAT_22(0X80, 0X40)
-    },
-  },
-
-  {
-    6,				/* identity */
-    "BrailleX IB 80 CR Soft",	/* name of terminal */
-    "brltty-pm-ib-80.hlp",		/* filename of local helpfile */
-    80, 1,			/* size of display */
-    4,				/* number of status cells */
-    9,				/* number of frontkeys */
-    0,				/* terminal has an easy bar */
-    {
-      SHOW_STAT_4
-    },
-    {				/* modifiers */
-      MOD_FRONT_9
-    },
-    {				/* commands + keys */
-      CMDS_FRONT_9,
-      CMDS_STAT_4
-    },
-  },
-
-  {
-    64,				/* identity */
-    "BrailleX EL 2D-40",	/* name of terminal */
-    "brltty-pm-el-2d-40.hlp",		/* filename of local helpfile */
-    40, 1,			/* size of display */
-    13,				/* number of status cells */
-    0,				/* number of frontkeys */
-    1,				/* terminal has an easy bar */
-    {
-      SHOW_STAT_13
-    },
-    {				/* modifiers */
-      MOD_EASY
-    },
-    {				/* commands + keys */
-      CMDS_EASY,
-      CMDS_STAT_13(0X8000, 0X4000)
-    },
-  },
-
-  {
-    65,				/* identity */
-    "BrailleX EL 2D-66",	/* name of terminal */
-    "brltty-pm-el-2d-66.hlp",		/* filename of local helpfile */
-    66, 1,			/* size of display */
-    13,				/* number of status cells */
-    0,				/* number of frontkeys */
-    1,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-      SHOW_STAT_13
-    },
-    {				/* modifiers */
-      MOD_EASY
-    },
-    {				/* commands + keys */
-      CMDS_EASY,
-      CMDS_STAT_13(0X8000, 0X4000)
-    },
-  },
-
-  {
-    66,				/* identity */
-    "BrailleX EL 80",		/* name of terminal */
-    "brltty-pm-el-80.hlp",		/* filename of local helpfile */
-    80, 1,			/* size of display */
-    2,				/* number of status cells */
-    0,				/* number of frontkeys */
-    1,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-      SHOW_STAT_2
-    },
-    {				/* modifiers */
-      MOD_EASY
-    },
-    {				/* commands + keys */
-      CMDS_EASY,
-      CMDS_STAT_2
-    },
-  },
-
-  {
-    67,				/* identity */
-    "BrailleX EL 2D-80",		/* name of terminal */
-    "brltty-pm-el-2d-80.hlp",		/* filename of local helpfile */
-    80, 1,			/* size of display */
-    20,				/* number of status cells */
-    0,				/* number of frontkeys */
-    1,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-      SHOW_STAT_20
-    },
-    {				/* modifiers */
-      MOD_EASY
-    },
-    {				/* commands + keys */
-      CMDS_EASY,
-      CMDS_STAT_20(0X8000, 0X4000)
-    },
-  },
-
-  {
-    68,				/* identity */
-    "BrailleX EL 40 P",		/* name of terminal */
-    "brltty-pm-el-40-p.hlp",		/* filename of local helpfile */
-    40, 1,			/* size of display */
-    0,				/* number of status cells */
-    0,				/* number of frontkeys */
-    1,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-    },
-    {				/* modifiers */
-      MOD_EASY
-    },
-    {				/* commands + keys */
-      CMDS_EASY
-    },
-  },
-
-  {
-    69,				/* identity */
-    "BrailleX Elba 32",		/* name of terminal */
-    "brltty-pm-elba-32.hlp",		/* filename of local helpfile */
-    32, 1,			/* size of display */
-    0,				/* number of status cells */
-    0,				/* number of frontkeys */
-    1,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-    },
-    {				/* modifiers */
-      MOD_EASY
-    },
-    {				/* commands + keys */
-      CMDS_EASY
-    },
-  },
-
-  {
-    70,				/* identity */
-    "BrailleX Elba 20",		/* name of terminal */
-    "brltty-pm-elba-20.hlp",		/* filename of local helpfile */
-    20, 1,			/* size of display */
-    0,				/* number of status cells */
-    0,				/* number of frontkeys */
-    1,				/* terminal has an easy bar */
-    {				/* status cells: info to show */
-    },
-    {				/* modifiers */
-      MOD_EASY
-    },
-    {				/* commands + keys */
-      CMDS_EASY
-    },
-  },
+static uint16_t pm_status_c_486[] = {
+};
+static int16_t pm_modifiers_c_486[] = {
+  MOD_FRONT_9
+};
+static CommandDefinition pm_commands_c_486[] = {
+  CMDS_FRONT_9
 };
 
-static const int num_terminals = sizeof(pm_terminals)/sizeof(pm_terminals[0]);
+static uint16_t pm_status_2d_l[] = {
+  SHOW_STAT_13
+};
+static int16_t pm_modifiers_2d_l[] = {
+  MOD_FRONT_9
+};
+static CommandDefinition pm_commands_2d_l[] = {
+  CMDS_FRONT_9,
+  CMDS_STAT_13(0X2, 0X1)
+};
+
+static uint16_t pm_status_c[] = {
+};
+static int16_t pm_modifiers_c[] = {
+  MOD_FRONT_9
+};
+static CommandDefinition pm_commands_c[] = {
+  CMDS_FRONT_9
+};
+
+static uint16_t pm_status_2d_s[] = {
+  SHOW_STAT_22
+};
+static int16_t pm_modifiers_2d_s[] = {
+  MOD_FRONT_13
+};
+static CommandDefinition pm_commands_2d_s[] = {
+  CMDS_FRONT_13,
+  CMDS_STAT_22(0X80, 0X40)
+};
+
+static uint16_t pm_status_ib_80[] = {
+  SHOW_STAT_4
+};
+static int16_t pm_modifiers_ib_80[] = {
+  MOD_FRONT_9
+};
+static CommandDefinition pm_commands_ib_80[] = {
+  CMDS_FRONT_9,
+  CMDS_STAT_4
+};
+
+static uint16_t pm_status_el_2d_40[] = {
+  SHOW_STAT_13
+};
+static int16_t pm_modifiers_el_2d_40[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_el_2d_40[] = {
+  CMDS_EASY,
+  CMDS_STAT_13(0X8000, 0X4000)
+};
+
+static uint16_t pm_status_el_2d_66[] = {
+  SHOW_STAT_13
+};
+static int16_t pm_modifiers_el_2d_66[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_el_2d_66[] = {
+  CMDS_EASY,
+  CMDS_STAT_13(0X8000, 0X4000)
+};
+
+static uint16_t pm_status_el_80[] = {
+  SHOW_STAT_2
+};
+static int16_t pm_modifiers_el_80[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_el_80[] = {
+  CMDS_EASY,
+  CMDS_STAT_2
+};
+
+static uint16_t pm_status_el_2d_80[] = {
+  SHOW_STAT_20
+};
+static int16_t pm_modifiers_el_2d_80[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_el_2d_80[] = {
+  CMDS_EASY,
+  CMDS_STAT_20(0X8000, 0X4000)
+};
+
+static uint16_t pm_status_el_40_p[] = {
+};
+static int16_t pm_modifiers_el_40_p[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_el_40_p[] = {
+  CMDS_EASY
+};
+
+static uint16_t pm_status_elba_32[] = {
+};
+static int16_t pm_modifiers_elba_32[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_elba_32[] = {
+  CMDS_EASY
+};
+
+static uint16_t pm_status_elba_20[] = {
+};
+static int16_t pm_modifiers_elba_20[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_elba_20[] = {
+  CMDS_EASY
+};
+
+
+static TerminalDefinition pmTerminalTable[] = {
+  PM_TERMINAL(
+    0,				/* identity */
+    c_486,		/* filename of local helpfile */
+    "BrailleX Compact 486",	/* name of terminal */
+    40, 1,			/* size of display */
+    9,				/* number of front keys */
+    0				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    1,				/* identity */
+    2d_l,		/* filename of local helpfile */
+    "BrailleX 2D Lite (plus)",	/* name of terminal */
+    40, 1,			/* size of display */
+    9,				/* number of front keys */
+    0				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    2,				/* identity */
+    c,		/* filename of local helpfile */
+    "BrailleX Compact/Tiny",	/* name of terminal */
+    40, 1,			/* size of display */
+    9,				/* number of front keys */
+    0				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    3,				/* identity */
+    2d_s,		/* filename of local helpfile */
+    "BrailleX 2D Screen Soft", /* name of terminal */
+    80, 1,			/* size of display */
+    13,				/* number of front keys */
+    0				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    6,				/* identity */
+    ib_80,		/* filename of local helpfile */
+    "BrailleX IB 80 CR Soft",	/* name of terminal */
+    80, 1,			/* size of display */
+    9,				/* number of front keys */
+    0				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    64,				/* identity */
+    el_2d_40,		/* filename of local helpfile */
+    "BrailleX EL 2D-40",	/* name of terminal */
+    40, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    65,				/* identity */
+    el_2d_66,		/* filename of local helpfile */
+    "BrailleX EL 2D-66",	/* name of terminal */
+    66, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    66,				/* identity */
+    el_80,		/* filename of local helpfile */
+    "BrailleX EL 80",		/* name of terminal */
+    80, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    67,				/* identity */
+    el_2d_80,		/* filename of local helpfile */
+    "BrailleX EL 2D-80",		/* name of terminal */
+    80, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    68,				/* identity */
+    el_40_p,		/* filename of local helpfile */
+    "BrailleX EL 40 P",		/* name of terminal */
+    40, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    69,				/* identity */
+    elba_32,		/* filename of local helpfile */
+    "BrailleX Elba 32",		/* name of terminal */
+    32, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  ),
+
+  PM_TERMINAL(
+    70,				/* identity */
+    elba_20,		/* filename of local helpfile */
+    "BrailleX Elba 20",		/* name of terminal */
+    20, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  )
+};
+
+static TerminalDefinition *pmTerminals = pmTerminalTable;
+static int pmTerminalCount = PM_COUNT(pmTerminalTable);
+static int pmTerminalsAllocated = 0;

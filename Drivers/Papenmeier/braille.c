@@ -74,12 +74,12 @@ typedef enum {
 #ifdef ENABLE_PM_CONFIGURATION_FILE
 #include "config.tab.c"
  
-int
+static int
 yyerror (char *problem)  /* Called by yyparse on error */
 {
-  LogPrint(LOG_CRIT, "Configuration file error: line %d: %s",
+  LogPrint(LOG_CRIT, "Papenmeier configuration error: line %d: %s",
            lineNumber, problem);
-  exit(99);
+  return 0;
 }
 
 static void
@@ -313,9 +313,9 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
            identity[2],
            identity[3], identity[4], identity[5],
            identity[6], identity[7], identity[8]);
-  for (tn=0; tn<num_terminals; tn++) {
-    if (pm_terminals[tn].identifier == identity[2]) {
-      the_terminal = &pm_terminals[tn];
+  for (tn=0; tn<pmTerminalCount; tn++) {
+    if (pmTerminals[tn].identifier == identity[2]) {
+      the_terminal = &pmTerminals[tn];
       LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
                the_terminal->name,
                the_terminal->columns, the_terminal->rows,
@@ -324,7 +324,7 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       brl->y = the_terminal->rows;
 
       curr_cols = the_terminal->columns;
-      curr_stats = the_terminal->statusCells;
+      curr_stats = the_terminal->statusCount;
 
       /* TODO: ?? HACK */
       BRLSYMBOL.helpFile = the_terminal->helpFile;
@@ -360,7 +360,7 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
 
       /* address of display */
       addr_status = XMT_BRLDATA;
-      addr_display = addr_status + the_terminal->statusCells;
+      addr_display = addr_status + the_terminal->statusCount;
       LogPrint(LOG_DEBUG, "Cells: status=%04X display=%04X",
                addr_status, addr_display);
 
@@ -422,9 +422,9 @@ initializeDisplay (BrailleDisplay *brl, const char *dev, speed_t baud) {
 /* HACK - used with serial.c */
 #ifdef _SERIAL_C_
       /* HACK - used with serial.c - 2d screen */
-      the_terminal = &pm_terminals[3];
+      the_terminal = &pmTerminals[3];
       addr_status = XMT_BRLDATA;
-      addr_display = addr_status + the_terminal->statusCells;
+      addr_display = addr_status + the_terminal->statusCount;
       if (1) {
 #else /* _SERIAL_C_ */
       if (identifyTerminal(brl)) {
@@ -508,7 +508,7 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       memcpy(values, s, sizeof(values));
       values[STAT_INPUT] = input_mode;
 
-      for (i=0; i < curr_stats; i++) {
+      for (i=0; i<curr_stats; i++) {
 	int code = the_terminal->statshow[i];
 	if (code == OFFS_EMPTY)
 	  cells[i] = 0;
@@ -605,7 +605,7 @@ handleModifier (int bit, int press) {
         LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
     } else {
       int i;
-      for (i=0; i<CMDMAX; i++) {
+      for (i=0; i<the_terminal->commandCount; i++) {
         const CommandDefinition *cmd = &the_terminal->commands[i];
         if ((cmd->modifiers == modifiers) &&
             (cmd->key == NOKEY)) {
@@ -630,14 +630,14 @@ handleKey (int code, int press, int offsroute) {
   int cmd;
 
   /* look for modfier keys */
-  for (i=0; i<MODMAX; i++)
+  for (i=0; i<the_terminal->modifierCount; i++)
     if (the_terminal->modifiers[i] == code)
       return handleModifier(1<<i, press);
 
   /* must be a "normal key" - search for cmd on key press */
   if (press) {
     saved_modifiers = 0;
-    for (i=0; i<CMDMAX; i++) {
+    for (i=0; i<the_terminal->commandCount; i++) {
       const CommandDefinition *cmd = &the_terminal->commands[i];
       if ((cmd->key == code) &&
           (cmd->modifiers == pressed_modifiers)) {
