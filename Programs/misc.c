@@ -512,33 +512,67 @@ timeout_yet (int milliseconds) {
 }
 
 int
-isInteger (int *integer, const char *value) {
-  if (*value) {
+isInteger (int *value, const char *word) {
+  if (*word) {
     char *end;
-    *integer = strtol(value, &end, 0);
+    *value = strtol(word, &end, 0);
     if (!*end) return 1;
   }
   return 0;
 }
 
 int
-validateInteger (int *integer, const char *description, const char *value, const int *minimum, const int *maximum) {
-   if (*value && !isInteger(integer, value)) {
+isFloat (double *value, const char *word) {
+  if (*word) {
+    char *end;
+    *value = strtod(word, &end);
+    if (!*end) return 1;
+  }
+  return 0;
+}
+
+int
+validateInteger (int *value, const char *description, const char *word, const int *minimum, const int *maximum) {
+   if (*word && !isInteger(value, word)) {
       LogPrint(LOG_ERR, "The %s must be an integer: %s",
-               description, value);
+               description, word);
       return 0;
    }
    if (minimum) {
-      if (*integer < *minimum) {
+      if (*value < *minimum) {
          LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
-                  description, *minimum, *integer);
+                  description, *minimum, *value);
          return 0;
       }
    }
    if (maximum) {
-      if (*integer > *maximum) {
+      if (*value > *maximum) {
          LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
-                  description, *maximum, *integer);
+                  description, *maximum, *value);
+         return 0;
+      }
+   }
+   return 1;
+}
+
+int
+validateFloat (double *value, const char *description, const char *word, const double *minimum, const double *maximum) {
+   if (*word && !isFloat(value, word)) {
+      LogPrint(LOG_ERR, "The %s must be a floating-point number: %s",
+               description, word);
+      return 0;
+   }
+   if (minimum) {
+      if (*value < *minimum) {
+         LogPrint(LOG_ERR, "The %s must not be less than %f: %f",
+                  description, *minimum, *value);
+         return 0;
+      }
+   }
+   if (maximum) {
+      if (*value > *maximum) {
+         LogPrint(LOG_ERR, "The %s must not be greater than %f: %f",
+                  description, *maximum, *value);
          return 0;
       }
    }
@@ -644,9 +678,9 @@ static BaudEntry baudTable[] = {
 };
 
 int
-validateBaud (speed_t *baud, const char *description, const char *value, const unsigned int *choices) {
+validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices) {
    int integer;
-   if (!*value || isInteger(&integer, value)) {
+   if (!*word || isInteger(&integer, word)) {
       BaudEntry *entry = baudTable;
       while (entry->integer) {
          if (integer == entry->integer) {
@@ -663,7 +697,7 @@ validateBaud (speed_t *baud, const char *description, const char *value, const u
                   return 0;
                }
             }
-            *baud = entry->baud;
+            *value = entry->baud;
             return 1;
          }
          ++entry;
@@ -675,8 +709,7 @@ validateBaud (speed_t *baud, const char *description, const char *value, const u
 }
 
 int
-baud2integer (speed_t baud)
-{
+baud2integer (speed_t baud) {
   BaudEntry *entry = baudTable;
   while (entry->integer) {
     if (baud == entry->baud)
@@ -687,38 +720,38 @@ baud2integer (speed_t baud)
 }
 
 int
-validateChoice (unsigned int *choice, const char *description, const char *value, const char *const *choices) {
-   int length = strlen(value);
+validateChoice (unsigned int *value, const char *description, const char *word, const char *const *choices) {
+   int length = strlen(word);
    if (length) {
       int index = 0;
       while (choices[index]) {
          if (length <= strlen(choices[index])) {
-            if (strncasecmp(value, choices[index], length) == 0) {
-               *choice = index;
+            if (strncasecmp(word, choices[index], length) == 0) {
+               *value = index;
                return 1;
             }
          }
          ++index;
       }
-      LogPrint(LOG_ERR, "Unsupported %s: %s", description, value);
+      LogPrint(LOG_ERR, "Unsupported %s: %s", description, word);
       return 0;
    }
-   *choice = 0;
+   *value = 0;
    return 1;
 }
 
 int
-validateFlag (unsigned int *flag, const char *description, const char *value, const char *on, const char *off) {
+validateFlag (unsigned int *value, const char *description, const char *word, const char *on, const char *off) {
    const char *choices[] = {off, on, NULL};
-   return validateChoice(flag, description, value, choices);
+   return validateChoice(value, description, word, choices);
 }
 
 int
-validateOnOff (unsigned int *flag, const char *description, const char *value) {
-   return validateFlag(flag, description, value, "on", "off");
+validateOnOff (unsigned int *value, const char *description, const char *word) {
+   return validateFlag(value, description, word, "on", "off");
 }
 
 int
-validateYesNo (unsigned int *flag, const char *description, const char *value) {
-   return validateFlag(flag, description, value, "yes", "no");
+validateYesNo (unsigned int *value, const char *description, const char *word) {
+   return validateFlag(value, description, word, "yes", "no");
 }

@@ -117,14 +117,16 @@ extern int resetSerialDevice (int descriptor, struct termios *attributes, speed_
 extern int awaitInput (int descriptor, int milliseconds);
 extern int readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout);
 
-extern int isInteger (int *integer, const char *value);
-extern int validateInteger (int *integer, const char *description, const char *value, const int *minimum, const int *maximum);
-extern int validateBaud (speed_t *baud, const char *description, const char *value, const unsigned int *choices);
+extern int isInteger (int *value, const char *word);
+extern int isFloat (double *value, const char *word);
+extern int validateInteger (int *value, const char *description, const char *word, const int *minimum, const int *maximum);
+extern int validateFloat (double *value, const char *description, const char *word, const double *minimum, const double *maximum);
+extern int validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices);
 extern int baud2integer (speed_t baud);
-extern int validateChoice (unsigned int *choice, const char *description, const char *value, const char *const *choices);
-extern int validateFlag (unsigned int *flag, const char *description, const char *value, const char *on, const char *off);
-extern int validateOnOff (unsigned int *flag, const char *description, const char *value);
-extern int validateYesNo (unsigned int *flag, const char *description, const char *value);
+extern int validateChoice (unsigned int *value, const char *description, const char *word, const char *const *choices);
+extern int validateFlag (unsigned int *value, const char *description, const char *word, const char *on, const char *off);
+extern int validateOnOff (unsigned int *value, const char *description, const char *word);
+extern int validateYesNo (unsigned int *value, const char *description, const char *word);
 
 #ifdef __cplusplus
 }

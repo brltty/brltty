@@ -179,10 +179,13 @@
 #speech-parameters Command=/usr/local/bin/say
 
 # Theta Speech Driver Parameters
+#speech-parameters Age= # [1-99,-1--99]
 #speech-parameters Gender= # [male,female,neuter]
 #speech-parameters Language= # [two-letter language code]
 #speech-parameters Name= # [regular expression]
-#speech-parameters Age= # [1-99,-1--99]
+#speech-parameters Pitch=0.0 # [-2.0-2.0]
+#speech-parameters Rate=1.0 # [0.1-10.0]
+#speech-parameters Volume=1.0 # [0.0-10.0]
 
 # ViaVoice Speech Driver Parameters
 #speech-parameters IniFile=/usr/lib/ViaVoiceTTS/eci.ini

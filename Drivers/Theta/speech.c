@@ -37,12 +37,15 @@
 #define SPKNAME "Theta"
 
 typedef enum {
+  PARM_AGE,
   PARM_GENDER,
   PARM_LANGUAGE,
   PARM_NAME,
-  PARM_AGE
+  PARM_PITCH,
+  PARM_RATE,
+  PARM_VOLUME
 } DriverParameter;
-#define SPKPARMS "gender", "language", "name", "age"
+#define SPKPARMS "age", "gender", "language", "name", "pitch", "rate", "volume"
 
 #include "Programs/spk_driver.h"
 #include <theta.h>
@@ -109,6 +112,34 @@ spk_open (char **parameters) {
                  theta_voice_human(voice),
                  theta_voice_gender(voice),
                  theta_voice_age(voice));
+
+        {
+          double pitch = 0.0;
+          static const double minimumPitch = -2.0;
+          static const double maximumPitch = 2.0;
+          if (validateFloat(&pitch, "pitch shift", parameters[PARM_PITCH],
+                            &minimumPitch, &maximumPitch))
+            theta_set_pitch_shift(voice, pitch, NULL);
+        }
+
+        {
+          double rate = 1.0;
+          static const double minimumRate = 0.1;
+          static const double maximumRate = 10.0;
+          if (validateFloat(&rate, "rate adjustment", parameters[PARM_RATE],
+                            &minimumRate, &maximumRate))
+            theta_set_rate_stretch(voice, 1.0/rate, NULL);
+        }
+
+        {
+          double volume = 1.0;
+          static const double minimumVolume = 0.0;
+          static const double maximumVolume = 10.0;
+          if (validateFloat(&volume, "volume adjustment", parameters[PARM_VOLUME],
+                            &minimumVolume, &maximumVolume))
+            theta_set_rescale(voice, volume, NULL);
+        }
+
         return 1;
       } else {
         LogPrint(LOG_WARNING, "Voice load error: %s", voiceEntry->voxname);
