@@ -48,7 +48,7 @@ getProgramPath (void) {
       int length = readlink("/proc/self/exe", buffer, size);
 
       if (length == -1) {
-        LogError("readlink");
+        if (errno != ENOENT) LogError("readlink");
         break;
       }
 
