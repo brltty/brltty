@@ -118,6 +118,38 @@ readData (
   return -1;
 }
 
+int
+awaitOutput (int fileDescriptor, int milliseconds) {
+  fd_set mask;
+  struct timeval timeout;
+
+  FD_ZERO(&mask);
+  FD_SET(fileDescriptor, &mask);
+
+  memset(&timeout, 0, sizeof(timeout));
+  timeout.tv_sec = milliseconds / 1000;
+  timeout.tv_usec = (milliseconds % 1000) * 1000;
+
+  while (1) {
+    switch (select(fileDescriptor+1, NULL, &mask, NULL, &timeout)) {
+      case -1:
+        if (errno == EINTR) continue;
+        LogError("Output wait");
+        return 0;
+
+      case 0:
+        if (milliseconds > 0)
+          LogPrint(LOG_DEBUG, "Output wait timed out after %d %s.",
+                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+        errno = EAGAIN;
+        return 0;
+
+      default:
+        return 1;
+    }
+  }
+}
+
 ssize_t
 writeData (int fileDescriptor, const void *buffer, size_t size) {
   const unsigned char *address = buffer;
@@ -127,16 +159,23 @@ writeData (int fileDescriptor, const void *buffer, size_t size) {
 
     if (count == -1) {
       if (errno == EINTR) continue;
-      if (errno != EAGAIN) return count;
-      count = 0;
+      if (errno == EAGAIN) goto noOutput;
+      if (errno == EWOULDBLOCK) goto noOutput;
+      LogError("Write");
+      return count;
     }
 
-    if (count) {
-      address += count;
-      size -= count;
-    } else {
-      approximateDelay(100);
+    if (!count) {
+    noOutput:
+      do {
+        if (awaitOutput(fileDescriptor, 15000)) continue;
+      } while (errno == EAGAIN);
+
+      return -1;
     }
+
+    address += count;
+    size -= count;
   }
 
   {

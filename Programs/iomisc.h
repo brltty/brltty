@@ -33,6 +33,7 @@ extern ssize_t readData (
   int initialTimeout, int subsequentTimeout
 );
 
+extern int awaitOutput (int fileDescriptor, int milliseconds);
 extern ssize_t writeData (int fileDescriptor, const void *buffer, size_t size);
 
 extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);

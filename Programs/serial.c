@@ -466,18 +466,16 @@ serialOpenDevice (const char *path) {
     if ((device = getDevicePath(path))) {
       if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
         if (isatty(serial->fileDescriptor)) {
-          if (setBlockingIo(serial->fileDescriptor, 1)) {
-            if (serialReadAttributes(serial)) {
-              serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
-              serialInitializeAttributes(&serial->pendingAttributes);
+          if (serialReadAttributes(serial)) {
+            serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
+            serialInitializeAttributes(&serial->pendingAttributes);
 
-              serial->stream = NULL;
+            serial->stream = NULL;
 
-              LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d",
-                       device, serial->fileDescriptor);
-              free(device);
-              return serial;
-            }
+            LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d",
+                     device, serial->fileDescriptor);
+            free(device);
+            return serial;
           }
         } else {
           LogPrint(LOG_ERR, "Not a serial device: %s", device);
