@@ -39,14 +39,14 @@ static struct termios oldSettings;
 static struct termios newSettings;
 
 static TranslationTable outputTable;
-static int windowWidth;
-static unsigned char windowContent[80];
+static int cellCount;
+static unsigned char cellContent[80];
 
 static int
 readByte (unsigned char *byte) {
-  int count = read(fileDescriptor, byte, 1);
-  if (count == -1) LogError("Albatross read");
-  return count == 1;
+  int received = read(fileDescriptor, byte, 1);
+  if (received == -1) LogError("Albatross read");
+  return received == 1;
 }
 
 static int
@@ -59,9 +59,9 @@ awaitByte (unsigned char *byte) {
 
 static int
 writeBytes (unsigned char *bytes, int count) {
-  int written = write(fileDescriptor, bytes, count);
-  if (written == -1) LogError("Albatross write");
-  return written == 1;
+  int sent = write(fileDescriptor, bytes, count);
+  if (sent == -1) LogError("Albatross write");
+  return sent == 1;
 }
 
 static int
@@ -71,16 +71,37 @@ clearDisplay (void) {
 }
 
 static int
+acknowledgeDisplay (void) {
+  unsigned char attributes;
+  cellCount = 0;
+
+  if (!awaitByte(&attributes)) return 0;
+
+  {
+    unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
+    if (!writeBytes(acknowledgement, sizeof(acknowledgement))) return 0;
+  }
+
+  if (!clearDisplay()) return 0;
+  cellCount = (attributes & 0X80)? 80: 40;
+  memset(cellContent, 0, cellCount);
+
+  LogPrint(LOG_INFO, "Albatross detected: %d columns",
+           baud2integer(cellCount));
+  return 1;
+}
+
+static int
 updateDisplay (unsigned char *cells) {
-  unsigned char bytes[windowWidth * 2 + 2];
+  unsigned char bytes[cellCount * 2 + 2];
   unsigned char *byte = bytes;
   int column;
   *byte++ = 0XFB;
-  for (column=0; column<windowWidth; ++column) {
+  for (column=0; column<cellCount; ++column) {
     unsigned char cell;
     if (!cells) {
-      cell = windowContent[column];
-    } else if ((cell = outputTable[cells[column]]) == windowContent[column]) {
+      cell = cellContent[column];
+    } else if ((cell = outputTable[cells[column]]) == cellContent[column]) {
       continue;
     }
     *byte++ = column + 1;
@@ -115,18 +136,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       unsigned char byte;
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
-          if (awaitByte(&byte)) {
-            windowWidth = (byte & 0X80)? 80: 40;
-
-            {
-              unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
-              writeBytes(acknowledgement, sizeof(acknowledgement));
-            }
-
-            memset(windowContent, 0, windowWidth);
-            clearDisplay();
-
-            brl->x = windowWidth;
+          if (acknowledgeDisplay()) {
+            brl->x = cellCount;
             brl->y = 1;
             return 1;
           }
@@ -151,17 +162,27 @@ brl_close (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
-  updateDisplay(brl->buffer);
+  if (cellCount) {
+    updateDisplay(brl->buffer);
+  }
 }
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
+  if (cellCount) {
+  }
 }
 
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   unsigned char byte;
   while (readByte(&byte)) {
+    if (byte == 0XFF) {
+      if (acknowledgeDisplay()) brl->resizeRequired = 1;
+      continue;
+    }
+    if (!cellCount) continue;
+
     switch (byte) {
       default:
         if ((byte >= 2) && (byte <= 41)) return CR_ROUTE + (byte - 2);
@@ -172,7 +193,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         updateDisplay(NULL);
         continue;
     }
+
     LogPrint(LOG_WARNING, "Unexpected byte: %02X", byte);
   }
+
   return EOF;
 }
