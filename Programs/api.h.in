@@ -362,10 +362,10 @@ typedef struct {
   char *text; /** Text to display */
   char *attrAnd; /** And attributes; applied first */
   char *attrOr; /** Or attributes; applied \e after ANDing */
-  int cursor; /* -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
+  int cursor; /** -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
 } brlapi_writeStruct;
 
-/* BRLAPI_EXTWRITESTRUCT_INITIALIZER */
+/* BRLAPI_WRITESTRUCT_INITIALIZER */
 /** Allows to initialize a structure of type \e brlapi_writeStruct *
  * with default values:
  * displayNumber = -1; (unspecified)
@@ -373,7 +373,7 @@ typedef struct {
  * text = attrAnd = attrOr = NULL; (no text, no attribute)
  * cursor = -1; (don't touch cursor)
 */
-#define BRLAPI_EXTWRITESTRUCT_INITIALIZER \
+#define BRLAPI_WRITESTRUCT_INITIALIZER \
   { -1, 0, 0, NULL, NULL, NULL, -1};
 
 /* brlapi_write */
