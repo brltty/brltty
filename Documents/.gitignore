@@ -1,4 +1,6 @@
 Makefile
 reldeps.mk
+api_doxy.cfg
+man?
 *.txt
 *-HTML
