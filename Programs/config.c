@@ -74,7 +74,9 @@ static short opt_environmentVariables = 0;
 static const char *opt_libraryDirectory = NULL;
 static short opt_logLevel = LOG_NOTICE;
 static short opt_noDaemon = 0;
+#ifdef ENABLE_SPEECH_SUPPORT
 static short opt_noSpeech = 0;
+#endif /* ENABLE_SPEECH_SUPPORT */
 static const char *opt_pidFile = NULL;
 static const char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
@@ -283,8 +285,10 @@ BEGIN_OPTION_TABLE
    "Path to directory for loading drivers."},
   {'M', "message-delay", "csecs", NULL, 0,
    "Message hold time [400]."},
+#ifdef ENABLE_SPEECH_SUPPORT
   {'N', "no-speech", NULL, NULL, 0,
    "Defer speech until restarted by command."},
+#endif /* ENABLE_SPEECH_SUPPORT */
   {'P', "pid-file", "file", NULL, 0,
    "Path to process identifier file."},
   {'R', "refresh-interval", "csecs", NULL, 0,
@@ -1520,9 +1524,11 @@ handleOption (const int option) {
         messageDelay = value * 10;
       break;
     }
+#ifdef ENABLE_SPEECH_SUPPORT
     case 'N':                /* defer speech until restarted by command */
       opt_noSpeech = 1;
       break;
+#endif /* ENABLE_SPEECH_SUPPORT */
     case 'P':                /* process identifier file */
       opt_pidFile = optarg;
       break;
