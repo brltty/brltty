@@ -152,6 +152,12 @@
 #speech-driver	tv	# Televox
 #speech-driver	vv	# ViaVoice (text to speech engine)
 
+# The speech-fifo directive specifies the path to the FIFO used by the speech
+# pass-through facility. Relative paths are anchored at "@DATA_DIRECTORY@".
+# If not specified, the speech pass-through facility isn't enabled.
+# (can be overridden with the -F [--speech-fifo=] option)
+#speech-fifo	spk
+
 
 ############################
 # Speech Driver Parameters #

@@ -1717,6 +1717,8 @@ startup (int argc, char *argv[]) {
     processConfigurationFile(optionTable, optionCount, opt_configurationFile, optional);
   }
   ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE", -1);
+  ensureOptionSetting(&opt_dataDirectory, DATA_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
+  ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
   ensureOptionSetting(&opt_tablesDirectory, DATA_DIRECTORY, cfg_tablesDirectory, "BRLTTY_TABLES_DIRECTORY", -1);
   ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE", 2);
   ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE", -1);
@@ -1724,12 +1726,11 @@ startup (int argc, char *argv[]) {
   ensureOptionSetting(&opt_contractionsDirectory, DATA_DIRECTORY, cfg_contractionsDirectory, "BRLTTY_CONTRACTIONS_DIRECTORY", -1);
   ensureOptionSetting(&opt_contractionTable, NULL, cfg_contractionTable, "BRLTTY_CONTRACTION_TABLE", -1);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
-  ensureOptionSetting(&opt_dataDirectory, DATA_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
   ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER", 0);
   ensureOptionSetting(&opt_brailleDevice, BRAILLE_DEVICE, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
 #ifdef ENABLE_SPEECH_SUPPORT
   ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER", -1);
+  ensureOptionSetting(&opt_speechFifo, NULL, cfg_speechFifo, "BRLTTY_SPEECH_FIFO", -1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (*opt_brailleDevice == 0) {
