@@ -861,7 +861,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
         unsigned char value = st[i];
         if (all || (value != previousStatus[i])) {
           static const char *const names[] = {
-            [0 ... (StatusCellCount-1)]=NULL,
+            [FirstStatusCell]=NULL,
             [STAT_BRLCOL]="BRLCOL",
             [STAT_BRLROW]="BRLROW",
             [STAT_CSRCOL]="CSRCOL",
