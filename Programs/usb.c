@@ -477,6 +477,168 @@ static const UsbSerialOperations usbBelkinOperations = {
   usbSetBelkinRtsState
 };
 
+static int
+usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
+  return usbControlTransfer(device,
+                            USB_RECIPIENT_DEVICE, USB_DIRECTION_OUTPUT, USB_TYPE_VENDOR, 
+                            request, value, index, NULL, 0, 1000);
+}
+static int
+usbSetFtdiModemState (UsbDevice *device, int state, int shift, const char *name) {
+  if ((state < 0) || (state > 1)) {
+    LogPrint(LOG_WARNING, "Unsupported FTDI %s state: %d", name, state);
+    errno = EINVAL;
+    return -1;
+  }
+  return usbSetFtdiAttribute(device, 1, ((1 << (shift + 8)) | (state << shift)), 0);
+}
+static int
+usbSetFtdiDtrState (UsbDevice *device, int state) {
+  return usbSetFtdiModemState(device, state, 0, "DTR");
+}
+static int
+usbSetFtdiRtsState (UsbDevice *device, int state) {
+  return usbSetFtdiModemState(device, state, 1, "RTS");
+}
+static int
+usbSetFtdiFlowControl (UsbDevice *device, int flow) {
+  int index = 0;
+#define FTDI_FLOW(from,to) if (flow & from) flow &= ~from, index |= to
+  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_XON, 0X0080);
+  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_CTS, 0X0001);
+  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_DSR, 0X0002);
+  FTDI_FLOW(USB_SERIAL_FLOW_OUTPUT_RTS, 0X0020);
+  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_XON , 0X0100);
+  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_RTS , 0X0010);
+  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_DTR , 0X0008);
+  FTDI_FLOW(USB_SERIAL_FLOW_INPUT_DSR , 0X0004);
+#undef FTDI_FLOW
+  if (flow) {
+    LogPrint(LOG_WARNING, "Unsupported FTDI flow control: %02X", flow);
+  }
+  return usbSetFtdiAttribute(device, 2, ((index & 0X200)? 0X1311: 0), index);
+}
+static int
+usbSetFtdiBaud (UsbDevice *device, int divisor) {
+  return usbSetFtdiAttribute(device, 3, divisor&0XFFFF, divisor>>0X10);
+}
+static int
+usbSetFtdiBaud_SIO (UsbDevice *device, int rate) {
+  int divisor;
+  switch (rate) {
+    case    300: divisor = 0; break;
+    case    600: divisor = 1; break;
+    case   1200: divisor = 2; break;
+    case   2400: divisor = 3; break;
+    case   4800: divisor = 4; break;
+    case   9600: divisor = 5; break;
+    case  19200: divisor = 6; break;
+    case  38400: divisor = 7; break;
+    case  57600: divisor = 8; break;
+    case 115200: divisor = 9; break;
+    default:
+      LogPrint(LOG_WARNING, "Unsupported FTDI SIO baud: %d", rate);
+      errno = EINVAL;
+      return -1;
+  }
+  return usbSetFtdiBaud(device, divisor);
+}
+static int
+usbSetFtdiBaud_FT8U232AM (UsbDevice *device, int rate) {
+  if (rate > 3000000) {
+    LogPrint(LOG_WARNING, "Unsupported FTDI FT8U232AM baud: %d", rate);
+    errno = EINVAL;
+    return -1;
+  }
+  {
+    const int base = 48000000;
+    int eighths = base / 2 / rate;
+    int divisor;
+    if ((eighths & 07) == 7) eighths++;
+    divisor = eighths >> 3;
+    divisor |= (eighths & 04)? 0X4000:
+               (eighths & 02)? 0X8000:
+               (eighths & 01)? 0XC000:
+                               0X0000;
+    if (divisor == 1) divisor = 0;
+    return usbSetFtdiBaud(device, divisor);
+  }
+}
+static int
+usbSetFtdiBaud_FT232BM (UsbDevice *device, int rate) {
+  if (rate > 3000000) {
+    LogPrint(LOG_WARNING, "Unsupported FTDI FT232BM baud: %d", rate);
+    errno = EINVAL;
+    return -1;
+  }
+  {
+    static const unsigned char mask[8] = {00, 03, 02, 04, 01, 05, 06, 07};
+    const int base = 48000000;
+    const int eighths = base / 2 / rate;
+    int divisor = (eighths >> 3) | (mask[eighths & 07] << 14);
+    if (divisor == 1) {
+      divisor = 0;
+    } else if (divisor == 0X4001) {
+      divisor = 1;
+    }
+    return usbSetFtdiBaud(device, divisor);
+  }
+}
+static int
+usbSetFtdiDataFormat (UsbDevice *device, int dataBits, int stopBits, UsbSerialParity parity) {
+  int ok = 1;
+  int value = dataBits & 0XFF;
+  if (dataBits != value) {
+    LogPrint(LOG_WARNING, "Unsupported FTDI data bits: %d", dataBits);
+    ok = 0;
+  }
+  switch (parity) {
+    case USB_SERIAL_PARITY_NONE:  value |= 0X000; break;
+    case USB_SERIAL_PARITY_ODD:   value |= 0X100; break;
+    case USB_SERIAL_PARITY_EVEN:  value |= 0X200; break;
+    case USB_SERIAL_PARITY_MARK:  value |= 0X300; break;
+    case USB_SERIAL_PARITY_SPACE: value |= 0X400; break;
+    default:
+      LogPrint(LOG_WARNING, "Unsupported FTDI parity: %d", parity);
+      ok = 0;
+      break;
+  }
+  switch (stopBits) {
+    case 1: value |= 0X0000; break;
+    case 2: value |= 0X1000; break;
+    default:
+      LogPrint(LOG_WARNING, "Unsupported FTDI stop bits: %d", stopBits);
+      ok = 0;
+      break;
+  }
+  if (!ok) {
+    errno = EINVAL;
+    return -1;
+  }
+  return usbSetFtdiAttribute(device, 4, value, 0);
+}
+static const UsbSerialOperations usbFtdiOperations_SIO = {
+  usbSetFtdiBaud_SIO,
+  usbSetFtdiFlowControl,
+  usbSetFtdiDataFormat,
+  usbSetFtdiDtrState,
+  usbSetFtdiRtsState
+};
+static const UsbSerialOperations usbFtdiOperations_FT8U232AM = {
+  usbSetFtdiBaud_FT8U232AM,
+  usbSetFtdiFlowControl,
+  usbSetFtdiDataFormat,
+  usbSetFtdiDtrState,
+  usbSetFtdiRtsState
+};
+static const UsbSerialOperations usbFtdiOperations_FT232BM = {
+  usbSetFtdiBaud_FT232BM,
+  usbSetFtdiFlowControl,
+  usbSetFtdiDataFormat,
+  usbSetFtdiDtrState,
+  usbSetFtdiRtsState
+};
+
 const UsbSerialOperations *
 usbGetSerialOperations (const UsbDevice *device) {
   typedef struct {
