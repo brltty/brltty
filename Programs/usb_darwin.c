@@ -32,6 +32,10 @@
 #include "usb.h"
 #include "usb_internal.h"
 
+typedef struct {
+  IOUSBDeviceInterface182 **interface;
+} UsbDeviceExtension;
+
 int
 usbResetDevice (UsbDevice *device) {
   errno = ENOSYS;
@@ -189,13 +193,46 @@ usbReapResponse (
 
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
-  errno = ENOSYS;
-  LogError("USB device descriptor read");
-  return 0;
+  UsbDeviceExtension *devx = device->extension;
+
+  device->descriptor.bLength = USB_DESCRIPTOR_SIZE_DEVICE;
+  device->descriptor.bDescriptorType = USB_DESCRIPTOR_TYPE_DEVICE;
+
+  {
+    uint8_t speed;
+    (*devx->interface)->GetDeviceSpeed(devx->interface, &speed);
+    switch (speed) {
+      default                 : device->descriptor.bcdUSB = 0X0000; break;
+      case kUSBDeviceSpeedLow : device->descriptor.bcdUSB = 0X0100; break;
+      case kUSBDeviceSpeedFull: device->descriptor.bcdUSB = 0X0110; break;
+      case kUSBDeviceSpeedHigh: device->descriptor.bcdUSB = 0X0200; break;
+    }
+  }
+
+  (*devx->interface)->GetDeviceClass(devx->interface, &device->descriptor.bDeviceClass);
+  (*devx->interface)->GetDeviceSubClass(devx->interface, &device->descriptor.bDeviceSubClass);
+  (*devx->interface)->GetDeviceProtocol(devx->interface, &device->descriptor.bDeviceProtocol);
+
+  (*devx->interface)->GetDeviceVendor(devx->interface, &device->descriptor.idVendor);
+  (*devx->interface)->GetDeviceProduct(devx->interface, &device->descriptor.idProduct);
+  (*devx->interface)->GetDeviceReleaseNumber(devx->interface, &device->descriptor.bcdDevice);
+
+  (*devx->interface)->USBGetManufacturerStringIndex(devx->interface, &device->descriptor.iManufacturer);
+  (*devx->interface)->USBGetProductStringIndex(devx->interface, &device->descriptor.iProduct);
+  (*devx->interface)->USBGetSerialNumberStringIndex(devx->interface, &device->descriptor.iSerialNumber);
+
+  (*devx->interface)->GetNumberOfConfigurations(devx->interface, &device->descriptor.bNumConfigurations);
+  device->descriptor.bMaxPacketSize0 = 0;
+
+  return 1;
 }
 
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
+  UsbDeviceExtension *devx = device->extension;
+  (*devx->interface)->USBDeviceClose(devx->interface);
+  (*devx->interface)->Release(devx->interface);
+  free(devx);
 }
 
 UsbDevice *
@@ -227,21 +264,29 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
                                                        kIOCFPlugInInterfaceID,
                                                        &servicePlugin, &score);
           if (!ioResult && servicePlugin) {
-            IOUSBDeviceInterface **deviceInterface;
+            IOUSBDeviceInterface182 **deviceInterface;
 
             ioResult = (*servicePlugin)->QueryInterface(servicePlugin,
-                                                        CFUUIDGetUUIDBytes(kIOUSBInterfaceInterfaceID),
+                                                        CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID182),
                                                         (LPVOID)&deviceInterface);
             if (!ioResult && deviceInterface) {
               if (!(ioResult = (*deviceInterface)->USBDeviceOpen(deviceInterface))) {
-                LogPrint(LOG_NOTICE, "intf=%p", (void*)deviceInterface);
+                UsbDeviceExtension *devx;
+                if ((devx = malloc(sizeof(*devx)))) {
+                  devx->interface = deviceInterface;
+                  device = usbTestDevice(devx, chooser, data);
 
-                (*deviceInterface)->USBDeviceClose(deviceInterface);
+                  if (!device) free(devx);
+                } else {
+                  LogPrint(LOG_ERR, "USB: cannot allocate device extension.");
+                }
+
+                if (!device) (*deviceInterface)->USBDeviceClose(deviceInterface);
               } else {
                 LogPrint(LOG_ERR, "USB: cannot open device interface: err=%d", ioResult);
               }
 
-              (*deviceInterface)->Release(deviceInterface);
+              if (!device) (*deviceInterface)->Release(deviceInterface);
             } else {
               LogPrint(LOG_ERR, "USB: cannot create device interface: err=%d", ioResult);
             }
@@ -252,6 +297,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
           }
 
           IOObjectRelease(service);
+          if (device) break;
         }
 
         IOObjectRelease(serviceIterator);

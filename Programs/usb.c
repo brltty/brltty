@@ -400,7 +400,7 @@ usbCloseDevice (UsbDevice *device) {
   deallocateQueue(device->inputFilters);
   deallocateQueue(device->endpoints);
   if (device->configurationDescriptor) free(device->configurationDescriptor);
-  usbDeallocateDeviceExtension(device);
+  if (device->extension) usbDeallocateDeviceExtension(device);
   free(device);
 }
 
@@ -443,6 +443,7 @@ usbTestDevice (void *extension, UsbDeviceChooser chooser, void *data) {
     }
 
     errno = ENOENT;
+    device->extension = NULL;
     usbCloseDevice(device);
   }
   return NULL;
