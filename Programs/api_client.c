@@ -596,7 +596,6 @@ int brlapi_write(const brlapi_writeStruct *s)
   int res;
   ws->flags = 0;
   if (s==NULL) goto send;
-  if (s==NULL) goto send;
   if ((1<=s->regionBegin) && (s->regionBegin<=dispSize) && (1<=s->regionEnd) && (s->regionEnd<=dispSize)) {
     if (s->regionBegin>s->regionEnd) return 0;
     rbeg = s->regionBegin; rend = s->regionEnd;
