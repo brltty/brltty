@@ -111,11 +111,13 @@ endBeep (void) {
 }
 
 #ifdef ENABLE_PCM_SUPPORT
-#if defined(USE_PCM_SUPPORT_ALSA)
-#include "sys_pcm_alsa.h"
-#else /* USE_PCM_SUPPORT_ */
+#if defined(USE_PCM_SUPPORT_OSS)
 #define PCM_OSS_DEVICE_PATH "/dev/dsp"
 #include "sys_pcm_oss.h"
+#elif defined(USE_PCM_SUPPORT_ALSA)
+#include "sys_pcm_alsa.h"
+#else /* USE_PCM_SUPPORT_ */
+#error unknown PCM interface
 #endif /* USE_PCM_SUPPORT_ */
 #endif /* ENABLE_PCM_SUPPORT */
 

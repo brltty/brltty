@@ -520,6 +520,12 @@ BRLTTY_ARG_DISABLE(
    [support for soundcard digital audio], [dnl
    AC_DEFINE([ENABLE_PCM_SUPPORT])
    pcm_tune_objects='pcm.$O'
+   case "${enableval}"
+   in
+      alsa)
+         AC_SEARCH_LIBS([snd_pcm_open], [asound], [], [AC_MSG_ERROR([ALSA library not found])])
+         ;;
+   esac
 ],
 [],
 [${brltty_pcm_interfaces}])
