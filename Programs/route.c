@@ -204,11 +204,11 @@ doCursorRouting (int column, int row, int screen) {
     if (column < 0) {
       adjustCursorVertically(&crd, 0, row);
     } else {
-      (adjustCursorVertically(&crd, -1, row) == CRR_FAIL) ||
-      (adjustCursorHorizontally(&crd, 0, row, column) != CRR_NEAR) ||
-      (crd.cury >= row) ||
-      (adjustCursorVertically(&crd, 1, crd.cury+1) == CRR_FAIL) ||
-      (adjustCursorHorizontally(&crd, 0, row, column) != CRR_NEAR);
+      if (adjustCursorVertically(&crd, -1, row) != CRR_FAIL)
+        if (adjustCursorHorizontally(&crd, 0, row, column) == CRR_NEAR)
+          if (crd.cury < row)
+            if (adjustCursorVertically(&crd, 1, crd.cury+1) != CRR_FAIL)
+              adjustCursorHorizontally(&crd, 0, row, column);
     }
   }
 
