@@ -1000,6 +1000,9 @@ updatePreferences (void) {
 #endif /* ENABLE_FM_TUNES */
        BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
        BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, "Alert Messages"),
+#ifdef ENABLE_SPEECH_SUPPORT
+       BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, "Autospeak"),
+#endif /* ENABLE_SPEECH_SUPPORT */
        SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
        GLOB_ITEM(glob_textTable, changedTextTable, NULL, "Text Table"),
@@ -1619,6 +1622,8 @@ startup (int argc, char *argv[]) {
     prefs.midiVolume = DEFAULT_MIDI_VOLUME;
     prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
     prefs.fmVolume = DEFAULT_FM_VOLUME;
+
+    prefs.autospeak = DEFAULT_AUTOSPEAK;
 
     prefs.statusStyle = brailleDriver->statusStyle;
   }

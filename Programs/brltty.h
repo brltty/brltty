@@ -53,7 +53,7 @@ typedef struct {
   unsigned char cursorStyle;
   unsigned char spare6;
   unsigned char cursorVisiblePeriod;
-  unsigned char spare7;
+  unsigned char autospeak;
   unsigned char cursorInvisiblePeriod;
   unsigned char pcmVolume;
   unsigned char capitalsVisiblePeriod;

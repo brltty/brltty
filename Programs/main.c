@@ -472,8 +472,9 @@ sayLines (int line, int count, int track) {
   int length = scr.cols * count;
   unsigned char buffer[length * 2];
 
+  speech->mute();
   readScreen(0, line, scr.cols, count, buffer, SCR_TEXT);
-  if(speech->express) {
+  if (speech->express) {
     readScreen(0, line, scr.cols, count, buffer+length, SCR_ATTRIB);
     speech->express(buffer, length);
   } else
@@ -1358,7 +1359,7 @@ main (int argc, char *argv[]) {
             speech->mute();
             break;
           case CMD_SPKHOME:
-            if(scr.no == speechScreen) {
+            if (scr.no == speechScreen) {
               trackSpeech(speech->getTrack());
             } else {
               playTune(&tune_bad_command);
@@ -1613,6 +1614,11 @@ main (int argc, char *argv[]) {
     /* speech tracking */
     speech->doTrack(); /* called continually even if we're not tracking
                              so that the pipe doesn't fill up. */
+    if (prefs.autospeak) {
+      if (p->winy != oldwiny) {
+        sayLines(p->winy, 1, 0);
+      }
+    }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     if (p->trackCursor) {

@@ -78,6 +78,8 @@ extern "C" {
 #define DEFAULT_MIDI_INSTRUMENT 0	/* 0 to 127 */
 #define DEFAULT_FM_VOLUME 70		/* 0 to 100 (percent) */
 
+#define DEFAULT_AUTOSPEAK 0		/* 0 to 100 (percent) */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
