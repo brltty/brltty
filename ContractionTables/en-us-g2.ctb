@@ -385,8 +385,7 @@ always hydro =
 
 # the letter i
 always i 24
-word I 24
-always I 24
+word i 24
 midendword iever 24-15-1236-12456
 always immediate 24-134-134
 contraction imm
