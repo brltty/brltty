@@ -32,6 +32,8 @@ struct UsbInputElement {
 
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
+  UsbDescriptor *configurationDescriptor;
+  int configurationLength;
   Queue *endpoints;
   int file;
   int interface;
