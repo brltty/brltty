@@ -81,12 +81,6 @@ then
    brltty_external_names_$1=""
    brltty_internal_codes_$1=""
    brltty_internal_names_$1=""
-elif test "${brltty_items}" = "all"
-then
-   brltty_external_codes_$1=""
-   brltty_external_names_$1=""
-   brltty_internal_codes_$1="${brltty_item_codes_$1}"
-   brltty_internal_names_$1="${brltty_item_names_$1}"
 else
    brltty_external_codes_$1=" ${brltty_item_codes_$1} "
    brltty_external_names_$1=" ${brltty_item_names_$1} "
@@ -102,6 +96,14 @@ changequote(, )dnl
          then
             brltty_item="${brltty_items}"
             brltty_items=""
+            if test "${brltty_item}" = "all"
+            then
+               brltty_internal_codes_$1="${brltty_internal_codes_$1}${brltty_external_codes_$1}"
+               brltty_internal_names_$1="${brltty_internal_names_$1}${brltty_external_names_$1}"
+               brltty_external_codes_$1=""
+               brltty_external_names_$1=""
+               break
+            fi
          else
             brltty_item="`expr "${brltty_items}" : '\([^,]*\)'`"
             brltty_items="`expr "${brltty_items}" : '[^,]*,\(.*\)'`"
