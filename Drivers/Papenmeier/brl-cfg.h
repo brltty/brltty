@@ -253,6 +253,7 @@ typedef struct {
       { CR_CUTLINE                  , ROUTINGKEY     , 0040 }, \
       { CR_CUTRECT                  , ROUTINGKEY     , 0200 }, \
                                                                \
+      { CMD_LEARN                   , NOKEY          , 0300 }, \
       { CR_ROUTE                    , ROUTINGKEY     , 0000 }
 	
 
