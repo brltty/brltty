@@ -1,251 +1,187 @@
 #!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
 #
-# install - install a program, script, or datafile
-# This comes from X11R5 (mit/util/scripts/install.sh).
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
 #
-# Copyright 1991 by the Massachusetts Institute of Technology
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
-# Permission to use, copy, modify, distribute, and sell this software and its
-# documentation for any purpose is hereby granted without fee, provided that
-# the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of M.I.T. not be used in advertising or
-# publicity pertaining to distribution of the software without specific,
-# written prior permission.  M.I.T. makes no representations about the
-# suitability of this software for any purpose.  It is provided "as is"
-# without express or implied warranty.
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
 #
-# Calling this script install-sh is preferred over install.sh, to prevent
-# `make' implicit rules from creating a file called install from it
-# when there is no Makefile.
+# Web Page: http://mielke.cc/brltty/
 #
-# This script is compatible with the BSD install script, but was written
-# from scratch.  It can only install one file at a time, a restriction
-# shared with many OS's install programs.
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
 
+umask 077
 
-# set DOITPROG to echo to test this script
+programName="`echo "${0}" | sed -e 's%^.*/%%'`"
+programMessage() {
+   echo >&2 "${programName}: ${1}"
+}
 
-# Don't use :- since 4.3BSD and earlier shells don't like it.
-doit="${DOITPROG-}"
+syntaxError() {
+   programMessage "${1}"
+   exit 2
+}
 
+copyCommand="cp"
+directoryCommand="mkdir"
+groupCommand="chgrp"
+modeCommand="chmod"
+ownerCommand="chown"
+stripCommand="strip"
 
-# put in absolute paths if you don't have them in your path; or use env. vars.
+defaultMode="0755"
 
-mvprog="${MVPROG-mv}"
-cpprog="${CPPROG-cp}"
-chmodprog="${CHMODPROG-chmod}"
-chownprog="${CHOWNPROG-chown}"
-chgrpprog="${CHGRPPROG-chgrp}"
-stripprog="${STRIPPROG-strip}"
-rmprog="${RMPROG-rm}"
-mkdirprog="${MKDIRPROG-mkdir}"
+createDirectories=false
+newGroup=""
+newMode="${defaultMode}"
+newOwner=""
+showActions=false
+showUsage=false
+stripSymbols=false
 
-transformbasename=""
-transform_arg=""
-instcmd="$mvprog"
-chmodcmd="$chmodprog 0755"
-chowncmd=""
-chgrpcmd=""
-stripcmd=""
-rmcmd="$rmprog -f"
-mvcmd="$mvprog"
-src=""
-dst=""
-dir_arg=""
+while [ "${#}" -gt 0 ]
+do
+   option="${1}"
+   operand=""
 
-while [ x"$1" != x ]; do
-    case $1 in
-	-c) instcmd="$cpprog"
-	    shift
-	    continue;;
+   case "${option}"
+   in
+      -c) ;;
+      -d) createDirectories=true;;
+      -g) operand=newGroup;;
+      -h) showUsage=true;;
+      -m) operand=newMode;;
+      -o) operand=newOwner;;
+      -s) stripSymbols=true;;
+      -v) showActions=true;;
+      -*) syntaxError "unknown option: ${option}";;
+      *) break;;
+   esac
 
-	-d) dir_arg=true
-	    shift
-	    continue;;
-
-	-m) chmodcmd="$chmodprog $2"
-	    shift
-	    shift
-	    continue;;
-
-	-o) chowncmd="$chownprog $2"
-	    shift
-	    shift
-	    continue;;
-
-	-g) chgrpcmd="$chgrpprog $2"
-	    shift
-	    shift
-	    continue;;
-
-	-s) stripcmd="$stripprog"
-	    shift
-	    continue;;
-
-	-t=*) transformarg=`echo $1 | sed 's/-t=//'`
-	    shift
-	    continue;;
-
-	-b=*) transformbasename=`echo $1 | sed 's/-b=//'`
-	    shift
-	    continue;;
-
-	*)  if [ x"$src" = x ]
-	    then
-		src=$1
-	    else
-		# this colon is to work around a 386BSD /bin/sh bug
-		:
-		dst=$1
-	    fi
-	    shift
-	    continue;;
-    esac
+   shift
+   [ -z "${operand}" ] && continue
+   [ "${#}" -eq 0 ] && syntaxError "missing operand: ${option}";
+   eval "${operand}"'="${1}"'
+   shift
 done
 
-if [ x"$src" = x ]
-then
-	echo "install:	no input file specified"
-	exit 1
-else
-	true
-fi
+"${showUsage}" && {
+   cat <<END_OF_USAGE
+Usage:
+   ${programName} [-option ...] source destination
+   ${programName} [-option ...] source ... directory
+   ${programName} -d [-option ...] directory ...
 
-if [ x"$dir_arg" != x ]; then
-	dst=$src
-	src=""
-	
-	if [ -d $dst ]; then
-		instcmd=:
-		chmodcmd=""
-	else
-		instcmd=mkdir
-	fi
-else
+Options:
+   -c        (ignored for backward compatibility)
+   -d        Create all components of each directory (${directoryCommand}).
+   -g group  Set owning group (${groupCommand}).
+   -h        Display usage summary (this text) and exit.
+   -m mode   Set permission modes (${modeCommand}) instead of ${defaultMode}.
+   -o owner  Set owning user (${ownerCommand}).
+   -s        Strip symbols from executable (${stripCommand}).
+   -v        Display each successful action.
+END_OF_USAGE
 
-# Waiting for this to be detected by the "$instcmd $src $dsttmp" command
-# might cause directories to be created, which would be especially bad 
-# if $src (and thus $dsttmp) contains '*'.
+   exit 0
+}
 
-	if [ -f $src -o -d $src ]
-	then
-		true
-	else
-		echo "install:  $src does not exist"
-		exit 1
-	fi
-	
-	if [ x"$dst" = x ]
-	then
-		echo "install:	no destination specified"
-		exit 1
-	else
-		true
-	fi
+changeAttributes='
+   [ "${newMode}" != "" ] && {
+      ${modeCommand} "${newMode}" "${path}" || exit 3
+      "${showActions}" && programMessage "mode changed: ${path}"
+   }
 
-# If destination is a directory, append the input filename; if your system
-# does not like double slashes in filenames, you may need to add some logic
+   [ "${newGroup}" != "" ] && {
+      ${groupCommand} "${newGroup}" "${path}" || exit 3
+      "${showActions}" && programMessage "group changed: ${path}"
+   }
 
-	if [ -d $dst ]
-	then
-		dst="$dst"/`basename $src`
-	else
-		true
-	fi
-fi
-
-## this sed command emulates the dirname command
-dstdir=`echo $dst | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
-
-# Make sure that the destination directory exists.
-#  this part is taken from Noah Friedman's mkinstalldirs script
-
-# Skip lots of stat calls in the usual case.
-if [ ! -d "$dstdir" ]; then
-defaultIFS='	
+   [ "${newOwner}" != "" ] && {
+      ${ownerCommand} "${newOwner}" "${path}" || exit 3
+      "${showActions}" && programMessage "owner changed: ${path}"
+   }
 '
-IFS="${IFS-${defaultIFS}}"
 
-oIFS="${IFS}"
-# Some sh's can't handle IFS=/ for some reason.
-IFS='%'
-set - `echo ${dstdir} | sed -e 's@/@%@g' -e 's@^%@/@'`
-IFS="${oIFS}"
+"${createDirectories}" && {
+   "${stripSymbols}" && syntaxError "cannot strip a directory."
+   [ "${#}" -eq 0 ] && syntaxError "directory not specified."
 
-pathcomp=''
+   for destination
+   do
+      [ "${destination}" = "" ] && {
+         programMessage "null directory."
+         continue
+      }
 
-while [ $# -ne 0 ] ; do
-	pathcomp="${pathcomp}${1}"
-	shift
+      directory=""
+      paths=""
+      for component in `echo "${destination}" | sed -e 's%/% %g' -e 's%^ %/ %'  -e 's% *$%%' -e 's%  *% %g'`
+      do
+         directory="${directory}${component}"
+         [ "${component}" = "/" ] || directory="${directory}/"
 
-	if [ ! -d "${pathcomp}" ] ;
-        then
-		$mkdirprog "${pathcomp}"
-	else
-		true
-	fi
+         [ -d "${directory}" ] || {
+            ${directoryCommand} "${directory}" || exit 3
+            "${showActions}" && programMessage "directory created: ${directory}"
+            paths="${directory} ${paths}"
+         }
+      done
 
-	pathcomp="${pathcomp}/"
-done
+      [ -n "${paths}" ] && {
+         for path in $paths
+         do
+            eval "${changeAttributes}"
+         done
+      }
+   done
+
+   exit 0
+}
+
+[ "${#}" -eq 0 ] && syntaxError "source not specified."
+[ "${#}" -eq 1 ] && syntaxError "destination not specified."
+
+count="`expr "${#}" - 1`"
+destination="`( shift "${count}"; echo "${1}" )`"
+
+if [ -d "${destination}" ]
+then
+   toDirectory=true
+else
+   [ "${#}" -eq 2 ] || syntaxError "more than one source - destination not a directory: ${destination}"
+   toDirectory=false
 fi
 
-if [ x"$dir_arg" != x ]
-then
-	$doit $instcmd $dst &&
+while [ "${#}" -gt 1 ]
+do
+   source="${1}"
+   shift
 
-	if [ x"$chowncmd" != x ]; then $doit $chowncmd $dst; else true ; fi &&
-	if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dst; else true ; fi &&
-	if [ x"$stripcmd" != x ]; then $doit $stripcmd $dst; else true ; fi &&
-	if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dst; else true ; fi
-else
+   if [ -f "${source}" ]
+   then
+      type=file
+   else
+      syntaxError "source not a file: ${source}"
+   fi
 
-# If we're going to rename the final executable, determine the name now.
+   path="${destination}"
+   "${toDirectory}" && path="${path}/`basename ${source}`"
+   ${copyCommand} "${source}" "${path}" || exit 3
+   "${showActions}" && programMessage "${type} copied: ${source} -> ${path}"
 
-	if [ x"$transformarg" = x ] 
-	then
-		dstfile=`basename $dst`
-	else
-		dstfile=`basename $dst $transformbasename | 
-			sed $transformarg`$transformbasename
-	fi
+   "${stripSymbols}" && {
+      ${stripCommand} "${path}" || exit 3
+      "${showActions}" && programMessage "symbols stripped: ${path}"
+   }
 
-# don't allow the sed command to completely eliminate the filename
-
-	if [ x"$dstfile" = x ] 
-	then
-		dstfile=`basename $dst`
-	else
-		true
-	fi
-
-# Make a temp file name in the proper directory.
-
-	dsttmp=$dstdir/#inst.$$#
-
-# Move or copy the file name to the temp name
-
-	$doit $instcmd $src $dsttmp &&
-
-	trap "rm -f ${dsttmp}" 0 &&
-
-# and set any options; do chmod last to preserve setuid bits
-
-# If any of these fail, we abort the whole thing.  If we want to
-# ignore errors from any of these, just make sure not to ignore
-# errors from the above "$doit $instcmd $src $dsttmp" command.
-
-	if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; else true;fi &&
-	if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; else true;fi &&
-	if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; else true;fi &&
-	if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; else true;fi &&
-
-# Now rename the file to the real destination.
-
-	$doit $rmcmd -f $dstdir/$dstfile &&
-	$doit $mvcmd $dsttmp $dstdir/$dstfile 
-
-fi &&
-
+   eval "${changeAttributes}"
+done
 
 exit 0
