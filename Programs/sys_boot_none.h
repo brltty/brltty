@@ -15,28 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
-
-#include <stdlib.h>
-#include <unistd.h>
-
-#include "misc.h"
-#include "system.h"
-
-#include "sys_boot_none.h"
-
-#include "sys_shlib_none.h"
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_TUNES
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_TUNES */
-
-#ifdef ENABLE_MIDI_TUNES
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_TUNES */
-
-#include "sys_ports_none.h"
+char *
+getBootParameters (void) {
+  return NULL;
+}

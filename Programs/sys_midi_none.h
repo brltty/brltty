@@ -15,28 +15,32 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+int
+getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
+  LogPrint(errorLevel, "MIDI device not supported.");
+  return -1;
+}
 
-#include <stdlib.h>
-#include <unistd.h>
+void
+setMidiInstrument (unsigned char channel, unsigned char instrument) {
+}
 
-#include "misc.h"
-#include "system.h"
+void
+beginMidiBlock (int descriptor) {
+}
 
-#include "sys_boot_none.h"
+void
+endMidiBlock (int descriptor) {
+}
 
-#include "sys_shlib_none.h"
+void
+startMidiNote (unsigned char channel, unsigned char note, unsigned char volume) {
+}
 
-#include "sys_beep_none.h"
+void
+stopMidiNote (unsigned char channel) {
+}
 
-#ifdef ENABLE_PCM_TUNES
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_TUNES */
-
-#ifdef ENABLE_MIDI_TUNES
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_TUNES */
-
-#include "sys_ports_none.h"
+void
+insertMidiWait (int duration) {
+}

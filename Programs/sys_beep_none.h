@@ -15,28 +15,22 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+int
+canBeep (void) {
+  return 0;
+}
 
-#include <stdlib.h>
-#include <unistd.h>
+int
+timedBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
 
-#include "misc.h"
-#include "system.h"
+int
+startBeep (unsigned short frequency) {
+  return 0;
+}
 
-#include "sys_boot_none.h"
-
-#include "sys_shlib_none.h"
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_TUNES
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_TUNES */
-
-#ifdef ENABLE_MIDI_TUNES
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_TUNES */
-
-#include "sys_ports_none.h"
+int
+stopBeep (void) {
+  return 0;
+}

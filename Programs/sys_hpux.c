@@ -37,10 +37,7 @@
 #include "misc.h"
 #include "system.h"
 
-char *
-getBootParameters (void) {
-  return NULL;
-}
+#include "sys_boot_none.h"
 
 void *
 loadSharedObject (const char *path) {
@@ -73,25 +70,7 @@ findSharedSymbol (void *object, const char *symbol, const void **address) {
   return 0;
 }
 
-int
-canBeep (void) {
-  return 0;
-}
-
-int
-timedBeep (unsigned short frequency, unsigned short milliseconds) {
-  return 0;
-}
-
-int
-startBeep (unsigned short frequency) {
-  return 0;
-}
-
-int
-stopBeep (void) {
-  return 0;
-}
+#include "sys_beep_none.h"
 
 #ifdef ENABLE_PCM_TUNES
 #ifdef HAVE_HPUX_AUDIO
@@ -238,53 +217,7 @@ cancelPcmOutput (int descriptor) {
 #endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES
-int
-getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
-  LogPrint(errorLevel, "MIDI device not supported.");
-  return -1;
-}
-
-void
-setMidiInstrument (unsigned char channel, unsigned char instrument) {
-}
-
-void
-beginMidiBlock (int descriptor) {
-}
-
-void
-endMidiBlock (int descriptor) {
-}
-
-void
-startMidiNote (unsigned char channel, unsigned char note, unsigned char volume) {
-}
-
-void
-stopMidiNote (unsigned char channel) {
-}
-
-void
-insertMidiWait (int duration) {
-}
+#include "sys_midi_none.h"
 #endif /* ENABLE_MIDI_TUNES */
 
-int
-enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
-  LogPrint(errorLevel, "I/O ports not supported.");
-  return 0;
-}
-
-int
-disablePorts (unsigned short int base, unsigned short int count) {
-  return 0;
-}
-
-unsigned char
-readPort1 (unsigned short int port) {
-  return 0;
-}
-
-void
-writePort1 (unsigned short int port, unsigned char value) {
-}
+#include "sys_ports_none.h"
