@@ -52,6 +52,7 @@ readByte (unsigned char *byte) {
 
 static int
 awaitByte (unsigned char *byte) {
+  if (readByte(byte)) return 1;
   if (awaitInput(fileDescriptor, 4000))
     if (readByte(byte))
       return 1;
@@ -74,13 +75,15 @@ acknowledgeDisplay (void) {
   {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
     if (!writeBytes(acknowledgement, sizeof(acknowledgement))) return 0;
+    tcflush(fileDescriptor, TCIFLUSH);
+    delay(500);
+    tcflush(fileDescriptor, TCIFLUSH);
   }
 
   cellCount = (attributes & 0X80)? 80: 40;
   cursorCommand = CR_ROUTE;
 
-  LogPrint(LOG_INFO, "Albatross detected: %d columns",
-           baud2integer(cellCount));
+  LogPrint(LOG_INFO, "Albatross has %d columns.", cellCount);
   return 1;
 }
 
@@ -140,6 +143,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       unsigned char byte;
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
+          LogPrint(LOG_INFO, "Albatross is at %d baud.", baud2integer(*speed));
           if (acknowledgeDisplay()) {
             clearDisplay();
             brl->x = cellCount;
