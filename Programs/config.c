@@ -1155,8 +1155,7 @@ globBegin (GlobData *data) {
     int originalDirectory = open(".", O_RDONLY);
     if (originalDirectory != -1) {
 #else /* HAVE_FCHDIR */
-    char originalDirectoryBuffer[PATH_MAX+1];
-    char *originalDirectory = getcwd(originalDirectoryBuffer, sizeof(originalDirectoryBuffer));
+    char *originalDirectory = getWorkingDirectory();
     if (originalDirectory) {
 #endif /* HAVE_FCHDIR */
       if (chdir(data->directory) != -1) {
@@ -1184,9 +1183,14 @@ globBegin (GlobData *data) {
 #ifdef HAVE_FCHDIR
       close(originalDirectory);
 #else /* HAVE_FCHDIR */
+      free(originalDirectory);
 #endif /* HAVE_FCHDIR */
     } else {
+#ifdef HAVE_FCHDIR
       LogError("working directory open");
+#else /* HAVE_FCHDIR */
+      LogError("working directory determination");
+#endif /* HAVE_FCHDIR */
     }
   }
 
@@ -1839,10 +1843,13 @@ startup (int argc, char *argv[]) {
   }
 
   {
-    char buffer[PATH_MAX+1];
-    char *path = getcwd(buffer, sizeof(buffer));
-    LogPrint(LOG_INFO, "Working Directory: %s",
-             path? path: "path-too-long");
+    char *directory;
+    if ((directory = getWorkingDirectory())) {
+      LogPrint(LOG_INFO, "Working Directory: %s", directory);
+      free(directory);
+    } else {
+      LogPrint(LOG_ERR, "Cannot determine working directory: %s", strerror(errno));
+    }
   }
 
   LogPrint(LOG_INFO, "Configuration File: %s", opt_configurationFile);

@@ -26,6 +26,7 @@ typedef void (*TranslationTableReporter) (const char *message);
 
 #define TBL_UNDEFINED 0X1
 #define TBL_DUPLICATE 0X2
+#define TBL_UNUSED    0X4
 
 extern int loadTranslationTable (
   const char *file,

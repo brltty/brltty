@@ -32,7 +32,12 @@
 #include "brl.h"
 #include "tbl.h"
 
+static char *opt_dataDirectory;
+
 BEGIN_OPTION_TABLE
+  {"data-directory", "file", 'D', 0, OPT_Hidden,
+   &opt_dataDirectory, DATA_DIRECTORY,
+   "Path to directory for configuration files."},
 END_OPTION_TABLE
 
 static void
@@ -56,10 +61,10 @@ main (int argc, char *argv[]) {
   }
   path = *argv++, argc--;
 
-  if ((path = makePath(DATA_DIRECTORY, path))) {
+  if ((path = makePath(opt_dataDirectory, path))) {
     TranslationTable table;
     if (loadTranslationTable(path, &table, reportMessage,
-                             TBL_UNDEFINED | TBL_DUPLICATE)) {
+                             TBL_UNDEFINED | TBL_DUPLICATE | TBL_UNUSED)) {
       status = 0;
     } else {
       status = 3;

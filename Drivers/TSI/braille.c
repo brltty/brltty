@@ -375,7 +375,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     return 0;
   }
 
-  rawdata = prevdata = NULL;
+  dispbuf = rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
   if (!(serialDevice = serialOpenDevice(device))) goto failure;
@@ -542,11 +542,24 @@ static void
 brl_close (BrailleDisplay *brl)
 {
   if (serialDevice) {
-    serialCloseDevice (serialDevice);
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
   }
-  free (dispbuf);
-  free (rawdata);
-  free (prevdata);
+
+  if (dispbuf) {
+    free(dispbuf);
+    dispbuf = NULL;
+  }
+
+  if (rawdata) {
+    free(rawdata);
+    rawdata = NULL;
+  }
+
+  if (prevdata) {
+    free(prevdata);
+    prevdata = NULL;
+  }
 }
 
 static void 

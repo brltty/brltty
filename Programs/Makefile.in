@@ -347,7 +347,7 @@ host_misc.$O: misc.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/misc.c
 
 host_sys.$O: $(SYSTEM_OBJECT)
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$(SYSTEM_OBJECT:.$O=.c)
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$(SYSTEM_OBJECT:.${O}=.c)
 
 host_io.$O: iomisc.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/iomisc.c

@@ -45,6 +45,8 @@ static iconv_t conversionDescriptor = NULL;
 #include <curses.h>
 #elif defined(HAVE_PKG_NCURSES)
 #include <ncurses.h>
+#elif defined(HAVE_PKG_NCURSESW)
+#include <ncurses.h>
 #else /* HAVE_PKG_ */
 #error curses package either unspecified or unsupported
 #endif /* HAVE_PKG_ */

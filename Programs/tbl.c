@@ -73,6 +73,19 @@ syntaxError (InputData *input, const char *problem) {
   reportError(input, "%s[%d]: %s", input->file, input->line, problem);
 }
 
+static void
+putCell (unsigned char cell, char *buffer, int *count) {
+  *count = 0;
+  if (cell) {
+    int dotIndex;
+    for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex)
+      if (cell & DOT_BIT(dotIndex))
+        buffer[(*count)++] = dotNumbers[dotIndex];
+  } else {
+    buffer[(*count)++] = noDots[0];
+  }
+}
+
 static int
 testWord (const unsigned char *location, int length, const char *word) {
   return (length == strlen(word)) && (strncasecmp((const char *)location, word, length) == 0);
@@ -393,48 +406,55 @@ processTableLine (char *line, void *data) {
 
 static void
 setTable (InputData *input, TranslationTable *table) {
-  int byteIndex;
   TranslationTable dotsDefined;
   memset(&dotsDefined, 0, sizeof(dotsDefined));
 
-  for (byteIndex=0; byteIndex<0X100; ++byteIndex) {
-    ByteEntry *byte = &input->bytes[byteIndex];
-    unsigned char *cell = &(*table)[byteIndex];
-    if (byte->defined) {
-      *cell = byte->cell;
+  {
+    int byteIndex;
+    for (byteIndex=0; byteIndex<0X100; ++byteIndex) {
+      ByteEntry *byte = &input->bytes[byteIndex];
+      unsigned char *cell = &(*table)[byteIndex];
+      if (byte->defined) {
+        *cell = byte->cell;
 
-      if (!dotsDefined[byte->cell]) {
-        dotsDefined[byte->cell] = 1;
-      } else if (input->options & TBL_DUPLICATE) {
-        unsigned char dotsBuffer[DOT_COUNT];
-        int dotCount = 0;
-        if (byte->cell) {
-          int dotIndex;
-          for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex)
-            if (byte->cell & DOT_BIT(dotIndex))
-              dotsBuffer[dotCount++] = dotNumbers[dotIndex];
-        } else {
-          dotsBuffer[dotCount++] = noDots[0];
+        if (!dotsDefined[byte->cell]) {
+          dotsDefined[byte->cell] = 1;
+        } else if (input->options & TBL_DUPLICATE) {
+          unsigned char dotsBuffer[DOT_COUNT];
+          int dotCount;
+          putCell(byte->cell, dotsBuffer, &dotCount);
+          reportError(input, "duplicate dots: %.*s [\\X%02X]", dotCount, dotsBuffer, byteIndex);
         }
-        reportError(input, "duplicate dots: %.*s [\\X%02X]", dotCount, dotsBuffer, byteIndex);
-      }
-    } else {
-      int dotIndex;
-      *cell = input->undefined;
+      } else {
+        int dotIndex;
+        *cell = input->undefined;
 
-      for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex) {
-        if (byteIndex & input->masks[dotIndex]) {
-          unsigned char bit = DOT_BIT(dotIndex);
-          if (input->undefined & bit) {
-            *cell &= ~bit;
-          } else {
-            *cell |= bit;
+        for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex) {
+          if (byteIndex & input->masks[dotIndex]) {
+            unsigned char bit = DOT_BIT(dotIndex);
+            if (input->undefined & bit) {
+              *cell &= ~bit;
+            } else {
+              *cell |= bit;
+            }
           }
         }
-      }
 
-      if (input->options & TBL_UNDEFINED) {
-        reportError(input, "undefined byte: \\X%02X", byteIndex);
+        if (input->options & TBL_UNDEFINED) {
+          reportError(input, "undefined byte: \\X%02X", byteIndex);
+        }
+      }
+    }
+  }
+
+  if (input->options & TBL_UNUSED) {
+    int cell;
+    for (cell=0; cell<0X100; ++cell) {
+      if (!dotsDefined[cell]) {
+        unsigned char dotsBuffer[DOT_COUNT];
+        int dotCount;
+        putCell(cell, dotsBuffer, &dotCount);
+        reportError(input, "unused dots: %.*s", dotCount, dotsBuffer);
       }
     }
   }

@@ -121,6 +121,8 @@ extern int ringBell (void);
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
+
+extern char *getWorkingDirectory (void);
 extern char *makePath (const char *directory, const char *file);
 extern int makeDirectory (const char *path);
 

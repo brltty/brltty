@@ -791,6 +791,7 @@ const char *brlapi_errlist[] = {
   "bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
   "unexpected end of file",             /* BRLERR_EOF */
   "too many levels of recursion",       /* BRLERR_TOORECURSE */
+  "driver error",
 };
 
 /* brlapi_nerr: last error number */
@@ -883,10 +884,10 @@ brlapi_errorHandler_t brlapi_setErrorHandler(brlapi_errorHandler_t new)
 
 void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *packet, size_t size)
 {
-  unsigned char *c;
+  const unsigned char *c;
   fprintf(stderr, "Error: %s on %s request:\n",brlapi_strerror(err),brlapi_packetType(type));
   if (size>16) size=16;
-  for (c=0;c<(unsigned char *)packet+size;c++) fprintf(stderr,"%2x ", *c);
+  for (c=packet;c<(unsigned char *)packet+size;c++) fprintf(stderr,"%2x ", *c);
   fprintf(stderr,"\n");
   exit(1);
 }

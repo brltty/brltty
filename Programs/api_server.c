@@ -116,9 +116,9 @@ typedef struct Connection {
   unsigned int how; /* how keys must be delivered to clients */
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
-  pthread_mutex_t brlmutex;
+  pthread_mutex_t brlMutex;
   rangeList *unmaskedKeys;
-  pthread_mutex_t maskmutex;
+  pthread_mutex_t maskMutex;
   long upTime;
 } Connection;
 
@@ -146,7 +146,7 @@ static struct closeinfo {
 static int sockets[MAXSOCKETS]; /* server sockets fds */
 static int numSockets; /* number of sockets */
 
-static pthread_mutex_t connections_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t connectionsMutex = PTHREAD_MUTEX_INITIALIZER;
 static Tty notty;
 static Tty ttys;
 
@@ -154,7 +154,7 @@ static unsigned int unauthConnections;
 static unsigned int unauthConnLog = 0;
 
 /* These variables let access to some information be synchronized */
-static pthread_mutex_t packet_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t driverMutex = PTHREAD_MUTEX_INITIALIZER;
 static Connection *rawConnection = NULL;
 
 /* Pointer on subroutines of the real braille driver */
@@ -308,8 +308,8 @@ static Connection *createConnection(int fd, long currentTime)
   c->tty = NULL;
   c->raw = 0;
   c->brlbufstate = EMPTY;
-  pthread_mutex_init(&c->brlmutex,NULL);
-  pthread_mutex_init(&c->maskmutex,NULL);
+  pthread_mutex_init(&c->brlMutex,NULL);
+  pthread_mutex_init(&c->maskMutex,NULL);
   c->how = 0;
   c->unmaskedKeys = NULL;
   c->upTime = currentTime;
@@ -329,8 +329,8 @@ out:
 static void freeConnection(Connection *c)
 {
   if (c->fd>=0) close(c->fd);
-  pthread_mutex_destroy(&c->brlmutex);
-  pthread_mutex_destroy(&c->maskmutex);
+  pthread_mutex_destroy(&c->brlMutex);
+  pthread_mutex_destroy(&c->maskMutex);
   freeBrailleWindow(&c->brailleWindow);
   freeRangeList(&c->unmaskedKeys);
   free(c);
@@ -347,9 +347,9 @@ static void __addConnection(Connection *c, Connection *connections)
 }
 static void addConnection(Connection *c, Connection *connections)
 {
-  pthread_mutex_lock(&connections_mutex);
+  pthread_mutex_lock(&connectionsMutex);
   __addConnection(c,connections);
-  pthread_mutex_unlock(&connections_mutex);
+  pthread_mutex_unlock(&connectionsMutex);
 }
 
 /* Function : removeConnection */
@@ -361,9 +361,9 @@ static void __removeConnection(Connection *c)
 }
 static void removeConnection(Connection *c)
 {
-  pthread_mutex_lock(&connections_mutex);
+  pthread_mutex_lock(&connectionsMutex);
   __removeConnection(c);
-  pthread_mutex_unlock(&connections_mutex);
+  pthread_mutex_unlock(&connectionsMutex);
 }
 
 /* Function: removeFreeConnection */
@@ -503,7 +503,7 @@ static int processRequest(Connection *c)
         WERR(c->fd,BRLERR_NOMEM);
 	return 0;
       }
-      pthread_mutex_lock(&connections_mutex);
+      pthread_mutex_lock(&connectionsMutex);
       tty = tty2 = &ttys;
       for (ptty=ints; ptty<&ints[size/sizeof(uint32_t)-1]; ptty++) {
         for (tty2=tty->subttys; tty2 && tty2->number!=ntohl(*ptty); tty2=tty2->next);
@@ -516,7 +516,7 @@ static int processRequest(Connection *c)
 	if (c->tty) {
 	  /* uhu, we already got a tty, but not this one, since the path
 	   * doesn't exist yet. This is forbidden. */
-          pthread_mutex_unlock(&connections_mutex);
+          pthread_mutex_unlock(&connectionsMutex);
           WEXC(c->fd, BRLERR_INVALID_PARAMETER);
           freeBrailleWindow(&c->brailleWindow);
 	  return 0;
@@ -524,7 +524,7 @@ static int processRequest(Connection *c)
 	/* ok, allocate path */
 	/* we lock the entire subtree for easier cleanup */
 	if (!(tty2 = newTty(tty,ntohl(*ptty)))) {
-          pthread_mutex_unlock(&connections_mutex);
+          pthread_mutex_unlock(&connectionsMutex);
           WERR(c->fd,BRLERR_NOMEM);
           freeBrailleWindow(&c->brailleWindow);
 	  return 0;
@@ -538,7 +538,7 @@ static int processRequest(Connection *c)
 	      tty3 = tty2->subttys;
 	      freeTty(tty2);
 	    }
-            pthread_mutex_unlock(&connections_mutex);
+            pthread_mutex_unlock(&connectionsMutex);
             WERR(c->fd,BRLERR_NOMEM);
             freeBrailleWindow(&c->brailleWindow);
 	    return 0;
@@ -548,7 +548,7 @@ static int processRequest(Connection *c)
 	tty = tty2;
       }
       if (c->tty) {
-        pthread_mutex_unlock(&connections_mutex);
+        pthread_mutex_unlock(&connectionsMutex);
 	if (c->tty == tty) {
           if (c->how==how) {
             LogPrint(LOG_WARNING,"One already controls tty %#010x !",c->tty->number);
@@ -572,7 +572,7 @@ static int processRequest(Connection *c)
       c->tty = tty;
       __removeConnection(c);
       __addConnection(c,tty->connections);
-      pthread_mutex_unlock(&connections_mutex);
+      pthread_mutex_unlock(&connectionsMutex);
       writeAck(c->fd);
       LogPrint(LOG_DEBUG,"Taking control of tty %#010x (how=%d)",tty->number,how);
       return 0;
@@ -610,10 +610,10 @@ static int processRequest(Connection *c)
       x = ntohl(ints[0]);
       y = ntohl(ints[1]);
       LogPrint(LOG_DEBUG,"range: [%u..%u]",x,y);
-      pthread_mutex_lock(&c->maskmutex);
+      pthread_mutex_lock(&c->maskMutex);
       if (type==BRLPACKET_IGNOREKEYRANGE) res = removeRange(x,y,&c->unmaskedKeys);
       else res = addRange(x,y,&c->unmaskedKeys);
-      pthread_mutex_unlock(&c->maskmutex);
+      pthread_mutex_unlock(&c->maskMutex);
       if (res==-1) WERR(c->fd,BRLERR_NOMEM);
       else writeAck(c->fd);
       return 0;
@@ -629,12 +629,12 @@ static int processRequest(Connection *c)
       CHECKEXC(( (!c->raw) && c->tty ),BRLERR_ILLEGAL_INSTRUCTION);
       CHECKEXC(size % sizeof(brl_keycode_t)==0,BRLERR_INVALID_PACKET);
       nbkeys = size/sizeof(brl_keycode_t);
-      pthread_mutex_lock(&c->maskmutex);
+      pthread_mutex_lock(&c->maskMutex);
       while ((res!=-1) && (i<nbkeys)) {
         res = fptr(k[i],k[i],&c->unmaskedKeys);
         i++;
       }
-      pthread_mutex_unlock(&c->maskmutex);
+      pthread_mutex_unlock(&c->maskMutex);
       if (res==-1) WERR(c->fd,BRLERR_NOMEM);
       else writeAck(c->fd);
       return 0;
@@ -652,14 +652,14 @@ static int processRequest(Connection *c)
       brailleWindow.text = x;
       brailleWindow.andAttr = y;
       brailleWindow.orAttr = z;
-      pthread_mutex_lock(&c->brlmutex);
+      pthread_mutex_lock(&c->brlMutex);
       if ((size==sizeof(ws->flags))&&(ws->flags==0)) {
         c->brlbufstate = EMPTY;
-        pthread_mutex_unlock(&c->brlmutex);
+        pthread_mutex_unlock(&c->brlMutex);
         return 0;
       }
       copyBrailleWindow(&brailleWindow, &c->brailleWindow);
-      pthread_mutex_unlock(&c->brlmutex);
+      pthread_mutex_unlock(&c->brlMutex);
       size -= sizeof(ws->flags); /* flags */
       CHECKERR((ws->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP);
       if (ws->flags & BRLAPI_WF_REGION) {
@@ -699,10 +699,10 @@ static int processRequest(Connection *c)
       }
       CHECKEXC(size==0, BRLERR_INVALID_PACKET);
       /* Here all the packet has been processed. */
-      pthread_mutex_lock(&c->brlmutex);
+      pthread_mutex_lock(&c->brlMutex);
       copyBrailleWindow(&c->brailleWindow, &brailleWindow);
       c->brlbufstate = TODISPLAY;
-      pthread_mutex_unlock(&c->brlmutex);
+      pthread_mutex_unlock(&c->brlMutex);
       return 0;
     }
     case BRLPACKET_GETRAW: {
@@ -734,9 +734,9 @@ static int processRequest(Connection *c)
     case BRLPACKET_PACKET: {
       LogPrintRequest(type, c->fd);
       CHECKEXC(c->raw,BRLERR_ILLEGAL_INSTRUCTION);
-      pthread_mutex_lock(&packet_mutex);
+      pthread_mutex_lock(&driverMutex);
       trueBraille->writePacket(disp,packet,size);
-      pthread_mutex_unlock(&packet_mutex);
+      pthread_mutex_unlock(&driverMutex);
       return 0;
     }
     case BRLPACKET_GETDRIVERID: str = braille->identifier; goto l1;
@@ -1020,9 +1020,11 @@ static void *server(void *arg)
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
 
+  for (i=0;i<numSockets;i++)
+    sockets[i]=-1;
+
   pthread_cleanup_push(closeSockets,NULL);
   for (i=0;i<numSockets;i++) {
-    sockets[i]=-1;
     if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *) i)) != 0) {
       LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
       for (;i>=0;i--)
@@ -1035,16 +1037,17 @@ static void *server(void *arg)
   while (1) {
     /* Compute sockets set and fdmax */
     FD_ZERO(&sockset);
+    fdmax=0;
     for (i=0;i<numSockets;i++)
       if (sockets[i]>=0) {
 	FD_SET(sockets[i], &sockset);
 	if (sockets[i]>fdmax)
 	  fdmax = sockets[i];
       }
-    pthread_mutex_lock(&connections_mutex);
+    pthread_mutex_lock(&connectionsMutex);
     addTtyFds(&sockset, &fdmax, &notty);
     addTtyFds(&sockset, &fdmax, &ttys);
-    pthread_mutex_unlock(&connections_mutex);
+    pthread_mutex_unlock(&connectionsMutex);
     tv.tv_sec = 1; tv.tv_usec = 0;
     if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0)
     {
@@ -1162,12 +1165,12 @@ static void api_writeWindow(BrailleDisplay *brl)
 {
   setCurrentRootTty();
   if (rawConnection!=NULL) return;
-  pthread_mutex_lock(&connections_mutex);
+  pthread_mutex_lock(&connectionsMutex);
   if (whoFillsTty(&ttys)!=NULL) {
-    pthread_mutex_unlock(&connections_mutex);
+    pthread_mutex_unlock(&connectionsMutex);
     return;
   }
-  pthread_mutex_unlock(&connections_mutex);
+  pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
   trueBraille->writeWindow(brl);
 }
@@ -1178,12 +1181,12 @@ static void api_writeVisual(BrailleDisplay *brl)
   setCurrentRootTty();
   if (!trueBraille->writeVisual) return;
   if (rawConnection!=NULL) return;
-  pthread_mutex_lock(&connections_mutex);
+  pthread_mutex_lock(&connectionsMutex);
   if (whoFillsTty(&ttys)!=NULL) {
-    pthread_mutex_unlock(&connections_mutex);
+    pthread_mutex_unlock(&connectionsMutex);
     return;
   }
-  pthread_mutex_unlock(&connections_mutex);
+  pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
   trueBraille->writeVisual(brl);
 }
@@ -1197,12 +1200,12 @@ static Connection *whoGetsKey(Tty *tty, brl_keycode_t command, brl_keycode_t key
   {
     int masked;
     for (c=tty->connections->next; c!=tty->connections; c = c->next) {
-      pthread_mutex_lock(&c->maskmutex);
+      pthread_mutex_lock(&c->maskMutex);
       if (c->how==BRLKEYCODES)
         masked = (contains(c->unmaskedKeys,keycode) == NULL);
       else
         masked = (contains(c->unmaskedKeys,command & BRL_MSK_CMD) == NULL);
-      pthread_mutex_unlock(&c->maskmutex);
+      pthread_mutex_unlock(&c->maskMutex);
       if (!masked) goto found;
     }
   }
@@ -1226,35 +1229,38 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   brl_keycode_t keycode, command;
 
   if (rawConnection!=NULL) {
-    pthread_mutex_lock(&packet_mutex);
+    pthread_mutex_lock(&driverMutex);
     size = trueBraille->readPacket(brl, packet,BRLAPI_MAXPACKETSIZE);
-    pthread_mutex_unlock(&packet_mutex);
-    if (size>0) {
+    pthread_mutex_unlock(&driverMutex);
+    if (size<0)
+      writeException(rawConnection->fd, BRLERR_DRIVERERROR, BRLPACKET_PACKET, NULL, 0);
+    else 
       brlapi_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
-    }
     return EOF;
   }
   setCurrentRootTty();
-  pthread_mutex_lock(&connections_mutex);
+  pthread_mutex_lock(&connectionsMutex);
   c = whoFillsTty(&ttys);
   if (c && last_conn_write!=c) {
     last_conn_write=c;
     refresh=1;
   }
-  pthread_mutex_unlock(&connections_mutex);
+  pthread_mutex_unlock(&connectionsMutex);
   if (c) {
-    pthread_mutex_lock(&c->brlmutex);
+    pthread_mutex_lock(&c->brlMutex);
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
       char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
-      getText(&c->brailleWindow, buf);
-      trueBraille->writeVisual(brl);
+      if (trueBraille->writeVisual) {
+        getText(&c->brailleWindow, buf);
+        trueBraille->writeVisual(brl);
+      }
       getDots(&c->brailleWindow, buf);
       trueBraille->writeWindow(brl);
       disp->buffer = oldbuf;
       c->brlbufstate = FULL;
     }
-    pthread_mutex_unlock(&c->brlmutex);
+    pthread_mutex_unlock(&c->brlMutex);
   }
   if (trueBraille->readKey) {
     res = trueBraille->readKey(brl);
@@ -1334,7 +1340,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
   res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH),
                            &authKeyLength,authKey);
   if (res==-1) {
-    LogPrint(LOG_WARNING,"Unable to load API authentication key: no connections will be accepted.");
+    LogPrint(LOG_WARNING,"Unable to load API authentication key (%s): no connections will be accepted.", strerror(errno));
     goto out;
   }
   LogPrint(LOG_DEBUG, "Authentication key loaded");

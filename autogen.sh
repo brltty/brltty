@@ -16,9 +16,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-cd "${0%/*}"
+set -e
+cd `dirname "${0}"`
 ./gendeps
 [ -f Makefile ] && make -s distclean
 "${BRLTTY_AUTOCONF:-autoconf}"
-rm -fr autom4te*.cache
+rm -fr autom4te*.cache || :
+[ "${#}" -gt 0 ] && ./configure "${@}"
 exit 0

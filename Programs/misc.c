@@ -243,6 +243,25 @@ strdupWrapper (const char *string) {
 }
 
 char *
+getWorkingDirectory (void) {
+  size_t size = 0X100;
+  char *buffer = NULL;
+
+  do {
+    {
+      char *new = realloc(buffer, size<<=1);
+      if (!new) break;
+      buffer = new;
+    }
+
+    if (getcwd(buffer, size)) return buffer;
+  } while (errno == ERANGE);
+
+  if (buffer) free(buffer);
+  return NULL;
+}
+
+char *
 makePath (const char *directory, const char *file) {
   const int count = 3;
   const char *components[count];

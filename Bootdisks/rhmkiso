@@ -83,6 +83,7 @@ brlttyArchive="${1}"
 cleanup() {
    set +e
    cd /
+   "${newMounted}" && umount "${newRoot}"
    "${initrdMounted}" && umount "${initrdRoot}"
    "${originalMounted}" && umount "${originalRoot}"
    [ -n "${temporaryDirectory}" ] && rm -r "${temporaryDirectory}"
@@ -90,6 +91,7 @@ cleanup() {
 set -e
 originalMounted=false
 initrdMounted=false
+newMounted=false
 trap "cleanup" 0
 
 temporaryDirectory="$(mktemp -d "${TMPDIR:-/tmp}/${programName}.XXXXXX")"
@@ -101,10 +103,9 @@ originalMounted=true
 
 modifiedRoot="${temporaryDirectory}/modified"
 mkdir "${modifiedRoot}"
-cp -a "${originalRoot}/." "${modifiedRoot}"
+cp -a -- "${originalRoot}/." "${modifiedRoot}"
 
 loaderDirectory=""
-set +e
 for directory in boot/isolinux isolinux
 do
    [ -d "${originalRoot}/${directory}" ] && {
@@ -112,7 +113,6 @@ do
       break
    }
 done
-set -e
 
 configurationFile="isolinux.cfg"
 sed -n -e '
@@ -146,10 +146,7 @@ shopt -u nullglob
 for device in /dev/vcs*
 do
    deviceName="${device##*/}"
-   devicePath="${deviceDirectory}/${deviceName}"
-   set +e
    [ -e "${deviceDirectory}/${deviceName}" ] && continue
-   set -e
    cp -a "${device}" "${deviceDirectory}"
 done
 
@@ -168,26 +165,74 @@ esac
 
 shopt -s nullglob
 set -- ${temporaryDirectory}/brltty*
-[ "${#}" -eq 0 ] && programError "brltty directory not found."
-brlttyDirectory="${1}"
+[ "${#}" -eq 0 ] && programError "brltty build directory not found."
+brlttyBuildRoot="${1}"
 
+brlttyInstallRoot="${temporaryDirectory}/install"
 (
    set -e
    trap "" 0
-   cd "${brlttyDirectory}"
+   cd "${brlttyBuildRoot}"
 
    ./autogen.sh
-   ./configure --quiet --with-install-root="${initrdRoot}" \
+   ./configure --quiet --with-install-root="${brlttyInstallRoot}" \
 	       --with-init-path="${initPath}" \
 	       --with-braille-driver="${brailleDrivers}" \
 	       --with-text-table="${textTable}" \
-	       --disable-speech-support --without-x \
+	       --disable-speech-support --without-libbraille --without-curses --without-x \
 	       --disable-pcm-support --disable-fm-support --disable-midi-support \
                --enable-standalone-programs --disable-api --disable-gpm
    make -s -C Programs all
    strip Programs/brltty
    make -s -C Programs install-programs install-help install-tables
 ) || exit "${?}"
+
+set -- $(stat -c '%a %s' -f "${initrdRoot}")
+initrdAvailableBlocks="${1}"
+initrdBlockSize="${2}"
+set -- $(du -B "${initrdBlockSize}" -s "${brlttyInstallRoot}")
+brlttyInstallBlocks="${1}"
+set -- $(stat -c '%s' "${initrdImage}")
+initrdImageBytes="${1}"
+initrdImageBlocks=$(( (initrdImageBytes + initrdBlockSize - 1) / initrdBlockSize ))
+initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
+(( (initrdPadBlocks += 100) > 0 )) && {
+   initrdMounted=false
+   umount "${initrdRoot}"
+
+   dd bs="${initrdBlockSize}" count="${initrdPadBlocks}" if="/dev/zero" of="${initrdImage}" seek="${initrdImageBlocks}"
+   e2fsck -f "${initrdImage}" && resize2fs "${initrdImage}" || {
+      newImage="${temporaryDirectory}/new.ext2"
+      cp -a -- "${initrdImage}" "${newImage}"
+      mke2fs -q -b "${initrdBlockSize}" -F "${newImage}"
+
+      newRoot="${temporaryDirectory}/new"
+      mkdir "${newRoot}"
+
+      mount -o loop -t ext2 "${newImage}" "${newRoot}"
+      newMounted=true
+
+      mount -o loop -t ext2 "${initrdImage}" "${initrdRoot}"
+      initrdMounted=true
+      cp -a -- "${initrdRoot}/." "${newRoot}"
+      initrdMounted=false
+      umount "${initrdRoot}"
+
+      newMounted=false
+      umount "${newRoot}"
+
+      cp -- "${newImage}" "${initrdImage}"
+   }
+
+   mount -o loop -t ext2 "${initrdImage}" "${initrdRoot}"
+   initrdMounted=true
+}
+
+(
+   set -e
+   cd "${brlttyInstallRoot}"
+   cp --parents -- $(find . -type f -printf '%P ') "${initrdRoot}"
+) || exit 1
 
 "${invokeShell}" && (
    set +e
