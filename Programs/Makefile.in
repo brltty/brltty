@@ -391,4 +391,6 @@ clean::
 
 distclean clean install uninstall::
 	-for driver in $(CONFIGURED_DRIVERS); do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) $@); done
+
+distclean::
 	-rm -f brltty-config$X
