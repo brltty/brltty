@@ -16,7 +16,7 @@
  */
 
 /* EuroBraille/braille.c - Braille display library for the EuroBraille family.
- * Copyright (C) 1997-2003 by Yannick Plassiard <yan@mistigri.org>
+ * Copyright (C) 1997-2005 by Yannick Plassiard <yan@mistigri.org>
  *                        and Nicolas Pitre <nico@cam.org>
  * See the GNU General Public License for details in the ../../COPYING file
  * See the README file for details about copyrights and version informations
@@ -321,7 +321,7 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
 #endif
 
    if (!len)
-     return (1);
+     return 1;
 
    *p++ = SOH;
    while (len--)
@@ -370,14 +370,14 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
 
 static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t sz)
 {
-  char			c;
+  unsigned char	c;
 
-  if (serialWriteData(serialDevice, p, sz) != sz)
+  if (((size_t)WriteToBrlDisplay(brl, sz, p)) != sz)
     return (0);
-  if (!serialAwaitInput(serialDevice, 20))
+  if (!serialAwaitInput(serialDevice, 200))
     return (0);
   if (serialReadData(serialDevice, &c, 1, 0, 0) == 1 && c == ACK)
-    return (1);
+    return (sz);
   else
     serialReadData(serialDevice, &c, 1, 0, 0); /* This is done to trap the error code */
   return (0);
@@ -391,7 +391,7 @@ static int brl_reset(BrailleDisplay *brl)
 
 static void brl_identify (void)
 {
-   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.2");
+   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.3");
    LogPrint(LOG_INFO, "  Copyright (C) 1997-2003");
    LogPrint(LOG_INFO, "      - Yannick PLASSIARD <plassi_y@epitech.net>");
    LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
@@ -910,36 +910,48 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf)
 
 static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *bp, size_t size)
 {
-  int			i,j;
-  unsigned char		c;
-  char			end;
-  char			flag = 0;
-  unsigned char		par = 1;
+  int		i = 0;
+  char		start = 0;  /* a flag */
+  size_t	offset = 0;
+  unsigned char		par = 0;
+  int		j = 0;
+  unsigned char c;
+  unsigned char	buf[512];
 
-  if (!serialAwaitInput(serialDevice, 20))
-    return (0);
-  memset(bp, 0, size);
-  for (i = 0, end = 0; !end; i++)
+  if (bp == NULL)
+    return 0;
+  while (serialReadChunk(serialDevice, &c, &offset, 1, 100, 0))
     {
-      if (serialReadData(serialDevice, &c, 1, 0, 0) != 1)
-	return (0); /* Error while reading information */
-      if (i >= size)
-	return (0); /* Packet is too long to be read */
-      bp[i] = c;
-      if (c == SOH && i == 0)
-	flag = 2; /* start of packet */
-      if (c == EOT && flag == 2 && bp[i - 1] != DLE)
-	end = 1; /* We've done reading a packet */
+      if (c == SOH)
+	start = 1;
+      if (c == EOT && buf[i - 1] != DLE)
+	{
+	  buf[i++] = EOT;
+	  break;
+	}
+      if (start) {
+	buf[i++] = c;
+      }
+      offset = 0;
     }
-  for (j = 0; j < i - 2; j++)
-    par ^= bp[j];
-  if (bp[i - 2] != par)
+  if (i == 0) /* no character, timeout */
+    return 0;
+  for (j = 1; j < i - 2 && j <= size ; j++) {
+    if (buf[j] != DLE || (buf[j - 1] == DLE)) 
+       {
+	 par ^= buf[j];
+	 bp[j - 1] = buf[j];
+       }
+  }
+  if (par == buf[i - 2])
     {
-      sendbyte(NACK);
-      sendbyte(PRT_E_PAR);
-      return (-1);
+      sendbyte(ACK);
+      return i - 4;
     }
-  return (i);
+  /* if bad parity */
+  sendbyte(NACK);
+  sendbyte(1); /* error code of a parity error */
+  return 0;
 }
 
 #endif
