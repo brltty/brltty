@@ -14,8 +14,25 @@ AC_DEFUN([BRLTTY_DEFINE_EXPANDED], [dnl
 BRLTTY_VAR_EXPAND([brltty_expanded], [$2])
 AC_DEFINE_UNQUOTED([$1], ["${brltty_expanded}"])])
 
+AC_DEFUN([BRLTTY_DEFINE_DIRECTORY], [dnl
+BRLTTY_VAR_EXPAND([$1], [$2])
+AC_SUBST([$1])
+BRLTTY_DEFINE_EXPANDED([$1], ["${$1}"])])
+
 AC_DEFUN([BRLTTY_ARG_WITH], [dnl
 AC_ARG_WITH([$1], BRLTTY_HELP_STRING([--with-$1=$2], [$3]), [$4="${withval}"], [$4=$5])])
+
+AC_DEFUN([BRLTTY_ARG_REQUIRED], [dnl
+BRLTTY_ARG_WITH([$1], [$2], [$3], [$4], ["yes"])
+if test "${$4}" = "no"
+then
+   AC_MSG_ERROR([$1 not specified])
+elif test "${$4}" = "yes"
+then
+   $4=$5
+fi
+AC_SUBST([$4])
+BRLTTY_SUMMARY_ITEM([$1], [$4])])
 
 AC_DEFUN([BRLTTY_ARG_ENABLE], [dnl
 BRLTTY_ARG_FEATURE([$1], [$2], [enable], [no], [$3], [$4], [$5])])

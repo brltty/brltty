@@ -608,6 +608,9 @@ for any additional display-specific instructions.
     These directories include:
     <itemize>
       <item>the <ref id="build-data-directory" name="data directory">
+      <item>the <ref id="build-configuration-directory" name="configuration directory">
+      <item>the <ref id="build-manpage-directory" name="manpage directory">
+      <item>the <ref id="build-include-directory" name="include directory">
     </itemize>
     The absolute path should be supplied.
     If this option isn't specified,
@@ -623,6 +626,7 @@ for any additional display-specific instructions.
     <itemize>
       <item>the <ref id="build-program-directory" name="program directory">
       <item>the <ref id="build-library-directory" name="library directory">
+      <item>the <ref id="build-api-directory" name="API directory">
     </itemize>
     The absolute path should be supplied.
     If this option isn't specified,
@@ -631,42 +635,82 @@ for any additional display-specific instructions.
     build option is assumed.
     This directory is rooted at the directory specified by the
     <ref id="build-execute-root" name="--with-execute-root"> build option.
-  <tag><tt/--bindir=/<em/directory/<label id="build-program-directory"></tag>
+  <tag><tt/--libdir=/<em/directory/<label id="build-api-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where BrlAPI's static archive and dynamically loadable object
+    (see section <ref id="api" name="The Application Programming Interface">)
+    are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the directory
+    specified via the standard configure option <tt/--libdir/
+    (which defaults to <tt>/lib</> rooted at the directory specified by the
+    <ref id="build-architecture-root" name="--exec-prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
+  <tag><tt/--sysconfdir=/<em/directory/<label id="build-configuration-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the configuration files are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the directory
+    specified via the standard configure option <tt/--sysconfdir/
+    (which defaults to <tt>/etc</> rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
+  <tag><tt/--with-program-directory=/<em/directory/<label id="build-program-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
     where the runnable programs (binaries, executables) are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
-    then <tt>/bin</>, rooted at the directory specified by the
-    <ref id="build-architecture-root" name="--exec-prefix">
-    build option, is assumed.
-  <tag><tt/--libdir=/<em/directory/<label id="build-library-directory"></tag>
+    then the directory
+    specified via the standard configure option <tt/--bindir/
+    (which defaults to <tt>/bin</> rooted at the directory specified by the
+    <ref id="build-architecture-root" name="--exec-prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
+  <tag><tt/--with-library-directory=/<em/directory/<label id="build-library-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
     where the drivers and other architecture-dependent files are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
-    then <tt>/lib</>, rooted at the directory specified by the
-    <ref id="build-architecture-root" name="--exec-prefix">
-    build option, is assumed.
-    BrlAPI's files
-    (see section <ref id="api" name="The Application Programming Interface">)
-    are installed within this directory itself.
-    BRLTTY's files are installed within this directory's <tt/brltty/ subdirectory
-    (which is created if necessary).
-  <tag><tt/--sysconfdir=/<em/directory/<label id="build-data-directory"></tag>
+    then the <tt/brltty/ subdirectory of the directory
+    specified via the standard configure option <tt/--libdir/
+    (which defaults to <tt>/lib</> rooted at the directory specified by the
+    <ref id="build-architecture-root" name="--exec-prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
+  <tag><tt/--with-data-directory=/<em/directory/<label id="build-data-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
-    where the configuration files, tables, help pages,
+    where the tables, help pages,
     and other architecture-independent files are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
-    then <tt>/etc</>, rooted at the directory specified by the
-    <ref id="build-portable-root" name="--prefix">
-    build option, is assumed.
-    The files themselves are installed within this directory's <tt/brltty/ subdirectory
-    (which is created if necessary).
-  <tag><tt/--includedir=/<em/directory/<label id="build-include-directory"></tag>
+    then the <tt/brltty/ subdirectory of the directory
+    specified via the standard configure option <tt/--sysconfdir/
+    (which defaults to <tt>/etc</> rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
+  <tag><tt/--with-manpage-directory=/<em/directory/<label id="build-manpage-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the man pages are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the directory
+    specified via the standard configure option <tt/--mandir/
+    (which defaults to <tt>/man</> rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
+  <tag><tt/--with-include-directory=/<em/directory/<label id="build-include-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
     where the C header files
@@ -674,20 +718,12 @@ for any additional display-specific instructions.
     are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
-    then <tt>/include</>, rooted at the directory specified by the
-    <ref id="build-portable-root" name="--prefix">
-    build option, is assumed.
-    The files themselves are installed within this directory's <tt/brltty/ subdirectory
-    (which is created if necessary).
-  <tag><tt/--mandir=/<em/directory/<label id="build-manpages-directory"></tag>
-    Specify the directory within the
-    <ref id="hierarchy" name="installed file hierarchy">
-    where the man pages are to be installed.
-    The absolute path should be supplied.
-    If this option isn't specified,
-    then <tt>/man</>, rooted at the directory specified by the
-    <ref id="build-portable-root" name="--prefix">
-    build option, is assumed.
+    then the <tt/brltty/ subdirectory of the directory
+    specified via the standard configure option <tt/--includedir/
+    (which defaults to <tt>/include</> rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
 </descrip>
 
 <sect3>Build Features<label id="build-features"><p>
@@ -1161,23 +1197,23 @@ The following environment variables are set:
   <tag/BRLTTY_VERSION/
     The version number of the BRLTTY package.
   <tag/BRLTTY_EXECUTE_ROOT/
-    Root for the installed package.
+    Run-time root for the installed package.
     Configured via the <ref id="build-execute-root" name="--with-execute-root"> build option.
   <tag/BRLTTY_PROGRAM_DIRECTORY/
-    Directory for user executables.
-    Configured via the <ref id="build-program-directory" name="--bindir"> build option.
+    Directory for runnable programs (binaries, executables).
+    Configured via the <ref id="build-program-directory" name="--with-program-directory"> build option.
   <tag/BRLTTY_LIBRARY_DIRECTORY/
-    Directory for object code libraries.
-    Configured via the <ref id="build-library-directory" name="--libdir"> build option.
+    Directory for drivers.
+    Configured via the <ref id="build-library-directory" name="--with-library-directory"> build option.
   <tag/BRLTTY_DATA_DIRECTORY/
-    Directory for data files.
-    Configured via the <ref id="build-data-directory" name="--sysconfdir"> build option.
+    Directory for tables and help pages.
+    Configured via the <ref id="build-data-directory" name="--with-data-directory"> build option.
   <tag/BRLTTY_MANPAGE_DIRECTORY/
-    Directory for man pages.
-    Configured via the <ref id="build-manpages-directory" name="--mandir"> build option.
+    Directory for manual pages.
+    Configured via the <ref id="build-manpage-directory" name="--with-manpage-directory"> build option.
   <tag/BRLTTY_INCLUDE_DIRECTORY/
     Directory for BrlAPI's C header files.
-    Configured via the <ref id="build-include-directory" name="--includedir"> build option.
+    Configured via the <ref id="build-include-directory" name="--with-include-directory"> build option.
   <tag/BRLAPI_VERSION/
     The version number of BrlAPI (BRLTTY's Application Programming Interface).
   <tag/BRLAPI_RELEASE/
@@ -1186,29 +1222,26 @@ The following environment variables are set:
     The name of BrlAPI's key file.
 </descrip>
 
-In addition, the following <bf/autoconf/ environment variables are also set:
+In addition, the following standard <bf/autoconf/ environment variables are also set:
 <descrip>
   <tag/prefix/
     Subroot for architecture-independent files.
-    Configured via the <ref id="build-portable-root" name="--prefix"> build option.
+    Configured via the <tt/--prefix/ build option.
   <tag/exec_prefix/
     Subroot for architecture-dependent files.
-    Configured via the <ref id="build-architecture-root" name="--exec-prefix"> build option.
+    Configured via the <tt/--exec-prefix/ build option.
   <tag/bindir/
-    Directory for user executables.
-    Configured via the <ref id="build-program-directory" name="--bindir"> build option.
+    Configured via the <tt/--bindir/ build option.
   <tag/libdir/
-    Directory for object code libraries.
-    Configured via the <ref id="build-library-directory" name="--libdir"> build option.
+    Directory for BrlAPI's static archive and dynamically loadable object.
+    Configured via the <tt/--libdir/ build option.
   <tag/sysconfdir/
-    Directory for read-only single-machine data.
-    Configured via the <ref id="build-data-directory" name="--sysconfdir"> build option.
-  <tag/includedir/
-    Directory for C header files.
-    Configured via the <ref id="build-include-directory" name="--includedir"> build option.
+    Directory for configuration files.
+    Configured via the <tt/--sysconfdir/ build option.
   <tag/mandir/
-    Directory for man pages.
-    Configured via the <ref id="build-manpages-directory" name="--mandir"> build option.
+    Configured via the <tt/--mandir/ build option.
+  <tag/includedir/
+    Configured via the <tt/--includedir/ build option.
 </descrip>
 
 <sect2>txt2hlp<p>

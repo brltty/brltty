@@ -77,31 +77,46 @@ BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"])
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
 
-BRLTTY_SUMMARY_ITEM([bindir], [bindir])
 BRLTTY_SUMMARY_ITEM([libdir], [libdir])
 BRLTTY_SUMMARY_ITEM([sysconfdir], [sysconfdir])
-BRLTTY_SUMMARY_ITEM([mandir], [mandir])
-BRLTTY_SUMMARY_ITEM([includedir], [includedir])
 
-AC_SUBST([program_directory], ["${bindir}"])
-AC_SUBST([library_directory], ["${libdir}/${PACKAGE_NAME}"])
-AC_SUBST([data_directory], ["${sysconfdir}/${PACKAGE_NAME}"])
-AC_SUBST([manpage_directory], ["${mandir}"])
-AC_SUBST([include_directory], ["${includedir}/${PACKAGE_NAME}"])
+BRLTTY_ARG_REQUIRED(
+   [program-directory], [DIRECTORY],
+   [path to directory containing executables],
+   [program_directory], ["${bindir}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [library-directory], [DIRECTORY],
+   [path to directory containing drivers],
+   [library_directory], ["${libdir}/${PACKAGE_NAME}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [data-directory], [DIRECTORY],
+   [path to directory containing tables and help pages],
+   [data_directory], ["${sysconfdir}/${PACKAGE_NAME}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [manpage-directory], [DIRECTORY],
+   [path to directory containing manual pages],
+   [manpage_directory], ["${mandir}"]
+)
+
+BRLTTY_ARG_REQUIRED(
+   [include-directory], [DIRECTORY],
+   [path to directory containing header files],
+   [include_directory], ["${includedir}/${PACKAGE_NAME}"]
+)
 
 original_prefix="${prefix}"
 test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
-BRLTTY_VAR_EXPAND([DATA_DIRECTORY], [${execute_root}${data_directory}])
-AC_SUBST([DATA_DIRECTORY])
-BRLTTY_DEFINE_EXPANDED([DATA_DIRECTORY], ["${DATA_DIRECTORY}"])
-BRLTTY_VAR_EXPAND([LIBRARY_DIRECTORY], [${execute_root}${library_directory}])
-AC_SUBST([LIBRARY_DIRECTORY])
-BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${LIBRARY_DIRECTORY}"])
-BRLTTY_VAR_EXPAND([CONFIGURATION_DIRECTORY], [${sysconfdir}])
-AC_SUBST([CONFIGURATION_DIRECTORY])
-BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${CONFIGURATION_DIRECTORY}"])
+BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}])
+BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}])
+BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
@@ -651,50 +666,23 @@ BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
 BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
 BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
 BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
-   BRLTTY_ARG_WITH(
+   BRLTTY_ARG_REQUIRED(
       [flite-language], [LANGUAGE],
       [the FestivalLite language to use],
-      [flite_language], ["yes"]
+      [flite_language], ["usenglish"]
    )
-   if test "${flite_language}" = "no"
-   then
-      AC_MSG_ERROR([FestivalLite language not specified])
-   elif test "${flite_language}" = "yes"
-   then
-      flite_language="usenglish"
-   fi
-   AC_SUBST([flite_language])
-   BRLTTY_SUMMARY_ITEM([flite-language], [flite_language])
 
-   BRLTTY_ARG_WITH(
+   BRLTTY_ARG_REQUIRED(
       [flite-lexicon], [LEXICON],
       [the FestivalLite lexicon to use],
-      [flite_lexicon], ["yes"]
+      [flite_lexicon], ["cmulex"]
    )
-   if test "${flite_lexicon}" = "no"
-   then
-      AC_MSG_ERROR([FestivalLite lexicon not specified])
-   elif test "${flite_lexicon}" = "yes"
-   then
-      flite_lexicon="cmulex"
-   fi
-   AC_SUBST([flite_lexicon])
-   BRLTTY_SUMMARY_ITEM([flite-lexicon], [flite_lexicon])
 
-   BRLTTY_ARG_WITH(
+   BRLTTY_ARG_REQUIRED(
       [flite-voice], [VOICE],
       [the FestivalLite voice to use],
-      [flite_voice], ["yes"]
+      [flite_voice], ["cmu_us_kal16"]
    )
-   if test "${flite_voice}" = "no"
-   then
-      AC_MSG_ERROR([FestivalLite voice not specified])
-   elif test "${flite_voice}" = "yes"
-   then
-      flite_voice="cmu_us_kal16"
-   fi
-   AC_SUBST([flite_voice])
-   BRLTTY_SUMMARY_ITEM([flite-voice], [flite_voice])
 
    BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite])
 ])
