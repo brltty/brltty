@@ -50,8 +50,10 @@ extern "C" {
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 
+#ifndef WINDOWS
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
+#endif
 
 /* Define this if the header file sys/wait.h exists. */
 #undef HAVE_SYS_WAIT_H

@@ -1066,7 +1066,7 @@ BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 screen_driver_objects="scr_${screen_driver}."'$O'
 case "${screen_driver}"
 in
-   linux|hurd|shm|atspi)
+   linux|hurd|shm|windows|atspi)
       screen_driver_objects="${screen_driver_objects} "'scr_real.$O'
       ;;
 esac

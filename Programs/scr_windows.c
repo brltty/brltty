@@ -47,7 +47,6 @@ open_WindowsScreen (void) {
     LogWindowsError("GetStdHandle");
     return 0;
   }
-  fprintf(stderr,"console opened: %p\n",consoleOutput);
   return 1;
 }
 
@@ -88,7 +87,7 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     return NULL;
 
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info)))
-    return;
+    return NULL;
 
   coord.X = box.left + info.srWindow.Left;
   coord.Y = box.top + info.srWindow.Top;
