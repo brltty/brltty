@@ -25,11 +25,16 @@ By using a real tty
 
 Just give the serial port on which it is connected to brltty:
 
-# brltty -b ty -t identity -d /dev/ttyS0 -B term=ampex232,cset=CP850
+# brltty -b ty -t identity -d /dev/ttyS0 -B term=ampex232,cset=IBM850,locale=fr_FR.IBM850
 
 I here had to precise the type of terminal (I have an Ampex232, see somewhere
-like /usr/share/terminfo for your own's. I also had to tell that it uses the
-CP850 codepage table.
+like /usr/share/terminfo for your own's.
+
+I also had to tell that it uses the IBM850 codepage table. And I hence also
+had to tell to use a special locale: fr_FR.IBM850, since I want french,
+with IBM850 charset. I had to generate since by hand by adding
+fr_FR.IBM850 IBM850
+to my /etc/locale.gen, and then relaunch locale-gen
 
 
 Notes

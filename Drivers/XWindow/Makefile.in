@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 ###############################################################################
 #
-# Makefile for BRLTTY X driver
+# Makefile for BRLTTY XWindow driver
 # All variables are defined in the main Makefile...
 #
 ###############################################################################

@@ -38,14 +38,16 @@
 #include <curses.h>
 #include <iconv.h>
 #include <ctype.h>
+#include <locale.h>
 
 typedef enum {
   PARM_TERM,
   PARM_LINES,
   PARM_COLS,
-  PARM_CSET
+  PARM_CSET,
+  PARM_LOCALE
 } DriverParameter;
-#define BRLPARMS "term", "lines", "cols", "cset"
+#define BRLPARMS "term", "lines", "cols", "cset", "locale"
 
 #define BRL_HAVE_KEY_CODES
 #include "Programs/brl_driver.h"
@@ -61,6 +63,7 @@ static int lines,cols;
 static FILE *tty_ffd;
 static SCREEN *scr;
 static struct termios oldtio,newtio;
+static char *locale=NULL;
 
 static void brl_identify()
 {
@@ -78,6 +81,9 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 
  if (*parameters[PARM_CSET])
   cset=parameters[PARM_CSET];
+
+ if (*parameters[PARM_LOCALE])
+  locale=parameters[PARM_LOCALE];
 
  lines=1;
  if (*parameters[PARM_LINES]) {
@@ -174,23 +180,30 @@ static void brl_writeWindow(BrailleDisplay *brl)
  int i,j;
  char c,*pc,d,*pd;
  size_t sc,sd;
- static const unsigned char crlf[]="\r\n";
+ char *oldlocale = NULL;
  if (memcmp(prevdata,brl->buffer,brl->x*brl->y)==0) return;
  clear();
- refresh();
  memcpy(&prevdata,brl->buffer,brl->x*brl->y);
+ if (locale) {
+  oldlocale=setlocale(LC_CTYPE,NULL);
+  setlocale(LC_CTYPE,locale);
+ }
  for (j=0; j<brl->y; j++) {
   for (i=0; i<brl->x; i++) {
    c = brl->buffer[j*brl->x+i];
    sc=1; sd=1;
    pc=&c; pd=&d;
    if (iconv(conv,&pc,&sc,&pd,&sd)<0 && !sd)
-    write(tty_fd,&c,1);
+    addch((unsigned char)c);
    else
-    write(tty_fd,&d,1);
+    addch((unsigned char)d);
   }
-  write(tty_fd,&crlf,2);
+  addch('\n');
  }
+ if (oldlocale)
+  setlocale(LC_CTYPE,oldlocale);
+ /*move(y,x);*/
+ refresh();
 }
 
 static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
