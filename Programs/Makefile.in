@@ -403,6 +403,7 @@ install-api-libraries: $(API_LIB) $(API_ARC)
 install-api-headers:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/api_protocol.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
 install-api-manpages:
@@ -449,6 +450,7 @@ uninstall-manpages:
 
 uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api.h
+	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api_*.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
 	-[ -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)

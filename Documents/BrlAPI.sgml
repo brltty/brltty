@@ -6,7 +6,7 @@
 <and>
 <name>Samuel Thibault <tt><htmlurl url="mailto:samuel.thibault@fnac.net" name="&lt;samuel.thibault@fnac.net&gt;"></tt><newline></name>
 </author>
-<date>V1.1, June 2004
+<date>V1.2, July 2004
 <abstract>
 This document describes how to use <tt>BrlAPI</tt>.
 </abstract>
@@ -360,8 +360,21 @@ sense that it involves no change on the braille display.
 <!-- Seb -->
 <!-- an installation and configuration documentation -->
 <p>
-Will be written later with Dave Mielke, the maintainer of <em/brltty/, since
-the precise installation steps are not known yet.
+<tt/make install/ will install libbrlapi.so in /lib, and include files in
+/usr/include/brltty. An authentication key will also typically be set in
+/etc/brlapi.key, but won't be readable by anybody else than root. It is up
+to you to define a group of users who will have the right to read it and hence
+be able to connect to the server. For instance, you may want to do:
+
+<tscreen><code>
+# addgroup brlapi
+# chgrp brlapi /etc/brlapi.key
+# chmod g+r /etc/brlapi.key
+# addgroup user1 brlapi
+# addgroup user2 brlapi
+...
+</code></tscreen>
+
 
 <!---->
 <sect>Library description
@@ -516,7 +529,7 @@ a key press (a command here, which is driver-independent) may be waited for:
 
 <tscreen><code>
    fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
-   if (brlapi_readCommand(1,&amp;key)>0)
+   if (brlapi_readKey(1,&amp;key)>0)
     fprintf(stderr,"got it! (code=%d)\n",key);
 </code></tscreen>
 
@@ -614,9 +627,9 @@ int main()
 
 /* Wait for a key press */
    fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
-   if (brlapi_readCommand(1,&amp;key)>0)
+   if (brlapi_readKey(1,&amp;key)>0)
     fprintf(stderr,"got it! (code=%d)\n",key);
-   else brlapi_perror("brlapi_readCommand");
+   else brlapi_perror("brlapi_readKey");
 
   } else brlapi_perror("brlapi_writeBrl");
 
@@ -939,7 +952,7 @@ can safely be ignored by the functions described here.
 in detail -->
 <p>
 Under some circumstances, it may be preferable to communicate directly with
-<em/BrlAPI/'s server.avoid rather than using <em/BrlAPI/'s
+<em/BrlAPI/'s server rather than using <em/BrlAPI/'s
 library. Here are the needed details to be able
 to do this. This chapter is also of interest if a precise understanding of
 how the communication stuff works is desired, to be sure to understand how
@@ -1003,6 +1016,11 @@ Upon reception, the server will send either:
 <item>or a <tt/BRLPACKET_ERROR/ packet.
 </itemize>
 
+<p>
+If at some point an ill-formed or non-sense packet is received by the server,
+and <tt/BRLPACKET_EXCEPTION/ is returned, holding the guilty packet for
+further analysis.
+
 <sect1>Operating modes
 <p>
 The connection between the client and the server can be in either of the 
@@ -1021,7 +1039,6 @@ or raw mode. The client can send either of these types of packet:
   or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
   <item><tt/BRLPACKET_GETTTY/ to enter tty handling mode,
   <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
-  <item><tt/BRLPACKET_BYE/ to tell the server it wants to close the connection.
   </itemize>
 
 
@@ -1033,14 +1050,13 @@ display and keypresses. For this, it can send either of these types of packet:
   should be sent mustn't change,
   <item><tt/BRLPACKET_LEAVETTY/ to leave tty handling mode and go back to
   normal mode,
-  <item><tt/BRLPACKET_MASKKEY/ or <tt/BRLPACKET_UNMASKKEY/ to mask and unmask
+  <item><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
+  <tt/BRLPACKET_IGNOREKEYSET/, <tt/BRLPACKET_UNIGNOREKEYSET/ to mask and unmask
   keys,
-  <item><tt/BRLPACKET_WRITE/ or <tt/BRLPACKET_STATUSWRITE/ to display text on
-  this tty,
+  <item><tt/BRLPACKET_EXTWRITE/ to display text on this tty,
   <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
   <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
   or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
-  <item><tt/BRLPACKET_BYE/ to tell the server it wants to close the connection.
   </itemize>
 And the server might send either <tt/BRLPACKET_KEY/ or <tt/BRLPACKET_COMMAND/
 packets to signal key presses.
@@ -1052,11 +1068,15 @@ terminal. Only these types of packet will be accepted.
   <item><tt/BRLPACKET_LEAVERAW/ to get back to previous mode, either normal or
   tty handling mode.
   <item><tt/BRLPACKET_PACKET/ to send a packet to the braille terminal.
-  <item><tt/BRLPACKET_BYE/ to tell the server it wants to close the connection.
   </itemize>
 And the server might send <tt/BRLPACKET_PACKET/ packets to give received packets
 from the terminal to the client.
 </itemize>
+
+Termination of the connection is initiated by the client in normal mode by
+simply closing its side of the socket. The server will then close the
+connection.
+
 
 <sect1>Details for each type of packet
 
@@ -1068,8 +1088,13 @@ online manual page as well will hence be of good help for understanding.
 <sect2><tt/BRLPACKET_AUTHKEY/ (see <em/brlapi_loadAuthKey()/)
 <p>
 This must be the first packet ever transmitted from the client to the
-server. It lets the client authenticate itself to the server. Data is the
-authentication key itself.
+server. It lets the client authenticate itself to the server. Data is
+first an integer indicating a protocol number, then comes the authentication
+key itself.
+
+If the protocol number is not the same as the server's, a 
+<tt/BRLERR_PROTOCOL_VERSION/ error packet is returned and the connection is
+closed.
 
 If the authentication key matches the servers', it is acknowledged, and
 other types of packets might be used, other <tt/BRLPACKET_AUTHKEY/ shouldn't
@@ -1077,16 +1102,6 @@ be sent by the client.
 
 If the authentication key doesn't match, the server sends a
 <tt/BRLERR_CONNREFUSED/ and closes the connection.
-
-<sect2><tt/BRLPACKET_BYE/ (see <em/brlapi_closeConnection()/)
-<p>
-This should be sent by the client when it doesn't need server's services any
-more, just before disconnecting from it. The server will acknowledge this
-packet and close the connection. It will also clean up things like the tty which
-was got by the application, as well as raw mode, by sending a special reset
-event to the braille device, if the <tt/brltty/ driver implements it. But this
-shouldn't prevent clients from cleanly leaving ttys and raw mode before issuing
-<tt/BRLPACKET_BYE/ !
 
 <sect2><tt/BRLPACKET_GETDRIVERID/ (see <em/brlapi_getDriverId()/)
 <p>
@@ -1106,7 +1121,10 @@ size. The returned data are two integers: width and then height.
 <sect2><tt/BRLPACKET_GETTTY/ (see <em/brlapi_getTty()/)
 <p>
 This should be sent by the client to get control of a tty. Sent data are
-two integers: the number of the tty to get control of (it mustn't be 0), and
+first a series of integers: the numbers of ttys that leads to the tty that
+the application wants to take control of (it can be empty if the tty is 
+one of the machine's VT). Then comes an integer telling the number of the tty
+to get control of, and finaly
 how key presses should be sent: either <tt/BRLKEYCODES/ or <tt/BRLCOMMANDS/.
 This packet is then acknowledged by the server.
 
@@ -1121,49 +1139,71 @@ The data holds the key press code
 as an integer, either a raw key code in <tt/BRLPACKET_KEY/ packets, or a
 <tt/brltty/ command code in <tt/BRLPACKET_COMMAND/ packets.
 
+<sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
+
+<p>
+For the server to know which tty is active, one particular client is responsible
+for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
+the new current tty. For instance, when running an X server on VT7, the
+<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_GETTTY(7)/ and will send
+window IDs whenever X focus changes, allowing display and keypresses switching
+between xterms.
+
 <sect2><tt/BRLPACKET_LEAVETTY/ (see <em/brlapi_leaveTty()/)
 <p>
 This should be sent to free the tty and masked keys lists.
 This is acknowledged by the server.
 
-<sect2><tt/BRLPACKET_MASKKEYS/ and <tt/BRLPACKET_UNMASKKEYS/ (see
-<em/brlapi_ignoreKeys()/ and <em/brlapi_unignoreKeys()/)
+<sect2><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
+<tt/BRLPACKET_IGNOREKEYSET/ and <tt/BRLPACKET_UNIGNOREKEYSET/ (see
+<em/brlapi_ignoreKeyRange()/, <em/brlapi_unignoreKeyRange/,
+<em/brlapi_ignoreKeySet()/, and <em/brlapi_unignoreKeySet()/)
 <p>
 If the client doesn't want every key press to be signaled to it, but some of
 them to be given to <tt/brltty/ for normal processing, it can send
-<tt/BRLPACKET_MASKKEYS/ packets to tell ranges of key codes which shouldn't be
-sent to it, but given to <tt/brltty/, and <tt/BRLPACKET_UNMASKKEYS/ packets
-to tell ranges of key codes which should be sent to it, and not given to
+<tt/BRLPACKET_IGNOREKEYRANGE/ (resp. <tt/BRLPACKET_IGNOREKEYSET/) packets to
+tell ranges (resp. sets) of key codes which shouldn't be
+sent to it, but given to <tt/brltty/, and <tt/BRLPACKET_UNIGNOREKEYRANGE/
+(resp. <tt/BRLPACKET_UNIGNOREKEYSET/) packets to tell ranges (resp. sets)
+of key codes which should be sent to it, and not given to
 <tt/brltty/. The server keeps a dynamic list of ranges, so that arbitrary
-sequences of such packets can be sent. Data are 2 integers: the lower and the
+sequences of such packets can be sent.
+For ranges, Data are 2 integers: the lower and the
 upper boundaries; lower and upper must be equal to tell one key, for instance.
+For Sets, Data simply consists of integers, one per key in the set.
 
-<sect2><tt/BRLPACKET_WRITE/ (see <em/brlapi_writeBrl()/)
+<sect2><tt/BRLPACKET_EXTWRITE/ (see <em/brlapi_extWriteBrl()/)
 <p>
 To display text on the braille terminal and set the position of the cursor,
-the client can send a <tt/BRLPACKET_WRITE/ packet. This packet holds the cursor
-position as an integer, and then the text to display, one byte per
-caracter.
-The text must exactly fit the braille display, ie hold <em/height/*<em/width/
+the client can send a <tt/BRLPACKET_EXTWRITE/ packet. This packet first
+holds an integer holding flags (see <tt/BRLAPI_EWF_*/). These flags indicate
+which data will then be available, in the following order (corresponding to
+flag weight):
+
+<itemize>
+<item> A display number can be given as a integer, in case the braille
+display has several. If not given, usual display is used.
+<item> A region can be given as two integers indicating the beginning and the
+end of the part of the braille display which is to be updated (included).
+1 represents the first character of display. If not given, the whole display
+is considered to be updated (and hence the following three fields should exactly
+fit the braille display ie hold <em/height/*<em/width/
 bytes, where <em/height/ and <em/width/ must be get by sending a
-<tt/BRLPACKET_GETDISPLAYSIZE/ packet. Moreover, characters are expected to
-be encoded in latin-1. This packet is acknowledged by the server.
-
-<sect2><tt/BRLPACKET_WRITEDOTS/ (see <em/brlapi_writeBrlDots()/)
-<p>
-Is used the same way as <tt/BRLPACKET_WRITE/, the only difference being that
-characters are encoded in braille dots.
-
-<sect2><tt/BRLPACKET_STATWRITE/
-<p>
-Some braille terminals have a special status display, whose text is independent
-from normal display's. To display text on it, the client can send a
-<tt/BRLPACKET_STATWRITE/ packet, just like <tt/BRLPACKET_WRITE/ packets.
-
-<sect2><tt/BRLPACKET_STATWRITEDOTS/
-<p>
-Is used the same way as <tt/BRLPACKET_STATWRITE/, the only difference being that
-characters are encoded in braille dots.
+<tt/BRLPACKET_GETDISPLAYSIZE/ packet.
+<item> The text to display can then be given, one byte per caracter, expected to
+be encoded in latin-1 (an extension to the bitfield may set other encodings
+some day).
+<item> Then an AND field can be given, one byte per character: the 8-dot
+representation of the above text will be AND-ed with this field, hence allowing
+to erase some unwanted parts of characters.
+<item> As well, an OR field may be given, one byte per character: the 8-dot
+result of the AND operation above (or the 8-dot representation of the text if
+no AND operation was performed) is OR-ed with this field, hence allowing
+to set some dots, to underline characters for instance.
+<item> Last but not least, a cursor position can be specified. 1 representing
+the first character of the display, 0 turning the cursor off. If not given,
+the cursor (if any) is left unmodified.
+</itemize>
 
 <sect2><tt/BRLPACKET_GETRAW/ (see <em/brlapi_getRaw()/)
 <p>

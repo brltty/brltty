@@ -75,16 +75,32 @@ extern "C" {
 /** Magic number to give when sending a BRLPACKET_GETRAW packet */
 #define BRLRAW_MAGIC (0xdeadbeefL)
 
+/** Structure of authentication packets */
 typedef struct {
   uint32_t protocolVersion;
   unsigned char key;
 } authStruct;
 
+/** Structure of error packets */
 typedef struct {
   uint32_t code;
   brl_type_t type;
   unsigned char packet;
 } errorPacket_t;
+
+/** Flags for extended write */
+#define BRLAPI_EWF_DISPLAYNUMBER 0X01   /**< Display number                 */
+#define BRLAPI_EWF_REGION        0X02   /**< Region parameter               */
+#define BRLAPI_EWF_TEXT          0X04   /**< Contains some text             */
+#define BRLAPI_EWF_ATTR_AND      0X08   /**< And attributes                 */
+#define BRLAPI_EWF_ATTR_OR       0X10   /**< Or attributes                  */
+#define BRLAPI_EWF_CURSOR        0X20   /**< Cursor position                */
+
+/** Structure of extended write packets */
+typedef struct {
+  uint32_t flags; /** Flags to tell which fields are present */
+  unsigned char data; /** Fields in the same order as flag weight */
+} extWriteStruct;
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server

@@ -258,7 +258,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  * - COMMANDS means that applications will get exactly the same values as
  *   \e brltty. This allows driver-independent clients, which will hopefully
  *   be nice to use with a lot of different terminals
- * \sa brlapi_readKey() brlapi_readCommand()
+ * \sa brlapi_readKey()
  * @{
  */
 
@@ -267,9 +267,9 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  *
  * \param tty
  * - If tty>0, application takes control of the specified tty;
- * - if tty<=0, the library first looks at a CONTROLVT environment variable to
- * get the tty number. If none is found, the WINDOWID is tried (for an xterm
- * case), and if none is found, it tries to get it from /proc/self/stat
+ * - if tty<=0, the library first tries to get the tty number by reading
+ * /proc/self/stat (on linux). If none is found, it looks at a CONTROLVT
+ * environment variable, then WINDOWID is tried (for an xterm case).
  *
  * \param how tells whether the application wants brlapi_readKey() to return
  * keycodes or \e brltty commands: either BRLKEYCODES or BRLCOMMANDS;
@@ -286,7 +286,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  *
  * \return the used tty number on success, -1 on error
  *
- * \sa brlapi_leaveTty()
+ * \sa brlapi_leaveTty() brlapi_readKey()
  */
 int brlapi_getTty(int tty, int how);
 
@@ -353,28 +353,26 @@ int brlapi_writeBrl(int cursor, const unsigned char *str);
  * \return 0 on success, -1 on error.
  */
 int brlapi_writeDots(const unsigned char *dots);
-int brlapi_writeBrlDots(const unsigned char *dots) __attribute__((__deprecated__));
 
 /* brlapi_extWriteStruct */
-/** Structure containing arguments to be given to brlapi_extWrite */
+/** Structure containing arguments to be given to brlapi_extWriteBrl() */
 typedef struct {
   int displayNumber; /** Display number -1 == unspecified */
   uint32_t regionBegin, regionEnd; /** Region of display to update, 1st character of display is 1 */
   char *text; /** Text to display */
   char *attrAnd; /** And attributes; applied first */
-  char *attrOr; /** Or attributes; applied after anding */
+  char *attrOr; /** Or attributes; applied \e after ANDing */
   int cursor; /* -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
 } brlapi_extWriteStruct;
 
 /* BRLAPI_EXTWRITESTRUCT_INITIALIZER */
 /** Allows to initialize a structure of type \e brlapi_extWriteStruct *
  * with default values:
- * displayNumber = -1;
+ * displayNumber = -1; (unspecified)
  * regionBegin = regionEnd = 0; (update the whole display)
- * text = attrAnd = attrOr = NULL;
- * cursor = -1;
+ * text = attrAnd = attrOr = NULL; (no text, no attribute)
+ * cursor = -1; (don't touch cursor)
 */
-
 #define BRLAPI_EXTWRITESTRUCT_INITIALIZER \
   { -1, 0, 0, NULL, NULL, NULL, -1};
 
@@ -392,9 +390,9 @@ int brlapi_extWriteBrl(const brlapi_extWriteStruct *s);
 /** \defgroup brlapi_keys Reading key presses
  * \brief How to read key presses from the braille terminal
  *
- * Once brlapi_getTty() is called, the application can call brlapi_readKey() or
- * brlapi_readCommand() to read key presses. Not everyone can be called, it
- * depends on parameters given to brlapi_getTty().
+ * Once brlapi_getTty() is called, the application can call brlapi_readKey() to
+ * read key presses. Either key codes or commands will be returned, depending
+ * on parameters given to brlapi_getTty().
  *
  * key presses are buffered, so that calling brlapi_readKey() in non-blocking
  * mode from times to times should suffice.
@@ -425,15 +423,26 @@ typedef uint32_t brl_keycode_t;
 /* brlapi_readKey */
 /** Read a key from the braille keyboard
  *
- * This function returns raw keycodes, as specified by the terminal driver. It
- * generally corresponds to the code the terminal tells to the driver.
+ * This function returns one key press's code.
  *
- * This should only be used to application which are dedicated to a particular
+ * If BRLCOMMANDS was given to brlapi_getTty(), a \e brltty command is returned,
+ * as described in \c <brltty/brldefs.h> . It is hence pretty
+ * driver-independent, and should be used by default when no other option is
+ * possible.
+ *
+ * By default, all commands but those which restart drivers and switch
+ * virtual terminals are returned to the application and not to brltty.
+ * If the application doesn't want to see some command events,
+ * it should call either brlapi_ignoreKeySet() or brlapi_ignoreKeyRange()
+ *
+ * If BRLKEYCODES was given to brlapi_getTty(), a raw keycode is returned,
+ * as specified by the terminal driver, usually in <brltty/brldefs-xy> where xy
+ * is the driver's code. It generally corresponds to the very code that the
+ * terminal tells to the driver.
+ * This should only be used by applications which are dedicated to a particular
  * braille terminal. Hence, checking the terminal type thanks to a call to
  * brlapi_getDriverId() or even brlapi_getDriverName() before getting tty
  * control is a pretty good idea.
- *
- * It can be called only if BRLKEYCODES was given to brlapi_getTty()
  *
  * By default, all the keypresses will be passed to the client, none will go
  * through brltty, so the application will have to handle console switching
@@ -448,49 +457,23 @@ typedef uint32_t brl_keycode_t;
  */
 int brlapi_readKey(int block, brl_keycode_t *code);
 
-/* brlapi_readCommand */
-/** Read a command from the braille keyboard (deprecated!)
- *
- * This function returns \e brltty commands, as described in
- * \c <brltty/brldefs.h> .
- * Use brlapi_readKey instead
- * These are hence pretty driver-independent, and should be used by default
- * when no other option is possible.
- *
- * It can be called only if BRLCOMMANDS was given to brlapi_getTty()
- *
- * By default, all commands but those which restart drivers and switch
- * virtual terminals are returned to the application and not to brltty.
- * If the application doesn't want to see some command events,
- * it should call either brlapi_ignoreKeySet() or brlapi_ignoreKeyRange()
- *
- * \param block tells whether the call should block until a key is pressed (1)
- *  or should only probe key presses (0).
- * \param code holds the command code if a key press is indeed read.
- *
- * \return -1 on error and *code is then undefined, 0 if block was 0 and no
- *  key was pressed so far, or 1 and *code holds the command code.
- */
-int brlapi_readCommand(int block, brl_keycode_t *code) __attribute__((__deprecated__));
-
 /* brlapi_ignoreKeyRange */
 /** Ignore some key presses from the braille keyboard
  *
  * This function asks the server to give keys between x and y to \e brltty,
  * rather than returning them to the application via
- * brlapi_read(Key|Command)()
+ * brlapi_readKey()
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
 int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
-int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((__deprecated__));
 
 /* brlapi_ignoreKeySet */
 /** Ignore some key presses from the braille keyboard
  *
  * This function asks the server to give the n keys in set s to \e brltty,
  * rather than returning them to the application via
- * brlapi_read(Key|Command)()
+ * brlapi_readKey()
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
@@ -508,7 +491,6 @@ int brlapi_ignoreKeySet(const brl_keycode_t *s, uint32_t n);
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
 int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
-int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((__deprecated__));
 
 /* brlapi_unignoreKeySet */
 /** Unignore some key presses from the braille keyboard
@@ -575,6 +557,22 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 /** \defgroup brlapi_error Error handling
  * \brief how to handle errors which might very well happen
  *
+ * When a function fails for some normal error, brlapi_errno will hold an error
+ * code to explain why it failed. It is good practice to print it somewhere for
+ * the user or the programmer to understand why it failed.
+ *
+ * When something really wrong was done somewhere, like an out-of-bounds
+ * argument, which is really a bug in either the implementation of BrlAPI or
+ * in the application, an exception may be sent by the server. As soon as
+ * libbrlapi receives it, an error handler prints it and \e exit()s the program,
+ * since it means something went really wrong and that we shouldn't go further.
+ *
+ * This is hopefully a really rare event, but in the case of an editor, for
+ * instance, one would surely want to have files saved before actually
+ * exit()ing. brlapi_setErrorHandler() lets the programmer to define another
+ * exception handler which would save files and then call the default handler
+ * brlapi_defaultErrorHandler().
+ *
  * @{ */
 
 /* Error codes */
@@ -595,7 +593,7 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_UNKNOWNTTY              14  /**< Couldn't find out the tty number */
 #define BRLERR_PROTOCOL_VERSION        15  /**< Bad protocol version */
 #define BRLERR_EOF                     16  /**< Unexpected end of file */
-#define BRLERR_TOORECURSE              16  /**< Too many levels of recursion */
+#define BRLERR_TOORECURSE              17  /**< Too many levels of recursion */
 
 /* brlapi_errlist */
 /** Error message list
@@ -637,26 +635,48 @@ extern int brlapi_errno;
 /* brlapi_strerror */
 /** Get plain error message
  *
- * brlapi_strerror returns the plain error message corresponding to its *
+ * brlapi_strerror() returns the plain error message corresponding to its
  * argument.
  */
-extern const char *brlapi_strerror(int err);
+const char *brlapi_strerror(int err);
+
+/** Type for packet type. Only unsigned can cross networks, 32bits */
+typedef uint32_t brl_type_t;
+
+/* brlapi_packetType */
+/** Get plain packet type
+ *
+ * brlapi_packetType() returns the plain packet type name corresponding to
+ * its argument.
+ */
+const char *brlapi_packetType(brl_type_t ptype);
+
+/* brlapi_errorHandler_t */
+/** Type for error handlers
+ *
+ * Type to give to error handlers which are to be given to
+ * brlapi_setErrorHandler()
+ *
+ * \param err is a BRLERR_ error code
+ * \param type is the type of the guilt packet
+ * \param buf points to the content of the guilt packet (might be a little bit truncated)
+ * \param size gives the guilt packet's size
+ */
+typedef void (*brlapi_errorHandler_t)(int err, brl_type_t type, const void *buf, size_t size);
+
+/* brlapi_setErrorHandler */
+/** Set a new exception handler
+ *
+ * brlapi_setErrorHandler() replaces the previous error handler by the handler
+ * parameter. The previous error handler is returned so that chaining error
+ * handlers might be possible.
+ *
+ * The default handler just prints the error and exit()s
+ */
+brlapi_errorHandler_t brlapi_setErrorHandler(brlapi_errorHandler_t handler);
+void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *buf, size_t size);
 
 /** @} */
-
-/** Flags for extended write */
-#define BRLAPI_EWF_DISPLAYNUMBER 0X01   /**< Display number                 */
-#define BRLAPI_EWF_REGION        0X02   /**< Region parameter               */
-#define BRLAPI_EWF_TEXT          0X04   /**< Contains some text             */
-#define BRLAPI_EWF_ATTR_AND      0X08   /**< And attributes                 */
-#define BRLAPI_EWF_ATTR_OR       0X10   /**< Or attributes                  */
-#define BRLAPI_EWF_CURSOR        0X20   /**< Cursor position                */
-
-/** Structure of extended write packets */
-typedef struct {
-  uint32_t flags;
-  unsigned char data;
-} extWriteStruct;
 
 #include <pthread.h>
 
@@ -678,25 +698,15 @@ typedef struct {
  * - brlapi_getDisplaySize()
  * - brlapi_getTty()
  * - brlapi_leaveTty()
- * - brlapi_write*()
- * - brlapi_(un)?ignorekeys()
- * - brlapi_read*()
+ * - brlapi_*write*()
+ * - brlapi_(un)?ignorekey(Range|Set)()
+ * - brlapi_readKey()
  *
  * If both these functions and brlapi_writePacket() or brlapi_readPacket() are
  * used in a multithreaded application, this mutex must be locked before calling
  * brlapi_writePacket() or brlapi_readPacket(), and unlocked afterwards.
  */
 extern pthread_mutex_t brlapi_fd_mutex;
-
-/** type for packet type. Only unsigned can cross networks, 32bits */
-typedef uint32_t brl_type_t;
-
-const char *brlapi_packetType(brl_type_t ptype);
-
-typedef void (*brlapi_errorHandler_t)(int, brl_type_t, const void *, size_t);
-
-brlapi_errorHandler_t brlapi_setErrorHandler(brlapi_errorHandler_t);
-void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *buf, size_t size);
 
 #ifdef __cplusplus
 }

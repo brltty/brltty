@@ -504,7 +504,11 @@ int brlapi_setFocus(int tty)
 {
   uint32_t utty;
   utty = htonl(tty);
-  return brlapi_writePacket(fd, BRLPACKET_SETFOCUS, &utty, sizeof(utty));
+  int res;
+  pthread_mutex_lock(&brlapi_fd_mutex);
+  res = brlapi_writePacket(fd, BRLPACKET_SETFOCUS, &utty, sizeof(utty));
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  return res;
 }
 
 /* Function : brlapi_writeBrl */
@@ -516,6 +520,7 @@ int brlapi_writeBrl(int cursor, const unsigned char *str)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   extWriteStruct *ews = (extWriteStruct *) packet;
   unsigned char *p = &ews->data;
+  int res;
   if ((dispSize == 0) || (dispSize > BRLAPI_MAXPACKETSIZE/4)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
@@ -530,7 +535,10 @@ int brlapi_writeBrl(int cursor, const unsigned char *str)
     *((uint32_t *) p) = htonl(cursor);
     p += sizeof(cursor);
   }
-  return brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
+  pthread_mutex_lock(&brlapi_fd_mutex);
+  res=brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  return res;
 }
 
 /* Function : brlapi_writeDots */
@@ -566,7 +574,6 @@ int brlapi_writeDots(const unsigned char *dots)
   free(ews.attrOr);
   return res;
 }
-int brlapi_writeBrlDots(const unsigned char *dots) __attribute__((alias("brlapi_writeDots")));
 
 /* Function : brlapi_extWrite */
 /* Extended writes on braille displays */
@@ -577,6 +584,7 @@ int brlapi_extWriteBrl(const brlapi_extWriteStruct *s)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   extWriteStruct *ews = (extWriteStruct *) packet;
   unsigned char *p = &ews->data;
+  int res;
   ews->flags = 0;
   if ((1<=s->regionBegin) && (s->regionBegin<=dispSize) && (1<=s->regionEnd) && (s->regionEnd<=dispSize)) {
     if (s->regionBegin>s->regionEnd) return 0;
@@ -608,7 +616,10 @@ int brlapi_extWriteBrl(const brlapi_extWriteStruct *s)
     *((uint32_t *) p) = htonl(s->cursor);
     p += sizeof(uint32_t);
   }
-  return brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
+  pthread_mutex_lock(&brlapi_fd_mutex);
+  res = brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  return res;
 }
 
 /* Function : packetReady */
@@ -664,10 +675,6 @@ int brlapi_readKey(int block, brl_keycode_t *code)
   return 1;
 }
 
-/* Function : brlapi_readCommand */
-/* Reads a command from the braille keyboard */
-int brlapi_readCommand(int block, brl_keycode_t *code) __attribute__((alias("brlapi_readKey")));
-
 /* Function : ignore_unignore_key_range */
 /* Common tasks for ignoring and unignoring key ranges */
 /* what = 0 for ignoring !0 for unignoring */
@@ -683,16 +690,12 @@ int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
   return ignore_unignore_key_range(0,x,y);
 }
-/* compatibility */
-int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((alias("brlapi_ignoreKeyRange")));
 
 /* Function : brlapi_unignoreKeyRange */
 int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
   return ignore_unignore_key_range(!0,x,y);
 }
-/* compatibility */
-int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((alias("brlapi_unignoreKeyRange")));
 
 /* Function : ignore_unignore_key_set */
 /* Common tasks for ignoring and unignoring key sets */
@@ -833,6 +836,10 @@ brlapi_errorHandler_t brlapi_setErrorHandler(brlapi_errorHandler_t new)
 
 void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *packet, size_t size)
 {
-  fprintf(stderr, "Error: %s on %s request",brlapi_strerror(err),brlapi_packetType(type));
+  unsigned char *c;
+  fprintf(stderr, "Error: %s on %s request:\n",brlapi_strerror(err),brlapi_packetType(type));
+  if (size>16) size=16;
+  for (c=0;c<(unsigned char *)packet+size;c++) fprintf(stderr,"%2x ", *c);
+  fprintf(stderr,"\n");
   exit(1);
 }
