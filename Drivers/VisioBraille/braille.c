@@ -93,7 +93,8 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
   for (i=1; i<=5; i++) {
     if (serialWriteData(serialDevice,obuf,lgtho) != lgtho) continue; /* write failed, retry */
     serialDrainOutput(serialDevice);
-    res = serialReadData(serialDevice,&chksum,1,1000,0);
+    serialAwaitInput(serialDevice, 1000);
+    res = serialReadData(serialDevice,&chksum,1,0,0);
     if ((res==1) && (chksum == 0x04)) return 0;
   }
   return (-1);
