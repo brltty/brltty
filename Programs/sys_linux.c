@@ -110,18 +110,18 @@ void
 endBeep (void) {
 }
 
-#ifdef ENABLE_PCM_TUNES
-#if defined(USE_PCM_TUNES_ALSA)
+#ifdef ENABLE_PCM_SUPPORT
+#if defined(USE_PCM_SUPPORT_ALSA)
 #include "sys_pcm_alsa.h"
-#else /* USE_PCM_TUNES_ */
+#else /* USE_PCM_SUPPORT_ */
 #define PCM_OSS_DEVICE_PATH "/dev/dsp"
 #include "sys_pcm_oss.h"
-#endif /* USE_PCM_TUNES_ */
-#endif /* ENABLE_PCM_TUNES */
+#endif /* USE_PCM_SUPPORT_ */
+#endif /* ENABLE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
 #include "sys_midi_oss.h"
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
 
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {

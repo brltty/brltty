@@ -148,21 +148,21 @@ extern "C" {
 /* Define this to include speech synthesizer support. */
 #undef ENABLE_SPEECH_SUPPORT
 
-/* Define this to include beeper (console bell) alert tunes support. */
-#undef ENABLE_BEEPER_TUNES
+/* Define this to include beeper (console tone generator) support. */
+#undef ENABLE_BEEPER_SUPPORT
 
-/* Define this to include PCM (soundcard audio) alert tunes support. */
-#undef ENABLE_PCM_TUNES
+/* Define this to include PCM (soundcard audio) support. */
+#undef ENABLE_PCM_SUPPORT
 
 /* Define only one of the following PCM interfaces. */
-#undef USE_PCM_TUNES_OSS
-#undef USE_PCM_TUNES_ALSA
+#undef USE_PCM_SUPPORT_OSS
+#undef USE_PCM_SUPPORT_ALSA
 
-/* Define this to include MIDI (Musical Instrument Digital Interface) alert tunes support. */
-#undef ENABLE_MIDI_TUNES
+/* Define this to include MIDI (Musical Instrument Digital Interface) support. */
+#undef ENABLE_MIDI_SUPPORT
 
-/* Define this to include FM (soundcard synthesizer) alert tunes support. */
-#undef ENABLE_FM_TUNES
+/* Define this to include FM (soundcard synthesizer) support. */
+#undef ENABLE_FM_SUPPORT
 
 /* Define this to be a string containing the path to the root of the FestivalLite package. */
 #undef FLITE_ROOT

@@ -182,7 +182,7 @@ brlttyDirectory="${1}"
 	       --with-braille-driver="${brailleDrivers}" \
 	       --with-text-table="${textTable}" \
 	       --disable-speech-support --without-x \
-	       --disable-pcm-tunes --disable-fm-tunes --disable-midi-tunes \
+	       --disable-pcm-support --disable-fm-support --disable-midi-support \
                --enable-standalone-programs --disable-api --disable-gpm
    make -s -C Programs all
    strip Programs/brltty

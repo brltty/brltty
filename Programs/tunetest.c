@@ -41,10 +41,10 @@ Preferences prefs;
 BEGIN_OPTION_TABLE
   {'d', "device", "device", NULL, 0,
    "Name of tune device."},
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
   {'i', "instrument", "instrument", NULL, 0,
    "Name of MIDI instrument."},
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
   {'v', "level", "volume", NULL, 0,
    "Output volume."},
 END_OPTION_TABLE
@@ -52,12 +52,12 @@ END_OPTION_TABLE
 static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
 static unsigned int opt_tuneDevice;
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
 static unsigned char opt_midiInstrument = 0;
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
 static short opt_outputVolume = 50;
 
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
 static unsigned char
 instrumentArgument (const char *argument) {
   size_t argumentLength = strlen(argument);
@@ -92,7 +92,7 @@ instrumentArgument (const char *argument) {
   fprintf(stderr, "%s: Invalid instrument: %s\n", programName, argument);
   exit(2);
 }
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
 
 static int
 handleOption (const int option) {
@@ -102,11 +102,11 @@ handleOption (const int option) {
     case 'd':
       opt_tuneDevice = wordArgument(optarg, deviceNames, "device");
       break;
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
     case 'i':
       opt_midiInstrument = instrumentArgument(optarg);
       break;
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
     case 'v':
       opt_outputVolume = integerArgument(optarg, 0, 100, "level");
       break;
@@ -158,9 +158,9 @@ main (int argc, char *argv[]) {
         prefs.fmVolume = opt_outputVolume;
         break;
     }
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
     prefs.midiInstrument = opt_midiInstrument;
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
     {
       TuneDefinition tune = {NULL, 0, elements};
       playTune(&tune);

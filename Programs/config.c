@@ -952,26 +952,26 @@ changedTuneDevice (unsigned char setting) {
   return setTuneDevice(setting);
 }
 
-#ifdef ENABLE_PCM_TUNES
+#ifdef ENABLE_PCM_SUPPORT
 static int
 testTunesPcm (void) {
   return testTunes() && (prefs.tuneDevice == tdPcm);
 }
-#endif /* ENABLE_PCM_TUNES */
+#endif /* ENABLE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
 static int
 testTunesMidi (void) {
   return testTunes() && (prefs.tuneDevice == tdMidi);
 }
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
 
-#ifdef ENABLE_FM_TUNES
+#ifdef ENABLE_FM_SUPPORT
 static int
 testTunesFm (void) {
   return testTunes() && (prefs.tuneDevice == tdFm);
 }
-#endif /* ENABLE_FM_TUNES */
+#endif /* ENABLE_FM_SUPPORT */
 
 #ifdef ENABLE_TABLE_SELECTION
 typedef struct {
@@ -1185,35 +1185,35 @@ updatePreferences (void) {
     static const char *textStyles[] = {"8-dot", "6-dot"};
     static const char *tuneDevices[] = {
       "Beeper ("
-#ifdef ENABLE_BEEPER_TUNES
+#ifdef ENABLE_BEEPER_SUPPORT
         "console tone generator"
-#else /* ENABLE_BEEPER_TUNES */
+#else /* ENABLE_BEEPER_SUPPORT */
         "unsupported"
-#endif /* ENABLE_BEEPER_TUNES */
+#endif /* ENABLE_BEEPER_SUPPORT */
         ")",
 
       "PCM ("
-#ifdef ENABLE_PCM_TUNES
+#ifdef ENABLE_PCM_SUPPORT
         "soundcard digital audio"
-#else /* ENABLE_PCM_TUNES */
+#else /* ENABLE_PCM_SUPPORT */
         "unsupported"
-#endif /* ENABLE_PCM_TUNES */
+#endif /* ENABLE_PCM_SUPPORT */
         ")",
 
       "MIDI ("
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
         "Musical Instrument Digital Interface"
-#else /* ENABLE_MIDI_TUNES */
+#else /* ENABLE_MIDI_SUPPORT */
         "unsupported"
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
         ")",
 
       "FM ("
-#ifdef ENABLE_FM_TUNES
+#ifdef ENABLE_FM_SUPPORT
         "soundcard synthesizer"
-#else /* ENABLE_FM_TUNES */
+#else /* ENABLE_FM_SUPPORT */
         "unsupported"
-#endif /* ENABLE_FM_TUNES */
+#endif /* ENABLE_FM_SUPPORT */
         ")"
     };
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1258,16 +1258,16 @@ updatePreferences (void) {
 #endif /* HAVE_LIBGPM */
        BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, "Alert Tunes"),
        SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, "Tune Device", tuneDevices),
-#ifdef ENABLE_PCM_TUNES
+#ifdef ENABLE_PCM_SUPPORT
        VOLUME_ITEM(prefs.pcmVolume, NULL, testTunesPcm, "PCM Volume"),
-#endif /* ENABLE_PCM_TUNES */
-#ifdef ENABLE_MIDI_TUNES
+#endif /* ENABLE_PCM_SUPPORT */
+#ifdef ENABLE_MIDI_SUPPORT
        VOLUME_ITEM(prefs.midiVolume, NULL, testTunesMidi, "MIDI Volume"),
        TEXT_ITEM(prefs.midiInstrument, NULL, testTunesMidi, "MIDI Instrument", midiInstrumentTable, midiInstrumentCount),
-#endif /* ENABLE_MIDI_TUNES */
-#ifdef ENABLE_FM_TUNES
+#endif /* ENABLE_MIDI_SUPPORT */
+#ifdef ENABLE_FM_SUPPORT
        VOLUME_ITEM(prefs.fmVolume, NULL, testTunesFm, "FM Volume"),
-#endif /* ENABLE_FM_TUNES */
+#endif /* ENABLE_FM_SUPPORT */
        BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
        BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, "Alert Messages"),
 #ifdef ENABLE_SPEECH_SUPPORT

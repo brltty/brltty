@@ -458,29 +458,29 @@ setTuneDevice (TuneDevice device) {
          generator = NULL;
          break;
 
-#ifdef ENABLE_BEEPER_TUNES
+#ifdef ENABLE_BEEPER_SUPPORT
       case tdBeeper:
          generator = &beeperNoteGenerator;
 	 break;
-#endif /* ENABLE_BEEPER_TUNES */
+#endif /* ENABLE_BEEPER_SUPPORT */
 
-#ifdef ENABLE_PCM_TUNES
+#ifdef ENABLE_PCM_SUPPORT
       case tdPcm:
          generator = &pcmNoteGenerator;
 	 break;
-#endif /* ENABLE_PCM_TUNES */
+#endif /* ENABLE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
       case tdMidi:
          generator = &midiNoteGenerator;
 	 break;
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
 
-#ifdef ENABLE_FM_TUNES
+#ifdef ENABLE_FM_SUPPORT
       case tdFm:
          generator = &fmNoteGenerator;
 	 break;
-#endif /* ENABLE_FM_TUNES */
+#endif /* ENABLE_FM_SUPPORT */
    }
 
    if (!generator) return 0;

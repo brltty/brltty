@@ -508,17 +508,17 @@ AC_SUBST([contracted_braille_objects])
 AC_SUBST([install_contraction_tables])
 
 BRLTTY_ARG_DISABLE(
-   [beeper-tunes],
-   [tunes via beeper (console bell)], [dnl
-   AC_DEFINE([ENABLE_BEEPER_TUNES])
+   [beeper-support],
+   [support for the console tone generator], [dnl
+   AC_DEFINE([ENABLE_BEEPER_SUPPORT])
    beeper_tune_objects='beeper.$O'
 ])
 AC_SUBST([beeper_tune_objects])
 
 BRLTTY_ARG_DISABLE(
-   [pcm-tunes],
-   [tunes via PCM (soundcard digital audio)], [dnl
-   AC_DEFINE([ENABLE_PCM_TUNES])
+   [pcm-support],
+   [support for soundcard digital audio], [dnl
+   AC_DEFINE([ENABLE_PCM_SUPPORT])
    pcm_tune_objects='pcm.$O'
 ],
 [],
@@ -526,17 +526,17 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([pcm_tune_objects])
 
 BRLTTY_ARG_DISABLE(
-   [midi-tunes],
-   [tunes via MIDI (Musical Instrument Digital Interface)], [dnl
-   AC_DEFINE([ENABLE_MIDI_TUNES])
+   [midi-support],
+   [support for the Musical Instrument Digital Interface], [dnl
+   AC_DEFINE([ENABLE_MIDI_SUPPORT])
    midi_tune_objects='midi.$O'
 ])
 AC_SUBST([midi_tune_objects])
 
 BRLTTY_ARG_DISABLE(
-   [fm-tunes],
-   [tunes via FM (soundcard synthesizer)], [dnl
-   AC_DEFINE([ENABLE_FM_TUNES])
+   [fm-support],
+   [support for the soundcard synthesizer], [dnl
+   AC_DEFINE([ENABLE_FM_SUPPORT])
    fm_tune_objects='fm.$O adlib.$O'
 ])
 AC_SUBST([fm_tune_objects])

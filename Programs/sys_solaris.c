@@ -36,13 +36,13 @@
 
 #include "sys_beep_none.h"
 
-#ifdef ENABLE_PCM_TUNES
+#ifdef ENABLE_PCM_SUPPORT
 #define PCM_AUDIO_DEVICE_PATH "/dev/audio"
 #include "sys_pcm_audio.h"
-#endif /* ENABLE_PCM_TUNES */
+#endif /* ENABLE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_TUNES
+#ifdef ENABLE_MIDI_SUPPORT
 #include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_TUNES */
+#endif /* ENABLE_MIDI_SUPPORT */
 
 #include "sys_ports_none.h"

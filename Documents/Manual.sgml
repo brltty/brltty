@@ -871,22 +871,18 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     Reduce program size by excluding support for bluetooth devices.
   <tag><tt/--disable-speech-support/<label id="build-speech-support"></tag>
     Reduce program size by excluding support for speech synthesizers.
-  <tag><tt/--disable-beeper-tunes/<label id="build-beeper-tunes"></tag>
-    Reduce program size by excluding support for the playing of alert tunes
-    (see section <ref id="tunes" name="Alert Tunes">)
-    via the internal beeper (console tone generator).
-  <tag><tt/--disable-pcm-tunes/<label id="build-pcm-tunes"></tag>
-    Reduce program size by excluding support for the playing of alert tunes
-    (see section <ref id="tunes" name="Alert Tunes">)
-    via the digital audio interface on the sound card.
-  <tag><tt/--disable-midi-tunes/<label id="build-midi-tunes"></tag>
-    Reduce program size by excluding support for the playing of alert tunes
-    (see section <ref id="tunes" name="Alert Tunes">)
-    via the Musical Instrument Digital Interface on the sound card.
-  <tag><tt/--disable-fm-tunes/<label id="build-fm-tunes"></tag>
-    Reduce program size by excluding support for the playing of alert tunes
-    (see section <ref id="tunes" name="Alert Tunes">)
-    via the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card.
+  <tag><tt/--disable-beeper-support/<label id="build-beeper-support"></tag>
+    Reduce program size by excluding support for
+    the console tone generator.
+  <tag><tt/--disable-pcm-support/<label id="build-pcm-support"></tag>
+    Reduce program size by excluding support for
+    the digital audio interface on the sound card.
+  <tag><tt/--disable-midi-support/<label id="build-midi-support"></tag>
+    Reduce program size by excluding support for
+    the Musical Instrument Digital Interface of the sound card.
+  <tag><tt/--disable-fm-support/<label id="build-fm-support"></tag>
+    Reduce program size by excluding support for
+    the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card.
   <tag><tt/--disable-pm-configfile/<label id="build-pm-configfile"></tag>
     Reduce program size by excluding support for
     the Papenmeier driver's configuration file.
@@ -3204,7 +3200,7 @@ Notes:
         It's always safe to use,
         although it may be somewhat soft.
         This device isn't available if the
-        <ref id="build-beeper-tunes" name="--disable-beeper-tunes"> build option was specified.
+        <ref id="build-beeper-support" name="--disable-beeper-support"> build option was specified.
       <tag/PCM/
         The digital audio interface on the sound card.
         This setting is supported
@@ -3216,7 +3212,7 @@ Notes:
         It doesn't work when this device is already being used
         by another application.
         This device isn't available if the
-        <ref id="build-pcm-tunes" name="--disable-pcm-tunes"> build option was specified.
+        <ref id="build-pcm-support" name="--disable-pcm-support"> build option was specified.
       <tag/MIDI/
         The Musical Instrument Digital Interface on the sound card
         This setting is supported
@@ -3224,7 +3220,7 @@ Notes:
         It doesn't work when this device is already being used
         by another application.
         This device isn't available if the
-        <ref id="build-midi-tunes" name="--disable-midi-tunes"> build option was specified.
+        <ref id="build-midi-support" name="--disable-midi-support"> build option was specified.
       <tag/FM/
         The FM synthesizer on an
         AdLib, OPL3, Sound Blaster, or equivalent sound card.
@@ -3235,7 +3231,7 @@ Notes:
         The results are unpredictable, and potentially not very good,
         if it's used with a sound card which doesn't support this feature.
         This device isn't available if the
-        <ref id="build-fm-tunes" name="--disable-fm-tunes"> build option was specified.
+        <ref id="build-fm-support" name="--disable-fm-support"> build option was specified.
     </descrip>
     The initial setting is <tt/beeper/ on those platforms which support it,
     and <tt/PCM/ on those platforms which don't.

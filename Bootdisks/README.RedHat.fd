@@ -131,7 +131,7 @@ specific feature from BRLTTY, and results in a corresponding decrease in the
 size of the executable. Recommended possibilities include:
 
    --disable-table-selection --disable-learn-mode --disable-contracted-braille
-   --disable-pcm-tunes --disable-midi-tunes --disable-fm-tunes
+   --disable-pcm-support --disable-midi-support --disable-fm-support
    --disable-speech-support --without-x
 
 If building the Papenmeier driver, then also consider:
