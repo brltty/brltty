@@ -19,7 +19,8 @@ like to.  To subscribe, send a mail to
 debian-accessibility-request@lists.debian.org with "subscribe" in the
 subject field, or go to http://lists.debian.org/.  "Installing Debian"
 is right in the scope of our discussions.
-B. Daix (Thu Jul 03, 2003)
+
+	B. Daix (Wed Sep 10, 2003)
 
 
 Purpose
@@ -29,37 +30,36 @@ Purpose
 called "boot floppies". They are two of them by default : the boot one
 (with Linux kernel and friends) named "rescue floppy", and the root
 one where is put setup stuff. Few other floppies can provide modules
-(driver-* ones), but those two boot ones are fundamental. As you can
-guess, fitting all those means on only two 1.44Mo-sized floppies was a
-real challenge... They were, as a consequence, really well built and
-there is no place for guests there ! So we'll have to manage a third
-floppy to give BRLTTY a place.
+(driver-{1,2,3,4} ones), but those two boot ones are fundamental. As
+you can guess, fitting all those means on only two 1.44Mo-sized
+floppies was a real challenge... They were, as a consequence, really
+well built and there is no room for guests there ! So we'll have to
+manage a third floppy to give BRLTTY a place.
    So there are little things to do to install Debian with BRLTTY
 (version >= v3.1), this file says which ones. The tip comes directly
-from Mario Lang and his team, so let's thank them loudly ! Please be
-really attentive to all points because if you don't, you could
+from Mario Lang and BRLTTY's team, so let's thank them loudly ! Please
+be really attentive to all points because if you don't, you could
 encounter troubles. You should know that a brand-new way to install
-Debian is about to be available, so this "boot floppies fashion" is
+Debian is about to be released, so this "boot floppies fashion" is
 going to be obsolete soon.
 
 
 Official boot floppies tune
 ***************************
 
-1) Get boot floppies images, corresponding to the version you want to
-   install. Here, they are the current ones coming with Woody :
-   rescue.bin and root.bin
+1) Get the current boot floppies images coming with Woody : rescue.bin
+   and root.bin
    (/dists/stable/main/disks-i386/current/images-1.44/bf2.4/). We're
    about to work on root.bin.
 2) Rename root.bin : "mv root.bin root.gz" then gunzip it, "gunzip
    root.gz" so that we have the mountable image now named "root". 
-3) Mount this "root" image on a loop device (like if it was on a
-   floppy) : "mount root /mnt -o loop=/dev/loop0", where /mnt is the
-   mounting point and /dev/loop0 an unused loop device. Superuser
-   (root) permissions are required to do so. To check
-   everything goes right, "ls /mnt" should show a kind of normal
-   file-system with few things added.
-4) Edit the file named "rcS" in the loop-mounted image : "vi
+3) Mount this "root" image on a loopback device (like if it was on a
+   real floppy) : "mount root /mnt -o loop=/dev/loop0", where /mnt is
+   the mounting point and /dev/loop0 an unused loopback
+   device. Superuser (root) permissions are required to do so. To
+   check everything goes right, "ls /mnt" should show a kind of normal
+   filesystem with few things added.
+4) Edit the file named "rcS" in the loopback-mounted image : "vi
    /mnt/etc/init.d/rcS" for example. Jump to the end of file, and
    insert the following lines before the last one ("exit 0") :
    "echo "Please insert BRLTTY floppy and press ENTER"
@@ -69,12 +69,12 @@ Official boot floppies tune
     /bin/brltty
     echo "Press enter to continue"
     read ret"
-   (Forget double-quotes like each time in this tip file) Save and
-   exit. We have to say that those seven lines will untar from
+   (Forget global double-quotes like each time in this tip file) Save
+   and exit. We have to say that those seven lines will untar from
    the third floppy we'll build and will run BRLTTY from the loaded
-   file-system, it's not on the target disk yet (as you're about to
-   install, hard drives are not ready yet).
-5) Edit the file named "inittab" in the loop-mounted image : "vi
+   filesystem, it won't be on the target disk yet (as you'll be
+   setting things up, hard drives won't be ready yet).
+5) Edit the file named "inittab" in the loopback-mounted image : "vi
    /mnt/etc/inittab" for example. Then near line 21, replace the word
    "null" by "tty1" so that "null::sysinit:/etc/init.d/rcS" becomes
    "tty1::sysinit:/etc/init.d/rcS". Then, near line 25, remove the "u"
@@ -82,9 +82,8 @@ Official boot floppies tune
    "::respawn:/sbin/dbootstrap" : this will prevent setup programs
    from not using standard console tty1 "the normal way" (so that we
    can be asked for BRLTTY floppy). In some case, this second
-modification is
-   superfluous, anyway, it's probably a good idea to do it. Save and
-   exit.
+   modification is superfluous, anyway, it's probably a good idea to
+   do it. Save and exit.
 6) Unmount the modified image : "umount /mnt", gzip it "gzip root" and
    rename it "mv root.gz root.bin". Here it is.
 
@@ -95,19 +94,20 @@ Building the third floppy
 1) Compile BRLTTY "statically" (no dependencies on shared libraries so
    that BRLTTY works on its own), specify the display you want to use,
    specify the braille table you want to use, and install it in a
-   personal directory specially built ("mkdir $HOME/tmpbrl"). This is
+   personal directory specially built ("mkdir ~/tmpbrl"). This is
    respectively done by adding the
    "--enable-standalone-programs",
    "--with-braille-driver=DISPLAY",
    "--with-text-table=TABLE" and
-   "--with-install-root=$HOME/tmpbrl" flags to the "configure" script
-   (c.f. BRLTTY's documentation; replace the value "DISPLAY" in inner
+   "--with-install-root=~/tmpbrl" flags to the "configure" script
+   (c.f. BRLTTY's documentation, and run "./configure --help" for more
+   details on available flags; replace the value "DISPLAY" in inner
    flag by the module name you want to use). After having run
    "configure" with these flags at least, do "make install" so that
    all BRLTTY's stuff goes to the temporary directory. Check it to
-   recognize etc, lib and bin dirs in it : "ls $HOME/tmpbrl".
+   recognize etc, lib and bin dirs in it: "ls ~/tmpbrl".
 2) Create a tarball by first changing to the directory : "cd
-   $HOME/tmpbrl", then "tar czf ../brltty.tar.gz *". You should have a
+   ~/tmpbrl", then "tar czf ../brltty.tar.gz *". You should have a
    file named "brltty.tar.gz" in the parent dir now. 
 3) Copy this file to a free floppy -- not the usual way, this is what
    I would call a "brute copy"... like this (change to the tarball dir
@@ -115,7 +115,7 @@ Building the third floppy
    dumped, it worked well. It's "brutal" because in this kind of copy
    you don't mount the device you are writing to, it prevents you from
    having to mount things when you use the tarball (some would call
-this a "raw copy").
+   this a "raw copy").
 
 
 Going on the install process
@@ -131,7 +131,10 @@ hangs up a second time : because of the first "read ret" line in rcS
 script file. Here, insert BRLTTY floppy and hit ENTER again. Then
 BRLTTY should be beeping at you, and all goes right. You'll last have
 to hit ENTER to begin Debian installation process the usual way, due
-to the second "read ret" line.
+to the second "read ret" line. Note that in some cases, computer hangs
+up at the very beginning, because of LILO's prompt. If you realize that
+first floppy couldn't have the time to be loaded, hitting ENTER will
+re-emphasize what I said above with real-world.
    You should realize that BRLTTY stuff is loaded temporarily, as
 system drives are not ready. So, to install it permanently, you must
 wait until they are on (for example, before the reboot time), and as
