@@ -10,25 +10,60 @@ basic braille displaying, as well as key transmission, work fine.
 Building BRLTTY
 ===============
 
-Configure BRLTTY with --enable-api in order to enable the compilation and
-installation of libbrlapi and its header files.
+Gnopernicus uses BrlAPI (BRLTTY's application programming interface).  When
+building BRLTTY, therefore, configure it with --enable-api in order to enable
+the compilation and installation of libbrlapi and its header files.
 
     ./configure --enable-api
     make
     make install
 
 After installation, but *before* launching the new BRLTTY, you need to generate
-an authentication key. The easiest way to do this is:
+an authentication key for its API. The easiest way to do this is:
 
-    echo some-string >/etc/brltty/brlapi-key
+    echo some-string >/etc/bbrlapi.key
+
+Easiest, of course and as usual, doesn't necessarily mean best. It's much
+better for this kind of data to be unpredictable. If, therefore, a random data
+source is available then it should be used.
+
+If you have the mcookie command then you can do:
+
+    mcookie >/etc/brlapi.key
+
+If you have the dd command and the /dev/random device then you can do:
+
+    dd if=/dev/random of=/etc/brlapi.key bs=32 count=1
+
+If there's the slightest possibility that even just one untrustworthy user can
+access your system then you should seriously consider ensuring that the fiLe
+containing the authentication key for BrlAPI can only be accessed by those
+users who actually need to use the braille display. If there's only one braille
+user then it's easy.  Just make him the owner of the file and ensure that noone
+else can access it.
+
+    chown whoever /etc/brlapi.key
+    chmod 600 /etc/brlapi.key
+
+If there's more than one braille user then it's a little more complicated.  
+Create a new group with a meaningful name (like, say, brlapi), make the file
+readable to that group but not to anyone else, and ensure that each braille
+user is a member of that group.
+
+    groupadd brlapi
+    chgrp brlapi /etc/brlapi.key
+    chmod 640 /etc/brlapi.key
+    usermod -G brlapi user1
+    usermod -G brlapi user2
+    ...
 
 
 Configuring Gnopernicus
 =======================
 
 You need to activate Braille Support, and to change the Braille Device Type to
-"BRLTTY". This configuration can be done not only via the GUI but also via the
-command line. Both of these interfaces are described here.
+"BRLTTY". This configuration can be done not only via the display but also via
+the command line. Both of these methods are described here.
 
 
 When the focus is inside the Gnopernicus window, select
@@ -49,15 +84,21 @@ In this dialog box, ensure that "BRLTTY" is the selected braille device.
 After applying your changes, "Close" the "Braille Settings" and "Input/Output
 Settings" windows.
 
-You might need to restart Gnopernicus to get working braille support.
+Braille should start working as soon as any needed configuration changes are
+made.
 
 
 There's a command-line interface to the Gnome configuration system (gconf)
 called "gconftool-2". You can get verbose help for it with "gconftool-2 --help"
 or something shorter with "gconftool-2 --usage".
 
-èBefore accessibility will work across the desktop, you need to check thi
-gconf key:
+The first step is to ensure that the accessibility features of Gnome are
+enabled. Gnopernicus, at start time, automatically detects if accessibility
+isn't enabled, and, if so, displays a dialog which asks the user if it should
+be enabled. Since a blind user can't see this dialog, here's how to ensure that
+the setting is correct ahead of time.
+
+Check the current setting by inspecting the relevant gconf key:
 
     gconftool-2 --get /apps/desktop/gnome/interface/accessibility
 
@@ -97,7 +138,8 @@ and is used when you type "startx" to start the X-server.
 
  ------------------------------------------------------------------------------
  #!/bin/sh
- gconftool-2 --type bool --set /apps/desktop/gnome/interface/accessibility true
+
+ # Define environment variables.
  GARNOME=$HOME/garnome
  PATH=$GARNOME/bin:$PATH
  LD_LIBRARY_PATH=$GARNOME/lib:$LD_LIBRARY_PATH
@@ -106,6 +148,16 @@ and is used when you type "startx" to start the X-server.
  GDK_USE_XFT=1
  GTK_MODULES=gail:atk-bridge
  export PATH LD_LIBRARY_PATH PYTHONPATH PKG_CONFIG_PATH GDK_USE_XFT GTK_MODULES
+
+ # Configure Gnome.
+ gconftool-2 --type bool --set /apps/desktop/gnome/interface/accessibility true
+
+ # Tell Gnopernicus which virtual terminal is being used by the X display.
+ # This is a bit complicated so cut-and-paste (rather than retype) it.
+ CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
+ export CONTROLVT
+
+ # Start the Gnome session.
  exec $GARNOME/bin/gnome-session
  ------------------------------------------------------------------------------
 
