@@ -25,24 +25,18 @@ extern "C" {
 #include <stdint.h>
 
 /* Descriptor types. */
-#define USB_DT_DEVICE    0x01
-#define USB_DT_CONFIG    0x02
-#define USB_DT_STRING    0x03
-#define USB_DT_INTERFACE 0x04
-#define USB_DT_ENDPOINT  0x05
-#define USB_DT_HID       (USB_TYPE_CLASS | 0x01)
-#define USB_DT_REPORT    (USB_TYPE_CLASS | 0x02)
-#define USB_DT_PHYSICAL  (USB_TYPE_CLASS | 0x03)
-#define USB_DT_HUB       (USB_TYPE_CLASS | 0x09)
+#define USB_DESCRIPTOR_TYPE_DEVICE        0x01
+#define USB_DESCRIPTOR_TYPE_CONFIGURATION 0x02
+#define USB_DESCRIPTOR_TYPE_STRING        0x03
+#define USB_DESCRIPTOR_TYPE_INTERFACE     0x04
+#define USB_DESCRIPTOR_TYPE_ENDPOINT      0x05
 
 /* Descriptor sizes. */
-#define USB_DT_DEVICE_SIZE         18
-#define USB_DT_CONFIG_SIZE          9
-#define USB_DT_INTERFACE_SIZE       9
-#define USB_DT_ENDPOINT_SIZE        7
-#define USB_DT_ENDPOINT_AUDIO_SIZE  9        /* Audio extension */
-#define USB_DT_HUB_NONVAR_SIZE      7
-#define USB_DT_HID_SIZE             9
+#define USB_DESCRIPTOR_SIZE_DEVICE        18
+#define USB_DESCRIPTOR_SIZE_CONFIGURATION  9
+#define USB_DESCRIPTOR_SIZE_STRING         2
+#define USB_DESCRIPTOR_SIZE_INTERFACE      9
+#define USB_DESCRIPTOR_SIZE_ENDPOINT       7
 
 /* Device and interface classes. */
 #define USB_CLASS_PER_INTERFACE 0X00
@@ -57,23 +51,23 @@ extern "C" {
 #define USB_CLASS_APP_SPEC      0XFE
 #define USB_CLASS_VENDOR_SPEC   0XFF
 
-/* Endpoint addresses. */
-#define USB_ENDPOINT_NUMBER_MASK 0X0F        /* in bEndpointAddress */
-#define USB_ENDPOINT_DIR_MASK    0X80
+/* Endpoint addresses (bEndpointAddress). */
+#define USB_ENDPOINT_NUMBER_MASK    0X0F
+#define USB_ENDPOINT_DIRECTION_MASK 0X80
 
-/* Endpoint types. */
-#define USB_ENDPOINT_XFERTYPE_MASK 0X03        /* in bmAttributes */
-#define USB_ENDPOINT_XFER_CONTROL  0X00
-#define USB_ENDPOINT_XFER_ISOC     0X01
-#define USB_ENDPOINT_XFER_BULK     0X02
-#define USB_ENDPOINT_XFER_INT      0X03
+/* Endpoint types (bmAttributes). */
+#define USB_ENDPOINT_TRANSFER_MASK        0X03
+#define USB_ENDPOINT_TRANSFER_CONTROL     0X00
+#define USB_ENDPOINT_TRANSFER_ISOCHRONOUS 0X01
+#define USB_ENDPOINT_TRANSFER_BULK        0X02
+#define USB_ENDPOINT_TRANSFER_INTERRUPT   0X03
 
 /* Control transfer recipients. */
-#define USB_RECIP_MASK      0X1F
-#define USB_RECIP_DEVICE    0X00
-#define USB_RECIP_INTERFACE 0X01
-#define USB_RECIP_ENDPOINT  0X02
-#define USB_RECIP_OTHER     0X03
+#define USB_RECIPIENT_MASK      0X1F
+#define USB_RECIPIENT_DEVICE    0X00
+#define USB_RECIPIENT_INTERFACE 0X01
+#define USB_RECIPIENT_ENDPOINT  0X02
+#define USB_RECIPIENT_OTHER     0X03
 
 /* Control transfer types. */
 #define USB_TYPE_MASK     0X60
@@ -267,7 +261,7 @@ extern int usbBulkRead (
 extern int usbBulkWrite (
   UsbDevice *device,
   unsigned char endpoint,
-  void *data,
+  const void *data,
   int length,
   int timeout
 );
@@ -280,7 +274,7 @@ typedef struct {
 extern void *usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpoint,
-  unsigned char type,
+  unsigned char transfer,
   void *buffer,
   int length,
   unsigned int flags,

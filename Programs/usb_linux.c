@@ -57,70 +57,6 @@ struct UsbDeviceStruct {
   unsigned int stringLanguage;
 };
 
-UsbDevice *
-usbOpenDevice (const char *path) {
-  UsbDevice *device;
-  if ((device = malloc(sizeof(*device)))) {
-    memset(device, 0, sizeof(*device));
-    if ((device->file = open(path, O_RDWR)) != -1) {
-      if (read(device->file, &device->descriptor, USB_DT_DEVICE_SIZE) == USB_DT_DEVICE_SIZE)
-        if (device->descriptor.bDescriptorType == USB_DT_DEVICE)
-          if (device->descriptor.bLength == USB_DT_DEVICE_SIZE)
-            return device;
-      close(device->file);
-    }
-    free(device);
-  }
-  return NULL;
-}
-
-void
-usbCloseDevice (UsbDevice *device) {
-  close(device->file);
-  free(device);
-}
-
-static UsbDevice *
-usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
-  UsbDevice *device;
-  if ((device = usbOpenDevice(path))) {
-    if (chooser(device, data)) return device;
-    usbCloseDevice(device);
-  }
-  return NULL;
-}
-
-static UsbDevice *
-usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
-  UsbDevice *device = NULL;
-  DIR *directory;
-  if ((directory = opendir(root))) {
-    struct dirent *entry;
-    while ((entry = readdir(directory))) {
-      struct stat status;
-      char path[PATH_MAX+1];
-      if (strlen(entry->d_name) != 3) continue;
-      if (!isdigit(entry->d_name[0]) ||
-          !isdigit(entry->d_name[1]) ||
-          !isdigit(entry->d_name[2])) continue;
-      snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
-      if (stat(path, &status) == -1) continue;
-      if (S_ISDIR(status.st_mode)) {
-        if ((device = usbSearchDevice(path, chooser, data))) break;
-      } else if (S_ISREG(status.st_mode)) {
-        if ((device = usbTestDevice(path, chooser, data))) break;
-      }
-    }
-    closedir(directory);
-  }
-  return device;
-}
-
-UsbDevice *
-usbFindDevice (UsbDeviceChooser chooser, void *data) {
-  return usbSearchDevice("/proc/bus/usb", chooser, data);
-}
-
 const UsbDeviceDescriptor *
 usbDeviceDescriptor (UsbDevice *device) {
   return &device->descriptor;
@@ -174,7 +110,6 @@ usbGetSerialDevice (
   char *path = NULL;
   char *driver;
   if ((driver = usbGetDriver(device, interface))) {
-LogPrint(LOG_WARNING, "USB driver: %s", driver);
     if (strcmp(driver, "serial") == 0) {
       struct serial_struct serial;
       if (usbControlDriver(device, interface, TIOCGSERIAL, &serial) != -1) {
@@ -280,7 +215,7 @@ usbGetDescriptor (
   UsbDescriptor *descriptor,
   int timeout
 ) {
-  return usbControlTransfer(device, USB_RECIP_DEVICE, USB_DIR_IN, USB_TYPE_STANDARD,
+  return usbControlTransfer(device, USB_RECIPIENT_DEVICE, USB_DIR_IN, USB_TYPE_STANDARD,
                             USB_REQ_GET_DESCRIPTOR, (type << 8) | number, index,
                             descriptor->bytes, sizeof(descriptor->bytes), timeout);
 }
@@ -296,7 +231,7 @@ usbGetString (
   unsigned char *string;
 
   if (!device->stringLanguage) {
-    if ((count = usbGetDescriptor(device, USB_DT_STRING, 0, 0,
+    if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING, 0, 0,
                                   &descriptor, timeout)) == -1)
       return NULL;
     if (count < 4) {
@@ -306,7 +241,7 @@ usbGetString (
     device->stringLanguage = descriptor.string.wData[0];
   }
 
-  if ((count = usbGetDescriptor(device, USB_DT_STRING,
+  if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
                                 number, device->stringLanguage,
                                 &descriptor, timeout)) == -1)
     return NULL;
@@ -355,18 +290,18 @@ int
 usbBulkWrite (
   UsbDevice *device,
   unsigned char endpoint,
-  void *data,
+  const void *data,
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(device, endpoint|USB_DIR_OUT, data, length, timeout);
+  return usbBulkTransfer(device, endpoint|USB_DIR_OUT, (unsigned char *)data, length, timeout);
 }
 
 void *
 usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpoint,
-  unsigned char type,
+  unsigned char transfer,
   void *buffer,
   int length,
   unsigned int flags,
@@ -376,14 +311,25 @@ usbSubmitRequest (
   if ((urb = malloc(sizeof(*urb) + length))) {
     memset(urb, 0, sizeof(*urb));
     urb->endpoint = endpoint;
-    urb->type = type;
+    switch (transfer) {
+      case USB_ENDPOINT_TRANSFER_CONTROL:
+        urb->type = USBDEVFS_URB_TYPE_CONTROL;
+        break;
+      case USB_ENDPOINT_TRANSFER_ISOCHRONOUS:
+        urb->type = USBDEVFS_URB_TYPE_ISO;
+        break;
+      case USB_ENDPOINT_TRANSFER_BULK:
+        urb->type = USBDEVFS_URB_TYPE_BULK;
+        break;
+      case USB_ENDPOINT_TRANSFER_INTERRUPT:
+        urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
+        break;
+    }
     urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
     if (buffer) memcpy(urb->buffer, buffer, length);
     urb->flags = flags;
     urb->signr = 0;
     urb->usercontext = data;
-    LogPrint(LOG_DEBUG, "submit urb: ept=%x typ=%d flg=%x sig=%d len=%d urb=%p",
-             urb->endpoint, urb->type, urb->flags, urb->signr, urb->buffer_length, urb);
     if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
     free(urb);
   }
@@ -397,7 +343,6 @@ usbReapResponse (
   int wait
 ) {
   struct usbdevfs_urb *urb;
-  LogPrint(LOG_DEBUG, "reaping urb");
 
   response->buffer = NULL;
   response->length = 0;
@@ -410,8 +355,6 @@ usbReapResponse (
   } else if (!urb) {
     errno = EAGAIN;
   } else {
-    LogPrint(LOG_DEBUG, "reaped urb: %p st=%d len=%d",
-             urb, urb->status, urb->actual_length);
     response->buffer = urb->buffer;
     response->length = urb->actual_length;
     response->context = urb->usercontext;
@@ -427,7 +370,7 @@ usbAddInputElement (
   if ((input = malloc(sizeof(*input)))) {
     memset(input, 0, sizeof(*input));
     if ((input->urb = usbSubmitRequest(device, device->inputEndpoint,
-                                       USBDEVFS_URB_TYPE_BULK,
+                                       USB_ENDPOINT_TRANSFER_BULK,
                                        NULL, device->inputSize,
                                        device->inputFlags, input))) {
       if (device->inputElements) {
@@ -515,4 +458,70 @@ usbReapInput (
     }
   }
   return target - bytes;
+}
+
+void
+usbCloseDevice (UsbDevice *device) {
+  if (device->inputRequest) free(device->inputRequest);
+  while (device->inputElements) usbDeleteInputElement(device, device->inputElements);
+  close(device->file);
+  free(device);
+}
+
+UsbDevice *
+usbOpenDevice (const char *path) {
+  UsbDevice *device;
+  if ((device = malloc(sizeof(*device)))) {
+    memset(device, 0, sizeof(*device));
+    if ((device->file = open(path, O_RDWR)) != -1) {
+      if (read(device->file, &device->descriptor, USB_DESCRIPTOR_SIZE_DEVICE) == USB_DESCRIPTOR_SIZE_DEVICE)
+        if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
+          if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
+            return device;
+      close(device->file);
+    }
+    free(device);
+  }
+  return NULL;
+}
+
+static UsbDevice *
+usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
+  UsbDevice *device;
+  if ((device = usbOpenDevice(path))) {
+    if (chooser(device, data)) return device;
+    usbCloseDevice(device);
+  }
+  return NULL;
+}
+
+static UsbDevice *
+usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
+  UsbDevice *device = NULL;
+  DIR *directory;
+  if ((directory = opendir(root))) {
+    struct dirent *entry;
+    while ((entry = readdir(directory))) {
+      struct stat status;
+      char path[PATH_MAX+1];
+      if (strlen(entry->d_name) != 3) continue;
+      if (!isdigit(entry->d_name[0]) ||
+          !isdigit(entry->d_name[1]) ||
+          !isdigit(entry->d_name[2])) continue;
+      snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
+      if (stat(path, &status) == -1) continue;
+      if (S_ISDIR(status.st_mode)) {
+        if ((device = usbSearchDevice(path, chooser, data))) break;
+      } else if (S_ISREG(status.st_mode)) {
+        if ((device = usbTestDevice(path, chooser, data))) break;
+      }
+    }
+    closedir(directory);
+  }
+  return device;
+}
+
+UsbDevice *
+usbFindDevice (UsbDeviceChooser chooser, void *data) {
+  return usbSearchDevice("/proc/bus/usb", chooser, data);
 }
