@@ -150,7 +150,7 @@ insertKey (ScreenKey key) {
 int
 insertCharacters (const char *characters, int count) {
   while (count-- > 0)
-    if (!insertKey(*characters++))
+    if (!insertKey((unsigned char)*characters++))
       return 0;
   return 1;
 }
