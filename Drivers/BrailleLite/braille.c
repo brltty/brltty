@@ -117,8 +117,8 @@ brl_identify (void)
 
 static void
 init_maps (void) {
-  static unsigned char standard[] = {0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
-  static unsigned char Blazie[]   = {0, 3, 1, 4, 2, 5, 6, 7};	/* Blazie standard */
+  static const unsigned char standard[] = {0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
+  static const unsigned char Blazie[]   = {0, 3, 1, 4, 2, 5, 6, 7};	/* Blazie standard */
   int byte;			/* loop counters */
 
   memset(blitetrans, 0, 256);	/* ordinary dot mapping */
@@ -139,7 +139,7 @@ init_maps (void) {
 
 static int
 send_prebrl (int forever) {
-  static unsigned char request[] = {0X05, 0X44};			/* code to send before Braille */
+  static const unsigned char request[] = {0X05, 0X44};			/* code to send before Braille */
   if (forever) {
     /* wait forever method */
     while (1) {
@@ -235,7 +235,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
             }
 
             {
-              static unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
+              static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
               delay(200);
               write(blite_fd, request, sizeof(request));
               waiting_ack = 0;
@@ -251,7 +251,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
                   response[length++] = byte;
                 } while (qlen);
                 response[length] = 0;
-                LogPrint(LOG_NOTICE, "Braille Lite identity: %s", response);
+                LogPrint(LOG_INFO, "Braille Lite identity: %s", response);
               }
             }
 
@@ -867,16 +867,12 @@ qget (blkey * kp)
         c3 = ((c3 & 0x11) << 3) | ((c3 & 0x22) << 1) | ((c3 & 0x44) >> 1) | ((c3 & 0x88) >> 3);
       kp->raw = c3;
 
-      if (c3 & 0xf)
+      if (c3 & 0x0f)
         kp->cmd = barcmds[((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3)];
-      else if (c3 & 0x10)
-        kp->cmd = BLT_WHLUP2;
-      else if (c3 & 0x20)
-        kp->cmd = BLT_WHLDN2;
-      else if (c3 & 0x40)
-        kp->cmd = BLT_WHLUP1;
-      else if (c3 & 0x80)
-        kp->cmd = BLT_WHLDN1;
+      else if (c3 & 0x30)
+        kp->cmd = rwwcmds[(c3 >> 4) & 0x3];
+      else if (c3 & 0xc0)
+        kp->cmd = lwwcmds[(c3 >> 6) & 0x3];
       else
         kp->cmd = 0;
       break;

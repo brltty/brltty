@@ -69,7 +69,7 @@ static unsigned char keys_to_dots[64] =
  * left as 0 here.
  */
 
-static int cmdtrans[64] =
+static const int cmdtrans[64] =
 {
   0, CMD_LNUP, VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_BACKSPACE, CMD_CHRLT, 0 /*k: kbemu*/, VAL_PASSKEY+VPK_CURSOR_UP, CMD_TOP_LEFT,
   CMD_LNDN, CMD_CSRTRK, CMD_DISPMD, CMD_FREEZE, CMD_INFO, CMD_MUTE, CMD_NXSEARCH, CMD_PASTE,
@@ -88,7 +88,8 @@ static int cmdtrans[64] =
 static unsigned char dangcmd[8] =
 { 0x00, 0x88, 0x80, 0x05, 0x40, 0x00, 0x10, 0x00 };
 
-static int barcmds[16] =
+/* Advance bar commands. */
+static const int barcmds[16] =
 {
 /* Left Bar\  Right Bar> None         Right        Left         Both         */
 /*         None       */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
@@ -96,6 +97,16 @@ static int barcmds[16] =
 /*         Left       */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
 /*         Both       */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
 };
+
+/* Left whiz wheel commands. */
+static const int lwwcmds[] =
+/* None         Up           Down         Press        */
+  {0          , CMD_FWINLT , CMD_FWINRT , CMD_CSRVIS };
+
+/* Right whiz wheel commands. */
+static const int rwwcmds[] =
+/* None         Up           Down         Press        */
+  {0          , CMD_LNUP   , CMD_LNDN   , CMD_ATTRVIS};
 
 #endif /* BL_NEED_ARRAYS */
 
@@ -108,14 +119,6 @@ static int barcmds[16] =
 /* BrailleLite 18 */
 #define BLT_BARLT CMD_FWINLT
 #define BLT_BARRT CMD_FWINRT
-
-/* BrailleLite 40 (patterned after other screen readers) */
-/* Left-hand wheel: up=pan left, down=pan right */
-#define BLT_WHLUP1 CMD_FWINLT
-#define BLT_WHLDN1 CMD_FWINRT
-/* Right-hand wheel: up=line up, down=line down */
-#define BLT_WHLUP2 CMD_LNUP
-#define BLT_WHLDN2 CMD_LNDN
 
 
 /* Internal commands.  The definitions use the ASCII codes from brltrans[]

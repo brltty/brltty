@@ -60,11 +60,13 @@ restart driver, etc.
 <x40>both left: up to top line
 <x40>both right: down to bottom line
 <x40>
-<x40>Wheel Functions:
+<x40>Whiz Wheel Functions:
 <x40>left up: full window left
 <x40>left down: full window right
 <x40>right up: one line up
 <x40>right down: one line down
+<x40>left press: show cursor (toggle)
+<x40>right press: attribute underlining (toggle)
 <x40>
 Internal:
 
