@@ -170,7 +170,7 @@ new="${file}.rpmnew"
 )
 
 %changelog
-* Mon Oct 12 2004 Dave Mielke <dave@mielke.cc> 3.6
+* Mon Oct 11 2004 Dave Mielke <dave@mielke.cc> 3.6
 +  Add support for old VisioBraille input flow control (PROM version < 4).
 +  Add rate setting to the ExternalSpeech driver.
 +  Remove type-punning warnings from the Mikropuhe driver.
@@ -185,7 +185,7 @@ new="${file}.rpmnew"
       A bogus routing key press event is generated for routing keys 25-29
       when at least two front keys are already pressed.
 +  Papenmeier driver updates:
-      The "qauery switches" command should show "both" rather than "?".
+      The "query switches" command should show "both" rather than "?".
       Add bindings for bar motion with the right front key pressed.
       Resynchronize the switches and keys whenever the bar is moved.
 +  API updates:
