@@ -56,32 +56,20 @@ struct UsbDeviceStruct {
   uint16_t language;
 };
 
-extern int usbControlTransfer (
-  UsbDevice *device,
-  unsigned char direction,
-  unsigned char recipient,
-  unsigned char type,
-  unsigned char request,
-  unsigned short value,
-  unsigned short index,
-  void *buffer,
-  int length,
-  int timeout
-);
-
 extern UsbDevice *usbTestDevice (
   void *extension,
   UsbDeviceChooser chooser,
   void *data
 );
-extern int usbReadDeviceDescriptor (UsbDevice *device);
-extern void usbDeallocateDeviceExtension (UsbDevice *device);
+extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
+extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
+extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
+extern int usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length);
 
 extern int usbSetConfiguration (
   UsbDevice *device,
   unsigned char configuration
 );
-
 extern int usbClaimInterface (
   UsbDevice *device,
   unsigned char interface
@@ -95,15 +83,22 @@ extern int usbSetAlternative (
   unsigned char interface,
   unsigned char alternative
 );
-
-extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
-extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
-extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
-
+extern int usbControlTransfer (
+  UsbDevice *device,
+  unsigned char direction,
+  unsigned char recipient,
+  unsigned char type,
+  unsigned char request,
+  unsigned short value,
+  unsigned short index,
+  void *buffer,
+  int length,
+  int timeout
+);
+extern int usbReadDeviceDescriptor (UsbDevice *device);
 extern int usbAllocateEndpointExtension (UsbEndpoint *endpoint);
 extern void usbDeallocateEndpointExtension (UsbEndpoint *endpoint);
-
-extern int usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length);
+extern void usbDeallocateDeviceExtension (UsbDevice *device);
 
 #ifdef __cplusplus
 }
