@@ -27,7 +27,7 @@ PREFIX =
 # and you will need to specify the display type at run-time via -b.
 # Note to maintainer:
 #    When adding a new target here, add it also to the "BRL_TARGETS =" line.
-BRL_TARGET = Alva
+#BRL_TARGET = Alva
 #BRL_TARGET = BrailleLite
 #BRL_TARGET = BrailleNote
 #BRL_TARGET = CombiBraille
@@ -135,10 +135,20 @@ INSKEY_O = inskey_lnx.o
 # LEAVE THEM ALONE!
 MAKE = make
 
-CC = gcc
+# This is for the unlikely case where you would want to use a cross-compiler
+# (to compile for another archtecture).
+CROSSCOMP=
+#CROSSCOMP=arm-linux-
+
+HOSTCC = gcc
+CC = $(CROSSCOMP)$(HOSTCC)
+HOSTLD = ld
+LD = $(CROSSCOMP)$(HOSTLD)
+
 # To compile in a.out (if you use ELF by default), you may be able to use
 # `-b i486-linuxaout'; however, you may also need to use the -V flag, or
 # possibly a different gcc executable, depending on your setup.
+
 COMMONCFLAGS = -Wall -D_POSIX_C_SOURCE=2 -D_BSD_SOURCE
 CFLAGS = $(COMMONCFLAGS) -O2
 #CFLAGS = $(COMMONCFLAGS) -g
@@ -148,10 +158,8 @@ LIB_CFLAGS = $(CFLAGS) -fPIC
 LIB_SO_NAME = libbrltty
 LIB_VER = 1
 
-COMPCPP = gcc
+COMPCPP = $(CROSSCOMP)gcc
 
-#LD = gcc
-LD = gcc
 COMMONLDFLAGS = -rdynamic
 LDFLAGS = $(COMMONLDFLAGS) -s
 #LDFLAGS = $(COMMONLDFLAGS) -g
@@ -215,11 +223,11 @@ brltty-static: brltty-static.o
 	$(LD) $(LDFAGS) -Wl,-rpath,$(LIB_DIR) -o $@ $<
 
 brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
-	$(LD) $(LDFLAGS) -Wl,-rpath,$(LIB_DIR) -o $@ \
+	$(CC) $(LDFLAGS) -Wl,-rpath,$(LIB_DIR) -o $@ \
 	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
 main.o: main.c brl.h spk.h scr.h csrjmp.h inskey.h beeps.h cut-n-paste.h \
-	misc.h message.h config.h common.h text.auto.h attrib.auto.h
+	misc.h message.h config.h common.h
 	$(CC) $(CFLAGS) -c main.c
 
 config.o: config.c config.h brl.h spk.h scr.h beeps.h message.h misc.h common.h
@@ -232,7 +240,7 @@ config.o: config.c config.h brl.h spk.h scr.h beeps.h message.h misc.h common.h
 csrjmp.o: csrjmp.c csrjmp.h scr.h inskey.h misc.h
 	$(CC) $(CFLAGS) -c csrjmp.c
 
-misc.o: misc.c misc.h
+misc.o: misc.c misc.h text.auto.h attrib.auto.h
 	$(CC) $(CFLAGS) -c misc.c
 
 beeps.o: beeps.c beeps.h
@@ -285,14 +293,14 @@ speech:
 
 BRLTEST_OBJECTS = brltest.o misc.o beeps.o brl_load.o
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
-	$(LD) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
-brltest.o: brltest.c brl.h config.h text.auto.h
+brltest.o: brltest.c brl.h config.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DBRLDEV="$(BRLDEV)"' -c brltest.c
 
 SCRTEST_OBJECTS = scrtest.o misc.o
 scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
 
 scrtest.o: scrtest.c 
 	$(CC) $(CFLAGS) -c scrtest.c
@@ -312,17 +320,11 @@ text.auto.h: Makefile BrailleTables/$(TEXTTRANS) comptable
 attrib.auto.h: Makefile BrailleTables/attrib.tbl comptable
 	./comptable < BrailleTables/attrib.tbl > attrib.auto.h
 
-txt2hlp: txt2hlp.o
-	$(LD) $(LDFLAGS) -o $@ txt2hlp.o $(LDLIBS)
+txt2hlp: txt2hlp.c helphdr.h
+	$(HOSTCC) $(LDFLAGS) -o $@ txt2hlp.c $(LDLIBS)
 
-txt2hlp.o: txt2hlp.c helphdr.h
-	$(CC) $(UTILS_CFLAGS) -c txt2hlp.c
-
-comptable: comptable.o
-	$(LD) $(LDFLAGS) -o $@ comptable.o $(LDLIBS)
-
-comptable.o: comptable.c
-	$(CC) $(UTILS_CFLAGS) -c comptable.c
+comptable: comptable.c
+	$(HOSTCC) $(LDFLAGS) -o $@ comptable.c $(LDLIBS)
 
 install: install-programs install-help install-tables $(INSTALL_DRIVERS) install-devices
 
@@ -369,6 +371,7 @@ clean:
 distclean: clean
 	rm -f brltty txt2hlp comptable *test
 	rm -f *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
+	$(MAKE) -C BrailleLite distclean
 	$(MAKE) -C Papenmeier distclean
 	$(MAKE) -C BrailleTables distclean
 

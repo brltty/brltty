@@ -1,12 +1,16 @@
 Braille Lite Driver for BRLTTY
 
-This is a beta driver for the Blazie Engineering's Braille Lite.
-written by Nikhil Nair, with additions from Nicolas Pitre and Pete De Vasto.
+This is a beta driver for the Blazie Engineering Braille Lite.
+written by Nikhil Nair,
+with additions from Nicolas Pitre Nicolas Pitre <nico@cam.org>
+and Pete De Vasto,
+further modifications by Stéphane Doyon <s.doyon@videotron.ca>
+  in August 2001.
 
-Both BrailleLite 18 and 40 should work.  However you must edit brlconf.h
-to select which one you want to compile for.  It seems that there is no way
-of autodetecting what is plugged on the serial cable...  If you know a way
-to do so, please tell me.
+Both BrailleLite 18 and 40 should work, and there is now code that should
+auto-detect the display type.
+
+Edit brlconf.h to select baudrate and some features.
 
 On the BrailleLite, you should type 345-chord and p-chord to enter the 
 "speech box mode" required by BRLTTY.  You should type the same sequence 
@@ -20,97 +24,62 @@ The Braille Lite 40 has two advance bars on it.  Brltty has been set up
 so that moving the display left or right works the same as it does
 when the unit is in its internal notetaker mode.
 
-Enjoy!
-Nicolas Pitre <nico@cam.org>
------
+See brltty_genhelp.txt for a description of the key bindings.
 
+History:
+Stéphane Doyon, August 2001
+-Added a version number, as many people have been playing with this
+   driver. Arbitrarily started at 0.5.
+-Made the help more compact, and remove the duplication of the key
+   bindings list from README.
+-Use separate help files for BL18 and BL40, automatically generated from
+   brltty_genhelp.txt.
+-DETECT_FOREVER in brlconf.h allows the driver to keep probing for a
+   display forever (until you connect it) instead of giving up if no
+   display is connected.
+-Option USE_TEXTTRANS in brlconf.h, allows mapping of braille keyboard
+   input to characters to be performed using the output text translation
+   table (use definable) instead of the hardcoded US table. Useful if you
+   don't use the US table or if you want to enter characters numbered
+   >127 (such as accents for me). Obviously your output dot translation
+   table must not have duplicate representations for characters you want
+   to type. If that option is selected, dot 8 no longer generates a META
+   key.
+-Added DOT8SHIFT for use with USE_TEXTTRANS: 26-chord means the next
+   input char should be looked up with dot8 added.
+-Added bindings for search forward/backward (NXSEARCH), move by
+   paragraphs (NXBLNKLN), switch to next/previous virtual terminal
+   (SWITCHVT_NEXT).
+-Added a binding (246) for escape. Sometimes you want escape alone, or
+   followed by delete... and the META key doesn't do it as it expects a
+   character to combine the META to.
+-Made the "restart driver" command dangerous (required chord), as it
+   tended to kill the driver for me if I continued typing while it
+   resets...
+-Modified repeat count so that you can give the command right away, no
+   need to do e-chord. You can do a one-digit repeat of a movement key in
+   three strokes now.
+-Abused the repeat count function to allow switching directly to a VT
+   given it's number: o-chord then VT number then s-chord or 156-chord.
+-Fixed a very nice little bug that caused the internal cursor to go off
+   the display during g-chord with advance bar left.
+-Fixed a statement that caused a portability problem.
+-Fixed k-chord which activated but did not toggle off keyboard emulation.
 
-Key bindings:
+Anecdotes on weird bugs:
 
-advance bar left (Braille Lite 18): full window left
-advance bar right (Braille Lite 18): full window right
-left advance bar left (Braille Lite 40): full window left
-left advance bar right (Braille Lite 40): 1 line up
-right advance bar left (Braille Lite 40): 1 line down
-right advance bar right (Braille Lite 40): full window right
+The code:
+    for (i = 0; i < blitesz; rawdata[i++] = blitetrans[rawdata[i]]);
+can, in some (not yet quite clear) circumstances and under other
+processor architectures, not have the desired effect: all the text
+appears shifted by one cell. Supposedly the behavior for such a construct
+is undefined with gcc. So we put the i++ outside the assignment
+statement.
 
-1: line up
-4: line down
-23: keyboard up arrow
-56: keyboard down arrow
-2: keyboard left arrow
-5: keyboard right arrow
-3: window character left
-6: window character right
-235: line start
-256: line end
-123: top left
-456: bottom left
-
-125: home
-14: toggle cursor tracking
-124 chord: (un)freeze screen
-1456: toggle help mode
-34: toggle status mode
-24: toggle attribute display
-
-245 chord: route cursor to beginning of line
-45 chord: route cursor to current line
-236 chord: cut start
-356 chord: cut end
-1234 chord: paste
-
-36: speak line
-134: mute speech
-
-25 chord: configuration options: menu, save or reset (cancel).
-1235: restart Braille driver
-
-Insist on chord for *dangerous* commands, i.e. routing, cut/paste etc.
-These are also available if chorded while in keyboard emulation mode.
-
-TODO: prdifln nxdifln attrup attrdn top bot hwinlt hwinrt dispmd
-  csrvis etc
-
-INTERNAL:
-
-g chord: position internal (alternate inversion?) cursor for routing or
-  cutting.  Terminate with route, cutbeg, cutend or cancel.  To move
-  cursor: chrlt, chrrt by 1; bar by (width+3)/4; lnbeg, home, lnend for
-  beginning, middle and end of display.
-
-k chord toggles keyboard emulation mode - initially off.
-
-When on, unchorded characters passed directly to inskey(), unless prefixed
-by:
-
-u chord: uppercase (twice to lock)
-q chord: unlock
-x chord: control character
-35 chord: meta or ALT (hardwire to `^[' for the time being)
-z chord: cancel preceding meta/control
-
-In addition:
-b chord: backspace
-d chord: delete
-t chord: tab
-46 chord: return
-
-Also, on the BrailleLite 40, combinations with ...
-dot 7: shift
-dot 78: control
-dot 8: alt (or meta)
-
-
-Could get away without cursor keys - use routing - but we do need virtual
-console controls: incr, decr and spawn.
-
-Other internals:
-
-2356 chord: rotate BrailleLite by 180 degrees
-o chord: set two digit (00-99) repeat count for following command.  Starts
-  at 00 (default 01), new digits scroll in from right.  Either terminate
-  with e chord, or z chord to cancel, or chorded command.  Works with
-  cursor movement as well as keyboard emulation.
-
-Enough to be going on with ...
+The code:
+   int_cursor = MAX (int_cursor - blitesz / 4, 1);
+did not have the intended effect. int_cursor was signed and blitesz
+unsigned. The compiler somehow decided to evaluate the comparison as if
+the first argument was unsigned, which caused the MAX strategy to fail
+and the cursor to go off the display. Declaring blitesz as signed fixed
+it.

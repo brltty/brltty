@@ -23,8 +23,6 @@
 #
 ###############################################################################
 
-LD = ld
-
 HELPDIR = ../help
 LIBDIR = ../lib
 BRLNAMES = $(LIBDIR)/brltty-brl.lst
@@ -32,7 +30,10 @@ SPKNAMES = $(LIBDIR)/brltty-spk.lst
 
 HELPNAME = brltty-$(DRIVER_CODE).hlp
 HELPFILE = $(HELPDIR)/$(HELPNAME)
-$(HELPFILE): brlttyh*.txt
+ifeq ($(HELPTARGETS),)
+   HELPTARGETS = brlttyh*.txt
+endif
+$(HELPFILE): $(HELPTARGETS)
 	../txt2hlp $(HELPFILE) brlttyh*.txt
 
 braille-help: $(HELPFILE)

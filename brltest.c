@@ -33,19 +33,9 @@
 
 brldim brl;
 
-/* Output translation tables - the files *.auto.h are generated at
- * compile-time:
- */
-unsigned char texttrans[256] =
-{
-#include "text.auto.h"
-};
-
 #ifdef SAY_CMD
 unsigned char say_buffer[140];
 #endif
-
-unsigned char statcells[22];	/* status cell buffer */
 
 void message (char *s);
 

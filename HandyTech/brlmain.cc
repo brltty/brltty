@@ -202,7 +202,6 @@ extern "C" {
 
 int SendToHandy( unsigned char *data, int len )
 {
-  unsigned char c;
   if (memcmp(data,&refdata,len)!=0) {
     memcpy(&refdata,data,len);
     if( write( brl_fd, data, len ) != len ) return 0;

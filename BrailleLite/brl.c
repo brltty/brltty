@@ -18,8 +18,13 @@
 /* BrailleLite/brl.c - Braille display library
  * For Blazie Engineering's Braille Lite series
  * Author: Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Copyright (C) 1998 by Nikhil Nair.
  * Some additions by: Nicolas Pitre <nico@cam.org>
+ * Some modifications copyright 2001 by Stéphane Doyon <s.doyon@videotron.ca>.
  */
+
+#define VERSION \
+"Braille Lite driver, version 0.5 (August 2001)"
 
 #define BRL_C
 
@@ -39,6 +44,7 @@
 #include "../message.h"
 #include "brlconf.h"
 #include "../brl_driver.h"
+#include "../scr.h"
 #include "bindings.h"		/* for keybindings */
 
 
@@ -56,7 +62,7 @@ static unsigned char revtrans[256];	/* mapping for reversed display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char *rawdata;	/* writebrl() buffer for raw Braille data */
 static struct termios oldtio;	/* old terminal settings */
-static unsigned int blitesz;	/* set to 18 or 40 */
+static int blitesz;	/* set to 18 or 40 */
 static int waiting_ack = 0;	/* waiting acknowledgement flag */
 static int reverse_kbd = 0;	/* reverse keyboard flag */
 static int intoverride = 0;	/* internal override flag -
@@ -70,7 +76,6 @@ static int int_cursor = 0;	/* position of internal cursor: 0 = none */
 static unsigned char *qbase;	/* start of queue in memory */
 static int qoff = 0;		/* offset of first byte */
 static int qlen = 0;		/* number of items in the queue */
-static int repeat = 0;		/* repeat count for next qget() */
 
 
 /* Data type for a Braille Lite key, including translation into command
@@ -96,8 +101,11 @@ static int qget (blkey *);	/* get a byte from the input queue */
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "Braille Lite driver (BLT18/40)");
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");
+  LogAndStderr(LOG_NOTICE, VERSION);
+  /* I don't mean to take away anyone's copyright, but now that significant
+     modifs have been made in more recent years by 2-3 others... it'd become
+     bulky IMHO so let's just live without the copyright notice. */
+  /*LogAndStderr(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");*/
 }
 
 
@@ -115,7 +123,9 @@ initbrl (brldim * brl, const char *brldev)
   {"\005D"};			/* code to send before Braille */
   /* Init string for Model detection */
   static unsigned char InitData[18]="";
+#ifndef DETECT_FOREVER
   int timeout;			/* while waiting for an ACK */
+#endif
   unsigned char BltLen;
 
   res.disp = prevdata = rawdata = qbase = NULL;		/* clear pointers */
@@ -141,6 +151,7 @@ initbrl (brldim * brl, const char *brldev)
   tcflush (blite_fd, TCIFLUSH);	/* clean line */
   tcsetattr (blite_fd, TCSANOW, &newtio);	/* activate new settings */
 
+#ifndef DETECT_FOREVER
   /* Braille Lite identification */
   write (blite_fd, prebrl, 2);
   /* Now we must wait for an acknowledgement ... */
@@ -157,6 +168,19 @@ initbrl (brldim * brl, const char *brldev)
   }
   while (waiting_ack);
 
+#else
+  /* wait forever method */
+ again:
+  write (blite_fd, prebrl, 2);
+  waiting_ack = 1;
+  delay (100);
+  getbrlkeys ();
+  if(waiting_ack) {
+    delay(2000);
+    goto again;
+  }
+#endif
+
   /* Next, let's detect the BLT-Model (18 || 40). */
   BltLen=18;
   write (blite_fd, InitData, BltLen);
@@ -166,7 +190,8 @@ initbrl (brldim * brl, const char *brldev)
   if (waiting_ack) // no response, so it must be BLT40
   { // assuming BLT40 now
     BltLen=40;
-  }
+    sethlpscr(1);
+  }else sethlpscr(0);
   
   blitesz = res.x = BltLen;	/* initialise size of display - */
   res.y = 1;			/* Braille Lites are single line displays */
@@ -207,7 +232,10 @@ failure:
   free (prevdata);
   free (rawdata);
   free (qbase);
+
+#ifndef DETECT_FOREVER
 RestorePort:
+#endif
   if (blite_fd >= 0)
     close (blite_fd);
   brl->x = -1;
@@ -278,7 +306,8 @@ writebrl (brldim * brl)
       memcpy (prevdata, rawdata, blitesz);
 
       /* Dot mapping from standard to BrailleLite: */
-      for (i = 0; i < blitesz; rawdata[i++] = blitetrans[rawdata[i]]);
+      for (i = 0; i < blitesz; i++)
+	rawdata[i] = blitetrans[rawdata[i]];
 
       /* First we process any pending keystrokes, just in case any of them
        * are ^e ...
@@ -327,15 +356,28 @@ readbrl (int type)
 				 * 2 = setting repeat count
 				 * 3 = configuration options
 				 */
+  static int repeat = 0;		/* repeat count for command */
+  static int repeatNext = 0; /* flag to indicate  whether 0 we repeat the
+				same command or 1 we get the next command
+				and repeat that. */
   static int hold, shift, shiftlck, ctrl;
-  blkey key;
-  int temp = CMD_NOOP;
+#ifdef USE_TEXTTRANS
+  static int dot8shift;
+#endif
+  static blkey key;
   static unsigned char outmsg[41];
+  int temp = CMD_NOOP;
 
-  /* Process any new keystrokes: */
-  getbrlkeys ();
-  if (qget (&key) == EOF)	/* no keys to process */
-    return EOF;
+ again:
+  if(repeatNext || repeat == 0) {
+    /* Process any new keystrokes: */
+    getbrlkeys ();
+    if (qget (&key) == EOF)	/* no keys to process */
+      return EOF;
+    repeatNext = 0;
+  }
+  if(repeat>0)
+    repeat--;
 
   /* Our overall behaviour depends on the state variable (see above). */
   switch (state)
@@ -374,11 +416,15 @@ readbrl (int type)
 	switch (key.asc)
 	  {
 	  case BLT_KBEMU:	/* set keyboard emulation */
-	    kbemu = 1;
+	    kbemu ^= 1;
 	    shift = shiftlck = ctrl = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
 	    outmsg[0] = 0;
-	    message ("keyboard emu on", MSG_SILENT);
-	    delay (DISPDEL);	/* sleep for a while */
+	    if(kbemu)
+	      message ("keyboard emu on", MSG_SILENT);
+	    else message ("keyboard emu off", MSG_SILENT);
 	    return CMD_NOOP;
 	  case BLT_ROTATE:	/* rotate Braille Lite by 180 degrees */
 	    reverse_kbd ^= 1;
@@ -390,13 +436,13 @@ readbrl (int type)
 	  case BLT_REPEAT:	/* set repeat count */
 	    hold = 0;
 	    sprintf (outmsg, "Repeat count:");
-	    message (outmsg, MSG_SILENT);
+	    message (outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = 2;
 	    return CMD_NOOP;
 	  case BLT_CONFIG:	/* configuration menu */
 	    sprintf (outmsg, "Config? [m/s/r/z]");
-	    message (outmsg, MSG_SILENT);
+	    message (outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = 3;
 	    return CMD_NOOP;
@@ -423,8 +469,12 @@ readbrl (int type)
 	  ctrl = 1;
 	  break;
 	case 0x80:		/* dot 8 */
+#ifndef USE_TEXTTRANS
 	  outmsg[0] = 27;
 	  outmsg[1] = 0;
+#else
+	  dot8shift = 1;
+#endif
 	  break;
 	}
 
@@ -443,9 +493,26 @@ readbrl (int type)
 	  case BLT_CTRL:	/* control next */
 	    ctrl = 1;
 	    return CMD_NOOP;
+#ifdef USE_TEXTTRANS
+	  case BLT_DOT8SHIFT:	/* control next */
+	    dot8shift = 1;
+	    return CMD_NOOP;
+#endif
 	  case BLT_META:	/* meta next */
 	    outmsg[0] = 27;
 	    outmsg[1] = 0;
+	    return CMD_NOOP;
+	  case BLT_ESCAPE:
+	    outmsg[0] = 27;
+	    outmsg[1] = 0;
+	    inskey (outmsg);
+	    if (!shiftlck)
+	      shift = 0;
+	    ctrl = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
+	    outmsg[0] = 0;
 	    return CMD_NOOP;
 	  case BLT_TAB:
 	    outmsg[0] = '\t';
@@ -454,6 +521,9 @@ readbrl (int type)
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
 	    outmsg[0] = 0;
 	    return CMD_NOOP;
 	  case BLT_BACKSP:	/* remove backwards */
@@ -463,6 +533,9 @@ readbrl (int type)
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
 	    outmsg[0] = 0;
 	    return CMD_NOOP;
 	  case BLT_DELETE:	/* remove forwards */
@@ -475,6 +548,9 @@ readbrl (int type)
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
 	    outmsg[0] = 0;
 	    return CMD_NOOP;
 	  case BLT_ENTER:	/* enter - do ^m, or ^j if control-enter */
@@ -485,32 +561,49 @@ readbrl (int type)
 	    if (!shiftlck)
 	      shift = 0;
 	    ctrl = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
 	    outmsg[0] = 0;
 	    return CMD_NOOP;
 	  case BLT_ABORT:	/* abort - quit keyboard emulation */
 	    kbemu = 0;
 	    message ("keyboard emu off", MSG_SILENT);
-	    delay (DISPDEL);	/* sleep for a while */
 	    return CMD_NOOP;
 	  default:		/* unrecognised command */
 	    shift = shiftlck = ctrl = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
 	    outmsg[0] = 0;
 	    return CMD_NOOP;
 	  }
 
       /* OK, it's an ordinary (non-chorded) keystroke, and kbemu is on. */
       temp = (outmsg[0] == 0) ? 0 : 1;	/* just checking for a meta character */
+#ifndef USE_TEXTTRANS
       if (ctrl && key.asc >= 96)
 	outmsg[temp] = key.asc & 0x1f;
       else if (shift && (key.asc & 0x40))
 	outmsg[temp] = key.asc & 0xdf;
       else
 	outmsg[temp] = key.asc;
+#else
+      outmsg[temp]
+	= untexttrans[
+		      (keys_to_dots[key.raw]
+		       | ((ctrl) ? 0xC0 : 
+			  (shift) ? 0x40 : 
+			  (dot8shift) ? 0x80 : 0))];
+#endif
       outmsg[temp + 1] = 0;
       inskey (outmsg);
       if (!shiftlck)
 	shift = 0;
       ctrl = 0;
+#ifdef USE_TEXTTRANS
+      dot8shift = 0;
+#endif
       outmsg[0] = 0;
       return CMD_NOOP;
 
@@ -570,38 +663,50 @@ readbrl (int type)
 	int_cursor = key.routing;
       return CMD_NOOP;
     case 2:			/* set repeat count */
-      if (key.spcbar)		/* chorded */
-	switch (key.asc)
-	  {
-	  case BLT_ENDCMD:	/* set repeat count */
-	    if (hold > 1)
-	      repeat = hold - 1;
-	  case BLT_ABORT:	/* abort or endcmd */
-	    outmsg[0] = 0;
-	    state = 0;
-	    intoverride = 0;
-	  default:		/* in all cases of chorded commands */
-	    return CMD_NOOP;
-	  }
       if (key.asc >= '0' && key.asc <= '9')
 	{
 	  hold = (hold * 10 + key.asc - '0') % 100;
-	  if (hold)
+	  if(hold)
 	    sprintf (outmsg, "Repeat count: %d", hold);
-	  else
-	    sprintf (outmsg, "Repeat count:");
+	  else sprintf (outmsg, "Repeat count: ");
 	  intoverride = 0;
-	  message (outmsg, MSG_SILENT);
+	  message (outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;
 	}
       else if (key.routing)
 	{
-	  hold = key.routing;
+	  hold = key.routing +1;
 	  sprintf (outmsg, "Repeat count: %d", hold);
 	  intoverride = 0;
-	  message (outmsg, MSG_SILENT);
+	  message (outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;
 	}
+      else{
+	intoverride = 0;
+	outmsg[0] = 0;
+	state = 0;
+	if(hold > 0) {
+	  if(key.asc == SWITCHVT_NEXT || key.asc == SWITCHVT_PREV)
+	    /* That's chorded or not... */
+	    return CR_SWITCHVT + (hold-1);
+	  else if (key.spcbar)		/* chorded */
+	    switch(key.asc)
+	      {
+	      case BLT_ENDCMD:	/* set repeat count */
+		if (hold > 1) {
+		  /* repeat next command */
+		  repeat = hold;
+		  repeatNext = 1;
+		}
+		/* fall through */
+	      case BLT_ABORT:	/* abort or endcmd */
+		return CMD_NOOP;
+	      }
+	  /* if the key is any other, start repeating it. */
+	  repeat = hold;
+	  goto again;
+	}
+      }
       return CMD_NOOP;
     case 3:			/* configuration options */
       if (!key.spcbar)		/* not chorded */
@@ -773,14 +878,9 @@ qget (blkey * kp)
 	}
     }
 
-  if (repeat > 0)		/* we'll have to repeat this ... */
-    repeat--;
-  else
-    /* adjust queue variables for next member */
-    {
-      qoff = (qoff + (ext ? 3 : 1)) % QSZ;
-      qlen -= (ext ? 3 : 1);
-    }
+  /* adjust queue variables for next member */
+  qoff = (qoff + (ext ? 3 : 1)) % QSZ;
+  qlen -= (ext ? 3 : 1);
 
   return 0;
 }

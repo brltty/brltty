@@ -24,3 +24,5 @@ void message (unsigned char *, short);
 /* Flags for the second argument: */
 #define MSG_SILENT 1		/* Prevent output to speech */
 #define MSG_WAITKEY 2		/* Wait for a key after the message is displayed */
+#define MSG_NODELAY 4 /* message now automatically delays for DISPDEL ms,
+			 unless this flag is set. */

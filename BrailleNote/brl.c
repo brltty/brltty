@@ -40,7 +40,6 @@ static int displayDescriptor = -1;
 static int displayTerminal;
 
 #include "../brl.h"
-#include "../common.h"
 #include "../config.h"
 #include "../misc.h"
 #include "../inskey.h"

@@ -1,6 +1,7 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   BrailleLite enhancements. (sd)
    Add the HandyTech driver. Andreas Gross <andi@andi-bika.de>
    Add cut-and-paste for VideoBraille. (Christian Comaschi)
    List translation tables in make file. (dm)

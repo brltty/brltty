@@ -57,7 +57,6 @@
    #define USE_PARALLEL_PORT 0
 #endif
 
-
 #if USE_PARALLEL_PORT == 0
    /* If you defined USE_PARALLEL_PORT to 0, then the serial line baudrate
     * is defined here.  Note that default braille serial device is defined 

@@ -18,6 +18,13 @@
 /* beeps.c - console beeps used by the system
  */
 
+#include <string.h>
+
+#include "brl.h"
+#include "common.h"
+
+void tactileBell(int sing[]);
+
 #ifdef linux
 
 #include <sys/ioctl.h>
@@ -101,7 +108,8 @@ play (int song[])
 	}
       nosnd(consolefd);
       close (consolefd);
-    }
+    }else
+      tactileBell(song);
 }
 
 #else
@@ -109,6 +117,7 @@ play (int song[])
 void
 play (int song[])
 {
+  tactileBell(song);
 }
 #endif
 
@@ -182,3 +191,26 @@ int snd_skip[] =
 int snd_skipmore[] =
 {2100, 20, 1, 1, 0};
 
+void tactileBell(int song[])
+{
+  unsigned char pat = 0;
+  int time = 20;
+  if(song == snd_bounce) {
+    pat = 0xFF;
+    time *= 2.5;
+  }else if(song == snd_wrap_up || song == snd_wrap_down) {
+    pat = 0xAA;
+  }else if(song == snd_skip_first) {
+    pat = 0xC3;
+    time *= 2;
+    /* may be we can even use snd_skip and snd_skipmore! later. */
+  }
+  /* later: link/unlink, cut beg/end, toggle on/off... */
+  if(pat) {
+    memset(statcells, pat, sizeof(statcells));
+    memset(brl.disp, pat, brl.x*brl.y);
+    braille->setstatus(statcells);
+    braille->write(&brl);
+    shortdelay(time);
+  }
+}

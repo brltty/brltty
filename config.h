@@ -67,3 +67,6 @@
 #define INIT_ATTR_ON_CNT 4      /* for attribute underlining */
 #define INIT_ATTR_OFF_CNT 12
 
+/* Define this to allow "offright" position: i.e. positions such that part
+   of the braille display goes beyond the right edge of the screen .*/
+#define ALLOW_OFFRIGHT_POSITIONS

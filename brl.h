@@ -88,6 +88,8 @@
 #define CMD_INFO 'i'		/* get status information */
 #define CMD_RESTARTBRL 5        /* reinitialize braille display */
 #define CMD_RESTARTSPEECH 124   /* reinitialize speech driver */
+#define CMD_SWITCHVT_PREV 16 /* switch to previous VT */
+#define CMD_SWITCHVT_NEXT 17 /* switch to next VT */
 
 /* Cursor routing */
 #define CMD_CSRJMP 'j'		/* jump cursor to window (cursor routing) */

@@ -30,6 +30,28 @@
 
 #include "misc.h"
 
+/*
+ * Output braille translation tables.
+ * The files *.auto.h (the default tables) are generated at compile-time.
+ */
+unsigned char texttrans[256] =
+{
+  #include "text.auto.h"
+};
+unsigned char untexttrans[256];
+
+unsigned char attribtrans[256] =
+{
+  #include "attrib.auto.h"
+};
+
+/*
+ * Status cells support 
+ * remark: the Papenmeier has a column with 22 cells, 
+ * all other terminals use up to 5 bytes
+ */
+unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
+
 // Process each line of an input text file safely.
 // This routine handles the actual reading of the file,
 // insuring that the input buffer is always big enough,
@@ -370,3 +392,11 @@ int portrait_flag(int number, int on)
   return dots;
 }
 
+/* Reverse a 256x256 mapping, used for charset maps. */
+void reverseTable(unsigned char *origtab, unsigned char *revtab)
+{
+  int i;
+  memset(revtab, 0, 256);
+  for(i=255; i>=0; i--)
+    revtab[origtab[i]] = i;
+}

@@ -31,3 +31,12 @@
 
 /* Define the preferred/default status cells mode. */
 #define PREFSTYLE ST_None
+
+/* Define this if you want to keep trying to detect a display forever,
+   instead of exiting when no display appears to be connected. */
+#define DETECT_FOREVER
+
+/* Define the following for dots to character mapping for input to use 
+   the same (user-defined) table as is used for output, instead of the
+   hard-coded US table. */
+#define USE_TEXTTRANS

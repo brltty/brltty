@@ -25,6 +25,7 @@ DRIVER_CODE = bl
 DRIVER_NAME = BrailleLite
 BRAILLE_MODELS = 18/40
 SPEECH_MODELS = 
+HELPTARGETS = brlttyhelp0.txt brlttyhelp1.txt
 include ../driver.mk
 
 brl.o: brl.c ../brl.h ../misc.h ../inskey.h ../message.h \
@@ -34,3 +35,13 @@ brl.o: brl.c ../brl.h ../misc.h ../inskey.h ../message.h \
 speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h brlconf.h
 	$(CC) $(SPK_CFLAGS) -c speech.c
 
+brlttyhelp0.txt: brltty_genhelp.txt
+	sed 's/<x20>\(.*\)$$/\1/' < brltty_genhelp.txt \
+	| grep -Ev '<x40>.*$$' > brlttyhelp0.txt
+
+brlttyhelp1.txt: brltty_genhelp.txt
+	sed 's/<x40>\(.*\)$$/\1/' < brltty_genhelp.txt \
+	| grep -Ev '<x20>.*$$' > brlttyhelp1.txt
+
+distclean:
+	rm -f brlttyhelp0.txt brlttyhelp1.txt

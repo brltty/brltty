@@ -44,7 +44,7 @@ struct brltty_env {
 	short skpblnkeol;
 	short skpblnkwins;
 	short stcellstyle;
-};
+} __attribute__((packed));
 
 /* 
  * struct definition for volatile parameters
@@ -75,14 +75,12 @@ extern struct brltty_param initparam;	/* defaults for new brltty_param */
 extern struct brltty_env env;		/* current env parameters */
 extern brldim brl;			/* braille driver reference */
 
+extern short offr; /* Braille display can stick out by brl.x-offr from
+		      the right edge of the screen. */
 extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */
 extern short csr_offright;		/* used for sliding window */
-
-extern unsigned char texttrans[256];	/* current text to braille translation table */
-extern unsigned char untexttrans[256];	/* current braille to text translation table */
-extern unsigned char statcells[22];	/* status cell buffer */
 
 
 /*

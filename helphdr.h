@@ -30,5 +30,5 @@ typedef struct
   {
     unsigned char rows;
     unsigned char cols;
-  }
+} __attribute__((packed))
 pageinfo;

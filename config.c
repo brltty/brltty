@@ -297,7 +297,6 @@ saveconfig (void)
   if (fd < 0){
     LogPrint(LOG_WARNING, "Cannot save to configuration file '%s'.", opt_c);
     message ("can't save config", 0);
-    delay (DISPDEL);
   }
   else{
     fchmod (fd, S_IRUSR | S_IWUSR);
@@ -324,6 +323,14 @@ startbrl(void)
       LogClose();
       exit (5);
     }
+#ifdef ALLOW_OFFRIGHT_POSITIONS
+  /* The braille display is allowed to stick out the right side of the
+     screen by brl.x-offr. This allows the feature: */
+  offr = 1;
+#else
+  /* This disallows it, as it was before. */
+  offr = brl.x;
+#endif
   fwinshift = brl.x;
   hwinshift = fwinshift / 2;
   csr_offright = brl.x / 4;
@@ -511,10 +518,9 @@ void startup(int argc, char *argv[])
       if (tbl_fd >= 0)
 	  close (tbl_fd);
     }
-  for (i=0; i<256; ++i)
-    {
-       untexttrans[texttrans[i]] = i;
-    }
+
+  /* Find dots to char mapping by reversing braille translation table. */
+  reverseTable(texttrans, untexttrans);
 
   /*
    * Print version and copyright information: 
@@ -742,7 +748,6 @@ configmenu (void)
   braille->setstatus(statcells);
 
   message ("Configuration menu", 0);
-  delay (DISPDEL);
 
   while (keep_going)
     {
@@ -841,12 +846,11 @@ configmenu (void)
 		"Press UP and DOWN to select an item, "
 		"HOME to toggle the setting. "
 		"Routing keys are available too! "
-		"Press CONFIG again to quit.", MSG_WAITKEY);
+		"Press CONFIG again to quit.", MSG_WAITKEY |MSG_NODELAY);
 	    break;
 	  case CMD_RESET:
 	    env = oldenv;
 	    message ("changes undone", 0);
-	    delay (DISPDEL);
 	    break;
 	  case CMD_SAVECONF:
 	    savecfg |= 1;
@@ -869,7 +873,9 @@ configmenu (void)
 	    if (savecfg)
 	      {
 		saveconfig ();
-		play (snd_done);
+		if(env.sound)
+		  play (snd_done);
+		else message("Saved", 0);
 	      }
 	    return;
 	  }

@@ -51,6 +51,9 @@ short dispmd = LIVE_SCRN;	/* freeze screen on/off */
 short infmode = 0;		/* display screen image or info */
 short csr_offright;		/* used for sliding window */
 short hwinshift;		/* Half window horizontal distance */
+short offr; /* How much of the display must be kept onto the screen when
+	       moving to the right. In other words, the display can move
+	       beyond the right edge of the screen by brl.x-offr. */
 short fwinshift;		/* Full window horizontal distance */
 short vwinshift;		/* Window vertical distance */
 struct brltty_env env;		/* environment (i.e. global) parameters */
@@ -76,21 +79,6 @@ unsigned int TickCount = 0;	/* incremented each main loop cycle */
 	       ? 1 : ((keypress & VAL_SWITCHOFF) \
 		      ? 0 : (var ^ 1)))
 
-
-/*
- * Output braille translation tables.
- * The files *.auto.h (the default tables) are generated at compile-time.
- */
-unsigned char texttrans[256] =
-{
-  #include "text.auto.h"
-};
-unsigned char untexttrans[256];
-
-unsigned char attribtrans[256] =
-{
-  #include "attrib.auto.h"
-};
 
 unsigned char *curtbl = texttrans;	/* active translation table */
 
@@ -132,13 +120,6 @@ switchto( unsigned int scrno )
   usetable (p->dispmode ? TBL_ATTRIB : TBL_TEXT);
 }
 
-
-/*
- * Status cells support 
- * remark: the Papenmeier has a column with 22 cells, 
- * all other terminals use up to 5 bytes
- */
-unsigned char statcells[22];	/* status cell buffer */
 
 /* Number dot translation for status cells */
 const unsigned char num[10] = {14, 1, 5, 3, 11, 9, 7, 15, 13, 6};
@@ -241,10 +222,8 @@ main (int argc, char *argv[])
   signal (SIGCHLD, child_stop_handler);
   signal (SIGPIPE, SIG_IGN);
 
-  if (!opt_q) {
+  if (!opt_q)
     message (VERSION, 0);	/* display initialisation message */
-    delay (DISPDEL);		/* sleep for a while */
-  }
 
   /*
    * Initialize state variables 
@@ -254,8 +233,10 @@ main (int argc, char *argv[])
   for (i = 1; i <= NBR_SCR; i++)
     scrparam[i] = 0;
   curscr = 0;
-	
+  
   getstat (&scr);
+  /* I don't know if runtime screen resizing is something that can happen,
+     but we're not ready for it. */
   switchto( scr.no );			/* allocate current screen params */
   setwinxy (scr.posx, scr.posy);	/* set initial window position */
   oldwinx = p->winx; oldwiny = p->winy;
@@ -315,7 +296,8 @@ main (int argc, char *argv[])
 	  case CMD_FWINLT:
 	    if(env.skpblnkwins)
 	      goto fwinltskip;
-	    if(env.skpblnkeol && p->winx == scr.cols-brl.x
+	    if(env.skpblnkeol
+	       && p->winx>0
 	       && p->winy > 0
 	       && (scr.posy != p->winy || scr.posx >= p->winx)) {
 	      char buffer[scr.cols];
@@ -401,7 +383,8 @@ main (int argc, char *argv[])
 	  case CMD_FWINRT:
 	    if(env.skpblnkwins)
 	      goto fwinrtskip;
-	    if(env.skpblnkeol && p->winx == 0
+	    if(env.skpblnkeol 
+	       && p->winx+brl.x < scr.cols
 	       && p->winy < scr.rows - brl.y
 	       && (scr.posy != p->winy || scr.posx < brl.x)) {
 	      char buffer[scr.cols];
@@ -412,10 +395,11 @@ main (int argc, char *argv[])
 		  }
 		      ,buffer, SCR_TEXT);
 
-	      for(i=brl.x; i<scr.cols; i++)
+	      for(i=p->winx+brl.x; i<scr.cols; i++)
 		if(buffer[i] != ' ' && buffer[i] != 0)
 		  break;
 	      if(i == scr.cols) {
+		p->winx = 0;
 		play (snd_wrap_down);
 		goto skip_forw;
 	      }
@@ -428,7 +412,7 @@ main (int argc, char *argv[])
 	      }else
 		  play (snd_bounce);
 	    }else
-	      p->winx = MIN (p->winx + fwinshift, scr.cols - brl.x);
+	      p->winx = MIN (p->winx + fwinshift, scr.cols - offr);
 	    break;
 	    skip_forw: /* go on through */
 	  case CMD_LNDN:
@@ -549,8 +533,8 @@ main (int argc, char *argv[])
 		  break;
 		}
 	      }else
-		p->winx = MIN (p->winx + fwinshift, scr.cols - brl.x);
-	      l = MAX(p->winx, scr.cols-brl.x);
+		p->winx = MIN (p->winx + fwinshift, scr.cols - offr);
+	      l = MIN(brl.x, scr.cols -p->winx);
 	      getscr ((winpos)
 	      {
 		p->winx, p->winy, l, 1
@@ -575,7 +559,7 @@ main (int argc, char *argv[])
 		  p->winx = scr.cols - brl.x;
 		  p->winy--;
 		  if(++cnt<=3)
-		    play (snd_wrap_down);
+		    play (snd_wrap_up);
 		}else{
 		  p->winy = y;
 		  p->winx = x;
@@ -584,7 +568,7 @@ main (int argc, char *argv[])
 		}
 	      }else
 		p->winx = MAX (p->winx - fwinshift, 0);
-	      l = MAX(p->winx, scr.cols-brl.x);
+	      l = MIN(brl.x, scr.cols -p->winx);
 	      getscr ((winpos)
 	      {
 		p->winx, p->winy, l, 1
@@ -663,9 +647,9 @@ main (int argc, char *argv[])
 	    p->winx = MAX (p->winx - 1, 0);
 	    break;
 	  case CMD_CHRRT:
-	    if (p->winx == scr.cols - brl.x)
+	    if (p->winx >= scr.cols - offr)
 	      play (snd_bounce);
-	    p->winx = MIN (p->winx + 1, scr.cols - brl.x);
+	    else p->winx++;
 	    break;
 	  case CMD_HWINLT:
 	    if (p->winx == 0)
@@ -673,9 +657,9 @@ main (int argc, char *argv[])
 	    p->winx = MAX (p->winx - hwinshift, 0);
 	    break;
 	  case CMD_HWINRT:
-	    if (p->winx == scr.cols - brl.x)
+	    if (p->winx >= scr.cols - offr)
 	      play (snd_bounce);
-	    p->winx = MIN (p->winx + hwinshift, scr.cols - brl.x);
+	    p->winx = MIN (p->winx + hwinshift, scr.cols - offr);
 	    break;
 	  case CMD_CSRJMP:
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
@@ -746,7 +730,7 @@ main (int argc, char *argv[])
 	    cut_begin (p->winx, p->winy);
 	    break;
 	  case CMD_CUT_END:
-	    cut_end (p->winx + brl.x - 1, p->winy + brl.y - 1);
+	    cut_end (MIN(p->winx + brl.x - 1, scr.cols-1), p->winy + brl.y - 1);
 	    break;
 	  case CMD_PASTE:
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
@@ -765,10 +749,14 @@ main (int argc, char *argv[])
 	      TOGGLE(v);
 	      if(v){
 		dispmd = selectdisp (dispmd | FROZ_SCRN);
-		play (snd_freeze);
+		if(env.sound)
+		  play (snd_freeze);
+		else message("Freezing", 0);
 	      }else{
 		dispmd = selectdisp (dispmd & ~FROZ_SCRN);
-		play (snd_unfreeze);
+		if(env.sound)
+		  play (snd_unfreeze);
+		else message("Unfreezing", 0);
 	      }
 	    }
 	    break;
@@ -785,10 +773,7 @@ main (int argc, char *argv[])
 		    *p = initparam;	/* reset params for help screen */
 		  }
 		else	/* help screen selection failed */
-		  {
 		    message ("can't find help", 0);
-		    delay (DISPDEL);
-		  }
 	      }else
 		dispmd = selectdisp (dispmd & ~HELP_SCRN);
 	    }
@@ -840,7 +825,9 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_SAVECONF:
 	    saveconfig ();
-	    play (snd_done);
+	    if(env.sound)
+	      play (snd_done);
+	    else message("Saved", 0);
 	    break;
 	  case CMD_CONFMENU:
 	    configmenu ();
@@ -851,7 +838,9 @@ main (int argc, char *argv[])
 	    csron = 1;
 	    capon = 0;
 	    csrcntr = capcntr = 1;
-	    play (snd_done);
+	    if(env.sound)
+	      play (snd_done);
+	    else message("Reset", 0);
 	    break;
 	  case CMD_SAY:
 	  case CMD_SAYALL:
@@ -891,6 +880,14 @@ main (int argc, char *argv[])
 	  case CMD_MUTE:
 	    speech->mute();
 	    break;
+	  case CMD_SWITCHVT_PREV:
+	    if(scr.no >0)
+	      switchvt( scr.no -1);
+	    break;
+	  case CMD_SWITCHVT_NEXT:
+	    if(scr.no < 0X3F-1)
+	      switchvt( scr.no +1);
+	    break;
 	  default: {
 	      int key = (keypress & ~0xFF);
 	      int arg = keypress &0xFF;
@@ -909,18 +906,19 @@ main (int argc, char *argv[])
 		/* Cursor routing keys: */
 		if(arg >= brl.x || (dispmd & HELP_SCRN) == HELP_SCRN)
 		  break;
-		csrjmp (p->winx + arg, p->winy, curscr);
+		csrjmp (MIN(p->winx + arg, scr.cols-1), p->winy, curscr);
 		break;
 	      case CR_BEGBLKOFFSET:
-		if(arg >= brl.x) break;
+		if(arg >= brl.x || p->winx +arg >= scr.cols)
+		  break;
 		cut_begin (p->winx + arg, p->winy);
 		break;
 	      case CR_ENDBLKOFFSET:
 		if(arg >= brl.x) break;
-		cut_end (p->winx + arg, p->winy);
+		cut_end (MIN(p->winx + arg, scr.cols-1), p->winy);
 		break;
 	      case CR_SWITCHVT:
-		if(arg < 0X3F)
+		if(arg < 0X3F-1)
 		  switchvt(arg+1);
 		break;
 	      case CR_NXINDENT:
@@ -1042,6 +1040,7 @@ main (int argc, char *argv[])
       /* If not in info mode, get screen image: */
       if (!infmode)
 	{
+	  int winlen;
 	  /* Update the Braille display. * For the sake of displays on 
 	   * which the status cells and the * main display have to be
 	   * updated together, it is guaranteed * that setbrlstat() will 
@@ -1118,14 +1117,15 @@ main (int argc, char *argv[])
 	    }
 	  braille->setstatus(statcells);
 
+	  winlen = MIN(brl.x, scr.cols -p->winx);
 	  getscr ((winpos)
 		  {
-		  p->winx, p->winy, brl.x, brl.y
+		  p->winx, p->winy, winlen, brl.y
 		  }
 		  ,brl.disp, \
 		  p->dispmode ? SCR_ATTRIB : SCR_TEXT);
 	  if (env.capblink && !capon)
-	    for (i = 0; i < brl.x * brl.y; i++)
+	    for (i = 0; i < winlen * brl.y; i++)
 	      if (BRL_ISUPPER (brl.disp[i]))
 		brl.disp[i] = ' ';
 
@@ -1133,40 +1133,52 @@ main (int argc, char *argv[])
 	   * Do Braille translation using current table: 
 	   */
 	  if (env.sixdots && curtbl != attribtrans)
-	    for (i = 0; i < brl.x * brl.y; brl.disp[i] = \
+	    for (i = 0; i < winlen * brl.y; brl.disp[i] = \
 		 curtbl[brl.disp[i]] & 0x3f, i++);
 	  else
-	    for (i = 0; i < brl.x * brl.y; brl.disp[i] = \
+	    for (i = 0; i < winlen * brl.y; brl.disp[i] = \
 		 curtbl[brl.disp[i]], i++);
+
+	  if(winlen <brl.x) {
+	    /* We got a rectangular piece of text with getscr. But the display
+	       is in an off-right position, with some cells at the end blank.
+	       So we'll insert these cells and blank them. */
+	    for(i=brl.y-1; i>0; i--)
+	      memmove(brl.disp +i*brl.x, brl.disp +i*winlen, winlen);
+	    for(i=0; i<brl.y; i++)
+	      memset(brl.disp +i*brl.x +winlen, 0, brl.x-winlen);
+	  }
 
 	  /* Attribute underlining: if viewing text (not attributes), attribute
 	     underlining is active and visible and we're not in help, then we
 	     get the attributes for the current region and OR the underline. */
 	  if (!p->dispmode && env.attrvis && (!env.attrblink || attron)
 	      && !(dispmd & HELP_SCRN)){
-	    unsigned char attrbuf[brl.x*brl.y];
+	    int x,y;
+	    unsigned char attrbuf[winlen*brl.y];
 	    getscr ((winpos)
 		    {
-		    p->winx, p->winy, brl.x, brl.y
+		    p->winx, p->winy, winlen, brl.y
 		    }
 		    ,attrbuf, \
 		    SCR_ATTRIB);
-	    for (i = 0; i < brl.x * brl.y; i++)
-	      switch(attrbuf[i]){
-		/* Experimental! Attribute values are hardcoded... */
+	    for(y=0; y<brl.y; y++)
+	      for(x=0; x<winlen; x++)
+		switch(attrbuf[y*winlen + x]){
+		  /* Experimental! Attribute values are hardcoded... */
   	        case 0x08: /* dark-gray on black */
   	        case 0x07: /* light-gray on black */
   	        case 0x17: /* light-gray on blue */
   	        case 0x30: /* black on cyan */
 		  break;
 	        case 0x70: /* black on light-gray */
-		  brl.disp[i] |= ATTR1CHAR;
+		  brl.disp[y*brl.x +x] |= ATTR1CHAR;
 		  break;
 	        case 0x0F: /* white on black */
 	        default:
-		  brl.disp[i] |= ATTR2CHAR;
+		  brl.disp[y*brl.x +x] |= ATTR2CHAR;
 		  break;
-	      };
+		};
 	  }
 
 	  /*
@@ -1245,7 +1257,7 @@ main (int argc, char *argv[])
 	  braille->setstatus(statcells);
 
 	  if (brl.x * brl.y >= 21)
-	    message (infbuf, MSG_SILENT);
+	    message (infbuf, MSG_SILENT |MSG_NODELAY);
 	  else
 	    {
 	      memcpy (brl.disp, infbuf, brl.x * brl.y);
@@ -1316,11 +1328,14 @@ message (unsigned char *s, short flags)
        * work ... 
        */
       for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], i++);
+
       braille->write( &brl );
 
       if ( l || (flags & MSG_WAITKEY) )
 	while (braille->read(TBL_ARG) == EOF)
 	  delay (KEYDEL);
+      else if(!(flags & MSG_NODELAY))
+	delay(DISPDEL);
     }
 }
 

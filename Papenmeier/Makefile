@@ -39,7 +39,8 @@ brl.o: $(TARGETS)
 
 read_config.c: read_config.y cmd.h hlp.h brl-cfg.h $(BRL_H) ../misc.h ../misc.c
 
-read_confg: read_config.c
+read_config: read_config.c
+	$(HOSTCC) $(CFLAGS) read_config.c -o read_config
 
 serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c
 	$(CC) $(CFLAGS) serial.c -o serial -lncurses 

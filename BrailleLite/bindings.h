@@ -45,6 +45,21 @@ static unsigned char brltrans[64] =
   '_', '?', 'w', '}', '#', 'y', ')', '='
 };
 
+#ifdef USE_TEXTTRANS
+/* Map from key representations (bits 0-5 for dots 1-6) to BRLTTY dot
+   pattern representation (dot 1 bit 0, dot 4 bit 1, dot 2 bit 2, etc) */
+static unsigned char keys_to_dots[64] =
+{
+  0x0, 0x1, 0x4, 0x5, 0x10, 0x11, 0x14, 0x15,
+  0x2, 0x3, 0x6, 0x7, 0x12, 0x13, 0x16, 0x17,
+  0x8, 0x9, 0xc, 0xd, 0x18, 0x19, 0x1c, 0x1d,
+  0xa, 0xb, 0xe, 0xf, 0x1a, 0x1b, 0x1e, 0x1f,
+  0x20, 0x21, 0x24, 0x25, 0x30, 0x31, 0x34, 0x35,
+  0x22, 0x23, 0x26, 0x27, 0x32, 0x33, 0x36, 0x37,
+  0x28, 0x29, 0x2c, 0x2d, 0x38, 0x39, 0x3c, 0x3d,
+  0x2a, 0x2b, 0x2e, 0x2f, 0x3a, 0x3b, 0x3e, 0x3f
+};
+#endif
 
 /* This table is for global BRLTTY commands, to be passed straight back to
  * the main module.  If keyboard emulation is off, they will work with or
@@ -57,13 +72,13 @@ static unsigned char brltrans[64] =
 static unsigned char cmdtrans[64] =
 {
   0, CMD_LNUP, CMD_KEY_LEFT, 0, CMD_CHRLT, 0, CMD_KEY_UP, CMD_TOP_LEFT,
-  CMD_LNDN, CMD_CSRTRK, CMD_DISPMD, CMD_FREEZE, CMD_INFO, CMD_MUTE, 0, CMD_PASTE,
+  CMD_LNDN, CMD_CSRTRK, CMD_DISPMD, CMD_FREEZE, CMD_INFO, CMD_MUTE, CMD_NXSEARCH, CMD_PASTE,
   CMD_KEY_RIGHT, 0, 0, CMD_HOME, 0, 0, CMD_LNBEG, CMD_RESTARTBRL,
-  CMD_CSRJMP_VERT, 0, CMD_CSRJMP, 0, 0, 0, 0, 0,
-  CMD_CHRRT, 0, 0, 0, CMD_SAY, 0, CMD_CUT_BEG, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  CMD_KEY_DOWN, 0, CMD_LNEND, 0, CMD_CUT_END, 0, 0, 0,
-  CMD_BOT_LEFT, CMD_HELP, 0, 0, 0, 0, 0, 0
+  CMD_CSRJMP_VERT, 0, CMD_CSRJMP, 0, 0, CMD_NXBLNKLN, 0, 0,
+  CMD_CHRRT, 0, 0, 0, CMD_SAY, 0, CMD_CUT_BEG, CMD_SWITCHVT_NEXT,
+  0, 0, 0, CMD_PRBLNKLN, 0, 0, 0, 0,
+  CMD_KEY_DOWN, CMD_PRSEARCH, CMD_LNEND, 0, CMD_CUT_END, 0, 0, 0,
+  CMD_BOT_LEFT, CMD_HELP, 0, 0, CMD_SWITCHVT_PREV, 0, 0, 0
 };
 
 /* Dangerous commands; 1 bit per command, order as cmdtrans[], set if
@@ -71,7 +86,7 @@ static unsigned char cmdtrans[64] =
  */
 
 static unsigned char dangcmd[8] =
-{ 0x00, 0x88, 0x00, 0x05, 0x40, 0x00, 0x10, 0x00 };
+{ 0x00, 0x88, 0x80, 0x05, 0x40, 0x00, 0x10, 0x00 };
 
 #endif /* defined(BRL_C) */
 
@@ -105,15 +120,22 @@ static unsigned char dangcmd[8] =
 #define BLT_CONFIG '3'
 #define BLT_ENDCMD 'e'
 #define BLT_ABORT 'z'
+#define SWITCHVT_NEXT 's'
+#define SWITCHVT_PREV ':'
+
 
 /* For keyboard emulation mode: */
 #define BLT_UPCASE 'u'
 #define BLT_UPCOFF 'q'
 #define BLT_CTRL 'x'
+#ifdef USE_TEXTTRANS
+#define BLT_DOT8SHIFT '5'
+#endif
 #define BLT_META '9'
 #define BLT_BACKSP 'b'
 #define BLT_DELETE 'd'
 #define BLT_TAB 't'
+#define BLT_ESCAPE '{'
 #define BLT_ENTER '.'
 /* Console - incr, decr, spawn.  Cursor keys? */
 

@@ -87,3 +87,10 @@ extern int seascape_number(int x);
 extern int seascape_flag(int number, int on);
 extern int portrait_number(int x);
 extern int portrait_flag(int number, int on);
+
+#define MAXNSTATCELLS 22
+extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
+extern unsigned char texttrans[256];	/* current text to braille translation table */
+extern unsigned char untexttrans[256];	/* current braille to text translation table */
+extern void reverseTable(unsigned char *origtab, unsigned char *revtab);
+extern unsigned char attribtrans[256];  /* current attributes to braille translation table */
