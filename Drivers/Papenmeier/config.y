@@ -130,6 +130,10 @@ addTerminal (int identifier) {
 
       terminal->frontKeys = 0;
       terminal->hasEasyBar = 0;
+      terminal->leftSwitches = 0;
+      terminal->rightSwitches = 0;
+      terminal->leftKeys = 0;
+      terminal->rightKeys = 0;
 
       terminal->statusCount = 0;
       terminal->modifierCount = 0;
@@ -238,14 +242,26 @@ setFrontKeys (int count) {
 }
 
 static int
-setHasEasyBar (void) {
+setHasEasyBar (int ls, int rs, int lk, int rk) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    if (!terminal->hasEasyBar) {
-      terminal->hasEasyBar = 1;
-      return 1;
-    } else {
+    if (terminal->hasEasyBar) {
       yyerror("duplicate easy bar specification");
+    } else if ((ls < 0) || (ls > 1)) {
+      yyerror("invalid left switches count");
+    } else if ((rs < 0) || (rs > 1)) {
+      yyerror("invalid right switches count");
+    } else if ((lk < 0) || (lk > 1)) {
+      yyerror("invalid left keys count");
+    } else if ((rk < 0) || (rk > 1)) {
+      yyerror("invalid right keys count");
+    } else {
+      terminal->hasEasyBar = 1;
+      terminal->leftSwitches = ls;
+      terminal->rightSwitches = rs;
+      terminal->leftKeys = lk;
+      terminal->rightKeys = rk;
+      return 1;
     }
   }
   return 0;
@@ -370,7 +386,8 @@ inputline:  '\n'
        | SIZE eq NUM '\n'           { setColumns(numval); }
        | STATCELLS eq NUM '\n'      { setStatusCells(numval); }
        | FRONTKEYS eq NUM '\n'      { setFrontKeys(numval); }
-       | EASYBAR '\n'               { setHasEasyBar(); }
+       | EASYBAR '\n'               { setHasEasyBar(1, 1, 1, 1); }
+       | EASYBAR eq NUM NUM NUM NUM '\n' { setHasEasyBar($3, $4, $5, $6); }
 
        | statdef eq statdisp '\n'  { setStatusCell(keyindex, numval);  }
        | MODIFIER eq anykey '\n'   { addModifier(keyindex); }
@@ -533,6 +550,7 @@ int yylex ()
   if (c == '.' || isdigit (c)) {
     ungetc (c, configurationFile);
     fscanf (configurationFile, "%d", &numval);
+    yylval = numval;
     return NUM;
   }
 

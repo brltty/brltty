@@ -88,7 +88,11 @@ typedef struct {
   uint8_t columns;		/* width of display */
   uint8_t rows;			/* height of display */
   uint8_t frontKeys;		/* number of front keys */
-  uint8_t hasEasyBar;		/* terminal has an easy bar */
+  uint8_t hasEasyBar;		/* has an easy access bar */
+  uint8_t leftSwitches;		/* number of switches on the left side */
+  uint8_t rightSwitches;		/* number of switches on the right side */
+  uint8_t leftKeys;		/* number of keys on the left side */
+  uint8_t rightKeys;		/* number of keys on the right side */
   uint8_t statusCount;		/* number of status cells */
   uint8_t modifierCount;		/* number of modifier keys */
   uint16_t commandCount;		/* number of commands */
@@ -99,10 +103,10 @@ typedef struct {
 } TerminalDefinition; 
 
 #define PM_COUNT(array) (sizeof((array)) / sizeof((array)[0]))
-#define PM_TERMINAL(identifier, signature, name, columns, rows, front, easy) \
+#define PM_TERMINAL(identifier, signature, name, columns, rows, front, eab, ls, rs, lk, rk) \
 { \
   identifier, name, "brltty-pm-" #signature ".hlp", \
-  columns, rows, front, easy, \
+  columns, rows, front, eab, ls, rs, lk, rk, \
   PM_COUNT(pm_status_##signature), \
   PM_COUNT(pm_modifiers_##signature), \
   PM_COUNT(pm_commands_##signature), \
@@ -649,7 +653,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX Compact 486",	/* name of terminal */
     40, 1,			/* size of display */
     9,				/* number of front keys */
-    0				/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -658,7 +662,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX 2D Lite (plus)",	/* name of terminal */
     40, 1,			/* size of display */
     9,				/* number of front keys */
-    0				/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -667,7 +671,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX Compact/Tiny",	/* name of terminal */
     40, 1,			/* size of display */
     9,				/* number of front keys */
-    0				/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -676,7 +680,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX 2D Screen Soft", /* name of terminal */
     80, 1,			/* size of display */
     13,				/* number of front keys */
-    0				/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -685,7 +689,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX IB 80 CR Soft",	/* name of terminal */
     80, 1,			/* size of display */
     9,				/* number of front keys */
-    0				/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -694,7 +698,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX EL 2D-40",	/* name of terminal */
     40, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 1, 1, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -703,7 +707,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX EL 2D-66",	/* name of terminal */
     66, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 1, 1, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -712,7 +716,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX EL 80",		/* name of terminal */
     80, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 1, 1, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -721,7 +725,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX EL 2D-80",		/* name of terminal */
     80, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 1, 1, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -730,7 +734,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX EL 40 P",		/* name of terminal */
     40, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 1, 1, 1, 0		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -739,7 +743,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX Elba 32",		/* name of terminal */
     32, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 1, 1, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -748,7 +752,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX Elba 20",		/* name of terminal */
     20, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 1, 1, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -757,7 +761,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX II EL 40 S",		/* name of terminal */
     40, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -766,7 +770,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX II EL 80 S",		/* name of terminal */
     80, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
   ,
   PM_TERMINAL(
@@ -775,7 +779,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX II EL 66 S",		/* name of terminal */
     66, 1,			/* size of display */
     0,				/* number of front keys */
-    1				/* terminal has an easy bar */
+    1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
 };
 

@@ -769,6 +769,12 @@ identifyTerminal1 (BrailleDisplay *brl) {
             if (identity[1] == cIdIdentify) {
               if (interpretIdentity1(brl, identity)) {
                 protocol = &protocolOperations1;
+
+                {
+                  static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+                  makeOutputTable(&dots, &outputTable);
+                }
+
                 return 1;
               }
             } else {
@@ -986,6 +992,12 @@ identifyTerminal2 (BrailleDisplay *brl) {
         if (packet.type == 0X0A) {
           if (interpretIdentity2(brl, packet.data.bytes)) {
             protocol = &protocolOperations2;
+
+            {
+              static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
+              makeOutputTable(&dots, &outputTable);
+            }
+
             refreshDisplay = 1;
             return 1;
           }
@@ -1030,11 +1042,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   LogPrint(LOG_DEBUG, "Loading configuration file.");
   read_config(brl->dataDirectory, parameters[PARM_CONFIGFILE]);
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
-
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(&dots, &outputTable);
-  }
 
   if (isSerialDevice(&device)) {
     io = &serialOperations;

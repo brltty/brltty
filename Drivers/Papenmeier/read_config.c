@@ -200,7 +200,10 @@ void terminals(int help, int verbose)
         fprintf(fh, "%s = %d\n", 
                 search_symbol(FRONTKEYS), terminal->frontKeys);
       if (terminal->hasEasyBar)
-	fprintf(fh, "%s\n", search_symbol(EASYBAR));
+	fprintf(fh, "%s = %d %d %d %d\n",
+                search_symbol(EASYBAR),
+                terminal->leftSwitches, terminal->rightSwitches,
+                terminal->leftKeys, terminal->rightKeys);
 
       {
         int first = 1;
