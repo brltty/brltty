@@ -915,7 +915,6 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
   static unsigned int RoutingPos = 0;
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
-  static int Typematic = 0;
   int res = EOF;
   int ProcessKey = GetKey(brl, &CurrentKeys, &RoutingPos);
 
@@ -923,7 +922,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     /* An input error occurred (perhaps disconnect of USB device) */
     res = CMD_RESTARTBRL;
   } else if (ProcessKey > 0) {
-    if (Typematic) res = CMD_NOOP;
+    res = CMD_NOOP;
 
     if (CurrentKeys > LastKeys) {
       /* These are the keys that should be processed when pressed */
@@ -1272,15 +1271,12 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     case CMD_CHRLT:
     case CMD_CHRRT:
       res |= VAL_AUTOREPEAT;
-      Typematic = 1;
       break;
 
     case CMD_RESTARTBRL:
       CurrentKeys = LastKeys = ReleasedKeys = 0;
       RoutingPos = 0;
     default:
-      Typematic = 0;
-    case EOF:
       break;
   }
 
