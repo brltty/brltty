@@ -335,10 +335,10 @@ then
       AC_MSG_WARN([$1 package not found: ${roots}])
    fi
 fi
+AC_SUBST([$2_root])
+BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])
 if test -n "${$2_root}"
 then
    $4
-fi
-AC_SUBST([$2_root])
-BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])])
+fi])
 

@@ -650,7 +650,54 @@ BRLTTY_SPEECH_DRIVER([al], [Alva])
 BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
 BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
 BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
-BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite])])
+BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
+   BRLTTY_ARG_WITH(
+      [flite-language], [LANGUAGE],
+      [the FestivalLite language to use],
+      [flite_language], ["yes"]
+   )
+   if test "${flite_language}" = "no"
+   then
+      AC_MSG_ERROR([FestivalLite language not specified])
+   elif test "${flite_language}" = "yes"
+   then
+      flite_language="usenglish"
+   fi
+   AC_SUBST([flite_language])
+   BRLTTY_SUMMARY_ITEM([flite-language], [flite_language])
+
+   BRLTTY_ARG_WITH(
+      [flite-lexicon], [LEXICON],
+      [the FestivalLite lexicon to use],
+      [flite_lexicon], ["yes"]
+   )
+   if test "${flite_lexicon}" = "no"
+   then
+      AC_MSG_ERROR([FestivalLite lexicon not specified])
+   elif test "${flite_lexicon}" = "yes"
+   then
+      flite_lexicon="cmulex"
+   fi
+   AC_SUBST([flite_lexicon])
+   BRLTTY_SUMMARY_ITEM([flite-lexicon], [flite_lexicon])
+
+   BRLTTY_ARG_WITH(
+      [flite-voice], [VOICE],
+      [the FestivalLite voice to use],
+      [flite_voice], ["yes"]
+   )
+   if test "${flite_voice}" = "no"
+   then
+      AC_MSG_ERROR([FestivalLite voice not specified])
+   elif test "${flite_voice}" = "yes"
+   then
+      flite_voice="cmu_us_kal16"
+   fi
+   AC_SUBST([flite_voice])
+   BRLTTY_SUMMARY_ITEM([flite-voice], [flite_voice])
+
+   BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite])
+])
 BRLTTY_SPEECH_DRIVER([fv], [Festival])
 BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
 BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
