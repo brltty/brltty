@@ -203,34 +203,38 @@ extern int usbResetDevice (UsbDevice *device);
 
 extern int usbSetConfiguration (
   UsbDevice *device,
-  unsigned int configuration
+  unsigned char configuration
+);
+extern int usbGetConfiguration (
+  UsbDevice *device,
+  unsigned char *number
 );
 
 extern int usbIsSerialDevice (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 );
 extern int usbClaimInterface (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 );
 extern int usbReleaseInterface (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 );
 extern int usbSetAlternative (
   UsbDevice *device,
-  unsigned int interface,
-  unsigned int alternative
+  unsigned char interface,
+  unsigned char alternative
 );
 
 extern int usbResetEndpoint (
   UsbDevice *device,
-  unsigned int endpointAddress
+  unsigned char endpointAddress
 );
 extern int usbClearEndpoint (
   UsbDevice *device,
-  unsigned int endpointAddress
+  unsigned char endpointAddress
 );
 
 extern int usbControlTransfer (
@@ -241,7 +245,7 @@ extern int usbControlTransfer (
   unsigned char request,
   unsigned short value,
   unsigned short index,
-  void *data,
+  void *buffer,
   int length,
   int timeout
 );
@@ -265,27 +269,40 @@ extern char *usbGetString (
 );
 extern void usbLogString (
   UsbDevice *device,
-  int index,
+  unsigned char number,
   const char *description
 );
+
+typedef int (UsbStringVerifier) (const char *reference, const char *value);
+extern UsbStringVerifier usbStringEquals;
+extern UsbStringVerifier usbStringMatches;
+extern int usbVerifyString (
+  UsbDevice *device,
+  UsbStringVerifier verify,
+  unsigned char index,
+  const char *value
+);
+extern int usbVerifyManufacturer (UsbDevice *device, const char *eRegExp);
+extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
+extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
 extern int usbBulkRead (
   UsbDevice *device,
   unsigned char endpointNumber,
-  void *data,
+  void *buffer,
   int length,
   int timeout
 );
 extern int usbBulkWrite (
   UsbDevice *device,
   unsigned char endpointNumber,
-  const void *data,
+  const void *buffer,
   int length,
   int timeout
 );
 
 typedef struct {
-  unsigned char *buffer;
+  void *buffer;
   int length;
   void *context;
 } UsbResponse;
@@ -323,19 +340,6 @@ extern int usbReapInput (
   int length,
   int timeout
 );
-
-typedef int (UsbStringVerifier) (const char *reference, const char *value);
-extern UsbStringVerifier usbStringEquals;
-extern UsbStringVerifier usbStringMatches;
-extern int usbVerifyString (
-  UsbDevice *device,
-  UsbStringVerifier verify,
-  unsigned char index,
-  const char *value
-);
-extern int usbVerifyManufacturer (UsbDevice *device, const char *eRegExp);
-extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
-extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
 /* Serial adapter parity settings. */
 typedef enum {

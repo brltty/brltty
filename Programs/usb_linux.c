@@ -57,9 +57,10 @@ usbResetDevice (UsbDevice *device) {
 int
 usbSetConfiguration (
   UsbDevice *device,
-  unsigned int configuration
+  unsigned char configuration
 ) {
-  if (ioctl(device->file, USBDEVFS_SETCONFIGURATION, &configuration) != -1) return 1;
+  unsigned int arg = configuration;
+  if (ioctl(device->file, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
   LogError("USB configuration set");
   return 0;
 }
@@ -67,7 +68,7 @@ usbSetConfiguration (
 static char *
 usbGetDriver (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 ) {
   struct usbdevfs_getdriver arg;
   memset(&arg, 0, sizeof(arg));
@@ -79,7 +80,7 @@ usbGetDriver (
 int
 usbIsSerialDevice (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 ) {
   int yes = 0;
   char *driver = usbGetDriver(device, interface);
@@ -95,7 +96,7 @@ usbIsSerialDevice (
 static int
 usbControlDriver (
   UsbDevice *device,
-  unsigned int interface,
+  unsigned char interface,
   int code,
   void *data
 ) {
@@ -112,7 +113,7 @@ usbControlDriver (
 static int
 usbDisconnectDriver (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 ) {
 #ifdef USBDEVFS_DISCONNECT
   if (usbControlDriver(device, interface, USBDEVFS_DISCONNECT, NULL)) return 1;
@@ -125,11 +126,12 @@ usbDisconnectDriver (
 int
 usbClaimInterface (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 ) {
+  unsigned int arg = interface;
   int disconnected = 0;
 claim:
-  if (ioctl(device->file, USBDEVFS_CLAIMINTERFACE, &interface) != -1) return 1;
+  if (ioctl(device->file, USBDEVFS_CLAIMINTERFACE, &arg) != -1) return 1;
 
   if (errno == EBUSY) {
     char *driver = usbGetDriver(device, interface);
@@ -152,9 +154,10 @@ claim:
 int
 usbReleaseInterface (
   UsbDevice *device,
-  unsigned int interface
+  unsigned char interface
 ) {
-  if (ioctl(device->file, USBDEVFS_RELEASEINTERFACE, &interface) != -1) return 1;
+  unsigned int arg = interface;
+  if (ioctl(device->file, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
   LogError("USB interface release");
   return 0;
 }
@@ -162,8 +165,8 @@ usbReleaseInterface (
 int
 usbSetAlternative (
   UsbDevice *device,
-  unsigned int interface,
-  unsigned int alternative
+  unsigned char interface,
+  unsigned char alternative
 ) {
   struct usbdevfs_setinterface arg;
   memset(&arg, 0, sizeof(arg));
@@ -177,9 +180,10 @@ usbSetAlternative (
 int
 usbResetEndpoint (
   UsbDevice *device,
-  unsigned int endpointAddress
+  unsigned char endpointAddress
 ) {
-  if (ioctl(device->file, USBDEVFS_RESETEP, &endpointAddress) != -1) return 1;
+  unsigned int arg = endpointAddress;
+  if (ioctl(device->file, USBDEVFS_RESETEP, &arg) != -1) return 1;
   LogError("USB endpoint reset");
   return 0;
 }
@@ -187,9 +191,10 @@ usbResetEndpoint (
 int
 usbClearEndpoint (
   UsbDevice *device,
-  unsigned int endpointAddress
+  unsigned char endpointAddress
 ) {
-  if (ioctl(device->file, USBDEVFS_CLEAR_HALT, &endpointAddress) != -1) return 1;
+  unsigned int arg = endpointAddress;
+  if (ioctl(device->file, USBDEVFS_CLEAR_HALT, &arg) != -1) return 1;
   LogError("USB endpoint clear");
   return 0;
 }
@@ -203,7 +208,7 @@ usbControlTransfer (
   unsigned char request,
   unsigned short value,
   unsigned short index,
-  void *data,
+  void *buffer,
   int length,
   int timeout
 ) {
@@ -217,7 +222,7 @@ usbControlTransfer (
   putLittleEndian(&arg.setup.wValue, value);
   putLittleEndian(&arg.setup.wIndex, index);
   putLittleEndian(&arg.setup.wLength, length);
-  arg.transfer.data = data;
+  arg.transfer.data = buffer;
   arg.transfer.timeout = timeout;
 
   {
@@ -230,7 +235,7 @@ usbControlTransfer (
 static int
 usbBulkTransfer (
   UsbEndpoint *endpoint,
-  void *data,
+  void *buffer,
   int length,
   int timeout
 ) {
@@ -238,7 +243,7 @@ usbBulkTransfer (
     struct usbdevfs_bulktransfer arg;
     memset(&arg, 0, sizeof(arg));
     arg.ep = endpoint->descriptor->bEndpointAddress;
-    arg.data = data;
+    arg.data = buffer;
     arg.len = length;
     arg.timeout = timeout;
 
@@ -255,22 +260,24 @@ int
 usbBulkRead (
   UsbDevice *device,
   unsigned char endpointNumber,
-  void *data,
+  void *buffer,
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(usbGetInputEndpoint(device, endpointNumber), data, length, timeout);
+  return usbBulkTransfer(usbGetInputEndpoint(device, endpointNumber),
+                         buffer, length, timeout);
 }
 
 int
 usbBulkWrite (
   UsbDevice *device,
   unsigned char endpointNumber,
-  const void *data,
+  const void *buffer,
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(usbGetOutputEndpoint(device, endpointNumber), (unsigned char *)data, length, timeout);
+  return usbBulkTransfer(usbGetOutputEndpoint(device, endpointNumber),
+                         (void *)buffer, length, timeout);
 }
 
 void *

@@ -103,16 +103,72 @@ usbGetString (
 void
 usbLogString (
   UsbDevice *device,
-  int index,
+  unsigned char number,
   const char *description
 ) {
-  if (index) {
-    char *string = usbGetString(device, index, 1000);
+  if (number) {
+    char *string = usbGetString(device, number, 1000);
     if (string) {
       LogPrint(LOG_INFO, "USB: %s: %s", description, string);
       free(string);
     }
   }
+}
+
+int
+usbStringEquals (const char *reference, const char *value) {
+  return strcmp(reference, value) == 0;
+}
+
+int
+usbStringMatches (const char *reference, const char *value) {
+  int ok = 0;
+  regex_t expression;
+  if (regcomp(&expression, value, REG_EXTENDED|REG_NOSUB) == 0) {
+    if (regexec(&expression, reference, 0, NULL, 0) == 0) {
+      ok = 1;
+    }
+    regfree(&expression);
+  }
+  return ok;
+}
+
+int
+usbVerifyString (
+  UsbDevice *device,
+  UsbStringVerifier verify,
+  unsigned char index,
+  const char *value
+) {
+  int ok = 0;
+  if (!(value && *value)) return 1;
+
+  if (index) {
+    char *reference = usbGetString(device, index, 1000);
+    if (reference) {
+      if (verify(reference, value)) ok = 1;
+      free(reference);
+    }
+  }
+  return ok;
+}
+
+int
+usbVerifyManufacturer (UsbDevice *device, const char *eRegExp) {
+  return usbVerifyString(device, usbStringMatches,
+                         device->descriptor.iManufacturer, eRegExp);
+}
+
+int
+usbVerifyProduct (UsbDevice *device, const char *eRegExp) {
+  return usbVerifyString(device, usbStringMatches,
+                         device->descriptor.iProduct, eRegExp);
+}
+
+int
+usbVerifySerialNumber (UsbDevice *device, const char *string) {
+  return usbVerifyString(device, usbStringEquals,
+                         device->descriptor.iSerialNumber, string);
 }
 
 static struct UsbInputElement *
@@ -249,8 +305,11 @@ usbReapInput (
   return -1;
 }
 
-static int
-usbGetConfiguration (UsbDevice *device, unsigned char *number) {
+int
+usbGetConfiguration (
+  UsbDevice *device,
+  unsigned char *number
+) {
   int size = usbControlTransfer(device, USB_DIRECTION_INPUT,
                                 USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
                                 USB_REQ_GET_CONFIGURATION, 0, 0,
@@ -441,62 +500,6 @@ usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
 const UsbDeviceDescriptor *
 usbDeviceDescriptor (UsbDevice *device) {
   return &device->descriptor;
-}
-
-int
-usbStringEquals (const char *reference, const char *value) {
-  return strcmp(reference, value) == 0;
-}
-
-int
-usbStringMatches (const char *reference, const char *value) {
-  int ok = 0;
-  regex_t expression;
-  if (regcomp(&expression, value, REG_EXTENDED|REG_NOSUB) == 0) {
-    if (regexec(&expression, reference, 0, NULL, 0) == 0) {
-      ok = 1;
-    }
-    regfree(&expression);
-  }
-  return ok;
-}
-
-int
-usbVerifyString (
-  UsbDevice *device,
-  UsbStringVerifier verify,
-  unsigned char index,
-  const char *value
-) {
-  int ok = 0;
-  if (!(value && *value)) return 1;
-
-  if (index) {
-    char *reference = usbGetString(device, index, 1000);
-    if (reference) {
-      if (verify(reference, value)) ok = 1;
-      free(reference);
-    }
-  }
-  return ok;
-}
-
-int
-usbVerifyManufacturer (UsbDevice *device, const char *eRegExp) {
-  return usbVerifyString(device, usbStringMatches,
-                         device->descriptor.iManufacturer, eRegExp);
-}
-
-int
-usbVerifyProduct (UsbDevice *device, const char *eRegExp) {
-  return usbVerifyString(device, usbStringMatches,
-                         device->descriptor.iProduct, eRegExp);
-}
-
-int
-usbVerifySerialNumber (UsbDevice *device, const char *string) {
-  return usbVerifyString(device, usbStringEquals,
-                         device->descriptor.iSerialNumber, string);
 }
 
 int

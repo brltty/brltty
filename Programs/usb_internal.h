@@ -30,16 +30,6 @@ struct UsbInputElement {
   void *request;
 };
 
-struct UsbDeviceStruct {
-  UsbDeviceDescriptor descriptor;
-  UsbDescriptor *configurationDescriptor;
-  int configurationLength;
-  Queue *endpoints;
-  int file;
-  int interface;
-  uint16_t language;
-};
-
 typedef struct {
   UsbDevice *device;
   UsbEndpointDescriptor *descriptor;
@@ -57,15 +47,21 @@ typedef struct {
   } direction;
 } UsbEndpoint;
 
+struct UsbDeviceStruct {
+  UsbDeviceDescriptor descriptor;
+  UsbDescriptor *configurationDescriptor;
+  int configurationLength;
+  Queue *endpoints;
+  int file;
+  uint16_t language;
+};
+
 extern UsbDevice *usbTestDevice (
   const char *path,
   UsbDeviceChooser chooser,
   void *data
 );
-
-extern int usbReadDeviceDescriptor (
-  UsbDevice *device
-);
+extern int usbReadDeviceDescriptor (UsbDevice *device);
 
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
