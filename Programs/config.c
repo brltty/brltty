@@ -145,7 +145,7 @@ getConfigurationOperand (char **operandAddress, const char *delimiters, int exte
       snprintf(buffer, size, "%s,%s", *operandAddress, operand);
       free(*operandAddress);
       *operandAddress = buffer;
-    } else if (extend) {
+    } else {
       *operandAddress = strdupWrapper(operand);
     }
     return status;
