@@ -546,28 +546,21 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   rawData = prevData = NULL;		/* clear pointers */
-
-  /* Open the Braille display device for random access */
   charactersPerSecond = baud2integer(baud) / 10;
-  if (!io->openPort(parameters, device)) goto failure;
 
-  while (1) {
-    /* autodetecting MODEL */
+  if (io->openPort(parameters, device)) {
     if (writeDescribe(brl)) {
       if (io->awaitInput(1000)) {
         unsigned char buffer[sizeof(HandyDescription) + 1];
         if (readBytes(brl, buffer, sizeof(buffer)) == sizeof(buffer)) {
           if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
             if (identifyModel(brl, buffer[sizeof(HandyDescription)])) return 1;
-            goto failure;
           }
         }
       }
     }
-    delay(1000);
   }
 
-failure:
   brl_close(brl);
   return 0;
 }
@@ -1316,6 +1309,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
           setState(BDS_OFF);
           continue;
         }
+        if (errno != EAGAIN) return CMD_RESTARTBRL;
       }
     }
 
