@@ -369,13 +369,13 @@ processParameters (
 
 static void
 logParameters (const char *const *names, char **values, char *description) {
-   if (names && values) {
-      while (*names) {
-         LogPrint(LOG_INFO, "%s Parameter: %s=%s", description, *names, *values);
-         ++names;
-         ++values;
-      }
-   }
+  if (names && values) {
+    while (*names) {
+      LogPrint(LOG_INFO, "%s Parameter: %s=%s", description, *names, *values);
+      ++names;
+      ++values;
+    }
+  }
 }
 
 static void
@@ -1000,10 +1000,10 @@ exitSpeechDriver (void) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static void
 exitContractionTable (void) {
-   if (contractionTable) {
-      destroyContractionTable(contractionTable);
-      contractionTable = NULL;
-   }
+  if (contractionTable) {
+    destroyContractionTable(contractionTable);
+    contractionTable = NULL;
+  }
 }
 
 static int
@@ -1086,7 +1086,7 @@ changedSpeechVolume (unsigned char setting) {
 
 static int
 testTunes (void) {
-   return prefs.alertTunes;
+  return prefs.alertTunes;
 }
 
 static int
@@ -1661,12 +1661,12 @@ exitTunes (void) {
 
 static void
 exitScreen (void) {
-   closeAllScreens();
+  closeAllScreens();
 }
 
 static void
 exitPidFile (void) {
-   unlink(opt_pidFile);
+  unlink(opt_pidFile);
 }
 
 static void
@@ -1676,36 +1676,37 @@ parentExit0 (int signalNumber) {
 
 static void
 background (void) {
-   pid_t child;
+  pid_t child;
 
-   fflush(stdout);
-   fflush(stderr);
+  fflush(stdout);
+  fflush(stderr);
 
-   switch (child = fork()) {
-      case -1: /* error */
-         LogPrint(LOG_CRIT, "Process creation error: %s", strerror(errno));
-         exit(10);
+  switch (child = fork()) {
+    case -1: /* error */
+      LogPrint(LOG_CRIT, "Process creation error: %s", strerror(errno));
+      exit(10);
 
-      case 0: /* child */
-         break;
+    case 0: /* child */
+      break;
 
-      default: /* parent */
-         while (1) {
-            int status;
-            if (waitpid(child, &status, 0) == -1) {
-               if (errno == EINTR) continue;
-               LogPrint(LOG_CRIT, "waitpid error: %s", strerror(errno));
-               _exit(11);
-            }
-            if (WIFEXITED(status)) _exit(WEXITSTATUS(status));
-            if (WIFSIGNALED(status)) _exit(WTERMSIG(status) | 0X80);
-         }
-   }
+    default: /* parent */
+      while (1) {
+        int status;
+        if (waitpid(child, &status, 0) == -1) {
+          if (errno == EINTR) continue;
+          LogPrint(LOG_CRIT, "waitpid error: %s", strerror(errno));
+          _exit(11);
+        }
 
-   if (!opt_standardError) {
-      LogClose();
-      LogOpen(1);
-   }
+        if (WIFEXITED(status)) _exit(WEXITSTATUS(status));
+        if (WIFSIGNALED(status)) _exit(WTERMSIG(status) | 0X80);
+      }
+  }
+
+  if (!opt_standardError) {
+    LogClose();
+    LogOpen(1);
+  }
 }
 
 static int
@@ -1901,12 +1902,6 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  if (!*opt_brailleDevice) {
-    LogPrint(LOG_CRIT, "No braille device specified.");
-    fprintf(stderr, "Use -d to specify one.\n");
-    exit(4);
-  }
-
   /* initialize screen driver */
   initializeAllScreens();
   screenParameters = processParameters(getScreenParameters(),
@@ -1954,8 +1949,14 @@ startup (int argc, char *argv[]) {
    * be used instead.
    */
 
-  /* Activate the braille display. */
+  /* The device(s) the braille display might be connected to. */
+  if (!*opt_brailleDevice) {
+    LogPrint(LOG_CRIT, "Braille device not specified.");
+    exit(4);
+  }
   brailleDevices = splitString(opt_brailleDevice, ',', NULL);
+
+  /* Activate the braille display. */
   brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
   if (opt_verify) {
     if (openBrailleDriver(1)) closeBrailleDriver();

@@ -549,92 +549,100 @@ sayLines (int line, int count, int track, SayMode mode) {
 
 static int
 upDifferentLine (short mode) {
-   if (p->winy > 0) {
-      char buffer1[scr.cols], buffer2[scr.cols];
-      int skipped = 0;
-      if (mode==SCR_TEXT && p->showAttributes)
-         mode = SCR_ATTRIB;
-      readScreen(0, p->winy, scr.cols, 1, buffer1, mode);
-      do {
-         readScreen(0, --p->winy, scr.cols, 1, buffer2, mode);
-         if (memcmp(buffer1, buffer2, scr.cols) ||
-             (mode==SCR_TEXT && prefs.showCursor && p->winy==scr.posy))
-            return 1;
+  if (p->winy > 0) {
+    unsigned char buffer1[scr.cols], buffer2[scr.cols];
+    int skipped = 0;
 
-         /* lines are identical */
-         if (skipped == 0)
-            playTune(&tune_skip_first);
-         else if (skipped <= 4)
-            playTune(&tune_skip);
-         else if (skipped % 4 == 0)
-            playTune(&tune_skip_more);
-         skipped++;
-      } while (p->winy > 0);
-   }
+    if ((mode == SCR_TEXT) && p->showAttributes) mode = SCR_ATTRIB;
+    readScreen(0, p->winy, scr.cols, 1, buffer1, mode);
 
-   playTune(&tune_bounce);
-   return 0;
+    do {
+      readScreen(0, --p->winy, scr.cols, 1, buffer2, mode);
+      if ((memcmp(buffer1, buffer2, scr.cols) != 0) ||
+          ((mode == SCR_TEXT) && prefs.showCursor && (p->winy == scr.posy)))
+        return 1;
+
+      /* lines are identical */
+      if (skipped == 0) {
+        playTune(&tune_skip_first);
+      } else if (skipped <= 4) {
+        playTune(&tune_skip);
+      } else if (skipped % 4 == 0) {
+        playTune(&tune_skip_more);
+      }
+      skipped++;
+    } while (p->winy > 0);
+  }
+
+  playTune(&tune_bounce);
+  return 0;
 }
 
 static int
 downDifferentLine (short mode) {
-   if (p->winy < (scr.rows - brl.y)) {
-      char buffer1[scr.cols], buffer2[scr.cols];
-      int skipped = 0;
-      if (mode==SCR_TEXT && p->showAttributes)
-         mode = SCR_ATTRIB;
-      readScreen(0, p->winy, scr.cols, 1, buffer1, mode);
-      do {
-         readScreen(0, ++p->winy, scr.cols, 1, buffer2, mode);
-         if (memcmp(buffer1, buffer2, scr.cols) ||
-             (mode==SCR_TEXT && prefs.showCursor && p->winy==scr.posy))
-            return 1;
+  if (p->winy < (scr.rows - brl.y)) {
+    unsigned char buffer1[scr.cols], buffer2[scr.cols];
+    int skipped = 0;
 
-         /* lines are identical */
-         if (skipped == 0)
-            playTune(&tune_skip_first);
-         else if (skipped <= 4)
-            playTune(&tune_skip);
-         else if (skipped % 4 == 0)
-            playTune(&tune_skip_more);
-         skipped++;
-      } while (p->winy < (scr.rows - brl.y));
-   }
+    if ((mode == SCR_TEXT) && p->showAttributes) mode = SCR_ATTRIB;
+    readScreen(0, p->winy, scr.cols, 1, buffer1, mode);
 
-   playTune(&tune_bounce);
-   return 0;
+    do {
+      readScreen(0, ++p->winy, scr.cols, 1, buffer2, mode);
+      if ((memcmp(buffer1, buffer2, scr.cols) != 0) ||
+          ((mode == SCR_TEXT) && prefs.showCursor && (p->winy == scr.posy)))
+        return 1;
+
+      /* lines are identical */
+      if (skipped == 0) {
+        playTune(&tune_skip_first);
+      } else if (skipped <= 4) {
+        playTune(&tune_skip);
+      } else if (skipped % 4 == 0) {
+        playTune(&tune_skip_more);
+      }
+      skipped++;
+    } while (p->winy < (scr.rows - brl.y));
+  }
+
+  playTune(&tune_bounce);
+  return 0;
 }
 
 static void
 upOneLine (short mode) {
-   if (p->winy > 0)
-      p->winy--;
-   else
-      playTune(&tune_bounce);
+  if (p->winy > 0) {
+    p->winy--;
+  } else {
+    playTune(&tune_bounce);
+  }
 }
 
 static void
 downOneLine (short mode) {
-   if (p->winy < (scr.rows - brl.y))
-      p->winy++;
-   else
-      playTune(&tune_bounce);
+  if (p->winy < (scr.rows - brl.y)) {
+    p->winy++;
+  } else {
+    playTune(&tune_bounce);
+  }
 }
 
 static void
 upLine (short mode) {
-   if (prefs.skipIdenticalLines)
-      upDifferentLine(mode);
-   else
-      upOneLine(mode);
+  if (prefs.skipIdenticalLines) {
+    upDifferentLine(mode);
+  } else {
+    upOneLine(mode);
+  }
 }
 
 static void
 downLine (short mode) {
-   if (prefs.skipIdenticalLines)
-      downDifferentLine(mode);
-   else
-      downOneLine(mode);
+  if (prefs.skipIdenticalLines) {
+    downDifferentLine(mode);
+  } else {
+    downOneLine(mode);
+  }
 }
 
 static void
@@ -2207,58 +2215,57 @@ main (int argc, char *argv[]) {
 
 void 
 message (const char *text, short flags) {
-   int length = strlen(text);
+  int length = strlen(text);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-   if (prefs.alertTunes && !(flags & MSG_SILENT)) {
-      speech->mute();
-      speech->say(text, length);
-   }
+  if (prefs.alertTunes && !(flags & MSG_SILENT)) {
+    speech->mute();
+    speech->say(text, length);
+  }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-   if (braille && brl.buffer) {
-      while (length) {
-         int count;
-         int index;
+  if (braille && brl.buffer) {
+    while (length) {
+      int count;
+      int index;
 
-         /* strip leading spaces */
-         while (*text == ' ')  text++, length--;
+      /* strip leading spaces */
+      while (*text == ' ')  text++, length--;
 
-         if (length <= brl.x*brl.y) {
-            count = length; /* the whole message fits on the braille window */
-         } else {
-            /* split the message across multiple windows on space characters */
-            for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
-            if (!count) count = brl.x * brl.y - 1;
-         }
-
-         memset(brl.buffer, ' ', brl.x*brl.y);
-         for (index=0; index<count; brl.buffer[index++]=*text++);
-         if (length -= count) {
-            while (index < brl.x*brl.y) brl.buffer[index++] = '-';
-            brl.buffer[brl.x*brl.y - 1] = '>';
-         }
-
-         /*
-          * Do Braille translation using text table. * Six-dot mode is
-          * ignored, since case can be important, and * blinking caps won't 
-          * work ... 
-          */
-         writeBrailleBuffer(&brl);
-
-         if (flags & MSG_WAITKEY)
-            getCommand(BRL_CTX_MESSAGE);
-         else if (length || !(flags & MSG_NODELAY)) {
-            int i;
-            for (i=0; i<messageDelay; i+=updateInterval) {
-               int command;
-               drainBrailleOutput(&brl, updateInterval);
-               while ((command = readCommand(BRL_CTX_MESSAGE)) == BRL_CMD_NOOP);
-               if (command != EOF) break;
-            }
-         }
+      if (length <= brl.x*brl.y) {
+        count = length; /* the whole message fits in the braille window */
+      } else {
+        /* split the message across multiple windows on space characters */
+        for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
+        if (!count) count = brl.x * brl.y - 1;
       }
-   }
+
+      memset(brl.buffer, ' ', brl.x*brl.y);
+      for (index=0; index<count; brl.buffer[index++]=*text++);
+      if (length -= count) {
+        while (index < brl.x*brl.y) brl.buffer[index++] = '-';
+        brl.buffer[brl.x*brl.y - 1] = '>';
+      }
+
+      /*
+       * Do Braille translation using text table. Six-dot mode is ignored
+       * since case can be important, and blinking caps won't work. 
+       */
+      writeBrailleBuffer(&brl);
+
+      if (flags & MSG_WAITKEY) {
+        getCommand(BRL_CTX_MESSAGE);
+      } else if (length || !(flags & MSG_NODELAY)) {
+        int i;
+        for (i=0; i<messageDelay; i+=updateInterval) {
+          int command;
+          drainBrailleOutput(&brl, updateInterval);
+          while ((command = readCommand(BRL_CTX_MESSAGE)) == BRL_CMD_NOOP);
+          if (command != EOF) break;
+        }
+      }
+    }
+  }
 }
 
 void
