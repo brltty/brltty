@@ -20,6 +20,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "at2.h"
 #include "brldefs.h"
@@ -42,8 +43,8 @@ typedef enum {
 } At2Modifier;
 
 typedef struct {
-  int command;
-  int alternate;
+  uint16_t command;
+  uint16_t alternate;
 } At2KeyEntry;
 typedef At2KeyEntry At2KeyTable[0X100];
 
@@ -220,6 +221,25 @@ AT2_interpretCode (int *command, unsigned char byte) {
             if (AT2_TST(AT2_LEFT_CONTROL) || AT2_TST(AT2_RIGHT_CONTROL)) cmd |= VPC_CONTROL;
           }
 
+          if ((blk == VAL_PASSKEY) && AT2_TST(AT2_LEFT_ALT)) {
+            int arg = cmd & VAL_ARG_MASK;
+            switch (arg) {
+              case VPK_CURSOR_LEFT:
+                cmd = CMD_SWITCHVT_PREV;
+                break;
+
+              case VPK_CURSOR_RIGHT:
+                cmd = CMD_SWITCHVT_NEXT;
+                break;
+
+              default:
+                if (arg >= VPK_FUNCTION) {
+                  cmd = CR_SWITCHVT + (arg - VPK_FUNCTION);
+                }
+                break;
+            }
+          }
+
           *command = cmd;
           return 1;
         }
@@ -256,4 +276,3 @@ AT2_interpretCode (int *command, unsigned char byte) {
   }
   return 0;
 }
-
