@@ -74,16 +74,19 @@ Trangelist *contains(Trangelist *l, uint32_t n)
 /* Function : DisplayRangeList */
 void DisplayRangeList(Trangelist *l)
 {
- Trangelist *c;
- if (l==NULL) { printf("emptyset"); return; }
- c = l;
- while (1)
- {
-  printf("[%d..%d]",c->x,c->y);
-  if (c->next==NULL) return;
-  printf(",");
-  c = c->next;
+ if (l==NULL) {
+  printf("emptyset");
+ } else {
+  Trangelist *c = l;
+  while (1)
+  {
+   printf("[%d..%d]",c->x,c->y);
+   if (c->next==NULL) break;
+   printf(",");
+   c = c->next;
+  }
  }
+ printf("\n");
 }
 
 /* Function : AddRange */
