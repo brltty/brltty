@@ -670,7 +670,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
     do {
       READ(0, 1, 0);
     } while (buf[0] != cSTX);
-    if (debug_reads) LogPrint(LOG_DEBUG, "read: STX");
+    if (debug_reads) LogPrint(LOG_DEBUG, "Read: STX");
 
     READ(1, 1, 0);
     switch (buf[1]) {
@@ -705,7 +705,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
           return CMD_ERR;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
-        if (debug_reads) LogBytes("read", buf, length);
+        if (debug_reads) LogBytes("Read", buf, length);
 
         {
           int command = handleKey1(((buf[2] << 8) | buf[3]),
@@ -912,11 +912,7 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
   }
 
   *byte++ = cETX;
-  {
-    int size = byte - buffer;
-    if (debug_writes) LogBytes("Output Packet", buffer, size);
-    return writeBytes(brl, buffer, size);
-  }
+  return writeBytes(brl, buffer, byte-buffer);
 }
 
 static int
@@ -1105,7 +1101,6 @@ updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
   int i;
-  if (debug_writes) LogBytes("Window", brl->buffer, terminal->columns);
   for (i=0; i<terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
   updateCells(brl, terminal->columns, brl->buffer, currentText, protocol->writeText);
   protocol->flushCells(brl);
@@ -1135,7 +1130,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
         else
           cells[i] = outputTable[values[code]];
       }
-      if (debug_writes) LogBytes("Status", s, InternalStatusCellCount);
     } else {
       int i = 0;
       while (i < terminal->statusCount) {
@@ -1143,7 +1137,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
         if (!dots) break;
         cells[i++] = outputTable[dots];
       }
-      if (debug_writes) LogBytes("Status", s, i);
       while (i < terminal->statusCount) cells[i++] = outputTable[0];
     }
     updateCells(brl, terminal->statusCount, cells, currentStatus, protocol->writeStatus);
