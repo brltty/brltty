@@ -274,7 +274,8 @@ awaitUsbInput (int milliseconds) {
 
 static int
 readUsbBytes (void *buffer, int *offset, int length, int timeout) {
-  int count = usbReapInput(usbDevice, usbInputEndpoint, buffer+*offset, length, timeout);
+  int count = usbReapInput(usbDevice, usbInputEndpoint, buffer+*offset, length, 
+                           (offset? timeout: 0), timeout);
   if (count == -1)
     if (errno == EAGAIN)
       return 0;
@@ -426,9 +427,84 @@ writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned cha
   return 1;
 }
 
+#define HIGH_NIBBLE(byte) ((byte) & 0XF0)
+#define LOW_NIBBLE(byte) ((byte) & 0XF)
+#define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
+#define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
+
 static int
-readPacket2 (BrailleDisplay *brl, char *buffer, int size) {
-  return 0;
+readPacket2 (BrailleDisplay *brl, char *packet, int size) {
+  char buffer[0X203];
+  int offset = 0;
+  unsigned char length;
+  int count;
+
+  while (1) {
+    if (!io->readBytes(buffer, &offset, 1, 1000)) {
+      LogBytes("Partial Packet", buffer, offset);
+      return 0;
+    }
+
+    {
+      unsigned char byte = buffer[offset-1];
+      unsigned char type = HIGH_NIBBLE(byte);
+      unsigned char value = LOW_NIBBLE(byte);
+
+      switch (byte) {
+        case cSTX:
+          if (offset > 1) {
+            LogBytes("Incomplete Packet", buffer, offset);
+            offset = 1;
+          }
+          continue;
+
+        case cETX:
+          if ((offset < 5) || (offset < count)) {
+            LogBytes("Short Packet", buffer, offset);
+          } else if (offset > count) {
+            LogBytes("Long Packet", buffer, offset);
+          } else {
+            LogBytes("Input Packet", buffer, offset);
+            memcpy(packet, buffer, offset);
+            LogBytes("Input Packet", buffer, offset);
+            return 1;
+          }
+          offset = 0;
+          continue;
+
+        default:
+          switch (offset) {
+            case 1:
+              LogBytes("Discarded Byte", buffer, offset);
+              offset = 0;
+              continue;
+    
+            case 2:
+              if (type != 0X40) break;
+              continue;
+    
+            case 3:
+              if (type != 0X50) break;
+              length = value << 4;
+              continue;
+    
+            case 4:
+              if (type != 0X50) break;
+              length |= value;
+              count = length + 5;
+              continue;
+    
+            default:
+              if (type != 0X30) break;
+              continue;
+          }
+          break;
+      }
+    }
+
+    LogBytes("Corrupt Packet", buffer, offset);
+    offset = 0;
+  }
 }
 
 static int
@@ -528,15 +604,12 @@ readBytes (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, in
 }
 
 static int
-interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
+interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) {
   int tn;
-  LogBytes("Identity", identity, IDENTITY_LENGTH);
-  LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
-           identity[2],
-           identity[3], identity[4], identity[5],
-           identity[6], identity[7], identity[8]);
+  LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", 
+           id, major, minor);
   for (tn=0; tn<pmTerminalCount; tn++) {
-    if (pmTerminals[tn].identifier == identity[2]) {
+    if (pmTerminals[tn].identifier == id) {
       the_terminal = &pmTerminals[tn];
       LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
                the_terminal->name,
@@ -579,8 +652,22 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       return 1;
     }
   }
-  LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", identity[2]);
+  LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", id);
   return 0;
+}
+
+static int
+interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
+  return interpretIdentity(brl, identity[2], 
+                           identity[3], ((identity[4] * 10) + identity[5]));
+}
+
+static int
+interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
+  return interpretIdentity(brl,
+                           PM2_MAKE_BYTE(identity[4], identity[5]),
+                           LOW_NIBBLE(identity[6]),
+                           PM2_MAKE_INTEGER2(identity[7], identity[8]));
 }
 
 static int
@@ -601,7 +688,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
         if (identity[0] == cSTX) {
           if (readBytes(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
             if (identity[1] == cIdIdentify) {
-              if (interpretIdentity(identity, brl)) return 1;
+              if (interpretIdentity1(brl, identity)) return 1;
             } else {
               LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
             }
@@ -617,23 +704,22 @@ identifyTerminal1 (BrailleDisplay *brl) {
 
 static int
 identifyTerminal2 (BrailleDisplay *brl) {
+  int tries = 0;
   io->flushPort(brl);
-  if (writePacket2(brl, 2, 0, NULL)) {
-    if (io->awaitInput(1000)) {
+  while (writePacket2(brl, 2, 0, NULL)) {
+    while (io->awaitInput(100)) {
       unsigned char identity[20];			/* answer has 10 chars */
       if (readPacket2(brl, identity, sizeof(identity))) {
-        if (identity[0] == cSTX) {
-          if (readBytes(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
-            if (identity[1] == cIdIdentify) {
-              if (interpretIdentity(identity, brl)) return 1;
-            } else {
-              LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
-            }
-          } else {
-            LogPrint(LOG_WARNING, "Malformed identification packet.");
-          }
+        if (identity[1] == 0X4A) {
+          if (interpretIdentity2(brl, identity)) return 1;
         }
       }
+    }
+    if (errno != EAGAIN) break;
+
+    if (++tries == 5) {
+      LogPrint(LOG_WARNING, "No response from display.");
+      break;
     }
   }
   return 0;
@@ -732,24 +818,24 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       values[STAT_INPUT] = input_mode;
 
       for (i=0; i<the_terminal->statusCount; i++) {
-	int code = the_terminal->statusCells[i];
-	if (code == OFFS_EMPTY)
-	  cells[i] = 0;
-	else if (code >= OFFS_NUMBER)
-	  cells[i] = outputTable[portraitNumber(values[code-OFFS_NUMBER])];
-	else if (code >= OFFS_FLAG)
-	  cells[i] = outputTable[seascapeFlag(i+1, values[code-OFFS_FLAG])];
-	else if (code >= OFFS_HORIZ)
-	  cells[i] = outputTable[seascapeNumber(values[code-OFFS_HORIZ])];
-	else
-	  cells[i] = outputTable[values[code]];
+        int code = the_terminal->statusCells[i];
+        if (code == OFFS_EMPTY)
+          cells[i] = 0;
+        else if (code >= OFFS_NUMBER)
+          cells[i] = outputTable[portraitNumber(values[code-OFFS_NUMBER])];
+        else if (code >= OFFS_FLAG)
+          cells[i] = outputTable[seascapeFlag(i+1, values[code-OFFS_FLAG])];
+        else if (code >= OFFS_HORIZ)
+          cells[i] = outputTable[seascapeNumber(values[code-OFFS_HORIZ])];
+        else
+          cells[i] = outputTable[values[code]];
       }
       if (debug_writes) LogBytes("Status", s, InternalStatusCellCount);
     } else {
       int i = 0;
       while (i < the_terminal->statusCount) {
-	unsigned char dots = s[i];
-	if (!dots) break;
+        unsigned char dots = s[i];
+        if (!dots) break;
         cells[i++] = outputTable[dots];
       }
       if (debug_writes) LogBytes("Status", s, i);
@@ -933,7 +1019,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       case cIdIdentify: {
         const int length = 10;
         READ(2, length-2, RBF_ETX);
-        if (interpretIdentity(buf, brl)) brl->resizeRequired = 1;
+        if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
         delay(200);
         restartTerminal(brl);
         break;

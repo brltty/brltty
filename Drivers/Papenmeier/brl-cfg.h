@@ -622,6 +622,35 @@ static CommandDefinition pm_commands_elba_20[] = {
   CMDS_EASY
 };
 
+static uint16_t pm_status_elba_40_s[] = {
+};
+static int16_t pm_modifiers_elba_40_s[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_elba_40_s[] = {
+  CMDS_EASY
+};
+
+static uint16_t pm_status_elba_80_s[] = {
+  SHOW_STAT_2
+};
+static int16_t pm_modifiers_elba_80_s[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_elba_80_s[] = {
+  CMDS_EASY,
+  CMDS_STAT_2
+};
+
+static uint16_t pm_status_elba_66_s[] = {
+};
+static int16_t pm_modifiers_elba_66_s[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_elba_66_s[] = {
+  CMDS_EASY
+};
+
 
 static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
@@ -631,8 +660,8 @@ static TerminalDefinition pmTerminalTable[] = {
     40, 1,			/* size of display */
     9,				/* number of front keys */
     0				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     1,				/* identity */
     2d_l,		/* filename of local helpfile */
@@ -640,8 +669,8 @@ static TerminalDefinition pmTerminalTable[] = {
     40, 1,			/* size of display */
     9,				/* number of front keys */
     0				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     2,				/* identity */
     c,		/* filename of local helpfile */
@@ -649,8 +678,8 @@ static TerminalDefinition pmTerminalTable[] = {
     40, 1,			/* size of display */
     9,				/* number of front keys */
     0				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     3,				/* identity */
     2d_s,		/* filename of local helpfile */
@@ -658,8 +687,8 @@ static TerminalDefinition pmTerminalTable[] = {
     80, 1,			/* size of display */
     13,				/* number of front keys */
     0				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     6,				/* identity */
     ib_80,		/* filename of local helpfile */
@@ -667,8 +696,8 @@ static TerminalDefinition pmTerminalTable[] = {
     80, 1,			/* size of display */
     9,				/* number of front keys */
     0				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     64,				/* identity */
     el_2d_40,		/* filename of local helpfile */
@@ -676,8 +705,8 @@ static TerminalDefinition pmTerminalTable[] = {
     40, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     65,				/* identity */
     el_2d_66,		/* filename of local helpfile */
@@ -685,8 +714,8 @@ static TerminalDefinition pmTerminalTable[] = {
     66, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     66,				/* identity */
     el_80,		/* filename of local helpfile */
@@ -694,8 +723,8 @@ static TerminalDefinition pmTerminalTable[] = {
     80, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     67,				/* identity */
     el_2d_80,		/* filename of local helpfile */
@@ -703,8 +732,8 @@ static TerminalDefinition pmTerminalTable[] = {
     80, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     68,				/* identity */
     el_40_p,		/* filename of local helpfile */
@@ -712,8 +741,8 @@ static TerminalDefinition pmTerminalTable[] = {
     40, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     69,				/* identity */
     elba_32,		/* filename of local helpfile */
@@ -721,13 +750,40 @@ static TerminalDefinition pmTerminalTable[] = {
     32, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
-  ),
-
+  )
+  ,
   PM_TERMINAL(
     70,				/* identity */
     elba_20,		/* filename of local helpfile */
     "BrailleX Elba 20",		/* name of terminal */
     20, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  )
+  ,
+  PM_TERMINAL(
+    85,				/* identity */
+    elba_40_s,		/* filename of local helpfile */
+    "BrailleX II Elba 40",		/* name of terminal */
+    40, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  )
+  ,
+  PM_TERMINAL(
+    86,				/* identity */
+    elba_80_s,		/* filename of local helpfile */
+    "BrailleX II Elba 80",		/* name of terminal */
+    80, 1,			/* size of display */
+    0,				/* number of front keys */
+    1				/* terminal has an easy bar */
+  )
+  ,
+  PM_TERMINAL(
+    87,				/* identity */
+    elba_66_s,		/* filename of local helpfile */
+    "BrailleX II Elba 66",		/* name of terminal */
+    66, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
   )

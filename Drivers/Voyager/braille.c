@@ -510,7 +510,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     return cmd;
   }
 
-  r = usbReapInput(usbDevice, USB_INPUT_ENDPOINT, buf, 8, 0);
+  r = usbReapInput(usbDevice, USB_INPUT_ENDPOINT, buf, 8, 0, 0);
   if(r<0) {
     if(errno == EAGAIN) {
       /* no input */

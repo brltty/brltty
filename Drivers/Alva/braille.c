@@ -553,7 +553,7 @@ static int
 readUsbPacket (unsigned char *buffer, int length) {
   while (1) {
     unsigned char bytes[2];
-    int count = usbReapInput(usbDevice, usbInputEndpoint, bytes, sizeof(bytes), 0);
+    int count = usbReapInput(usbDevice, usbInputEndpoint, bytes, sizeof(bytes), 0, 0);
     if (count == -1) {
       if (errno == EAGAIN) return 0;
       return count;

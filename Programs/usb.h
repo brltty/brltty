@@ -335,7 +335,8 @@ extern int usbReapInput (
   unsigned char endpointNumber,
   void *buffer,
   int length,
-  int timeout
+  int initialTimeout,
+  int subsequentTimeout
 );
 
 typedef struct {

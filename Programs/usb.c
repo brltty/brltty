@@ -473,7 +473,7 @@ usbAwaitInput (
 ) {
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (!endpoint) return 0;
-  if (!endpoint->direction.input.completed) {
+  while (!endpoint->direction.input.completed) {
     UsbResponse response;
     while (!(endpoint->direction.input.completed = usbReapResponse(device, &response, 0))) {
       if (errno != EAGAIN) return 0;
@@ -488,8 +488,13 @@ usbAwaitInput (
     usbAddPendingInputRequest(endpoint);
     deleteItem(endpoint->direction.input.pending, endpoint->direction.input.completed);
 
-    endpoint->direction.input.buffer = response.buffer;
-    endpoint->direction.input.length = response.length;
+    if (response.length) {
+      endpoint->direction.input.buffer = response.buffer;
+      endpoint->direction.input.length = response.length;
+    } else {
+      free(endpoint->direction.input.completed);
+      endpoint->direction.input.completed = NULL;
+    }
   }
   return 1;
 }
@@ -500,7 +505,8 @@ usbReapInput (
   unsigned char endpointNumber,
   void *buffer,
   int length,
-  int timeout
+  int initialTimeout,
+  int subsequentTimeout
 ) {
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
@@ -508,7 +514,7 @@ usbReapInput (
     unsigned char *target = bytes;
     while (length > 0) {
       if (!usbAwaitInput(device, endpointNumber,
-                         (target == bytes)? 0: timeout)) return -1;
+                         (target == bytes)? initialTimeout: subsequentTimeout)) return -1;
 
       {
         int count = endpoint->direction.input.length;
