@@ -49,12 +49,13 @@ spk_identify (void)
   LogPrint(LOG_NOTICE, "Generic Say Driver");
 }
 
-static void
+static int
 spk_open (char **parameters)
 {
   const char *command = parameters[PARM_COMMAND];
   commandPath = *command? command: SAY_CMD;
   LogPrint(LOG_INFO, "Speech Command: %s", commandPath);
+  return 1;
 }
 
 static void

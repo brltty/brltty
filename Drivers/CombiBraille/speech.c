@@ -79,14 +79,14 @@ spk_identify (void)
 }
 
 
-static void
+static int
 spk_open (char **parameters)
 {
   if ((spk_buffer = malloc(spk_size))) {
     if ((spk_fd = dup(brl_fd)) != -1) {
       if ((spk_stream = fdopen(spk_fd, "a"))) {
         setvbuf(spk_stream, spk_buffer, _IOFBF, spk_size);
-        return;
+        return 1;
       } else {
         LogError("fdopen");
       }
@@ -100,6 +100,7 @@ spk_open (char **parameters)
   } else {
     LogError("malloc");
   }
+  return 0;
 }
 
 

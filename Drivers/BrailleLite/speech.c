@@ -73,9 +73,10 @@ spk_identify (void)
 }
 
 
-static void
+static int
 spk_open (char **parameters)
 {
+  return 1;
 }
 
 

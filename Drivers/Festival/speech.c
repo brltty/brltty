@@ -45,7 +45,7 @@ spk_identify (void)
 }
 
 
-static void
+static int
 spk_open (char **parameters)
 {
   unsigned char init_speech[] = { INIT_SPEECH };
@@ -55,7 +55,9 @@ spk_open (char **parameters)
     {
       fwrite (init_speech + 1, init_speech[0], 1, festival);
       fflush (festival);
+      return 1;
     }
+  return 0;
 }
 
 

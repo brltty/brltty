@@ -66,7 +66,7 @@ spk_identify (void)
 	   FLITE_PROJECT_DATE);
 }
 
-static void
+static int
 spk_open (char **parameters)
 {
   child = -1;
@@ -91,6 +91,8 @@ spk_open (char **parameters)
       pitch = 100;
     feat_set_int(voice->features, "int_f0_target_mean", pitch);
   }
+
+  return 1;
 }
 
 static int

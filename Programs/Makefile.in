@@ -17,9 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-all: all-brltty all-brltest scrtest$X tunetest$X $(BUILD_API)
+all: all-brltty all-brltest all-spktest scrtest$X tunetest$X $(BUILD_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
+all-spktest: spktest$X $(SPEECH_DRIVERS)
 
 ###############################################################################
 
@@ -167,6 +168,16 @@ brltest$X: $(BRLTEST_OBJECTS)
 
 brltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c
+
+###############################################################################
+
+SPKTEST_OBJECTS = spktest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) spk.$O $(SPEECH_DRIVER_OBJECTS)
+
+spktest$X: $(SPKTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(LDLIBS)
+
+spktest.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/spktest.c
 
 ###############################################################################
 

@@ -241,7 +241,7 @@ isSet:
    return 1;
 }
 
-static void
+static int
 spk_open (char **parameters) {
    if (!eci) {
       if (setIni(parameters[PARM_IniFile])) {
@@ -269,7 +269,7 @@ spk_open (char **parameters) {
 	       rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
 	       rangeVoiceParameter(eci, "speed", parameters[PARM_Speed], eciSpeed, 0, 250);
 	       rangeVoiceParameter(eci, "volume", parameters[PARM_Volume], eciVolume, 0, 100);
-               return;
+               return 1;
 	    } else {
 	       reportError(eci, "eciSetOutputDevice");
 	    }
@@ -280,6 +280,7 @@ spk_open (char **parameters) {
 	 }
       }
    }
+   return 0;
 }
 
 static int

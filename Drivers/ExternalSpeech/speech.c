@@ -96,7 +96,7 @@ static void myperror(char *fmt, ...)
   spk_close();
 }
 
-static void spk_open (char **parameters)
+static int spk_open (char **parameters)
 {
   int fd1[2], fd2[2];
   uid_t uid, gid;
@@ -111,7 +111,7 @@ static void spk_open (char **parameters)
     uid = strtol(s_uid, &ptr, 0);
     if(*ptr != 0) {
       myerror("Unable to parse uid value '%s'", s_uid);
-      return;
+      return 0;
     }
   }else uid = UID;
   if(*s_gid) {
@@ -119,21 +119,21 @@ static void spk_open (char **parameters)
     gid = strtol(s_gid, &ptr, 0);
     if(*ptr != 0) {
       myerror("Unable to parse gid value '%s'", s_uid);
-      return;
+      return 0;
     }
   }else gid = GID;
 
   if(pipe(fd1) < 0
      || pipe(fd2) < 0) {
     myperror("pipe");
-    return;
+    return 0;
   }
   LogPrint(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d",
 	   fd1[0],fd1[1], fd2[0],fd2[1]);
   switch(fork()) {
   case -1:
     myperror("fork");
-    return;
+    return 0;
   case 0: {
     int i;
     if(setgid(gid) <0) {
@@ -172,12 +172,14 @@ static void spk_open (char **parameters)
     if(fcntl(helper_fd_in, F_SETFL,O_NDELAY) < 0
        || fcntl(helper_fd_out, F_SETFL,O_NDELAY) < 0) {
       myperror("fcntl F_SETFL O_NDELAY");
-      return;
+      return 0;
     }
   };
 
   LogPrint(LOG_INFO,"Opened pipe to external speech program '%s'",
 	   extProgPath);
+
+  return 1;
 }
 
 static void mywrite(int fd, const void *buf, int len)

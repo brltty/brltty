@@ -51,10 +51,11 @@ spk_identify (void)
   LogPrint(LOG_NOTICE, "Using the Televox speech interface.");
 }
 
-static void
+static int
 spk_open (char **parameters)
 {
   dev_fd = open (DevPath, O_WRONLY | O_NOCTTY | O_NONBLOCK);
+  return 1;
 }
 
 static void

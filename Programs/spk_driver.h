@@ -31,7 +31,7 @@ extern "C" {
 
 /* Routines provided by this speech driver. */
 static void spk_identify (void);
-static void spk_open (char **parameters);
+static int spk_open (char **parameters);
 static void spk_say (const unsigned char *buffer, int len);
 static void spk_mute (void);
 static void spk_close (void);

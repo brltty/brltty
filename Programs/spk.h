@@ -30,7 +30,7 @@ typedef struct {
   const char *identifier;
   const char *const *parameters;
   void (*identify) (void);		/* print start-up messages */
-  void (*open) (char **parameters);		/* initialize speech device */
+  int (*open) (char **parameters);		/* initialize speech device */
   void (*say) (const unsigned char *buffer, int len);	/* speak text */
   void (*mute) (void);		/* mute speech */
   void (*close) (void);		/* close speech device */

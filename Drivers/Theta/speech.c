@@ -53,14 +53,14 @@ spk_identify (void) {
   LogPrint(LOG_NOTICE, "Using Theta");
 }
 
-static void
+static int
 spk_open (char **parameters) {
   theta_init(NULL);
   if ((voiceList = theta_enum_voices(theta_voxpath, NULL))) {
     for (voiceEntry=voiceList; voiceEntry; voiceEntry=voiceEntry->next) {
       if ((voice = theta_load_voice(voiceEntry))) {
         LogPrint(LOG_INFO, "Using voice %s.", voiceEntry->voxname);
-        return;
+        return 1;
       } else {
         LogPrint(LOG_WARNING, "Voice load error: %s", voiceEntry->voxname);
       }
@@ -69,6 +69,7 @@ spk_open (char **parameters) {
     LogPrint(LOG_WARNING, "No voices found.");
   }
   spk_close();
+  return 0;
 }
 
 static int
