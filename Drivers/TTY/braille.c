@@ -52,9 +52,9 @@ static iconv_t conversionDescriptor = NULL;
 #include <ncurses.h>
 #else /* HAVE_PKG_ */
 #warning curses package either unspecified or unsupported
-#define addstr(string) puts(string)
-#define addch(character) putchar(character)
-#define getch() getchar()
+#define addstr(string) fputs(string, ttyStream)
+#define addch(character) fputc(character, ttyStream)
+#define getch() fgetc(ttyStream)
 #endif /* HAVE_PKG_CURSES */
 
 #include "Programs/misc.h"
