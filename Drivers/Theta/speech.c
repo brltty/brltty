@@ -36,6 +36,14 @@
 
 #define SPKNAME "Theta"
 
+typedef enum {
+  PARM_GENDER,
+  PARM_LANGUAGE,
+  PARM_NAME,
+  PARM_AGE
+} DriverParameter;
+#define SPKPARMS "gender", "language", "name", "age"
+
 #include "Programs/spk_driver.h"
 #include <theta.h>
 
@@ -55,8 +63,35 @@ spk_identify (void) {
 
 static int
 spk_open (char **parameters) {
+  theta_voice_search criteria;
+  memset(&criteria, 0, sizeof(criteria));
   theta_init(NULL);
-  if ((voiceList = theta_enum_voices(theta_voxpath, NULL))) {
+
+  {
+    const char *const choices[] = {"male", "female", "neuter", NULL};
+    int choice;
+    if (validateChoice(&choice, "gender", parameters[PARM_GENDER], choices))
+      criteria.gender = (char *)choices[choice];
+  }
+
+  if (*parameters[PARM_LANGUAGE]) criteria.lang = parameters[PARM_LANGUAGE];
+
+  if (*parameters[PARM_NAME]) criteria.name_regex = parameters[PARM_NAME];
+
+  if (*parameters[PARM_AGE]) {
+    const char *word = parameters[PARM_AGE];
+    int value;
+    int younger;
+    static const int minimumAge = 1;
+    static const int maximumAge = 99;
+    if ((younger = word[0] == '-') && word[1]) ++word;
+    if (validateInteger(&value, "age", word, &minimumAge, &maximumAge)) {
+      if (younger) value = -value;
+      criteria.age = value;
+    }
+  }
+
+  if ((voiceList = theta_enum_voices(theta_voxpath, &criteria))) {
     for (voiceEntry=voiceList; voiceEntry; voiceEntry=voiceEntry->next) {
       if ((voice = theta_load_voice(voiceEntry))) {
         LogPrint(LOG_INFO, "Using voice %s.", voiceEntry->voxname);
