@@ -43,5 +43,3 @@ $(SRC_DIR)/help1.txt: $(SRC_DIR)/help.src
 	sed 's/<x40>\(.*\)$$/\1/' <$(SRC_DIR)/help.src \
 	| grep -v '<x20>' >$@
 
-clean::
-	-rm -f $(HELP_DEPS)

@@ -379,7 +379,7 @@ host_tbl.$O: tbl.$O
 
 XBRLAPI_OBJECTS = xbrlapi.$O
 
-xbrlapi: $(XBRLAPI_OBJECTS) api
+xbrlapi$X: $(XBRLAPI_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(X_LIBS) -lX11
 
 xbrlapi.$O: $(SRC_DIR)/xbrlapi.c
@@ -506,7 +506,7 @@ distclean::
 	-rm -f api.h
 
 clean::
-	-rm -f brltty$X txt2hlp$X tbl2hex$X *test$X *-static$X
+	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
 	-rm -f $(API_LIB) $(API_ARC)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 

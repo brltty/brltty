@@ -37,7 +37,7 @@ mkhlpfile()
          -e "s/<COLS>/${cols}/g" \
          -e "s/<CELLS-1>/${cells_m_1}/g" \
          -e "s/<CELLS>/${cells}/g" \
-         >help${fno}.txt
+         >${SRC_DIR}/help${fno}.txt
 }
 
 mkhlpfile 0 40 44
