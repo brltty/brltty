@@ -15,9 +15,9 @@ Author: dave@mielke.cc (Dave Mielke)
         nn201@cus.cam.ac.uk (Nikhil Nair)
 Maintained-by: dave@mielke.cc (Dave Mielke)
 Primary-site: ftp.ibiblio.org /pub/Linux/system/access
-              1060KB brltty-3.6.1.tar.gz
-               780KB brltty-3.6.1-1.i386.rpm
-              1080KB brltty-3.6.1-1.src.rpm
+              1080KB brltty-3.6.1.tar.gz
+               770KB brltty-3.6.1-1.i386.rpm
+              1100KB brltty-3.6.1-1.src.rpm
                 13KB brltty-3.6.1.README
                  3KB brltty-3.6.1.lsm
 Alternate-site: ftp://leb.net /pub/blinux/brltty
