@@ -14,8 +14,8 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION \
-"BRLTTY user-space-only driver for Tieman Voyager, version 0.20 (June 2004)"
+#define VERSION "0.20"
+#define DATE "June 2004"
 #define COPYRIGHT \
 "   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>"
 
@@ -69,40 +69,31 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
 
-static int inputMode = 0;
-
-/* Workaround USB<->Voyager flakiness: repeat commands */
+/* Workarounds for control transfer flakiness (at least in this demo model) */
 #define STALL_TRIES 7
 #define SENDBRAILLE_REPEATS 2
 
-/* Braille display parameters that do not change */
-#define BRLROWS 1		/* only one row on braille display */
-
-#define MAXNRCELLS 70 /* arbitrary max for allocations */
-
 /* control message request codes */
-#define BRLVGER_SET_DISPLAY_ON 0
-#define BRLVGER_SET_DISPLAY_VOLTAGE 1
-#define BRLVGER_GET_SERIAL 3
-#define BRLVGER_GET_FWVERSION 5
-#define BRLVGER_GET_LENGTH 6
-#define BRLVGER_SEND_BRAILLE 7
-#define BRLVGER_BEEP 9
-#if 0 /* not used and not sure they're working */
-/* hw ver is either 0.0 or unspecified on the prototype I have.
-  Not sure how to decode it properly. */
-#define BRLVGER_GET_DISPLAY_VOLTAGE 2
-#define BRLVGER_GET_HWVERSION 4
-#define BRLVGER_GET_CURRENT 8
-#endif
+#define BRLVGER_SET_DISPLAY_ON       0
+#define BRLVGER_SET_DISPLAY_VOLTAGE  1
+#define BRLVGER_GET_DISPLAY_VOLTAGE  2
+#define BRLVGER_GET_SERIAL_NUMBER    3
+#define BRLVGER_GET_HARDWARE_VERSION 4
+#define BRLVGER_GET_FIRMWARE_VERSION 5
+#define BRLVGER_GET_DISPLAY_SIZE     6
+#define BRLVGER_SEND_BRAILLE         7
+#define BRLVGER_GET_CURRENT          8
+#define BRLVGER_BEEP                 9
 
 /* Global variables */
-
-/* Mappings between Voyager's dot coding and brltty's coding. */
-static TranslationTable outputTable;
-
 static UsbChannel *usb = NULL;
+static char firstRead; /* Flag to reinitialize brl_readCommand() function state. */
+static int inputMode = 0;
+static TranslationTable outputTable;
+static unsigned char *previousCells; /* previous pattern displayed */
+static unsigned char *currentCells; /* buffer to prepare new pattern */
 
+#define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
 static unsigned char totalCells;
 static unsigned char textOffset;
 static unsigned char textCells;
@@ -111,10 +102,6 @@ static unsigned char statusCells;
 #define IS_TEXT_RANGE(key1,key2) (((key1) >= textOffset) && ((key2) < (textOffset + textCells)))
 #define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
 #define IS_STATUS_KEY(key) (((key) >= statusOffset) && ((key) < (statusOffset + statusCells)))
-
-static unsigned char *prevdata, /* previous pattern displayed */
-                     *dispbuf; /* buffer to prepare new pattern */
-static char readbrl_init; /* Flag to reinitialize readbrl function state. */
 
 
 static int
@@ -135,7 +122,6 @@ _sndcontrolmsg (const char *reqname, uint8_t request, uint16_t value, uint16_t i
              request, strerror(errno));
   return ret;
 }
-
 #define sndcontrolmsg(request, value, index, buffer, size) \
   (_sndcontrolmsg(#request, request, value, index, buffer, size))
 
@@ -157,37 +143,39 @@ _rcvcontrolmsg (const char *reqname, uint8_t request, uint16_t value, uint16_t i
              request, strerror(errno));
   return ret;
 }
-
 #define rcvcontrolmsg(request, value, index, buffer, size) \
   (_rcvcontrolmsg(#request, request, value, index, buffer, size))
 
-#define RAW_STRING_SIZE 500
-#define STRING_SIZE (2*RAW_STRING_SIZE +1)
+#define MAX_STRING_LENGTH 0XFF
+#define RAW_STRING_SIZE (MAX_STRING_LENGTH * 2) + 2
+#define STRING_SIZE (MAX_STRING_LENGTH + 1)
 static unsigned char *
-decodeString(char *rawbuf)
-{
-  static unsigned char str[STRING_SIZE];
-  int i, len = (rawbuf[0]-2)/2;
-  if(len<0)
-    len = 0;
-  else if(len+1 > STRING_SIZE)
-    len = STRING_SIZE-1;
-  for(i=0; i<len; i++)
-    str[i] = rawbuf[2+2*i];
-  str[i] = 0;
-  return str;
+decodeString (unsigned char *buffer) {
+  static unsigned char string[STRING_SIZE];
+  int length = (buffer[0] - 2) / 2;
+  int index;
+
+  if (length < 0) {
+    length = 0;
+  } else if (length >= STRING_SIZE) {
+    length = STRING_SIZE - 1;
+  }
+
+  for (index=0; index<length; index++)
+    string[index] = buffer[2+2*index];
+  string[index] = 0;
+
+  return string;
 }
 
-
-static void 
+static void
 brl_identify (void) {
-  LogPrint(LOG_NOTICE, VERSION);
+  LogPrint(LOG_NOTICE, "Tieman Voyager user-space driver: version " VERSION " (" DATE ")");
   LogPrint(LOG_INFO, COPYRIGHT);
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device)
-{
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   int ret;
 
   if (*parameters[PARM_INPUTMODE])
@@ -217,32 +205,35 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     makeOutputTable(&dots, &outputTable);
   }
 
-  dispbuf = prevdata = NULL;
+  currentCells = previousCells = NULL;
 
+  /* find out how big the display is */
   {
-    /* query for length */
     unsigned char data[2];
-    ret = rcvcontrolmsg(BRLVGER_GET_LENGTH, 0, 0, data, 2);
-    if(ret<0) goto failure;
-    switch(data[1]) {
-    case 48:
-      totalCells = 44;
-      brl->helpPage = 0;
-      break;
-    case 72:
-      totalCells = 70;
-      brl->helpPage = 1;
-      break;
-    default:
-      LogPrint(LOG_ERR,"Unsupported display length code %u", data[1]);
-      goto failure;
-    };
-  }
-  LogPrint(LOG_INFO, "Display has %u cells", totalCells);
+    ret = rcvcontrolmsg(BRLVGER_GET_DISPLAY_SIZE, 0, 0, data, sizeof(data));
+    if (ret == -1) goto failure;
 
+    switch (data[1]) {
+      case 48:
+        totalCells = 44;
+        brl->helpPage = 0;
+        break;
+
+      case 72:
+        totalCells = 70;
+        brl->helpPage = 1;
+        break;
+
+      default:
+        LogPrint(LOG_ERR, "Unsupported display length code %u", data[1]);
+        goto failure;
+    }
+    LogPrint(LOG_INFO, "Voyager Size: %u", totalCells);
+  }
+
+  /* position the text and status cells */
   textCells = totalCells;
   textOffset = statusOffset = 0;
-
   {
     int cells = 3;
     const char *word = parameters[PARM_STATUSCELLS];
@@ -267,30 +258,34 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     statusCells = cells;
   }
 
+  /* log the serial number of the display */
   {
-    unsigned char rawbuf[RAW_STRING_SIZE];
-    ret = rcvcontrolmsg(BRLVGER_GET_SERIAL, 0, 0,
-                        rawbuf, sizeof(rawbuf));
-    if (ret != -1) {
-      LogPrint(LOG_INFO, "Voyager Serial Number: %s", decodeString(rawbuf));
-    }
+    unsigned char buffer[RAW_STRING_SIZE];
+    ret = rcvcontrolmsg(BRLVGER_GET_SERIAL_NUMBER, 0, 0,
+                        buffer, sizeof(buffer));
+    if (ret != -1)
+      LogPrint(LOG_INFO, "Voyager Serial Number: %s",
+               decodeString(buffer));
   }
 
+  /* log the firmware version of the display */
   {
-    unsigned char rawbuf[RAW_STRING_SIZE];
-    ret = rcvcontrolmsg(BRLVGER_GET_FWVERSION, 0, 0,
-                        rawbuf, sizeof(rawbuf));
-    if (ret != -1) {
-      LogPrint(LOG_INFO, "Voyager Firmware Version: %s", decodeString(rawbuf));
-    }
+    unsigned char buffer[RAW_STRING_SIZE];
+    ret = rcvcontrolmsg(BRLVGER_GET_FIRMWARE_VERSION, 0, 0,
+                        buffer, sizeof(buffer));
+    if (ret != -1)
+      LogPrint(LOG_INFO, "Voyager Firmware: %s",
+               decodeString(buffer));
   }
 
+  /* turn the display on */
   ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_ON, 1, 0, NULL, 0);
-  if(ret<0) goto failure;
+  if (ret == -1) goto failure;
 
   /* cause the display to beep */
   ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
 
+  /* start the input packet monitor */
   {
     int ret, repeats = STALL_TRIES;
     do {
@@ -305,20 +300,21 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
   }
 
-  if(!(dispbuf = malloc(totalCells))
-     || !(prevdata = malloc(totalCells)))
+  if(!(currentCells = malloc(totalCells))
+     || !(previousCells = malloc(totalCells)))
     goto failure;
 
-  /* dispbuf will hold the status cells and the text cells.
-     We export directly to BRLTTY only the text cells. */
+  /* currentCells holds the status cells and the text cells.
+   * We export directly to BRLTTY only the text cells.
+   */
   brl->x = textCells;		/* initialize size of display */
-  brl->y = BRLROWS;		/* always 1 */
+  brl->y = 1;		/* always 1 */
 
   /* Force rewrite of display on first writebrl */
-  memset(dispbuf, 0, totalCells); /* no dots */
-  memset(prevdata, 0XFF, totalCells); /* all dots */
+  memset(currentCells, 0, totalCells); /* no dots */
+  memset(previousCells, 0XFF, totalCells); /* all dots */
 
-  readbrl_init = 1; /* init state on first readbrl */
+  firstRead = 1;
 
   return 1;
 
@@ -335,17 +331,21 @@ brl_close (BrailleDisplay *brl) {
     usb = NULL;
   }
 
-  free(dispbuf);
-  free(prevdata);
-  dispbuf = prevdata = NULL;
-}
+  if (currentCells) {
+    free(currentCells);
+    currentCells = NULL;
+  }
 
+  if (previousCells) {
+    free(previousCells);
+    previousCells = NULL;
+  }
+}
 
 static void
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
-  memcpy(dispbuf+statusOffset, s, statusCells);
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
+  memcpy(currentCells+statusOffset, cells, statusCells);
 }
-
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
@@ -353,17 +353,17 @@ brl_writeWindow (BrailleDisplay *brl) {
   unsigned char buf[totalCells];
   int i;
 
-  memcpy(dispbuf+textOffset, brl->buffer, textCells);
+  memcpy(currentCells+textOffset, brl->buffer, textCells);
 
   /* If content hasn't changed, do nothing. */
-  if (memcmp(prevdata, dispbuf, totalCells) == 0) return;
+  if (memcmp(previousCells, currentCells, totalCells) == 0) return;
 
   /* remember current content */
-  memcpy(prevdata, dispbuf, totalCells);
+  memcpy(previousCells, currentCells, totalCells);
 
   /* translate to voyager dot pattern coding */
   for (i=0; i<totalCells; i++)
-    buf[i] = outputTable[dispbuf[i]];
+    buf[i] = outputTable[currentCells[i]];
 
   /* Firmware supports multiples of 8cells, so there are extra cells
      in the firmware's imagination that don't actually exist physically.
@@ -449,27 +449,31 @@ brl_writeWindow (BrailleDisplay *brl) {
 #define HKEY(where, keys, command, description) \
   HLP(where, #keys, description) \
   KEY(keys, command)
+
 #define PHKEY(where, prefix, keys, command, description) \
   HLP(where, prefix "+" #keys, description) \
   KEY(keys, command)
+
 #define CKEY(where, dots, command, description) \
   HLP(where, "Chord-" #dots, description) \
   KEY(dots, command)
+
 #define HKEY2(where, keys1, keys2, command1, command2, description) \
   HLP(where, #keys1 "/" #keys2, description) \
   KEY(keys1, command1); \
   KEY(keys2, command2)
+
 #define PHKEY2(where, prefix, keys1, keys2, command1, command2, description) \
   HLP(where, prefix "+ " #keys1 "/" #keys2, description) \
   KEY(keys1, command1); \
   KEY(keys2, command2)
 
-static int 
+static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   /* Structure to remember which keys are pressed */
   typedef struct {
     unsigned int control; /* Front and dot keys */
-    unsigned char routing[MAXNRCELLS];
+    unsigned char routing[MAXIMUM_CELLS];
   } Keys;
 
   /* Static variables to remember the state between calls. */
@@ -480,16 +484,16 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   static Keys activeKeys;
   static Keys pressedKeys;
   /* For a key binding that triggers two commands */
-  static int pending_cmd;
+  static int pendingCommand;
 
   /* Ordered list of pressed routing keys by number */
-  unsigned char rtk_which[MAXNRCELLS];
-  /* number of entries in rtk_which */
-  int rtk_count = 0;
+  unsigned char routingKeys[MAXIMUM_CELLS];
+  /* number of entries in routingKeys */
+  int routingCount = 0;
 
   /* recognized command */
   int cmd = CMD_NOOP;
-  int key_pressed = 0;
+  int keyPressed = 0;
 
   /* read buffer: packet[0] for DOT keys, packet[1] for keys A B C D UP DOWN
    * RL RR, packet[2]-packet[7] list pressed routing keys by number, maximum
@@ -498,17 +502,17 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
    */
   unsigned char packet[8];
 
-  if (readbrl_init) {
+  if (firstRead) {
     /* initialize state */
-    readbrl_init = 0;
+    firstRead = 0;
     memset(&activeKeys, 0, sizeof(activeKeys));
     memset(&pressedKeys, 0, sizeof(pressedKeys));
-    pending_cmd = EOF;
+    pendingCommand = EOF;
   }
 
-  if (pending_cmd != EOF) {
-    cmd = pending_cmd;
-    pending_cmd = EOF;
+  if (pendingCommand != EOF) {
+    cmd = pendingCommand;
+    pendingCommand = EOF;
     return cmd;
   }
 
@@ -524,13 +528,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         return CMD_RESTARTBRL;
       } else {
         LogPrint(LOG_ERR, "Voyager read error: %s", strerror(errno));
-        readbrl_init = 1;
+        firstRead = 1;
         return EOF;
       }
     } else if ((size > 0) && (size < sizeof(packet))) {
       /* The display handles read requests of only and exactly 8bytes */
       LogPrint(LOG_NOTICE, "Short read: %d", size);
-      readbrl_init = 1;
+      firstRead = 1;
       return EOF;
     }
 
@@ -548,7 +552,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
     /* We combine dot and front key info in keystate */
     keys.control = (packet[1] << 8) | packet[0];
-    if (keys.control & ~pressedKeys.control) key_pressed = 1;
+    if (keys.control & ~pressedKeys.control) keyPressed = 1;
     
     for (i=2; i<8; i++) {
       unsigned char key = packet[i];
@@ -561,21 +565,21 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       key--;
 
       keys.routing[key] = 1;
-      if (!pressedKeys.routing[key]) key_pressed = 1;
+      if (!pressedKeys.routing[key]) keyPressed = 1;
     }
 
     pressedKeys = keys;
-    if (key_pressed) activeKeys = keys;
+    if (keyPressed) activeKeys = keys;
   }
 
   {
     int key;
     for (key=0; key<totalCells; key++)
       if (activeKeys.routing[key])
-        rtk_which[rtk_count++] = key;
+        routingKeys[routingCount++] = key;
   }
 
-  if (rtk_count == 0) {
+  if (routingCount == 0) {
     /* No routing keys */
 
     if (!(activeKeys.control & ~FRONT_KEYS)) {
@@ -659,7 +663,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       switch (activeKeys.control & DOT_KEYS) {
         HLP(601, "Chord-1478", "Input mode (toggle)")
         case DOT1|DOT4|DOT7|DOT8:
-          if (!key_pressed) cmd = CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
+          if (!keyPressed) cmd = CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
           break;
 
 	CKEY(210, DOT1, CMD_ATTRVIS, "Attribute underlining (toggle)");
@@ -701,13 +705,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     }
   } else if (!activeKeys.control) {
     /* Just routing keys */
-    if (rtk_count == 1) {
-      if (IS_TEXT_KEY(rtk_which[0])) {
+    if (routingCount == 1) {
+      if (IS_TEXT_KEY(routingKeys[0])) {
         HLP(301,"CRt#", "Route cursor to cell")
-        cmd = CR_ROUTE + rtk_which[0] - textOffset;
+        cmd = CR_ROUTE + routingKeys[0] - textOffset;
       } else {
-        int key = statusOffset? totalCells - 1 - rtk_which[0]:
-                                rtk_which[0] - statusOffset;
+        int key = statusOffset? totalCells - 1 - routingKeys[0]:
+                                routingKeys[0] - statusOffset;
         switch (key) {
           case 0:
             HLP(881, "CRs1", "Help screen (toggle)")
@@ -730,11 +734,11 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
             break;
         }
       }
-    } else if ((rtk_count == 2) &&
-               IS_TEXT_RANGE(rtk_which[0], rtk_which[1])) {
+    } else if ((routingCount == 2) &&
+               IS_TEXT_RANGE(routingKeys[0], routingKeys[1])) {
       HLP(405, "CRtx+CRty", "Cut text from x through y")
-      cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
-      pending_cmd = CR_CUTLINE + rtk_which[1] - textOffset;
+      cmd = CR_CUTBEGIN + routingKeys[0] - textOffset;
+      pendingCommand = CR_CUTLINE + routingKeys[1] - textOffset;
     }
   } else if (activeKeys.control & (K_UP|K_RL|K_RR)) {
     /* Some routing keys combined with UP RL or RR (actually any key
@@ -742,55 +746,55 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
      * Treated special because we use absolute routing key numbers
      * (counting the status cell keys).
      */
-    if (rtk_count == 1) {
+    if (routingCount == 1) {
       switch (activeKeys.control) {
         case K_UP:
           HLP(692, "UP+ CRa<CELLS-1>/CRa<CELLS>",
               "Switch to previous/next virtual console")
-          if (rtk_which[0] == totalCells-1) {
+          if (routingKeys[0] == totalCells-1) {
             cmd = CMD_SWITCHVT_NEXT;
-          } else if (rtk_which[0] == totalCells-2) {
+          } else if (routingKeys[0] == totalCells-2) {
             cmd = CMD_SWITCHVT_PREV;
           } else {
             HLP(691, "UP+CRa#", "Switch to virtual console #")
-            cmd = CR_SWITCHVT + rtk_which[0];
+            cmd = CR_SWITCHVT + routingKeys[0];
           }
           break;
 
         PHKEY(501,"CRa#", K_RL,
-              CR_SETMARK + rtk_which[0],
+              CR_SETMARK + routingKeys[0],
               "Remember current position as mark #");
         PHKEY(501,"CRa#", K_RR,
-              CR_GOTOMARK + rtk_which[0],
+              CR_GOTOMARK + routingKeys[0],
               "Go to mark #");
       }
     }
-  } else if ((rtk_count == 1) && IS_TEXT_KEY(rtk_which[0])) {
+  } else if ((routingCount == 1) && IS_TEXT_KEY(routingKeys[0])) {
     /* One text routing key with some other keys */
     switch (activeKeys.control) {
       PHKEY(501, "CRt#", K_DOWN,
-            CR_SETLEFT + rtk_which[0] - textOffset,
+            CR_SETLEFT + routingKeys[0] - textOffset,
             "Go right # cells");
       PHKEY(401, "CRt#", K_A,
-            CR_CUTBEGIN + rtk_which[0] - textOffset,
+            CR_CUTBEGIN + routingKeys[0] - textOffset,
             "Mark beginning of region to cut");
       PHKEY(401, "CRt#", K_A|K_B,
-            CR_CUTAPPEND + rtk_which[0] - textOffset,
+            CR_CUTAPPEND + routingKeys[0] - textOffset,
             "Mark beginning of cut region for append");
       PHKEY(401, "CRt#", K_D,
-            CR_CUTRECT + rtk_which[0] - textOffset,
+            CR_CUTRECT + routingKeys[0] - textOffset,
             "Mark bottom-right of rectangular region and cut");
       PHKEY(401, "CRt#", K_D|K_C,
-            CR_CUTLINE + rtk_which[0] - textOffset,
+            CR_CUTLINE + routingKeys[0] - textOffset,
             "Mark end of linear region and cut");
       PHKEY2(501, "CRt#", K_B, K_C,
-             CR_PRINDENT + rtk_which[0] - textOffset,
-             CR_NXINDENT + rtk_which[0] - textOffset,
+             CR_PRINDENT + routingKeys[0] - textOffset,
+             CR_NXINDENT + routingKeys[0] - textOffset,
              "Go to previous/next line indented no more than #");
     }
   }
 
-  if (key_pressed) {
+  if (keyPressed) {
     /* key was pressed, start the autorepeat delay */
     cmd |= VAL_REPEAT_DELAY;
   } else {
