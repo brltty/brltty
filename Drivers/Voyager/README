@@ -34,10 +34,14 @@ very young and not thoroughly tested.
 When BRLTTY will be running, press the leftmost routing key to bring up
 the help screen so you can read the details of the key bindings.
 
-The old kernel driver, included in official kernels since 2.4.19, will
-actually get in the way of this driver as it will claim the USB interface
-to the display. One simple way to prevent that module from auto-loading
-is to rename the module file so it isn't found.
+Users of the 2.6.x kernel may experience some difficulties.  The old
+kernel driver, which is included in the official kernels, will actually
+get in the way of this driver as it will claim the USB interface to the
+display, and I've seen some hangs occur when BRLTTY asks to disconnect
+the kernel driver. If you have this problem you should make sure the
+kernel module called brlvger is not inserted into your kernel. One simple
+way to prevent that module from auto-loading is to rename the module file
+so it isn't found.
 cd /lib/modules/`uname -r`/kernel/drivers/usb/
 mv brlvger.o brlvger.o.hold
 If lsmod shows the brlvger module as already loaded then do
