@@ -33,7 +33,16 @@
 #include "braille.h"
 #include "variolow.h"
 
-static unsigned char lastbuff[40];
+static unsigned char lastWindow[40];
+
+static int pressedKeys;
+static int currentKeys;
+#define KEY_1 0X01
+#define KEY_2 0X02
+#define KEY_3 0X04
+#define KEY_4 0X08
+#define KEY_5 0X10
+#define KEY_6 0X20
 
 static void
 brl_identify (void)
@@ -46,10 +55,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
 		/*	Seems to signal en error */ 
 	if(!varioinit((char*)dev)) {
-			/*	Theese are pretty static */ 
+		memset(lastWindow, 0, 40);
+		pressedKeys = 0;
+		currentKeys = 0;
+
 		brl->x=40;
 		brl->y=1;
                 brl->helpPage = 0;
+
 		return 1;
 	}
 	return 0;
@@ -64,9 +77,9 @@ brl_close (BrailleDisplay *brl)
 static void 
 brl_writeWindow (BrailleDisplay *brl)
 {
-	if(memcmp(lastbuff,brl->buffer,40)!=0) {
+	if(memcmp(lastWindow,brl->buffer,40)!=0) {
 		char		outbuff[40];
-		memcpy(lastbuff,brl->buffer,40);
+		memcpy(lastWindow,brl->buffer,40);
 			/*	Redefine the given dot-pattern to match ours */
 		variotranslate(brl->buffer,outbuff,40);
 		variodisplay(outbuff);
@@ -82,44 +95,96 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 static int 
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
-	static int shift_button_down=0;
-	int noop = 0;
-	int c;
+	int code;
 		/*	Since we are nonblocking this will happen quite a lot */ 
-	while((c=varioget())!=-1) {
-		switch(c) {
-			case VARIO_PUSHBUTTON_PRESS_3:
-				shift_button_down=1;
-			case VARIO_PUSHBUTTON_PRESS_1:
-			case VARIO_PUSHBUTTON_PRESS_2:
-			case VARIO_PUSHBUTTON_PRESS_4:
-			case VARIO_PUSHBUTTON_PRESS_5:
-			case VARIO_PUSHBUTTON_PRESS_6:
-				noop=1;	
-			case VARIO_DISPLAY_DATA_ACK:
-			case 0X89: /* identity code for modular 40 */
-				continue;	
-	
-			case VARIO_PUSHBUTTON_RELEASE_1:
-				return (shift_button_down?CMD_TOP_LEFT:CMD_LNUP);
-			case VARIO_PUSHBUTTON_RELEASE_2:
-				return (shift_button_down?CMD_SKPIDLNS:CMD_FWINLT);
-			case VARIO_PUSHBUTTON_RELEASE_3:
-				shift_button_down=0;
-				noop=1;
-				continue;
-			case VARIO_PUSHBUTTON_RELEASE_4:
-				return (shift_button_down?CMD_BOT_LEFT:CMD_LNDN);
-			case VARIO_PUSHBUTTON_RELEASE_5:
-				return (shift_button_down?CMD_CSRTRK:CMD_FWINRT);
-			case VARIO_PUSHBUTTON_RELEASE_6:
-				return (shift_button_down?CMD_PREFMENU:CMD_HOME);
+	while((code=varioget())!=-1) {
+                int release;
+                int key;
+		if (code == VARIO_DISPLAY_DATA_ACK) continue;
+		if (code == 0X89) continue;
+                if ((release = ((code & VARIO_RELEASE_FLAG) != 0)))
+                	code &= ~VARIO_RELEASE_FLAG;
 
-			default:
-				if(c>=VARIO_CURSOR_BASE&&c<=VARIO_CURSOR_BASE+VARIO_CURSOR_COUNT)
-					return CR_ROUTE+c-VARIO_CURSOR_BASE;
+		if ((code >= VARIO_CURSOR_BASE) &&
+		    (code < (VARIO_CURSOR_BASE + VARIO_CURSOR_COUNT))) {
+			int keys = currentKeys;
+			currentKeys = 0;
+			key = code - VARIO_CURSOR_BASE;
+			if (release) return EOF;
+			switch (keys) {
+				case 0:
+					return CR_ROUTE + key;
+				case (KEY_1):
+					return CR_DESCCHAR + key;
+				case (KEY_2):
+					return CR_CUTAPPEND + key;
+				case (KEY_3):
+					return CR_CUTBEGIN + key;
+				case (KEY_4):
+					return CR_SETLEFT + key;
+				case (KEY_5):
+					return CR_CUTLINE + key;
+				case (KEY_6):
+					return CR_CUTRECT + key;
+				default:
+					return CMD_NOOP;
+			}
+		}
+
+		switch (code) {
+			case VARIO_PUSHBUTTON_1:
+				key = KEY_1;
 				break;
+			case VARIO_PUSHBUTTON_2:
+				key = KEY_2;
+				break;
+			case VARIO_PUSHBUTTON_3:
+				key = KEY_3;
+				break;
+			case VARIO_PUSHBUTTON_4:
+				key = KEY_4;
+				break;
+			case VARIO_PUSHBUTTON_5:
+				key = KEY_5;
+				break;
+			case VARIO_PUSHBUTTON_6:
+				key = KEY_6;
+				break;
+			default:
+				continue;
+		}
+		if (release) {
+			int keys = currentKeys;
+			pressedKeys &= ~key;
+			currentKeys = 0;
+			switch (keys) {
+				case (KEY_1):
+					return CMD_LNUP;
+				case (KEY_2):
+					return CMD_FWINLT;
+				case (KEY_4):
+					return CMD_LNDN;
+				case (KEY_5):
+					return CMD_FWINRT;
+				case (KEY_6):
+					return CMD_HOME;
+				case (KEY_3 | KEY_1):
+					return CMD_TOP_LEFT;
+				case (KEY_3 | KEY_2):
+					return CMD_SKPIDLNS;
+				case (KEY_3 | KEY_4):
+					return CMD_BOT_LEFT;
+				case (KEY_3 | KEY_5):
+					return CMD_CSRTRK;
+				case (KEY_3 | KEY_6):
+					return CMD_PREFMENU;
+				default:
+					return EOF;
+			}
+		} else {
+			pressedKeys |= key;
+			currentKeys = pressedKeys;
 		}
 	}
-	return noop? CMD_NOOP: EOF;
+	return EOF;
 }

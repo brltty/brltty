@@ -25,28 +25,23 @@
 	/*	Header (and length of header) for sending the 40 display bytes */ 
 #define VARIO_DISPLAY_DATA	"\001\000\000\000\000"
 #define VARIO_DISPLAY_DATA_LEN	5
+
+#define VARIO_RELEASE_FLAG	0X80
 	/*	Cursor movement keys have codes in the range of 0x20-0x6f (left to right)
 	 *	for press and 0xa0-0xef for release */
-#define VARIO_CURSOR_BASE	0xa0
+#define VARIO_CURSOR_BASE	0X20
 #define VARIO_CURSOR_COUNT	40
-	/*	The six buttons press and release codes .. they are numbered from
+	/*	The press codes of the six buttons .. they are numbered from
 	 *	top left to bottom right like:
 	 * 	1	4
 	 *	2	5
 	 *	3	6 */
-#define VARIO_PUSHBUTTON_PRESS_1	0x04
-#define VARIO_PUSHBUTTON_PRESS_2	0x03
-#define VARIO_PUSHBUTTON_PRESS_3	0x08
-#define VARIO_PUSHBUTTON_PRESS_4	0x07
-#define VARIO_PUSHBUTTON_PRESS_5	0x0b
-#define VARIO_PUSHBUTTON_PRESS_6	0x0f
-
-#define VARIO_PUSHBUTTON_RELEASE_1	0x84
-#define VARIO_PUSHBUTTON_RELEASE_2	0x83
-#define VARIO_PUSHBUTTON_RELEASE_3	0x88
-#define VARIO_PUSHBUTTON_RELEASE_4	0x87
-#define VARIO_PUSHBUTTON_RELEASE_5	0x8b
-#define VARIO_PUSHBUTTON_RELEASE_6	0x8f
+#define VARIO_PUSHBUTTON_1	0X04
+#define VARIO_PUSHBUTTON_2	0X03
+#define VARIO_PUSHBUTTON_3	0X08
+#define VARIO_PUSHBUTTON_4	0X07
+#define VARIO_PUSHBUTTON_5	0X0b
+#define VARIO_PUSHBUTTON_6	0X0f
 
 	/*	Open and set the serial port right */ 
 int varioinit(char *dev) ;
