@@ -405,7 +405,11 @@ which were actually used to initialize connection. <tt/NULL/ will also be nice
 for now.
 
 <tscreen><code>
- if (brlapi_initializeConnection(NULL,NULL)<0) exit(1);
+ if (brlapi_initializeConnection(NULL,NULL)<0)
+ {
+  brlapi_perror("brlapi_initializeConnection");
+  exit(1);
+ }
 </code></tscreen>
 
 The connection might fail, so testing is needed.
@@ -417,14 +421,14 @@ The connection might fail, so testing is needed.
 
 <tscreen><code>
  p = brlapi_getDriverId();
- if (p==NULL)
-  fprintf(stderr,"Unable to get driver id!\n");
+ if (!p)
+  brlapi_perror("brlapi_getDriverId");
  else
   printf("Driver id: %s\n",p);
  
  p = brlapi_getDriverName();
- if (p==NULL)
-  fprintf(stderr,"Unable to get driver name!\n");
+ if (!p)
+  brlapi_perror("brlapi_getDriverName");
  else
   printf("Driver name: %s\n",p);
 </code></tscreen>
@@ -439,8 +443,10 @@ expected.
 checked to be sure everything will hold on it:
 
 <tscreen><code>
- brlapi_getDisplaySize(&amp;x, &amp;y);
- printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
+ if (brlapi_getDisplaySize(&amp;x, &amp;y)<0)
+  brlapi_perror("brlapi_getDisplaySize");
+ else
+  printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
 </code></tscreen>
 
 <sect1>Entering raw mode, immediately leaving raw mode.
@@ -450,7 +456,7 @@ checked to be sure everything will hold on it:
 <tscreen><code>
  fprintf(stderr,"Trying to enter in raw mode... ");
  if (brlapi_getRaw()<0)
-  fprintf(stderr,"Driver is not raw capable\n");
+  brlapi_perror("brlapi_getRaw");
  else {
   fprintf(stderr,"Ok, leaving raw mode immediately\n");
   brlapi_leaveRaw();
@@ -562,29 +568,35 @@ int main()
  int x, y;
 
 /* Connect to BrlAPI */
-  if (brlapi_initializeConnection(NULL,NULL)<0) exit(1);
+  if (brlapi_initializeConnection(NULL,NULL)<0)
+  {
+   brlapi_perror("brlapi_initializeConnection");
+   exit(1);
+  }
 
 /* Get driver id & name */
  p = brlapi_getDriverId();
- if (p==NULL)
-  fprintf(stderr,"Unable to get driver id!\n");
+ if (!p)
+  brlapi_perror("brlapi_getDriverId");
  else
   printf("Driver id: %s\n",p);
  
  p = brlapi_getDriverName();
- if (p==NULL)
-  fprintf(stderr,"Unable to get driver name!\n");
+ if (!p)
+  brlapi_perror("brlapi_getDriverName");
  else
   printf("Driver name: %s\n",p);
 
 /* Get display size */
- brlapi_getDisplaySize(&amp;x, &amp;y);
- printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
+ if (brlapi_getDisplaySize(&amp;x, &amp;y)<0)
+  brlapi_perror("brlapi_getDisplaySize");
+ else
+  printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
 
 /* Try entering raw mode, immediately go out from raw mode */
  printf("Trying to enter in raw mode... ");
  if (brlapi_getRaw()<0)
-  fprintf(stderr,"Driver is not raw capable\n");
+  brlapi_perror("brlapi_getRaw");
  else {
   printf("Ok, leaving raw mode immediately\n");
   brlapi_leaveRaw();
@@ -606,17 +618,17 @@ int main()
    fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
    if (brlapi_readCommand(1,&amp;key)>0)
     fprintf(stderr,"got it! (code=%d)\n",key);
-   else fprintf(stderr,"failed\n");
+   else brlapi_perror("brlapi_readCommand");
 
-  } else fprintf(stderr,"failed\n");
+  } else brlapi_perror("brlapi_writeBrl");
 
 /* Leave tty control */
   fprintf(stderr,"Leaving tty... ");
   if (brlapi_leaveTty()>=0)
    fprintf(stderr,"Ok\n");
-  else fprintf(stderr,"failed\n");
+  else brlapi_perror("brlapi_leaveTty");
 
- } else fprintf(stderr,"failed\n");
+ } else brlapi_perror("brlapi_getTty");
 
 /* Disconnect from BrlAPI */
  brlapi_closeConnection();

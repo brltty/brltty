@@ -36,6 +36,8 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <pthread.h>
+#include <syslog.h>
 
 #include "brlapi.h"
 #include "api_common.h"
@@ -44,16 +46,25 @@
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
 
+/* for remembering getaddrinfo error code */
+static int gai_error;
+
 /* Some useful global variables */
 static uint32_t brlx = 0;
 static uint32_t brly = 0;
 static int fd = -1; /* Descriptor of the socket connected to BrlApi */
+
+pthread_mutex_t brlapi_fd_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concurrent fd access */
+
 static int deliver_mode = -1; /* How keypresses are delivered (codes | commands) */
 
 /* what a key press does */
 typedef enum { NONE=0, STROKE=1, MOD=2, UNMOD=3 } actions;
+
 #define NBMAXMODS 32
 static uint32_t mods_state;
+pthread_mutex_t mods_mutex; /* to protect concurrent key reading */
+
 /* key binding */
 struct bind {
  brl_keycode_t code;
@@ -70,11 +81,12 @@ static char *cmdnames;
 /* key presses buffer, for when key presses are received instead of
  * acknowledgements for instance
  *
- * every function must hence be able to read at least sizeof(uint32_t) */
+ * every function must hence be able to read at least sizeof(brl_keycode_t) */
 
 static brl_keycode_t keybuf[BRL_KEYBUF_SIZE];
-static brl_keycode_t keybuf_next;
-static brl_keycode_t keybuf_nb;
+static unsigned keybuf_next;
+static unsigned keybuf_nb;
+static pthread_mutex_t keybuf_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concurrent key buffering */
 
 static int handle_keypress(brl_type_t type, uint32_t *code, int size) {
  brl_keycode_t *keycode = (brl_keycode_t *) code;
@@ -88,17 +100,20 @@ static int handle_keypress(brl_type_t type, uint32_t *code, int size) {
  /* if size is not enough, ignore it */
  if (size<sizeof(brl_keycode_t)) return 1;
 
+ pthread_mutex_lock(&keybuf_mutex);
  if (keybuf_nb>=BRL_KEYBUF_SIZE) {
-  fprintf(stderr,"lost key 0x%x !\n",*keycode);
+  pthread_mutex_unlock(&keybuf_mutex);
+  syslog(LOG_WARNING,"lost key 0x%x !\n",*keycode);
   return 1;
  }
 
  keybuf[(keybuf_next+keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*keycode);
+ pthread_mutex_unlock(&keybuf_mutex);
  return 1;
 }
 
 /* brlapi_waitForAck */
-/* Wait for an acknowledgement */
+/* Wait for an acknowledgement, must be called with brlapi_fd_mutex locked */
 static int brlapi_waitForAck()
 {
  brl_type_t type;
@@ -108,8 +123,8 @@ static int brlapi_waitForAck()
  {
   if ((res=brlapi_readPacket(fd,&type,&code,sizeof(code)))<0)
   {
-   if (res==-1) perror("waiting for ack");
-   return -1;
+   brlapi_errno=BRLERR_LIBCERR;
+   return res;
   }
   if (handle_keypress(type,&code,res)) continue;
   switch (type)
@@ -117,15 +132,30 @@ static int brlapi_waitForAck()
    case BRLPACKET_ACK: return 0;
    case BRLPACKET_ERROR:
    {
-    fprintf(stderr,"BrlApi error %u !\n",ntohl(code));
-    errno=0;
+    brlapi_errno=ntohl(code);
     return -1;
    }
    /* default is ignored, but logged */
    default:
-    fprintf(stderr,"(brlapi_waitForAck) Received unknown packet of type %u and size %d\n",type,res);
+    syslog(LOG_ERR,"(brlapi_waitForAck) Received unknown packet of type %u and size %d\n",type,res);
   }
  }
+}
+
+/* brlapi_writePacketWaitForAck */
+/* write a packet and wait for an acknowledgement */
+static int brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf, size_t size)
+{
+ int res;
+ pthread_mutex_lock(&brlapi_fd_mutex);
+ if ((res=brlapi_writePacket(fd,type,buf,size))<0) {
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  brlapi_errno=BRLERR_LIBCERR;
+  return res;
+ }
+ res=brlapi_waitForAck();
+ pthread_mutex_unlock(&brlapi_fd_mutex);
+ return res;
 }
 
 /* Function : updateSettings */
@@ -153,15 +183,17 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
  char auth[BRLAPI_MAXPACKETSIZE];
 
  brlapi_settings_t settings = { BRLAPI_AUTHNAME, ":" BRLAPI_SOCKETPORT };
+ brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHNAME"), getenv("BRLAPI_HOSTNAME") };
 
  /* Here update settings with the parameters from misc sources (files, env...) */
+ updateSettings(&settings, &envsettings);
  updateSettings(&settings, clientSettings);
  if (usedSettings!=NULL) updateSettings(usedSettings, &settings); 
 
- if (brlapi_loadAuthKey(settings.authKey,&authlength,(void *) &auth[0])<0)
+ if ((err=brlapi_loadAuthKey(settings.authKey,&authlength,(void *) &auth[0]))<0)
  {
-  fprintf(stderr,"unable to load authentication key: %s\n",settings.authKey);
-  return -1;
+  brlapi_errno=BRLERR_LIBCERR;
+  return err;
  }
 
  if ((port = strchr(settings.hostName,':')))
@@ -184,12 +216,12 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
  hints.ai_family = PF_UNSPEC;
  hints.ai_socktype = SOCK_STREAM;
 
- err = getaddrinfo(hostname, port, &hints, &res);
- if (err)
- {
-  fprintf(stderr,"getaddrinfo(%s) : %s\n",settings.hostName,gai_strerror(err));
+ gai_error = getaddrinfo(hostname, port, &hints, &res);
+ if (gai_error) {
+  brlapi_errno=BRLERR_GAIERR;
   return -1;
  }
+ pthread_mutex_lock(&brlapi_fd_mutex);
  for(cur = res; cur; cur = cur->ai_next)
  {
   fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
@@ -206,22 +238,27 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
  freeaddrinfo(res);
  if (!cur)
  {
-  fprintf(stderr,"Can't connect to BrlApi on %s !\n",settings.hostName);
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  brlapi_errno=BRLERR_CONNREFUSED;
   return -1;
  }
- if (brlapi_writePacket(fd, BRLPACKET_AUTHKEY, &auth[0], authlength)<0)
+ if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, &auth[0], authlength))<0)
  {
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  brlapi_errno=BRLERR_LIBCERR;
   close(fd);
   fd = -1;
-  return -1;
+  return err;
  }
- if (brlapi_waitForAck()!=0)
+ if ((err=brlapi_waitForAck())<0)
  {
+  pthread_mutex_unlock(&brlapi_fd_mutex);
   close(fd);
   fd = -1;
-  return -1;
+  return err;
  }
 
+ pthread_mutex_unlock(&brlapi_fd_mutex);
  return fd;
 }
 
@@ -229,38 +266,27 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 /* Cleanly close the socket */
 void brlapi_closeConnection()
 {
+ pthread_mutex_lock(&brlapi_fd_mutex);
  brlapi_writePacket(fd, BRLPACKET_BYE, NULL, 0);
  brlapi_waitForAck();
  close(fd);
  fd = -1;
+ pthread_mutex_unlock(&brlapi_fd_mutex);
 }
 
 /* brlapi_getRaw */
 /* Switch to Raw mode */
 int brlapi_getRaw()
 {
- static const unsigned char paquet[sizeof(uint32_t)];
- int res;
- *((uint32_t *)paquet) = htonl(BRLRAW_MAGIC);
- if ((res=brlapi_writePacket(fd, BRLPACKET_GETRAW, paquet, sizeof(uint32_t)))<0)
- {
-  perror("getting raw");
-  return -1;
- }
- return brlapi_waitForAck();
+ const uint32_t magic = htonl(BRLRAW_MAGIC);
+ return brlapi_writePacketWaitForAck(fd, BRLPACKET_GETRAW, &magic, sizeof(magic));
 }
 
 /* brlapi_leaveRaw */
 /* Leave Raw mode */
 int brlapi_leaveRaw()
 {
- int res;
- if ((res=brlapi_writePacket(fd, BRLPACKET_LEAVERAW, NULL, 0))<0)
- {
-  perror("leaving raw");
-  return -1;
- }
- return brlapi_waitForAck();
+ return brlapi_writePacketWaitForAck(fd, BRLPACKET_LEAVERAW, NULL, 0);
 }
 
 /* brlapi_sendRaw */
@@ -268,10 +294,13 @@ int brlapi_leaveRaw()
 int brlapi_sendRaw(const unsigned char *buf, size_t size)
 {
  int res;
- if ((res=brlapi_writePacket(fd, BRLPACKET_PACKET, buf, size))<0)
+ pthread_mutex_lock(&brlapi_fd_mutex);
+ res=brlapi_writePacket(fd, BRLPACKET_PACKET, buf, size);
+ pthread_mutex_unlock(&brlapi_fd_mutex);
+ if (res<0)
  {
-  perror("writing raw packet");
-  return -1;
+  brlapi_errno=BRLERR_LIBCERR;
+  return res;
  }
  return 0;
 }
@@ -282,24 +311,29 @@ int brlapi_recvRaw(unsigned char *buf, size_t size)
 {
  int res;
  brl_type_t type;
+ pthread_mutex_lock(&brlapi_fd_mutex);
  while (1)
  {
   if ((res=brlapi_readPacket(fd, &type, buf, size))<0)
   {
-   if (res==-1) perror("reading raw packet");
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   brlapi_errno=BRLERR_LIBCERR;
    return res;
   }
-  if (type==BRLPACKET_PACKET) return res;
+  if (type==BRLPACKET_PACKET)
+  {
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   return res;
+  }
   if (type==BRLPACKET_ERROR)
   {
-   fprintf(stderr,"BrlApi error %u !\n",ntohl(*((uint32_t*)buf)));
-   errno=0;
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   brlapi_errno=ntohl(*((uint32_t*)buf));
    return -1;
   }
   /* other packets are ignored, but logged */
-  fprintf(stderr,"(RecvRaw) Received unknown packet of type %u and size %d\n",type,res);
+  syslog(LOG_ERR,"(RecvRaw) Received unknown packet of type %u and size %d\n",type,res);
  }
- return 0;
 }
 
 /* Function : brlapi_getDriverId */
@@ -310,16 +344,19 @@ char *brlapi_getDriverId()
  int res;
  static char id[3];
  uint32_t *code = (uint32_t *) &id[0];
+ pthread_mutex_lock(&brlapi_fd_mutex);
  if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERID, NULL, 0)<0)
  {
-  perror("getting driver id");
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  brlapi_errno=BRLERR_LIBCERR;
   return NULL;
  }
  while (1)
  {
   if ((res=brlapi_readPacket(fd,&type, &id[0],sizeof(id)))<0)
   {
-   if (res==-1) perror("Getting driver id");
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   brlapi_errno=BRLERR_LIBCERR;
    return NULL;
   }
   if (handle_keypress(type,code,res)) continue;
@@ -327,17 +364,19 @@ char *brlapi_getDriverId()
   {
    case BRLPACKET_GETDRIVERID:
    {
+    pthread_mutex_unlock(&brlapi_fd_mutex);
     id[res]='\0';
     return &id[0];
    }
    case BRLPACKET_ERROR:
    {
-    fprintf(stderr,"BrlApi error %d while getting driver id\n",ntohl(*code));
+    pthread_mutex_unlock(&brlapi_fd_mutex);
+    brlapi_errno=ntohl(*code);
     return NULL;
    }
    /* default is ignored, but logged */
    default:
-    fprintf(stderr,"(brlapi_getDriverId) Received unknown packet of type %u and size %d\n",type,res);
+    syslog(LOG_ERR,"(brlapi_getDriverId) Received unknown packet of type %u and size %d\n",type,res);
   }
  }
 }
@@ -350,16 +389,19 @@ char *brlapi_getDriverName()
  int res;
  static char name[80]; /* should be enough */
  uint32_t *code = (uint32_t *) &name[0];
+ pthread_mutex_lock(&brlapi_fd_mutex);
  if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERNAME, NULL, 0)<0)
  {
-  perror("getting driver name");
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  brlapi_errno=BRLERR_LIBCERR;
   return NULL;
  }
  while (1)
  {
   if ((res=brlapi_readPacket(fd, &type, &name[0],sizeof(name)))<0)
   {
-   if (res==-1) perror("Getting driver name");
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   brlapi_errno=BRLERR_LIBCERR;
    return NULL;
   }
   if (handle_keypress(type,code,res)) continue;
@@ -367,17 +409,19 @@ char *brlapi_getDriverName()
   {
    case BRLPACKET_GETDRIVERNAME:
    {
+    pthread_mutex_unlock(&brlapi_fd_mutex);
     name[res]='\0';
     return &name[0];
    }
    case BRLPACKET_ERROR:
    {
-    fprintf(stderr,"BrlApi error %d while getting driver name\n",ntohl(*code));
+    pthread_mutex_unlock(&brlapi_fd_mutex);
+    brlapi_errno=ntohl(*code);
     return NULL;
    }
    /* default is ignored, but logged */
    default:
-    fprintf(stderr,"(GetDriverName) Received unknown packet of type %u and size %d\n",type,res);
+    syslog(LOG_ERR,"(GetDriverName) Received unknown packet of type %u and size %d\n",type,res);
   }
  }
 }
@@ -396,23 +440,27 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
   *y = brly;
   return 0;
  }
- if (brlapi_writePacket(fd, BRLPACKET_GETDISPLAYSIZE, NULL, 0)<0)
+ pthread_mutex_lock(&brlapi_fd_mutex);
+ if ((res=brlapi_writePacket(fd, BRLPACKET_GETDISPLAYSIZE, NULL, 0))<0)
  {
-  perror("Getting braille display size");
-  return -1;
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  brlapi_errno=BRLERR_LIBCERR;
+  return res;
  }
  while (1)
  {
   if ((res=brlapi_readPacket(fd,&type,&DisplaySize[0],sizeof(DisplaySize)))<0)
   {
-   if (res==-1) perror("getting display size");
-   return -1;
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   brlapi_errno=BRLERR_LIBCERR;
+   return res;
   }
   if (handle_keypress(type,&DisplaySize[0],res)) continue;
   switch (type)
   {
    case BRLPACKET_GETDISPLAYSIZE: 
    {
+    pthread_mutex_unlock(&brlapi_fd_mutex);
     brlx = ntohl(DisplaySize[0]);
     brly = ntohl(DisplaySize[1]);
     *x = brlx;
@@ -421,12 +469,13 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
    }
    case BRLPACKET_ERROR:
    {
-    fprintf(stderr,"BrlApi error %d while getting display size\n",ntohl(DisplaySize[0]));
+    pthread_mutex_unlock(&brlapi_fd_mutex);
+    brlapi_errno=ntohl(DisplaySize[0]);
     return -1;
    }
    /* default is ignored, but logged */
    default:
-    fprintf(stderr,"(brlapi_getDisplaySize) Received unknown packet of type %u and size %d\n",type,res);
+    syslog(LOG_ERR,"(brlapi_getDisplaySize) Received unknown packet of type %u and size %d\n",type,res);
   }
  }
 }
@@ -439,19 +488,14 @@ int brlapi_getControllingTty()
  int tty;
  FILE *f;
  int i = (int) NULL;
- char c[100];
+ char c[100],*d;
+ if ((d=getenv("CONTROLVT")) && sscanf(d,"%d",&tty)==1) return tty;
  f = fopen("/proc/self/stat","r");
- if (f==NULL)
- {
-  perror("open");
-  return -1;
- }
- if (fscanf(f,"%d %s %c %d %d %d %d",&i,c,c,&i,&i,&i,&tty)==-1)
- {
-  perror("fscanf");
-  return -1;
- }
+ if (f==NULL) return -1;
+ if (fscanf(f,"%d %s %c %d %d %d %d",&i,c,c,&i,&i,&i,&tty)<7) return -1;
  fclose(f);
+ if ((tty & 0xff00) != 0x400) return -1; /* major number of /dev/tty* */
+ if ((tty & 0xff) >= 64) return -1; /* /dev/ttyS* */
  return tty & 0xff;
 }
 
@@ -483,23 +527,32 @@ int brlapi_getTty(uint32_t tty, uint32_t how, brlapi_keybinding_t *keybinding)
  uint32_t mods_state;
  
  /* Check if "how" is valid */
- if ((how!=BRLKEYCODES) && (how!=BRLCOMMANDS)) return -1;
+ if ((how!=BRLKEYCODES) && (how!=BRLCOMMANDS))
+ {
+  brlapi_errno=BRLERR_INVALID_PARAMETER;
+  return -1;
+ }
 
  /* Get dimensions of braille display */
- if (brlapi_getDisplaySize(&brlx,&brly)<0) return -1; /* failed, we stop here */
+ if ((res=brlapi_getDisplaySize(&brlx,&brly))<0) return res; /* failed, we stop here */
  
  /* Then determine of which tty to take control */
  if (tty==0) truetty = brlapi_getControllingTty(); else truetty = tty;
- if (truetty == -1) return -1;
+ if (truetty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return truetty; }
  
  /* OK, Now we know where we are, so get the effective control of the terminal! */
  uints[0] = htonl(truetty); 
  uints[1] = htonl(how);
- if (brlapi_writePacket(fd,BRLPACKET_GETTTY,&uints[0],sizeof(uints))<0) return -1;
- if (brlapi_waitForAck()!=0) return -1;
+ if ((res=brlapi_writePacketWaitForAck(fd,BRLPACKET_GETTTY,&uints[0],sizeof(uints)))<0)
+ {
+  brlapi_errno=BRLERR_LIBCERR;
+  return res;
+ }
  
  deliver_mode = how;
+ pthread_mutex_lock(&keybuf_mutex);
  keybuf_next = keybuf_nb = 0;
+ pthread_mutex_unlock(&keybuf_mutex);
 
  // ok, grabbed it, see if a key binding is required
  if (!keybinding) return 0;
@@ -757,8 +810,7 @@ int brlapi_getTty(uint32_t tty, uint32_t how, brlapi_keybinding_t *keybinding)
 int brlapi_leaveTty()
 {
  brlx = 0; brly = 0; deliver_mode = -1;
- if (brlapi_writePacket(fd,BRLPACKET_LEAVETTY,NULL,0)<0) return -1;
- return brlapi_waitForAck();
+ return brlapi_writePacketWaitForAck(fd,BRLPACKET_LEAVETTY,NULL,0);
 }
 
 /* Function : brlapi_writeBrl */
@@ -769,13 +821,16 @@ int brlapi_writeBrl(uint32_t cursor, const char *str)
  uint32_t *csr = (uint32_t *) &disp[0];
  unsigned char *s = &disp[sizeof(uint32_t)];
  uint32_t tmp = brlx * brly, min, i;
- if ((tmp == 0) || (tmp > 256)) return -1;
+ if ((tmp == 0) || (tmp > 256))
+ {
+  brlapi_errno=BRLERR_INVALID_PARAMETER;
+  return -1;
+ }
  *csr = htonl(cursor);
  min = MIN( strlen(str), tmp);
  strncpy(s,str,min);
  for (i = min; i<tmp; i++) *(s+i) = ' '; 
- if (brlapi_writePacket(fd,BRLPACKET_WRITE,disp,sizeof(uint32_t)+tmp)<0) return -1;
- return brlapi_waitForAck();
+ return brlapi_writePacketWaitForAck(fd,BRLPACKET_WRITE,disp,sizeof(uint32_t)+tmp);
 }
 
 /* Function : brlapi_writeBrlDots */
@@ -784,10 +839,13 @@ int brlapi_writeBrlDots(const char *dots)
 {
  static unsigned char disp[256];
  uint32_t size = brlx * brly;
- if ((size == 0) || (size > 256)) return -1;
+ if ((size == 0) || (size > 256))
+ {
+  brlapi_errno=BRLERR_INVALID_PARAMETER;
+  return -1;
+ }
  memcpy(disp,dots,size);
- if (brlapi_writePacket(fd,BRLPACKET_WRITEDOTS,disp,size)<0) return -1;
- return brlapi_waitForAck();
+ return brlapi_writePacketWaitForAck(fd,BRLPACKET_WRITEDOTS,disp,size);
 }
 
 /* Function : packetReady */
@@ -811,32 +869,47 @@ int brlapi_readKey(int block, brl_keycode_t *code)
  int res;
  brl_type_t type;
 
- if (deliver_mode!=BRLKEYCODES) return -1;
+ if (deliver_mode!=BRLKEYCODES)
+ {
+  brlapi_errno=BRLERR_INVALID_PARAMETER;
+  return -1;
+ }
  while (1)
  {
 /* if a key press was already received, just return it */
+  pthread_mutex_lock(&keybuf_mutex);
   if (keybuf_nb>0) {
-   *code=keybuf[keybuf_next++];
+   *code=keybuf[keybuf_next];
+   keybuf_next=(keybuf_next+1)%BRL_KEYBUF_SIZE;
    keybuf_nb--;
+   pthread_mutex_unlock(&keybuf_mutex);
    return 1;
   }
+  pthread_mutex_unlock(&keybuf_mutex);
+  pthread_mutex_lock(&brlapi_fd_mutex);
   if (!block)
   {
    res = packetReady(fd);
-   if (res<=0) return res;
+   if (res<=0) {
+    pthread_mutex_unlock(&brlapi_fd_mutex);
+    return res;
+   }
   }
   if ((res=brlapi_readPacket(fd, &type, code, sizeof(*code)))<0)
   {
-   if (res==-1) perror("reading braille key");
-   return -1;
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   brlapi_errno=BRLERR_LIBCERR;
+   return res;
   }
   if (type==BRLPACKET_KEY)
   {
+   pthread_mutex_unlock(&brlapi_fd_mutex);
    *code = ntohl(*code);
    return 1;
   }
+  pthread_mutex_unlock(&brlapi_fd_mutex);
   /* other packets are ignored, but logged */
-  fprintf(stderr,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
+  syslog(LOG_ERR,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
  }
 }
 
@@ -847,32 +920,47 @@ int brlapi_readCommand(int block, brl_keycode_t *code)
  int res;
  brl_type_t type;
 
- if (deliver_mode!=BRLCOMMANDS) return -1;
+ if (deliver_mode!=BRLCOMMANDS)
+ {
+  brlapi_errno=BRLERR_INVALID_PARAMETER;
+  return -1;
+ }
  while (1)
  {
 /* if a key press was already received, just return it */
+  pthread_mutex_lock(&keybuf_mutex);
   if (keybuf_nb>0) {
-   *code=keybuf[keybuf_next++];
+   *code=keybuf[keybuf_next];
+   keybuf_next=(keybuf_next+1)%BRL_KEYBUF_SIZE;
    keybuf_nb--;
+   pthread_mutex_unlock(&keybuf_mutex);
    return 1;
   }
+  pthread_mutex_unlock(&keybuf_mutex);
+  pthread_mutex_lock(&brlapi_fd_mutex);
   if (!block)
   {
    res = packetReady(fd);
-   if (res<=0) return res;
+   if (res<=0) {
+    pthread_mutex_unlock(&brlapi_fd_mutex);
+    return res;
+   }
   }
   if ((res=brlapi_readPacket(fd, &type, code, sizeof(*code)))<0)
   {
-   if (res==-1) perror("reading braille key");
-   return -1;
+   pthread_mutex_unlock(&brlapi_fd_mutex);
+   brlapi_errno=BRLERR_LIBCERR;
+   return res;
   }
   if (type==BRLPACKET_COMMAND)
   {
+   pthread_mutex_unlock(&brlapi_fd_mutex);
    *code = ntohl(*code);
    return 1;
   }
+  pthread_mutex_unlock(&brlapi_fd_mutex);
   /* other packets are ignored, but logged */
-  fprintf(stderr,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
+  syslog(LOG_ERR,"(ReadKey) Received unknown packet of type %u and size %d\n",type,res);
  }
 }
 
@@ -883,7 +971,11 @@ int brlapi_readBinding(int block, const char **code)
  brl_keycode_t keycode;
  struct bind *bindtmp;
  int res;
- if (!bindings) return -1;
+ if (!bindings)
+ {
+  brlapi_errno=BRLERR_INVALID_PARAMETER;
+  return -1;
+ }
  while (1) {
   if ((res=brlapi_readKey(block, &keycode))<=0)
    return res;
@@ -891,8 +983,20 @@ int brlapi_readBinding(int block, const char **code)
    if (bindtmp->code == keycode && bindtmp->mods_state == mods_state) {
     switch (bindtmp->action) {
      case STROKE: *code=bindtmp->modif.cmd; return 1;
-     case MOD: mods_state|=1<<bindtmp->modif.mod; break;
-     case UNMOD: mods_state&=~(1<<bindtmp->modif.mod); break;
+     case MOD: 
+     {
+      pthread_mutex_lock(&mods_mutex);
+      mods_state|=1<<bindtmp->modif.mod;
+      pthread_mutex_unlock(&mods_mutex);
+      break;
+     }
+     case UNMOD:
+     {
+      pthread_mutex_lock(&mods_mutex);
+      mods_state&=~(1<<bindtmp->modif.mod);
+      pthread_mutex_unlock(&mods_mutex);
+      break;
+     }
      default: break;
     }
    mods_state=0;
@@ -906,13 +1010,9 @@ int brlapi_readBinding(int block, const char **code)
 /* what = 0 for masing, !0 for unmasking */
 static int Mask_Unmask(int what, brl_keycode_t x, brl_keycode_t y)
 {
- brl_keycode_t ints[2];
+ brl_keycode_t ints[2] = { htonl(x), htonl(y) };
 
- ints[0] = htonl(x);
- ints[1] = htonl(y);
-
- if (brlapi_writePacket(fd,(what ? BRLPACKET_UNMASKKEYS : BRLPACKET_MASKKEYS),&ints[0],sizeof(ints))<0) return -1;
- return brlapi_waitForAck();
+ return brlapi_writePacketWaitForAck(fd,(what ? BRLPACKET_UNMASKKEYS : BRLPACKET_MASKKEYS),ints,sizeof(ints));
 }
 
 /* Function : brlapi_ignoreKeys */
@@ -926,3 +1026,92 @@ int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y)
 {
  return Mask_Unmask(!0,x,y);
 }
+
+/* Error code handling */
+
+/* brlapi_errlist: error messages */
+const char *brlapi_errlist[] = {
+ "Success",		/* BRLERR_SUCESS */
+ "Not enough memory",	/* BRLERR_NOMEM */
+ "Busy Tty",		/* BRLERR_TTYBUSY */
+ "Unknown instruction",	/* BRLERR_UNKNOWN_INSTRUCTION */
+ "Illegal instruction",	/* BRLERR_ILLEGAL_INSTRUCTION */
+ "Invalid parameter",	/* BRLERR_INVALID_PARAMETER */
+ "Invalid packet",	/* BRLERR_INVALID_PACKET */
+ "Raw mode not supported by driver",	/* BRLERR_RAWNOTSUPP */
+ "Key codes not supported by driver",	/* BRLERR_KEYSNOTSUPP */
+ "Connection refused",	/* BRLERR_CONNREFUSED */
+ "Operation not supported",	/* BRLERR_OPNOTSUPP */
+ "getaddrinfo error",	/* BRLERR_GAIERR */
+ "libc error",		/* BRLERR_LIBCERR */
+ "couldn't find out tty number",	/* BRLERR_UNKNOWNTTY */
+};
+
+/* brlapi_nerr: last error number */
+const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*)) - 1;
+
+/* brlapi_perror: error message printing */
+void brlapi_perror(const char *s)
+{
+ int err=brlapi_errno;
+ if (err>brlapi_nerr)
+  fprintf(stderr,"%s: Unknown error\n",s);
+ else if (err==BRLERR_GAIERR)
+  fprintf(stderr,"%s: %s: %s\n",s,brlapi_errlist[err],gai_strerror(gai_error));
+ else if (err==BRLERR_LIBCERR)
+  if (brlapi_libcerrno>sys_nerr)
+   fprintf(stderr,"%s: %s: Unknown error\n",s,brlapi_errlist[err]);
+  else
+   fprintf(stderr,"%s: %s: %s\n",s,brlapi_errlist[err],sys_errlist[brlapi_libcerrno]);
+ else
+  fprintf(stderr,"%s: %s\n",s,brlapi_errlist[err]);
+}
+
+#ifdef brlapi_errno
+#undef brlapi_errno
+#endif
+
+int brlapi_errno;
+static int pthread_errno_ok;
+
+/* we need a per-thread errno variable, thanks to pthread_keys */
+static pthread_key_t errno_key;
+
+/* the key must be created at most once */
+static pthread_once_t errno_key_once = PTHREAD_ONCE_INIT;
+
+extern int pthread_key_create(pthread_key_t *, void (*) (void *)) __attribute__ ((weak));
+extern int pthread_once(pthread_once_t *, void (*) (void)) __attribute__ ((weak));
+extern void *pthread_getspecific(pthread_key_t) __attribute__ ((weak));
+extern int pthread_setspecific(pthread_key_t, const void *) __attribute__ ((weak));
+
+static void errno_key_alloc(void)
+{
+ pthread_errno_ok=!pthread_key_create(&errno_key, NULL);
+}
+
+/* how to get per-thread errno variable. This will be called by the macro
+ * brlapi_errno */
+int *brlapi_errno_location(void)
+{
+ int *errnop;
+ if (pthread_once && pthread_key_create)
+ {
+  pthread_once(&errno_key_once, errno_key_alloc);
+  if (pthread_errno_ok)
+  {
+   if ((errnop=(int *) pthread_getspecific(errno_key)))
+   /* normal case */
+    return errnop;
+   else
+   /* on the first time, must allocate it */
+    if ((errnop=malloc(sizeof(*errnop)))
+    && !pthread_setspecific(errno_key,errnop));
+    return errnop;
+  }
+ }
+ /* fall-back: shared errno :/ */
+ return &brlapi_errno;
+}
+
+/* XXX functions mustn't use brlapi_errno after this one since it was #undef'ed XXX */

@@ -49,7 +49,7 @@ extern "C" {
 
 /** \e brltty 's settings directory
  *
- * This is where authentication key and driver-dependent key names are found 
+ * This is where authentication key and driver-dependent key names are found
  * for instance. */
 #define BRLAPI_ETCDIR "/etc/brltty"
 
@@ -90,14 +90,15 @@ extern "C" {
  * lets \e libbrlapi connect to the local computer, on TCP port 4321
  *
  * \sa brlapi_initializeConnection() brlapi_loadAuthKey()
- * */
+ */
 typedef struct
 {
   /** To get authenticated, \e libbrlapi has to tell the \e BrlAPI server a
-   * secret key, for security reasons. This is the path to the file which 
+   * secret key, for security reasons. This is the path to the file which
    * holds it; it will hence have to be readable by the application.
    *
-   * Setting \c NULL defaults it to local installation setup. */
+   * Setting \c NULL defaults it to local installation setup or to the content
+   * of the BRLAPI_AUTHNAME environment variable, if it exists. */
   char *authKey;
 
   /** this tells where the \e BrlAPI server resides: it might be listening on
@@ -106,7 +107,8 @@ typedef struct
    * \note Please check that resolving this name works before complaining
    *
    * Settings \c NULL defaults it to localhost, using the local installation's
-   * default TCP port. */
+   * default TCP port, or to the content of the BRLAPI_HOSTNAME environment
+   * variable, if it exists. */
   char *hostName;
 } brlapi_settings_t;
 
@@ -136,7 +138,7 @@ typedef struct
  * \par Errors:
  * \e BrlAPI might not be on this TCP port, the host name might not be
  * resolvable, the authentication may fail,...
- * 
+ *
  * \param clientSettings this gives the connection parameters, as described
  * in brlapi_settings_t. If \c NULL, defaults values are used, so that it is
  * generally a good idea to give \c NULL as default, and only fill a
@@ -155,7 +157,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
 /* brlapi_closeConnection */
 /** \ingroup brlapi_connection
- * Cleanly close the socket 
+ * Cleanly close the socket
  *
  * This function locks until a closing acknowledgement is received from the
  * server. The socket is then freed, so the file descriptor
@@ -180,6 +182,24 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth);
 
 /* brlapi_getControllingTty */
 /** Return the number of the caller's controlling terminal
+ *
+ * BrlAPI needs to know on which VT the application is connected.
+ * This function tries to find it out. It first looks for the CONTROLTTY
+ * environment variable, then tries to get it from /proc/self/stat
+ *
+ * Hence people has to modify their xinitrc & xsession so that CONTROLTTY is
+ * set to 7 for instance, if the X server is launched on VT 7. The value can
+ * be got by grepping "using VT number [0-9]*" from X's log.
+ *
+ * I personnaly have
+ *
+ * CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
+ * export CONTROLVT
+ *
+ * in my .xsession
+ *
+ * People also have to set CONTROLTTY when working remotely (as well as
+ * BRLAPI_HOSTNAME)
  *
  * \return -1 if unknown or on error */
 int brlapi_getControllingTty(void);
@@ -225,7 +245,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  * \ingroup brlapi_keys
  *
  * This holds settings for the key binding mechanism. Calling
- * brlapi_getTty() with it will load bindings from file 
+ * brlapi_getTty() with it will load bindings from file
  * \c "$HOME/BRLAPI_HOMEKEYDIR/client-xy\#\#BRLAPI_HOMEKEYEXT"
  * where \c xy is the driver code, as returned by brlapi_getDriverId()
  */
@@ -246,7 +266,7 @@ typedef struct
  * that only one client gets control of each tty.
  *
  * The application must also specify how braille keys will be delivered to it.
- * Two ways are possible: KEYCODES and COMMANDS 
+ * Two ways are possible: KEYCODES and COMMANDS
  *
  * - KEYCODES are specific to each braille driver, since the raw keycode, as
  *   defined in the driver will be given for each key press.
@@ -265,8 +285,8 @@ typedef struct
  *
  * \param tty
  * - If tty>0, application takes control of the specified tty;
- * - if tty==0, the library tries to determine which tty the application is
- * running on and take control of this one.
+ * - if tty==0, the library calls brlapi_getControllingTty() itself and
+ * takes control of the result.
  *
  * \param how tells whether the application wants brlapi_readKey() to return
  * keycodes or \e brltty commands: either BRLKEYCODES or BRLCOMMANDS;
@@ -293,10 +313,15 @@ int brlapi_leaveTty(void);
 /** @} */
 
 /** \defgroup brlapi_write Writing on the braille display
- * \brief write text to the braille display 
- * 
+ * \brief write text to the braille display
+ *
  * Once brlapi_getTty() was called, the application can call brlapi_writeBrl()
  * to write things on the braille display.
+ *
+ * \note Be sure to call brlapi_getTty() \e before calling brlapi_write*(), or
+ * else you'll get an error. This is particularly not always trivial when
+ * writing multithreaded applications.
+ *
  * @{ */
 
 /* brlapi_writeBrl */
@@ -421,7 +446,7 @@ int brlapi_readCommand(int block, brl_keycode_t *code);
  * This function returns a command name, as bound in user's configuration file:
  * if the read is successful, a pointer on a string is
  * returned, this is the string defined in $HOME/.brlkeys/appli-xy.kbd for the
- * key which was read, else \c NULL is returned 
+ * key which was read, else \c NULL is returned
  *
  * \param block tells whether the call should block until a key is pressed (1)
  *  or should only probe key presses (0).
@@ -491,7 +516,7 @@ int brlapi_leaveRaw(void);
 
 /* brlapi_sendRaw */
 /** Send a Raw Packet
- * 
+ *
  * \param buf points on the packet;
  * \param size holds the packet size.
  * \return 0 on success, -1 on error */
@@ -511,11 +536,10 @@ int brlapi_recvRaw(unsigned char *buf, size_t size);
 /** \defgroup brlapi_error Error handling
  * \brief how to handle errors which might very well happen
  *
- * This is still under development. A brlapi_errno variable should be available,
- * as well as a brlapi_errlist[] array and a brlapi_perror() function.
  * @{ */
 
-/* Error codes */ 
+/* Error codes */
+#define BRLERR_SUCCESS                  0  /**< Success */
 #define BRLERR_NOMEM                    1  /**< Not enough memory */
 #define BRLERR_TTYBUSY                  2  /**< Already a connection running in this tty */
 #define BRLERR_UNKNOWN_INSTRUCTION      3  /**< Not implemented in protocol */
@@ -525,12 +549,53 @@ int brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_RAWNOTSUPP               7  /**< Raw mode not supported by loaded driver */
 #define BRLERR_KEYSNOTSUPP              8  /**< Reading of key codes not supported by loaded driver */
 #define BRLERR_CONNREFUSED              9  /**< Connection refused */
-#define BRLERR_OPNOTSUPP                10  /**< Operation not supported */
+#define BRLERR_OPNOTSUPP               10  /**< Operation not supported */
+#define BRLERR_GAIERR                  11  /**< Getaddrinfo error */
+#define BRLERR_LIBCERR                 12  /**< Libc error */
+#define BRLERR_UNKNOWNTTY              13  /**< Couldn't find out the tty number */
+
+/* brlapi_errlist */
+/** Error message list
+ *
+ * These are the string constants used by brlapi_perror()
+ */
+extern const char *brlapi_errlist[];
+
+/* brlapi_nerr */
+/** Number of error messages */
+extern const int brlapi_nerr;
+
+/* brlapi_perror */
+/** Print a BrlAPI error message
+ *
+ * brlapi_perror() reads brlapi_errno, and acts just like perror()
+ */
+void brlapi_perror(const char *s);
+
+/** Get per-thread errno location
+ *
+ * In multithreaded software, brlapi_errno is thread specific, so brlapi.h
+ * cheats about the brlapi_errno token and actually calls
+ * brlapi_errno_location()
+ *
+ * This gets the thread specific location of global variable brlapi_errno
+ */
+int *brlapi_errno_location(void);
+
+/** Global variable brlapi_errno
+ *
+ * brlapi_errno is a global left-value containing the last error code. It is
+ * not reset to BRLERR_SUCCESS on success.
+ */
+extern int brlapi_errno;
+/** cheat about the brlapi_errno C token */
+#define brlapi_errno (*brlapi_errno_location ())
+
 /** @} */
 
 /** \defgroup brlapi_protocol BrlAPI's protocol
  * \brief Instructions and constants for \e BrlAPI 's protocol
- * 
+ *
  * These are defines for the protocol between \e BrlAPI 's server and clients.
  * Understanding is not needed to use the \e BrlAPI library, so reading this
  * is not needed unless really wanting to connect to \e BrlAPI without
@@ -566,18 +631,18 @@ typedef uint32_t brl_type_t;
 #define BRLPACKET_ERROR             'E'    /**< Error in protocol           */
 
 /** Magic number to give when sending a BRLPACKET_GETRAW packet */
-#define BRLRAW_MAGIC (0xdeadbeefL) 
+#define BRLRAW_MAGIC (0xdeadbeefL)
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server
  *
  * This function is for internal use, but one might use it if one really knows
  * what one is doing...
- * 
+ *
  * \e type should only be one of the above defined BRLPACKET_*.
  *
  * The syntax is the same as write()'s.
- * 
+ *
  * \return 0 on success, -1 on failure */
 int brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size);
 
@@ -595,6 +660,36 @@ int brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size);
  *
  * \return packet's size, -2 if \c EOF occurred, -1 on error */
 int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size);
+
+#include <pthread.h>
+
+/* brlapi_fd_mutex */
+/** Mutex for protecting concurrent fd access
+ *
+ * In order to regulate concurrent access to the library's file descriptor and
+ * requests to / answers from \e BrlAPI server, every function of the library
+ * locks this mutex, namely
+ *
+ * - brlapi_initializeConnection()
+ * - brlapi_closeConnection()
+ * - brlapi_getRaw()
+ * - brlapi_leaveRaw()
+ * - brlapi_sendRaw()
+ * - brlapi_recvRaw()
+ * - brlapi_getDriverId()
+ * - brlapi_getDriverName()
+ * - brlapi_getDisplaySize()
+ * - brlapi_getTty()
+ * - brlapi_leaveTty()
+ * - brlapi_write*()
+ * - brlapi_(un)?ignorekeys()
+ * - brlapi_read*()
+ * 
+ * If both these functions and brlapi_writePacket() or brlapi_readPacket() are
+ * used in a multithreaded application, this mutex must be locked before calling
+ * brlapi_writePacket() or brlapi_readPacket(), and unlocked afterwards.
+ */
+extern pthread_mutex_t brlapi_fd_mutex;
 
 /** @} */
 

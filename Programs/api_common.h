@@ -32,6 +32,14 @@ int brlapi_writeFile(int fd, const unsigned char *buf, size_t size);
 /* Exactly read a buffer from a file */
 int brlapi_readFile(int fd, unsigned char *buf, size_t size);
 
+/* brlapi_libcerrno */
+/* saves the libc errno */
+int brlapi_libcerrno;
+
+/* brlapi_liberrfun */
+/* saves the libc function which generated an error */
+const char *brlapi_libcerrfun;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -54,11 +54,12 @@
 #define CONNECTIONS 64
 
 typedef enum {
+	PARM_HOST,
 	PARM_PORT,
-	PARM_KEYFILE
+	PARM_KEYFILE,
 } Parameters;
 
-const char *const api_parameters[] = { "port", "keyfile", NULL };
+const char *const api_parameters[] = { "host", "port", "keyfile", NULL };
 
 #define VERSION "BRLTTY API Library: version " BRLAPI_VERSION
 #define COPYRIGHT "   Copyright Sebastien HINDERER <shindere@ens-lyon.fr> \
@@ -132,6 +133,12 @@ static BrailleDriver ApiBraille;
 
 /* Identication of the REAL braille driver currently used */
 static uint32_t DisplaySize[2] = { 0, 0 };
+
+/* connection binding */
+typedef struct {
+	const char *host;
+	const char *port;
+} Tbinding;
 
 static int authlength = 0;
 static unsigned char auth[BRLAPI_MAXPACKETSIZE];
@@ -549,7 +556,7 @@ void *ProcessConnection(void *arg)
 /* Function : InitializeSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
-int InitializeSocket(const char *socketport)
+int InitializeSocket(const Tbinding *binding)
 {
  int fd=-1, err, yes=1;
  struct addrinfo *res,*cur;
@@ -560,7 +567,7 @@ int InitializeSocket(const char *socketport)
  hints.ai_family = PF_UNSPEC;
  hints.ai_socktype = SOCK_STREAM;
 
- err = getaddrinfo("localhost", socketport, &hints, &res);
+ err = getaddrinfo(binding->host, binding->port, &hints, &res);
  if (err)
  {
   LogPrint(LOG_WARNING,"getaddrinfo : %s",gai_strerror(err));
@@ -605,7 +612,7 @@ int InitializeSocket(const char *socketport)
  }
  freeaddrinfo(res);
  if (cur) return fd;
- LogPrint(LOG_WARNING,"unable to find a local TCP port %s !",socketport);
+ LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",binding->host,binding->port);
  return -1;
 }
 
@@ -627,14 +634,14 @@ void *ConnectionsManager(void *arg)
  int res, mainsock;
  struct sockaddr addr;
  socklen_t addrlen = sizeof(addr);
- char *port = (char *) arg;
+ Tbinding *binding = (Tbinding *) arg;
  Tconnection *c;
  if ((res = pthread_sigmask(SIG_BLOCK,&BlockedSignals,NULL))!=0)
  {
   LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
   pthread_exit(NULL);
  }
- if ((mainsock = InitializeSocket(port))==-1)
+ if ((mainsock = InitializeSocket(binding))==-1)
  {
   LogPrint(LOG_WARNING,"Error while initializing socket : %s",strerror(errno));
   return NULL;
@@ -881,10 +888,10 @@ void api_identify(void)
 /* Initializes BrlApi */
 /* One first initialize the driver */
 /* Then one creates the communication socket */
+static Tbinding binding;
 void api_open(BrailleDisplay *brl, char **parameters)
 {
  int res;
- const char *socketport;
  
  DisplaySize[0] = htonl(brl->x); 
  DisplaySize[1] = htonl(brl->y);
@@ -902,12 +909,17 @@ void api_open(BrailleDisplay *brl, char **parameters)
 
  for (res=0; res<CONNECTIONS; res++) connections[res] = NULL;
  InitBlockedSignals();
+
+ if (*parameters[PARM_HOST])
+ {
+  binding.host = parameters[PARM_HOST];
+ } else binding.host = NULL;
  if (*parameters[PARM_PORT])
  {
-  socketport = parameters[PARM_PORT];
- } else socketport = BRLAPI_SOCKETPORT;
+  binding.port = parameters[PARM_PORT];
+ } else binding.port = BRLAPI_SOCKETPORT;
 
- if ((res = pthread_create(&t,NULL,ConnectionsManager,(void *) socketport)) != 0)
+ if ((res = pthread_create(&t,NULL,ConnectionsManager,(void *) &binding)) != 0)
  {
   LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
   return;

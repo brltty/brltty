@@ -35,6 +35,9 @@
 
 #include "brlapi.h"
 
+int brlapi_libcerrno;
+const char *brlapi_libcerrfun;
+
 /* brlapi_writeFile */
 /* Writes a buffer to a file */
 static int brlapi_writeFile(int fd, const void *buf, size_t size)
@@ -44,14 +47,10 @@ static int brlapi_writeFile(int fd, const void *buf, size_t size)
  for (n=0;n<size;n+=res)
  {
   res=write(fd,buf+n,size-n);
-  if (res==0) {
-   fprintf(stderr,"Couldn't write !\n");
-   close(fd);
-   return -1;
-  }
   if ((res<0) && (errno!=EINTR) && (errno!=EAGAIN)) /* EAGAIN shouldn't happen, but who knows... */
   {
-   perror("Socket error while writing, can't recover");
+   brlapi_libcerrno=errno;
+   brlapi_libcerrfun="write in writeFile";
    close(fd);	/* for safety */
    return res;
   }
@@ -69,43 +68,37 @@ static int brlapi_readFile(int fd, void *buf, size_t size)
  {
   res=read(fd,buf+n,size-n);
   if (res==0) {
-   fprintf(stderr,"Unexpected end of file !\n");
+   /* Unexpected end of file ! */
    close(fd);
-   return 0;
+   return n;
   }
   if ((res<0) && (errno!=EINTR) && (errno!=EAGAIN)) /* EAGAIN shouldn't happen, but who knows... */
   {
-   perror("Socket error while reading, can't recover");
+   brlapi_libcerrno=errno;
+   brlapi_libcerrfun="read in readFile";
    close(fd);	/* for safety */
    return -1;
   }
  }
- return size;
+ return n;
 }
 
 /* brlapi_writePacket */
 /* Write a packet on the socket */
 int brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size)
 {
- uint32_t header[2];
+ uint32_t header[2] = { htonl(size), htonl(type) };
  int res;
  
  /* first send packet header (size+type) */
- header[0] = htonl(size);
- header[1] = htonl(type);
- if ((res=brlapi_writeFile(fd,&header[0],sizeof(header)))==-1)
- {
-  perror("writing packet header");
+ if ((res=brlapi_writeFile(fd,&header[0],sizeof(header)))<0)
   return res;
- }
 
  /* eventually data */
  if (size && buf)
- if ((res=brlapi_writeFile(fd,buf,size)) == -1)
- {
-  perror("writing data");
-  return res;
- }
+  if ((res=brlapi_writeFile(fd,buf,size))<0)
+   return res;
+
  return 0;
 }
 
@@ -120,13 +113,13 @@ int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
 
  /* first read packet header (size+type) */
  if ((res=brlapi_readFile(fd,&header[0],sizeof(header))) != sizeof(header))
- {
-  if (res<0) perror("reading packet size and type");
   /* If there is a real error, we return -1 */
   /* if we got not enough bytes for the header, we assume end of file */
   /* is reached and we return -2 */
+ {
   if (res<0) return -1; else return -2;
  }
+
  n = ntohl(header[0]);
  *type = ntohl(header[1]);
 
@@ -135,9 +128,9 @@ int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
  {
   if (n>BRLAPI_MAXPACKETSIZE)
   {
-   fprintf(stderr,"packet really too big : %d\n",n);
    /* brlapi_writePacket(fd,PACKET_BYE,NULL,0); */
-   errno=0;
+   brlapi_libcerrno=EFBIG;
+   brlapi_libcerrfun="read in readPacket";
    return -1;
   }
   buf=foo;
@@ -145,17 +138,17 @@ int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
  /* check that his buffer is large enough */
  if (n>size)
  {
-  fprintf(stderr,"buffer too small : %d while %d are needed !\n", size, n);
   /* brlapi_writePacket(fd,PACKET_BYE,NULL,0); */
-  errno=0;
+  brlapi_libcerrno=EFBIG;
+  brlapi_libcerrfun="read in readPacket";
   return -1;
  }
 
  if ((res=brlapi_readFile(fd,buf,n)) != n)
  {
-  /* perror("reading data"); */
   if (res<0) return -1; else return -2;
  }
+
  return n;
 }
 
@@ -169,26 +162,33 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth)
  struct stat statbuf;
  if (stat(filename, &statbuf)<0)
  {
-  /* LogPrint(LOG_ERROR,"stat : %s",strerror(errno)); */
+  brlapi_libcerrno=errno;
+  brlapi_libcerrfun="stat in loadAuthKey";
   return -1;
  }
+
  if ((res = statbuf.st_size)>BRLAPI_MAXPACKETSIZE)
  {
-  /* LogPrint(LOG_ERROR,"Key file too big"); */
+  brlapi_libcerrno=EFBIG;
+  brlapi_libcerrfun="stat in loadAuthKey";
   return -1;
  }
+
  if ((fd = open(filename, O_RDONLY)) <0) 
  {
-  /* LogPrint(LOG_ERROR,"open : %s",strerror(errno)); */
+  brlapi_libcerrno=errno;
+  brlapi_libcerrfun="open in loadAuthKey";
   return -1;
  }
- *authlength = read(fd, auth, res);
+
+ *authlength = brlapi_readFile(fd, auth, res);
+
  if (*authlength!=res)
  {
-  /* LogPrint(LOG_ERROR,"read failed"); */
   close(fd);
   return -1;
  } 
+
  close(fd);
  return 0;
 }
