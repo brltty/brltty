@@ -86,23 +86,23 @@ loadConfigurationFile (const char *path) {
 #include "brl-cfg.h"
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
 
-static unsigned int debug_keys = 0;
-static unsigned int debug_reads = 0;
-static unsigned int debug_writes = 0;
+static unsigned int debugKeys = 0;
+static unsigned int debugReads = 0;
+static unsigned int debugWrites = 0;
 
 /*--- Command Determination ---*/
 
 static const TerminalDefinition *terminal = NULL;
 static TranslationTable outputTable;
-static unsigned int pressed_modifiers = 0;
-static unsigned int saved_modifiers = 0;
-static int input_mode = 0;
+static unsigned int currentModifiers = 0;
+static unsigned int activeModifiers = 0;
+static int inputMode = 0;
  
 static void
 resetState (void) {
-  pressed_modifiers = 0;
-  saved_modifiers = 0;
-  input_mode = 0;
+  currentModifiers = 0;
+  activeModifiers = 0;
+  inputMode = 0;
 }
 
 static int
@@ -149,17 +149,24 @@ findCommand (int *command, int key, int modifiers) {
 
 static void
 logModifiers (void) {
-  if (debug_keys) {
-    LogPrint(LOG_DEBUG, "modifiers: %04X", pressed_modifiers);
+  if (debugKeys) {
+    LogPrint(LOG_DEBUG, "modifiers: %04X [%04X]",
+             currentModifiers, activeModifiers);
   }
 }
 
 static int
 changeModifiers (int remove, int add) {
-  pressed_modifiers &= ~remove;
-  pressed_modifiers |= add;
-  saved_modifiers = 0;
-  logModifiers();
+  int originalModifiers = currentModifiers;
+
+  currentModifiers &= ~remove;
+  currentModifiers |= add;
+
+  if (currentModifiers != originalModifiers) {
+    activeModifiers = (currentModifiers & ~originalModifiers)? currentModifiers: 0;
+    logModifiers();
+  }
+
   return BRL_CMD_NOOP;
 }
 
@@ -167,23 +174,23 @@ static int
 handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
   if (cmd == BRL_CMD_INPUT) {
     /* translate toggle -> ON/OFF */
-    cmd |= input_mode? BRL_FLG_TOGGLE_OFF: BRL_FLG_TOGGLE_ON;
+    cmd |= inputMode? BRL_FLG_TOGGLE_OFF: BRL_FLG_TOGGLE_ON;
   }
 
   if (!IS_DELAYED_COMMAND(repeat)) {
     switch (cmd) {
       case BRL_CMD_INPUT | BRL_FLG_TOGGLE_ON:
-        input_mode = 1;
+        inputMode = 1;
         cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
-        if (debug_keys) {
+        if (debugKeys) {
           LogPrint(LOG_DEBUG, "input mode on"); 
         }
         break;
 
       case BRL_CMD_INPUT | BRL_FLG_TOGGLE_OFF:
-        input_mode = 0;
+        inputMode = 0;
         cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
-        if (debug_keys) {
+        if (debugKeys) {
           LogPrint(LOG_DEBUG, "input mode off"); 
         }
         break;
@@ -204,8 +211,8 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
         return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF|MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SLC|MOD_EASY_SRC);
       case BRL_CMD_SWSIM_BQ: {
         static const char *const states[] = {"center", "rear", "front", "?"};
-        const char *left = states[pressed_modifiers & 0X3];
-        const char *right = states[(pressed_modifiers >> 2) & 0X3];
+        const char *left = states[currentModifiers & 0X3];
+        const char *right = states[(currentModifiers >> 2) & 0X3];
         char buffer[20];
         snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
         showBrailleString(brl, buffer, 2000);
@@ -223,17 +230,17 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
   int modifiers;
 
   if (press) {
-    saved_modifiers = (pressed_modifiers |= bit);
-    modifiers = saved_modifiers;
+    activeModifiers = (currentModifiers |= bit);
+    modifiers = activeModifiers;
   } else {
-    pressed_modifiers &= ~bit;
-    modifiers = saved_modifiers;
-    saved_modifiers = 0;
+    currentModifiers &= ~bit;
+    modifiers = activeModifiers;
+    activeModifiers = 0;
   }
   logModifiers();
 
   if (modifiers) {
-    if (input_mode && !(modifiers & ~0XFF)) {
+    if (inputMode && !(modifiers & ~0XFF)) {
       static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
       const unsigned char *dot = dots;
       int mod;
@@ -241,10 +248,10 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
       for (mod=1; mod<0X100; ++dot, mod<<=1)
         if (modifiers & mod)
           command |= *dot;
-      if (debug_keys)
+      if (debugKeys)
         LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
     } else if (findCommand(&command, NOKEY, modifiers)) {
-      if (debug_keys)
+      if (debugKeys)
         LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
                  modifiers, command); 
     }
@@ -266,17 +273,17 @@ handleKey (BrailleDisplay *brl, int code, int press, int offset) {
   /* must be a "normal key" - search for cmd on key press */
   if (press) {
     int command;
-    saved_modifiers = 0;
-    if (findCommand(&command, code, pressed_modifiers)) {
-      if (debug_keys)
+    activeModifiers = 0;
+    if (findCommand(&command, code, currentModifiers)) {
+      if (debugKeys)
         LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
-                 code, pressed_modifiers, command, offset); 
+                 code, currentModifiers, command, offset); 
       return handleCommand(brl, command+offset,
                            (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
     }
 
     /* no command found */
-    LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, pressed_modifiers); 
+    LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, currentModifiers); 
   }
   return BRL_CMD_NOOP;
 }
@@ -440,7 +447,7 @@ static unsigned char currentText[BRLCOLSMAX];
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
-  if (debug_writes) LogBytes("Write", bytes, count);
+  if (debugWrites) LogBytes("Write", bytes, count);
   if (io->writeBytes(bytes, count) != -1) {
     brl->writeDelay += count * 1000 / charactersPerSecond;
     return 1;
@@ -646,6 +653,34 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
 
   if (rcvBarFirst <= code && 
       code <= rcvBarLast) { /* easy bar */
+    {
+      static const int modifiers[] = {
+        MOD_EASY_SLR, MOD_EASY_SLF,
+        MOD_EASY_KLR, MOD_EASY_KLF,
+        MOD_EASY_KRR, MOD_EASY_KRF,
+        MOD_EASY_SRR, MOD_EASY_SRF,
+        0
+      };
+      const int *modifier = modifiers;
+
+      int remove = 0;
+      int add = 0;
+      int bit = 1;
+
+      while (*modifier) {
+        if (time & bit) {
+          add |= *modifier;
+        } else {
+          remove |= *modifier;
+        }
+
+        bit <<= 1;
+        ++modifier;
+      }
+
+      changeModifiers(remove, add);
+    }
+
     num = 1 + (code - rcvBarFirst) / 3;
     return handleKey(brl, OFFS_EASY+num, press, 0);
   }
@@ -739,7 +774,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       case cIdIdentify: {
         const int length = 10;
         READ(2, length-2, RBF_ETX);
-        if (debug_reads) LogBytes("Identity Packet", buf, length);
+        if (debugReads) LogBytes("Identity Packet", buf, length);
         if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
         approximateDelay(200);
         restartTerminal1(brl);
@@ -758,7 +793,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           return EOF;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
-        if (debug_reads) LogBytes("Input Packet", buf, length);
+        if (debugReads) LogBytes("Input Packet", buf, length);
 
         {
           int command = handleKey1(brl, ((buf[2] << 8) | buf[3]),
@@ -787,7 +822,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         message = "data framing error";
       logError:
         READ(2, 1, RBF_ETX);
-        if (debug_reads) LogBytes("Error Packet", buf, 3);
+        if (debugReads) LogBytes("Error Packet", buf, 3);
         LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
         restartTerminal1(brl);
         break;
@@ -900,7 +935,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
 
         case cETX:
           if ((offset >= 5) && (offset == size)) {
-            if (debug_reads) LogBytes("Input Packet", buffer, offset);
+            if (debugReads) LogBytes("Input Packet", buffer, offset);
             return 1;
           }
           LogBytes("Short Packet", buffer, offset);
@@ -1315,9 +1350,9 @@ identifyTerminal (BrailleDisplay *brl) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  validateYesNo(&debug_keys, "debug keys flag", parameters[PARM_DEBUGKEYS]);
-  validateYesNo(&debug_reads, "debug reads flag", parameters[PARM_DEBUGREADS]);
-  validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
+  validateYesNo(&debugKeys, "debug keys flag", parameters[PARM_DEBUGKEYS]);
+  validateYesNo(&debugReads, "debug reads flag", parameters[PARM_DEBUGREADS]);
+  validateYesNo(&debugWrites, "debug writes flag", parameters[PARM_DEBUGWRITES]);
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
   {
@@ -1419,7 +1454,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
 
       unsigned char values[InternalStatusCellCount];
       memcpy(values, s, BRL_genericStatusCellCount);
-      values[BRL_GSC_INPUT] = input_mode;
+      values[BRL_GSC_INPUT] = inputMode;
 
       for (i=0; i<terminal->statusCount; i++) {
         int code = terminal->statusCells[i];
