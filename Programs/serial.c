@@ -192,6 +192,12 @@ serialInitializeAttributes (struct termios *attributes) {
 #ifdef IEXTEN
   attributes->c_lflag = IEXTEN;
 #endif /* IEXTEN */
+
+#ifdef _POSIX_VDISABLE
+  memset(attributes->c_cc, _POSIX_VDISABLE, NCCS);
+  attributes->c_cc[VTIME] = 0;
+  attributes->c_cc[VMIN] = 0;
+#endif /* _POSIX_VDISABLE */
 }
 
 static int
