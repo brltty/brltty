@@ -706,12 +706,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
         HLP(884, "CRs4", "Route cursor to current line")
         cmd = CMD_CSRJMP_VERT;
       }
-    } else if (howmanykeys == 3 &&
-               IS_TEXT_RANGE(rtk_which[0], rtk_which[2]) &&
-               rtk_which[0]+2 == rtk_which[1]) {
-      HLP(405, "CRtx + CRt(x+2) + CRty", "Cut text from x through y")
+    } else if (howmanykeys == 2 && IS_TEXT_RANGE(rtk_which[0], rtk_which[1])) {
+      HLP(405, "CRtx+CRty", "Cut text from x through y")
       cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
-      pending_cmd = CR_CUTRECT + rtk_which[2] - textOffset;
+      pending_cmd = CR_CUTLINE + rtk_which[1] - textOffset;
     }
   } else if (keystate & (K_UP|K_RL|K_RR)) {
     /* Some routing keys combined with UP RL or RR (actually any key

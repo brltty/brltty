@@ -47,7 +47,7 @@ CRt#+D: Mark beginning of region to cut
 CRt#+D+C: Mark beginning of cut region for append
 CRt#+A: Mark bottom-right of rectangular region and cut
 CRt#+A+B: Mark end of linear region and cut
-CRtx + CRt(x+2) + CRty: Cut text from x through y
+CRtx+CRty: Cut text from x through y
 Chord-1234: Paste cut text
 
 Fancy Navigation
