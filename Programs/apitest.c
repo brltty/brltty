@@ -15,20 +15,59 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* apitest provides a small test utility for brltty's API */
+/* apitest provides a small test utility for BRLTTY's API */
  
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+
+#include "options.h"
 #include "api.h"
 #include "brldefs.h"
 #include "cmd.h"
 
-void getDisplaySize(void)
+BEGIN_OPTION_TABLE
+  {'i', "identifier", NULL, NULL, 0,
+   "Show the driver's identifier."},
+  {'l', "learn", NULL, NULL, 0,
+   "Enter learn mode."},
+  {'n', "name", NULL, NULL, 0,
+   "Show the display's name."},
+  {'s', "size", NULL, NULL, 0,
+   "Show the display's size."},
+END_OPTION_TABLE
+
+static int opt_learnMode = 0;
+static int opt_showIdentifier = 0;
+static int opt_showName = 0;
+static int opt_showSize = 0;
+
+static int
+handleOption (const int option) {
+  switch (option) {
+    default:
+      return 0;
+    case 'i':
+      opt_showIdentifier = 1;
+      break;
+    case 'l':
+      opt_learnMode = 1;
+      break;
+    case 'n':
+      opt_showName = 1;
+      break;
+    case 's':
+      opt_showSize = 1;
+      break;
+  }
+  return 1;
+}
+
+void showDisplaySize(void)
 {
   unsigned int x, y;
   fprintf(stderr,"Getting display size: ");
@@ -39,7 +78,7 @@ void getDisplaySize(void)
   fprintf(stderr, "%dX%d\n", x, y);
 }
 
-void getDriverId(void)
+void showDriverIdentifier(void)
 {
   char id[3];
   fprintf(stderr, "Getting driver id: ");
@@ -50,7 +89,7 @@ void getDriverId(void)
   fprintf(stderr, "%s\n", id);
 }
 
-void getDriverName(void)
+void showDriverName(void)
 {
   char name[30];
   fprintf(stderr, "Getting driver name: ");
@@ -61,7 +100,7 @@ void getDriverName(void)
   fprintf(stderr, "%s\n", name);
 }
 
-void testLearnMode(void)
+void enterLearnMode(void)
 {
   int res;
   brl_keycode_t cmd;
@@ -86,29 +125,37 @@ void testLearnMode(void)
 
 int main(int argc, char *argv[])
 {
-  int i, fd;
+  int status = 0;
+  int fd;
+
+  processOptions(optionTable, optionCount, handleOption,
+                 &argc, &argv, "");
+
   fprintf(stderr, "Connecting to BrlAPI... ");
-  if ((fd=brlapi_initializeConnection(NULL, NULL))<0) {
+  if ((fd=brlapi_initializeConnection(NULL, NULL)) >= 0) {
+    fprintf(stderr, "done\n");
+
+    if (opt_showIdentifier) {
+      showDriverIdentifier();
+    }
+
+    if (opt_showName) {
+      showDriverName();
+    }
+
+    if (opt_showSize) {
+      showDisplaySize();
+    }
+
+    if (opt_learnMode) {
+      enterLearnMode();
+    }
+
+    brlapi_closeConnection();
+    fprintf(stderr, "Disconnected\n"); 
+  } else {
     brlapi_perror("failed");
-    exit(1);
+    status = 1;
   }
-  fprintf(stderr, "done\n");
-  for (i=1; i<argc; i++) {
-    if (!strcmp(argv[i], "-ds")) {
-      getDisplaySize();
-      continue;
-    } else if (!strcmp(argv[i], "-di")) {
-      getDriverId();
-      continue;
-    } else if (!strcmp(argv[i], "-dn")) {
-      getDriverName();
-      continue;
-    } else if (!strcmp(argv[i], "-lm")) {
-      testLearnMode();
-      continue;
-    } else fprintf(stderr, "Don't know what to do with argument %d (%s), skipping\n",i,argv[i]);
-  }
-  brlapi_closeConnection();
-  fprintf(stderr, "Disconnected\n"); 
-  return 0;
+  return status;
 }

@@ -261,7 +261,7 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O cmd.$O
+APITEST_OBJECTS = apitest.$O cmd.$O options.$O misc.$O
 
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
