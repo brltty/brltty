@@ -23,6 +23,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include <unistd.h>
+#include <stdio.h>
 
 #include "iodefs.h"
 
