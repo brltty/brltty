@@ -1898,6 +1898,26 @@ via the <ref id="preferences-menu" name="preferences menu">.
     This feature is initially <bf/on/.
     This setting can also be changed with the
     <ref id="preference-alert-tunes" name="Alert Tunes"> preference.
+  <tag>AUTOREPEAT<label id="command-AUTOREPEAT"></tag>
+    Automatically repeat a command at a regular interval
+    after an initial delay
+    while its key (combination) remains pressed.
+    Only some drivers support this functionality,
+    the primary limitation being that many braille displays
+    don't signal both key presses and key releases as distinctly separate events.
+    This feature is initially <bf/off/.
+    This setting can also be changed with the
+    <ref id="preference-autorepeat" name="Autorepeat"> preference.
+  <tag>AUTOSPEAK<label id="command-AUTOSPEAK"></tag>
+    Automatically speak:
+    <itemize>
+      <item>the new line when the braille window is moved vertically.
+      <item>characters which are entered or deleted.
+      <item>the character to which the cursor is moved.
+    </itemize>
+    This feature is initially <bf/off/.
+    This setting can also be changed with the
+    <ref id="preference-autospeak" name="Autospeak"> preference.
 </descrip>
 
 <sect2>Mode Selection<p>
@@ -1974,6 +1994,18 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Stop speaking immediately.
   <tag>SPKHOME<label id="command-SPKHOME"></tag>
     Go to where the speech cursor is.
+  <tag>SAY_SLOWER<label id="command-SAY_SLOWER"></tag>
+    Decrease the speech rate
+    (see also the <ref id="preference-speech-rate" name="Speech Rate"> preference).
+  <tag>SAY_FASTER<label id="command-SAY_FASTER"></tag>
+    Increase the speech rate
+    (see also the <ref id="preference-speech-rate" name="Speech Rate"> preference).
+  <tag>SAY_SOFTER<label id="command-SAY_SOFTER"></tag>
+    Decrease the speech volume
+    (see also the <ref id="preference-speech-volume" name="Speech Volume"> preference).
+  <tag>SAY_LOUDER<label id="command-SAY_LOUDER"></tag>
+    Increase the speech volume
+    (see also the <ref id="preference-speech-volume" name="Speech Volume"> preference).
 </descrip>
 
 <sect2>Virtual Terminal Switching<p>
@@ -2898,6 +2930,10 @@ Notes:
         and <ref id="command-LNDN" name="LNDN">
         commands.
       <item>
+        The <ref id="command-PRDIFLN" name="PRDIFLN">
+        and <ref id="command-NXDIFLN" name="NXDIFLN">
+        commands.
+      <item>
         The <ref id="command-CHRLT" name="CHRLT">
         and <ref id="command-CHRRT" name="CHRRT">
         commands.
@@ -2908,12 +2944,16 @@ Notes:
       <item>
         The Cursor-Left and Cursor-Right operations.
       <item>
-        Input characters.
+        The Backspace and Delete operations.
+      <item>
+        Character entry.
     </itemize>
     Only some drivers support this functionality,
     the primary limitation being that many braille displays
     don't signal both key presses and key releases as distinctly separate events.
-    The initial setting is <tt/No/.
+    This setting can also be changed with the
+    <ref id="command-AUTOREPEAT" name="AUTOREPEAT"> command.
+    The initial setting is <tt/off/.
   <tag>Autorepeat Delay<label id="preference-autorepeat-delay"></tag>
     When a character is to be autorepeated,
     this setting specifies the amount of time
@@ -3059,6 +3099,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-TUNES" name="TUNES"> command.
+    The initial setting is <tt/on/.
   <tag>Tune Device<label id="preference-tune-device"></tag>
     Play alert tunes via:
     <descrip>
@@ -3146,14 +3187,40 @@ Notes:
       <tag/Enqueue/
         Don't discard pending speech.
     </descrip>
+    The initial setting is <tt/immediate/.
   <tag>Autospeak<label id="preference-autospeak"></tag>
     <descrip>
       <tag/No/
-        Only speak when explicitly requested to do so
-        (see section <ref id="speech" name="Speech Controls">).
+        Only speak when explicitly requested to do so.
       <tag/Yes/
-        This setting is experimental.
+        Automatically speak:
+        <itemize>
+          <item>the new line when the braille window is moved vertically.
+          <item>characters which are entered or deleted.
+          <item>the character to which the cursor is moved.
+        </itemize>
     </descrip>
+    This setting can also be changed with the
+    <ref id="command-AUTOSPEAK" name="AUTOSPEAK"> command.
+    The initial setting is <tt/off/.
+  <tag>Speech Rate<label id="preference-speech-rate"></tag>
+    Adjust the speech rate
+    (<tt/0/ is the slowest, <tt/20/ is the fastest).
+    This preference is only available if a driver which supports it is being used.
+    This setting can also be changed with
+    the <ref id="command-SAY_SLOWER" name="SAY_SLOWER">
+    and <ref id="command-SAY_FASTER" name="SAY_FASTER">
+    commands.
+    The initial setting is <tt/10/.
+  <tag>Speech Volume<label id="preference-speech-volume"></tag>
+    Adjust the speech volume
+    (<tt/0/ is the softest, <tt/20/ is the loudest).
+    This preference is only available if a driver which supports it is being used.
+    This setting can also be changed with
+    the <ref id="command-SAY_SOFTER" name="SAY_SOFTER">
+    and <ref id="command-SAY_LOUDER" name="SAY_LOUDER">
+    commands.
+    The initial setting is <tt/10/.
   <tag>Status Style<label id="preference-status-style"></tag>
     This setting specifies the way that the status cells are to be used.
     You shuldn't normally need to play with it.
