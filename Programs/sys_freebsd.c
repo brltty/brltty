@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #include "misc.h"
 #include "system.h"
@@ -32,15 +33,23 @@ getBootParameters (void) {
 
 void *
 loadSharedObject (const char *path) {
+  void *object = dlopen(path, RTLD_NOW|RTLD_GLOBAL);
+  if (object) return object;
+  LogPrint(LOG_ERR, "%s", dlerror());
   return NULL;
 }
 
 void 
 unloadSharedObject (void *object) {
+  dlclose(object);
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, const void **address) {
+  const char *error;
+  *address = dlsym(object, symbol);
+  if (!(error = dlerror())) return 1;
+  LogPrint(LOG_ERR, "%s", error);
   return 0;
 }
 
