@@ -29,7 +29,7 @@ BrlAPI: BrlAPI.txt BrlAPI.made
 
 api: BrlAPIref.made
 
-BrlAPIref.made: $(SRC_TOP)$(PGM_DIR)/api.h BrlAPIref.doxy
+BrlAPIref.made: $(BLD_TOP)$(PGM_DIR)/api.h BrlAPIref.doxy
 	doxygen BrlAPIref.doxy
 	ln -sf man3/brlapi_*.3 .
 	touch $@
