@@ -141,7 +141,7 @@ usbAddInputElement (
   struct UsbInputElement *input;
   if ((input = malloc(sizeof(*input)))) {
     memset(input, 0, sizeof(*input));
-    if ((input->urb = usbSubmitRequest(device, device->inputEndpoint,
+    if ((input->request = usbSubmitRequest(device, device->inputEndpoint,
                                        USB_ENDPOINT_TRANSFER_BULK,
                                        NULL, device->inputSize,
                                        device->inputFlags, input))) {

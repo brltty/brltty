@@ -25,7 +25,7 @@ extern "C" {
 struct UsbInputElement {
   struct UsbInputElement *next;
   struct UsbInputElement *previous;
-  struct usbdevfs_urb *urb;
+  void *request;
 };
 
 struct UsbDeviceStruct {
@@ -36,7 +36,7 @@ struct UsbDeviceStruct {
   int inputSize;
   unsigned int inputFlags;
   struct UsbInputElement *inputElements;
-  struct usbdevfs_urb *inputRequest;
+  void *inputRequest;
   unsigned char *inputBuffer;
   int inputLength;
 
