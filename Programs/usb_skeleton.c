@@ -132,7 +132,7 @@ usbReadEndpoint (
   int timeout
 ) {
   errno = ENOSYS;
-  LogError("USB bulk read");
+  LogError("USB endpoint read");
   return -1;
 }
 
@@ -145,7 +145,7 @@ usbWriteEndpoint (
   int timeout
 ) {
   errno = ENOSYS;
-  LogError("USB bulk write");
+  LogError("USB endpoint write");
   return -1;
 }
 
