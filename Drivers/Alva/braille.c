@@ -117,6 +117,7 @@
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_FIRMNESS
+#define BRLCONST
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
@@ -658,8 +659,11 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   gettimeofday(&rewriteTime, NULL);
 
   if (model->Flags & BPF_CONFIGURABLE) {
+    BRLSYMBOL.firmness = brl_firmness;
     writeFunction(brl, 0X07);
     writeFunction(brl, 0X0B);
+  } else {
+    BRLSYMBOL.firmness = NULL; 
   }
   return 1;
 }
@@ -1364,8 +1368,6 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
 static void
 brl_firmness (BrailleDisplay *brl, int setting) {
-  if (model->Flags & BPF_CONFIGURABLE) {
-    writeParameter(brl, 3,
-                   setting * 4 / BRL_MAXIMUM_FIRMNESS);
-  }
+  writeParameter(brl, 3,
+                 setting * 4 / BRL_MAXIMUM_FIRMNESS);
 }
