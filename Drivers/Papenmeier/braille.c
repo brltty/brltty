@@ -200,6 +200,7 @@ flushTerminal (BrailleDisplay *brl) {
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
+  if (debug_writes) LogBytes("Write", bytes, count);
   if (safe_write(brl_fd, bytes, count) != -1) return 1;
   LogError("Write");
   return 0;
@@ -219,28 +220,38 @@ resetTerminal (BrailleDisplay *brl) {
 }
 
 static int
-writeData (BrailleDisplay *brl, int offset, int size, const unsigned char *data) {
-  unsigned char header[] = {
-    cSTX,
-    cIdSend,
-    0,
-    0,
-    0,
-    0,
-  };
-  unsigned char trailer[] = {cETX};
-  int count = sizeof(header) + size + sizeof(trailer);
-  header[2] = offset >> 8;
-  header[3] = offset & 0XFF;
-  header[4] = count >> 8;
-  header[5] = count & 0XFF;
-  
-  brl->writeDelay += count * 1000 / chars_per_sec;
-  if (writeBytes(brl, header, sizeof(header)))
-    if (writeBytes(brl, data, size))
-      if (writeBytes(brl, trailer, sizeof(trailer)))
-        return 1;
-  return 0;
+writeData (BrailleDisplay *brl, int offset, int count, const unsigned char *data) {
+  if (count) {
+    unsigned char header[] = {
+      cSTX,
+      cIdSend,
+      0,
+      0,
+      0,
+      0,
+    };
+    unsigned char trailer[] = {cETX};
+    int size = sizeof(header) + count + sizeof(trailer);
+    unsigned char buffer[size];
+    int index = 0;
+
+    header[2] = offset >> 8;
+    header[3] = offset & 0XFF;
+    header[4] = size >> 8;
+    header[5] = size & 0XFF;
+    memcpy(&buffer[index], header, sizeof(header));
+    index += sizeof(header);
+
+    memcpy(&buffer[index], data, count);
+    index += count;
+    
+    memcpy(&buffer[index], trailer, sizeof(trailer));
+    index += sizeof(trailer);
+    
+    brl->writeDelay += count * 1000 / chars_per_sec;
+    if (!writeBytes(brl, buffer, index)) return 0;
+  }
+  return 1;
 }
 
 static void
@@ -286,7 +297,7 @@ writeLine (BrailleDisplay *brl) {
 
 static void
 writeStatus (BrailleDisplay *brl) {
-  if (curr_stats > 0) writeData(brl, addr_status, curr_stats, currentStatus);
+  writeData(brl, addr_status, curr_stats, currentStatus);
 }
 
 static void
@@ -346,10 +357,15 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       code_status_last  = code_status_first + 3 * (curr_stats - 1);
       code_route_first = code_status_last + 3;
       code_route_last  = code_route_first + 3 * (curr_cols - 1);
+      LogPrint(LOG_DEBUG, "Keys: status=%03X-%03X routing=%03X-%03X",
+               code_status_first, code_status_last,
+               code_route_first, code_route_last);
 
       if (the_terminal->frontkeys > 0) {
         code_front_first = RCV_KEYFUNC + 3;
         code_front_last  = code_front_first + 3 * (the_terminal->frontkeys - 1);
+        LogPrint(LOG_DEBUG, "Keys: front=%03X-%03X",
+                 code_front_first, code_front_last);
       } else
         code_front_first = code_front_last  = -1;
 
@@ -358,20 +374,16 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
         code_easy_last  = 0X18;
         code_switch_first = 0X1B;
         code_switch_last = 0X30;
+        LogPrint(LOG_DEBUG, "Keys: bar=%03X-%03X switches=%03X-%03X",
+                 code_easy_first, code_easy_last,
+                 code_switch_first, code_switch_last);
       } else
         code_easy_first = code_easy_last = code_switch_first = code_switch_last = -1;
-
-      LogPrint(LOG_DEBUG, "s=%03X-%03X r=%03X-%03X f=%03X-%03X e=%03X-%03X sw=%03X-%03X",
-               code_status_first, code_status_last,
-               code_route_first, code_route_last,
-               code_front_first, code_front_last,
-               code_easy_first, code_easy_last,
-               code_switch_first, code_switch_last);
 
       /* address of display */
       addr_status = XMT_BRLDATA;
       addr_display = addr_status + the_terminal->statcells;
-      LogPrint(LOG_DEBUG, "addr: s=%d d=%d",
+      LogPrint(LOG_DEBUG, "Cells: status=%04X display=%04X",
                addr_status, addr_display);
 
       return 1;
@@ -501,9 +513,6 @@ brl_identify (void)
 
 static void
 brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
-  if (debug_writes)
-    LogPrint(LOG_DEBUG, "setbrlstat %d", curr_stats);
-
   if (curr_stats) {
     unsigned char cells[curr_stats];
     if (s[FirstStatusCell] == FSC_GENERIC) {
@@ -526,6 +535,7 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
 	else
 	  cells[i] = change_bits[values[code]];
       }
+      if (debug_writes) LogBytes("Status", s, InternalStatusCellCount);
     } else {
       int i = 0;
       while (i < curr_stats) {
@@ -533,8 +543,8 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
 	if (!dots) break;
         cells[i++] = change_bits[dots];
       }
-      while (i < curr_stats)
-        cells[i++] = change_bits[0];
+      if (debug_writes) LogBytes("Status", s, i);
+      while (i < curr_stats) cells[i++] = change_bits[0];
     }
     updateData(brl, addr_status, curr_stats, cells, currentStatus);
   }
@@ -543,7 +553,7 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
 static void
 brl_writeWindow (BrailleDisplay *brl) {
   int i;
-  if (debug_writes) LogBytes("write", brl->buffer, curr_cols);
+  if (debug_writes) LogBytes("Window", brl->buffer, curr_cols);
   for (i=0; i<curr_cols; i++) brl->buffer[i] = change_bits[brl->buffer[i]];
   updateData(brl, addr_display, curr_cols, brl->buffer, currentLine);
 }
