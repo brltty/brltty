@@ -229,24 +229,26 @@ usbControlTransfer (
 
 static int
 usbBulkTransfer (
-  UsbDevice *device,
-  unsigned char endpointAddress,
+  UsbEndpoint *endpoint,
   void *data,
   int length,
   int timeout
 ) {
-  struct usbdevfs_bulktransfer arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.ep = endpointAddress;
-  arg.data = data;
-  arg.len = length;
-  arg.timeout = timeout;
+  if (endpoint) {
+    struct usbdevfs_bulktransfer arg;
+    memset(&arg, 0, sizeof(arg));
+    arg.ep = endpoint->descriptor->bEndpointAddress;
+    arg.data = data;
+    arg.len = length;
+    arg.timeout = timeout;
 
-  {
-    int count = ioctl(device->file, USBDEVFS_BULK, &arg);
-    if (count == -1) LogError("USB bulk transfer");
-    return count;
+    {
+      int count = ioctl(endpoint->device->file, USBDEVFS_BULK, &arg);
+      if (count != -1) return count;
+      LogError("USB bulk transfer");
+    }
   }
+  return -1;
 }
 
 int
@@ -257,7 +259,7 @@ usbBulkRead (
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(device, endpointNumber|USB_DIRECTION_INPUT, data, length, timeout);
+  return usbBulkTransfer(usbGetInputEndpoint(device, endpointNumber), data, length, timeout);
 }
 
 int
@@ -268,7 +270,7 @@ usbBulkWrite (
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(device, endpointNumber|USB_DIRECTION_OUTPUT, (unsigned char *)data, length, timeout);
+  return usbBulkTransfer(usbGetOutputEndpoint(device, endpointNumber), (unsigned char *)data, length, timeout);
 }
 
 void *
@@ -285,7 +287,7 @@ usbSubmitRequest (
     if ((urb = malloc(sizeof(*urb) + length))) {
       memset(urb, 0, sizeof(*urb));
       urb->endpoint = endpointAddress;
-      switch (endpoint->descriptor->bmAttributes & USB_ENDPOINT_TRANSFER_MASK) {
+      switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
         case USB_ENDPOINT_TRANSFER_CONTROL:
           urb->type = USBDEVFS_URB_TYPE_CONTROL;
           break;
@@ -309,7 +311,7 @@ usbSubmitRequest (
     submit:
       if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
       if ((errno == EINVAL) &&
-          ((endpoint->descriptor->bmAttributes & USB_ENDPOINT_TRANSFER_MASK) == USB_ENDPOINT_TRANSFER_INTERRUPT) &&
+          (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == USB_ENDPOINT_TRANSFER_INTERRUPT) &&
           (urb->type == USBDEVFS_URB_TYPE_BULK)) {
         urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
         goto submit;

@@ -166,7 +166,7 @@ usbBeginInput (
   int count
 ) {
   int actual = 0;
-  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointNumber|USB_DIRECTION_INPUT);
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
     while (actual < count) {
       if (!usbAddInputElement(endpoint)) break;
@@ -182,7 +182,7 @@ usbAwaitInput (
   unsigned char endpointNumber,
   int timeout
 ) {
-  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointNumber|USB_DIRECTION_INPUT);
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (!endpoint) return 0;
   if (!endpoint->direction.input.request) {
     UsbResponse response;
@@ -218,7 +218,7 @@ usbReapInput (
   int length,
   int timeout
 ) {
-  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointNumber|USB_DIRECTION_INPUT);
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
     unsigned char *bytes = buffer;
     unsigned char *target = bytes;
@@ -251,8 +251,16 @@ usbReapInput (
 static void
 usbDeallocateEndpoint (void *item) {
   UsbEndpoint *endpoint = item;
-  if (endpoint->direction.input.request) free(endpoint->direction.input.request);
-  while (endpoint->direction.input.elements) usbDeleteInputElement(endpoint, endpoint->direction.input.elements);
+
+  switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+    case USB_ENDPOINT_DIRECTION_INPUT:
+      if (endpoint->direction.input.request)
+        free(endpoint->direction.input.request);
+      while (endpoint->direction.input.elements)
+        usbDeleteInputElement(endpoint, endpoint->direction.input.elements);
+      break;
+  }
+
   free(endpoint->descriptor);
   free(endpoint);
 }
@@ -270,6 +278,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
   if (endpoint) return endpoint;
 
   {
+    int ok = 1;
     int endpointNumber;
     while ((endpointNumber = queueSize(device->endpoints) + 1) < 0X100) {
       UsbDescriptor descriptor;
@@ -282,13 +291,13 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         const char *direction;
         const char *transfer;
 
-        switch (descriptor.endpoint.bEndpointAddress & USB_ENDPOINT_DIRECTION_MASK) {
-          default:                   direction = "?";   break;
-          case USB_DIRECTION_INPUT:  direction = "in";  break;
-          case USB_DIRECTION_OUTPUT: direction = "out"; break;
+        switch (USB_ENDPOINT_DIRECTION(&descriptor.endpoint)) {
+          default:                            direction = "?";   break;
+          case USB_ENDPOINT_DIRECTION_INPUT:  direction = "in";  break;
+          case USB_ENDPOINT_DIRECTION_OUTPUT: direction = "out"; break;
         }
 
-        switch (descriptor.endpoint.bmAttributes & USB_ENDPOINT_TRANSFER_MASK) {
+        switch (USB_ENDPOINT_TRANSFER(&descriptor.endpoint)) {
           default:                                transfer = "?";   break;
           case USB_ENDPOINT_TRANSFER_CONTROL:     transfer = "ctl"; break;
           case USB_ENDPOINT_TRANSFER_ISOCHRONOUS: transfer = "iso"; break;
@@ -296,7 +305,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           case USB_ENDPOINT_TRANSFER_INTERRUPT:   transfer = "int"; break;
         }
 
-        LogPrint(LOG_DEBUG, "USB: ept#%d adr=%02X dir=%s xfr=%s pkt=%d int=%d",
+        LogPrint(LOG_DEBUG, "USB: ept#%d adr=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
                  endpointNumber,
                  descriptor.endpoint.bEndpointAddress, direction, transfer,
                  descriptor.endpoint.wMaxPacketSize,
@@ -311,8 +320,8 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           memcpy(endpoint->descriptor, &descriptor.endpoint, size);
           endpoint->descriptor->wMaxPacketSize = getLittleEndian(endpoint->descriptor->wMaxPacketSize);
 
-          switch (endpoint->descriptor->bEndpointAddress & USB_ENDPOINT_DIRECTION_MASK) {
-            case USB_DIRECTION_INPUT:
+          switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+            case USB_ENDPOINT_DIRECTION_INPUT:
               endpoint->direction.input.elements = NULL;
               endpoint->direction.input.request = NULL;
               endpoint->direction.input.buffer = NULL;
@@ -324,19 +333,28 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
             if (endpoint->descriptor->bEndpointAddress == endpointAddress) return endpoint;
             continue;
           }
-
           free(endpoint->descriptor);
         }
-
         free(endpoint);
       }
-
+      ok = 0;
       break;
     }
+    if (ok) errno = ENOENT;
   }
 
   LogPrint(LOG_WARNING, "USB: endpoint not found: %02X", endpointAddress);
   return NULL;
+}
+
+UsbEndpoint *
+usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber) {
+  return usbGetEndpoint(device, endpointNumber|USB_ENDPOINT_DIRECTION_INPUT);
+}
+
+UsbEndpoint *
+usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber) {
+  return usbGetEndpoint(device, endpointNumber|USB_ENDPOINT_DIRECTION_OUTPUT);
 }
 
 void

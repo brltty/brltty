@@ -56,9 +56,15 @@ extern "C" {
 #define USB_CLASS_APP_SPEC      0XFE
 #define USB_CLASS_VENDOR_SPEC   0XFF
 
-/* Endpoint addresses (bEndpointAddress). */
-#define USB_ENDPOINT_NUMBER_MASK    0X0F
-#define USB_ENDPOINT_DIRECTION_MASK 0X80
+/* Endpoint numbers (bEndpointAddress). */
+#define USB_ENDPOINT_NUMBER_MASK 0X0F
+#define USB_ENDPOINT_NUMBER(endpoint) ((endpoint)->bEndpointAddress & USB_ENDPOINT_NUMBER_MASK)
+
+/* Endpoint directions (bEndpointAddress). */
+#define USB_ENDPOINT_DIRECTION_MASK   0X80
+#define USB_ENDPOINT_DIRECTION_OUTPUT 0X00
+#define USB_ENDPOINT_DIRECTION_INPUT  0X80
+#define USB_ENDPOINT_DIRECTION(endpoint) ((endpoint)->bEndpointAddress & USB_ENDPOINT_DIRECTION_MASK)
 
 /* Endpoint transfer types (bmAttributes). */
 #define USB_ENDPOINT_TRANSFER_MASK        0X03
@@ -66,12 +72,14 @@ extern "C" {
 #define USB_ENDPOINT_TRANSFER_ISOCHRONOUS 0X01
 #define USB_ENDPOINT_TRANSFER_BULK        0X02
 #define USB_ENDPOINT_TRANSFER_INTERRUPT   0X03
+#define USB_ENDPOINT_TRANSFER(endpoint) ((endpoint)->bmAttributes & USB_ENDPOINT_TRANSFER_MASK)
 
 /* Endpoint isochronous types (bmAttributes). */
 #define USB_ENDPOINT_ISOCHRONOUS_MASK          0X0C
 #define USB_ENDPOINT_ISOCHRONOUS_aSYNOCHRONOUS 0X04
 #define USB_ENDPOINT_ISOCHRONOUS_ADAPTABLE     0X08
 #define USB_ENDPOINT_ISOCHRONOUS_SYNCHRONOUS   0X0C
+#define USB_ENDPOINT_ISOCHRONOUS(endpoint) ((endpoint)->bmAttributes & USB_ENDPOINT_ISOCHRONOUS_MASK)
 
 /* Control transfer recipients. */
 #define USB_RECIPIENT_MASK      0X1F
