@@ -1443,7 +1443,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
                     switch (data[0]) {
                       case 0X09: {
                         if (length) {
-                          int code = *bytes++;
+                          unsigned char code = *bytes++;
                           if (--length) {
                             int newCount = at2Count + length;
                             if (newCount > at2Size) {
