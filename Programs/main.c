@@ -1720,75 +1720,13 @@ main (int argc, char *argv[]) {
     }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    /* speech tracking */
-    speech->doTrack(); /* called continually even if we're not tracking
-                             so that the pipe doesn't fill up. */
-    if (prefs.autospeak) {
-      static unsigned char *oldText = NULL;
-      static int oldLength = 0;
-      static int oldX = -1;
-      static int oldY = -1;
-
-      int newX = scr.posx;
-      int newY = scr.posy;
-      int newLength = scr.cols;
-      unsigned char newText[newLength];
-
-      int column = 0;
-      int count = scr.cols;
-      const unsigned char *text = newText;
-
-      readScreen(0, p->winy, newLength, 1, newText, SCR_TEXT);
-
-      if (oldText) {
-        if ((p->winy == oldwiny) && (newLength == oldLength)) {
-          if (memcmp(newText, oldText, newLength) != 0) {
-            if ((newY == p->winy) && (newY == oldY)) {
-              if (newX > oldX) {
-                if ((memcmp(newText, oldText, oldX) == 0) &&
-                    (memcmp(newText+newX, oldText+oldX, newLength-newX) == 0)) {
-                  column = oldX;
-                  count = newX - oldX;
-                }
-              } else if (newX < oldX) {
-                if ((memcmp(newText, oldText, newX) == 0) &&
-                    (memcmp(newText+newX, oldText+oldX, newLength-oldX) == 0)) {
-                  column = newX;
-                  count = oldX - newX;
-                  text = oldText;
-                }
-              } else {
-                while (newText[column] == oldText[column]) ++column;
-                while (newText[count-1] == oldText[count-1]) --count;
-                count -= column;
-              }
-            }
-          } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY))) {
-            column = newX;
-            count = 1;
-          } else {
-            count = 0;
-          }
-        }
-      }
-
-      if (count) {
-        speech->mute();
-        speech->say(text+column, count);
-      }
-
-      oldText = reallocWrapper(oldText, newLength);
-      memcpy(oldText, newText, newLength);
-      oldLength = newLength;
-
-      oldX = newX;
-      oldY = newY;
-    }
+    /* called continually even if we're not tracking so that the pipe doesn't fill up. */
+    speech->doTrack();
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     if (p->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
-      if (speech->isSpeaking() && (scr.no == speechScreen) && speechTracking) {
+      if (speechTracking && (scr.no == speechScreen) && speech->isSpeaking()) {
         int index = speech->getTrack();
         if (index != speechIndex) {
           trackSpeech(speechIndex = index);
@@ -1836,8 +1774,89 @@ main (int argc, char *argv[]) {
       }
     }
 
+#ifdef ENABLE_SPEECH_SUPPORT
+    if (prefs.autospeak) {
+      static int oldScreen = -1;
+      static unsigned char *oldText = NULL;
+      static int oldLength = 0;
+      static int oldX = -1;
+      static int oldY = -1;
+
+      int newScreen = scr.no;
+      int newX = scr.posx;
+      int newY = scr.posy;
+      int newLength = scr.cols;
+      unsigned char newText[newLength];
+
+      int column = 0;
+      int count = newLength;
+      const unsigned char *text = newText;
+
+      readScreen(0, p->winy, newLength, 1, newText, SCR_TEXT);
+
+      if (oldText) {
+        if ((newScreen == oldScreen) && (p->winy == oldwiny) && (newLength == oldLength)) {
+          if (memcmp(newText, oldText, newLength) != 0) {
+            if ((newY == p->winy) && (newY == oldY)) {
+              if (newX > oldX) {
+                if ((memcmp(newText, oldText, oldX) == 0) &&
+                    (memcmp(newText+newX, oldText+oldX, newLength-newX) == 0)) {
+                  column = oldX;
+                  count = newX - oldX;
+                }
+              } else if (newX < oldX) {
+                if ((memcmp(newText, oldText, newX) == 0) &&
+                    (memcmp(newText+newX, oldText+oldX, newLength-oldX) == 0)) {
+                  column = newX;
+                  count = oldX - newX;
+                  text = oldText;
+                }
+              } else {
+                if (memcmp(newText, oldText, newX) == 0) {
+                  int x;
+                  for (x=newX+1; x<newLength; ++x) {
+                    if (memcmp(newText+newX, oldText+x, newLength-x) == 0) {
+                      column = newX;
+                      count = x - newX;
+                      text = oldText;
+                      break;
+                    }
+                  }
+                }
+
+                if (text == newText) {
+                  while (newText[column] == oldText[column]) ++column;
+                  while (newText[count-1] == oldText[count-1]) --count;
+                  count -= column;
+                }
+              }
+            }
+          } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY))) {
+            column = newX;
+            count = 1;
+          } else {
+            count = 0;
+          }
+        }
+      }
+
+      if (count) {
+        speech->mute();
+        speech->say(text+column, count);
+      }
+
+      oldText = reallocWrapper(oldText, newLength);
+      memcpy(oldText, newText, newLength);
+      oldLength = newLength;
+
+      oldScreen = newScreen;
+      oldX = newX;
+      oldY = newY;
+    }
+#endif /* ENABLE_SPEECH_SUPPORT */
+
     /* There are a few things to take care of if the display has moved. */
-    if (p->winx != oldwinx || p->winy != oldwiny) {
+    if ((p->winx != oldwinx) || (p->winy != oldwiny)) {
       if (prefs.pointerFollowsWindow && !pointerMoved) setPointer(p->winx, p->winy);
 
       if (prefs.showAttributes && prefs.blinkingAttributes) {
@@ -1850,9 +1869,11 @@ main (int argc, char *argv[]) {
            stationnary and the attributes themselves are moving
            (example: tin). */
       }
+
+      oldwinx = p->winx;
+      oldwiny = p->winy;
     }
 
-    oldwinx = p->winx; oldwiny = p->winy;
     if (infmode) {
       showInfo();
     } else {
