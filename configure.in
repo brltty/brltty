@@ -93,12 +93,16 @@ original_prefix="${prefix}"
 test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
-BRLTTY_DEFINE_EXPANDED([DATA_DIRECTORY], ["${execute_root}${data_directory}"])
-BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${sysconfdir}"])
-BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${execute_root}${library_directory}"])
-eval 'configuration_directory="'"${sysconfdir}"'"'
-AC_SUBST([configuration_directory])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${configuration_directory}"])
+BRLTTY_VAR_EXPAND([DATA_DIRECTORY], [${execute_root}${data_directory}])
+AC_SUBST([DATA_DIRECTORY])
+BRLTTY_DEFINE_EXPANDED([DATA_DIRECTORY], ["${DATA_DIRECTORY}"])
+BRLTTY_VAR_EXPAND([LIBRARY_DIRECTORY], [${execute_root}${library_directory}])
+AC_SUBST([LIBRARY_DIRECTORY])
+BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${LIBRARY_DIRECTORY}"])
+BRLTTY_VAR_EXPAND([CONFIGURATION_DIRECTORY], [${sysconfdir}])
+AC_SUBST([CONFIGURATION_DIRECTORY])
+BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${CONFIGURATION_DIRECTORY}"])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
 

@@ -2,7 +2,7 @@
 # Uncomment those entries which apply to your personal needs and system
 # requirements.
 
-# BRLTTY expects to find its configuration file in "@sysconfdir@/brltty.conf"
+# BRLTTY expects to find its configuration file in "@CONFIGURATION_DIRECTORY@/@configuration_file@"
 # (can be overridden with the -f [--configuration-file=] option).
 # If it doesn't exist, then BRLTTY silently continues but may require
 # that certain command line options be explicitly supplied.
@@ -68,7 +68,7 @@
 #braille-device	usb/brlvger0	# Primary Linux USB Voyager port (devfs 2.6).
 
 # The text-table directive specifies which text translation table to
-# use. Relative paths are anchored at "@data_directory@". If not specified,
+# use. Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,
 # "nabcc" will be used.
 # (can be overridden with the -t [--text-table=] option)
 #text-table	cz	# Czech (iso-8859-2)
@@ -90,14 +90,14 @@
 #text-table	vni	# Vietnamese
 
 # The attributes-table directive specifies which attributes translation
-# table to use. Relative paths are anchored at "@data_directory@". If not
+# table to use. Relative paths are anchored at "@DATA_DIRECTORY@". If not
 # specified, "attributes.tbl" will be used.
 # (can be overridden with the -a [--attributes-table=] option)
 #attributes-table	attributes.tbl	#
 #attributes-table	attrib.tbl	#
 
 # The contraction-table directive specifies which braille contraction
-# table to use. Relative paths are anchored at "@data_directory@". If not
+# table to use. Relative paths are anchored at "@DATA_DIRECTORY@". If not
 # specified, no contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
 #contraction-table	big5		# Chinese
@@ -122,7 +122,7 @@
 #braille-parameters StatusCells=0
 
 # Papenmeier Braille Driver Parameters
-#braille-parameters ConfigFile=@data_directory@/brltty-pm.conf
+#braille-parameters ConfigFile=@DATA_DIRECTORY@/brltty-pm.conf
 #braille-parameters DebugKeys=no # [no,yes]
 #braille-parameters DebugReads=no # [no,yes]
 #braille-parameters DebugWrites=no # [no,yes]
@@ -197,35 +197,35 @@
 
 # The preferences-file directive specifies the file which is used for
 # saving and restoring the preferred default settings. Relative paths
-# are anchored at "@data_directory@". If not specified, "brltty-XX.prefs"
+# are anchored at "@DATA_DIRECTORY@". If not specified, "brltty-XX.prefs"
 # (where "XX" is the two-letter identifier of the braille driver) will
 # be used. 
 # (can be overridden with the -p [--preferences-file=] option)
-#preferences-file @sysconfdir@/brltty.prefs
+#preferences-file @CONFIGURATION_DIRECTORY@/brltty.prefs
 
 # The library-directory directive specifies the absolute path to the
 # directory which contains the dynamically loadable drivers. If not
-# specified, @library_directory@ will be used.
+# specified, @LIBRARY_DIRECTORY@ will be used.
 # (can be overridden with the -L [--library-directory=] option)
-#library-directory @library_directory@
+#library-directory @LIBRARY_DIRECTORY@
 
 # The data-directory directive specifies the absolute path to the directory
 # which contains driver data files (help files, configuration files, etc.). If
-# not specified, "@data_directory@" will be used.
+# not specified, "@DATA_DIRECTORY@" will be used.
 # (can be overridden with the -D [--data-directory=] option)
-#data-directory @data_directory@
+#data-directory @DATA_DIRECTORY@
 
 # The tables-directory directive specifies the absolute path to the directory
 # which contains the text and attributes tables. If not specified,
-# "@data_directory@" will be used.
+# "@DATA_DIRECTORY@" will be used.
 # (can be overridden with the -T [--tables-directory=] option)
-#tables-directory @data_directory@
+#tables-directory @DATA_DIRECTORY@
 
 # The contractions-directory directive specifies the absolute path to the
 # directory which contains the contraction tables. If not specified,
-# "@data_directory@" will be used.
+# "@DATA_DIRECTORY@" will be used.
 # (can be overridden with the -C [--contractions-directory=] option)
-#contractions-directory @data_directory@
+#contractions-directory @DATA_DIRECTORY@
 
 # The api-parameters directive passes parameters to the Application
 # Programming Interface.
@@ -233,7 +233,7 @@
 #api-parameters parameter=setting,...
 #api-parameters host=
 #api-parameters port=35751
-#api-parameters keyfile=@sysconfdir@/brlapi.key
+#api-parameters keyfile=@CONFIGURATION_DIRECTORY@/@api_keyfile@
 
 
 ############################
