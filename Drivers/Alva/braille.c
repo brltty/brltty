@@ -290,19 +290,19 @@ static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define KEY_STATUS2_E	0x50000	/* fifth upper status key */
 #define KEY_STATUS2_F	0x60000	/* sixth upper status key */
 
-#define KEY_BTAB	0x0100000
-#define KEY_FTAB	0x0200000
-#define KEY_UPPAD	0x1000000
-#define KEY_DOWNPAD	0x2000000
-#define KEY_LEFTPAD	0x3000000
-#define KEY_RIGHTPAD	0x4000000
+#define KEY_SPK_F1	0x0100000
+#define KEY_SPK_F2	0x0200000
+#define KEY_SPK_UP	0x1000000
+#define KEY_SPK_DOWN	0x2000000
+#define KEY_SPK_LEFT	0x3000000
+#define KEY_SPK_RIGHT	0x4000000
 
-#define KEY_BEAR	0x0400000
-#define KEY_FEAR	0x0800000
-#define KEY_NORTHPAD	0x5000000
-#define KEY_SOUTHPAD	0x6000000
-#define KEY_WESTPAD	0x7000000
-#define KEY_EASTPAD	0x8000000
+#define KEY_BRL_F1	0x0400000
+#define KEY_BRL_F2	0x0800000
+#define KEY_BRL_UP	0x5000000
+#define KEY_BRL_DOWN	0x6000000
+#define KEY_BRL_LEFT	0x7000000
+#define KEY_BRL_RIGHT	0x8000000
 
 /* first cursor routing offset on main display (old firmware only) */
 #define KEY_ROUTING_OFFSET 168
@@ -326,14 +326,14 @@ static int StatusKeys2[6] = {
   KEY_STATUS2_D, KEY_STATUS2_E, KEY_STATUS2_F
 };
 
-static int WindowsKeys[6] = {
-  KEY_BTAB, KEY_UPPAD, KEY_LEFTPAD,
-  KEY_DOWNPAD, KEY_RIGHTPAD, KEY_FTAB
+static int SpeechPad[6] = {
+  KEY_SPK_F1, KEY_SPK_UP, KEY_SPK_LEFT,
+  KEY_SPK_DOWN, KEY_SPK_RIGHT, KEY_SPK_F2
 };
 
-static int SpeechKeys[6] = {
-  KEY_BEAR, KEY_NORTHPAD, KEY_WESTPAD,
-  KEY_SOUTHPAD, KEY_EASTPAD, KEY_FEAR
+static int BraillePad[6] = {
+  KEY_BRL_F1, KEY_BRL_UP, KEY_BRL_LEFT,
+  KEY_BRL_DOWN, KEY_BRL_RIGHT, KEY_BRL_F2
 };
 
 static int (*openPort) (char **parameters, const char *device);
@@ -846,13 +846,13 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
     case 0X77: { /* windows keys and speech keys */
       unsigned char key = packet[1];
       if (key <= 0X05) {
-        *Keys |= WindowsKeys[key];
+        *Keys |= SpeechPad[key];
       } else if ((key >= 0X80) && (key <= 0X85)) {
-        *Keys &= ~WindowsKeys[key - 0X80];
+        *Keys &= ~SpeechPad[key - 0X80];
       } else if ((key >= 0X20) && (key <= 0X25)) {
-        *Keys |= SpeechKeys[key - 0X20];
+        *Keys |= BraillePad[key - 0X20];
       } else if ((key >= 0XA0) && (key <= 0XA5)) {
-        *Keys &= ~SpeechKeys[key - 0XA0];
+        *Keys &= ~BraillePad[key - 0XA0];
       } else {
         *Keys = 0;
       }
@@ -1175,22 +1175,75 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               break;
 
             case KEY_STATUS1_A:
-              res = CMD_NXDIFLN;
+              res = CMD_CSRVIS;
               break;
             case KEY_STATUS2_A:
-              res = CMD_PRDIFLN;
+              res = CMD_SKPIDLNS;
               break;
             case KEY_STATUS1_B:
-              res = CMD_NXPROMPT;
+              res = CMD_ATTRVIS;
               break;
             case KEY_STATUS2_B:
-              res = CMD_PRPROMPT;
+              res = CMD_DISPMD;
               break;
             case KEY_STATUS1_C:
-              res = CMD_NXPGRPH;
+              res = CMD_CAPBLINK;
               break;
             case KEY_STATUS2_C:
+              res = CMD_SKPBLNKWINS;
+              break;
+
+            case KEY_BRL_LEFT:
+              res = CMD_PREFMENU;
+              break;
+            case KEY_BRL_RIGHT:
+              res = CMD_INFO;
+              break;
+
+            case KEY_BRL_F1 | KEY_BRL_LEFT:
+              res = CMD_FREEZE;
+              break;
+            case KEY_BRL_F1 | KEY_BRL_RIGHT:
+              res = CMD_SIXDOTS;
+              break;
+
+            case KEY_BRL_F2 | KEY_BRL_LEFT:
+              res = CMD_PASTE;
+              break;
+            case KEY_BRL_F2 | KEY_BRL_RIGHT:
+              res = CMD_CSRJMP_VERT;
+              break;
+
+            case KEY_BRL_UP:
+              res = CMD_PRDIFLN;
+              break;
+            case KEY_BRL_DOWN:
+              res = CMD_NXDIFLN;
+              break;
+            case KEY_BRL_F1 | KEY_BRL_UP:
+              res = CMD_PRPROMPT;
+              break;
+            case KEY_BRL_F1 | KEY_BRL_DOWN:
+              res = CMD_NXPROMPT;
+              break;
+            case KEY_BRL_F2 | KEY_BRL_UP:
               res = CMD_PRPGRPH;
+              break;
+            case KEY_BRL_F2 | KEY_BRL_DOWN:
+              res = CMD_NXPGRPH;
+              break;
+
+            case KEY_SPK_LEFT:
+              res = CMD_MUTE;
+              break;
+            case KEY_SPK_RIGHT:
+              res = CMD_SAY_LINE;
+              break;
+            case KEY_SPK_UP:
+              res = CMD_SAY_ABOVE;
+              break;
+            case KEY_SPK_DOWN:
+              res = CMD_SAY_BELOW;
               break;
           }
           break;
@@ -1237,6 +1290,23 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                   break;
                 case KEY_HOME | KEY_CURSOR:
                   res = CMD_CSRTRK;
+                  break;
+
+                case KEY_BRL_F1:
+                  res = CMD_HELP;
+                  break;
+                case KEY_BRL_F2:
+                  res = CMD_LEARN;
+                  break;
+                case KEY_BRL_F1 | KEY_BRL_F2:
+                  res = CMD_RESTARTBRL;
+                  break;
+
+                case KEY_SPK_F2:
+                  res = CMD_SPKHOME;
+                  break;
+                case KEY_SPK_F1 | KEY_SPK_F2:
+                  res = CMD_RESTARTSPEECH;
                   break;
               }
               break;

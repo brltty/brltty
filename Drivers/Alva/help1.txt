@@ -30,17 +30,42 @@ Home Cursor Right go to end of line
 Routing Keys:
 Lower             bring cursor to character
 Upper             describe character
-Home Lower        start new cut buffer
-Home Upper        append to existing cut buffer
-Cursor Lower      rectangular cut
-Cursor Upper      linear cut
+Home Lower        start new cut buffer at character
+Home Upper        append to existing cut buffer from character
+Cursor Lower      rectangular cut to character
+Cursor Upper      linear cut to character
 Home Cursor Lower go down to nearest line without greater indent
 Home Cursor Upper go up to nearest line without greater indent
 
 Status Keys:
-Upper1            go up to nearest line with different content
-Lower1            go down to nearest line with different content
-Upper2            go up to previous command prompt
-Lower2            go down to next command prompt
-Upper3            go up to last line of previous paragraph
-Lower3            go down to first line of next paragraph
+Lower1            toggle cursor visibility mode
+Lower2            toggle attribute underlining mode
+Lower3            toggle blinking capitals mode
+Upper1            toggle skip identical lines mode
+Upper2            toggle text/attributes display mode
+Upper3            toggle skip blank windows mode
+
+Braille (right) Key Pad:
+F1                enter/leave help display
+F2                enter/leave command learn mode
+Left              enter/leave preferences menu
+Right             enter/leave status display
+F1 Left           toggle screen freeze mode
+F1 Right          toggle 6-dot braille mode
+F2 Left           paste cut buffer at cursor location
+F2 Right          bring cursor to line (no horizontal motion)
+Up                go up to nearest line with different content
+Down              go down to nearest line with different content
+F1 Up             go up to previous command prompt
+F1 Down           go down to next command prompt
+F2 Up             go up to last line of previous paragraph
+F2 Down           go down to first line of next paragraph
+F1 F2             restart braille driver
+
+Speech (left) Key Pad:
+F2                go to current (most recent) speech location
+Left              stop speaking immediately
+Right             say current line
+Up                say from top of screen through current line
+Down              say from current line through bottom of screen
+F1 F2             restart speech driver
