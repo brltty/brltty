@@ -106,7 +106,7 @@ API_ARC = $(API_NAME).$(ARC_EXT)
 api: $(API_LIB) $(API_ARC)
 
 $(API_LIB): $(API_LIB_OBJS)
-	$(MKLIB:SONAME=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS)
+	$(MKLIB:<soname>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS)
 
 $(API_ARC): $(API_LIB_OBJS)
 	$(AR) rc $@ $(API_LIB_OBJS)
@@ -175,6 +175,9 @@ sys_hpux.$O:
 sys_openbsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_openbsd.c
 
+sys_freebsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_freebsd.c
+
 ###############################################################################
 
 usb.$O:
@@ -188,6 +191,9 @@ usb_linux.$O:
 
 usb_openbsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_openbsd.c
+
+usb_freebsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_freebsd.c
 
 ###############################################################################
 

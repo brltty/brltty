@@ -207,7 +207,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for make shared object command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*)
+   linux*|openbsd*|freebsd*)
       brltty_ld_flag_shared="-shared"
       brltty_ld_flag_soname="-soname"
       ;;
@@ -225,9 +225,9 @@ in
 esac
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_mklib="\$(CC) -shared -Wl,${brltty_ld_flag_soname},SONAME -o"
+   brltty_cv_prog_mklib="\$(CC) -shared -Wl,${brltty_ld_flag_soname},<soname> -o"
 else
-   brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname} SONAME -o"
+   brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname} <soname> -o"
 fi])
 AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 
@@ -367,7 +367,10 @@ in
       ;;
    openbsd*)
       system_object="openbsd"
-      ;; 
+      ;;
+   freebsd*)
+      system_object="freebsd"
+      ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
@@ -458,7 +461,7 @@ BRLTTY_ARG_DISABLE(
    api_objects='api_server.$O api_common.$O rangelist.$O'
    build_api="api"
    install_api="install-api"
-   BRLTTY_SEARCH_LIBS([pthread_create], [pthread])
+   BRLTTY_SEARCH_LIBS([pthread_create], [pthread c_r])
    BRLTTY_ARG_PARAMETERS([api])
 ])
 AC_SUBST([api_objects])
@@ -470,7 +473,7 @@ BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
 AC_CACHE_CHECK([for linkage editor flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*)
+   linux*|openbsd*|freebsd*)
       brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
       ;;
    solaris*)
@@ -488,7 +491,7 @@ brltty_link_flags="${brltty_cv_prog_ld_flags}"
 AC_CACHE_CHECK([for static linkage flag], [brltty_cv_prog_ld_static], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*)
+   linux*|openbsd*|freebsd*)
       brltty_cv_prog_ld_static="-static"
       ;;
    solaris*)
@@ -535,6 +538,9 @@ in
       ;;
    openbsd*)
       usb_object="openbsd"
+      ;;
+   freebsd*)
+      usb_object="freebsd"
       ;;
    *)
       usb_object=""
@@ -594,6 +600,9 @@ in
       ;;
    openbsd*)
       brltty_cv_default_braille_device="/dev/cua00"
+      ;;
+   freebsd*)
+      brltty_cv_default_braille_device="/dev/tty00"
       ;;
    *)
       brltty_cv_default_braille_device=""

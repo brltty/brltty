@@ -61,7 +61,7 @@ usbGetLanguage (
       *language = getLittleEndian(descriptor.string.wData[0]);
       return 1;
     }
-    errno = ENODATA;
+    errno = EIO;
   }
   return 0;
 }
