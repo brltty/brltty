@@ -31,7 +31,7 @@ syntaxError() {
 originalImage="boot.iso"
 modifiedImage="brltty.iso"
 brailleDrivers="all"
-textTable="text.nabcc.tbl"
+textTable="nabcc"
 invokeShell=false
 showUsage() {
    cat <<EOF
@@ -40,9 +40,9 @@ The original (input) image defaults to "${originalImage}".
 The modified (output) image defaults to "${modifiedImage}".
 The following options are supported:
 -b driver,...   The braille driver(s) to include (default: ${brailleDrivers}).
--t file         The built-in text translation table (default: ${textTable}).
--h              Display usage information for this command.
--s              Invoke interactive shell to inspect modified image.
+-t file         The text translation table to build in (default: ${textTable}).
+-s              Invoke an interactive shell to inspect the modified image.
+-h              Display usage information and exit.
 EOF
    exit 0
 }

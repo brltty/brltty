@@ -1,0 +1,148 @@
+Adding BRLTTY to a Red Hat Linux Install CD
+===========================================
+
+Written during April, 2004, by Dave Mielke <dave@mielke.cc>.
+
+
+Quick Start
+-----------
+
+The script "rhmkiso" can be used to add BRLTTY to a RedHat or Fedora install
+CD. Here's how to use it.
+
+First: Log in as (or su to) root. This is because the script uses a loopback
+mount. You'll probably also need to be root in order to write the resultant
+image to a CD as well.
+
+Second: Create an empty directory and change to it.
+
+   mkdir work
+   cd work
+
+Third: Copy or download the image of the installer CD ("boot.iso") for the
+desired RedHat or Fedora release, or the image for the first CD of the full
+installation set ("disc1.iso"), into the current directory.
+
+   cp /path/to/boot.iso .
+or
+   wget http://download.fedora.redhat.com/pub/fedora/linux/core/1/i386/os/
+        images/boot.iso
+
+Fourth: Copy or download the tarball for the desired BRLTTY release into the
+current directory.
+
+   cp /path/to/brltty-3.5.tar.gz .
+or
+   wget http://mielke.cc/brltty/releases/brltty-3.5.tar.gz
+
+Fifth: Run the "rhmkiso" script with no options or parameters.
+
+   rhmkiso
+
+Sixth: You should now have a new file, "brltty.iso", in the current directory. 
+Write this modified image to a CD.
+
+   cdrecord dev=0,0,0 -v -data brltty.iso
+
+Seventh: Boot from the CD you've just written, and wait a few seconds after it
+starts to spin in order to give the boot loader enough time to get started and
+present its initial prompt. Then enter:
+
+   text brltty=<driver>,<device>,<table>
+e.g.
+   text brltty=ht,ttyS1,de
+
+You can omit any operand, allowing it to default, simply by not specifying it. 
+You also needn't specify any trailing commas resulting from omitted operands.
+
+   text brltty=ht,ttyS1,
+   text brltty=ht,ttyS1
+   text brltty=ht,
+   text brltty=ht
+   text brltty=ht,,de
+   text brltty=ht,,
+
+The <driver> operand is the two-letter identifier of the driver for your
+braille display. It's the only required operand. See the -b option (below) for
+further details.
+
+The <device> operand is the device to which your braille display is connected. 
+It's optional, and defaults to the primary serial port ("/dev/ttyS0"). If your
+display is connected to a serial port then specify the name ("ttyS1") of, or
+the path ("/dev/ttyS1") to, the corresponding device. If it's connected to the
+USB then specify "usb:" (the trailing colon is important).
+
+The <table> operand is the text translation table you wish to use. It's
+optional, and defaults to the North American Braille Computer Code ("nabcc").
+See the "text.*.tbl" files in the "BrailleTables" subdirectory of BRLTTY's
+source tree for alternatives. See the -t option (below) for further details.
+
+
+The Details
+-----------
+
+The "rhmkiso" script can add BRLTTY to either a RedHat or a Fedora install CD. 
+It can be applied either to the basic installer CD or to the first CD of the
+full installation set, and makes the following modifications to the image:
+
+*  BRLTTY is added (all drivers, all tables).
+*  The timeout for the initial boot loader prompt is disabled.
+*  The use of a frame buffer for the console is disabled.
+
+Although its defaults are what usually needs to be done, the "rhmkiso" script
+offers a number of options so that you can customize what it does. It's general
+invocation syntax is:
+
+   rhmkiso [-option ...] [original-image [modified-image]]
+
+The first parameter is either the relative or the absolute path to the
+distribution-supplied original (input) image which is to be modified. It's
+optional, and defaults to "boot.iso" (the usual name for the basic installer CD
+image).
+
+The second parameter is either the relative or the absolute path to the file
+which is to contain the modified (output) image which the script creates. It's
+optional, and defaults to "brltty.iso".
+
+The following options are provided:
+   -b driver,...   The braille driver(s) to include (default: all).
+   -t file         The text translation table to build in (default: nabcc).
+   -s              Invoke an interactive shell to inspect the modified image.
+   -h              Display usage information and exit.
+
+The -b option specifies which braille display drivers will be linked into the
+brltty executable (as opposed to being built as dynamically loadable shared
+objects). If more than one driver is specified then their specifiers must be
+separated from one another by a comma. Either the two-letter identifier or the
+proper name (full or abbreviated) for each driver must be supplied. If a driver
+specifier is prefixed by a minus sign (-) then that driver is excluded from the
+build. The first non-excluded driver in the list is the default driver. The
+word "all", if used instead of a driver specifier as the last item in the list,
+causes all the remaining drivers to be implicitly appended to the list in no
+specific order (or, if preceded by a minus sign, to be excluded from the
+build). The default is "all", i.e. all of the drivers (in no particular order
+so the default is unpredictable) are linked in.
+
+The -t option specifies which text translation table is to be built into the
+brltty executable. If a relative path is supplied then it's anchored at the
+"BrailleTables" subdirectory within BRLTTY's source tree. Since any of BRLTTY's
+own tables can also be specified when the image is booted, the primary use of
+this option is to specify the absolute path to a user-defined table outside
+BRLTTY's source tree. The ".tbl" extension is optional. If a simple file name,
+i.e. one of BRLTTY's own tables, is being supplied then the "text." prefix is
+also optional. The default is "nabcc" (North American Braille Computer Code).
+
+The -s option causes an interactive shell to be invoked after all of the
+modifications to the files within the image have been made but before the CD
+image is created. This gives you an opportunity to inspect what the script has
+done. Your login shell, i.e. the one pointed to by the $SHELL environment
+variable, is used; if it's not set then "/bin/sh" is assumed. 
+
+The script uses a lot of temporary file space to do its job, especially if the
+first CD of the full installation set is being used. This is because it needs
+to work with a complete extracted copy of the files within the image. If
+there's not enough space in "/tmp" then you can direct the script to use
+another directory via the $TMPDIR environment variable.
+
+The script uses a loopback mount to access the files within the original CD
+image. This means that it must be run as root.
