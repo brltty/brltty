@@ -603,7 +603,7 @@ in
       brltty_cv_default_braille_device="/dev/cua00"
       ;;
    freebsd*)
-      brltty_cv_default_braille_device="/dev/tty00"
+      brltty_cv_default_braille_device="/dev/cuaa0"
       ;;
    *)
       brltty_cv_default_braille_device=""
