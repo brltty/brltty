@@ -387,7 +387,7 @@ static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
 
 static int brl_reset(BrailleDisplay *brl)
 {
-  return (brl_writePacket(brl, "\x02SI\x03MP\x37", 7));
+  return (brl_writePacket(brl, "\x02SI\x03MP\x37", 7) == 7);
 }
 
 static void brl_identify (void)
