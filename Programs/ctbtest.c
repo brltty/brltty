@@ -35,11 +35,16 @@
 #include "tbl.h"
 
 static char *opt_textTable;
+static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
   {"text-table", "file", 't', 0, 0,
    &opt_textTable, TEXT_TABLE,
    "Text translation table."},
+
+  {"data-directory", "file", 'D', 0, OPT_Hidden,
+   &opt_dataDirectory, DATA_DIRECTORY,
+   "Path to directory for configuration files."},
 END_OPTION_TABLE
 
 TranslationTable textTable;
@@ -98,10 +103,10 @@ main (int argc, char *argv[]) {
   }
   contractionTablePath = *argv++, argc--;
 
-  if ((contractionTablePath = makePath(DATA_DIRECTORY, contractionTablePath))) {
+  if ((contractionTablePath = makePath(opt_dataDirectory, contractionTablePath))) {
     if ((contractionTable = compileContractionTable(contractionTablePath))) {
       char *textTablePath;
-      if ((textTablePath = makePath(DATA_DIRECTORY, opt_textTable))) {
+      if ((textTablePath = makePath(opt_dataDirectory, opt_textTable))) {
         if (loadTranslationTable(textTablePath, &textTable, reportTextTableMessage, 0)) {
           LineProcessingData lpd;
           reverseTranslationTable(&textTable, &untextTable);
