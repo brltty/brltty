@@ -15,18 +15,20 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION \
-"BRLTTY user-space-only driver for Tieman Voyager, version 0.01 (January 2004)"
+"BRLTTY user-space-only driver for Tieman Voyager, version 0.10 (March 2004)"
 #define COPYRIGHT \
-"   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>\n"
+"   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>"
 
 /* Voyager/braille.c - Braille display driver for Tieman Voyager displays.
  *
  * Written by Stéphane Doyon  <s.doyon@videotron.ca>
  *
  * It is being tested on Voyager 44, should also support Voyager 70.
- * It is designed to be compiled in BRLTTY version 3.4.
+ * It is designed to be compiled in BRLTTY version 3.4.2.
  *
  * History:
+ * 0.10, March 2004: Use BRLTTY core repeat functions. Add brlinput parameter
+ *   and toggle to disallow braille typing.
  * 0.01, January 2004: fork from the original driver which relied on an
  *   in-kernel USB driver.
  */
@@ -47,23 +49,18 @@
 #include "Programs/usb.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
+#include "Programs/message.h"
 
 typedef enum {
-  PARM_REPEAT_INIT_DELAY=0,
-  PARM_REPEAT_INTER_DELAY,
-  PARM_DOTS_REPEAT_INIT_DELAY,
-  PARM_DOTS_REPEAT_INTER_DELAY,
+  PARM_BRLINPUT=0
 } DriverParameter;
-#define BRLPARMS "repeat_init_delay", "repeat_inter_delay", \
-                 "dots_repeat_init_delay", "dots_repeat_inter_delay"
+#define BRLPARMS "brlinput"
 
 #define BRLSTAT ST_VoyagerStyle
 #include "Programs/brl_driver.h"
 
-#define DEFAULT_REPEAT_INIT_DELAY  120
-#define DEFAULT_REPEAT_INTER_DELAY  60
-#define DEFAULT_DOTS_REPEAT_INIT_DELAY  500
-#define DEFAULT_DOTS_REPEAT_INTER_DELAY  60
+static int brlinput = 1;
+
 /* Voltage. Presumably this is voltage for cell dots. Presumably 0
    makes dots hardest, 255 makes them softest. */
 /* from 0->300V to 255->200V, we are told 265V is normal operating voltage,
@@ -126,10 +123,6 @@ static unsigned char *prevdata, /* previous pattern displayed */
 static unsigned brl_cols, /* Number of cells available for text */
                 ncells; /* total number of cells including status */
 static char readbrl_init; /* Flag to reinitialize readbrl function state. */
-static int repeat_init_delay, repeat_inter_delay; /* key repeat rate params */
-/* repeat rate params for braile dots being typed */
-static int dots_repeat_init_delay, dots_repeat_inter_delay;
-
 
 
 static int
@@ -235,6 +228,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
   int ret;
 
+  if (*parameters[PARM_BRLINPUT])
+    validateYesNo(&brlinput, "Allow braille input",
+                  parameters[PARM_BRLINPUT]);
+  brlinput = !!brlinput;
+
   if (!isUsbDevice(&dev)) {
     LogPrint(LOG_ERR,"Unsupported port type. Must be USB.");
     goto failure;
@@ -252,33 +250,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
       = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
     makeOutputTable(&dots, &outputTable);
     reverseTranslationTable(&outputTable, &inputTable);
-  }
-
-  /* use user parameters */
-  {
-    int min = 0, max = 5000;
-    if(!*parameters[PARM_REPEAT_INIT_DELAY]
-       || !validateInteger(&repeat_init_delay,
-			   "Delay before key repeat begins",
-			   parameters[PARM_REPEAT_INIT_DELAY], &min, &max))
-      repeat_init_delay = DEFAULT_REPEAT_INIT_DELAY;
-    if(!*parameters[PARM_REPEAT_INTER_DELAY]
-       || !validateInteger(&repeat_inter_delay, 
-			   "Delay between key repeatitions",
-			   parameters[PARM_REPEAT_INTER_DELAY], &min, &max))
-      repeat_inter_delay = DEFAULT_REPEAT_INTER_DELAY;
-    if(!*parameters[PARM_DOTS_REPEAT_INIT_DELAY]
-       || !validateInteger(&dots_repeat_init_delay, 
-			   "Delay before typed dots repeat begins",
-			   parameters[PARM_DOTS_REPEAT_INIT_DELAY],
-			   &min, &max))
-      dots_repeat_init_delay = DEFAULT_DOTS_REPEAT_INIT_DELAY;
-    if(!*parameters[PARM_DOTS_REPEAT_INTER_DELAY]
-       || !validateInteger(&dots_repeat_inter_delay, 
-			   "Delay between typed dots repeatitions",
-			   parameters[PARM_DOTS_REPEAT_INTER_DELAY],
-			   &min, &max))
-      dots_repeat_inter_delay = DEFAULT_DOTS_REPEAT_INTER_DELAY;
   }
 
   dispbuf = prevdata = NULL;
@@ -525,19 +496,6 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   static int pending_cmd = EOF;
   /* OR of all display keys pressed since last time all keys were released. */
   static unsigned keystate = 0;
-  /* Reference time for fastkey (typematic / key repeat) */
-  static struct timeval presstime;
-  /* key repeat state: 0 not a fastkey (not a key that repeats), 
-     1 waiting for initial delay to begin repeating (can still be combined
-     with other keys),
-     2 key effect occured at least once and now waiting for next repeat,
-     3 during repeat another key was pressed, so lock up and do nothing
-     until keys are released. */
-  static int fastkey = 0;
-  /* type of key being repeated: valid when fastkey is 1 or 2. fastdots=0
-     means movement keys (fast), fastdots=1 means brialle dots or space
-     (longer delay and slower repeat). */
-  static int fastdots = 0;
   /* a flag for each routing key indicating if it was pressed since last time
      all keys were released. */
   static unsigned char rtk_pressed[MAXNRCELLS];
@@ -553,15 +511,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
      All 0s is sent when all keys released. */
   unsigned char buf[8];
   /* recognized command */
-  int i, r, cmd = EOF;
-  int ignore_release = 0;
+  int cmd = CMD_NOOP;
+  int i, r, release, repeat = 0;
 
   if(readbrl_init) {
     /* initialize state */
     readbrl_init = 0;
     pending_cmd = EOF;
-    keystate = 0;
-    fastkey = 0;
     memset(rtk_pressed, 0, sizeof(rtk_pressed));
   }
 
@@ -585,93 +541,59 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       return EOF;
     }
   }else if(r>0 && r<8) {
-    /* The driver wants and handles read requests of only and exactly 8bytes */
+    /* The display handles read requests of only and exactly 8bytes */
     LogPrint(LOG_NOTICE,"Short read %d", r);
     readbrl_init = 1;
     return EOF;
   }
 
-  if(r==0) { /* no new key */
-    /* handle key repetition */
-    struct timeval now;
-    /* If no repeatable keys are pressed then do nothing. */
-    if(!fastkey)
-      return EOF;
-    /* If a key repeat was interrupted by the press of another key, do
-       nothing and wait for the keys to be released. */
-    if(fastkey == 3)
-      return EOF;
-    gettimeofday(&now, NULL);
-    if(!((fastkey == 1 && elapsedMilliseconds(&presstime, &now)
-	  > ((fastdots) ? dots_repeat_init_delay : repeat_init_delay))
-	 || (fastkey > 1 && elapsedMilliseconds(&presstime, &now)
-	     > ((fastdots) ? dots_repeat_inter_delay : repeat_inter_delay))))
-      return EOF;
-    fastkey = 2;
-    memcpy(&presstime, &now, sizeof(presstime));
-  }else{ /* one or more keys were pressed or released */
-    /* We combine dot and front key info in keystate */
-    keystate |= (buf[1]<<8) | buf[0];
+  if(r==0) /* no new key */
+    return EOF;
+  /* one or more keys were pressed or released */
 
-    for(i=2; i<8; i++) {
-      unsigned key = buf[i];
-      if(!key)
-	break;
-      if(key < 1 || key > ncells) {
-	LogPrint(LOG_NOTICE, "Invalid routing key number %u", key);
-	continue;
-      }
-      key -= 1; /* start counting at 0 */
-      rtk_pressed[key] = 1;
+  /* We combine dot and front key info in keystate */
+  keystate |= (buf[1]<<8) | buf[0];
+  
+  for(i=2; i<8; i++) {
+    unsigned key = buf[i];
+    if(!key)
+      break;
+    if(key < 1 || key > ncells) {
+      LogPrint(LOG_NOTICE, "Invalid routing key number %u", key);
+      continue;
     }
-
-    /* build rtk_which */
-    for(howmanykeys = 0, i = 0; i < ncells; i++)
-      if(rtk_pressed[i])
-	rtk_which[howmanykeys++] = i;
-    /* rtk_pressed[i] tells if routing key i is pressed.
-       rtk_which[0] to rtk_which[howmanykeys-1] lists
-       the numbers of the keys that are pressed. */
-
-    /* A few keys trigger the repeat behavior: B, C, UP and DOWN,
-       B+C (space bar), type dots patterns, or a dots pattern + B or C or both.
-    */
-    if(fastkey <= 1 && howmanykeys==0 && (buf[0] || buf[1] /*press event*/)
-       && (keystate == K_B || keystate == K_C
-	   || keystate == K_UP || keystate == K_DOWN
-	   || (keystate &(0xFF |K_B|K_C)) == keystate)) {
-      /* Stand by to begin repeating */
-      gettimeofday(&presstime, NULL);
-      fastkey = 1;
-      fastdots = ((keystate & 0xFF) || keystate == (K_B|K_C));
-      return EOF;
-    }else{
-      if(fastkey == 2 || fastkey == 3) {
-	/* A key was repeating and its effect has occured at least once. */
-	if(buf[0] || buf[1] || buf[2]) {
-	  /* wait for release */
-	  fastkey = 3;
-	  return EOF;
-	}
-	/* ignore release (goto clear state) */
-	ignore_release = 1;
-	fastkey = 0;
-      }else{
-	/* If there was any key waiting to repeat it is stil within
-	   repeat_init_delay timeout, so allow combination. */
-	fastkey = 0;
-      }
-    }
-
-    if(buf[0] || buf[1] || buf[2])
-      /* wait until all keys are released to decide the effect */
-      return EOF;
+    key -= 1; /* start counting at 0 */
+    rtk_pressed[key] = 1;
   }
+
+  /* build rtk_which */
+  for(howmanykeys = 0, i = 0; i < ncells; i++)
+    if(rtk_pressed[i])
+      rtk_which[howmanykeys++] = i;
+  /* rtk_pressed[i] tells if routing key i is pressed.
+     rtk_which[0] to rtk_which[howmanykeys-1] lists
+     the numbers of the keys that are pressed. */
+
+  release = (!buf[0] && !buf[1] && !buf[2]);
+
+  /* A few keys trigger the repeat behavior: B, C, UP and DOWN,
+     B+C (space bar), type dots patterns, or a dots pattern + B or C or both.
+  */
+  if(howmanykeys==0
+     && (keystate == K_B || keystate == K_C
+	 || keystate == K_UP || keystate == K_DOWN
+	 || (keystate &(0xFF |K_B|K_C)) == keystate)) {
+    /* Stand by to begin repeating */
+    repeat = VAL_REPEAT_DELAY;
+  }
+
+  if(!repeat && !release)
+    /* wait until all keys are released to decide the effect */
+    return EOF;
 
   /* Key effect */
 
-  if(ignore_release); /* do nothing */
-  else if(howmanykeys == 0) {
+  if(howmanykeys == 0) {
     if(!(keystate & 0xFF)) {
       /* No routing keys, no dots, only front keys (or possibly a spurious
          release) */
@@ -687,7 +609,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  break;
 	}
       }
-      if(cmd == EOF) {
+      if(cmd == CMD_NOOP) {
 	switch(keystate) {
 	  HKEY2(101, K_A,K_D, "Move backward/forward", CMD_FWINLT,CMD_FWINRT );
 	  HKEY2(101, K_B,K_C, "Move up/down", CMD_LNUP,CMD_LNDN );
@@ -709,7 +631,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  HKEY2(501, K_RR|K_A,K_RR|K_D, "Previous/next non-blank window",
 		CMD_FWINLTSKIP, CMD_FWINRTSKIP);
 	  /* typing */
-	  HLP0(601, "B+C: Space (spacebar)")
+	  HLP0(602, "B+C: Space (spacebar)")
 	  case K_B|K_C: cmd = VAL_PASSDOTS +0; /* space: no dots */ break;
 	}
       }
@@ -719,16 +641,27 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       cmd = VAL_PASSDOTS | inputTable[keystate];
     }else if((keystate & (K_B|K_C)) && !(keystate & 0xFF00 & ~(K_B|K_C))) {
       /* no routing keys, some dots, combined with B or C or both but
-	 no other front keys. */
+	 no other front key */
       /* This is a chorded character typed in braille */
       switch(keystate &0xFF) {
-	CKEY(601, DOT4|DOT6, "Return", VAL_PASSKEY + VPK_RETURN );
-	CKEY(601, DOT2|DOT3|DOT4|DOT5, "Tab", VAL_PASSKEY + VPK_TAB );
-	CKEY(601, DOT1|DOT2, "Backspace", VAL_PASSKEY + VPK_BACKSPACE );
-	CKEY(601, DOT2|DOT4|DOT6, "Escape", VAL_PASSKEY + VPK_ESCAPE );
-	CKEY(601, DOT1|DOT4|DOT5, "Delete", VAL_PASSKEY + VPK_DELETE );
-	CKEY(601, DOT7, "Left arrow", VAL_PASSKEY+VPK_CURSOR_LEFT);
-	CKEY(601, DOT8, "Right arrow", VAL_PASSKEY+VPK_CURSOR_RIGHT);
+        HLP0(601, "Chord-1478: Toggle braille input on/off")
+        case DOT1|DOT4|DOT7|DOT8:
+          if(release) {
+            brlinput ^= 1;
+            /* ouch! message() will recurse in here. */
+            keystate = 0;
+            message((brlinput) ? "Braille input on" : "Braille input off",
+                     MSG_SILENT);
+            return CMD_NOOP;
+          }
+          break;
+	CKEY(610, DOT4|DOT6, "Return", VAL_PASSKEY + VPK_RETURN );
+	CKEY(610, DOT2|DOT3|DOT4|DOT5, "Tab", VAL_PASSKEY + VPK_TAB );
+	CKEY(610, DOT1|DOT2, "Backspace", VAL_PASSKEY + VPK_BACKSPACE );
+	CKEY(610, DOT2|DOT4|DOT6, "Escape", VAL_PASSKEY + VPK_ESCAPE );
+	CKEY(610, DOT1|DOT4|DOT5, "Delete", VAL_PASSKEY + VPK_DELETE );
+	CKEY(610, DOT7, "Left arrow", VAL_PASSKEY+VPK_CURSOR_LEFT);
+	CKEY(610, DOT8, "Right arrow", VAL_PASSKEY+VPK_CURSOR_RIGHT);
       }
     }
   }else{ /* Some routing keys */
@@ -857,10 +790,18 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     }
   }
 
-  if(!fastkey) {
+  if(!brlinput &&
+     ((keystate & 0xFF) || (keystate & (K_B|K_C)) == (K_B|K_C)))
+    /* braille dot keys or spacebar is disallowed. */
+    cmd = CMD_NOOP;
+
+  if(release)
+    repeat = 0;
+  cmd |= repeat;
+
+  if(release) {
     /* keys were released, clear state */
     keystate = 0;
-    fastkey = 0;
     memset(rtk_pressed, 0, ncells);
   }
 

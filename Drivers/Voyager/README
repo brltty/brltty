@@ -1,6 +1,6 @@
 BRLTTY Driver for the Tieman Voyager Braille Display
 This is the user-space-only version of the driver.
-Version 0.01 (January 2004)
+Version 0.10 (March 2004)
 
 Copyright 2004 by Stéphane Doyon  <s.doyon@videotron.ca>
 
@@ -47,9 +47,7 @@ mv brlvger.o brlvger.o.hold
 If lsmod shows the brlvger module as already loaded then do
 rmmod brlvger
 
-The old kernel driver will be pulled out of 2.6.x kernels as soon as we
-have confirmation from a few beta-testers that this replacement driver is
-working properly.
+The old kernel driver will soon be pulled out of 2.6.x kernels.
 
 BRLTTY currently assumes the default braille device to be a serial port,
 so you must tell it that it is in fact USB.
@@ -62,19 +60,13 @@ If you actually have more than one Voyager display connected at the same
 time, you can also specify the serial number of the device that you want
 to use.
 
-This driver knows four parameters, which you can pass using the
-braille-parameters clause in your BRLTTY configuration file. They control
-the repeat rate of some keys (only a few keys actually do repeat when
-they are held). They are:
--"repeat_init_delay": delay in milliseconds before some movement key
-   starts to repeat.
--"repeat_inter_delay": Delay in milliseconds between each repetition
-   of movement keys.
--"dots_repeat_init_delay" and "dots_repeat_inter_delay": Same thing but
-   for typed braille dots.
-The default values seem fine to me, but if you want to
-change them, place a line like this in your brltty.conf:
-braille-parameters repeat_init_delay=300,repeat_inter_delay=150
+This driver knows one driver parameter, which you can pass using the
+braille-parameters clause in your BRLTTY configuration file.
+The parameter is "brlinput", a boolean (0 or 1), and determines whether
+braille typing will be allowed or not.
+Default is allowed. To disallow braille typing, place a line like
+this in your brltty.conf:
+braille-parameters brlinput=0
 
 There is only a handful of BRLTTY users, so if you are trying out this
 driver, please drop us a note, even if you have no problems!

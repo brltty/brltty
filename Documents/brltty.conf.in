@@ -128,10 +128,7 @@
 #braille-parameters pm:DebugWrites=no # [no,yes]
 
 # Voyager Braille Driver Parameters
-#braille-parameters vo:Repeat_Init_Delay=120 # [milliseconds]
-#braille-parameters vo:Repeat_Inter_Delay=60 # [milliseconds]
-#braille-parameters vo:Dots_Repeat_Init_Delay=500 # [milliseconds]
-#braille-parameters vo:Dots_Repeat_Inter_Delay=60 # [milliseconds]
+#braille-parameters vo:BrlInput=yes # [yes,no]
 
 
 ###########################

@@ -1,6 +1,6 @@
 ---BRLTTY Voyager 70 Help Screen---
 
-Keys Names:
+Key Names:
   Front Pannel keys:
     Leftmost key is named A, second key from left is named B.
     Rightmost key is named D, second key from right is named C.
@@ -58,6 +58,7 @@ CRt1+CRt3+B / C: Search screen backward/forward for cut text
 CRt2+CRt3+B / C: Previous/next prompt (same prompt as current line)
 
 Typing In Braille
+Chord-1478: Toggle braille input on/off
 B+C: Space (spacebar)
 Chord-46: Return
 Chord-2345: Tab
