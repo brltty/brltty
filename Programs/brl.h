@@ -50,7 +50,7 @@ typedef struct {
 } BrailleDisplay;				/* used for writing to a braille display */
 
 extern void initializeBrailleDisplay (BrailleDisplay *);
-extern unsigned int drainBrailleOutput (BrailleDisplay *, unsigned int minimumDelay);
+extern unsigned int drainBrailleOutput (BrailleDisplay *, int minimumDelay);
 extern int allocateBrailleBuffer (BrailleDisplay *);
 
 extern void writeBrailleBuffer (BrailleDisplay *);

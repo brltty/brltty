@@ -123,8 +123,9 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
 }
 
 unsigned int
-drainBrailleOutput (BrailleDisplay *brl, unsigned int minimumDelay) {
-  unsigned int duration = MAX(minimumDelay, brl->writeDelay);
+drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
+  int duration = brl->writeDelay + 1;
+  if (duration < minimumDelay) duration = minimumDelay;
   brl->writeDelay = 0;
   delay(duration);
   return duration;
