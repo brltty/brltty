@@ -636,7 +636,7 @@ handleKey (int code, int press, int offsroute) {
   /* must be a "normal key" - search for cmd on key press */
   if (press) {
     saved_modifiers = 0;
-    for (i=0; i<CMDMAX; i++)
+    for (i=0; i<CMDMAX; i++) {
       if ((the_terminal->cmds[i].keycode == code) &&
           (the_terminal->cmds[i].modifiers == pressed_modifiers)) {
         if (debug_keys)
@@ -645,11 +645,11 @@ handleKey (int code, int press, int offsroute) {
         return handleCommand(the_terminal->cmds[i].code + offsroute,
                              VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY);
       }
-  } else {
+    }
+
     /* no command found */
     LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, pressed_modifiers); 
   }
-
   return CMD_NOOP;
 }
 
