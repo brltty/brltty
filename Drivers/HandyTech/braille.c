@@ -899,13 +899,13 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
         *command = CMD_ATTRVIS;
         return 1;
       case (KEY_B8 | KEY_B6):
-        *command = CMD_SIXDOTS;
+        *command = CMD_FREEZE;
         return 1;
       case (KEY_B8 | KEY_B7):
         *command = CMD_TUNES;
         return 1;
       case (KEY_B7):
-        *command = CMD_FREEZE;
+        *command = CMD_SIXDOTS;
         return 1;
       case (KEY_B7 | KEY_B1):
         *command = CMD_PREFMENU;

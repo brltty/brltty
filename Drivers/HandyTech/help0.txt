@@ -35,9 +35,9 @@ b8        toggle help mode
 B8 B1     toggle cursor tracking
 B8 B2     toggle show cursor
 B8 B3     toggle show attributes
-B8 B6     toggle six-dot braille
+B8 B6     toggle frozen screen
 B8 B7     toggle alert tunes
-B7        toggle frozen screen
+B7        toggle six-dot braille
 B7 B1     toggle preferences menu
 B7 B2     load saved preferences
 B7 B3     save preferences
