@@ -256,8 +256,7 @@ contractText (void *contractionTable,
               int *offsetsMap, const int cursorOffset) { /*begin translation */
   const BYTE *srcword = NULL;
   BYTE *destword = NULL; /* last word transla1ted */
-  int computerBraille = 0;
-  const BYTE *activeBegin, *activeEnd;
+  const BYTE *computerBraille = NULL;
 
   if (!(table = (ContractionTableHeader *) contractionTable)) return 0;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
@@ -265,30 +264,24 @@ contractText (void *contractionTable,
   offsets = offsetsMap;
   previousOpcode = CTO_None;
 
-  activeBegin = activeEnd = NULL;
-  if (table->locale) {
-    if (cursorOffset >= 0 && cursorOffset < *inputLength &&
-        !CTC(inputBuffer[cursorOffset], CTC_Space)) {
-      activeBegin = activeEnd = srcmin + cursorOffset;
-      while (--activeBegin >= srcmin && !CTC(*activeBegin, CTC_Space));
-      while (++activeEnd < srcmax && !CTC(*activeEnd, CTC_Space));
-    }
-  }
-
   while (src < srcmax) { /*the main translation loop */
     setOffset();
     setBefore();
     if (computerBraille)
-      if (CTC(*src, CTC_Space))
-        computerBraille = 0;
-    if (computerBraille || (src > activeBegin && src < activeEnd)) {
+      if (src == computerBraille)
+        if (CTC(*src, CTC_Space) || CTC(src[-1], CTC_Space))
+          computerBraille = NULL;
+    if (computerBraille) {
       setAfter(1);
       currentOpcode = CTO_Literal;
       if (!putBytes(&textTable[*src], 1)) break;
       src++;
     } else if (selectRule(srcmax-src) || selectRule(1)) {
-      if (table->numberSign && previousOpcode != CTO_MidNum &&
-          !CTC(before, CTC_Digit) && CTC(*src, CTC_Digit)) {
+      if ((cursorOffset >= (src - srcmin)) &&
+          (cursorOffset < (src - srcmin + currentFindLength))) {
+        currentOpcode = CTO_Literal;
+      } else if (table->numberSign && previousOpcode != CTO_MidNum &&
+                 !CTC(before, CTC_Digit) && CTC(*src, CTC_Digit)) {
         if (!putSequence(table->numberSign)) break;
       } else if (table->englishLetterSign && CTC(*src, CTC_Letter)) {
         if ((currentOpcode == CTO_Contraction) ||
@@ -346,6 +339,8 @@ contractText (void *contractionTable,
           break;
         case CTO_Literal: {
           const BYTE *srcorig = src;
+          computerBraille = src + currentFindLength;
+          if (CTC(*src, CTC_Space)) continue;
           if (destword) {
             src = srcword;
             dest = destword;
@@ -354,7 +349,6 @@ contractText (void *contractionTable,
             dest = destmin;
           }
           while (srcorig > src) offsets[--srcorig - srcmin] = -1;
-          computerBraille = 1;
           continue;
         }
         default:
