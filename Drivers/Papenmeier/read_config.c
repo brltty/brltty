@@ -154,110 +154,173 @@ printkeys (FILE *fh, const CommandDefinition *cmd, const int16_t *modifiers) {
 
 void terminals(int help, int verbose)
 {
-  int tn, i, j;
-  FILE * fh = stdout;
+  int t;
+  FILE *fh = stdout;
 
   /* TODO: Comment/Help for status display */
 
-  for(tn=0; tn < num_terminals; tn++) {
-    if (pm_terminals[tn].name != 0) {
+  for (t=0; t<num_terminals; t++) {
+    const TerminalDefinition *terminal = &pm_terminals[t];
+
+    if (terminal->name) {
       if (help) {
-	fh = fopen(pm_terminals[tn].helpFile, "wa");
+	fh = fopen(terminal->helpFile, "wa");
 	if (!fh) {
 	  perror("fopen");
 	  fprintf(stderr, "read_config: Error creating help file %s for %s.\n", 
-		  pm_terminals[tn].helpFile, pm_terminals[tn].name);
+		  terminal->helpFile, terminal->name);
 	  continue;
 	}
 	if (verbose)
 	  fprintf(stderr, "read_config: Generating help file %s for %s.\n", 
-		  pm_terminals[tn].helpFile, pm_terminals[tn].name);
+		  terminal->helpFile, terminal->name);
       } else {
         if (verbose)
 	  fprintf(stderr, "read_config: Writing configuration records for %s.\n",
-	          pm_terminals[tn].name);
+	          terminal->name);
       }
       
       if (!help)
 	fprintf(fh, "# --------------------------------------------\n");
 
-      fprintf(fh, "# Terminal Parameter:\n");
+      fprintf(fh, "# Terminal Parameters:\n");
      
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(IDENT), pm_terminals[tn].identifier);
+	      search_symbol(IDENT), terminal->identifier);
       fprintf(fh, "%s = \"%s\"\n", 
-	      search_symbol(NAME), pm_terminals[tn].name);
+	      search_symbol(NAME), terminal->name);
       fprintf(fh, "%s = \"%s\"\n", 
-	      search_symbol(HELPFILE), pm_terminals[tn].helpFile);
+	      search_symbol(HELPFILE), terminal->helpFile);
 
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(SIZE),      pm_terminals[tn].columns);
+	      search_symbol(SIZE),      terminal->columns);
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(STATCELLS), pm_terminals[tn].statusCells);
+	      search_symbol(STATCELLS), terminal->statusCells);
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(FRONTKEYS), pm_terminals[tn].frontKeys);
-      if (pm_terminals[tn].hasEasyBar)
+	      search_symbol(FRONTKEYS), terminal->frontKeys);
+      if (terminal->hasEasyBar)
 	fprintf(fh, "%s\n", search_symbol(EASYBAR));
 
-      fprintf(fh, "# Terminal settings:\n");
+      {
+        int first = 1;
+        int s;
+        for (s=0; s<STATMAX; s++) {
+          uint16_t show = terminal->statshow[s];
+          if (show != OFFS_EMPTY) {
+            if (first) {
+              first = 0;
+              fprintf(fh, "# Status Cells:\n");    
+              fprintf(fh, "# flag: left half is cell number,"
+                          " right half is no/all dots for off/on\n");
+              fprintf(fh, "# horiz: horizontal two-digit number (for vertical status display)\n");
+              fprintf(fh, "# number: vertical two-digit number (for horizontal status display)\n");
+            }
 
-      fprintf(fh, "# Statusdisplay settings:\n");    
-      fprintf(fh, "# flag: left half: line number"
-	      "  right half: no/all bits set\n");
-      fprintf(fh, "# horiz: two digits on vertikal status-display\n"
-	      "# number: display two digits in one cell "
-	      "when status on horiz.display\n");
-      for(i=0; i < STATMAX; i++) 
-	if(pm_terminals[tn].statshow[i] != OFFS_EMPTY)
-	  {
-	    int val = pm_terminals[tn].statshow[i];
+            fprintf(fh, "%s %d = ", search_symbol(STAT), s+1);
+            if (show >= OFFS_NUMBER) {
+              fprintf(fh, "%s", search_symbol(NUMBER));
+              show -= OFFS_NUMBER;
+            } else if (show >= OFFS_FLAG) {
+              fprintf(fh, "%s", search_symbol(FLAG));
+              show -= OFFS_FLAG;
+            } else if (show >= OFFS_HORIZ) {
+              fprintf(fh, "%s", search_symbol(HORIZ));
+              show -= OFFS_HORIZ;
+            }
 
-	    fprintf(fh, "%s %d = ", search_symbol(STAT), i+1);
-	    if (val >= OFFS_NUMBER) {
-	      fprintf(fh, "%s", 
-		      search_symbol(NUMBER));
-	      val -= OFFS_NUMBER;
-	    } else if (val >= OFFS_FLAG) {
-	      fprintf(fh, "%s", 
-		      search_symbol(FLAG));
-	      val -= OFFS_FLAG;
-	    } else if (val >= OFFS_HORIZ) {
-	      fprintf(fh, "%s", 
-		      search_symbol(HORIZ));
-	      val -= OFFS_HORIZ;
-	    }
-
-	    fprintf(fh, " %s # %s\n",
-		    search_code(STATCODE, val),
-		    search_help_text(val + OFFS_STAT));
-	  }
-
-      fprintf(fh, "# Modifierkey and input mode dots - settings:\n");    
-      for(i=0; i < MODMAX; i++) 
-	if (pm_terminals[tn].modifiers[i] != 0 &&
-	    pm_terminals[tn].modifiers[i] != ROUTINGKEY) 
-	  fprintf(fh, "modifier = %s # dot %d\n", 
-		  search_key(pm_terminals[tn].modifiers[i]), i+1);
-
-      fprintf(fh, "# Commandkey settings:\n");    
-      for(i=0; i < CMDMAX; i++) {
-	if (pm_terminals[tn].commands[i].code != 0) {
-	  char* txtand = "";
-	  fprintf(fh, "%s",
-		  search_cmd(pm_terminals[tn].commands[i].code & VAL_CMD_MASK));
-	  if (pm_terminals[tn].commands[i].code & VAL_TOGGLE_MASK) 
-	    fprintf(fh, " %s", search_onoff(pm_terminals[tn].commands[i].code) );
-	  fprintf(fh, " = ");
-	  printkeys(fh, &pm_terminals[tn].commands[i], pm_terminals[tn].modifiers);
-	  fprintf(fh, " # %s",
-		  get_command_description(pm_terminals[tn].commands[i].code & VAL_CMD_MASK));
-	  if (pm_terminals[tn].commands[i].code & VAL_TOGGLE_MASK) 
-	    fprintf(fh, " - set %s", search_onoff(pm_terminals[tn].commands[i].code) );
-	  fprintf(fh, "\n");
-	}
+            fprintf(fh, " %s # %s\n",
+                    search_code(STATCODE, show),
+                    search_help_text(show + OFFS_STAT));
+          }
+        }
       }
+
+      {
+        int first = 1;
+        int m;
+        for (m=0; m<MODMAX; m++)  {
+          uint16_t key = terminal->modifiers[m];
+          if (key) {
+            if (first) {
+              first = 0;
+              fprintf(fh, "# Modifier Keys:\n");    
+            }
+
+            fprintf(fh, "modifier = %s\n", search_key(key));
+          }
+        }
+      }
+
+      fprintf(fh, "# Command Definitions:\n");    
+      {
+        int c;
+        for (c=0; c<CMDMAX; c++) {
+          const CommandDefinition *command = &terminal->commands[c];
+          if (command->code) {
+            fprintf(fh, "%s", search_cmd(command->code & VAL_CMD_MASK));
+            if (command->code & VAL_TOGGLE_MASK) 
+              fprintf(fh, " %s", search_onoff(command->code));
+            fprintf(fh, " = ");
+            printkeys(fh, command, terminal->modifiers);
+            fprintf(fh, " # ");
+            {
+              const char *description = get_command_description(command->code & VAL_CMD_MASK);
+              if (!*description) goto described;
+
+              if (command->code & VAL_TOGGLE_MASK)  {
+                int on = command->code & VAL_TOGGLE_ON;
+                const char *firstBlank = strchr(description, ' ');
+                if (firstBlank) {
+                  {
+                    const char *slash = memchr(description, '/', firstBlank-description);
+                    if (slash) {
+                      if (on) {
+                        fprintf(fh, "%.*s", slash-description, description);
+                      } else {
+                        slash++;
+                        fprintf(fh, "%.*s", firstBlank-slash, slash);
+                      }
+                      fprintf(fh, "%s", firstBlank);
+                      goto described;
+                    }
+                  }
+
+                  {
+                    const char *oldVerb = "toggle";
+                    int oldLength = strlen(oldVerb);
+                    if ((oldLength == (firstBlank-description)) &&
+                        (memcmp(description, oldVerb, oldLength) == 0)) {
+                      const char *lastWord = strrchr(firstBlank, ' ');
+                      if (lastWord) {
+                        const char *slash = strchr(++lastWord, '/');
+                        if (slash) {
+                          fprintf(fh, "set%.*s", lastWord-firstBlank, firstBlank);
+                          if (on) {
+                            fprintf(fh, "%.*s", slash-lastWord, lastWord);
+                          } else {
+                            fprintf(fh, "%s", slash+1);
+                          }
+                          goto described;
+                        }
+                      }
+                    }
+                  }
+                }
+
+                fprintf(fh, "%s - set %s",
+                        description, search_onoff(command->code));
+                goto described;
+              }
+              fprintf(fh, "%s", description);
+            }
+          described:
+            fprintf(fh, "\n");
+          }
+        }
+      }
+
       if (help)
-	fclose (fh);
+	fclose(fh);
     }
   }
 }
