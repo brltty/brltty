@@ -46,7 +46,7 @@ extern "C" {
 
 /** \e brltty 's settings directory
  *
- * This is where authentication key and driver-dependant key names are found 
+ * This is where authentication key and driver-dependent key names are found 
  * for instance. */
 #define BRLAPI_ETCDIR "/etc/brltty"
 
@@ -251,7 +251,7 @@ typedef struct
  *   can yet sometimes be useful to mimic existing proprietary applications
  *   for instance.
  * - COMMANDS means that applications will get exactly the same values as
- *   \e brltty. This allows driver-independent clients, which will hopefuly
+ *   \e brltty. This allows driver-independent clients, which will hopefully
  *   be nice to use with a lot of different terminals
  * \sa brlapi_readKey() brlapi_readCommand() brlapi_readBinding()
  * @{
@@ -325,7 +325,7 @@ int brlapi_writeBrlDots(const char *dots);
  * \brief How to read key presses from the braille terminal
  *
  * Once brlapi_getTty() is called, the application can call brlapi_readKey(),
- * brlapi_readCommand() or brlapi_readBinding() to read keypresses. Not
+ * brlapi_readCommand() or brlapi_readBinding() to read key presses. Not
  * everyone can be called, it depends on parameters given to brlapi_getTty().
  *
  * key presses are buffered, so that calling brlapi_readKey() in non-blocking
@@ -349,7 +349,7 @@ int brlapi_writeBrlDots(const char *dots);
  * a 32 bit space. */
 typedef uint32_t brl_keycode_t;
 
-/** brl_keycode_t's bigest value
+/** brl_keycode_t's biggest value
  *
  * As defined in \c <inttypes.h> */
 #define BRL_KEYCODE_MAX ((brl_keycode_t) (UINT32_MAX))
@@ -381,7 +381,7 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  *
  * This function returns \e brltty commands, as described in
  * \c <brltty/brldefs.h> .
- * These are hence pretty driver-independant, and should be used by default
+ * These are hence pretty driver-independent, and should be used by default
  * when no other option is possible.
  *
  * It can be called only if BRLCOMMANDS was given to brlapi_getTty()
@@ -405,9 +405,9 @@ int brlapi_readCommand(int block, brl_keycode_t *code);
  */
 #define BRLAPI_HOMEKEYEXT ".kbd"
 
-/** Prefix for driver-dependant keynames header files
+/** Prefix for driver-dependent key names header files
  *
- * Driver-dependant keynames header files are stored in
+ * Driver-dependent key names header files are stored in
  * BRLAPI_ETCDIR/BRLAPI_ETCKEYFILE-xy.h
  * where \c xy is the driver code, as returned by brlapi_getDriverId() */
 #define BRLAPI_ETCKEYFILE "brlkeys"
@@ -415,7 +415,7 @@ int brlapi_readCommand(int block, brl_keycode_t *code);
 /* brlapi_readBinding */
 /** read a key binding from the braille keyboard
  *
- * This function returns a command name, as bound in user's config file:
+ * This function returns a command name, as bound in user's configuration file:
  * if the read is successful, a pointer on a string is
  * returned, this is the string defined in $HOME/.brlkeys/appli-xy.kbd for the
  * key which was read, else \c NULL is returned 
@@ -433,7 +433,7 @@ int brlapi_readCommand(int block, brl_keycode_t *code);
 int brlapi_readBinding(int block, const char **code);
 
 /* brlapi_ignoreKeys */
-/** Ignore some keypresses from the braille keyboard
+/** Ignore some key presses from the braille keyboard
  *
  * This function asks the server to give keys between x and y to \e brltty,
  * rather than returning them to the application via
@@ -444,12 +444,12 @@ int brlapi_readBinding(int block, const char **code);
 int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y);
 
 /* brlapi_unignoreKeys */
-/** Unignore some keypresses from the braille keyboard
+/** Unignore some key presses from the braille keyboard
  *
  * This function asks the server to return keys between x and y to the
  * application, and not give them to \e brltty.
  *
- * \note You shouldn't ask the server to give you keypresses which are usually
+ * \note You shouldn't ask the server to give you key presses which are usually
  * used to switch between TTYs, unless you really know what you are doing !
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
@@ -466,7 +466,7 @@ int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y);
  * terminal to it: \e brltty doesn't work any more.
  *
  * For this, it simply has to call brlapi_getRaw(), then brlapi_sendRaw()
- * and brlapi_recvRaw(), and finaly give control back thanks to
+ * and brlapi_recvRaw(), and finally give control back thanks to
  * brlapi_leaveRaw()
  *
  * Special care of the terminal should be taken, since one might completely
@@ -590,7 +590,7 @@ int brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size);
  *
  * The syntax is the same as read()'s.
  *
- * \return packet's size, -2 if \c EOF occured, -1 on error */
+ * \return packet's size, -2 if \c EOF occurred, -1 on error */
 int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size);
 
 /** @} */
