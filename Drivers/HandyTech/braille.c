@@ -166,8 +166,8 @@ static TranslationTable outputTable;
 /* Global variables */
 static int fileDescriptor;			/* file descriptor for Braille display */
 static struct termios originalAttributes;		/* old terminal settings */
-static unsigned char *rawData;		/* translated data to send to Braille */
-static unsigned char *prevData;	/* previously sent raw data */
+static unsigned char *rawData = NULL;		/* translated data to send to Braille */
+static unsigned char *prevData = NULL;	/* previously sent raw data */
 static unsigned char rawStatus[MAX_STCELLS];		/* to hold status info */
 static unsigned char prevStatus[MAX_STCELLS];	/* to hold previous status */
 static const ModelDescription *model;		/* points to terminal model config struct */
@@ -322,9 +322,64 @@ writeDescribe (BrailleDisplay *brl) {
 }
 
 static int
+reallocateBuffer (unsigned char **buffer, size_t size) {
+  void *address = realloc(*buffer, size);
+  int allocated = address != NULL;
+  if (allocated) {
+    *buffer = address;
+  } else {
+    LogError("buffer allocation");
+  }
+  return allocated;
+}
+
+static int
+identifyModel (BrailleDisplay *brl, unsigned char identifier) {
+  for (
+    model = Models;
+    model->name && (model->identifier != identifier);
+    model++
+  );
+  if (!model->name) {
+    LogPrint(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
+             identifier);
+    LogPrint(LOG_WARNING, "Please fix Models[] in HandyTech/braille.c and notify the maintainer.");
+    return 0;
+  }
+  LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
+           model->name,
+           model->columns, (model->columns == 1)? "cell": "cells",
+           model->statusCells, (model->statusCells == 1)? "cell": "cells");
+
+  brl->helpPage = model->helpPage;		/* position in the model list */
+  brl->x = model->columns;			/* initialise size of display */
+  brl->y = BRLROWS;
+
+  if (!reallocateBuffer(&rawData, brl->x*brl->y)) return 0;
+  if (!reallocateBuffer(&prevData, brl->x*brl->y)) return 0;
+
+  nullKeys.front = 0;
+  nullKeys.column = -1;
+  nullKeys.status = -1;
+  currentKeys = pressedKeys = nullKeys;
+  inputMode = 0;
+  repeatCounter = repeatDelay;
+
+  memset(rawStatus, 0, model->statusCells);
+  memset(rawData, 0, model->columns);
+
+  currentState = BDS_OFF;
+  stateTimer = 0;
+  retryCount = 0;
+  updateRequired = 0;
+  setState(BDS_READY);
+
+  return 1;
+}
+
+static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   struct termios newtio;	/* new terminal settings */
-  int modelIdentifier = 0;
 
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
@@ -351,62 +406,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
         unsigned char buffer[sizeof(HandyDescription) + 1];
         if (readBytes(brl, buffer, sizeof(buffer))) {
           if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
-            modelIdentifier = buffer[sizeof(HandyDescription)];
-            break;
+            if (identifyModel(brl, buffer[sizeof(HandyDescription)])) return 1;
+            goto failure;
           }
         }
       }
     }
     delay(1000);
   }
-
-  /* Find out which model we are connected to... */
-  for (
-    model = Models;
-    model->name && (model->identifier != modelIdentifier);
-    model++
-  );
-  if (!model->name) {
-    LogPrint(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
-             modelIdentifier);
-    LogPrint(LOG_WARNING, "Please fix Models[] in HandyTech/braille.c and mail the maintainer.");
-    goto failure;
-  }
-  LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
-           model->name,
-           model->columns, (model->columns == 1)? "cell": "cells",
-           model->statusCells, (model->statusCells == 1)? "cell": "cells");
-
-  /* Set model params... */
-  brl->helpPage = model->helpPage;		/* position in the model list */
-  brl->x = model->columns;			/* initialise size of display */
-  brl->y = BRLROWS;
-
-  /* Allocate space for buffers */
-  rawData = (unsigned char *) malloc (brl->x * brl->y);
-  prevData = (unsigned char *) malloc (brl->x * brl->y);
-  if (!rawData || !prevData) {
-    LogError("braille buffer allocation");
-    goto failure;
-  }
-
-  nullKeys.front = 0;
-  nullKeys.column = -1;
-  nullKeys.status = -1;
-  currentKeys = pressedKeys = nullKeys;
-  inputMode = 0;
-  repeatCounter = repeatDelay;
-
-  memset(rawStatus, 0, model->statusCells);
-  memset(rawData, 0, model->columns);
-
-  currentState = BDS_OFF;
-  stateTimer = 0;
-  retryCount = 0;
-  updateRequired = 0;
-  setState(BDS_READY);
-
-  return 1;
 
 failure:
   brl_close(brl);
