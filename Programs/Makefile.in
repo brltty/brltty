@@ -251,7 +251,7 @@ brltty-install$X: $(SRC_DIR)/brltty-install.in
 	sed -e 's%=F%$(EXECUTE_ROOT)%g' \
 	    -e 's%=P%$(PROGRAM_DIRECTORY)%g' \
             -e 's%=L%$(LIBRARY_DIRECTORY)%g' \
-	    -e 's%=D%$(DATA_DIR)%g' \
+	    -e 's%=D%$(DATA_DIRECTORY)%g' \
 	    -e 's%=C%$(sysconfdir)%g' \
             $(SRC_DIR)/brltty-install.in >$@
 	chmod a+rx $@
@@ -282,22 +282,22 @@ install-programs: brltty brltty-install
 	$(INSTALL_SCRIPT) brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_DRIVERS) install-data-directory
-	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIR) 
+	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIRECTORY) 
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES)
 
 install-text-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/text.*.tbl $(INSTALL_ROOT)$(DATA_DIR)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/text.*.tbl $(INSTALL_ROOT)$(DATA_DIRECTORY)
 
 install-attributes-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/attr*.tbl $(INSTALL_ROOT)$(DATA_DIR)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/attr*.tbl $(INSTALL_ROOT)$(DATA_DIRECTORY)
 
 install-contraction-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.ctb $(INSTALL_ROOT)$(DATA_DIR)
-	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.cti $(INSTALL_ROOT)$(DATA_DIR)
+	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.ctb $(INSTALL_ROOT)$(DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.cti $(INSTALL_ROOT)$(DATA_DIRECTORY)
 
 install-data-directory:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIR) 
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIRECTORY) 
 
 install-drivers: brltty
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
@@ -340,11 +340,11 @@ uninstall-programs:
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install
 
 uninstall-data:
-	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.tbl
-	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.ctb
-	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.cti
-	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/brltty*
-	-rmdir $(INSTALL_ROOT)$(DATA_DIR)
+	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.tbl
+	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.ctb
+	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.cti
+	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/brltty*
+	-rmdir $(INSTALL_ROOT)$(DATA_DIRECTORY)
 
 uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
