@@ -72,7 +72,7 @@ describeCommand (int command, char *buffer, int size) {
         break;
 
       case BRL_BLK_PASSDOTS: {
-        unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
+        unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
         int dot;
         number = 0;
         for (dot=0; dot<sizeof(dots); ++dot) {

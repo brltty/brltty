@@ -846,14 +846,14 @@ interpretKeys (void) {
   {
     if ((keys & DOT_KEYS) && !(keys & ~(DOT_KEYS | SHIFT_KEYS))) {
       command = BRL_BLK_PASSDOTS | flags;
-      if (keys & KEY_DOT1) command |= B1;
-      if (keys & KEY_DOT2) command |= B2;
-      if (keys & KEY_DOT3) command |= B3;
-      if (keys & KEY_DOT4) command |= B4;
-      if (keys & KEY_DOT5) command |= B5;
-      if (keys & KEY_DOT6) command |= B6;
-      if (keys & KEY_DOT7) command |= B7;
-      if (keys & KEY_DOT8) command |= B8;
+      if (keys & KEY_DOT1) command |= BRL_DOT1;
+      if (keys & KEY_DOT2) command |= BRL_DOT2;
+      if (keys & KEY_DOT3) command |= BRL_DOT3;
+      if (keys & KEY_DOT4) command |= BRL_DOT4;
+      if (keys & KEY_DOT5) command |= BRL_DOT5;
+      if (keys & KEY_DOT6) command |= BRL_DOT6;
+      if (keys & KEY_DOT7) command |= BRL_DOT7;
+      if (keys & KEY_DOT8) command |= BRL_DOT8;
       if (keys & KEY_SHIFT_LEFT) command |= BRL_FLG_CHAR_UPPER;
       if (keys & KEY_SHIFT_RIGHT) command |= BRL_FLG_CHAR_CONTROL;
       return command;

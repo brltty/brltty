@@ -513,14 +513,14 @@ writeDots (const unsigned char *cells, int count) {
 
     if (cell != cells) *d++ = '|';
     if (*cell) {
-      if (*cell & B1) *d++ = '1';
-      if (*cell & B2) *d++ = '2';
-      if (*cell & B3) *d++ = '3';
-      if (*cell & B4) *d++ = '4';
-      if (*cell & B5) *d++ = '5';
-      if (*cell & B6) *d++ = '6';
-      if (*cell & B7) *d++ = '7';
-      if (*cell & B8) *d++ = '8';
+      if (*cell & BRL_DOT1) *d++ = '1';
+      if (*cell & BRL_DOT2) *d++ = '2';
+      if (*cell & BRL_DOT3) *d++ = '3';
+      if (*cell & BRL_DOT4) *d++ = '4';
+      if (*cell & BRL_DOT5) *d++ = '5';
+      if (*cell & BRL_DOT6) *d++ = '6';
+      if (*cell & BRL_DOT7) *d++ = '7';
+      if (*cell & BRL_DOT8) *d++ = '8';
     } else {
       *d++ = ' ';
     }

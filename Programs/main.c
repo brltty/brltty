@@ -207,14 +207,14 @@ setStateLetter (unsigned char *cell) {
 
 static void
 setStateDots (unsigned char *cell) {
-  *cell = ((dispmd & FROZ_SCRN) == FROZ_SCRN? B1: 0) |
-          (prefs.showCursor                 ? B4: 0) |
-          (p->showAttributes                ? B2: 0) |
-          (prefs.cursorStyle                ? B5: 0) |
-          (prefs.alertTunes                 ? B3: 0) |
-          (prefs.blinkingCursor             ? B6: 0) |
-          (p->trackCursor                   ? B7: 0) |
-          (prefs.slidingWindow              ? B8: 0);
+  *cell = ((dispmd & FROZ_SCRN) == FROZ_SCRN? BRL_DOT1: 0) |
+          (prefs.showCursor                 ? BRL_DOT4: 0) |
+          (p->showAttributes                ? BRL_DOT2: 0) |
+          (prefs.cursorStyle                ? BRL_DOT5: 0) |
+          (prefs.alertTunes                 ? BRL_DOT3: 0) |
+          (prefs.blinkingCursor             ? BRL_DOT6: 0) |
+          (p->trackCursor                   ? BRL_DOT7: 0) |
+          (prefs.slidingWindow              ? BRL_DOT8: 0);
 }
 
 static void
@@ -646,11 +646,11 @@ overlayAttributes (const unsigned char *attributes, int width, int height) {
         case 0x30: /* black on cyan */
           break;
         case 0x70: /* black on light-gray */
-          brl.buffer[row*brl.x + column] |= (B7 | B8);
+          brl.buffer[row*brl.x + column] |= (BRL_DOT7 | BRL_DOT8);
           break;
         case 0x0F: /* white on black */
         default:
-          brl.buffer[row*brl.x + column] |= (B8);
+          brl.buffer[row*brl.x + column] |= (BRL_DOT8);
           break;
       }
     }
@@ -769,7 +769,7 @@ getOffset (int arg, int end) {
 
 unsigned char
 cursorDots (void) {
-  return prefs.cursorStyle?  (B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8): (B7 | B8);
+  return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
 }
 
 static void
@@ -2147,7 +2147,7 @@ main (int argc, char *argv[]) {
           for (
             i = 0;
             i < (winlen * brl.y);
-            brl.buffer[i] = curtbl[brl.buffer[i]] & (B1 | B2 | B3 | B4 | B5 | B6), i++
+            brl.buffer[i] = curtbl[brl.buffer[i]] & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6), i++
           );
         }
 

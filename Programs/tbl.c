@@ -34,7 +34,7 @@
 #define DOT_COUNT 8
 static const unsigned char noDots[] = {'0'};
 static const unsigned char dotNumbers[DOT_COUNT] = {'1', '2', '3', '4', '5', '6', '7', '8'};
-static const unsigned char dotBits[DOT_COUNT] = {B1, B2, B3, B4, B5, B6, B7, B8};
+static const unsigned char dotBits[DOT_COUNT] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
 #define DOT_BIT(dot) (dotBits[(dot)])
 
 typedef struct {

@@ -256,7 +256,7 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
 
   if (modifiers) {
     if (input_mode && !(modifiers & ~0XFF)) {
-      static const unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
+      static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
       const unsigned char *dot = dots;
       int mod;
       command = BRL_BLK_PASSDOTS;

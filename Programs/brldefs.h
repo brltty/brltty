@@ -277,14 +277,14 @@ typedef enum {
  *
  * Bx: x from dot number, value from actual bit.
  */
-#define B1 0X01
-#define B2 0X04
-#define B3 0X10
-#define B4 0X02
-#define B5 0X08
-#define B6 0X20
-#define B7 0X40
-#define B8 0X80
+#define BRL_DOT1 0X01
+#define BRL_DOT2 0X04
+#define BRL_DOT3 0X10
+#define BRL_DOT4 0X02
+#define BRL_DOT5 0X08
+#define BRL_DOT6 0X20
+#define BRL_DOT7 0X40
+#define BRL_DOT8 0X80
 
 #ifdef __cplusplus
 }

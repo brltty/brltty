@@ -984,14 +984,14 @@ interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *c
         unsigned long int modifiers = keys->front & ~dots;
         *command = BRL_BLK_PASSDOTS;
 
-        if (keys->front & KEY_B1) *command |= B7;
-        if (keys->front & KEY_B2) *command |= B3;
-        if (keys->front & KEY_B3) *command |= B2;
-        if (keys->front & KEY_B4) *command |= B1;
-        if (keys->front & KEY_B5) *command |= B4;
-        if (keys->front & KEY_B6) *command |= B5;
-        if (keys->front & KEY_B7) *command |= B6;
-        if (keys->front & KEY_B8) *command |= B8;
+        if (keys->front & KEY_B1) *command |= BRL_DOT7;
+        if (keys->front & KEY_B2) *command |= BRL_DOT3;
+        if (keys->front & KEY_B3) *command |= BRL_DOT2;
+        if (keys->front & KEY_B4) *command |= BRL_DOT1;
+        if (keys->front & KEY_B5) *command |= BRL_DOT4;
+        if (keys->front & KEY_B6) *command |= BRL_DOT5;
+        if (keys->front & KEY_B7) *command |= BRL_DOT6;
+        if (keys->front & KEY_B8) *command |= BRL_DOT8;
 
         if (modifiers & KEY_UP) {
           modifiers &= ~KEY_UP;

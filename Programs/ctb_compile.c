@@ -420,28 +420,28 @@ parseDots (FileData *data, ByteString *cells, const unsigned char *token, const 
       {
         int dot;
       case '1':
-        dot = B1;
+        dot = BRL_DOT1;
         goto haveDot;
       case '2':
-        dot = B2;
+        dot = BRL_DOT2;
         goto haveDot;
       case '3':
-        dot = B3;
+        dot = BRL_DOT3;
         goto haveDot;
       case '4':
-        dot = B4;
+        dot = BRL_DOT4;
         goto haveDot;
       case '5':
-        dot = B5;
+        dot = BRL_DOT5;
         goto haveDot;
       case '6':
-        dot = B6;
+        dot = BRL_DOT6;
         goto haveDot;
       case '7':
-        dot = B7;
+        dot = BRL_DOT7;
         goto haveDot;
       case '8':
-        dot = B8;
+        dot = BRL_DOT8;
       haveDot:
         if (started && !cell) goto invalid;
         if (cell & dot) {

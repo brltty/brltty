@@ -260,7 +260,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 
 void
 makeOutputTable (const DotsTable *dots, TranslationTable *table) {
-  static const DotsTable internalDots = {B1, B2, B3, B4, B5, B6, B7, B8};
+  static const DotsTable internalDots = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
   int byte, dot;
   memset(table, 0, sizeof(*table));
   for (byte=0; byte<0X100; byte++)
@@ -274,9 +274,12 @@ makeOutputTable (const DotsTable *dots, TranslationTable *table) {
 
 /* Dots for landscape (counterclockwise-rotated) digits. */
 const unsigned char landscapeDigits[11] = {
-  B1+B5+B2,    B4,          B4+B1,       B4+B5,       B4+B5+B2,
-  B4+B2,       B4+B1+B5,    B4+B1+B5+B2, B4+B1+B2,    B1+B5,
-  B1+B2+B4+B5
+  BRL_DOT1+BRL_DOT5+BRL_DOT2, BRL_DOT4,
+  BRL_DOT4+BRL_DOT1,          BRL_DOT4+BRL_DOT5,
+  BRL_DOT4+BRL_DOT5+BRL_DOT2, BRL_DOT4+BRL_DOT2,
+  BRL_DOT4+BRL_DOT1+BRL_DOT5, BRL_DOT4+BRL_DOT1+BRL_DOT5+BRL_DOT2,
+  BRL_DOT4+BRL_DOT1+BRL_DOT2, BRL_DOT1+BRL_DOT5,
+  BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5
 };
 
 /* Format landscape representation of numbers 0 through 99. */
@@ -295,9 +298,12 @@ landscapeFlag (int number, int on) {
 
 /* Dots for seascape (clockwise-rotated) digits. */
 const unsigned char seascapeDigits[11] = {
-  B5+B1+B4,    B2,          B2+B5,       B2+B1,       B2+B1+B4,
-  B2+B4,       B2+B5+B1,    B2+B5+B1+B4, B2+B5+B4,    B5+B1,
-  B1+B2+B4+B5
+  BRL_DOT5+BRL_DOT1+BRL_DOT4, BRL_DOT2,
+  BRL_DOT2+BRL_DOT5,          BRL_DOT2+BRL_DOT1,
+  BRL_DOT2+BRL_DOT1+BRL_DOT4, BRL_DOT2+BRL_DOT4,
+  BRL_DOT2+BRL_DOT5+BRL_DOT1, BRL_DOT2+BRL_DOT5+BRL_DOT1+BRL_DOT4,
+  BRL_DOT2+BRL_DOT5+BRL_DOT4, BRL_DOT5+BRL_DOT1,
+  BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5
 };
 
 /* Format seascape representation of numbers 0 through 99. */
@@ -316,8 +322,12 @@ seascapeFlag (int number, int on) {
 
 /* Dots for portrait digits - 2 numbers in one cells */
 const unsigned char portraitDigits[11] = {
-  B2+B4+B5, B1, B1+B2, B1+B4, B1+B4+B5, B1+B5, B1+B2+B4, 
-  B1+B2+B4+B5, B1+B2+B5, B2+B4, B1+B2+B4+B5
+  BRL_DOT2+BRL_DOT4+BRL_DOT5, BRL_DOT1,
+  BRL_DOT1+BRL_DOT2,          BRL_DOT1+BRL_DOT4,
+  BRL_DOT1+BRL_DOT4+BRL_DOT5, BRL_DOT1+BRL_DOT5,
+  BRL_DOT1+BRL_DOT2+BRL_DOT4, BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5,
+  BRL_DOT1+BRL_DOT2+BRL_DOT5, BRL_DOT2+BRL_DOT4,
+  BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5
 };
 
 /* Format portrait representation of numbers 0 through 99. */

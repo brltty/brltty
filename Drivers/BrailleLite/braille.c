@@ -478,8 +478,8 @@ brl_writeWindow (BrailleDisplay * brl)
       static int timer = 0;		/* for internal cursor */
       timer = (timer + 1) % (INT_CSR_SPEED * 2);
       brl->buffer[int_cursor - 1] = (timer < INT_CSR_SPEED)?
-                                      (B1 | B2 | B3 | B7):
-                                      (B4 | B5 | B6 | B8);
+                                      (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7):
+                                      (BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8);
     }
 
   /* Next we must handle display reversal: */

@@ -1025,14 +1025,14 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       /* Just dot keys */
       /* This is a character typed in braille */
       cmd = BRL_BLK_PASSDOTS;
-      if (activeKeys.control & DOT1) cmd |= B1;
-      if (activeKeys.control & DOT2) cmd |= B2;
-      if (activeKeys.control & DOT3) cmd |= B3;
-      if (activeKeys.control & DOT4) cmd |= B4;
-      if (activeKeys.control & DOT5) cmd |= B5;
-      if (activeKeys.control & DOT6) cmd |= B6;
-      if (activeKeys.control & DOT7) cmd |= B7;
-      if (activeKeys.control & DOT8) cmd |= B8;
+      if (activeKeys.control & DOT1) cmd |= BRL_DOT1;
+      if (activeKeys.control & DOT2) cmd |= BRL_DOT2;
+      if (activeKeys.control & DOT3) cmd |= BRL_DOT3;
+      if (activeKeys.control & DOT4) cmd |= BRL_DOT4;
+      if (activeKeys.control & DOT5) cmd |= BRL_DOT5;
+      if (activeKeys.control & DOT6) cmd |= BRL_DOT6;
+      if (activeKeys.control & DOT7) cmd |= BRL_DOT7;
+      if (activeKeys.control & DOT8) cmd |= BRL_DOT8;
     }
   } else if (!activeKeys.control) {
     /* Just routing keys */

@@ -68,7 +68,7 @@ static TuneElement elements_command_rejected[] = {
    TUNE_STOP()
 };
 TuneDefinition tune_command_rejected = {
-   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_command_rejected
+   NULL, TUNE_TACTILE(50,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT7|BRL_DOT8), elements_command_rejected
 };
 
 static TuneElement elements_mark_set[] = {
@@ -109,7 +109,7 @@ static TuneElement elements_toggle_on[] = {
    TUNE_STOP()
 };
 TuneDefinition tune_toggle_on = {
-   NULL, TUNE_TACTILE(30,B1|B2|B4|B5), elements_toggle_on
+   NULL, TUNE_TACTILE(30,BRL_DOT1|BRL_DOT2|BRL_DOT4|BRL_DOT5), elements_toggle_on
 };
 
 static TuneElement elements_toggle_off[] = {
@@ -121,7 +121,7 @@ static TuneElement elements_toggle_off[] = {
    TUNE_STOP()
 };
 TuneDefinition tune_toggle_off = {
-   NULL, TUNE_TACTILE(30,B3|B7|B6|B8), elements_toggle_off
+   NULL, TUNE_TACTILE(30,BRL_DOT3|BRL_DOT7|BRL_DOT6|BRL_DOT8), elements_toggle_off
 };
 
 static TuneElement elements_cursor_linked[] = {
@@ -214,7 +214,7 @@ static TuneElement elements_wrap_down[] = {
    TUNE_STOP()
 };
 TuneDefinition tune_wrap_down = {
-   NULL, TUNE_TACTILE(20,B1|B2|B3|B7), elements_wrap_down
+   NULL, TUNE_TACTILE(20,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT7), elements_wrap_down
 };
 
 static TuneElement elements_wrap_up[] = {
@@ -225,7 +225,7 @@ static TuneElement elements_wrap_up[] = {
    TUNE_STOP()
 };
 TuneDefinition tune_wrap_up = {
-   NULL, TUNE_TACTILE(20,B4|B5|B6|B8), elements_wrap_up
+   NULL, TUNE_TACTILE(20,BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT8), elements_wrap_up
 };
 
 static TuneElement elements_skip_first[] = {
@@ -237,7 +237,7 @@ static TuneElement elements_skip_first[] = {
    TUNE_STOP()
 };
 TuneDefinition tune_skip_first = {
-   NULL, TUNE_TACTILE(30,B1|B4|B7|B8), elements_skip_first
+   NULL, TUNE_TACTILE(30,BRL_DOT1|BRL_DOT4|BRL_DOT7|BRL_DOT8), elements_skip_first
 };
 
 static TuneElement elements_skip[] = {
@@ -267,7 +267,7 @@ static TuneElement elements_bounce[] = {
    TUNE_STOP()
 };
 TuneDefinition tune_bounce = {
-   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_bounce
+   NULL, TUNE_TACTILE(50,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT7|BRL_DOT8), elements_bounce
 };
 
 static TuneElement elements_routing_started[] = {
