@@ -32,8 +32,8 @@
 #include "tbl.h"
 
 #define DOT_COUNT 8
-static const char noDots[] = {'0'};
-static const char dotNumbers[DOT_COUNT] = {'1', '2', '3', '4', '5', '6', '7', '8'};
+static const unsigned char noDots[] = {'0'};
+static const unsigned char dotNumbers[DOT_COUNT] = {'1', '2', '3', '4', '5', '6', '7', '8'};
 static const unsigned char dotBits[DOT_COUNT] = {B1, B2, B3, B4, B5, B6, B7, B8};
 #define DOT_BIT(dot) (dotBits[(dot)])
 
@@ -48,7 +48,7 @@ typedef struct {
   unsigned ok:1;
   const char *file;
   int line;
-  const char *location;
+  const unsigned char *location;
   ByteEntry bytes[0X100];
   unsigned char undefined;
   unsigned char masks[DOT_COUNT];
@@ -73,26 +73,26 @@ syntaxError (InputData *input, const char *problem) {
 }
 
 static int
-testWord (const char *location, int length, const char *word) {
-  return (length == strlen(word)) && (strncasecmp(location, word, length) == 0);
+testWord (const unsigned char *location, int length, const char *word) {
+  return (length == strlen(word)) && (strncasecmp((const char *)location, word, length) == 0);
 }
 
 static int
-testCharacter (char character, unsigned char *index, const char *characters, unsigned char count) {
-  const char *address = memchr(characters, character, count);
+testCharacter (unsigned char character, unsigned char *index, const unsigned char *characters, unsigned char count) {
+  const unsigned char *address = memchr(characters, character, count);
   if (!address) return 0;
   *index = address - characters;
   return 1;
 }
 
 static int
-testDotNumber (char character, unsigned char *index) {
+testDotNumber (unsigned char character, unsigned char *index) {
   return testCharacter(character, index, dotNumbers, sizeof(dotNumbers));
 }
 
 static int
-testHexadecimalDigit (char character, unsigned char *index) {
-  static const char digits[] = {
+testHexadecimalDigit (unsigned char character, unsigned char *index) {
+  static const unsigned char digits[] = {
     '0', '1', '2', '3', '4', '5', '6', '7',
     '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
   };
@@ -104,16 +104,16 @@ skipSpace (InputData *input) {
   while (*input->location && isspace(*input->location)) ++input->location;
 }
 
-static const char *
+static const unsigned char *
 findSpace (InputData *input) {
-  const char *location = input->location;
+  const unsigned char *location = input->location;
   while (*location && !isspace(*location)) ++location;
   return location;
 }
 
 static int
 getBit (InputData *input, unsigned char *set, unsigned char *mask) {
-  const char *location = input->location;
+  const unsigned char *location = input->location;
   int length = findSpace(input) - location;
 
   if (!*location) {
@@ -127,7 +127,7 @@ getBit (InputData *input, unsigned char *set, unsigned char *mask) {
   } else if (testWord(location, length, "off")) {
     *set = 0;
   } else {
-    static const char operators[] = {'=', '~'};
+    static const unsigned char operators[] = {'=', '~'};
     if (testCharacter(*input->location, set, operators, sizeof(operators))) {
       typedef struct {
         const char *name;
@@ -168,7 +168,7 @@ getBit (InputData *input, unsigned char *set, unsigned char *mask) {
 
 static int
 getByte (InputData *input, unsigned char *byte) {
-  const char *location = input->location;
+  const unsigned char *location = input->location;
   switch (*location++) {
     default:
       *byte = *(location - 1);
@@ -218,10 +218,10 @@ getByte (InputData *input, unsigned char *byte) {
 
 static int
 getCell (InputData *input, unsigned char *cell) {
-  const char *location = input->location;
+  const unsigned char *location = input->location;
   int none = 0;
-  char enclosed = (*location == '(')? ')':
-                  0;
+  unsigned char enclosed = (*location == '(')? ')':
+                           0;
   *cell = 0;
 
   if (enclosed) {
@@ -235,7 +235,7 @@ getCell (InputData *input, unsigned char *cell) {
   }
 
   while (*location) {
-    char character = *location++;
+    unsigned char character = *location++;
     int space = isspace(character);
 
     if (enclosed) {
@@ -348,7 +348,7 @@ processTableLine (char *line, void *data) {
   InputData *input = data;
 
   input->line++;
-  input->location = line;
+  input->location = (const unsigned char *)line;
 
   skipSpace(input);
   if (!isEnd(input)) {
@@ -393,7 +393,7 @@ setTable (InputData *input, TranslationTable *table) {
       if (!dotsDefined[byte->cell]) {
         dotsDefined[byte->cell] = 1;
       } else if (input->options & TBL_DUPLICATE) {
-        char dotsBuffer[DOT_COUNT];
+        unsigned char dotsBuffer[DOT_COUNT];
         int dotCount = 0;
         if (byte->cell) {
           int dotIndex;
