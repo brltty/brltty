@@ -46,10 +46,11 @@ extern unsigned int drainBrailleOutput (BrailleDisplay *, unsigned int minimumDe
 extern void writeBrailleBuffer (BrailleDisplay *);
 extern void writeBrailleText (BrailleDisplay *, const char *, int);
 extern void writeBrailleString (BrailleDisplay *, const char *);
-extern int allocateBrailleBuffer (BrailleDisplay *);
-extern int readBrailleCommand (BrailleDisplay *, DriverCommandContext);
+extern void showBrailleString (BrailleDisplay *, const char *, unsigned int);
 extern void clearStatusCells (BrailleDisplay *brl);
 extern void setStatusText (BrailleDisplay *brl, const char *text);
+extern int allocateBrailleBuffer (BrailleDisplay *);
+extern int readBrailleCommand (BrailleDisplay *, DriverCommandContext);
 
 typedef enum {
   BF_MINIMUM,

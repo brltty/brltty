@@ -152,6 +152,32 @@ writeBrailleString (BrailleDisplay *brl, const char *string) {
   writeBrailleText(brl, string, strlen(string));
 }
 
+void
+showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duration) {
+  writeBrailleString(brl, string);
+  drainBrailleOutput(brl, duration);
+}
+
+void
+clearStatusCells (BrailleDisplay *brl) {
+  unsigned char status[StatusCellCount];        /* status cell buffer */
+  memset(status, 0, sizeof(status));
+  braille->writeStatus(brl, status);
+}
+
+void
+setStatusText (BrailleDisplay *brl, const char *text) {
+  unsigned char status[StatusCellCount];        /* status cell buffer */
+  int i;
+  memset(status, 0, sizeof(status));
+  for (i=0; i<sizeof(status); ++i) {
+    unsigned char character = text[i];
+    if (!character) break;
+    status[i] = textTable[character];
+  }
+  braille->writeStatus(brl, status);
+}
+
 static void
 brailleBufferResized (BrailleDisplay *brl) {
   memset(brl->buffer, 0, brl->x*brl->y);
@@ -194,26 +220,6 @@ readBrailleCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   int command = braille->readCommand(brl, cmds);
   resizeBrailleBuffer(brl);
   return command;
-}
-
-void
-clearStatusCells (BrailleDisplay *brl) {
-   unsigned char status[StatusCellCount];        /* status cell buffer */
-   memset(status, 0, sizeof(status));
-   braille->writeStatus(brl, status);
-}
-
-void
-setStatusText (BrailleDisplay *brl, const char *text) {
-   unsigned char status[StatusCellCount];        /* status cell buffer */
-   int i;
-   memset(status, 0, sizeof(status));
-   for (i=0; i<sizeof(status); ++i) {
-      unsigned char character = text[i];
-      if (!character) break;
-      status[i] = textTable[character];
-   }
-   braille->writeStatus(brl, status);
 }
 
 #ifdef ENABLE_LEARN_MODE

@@ -29,13 +29,13 @@
 #include "Programs/brl.h"
 typedef enum {
   CMD_INPUT = DriverCommandCount /* toggle input mode */,
-  CMD_SWSIM_LC /* simulate left switch centred */,
+  CMD_SWSIM_LC /* simulate left switch centered */,
   CMD_SWSIM_LR /* simulate left switch rear */,
   CMD_SWSIM_LF /* simulate left switch front */,
-  CMD_SWSIM_RC /* simulate right switch centred */,
+  CMD_SWSIM_RC /* simulate right switch centered */,
   CMD_SWSIM_RR /* simulate right switch rear */,
   CMD_SWSIM_RF /* simulate right switch front */,
-  CMD_SWSIM_BC /* simulate both switches centred */,
+  CMD_SWSIM_BC /* simulate both switches centered */,
   CMD_SWSIM_BQ /* show positions of both switches */,
   CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
 } InternalDriverCommands;

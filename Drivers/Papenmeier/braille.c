@@ -188,7 +188,7 @@ changeModifiers (int remove, int add) {
 }
 
 static int
-handleCommand (int cmd, int repeat) {
+handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
   if (cmd == CMD_INPUT) {
     /* translate toggle -> ON/OFF */
     cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
@@ -226,11 +226,12 @@ handleCommand (int cmd, int repeat) {
     case CMD_SWSIM_BC:
       return changeModifiers(0XF, 0X0);
     case CMD_SWSIM_BQ: {
-      static const char *const states[] = {"centre", "rear", "front", "?"};
+      static const char *const states[] = {"center", "rear", "front", "?"};
       const char *left = states[pressed_modifiers & 0X3];
       const char *right = states[(pressed_modifiers >> 2) & 0X3];
       char buffer[20];
       snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
+      showBrailleString(brl, buffer, 2000);
       return CMD_NOOP;
     }
   }
@@ -239,7 +240,7 @@ handleCommand (int cmd, int repeat) {
 }
 
 static int
-handleModifier (int bit, int press) {
+handleModifier (BrailleDisplay *brl, int bit, int press) {
   int command = CMD_NOOP;
   int modifiers;
 
@@ -271,18 +272,18 @@ handleModifier (int bit, int press) {
     }
   }
 
-  return handleCommand(command, (press? VAL_REPEAT_DELAY: 0));
+  return handleCommand(brl, command, (press? VAL_REPEAT_DELAY: 0));
 }
 
 static int
-handleKey (int code, int press, int offsroute) {
+handleKey (BrailleDisplay *brl, int code, int press, int offset) {
   int i;
   int cmd;
 
   /* look for modfier keys */
   for (i=0; i<terminal->modifierCount; i++)
     if (terminal->modifiers[i] == code)
-      return handleModifier(1<<i, press);
+      return handleModifier(brl, 1<<i, press);
 
   /* must be a "normal key" - search for cmd on key press */
   if (press) {
@@ -291,8 +292,8 @@ handleKey (int code, int press, int offsroute) {
     if (findCommand(&command, code, pressed_modifiers)) {
       if (debug_keys)
         LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
-                 code, pressed_modifiers, command, offsroute); 
-      return handleCommand(command + offsroute,
+                 code, pressed_modifiers, command, offset); 
+      return handleCommand(brl, command+offset,
                            (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY));
     }
 
@@ -652,7 +653,7 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 }
 
 static int
-handleKey1 (int code, int press, int time) {
+handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
   /* which key -> translate to OFFS_* + number */
   /* attn: number starts with 1 */
   int num;
@@ -660,31 +661,31 @@ handleKey1 (int code, int press, int time) {
   if (rcvFrontFirst <= code && 
       code <= rcvFrontLast) { /* front key */
     num = 1 + (code - rcvFrontFirst) / 3;
-    return handleKey(OFFS_FRONT + num, press, 0);
+    return handleKey(brl, OFFS_FRONT+num, press, 0);
   }
 
   if (rcvStatusFirst <= code && 
       code <= rcvStatusLast) { /* status key */
     num = 1 + (code - rcvStatusFirst) / 3;
-    return handleKey(OFFS_STAT + num, press, 0);
+    return handleKey(brl, OFFS_STAT+num, press, 0);
   }
 
   if (rcvBarFirst <= code && 
       code <= rcvBarLast) { /* easy bar */
     num = 1 + (code - rcvBarFirst) / 3;
-    return handleKey(OFFS_EASY + num, press, 0);
+    return handleKey(brl, OFFS_EASY+num, press, 0);
   }
 
   if (rcvSwitchFirst <= code && 
       code <= rcvSwitchLast) { /* easy bar */
     num = 1 + (code - rcvSwitchFirst) / 3;
-    return handleKey(OFFS_SWITCH + num, press, 0);
+    return handleKey(brl, OFFS_SWITCH+num, press, 0);
   }
 
   if (rcvCursorFirst <= code && 
       code <= rcvCursorLast) { /* Routing Keys */ 
     num = (code - rcvCursorFirst) / 3;
-    return handleKey(ROUTINGKEY, press, num);
+    return handleKey(brl, ROUTINGKEY, press, num);
   }
 
   LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
@@ -784,7 +785,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
         if (debug_reads) LogBytes("Read", buf, length);
 
         {
-          int command = handleKey1(((buf[2] << 8) | buf[3]),
+          int command = handleKey1(brl, ((buf[2] << 8) | buf[3]),
                                    (buf[6] == PRESSED),
                                    ((buf[7] << 8) | buf[8]));
           if (command != EOF) return command;
@@ -1104,7 +1105,7 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
               while (bit) {
                 if (!(new & bit) && (old & bit)) {
                   if (mapping->code != NOKEY) {
-                    int cmd = handleKey(mapping->code, 0, mapping->offset);
+                    int cmd = handleKey(brl, mapping->code, 0, mapping->offset);
                     if (!release) {
                       command = cmd;
                       release = 1;
@@ -1135,7 +1136,7 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
             while (bit) {
               if ((new & bit) && !(old & bit)) {
                 if (mapping->code != NOKEY) {
-                  command = handleKey(mapping->code, 1, mapping->offset);
+                  command = handleKey(brl, mapping->code, 1, mapping->offset);
                 }
 
                 if ((inputState2[byte] |= bit) == new) break;
