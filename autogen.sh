@@ -19,5 +19,6 @@
 cd "${0%/*}"
 [ -f Makefile ] && make -s distclean
 "${BRLTTY_AUTOCONF:-autoconf}"
+rm -fr autom4te*.cache
 ./gendeps
 exit 0
