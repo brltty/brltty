@@ -253,7 +253,6 @@ typedef struct {
       { CR_CUTLINE                  , ROUTINGKEY     , 0040 }, \
       { CR_CUTRECT                  , ROUTINGKEY     , 0200 }, \
                                                                \
-      { CMD_LEARN                   , NOKEY          , 0300 }, \
       { CR_ROUTE                    , ROUTINGKEY     , 0000 }
 	
 
@@ -355,8 +354,8 @@ typedef struct {
 
 /* commands for 2 status keys */
 #define CMDS_STAT_2 \
-      { CMD_HELP,       OFFS_STAT + 1, 0 }, \
-      { CMD_RESTARTBRL, OFFS_STAT + 2, 0 }
+      { CMD_HELP , OFFS_STAT + 1, 0 }, \
+      { CMD_LEARN, OFFS_STAT + 2, 0 }
 
 
 /* what to show for 4 status cells */
@@ -369,7 +368,7 @@ typedef struct {
 /* commands for 4 status keys */
 #define CMDS_STAT_4 \
       { CMD_HELP       , OFFS_STAT + 1, 0 }, \
-      { CMD_RESTARTBRL , OFFS_STAT + 2, 0 }, \
+      { CMD_LEARN      , OFFS_STAT + 2, 0 }, \
       { CMD_CSRJMP_VERT, OFFS_STAT + 3, 0 }, \
       { CMD_DISPMD     , OFFS_STAT + 4, 0 }
 
@@ -393,7 +392,7 @@ typedef struct {
 /* commands for 13 status keys */
 #define CMDS_STAT_13 \
       CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 2, 1), \
-              { CMD_RESTARTBRL , OFFS_STAT +  2, 0   }, \
+              { CMD_LEARN      , OFFS_STAT +  2, 0   }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0   }, \
               { CMD_BACK       , OFFS_STAT +  4, 0   }, \
       CHGONOFF( CMD_INFO       , OFFS_STAT +  5, 2, 1), \
@@ -401,7 +400,7 @@ typedef struct {
       CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 2, 1), \
       CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 2, 1), \
               { CMD_PREFMENU   , OFFS_STAT +  9, 0   }, \
-              { CMD_PREFSAVE   , OFFS_STAT + 10, 0   }, \
+              { CMD_PREFLOAD   , OFFS_STAT + 10, 0   }, \
       CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 11, 2, 1), \
       CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 12, 2, 1), \
               { CMD_PASTE      , OFFS_STAT + 13, 0   }
@@ -409,31 +408,31 @@ typedef struct {
 
 /* what to show for 20 status cells */
 #define SHOW_STAT_20 \
-      OFFS_HORIZ + STAT_BRLROW   , \
-      OFFS_EMPTY                 , \
-      OFFS_HORIZ + STAT_CSRROW   , \
-      OFFS_HORIZ + STAT_CSRCOL   , \
-      OFFS_EMPTY                 , \
-      OFFS_FLAG  + STAT_CSRTRK   , \
-      OFFS_FLAG  + STAT_DISPMD   , \
-      OFFS_FLAG  + STAT_FREEZE   , \
-      OFFS_EMPTY                 , \
-      OFFS_HORIZ + STAT_SCRNUM   , \
-      OFFS_EMPTY                 , \
-      OFFS_FLAG  + STAT_CSRVIS   , \
-      OFFS_FLAG  + STAT_CSRSIZE  , \
-      OFFS_FLAG  + STAT_CSRBLINK , \
-      OFFS_FLAG  + STAT_CAPBLINK , \
-      OFFS_FLAG  + STAT_SIXDOTS  , \
-      OFFS_FLAG  + STAT_TUNES    , \
-      OFFS_FLAG  + STAT_SKPIDLNS , \
-      OFFS_FLAG  + STAT_ATTRVIS  , \
-      OFFS_FLAG  + STAT_ATTRBLINK
+      OFFS_HORIZ + STAT_BRLROW    , \
+      OFFS_EMPTY                  , \
+      OFFS_HORIZ + STAT_CSRROW    , \
+      OFFS_HORIZ + STAT_CSRCOL    , \
+      OFFS_EMPTY                  , \
+      OFFS_FLAG  + STAT_CSRTRK    , \
+      OFFS_FLAG  + STAT_DISPMD    , \
+      OFFS_FLAG  + STAT_FREEZE    , \
+      OFFS_EMPTY                  , \
+      OFFS_HORIZ + STAT_SCRNUM    , \
+      OFFS_EMPTY                  , \
+      OFFS_FLAG  + STAT_CSRVIS    , \
+      OFFS_FLAG  + STAT_ATTRVIS   , \
+      OFFS_FLAG  + STAT_CAPBLINK  , \
+      OFFS_FLAG  + STAT_SIXDOTS   , \
+      OFFS_FLAG  + STAT_SKPIDLNS  , \
+      OFFS_FLAG  + STAT_TUNES     , \
+      OFFS_FLAG  + STAT_AUTOSPEAK , \
+      OFFS_FLAG  + STAT_AUTOREPEAT, \
+      OFFS_EMPTY
 
 /* commands for 20 status keys */
 #define CMDS_STAT_20 \
               { CMD_HELP       , OFFS_STAT +  1, 0000       }, \
-              { CMD_RESTARTBRL , OFFS_STAT +  2, 0000       }, \
+              { CMD_LEARN      , OFFS_STAT +  2, 0000       }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
               { CMD_BACK       , OFFS_STAT +  4, 0000       }, \
               { CMD_INFO       , OFFS_STAT +  5, 0000       }, \
@@ -444,64 +443,64 @@ typedef struct {
               { CMD_PREFSAVE   , OFFS_STAT + 10, 0000       }, \
               { CMD_PREFLOAD   , OFFS_STAT + 11, 0000       }, \
       CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 12, 0200, 0100 ), \
-      CHGONOFF( CMD_CSRSIZE    , OFFS_STAT + 13, 0200, 0100 ), \
-      CHGONOFF( CMD_CSRBLINK   , OFFS_STAT + 14, 0200, 0100 ), \
-      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 15, 0200, 0100 ), \
-      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 16, 0200, 0100 ), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 13, 0200, 0100 ), \
+      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 14, 0200, 0100 ), \
+      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 15, 0200, 0100 ), \
+      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 16, 0200, 0100 ), \
       CHGONOFF( CMD_TUNES      , OFFS_STAT + 17, 0200, 0100 ), \
-      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 18, 0200, 0100 ), \
-      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 19, 0200, 0100 ), \
-      CHGONOFF( CMD_ATTRBLINK  , OFFS_STAT + 20, 0200, 0100 )
+      CHGONOFF( CMD_AUTOSPEAK  , OFFS_STAT + 18, 0200, 0100 ), \
+      CHGONOFF( CMD_AUTOREPEAT , OFFS_STAT + 19, 0200, 0100 ), \
+      CHGONOFF( CMD_PASTE      , OFFS_STAT + 20, 0200, 0100 )
 
 
 /* what to show for 22 status cells */
 #define SHOW_STAT_22 \
-      OFFS_HORIZ + STAT_BRLROW   , \
-      OFFS_EMPTY                 , \
-      OFFS_HORIZ + STAT_CSRROW   , \
-      OFFS_HORIZ + STAT_CSRCOL   , \
-      OFFS_EMPTY                 , \
-      OFFS_FLAG  + STAT_CSRTRK   , \
-      OFFS_FLAG  + STAT_DISPMD   , \
-      OFFS_FLAG  + STAT_INPUT    , \
-      OFFS_FLAG  + STAT_FREEZE   , \
-      OFFS_EMPTY                 , \
-      OFFS_HORIZ + STAT_SCRNUM   , \
-      OFFS_EMPTY                 , \
-      OFFS_FLAG  + STAT_CSRVIS   , \
-      OFFS_FLAG  + STAT_CSRSIZE  , \
-      OFFS_FLAG  + STAT_CSRBLINK , \
-      OFFS_FLAG  + STAT_CAPBLINK , \
-      OFFS_FLAG  + STAT_SIXDOTS  , \
-      OFFS_FLAG  + STAT_TUNES    , \
-      OFFS_FLAG  + STAT_SKPIDLNS , \
-      OFFS_FLAG  + STAT_ATTRVIS  , \
-      OFFS_FLAG  + STAT_ATTRBLINK, \
+      OFFS_HORIZ + STAT_BRLROW    , \
+      OFFS_EMPTY                  , \
+      OFFS_HORIZ + STAT_CSRROW    , \
+      OFFS_HORIZ + STAT_CSRCOL    , \
+      OFFS_EMPTY                  , \
+      OFFS_FLAG  + STAT_CSRTRK    , \
+      OFFS_FLAG  + STAT_DISPMD    , \
+      OFFS_FLAG  + STAT_FREEZE    , \
+      OFFS_EMPTY                  , \
+      OFFS_HORIZ + STAT_SCRNUM    , \
+      OFFS_EMPTY                  , \
+      OFFS_FLAG  + STAT_CSRVIS    , \
+      OFFS_FLAG  + STAT_ATTRVIS   , \
+      OFFS_FLAG  + STAT_CAPBLINK  , \
+      OFFS_FLAG  + STAT_SIXDOTS   , \
+      OFFS_FLAG  + STAT_SKPIDLNS  , \
+      OFFS_FLAG  + STAT_TUNES     , \
+      OFFS_EMPTY                  , \
+      OFFS_FLAG  + STAT_INPUT     , \
+      OFFS_FLAG  + STAT_AUTOSPEAK , \
+      OFFS_FLAG  + STAT_AUTOREPEAT, \
       OFFS_EMPTY
 
 /* commands for 22 status keys */
 #define CMDS_STAT_22 \
       CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 0200, 0100 ), \
-              { CMD_RESTARTBRL , OFFS_STAT +  2, 0000       }, \
+              { CMD_LEARN      , OFFS_STAT +  2, 0000       }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
               { CMD_BACK       , OFFS_STAT +  4, 0000       }, \
       CHGONOFF( CMD_INFO       , OFFS_STAT +  5, 0200, 0100 ), \
       CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 0200, 0100 ), \
       CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 0200, 0100 ), \
-      CHGONOFF( CMD_INPUT      , OFFS_STAT +  8, 0200, 0100 ), \
-      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  9, 0200, 0100 ), \
-              { CMD_PREFMENU   , OFFS_STAT + 10, 0000       }, \
-              { CMD_PREFSAVE   , OFFS_STAT + 11, 0000       }, \
-              { CMD_PREFLOAD   , OFFS_STAT + 12, 0000       }, \
-      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 13, 0200, 0100 ), \
-      CHGONOFF( CMD_CSRSIZE    , OFFS_STAT + 14, 0200, 0100 ), \
-      CHGONOFF( CMD_CSRBLINK   , OFFS_STAT + 15, 0200, 0100 ), \
-      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 16, 0200, 0100 ), \
-      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 17, 0200, 0100 ), \
-      CHGONOFF( CMD_TUNES      , OFFS_STAT + 18, 0200, 0100 ), \
-      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 19, 0200, 0100 ), \
-      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 20, 0200, 0100 ), \
-      CHGONOFF( CMD_ATTRBLINK  , OFFS_STAT + 21, 0200, 0100 ), \
+      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 0200, 0100 ), \
+              { CMD_PREFMENU   , OFFS_STAT +  9, 0000       }, \
+              { CMD_PREFSAVE   , OFFS_STAT + 10, 0000       }, \
+              { CMD_PREFLOAD   , OFFS_STAT + 11, 0000       }, \
+      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 12, 0200, 0100 ), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 13, 0200, 0100 ), \
+      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 14, 0200, 0100 ), \
+      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 15, 0200, 0100 ), \
+      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 16, 0200, 0100 ), \
+      CHGONOFF( CMD_TUNES      , OFFS_STAT + 17, 0200, 0100 ), \
+              { CMD_RESTARTBRL , OFFS_STAT + 18, 0000       }, \
+      CHGONOFF( CMD_INPUT      , OFFS_STAT + 19, 0200, 0100 ), \
+      CHGONOFF( CMD_AUTOSPEAK  , OFFS_STAT + 20, 0200, 0100 ), \
+      CHGONOFF( CMD_AUTOREPEAT , OFFS_STAT + 21, 0200, 0100 ), \
               { CMD_PASTE      , OFFS_STAT + 22, 0000       }
 
 
