@@ -696,7 +696,7 @@ insertCharacter (unsigned char character, int flags) {
   }
 
   {
-    unsigned short key = character;
+    ScreenKey key = character;
     if (flags & VPC_META) key |= SCR_KEY_MOD_META;
     return insertKey(key);
   }

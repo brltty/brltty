@@ -250,7 +250,7 @@ read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
-insert_HelpScreen (unsigned short key) {
+insert_HelpScreen (ScreenKey key) {
   switch (key) {
     case SCR_KEY_PAGE_UP:
       if (pageNumber > 0) {

@@ -799,7 +799,7 @@ insertByte (unsigned char byte) {
 }
 
 static int
-insertCode (unsigned short key, int raw) {
+insertCode (ScreenKey key, int raw) {
   unsigned char prefix = 0X00;
   unsigned char code;
   int modShift = 0;
@@ -949,7 +949,7 @@ insertCode (unsigned short key, int raw) {
 }
 
 static int
-insertMapped (unsigned short key, int (*byteInserter)(unsigned char byte)) {
+insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
   unsigned char buffer[3];
   unsigned char *sequence;
 
@@ -1103,7 +1103,7 @@ insertUtf8 (unsigned char byte) {
 }
 
 static int
-insert_LinuxScreen (unsigned short key) {
+insert_LinuxScreen (ScreenKey key) {
   int ok = 0;
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   if (rebindConsole()) {

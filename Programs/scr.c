@@ -141,7 +141,7 @@ readScreen (short left, short top, short width, short height, unsigned char *buf
 
 
 int
-insertKey (unsigned short key) {
+insertKey (ScreenKey key) {
   return currentScreen->insert(key);
 }
 

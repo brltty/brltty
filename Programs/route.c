@@ -44,7 +44,7 @@ volatile pid_t routingProcess = 0;
 volatile int routingStatus = -1;
 
 static void
-insertCursorKey (unsigned short key, const sigset_t *mask) {
+insertCursorKey (ScreenKey key, const sigset_t *mask) {
   sigset_t old;
   sigprocmask(SIG_BLOCK, mask, &old);
   insertKey(key);

@@ -49,7 +49,7 @@ read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
-insert_BaseScreen (unsigned short key) {
+insert_BaseScreen (ScreenKey key) {
   return 0;
 }
 
