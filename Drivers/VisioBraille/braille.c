@@ -378,6 +378,7 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
       case BRL_VSKEY_PLOC_PLOC_F: return BRL_CMD_FREEZE;
       case BRL_VSKEY_PLOC_PLOC_H: return BRL_BLK_PASSKEY + BRL_KEY_HOME;
       case BRL_VSKEY_PLOC_PLOC_I: return BRL_CMD_INFO;
+      case BRL_VSKEY_PLOC_PLOC_L: return BRL_CMD_LEARN;
       case BRL_VSKEY_PLOC_PLOC_R: return BRL_CMD_PREFLOAD;
       case BRL_VSKEY_PLOC_PLOC_S: return BRL_CMD_PREFSAVE;
       case BRL_VSKEY_PLOC_PLOC_T: return BRL_CMD_CSRTRK;
