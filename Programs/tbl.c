@@ -29,7 +29,7 @@
 
 #include "misc.h"
 #include "brl.h"
-#include "tbl_load.h"
+#include "tbl.h"
 
 #define DOT_COUNT 8
 static const char noDots[] = {'0'};
@@ -460,4 +460,11 @@ loadTranslationTable (
   }
 
   return ok;
+}
+
+void
+reverseTranslationTable (TranslationTable *from, TranslationTable *to) {
+  int byte;
+  memset(to, 0, sizeof(*to));
+  for (byte=sizeof(*to)-1; byte>=0; byte--) (*to)[(*from)[byte]] = byte;
 }

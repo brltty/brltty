@@ -46,6 +46,7 @@ typedef enum {
 #define BRLPARMS "statuscells"
 
 #include "Programs/brl_driver.h"
+#include "Programs/tbl.h"
 #include "braille.h"
 #include "Programs/serial.h"
 

@@ -29,7 +29,7 @@
 #include <errno.h>
  
 #include "misc.h"
-#include "contract.h"
+#include "ctb.h"
 #include "ctb_definitions.h"
 #include "brl.h"
 

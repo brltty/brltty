@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <string.h>
  
-#include "contract.h"
+#include "ctb.h"
 #include "ctb_definitions.h"
 #include "brl.h"
 

@@ -15,27 +15,27 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _tbl_load_H
-#define _tbl_load_H
+#ifndef _CTB_H
+#define _CTB_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef void (*TranslationTableReporter) (const char *message);
-
-#define TBL_UNDEFINED 0X1
-#define TBL_DUPLICATE 0X2
-
-extern int loadTranslationTable (
-  const char *file,
-  TranslationTable *table,
-  TranslationTableReporter report,
-  int options
+extern void *compileContractionTable (const char *fileName);
+extern int destroyContractionTable (void *contractionTable);
+extern int contractText (
+  void *contractionTable, /* Pointer to translation table */
+  const unsigned char *inputBuffer, /* What is to be translated */
+  int *inputLength, /* Its length */
+  unsigned char *outputBuffer, /* Where the translation is to go */
+  int *outputLength, /* length of this area */
+  int *offsetsMap, /* Array of offsets of translated chars in source */
+  int cursorOffset /* Position of coursor in source */
 );
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* _tbl_load_H */
+#endif /* _CTB_H */

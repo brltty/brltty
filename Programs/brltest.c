@@ -31,6 +31,7 @@
 
 #include "options.h"
 #include "brl.h"
+#include "tbl.h"
 #include "misc.h"
 #include "message.h"
 #include "scr.h"

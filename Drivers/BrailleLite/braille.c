@@ -38,7 +38,6 @@
 #include <string.h>
 
 #define BL_NEED_ARRAYS
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
@@ -49,6 +48,7 @@ typedef enum {
 #define BRLPARMS "baudrate", "kbemu"
 
 #include "Programs/brl_driver.h"
+#include "Programs/tbl.h"
 #include "braille.h"
 #include "bindings.h"		/* for keybindings */
 #include "Programs/serial.h"

@@ -30,23 +30,16 @@
 #include "options.h"
 #include "misc.h"
 #include "brl.h"
-#include "tbl_load.h"
+#include "tbl.h"
 
 BEGIN_OPTION_TABLE
-  {'T', "tables-directory", "directory", NULL, 0,
-   "Path to directory for text and attributes tables."},
 END_OPTION_TABLE
-
-static const char *opt_tablesDirectory = DATA_DIRECTORY;
 
 static int
 handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-    case 'T':
-      opt_tablesDirectory = optarg;
-      break;
   }
   return 1;
 }
@@ -60,12 +53,12 @@ int
 main (int argc, char *argv[]) {
   int status;
   char *path;
-  TranslationTable table;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "input-file");
+                 &argc, &argv, "translation-table");
 
-  if ((path = makePath(opt_tablesDirectory, argv[0]))) {
+  if ((path = makePath(DATA_DIRECTORY, argv[0]))) {
+    TranslationTable table;
     if (loadTranslationTable(path, &table, reportMessage,
                              TBL_UNDEFINED | TBL_DUPLICATE)) {
       status = 0;

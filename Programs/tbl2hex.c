@@ -29,7 +29,7 @@
 
 #include "options.h"
 #include "brl.h"
-#include "tbl_load.h"
+#include "tbl.h"
 
 BEGIN_OPTION_TABLE
 END_OPTION_TABLE
@@ -54,7 +54,7 @@ main (int argc, char *argv[]) {
   TranslationTable table;
 
   processOptions(optionTable, optionCount, handleOption,
-                 &argc, &argv, "input-file");
+                 &argc, &argv, "translation-table");
 
   if (loadTranslationTable(argv[0], &table, reportMessage, 0)) {
     unsigned int columns = 8;

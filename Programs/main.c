@@ -35,7 +35,7 @@
 #include "misc.h"
 #include "message.h"
 #include "tunes.h"
-#include "contract.h"
+#include "ctb.h"
 #include "route.h"
 #include "cut.h"
 #include "scr.h"

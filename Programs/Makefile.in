@@ -17,7 +17,7 @@
 
 include $(BLD_TOP)config.mk
 
-all: all-brltty all-brltest all-spktest scrtest$X tbltest$X tunetest$X $(BUILD_API)
+all: all-brltty all-brltest all-spktest scrtest$X tbltest$X ctbtest$X tunetest$X $(BUILD_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
@@ -29,8 +29,8 @@ options.$O:
 
 ###############################################################################
 
-tbl_load.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl_load.c
+tbl.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl.c
 
 ###############################################################################
 
@@ -179,7 +179,7 @@ usb_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) serial.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) tbl.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -209,13 +209,23 @@ scrtest.$O:
 
 ###############################################################################
 
-TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O tbl_load.$O
+TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O tbl.$O
 
 tbltest$X: $(TBLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS)
 
 tbltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbltest.c
+
+###############################################################################
+
+CTBTEST_OBJECTS = ctbtest.$O options.$O misc.$O ctb_compile.$O ctb_translate.$O tbl.$O
+
+ctbtest$X: $(CTBTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(LDLIBS)
+
+ctbtest.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctbtest.c
 
 ###############################################################################
 
@@ -287,7 +297,7 @@ txt2hlp.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O host_tbl_load.$O $(HOSTOPTS_OBJECTS)
+TBL2HEX_OBJECTS = tbl2hex.$O host_tbl.$O $(HOSTOPTS_OBJECTS)
 
 tbl2hex: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)
@@ -295,8 +305,8 @@ tbl2hex: $(TBL2HEX_OBJECTS)
 tbl2hex.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
 
-host_tbl_load.$O:
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/tbl_load.c
+host_tbl.$O:
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/tbl.c
 
 ###############################################################################
 

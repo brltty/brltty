@@ -296,14 +296,6 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 }
 #endif /* ENABLE_LEARN_MODE */
 
-/* Reverse a 256x256 mapping, used for charset maps. */
-void
-reverseTranslationTable (TranslationTable *from, TranslationTable *to) {
-  int byte;
-  memset(to, 0, sizeof(*to));
-  for (byte=sizeof(*to)-1; byte>=0; byte--) (*to)[(*from)[byte]] = byte;
-}
-
 void
 makeOutputTable (const DotsTable *dots, TranslationTable *table) {
   static const DotsTable internalDots = {B1, B2, B3, B4, B5, B6, B7, B8};

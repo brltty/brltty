@@ -47,7 +47,6 @@
 #include <errno.h>
 
 #include "Programs/usb.h"
-#include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
@@ -58,6 +57,7 @@ typedef enum {
 
 #define BRLSTAT ST_VoyagerStyle
 #include "Programs/brl_driver.h"
+#include "Programs/tbl.h"
 
 static int brlinput = 1;
 
