@@ -1172,6 +1172,7 @@ updatePreferences (void) {
           lineIndent = 0;
           break;
         case CMD_LNUP:
+        case CMD_PRDIFLN:
         case VAL_PASSKEY+VPK_CURSOR_UP:
         case CMD_MENU_PREV_ITEM:
           do {
@@ -1181,6 +1182,7 @@ updatePreferences (void) {
           lineIndent = 0;
           break;
         case CMD_LNDN:
+        case CMD_NXDIFLN:
         case VAL_PASSKEY+VPK_CURSOR_DOWN:
         case CMD_MENU_NEXT_ITEM:
           do {
