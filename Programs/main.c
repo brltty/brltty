@@ -840,8 +840,8 @@ main (int argc, char *argv[]) {
           command = next & ~VAL_REPEAT_MASK;
           if (next & VAL_REPEAT_DELAY) {
             autorepeat = autorepeatDelay;
-            if (!(next & VAL_REPEAT_IMMEDIATE)) break;
-          } else if (next & VAL_REPEAT_IMMEDIATE) {
+            if (!(next & VAL_REPEAT_INITIAL)) break;
+          } else if (next & VAL_REPEAT_INITIAL) {
             autorepeat = autorepeatInterval;
           } else {
             autorepeat = 0;

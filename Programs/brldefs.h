@@ -86,21 +86,21 @@ typedef enum {
   CMD_BACK /* go back (undo unexpected cursor tracking motion) */,
   
   /* feature activation and deactivation */
-  CMD_FREEZE /* toggle screen mode [live/frozen] */,
-  CMD_DISPMD /* toggle display mode [text/attributes] */,
-  CMD_SIXDOTS /* toggle text style [8-dot/6-dot] */,
-  CMD_SLIDEWIN /* toggle sliding window [off/on] */,
-  CMD_SKPIDLNS /* toggle skipping of lines with identical content [off/on] */,
-  CMD_SKPBLNKWINS /* toggle skipping of blank windows [off/on] */,
-  CMD_CSRVIS /* toggle cursor visibility [on/off] */,
-  CMD_CSRHIDE /* toggle hidden cursor [off/on] */,
-  CMD_CSRTRK /* toggle cursor tracking [on/off] */,
-  CMD_CSRSIZE /* toggle cursor style [underline,block] */,
-  CMD_CSRBLINK /* toggle cursor blinking [off/on] */,
-  CMD_ATTRVIS /* toggle attribute underlining [off/on] */,
-  CMD_ATTRBLINK /* toggle attribute blinking [on/off] */,
-  CMD_CAPBLINK /* toggle capital letter blinking [off/on] */,
-  CMD_TUNES /* toggle alert tunes [on/off] */,
+  CMD_FREEZE /* toggle screen mode frozen/live */,
+  CMD_DISPMD /* toggle display mode attributes/text */,
+  CMD_SIXDOTS /* toggle text style 6-dot/8-dot */,
+  CMD_SLIDEWIN /* toggle sliding window on/off */,
+  CMD_SKPIDLNS /* toggle skipping of lines with identical content on/off */,
+  CMD_SKPBLNKWINS /* toggle skipping of blank windows on/off */,
+  CMD_CSRVIS /* toggle cursor visibility on/off */,
+  CMD_CSRHIDE /* toggle hidden cursor on/off */,
+  CMD_CSRTRK /* toggle cursor tracking on/off */,
+  CMD_CSRSIZE /* toggle cursor style block/underline */,
+  CMD_CSRBLINK /* toggle cursor blinking on/off */,
+  CMD_ATTRVIS /* toggle attribute underlining on/off */,
+  CMD_ATTRBLINK /* toggle attribute blinking on/off */,
+  CMD_CAPBLINK /* toggle capital letter blinking on/off */,
+  CMD_TUNES /* toggle alert tunes on/off */,
  
   /* mode selection */
   CMD_HELP /* enter/leave help display */,
@@ -148,9 +148,9 @@ typedef enum {
 #define VAL_TOGGLE_OFF  0x020000
 #define VAL_TOGGLE_MASK (VAL_TOGGLE_ON | VAL_TOGGLE_OFF)
 
-#define VAL_REPEAT_IMMEDIATE 0x800000
-#define VAL_REPEAT_DELAY     0x400000
-#define VAL_REPEAT_MASK      (VAL_REPEAT_IMMEDIATE | VAL_REPEAT_DELAY)
+#define VAL_REPEAT_INITIAL 0x800000
+#define VAL_REPEAT_DELAY   0x400000
+#define VAL_REPEAT_MASK    (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY)
   
 /* cursor routing keys block offset values */
 /*

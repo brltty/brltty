@@ -1274,7 +1274,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     case CMD_LNDN:
     case CMD_CHRLT:
     case CMD_CHRRT:
-      res |= VAL_REPEAT_IMMEDIATE | VAL_REPEAT_DELAY;
+      res |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
       break;
 
     case CMD_RESTARTBRL:
