@@ -24,22 +24,6 @@
  *  some defines and the big config table
  */
 
- /* supported terminals:
-   id   name                     help  x  y  stat frnt easy
-    0, "BRAILLEX Compact 486", 	  '1', 40, 1,  0,  9,  0
-    1, "BRAILLEX 2D Lite (plus)", '2', 40, 1, 13,  9,  0
-    2, "BRAILLEX Compact/Tiny",	  '3', 40, 1,  0,  9,  0
-    3, "BRAILLEX 2D Screen Soft", '4', 80, 1, 22, 13,  0
-    6, "BRAILLEX IB 80 cr soft",  '5', 80, 1,  4,  9,  0
-   64, "BRAILLEX EL 2D-40",	  '6', 40, 1, 13,  0,  1
-   65, "BRAILLEX EL 2D-66",	  '7', 66, 1, 13,  0,  1
-   66, "BRAILLEX EL 80 (IB)",	  '8', 80, 1,  2,  0,  1
-   67, "BRAILLEX EL 2D-80",	  '8', 80, 1,  20, 0,  1
-   68, "BRAILLEX EL 40 P",	  '8', 40, 1,  0,  0,  1
-   69, "BRAILLEX Elba 32",	  '8', 32, 1,  0,  0,  1
-   70, "BRAILLEX Elba 20",	  '8', 20, 1,  0,  0,  1
- */
-
 #include <inttypes.h>
 
 #include "Programs/brl.h"
@@ -764,7 +748,7 @@ static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
     85,				/* identity */
     elba_40_s,		/* filename of local helpfile */
-    "BrailleX II Elba 40",		/* name of terminal */
+    "BrailleX II Elba 40 S",		/* name of terminal */
     40, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
@@ -773,7 +757,7 @@ static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
     86,				/* identity */
     elba_80_s,		/* filename of local helpfile */
-    "BrailleX II Elba 80",		/* name of terminal */
+    "BrailleX II Elba 80 S",		/* name of terminal */
     80, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
@@ -782,7 +766,7 @@ static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
     87,				/* identity */
     elba_66_s,		/* filename of local helpfile */
-    "BrailleX II Elba 66",		/* name of terminal */
+    "BrailleX II Elba 66 S",		/* name of terminal */
     66, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */

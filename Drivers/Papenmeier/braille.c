@@ -116,7 +116,7 @@ static unsigned int debug_writes = 0;
 
 /*--- Command Utilities ---*/
 
-static const TerminalDefinition *the_terminal = NULL;
+static const TerminalDefinition *terminal = NULL;
 static TranslationTable outputTable;
 static unsigned int pressed_modifiers = 0;
 static unsigned int saved_modifiers = 0;
@@ -142,19 +142,19 @@ compareCommands (const void *item1, const void *item2) {
 
 static void
 sortCommands (void) {
-  qsort(the_terminal->commands, the_terminal->commandCount, sizeof(*the_terminal->commands), compareCommands);
+  qsort(terminal->commands, terminal->commandCount, sizeof(*terminal->commands), compareCommands);
 }
 
 static int
 findCommand (int *command, int key, int modifiers) {
   int first = 0;
-  int last = the_terminal->commandCount - 1;
+  int last = terminal->commandCount - 1;
   CommandDefinition ref;
   ref.key = key;
   ref.modifiers = modifiers;
   while (first <= last) {
     int current = (first + last) / 2;
-    CommandDefinition *cmd = &the_terminal->commands[current];
+    CommandDefinition *cmd = &terminal->commands[current];
     int relation = compareCommands(cmd, &ref);
 
     if (!relation) {
@@ -243,8 +243,8 @@ handleKey (int code, int press, int offsroute) {
   int cmd;
 
   /* look for modfier keys */
-  for (i=0; i<the_terminal->modifierCount; i++)
-    if (the_terminal->modifiers[i] == code)
+  for (i=0; i<terminal->modifierCount; i++)
+    if (terminal->modifiers[i] == code)
       return handleModifier(1<<i, press);
 
   /* must be a "normal key" - search for cmd on key press */
@@ -453,11 +453,13 @@ static const InputOutputOperations usbOperations = {
 typedef struct {
   void (*initializeTerminal) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, DriverCommandContext cmds);
+  void (*writeText) (BrailleDisplay *brl, int start, int count);
+  void (*writeStatus) (BrailleDisplay *brl, int start, int count);
 } ProtocolOperations;
 
 static const ProtocolOperations *protocol;
 static unsigned char currentStatus[PMSC];
-static unsigned char currentLine[BRLCOLSMAX];
+static unsigned char currentText[BRLCOLSMAX];
 
 
 static int
@@ -479,16 +481,16 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
            id, major, minor);
   for (tn=0; tn<pmTerminalCount; tn++) {
     if (pmTerminals[tn].identifier == id) {
-      the_terminal = &pmTerminals[tn];
+      terminal = &pmTerminals[tn];
       LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
-               the_terminal->name,
-               the_terminal->columns, the_terminal->rows,
-               the_terminal->helpFile);
-      brl->x = the_terminal->columns;
-      brl->y = the_terminal->rows;
+               terminal->name,
+               terminal->columns, terminal->rows,
+               terminal->helpFile);
+      brl->x = terminal->columns;
+      brl->y = terminal->rows;
 
       /* TODO: ?? HACK */
-      BRLSYMBOL.helpFile = the_terminal->helpFile;
+      BRLSYMBOL.helpFile = terminal->helpFile;
 
       sortCommands();
       return 1;
@@ -580,20 +582,20 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 
   /* routing key codes: 0X300 -> status -> cursor */
   rcvStatusFirst = RCV_KEYROUTE;
-  rcvStatusLast  = rcvStatusFirst + 3 * (the_terminal->statusCount - 1);
+  rcvStatusLast  = rcvStatusFirst + 3 * (terminal->statusCount - 1);
   rcvCursorFirst = rcvStatusLast + 3;
-  rcvCursorLast  = rcvCursorFirst + 3 * (the_terminal->columns - 1);
+  rcvCursorLast  = rcvCursorFirst + 3 * (terminal->columns - 1);
   LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
            rcvStatusFirst, rcvStatusLast,
            rcvCursorFirst, rcvCursorLast);
 
   /* function key codes: 0X000 -> front -> bar -> switches */
   rcvFrontFirst = RCV_KEYFUNC + 3;
-  rcvFrontLast  = rcvFrontFirst + 3 * (the_terminal->frontKeys - 1);
+  rcvFrontLast  = rcvFrontFirst + 3 * (terminal->frontKeys - 1);
   rcvBarFirst = rcvFrontLast + 3;
-  rcvBarLast  = rcvBarFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+  rcvBarLast  = rcvBarFirst + 3 * ((terminal->hasEasyBar? 8: 0) - 1);
   rcvSwitchFirst = rcvBarLast + 3;
-  rcvSwitchLast  = rcvSwitchFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+  rcvSwitchLast  = rcvSwitchFirst + 3 * ((terminal->hasEasyBar? 8: 0) - 1);
   LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
            rcvFrontFirst, rcvFrontLast,
            rcvBarFirst, rcvBarLast,
@@ -601,7 +603,7 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 
   /* cell offsets: 0X00 -> status -> text */
   xmtStatusOffset = 0;
-  xmtTextOffset = xmtStatusOffset + the_terminal->statusCount;
+  xmtTextOffset = xmtStatusOffset + terminal->statusCount;
   LogPrint(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
            xmtStatusOffset, xmtTextOffset);
 
@@ -658,18 +660,18 @@ disableOutputTranslation1 (BrailleDisplay *brl, unsigned char xmtOffset, int cou
 
 static void
 initializeTable1 (BrailleDisplay *brl) {
-  disableOutputTranslation1(brl, xmtStatusOffset, the_terminal->statusCount);
-  disableOutputTranslation1(brl, xmtTextOffset, the_terminal->columns);
+  disableOutputTranslation1(brl, xmtStatusOffset, terminal->statusCount);
+  disableOutputTranslation1(brl, xmtTextOffset, terminal->columns);
 }
 
 static void
-writeLine1 (BrailleDisplay *brl) {
-  writePacket1(brl, XMT_BRLDATA+xmtTextOffset, the_terminal->columns, currentLine);
+writeText1 (BrailleDisplay *brl, int start, int count) {
+  writePacket1(brl, XMT_BRLDATA+xmtTextOffset+start, count, currentText+start);
 }
 
 static void
-writeStatus1 (BrailleDisplay *brl) {
-  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset, the_terminal->statusCount, currentStatus);
+writeStatus1 (BrailleDisplay *brl, int start, int count) {
+  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset+start, count, currentStatus+start);
 }
 
 static void
@@ -677,10 +679,10 @@ initializeTerminal1 (BrailleDisplay *brl) {
   initializeTable1(brl);
   drainBrailleOutput(brl, 0);
 
-  writeStatus1(brl);
+  writeStatus1(brl, 0, terminal->statusCount);
   drainBrailleOutput(brl, 0);
 
-  writeLine1(brl);
+  writeText1(brl, 0, terminal->columns);
   drainBrailleOutput(brl, 0);
 }
 
@@ -774,7 +776,9 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
 
 static const ProtocolOperations protocolOperations1 = {
   initializeTerminal1,
-  readCommand1
+  readCommand1,
+  writeText1,
+  writeStatus1
 };
 
 static int
@@ -926,6 +930,14 @@ interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
 }
 
 static void
+writeText2 (BrailleDisplay *brl, int start, int count) {
+}
+
+static void
+writeStatus2 (BrailleDisplay *brl, int start, int count) {
+}
+
+static void
 initializeTerminal2 (BrailleDisplay *brl) {
 }
 
@@ -936,7 +948,9 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
 
 static const ProtocolOperations protocolOperations2 = {
   initializeTerminal2,
-  readCommand2
+  readCommand2,
+  writeText2,
+  writeStatus2
 };
 
 static int
@@ -968,23 +982,21 @@ identifyTerminal2 (BrailleDisplay *brl) {
 /*--- Driver Operations ---*/
 
 static void
-updateData (BrailleDisplay *brl, unsigned char xmtOffset, int size, const unsigned char *data, unsigned char *buffer) {
-  if (memcmp(buffer, data, size) != 0) {
+updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned char *cells,
+             void (*writeCells) (BrailleDisplay *brl, int start, int count)) {
+  if (memcmp(cells, data, size) != 0) {
     int index;
     while (size) {
       index = size - 1;
-      if (buffer[index] != data[index]) break;
+      if (cells[index] != data[index]) break;
       size = index;
     }
     for (index=0; index<size; ++index) {
-      if (buffer[index] != data[index]) break;
+      if (cells[index] != data[index]) break;
     }
     if ((size -= index)) {
-      buffer += index;
-      data += index;
-      xmtOffset += index;
-      memcpy(buffer, data, size);
-      writePacket1(brl, XMT_BRLDATA+xmtOffset, size, buffer);
+      memcpy(cells+index, data+index, size);
+      writeCells(brl, index, size);
     }
   }
 }
@@ -1005,8 +1017,8 @@ initializeTerminal (BrailleDisplay *brl, char **parameters, const char *device) 
   if (io->openPort(parameters, device)) {
     charactersPerSecond = baud2integer(*baudRate) / 10;
     if (identifyTerminal(brl)) {
-      memset(currentStatus, outputTable[0], the_terminal->statusCount);
-      memset(currentLine, outputTable[0], the_terminal->columns);
+      memset(currentStatus, outputTable[0], terminal->statusCount);
+      memset(currentText, outputTable[0], terminal->columns);
       resetState();
       protocol->initializeTerminal(brl);
       return 1;
@@ -1068,9 +1080,9 @@ brl_identify (void) {
 }
 
 static void
-brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
-  if (the_terminal->statusCount) {
-    unsigned char cells[the_terminal->statusCount];
+brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
+  if (terminal->statusCount) {
+    unsigned char cells[terminal->statusCount];
     if (s[FirstStatusCell] == FSC_GENERIC) {
       int i;
 
@@ -1078,8 +1090,8 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       memcpy(values, s, sizeof(values));
       values[STAT_INPUT] = input_mode;
 
-      for (i=0; i<the_terminal->statusCount; i++) {
-        int code = the_terminal->statusCells[i];
+      for (i=0; i<terminal->statusCount; i++) {
+        int code = terminal->statusCells[i];
         if (code == OFFS_EMPTY)
           cells[i] = 0;
         else if (code >= OFFS_NUMBER)
@@ -1094,24 +1106,24 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       if (debug_writes) LogBytes("Status", s, InternalStatusCellCount);
     } else {
       int i = 0;
-      while (i < the_terminal->statusCount) {
+      while (i < terminal->statusCount) {
         unsigned char dots = s[i];
         if (!dots) break;
         cells[i++] = outputTable[dots];
       }
       if (debug_writes) LogBytes("Status", s, i);
-      while (i < the_terminal->statusCount) cells[i++] = outputTable[0];
+      while (i < terminal->statusCount) cells[i++] = outputTable[0];
     }
-    updateData(brl, xmtStatusOffset, the_terminal->statusCount, cells, currentStatus);
+    updateCells(brl, terminal->statusCount, cells, currentStatus, protocol->writeStatus);
   }
 }
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
   int i;
-  if (debug_writes) LogBytes("Window", brl->buffer, the_terminal->columns);
-  for (i=0; i<the_terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
-  updateData(brl, xmtTextOffset, the_terminal->columns, brl->buffer, currentLine);
+  if (debug_writes) LogBytes("Window", brl->buffer, terminal->columns);
+  for (i=0; i<terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
+  updateCells(brl, terminal->columns, brl->buffer, currentText, protocol->writeText);
 }
 
 /* ------------------------------------------------------------ */
