@@ -71,9 +71,6 @@ Stéphane Doyon, August 2001
    bindings list from README.
 -Use separate help files for BL18 and BL40, automatically generated from
    brltty_genhelp.txt.
--DETECT_FOREVER in braille.h allows the driver to keep probing for a
-   display forever (until you connect it) instead of giving up if no
-   display is connected.
 -Option USE_TEXTTRANS in braille.h, allows mapping of braille keyboard
    input to characters to be performed using the output text translation
    table (use definable) instead of the hardcoded US table. Useful if you

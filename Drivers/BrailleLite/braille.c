@@ -337,23 +337,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
       /* activate new settings */
       if (resetSerialDevice(blite_fd, &newtio, baudrate)) {
-#ifdef DETECT_FOREVER
-        /* wait forever method */
-        while (1) {
-          qflush();
-          write_prebrl();
-          waiting_ack = 1;
-          delay(100);
-          qfill();
-          if (!waiting_ack) break;
-          delay(2000);
-        }
-        if (1) {
-#else /* DETECT_FOREVER */
         qflush();
         write_prebrl();
         if (await_ack()) {
-#endif /* DETECT_FOREVER */
           LogPrint(LOG_DEBUG, "Got response.");
 
           /* Next, let's detect the BLT-Model (18, 40, M20, M40). */
@@ -426,7 +412,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
             LogPrint(LOG_ERR, "Cannot allocate prevdata.");
           }
         } else {
-          LogPrint(LOG_WARNING, "BLT doesn't seem to be connected, giving up!");
+          LogPrint(LOG_DEBUG, "BrailleLite not responding.");
         }
         tcsetattr(blite_fd, TCSANOW, &oldtio);
       }
