@@ -120,6 +120,8 @@ SPEECH_INTERNAL_DRIVER_NAMES = @brltty_internal_names_speech@
 SPEECH_DRIVERS = @speech_drivers@
 SPEECH_EXTERNAL_DRIVER_NAMES = @brltty_external_names_speech@
 
+FLITE_ROOT = @flite_root@
+
 INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@
 INSTALL_CONTRACTION_TABLES = @install_contraction_tables@

@@ -1,0 +1,40 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 2003 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+include $(BLD_TOP)config.mk
+
+###############################################################################
+# Makefile for BRLTTY Festival Lite speech driver
+###############################################################################
+
+DRIVER_CODE = fl
+DRIVER_NAME = FestivalLite
+SPEECH_MODELS = 
+
+include $(SRC_TOP)driver.mk
+
+FLITE_LANG = usenglish
+FLITE_LEX = cmulex
+FLITE_VOX = cmu_us_kal
+#FLITE_VOX = cmu_us_kal16
+
+flite.$O:
+	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOX) -DUNREGISTER_VOX=unregister_$(FLITE_VOX) -c $(SRC_DIR)/flite.c
+
+speech.$O: flite.$O
+	$(MKOBJ) speech.$O flite.$O -L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOX) -lflite_$(FLITE_LEX) -lflite_$(FLITE_LANG) -lflite
+

@@ -652,11 +652,41 @@ BRLTTY_ARG_DISABLE(
 ])
 AC_SUBST([speech_support_object])
 
+BRLTTY_ARG_WITH(
+   [flite-root], [DIRECTORY],
+   [where FestivalLite is installed],
+   [flite_root], ["yes"]
+)
+if test "${flite_root}" = "no"
+then
+   flite_root=""
+elif test "${flite_root}" = "yes"
+then
+   flite_root=""
+   for root in /usr /usr/local
+   do
+      if test -f "${root}/include/flite/flite.h"
+      then
+         flite_root="${root}"
+         break
+      fi
+   done
+   if test -z "${flite_root}"
+   then
+      AC_MSG_WARN([Festival Lite not found.])
+   fi
+fi
+AC_SUBST([flite_root])
+BRLTTY_SUMMARY_ITEM([flite-root], [flite_root])
+
 BRLTTY_SPEECH_DRIVER([al], [Alva])
 BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
 BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
 BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
-AC_CHECK_HEADER([flite/flite.h], [BRLTTY_SPEECH_DRIVER([fl], [FestivalLite])])
+if test -n "${flite_root}"
+then
+   BRLTTY_SPEECH_DRIVER([fl], [FestivalLite])
+fi
 BRLTTY_SPEECH_DRIVER([fv], [Festival])
 BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
 BRLTTY_SPEECH_DRIVER([tv], [Televox])
