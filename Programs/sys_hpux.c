@@ -182,12 +182,22 @@ getPcmSampleRate (int descriptor) {
 }
 
 int
+setPcmSampleRate (int descriptor, int rate) {
+  return getPcmSampleRate(descriptor);
+}
+
+int
 getPcmChannelCount (int descriptor) {
 #ifdef HAVE_HPUX_AUDIO
   return getAudioAttributes()->attr.sampled_attr.channels;
 #else /* HAVE_HPUX_AUDIO */
   return 1;
 #endif /* HAVE_HPUX_AUDIO */
+}
+
+int
+setPcmChannelCount (int descriptor, int channels) {
+  return getPcmChannelCount(descriptor);
 }
 
 PcmAmplitudeFormat

@@ -157,39 +157,79 @@ getPcmBlockSize (int descriptor) {
 int
 getPcmSampleRate (int descriptor) {
   if (descriptor != -1) {
-    int sampleRate;
-    if (ioctl(descriptor, SOUND_PCM_READ_RATE, &sampleRate) != -1) return sampleRate;
+    int rate;
+    if (ioctl(descriptor, SOUND_PCM_READ_RATE, &rate) != -1) return rate;
   }
   return 8000;
 }
 
 int
+setPcmSampleRate (int descriptor, int rate) {
+  if (descriptor != -1) {
+    if (ioctl(descriptor, SOUND_PCM_WRITE_RATE, &rate) != -1) return rate;
+  }
+  return getPcmSampleRate(descriptor);
+}
+
+int
 getPcmChannelCount (int descriptor) {
   if (descriptor != -1) {
-    int channelCount;
-    if (ioctl(descriptor, SOUND_PCM_READ_CHANNELS, &channelCount) != -1) return channelCount;
+    int channels;
+    if (ioctl(descriptor, SOUND_PCM_READ_CHANNELS, &channels) != -1) return channels;
   }
   return 1;
 }
 
-PcmAmplitudeFormat
-getPcmAmplitudeFormat (int descriptor) {
+int
+setPcmChannelCount (int descriptor, int channels) {
   if (descriptor != -1) {
-    int format = AFMT_QUERY;
+    if (ioctl(descriptor, SOUND_PCM_WRITE_CHANNELS, &channels) != -1) return channels;
+  }
+  return getPcmChannelCount(descriptor);
+}
+
+typedef struct {
+  PcmAmplitudeFormat internal;
+  int external;
+} AmplitudeFormatEntry;
+static const AmplitudeFormatEntry amplitudeFormatTable[] = {
+  {PCM_FMT_U8     , AFMT_U8    },
+  {PCM_FMT_S8     , AFMT_S8    },
+  {PCM_FMT_U16B   , AFMT_U16_BE},
+  {PCM_FMT_S16B   , AFMT_S16_BE},
+  {PCM_FMT_U16L   , AFMT_U16_LE},
+  {PCM_FMT_S16L   , AFMT_S16_LE},
+  {PCM_FMT_ULAW   , AFMT_MU_LAW},
+  {PCM_FMT_UNKNOWN, AFMT_QUERY }
+};
+
+static PcmAmplitudeFormat
+pcmAmplitudeFormat (int descriptor, int format) {
+  if (descriptor != -1) {
     if (ioctl(descriptor, SNDCTL_DSP_SETFMT, &format) != -1) {
-      switch (format) {
-        default:          break;
-        case AFMT_U8:     return PCM_FMT_U8;
-        case AFMT_S8:     return PCM_FMT_S8;
-        case AFMT_U16_BE: return PCM_FMT_U16B;
-        case AFMT_S16_BE: return PCM_FMT_S16B;
-        case AFMT_U16_LE: return PCM_FMT_U16L;
-        case AFMT_S16_LE: return PCM_FMT_S16L;
-        case AFMT_MU_LAW: return PCM_FMT_ULAW;
+      const AmplitudeFormatEntry *entry = amplitudeFormatTable;
+      while (entry->internal != PCM_FMT_UNKNOWN) {
+        if (entry->external == format) return entry->internal;
+        ++entry;
       }
     }
   }
   return PCM_FMT_UNKNOWN;
+}
+
+PcmAmplitudeFormat
+getPcmAmplitudeFormat (int descriptor) {
+  return pcmAmplitudeFormat(descriptor, AFMT_QUERY);
+}
+
+PcmAmplitudeFormat
+setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
+  const AmplitudeFormatEntry *entry = amplitudeFormatTable;
+  while (entry->internal != PCM_FMT_UNKNOWN) {
+    if (entry->internal == format) break;
+    ++entry;
+  }
+  return pcmAmplitudeFormat(descriptor, entry->external);
 }
 #endif /* ENABLE_PCM_TUNES */
 

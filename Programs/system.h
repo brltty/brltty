@@ -46,8 +46,11 @@ typedef enum {
 extern int getPcmDevice (int errorLevel);
 extern int getPcmBlockSize (int descriptor);
 extern int getPcmSampleRate (int descriptor);
+extern int setPcmSampleRate (int descriptor, int rate);
 extern int getPcmChannelCount (int descriptor);
+extern int setPcmChannelCount (int descriptor, int channels);
 extern PcmAmplitudeFormat getPcmAmplitudeFormat (int descriptor);
+extern PcmAmplitudeFormat setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format);
 
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);
 extern int getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer);

@@ -158,12 +158,22 @@ getPcmSampleRate (int descriptor) {
 }
 
 int
+setPcmSampleRate (int descriptor, int rate) {
+  return getPcmSampleRate(descriptor);
+}
+
+int
 getPcmChannelCount (int descriptor) {
   if (descriptor != -1) {
     audio_info_t info;
     if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) return info.play.channels;
   }
   return 1;
+}
+
+int
+setPcmChannelCount (int descriptor, int channels) {
+  return getPcmChannelCount(descriptor);
 }
 
 PcmAmplitudeFormat

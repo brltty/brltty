@@ -124,9 +124,34 @@ static int
 speechWrite (const char *text, int tags) {
   if (speechDevice == -1) {
     if ((speechDevice = getPcmDevice(LOG_WARNING)) == -1) return 0;
-    speechParameters.nSampleFreq = getPcmSampleRate(speechDevice);
-    speechParameters.nBits = 8;
-    speechParameters.nChannels = getPcmChannelCount(speechDevice);
+    speechParameters.nChannels = setPcmChannelCount(speechDevice, 1);
+    speechParameters.nSampleFreq = setPcmSampleRate(speechDevice, 22050);
+    {
+      static const PcmAmplitudeFormat formats[] = {PCM_FMT_S16L, PCM_FMT_S8, PCM_FMT_UNKNOWN};
+      const PcmAmplitudeFormat *format = formats;
+LogPrint(LOG_NOTICE, "fmt=%d", *format);
+      while (*format != PCM_FMT_UNKNOWN) {
+        switch (setPcmAmplitudeFormat(speechDevice, *format)) {
+          case PCM_FMT_S8:
+          case PCM_FMT_U8:
+            speechParameters.nBits = 8;
+            break;
+          case PCM_FMT_S16B:
+          case PCM_FMT_S16L:
+          case PCM_FMT_U16B:
+          case PCM_FMT_U16L:
+            speechParameters.nBits = 16;
+            break;
+          default:
+            speechParameters.nBits = 0;
+            break;
+        }
+        if (speechParameters.nBits) break;
+        ++format;
+      }
+    }
+    LogPrint(LOG_NOTICE, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
+             speechParameters.nChannels, speechParameters.nSampleFreq, speechParameters.nBits);
   }
 
   speechParameters.nTags = tags;
