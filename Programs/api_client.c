@@ -26,18 +26,22 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <inttypes.h>
-#include <fcntl.h>
 #include <errno.h>
-#include <alloca.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
 #include <sys/types.h>
-#include <netinet/in.h>
-#include <netdb.h>
+#include <sys/mman.h>
 #include <pthread.h>
 #include <syslog.h>
+#include <alloca.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+#ifdef linux
+#include <linux/major.h>
+#endif /* linux */
 
 #include "brlapi.h"
 #include "api_common.h"
@@ -485,18 +489,50 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 /* -1 if error or unknown */
 int brlapi_getControllingTty()
 {
- int tty;
- FILE *f;
- int i = (int) NULL;
- char c[100],*d;
- if ((d=getenv("CONTROLVT")) && sscanf(d,"%d",&tty)==1) return tty;
- f = fopen("/proc/self/stat","r");
- if (f==NULL) return -1;
- if (fscanf(f,"%d %s %c %d %d %d %d",&i,c,c,&i,&i,&i,&tty)<7) return -1;
- fclose(f);
- if ((tty & 0xff00) != 0x400) return -1; /* major number of /dev/tty* */
- if ((tty & 0xff) >= 64) return -1; /* /dev/ttyS* */
- return tty & 0xff;
+ int vt = 0;
+
+ const char *number = getenv("CONTROLVT");
+ if (number) {
+  int tty;
+  if (sscanf(number, "%d", &tty) == 1) vt = tty;
+ } else {
+#ifdef linux
+  pid_t pid = getpid();
+  while (pid != 1) {
+   int ok = 0;
+   char path[0X40];
+   FILE *stream;
+
+   int process;
+   char command[0X200];
+   char status;
+   int parent;
+   int group;
+   int session;
+   int tty;
+
+   snprintf(path, sizeof(path), "/proc/%d/stat", pid);
+   if ((stream = fopen(path, "r"))) {
+    if (fscanf(stream, "%d %s %c %d %d %d %d",
+               &process, command, &status, &parent, &group, &session, &tty) >= 7)
+     if (process == pid)
+      ok = 1;
+    fclose(stream);
+   }
+   if (!ok) break;
+
+   if (major(tty) == TTY_MAJOR) {
+    vt = minor(tty);
+    break;
+   }
+
+   pid = parent;
+  }
+#endif /* linux */
+ }
+
+ if ((vt < 1) || (vt >= 0X40)) return -1;
+ return vt;
 }
 
 /* Function : brlapi_getTty */
