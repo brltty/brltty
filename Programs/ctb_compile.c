@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <locale.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
@@ -47,6 +48,8 @@ static ContractionTableOffset tableUsed;
 static BYTE *opcodesTable;
 static int opcodesSize;
 static int opcodesUsed;
+
+static const char *originalLocale;
 
 typedef struct {
   const char *fileName;
@@ -88,71 +91,71 @@ allocateBytes (FileData *data, ContractionTableOffset *offset, int count, int al
 }
 
 static int
-addEntry (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteString *replace) {
-  ContractionTableOffset entryOffset;
-  int entrySize = sizeof(ContractionTableEntry) - 1;
-  if (find) entrySize += find->length;
-  if (replace) entrySize += replace->length;
-  if (allocateBytes(data, &entryOffset, entrySize, __alignof__(ContractionTableEntry))) {
-    ContractionTableEntry *newEntry = CTE(tableHeader, entryOffset);
-    newEntry->opcode = opcode;
+addRule (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteString *replace) {
+  ContractionTableOffset ruleOffset;
+  int ruleSize = sizeof(ContractionTableRule) - 1;
+  if (find) ruleSize += find->length;
+  if (replace) ruleSize += replace->length;
+  if (allocateBytes(data, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
+    ContractionTableRule *newRule = CTR(tableHeader, ruleOffset);
+    newRule->opcode = opcode;
     if (find)
-      memcpy(&newEntry->findrep[0], &find->bytes[0],
-             (newEntry->findlen = find->length));
+      memcpy(&newRule->findrep[0], &find->bytes[0],
+             (newRule->findlen = find->length));
     else
-      newEntry->findlen = 0;
+      newRule->findlen = 0;
     if (replace)
-      memcpy(&newEntry->findrep[newEntry->findlen], &replace->bytes[0],
-             (newEntry->replen = replace->length));
+      memcpy(&newRule->findrep[newRule->findlen], &replace->bytes[0],
+             (newRule->replen = replace->length));
     else
-      newEntry->replen = 0;
-    newEntry->next = 0;
+      newRule->replen = 0;
+    newRule->next = 0;
 
-    /*link new entry into table.*/
-    if (newEntry->findlen) {
+    /*link new rule into table.*/
+    if (newRule->findlen) {
       ContractionTableOffset bucket;
 
-      /* first, handle single-character entries. */
-      if (newEntry->findlen == 1) { /*it's a cup, not a bucket */
-        BYTE character = newEntry->findrep[0];
-        if (newEntry->opcode == CTO_Always) {
-          tableHeader->characters[character].entry = entryOffset;
+      /* first, handle single-character find strings. */
+      if (newRule->findlen == 1) {
+        ContractionTableCharacter *character = &tableHeader->characters[newRule->findrep[0]];
+        if (newRule->opcode == CTO_Always) {
+          character->always = ruleOffset;
         }
-        if ((bucket = tableHeader->cups[character])) {
-          ContractionTableEntry *currentEntry = CTE(tableHeader, bucket);
-          while (currentEntry->next)
-            currentEntry = CTE(tableHeader, currentEntry->next);
-          currentEntry->next = entryOffset;
+        if ((bucket = character->rules)) {
+          ContractionTableRule *currentRule = CTR(tableHeader, bucket);
+          while (currentRule->next)
+            currentRule = CTR(tableHeader, currentRule->next);
+          currentRule->next = ruleOffset;
         } else {
-          tableHeader->cups[character] = entryOffset;
+          character->rules = ruleOffset;
         }
       } else {
         /* Now, work through the various cases for multi-byte find strings. */
-        bucket = hash(newEntry->findrep);
+        bucket = hash(newRule->findrep);
 
         /* case 1, start new hash chain. */
-        if (tableHeader->buckets[bucket] == 0) {
-          tableHeader->buckets[bucket] = entryOffset;
+        if (!tableHeader->rules[bucket]) {
+          tableHeader->rules[bucket] = ruleOffset;
         } else {
-          /* Case 2, longest entry goes at head of chain. */
-          ContractionTableEntry *currentEntry = CTE(tableHeader, tableHeader->buckets[bucket]);
-          if (newEntry->findlen > currentEntry->findlen) {
-            newEntry->next = tableHeader->buckets[bucket];
-            tableHeader->buckets[bucket] = entryOffset;
+          /* Case 2, longest find string goes at head of chain. */
+          ContractionTableRule *currentRule = CTR(tableHeader, tableHeader->rules[bucket]);
+          if (newRule->findlen > currentRule->findlen) {
+            newRule->next = tableHeader->rules[bucket];
+            tableHeader->rules[bucket] = ruleOffset;
           } else {
-            /* Case 3, new entry goes somewhere in chain. */
-            while (currentEntry->next) { /*loop through chain */
-              ContractionTableEntry *previousEntry = currentEntry;	/*also used in sorting */
-              currentEntry = CTE(tableHeader, currentEntry->next);
-              if (newEntry->findlen > currentEntry->findlen) {
-                newEntry->next = previousEntry->next;
-                previousEntry->next = entryOffset;
+            /* Case 3, new rule goes somewhere in chain. */
+            while (currentRule->next) { /*loop through chain */
+              ContractionTableRule *previousRule = currentRule;
+              currentRule = CTR(tableHeader, currentRule->next);
+              if (newRule->findlen > currentRule->findlen) {
+                newRule->next = previousRule->next;
+                previousRule->next = ruleOffset;
                 break;
               }
             }
-            if (!newEntry->next) {
-              /* Case 4, new entry goes at end of chain*/
-              currentEntry->next = entryOffset;
+            if (!newRule->next) {
+              /* Case 4, new rule goes at end of chain*/
+              currentRule->next = ruleOffset;
             }
           }
         }
@@ -215,10 +218,8 @@ getToken (FileData *data, const BYTE **token, int *length, const char *descripti
   const BYTE *start = *token + *length;
   int count = 0;
 
-  while (isspace(*start))
-    start++;
-  while (start[count] && !isspace(start[count]))
-    count++;
+  while (isspace(*start)) start++;
+  while (start[count] && !isspace(start[count])) count++;
   *token = start;
   if (!(*length = count)) {
     if (description)
@@ -460,19 +461,29 @@ opcodeToken (FileData *data, ContractionTableOpcode *opcode, const char *token, 
   return 1;
 }
 
+static const char *
+setLocale (const char *locale) {
+  return setlocale(LC_CTYPE, locale);
+}
+
+static const char *
+getLocale (void) {
+  return setLocale(NULL);
+}
+
 static int processFile (const char *fileName);
 static int
 includeFile (FileData *data, ByteString *path) {
-  const BYTE *prefixAddress = data->fileName;
+  const char *prefixAddress = data->fileName;
   int prefixLength = 0;
   const BYTE *suffixAddress = path->bytes;
   int suffixLength = path->length;
   if (*suffixAddress != '/') {
-    const BYTE *ptr = strrchr(prefixAddress, '/');
+    const char *ptr = strrchr(prefixAddress, '/');
     if (ptr) prefixLength = ptr - prefixAddress + 1;
   }
   {
-    BYTE file[prefixLength + suffixLength + 1];
+    char file[prefixLength + suffixLength + 1];
     snprintf(file, sizeof(file), "%.*s%.*s",
              prefixLength, prefixAddress, suffixLength, suffixAddress);
     return processFile(file);
@@ -504,6 +515,19 @@ processLine (FileData *data, const BYTE *line) {
             goto failure;
       break;
     }
+    case CTO_Locale: {
+      ByteString locale;
+      if (getToken(data, &token, &length, "locale specification"))
+        if (parseText(data, &locale, token, length)) {
+          char string[locale.length + 1];
+          snprintf(string, sizeof(string), "%.*s", locale.length, locale.bytes);
+          if (!setLocale(string))
+            compileError(data, "locale not available: %s", string);
+          else if (!addString(data, &tableHeader->locale, &locale))
+            goto failure;
+        }
+      break;
+    }
     case CTO_Synonym:
       if (getToken(data, &token, &length, "opcode number"))
         if (opcodeToken(data, &opcode, token, length))
@@ -532,7 +556,7 @@ processLine (FileData *data, const BYTE *line) {
       ByteString replace;
       if (getFindText(data, &find, &token, &length))
         if (getReplacePattern(data, &replace, &token, &length))
-          if (!addEntry(data, opcode, &find, &replace))
+          if (!addRule(data, opcode, &find, &replace))
             goto failure;
       break;
     }
@@ -541,7 +565,7 @@ processLine (FileData *data, const BYTE *line) {
       ByteString replace;
       if (getFindText(data, &find, &token, &length))
         if (getReplaceText(data, &replace, &token, &length))
-          if (!addEntry(data, opcode, &find, &replace))
+          if (!addRule(data, opcode, &find, &replace))
             goto failure;
       break;
     }
@@ -549,7 +573,7 @@ processLine (FileData *data, const BYTE *line) {
     case CTO_Literal: {
       ByteString find;
       if (getFindText(data, &find, &token, &length))
-        if (!addEntry(data, opcode, &find, NULL))
+        if (!addRule(data, opcode, &find, NULL))
           goto failure;
       break;
     }
@@ -613,7 +637,7 @@ processFile (const char *fileName) {
   data.lineNumber = 0;
   LogPrint(LOG_DEBUG, "Including contraction table: %s", fileName);
 
-  if ((stream = fopen(data.fileName, "r"))) { /*fatal error */
+  if ((stream = fopen(data.fileName, "r"))) {
     int size = 0X80;
     BYTE *buffer = malloc(size);
     if (buffer) {
@@ -700,7 +724,7 @@ auditCharacters (BYTE *encountered, const BYTE *start, BYTE length) {
    BYTE count = length;
   while (count--) {
     BYTE character = *address++;
-    if (!tableHeader->characters[character].entry && !encountered[character]) {
+    if (!tableHeader->characters[character].always && !encountered[character]) {
       encountered[character] = 1;
       compileError(NULL, "character representation not defined: %c (%.*s)",
                    character, length, start);
@@ -717,26 +741,26 @@ auditTable (void) {
   int hashIndex;
   memset(characterEncountered, 0, sizeof(characterEncountered));
   for (hashIndex = 0; hashIndex < HASHNUM; hashIndex++) {
-    ContractionTableOffset bucket = tableHeader->buckets[hashIndex];
+    ContractionTableOffset bucket = tableHeader->rules[hashIndex];
     while (bucket) {
-      const ContractionTableEntry *entry = CTE(tableHeader, bucket);
-      switch (entry->opcode) {
+      const ContractionTableRule *rule = CTR(tableHeader, bucket);
+      switch (rule->opcode) {
         default:
-          if (!entry->replen) {
-            if (!auditCharacters(characterEncountered, &entry->findrep[0], entry->findlen)) {
+          if (!rule->replen) {
+            if (!auditCharacters(characterEncountered, &rule->findrep[0], rule->findlen)) {
               ok = 0;
             }
           }
           break;
         case CTO_Replace:
-          if (!auditCharacters(characterEncountered, &entry->findrep[entry->findlen], entry->replen)) {
+          if (!auditCharacters(characterEncountered, &rule->findrep[rule->findlen], rule->replen)) {
             ok = 0;
           }
           break;
         case CTO_Literal:
           break;
       }
-      bucket = entry->next;
+      bucket = rule->next;
     }
   }
   return ok;
@@ -755,9 +779,10 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
   opcodesSize = 0;
   opcodesUsed = 0;
 
+  originalLocale = setLocale("C");
+
   if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
     if (headerOffset == 0) {
-      cacheCharacterAttributes();
       if (processFile(fileName))
         auditTable();
       if (errorCount)
@@ -768,11 +793,15 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
     }
   }
 
+  cacheCharacterAttributes();
+  setLocale(originalLocale);
+
   if (opcodesTable) {
     free(opcodesTable);
     opcodesTable = NULL;
   }
-  return (void *) tableHeader;
+
+  return (void *)tableHeader;
 }
 
 int

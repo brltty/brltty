@@ -25,7 +25,7 @@ extern "C" {
 #define BYTE unsigned char
 
 #define CTA(table, offset) (((BYTE *)(table)) + (offset))
-#define CTE(table, offset) ((ContractionTableEntry *) CTA((table), (offset)))
+#define CTR(table, offset) ((ContractionTableRule *)CTA((table), (offset)))
 
 #define HASHNUM 1087
 #define hash(x) (((x[0]<<8)+x[1])%HASHNUM)
@@ -42,10 +42,11 @@ typedef enum {
 } ContractionTableCharacterAttribute;
 
 typedef struct {
-  ContractionTableOffset entry;
+  ContractionTableOffset rules;
+  ContractionTableOffset always;
+  BYTE attributes;
   BYTE uppercase;
   BYTE lowercase;
-  BYTE attributes;
 } ContractionTableCharacter;
 
 typedef enum { /*Op codes*/
@@ -75,26 +76,27 @@ typedef enum { /*Op codes*/
   CTO_PostPunc, /*punctuation in string at end of word*/
   CTO_SuffixableWord, /*whole word or beginning of word*/
   CTO_EndCapitalSign, /*dot pattern for ending capital block*/
+  CTO_Locale, /*locale specification for character interpretation*/
   CTO_None /*For internal use only*/
 } ContractionTableOpcode;
 
-typedef struct { /*entry in translation table*/
+typedef struct {
   ContractionTableOffset next; /*next entry*/
   BYTE opcode; /*rule for testing validity of replacement*/
   BYTE findlen; /*length of string to be replaced*/
   BYTE replen; /*length of replacement string*/
   BYTE findrep[1]; /*find and replacement strings*/
-} ContractionTableEntry;
+} ContractionTableRule;
 
 typedef struct { /*translation table*/
+  ContractionTableOffset locale; /*locale specification*/
   ContractionTableOffset capitalSign; /*capitalization sign*/
   ContractionTableOffset beginCapitalSign; /*begin capitals sign*/
   ContractionTableOffset endCapitalSign; /*end capitals sign*/
   ContractionTableOffset englishLetterSign; /*english letter sign*/
   ContractionTableOffset numberSign; /*number sign*/
   ContractionTableCharacter characters[0X100]; /*descriptions of characters*/
-  ContractionTableOffset cups[0X100]; /*locations of character rules in table*/
-  ContractionTableOffset buckets[HASHNUM]; /*locations of multi-character rules in table*/
+  ContractionTableOffset rules[HASHNUM]; /*locations of multi-character rules in table*/
 } ContractionTableHeader;
 
 #ifdef __cplusplus

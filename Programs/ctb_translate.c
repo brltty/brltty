@@ -32,12 +32,23 @@ static const BYTE *src, *srcmin, *srcmax;
 static BYTE *dest, *destmin, *destmax;
 static int *offsets;
 static BYTE before, after;	/*the characters before and after a string */
-static int curfindlen;		/*length of current find string */
-static ContractionTableOpcode curop;
-static ContractionTableOpcode prevop;
-static const ContractionTableEntry *curentry;	/*pointer to current entry in table */
+static int currentFindLength;		/*length of current find string */
+static ContractionTableOpcode currentOpcode;
+static ContractionTableOpcode previousOpcode;
+static const ContractionTableRule *currentRule;	/*pointer to current rule in table */
 
 #define setOffset() offsets[src - srcmin] = dest - destmin
+#define CTC(c,a) (table->characters[(c)].attributes & (a))
+#define CTL(c) (CTC((c), CTC_UpperCase)? table->characters[(c)].lowercase: (c))
+
+static int
+compareBytes (const BYTE *address1, const BYTE *address2, int count) {
+  while (count) {
+    if (CTL(*address1) != CTL(*address2)) return 0;
+    --count, ++address1, ++address2;
+  }
+  return 1;
+}
 
 static void
 setBefore (void) {
@@ -49,30 +60,28 @@ setAfter (int length) {
   after = (src + length < srcmax)? src[length]: ' ';
 }
 
-#define CTC(c,a) (table->characters[(c)].attributes & (a))
 static int
 selectRule (int length) { /*check for valid contractions */
-  int bucket;			/*integer offset of talle entry */
+  int ruleOffset;
 
   if (length < 1) return 0;
   if (length == 1) {
-    bucket = table->cups[*src];
+    ruleOffset = table->characters[*src].rules;
   } else {
     BYTE bytes[2];
-    bytes[0] = table->characters[src[0]].lowercase;
-    bytes[1] = table->characters[src[1]].lowercase;
-    bucket = table->buckets[hash(bytes)];
+    bytes[0] = CTL(src[0]);
+    bytes[1] = CTL(src[1]);
+    ruleOffset = table->rules[hash(bytes)];
   }
-  while (bucket) {
-    curentry = CTE(table, bucket);
-    curop = curentry->opcode;
-    curfindlen = curentry->findlen;
-    if (length == 1 ||
-        (curfindlen <= length &&
-         (strncasecmp(src, curentry->findrep, curfindlen) == 0))) {
-      /* check this entry */
-      setAfter(curfindlen);
-      switch (curop) { /*check validity of this contraction */
+  while (ruleOffset) {
+    currentRule = CTR(table, ruleOffset);
+    currentOpcode = currentRule->opcode;
+    currentFindLength = currentRule->findlen;
+    if ((length == 1) ||
+        ((currentFindLength <= length) && compareBytes(src, currentRule->findrep, currentFindLength))) {
+      /* check this rule */
+      setAfter(currentFindLength);
+      switch (currentOpcode) { /*check validity of this contraction */
         case CTO_Always:
         case CTO_Repeated:
         case CTO_Replace:
@@ -80,7 +89,7 @@ selectRule (int length) { /*check for valid contractions */
           return 1;
         case CTO_LargeSign:
           if (!CTC(before, CTC_Space) || !CTC(after, CTC_Space))
-            curop = CTO_Always;
+            currentOpcode = CTO_Always;
           return 1;
         case CTO_WholeWord:
         case CTO_Contraction:
@@ -90,14 +99,14 @@ selectRule (int length) { /*check for valid contractions */
           break;
         case CTO_LowWord:
           if (CTC(before, CTC_Space) && CTC(after, CTC_Space) &&
-              (prevop != CTO_JoinableWord))
+              (previousOpcode != CTO_JoinableWord))
             return 1;
           break;
         case CTO_JoinableWord:
           if (CTC(before, CTC_Space|CTC_Punctuation) &&
               CTC(after, CTC_Space) &&
-              (dest + curentry->replen < destmax)) {
-            const BYTE *ptr = src + curfindlen + 1;
+              (dest + currentRule->replen < destmax)) {
+            const BYTE *ptr = src + currentFindLength + 1;
             while (ptr < srcmax) {
               if (!CTC(*ptr, CTC_Space)) {
                 if (CTC(*ptr, CTC_Letter)) return 1;
@@ -155,7 +164,7 @@ selectRule (int length) { /*check for valid contractions */
         doPunc:
           if (CTC(*src, CTC_Punctuation)) {
             const BYTE *pre = src;
-            const BYTE *post = src + curfindlen;
+            const BYTE *post = src + currentFindLength;
             while (--pre >= srcmin)
               if (!CTC(*pre, CTC_Punctuation))
                 break;
@@ -179,11 +188,11 @@ selectRule (int length) { /*check for valid contractions */
         default:
           break;
       }
-    }				/*Done with checking this entry */
-    bucket = curentry->next;
+    }				/*Done with checking this rule */
+    ruleOffset = currentRule->next;
   }
   return 0;
-}				/*done with validation */
+}
 
 static int
 putBytes (const BYTE *bytes, int count) {
@@ -208,10 +217,10 @@ putUnknown (BYTE character) { /* Convert unknown character to hexadecimal. */
 
 static int
 putCharacter (BYTE character) {
-  ContractionTableOffset offset = table->characters[character].entry;
+  ContractionTableOffset offset = table->characters[character].always;
   if (offset) {
-    const ContractionTableEntry *entry = CTE(table, offset);
-    if (entry->replen) return putBytes(&entry->findrep[1], entry->replen);
+    const ContractionTableRule *rule = CTR(table, offset);
+    if (rule->replen) return putBytes(&rule->findrep[1], rule->replen);
     return putBytes(&textTable[character], 1);
   }
   return putUnknown(character);
@@ -245,7 +254,7 @@ contractText (void *contractionTable,
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
   offsets = offsetsMap;
-  prevop = CTO_None;
+  previousOpcode = CTO_None;
 
   activeBegin = activeEnd = NULL;
   if (cursorOffset >= 0 && cursorOffset < *inputLength &&
@@ -263,17 +272,17 @@ contractText (void *contractionTable,
         computerBraille = 0;
     if (computerBraille || (src > activeBegin && src < activeEnd)) {
       setAfter(1);
-      curop = CTO_Literal;
+      currentOpcode = CTO_Literal;
       if (!putBytes(&textTable[*src], 1)) break;
       src++;
     } else if (selectRule(srcmax-src) || selectRule(1)) {
-      if (table->numberSign && prevop != CTO_MidNum &&
+      if (table->numberSign && previousOpcode != CTO_MidNum &&
           !CTC(before, CTC_Digit) && CTC(*src, CTC_Digit)) {
         if (!putSequence(table->numberSign)) break;
       } else if (table->englishLetterSign && CTC(*src, CTC_Letter)) {
-        if ((curop == CTO_Contraction) ||
-            (curop != CTO_EndNum && CTC(before, CTC_Digit)) ||
-            (curop == CTO_Always && curfindlen == 1 && CTC(before, CTC_Space) &&
+        if ((currentOpcode == CTO_Contraction) ||
+            (currentOpcode != CTO_EndNum && CTC(before, CTC_Digit)) ||
+            (currentOpcode == CTO_Always && currentFindLength == 1 && CTC(before, CTC_Space) &&
              (src + 1 == srcmax || CTC(src[1], CTC_Space) ||
               (CTC(src[1], CTC_Punctuation) &&
               !(src + 2 < srcmax && src[1] == '.' && CTC(src[2], CTC_Letter)))))) {
@@ -297,9 +306,9 @@ contractText (void *contractionTable,
       }
 
       /* pre processing */
-      switch (curop) {
+      switch (currentOpcode) {
         case CTO_LargeSign:
-          if (prevop == CTO_LargeSign) {
+          if (previousOpcode == CTO_LargeSign) {
             int srcoff = src - srcmin;
             int destlen;
             while (dest > destmin && !dest[-1]) dest--;
@@ -319,10 +328,10 @@ contractText (void *contractionTable,
       }				/*end of action */
 
       /* main processing */
-      switch (curop) {
+      switch (currentOpcode) {
         case CTO_Replace:
-          src += curfindlen;
-          if (!putCharacters(&curentry->findrep[curfindlen], curentry->replen)) goto done;
+          src += currentFindLength;
+          if (!putCharacters(&currentRule->findrep[currentFindLength], currentRule->replen)) goto done;
           break;
         case CTO_Literal: {
           const BYTE *srcorig = src;
@@ -338,11 +347,11 @@ contractText (void *contractionTable,
           continue;
         }
         default:
-          if (curentry->replen) {
-            if (!putBytes(&curentry->findrep[curfindlen], curentry->replen)) goto done;
-            src += curfindlen;
+          if (currentRule->replen) {
+            if (!putBytes(&currentRule->findrep[currentFindLength], currentRule->replen)) goto done;
+            src += currentFindLength;
           } else {
-            const BYTE *srclim = src + curfindlen;
+            const BYTE *srclim = src + currentFindLength;
             while (1) {
               if (!putCharacter(*src)) goto done;
               if (++src == srclim) break;
@@ -352,13 +361,12 @@ contractText (void *contractionTable,
       }
 
       /* post processing */
-      switch (curop) {
+      switch (currentOpcode) {
         case CTO_Repeated: {
-          const BYTE *srclim = srcmax - curfindlen;
+          const BYTE *srclim = srcmax - currentFindLength;
           setOffset();
-          while ((src <= srclim) &&
-                 (strncasecmp(curentry->findrep, src, curfindlen) == 0)) {
-            src += curfindlen;
+          while ((src <= srclim) && compareBytes(currentRule->findrep, src, currentFindLength)) {
+            src += currentFindLength;
           }
           break;
         }
@@ -373,12 +381,12 @@ contractText (void *contractionTable,
       src++;
     }
 
-    if (((src > srcmin) && CTC(src[-1], CTC_Space) && (curop != CTO_JoinableWord))) {
+    if (((src > srcmin) && CTC(src[-1], CTC_Space) && (currentOpcode != CTO_JoinableWord))) {
       srcword = src;
       destword = dest;
     }
     if ((dest == destmin) || dest[-1])
-      prevop = curop;
+      previousOpcode = currentOpcode;
   }				/*end of translation loop */
 done:
 

@@ -41,3 +41,4 @@ opcode 22 prepunc
 opcode 23 postpunc
 opcode 24 sufword
 opcode 25 endcaps
+opcode 26 locale
