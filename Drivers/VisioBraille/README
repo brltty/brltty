@@ -1,30 +1,31 @@
-Ceci est le fichier README relatif au driver VisioBraille pour BRLTTY,
-version 0.1. Driver testé avec un TVB 2040 équippé d'une PROM 4.0g.
+Ceci est le fichier README relatif à la version 0.2 du pilote VisioBraille
+pour BRLTTY.
+
+Ce pilote a été testé avec succès avec les terminaux équipés de PROMs 0.0g et
+5.0q-fr. Il est vraisemblable que toutes les PROMs de version >=4
+soient supportées par le présent pilote.
 
 Auteur et mainteneur actuel: Sébastien HINDERER
 <sebastien.hinderer@libertysurf.fr>
 
-  Ceci est la première version publiée du driver permettant à VisioBraille
-de s'interfacer avec BRLTTY, offrant ainsi la possibilité à un utilisateur
-du TVB de travailler sous Linux.
-Bien que j'aie testé avec succès ce driver pendant plusieurs semaines et de
-manière intensive, il n'est pas impossible que certains bogues subsistent.
+Bien que ce pilote soit utilisé de manière intensive, il n'est pas impossible
+que certaines erreurs subsistent.
 Si vous en trouvez, ou si vous avez des commentaires/suggestions quant à
-l'évolution de ce driver, n'hésitez surtout pas à me contacter. 
+l'évolution de ce pilote, n'hésitez surtout pas à me contacter. 
 
-Notes pour l'installation.
-==========================
+Notes pour l'installation et Paramètres
+=======================================
 
-  Avant de compiler le driver et BRLTTY, pensez à éditer le fichier
-braille.h de ce même répertoire. Dans ce fichier, modifiez la ligne 
-#define TAILLEPLAGETACTILE 
-de sorte à ce ru'elle corresponde à votre matériel.
-Ensuite, lisez le manuel fourni avec BRLTTY (dans le répertoire DOCS de
-BRLTTY), pour savoir comment paramétrer correctement le programme. Suivez
-les instruct,ons de ce manuel pour la compilation, et choisissez la table de
-caractères visiob.tbl, qui correspond à la représentation usuelle des
-caractères à laquelle les visiobraillistes sont habitués.
+Une table braille compatible avec celle fournie en standard dans le TVB
+(basée sur la table SAGEM) est disponible, dans le fichier text.visiob.tbl du
+répertoire ../../BrailleTables
 
+Le pilote VisioBraille accepte un paramètre displaysize= qui permet de
+spécifier la taille de la plage tactile.
+
+Pour des informations sur la manière de passer ce paramètre au pilote, ou
+pour toute autre précision concernant l'installation et l'utilisation de
+brltty, merci de voir la documentation du répertoire ../../Documents
 
 Notes pour l'utilisation. 
 =========================
@@ -49,7 +50,7 @@ virtuelles (correspond à alt-f1 à alt-f6).
 B6 coin supérieur gauche de l'écran
 D6 coin inférieur gauche de l'écran
 A4 précédente fenêtre non vide 
-A5 prochaine fenêtre nonvide
+A5 prochaine fenêtre non vide
 B7 Affiche la ligne précédente
 D7 Affiche la ligne suivante
 C6/C8 Fenêtre précédente/suivante
@@ -58,9 +59,16 @@ C1/C3/B2/D2 flèches de direction
 B3 Inverse la visibilité du curseur
 D1 delete
 
-  En outre, vous avez accès aux fonctions auxquelles vous êtes habitués sous
-DOS/Windows pour la simulation des touches backspace, tab, contrôle, alt...
+  En outre, les touches backspace, tab, ctrl, alt... sont siulées de la même
+manière que sous DOS et Windows.
 
+Autres liens
+============
+
+Un programme permettant le transfert de visiobases entre PC et TVB est
+disponible à l'adresse suivante :
+
+http://brl.thefreecat.org
 
 Ce qu'il reste à faire
 ======================
@@ -68,14 +76,6 @@ Ce qu'il reste à faire
   Pour les prochaines versions du driver, il serait peut-être souhaitable
 d'inclure la possibilité de reprohrammer les touches, un peu comme cela se
 fait sous DOS avec la commande ~~f.
-De plus, pour pouvoir disposer d'une solution VisioBraille-Linux la plus
-complète possible, il reste à développer un utilitaire de transfert de
-visiobases entre PC et TVB (type xfl), ainsi qu'un éditeur de visiobases tel
-que utb.
 
-  Voilà. Si vous avez envie d'ajouter des choses à faire à cette liste, ou
-si vous avez besoin de quelque information que ce soit, ou encore si vous
-souhaitez émettre des suggestions, participer au projet VisioBraille pour
-Linux, n'hésitez surtout pas à me contacter.
+
 Sébastien HINDERER <sebastien.hinderer@libertysurf.fr>
-
