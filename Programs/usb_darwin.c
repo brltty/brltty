@@ -54,7 +54,7 @@ typedef struct {
 
 typedef struct {
   UsbEndpoint *endpoint;
-  UsbAsynchronousRequest *requests;
+  Queue *requests;
 
   UInt8 pipe;
   UInt8 number;
@@ -349,22 +349,10 @@ setInterface (UsbDevice *device, UInt8 number) {
   return interface != NULL;
 }
 
-static UsbAsynchronousRequest *
-usbDequeueAsynchronousRequest (UsbEndpointExtension *eptx) {
-  if (eptx->requests) {
-    UsbAsynchronousRequest *request = eptx->requests->next;
-
-    if (request == eptx->requests) {
-      eptx->requests = NULL;
-    } else {
-      eptx->requests->next = request->next;
-    }
-
-    request->next = NULL;
-    return request;
-  }
-
-  return NULL;
+static void
+usbDeallocateAsynchronousRequest (void *item, void *data) {
+  UsbAsynchronousRequest *request = item;
+  free(request);
 }
 
 static void
@@ -376,13 +364,7 @@ usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   request->result = result;
   request->count = (int)arg;
 
-  if (eptx->requests) {
-    request->next = eptx->requests->next;
-    eptx->requests->next = request;
-    eptx->requests = request;
-  } else {
-    eptx->requests = request->next = request;
-  }
+  enqueueItem(eptx->requests, request);
 }
 
 int
@@ -532,41 +514,46 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
 
   if ((eptx = malloc(sizeof(*eptx)))) {
-    IOReturn result;
-    UInt8 count;
+    if ((eptx->requests = newQueue(usbDeallocateAsynchronousRequest, NULL))) {
+      IOReturn result;
+      UInt8 count;
 
-    result = (*devx->interface)->GetNumEndpoints(devx->interface, &count);
-    if (result == kIOReturnSuccess) {
-      unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
-      unsigned char output = USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT;
+      result = (*devx->interface)->GetNumEndpoints(devx->interface, &count);
+      if (result == kIOReturnSuccess) {
+        unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
+        unsigned char output = USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT;
 
-      for (eptx->pipe=1; eptx->pipe<=count; ++eptx->pipe) {
-        result = (*devx->interface)->GetPipeProperties(devx->interface, eptx->pipe,
-                                                       &eptx->direction, &eptx->number,
-                                                       &eptx->transfer, &eptx->size, &eptx->interval);
-        if (result == kIOReturnSuccess) {
-          if ((eptx->number == number) &&
-              ((eptx->direction == kUSBOut) == output)) {
-            LogPrint(LOG_DEBUG, "USB: ept=%02X -> ref=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
-                     endpoint->descriptor->bEndpointAddress, eptx->pipe,
-                     eptx->number, eptx->direction, eptx->transfer,
-                     eptx->interval, eptx->size);
+        for (eptx->pipe=1; eptx->pipe<=count; ++eptx->pipe) {
+          result = (*devx->interface)->GetPipeProperties(devx->interface, eptx->pipe,
+                                                         &eptx->direction, &eptx->number,
+                                                         &eptx->transfer, &eptx->size, &eptx->interval);
+          if (result == kIOReturnSuccess) {
+            if ((eptx->number == number) &&
+                ((eptx->direction == kUSBOut) == output)) {
+              LogPrint(LOG_DEBUG, "USB: ept=%02X -> ref=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
+                       endpoint->descriptor->bEndpointAddress, eptx->pipe,
+                       eptx->number, eptx->direction, eptx->transfer,
+                       eptx->interval, eptx->size);
 
-            eptx->requests = NULL;
-            eptx->endpoint = endpoint;
-            endpoint->extension = eptx;
-            return 1;
+              eptx->endpoint = endpoint;
+              endpoint->extension = eptx;
+              return 1;
+            }
+          } else {
+            setErrnoIo(result, "USB endpoint properties query");
           }
-        } else {
-          setErrnoIo(result, "USB endpoint properties query");
         }
+
+        errno = EIO;
+        LogPrint(LOG_ERR, "USB endpoint not found: %02X",
+                 endpoint->descriptor->bEndpointAddress);
+      } else {
+        setErrnoIo(result, "USB pipe count query");
       }
 
-      errno = EIO;
-      LogPrint(LOG_ERR, "USB endpoint not found: %02X",
-               endpoint->descriptor->bEndpointAddress);
+      deallocateQueue(eptx->requests);
     } else {
-      setErrnoIo(result, "USB pipe count query");
+      LogError("USB asynchronous request queue allocate");
     }
 
     free(eptx);
@@ -580,12 +567,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
-
-  {
-    UsbAsynchronousRequest *request;
-    while ((request = usbDequeueAsynchronousRequest(eptx))) free(request);
-  }
-
+  deallocateQueue(eptx->requests);
   endpoint->extension = NULL;
   free(eptx);
 }
@@ -763,7 +745,7 @@ usbReapResponse (
     UsbEndpointExtension *eptx = endpoint->extension;
     UsbAsynchronousRequest *request;
 
-    while (!(request = usbDequeueAsynchronousRequest(eptx))) {
+    while (!(request = dequeueItem(eptx->requests))) {
       switch (CFRunLoopRunInMode(devx->runloopMode, (wait? 60: 0), 1)) {
         case kCFRunLoopRunTimedOut:
           if (wait) continue;
@@ -843,10 +825,12 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
                           devx->runloopSource,
                           devx->runloopMode);
   }
+
   if (devx->opened) {
     closeInterface(device);
     (*devx->device)->USBDeviceClose(devx->device);
   }
+
   (*devx->device)->Release(devx->device);
   free(devx);
 }
