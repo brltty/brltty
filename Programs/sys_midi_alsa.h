@@ -92,6 +92,7 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
               clientOk = 1;
               LogPrint(LOG_INFO, "Using ALSA MIDI client: %d[%s]",
                        clientIdentifier, name);
+              break;
             }
           }
           free(info);
@@ -115,6 +116,7 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
                 portOk = 1;
                 LogPrint(LOG_INFO, "Using ALSA MIDI port: %d[%s]",
                          portIdentifier, name);
+                break;
               }
             }
             free(info);
