@@ -8,18 +8,18 @@ Description: Braille Display Driver for Linux/Unix
              using a refreshable braille display. It drives the braille
              display, and provides complete screen review functionality. Some
              speech capability has also been incorporated.
-Keywords: refreshable braille display console access visually impaired blind linux
+Keywords: refreshable braille display console access visually impaired blind linux unix
 Author: dave@mielke.cc (Dave Mielke)
         nico@cam.org (Nicolas Pitre)
         s.doyon@videotron.ca (Stéphane Doyon)
         nn201@cus.cam.ac.uk (Nikhil Nair)
 Maintained-by: dave@mielke.cc (Dave Mielke)
 Primary-site: ftp.ibiblio.org /pub/Linux/system/access
-              1022KB brltty-3.4.tar.gz
-               604KB brltty-3.4-1.i386.rpm
-              1033KB brltty-3.4-1.src.rpm
-                11KB brltty-3.4.README
-                 3KB brltty-3.4.lsm
+               970KB brltty-3.5.tar.gz
+               715KB brltty-3.5-1.i386.rpm
+              1004KB brltty-3.5-1.src.rpm
+                12KB brltty-3.5.README
+                 3KB brltty-3.5.lsm
 Alternate-site: ftp://leb.net /pub/blinux/brltty
 Original-site:
 Platforms: Linux (kernel 1.1.92 or later)
