@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -52,17 +53,41 @@ static const int shmSize = 4 + ((66 * 132) * 2);
 static int
 open_ShmScreen (void) {
 #ifdef HAVE_SHMGET
-  /* this should be generated from ftok(), but... */
-  shmKey = 0xBACD072F;     /* random static IPC key */
+  key_t keys[2];
+  int keyCount = 0;
 
-  if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
-    if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
-      return 1;
+  /* The original, static key. */
+  keys[keyCount++] = 0xBACD072F;
+
+  /* The new, dynamically generated, per user key. */
+  {
+    int project = 'b';
+    const char *path = getenv("HOME");
+    if (!path || !*path) path = "/";
+    LogPrint(LOG_DEBUG, "Shared memory file system object: %s", path);
+    if ((keys[keyCount] = ftok(path, project)) != -1) {
+      keyCount++;
     } else {
-      LogError("shmat");
+      LogPrint(LOG_WARNING, "Per user shared memory key not generated: %s",
+               strerror(errno));
     }
-  } else {
-    LogError("shmget");
+  }
+
+  while (keyCount > 0) {
+    shmKey = keys[--keyCount];
+    LogPrint(LOG_DEBUG, "Trying shared memory key: 0X%X", shmKey);
+    if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
+      if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
+        LogPrint(LOG_INFO, "Screen image shared memory key: 0X%X", shmKey);
+        return 1;
+      } else {
+        LogPrint(LOG_WARNING, "Cannot attach shared memory segment 0X%X: %s",
+                 shmKey, strerror(errno));
+      }
+    } else {
+      LogPrint(LOG_WARNING, "Cannot access shared memory segment 0X%X: %s",
+               shmKey, strerror(errno));
+    }
   }
   shmIdentifier = -1;
 #endif /* HAVE_SHMGET */
