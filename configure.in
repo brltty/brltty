@@ -259,6 +259,9 @@ in
    linux*)
       brltty_cv_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE"
       ;;
+   hpux*)
+      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED -D_HPUX_SOURCE"
+      ;;
    *)
       brltty_cv_prog_cc_sysflags=""
       ;;
@@ -358,7 +361,7 @@ in
       ;;
    hpux*)
       system_object="hpux"
-      if test -d /opt/audio
+      if test -d /opt/audio/include
       then
          SYSCFLAGS="${SYSCFLAGS} -I/opt/audio/include"
          LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
@@ -461,8 +464,8 @@ BRLTTY_ARG_DISABLE(
    api_objects='api_server.$O api_common.$O rangelist.$O'
    build_api="api"
    install_api="install-api"
-   BRLTTY_SEARCH_LIBS([pthread_create], [pthread c_r])
-   BRLTTY_SEARCH_LIBS([socket], [socket])
+   AC_SEARCH_LIBS([pthread_create], [pthread c_r])
+   AC_SEARCH_LIBS([socket], [socket])
    BRLTTY_ARG_PARAMETERS([api])
 ])
 AC_SUBST([api_objects])

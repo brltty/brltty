@@ -35,6 +35,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 
 #include "api.h"
