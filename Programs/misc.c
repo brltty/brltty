@@ -135,63 +135,60 @@ setPrintOff (void) {
 
 int
 getConsole (void) {
-   static int console = -1;
-   if (console == -1) {
-      if ((console = open("/dev/console", O_WRONLY)) != -1) {
-         LogPrint(LOG_DEBUG, "Console opened: fd=%d", console);
-      } else {
-         LogError("Console open");
-      }
-   }
-   return console;
+  static int console = -1;
+  if (console == -1) {
+    if ((console = open("/dev/console", O_WRONLY)) != -1) {
+      LogPrint(LOG_DEBUG, "Console opened: fd=%d", console);
+    } else {
+      LogError("Console open");
+    }
+  }
+  return console;
 }
 
 int
 writeConsole (const unsigned char *address, size_t count) {
-   int console = getConsole();
-   if (console != -1) {
-      if (write(console, address, count) != -1) {
-         return 1;
-      }
+  int console = getConsole();
+  if (console != -1) {
+    if (write(console, address, count) != -1) {
+      return 1;
+    } else {
       LogError("Console write");
-   }
-   return 0;
+    }
+  }
+  return 0;
 }
 
 int
 ringBell (void) {
-   static unsigned char bellSequence[] = {0X07};
-   return writeConsole(bellSequence, sizeof(bellSequence));
+  static unsigned char bellSequence[] = {0X07};
+  return writeConsole(bellSequence, sizeof(bellSequence));
 }
 
 static void
-noMemory (void)
-{
-   LogPrint(LOG_CRIT, "Insufficient memory: %s", strerror(errno));
-   exit(3);
+noMemory (void) {
+  LogPrint(LOG_CRIT, "Insufficient memory: %s", strerror(errno));
+  exit(3);
 }
 
 void *
 mallocWrapper (size_t size) {
-   void *address = malloc(size);
-   if (!address)
-      noMemory();
-   return address;
+  void *address = malloc(size);
+  if (!address && size) noMemory();
+  return address;
 }
 
 void *
 reallocWrapper (void *address, size_t size) {
-   if (!(address = realloc(address, size)))
-      noMemory();
-   return address;
+  if (!(address = realloc(address, size)) && size) noMemory();
+  return address;
 }
 
 char *
 strdupWrapper (const char *string) {
-   char *address = strdup(string);
-   if (!address)
-      noMemory();
-   return address;
+  char *address = strdup(string);
+  if (!address) noMemory();
+  return address;
 }
 
 char *
