@@ -243,6 +243,7 @@ describeCommand (int command, char *buffer, int size) {
         if (!last || (last->code < current->code)) last = current;
         if (!candidate || (candidate->code < cmd)) candidate = current;
       }
+
       ++current;
     }
   }
@@ -250,6 +251,7 @@ describeCommand (int command, char *buffer, int size) {
     if (candidate->code != cmd)
       if ((blk == 0) || (candidate->code < last->code))
         candidate = NULL;
+
   if (!candidate) {
     snprintf(buffer, size, "unknown: %06X", command);
   } else if ((candidate == last) && (blk != 0)) {
@@ -258,9 +260,11 @@ describeCommand (int command, char *buffer, int size) {
       default:
         number = cmd - candidate->code + 1;
         break;
+
       case VAL_PASSCHAR:
         number = cmd - candidate->code;
         break;
+
       case VAL_PASSDOTS: {
         unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
         int dot;
@@ -279,6 +283,7 @@ describeCommand (int command, char *buffer, int size) {
     int offset;
     snprintf(buffer, size, "%s: %n%s",
              candidate->name, &offset, candidate->description);
+
     if ((blk == 0) && (command & VAL_TOGGLE_MASK)) {
       char *description = buffer + offset;
       const char *oldVerb = "toggle";
@@ -307,24 +312,34 @@ describeCommand (int command, char *buffer, int size) {
 
 void
 learnMode (BrailleDisplay *brl, int poll, int timeout) {
-  int timer = 0;
   setStatusText(brl, "lrn");
   message("command learn mode", MSG_NODELAY);
+
+  timeout_yet(0);
   do {
     int command = readBrailleCommand(brl, CMDS_SCREEN);
     if (command != EOF) {
-      int cmd = command & VAL_CMD_MASK;
-      char buffer[0X100];
       LogPrint(LOG_DEBUG, "Learn: command=%06X", command);
       if (IS_DELAYED_COMMAND(command)) continue;
-      if (cmd == CMD_NOOP) continue;
-      if (cmd == CMD_LEARN) return;
-      describeCommand(command, buffer, sizeof(buffer));
-      LogPrint(LOG_DEBUG, "Learn: %s", buffer);
-      message(buffer, MSG_NODELAY|MSG_SILENT);
-      timer = 0;
+
+      {
+        int cmd = command & VAL_CMD_MASK;
+        if (cmd == CMD_NOOP) continue;
+        if (cmd == CMD_LEARN) return;
+      }
+
+      {
+        char buffer[0X100];
+        describeCommand(command, buffer, sizeof(buffer));
+        LogPrint(LOG_DEBUG, "Learn: %s", buffer);
+        message(buffer, MSG_NODELAY|MSG_SILENT);
+      }
+
+      timeout_yet(0);
     }
-  } while ((timer += drainBrailleOutput(brl, poll)) < timeout);
+
+    drainBrailleOutput(brl, poll);
+  } while (!timeout_yet(timeout));
   message("done", 0);
 }
 #endif /* ENABLE_LEARN_MODE */
