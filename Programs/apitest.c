@@ -123,14 +123,14 @@ void enterLearnMode(void)
     exit(1);
   }
 
-  if (brlapi_writeBrl(0, "command learn mode")<0) {
-    brlapi_perror("writeBrl");
+  if (brlapi_writeText(0, "command learn mode")<0) {
+    brlapi_perror("brlapi_writeText");
     exit(1);
   }
 
   while ((res = brlapi_readKey(1, &cmd)) != -1) {
     describeCommand(cmd, buf, sizeof(buf));
-    brlapi_writeBrl(0, buf);
+    brlapi_writeText(0, buf);
     if (cmd==CMD_LEARN) break;
   }
 }

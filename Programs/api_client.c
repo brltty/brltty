@@ -511,9 +511,9 @@ int brlapi_setFocus(int tty)
   return res;
 }
 
-/* Function : brlapi_writeBrl */
+/* Function : brlapi_writeText */
 /* Writes a string to the braille display */
-int brlapi_writeBrl(int cursor, const unsigned char *str)
+int brlapi_writeText(int cursor, const unsigned char *str)
 {
   int dispSize = brlx * brly;
   uint32_t min, i;

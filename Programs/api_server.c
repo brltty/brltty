@@ -154,7 +154,7 @@ static Tconnection *last_conn_write;
 /****************************************************************************/
 
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
-static int initializeunmaskedKeys(Tconnection *c);
+static int initializeUnmaskedKeys(Tconnection *c);
 
 /****************************************************************************/
 /** PACKET MANAGING                                                        **/
@@ -405,7 +405,7 @@ static int processRequest(Tconnection *c)
           return 0;
         }
       }
-      if (initializeunmaskedKeys(c)==-1) {
+      if (initializeUnmaskedKeys(c)==-1) {
         LogPrint(LOG_WARNING,"Failed to initialize unmasked keys");
         freeRangeList(&c->unmaskedKeys);
         WERR(c->fd,BRLERR_NOMEM);
@@ -859,13 +859,13 @@ static void *server(void *arg)
 /** MISCELLANEOUS FUNCTIONS                                                **/
 /****************************************************************************/
 
-/* Function : initializeunmaskedKeys */
+/* Function : initializeUnmaskedKeys */
 /* Specify which keys should be passed to the client by default, as soon */
 /* as he controls the tty */
 /* If clients asked for commands, one lets him process routing cursor */
 /* and screen-related commands */
 /* If the client is interested in braille codes, one passes him every key */
-static int initializeunmaskedKeys(Tconnection *c)
+static int initializeUnmaskedKeys(Tconnection *c)
 {
   if (c==NULL) return 0;
   if (addRange(0,BRL_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;

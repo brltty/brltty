@@ -322,7 +322,7 @@ int brlapi_setFocus(int tty);
 /** \defgroup brlapi_write Writing on the braille display
  * \brief write text to the braille display
  *
- * Once brlapi_getTty() was called, the application can call brlapi_writeBrl()
+ * Once brlapi_getTty() was called, the application can call brlapi_writeText()
  * to write things on the braille display.
  *
  * \note Be sure to call brlapi_getTty() \e before calling brlapi_write*(), or
@@ -331,7 +331,7 @@ int brlapi_setFocus(int tty);
  *
  * @{ */
 
-/* brlapi_writeBrl */
+/* brlapi_writeText */
 /** Write the given \\0-terminated string to the braille display
  *
  * If the string is too long, it is cut. If it's too short, spaces are appended.
@@ -342,7 +342,7 @@ int brlapi_setFocus(int tty);
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_writeBrl(int cursor, const unsigned char *str);
+int brlapi_writeText(int cursor, const unsigned char *str);
 
 /* brlapi_writeDots */
 /** Write the given dots array to the display
