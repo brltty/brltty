@@ -25,7 +25,7 @@ By using a real tty
 
 Just give the serial port on which it is connected to brltty:
 
-# brltty -b tt -t identity -d /dev/ttyS0 -B term=ampex232,cset=IBM850,locale=fr_FR.IBM850
+# brltty -b tt -t identity -d /dev/ttyS0 -B term=ampex232,baud=19200,cset=IBM850,locale=fr_FR.IBM850
 
 I here had to precise the type of terminal (I have an Ampex232, see somewhere
 like /usr/share/terminfo for your own's.
