@@ -574,15 +574,17 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       /* No routing keys, no dots, only front keys */
       if (cmds == CMDS_PREFS) {
 	switch (keystate) {
-          case K_UP:
-          case K_RL:
-            cmd = CMD_MENU_PREV_SETTING;
-            break;
-
-          case K_DOWN:
-          case K_RR:
-            cmd = CMD_MENU_NEXT_SETTING;
-            break;
+          HKEY(910, K_A, CMD_PREFLOAD, "Discard changes");
+          HKEY(910, K_D, CMD_PREFLOAD, "Exit menu");
+          HKEY2(910, K_B, K_C,
+                CMD_MENU_FIRST_ITEM, CMD_MENU_LAST_ITEM,
+                "Go to first/last item");
+          HKEY2(910, K_RL, K_RR,
+                CMD_MENU_PREV_ITEM, CMD_MENU_NEXT_ITEM,
+                "Go to previous/next item");
+          HKEY2(910, K_UP, K_DOWN,
+                CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING,
+                "Select previous/next setting");
 	}
       }
 

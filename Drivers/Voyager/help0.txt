@@ -70,4 +70,11 @@ Chord-246: Escape
 Chord-145: Delete
 Chord-7: Left arrow
 Chord-8: Right arrow
+
+When in Preferences Menu
+A: Discard changes
+D: Exit menu
+B / C: Go to first/last item
+RL / RR: Go to previous/next item
+UP / DOWN: Select previous/next setting
 -----End of help screen-----
