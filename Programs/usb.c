@@ -915,8 +915,8 @@ usbChooseChannel (UsbDevice *device, void *data) {
     if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
       if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
 
-      if (usbClaimInterface(device, definition->interface)) {
-        if (usbSetConfiguration(device, definition->configuration)) {
+      if (usbSetConfiguration(device, definition->configuration)) {
+        if (usbClaimInterface(device, definition->interface)) {
           if (usbSetAlternative(device, definition->interface, definition->alternative)) {
             int ok = 1;
 
@@ -938,8 +938,8 @@ usbChooseChannel (UsbDevice *device, void *data) {
               return 1;
             }
           }
+          usbReleaseInterface(device, definition->interface);
         }
-        usbReleaseInterface(device, definition->interface);
       }
     }
 
