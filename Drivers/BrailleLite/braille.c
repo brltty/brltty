@@ -115,155 +115,154 @@ brl_identify (void)
   /*LogPrint(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");*/
 }
 
+static void
+init_maps (void) {
+  static unsigned char standard[] = {0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
+  static unsigned char Blazie[]   = {0, 3, 1, 4, 2, 5, 6, 7};	/* Blazie standard */
+  int byte;			/* loop counters */
+
+  memset(blitetrans, 0, 256);	/* ordinary dot mapping */
+  memset(revtrans, 0, 256);	/* display reversal - extra mapping */
+
+  for (byte = 0; byte < 256; byte++) {
+    int bit;
+    for (bit = 0; bit < 8; bit++)
+      if (byte & (1 << standard[bit]))
+        blitetrans[byte] |= 1 << Blazie[bit];
+    for (bit = 0; bit < 8; bit++) {
+      revtrans[byte] <<= 1;
+      if (byte & (1 << bit))
+        revtrans[byte] |= 1;
+    }
+  }
+}
+
+static int
+send_prebrl (int forever) {
+  static unsigned char prebrl[] = {0X05, 0X44};			/* code to send before Braille */
+  if (forever) {
+    /* wait forever method */
+    while (1) {
+      write(blite_fd, prebrl, sizeof(prebrl));
+      waiting_ack = 1;
+      delay(100);
+      getbrlkeys();
+      if (!waiting_ack) break;
+      delay(2000);
+    }
+  } else {
+    int timeout = ACK_TIMEOUT / 10;
+    write(blite_fd, prebrl, sizeof(prebrl));
+    waiting_ack = 1;
+    while (1) {
+      delay(10);	/* sleep for 10 ms */
+      getbrlkeys();
+      if (!waiting_ack) break;
+      if (--timeout < 0) return 0;
+    }
+  }
+  return 1;
+}
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 {
-  static unsigned good_baudrates[]
-    = {300,600,1200,2400,4800,9600,19200,38400, 0};
+  static unsigned good_baudrates[] =
+    {300,600,1200,2400,4800,9600,19200,38400, 0};
   speed_t baudrate;
-  struct termios newtio;	/* new terminal settings */
-  short i, n;			/* loop counters */
-  static unsigned char standard[8] =
-  {0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
-  static unsigned char Blazie[8] =
-  {0, 3, 1, 4, 2, 5, 6, 7};	/* Blazie standard */
-  static unsigned char prebrl[2] =
-  {"\005D"};			/* code to send before Braille */
   /* Init string for Model detection */
-  static unsigned char InitData[18]="";
-#ifndef DETECT_FOREVER
-  int timeout;			/* while waiting for an ACK */
-#endif /* DETECT_FOREVER */
-  unsigned char BltLen;
 
-  prevdata = rawdata = NULL;		/* clear pointers */
-  if(!(qbase = (unsigned char *) malloc (QSZ))) {
-    LogPrint(LOG_ERR, "Cannot allocate qbase");
-    return 0;
-  }
-
-  if(!*parameters[PARM_BAUDRATE]
-     || !validateBaud(&baudrate, "baud rate",
-		     parameters[PARM_BAUDRATE], good_baudrates))
+  if (!*parameters[PARM_BAUDRATE] ||
+      !validateBaud(&baudrate, "baud rate",
+		    parameters[PARM_BAUDRATE], good_baudrates))
     baudrate = BAUDRATE;
-  if(*parameters[PARM_KBEMU])
+
+  if (*parameters[PARM_KBEMU])
     validateYesNo(&kbemu, "keyboard emulation initial state",
 		  parameters[PARM_KBEMU]);
   kbemu = !!kbemu;
 
-  /* Open the Braille display device for random access */
-  LogPrint(LOG_DEBUG, "Opening serial port %s", brldev);
-  blite_fd = open (brldev, O_RDWR | O_NOCTTY);
-  if (blite_fd < 0)
-    {
-      LogPrint (LOG_ERR, "open %s: %s", brldev, strerror (errno));
-      return 0;
-    }
-  if(tcgetattr (blite_fd, &oldtio) <0){	/* save current settings */
-    LogPrint(LOG_ERR, "tcgetattr: %s", strerror(errno));
-    return 0;
-  }
+  if ((qbase = (unsigned char *) malloc(QSZ))) {
+    /* Open the Braille display device for random access */
+    LogPrint(LOG_DEBUG, "Opening serial port: %s", brldev);
+    if ((blite_fd = open(brldev, O_RDWR | O_NOCTTY)) != -1) {
+      /* save current settings */
+      if (tcgetattr(blite_fd, &oldtio) != -1) {
+        struct termios newtio;	/* new terminal settings */
+        /* Set bps, flow control and 8n1, enable reading */
+        newtio.c_cflag = baudrate | CRTSCTS | CS8 | CLOCAL | CREAD;
+        LogPrint(LOG_DEBUG, "Selecting baudrate %d",
+                 baud2integer(baudrate));
 
-  /* Set bps, flow control and 8n1, enable reading */
-  newtio.c_cflag = baudrate | CRTSCTS | CS8 | CLOCAL | CREAD;
-  LogPrint(LOG_DEBUG, "Selecting baudrate %d",
-	   baud2integer(baudrate));
+        /* Ignore bytes with parity errors and make terminal raw and dumb */
+        newtio.c_iflag = IGNPAR;
+        newtio.c_oflag = 0;		/* raw output */
+        newtio.c_lflag = 0;		/* don't echo or generate signals */
+        newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
+        newtio.c_cc[VTIME] = 0;
 
-  /* Ignore bytes with parity errors and make terminal raw and dumb */
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;		/* raw output */
-  newtio.c_lflag = 0;		/* don't echo or generate signals */
-  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-  newtio.c_cc[VTIME] = 0;
-  tcflush (blite_fd, TCIFLUSH);	/* clean line */
-  if(tcsetattr (blite_fd, TCSANOW, &newtio) <0){    /* activate new settings */
-    LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
-    goto failure;
-  }
-
-#ifndef DETECT_FOREVER
-  /* Braille Lite identification */
-  write (blite_fd, prebrl, 2);
-  /* Now we must wait for an acknowledgement ... */
-  waiting_ack = 1;
-  timeout = ACK_TIMEOUT / 10;
-  do {
-    getbrlkeys ();
-    delay (10);	/* sleep for 10 ms */
-    if (--timeout < 0)
-    {
-      LogPrint(LOG_WARNING, "BLT doesn't seem to be connected, giving up!");
-      goto RestorePort;
-    }
-  }
-  while (waiting_ack);
-
+        /* activate new settings */
+        tcflush(blite_fd, TCIFLUSH);	/* clean line */
+        if (tcsetattr(blite_fd, TCSANOW, &newtio) != -1) {
+#ifdef DETECT_FOREVER
+          if (send_prebrl(1)) {
 #else /* DETECT_FOREVER */
-  /* wait forever method */
- again:
-  write (blite_fd, prebrl, 2);
-  waiting_ack = 1;
-  delay (100);
-  getbrlkeys ();
-  if(waiting_ack) {
-    delay(2000);
-    goto again;
-  }
+          if (send_prebrl(0)) {
 #endif /* DETECT_FOREVER */
+            LogPrint(LOG_DEBUG, "Got response.");
 
-  LogPrint(LOG_DEBUG, "Got response");
+            /* Next, let's detect the BLT-Model (18 || 40). */
+            {
+              unsigned char BltLen = 18;
+              unsigned char cells[BltLen];
+              memset(cells, 0, BltLen);
+              write(blite_fd, cells, BltLen);
+              waiting_ack = 1;
+              delay(400);
+              getbrlkeys();
+              if (waiting_ack) {
+                /* no response, so it must be BLT40 */
+                BltLen = 40;
+                brl->helpPage = 1;
+              } else {
+                brl->helpPage = 0;
+              }
+              brl->x = blitesz = BltLen;	/* initialise size of display - */
+              brl->y = 1;			/* Braille Lites are single line displays */
+              LogPrint(LOG_NOTICE, "Braille Lite %d detected.", BltLen);
+            }
 
-  /* Next, let's detect the BLT-Model (18 || 40). */
-  BltLen=18;
-  write (blite_fd, InitData, BltLen);
-  waiting_ack = 1;
-  delay (400);
-  getbrlkeys();
-  if (waiting_ack) /* no response, so it must be BLT40 */
-  { /* assuming BLT40 now */
-    BltLen=40;
-    brl->helpPage=1;
-  }else brl->helpPage=0;
-  
-  blitesz = brl->x = BltLen;	/* initialise size of display - */
-  brl->y = 1;			/* Braille Lites are single line displays */
-  LogPrint(LOG_NOTICE, "Braille Lite %d detected",BltLen);
-
-  /* Allocate space for buffers */
-  prevdata = (unsigned char *) malloc (brl->x);
-  rawdata = (unsigned char *) malloc (brl->x);
-  if (!prevdata || !rawdata)
-    {
-      LogPrint (LOG_ERR, "Cannot allocate braille buffers.");
-      goto failure;
+            /* Allocate space for buffers */
+            if ((prevdata = (unsigned char *) malloc(brl->x))) {
+              memset(prevdata, 0, brl->x);
+              if ((rawdata = (unsigned char *) malloc(brl->x))) {
+                init_maps();
+                return 1;
+                free(rawdata);
+              } else {
+                LogPrint(LOG_ERR, "Cannot allocate rawdata.");
+              }
+              free(prevdata);
+            } else {
+              LogPrint(LOG_ERR, "Cannot allocate prevdata.");
+            }
+          } else {
+            LogPrint(LOG_WARNING, "BLT doesn't seem to be connected, giving up!");
+          }
+          tcsetattr(blite_fd, TCSANOW, &oldtio);
+        } else {
+          LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
+        }
+      } else {
+        LogPrint(LOG_ERR, "tcgetattr: %s", strerror(errno));
+      }
+      close(blite_fd);
+    } else {
+      LogPrint(LOG_ERR, "Open %s: %s", brldev, strerror(errno));
     }
-  memset (prevdata, 0, brl->x);
-
-  /* Generate dot mapping tables: */
-  memset (blitetrans, 0, 256);	/* ordinary dot mapping */
-  memset (revtrans, 0, 256);	/* display reversal - extra mapping */
-  for (n = 0; n < 256; n++)
-    {
-      for (i = 0; i < 8; i++)
-	if (n & 1 << standard[i])
-	  blitetrans[n] |= 1 << Blazie[i];
-      for (i = 0; i < 8; i++)
-	{
-	  revtrans[n] <<= 1;
-	  if (n & (1 << i))
-	    revtrans[n] |= 1;
-	}
-    }
-  return 1;
-
-failure:
-  free (prevdata);
-  free (rawdata);
-  free (qbase);
-  if (blite_fd >= 0) {
-    tcsetattr (blite_fd, TCSANOW, &oldtio);	/* restore terminal settings */
-    close (blite_fd);
+    free(qbase);
+  } else {
+    LogPrint(LOG_ERR, "Cannot allocate qbase.");
   }
   return 0;
 }
@@ -299,8 +298,6 @@ static void
 brl_writeWindow (BrailleDisplay * brl)
 {
   short i;			/* loop counter */
-  static unsigned char prebrl[2] =
-  {"\005D"};			/* code to send before Braille */
   static int timer = 0;		/* for internal cursor */
   int timeout;			/* while waiting for an ACK */
 
@@ -347,17 +344,7 @@ brl_writeWindow (BrailleDisplay * brl)
       /* Next we send the ^eD sequence, and wait for an ACK */
       waiting_ack = 1;
       /* send the ^ED... */
-      write (blite_fd, prebrl, 2);
-
-      /* Now we must wait for an acknowledgement ... */
-      timeout = ACK_TIMEOUT / 10;
-      do {
-	getbrlkeys ();
-        delay (10);	/* sleep for 10 ms */
-        if (--timeout < 0)
-	    return; /* BLT doesn't seem to be connected any more! */
-	}
-      while (waiting_ack);
+      if (!send_prebrl(0)) return;
 
       /* OK, now we'll suppose we're all clear to send Braille data. */
       write (blite_fd, rawdata, blitesz);
