@@ -24,8 +24,8 @@ extern "C" {
 
 #define HURD_CONSDIR		"/dev/cons"
 #define HURD_VCSDIR		"/dev/vcs"
-#define HURD_INPUTPATH		HURD_VCSDIR "/input"
-#define HURD_DISPLAYPATH	HURD_VCSDIR "/display"
+#define HURD_INPUTPATH		HURD_VCSDIR "/%u/input"
+#define HURD_DISPLAYPATH	HURD_VCSDIR "/%u/display"
 #define HURD_CURVCSPATH		HURD_CONSDIR "/vcs"
 
 #ifdef __cplusplus
