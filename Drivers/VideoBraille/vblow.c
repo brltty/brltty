@@ -61,7 +61,7 @@ void vbsleep(long x) {
   for (i = 0; i<x; i++) writePort1(0x80, 1);
 }
 
-void vbclockpause() {
+static void vbclockpause() {
   int i;
   for (i = 0; i<=VBCLOCK*100; i++) ;
 }

@@ -45,7 +45,7 @@
 #include "braille.h"
 
 
-t_key		num_keys[27] = {
+static t_key	num_keys[27] = {
   {1, '1', 0},
   {2, '2', 0},
   {3, '3', 0},
@@ -83,7 +83,7 @@ t_key		num_keys[27] = {
 ** update the driver for next releases.
 */
 
-t_key		scriba_keys[17] = {		
+static t_key	scriba_keys[17] = {		
   {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
   {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
   {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
@@ -103,7 +103,7 @@ t_key		scriba_keys[17] = {
   {0, 0, 0}
 };
 
-t_key		pscriba_keys[7] = {
+static t_key	pscriba_keys[7] = {
   {CMD_PREFMENU, 2, 0},
   {CMD_TUNES, 6, 0},
   {CMD_CSRTRK, 8, 0},
@@ -113,7 +113,7 @@ t_key		pscriba_keys[7] = {
   {0, 0, 0}
 };
 
-t_key		azer40_keys[8] = {
+static t_key	azer40_keys[8] = {
   {CMD_FWINLT, 16, 0},
   {CMD_LNUP, 17, 0},
   {CMD_PRPROMPT, 18, 0},
@@ -124,9 +124,9 @@ t_key		azer40_keys[8] = {
   {0, 0, 0}
 };
 
-t_key		*pazer40_keys = pscriba_keys;
+static t_key	*pazer40_keys = pscriba_keys;
 
-t_key		azer80_keys[23] = {
+static t_key	azer80_keys[23] = {
   {CMD_TOP_LEFT, 1, 0},
   {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
   {CMD_PRDIFLN, 3, 0},
@@ -151,15 +151,15 @@ t_key		azer80_keys[23] = {
   {CMD_FWINRT, 24, 0},
   {0, 0, 0}
 };
-t_key		*pazer80_keys = pscriba_keys;
+static t_key	*pazer80_keys = pscriba_keys;
 
-t_key		*clio_keys = azer80_keys;
-t_key		*pclio_keys = pscriba_keys;
+static t_key	*clio_keys = azer80_keys;
+static t_key	*pclio_keys = pscriba_keys;
 
-t_key		*nb_keys = azer80_keys;
-t_key		*pnb_keys = pscriba_keys;
+static t_key	*nb_keys = azer80_keys;
+static t_key	*pnb_keys = pscriba_keys;
 
-t_key		iris_keys[14] = {
+static t_key	iris_keys[14] = {
   {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
   {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
   {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
@@ -194,7 +194,7 @@ t_key		iris_keys[14] = {
 ** space	512
 */
 
-t_alias		brl_key[] = {
+static t_alias	brl_key[] = {
   {0x100,	VAL_PASSKEY + VPK_BACKSPACE},
   {0x300,	VAL_PASSKEY + VPK_RETURN},
   {0x232,	VAL_PASSKEY + VPK_TAB},
@@ -249,14 +249,14 @@ static TranslationTable outputTable;
 
 /* Global variables */
 
-int		InDate = 0;
-int		chars_per_sec;
-int		brl_fd;			/* file descriptor for Braille display */
-struct termios	oldtio;		/* old terminal settings */
-unsigned char	*rawdata = NULL;		/* translated data to send to Braille */
-unsigned char	*prevdata = NULL;	/* previously sent raw data */
-unsigned char	*lcd_data = NULL;	/* previously sent to LCD */
-int		NbCols = 0;			/* number of cells available */
+static int	InDate = 0;
+static int		chars_per_sec;
+static int		brl_fd;			/* file descriptor for Braille display */
+static struct termios	oldtio;		/* old terminal settings */
+static unsigned char	*rawdata = NULL;		/* translated data to send to Braille */
+static unsigned char	*prevdata = NULL;	/* previously sent raw data */
+static unsigned char	*lcd_data = NULL;	/* previously sent to LCD */
+static int		NbCols = 0;			/* number of cells available */
 static short	ReWrite = 0;		/* 1 if display need to be rewritten */
 static short	ReWrite_LCD = 0;		/* same as rewrite, for LCD */
 static int	OffsetType = CR_ROUTE;
