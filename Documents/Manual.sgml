@@ -3871,7 +3871,7 @@ The following directives are provided:
     Use the <tt/dot/ directive to specify
     how the undefined bytes are to be represented in braille.
     See the attributes translation tables for examples of its use.
-    The default is that all dots are on.
+    The default is that all dots are <tt/on/.
 
     <descrip>
       <tag><em/dot/</tag>
@@ -4118,19 +4118,23 @@ BRLTTY supports the following speech synthesizers:
 
 <sect1>Standard Braille Dot Numbering Convention<label id="dots"><p>
 A standard braille cell consists of six dots
-arranged in two columns and three rows.
-Computer braille has introduced a fourth row at the bottom.
+arranged in three rows and two columns.
 Each dot can be specifically identified by its number as follows:
 <descrip>
-  <tag/1/Row 1 (top) left.
-  <tag/2/Row 2 left.
-  <tag/3/Row 3 left.
-  <tag/4/Row 1 (top) right.
-  <tag/5/Row 2 right.
-  <tag/6/Row 3 right.
-  <tag/7/Row 4 (bottom) left.
-  <tag/8/Row 4 (bottom) right.
+  <tag/1/Top-left (row 1, column 1).
+  <tag/2/Middle-left (row 2, column 1).
+  <tag/3/Bottom-left (row 3, column 1).
+  <tag/4/Top-right (row 1, column 2).
+  <tag/5/Middle-right (row 2, column 2).
+  <tag/6/Bottom-right (row 3, column 2).
 </descrip>
+
+Computer braille has introduced a fourth row at the bottom.
+<descrip>
+  <tag/7/Below-left (row 4, column 1).
+  <tag/8/Below-right (row 4, column 2).
+</descrip>
+
 Perhaps a picture will make this numbering convention easier to understand.
 <tscreen><verb>
 1 o o 4

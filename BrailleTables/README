@@ -96,19 +96,22 @@ Examples:
 Standard Braille Dot Numbering Convention
 -----------------------------------------
 
-A standard braille cell consists of six dots arranged in two columns and three
-rows. Computer braille has introduced a fourth row at the bottom. Each dot can
-be specifically identified by its number as follows:
+A standard braille cell consists of six dots arranged in three rows and two
+columns. Each dot can be specifically identified by its number as follows:
 
-   Dot  Position
-    1   Row 1 (top) left.
-    2   Row 2 left.
-    3   Row 3 left.
-    4   Row 1 (top) right.
-    5   Row 2 right.
-    6   Row 3 right.
-    7   Row 4 (bottom) left.
-    8   Row 4 (bottom) right.
+   Dot  Position     Row  Col
+    1   top-left      1    1
+    2   middle-left   2    1
+    3   bottom-left   3    1
+    4   top-right     1    2
+    5   middle-right  2    2
+    6   bottom-right  3    2
+
+Computer braille has introduced a fourth row at the bottom.
+
+   Dot  Position     Row  Col
+    7   below-left    4    1
+    8   below-right   4    2
 
 Perhaps a picture will make this numbering convention easier to understand.
 
