@@ -161,7 +161,7 @@ char *brlapi_getDriverName();
 
 /* brlapi_getDisplaySize */
 /* Returns the size of the braille display */
-int brlapi_getDisplaySize(int *x, int *y);
+int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
 
 /* brlapi_loadAuthKey */
 /* Loads an authentication key from the given file. The key is stored in */

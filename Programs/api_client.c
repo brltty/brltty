@@ -360,7 +360,7 @@ char *brlapi_getDriverName()
 
 /* Function : brlapi_getDisplaySize */
 /* Returns the size of the braille display */
-int brlapi_getDisplaySize(int *x, int *y)
+int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 {
  brl_type_t type;
  uint32_t DisplaySize[2];
