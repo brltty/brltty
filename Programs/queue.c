@@ -156,7 +156,6 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
     queue->deallocate = deallocate;
     queue->compare = compare;
     return queue;
-    free(queue);
   }
   return NULL;
 }

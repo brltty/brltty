@@ -46,8 +46,6 @@ int vbinit() {
       memset(alldots, 0XFF, 40);
       vbdisplay(alldots);
       return 0;
-
-      disablePorts(0X80, 1);
     }
     disablePorts(LPTPORT, 3);
   }

@@ -687,8 +687,6 @@ dimensionsChanged (BrailleDisplay *brl) {
         brl->y = rows;
         brl->helpPage = 0;
         return 1;
-
-        free(visual);
       }
 
       free(braille);

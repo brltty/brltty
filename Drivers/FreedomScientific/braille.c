@@ -154,9 +154,6 @@ openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
     usbBeginInput(usbDevice, usbInputEndpoint, 8);
     return 1;
-
-    usbCloseDevice(usbDevice);
-    usbDevice = NULL;
   } else {
     LogPrint(LOG_DEBUG, "USB device not found%s%s",
              (*device? ": ": "."),
@@ -260,22 +257,22 @@ typedef struct {
 
 typedef struct {
   const char *identifier;
+  const DotsTable *dotsTable;
   unsigned char totalCells;
   unsigned char statusCells;
-  const DotsTable *dotsTable;
-  int hotkeysRow;
+  signed char hotkeysRow;
 } ModelEntry;
 
 static const DotsTable dots12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
 static const DotsTable dots12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
 
 static const ModelEntry modelTable[] = {
-  {"Focus 44"     , 44, 3, &dots12374568, -1},
-  {"Focus 70"     , 70, 3, &dots12374568, -1},
-  {"Focus 84"     , 84, 3, &dots12374568, -1},
-  {"pm display 20", 20, 0, &dots12345678,  1},
-  {"pm display 40", 40, 0, &dots12345678,  1},
-  {NULL           ,  0, 0, NULL         , -1}
+  {"Focus 44"     , &dots12374568, 44, 3, -1},
+  {"Focus 70"     , &dots12374568, 70, 3, -1},
+  {"Focus 84"     , &dots12374568, 84, 3, -1},
+  {"pm display 20", &dots12345678, 20, 0,  1},
+  {"pm display 40", &dots12345678, 40, 0,  1},
+  {NULL           , NULL         ,  0, 0, -1}
 };
 static const ModelEntry *model;
 

@@ -525,9 +525,6 @@ openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
     usbBeginInput(usbDevice, usbInputEndpoint, 8);
     return 1;
-
-    usbCloseDevice(usbDevice);
-    usbDevice = NULL;
   } else {
     LogPrint(LOG_DEBUG, "USB device not found%s%s",
              (*device? ": ": "."),
