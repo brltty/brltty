@@ -330,7 +330,7 @@ readBytes (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, in
 static int
 interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
   int tn;
-  LogBytes("Identification packet", identity, sizeof(identity));
+  LogBytes("Identity", identity, 10);
   LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
            identity[2],
            identity[3], identity[4], identity[5],
