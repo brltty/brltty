@@ -258,7 +258,7 @@ usbReadConfiguration (UsbDevice *device) {
 }
 
 static const UsbInterfaceDescriptor *
-usbFindInterfaceDescriptor (UsbDevice *device, unsigned char interfaceNumber) {
+usbFindInterfaceDescriptor (UsbDevice *device, unsigned char interface, unsigned char alternative) {
   if (usbReadConfiguration(device)) {
     int offset = 0;
 
@@ -267,11 +267,12 @@ usbFindInterfaceDescriptor (UsbDevice *device, unsigned char interfaceNumber) {
       offset += descriptor->bLength;
 
       if (descriptor->bDescriptorType == UsbDescriptorType_Interface)
-        if (descriptor->bInterfaceNumber == interfaceNumber)
-          return descriptor;
+        if (descriptor->bInterfaceNumber == interface)
+          if (descriptor->bAlternateSetting == alternative)
+            return descriptor;
     }
 
-    LogPrint(LOG_WARNING, "USB: interface descriptor not found: %d", interfaceNumber);
+    LogPrint(LOG_WARNING, "USB: interface descriptor not found: %d.%d", interface, alternative);
     errno = ENOENT;
   }
 
@@ -451,15 +452,28 @@ usbCloseInterface (
 int
 usbOpenInterface (
   UsbDevice *device,
-  unsigned char interface
+  unsigned char interface,
+  unsigned char alternative
 ) {
-  const UsbInterfaceDescriptor *descriptor = usbFindInterfaceDescriptor(device, interface);
-  if (descriptor != device->interface) {
-    usbCloseInterface(device);
-    if (!usbClaimInterface(device, interface)) return 0;
+  const UsbInterfaceDescriptor *descriptor = usbFindInterfaceDescriptor(device, interface, alternative);
+  if (!descriptor) return 0;
+  if (descriptor == device->interface) return 1;
+
+  if (device->interface)
+    if (device->interface->bInterfaceNumber != interface)
+      usbCloseInterface(device);
+
+  if (!device->interface)
+    if (!usbClaimInterface(device, interface))
+      return 0;
+
+  if (usbSetAlternative(device, interface, alternative)) {
     device->interface = descriptor;
+    return 1;
   }
-  return 1;
+
+  if (!device->interface) usbReleaseInterface(device, interface);
+  return 0;
 }
 
 void
@@ -1015,27 +1029,25 @@ usbChooseChannel (UsbDevice *device, void *data) {
       if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
 
       if (usbSetConfiguration(device, definition->configuration)) {
-        if (usbOpenInterface(device, definition->interface)) {
-          if (usbSetAlternative(device, definition->interface, definition->alternative)) {
-            int ok = 1;
+        if (usbOpenInterface(device, definition->interface, definition->alternative)) {
+          int ok = 1;
 
-            if (definition->baud) {
-              const UsbSerialOperations *serial = usbGetSerialOperations(device);
-              if (serial) {
-                if (!serial->setBaud(device, definition->baud)) ok = 0;
-                if (!serial->setFlowControl(device, definition->flowControl)) ok = 0;
-                if (!serial->setDataFormat(device, definition->dataBits, definition->stopBits, definition->parity)) ok = 0;
-              } else {
-                LogPrint(LOG_WARNING, "Unsupported serial adapter: vendor=%04X product=%04X",
-                         definition->vendor, definition->product);
-                ok = 0;
-              }
+          if (definition->baud) {
+            const UsbSerialOperations *serial = usbGetSerialOperations(device);
+            if (serial) {
+              if (!serial->setBaud(device, definition->baud)) ok = 0;
+              if (!serial->setFlowControl(device, definition->flowControl)) ok = 0;
+              if (!serial->setDataFormat(device, definition->dataBits, definition->stopBits, definition->parity)) ok = 0;
+            } else {
+              LogPrint(LOG_WARNING, "Unsupported serial adapter: vendor=%04X product=%04X",
+                       definition->vendor, definition->product);
+              ok = 0;
             }
+          }
 
-            if (ok) {
-              choose->definition = definition;
-              return 1;
-            }
+          if (ok) {
+            choose->definition = definition;
+            return 1;
           }
           usbCloseInterface(device);
         }

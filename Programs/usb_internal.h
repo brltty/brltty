@@ -86,6 +86,11 @@ extern int usbReleaseInterface (
   UsbDevice *device,
   unsigned char interface
 );
+extern int usbSetAlternative (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char alternative
+);
 
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);

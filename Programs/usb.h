@@ -278,15 +278,11 @@ extern int usbGetConfiguration (
 
 extern int usbOpenInterface (
   UsbDevice *device,
-  unsigned char interface
+  unsigned char interface,
+  unsigned char alternative
 );
 extern void usbCloseInterface (
   UsbDevice *device
-);
-extern int usbSetAlternative (
-  UsbDevice *device,
-  unsigned char interface,
-  unsigned char alternative
 );
 
 extern int usbResetEndpoint (
