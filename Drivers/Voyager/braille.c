@@ -34,6 +34,7 @@
  *       Chorded functions work without chording when inputmode is no.
  *       Move complex routing key combinations to front/dot keys.
  *       Duplicate status key bindings on front/dot keys.
+ *       Execute on first release rather than on all released.
  * 0.10, March 2004: Use BRLTTY core repeat functions. Add brlinput parameter
  *   and toggle to disallow braille typing.
  * 0.01, January 2004: fork from the original driver which relied on an
@@ -647,11 +648,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 "Move cursor up/down (arrow keys)");
 	  HKEY(210, K_RL|K_UP, CMD_DISPMD, "Show attributes (toggle)");
 	  HKEY(210, K_RL|K_DOWN, CMD_SIXDOTS, "Six dots (toggle)");
-	  HKEY(210, K_RR|K_UP, CMD_FREEZE, "Freeze screen (toggle)");
-	  HKEY(302, K_RR|K_DOWN, CMD_CSRJMP_VERT,
-	       "Route cursor to current line");
+	  HKEY(210, K_RR|K_UP, CMD_AUTOREPEAT, "Autorepeat (toggle)");
+	  HKEY(210, K_RR|K_DOWN, CMD_AUTOSPEAK, "Autospeak (toggle)");
 
 	  HKEY(602, K_B|K_C, VAL_PASSDOTS+0, "Space bar")
+	  HKEY(302, K_A|K_D, CMD_CSRJMP_VERT,
+	       "Route cursor to current line");
 	}
       }
     } else if ((!inputMode || (pressedKeys.control & SPACE_BAR)) &&
@@ -665,16 +667,22 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
           if (!key_pressed) cmd = CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
           break;
 
-	CKEY(205, DOT1|DOT2|DOT3|DOT4|DOT5|DOT6|DOT7|DOT8, CMD_PREFMENU, "Preferences menu (toggle)");
+	CKEY(210, DOT1, CMD_ATTRVIS, "Attribute underlining (toggle)");
 	CKEY(610, DOT1|DOT2, VAL_PASSKEY + VPK_BACKSPACE, "Backspace key");
+	CKEY(210, DOT1|DOT4, CMD_CSRVIS, "Cursor visibility (toggle)");
 	CKEY(610, DOT1|DOT4|DOT5, VAL_PASSKEY + VPK_DELETE, "Delete key");
 	CKEY(610, DOT1|DOT5, VAL_PASSKEY + VPK_ESCAPE, "Escape key");
+	CKEY(210, DOT1|DOT2|DOT4, CMD_FREEZE, "Freeze screen (toggle)");
 	CKEY(201, DOT1|DOT2|DOT5, CMD_HELP, "Help screen (toggle)");
 	CKEY(610, DOT2|DOT4, VAL_PASSKEY + VPK_INSERT, "Insert key");
 	CKEY(201, DOT1|DOT2|DOT3, CMD_LEARN, "Learn mode (toggle)");
+	case DOT1|DOT2|DOT3|DOT4|DOT5|DOT6|DOT7|DOT8:
+	CKEY(205, DOT1|DOT3|DOT4, CMD_PREFMENU, "Preferences menu (toggle)");
 	CKEY(408, DOT1|DOT2|DOT3|DOT4, CMD_PASTE, "Paste cut text");
+	CKEY(206, DOT1|DOT2|DOT3|DOT5, CMD_PREFLOAD, "Reload preferences from disk");
 	CKEY(201, DOT2|DOT3|DOT4, CMD_INFO, "Status line (toggle)");
 	CKEY(610, DOT2|DOT3|DOT4|DOT5, VAL_PASSKEY + VPK_TAB, "Tab key");
+	CKEY(206, DOT2|DOT4|DOT5|DOT6, CMD_PREFSAVE, "Write preferences to disk");
 	CKEY(610, DOT4|DOT6, VAL_PASSKEY + VPK_RETURN, "Return key");
 	CKEY(610, DOT2, VAL_PASSKEY+VPK_PAGE_UP, "Page up");
 	CKEY(610, DOT5, VAL_PASSKEY+VPK_PAGE_DOWN, "Page down");

@@ -34,14 +34,20 @@ Modes and Functions
 Chord-125: Help screen (toggle)
 Chord-123: Learn mode (toggle)
 Chord-234: Status line (toggle)
-Chord-12345678: Preferences menu (toggle)
+Chord-134: Preferences menu (toggle)
+Chord-1235: Reload preferences from disk
+Chord-2456: Write preferences to disk
 RL+UP: Show attributes (toggle)
 RL+DOWN: Six dots (toggle)
-RR+UP: Freeze screen (toggle)
+RR+UP: Autorepeat (toggle)
+RR+DOWN: Autospeak (toggle)
+Chord-1: Attribute underlining (toggle)
+Chord-14: Cursor visibility (toggle)
+Chord-124: Freeze screen (toggle)
 
 Cursor Routing
 CRt#: Route cursor to cell
-RR+DOWN: Route cursor to current line
+A+D: Route cursor to current line
 
 Cut and Paste
 CRt#+D: Mark beginning of region to cut
