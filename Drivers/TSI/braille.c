@@ -343,7 +343,7 @@ myread(int fd, void *buf, unsigned len)
   while(l < len){
     r = read(fd,ptr+l,len-l);
     if(r == 0) return(l);
-    else if(r<0) return(r);
+    if(r<0) return(r);
     l += r;
   }
   return(l);
@@ -354,9 +354,9 @@ static int
 QueryDisplay(int brl_fd, char *reply)
 /* For auto-detect: send query, read response and validate response header. */
 {
-  if (write(brl_fd, BRL_QUERY, DIM_BRL_QUERY) == DIM_BRL_QUERY) {
+  int count;
+  if ((count = write(brl_fd, BRL_QUERY, DIM_BRL_QUERY)) == DIM_BRL_QUERY) {
     if (awaitInput(brl_fd, 100)) {
-      int count;
       if ((count = myread(brl_fd, reply, Q_REPLY_LENGTH)) != -1) {
         if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
           LogPrint(LOG_DEBUG, "Valid reply received.");
@@ -365,11 +365,13 @@ QueryDisplay(int brl_fd, char *reply)
           LogBytes("Unexpected response", reply, count);
         }
       } else {
-        LogError("read");
+        LogError("Read");
       }
     }
+  } else if (count != -1) {
+    LogPrint(LOG_ERR, "Short write: %d < %d", count, DIM_BRL_QUERY);
   } else {
-    LogError("write");
+    LogError("Write");
   }
   return 0;
 }
@@ -424,12 +426,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
        about the others. */
     if(!CheckCTSLine(brl_fd)){
       LogPrint(LOG_INFO, "Display is off or not connected");
-      while(!i){
+      do{
 	delay(DETECT_DELAY);
-	if((i = CheckCTSLine(brl_fd)) == -1)
-	  goto failure;
-      }
-      LogPrint(LOG_DEBUG,"Device was connected or activated");
+      }while(!CheckCTSLine(brl_fd));
+      LogPrint(LOG_DEBUG,"Display was connected or activated");
     }
     LogPrint(LOG_DEBUG,"Sending query at 9600bps");
     if(!restartSerialDevice(brl_fd, &curtio, 9600)) goto failure;
@@ -998,7 +998,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
       int ping_due = (pings==0 || (millisecondsBetween(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
       if((pings>=PING_MAXNQUERY && ping_due)
-	 || CheckCTSLine(brl_fd) != 1)
+	 || !CheckCTSLine(brl_fd))
 	return BRL_CMD_RESTARTBRL;
       else if(ping_due){
 	LogPrint(LOG_DEBUG,"Display idle: sending query");
