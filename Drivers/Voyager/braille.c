@@ -54,7 +54,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/usb.h"
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
@@ -69,46 +68,53 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
 
+typedef struct {
+  int (*openPort) (char **parameters, const char *device);
+  void (*closePort) (void);
+  int (*getDisplayLength) (unsigned char *length);
+  int (*logSerialNumber) (void);
+  int (*logHardwareVersion) (void);
+  int (*logFirmwareVersion) (void);
+  int (*setDisplayVoltage) (unsigned char voltage);
+  int (*getDisplayVoltage) (unsigned char *voltage);
+  int (*getDisplayCurrent) (unsigned char *current);
+  int (*setDisplayState) (unsigned char state);
+  int (*writeBraille) (unsigned char *cells, unsigned char count, unsigned char start);
+  int (*getKeys) (unsigned char *packet);
+  int (*soundBeep) (int duration);
+} InputOutputOperations;
+static const InputOutputOperations *io;
+
+
+#include "Programs/serial.h"
+
+
+#ifdef ENABLE_USB
+#include "Programs/usb.h"
+
 /* Workarounds for control transfer flakiness (at least in this demo model) */
 #define CONTROL_RETRIES 6
 
 /* control message request codes */
-#define CTL_REQ_SET_DISPLAY_STATE    0
-#define CTL_REQ_SET_DISPLAY_VOLTAGE  1
-#define CTL_REQ_GET_DISPLAY_VOLTAGE  2
-#define CTL_REQ_GET_SERIAL_NUMBER    3
-#define CTL_REQ_GET_HARDWARE_VERSION 4
-#define CTL_REQ_GET_FIRMWARE_VERSION 5
-#define CTL_REQ_GET_DISPLAY_LENGTH   6
-#define CTL_REQ_WRITE_BRAILLE        7
-#define CTL_REQ_GET_DISPLAY_CURRENT  8
-#define CTL_REQ_BEEP                 9
-#define CTL_REQ_GET_KEYS            11
-#define CTL_REQ_SET_DISPLAY_LENGTH  12
-#define CTL_REQ_READ_MEMORY        128
-#define CTL_REQ_WRITE_MEMORY       129
-#define CTL_REQ_READ_CODE          130
-#define CTL_REQ_WRITE_IO           131
-#define CTL_REQ_READ_IO            132
+#define CTL_REQ_SET_DISPLAY_STATE    0X00
+#define CTL_REQ_SET_DISPLAY_VOLTAGE  0X01
+#define CTL_REQ_GET_DISPLAY_VOLTAGE  0X02
+#define CTL_REQ_GET_SERIAL_NUMBER    0X03
+#define CTL_REQ_GET_HARDWARE_VERSION 0X04
+#define CTL_REQ_GET_FIRMWARE_VERSION 0X05
+#define CTL_REQ_GET_DISPLAY_LENGTH   0X06
+#define CTL_REQ_WRITE_BRAILLE        0X07
+#define CTL_REQ_GET_DISPLAY_CURRENT  0X08
+#define CTL_REQ_BEEP                 0X09
+#define CTL_REQ_GET_KEYS             0X0B
+#define CTL_REQ_SET_DISPLAY_LENGTH   0X0C
+#define CTL_REQ_READ_MEMORY          0X80
+#define CTL_REQ_WRITE_MEMORY         0X81
+#define CTL_REQ_READ_CODE            0X82
+#define CTL_REQ_WRITE_IO             0X83
+#define CTL_REQ_READ_IO              0X84
 
-/* Global variables */
 static UsbChannel *usb = NULL;
-static char firstRead; /* Flag to reinitialize brl_readCommand() function state. */
-static int inputMode;
-static TranslationTable outputTable;
-static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
-static unsigned char *previousCells = NULL; /* previous pattern displayed */
-
-#define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
-static unsigned char totalCells;
-static unsigned char textOffset;
-static unsigned char textCells;
-static unsigned char statusOffset;
-static unsigned char statusCells;
-#define IS_TEXT_RANGE(key1,key2) (((key1) >= textOffset) && ((key2) < (textOffset + textCells)))
-#define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
-#define IS_STATUS_KEY(key) (((key) >= statusOffset) && ((key) < (statusOffset + statusCells)))
-
 
 static int
 tellDisplay (uint8_t request, uint16_t value, uint16_t index,
@@ -134,21 +140,6 @@ askDisplay (uint8_t request, uint16_t value, uint16_t index,
   }
 }
 
-static int
-setDisplayState (uint16_t state) {
-  return tellDisplay(CTL_REQ_SET_DISPLAY_STATE, state, 0, NULL, 0) != -1;
-}
-
-static int
-writeBraille (unsigned char *cells, uint16_t count, uint16_t start) {
-  return tellDisplay(CTL_REQ_WRITE_BRAILLE, 0, start, cells, count) != -1;
-}
-
-static int
-soundBeep (uint16_t duration) {
-  return tellDisplay(CTL_REQ_BEEP, duration, 0, NULL, 0) != -1;
-}
-
 #define MAX_STRING_LENGTH 0XFF
 #define RAW_STRING_SIZE (MAX_STRING_LENGTH * 2) + 2
 #define STRING_SIZE (MAX_STRING_LENGTH + 1)
@@ -171,6 +162,152 @@ decodeString (unsigned char *buffer) {
   return string;
 }
 
+static int
+openUsbPort (char **parameters, const char *device) {
+  static const UsbChannelDefinition definitions[] = {
+    {0X0798, 0X0001, 1, 0, 0, 1, 0, 0},
+    {0}
+  };
+
+  LogPrint(LOG_DEBUG, "Attempting open: %s", device);
+  if (!(usb = usbFindChannel(definitions, (void *)device))) return 0;
+
+  /* start the input packet monitor */
+  {
+    int retry = 0;
+    while (1) {
+      int ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+      if ((ret != 0) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) break;
+      LogPrint(LOG_WARNING, "begin input retry #%d.", ++retry);
+    }
+  }
+
+  return 1;
+}
+
+static void
+closeUsbPort (void) {
+  if (usb) {
+    usbCloseChannel(usb);
+    usb = NULL;
+  }
+}
+
+static int
+getUsbDisplayLength (unsigned char *length) {
+  unsigned char data[2];
+  int size = askDisplay(CTL_REQ_GET_DISPLAY_LENGTH, 0, 0, data, sizeof(data));
+  if (size == -1) return 0;
+
+  *length = data[1];
+  return 1;
+}
+
+static int
+logUsbSerialNumber (void) {
+  unsigned char buffer[RAW_STRING_SIZE];
+  int size = askDisplay(CTL_REQ_GET_SERIAL_NUMBER, 0, 0, buffer, sizeof(buffer));
+  if (size == -1) return 0;
+
+  LogPrint(LOG_INFO, "Voyager Serial Number: %s",
+           decodeString(buffer));
+  return 1;
+}
+
+static int
+logUsbHardwareVersion (void) {
+  unsigned char buffer[2];
+  int size = askDisplay(CTL_REQ_GET_HARDWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+  if (size == -1) return 0;
+
+  LogPrint(LOG_INFO, "Voyager Hardware: %u.%u",
+           buffer[0], buffer[1]);
+  return 1;
+}
+
+static int
+logUsbFirmwareVersion (void) {
+  unsigned char buffer[RAW_STRING_SIZE];
+  int size = askDisplay(CTL_REQ_GET_FIRMWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+  if (size == -1) return 0;
+
+  LogPrint(LOG_INFO, "Voyager Firmware: %s",
+           decodeString(buffer));
+  return 1;
+}
+
+static int
+setUsbDisplayVoltage (unsigned char voltage) {
+  return tellDisplay(CTL_REQ_SET_DISPLAY_VOLTAGE, voltage, 0, NULL, 0) != -1;
+}
+
+static int
+getUsbDisplayVoltage (unsigned char *voltage) {
+  unsigned char buffer[1];
+  int size = askDisplay(CTL_REQ_GET_DISPLAY_VOLTAGE, 0, 0, buffer, sizeof(buffer));
+  if (size == -1) return 0;
+
+  *voltage = buffer[0];
+  return 1;
+}
+
+static int
+getUsbDisplayCurrent (unsigned char *current) {
+  unsigned char buffer[1];
+  int size = askDisplay(CTL_REQ_GET_DISPLAY_CURRENT, 0, 0, buffer, sizeof(buffer));
+  if (size == -1) return 0;
+
+  *current = buffer[0];
+  return 1;
+}
+
+static int
+setUsbDisplayState (unsigned char state) {
+  return tellDisplay(CTL_REQ_SET_DISPLAY_STATE, state, 0, NULL, 0) != -1;
+}
+
+static int
+writeUsbBraille (unsigned char *cells, unsigned char count, unsigned char start) {
+  return tellDisplay(CTL_REQ_WRITE_BRAILLE, 0, start, cells, count) != -1;
+}
+
+static int
+getUsbKeys (unsigned char *packet) {
+  return usbReapInput(usb->device, usb->definition.inputEndpoint, packet, 8, 0, 0);
+}
+
+static int
+soundUsbBeep (int duration) {
+  return tellDisplay(CTL_REQ_BEEP, duration, 0, NULL, 0) != -1;
+}
+
+static const InputOutputOperations usbOperations = {
+  openUsbPort, closeUsbPort, getUsbDisplayLength,
+  logUsbSerialNumber, logUsbHardwareVersion, logUsbFirmwareVersion,
+  setUsbDisplayVoltage, getUsbDisplayVoltage, getUsbDisplayCurrent,
+  setUsbDisplayState, writeUsbBraille,
+  getUsbKeys, soundUsbBeep
+};
+#endif /* ENABLE_USB */
+
+
+/* Global variables */
+static char firstRead; /* Flag to reinitialize brl_readCommand() function state. */
+static int inputMode;
+static TranslationTable outputTable;
+static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
+static unsigned char *previousCells = NULL; /* previous pattern displayed */
+
+#define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
+static unsigned char totalCells;
+static unsigned char textOffset;
+static unsigned char textCells;
+static unsigned char statusOffset;
+static unsigned char statusCells;
+#define IS_TEXT_RANGE(key1,key2) (((key1) >= textOffset) && ((key2) < (textOffset + textCells)))
+#define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
+#define IS_STATUS_KEY(key) (((key) >= statusOffset) && ((key) < (statusOffset + statusCells)))
+
 static void
 brl_identify (void) {
   LogPrint(LOG_NOTICE, "Tieman Voyager User-space Driver: version " VERSION " (" DATE ")");
@@ -179,57 +316,32 @@ brl_identify (void) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (!isUsbDevice(&device)) {
+  if (isSerialDevice(&device)) {
+    LogPrint(LOG_WARNING, "Serial devices not supported yet: %s", device);
+    return 0;
+
+#ifdef ENABLE_USB
+  } else if (isUsbDevice(&device)) {
+    io = &usbOperations;
+#endif /* ENABLE_USB */
+
+  } else {
     unsupportedDevice(device);
     return 0;
   }
 
-  /* Open the braille display device */
-  {
-    static const UsbChannelDefinition definitions[] = {
-      {0X0798, 0X0001, 1, 0, 0, 1, 0, 0},
-      {0}
-    };
-
-    LogPrint(LOG_DEBUG, "Attempting open: %s", device);
-    usb = usbFindChannel(definitions, (void *)device);
-  }
-
-  if (usb) {
-    /* log the serial number of the display */
-    {
-      unsigned char buffer[RAW_STRING_SIZE];
-      int size = askDisplay(CTL_REQ_GET_SERIAL_NUMBER, 0, 0, buffer, sizeof(buffer));
-      if (size != -1)
-        LogPrint(LOG_INFO, "Voyager Serial Number: %s",
-                 decodeString(buffer));
-    }
-
-    /* log the hardware version of the display */
-    {
-      unsigned char buffer[2];
-      int size = askDisplay(CTL_REQ_GET_HARDWARE_VERSION, 0, 0, buffer, sizeof(buffer));
-      if (size != -1)
-        LogPrint(LOG_INFO, "Voyager Hardware: %u.%u",
-                 buffer[0], buffer[1]);
-    }
-
-    /* log the firmware version of the display */
-    {
-      unsigned char buffer[RAW_STRING_SIZE];
-      int size = askDisplay(CTL_REQ_GET_FIRMWARE_VERSION, 0, 0, buffer, sizeof(buffer));
-      if (size != -1)
-        LogPrint(LOG_INFO, "Voyager Firmware: %s",
-                 decodeString(buffer));
-    }
+  if (io->openPort(parameters, device)) {
+    /* log information about the display */
+    io->logSerialNumber();
+    io->logHardwareVersion();
+    io->logFirmwareVersion();
 
     /* find out how big the display is */
     totalCells = 0;
     {
-      unsigned char data[2];
-      int size = askDisplay(CTL_REQ_GET_DISPLAY_LENGTH, 0, 0, data, sizeof(data));
-      if (size != -1) {
-        switch (data[1]) {
+      unsigned char length;
+      if (io->getDisplayLength(&length)) {
+        switch (length) {
           case 48:
             totalCells = 44;
             brl->helpPage = 0;
@@ -241,7 +353,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             break;
 
           default:
-            LogPrint(LOG_ERR, "Unsupported Voyager length code: %u", data[1]);
+            LogPrint(LOG_ERR, "Unsupported Voyager length code: %u", length);
             break;
         }
       }
@@ -283,24 +395,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       brl->x = textCells;		/* initialize size of display */
       brl->y = 1;		/* always 1 */
 
-      /* start the input packet monitor */
-      {
-        int retry = 0;
-        while (1) {
-          int ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
-          if ((ret != 0) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) break;
-          LogPrint(LOG_WARNING, "begin input retry #%d.", ++retry);
-        }
-      }
-
       if ((currentCells = malloc(totalCells))) {
         if ((previousCells = malloc(totalCells))) {
           /* Force rewrite of display */
           memset(currentCells, 0, totalCells); /* no dots */
           memset(previousCells, 0XFF, totalCells); /* all dots */
 
-          if (setDisplayState(1)) {
-            soundBeep(200);
+          if (io->setDisplayState(1)) {
+            io->soundBeep(200);
 
             {
               static const DotsTable dots
@@ -326,18 +428,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    usbCloseChannel(usb);
-    usb = NULL;
+    io->closePort();
   }
   return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
-  }
+  io->closePort();
 
   if (currentCells) {
     free(currentCells);
@@ -386,13 +484,13 @@ brl_writeWindow (BrailleDisplay *brl) {
       memcpy(hbuf, buffer, 6);
       hbuf[6] = hbuf[7] = 0;
       memcpy(hbuf+8, buffer+6, 38);
-      writeBraille(hbuf, 46, 2);
+      io->writeBraille(hbuf, 46, 2);
       break;
     }
 
     case 70:
       /* Two ghost cells at the beginning of the display. */
-      writeBraille(buffer, 70, 2);
+      io->writeBraille(buffer, 70, 2);
       break;
   }
 }
@@ -520,8 +618,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   }
 
   {
-    int size = usbReapInput(usb->device, usb->definition.inputEndpoint,
-                            packet, sizeof(packet), 0, 0);
+    int size = io->getKeys(packet);
     if (size < 0) {
       if (errno == EAGAIN) {
         /* no input */
@@ -815,23 +912,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
  */
 static void
 brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  unsigned char value = 0XFF - (setting * 0XFF / BF_MAXIMUM);
-  LogPrint(LOG_DEBUG, "Setting voltage: %02X", value);
-  tellDisplay(CTL_REQ_SET_DISPLAY_VOLTAGE, value, 0, NULL, 0);
-
-  /* log the display voltage */
-  {
-    unsigned char buffer[2];
-    int size = askDisplay(CTL_REQ_GET_DISPLAY_VOLTAGE, 0, 0, buffer, sizeof(buffer));
-    if (size != -1)
-      LogBytes("Display Voltage", buffer, size);
-  }
-
-  /* log the display current */
-  {
-    unsigned char buffer[2];
-    int size = askDisplay(CTL_REQ_GET_DISPLAY_CURRENT, 0, 0, buffer, sizeof(buffer));
-    if (size != -1)
-      LogBytes("Display Current", buffer, size);
-  }
+  unsigned char voltage = 0XFF - (setting * 0XFF / BF_MAXIMUM);
+  LogPrint(LOG_DEBUG, "Setting voltage: %02X", voltage);
+  io->setDisplayVoltage(voltage);
 }
