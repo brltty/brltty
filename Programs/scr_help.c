@@ -97,7 +97,7 @@ loadPages (const char *file) {
         LogPrint(LOG_ERR, "Help file corrupt");
         goto failure;
       }
-      characterCount += description->rows * description->columns;
+      characterCount += getBigEndian(description->height) * getBigEndian(description->width);
     }
   }
 
@@ -114,7 +114,7 @@ loadPages (const char *file) {
     int page;
     for (page=0; page<(fileHeader.pages-1); page++) {
       const HelpPageEntry *description = &pageDescriptions[page];
-      pages[page+1] = pages[page] + (description->rows * description->columns);
+      pages[page+1] = pages[page] + (getBigEndian(description->height) * getBigEndian(description->width));
     }
   }
 
@@ -125,9 +125,9 @@ loadPages (const char *file) {
       unsigned char *buffer = pages[page];
       {
         int row;
-        for (row=0; row<description->rows; row++) {
+        for (row=0; row<getBigEndian(description->height); row++) {
           unsigned char lineLength;
-          unsigned char *line = &buffer[row * description->columns];
+          unsigned char *line = &buffer[row * getBigEndian(description->width)];
           if ((bytesRead = read(fileDescriptor, &lineLength, sizeof(lineLength))) == -1) {
             LogError("Help line length read");
             goto failure;
@@ -146,7 +146,7 @@ loadPages (const char *file) {
               goto failure;
             }
           }
-          memset(&line[lineLength], ' ', description->columns-lineLength);
+          memset(&line[lineLength], ' ', getBigEndian(description->width)-lineLength);
         }
       }
     }
@@ -190,20 +190,20 @@ describe_HelpScreen (ScreenDescription *description) {
   const HelpPageEntry *page = &pageDescriptions[pageNumber];
   description->posx = cursorColumn;
   description->posy = cursorRow;
-  description->cols = page->columns;
-  description->rows = page->rows;
+  description->cols = getBigEndian(page->width);
+  description->rows = getBigEndian(page->height);
   description->no = 0;	/* 0 is reserved for help screen */
 }
 
 static unsigned char *
 read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   const HelpPageEntry *description = &pageDescriptions[pageNumber];
-  if (validateScreenBox(&box, description->columns, description->rows)) {
+  if (validateScreenBox(&box, getBigEndian(description->width), getBigEndian(description->height))) {
     if (mode == SCR_TEXT) {
        int row;
       for (row=0; row<box.height; row++) {
         memcpy(buffer + (row * box.width),
-               pages[pageNumber] + ((box.top + row) * description->columns) + box.left,
+               pages[pageNumber] + ((box.top + row) * getBigEndian(description->width)) + box.left,
                box.width);
       }
     } else {
@@ -238,7 +238,7 @@ insert_HelpScreen (unsigned short key) {
       }
       break;
     case KEY_CURSOR_DOWN:
-      if (cursorRow < (pageDescriptions[pageNumber].rows - 1)) {
+      if (cursorRow < (getBigEndian(pageDescriptions[pageNumber].height) - 1)) {
         ++cursorRow;
         return 1;
       }
@@ -250,7 +250,7 @@ insert_HelpScreen (unsigned short key) {
       }
       break;
     case KEY_CURSOR_RIGHT:
-      if (cursorColumn < (pageDescriptions[pageNumber].columns - 1)) {
+      if (cursorColumn < (getBigEndian(pageDescriptions[pageNumber].width) - 1)) {
         ++cursorColumn;
         return 1;
       }
@@ -265,11 +265,11 @@ static int
 route_HelpScreen (int column, int row, int screen) {
   const HelpPageEntry *description = &pageDescriptions[pageNumber];
   if (row != -1) {
-    if ((row < 0) || (row >= description->rows)) return 0;
+    if ((row < 0) || (row >= getBigEndian(description->height))) return 0;
     cursorRow = row;
   }
   if (column != -1) {
-    if ((column < 0) || (column >= description->columns)) return 0;
+    if ((column < 0) || (column >= getBigEndian(description->width))) return 0;
     cursorColumn = column;
   }
   return 1;

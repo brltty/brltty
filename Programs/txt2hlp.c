@@ -67,7 +67,8 @@ main (int argc, char *argv[]) {
           fseek(outputStream, sizeof(fileHeader) + (fileHeader.pages * sizeof(*pageTable)), SEEK_SET);
 
           for (pageNumber=0; pageNumber<fileHeader.pages; pageNumber++) {
-            HelpPageEntry *page = &pageTable[pageNumber];
+            int rows = 0;
+            int columns = 0;
             const char *inputPath = argv[pageNumber];
             FILE *inputStream = fopen(inputPath, "r");
             if (!inputStream) {
@@ -78,7 +79,6 @@ main (int argc, char *argv[]) {
             }
             setvbuf(inputStream, NULL, _IOFBF, 0X7FF0);
 
-            memset(page, 0, sizeof(*page));
             while (1) {
               char buffer[242];
               int length = sizeof(buffer);
@@ -87,14 +87,20 @@ main (int argc, char *argv[]) {
                 if (end) length = end - buffer;
                 fputc(length, outputStream);
                 fwrite(buffer, 1, length, outputStream);
-                page->columns = MAX(page->columns, length);
-                page->rows++;
+                columns = MAX(columns, length);
+                rows++;
               } else {
                 break;
               }
             }
-            page->columns = (((int) ((page->columns - 1) / 40)) + 1) * 40;
             fclose(inputStream);
+
+            {
+              HelpPageEntry *page = &pageTable[pageNumber];
+              memset(page, 0, sizeof(*page));
+              putBigEndian(&page->height, rows);
+              putBigEndian(&page->width, (((columns - 1) / 40) + 1) * 40);
+            }
           }
 
           fseek(outputStream, 0, SEEK_SET);

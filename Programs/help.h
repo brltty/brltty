@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <inttypes.h>
+
 /* help.h - describes the helpfile format
  * $Id: help.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
  */
@@ -39,8 +41,8 @@ typedef struct {
 } __attribute__((packed)) HelpFileHeader;
 
 typedef struct {
-  unsigned char rows;
-  unsigned char columns;
+  uint16_t height;
+  uint16_t width;
 } __attribute__((packed)) HelpPageEntry;
 
 #ifdef __cplusplus
