@@ -91,7 +91,7 @@ static int inputMode = 0;
 /* Global variables */
 
 /* Mappings between Voyager's dot coding and brltty's coding. */
-static TranslationTable inputTable, outputTable;
+static TranslationTable outputTable;
 
 static UsbChannel *usb = NULL;
 
@@ -210,7 +210,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     static const DotsTable dots
       = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
     makeOutputTable(&dots, &outputTable);
-    reverseTranslationTable(&outputTable, &inputTable);
   }
 
   dispbuf = prevdata = NULL;
@@ -560,7 +559,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   if (howmanykeys == 0 &&
       (keystate == K_B || keystate == K_C ||
        keystate == K_UP || keystate == K_DOWN ||
-       (keystate & (DOT_KEYS|K_B|K_C)) == keystate)) {
+       (keystate & (DOT_KEYS|SPACE_BAR)) == keystate)) {
     repeat = VAL_REPEAT_DELAY;
   }
 
@@ -577,17 +576,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
       if (cmds == CMDS_PREFS) {
 	switch (keystate) {
-          HKEY(891, K_A, CMD_PREFLOAD, "Discard changes");
-          HKEY(891, K_D, CMD_PREFLOAD, "Exit menu");
-          HKEY2(895, K_B, K_C,
-                CMD_MENU_FIRST_ITEM, CMD_MENU_LAST_ITEM,
-                "Go to first/last item");
-          HKEY2(895, K_RL, K_RR,
-                CMD_MENU_PREV_ITEM, CMD_MENU_NEXT_ITEM,
-                "Go to previous/next item");
-          HKEY2(895, K_UP, K_DOWN,
+          HKEY2(891, K_UP, K_DOWN,
                 CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING,
                 "Select previous/next setting");
+          HKEY(892, K_RL, CMD_PREFLOAD, "Discard changes");
+          HKEY(892, K_RR, CMD_PREFLOAD, "Exit menu");
+          HKEY(892, K_RL|K_RR, CMD_PREFLOAD, "Save changes and exit menu");
 	}
       }
 
@@ -649,10 +643,6 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  HKEY(602, K_B|K_C, VAL_PASSDOTS+0, "Space bar")
 	}
       }
-    } else if (!(keystate & ~DOT_KEYS)) {
-      /* Just dot keys */
-      /* This is a character typed in braille */
-      cmd = VAL_PASSDOTS | inputTable[keystate];
     } else if ((!inputMode || (keystate & SPACE_BAR)) &&
                !(keystate & FRONT_KEYS & ~SPACE_BAR)) {
       /* Dots combined with B or C or both but no other front keys.
@@ -684,6 +674,18 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	CKEY(610, DOT7, VAL_PASSKEY+VPK_CURSOR_LEFT, "Left arrow");
 	CKEY(610, DOT8, VAL_PASSKEY+VPK_CURSOR_RIGHT, "Right arrow");
       }
+    } else if (!(keystate & ~DOT_KEYS)) {
+      /* Just dot keys */
+      /* This is a character typed in braille */
+      cmd = VAL_PASSDOTS;
+      if (keystate & DOT1) cmd |= B1;
+      if (keystate & DOT2) cmd |= B2;
+      if (keystate & DOT3) cmd |= B3;
+      if (keystate & DOT4) cmd |= B4;
+      if (keystate & DOT5) cmd |= B5;
+      if (keystate & DOT6) cmd |= B6;
+      if (keystate & DOT7) cmd |= B7;
+      if (keystate & DOT8) cmd |= B8;
     }
   } else if (!keystate) {
     /* Just routing keys */
@@ -767,14 +769,11 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   }
 
   if (release) {
-    repeat = 0;
-  }
-  cmd |= repeat;
-
-  if (release) {
     /* keys were released, clear state */
     keystate = 0;
     memset(rtk_pressed, 0, totalCells);
+  } else {
+    cmd |= repeat;
   }
 
   return cmd;
