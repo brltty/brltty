@@ -32,6 +32,7 @@
 
 #include "Programs/misc.h"
 
+#define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 
 #define DEBUG_PACKETS
@@ -1163,4 +1164,45 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       }
     }
   }
+}
+
+static int
+brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, int length) {
+  Packet packet;
+  int count = readPacket(brl, &packet);
+  if (count > 0) {
+    if (count > sizeof(packet.header)) count--;
+    if (length < count) {
+      LogPrint(LOG_WARNING, "Input packet buffer too small: %d < %d", length, count);
+      count = length;
+    }
+    memcpy(buffer, &packet, count);
+  }
+  return count;
+}
+
+static int
+brl_writePacket (BrailleDisplay *brl, const unsigned char *buffer, int length) {
+  int size = 4;
+  if (length >= size) {
+    int hasPayload = 0;
+    if (buffer[0] & 0X80) {
+      size += buffer[1];
+      hasPayload = 1;
+    }
+    if (length >= size) {
+      if (length > size)
+        LogPrint(LOG_WARNING, "Output packet buffer larger than necessary: %d > %d",
+                 length, size);
+      return writePacket(brl, buffer[0], buffer[1], buffer[2], buffer[3],
+                         (hasPayload? &buffer[4]: NULL));
+    }
+  }
+  LogPrint(LOG_WARNING, "Output packet buffer too small: %d < %d", length, size);
+  return 0;
+}
+
+static int
+brl_reset (BrailleDisplay *brl) {
+  return 0;
 }
