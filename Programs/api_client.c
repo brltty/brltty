@@ -778,6 +778,18 @@ int brlapi_writeBrl(uint32_t cursor, const char *str)
  return brlapi_waitForAck();
 }
 
+/* Function : brlapi_writeBrlDots */
+/* Writes dot-matrix to the braille display */
+int brlapi_writeBrlDots(const char *dots)
+{
+ static unsigned char disp[256];
+ uint32_t size = brlx * brly;
+ if ((size == 0) || (size > 256)) return -1;
+ memcpy(disp,dots,size);
+ if (brlapi_writePacket(fd,BRLPACKET_WRITEDOTS,disp,size)<0) return -1;
+ return brlapi_waitForAck();
+}
+
 /* Function : packetReady */
 /* Tests wether a packet is ready on file descriptor fd */
 /* Returns -1 if an error occurs, 0 if no packet is ready, 1 if there is a */

@@ -309,6 +309,16 @@ int brlapi_leaveTty(void);
  */
 int brlapi_writeBrl(uint32_t cursor, const char *str);
 
+/* brlapi_writeBrlDots */
+/** Write the given brlx*brly sized array to the display
+ *
+ * \param dots points on the memory address which contains
+ * the dot information.
+ *
+ * \return 0 on success, -1 on error.
+ */
+int brlapi_writeBrlDots(const char *dots);
+
 /** @} */
 
 /** \defgroup brlapi_keys Reading key presses
@@ -544,6 +554,7 @@ typedef uint32_t brl_type_t;
 #define BRLPACKET_MASKKEYS          'm'    /**< Mask a key-range            */
 #define BRLPACKET_UNMASKKEYS        'u'    /**< Unmask key range            */
 #define BRLPACKET_WRITE             'W'    /**< Write On Braille Display    */
+#define BRLPACKET_WRITEDOTS         'D'    /**< Write Dots On Braille Display  */
 #define BRLPACKET_STATWRITE         'S'    /**< Write Status Cells          */
 #define BRLPACKET_GETRAW            '*'    /**< Enter in raw mode           */
 #define BRLPACKET_LEAVERAW          '#'    /**< Leave raw mode              */

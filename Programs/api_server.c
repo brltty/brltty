@@ -423,6 +423,18 @@ void *ProcessConnection(void *arg)
     WriteAckPacket(c->fd);
     continue;
    }
+   case BRLPACKET_WRITEDOTS:
+   {
+    LogPrint(LOG_DEBUG,"Received WriteDots request... ");
+    CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
+    CHECK(size==c->brl.x*c->brl.y,BRLERR_INVALID_PACKET);
+    pthread_mutex_lock(&c->brlmutex);
+    memcpy(c->brl.buffer, packet,c->brl.x*c->brl.y);
+    c->brlbufstate = FULL;
+    pthread_mutex_unlock(&c->brlmutex);
+    WriteAckPacket(c->fd);
+    continue;
+   }
    case BRLPACKET_STATWRITE:
    {
     CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
