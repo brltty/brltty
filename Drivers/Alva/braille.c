@@ -22,6 +22,10 @@
  */
 
 /* Changes:
+ *    january 2004:
+ *              - Added USB support.
+ *              - Improved key bindings for Satellite models.
+ *              - Moved autorepeat (typematic) support to the core.
  *    september 2002:
  *		- This pesky binary only parallel port library is just
  *		  causing trouble (not compatible with new compilers, etc).
@@ -558,8 +562,8 @@ static const InputOutputOperations usbOperations = {
 static void
 brl_identify (void)
 {
-  LogPrint(LOG_NOTICE, "Alva driver, version 2.1");
-  LogPrint(LOG_INFO, "   Copyright (C) 1995-2000 by Nicolas Pitre <nico@cam.org>.");
+  LogPrint(LOG_NOTICE, "Alva driver, version 2.2");
+  LogPrint(LOG_INFO, "   Copyright (C) 1995-2004 by Nicolas Pitre <nico@cam.org>.");
   LogPrint(LOG_INFO, "   Compiled for %s with %s version.",
 #if MODEL == ABT_AUTO
 	  "terminal autodetection",
