@@ -41,11 +41,6 @@
 #define BRLNAME	"EuroBraille"
 #define PREFSTYLE ST_None
 
-/*
-** the next define controls whichever you want the LCD support or not.
-** Please do not use this define if you use an IRIS, this terminal doesn't have
-** any LCD screen.
-*/
 #define BRL_HAVE_VISUAL_DISPLAY
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
@@ -444,7 +439,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 	int i = 0;
 	unsigned char AskIdent[] =
 	  {2, 'S', 'I',3,'M','P','\x37'};
-	WriteToBrlDisplay (brl, 7, AskIdent);
+	WriteToBrlDisplay (brl, sizeof(AskIdent), AskIdent);
 	while (!NbCols)
 	  {
 	     drainBrailleOutput (brl, 100);
@@ -490,19 +485,16 @@ static void brl_writeWindow (BrailleDisplay *brl)
 
    if (context) 
      return ;
-   if (!ReWrite)
-     {
-      /* We update the display only if it has changed */
-	if (memcmp(brl->buffer, prevdata, NbCols) != 0)
-	  ReWrite = 1;
-     }
+   /* We update the display only if it has changed */
+   if (memcmp(brl->buffer, prevdata, NbCols) != 0)
+     ReWrite = 1;
    if (ReWrite)
      {
       /* right end cells don't have to be transmitted if all dots down */
 	i = NbCols;
 
 	  {
-	     char OutBuf[2 * i + 6];
+	     char OutBuf[i + 3];
 	     char *p = OutBuf;
 
 	     *p++ = i + 2;
@@ -525,27 +517,30 @@ static void brl_writeWindow (BrailleDisplay *brl)
 
 static void	brl_writeVisual(BrailleDisplay *brl)
 {
-  int		i = NbCols;
-  char		OutBuf[2 * NbCols + 6];
-  char	        *p = OutBuf;
-  int		j;
-
-  if (ReWrite_LCD == 0)
-    if (memcmp(brl->buffer, lcd_data, NbCols) != 0)
-      {
-	ReWrite_LCD = 1;
-	memcpy(lcd_data, brl->buffer, NbCols);
-      }
-  if (ReWrite_LCD)
+  /* The Iris doesn't have an LCD. */
+  if (model_ID != 5)
     {
-      memset(OutBuf, 0, NbCols + 2);
-      *p++ = i + 2;
-      *p++ = 'D';
-      *p++ = 'L';
-      for (j = 0; j < i; j++)
-	*p++ = brl->buffer[j];
-      WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
-      ReWrite_LCD = 0;
+      int		i = NbCols;
+      char		OutBuf[NbCols + 3];
+      char	        *p = OutBuf;
+      int		j;
+
+      if (memcmp(brl->buffer, lcd_data, NbCols) != 0)
+        {
+          ReWrite_LCD = 1;
+          memcpy(lcd_data, brl->buffer, NbCols);
+        }
+      if (ReWrite_LCD)
+        {
+          memset(OutBuf, 0, NbCols + 3);
+          *p++ = i + 2;
+          *p++ = 'D';
+          *p++ = 'L';
+          for (j = 0; j < i; j++)
+            *p++ = brl->buffer[j];
+          WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
+          ReWrite_LCD = 0;
+        }
     }
 }
 
