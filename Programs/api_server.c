@@ -431,11 +431,12 @@ static int processRequest(Tconnection *c)
 	}
 	/* ok, allocate path */
 	/* we lock the entire subtree for easier cleanup */
-	if (!(tty2 = newTty(tty,ntohl(*ptty++)))) {
+	if (!(tty2 = newTty(tty,ntohl(*ptty)))) {
           pthread_mutex_unlock(&connections_mutex);
           WERR(c->fd,BRLERR_NOMEM);
 	  return 0;
 	}
+	ptty++;
 	LogPrint(LOG_DEBUG,"allocated tty %#010x",ntohl(*(ptty-1)));
 	for (; ptty<&ints[size/sizeof(uint32_t)-1]; ptty++) {
 	  if (!(tty2 = newTty(tty2,ntohl(*ptty)))) {
@@ -1013,13 +1014,13 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
     pthread_mutex_unlock(&c->brlmutex);
   }
   if (TrueBraille->readKey) {
-    res = TrueBraille->readKey(&c->brl);
+    res = TrueBraille->readKey(disp);
     if (res==EOF) return EOF;
     keycode = (brl_keycode_t) res;
-    command = TrueBraille->keyToCommand(&c->brl,caller,keycode);
+    command = TrueBraille->keyToCommand(disp,caller,keycode);
   } else {
     /* we already ensured in GETTTY that no connection has how == KEYCODES */
-    res = TrueBraille->readCommand(&c->brl,caller);
+    res = TrueBraille->readCommand(disp,caller);
     if (res==EOF) return EOF;
     keycode = 0;
     command = (brl_keycode_t) res;
