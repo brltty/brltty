@@ -24,20 +24,14 @@ extern "C" {
 
 #include "queue.h"
 
-struct UsbInputElement {
-  struct UsbInputElement *next;
-  struct UsbInputElement *previous;
-  void *request;
-};
-
 typedef struct {
   UsbDevice *device;
   UsbEndpointDescriptor *descriptor;
 
   union {
     struct {
-      struct UsbInputElement *elements;
-      void *request;
+      Queue *pending;
+      void *completed;
       unsigned char *buffer;
       int length;
     } input;

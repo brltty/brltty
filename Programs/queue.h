@@ -24,12 +24,14 @@ extern "C" {
 
 typedef struct QueueStruct Queue;
 typedef struct ElementStruct Element;
-typedef void (*ItemDeallocator) (void *item);
-typedef int (*ItemComparator) (const void *item1, const void *item2);
+typedef void (*ItemDeallocator) (void *item, void *data);
+typedef int (*ItemComparator) (const void *item1, const void *item2, void *data);
 
 extern Queue *newQueue (ItemDeallocator deallocate, ItemComparator compare);
 extern void deallocateQueue (Queue *queue);
-extern int queueSize (Queue *queue);
+extern int getQueueSize (Queue *queue);
+extern void *getQueueData (Queue *queue);
+extern void *setQueueData (Queue *queue, void *data);
 
 typedef int (*ItemTester) (void *item, void *data);
 extern Element *findElement (Queue *queue, ItemTester test, void *data);
@@ -39,6 +41,7 @@ extern void deleteElement (Element *element);
 
 extern Element *enqueueItem (Queue *queue, void *item);
 extern void *dequeueItem (Queue *queue);
+extern void deleteItem (Queue *queue, void *item);
 
 #ifdef __cplusplus
 }

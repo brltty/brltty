@@ -28,6 +28,7 @@
 struct QueueStruct {
   Element *head;
   unsigned int size;
+  void *data;
   ItemDeallocator deallocate;
   ItemComparator compare;
 };
@@ -52,7 +53,7 @@ discardElement (Element *element) {
   discardedElements = element;
 
   if (element->item) {
-    if (queue->deallocate) queue->deallocate(element->item);
+    if (queue->deallocate) queue->deallocate(element->item, queue->data);
     element->item = NULL;
   }
 }
@@ -168,8 +169,20 @@ deallocateQueue (Queue *queue) {
 }
 
 int
-queueSize (Queue *queue) {
+getQueueSize (Queue *queue) {
   return queue->size;
+}
+
+void *
+getQueueData (Queue *queue) {
+  return queue->data;
+}
+
+void *
+setQueueData (Queue *queue, void *data) {
+  void *previous = queue->data;
+  queue->data = data;
+  return previous;
 }
 
 Element *
@@ -188,4 +201,20 @@ findItem (Queue *queue, ItemTester test, void *data) {
   Element *element = findElement(queue, test, data);
   if (element) return element->item;
   return NULL;
+}
+
+static int
+testItemAddress (void *item, void *data) {
+  return item == data;
+}
+
+void
+deleteItem (Queue *queue, void *item) {
+  Element *element = findElement(queue, testItemAddress, item);
+  if (element) {
+    element->item = NULL;
+    deleteElement(element);
+  } else {
+    LogPrint(LOG_WARNING, "Item not found: %p", item);
+  }
 }
