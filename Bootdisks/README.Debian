@@ -4,18 +4,36 @@
 		   Written by B. Daix (Thu Aug 22, 2002)
 
 
+Disclaimer
+**********
+
+   This paper was originally written (and hardly tested) for BRLTTY
+3.0.  I thought it could be helpful for following releases, so I fixed
+some commands to match new requirements (3.0 didn't use autoconf for
+example).  But this time, tests weren't made as strong as for BRLTTY
+3.0, I'm looking for feedback.
+   Since it was written, a Debian mailing-list dedicated to
+accessibility was openned.  I suggest you to subscribe to this list,
+to help us improve Debian accessibility and/or to ask whatever you'd
+like to.  To subscribe, send a mail to
+debian-accessibility-request@lists.debian.org with "subscribe" in the
+subject field, or go to http://lists.debian.org/.  "Installing Debian"
+is right in the scope of our discussions.
+B. Daix (Thu Jul 03, 2003)
+
+
 Purpose
 *******
 
    Woody installation process can be done via a set of floppies,
-called "boot floppies". There are two of them by default : the boot
-one (with Linux kernel and friends) named "rescue floppy", and the
-root one where is put setup stuff. Few other floppies can provide
-modules (driver-* ones), but those two boot ones are fundamental. As
-you can guess, fitting all those means on only two 1.44 Mo sized
-floppies was a real challenge... They were, as a consequence, really
-well built and there is no place for guests there ! So we'll have to
-manage a third floppy, to give BRLTTY a place.
+called "boot floppies". They are two of them by default : the boot one
+(with Linux kernel and friends) named "rescue floppy", and the root
+one where is put setup stuff. Few other floppies can provide modules
+(driver-* ones), but those two boot ones are fundamental. As you can
+guess, fitting all those means on only two 1.44Mo-sized floppies was a
+real challenge... They were, as a consequence, really well built and
+there is no place for guests there ! So we'll have to manage a third
+floppy to give BRLTTY a place.
    So there are little things to do to install Debian with BRLTTY
 (version >= v3.1), this file says which ones. The tip comes directly
 from Mario Lang and his team, so let's thank them loudly ! Please be
@@ -33,11 +51,12 @@ Official boot floppies tune
    rescue.bin and root.bin
    (/dists/stable/main/disks-i386/current/images-1.44/bf2.4/). We're
    about to work on root.bin.
-2) Rename root.bin : "mv root.bin root.gz" then unzip it, "gunzip
+2) Rename root.bin : "mv root.bin root.gz" then gunzip it, "gunzip
    root.gz" so that we have the mountable image now named "root". 
 3) Mount this "root" image on a loop device (like if it was on a
    floppy) : "mount root /mnt -o loop=/dev/loop0", where /mnt is the
-   mount point and /dev/loop0 an unused loop device. To check
+   mounting point and /dev/loop0 an unused loop device. Superuser
+   (root) permissions are required to do so. To check
    everything goes right, "ls /mnt" should show a kind of normal
    file-system with few things added.
 4) Edit the file named "rcS" in the loop-mounted image : "vi
@@ -50,7 +69,7 @@ Official boot floppies tune
     /bin/brltty
     echo "Press enter to continue"
     read ret"
-   (Leave double-quotes like each time in this tip file) Save and
+   (Forget double-quotes like each time in this tip file) Save and
    exit. We have to say that those seven lines will untar from
    the third floppy we'll build and will run BRLTTY from the loaded
    file-system, it's not on the target disk yet (as you're about to
@@ -61,8 +80,9 @@ Official boot floppies tune
    "tty1::sysinit:/etc/init.d/rcS". Then, near line 25, remove the "u"
    in "::respawn:/sbin/udbootstrap" so that it becomes
    "::respawn:/sbin/dbootstrap" : this will prevent setup programs
-   from not using standard console tty1 "the normal way" (so that it
-   works with BRLTTY). In some case, this second modification is
+   from not using standard console tty1 "the normal way" (so that we
+   can be asked for BRLTTY floppy). In some case, this second
+modification is
    superfluous, anyway, it's probably a good idea to do it. Save and
    exit.
 6) Unmount the modified image : "umount /mnt", gzip it "gzip root" and
@@ -73,16 +93,16 @@ Building the third floppy
 *************************
 
 1) Compile BRLTTY for the display you want to use, do this
-   "statically" (no current libs linked so that BRLTTY works by
-   itself), and fake to install it in a personal directory specially
+   "statically" (no usual libs linked so that BRLTTY works on its
+   own), and fake to install it in a personal directory specially
    built ("mkdir $HOME/tmpbrl"). This is respectively done by adding
-   the "--with-braille-display=DISPLAY",
+   the "--with-braille-driver=DISPLAY",
    "--enable-standalone-programs" and the
-   "--with-install-root=$HOME/tmpbrl" flags to the script configure
+   "--with-install-root=$HOME/tmpbrl" flags to the "configure" script
    (c.f. BRLTTY's documentation ; replace the value "DISPLAY" in inner
    flag by the module name you want to use). After having run
-   configure with these flags at least, do "make install" so that all
-   BRLTTY's stuff goes to the temporary directory. Check it to
+   "configure" with these flags at least, do "make install" so that
+   all BRLTTY's stuff goes to the temporary directory. Check it to
    recognize etc, dev, lib and bin dirs in it : "ls $HOME/tmpbrl".
 2) Create a tarball by first changing to the directory : "cd
    $HOME/tmpbrl", then "tar czf ../brltty.tar.gz *". You should have a
@@ -92,7 +112,8 @@ Building the third floppy
    before) : "dd if=brltty.tar.gz of=/dev/fd0 bs=1024". If no alert is
    dumped, it worked well. It's "brutal" because in this kind of copy
    you don't mount the device you are writing to, it prevents you from
-   having to mount things when you use the tarball. 
+   having to mount things when you use the tarball (some would call
+this a "raw copy").
 
 
 Going on the install process
@@ -132,7 +153,7 @@ favorite OS is OK.
 Author
 ******
 
-   Boris Daix, reachable via carrefourblinux@yahoogroupes.fr or
+   Boris Daix, reachable via debian-accessibility@lists.debian.org or
 directly at Boris.Daix@insa-lyon.fr.
    Thanks to Mario Lang and Dave Mielke for their support, and thanks
 to Nath for her test reports.
