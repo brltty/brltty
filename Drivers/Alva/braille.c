@@ -868,7 +868,7 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
             unsigned char cells = packet[9];
             if (cells != NbStCells) {
               NbStCells = cells;
-              LogPrint(LOG_INFO, "Status cell count changed to %d", NbStCells);
+              LogPrint(LOG_INFO, "Status cell count changed to %d.", NbStCells);
             }
           }
 
@@ -905,16 +905,24 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
       (key < (KEY_ROUTING_OFFSET + brl->x + 6))) {
     /* make for Status keys of Touch Cursor */
     *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->x)];
-  } else if (key >= KEY_ROUTING_OFFSET) {
+    return 1;
+  }
+
+  if ((key >= KEY_ROUTING_OFFSET) &&
+      (key < (KEY_ROUTING_OFFSET + brl->x))) {
     /* make for display keys of Touch cursor */
     *Pos = key - KEY_ROUTING_OFFSET;
     *Keys |= KEY_ROUTING;
-  } else {
-    *Keys = key;		/* check comments where KEY_xxxx are defined */
+    return 1;
   }
-  return 1;
+
+  if (!(key & 0X80)) {
+    *Keys = key;		/* check comments where KEY_xxxx are defined */
+    return 1;
+  }
 
 #endif /* ! ABT3_OLD_FIRMWARE */
+  LogBytes("Unexpected Input Packet", packet, length);
   return 0;
 }
 
