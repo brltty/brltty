@@ -791,6 +791,7 @@ const char *brlapi_errlist[] = {
   "bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
   "unexpected end of file",             /* BRLERR_EOF */
   "too many levels of recursion",       /* BRLERR_TOORECURSE */
+  "driver error",
 };
 
 /* brlapi_nerr: last error number */

@@ -598,6 +598,7 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_PROTOCOL_VERSION        15  /**< Bad protocol version */
 #define BRLERR_EOF                     16  /**< Unexpected end of file */
 #define BRLERR_TOORECURSE              17  /**< Too many levels of recursion */
+#define BRLERR_DRIVERERROR             18  /**< Packet returned by driver too large */
 
 /* brlapi_errlist */
 /** Error message list
