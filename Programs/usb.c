@@ -535,7 +535,9 @@ usbAwaitInput (
   while (1) {
     UsbResponse response;
     void *request;
-    while (!(request = usbReapResponse(device, &response, 0))) {
+    while (!(request = usbReapResponse(device,
+                                       endpointNumber | USB_ENDPOINT_DIRECTION_INPUT,
+                                       &response, 0))) {
       if (errno != EAGAIN) return 0;
       if (timeout <= 0) return 0;
 

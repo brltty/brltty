@@ -274,6 +274,7 @@ usbCancelRequest (
 void *
 usbReapResponse (
   UsbDevice *device,
+  unsigned char endpointAddress,
   UsbResponse *response,
   int wait
 ) {

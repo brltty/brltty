@@ -361,6 +361,7 @@ extern int usbCancelRequest (
 );
 extern void *usbReapResponse (
   UsbDevice *device,
+  unsigned char endpointAddress,
   UsbResponse *response,
   int wait
 );

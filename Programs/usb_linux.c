@@ -322,7 +322,7 @@ usbSubmitRequest (
   unsigned char endpointAddress,
   void *buffer,
   int length,
-  void *data
+  void *context
 ) {
   UsbDeviceExtension *devx = device->extension;
   UsbEndpoint *endpoint = usbGetEndpoint(device, endpointAddress);
@@ -344,10 +344,12 @@ usbSubmitRequest (
           break;
       }
       urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
-      if (buffer) memcpy(urb->buffer, buffer, length);
+      if (buffer)
+        if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT)
+          memcpy(urb->buffer, buffer, length);
       urb->flags = 0;
       urb->signr = 0;
-      urb->usercontext = data;
+      urb->usercontext = context;
 
     /*
       LogPrint(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
@@ -392,6 +394,7 @@ usbCancelRequest (
 void *
 usbReapResponse (
   UsbDevice *device,
+  unsigned char endpointAddress,
   UsbResponse *response,
   int wait
 ) {
