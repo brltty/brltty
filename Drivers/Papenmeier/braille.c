@@ -74,34 +74,16 @@ yyerror (char *problem)  /* Called by yyparse on error */
 }
 
 static void
-read_file (const char *name) {
-  LogPrint(LOG_DEBUG, "Opening config file: %s", name);
-  if ((configurationFile = fopen(name, "r")) != NULL) {
-    LogPrint(LOG_DEBUG, "Reading config file: %s", name);
+loadConfigurationFile (const char *path) {
+  LogPrint(LOG_DEBUG, "Loading Papenmeier configuration file: %s", path);
+  if ((configurationFile = fopen(path, "r")) != NULL) {
     parse();
     fclose(configurationFile);
     configurationFile = NULL;
   } else {
     LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
              "Cannot open Papenmeier configuration file '%s': %s",
-             name, strerror(errno));
-  }
-}
-
-static void
-read_config (const char *directory, const char *name) {
-  if (!*name) {
-    if (!(name = getenv(PM_CONFIG_ENV))) {
-      name = PM_CONFIG_FILE;
-    }
-  }
-  {
-    char *path = makePath(directory, name);
-    if (path) {
-      LogPrint(LOG_INFO, "Papenmeier Configuration File: %s", path);
-      read_file(path);
-      free(path);
-    }
+             path, strerror(errno));
   }
 }
 #else /* ENABLE_PM_CONFIGURATION_FILE */
@@ -1340,9 +1322,22 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
-  /* read the config file for individual configurations */
-  LogPrint(LOG_DEBUG, "Loading configuration file.");
-  read_config(brl->dataDirectory, parameters[PARM_CONFIGFILE]);
+  {
+    const char *name = parameters[PARM_CONFIGFILE];
+    if (!*name) {
+      if (!(name = getenv(PM_CONFIG_ENV))) {
+        name = PM_CONFIG_FILE;
+      }
+    }
+
+    {
+      char *path = makePath(brl->dataDirectory, name);
+      if (path) {
+        loadConfigurationFile(path);
+        free(path);
+      }
+    }
+  }
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
 
   if (isSerialDevice(&device)) {
@@ -1360,6 +1355,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   baud = io->bauds;
   while (*baud) {
+    LogPrint(LOG_DEBUG, "Probing Papenmeier display at %d baud.", *baud);
     charactersPerSecond = *baud / 10;
 
     if (io->openPort(parameters, device)) {
