@@ -269,6 +269,34 @@ static union {
 } inputBuffer;
 static int inputCount;
 
+static int pressedKeys;
+static int activeKeys;
+#define KEY_DOT1          0X000001
+#define KEY_DOT2          0X000002
+#define KEY_DOT3          0X000004
+#define KEY_DOT4          0X000008
+#define KEY_DOT5          0X000010
+#define KEY_DOT6          0X000020
+#define KEY_DOT7          0X000040
+#define KEY_DOT8          0X000080
+#define KEY_WHEEL_LEFT    0X000100
+#define KEY_WHEEL_RIGHT   0X000200
+#define KEY_SHIFT_LEFT    0X000400
+#define KEY_SHIFT_RIGHT   0X000800
+#define KEY_ADVANCE_LEFT  0X001000
+#define KEY_ADVANCE_RIGHT 0X002000
+#define KEY_SPACE         0X008000
+#define KEY_GDF_LEFT      0X010000
+#define KEY_GDF_RIGHT     0X020000
+
+static int wheelCommand;
+static int wheelCounter;
+#define WHEEL_COUNT 0X07
+#define WHEEL_DOWN  0X08
+#define WHEEL_UNIT  0X30
+#define WHEEL_LEFT  0X00
+#define WHEEL_RIGHT 0X10
+
 static void
 negativeAcknowledgement (const Packet *packet) {
   LogPrint(LOG_WARNING, "Negative Acknowledgement: %02X %02X",
@@ -447,7 +475,29 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             if (strcmp(response.payload.info.model, model->identifier) == 0) break;
             ++model;
           }
-          if (model->identifier) {
+
+          if (!model->identifier) {
+            LogPrint(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
+            model = NULL;
+
+            {
+              const char *word = strrchr(response.payload.info.model, ' ');
+              if (word) {
+                int size;
+                if (isInteger(&size, ++word)) {
+                  static ModelEntry entry;
+                  static char identifier[sizeof(response.payload.info.model)];
+                  memset(&entry, 0, sizeof(entry));
+                  entry.totalCells = entry.textCells = size;
+                  snprintf(identifier, sizeof(identifier), "Generic %d", size);
+                  entry.identifier = identifier;
+                  model = &entry;
+                }
+              }
+            }
+          }
+
+          if (model) {
             LogPrint(LOG_INFO, "Detected %s: text=%d, status=%d, firmware=%s",
                      model->identifier,
                      model->textCells, model->statusCells,
@@ -460,9 +510,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             writeFrom = 0;
             writeTo = model->totalCells - 1;
             writing = 0;
-          } else {
-            model = NULL;
-            LogPrint(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
+            pressedKeys = 0;
+            activeKeys = 0;
+            wheelCounter = 0;
           }
           break;
 
@@ -505,11 +555,17 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+  if (wheelCounter) {
+    --wheelCounter;
+    return wheelCommand;
+  }
+
   while (1) {
     Packet packet;
     int count = readPacket(brl, &packet);
     if (count == -1) return CMD_RESTARTBRL;
     if (count == 0) return EOF;
+
     switch (packet.header.type) {
       default:
         LogPrint(LOG_WARNING, "Unsupported packet: %02X %02X %02X %02X",
@@ -528,6 +584,136 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
           writing = 0;
         }
         continue;
+
+      case PKT_KEY: {
+        int keys = packet.header.arg1 |
+                   (packet.header.arg2 << 8) |
+                   (packet.header.arg3 << 16);
+        int command;
+
+        pressedKeys = keys;
+        if ((activeKeys & keys) != keys) {
+          activeKeys = keys;
+          command = VAL_REPEAT_DELAY;
+        } else {
+          keys = activeKeys;
+          activeKeys = 0;
+          command = 0;
+        }
+
+        switch (keys) {
+          default:
+            command |= CMD_NOOP;
+            break;
+          case (KEY_WHEEL_LEFT):
+            command |= CMD_BACK;
+            break;
+          case (KEY_WHEEL_RIGHT):
+            command |= CMD_HOME;
+            break;
+        }
+        return command;
+      }
+
+      case PKT_BUTTON: {
+        int command = CMD_NOOP;
+        activeKeys = 0;
+        if (packet.header.arg2 & 0X01) {
+          switch (packet.header.arg3) {
+            default:
+              break;
+
+            case 0:
+              switch (pressedKeys) {
+                default:
+                  break;
+              }
+              break;
+
+            case 1:
+              switch (pressedKeys) {
+                default:
+                  break;
+
+                case 0:
+                  command = CR_ROUTE;
+                  break;
+              }
+              break;
+          }
+        }
+
+        if (command != CMD_NOOP) command += packet.header.arg1;
+        return command;
+      }
+
+      case PKT_WHEEL: {
+        int unit = packet.header.arg1 & WHEEL_UNIT;
+        int motion = packet.header.arg1 & (WHEEL_UNIT | WHEEL_DOWN);
+        if (unit == WHEEL_RIGHT) motion ^= WHEEL_DOWN;
+
+        activeKeys = 0;
+        wheelCommand = CMD_NOOP;
+        switch (motion) {
+          default:
+            break;
+
+          case (WHEEL_LEFT):
+            switch (pressedKeys) {
+              default:
+                break;
+              case 0:
+                wheelCommand = CMD_LNUP;
+                break;
+              case (KEY_WHEEL_LEFT):
+                wheelCommand = CMD_PRDIFLN;
+                break;
+            }
+            break;
+
+          case (WHEEL_LEFT | WHEEL_DOWN):
+            switch (pressedKeys) {
+              default:
+                break;
+              case 0:
+                wheelCommand = CMD_LNDN;
+                break;
+              case (KEY_WHEEL_LEFT):
+                wheelCommand = CMD_NXDIFLN;
+                break;
+            }
+            break;
+
+          case (WHEEL_RIGHT):
+            switch (pressedKeys) {
+              default:
+                break;
+              case 0:
+                wheelCommand = CMD_FWINLT;
+                break;
+              case (KEY_WHEEL_RIGHT):
+                wheelCommand = CMD_CHRLT;
+                break;
+            }
+            break;
+
+          case (WHEEL_RIGHT | WHEEL_DOWN):
+            switch (pressedKeys) {
+              default:
+                break;
+              case 0:
+                wheelCommand = CMD_FWINRT;
+                break;
+              case (KEY_WHEEL_RIGHT):
+                wheelCommand = CMD_CHRRT;
+                break;
+            }
+            break;
+        }
+
+        if (wheelCommand != CMD_NOOP) wheelCounter = (packet.header.arg1 & WHEEL_COUNT) - 1;
+        return wheelCommand;
+      }
     }
   }
 }
