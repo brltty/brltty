@@ -310,10 +310,10 @@ int brlapi_leaveTty(void);
 int brlapi_writeBrl(uint32_t cursor, const char *str);
 
 /* brlapi_writeBrlDots */
-/** Write the given brlx*brly sized array to the display
+/** Write the given dots array to the display
  *
- * \param dots points on the memory address which contains
- * the dot information.
+ * \param dots points on an array of dot information, one per character. Its
+ * size must hence be the same as what brlapi_getDisplaySize() returns.
  *
  * \return 0 on success, -1 on error.
  */
