@@ -25,25 +25,16 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
-#ifdef __MINGW32__
+#ifdef WINDOWS
 #include <windows.h>
 #include <ws2tcpip.h>
 
+#ifdef __MINGW32__
 #include "win_pthread.h"
+#endif /* __MINGW32__ */
 
 #define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, __VA_ARGS__)
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -57,7 +48,18 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <string.h>
+#include <inttypes.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -98,9 +100,9 @@
 /* for remembering getaddrinfo error code */
 static int gai_error;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
 static WSADATA wsadata;
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 /* Some useful global variables */
 static unsigned int brlx = 0;
@@ -252,39 +254,58 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
 #ifdef PF_LOCAL
   if (addrfamily == PF_LOCAL) {
-    struct sockaddr_un sa;
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
-    if (lpath+lport+1>sizeof(sa.sun_path)) {
-      brlapi_libcerrno=ENAMETOOLONG;
-      brlapi_libcerrfun="path";
-      brlapi_errno = BRLERR_LIBCERR;
-      goto out;
+#ifdef WINDOWS
+    {
+      char path[lpath+lport+1];
+      memcpy(path,BRLAPI_SOCKETPATH,lpath);
+      memcpy(path+lpath,port,lport+1);
+      while ((HANDLE) (fd = (int)CreateFile(path,GENERIC_READ|GENERIC_WRITE,
+	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL))
+	  == INVALID_HANDLE_VALUE) {
+	if (GetLastError() != ERROR_PIPE_BUSY) {
+	  brlapi_libcerrfun="CreateFile";
+	  goto outlibc;
+	}
+	WaitNamedPipe(path,NMPWAIT_WAIT_FOREVER);
+      }
     }
-    if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
-      brlapi_libcerrfun="socket";
-      goto outlibc;
+#else /* WINDOWS */
+    {
+      struct sockaddr_un sa;
+      if (lpath+lport+1>sizeof(sa.sun_path)) {
+	brlapi_libcerrno=ENAMETOOLONG;
+	brlapi_libcerrfun="path";
+	brlapi_errno = BRLERR_LIBCERR;
+	goto out;
+      }
+      if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+	brlapi_libcerrfun="socket";
+	goto outlibc;
+      }
+      sa.sun_family = AF_LOCAL;
+      memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
+      memcpy(sa.sun_path+lpath,port,lport+1);
+      if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
+	brlapi_libcerrfun="connect";
+	goto outlibc;
+      }
     }
-    sa.sun_family = AF_LOCAL;
-    memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
-    memcpy(sa.sun_path+lpath,port,lport+1);
-    if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-      brlapi_libcerrfun="connect";
-      goto outlibc;
-    }
+#endif /* WINDOWS */
   } else {
-#else
+#else /* PF_LOCAL */
   if (0) {} else {
-#endif
+#endif /* PF_LOCAL */
 
 #ifdef HAVE_GETADDRINFO
 
     struct addrinfo *res,*cur;
     struct addrinfo hints;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
     WSAStartup(MAKEWORD(2,0),&wsadata);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
@@ -318,9 +339,9 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     struct sockaddr_in addr;
     struct hostent *he;
 
-#ifdef __MINGW32__
-    WSAStartup(MAKEWORD(2,0),&wsadata);
-#endif /* __MINGW32__ */
+#ifdef WINDOWS
+    WSAStartup(MAKEWORD(1,0),&wsadata);
+#endif /* WINDOWS */
 
     memset(&addr,0,sizeof(addr));
     addr.sin_family = AF_INET;
@@ -413,9 +434,9 @@ void brlapi_closeConnection(void)
   close(fd);
   fd = -1;
   pthread_mutex_unlock(&brlapi_fd_mutex);
-#ifdef __MINGW32__
+#ifdef WINDOWS
   WSACleanup();
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 }
 
 /* brlapi_getRaw */
@@ -877,9 +898,9 @@ const char *brlapi_strerror(int err)
   if (err>=brlapi_nerr)
     return "Unknown error";
   else if (err==BRLERR_GAIERR)
-#if defined(HAVE_GETADDRINFO) && defined (HAVE_GAI_STRERROR)
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR)
     return gai_strerror(gai_error);
-#elif defined(HAVE_HSTRERROR)
+#elif defined(HAVE_HSTRERROR) && !defined(WINDOWS)
     return hstrerror(gai_error);
 #else
     {

@@ -61,7 +61,11 @@ extern "C" {
 #define BRLAPI_SOCKETPORT "35751"
 
 /** Default unix path on which connections to \e BrlAPI can be established */
+#ifdef WINDOWS
+#define BRLAPI_SOCKETPATH "\\\\.\\pipe\\BrlAPI"
+#else /* WINDOWS */
 #define BRLAPI_SOCKETPATH "/var/lib/BrlAPI/"
+#endif /* WINDOWS */
 
 /** \e brltty 's settings directory
  *

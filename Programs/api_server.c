@@ -21,24 +21,15 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <signal.h>
-#include <time.h>
-
-#ifdef __MINGW32__
+#ifdef WINDOWS
+#define __USE_W32_SOCKETS
 #include <windows.h>
 #include <ws2tcpip.h>
 
+#ifdef __MINGW32__
 #include "win_pthread.h"
-#else /* __MINGW32__ */
+#endif /* __MINGW32__ */
+#else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -51,7 +42,19 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <signal.h>
+#include <time.h>
 
 #include "api.h"
 #include "api_protocol.h"
@@ -63,6 +66,10 @@
 #include "iomisc.h"
 #include "scr.h"
 #include "tunes.h"
+
+#ifdef WINDOWS
+#define close(fd) CloseHandle((HANDLE)(fd))
+#endif /* WINDOWS */
 
 #define UNAUTH_MAX 5
 #define UNAUTH_DELAY 30
@@ -118,6 +125,9 @@ typedef struct {
 typedef enum { TODISPLAY, FULL, EMPTY } BrlBufState;
 
 typedef enum {
+#ifdef WINDOWS
+  READY, /* but no pending ReadFile */
+#endif /* WINDOWS */
   READING_HEADER,
   READING_CONTENT,
   DISCARDING
@@ -130,6 +140,9 @@ typedef struct {
   int readBytes; /* Already read bytes */
   unsigned char *p; /* Where read() should load datas */
   int n; /* Value to give so read() */ 
+#ifdef WINDOWS
+  OVERLAPPED overl;
+#endif /* WINDOWS */
 } Packet;
 
 typedef struct Connection {
@@ -165,13 +178,20 @@ static int connectionsAllowed = 0;
 static pthread_t serverThread; /* server */
 static pthread_t socketThreads[MAXSOCKETS]; /* socket binding threads */
 static char **socketHosts; /* socket local hosts */
-static struct closeinfo {
+static struct socketInfo {
   int addrfamily;
   int fd;
+  char *hostname;
   char *port;
-} socketClose[MAXSOCKETS]; /* information for cleaning sockets */
-static int sockets[MAXSOCKETS]; /* server sockets fds */
+#ifdef WINDOWS
+  OVERLAPPED overl;
+#endif /* WINDOWS */
+} socketInfo[MAXSOCKETS]; /* information for cleaning sockets */
 static int numSockets; /* number of sockets */
+#ifdef WINDOWS
+static pthread_t socketSelectThread;
+static HANDLE socketSelectEvent;
+#endif /* WINDOWS */
 
 static pthread_mutex_t connectionsMutex = PTHREAD_MUTEX_INITIALIZER;
 static Tty notty;
@@ -202,9 +222,9 @@ static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
 
 static Connection *last_conn_write;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
 static WSADATA wsadata;
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -249,14 +269,37 @@ static void writeException(int fd, unsigned int err, brl_type_t type, const void
   brlapi_writePacket(fd,BRLPACKET_EXCEPTION,epacket, hdrsize+esize);
 }
 
-/* Function: initializePacket */
-/* Prepares a Packet structure */
-void initializePacket(Packet *packet)
+/* Function: resetPacket */
+/* Resets a Packet structure */
+void resetPacket(Packet *packet)
 {
+#ifdef WINDOWS
+  packet->state = READY;
+#else /* WINDOWS */
   packet->state = READING_HEADER;
+#endif /* WINDOWS */
   packet->readBytes = 0;
   packet->p = (char *) &packet->header;
   packet->n = sizeof(packet->header);
+#ifdef WINDOWS
+  SetEvent(packet->overl.hEvent);
+#endif /* WINDOWS */
+}
+
+/* Function: initializePacket */
+/* Prepares a Packet structure */
+/* returns 0 on success, -1 on failure */
+int initializePacket(Packet *packet)
+{
+#ifdef WINDOWS
+  memset(&packet->overl,0,sizeof(packet->overl));
+  if (!(packet->overl.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL))) {
+    LogWindowsError("CreateEvent for readPacket");
+    return -1;
+  }
+#endif /* WINDOWS */
+  resetPacket(packet);
+  return 0;
 }
 
 /* Function : readPacket */
@@ -265,11 +308,24 @@ void initializePacket(Packet *packet)
 /* 1 if the packet has been read. */
 int readPacket(Connection *c)
 {
-  int res;
   Packet *packet = &c->packet;
+#ifdef WINDOWS
+  DWORD res;
+  if (packet->state!=READY) {
+    /* pending read */
+    if (!GetOverlappedResult((HANDLE) c->fd,&packet->overl,&res,FALSE)) {
+      switch (errno = GetLastError()) {
+        case ERROR_IO_PENDING: return 0;
+	case 0:
+	case ERROR_BROKEN_PIPE: return -2;
+	default: LogWindowsError("GetOverlappedResult"); return -1;
+      }
+    }
+read:
+#else /* WINDOWS */
+  int res;
 read:
   res = read(c->fd, packet->p, packet->n);
-  if (res==0) return -2; /* EOF */
   if (res==-1) {
     switch (errno) {
       case EINTR: goto read;
@@ -277,6 +333,8 @@ read:
       default: return -1;
     }
   }
+#endif /* WINDOWS */
+  if (res==0) return -2; /* EOF */
   packet->readBytes += res;
   if ((packet->state==READING_HEADER) && (packet->readBytes==HEADERSIZE)) {
     packet->header.size = ntohl(packet->header.size);
@@ -299,10 +357,21 @@ read:
     packet->n -= res;
     packet->p += res;
   }
+#ifdef WINDOWS
+  } else packet->state = READING_HEADER;
+  if (!ReadFile((HANDLE)c->fd, packet->p, packet->n, &res, &packet->overl)) {
+    switch (errno = GetLastError()) {
+      case ERROR_IO_PENDING: return 0;
+      case 0:
+      case ERROR_BROKEN_PIPE: return -2;
+      default: LogWindowsError("ReadFile"); return -1;
+    }
+  }
+#endif /* WINDOWS */
   goto read;
 
 out:
-  initializePacket(packet);
+  resetPacket(packet);
   return 1;
 }
 
@@ -404,9 +473,12 @@ static Connection *createConnection(int fd, time_t currentTime)
   c->brailleWindow.text = NULL;
   c->brailleWindow.andAttr = NULL;
   c->brailleWindow.orAttr = NULL;
-  initializePacket(&c->packet);
+  if (initializePacket(&c->packet))
+    goto outmalloc;
   return c;
 
+outmalloc:
+  free(c);
 out:
   writeError(fd,BRLERR_NOMEM);
   close(fd);
@@ -879,6 +951,16 @@ l1:   len = strlen(str);
 /** SOCKETS AND CONNECTIONS MANAGING                                       **/
 /****************************************************************************/
 
+/*
+ * There is one server thread which first launches binding threads and then
+ * enters infinite loop trying to accept connections, read packets, etc.
+ *
+ * Binding threads loop trying to establish some socket, waiting for 
+ * filesystems to be read/write or network to be configured.
+ *
+ * On windows, WSAEventSelect() is emulated by a standalone thread.
+ */
+
 /* Function: loopBind */
 /* tries binding while temporary errors occur */
 static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
@@ -899,10 +981,10 @@ static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
   return 0;
 }
 
-/* Function : initializeSocket */
+/* Function : initializeTcpSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
-static int initializeTcpSocket(char *hostname, char *port)
+static int initializeTcpSocket(struct socketInfo *info)
 {
   int fd=-1;
   const char *fun;
@@ -919,10 +1001,11 @@ static int initializeTcpSocket(char *hostname, char *port)
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
   WSAStartup(MAKEWORD(2,0),&wsadata);
-#endif /* __MINGW32__ */
-  err = getaddrinfo(hostname, port, &hints, &res);
+#endif /* WINDOWS */
+
+  err = getaddrinfo(info->hostname, info->port, &hints, &res);
   if (err) {
     LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): "
 #ifdef HAVE_GAI_STRERROR
@@ -930,7 +1013,7 @@ static int initializeTcpSocket(char *hostname, char *port)
 #else /* HAVE_GAI_STRERROR */
 	"%d"
 #endif /* HAVE_GAI_STRERROR */
-	,hostname,port
+	,info->hostname,info->port
 #ifdef HAVE_GAI_STRERROR
 	,gai_strerror(err)
 #else /* HAVE_GAI_STRERROR */
@@ -966,43 +1049,55 @@ cont:
   }
   freeaddrinfo(res);
   if (cur) {
-    free(hostname);
-    free(port);
+    free(info->hostname);
+    info->hostname = NULL;
+    free(info->port);
+    info->port = NULL;
+
+#ifdef WINDOWS
+    if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
+      LogWindowsError("CreateEvent");
+      close(fd);
+      return -1;
+    }
+#endif /* WINDOWS */
+
     return fd;
   }
-  LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",hostname,port);
+  LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->hostname,info->port);
 
 #else /* HAVE_GETADDRINFO */
 
   struct sockaddr_in addr;
   struct hostent *he;
 
-#ifdef __MINGW32__
-  WSAStartup(MAKEWORD(2,0),&wsadata);
-#endif /* __MINGW32__ */
+#ifdef WINDOWS
+  WSAStartup(MAKEWORD(1,0),&wsadata);
+#endif /* WINDOWS */
+
   memset(&addr,0,sizeof(addr));
   addr.sin_family = AF_INET;
-  if (!port)
+  if (!info->port)
     addr.sin_port = htons(BRLAPI_SOCKETPORTNUM);
   else {
     char *c;
-    addr.sin_port = htons(strtol(port, &c, 0));
+    addr.sin_port = htons(strtol(info->port, &c, 0));
     if (*c) {
       struct servent *se;
 
-      if (!(se = getservbyname(port,"tcp"))) {
+      if (!(se = getservbyname(info->port,"tcp"))) {
         LogPrint(LOG_ERR,"port %s: "
-#ifdef __MINGW32__
+#ifdef WINDOWS
 	  "%d"
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 	  "%s"
-#endif /* __MINGW32__ */
-	  ,port,
-#ifdef __MINGW32__
+#endif /* WINDOWS */
+	  ,info->port,
+#ifdef WINDOWS
 	  WSAGetLastError()
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 	  hstrerror(h_errno)
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 	  );
 	return -1;
       }
@@ -1010,22 +1105,22 @@ cont:
     }
   }
 
-  if (!hostname) {
+  if (!info->hostname) {
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   } else {
-    if (!(he = gethostbyname(hostname))) {
+    if (!(he = gethostbyname(info->hostname))) {
       LogPrint(LOG_ERR,"gethostbyname(%s): "
-#ifdef __MINGW32__
+#ifdef WINDOWS
 	"%d"
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 	"%s"
-#endif /* __MINGW32__ */
-	,hostname,
-#ifdef __MINGW32__
+#endif /* WINDOWS */
+	,info->hostname,
+#ifdef WINDOWS
 	WSAGetLastError()
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 	hstrerror(h_errno)
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 	);
       return -1;
     }
@@ -1063,8 +1158,19 @@ cont:
     fun = "listen";
     goto errfd;
   }
-  free(hostname);
-  free(port);
+  free(info->hostname);
+  info->hostname = NULL;
+  free(info->port);
+  info->port = NULL;
+
+#ifdef WINDOWS
+  if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
+    LogWindowsError("CreateEvent");
+    close(fd);
+    return -1;
+  }
+#endif /* WINDOWS */
+
   return fd;
 
 errfd:
@@ -1074,27 +1180,63 @@ err:
 
 #endif /* HAVE_GETADDRINFO */
 
-  free(hostname);
-  free(port);
+  free(info->hostname);
+  info->hostname = NULL;
+  free(info->port);
+  info->port = NULL;
   return -1;
 }
 
 #ifdef PF_LOCAL
-/* Function : initializeSocket */
+/* Function : initializeLocalSocket */
 /* Creates the listening socket for in-connections */
-/* Returns the descriptor, or -1 if an error occurred */
-static int initializeUnixSocket(const char *port)
+/* Returns 1, or 0 if an error occurred */
+static int initializeLocalSocket(struct socketInfo *info)
 {
+  int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
+  int fd;
+#ifdef WINDOWS
+  char path[lpath+lport+1];
+  memcpy(path,BRLAPI_SOCKETPATH,lpath);
+  memcpy(path+lpath,info->port,lport+1);
+  if ((HANDLE) (fd = (int) CreateNamedPipe(path,
+	  PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+	  PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
+	  PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
+    LogWindowsError("CreateNamedPipe");
+    goto out;
+  }
+  LogPrint(LOG_DEBUG,"CreateFile -> %p",(HANDLE) fd);
+  if (!info->overl.hEvent) {
+    if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
+      LogWindowsError("CreateEvent");
+      goto outfd;
+    }
+    LogPrint(LOG_DEBUG,"Event -> %d",(int)info->overl.hEvent);
+  }
+  if (!(ResetEvent(info->overl.hEvent))) {
+    LogWindowsError("ResetEvent");
+    goto outfd;
+  }
+  if (ConnectNamedPipe((HANDLE) fd, &info->overl)) {
+    LogPrint(LOG_DEBUG,"already connected !");
+    return fd;
+  }
+
+  switch(GetLastError()) {
+    case ERROR_IO_PENDING: return fd;
+    case ERROR_PIPE_CONNECTED: SetEvent(info->overl.hEvent); return fd;
+    default: LogWindowsError("ConnectNamedPipe");
+  }
+  CloseHandle(info->overl.hEvent);
+#else /* WINDOWS */
   struct sockaddr_un sa;
-  int fd = socket(PF_LOCAL, SOCK_STREAM, 0);
-  int lpath=strlen(BRLAPI_SOCKETPATH),lport;
   mode_t oldmode;
-  if (fd==-1) {
+  if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))==-1) {
     LogError("socket");
     goto out;
   }
   sa.sun_family = AF_LOCAL;
-  lport=strlen(port);
   if (lpath+lport+1>sizeof(sa.sun_path)) {
     LogError("Unix path too long");
     goto outfd;
@@ -1111,7 +1253,7 @@ static int initializeUnixSocket(const char *port)
     sleep(1);
   }
   memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
-  memcpy(sa.sun_path+lpath,port,lport+1);
+  memcpy(sa.sun_path+lpath,info->port,lport+1);
   /* hacky, TODO: find a better way to keep secure */
   unlink(sa.sun_path);
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
@@ -1127,6 +1269,7 @@ static int initializeUnixSocket(const char *port)
   
 outmode:
   umask(oldmode);
+#endif /* WINDOWS */
 outfd:
   close(fd);
 out:
@@ -1137,10 +1280,7 @@ out:
 static void *establishSocket(void *arg)
 {
   int num = (int) arg;
-  char *host = socketHosts[num];
-  char *hostname;
-  struct closeinfo *cinfo = &socketClose[num];
-
+  struct socketInfo *cinfo = &socketInfo[num];
 #ifndef WINDOWS
   int res;
   sigset_t blockedSignals;
@@ -1157,35 +1297,85 @@ static void *establishSocket(void *arg)
   }
 #endif /* WINDOWS */
 
-  cinfo->addrfamily=brlapi_splitHost(host,&hostname,&cinfo->port);
-#ifdef PF_LOCAL
-  if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd = initializeUnixSocket(cinfo->port))==-1) ||
-      (cinfo->addrfamily!=PF_LOCAL && (
+#if defined(PF_LOCAL)
+  if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==-1) ||
+      (cinfo->addrfamily!=PF_LOCAL && 
 #else
-  if (((
+  if ((
 #endif
-	cinfo->fd = initializeTcpSocket(hostname,cinfo->port))==-1)) {
-    LogPrint(LOG_WARNING,"Error while initializing socket: %s",strerror(errno));
-    return NULL;
-  }
-  LogPrint(LOG_DEBUG,"socket %d established (fd %d)",num,cinfo->fd);
-  sockets[num]=cinfo->fd;
+	(cinfo->fd=initializeTcpSocket(cinfo))==-1))
+    LogPrint(LOG_WARNING,"Error while initializing socket %d",num);
+  else
+    LogPrint(LOG_DEBUG,"socket %d established (fd %d)",num,cinfo->fd);
   return NULL;
 }
+
+#ifdef WINDOWS
+static void *socketSelect(void *foo)
+{
+  fd_set sockset;
+  int fdmax;
+  struct timeval tv;
+  int n,i;
+
+  while(1) {
+    FD_ZERO(&sockset);
+    fdmax=0;
+    for (i=0;i<numSockets;i++)
+      if (socketInfo[i].fd>=0 && socketInfo[i].addrfamily != PF_LOCAL) {
+	FD_SET(socketInfo[i].fd, &sockset);
+	if (socketInfo[i].fd>fdmax)
+	  fdmax = socketInfo[i].fd;
+      }
+    tv.tv_sec = 1; tv.tv_usec = 0;
+    if (fdmax == 0) {
+      /* still no server socket */
+      Sleep(1000);
+      continue;
+    }
+    if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0) {
+      LogPrint(LOG_WARNING,"select: %s",strerror(errno));
+      break;
+    }
+    if (n==0) continue;
+    if (!ResetEvent(socketSelectEvent))
+      LogWindowsError("ResetEvent(socketSelectEvent)");
+    for (i=0;i<numSockets;i++)
+      if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset))
+	if (!(SetEvent(socketInfo[i].overl.hEvent)))
+	  LogWindowsError("SetEvent(socketInfo)");
+    if (WaitForSingleObject(socketSelectEvent, INFINITE) == WAIT_FAILED) {
+      LogWindowsError("WaitForSingleObject(socketSelectEvent");
+      break;
+    }
+  }
+  return NULL;
+}
+#endif /* WINDOWS */
 
 static void closeSockets(void *arg)
 {
   int i;
-  struct closeinfo *info;
+  struct socketInfo *info;
   
+#ifdef WINDOWS
+  pthread_cancel(socketSelectThread);
+#endif /* WINDOWS */
+
   for (i=0;i<numSockets;i++) {
     pthread_cancel(socketThreads[i]);
-    info=&socketClose[i];
+    info=&socketInfo[i];
     if (info->fd>=0) {
-      if (close(info->fd)<0)
+      if (close(info->fd))
         LogError("closing socket");
       info->fd=-1;
     }
+#ifdef WINDOWS
+    if ((info->overl.hEvent)) {
+      CloseHandle(info->overl.hEvent);
+      info->overl.hEvent = NULL;
+    }
+#else /* WINDOWS */
 #ifdef PF_LOCAL
     if (info->addrfamily==PF_LOCAL) {
       char *path;
@@ -1197,24 +1387,45 @@ static void closeSockets(void *arg)
           LogError("unlinking socket");
       }
     }
-#endif
+#endif /* PF_LOCAL */
+#endif /* WINDOWS */
     free(info->port);
+    info->port = NULL;
+    free(info->hostname);
+    info->hostname = NULL;
   }
 }
 
 /* Function: addTtyFds */
 /* recursively add fds of ttys */
+#ifdef WINDOWS
+static void addTtyFds(HANDLE *lpHandles, int *nbAlloc, int *nbHandles, Tty *tty) {
+#else /* WINDOWS */
 static void addTtyFds(fd_set *fds, int *fdmax, Tty *tty) {
+#endif /* WINDOWS */
   {
     Connection *c;
     for (c = tty->connections->next; c != tty->connections; c = c -> next) {
+#ifdef WINDOWS
+      if (*nbHandles == *nbAlloc) {
+	*nbAlloc *= 2;
+	*lpHandles = realloc(lpHandles,*nbAlloc*sizeof(*lpHandles));
+      }
+      lpHandles[(*nbHandles)++] = (HANDLE) c->packet.overl.hEvent;
+#else /* WINDOWS */
       if (c->fd>*fdmax) *fdmax = c->fd;
       FD_SET(c->fd,fds);
+#endif /* WINDOWS */
     }
   }
   {
     Tty *t;
-    for (t = tty->subttys; t; t = t->next) addTtyFds(fds,fdmax,t);
+    for (t = tty->subttys; t; t = t->next)
+#ifdef WINDOWS
+      addTtyFds(lpHandles, nbAlloc, nbHandles, t);
+#else /* WINDOWS */
+      addTtyFds(fds,fdmax,t);
+#endif /* WINDOWS */
   }
 }
 
@@ -1227,9 +1438,16 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
     while (c!=tty->connections) {
       int remove = 0;
       next = c->next;
-      if (FD_ISSET(c->fd, fds)) remove = processRequest(c);
+#ifdef WINDOWS
+      if (WaitForSingleObject(c->packet.overl.hEvent,0) == WAIT_OBJECT_0)
+#else /* WINDOWS */
+      if (FD_ISSET(c->fd, fds))
+#endif /* WINDOWS */
+	remove = processRequest(c);
       else remove = c->auth==0 && currentTime-(c->upTime) > UNAUTH_DELAY;
+#ifndef WINDOWS
       FD_CLR(c->fd,fds);
+#endif /* WINDOWS */
       if (remove) removeFreeConnection(c);
       c = next;
     }
@@ -1248,14 +1466,22 @@ static void *server(void *arg)
   char *hosts = (char *)arg;
   pthread_attr_t attr;
   int i;
-  int res, fdmax;
-  fd_set sockset;
+  int res;
   struct sockaddr addr;
-  socklen_t addrlen = sizeof(addr);
+  socklen_t addrlen;
   Connection *c;
   time_t currentTime;
+  fd_set sockset;
+  int nbAlloc;
+#ifdef WINDOWS
+  HANDLE *lpHandles;
+  int nbHandles = 0;
+#else /* WINDOWS */
+  int fdmax;
   struct timeval tv;
   int n;
+#endif /* WINDOWS */
+
 
 #ifndef WINDOWS
   sigset_t blockedSignals;
@@ -1276,33 +1502,80 @@ static void *server(void *arg)
     LogPrint(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
     pthread_exit(NULL);
   }
+  if (numSockets == 0) {
+    LogPrint(LOG_INFO,"no hosts specified");
+    pthread_exit(NULL);
+  }
+  nbAlloc = numSockets;
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
 
   for (i=0;i<numSockets;i++)
-    sockets[i]=-1;
+    socketInfo[i].fd = -1;
 
   pthread_cleanup_push(closeSockets,NULL);
   for (i=0;i<numSockets;i++) {
-    if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *) i)) != 0) {
-      LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
-      for (;i>=0;i--)
-	pthread_cancel(socketThreads[i]);
-      return NULL;
+    socketInfo[i].addrfamily=brlapi_splitHost(socketHosts[i],&socketInfo[i].hostname,&socketInfo[i].port);
+#ifdef WINDOWS
+    if (socketInfo[i].addrfamily != PF_LOCAL) {
+#endif /* WINDOWS */
+      if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *)i)) != 0) {
+	LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
+	for (i--;i>=0;i--)
+	  pthread_cancel(socketThreads[i]);
+	pthread_exit(NULL);
+      }
+#ifdef WINDOWS
+    } else {
+      /* Windows doesn't have troubles with local sockets on read-only
+       * filesystems, but it has with inter-thread events, so call from here */
+      establishSocket((void *)i);
     }
+#endif /* WINDOWS */
   }
+#ifdef WINDOWS
+  if (!(socketSelectEvent = CreateEvent(NULL,TRUE,TRUE,NULL))) {
+    LogWindowsError("CreateEvent");
+    pthread_exit(NULL);
+  }
+  if ((pthread_create(&socketSelectThread, NULL, socketSelect, NULL))) {
+    LogWindowsError("pthread_create");
+    pthread_exit(NULL);
+  }
+#endif /* WINDOWS */
 
   unauthConnections = 0; unauthConnLog = 0;
   while (1) {
+#ifdef WINDOWS
+    lpHandles = malloc(nbAlloc * sizeof(*lpHandles));
+    nbHandles = 0;
+    for (i=0;i<numSockets;i++)
+      if ((HANDLE) socketInfo[i].fd != INVALID_HANDLE_VALUE)
+	lpHandles[nbHandles++] = socketInfo[i].overl.hEvent;
+    pthread_mutex_lock(&connectionsMutex);
+    addTtyFds(lpHandles, &nbAlloc, &nbHandles, &notty);
+    addTtyFds(lpHandles, &nbAlloc, &nbHandles, &ttys);
+    pthread_mutex_unlock(&connectionsMutex);
+    if (!nbHandles) {
+      free(lpHandles);
+      Sleep(1000);
+      continue;
+    }
+    switch (WaitForMultipleObjects(nbHandles, lpHandles, FALSE, 1000)) {
+      case WAIT_TIMEOUT: continue;
+      case WAIT_FAILED: LogWindowsError("WaitForMultipleObjects");
+    }
+    free(lpHandles);
+#else /* WINDOWS */
     /* Compute sockets set and fdmax */
     FD_ZERO(&sockset);
     fdmax=0;
     for (i=0;i<numSockets;i++)
-      if (sockets[i]>=0) {
-	FD_SET(sockets[i], &sockset);
-	if (sockets[i]>fdmax)
-	  fdmax = sockets[i];
+      if (socketInfo[i].fd>=0) {
+	FD_SET(socketInfo[i].fd, &sockset);
+	if (socketInfo[i].fd>fdmax)
+	  fdmax = socketInfo[i].fd;
       }
     pthread_mutex_lock(&connectionsMutex);
     addTtyFds(&sockset, &fdmax, &notty);
@@ -1315,16 +1588,33 @@ static void *server(void *arg)
       LogPrint(LOG_WARNING,"select: %s",strerror(errno));
       break;
     }
+#endif /* WINDOWS */
     time(&currentTime);
     for (i=0;i<numSockets;i++)
-    if (sockets[i]>=0 && FD_ISSET(sockets[i], &sockset)) {
-      addrlen=sizeof(addr);
-      LogPrint(LOG_DEBUG,"Incoming connection attempt detected");
-      res = accept(sockets[i], &addr, &addrlen);
-      if (res<0) {
-        LogPrint(LOG_WARNING,"accept: %s",strerror(errno));
-	break;
+#ifdef WINDOWS
+    if (socketInfo[i].fd != -1 &&
+	WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
+      if (socketInfo[i].addrfamily != PF_LOCAL) {
+	ResetEvent(socketInfo[i].overl.hEvent);
+#else /* WINDOWS */
+    if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
+#endif /* WINDOWS */
+	addrlen = sizeof(addr);
+	res = accept(socketInfo[i].fd, &addr, &addrlen);
+	if (res<0) {
+	  LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
+	  break;
+	}
+#ifdef WINDOWS
+      } else /* PF_LOCAL */ {
+        DWORD foo;
+	if (!(GetOverlappedResult((HANDLE) socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
+	  LogWindowsError("GetOverlappedResult");
+        res = socketInfo[i].fd;
+	if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
+	  LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
       }
+#endif /* WINDOWS */
       LogPrint(LOG_DEBUG,"Connection accepted on fd %d",res);
       if (unauthConnections>=UNAUTH_MAX) {
         writeError(res, BRLERR_CONNREFUSED);
@@ -1333,10 +1623,12 @@ static void *server(void *arg)
         unauthConnLog++;
       } else {
         unauthConnections++;
+#ifndef WINDOWS
         if (!setBlockingIo(res, 0)) {
           LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
           break;
         }
+#endif /* WINDOWS */
         c = createConnection(res, currentTime);
         if (c==NULL) {
           LogPrint(LOG_WARNING,"Failed to create connection structure");
@@ -1345,6 +1637,10 @@ static void *server(void *arg)
 	addConnection(c, notty.connections);
       }
     }
+#ifdef WINDOWS
+    if (!SetEvent(socketSelectEvent))
+      LogWindowsError("SetEvent(socketSelectEvent)");
+#endif /* WINDOWS */
     handleTtyFds(&sockset,currentTime,&notty);
     handleTtyFds(&sockset,currentTime,&ttys);
   }
@@ -1387,15 +1683,15 @@ static void ttyTerminationHandler(Tty *tty)
 static void terminationHandler(void)
 {
   int res;
-  int i;
   if (connectionsAllowed!=0) {
-    for (i=0;i<numSockets;i++)
-      pthread_cancel(socketThreads[i]);
     if ((res = pthread_cancel(serverThread)) != 0 )
       LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
     ttyTerminationHandler(&notty);
     ttyTerminationHandler(&ttys);
     api_unlink();
+#ifdef WINDOWS
+    WSACleanup();
+#endif /* WINDOWS */
   }
 }
 
@@ -1603,6 +1899,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
 #else
 	"127.0.0.1:0";
 #endif
+  char *keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH;
   pthread_attr_t attr;
 
   displayDimensions[0] = htonl(brl->x);
@@ -1610,10 +1907,9 @@ int api_open(BrailleDisplay *brl, char **parameters)
   displaySize = brl->x * brl->y;
   disp = brl;
 
-  res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH),
-                           &authKeyLength,authKey);
+  res = brlapi_loadAuthKey(keyfile,&authKeyLength,authKey);
   if (res==-1) {
-    LogPrint(LOG_WARNING,"Unable to load API authentication key (%s): no connections will be accepted.", strerror(brlapi_libcerrno));
+    LogPrint(LOG_WARNING,"Unable to load API authentication key from %s: %s in %s, no connections will be accepted.", keyfile, strerror(brlapi_libcerrno), brlapi_libcerrfun);
     goto out;
   }
   LogPrint(LOG_DEBUG, "Authentication key loaded");

@@ -286,7 +286,7 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 
 case "${host_os}"
 in
-   mingw*)
+   cygwin*|mingw*)
       AC_HAVE_LIBRARY([wsock32])
       ;;
    *)

@@ -47,7 +47,7 @@ static inline int pthread_attr_init (pthread_attr_t *attr) {
 
 #define PTHREAD_CREATE_DETACHED 1
 static inline int pthread_attr_setdetachstate (pthread_attr_t *attr, int yes) {
-  /* not supported */
+  /* not supported, ignore */
   return 0;
 }
 
@@ -74,7 +74,7 @@ static inline int pthread_create (
   pthread_t *thread, const pthread_attr_t *attr,
   void * (*fun) (void *), void *arg
 ) {
-  if (*attr) {
+  if (attr && *attr) {
     errno = EINVAL;
     return -1;
   }
@@ -249,12 +249,12 @@ typedef struct {
 } pthread_once_t;
 
 static inline int pthread_once (pthread_once_t *once, void (*oncefun)(void)) {
-  pthread_mutex_lock(once->mutex);
+  pthread_mutex_lock(&once->mutex);
   if (!once->done) {
     oncefun();
     once->done = 1;
   }
-  pthread_mutex_unlock(once->mutex);
+  pthread_mutex_unlock(&once->mutex);
   return 0;
 }
 
