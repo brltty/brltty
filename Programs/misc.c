@@ -29,9 +29,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
 #include <windows.h>
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
