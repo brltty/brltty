@@ -854,11 +854,9 @@ static int brl_read (DriverCommandContext cmds)
 	      res = CMD_SPKHOME;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_LEFT:
-	      //res = CMD_CUT_BEG;
 	      res = CMD_RESTARTSPEECH;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_RIGHT:
-	      //res = CMD_CUT_END;
 	      res = CMD_SAYALL;
 	      break;
 	    case KEY_ROUTING:

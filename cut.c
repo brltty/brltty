@@ -26,7 +26,8 @@
 
 /* Global state variables */
 unsigned char *cut_buffer = NULL;
-static short beginColumn = 0, beginRow = 0;
+static short int beginColumn = 0, beginRow = 0;
+static unsigned int previousLength = 0;
 
 static unsigned char *
 cut (int fromColumn, int fromRow, int toColumn, int toRow, unsigned char delimiter) {
@@ -81,9 +82,10 @@ cut (int fromColumn, int fromRow, int toColumn, int toRow, unsigned char delimit
 static int
 append (unsigned char *buffer) {
   if (cut_buffer) {
-    unsigned char *newBuffer = (unsigned char *)malloc(strlen(cut_buffer) + strlen(buffer) + 1);
+    unsigned char *newBuffer = (unsigned char *)malloc(previousLength + strlen(buffer) + 1);
     if (!newBuffer) return 0;
-    sprintf(newBuffer, "%s%s", cut_buffer, buffer);
+    memcpy(newBuffer, cut_buffer, previousLength);
+    strcpy(newBuffer+previousLength, buffer);
     free(buffer);
     free(cut_buffer);
     cut_buffer = newBuffer;
@@ -94,8 +96,8 @@ append (unsigned char *buffer) {
   return 1;
 }
 
-void
-cut_append (int column, int row) {
+static void
+start (int column, int row) {
   beginColumn = column;
   beginRow = row;
   playTune(&tune_cut_begin);
@@ -107,7 +109,14 @@ cut_begin (int column, int row) {
     free(cut_buffer);
     cut_buffer = NULL;
   }
-  cut_append(column, row);
+  previousLength = 0;
+  start(column, row);
+}
+
+void
+cut_append (int column, int row) {
+  previousLength = cut_buffer? strlen(cut_buffer): 0;
+  start(column, row);
 }
 
 int

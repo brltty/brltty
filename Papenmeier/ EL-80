@@ -1,0 +1,62 @@
+# Terminal Parameter:
+identification = 0
+terminal = ""
+helpfile = " EL-80"
+displaysize = 808988012
+statuscells = 0
+frontkeys = 0
+# Terminal settings:
+# Statusdisplay settings:
+# flag: left half: line number  right half: no/all bits set
+# horiz: two digits on vertikal status-display
+# number: display two digits in one cell when status on horiz.display
+status 14 =  ??? # 
+status 15 =  STAT_brlcol # current line number
+status 16 =  STAT_brlrow # current line number
+status 18 =  STAT_brlcol # current line number
+status 19 = number STAT_brlrow # current line number
+status 20 = number STAT_csrrow # cursor position - row
+# Modifierkey and input mode dots - settings:
+# Commandkey settings:
+??? = easy left  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  # 
+??? = switch 2  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  and front   0  # 
+??? = front   0   # 
+CMD_LNUP = front   0  # go up one line
+CMD_TOP = easy up2  and front   0  # go to top line
+CMD_LNDN = front   0  # go down one line
+CMD_BOT = easy down2  and front   0  # go to bottom line
+CMD_FWINLT = front   0  # go left one full window
+CMD_LNBEG = easy left2  and front   0  # go to beginning of line
+CMD_FWINRT = front   0  # go right one full window
+CMD_LNEND = easy right2  and front   0  # go to end of line
+CMD_BACK = switch 3  # go to last motion
+CMD_HOME = switch 4  # go to cursor
+CMD_CSRJMP_VERT = switch 5  # route cursor to top line of window
+CMD_PASTE = switch 6  # insert cut buffer at cursor
+VPK_CURSOR_UP = front   0  and front   0  # send CURSOR_UP key
+VPK_PAGE_UP = easy up2  and front   0  and front   0  # send PAGE_UP key
+VPK_CURSOR_DOWN = front   0  and front   0  # send CURSOR_DOWN key
+VPK_PAGE_DOWN = easy down2  and front   0  and front   0  # send PAGE_DOWN key
+VPK_CURSOR_UP = front   0  and front   0  # send CURSOR_UP key
+VPK_PAGE_UP = easy up2  and front   0  and front   0  # send PAGE_UP key
+VPK_CURSOR_DOWN = front   0  and front   0  # send CURSOR_DOWN key
+VPK_PAGE_DOWN = easy down2  and front   0  and front   0  # send PAGE_DOWN key
+VPK_CURSOR_LEFT = front   0  and front   0  # send CURSOR_LEFT key
+VPK_HOME = easy left2  and front   0  and front   0  # send HOME key
+VPK_CURSOR_RIGHT = front   0  and front   0  # send CURSOR_RIGHT key
+VPK_END = easy right2  and front   0  and front   0  # send END key
+CMD_PRDIFLN = front   0  and front   0  # go up to line with different content
+CMD_ATTRUP = easy up2  and front   0  and front   0  # go up to line with different attributes
+CMD_NXDIFLN = front   0  and front   0  # go down to line with different content
+CMD_ATTRDN = easy down2  and front   0  and front   0  # go down to line with different attributes
+CMD_CHRLT = front   0  and front   0  # go left one character
+CMD_HWINLT = easy left2  and front   0  and front   0  # go left one half window
+CMD_CHRRT = front   0  and front   0  # go right one character
+CMD_HWINRT = easy right2  and front   0  and front   0  # go right one half window
+CR_ROUTE = routing  # route cursor to character
+CR_PRINDENT = routing  and front   0  # find previous line not more indented than routing key indicates
+CR_NXINDENT = routing  and front   0  # find next line not more indented than routing key indicates
+CR_CUTBEGIN = routing  and front   0  # begin cut area at character
+CR_CUTRECT = routing  and front   0  # rectangular cut to area
+CMD_HELP = status  1   # display driver help
+CMD_RESTARTBRL = status  2   # reinitialize braille driver

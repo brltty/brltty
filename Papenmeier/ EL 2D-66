@@ -1,0 +1,89 @@
+# Terminal Parameter:
+identification = 0
+terminal = ""
+helpfile = " EL 2D-66"
+displaysize = 1681010028
+statuscells = 7367784
+frontkeys = 0
+# Terminal settings:
+# Statusdisplay settings:
+# flag: left half: line number  right half: no/all bits set
+# horiz: two digits on vertikal status-display
+# number: display two digits in one cell when status on horiz.display
+status 14 =  ??? # 
+status 15 =  STAT_brlcol # current line number
+status 16 =  STAT_dots # 6 or 8 dots
+status 18 =  STAT_brlcol # current line number
+status 19 = horiz STAT_brlrow # current line number
+status 21 = horiz STAT_csrrow # cursor position - row
+status 22 = horiz STAT_csrcol # cursor position - column
+# Modifierkey and input mode dots - settings:
+modifier = status ”6  # dot 1
+modifier = status ”7  # dot 2
+modifier = status ”8  # dot 4
+modifier = status ”9  # dot 7
+modifier = status •0  # dot 8
+# Commandkey settings:
+??? = easy left  and status ”6  and front   0  and status ”8  and front   0  and front   0  and status •0  and front   0  and front   0  and front   0  # 
+??? = switch 2  and status ”6  and status ”7  and front   0  and front   0  and status •0  and front   0  and front   0  and front   0  and front   0  # 
+??? = front   0   # 
+CMD_HELP = status  1   # display driver help
+CMD_RESTARTBRL = status  2   # reinitialize braille driver
+CMD_CSRJMP_VERT = status  3   # route cursor to top line of window
+CMD_BACK = status  4   # go to last motion
+CMD_CSRTRK = status  5   # toggle cursor tracking on/off
+CMD_CSRTRK on = status  5   and status ”7  # toggle cursor tracking on/off - set on
+CMD_CSRTRK off = status  5   and status ”6  # toggle cursor tracking on/off - set off
+CMD_DISPMD = status  6   # toggle display attributes/text
+CMD_DISPMD on = status  6   and status ”7  # toggle display attributes/text - set on
+CMD_DISPMD off = status  6   and status ”6  # toggle display attributes/text - set off
+CMD_INFO = status  7   # display status summary
+CMD_FREEZE = status  8   # freeze/unfreeze screen
+CMD_FREEZE on = status  8   and status ”7  # freeze/unfreeze screen - set on
+CMD_FREEZE off = status  8   and status ”6  # freeze/unfreeze screen - set off
+CMD_PREFMENU = status  9   # present preferences menu
+CMD_PREFSAVE = status 10   # save preferences
+CMD_CSRVIS = status 11   # toggle cursor visibility on/off
+CMD_CSRVIS on = status 11   and status ”7  # toggle cursor visibility on/off - set on
+CMD_CSRVIS off = status 11   and status ”6  # toggle cursor visibility on/off - set off
+CMD_CSRSIZE = status 12   # toggle cursor style underline/block
+CMD_CSRSIZE on = status 12   and status ”7  # toggle cursor style underline/block - set on
+CMD_CSRSIZE off = status 12   and status ”6  # toggle cursor style underline/block - set off
+CMD_PASTE = status 13   # insert cut buffer at cursor
+CMD_LNUP = status ”6  # go up one line
+CMD_TOP = easy up2  and status ”6  # go to top line
+CMD_LNDN = status ”7  # go down one line
+CMD_BOT = easy down2  and status ”7  # go to bottom line
+CMD_FWINLT = front   0  # go left one full window
+CMD_LNBEG = easy left2  and front   0  # go to beginning of line
+CMD_FWINRT = status ”8  # go right one full window
+CMD_LNEND = easy right2  and status ”8  # go to end of line
+CMD_BACK = switch 3  # go to last motion
+CMD_HOME = switch 4  # go to cursor
+CMD_CSRJMP_VERT = switch 5  # route cursor to top line of window
+CMD_PASTE = switch 6  # insert cut buffer at cursor
+VPK_CURSOR_UP = status ”6  and front   0  # send CURSOR_UP key
+VPK_PAGE_UP = easy up2  and status ”6  and front   0  # send PAGE_UP key
+VPK_CURSOR_DOWN = status ”7  and front   0  # send CURSOR_DOWN key
+VPK_PAGE_DOWN = easy down2  and status ”7  and front   0  # send PAGE_DOWN key
+VPK_CURSOR_UP = status ”6  and front   0  # send CURSOR_UP key
+VPK_PAGE_UP = easy up2  and status ”6  and front   0  # send PAGE_UP key
+VPK_CURSOR_DOWN = status ”7  and front   0  # send CURSOR_DOWN key
+VPK_PAGE_DOWN = easy down2  and status ”7  and front   0  # send PAGE_DOWN key
+VPK_CURSOR_LEFT = front   0  and front   0  # send CURSOR_LEFT key
+VPK_HOME = easy left2  and front   0  and front   0  # send HOME key
+VPK_CURSOR_RIGHT = status ”8  and front   0  # send CURSOR_RIGHT key
+VPK_END = easy right2  and status ”8  and front   0  # send END key
+CMD_PRDIFLN = status ”6  and front   0  # go up to line with different content
+CMD_ATTRUP = easy up2  and status ”6  and front   0  # go up to line with different attributes
+CMD_NXDIFLN = status ”7  and front   0  # go down to line with different content
+CMD_ATTRDN = easy down2  and status ”7  and front   0  # go down to line with different attributes
+CMD_CHRLT = front   0  and front   0  # go left one character
+CMD_HWINLT = easy left2  and front   0  and front   0  # go left one half window
+CMD_CHRRT = status ”8  and front   0  # go right one character
+CMD_HWINRT = easy right2  and status ”8  and front   0  # go right one half window
+CR_ROUTE = routing  # route cursor to character
+CR_PRINDENT = routing  and status ”6  # find previous line not more indented than routing key indicates
+CR_NXINDENT = routing  and status ”7  # find next line not more indented than routing key indicates
+CR_CUTBEGIN = routing  and front   0  # begin cut area at character
+CR_CUTRECT = routing  and status ”8  # rectangular cut to area

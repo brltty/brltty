@@ -232,7 +232,7 @@ static int brl_read(DriverCommandContext cmds)
  }
  if (process) // process packet
  {
-  if ((ibuf[0]==0x3c) | (ibuf[0]==0x3d)) // a key was pressed
+  if ((ibuf[0]==0x3c) | (ibuf[0]==0x3d) | (ibuf[0]==0x23)) // a key was pressed
   {
    if (routing)
    {

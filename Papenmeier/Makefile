@@ -30,7 +30,7 @@ include ../driver.mk
 
 PM_YACC_CFLAGS = -Wno-parentheses -Wno-unused
 
-BRL_H = ../brl.h
+BRL_H = ../brl.h config.y
 
 brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../scr.h ../misc.h brl-cfg.h config.tab.c cmd.h hlp.h
 	$(CC) $(BRL_CFLAGS) $(PM_YACC_CFLAGS) -DREAD_CONFIG -o $@ -c $<
@@ -52,10 +52,10 @@ simulate: simulate.c ../brl.h brl.c ../text.auto.h ../misc.c config.tab.c brl-cf
 
 
 cmd.h: $(BRL_H) cmd.awk
-	awk <$(BRL_H) >cmd.h -f cmd.awk
+	awk >cmd.h -f cmd.awk $(BRL_H)
 
 hlp.h: $(BRL_H) hlp.awk
-	awk <$(BRL_H) >hlp.h -f hlp.awk
+	awk >hlp.h -f hlp.awk $(BRL_H)
 
 ifneq (,$(findstring s,$(MAKEFLAGS)))
    READ_CONFIG_D = d

@@ -57,12 +57,12 @@
 /* 0X1B */ CMD_NOOP,                       // dots 1,2,5,6
 /* 0X1C */ CMD_FREEZE,                     // dots 1,2,4
 /* 0X1D */ CMD_NOOP,                       // dots 1,2,4,6
-/* 0X1E */ CMD_CSRJMP,                     // dots 1,2,4,5
+/* 0X1E */ CR_ROUTE,                       // dots 1,2,4,5
 /* 0X1F */ CMD_NOOP,                       // dots 1,2,4,5,6
 /* 0X20 */ CMD_FWINLT,                     // dots 3
 /* 0X21 */ CMD_HOME,                       // dots 3,6
 /* 0X22 */ CMD_NOOP,                       // dots 3,5
-/* 0X23 */ CMD_CUT_END,                    // dots 3,5,6
+/* 0X23 */ CR_CUTRECT + VAL_ARG_MASK - 1,  // dots 3,5,6
 /* 0X24 */ CMD_INFO,                       // dots 3,4
 /* 0X25 */ CMD_NOOP,                       // dots 3,4,6
 /* 0X26 */ CMD_NOOP,                       // dots 3,4,5
@@ -76,7 +76,7 @@
 /* 0X2E */ CMD_NOOP,                       // dots 1,3,4,5
 /* 0X2F */ CMD_NOOP,                       // dots 1,3,4,5,6
 /* 0X30 */ CMD_LNBEG,                      // dots 2,3
-/* 0X31 */ CMD_CUT_BEG,                    // dots 2,3,6
+/* 0X31 */ CR_CUTBEGIN,                    // dots 2,3,6
 /* 0X32 */ CMD_SIXDOTS,                    // dots 2,3,5
 /* 0X33 */ CMD_NOOP,                       // dots 2,3,5,6
 /* 0X34 */ CMD_SND,                        // dots 2,3,4

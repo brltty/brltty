@@ -47,12 +47,13 @@ static unsigned char BookwormStop[] = {0X05, 0X07};	/* bookworm trailer to displ
 
 
 /* Braille display parameters */
-typedef int (GetCommandHandler) (DriverCommandContext cmds);
-typedef int (InterpretCommandHandler) (DriverCommandContext cmds);
+typedef int (GetCommandHandler) (DriverCommandContext context);
 static GetCommandHandler getHandyCommand;
 static GetCommandHandler getBookwormCommand;
-static GetCommandHandler interpretBrailleWaveCommand;
-static GetCommandHandler interpretBrailleStarCommand;
+typedef int (InterpretCommandHandler) (DriverCommandContext context, int &command);
+static InterpretCommandHandler interpretModularCommand;
+static InterpretCommandHandler interpretBrailleWaveCommand;
+static InterpretCommandHandler interpretBrailleStarCommand;
 typedef struct {
   const char *Name;
   int ID;
@@ -70,37 +71,33 @@ typedef struct {
 } ModelDescription;
 static const ModelDescription Models[] = {
   {
-    /* ID == 0x80 */
     "Modular 20+4", 0X80,
     20, 4,
-    getHandyCommand, NULL, 0,
+    getHandyCommand, interpretModularCommand, 0,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
   }
   ,
   {
-    /* ID == 89 */
     "Modular 40+4", 0X89,
     40, 4,
-    getHandyCommand, NULL, 0,
+    getHandyCommand, interpretModularCommand, 0,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
   }
   ,
   {
-    /* ID == 0x88 */
     "Modular 80+4", 0X88,
     80, 4,
-    getHandyCommand, NULL, 0,
+    getHandyCommand, interpretModularCommand, 0,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
   }
   ,
   {
-    /* ID == 0x05 */
     "Braille Wave", 0X05,
     40, 0,
     getHandyCommand, interpretBrailleWaveCommand, 0,
@@ -110,7 +107,6 @@ static const ModelDescription Models[] = {
   }
   ,
   {
-    /* ID == 0x90 */
     "Bookworm", 0X90,
     8, 0,
     getBookwormCommand, NULL, 1,
@@ -120,27 +116,24 @@ static const ModelDescription Models[] = {
   }
   ,
   {
-    /* ID == 0x74 */
     "Braille Star 40", 0X74,
     40, 0,
-    getHandyCommand, interpretBrailleStarCommand, 0,
+    getHandyCommand, interpretBrailleStarCommand, 2,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
   }
   ,
   {
-    /* ID == 0x78 */
     "Braille Star 80", 0X78,
     80, 0,
-    getHandyCommand, interpretBrailleStarCommand, 0,
+    getHandyCommand, interpretBrailleStarCommand, 2,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
   }
   ,
-  {
-    /* end of table */
+  { /* end of table */
     NULL, 0,
     0, 0,
     NULL, NULL, 0,
@@ -149,8 +142,6 @@ static const ModelDescription Models[] = {
     NULL, 0
   }
 };
-static unsigned int CurrentKeys[0x81], LastKeys[0x81], nullKeys[0x81];
-
 
 #define BRLROWS		1
 #define MAX_STCELLS	4	/* highest number of status cells */
@@ -205,7 +196,6 @@ static unsigned char *prevData;	/* previously sent raw data */
 static unsigned char rawStatus[MAX_STCELLS];		/* to hold status info */
 static unsigned char prevStatus[MAX_STCELLS];	/* to hold previous status */
 static const ModelDescription *model;		/* points to terminal model config struct */
-static unsigned char refdata[1 + 4 + 80 + 1]; /* reference data */
 
 typedef enum {
   BDS_OFF,
@@ -217,55 +207,66 @@ typedef enum {
 static BrailleDisplayState currentState = BDS_OFF;
 static unsigned long int stateTimer = 0;
 static unsigned int retryCount = 0;
+static unsigned int updateRequired = 0;
 
-/* Key values */
-#define KEY_B1 0X03
-#define KEY_B2 0X07
-#define KEY_B3 0X0B
-#define KEY_B4 0X0F
-#define KEY_B5 0X13
-#define KEY_B6 0X17
-#define KEY_B7 0X1B
-#define KEY_B8 0X1F
+typedef struct {
+  unsigned long int keys;
+  unsigned short int status;
+  char route;
+} Keys;
+static Keys currentKeys, pressedKeys, NullKeys;
+static int inputMode;
 
-#define KEY_UP 0X04
-#define KEY_DOWN 0X08
-#define KEY_ESCAPE 0X0C
-#define KEY_SPACE 0X10
-#define KEY_SPACE_LEFT KEY_SPACE
-#define KEY_RETURN 0X14
-#define KEY_SPACE_RIGHT 0X18
-
-#define KEY_LEFT_UP KEY_ESCAPE
-#define KEY_LEFT_DOWN KEY_RETURN
-#define KEY_RIGHT_UP KEY_UP
-#define KEY_RIGHT_DOWN KEY_DOWN
-
-#define KEY_B12 0X01
-#define KEY_ZERO 0X05
-#define KEY_B13 0X09
-#define KEY_B14 0X0D
-
-#define KEY_B11 0X11
-#define KEY_ONE 0X15
-#define KEY_TWO 0X19
-#define KEY_THREE 0X1D
-
-#define KEY_B10 0X02
-#define KEY_FOUR 0X06
-#define KEY_FIVE 0X0A
-#define KEY_SIX 0X0E
-
-#define KEY_B9 0X12
-#define KEY_SEVEN 0X16
-#define KEY_EIGHT 0X1A
-#define KEY_NINE 0X1E
-
+/* common key constants */
+#define KEY_RELEASE 0X80
 #define KEY_ROUTING 0X20
-#define KEY_STATUS 0X70
+#define KEY_STATUS  0X70
+#define KEY(code)   (1 << (code))
 
-#define KEY_MASK 0X7F
-#define KEY_RELEASE (KEY_MASK + 1)
+/* modular front keys */
+#define KEY_B1              KEY(0X03)
+#define KEY_B2              KEY(0X07)
+#define KEY_B3              KEY(0X0B)
+#define KEY_B4              KEY(0X0F)
+#define KEY_B5              KEY(0X13)
+#define KEY_B6              KEY(0X17)
+#define KEY_B7              KEY(0X1B)
+#define KEY_B8              KEY(0X1F)
+#define KEY_UP              KEY(0X04)
+#define KEY_DOWN            KEY(0X08)
+
+/* modular keypad keys */
+#define KEY_B12             KEY(0X01)
+#define KEY_ZERO            KEY(0X05)
+#define KEY_B13             KEY(0X09)
+#define KEY_B14             KEY(0X0D)
+#define KEY_B11             KEY(0X11)
+#define KEY_ONE             KEY(0X15)
+#define KEY_TWO             KEY(0X19)
+#define KEY_THREE           KEY(0X1D)
+#define KEY_B10             KEY(0X02)
+#define KEY_FOUR            KEY(0X06)
+#define KEY_FIVE            KEY(0X0A)
+#define KEY_SIX             KEY(0X0E)
+#define KEY_B9              KEY(0X12)
+#define KEY_SEVEN           KEY(0X16)
+#define KEY_EIGHT           KEY(0X1A)
+#define KEY_NINE            KEY(0X1E)
+
+/* braille wave keys */
+#define KEY_ESCAPE          KEY(0X0C)
+#define KEY_SPACE           KEY(0X10)
+#define KEY_RETURN          KEY(0X14)
+
+/* braille star keys */
+#define KEY_SPACE_LEFT      KEY_SPACE
+#define KEY_SPACE_RIGHT     KEY(0X18)
+#define ROCKER_LEFT_TOP     KEY_ESCAPE
+#define ROCKER_LEFT_BOTTOM  KEY_RETURN
+#define ROCKER_LEFT_MIDDLE  (ROCKER_LEFT_TOP | ROCKER_LEFT_BOTTOM)
+#define ROCKER_RIGHT_TOP    KEY_UP
+#define ROCKER_RIGHT_BOTTOM KEY_DOWN
+#define ROCKER_RIGHT_MIDDLE (ROCKER_RIGHT_TOP | ROCKER_RIGHT_BOTTOM)
 
 
 static void
@@ -316,7 +317,13 @@ readByte (unsigned char &byte) {
 static int
 writeData (unsigned char *data, int length) {
   // LogBytes("Write", data, length);
-  if (write(fileDescriptor, data, length) == length) return 1;
+  int count = safe_write(fileDescriptor, data, length);
+  if (count == length) return 1;
+  if (count == -1) {
+    LogError("HandyTech write");
+  } else {
+    LogPrint(LOG_WARNING, "Trunccated write: %d < %d", count, length);
+  }
   return 0;
 }
 
@@ -326,10 +333,7 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
   struct termios newtio;	/* new terminal settings */
   int ModelID = 0;
   unsigned char buffer[sizeof(HandyDescription) + 1];
-  unsigned int i=0;
 
-  /* renice because Handy is too slow!!! */
-  nice(-10);
   res.disp = rawData = prevData = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
@@ -403,13 +407,22 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
     goto failure;
   }
 
-  *brl = res;
+  NullKeys.keys = 0;
+  NullKeys.status = 0;
+  NullKeys.route = -1;
+  currentKeys = pressedKeys = NullKeys;
+  inputMode = 0;
 
-  /* reset tables of pressed/released keys to 0 */
-  for (i=0; i<=0x80; i++)
-    CurrentKeys[i] = LastKeys[i] = nullKeys[i] = 0;
+  memset(rawStatus, 0, model->StatusCells);
+  memset(rawData, 0, model->Columns);
 
+  currentState = BDS_OFF;
+  stateTimer = 0;
+  retryCount = 0;
+  updateRequired = 0;
   setState(BDS_READY);
+
+  *brl = res;
   return;
 
 failure:
@@ -451,323 +464,513 @@ brl_close (brldim *brl) {
 }
 
 static int
-updateBrailleCells (int force) {
-  unsigned char buffer[model->BrailleStartLength + model->StatusCells + model->Columns + model->BrailleEndLength];
-  int count = 0;
+updateBrailleCells (void) {
+  if (updateRequired && (currentState == BDS_READY)) {
+    unsigned char buffer[model->BrailleStartLength + model->StatusCells + model->Columns + model->BrailleEndLength];
+    int count = 0;
 
-  if (model->BrailleStartLength) {
-    memcpy(buffer+count, model->BrailleStartAddress, model->BrailleStartLength);
-    count += model->BrailleStartLength;
+    if (model->BrailleStartLength) {
+      memcpy(buffer+count, model->BrailleStartAddress, model->BrailleStartLength);
+      count += model->BrailleStartLength;
+    }
+
+    memcpy(buffer+count, rawStatus, model->StatusCells);
+    count += model->StatusCells;
+
+    memcpy(buffer+count, rawData, model->Columns);
+    count += model->Columns;
+
+    if (model->BrailleEndLength) {
+      memcpy(buffer+count, model->BrailleEndAddress, model->BrailleEndLength);
+      count += model->BrailleEndLength;
+    }
+
+    // LogBytes("Write", buffer, count);
+    if (!writeData(buffer, count)) return 0;
+    setState(BDS_WRITING);
+    updateRequired = 0;
   }
-
-  memcpy(buffer+count, rawStatus, model->StatusCells);
-  count += model->StatusCells;
-
-  memcpy(buffer+count, rawData, model->Columns);
-  count += model->Columns;
-
-  if (model->BrailleEndLength) {
-    memcpy(buffer+count, model->BrailleEndAddress, model->BrailleEndLength);
-    count += model->BrailleEndLength;
-  }
-
-  if (!force) {
-    if (currentState != BDS_READY) return 1;
-    if (memcmp(buffer, &refdata, count) == 0) return 1;
-  }
-  if (!writeData(buffer, count)) return 0;
-  memcpy(&refdata, buffer, count);
-  setState(BDS_WRITING);
   return 1;
 }
 
 static void
 brl_writeWindow (brldim *brl) {
-  int i;
-  for (i=0; i<model->Columns; ++i) {
-    rawData[i] = TransTable[(prevData[i] = brl->disp[i])];
+  if (memcmp(brl->disp, prevData, model->Columns) != 0) {
+    for (int i=0; i<model->Columns; ++i) {
+      rawData[i] = TransTable[(prevData[i] = brl->disp[i])];
+    }
+    updateRequired = 1;
   }
-  updateBrailleCells(0);
+  updateBrailleCells();
 }
 
 static void
 brl_writeStatus (const unsigned char *st) {
-  /* Update status cells on braille display */
   if (memcmp(st, prevStatus, model->StatusCells) != 0) {	/* only if it changed */
-    int i;
-    for (i=0; i<model->StatusCells; ++i) {
+    for (int i=0; i<model->StatusCells; ++i) {
       rawStatus[i] = TransTable[(prevStatus[i] = st[i])];
-    /* updateBrailleCells(0); writebrl will do this anyway */
     }
+    updateRequired = 1;
   }
 }
 
 static int
-getHandyKey (unsigned int *routingKey) {
-  unsigned char c;
-
-  if (readByte(c)) {
-    if (c == 0X7E) {
+getHandyKey (int &release) {
+  unsigned char byte;
+  while (readByte(byte)) {
+    if (byte == 0X7E) {
       setState(BDS_READY);
+      continue;
+    }
+    if ((release = ((byte & KEY_RELEASE) != 0))) byte &= ~KEY_RELEASE;
+
+    currentKeys.route = -1;
+    if ((byte >= KEY_ROUTING) &&
+        (byte < (KEY_ROUTING + model->Columns))) {
+      if (release) return 0;
+      currentKeys.route = byte - KEY_ROUTING;
+      pressedKeys = currentKeys;
+      return 1;
+    }
+
+    if (!release) {
+      currentKeys.keys |= KEY(byte);
+      pressedKeys = currentKeys;
       return 0;
     }
-    if (c & KEY_RELEASE) {
-      c &= KEY_MASK;
-      CurrentKeys[KEY_RELEASE] = 1;
+    return (currentKeys.keys &= ~KEY(byte)) == 0;
+  }
+
+  release = 1;
+  return 0;
+}
+
+static int
+getHandyCommand (DriverCommandContext context) {
+  int release;
+  if (getHandyKey(release)) {
+    int command;
+    if (model->InterpretCommand(context, command)) return command;
+  }
+  return release? EOF: CMD_NOOP;
+}
+
+static int
+interpretModularCommand (DriverCommandContext context, int &command) {
+  if (pressedKeys.route == -1) {
+    if (inputMode) {
+      const unsigned int dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
+      if (!(pressedKeys.keys & ~dots)) {
+        command = VAL_PASSDOTS;
+        if (pressedKeys.keys & KEY_B1) command |= B7;
+        if (pressedKeys.keys & KEY_B2) command |= B3;
+        if (pressedKeys.keys & KEY_B3) command |= B2;
+        if (pressedKeys.keys & KEY_B4) command |= B1;
+        if (pressedKeys.keys & KEY_B5) command |= B4;
+        if (pressedKeys.keys & KEY_B6) command |= B5;
+        if (pressedKeys.keys & KEY_B7) command |= B6;
+        if (pressedKeys.keys & KEY_B8) command |= B8;
+        return 1;
+      }
+      switch (pressedKeys.keys) {
+        default:
+          break;
+        case (KEY_UP):
+        case (KEY_DOWN):
+          command = VAL_PASSDOTS;
+          return 1;
+      }
     }
-    if ((c >= KEY_ROUTING) &&
-        (c < (KEY_ROUTING + model->Columns))) {
-      /* make for display keys of Touch cursor */
-      *routingKey = c - KEY_ROUTING;
-      CurrentKeys[KEY_ROUTING] = 1;
-    } else
-      CurrentKeys[c] = CurrentKeys[c]? 0: 1;		/* check comments where KEY_xxxx are defined */
-    return 1;
+    switch (pressedKeys.keys) {
+      default:
+        break;
+      case (KEY_UP):
+        command = CMD_FWINLT;
+        return 1;
+      case (KEY_DOWN):
+        command = CMD_FWINRT;
+        return 1;
+      case (KEY_B1):
+        command = CMD_HOME;
+        return 1;
+      case (KEY_B1 | KEY_UP):
+        command = CMD_LNBEG;
+        return 1;
+      case (KEY_B1 | KEY_DOWN):
+        command = CMD_LNEND;
+        return 1;
+      case (KEY_B2):
+        command = CMD_TOP_LEFT;
+        return 1;
+      case (KEY_B2 | KEY_UP):
+        command = CMD_TOP;
+        return 1;
+      case (KEY_B2 | KEY_DOWN):
+        command = CMD_BOT;
+        return 1;
+      case (KEY_B3):
+        command = CMD_BACK;
+        return 1;
+      case (KEY_B3 | KEY_UP):
+        command = CMD_HWINLT;
+        return 1;
+      case (KEY_B3 | KEY_DOWN):
+        command = CMD_HWINRT;
+        return 1;
+      case (KEY_B6 | KEY_UP):
+        command = CMD_CHRLT;
+        return 1;
+      case (KEY_B6 | KEY_DOWN):
+        command = CMD_CHRRT;
+        return 1;
+      case (KEY_B4):
+        command = CMD_LNUP;
+        return 1;
+      case (KEY_B5):
+        command = CMD_LNDN;
+        return 1;
+      case (KEY_B1 | KEY_B4):
+        command = CMD_PRPGRPH;
+        return 1;
+      case (KEY_B1 |  KEY_B5):
+        command = CMD_NXPGRPH;
+        return 1;
+      case (KEY_B2 | KEY_B4):
+        command = CMD_PRPROMPT;
+        return 1;
+      case (KEY_B2 |  KEY_B5):
+        command = CMD_NXPROMPT;
+        return 1;
+      case (KEY_B3 | KEY_B4):
+        command = CMD_PRSEARCH;
+        return 1;
+      case (KEY_B3 |  KEY_B5):
+        command = CMD_NXSEARCH;
+        return 1;
+      case (KEY_B6 | KEY_B4):
+        command = CMD_ATTRUP;
+        return 1;
+      case (KEY_B6 |  KEY_B5):
+        command = CMD_ATTRDN;
+        return 1;
+      case (KEY_B7 | KEY_B4):
+        command = CMD_WINUP;
+        return 1;
+      case (KEY_B7 |  KEY_B5):
+        command = CMD_WINDN;
+        return 1;
+      case (KEY_B8 | KEY_B4):
+        command = CMD_PRDIFLN;
+        return 1;
+      case (KEY_B8 | KEY_B5):
+        command = CMD_NXDIFLN;
+        return 1;
+      case (KEY_B8):
+        command = CMD_HELP;
+        return 1;
+      case (KEY_B8 | KEY_B1):
+        command = CMD_CSRTRK;
+        return 1;
+      case (KEY_B8 | KEY_B2):
+        command = CMD_CSRVIS;
+        return 1;
+      case (KEY_B8 | KEY_B3):
+        command = CMD_ATTRVIS;
+        return 1;
+      case (KEY_B8 | KEY_B6):
+        command = CMD_SIXDOTS;
+        return 1;
+      case (KEY_B8 | KEY_B7):
+        command = CMD_SND;
+        return 1;
+      case (KEY_B7):
+        command = CMD_FREEZE;
+        return 1;
+      case (KEY_B7 | KEY_B1):
+        command = CMD_CAPBLINK;
+        return 1;
+      case (KEY_B7 | KEY_B2):
+        command = CMD_CSRBLINK;
+        return 1;
+      case (KEY_B7 | KEY_B3):
+        command = CMD_ATTRBLINK;
+        return 1;
+      case (KEY_B7 | KEY_B6):
+        command = CMD_SLIDEWIN;
+        return 1;
+      case (KEY_B6):
+        command = CMD_DISPMD;
+        return 1;
+      case (KEY_B6 | KEY_B1):
+        command = CMD_PREFMENU;
+        return 1;
+      case (KEY_B6 | KEY_B2):
+        command = CMD_PREFLOAD;
+        return 1;
+      case (KEY_B6 | KEY_B3):
+        command = CMD_PREFSAVE;
+        return 1;
+      case (KEY_B2 | KEY_B3 | KEY_UP):
+        command = CMD_MUTE;
+        return 1;
+      case (KEY_B2 | KEY_B3 | KEY_DOWN):
+        command = CMD_SAY;
+        return 1;
+      case (KEY_B4 | KEY_B5):
+        command = CMD_PASTE;
+        return 1;
+      case (KEY_B1 | KEY_B8 | KEY_UP):
+        inputMode = 0;
+        command = EOF;
+        return 1;
+      case (KEY_B1 | KEY_B8 | KEY_DOWN):
+        inputMode = 1;
+        command = EOF;
+        return 1;
+    }
+  } else {
+    switch (pressedKeys.keys) {
+      default:
+        break;
+      case 0:
+        command = CR_ROUTE + pressedKeys.route;
+        return 1;
+      case (KEY_B1):
+        command = CR_SETLEFT + pressedKeys.route;
+        return 1;
+      case (KEY_B2):
+        command = CR_SETMARK + pressedKeys.route;
+        return 1;
+      case (KEY_B3):
+        command = CR_CUTAPPEND + pressedKeys.route;
+        return 1;
+      case (KEY_B4):
+        command = CR_CUTBEGIN + pressedKeys.route;
+        return 1;
+      case (KEY_UP):
+        command = CR_PRINDENT + pressedKeys.route;
+        return 1;
+      case (KEY_DOWN):
+        command = CR_NXINDENT + pressedKeys.route;
+        return 1;
+      case (KEY_B5):
+        command = CR_CUTRECT + pressedKeys.route;
+        return 1;
+      case (KEY_B6):
+        command = CR_CUTLINE + pressedKeys.route;
+        return 1;
+      case (KEY_B7):
+        command = CR_GOTOMARK + pressedKeys.route;
+        return 1;
+      case (KEY_B8):
+        command = CR_DESCCHAR + pressedKeys.route;
+        return 1;
+    }
   }
   return 0;
 }
 
 static int
-getHandyCommand (DriverCommandContext cmds) {
-  static int Typematic = 0, KeyDelay = 0, KeyRepeat = 0;
-  static unsigned int routingKey = 0;
-  int gotKey = getHandyKey(&routingKey);
-  int command = EOF;
+interpretBrailleWaveCommand (DriverCommandContext context, int &command) {
+  return interpretModularCommand(context, command);
+}
 
-  if (!gotKey) {
-    if (Typematic) {
-      /* a key is being held */
-      if (KeyDelay < TYPEMATIC_DELAY)
-        KeyDelay++;
-      else if (KeyRepeat < TYPEMATIC_REPEAT)
-        KeyRepeat++;
-      else {
-        /* It's time to issue the command again */
-        CurrentKeys = LastKeys;
-        LastKeys = nullKeys;
-        KeyRepeat = 0;
-        gotKey = 1;
-      }
+static int
+interpretBrailleStarCommand (DriverCommandContext context, int &command) {
+  if (pressedKeys.route == -1) {
+    switch (pressedKeys.keys) {
+      default:
+        break;
+      case (ROCKER_LEFT_TOP):
+      case (ROCKER_RIGHT_TOP):
+        command = CMD_LNUP;
+        return 1;
+      case (ROCKER_LEFT_BOTTOM):
+      case (ROCKER_RIGHT_BOTTOM):
+        command = CMD_LNDN;
+        return 1;
+      case (ROCKER_LEFT_MIDDLE):
+        command = CMD_FWINLT;
+        return 1;
+      case (ROCKER_RIGHT_MIDDLE):
+        command = CMD_FWINRT;
+        return 1;
+      case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_MIDDLE):
+        command = CMD_HOME;
+        return 1;
+      case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_TOP):
+        command = CMD_TOP_LEFT;
+        return 1;
+      case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_BOTTOM):
+        command = CMD_BOT_LEFT;
+        return 1;
+      case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_TOP):
+        command = CMD_TOP;
+        return 1;
+      case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_BOTTOM):
+        command = CMD_BOT;
+        return 1;
+      case (ROCKER_LEFT_TOP | ROCKER_RIGHT_TOP):
+        command = CMD_PRDIFLN;
+        return 1;
+      case (ROCKER_LEFT_TOP | ROCKER_RIGHT_BOTTOM):
+        command = CMD_NXDIFLN;
+        return 1;
+      case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_TOP):
+        command = CMD_ATTRUP;
+        return 1;
+      case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_BOTTOM):
+        command = CMD_ATTRDN;
+        return 1;
+      case (KEY_SPACE_LEFT):
+      case (KEY_SPACE_RIGHT):
+        command = VAL_PASSCHAR + ' ';
+        return 1;
     }
   } else {
-    /* A new key is being pressed/released, we clear the typematic counters */
-    Typematic = KeyDelay = KeyRepeat = 0;
+    switch (pressedKeys.keys) {
+      default:
+        break;
+      case (ROCKER_LEFT_TOP):
+        command = CR_CUTBEGIN + pressedKeys.route;
+        return 1;
+      case (ROCKER_LEFT_BOTTOM):
+        command = CR_CUTAPPEND + pressedKeys.route;
+        return 1;
+      case (ROCKER_RIGHT_TOP):
+        command = CR_CUTLINE + pressedKeys.route;
+        return 1;
+      case (ROCKER_RIGHT_BOTTOM):
+        command = CR_CUTRECT + pressedKeys.route;
+        return 1;
+    }
   }
-
-  if (gotKey < 0) {
-    /* Oops... seems we should restart from scratch... */
-    routingKey = 0;
-    CurrentKeys = nullKeys;
-    LastKeys = nullKeys;
-    return CMD_RESTARTBRL;
+  if (!(pressedKeys.keys & (KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8 | KEY_SPACE_LEFT | KEY_SPACE_RIGHT))) {
+    Keys oldKeys = pressedKeys;
+    if (pressedKeys.keys & KEY_SPACE_LEFT) {
+      pressedKeys.keys &= ~KEY_SPACE_LEFT;
+      pressedKeys.keys |= KEY_UP;
+    }
+    if (pressedKeys.keys & KEY_SPACE_RIGHT) {
+      pressedKeys.keys &= ~KEY_SPACE_RIGHT;
+      pressedKeys.keys |= KEY_DOWN;
+    }
+    int interpreted = interpretModularCommand(context, command);
+    pressedKeys = oldKeys;
+    if (interpreted) return 1;
   }
-  if (gotKey > 0) {
-    if (!CurrentKeys[KEY_RELEASE]) {
-      LastKeys = CurrentKeys;	/* we keep it until it is released */
-      return CMD_NOOP;
-    }
-    if (model->InterpretCommand)
-      if ((command = model->InterpretCommand(cmds)) != EOF)
-        goto end_switch;
-    /* 3KEYs */
-    if (LastKeys[KEY_B2] && LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
-      command = CMD_MUTE;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B2] && LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
-      command = CMD_SAY;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8] && LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
-      command = CMD_CHRRT;
-      Typematic = 1;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8] && LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
-      command = CMD_CHRLT;
-      Typematic = 1;
-      goto end_switch;
-    }
-    /* 2KEYS */
-    if (LastKeys[KEY_B4] && LastKeys[KEY_B5]) {
-      command = CMD_PASTE;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B4] && LastKeys[KEY_UP]) {
-      command = CMD_CUT_BEG;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B4] && LastKeys[KEY_DOWN]) {
-      command = CMD_CUT_END;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8] && LastKeys[KEY_B4]) {
-      command = CMD_PRDIFLN;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8] && LastKeys[KEY_B5]) {
-      command = CMD_NXDIFLN;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B1] && LastKeys[KEY_B8]) {
-      command = CMD_CSRTRK;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B4] && LastKeys[KEY_ROUTING]) {
-      /* marking beginning of block */
-      command = CR_CUTBEGIN + routingKey;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B5] && LastKeys[KEY_ROUTING]) {
-      /* marking end of block */
-      command = CR_CUTRECT + routingKey;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B2] && LastKeys[KEY_UP]) {
-      command = CMD_TOP;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B2] && LastKeys[KEY_DOWN]) {
-      command = CMD_BOT;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B6] && LastKeys[KEY_B4]) {
-      command = CMD_ATTRUP;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B6] &&  LastKeys[KEY_B5]) {
-      command = CMD_ATTRDN;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B3] && LastKeys[KEY_B4]) {
-      command = CMD_LNBEG;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
-      command = CMD_HWINLT;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B3] && LastKeys[KEY_B5]) {
-      command = CMD_LNEND;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
-      command = CMD_HWINRT;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8] && LastKeys[KEY_B6]) {
-      command = CMD_SIXDOTS;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B7] && LastKeys[KEY_B6]) {
-      command = CMD_CSRSIZE;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B3] && LastKeys[KEY_B8]) {
-      command = CMD_SLIDEWIN;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8] && LastKeys[KEY_B5]) {
-      command = CMD_FREEZE;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8] && LastKeys[KEY_B4]) {
-      command = CMD_INFO;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B7] && LastKeys[KEY_B1]) {
-      command = CMD_CAPBLINK;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B7] && LastKeys[KEY_B2]) {
-      command = CMD_CSRBLINK;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B7] && LastKeys[KEY_B3]) {
-      command = CMD_PREFMENU;
-      goto end_switch;
-    }
-    /* 1KEY */
-    if (LastKeys[KEY_STATUS+2]) {
-      command = CMD_PREFMENU;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B6]) {
-      command = CMD_DISPMD;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B4]) {
-      command = CMD_LNUP;
-      Typematic = 1;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B5]) {
-      command = CMD_LNDN;
-      Typematic = 1;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_UP]) {
-      command = CMD_FWINLT;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_DOWN]) {
-      command = CMD_FWINRT;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_STATUS+0]) {
-      command = CMD_CAPBLINK;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B7]) {
-      command = CMD_CSRVIS;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_STATUS+1]) {
-      command = CMD_CSRBLINK;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_ROUTING]) {
-      /* normal Cursor routing keys */
-      command = CR_ROUTE + routingKey;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B2]) {
-      command = CMD_TOP_LEFT;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B1]) {
-      command = CMD_HOME;
-      goto end_switch;
-    }
-    if (LastKeys[KEY_B8]) {
-      command = CMD_HELP;
-      goto end_switch;
-    }
-  end_switch:
-    CurrentKeys = nullKeys;
-    LastKeys = nullKeys;
-  }
-  return command;
+  return 0;
 }
 
 static int
-interpretBrailleWaveCommand (DriverCommandContext cmds) {
-  return EOF;
+interpretBookwormCommand (DriverCommandContext context, unsigned char key, int &command) {
+  const int BWK_BACKWARD = 0X01;
+  const int BWK_ESCAPE   = 0X02;
+  const int BWK_ENTER    = 0X04;
+  const int BWK_FORWARD  = 0X08;
+  switch (context) {
+    case CMDS_PREFS:
+      switch (key) {
+        case (BWK_BACKWARD):
+          command = CMD_FWINLT;
+          return 1;
+        case (BWK_FORWARD):
+          command = CMD_FWINRT;
+          return 1;
+        case (BWK_ESCAPE):
+          command = CMD_PREFLOAD;
+          return 1;
+        case (BWK_ESCAPE | BWK_BACKWARD):
+          command = CMD_MENU_PREV_SETTING;
+          return 1;
+        case (BWK_ESCAPE | BWK_FORWARD):
+          command = CMD_MENU_NEXT_SETTING;
+          return 1;
+        case (BWK_ENTER):
+          command = CMD_PREFMENU;
+          return 1;
+        case (BWK_ENTER | BWK_BACKWARD):
+          command = CMD_MENU_PREV_ITEM;
+          return 1;
+        case (BWK_ENTER | BWK_FORWARD):
+          command = CMD_MENU_NEXT_ITEM;
+          return 1;
+        case (BWK_ESCAPE | BWK_ENTER):
+          command = CMD_PREFSAVE;
+          return 1;
+        case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
+          command = CMD_MENU_FIRST_ITEM;
+          return 1;
+        case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
+          command = CMD_MENU_LAST_ITEM;
+          return 1;
+        case (BWK_BACKWARD | BWK_FORWARD):
+          command = CMD_NOOP;
+          return 1;
+        case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
+          command = CMD_NOOP;
+          return 1;
+        case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
+          command = CMD_NOOP;
+          return 1;
+        default:
+          break;
+      }
+      break;
+    default:
+      switch (key) {
+        case (BWK_BACKWARD):
+          command = CMD_FWINLT;
+          return 1;
+        case (BWK_FORWARD):
+          command = CMD_FWINRT;
+          return 1;
+        case (BWK_ESCAPE):
+          command = CMD_CSRTRK;
+          return 1;
+        case (BWK_ESCAPE | BWK_BACKWARD):
+          command = CMD_BACK;
+          return 1;
+        case (BWK_ESCAPE | BWK_FORWARD):
+          command = CMD_DISPMD;
+          return 1;
+        case (BWK_ENTER):
+          command = CR_ROUTE;
+          return 1;
+        case (BWK_ENTER | BWK_BACKWARD):
+          command = CMD_LNUP;
+          return 1;
+        case (BWK_ENTER | BWK_FORWARD):
+          command = CMD_LNDN;
+          return 1;
+        case (BWK_ESCAPE | BWK_ENTER):
+          command = CMD_PREFMENU;
+          return 1;
+        case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
+          command = CMD_LNBEG;
+          return 1;
+        case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
+          command = CMD_LNEND;
+          return 1;
+        case (BWK_BACKWARD | BWK_FORWARD):
+          command = CMD_HELP;
+          return 1;
+        case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
+          command = CMD_CSRSIZE;
+          return 1;
+        case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
+          command = CMD_FREEZE;
+          return 1;
+        default:
+          break;
+      }
+      break;
+  }
+  return 0;
 }
 
 static int
-interpretBrailleStarCommand (DriverCommandContext cmds) {
-  if (LastKeys[KEY_LEFT_UP]) return CMD_LNUP;
-  if (LastKeys[KEY_LEFT_DOWN]) return CMD_LNDN;
-  if (LastKeys[KEY_RIGHT_UP]) return CMD_LNUP;
-  if (LastKeys[KEY_RIGHT_DOWN]) return CMD_LNDN;
-  if (LastKeys[KEY_SPACE_LEFT]) return CMD_FWINLT;
-  if (LastKeys[KEY_SPACE_RIGHT]) return CMD_FWINRT;
-  return EOF;
-}
-
-static int
-getBookwormCommand (DriverCommandContext cmds) {
+getBookwormCommand (DriverCommandContext context) {
   int timeout = 1;
   unsigned char key;
   while (readByte(key)) {
@@ -784,16 +987,16 @@ getBookwormCommand (DriverCommandContext cmds) {
     switch (key) {
       case 0XFE:
         setState(BDS_IDENTIFYING);
-        break;
+        continue;
       default:
         switch (currentState) {
           case BDS_OFF:
-            break;
+            continue;
           case BDS_RESETTING:
             switch (key) {
               case 0XFE:
                 setState(BDS_IDENTIFYING);
-                break;
+                continue;
               default:
                 break;
             }
@@ -802,104 +1005,34 @@ getBookwormCommand (DriverCommandContext cmds) {
             switch (key) {
               case 0X90:
                 setState(BDS_READY);
-                updateBrailleCells(1);
-                break;
+                updateRequired = 1;
+                updateBrailleCells();
+                continue;
               default:
                 break;
             }
             break;
-          case BDS_READY: {
-            const int BWK_BACKWARD = 0X01;
-            const int BWK_ESCAPE   = 0X02;
-            const int BWK_ENTER    = 0X04;
-            const int BWK_FORWARD  = 0X08;
-            switch (cmds) {
-              case CMDS_PREFS:
-                switch (key) {
-                  case (BWK_BACKWARD):
-                    return CMD_FWINLT;
-                  case (BWK_FORWARD):
-                    return CMD_FWINRT;
-                  case (BWK_ESCAPE):
-                    return CMD_PREFLOAD;
-                  case (BWK_ESCAPE | BWK_BACKWARD):
-                    return CMD_MENU_PREV_SETTING;
-                  case (BWK_ESCAPE | BWK_FORWARD):
-                    return CMD_MENU_NEXT_SETTING;
-                  case (BWK_ENTER):
-                    return CMD_PREFMENU;
-                  case (BWK_ENTER | BWK_BACKWARD):
-                    return CMD_MENU_PREV_ITEM;
-                  case (BWK_ENTER | BWK_FORWARD):
-                    return CMD_MENU_NEXT_ITEM;
-                  case (BWK_ESCAPE | BWK_ENTER):
-                    return CMD_PREFSAVE;
-                  case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
-                    return CMD_MENU_FIRST_ITEM;
-                  case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
-                    return CMD_MENU_LAST_ITEM;
-                  case (BWK_BACKWARD | BWK_FORWARD):
-                    return CMD_NOOP;
-                  case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
-                    return CMD_NOOP;
-                  case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
-                    return CMD_NOOP;
-                  default:
-                    break;
-                }
-                break;
-              default:
-                switch (key) {
-                  case (BWK_BACKWARD):
-                    return CMD_FWINLT;
-                  case (BWK_FORWARD):
-                    return CMD_FWINRT;
-                  case (BWK_ESCAPE):
-                    return CMD_CSRTRK;
-                  case (BWK_ESCAPE | BWK_BACKWARD):
-                    return CMD_BACK;
-                  case (BWK_ESCAPE | BWK_FORWARD):
-                    return CMD_DISPMD;
-                  case (BWK_ENTER):
-                    return CMD_CSRJMP;
-                  case (BWK_ENTER | BWK_BACKWARD):
-                    return CMD_LNUP;
-                  case (BWK_ENTER | BWK_FORWARD):
-                    return CMD_LNDN;
-                  case (BWK_ESCAPE | BWK_ENTER):
-                    return CMD_PREFMENU;
-                  case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
-                    return CMD_LNBEG;
-                  case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
-                    return CMD_LNEND;
-                  case (BWK_BACKWARD | BWK_FORWARD):
-                    return CMD_HELP;
-                  case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
-                    return CMD_CSRSIZE;
-                  case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
-                    return CMD_FREEZE;
-                  default:
-                    break;
-                }
-                break;
-            }
-            break;
-          }
           case BDS_WRITING:
             switch (key) {
               case 0X7E:
                 setState(BDS_READY);
-                break;
+                continue;
               case 0X7D:
-                updateBrailleCells(1);
-                break;
+                updateRequired = 1;
+                updateBrailleCells();
+                continue;
               default:
                 break;
             }
+          case BDS_READY: {
+            int command;
+            if (interpretBookwormCommand(context, key, command)) return command;
             break;
+          }
         }
         break;
     }
+    LogPrint(LOG_WARNING, "Unexpected byte: %02X (state %d)", key, currentState);
   }
   if (timeout) {
     switch (currentState) {
@@ -935,8 +1068,9 @@ getBookwormCommand (DriverCommandContext cmds) {
             } else {
               setState(BDS_OFF);
             }
-          } else if (!updateBrailleCells(1)) {
-            setState(BDS_OFF);
+          } else {
+            updateRequired = 1;
+            if (!updateBrailleCells()) setState(BDS_OFF);
           }
         }
         break;
@@ -946,7 +1080,8 @@ getBookwormCommand (DriverCommandContext cmds) {
 }
 
 static int
-brl_read (DriverCommandContext cmds) {
+brl_read (DriverCommandContext context) {
   stateTimer += refreshInterval;
-  return model->GetCommand(cmds);
+  updateBrailleCells();
+  return model->GetCommand(context);
 }

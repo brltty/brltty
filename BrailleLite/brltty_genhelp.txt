@@ -27,7 +27,9 @@
 245 chord: route cursor to beginning of line
 45 chord: route cursor to current line
 236 chord: cut start
-356 chord: cut end
+126 chird: cut start but append
+356 chord: cut rectangular end
+16 chord: cut linear end
 1234 chord: paste
 
 36: speak line
@@ -79,3 +81,4 @@ o chord: set repeat count for following command (up to 2digits).
   e chord: confirms count and waits for key to repeat.
 Goto virtual terminal: use o chord, followed by VT number,
   followed by v chord or # chord.
+Set/goto mark: use o chord followed by # followed by s to set or m to go.

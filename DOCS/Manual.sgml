@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 2.99.3, January 2002
+  <date>Version 2.99.4, January 2002
   <abstract>
     Copyright &copy; 1995-2001 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -901,9 +901,17 @@ and the <ref id="command-PRINDENT" name="PRINDENT"> routing key commands.
   <tag>PRDIFLN<label id="command-PRDIFLN"></tag>
     Go up to the nearest previous line
     with different content.
+    If identical line skipping has been activated
+    (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
+    then this command, rather than skipping identical lines,
+    is an alias for the <ref id="command-LNUP" name="LNUP"> command.
   <tag>NXDIFLN<label id="command-NXDIFLN"></tag>
     Go down to the nearest next line
     with different content.
+    If identical line skipping has been activated
+    (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
+    then this command, rather than skipping identical lines,
+    is an alias for the <ref id="command-LNDN" name="LNDN"> command.
   <tag>ATTRUP<label id="command-ATTRUP"></tag>
     Go up to the nearest previous line
     with different character highlighting (attributes).
@@ -918,12 +926,16 @@ and the <ref id="command-PRINDENT" name="PRINDENT"> routing key commands.
     Go to the top-left corner.
   <tag>BOT_LEFT<label id="command-BOT_LEFT"></tag>
     Go to the bottom-left corner.
-  <tag>PRBLNKLN<label id="command-PRBLNKLN"></tag>
+  <tag>PRPGRPH<label id="command-PRPGRPH"></tag>
     Go up to the last line of the previous paragraph
     (the first non-blank line beyond the nearest previous blank line).
-  <tag>NXBLNKLN<label id="command-NXBLNKLN"></tag>
+  <tag>NXPGRPH<label id="command-NXPGRPH"></tag>
     Go down to the first line of the next paragraph
     (the first non-blank line beyond the nearest next blank line).
+  <tag>PRPROMPT<label id="command-PRPROMPT"></tag>
+    Go up to the previous command prompt.
+  <tag>NXPROMPT<label id="command-NXPROMPT"></tag>
+    Go down to the next command prompt.
   <tag>PRSEARCH<label id="command-PRSEARCH"></tag>
     Go up to the nearest previous line
     whereon the character string within the cut buffer can be found.
@@ -1204,15 +1216,11 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     This command doesn't always work because some applications
     either move the cursor somewhat unpredictably
     or use the arrow keys for purposes other than cursor motion.
-    Braille displays which don't have routing keys
-    should use the <ref id="command-CSRJMP" name="CSRJMP"> command.
   <tag>CUTBEGIN<label id="command-CUTBEGIN"></tag>
     Anchor the start of the cut block at the character
     associated with the routing key
     (see <ref id="cut" name="Cut and Paste"> for full details).
     This command clears the cut buffer.
-    Braille displays which don't have routing keys
-    should use the <ref id="command-CUT_BEG" name="CUT_BEG"> command.
   <tag>CUTAPPEND<label id="command-CUTAPPEND"></tag>
     Anchor the start of the cut block at the character
     associated with the routing key
@@ -1223,8 +1231,6 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     associated with the routing key,
     and append the rectangular region to the cut buffer
     (see <ref id="cut" name="Cut and Paste"> for full details).
-    Braille displays which don't have routing keys
-    should use the <ref id="command-CUT_END" name="CUT_END"> command.
   <tag>CUTLINE<label id="command-CUTLINE"></tag>
     Anchor the end of the cut block at the character
     associated with the routing key,
@@ -1233,11 +1239,11 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
   <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
     Switch to the virtual terminal whose number
     (counting from 1) matches that of the routing key.
-  <tag>NXINDENT<label id="command-NXINDENT"></tag>
-    Go down to the nearest next line which isn't indented
-    more than the column associated with the routing key.
   <tag>PRINDENT<label id="command-PRINDENT"></tag>
     Go up to the nearest previous line which isn't indented
+    more than the column associated with the routing key.
+  <tag>NXINDENT<label id="command-NXINDENT"></tag>
+    Go down to the nearest next line which isn't indented
     more than the column associated with the routing key.
   <tag>DESCCHAR<label id="command-DESCCHAR"></tag>
     Momentarily (see the <ref id="options-message-delay" name="-M"> command line option)
@@ -1252,7 +1258,8 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     Horizontally reposition the braille window so that
     its left edge is at the column associated with the routing key.
     This feature makes it very easy to put the window exactly where it's needed,
-    and, therefore, eliminates the need for a lot of elementary window motion
+    and, therefore, for displays which have routing keys,
+    almost eliminates the need for a lot of elementary window motion
     (like the <ref id="command-CHRLT" name="CHRLT">,
     <ref id="command-CHRRT" name="CHRRT">,
     <ref id="command-HWINLT" name="HWINLT">,
@@ -1267,37 +1274,6 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     (see the <ref id="command-SETMARK" name="SETMARK"> command)
     with the same routing key.
     This feature only affects the current virtual terminal.
-</descrip>
-
-<sect2>No Routing Keys<p>
-<descrip>
-  <tag>CSRJMP<label id="command-CSRJMP"></tag>
-    Route (bring) the cursor to the character
-    at the top-left corner of the braille window.
-    (see <ref id="routing" name="Cursor Routing"> for full details).
-    The cursor is moved by simulating arrow-key presses.
-    This command doesn't always work because some applications
-    either move the cursor somewhat unpredictably
-    or use the arrow keys for purposes other than cursor motion.
-    Braille displays which have routing keys
-    should use the <ref id="command-ROUTE" name="ROUTE">
-    command instead of this one.
-  <tag>CUT_BEG<label id="command-CUT_BEG"></tag>
-    Anchor the start of the cut block at the character
-    at the top-left corner of the braille window
-    (see <ref id="cut" name="Cut and Paste"> for full details).
-    This command clears the cut buffer.
-    Braille displays which have routing keys
-    should use the <ref id="command-CUTBEGIN" name="CUTBEGIN">
-    command instead of this one.
-  <tag>CUT_END<label id="command-CUT_END"></tag>
-    Anchor the end of the cut block at the character
-    at the bottom-right corner of the braille window,
-    and append the rectangular region to the cut buffer
-    (see <ref id="cut" name="Cut and Paste"> for full details).
-    Braille displays which have routing keys
-    should use the <ref id="command-CUTRECT" name="CUTRECT">
-    command instead of this one.
 </descrip>
 
 <sect1>Cursor Routing<label id="routing"><p>
@@ -1319,12 +1295,6 @@ and by monitoring the progress of the cursor as it moves.
 Some braille displays have a button, known as a routing key, above each cell.
 These keys use the <ref id="command-ROUTE" name="ROUTE"> command
 to route the cursor right to the desired location.
-If your display doesn't have routing keys,
-then use the <ref id="command-CSRJMP" name="CSRJMP"> command
-to route the cursor to the top-left corner of the braille window,
-and then use the arrow keys on the keyboard to do the rest.
-Some drivers interpret certain keys on the braille display itself as arrow keys
-so that this can be done without having to remove your hands from the display.
 
 Cursor routing, while very convenient and effective,
 is, strictly speaking, not completely reliable.
@@ -1340,7 +1310,7 @@ because they don't allow the cursor to be to the right of the end of a line.
 A major problem found within some web browsers (like <tt/lynx/)
 is that the up- and down-arrow keys are used to move among the links
 (which may skip lines and/or move the cursor horizontally,
-but which rarely just moves the cursor one line in the desired diretion),
+but which rarely just moves the cursor one line in the desired direction),
 and that the left- and right-arrow keys are used to select links
 (which has absolutely nothing to do with any form of cursor motion whatsoever,
 and which even totally changes the screen content).
@@ -1401,11 +1371,6 @@ and URLs. Cutting and pasting text involves three simple steps:
     </itemize>
     by holding down the key(s) associated with it
     and pressing the routing key associated with the character.
-    If your display doesn't have routing keys,
-    then move the braille window so that
-    the first character to be cut is at its top-left corner,
-    and then invoke the <ref id="command-CUT_BEG" name="CUT_BEG"> command
-    to start a new cut buffer (you can't append to the existing cut buffer).
   <item>
     Mark either the bottom-right corner of the rectangular area
     or the end of the linear area
@@ -1423,11 +1388,6 @@ and URLs. Cutting and pasting text involves three simple steps:
     </itemize>
     by holding down the key(s) associated with it
     and pressing the routing key associated with the character.
-    If your display doesn't have routing keys,
-    then move the braille window so that
-    the last character to be cut is at its bottom-right corner,
-    and invoke the <ref id="command-CUT_END" name="CUT_END"> command
-    to cut a rectangular area (you can't cut a linear area).
     Marking the end of the cut area
     appends the selected screen content to the cut buffer.
     Excess white space is removed from the end of each line in the cut buffer
@@ -2748,10 +2708,6 @@ in a typical Unix editor on a fairly lightly loaded system,
 but very poorly in some other situations,
 e.g. over a slow serial link to a remote host.
 
-There's a bug in the 2.0.35 Linux kernel
-which causes PC speaker beeps to remain on once started.
-We've found a way to avoid this problem in the current version of BRLTTY.
-
 <sect>Appendices<p>
 
 <sect1>Supported Braille Displays<label id="displays"><p>
@@ -2770,17 +2726,16 @@ BRLTTY supports the following braille displays:
     BrailleLite 18/40
   <item>
     <htmlurl url="http://www.eurobraille.fr/Indexuk.htm" name="EuroBraille">:
-    (tested on Clio-noteBraille 40)
+    AzerBraille (tested on Clio-noteBraille 40)
   <item>
     <htmlurl url="http://www.handialog.com/indexuk.htm" name="Handialog">:
     VisioBraille 2040
   <item>
     <htmlurl url="http://www.handytech.com/" name="Handy Tech Elektronik GmbH">:
     Bookworm,
+    Braille Star 40/80,
     Braille Wave,
-    Modular 20+4,
-    Modular 40+4,
-    Modular 80+4
+    Modular 20/40/80
   <item>
     <htmlurl url="http://cidat.once.es/" name="La O.N.C.E.">:
     EcoBraille 20/40/80

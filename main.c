@@ -394,14 +394,13 @@ trackCursor (int place)
 
 static int speaking_start_line = 0;
 static void
-trackSpeech (int inx)
-{
+trackSpeech (int inx) {
   placeWindowHorizontally(inx % scr.cols);
   slideWindowVertically((inx / scr.cols) + speaking_start_line);
 }
 
 static int
-upDifferentLine(short mode) {
+upDifferentLine (short mode) {
    if (p->winy > 0) {
       char buffer1[scr.cols], buffer2[scr.cols];
       int skipped = 0;
@@ -432,7 +431,7 @@ upDifferentLine(short mode) {
 }
 
 static int
-downDifferentLine(short mode) {
+downDifferentLine (short mode) {
    if (p->winy < (scr.rows - brl.y)) {
       char buffer1[scr.cols], buffer2[scr.cols];
       int skipped = 0;
@@ -463,23 +462,35 @@ downDifferentLine(short mode) {
 }
 
 static void
-upLine(short mode) {
-   if (prefs.skpidlns)
-      upDifferentLine(mode);
-   else if (p->winy > 0)
+upOneLine (short mode) {
+   if (p->winy > 0)
       p->winy--;
    else
       playTune(&tune_bounce);
 }
 
 static void
-downLine(short mode) {
-   if (prefs.skpidlns)
-      downDifferentLine(mode);
-   else if (p->winy < (scr.rows - brl.y))
+downOneLine (short mode) {
+   if (p->winy < (scr.rows - brl.y))
       p->winy++;
    else
       playTune(&tune_bounce);
+}
+
+static void
+upLine (short mode) {
+   if (prefs.skpidlns)
+      upDifferentLine(mode);
+   else
+      upOneLine(mode);
+}
+
+static void
+downLine (short mode) {
+   if (prefs.skpidlns)
+      downDifferentLine(mode);
+   else
+      downOneLine(mode);
 }
 
 
@@ -527,10 +538,43 @@ insertCharacter (unsigned char character, int flags) {
   return insertKey(character);
 }
 
+typedef int (*RowTester) (int column, int row, void *data);
+static void
+findRow (int column, int increment, RowTester test, void *data) {
+  int row = p->winy + increment;
+  while ((row >= 0) && (row <= scr.rows-brl.y)) {
+    if (test(column, row, data)) {
+      p->winy = row;
+      return;
+    }
+    row += increment;
+  }
+  playTune(&tune_bounce);
+}
+
+static int
+testIndent (int column, int row, void *data) {
+  int count = column+1;
+  char buffer[count];
+  readScreen((ScreenBox){0, row, count, 1}, buffer, SCR_TEXT);
+  while (column >= 0) {
+    if ((buffer[column] != ' ') && (buffer[column] != 0)) return 1;
+    --column;
+  }
+  return 0;
+}
+
+static int
+testPrompt (int column, int row, void *data) {
+  const char *prompt = data;
+  int count = column+1;
+  char buffer[count];
+  readScreen((ScreenBox){0, row, count, 1}, buffer, SCR_TEXT);
+  return memcmp(buffer, prompt, count) == 0;
+}
 
 int
-main (int argc, char *argv[])
-{
+main (int argc, char *argv[]) {
   int keypress;                        /* character received from braille display */
   int i;                        /* loop counter */
   short csron = 1;                /* display cursor on (toggled during blink) */
@@ -541,6 +585,26 @@ main (int argc, char *argv[])
   short attrcntr = 1;
   short oldwinx, oldwiny;
   short speaking_scrno = -1, speaking_prev_inx = -1;
+
+#ifdef INIT_PATH
+  if (getpid() == 1) {
+    switch (fork()) {
+      case -1: /* failed */
+        perror("fork");
+      default: /* parent */
+        execv(INIT_PATH, argv);
+        /* execv() shouldn't return */
+        perror("execv: " INIT_PATH);
+        exit(1);
+      case 0: { /* child */
+        static char *arguments[] = {"brltty", "-E", NULL};
+        argv = arguments;
+        argc = (sizeof(arguments) / sizeof(arguments[0])) - 1;
+        break;
+      }
+    }
+  }
+#endif
 
   /* Open the system log. */
   LogOpen(0);
@@ -740,7 +804,10 @@ main (int argc, char *argv[])
             upLine(SCR_TEXT);
             break;
           case CMD_PRDIFLN:
-            upDifferentLine(SCR_TEXT);
+            if (prefs.skpidlns)
+              upOneLine(SCR_TEXT);
+            else
+              upDifferentLine(SCR_TEXT);
             break;
           case CMD_ATTRUP:
             upDifferentLine(SCR_ATTRIB);
@@ -823,14 +890,17 @@ main (int argc, char *argv[])
             downLine(SCR_TEXT);
             break;
           case CMD_NXDIFLN:
-            downDifferentLine(SCR_TEXT);
+            if (prefs.skpidlns)
+              downOneLine(SCR_TEXT);
+            else
+              downDifferentLine(SCR_TEXT);
             break;
           case CMD_ATTRDN:
             downDifferentLine(SCR_ATTRIB);
             break;
-          case CMD_NXBLNKLN:
-          case CMD_PRBLNKLN: {
-            int dir = (keypress == CMD_NXBLNKLN) ? +1 : -1;
+          case CMD_NXPGRPH:
+          case CMD_PRPGRPH: {
+            int dir = (keypress == CMD_NXPGRPH) ? +1 : -1;
             int i;
             int found = 0;
             int l = p->winy +dir;
@@ -868,7 +938,26 @@ main (int argc, char *argv[])
             }
             if(!found) {
               playTune (&tune_bounce);
-              playTune (&tune_bounce);
+            }
+            break;
+          }
+          {
+            int increment;
+          case CMD_PRPROMPT:
+            increment = -1;
+            goto findPrompt;
+          case CMD_NXPROMPT:
+            increment = 1;
+          findPrompt:
+            {
+              unsigned char buffer[scr.cols];
+              unsigned char *blank;
+              readScreen((ScreenBox){0, p->winy, scr.cols, 1}, buffer, SCR_TEXT);
+              if ((blank = memchr(buffer, ' ', scr.cols))) {
+                findRow(blank-buffer, increment, testPrompt, buffer);
+              } else {
+                playTune(&tune_bad_command);
+              }
             }
             break;
           }
@@ -927,10 +1016,16 @@ main (int argc, char *argv[])
             }
             break;
           case CMD_LNBEG:
-            p->winx = 0;
+            if (p->winx)
+              p->winx = 0;
+            else
+              playTune(&tune_bounce);
             break;
           case CMD_LNEND:
-            p->winx = scr.cols - brl.x;
+            if (p->winx == (scr.cols - brl.x))
+              playTune(&tune_bounce);
+            else
+              p->winx = scr.cols - brl.x;
             break;
           case CMD_CHRLT:
             if (p->winx == 0)
@@ -938,9 +1033,6 @@ main (int argc, char *argv[])
             p->winx = MAX (p->winx - 1, 0);
             break;
           case CMD_CHRRT:
-            /* here we ignore offr so as to allow off-right positions when
-             * explicitely requested.
-             */
             if (p->winx < (scr.cols - 1))
               p->winx++;
             else
@@ -948,17 +1040,15 @@ main (int argc, char *argv[])
             break;
           case CMD_HWINLT:
             if (p->winx == 0)
-              playTune (&tune_bounce);
-            p->winx = MAX (p->winx - hwinshift, 0);
+              playTune(&tune_bounce);
+            else
+              p->winx = MAX(p->winx-hwinshift, 0);
             break;
           case CMD_HWINRT:
-            if (p->winx >= scr.cols - offr)
-              playTune (&tune_bounce);
-            p->winx = MIN (p->winx + hwinshift, scr.cols - offr);
-            break;
-          case CMD_CSRJMP:
-            if (!routeCursor(p->winx, p->winy, curscr))
-              playTune(&tune_bad_command);
+            if (p->winx < (scr.cols - hwinshift))
+              p->winx += hwinshift;
+            else
+              playTune(&tune_bounce);
             break;
           case CMD_CSRJMP_VERT:
             if (!routeCursor(-1, p->winy, curscr))
@@ -1000,14 +1090,6 @@ main (int argc, char *argv[])
             } else
               playTune(&tune_unlink);
             break;
-          case CMD_CUT_BEG:
-            cut_begin (p->winx, p->winy);
-            break;
-          case CMD_CUT_END:
-            if (!cut_rectangle(MIN(p->winx + brl.x - 1, scr.cols-1), p->winy + brl.y - 1)) {
-              playTune(&tune_bad_command);
-            }
-            break;
           case CMD_PASTE:
             if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
               if (cut_paste())
@@ -1042,7 +1124,6 @@ main (int argc, char *argv[])
                 if (dispmd & HELP_SCRN) /* help screen selection successful */
                   {
                     switchto(0);        /* screen 0 for help screen */
-                    *p = initialScreenState;        /* reset params for help screen */
                   }
                 else        /* help screen selection failed */
                     message ("can't find help", 0);
@@ -1286,6 +1367,7 @@ main (int argc, char *argv[])
                 ScreenMark *mark = &p->marks[arg];
                 mark->column = p->winx;
                 mark->row = p->winy;
+                playTune(&tune_mark_set);
                 break;
               }
               case CR_GOTOMARK: {
@@ -1300,36 +1382,14 @@ main (int argc, char *argv[])
                   break;
               {
                 int increment;
-              case CR_NXINDENT:
-                increment = 1;
-                goto find;
               case CR_PRINDENT:
                 increment = -1;
-              find:
-                {
-                  int count = MIN(p->winx+arg+1, scr.cols);
-                  int found = 0;
-                  int row = p->winy + increment;
-                  char buffer[scr.cols];
-                  while ((row >= 0) && (row <= scr.rows-brl.y)) {
-                    int column;
-                    readScreen((ScreenBox){0, row, count, 1},
-                               buffer, SCR_TEXT);
-                    for (column=0; column<count; column++)
-                      if ((buffer[column] != ' ') && (buffer[column] != 0))
-                        break;
-                    if (column < count) {
-                      found = 1;
-                      p->winy = row;
-                      break;
-                    }
-                    row += increment;
-                  }
-                  if (!found) {
-                    playTune(&tune_bounce);
-                    playTune(&tune_bounce);
-                  }
-                }
+                goto findIndent;
+              case CR_NXINDENT:
+                increment = 1;
+              findIndent:
+                findRow(MIN(p->winx+arg, scr.cols-1),
+                        increment, testIndent, NULL);
                 break;
               }
               default:
@@ -1570,4 +1630,13 @@ message (const unsigned char *text, short flags) {
          }
       }
    }
+}
+
+void
+showDotPattern (unsigned char dots, unsigned char duration) {
+  memset(statcells, dots, sizeof(statcells));
+  memset(brl.disp, dots, brl.x*brl.y);
+  braille->writeStatus(statcells);
+  braille->writeWindow(&brl);
+  shortdelay(duration);
 }

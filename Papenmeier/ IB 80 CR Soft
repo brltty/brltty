@@ -1,0 +1,58 @@
+# Terminal Parameter:
+identification = 43
+terminal = ""
+helpfile = " IB 80 CR Soft"
+displaysize = 808988002
+statuscells = 0
+frontkeys = 0
+# Terminal settings:
+# Statusdisplay settings:
+# flag: left half: line number  right half: no/all bits set
+# horiz: two digits on vertikal status-display
+# number: display two digits in one cell when status on horiz.display
+status 14 =  ??? # 
+status 15 =  STAT_brlcol # current line number
+status 16 =  STAT_csrrow # cursor position - row
+status 17 =  STAT_visible # cursor visible
+status 19 = number STAT_brlrow # current line number
+status 20 = number STAT_csrrow # cursor position - row
+status 21 = number STAT_csrcol # cursor position - column
+status 22 = flag STAT_dispmode # dispmode (text / attribut)
+# Modifierkey and input mode dots - settings:
+# Commandkey settings:
+CMD_TOP = front   2   and front   0  # go to top line
+CMD_FWINLT = front   0  # go left one full window
+CMD_FWINRT = front   0  # go right one full window
+CMD_HWINLT = front   0  # go left one half window
+CMD_HWINRT = front   0  # go right one half window
+CMD_HOME = front   5   # go to cursor
+CMD_LNBEG = front   5   and front   0  # go to beginning of line
+CMD_LNEND = front   5   and front   0  # go to end of line
+CMD_CHRLT = front   5   and front   0  # go left one character
+CMD_CHRRT = front   5   and front   0  # go right one character
+CMD_WINUP = front   4   # go up several lines
+CMD_PRDIFLN = front   4   and front   0  # go up to line with different content
+CMD_ATTRUP = front   4   and front   0  # go up to line with different attributes
+CMD_PRBLNKLN = front   4   and front   0  # go to last line of previous paragraph
+CMD_PRSEARCH = front   4   and front   0  # search up for content of cut buffer
+CMD_WINDN = front   6   # go down several lines
+CMD_NXDIFLN = front   6   and front   0  # go down to line with different content
+CMD_ATTRDN = front   6   and front   0  # go down to line with different attributes
+CMD_NXBLNKLN = front   6   and front   0  # go to first line of next paragraph
+CMD_NXSEARCH = front   6   and front   0  # search down for content of cut buffer
+CMD_LNUP = front   3   # go up one line
+CMD_TOP_LEFT = front   3   and front   0  # go to top-left corner
+CMD_TOP = front   3   and front   0  # go to top line
+CMD_LNDN = front   7   # go down one line
+CMD_BOT_LEFT = front   7   and front   0  # go to bottom-left corner
+CMD_BOT = front   7   and front   0  # go to bottom line
+CR_ROUTE = routing  # route cursor to character
+CR_CUTBEGIN = routing  and front   0  # begin cut area at character
+CR_CUTRECT = routing  and front   0  # rectangular cut to area
+CR_PRINDENT = routing  and front   0  # find previous line not more indented than routing key indicates
+CR_NXINDENT = routing  and front   0  # find next line not more indented than routing key indicates
+CMD_PASTE = front   0  and front   0  # insert cut buffer at cursor
+CMD_HELP = status  1   # display driver help
+CMD_RESTARTBRL = status  2   # reinitialize braille driver
+CMD_CSRJMP_VERT = status  3   # route cursor to top line of window
+CMD_DISPMD = status  4   # toggle display attributes/text

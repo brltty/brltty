@@ -179,7 +179,7 @@ COMPCPP = $(CROSSCOMP)gcc
 COMMONLDFLAGS = -rdynamic
 LDFLAGS = $(COMMONLDFLAGS) -s
 #LDFLAGS = $(COMMONLDFLAGS) -g
-LDLIBS = -ldl -lpthread -lm -lc
+LDLIBS = -ldl -lm -lc
 
 MAKE = make
 
@@ -210,7 +210,7 @@ endif
 
 .EXPORT_ALL_VARIABLES:
 
-all: brltty install-brltty txt2hlp brltest scrtest
+all: brltty install-brltty txt2hlp brltest scrtest tunetest
 
 install-brltty: install.template
 	sed -e 's%=F%$(PREFIX)%g' \
@@ -354,6 +354,13 @@ scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)
 scrtest.o: scrtest.c 
 	$(CC) $(CFLAGS) -c scrtest.c
 
+TUNETEST_OBJECTS = tunetest.o misc.o
+tunetest: $(TUNETEST_OBJECTS) $(TUNE_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(TUNE_OBJECTS) $(LDLIBS)
+
+tunetest.o: tunetest.c tunes.h misc.h config.h common.h message.h brl.h
+	$(CC) $(CFLAGS) -c tunetest.c
+
 # quick hack to check all libs
 # try to load all libs - start brltty with library
 check-braille: brltty dynamic-braille
@@ -421,7 +428,7 @@ clean:
 	rm -f *.o */*.o lib/* help/* *.auto.h core
 
 distclean: clean
-	rm -f *test *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
+	rm -f *test *-static *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
 	$(MAKE) -C BrailleLite distclean
 	$(MAKE) -C Papenmeier distclean
 	$(MAKE) -C Voyager distclean

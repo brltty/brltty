@@ -9,7 +9,7 @@ Movement:
   Left/right one window: Rlt / Rrt
   One line up/down: Rup / Rdn
   Goto cursor: Rrn
-  Goto cursor previous position: Rrn+Lup
+  Goto previous reading position (before cursor tracking moved us): Rrn+Lup
   Cursor tracking (link/unlink): Lrn (toggle)
   Goto top left of screen: RUP+RLT
   Goto bottom left of screen: RDN+RLT
@@ -36,13 +36,14 @@ Cursor routing:
   Route cursor towards end of display: Ldn+Rdn+Rrt
 
 Cut & paste:
-  Mark that beginning of region to cut starts at cell 1: Rrn+Llt
-  Mark that end (bottom right) of region is at last cell: Rrn+Lrt
+  Mark start of cut regoin at first cell: Rrn+Llt
+  Mark start of cut regoin for appending: Rrn+Llt+Rup
+  Mark end (bottom right) of rectangular cut region at last cell: Rrn+Lrt
+  Mark end of linear cut region at last cell: Rrn+Lrt+Rup
   Virtual cursor mode for specifying region to cut: Rrn+Llt+Lrt
     In this mode:
     Quit and cancel: Rrn+Llt+Lrt again
-    Mark that beginning of region is at virtual cursor position: Rrn+Llt
-    End of region at cursor position: Rrn+Lrt
+    Cut commands now act on cursor position instead of first/last cell.
     Move virtual cursor left/right: Rlt / Rrt
     Move cursor left/right by 5cells: Rup / Rdn
     ... By 10cells: Lup / Ldn

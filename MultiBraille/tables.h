@@ -34,7 +34,7 @@
  ? 0x18             45       down several lines                CMD_PRDIFLN
  * 0x04  0x0e     1     (B)  up one line                       CMD_LNUP
  * 0x08  0x13       4   (D)  down one line                     CMD_LNDN
- ? 0x21  0x10   3     6 (CC) cursor position                   CMD_CSRJMP
+ ? 0x21  0x10   3     6 (CC) cursor position                   CR_ROUTE
  * 0x03         32           beginning of line                 CMD_LNBEG
  * 0x30              56      end of line                       CMD_LNEND
  * 0x05         3 1          left one character                CMD_CHRLT
@@ -48,8 +48,8 @@
  * 0x34           1  56      speak current line                CMD_SAY
  * 0x24           1   6      mute speech                       CMD_MUTE
  ? 0x1e          21 45       route cursor to start of window   CMD_HOME
- * 0x23         32    6      cut start                         CMD_CUT_BEG
- * 0x31         3    56      cut end                           CMD_CUT_END
+ * 0x23         32    6      cut start                         CR_CUTBEGIN
+ * 0x31         3    56      cut end                           CR_CUTRECT+brlcols-1
  * 0x0f         321 4        paste                             CMD_PASTE
  * 0x10              5       cursor visibility on/off          CMD_CSRVIS
  * 0x0c  0x10     1 4   (C)  cursor tracking on/off            CMD_CSRTRK
@@ -93,7 +93,7 @@
    jump to the beginning of the line
  
 */
-unsigned char cmd_T_trans[23] = {
+int cmd_T_trans[23] = {
 /* 0x00 */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 /* 0x08 */ 0x00, 0x00, 0x00, 0x00, 0x00, CMD_FWINLT, CMD_LNUP, 0x00, 
 /* 0x10 */ CMD_CSRTRK, 0x00, 0x00, CMD_LNDN, CMD_FWINRT, 0x00, 0x00
@@ -103,7 +103,7 @@ unsigned char cmd_T_trans[23] = {
 /* Command translation table for 'S' events (braille dot keys) */
 /* 63 customizable key-bindings! (index 0 can't be customized ..) */
 /* combinations returning 0x00 are ignored */
-unsigned char cmd_S_trans[0x40] = {
+int cmd_S_trans[0x40] = {
 /* 0x00 */  0x00,         CMD_FWINLT,   CMD_CSRBLINK, CMD_LNBEG,   
 /* 0x04 */  CMD_LNUP,     CMD_CHRLT,    CMD_NXDIFLN,  CMD_TOP,
 /* 0x08 */  CMD_LNDN,     CMD_INFO,     0x00,         CMD_SND,        
@@ -112,11 +112,11 @@ unsigned char cmd_S_trans[0x40] = {
 /* 0x14 */  0x00,         CMD_HWINRT,   CMD_HELP,     CMD_PREFLOAD, 
 /* 0x18 */  CMD_PRDIFLN,  0x00,         CMD_SKPIDLNS, 0x00,        
 /* 0x1c */  0x00,         0x00,         CMD_HOME,     0x00, 
-/* 0x20 */  CMD_FWINRT,   CMD_CSRJMP,   0x00,         CMD_CUT_BEG, 
+/* 0x20 */  CMD_FWINRT,   CR_ROUTE,     0x00,         CR_CUTBEGIN, 
 /* 0x24 */  CMD_MUTE,     0x00,         0x00,         0x00, 
 /* 0x28 */  CMD_CHRRT,    0x00,         CMD_HWINLT,   0x00,        
 /* 0x2c */  CMD_CAPBLINK, CMD_PREFMENU, 0x00,         0x00, 
-/* 0x30 */  CMD_LNEND,    CMD_CUT_END,  0x00,         0x00,        
+/* 0x30 */  CMD_LNEND,    CR_CUTRECT,   0x00,         0x00,        
 /* 0x34 */  CMD_SAY,      0x00,         0x00,         0x00, 
 /* 0x38 */  CMD_BOT,      0x00,         CMD_SLIDEWIN, 0x00,        
 /* 0x3c */  0x00,         0x00,         0x00,         CMD_PREFSAVE, 
@@ -126,6 +126,6 @@ unsigned char cmd_S_trans[0x40] = {
 /* Command translation table for 'R' events (cursor routing keys)*/
 /* only keys 3, 4, 5 (startindex: 0) can be customized!! others are
    ignored (hard-coded)! */
-unsigned char cmd_R_trans[MB_CR_EXTRAKEYS] = {
+int cmd_R_trans[MB_CR_EXTRAKEYS] = {
 /* 0x00 */ 0x00, 0x00, 0x00, CMD_PREFMENU, CMD_PREFLOAD, CMD_HELP
 };

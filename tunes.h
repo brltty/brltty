@@ -52,6 +52,7 @@ extern TuneDefinition tune_wrap_up;
 extern TuneDefinition tune_bounce;
 extern TuneDefinition tune_bad_command;
 extern TuneDefinition tune_done;
+extern TuneDefinition tune_mark_set;
 
 extern void setTuneDevice (unsigned char device);
 extern void closeTuneDevice (int force);

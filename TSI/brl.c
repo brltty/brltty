@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.61 (November 2001)"
-#define COPYRIGHT "Copyright (C) 1996-2001 by Stéphane Doyon " \
+#define VERSION "BRLTTY driver for TSI displays, version 2.70 (January 2002)"
+#define COPYRIGHT "Copyright (C) 1996-2002 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
  *
@@ -26,6 +26,11 @@
  * It is designed to be compiled into BRLTTY versions 3.0.
  *
  * History:
+ * Version 2.70: Added CR_CUTAPPEND, CR_CUTLINE, CR_SETMARK, CR_GOTOMARK
+ *   and CR_SETLEFT. Changed binding for NXSEARCH.. Adjusted PB80 cut&paste
+ *   bindings. Replaced CMD_CUT_BEG/CMD_CUT_END by CR_CUTBEGIN/CR_CUTRECT,
+ *   and CMD_CSRJMP by CR_ROUTE+0. Adjusted cut_cursor for new cut&paste
+ *   bindings (untested).
  * Version 2.61: Adjusted key bindings for preferences menu.
  * Version 2.60: Use TCSADRAIN when closing serial port. Slight API and
  *   name changes for BRLTTY 3.0. Argument to readbrl now ignore, instead
@@ -265,7 +270,7 @@ static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
 
 /* For navigator and pb40 */
 /* bits from byte 1: navigator right pannel keys, pb right rocker +round button
-   + dislpay forward/backward controls on the top of the display */
+   + display forward/backward controls on the top of the display */
 #define KEY_BLEFT  (1<<0)
 #define KEY_BUP	   (1<<1)
 #define KEY_BRIGHT (1<<2)
@@ -306,7 +311,7 @@ static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
 /* Special mask: switches are special keys to distinguish... */
 #define KEY_SWITCHMASK (KEY_S1UP|KEY_S1DN | KEY_S2UP|KEY_S2DN \
 			| KEY_S3UP|KEY_S3DN | KEY_S4UP|KEY_S4DN)
-/* bits from byte 3: rightmost forward bars from dislpay top */
+/* bits from byte 3: rightmost forward bars from display top */
 #define KEY_BAR3   (1<<18)
   /* one unused bit */
 #define KEY_BAR4   (1<<20)
@@ -914,7 +919,7 @@ do_battery_warn ()
    the display's key pads. It calls cut_cursor() if it gets a certain key
    press. cut_cursor() is an elaborate function that allows selection of
    portions of text for cut&paste (presenting a moving cursor to replace
-   the cursor routing keys that the Navigator/20/40 does not have). (This
+   the cursor routing keys that the Navigator 20/40 does not have). (This
    function is not bound to PB keys). The strange part is that cut_cursor()
    itself calls back to readbrl() to get keys from the user. It receives
    and processes keys by calling readbrl again and again and eventually
@@ -923,7 +928,7 @@ do_battery_warn ()
 
 /* If cut_cursor() returns the following special code to readbrl(), then
    the cut_cursor() operation has been cancelled. */
-#define CMD_CUT_CURSOR 0xF0F0
+#define CMD_CUT_CURSOR 0xF0F0F0F0
 
 static int 
 cut_cursor ()
@@ -966,7 +971,17 @@ cut_cursor ()
       prevdata[pos] = oldchar;
 
       while ((key = brl_read (CMDS_SCREEN)) == EOF) delay(1); /* just yield */
-      switch (key)
+      if((key &VAL_BLK_MASK) == CR_CUTBEGIN)
+	  res = CR_CUTBEGIN + pos;
+      else if((key &VAL_BLK_MASK) == CR_CUTAPPEND)
+	  res = CR_CUTAPPEND + pos;
+      else if((key &VAL_BLK_MASK) == CR_CUTRECT) {
+	  res = CR_CUTRECT + pos;
+	  pos = -1;
+      }else if((key &VAL_BLK_MASK) == CR_CUTLINE) {
+	  res = CR_CUTLINE + pos;
+	  pos = -1;
+      }else switch (key)
 	{
 	case CMD_FWINRT:
 	  pos++;
@@ -992,22 +1007,11 @@ cut_cursor ()
 	case VAL_PASSKEY+VPK_CURSOR_DOWN:
 	  pos -= 10;
 	  break;
-	case CMD_CUT_BEG:
-	  res = CR_CUTBEGIN + pos;
-	  break;
-	case CMD_CUT_END:
-	  res = CR_CUTRECT + pos;
-	  pos = -1;
-	  break;
 	case CMD_CUT_CURSOR:
 	  res = EOF;
 	  break;
 	  /* That's where we catch the special return code: user has typed
 	     cut_cursor() activation key again, so we cancel it. */
-	case CMD_RESTARTBRL:
-	  res = CMD_RESTARTBRL;
-	  pos = -1;
-	  break;
 	}
     }
 
@@ -1280,30 +1284,51 @@ brl_read (DriverCommandContext cmds)
 	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, CR_CUTRECT + sw_which[0]);
 	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CR_NXINDENT + sw_which[0]);
 	KEYAND(KEY_R2UP) KEY (KEY_BUP, CR_PRINDENT + sw_which[0]);
+	KEY (KEY_CROUND, CR_SETMARK + sw_which[0]);
+	KEYAND(KEY_CNCV) KEY (KEY_BROUND, CR_GOTOMARK + sw_which[0]);
+	KEY (KEY_CUP, CR_SETLEFT + sw_which[0]);
+	KEY (KEY_CDOWN, CR_SWITCHVT + sw_which[0]);
 	KEYAND(KEY_CDOWN | KEY_BUP) KEY(KEY_CUP | KEY_CDOWN,
 					CR_DESCCHAR +sw_which[0]);
-	KEY (KEY_CDOWN, CR_SWITCHVT + sw_which[0]);
       }
-    }else if(sw_howmany == 2 && sw_which[0]==0 && sw_which[1]==1){
-      switch(code){
-	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CMD_NXBLNKLN);
-	KEYAND(KEY_R2UP) KEY (KEY_BUP, CMD_PRBLNKLN);
-	KEYAND(KEY_BUT4) KEY (KEY_BRIGHT, CMD_NXSEARCH);
-	KEYAND(KEY_BUT3) KEY (KEY_BLEFT, CMD_PRSEARCH);
+    }else if(sw_howmany == 2) {
+      if(sw_which[0]+1 == sw_which[1]
+	 && (code == KEY_BRIGHT || code == KEY_BUT3))
+	res = CR_CUTAPPEND + sw_which[0];
+      else if(sw_which[0]+1 == sw_which[1]
+	 && (code == KEY_BLEFT || code == KEY_BUT2))
+	res = CR_CUTLINE + sw_which[1];
+      else if(sw_which[0]==0 && sw_which[1]==1){
+	switch(code){
+	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CMD_NXPGRPH);
+	  KEYAND(KEY_R2UP) KEY (KEY_BUP, CMD_PRPGRPH);
+	}
+      }else if(sw_which[0]==0 && sw_which[1]==2){
+	switch(code){
+	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CMD_NXSEARCH);
+	  KEYAND(KEY_R2UP) KEY (KEY_BUP, CMD_PRSEARCH);
+	}
       }
     }
   }else if (has_sw && sw_howmany)	/* routing key */
     {
       if (sw_howmany == 1)
 	res = CR_ROUTE + sw_which[0];
+#if 0
      else if (sw_howmany == 3 && sw_which[1] == sw_lastkey - 1
 	       && sw_which[2] == sw_lastkey)
 	res = CR_CUTBEGIN + sw_which[0];
       else if (sw_howmany == 3 && sw_which[0] == 0 && sw_which[1] == 1)
  	res = CR_CUTRECT + sw_which[2];
-      else if ((sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
+#endif
+      else if(
+#if 0
+	      (sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
 	       && sw_which[2] == sw_lastkey-1 && sw_which[3] == sw_lastkey)
-	       || (sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2))
+	      ||
+#endif
+	      (sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2)
+	      )
  	res = CMD_PASTE;
       else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1)
 	res = CMD_CHRLT;
@@ -1388,12 +1413,14 @@ brl_read (DriverCommandContext cmds)
 
   /* Emulation of cursor routing */
     KEYAND(KEY_R1DN | KEY_R2DN) KEY (KEY_CDOWN | KEY_BDOWN, CMD_CSRJMP_VERT);
-    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BLEFT, CMD_CSRJMP);
+    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BLEFT, CR_ROUTE +0);
     KEY (KEY_CDOWN | KEY_BDOWN | KEY_BRIGHT, CR_ROUTE + 3 * brl_cols / 4 - 1);
 
   /* Emulation of routing keys for cut&paste */
-    KEY (KEY_CLEFT | KEY_BROUND, CMD_CUT_BEG);
-    KEY (KEY_CRIGHT | KEY_BROUND, CMD_CUT_END);
+    KEY (KEY_CLEFT | KEY_BROUND, CR_CUTBEGIN +0);
+    KEY (KEY_CLEFT | KEY_BROUND | KEY_BUP, CR_CUTAPPEND +0);
+    KEY (KEY_CRIGHT | KEY_BROUND, CR_CUTRECT +brl_cols-1);
+    KEY (KEY_CRIGHT | KEY_BROUND | KEY_BUP, CR_CUTLINE +brl_cols-1);
     KEY (KEY_CLEFT | KEY_CRIGHT | KEY_BROUND, CMD_CUT_CURSOR);  /* special: see
 	 				    at the end of this fn */
   /* paste */

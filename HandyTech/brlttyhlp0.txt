@@ -1,48 +1,66 @@
 BRLTTY Help for Handy Tech Modular Displays
-From left to right, the front keys are:
-B1 B2 B3 B4 LEFT RIGHT B5 B6 B7 B8
+From left to right, the front keys are: B1 B2 B3 B4 UP DN B5 B6 B7 B8
 
-Movement keys:
-B1              go to cursor position
-LEFT            left one full window
-RIGHT           right one full window
-B3 + LEFT       left one half window
-B3 + RIGHT      right one half window
-B3 + B8 + LEFT  left one character
-B3 + B8 + RIGHT right one character
-B2              top left of screen
-B2 + LEFT       top of screen
-B2 + RIGHT      bottom of screen
-B4              up one line
-B5              down one line
-B3 + B4         beginning of line
-B3 + B5         end of line
-B8 + B4         previous different line
-B8 + B5         next different line
-B6 + B4         previous line with different attributes
-B6 + B5         next line with different attributes
+Movement Keys:
+UP        go one window left
+DN        go one window right
+B1        go to cursor
+B1 UP     go to left end of line
+B1 DN     go to right end of line
+B2        go to top-left corner
+B2 UP     go to top line
+B2 DN     go to bottom line
+B3        go to last motion
+B3 UP     go left half window
+B3 DN     go right half window
+B6 UP     go left one character
+B6 DN     go right one character
+B4        go up one line
+B5        go down one line
+B4 b1     go up to last line of previous paragraph
+B5 b1     go down to first line of next paragraph
+B4 b2     go up to previous command prompt
+B5 b2     go down to next command prompt
+B4 b3     go up to previous line containing cut buffer
+B5 b3     go down to next line containing cut buffer
+B4 b6     go up to nearest line with different highlighting
+B5 b6     go down to nearest line with different highlighting
+B4 b7     go up several lines
+B5 b7     go down several lines
+B4 b8     go up to nearest line with different content
+B5 b8     go down to nearest line with different content
 
-Other functions:
-B6              toggle attribute display
-B7              toggle cursor visible
-B7 + B6         toggle cursor size
-B7 + B1         toggle blinking captals
-B7 + B2         toggle blinking cursor
-B7 + B3         toggle configuration menu
-B8              toggle help display
-B8 + B5         toggle freeze mode
-B8 + B1         toggle cursor tracking
-B8 + B6         toggle six dot braille
-B8 + B3         toggle sliding window
+Modes and Features:
+b8        toggle help mode
+B8 B1     toggle cursor tracking
+B8 B2     toggle show cursor
+B8 B3     toggle show attributes
+B8 B6     toggle six-dot braille
+B8 B7     toggle alert tunes
+B7        toggle frozen screen
+B7 B1     toggle blinking capitals
+B7 B2     toggle blinking cursor
+B7 B3     toggle blinking attributes
+B7 B6     toggle sliding window
+B6        toggle display attributes
+B6 B1     toggle preferences menu
+B6 B2     load saved preferences
+B6 B3     save preferences
 
-Functions of the 3 cursor routing buttons over the status cells:
-Button 1        toggle caps blinking
-Button 2        toggle cursor blinking
-Button 3        activate preferences menu
+Speech Control:
+B2 B3 UP  stop speaking
+B2 B3 DN  say current line
 
-Cut & Paste function keys:
-B4 + routing button  defines the beginning of a block
-B5 + routing button  defines the end of that block
-B4 + LEFT       begins block at start of braille display
-B4 + RIGHT      ends block at end of braille display
-B4 + B5         paste block at cursor position
+Routing Key Functions:
+RK        bring cursor to character
+B1 RK     bring left end of window to column
+B2 RK     set mark
+B3 RK     append to cut buffer from character
+B4 RK     start new cut buffer from character
+B4 B5     paste cut buffer at cursor position
+UP RK     go up to line not indented more than column
+DN RK     go down to line not indented more than column
+B5 RK     rectangular cut to character
+B6 RK     linear cut to character
+B7 RK     go to mark
+B8 RK     describe character

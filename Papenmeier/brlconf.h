@@ -48,15 +48,44 @@
 #define cSTX 02
 #define cETX 03
 #define cIdSend 'S'
+#define cIdIdentify 'I'
 #define cIdReceive 'K'
 #define PRESSED 1
 
 /* maximum number of status cells */
 #define PMSC 22
 
-/* offset within data structure */
-/* additional offset - use internal table */
-#define offsetTable      512
+/* offsets within input data structure */
+#define RCV_KEYFUNC  0X0000 /* physical and logical function keys */
+#define RCV_KEYROUTE 0X0300 /* routing keys and sensors */
+
+/* offsets within output data structure */
+#define XMT_BRLDATA  0X0000 /* data for braille display */
+#define XMT_LCDDATA  0X0100 /* data for LCD */
+#define XMT_BRLWRITE 0X0200 /* how to write each braille cell:
+                             * 0 = convert data according to braille table (default)
+                             * 1 = write directly
+                             * 2 = mark end of braille display
+                             */
+#define XMT_BRLCELL  0X0300 /* description of eadch braille cell:
+                             * 0 = has cursor routing key
+                             * 1 = has cursor routing key and sensor
+                             */
+#define XMT_ASC2BRL  0X0400 /* ASCII to braille translation table */
+#define XMT_LCDUSAGE 0X0500 /* source of LCD data:
+                             * 0 = same as braille display
+                             * 1 = not same as braille display
+                             */
+#define XMT_CSRPOSN  0X0501 /* cursor position (0 for no cursor) */
+#define XMT_CSRDOTS  0X0502 /* cursor represenation in braille dots */
+#define XMT_BRL2ASC  0X0503 /* braille to ASCII translation table */
+#define XMT_LENFBSEQ 0X0603 /* length of feedback sequence for speech synthesizer */
+#define XMT_LENKPSEQ 0X0604 /* length of keypad sequence */
+#define XMT_MSECK2   0X0605 /* maximum time after k1 */
+#define XMT_MSECK4   0X0606 /* maximum time after k3 */
+#define XMT_MSECK6   0X0607 /* maximum time after k5 */
+#define XMT_MSECK8   0X0608 /* maximum time after k7 */
+#define XMT_MSECDBNC 0X0609 /* maximum debounce time */
 
 /* Define the preferred/default status cells mode. */
 #define PREFSTYLE ST_Generic

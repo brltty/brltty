@@ -113,9 +113,21 @@ is an alias for the
 <DT><B>PRDIFLN
 <A NAME="command-PRDIFLN"></A> </B><DD><P>Go up to the nearest previous line
 with different content.
+If identical line skipping has been activated
+(see the 
+<A HREF="#command-SKPIDLNS">SKPIDLNS</A> command),
+then this command, rather than skipping identical lines,
+is an alias for the 
+<A HREF="#command-LNUP">LNUP</A> command.
 <DT><B>NXDIFLN
 <A NAME="command-NXDIFLN"></A> </B><DD><P>Go down to the nearest next line
 with different content.
+If identical line skipping has been activated
+(see the 
+<A HREF="#command-SKPIDLNS">SKPIDLNS</A> command),
+then this command, rather than skipping identical lines,
+is an alias for the 
+<A HREF="#command-LNDN">LNDN</A> command.
 <DT><B>ATTRUP
 <A NAME="command-ATTRUP"></A> </B><DD><P>Go up to the nearest previous line
 with different character highlighting (attributes).
@@ -130,12 +142,16 @@ with different character highlighting (attributes).
 <A NAME="command-TOP_LEFT"></A> </B><DD><P>Go to the top-left corner.
 <DT><B>BOT_LEFT
 <A NAME="command-BOT_LEFT"></A> </B><DD><P>Go to the bottom-left corner.
-<DT><B>PRBLNKLN
-<A NAME="command-PRBLNKLN"></A> </B><DD><P>Go up to the last line of the previous paragraph
+<DT><B>PRPGRPH
+<A NAME="command-PRPGRPH"></A> </B><DD><P>Go up to the last line of the previous paragraph
 (the first non-blank line beyond the nearest previous blank line).
-<DT><B>NXBLNKLN
-<A NAME="command-NXBLNKLN"></A> </B><DD><P>Go down to the first line of the next paragraph
+<DT><B>NXPGRPH
+<A NAME="command-NXPGRPH"></A> </B><DD><P>Go down to the first line of the next paragraph
 (the first non-blank line beyond the nearest next blank line).
+<DT><B>PRPROMPT
+<A NAME="command-PRPROMPT"></A> </B><DD><P>Go up to the previous command prompt.
+<DT><B>NXPROMPT
+<A NAME="command-NXPROMPT"></A> </B><DD><P>Go down to the next command prompt.
 <DT><B>PRSEARCH
 <A NAME="command-PRSEARCH"></A> </B><DD><P>Go up to the nearest previous line
 whereon the character string within the cut buffer can be found.
@@ -465,18 +481,12 @@ The cursor is moved by simulating arrow-key presses.
 This command doesn't always work because some applications
 either move the cursor somewhat unpredictably
 or use the arrow keys for purposes other than cursor motion.
-Braille displays which don't have routing keys
-should use the 
-<A HREF="#command-CSRJMP">CSRJMP</A> command.
 <DT><B>CUTBEGIN
 <A NAME="command-CUTBEGIN"></A> </B><DD><P>Anchor the start of the cut block at the character
 associated with the routing key
 (see 
 <A HREF="#cut">Cut and Paste</A> for full details).
 This command clears the cut buffer.
-Braille displays which don't have routing keys
-should use the 
-<A HREF="#command-CUT_BEG">CUT_BEG</A> command.
 <DT><B>CUTAPPEND
 <A NAME="command-CUTAPPEND"></A> </B><DD><P>Anchor the start of the cut block at the character
 associated with the routing key
@@ -489,9 +499,6 @@ associated with the routing key,
 and append the rectangular region to the cut buffer
 (see 
 <A HREF="#cut">Cut and Paste</A> for full details).
-Braille displays which don't have routing keys
-should use the 
-<A HREF="#command-CUT_END">CUT_END</A> command.
 <DT><B>CUTLINE
 <A NAME="command-CUTLINE"></A> </B><DD><P>Anchor the end of the cut block at the character
 associated with the routing key,
@@ -501,11 +508,11 @@ and append the linear region to the cut buffer
 <DT><B>SWITCHVT
 <A NAME="command-SWITCHVT"></A> </B><DD><P>Switch to the virtual terminal whose number
 (counting from 1) matches that of the routing key.
-<DT><B>NXINDENT
-<A NAME="command-NXINDENT"></A> </B><DD><P>Go down to the nearest next line which isn't indented
-more than the column associated with the routing key.
 <DT><B>PRINDENT
 <A NAME="command-PRINDENT"></A> </B><DD><P>Go up to the nearest previous line which isn't indented
+more than the column associated with the routing key.
+<DT><B>NXINDENT
+<A NAME="command-NXINDENT"></A> </B><DD><P>Go down to the nearest next line which isn't indented
 more than the column associated with the routing key.
 <DT><B>DESCCHAR
 <A NAME="command-DESCCHAR"></A> </B><DD><P>Momentarily (see the 
@@ -523,7 +530,8 @@ char 65 (0x41): white on black bright blink
 <A NAME="command-SETLEFT"></A> </B><DD><P>Horizontally reposition the braille window so that
 its left edge is at the column associated with the routing key.
 This feature makes it very easy to put the window exactly where it's needed,
-and, therefore, eliminates the need for a lot of elementary window motion
+and, therefore, for displays which have routing keys,
+almost eliminates the need for a lot of elementary window motion
 (like the 
 <A HREF="#command-CHRLT">CHRLT</A>,
 <A HREF="#command-CHRRT">CHRRT</A>,
@@ -542,45 +550,6 @@ This feature only affects the current virtual terminal.
 <A HREF="#command-SETMARK">SETMARK</A> command)
 with the same routing key.
 This feature only affects the current virtual terminal.
-</DL>
-<P>
-<H3>No Routing Keys</H3>
-
-<P>
-<DL>
-<DT><B>CSRJMP
-<A NAME="command-CSRJMP"></A> </B><DD><P>Route (bring) the cursor to the character
-at the top-left corner of the braille window.
-(see 
-<A HREF="#routing">Cursor Routing</A> for full details).
-The cursor is moved by simulating arrow-key presses.
-This command doesn't always work because some applications
-either move the cursor somewhat unpredictably
-or use the arrow keys for purposes other than cursor motion.
-Braille displays which have routing keys
-should use the 
-<A HREF="#command-ROUTE">ROUTE</A>
-command instead of this one.
-<DT><B>CUT_BEG
-<A NAME="command-CUT_BEG"></A> </B><DD><P>Anchor the start of the cut block at the character
-at the top-left corner of the braille window
-(see 
-<A HREF="#cut">Cut and Paste</A> for full details).
-This command clears the cut buffer.
-Braille displays which have routing keys
-should use the 
-<A HREF="#command-CUTBEGIN">CUTBEGIN</A>
-command instead of this one.
-<DT><B>CUT_END
-<A NAME="command-CUT_END"></A> </B><DD><P>Anchor the end of the cut block at the character
-at the bottom-right corner of the braille window,
-and append the rectangular region to the cut buffer
-(see 
-<A HREF="#cut">Cut and Paste</A> for full details).
-Braille displays which have routing keys
-should use the 
-<A HREF="#command-CUTRECT">CUTRECT</A>
-command instead of this one.
 </DL>
 <P>
 <H2><A NAME="routing"></A> <A NAME="ss3.2">3.2 Cursor Routing</A>
@@ -604,13 +573,6 @@ and by monitoring the progress of the cursor as it moves.
 These keys use the 
 <A HREF="#command-ROUTE">ROUTE</A> command
 to route the cursor right to the desired location.
-If your display doesn't have routing keys,
-then use the 
-<A HREF="#command-CSRJMP">CSRJMP</A> command
-to route the cursor to the top-left corner of the braille window,
-and then use the arrow keys on the keyboard to do the rest.
-Some drivers interpret certain keys on the braille display itself as arrow keys
-so that this can be done without having to remove your hands from the display.
 <P>Cursor routing, while very convenient and effective,
 is, strictly speaking, not completely reliable.
 One reason for this is that its current implementation assumes
@@ -625,7 +587,7 @@ because they don't allow the cursor to be to the right of the end of a line.
 A major problem found within some web browsers (like <CODE>lynx</CODE>)
 is that the up- and down-arrow keys are used to move among the links
 (which may skip lines and/or move the cursor horizontally,
-but which rarely just moves the cursor one line in the desired diretion),
+but which rarely just moves the cursor one line in the desired direction),
 and that the left- and right-arrow keys are used to select links
 (which has absolutely nothing to do with any form of cursor motion whatsoever,
 and which even totally changes the screen content).
@@ -684,13 +646,7 @@ to append to the existing cut buffer</LI>
 </UL>
 
 by holding down the key(s) associated with it
-and pressing the routing key associated with the character.
-If your display doesn't have routing keys,
-then move the braille window so that
-the first character to be cut is at its top-left corner,
-and then invoke the 
-<A HREF="#command-CUT_BEG">CUT_BEG</A> command
-to start a new cut buffer (you can't append to the existing cut buffer).</LI>
+and pressing the routing key associated with the character.</LI>
 <LI>Mark either the bottom-right corner of the rectangular area
 or the end of the linear area
 on the screen which is to be grabbed (cut).
@@ -708,12 +664,6 @@ to cut a linear area</LI>
 
 by holding down the key(s) associated with it
 and pressing the routing key associated with the character.
-If your display doesn't have routing keys,
-then move the braille window so that
-the last character to be cut is at its bottom-right corner,
-and invoke the 
-<A HREF="#command-CUT_END">CUT_END</A> command
-to cut a rectangular area (you can't cut a linear area).
 Marking the end of the cut area
 appends the selected screen content to the cut buffer.
 Excess white space is removed from the end of each line in the cut buffer

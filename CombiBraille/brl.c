@@ -42,6 +42,7 @@ static int cmdtrans[0X100] = {
 
 static unsigned char combitrans[256];	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
+int brl_cols;			/* file descriptor for Braille display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
@@ -132,7 +133,7 @@ brl_initialize (char **parameters, brldim *brl, const char *brldev)
       goto failure;
     }
 
-  res.x = BRLCOLS (id);		/* initialise size of display */
+  res.x = brl_cols = BRLCOLS(id);		/* initialise size of display */
   res.y = BRLROWS;
   if ((brl->x = res.x) == -1)
     return;
@@ -278,6 +279,9 @@ brl_read (DriverCommandContext cmds)
       if (arg == VAL_ARG_MASK) {
         status = rng;
 	return CMD_NOOP;
+      }
+      if (arg == (VAL_ARG_MASK - 1)) {
+        cmd += brl_cols - 1;
       }
       if (status && (rng == CR_ROUTE)) {
         cmd = status + arg;

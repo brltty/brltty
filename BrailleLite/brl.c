@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.6 (January 2002)"
+"Braille Lite driver, version 0.5.7 (January 2002)"
 
 #define BRL_C
 
@@ -421,6 +421,12 @@ brl_read (DriverCommandContext cmds)
 	  if (key.asc == 0)
 	    return key.cmd;
 
+	  /* I thought I was smart when I suggested to remove CMD_CUT_END.
+	     Well now there's this nasty exception: the command offset
+	     depends on the display size! */
+	  if(key.cmd == CR_CUTRECT || key.cmd == CR_CUTLINE)
+	    key.cmd += blitesz-1;
+
 	  /* always OK if chorded */
 	  if (key.spcbar)
 	    return key.cmd;
@@ -636,24 +642,26 @@ brl_read (DriverCommandContext cmds)
 	  if (int_cursor < blitesz)
 	    int_cursor++;
 	  break;
-	case CMD_CSRJMP:	/* route cursor */
+	case CR_ROUTE:	/* route cursor */
 	  if (key.spcbar)
 	    {
 	      temp = CR_ROUTE + int_cursor - 1;
 	      int_cursor = state = 0;
 	    }
 	  return temp;
-	case CMD_CUT_BEG:	/* begin cut */
+	case CR_CUTBEGIN:	/* begin cut */
+	case CR_CUTAPPEND:
 	  if (key.spcbar)
 	    {
-	      temp = CR_CUTBEGIN + int_cursor - 1;
+	      temp = key.cmd + int_cursor - 1;
 	      int_cursor = state = 0;
 	    }
 	  return temp;
-	case CMD_CUT_END:	/* end cut */
+	case CR_CUTRECT:	/* end cut */
+	case CR_CUTLINE:
 	  if (key.spcbar)
 	    {
-	      temp = CR_CUTRECT + int_cursor - 1;
+	      temp = key.cmd + int_cursor - 1;
 	      int_cursor = state = 0;
 	    }
 	  return temp;
@@ -696,6 +704,10 @@ brl_read (DriverCommandContext cmds)
 	  if(key.asc == SWITCHVT_NEXT || key.asc == SWITCHVT_PREV)
 	    /* That's chorded or not... */
 	    return CR_SWITCHVT + (hold-1);
+	  else if(key.asc == O_SETMARK)
+	    return CR_SETMARK + (hold-1);
+	  else if(key.asc == O_GOTOMARK)
+	    return CR_GOTOMARK + (hold-1);
 	  else if (key.spcbar)		/* chorded */
 	    switch(key.asc)
 	      {

@@ -73,6 +73,7 @@
 
 static unsigned char combitrans[256];	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
+static int brlcols;		/* length of braille line (auto-detected) */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
@@ -107,12 +108,12 @@ static void brl_initialize (char **parameters, brldim *brl, const char *brldev) 
 	unsigned char *init_seq = "\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
 	unsigned char *init_ack = "\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
 	unsigned char c;
-	int brlcols = -1;		/* length of braille line (auto-detected) */
 	unsigned char standard[8] =
 	{0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
 	unsigned char Tieman[8] =
 	{0, 7, 1, 6, 2, 5, 3, 4};	/* Tieman standard */
 
+	brlcols = -1;		/* length of braille line (auto-detected) */
 	res.disp = prevdata = rawdata = NULL;		/* clear pointers */
 
 	/* No need to load translation tables, as these are now
@@ -325,6 +326,8 @@ static int brl_read (DriverCommandContext cmds) {
 		else
 			keystroke.key = cmd_S_trans[keystroke.key];
 		status = 0;
+                if ((keystroke.key == CR_CUTLINE) || (keystroke.key == CR_CUTRECT))
+                  keystroke.key += brlcols - 1;
 		return keystroke.key;
 	} else { // directly process 'R' events
 	  // cursor routing key 1 or 2 pressed: begin / end block to copy'n'paste

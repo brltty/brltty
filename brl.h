@@ -61,8 +61,10 @@ typedef enum {
   CMD_BOT /* go to bottom line */,
   CMD_TOP_LEFT /* go to top-left corner */,
   CMD_BOT_LEFT /* go to bottom-left corner */,
-  CMD_PRBLNKLN /* go to last line of previous paragraph */,
-  CMD_NXBLNKLN /* go to first line of next paragraph */,
+  CMD_PRPGRPH /* go to last line of previous paragraph */,
+  CMD_NXPGRPH /* go to first line of next paragraph */,
+  CMD_PRPROMPT /* go to previous prompt */,
+  CMD_NXPROMPT /* go to next prompt */,
   CMD_PRSEARCH /* search up for content of cut buffer */,
   CMD_NXSEARCH /* search down for content of cut buffer */,
   
@@ -97,7 +99,7 @@ typedef enum {
   CMD_ATTRVIS /* toggle attribute underlining on/off */,
   CMD_ATTRBLINK /* toggle attribute blinking on/off */,
   CMD_CAPBLINK /* toggle capital letter blinking on/off */,
-  CMD_SND /* toggle sound on/off */,
+  CMD_SND /* toggle alert tunes on/off */,
  
   /* mode selection */
   CMD_HELP /* display driver help */,
@@ -132,14 +134,6 @@ typedef enum {
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
   
-  /* for displays without routing keys */
-  CMD_CSRJMP /* route cursor to top-left corner of braille window */,
-  CMD_CUT_BEG /* cut text from top-left corner of braille window */,
-  CMD_CUT_END /* cut text to bottom-right corner of braille window */,
-  
-  /* internal (to the driver) use only */
-  CMD_INPUTMODE /* toggle input mode */,
-  
   DriverCommandCount /* must be last */
 } DriverCommand;
 #define VAL_ARG_MASK 0XFF
@@ -162,15 +156,15 @@ typedef enum {
 #define CR_CUTRECT   0X400 /* rectangular cut to area */
 #define CR_CUTLINE   0X500 /* linear cut to character */
 #define CR_SWITCHVT  0X600 /* switch virtual terminal */
-#define CR_NXINDENT  0X700 /* find next line not more indented than routing key indicates */
-#define CR_PRINDENT  0X800 /* find previous line not more indented than routing key indicates */
+#define CR_PRINDENT  0X700 /* find previous line not more indented than routing key indicates */
+#define CR_NXINDENT  0X800 /* find next line not more indented than routing key indicates */
 #define CR_DESCCHAR  0X900 /* describe character */
 #define CR_SETLEFT   0XA00 /* bring left of window to character */
 #define CR_SETMARK   0XB00 /* mark current window position */
 #define CR_GOTOMARK  0XC00 /* return to marked window position */
 
 /* For entering a special key. */
-#define VAL_PASSKEY	0xD00
+#define VAL_PASSKEY	0x2000
 typedef enum {
   VPK_RETURN,
   VPK_TAB,
@@ -190,10 +184,10 @@ typedef enum {
 } Key;
 
 /* For typing a character -- pass through. */
-#define VAL_PASSCHAR	0xE00
+#define VAL_PASSCHAR	0x2100
 
 /* For typing a character -- use current text translation table. */
-#define VAL_PASSDOTS      0xF00
+#define VAL_PASSDOTS      0x2200
 
 /* For modifying a character to be typed. */
 #define VPC_CONTROL 0X010000
@@ -240,9 +234,6 @@ typedef enum {
   STAT_skip /* skip identical lines */,
   STAT_underline /* attribute underlining */,
   STAT_blinkattr /* blinking of attribute underlining */,
-
-  /* internal (to the driver) use only */
-  STAT_input /* input mode */,
 
   StatusCellCount /* must be last */
 } StatusCell;
@@ -301,5 +292,7 @@ extern unsigned char attribtrans[0X100]; /* current attributes to braille transl
 
 #define MAXNSTATCELLS 22
 extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
+
+extern void showDotPattern (unsigned char dots, unsigned char duration);
 
 #endif /* !defined(_BRL_H) */

@@ -53,7 +53,7 @@
 #define  EASYMAX   8
 #define  NAMEMAX   80
 #define  MODMAX    16
-#define  CMDMAX    100
+#define  CMDMAX    120
 #define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
@@ -127,13 +127,13 @@ typedef struct {
      { CMD_WINUP      , OFFS_FRONT + 4, 0X0 }, \
      { CMD_PRDIFLN    , OFFS_FRONT + 4, 0X1 }, \
      { CMD_ATTRUP     , OFFS_FRONT + 4, 0X2 }, \
-     { CMD_PRBLNKLN   , OFFS_FRONT + 4, 0X4 }, \
+     { CMD_PRPGRPH    , OFFS_FRONT + 4, 0X4 }, \
      { CMD_PRSEARCH   , OFFS_FRONT + 4, 0X8 }, \
                                                \
      { CMD_WINDN      , OFFS_FRONT + 6, 0X0 }, \
      { CMD_NXDIFLN    , OFFS_FRONT + 6, 0X1 }, \
      { CMD_ATTRDN     , OFFS_FRONT + 6, 0X2 }, \
-     { CMD_NXBLNKLN   , OFFS_FRONT + 6, 0X4 }, \
+     { CMD_NXPGRPH    , OFFS_FRONT + 6, 0X4 }, \
      { CMD_NXSEARCH   , OFFS_FRONT + 6, 0X8 }, \
                                                \
      { CMD_LNUP       , OFFS_FRONT + 3, 0X0 }, \
@@ -177,22 +177,33 @@ typedef struct {
       { CMD_WINDN                   , NOKEY          , 0020 }, \
       { CMD_ATTRUP                  , NOKEY          , 0004 },         \
       { CMD_ATTRDN                  , NOKEY          , 0040 },        \
+      { CMD_PRPROMPT                , NOKEY          , 0100 },        \
+      { CMD_NXPROMPT                , NOKEY          , 0200 },        \
                                                                \
-      { VAL_PASSKEY+VPK_TAB         , OFFS_FRONT +  7, 0001 }, \
-      { VAL_PASSKEY+VPK_ESCAPE      , OFFS_FRONT +  6, 0001 }, \
-      { VAL_PASSKEY+VPK_BACKSPACE   , OFFS_FRONT +  5, 0001 }, \
-      { VAL_PASSKEY+VPK_RETURN      , OFFS_FRONT +  9, 0001 }, \
+      { CMD_PRPGRPH                 , NOKEY          , 0003 },        \
+      { CMD_NXPGRPH                 , NOKEY          , 0030 },        \
+      { CMD_PRSEARCH                , NOKEY          , 0104 },        \
+      { CMD_NXSEARCH                , NOKEY          , 0240 },        \
+      { CR_PRINDENT                 , ROUTINGKEY     , 0104 },        \
+      { CR_NXINDENT                 , ROUTINGKEY     , 0240 },        \
                                                                \
-      { CMD_SPKHOME                 , OFFS_FRONT +  7, 0010 }, \
-      { CMD_MUTE                    , OFFS_FRONT +  6, 0010 }, \
-      { CMD_RESTARTSPEECH           , OFFS_FRONT +  8, 0010 }, \
-      { CMD_SAY                     , OFFS_FRONT +  5, 0010 }, \
-      { CMD_SAYALL                  , OFFS_FRONT +  9, 0010 }, \
-      { CR_DESCCHAR                 , ROUTINGKEY     , 0010 }, \
+      { CMD_LNBEG                   , OFFS_FRONT +  7, 0001 }, \
+      { CMD_TOP_LEFT                , OFFS_FRONT +  6, 0001 }, \
+      { CMD_BOT_LEFT                , OFFS_FRONT +  8, 0001 }, \
+      { CMD_FWINLT                  , OFFS_FRONT +  5, 0001 }, \
+      { CMD_FWINRT                  , OFFS_FRONT +  9, 0001 }, \
+      { CR_DESCCHAR                 , ROUTINGKEY     , 0001 }, \
+                                                               \
+      { CMD_LNEND                   , OFFS_FRONT +  7, 0010 }, \
+      { CMD_CHRLT                   , OFFS_FRONT +  6, 0010 }, \
+      { CMD_CHRRT                   , OFFS_FRONT +  8, 0010 }, \
+      { CMD_HWINLT                  , OFFS_FRONT +  5, 0010 }, \
+      { CMD_HWINRT                  , OFFS_FRONT +  9, 0010 }, \
+      { CR_SETLEFT                  , ROUTINGKEY     , 0010 }, \
                                                                \
       { VAL_PASSKEY+VPK_INSERT      , OFFS_FRONT +  7, 0002 }, \
-      { VAL_PASSKEY+VPK_CURSOR_LEFT , OFFS_FRONT +  6, 0002 }, \
-      { VAL_PASSKEY+VPK_CURSOR_RIGHT, OFFS_FRONT +  8, 0002 }, \
+      { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_FRONT +  6, 0002 }, \
+      { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_FRONT +  8, 0002 }, \
       { VAL_PASSKEY+VPK_CURSOR_UP   , OFFS_FRONT +  5, 0002 }, \
       { VAL_PASSKEY+VPK_CURSOR_DOWN , OFFS_FRONT +  9, 0002 }, \
       { CR_SWITCHVT                 , ROUTINGKEY     , 0002 }, \
@@ -200,16 +211,29 @@ typedef struct {
       { VAL_PASSKEY+VPK_DELETE      , OFFS_FRONT +  7, 0020 }, \
       { VAL_PASSKEY+VPK_HOME        , OFFS_FRONT +  6, 0020 }, \
       { VAL_PASSKEY+VPK_END         , OFFS_FRONT +  8, 0020 }, \
-      { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_FRONT +  5, 0020 }, \
-      { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_FRONT +  9, 0020 }, \
+      { VAL_PASSKEY+VPK_CURSOR_LEFT , OFFS_FRONT +  5, 0020 }, \
+      { VAL_PASSKEY+VPK_CURSOR_RIGHT, OFFS_FRONT +  9, 0020 }, \
       { VAL_PASSKEY+VPK_FUNCTION    , ROUTINGKEY     , 0020 }, \
                                                                \
-      { CR_ROUTE                    , ROUTINGKEY     , 0000 }, \
-      { CR_PRINDENT                 , ROUTINGKEY     , 0004 }, \
-      { CR_NXINDENT                 , ROUTINGKEY     , 0040 }, \
+      { CMD_NODOTS                  , OFFS_FRONT +  7, 0004 }, \
+      { VAL_PASSKEY+VPK_ESCAPE      , OFFS_FRONT +  6, 0004 }, \
+      { VAL_PASSKEY+VPK_TAB         , OFFS_FRONT +  8, 0004 }, \
+      { VAL_PASSKEY+VPK_BACKSPACE   , OFFS_FRONT +  5, 0004 }, \
+      { VAL_PASSKEY+VPK_RETURN      , OFFS_FRONT +  9, 0004 }, \
+                                                               \
+      { CMD_SPKHOME                 , OFFS_FRONT +  7, 0040 }, \
+      { CMD_MUTE                    , OFFS_FRONT +  6, 0040 }, \
+      { CMD_RESTARTSPEECH           , OFFS_FRONT +  8, 0040 }, \
+      { CMD_SAY                     , OFFS_FRONT +  5, 0040 }, \
+      { CMD_SAYALL                  , OFFS_FRONT +  9, 0040 }, \
+                                                               \
       { CR_CUTBEGIN                 , ROUTINGKEY     , 0100 }, \
+      { CR_CUTAPPEND                , ROUTINGKEY     , 0004 }, \
+      { CR_CUTLINE                  , ROUTINGKEY     , 0040 }, \
       { CR_CUTRECT                  , ROUTINGKEY     , 0200 }, \
-      { CMD_PASTE                   , NOKEY          , 0300 }
+      { CMD_PASTE                   , NOKEY          , 0300 }, \
+                                                               \
+      { CR_ROUTE                    , ROUTINGKEY     , 0000 }
 	
 
 /* modifiers for switches */

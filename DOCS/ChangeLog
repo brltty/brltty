@@ -142,6 +142,11 @@ Note: this file is in reversed chronological order (bottom to top).
    Implement CR_CUTAPPEND (start cut area without clearing cut buffer). (dm)
    Implement CR_SETMARK (remember window position). (dm)
    Implement CR_GOTOMARK (return to remembered window position). (dm)
+   Implement CMD_{PR,NX}PROMPT (find previous prompt). (dm)
+   Remove special commands for displays without routing keys: (dm,sd)
+      Use CR_ROUTE instead of CMD_CSRJMP.
+      Use CR_CUTBEGIN instead of CMD_CUT_BEG.
+      Use CR_CUTRECT instead of CMD_CUT_END.
    Add reverse text translation table for input from braille display. (dm,sd)
    Get font data from kernel rather than guess at it by probing. (sd)
    Handle font change and screen size change. (sd)

@@ -255,6 +255,17 @@ TuneDefinition tune_done = {
    "Done", 0, tones_done
 };
 
+static ToneDefinition tones_mark_set[] = {
+   TONE_NOTE( 20,  83),
+   TONE_NOTE( 15,  81),
+   TONE_NOTE( 15,  79),
+   TONE_NOTE( 25,  84),
+   TONE_STOP()
+};
+TuneDefinition tune_mark_set = {
+   NULL, 0, tones_mark_set
+};
+
 double noteFrequencies[] = {
    /*   0 -5C  */     8.176,
    /*   1 -5C# */     8.662,
@@ -440,11 +451,7 @@ void playTune (TuneDefinition *tune) {
       if (tune->tactile) {
 	 unsigned char dots = tune->tactile & 0XFF;
 	 unsigned char duration = tune->tactile >> 8;
-	 memset(statcells, dots, sizeof(statcells));
-	 memset(brl.disp, dots, brl.x*brl.y);
-	 braille->writeStatus(statcells);
-	 braille->writeWindow(&brl);
-	 shortdelay(duration);
+         showDotPattern(dots, duration);
       }
       if (tune->message) {
 	 message(tune->message, 0);

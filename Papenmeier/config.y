@@ -34,6 +34,14 @@
 #include <assert.h>
 
 #include "../brl.h"
+typedef enum {
+  CMD_INPUTMODE = DriverCommandCount /* toggle input mode */,
+  CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
+} InternalDriverCommands;
+typedef enum {
+  STAT_input = StatusCellCount /* input mode */,
+  InternalStatusCellCount
+} InternalStatusCell;
 #include "brl-cfg.h"
 
 static int yylex(void);

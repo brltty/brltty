@@ -16,19 +16,22 @@ CR81 is not used. "last cell" always refers to cell 80.
 Movement:
   One line up/down: Rup / Rdn or bar1 / bar234
   Goto cursor: cncv
-  Goto cursor previous position: cncv+Lup
+  Goto previous reading position (before cursor tracking moved us): cncv+Lup
   Cursor tracking (link/unlink): cnvx (toggle)
   Goto top left of screen: but1+bar1
   Goto bottom left of screen: but1+bar2
   Previous/next non-identical line: but2+bar1 / but2+bar234
   Previous/next line with different attributes: but2+Rup / but2+Rdn
   One character left/right: CR1+CR2 / CR79+CR80
+  Move right # chars: CR# +Rup
   Left/right one window (useful if line longer than 80chars): but3 / but4
   Beginning/end of line: Lup+but3 / Lup+but4
   Half-window left/right: CR1+CR3 / CR78+CR80
   Several lines up/down: but1+but2+bar1 / but1+but2+bar2
   Prev/next paragraph (line after blank lines): CR1+CR2 + Rup / CR1+CR2 + Rdn
   Prev/next line indented no more than #: CR# + Rup / CR# + Rdn
+  Remember current position as mark #: CR# + cnvx
+  Goto mark #: CR# + cncv
 
 Simulation of keyboard arrow keys:
   Up/dn / left/right arrow: Lup/Ldn / but1/but2
@@ -47,13 +50,15 @@ Cursor routing:
   Route cursor to cell #: CR#
 
 Cut & paste:
-  Mark that region to cut starts at cell #: CR#+CR79+CR80
-  Mark that end (bottom right) of region is at cell #: CR1+CR2+CR#
+  Mark start of cut region at cell #: CR#+but3
+  Mark start of cut region for append at cell #: CR#+CR(#+1) + but3
+  Mark end (bottom right) of rectangular cut region at cell #: but2+CR#
+  Mark end of linear cut region at cell #: but2 + CR#+CR(#-1)
   Mark whole region (on one display) starting at cell #(n1) and ending at
     cell #(n2): CR#(n1) + CR#(n1+2) + CR#(n2)
     For example, a region from cell 10 to cell 20: CR10+CR12+CR20
   Paste cut region: CR2+CR3
-  Search for same text as in content buffer: CR1+CR2+But3 / CR1+CR2+But4
+  Search for same text as in content buffer: CR1+CR2+Rup / CR1+CR2+Rdn
 
 Speech:
   Speak line: bar2+Rdn

@@ -1,0 +1,23 @@
+BRLTTY Help for Handy Tech Braille Star Displays
+
+From left to right, the front keys are: D7 D3 D2 D1 LS RS D4 D5 D6 D8
+The Dn keys are the eight braille dot keys. LS and RS are the left and
+right space bars. Pressing any combination of the dot keys enters the
+corresponding character, and pressing either space bar enters a space.
+
+There are two navigation keys, one at the left and one at the right
+end of the braille line.  Each has a top, middle, and bottom position.
+These six positions are called: LT LM LB  RT RM RB
+LT or RT  Go up one line.
+LB or RB  Go down one line.
+LM        Go left one window.
+RM        Go right one window.
+LM RM     Go to the cursor.
+RM LT     Go to the top-left corner.
+RM LB     Go to the bottom-left corner.
+LM RT     Go up to the top line.
+LM RB     Go down to the bottom line.
+LT RT     Go up to the nearest line with different content.
+LT RB     Go down to the nearest line with different content.
+LB RT     Go up to the nearest line with different highlighting.
+LB RB     Go down to the nearest line with different highlighting.

@@ -192,8 +192,8 @@ main (int argc, char *argv[]) {
             SIMPLE(CMD_NXDIFLN, "down to different line");
             SIMPLE(CMD_ATTRUP, "up to different attributes");
             SIMPLE(CMD_ATTRDN, "down to different attributes");
-            SIMPLE(CMD_PRBLNKLN, "up to previous paragraph");
-            SIMPLE(CMD_NXBLNKLN, "down to next paragraph");
+            SIMPLE(CMD_PRPGRPH, "up to previous paragraph");
+            SIMPLE(CMD_NXPGRPH, "down to next paragraph");
             SIMPLE(CMD_PRSEARCH, "search up");
             SIMPLE(CMD_NXSEARCH, "search down");
             SIMPLE(CMD_TOP, "up to top");
@@ -210,9 +210,6 @@ main (int argc, char *argv[]) {
             SIMPLE(CMD_FWINRTSKIP, "right to non-blank window");
             SIMPLE(CMD_LNBEG, "left to start");
             SIMPLE(CMD_LNEND, "right to end");
-            SIMPLE(CMD_CSRJMP, "cursor to window");
-            SIMPLE(CMD_CUT_BEG, "start cut block");
-            SIMPLE(CMD_CUT_END, "end cut block");
             SIMPLE(CMD_HOME, "go to cursor");
             SIMPLE(CMD_BACK, "go back");
             SIMPLE(CMD_CSRJMP_VERT, "cursor to line");
@@ -251,7 +248,6 @@ main (int argc, char *argv[]) {
             SIMPLE(CMD_MENU_NEXT_ITEM, "next menu item");
             SIMPLE(CMD_MENU_PREV_SETTING, "previous menu setting");
             SIMPLE(CMD_MENU_NEXT_SETTING, "next menu setting");
-            TOGGLE(CMD_INPUTMODE, "input mode");
             default:
               argument = key & VAL_ARG_MASK;
               switch (key & VAL_BLK_MASK) {
