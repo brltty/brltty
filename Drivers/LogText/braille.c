@@ -68,11 +68,11 @@ static unsigned char currentLine;
 static unsigned char cursorRow;
 static unsigned char cursorColumn;
 
-static unsigned char inputTable[0X100] = {
+static TranslationTable inputTable = {
    #include "input.h"
 };
 
-static unsigned char outputTable[0X100] = {
+static TranslationTable outputTable = {
    #include "output.h"
 };
 

@@ -123,10 +123,10 @@ static struct termios oldtio;		/* old terminal settings */
 
 typedef struct
   {
-    char *Name;
-    int ID;
-    int Cols;
-    int NbStCells;
+    const char *Name;
+    unsigned char ID;
+    unsigned char Cols;
+    unsigned char NbStCells;
   }
 BRLPARAMS;
 
@@ -343,7 +343,7 @@ extern int SendToAlva( unsigned char *data, int len );
 
 int SendToAlva( unsigned char *data, int len )
 {
-  if( write( brl_fd, data, len ) == len ) return 1;
+  if( safe_write( brl_fd, data, len ) == len ) return 1;
   return 0;
 }
 

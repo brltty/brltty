@@ -103,7 +103,7 @@ static int cmd_T_trans[23] = {
 /* Command translation table for 'S' events (braille dot keys) */
 /* 63 customizable key-bindings! (index 0 can't be customized ..) */
 /* combinations returning 0x00 are ignored */
-int cmd_S_trans[0x40] = {
+static int cmd_S_trans[0x40] = {
 /* 0x00 */  0x00,         CMD_FWINLT,   CMD_CSRBLINK, CMD_LNBEG,   
 /* 0x04 */  CMD_LNUP,     CMD_CHRLT,    CMD_NXDIFLN,  CMD_TOP,
 /* 0x08 */  CMD_LNDN,     CMD_INFO,     0x00,         CMD_TUNES,      
@@ -126,6 +126,6 @@ int cmd_S_trans[0x40] = {
 /* Command translation table for 'R' events (cursor routing keys)*/
 /* only keys 3, 4, 5 (startindex: 0) can be customized!! others are
    ignored (hard-coded)! */
-int cmd_R_trans[MB_CR_EXTRAKEYS] = {
+static int cmd_R_trans[MB_CR_EXTRAKEYS] = {
 /* 0x00 */ 0x00, 0x00, 0x00, CMD_PREFMENU, CMD_PREFLOAD, CMD_HELP
 };
