@@ -248,11 +248,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     newSettings.c_iflag = IGNPAR | IGNBRK;
 
     while (resetSerialDevice(fileDescriptor, &newSettings, *speed)) {
-      charactersPerSecond = baud2integer(*speed) / 10;
       time_t start = time(NULL);
       int count = 0;
       unsigned char byte;
 
+      charactersPerSecond = baud2integer(*speed) / 10;
       LogPrint(LOG_DEBUG, "Trying Albatross at %d baud.", baud2integer(*speed));
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
