@@ -388,8 +388,9 @@ usbTestPath (const char *path) {
 static char *
 usbGetRoot (void) {
   char *root = NULL;
+  const char *path = MOUNTED;
   FILE *table;
-  if ((table = setmntent(MOUNTED, "r"))) {
+  if ((table = setmntent(path, "r"))) {
     struct mntent *entry;
     while ((entry = getmntent(table))) {
       if ((strcmp(entry->mnt_type, "usbdevfs") == 0) ||
@@ -401,6 +402,11 @@ usbGetRoot (void) {
       }
     }
     endmntent(table);
+    if (!root) LogPrint(LOG_WARNING, "USBFS file system not mounted.");
+  } else {
+    LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
+             "Mounted file system table open erorr: %s: %s",
+             path, strerror(errno));
   }
   return root;
 }
