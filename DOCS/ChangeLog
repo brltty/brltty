@@ -3,6 +3,9 @@ Note: this file is in reversed chronological order (bottom to top).
 
   ...
 
+  - cursor routing has been broken -- fixed  (NP)
+  - fixed compilation warnings  (NP)
+
 01 April 2000:
   - Released BRLTTY 2.40 (beta)
   - Work from Dave Mielke <dave@mielke.cc>:

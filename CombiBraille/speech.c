@@ -62,7 +62,7 @@ static unsigned char latin2cp437[128] =
 static void
 identspk (void)
 {
-  puts ("Using the CombiBraille's in-built speech.\n");
+  printf ("Using the CombiBraille's in-built speech.\n");
 }
 
 

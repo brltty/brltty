@@ -79,20 +79,26 @@ static const unsigned char cp437_to_latin1[128] =
  * in use by looking at the resulting font index value.
  */
 
-void vcsa_Screen::set_screen_translation_table (void) {
-    unsigned short old_character;	/* 'short' to hold char and attr */
-    unsigned char new_character;
+void vcsa_Screen::set_screen_translation_table (void) 
+{
+  unsigned short old_character;	/* 'short' to hold char and attr */
+  unsigned char new_character = 0;
+  int tty_fd;
 
+  if ((tty_fd = ::open (CONSOLE, O_WRONLY)) == -1) {
+    LogAndStderr(LOG_WARNING,"Can't open console device '%s'for writing: %s\n",
+		 CONSOLE, strerror(errno));
+  } else {
     // Save the current cursor position.
     {
 	static const unsigned char save_cursor[] = {0X1B, '7'};
-	write(cons_fd, save_cursor, sizeof(save_cursor));
+	write(tty_fd, save_cursor, sizeof(save_cursor));
     }
 
     // Move the cursor to the top-left character.
     {
 	static const unsigned char home[] = {0X1B, '[', 'H'};
-	write(cons_fd, home, sizeof(home));
+	write(tty_fd, home, sizeof(home));
     }
 
     // Get the current character at this position.
@@ -101,7 +107,7 @@ void vcsa_Screen::set_screen_translation_table (void) {
 
     // Change it to an ISO "nobreakspace".
     new_character = 0xA0;
-    write(cons_fd, &new_character, 1);
+    write(tty_fd, &new_character, 1);
 
     // Get the new value of the character.
     lseek(fd, -2, SEEK_CUR);
@@ -114,11 +120,14 @@ void vcsa_Screen::set_screen_translation_table (void) {
     // Restore the cursor to its original position.
     {
 	static const unsigned char restore_cursor[] = {0X1B, '8'};
-	write(cons_fd, restore_cursor, sizeof(restore_cursor));
+	write(tty_fd, restore_cursor, sizeof(restore_cursor));
     }
 
-    // Determine which translation table to use when reading the screen.
-    {
+    ::close(tty_fd);
+  }
+
+  // Determine which translation table to use when reading the screen.
+  {
 	int level = LOG_INFO;
 	const char *font;
 	switch (new_character) {
@@ -137,7 +146,7 @@ void vcsa_Screen::set_screen_translation_table (void) {
 	    break;
 	}
 	LogAndStderr(level, "Screen Font: %s", font);
-    }
+  }
 }
 
 
@@ -161,7 +170,7 @@ int vcsa_Screen::open (void)
 		 VCSADEV, strerror(errno));
     return 1;
   }
-  if ((cons_fd = ::open (CONSOLE, O_RDWR)) == -1)
+  if ((cons_fd = ::open (CONSOLE, O_RDONLY)) == -1)
     {
       LogAndStderr(LOG_WARNING,"Can't open console device '%s': %s\n",
 		 CONSOLE, strerror(errno));

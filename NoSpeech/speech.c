@@ -31,7 +31,7 @@
 static void
 identspk (void)
 {
-  puts ("No speech support.\n");
+  printf ("No speech support.\n");
 }
 
 static void

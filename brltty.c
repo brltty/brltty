@@ -42,7 +42,7 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.40 (beta)"
+#define VERSION "BRLTTY 2.41 (beta)"
 #define COPYRIGHT "\
 Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\

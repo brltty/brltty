@@ -60,7 +60,7 @@ static unsigned char latin2cp437[128] =
 static void
 identspk (void)
 {
-  puts ("Using the Alva Delphi's in-built speech.\n");
+  printf ("Using the Alva Delphi's in-built speech.\n");
 }
 
 

@@ -34,7 +34,7 @@ static FILE *festival;
 static void
 identspk (void)
 {
-  puts ("Using the Festival text to speech package.\n");
+  printf ("Using the Festival text to speech package.\n");
 }
 
 
