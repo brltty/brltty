@@ -27,9 +27,9 @@
 /* Delay times, measured in milliseconds.
  * Note that I found a large error in timing - 40 is nearer 50 ms.
  */
-#define DELAY_TIME 40		/* sleep time per cycle - overall speed */
-#define KEYDEL 40		/* sleep time when awaiting a keypress */
-#define DISPDEL 10000		/* time duration to display messages */
+#define CYCLE_DELAY 40		/* default sleep time per cycle - overall speed */
+#define READ_DELAY 40		/* default sleep time when awaiting a keypress */
+#define MESSAGE_DELAY 5000	/* default time duration to display messages */
 
 
 /* Character cursor initialisation: */

@@ -308,7 +308,7 @@ scr_shm.o: scr_shm.cc scr_shm.h scr.h scrdev.h config.h
 speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
-BRLTEST_OBJECTS = brltest.o misc.o $(TUNE_OBJECTS) brl_load.o
+BRLTEST_OBJECTS = brltest.o misc.o brl_load.o
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 

@@ -154,8 +154,6 @@ static int readbrl(DriverCommandContext cmds)
 {
 	unsigned char znak;
 	int rv;
-	if (cmds == CMDS_MESSAGE)
-	  return EOF;
 	rv = read(brl_fd, &znak, 1);
 	switch (mode) {
 	case NORMAL_MODE:

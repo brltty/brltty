@@ -220,13 +220,12 @@ static void processOptions (int argc, char **argv)
 {
   int option;
 
-  const char *short_options = "+a:b:B:d:ef:hl:np:qs:S:t:v";
+  const char *short_options = "+a:b:d:ef:hl:np:qs:t:vB:C:M:R:S:";
   #ifdef no_argument
     const struct option long_options[] =
       {
         {"attributes-table"  , required_argument, NULL, 'a'},
         {"braille-driver"    , required_argument, NULL, 'b'},
-        {"braille-parameters", required_argument, NULL, 'B'},
         {"braille-device"    , required_argument, NULL, 'd'},
         {"errors"            , no_argument      , NULL, 'e'},
         {"configuration-file", required_argument, NULL, 'f'},
@@ -236,9 +235,13 @@ static void processOptions (int argc, char **argv)
         {"preferences-file"  , required_argument, NULL, 'p'},
         {"quiet"             , no_argument      , NULL, 'q'},
         {"speech-driver"     , required_argument, NULL, 's'},
-        {"speech-parameters" , required_argument, NULL, 'S'},
         {"text-table"        , required_argument, NULL, 't'},
         {"version"           , no_argument      , NULL, 'v'},
+        {"braille-parameters", required_argument, NULL, 'B'},
+        {"cycle-delay"       , required_argument, NULL, 'C'},
+        {"message-delay"     , required_argument, NULL, 'M'},
+        {"read-delay"        , required_argument, NULL, 'R'},
+        {"speech-parameters" , required_argument, NULL, 'S'},
         {NULL                , 0                , NULL, ' '}
       };
     #define get_option() getopt_long(argc, argv, short_options, long_options, NULL)
@@ -248,11 +251,10 @@ static void processOptions (int argc, char **argv)
 
   /* Parse command line using getopt(): */
   opterr = 0;
-  while ((option = get_option()) != -1)
+  while ((option = get_option()) != -1) {
     /* continue on error as much as possible, as often we are typing blind
        and won't even see the error message unless the display come up. */
-    switch (option)
-      {
+    switch (option) {
       default:
 	LogPrint(LOG_WARNING, "Unimplemented invocation option: -%c", option);
 	break;
@@ -264,9 +266,6 @@ static void processOptions (int argc, char **argv)
 	break;
       case 'b':			/* name of driver */
 	braille_libraryName = optarg;
-	break;
-      case 'B':			/* parameter to speech driver */
-	extendParameters(&opt_brailleParameters, optarg);
 	break;
       case 'd':		/* serial device path */
 	opt_brailleDevice = optarg;
@@ -326,16 +325,41 @@ static void processOptions (int argc, char **argv)
       case 's':			/* name of speech driver */
 	speech_libraryName = optarg;
 	break;
-      case 'S':			/* parameter to speech driver */
-	extendParameters(&opt_speechParameters, optarg);
-	break;
       case 't':		/* text translation table file name */
 	opt_textTable = optarg;
 	break;
       case 'v':		/* version */
 	opt_version = 1;
 	break;
+      case 'B':			/* parameter to speech driver */
+	extendParameters(&opt_brailleParameters, optarg);
+	break;
+      case 'C': {	/* cycle delay */
+	int value;
+	int minimum = 1;
+	if (validateInteger(&value, "cycle delay", optarg, &minimum, NULL))
+	  cycleDelay = value * 10;
+	break;
       }
+      case 'M': {	/* message delay */
+	int value;
+	int minimum = 1;
+	if (validateInteger(&value, "message delay", optarg, &minimum, NULL))
+	  messageDelay = value * 10;
+	break;
+      }
+      case 'R': {	/* read delay */
+	int value;
+	int minimum = 1;
+	if (validateInteger(&value, "read delay", optarg, &minimum, NULL))
+	  readDelay = value * 10;
+	break;
+      }
+      case 'S':			/* parameter to speech driver */
+	extendParameters(&opt_speechParameters, optarg);
+	break;
+    }
+  }
   #undef get_option
 
   if (opt_help)
@@ -592,7 +616,7 @@ readKey (DriverCommandContext cmds)
       int key = braille->read(cmds);
       if (key == CMD_NOOP) continue;
       if (key != EOF) return key;
-      delay(KEYDEL);
+      delay(readDelay);
    }
 }
 
@@ -810,7 +834,7 @@ updatePreferences (void)
             brl.disp[index] = texttrans[line[lineIndent+index]];
       }
       braille->write(&brl);
-      delay (DELAY_TIME);
+      delay(cycleDelay);
 
       /* Now process any user interaction */
       switch (key = readKey(CMDS_PREFS)) {
@@ -884,10 +908,16 @@ updatePreferences (void)
 	      "Routing keys are available too! "
 	      "Press PREFS again to quit.", MSG_WAITKEY |MSG_NODELAY);
 	  break;
-	case CMD_PREFLOAD:
+	case CMD_PREFLOAD: {
+	  int index;
 	  env = oldEnvironment;
+	  for (index=0; index<menuSize; ++index) {
+	    void (*changed) (void) = menu[index].changed;
+	    if (changed) changed();
+	  }
 	  message("changes discarded", 0);
 	  break;
+	}
 	case CMD_PREFSAVE:
 	  exitSave = 1;
 	  goto exitMenu;

@@ -36,7 +36,7 @@ BRAILLE_MODELS = ABT3xx, Delphi, Satellite
 SPEECH_MODELS = Delphi
 include ../driver.mk
 
-brlmain.o: brlmain.cc brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
+brlmain.o: brlmain.cc brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h ../common.h
 	$(COMPCPP) $(BRL_CFLAGS) -c brlmain.cc
 
 brl.o: brlmain.o $(ALVALIB)

@@ -1073,10 +1073,6 @@ readbrl (DriverCommandContext cmds)
   struct timeval now;
   int skip_this_cmd = 0;
 
-  /* We have no need for command arguments... */
-  if (cmds == CMDS_MESSAGE)
-    return (EOF);
-
   gettimeofday (&now, &dum_tz);
   if (elapsed_msec (&last_readbrl_time, &now) > READBRL_SKIP_TIME)
     /* if the key we get this time is the same as the one we returned at last

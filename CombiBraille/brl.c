@@ -274,7 +274,7 @@ readbrl (DriverCommandContext cmds)
   c = getbrlkey ();
   if (c == EOF)
     return EOF;
-  c = cmds != CMDS_MESSAGE ? cmdtrans[c] : CMD_NOOP;
+  c = cmdtrans[c];
   if (c == 1 || c == 2)
     {
       status = c;

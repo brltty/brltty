@@ -93,12 +93,16 @@ extern struct brltty_param initparam;	/* defaults for new brltty_param */
 extern struct brltty_env env;		/* current env parameters */
 extern brldim brl;			/* braille driver reference */
 
-extern short offr; /* Braille display can stick out by brl.x-offr from
-		      the right edge of the screen. */
 extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */
 extern short csr_offright;		/* used for sliding window */
+extern short offr; /* Braille display can stick out by brl.x-offr from
+		      the right edge of the screen. */
+
+extern int cycleDelay;
+extern int readDelay;
+extern int messageDelay;
 
 
 /*

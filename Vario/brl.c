@@ -54,7 +54,6 @@
 #include "../misc.h"
 #include "../scr.h"
 #include "../brl_driver.h"
-#include "../tunes.h"
 #include "../inskey.h"
 
 		  
@@ -448,10 +447,6 @@ static int readbrl(DriverCommandContext cmds) {
   unsigned i;
   struct timeval now;
 
-  /* We have no need for command arguments... */
-  if (cmds == CMDS_MESSAGE)
-    return (EOF);
-
   if (pending_cmd != EOF) {
     res = pending_cmd;
     lastcmd = EOF;
@@ -595,7 +590,6 @@ static int readbrl(DriverCommandContext cmds) {
       if (ck == 127) {
 	typing_mode ^= 1;
 	ck = 0;
-	if (typing_mode) playTune(&tune_detected); else playTune(&tune_braille_off);
 	return(EOF);
       }
       if (typing_mode) {

@@ -109,6 +109,7 @@ extern "C"
 #include "../scr.h"
 #include "../misc.h"
 #include "../config.h"
+#include "../common.h"
 #include "../brl_driver.h"
 }
 
@@ -555,7 +556,7 @@ static void writebrl (brldim *brl)
   }
 #endif
 
-  if (ReWrite ||  ++Timeout > (REFRESH_RATE/DELAY_TIME))
+  if (ReWrite ||  ++Timeout > (REFRESH_RATE/cycleDelay))
     {
       ReWrite = Timeout = 0;
       /* We rewrite the whole display */

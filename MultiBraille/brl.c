@@ -321,9 +321,9 @@ static int readbrl (DriverCommandContext cmds) {
 		// translate only 'T' and 'S' events
 		// I kicked argtrans[] (never ever needed) --> simply return 0x00
 		if (keystroke.block == 'T')
-			keystroke.key = (cmds != CMDS_MESSAGE) ? cmd_T_trans[keystroke.key] : CMD_NOOP;
+			keystroke.key = cmd_T_trans[keystroke.key];
 		else
-			keystroke.key = (cmds != CMDS_MESSAGE) ? cmd_S_trans[keystroke.key] : CMD_NOOP;
+			keystroke.key = cmd_S_trans[keystroke.key];
 		status = 0;
 		return keystroke.key;
 	} else { // directly process 'R' events

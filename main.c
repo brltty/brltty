@@ -41,8 +41,12 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99 (beta)";
+char VERSION[] = "BRLTTY 2.99q (beta)";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
+
+int cycleDelay = CYCLE_DELAY;
+int readDelay = READ_DELAY;
+int messageDelay = MESSAGE_DELAY;
 
 /*
  * Misc param variables
@@ -131,7 +135,7 @@ void clrbrlstat (void)
 
 static void
 terminateProgram (void) {
-  message("BRLTTY exiting.", 0);
+  message("BRLTTY exiting.", MSG_NODELAY);
   closescr();
   if (speech)
     speech->close();
@@ -1334,7 +1338,7 @@ main (int argc, char *argv[])
 	    }
 	}
 
-      delay (DELAY_TIME);
+      delay(cycleDelay);
     }
 
   terminateProgram();
@@ -1392,12 +1396,11 @@ message (unsigned char *text, short flags)
 	  braille->write(&brl);
 
 	  if (flags & MSG_WAITKEY)
-	    while (braille->read(CMDS_MESSAGE) == EOF)
-	      delay(KEYDEL);
+	    while (braille->read(CMDS_MESSAGE) == EOF) delay(readDelay);
 	  else if (length || !(flags & MSG_NODELAY)) {
 	    int i;
-	    for (i=0; i<DISPDEL; i+=KEYDEL) {
-	      delay(KEYDEL);
+	    for (i=0; i<messageDelay; i+=readDelay) {
+	      delay(readDelay);
 	      if (braille->read(CMDS_MESSAGE) != EOF) break;
 	    }
 	  }
