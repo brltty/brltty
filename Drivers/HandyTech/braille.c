@@ -168,8 +168,8 @@ typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) ();
   int (*awaitInput) (int milliseconds);
-  int (*readPacket) (unsigned char *buffer, int length);
-  int (*writePacket) (const unsigned char *buffer, int length, int *delay);
+  int (*readBytes) (unsigned char *buffer, int length);
+  int (*writeBytes) (const unsigned char *buffer, int length, int *delay);
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
@@ -178,7 +178,7 @@ static const speed_t baud = B19200;
 static void
 writeStopSequence (void) {
   if (model->stopLength) {
-    io->writePacket(model->stopAddress, model->stopLength, NULL);
+    io->writeBytes(model->stopAddress, model->stopLength, NULL);
   }
 }
 
@@ -219,14 +219,14 @@ awaitSerialInput (int milliseconds) {
 }
 
 static int
-readSerialPacket (unsigned char *buffer, int count) {
+readSerialBytes (unsigned char *buffer, int count) {
   int offset = 0;
   readChunk(serialDevice, buffer, &offset, count, 100);
   return offset;
 }
 
 static int
-writeSerialPacket (const unsigned char *buffer, int length, int *delay) {
+writeSerialBytes (const unsigned char *buffer, int length, int *delay) {
   int count = safe_write(serialDevice, buffer, length);
   if (delay) *delay += length * 1000 / serialCharactersPerSecond;
   if (count != length) {
@@ -250,8 +250,8 @@ closeSerialPort (void) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort, awaitSerialInput,
-  readSerialPacket, writeSerialPacket
+  openSerialPort, closeSerialPort,
+  awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
 #ifdef ENABLE_USB
@@ -320,7 +320,7 @@ awaitUsbInput (int milliseconds) {
 }
 
 static int
-readUsbPacket (unsigned char *buffer, int length) {
+readUsbBytes (unsigned char *buffer, int length) {
   int count = usbReapInput(usbDevice, buffer, length, 0);
   if (count == -1) {
     if (errno == EAGAIN)
@@ -330,7 +330,7 @@ readUsbPacket (unsigned char *buffer, int length) {
 }
 
 static int
-writeUsbPacket (const unsigned char *buffer, int length, int *delay) {
+writeUsbBytes (const unsigned char *buffer, int length, int *delay) {
   return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
 }
 
@@ -345,8 +345,8 @@ closeUsbPort (void) {
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort, awaitUsbInput,
-  readUsbPacket, writeUsbPacket
+  openUsbPort, closeUsbPort,
+  awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 #endif /* ENABLE_USB */
 
@@ -439,7 +439,7 @@ setState (BrailleDisplayState state) {
 
 static int
 brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, int count) {
-  return io->readPacket(bytes, count);
+  return io->readBytes(bytes, count);
 }
 
 static int
@@ -455,7 +455,7 @@ readByte (BrailleDisplay *brl, unsigned char *byte) {
 static int
 brl_writePacket (BrailleDisplay *brl, const unsigned char *data, int length) {
   // LogBytes("Write", data, length);
-  return io->writePacket(data, length, &brl->writeDelay);
+  return io->writeBytes(data, length, &brl->writeDelay);
 }
 
 static int
