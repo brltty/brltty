@@ -38,6 +38,9 @@ extern "C" {
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
 #endif /* MAX */
 
+#define HIGH_NIBBLE(byte) ((byte) & 0XF0)
+#define LOW_NIBBLE(byte) ((byte) & 0XF)
+
 #define getSameEndian(from) (from)
 #define getOtherEndian(from) ((((from) & 0XFF) << 8) | (((from) >> 8) & 0XFF))
 #define putSameEndian(to, from) (*(to) = getSameEndian((from)))

@@ -119,8 +119,45 @@ read_config (const char *directory, const char *name) {
  */
 static TranslationTable outputTable;
 
+static unsigned int debug_keys = 0;
+static unsigned int debug_reads = 0;
+static unsigned int debug_writes = 0;
+
+/*--- Command Utilities ---*/
+
+static const TerminalDefinition *the_terminal = NULL;
+static unsigned int pressed_modifiers = 0;
+static unsigned int saved_modifiers = 0;
+static int input_mode = 0;
+ 
+static void
+resetState (void) {
+  pressed_modifiers = 0;
+  saved_modifiers = 0;
+  input_mode = 0;
+}
+
+static int
+compareCommands (const void *item1, const void *item2) {
+  const CommandDefinition *cmd1 = item1;
+  const CommandDefinition *cmd2 = item2;
+  if (cmd1->key < cmd2->key) return -1;
+  if (cmd1->key > cmd2->key) return 1;
+  if (cmd1->modifiers < cmd2->modifiers) return -1;
+  if (cmd1->modifiers > cmd2->modifiers) return 1;
+  return 0;
+}
+
+static void
+sortCommands (void) {
+  qsort(the_terminal->commands, the_terminal->commandCount, sizeof(*the_terminal->commands), compareCommands);
+}
+
+/*--- Input/Output Operations ---*/
+
 typedef struct {
   const speed_t *baudRates;
+  unsigned char identifyCount;
   unsigned char tryProtocol1;
   unsigned char tryProtocol2;
   int (*openPort) (char **parameters, const char *device);
@@ -134,6 +171,8 @@ typedef struct {
 static const InputOutputOperations *io;
 static const speed_t *baudRate;
 static int charactersPerSecond;
+
+/*--- Serial Operations ---*/
 
 #include "Programs/serial.h"
 static int serialDevice = -1;
@@ -195,10 +234,12 @@ writeSerialBytes (const void *buffer, int length) {
 }
 
 static const InputOutputOperations serialOperations = {
-  serialBaudRates, 1, 1,
+  serialBaudRates, 1, 1, 1,
   openSerialPort, closeSerialPort, flushSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
+
+/*--- USB Operations ---*/
 
 #ifdef ENABLE_USB
 #include "Programs/usb.h"
@@ -289,22 +330,13 @@ writeUsbBytes (const void *buffer, int length) {
 }
 
 static const InputOutputOperations usbOperations = {
-  usbBaudRates, 0, 1,
+  usbBaudRates, 5, 0, 1,
   openUsbPort, closeUsbPort, flushUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 #endif /* ENABLE_USB */
 
-static unsigned int debug_keys = 0;
-static unsigned int debug_reads = 0;
-static unsigned int debug_writes = 0;
-
-static unsigned char currentStatus[PMSC];
-static unsigned char currentLine[BRLCOLSMAX];
-
-/* ------------------------------------------------------------ */
-
-static const TerminalDefinition *the_terminal = NULL;
+/*--- Protocol Operation Utilities ---*/
 
 static int rcvStatusFirst;
 static int rcvStatusLast;
@@ -320,52 +352,6 @@ static int rcvSwitchLast;
 static unsigned char xmtStatusOffset;
 static unsigned char xmtTextOffset;
 
-static unsigned int pressed_modifiers = 0;
-static unsigned int saved_modifiers = 0;
-static int input_mode = 0;
- 
-static int
-compareCommands (const void *item1, const void *item2) {
-  const CommandDefinition *cmd1 = item1;
-  const CommandDefinition *cmd2 = item2;
-  if (cmd1->key < cmd2->key) return -1;
-  if (cmd1->key > cmd2->key) return 1;
-  if (cmd1->modifiers < cmd2->modifiers) return -1;
-  if (cmd1->modifiers > cmd2->modifiers) return 1;
-  return 0;
-}
-
-static void
-sortCommands (void) {
-  qsort(the_terminal->commands, the_terminal->commandCount, sizeof(*the_terminal->commands), compareCommands);
-}
-
-static int
-findCommand (int *command, int key, int modifiers) {
-  int first = 0;
-  int last = the_terminal->commandCount - 1;
-  CommandDefinition ref;
-  ref.key = key;
-  ref.modifiers = modifiers;
-  while (first <= last) {
-    int current = (first + last) / 2;
-    CommandDefinition *cmd = &the_terminal->commands[current];
-    int relation = compareCommands(cmd, &ref);
-
-    if (!relation) {
-      *command = cmd->code;
-      return 1;
-    }
-
-    if (relation > 0) {
-      last = current - 1;
-    } else {
-      first = current + 1;
-    }
-  }
-  return 0;
-}
-
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   if (debug_writes) LogBytes("Write", bytes, count);
@@ -378,19 +364,80 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   }
 }
 
-static void
-resetState (void) {
-  pressed_modifiers = 0;
-  saved_modifiers = 0;
-  input_mode = 0;
+static int
+interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) {
+  int tn;
+  LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", 
+           id, major, minor);
+  for (tn=0; tn<pmTerminalCount; tn++) {
+    if (pmTerminals[tn].identifier == id) {
+      the_terminal = &pmTerminals[tn];
+      LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
+               the_terminal->name,
+               the_terminal->columns, the_terminal->rows,
+               the_terminal->helpFile);
+      brl->x = the_terminal->columns;
+      brl->y = the_terminal->rows;
+
+      /* TODO: ?? HACK */
+      BRLSYMBOL.helpFile = the_terminal->helpFile;
+
+      /* routing key codes: 0X300 -> status -> cursor */
+      rcvStatusFirst = RCV_KEYROUTE;
+      rcvStatusLast  = rcvStatusFirst + 3 * (the_terminal->statusCount - 1);
+      rcvCursorFirst = rcvStatusLast + 3;
+      rcvCursorLast  = rcvCursorFirst + 3 * (the_terminal->columns - 1);
+      LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
+               rcvStatusFirst, rcvStatusLast,
+               rcvCursorFirst, rcvCursorLast);
+
+      /* function key codes: 0X000 -> front -> bar -> switches */
+      rcvFrontFirst = RCV_KEYFUNC + 3;
+      rcvFrontLast  = rcvFrontFirst + 3 * (the_terminal->frontKeys - 1);
+      rcvBarFirst = rcvFrontLast + 3;
+      rcvBarLast  = rcvBarFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+      rcvSwitchFirst = rcvBarLast + 3;
+      rcvSwitchLast  = rcvSwitchFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+      LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
+               rcvFrontFirst, rcvFrontLast,
+               rcvBarFirst, rcvBarLast,
+               rcvSwitchFirst, rcvSwitchLast);
+
+      /* cell offsets: 0X00 -> status -> text */
+      xmtStatusOffset = 0;
+      xmtTextOffset = xmtStatusOffset + the_terminal->statusCount;
+      LogPrint(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
+               xmtStatusOffset, xmtTextOffset);
+
+      sortCommands();
+      return 1;
+    }
+  }
+  LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", id);
+  return 0;
 }
 
+/*--- Protocol 1 Operations ---*/
+
 static void
-resetTerminal (BrailleDisplay *brl) {
+resetTerminal1 (BrailleDisplay *brl) {
   static const unsigned char sequence[] = {cSTX, 0X01, cETX};
   LogPrint(LOG_WARNING, "Resetting terminal.");
   io->flushPort(brl);
   if (writeBytes(brl, sequence, sizeof(sequence))) resetState();
+}
+
+#define RBF_ETX 1
+#define RBF_RESET 2
+static int
+readBytes1 (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, int flags) {
+  if (io->readBytes(buffer, &offset, count, 1000)) {
+    if (!(flags & RBF_ETX)) return 1;
+    if (*(buffer+offset-1) == cETX) return 1;
+    LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
+  }
+  if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
+  return 0;
 }
 
 static int
@@ -427,8 +474,46 @@ writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned cha
   return 1;
 }
 
-#define HIGH_NIBBLE(byte) ((byte) & 0XF0)
-#define LOW_NIBBLE(byte) ((byte) & 0XF)
+static int
+interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
+  return interpretIdentity(brl, identity[2], 
+                           identity[3], ((identity[4] * 10) + identity[5]));
+}
+
+static int
+identifyTerminal1 (BrailleDisplay *brl) {
+  static const unsigned char badPacket[] = { 
+    cSTX,
+    cIdSend,
+    0, 0,			/* position */
+    0, 0,			/* wrong number of bytes */
+    cETX
+  };
+
+  io->flushPort(brl);
+  if (writeBytes(brl, badPacket, sizeof(badPacket))) {
+    if (io->awaitInput(1000)) {
+      unsigned char identity[IDENTITY_LENGTH];			/* answer has 10 chars */
+      if (readBytes1(brl, identity, 0, 1, 0)) {
+        if (identity[0] == cSTX) {
+          if (readBytes1(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
+            if (identity[1] == cIdIdentify) {
+              if (interpretIdentity1(brl, identity)) return 1;
+            } else {
+              LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
+            }
+          } else {
+            LogPrint(LOG_WARNING, "Malformed identification packet.");
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+/*--- Protocol 2 Operations ---*/
+
 #define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
@@ -464,7 +549,7 @@ readPacket2 (BrailleDisplay *brl, char *packet, int size) {
           } else if (offset > count) {
             LogBytes("Long Packet", buffer, offset);
           } else {
-            LogBytes("Input Packet", buffer, offset);
+            if (debug_reads) LogBytes("Input Packet", buffer, offset);
             memcpy(packet, buffer, offset);
             LogBytes("Input Packet", buffer, offset);
             return 1;
@@ -528,6 +613,70 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
   return writeBytes(brl, buffer, byte-buffer);
 }
 
+static int
+interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
+  return interpretIdentity(brl,
+                           PM2_MAKE_BYTE(identity[4], identity[5]),
+                           LOW_NIBBLE(identity[6]),
+                           PM2_MAKE_INTEGER2(identity[7], identity[8]));
+}
+
+static int
+identifyTerminal2 (BrailleDisplay *brl) {
+  int tries = 0;
+  io->flushPort(brl);
+  while (writePacket2(brl, 2, 0, NULL)) {
+    while (io->awaitInput(100)) {
+      unsigned char identity[20];			/* answer has 10 chars */
+      if (readPacket2(brl, identity, sizeof(identity))) {
+        if (identity[1] == 0X4A) {
+          if (interpretIdentity2(brl, identity)) return 1;
+        }
+      }
+    }
+    if (errno != EAGAIN) break;
+
+    if (++tries == io->identifyCount) {
+      LogPrint(LOG_WARNING, "No response from display.");
+      break;
+    }
+  }
+  return 0;
+}
+
+/*---  ---*/
+
+static unsigned char currentStatus[PMSC];
+static unsigned char currentLine[BRLCOLSMAX];
+
+/* ------------------------------------------------------------ */
+
+static int
+findCommand (int *command, int key, int modifiers) {
+  int first = 0;
+  int last = the_terminal->commandCount - 1;
+  CommandDefinition ref;
+  ref.key = key;
+  ref.modifiers = modifiers;
+  while (first <= last) {
+    int current = (first + last) / 2;
+    CommandDefinition *cmd = &the_terminal->commands[current];
+    int relation = compareCommands(cmd, &ref);
+
+    if (!relation) {
+      *command = cmd->code;
+      return 1;
+    }
+
+    if (relation > 0) {
+      last = current - 1;
+    } else {
+      first = current + 1;
+    }
+  }
+  return 0;
+}
+
 static void
 updateData (BrailleDisplay *brl, unsigned char xmtOffset, int size, const unsigned char *data, unsigned char *buffer) {
   if (memcmp(buffer, data, size) != 0) {
@@ -589,141 +738,6 @@ restartTerminal (BrailleDisplay *brl) {
 }
 
 /* ------------------------------------------------------------ */
-
-#define RBF_ETX 1
-#define RBF_RESET 2
-static int
-readBytes (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, int flags) {
-  if (io->readBytes(buffer, &offset, count, 1000)) {
-    if (!(flags & RBF_ETX)) return 1;
-    if (*(buffer+offset-1) == cETX) return 1;
-    LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
-  }
-  if ((offset > 0) && (flags & RBF_RESET)) resetTerminal(brl);
-  return 0;
-}
-
-static int
-interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) {
-  int tn;
-  LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", 
-           id, major, minor);
-  for (tn=0; tn<pmTerminalCount; tn++) {
-    if (pmTerminals[tn].identifier == id) {
-      the_terminal = &pmTerminals[tn];
-      LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
-               the_terminal->name,
-               the_terminal->columns, the_terminal->rows,
-               the_terminal->helpFile);
-      brl->x = the_terminal->columns;
-      brl->y = the_terminal->rows;
-
-      /* TODO: ?? HACK */
-      BRLSYMBOL.helpFile = the_terminal->helpFile;
-
-      /* routing key codes: 0X300 -> status -> cursor */
-      rcvStatusFirst = RCV_KEYROUTE;
-      rcvStatusLast  = rcvStatusFirst + 3 * (the_terminal->statusCount - 1);
-      rcvCursorFirst = rcvStatusLast + 3;
-      rcvCursorLast  = rcvCursorFirst + 3 * (the_terminal->columns - 1);
-      LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
-               rcvStatusFirst, rcvStatusLast,
-               rcvCursorFirst, rcvCursorLast);
-
-      /* function key codes: 0X000 -> front -> bar -> switches */
-      rcvFrontFirst = RCV_KEYFUNC + 3;
-      rcvFrontLast  = rcvFrontFirst + 3 * (the_terminal->frontKeys - 1);
-      rcvBarFirst = rcvFrontLast + 3;
-      rcvBarLast  = rcvBarFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
-      rcvSwitchFirst = rcvBarLast + 3;
-      rcvSwitchLast  = rcvSwitchFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
-      LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
-               rcvFrontFirst, rcvFrontLast,
-               rcvBarFirst, rcvBarLast,
-               rcvSwitchFirst, rcvSwitchLast);
-
-      /* cell offsets: 0X00 -> status -> text */
-      xmtStatusOffset = 0;
-      xmtTextOffset = xmtStatusOffset + the_terminal->statusCount;
-      LogPrint(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
-               xmtStatusOffset, xmtTextOffset);
-
-      sortCommands();
-      return 1;
-    }
-  }
-  LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", id);
-  return 0;
-}
-
-static int
-interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
-  return interpretIdentity(brl, identity[2], 
-                           identity[3], ((identity[4] * 10) + identity[5]));
-}
-
-static int
-interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
-  return interpretIdentity(brl,
-                           PM2_MAKE_BYTE(identity[4], identity[5]),
-                           LOW_NIBBLE(identity[6]),
-                           PM2_MAKE_INTEGER2(identity[7], identity[8]));
-}
-
-static int
-identifyTerminal1 (BrailleDisplay *brl) {
-  static const unsigned char badPacket[] = { 
-    cSTX,
-    cIdSend,
-    0, 0,			/* position */
-    0, 0,			/* wrong number of bytes */
-    cETX
-  };
-
-  io->flushPort(brl);
-  if (writeBytes(brl, badPacket, sizeof(badPacket))) {
-    if (io->awaitInput(1000)) {
-      unsigned char identity[IDENTITY_LENGTH];			/* answer has 10 chars */
-      if (readBytes(brl, identity, 0, 1, 0)) {
-        if (identity[0] == cSTX) {
-          if (readBytes(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
-            if (identity[1] == cIdIdentify) {
-              if (interpretIdentity1(brl, identity)) return 1;
-            } else {
-              LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
-            }
-          } else {
-            LogPrint(LOG_WARNING, "Malformed identification packet.");
-          }
-        }
-      }
-    }
-  }
-  return 0;
-}
-
-static int
-identifyTerminal2 (BrailleDisplay *brl) {
-  int tries = 0;
-  io->flushPort(brl);
-  while (writePacket2(brl, 2, 0, NULL)) {
-    while (io->awaitInput(100)) {
-      unsigned char identity[20];			/* answer has 10 chars */
-      if (readPacket2(brl, identity, sizeof(identity))) {
-        if (identity[1] == 0X4A) {
-          if (interpretIdentity2(brl, identity)) return 1;
-        }
-      }
-    }
-    if (errno != EAGAIN) break;
-
-    if (++tries == 5) {
-      LogPrint(LOG_WARNING, "No response from display.");
-      break;
-    }
-  }
-  return 0;
-}
 
 static int
 identifyTerminal (BrailleDisplay *brl) {
@@ -993,7 +1007,7 @@ handleCode (int code, int press, int time) {
 
 /* ------------------------------------------------------------ */
 
-#define READ(offset,count,flags) { if (!readBytes(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
+#define READ(offset,count,flags) { if (!readBytes1(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
 static int 
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   while (1) {
@@ -1033,7 +1047,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         length = (buf[4] << 8) | buf[5];	/* packet size */
         if (length != 10) {
           LogPrint(LOG_WARNING, "Unexpected input packet length: %d", length);
-          resetTerminal(brl);
+          resetTerminal1(brl);
           return CMD_ERR;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
