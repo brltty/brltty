@@ -385,8 +385,8 @@ BRLTTY_ARG_DISABLE(
    [table-selection],
    [text/attribute/contraction table selection in preferences menu], [dnl
    AC_DEFINE([ENABLE_TABLE_SELECTION])
-   translation_table_objects='tbl_load.$O'
 ])
+translation_table_objects='tbl_load.$O'
 AC_SUBST([translation_table_objects])
 
 BRLTTY_ARG_DISABLE(
