@@ -33,6 +33,7 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 
 #include "Programs/misc.h"
 #include "Programs/brl.h"
@@ -179,7 +180,7 @@ acceptConnection (
 static int
 requestConnection (
   int (*getSocket) (void),
-  struct sockaddr *remoteAddress, socklen_t remoteSize
+  const struct sockaddr *remoteAddress, socklen_t remoteSize
 ) {
   int clientSocket;
 
@@ -199,7 +200,7 @@ requestConnection (
 
       return clientSocket;
     } else {
-      LogPrint(LOG_DEBUG, "connect error: %s", strerror(errno));
+      LogPrint(LOG_WARNING, "connect error: %s", strerror(errno));
     }
 
     close(clientSocket);
@@ -222,15 +223,25 @@ setReuseAddress (int socket) {
 }
 
 static int
-getUnixSocket (void) {
-  return socket(PF_UNIX, SOCK_STREAM, 0);
-}
+setUnixAddress (const char *string, struct sockaddr_un *address) {
+  int ok = 1;
 
-static void
-setUnixAddress (struct sockaddr_un *address, const char *path) {
   memset(address, 0, sizeof(*address));
   address->sun_family = AF_UNIX;
-  strncpy(address->sun_path, path, sizeof(address->sun_path)-1);
+
+  if (strlen(string) < sizeof(address->sun_path)) {
+    strncpy(address->sun_path, string, sizeof(address->sun_path)-1);
+  } else {
+    ok = 0;
+    LogPrint(LOG_WARNING, "Unix socket path too long: %s", string);
+  }
+
+  return ok;
+}
+
+static int
+getUnixSocket (void) {
+  return socket(PF_UNIX, SOCK_STREAM, 0);
 }
 
 static void
@@ -242,37 +253,79 @@ unbindUnixAddress (const struct sockaddr *address) {
 }
 
 static int
-acceptUnixConnection (const char *path) {
-  struct sockaddr_un localAddress;
+acceptUnixConnection (const struct sockaddr_un *localAddress) {
   struct sockaddr_un remoteAddress;
   socklen_t remoteSize = sizeof(remoteAddress);
 
-  setUnixAddress(&localAddress, path);
   return acceptConnection(getUnixSocket, NULL, unbindUnixAddress,
-                          (struct sockaddr *)&localAddress, sizeof(localAddress),
+                          (const struct sockaddr *)localAddress, sizeof(*localAddress),
                           (struct sockaddr *)&remoteAddress, &remoteSize);
 }
 
 static int
-requestUnixConnection (const char *path) {
-  struct sockaddr_un remoteAddress;
-
-  setUnixAddress(&remoteAddress, path);
+requestUnixConnection (const struct sockaddr_un *remoteAddress) {
   return requestConnection(getUnixSocket,
-                           (struct sockaddr *)&remoteAddress, sizeof(remoteAddress));
+                           (const struct sockaddr *)remoteAddress, sizeof(*remoteAddress));
+}
+
+static int
+setInetAddress (const char *string, struct sockaddr_in *address) {
+  int ok = 1;
+  char *hostName = strdupWrapper(string);
+  char *portNumber = strchr(hostName, ':');
+
+  if (portNumber) {
+    *portNumber++ = 0;
+  } else {
+    portNumber = "";
+  }
+
+  memset(address, 0, sizeof(*address));
+  address->sin_family = AF_INET;
+
+  if (*hostName) {
+    const struct hostent *host = gethostbyname(hostName);
+    if (host && (host->h_addrtype == AF_INET) && (host->h_length == sizeof(address->sin_addr))) {
+      memcpy(&address->sin_addr, host->h_addr, sizeof(address->sin_addr));
+    } else {
+      ok = 0;
+      LogPrint(LOG_WARNING, "Unknown host name: %s", hostName);
+    }
+    endhostent();
+  } else {
+    address->sin_addr.s_addr = INADDR_ANY;
+  }
+
+  if (*portNumber) {
+    int port;
+    if (isInteger(&port, portNumber)) {
+      if ((port > 0) && (port <= 0XFFFF)) {
+        address->sin_port = htons(port);
+      } else {
+        ok = 0;
+        LogPrint(LOG_WARNING, "Invalid port number: %s", portNumber);
+      }
+    } else {
+      const struct servent *service = getservbyname(portNumber, "tcp");
+      if (service) {
+        address->sin_port = service->s_port;
+      } else {
+        ok = 0;
+        LogPrint(LOG_WARNING, "Unknown service: %s", portNumber);
+      }
+      endservent();
+    }
+  } else {
+    address->sin_port = htons(VR_DEFAULT_PORT);
+  }
+
+  free(hostName);
+  return ok;
 }
 
 static int
 getInetSocket (void) {
   return socket(PF_INET, SOCK_STREAM, 0);
-}
-
-static void
-setInetAddress (struct sockaddr_in *address, unsigned short port, unsigned long host) {
-  memset(address, 0, sizeof(*address));
-  address->sin_family = AF_INET;
-  address->sin_addr.s_addr = host;
-  address->sin_port = htons(port);
 }
 
 static int
@@ -283,24 +336,19 @@ prepareInetQueue (int socket) {
 }
 
 static int
-acceptInetConnection (unsigned short port, unsigned long host) {
-  struct sockaddr_in localAddress;
+acceptInetConnection (const struct sockaddr_in *localAddress) {
   struct sockaddr_in remoteAddress;
   socklen_t remoteSize = sizeof(remoteAddress);
 
-  setInetAddress(&localAddress, port, host);
   return acceptConnection(getInetSocket, prepareInetQueue, NULL,
-                          (struct sockaddr *)&localAddress, sizeof(localAddress),
+                          (const struct sockaddr *)localAddress, sizeof(*localAddress),
                           (struct sockaddr *)&remoteAddress, &remoteSize);
 }
 
 static int
-requestInetConnection (unsigned short port, unsigned long host) {
-  struct sockaddr_in remoteAddress;
-
-  setInetAddress(&remoteAddress, port, host);
+requestInetConnection (const struct sockaddr_in *remoteAddress) {
   return requestConnection(getInetSocket,
-                           (struct sockaddr *)&remoteAddress, sizeof(remoteAddress));
+                           (const struct sockaddr *)remoteAddress, sizeof(*remoteAddress));
 }
 
 static char *
@@ -652,38 +700,36 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   {
     typedef struct {
-      int (*getUnixConnection) (const char *path);
-      int (*getInetConnection) (unsigned short port, unsigned long host);
+      int (*getUnixConnection) (const struct sockaddr_un *address);
+      int (*getInetConnection) (const struct sockaddr_in *address);
     } ModeEntry;
-    const ModeEntry modeTable[] = {
-      {requestUnixConnection, requestInetConnection},
-      {acceptUnixConnection , acceptInetConnection }
-    };
     const ModeEntry *mode;
 
-    const char *socket = parameters[PARM_SOCKET];
-    int port;
-
     {
+      static const ModeEntry modeTable[] = {
+        {requestUnixConnection, requestInetConnection},
+        {acceptUnixConnection , acceptInetConnection }
+      };
       const char *modes[] = {"client", "server", NULL};
       int modeIndex;
-      validateChoice(&modeIndex, "mode", parameters[PARM_MODE], modes);
-      mode = &modeTable[modeIndex];
+      mode = validateChoice(&modeIndex, "mode", parameters[PARM_MODE], modes)?
+               &modeTable[modeIndex]:
+               NULL;
     }
 
-    if (!*socket) socket = "brltty-vr.socket";
-
-    if (isInteger(&port, socket)) {
-      if ((port > 0) && (port <= 0XFFFF)) {
-        fileDescriptor = mode->getInetConnection(port, INADDR_ANY);
+    if (mode) {
+      const char *socket = parameters[PARM_SOCKET];
+      if (!*socket) socket = VR_DEFAULT_SOCKET;
+      if (socket[0] == '/') {
+        struct sockaddr_un address;
+        if (setUnixAddress(socket, &address)) {
+          fileDescriptor = mode->getUnixConnection(&address);
+        }
       } else {
-        LogPrint(LOG_WARNING, "Invalid port: %d", port);
-      }
-    } else {
-      char *path = makePath(brl->dataDirectory, socket);
-      if (path) {
-        fileDescriptor = mode->getUnixConnection(path);
-        free(path);
+        struct sockaddr_in address;
+        if (setInetAddress(socket, &address)) {
+          fileDescriptor = mode->getInetConnection(&address);
+        }
       }
     }
   }

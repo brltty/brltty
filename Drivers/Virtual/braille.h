@@ -20,3 +20,5 @@
  * Edit as necessary for your system.
  */
 
+#define VR_DEFAULT_SOCKET "127.0.0.1"
+#define VR_DEFAULT_PORT 35752

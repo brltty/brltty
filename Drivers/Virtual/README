@@ -1,31 +1,38 @@
-Virtual display driver
+Virtual Display Driver
 ----------------------
 
-This is a Virtual Display driver for BRLTTY.  It opened a listening
-TCP port and uses a special text based protocol to transmit the information to
-the remote end.
+This is a virtual braille display driver for BRLTTY.  It uses a simple
+text-based protocol over a socket to transmit information to, and to receive
+information from, the virtual braille display application. The intention of
+this driver is two-fold:
+ * Give interested developers the ability to test BRLTTY without requiring 
+   access to a real braille display.
+ * Enable the implementation of a visual display based on this driver which
+   allows a sighted person to see, and even to experience, how a blind person
+   uses a braille display to work with a computer.
 
-The intention of this backend is two-fold:
- * Give interested developers the ability to test BRLTTY without
-   the availability of a real Braille display.
- * Eventually provide a visual client based on this backend which
-   allows to demonstrate to people with normal sight how
-   a blind person works with the computer using a braille display.
-
-However, there is currently no visual client for this protocol
-written.  You can use telnet or netcat to use it in the meantime.
-
-Implementation Notes:
----------------------
-
-Currently, all invasive commands, like cursor routing, or keyboard
-input are intentionally not implemented.  This is because the vr
-driver actually presents a security risk.  Since it is very hard to
-come up with an actually secure scheme for remote authentification,
-I decided to just not implement the very dangerous functionality
-for now.  This does not mean that you should use the vr driver
-without caution.  It can still be used to sniff information
-off your console.
+This driver supports the following parameters:
+mode={client | server}
+   This parameter determines which end of the socket connection is owned by the 
+   driver. If it's "client" then the driver periodically tries to connect to 
+   the braille display application. If it's "server" then the driver waits for 
+   a connection request from the braille display application. The default mode
+   is "client".
+socket=<address>
+   This parameter specifies the network address of the braille display 
+   application. The default address is a TCP/IP connection on the default port 
+   on the local host. The address may be:
+   /path/to/unix-socket-file
+      If the address starts with a slash (/) then it's interpreted as the path
+      to a unix socket file. If the driver is in "client" mode then the 
+      specified file must already exist. If the driver is in "server" mode then 
+      the specified file is created by the driver and must not already exist.
+   [host][:[port]]
+      An IP address. The TCP/IP protocol is used. Both the host and port 
+      components of the address are optional. The delimiting colon (:) is only 
+      required if the port is being specified. The host may be a name, an 
+      alias, or an IPV4 address (in dotted-decimal form); if it's not supplied 
+      then the local host is assumed. The port may be a service name or a port 
+      number; if it's not supplied then 35752 is assumed.
 
  -- Mario Lang <mlang@delysid.org>
-
