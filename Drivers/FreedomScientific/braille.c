@@ -48,11 +48,11 @@ typedef struct {
   void (*closePort) (void);
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (void *buffer, int length);
-  int (*writePacket) (const void *buffer, int length, int *delay);
+  int (*writePacket) (const void *buffer, int length, unsigned int *delay);
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static int debugPackets = 0;
+static unsigned int debugPackets = 0;
 static int outputPayloadLimit;
 
 #include "Programs/serial.h"
@@ -94,7 +94,7 @@ readSerialBytes (void *buffer, int length) {
 }
 
 static int
-writeSerialPacket (const void *buffer, int length, int *delay) {
+writeSerialPacket (const void *buffer, int length, unsigned int *delay) {
   int written = serialWriteData(serialDevice, buffer, length);
   if (delay && (written != -1)) *delay += length * 1000 / serialCharactersPerSecond;
   return written;
@@ -148,7 +148,7 @@ readUsbBytes (void *buffer, int length) {
 }
 
 static int
-writeUsbPacket (const void *buffer, int length, int *delay) {
+writeUsbPacket (const void *buffer, int length, unsigned int *delay) {
   return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
