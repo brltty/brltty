@@ -433,14 +433,16 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
 
 static UsbDevice *
 usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
+  size_t rootLength = strlen(root);
   UsbDevice *device = NULL;
   DIR *directory;
   if ((directory = opendir(root))) {
     struct dirent *entry;
     while ((entry = readdir(directory))) {
+      size_t nameLength = strlen(entry->d_name);
       struct stat status;
-      char path[PATH_MAX+1];
-      if (strlen(entry->d_name) != 3) continue;
+      char path[rootLength + 1 + nameLength + 1];
+      if (nameLength != 3) continue;
       if (!isdigit(entry->d_name[0]) ||
           !isdigit(entry->d_name[1]) ||
           !isdigit(entry->d_name[2])) continue;
