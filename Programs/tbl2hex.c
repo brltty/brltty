@@ -51,12 +51,19 @@ reportMessage (const char *message) {
 int
 main (int argc, char *argv[]) {
   int status;
+  char *path;
   TranslationTable table;
 
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, "translation-table");
 
-  if (loadTranslationTable(argv[0], &table, reportMessage, 0)) {
+  if (argc == 0) {
+    fprintf(stderr, "%s: missing translation table.\n", programName);
+    exit(2);
+  }
+  path = *argv++, argc--;
+
+  if (loadTranslationTable(path, &table, reportMessage, 0)) {
     unsigned int columns = 8;
     unsigned int rows = 0X100 / columns;
     unsigned int row;

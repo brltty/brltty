@@ -101,7 +101,13 @@ main (int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, "contraction-table");
 
-  if ((contractionTablePath = makePath(DATA_DIRECTORY, argv[0]))) {
+  if (argc == 0) {
+    fprintf(stderr, "%s: missing contraction table.\n", programName);
+    exit(2);
+  }
+  contractionTablePath = *argv++, argc--;
+
+  if ((contractionTablePath = makePath(DATA_DIRECTORY, contractionTablePath))) {
     if ((contractionTable = compileContractionTable(contractionTablePath))) {
       char *textTablePath;
       if ((textTablePath = makePath(DATA_DIRECTORY, opt_textTable))) {

@@ -57,7 +57,13 @@ main (int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, "translation-table");
 
-  if ((path = makePath(DATA_DIRECTORY, argv[0]))) {
+  if (argc == 0) {
+    fprintf(stderr, "%s: missing translation table.\n", programName);
+    exit(2);
+  }
+  path = *argv++, argc--;
+
+  if ((path = makePath(DATA_DIRECTORY, path))) {
     TranslationTable table;
     if (loadTranslationTable(path, &table, reportMessage,
                              TBL_UNDEFINED | TBL_DUPLICATE)) {
