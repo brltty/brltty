@@ -1603,13 +1603,15 @@ startup (int argc, char *argv[]) {
     opt_preferencesFile = path;
   }
 
-  if (chdir(DATA_DIRECTORY) == -1) {                /* * change to directory containing data files  */
-    char *backup_dir = "/etc";
-    LogPrint(LOG_ERR, "Cannot change directory to '%s': %s",
-             DATA_DIRECTORY, strerror(errno));
-    LogPrint(LOG_WARNING, "Using backup directory '%s' instead.",
-             backup_dir);
-    chdir(backup_dir);                /* home directory not found, use backup */
+  {
+    const char *directories[] = {DATA_DIRECTORY, "/etc", "/", NULL};
+    const char **directory = directories;
+    while (*directory) {
+      if (chdir(*directory) != -1) break;                /* * change to directory containing data files  */
+      LogPrint(LOG_WARNING, "Cannot change directory to '%s': %s",
+               *directory, strerror(errno));
+      ++directory;
+    }
   }
 
   if (opt_textTable) {
