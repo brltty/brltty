@@ -36,7 +36,7 @@ include fr-integral.ctb
 letsign 6
 
 class voy aeiouyéàèùâêîôûëïüAEIOUYÉÀÈÙÂÊËïü
-class con bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ
+class con bcçdfghjklmnpqrstvwxzBCÇDFGHJKLMNPQRSTVWXZ
 class bmp bmpBMP
 
 endword able 45
@@ -154,7 +154,7 @@ endword ient 24-126
 word balbutient 12-1-123-12-136-2345-24-126
 word initient 35-24-2345-24-126
 word dévient 145-123456-1236-24-126
-word renvient 1235-26-1236-24-126
+word envient 1235-26-1236-24-126
 
 sufword bleu 45-15-136
 before con always brui 12-1235-23
