@@ -43,8 +43,9 @@ extern "C" {
  * The caller-supplied data pointer is passed straight through to the handler.
  */
 extern int processLines (FILE *file, /* The input file. */
-                         void (*handler) (char *line, void *data), /* The input line handler. */
+                         int (*handler) (char *line, void *data), /* The input line handler. */
 		         void *data); /* A pointer to caller-specific data. */
+extern int readLine (FILE *file, char **buffer, size_t *size);
 
 /* Safe wrappers for system calls which handle the various scenarios
  * which can occur when signals interrupt them.

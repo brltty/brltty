@@ -225,7 +225,7 @@ typedef struct {
   unsigned int optionCount;
 } ConfigurationFileProcessingData;
 
-static void
+static int
 processConfigurationLine (
   char *line,
   void *data
@@ -249,7 +249,7 @@ processConfigurationLine (
           ConfigurationLineStatus status = option->configure(delimiters);
           switch (status) {
             case CFG_OK:
-              return;
+              return 1;
 
             case CFG_NoValue:
               LogPrint(LOG_ERR,
@@ -283,12 +283,14 @@ processConfigurationLine (
                        status);
               break;
           }
-          return;
+          return 1;
         }
       }
     }
     LogPrint(LOG_ERR, "Unknown configuration item: '%s'.", keyword);
+    return 1;
   }
+  return 1;
 }
 
 int

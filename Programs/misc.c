@@ -344,6 +344,43 @@ setCloseOnExec (int fileDescriptor) {
    fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC);
 }
 
+int
+readLine (FILE *file, char **buffer, size_t *size) {
+  char *line;
+
+  if (ferror(file)) return 0;
+  if (feof(file)) return 0;
+  if (!*size) *buffer = mallocWrapper(*size = 0X80);
+
+  if ((line = fgets(*buffer, *size, file))) {
+    size_t length = strlen(line); /* Line length including new-line. */
+
+    /* No trailing new-line means that the buffer isn't big enough. */
+    while (line[length-1] != '\n') {
+      /* If necessary, extend the buffer. */
+      if ((*size - (length + 1)) == 0)
+        *buffer = reallocWrapper(*buffer, (*size <<= 1));
+
+      /* Read the rest of the line into the end of the buffer. */
+      if (!(line = fgets(&(*buffer)[length], *size-length, file))) {
+        if (!ferror(file)) return 1;
+        LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
+        return 0;
+      }
+
+      length += strlen(line); /* New total line length. */
+      line = *buffer; /* Point to the beginning of the line. */
+    }
+
+    line[--length] = 0; /* Remove trailing new-line. */
+    return 1;
+  } else if (ferror(file)) {
+    LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
+  }
+
+  return 0;
+}
+
 /* Process each line of an input text file safely.
  * This routine handles the actual reading of the file,
  * insuring that the input buffer is always big enough,
@@ -351,52 +388,16 @@ setCloseOnExec (int fileDescriptor) {
  * The caller-supplied data pointer is passed straight through to the handler.
  */
 int
-processLines (FILE *file, void (*handler) (char *line, void *data), void *data) {
-  int ok = 1;
-  size_t buff_size = 0X80; /* Initial buffer size. */
-  char *buff_addr = mallocWrapper(buff_size); /* Allocate the buffer. */
+processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
+  char *buffer = NULL;
+  size_t bufferSize = 0;
 
-  /* Keep looping, once per line, until end-of-file. */
-  while (1) {
-    char *line; /* Will point to each line that is read. */
-    if ((line = fgets(buff_addr, buff_size, file)) != NULL) {
-      size_t line_len = strlen(line); /* Line length including new-line. */
-
-      /* No trailing new-line means that the buffer isn't big enough. */
-      while (line[line_len-1] != '\n') {
-        /* Extend the buffer, keeping track of its new size. */
-        buff_addr = reallocWrapper(buff_addr, (buff_size <<= 1));
-
-        /* Read the rest of the line into the end of the buffer. */
-        if (!(line = fgets(buff_addr+line_len, buff_size-line_len, file))) {
-          if (ferror(file))
-            LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
-          else
-            LogPrint(LOG_ERR, "Incomplete last line.");
-          ok = 0;
-          goto done;
-        }
-
-        line_len += strlen(line); /* New total line length. */
-        line = buff_addr; /* Point to the beginning of the line. */
-      }
-      line[--line_len] = 0; /* Remove trailing new-line. */
-
-      handler(line, data);
-    } else {
-      if (ferror(file)) {
-        LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
-        ok = 0;
-      }
+  while (readLine(file, &buffer, &bufferSize))
+    if (!handler(buffer, data))
       break;
-    }
-  }
-done:
 
-  /* Deallocate the buffer. */
-  free(buff_addr);
-
-  return ok;
+  if (buffer) free(buffer);
+  return feof(file);
 }
 
 /* Write data safely by continually retrying the write system call until
