@@ -1,1 +1,21 @@
-Help
+Help Screen for Tty Driver:
+
+Basic Navigation:
+Left/Right Arrow: Go left/right one window.
+Up/Down Arrow: Go up/down one line.
+Previous/Next Page: Go to top/bottom  line.
+Home/End: Go to top-left/bottom-left corner.
+Insert: Go to cursor.
+
+Advanced Navigation:
+F5/F8: Go to beginning/end of line.
+F6/F7: Go left/right one character.
+F9/F10: Go to previous/next command prompt.
+F11/F12: Go to nearest line of previous/next paragraph.
+
+Modes and Features:
+F1: Help screen (toggle).
+F2: Command learn mode (toggle).
+F3: Status line (toggle).
+F4: Preferences menu (toggle).
+Delete: Cursor tracking (toggle).

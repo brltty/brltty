@@ -199,21 +199,42 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 
 int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
 {
- if (code==EOF) return EOF;
- if (code<32) return code|VPC_CONTROL|VAL_PASSCHAR;
- if (code<256) return code|VAL_PASSCHAR;
- if (code>=KEY_F0 && code<=KEY_F0+12)
-  return (VAL_PASSKEY|VPK_FUNCTION)+(code-KEY_F0);
  switch (code) {
-  case KEY_DOWN: return CMD_LNDN;
-  case KEY_UP: return CMD_LNUP;
   case KEY_LEFT: return CMD_FWINLT;
   case KEY_RIGHT: return CMD_FWINRT;
-  case KEY_HOME: return CMD_HOME;
-  case KEY_BACKSPACE: return VAL_PASSKEY|VPK_BACKSPACE;
-  default: LogPrint(LOG_NOTICE,"Unknown key %o\n",code);
+  case KEY_UP: return CMD_LNUP;
+  case KEY_DOWN: return CMD_LNDN;
+
+  case KEY_PPAGE: return CMD_TOP;
+  case KEY_NPAGE: return CMD_BOT;
+  case KEY_HOME: return CMD_TOP_LEFT;
+  case KEY_LL: return CMD_BOT_LEFT;
+  case KEY_IC: return CMD_HOME;
+  case KEY_DC: return CMD_CSRTRK;
+
+  case KEY_F(1): return CMD_HELP;
+  case KEY_F(2): return CMD_LEARN;
+  case KEY_F(3): return CMD_INFO;
+  case KEY_F(4): return CMD_PREFMENU;
+
+  case KEY_F(5): return CMD_LNBEG;
+  case KEY_F(6): return CMD_CHRLT;
+  case KEY_F(7): return CMD_CHRRT;
+  case KEY_F(8): return CMD_LNEND;
+
+  case KEY_F(9): return CMD_PRPROMPT;
+  case KEY_F(10): return CMD_NXPROMPT;
+  case KEY_F(11): return CMD_PRPGRPH;
+  case KEY_F(12): return CMD_NXPGRPH;
+
+  case KEY_BACKSPACE: return VAL_PASSKEY | VPK_BACKSPACE;
+
+  case EOF: return EOF;
+  default:
+   if (code <= 0XFF) return VAL_PASSCHAR | code;
+   LogPrint(LOG_WARNING, "Unknown key: %02X", code);
+   return CMD_NOOP;
  }
- return EOF;
 }
 
 static int brl_readKey(BrailleDisplay *brl)
