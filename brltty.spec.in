@@ -127,7 +127,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
-%doc Documents/BrlAPI.sgml Documents/BrlAPI.txt Documents/BrlAPI-HTML/*
+%doc Documents/BrlAPI.sgml Documents/BrlAPI.txt Documents/BrlAPI-HTML
 
 %files -n brlapi-devel
 %defattr(-,root,root)
@@ -135,7 +135,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/libbrlapi.so
 %{_includedir}/brltty
 %doc %{_mandir}/man3/*
-%doc Documents/BrlAPIref-HTML/*
+%doc Documents/BrlAPIref-HTML
 %doc Documents/README.Gnopernicus
 
 %pre
