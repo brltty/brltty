@@ -991,8 +991,12 @@ main (int argc, char *argv[]) {
                   repeatFlags = 0;
                 case CMD_LNUP:
                 case CMD_LNDN:
+                case CMD_PRDIFLN:
+                case CMD_NXDIFLN:
                 case CMD_CHRLT:
                 case CMD_CHRRT:
+                case VAL_PASSKEY + VPK_BACKSPACE:
+                case VAL_PASSKEY + VPK_DELETE:
                 case VAL_PASSKEY + VPK_PAGE_UP:
                 case VAL_PASSKEY + VPK_PAGE_DOWN:
                 case VAL_PASSKEY + VPK_CURSOR_UP:
