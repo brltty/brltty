@@ -37,6 +37,9 @@ extern "C" {
 /* Define this if the function vsyslog exists. */
 #undef HAVE_VSYSLOG
 
+/* Define this if the header file alloca.h exists. */
+#undef HAVE_ALLOCA_H
+
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 

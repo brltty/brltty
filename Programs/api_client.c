@@ -25,13 +25,13 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <string.h>
 #include <inttypes.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <pthread.h>
 #include <syslog.h>
-#include <alloca.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -39,17 +39,34 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif /* HAVE_ALLOCA_H */
+
 #ifdef linux
 #include <linux/major.h>
 #include <linux/tty.h>
+#define MAXIMUM_VIRTUAL_CONSOLE MAX_NR_CONSOLES
 #endif /* linux */
+
+#ifdef __OpenBSD__
+#define MAXIMUM_VIRTUAL_CONSOLE 16
+#endif /* __OpenBSD__ */
+
+#ifndef MAXIMUM_VIRTUAL_CONSOLE
+#define MAXIMUM_VIRTUAL_CONSOLE 1
+#endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
 #include "brlapi.h"
 #include "api_common.h"
 
-/* macros */
-#define MIN(a, b)  (((a) < (b))? (a): (b)) 
-#define MAX(a, b)  (((a) > (b))? (a): (b)) 
+#ifndef MIN
+#define MIN(a, b) (((a) < (b))? (a): (b))
+#endif /* MIN */
+
+#ifndef MAX
+#define MAX(a, b) (((a) > (b))? (a): (b)) 
+#endif /* MAX */
 
 /* for remembering getaddrinfo error code */
 static int gai_error;
@@ -532,7 +549,7 @@ int brlapi_getControllingTty()
 #endif /* linux */
  }
 
- if ((vt < 1) || (vt > MAX_NR_CONSOLES)) return -1;
+ if ((vt < 1) || (vt > MAXIMUM_VIRTUAL_CONSOLE)) return -1;
  return vt;
 }
 
