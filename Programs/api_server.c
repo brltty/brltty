@@ -394,7 +394,7 @@ static int processRequest(Tconnection *c)
       CHECKEXC((!(size%sizeof(uint32_t))),BRLERR_INVALID_PACKET);
       CHECKEXC(((size<(MAXTTYRECUR+1)*sizeof(uint32_t))),BRLERR_TOORECURSE);
       how = ntohl(ints[size/sizeof(uint32_t)-1]);
-      CHECKEXC(((how == BRLKEYCODES) || (how == BRLCOMMANDS)),BRLERR_INVALID_PARAMETER);
+      if (how!=0) how = BRLKEYCODES;
       if (how==BRLKEYCODES) { /* We must check if the braille driver supports that */
         if ((TrueBraille->readKey==NULL) || (TrueBraille->keyToCommand==NULL)) {
           WEXC(c->fd, BRLERR_KEYSNOTSUPP);
