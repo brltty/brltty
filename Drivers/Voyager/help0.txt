@@ -14,6 +14,10 @@ Key Names:
     CRa1 to CRa44: all routing keys.
     CRs1 to CRs4: routing keys over status cells.
     CRt1 to CRt40: routing keys over text cells.
+Chords:
+  The prefix "Chord-" means that the space bar (B+C) must be pressed
+  along with the associated dot combination (entered via the top keys).
+  Pressing either B or C alone is also valid.
 
 Basic Navigation
 A/D: Go backward/forward one window

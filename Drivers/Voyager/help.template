@@ -14,6 +14,10 @@
 013:    CRa1 to CRa<CELLS>: all routing keys.
 013:    CRs1 to CRs4: routing keys over status cells.
 013:    CRt1 to CRt<COLS>: routing keys over text cells.
+020:Chords:
+021:  The prefix "Chord-" means that the space bar (B+C) must be pressed
+021:  along with the associated dot combination (entered via the top keys).
+021:  Pressing either B or C alone is also valid.
 099:
 100:Basic Navigation
 199:
