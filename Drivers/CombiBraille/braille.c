@@ -90,55 +90,51 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* Now open the Braille display device for random access */
   if (!(CB_serialDevice = serialOpenDevice(device))) goto failure;
-  serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE);
-
-  serialRestartDevice(CB_serialDevice, BAUDRATE);		/* activate new settings */
+  if (!serialRestartDevice(CB_serialDevice, BAUDRATE)) goto failure;
   CB_charactersPerSecond = BAUDRATE / 10;
 
   /* CombiBraille initialisation procedure: */
   success = 0;
-  /* Try MAX_ATTEMPTS times, or forever if MAX_ATTEMPTS is 0: */
-#if MAX_ATTEMPTS == 0
-  while (!success)
-#else /* MAX_ATTEMPTS == 0 */
-  for (i = 0; i < MAX_ATTEMPTS && !success; i++)
-#endif /* MAX_ATTEMPTS == 0 */
+  if (init_seq[0])
+    if (serialWriteData (CB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
+      goto failure;
+  timeout_yet (0);		/* initialise timeout testing */
+  n = 0;
+  do
     {
-      if (init_seq[0])
-	if (serialWriteData (CB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
-	  continue;
-      timeout_yet (0);		/* initialise timeout testing */
-      n = 0;
-      do
-	{
-	  delay (20);
-	  if (serialReadData (CB_serialDevice, &c, 1, 0, 0) != 1)
-	    continue;
-	  if (n < init_ack[0] && c != init_ack[1 + n])
-	    continue;
-	  if (n == init_ack[0])
-	    id = c, success = 1;
-	  n++;
-	}
-      while (!timeout_yet (ACK_TIMEOUT) && n <= init_ack[0]);
+      delay (20);
+      if (serialReadData (CB_serialDevice, &c, 1, 0, 0) != 1)
+        continue;
+      if (n < init_ack[0] && c != init_ack[1 + n])
+        continue;
+      if (n == init_ack[0]) {
+        id = c;
+        success = 1;
+        break;
+      }
+      n++;
     }
+  while (!timeout_yet (ACK_TIMEOUT) && n <= init_ack[0]);
+
   if (!success)
     {
       goto failure;
     }
 
+  if (!serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
+
   brl->y = BRLROWS;
   if ((brl->x = brl_cols = BRLCOLS(id)) == -1)
-    return 0;
+    goto failure;
 
   /* Allocate space for buffers */
-  prevdata = (unsigned char *) mallocWrapper (brl->x * brl->y);
+  prevdata = mallocWrapper (brl->x * brl->y);
   /* rawdata has to have room for the pre- and post-data sequences,
    * the status cells, and escaped 0x1b's: */
-  rawdata = (unsigned char *) mallocWrapper (20 + brl->x * brl->y * 2);
+  rawdata = mallocWrapper (20 + brl->x * brl->y * 2);
   return 1;
 
-failure:;
+failure:
   if (prevdata)
     free (prevdata);
   if (rawdata)

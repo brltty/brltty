@@ -325,8 +325,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     /* Open the Braille display device for random access */
     LogPrint(LOG_DEBUG, "Opening serial port: %s", device);
     if ((BL_serialDevice = serialOpenDevice(device))) {
-      serialSetFlowControl(BL_serialDevice, SERIAL_FLOW_HARDWARE);
-
       /* activate new settings */
       if (serialRestartDevice(BL_serialDevice, baudrate)) {
         qflush();
@@ -387,14 +385,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
           brl->y = 1;		/* Braille Lites are single line displays */
 
           /* Allocate space for buffers */
-          if ((prevdata = (unsigned char *) malloc(brl->x))) {
+          if ((prevdata = malloc(brl->x))) {
             memset(prevdata, 0, brl->x);
-            if ((rawdata = (unsigned char *) malloc(brl->x))) {
-              return 1;
-            /*
+
+            if ((rawdata = malloc(brl->x))) {
+              if (serialSetFlowControl(BL_serialDevice, SERIAL_FLOW_HARDWARE)) return 1;
+
               free(rawdata);
               rawdata = NULL;
-            */
             } else {
               LogPrint(LOG_ERR, "Cannot allocate rawdata.");
             }

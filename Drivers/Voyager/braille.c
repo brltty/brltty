@@ -67,6 +67,7 @@ typedef enum {
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
+  int (*preparePort) (void);
   void (*closePort) (void);
   int (*getCellCount) (unsigned char *length);
   int (*logSerialNumber) (void);
@@ -195,8 +196,6 @@ nextSerialPacket (unsigned char code, char *buffer, int size) {
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
-
     if (serialRestartDevice(serialDevice, 38400)) {
       return 1;
     }
@@ -205,6 +204,11 @@ openSerialPort (char **parameters, const char *device) {
     serialDevice = NULL;
   }
   return 0;
+}
+
+static int
+prepareSerialPort (void) {
+  return serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
 }
 
 static void
@@ -338,7 +342,7 @@ soundSerialBeep (unsigned char duration) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort, getSerialCellCount,
+  openSerialPort, prepareSerialPort, closeSerialPort, getSerialCellCount,
   logSerialSerialNumber, logSerialHardwareVersion, logSerialFirmwareVersion,
   setSerialDisplayVoltage, getSerialDisplayVoltage, getSerialDisplayCurrent,
   setSerialDisplayState, writeSerialBraille,
@@ -397,6 +401,11 @@ openUsbPort (char **parameters, const char *device) {
     }
   }
 
+  return 1;
+}
+
+static int
+prepareUsbPort (void) {
   return 1;
 }
 
@@ -499,7 +508,7 @@ soundUsbBeep (unsigned char duration) {
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort, getUsbCellCount,
+  openUsbPort, prepareUsbPort, closeUsbPort, getUsbCellCount,
   logUsbSerialNumber, logUsbHardwareVersion, logUsbFirmwareVersion,
   setUsbDisplayVoltage, getUsbDisplayVoltage, getUsbDisplayCurrent,
   setUsbDisplayState, writeUsbBraille,
@@ -547,11 +556,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(parameters, device)) {
-    /* log information about the display */
-    io->logSerialNumber();
-    io->logHardwareVersion();
-    io->logFirmwareVersion();
-
     /* find out how big the display is */
     totalCells = 0;
     {
@@ -606,6 +610,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         statusCells = cells;
       }
 
+      /* log information about the display */
+      io->logSerialNumber();
+      io->logHardwareVersion();
+      io->logFirmwareVersion();
+
       /* currentCells holds the status cells and the text cells.
        * We export directly to BRLTTY only the text cells.
        */
@@ -633,7 +642,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                             parameters[PARM_INPUTMODE]);
 
             firstRead = 1;
-            return 1;
+            if (io->preparePort()) return 1;
           }
 
           free(previousCells);

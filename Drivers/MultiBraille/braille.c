@@ -102,7 +102,7 @@ static void brl_identify (void) {
 
 
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-	short i, n, success;		/* loop counters, flags, etc. */
+	short n, success;		/* loop counters, flags, etc. */
 	unsigned char *init_seq = "\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
 	unsigned char *init_ack = "\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
 	unsigned char c;
@@ -126,9 +126,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
 	/* Now open the Braille display device for random access */
 	if (!(MB_serialDevice = serialOpenDevice(device))) goto failure;
-	serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE);
-
-	serialRestartDevice(MB_serialDevice, BAUDRATE);		/* activate new settings */
+	if (!serialRestartDevice(MB_serialDevice, BAUDRATE)) goto failure;
 
 	/* MultiBraille initialisation procedure:
 	 * [ESC][V][Braillelength][Software Version][CR]
@@ -136,58 +134,48 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 	 * firmware version == [Software Version] / 10.0
          */
 	success = 0;
-	/* Try MAX_ATTEMPTS times, or forever if MAX_ATTEMPTS is 0: */
-#if MAX_ATTEMPTS == 0
-	while (!success) {
-#else /* MAX_ATTEMPTS == 0 */
-	for (i = 0; i < MAX_ATTEMPTS && !success; i++) {
-#endif /* MAX_ATTEMPTS == 0 */
-		if (init_seq[0])
-			if (serialWriteData (MB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
-				continue;
-			timeout_yet (0);		/* initialise timeout testing */
-			n = 0;
-			do {
-				delay (20);
-				if (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 0)
-					continue;
-				if (n < init_ack[0] && c != init_ack[1 + n])
-					continue;
-				if (n == init_ack[0]) {
-					brlcols = c, success = 1;
-					/* reading version-info */
-					/* firmware version == [Software Version] / 10.0 */
-					serialReadData (MB_serialDevice, &c, 1, 0, 0);
-					LogPrint (LOG_INFO, "MultiBraille: Version: %2.1f", c/10.0);
-					/* read trailing [CR] */
-					serialReadData (MB_serialDevice, &c, 1, 0, 0);
-				}
-				n++;
-			}
-			while (!timeout_yet (ACK_TIMEOUT) && n <= init_ack[0]);
-	}
-  if (!success) {
-		goto failure;
-	}
+	if (init_seq[0])
+		if (serialWriteData (MB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
+			goto failure;
+	timeout_yet (0);		/* initialise timeout testing */
+	n = 0;
+	do {
+		delay (20);
+		if (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 0)
+			continue;
+		if (n < init_ack[0] && c != init_ack[1 + n])
+			continue;
+		if (n == init_ack[0]) {
+			brlcols = c, success = 1;
 
-	if (brlcols == 25)
-		return 0;						/* MultiBraille Vertical uses a different protocol --> not supported */
+			/* reading version-info */
+			/* firmware version == [Software Version] / 10.0 */
+			serialReadData (MB_serialDevice, &c, 1, 0, 0);
+			LogPrint (LOG_INFO, "MultiBraille: Version: %2.1f", c/10.0);
 
+			/* read trailing [CR] */
+			serialReadData (MB_serialDevice, &c, 1, 0, 0);
+		}
+		n++;
+	}
+	while (!timeout_yet (ACK_TIMEOUT) && n <= init_ack[0]);
+
+	if (!success) goto failure;
+	if (!serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
+
+	if (brlcols == 25) goto failure;						/* MultiBraille Vertical uses a different protocol --> not supported */
+	if ((brl->x = brlcols) == -1) goto failure;
 	brl->y = BRLROWS;
-	if ((brl->x = brlcols) == -1)		/* oops: braille length couldn't be read ... */
-		return 0;
 
 	/* Allocate space for buffers */
-	prevdata = (unsigned char *) malloc (brl->x * brl->y);
+	prevdata = mallocWrapper (brl->x * brl->y);
 	/* rawdata has to have room for the pre- and post-data sequences,
 	 * the status cells, and escaped 0x1b's: */
-	rawdata = (unsigned char *) malloc (20 + brl->x * brl->y * 2);
-	if (!prevdata || !rawdata)
-		goto failure;
+	rawdata = mallocWrapper (20 + brl->x * brl->y * 2);
 
 	return 1;
 
-failure:;
+failure:
 	if (prevdata)
 		free (prevdata);
 	if (rawdata)

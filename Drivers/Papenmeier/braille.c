@@ -288,6 +288,7 @@ typedef struct {
   unsigned char protocol1;
   unsigned char protocol2;
   int (*openPort) (char **parameters, const char *device);
+  int (*preparePort) (void);
   void (*closePort) (void);
   void (*flushPort) (BrailleDisplay *brl);
   int (*awaitInput) (int milliseconds);
@@ -308,14 +309,17 @@ static const int serialBauds[] = {19200, 38400, 0};
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
-
     if (serialRestartDevice(serialDevice, *baud)) return 1;
 
     serialCloseDevice(serialDevice);
     serialDevice = NULL;
   }
   return 0;
+}
+
+static int
+prepareSerialPort (void) {
+  return serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
 }
 
 static void
@@ -350,7 +354,7 @@ writeSerialBytes (const void *buffer, int length) {
 
 static const InputOutputOperations serialOperations = {
   serialBauds, 1, 1,
-  openSerialPort, closeSerialPort, flushSerialPort,
+  openSerialPort, prepareSerialPort, closeSerialPort, flushSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
@@ -373,6 +377,11 @@ openUsbPort (char **parameters, const char *device) {
     return 1;
   }
   return 0;
+}
+
+static int
+prepareUsbPort (void) {
+  return 1;
 }
 
 static void
@@ -408,7 +417,7 @@ writeUsbBytes (const void *buffer, int length) {
 
 static const InputOutputOperations usbOperations = {
   usbBauds, 0, 5,
-  openUsbPort, closeUsbPort, flushUsbPort,
+  openUsbPort, prepareUsbPort, closeUsbPort, flushUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 #endif /* ENABLE_USB_SUPPORT */
@@ -1353,7 +1362,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         memset(currentStatus, outputTable[0], terminal->statusCount);
         resetState();
         protocol->initializeTerminal(brl);
-        return 1;
+        if (io->preparePort()) return 1;
       }
       io->closePort();
     }
