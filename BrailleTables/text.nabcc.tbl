@@ -15,261 +15,405 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Translation Table - North American Braille Computer Code (iso-8859-1)
+########################################################################
+# BRLTTY Text Translation Table - North American Braille Computer Code #
+########################################################################
 
-\X00 [7   4  8]  # null
-\X01 [7  1   8]  # start of heading
-\X02 [7 21   8]  # start of text
-\X03 [7  14  8]  # end of text
-\X04 [7  145 8]  # end of transmission
-\X05 [7  1 5 8]  # enquiry
-\X06 [7 214  8]  # acknowledge
-\X07 [7 2145 8]  # bell
-\X08 [7 21 5 8]  # backspace
-\X09 [7 2 4  8]  # horizontal tabulation
-\X0A [7 2 45 8]  # line feed
-\X0B [73 1   8]  # vertical tabulation
-\X0C [7321   8]  # form feed
-\X0D [73 14  8]  # carriage return
-\X0E [73 145 8]  # shift out
-\X0F [73 1 5 8]  # shift in
-\X10 [73214  8]  # data link escape
-\X11 [732145 8]  # device control one
-\X12 [7321 5 8]  # device control two
-\X13 [732 4  8]  # device control three
-\X14 [732 45 8]  # device control four
-\X15 [73 1  68]  # negative acknowledge
-\X16 [7321  68]  # synchronous idle
-\X17 [7 2 4568]  # end of transmission block
-\X18 [73 14 68]  # cancel
-\X19 [73 14568]  # end of medium
-\X1A [73 1 568]  # substitute
-\X1B [7 2 4 68]  # escape
-\X1C [7 21 568]  # file separator
-\X1D [7 214568]  # group separator
-\X1E [7   45 8]  # record separator
-\X1F [7   4568]  # unit separator
-\X20 [        ]  # space
-\X21 [ 32 4 6 ]  # exclamation mark
-\X22 [     5  ]  # quotation mark
-\X23 [ 3  456 ]  # number sign
-\X24 [  214 6 ]  # dollar sign
-\X25 [   14 6 ]  # percent sign
-\X26 [ 3214 6 ]  # ampersand
-\X27 [ 3      ]  # apostrophe
-\X28 [ 321 56 ]  # left parenthesis
-\X29 [ 32 456 ]  # right parenthesis
-\X2A [   1  6 ]  # asterisk
-\X2B [ 3  4 6 ]  # plus sign
-\X2C [      6 ]  # comma
-\X2D [ 3    6 ]  # hyphen-minus
-\X2E [    4 6 ]  # full stop
-\X2F [ 3  4   ]  # solidus
-\X30 [ 3   56 ]  # digit zero
-\X31 [  2     ]  # digit one
-\X32 [ 32     ]  # digit two
-\X33 [  2  5  ]  # digit three
-\X34 [  2  56 ]  # digit four
-\X35 [  2   6 ]  # digit five
-\X36 [ 32  5  ]  # digit six
-\X37 [ 32  56 ]  # digit seven
-\X38 [ 32   6 ]  # digit eight
-\X39 [ 3   5  ]  # digit nine
-\X3A [   1 56 ]  # colon
-\X3B [     56 ]  # semicolon
-\X3C [  21  6 ]  # less-than sign
-\X3D [ 321456 ]  # equals sign
-\X3E [ 3  45  ]  # greater-than sign
-\X3F [   1456 ]  # question mark
-\X40 [7   4   ]  # commercial at
-\X41 [7  1    ]  # latin capital letter a
-\X42 [7 21    ]  # latin capital letter b
-\X43 [7  14   ]  # latin capital letter c
-\X44 [7  145  ]  # latin capital letter d
-\X45 [7  1 5  ]  # latin capital letter e
-\X46 [7 214   ]  # latin capital letter f
-\X47 [7 2145  ]  # latin capital letter g
-\X48 [7 21 5  ]  # latin capital letter h
-\X49 [7 2 4   ]  # latin capital letter i
-\X4A [7 2 45  ]  # latin capital letter j
-\X4B [73 1    ]  # latin capital letter k
-\X4C [7321    ]  # latin capital letter l
-\X4D [73 14   ]  # latin capital letter m
-\X4E [73 145  ]  # latin capital letter n
-\X4F [73 1 5  ]  # latin capital letter o
-\X50 [73214   ]  # latin capital letter p
-\X51 [732145  ]  # latin capital letter q
-\X52 [7321 5  ]  # latin capital letter r
-\X53 [732 4   ]  # latin capital letter s
-\X54 [732 45  ]  # latin capital letter t
-\X55 [73 1  6 ]  # latin capital letter u
-\X56 [7321  6 ]  # latin capital letter v
-\X57 [7 2 456 ]  # latin capital letter w
-\X58 [73 14 6 ]  # latin capital letter x
-\X59 [73 1456 ]  # latin capital letter y
-\X5A [73 1 56 ]  # latin capital letter z
-\X5B [7 2 4 6 ]  # left square bracket
-\X5C [7 21 56 ]  # reverse solidus
-\X5D [7 21456 ]  # right square bracket
-\X5E [7   45  ]  # circumflex accent
-\X5F [    456 ]  # low line
-\X60 [    4   ]  # grave accent
-\X61 [   1    ]  # latin small letter a
-\X62 [  21    ]  # latin small letter b
-\X63 [   14   ]  # latin small letter c
-\X64 [   145  ]  # latin small letter d
-\X65 [   1 5  ]  # latin small letter e
-\X66 [  214   ]  # latin small letter f
-\X67 [  2145  ]  # latin small letter g
-\X68 [  21 5  ]  # latin small letter h
-\X69 [  2 4   ]  # latin small letter i
-\X6A [  2 45  ]  # latin small letter j
-\X6B [ 3 1    ]  # latin small letter k
-\X6C [ 321    ]  # latin small letter l
-\X6D [ 3 14   ]  # latin small letter m
-\X6E [ 3 145  ]  # latin small letter n
-\X6F [ 3 1 5  ]  # latin small letter o
-\X70 [ 3214   ]  # latin small letter p
-\X71 [ 32145  ]  # latin small letter q
-\X72 [ 321 5  ]  # latin small letter r
-\X73 [ 32 4   ]  # latin small letter s
-\X74 [ 32 45  ]  # latin small letter t
-\X75 [ 3 1  6 ]  # latin small letter u
-\X76 [ 321  6 ]  # latin small letter v
-\X77 [  2 456 ]  # latin small letter w
-\X78 [ 3 14 6 ]  # latin small letter x
-\X79 [ 3 1456 ]  # latin small letter y
-\X7A [ 3 1 56 ]  # latin small letter z
-\X7B [  2 4 6 ]  # left curly bracket
-\X7C [  21 56 ]  # vertical line
-\X7D [  21456 ]  # right curly bracket
-\X7E [    45  ]  # tilde
-\X7F [7   456 ]  # delete
-\X80 [    4  8]  # <control>
-\X81 [   1   8]  # <control>
-\X82 [  21   8]  # break permitted here
-\X83 [   14  8]  # no break here
-\X84 [   145 8]  # <control>
-\X85 [   1 5 8]  # next line
-\X86 [  214  8]  # start of selected area
-\X87 [  2145 8]  # end of selected area
-\X88 [  21 5 8]  # character tabulation set
-\X89 [  2 4  8]  # character tabulation with justification
-\X8A [  2 45 8]  # line tabulation set
-\X8B [ 3 1   8]  # partial line down
-\X8C [ 321   8]  # partial line up
-\X8D [ 3 14  8]  # reverse line feed
-\X8E [ 3 145 8]  # single shift two
-\X8F [ 3 1 5 8]  # single shift three
-\X90 [ 3214  8]  # device control string
-\X91 [ 32145 8]  # private use one
-\X92 [ 321 5 8]  # private use two
-\X93 [ 32 4  8]  # set transmit state
-\X94 [ 32 45 8]  # cancel character
-\X95 [ 3 1  68]  # message waiting
-\X96 [ 321  68]  # start of guarded area
-\X97 [  2 4568]  # end of guarded area
-\X98 [ 3 14 68]  # start of string
-\X99 [ 3 14568]  # <control>
-\X9A [ 3 1 568]  # single character introducer
-\X9B [  2 4 68]  # control sequence introducer
-\X9C [  21 568]  # string terminator
-\X9D [  214568]  # operating system command
-\X9E [    45 8]  # privacy message
-\X9F [    4568]  # application program command
-\XA0 [7      8]  # no-break space
-\XA1 [732 4 6 ]  # inverted exclamation mark
-\XA2 [7 214 6 ]  # cent sign
-\XA3 [73  456 ]  # pound sign
-\XA4 [7  14 6 ]  # currency sign
-\XA5 [73214 6 ]  # yen sign
-\XA6 [7  1 56 ]  # broken bar
-\XA7 [73   5  ]  # section sign
-\XA8 [7    5  ]  # diaeresis
-\XA9 [732  56 ]  # copyright sign
-\XAA [       8]  # feminine ordinal indicator
-\XAB [7 21  6 ]  # left-pointing double angle quotation mark
-\XAC [7 2  56 ]  # not sign
-\XAD [73    6 ]  # soft hyphen
-\XAE [732   6 ]  # registered sign
-\XAF [7 2   6 ]  # macron
-\XB0 [73   56 ]  # degree sign
-\XB1 [73  4 6 ]  # plus-minus sign
-\XB2 [732     ]  # superscript two
-\XB3 [7 2  5  ]  # superscript three
-\XB4 [73      ]  # acute accent
-\XB5 [7    56 ]  # micro sign
-\XB6 [732  5  ]  # pilcrow sign
-\XB7 [7   4 6 ]  # middle dot
-\XB8 [7     6 ]  # cedilla
-\XB9 [7 2     ]  # superscript one
-\XBA [7       ]  # masculine ordinal indicator
-\XBB [73  45  ]  # right-pointing double angle quotation mark
-\XBC [7321 56 ]  # vulgar fraction one quarter
-\XBD [7321456 ]  # vulgar fraction one half
-\XBE [732 456 ]  # vulgar fraction three quarters
-\XBF [7  1456 ]  # inverted question mark
-\XC0 [732  5 8]  # latin capital letter a with grave
-\XC1 [7  1  68]  # latin capital letter a with acute
-\XC2 [7 2    8]  # latin capital letter a with circumflex
-\XC3 [7    5 8]  # latin capital letter a with tilde
-\XC4 [73214 68]  # latin capital letter a with diaeresis
-\XC5 [73  45 8]  # latin capital letter a with ring above
-\XC6 [73     8]  # latin capital letter ae
-\XC7 [73  4 68]  # latin capital letter c with cedilla
-\XC8 [732  568]  # latin capital letter e with grave
-\XC9 [7 21  68]  # latin capital letter e with acute
-\XCA [732    8]  # latin capital letter e with circumflex
-\XCB [73214568]  # latin capital letter e with diaeresis
-\XCC [732   68]  # latin capital letter i with grave
-\XCD [7  14 68]  # latin capital letter i with acute
-\XCE [7 2  5 8]  # latin capital letter i with circumflex
-\XCF [7321 568]  # latin capital letter i with diaeresis
-\XD0 [7     68]  # latin capital letter eth
-\XD1 [7   4 68]  # latin capital letter n with tilde
-\XD2 [73   5 8]  # latin capital letter o with grave
-\XD3 [7  14568]  # latin capital letter o with acute
-\XD4 [7 2  568]  # latin capital letter o with circumflex
-\XD5 [7    568]  # latin capital letter o with tilde
-\XD6 [732 4 68]  # latin capital letter o with diaeresis
-\XD7 [7  1  6 ]  # multiplication sign
-\XD8 [73  4  8]  # latin capital letter o with stroke
-\XD9 [73   568]  # latin capital letter u with grave
-\XDA [7  1 568]  # latin capital letter u with acute
-\XDB [7 2   68]  # latin capital letter u with circumflex
-\XDC [732 4568]  # latin capital letter u with diaeresis
-\XDD [7 214 68]  # latin capital letter y with acute
-\XDE [73    68]  # latin capital letter thorn
-\XDF [73  4568]  # latin small letter sharp s
-\XE0 [ 32  5 8]  # latin small letter a with grave
-\XE1 [   1  68]  # latin small letter a with acute
-\XE2 [  2    8]  # latin small letter a with circumflex
-\XE3 [     5 8]  # latin small letter a with tilde
-\XE4 [ 3214 68]  # latin small letter a with diaeresis
-\XE5 [ 3  45 8]  # latin small letter a with ring above
-\XE6 [ 3     8]  # latin small letter ae
-\XE7 [ 3  4 68]  # latin small letter c with cedilla
-\XE8 [ 32  568]  # latin small letter e with grave
-\XE9 [  21  68]  # latin small letter e with acute
-\XEA [ 32    8]  # latin small letter e with circumflex
-\XEB [ 3214568]  # latin small letter e with diaeresis
-\XEC [ 32   68]  # latin small letter i with grave
-\XED [   14 68]  # latin small letter i with acute
-\XEE [  2  5 8]  # latin small letter i with circumflex
-\XEF [ 321 568]  # latin small letter i with diaeresis
-\XF0 [      68]  # latin small letter eth
-\XF1 [    4 68]  # latin small letter n with tilde
-\XF2 [ 3   5 8]  # latin small letter o with grave
-\XF3 [   14568]  # latin small letter o with acute
-\XF4 [  2  568]  # latin small letter o with circumflex
-\XF5 [     568]  # latin small letter o with tilde
-\XF6 [ 32 4 68]  # latin small letter o with diaeresis
-\XF7 [73  4   ]  # division sign
-\XF8 [ 3  4  8]  # latin small letter o with stroke
-\XF9 [ 3   568]  # latin small letter u with grave
-\XFA [   1 568]  # latin small letter u with acute
-\XFB [  2   68]  # latin small letter u with circumflex
-\XFC [ 32 4568]  # latin small letter u with diaeresis
-\XFD [  214 68]  # latin small letter y with acute
-\XFE [ 3    68]  # latin small letter thorn
-\XFF [ 3  4568]  # latin small letter y with diaeresis
+# This is a description of the default text translation table used by BRLTTY.  
+# It's based on the North American Braille Computer Code, but defines the full
+# Latin1 (ISO-8859-1) character set.
+
+# The 95 printable characters of the standard 7-bit US-ASCII character set
+# (32-126) are identical to their representations within the North American
+# Braille Computer Code (these are the only characters which the NABCC actually
+# defines). Characters from literary braille, symbols from The Nemeth Braille
+# Code for Mathematics and Science Notation, and a bit of human imagination
+# have all been combined to create an easy-to-remember, one-to-one mapping
+# between each character and its braille counterpart. All possible combinations
+# involving only the original 6 braille dots are used, but that only allows for
+# 64 out of the required 95 character representations. The presence or absence
+# of dot 7 is used to differentiate between pairs of characters which either
+# are very closely related in meaning or, in a few cases where a more intuitive
+# reason couldn't be found, have a very close logical relationship within the
+# US-ASCII code. Dot 8 isn't used at all.
+
+# The space and the 26 lowercase letters (a-z) are the same as in literary 
+# braille:
+
+   #Hex    Dots       Dec Char Description
+   \X20 [        ]  #  32      space
+   \X61 [   1    ]  #  97   a  latin small letter a
+   \X62 [  21    ]  #  98   b  latin small letter b
+   \X63 [   14   ]  #  99   c  latin small letter c
+   \X64 [   145  ]  # 100   d  latin small letter d
+   \X65 [   1 5  ]  # 101   e  latin small letter e
+   \X66 [  214   ]  # 102   f  latin small letter f
+   \X67 [  2145  ]  # 103   g  latin small letter g
+   \X68 [  21 5  ]  # 104   h  latin small letter h
+   \X69 [  2 4   ]  # 105   i  latin small letter i
+   \X6A [  2 45  ]  # 106   j  latin small letter j
+   \X6B [ 3 1    ]  # 107   k  latin small letter k
+   \X6C [ 321    ]  # 108   l  latin small letter l
+   \X6D [ 3 14   ]  # 109   m  latin small letter m
+   \X6E [ 3 145  ]  # 110   n  latin small letter n
+   \X6F [ 3 1 5  ]  # 111   o  latin small letter o
+   \X70 [ 3214   ]  # 112   p  latin small letter p
+   \X71 [ 32145  ]  # 113   q  latin small letter q
+   \X72 [ 321 5  ]  # 114   r  latin small letter r
+   \X73 [ 32 4   ]  # 115   s  latin small letter s
+   \X74 [ 32 45  ]  # 116   t  latin small letter t
+   \X75 [ 3 1  6 ]  # 117   u  latin small letter u
+   \X76 [ 321  6 ]  # 118   v  latin small letter v
+   \X77 [  2 456 ]  # 119   w  latin small letter w
+   \X78 [ 3 14 6 ]  # 120   x  latin small letter x
+   \X79 [ 3 1456 ]  # 121   y  latin small letter y
+   \X7A [ 3 1 56 ]  # 122   z  latin small letter z
+
+# The 26 uppercase letters (A-Z) are the same as their lowercase counterparts 
+# except that dot 7 is added:
+
+   #Hex    Dots       Dec Char Description
+   \X41 [7  1    ]  #  65   A  latin capital letter a
+   \X42 [7 21    ]  #  66   B  latin capital letter b
+   \X43 [7  14   ]  #  67   C  latin capital letter c
+   \X44 [7  145  ]  #  68   D  latin capital letter d
+   \X45 [7  1 5  ]  #  69   E  latin capital letter e
+   \X46 [7 214   ]  #  70   F  latin capital letter f
+   \X47 [7 2145  ]  #  71   G  latin capital letter g
+   \X48 [7 21 5  ]  #  72   H  latin capital letter h
+   \X49 [7 2 4   ]  #  73   I  latin capital letter i
+   \X4A [7 2 45  ]  #  74   J  latin capital letter j
+   \X4B [73 1    ]  #  75   K  latin capital letter k
+   \X4C [7321    ]  #  76   L  latin capital letter l
+   \X4D [73 14   ]  #  77   M  latin capital letter m
+   \X4E [73 145  ]  #  78   N  latin capital letter n
+   \X4F [73 1 5  ]  #  79   O  latin capital letter o
+   \X50 [73214   ]  #  80   P  latin capital letter p
+   \X51 [732145  ]  #  81   Q  latin capital letter q
+   \X52 [7321 5  ]  #  82   R  latin capital letter r
+   \X53 [732 4   ]  #  83   S  latin capital letter s
+   \X54 [732 45  ]  #  84   T  latin capital letter t
+   \X55 [73 1  6 ]  #  85   U  latin capital letter u
+   \X56 [7321  6 ]  #  86   V  latin capital letter v
+   \X57 [7 2 456 ]  #  87   W  latin capital letter w
+   \X58 [73 14 6 ]  #  88   X  latin capital letter x
+   \X59 [73 1456 ]  #  89   Y  latin capital letter y
+   \X5A [73 1 56 ]  #  90   Z  latin capital letter z
+
+# The 10 decimal digits (0-9) are the same as in the Nemeth Code:
+
+   #Hex    Dots       Dec Char Description
+   \X30 [ 3   56 ]  #  48   0  digit zero
+   \X31 [  2     ]  #  49   1  digit one
+   \X32 [ 32     ]  #  50   2  digit two
+   \X33 [  2  5  ]  #  51   3  digit three
+   \X34 [  2  56 ]  #  52   4  digit four
+   \X35 [  2   6 ]  #  53   5  digit five
+   \X36 [ 32  5  ]  #  54   6  digit six
+   \X37 [ 32  56 ]  #  55   7  digit seven
+   \X38 [ 32   6 ]  #  56   8  digit eight
+   \X39 [ 3   5  ]  #  57   9  digit nine
+
+# Common symbols used within mathematical expressions by popular computer
+# programming languages are the same as in the Nemeth Code:
+
+   #Hex    Dots       Dec Char Description
+   \X2E [    4 6 ]  #  46   .  full stop
+   \X2B [ 3  4 6 ]  #  43   +  plus sign
+   \X2D [ 3    6 ]  #  45   -  hyphen-minus
+   \X2A [   1  6 ]  #  42   *  asterisk
+   \X2F [ 3  4   ]  #  47   /  solidus
+   \X28 [ 321 56 ]  #  40   (  left parenthesis
+   \X29 [ 32 456 ]  #  41   )  right parenthesis
+
+# With all of these major considerations having been taken into account, 
+# convenient representations were still available, and are used, for some of 
+# the remaining characters:
+
+   #Hex    Dots       Dec Char Description
+   \X26 [ 3214 6 ]  #  38   &  ampersand
+   \X23 [ 3  456 ]  #  35   #  number sign
+
+# The remaining characters are what they are. Dot 7 isn't used either within 
+# the number block (32-63) or, with the exception of the DEL control character
+# (127), within the lowercase block (96-127). With the exception of the
+# underscore (95), dot 7 is used for every character within the uppercase block
+# (64-95). Adding dot 7 to any character within the lowercase block (96-127)
+# yields its corresponding character within the uppercase block (64-95) except
+# that removing dot 7 from the DEL control character yields the underscore.
+
+   #Hex    Dots       Dec Char Description
+   \X2C [      6 ]  #  44   ,  comma
+   \X3B [     56 ]  #  59   ;  semicolon
+   \X3A [   1 56 ]  #  58   :  colon
+   \X21 [ 32 4 6 ]  #  33   !  exclamation mark
+   \X3F [   1456 ]  #  63   ?  question mark
+   \X22 [     5  ]  #  34   "  quotation mark
+   \X27 [ 3      ]  #  39   '  apostrophe
+   \X60 [    4   ]  #  96   `  grave accent
+   \X5E [7   45  ]  #  94   ^  circumflex accent
+   \X7E [    45  ]  # 126   ~  tilde
+   \X5B [7 2 4 6 ]  #  91   [  left square bracket
+   \X5D [7 21456 ]  #  93   ]  right square bracket
+   \X7B [  2 4 6 ]  # 123   {  left curly bracket
+   \X7D [  21456 ]  # 125   }  right curly bracket
+   \X3D [ 321456 ]  #  61   =  equals sign
+   \X3C [  21  6 ]  #  60   <  less-than sign
+   \X3E [ 3  45  ]  #  62   >  greater-than sign
+   \X24 [  214 6 ]  #  36   $  dollar sign
+   \X25 [   14 6 ]  #  37   %  percent sign
+   \X40 [7   4   ]  #  64   @  commercial at
+   \X7C [  21 56 ]  # 124   |  vertical line
+   \X5C [7 21 56 ]  #  92   \  reverse solidus
+   \X5F [    456 ]  #  95   _  low line
+
+# Each of the characters within the basic control character block (0-31) is the
+# same as its corresponding character within both the uppercase block (64-95)
+# and the lowercase block (96-127) except that dots 7 and 8 are both used.
+
+   #Hex    Dots       Dec Char Description
+   \X00 [7   4  8]  #   0  ^@  null
+   \X01 [7  1   8]  #   1  ^A  start of heading
+   \X02 [7 21   8]  #   2  ^B  start of text
+   \X03 [7  14  8]  #   3  ^C  end of text
+   \X04 [7  145 8]  #   4  ^D  end of transmission
+   \X05 [7  1 5 8]  #   5  ^E  enquiry
+   \X06 [7 214  8]  #   6  ^F  acknowledge
+   \X07 [7 2145 8]  #   7  ^G  bell
+   \X08 [7 21 5 8]  #   8  ^H  backspace
+   \X09 [7 2 4  8]  #   9  ^I  horizontal tabulation
+   \X0A [7 2 45 8]  #  10  ^J  line feed
+   \X0B [73 1   8]  #  11  ^K  vertical tabulation
+   \X0C [7321   8]  #  12  ^L  form feed
+   \X0D [73 14  8]  #  13  ^M  carriage return
+   \X0E [73 145 8]  #  14  ^N  shift out
+   \X0F [73 1 5 8]  #  15  ^O  shift in
+   \X10 [73214  8]  #  16  ^P  data link escape
+   \X11 [732145 8]  #  17  ^Q  device control one
+   \X12 [7321 5 8]  #  18  ^R  device control two
+   \X13 [732 4  8]  #  19  ^S  device control three
+   \X14 [732 45 8]  #  20  ^T  device control four
+   \X15 [73 1  68]  #  21  ^U  negative acknowledge
+   \X16 [7321  68]  #  22  ^V  synchronous idle
+   \X17 [7 2 4568]  #  23  ^W  end of transmission block
+   \X18 [73 14 68]  #  24  ^X  cancel
+   \X19 [73 14568]  #  25  ^Y  end of medium
+   \X1A [73 1 568]  #  26  ^Z  substitute
+   \X1B [7 2 4 68]  #  27  ^[  escape
+   \X1C [7 21 568]  #  28  ^\  file separator
+   \X1D [7 214568]  #  29  ^]  group separator
+   \X1E [7   45 8]  #  30  ^^  record separator
+   \X1F [7   4568]  #  31  ^_  unit separator
+
+# Each of the characters within the extended control character block (128-159)  
+# is the same as its corresponding character within the basic control character
+# block (0-31) except that only dot 8 is used.
+
+   #Hex    Dots       Dec Char Description
+   \X80 [    4  8]  # 128  ~@  <control>
+   \X81 [   1   8]  # 129  ~A  <control>
+   \X82 [  21   8]  # 130  ~B  break permitted here
+   \X83 [   14  8]  # 131  ~C  no break here
+   \X84 [   145 8]  # 132  ~D  <control>
+   \X85 [   1 5 8]  # 133  ~E  next line
+   \X86 [  214  8]  # 134  ~F  start of selected area
+   \X87 [  2145 8]  # 135  ~G  end of selected area
+   \X88 [  21 5 8]  # 136  ~H  character tabulation set
+   \X89 [  2 4  8]  # 137  ~I  character tabulation with justification
+   \X8A [  2 45 8]  # 138  ~J  line tabulation set
+   \X8B [ 3 1   8]  # 139  ~K  partial line down
+   \X8C [ 321   8]  # 140  ~L  partial line up
+   \X8D [ 3 14  8]  # 141  ~M  reverse line feed
+   \X8E [ 3 145 8]  # 142  ~N  single shift two
+   \X8F [ 3 1 5 8]  # 143  ~O  single shift three
+   \X90 [ 3214  8]  # 144  ~P  device control string
+   \X91 [ 32145 8]  # 145  ~Q  private use one
+   \X92 [ 321 5 8]  # 146  ~R  private use two
+   \X93 [ 32 4  8]  # 147  ~S  set transmit state
+   \X94 [ 32 45 8]  # 148  ~T  cancel character
+   \X95 [ 3 1  68]  # 149  ~U  message waiting
+   \X96 [ 321  68]  # 150  ~V  start of guarded area
+   \X97 [  2 4568]  # 151  ~W  end of guarded area
+   \X98 [ 3 14 68]  # 152  ~X  start of string
+   \X99 [ 3 14568]  # 153  ~Y  <control>
+   \X9A [ 3 1 568]  # 154  ~Z  single character introducer
+   \X9B [  2 4 68]  # 155  ~[  control sequence introducer
+   \X9C [  21 568]  # 156  ~\  string terminator
+   \X9D [  214568]  # 157  ~]  operating system command
+   \X9E [    45 8]  # 158  ~^  privacy message
+   \X9F [    4568]  # 159  ~_  application program command
+
+# Representations for the uppercase accented letters are drawn from the
+# remaining combinations which use both dots 7 and 8. The representation for a
+# lowercase accented letter is the same as its uppercase counterpart except
+# that dot 7 isn't used. This scheme retains the use of dot 7 as the modifier
+# for a capitalized letter. The only exception to these rules is that, due to
+# the nature of the Latin1 character set, the German lowercase double-s is
+# treated as though it were an uppercase y-dieresis (neither has an uppercase
+# definition). These representations have been gathered, as much as possible,
+# into logical groupings.
+
+# The 5 letters with a circumflex accent (^) use the [1-5] dot combinations:
+
+   #Hex    Dots       Dec Char Description
+   \XC2 [7 2    8]  # 194   Â  latin capital letter a with circumflex
+   \XCA [732    8]  # 202   Ê  latin capital letter e with circumflex
+   \XCE [7 2  5 8]  # 206   Î  latin capital letter i with circumflex
+   \XD4 [7 2  568]  # 212   Ô  latin capital letter o with circumflex
+   \XDB [7 2   68]  # 219   Û  latin capital letter u with circumflex
+   \XE2 [  2    8]  # 226   â  latin small letter a with circumflex
+   \XEA [ 32    8]  # 234   ê  latin small letter e with circumflex
+   \XEE [  2  5 8]  # 238   î  latin small letter i with circumflex
+   \XF4 [  2  568]  # 244   ô  latin small letter o with circumflex
+   \XFB [  2   68]  # 251   û  latin small letter u with circumflex
+
+# The 5 letters with a grave accent (`) use the [6-0] dot combinations:
+
+   #Hex    Dots       Dec Char Description
+   \XC0 [732  5 8]  # 192   À  latin capital letter a with grave
+   \XC8 [732  568]  # 200   È  latin capital letter e with grave
+   \XCC [732   68]  # 204   Ì  latin capital letter i with grave
+   \XD2 [73   5 8]  # 210   Ò  latin capital letter o with grave
+   \XD9 [73   568]  # 217   Ù  latin capital letter u with grave
+   \XE0 [ 32  5 8]  # 224   à  latin small letter a with grave
+   \XE8 [ 32  568]  # 232   è  latin small letter e with grave
+   \XEC [ 32   68]  # 236   ì  latin small letter i with grave
+   \XF2 [ 3   5 8]  # 242   ò  latin small letter o with grave
+   \XF9 [ 3   568]  # 249   ù  latin small letter u with grave
+
+# The 6 letters with an acute accent (') use the [a-f] dot combinations with
+# dots 3 and 6 added:
+
+   #Hex    Dots       Dec Char Description
+   \XC1 [7  1  68]  # 193   Á  latin capital letter a with acute
+   \XC9 [7 21  68]  # 201   É  latin capital letter e with acute
+   \XCD [7  14 68]  # 205   Í  latin capital letter i with acute
+   \XD3 [7  14568]  # 211   Ó  latin capital letter o with acute
+   \XDA [7  1 568]  # 218   Ú  latin capital letter u with acute
+   \XDD [7 214 68]  # 221   Ý  latin capital letter y with acute
+   \XE1 [   1  68]  # 225   á  latin small letter a with acute
+   \XE9 [  21  68]  # 233   é  latin small letter e with acute
+   \XED [   14 68]  # 237   í  latin small letter i with acute
+   \XF3 [   14568]  # 243   ó  latin small letter o with acute
+   \XFA [   1 568]  # 250   ú  latin small letter u with acute
+   \XFD [  214 68]  # 253   ý  latin small letter y with acute
+
+# The 6 letters with a dieresis accent (") use the [f-j] dot combinations with
+# dots 3 and 6 added, and the number sign (because it fits the sequence
+# reasonably well):
+
+   #Hex    Dots       Dec Char Description
+   \XC4 [73214 68]  # 196   Ä  latin capital letter a with diaeresis
+   \XCB [73214568]  # 203   Ë  latin capital letter e with diaeresis
+   \XCF [7321 568]  # 207   Ï  latin capital letter i with diaeresis
+   \XD6 [732 4 68]  # 214   Ö  latin capital letter o with diaeresis
+   \XDC [732 4568]  # 220   Ü  latin capital letter u with diaeresis
+   \XE4 [ 3214 68]  # 228   ä  latin small letter a with diaeresis
+   \XEB [ 3214568]  # 235   ë  latin small letter e with diaeresis
+   \XEF [ 321 568]  # 239   ï  latin small letter i with diaeresis
+   \XF6 [ 32 4 68]  # 246   ö  latin small letter o with diaeresis
+   \XFC [ 32 4568]  # 252   ü  latin small letter u with diaeresis
+   \XFF [ 3  4568]  # 255   ÿ  latin small letter y with diaeresis
+
+# There is no uppercase y-dieresis in the Latin1 character set. The German
+# lowercase double-s, which also doesn't have an uppercase counterpart in the
+# Latin1 character set, uses its representation:
+
+   #Hex    Dots       Dec Char Description
+   \XDF [73  4568]  # 223   ß  latin small letter sharp s
+
+# The remaining accented letters are:
+
+   #Hex    Dots       Dec Char Description
+   \XC3 [7    5 8]  # 195   Ã  latin capital letter a with tilde
+   \XD1 [7   4 68]  # 209   Ñ  latin capital letter n with tilde
+   \XD5 [7    568]  # 213   Õ  latin capital letter o with tilde
+   \XC5 [73  45 8]  # 197   Å  latin capital letter a with ring above
+   \XC7 [73  4 68]  # 199   Ç  latin capital letter c with cedilla
+   \XD8 [73  4  8]  # 216   Ø  latin capital letter o with stroke
+   \XC6 [73     8]  # 198   Æ  latin capital letter ae
+   \XD0 [7     68]  # 208   Ð  latin capital letter eth
+   \XDE [73    68]  # 222   Þ  latin capital letter thorn
+   \XE3 [     5 8]  # 227   ã  latin small letter a with tilde
+   \XF1 [    4 68]  # 241   ñ  latin small letter n with tilde
+   \XF5 [     568]  # 245   õ  latin small letter o with tilde
+   \XE5 [ 3  45 8]  # 229   å  latin small letter a with ring above
+   \XE7 [ 3  4 68]  # 231   ç  latin small letter c with cedilla
+   \XF8 [ 3  4  8]  # 248   ø  latin small letter o with stroke
+   \XE6 [ 3     8]  # 230   æ  latin small letter ae
+   \XF0 [      68]  # 240   ð  latin small letter eth
+   \XFE [ 3    68]  # 254   þ  latin small letter thorn
+
+# Some characters are the same as other characters which they resemble but with
+# dot 7 added:
+
+   #Hex    Dots       Dec Char Description
+   \XAD [73    6 ]  # 173   ­  soft hyphen
+   \XAB [7 21  6 ]  # 171   «  left-pointing double angle quotation mark
+   \XBB [73  45  ]  # 187   »  right-pointing double angle quotation mark
+   \XA6 [7  1 56 ]  # 166   ¦  broken bar
+   \XB9 [7 2     ]  # 185   ¹  superscript one
+   \XB2 [732     ]  # 178   ²  superscript two
+   \XB3 [7 2  5  ]  # 179   ³  superscript three
+   \XB1 [73  4 6 ]  # 177   ±  plus-minus sign
+   \XD7 [7  1  6 ]  # 215   ×  multiplication sign
+   \XF7 [73  4   ]  # 247   ÷  division sign
+   \XB7 [7   4 6 ]  # 183   ·  middle dot
+   \XA1 [732 4 6 ]  # 161   ¡  inverted exclamation mark
+   \XBF [7  1456 ]  # 191   ¿  inverted question mark
+   \XA2 [7 214 6 ]  # 162   ¢  cent sign
+   \XA3 [73  456 ]  # 163   £  pound sign
+
+# A few more characters follow this same convention but they're relationships
+# to their base characters is a bit obscure:
+
+   #Hex    Dots       Dec Char Description
+   \XA4 [7  14 6 ]  # 164   ¤  currency sign
+   \XA5 [73214 6 ]  # 165   ¥  yen sign
+
+# Some characters are represented by the first letters of their names lowered
+# by one row of dots:
+
+   #Hex    Dots       Dec Char Description
+   \XAC [7 2  56 ]  # 172   ¬  not sign
+   \XB6 [732  5  ]  # 182   ¶  pilcrow sign
+   \XA9 [732  56 ]  # 169   ©  copyright sign
+   \XAE [732   6 ]  # 174   ®  registered sign
+   \XA7 [73   5  ]  # 167   §  section sign
+   \XB0 [73   56 ]  # 176   °  degree sign
+
+# The three fraction characters use combinations of dots 1 and 4 (which
+# progress from left to right as the value of the fraction increases) together
+# with dots 2,3,5,6,7:
+
+   #Hex    Dots       Dec Char Description
+   \XBC [7321 56 ]  # 188   ¼  vulgar fraction one quarter
+   \XBD [7321456 ]  # 189   ½  vulgar fraction one half
+   \XBE [732 456 ]  # 190   ¾  vulgar fraction three quarters
+
+# Each of the three extended accent characters is the same as its conventional
+# compose character but with dot 7 added:
+
+   #Hex    Dots       Dec Char Description
+   \XB4 [73      ]  # 180   ´  acute accent
+   \XB8 [7     6 ]  # 184   ¸  cedilla
+   \XA8 [7    5  ]  # 168   ¨  diaeresis
+
+# The two gender symbols are:
+
+   #Hex    Dots       Dec Char Description
+   \XBA [7       ]  # 186   º  masculine ordinal indicator
+   \XAA [       8]  # 170   ª  feminine ordinal indicator
+
+# The three remaining characters are:
+
+   #Hex    Dots       Dec Char Description
+   \XAF [7 2   6 ]  # 175   ¯  macron
+   \XB5 [7    56 ]  # 181   µ  micro sign
+   \XA0 [7      8]  # 160  ~   no-break space
+
+# The nonbreaking space is dots 7 and 8 because this presents a sequence of
+# nonbreaking spaces as a smooth low line segment.
+
+   #Hex    Dots       Dec Char Description
+   \X7F [7   456 ]  # 127  ^?  delete

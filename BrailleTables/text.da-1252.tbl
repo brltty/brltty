@@ -15,7 +15,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Translation Table - (iso-8859-1)
+# BRLTTY Text Translation Table - Danish Svend Thougaard 2002-11-18 (iso-8859-1)
+
+# This is the standard table defined by Svend Thougaard [2002-11-18]. It is
+# primarily defined for use with the Windows-1252 character table. It is only
+# in the BRLTTY package for reference as most of the control characters have
+# been mapped to unusual braille patterns. The left brace ({) and percent sign
+# (%) don't have logical representations.
 
 \X00 [       8]  # null
 \X01 [7  1   8]  # start of heading

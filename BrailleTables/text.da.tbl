@@ -17,6 +17,10 @@
 
 # BRLTTY Text Translation Table - Danish (iso-8859-1)
 
+# This is the table which comes closest to the Danish standard 1252 table. All
+# control characters are mapped as their corresponding capital letters with
+# dot-8 added. Most Danish braille users should use this table.
+
 \X00 [73214568]  # null
 \X01 [7  1   8]  # start of heading
 \X02 [7 21   8]  # start of text
