@@ -340,7 +340,7 @@ typedef struct {
   int (*resetPort) (void);
   void (*closePort) (void);
   int (*readPacket) (unsigned char *buffer, int length);
-  int (*writePacket) (const unsigned char *buffer, int length);
+  int (*writePacket) (const unsigned char *buffer, int length, int *delay);
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
@@ -405,15 +405,16 @@ verifyInputPacket (unsigned char *buffer, int *length) {
 }
 
 static int
-writeFunction (unsigned char code) {
+writeFunction (BrailleDisplay *brl, unsigned char code) {
   unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
-  return io->writePacket(bytes, sizeof(bytes));
+  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
 #include "Programs/serial.h"
 static int serialDevice = -1;
 static struct termios oldSerialSettings;
 static struct termios newSerialSettings;
+static int serialCharactersPerSecond;			/* file descriptor for Braille display */
 
 static int
 openSerialPort (char **parameters, const char *device) {
@@ -432,7 +433,9 @@ openSerialPort (char **parameters, const char *device) {
 
 static int
 resetSerialPort (void) {
-  return resetSerialDevice(serialDevice, &newSerialSettings, BAUDRATE);	/* activate new settings */
+  if (!resetSerialDevice(serialDevice, &newSerialSettings, BAUDRATE)) return 0;
+  serialCharactersPerSecond = baud2integer(BAUDRATE) / 10;
+  return 1;
 }
 
 static void
@@ -459,7 +462,8 @@ readSerialPacket (unsigned char *buffer, int length) {
 }
 
 static int
-writeSerialPacket (const unsigned char *buffer, int length) {
+writeSerialPacket (const unsigned char *buffer, int length, int *delay) {
+  if (delay) *delay += length * 1000 / serialCharactersPerSecond;
   return safe_write(serialDevice, buffer, length);
 }
 
@@ -551,7 +555,7 @@ readUsbPacket (unsigned char *buffer, int length) {
 }
 
 static int
-writeUsbPacket (const unsigned char *buffer, int length) {
+writeUsbPacket (const unsigned char *buffer, int length, int *delay) {
   return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
 }
 
@@ -586,7 +590,7 @@ extern int SendToAlva( unsigned char *data, int len );
 
 int SendToAlva( unsigned char *data, int len )
 {
-  if (io->writePacket(data, len) == len) return 1;
+  if (io->writePacket(data, len, NULL) == len) return 1;
   return 0;
 }
 
@@ -636,7 +640,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   if (!reallocateBuffers(brl)) return 0;
   ReWrite = 1;			/* To write whole display at first time */
 
-  if (model->Flags & BPF_CONFIGURABLE) writeFunction(0X07);
+  if (model->Flags & BPF_CONFIGURABLE) writeFunction(brl, 0X07);
   return 1;
 }
 
@@ -684,7 +688,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     delay(1000);		/* delay before 2nd line drop */
     if (getModelIdentifier(&ModelID)) break;
 
-    if (writeFunction(0X06) == -1) goto failure;
+    if (writeFunction(brl, 0X06) == -1) goto failure;
     delay(200);
     if (getModelIdentifier(&ModelID)) break;
   } while (ModelID == ABT_AUTO);
@@ -714,7 +718,7 @@ static void brl_close (BrailleDisplay *brl)
 }
 
 
-static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
+static int WriteToBrlDisplay (BrailleDisplay *brl, int Start, int Len, unsigned char *Data)
 {
   unsigned char outbuf[ BRL_START_LENGTH + 2 + Len + BRL_END_LENGTH ];
   int outsz = 0;
@@ -727,7 +731,7 @@ static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
   outsz += Len;
   memcpy( outbuf+outsz, BRL_END, BRL_END_LENGTH );
   outsz += BRL_END_LENGTH;
-  return io->writePacket(outbuf, outsz);
+  return io->writePacket(outbuf, outsz, &brl->writeDelay);
 }
 
 static void brl_writeWindow (BrailleDisplay *brl)
@@ -758,7 +762,7 @@ static void brl_writeWindow (BrailleDisplay *brl)
       for (k = 0;
 	   k < (j - i);
 	   rawdata[k++] = outputTable[(prevdata[i + k] = brl->buffer[i + k])]);
-      WriteToBrlDisplay (NbStCells + i, j - i, rawdata);
+      WriteToBrlDisplay (brl, NbStCells + i, j - i, rawdata);
     }
 }
 
@@ -774,7 +778,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
       for (i = 0;
 	   i < NbStCells;
 	   StatusCells[i++] = outputTable[(PrevStatus[i] = st[i])]);
-      WriteToBrlDisplay (0, NbStCells, StatusCells);
+      WriteToBrlDisplay (brl, 0, NbStCells, StatusCells);
     }
 }
 
