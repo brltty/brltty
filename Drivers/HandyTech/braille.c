@@ -318,7 +318,7 @@ readUsbBytes (unsigned char *buffer, int length) {
 static int
 writeUsbBytes (const unsigned char *buffer, int length, int *delay) {
   if (delay) *delay += length * 1000 / charactersPerSecond;
-  return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usbDevice, usbOutputEndpoint, buffer, length, 1000);
 }
 
 static void

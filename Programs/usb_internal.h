@@ -43,6 +43,7 @@ typedef struct {
 } UsbEndpoint;
 
 struct UsbDeviceStruct {
+  char *path;
   UsbDeviceDescriptor descriptor;
   UsbDescriptor *configurationDescriptor;
   int configurationLength;
@@ -62,8 +63,8 @@ extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAdd
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 
-extern int usbOpenEndpoint (const UsbEndpointDescriptor *descriptor, void **system);
-extern void usbCloseEndpoint (void *system);
+extern int usbOpenEndpoint (UsbEndpoint *endpoint);
+extern void usbCloseEndpoint (UsbEndpoint *endpoint);
 
 #ifdef __cplusplus
 }

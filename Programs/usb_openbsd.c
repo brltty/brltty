@@ -41,6 +41,13 @@ usbSetTimeout (int file, int timeout) {
   return 0;
 }
 
+static int
+usbSetShortTransfers (int file, int arg) {
+  if (ioctl(file, USB_SET_SHORT_XFER, &arg) != -1) return 1;
+  LogError("USB set short transfers");
+  return 0;
+}
+
 int
 usbResetDevice (UsbDevice *device) {
   errno = ENOSYS;
@@ -56,14 +63,6 @@ usbSetConfiguration (
   int arg = configuration;
   if (ioctl(device->file, USB_SET_CONFIG, &arg) != -1) return 1;
   LogError("USB configuration set");
-  return 0;
-}
-
-int
-usbIsSerialDevice (
-  UsbDevice *device,
-  unsigned char interface
-) {
   return 0;
 }
 
@@ -157,7 +156,16 @@ usbControlTransfer (
 }
 
 int
-usbBulkRead (
+usbOpenEndpoint (UsbEndpoint *endpoint) {
+  return 1;
+}
+
+void
+usbCloseEndpoint (UsbEndpoint *endpoint) {
+}
+
+int
+usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
@@ -170,7 +178,7 @@ usbBulkRead (
 }
 
 int
-usbBulkWrite (
+usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
@@ -217,15 +225,6 @@ usbReapResponse (
 }
 
 int
-usbOpenEndpoint (const UsbEndpointDescriptor *descriptor, void **system) {
-  return 1;
-}
-
-void
-usbCloseEndpoint (void *system) {
-}
-
-int
 usbReadDeviceDescriptor (UsbDevice *device) {
   if (ioctl(device->file, USB_GET_DEVICE_DESC, &device->descriptor) != -1) {
     device->descriptor.bcdUSB = getLittleEndian(device->descriptor.bcdUSB);
@@ -255,6 +254,18 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 	if (ioctl(bus, USB_DEVICEINFO, &info) != -1) {
 	  static const char *driver = "ugen";
 	  const char *deviceName = info.udi_devnames[0];
+
+	  LogPrint(LOG_DEBUG, "USB device [%d,%d]: vendor=%s product=%s",
+		   busNumber, deviceNumber, info.udi_vendor, info.udi_product);
+	  {
+	    int nameNumber;
+	    for (nameNumber=0; nameNumber<USB_MAX_DEVNAMES; nameNumber++) {
+	      const char *name = info.udi_devnames[nameNumber];
+	      if (*name)
+	        LogPrint(LOG_DEBUG, "USB name %d: %s", nameNumber, name);
+	    }
+	  }
+
 	  if (strncmp(deviceName, driver, strlen(driver)) == 0) {
 	    char devicePath[PATH_MAX+1];
 	    snprintf(devicePath, sizeof(devicePath), "/dev/%s.00", deviceName);

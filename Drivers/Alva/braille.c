@@ -572,7 +572,7 @@ readUsbPacket (unsigned char *buffer, int length) {
 
 static int
 writeUsbPacket (const unsigned char *buffer, int length, int *delay) {
-  return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usbDevice, usbOutputEndpoint, buffer, length, 1000);
 }
 
 static const InputOutputOperations usbOperations = {

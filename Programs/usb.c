@@ -227,7 +227,7 @@ usbDeallocateEndpoint (void *item, void *data) {
       break;
   }
 
-  usbCloseEndpoint(endpoint->system);
+  usbCloseEndpoint(endpoint);
   free(endpoint);
 }
 
@@ -292,9 +292,9 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
             break;
         }
 
-        if (usbOpenEndpoint(endpoint->descriptor, &endpoint->system)) {
+        if (usbOpenEndpoint(endpoint)) {
           if (enqueueItem(device->endpoints, endpoint)) return endpoint;
-          usbCloseEndpoint(endpoint->system);
+          usbCloseEndpoint(endpoint);
         }
 
         free(endpoint);
@@ -322,6 +322,7 @@ void
 usbCloseDevice (UsbDevice *device) {
   deallocateQueue(device->endpoints);
   close(device->file);
+  free(device->path);
   if (device->configurationDescriptor) free(device->configurationDescriptor);
   free(device);
 }
@@ -332,20 +333,23 @@ usbOpenDevice (const char *path) {
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
 
-    if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
-      if ((device->file = open(path, O_RDWR)) != -1) {
-        if (usbReadDeviceDescriptor(device))
-          if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
-            if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
-              return device;
-        close(device->file);
+    if ((device->path = strdup(path))) {
+      if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
+        if ((device->file = open(path, O_RDWR)) != -1) {
+          if (usbReadDeviceDescriptor(device))
+            if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
+              if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
+                return device;
+          close(device->file);
+        }
+        deallocateQueue(device->endpoints);
       }
-      deallocateQueue(device->endpoints);
+      free(device->path);
     }
     free(device);
-  } else {
-    LogError("USB device allocation");
   }
+
+  LogError("USB device open");
   return NULL;
 }
 
@@ -362,6 +366,8 @@ usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
       usbLogString(device, device->descriptor.iSerialNumber, "Serial Number");
       return device;
     }
+
+    errno = ENOENT;
     usbCloseDevice(device);
   }
   return NULL;

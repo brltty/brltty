@@ -77,22 +77,6 @@ usbGetDriver (
   return strdup(arg.driver);
 }
 
-int
-usbIsSerialDevice (
-  UsbDevice *device,
-  unsigned char interface
-) {
-  int yes = 0;
-  char *driver = usbGetDriver(device, interface);
-  if (driver) {
-    if (strcmp(driver, "serial") == 0) {
-      yes = 1;
-    }
-    free(driver);
-  }
-  return yes;
-}
-
 static int
 usbControlDriver (
   UsbDevice *device,
@@ -232,6 +216,15 @@ usbControlTransfer (
   }
 }
 
+int
+usbOpenEndpoint (UsbEndpoint *endpoint) {
+  return 1;
+}
+
+void
+usbCloseEndpoint (UsbEndpoint *endpoint) {
+}
+
 static int
 usbBulkTransfer (
   UsbEndpoint *endpoint,
@@ -239,45 +232,63 @@ usbBulkTransfer (
   int length,
   int timeout
 ) {
-  if (endpoint) {
-    struct usbdevfs_bulktransfer arg;
-    memset(&arg, 0, sizeof(arg));
-    arg.ep = endpoint->descriptor->bEndpointAddress;
-    arg.data = buffer;
-    arg.len = length;
-    arg.timeout = timeout;
+  struct usbdevfs_bulktransfer arg;
+  memset(&arg, 0, sizeof(arg));
+  arg.ep = endpoint->descriptor->bEndpointAddress;
+  arg.data = buffer;
+  arg.len = length;
+  arg.timeout = timeout;
 
-    {
-      int count = ioctl(endpoint->device->file, USBDEVFS_BULK, &arg);
-      if (count != -1) return count;
-      LogError("USB bulk transfer");
-    }
+  {
+    int count = ioctl(endpoint->device->file, USBDEVFS_BULK, &arg);
+    if (count != -1) return count;
+    LogError("USB bulk transfer");
   }
   return -1;
 }
 
 int
-usbBulkRead (
+usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(usbGetInputEndpoint(device, endpointNumber),
-                         buffer, length, timeout);
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+  if (endpoint) {
+    switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
+      case USB_ENDPOINT_TRANSFER_BULK:
+        return usbBulkTransfer(endpoint, buffer, length, timeout);
+
+      default:
+        errno = EINVAL;
+        break;
+    }
+  }
+  return -1;
 }
 
 int
-usbBulkWrite (
+usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(usbGetOutputEndpoint(device, endpointNumber),
-                         (void *)buffer, length, timeout);
+  UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
+  if (endpoint) {
+    switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
+      case USB_ENDPOINT_TRANSFER_BULK:
+        return usbBulkTransfer(endpoint, (void *)buffer, length, timeout);
+
+      default:
+        errno = EINVAL;
+        break;
+    }
+  }
+  return -1;
 }
 
 void *
@@ -380,15 +391,6 @@ usbReapResponse (
     response->context = urb->usercontext;
   }
   return urb;
-}
-
-int
-usbOpenEndpoint (const UsbEndpointDescriptor *descriptor, void **system) {
-  return 1;
-}
-
-void
-usbCloseEndpoint (void *system) {
 }
 
 int

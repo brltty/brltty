@@ -46,14 +46,6 @@ usbSetConfiguration (
 }
 
 int
-usbIsSerialDevice (
-  UsbDevice *device,
-  unsigned char interface
-) {
-  return 0;
-}
-
-int
 usbClaimInterface (
   UsbDevice *device,
   unsigned char interface
@@ -123,7 +115,16 @@ usbControlTransfer (
 }
 
 int
-usbBulkRead (
+usbOpenEndpoint (UsbEndpoint *endpoint) {
+  return 1;
+}
+
+void
+usbCloseEndpoint (UsbEndpoint *endpoint) {
+}
+
+int
+usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
@@ -136,7 +137,7 @@ usbBulkRead (
 }
 
 int
-usbBulkWrite (
+usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
@@ -180,15 +181,6 @@ usbReapResponse (
   errno = ENOSYS;
   LogError("USB request reap");
   return NULL;
-}
-
-int
-usbOpenEndpoint (const UsbEndpointDescriptor *descriptor, void **system) {
-  return 1;
-}
-
-void
-usbCloseEndpoint (void *system) {
 }
 
 int

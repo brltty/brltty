@@ -210,10 +210,6 @@ extern int usbGetConfiguration (
   unsigned char *number
 );
 
-extern int usbIsSerialDevice (
-  UsbDevice *device,
-  unsigned char interface
-);
 extern int usbClaimInterface (
   UsbDevice *device,
   unsigned char interface
@@ -286,14 +282,14 @@ extern int usbVerifyManufacturer (UsbDevice *device, const char *eRegExp);
 extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
 extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
-extern int usbBulkRead (
+extern int usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
   int length,
   int timeout
 );
-extern int usbBulkWrite (
+extern int usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
