@@ -402,25 +402,6 @@ static void *processConnection(void *arg)
         else writeAckPacket(c->fd);
         continue;
       }
-      case BRLPACKET_WRITE: {
-        uint32_t cursor;
-        LogPrint(LOG_DEBUG,"Received Write request... ");
-        CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
-        CHECK(size==sizeof(uint32_t)+c->brl.x*c->brl.y,BRLERR_INVALID_PACKET);
-        pthread_mutex_lock(&c->brlmutex);
-        memcpy(c->brl.buffer, packet+sizeof(uint32_t),c->brl.x*c->brl.y);
-        for (i=0; i<c->brl.x*c->brl.y; i++)
-          *(c->brl.buffer+i) = textTable[*(c->brl.buffer+i)];
-        cursor = ntohl (ints[0]);
-        if ((cursor>=1) && (cursor<=c->brl.x*c->brl.y)) {
-          cursor--;
-          *(c->brl.buffer+cursor) |= cursorDots();
-        }
-        c->brlbufstate = FULL;
-        pthread_mutex_unlock(&c->brlmutex);
-        writeAckPacket(c->fd);
-        continue;
-      }
       case BRLPACKET_WRITEDOTS: {
         LogPrint(LOG_DEBUG,"Received WriteDots request... ");
         CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);

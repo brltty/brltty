@@ -345,12 +345,7 @@ int brlapi_getDriverId(unsigned char *id, size_t n)
     switch (type) {
       case BRLPACKET_GETDRIVERID: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
-        if (n<res) {
-          brlapi_errno = BRLERR_NOMEM;
-          return -1;
-        }
-        strcpy(id,packet);
-        return 0;
+        return snprintf(id, n, "%s", packet);
       }
       case BRLPACKET_ERROR: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
@@ -388,12 +383,7 @@ int brlapi_getDriverName(unsigned char *name, size_t n)
     switch (type) {
       case BRLPACKET_GETDRIVERNAME: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
-        if (n<res) {
-          brlapi_errno = BRLERR_NOMEM;
-          return -1;
-        }
-        strcpy(name, packet);
-        return 0;
+        return snprintf(name, n, "%s", packet);
       }
       case BRLPACKET_ERROR: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
@@ -557,19 +547,26 @@ int brlapi_leaveTty()
 /* Writes a string to the braille display */
 int brlapi_writeBrl(int cursor, const unsigned char *str)
 {
-  unsigned char disp[sizeof(uint32_t)+256];
-  uint32_t *csr = (uint32_t *) &disp[0];
-  unsigned char *s = &disp[sizeof(uint32_t)];
-  uint32_t tmp = brlx * brly, min, i;
-  if ((tmp == 0) || (tmp > 256)) {
+  int dispSize = brlx * brly;
+  uint32_t min, i;
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  extWriteStruct *ews = (extWriteStruct *) packet;
+  unsigned char *p = &ews->data;
+  if ((dispSize == 0) || (dispSize > 256)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
-  *csr = htonl(cursor);
-  min = MIN( strlen(str), tmp);
-  strncpy(s,str,min);
-  for (i = min; i<tmp; i++) *(s+i) = ' '; 
-  return brlapi_writePacketWaitForAck(fd,BRLPACKET_WRITE,disp,sizeof(uint32_t)+tmp);
+  ews->flags = BRLAPI_EWF_TEXT;
+  min = MIN( strlen(str), dispSize);
+  strncpy(p,str,min);
+  p += min;
+  for (i = min; i<dispSize; i++,p++) *p = ' ';
+  if ((cursor>=0) && (cursor<=dispSize)) {
+    ews->flags |= BRLAPI_EWF_CURSOR;
+    *((uint32_t *) p) = htonl(cursor);
+    p += sizeof(cursor);
+  } 
+  return brlapi_writePacketWaitForAck(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
 }
 
 /* Function : brlapi_writeBrlDots */

@@ -204,7 +204,8 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth);
  *
  * \param n is the maximum size of the id buffer
  *
- * \return 0 on success, -1 on error
+ * \return -1 on error, or aApositive value giving the size of the needed
+ * buffer, if th supplied one is to small (same as \e snprintf)
 */
 int brlapi_getDriverId(unsigned char *id, size_t n);
 
@@ -216,7 +217,8 @@ int brlapi_getDriverId(unsigned char *id, size_t n);
  *
  * \param n is the maximum size for the name buffer
  *
- * \return 0 on success, -1 on error
+ * \return -1 on error, or aApositive value giving the size of the needed
+ * buffer, if th supplied one is to small (same as \e snprintf)
 */
 int brlapi_getDriverName(unsigned char *name, size_t n);
 
@@ -599,7 +601,7 @@ extern const char *brlapi_strerror(void);
 /** type for packet type. Only unsigned can cross networks, 32bits */
 typedef uint32_t brl_type_t;
 
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 1) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 2) /** Communication protocol version */
 
 #define BRLPACKET_AUTHKEY           'K'    /**< Authentication key          */
 #define BRLPACKET_BYE               'B'    /**< Bye                         */
@@ -612,7 +614,6 @@ typedef uint32_t brl_type_t;
 #define BRLPACKET_COMMAND           'c'    /**< braille command             */
 #define BRLPACKET_MASKKEYS          'm'    /**< Mask a key-range            */
 #define BRLPACKET_UNMASKKEYS        'u'    /**< Unmask key range            */
-#define BRLPACKET_WRITE             'W'    /**< Write On Braille Display    */
 #define BRLPACKET_WRITEDOTS         'D'    /**< Write Dots On Braille Display  */
 #define BRLPACKET_STATWRITE         'S'    /**< Write Status Cells          */
 #define BRLPACKET_EXTWRITE          'e'    /**< Extended Write              */
