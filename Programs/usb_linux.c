@@ -695,7 +695,8 @@ usbMakeRoot (void) {
       if (usbTestPath(directory)) return directory;
       LogPrint(LOG_NOTICE, "Mounting USBFS: %s", directory);
       if (mount(name, directory, type, 0, NULL) != -1) return directory;
-      LogPrint(LOG_ERR, "USBFS mount error: %s: %s", directory, strerror(errno));
+      LogPrint(((errno == EROFS) || (errno == EACCES))? LOG_WARNING: LOG_ERR,
+               "USBFS mount error: %s: %s", directory, strerror(errno));
     }
     free(directory);
   }
