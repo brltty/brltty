@@ -388,7 +388,7 @@ initbrl (brldim *brl, const char *device)
 			brl->x = response[2];
 			brl->y = 1;
 			if ((statusCells == 5) && (brl->x == 30)) {
-			   statusCells = 0;
+			   statusCells -= 2;
 			   brl->x += 2;
 			}
 			dataCells = brl->x * brl->y;

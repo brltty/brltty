@@ -68,6 +68,7 @@ typedef enum {
 #define INIT_SKPIDLNS 0		/* 1 = skip all identical lines after first */
 #define INIT_SKPBLNKWINS 0       /* 1 = skip blank windows */
 #define INIT_SKPBLNKWINSMODE sbwEndOfLine
+#define INIT_WINOVLP 0
 
 /* These control the speed of any blinking cursor or capital letters.
  * The numbers refer to cycles of the main program loop.

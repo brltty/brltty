@@ -317,8 +317,8 @@ main (int argc, char *argv[])
   switchto( scr.no );			/* allocate current screen params */
   setwinxy (scr.posx, scr.posy);	/* set initial window position */
   oldwinx = p->winx; oldwiny = p->winy;
-  p->cox = scr.posx;
-  p->coy = scr.posy;
+  p->trkx = scr.posx;
+  p->trky = scr.posy;
 
   /*
    * Main program loop 
@@ -1019,13 +1019,13 @@ main (int argc, char *argv[])
 	  /* If cursor moves while blinking is on */
 	  if (env.csrblink)
 	    {
-	      if (scr.posy != p->coy)
+	      if (scr.posy != p->trky)
 		{
 		  /* turn off cursor to see what's under it while changing lines */
 		  csron = 0;
 		  csrcntr = env.csroffcnt;
 		}
-	      if (scr.posx != p->cox)
+	      else if (scr.posx != p->trkx)
 		{
 		  /* turn on cursor to see it moving on the line */
 		  csron = 1;
@@ -1033,11 +1033,11 @@ main (int argc, char *argv[])
 		}
 	    }
 	  /* If the cursor moves in cursor tracking mode: */
-	  if (!csr_active && (scr.posx != p->cox || scr.posy != p->coy))
+	  if (!csr_active && (scr.posx != p->trkx || scr.posy != p->trky))
 	    {
 	      setwinxy (scr.posx, scr.posy);
-	      p->cox = scr.posx;
-	      p->coy = scr.posy;
+	      p->trkx = scr.posx;
+	      p->trky = scr.posy;
 	    }
 	}
       /* If attribute underlining is blinking during display movement */

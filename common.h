@@ -62,7 +62,7 @@ struct brltty_env {
 	unsigned char skpblnkwins;
 	unsigned char spare17;
 	unsigned char stcellstyle;
-	unsigned char spare18;
+	unsigned char winovlp;
 } __attribute__((packed));
 
 /* 
@@ -72,8 +72,8 @@ struct brltty_param {
 	short csrtrk;		/* tracking mode */
 	short csrhide;		/* For temporarily hiding cursor */
 	short dispmode;		/* text or attributes display */
-	short winx, winy;	/* Start row and column of Braille window */
-	short cox, coy;		/* Old cursor position */
+	short winx, winy;	/* upper-left corner of braille window */
+	short trkx, trky;	/* tracked cursor position */
 };
 
 

@@ -381,7 +381,7 @@ static struct brltty_env initenv = {
 	INIT_SKPIDLNS,  0,
 	INIT_SKPBLNKWINSMODE, 0,
 	INIT_SKPBLNKWINS, 0,
-	ST_None, 0
+	ST_None, INIT_WINOVLP
 };
 
 /* 
@@ -711,6 +711,7 @@ configmenu (void)
      BOOLEAN_ITEM(env.skpblnkwins, "Skip Blank Windows"),
      SYMBOLIC_ITEM(env.skpblnkwinsmode, "Which Blank Windows", skipBlankWindowsModes),
      BOOLEAN_ITEM(env.slidewin, "Sliding Window"),
+     NUMERIC_ITEM(env.winovlp, "Window Overlap", 0, 20),
      BOOLEAN_ITEM(env.csrvis, "Show Cursor"),
      SYMBOLIC_ITEM(env.csrsize, "Cursor Style", cursorStyles),
      BOOLEAN_ITEM(env.csrblink, "Blinking Cursor"),
