@@ -1,4 +1,4 @@
-TechniBraille Help
+Help for TechniBraille Displays
 
 Combinations of dots 1-8: Keyboard input.
 Key below dot 7: Escape key.
@@ -16,7 +16,7 @@ Top/Bottom: Go up/down one line.
 Left/Right: Go left/right one window.
 
 The six keys at the left front (2 columns, 3 row):
-Ins [1,1]: .
+Ins [1,1]: Go to cursor (or undo cursor tracking motion).
 E [2,1]: Go to top line.
 Supp [1,2]: Toggle cursor tracking.
 L [2,2]: Go to bottom line.
@@ -49,4 +49,3 @@ The twelve keys of the numeric pad (3 columns, 4 rows):
 VerrN3m [1,4]: Toggle six-dot braille.
 0 [2,4]: Insert key.
 . [3,4]: Delete key.
-
