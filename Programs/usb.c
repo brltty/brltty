@@ -209,6 +209,7 @@ usbAwaitInput (
   if (!device->inputRequest) {
     UsbResponse response;
     while (!(device->inputRequest = usbReapResponse(device, &response, 0))) {
+      if (errno != EAGAIN) return 0;
       if (timeout <= 0) return 0;
       {
         const int interval = 10;
