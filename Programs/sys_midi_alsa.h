@@ -25,44 +25,149 @@ struct MidiDeviceStruct {
   int           duration;
 };
 
+static int
+findMidiDevice (MidiDevice *midi, int *client, int *port) {
+  snd_seq_client_info_t *clientInformation = mallocWrapper(snd_seq_client_info_sizeof());
+  memset(clientInformation, 0, snd_seq_client_info_sizeof());
+  snd_seq_client_info_set_client(clientInformation, -1);
+
+  while (snd_seq_query_next_client(midi->handle, clientInformation) >= 0) {
+    int clientIdentifier = snd_seq_client_info_get_client(clientInformation);
+
+    snd_seq_port_info_t *portInformation = mallocWrapper(snd_seq_port_info_sizeof());
+    memset(portInformation, 0, snd_seq_port_info_sizeof());
+    snd_seq_port_info_set_client(portInformation, clientIdentifier);
+    snd_seq_port_info_set_port(portInformation, -1);
+
+    while (snd_seq_query_next_port(midi->handle, portInformation) >= 0) {
+      int portIdentifier = snd_seq_port_info_get_port(portInformation);
+      int actualCapabilities = snd_seq_port_info_get_capability(portInformation);
+      const int neededCapabilties = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
+
+      if (((actualCapabilities & neededCapabilties) == neededCapabilties) &&
+          !(actualCapabilities & SND_SEQ_PORT_CAP_NO_EXPORT)) {
+        *client = clientIdentifier;
+        *port = portIdentifier;
+
+        free(portInformation);
+        free(clientInformation);
+        return 1;
+      }
+    }
+
+    free(portInformation);
+  }
+
+  free(clientInformation);
+  return 0;
+}
+
+static int
+parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *client, int *port) {
+  char **components = splitString(device, ':', NULL);
+  char **component = components;
+  if (*component && **component) {
+    const char *clientSpecifier = *component++;
+
+    if (*component && **component) {
+      const char *portSpecifier = *component++;
+
+      if (!*component) {
+        int clientIdentifier;
+        int clientOk = 0;
+
+        if (isInteger(&clientIdentifier, clientSpecifier)) {
+          if ((clientIdentifier >= 0) && (clientIdentifier <= 0XFFFF)) clientOk = 1;
+        }
+
+        if (clientOk) {
+          int portIdentifier;
+          int portOk = 0;
+
+          if (isInteger(&portIdentifier, portSpecifier)) {
+            if ((portIdentifier >= 0) && (portIdentifier <= 0XFFFF)) portOk = 1;
+          }
+
+          if (portOk) {
+            *client = clientIdentifier;
+            *port = portIdentifier;
+            return 1;
+          } else {
+            LogPrint(errorLevel, "Invalid ALSA MIDI port: %s", device);
+          }
+        } else {
+          LogPrint(errorLevel, "Invalid ALSA MIDI client: %s", device);
+        }
+      } else {
+        LogPrint(errorLevel, "Too many ALSA MIDI device components: %s", device);
+      }
+    } else {
+      LogPrint(errorLevel, "Missing ALSA MIDI port specifier: %s", device);
+    }
+  } else {
+    LogPrint(errorLevel, "Missing ALSA MIDI client specifier: %s", device);
+  }
+
+  deallocateStrings(components);
+  return 0;
+}
+
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
 
   if ((midi = malloc(sizeof(*midi)))) {
+    const char *name = "default";
     int result;
 
-    if ((result = snd_seq_open(&midi->handle, "default",
-			       SND_SEQ_OPEN_OUTPUT, 0)) == 0) {
+    if ((result = snd_seq_open(&midi->handle, name,
+                               SND_SEQ_OPEN_OUTPUT, 0)) == 0) {
       snd_seq_set_client_name(midi->handle, PACKAGE_TITLE);
 
-      if ((midi->port =
-	   snd_seq_create_simple_port(
-	    midi->handle, "out0",
-	    SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
-	    SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
-	if ((midi->queue = snd_seq_alloc_queue(midi->handle)) >= 0) {
-	  if ((result = snd_seq_connect_to(midi->handle, midi->port, 65, 0)) == 0) {
-	    if ((result = snd_seq_start_queue(midi->handle, midi->queue, NULL)) >= 0) {
-	      midi->duration = 0;
+      if ((midi->port = snd_seq_create_simple_port(midi->handle, "out0",
+						   SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
+						   SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
+        if ((midi->queue = snd_seq_alloc_queue(midi->handle)) >= 0) {
+          int client;
+          int port;
+          int deviceOk;
 
-	      return midi;
-	    } else {
-	      LogPrint(errorLevel, "Failed to start queue: %s", snd_strerror(result));
-	    }
-	  } else {
-	    LogPrint(errorLevel, "Unable to connect to: %s", snd_strerror(result));
-	  }
-	} else {
-	  LogPrint(errorLevel, "Unable to allocate queue: %s", snd_strerror(result));
-	}
+          if (device) {
+            deviceOk = parseMidiDevice(midi, errorLevel, device, &client, &port);
+          } else {
+            deviceOk = findMidiDevice(midi, &client, &port);
+          }
+
+          if (deviceOk) {
+	    LogPrint(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
+
+            if ((result = snd_seq_connect_to(midi->handle, midi->port, client, port)) >= 0) {
+              if ((result = snd_seq_start_queue(midi->handle, midi->queue, NULL)) >= 0) {
+                midi->duration = 0;
+
+                return midi;
+              } else {
+                LogPrint(errorLevel, "Cannot start ALSA MIDI queue: %d:%d: %s",
+		         client, port, snd_strerror(result));
+              }
+            } else {
+              LogPrint(errorLevel, "Cannot connect to ALSA MIDI device: %d:%d: %s",
+	               client, port, snd_strerror(result));
+            }
+          }
+        } else {
+          LogPrint(errorLevel, "Cannot allocate ALSA MIDI queue: %s",
+	           snd_strerror(result));
+        }
       } else {
-	LogPrint(errorLevel, "Can't open output port: %s", snd_strerror(midi->port));
+        LogPrint(errorLevel, "Cannot create ALSA MIDI output port: %s",
+	         snd_strerror(midi->port));
       }
 
       snd_seq_close(midi->handle);
     } else {
-      LogPrint(errorLevel, "Cannot open MIDI device: %s", snd_strerror(result));
+      LogPrint(errorLevel, "Cannot open ALSA sequencer: %s: %s",
+               name, snd_strerror(result));
     }
 
     free(midi);

@@ -47,11 +47,11 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_MIDI_SUPPORT */
 #ifdef ENABLE_MIDI_SUPPORT
   {'m', "midi-device", "device", NULL, 0,
-   "Specifier (client:port for ALSA, else path) for accessing the Musical Instrument Digital Interface."},
+   "Device specifier for the Musical Instrument Digital Interface."},
 #endif /* ENABLE_MIDI_SUPPORT */
 #ifdef ENABLE_PCM_SUPPORT
   {'p', "pcm-device", "device", NULL, 0,
-   "Specifier (path) for accessing the Pulse Code Modulation interface."},
+   "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
   {'v', "level", "volume", NULL, 0,
    "Output volume."},

@@ -34,6 +34,7 @@
 #include "Programs/misc.h"
 #include "Programs/system.h"
 #include "Programs/queue.h"
+#include "Programs/brltty.h"
 
 typedef enum {
   PARM_NAME,
@@ -82,7 +83,7 @@ static PcmDevice *pcm = NULL;
 static int
 openSoundDevice (void) {
   if (!pcm) {
-    if (!(pcm = openPcmDevice(LOG_WARNING))) return 0;
+    if (!(pcm = openPcmDevice(LOG_WARNING, opt_pcmDevice))) return 0;
 
     speechParameters.nChannels = setPcmChannelCount(pcm, 1);
     speechParameters.nSampleFreq = setPcmSampleRate(pcm, 22050);

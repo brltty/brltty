@@ -268,13 +268,13 @@ BEGIN_OPTION_TABLE
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
 #ifdef ENABLE_MIDI_SUPPORT
   {'m', "midi-device", "device", NULL, 0,
-   "Specifier (client:port for ALSA, else path) for accessing the Musical Instrument Digital Interface."},
+   "Device specifier for the Musical Instrument Digital Interface."},
 #endif /* ENABLE_MIDI_SUPPORT */
   {'n', "no-daemon", NULL, NULL, 0,
    "Remain a foreground process."},
 #ifdef ENABLE_PCM_SUPPORT
   {'p', "pcm-device", "device", NULL, 0,
-   "Specifier (path) for accessing the Pulse Code Modulation interface."},
+   "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
   {'q', "quiet", NULL, NULL, 0,
    "Suppress start-up messages."},

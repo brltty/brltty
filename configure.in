@@ -446,10 +446,12 @@ in
       system_object="linux"
       brltty_pcm_interfaces="oss"
       brltty_midi_interfaces="oss"
-      AC_CHECK_HEADER([alsa/asoundlib.h], [dnl
-         brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"
-         brltty_midi_interfaces="${brltty_midi_interfaces} alsa"
+      test -d /proc/asound && {
+         AC_CHECK_HEADER([alsa/asoundlib.h], [dnl
+            brltty_pcm_interfaces="alsa ${brltty_pcm_interfaces}"
+            brltty_midi_interfaces="alsa ${brltty_midi_interfaces}"
 ])
+      }
       ;;
    solaris*)
       system_object="solaris"

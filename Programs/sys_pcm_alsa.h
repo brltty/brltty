@@ -23,7 +23,7 @@ struct PcmDeviceStruct {
 };
 
 static void
-logAlsaError (int level, const char *action, int code) {
+logPcmError (int level, const char *action, int code) {
   LogPrint(level, "ALSA PCM %s error: %s", action, snd_strerror(code));
 }
 
@@ -33,41 +33,42 @@ openPcmDevice (int errorLevel, const char *device) {
   if ((pcm = malloc(sizeof(*pcm)))) {
     int result;
 
-    if ((result = snd_pcm_open(&pcm->handle, "hw:0,0", SND_PCM_STREAM_PLAYBACK, 0)) >= 0) {
+    if (!device) device = "hw:0,0";
+    if ((result = snd_pcm_open(&pcm->handle, device, SND_PCM_STREAM_PLAYBACK, 0)) >= 0) {
       if ((result = snd_pcm_hw_params_malloc(&pcm->hwparams)) >= 0) {
-	int buffer_time = 1000000 / 4; /* usecs */
-	int dir;
+        int buffer_time = 1000000 / 4; /* usecs */
+        int dir;
 
-	if ((result = snd_pcm_hw_params_any(pcm->handle, pcm->hwparams)) == 0) {
-	  snd_pcm_hw_params_set_access(pcm->handle, pcm->hwparams,
-				       SND_PCM_ACCESS_RW_INTERLEAVED);
-	  {
-	    int rate;
-	    if ((result = snd_pcm_hw_params_get_rate_max(pcm->hwparams, &rate, 0)) == 0) {
-	      if ((result = snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hwparams, &rate, 0)) == 0) {
-		LogPrint(LOG_INFO, "Using maximum rate of %d.", rate);
-	      } else {
-		logAlsaError(errorLevel, "set rate near", result);
-	      }
-	    } else {
-	      logAlsaError(errorLevel, "get rate max", result);
-	    }
-	  }
-	  snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hwparams, &buffer_time, &dir);
-	  setPcmAmplitudeFormat(pcm, PCM_FMT_S16L);
-	  snd_pcm_hw_params(pcm->handle, pcm->hwparams);
+        if ((result = snd_pcm_hw_params_any(pcm->handle, pcm->hwparams)) == 0) {
+          snd_pcm_hw_params_set_access(pcm->handle, pcm->hwparams,
+                                       SND_PCM_ACCESS_RW_INTERLEAVED);
+          {
+            int rate;
+            if ((result = snd_pcm_hw_params_get_rate_max(pcm->hwparams, &rate, 0)) == 0) {
+              if ((result = snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hwparams, &rate, 0)) == 0) {
+                LogPrint(LOG_INFO, "Using maximum rate of %d.", rate);
+              } else {
+                logPcmError(errorLevel, "set rate near", result);
+              }
+            } else {
+              logPcmError(errorLevel, "get rate max", result);
+            }
+          }
+          snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hwparams, &buffer_time, &dir);
+          setPcmAmplitudeFormat(pcm, PCM_FMT_S16L);
+          snd_pcm_hw_params(pcm->handle, pcm->hwparams);
 
-	  return pcm;
-	} else {
-	  logAlsaError(errorLevel, "getting hardware parameters", result);
-	}
+          return pcm;
+        } else {
+          logPcmError(errorLevel, "getting hardware parameters", result);
+        }
       } else {
-	logAlsaError(errorLevel, "hardware parameters allocation", result);
+        logPcmError(errorLevel, "hardware parameters allocation", result);
       }
 
       snd_pcm_close(pcm->handle);
     } else {
-      logAlsaError(errorLevel, "open", result);
+      logPcmError(errorLevel, "open", result);
     }
 
     free(pcm);
@@ -98,23 +99,23 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
       buffer += result * frameSize;
     } else {
       switch (result) {
-	case -EPIPE:
-	  if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
-	    logAlsaError(LOG_WARNING, "underrun recovery - prepare", result);
-	    return 0;
-	  }
-	  continue;
+        case -EPIPE:
+          if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
+            logPcmError(LOG_WARNING, "underrun recovery - prepare", result);
+            return 0;
+          }
+          continue;
 
-	case -ESTRPIPE:
-	  while ((result = snd_pcm_resume(pcm->handle)) == -EAGAIN) sleep(1);
+        case -ESTRPIPE:
+          while ((result = snd_pcm_resume(pcm->handle)) == -EAGAIN) sleep(1);
 
-	  if (result < 0) {
-	    if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
-	      logAlsaError(LOG_WARNING, "resume - prepare", result);
-	      return 0;
-	    }
-	  }
-	  continue;
+          if (result < 0) {
+            if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
+              logPcmError(LOG_WARNING, "resume - prepare", result);
+              return 0;
+            }
+          }
+          continue;
       }
     }
   }
@@ -127,10 +128,10 @@ getPcmBlockSize (PcmDevice *pcm) {
   int result, dir;
 
   if ((result = snd_pcm_hw_params_get_period_size(pcm->hwparams, &buffer_size,
-						  &dir)) == 0) {
+                                                  &dir)) == 0) {
     return buffer_size;
   } else {
-    logAlsaError(LOG_ERR, "set rate near", result);
+    logPcmError(LOG_ERR, "set rate near", result);
   }
   return 65535;
 }
@@ -166,7 +167,7 @@ setPcmChannelCount (PcmDevice *pcm, int channels) {
   err = snd_pcm_hw_params_set_channels(pcm->handle, pcm->hwparams, channels);
   if (err < 0) {
     LogPrint(LOG_ERR, "Channels count (%i) not available for playback: %s",
-	     channels, snd_strerror(err));
+             channels, snd_strerror(err));
     return 0;
   }
   return channels;
