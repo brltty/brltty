@@ -1037,7 +1037,11 @@ savePreferences (void) {
   int ok = 0;
   int fd = open(preferencesFile, O_WRONLY | O_CREAT | O_TRUNC);
   if (fd != -1) {
+#ifdef HAVE_FCHMOD
     fchmod(fd, S_IRUSR | S_IWUSR);
+#else /* HAVE_FCHMOD */
+    chmod(preferencesFile, S_IRUSR | S_IWUSR);
+#endif /* HAVE_FCHMOD */
     if (write(fd, &prefs, sizeof(prefs)) == sizeof(prefs)) {
       ok = 1;
     } else {
@@ -1944,6 +1948,7 @@ startup (int argc, char *argv[]) {
     atexit(exitScreen);
   }
   
+#ifdef HAVE_SYS_WAIT_H
   if (!(opt_noDaemon || opt_verify)) {
     setPrintOff();
 
@@ -1970,6 +1975,8 @@ startup (int argc, char *argv[]) {
       exit(13);
     }
   }
+#endif /* HAVE_SYS_WAIT_H */
+
   /*
    * From this point, all IO functions as printf, puts, perror, etc. can't be
    * used anymore since we are a daemon.  The LogPrint facility should 

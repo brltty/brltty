@@ -77,6 +77,9 @@ extern "C" {
 /* Define this if the function fchdir exists. */
 #undef HAVE_FCHDIR
 
+/* Define this if the function fchmod exists. */
+#undef HAVE_FCHMOD
+
 /* Define this if the function getaddrinfo exists. */
 #undef HAVE_GETADDRINFO
 
