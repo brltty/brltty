@@ -197,8 +197,8 @@ INSTALL_DRIVERS =
 BRL_TARGETS = Alva BrailleLite BrailleNote CombiBraille EcoBraille EuroBraille HandyTech LogText MDV MiniBraille MultiBraille Papenmeier TSI Vario Vario-HT VideoBraille VisioBraille Voyager
 BRL_LIBS = al bl bn cb ec eu ht lt md mn mb pm ts va vh vd vs vo
 
-SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival GenericSay Televox
-SPK_LIBS = no al bl cb es fv gs tv
+SPK_TARGETS = Alva BrailleLite CombiBraille ExternalSpeech Festival GenericSay Televox
+SPK_LIBS = al bl cb es fv gs tv
 
 ifneq (,$(wildcard /usr/include/eci.h))
 SPK_TARGETS += ViaVoice
@@ -223,14 +223,15 @@ install-brltty: install.template
 SCREEN_OBJECTS = scr.o scr_base.o $(SCR_O)
 
 ifeq ($(SPK_TARGET),)
-   SPK_TARGET = NoSpeech
    INSTALL_DRIVERS = install-drivers
    SPEECH_TARGETS = dynamic-speech
+   SPEECH_OBJECTS =
+   BUILTIN_SPEECH =
 else
    SPEECH_TARGETS = static-speech
+   SPEECH_OBJECTS = $(SPK_TARGET)/speech.o 
+   BUILTIN_SPEECH = -DSPK_BUILTIN
 endif
-SPEECH_OBJECTS = $(SPK_TARGET)/speech.o 
-BUILTIN_SPEECH = -DSPK_BUILTIN
 
 ifeq ($(BRL_TARGET),)
    INSTALL_DRIVERS = install-drivers
@@ -265,12 +266,9 @@ adlib.o: adlib.c adlib.h misc.h
 
 BRLTTY_OBJECTS = main.o config.o route.o misc.o $(TUNE_OBJECTS) cut.o spk_load.o brl_load.o
 
-brltty-static.o: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
-	ld -r -static -o $@ \
+brltty-static: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
+	$(CC) $(LDFLAGS) -static -Wl,--export-dynamic,-rpath,$(LIB_DIR) -o $@ \
 	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
-
-brltty-static: brltty-static.o
-	$(LD) $(LDFAGS) -Wl,-rpath,$(LIB_DIR) -o $@ $<
 
 brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -Wl,-rpath,$(LIB_DIR) -o $@ \
@@ -290,7 +288,7 @@ config.o: config.c config.h brl.h spk.h scr.h tunes.h message.h misc.h common.h
 route.o: route.c route.h scr.h misc.h
 	$(CC) $(CFLAGS) -c route.c
 
-misc.o: misc.c misc.h text.auto.h attrib.auto.h config.h brl.h common.h
+misc.o: misc.c misc.h config.h brl.h common.h
 	$(CC) $(CFLAGS) -c misc.c
 
 cut.o: cut.c cut.h tunes.h scr.h
@@ -308,7 +306,7 @@ dynamic-speech:
 static-speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
-brl_load.o: brl_load.c brl.h misc.h
+brl_load.o: brl_load.c brl.h misc.h text.auto.h attrib.auto.h
 	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_DIR)"' $(BUILTIN_BRAILLE) -c brl_load.c 
 
 dynamic-braille: txt2hlp
@@ -335,6 +333,13 @@ scr_shm.o: scr_shm.cc scr_shm.h scr.h scr_base.h config.h
 speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
+check-brltest:
+	$(MAKE) distclean
+	for target in $(BRL_TARGETS); \
+	do $(MAKE) BRL_TARGET=$$target brltest || exit 99; \
+	   $(MAKE) distclean; \
+	done
+
 BRLTEST_OBJECTS = brltest.o misc.o brl_load.o
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
@@ -354,8 +359,8 @@ scrtest.o: scrtest.c
 check-braille: brltty dynamic-braille
 	if [ $$UID = 0 ]; then exit 99; fi
 	for lib in $(BRL_LIBS); \
-	do ls -al lib/*$$lib* || exit 1; \
-	   LD_RUN_PATH="./lib" ./brltty -v -b $$lib 2>&1 || exit 1; \
+	do ls -al lib/libbrlttyb$$lib.* || exit 1; \
+	   LD_RUN_PATH="./lib" ./brltty -v -q -N -e -f /dev/null -b $$lib 2>&1 || exit 1; \
 	done
 
 text.auto.h: BrailleTables/$(TEXTTRANS) tbl2hex Makefile

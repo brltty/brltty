@@ -115,12 +115,7 @@ extern const unsigned char portraitDigits[11];
 extern int portraitNumber (int x);
 extern int portraitFlag (int number, int on);
 
-#define MAXNSTATCELLS 22
-extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
-extern unsigned char texttrans[0X100];	 /* current text to braille translation table */
-extern unsigned char untexttrans[0X100]; /* current braille to text translation table */
 extern void reverseTable(unsigned char *origtab, unsigned char *revtab);
-extern unsigned char attribtrans[0X100]; /* current attributes to braille translation table */
 
 #ifdef __cplusplus
 }

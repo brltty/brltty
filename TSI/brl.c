@@ -357,7 +357,7 @@ static unsigned char *battery_msg;     /* low battery warning msg */
 static enum { NAV20_40=0, NAV80, PB40, PB65_80} displayType;
 
 static void 
-identbrl (void)
+brl_identify (void)
 {
   LogPrint(LOG_NOTICE, VERSION);
   LogPrint(LOG_INFO, "   "COPYRIGHT);
@@ -446,7 +446,8 @@ ResetTypematic (void)
 }
 
 
-static void initbrl (char **parameters, brldim *brl, const char *tty)
+static void
+brl_initialize (char **parameters, brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
   int i=0;
@@ -689,14 +690,14 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
 
 failure:;
   LogPrint(LOG_WARNING,"TSI driver giving up");
-  closebrl(&res);
+  brl_close(&res);
   brl->x = -1;
   return;
 }
 
 
 static void 
-closebrl (brldim *brl)
+brl_close (brldim *brl)
 {
   if (brl_fd >= 0) {
     tcsetattr (brl_fd, TCSADRAIN, &oldtio);
@@ -786,7 +787,8 @@ display (const unsigned char *pattern,
   };
 }
 
-static void setbrlstat (const unsigned char *s)
+static void
+brl_writeStatus (const unsigned char *s)
 /* Only the PB80, which actually has 81cells, can be considered to have status
    cells, and it has only one. We could also decide to devote some of
    the cells of the PB65? */
@@ -804,7 +806,7 @@ display_all (unsigned char *pattern)
 
 
 static void 
-writebrl (brldim *brl)
+brl_writeWindow (brldim *brl)
 {
   static int count = 0;
 
@@ -908,10 +910,6 @@ do_battery_warn ()
 #endif
 
 
-/* OK now about key inputs */
-int readbrl (DriverCommandContext);
-
-
 /* OK this one is pretty strange and ugly. readbrl() reads keys from
    the display's key pads. It calls cut_cursor() if it gets a certain key
    press. cut_cursor() is an elaborate function that allows selection of
@@ -967,7 +965,7 @@ cut_cursor ()
       display_all (prevdata);
       prevdata[pos] = oldchar;
 
-      while ((key = readbrl (CMDS_SCREEN)) == EOF) delay(1); /* just yield */
+      while ((key = brl_read (CMDS_SCREEN)) == EOF) delay(1); /* just yield */
       switch (key)
 	{
 	case CMD_FWINRT:
@@ -1056,7 +1054,7 @@ cut_cursor ()
 #define MAXREAD 10
 
 static int 
-readbrl (DriverCommandContext cmds)
+brl_read (DriverCommandContext cmds)
 {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */

@@ -15,72 +15,112 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/*
- * brl_load.c - handling of dynamic braille drivers
- */
-
-#include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 #include <dlfcn.h>
 
-#include "brl.h"
 #include "misc.h"
+#include "brl.h"
 
+#define BRLSYMBOL noBraille
+#define BRLNAME "NoBraille"
+#define BRLDRIVER "no"
+#define BRLHELP "/dev/null"
+#define PREFSTYLE ST_None
+#include "brl_driver.h"
+static void brl_identify (void) {
+  LogPrint(LOG_NOTICE, "No braille support.");
+}
+static void brl_initialize (char **parameters, brldim *brl, const char *device) { }
+static void brl_close (brldim *brl) { }
+static void brl_writeWindow (brldim *brl) { }
+static void brl_writeStatus (const unsigned char *status) { }
+static int brl_read (DriverCommandContext cmds) { return EOF; }
+
+static void *libraryHandle = NULL;	/* handle to driver */
+static const char *symbolName = "brl_driver";
 braille_driver *braille = NULL;	/* filled by dynamic libs */
-static void *library = NULL;	/* handle to driver */
-#define BRL_SYMBOL "brl_driver"
+
+/*
+ * Output braille translation tables.
+ * The files *.auto.h (the default tables) are generated at compile-time.
+ */
+unsigned char texttrans[0X100] = {
+  #include "text.auto.h"
+};
+unsigned char untexttrans[0X100];
+
+unsigned char attribtrans[0X100] = {
+  #include "attrib.auto.h"
+};
+
+/*
+ * Status cells support 
+ * remark: the Papenmeier has a column with 22 cells, 
+ * all other terminals use up to 5 bytes
+ */
+unsigned char statcells[MAXNSTATCELLS];        /* status cell buffer */
 
 /* load driver from library */
 /* return true (nonzero) on success */
-int loadBrailleDriver (const char **libraryName) {
-  const char *error;
+int loadBrailleDriver (const char **driver) {
+  if (*driver != NULL)
+    if (strcmp(*driver, noBraille.identifier) == 0) {
+      braille = &noBraille;
+      *driver = NULL;
+      return 1;
+    }
 
   #ifdef BRL_BUILTIN
-    extern braille_driver brl_driver;
-    if (*libraryName != NULL)
-      if (strcmp(*libraryName, brl_driver.identifier) == 0)
-        *libraryName = NULL;
-    if (*libraryName == NULL)
-      {
-	braille = &brl_driver;
-	*libraryName = "built-in";
-	return 1;
+    {
+      extern braille_driver brl_driver;
+      if (*driver != NULL)
+        if (strcmp(*driver, brl_driver.identifier) == 0)
+          *driver = NULL;
+      if (*driver == NULL) {
+        braille = &brl_driver;
+        return 1;
       }
+    }
   #else
-    if (*libraryName == NULL)
-      return 0;
+    if (*driver == NULL) {
+      braille = &noBraille;
+      return 1;
+    }
   #endif
 
-  /* allow shortcuts */
-  if (strlen(*libraryName) == 2)
-    {
-      static char name[] = "libbrlttyb??.so.1"; /* two ? for shortcut */
-      char *pos = strchr(name, '?');
-      memcpy(pos, *libraryName, 2);
-      *libraryName = name;
+  {
+    const char *libraryName = *driver;
+
+    /* allow shortcuts */
+    if (strlen(libraryName) == 2) {
+      static char buffer[] = "libbrlttyb??.so.1"; /* two ? for shortcut */
+      memcpy(strchr(buffer, '?'), libraryName, 2);
+      libraryName = buffer;
     }
 
-  library = dlopen(*libraryName, RTLD_NOW|RTLD_GLOBAL);
-  if (library == NULL) 
-    {
+    if ((libraryHandle = dlopen(libraryName, RTLD_NOW|RTLD_GLOBAL))) {
+      const char *error;
+      braille = dlsym(libraryHandle, symbolName);
+      if (!(error = dlerror())) {
+        return 1;
+      } else {
+        LogPrint(LOG_ERR, "%s", error);
+        LogPrint(LOG_ERR, "Braille driver symbol not found: %s", symbolName);
+      }
+      dlclose(libraryHandle);
+      libraryHandle = NULL;
+    } else {
       LogPrint(LOG_ERR, "%s", dlerror());
-      LogPrint(LOG_ERR, "Cannot open braille driver library: %s", *libraryName);
-      return 0;
+      LogPrint(LOG_ERR, "Cannot open braille driver library: %s", libraryName);
     }
+  }
 
-  braille = dlsym(library, BRL_SYMBOL); /* locate struct driver - filled with all the data */
-  error = dlerror();
-  if (error)
-    {
-      LogPrint(LOG_ERR, "%s", error);
-      LogPrint(LOG_ERR, "Braille driver symbol not found: %s", BRL_SYMBOL);
-      return 0;
-    }
-
-  return 1;
+  braille = &noBraille;
+  return 0;
 }
 
 

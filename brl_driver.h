@@ -20,40 +20,45 @@
 
 /* this header file is used to create the driver structure
  * for a dynamically loadable braille display driver.
- * BRLNAME, HELPNAME, and PREFSTYLE must be defined - see brlconf.h
+ * BRLNAME, BRLDRIVER, BRLHELP, and PREFSTYLE must be defined - see brlconf.h
  */
 
 #include "brl.h"
 
 /* Routines provided by this braille display driver. */
-static void identbrl (void);/* print start-up messages */
-static void initbrl (char **parameters, brldim *, const char *); /* initialise Braille display */
-static void closebrl (brldim *); /* close braille display */
-static void writebrl (brldim *); /* write to braille display */
-static int readbrl (DriverCommandContext);	/* get key press from braille display */
-static void setbrlstat (const unsigned char *);	/* set status cells */
+static void brl_identify (void);/* print start-up messages */
+static void brl_initialize (char **parameters, brldim *, const char *); /* initialise Braille display */
+static void brl_close (brldim *); /* close braille display */
+static void brl_writeWindow (brldim *); /* write to braille display */
+static int brl_read (DriverCommandContext);	/* get key press from braille display */
+static void brl_writeStatus (const unsigned char *);	/* set status cells */
 
 #ifdef BRLPARMS
-static char *brl_parameters[] = {BRLPARMS, NULL};
+  static const char *const brl_parameters[] = {BRLPARMS, NULL};
 #endif
 
-braille_driver brl_driver = 
-{
+#ifndef BRLSYMBOL
+  #define BRLSYMBOL brl_driver
+#endif
+braille_driver BRLSYMBOL = {
   BRLNAME,
   BRLDRIVER,
-#ifdef BRLPARMS
-  brl_parameters,
-#else
-  NULL,
-#endif
-  HELPNAME,
+
+  #ifdef BRLPARMS
+    brl_parameters,
+  #else
+    NULL,
+  #endif
+
+  BRLHELP,
   PREFSTYLE,
-  identbrl,
-  initbrl,
-  closebrl,
-  writebrl,
-  readbrl,
-  setbrlstat
+
+  brl_identify,
+  brl_initialize,
+  brl_close,
+  brl_writeWindow,
+  brl_read,
+  brl_writeStatus
 };
 
 #endif /* !defined(_BRL_DRIVER_H) */

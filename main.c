@@ -133,7 +133,7 @@ switchto (unsigned int scrno) {
 void
 clearStatusCells (void) {
    memset(statcells, 0, sizeof(statcells));
-   braille->setstatus(statcells);
+   braille->writeStatus(statcells);
 }
 
 static void
@@ -221,7 +221,7 @@ setStatusCells (void) {
       default:
          break;
    }
-   braille->setstatus(statcells);
+   braille->writeStatus(statcells);
 }
 
 void
@@ -233,7 +233,7 @@ setStatusText (const unsigned char *text) {
       if (!character) break;
       statcells[i] = texttrans[character];
    }
-   braille->setstatus(statcells);
+   braille->writeStatus(statcells);
 }
 
 static void
@@ -288,7 +288,7 @@ showInfo (void)
       infbuf[i] = texttrans[infbuf[i]];
 
     memcpy(brl.disp, infbuf, brl.x*brl.y);
-    braille->write(&brl);
+    braille->writeWindow(&brl);
   }
 }
 
@@ -324,7 +324,7 @@ exitScreenParameters (void) {
 
 static void
 terminateProgram (int quickly) {
-  int silently = quickly || (strcmp(speech->name, "NoSpeech") == 0);
+  int silently = quickly || (speech == &noSpeech);
   clearStatusCells();
   message("BRLTTY exiting.", 
           MSG_NODELAY | (silently? MSG_SILENT: 0));
@@ -335,7 +335,7 @@ terminateProgram (int quickly) {
       delay(refreshInterval);
       if (braille->read(CMDS_MESSAGE) != EOF) break;
       if (awaitSilence) {
-        speech->processSpkTracking();
+        speech->doTrack();
         if (!speech->isSpeaking()) break;
       }
     }
@@ -921,7 +921,7 @@ main (int argc, char *argv[])
             break;
           case CMD_SPKHOME:
             if(scr.no == speaking_scrno) {
-              trackSpeech(speech->track());
+              trackSpeech(speech->getTrack());
             } else {
               playTune(&tune_bad_command);
             }
@@ -1126,10 +1126,10 @@ main (int argc, char *argv[])
               while(i>=0 && buffer[i] == 0) i--;
               i++;
               if(i==0) break;
-              if(speech->sayWithAttribs != NULL) {
+              if(speech->express != NULL) {
                 readScreen((ScreenBox){0, p->winy, scr.cols, r},
                            buffer+i, SCR_ATTRIB);
-                speech->sayWithAttribs(buffer, i);
+                speech->express(buffer, i);
               }else speech->say(buffer, i);
               if ((keypress & ~VAL_SWITCHMASK) == CMD_SAYALL) {
                 speaking_scrno = scr.no;
@@ -1391,10 +1391,10 @@ main (int argc, char *argv[])
     }
 
     /* speech tracking */
-    speech->processSpkTracking(); /* called continually even if we're not tracking
+    speech->doTrack(); /* called continually even if we're not tracking
                              so that the pipe doesn't fill up. */
     if(p->trackCursor && speech->isSpeaking() && scr.no == speaking_scrno) {
-      int inx = speech->track();
+      int inx = speech->getTrack();
       if(inx != speaking_prev_inx) {
         trackSpeech(speaking_prev_inx = inx);
       }
@@ -1510,7 +1510,7 @@ main (int argc, char *argv[])
           prefs.csrsize ? BIG_CSRCHAR : SMALL_CSRCHAR;
 
       setStatusCells();
-      braille->write(&brl);
+      braille->writeWindow(&brl);
     }
     delay(refreshInterval);
   }
@@ -1520,7 +1520,7 @@ main (int argc, char *argv[])
 }
 
 void 
-message (unsigned char *text, short flags) {
+message (const unsigned char *text, short flags) {
    int length = strlen(text);
 
    if (prefs.sound && !(flags & MSG_SILENT)) {
@@ -1557,7 +1557,7 @@ message (unsigned char *text, short flags) {
           * work ... 
           */
          for (index=0; index<brl.x*brl.y; ++index) brl.disp[index] = texttrans[brl.disp[index]];
-         braille->write(&brl);
+         braille->writeWindow(&brl);
 
          if (flags & MSG_WAITKEY)
             while (braille->read(CMDS_MESSAGE) == EOF) delay(refreshInterval);

@@ -19,15 +19,20 @@
 #define _TUNES_H
 
 typedef struct {
-   unsigned int frequency;
-   unsigned int duration;
+   unsigned char note;     // standard MIDI values (0 means silence)
+                           // 1 through 127 are semitones, 60 is middle C
+   unsigned char duration; // milliseconds (0 means stop)
 } ToneDefinition;
+#define TONE_NOTE(duration,note) {note, duration}
+#define TONE_WAIT(duration) TONE_NOTE(duration, 0)
+#define TONE_STOP() TONE_WAIT(0)
 
 typedef struct {
    char *message;
    unsigned int tactile;
    ToneDefinition *tones;
 } TuneDefinition;
+#define TUNE_TACTILE(duration,pattern) (((duration) << 8) | (pattern))
 
 extern TuneDefinition tune_detected;
 extern TuneDefinition tune_braille_off;

@@ -41,19 +41,19 @@ static int dev_fd;
 static unsigned char ShutUp[] = "\033S";	/* stop string */
 
 static void
-identspk (void)
+spk_identify (void)
 {
   LogPrint(LOG_NOTICE, "Using the Televox speech interface.");
 }
 
 static void
-initspk (char **parameters)
+spk_initialize (char **parameters)
 {
   dev_fd = open (DevPath, O_WRONLY | O_NOCTTY | O_NONBLOCK);
 }
 
 static void
-say (unsigned char *buffer, int len)
+spk_say (const unsigned char *buffer, int len)
 {
   if (dev_fd >= 0)
     {
@@ -63,13 +63,13 @@ say (unsigned char *buffer, int len)
 }
 
 static void
-mutespk (void)
+spk_mute (void)
 {
-  say (ShutUp, strlen (ShutUp));
+  spk_say (ShutUp, strlen (ShutUp));
 }
 
 static void
-closespk (void)
+spk_close (void)
 {
   if (dev_fd >= 0)
     close (dev_fd);

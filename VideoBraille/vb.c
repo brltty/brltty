@@ -29,11 +29,11 @@
 
 static unsigned char lastbuff[40];
 
-static void identbrl(void) {
+static void brl_identify(void) {
   LogPrint(LOG_NOTICE, "VideoBraille Driver");
 }
 
-static void initbrl(char **parameters, brldim *brl, const char *dev) {
+static void brl_initialize(char **parameters, brldim *brl, const char *dev) {
   /*	Seems to signal en error */ 
   brl->x=-1;
   if (!vbinit()) {
@@ -47,11 +47,11 @@ static void initbrl(char **parameters, brldim *brl, const char *dev) {
   }
 }
 
-static void closebrl(brldim *brl) {
+static void brl_close(brldim *brl) {
   free(brl->disp);
 }
 
-static void writebrl(brldim *brl) {
+static void brl_writeWindow(brldim *brl) {
   char outbuff[40];
   int i;
 
@@ -75,11 +75,11 @@ static void writebrl(brldim *brl) {
   }
 }
 
-static void setbrlstat (const unsigned char *st) {
+static void brl_writeStatus (const unsigned char *st) {
 // The VideoBraille display has no status cells
 }
 
-static int readbrl(DriverCommandContext cmds) {
+static int brl_read(DriverCommandContext cmds) {
   vbButtons buttons;
   BrButtons(&buttons);
   if (!buttons.keypressed) {

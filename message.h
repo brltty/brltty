@@ -21,7 +21,7 @@
 /* message.h - send a message to Braille and speech */
 
 /* Prototype: */
-void message (unsigned char *, short);
+void message (const unsigned char *, short);
 
 
 /* Flags for the second argument: */

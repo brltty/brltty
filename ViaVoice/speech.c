@@ -204,7 +204,7 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, in
 }
 
 static void
-identspk (void) {
+spk_identify (void) {
    LogPrint(LOG_NOTICE, "ViaVoice Text to Speech System");
 
    {
@@ -238,7 +238,7 @@ isSet:
 }
 
 static void
-initspk (char **parameters) {
+spk_initialize (char **parameters) {
    if (!eci) {
       if (setIni(parameters[PARM_IniFile])) {
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
@@ -291,7 +291,7 @@ insureSayBuffer (int size) {
 }
 
 static int
-saySegment (ECIHand eci, unsigned char *buffer, int from, int to) {
+saySegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
    int length = to - from;
    if (!length) return 1;
    if (insureSayBuffer(length+1)) {
@@ -311,7 +311,7 @@ saySegment (ECIHand eci, unsigned char *buffer, int from, int to) {
 }
 
 static void
-say (unsigned char *buffer, int length) {
+spk_say (const unsigned char *buffer, int length) {
    if (eci) {
       int onSpace = -1;
       int sayFrom = 0;
@@ -342,7 +342,7 @@ say (unsigned char *buffer, int length) {
 }
 
 static void
-mutespk (void) {
+spk_mute (void) {
    if (eci) {
       if (eciStop(eci)) {
       } else {
@@ -352,7 +352,7 @@ mutespk (void) {
 }
 
 static void
-closespk (void) {
+spk_close (void) {
    if (eci) {
       eciDelete(eci);
       eci = NULL_ECI_HAND;
@@ -360,13 +360,13 @@ closespk (void) {
 }
 
 static void
-processSpkTracking (void) {
+spk_doTrack (void) {
    if (eci) {
    }
 }
 
 static int
-trackspk (void) {
+spk_getTrack (void) {
    if (eci) {
       int index = eciGetIndex(eci);
       LogPrint(LOG_DEBUG, "speech tracked at %d", index);
@@ -376,7 +376,7 @@ trackspk (void) {
 }
 
 static int
-isSpeaking (void) {
+spk_isSpeaking (void) {
    if (eci) {
       if (eciSpeaking(eci)) {
          return 1;

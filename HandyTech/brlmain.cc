@@ -48,14 +48,18 @@ static unsigned char BookwormStop[] = {0X05, 0X07};	/* bookworm trailer to displ
 
 /* Braille display parameters */
 typedef int (GetCommandHandler) (DriverCommandContext cmds);
+typedef int (InterpretCommandHandler) (DriverCommandContext cmds);
 static GetCommandHandler getHandyCommand;
 static GetCommandHandler getBookwormCommand;
+static GetCommandHandler interpretBrailleWaveCommand;
+static GetCommandHandler interpretBrailleStarCommand;
 typedef struct {
   const char *Name;
   int ID;
   int Columns;
   int StatusCells;
   GetCommandHandler *GetCommand;
+  InterpretCommandHandler *InterpretCommand;
   int HelpPage;
   unsigned char *BrailleStartAddress;
   unsigned char BrailleStartLength;
@@ -69,7 +73,7 @@ static const ModelDescription Models[] = {
     /* ID == 0x80 */
     "Modular 20+4", 0X80,
     20, 4,
-    getHandyCommand, 0,
+    getHandyCommand, NULL, 0,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
@@ -79,7 +83,7 @@ static const ModelDescription Models[] = {
     /* ID == 89 */
     "Modular 40+4", 0X89,
     40, 4,
-    getHandyCommand, 0,
+    getHandyCommand, NULL, 0,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
@@ -89,7 +93,7 @@ static const ModelDescription Models[] = {
     /* ID == 0x88 */
     "Modular 80+4", 0X88,
     80, 4,
-    getHandyCommand, 0,
+    getHandyCommand, NULL, 0,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
@@ -99,7 +103,7 @@ static const ModelDescription Models[] = {
     /* ID == 0x05 */
     "Braille Wave", 0X05,
     40, 0,
-    getHandyCommand, 0,
+    getHandyCommand, interpretBrailleWaveCommand, 0,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     NULL, 0,
     NULL, 0
@@ -109,23 +113,43 @@ static const ModelDescription Models[] = {
     /* ID == 0x90 */
     "Bookworm", 0X90,
     8, 0,
-    getBookwormCommand, 1,
+    getBookwormCommand, NULL, 1,
     HandyBrailleStart, sizeof(HandyBrailleStart),
     BookwormBrailleEnd, sizeof(BookwormBrailleEnd),
     BookwormStop, sizeof(BookwormStop)
   }
   ,
   {
+    /* ID == 0x74 */
+    "Braille Star 40", 0X74,
+    40, 0,
+    getHandyCommand, interpretBrailleStarCommand, 0,
+    HandyBrailleStart, sizeof(HandyBrailleStart),
+    NULL, 0,
+    NULL, 0
+  }
+  ,
+  {
+    /* ID == 0x78 */
+    "Braille Star 80", 0X78,
+    80, 0,
+    getHandyCommand, interpretBrailleStarCommand, 0,
+    HandyBrailleStart, sizeof(HandyBrailleStart),
+    NULL, 0,
+    NULL, 0
+  }
+  ,
+  {
     /* end of table */
     NULL, 0,
     0, 0,
-    NULL, 0,
+    NULL, NULL, 0,
     NULL, 0,
     NULL, 0,
     NULL, 0
   }
 };
-static unsigned int CurrentKeys[0x81], LastKeys[0x81], ReleasedKeys[0x81], nullKeys[0x81];
+static unsigned int CurrentKeys[0x81], LastKeys[0x81], nullKeys[0x81];
 
 
 #define BRLROWS		1
@@ -203,33 +227,49 @@ static unsigned int retryCount = 0;
 #define KEY_B6 0X17
 #define KEY_B7 0X1B
 #define KEY_B8 0X1F
+
 #define KEY_UP 0X04
 #define KEY_DOWN 0X08
 #define KEY_ESCAPE 0X0C
 #define KEY_SPACE 0X10
+#define KEY_SPACE_LEFT KEY_SPACE
 #define KEY_RETURN 0X14
+#define KEY_SPACE_RIGHT 0X18
+
+#define KEY_LEFT_UP KEY_ESCAPE
+#define KEY_LEFT_DOWN KEY_RETURN
+#define KEY_RIGHT_UP KEY_UP
+#define KEY_RIGHT_DOWN KEY_DOWN
+
 #define KEY_B12 0X01
 #define KEY_ZERO 0X05
 #define KEY_B13 0X09
 #define KEY_B14 0X0D
+
 #define KEY_B11 0X11
 #define KEY_ONE 0X15
 #define KEY_TWO 0X19
 #define KEY_THREE 0X1D
+
 #define KEY_B10 0X02
 #define KEY_FOUR 0X06
 #define KEY_FIVE 0X0A
 #define KEY_SIX 0X0E
+
 #define KEY_B9 0X12
 #define KEY_SEVEN 0X16
 #define KEY_EIGHT 0X1A
 #define KEY_NINE 0X1E
-#define KEY_ROUTING 0x20
-#define KEY_STATUS 0x70
+
+#define KEY_ROUTING 0X20
+#define KEY_STATUS 0X70
+
+#define KEY_MASK 0X7F
+#define KEY_RELEASE (KEY_MASK + 1)
 
 
 static void
-identbrl (void) {
+brl_identify (void) {
   LogPrint(LOG_NOTICE, "Handy Tech Driver, version 0.3");
   LogPrint(LOG_INFO, "  Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de>");
 }
@@ -281,7 +321,7 @@ writeData (unsigned char *data, int length) {
 }
 
 static void
-initbrl (char **parameters, brldim *brl, const char *dev) {
+brl_initialize (char **parameters, brldim *brl, const char *dev) {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
   int ModelID = 0;
@@ -367,7 +407,7 @@ initbrl (char **parameters, brldim *brl, const char *dev) {
 
   /* reset tables of pressed/released keys to 0 */
   for (i=0; i<=0x80; i++)
-    CurrentKeys[i] = LastKeys[i] = ReleasedKeys[i] = nullKeys[i] = 0;
+    CurrentKeys[i] = LastKeys[i] = nullKeys[i] = 0;
 
   setState(BDS_READY);
   return;
@@ -390,7 +430,7 @@ failure:
 }
 
 static void
-closebrl (brldim *brl) {
+brl_close (brldim *brl) {
   if (model->StopLength) {
     writeData(model->StopAddress, model->StopLength);
   }
@@ -442,7 +482,7 @@ updateBrailleCells (int force) {
 }
 
 static void
-writebrl (brldim *brl) {
+brl_writeWindow (brldim *brl) {
   int i;
   for (i=0; i<model->Columns; ++i) {
     rawData[i] = TransTable[(prevData[i] = brl->disp[i])];
@@ -451,7 +491,7 @@ writebrl (brldim *brl) {
 }
 
 static void
-setbrlstat (const unsigned char *st) {
+brl_writeStatus (const unsigned char *st) {
   /* Update status cells on braille display */
   if (memcmp(st, prevStatus, model->StatusCells) != 0) {	/* only if it changed */
     int i;
@@ -463,260 +503,267 @@ setbrlstat (const unsigned char *st) {
 }
 
 static int
-getHandyKey (unsigned int *Pos) {
+getHandyKey (unsigned int *routingKey) {
   unsigned char c;
 
-  if (readByte(c))
-    {
-      if (c == 0X7E) {
-        setState(BDS_READY);
-	return 0;
-      }
-      if (c >= 0x80) {
-	c=c-0x80;
-	CurrentKeys[0x80] =1;
-      }
-      if ((c >= KEY_ROUTING) &&
-	  (c < (KEY_ROUTING + model->Columns)))
-	{
-	  /* make for display keys of Touch cursor */
-	  *Pos = c - KEY_ROUTING;
-	  CurrentKeys[KEY_ROUTING]=1;
-	}
-      else
-	CurrentKeys[c]=CurrentKeys[c] ? 0 : 1;		/* check comments where KEY_xxxx are defined */
-      return (1);
+  if (readByte(c)) {
+    if (c == 0X7E) {
+      setState(BDS_READY);
+      return 0;
     }
-  return (0);
+    if (c & KEY_RELEASE) {
+      c &= KEY_MASK;
+      CurrentKeys[KEY_RELEASE] = 1;
+    }
+    if ((c >= KEY_ROUTING) &&
+        (c < (KEY_ROUTING + model->Columns))) {
+      /* make for display keys of Touch cursor */
+      *routingKey = c - KEY_ROUTING;
+      CurrentKeys[KEY_ROUTING] = 1;
+    } else
+      CurrentKeys[c] = CurrentKeys[c]? 0: 1;		/* check comments where KEY_xxxx are defined */
+    return 1;
+  }
+  return 0;
 }
 
 static int
 getHandyCommand (DriverCommandContext cmds) {
-  int ProcessKey, res = EOF;
-  static unsigned int RoutingPos = 0;
   static int Typematic = 0, KeyDelay = 0, KeyRepeat = 0;
+  static unsigned int routingKey = 0;
+  int gotKey = getHandyKey(&routingKey);
+  int command = EOF;
 
-  if (!(ProcessKey = getHandyKey(&RoutingPos)))
-    {
-      if (Typematic)
-	{
-	  /* a key is being hold */
-	  if (KeyDelay < TYPEMATIC_DELAY)
-	    KeyDelay++;
-	  else if (KeyRepeat < TYPEMATIC_REPEAT)
-	    KeyRepeat++;
-	  else
-	    {
-	      /* It's time to issue the command again */
-	      CurrentKeys = LastKeys;
-              LastKeys=nullKeys;
-	      KeyRepeat = 0;
-	      ProcessKey = 1;
-	    }
-	}
+  if (!gotKey) {
+    if (Typematic) {
+      /* a key is being held */
+      if (KeyDelay < TYPEMATIC_DELAY)
+        KeyDelay++;
+      else if (KeyRepeat < TYPEMATIC_REPEAT)
+        KeyRepeat++;
+      else {
+        /* It's time to issue the command again */
+        CurrentKeys = LastKeys;
+        LastKeys = nullKeys;
+        KeyRepeat = 0;
+        gotKey = 1;
+      }
     }
-  else
-    {
-      /* A new key is being pressed/released, we clear the typematic counters */
-      Typematic = KeyDelay = KeyRepeat = 0;
-    }
+  } else {
+    /* A new key is being pressed/released, we clear the typematic counters */
+    Typematic = KeyDelay = KeyRepeat = 0;
+  }
 
-  if (ProcessKey < 0)
-    {
-      /* Oops... seems we should restart from scratch... */
-      RoutingPos = 0;
-      CurrentKeys = nullKeys;
-      LastKeys = nullKeys;
-      ReleasedKeys = nullKeys;
-      return CMD_RESTARTBRL;
+  if (gotKey < 0) {
+    /* Oops... seems we should restart from scratch... */
+    routingKey = 0;
+    CurrentKeys = nullKeys;
+    LastKeys = nullKeys;
+    return CMD_RESTARTBRL;
+  }
+  if (gotKey > 0) {
+    if (!CurrentKeys[KEY_RELEASE]) {
+      LastKeys = CurrentKeys;	/* we keep it until it is released */
+      return CMD_NOOP;
     }
-  else if(ProcessKey > 0)
-    {
-      if (CurrentKeys[0x80]==0)
-	{
-	  LastKeys = CurrentKeys;	/* we keep it until it is released */
-          return(0);
-        }
-      /* 3KEYs */
-      if (LastKeys[KEY_B2] && LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
-	res = CMD_MUTE;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B2] && LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
-	res = CMD_SAY;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8] && LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
-	res = CMD_CHRRT;
-	Typematic = 1;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8] && LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
-	res = CMD_CHRLT;
-	Typematic = 1;
-	goto end_switch;
-      }
-      /* 2KEYS */
-      if (LastKeys[KEY_B4] && LastKeys[KEY_B5]) {
-	res = CMD_PASTE;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B4] && LastKeys[KEY_UP]) {
-	res = CMD_CUT_BEG;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B4] && LastKeys[KEY_DOWN]) {
-	res = CMD_CUT_END;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8] && LastKeys[KEY_B4]) {
-	res = CMD_PRDIFLN;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8] && LastKeys[KEY_B5]) {
-	res = CMD_NXDIFLN;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B1] && LastKeys[KEY_B8]) {
-	res = CMD_CSRTRK;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B4] && LastKeys[KEY_ROUTING]) {
-	/* marking beginning of block */
-	res = CR_CUTBEGIN + RoutingPos;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B5] && LastKeys[KEY_ROUTING]) {
-	/* marking end of block */
-	res = CR_CUTRECT + RoutingPos;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B2] && LastKeys[KEY_UP]) {
-	res = CMD_TOP;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B2] && LastKeys[KEY_DOWN]) {
-	res = CMD_BOT;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B6] && LastKeys[KEY_B4]) {
-	res = CMD_ATTRUP;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B6] &&  LastKeys[KEY_B5]) {
-	res = CMD_ATTRDN;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B3] && LastKeys[KEY_B4]) {
-	res = CMD_LNBEG;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
-	res = CMD_HWINLT;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B3] && LastKeys[KEY_B5]) {
-	res = CMD_LNEND;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
-	res = CMD_HWINRT;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8] && LastKeys[KEY_B6]) {
-	res = CMD_SIXDOTS;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B7] && LastKeys[KEY_B6]) {
-	res = CMD_CSRSIZE;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B3] && LastKeys[KEY_B8]) {
-	res = CMD_SLIDEWIN;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8] && LastKeys[KEY_B5]) {
-	res = CMD_FREEZE;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8] && LastKeys[KEY_B4]) {
-	res = CMD_INFO;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B7] && LastKeys[KEY_B1]) {
-        res = CMD_CAPBLINK;
+    if (model->InterpretCommand)
+      if ((command = model->InterpretCommand(cmds)) != EOF)
         goto end_switch;
-      }
-      if (LastKeys[KEY_B7] && LastKeys[KEY_B2]) {
-        res = CMD_CSRBLINK;
-        goto end_switch;
-      }
-      if (LastKeys[KEY_B7] && LastKeys[KEY_B3]) {
-        res = CMD_PREFMENU;
-        goto end_switch;
-      }
-      /* 1KYES */
-      if (LastKeys[KEY_STATUS+2]) {
-	res = CMD_PREFMENU;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B6]) {
-	res = CMD_DISPMD;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B4]) {
-	res = CMD_LNUP;
-	Typematic = 1;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B5]) {
-	res = CMD_LNDN;
-	Typematic = 1;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_UP]) {
-	res = CMD_FWINLT;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_DOWN]) {
-	res = CMD_FWINRT;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_STATUS+0]) {
-	res = CMD_CAPBLINK;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B7]) {
-	res = CMD_CSRVIS;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_STATUS+1]) {
-	res = CMD_CSRBLINK;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_ROUTING]) {
-	/* normal Cursor routing keys */
-	res = CR_ROUTE + RoutingPos;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B2]) {
-	res = CMD_TOP_LEFT;
-        goto end_switch;
-      }
-      if (LastKeys[KEY_B1]) {
-	res = CMD_HOME;
-	goto end_switch;
-      }
-      if (LastKeys[KEY_B8]) {
-	res = CMD_HELP;
-	goto end_switch;
-	/*res = CMD_SAY;*/
-      }
-    end_switch:
-      CurrentKeys=nullKeys;
-      LastKeys=nullKeys;
+    /* 3KEYs */
+    if (LastKeys[KEY_B2] && LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
+      command = CMD_MUTE;
+      goto end_switch;
     }
-  return (res);
+    if (LastKeys[KEY_B2] && LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
+      command = CMD_SAY;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8] && LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
+      command = CMD_CHRRT;
+      Typematic = 1;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8] && LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
+      command = CMD_CHRLT;
+      Typematic = 1;
+      goto end_switch;
+    }
+    /* 2KEYS */
+    if (LastKeys[KEY_B4] && LastKeys[KEY_B5]) {
+      command = CMD_PASTE;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B4] && LastKeys[KEY_UP]) {
+      command = CMD_CUT_BEG;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B4] && LastKeys[KEY_DOWN]) {
+      command = CMD_CUT_END;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8] && LastKeys[KEY_B4]) {
+      command = CMD_PRDIFLN;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8] && LastKeys[KEY_B5]) {
+      command = CMD_NXDIFLN;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B1] && LastKeys[KEY_B8]) {
+      command = CMD_CSRTRK;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B4] && LastKeys[KEY_ROUTING]) {
+      /* marking beginning of block */
+      command = CR_CUTBEGIN + routingKey;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B5] && LastKeys[KEY_ROUTING]) {
+      /* marking end of block */
+      command = CR_CUTRECT + routingKey;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B2] && LastKeys[KEY_UP]) {
+      command = CMD_TOP;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B2] && LastKeys[KEY_DOWN]) {
+      command = CMD_BOT;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B6] && LastKeys[KEY_B4]) {
+      command = CMD_ATTRUP;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B6] &&  LastKeys[KEY_B5]) {
+      command = CMD_ATTRDN;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B3] && LastKeys[KEY_B4]) {
+      command = CMD_LNBEG;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B3] && LastKeys[KEY_UP]) {
+      command = CMD_HWINLT;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B3] && LastKeys[KEY_B5]) {
+      command = CMD_LNEND;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B3] && LastKeys[KEY_DOWN]) {
+      command = CMD_HWINRT;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8] && LastKeys[KEY_B6]) {
+      command = CMD_SIXDOTS;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B7] && LastKeys[KEY_B6]) {
+      command = CMD_CSRSIZE;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B3] && LastKeys[KEY_B8]) {
+      command = CMD_SLIDEWIN;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8] && LastKeys[KEY_B5]) {
+      command = CMD_FREEZE;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8] && LastKeys[KEY_B4]) {
+      command = CMD_INFO;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B7] && LastKeys[KEY_B1]) {
+      command = CMD_CAPBLINK;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B7] && LastKeys[KEY_B2]) {
+      command = CMD_CSRBLINK;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B7] && LastKeys[KEY_B3]) {
+      command = CMD_PREFMENU;
+      goto end_switch;
+    }
+    /* 1KEY */
+    if (LastKeys[KEY_STATUS+2]) {
+      command = CMD_PREFMENU;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B6]) {
+      command = CMD_DISPMD;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B4]) {
+      command = CMD_LNUP;
+      Typematic = 1;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B5]) {
+      command = CMD_LNDN;
+      Typematic = 1;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_UP]) {
+      command = CMD_FWINLT;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_DOWN]) {
+      command = CMD_FWINRT;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_STATUS+0]) {
+      command = CMD_CAPBLINK;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B7]) {
+      command = CMD_CSRVIS;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_STATUS+1]) {
+      command = CMD_CSRBLINK;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_ROUTING]) {
+      /* normal Cursor routing keys */
+      command = CR_ROUTE + routingKey;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B2]) {
+      command = CMD_TOP_LEFT;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B1]) {
+      command = CMD_HOME;
+      goto end_switch;
+    }
+    if (LastKeys[KEY_B8]) {
+      command = CMD_HELP;
+      goto end_switch;
+    }
+  end_switch:
+    CurrentKeys = nullKeys;
+    LastKeys = nullKeys;
+  }
+  return command;
+}
+
+static int
+interpretBrailleWaveCommand (DriverCommandContext cmds) {
+  return EOF;
+}
+
+static int
+interpretBrailleStarCommand (DriverCommandContext cmds) {
+  if (LastKeys[KEY_LEFT_UP]) return CMD_LNUP;
+  if (LastKeys[KEY_LEFT_DOWN]) return CMD_LNDN;
+  if (LastKeys[KEY_RIGHT_UP]) return CMD_LNUP;
+  if (LastKeys[KEY_RIGHT_DOWN]) return CMD_LNDN;
+  if (LastKeys[KEY_SPACE_LEFT]) return CMD_FWINLT;
+  if (LastKeys[KEY_SPACE_RIGHT]) return CMD_FWINRT;
+  return EOF;
 }
 
 static int
@@ -899,7 +946,7 @@ getBookwormCommand (DriverCommandContext cmds) {
 }
 
 static int
-readbrl (DriverCommandContext cmds) {
+brl_read (DriverCommandContext cmds) {
   stateTimer += refreshInterval;
-  return model->GetCommand (cmds);
+  return model->GetCommand(cmds);
 }

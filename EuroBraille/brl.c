@@ -187,13 +187,13 @@ static int
    return (1);
 }
 
-static void identbrl (void)
+static void brl_identify (void)
 {
    LogPrint(LOG_NOTICE, StartupNotice);
    LogPrint(LOG_INFO, StartupInfo);
 }
 
-static void initbrl (char **parameters, brldim *brl, const char *dev)
+static void brl_initialize (char **parameters, brldim *brl, const char *dev)
 {
    brldim res;			/* return result */
    struct termios newtio;	/* new terminal settings */
@@ -233,7 +233,7 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
 	while (!NbCols)
 	  {
 	     delay (100);
-	     readbrl (CMDS_SCREEN);		/* to get the answer */
+	     brl_read (CMDS_SCREEN);		/* to get the answer */
 	     if (++i >= 10)
 	       break;
 	  }
@@ -268,7 +268,7 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
    return;
 }
 
-static void closebrl (brldim *brl)
+static void brl_close (brldim *brl)
 {
    free (brl->disp);
    free (rawdata);
@@ -277,7 +277,7 @@ static void closebrl (brldim *brl)
    close (brl_fd);
 }
 
-static void writebrl (brldim *brl)
+static void brl_writeWindow (brldim *brl)
 {
    int i, j;
    if (InMenu != 0) return;
@@ -327,7 +327,7 @@ static void writebrl (brldim *brl)
      }
 }
 
-static void setbrlstat (const unsigned char *st)
+static void brl_writeStatus (const unsigned char *st)
 {
   /* sorry but the ClioBraille I got here doesn't have any status cells...
    * Don't know either if any EuroBraille terminal have some.
@@ -675,7 +675,7 @@ static int ViewOn(void)
    return res2;
 }
 
-static int readbrl(DriverCommandContext cmds)
+static int brl_read(DriverCommandContext cmds)
 {
    int result;
    result=readbrlkey(0);

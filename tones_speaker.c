@@ -40,15 +40,15 @@ static int openSpeaker (void) {
    return 1;
 }
 
-static int generateSpeaker (int frequency, int duration) {
+static int generateSpeaker (int note, int duration) {
    if (fileDescriptor != -1) {
-      LogPrint(LOG_DEBUG, "Tone: msec=%d freq=%d",
-               duration, frequency);
-      if (!frequency) {
+      LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d",
+               duration, note);
+      if (!note) {
          shortdelay(duration);
 	 return 1;
       }
-      if (ioctl(fileDescriptor, KIOCSOUND, 1190000/frequency) != -1) {
+      if (ioctl(fileDescriptor, KIOCSOUND, (int)(1190000.0/noteFrequencies[note])) != -1) {
          shortdelay(duration);
 	 if (ioctl(fileDescriptor, KDMKTONE, 0) != -1) {
 	    return 1;

@@ -28,13 +28,13 @@
 static unsigned char lastbuff[40];
 
 static void
-identbrl (void)
+brl_identify (void)
 {
   LogPrint(LOG_NOTICE, "HT Protocol driver");
 }
 
 static void 
-initbrl (char **parameters, brldim *brl, const char *dev)
+brl_initialize (char **parameters, brldim *brl, const char *dev)
 {
 		/*	Seems to signal en error */ 
 	brl->x=-1;
@@ -50,14 +50,14 @@ initbrl (char **parameters, brldim *brl, const char *dev)
 }
 
 static void 
-closebrl (brldim *brl)
+brl_close (brldim *brl)
 {
 	varioclose();
 	free(brl->disp);
 }
 
 static void 
-writebrl (brldim *brl)
+brl_writeWindow (brldim *brl)
 {
 	char		outbuff[40];
 	int			i;
@@ -82,13 +82,13 @@ writebrl (brldim *brl)
 }
 
 static void
-setbrlstat (const unsigned char *st)
+brl_writeStatus (const unsigned char *st)
 {
 	/*	Dumdidummm */ 
 }
 
 static int 
-readbrl (DriverCommandContext cmds)
+brl_read (DriverCommandContext cmds)
 {
 	static int shift_button_down=0;
 	int	decoded=EOF;

@@ -29,18 +29,21 @@
 
 #include "brl.h"
 #include "misc.h"
+#include "message.h"
+#include "scr.h"
 #include "config.h"
 
 extern braille_driver *braille;
+int refreshInterval = REFRESH_INTERVAL;
 static brldim brl;
 
-static void
-message (const char *string) {
+void
+message (const unsigned char *string, short flags) {
   int length = strlen(string);
   int limit = brl.x * brl.y;
 
   memset(statcells, 0, sizeof(statcells));
-  braille->setstatus(statcells);
+  braille->writeStatus(statcells);
 
   memset(brl.disp, ' ', brl.x*brl.y);
   while (length) {
@@ -55,13 +58,13 @@ message (const char *string) {
     /* Do Braille translation using text table: */
     for (index=0; index<limit; index++)
       brl.disp[index] = texttrans[brl.disp[index]];
-    braille->write(&brl);
+    braille->writeWindow(&brl);
     if (length) {
       int timer = 0;
       while (braille->read(CMDS_MESSAGE) == EOF) {
         if (timer > 4000) break;
-        delay(REFRESH_INTERVAL);
-        timer += REFRESH_INTERVAL;
+        delay(refreshInterval);
+        timer += refreshInterval;
       }
     }
   }
@@ -106,14 +109,14 @@ main (int argc, char *argv[]) {
   if (!device) device = BRLDEV;
 
   if (loadBrailleDriver(&driver)) {
-    char **parameterNames = braille->parameters;
+    const char *const *parameterNames = braille->parameters;
     char **parameterSettings;
     if (!parameterNames) {
-      static char *noNames[] = {NULL};
+      static const char *const noNames[] = {NULL};
       parameterNames = noNames;
     }
     {
-      char **name = parameterNames;
+      const char *const *name = parameterNames;
       unsigned int count;
       char **setting;
       while (*name) ++name;
@@ -136,7 +139,7 @@ main (int argc, char *argv[]) {
         LogPrint(LOG_ERR, "Missing braille driver parameter name: %s", assignment);
       } else {
         size_t nameLength = delimiter - assignment;
-        char **name = parameterNames;
+        const char *const *name = parameterNames;
         while (*name) {
           if (strlen(*name) >= nameLength) {
             if (strncasecmp(*name, assignment, nameLength) == 0) {
@@ -161,7 +164,7 @@ main (int argc, char *argv[]) {
         printf("Braille display successfully initialized: %d %s of %d %s\n",
                brl.y, ((brl.y == 1)? "row": "rows"),
                brl.x, ((brl.x == 1)? "column": "columns"));
-        message("This is BRLTTY!");
+        message("This is BRLTTY!", 0);
 
         while (1) {
           static int timer = 0;
@@ -177,8 +180,8 @@ main (int argc, char *argv[]) {
           switch (key) {
             case EOF:
               if (timer > 10000) goto done;
-              delay(REFRESH_INTERVAL);
-              timer += REFRESH_INTERVAL;
+              delay(refreshInterval);
+              timer += refreshInterval;
               continue;
             SIMPLE(CMD_NOOP, "no operation");
             SIMPLE(CMD_LNUP, "up one line");
@@ -303,11 +306,11 @@ main (int argc, char *argv[]) {
             snprintf(buffer, sizeof(buffer), "%s %d", description, argument+adjustment);
             description = buffer;
           }
-          message(description);
+          message(description, 0);
           timer = 0;
         }
       done:
-        message("done");
+        message("done", 0);
 
         braille->close(&brl);		/* finish with the display */
         status = 0;
@@ -329,4 +332,8 @@ main (int argc, char *argv[]) {
 /* dummy function to allow brl.o to link... */
 void
 setHelpPageNumber (short page) {
+}
+int
+insertString (const unsigned char *string) {
+  return 0;
 }

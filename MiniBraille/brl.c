@@ -68,13 +68,13 @@ static void beep(void)
 };
 
 /* interface */
-static void identbrl(void)
+static void brl_identify(void)
 {
 	LogPrint(LOG_NOTICE, "Tieman B.V. MiniBraille driver");
 	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Brailcom o.p.s. <technik@brailcom.cz>"); 
 }
 
-static void initbrl(char **parameters, brldim *brl, const char *brldev)
+static void brl_initialize(char **parameters, brldim *brl, const char *brldev)
 {
 	__label__ __errexit;
 	struct termios newtermios;
@@ -125,7 +125,7 @@ __errexit:
 	return;
 }
 
-static void closebrl(brldim *brl)
+static void brl_close(brldim *brl)
 {
 	free(brl->disp); // handles NULL
 	tcsetattr(brl_fd, TCSADRAIN, &oldtermios);
@@ -142,7 +142,7 @@ static void refresh(void)
 	write(brl_fd, datae, sizeof datae);
 };
 
-static void writebrl(brldim *brl)
+static void brl_writeWindow(brldim *brl)
 {
 	int i;
 	for (i = 0; i < 20; i++) xlated[i] = xtbl[brl->disp[i]];
@@ -150,7 +150,7 @@ static void writebrl(brldim *brl)
 }
 
 
-static int readbrl(DriverCommandContext cmds)
+static int brl_read(DriverCommandContext cmds)
 {
 	unsigned char znak;
 	int rv;
@@ -265,7 +265,7 @@ static int readbrl(DriverCommandContext cmds)
 	return EOF; // never should reach this
 }
 
-static void setbrlstat(const unsigned char *s)
+static void brl_writeStatus(const unsigned char *s)
 {
 	status[0] = xtbl[s[0]];
 	status[1] = xtbl[s[1]];

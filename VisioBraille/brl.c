@@ -122,12 +122,12 @@ static int isinbounds(unsigned char x,unsigned char a,unsigned char b)
  if (a<=x && x<=b) return 1; else return 0;
 }
 
-static void identbrl(void)
+static void brl_identify(void)
 {
   LogPrint(LOG_NOTICE, "VisioBraille Driver");
 }
 
-static void initbrl(char **parameters, brldim *brl,const char *tty)
+static void brl_initialize(char **parameters, brldim *brl,const char *tty)
 {
  brl_fd = open(tty, O_RDWR | O_NOCTTY );
  if (brl_fd <0) {LogPrint(LOG_ERR,"impossible d'ouvrir le port serie: %s: %s",tty,strerror(errno)); exit(-1); }
@@ -143,7 +143,7 @@ static void initbrl(char **parameters, brldim *brl,const char *tty)
  obuf[0]=0x02;
 }
 
-static void closebrl(brldim *brl)
+static void brl_close(brldim *brl)
 {
  if (brl_fd>=0)
  {
@@ -188,7 +188,7 @@ static int sendpacket(void *p,int size)
  return (-1);
 }
 
-static int readbrl(DriverCommandContext cmds)
+static int brl_read(DriverCommandContext cmds)
 {
  unsigned char kbuf[20]; // Keyboard simulation
  int lgthk=0; // Length of keyboard buffer
@@ -333,11 +333,11 @@ static int readbrl(DriverCommandContext cmds)
  return EOF; // No packet received
 }
 
-static void setbrlstat(const unsigned char *s)
+static void brl_writeStatus(const unsigned char *s)
 {
 }
 
-static void writebrl(brldim *brl)
+static void brl_writeWindow(brldim *brl)
 {
  int i;
  if (memcmp(&prevdata,&dispbuf,40)==0) return;

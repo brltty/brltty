@@ -355,7 +355,7 @@ visualDisplay (unsigned char character, DriverCommandContext cmds) {
 }
 
 static void
-identbrl (void) {
+brl_identify (void) {
    LogPrint(LOG_NOTICE, "BrailleNote Driver, version 1.0");
    LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
@@ -375,7 +375,7 @@ adjustStatusCells (brldim *brl, const char *parameter) {
 }
 
 static void
-initbrl (char **parameters, brldim *brl, const char *device) {
+brl_initialize (char **parameters, brldim *brl, const char *device) {
    if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
       if (tcgetattr(fileDescriptor, &oldSettings) != -1) {
 	 memset(&newSettings, 0, sizeof(newSettings));
@@ -455,7 +455,7 @@ initbrl (char **parameters, brldim *brl, const char *device) {
 }
 
 static void
-closebrl (brldim *brl) {
+brl_close (brldim *brl) {
    tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
    close(fileDescriptor);
    fileDescriptor = -1;
@@ -471,7 +471,7 @@ closebrl (brldim *brl) {
 }
 
 static void
-writebrl (brldim *brl) {
+brl_writeWindow (brldim *brl) {
    if (memcmp(dataArea, brl->disp, dataCells) != 0) {
       memcpy(dataArea, brl->disp, dataCells);
       refreshCells();
@@ -479,7 +479,7 @@ writebrl (brldim *brl) {
 }
 
 static void
-setbrlstat (const unsigned char *status) {
+brl_writeStatus (const unsigned char *status) {
    if (memcmp(statusArea, status, statusCells) != 0) {
       memcpy(statusArea, status, statusCells);
       /* refreshCells();
@@ -922,7 +922,7 @@ interpretRoutingKey (unsigned char key, DriverCommandContext cmds) {
 }
 
 static int
-readbrl (DriverCommandContext cmds) {
+brl_read (DriverCommandContext cmds) {
    unsigned char character;
    int count = read(fileDescriptor, &character, 1);
    int (*handler)(unsigned char, DriverCommandContext);

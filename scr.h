@@ -76,7 +76,7 @@ int switchVirtualTerminal (int);
 int executeScreenCommand (int);
 
 /* Routines which apply to the live screen. */
-char **getScreenParameters (void);			/* initialise screen reading functions */
+const char *const *getScreenParameters (void);			/* initialise screen reading functions */
 int initializeLiveScreen (char **parameters);			/* initialise screen reading functions */
 
 /* Routines which apply to the routing screen.
@@ -89,7 +89,7 @@ void describeRoutingScreen (ScreenDescription *);
 void closeRoutingScreen (void);
 
 /* Routines which apply to the help screen. */
-int initializeHelpScreen (char *);	/* open help screen file */
+int initializeHelpScreen (const char *);	/* open help screen file */
 void setHelpPageNumber (short);			/* set screen number (initial default 0) */
 short getHelpPageCount (void);			/* get number of help screens */
 

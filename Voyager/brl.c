@@ -169,14 +169,14 @@ static int dots_repeat_init_delay, dots_repeat_inter_delay;
 
 
 static void 
-identbrl (void)
+brl_identify (void)
 {
   LogPrint(LOG_NOTICE, VERSION);
   LogPrint(LOG_INFO, COPYRIGHT);
 }
 
 static void
-initbrl (char **parameters, brldim *brl, const char *dev)
+brl_initialize (char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct voyager_info vi;
@@ -289,13 +289,13 @@ initbrl (char **parameters, brldim *brl, const char *dev)
 
 failure:;
   LogPrint(LOG_WARNING,"Voyager driver giving up");
-  closebrl(&res);
+  brl_close(&res);
   brl->x = -1;
   return;
 }
 
 static void 
-closebrl (brldim *brl)
+brl_close (brldim *brl)
 {
   if (brl_fd >= 0)
     close(brl_fd);
@@ -306,14 +306,14 @@ closebrl (brldim *brl)
 
 
 static void
-setbrlstat (const unsigned char *s)
+brl_writeStatus (const unsigned char *s)
 {
   memcpy(dispbuf, s, NRSTATCELLS);
 }
 
 
 static void 
-writebrl (brldim *brl)
+brl_writeWindow (brldim *brl)
 {
   unsigned char buf[ncells];
   int i;
@@ -442,7 +442,7 @@ writebrl (brldim *brl)
 #endif
 
 static int 
-readbrl (DriverCommandContext cmds)
+brl_read (DriverCommandContext cmds)
 {
   /* State: */
   /* For a key binding that triggers two cmds */

@@ -245,7 +245,7 @@ static char packet_to_process = 1, /* flag: if a packet is received while
 
 
 static void 
-identbrl (void)
+brl_identify (void)
 {
   LogPrint(LOG_NOTICE, VERSION);
   LogPrint(LOG_INFO, "   Copyright (C) 1996-2000 by Stéphane Doyon <s.doyon@videotron.ca>.");
@@ -374,7 +374,8 @@ peek_receive_packet(unsigned char *packet)
 }
 
 
-static void initbrl (char **parameters, brldim *brl, const char *tty)
+static void
+brl_initialize (char **parameters, brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
 
@@ -527,14 +528,14 @@ detected:
 
 failure:;
   LogPrint(LOG_WARNING,"MDV driver giving up");
-  closebrl(&res);
+  brl_close(&res);
   brl->x = -1;
   return;
 }
 
 
 static void 
-closebrl (brldim *brl)
+brl_close (brldim *brl)
 {
   if (brl_fd >= 0)
     {
@@ -554,7 +555,8 @@ closebrl (brldim *brl)
 }
 
 
-static void setbrlstat (const unsigned char *s)
+static void
+brl_writeStatus (const unsigned char *s)
 {
   if(nrstatcells >= EXPECTEDNRSTATCELLS)
     memcpy(statbuf, s, EXPECTEDNRSTATCELLS);
@@ -563,7 +565,7 @@ static void setbrlstat (const unsigned char *s)
 
 
 static void 
-writebrl (brldim *brl)
+brl_writeWindow (brldim *brl)
 {
   int i;
   unsigned char *p;
@@ -606,7 +608,7 @@ writebrl (brldim *brl)
 
 
 static int 
-readbrl (DriverCommandContext cmds)
+brl_read (DriverCommandContext cmds)
 {
   static char
     ignore_next_release = 0; /* when a command is triggered by combining

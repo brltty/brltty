@@ -42,11 +42,11 @@ static int openAdLib (void) {
    return cardOpen;
 }
 
-static int generateAdLib (int frequency, int duration) {
-   LogPrint(LOG_DEBUG, "Tone: msec=%d freq=%d",
-	    duration, frequency);
-   if (frequency)
-      AL_playTone(channelNumber, frequency, duration, 100);
+static int generateAdLib (int note, int duration) {
+   LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d",
+	    duration, note);
+   if (note)
+      AL_playTone(channelNumber, (int)noteFrequencies[note], duration, 100);
    else
       shortdelay(duration);
    return 1;

@@ -40,12 +40,12 @@ static char *argumentVector[30];
 static int argumentCount = 0;
 
 static void
-addArgument(char *argument) {
+addArgument (char *argument) {
    argumentVector[argumentCount++] = argument;
 }
 
 static void
-addOption(char *variable, char *option) {
+addOption (char *variable, char *option) {
    char *value = getenv(variable);
    if (value) {
       if (*value) {
@@ -58,21 +58,8 @@ addOption(char *variable, char *option) {
 int
 main(int argc, char *argv[]) {
    addArgument(BRLTTY);
-
-   addOption("BRLTTY_CONFIGURATION_FILE", "-f");
-   addOption("BRLTTY_PREFERENCES_FILE", "-p");
    addOption("BRLTTY_LOG_LEVEL", "-l");
-
-   addOption("BRLTTY_BRAILLE_DEVICE", "-d");
-   addOption("BRLTTY_BRAILLE_DRIVER", "-b");
-   addOption("BRLTTY_BRAILLE_PARAMETERS", "-B");
-
-   addOption("BRLTTY_SPEECH_DRIVER", "-s");
-   addOption("BRLTTY_SPEECH_PARAMETERS", "-S");
-
-   addOption("BRLTTY_TEXT_TABLE", "-t");
-   addOption("BRLTTY_ATTRIBUTES_TABLE", "-a");
-
+   addArgument("-E");
    addArgument(NULL);
 
    switch (fork()) {

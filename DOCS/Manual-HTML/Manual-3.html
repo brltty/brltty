@@ -535,11 +535,13 @@ and
 in a register associated with the routing key.
 See the 
 <A HREF="#command-GOTOMARK">GOTOMARK</A> command.
+This feature only affects the current virtual terminal.
 <DT><B>GOTOMARK
 <A NAME="command-GOTOMARK"></A> </B><DD><P>Move the braille window to the position formerly marked
 (see the 
 <A HREF="#command-SETMARK">SETMARK</A> command)
 with the same routing key.
+This feature only affects the current virtual terminal.
 </DL>
 <P>
 <H3>No Routing Keys</H3>
@@ -1581,6 +1583,56 @@ please see the documentation for that driver.
 See the 
 <A HREF="#configure-braille-parameters">braille-parameters</A>
 configuration file directive for the default run-time setting.
+<DT><B><CODE>-E</CODE> <CODE>--environment-variables</CODE>
+<A NAME="options-environment-variables"></A> </B><DD><P>Recognize environment variables when determining
+the default settings for unspecified command line options
+(see section 
+<A HREF="#options">Command Line Options</A>).
+If this option is specified, 
+and if the environment variable associated with an unspecified option is defined,
+then the value of that environment variable is used.
+The names of these environment variables are based on
+the long names of the options they correspond to:
+<UL>
+<LI>All letters are in upper case.</LI>
+<LI>Underscores (<CODE>_</CODE>) are used instead of minus signs (<CODE>-</CODE>).</LI>
+<LI>The prefix <CODE>BRLTTY_</CODE> is added.</LI>
+</UL>
+   
+This option allows BRLTTY to be configured via Linux boot parameters.
+The following environment variables are supported:
+<DL>
+<DT><B><CODE>BRLTTY_ATTRIBUTES_TABLE</CODE></B><DD><P>The attributes translation table
+(see the 
+<A HREF="#options-attributes-table">-a</A> command line option).
+<DT><B><CODE>BRLTTY_BRAILLE_DEVICE</CODE></B><DD><P>The braille display device
+(see the 
+<A HREF="#options-braille-device">-d</A> command line option).
+<DT><B><CODE>BRLTTY_BRAILLE_DRIVER</CODE></B><DD><P>The braille display driver
+(see the 
+<A HREF="#options-braille-driver">-b</A> command line option).
+<DT><B><CODE>BRLTTY_BRAILLE_PARAMETERS</CODE></B><DD><P>Parameters for the braille display driver
+(see the 
+<A HREF="#options-braille-parameters">-B</A> command line option).
+<DT><B><CODE>BRLTTY_CONFIGURATION_FILE</CODE></B><DD><P>The configuration file
+(see the 
+<A HREF="#options-configuration-file">-f</A> command line option).
+<DT><B><CODE>BRLTTY_PREFERENCES_FILE</CODE></B><DD><P>The preferences file
+(see the 
+<A HREF="#options-preferences-file">-p</A> command line option).
+<DT><B><CODE>BRLTTY_SCREEN_PARAMETERS</CODE></B><DD><P>Parameters for the screen driver
+(see the 
+<A HREF="#options-screen-parameters">-X</A> command line option).
+<DT><B><CODE>BRLTTY_SPEECH_DRIVER</CODE></B><DD><P>The speech synthesizer driver
+(see the 
+<A HREF="#options-speech-driver">-s</A> command line option).
+<DT><B><CODE>BRLTTY_SPEECH_PARAMETERS</CODE></B><DD><P>Parameters for the speech synthesizer driver
+(see the 
+<A HREF="#options-speech-parameters">-S</A> command line option).
+<DT><B><CODE>BRLTTY_TEXT_TABLE</CODE></B><DD><P>The text translation table
+(see the 
+<A HREF="#options-text-table">-a</A> command line option).
+</DL>
 <DT><B><CODE>-M</CODE><EM>csecs</EM> <CODE>--message-delay=</CODE><EM>csecs</EM>
 <A NAME="options-message-delay"></A> </B><DD><P>Specify the message hold time (in hundredths of a second).
 If not specified, then <CODE>400</CODE> (4 seconds) is assumed.

@@ -84,7 +84,7 @@ clearbrl (brldim *brl) {
 }
 
 static void
-identbrl (void) {
+brl_identify (void) {
    LogPrint(LOG_NOTICE, "LogText Driver");
    LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
@@ -113,7 +113,7 @@ makeDownloadFifo (void) {
 }
 
 static void
-initbrl (char **parameters, brldim *brl, const char *device) {
+brl_initialize (char **parameters, brldim *brl, const char *device) {
    makeDownloadFifo();
    if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY)) != -1) {
       if (tcgetattr(fileDescriptor, &oldSettings) != -1) {
@@ -149,7 +149,7 @@ initbrl (char **parameters, brldim *brl, const char *device) {
 }
 
 static void
-closebrl (brldim *brl) {
+brl_close (brldim *brl) {
    tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
    close(fileDescriptor);
    fileDescriptor = -1;
@@ -254,7 +254,7 @@ handleUpdate (unsigned char line) {
 }
 
 static void
-writebrl (brldim *brl) {
+brl_writeWindow (brldim *brl) {
    if (deviceStatus == DEV_READY) {
       sendCurrentLine();
    }
@@ -281,7 +281,7 @@ isOnline (void) {
 }
 
 static void
-setbrlstat (const unsigned char *status) {
+brl_writeStatus (const unsigned char *status) {
    if (isOnline()) {
       if (status[FirstStatusCell] == FSC_GENERIC) {
          unsigned char row = status[STAT_csrrow];
@@ -513,7 +513,7 @@ downloadFile (void) {
 }
 
 static int
-readbrl (DriverCommandContext cmds) {
+brl_read (DriverCommandContext cmds) {
    int key = readKey();
    if (cmds != currentContext) {
       LogPrint(LOG_DEBUG, "Context switch: %d -> %d", currentContext, cmds);

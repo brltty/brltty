@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.5 (December 2001)"
+"Braille Lite driver, version 0.5.6 (January 2002)"
 
 #define BRL_C
 
@@ -103,7 +103,7 @@ static int qget (blkey *);	/* get a byte from the input queue */
 
 
 static void
-identbrl (void)
+brl_identify (void)
 {
   LogPrint(LOG_NOTICE, VERSION);
   /* I don't mean to take away anyone's copyright, but now that significant
@@ -114,7 +114,7 @@ identbrl (void)
 
 
 static void
-initbrl (char **parameters, brldim * brl, const char *brldev)
+brl_initialize (char **parameters, brldim * brl, const char *brldev)
 {
   static unsigned good_baudrates[]
     = {300,600,1200,2400,4800,9600,19200,38400, 0};
@@ -267,12 +267,12 @@ failure:
 
 
 static void
-closebrl (brldim * brl)
+brl_close (brldim * brl)
 {
 #if 0 /* SDo: Let's leave the BRLTTY exit message there. */
   /* We just clear the display, using writebrl(): */
   memset (brl->disp, 0, brl->x);
-  writebrl (brl);
+  brl_writeWindow (brl);
 #endif
 
   free (brl->disp);
@@ -288,13 +288,13 @@ closebrl (brldim * brl)
 
 
 static void
-setbrlstat (const unsigned char *s)
+brl_writeStatus (const unsigned char *s)
 {
 }
 
 
 static void
-writebrl (brldim * brl)
+brl_writeWindow (brldim * brl)
 {
   short i;			/* loop counter */
   static unsigned char prebrl[2] =
@@ -375,7 +375,7 @@ writebrl (brldim * brl)
 
 
 static int
-readbrl (DriverCommandContext cmds)
+brl_read (DriverCommandContext cmds)
 {
   static int kbemu = 0;		/* keyboard emulation flag */
   static int state = 0;		/* 0 = normal - transparent
@@ -595,7 +595,7 @@ readbrl (DriverCommandContext cmds)
 	temp = VAL_PASSCHAR | key.asc;
 #else
       temp = VAL_PASSDOTS |
-	(keys_to_dots[key.raw]
+	(keys_to_dots[key.raw &0x3F]
 	 | ((meta) ? VPC_META : 0)
 	 | ((ctrl) ? 0xC0 : 
 	    (shift) ? 0x40 : 
@@ -879,9 +879,10 @@ qget (blkey * kp)
 	}
       else
 	{
-	  kp->raw = c2;
 	  kp->spcbar = ((c3 & 0x40) ? 1 : 0);
 	  c3 &= 0x3f;		/* leave only dot key info */
+	  kp->raw = (c2 &0xC0) | c3; /* combine info for all 8 dots */
+	  /* I have no idea what is in c2&0x3F. */
 	  kp->cmd = cmdtrans[c3];
 	  kp->asc = brltrans[c3];
 	}

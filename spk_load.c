@@ -15,76 +15,88 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/*
- * spk_load.c - handling of dynamic speech drivers
- */
-
-#include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 #include <dlfcn.h>
 
 #include "misc.h"
 #include "spk.h"
 
+#define SPKSYMBOL noSpeech
+#define SPKNAME "NoSpeech"
+#define SPKDRIVER "no"
+#include "spk_driver.h"
+static void spk_identify (void) {
+  LogPrint(LOG_NOTICE, "No speech support.");
+}
+static void spk_initialize (char **parameters) { }
+static void spk_say (const unsigned char *buffer, int len) { }
+static void spk_mute (void) { }
+static void spk_close (void) { }
+
+static void *libraryHandle = NULL;	/* handle to driver */
+static const char *symbolName = "spk_driver";
 speech_driver *speech = NULL;	/* filled by dynamic libs */
-static void *library = NULL;	/* handle to driver */
-#define SPK_SYMBOL "spk_driver"
 
 /* load driver from library */
 /* return true (nonzero) on success */
-int loadSpeechDriver (const char **libraryName) {
-  const char *error;
+int loadSpeechDriver (const char **driver) {
+  if (*driver != NULL)
+    if (strcmp(*driver, noSpeech.identifier) == 0) {
+      speech = &noSpeech;
+      *driver = NULL;
+      return 1;
+    }
 
   #ifdef SPK_BUILTIN
-    extern speech_driver spk_driver;
-    if (*libraryName != NULL)
-      if (strcmp(*libraryName, spk_driver.identifier) == 0)
-        *libraryName = NULL;
-    if (*libraryName == NULL)
-      {
-	speech = &spk_driver;
-	*libraryName = "built-in";
-	return 1;
+    {
+      extern speech_driver spk_driver;
+      if (*driver != NULL)
+        if (strcmp(*driver, spk_driver.identifier) == 0)
+          *driver = NULL;
+      if (*driver == NULL) {
+        speech = &spk_driver;
+        return 1;
       }
+    }
   #else
-#error "No built-in speech driver: please provide at least NoSpeech driver!"
+    if (*driver == NULL) {
+      speech = &noSpeech;
+      return 1;
+    }
   #endif
 
-  /* allow shortcuts */
-  if (strlen(*libraryName) == 2)
-    {
-      static char name[] = "libbrlttys??.so.1"; /* two ? for shortcut */
-      char *pos = strchr(name, '?');
-      memcpy(pos, *libraryName, 2);
-      *libraryName = name;
+  {
+    const char *libraryName = *driver;
+
+    /* allow shortcuts */
+    if (strlen(libraryName) == 2) {
+      static char buffer[] = "libbrlttys??.so.1"; /* two ? for shortcut */
+      memcpy(strchr(buffer, '?'), libraryName, 2);
+      libraryName = buffer;
     }
 
-  library = dlopen(*libraryName, RTLD_NOW);
-  if (library == NULL) 
-    {
+    if ((libraryHandle = dlopen(libraryName, RTLD_NOW|RTLD_GLOBAL))) {
+      const char *error;
+      speech = dlsym(libraryHandle, symbolName);
+      if (!(error = dlerror())) {
+        return 1;
+      } else {
+        LogPrint(LOG_ERR, "%s", error);
+        LogPrint(LOG_ERR, "Speech driver symbol not found: %s", symbolName);
+      }
+      dlclose(libraryHandle);
+      libraryHandle = NULL;
+    } else {
       LogPrint(LOG_ERR, "%s", dlerror());
-      LogPrint(LOG_ERR, "Cannot open speech driver library: %s", *libraryName);
-      goto liberror;
+      LogPrint(LOG_ERR, "Cannot open speech driver library: %s", libraryName);
     }
+  }
 
-  speech = dlsym(library, SPK_SYMBOL); /* locate struct driver - filled with all the data */
-  error = dlerror();
-  if (error)
-    {
-      LogPrint(LOG_ERR, "%s", error);
-      LogPrint(LOG_ERR, "Speech driver symbol not found: %s", SPK_SYMBOL);
-      goto liberror;
-    }
-
-  return 1;
-
- liberror:
-  /* fall back to built-in */
-  speech = &spk_driver;
-  *libraryName = "built-in";
+  speech = &noSpeech;
   return 0;
 }
 

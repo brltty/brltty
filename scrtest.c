@@ -82,15 +82,15 @@ main (int argc, char *argv[]) {
   const char *boxLeft = NULL;
   const char *boxWidth = NULL;
 
-  char **parameterNames = getScreenParameters();
+  const char *const *parameterNames = getScreenParameters();
   char **parameterSettings;
 
   if (!parameterNames) {
-    static char *noNames[] = {NULL};
+    static const char *const noNames[] = {NULL};
     parameterNames = noNames;
   }
   {
-    char **name = parameterNames;
+    const char *const *name = parameterNames;
     unsigned int count;
     char **setting;
     while (*name) ++name;
@@ -134,7 +134,7 @@ main (int argc, char *argv[]) {
           fprintf(stderr, "scrtest: Missing screen parameter name: %s\n", assignment);
         } else {
           size_t nameLength = delimiter - assignment;
-          char **name = parameterNames;
+          const char *const *name = parameterNames;
           while (*name) {
             if (strlen(*name) >= nameLength) {
               if (strncasecmp(*name, assignment, nameLength) == 0) {

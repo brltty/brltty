@@ -158,7 +158,7 @@ static unsigned char *rawdata,	/* translated data to send to display */
                      *prevdata, /* previous data sent */
                      *dispbuf;
 
-static void identbrl (void)
+static void brl_identify (void)
 {
   LogPrint(LOG_NOTICE, VERSION);
   LogPrint(LOG_INFO, "   "COPYRIGHT);
@@ -197,7 +197,7 @@ static int QueryDisplay(int brl_fd, char *reply)
   return 0;
 }
 
-static void initbrl (char **parameters, brldim *brl, const char *tty)
+static void brl_initialize (char **parameters, brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
   int i = 0;
@@ -314,12 +314,12 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
 
 failure:;
   LogPrint(LOG_WARNING,"Baum Vario driver giving up");
-  closebrl(&res);
+  brl_close(&res);
   brl->x = -1;
   return;
 }
 
-static void closebrl (brldim *brl)
+static void brl_close (brldim *brl)
 {
   if (brl_fd >= 0) {
     tcsetattr (brl_fd, TCSADRAIN, &oldtio);
@@ -351,7 +351,7 @@ static void display(const unsigned char *buf)
 		      smoother */
 }
 
-static void setbrlstat (const unsigned char *s)
+static void brl_writeStatus (const unsigned char *s)
 /* We have 4 status cells. Unclear how to handle. 
    I choose Tieman style in brlconf.h. Any other suggestions? */
 {
@@ -363,7 +363,7 @@ static void setbrlstat (const unsigned char *s)
   }
 }
 
-static void writebrl (brldim *brl)
+static void brl_writeWindow (brldim *brl)
 {
   int start, stop;
     
@@ -394,7 +394,7 @@ static int is_repeat_cmd (int cmd) {
   return (0);
 }
 
-static int readbrl(DriverCommandContext cmds) {
+static int brl_read(DriverCommandContext cmds) {
 #define TSP 0x22
 #define BUTTON 0x24
 #define KEY_TL1 (1<<0)

@@ -61,20 +61,20 @@ static unsigned char latin2cp437[128] =
 
 
 static void
-identspk (void)
+spk_identify (void)
 {
   LogPrint(LOG_NOTICE, "Using the Alva Delphi's built-in speech.");
 }
 
 
 static void
-initspk (char **parameters)
+spk_initialize (char **parameters)
 {
 }
 
 
 static void
-say (unsigned char *buffer, int len)
+spk_say (const unsigned char *buffer, int len)
 {
   static unsigned char *pre_speech = PRE_SPEECH;
   static unsigned char *post_speech = POST_SPEECH;
@@ -113,7 +113,7 @@ say (unsigned char *buffer, int len)
 
 
 static void
-mutespk (void)
+spk_mute (void)
 {
   static unsigned char *mute_seq = MUTE_SEQ;
   unsigned char buffer[32];
@@ -125,6 +125,6 @@ return;
 
 
 static void
-closespk (void)
+spk_close (void)
 {
 }

@@ -9,7 +9,7 @@
 
   Dave Mielke <dave@mielke.cc>
 
-  Version 2.99.2, January 2002
+  Version 2.99.3, January 2002
 
   Copyright © 1995-2001 by The BRLTTY Team - All Rights Reserved.  This
   is free software, placed under the terms of TThhee GGNNUU GGeenneerraall PPuubblliicc
@@ -1447,12 +1447,13 @@
      SSEETTMMAARRKK
         Mark (remember) the current position of the braille window in a
         register associated with the routing key.  See the ``GOTOMARK''
-        command.
-
+        command.  This feature only affects the current virtual
+        terminal.
 
      GGOOTTOOMMAARRKK
         Move the braille window to the position formerly marked (see the
-        ``SETMARK'' command) with the same routing key.
+        ``SETMARK'' command) with the same routing key.  This feature
+        only affects the current virtual terminal.
 
 
   33..11..1122..  NNoo RRoouuttiinngg KKeeyyss
@@ -1648,6 +1649,7 @@
   information as well (see the documentation for your display's driver).
   The data presented by this display isn't static, and may change at any
   time in response to screen updates and/or BRLTTY commands.
+
   Use the ``INFO'' command to switch to the status display, and use it
   again to return to the screen.  The layout of the information
   contained therein is dependent on the size of the braille window.
@@ -1711,8 +1713,8 @@
 
         8  All eight dots are being used.
 
-        6  Only dots 1 through 6 are being used.
 
+        6  Only dots 1 through 6 are being used.
 
      _u  The state of the uppercase (capital letter) display features
         (see the ``CAPBLINK'' command).
@@ -1777,8 +1779,8 @@
         bbllaannkk
            Cursor tracking is off.
 
-        t  Cursor tracking is on.
 
+        t  Cursor tracking is on.
 
      _c  The state of the cursor visibility features (see the ``CSRVIS''
         and ``CSRBLINK'' commands).
@@ -1844,8 +1846,6 @@
   command.  The braille display briefly (see the ``-M'' command line
   option) shows the menu title, and then presents the current item and
   its current setting.
-
-
   33..66..11..11..  NNaavviiggaattiinngg tthhee MMeennuu
 
   See ``Menu Navigation Commands'' for the full list of commands which
@@ -2489,6 +2489,61 @@
         that driver.  See the ``braille-parameters'' configuration file
         directive for the default run-time setting.
 
+     -E --environment-variables
+        Recognize environment variables when determining the default
+        settings for unspecified command line options (see section
+        ``Command Line Options'').  If this option is specified, and if
+        the environment variable associated with an unspecified option
+        is defined, then the value of that environment variable is used.
+        The names of these environment variables are based on the long
+        names of the options they correspond to:
+
+     ·  All letters are in upper case.
+
+     ·  Underscores (_) are used instead of minus signs (-).
+
+     ·  The prefix BRLTTY_ is added.
+
+        This option allows BRLTTY to be configured via Linux boot
+        parameters.  The following environment variables are supported:
+        BRLTTY_ATTRIBUTES_TABLE
+           The attributes translation table (see the ``-a'' command line
+           option).
+
+        BRLTTY_BRAILLE_DEVICE
+           The braille display device (see the ``-d'' command line
+           option).
+
+        BRLTTY_BRAILLE_DRIVER
+           The braille display driver (see the ``-b'' command line
+           option).
+
+        BRLTTY_BRAILLE_PARAMETERS
+           Parameters for the braille display driver (see the ``-B''
+           command line option).
+
+        BRLTTY_CONFIGURATION_FILE
+           The configuration file (see the ``-f'' command line option).
+
+        BRLTTY_PREFERENCES_FILE
+           The preferences file (see the ``-p'' command line option).
+
+        BRLTTY_SCREEN_PARAMETERS
+           Parameters for the screen driver (see the ``-X'' command line
+           option).
+
+        BRLTTY_SPEECH_DRIVER
+           The speech synthesizer driver (see the ``-s'' command line
+           option).
+
+        BRLTTY_SPEECH_PARAMETERS
+           Parameters for the speech synthesizer driver (see the ``-S''
+           command line option).
+
+        BRLTTY_TEXT_TABLE
+           The text translation table (see the ``-a'' command line
+           option).
+
      -M_c_s_e_c_s --message-delay=_c_s_e_c_s
         Specify the message hold time (in hundredths of a second).  If
         not specified, then 400 (4 seconds) is assumed.  This is the
@@ -2517,7 +2572,6 @@
         accepted by a specific driver, please see the documentation for
         that driver.  See the ``speech-parameters'' configuration file
         directive for the default run-time setting.
-
      -X_n_a_m_e=_v_a_l_u_e,... --screen-parameters=_n_a_m_e=_v_a_l_u_e,...
         Specify parameters for the screen driver.  If the same parameter
         is specified more than once, then its rightmost assignment is
@@ -2572,6 +2626,7 @@
 
      tteexxtt..sswweeddiisshh..ttbbll
         Swedish
+
      tteexxtt..uukk..ttbbll
         United Kingdom English
 
@@ -2637,7 +2692,6 @@
         DDoott 33
            Blue
 
-
         DDoott 77
            Blink
 
@@ -2648,6 +2702,7 @@
 
         DDoott 55
            Green
+
 
         DDoott 66
            Blue
@@ -2699,9 +2754,6 @@
 
   This particular mapping makes it easy and efficient for BRLTTY to ver­
   tically shift a dot pattern.
-
-
-
 
 
   44..44..  TTaabbllee UUttiilliittiieess
@@ -2769,7 +2821,6 @@
         same order as on a standard braille keyboard so as to make it
         easier to visualize the braille character.
 
-
      _t_t The hexadecimal value of the byte representing the dot
         combination which is in the translation table.
 
@@ -2836,7 +2887,7 @@
   This utility converts a binary translation table from one dot mapping
   to another.
 
-  tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
+       tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
 
 
 
@@ -2849,6 +2900,7 @@
   The source table is read from standard input, and the converted table
   is written to standard output.  The following dot mappings are sup­
   ported:
+
 
      ssttaannddaarrdd
         BRLTTY's native mapping (described above).
@@ -2900,7 +2952,6 @@
 
         BBiitt 55
            Dot 6
-
 
         BBiitt 66
            Dot 7
@@ -2966,11 +3017,9 @@
   of BRLTTY's standard locations.
 
 
-
-
-  ln -s /brltty/sbin/brltty /sbin/brltty
-  ln -s /brltty/etc/brltty /etc/brltty
-  ln -s /brltty/lib/brltty /lib/brltty
+       ln -s /brltty/sbin/brltty /sbin/brltty
+       ln -s /brltty/etc/brltty /etc/brltty
+       ln -s /brltty/lib/brltty /lib/brltty
 
 
 
@@ -3034,25 +3083,36 @@
 
   Apart from fixing bugs and supporting more types of braille displays,
   we hope, time permitting, to work on the following:
+
      BBeetttteerr AAttttrriibbuuttee HHaannddlliinngg
 
      ·  Attribute tracking.
 
      ·  Mixed text and attribute mode.
 
-     EEnnhhaanncceedd CCuutt aanndd PPaassttee
-
-     ·  Linear (as opposed to rectangular).
-
      SSccrroollll TTrraacckkiinngg
         Locking the braille window to one line as it scrolls on the
         screen.
 
      BBeetttteerr SSppeeeecchh SSuuppppoorrtt
-        Mixed braille and speech for faster reading of text.
+
+     ·  Mixed braille and speech for faster reading of text.
+
+     ·  Better speech navigation.
+
+     ·  More speech synthesizers.
 
      OOnn--tthhee--ffllyy GGrraaddee IIII TTrraannssllaattiioonn
         This would allow faster reading of text.
+
+     SSoocckkeett IInntteerrffaaccee
+        A mechanism allowing screen readers and X display interpreters
+        to easily make full use of all braille dsplays supported by
+        BRLTTY.
+
+     SSccrreeeenn SSuubbrreeggiioonnss
+        Ignore cursor motion outside the region, and set soft
+        navigational boundaries at the edges of the region.
 
   See the file TODO for a more complete list.
 
@@ -3092,7 +3152,8 @@
 
   ·  Handialog: VisioBraille 2040
 
-  ·  Handy Tech Elektronik GmbH: BrailleWave, mod20, mod40, mod80
+  ·  Handy Tech Elektronik GmbH: Bookworm, Braille Wave, Modular 20+4,
+     Modular 40+4, Modular 80+4
 
   ·  La O.N.C.E.: EcoBraille 20/40/80
 
@@ -3100,11 +3161,11 @@
 
   ·  Papenmeier: Tiny, Compact, Compact 486, 2D Lite, 2D Screen Soft, EL
      2D-40, EL 2D-66, EL-80, IB 80 CR Soft
+
   ·  Pulse Data International: BrailleNote 18/32
 
   ·  Telesensory Systems Inc.: Navigator 20/40/80 (latest firmware
      version only), PowerBraille 40/65/80
-
   ·  Tactilog: LogText
 
   ·  Tieman B.V.: CombiBraille 25/45/85, MiniBraille 20, MultiBraille
@@ -3170,6 +3231,7 @@
 
      ttvv Televox
 
+
      vvaa Vario/RBT (emulation 1)
 
      vvdd VideoBraille
@@ -3220,6 +3282,10 @@
 
 
   66..55..  NNoorrtthh AAmmeerriiccaann BBrraaiillllee CCoommppuutteerr CCooddee
+
+
+
+
 
 
 

@@ -26,54 +26,58 @@
 #include "spk.h"
 
 /* Routines provided by this speech driver. */
-static void identspk (void); /* print start-up messages */
-static void initspk (char **parameters); /* initialize speech device */
-static void say (unsigned char *buffer, int len); /* speak text */
-static void mutespk (void); /* mute speech */
-static void closespk (void); /* close speech device */
+static void spk_identify (void); /* print start-up messages */
+static void spk_initialize (char **parameters); /* initialize speech device */
+static void spk_say (const unsigned char *buffer, int len); /* speak text */
+static void spk_mute (void); /* mute speech */
+static void spk_close (void); /* close speech device */
 
-#ifdef SPK_HAVE_SAYATTRIBS
-  static void sayWithAttribs (unsigned char *buffer, int len); /* speak text */
+#ifdef SPK_HAVE_EXPRESS
+  static void spk_express (const unsigned char *buffer, int len); /* speak text */
 #endif
 
 #ifdef SPK_HAVE_TRACK
-  static void processSpkTracking (void); /* Get current speaking position */
-  static int trackspk (void); /* Get current speaking position */
-  static int isSpeaking (void);
+  static void spk_doTrack (void); /* Get current speaking position */
+  static int spk_getTrack (void); /* Get current speaking position */
+  static int spk_isSpeaking (void);
 #else
-  static void processSpkTracking (void) { }
-  static int trackspk () { return 0; }
-  static int isSpeaking () { return 0; }
+  static void spk_doTrack (void) { }
+  static int spk_getTrack () { return 0; }
+  static int spk_isSpeaking () { return 0; }
 #endif
 
 #ifdef SPKPARMS
-  static char *spk_parameters[] = {SPKPARMS, NULL};
+  static const char *const spk_parameters[] = {SPKPARMS, NULL};
 #endif
 
-speech_driver spk_driver = 
-{
+#ifndef SPKSYMBOL
+  #define SPKSYMBOL spk_driver
+#endif
+speech_driver SPKSYMBOL = {
   SPKNAME,
   SPKDRIVER,
-#ifdef SPKPARMS
-  spk_parameters,
-#else
-  NULL,
-#endif
-  identspk,
-  initspk,
-  say,
-  mutespk,
-  closespk,
 
-#ifdef SPK_HAVE_SAYATTRIBS
-  sayWithAttribs,
-#else
-  NULL,
-#endif
+  #ifdef SPKPARMS
+    spk_parameters,
+  #else
+    NULL,
+  #endif
 
-  processSpkTracking,
-  trackspk,
-  isSpeaking
+  spk_identify,
+  spk_initialize,
+  spk_say,
+  spk_mute,
+  spk_close,
+
+  #ifdef SPK_HAVE_EXPRESS
+    spk_express,
+  #else
+    NULL,
+  #endif
+
+  spk_doTrack,
+  spk_getTrack,
+  spk_isSpeaking
 };
 
 #endif /* !defined(_SPK_DRIVER_H) */

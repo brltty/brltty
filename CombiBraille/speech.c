@@ -63,20 +63,20 @@ static unsigned char latin2cp437[128] =
 
 
 static void
-identspk (void)
+spk_identify (void)
 {
   LogPrint(LOG_NOTICE, "Using the CombiBraille's built-in speech.");
 }
 
 
 static void
-initspk (char **parameters)
+spk_initialize (char **parameters)
 {
 }
 
 
 static void
-say (unsigned char *buffer, int len)
+spk_say (const unsigned char *buffer, int len)
 {
   unsigned char *pre_speech = PRE_SPEECH;
   unsigned char *post_speech = POST_SPEECH;
@@ -114,7 +114,7 @@ say (unsigned char *buffer, int len)
 
 
 static void
-mutespk (void)
+spk_mute (void)
 {
   unsigned char *mute_seq = MUTE_SEQ;
 
@@ -124,6 +124,6 @@ mutespk (void)
 
 
 static void
-closespk (void)
+spk_close (void)
 {
 }

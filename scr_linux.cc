@@ -23,10 +23,6 @@
  */
 
 #define SCR_C 1
-//#define DEBUG_TRANSLATION_TABLE
-//#define DEBUG_APPLICATION_CHARACTER_MAP
-//#define DEBUG_SCREEN_FONT_MAP
-//#define DEBUG_SCREEN_TEXT_TRANSLATION
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -51,6 +47,11 @@ static LinuxScreen screen;
 
 /* Pointer for external reference */
 RealScreen *live = &screen;
+
+static unsigned int debugCharacterTranslationTable = 0;
+static unsigned int debugApplicationCharacterMap = 0;
+static unsigned int debugScreenFontMap = 0;
+static unsigned int debugScreenTextTranslation = 0;
 
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[0]
  * 8-bit Latin-1 mapped to Unicode -- trivial mapping
@@ -167,19 +168,28 @@ static const unsigned short cp437_map[0X100] = {
 };
 
 
-static char *screenParameters[] = {
+static const char *const screenParameters[] = {
   "acm",
+  "debugacm",
+  "debugsfm",
+  "debugctt",
   NULL
 };
 typedef enum {
-  PARM_ACM
+  PARM_ACM,
+  PARM_DEBUGACM,
+  PARM_DEBUGSFM,
+  PARM_DEBUGCTT
 } ScreenParameters;
-char **LinuxScreen::parameters (void) {
+const char *const *LinuxScreen::parameters (void) {
   return screenParameters;
 }
 
 
 int LinuxScreen::prepare (char **parameters) {
+  validateYesNo(&debugApplicationCharacterMap, "debug application character map flag", parameters[PARM_DEBUGACM]);
+  validateYesNo(&debugScreenFontMap, "debug screen font map flag", parameters[PARM_DEBUGSFM]);
+  validateYesNo(&debugCharacterTranslationTable, "debug character translation table flag", parameters[PARM_DEBUGCTT]);
   setApplicationCharacterMap = &LinuxScreen::determineApplicationCharacterMap;
   {
     static const char *choices[] = {"default", "iso01", "vt100", "cp437", "user", NULL};
@@ -209,22 +219,22 @@ int LinuxScreen::prepare (char **parameters) {
 }
 
 void LinuxScreen::logApplicationCharacterMap (void) {
-#ifdef DEBUG_APPLICATION_CHARACTER_MAP
-  char buffer[0X80];
-  char *address = NULL;
-  unsigned char character = 0;
-  while (1) {
-    if (!(character % 8)) {
-      if (address) {
-        LogPrint(LOG_DEBUG, "%s", buffer);
-        if (!character) break;
+  if (debugApplicationCharacterMap) {
+    char buffer[0X80];
+    char *address = NULL;
+    unsigned char character = 0;
+    while (1) {
+      if (!(character % 8)) {
+        if (address) {
+          LogPrint(LOG_DEBUG, "%s", buffer);
+          if (!character) break;
+        }
+        address = buffer;
+        address += sprintf(address, "acm[%02X]:", character);
       }
-      address = buffer;
-      address += sprintf(address, "acm[%02X]:", character);
+      address += sprintf(address, " %4.4X", applicationCharacterMap[character++]);
     }
-    address += sprintf(address, " %4.4X", applicationCharacterMap[character++]);
   }
-#endif
 }
 
 static const char *findDevice (char *devices) {
@@ -402,19 +412,18 @@ int LinuxScreen::setTranslationTable (int force) {
         }
       }
       if (position < 0) {
-#ifdef DEBUG_TRANSLATION_TABLE
-        LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
-#endif
+        if (debugCharacterTranslationTable) {
+          LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
+        }
       } else {
         translationTable[position] = character;
-#ifdef DEBUG_TRANSLATION_TABLE
-        LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
-                 character, unicode, position);
-#endif
+        if (debugCharacterTranslationTable) {
+          LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
+                   character, unicode, position);
+        }
       }
     }
-#ifdef DEBUG_TRANSLATION_TABLE
-    {
+    if (debugCharacterTranslationTable) {
       unsigned int position;
       const unsigned int count = 0X10;
       for (position=0; position<sizeof(translationTable); position+=count) {
@@ -423,7 +432,6 @@ int LinuxScreen::setTranslationTable (int force) {
         LogBytes(description, &translationTable[position], count);
       }
     }
-#endif
     return 1;
   }
   return 0;
@@ -504,8 +512,7 @@ int LinuxScreen::setScreenFontMap (int force) {
   screenFontMapSize = size;
   LogPrint(LOG_DEBUG, "Screen font map changed: %d %s.",
            screenFontMapCount, (screenFontMapCount==1? "entry": "entries"));
-#ifdef DEBUG_SCREEN_FONT_MAP
-  {
+  if (debugScreenFontMap) {
     int i;
     for (i=0; i<screenFontMapCount; ++i) {
       const struct unipair *map = &screenFontMapTable[i];
@@ -513,7 +520,6 @@ int LinuxScreen::setScreenFontMap (int force) {
                i, map->unicode, map->fontpos);
     }
   }
-#endif
   return 1;
 }
 
@@ -603,8 +609,7 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
       unsigned char line[length];
       unsigned char *target = buffer;
       off_t increment = description.cols * 2 - length;
-      int row;
-      for (row=0; row<box.height; ++row) {
+      for (int row=0; row<box.height; ++row) {
         if (row) {
           if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
             LogError("Screen seek");
@@ -617,25 +622,20 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
         }
         unsigned char *source = line;
         if (text) {
-          int column;
-#ifdef DEBUG_SCREEN_TEXT_TRANSLATION
           unsigned char src[box.width];
           unsigned char *trg = target;
-#endif
-          for (column=0; column<box.width; ++column) {
-#ifdef DEBUG_SCREEN_TEXT_TRANSLATION
+          for (int column=0; column<box.width; ++column) {
             src[column] = *source;
-#endif
             *target++ = translationTable[*source];
             source += 2;
           }
-#ifdef DEBUG_SCREEN_TEXT_TRANSLATION
-          char desc[0X20];
-          sprintf(desc, "fpos[%03d,%03d]", box.left, box.top+row);
-          LogBytes(desc, src, box.width);
-          memcpy(desc, "char", 4);
-          LogBytes(desc, trg, box.width);
-#endif
+          if (debugScreenTextTranslation) {
+            char desc[0X20];
+            sprintf(desc, "fpos[%03d,%03d]", box.left, box.top+row);
+            LogBytes(desc, src, box.width);
+            memcpy(desc, "char", 4);
+            LogBytes(desc, trg, box.width);
+          }
         } else {
           int column;
           for (column=0; column<box.width; ++column) {

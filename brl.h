@@ -275,23 +275,31 @@ typedef struct {
  * with pointers to all the functions and variables.
  */
 typedef struct {
-  char *name;			/* name of driver */
-  char *identifier;		/* name of driver */
-  char **parameters;		/* user-supplied driver parameters */
-  char *help_file;		/* name of help file */
+  const char *name;			/* name of driver */
+  const char *identifier;		/* name of driver */
+  const char *const *parameters;		/* user-supplied driver parameters */
+  const char *help_file;		/* name of help file */
   int status_style;		/* prefered status cells mode */
 
   /* Routines provided by the braille driver library: */
   void (*identify) (void);	/* print start-up messages */
   void (*initialize) (char **parameters, brldim *, const char *);	/* initialise Braille display */
   void (*close) (brldim *);		/* close braille display */
-  void (*write) (brldim *);		/* write to braille display */
+  void (*writeWindow) (brldim *);		/* write to braille display */
   int (*read) (DriverCommandContext);		/* get key press from braille display */
-  void (*setstatus) (const unsigned char *);	/* set status cells */
+  void (*writeStatus) (const unsigned char *);	/* set status cells */
 } braille_driver;
 
-extern braille_driver *braille;	/* filled by dynamic libs */
 extern int loadBrailleDriver (const char **libraryName);
 extern int listBrailleDrivers (void);
+extern braille_driver *braille;
+extern braille_driver noBraille;
+
+extern unsigned char texttrans[0X100];	 /* current text to braille translation table */
+extern unsigned char untexttrans[0X100]; /* current braille to text translation table */
+extern unsigned char attribtrans[0X100]; /* current attributes to braille translation table */
+
+#define MAXNSTATCELLS 22
+extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
 
 #endif /* !defined(_BRL_H) */

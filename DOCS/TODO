@@ -9,16 +9,11 @@ Your help is welcome.
 - Socket interface so external programs (such as Ultrasonix) could make 
   use of all braille terminals supported by BRLTTY.
 
-- Setting marks at convenient places on the screen and jumping to them.
-
 - Defining smaller regions of the screen to be concentrated on.  Cursor
   movement outside the current region would be ignored.  This would be
   useful if the screen was split into multiple `windows' (e.g. in ytalk).
 
 - Attribute tracking (scroll bars, etc.)
-
-- Better support for mixed text + attribute mode i.e. underlined and/or 
-  flashing attributes.
 
 - Revision of beeps.  Too many events have the same beeps, so we might want
   to add new ones. See if we could optimize the use of the console resource.

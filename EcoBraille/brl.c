@@ -199,14 +199,14 @@ return(0);
 }
 
 
-static void identbrl(void)
+static void brl_identify(void)
 {
   LogPrint(LOG_NOTICE, "EcoBraille driver, version 1.00");
   LogPrint(LOG_INFO, "   Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>.");
 }
 
 
-static void initbrl(char **parameters, brldim *brl, const char *dev)
+static void brl_initialize(char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			// return result
   struct termios newtio;	// new terminal settings
@@ -328,7 +328,7 @@ return;
 }
 
 
-static void closebrl(brldim *brl)
+static void brl_close(brldim *brl)
 {
   free(brl->disp);
   free(rawdata);
@@ -341,7 +341,7 @@ static void closebrl(brldim *brl)
 }
 
 
-static void writebrl(brldim *brl)
+static void brl_writeWindow(brldim *brl)
 {
   int i, j;
 
@@ -362,14 +362,14 @@ static void writebrl(brldim *brl)
 }
 
 
-static void setbrlstat(const unsigned char *st)
+static void brl_writeStatus(const unsigned char *st)
 {
   // Update status cells
   memcpy(Status, st, model->NbStCells);
 }
 
 
-static int readbrl(DriverCommandContext cmds)
+static int brl_read(DriverCommandContext cmds)
 {
   int res = EOF;
   long bytes = 0;

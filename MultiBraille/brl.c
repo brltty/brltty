@@ -94,13 +94,13 @@ typedef struct KeyStroke {
 static struct KeyStroke getbrlkey (void);		/* get a keystroke from the MultiBraille */
 
 
-static void identbrl (void) {
+static void brl_identify (void) {
 	LogPrint(LOG_NOTICE, "Tieman B.V. MultiBraille driver");
 	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Wolfgang Astleitner."); 
 }
 
 
-static void initbrl (char **parameters, brldim *brl, const char *brldev) {
+static void brl_initialize (char **parameters, brldim *brl, const char *brldev) {
 	brldim res;			/* return result */
 	struct termios newtio;	/* new terminal settings */
 	short i, n, success;		/* loop counters, flags, etc. */
@@ -218,7 +218,7 @@ failure:;
 }
 
 
-static void closebrl (brldim *brl) {
+static void brl_close (brldim *brl) {
 	unsigned char *pre_data = "\002\033Z";	/* string to send to */
 	unsigned char *post_data = "\001\015";
 	unsigned char *close_seq = "";
@@ -255,7 +255,7 @@ static void closebrl (brldim *brl) {
 
 
 
-static void setbrlstat (const unsigned char *s) {
+static void brl_writeStatus (const unsigned char *s) {
 	short i;
 
 	/* Dot mapping: */
@@ -263,7 +263,7 @@ static void setbrlstat (const unsigned char *s) {
 }
 
 
-static void writebrl (brldim *brl) {
+static void brl_writeWindow (brldim *brl) {
 	short i;			/* loop counter */
 	unsigned char *pre_data = "\002\033Z";	/* bytewise accessible copies */
 	unsigned char *post_data = "\001\015";
@@ -308,7 +308,7 @@ static void writebrl (brldim *brl) {
 }
 
 
-static int readbrl (DriverCommandContext cmds) {
+static int brl_read (DriverCommandContext cmds) {
 	static short status = 0;	/* cursor routing keys mode */
 	
 	KeyStroke keystroke;

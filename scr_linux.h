@@ -65,7 +65,7 @@ class LinuxScreen:public RealScreen {
   int insertByte (unsigned char byte);
 
 public:
-  char **parameters (void);
+  const char *const *parameters (void);
   int prepare (char **parameters);
   int open (void);
   int setup (void);

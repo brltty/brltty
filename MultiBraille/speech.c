@@ -62,20 +62,20 @@ static unsigned char latin2cp437[128] =
 
 
 static void
-identspk (void)
+spk_identify (void)
 {
   puts ("Using the MultiBraille's in-built speech.\n");
 }
 
 
 static void
-initspk (char *parm)
+spk_initialize (char *parm)
 {
 }
 
 
 static void
-say (unsigned char *buffer, int len)
+spk_say (unsigned char *buffer, int len)
 {
   unsigned char *pre_speech = PRE_SPEECH;
   unsigned char *post_speech = POST_SPEECH;
@@ -113,7 +113,7 @@ say (unsigned char *buffer, int len)
 
 
 static void
-mutespk (void)
+spk_mute (void)
 {
   unsigned char *mute_seq = MUTE_SEQ;
 
@@ -123,6 +123,6 @@ mutespk (void)
 
 
 static void
-closespk (void)
+spk_close (void)
 {
 }

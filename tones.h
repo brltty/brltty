@@ -20,7 +20,7 @@
 
 typedef struct {
    int (*open) (void);
-   int (*generate) (int frequency, int duration);
+   int (*generate) (int note, int duration);
    int (*flush) (void);
    void (*close) (void);
 } ToneGenerator;
@@ -30,5 +30,8 @@ extern ToneProcedure toneSpeaker;
 extern ToneProcedure toneSoundCard;
 extern ToneProcedure toneSequencer;
 extern ToneProcedure toneAdLib;
+
+extern double noteFrequencies[];
+extern unsigned int noteCount;
 
 #endif /* !defined(_TONES_H) */

@@ -53,14 +53,15 @@ static int getbrlkey (void);		/* get a keystroke from the CombiBraille */
 
 
 static void
-identbrl (void)
+brl_identify (void)
 {
   LogPrint(LOG_NOTICE, "Tieman B.V. CombiBraille driver");
   LogPrint(LOG_INFO, "   Copyright (C) 1995, 1996 by Nikhil Nair.");
 }
 
 
-static void initbrl (char **parameters, brldim *brl, const char *brldev)
+static void
+brl_initialize (char **parameters, brldim *brl, const char *brldev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -169,7 +170,7 @@ failure:;
 
 
 static void
-closebrl (brldim *brl)
+brl_close (brldim *brl)
 {
   unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = POST_DATA;
@@ -210,7 +211,7 @@ closebrl (brldim *brl)
 
 
 static void
-setbrlstat (const unsigned char *s)
+brl_writeStatus (const unsigned char *s)
 {
   short i;
 
@@ -220,7 +221,7 @@ setbrlstat (const unsigned char *s)
 
 
 static void
-writebrl (brldim *brl)
+brl_writeWindow (brldim *brl)
 {
   short i;			/* loop counter */
   unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
@@ -266,7 +267,7 @@ writebrl (brldim *brl)
 
 
 static int
-readbrl (DriverCommandContext cmds)
+brl_read (DriverCommandContext cmds)
 {
   static int status = 0;	/* cursor routing keys mode */
   int cmd = getbrlkey();

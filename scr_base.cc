@@ -159,7 +159,7 @@ HelpScreen::HelpScreen ()
 
 
 int
-HelpScreen::loadPages (char *file)
+HelpScreen::loadPages (const char *file)
 {
   int bytesRead;
   unsigned long characterCount = 0;		// total length of formatted help screens
@@ -252,7 +252,7 @@ failure:
 
 
 inline int
-HelpScreen::open (char *file)
+HelpScreen::open (const char *file)
 {
   if (!pages)
     if (!loadPages(file))

@@ -325,7 +325,7 @@ static int StatusKeys[6] =
 
 
 static void
-identbrl (void)
+brl_identify (void)
 {
   LogPrint(LOG_NOTICE, "Alva driver, version 2.1");
   LogPrint(LOG_INFO, "   Copyright (C) 1995-2000 by Nicolas Pitre <nico@cam.org>.");
@@ -369,7 +369,7 @@ int SendToAlva( unsigned char *data, int len )
 }
 
 
-static void initbrl (char **parameters, brldim *brl, const char *dev)
+static void brl_initialize (char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   int ModelID = MODEL;
@@ -495,7 +495,7 @@ failure:
 }
 
 
-static void closebrl (brldim *brl)
+static void brl_close (brldim *brl)
 {
   free (brl->disp);
   free (rawdata);
@@ -531,7 +531,7 @@ int ReadCycles = 0;		/* for hack below */
 int ShouldRestart = 0;
 #endif
 
-static void writebrl (brldim *brl)
+static void brl_writeWindow (brldim *brl)
 {
   int i, j, k;
   static int Timeout = 0;
@@ -546,8 +546,8 @@ static void writebrl (brldim *brl)
   if( ReadCycles >= 50 ){
     int x = brl->x;
     ReadCycles = 0;
-    closebrl( brl );
-    initbrl( brl, NULL );
+    brl_close( brl );
+    brl_initialize( brl, NULL );
     if( brl->x != x ) {
       ShouldRestart = 1;
       return;
@@ -585,7 +585,7 @@ static void writebrl (brldim *brl)
 
 
 static void
-setbrlstat (const unsigned char *st)
+brl_writeStatus (const unsigned char *st)
 {
   int i;
 
@@ -717,7 +717,7 @@ static int GetABTKey (unsigned int *Keys, unsigned int *Pos)
 }
 
 
-static int readbrl (DriverCommandContext cmds)
+static int brl_read (DriverCommandContext cmds)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;

@@ -22,22 +22,23 @@
  */
 
 typedef struct {
-  char *name;
-  char *identifier;
-  char **parameters;
+  const char *name;
+  const char *identifier;
+  const char *const *parameters;
   void (*identify) (void);		/* print start-up messages */
   void (*initialize) (char **parameters);		/* initialize speech device */
-  void (*say) (unsigned char *buffer, int len);	/* speak text */
+  void (*say) (const unsigned char *buffer, int len);	/* speak text */
   void (*mute) (void);		/* mute speech */
   void (*close) (void);		/* close speech device */
-  void (*sayWithAttribs) (unsigned char *buffer, int len);	/* speak text */
-  void (*processSpkTracking) (void);		/* get current speaking position */
-  int (*track) (void);		/* get current speaking position */
+  void (*express) (const unsigned char *buffer, int len);	/* speak text */
+  void (*doTrack) (void);		/* get current speaking position */
+  int (*getTrack) (void);		/* get current speaking position */
   int (*isSpeaking) (void);		/* get current speaking position */
 } speech_driver;
 
-extern speech_driver *speech;
 extern int loadSpeechDriver (const char **libraryName);
 extern int listSpeechDrivers (void);
+extern speech_driver *speech;
+extern speech_driver noSpeech;
 
 #endif /* !defined(_SPK_H) */

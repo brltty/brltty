@@ -44,7 +44,7 @@ public:
 // abstract base class - useful for screen source driver pointers
 class RealScreen : public Screen {
 public:
-  virtual char **parameters (void) = 0;
+  virtual const char *const *parameters (void) = 0;
   virtual int prepare (char **parameters) = 0;
   virtual int open (void) = 0;
   virtual int setup (void) = 0;
@@ -74,10 +74,10 @@ class HelpScreen:public Screen {
   pageinfo *pageDescriptions;
   unsigned char **pages;
   unsigned char *characters;
-  int loadPages (char *);
+  int loadPages (const char *);
 public:
   HelpScreen ();
-  int open (char *helpfile);		// called every time the help screen is opened
+  int open (const char *helpfile);		// called every time the help screen is opened
   void close (void);		// called once to close the help screen
   void setPageNumber (short);
   short getPageCount (void);

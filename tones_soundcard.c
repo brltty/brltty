@@ -78,13 +78,13 @@ static int writeSample (unsigned char sample) {
    return 1;
 }
 
-static int generateSoundCard (int frequency, int duration) {
+static int generateSoundCard (int note, int duration) {
    if (fileDescriptor != -1) {
-      double waveLength = frequency? (double)sampleRate / (double)frequency: HUGE_VAL;
+      double waveLength = note? (double)sampleRate / noteFrequencies[note]: HUGE_VAL;
       unsigned long int sampleCount = sampleRate * duration / 1000;
       int sampleNumber;
-      LogPrint(LOG_DEBUG, "Tone: msec=%d freq=%d wvln=%.2E smct=%lu",
-               duration, frequency, waveLength, sampleCount);
+      LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d wvln=%.2E smct=%lu",
+               duration, note, waveLength, sampleCount);
       for (sampleNumber=0; sampleNumber<sampleCount; ++sampleNumber) {
          unsigned char sample = rint(sin(((double)sampleNumber / waveLength) * (2.0 * M_PI)) * 127.0) + 128;
 	 if (!writeSample(sample)) return 0;

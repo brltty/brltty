@@ -40,7 +40,7 @@
 #include "../spk.h"
 
 #define SPK_HAVE_TRACK
-#define SPK_HAVE_SAYATTRIBS
+#define SPK_HAVE_EXPRESS
 
 typedef enum {
   PARM_PROGRAM=0,
@@ -54,7 +54,7 @@ static int helper_fd_in = -1, helper_fd_out = -1;
 static unsigned short lastIndex, finalIndex;
 static char speaking = 0;
 
-static void identspk (void)
+static void spk_identify (void)
 {
   LogPrint(LOG_NOTICE, VERSION);
   LogPrint(LOG_INFO, "   "COPYRIGHT);
@@ -74,7 +74,7 @@ static void myerror(char *fmt, ...)
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
   LogPrint(LOG_ERR, "%s", buf);
-  closespk();
+  spk_close();
 }
 static void myperror(char *fmt, ...)
 {
@@ -91,10 +91,10 @@ static void myperror(char *fmt, ...)
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
   LogPrint(LOG_ERR, "%s", buf);
-  closespk();
+  spk_close();
 }
 
-static void initspk (char **parameters)
+static void spk_initialize (char **parameters)
 {
   int fd1[2], fd2[2];
   uid_t uid, gid;
@@ -170,7 +170,7 @@ static void initspk (char **parameters)
 	   extProgPath);
 }
 
-static void mywrite(int fd, void *buf, int len)
+static void mywrite(int fd, const void *buf, int len)
 {
   char *pos = (char *)buf;
   int w;
@@ -218,7 +218,7 @@ static int myread(int fd, void *buf, int len)
   return 1;
 }
 
-static void sayit(unsigned char *buffer, int len, int attriblen)
+static void sayit(const unsigned char *buffer, int len, int attriblen)
 {
   unsigned char l[5];
   if(helper_fd_out < 0) return;
@@ -235,16 +235,16 @@ static void sayit(unsigned char *buffer, int len, int attriblen)
   finalIndex = len;
 }
 
-static void say(unsigned char *buffer, int len)
+static void spk_say(const unsigned char *buffer, int len)
 {
   sayit(buffer,len,0);
 }
-static void sayWithAttribs(unsigned char *buffer, int len)
+static void spk_express(const unsigned char *buffer, int len)
 {
   sayit(buffer,len,len);
 }
 
-static void processSpkTracking()
+static void spk_doTrack(void)
 {
   unsigned char b[2];
   if(helper_fd_in < 0) return;
@@ -261,17 +261,17 @@ static void processSpkTracking()
   }
 }
 
-static int trackspk()
+static int spk_getTrack(void)
 {
   return lastIndex;
 }
 
-static int isSpeaking()
+static int spk_isSpeaking(void)
 {
   return speaking;
 }
 
-static void mutespk (void)
+static void spk_mute (void)
 {
   unsigned char c = 1;
   if(helper_fd_out < 0) return;
@@ -280,7 +280,7 @@ static void mutespk (void)
   mywrite(helper_fd_out, &c,1);
 }
 
-static void closespk (void)
+static void spk_close (void)
 {
   if(helper_fd_in >= 0)
     close(helper_fd_in);

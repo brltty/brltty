@@ -39,13 +39,13 @@ static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;
 
 static void
-identspk (void)
+spk_identify (void)
 {
   LogPrint(LOG_NOTICE, "Generic Say Driver");
 }
 
 static void
-initspk (char **parameters)
+spk_initialize (char **parameters)
 {
   const char *command = parameters[PARM_COMMAND];
   commandPath = *command? command: SAY_CMD;
@@ -53,7 +53,7 @@ initspk (char **parameters)
 }
 
 static void
-say (unsigned char *buffer, int length)
+spk_say (const unsigned char *buffer, int length)
 {
   if (!commandStream)
     commandStream = popen(commandPath, "w");
@@ -67,7 +67,7 @@ say (unsigned char *buffer, int length)
 }
 
 static void
-mutespk (void)
+spk_mute (void)
 {
   if (commandStream)
     {
@@ -77,7 +77,7 @@ mutespk (void)
 }
 
 static void
-closespk (void)
+spk_close (void)
 {
-   mutespk();
+   spk_mute();
 }

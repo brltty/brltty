@@ -32,7 +32,7 @@
 /* HACK - include brl.c - with little adjustments */
 
 #define  BRLDRIVER   NULL
-#define  HELPNAME "nohelp" 
+#define  BRLHELP "nohelp" 
 
 #define _SERIAL_C_
 #define _SCR_H

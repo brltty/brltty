@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 2.99.2, January 2002
+  <date>Version 2.99.3, January 2002
   <abstract>
     Copyright &copy; 1995-2001 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -1261,10 +1261,12 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     Mark (remember) the current position of the braille window
     in a register associated with the routing key.
     See the <ref id="command-GOTOMARK" name="GOTOMARK"> command.
+    This feature only affects the current virtual terminal.
   <tag>GOTOMARK<label id="command-GOTOMARK"></tag>
     Move the braille window to the position formerly marked
     (see the <ref id="command-SETMARK" name="SETMARK"> command)
     with the same routing key.
+    This feature only affects the current virtual terminal.
 </descrip>
 
 <sect2>No Routing Keys<p>
@@ -2293,6 +2295,54 @@ The <tt/brltty/ command accepts the following options:
     please see the documentation for that driver.
     See the <ref id="configure-braille-parameters" name="braille-parameters">
     configuration file directive for the default run-time setting.
+  <tag><tt/-E/ <tt/--environment-variables/<label id="options-environment-variables"></tag>
+    Recognize environment variables when determining
+    the default settings for unspecified command line options
+    (see section <ref id="options" name="Command Line Options">).
+    If this option is specified, 
+    and if the environment variable associated with an unspecified option is defined,
+    then the value of that environment variable is used.
+    The names of these environment variables are based on
+    the long names of the options they correspond to:
+    <itemize>   
+      <item>All letters are in upper case.
+      <item>Underscores (<tt/_/) are used instead of minus signs (<tt/-/).
+      <item>The prefix <tt/BRLTTY_/ is added.
+    </itemize>   
+    This option allows BRLTTY to be configured via Linux boot parameters.
+    The following environment variables are supported:
+    <descrip>
+      <tag><tt/BRLTTY_ATTRIBUTES_TABLE/</tag>
+        The attributes translation table
+        (see the <ref id="options-attributes-table" name="-a"> command line option).
+      <tag><tt/BRLTTY_BRAILLE_DEVICE/</tag>
+        The braille display device
+        (see the <ref id="options-braille-device" name="-d"> command line option).
+      <tag><tt/BRLTTY_BRAILLE_DRIVER/</tag>
+        The braille display driver
+        (see the <ref id="options-braille-driver" name="-b"> command line option).
+      <tag><tt/BRLTTY_BRAILLE_PARAMETERS/</tag>
+        Parameters for the braille display driver
+        (see the <ref id="options-braille-parameters" name="-B"> command line option).
+      <tag><tt/BRLTTY_CONFIGURATION_FILE/</tag>
+        The configuration file
+        (see the <ref id="options-configuration-file" name="-f"> command line option).
+      <tag><tt/BRLTTY_PREFERENCES_FILE/</tag>
+        The preferences file
+        (see the <ref id="options-preferences-file" name="-p"> command line option).
+      <tag><tt/BRLTTY_SCREEN_PARAMETERS/</tag>
+        Parameters for the screen driver
+        (see the <ref id="options-screen-parameters" name="-X"> command line option).
+      <tag><tt/BRLTTY_SPEECH_DRIVER/</tag>
+        The speech synthesizer driver
+        (see the <ref id="options-speech-driver" name="-s"> command line option).
+      <tag><tt/BRLTTY_SPEECH_PARAMETERS/</tag>
+        Parameters for the speech synthesizer driver
+        (see the <ref id="options-speech-parameters" name="-S"> command line option).
+      <tag><tt/BRLTTY_TEXT_TABLE/</tag>
+        The text translation table
+        (see the <ref id="options-text-table" name="-a"> command line option).
+    </descrip>
   <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
     Specify the message hold time (in hundredths of a second).
     If not specified, then <tt/400/ (4 seconds) is assumed.
@@ -2668,16 +2718,22 @@ we hope, time permitting, to work on the following:
       <item>Attribute tracking.
       <item>Mixed text and attribute mode.
     </itemize>
-  <tag/Enhanced Cut and Paste/
-    <itemize>
-      <item>Linear (as opposed to rectangular).
-    </itemize>
   <tag/Scroll Tracking/
     Locking the braille window to one line as it scrolls on the screen.
   <tag/Better Speech Support/
-    Mixed braille and speech for faster reading of text.
+    <itemize>
+      <item>Mixed braille and speech for faster reading of text.
+      <item>Better speech navigation.
+      <item>More speech synthesizers.
+    </itemize>
   <tag/On-the-fly Grade II Translation/
     This would allow faster reading of text.
+  <tag/Socket Interface/
+    A mechanism allowing screen readers and X display interpreters
+    to easily make full use of all braille dsplays supported by BRLTTY.
+  <tag/Screen Subregions/
+    Ignore cursor motion outside the region,
+    and set soft navigational boundaries at the edges of the region.
 </descrip>
 See the file <tt/TODO/ for a more complete list.
 
@@ -2720,10 +2776,11 @@ BRLTTY supports the following braille displays:
     VisioBraille 2040
   <item>
     <htmlurl url="http://www.handytech.com/" name="Handy Tech Elektronik GmbH">:
-    BrailleWave,
-    mod20,
-    mod40,
-    mod80
+    Bookworm,
+    Braille Wave,
+    Modular 20+4,
+    Modular 40+4,
+    Modular 80+4
   <item>
     <htmlurl url="http://cidat.once.es/" name="La O.N.C.E.">:
     EcoBraille 20/40/80

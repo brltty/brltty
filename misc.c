@@ -37,28 +37,6 @@
 #include "config.h"
 #include "common.h"
 
-/*
- * Output braille translation tables.
- * The files *.auto.h (the default tables) are generated at compile-time.
- */
-unsigned char texttrans[0X100] =
-{
-  #include "text.auto.h"
-};
-unsigned char untexttrans[0X100];
-
-unsigned char attribtrans[0X100] =
-{
-  #include "attrib.auto.h"
-};
-
-/*
- * Status cells support 
- * remark: the Papenmeier has a column with 22 cells, 
- * all other terminals use up to 5 bytes
- */
-unsigned char statcells[MAXNSTATCELLS];        /* status cell buffer */
-
 #ifdef USE_SYSLOG
    #include <syslog.h>
    static int syslogOpened = 0;

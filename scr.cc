@@ -156,7 +156,7 @@ executeScreenCommand (int cmd) {
 }
 
 
-char **
+const char *const *
 getScreenParameters (void) {
   return live->parameters();
 }
@@ -201,7 +201,7 @@ closeRoutingScreen (void) {
 
 
 int
-initializeHelpScreen (char *file) {
+initializeHelpScreen (const char *file) {
   return help.open(file);
 }
 

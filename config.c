@@ -47,7 +47,7 @@
 #include "misc.h"
 #include "common.h"
 
-char VERSION[] = "BRLTTY 2.99.2";
+char VERSION[] = "BRLTTY 2.99.3";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 /*
@@ -80,7 +80,7 @@ static const char *opt_brailleDevice = NULL;
 static const char *opt_brailleDriver = NULL;
 static char *opt_brailleParameters = NULL;
 static const char *opt_configurationFile = NULL;
-static char *opt_screenParameters = NULL;
+static short opt_environmentVariables = 0;
 static short opt_help = 0;
 static short opt_logLevel = LOG_NOTICE;
 static short opt_noDaemon = 0;
@@ -88,6 +88,7 @@ static short opt_noSpeech = 0;
 static const char *opt_pidFile = NULL;
 static const char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
+static char *opt_screenParameters = NULL;
 static const char *opt_speechDriver = NULL;
 static char *opt_speechParameters = NULL;
 static short opt_standardError = 0;
@@ -222,6 +223,8 @@ static OptionEntry optionTable[] = {
     "Print start-up messages and exit."},
    {'B', "braille-parameters", "arg,...", configureBrailleParameters,
     "Parameters to braille driver."},
+   {'E', "environment-variables", NULL, NULL,
+    "Recognize environment variables."},
    {'M', "message-delay", "csecs", NULL,
     "Message hold time [400]."},
    {'N', "no-speech", NULL, NULL,
@@ -326,6 +329,14 @@ processConfigurationFile (const char *path, int optional)
 }
 
 static void
+ensureOptionSetting (const char **setting, const char *defaultSetting, const char *configuredSetting, const char *environmentVariable) {
+  if (!*setting) {
+    if (opt_environmentVariables && environmentVariable) *setting = getenv(environmentVariable);
+    if (!*setting) *setting = configuredSetting? configuredSetting: defaultSetting;
+  }
+}
+
+static void
 extendParameters (char **parameters, char *operand) {
    if (*parameters) {
       size_t length = strlen(*parameters);
@@ -337,9 +348,9 @@ extendParameters (char **parameters, char *operand) {
 }
 
 static void
-parseParameters (char ***values, char **names, char *parameters, char *description) {
+parseParameters (char ***values, const char *const *names, const char *description, char *parameters) {
    if (!names) {
-      static char *noNames[] = {NULL};
+      static const char *const noNames[] = {NULL};
       names = noNames;
    }
    if (!*values) {
@@ -350,7 +361,7 @@ parseParameters (char ***values, char **names, char *parameters, char *descripti
       while (count--) (*values)[count] = strdupWrapper("");
    }
    if (parameters && *parameters) {
-      char *name = (parameters = strdupWrapper(parameters));
+      const char *name = (parameters = strdupWrapper(parameters));
       while (1) {
          char *delimiter = strchr(name, ',');
          int done = delimiter == NULL;
@@ -388,22 +399,16 @@ parseParameters (char ***values, char **names, char *parameters, char *descripti
 }
 
 static void
-parseBrailleParameters (char *parameters) {
-   parseParameters(&brailleParameters, braille->parameters, parameters, "braille driver");
+processParameters (char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable) {
+  parseParameters(values, names, description, configuredParameters);
+  if (opt_environmentVariables && environmentVariable) {
+    parseParameters(values, names, description, getenv(environmentVariable));
+  }
+  parseParameters(values, names, description, optionParameters);
 }
 
 static void
-parseSpeechParameters (char *parameters) {
-   parseParameters(&speechParameters, speech->parameters, parameters, "speech driver");
-}
-
-static void
-parseScreenParameters (char *parameters) {
-   parseParameters(&screenParameters, getScreenParameters(), parameters, "screen driver");
-}
-
-static void
-logParameters (char **names, char **values, char *description) {
+logParameters (const char *const *names, char **values, char *description) {
    if (names && values) {
       while (*names) {
          LogPrint(LOG_INFO, "%s Parameter: %s=%s", description, *names, *values);
@@ -534,6 +539,9 @@ processOptions (int argc, char **argv)
         break;
       case 'B':                        /* parameter to speech driver */
         extendParameters(&opt_brailleParameters, optarg);
+        break;
+      case 'E':                        /* parameter to speech driver */
+        opt_environmentVariables = 1;
         break;
       case 'M': {        /* message delay */
         int value;
@@ -671,6 +679,20 @@ initializeBraille (void) {
    brl.x = brl.y = -1;
 }
 
+static void
+getBrailleDriver (void) {
+  if (!loadBrailleDriver(&opt_brailleDriver)) {
+    LogPrint(LOG_ERR, "Bad braille driver selection: %s", opt_brailleDriver);
+    fprintf(stderr, "\n");
+    listBrailleDrivers();
+    fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
+    /* not fatal */
+  }
+  if (!opt_brailleDriver) opt_brailleDriver = "built-in";
+  processParameters(&brailleParameters, braille->parameters, "braille driver",
+                    opt_brailleParameters, cfg_brailleParameters, "BRLTTY_BRAILLE_PARAMETERS");
+}
+
 void
 startBrailleDriver (void) {
    braille->initialize(brailleParameters, &brl, opt_brailleDevice);
@@ -704,6 +726,20 @@ void
 initializeSpeech (void) {
 }
 
+static void
+getSpeechDriver (void) {
+  if (!loadSpeechDriver(&opt_speechDriver)) {
+    LogPrint(LOG_ERR, "Bad speech driver selection: %s", opt_speechDriver);
+    fprintf(stderr, "\n");
+    listSpeechDrivers();
+    fprintf(stderr, "\nUse -s to specify one, and -h for quick help.\n\n");
+    /* not fatal */
+  }
+  if (!opt_speechDriver) opt_speechDriver = "built-in";
+  processParameters(&speechParameters, speech->parameters, "speech driver",
+                    opt_speechParameters, cfg_speechParameters, "BRLTTY_SPEECH_PARAMETERS");
+}
+
 void
 startSpeechDriver (void) {
    speech->initialize(speechParameters);
@@ -714,6 +750,11 @@ stopSpeechDriver (void) {
    speech->mute();
    speech->close();
    initializeSpeech();
+   if (opt_noSpeech) {
+      opt_noSpeech = 0;
+      getSpeechDriver();
+      speech->identify();
+   }
 }
 
 static void
@@ -955,7 +996,7 @@ updatePreferences (void)
          for (index=0; index<MIN(brl.x*brl.y, lineLength-lineIndent); index++)
             brl.disp[index] = texttrans[line[lineIndent+index]];
       }
-      braille->write(&brl);
+      braille->writeWindow(&brl);
       delay(refreshInterval);
 
       /* Now process any user interaction */
@@ -1132,16 +1173,17 @@ startup(int argc, char *argv[])
   LogPrint(LOG_INFO, "%s", COPYRIGHT);
 
   /* Process the configuration file. */
-  if (opt_configurationFile)
-    processConfigurationFile(opt_configurationFile, 0);
-  else
-    processConfigurationFile(CONFIG_FILE, 1);
-  if (!opt_preferencesFile) opt_preferencesFile = cfg_preferencesFile;
-  if (!opt_textTable) opt_textTable = cfg_textTable;
-  if (!opt_attributesTable) opt_attributesTable = cfg_attributesTable;
-  if (!opt_brailleDevice) opt_brailleDevice = cfg_brailleDevice;
-  if (!opt_brailleDriver) opt_brailleDriver = cfg_brailleDriver;
-  if (!opt_speechDriver) opt_speechDriver = cfg_speechDriver;
+  {
+    int optional = opt_configurationFile == NULL;
+    ensureOptionSetting(&opt_configurationFile, CONFIG_FILE, NULL, "BRLTTY_CONFIGURATION_FILE");
+    processConfigurationFile(opt_configurationFile, optional);
+  }
+  ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE");
+  ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE");
+  ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE");
+  ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE");
+  ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER");
+  ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER");
 
   if (opt_brailleDevice == NULL)
     opt_brailleDevice = BRLDEV;
@@ -1152,51 +1194,32 @@ startup(int argc, char *argv[])
       exit(4);
     }
 
-  if (!loadBrailleDriver(&opt_brailleDriver)) {
-    LogPrint(LOG_CRIT, "%s braille driver selection.",
-             opt_brailleDriver? "Bad": "No");
-    fprintf(stderr, "\n");
-    listBrailleDrivers();
-    fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
-    exit(5);
+  getBrailleDriver();
+  if (opt_noSpeech) {
+    speech = &noSpeech;
+  } else {
+    getSpeechDriver();
   }
-  parseBrailleParameters(cfg_brailleParameters);
-  parseBrailleParameters(opt_brailleParameters);
+  processParameters(&screenParameters, getScreenParameters(), "screen driver",
+                    opt_screenParameters, cfg_screenParameters, "BRLTTY_SCREEN_PARAMETERS");
 
-  if (!loadSpeechDriver(&opt_speechDriver)) {
-    LogPrint(LOG_ERR, "%s speech driver selection.",
-             opt_speechDriver? "Bad": "No");
-    fprintf(stderr, "\n");
-    listSpeechDrivers();
-    fprintf(stderr, "\nUse -s to specify one, and -h for quick help.\n\n");
-    LogPrint(LOG_WARNING, "Falling back to built-in speech driver.");
-    /* not fatal */
+  if (!opt_preferencesFile) {
+    const char *part1 = "brltty-";
+    const char *part2 = braille->identifier;
+    const char *part3 = ".prefs";
+    char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+    sprintf(path, "%s%s%s", part1, part2, part3);
+    opt_preferencesFile = path;
   }
-  parseSpeechParameters(cfg_speechParameters);
-  parseSpeechParameters(opt_speechParameters);
 
-  parseScreenParameters(cfg_screenParameters);
-  parseScreenParameters(opt_screenParameters);
-
-  if (!opt_preferencesFile)
-    {
-      char *part1 = "brltty-";
-      char *part2 = braille->identifier;
-      char *part3 = ".prefs";
-      char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-      sprintf(path, "%s%s%s", part1, part2, part3);
-      opt_preferencesFile = path;
-    }
-
-  if (chdir(HOME_DIR))                /* * change to directory containing data files  */
-    {
-      char *backup_dir = "/etc";
-      LogPrint(LOG_ERR, "Cannot change directory to '%s': %s",
-               HOME_DIR, strerror(errno));
-      LogPrint(LOG_WARNING, "Using backup directory '%s' instead.",
-               backup_dir);
-      chdir (backup_dir);                /* home directory not found, use backup */
-    }
+  if (chdir(HOME_DIR) == -1) {                /* * change to directory containing data files  */
+    char *backup_dir = "/etc";
+    LogPrint(LOG_ERR, "Cannot change directory to '%s': %s",
+             HOME_DIR, strerror(errno));
+    LogPrint(LOG_WARNING, "Using backup directory '%s' instead.",
+             backup_dir);
+    chdir(backup_dir);                /* home directory not found, use backup */
+  }
 
   /*
    * Load translation tables: 
@@ -1231,7 +1254,7 @@ startup(int argc, char *argv[])
    * Give braille and speech libraries a chance to introduce themselves.
    */
   braille->identify();
-  speech->identify();
+  if (!opt_noSpeech) speech->identify();
 
   if (opt_version)
     exit(0);

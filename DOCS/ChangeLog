@@ -28,6 +28,7 @@ Note: this file is in reversed chronological order (bottom to top).
       (emergency, alert, critical, error, warning, notice, information, debug)
    Add -n (--no-daemon) option to make debugging easier and to permit invocation from inittab. (dm,sd)
    Add -B (--braille-parameters=) option, and the braille-parameters brltty.conf directive. (dm)
+   Add -E (--environment-variables) option to allow boot parameters. (dm,sd)
    Implement user-settable attributes translation table. (dm)
       Introduce short option -a.
       Introduce long option --attributes-table=.

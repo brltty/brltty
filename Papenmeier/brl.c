@@ -316,9 +316,9 @@ try_init(brldim *brl, const char *dev, unsigned int baud)
 
 
 static void 
-initbrl (char **parameters, brldim *brl, const char *dev)
+brl_initialize (char **parameters, brldim *brl, const char *dev)
 {
-  validateYesNo(&debug_keys, "debug modifiers flag", parameters[PARM_DEBUGKEYS]);
+  validateYesNo(&debug_keys, "debug keys flag", parameters[PARM_DEBUGKEYS]);
   validateYesNo(&debug_reads, "debug reads flag", parameters[PARM_DEBUGREADS]);
   validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
 
@@ -331,12 +331,12 @@ initbrl (char **parameters, brldim *brl, const char *dev)
   LogPrint(LOG_DEBUG,  "try 19200");
   try_init(brl, dev, B19200);
   if (the_terminal==NULL) {
-    closebrl(brl);
+    brl_close(brl);
     LogPrint(LOG_DEBUG,  "try 38400");
     try_init(brl, dev, B38400);
   }
   if (the_terminal==NULL) {
-    closebrl(brl);
+    brl_close(brl);
     LogPrint(LOG_ERR, "unknown braille terminal type");
     exit(9);
   }
@@ -344,7 +344,7 @@ initbrl (char **parameters, brldim *brl, const char *dev)
 
 
 static void
-closebrl (brldim *brl)
+brl_close (brldim *brl)
 {
   free (brl->disp);
   tcsetattr (brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
@@ -352,9 +352,9 @@ closebrl (brldim *brl)
 }
 
 static void
-identbrl (void)
+brl_identify (void)
 {
-  LogPrint(LOG_NOTICE, "Papenmeier Driver (%s %s)", __DATE__, __TIME__);
+  LogPrint(LOG_NOTICE, "Papenmeier Driver (compiled on %s at %s)", __DATE__, __TIME__);
   LogPrint(LOG_INFO, "   Copyright (C) 1998-2001 by The BRLTTY Team.");
   LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
   LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
@@ -417,7 +417,7 @@ writebrlstat(const unsigned char* s, int size)
 
 static int input_mode = 0;
 static void
-setbrlstat(const unsigned char* s)
+brl_writeStatus(const unsigned char* s)
 {
   if (debug_writes)
     LogPrint(LOG_DEBUG, "setbrlstat %d", curr_stats);
@@ -459,7 +459,7 @@ setbrlstat(const unsigned char* s)
 }
 
 static void
-writebrl (brldim *brl)
+brl_writeWindow (brldim *brl)
 {
   int i;
 
@@ -641,7 +641,7 @@ handle_key(int code, int ispressed, int offsroute)
 #define READ(OFFS) { if (safe_read(brl_fd,buf+OFFS,1) != 1) return EOF; }
 
 static int 
-readbrl (DriverCommandContext cmds)
+brl_read (DriverCommandContext cmds)
 {
   unsigned char buf [20];
   int code, num, action;
