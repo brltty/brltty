@@ -139,14 +139,14 @@ getConfigurationOperand (char **operandAddress, const char *delimiters, int exte
       free(*operandAddress);
       *operandAddress = NULL;
     }
-    if (!*operandAddress) {
-      *operandAddress = strdupWrapper(operand);
-    } else if (extend) {
+    if (*operandAddress) {
       int size = strlen(*operandAddress) + strlen(operand) + 2;
       char *buffer = mallocWrapper(size);
       snprintf(buffer, size, "%s,%s", *operandAddress, operand);
       free(*operandAddress);
       *operandAddress = buffer;
+    } else if (extend) {
+      *operandAddress = strdupWrapper(operand);
     }
     return status;
   }
