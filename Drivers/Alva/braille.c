@@ -1051,7 +1051,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_SLIDEWIN;
               break;
             case KEY_PROG | KEY_HOME | KEY_UP:
-              res = CMD_SPKHOME;
+              res = CMD_PRPROMPT;
               break;
             case KEY_PROG | KEY_HOME | KEY_LEFT:
               res = CMD_RESTARTSPEECH;
@@ -1077,6 +1077,10 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             case KEY_PROG | KEY_HOME | KEY_ROUTING1:
               /* attribute for pointed character */
               res = CR_DESCCHAR + RoutingPos;
+              break;
+            case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
+              /* attribute for pointed character */
+              res = CR_SETLEFT + RoutingPos;
               break;
           }
           break;
@@ -1279,12 +1283,11 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 res = CMD_TOP_LEFT;
                 break;
               case KEY_CURSOR:
-                res = CMD_HOME;
+                res = CMD_RETURN;
                 ReWrite = 1;	/* force rewrite of whole display */
                 break;
               case KEY_PROG:
                 res = CMD_HELP;
-                /*res = CMD_SAY_LINE;*/
                 break;
               case KEY_PROG | KEY_HOME:
                 res = CMD_DISPMD;
