@@ -374,7 +374,11 @@ static int processRequest(Tconnection *c)
     return 1;
   }
   if (c->auth==0) {
-    if ((type==BRLPACKET_AUTHKEY) && (size==sizeof(auth->protocolVersion)+authKeyLength) && (auth->protocolVersion==BRLAPI_PROTOCOL_VERSION) && (!memcmp(&auth->key, authKey, authKeyLength))) {
+    if (auth->protocolVersion!=BRLAPI_PROTOCOL_VERSION) {
+      writeError(c->fd, BRLERR_PROTOCOL_VERSION);
+      return 1;
+    }
+    if ((type==BRLPACKET_AUTHKEY) && (size==sizeof(auth->protocolVersion)+authKeyLength) && (!memcmp(&auth->key, authKey, authKeyLength))) {
       writeAck(c->fd);
       c->auth = 1;
       unauthConnections--;
