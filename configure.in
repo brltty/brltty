@@ -516,8 +516,6 @@ s/  */ /g
 y/ /,/
 '`"
 
-BRLTTY_SEARCH_LIBS([sin], [m])
-BRLTTY_SEARCH_LIBS([pow], [m])
 case "${host_os}"
 in
    linux*|solaris*|openbsd*)

@@ -55,12 +55,6 @@ extern "C" {
 /* Define this if the function shl_load is available. */
 #undef HAVE_FUNC_SHL_LOAD
 
-/* Define this if the function sin is available. */
-#undef HAVE_FUNC_SIN
-
-/* Define this if the function pow is available. */
-#undef HAVE_FUNC_POW
-
 /* Define this to be a string containing the package name. */
 #undef PACKAGE_NAME
 
