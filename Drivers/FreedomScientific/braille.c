@@ -620,21 +620,45 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           }
 
           if (!model->identifier) {
+            static ModelEntry generic;
+            model = &generic;
             LogPrint(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
-            model = NULL;
+
+            memset(&generic, 0, sizeof(generic));
+            generic.identifier = "Generic";
+            generic.totalCells = generic.textCells = 20;
+            generic.dotsTable = &dots12345678;
+            generic.hotkeysRow = 1;
+
+            {
+              typedef struct {
+                const char *identifier;
+                const DotsTable *dotsTable;
+              } ExceptionEntry;
+              static const ExceptionEntry exceptionTable[] = {
+                {"Focus", &dots12374568},
+                {NULL   , NULL         }
+              };
+              const ExceptionEntry *exception = exceptionTable;
+              while (exception->identifier) {
+                if (strncmp(response.payload.info.model, exception->identifier, strlen(exception->identifier)) == 0) {
+                  generic.dotsTable = exception->dotsTable;
+                  break;
+                }
+                exception++;
+              }
+            }
 
             {
               const char *word = strrchr(response.payload.info.model, ' ');
               if (word) {
                 int size;
                 if (isInteger(&size, ++word)) {
-                  static ModelEntry entry;
                   static char identifier[sizeof(response.payload.info.model)];
-                  memset(&entry, 0, sizeof(entry));
-                  entry.totalCells = entry.textCells = size;
-                  snprintf(identifier, sizeof(identifier), "Generic %d", size);
-                  entry.identifier = identifier;
-                  model = &entry;
+                  generic.totalCells = generic.textCells = size;
+                  snprintf(identifier, sizeof(identifier), "%s %d",
+                           generic.identifier, generic.totalCells);
+                  generic.identifier = identifier;
                 }
               }
             }
