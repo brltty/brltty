@@ -253,7 +253,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 static void brl_close(BrailleDisplay *brl)
 {
   if (brl_fd>=0) {
-    tcsetattr(brl_fd,TCSADRAIN,&oldtio);
+    putSerialAttributes(brl_fd,&oldtio);
     close(brl_fd);
   }
 }

@@ -130,7 +130,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     }
   if (!success)
     {
-      tcsetattr (brl_fd, TCSANOW, &oldtio);
+      putSerialAttributes (brl_fd, &oldtio);
       goto failure;
     }
 
@@ -189,9 +189,7 @@ brl_close (BrailleDisplay *brl)
   free (prevdata);
   free (rawdata);
 
-#if 0
-  tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
-#endif /* 0 */
+  putSerialAttributes (brl_fd, &oldtio);		/* restore terminal settings */
   close (brl_fd);
 }
 

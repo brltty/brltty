@@ -481,7 +481,7 @@ static void brl_close (BrailleDisplay *brl)
      }
    if (brl_fd >= 0)
      {
-       tcsetattr (brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
+       putSerialAttributes (brl_fd, &oldtio);	/* restore terminal settings */
        close (brl_fd);
        brl_fd = -1;
      }

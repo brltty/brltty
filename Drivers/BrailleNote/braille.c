@@ -356,7 +356,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
          }
          delay(1000);
       }
-      tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
+      putSerialAttributes(fileDescriptor, &oldSettings);
       close(fileDescriptor);
       fileDescriptor = -1;
    }
@@ -365,7 +365,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_close (BrailleDisplay *brl) {
-   tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
+   putSerialAttributes(fileDescriptor, &oldSettings);
    close(fileDescriptor);
    fileDescriptor = -1;
 

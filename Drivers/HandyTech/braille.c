@@ -233,7 +233,7 @@ writeSerialBytes (const unsigned char *buffer, int length, int *delay) {
 static void
 closeSerialPort (void) {
   if (serialDevice != -1) {
-    tcsetattr(serialDevice, TCSADRAIN, &oldSerialSettings);
+    putSerialAttributes(serialDevice, &oldSerialSettings);
     close(serialDevice);
     serialDevice = -1;
   }

@@ -409,7 +409,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
         } else {
           LogPrint(LOG_DEBUG, "BrailleLite not responding.");
         }
-        tcsetattr(blite_fd, TCSANOW, &oldtio);
+        putSerialAttributes(blite_fd, &oldtio);
       }
       close(blite_fd);
       blite_fd = -1;
@@ -442,7 +442,7 @@ brl_close (BrailleDisplay * brl)
   }
 
   if (blite_fd != -1) {
-    tcsetattr(blite_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
+    putSerialAttributes(blite_fd, &oldtio);	/* restore terminal settings */
     close(blite_fd);
     blite_fd = -1;
   }

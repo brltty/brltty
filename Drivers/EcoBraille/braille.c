@@ -293,7 +293,7 @@ return 0;
 static void brl_close(BrailleDisplay *brl)
 {
   free(rawdata);
-  tcsetattr(brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
+  putSerialAttributes(brl_fd, &oldtio);	/* restore terminal settings */
   close(brl_fd);
 
 #ifdef DEBUG  

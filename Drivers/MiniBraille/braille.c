@@ -116,7 +116,7 @@ __errexit:
 
 static void brl_close(BrailleDisplay *brl)
 {
-	tcsetattr(brl_fd, TCSADRAIN, &oldtermios);
+	putSerialAttributes(brl_fd, &oldtermios);
 	close(brl_fd);
 }
 

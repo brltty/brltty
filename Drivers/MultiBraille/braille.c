@@ -173,7 +173,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 			while (!timeout_yet (ACK_TIMEOUT) && n <= init_ack[0]);
 	}
   if (!success) {
-		tcsetattr (brl_fd, TCSANOW, &oldtio);
+		putSerialAttributes (brl_fd, &oldtio);
 		goto failure;
 	}
 
@@ -233,9 +233,7 @@ static void brl_close (BrailleDisplay *brl) {
 	free (prevdata);
 	free (rawdata);
 
-#if 0
-	tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
-#endif /* 0 */
+	putSerialAttributes (brl_fd, &oldtio);		/* restore terminal settings */
 	close (brl_fd);
 }
 

@@ -194,12 +194,6 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* Try to detect display by sending query */
   while(1) {
-    /* Reset serial port config, in case some other program interfered and
-       BRLTTY is resetting... */
-    if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1) {
-      LogError("tcsetattr");
-      goto failure;
-    }
     LogPrint(LOG_DEBUG,"Sending query");
     if(QueryDisplay(brl_fd,reply)) break;
     delay(DETECT_DELAY);
@@ -260,7 +254,7 @@ failure:;
 static void brl_close (BrailleDisplay *brl)
 {
   if (brl_fd >= 0) {
-    tcsetattr (brl_fd, TCSADRAIN, &oldtio);
+    putSerialAttributes (brl_fd, &oldtio);
     close (brl_fd);
   }
   if (brl->buffer)

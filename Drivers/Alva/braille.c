@@ -450,7 +450,7 @@ resetSerialPort (void) {
 static void
 closeSerialPort (void) {
   if (serialDevice != -1) {
-    tcsetattr(serialDevice, TCSADRAIN, &oldSerialSettings);		/* restore terminal settings */
+    putSerialAttributes(serialDevice, &oldSerialSettings);		/* restore terminal settings */
     close(serialDevice);
     serialDevice = -1;
   }
