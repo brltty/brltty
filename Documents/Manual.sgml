@@ -258,8 +258,6 @@ The build procedure should result in the installation of the following files:
         Translation tables
         (see section <ref id="translation" name="Translation Tables"> for details).
         Their names look like <tt/text./<em/language/<tt/.tbl/.
-        Tables designed for use with character sets other than <tt/iso-8859-1/
-        have names which indicate this fact.
         There are also a couple of special tables which map
         character highlighting attributes to braille dots:
         <tt/attrib.tbl/ does it the original way,
@@ -409,9 +407,12 @@ for any additional display-specific instructions.
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.tbl/ extension is optional.
+    For a simple file name, the <tt/text./ prefix is optional.
     If this option isn't specified,
-    then a commonly (in North America) used 8-dot variant of the
-    <ref id="nabcc" name="North American Braille Computer Code">
+    then <tt/nabcc/,
+    a commonly (in North America) used 8-dot variant of the
+    <ref id="nabcc" name="North American Braille Computer Code">,
     is assumed.
     See the <ref id="configure-text-table" name="text-table"> configuration file directive
     and the <ref id="options-text-table" name="-t"> command line option
@@ -425,9 +426,10 @@ for any additional display-specific instructions.
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.tbl/ extension is optional.
     If this option isn't specified,
-    then <tt/attributes.tbl/ is assumed.
-    Change it to <tt/attrib.tbl/ if you'd like it done the old way.
+    then <tt/attributes/ is assumed.
+    Change it to <tt/attrib/ if you'd like it done the old way.
     See the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive
     and the <ref id="options-attributes-table" name="-a"> command line option
     for run-time selection.
@@ -1807,6 +1809,7 @@ The following directives are recognized:
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.tbl/ extension is optional.
     See the <ref id="build-attributes-table" name="--with-attributes-table">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -1841,6 +1844,7 @@ The following directives are recognized:
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.ctb/ extension is optional.
     The contraction table is used when the 6-dot braille feature is activated
     (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command
     and the <ref id="preference-text-style" name="Text Style"> preference).
@@ -1887,6 +1891,8 @@ The following directives are recognized:
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.tbl/ extension is optional.
+    For a simple file name, the <tt/text./ prefix is optional.
     See the <ref id="build-text-table" name="--with-text-table">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -1904,6 +1910,7 @@ The <tt/brltty/ command accepts the following options:
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.tbl/ extension is optional.
     See the <ref id="configure-attributes-table" name="attributes-table">
     configuration file directive for the default run-time setting.
     This setting can be changed with the
@@ -1921,6 +1928,7 @@ The <tt/brltty/ command accepts the following options:
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.ctb/ extension is optional.
     The contraction table is used when the 6-dot braille feature is activated
     (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command
     and the <ref id="preference-text-style" name="Text Style"> preference).
@@ -1989,6 +1997,8 @@ The <tt/brltty/ command accepts the following options:
     (see the <ref id="build-data-directory" name="--sysconfdir">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
+    The <tt/.tbl/ extension is optional.
+    For a simple file name, the <tt/text./ prefix is optional.
     See the <ref id="configure-text-table" name="text-table">
     configureation file directive for the default run-time setting.
     This setting can be changed with the
@@ -3158,8 +3168,9 @@ This feature isn't available if the
 The following contraction tables are provided:
 <descrip>
   <tag/big5.ctb/Chinese big5.
-  <tag/compress.ctb/Remove excessive white-space.
-  <tag/en-us-g2.ctb/Grade 2 American English.
+  <tag/big5/Chinese
+  <tag/compress/Remove excessive white-space.
+  <tag/en-us-g2/Grade 2 American English.
 </descrip>
 
 <sect2>File Format<p>
@@ -3470,9 +3481,9 @@ The attributes translation table is used when BRLTTY
 is displaying screen attributes rather than screen content
 (see the <ref id="command-DISPMD" name="DISPMD"> command).
 Each of the eight braille dots represents one of the eight attribute bits.
-Two attributes translation tables are provided:
+The following attributes translation tables are provided:
 <descrip>
-  <tag/attributes.tbl/
+  <tag/attributes/
     The lefthand column represents the background colours:
     <descrip>
       <tag/Dot 1/Red
@@ -3493,7 +3504,7 @@ Two attributes translation tables are provided:
     One of its problems, though, is that it's difficult to discern
     the difference between normal (white on black)
     and reverse (black on white) video.
-  <tag/attrib.tbl/
+  <tag/attrib/
     The lefthand column represents the background colours:
     <descrip>
       <tag/Dot 1/Red
