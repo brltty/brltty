@@ -802,6 +802,25 @@ static int
 insertCode (unsigned short key, int raw) {
   unsigned char prefix = 0X00;
   unsigned char code;
+  int modShift = 0;
+  int modControl = 0;
+  int modMeta = 0;
+
+  if (key < KEY_RETURN) {
+    if (key & KEY_MOD_META) {
+      key &= ~KEY_MOD_META;
+      modMeta = 1;
+    }
+
+    if ((key >= 'A') && (key <= 'Z')) {
+      key = (key - 'A') + 'a';
+      modShift = 1;
+    } else if (!(key & 0XE0)) {
+      key += 'a';
+      modControl = 1;
+    }
+  }
+
   switch (key) {
     case KEY_ESCAPE:        code = 0X01; break;
     case KEY_FUNCTION +  0: code = 0X3B; break;
@@ -904,14 +923,24 @@ insertCode (unsigned short key, int raw) {
       }
       break;
   }
+
   {
-    unsigned char buffer[4];
+    unsigned char buffer[10];
     unsigned short count = 0;
     const unsigned char *byte = buffer;
+
+    if (modControl) buffer[count++] = 0X1D;
+    if (modMeta) buffer[count++] = 0X38;
+    if (modShift) buffer[count++] = 0X2A;
     if (prefix) buffer[count++] = prefix;
     buffer[count++] = code;
+
     if (prefix) buffer[count++] = prefix;
     buffer[count++] = code | 0X80;
+    if (modShift) buffer[count++] = 0X2A | 0X80;
+    if (modMeta) buffer[count++] = 0X38 | 0X80;
+    if (modControl) buffer[count++] = 0X1D | 0X80;
+
     while (count--) {
       if (!insertByte(*byte++)) return 0;
     }
