@@ -15,10 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/*
- * route.c - cursor routing functions
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -32,7 +28,6 @@
 #include "scr.h"
 #include "route.h"
 
-
 /*
  * These control the performance of cursor routing.  The optimal settings
  * will depend heavily on system load, etc.  See the documentation for
@@ -45,146 +40,144 @@
 #define CSRJMP_LOOP_DELAY 0	/* delay to use in csrjmp_sub() loops (ms) */
 #define CSRJMP_SETTLE_DELAY 400	/* delay to use in csrjmp_sub() loops (ms) */
 
-
 volatile pid_t routingProcess = 0;
 
-void csrjmp_sub(int x, int y, int curscr)
-{
-    ScreenDescription scr;		/* for screen state infos */
-    int curx, cury;		/* current cursor position */
-    int dif, t = 0;
-    sigset_t new_mask, old_mask;		/* for blocking of SIGUSR1 */
-
-    /* Set up signal mask: */
-    sigemptyset(&new_mask);
-    sigaddset(&new_mask, SIGUSR1);
-    sigprocmask(SIG_UNBLOCK, &new_mask, NULL);
-
-    /* Initialise second thread of screen reading: */
-    if (!openRoutingScreen()) return;
-
-    describeRoutingScreen(&scr);
-
-    /* Deal with vertical movement first, ignoring horizontal jumping ... */
-    while ((dif = y - scr.posy) && (curscr == scr.no)) {
-	timeout_yet(0);		/* initialise stop-watch */
-	sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
-	insertKey(dif > 0 ? KEY_CURSOR_DOWN : KEY_CURSOR_UP);
-	sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
-	do {
-#if CSRJMP_LOOP_DELAY > 0
-	    delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
-#endif /* CSRJMP_LOOP_DELAY > 0 */
-	    cury = scr.posy;
-	    curx = scr.posx;
-	    describeRoutingScreen(&scr);
-	} while (!(t = timeout_yet(CSRJMP_TIMEOUT)) &&
-		 scr.posy == cury && scr.posx == curx);
-	if (t)
-	    break;
-	if ((scr.posy == cury && (scr.posx - curx) * dif <= 0) ||
-	    (scr.posy != cury && (y - scr.posy) * (y - scr.posy) >= dif * dif))
-	{
-	    delay(CSRJMP_SETTLE_DELAY);
-	    describeRoutingScreen(&scr);
-	    if ((scr.posy == cury && (scr.posx - curx) * dif <= 0) ||
-		(scr.posy != cury && (y - scr.posy) * (y - scr.posy) >= dif * dif))
-	    {
-		/* 
-		 * We are getting farther from our target... Let's try to 
-		 * go back to the previous position wich was obviously the 
-		 * nearest ever reached to date before giving up.
-		 */
-		sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
-		insertKey(dif < 0 ? KEY_CURSOR_DOWN : KEY_CURSOR_UP);
-		sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
-		break;
-	    }
-	}
-    }
-
-    if (x >= 0) {	/* don't do this for vertical-only routing (x=-1) */
-	/* Now horizontal movement, quitting if the vertical position is wrong: */
-	while ((dif = x - scr.posx) && (scr.posy == y) && (curscr == scr.no)) {
-	    timeout_yet(0);	/* initialise stop-watch */
-	    sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
-	    insertKey(dif > 0 ? KEY_CURSOR_RIGHT : KEY_CURSOR_LEFT);
-	    sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
-	    do {
-#if CSRJMP_LOOP_DELAY > 0
-		delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
-#endif /* CSRJMP_LOOP_DELAY > 0 */
-		curx = scr.posx;
-		describeRoutingScreen(&scr);
-	    }
-	    while (!(t = timeout_yet(CSRJMP_TIMEOUT)) &&
-		   scr.posx == curx && scr.posy == y);
-	    if (t)
-		break;
-	    if (scr.posy != y ||
-		(x - scr.posx) * (x - scr.posx) >= dif * dif)
-	    {
-		delay(CSRJMP_SETTLE_DELAY);
-		describeRoutingScreen(&scr);
-		if (scr.posy != y ||
-		    (x - scr.posx) * (x - scr.posx) >= dif * dif)
-		{
-		    /* 
-		     * We probably wrapped on a short line... or are getting 
-		     * farther from our target. Try to get back to the previous
-		     * position which was obviously the nearest ever reached
-		     * to date before we exit.
-		     */
-		    sigprocmask(SIG_BLOCK, &new_mask, &old_mask);  /* block SIGUSR1 */
-		    insertKey(dif > 0 ? KEY_CURSOR_LEFT : KEY_CURSOR_RIGHT);
-		    sigprocmask(SIG_SETMASK, &old_mask, NULL);  /* unblock SIGUSR1 */
-		    break;
-		}
-	    }
-	}
-    }
-
-    closeRoutingScreen();		/* close second thread of screen reading */
+static void
+insertCursorKey (unsigned short key, const sigset_t *mask) {
+  sigset_t old;
+  sigprocmask(SIG_BLOCK, mask, &old);
+  insertKey(key);
+  sigprocmask(SIG_SETMASK, &old, NULL);
 }
 
-int csrjmp(int x, int y, int scrno)
-{
-    int started = 0;
-    sigset_t new_mask, old_mask;
-    sigemptyset(&new_mask);
-    sigaddset(&new_mask, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
+static void
+doCursorRouting (int column, int row, int screen) {
+  ScreenDescription scr;		/* for screen state infos */
+  int oldx, oldy;		/* current cursor position */
+  int dif, timedOut;
+  sigset_t mask;		/* for blocking of SIGUSR1 */
 
-    /*
-     * Fork cursor routing subprocess. First, we must check if a
-     * subprocess is already running: if so, we send it a SIGUSR1 and
-     * wait for it to die. 
-     */
-    /* NB According to man 2 wait, setting SIGCHLD handler to SIG_IGN may mean
-     * that wait can't catch the dying child.
-     */
-    if (routingProcess) {
-      kill(routingProcess, SIGUSR1);
+  /* Set up signal mask: */
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGUSR1);
+  sigprocmask(SIG_UNBLOCK, &mask, NULL);
+
+  /* Initialise second thread of screen reading: */
+  if (!openRoutingScreen()) return;
+  describeRoutingScreen(&scr);
+
+  /* Deal with vertical movement first, ignoring horizontal jumping ... */
+  while ((dif = row - scr.posy) && (scr.no == screen)) {
+    timeout_yet(0);		/* initialise stop-watch */
+    insertCursorKey((dif > 0)? KEY_CURSOR_DOWN: KEY_CURSOR_UP, &mask);
+
+    do {
+#if CSRJMP_LOOP_DELAY > 0
+      delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
+#endif /* CSRJMP_LOOP_DELAY > 0 */
+
+      oldy = scr.posy;
+      oldx = scr.posx;
+      describeRoutingScreen(&scr);
+      timedOut = timeout_yet(CSRJMP_TIMEOUT);
+    } while ((scr.posy == oldy) && (scr.posx == oldx) && !timedOut);
+    if (timedOut) break;
+
+    if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
+        (scr.posy != oldy && (row - scr.posy) * (row - scr.posy) >= dif * dif)) {
+      delay(CSRJMP_SETTLE_DELAY);
+      describeRoutingScreen(&scr);
+      if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
+          (scr.posy != oldy && (row - scr.posy) * (row - scr.posy) >= dif * dif)) {
+        /* 
+         * We are getting farther from our target... Let's try to 
+         * go back to the previous position wich was obviously the 
+         * nearest ever reached to date before giving up.
+         */
+        insertCursorKey((dif < 0)? KEY_CURSOR_DOWN: KEY_CURSOR_UP, &mask);
+        break;
+      }
+    }
+  }
+
+  if (column >= 0) {	/* don't do this for vertical-only routing (column=-1) */
+    /* Now horizontal movement, quitting if the vertical position is wrong: */
+    while ((dif = column - scr.posx) && (scr.posy == row) && (scr.no == screen)) {
+      timeout_yet(0);	/* initialise stop-watch */
+      insertCursorKey((dif > 0)? KEY_CURSOR_RIGHT: KEY_CURSOR_LEFT, &mask);
+
       do {
-        sigsuspend(&old_mask);
-      } while (routingProcess);
+#if CSRJMP_LOOP_DELAY > 0
+        delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
+#endif /* CSRJMP_LOOP_DELAY > 0 */
+
+        oldx = scr.posx;
+        describeRoutingScreen(&scr);
+        timedOut = timeout_yet(CSRJMP_TIMEOUT);
+      } while ((scr.posx == oldx) && (scr.posy == row) && !timedOut);
+      if (timedOut) break;
+
+      if (scr.posy != row ||
+          (column - scr.posx) * (column - scr.posx) >= dif * dif) {
+        delay(CSRJMP_SETTLE_DELAY);
+        describeRoutingScreen(&scr);
+        if (scr.posy != row ||
+            (column - scr.posx) * (column - scr.posx) >= dif * dif) {
+          /* 
+           * We probably wrapped on a short line... or are getting 
+           * farther from our target. Try to get back to the previous
+           * position which was obviously the nearest ever reached
+           * to date before we exit.
+           */
+          insertCursorKey((dif > 0)? KEY_CURSOR_LEFT: KEY_CURSOR_RIGHT, &mask);
+          break;
+        }
+      }
     }
+  }
 
-    switch (routingProcess = fork()) {
-      case 0: /* child, cursor routing process */
-	nice(CSRJMP_NICENESS);	/* reduce scheduling priority */
-	csrjmp_sub(x, y, scrno);
-	_exit(0);		/* terminate child process */
+  closeRoutingScreen();		/* close second thread of screen reading */
+}
 
-      case -1: /* fork failed */
-        LogError("fork");
-        routingProcess = 0;
-	break;
+int
+startCursorRouting (int column, int row, int screen) {
+  int started = 0;
+  sigset_t newMask, oldMask;
 
-      default: /* parent, wait for child to return */
-        started = 1;
-	break;
-    }
-    sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
-    return started;
+  sigemptyset(&newMask);
+  sigaddset(&newMask, SIGCHLD);
+  sigprocmask(SIG_BLOCK, &newMask, &oldMask);	/* block SIGUSR1 */
+
+  /*
+   * First, we must check if a subprocess is already running. 
+   * If so, we send it a SIGUSR1 and wait for it to die. 
+   * 
+   * N.B. According to man 2 wait, setting SIGCHLD handler to SIG_IGN may mean
+   * that wait can't catch the dying child.
+   */
+  if (routingProcess) {
+    kill(routingProcess, SIGUSR1);
+    do {
+      sigsuspend(&oldMask);
+    } while (routingProcess);
+  }
+
+  switch (routingProcess = fork()) {
+    case 0: /* child, cursor routing process */
+      nice(CSRJMP_NICENESS); /* reduce scheduling priority */
+      doCursorRouting(column, row, screen);
+      _exit(0);		/* terminate child process */
+
+    case -1: /* fork failed */
+      LogError("fork");
+      routingProcess = 0;
+      break;
+
+    default: /* parent, wait for child to return */
+      started = 1;
+      break;
+  }
+
+  sigprocmask(SIG_SETMASK, &oldMask, NULL); /* unblock SIGCHLD */
+  return started;
 }

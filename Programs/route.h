@@ -22,9 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern int startCursorRouting (int column, int row, int screen);
 extern volatile pid_t routingProcess;
-
-int csrjmp (int x, int y, int scrno);
 
 #ifdef __cplusplus
 }

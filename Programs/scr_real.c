@@ -66,7 +66,7 @@ gpmCloseConnection (void) {
 
 static int
 route_RealScreen (int column, int row, int screen) {
-  return csrjmp(column, row, screen);
+  return startCursorRouting(column, row, screen);
 }
 
 static int

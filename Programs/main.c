@@ -427,7 +427,7 @@ terminationHandler (int signalNumber) {
 static void 
 childDeathHandler (int signalNumber) {
   pid_t pid;
-  while ((pid = waitpid(-1, NULL, WNOHANG))) {
+  while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
     if (pid == routingProcess) routingProcess = 0;
   }
 }
