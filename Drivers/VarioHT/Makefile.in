@@ -26,7 +26,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = vh
 DRIVER_NAME = VarioHT
-BRAILLE_MODELS = 40/80 (Vario in HandyTech emulation mode)
+BRAILLE_MODELS = 40 (Vario in HandyTech emulation mode)
 HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk

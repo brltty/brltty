@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.4, August 2003
+  <date>Version 3.4, December 2003
   <abstract>
     Copyright &copy; 1995-2003 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -4019,107 +4019,42 @@ e.g. over a slow serial link to a remote host.
 
 <sect1>Supported Braille Displays<label id="displays"><p>
 BRLTTY supports the following braille displays:
-<itemize>
-  <item>
-    <htmlurl url="http://www.alva-bv.nl/alvacorp/alva_corp_home.html" name="Alva B.V.">:
-    ABT3xx,
-    Delphi,
-    Satellite
-  <item>
-    <htmlurl url="http://www.baum.de/English/homeeng1.htm" name="Baum">:
-    Vario/RBT 40/80 (emulation 1/2)
-  <item>
-    <htmlurl url="http://www.blazie.com/pages/main.html" name="Blazie Engineering">:
-    BrailleLite 18/40/M40
-  <item>
-    <htmlurl url="http://www.eurobraille.fr/Indexuk.htm" name="EuroBraille">:
-    AzerBraille,
-    Clio,
-    Iris,
-    NoteBraille,
-    Scriba
-  <item>
-    <htmlurl url="http://www.handialog.com/indexuk.htm" name="Handialog">:
-    VisioBraille 2040
-  <item>
-    <htmlurl url="http://www.handytech.com/" name="Handy Tech Elektronik GmbH">:
-    Bookworm,
-    Braille Star 40/80,
-    Braille Wave 40,
-    Braillino 20,
-    Modular 20/40/80
-  <item>
-    <htmlurl url="http://cidat.once.es/" name="La O.N.C.E.">:
-    EcoBraille 20/40/80
-  <item>
-    <htmlurl url="http://www.cavazza.it/cnt/schede/scheda-mb408l-eng.html" name="MDV">:
-    MB208/MB408L/MB408S (protocol 5)
-  <item>
-    <htmlurl url="http://www.papenmeier.de/" name="Papenmeier">:
-    Tiny,
-    Compact,
-    Compact 486,
-    2D Lite,
-    2D Screen Soft,
-    EL 2D-40,
-    EL 2D-66,
-    EL 2D-80,
-    EL 40,
-    EL 80,
-    Elba 20,
-    Elba 32,
-    IB 80 CR Soft
-  <item>
-    <htmlurl url="http://www.pulsedata.co.nz/" name="Pulse Data International">:
-    BrailleNote 18/32
-  <item>
-    <htmlurl url="http://www.telesensory.com/" name="Telesensory Systems Inc.">:
-    Navigator 20/40/80 (latest firmware version only),
-    PowerBraille 40/65/80
-  <item>
-    Tactilog:
-    LogText
-  <item>
-    <htmlurl url="http://www.braillevoyager.nl/uk/index.html" name="Tieman B.V.">:
-    CombiBraille 25/45/85,
-    MiniBraille 20,
-    MultiBraille MB125CR/MB145CR/MB185CR,
-    Voyager 44/70 (USB)
-  <item>
-    <htmlurl url="http://www.tinlecco.it/tiflosoft" name="Tiflosoft">:
-    VideoBraille 40
-</itemize>
+<descrip>
+  <tag/Alva/ ABT(3nn), Delphi(4nn), Satellite(5nn)
+  <tag/BrailleLite/ 18/40/M40
+  <tag/BrailleNote/ 18/32
+  <tag/CombiBraille/ 25/45/85
+  <tag/EcoBraille/ 20/40/80
+  <tag/EuroBraille/ AzerBraille, Clio, Iris, NoteBraille, Scriba
+  <tag/HandyTech/ Modular 20/40/80, Braille Wave 40, Braille Star 40/80, Bookworm, Braillino 20
+  <tag/LogText/ 32
+  <tag/MDV/ MB208/MB408L/MB408S (protocol 5)
+  <tag/MiniBraille/ 20
+  <tag/MultiBraille/ MB125CR/MB145CR/MB185CR
+  <tag/Papenmeier/ Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80, Elba 20/32, IB 80
+  <tag/TSI/ Navigator 20/40/80, PowerBraille 40/65/80
+  <tag/Vario/ 40/80 (native mode)
+  <tag/VarioHT/ 40 (Vario in HandyTech emulation mode)
+  <tag/VideoBraille/ 40
+  <tag/Virtual/ TCP/Unix, client/server
+  <tag/VisioBraille/ 20/40
+  <tag/Voyager/ 44/70 (USB)
+</descrip>
 
 <sect1>Supported Speech Synthesizers<label id="synthesizers"><p>
 BRLTTY supports the following speech synthesizers:
-<itemize>
-  <item>
-    <htmlurl url="http://www.alva-bv.nl/alvacorp/alva_corp_home.html" name="Alva B.V.">:
-    Delphi
-  <item>
-    <htmlurl url="http://www.blazie.com/pages/main.html" name="Blazie Engineering">:
-    BrailleLite
-  <item>
-    <htmlurl url="http://www.braillevoyager.nl/uk/index.html" name="Tieman B.V.">:
-    CombiBraille
-  <item>
-    <htmlurl url="http://www.ed.ac.uk/" name="The University of Edinburgh">
-    (<htmlurl url="http://www.cstr.ed.ac.uk/" name="Centre for Speech Technology Research">):
-    <htmlurl url="http://www.cstr.ed.ac.uk/projects/festival/" name="Festival">
-  <item>
-    <htmlurl url="http://www.cmu.edu" name="Carnegie Mellon University">
-    (<htmlurl url="http://www.cs.cmu.edu" name="School of Computer Science">):
-    <htmlurl url="http://www.speech.cs.cmu.edu/flite/index.html" name="FestivalLite">
-  <item>
-    <htmlurl url="http://www.elan.fr/" name="Elan Informatique">:
-    Televox
-  <item>
-    <htmlurl url="http://www.cepstral.com/" name="Cepstral">:
-    Theta
-  <item>
-    <htmlurl url="http://www.ibm.com/" name="International Business Machines (IBM)">:
-    <htmlurl url="http://www.ibm.com/software/speech/dev/ttssdk_linux.html" name="ViaVoice">
-</itemize>
+<descrip>
+  <tag/Alva/ Delphi(4nn)
+  <tag/BrailleLite/ -
+  <tag/CombiBraille/ -
+  <tag/ExternalSpeech/ runs /usr/local/bin/externalspeech
+  <tag/Festival/ text to speech engine
+  <tag/FestivalLite/ text to speech engine
+  <tag/GenericSay/ pipes to /usr/local/bin/say
+  <tag/Televox/ -
+  <tag/Theta/ text to speech engine
+  <tag/ViaVoice/ text to speech engine
+</descrip>
 
 <sect1>Driver Identification Codes<label id="drivers"><p>
 <descrip>

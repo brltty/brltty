@@ -1,6 +1,116 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+December 31, 2003:
+ - BRLTTY 3.4 released:
+   Remove duplicate files from screen-3.9.11 patch. (TK)
+   Add more build options to specify directories. (dm)
+      --with-program-directory
+      --with-library-directory
+      --with-data-directory
+      --with-manpage-directory
+      --with-include-directory
+   Swap HandyTech's "freeze screen" [B7] and "six-dot braille" [B6 B8] bindings. (dm)
+   Support HandyTech Modular and Braille Star 80 keypad. (ml)
+   Optional packages are also looked for in /opt/<package-name>. (dm)
+   Configure shouldn't list external drivers when linking statically. (dm)
+   Standardize the software speech driver identification notices. (dm)
+   Support dynamic external, dynamic internal, and static linking for drivers with external dependencies. (dm)
+   spk_open() should return a boolean indicating success or failure. (dm)
+   Add spktest. (dm)
+   Support the Theta text to speech engine. (dm)
+   Add the 4(hundred) to the names of the Alva Delphi models. (dm)
+   Get rid of --disable-tainted-components build option. (dm)
+   Add the --with[out]-viavoice build options. (dm)
+   Remove several unsigned/signed char conflicts. (dm)
+   C90 doesn't permit C++-style // comments. (ml,dm)
+   Support the Festival Lite text to speech engine. (ml)
+   Allow the --with-...-driver= options to take "all" or a comma-delimited list. (dm)
+   The Alva driver shouldn't set CRTSCTS as it prevents some models from displaying output. (dm)
+   Split out HandyTech model identification in preparation for buffer resize support. (dm)
+   Braille drivers providing packet I/O must now implement brl_reset(). (dm)
+   Allow the .tbl extension for attributes translation tables to be optional. (dm)
+   Allow the .ctb extension for contraction tables to be optional. (dm)
+   Support default table extensions and prefixes when configuring. (dm)
+   Disabling contracted braille doesn't fully disable it. (sd,dm)
+   No longer support library names and paths for drivers. (dm)
+   Make private globals static (MiniBraille, Papenmeier, VisioBraille). (dm)
+   Reduce size of BRLPARAMS structure in Avla driver to save space. (ml)
+   Ignore EINTR interruption in Alva's SendToAlva() routine. (ml)
+   Make more private globals static in MultiBraille driver. (ml)
+   Use the TranslationTable typedef in the LogText driver. (ml)
+   EuroBraille driver 1.3.1:
+      Corrected AzerBraille 40 Programming keys bugs.
+      Added a LOG_IO define to log in/out packets to a file.
+      Started to debug Iris identification failures (still not working perfectly).
+   Make private globals static (CombiBraille, MultiBraille). (ml)
+   Make private globals static (EuroBraille, MultiBraille, VideoBraille). (ml)
+   Append the driver code to the driver symbol name. (dm)
+   Convert the VideoBraille driver to use makeOutputTable. (dm)
+   Revive the VarioHT driver. (dm)
+   Fix hanging of Vario driver when display is turned off and on again. (ml)
+   Fix hanging of TSI driver when falling back to 9600 baud. (dm)
+   Convert the EcoBraille driver to use makeOutputTable, openSerialDevice and resetSerialDevice. (dm)
+   Rearrange the t_key structure in the EuroBraille driver to save space. (ml)
+   Convert the MiniBraille driver to use makeOutputTable and openSerialDevice. (dm)
+   Convert the BralleNote driver to use makeOutputTable. (dm)
+   Convert MultiBraille driver to use makeOutputTable, openSerialDevice and resetSerialDevice. (ml,dm)
+   Starting the HandyTech driver gobbles a file descriptor if:
+      model detection fails (ml)
+      resetting the device fails (dm)
+   Convert the MDV driver to use openSerialDevice and resetSerialDevice. (ml,dm)
+   Convert the VisioBraille driver to use openSerialDevice and resetSerialDevice. (ml,dm)
+   The O_NOCTTY flag shouldn't be used when opening the Voyager device. (dm)
+   Convert the EuroBraille driver to use openSerialDevice and resetSerialDevice. (ml)
+   Convert the Alva driver to use openSerialDevice and resetSerialDevice. (ml,dm)
+   Convert the Vario driver to use openSerialDevice and resetSerialDevice. (ml,dm)
+   Convert the BrailleLite driver to use openSerialDevice and resetSerialDevice. (dm)
+   Replace internal TSI driver SetSpeed() routine with resetSerialDevice(). (ml)
+   Opening a serial device shouldn't hang if CLOCAL isn't set. (dm)
+   Convert the TSI driver to use openSerialDevice(). (dm)
+   Update big5.ctb. (ck)
+   Add the patch for screen-4.0.1. (rb)
+   Add packet I/O to the HandyTech driver. (dm)
+   Changes to support OpenBSD. (ml,dm)
+   Add support for HandyTech's Braillino. (ml,dm)
+   Add a full list of country codes to en-us-g2.ctb as literal. (ml)
+   Implement contraction table opcode 26 (locale). (dm)
+   Document how to use stow to maintain multiple releases of BRLTTY. (bd)
+   brlapi_getControllingTty() now checks back through parent processes until a real tty is found. (ml,dm)
+   Add targets for compiling and uncompiling text translation tables. (ml)
+   Assume a direct-through mapping if there is no screen font map. (ml,dm)
+   Enhance the INIT_PATH mechanism: (np)
+      Handle being invoked as linuxrc.
+      Handle other commands, e.g. telinit, being ways to invoke init.
+   EuroBraille driver 1.3: (yp)
+      Reduced code size.
+      BrlAPI compatible.
+      Transfer routines moved to separate program.
+      Corrected bugs when using an Iris-40 (still not perfect).
+   Change the configure default for BrlAPI to enabled. (dm)
+   Put %config and %verify for brltty.conf on the same line in the rpm spec file. (dm)
+   Delay after receiving a Papenmeier identity packet to allow the display time to become fully ready. (dm)
+   Add the virtual braille display driver. (ml)
+   Introduce brltty-config and use it from brltty-install. (dm)
+   Add CMD_LEARN to the Papenmeier driver. (dm)
+   Allow PRDIFLN/NXDIFLN to move up/down in the preferences menu. (dm)
+   Don't report non-existent directories when uninstalling. (dm)
+   Reduce the log for failure to set the working directory to a warning. (dm)
+   Add / as an additional backup working directory. (dm)
+   Make the directory for driver help, driver configuration, and driver lists specifiable. (dm)
+      the -D (--data-directory=) command line option
+      the data-directory configuration file directive
+      the BRLTTY_DATA_DIRECTORY environment variable
+   Make the directory for text and attributes tables specifiable. (dm)
+      the -T (--tables-directory=) command line option
+      the tables-directory configuration file directive
+      the BRLTTY_TABLES_DIRECTORY environment variable
+   Make the directory for contraction tables specifiable. (dm)
+      the -C (--contractions-directory=) command line option
+      the contractions-directory configuration file directive
+      the BRLTTY_CONTRACTIONS_DIRECTORY environment variable
+   The "braille driver initialization failed" log fills /var when the display isn't connected. (dm)
+
 September 1, 2003:
  - BRLTTY 3.3.1 released:
    Correct the description of which commands are unmasked by default. (st)

@@ -2,7 +2,7 @@ BRLTTY is a background process (daemon) providing access to the Linux/Unix
 console (when in text mode) for a blind person using a refreshable braille
 display.
 
-Version 3.4, August 2003
+Version 3.4, December 2003
 
 Copyright (C) 1995-2003 by The BRLTTY Team, All rights reserved.
 
@@ -116,29 +116,42 @@ BRLTTY has been tested on:
 *  Solaris/Intel (release 9 and beyond)
 *  OpenBSD/Intel (release 3.4 and beyond)
 
-The following Braille displays are supported (serial communication only for
-most of them):
+The following braille displays are supported:
 
-*  Alva [ABT3xx, Delphi, Satellite]
-*  BrailleLite [18/40/M40]
-*  BrailleNote [18/32]
-*  CombiBraille [25/45/85]
-*  EcoBraille [20/40/80]
-*  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]
-*  HandyTech [Modular 20/40/80, Braille Wave 40, Braille Star 40/80,
+-  Alva [ABT(3nn), Delphi(4nn), Satellite(5nn)]
+-  BrailleLite [18/40/M40]
+-  BrailleNote [18/32]
+-  CombiBraille [25/45/85]
+-  EcoBraille [20/40/80]
+-  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]
+-  HandyTech [Modular 20/40/80, Braille Wave 40, Braille Star 40/80,
               Bookworm, Braillino 20]
-*  LogText [32]
-*  MDV (protocol 5) [MB208/MB408L/MB408S]
-*  MiniBraille [20]
-*  MultiBraille [MB125CR/MB145CR/MB185CR]
-*  Papenmeier [Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80,
-               EL 40/80, Elba 20/32, IB 80]
-*  TSI [Navigator 20/40/80, PowerBraille 40/65/80]
-*  Vario/RBT (emulation 1) [40/80]
-*  Vario/RBT (emulation 2) [40/80]
-*  VideoBraille [40]
-*  VisioBraille [2040]
-*  Voyager [44/70 (USB)]
+-  LogText [32]
+-  MDV [MB208/MB408L/MB408S (protocol 5)]
+-  MiniBraille [20]
+-  MultiBraille [MB125CR/MB145CR/MB185CR]
+-  Papenmeier [Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80,
+               Elba 20/32, IB 80]
+-  TSI [Navigator 20/40/80, PowerBraille 40/65/80]
+-  Vario [40/80 (native mode)]
+-  VarioHT [40 (Vario in HandyTech emulation mode)]
+-  VideoBraille [40]
+-  Virtual [TCP/Unix, client/server]
+-  VisioBraille [20/40]
+-  Voyager [44/70 (USB)]
+
+The following speech synthesizers are supported:
+
+-  Alva [Delphi(4nn)]
+-  BrailleLite
+-  CombiBraille
+-  ExternalSpeech [runs /usr/local/bin/externalspeech]
+-  Festival [text to speech engine]
+-  FestivalLite [text to speech engine]
+-  GenericSay [pipes to /usr/local/bin/say]
+-  Televox
+-  Theta [text to speech engine]
+-  ViaVoice [text to speech engine]
 
 The ability to add a new Braille display depends on the level of cooperation
 from its manufacturer in providing programming information.
