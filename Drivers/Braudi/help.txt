@@ -1,0 +1,14 @@
+Help for Braudi Displays
+
+1: go to top-left corner
+2: go left one window
+3: go down one line
+4: go up one line
+5: go right one window
+6: go to bottom-left corner
+23: go to beginning of line
+56: go to end of line
+14: toggle cursor visibility
+25: toggle attributes display
+26: toggle status display
+36: go to cursor
