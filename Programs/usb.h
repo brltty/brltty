@@ -77,8 +77,8 @@ extern "C" {
 #define USB_TYPE_RESERVED 0X60
 
 /* Transfer directions. */
-#define USB_DIR_OUT 0X00
-#define USB_DIR_IN  0X80
+#define USB_DIRECTION_OUTPUT 0X00
+#define USB_DIRECTION_INPUT  0X80
 
 /* Standard control requests. */
 #define USB_REQ_GET_STATUS        0X00
@@ -316,6 +316,37 @@ extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
 extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
 extern int isUsbDevice (const char **path);
+
+/* Serial adapter parity settings. */
+typedef enum {
+  USB_SERIAL_PARITY_SPACE,
+  USB_SERIAL_PARITY_ODD,
+  USB_SERIAL_PARITY_EVEN,
+  USB_SERIAL_PARITY_MARK,
+  USB_SERIAL_PARITY_NONE
+} UsbSerialParity;
+
+/* Serial adapter flow control options. */
+#define USB_SERIAL_FLOW_OUTPUT_XON 0X01 /* output controlled by XON/XOFF */
+#define USB_SERIAL_FLOW_OUTPUT_CTS 0X02 /* output controlled by CTS(input) */
+#define USB_SERIAL_FLOW_OUTPUT_DSR 0X04 /* output controlled by DSR(input) */
+#define USB_SERIAL_FLOW_OUTPUT_RTS 0X08 /* output indicated by RTS(output) */
+#define USB_SERIAL_FLOW_INPUT_XON  0X10 /* input controlled by XON/XOFF */
+#define USB_SERIAL_FLOW_INPUT_RTS  0X20 /* input controlled by RTS(output) */
+#define USB_SERIAL_FLOW_INPUT_DTR  0X40 /* input controlled by DTR(output) */
+#define USB_SERIAL_FLOW_INPUT_DSR  0X80 /* input enabled by DSR(input) */
+
+typedef struct {
+  int (*setBaud) (UsbDevice *device, int rate);
+  int (*setFlowControl) (UsbDevice *device, int flow);
+  int (*setDataBits) (UsbDevice *device, int bits);
+  int (*setStopBits) (UsbDevice *device, int bits);
+  int (*setParity) (UsbDevice *device, UsbSerialParity parity);
+  int (*setDtrState) (UsbDevice *device, int state);
+  int (*setRtsState) (UsbDevice *device, int state);
+} UsbSerialOperations;
+
+extern const UsbSerialOperations *usbGetSerialOperations (const UsbDevice *device);
 
 #ifdef __cplusplus
 }

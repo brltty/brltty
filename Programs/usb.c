@@ -41,7 +41,7 @@ usbGetDescriptor (
   UsbDescriptor *descriptor,
   int timeout
 ) {
-  return usbControlTransfer(device, USB_RECIPIENT_DEVICE, USB_DIR_IN, USB_TYPE_STANDARD,
+  return usbControlTransfer(device, USB_RECIPIENT_DEVICE, USB_DIRECTION_INPUT, USB_TYPE_STANDARD,
                             USB_REQ_GET_DESCRIPTOR, (type << 8) | number, index,
                             descriptor->bytes, sizeof(descriptor->bytes), timeout);
 }
@@ -122,7 +122,7 @@ usbBulkRead (
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(device, endpoint|USB_DIR_IN, data, length, timeout);
+  return usbBulkTransfer(device, endpoint|USB_DIRECTION_INPUT, data, length, timeout);
 }
 
 int
@@ -133,7 +133,7 @@ usbBulkWrite (
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(device, endpoint|USB_DIR_OUT, (unsigned char *)data, length, timeout);
+  return usbBulkTransfer(device, endpoint|USB_DIRECTION_OUTPUT, (unsigned char *)data, length, timeout);
 }
 
 static struct UsbInputElement *
@@ -190,7 +190,7 @@ usbBeginInput (
   int actual = 0;
 
   device->inputRequest = NULL;
-  device->inputEndpoint = endpoint | USB_DIR_IN;
+  device->inputEndpoint = endpoint | USB_DIRECTION_INPUT;
   device->inputTransfer = transfer;
   device->inputSize = size;
 
@@ -354,4 +354,92 @@ usbVerifySerialNumber (UsbDevice *device, const char *string) {
 int
 isUsbDevice (const char **path) {
   return isQualifiedDevice(path, "usb");
+}
+
+static int
+usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
+  return usbControlTransfer(device,
+                            USB_RECIPIENT_DEVICE, USB_DIRECTION_OUTPUT, USB_TYPE_VENDOR, 
+                            request, value, 0, NULL, 0, 1000);
+}
+static int
+usbSetBelkinBaud (UsbDevice *device, int rate) {
+  return usbSetBelkinAttribute(device, 0, 230400/rate);
+}
+static int
+usbSetBelkinStopBits (UsbDevice *device, int bits) {
+  return usbSetBelkinAttribute(device, 1, bits-1);
+}
+static int
+usbSetBelkinDataBits (UsbDevice *device, int bits) {
+  return usbSetBelkinAttribute(device, 2, bits-5);
+}
+static int
+usbSetBelkinParity (UsbDevice *device, UsbSerialParity parity) {
+  int value;
+  switch (parity) {
+    case USB_SERIAL_PARITY_SPACE: value = 4; break;
+    case USB_SERIAL_PARITY_ODD:   value = 2; break;
+    case USB_SERIAL_PARITY_EVEN:  value = 1; break;
+    case USB_SERIAL_PARITY_MARK:  value = 3; break;
+    default:
+    case USB_SERIAL_PARITY_NONE:  value = 0; break;
+  }
+  return usbSetBelkinAttribute(device, 3, value);
+}
+static int
+usbSetBelkinDtrState (UsbDevice *device, int state) {
+  return usbSetBelkinAttribute(device, 10, state);
+}
+static int
+usbSetBelkinRtsState (UsbDevice *device, int state) {
+  return usbSetBelkinAttribute(device, 11, state);
+}
+static int
+usbSetBelkinFlowControl (UsbDevice *device, int flow) {
+  int value = 0;
+  if (flow & USB_SERIAL_FLOW_OUTPUT_XON) value |= 0X0080;
+  if (flow & USB_SERIAL_FLOW_OUTPUT_CTS) value |= 0X0001;
+  if (flow & USB_SERIAL_FLOW_OUTPUT_DSR) value |= 0X0002;
+  if (flow & USB_SERIAL_FLOW_OUTPUT_RTS) value |= 0X0020;
+  if (flow & USB_SERIAL_FLOW_INPUT_XON ) value |= 0X0100;
+  if (flow & USB_SERIAL_FLOW_INPUT_RTS ) value |= 0X0010;
+  if (flow & USB_SERIAL_FLOW_INPUT_DTR ) value |= 0X0008;
+  if (flow & USB_SERIAL_FLOW_INPUT_DSR ) value |= 0X0004;
+  return usbSetBelkinAttribute(device, 16, value);
+}
+static const UsbSerialOperations usbBelkinOperations = {
+  usbSetBelkinBaud,
+  usbSetBelkinFlowControl,
+  usbSetBelkinDataBits,
+  usbSetBelkinStopBits,
+  usbSetBelkinParity,
+  usbSetBelkinDtrState,
+  usbSetBelkinRtsState
+};
+
+const UsbSerialOperations *
+usbGetSerialOperations (const UsbDevice *device) {
+  typedef struct {
+    uint16_t vendor;
+    uint16_t product;
+    const UsbSerialOperations *operations;
+  } UsbSerialDevice;
+  static const UsbSerialDevice usbSerialDevices[] = {
+    {0X050D, 0X1203, &usbBelkinOperations}, /* Belkin DockStation */
+    {0X050D, 0X0103, &usbBelkinOperations}, /* Belkin Serial Adapter */
+    {0X056C, 0X8007, &usbBelkinOperations}, /* Belkin Old Single Port Serial Converter */
+    {0X0565, 0X0001, &usbBelkinOperations}, /* Peracom Single Port Serial Converter */
+    {0X0921, 0X1000, &usbBelkinOperations}, /* GoHubs Single Port Serial Converter */
+    {0X0921, 0X1200, &usbBelkinOperations}, /* GoHubs HandyLink */
+    {}
+  };
+  const UsbSerialDevice *serial = usbSerialDevices;
+  while (serial->vendor) {
+    if (serial->vendor == device->descriptor.idVendor)
+      if (!serial->product || (serial->product == device->descriptor.idProduct))
+        return serial->operations;
+    ++serial;
+  }
+  return NULL;
 }
