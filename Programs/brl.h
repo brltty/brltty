@@ -122,8 +122,8 @@ extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 extern void showDotPattern (unsigned char dots, unsigned char duration);
 extern void setBrailleFirmness (BrailleDisplay *brl, int setting);
 
-#define BRL_DEFAULT_FIRMNESS 5
-#define BRL_MAXIMUM_FIRMNESS (BRL_DEFAULT_FIRMNESS * 2)
+#define BRL_DEFAULT_FIRMNESS 50
+#define BRL_MAXIMUM_FIRMNESS 100
 
 #ifdef __cplusplus
 }

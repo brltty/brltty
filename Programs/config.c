@@ -697,6 +697,7 @@ testBrailleFirmness (void) {
 
 static int
 changedBrailleFirmness (unsigned char setting) {
+  if (setting % 25) return 0;
   setBrailleFirmness(&brl, setting);
   return 1;
 }
