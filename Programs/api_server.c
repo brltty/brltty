@@ -30,19 +30,28 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <signal.h>
+#include <time.h>
+
+#ifdef __MINGW32__
+#include <windows.h>
+#include <ws2tcpip.h>
+
+#include "win_pthread.h"
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <pthread.h>
-#include <signal.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <pthread.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
+#endif /* __MINGW32__ */
 
 #include "api.h"
 #include "api_protocol.h"
@@ -119,7 +128,7 @@ typedef struct Connection {
   pthread_mutex_t brlMutex;
   rangeList *unmaskedKeys;
   pthread_mutex_t maskMutex;
-  long upTime;
+  time_t upTime;
 } Connection;
 
 typedef struct Tty {
@@ -174,6 +183,10 @@ static size_t authKeyLength = 0;
 static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
 
 static Connection *last_conn_write;
+
+#ifdef __MINGW32__
+static WSADATA wsadata;
+#endif /* __MINGW32__ */
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -299,7 +312,7 @@ void getText(const BrailleWindow *brailleWindow, char *buf)
 /* This function also records the connection in an array */
 /* If an error occurs, one returns NULL, and an error message is written on */
 /* the socket before closing it */
-static Connection *createConnection(int fd, long currentTime)
+static Connection *createConnection(int fd, time_t currentTime)
 {
   Connection *c =  (Connection *) malloc(sizeof(Connection));
   if (c==NULL) goto out;
@@ -771,10 +784,17 @@ l1:   len = strlen(str);
 static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
 {
   while (bind(fd, addr, len)<0) {
-    if (errno!=EADDRNOTAVAIL && errno!=EADDRINUSE && errno!=EROFS) {
+    if (
+#ifdef EADDRNOTAVAIL
+      errno!=EADDRNOTAVAIL &&
+#endif /* EADDRNOTAVAIL */
+#ifdef EADDRINUSE
+      errno!=EADDRINUSE &&
+#endif /* EADDRINUSE */
+      errno!=EROFS) {
       return -1;
     }
-    sleep(1);
+    approximateDelay(1000);
   }
   return 0;
 }
@@ -798,9 +818,24 @@ static int initializeTcpSocket(char *hostname, char *port)
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
+#ifdef __MINGW32__
+  WSAStartup(MAKEWORD(2,0),&wsadata);
+#endif /* __MINGW32__ */
   err = getaddrinfo(hostname, port, &hints, &res);
   if (err) {
-    LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): %s",hostname,port,gai_strerror(err));
+    LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): "
+#ifndef HAVE_GAI_STRERROR
+	"%s"
+#else /* HAVE_GAI_STRERROR */
+	"%d"
+#endif /* HAVE_GAI_STRERROR */
+	,hostname,port
+#ifndef HAVE_GAI_STRERROR
+	,gai_strerror(err)
+#else /* HAVE_GAI_STRERROR */
+	,err
+#endif /* HAVE_GAI_STRERROR */
+    );
     return -1;
   }
   for (cur = res; cur; cur = cur->ai_next) {
@@ -841,6 +876,9 @@ cont:
   struct sockaddr_in addr;
   struct hostent *he;
 
+#ifdef __MINGW32__
+  WSAStartup(MAKEWORD(2,0),&wsadata);
+#endif /* __MINGW32__ */
   memset(&addr,0,sizeof(addr));
   if (!port)
     addr.sin_port = htons(BRLAPI_SOCKETPORTNUM);
@@ -851,7 +889,19 @@ cont:
       struct servent *se;
 
       if (!(se = getservbyname(port,"tcp"))) {
-        LogPrint(LOG_ERR,"port %s: %s",port,hstrerror(h_errno));
+        LogPrint(LOG_ERR,"port %s: "
+#ifndef __MINGW32__
+	  "%s"
+#else /* __MINGW32__ */
+	  "%d"
+#endif /* __MINGW32__ */
+	  ,port,
+#ifndef __MINGW32__
+	  hstrerror(h_errno)
+#else /* __MINGW32__ */
+	  WSAGetLastError()
+#endif /* __MINGW32__ */
+	  );
 	return -1;
       }
       addr.sin_port = se->s_port;
@@ -863,7 +913,19 @@ cont:
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   } else {
     if (!(he = gethostbyname(hostname))) {
-      LogPrint(LOG_ERR,"gethostbyname(%s): %s",hostname,hstrerror(h_errno));
+      LogPrint(LOG_ERR,"gethostbyname(%s): "
+#ifndef __MINGW32__
+	"%s"
+#else /* __MINGW32__ */
+	"%d"
+#endif /* __MINGW32__ */
+	,hostname,
+#ifndef __MINGW32__
+	hstrerror(h_errno)
+#else /* __MINGW32__ */
+	WSAGetLastError()
+#endif /* __MINGW32__ */
+	);
       return -1;
     }
     addr.sin_family = he->h_addrtype;
@@ -903,6 +965,7 @@ err:
   return -1;
 }
 
+#ifdef PF_LOCAL
 /* Function : initializeSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
@@ -955,6 +1018,7 @@ outfd:
 out:
   return -1;
 }
+#endif
 
 static void *establishSocket(void *arg)
 {
@@ -980,8 +1044,13 @@ static void *establishSocket(void *arg)
 #endif /* WINDOWS */
 
   cinfo->addrfamily=brlapi_splitHost(host,&hostname,&cinfo->port);
+#ifdef PF_LOCAL
   if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd = initializeUnixSocket(cinfo->port))==-1) ||
-      (cinfo->addrfamily!=PF_LOCAL && (cinfo->fd = initializeTcpSocket(hostname,cinfo->port))==-1)) {
+      (cinfo->addrfamily!=PF_LOCAL && (
+#else
+  if (((
+#endif
+	cinfo->fd = initializeTcpSocket(hostname,cinfo->port))==-1)) {
     LogPrint(LOG_WARNING,"Error while initializing socket: %s",strerror(errno));
     return NULL;
   }
@@ -1003,6 +1072,7 @@ static void closeSockets(void *arg)
         LogError("closing socket");
       info->fd=-1;
     }
+#ifdef PF_LOCAL
     if (info->addrfamily==PF_LOCAL) {
       char *path;
       int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
@@ -1013,6 +1083,7 @@ static void closeSockets(void *arg)
           LogError("unlinking socket");
       }
     }
+#endif
     free(info->port);
   }
 }
@@ -1035,7 +1106,7 @@ static void addTtyFds(fd_set *fds, int *fdmax, Tty *tty) {
 
 /* Function: handleTtyFds */
 /* recursively handle ttys' fds */
-static void handleTtyFds(fd_set *fds, long currentTime, Tty *tty) {
+static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
   {
     Connection *c,*next;
     c = tty->connections->next;
@@ -1068,7 +1139,7 @@ static void *server(void *arg)
   struct sockaddr addr;
   socklen_t addrlen = sizeof(addr);
   Connection *c;
-  long currentTime;
+  time_t currentTime;
   struct timeval tv;
   int n;
 
@@ -1130,7 +1201,7 @@ static void *server(void *arg)
       LogPrint(LOG_WARNING,"select: %s",strerror(errno));
       break;
     }
-    gettimeofday(&tv, NULL); currentTime = tv.tv_sec;
+    time(&currentTime);
     for (i=0;i<numSockets;i++)
     if (sockets[i]>=0 && FD_ISSET(sockets[i], &sockset)) {
       addrlen=sizeof(addr);
@@ -1405,7 +1476,12 @@ void api_identify(void)
 int api_open(BrailleDisplay *brl, char **parameters)
 {
   int res,i;
-  char *hosts=":0+127.0.0.1:0";
+  char *hosts=
+#ifdef PF_LOCAL
+	":0+127.0.0.1:0";
+#else
+	"127.0.0.1:0";
+#endif
   pthread_attr_t attr;
 
   displayDimensions[0] = htonl(brl->x);

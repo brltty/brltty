@@ -27,6 +27,11 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#ifdef __MINGW32__
+#include <windows.h>
+#include <ws2tcpip.h>
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -38,6 +43,7 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
+#endif /* __MINGW32__ */
 
 #include "Programs/misc.h"
 #include "Programs/cmd.h"
@@ -77,7 +83,9 @@ static unsigned char *previousVisual = NULL;
 static unsigned char previousStatus[BRL_MAX_STATUS_CELL_COUNT];
 
 typedef struct {
+#ifdef AF_LOCAL
   int (*getLocalConnection) (const struct sockaddr_un *address);
+#endif /* AF_LOCAL */
   int (*getInetConnection) (const struct sockaddr_in *address);
 } ModeEntry;
 static const ModeEntry *mode;
@@ -85,10 +93,12 @@ static const ModeEntry *mode;
 static char *
 formatAddress (const struct sockaddr *address) {
   switch (address->sa_family) {
+#ifdef AF_LOCAL
     case AF_LOCAL: {
       const struct sockaddr_un *localAddress = (const struct sockaddr_un *)address;
       return strdupWrapper(localAddress->sun_path);
     }
+#endif /* AF_LOCAL */
 
     case AF_INET: {
       const struct sockaddr_in *inetAddress = (const struct sockaddr_in *)address;
@@ -225,6 +235,7 @@ setReuseAddress (int socket) {
   return 0;
 }
 
+#ifdef AF_LOCAL
 static int
 setLocalAddress (const char *string, struct sockaddr_un *address) {
   int ok = 1;
@@ -270,6 +281,7 @@ requestLocalConnection (const struct sockaddr_un *remoteAddress) {
   return requestConnection(getLocalSocket,
                            (const struct sockaddr *)remoteAddress, sizeof(*remoteAddress));
 }
+#endif /* AF_LOCAL */
 
 static int
 setInetAddress (const char *string, struct sockaddr_in *address) {
@@ -717,13 +729,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (isQualifiedDevice(&device, "client")) {
     static const ModeEntry modeEntry = {
+#ifdef AF_LOCAL
       requestLocalConnection,
+#endif /* AF_LOCAL */
       requestInetConnection
     };
     mode = &modeEntry;
   } else if (isQualifiedDevice(&device, "server")) {
     static const ModeEntry modeEntry = {
+#ifdef AF_LOCAL
       acceptLocalConnection,
+#endif /* AF_LOCAL */
       acceptInetConnection
     };
     mode = &modeEntry;
@@ -733,17 +749,21 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (!*device) device = VR_DEFAULT_SOCKET;
+#ifdef AF_LOCAL
   if (device[0] == '/') {
     struct sockaddr_un address;
     if (setLocalAddress(device, &address)) {
       fileDescriptor = mode->getLocalConnection(&address);
     }
   } else {
+#endif /* AF_LOCAL */
     struct sockaddr_in address;
     if (setInetAddress(device, &address)) {
       fileDescriptor = mode->getInetConnection(&address);
     }
+#ifdef AF_LOCAL
   }
+#endif /* AF_LOCAL */
 
   if (fileDescriptor != -1) {
     char *line = NULL;

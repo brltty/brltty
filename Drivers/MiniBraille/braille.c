@@ -58,7 +58,7 @@ static enum mode_t mode = NORMAL_MODE;
 /* #defines */
 /* delay this time after command - better: use CTS, DTR, CTR or find other signal which means "ready for next command" */
 #define AFTER_CMD_DELAY_TIME 10000
-#define AFTER_CMD_DELAY do { usleep(AFTER_CMD_DELAY_TIME); } while (0)
+#define AFTER_CMD_DELAY do { approximateDelay(AFTER_CMD_DELAY_TIME/1000); } while (0)
 
 static void beep(void)
 {

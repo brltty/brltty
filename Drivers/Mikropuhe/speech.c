@@ -29,7 +29,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+#ifdef __MINGW32__
+#include "Programs/win_pthread.h"
+#else /* __MINGW32__ */
 #include <pthread.h>
+#endif /* __MINGW32__ */
 
 #include "Programs/misc.h"
 #include "Programs/system.h"

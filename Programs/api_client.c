@@ -33,22 +33,31 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/mman.h>
-#include <pthread.h>
-#include <syslog.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#ifdef __MINGW32__
+#include <windows.h>
+#include <ws2tcpip.h>
+
+#include "win_pthread.h"
+
+#define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, __VA_ARGS__)
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <pthread.h>
+#include <syslog.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
+#endif /* __MINGW32__ */
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -88,6 +97,10 @@
 
 /* for remembering getaddrinfo error code */
 static int gai_error;
+
+#ifdef __MINGW32__
+static WSADATA wsadata;
+#endif /* __MINGW32__ */
 
 /* Some useful global variables */
 static unsigned int brlx = 0;
@@ -236,6 +249,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
   pthread_mutex_lock(&brlapi_fd_mutex);
 
+#ifdef PF_LOCAL
   if (addrfamily == PF_LOCAL) {
     struct sockaddr_un sa;
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
@@ -258,11 +272,19 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
       goto outlibc;
     }
   } else {
+#else
+  if (0) {} else {
+#endif
 
 #ifdef HAVE_GETADDRINFO
 
     struct addrinfo *res,*cur;
     struct addrinfo hints;
+
+#ifdef __MINGW32__
+    WSAStartup(MAKEWORD(2,0),&wsadata);
+#endif /* __MINGW32__ */
+
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -294,6 +316,10 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
     struct sockaddr_in addr;
     struct hostent *he;
+
+#ifdef __MINGW32__
+    WSAStartup(MAKEWORD(2,0),&wsadata);
+#endif /* __MINGW32__ */
 
     memset(&addr,0,sizeof(addr));
     if (!port)
@@ -373,6 +399,9 @@ void brlapi_closeConnection(void)
   close(fd);
   fd = -1;
   pthread_mutex_unlock(&brlapi_fd_mutex);
+#ifdef __MINGW32__
+  WSACleanup();
+#endif /* __MINGW32__ */
 }
 
 /* brlapi_getRaw */
@@ -834,11 +863,17 @@ const char *brlapi_strerror(int err)
   if (err>=brlapi_nerr)
     return "Unknown error";
   else if (err==BRLERR_GAIERR)
-#ifdef HAVE_GETADDRINFO
+#if defined(HAVE_GETADDRINFO) && defined (HAVE_GAI_STRERROR)
     return gai_strerror(gai_error);
-#else /* HAVE_GETADDRINFO */
+#elif defined(HAVE_HSTRERROR)
     return hstrerror(gai_error);
-#endif /* HAVE_GETADDRINFO */
+#else
+    {
+      static char c[15];
+      snprintf(c,15,"error %x", gai_error);
+      return c;
+    }
+#endif
   else if (err==BRLERR_LIBCERR)
     return strerror(brlapi_libcerrno);
   else
@@ -866,6 +901,7 @@ static pthread_key_t errno_key;
 /* the key must be created at most once */
 static pthread_once_t errno_key_once = PTHREAD_ONCE_INIT;
 
+#ifndef __MINGW32__
 /* We need to declare these with __attribute__((weak)) to determine at runtime 
  * whether libpthread is used or not. We can't rely on the functions prototypes,
  * hence the use of typeof
@@ -875,6 +911,7 @@ WEAK_REDEFINE(pthread_key_create);
 WEAK_REDEFINE(pthread_once);
 WEAK_REDEFINE(pthread_getspecific);
 WEAK_REDEFINE(pthread_setspecific);
+#endif /* __MINGW32__ */
 
 static void errno_key_free(void *key)
 {
