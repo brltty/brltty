@@ -49,8 +49,7 @@ typedef struct {
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
   void *extension;
-  UsbDescriptor *configurationDescriptor;
-  int configurationLength;
+  UsbConfigurationDescriptor *configuration;
   const UsbInterfaceDescriptor *interface;
   Queue *endpoints;
   Queue *inputFilters;

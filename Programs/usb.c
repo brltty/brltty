@@ -219,7 +219,7 @@ usbGetConfiguration (
 
 static int
 usbReadConfiguration (UsbDevice *device) {
-  if (device->configurationDescriptor) return 1;
+  if (device->configuration) return 1;
 
   {
     unsigned char configuration;
@@ -240,13 +240,19 @@ usbReadConfiguration (UsbDevice *device) {
         int length = getLittleEndian(descriptor.configuration.wTotalLength);
         UsbDescriptor *descriptors = malloc(length);
         if (descriptors) {
-          int size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
-                                    UsbStandardRequest_GetDescriptor,
-                                    (UsbDescriptorType_Configuration << 8) | number,
-                                    0, descriptors, length, 1000);
+          int size;
+
+          if (length > sizeof(descriptor)) {
+            size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
+                                  UsbStandardRequest_GetDescriptor,
+                                  (UsbDescriptorType_Configuration << 8) | number,
+                                  0, descriptors, length, 1000);
+          } else {
+            memcpy(descriptors, &descriptor, (size = length));
+          }
+
           if (size != -1) {
-            device->configurationDescriptor = descriptors;
-            device->configurationLength = length;
+            device->configuration = &descriptors->configuration;
             return 1;
           }
           free(descriptors);
@@ -257,46 +263,51 @@ usbReadConfiguration (UsbDevice *device) {
   return 0;
 }
 
+static int
+usbNextDescriptor (UsbDevice *device, const UsbDescriptor **descriptor) {
+  if (*descriptor) {
+    const UsbDescriptor *next = (UsbDescriptor *)&(*descriptor)->bytes[(*descriptor)->header.bLength];
+    const UsbDescriptor *first = (UsbDescriptor *)device->configuration;
+    unsigned int length = getLittleEndian(first->configuration.wTotalLength);
+    if ((&next->bytes[0] - &first->bytes[0]) >= length) return 0;
+    if ((&next->bytes[next->header.bLength] - &first->bytes[0]) > length) return 0;
+    *descriptor = next;
+  } else if (usbReadConfiguration(device)) {
+    *descriptor = (UsbDescriptor *)device->configuration;
+  } else {
+    return 0;
+  }
+  return 1;
+}
+
 static const UsbInterfaceDescriptor *
 usbFindInterfaceDescriptor (UsbDevice *device, unsigned char interface, unsigned char alternative) {
-  if (usbReadConfiguration(device)) {
-    int offset = 0;
+  const UsbDescriptor *descriptor = NULL;
 
-    while (offset < device->configurationLength) {
-      const UsbInterfaceDescriptor *descriptor = (UsbInterfaceDescriptor *)((unsigned char *)device->configurationDescriptor + offset);
-      offset += descriptor->bLength;
-
-      if (descriptor->bDescriptorType == UsbDescriptorType_Interface)
-        if (descriptor->bInterfaceNumber == interface)
-          if (descriptor->bAlternateSetting == alternative)
-            return descriptor;
-    }
-
-    LogPrint(LOG_WARNING, "USB: interface descriptor not found: %d.%d", interface, alternative);
-    errno = ENOENT;
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
+      if (descriptor->interface.bInterfaceNumber == interface)
+        if (descriptor->interface.bAlternateSetting == alternative)
+          return &descriptor->interface;
   }
 
+  LogPrint(LOG_WARNING, "USB: interface descriptor not found: %d.%d", interface, alternative);
+  errno = ENOENT;
   return NULL;
 }
 
 static const UsbEndpointDescriptor *
 usbFindEndpointDescriptor (UsbDevice *device, unsigned char endpointAddress) {
-  if (usbReadConfiguration(device)) {
-    int offset = 0;
+  const UsbDescriptor *descriptor = NULL;
 
-    while (offset < device->configurationLength) {
-      const UsbEndpointDescriptor *descriptor = (UsbEndpointDescriptor *)((unsigned char *)device->configurationDescriptor + offset);
-      offset += descriptor->bLength;
-
-      if (descriptor->bDescriptorType == UsbDescriptorType_Endpoint)
-        if (descriptor->bEndpointAddress == endpointAddress)
-          return descriptor;
-    }
-
-    LogPrint(LOG_WARNING, "USB: endpoint descriptor not found: %02X", endpointAddress);
-    errno = ENOENT;
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_Endpoint)
+      if (descriptor->endpoint.bEndpointAddress == endpointAddress)
+        return &descriptor->endpoint;
   }
 
+  LogPrint(LOG_WARNING, "USB: endpoint descriptor not found: %02X", endpointAddress);
+  errno = ENOENT;
   return NULL;
 }
 
@@ -490,9 +501,9 @@ usbCloseDevice (UsbDevice *device) {
     device->inputFilters = NULL;
   }
 
-  if (device->configurationDescriptor) {
-    free(device->configurationDescriptor);
-    device->configurationDescriptor = NULL;
+  if (device->configuration) {
+    free(device->configuration);
+    device->configuration = NULL;
   }
 
   if (device->extension) {
