@@ -69,7 +69,7 @@ extern TuneDevice getDefaultTuneDevice (void);
 extern void suppressTuneDeviceOpenErrors (void);
 extern int setTuneDevice (TuneDevice device);
 extern void closeTuneDevice (int force);
-extern void playTune (TuneDefinition *tune);
+extern void playTune (const TuneDefinition *tune);
 
 extern const char *midiInstrumentTable[];
 extern const unsigned int midiInstrumentCount;

@@ -465,7 +465,7 @@ closeTuneDevice (int force) {
 }
  
 void
-playTune (TuneDefinition *tune) {
+playTune (const TuneDefinition *tune) {
    int tunePlayed = 0;
    if (prefs.alertTunes && tune->elements) {
       if (noteGenerator) {

@@ -61,7 +61,7 @@ short hwinshift;                /* Half window horizontal distance */
 short vwinshift;                /* Window vertical distance */
 ScreenDescription scr;                        /* For screen state infos */
 static short dispmd = LIVE_SCRN;        /* freeze screen on/off */
-static short infmode = 0;                /* display screen image or info */
+static unsigned char infmode = 0;                /* display screen image or info */
 
 static int contracted = 0;
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -72,7 +72,7 @@ static int contractedTrack = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
-static unsigned int TickCount = 0;        /* incremented each main loop cycle */
+static unsigned int updateIntervals = 0;        /* incremented each main loop cycle */
 
 
 /*
@@ -81,11 +81,6 @@ static unsigned int TickCount = 0;        /* incremented each main loop cycle */
 
 #define BRL_ISUPPER(c) \
   (isupper((c)) || (c)=='@' || (c)=='[' || (c)=='^' || (c)==']' || (c)=='\\')
-
-#define TOGGLEPLAY(var) playTune((var)? &tune_toggle_on: &tune_toggle_off)
-#define TOGGLE(var) \
-  (var = (command & VAL_TOGGLE_ON)? 1: ((command & VAL_TOGGLE_OFF)? 0: (!var)))
-
 
 unsigned char *curtbl = textTable;        /* active translation table */
 
@@ -103,9 +98,9 @@ typedef struct {
   short row;
 } ScreenMark;
 typedef struct {
-  int trackCursor;		/* tracking mode */
-  int hideCursor;		/* For temporarily hiding cursor */
-  int showAttributes;		/* text or attributes display */
+  unsigned char trackCursor;		/* tracking mode */
+  unsigned char hideCursor;		/* For temporarily hiding cursor */
+  unsigned char showAttributes;		/* text or attributes display */
   int winx, winy;	/* upper-left corner of braille window */
   int motx, moty;	/* user motion of braille window */
   int trkx, trky;	/* tracked cursor position */
@@ -167,10 +162,10 @@ setStatusCells (void) {
             statusCells[2] = textTable['p'];
          } else {
             /* The coords are given with letters as the DOS tsr */
-            statusCells[0] = ((TickCount / 16) % (scr.posy / 25 + 1))? 0:
+            statusCells[0] = ((updateIntervals / 16) % (scr.posy / 25 + 1))? 0:
                              textTable[scr.posy % 25 + 'a'] |
                              ((scr.posx / brl.x) << 6);
-            statusCells[1] = ((TickCount / 16) % (p->winy / 25 + 1))? 0:
+            statusCells[1] = ((updateIntervals / 16) % (p->winy / 25 + 1))? 0:
                              textTable[p->winy % 25 + 'a'] |
                              ((p->winx / brl.x) << 6);
             statusCells[2] = textTable[(p->showAttributes)? 'a':
@@ -715,11 +710,20 @@ getOffset (int arg, int end) {
   return arg;
 }
 
+static int
+toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const TuneDefinition *on) {
+  const TuneDefinition *tune;
+  if ((command & VAL_TOGGLE_MASK) != VAL_TOGGLE_MASK)
+    *flag = (command & VAL_TOGGLE_ON)? 1: ((command & VAL_TOGGLE_OFF)? 0: !*flag);
+  if ((tune = *flag? on: off)) playTune(tune);
+  return *flag;
+}
+#define TOGGLE(flag, off, on) toggleFlag(&flag, command, off, on)
+#define TOGGLE_NOPLAY(flag) TOGGLE(flag, NULL, NULL)
+#define TOGGLE_PLAY(flag) TOGGLE(flag, &tune_toggle_off, &tune_toggle_on)
+
 int
 main (int argc, char *argv[]) {
-  int command = EOF;
-  int autorepeat = 0;
-
   short csron = 1;                /* display cursor on (toggled during blink) */
   short csrcntr = 1;
 
@@ -824,15 +828,17 @@ main (int argc, char *argv[]) {
     if (!offr) offr = brl.x;
 
     closeTuneDevice(0);
-    TickCount++;
+
     /*
      * Process any Braille input 
      */
     while (1) {
+      static int command = EOF;
       int oldmotx = p->winx;
       int oldmoty = p->winy;
 
       {
+        static int autorepeat = 0;
         int next = readBrailleCommand(&brl,
                                       infmode? CMDS_STATUS:
                                       ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
@@ -1234,19 +1240,19 @@ main (int argc, char *argv[]) {
           case CMD_CSRVIS:
             /* toggles the preferences option that decides whether cursor
                is shown at all */
-            TOGGLEPLAY ( TOGGLE(prefs.showCursor) );
+            TOGGLE_PLAY(prefs.showCursor);
             break;
           case CMD_CSRHIDE:
             /* This is for briefly hiding the cursor */
-            TOGGLE(p->hideCursor);
+            TOGGLE_NOPLAY(p->hideCursor);
             /* no tune */
             break;
           case CMD_ATTRVIS:
-            TOGGLEPLAY ( TOGGLE(prefs.showAttributes) );
+            TOGGLE_PLAY(prefs.showAttributes);
             break;
           case CMD_CSRBLINK:
             csron = 1;
-            TOGGLEPLAY ( TOGGLE(prefs.blinkingCursor) );
+            TOGGLE_PLAY(prefs.blinkingCursor);
             if (prefs.blinkingCursor) {
               csrcntr = prefs.cursorVisiblePeriod;
               attron = 1;
@@ -1256,17 +1262,14 @@ main (int argc, char *argv[]) {
             }
             break;
           case CMD_CSRTRK:
-            TOGGLE(p->trackCursor);
-            if (p->trackCursor) {
+            if (TOGGLE(p->trackCursor, &tune_unlink, &tune_link)) {
 #ifdef ENABLE_SPEECH_SUPPORT
               if (speech->isSpeaking()) {
                 speechIndex = -1;
               } else
 #endif /* ENABLE_SPEECH_SUPPORT */
                 trackCursor(1);
-              playTune(&tune_link);
-            } else
-              playTune(&tune_unlink);
+            }
             break;
           case CMD_PASTE:
             if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
@@ -1275,43 +1278,38 @@ main (int argc, char *argv[]) {
             playTune(&tune_bad_command);
             break;
           case CMD_TUNES:
-            TOGGLEPLAY ( TOGGLE(prefs.alertTunes) );        /* toggle sound on/off */
+            TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
             break;
           case CMD_DISPMD:
-            setTranslationTable(TOGGLE(p->showAttributes));
+            setTranslationTable(TOGGLE_NOPLAY(p->showAttributes));
             break;
-          case CMD_FREEZE:
-            { unsigned char v = (dispmd & FROZ_SCRN) ? 1 : 0;
-              TOGGLE(v);
-              if (v) {
-                dispmd = selectDisplay(dispmd | FROZ_SCRN);
-                playTune(&tune_freeze);
-              }else{
-                dispmd = selectDisplay(dispmd & ~FROZ_SCRN);
-                playTune(&tune_unfreeze);
+          case CMD_FREEZE: {
+            unsigned char frozen = (dispmd & FROZ_SCRN) != 0;
+            if (TOGGLE(frozen, &tune_unfreeze, &tune_freeze)) {
+              dispmd = selectDisplay(dispmd | FROZ_SCRN);
+            } else {
+              dispmd = selectDisplay(dispmd & ~FROZ_SCRN);
+            }
+            break;
+          }
+          case CMD_HELP: {
+            unsigned char help = (dispmd & HELP_SCRN) != 0;
+            infmode = 0;        /* ... and not in info mode */
+            if (TOGGLE_NOPLAY(help)) {
+              dispmd = selectDisplay(dispmd | HELP_SCRN);
+              if (dispmd & HELP_SCRN) { /* help screen selection successful */
+                switchto(0);        /* screen 0 for help screen */
+              } else {      /* help screen selection failed */
+                message("help not available", 0);
               }
+            } else {
+              dispmd = selectDisplay(dispmd & ~HELP_SCRN);
             }
             break;
-          case CMD_HELP:
-            { int v;
-              infmode = 0;        /* ... and not in info mode */
-              v = (dispmd & HELP_SCRN)? 1: 0;
-              TOGGLE(v);
-              if (v) {
-                dispmd = selectDisplay(dispmd | HELP_SCRN);
-                if (dispmd & HELP_SCRN) /* help screen selection successful */
-                  {
-                    switchto(0);        /* screen 0 for help screen */
-                  }
-                else        /* help screen selection failed */
-                    message("help not available", 0);
-              }else
-                dispmd = selectDisplay(dispmd & ~HELP_SCRN);
-            }
-            break;
+          }
           case CMD_CAPBLINK:
             capon = 1;
-            TOGGLEPLAY( TOGGLE(prefs.blinkingCapitals) );
+            TOGGLE_PLAY(prefs.blinkingCapitals);
             if (prefs.blinkingCapitals) {
               capcntr = prefs.capitalsVisiblePeriod;
              attron = 0;
@@ -1322,7 +1320,7 @@ main (int argc, char *argv[]) {
             break;
           case CMD_ATTRBLINK:
             attron = 1;
-            TOGGLEPLAY( TOGGLE(prefs.blinkingAttributes) );
+            TOGGLE_PLAY(prefs.blinkingAttributes);
             if (prefs.blinkingAttributes) {
               attrcntr = prefs.attributesVisiblePeriod;
               capon = 1;
@@ -1332,22 +1330,22 @@ main (int argc, char *argv[]) {
             }
             break;
           case CMD_INFO:
-            TOGGLE(infmode);
+            TOGGLE_NOPLAY(infmode);
             break;
           case CMD_CSRSIZE:
-            TOGGLEPLAY ( TOGGLE(prefs.cursorStyle) );
+            TOGGLE_PLAY(prefs.cursorStyle);
             break;
           case CMD_SIXDOTS:
-            TOGGLEPLAY ( TOGGLE(prefs.textStyle) );
+            TOGGLE_PLAY(prefs.textStyle);
             break;
           case CMD_SLIDEWIN:
-            TOGGLEPLAY ( TOGGLE(prefs.slidingWindow) );
+            TOGGLE_PLAY(prefs.slidingWindow);
             break;
           case CMD_SKPIDLNS:
-            TOGGLEPLAY ( TOGGLE(prefs.skipIdenticalLines) );
+            TOGGLE_PLAY(prefs.skipIdenticalLines);
             break;
           case CMD_SKPBLNKWINS:
-            TOGGLEPLAY ( TOGGLE(prefs.skipBlankWindows) );
+            TOGGLE_PLAY(prefs.skipBlankWindows);
             break;
           case CMD_PREFSAVE:
             if (savePreferences()) {
@@ -1873,7 +1871,9 @@ main (int argc, char *argv[]) {
       setStatusCells();
       braille->writeWindow(&brl);
     }
+
     drainBrailleOutput(&brl, updateInterval);
+    updateIntervals++;
   }
 
   terminateProgram(0);
