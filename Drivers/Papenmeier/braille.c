@@ -773,6 +773,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         const int length = 10;
         READ(2, length-2, RBF_ETX);
         if (interpretIdentity(buf, brl)) brl->resizeRequired = 1;
+        delay(200);
         restartTerminal(brl);
         break;
       }
