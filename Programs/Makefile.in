@@ -377,6 +377,16 @@ host_tbl.$O: tbl.$O
 
 ###############################################################################
 
+XBRLAPI_OBJECTS = xbrlapi.$O
+
+xbrlapi: $(XBRLAPI_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L/usr/X11R6/lib -lbrlapi -lX11
+
+xbrlapi.$O: xbrlapi.c
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/xbrlapi.c
+
+###############################################################################
+
 check-braille: brltty braille-drivers
 	for lib in $(BRAILLE_DRIVER_CODES); \
 	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$lib.$(LIB_EXT) || exit 10; \
