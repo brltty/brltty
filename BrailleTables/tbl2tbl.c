@@ -48,9 +48,13 @@ typedef struct {
 } MappingEntry;
 static unsigned char standard[8] = {0, 2, 4, 1, 3, 5, 6, 7}; /* BRLTTY standard mapping */
 static unsigned char Tieman[8]   = {0, 1, 2, 7, 6, 5, 3, 4}; /* Tieman standard */
+static unsigned char MDV[8]      = {3, 2, 1, 7, 6, 5, 0, 4}; /* MDV standard */
+static unsigned char Eco[8]      = {4, 5, 6, 0, 1, 2, 7, 3}; /* EcoBraille standard */
 static unsigned char Alva_TSI[8] = {0, 1, 2, 3, 4, 5, 6, 7}; /* Alva/TSI standard */
 static MappingEntry mappingTable[] = {
   {"standard", standard},
+  {"eco"     , Eco     },
+  {"mdv"     , MDV     },
   {"tieman"  , Tieman  },
   {"alva"    , Alva_TSI},
   {"tsi"     , Alva_TSI},
