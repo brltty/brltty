@@ -87,10 +87,38 @@ closePcmDevice (PcmDevice *pcm) {
 
 int
 writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
-  int samples = count / (getPcmChannelCount(pcm) * (snd_pcm_hw_params_get_sbits(pcm->hwparams) / 8));
+  int frameSize = getPcmChannelCount(pcm) * (snd_pcm_hw_params_get_sbits(pcm->hwparams) / 8);
+  int framesLeft = count / frameSize;
 
-  snd_pcm_prepare(pcm->handle);
-  return snd_pcm_writei(pcm->handle, buffer, samples) == samples;
+  while (framesLeft > 0) {
+    int result;
+
+    if ((result = snd_pcm_writei(pcm->handle, buffer, framesLeft)) > 0) {
+      framesLeft -= result;
+      buffer += result * frameSize;
+    } else {
+      switch (result) {
+	case -EPIPE:
+	  if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
+	    logAlsaError(LOG_WARNING, "underrun recovery - prepare", result);
+	    return 0;
+	  }
+	  continue;
+
+	case -ESTRPIPE:
+	  while ((result = snd_pcm_resume(pcm->handle)) == -EAGAIN) sleep(1);
+
+	  if (result < 0) {
+	    if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
+	      logAlsaError(LOG_WARNING, "resume - prepare", result);
+	      return 0;
+	    }
+	  }
+	  continue;
+      }
+    }
+  }
+  return 1;
 }
 
 int
