@@ -32,20 +32,22 @@
 #include "usb.h"
 #include "usb_internal.h"
 
-typedef struct UsbAsynchronousRequest {
-  struct UsbAsynchronousRequest *next;
+typedef struct {
   UsbEndpoint *endpoint;
   void *context;
   void *buffer;
   int length;
+
   IOReturn result;
   int count;
 } UsbAsynchronousRequest;
 
 typedef struct {
   IOUSBDeviceInterface182 **device;
-  IOUSBInterfaceInterface190 **interface;
   unsigned opened:1;
+
+  IOUSBInterfaceInterface190 **interface;
+  UInt8 pipeCount;
 
   CFRunLoopRef runloopReference;
   CFStringRef runloopMode;
@@ -54,147 +56,162 @@ typedef struct {
 
 typedef struct {
   UsbEndpoint *endpoint;
-  Queue *requests;
+  Queue *completedRequests;
 
-  UInt8 pipe;
-  UInt8 number;
-  UInt8 direction;
-  UInt8 transfer;
-  UInt8 interval;
-  UInt16 size;
+  UInt8 pipeNumber;
+  UInt8 endpointNumber;
+  UInt8 transferDirection;
+  UInt8 transferMode;
+  UInt8 pollInterval;
+  UInt16 packetSize;
 } UsbEndpointExtension;
 
 static void
-setErrnoIo (IOReturn result, const char *action) {
-#define SET(to) errno = E##to; break;
-#define MAP(from,to) case kIOReturn##from: SET(to)
-
-  LogPrint(LOG_WARNING, "Darwin I/O error 0X%X.", result);
+setErrno (long int result, const char *action) {
+#define SET(to) errno = (to); break;
+#define MAP(from,to) case (from): SET(to)
   switch (result) {
-    default: SET(IO)
-  //MAP(Success, )
-  //MAP(Error, )
-    MAP(NoMemory, NOMEM)
-    MAP(NoResources, AGAIN)
-  //MAP(IPCError, )
-    MAP(NoDevice, NODEV)
-    MAP(NotPrivileged, ACCES)
-    MAP(BadArgument, INVAL)
-    MAP(LockedRead, NOLCK)
-    MAP(LockedWrite, NOLCK)
-    MAP(ExclusiveAccess, BUSY)
-  //MAP(BadMessageID, )
-    MAP(Unsupported, NOTSUP)
-  //MAP(VMError, )
-  //MAP(InternalError, )
-    MAP(IOError, IO)
-    MAP(CannotLock, NOLCK)
-    MAP(NotOpen, BADF)
-    MAP(NotReadable, ACCES)
-    MAP(NotWritable, ROFS)
-  //MAP(NotAligned, )
-    MAP(BadMedia, NXIO)
-  //MAP(StillOpen, )
-  //MAP(RLDError, )
-    MAP(DMAError, DEVERR)
-    MAP(Busy, BUSY)
-    MAP(Timeout, TIMEDOUT)
-    MAP(Offline, NXIO)
-    MAP(NotReady, NXIO)
-    MAP(NotAttached, NXIO)
-    MAP(NoChannels, DEVERR)
-    MAP(NoSpace, NOSPC)
-    MAP(PortExists, ADDRINUSE)
-    MAP(CannotWire, NOMEM)
-  //MAP(NoInterrupt, )
-    MAP(NoFrames, DEVERR)
-    MAP(MessageTooLarge, MSGSIZE)
-    MAP(NotPermitted, PERM)
-    MAP(NoPower, PWROFF)
-    MAP(NoMedia, NXIO)
-    MAP(UnformattedMedia, NXIO)
-    MAP(UnsupportedMode, NOSYS)
-    MAP(Underrun, DEVERR)
-    MAP(Overrun, DEVERR)
-    MAP(DeviceError, DEVERR)
-  //MAP(NoCompletion, )
-    MAP(Aborted, CANCELED)
-    MAP(NoBandwidth, DEVERR)
-    MAP(NotResponding, DEVERR)
-    MAP(IsoTooOld, DEVERR)
-    MAP(IsoTooNew, DEVERR)
-    MAP(NotFound, NOENT)
-  //MAP(Invalid, )
-  }
-  if (action) LogError(action);
+    default: SET(EIO)
 
+  //MAP(KERN_SUCCESS, )
+    MAP(KERN_INVALID_ADDRESS, EINVAL)
+    MAP(KERN_PROTECTION_FAILURE, EFAULT)
+    MAP(KERN_NO_SPACE, ENOSPC)
+    MAP(KERN_INVALID_ARGUMENT, EINVAL)
+  //MAP(KERN_FAILURE, )
+    MAP(KERN_RESOURCE_SHORTAGE, EAGAIN)
+  //MAP(KERN_NOT_RECEIVER, )
+    MAP(KERN_NO_ACCESS, EACCES)
+    MAP(KERN_MEMORY_FAILURE, EFAULT)
+    MAP(KERN_MEMORY_ERROR, EFAULT)
+  //MAP(KERN_ALREADY_IN_SET, )
+  //MAP(KERN_NOT_IN_SET, )
+    MAP(KERN_NAME_EXISTS, EEXIST)
+    MAP(KERN_ABORTED, ECANCELED)
+    MAP(KERN_INVALID_NAME, EINVAL)
+    MAP(KERN_INVALID_TASK, EINVAL)
+    MAP(KERN_INVALID_RIGHT, EINVAL)
+    MAP(KERN_INVALID_VALUE, EINVAL)
+  //MAP(KERN_UREFS_OVERFLOW, )
+    MAP(KERN_INVALID_CAPABILITY, EINVAL)
+  //MAP(KERN_RIGHT_EXISTS, )
+    MAP(KERN_INVALID_HOST, EINVAL)
+  //MAP(KERN_MEMORY_PRESENT, )
+  //MAP(KERN_MEMORY_DATA_MOVED, )
+  //MAP(KERN_MEMORY_RESTART_COPY, )
+    MAP(KERN_INVALID_PROCESSOR_SET, EINVAL)
+  //MAP(KERN_POLICY_LIMIT, )
+    MAP(KERN_INVALID_POLICY, EINVAL)
+    MAP(KERN_INVALID_OBJECT, EINVAL)
+  //MAP(KERN_ALREADY_WAITING, )
+  //MAP(KERN_DEFAULT_SET, )
+  //MAP(KERN_EXCEPTION_PROTECTED, )
+    MAP(KERN_INVALID_LEDGER, EINVAL)
+    MAP(KERN_INVALID_MEMORY_CONTROL, EINVAL)
+    MAP(KERN_INVALID_SECURITY, EINVAL)
+  //MAP(KERN_NOT_DEPRESSED, )
+  //MAP(KERN_TERMINATED, )
+  //MAP(KERN_LOCK_SET_DESTROYED, )
+  //MAP(KERN_LOCK_UNSTABLE, )
+  //MAP(KERN_LOCK_OWNED, )
+  //MAP(KERN_LOCK_OWNED_SELF, )
+  //MAP(KERN_SEMAPHORE_DESTROYED, )
+  //MAP(KERN_RPC_SERVER_TERMINATED, )
+  //MAP(KERN_RPC_TERMINATE_ORPHAN, )
+  //MAP(KERN_RPC_CONTINUE_ORPHAN, )
+    MAP(KERN_NOT_SUPPORTED, ENOTSUP)
+    MAP(KERN_NODE_DOWN, EHOSTDOWN)
+  //MAP(KERN_NOT_WAITING, )
+    MAP(KERN_OPERATION_TIMED_OUT, ETIMEDOUT)
+
+  //MAP(kIOReturnSuccess, )
+  //MAP(kIOReturnError, )
+    MAP(kIOReturnNoMemory, ENOMEM)
+    MAP(kIOReturnNoResources, EAGAIN)
+  //MAP(kIOReturnIPCError, )
+    MAP(kIOReturnNoDevice, ENODEV)
+    MAP(kIOReturnNotPrivileged, EACCES)
+    MAP(kIOReturnBadArgument, EINVAL)
+    MAP(kIOReturnLockedRead, ENOLCK)
+    MAP(kIOReturnLockedWrite, ENOLCK)
+    MAP(kIOReturnExclusiveAccess, EBUSY)
+  //MAP(kIOReturnBadMessageID, )
+    MAP(kIOReturnUnsupported, ENOTSUP)
+  //MAP(kIOReturnVMError, )
+  //MAP(kIOReturnInternalError, )
+    MAP(kIOReturnIOError, EIO)
+    MAP(kIOReturnCannotLock, ENOLCK)
+    MAP(kIOReturnNotOpen, EBADF)
+    MAP(kIOReturnNotReadable, EACCES)
+    MAP(kIOReturnNotWritable, EROFS)
+  //MAP(kIOReturnNotAligned, )
+    MAP(kIOReturnBadMedia, ENXIO)
+  //MAP(kIOReturnStillOpen, )
+  //MAP(kIOReturnRLDError, )
+    MAP(kIOReturnDMAError, EDEVERR)
+    MAP(kIOReturnBusy, EBUSY)
+    MAP(kIOReturnTimeout, ETIMEDOUT)
+    MAP(kIOReturnOffline, ENXIO)
+    MAP(kIOReturnNotReady, ENXIO)
+    MAP(kIOReturnNotAttached, ENXIO)
+    MAP(kIOReturnNoChannels, EDEVERR)
+    MAP(kIOReturnNoSpace, ENOSPC)
+    MAP(kIOReturnPortExists, EADDRINUSE)
+    MAP(kIOReturnCannotWire, ENOMEM)
+  //MAP(kIOReturnNoInterrupt, )
+    MAP(kIOReturnNoFrames, EDEVERR)
+    MAP(kIOReturnMessageTooLarge, EMSGSIZE)
+    MAP(kIOReturnNotPermitted, EPERM)
+    MAP(kIOReturnNoPower, EPWROFF)
+    MAP(kIOReturnNoMedia, ENXIO)
+    MAP(kIOReturnUnformattedMedia, ENXIO)
+    MAP(kIOReturnUnsupportedMode, ENOSYS)
+    MAP(kIOReturnUnderrun, EDEVERR)
+    MAP(kIOReturnOverrun, EDEVERR)
+    MAP(kIOReturnDeviceError, EDEVERR)
+  //MAP(kIOReturnNoCompletion, )
+    MAP(kIOReturnAborted, ECANCELED)
+    MAP(kIOReturnNoBandwidth, EDEVERR)
+    MAP(kIOReturnNotResponding, EDEVERR)
+    MAP(kIOReturnIsoTooOld, EDEVERR)
+    MAP(kIOReturnIsoTooNew, EDEVERR)
+    MAP(kIOReturnNotFound, ENOENT)
+  //MAP(kIOReturnInvalid, )
+
+  //MAP(kIOUSBUnknownPipeErr, )
+  //MAP(kIOUSBTooManyPipesErr, )
+  //MAP(kIOUSBNoAsyncPortErr, )
+  //MAP(kIOUSBNotEnoughPipesErr, )
+  //MAP(kIOUSBNotEnoughPowerErr, )
+  //MAP(kIOUSBEndpointNotFound, )
+  //MAP(kIOUSBConfigNotFound, )
+    MAP(kIOUSBTransactionTimeout, ETIMEDOUT)
+  //MAP(kIOUSBTransactionReturned, )
+  //MAP(kIOUSBPipeStalled, )
+  //MAP(kIOUSBInterfaceNotFound, )
+  //MAP(kIOUSBLowLatencyBufferNotPreviouslyAllocated, )
+  //MAP(kIOUSBLowLatencyFrameListNotPreviouslyAllocated, )
+  //MAP(kIOUSBHighSpeedSplitError, )
+  //MAP(kIOUSBLinkErr, )
+  //MAP(kIOUSBNotSent2Err, )
+  //MAP(kIOUSBNotSent1Err, )
+  //MAP(kIOUSBBufferUnderrunErr, )
+  //MAP(kIOUSBBufferOverrunErr, )
+  //MAP(kIOUSBReserved2Err, )
+  //MAP(kIOUSBReserved1Err, )
+  //MAP(kIOUSBWrongPIDErr, )
+  //MAP(kIOUSBPIDCheckErr, )
+  //MAP(kIOUSBDataToggleErr, )
+  //MAP(kIOUSBBitstufErr, )
+  //MAP(kIOUSBCRCErr, )
+  }
 #undef MAP
 #undef SET
-}
 
-static void
-setErrnoKernel (kern_return_t result, const char *action) {
-#define SET(to) errno = E##to; break;
-#define MAP(from,to) case KERN_##from: SET(to)
-
-  LogPrint(LOG_WARNING, "Darwin kernel error 0X%X.", result);
-  switch (result) {
-    default: SET(IO)
-  //MAP(SUCCESS, )
-    MAP(INVALID_ADDRESS, INVAL)
-    MAP(PROTECTION_FAILURE, FAULT)
-    MAP(NO_SPACE, NOSPC)
-    MAP(INVALID_ARGUMENT, INVAL)
-  //MAP(FAILURE, )
-    MAP(RESOURCE_SHORTAGE, AGAIN)
-  //MAP(NOT_RECEIVER, )
-    MAP(NO_ACCESS, ACCES)
-    MAP(MEMORY_FAILURE, FAULT)
-    MAP(MEMORY_ERROR, FAULT)
-  //MAP(ALREADY_IN_SET, )
-  //MAP(NOT_IN_SET, )
-    MAP(NAME_EXISTS, EXIST)
-    MAP(ABORTED, CANCELED)
-    MAP(INVALID_NAME, INVAL)
-    MAP(INVALID_TASK, INVAL)
-    MAP(INVALID_RIGHT, INVAL)
-    MAP(INVALID_VALUE, INVAL)
-  //MAP(UREFS_OVERFLOW, )
-    MAP(INVALID_CAPABILITY, INVAL)
-  //MAP(RIGHT_EXISTS, )
-    MAP(INVALID_HOST, INVAL)
-  //MAP(MEMORY_PRESENT, )
-  //MAP(MEMORY_DATA_MOVED, )
-  //MAP(MEMORY_RESTART_COPY, )
-    MAP(INVALID_PROCESSOR_SET, INVAL)
-  //MAP(POLICY_LIMIT, )
-    MAP(INVALID_POLICY, INVAL)
-    MAP(INVALID_OBJECT, INVAL)
-  //MAP(ALREADY_WAITING, )
-  //MAP(DEFAULT_SET, )
-  //MAP(EXCEPTION_PROTECTED, )
-    MAP(INVALID_LEDGER, INVAL)
-    MAP(INVALID_MEMORY_CONTROL, INVAL)
-    MAP(INVALID_SECURITY, INVAL)
-  //MAP(NOT_DEPRESSED, )
-  //MAP(TERMINATED, )
-  //MAP(LOCK_SET_DESTROYED, )
-  //MAP(LOCK_UNSTABLE, )
-  //MAP(LOCK_OWNED, )
-  //MAP(LOCK_OWNED_SELF, )
-  //MAP(SEMAPHORE_DESTROYED, )
-  //MAP(RPC_SERVER_TERMINATED, )
-  //MAP(RPC_TERMINATE_ORPHAN, )
-  //MAP(RPC_CONTINUE_ORPHAN, )
-    MAP(NOT_SUPPORTED, NOTSUP)
-    MAP(NODE_DOWN, HOSTDOWN)
-  //MAP(NOT_WAITING, )
-    MAP(OPERATION_TIMED_OUT, TIMEDOUT)
+  if (action) {
+    LogPrint(LOG_WARNING, "Darwin error 0X%lX.", result);
+    LogError(action);
   }
-  if (action) LogError(action);
-
-#undef MAP
-#undef SET
 }
 
 static int
@@ -208,12 +225,12 @@ openDevice (UsbDevice *device, int seize) {
 
     result = (*devx->device)->USBDeviceOpen(devx->device);
     if (result != kIOReturnSuccess) {
-      setErrnoIo(result, "USB device open");
+      setErrno(result, "USB device open");
       if ((result != kIOReturnExclusiveAccess) || !seize) return 0;
 
       result = (*devx->device)->USBDeviceOpenSeize(devx->device);
       if (result != kIOReturnSuccess) {
-        setErrnoIo(result, "USB device seize");
+        setErrno(result, "USB device seize");
         return 0;
       }
 
@@ -230,7 +247,7 @@ openDevice (UsbDevice *device, int seize) {
 }
 
 static int
-closeInterface (UsbDevice *device) {
+unsetInterface (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   int ok = 1;
 
@@ -238,30 +255,24 @@ closeInterface (UsbDevice *device) {
     IOReturn result;
 
     {
-      UInt8 count;
-      result = (*devx->interface)->GetNumEndpoints(devx->interface, &count);
-      if (result == kIOReturnSuccess) {
-        int pipe;
-        for (pipe=1; pipe<=count; ++pipe) {
-          result = (*devx->interface)->AbortPipe(devx->interface, pipe);
-          if (result != kIOReturnSuccess) {
-            setErrnoIo(result, "pipe abort");
-          }
+      int pipe;
+      for (pipe=1; pipe<=devx->pipeCount; ++pipe) {
+        result = (*devx->interface)->AbortPipe(devx->interface, pipe);
+        if (result != kIOReturnSuccess) {
+          setErrno(result, "USB pipe abort");
         }
-      } else {
-        setErrnoIo(result, "USB pipe count query");
       }
     }
 
     result = (*devx->interface)->USBInterfaceClose(devx->interface);
     if (result != kIOReturnSuccess) {
-      setErrnoIo(result, "USB interface close");
+      setErrno(result, "USB interface close");
       ok = 0;
     }
 
     result = (*devx->interface)->Release(devx->interface);
     if (result != kIOReturnSuccess) {
-      setErrnoIo(result, "USB interface release");
+      setErrno(result, "USB interface release");
       ok = 0;
     }
 
@@ -277,10 +288,10 @@ isInterface (IOUSBInterfaceInterface190 **interface, UInt8 number) {
   UInt8 num;
 
   result = (*interface)->GetInterfaceNumber(interface, &num);
-  if (result == kIOReturnSuccess) {
-    if (num == number) return 1;
-  } else {
-    setErrnoIo(result, "USB interface number query");
+  if (result != kIOReturnSuccess) {
+    setErrno(result, "USB interface number query");
+  } else if (num == number) {
+    return 1;
   }
 
   return 0;
@@ -321,19 +332,19 @@ setInterface (UsbDevice *device, UInt8 number) {
                                            (LPVOID)&interface);
         if ((result == kIOReturnSuccess) && interface) {
           if (isInterface(interface, number)) {
-            closeInterface(device);
+            unsetInterface(device);
             devx->interface = interface;
           } else {
             (*interface)->Release(interface);
             interface = NULL;
           }
         } else {
-          setErrnoIo(result, "USB interface interface create");
+          setErrno(result, "USB interface interface create");
         }
 
         (*plugin)->Release(plugin);
       } else {
-        setErrnoIo(result, "USB interface service plugin create");
+        setErrno(result, "USB interface service plugin create");
       }
 
       IOObjectRelease(service);
@@ -343,7 +354,7 @@ setInterface (UsbDevice *device, UInt8 number) {
 
     IOObjectRelease(iterator);
   } else {
-    setErrnoIo(result, "USB interface iterator create");
+    setErrno(result, "USB interface iterator create");
   }
 
   return interface != NULL;
@@ -364,7 +375,10 @@ usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   request->result = result;
   request->count = (int)arg;
 
-  enqueueItem(eptx->requests, request);
+  if (!enqueueItem(eptx->completedRequests, request)) {
+    LogError("USB completed request enqueue");
+    free(request);
+  }
 }
 
 int
@@ -373,7 +387,7 @@ usbResetDevice (UsbDevice *device) {
   IOReturn result = (*devx->device)->ResetDevice(devx->device);
   if (result == kIOReturnSuccess) return 1;
 
-  setErrnoIo(result, "USB device reset");
+  setErrno(result, "USB device reset");
   return 0;
 }
 
@@ -388,7 +402,7 @@ usbSetConfiguration (
     UInt8 arg = configuration;
     IOReturn result = (*devx->device)->SetConfiguration(devx->device, arg);
     if (result == kIOReturnSuccess) return 1;
-    setErrnoIo(result, "USB configuration set");
+    setErrno(result, "USB configuration set");
   }
 
   return 0;
@@ -402,9 +416,21 @@ usbClaimInterface (
   UsbDeviceExtension *devx = device->extension;
 
   if (setInterface(device, interface)) {
-    IOReturn result = (*devx->interface)->USBInterfaceOpen(devx->interface);
-    if (result == kIOReturnSuccess) return 1;
-    setErrnoIo(result, "USB interface open");
+    IOReturn result;
+
+    result = (*devx->interface)->USBInterfaceOpen(devx->interface);
+    if (result == kIOReturnSuccess) {
+      result = (*devx->interface)->GetNumEndpoints(devx->interface, &devx->pipeCount);
+      if (result == kIOReturnSuccess) {
+        return 1;
+      } else {
+        setErrno(result, "USB pipe count query");
+      }
+
+      (*devx->interface)->USBInterfaceClose(devx->interface);
+    } else {
+      setErrno(result, "USB interface open");
+    }
   }
 
   return 0;
@@ -415,7 +441,7 @@ usbReleaseInterface (
   UsbDevice *device,
   unsigned char interface
 ) {
-  return setInterface(device, interface) && closeInterface(device);
+  return setInterface(device, interface) && unsetInterface(device);
 }
 
 int
@@ -427,9 +453,10 @@ usbSetAlternative (
   UsbDeviceExtension *devx = device->extension;
 
   if (setInterface(device, interface)) {
-    IOReturn result = (*devx->interface)->SetAlternateInterface(devx->interface, alternative);
+    UInt8 arg = alternative;
+    IOReturn result = (*devx->interface)->SetAlternateInterface(devx->interface, arg);
     if (result == kIOReturnSuccess) return 1;
-    setErrnoIo(result, "USB alternative set");
+    setErrno(result, "USB alternative set");
   }
 
   return 0;
@@ -447,9 +474,9 @@ usbResetEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipe);
+    result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipeNumber);
     if (result == kIOReturnSuccess) return 1;
-    setErrnoIo(result, "USB endpoint reset");
+    setErrno(result, "USB endpoint reset");
   }
 
   return 0;
@@ -467,9 +494,9 @@ usbClearEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipe);
+    result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipeNumber);
     if (result == kIOReturnSuccess) return 1;
-    setErrnoIo(result, "USB endpoint clear");
+    setErrno(result, "USB endpoint clear");
   }
 
   return 0;
@@ -504,7 +531,7 @@ usbControlTransfer (
 
   result = (*devx->device)->DeviceRequestTO(devx->device, &arg);
   if (result == kIOReturnSuccess) return arg.wLenDone;
-  setErrnoIo(result, "USB control transfer");
+  setErrno(result, "USB control transfer");
   return -1;
 }
 
@@ -514,46 +541,39 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
 
   if ((eptx = malloc(sizeof(*eptx)))) {
-    if ((eptx->requests = newQueue(usbDeallocateAsynchronousRequest, NULL))) {
+    if ((eptx->completedRequests = newQueue(usbDeallocateAsynchronousRequest, NULL))) {
       IOReturn result;
-      UInt8 count;
+      unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
+      unsigned char output = USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT;
 
-      result = (*devx->interface)->GetNumEndpoints(devx->interface, &count);
-      if (result == kIOReturnSuccess) {
-        unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
-        unsigned char output = USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT;
+      for (eptx->pipeNumber=1; eptx->pipeNumber<=devx->pipeCount; ++eptx->pipeNumber) {
+        result = (*devx->interface)->GetPipeProperties(devx->interface, eptx->pipeNumber,
+                                                       &eptx->transferDirection, &eptx->endpointNumber,
+                                                       &eptx->transferMode, &eptx->packetSize, &eptx->pollInterval);
+        if (result == kIOReturnSuccess) {
+          if ((eptx->endpointNumber == number) &&
+              ((eptx->transferDirection == kUSBOut) == output)) {
+            LogPrint(LOG_DEBUG, "USB: ept=%02X -> pip=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
+                     endpoint->descriptor->bEndpointAddress, eptx->pipeNumber,
+                     eptx->endpointNumber, eptx->transferDirection, eptx->transferMode,
+                     eptx->pollInterval, eptx->packetSize);
 
-        for (eptx->pipe=1; eptx->pipe<=count; ++eptx->pipe) {
-          result = (*devx->interface)->GetPipeProperties(devx->interface, eptx->pipe,
-                                                         &eptx->direction, &eptx->number,
-                                                         &eptx->transfer, &eptx->size, &eptx->interval);
-          if (result == kIOReturnSuccess) {
-            if ((eptx->number == number) &&
-                ((eptx->direction == kUSBOut) == output)) {
-              LogPrint(LOG_DEBUG, "USB: ept=%02X -> ref=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
-                       endpoint->descriptor->bEndpointAddress, eptx->pipe,
-                       eptx->number, eptx->direction, eptx->transfer,
-                       eptx->interval, eptx->size);
-
-              eptx->endpoint = endpoint;
-              endpoint->extension = eptx;
-              return 1;
-            }
-          } else {
-            setErrnoIo(result, "USB endpoint properties query");
+            eptx->endpoint = endpoint;
+            endpoint->extension = eptx;
+            return 1;
           }
+        } else {
+          setErrno(result, "USB pipe properties query");
         }
-
-        errno = EIO;
-        LogPrint(LOG_ERR, "USB endpoint not found: %02X",
-                 endpoint->descriptor->bEndpointAddress);
-      } else {
-        setErrnoIo(result, "USB pipe count query");
       }
 
-      deallocateQueue(eptx->requests);
+      errno = EIO;
+      LogPrint(LOG_ERR, "USB pipe not found: ept=%02X",
+               endpoint->descriptor->bEndpointAddress);
+
+      deallocateQueue(eptx->completedRequests);
     } else {
-      LogError("USB asynchronous request queue allocate");
+      LogError("USB completed request queue allocate");
     }
 
     free(eptx);
@@ -567,7 +587,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
-  deallocateQueue(eptx->requests);
+  deallocateQueue(eptx->completedRequests);
   endpoint->extension = NULL;
   free(eptx);
 }
@@ -591,7 +611,7 @@ usbReadEndpoint (
 
   read:
     count = length;
-    result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->pipe,
+    result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->pipeNumber,
                                             buffer, &count,
                                             timeout, timeout);
 
@@ -608,18 +628,18 @@ usbReadEndpoint (
 
       case kIOUSBPipeStalled:
         if (!stalled) {
-          result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipe);
-          if (result != kIOReturnSuccess) {
-            setErrnoIo(result, "USB stall clear");
-            return 0;
+          result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipeNumber);
+          if (result == kIOReturnSuccess) {
+            stalled = 1;
+            goto read;
           }
 
-          stalled = 1;
-          goto read;
+          setErrno(result, "USB stall clear");
+          break;
         }
 
       default:
-        setErrnoIo(result, "USB endpoint read");
+        setErrno(result, "USB endpoint read");
         break;
     }
   }
@@ -642,11 +662,11 @@ usbWriteEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->WritePipeTO(devx->interface, eptx->pipe,
+    result = (*devx->interface)->WritePipeTO(devx->interface, eptx->pipeNumber,
                                              (void *)buffer, length,
                                              timeout, timeout);
     if (result == kIOReturnSuccess) return length;
-    setErrnoIo(result, "USB endpoint write");
+    setErrno(result, "USB endpoint write");
   }
 
   return -1;
@@ -673,9 +693,9 @@ usbSubmitRequest (
       devx->runloopMode = kCFRunLoopDefaultMode;
 
       result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
-                                                             &devx->runloopSource);
+                                                                   &devx->runloopSource);
       if (result != kIOReturnSuccess) {
-        setErrnoIo(result, "USB interface event source create");
+        setErrno(result, "USB interface event source create");
         return NULL;
       }
       CFRunLoopAddSource(devx->runloopReference,
@@ -684,31 +704,31 @@ usbSubmitRequest (
     }
 
     if ((request = malloc(sizeof(*request) + length))) {
-      request->next = NULL;
       request->endpoint = endpoint;
       request->context = context;
       request->buffer = (request->length = length)? (request + 1): NULL;
 
-      switch (eptx->direction) {
+      switch (eptx->transferDirection) {
         case kUSBIn:
-          result = (*devx->interface)->ReadPipeAsync(devx->interface, eptx->pipe,
+          result = (*devx->interface)->ReadPipeAsync(devx->interface, eptx->pipeNumber,
                                                      request->buffer, request->length,
                                                      usbAsynchronousRequestCallback, request);
           if (result == kIOReturnSuccess) return request;
-          setErrnoIo(result, "USB endpoint asynchronous read");
+          setErrno(result, "USB endpoint asynchronous read");
           break;
 
         case kUSBOut:
           if (request->buffer) memcpy(request->buffer, buffer, length);
-          result = (*devx->interface)->WritePipeAsync(devx->interface, eptx->pipe,
+          result = (*devx->interface)->WritePipeAsync(devx->interface, eptx->pipeNumber,
                                                       request->buffer, request->length,
                                                       usbAsynchronousRequestCallback, request);
           if (result == kIOReturnSuccess) return request;
-          setErrnoIo(result, "USB endpoint asynchronous write");
+          setErrno(result, "USB endpoint asynchronous write");
           break;
 
         default:
-          LogPrint(LOG_ERR, "USB endpoint direction not suppported: %d", eptx->direction);
+          LogPrint(LOG_ERR, "USB endpoint direction not suppported: %d",
+                   eptx->transferDirection);
           errno = ENOSYS;
           break;
       }
@@ -745,7 +765,7 @@ usbReapResponse (
     UsbEndpointExtension *eptx = endpoint->extension;
     UsbAsynchronousRequest *request;
 
-    while (!(request = dequeueItem(eptx->requests))) {
+    while (!(request = dequeueItem(eptx->completedRequests))) {
       switch (CFRunLoopRunInMode(devx->runloopMode, (wait? 60: 0), 1)) {
         case kCFRunLoopRunTimedOut:
           if (wait) continue;
@@ -755,6 +775,7 @@ usbReapResponse (
 
         case kCFRunLoopRunStopped:
         case kCFRunLoopRunHandledSource:
+        default:
           continue;
       }
     }
@@ -768,8 +789,9 @@ usbReapResponse (
         return request;
       }
     } else {
-      setErrnoIo(request->result, "USB asynchronous response");
+      setErrno(request->result, "USB asynchronous response");
     }
+
     free(request);
   }
 
@@ -813,13 +835,14 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 
 error:
-  setErrnoIo(result, "USB device descriptor read");
+  setErrno(result, "USB device descriptor read");
   return 0;
 }
 
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
+
   if (devx->runloopSource) {
     CFRunLoopRemoveSource(devx->runloopReference,
                           devx->runloopSource,
@@ -827,7 +850,7 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
   }
 
   if (devx->opened) {
-    closeInterface(device);
+    unsetInterface(device);
     (*devx->device)->USBDeviceClose(devx->device);
   }
 
@@ -888,12 +911,12 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
               if (!device) (*deviceInterface)->Release(deviceInterface);
             } else {
-              setErrnoIo(ioResult, "USB device interface create");
+              setErrno(ioResult, "USB device interface create");
             }
 
             (*servicePlugin)->Release(servicePlugin);
           } else {
-            setErrnoIo(ioResult, "USB device service plugin create");
+            setErrno(ioResult, "USB device service plugin create");
           }
 
           IOObjectRelease(service);
@@ -902,7 +925,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
         IOObjectRelease(serviceIterator);
       } else {
-        setErrnoKernel(kernelResult, "USB device iterator create");
+        setErrno(kernelResult, "USB device iterator create");
       }
     } else {
       LogPrint(LOG_ERR, "USB device matching dictionary create error.");
@@ -910,7 +933,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
     mach_port_deallocate(mach_task_self(), masterPort);
   } else {
-    setErrnoKernel(kernelResult, "Darwin master port create");
+    setErrno(kernelResult, "Darwin master port create");
   }
 
   return device;
