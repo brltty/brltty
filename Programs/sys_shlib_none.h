@@ -27,6 +27,6 @@ unloadSharedObject (const void *object) {
 }
 
 int 
-findSharedSymbol (void *object, const char *symbol, const void **address) {
+findSharedSymbol (void *object, const char *symbol, void *address) {
   return 0;
 }
