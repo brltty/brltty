@@ -59,9 +59,9 @@ awaitByte (unsigned char *byte) {
 
 static int
 writeBytes (unsigned char *bytes, int count) {
-  int sent = write(fileDescriptor, bytes, count);
-  if (sent == -1) LogError("Albatross write");
-  return sent == 1;
+  if (safe_write(fileDescriptor, bytes, count) != -1) return 1;
+  LogError("Albatross write");
+  return 0;
 }
 
 static int
@@ -107,6 +107,7 @@ updateDisplay (unsigned char *cells) {
     *byte++ = column + 1;
     *byte++ = cell;
   }
+  if ((byte - bytes) == 1) return 1;
   *byte++ = 0XFC;
   return writeBytes(bytes, byte-bytes);
 }
@@ -192,6 +193,63 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       case 0XFB:
         updateDisplay(NULL);
         continue;
+
+/*
+      case  94:
+      case 204:
+        return CMD_HOME;
+      case  93:
+      case 203:
+        return CMD_NOOP;
+      case  91:
+      case 201:
+        return CMD_TOP_LEFT;
+      case  92:
+      case 202:
+        return CMD_BOT_LEFT;
+      case  95:
+      case  98:
+      case 205:
+        return CMD_LNUP;
+      case  96:
+      case 206:
+      case 208:
+        return CMD_LNDN;
+      case  85:
+      case 195:
+        return CMD_NOOP;
+      case  86:
+      case 196:
+        return CMD_NOOP;
+      case  84:
+      case 194:
+        return CMD_NOOP;
+      case  83:
+      case 193:
+        return CMD_NOOP;
+      case  87:
+      case 198:
+        return CMD_NOOP;
+      case  88:
+      case 197:
+        return CMD_NOOP;
+      case  89:
+      case 199:
+        return CMD_NOOP;
+      case  90:
+      case 200:
+        return CMD_NOOP;
+      case 105:
+      case 215:
+        return CMD_NOOP;
+      case 106:
+      case 216:
+        return CMD_NOOP;
+      case  97:
+        return CMD_FWINLT;
+      case 207:
+        return CMD_FWINRT;
+*/
     }
 
     LogPrint(LOG_WARNING, "Unexpected byte: %02X", byte);
