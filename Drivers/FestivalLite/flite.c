@@ -49,6 +49,10 @@ static	const char	*outtype	= "play";
 
 static	pid_t		child		= 0;
 
+static	int		fds[2];
+static	int		*const readfd = &fds[0];
+static	int		*const writefd = &fds[1];
+
 static void
 spk_identify (void)
 {
@@ -60,29 +64,58 @@ spk_identify (void)
 static void
 spk_open (char **parameters)
 {
-  features = new_features();
+  child = 0;
   flite_init();
+  features = new_features();
   voice = REGISTER_VOX(NULL);
   feat_copy_into(features, voice->features);
-  child = 0;
+}
+
+static int
+doChild (void)
+{
+  FILE *stream = fdopen(*readfd, "r");
+  char buffer[0X400];
+  char *line;
+  while ((line = fgets(buffer, sizeof(buffer), stream))) {
+    flite_text_to_speech(line, voice, outtype);
+  }
+  return 0;
 }
 
 static void
-spk_say (const unsigned char *buffer, int len)
+spk_say (const unsigned char *buffer, int length)
 {
-  spk_mute();
-  if ((child = fork()) == -1) {
-    LogError("fork");
-  } else if (child == 0) {
-    flite_text_to_speech(buffer, voice, outtype);
-    _exit(0);
+  if (child) goto ready;
+
+  if (pipe(fds) != -1) {
+    if ((child = fork()) == -1) {
+      LogError("fork");
+    } else if (child == 0) {
+      _exit(doChild());
+    } else
+    ready: {
+      unsigned char text[length + 1];
+      memcpy(text, buffer, length);
+      text[length] = '\n';
+      write(*writefd, text, sizeof(text));
+      return;
+    }
+
+    close(*readfd);
+    close(*writefd);
+  } else {
+    LogError("pipe");
   }
 }
 
 static void
 spk_mute (void)
 {
-  if (child > 0) {
+  if (child != 0) {
+    close(*readfd);
+    close(*writefd);
+
     kill(child, SIGKILL);
     child = 0;
   }
@@ -92,9 +125,12 @@ static void
 spk_close (void)
 {
   spk_mute();
+
   if (features) {
     delete_features(features);
     features = NULL;
   }
+
   UNREGISTER_VOX(voice);
+  voice = NULL;
 }
