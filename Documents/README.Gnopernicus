@@ -79,7 +79,6 @@ Gnopernicus Command-line Options
 
 As of Gnopernicus 0.7, the following command-line options are supported. 
 
-   -d  --default                  Launch in execution with default
    -b  --enable-braille           Enable the Braille service.
    -B  --disable-braille          Disable the Braille service.
    -s  --enable-speech            Enable the Speech service.
@@ -118,57 +117,82 @@ You can change the setting of any key with:
 
    gconftool-2 --type <type> --set <key> <value>
 
-To check if Accessibility is enabled, for example, do:
+To check if Assistive Technology Support (Accessibility) is enabled, for
+example, do:
 
-   gconftool-2 --get /apps/desktop/gnome/interface/accessibility
+   gconftool-2 --get /desktop/gnome/interface/accessibility
 
-If it's disabled (set to false) and you wish to enable it, set it to true as
-follows (all on one line):
+If it's disabled (set to false) and you'd like to permanently enable it, set it
+to true as follows:
 
-   gconftool-2 --type bool
-               --set /apps/desktop/gnome/interface/accessibility true
+   gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
+
+There's also a way to temporarily (for a single session) enable Accessibility.  
+This is done by setting the environment variable GNOME_ACCESSIBILITY to 1.
+
+    sh: GNOME_ACCESSIBILITY=1; export GNOME_ACCESSIBILITY
+   ksh: export GNOME_ACCESSIBILITY=1
+   csh: setenv GNOME_ACCESSIBILITY 1
 
 The relevant gconf keys are:
 
-[turn braille on]
+[turn Accessibility on (as just described above)]
+   gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
+
+[turn Braille on]
    gconftool-2 --type bool --set /apps/gnopernicus/srcore/br_active true
 
-[set braille device to BRLTTY]
+[set Braille Device to BRLTTY's BrlAPI]
    gconftool-2 --type string --set /apps/gnopernicus/braille/device BRLTTY
 
-[set braille table to German]
-   gconftool-2 --type string --set /apps/gnopernicus/braille/translation_table de
+[set Braille Translation Table to your preferred language]
+   gconftool-2 --type string --set /apps/gnopernicus/braille/translation_table
+      English: en_US (American)
+       German: de
+      Spanish: es
+      Swedish: sv
 
-[turn braille monitor display (for sighted users) off]
+[turn the on-screen Braille Monitor (for sighted users) off]
    gconftool-2 --type bool --set /apps/gnopernicus/srcore/bm_active false
 
-[turn speech off]
+[turn Speech off]
    gconftool-2 --type bool --set /apps/gnopernicus/srcore/sp_active false
 
 
 Configuration via the Gnome Desktop
 -----------------------------------
 
-When the focus is inside the Gnopernicus window, select
+To enable Assistive Technologies Support (Accessibility), do: Alt-F1 ->
+"Desktop Preferences" -> "Accessibility" -> "Assistive Technology Support"
 
-    1 General Settings
+If "Enable Assistive Technologies" isn't checked, then check it, log out, and
+log back in again.
 
-In this menu, check the checkbox with the label "Braille". This activates
-braille support, and makes the "Braille Settings" window available.
+If the main Gnopernicus window isn't visible, do: Alt-F1 -> "Accessibility" -> 
+"Screen Reader"
 
-Now click OK to apply the change and close the window.
+From the main Gnopernicus window, select: "Startup Mode"
 
-In the main Gnopernicus window again, select
+In this menu, check the checkbox with the label "Active Components Braille".  
+This activates braille support, and makes the "Braille Preferences" window
+available.
 
-    2 Input/Output Settings -> 2 Braille Settings -> 1 Braille Device
+Now click "OK" to apply the change and close the window.
 
-In this dialog box, ensure that "BRLTTY" is the selected braille device.
+From the main Gnopernicus window again, select: "Preferences" -> "Braille"
 
-After applying your changes, "Close" the "Braille Settings" and "Input/Output
-Settings" windows.
+Select "Braille Device", set it to "BRLTTY's BrlAPI", and click "OK" to apply
+the change.
 
-Braille should start working as soon as any needed configuration changes are
-made.
+Select "Translation Table", set it to your preferred language, and click "OK"  
+to apply the change.
+
+Make any other changes which more accurately taylour Gnopernicus's braille
+support to your own personal needs, then "Close" the "Braille Preferences"
+window, and, finally, "Close" the "Preferences" window.
+
+Braille should start working as soon as all needed configuration changes have
+been made.
 
 
 Starting Gnome
