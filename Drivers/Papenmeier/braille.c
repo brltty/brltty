@@ -374,7 +374,7 @@ awaitSerialInput (int milliseconds) {
 
 static int
 readSerialBytes (void *buffer, int *offset, int length, int timeout) {
-  return readChunk(serialDevice, buffer, offset, length, timeout);
+  return readChunk(serialDevice, buffer, offset, length, 0, timeout);
 }
 
 static int

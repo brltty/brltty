@@ -132,7 +132,7 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size
  static unsigned char buf[MAXPKTLEN]; 
  static unsigned char *q;
  if ((p==NULL) || (size<2) || (size>MAXPKTLEN)) return 0; 
- while ((res = readChunk(brl_fd,&ch,&tmp,1,1000))==1)
+ while ((res = readChunk(brl_fd,&ch,&tmp,1,0,1000))==1)
  {
   if (ch==0x02) 
   {

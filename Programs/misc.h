@@ -136,7 +136,11 @@ extern int isQualifiedDevice (const char **path, const char *qualifier);
 extern void unsupportedDevice (const char *path);
 
 extern int awaitInput (int descriptor, int milliseconds);
-extern int readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout);
+extern int readChunk (
+  int descriptor,
+  unsigned char *buffer, int *offset, int count,
+  int initialTimeout, int subsequentTimeout
+);
 
 extern int isInteger (int *value, const char *word);
 extern int isFloat (float *value, const char *word);

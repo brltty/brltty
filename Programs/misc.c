@@ -305,10 +305,10 @@ awaitInput (int descriptor, int milliseconds) {
         return 0;
 
       case 0:
-        errno = EAGAIN;
         if (milliseconds > 0)
           LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
                    milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+        errno = EAGAIN;
         return 0;
 
       default:
@@ -318,9 +318,14 @@ awaitInput (int descriptor, int milliseconds) {
 }
 
 int
-readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout) {
+readChunk (
+  int descriptor,
+  unsigned char *buffer, int *offset, int count,
+  int initialTimeout, int subsequentTimeout
+) {
   while (count > 0) {
     int amount = read(descriptor, buffer+*offset, count);
+
     if (amount == -1) {
       if (errno == EINTR) continue;
       if (errno == EAGAIN) goto noInput;
@@ -328,15 +333,19 @@ readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int ti
       LogError("Read");
       return 0;
     }
+
     if (amount == 0) {
+      int timeout;
     noInput:
-      errno = EAGAIN;
-      if (*offset) {
+      if ((timeout = *offset? subsequentTimeout: initialTimeout)) {
         if (awaitInput(descriptor, timeout)) continue;
         LogPrint(LOG_WARNING, "Input byte missing at offset %d.", *offset);
+      } else {
+        errno = EAGAIN;
       }
       return 0;
     }
+
     *offset += amount;
     count -= amount;
   }

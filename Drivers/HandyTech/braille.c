@@ -167,7 +167,7 @@ typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) ();
   int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, int length);
+  int (*readBytes) (unsigned char *buffer, int length, int wait);
   int (*writeBytes) (const unsigned char *buffer, int length, int *delay);
 } InputOutputOperations;
 
@@ -210,9 +210,11 @@ awaitSerialInput (int milliseconds) {
 }
 
 static int
-readSerialBytes (unsigned char *buffer, int count) {
+readSerialBytes (unsigned char *buffer, int count, int wait) {
+  const int timeout = 100;
   int offset = 0;
-  readChunk(serialDevice, buffer, &offset, count, 100);
+  readChunk(serialDevice, buffer, &offset, count,
+            (wait? timeout: 0), timeout);
   return offset;
 }
 
@@ -272,8 +274,10 @@ awaitUsbInput (int milliseconds) {
 }
 
 static int
-readUsbBytes (unsigned char *buffer, int length) {
-  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length, 0, 100);
+readUsbBytes (unsigned char *buffer, int length, int wait) {
+  const int timeout = 100;
+  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
+                           (wait? timeout: 0), timeout);
   if (count == -1) {
     if (errno == EAGAIN)
       count = 0;
@@ -374,10 +378,11 @@ awaitBluezInput (int milliseconds) {
 }
 
 static int
-readBluezBytes (unsigned char *buffer, int length) {
+readBluezBytes (unsigned char *buffer, int length, int wait) {
+  const int timeout = 100;
   int offset = 0;
-  if (awaitInput(bluezSocket, 0)) {
-    readChunk(bluezSocket, buffer, &offset, length, 100);
+  if (awaitInput(bluezSocket, (wait? timeout: 0))) {
+    readChunk(bluezSocket, buffer, &offset, length, 0, timeout);
   }
   return offset;
 }
@@ -495,8 +500,8 @@ setState (BrailleDisplayState state) {
 }
 
 static int
-readByte (BrailleDisplay *brl, unsigned char *byte) {
-  return io->readBytes(byte, sizeof(*byte));
+readByte (BrailleDisplay *brl, unsigned char *byte, int wait) {
+  return io->readBytes(byte, sizeof(*byte), wait);
 }
 
 static int
@@ -609,7 +614,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     while (writeDescribe(brl)) {
       while (io->awaitInput(100)) {
         unsigned char response[sizeof(HandyDescription) + 1];
-        if (io->readBytes(response, sizeof(response)) == sizeof(response)) {
+        if (io->readBytes(response, sizeof(response), 0) == sizeof(response)) {
           if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
             if (identifyModel(brl, response[sizeof(HandyDescription)])) return 1;
             deallocateBuffers();
@@ -1354,7 +1359,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
   while (1) {
     unsigned char byte;
     {
-      int count = readByte(brl, &byte);
+      int count = readByte(brl, &byte, 0);
       if (count == -1) return CMD_RESTARTBRL;
       if (count == 0) break;
     }
@@ -1403,10 +1408,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
             switch (byte) {
               case 0X79: {
                 unsigned char buf[2];
-                io->readBytes(buf, sizeof(buf));
+                io->readBytes(buf, sizeof(buf), 1);
                 if (buf[0] == model->identifier) {
                   unsigned char codes[buf[1]+1];
-                  io->readBytes(codes, buf[1]+1);
+                  io->readBytes(codes, buf[1]+1, 1);
                   if (codes[buf[1]] == 0X16) {
                     LogBytes("Key code", codes, buf[1]);
                   } else {
@@ -1483,7 +1488,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, size_t count) {
-  return io->readBytes(bytes, count);
+  return io->readBytes(bytes, count, 0);
 }
 
 static ssize_t
