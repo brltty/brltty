@@ -548,7 +548,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 int
 serialDiscardInput (SerialDevice *serial) {
 #ifdef __MINGW32__
-  if (PurgeComm(serial->fileHandle, PURGE_RXABORT|PURGE_RXCLEAR)) return 1;
+  if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
   LogWindowsError("PurgeComm");
 #else /* __MINGW32__ */
   if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
@@ -560,7 +560,7 @@ serialDiscardInput (SerialDevice *serial) {
 int
 serialDiscardOutput (SerialDevice *serial) {
 #ifdef __MINGW32__
-  if (PurgeComm(serial->fileHandle, PURGE_TXABORT|PURGE_TXCLEAR)) return 1;
+  if (PurgeComm(serial->fileHandle, PURGE_TXCLEAR)) return 1;
   LogWindowsError("PurgeComm");
 #else /* __MINGW32__ */
   if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
