@@ -83,54 +83,43 @@ static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
 	static int shift_button_down=0;
-	int	decoded=EOF;
 	int c;
 		/*	Since we are nonblocking this will happen quite a lot */ 
-	if((c=varioget())==-1) {
-		return EOF;
+	while((c=varioget())!=-1) {
+		switch(c) {
+				/*	Should be handled in a better manner, this will do for now tho */ 
+			case VARIO_DISPLAY_DATA_ACK:
+				continue;
+				/*	Always ignore press codes */ 
+			case VARIO_PUSHBUTTON_PRESS_1:
+			case VARIO_PUSHBUTTON_PRESS_2:
+			case VARIO_PUSHBUTTON_PRESS_4:
+			case VARIO_PUSHBUTTON_PRESS_5:
+			case VARIO_PUSHBUTTON_PRESS_6:
+				return CMD_NOOP;
+				/*	We define the button 3 as shift ... */ 
+			case VARIO_PUSHBUTTON_PRESS_3:
+				shift_button_down=1;
+				return CMD_NOOP;	
+	
+			case VARIO_PUSHBUTTON_RELEASE_1:
+				return (shift_button_down?CMD_TOP_LEFT:CMD_LNUP);
+			case VARIO_PUSHBUTTON_RELEASE_2:
+				return (shift_button_down?CMD_SKPIDLNS:CMD_FWINLT);
+			case VARIO_PUSHBUTTON_RELEASE_3:
+				shift_button_down=0;
+				return CMD_NOOP;
+			case VARIO_PUSHBUTTON_RELEASE_4:
+				return (shift_button_down?CMD_BOT_LEFT:CMD_LNDN);
+			case VARIO_PUSHBUTTON_RELEASE_5:
+				return (shift_button_down?CMD_CSRTRK:CMD_FWINRT);
+			case VARIO_PUSHBUTTON_RELEASE_6:
+				return (shift_button_down?CMD_PREFMENU:CMD_HOME);
+			default:
+				if(c>=VARIO_CURSOR_BASE&&c<=VARIO_CURSOR_BASE+VARIO_CURSOR_COUNT)
+					return CR_ROUTE+c-VARIO_CURSOR_BASE;
+				break;
+		}
 	}
-
-	switch(c) {
-			/*	Should be handled in a better manner, this will do for now tho */ 
-		case VARIO_DISPLAY_DATA_ACK:
-			decoded = CMD_NOOP;
-		break;
-			/*	Always ignore press codes */ 
-		case VARIO_PUSHBUTTON_PRESS_1:
-		case VARIO_PUSHBUTTON_PRESS_2:
-		case VARIO_PUSHBUTTON_PRESS_4:
-		case VARIO_PUSHBUTTON_PRESS_5:
-		case VARIO_PUSHBUTTON_PRESS_6:
-			decoded = CMD_NOOP;
-		break;
-			/*	We define the button 3 as shift ... */ 
-		case VARIO_PUSHBUTTON_PRESS_3:
-			shift_button_down=1;
-		break;	
-
-		case VARIO_PUSHBUTTON_RELEASE_1:
-			decoded = (shift_button_down?CMD_TOP_LEFT:CMD_LNUP);
-		break;
-		case VARIO_PUSHBUTTON_RELEASE_2:
-			decoded = (shift_button_down?CMD_SKPIDLNS:CMD_FWINLT);
-		break;
-		case VARIO_PUSHBUTTON_RELEASE_3:
-			shift_button_down=0;
-		break;
-		case VARIO_PUSHBUTTON_RELEASE_4:
-			decoded = (shift_button_down?CMD_BOT_LEFT:CMD_LNDN);
-		break;
-		case VARIO_PUSHBUTTON_RELEASE_5:
-			decoded = (shift_button_down?CMD_CSRTRK:CMD_FWINRT);
-		break;
-		case VARIO_PUSHBUTTON_RELEASE_6:
-			decoded = (shift_button_down?CMD_PREFMENU:CMD_HOME);
-		break;
-		default:
-			if(c>=VARIO_CURSOR_BASE&&c<=VARIO_CURSOR_BASE+VARIO_CURSOR_COUNT) {
-				decoded = CR_ROUTE+c-VARIO_CURSOR_BASE;
-			}
-		break;
-	}
-	return decoded;
+	return EOF;
 }
