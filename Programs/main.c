@@ -349,6 +349,7 @@ showInfo (void) {
       braille->writeVisual(&brl);
     }
 
+    memset(&status, 0, 5);
     setCoordinateUpper(&status[0], scr.posx, scr.posy);
     setCoordinateLower(&status[0], p->winx, p->winy);
     setStateDots(&status[4]);
