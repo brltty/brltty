@@ -70,6 +70,7 @@ z* 1356   Go to main menu (Braille Note function).
 {+ 246    Set start of cut area without clearing cut buffer.
 )+ 23456  Append rectangular area to cut buffer.
 }+ 12456  Append linear area to cut buffer.
+?  1456   Enter command learn mode.
 7  2356   Tab key.
 2  23     Left arrow key.
 ;  56     Right arrow key.

@@ -50,6 +50,7 @@ To bring the cursor to the current line without attempting to move it horizontal
 
 General Commands:
 To enter or leave the (h)elp screen, use space+backspace+[125].
+To enter or leave command learn mode, use space+[1456].
 To enter or leave the settings (s)ummary screen, use space+backspace+[234].
 To enter or leave the (c)hange preferences menu, use space+[14].
 To (w)rite the current preferences to disk, use space+[2456].
