@@ -886,9 +886,6 @@ typedef struct {
 #define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
-static int leftModules2;
-static int rightModules2;
-
 typedef struct {
   int code;
   int offset;
@@ -1039,9 +1036,9 @@ flushCells2 (BrailleDisplay *brl) {
     unsigned char buffer[0XFF];
     unsigned int size = 0;
 
-    /* Two dummy cells for each switch and key on the left side. */
+    /* Two dummy cells for each key on the left side. */
     {
-      int count = leftModules2;
+      int count = terminal->leftKeys;
       while (count-- > 0) {
         buffer[size++] = 0;
         buffer[size++] = 0;
@@ -1056,9 +1053,9 @@ flushCells2 (BrailleDisplay *brl) {
     memcpy(&buffer[size], currentStatus, terminal->statusCount);
     size += terminal->statusCount;
 
-    /* Two dummy cells for each switch and key on the right side. */
+    /* Two dummy cells for each key on the right side. */
     {
-      int count = rightModules2;
+      int count = terminal->rightKeys;
       while (count-- > 0) {
         buffer[size++] = 0;
         buffer[size++] = 0;
@@ -1074,6 +1071,33 @@ static void
 initializeTerminal2 (BrailleDisplay *brl) {
   memset(inputState2, 0, inputBytes2);
   refreshRequired2 = 1;
+
+  {
+    unsigned char data[13];
+    unsigned char size = 0;
+
+    data[size++] = terminal->identifier;
+
+    /* Set serial baud (bcd encoded) to default (57,600). */
+    data[size++] = 0;
+    data[size++] = 0;
+    data[size++] = 0;
+
+    data[size++] = terminal->statusCount;
+    data[size++] = terminal->leftKeys;
+    data[size++] = terminal->columns;
+    data[size++] = terminal->rightKeys;
+
+    data[size++] = 2; /* routing keys per cell */
+    data[size++] = 0; /* size of LCD */
+
+    data[size++] = 1; /* keys mixed into braille data stream */
+    data[size++] = 0; /* EAB mixed into braille data stream */
+    data[size++] = 1; /* routing keys mixed into braille data stream */
+
+    LogBytes("Init Packet", data, size);
+    // writePacket2(brl, 1, size, data);
+  }
 }
 
 static int 
@@ -1192,7 +1216,7 @@ nextInputModule2 (int *byte, int *bit) {
 }
 
 static void
-mapSwitchKey2 (int count, int *byte, int *bit, int rear, int front) {
+mapKey2 (int count, int *byte, int *bit, int rear, int front) {
   while (count--) {
     nextInputModule2(byte, bit);
     nextInputModule2(byte, bit);
@@ -1215,12 +1239,9 @@ mapInputModules2 (void) {
     }
   }
 
-  mapSwitchKey2(terminal->rightSwitches, &byte, &bit,
-                OFFS_SWITCH+SWITCH_RIGHT_REAR,
-                OFFS_SWITCH+SWITCH_RIGHT_FRONT);
-  mapSwitchKey2(terminal->rightKeys, &byte, &bit,
-                OFFS_SWITCH+KEY_RIGHT_REAR,
-                OFFS_SWITCH+KEY_RIGHT_FRONT);
+  mapKey2(terminal->rightKeys, &byte, &bit,
+          OFFS_SWITCH+KEY_RIGHT_REAR,
+          OFFS_SWITCH+KEY_RIGHT_FRONT);
 
   {
     unsigned char cell = terminal->statusCount;
@@ -1238,12 +1259,9 @@ mapInputModules2 (void) {
     }
   }
 
-  mapSwitchKey2(terminal->leftKeys, &byte, &bit,
-                OFFS_SWITCH+KEY_LEFT_REAR,
-                OFFS_SWITCH+KEY_LEFT_FRONT);
-  mapSwitchKey2(terminal->leftSwitches, &byte, &bit,
-                OFFS_SWITCH+SWITCH_LEFT_REAR,
-                OFFS_SWITCH+SWITCH_LEFT_FRONT);
+  mapKey2(terminal->leftKeys, &byte, &bit,
+          OFFS_SWITCH+KEY_LEFT_REAR,
+          OFFS_SWITCH+KEY_LEFT_FRONT);
 
   byte--;
   addInputMapping2(byte, 7, OFFS_EASY+EASY_L2, 0);
@@ -1273,11 +1291,9 @@ identifyTerminal2 (BrailleDisplay *brl) {
               makeOutputTable(&dots, &outputTable);
             }
 
-            leftModules2 = terminal->leftSwitches + terminal->leftKeys;
-            rightModules2 = terminal->rightSwitches + terminal->rightKeys;
             {
-              int modules = leftModules2 + rightModules2;
-              inputBytes2 = modules + 1 + ((((modules * 4) + ((terminal->statusCount + terminal->columns) * 2)) + 7) / 8);
+              int modules = terminal->leftKeys + terminal->rightKeys;
+              inputBytes2 = modules + 1 + ((((modules * 4) + ((terminal->columns + terminal->statusCount) * 2)) + 7) / 8);
             }
             inputBits2 = inputBytes2 * 8;
 
