@@ -30,7 +30,6 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
-#include <sys/time.h>
 
 #include "Programs/misc.h"
 #include "Programs/system.h"

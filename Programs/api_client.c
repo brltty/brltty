@@ -44,6 +44,12 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
+#include <sys/time.h>
+#endif /* HAVE_SYS_SELECT_H */
+
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif /* HAVE_ALLOCA_H */

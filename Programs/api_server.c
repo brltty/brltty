@@ -37,8 +37,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
+#endif /* HAVE_SYS_SELECT_H */
 
 #include "api.h"
 #include "api_protocol.h"

@@ -25,6 +25,12 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
+#include <sys/time.h>
+#endif /* HAVE_SYS_SELECT_H */
+
 #include "misc.h"
 #include "route.h"
 #include "scr.h"

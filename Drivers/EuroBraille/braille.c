@@ -31,6 +31,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
+#include <sys/time.h>
+#endif /* HAVE_SYS_SELECT_H */
+
 #include "Programs/brl.h"
 #include "Programs/message.h"
 #include "Programs/misc.h"

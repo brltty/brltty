@@ -27,8 +27,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
+#endif /* HAVE_SYS_SELECT_H */
 
 #include "misc.h"
 

@@ -31,6 +31,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
+#include <sys/time.h>
+#endif /* HAVE_SYS_SELECT_H */
+
 #ifdef HAVE_LINUX_VT_H
 #include <linux/vt.h>
 #endif /* HAVE_LINUX_VT_H */
