@@ -34,7 +34,7 @@
 
 #include "Programs/brl_driver.h"
 
-#define DEBUG_PACKETS
+#undef DEBUG_PACKETS
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -240,14 +240,22 @@ typedef struct {
   unsigned char totalCells;
   unsigned char textCells;
   unsigned char statusCells;
+  const DotsTable *dots;
+  int options;
 } ModelEntry;
+
+static const DotsTable dots12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+static const DotsTable dots12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
+
+#define OPT_HOT_KEYS 0X01
+
 static const ModelEntry modelTable[] = {
-  {"Focus 44"     , 44, 40, 3},
-  {"Focus 70"     , 70, 66, 3},
-  {"Focus 84"     , 84, 80, 3},
-  {"pm display 20", 20, 20, 0},
-  {"pm display 40", 40, 40, 0},
-  {NULL           ,  0,  0, 0}
+  {"Focus 44"     , 44, 40, 3, &dots12374568, 0},
+  {"Focus 70"     , 70, 66, 3, &dots12374568, 0},
+  {"Focus 84"     , 84, 80, 3, &dots12374568, 0},
+  {"pm display 20", 20, 20, 0, &dots12345678, OPT_HOT_KEYS},
+  {"pm display 40", 40, 40, 0, &dots12345678, OPT_HOT_KEYS},
+  {NULL           ,  0,  0, 0, NULL         , 0}
 };
 static const ModelEntry *model;
 
@@ -299,6 +307,10 @@ static int activeKeys;
 #define KEY_HOT6          0X20000000
 #define KEY_HOT7          0X40000000
 #define KEY_HOT8          0X80000000
+
+#define DOT_KEYS (KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8)
+#define HOT_KEYS (KEY_HOT1 | KEY_HOT2 | KEY_HOT3 | KEY_HOT4 | KEY_HOT5 | KEY_HOT6 | KEY_HOT7 | KEY_HOT8)
+#define SHIFT_KEYS (KEY_SHIFT_LEFT | KEY_SHIFT_RIGHT)
 
 static int wheelCommand;
 static int wheelCounter;
@@ -515,11 +527,6 @@ brl_identify (void) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(&dots, &outputTable);
-  }
-
   if (isSerialDevice(&device)) {
     io = &serialOperations;
 
@@ -587,9 +594,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                      model->textCells, model->statusCells,
                      response.payload.info.firmware);
 
+            makeOutputTable(model->dots, &outputTable);
+
             textOffset = statusOffset = 0;
             if (model->statusCells) {
-              textOffset += model->statusCells + 1;
+              statusOffset += model->textCells + 1;
             }
 
             memset(outputBuffer, 0, model->totalCells);
@@ -660,10 +669,7 @@ interpretKeys (void) {
   }
 
   {
-    const int inputKeys = KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 |
-                          KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8 |
-                          KEY_SHIFT_LEFT | KEY_SHIFT_RIGHT;
-    if (!(keys & ~inputKeys)) {
+    if ((keys & DOT_KEYS) && !(keys & ~(DOT_KEYS | SHIFT_KEYS))) {
       command = VAL_PASSDOTS | flags;
       if (keys & KEY_DOT1) command |= B1;
       if (keys & KEY_DOT2) command |= B2;
@@ -673,8 +679,8 @@ interpretKeys (void) {
       if (keys & KEY_DOT6) command |= B6;
       if (keys & KEY_DOT7) command |= B7;
       if (keys & KEY_DOT8) command |= B8;
-      if (keys & KEY_SHIFT_LEFT) command |= VPC_CONTROL;
-      if (keys & KEY_SHIFT_RIGHT) command |= VPC_UPPER;
+      if (keys & KEY_SHIFT_LEFT) command |= VPC_UPPER;
+      if (keys & KEY_SHIFT_RIGHT) command |= VPC_CONTROL;
       return command;
     }
   }
@@ -719,58 +725,134 @@ interpretKeys (void) {
       command = CMD_BOT;
       break;
 
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT4):
     case (KEY_HOT1):
       command = CMD_SKPIDLNS;
       break;
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2):
     case (KEY_GDF_RIGHT | KEY_HOT1):
       command = CMD_SKPBLNKWINS;
       break;
+
+    case (KEY_SPACE | KEY_DOT1):
     case (KEY_HOT2):
       command = CMD_DISPMD;
       break;
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT6):
     case (KEY_GDF_RIGHT | KEY_HOT2):
       command = CMD_ATTRVIS;
       break;
+
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5):
     case (KEY_HOT3):
       command = CMD_CSRTRK;
       break;
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT3):
       command = CMD_CSRVIS;
       break;
+
     case (KEY_HOT4):
       command = CMD_SIXDOTS;
       break;
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
+      command = CMD_SIXDOTS | VAL_TOGGLE_ON;
+      break;
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
+      command = CMD_SIXDOTS | VAL_TOGGLE_OFF;
+      break;
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
     case (KEY_GDF_RIGHT | KEY_HOT4):
       command = CMD_AUTOREPEAT;
       break;
 
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5):
     case (KEY_HOT5):
       command = CMD_HELP;
       break;
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT5):
       command = CMD_FREEZE;
       break;
+
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3):
     case (KEY_HOT6):
       command = CMD_LEARN;
       break;
+    case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT6):
       command = CMD_PREFLOAD;
       break;
+
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_HOT7):
       command = CMD_PREFMENU;
       break;
+    case (KEY_SPACE | KEY_SHIFT_RIGHT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT7):
       command = CMD_PREFSAVE;
       break;
+
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_HOT8):
       command = CMD_INFO;
       break;
+    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
     case (KEY_GDF_RIGHT | KEY_HOT8):
       command = CMD_CSRJMP_VERT;
       break;
 
     case (KEY_SPACE):
       command = VAL_PASSDOTS;
+      break;
+    case (KEY_SPACE | KEY_SHIFT_LEFT):
+      command = VAL_PASSKEY + VPK_BACKSPACE;
+      break;
+    case (KEY_SPACE | KEY_SHIFT_RIGHT):
+      command = VAL_PASSKEY + VPK_RETURN;
+      break;
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5 | KEY_DOT6):
+      command = VAL_PASSKEY + VPK_TAB;
+      break;
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3):
+      command = VAL_PASSKEY + VPK_CURSOR_LEFT;
+      break;
+    case (KEY_SPACE | KEY_DOT5 | KEY_DOT6):
+      command = VAL_PASSKEY + VPK_CURSOR_RIGHT;
+      break;
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT5):
+      command = VAL_PASSKEY + VPK_CURSOR_UP;
+      break;
+    case (KEY_SPACE | KEY_DOT3 | KEY_DOT6):
+      command = VAL_PASSKEY + VPK_CURSOR_DOWN;
+      break;
+    case (KEY_SPACE | KEY_DOT5):
+      command = VAL_PASSKEY + VPK_PAGE_UP;
+      break;
+    case (KEY_SPACE | KEY_DOT6):
+      command = VAL_PASSKEY + VPK_PAGE_DOWN;
+      break;
+    case (KEY_SPACE | KEY_DOT2):
+      command = VAL_PASSKEY + VPK_HOME;
+      break;
+    case (KEY_SPACE | KEY_DOT3):
+      command = VAL_PASSKEY + VPK_END;
+      break;
+    case (KEY_SPACE | KEY_DOT3 | KEY_DOT5):
+      command = VAL_PASSKEY + VPK_INSERT;
+      break;
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT5 | KEY_DOT6):
+      command = VAL_PASSKEY + VPK_DELETE;
+      break;
+    case (KEY_SPACE | KEY_DOT2 | KEY_DOT6):
+      command = VAL_PASSKEY + VPK_ESCAPE;
+      break;
+
+    case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
+      command = CMD_SWITCHVT_PREV;
+      break;
+    case (KEY_SPACE | KEY_SHIFT_RIGHT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
+      command = CMD_SWITCHVT_NEXT;
       break;
   }
 
@@ -829,32 +911,34 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         unsigned char row = packet.header.arg3;
         int command = CMD_NOOP;
 
-        if (row == 1) {
-          static int keys[] = {
-            KEY_GDF_LEFT,
-            KEY_HOT1, KEY_HOT2, KEY_HOT3, KEY_HOT4,
-            KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
-            KEY_GDF_RIGHT
-          };
-          static const int keyCount = sizeof(keys) / sizeof(keys[0]);
+        if (model->options & OPT_HOT_KEYS) {
+          if (row == 1) {
+            static int keys[] = {
+              KEY_GDF_LEFT,
+              KEY_HOT1, KEY_HOT2, KEY_HOT3, KEY_HOT4,
+              KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
+              KEY_GDF_RIGHT
+            };
+            static const int keyCount = sizeof(keys) / sizeof(keys[0]);
 
-          int key;
-          button -= (model->totalCells - keyCount) / 2;
+            int key;
+            button -= (model->totalCells - keyCount) / 2;
 
-          if (button < 0) {
-            key = KEY_ADVANCE_LEFT;
-          } else if (button >= keyCount) {
-            key = KEY_ADVANCE_RIGHT;
-          } else {
-            key = keys[button];
+            if (button < 0) {
+              key = KEY_ADVANCE_LEFT;
+            } else if (button >= keyCount) {
+              key = KEY_ADVANCE_RIGHT;
+            } else {
+              key = keys[button];
+            }
+
+            if (press) {
+              virtualKeys |= key;
+            } else {
+              virtualKeys &= ~key;
+            }
+            return interpretKeys();
           }
-
-          if (press) {
-            virtualKeys |= key;
-          } else {
-            virtualKeys &= ~key;
-          }
-          return interpretKeys();
         }
 
         activeKeys = 0;
@@ -883,6 +967,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
                     break;
                   case (KEY_GDF_RIGHT):
                     command = CR_CUTLINE;
+                    break;
+
+                  case (KEY_SPACE):
+                    command = VAL_PASSKEY + VPK_FUNCTION;
+                    break;
+                  case (KEY_SHIFT_RIGHT):
+                    command = CR_SWITCHVT;
                     break;
                 }
                 break;
