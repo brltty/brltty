@@ -1798,38 +1798,46 @@ main (int argc, char *argv[]) {
         if ((newScreen == oldScreen) && (p->winy == oldwiny) && (newLength == oldLength)) {
           if (memcmp(newText, oldText, newLength) != 0) {
             if ((newY == p->winy) && (newY == oldY)) {
-              if (newX > oldX) {
-                if ((memcmp(newText, oldText, oldX) == 0) &&
-                    (memcmp(newText+newX, oldText+oldX, newLength-newX) == 0)) {
-                  column = oldX;
-                  count = newX - oldX;
-                }
-              } else if (newX < oldX) {
-                if ((memcmp(newText, oldText, newX) == 0) &&
-                    (memcmp(newText+newX, oldText+oldX, newLength-oldX) == 0)) {
-                  column = newX;
-                  count = oldX - newX;
-                  text = oldText;
-                }
-              } else {
-                if (memcmp(newText, oldText, newX) == 0) {
-                  int x;
-                  for (x=newX+1; x<newLength; ++x) {
-                    if (memcmp(newText+newX, oldText+x, newLength-x) == 0) {
-                      column = newX;
-                      count = x - newX;
-                      text = oldText;
-                      break;
-                    }
+              if ((newX > oldX) &&
+                  (memcmp(newText, oldText, oldX) == 0) &&
+                  (memcmp(newText+newX, oldText+oldX, newLength-newX) == 0)) {
+                column = oldX;
+                count = newX - oldX;
+                goto speak;
+              }
+
+              if ((newX < oldX) &&
+                  (memcmp(newText, oldText, newX) == 0) &&
+                  (memcmp(newText+newX, oldText+oldX, newLength-oldX) == 0)) {
+                column = newX;
+                count = oldX - newX;
+                text = oldText;
+                goto speak;
+              }
+
+              if ((newX == oldX) &&
+                  (memcmp(newText, oldText, newX) == 0)) {
+                int x;
+                for (x=newX+1; x<newLength; ++x) {
+                  if (memcmp(newText+x, oldText+oldX, newLength-x) == 0) {
+                    column = oldX;
+                    count = x - oldX;
+                    goto speak;
+                  }
+
+                  if (memcmp(newText+newX, oldText+x, oldLength-x) == 0) {
+                    column = newX;
+                    count = x - newX;
+                    text = oldText;
+                    goto speak;
                   }
                 }
-
-                if (text == newText) {
-                  while (newText[column] == oldText[column]) ++column;
-                  while (newText[count-1] == oldText[count-1]) --count;
-                  count -= column;
-                }
               }
+
+              while (newText[column] == oldText[column]) ++column;
+              while (newText[count-1] == oldText[count-1]) --count;
+              count -= column;
+            speak:;
             }
           } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY))) {
             column = newX;

@@ -30,7 +30,7 @@
 
 #include "misc.h"
 #include "usb.h"
-#include "usb_definitions.h"
+#include "usb_internal.h"
 
 int
 usbGetDescriptor (

@@ -27,7 +27,9 @@
 #include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <mntent.h>
 #include <sys/stat.h>
+#include <sys/vfs.h>
 #include <sys/ioctl.h>
 #include <linux/compiler.h>
 #include <linux/usbdevice_fs.h>
@@ -42,7 +44,7 @@
 
 #include "misc.h"
 #include "usb.h"
-#include "usb_definitions.h"
+#include "usb_internal.h"
 
 int
 usbResetDevice (UsbDevice *device) {
@@ -374,7 +376,42 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
   return device;
 }
 
+static int
+usbTestPath (const char *path) {
+  struct statfs status;
+  if (statfs(path, &status) != -1) {
+    if (status.f_type == USBDEVICE_SUPER_MAGIC) return 1;
+  }
+  return 0;
+}
+
+static char *
+usbGetRoot (void) {
+  char *root = NULL;
+  FILE *table;
+  if ((table = setmntent(MOUNTED, "r"))) {
+    struct mntent *entry;
+    while ((entry = getmntent(table))) {
+      if ((strcmp(entry->mnt_type, "usbdevfs") == 0) ||
+          (strcmp(entry->mnt_type, "usbfs") == 0)) {
+        if (usbTestPath(entry->mnt_dir)) {
+          root = strdupWrapper(entry->mnt_dir);
+          break;
+        }
+      }
+    }
+    endmntent(table);
+  }
+  return root;
+}
+
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
-  return usbSearchDevice("/proc/bus/usb", chooser, data);
+  UsbDevice *device = NULL;
+  char *root;
+  if ((root = usbGetRoot())) {
+    device = usbSearchDevice("/proc/bus/usb", chooser, data);
+    free(root);
+  }
+  return device;
 }
