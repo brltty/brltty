@@ -45,16 +45,16 @@ printHelp (
   int all
 ) {
    char line[lineWidth+1];
-#ifdef HAVE_GETOPT_H
+#ifdef HAVE_GETOPT_LONG
    unsigned int wordWidth = 0;
-#endif /* HAVE_GETOPT_H */
+#endif /* HAVE_GETOPT_LONG */
    unsigned int argumentWidth = 0;
    int optionIndex;
    for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
       const OptionEntry *option = &optionTable[optionIndex];
-#ifdef HAVE_GETOPT_H
+#ifdef HAVE_GETOPT_LONG
       if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
-#endif /* HAVE_GETOPT_H */
+#endif /* HAVE_GETOPT_LONG */
       if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
    }
 
@@ -83,7 +83,7 @@ printHelp (
       }
       line[lineLength++] = ' ';
 
-#ifdef HAVE_GETOPT_H
+#ifdef HAVE_GETOPT_LONG
       {
          unsigned int end = lineLength + 2 + wordWidth + 1;
          if (option->word) {
@@ -97,7 +97,7 @@ printHelp (
          while (lineLength < end) line[lineLength++] = ' ';
       }
       line[lineLength++] = ' ';
-#endif /* HAVE_GETOPT_H */
+#endif /* HAVE_GETOPT_LONG */
 
       line[lineLength++] = ' ';
       {
@@ -143,7 +143,7 @@ processOptions (
   short opt_helpAll = 0;
   char shortOptions[1 + (optionCount * 2) + 1];
 
-#ifdef HAVE_GETOPT_H
+#ifdef HAVE_GETOPT_LONG
   struct option longOptions[optionCount + 1];
   {
     struct option *opt = longOptions;
@@ -158,7 +158,7 @@ processOptions (
     }
     memset(opt, 0, sizeof(*opt));
   }
-#endif /* HAVE_GETOPT_H */
+#endif /* HAVE_GETOPT_LONG */
 
   {
     char *opt = shortOptions;
@@ -180,11 +180,11 @@ processOptions (
   opterr = 0;
   while (1) {
     int option;
-#ifdef HAVE_GETOPT_H
+#ifdef HAVE_GETOPT_LONG
     option = getopt_long(*argc, *argv, shortOptions, longOptions, NULL);
-#else /* HAVE_GETOPT_H */
+#else /* HAVE_GETOPT_LONG */
     option = getopt(*argc, *argv, shortOptions);
-#endif /* HAVE_GETOPT_H */
+#endif /* HAVE_GETOPT_LONG */
     if (option == -1) break;
 
     /* continue on error as much as possible, as often we are typing blind

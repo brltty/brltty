@@ -172,7 +172,7 @@ AC_PROG_MAKE_SET
 AC_PROG_CC
 if test "${GCC}" = "yes"
 then
-   CFLAGS="${CFLAGS} -Wall -pipe"
+   CFLAGS="${CFLAGS} -Wall"
 fi
 
 if test -z "${CXX}"
@@ -230,13 +230,17 @@ in
       brltty_ld_flag_shared="-b"
       brltty_ld_flag_soname="+h"
       ;;
+   osf*)
+      brltty_ld_flag_shared="-shared"
+      brltty_ld_flag_soname="-expect_unresolved '*' -soname"
+      ;;
    *)
       AC_MSG_ERROR([linkage editor shared object flags not configured for ${host_os}])
       ;;
 esac
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_mklib="\$(CC) -shared -Wl,${brltty_ld_flag_soname},<soname> -o"
+   brltty_cv_prog_mklib="\$(CC) -shared BRLTTY_OPTIONS_LD2CC([${brltty_ld_flag_soname} <soname>]) -o"
 else
    brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname} <soname> -o"
 fi])
@@ -258,11 +262,12 @@ AC_PATH_XTRA
 AC_SEARCH_LIBS([socket], [socket])
 
 AC_CHECK_HEADERS([alloca.h getopt.h iconv.h sys/select.h syslog.h])
-AC_CHECK_FUNCS([vsyslog])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h linux/input.h])
 AC_CHECK_HEADERS([linux/uinput.h], [], [], [
 #include <linux/input.h>
 ])
+
+AC_CHECK_FUNCS([getopt_long vsyslog])
 
 AC_C_BIGENDIAN
 AC_C_CONST
@@ -278,6 +283,9 @@ in
       ;;
    hpux*)
       brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED -D_HPUX_SOURCE"
+      ;;
+   osf*)
+      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE -D_OSF_SOURCE"
       ;;
    *)
       brltty_cv_prog_cc_sysflags=""
@@ -394,6 +402,9 @@ in
    netbsd*)
       system_object="netbsd"
       ;;
+   osf*)
+      system_object="osf"
+      ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
@@ -506,6 +517,9 @@ in
    hpux*)
       brltty_cv_prog_ld_flags="-E +s +b ${execute_root}${library_directory}"
       ;;
+   osf*)
+      brltty_cv_prog_ld_flags="-rpath ${execute_root}${library_directory}"
+      ;;
    *)
       AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
       ;;
@@ -531,11 +545,14 @@ else
       hpux*)
          brltty_cv_prog_ld_static="-Bstatic"
          ;;
+      osf*)
+         brltty_cv_prog_ld_static="-non_shared"
+         ;;
       *)
          AC_MSG_ERROR([static linkage not supported by ${host_os}])
          ;;
    esac
-   brltty_cv_prog_ld_static="-Wl,${brltty_cv_prog_ld_static}"
+   brltty_cv_prog_ld_static="BRLTTY_OPTIONS_LD2CC([${brltty_cv_prog_ld_static}])"
 fi])
 brltty_static_flag="${brltty_cv_prog_ld_static}"
 BRLTTY_ARG_ENABLE(
@@ -544,17 +561,11 @@ BRLTTY_ARG_ENABLE(
    brltty_standalone_programs="yes"
    LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
 ])
-
-LDFLAGS="${LDFLAGS} -Wl,`echo "${brltty_link_flags}" | sed -e '
-s/^ *//
-s/ *$//
-s/  */ /g
-y/ /,/
-'`"
+LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 
 case "${host_os}"
 in
-   linux*|solaris*|openbsd*|freebsd*|netbsd*)
+   linux*|solaris*|openbsd*|freebsd*|netbsd*|osf*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -658,6 +669,9 @@ in
       ;;
    netbsd*)
       brltty_cv_device_serial_first="/dev/dty00"
+      ;;
+   osf*)
+      brltty_cv_device_serial_first="/dev/tty00"
       ;;
    *)
       brltty_cv_device_serial_first=""

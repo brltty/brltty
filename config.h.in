@@ -46,9 +46,6 @@ extern "C" {
 /* Define this if the header file syslog.h exists. */
 #undef HAVE_SYSLOG_H
 
-/* Define this if the function vsyslog exists. */
-#undef HAVE_VSYSLOG
-
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 
@@ -66,6 +63,12 @@ extern "C" {
 
 /* Define this if the header file linux/uinput.h exists. */
 #undef HAVE_LINUX_UINPUT_H
+
+/* Define this if the function getopt_long exists. */
+#undef HAVE_GETOPT_LONG
+
+/* Define this if the function vsyslog exists. */
+#undef HAVE_VSYSLOG
 
 /* Define this if the header file bluetooth/bluetooth.h exists. */
 #undef HAVE_BLUETOOTH_BLUETOOTH_H

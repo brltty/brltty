@@ -507,3 +507,10 @@ ifelse($#, 1, [], [BRLTTY_PACKAGE_DEFINE(m4_shift($@))])])])
 AC_DEFUN([BRLTTY_PACKAGE_LIST], [dnl
 ifelse($#, 0, [], $#, 1, [BRLTTY_PACKAGE_NAME([$1])], [BRLTTY_PACKAGE_NAME([$1]) BRLTTY_PACKAGE_LIST(m4_shift($@))])])
 AC_DEFUN([BRLTTY_PACKAGE_NAME], [patsubst([$1], [^ *\(\w+\).*], [\1])])
+
+AC_DEFUN([BRLTTY_OPTIONS_LD2CC], [dnl
+`echo "$1" | sed -e '
+s/^ */-Wl /
+s/ *$//
+s/  */,/g
+'`])
