@@ -1615,13 +1615,11 @@ updatePreferences (void) {
                 unsigned char highestValue = item->maximum - item->minimum;
                 *item->setting = (highestValue * (key + (highestKey / (highestValue * 2))) / highestKey) + item->minimum;
               }
-              if (*item->setting != oldSetting) {
-                if (item->changed && !item->changed(*item->setting)) {
-                  *item->setting = oldSetting;
-                  playTune(&tune_command_rejected);
-                } else {
-                  settingChanged = 1;
-                }
+              if (item->changed && !item->changed(*item->setting)) {
+                *item->setting = oldSetting;
+                playTune(&tune_command_rejected);
+              } else if (*item->setting != oldSetting) {
+                settingChanged = 1;
               }
               break;
             }
