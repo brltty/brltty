@@ -34,7 +34,7 @@
 #include "ctb.h"
 #include "tbl.h"
 
-static char *opt_textTable = NULL;
+static char *opt_textTable;
 
 BEGIN_OPTION_TABLE
   {"text-table", "file", 't', 0, 0,
@@ -45,15 +45,6 @@ END_OPTION_TABLE
 TranslationTable textTable;
 TranslationTable untextTable;
 static void *contractionTable;
-
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-  }
-  return 1;
-}
 
 static void
 reportTextTableMessage (const char *message) {
@@ -96,7 +87,7 @@ main (int argc, char *argv[]) {
   int status = 3;
   char *contractionTablePath;
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "ctbtest", &argc, &argv,
                  NULL, NULL, NULL,
                  "contraction-table");

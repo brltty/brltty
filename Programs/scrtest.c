@@ -33,10 +33,10 @@
 #include "options.h"
 #include "scr.h"
 
-static char *opt_boxLeft = NULL;
-static char *opt_boxWidth = NULL;
-static char *opt_boxTop = NULL;
-static char *opt_boxHeight = NULL;
+static char *opt_boxLeft;
+static char *opt_boxWidth;
+static char *opt_boxTop;
+static char *opt_boxHeight;
 
 BEGIN_OPTION_TABLE
   {"left", "column", 'l', 0, 0,
@@ -55,15 +55,6 @@ BEGIN_OPTION_TABLE
    &opt_boxHeight, NULL,
    "Height of region."},
 END_OPTION_TABLE
-
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-  }
-  return 1;
-}
 
 static void
 setRegion (short *offsetValue, const char *offsetOption, short offsetDefault, const char *offsetName,
@@ -92,7 +83,7 @@ main (int argc, char *argv[]) {
   const char *const *parameterNames;
   char **parameterSettings;
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "scrtest", &argc, &argv,
                  NULL, NULL, NULL,
                  "[parameter=value ...]");

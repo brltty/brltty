@@ -66,68 +66,68 @@
 
 char COPYRIGHT[] = "Copyright (C) 1995-2004 by The BRLTTY Team - all rights reserved.";
 
-static int opt_version = 0;
-static int opt_verify = 0;
-static int opt_quiet = 0;
-static int opt_noDaemon = 0;
-static int opt_standardError = 0;
+static int opt_version;
+static int opt_verify;
+static int opt_quiet;
+static int opt_noDaemon;
+static int opt_standardError;
 static char *opt_logLevel;
 static int opt_bootParameters = 1;
-static int opt_environmentVariables = 0;
+static int opt_environmentVariables;
 static char *opt_updateInterval;
 static char *opt_messageDelay;
 
-static char *opt_configurationFile = NULL;
-static char *opt_pidFile = NULL;
-static char *opt_dataDirectory = NULL;
-static char *opt_libraryDirectory = NULL;
+static char *opt_configurationFile;
+static char *opt_pidFile;
+static char *opt_dataDirectory;
+static char *opt_libraryDirectory;
 
-static char *opt_brailleDevice = NULL;
+static char *opt_brailleDevice;
 static char **brailleDevices;
 
-static char *opt_brailleDriver = NULL;
+static char *opt_brailleDriver;
 static char **brailleDrivers;
 static const BrailleDriver *brailleDriver = NULL;
 static int brailleInternal;
-static char *opt_brailleParameters = NULL;
+static char *opt_brailleParameters;
 static char **brailleParameters = NULL;
 static char *preferencesFile = NULL;
 
-static char *opt_tablesDirectory = NULL;
-static char *opt_textTable = NULL;
-static char *opt_attributesTable = NULL;
+static char *opt_tablesDirectory;
+static char *opt_textTable;
+static char *opt_attributesTable;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-static char *opt_contractionsDirectory = NULL;
-static char *opt_contractionTable = NULL;
+static char *opt_contractionsDirectory;
+static char *opt_contractionTable;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_API
-static char *opt_apiParameters = NULL;
+static char *opt_apiParameters;
 static char **apiParameters = NULL;
 static int apiOpened;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static char *opt_speechDriver = NULL;
+static char *opt_speechDriver;
 static char **speechDrivers = NULL;
 static const SpeechDriver *speechDriver = NULL;
 static int speechInternal;
-static char *opt_speechParameters = NULL;
+static char *opt_speechParameters;
 static char **speechParameters = NULL;
-static char *opt_speechFifo = NULL;
-static short opt_noSpeech = 0;
+static char *opt_speechFifo;
+static int opt_noSpeech;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static char *opt_screenParameters = NULL;
+static char *opt_screenParameters;
 static char **screenParameters = NULL;
 
 #ifdef ENABLE_PCM_SUPPORT
-char *opt_pcmDevice = NULL;
+char *opt_pcmDevice;
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
-char *opt_midiDevice = NULL;
+char *opt_midiDevice;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE
@@ -150,7 +150,7 @@ BEGIN_OPTION_TABLE
    "Path to device for accessing braille display."},
 
   {"standard-error", NULL, 'e', 0, 0,
-   NULL, NULL,
+   &opt_standardError, NULL,
    "Log to standard error rather than to syslog."},
 
   {"configuration-file", "file", 'f', 0, OPT_Environ,
@@ -168,7 +168,7 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_MIDI_SUPPORT */
 
   {"no-daemon", NULL, 'n', 0, 0,
-   NULL, NULL,
+   &opt_noDaemon, NULL,
    "Remain a foreground process."},
 
 #ifdef ENABLE_PCM_SUPPORT
@@ -178,7 +178,7 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_PCM_SUPPORT */
 
   {"quiet", NULL, 'q', 0, 0,
-   NULL, NULL,
+   &opt_quiet, NULL,
    "Suppress start-up messages."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -192,7 +192,7 @@ BEGIN_OPTION_TABLE
    "Path to text translation table file."},
 
   {"verify", NULL, 'v', 0, 0,
-   NULL, NULL,
+   &opt_verify, NULL,
    "Print start-up messages and exit."},
 
 #ifdef ENABLE_API
@@ -216,7 +216,7 @@ BEGIN_OPTION_TABLE
    "Path to directory for driver help and configuration files."},
 
   {"environment-variables", NULL, 'E', 0, 0,
-   NULL, NULL,
+   &opt_environmentVariables, NULL,
    "Recognize environment variables."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -235,7 +235,7 @@ BEGIN_OPTION_TABLE
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {"no-speech", NULL, 'N', 0, 0,
-   NULL, NULL,
+   &opt_noSpeech, NULL,
    "Defer speech until restarted by command."},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -258,7 +258,7 @@ BEGIN_OPTION_TABLE
    "Braille window update interval [4]."},
 
   {"version", NULL, 'V', 0, 0,
-   NULL, NULL,
+   &opt_version, NULL,
    "Print the versions of the core, API, and built-in drivers, and then exit."},
 
   {"screen-parameters", "arg,...", 'X', 0, OPT_Extend | OPT_Config | OPT_Environ,
@@ -1709,42 +1709,9 @@ validateInterval (int *value, const char *description, const char *word) {
   }
 }
 
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-
-    case 'V':	/* --version */
-      opt_version = 1;
-      break;
-
-    case 'v':	/* --verify */
-      opt_verify = 1;
-      break;
-
-    case 'q':	/* --quiet */
-      opt_quiet = 1;
-      break;
-
-    case 'n':	/* --no-daemon */
-      opt_noDaemon = 1;
-      break;
-
-    case 'e':	/* --standard-error */
-      opt_standardError = 1;
-      break;
-
-    case 'E':	/* --environment-variables */
-      opt_environmentVariables = 1;
-      break;
-  }
-  return 1;
-}
-
 void
 startup (int argc, char *argv[]) {
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "brltty", &argc, &argv,
                  &opt_bootParameters, &opt_environmentVariables, &opt_configurationFile,
                  NULL);

@@ -33,9 +33,9 @@
 #include "spk.h"
 #include "misc.h"
 
-static char *opt_textString = NULL;
-static char *opt_libraryDirectory = LIBRARY_DIRECTORY;
-static char *opt_dataDirectory = DATA_DIRECTORY;
+static char *opt_textString;
+static char *opt_libraryDirectory;
+static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
   {"text-string", "string", 't', 0, 0,
@@ -52,15 +52,6 @@ BEGIN_OPTION_TABLE
 END_OPTION_TABLE
 
 static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-  }
-  return 1;
-}
-
-static int
 sayLine (char *line, void *data) {
   sayString(line);
   return 1;
@@ -72,7 +63,7 @@ main (int argc, char *argv[]) {
   const char *driver = NULL;
   int internal;
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "spktest", &argc, &argv,
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");

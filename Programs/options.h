@@ -34,7 +34,7 @@ typedef struct {
   unsigned char bootParameter;
   unsigned char flags;
 
-  char **setting;
+  void *setting;
   const char *defaultSetting;
 
   const char *description;
@@ -52,11 +52,9 @@ typedef struct {
 }; \
 static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
 
-typedef int (*OptionHandler) (const int option);
 extern int processOptions (
   const OptionEntry *optionTable,
   unsigned int optionCount,
-  OptionHandler handleOption,
   const char *applicationName,
   int *argumentCount,
   char ***argumentVector,

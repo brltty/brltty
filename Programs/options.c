@@ -38,31 +38,48 @@
 const char *programPath;
 const char *programName;
 
+#define STRING_SETTING(opt) char **setting = (opt)->setting
+#define FLAG_SETTING(opt) int *setting = (opt)->setting
+
 static void
-extendSetting (char **setting, const char *operand, int prepend) {
-  if (operand && *operand) {
+extendSetting (char **setting, const char *value, int prepend) {
+  if (value && *value) {
     if (!*setting) {
-      *setting = strdupWrapper(operand);
+      *setting = strdupWrapper(value);
     } else if (prepend) {
-      char *area = mallocWrapper(strlen(operand) + 1 + strlen(*setting) + 1);
-      sprintf(area, "%s,%s", operand, *setting);
+      char *area = mallocWrapper(strlen(value) + 1 + strlen(*setting) + 1);
+      sprintf(area, "%s,%s", value, *setting);
       free(*setting);
       *setting = area;
     } else {
       size_t length = strlen(*setting);
-      *setting = reallocWrapper(*setting, length+1+strlen(operand)+1);
-      sprintf((*setting)+length, ",%s", operand);
+      *setting = reallocWrapper(*setting, length+1+strlen(value)+1);
+      sprintf((*setting)+length, ",%s", value);
     }
   }
 }
 
 static void
-ensureSetting (const OptionEntry *option, const char *operand) {
-  if (operand) {
-    if (option->flags & OPT_Extend) {
-      extendSetting(option->setting, operand, 1);
-    } else if (!*option->setting) {
-      *option->setting = strdupWrapper(operand);
+ensureSetting (const OptionEntry *option, const char *value) {
+  if (value) {
+    if (option->argument) {
+      STRING_SETTING(option);
+      if (option->flags & OPT_Extend) {
+        extendSetting(setting, value, 1);
+      } else if (!*setting) {
+        *setting = strdupWrapper(value);
+      }
+    } else {
+/*flag
+      FLAG_SETTING(option);
+      if (strcasecmp(value, "on") == 0) {
+        *setting = 1;
+      } else if (strcasecmp(value, "off") == 0) {
+        *setting = 0;
+      } else {
+        LogPrint(LOG_ERR, "Invalid flag setting: %s", value);
+      }
+*/
     }
   }
 }
@@ -349,7 +366,6 @@ int
 processOptions (
   const OptionEntry *optionTable,
   unsigned int optionCount,
-  OptionHandler handleOption,
   const char *applicationName,
   int *argumentCount,
   char ***argumentVector,
@@ -387,11 +403,20 @@ processOptions (
     *opt++ = '+';
     for (index=0; index<optionCount; ++index) {
       const OptionEntry *entry = &optionTable[index];
+      optionEntries[entry->letter] = entry;
+
       *opt++ = entry->letter;
       if (entry->argument) *opt++ = ':';
 
-      if (entry->setting) *entry->setting = NULL;
-      optionEntries[entry->letter] = entry;
+      if (entry->setting) {
+        if (entry->argument) {
+          STRING_SETTING(entry);
+          *setting = NULL;
+        } else {
+          FLAG_SETTING(entry);
+          *setting = 0;
+        }
+      }
     }
     *opt = 0;
   }
@@ -416,21 +441,25 @@ processOptions (
      * and won't even see the error message unless the display comes up.
      */
     switch (option) {
-      default:
-        {
-          const OptionEntry *entry = optionEntries[option];
-          if (!entry->setting) {
-            /* We can't process it directly, let's defer to handleOption() */
-            if (!handleOption(option)) {
-              LogPrint(LOG_ERR, "Unhandled option: -%c", option);
-            }
-          } else if (entry->flags & OPT_Extend) {
-            extendSetting(entry->setting, optarg, 0);
+      default: {
+        const OptionEntry *entry = optionEntries[option];
+        if (entry->argument) {
+          STRING_SETTING(entry);
+          if (entry->flags & OPT_Extend) {
+            extendSetting(setting, optarg, 0);
           } else {
-            *entry->setting = optarg;
+            *setting = optarg;
+          }
+        } else {
+          FLAG_SETTING(entry);
+          if (entry->flags & OPT_Extend) {
+            ++*setting;
+          } else {
+            *setting = 1;
           }
         }
         break;
+      }
 
       case '?':
         LogPrint(LOG_ERR, "Unknown option: -%c", optopt);

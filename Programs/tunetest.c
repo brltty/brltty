@@ -43,11 +43,11 @@ static char *opt_tuneDevice;
 static char *opt_outputVolume;
 
 #ifdef ENABLE_PCM_SUPPORT
-char *opt_pcmDevice = NULL;
+char *opt_pcmDevice;
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
-char *opt_midiDevice = NULL;
+char *opt_midiDevice;
 static char *opt_midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
 
@@ -117,15 +117,6 @@ instrumentArgument (const char *argument) {
 }
 #endif /* ENABLE_MIDI_SUPPORT */
 
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-  }
-  return 1;
-}
-
 int
 main (int argc, char *argv[]) {
   TuneDevice tuneDevice;
@@ -135,7 +126,7 @@ main (int argc, char *argv[]) {
   unsigned char midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "tunetest", &argc, &argv,
                  NULL, NULL, NULL,
                  "{note duration} ...");

@@ -35,15 +35,6 @@
 BEGIN_OPTION_TABLE
 END_OPTION_TABLE
 
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-  }
-  return 1;
-}
-
 static void
 reportMessage (const char *message) {
   fprintf(stderr, "%s: %s\n", programName, message);
@@ -54,7 +45,7 @@ main (int argc, char *argv[]) {
   int status;
   char *path;
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "tbltest", &argc, &argv,
                  NULL, NULL, NULL,
                  "translation-table");

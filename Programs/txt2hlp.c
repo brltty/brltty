@@ -32,20 +32,11 @@
 BEGIN_OPTION_TABLE
 END_OPTION_TABLE
 
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-  }
-  return 1;
-}
-
 int
 main (int argc, char *argv[]) {
   int status = 2;
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "txt2hlp", &argc, &argv,
                  NULL, NULL, NULL,
                  "output-file input-file ...");

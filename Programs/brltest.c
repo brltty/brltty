@@ -41,9 +41,9 @@
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static BrailleDisplay brl;
 
-static char *opt_brailleDevice = NULL;
-static char *opt_libraryDirectory = LIBRARY_DIRECTORY;
-static char *opt_dataDirectory = DATA_DIRECTORY;
+static char *opt_brailleDevice;
+static char *opt_libraryDirectory;
+static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
   {"device", "device", 'd', 0, 0,
@@ -58,15 +58,6 @@ BEGIN_OPTION_TABLE
    &opt_libraryDirectory, LIBRARY_DIRECTORY,
    "Path to directory for loading drivers."},
 END_OPTION_TABLE
-
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-  }
-  return 1;
-}
 
 void
 message (const char *string, short flags) {
@@ -103,7 +94,7 @@ main (int argc, char *argv[]) {
   const char *driver = NULL;
   int internal;
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "brltest", &argc, &argv,
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");

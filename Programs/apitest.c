@@ -32,14 +32,14 @@
 
 static brlapi_settings_t settings;
 
-static int opt_learnMode = 0;
-static int opt_showIdentifier = 0;
-static int opt_showName = 0;
-static int opt_showSize = 0;
+static int opt_learnMode;
+static int opt_showIdentifier;
+static int opt_showName;
+static int opt_showSize;
 
 BEGIN_OPTION_TABLE
   {"identifier", NULL, 'i', 0, 0,
-   NULL, NULL,
+   &opt_showIdentifier, NULL,
    "Show the driver's identifier."},
 
   {"brlapi-key", "file", 'k', 0, 0,
@@ -47,11 +47,11 @@ BEGIN_OPTION_TABLE
    "Path to file containing BrlAPI's authentication key."},
 
   {"learn", NULL, 'l', 0, 0,
-   NULL, NULL,
+   &opt_learnMode, NULL,
    "Enter interactive command learn mode."},
 
   {"name", NULL, 'n', 0, 0,
-   NULL, NULL,
+   &opt_showName, NULL,
    "Show the driver's name."},
 
   {"brlapi-server", "[host][:port]", 's', 0, 0,
@@ -59,34 +59,9 @@ BEGIN_OPTION_TABLE
    "Host name (or address) and port of the BrlAPI server."},
 
   {"window", NULL, 'w', 0, 0,
-   NULL, NULL,
+   &opt_showSize, NULL,
    "Show the braille window's size."},
 END_OPTION_TABLE
-
-static int
-handleOption (const int option) {
-  switch (option) {
-    default:
-      return 0;
-
-    case 'i':
-      opt_showIdentifier = 1;
-      break;
-
-    case 'l':
-      opt_learnMode = 1;
-      break;
-
-    case 'n':
-      opt_showName = 1;
-      break;
-
-    case 'w':
-      opt_showSize = 1;
-      break;
-  }
-  return 1;
-}
 
 void showDisplaySize(void)
 {
@@ -150,7 +125,7 @@ int main(int argc, char *argv[])
   int fd;
   settings.hostName = NULL; settings.authKey = NULL;
 
-  processOptions(optionTable, optionCount, handleOption,
+  processOptions(optionTable, optionCount,
                  "apitest", &argc, &argv,
                  NULL, NULL, NULL,
                  "");
