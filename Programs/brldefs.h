@@ -159,6 +159,7 @@ typedef enum {
 #define VAL_REPEAT_INITIAL 0x800000
 #define VAL_REPEAT_DELAY   0x400000
 #define VAL_REPEAT_MASK    (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY)
+#define IS_DELAYED_COMMAND(cmd) (((cmd) & VAL_REPEAT_DELAY) && !((cmd) & VAL_REPEAT_INITIAL))
   
 /* cursor routing keys block offset values */
 /*

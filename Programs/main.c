@@ -986,9 +986,7 @@ main (int argc, char *argv[]) {
             default:
               switch (next & VAL_CMD_MASK) {
                 default:
-                  if (repeatFlags & VAL_REPEAT_DELAY)
-                    if (!(repeatFlags & VAL_REPEAT_INITIAL))
-                      next = CMD_NOOP;
+                  if (IS_DELAYED_COMMAND(repeatFlags)) next = CMD_NOOP;
                   repeatFlags = 0;
 
                 case CMD_LNUP:
@@ -2245,7 +2243,7 @@ message (const char *text, short flags) {
 
 void
 showDotPattern (unsigned char dots, unsigned char duration) {
-   unsigned char status[StatusCellCount];        /* status cell buffer */
+  unsigned char status[StatusCellCount];        /* status cell buffer */
   memset(status, dots, sizeof(status));
   memset(brl.buffer, dots, brl.x*brl.y);
   braille->writeStatus(&brl, status);

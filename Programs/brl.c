@@ -245,7 +245,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
       const CommandEntry *command = commandTable;
 
       LogPrint(LOG_DEBUG, "Learn: key=%06X", key);
-      if ((key & VAL_REPEAT_DELAY) && !(key & VAL_REPEAT_INITIAL)) continue;
+      if (IS_DELAYED_COMMAND(key)) continue;
       if (cmd == CMD_NOOP) continue;
       if (cmd == CMD_LEARN) return;
 

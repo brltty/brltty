@@ -194,45 +194,47 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
     cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
   }
 
-  switch (cmd) {
-    case CMD_INPUT | VAL_TOGGLE_ON:
-      input_mode = 1;
-      cmd = VAL_TOGGLE_ON;
-      if (debug_keys) {
-        LogPrint(LOG_DEBUG, "input mode on"); 
-      }
-      break;
+  if (!IS_DELAYED_COMMAND(repeat)) {
+    switch (cmd) {
+      case CMD_INPUT | VAL_TOGGLE_ON:
+        input_mode = 1;
+        cmd = VAL_TOGGLE_ON;
+        if (debug_keys) {
+          LogPrint(LOG_DEBUG, "input mode on"); 
+        }
+        break;
 
-    case CMD_INPUT | VAL_TOGGLE_OFF:
-      input_mode = 0;
-      cmd = VAL_TOGGLE_OFF;
-      if (debug_keys) {
-        LogPrint(LOG_DEBUG, "input mode off"); 
-      }
-      break;
+      case CMD_INPUT | VAL_TOGGLE_OFF:
+        input_mode = 0;
+        cmd = VAL_TOGGLE_OFF;
+        if (debug_keys) {
+          LogPrint(LOG_DEBUG, "input mode off"); 
+        }
+        break;
 
-    case CMD_SWSIM_LC:
-      return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF, MOD_EASY_SLC);
-    case CMD_SWSIM_LR:
-      return changeModifiers(MOD_EASY_SLF, MOD_EASY_SLR);
-    case CMD_SWSIM_LF:
-      return changeModifiers(MOD_EASY_SLR, MOD_EASY_SLF);
-    case CMD_SWSIM_RC:
-      return changeModifiers(MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SRC);
-    case CMD_SWSIM_RR:
-      return changeModifiers(MOD_EASY_SRF, MOD_EASY_SRR);
-    case CMD_SWSIM_RF:
-      return changeModifiers(MOD_EASY_SRR, MOD_EASY_SRF);
-    case CMD_SWSIM_BC:
-      return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF|MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SLC|MOD_EASY_SRC);
-    case CMD_SWSIM_BQ: {
-      static const char *const states[] = {"center", "rear", "front", "?"};
-      const char *left = states[pressed_modifiers & 0X3];
-      const char *right = states[(pressed_modifiers >> 2) & 0X3];
-      char buffer[20];
-      snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
-      showBrailleString(brl, buffer, 2000);
-      return CMD_NOOP;
+      case CMD_SWSIM_LC:
+        return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF, MOD_EASY_SLC);
+      case CMD_SWSIM_LR:
+        return changeModifiers(MOD_EASY_SLF, MOD_EASY_SLR);
+      case CMD_SWSIM_LF:
+        return changeModifiers(MOD_EASY_SLR, MOD_EASY_SLF);
+      case CMD_SWSIM_RC:
+        return changeModifiers(MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SRC);
+      case CMD_SWSIM_RR:
+        return changeModifiers(MOD_EASY_SRF, MOD_EASY_SRR);
+      case CMD_SWSIM_RF:
+        return changeModifiers(MOD_EASY_SRR, MOD_EASY_SRF);
+      case CMD_SWSIM_BC:
+        return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF|MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SLC|MOD_EASY_SRC);
+      case CMD_SWSIM_BQ: {
+        static const char *const states[] = {"center", "rear", "front", "?"};
+        const char *left = states[pressed_modifiers & 0X3];
+        const char *right = states[(pressed_modifiers >> 2) & 0X3];
+        char buffer[20];
+        snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
+        showBrailleString(brl, buffer, 2000);
+        return CMD_NOOP;
+      }
     }
   }
 

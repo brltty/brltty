@@ -587,9 +587,7 @@ readCommand (DriverCommandContext cmds) {
    int command = readBrailleCommand(&brl, cmds);
    if (command != EOF) {
       LogPrint(LOG_DEBUG, "Command: %06X", command);
-      if (command & VAL_REPEAT_DELAY)
-         if (!(command & VAL_REPEAT_INITIAL))
-            command = CMD_NOOP;
+      if (IS_DELAYED_COMMAND(command)) command = CMD_NOOP;
       command &= VAL_CMD_MASK;
    }
    return command;
