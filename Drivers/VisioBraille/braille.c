@@ -109,7 +109,7 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
 /* "+" packets are silently discarded, since they are only disturbing us */
 static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size) 
 {
-  int tmp = 0;
+  size_t offset = 0;
   static unsigned char ack = 04;
   static unsigned char nack = 05;
   static int apacket = 0;
@@ -118,7 +118,7 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size
   static unsigned char buf[MAXPKTLEN]; 
   static unsigned char *q;
   if ((p==NULL) || (size<2) || (size>MAXPKTLEN)) return 0; 
-  while (serialReadChunk(serialDevice,&ch,&tmp,1,0,1000)) {
+  while (serialReadChunk(serialDevice,&ch,&offset,1,0,1000)) {
     if (ch==0x02) {
       apacket = 1;
       prefix = 0xff; 
@@ -151,7 +151,7 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size
         (*q) = ch; q++;   
       }
     }
-    tmp = 0;
+    offset = 0;
   } 
   return 0;
 }
@@ -162,8 +162,8 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *p, size_t size
 /* restoring a normal communication mode */
 static int brl_reset(BrailleDisplay *brl)
 {
-  static unsigned char *RescuePacket = "#"; 
-  brl_writePacket(brl,RescuePacket,strlen(RescuePacket));
+  static unsigned char RescuePacket[] = {'#'}; 
+  brl_writePacket(brl,RescuePacket,sizeof(RescuePacket));
   return 1;
 }
 
@@ -406,11 +406,11 @@ static int brl_readKey(BrailleDisplay *brl)
   static int routing = 0;
   ssize_t lgthi;
   readNextPacket:
-  lgthi = brl_readPacket(brl,(unsigned char *) &ibuf,MAXPKTLEN-1);
+  lgthi = brl_readPacket(brl,ibuf,MAXPKTLEN-1);
   if (lgthi==0) return EOF;
   if (ibuf[0]=='%') {
     ibuf[lgthi] = '\0';
-    insertString(&ibuf[1]);
+    insertString((char *)&ibuf[1]);
     return EOF;
   }  
   if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23)) {
