@@ -173,13 +173,13 @@ static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
  * Creates a socket to connect to BrlApi */
 int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  authStruct *auth = (authStruct *) packet;
   struct addrinfo *res,*cur;
   struct addrinfo hints;
   char *hostname = NULL;
   char *port = NULL;
-  int authlength;
-  int err;
-  char auth[BRLAPI_MAXPACKETSIZE];
+  int err, authKeyLength;
 
   brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":" BRLAPI_SOCKETPORT };
   brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOSTNAME") };
@@ -189,10 +189,12 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   updateSettings(&settings, clientSettings);
   if (usedSettings!=NULL) updateSettings(usedSettings, &settings); 
 
-  if ((err=brlapi_loadAuthKey(settings.authKey,&authlength,(void *) &auth[0]))<0) {
+  if ((err=brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key))<0) {
     brlapi_errno=BRLERR_LIBCERR;
     return err;
   }
+
+  auth->protocolVersion = BRLAPI_PROTOCOL_VERSION;
 
   if ((port = strchr(settings.hostName,':'))) {
     if (port != settings.hostName) {
@@ -232,7 +234,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     brlapi_errno=BRLERR_CONNREFUSED;
     return -1;
   }
-  if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, &auth[0], authlength))<0) {
+  if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, packet, sizeof(auth->protocolVersion)+authKeyLength))<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
     brlapi_errno=BRLERR_LIBCERR;
     close(fd);
@@ -773,6 +775,7 @@ const char *brlapi_errlist[] = {
   "getaddrinfo error",  /* BRLERR_GAIERR */
   "libc error",         /* BRLERR_LIBCERR */
   "couldn't find out tty number",       /* BRLERR_UNKNOWNTTY */
+  "bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
 };
 
 /* brlapi_nerr: last error number */

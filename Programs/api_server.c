@@ -71,7 +71,7 @@ const char *const api_parameters[] = { "host", "port", "keyfile", NULL };
 /* It is used in ProcessConnection function */
 #define CHECK(condition, error) \
 if (!( condition )) { \
-  WriteErrorPacket(c->fd, error ); \
+  writeErrorPacket(c->fd, error ); \
   continue; \
 } else { }
 
@@ -141,24 +141,24 @@ typedef struct {
   const char *port;
 } Tbinding;
 
-static int authlength = 0;
-static unsigned char auth[BRLAPI_MAXPACKETSIZE];
+static int authKeyLength = 0;
+static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
 /****************************************************************************/
 
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
-int InitializeUnmaskedKeys(Tconnection *c);
+static int initializeUnmaskedKeys(Tconnection *c);
 
 /****************************************************************************/
 /** SIGNALS HANDLING                                                       **/
 /****************************************************************************/
 
-/* Function : InitBlockedSignals */
+/* Function : initBlockedSignals */
 /* Prepares BlockedSignals */
 /* *Must* be called before any call to pthread_create */
-static inline void InitBlockedSignals()
+static inline void initBlockedSignals()
 {
   sigemptyset(&BlockedSignals);
   sigaddset(&BlockedSignals,SIGTERM);
@@ -172,16 +172,16 @@ static inline void InitBlockedSignals()
 /** PACKET MANAGING                                                        **/
 /****************************************************************************/
 
-/* Function : WriteAckPacket */
+/* Function : writeAckPacket */
 /* Sends an acknowledgement on the given socket */
-inline void WriteAckPacket(int fd)
+static inline void writeAckPacket(int fd)
 {
   brlapi_writePacket(fd,BRLPACKET_ACK,NULL,0);
 }
 
-/* Function : WriteErrorPacket */
+/* Function : writeErrorPacket */
 /* Sends the given error code on the given socket */
-void WriteErrorPacket(int fd,unsigned long int err)
+static void writeErrorPacket(int fd,unsigned long int err)
 {
   uint32_t code = htonl(err);
   brlapi_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
@@ -191,13 +191,13 @@ void WriteErrorPacket(int fd,unsigned long int err)
 /** COMMUNICATION PROTOCOLE HANDLING                                       **/
 /****************************************************************************/
 
-/* Function : CreateConnection */
+/* Function : createConnection */
 /* Creates a struct of type Tconnection and stores suitable values */
 /* x and y correspond to the braille display size */
 /* This function also record the connection in an array */
 /* If an error occur, one returns NULL, and an error message is written on */
 /* the socket before closing it */
-Tconnection *CreateConnection(int fd,int x, int y)
+static Tconnection *createConnection(int fd,int x, int y)
 {
   int i;
   Tconnection *c; 
@@ -206,7 +206,7 @@ Tconnection *CreateConnection(int fd,int x, int y)
     connections[i] = (Tconnection *) malloc(sizeof(Tconnection));
     if (connections[i]==NULL) {
       pthread_mutex_unlock(&connections_mutex);
-      WriteErrorPacket(fd,BRLERR_NOMEM);
+      writeErrorPacket(fd,BRLERR_NOMEM);
       close(fd);
       return NULL;
     }
@@ -216,7 +216,7 @@ Tconnection *CreateConnection(int fd,int x, int y)
       if (c->brl.buffer==NULL) {
         connections[i] = NULL;
         pthread_mutex_unlock(&connections_mutex);   
-        WriteErrorPacket(fd,BRLERR_NOMEM);
+        writeErrorPacket(fd,BRLERR_NOMEM);
         close(fd);
         free(c);
         return NULL;
@@ -241,17 +241,17 @@ Tconnection *CreateConnection(int fd,int x, int y)
   }
   /* One got here ? Uh, no connection identicator could be found... */
   pthread_mutex_unlock(&connections_mutex);
-  WriteErrorPacket(fd,BRLERR_NOMEM);
+  writeErrorPacket(fd,BRLERR_NOMEM);
   close(fd);
   return NULL;
 }
 
-/* Function : FreeConnection */
+/* Function : freeConnection */
 /* Frees all resources associated to a connection, ie : */
 /* - updates the connections array */
 /* - destroys resources associated to brlmutex */
 /* - frees memory used by struct Tconnection */
-void FreeConnection(Tconnection *c)
+static void freeConnection(Tconnection *c)
 {
   pthread_mutex_destroy(&c->brlmutex);
   pthread_mutex_destroy(&c->maskmutex);
@@ -263,11 +263,11 @@ void FreeConnection(Tconnection *c)
   free(c);
 }
 
-/* Function : EndThread */
+/* Function : endThread */
 /* Lets the thread associated to the given connection to signal its */
 /* termination */
 /* No resource is freed here (would somewhat gargble everything !) */
-void EndThread(void *arg)
+static void endThread(void *arg)
 {
   Tconnection *c = (Tconnection *) arg;
   LogPrint(LOG_DEBUG,"Ending thread associated to connection %d",c->id);
@@ -280,26 +280,35 @@ void EndThread(void *arg)
   pthread_mutex_unlock(&destroy_mutex);
 }
 
-/* Function : ProcessConnection */
+/* Function : processConnection */
 /* Root function for connection manager threads */
-void *ProcessConnection(void *arg)
+static void *processConnection(void *arg)
 {
   int i, size, go_on = 0;
   Tconnection *c = (Tconnection *) arg;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  authStruct *auth = (authStruct *) packet;
   uint32_t * ints = (uint32_t *) &packet[0];
   brl_type_t type;
-  pthread_cleanup_push(EndThread, arg);
+  pthread_cleanup_push(endThread, arg);
   LogPrint(LOG_DEBUG,"Beginning to process connection %d",c->id);
   size = brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE);
   LogPrint(LOG_DEBUG,"read packet of size %d and type %d",size,type);
-  if ((type==BRLPACKET_AUTHKEY) && (size == authlength) && (!memcmp(packet, auth, size))) {
-    WriteAckPacket(c->fd);
-    go_on = 1;
-  } else {
-    LogPrint(LOG_WARNING,"Authentication failed for client %d",c->id);
-    WriteErrorPacket(c->fd,BRLERR_CONNREFUSED);
-  }
+  if (type==BRLPACKET_AUTHKEY) {
+    if ((size == authKeyLength) && (!memcmp(packet, authKey, size)))
+      writeErrorPacket(c->fd, BRLERR_PROTOCOL_VERSION);
+    else {
+      if (size==sizeof(auth->protocolVersion)+authKeyLength) {
+        if (auth->protocolVersion==BRLAPI_PROTOCOL_VERSION) {
+          if (!memcmp(&auth->key, authKey, authKeyLength)) {
+            writeAckPacket(c->fd);
+            go_on = 1;
+          } else writeErrorPacket(c->fd, BRLERR_CONNREFUSED);
+        } else writeErrorPacket(c->fd, BRLERR_PROTOCOL_VERSION);
+      } else writeErrorPacket(c->fd, BRLERR_CONNREFUSED);
+    }
+  } else writeErrorPacket(c->fd, BRLERR_CONNREFUSED);
+  writeAckPacket(c->fd); go_on = 1;
   while (go_on) {
     if ((size=brlapi_readPacket(c->fd,&type,packet,BRLAPI_MAXPACKETSIZE))<0) {
       if (size==-1) LogPrint(LOG_WARNING,"read : %s (connection %d)",strerror(errno),c->id);
@@ -318,7 +327,7 @@ void *ProcessConnection(void *arg)
         if (c->tty==tty) {
           if (c->how==how) {
             LogPrint(LOG_WARNING,"One already controls tty %d",tty);
-            WriteAckPacket(c->fd);
+            writeAckPacket(c->fd);
           } else {
             /* Here one is in the case where the client tries to change */
             /* from BRLKEYCODES to BRLCOMMANDS, or something like that */
@@ -326,13 +335,13 @@ void *ProcessConnection(void *arg)
             /* A client that wants to do that should first LeaveTty() */
             /* and then get it again, risking to lose it */
             LogPrint(LOG_DEBUG,"Switching from BRLKEYCODES to BRLCOMMANDS not supported yet");
-            WriteErrorPacket(c->fd,BRLERR_OPNOTSUPP);
+            writeErrorPacket(c->fd,BRLERR_OPNOTSUPP);
           }
           continue;
         }
         if (how==BRLKEYCODES) { /* We must check if the braille driver supports that */
           if ((TrueBraille->readKey==NULL) || (TrueBraille->keyToCommand==NULL)) {
-            WriteErrorPacket(c->fd, BRLERR_KEYSNOTSUPP);
+            writeErrorPacket(c->fd, BRLERR_KEYSNOTSUPP);
             continue;
           }
         }
@@ -341,14 +350,14 @@ void *ProcessConnection(void *arg)
           if ((connections[i]!=NULL) && (connections[i]->tty == tty)) break;
         if (i<CONNECTIONS) {
           LogPrint(LOG_WARNING,"tty %d is already controled by someone else",tty);
-          WriteErrorPacket(c->fd,BRLERR_TTYBUSY);
+          writeErrorPacket(c->fd,BRLERR_TTYBUSY);
         } else {
           c->tty = tty;
           c->how = how;
-          if (InitializeUnmaskedKeys(c)==-1) {
+          if (initializeUnmaskedKeys(c)==-1) {
             LogPrint(LOG_WARNING,"Failed to initialize unmasked keys");
             FreeRangeList(&c->UnmaskedKeys);
-            WriteErrorPacket(c->fd,BRLERR_NOMEM);
+            writeErrorPacket(c->fd,BRLERR_NOMEM);
           } else {
             /* The following code fills braille display with blank spaces */
             /* this avoids random display, when client sends no text immediately */
@@ -356,7 +365,7 @@ void *ProcessConnection(void *arg)
             for (i=0; i<n; i++) *(c->brl.buffer+i) = textTable[*(p+i)];
             for (i=n; i<c->brl.x*c->brl.y; i++) *(c->brl.buffer+i) = textTable[' '];
             c->brlbufstate = FULL;
-            WriteAckPacket(c->fd);
+            writeAckPacket(c->fd);
             LogPrint(LOG_DEBUG,"Taking control of tty %d (how=%d)",tty,how);
           }
         }
@@ -371,7 +380,7 @@ void *ProcessConnection(void *arg)
         c->tty = -1;
         FreeRangeList(&c->UnmaskedKeys);
         pthread_mutex_unlock(&connections_mutex);
-        WriteAckPacket(c->fd);
+        writeAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_MASKKEYS:
@@ -389,8 +398,8 @@ void *ProcessConnection(void *arg)
         if (type==BRLPACKET_MASKKEYS) res = RemoveRange(x,y,&c->UnmaskedKeys);
         else res = AddRange(x,y,&c->UnmaskedKeys);
         pthread_mutex_unlock(&c->maskmutex);
-        if (res==-1) WriteErrorPacket(c->fd,BRLERR_NOMEM);
-        else WriteAckPacket(c->fd);
+        if (res==-1) writeErrorPacket(c->fd,BRLERR_NOMEM);
+        else writeAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_WRITE: {
@@ -409,7 +418,7 @@ void *ProcessConnection(void *arg)
         }
         c->brlbufstate = FULL;
         pthread_mutex_unlock(&c->brlmutex);
-        WriteAckPacket(c->fd);
+        writeAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_WRITEDOTS: {
@@ -420,12 +429,12 @@ void *ProcessConnection(void *arg)
         memcpy(c->brl.buffer, packet,c->brl.x*c->brl.y);
         c->brlbufstate = FULL;
         pthread_mutex_unlock(&c->brlmutex);
-        WriteAckPacket(c->fd);
+        writeAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_STATWRITE: {
         CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
-        WriteErrorPacket(c->fd,BRLERR_OPNOTSUPP);
+        writeErrorPacket(c->fd,BRLERR_OPNOTSUPP);
         continue;
       }
       case BRLPACKET_EXTWRITE: {
@@ -491,7 +500,7 @@ void *ProcessConnection(void *arg)
         memcpy(c->brl.buffer, buf, dispSize);
         c->brlbufstate = FULL; 
         pthread_mutex_unlock(&c->brlmutex);
-        WriteAckPacket(c->fd);
+        writeAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_GETRAW: {
@@ -500,7 +509,7 @@ void *ProcessConnection(void *arg)
         CHECK(((TrueBraille->readPacket!=NULL) && (TrueBraille->writePacket!=NULL)), BRLERR_RAWNOTSUPP);
         if (c->raw) {
           LogPrint(LOG_DEBUG,"satisfied immediately since one already is in raw mode");
-          WriteAckPacket(c->fd);
+          writeAckPacket(c->fd);
           continue;
         }
         raw_magic = ntohl(ints[0]);
@@ -508,7 +517,7 @@ void *ProcessConnection(void *arg)
         pthread_mutex_lock(&raw_mutex);
         c->raw = 1;
         RawConnection = c;
-        WriteAckPacket(c->fd);
+        writeAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_LEAVERAW: {
@@ -518,7 +527,7 @@ void *ProcessConnection(void *arg)
         c->raw = 0;
         RawConnection = NULL;
         pthread_mutex_unlock(&raw_mutex);
-        WriteAckPacket(c->fd);
+        writeAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_PACKET: {
@@ -553,12 +562,12 @@ void *ProcessConnection(void *arg)
       }
       case BRLPACKET_BYE: {
         LogPrint(LOG_DEBUG,"Client %d said Bye",c->id);
-        WriteAckPacket(c->fd);
+        writeAckPacket(c->fd);
         go_on = 0;
         continue;
       }
       default:
-        WriteErrorPacket(c->fd,BRLERR_UNKNOWN_INSTRUCTION);
+        writeErrorPacket(c->fd,BRLERR_UNKNOWN_INSTRUCTION);
     }
   }
   if (c->raw) {
@@ -589,10 +598,10 @@ void *ProcessConnection(void *arg)
 /** SOCKETS AND CONNECTIONS MANAGING                                       **/
 /****************************************************************************/
 
-/* Function : InitializeSocket */
+/* Function : initializeSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
-int InitializeSocket(const Tbinding *binding)
+static int initializeSocket(const Tbinding *binding)
 {
   int fd=-1, err, yes=1;
   struct addrinfo *res,*cur;
@@ -645,20 +654,20 @@ int InitializeSocket(const Tbinding *binding)
   return -1;
 }
 
-/* Function : CloseSocket */
+/* Function : closeSocket */
 /* Closes the listening socket for in-connections */
-void CloseSocket(int fd)
+static void closeSocket(int fd)
 {
   close(fd);
 }
 
-/* Function : ConnectionsManager */
+/* Function : connectionsManager */
 /* Creates a socket to listen incoming connections as soon as possible */
 /* (i.e. when the loopback interface is configured), accepts incoming connections */
 /* and areates data sructures aod threads to process them properly*/
 /* Argument : The port on which the socket will be bound */
 /* Returns NULL in any case */
-void *ConnectionsManager(void *arg)
+static void *connectionsManager(void *arg)
 {
   int res, mainsock;
   struct sockaddr addr;
@@ -669,22 +678,22 @@ void *ConnectionsManager(void *arg)
     LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
     pthread_exit(NULL);
   }
-  if ((mainsock = InitializeSocket(binding))==-1) {
+  if ((mainsock = initializeSocket(binding))==-1) {
     LogPrint(LOG_WARNING,"Error while initializing socket : %s",strerror(errno));
     return NULL;
   }
-  pthread_cleanup_push((void (*) (void *)) CloseSocket,(void *) mainsock);
+  pthread_cleanup_push((void (*) (void *)) closeSocket,(void *) mainsock);
   for (; (res = accept(mainsock, &addr, &addrlen))>=0; addrlen=sizeof(addr)) {
     LogPrint(LOG_DEBUG,"Connection accepted on socket %d",res);
-    c = CreateConnection(res,ntohl(DisplaySize[0]),ntohl(DisplaySize[1])); 
+    c = createConnection(res,ntohl(DisplaySize[0]),ntohl(DisplaySize[1])); 
     if (c==NULL) {
       LogPrint(LOG_WARNING,"Failed to create connection structure");
       continue;
     }
     LogPrint(LOG_DEBUG,"Connection on socket %d has identifier %d",c->fd,c->id);
-    if ((res = pthread_create(&(c->thread),NULL,ProcessConnection,(void *) c))!=0) {
+    if ((res = pthread_create(&(c->thread),NULL,processConnection,(void *) c))!=0) {
       LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
-      FreeConnection(c);
+      freeConnection(c);
       continue;
     }
   }
@@ -698,13 +707,13 @@ void *ConnectionsManager(void *arg)
 /** MISCELLANEOUS FUNCTIONS                                                **/
 /****************************************************************************/
 
-/* Function : InitializeUnmaskedKeys */
+/* Function : initializeUnmaskedKeys */
 /* Specify which keys should be passed to the client by default, as soon */
 /* as he controls the tty */
 /* If clients asked for commands, one lets him process routing cursor */
 /* and screen-related commands */
 /* If the client is interested in braille codes, one passes him every key */
-int InitializeUnmaskedKeys(Tconnection *c)
+static int initializeUnmaskedKeys(Tconnection *c)
 {
   if (c==NULL) return 0;
   if (AddRange(0,BRL_KEYCODE_MAX,&c->UnmaskedKeys)==-1) return -1;
@@ -715,10 +724,10 @@ int InitializeUnmaskedKeys(Tconnection *c)
   return 0; 
 }
 
-/* Function : CleanUp */
+/* Function : cleanUp */
 /* Checks whether a connection is to be destroyed, and if so, calls */
-/* FreeConnection */
-void CleanUp()
+/* freeConnection */
+static void cleanUp()
 {
   int res;
   pthread_mutex_lock(&destroy_mutex);
@@ -726,16 +735,16 @@ void CleanUp()
     if ((res = pthread_join(ConnectionToDestroy->thread,NULL))!=0) {
       LogPrint(LOG_WARNING,"pthread_join : %s",strerror(res));
     }
-    FreeConnection(ConnectionToDestroy);
+    freeConnection(ConnectionToDestroy);
     ConnectionToDestroy = NULL;
     pthread_cond_signal(&destroy_condition);
   }
   pthread_mutex_unlock(&destroy_mutex);
 }
 
-/* Function : TerminationHandler */
+/* Function : terminationHandler */
 /* Terminates driver */
-void TerminationHandler()
+static void terminationHandler()
 {
   int i,res;
   if (connectionsAllowed!=0) {
@@ -747,7 +756,7 @@ void TerminationHandler()
     for (i=0;i<CONNECTIONS;i++) if (connections[i]!=NULL) {
       if ((res = pthread_cancel(connections[i]->thread))!=0) {
         LogPrint(LOG_WARNING,"pthread_cancel (2) : %s",strerror(res));
-        FreeConnection(connections[i]);
+        freeConnection(connections[i]);
         connections[i]=NULL;
       }
     }
@@ -761,7 +770,7 @@ void TerminationHandler()
         if ((res = pthread_join(connections[ConnectionToDestroy->id]->thread,NULL))!=0)
           LogPrint(LOG_WARNING,"pthread_join : %s",strerror(res));
         connections[ConnectionToDestroy->id]=NULL;
-        FreeConnection(ConnectionToDestroy);
+        freeConnection(ConnectionToDestroy);
         ConnectionToDestroy=NULL;
         pthread_cond_broadcast(&destroy_condition);
         pthread_mutex_unlock(&destroy_mutex);
@@ -795,7 +804,7 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_keycode_t keycode = 0;
 
-  CleanUp(); /* destroys remaining connections if any */
+  cleanUp(); /* destroys remaining connections if any */
   if (RawConnection!=NULL) {
     pthread_mutex_lock(&packet_mutex);
     res = TrueBraille->readPacket(&c->brl,packet,BRLAPI_MAXPACKETSIZE);
@@ -899,21 +908,21 @@ void api_open(BrailleDisplay *brl, char **parameters)
   api_link();
 
   res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH),
-                           &authlength,auth);
+                           &authKeyLength,authKey);
   if (res==-1) {
     LogPrint(LOG_WARNING,"Unable to load API authentication key: no connections will be accepted.");
     connectionsAllowed = 0;
     return;
   }
   for (res=0; res<CONNECTIONS; res++) connections[res] = NULL;
-  InitBlockedSignals();
+  initBlockedSignals();
 
   if (*parameters[PARM_HOST]) binding.host = parameters[PARM_HOST];
   else binding.host = NULL;
   if (*parameters[PARM_PORT]) binding.port = parameters[PARM_PORT];
   else binding.port = BRLAPI_SOCKETPORT;
 
-  if ((res = pthread_create(&t,NULL,ConnectionsManager,(void *) &binding)) != 0) {
+  if ((res = pthread_create(&t,NULL,connectionsManager,(void *) &binding)) != 0) {
     LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
     return;
   } else connectionsAllowed = 1;
@@ -925,5 +934,5 @@ void api_open(BrailleDisplay *brl, char **parameters)
 /* Closes the driver */
 void api_close(BrailleDisplay *brl)
 {
-  TerminationHandler();
+  terminationHandler();
 }
