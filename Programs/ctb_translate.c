@@ -66,7 +66,7 @@ selectRule (int length) { /*check for valid contractions */
 
   if (length < 1) return 0;
   if (length == 1) {
-    ruleOffset = table->characters[*src].rules;
+    ruleOffset = table->characters[CTL(*src)].rules;
   } else {
     BYTE bytes[2];
     bytes[0] = CTL(src[0]);
