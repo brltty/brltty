@@ -299,7 +299,7 @@ typedef struct {
   void (*closePort) (void);
   void (*flushPort) (BrailleDisplay *brl);
   int (*awaitInput) (int milliseconds);
-  int (*readBytes) (void *buffer, int *offset, int length, int timeout);
+  int (*readBytes) (void *buffer, size_t *offset, size_t length, int timeout);
   int (*writeBytes) (const void *buffer, int length);
 } InputOutputOperations;
 
@@ -350,7 +350,7 @@ awaitSerialInput (int milliseconds) {
 }
 
 static int
-readSerialBytes (void *buffer, int *offset, int length, int timeout) {
+readSerialBytes (void *buffer, size_t *offset, size_t length, int timeout) {
   return serialReadChunk(serialDevice, buffer, offset, length, 0, timeout);
 }
 
@@ -409,7 +409,7 @@ awaitUsbInput (int milliseconds) {
 }
 
 static int
-readUsbBytes (void *buffer, int *offset, int length, int timeout) {
+readUsbBytes (void *buffer, size_t *offset, size_t length, int timeout) {
   int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer+*offset, length, 
                            (*offset? timeout: 0), timeout);
   if (count == -1) return 0;
@@ -550,7 +550,7 @@ resetTerminal1 (BrailleDisplay *brl) {
 #define RBF_ETX 1
 #define RBF_RESET 2
 static int
-readBytes1 (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, int flags) {
+readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t count, int flags) {
   if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == cETX) return 1;
@@ -909,9 +909,9 @@ static int refreshRequired2;
 
 static int
 readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
-  char buffer[0X203];
-  int offset = 0;
-  int size;
+  unsigned char buffer[0X203];
+  size_t offset = 0;
+  size_t size;
   int identity;
 
   while (1) {
