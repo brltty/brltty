@@ -391,11 +391,12 @@ spk_isSpeaking (void) {
 static void
 spk_rate (int setting) {
    eciSetVoiceParam(eci, 0, eciSpeed,
-                    setting * 125 / SPK_DEFAULT_RATE);
+                    (setting * 40 / SPK_DEFAULT_RATE) + 10);
 }
 
 static void
 spk_volume (int setting) {
-   eciSetVoiceParam(eci, 0, eciVolume,
-                    setting * 50 / SPK_DEFAULT_VOLUME);
+   double fraction = (double)setting / (double)SPK_MAXIMUM_VOLUME;
+   int volume = (int)(fraction * (2.0 - fraction) * 100.0);
+   eciSetVoiceParam(eci, 0, eciVolume, volume);
 }
