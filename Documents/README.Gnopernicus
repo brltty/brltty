@@ -62,8 +62,8 @@ Configuring Gnopernicus
 =======================
 
 You need to activate Braille Support, and to change the Braille Device Type to
-"BRLTTY". This configuration can be done not only via the GUI but also via the
-command line. Both of these interfaces are described here.
+"BRLTTY". This configuration can be done not only via the display but also via
+the command line. Both of these methods are described here.
 
 
 When the focus is inside the Gnopernicus window, select
@@ -132,7 +132,8 @@ and is used when you type "startx" to start the X-server.
 
  ------------------------------------------------------------------------------
  #!/bin/sh
- gconftool-2 --type bool --set /apps/desktop/gnome/interface/accessibility true
+
+ # Define environment variables.
  GARNOME=$HOME/garnome
  PATH=$GARNOME/bin:$PATH
  LD_LIBRARY_PATH=$GARNOME/lib:$LD_LIBRARY_PATH
@@ -141,6 +142,16 @@ and is used when you type "startx" to start the X-server.
  GDK_USE_XFT=1
  GTK_MODULES=gail:atk-bridge
  export PATH LD_LIBRARY_PATH PYTHONPATH PKG_CONFIG_PATH GDK_USE_XFT GTK_MODULES
+
+ # Configure Gnome.
+ gconftool-2 --type bool --set /apps/desktop/gnome/interface/accessibility true
+
+ # Tell Gnopernicus which virtual terminal is being used by the X display.
+ # This is a bit complicated so cut-and-paste (rather than retype) it.
+ CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
+ export CONTROLVT
+
+ # Start the Gnome session.
  exec $GARNOME/bin/gnome-session
  ------------------------------------------------------------------------------
 
