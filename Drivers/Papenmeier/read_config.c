@@ -105,22 +105,34 @@ static char* search_key(int code) {
     strcpy(res, search_code(ROUTING, 0));
     return res;
   }
+
   if (code >= OFFS_SWITCH) {
-    strcpy(res, "switch  ");
-    res[7]= '0' + (code-OFFS_SWITCH) % 10;
+    static const unsigned char map[] = {0, 2, 3, 1};
+    code = code - OFFS_SWITCH - 1;
+    code = (map[code >> 1] << 1) | (code & 0X1);
+    snprintf(res, sizeof(res), "%s %s %s",
+             (code & 0X04)? "key": "switch",
+             (code & 0X02)? "right": "left",
+             (code & 0X01)? "front": "rear");
     return res;
-  } else if (code >= OFFS_EASY) {
-    strcpy(res, "easy  ");
-    strcpy(res+5, search_easycode(code - OFFS_EASY));
+  }
+
+  if (code >= OFFS_EASY) {
+    snprintf(res, sizeof(res), "easy %s", search_easycode(code - OFFS_EASY));
     return res;
-  } else if (code >=  OFFS_STAT) {
-    strcpy(res, "status    ");
-    code -= OFFS_STAT;
-  } else
-    strcpy(res, "front     ");
-  if (code >= 10)
-    res[7]= '0' + code / 10;
-  res[8]= '0' + code % 10;
+  }
+
+  if (code >=  OFFS_STAT) {
+    snprintf(res, sizeof(res), "status %d", code-OFFS_STAT);
+    return res;
+  }
+
+  if (code >=  OFFS_FRONT) {
+    snprintf(res, sizeof(res), "front %d", code-OFFS_FRONT);
+    return res;
+  }
+
+  strcpy(res, "unknown");
   return res;
 }
 

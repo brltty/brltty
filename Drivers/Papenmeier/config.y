@@ -189,10 +189,11 @@ static FILE* configfile = NULL;
 %token CUTBEG CUTEND
 
 %token STATCELLS FRONTKEYS EASYBAR SIZE
-%token STAT FRONT KEYCODE STATCODE
-%token HORIZ FLAG
+%token STAT KEYCODE STATCODE
+%token FRONT REAR LEFT RIGHT
+%token HORIZ FLAG NUMBER
 %token EASY EASYCODE
-%token SWITCH NUMBER
+%token SWITCH KEY
 %token ROUTING
 %token ON OFF 
 %token VPK
@@ -243,11 +244,18 @@ statdisp: STATCODE            {  }
         | NUMBER STATCODE     { numval += OFFS_NUMBER; }
         ;
 
-anykey:   STAT NUM      { keyindex= OFFS_STAT + numval; } 
-        | FRONT NUM     { keyindex= OFFS_FRONT + numval; } 
-        | EASY EASYCODE { keyindex= OFFS_EASY + numval; } 
-        | SWITCH NUM    { keyindex= OFFS_SWITCH + numval; }
-        | ROUTING       { keyindex= ROUTINGKEY; }
+anykey:   STAT   NUM         { keyindex= OFFS_STAT + numval; } 
+        | FRONT  NUM         { keyindex= OFFS_FRONT + numval; } 
+        | EASY   EASYCODE    { keyindex= OFFS_EASY + numval; } 
+        | SWITCH LEFT  REAR  { keyindex= OFFS_SWITCH + 1; }
+        | SWITCH LEFT  FRONT { keyindex= OFFS_SWITCH + 2; }
+        | SWITCH RIGHT REAR  { keyindex= OFFS_SWITCH + 7; }
+        | SWITCH RIGHT FRONT { keyindex= OFFS_SWITCH + 8; }
+        | KEY    LEFT  REAR  { keyindex= OFFS_SWITCH + 3; }
+        | KEY    LEFT  FRONT { keyindex= OFFS_SWITCH + 4; }
+        | KEY    RIGHT REAR  { keyindex= OFFS_SWITCH + 5; }
+        | KEY    RIGHT FRONT { keyindex= OFFS_SWITCH + 6; }
+        | ROUTING            { keyindex= ROUTINGKEY; }
         ; 
 
 modifiers: modifier
@@ -289,27 +297,29 @@ static struct init_v symbols[]= {
   { "haseasybar",  EASYBAR, 0 },
   { "easybar",     EASYBAR, 0 },
 
-  { "status",      STAT, 0 },
-  { "front",       FRONT, 0 },
-  { "easy",        EASY, 0 },
-  { "switch",      SWITCH, 0 },
+  { "status",      STAT,   0 },
+  { "easy",        EASY,   0 },
 
-  { "horiz",       HORIZ, 0 },
-  { "flag",        FLAG, 0 },
+  { "front",       FRONT,  0 },
+  { "rear",        REAR,   0 },
+  { "left",        LEFT,   0 },
+  { "right",       RIGHT,  0 },
+
+  { "switch",      SWITCH, 0 },
+  { "key",         KEY,    0 },
+
+  { "horiz",       HORIZ,  0 },
+  { "flag",        FLAG,   0 },
   { "number",      NUMBER, 0 },
 
-  { "left",        EASYCODE, EASY_LE },
-  { "left1",       EASYCODE, EASY_LE },
-  { "left2",       EASYCODE, EASY_LE2 },
-  { "up",          EASYCODE, EASY_UP },
-  { "up1",         EASYCODE, EASY_UP },
-  { "up2",         EASYCODE, EASY_UP2 },
-  { "right",       EASYCODE, EASY_RI },
-  { "right1",      EASYCODE, EASY_RI },
-  { "right2",      EASYCODE, EASY_RI2 },
-  { "down",        EASYCODE, EASY_DO },
-  { "down1",       EASYCODE, EASY_DO },
-  { "down2",       EASYCODE, EASY_DO2 },
+  { "left1",       EASYCODE, EASY_L1},
+  { "left2",       EASYCODE, EASY_L2 },
+  { "up1",         EASYCODE, EASY_U1},
+  { "up2",         EASYCODE, EASY_U2 },
+  { "right1",      EASYCODE, EASY_R1},
+  { "right2",      EASYCODE, EASY_R2 },
+  { "down1",       EASYCODE, EASY_D1},
+  { "down2",       EASYCODE, EASY_D2 },
 
   { "routing",     ROUTING, 0 },
   { "route",       ROUTING, 0 },
