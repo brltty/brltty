@@ -42,7 +42,7 @@ static int charactersPerSecond;
 
 static int
 readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
-  int offset = 0;
+  size_t offset = 0;
   int size = -1;
 
   while (offset < length) {
