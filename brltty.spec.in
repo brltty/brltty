@@ -68,13 +68,37 @@ install Documents/brltty.conf "${RPM_BUILD_ROOT}/etc"
 /usr/share/man/man?/*
 
 %pre
+# The pre-install scriptlet.
+
+# If a configuration file already exists then rpm installs the new one as
+# <path>.rpmnew. If this is done then the .rpmnew file is overwritten if it
+# already exists.
+
+# There's no explicit way to tell if a configuration file has been installed
+# as itself or as a .rpmnew file. The way we'll figure it out, therefore, is by
+# erasing the .rpmnew file now so that we can see if it gets created later. 
 rm -f "@configuration_directory@/@configuration_file@.rpmnew"
 
 %post
+# The post-install scriptlet.
+
+# If BRLTTY's boot parameter has been specified then update the just installed
+# configuration file template to reflect the options supplied thereby.
+
+# First, we need to determine which file to update. If there's a .rpmnew file
+# then update it since a previous configuration file must already have existed.
 file="@configuration_directory@/@configuration_file@"
 new="${file}.rpmnew"
 [ -f "${new}" ] && file="${new}"
-(  set -- -u -f "${file}"
+
+# Update the configuration file template via the Bootdisks/bp2cf script.
+# Include it right within this scriptlet so that it needn't be installed.
+# Imbed it within a subshell to ensure that it won't impact this scriptlet.
+(
+   # First, set bp2cf's command line arguments.
+   set -- -u -f "${file}"
+
+   # Now run it by simply imbedding it right here.
    @configuration_file_customization_script@
 )
 
