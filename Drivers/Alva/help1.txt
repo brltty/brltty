@@ -23,6 +23,10 @@ Cursor Left/Right go to previous/next nonblank window
 F1b Left/Right    go left/right one character
 F2b Left/Right    go left/right half window
 
+Tumbler Keys:
+Left              go left/right one character
+Right             go left/right half window
+
 Braille (right) Key Pad:
 F1                enter/leave help display
 F2                enter/leave command learn mode
