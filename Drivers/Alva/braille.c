@@ -920,7 +920,8 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   int ProcessKey = GetKey(brl, &CurrentKeys, &RoutingPos);
 
   if (ProcessKey < 0) {
-    /* Oops... seems we should restart from scratch... */
+    /* An input error occurred (perhaps disconnect of USB device) */
+  restartDriver:
     RoutingPos = 0;
     CurrentKeys = LastKeys = ReleasedKeys = 0;
     Typematic = 0;
@@ -1251,8 +1252,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                   res = CMD_LEARN;
                   break;
                 case KEY_BRL_F1 | KEY_BRL_F2:
-                  res = CMD_RESTARTBRL;
-                  break;
+                  goto restartDriver;
 
                 case KEY_SPK_F2:
                   res = CMD_SPKHOME;
