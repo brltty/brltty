@@ -18,11 +18,12 @@
 #include <alsa/asoundlib.h>
 
 struct MidiDeviceStruct {
-  snd_seq_t    *sequencer;
-  int           port;
-  int           queue;
+  snd_seq_t *sequencer;
+  int port;
+  int queue;
+  snd_seq_queue_status_t *status;
+  snd_seq_real_time_t time;
   unsigned char note;
-  int           duration;
 };
 
 static void *alsaLibrary;
@@ -41,6 +42,7 @@ MIDI_ALSA_SYMBOL(seq_control_queue);
 MIDI_ALSA_SYMBOL(seq_create_simple_port);
 MIDI_ALSA_SYMBOL(seq_drain_output);
 MIDI_ALSA_SYMBOL(seq_event_output);
+MIDI_ALSA_SYMBOL(seq_get_queue_status);
 MIDI_ALSA_SYMBOL(seq_open);
 MIDI_ALSA_SYMBOL(seq_port_info_get_capability);
 MIDI_ALSA_SYMBOL(seq_port_info_get_name);
@@ -50,6 +52,9 @@ MIDI_ALSA_SYMBOL(seq_port_info_set_port);
 MIDI_ALSA_SYMBOL(seq_port_info_sizeof);
 MIDI_ALSA_SYMBOL(seq_query_next_client);
 MIDI_ALSA_SYMBOL(seq_query_next_port);
+MIDI_ALSA_SYMBOL(seq_queue_status_free);
+MIDI_ALSA_SYMBOL(seq_queue_status_get_real_time);
+MIDI_ALSA_SYMBOL(seq_queue_status_malloc);
 MIDI_ALSA_SYMBOL(seq_set_client_name);
 #define snd_seq_control_queue my_snd_seq_control_queue
 
@@ -175,6 +180,25 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
   return 0;
 }
 
+static void
+updateMidiStatus (MidiDevice *midi) {
+  my_snd_seq_get_queue_status(midi->sequencer, midi->queue, midi->status);
+}
+
+static void
+startMidiTimer (MidiDevice *midi) {
+  if (!midi->time.tv_sec && !midi->time.tv_nsec) {
+    updateMidiStatus(midi);
+    midi->time = *my_snd_seq_queue_status_get_real_time(midi->status);
+  }
+}
+
+static void
+stopMidiTimer (MidiDevice *midi) {
+  midi->time.tv_sec = 0;
+  midi->time.tv_nsec = 0;
+}
+
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
@@ -197,6 +221,7 @@ openMidiDevice (int errorLevel, const char *device) {
     findSharedSymbol(alsaLibrary, "snd_seq_create_simple_port", &my_snd_seq_create_simple_port);
     findSharedSymbol(alsaLibrary, "snd_seq_drain_output", &my_snd_seq_drain_output);
     findSharedSymbol(alsaLibrary, "snd_seq_event_output", &my_snd_seq_event_output);
+    findSharedSymbol(alsaLibrary, "snd_seq_get_queue_status", &my_snd_seq_get_queue_status);
     findSharedSymbol(alsaLibrary, "snd_seq_open", &my_snd_seq_open);
     findSharedSymbol(alsaLibrary, "snd_seq_port_info_get_capability", &my_snd_seq_port_info_get_capability);
     findSharedSymbol(alsaLibrary, "snd_seq_port_info_get_name", &my_snd_seq_port_info_get_name);
@@ -206,6 +231,9 @@ openMidiDevice (int errorLevel, const char *device) {
     findSharedSymbol(alsaLibrary, "snd_seq_port_info_sizeof", &my_snd_seq_port_info_sizeof);
     findSharedSymbol(alsaLibrary, "snd_seq_query_next_client", &my_snd_seq_query_next_client);
     findSharedSymbol(alsaLibrary, "snd_seq_query_next_port", &my_snd_seq_query_next_port);
+    findSharedSymbol(alsaLibrary, "snd_seq_queue_status_free", &my_snd_seq_queue_status_free);
+    findSharedSymbol(alsaLibrary, "snd_seq_queue_status_get_real_time", &my_snd_seq_queue_status_get_real_time);
+    findSharedSymbol(alsaLibrary, "snd_seq_queue_status_malloc", &my_snd_seq_queue_status_malloc);
     findSharedSymbol(alsaLibrary, "snd_seq_set_client_name", &my_snd_seq_set_client_name);
   }
 
@@ -221,32 +249,38 @@ openMidiDevice (int errorLevel, const char *device) {
                                                       SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
                                                       SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
         if ((midi->queue = my_snd_seq_alloc_queue(midi->sequencer)) >= 0) {
-          int client;
-          int port;
-          int deviceOk;
+          if ((result = my_snd_seq_queue_status_malloc(&midi->status)) >= 0) {
+            int client;
+            int port;
+            int deviceOk;
 
-          if (device) {
-            deviceOk = parseMidiDevice(midi, errorLevel, device, &client, &port);
-          } else {
-            deviceOk = findMidiDevice(midi, errorLevel, &client, &port);
-          }
+            if (device) {
+              deviceOk = parseMidiDevice(midi, errorLevel, device, &client, &port);
+            } else {
+              deviceOk = findMidiDevice(midi, errorLevel, &client, &port);
+            }
 
-          if (deviceOk) {
-            LogPrint(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
+            if (deviceOk) {
+              LogPrint(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
 
-            if ((result = my_snd_seq_connect_to(midi->sequencer, midi->port, client, port)) >= 0) {
-              if ((result = snd_seq_start_queue(midi->sequencer, midi->queue, NULL)) >= 0) {
-                midi->duration = 0;
-
-                return midi;
+              if ((result = my_snd_seq_connect_to(midi->sequencer, midi->port, client, port)) >= 0) {
+                if ((result = snd_seq_start_queue(midi->sequencer, midi->queue, NULL)) >= 0) {
+                  stopMidiTimer(midi);
+                  return midi;
+                } else {
+                  LogPrint(errorLevel, "Cannot start ALSA MIDI queue: %d:%d: %s",
+                           client, port, my_snd_strerror(result));
+                }
               } else {
-                LogPrint(errorLevel, "Cannot start ALSA MIDI queue: %d:%d: %s",
+                LogPrint(errorLevel, "Cannot connect to ALSA MIDI device: %d:%d: %s",
                          client, port, my_snd_strerror(result));
               }
-            } else {
-              LogPrint(errorLevel, "Cannot connect to ALSA MIDI device: %d:%d: %s",
-                       client, port, my_snd_strerror(result));
             }
+
+            my_snd_seq_queue_status_free(midi->status);
+          } else {
+            LogPrint(errorLevel, "Cannot allocate ALSA MIDI queue status container: %s",
+                     my_snd_strerror(result));
           }
         } else {
           LogPrint(errorLevel, "Cannot allocate ALSA MIDI queue: %s",
@@ -272,12 +306,29 @@ openMidiDevice (int errorLevel, const char *device) {
 
 void
 closeMidiDevice (MidiDevice *midi) {
+  my_snd_seq_queue_status_free(midi->status);
   my_snd_seq_close(midi->sequencer);
   free(midi);
 }
 
 int
 flushMidiDevice (MidiDevice *midi) {
+  while (1) {
+    int duration;
+
+    updateMidiStatus(midi);
+    {
+      const snd_seq_real_time_t *time = my_snd_seq_queue_status_get_real_time(midi->status);
+      int seconds = midi->time.tv_sec - time->tv_sec;
+      int nanoseconds = midi->time.tv_nsec - time->tv_nsec;
+      duration = (seconds * 1000) + (nanoseconds / 1000000);
+    }
+
+    if (duration <= 0) break;
+    approximateDelay(duration);
+  }
+
+  stopMidiTimer(midi);
   return 1;
 }
 
@@ -290,13 +341,7 @@ prepareMidiEvent (MidiDevice *midi, snd_seq_event_t *event) {
 
 static void
 scheduleMidiEvent (MidiDevice *midi, snd_seq_event_t *event) {
-  if (midi->duration) {
-    snd_seq_real_time_t time;
-    time.tv_sec = midi->duration / 1000;
-    time.tv_nsec = (midi->duration % 1000) * 1000000;
-    snd_seq_ev_schedule_real(event, midi->queue, 1, &time);
-    midi->duration = 0;
-  }
+  snd_seq_ev_schedule_real(event, midi->queue, 1, &midi->time);
 }
 
 static int
@@ -323,6 +368,7 @@ setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instru
 
 int
 beginMidiBlock (MidiDevice *midi) {
+  startMidiTimer(midi);
   return 1;
 }
 
@@ -355,6 +401,13 @@ stopMidiNote (MidiDevice *midi, unsigned char channel) {
 
 int
 insertMidiWait (MidiDevice *midi, int duration) {
-  midi->duration += duration;
+  midi->time.tv_sec += duration / 1000;
+  midi->time.tv_nsec += (duration % 1000) * 1000000;
+
+  while (midi->time.tv_nsec >= 1000000000) {
+    midi->time.tv_nsec -= 1000000000;
+    midi->time.tv_sec++;
+  }
+
   return 1;
 }
