@@ -159,7 +159,7 @@
 #braille-parameters xw:Cols=40 # [1-80]
 #braille-parameters xw:Lines=1 # [1-3]
 #braille-parameters xw:Model=bare # [bare]
-#braille-parameters xw:XtParms= # 
+#braille-parameters xw:TkParms= # 
 
 
 ###########################

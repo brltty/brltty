@@ -331,7 +331,7 @@ then
       AC_HAVE_LIBRARY([Xt], [
          LIBS="-lXt ${LIBS}"
 
-         BRLTTY_PACKAGE_CHOOSE([xt_toolkit],
+         BRLTTY_PACKAGE_CHOOSE([gui_toolkit],
             [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
             [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
             [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
@@ -340,6 +340,15 @@ then
       ])
    ])
 fi
+
+test -z "$brltty_package_gui_toolkit" && {
+   case "${host_os}"
+   in
+      cygwin*|mingw*)
+         brltty_package_gui_toolkit="windows"
+         ;;
+   esac
+}
 
 AC_CHECK_HEADERS([alloca.h getopt.h glob.h sys/select.h sys/wait.h syslog.h])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h])
@@ -882,7 +891,7 @@ BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
-test -n "${brltty_package_xt_toolkit}" && {
+test -n "${brltty_package_gui_toolkit}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
 }
 BRLTTY_ARG_DRIVER([braille])
