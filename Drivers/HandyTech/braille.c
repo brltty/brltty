@@ -277,9 +277,7 @@ chooseUsbDevice (UsbDevice *device, void *data) {
           usbSerial = usbGetSerialOperations(device);
           usbSerial->setBaud(device, baud2integer(baud));
           usbSerial->setFlowControl(device, 0);
-          usbSerial->setDataBits(device, 8);
-          usbSerial->setStopBits(device, 1);
-          usbSerial->setParity(device, USB_SERIAL_PARITY_ODD);
+          usbSerial->setDataFormat(device, 8, 1, USB_SERIAL_PARITY_ODD);
 
           usbOutputEndpoint = 1;
           usbInputEndpoint = 1;

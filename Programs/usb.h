@@ -319,8 +319,6 @@ extern int usbVerifyManufacturer (UsbDevice *device, const char *eRegExp);
 extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
 extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
-extern int isUsbDevice (const char **path);
-
 /* Serial adapter parity settings. */
 typedef enum {
   USB_SERIAL_PARITY_SPACE,
@@ -343,14 +341,14 @@ typedef enum {
 typedef struct {
   int (*setBaud) (UsbDevice *device, int rate);
   int (*setFlowControl) (UsbDevice *device, int flow);
-  int (*setDataBits) (UsbDevice *device, int bits);
-  int (*setStopBits) (UsbDevice *device, int bits);
-  int (*setParity) (UsbDevice *device, UsbSerialParity parity);
+  int (*setDataFormat) (UsbDevice *device, int dataBits, int stopBits, UsbSerialParity parity);
   int (*setDtrState) (UsbDevice *device, int state);
   int (*setRtsState) (UsbDevice *device, int state);
 } UsbSerialOperations;
 
 extern const UsbSerialOperations *usbGetSerialOperations (const UsbDevice *device);
+
+extern int isUsbDevice (const char **path);
 
 #ifdef __cplusplus
 }

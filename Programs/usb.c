@@ -461,12 +461,18 @@ usbSetBelkinFlowControl (UsbDevice *device, int flow) {
   }
   return usbSetBelkinAttribute(device, 16, value);
 }
+static int
+usbSetBelkinDataFormat (UsbDevice *device, int dataBits, int stopBits, UsbSerialParity parity) {
+  if (usbSetBelkinDataBits(device, dataBits) != -1)
+    if (usbSetBelkinStopBits(device, stopBits) != -1)
+      if (usbSetBelkinParity(device, parity) != -1)
+        return 0;
+  return -1;
+}
 static const UsbSerialOperations usbBelkinOperations = {
   usbSetBelkinBaud,
   usbSetBelkinFlowControl,
-  usbSetBelkinDataBits,
-  usbSetBelkinStopBits,
-  usbSetBelkinParity,
+  usbSetBelkinDataFormat,
   usbSetBelkinDtrState,
   usbSetBelkinRtsState
 };
