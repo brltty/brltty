@@ -426,12 +426,9 @@ terminationHandler (int signalNumber) {
 
 static void 
 childDeathHandler (int signalNumber) {
-  pid_t pid = wait(NULL);
-  if (csr_active) {
-    if (pid == csr_pid) {
-      csr_pid = 0;
-      csr_active = 0;
-    }
+  pid_t pid;
+  while ((pid = waitpid(-1, NULL, WNOHANG))) {
+    if (pid == routingProcess) routingProcess = 0;
   }
 }
 
@@ -1408,7 +1405,7 @@ main (int argc, char *argv[]) {
             }
             break;
           case CMD_PASTE:
-            if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
+            if ((dispmd & HELP_SCRN) != HELP_SCRN && !routingProcess)
               if (cut_paste())
                 break;
             playTune(&tune_bad_command);
@@ -1818,7 +1815,7 @@ main (int argc, char *argv[]) {
           }
         }
         /* If the cursor moves in cursor tracking mode: */
-        if (!csr_active && (scr.posx != p->trkx || scr.posy != p->trky)) {
+        if (!routingProcess && (scr.posx != p->trkx || scr.posy != p->trky)) {
           trackCursor(0);
           p->trkx = scr.posx;
           p->trky = scr.posy;

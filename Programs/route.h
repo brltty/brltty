@@ -22,8 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern volatile int csr_active;
-extern volatile pid_t csr_pid;
+extern volatile pid_t routingProcess;
 
 int csrjmp (int x, int y, int scrno);
 

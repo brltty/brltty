@@ -46,9 +46,7 @@
 #define CSRJMP_SETTLE_DELAY 400	/* delay to use in csrjmp_sub() loops (ms) */
 
 
-volatile int csr_active = 0;
-volatile pid_t csr_pid = 0;
-
+volatile pid_t routingProcess = 0;
 
 void csrjmp_sub(int x, int y, int curscr)
 {
@@ -165,25 +163,27 @@ int csrjmp(int x, int y, int scrno)
     /* NB According to man 2 wait, setting SIGCHLD handler to SIG_IGN may mean
      * that wait can't catch the dying child.
      */
-    if (csr_active) {
-      kill(csr_pid, SIGUSR1);
+    if (routingProcess) {
+      kill(routingProcess, SIGUSR1);
       do {
         sigsuspend(&old_mask);
-      } while (csr_active);
+      } while (routingProcess);
     }
 
-    switch (csr_pid = fork()) {
-      case -1:			/* fork failed */
-        LogError("fork");
-	break;
-      default:			/* parent waits for child to return */
-        csr_active = 1;
-        started = 1;
-	break;
-      case 0:			/* child, cursor routing process */
+    switch (routingProcess = fork()) {
+      case 0: /* child, cursor routing process */
 	nice(CSRJMP_NICENESS);	/* reduce scheduling priority */
 	csrjmp_sub(x, y, scrno);
 	_exit(0);		/* terminate child process */
+
+      case -1: /* fork failed */
+        LogError("fork");
+        routingProcess = 0;
+	break;
+
+      default: /* parent, wait for child to return */
+        started = 1;
+	break;
     }
     sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
     return started;
