@@ -575,7 +575,7 @@ readBytes1 (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, i
   if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == cETX) return 1;
-    LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
+    LogBytes("Corrupt Packet", buffer, offset);
   }
   if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
   return 0;
@@ -746,10 +746,11 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
   while (1) {
     unsigned char buf[0X100];
 
-    do {
+    while (1) {
       READ(0, 1, 0);
-    } while (buf[0] != cSTX);
-    if (debug_reads) LogPrint(LOG_DEBUG, "Read: STX");
+      if (buf[0] == cSTX) break;
+      LogBytes("Discarded Byte", buf, 1);
+    }
 
     READ(1, 1, 0);
     switch (buf[1]) {
@@ -766,6 +767,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
       case cIdIdentify: {
         const int length = 10;
         READ(2, length-2, RBF_ETX);
+        if (debug_reads) LogBytes("Identity Packet", buf, length);
         if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
         delay(200);
         restartTerminal1(brl);
@@ -784,7 +786,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
           return CMD_ERR;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
-        if (debug_reads) LogBytes("Read", buf, length);
+        if (debug_reads) LogBytes("Input Packet", buf, length);
 
         {
           int command = handleKey1(brl, ((buf[2] << 8) | buf[3]),
@@ -813,6 +815,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
         message = "data framing error";
       logError:
         READ(2, 1, RBF_ETX);
+        if (debug_reads) LogBytes("Error Packet", buf, 3);
         LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
         restartTerminal1(brl);
         break;
@@ -1429,7 +1432,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
       int i;
 
       unsigned char values[InternalStatusCellCount];
-      memcpy(values, s, sizeof(values));
+      memcpy(values, s, StatusCellCount);
       values[STAT_INPUT] = input_mode;
 
       for (i=0; i<terminal->statusCount; i++) {
