@@ -213,9 +213,9 @@ usbControlTransfer (
   memset(&arg, 0, sizeof(arg));
   arg.setup.bRequestType = direction | type | recipient;
   arg.setup.bRequest = request;
-  arg.setup.wValue = value;
-  arg.setup.wIndex = index;
-  arg.setup.wLength = length;
+  putLittleEndian(&arg.setup.wValue, value);
+  putLittleEndian(&arg.setup.wIndex, index);
+  putLittleEndian(&arg.setup.wLength, length);
   arg.transfer.data = data;
   arg.transfer.timeout = timeout;
 

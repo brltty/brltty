@@ -57,7 +57,7 @@ usbGetLanguage (
   if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
                                 0, 0, &descriptor, timeout)) != -1) {
     if (count >= 4) {
-      *language = descriptor.string.wData[0];
+      *language = getLittleEndian(descriptor.string.wData[0]);
       return 1;
     } else {
       errno = ENODATA;
@@ -89,7 +89,7 @@ usbGetString (
   if ((string = malloc(count+1))) {
     string[count] = 0;
     while (count--) {
-      uint16_t character = descriptor.string.wData[count];
+      uint16_t character = getLittleEndian(descriptor.string.wData[count]);
       if (character & 0XFF00) character = '?';
       string[count] = character;
     }

@@ -22,6 +22,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* Define this if the host is big endian. */
+#undef WORDS_BIGENDIAN
+
 /* Define this if the compiler doesn't fully support the const keyword. */
 #undef const
 

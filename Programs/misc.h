@@ -37,6 +37,22 @@ extern "C" {
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
 #endif /* MAX */
 
+#define getSameEndian(from) (from)
+#define getOtherEndian(from) ((((from) & 0XFF) << 8) | (((from) >> 8) & 0XFF))
+#define putSameEndian(to, from) (*(to) = getSameEndian((from)))
+#define putOtherEndian(to, from) putSameEndian((to), getOtherEndian((from)))
+#ifdef WORDS_BIGENDIAN
+#  define getLittleEndian getOtherEndian
+#  define putLittleEndian putOtherEndian
+#  define getBigEndian getSameEndian
+#  define putBigEndian putSameEndian
+#else /* WORDS_BIGENDIAN */
+#  define getLittleEndian getSameEndian
+#  define putLittleEndian putSameEndian
+#  define getBigEndian getOtherEndian
+#  define putBigEndian putOtherEndian
+#endif /* WORDS_BIGENDIAN */
+
 #define _CONCATENATE(a,b) a##b
 #define CONCATENATE(a,b) _CONCATENATE(a,b)
 

@@ -247,6 +247,7 @@ AC_CHECK_HEADERS([getopt.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])
 AC_CHECK_HEADERS([alloca.h sys/io.h linux/vt.h])
 
+AC_C_BIGENDIAN
 AC_C_CONST
 AC_C_INLINE
 AC_OBJEXT

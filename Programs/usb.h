@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdint.h>
+#include <inttypes.h>
 
 /* Descriptor types. */
 #define USB_DESCRIPTOR_TYPE_DEVICE        0x01
