@@ -148,7 +148,15 @@ before con begword indis 35-256
 before con begword intrans 35-356
 begword ines 35-156
 
-word bleu 45-15-136
+class tv tvTV
+after tv endword ient 256-2345
+endword ient 24-126
+word balbutient 12-1-123-12-136-2345-24-126
+word initient 35-24-2345-24-126
+word dévient 145-123456-1236-24-126
+word renvient 1235-26-1236-24-126
+
+sufword bleu 45-15-136
 before con always brui 12-1235-23
 endword clait 14-123-146
 before voy always concr 14-346-25
