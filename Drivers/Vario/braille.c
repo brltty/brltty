@@ -126,7 +126,7 @@ static int myread(void *buf, unsigned len)
   return serialReadData(serialDevice,buf,len,100,100);
 }
 
-static int QueryDisplay(char *reply)
+static int QueryDisplay(unsigned char *reply)
 /* For auto-detect: send query, read response and validate response. */
 {
   if (serialWriteData(serialDevice, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID))
@@ -149,7 +149,7 @@ static int QueryDisplay(char *reply)
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int i = 0;
-  char reply[VARIO_DEVICE_ID_REPLY_LEN+1];
+  unsigned char reply[VARIO_DEVICE_ID_REPLY_LEN+1];
 
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
