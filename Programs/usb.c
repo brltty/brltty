@@ -674,7 +674,7 @@ usbAwaitInput (
   if (!(endpoint = usbGetInputEndpoint(device, endpointNumber))) return 0;
   if (endpoint->direction.input.completed) return 1;
 
-  interval = getLittleEndian(endpoint->descriptor->bInterval);
+  interval = endpoint->descriptor->bInterval;
   interval = MAX(20, interval);
 
   if (!(endpoint->direction.input.pending && getQueueSize(endpoint->direction.input.pending))) {

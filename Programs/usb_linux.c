@@ -293,6 +293,37 @@ usbBulkTransfer (
   return -1;
 }
 
+static int
+usbReapUrb (
+  UsbDevice *device,
+  int wait
+) {
+  UsbDeviceExtension *devx = device->extension;
+  struct usbdevfs_urb *urb;
+
+  if (ioctl(devx->file,
+            wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
+            &urb) != -1) {
+    if (urb) {
+      UsbEndpoint *endpoint;
+
+      if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
+        UsbEndpointExtension *eptx = endpoint->extension;
+
+        if (enqueueItem(eptx->completedRequests, urb)) return 1;
+        LogError("USB completed request enqueue");
+        free(urb);
+      }
+    } else {
+      errno = EAGAIN;
+    }
+  } else {
+    if (wait || (errno != EAGAIN)) LogError("USB URB reap");
+  }
+
+  return 0;
+}
+
 int
 usbReadEndpoint (
   UsbDevice *device,
@@ -304,13 +335,56 @@ usbReadEndpoint (
   int count = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
-    switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
+    UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
+    switch (transfer) {
       case UsbEndpointTransfer_Bulk:
         count = usbBulkTransfer(endpoint, buffer, length, timeout);
         break;
 
+      case UsbEndpointTransfer_Interrupt: {
+        struct usbdevfs_urb *urb = usbSubmitRequest(device,
+                                                    endpoint->descriptor->bEndpointAddress,
+                                                    NULL, length, NULL);
+
+        count = -1;
+        if (urb) {
+          UsbEndpointExtension *eptx = endpoint->extension;
+          int interval = endpoint->descriptor->bInterval + 1;
+
+          hasTimedOut(0);
+          do {
+            if (usbReapUrb(device, 0) &&
+                deleteItem(eptx->completedRequests, urb)) {
+              if (!urb->status) {
+                count = urb->actual_length;
+                if (count > length) count = length;
+                memcpy(buffer, urb->buffer, count);
+              } else if ((errno = urb->status) < 0) {
+                errno = -errno;
+              }
+
+              break;
+            }
+
+            if (hasTimedOut(timeout)) {
+              usbCancelRequest(device, urb);
+              urb = NULL;
+
+              errno = ETIMEDOUT;
+              break;
+            }
+            approximateDelay(interval);
+          } while (1);
+
+          if (urb) free(urb);
+        }
+
+        break;
+      }
+
       default:
-        errno = EIO;
+        LogPrint(LOG_ERR, "USB input transfer not supported: %d", transfer);
+        errno = ENOSYS;
         break;
     }
 
@@ -334,12 +408,14 @@ usbWriteEndpoint (
 ) {
   UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
   if (endpoint) {
-    switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
+    UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
+    switch (transfer) {
       case UsbEndpointTransfer_Bulk:
         return usbBulkTransfer(endpoint, (void *)buffer, length, timeout);
 
       default:
-        errno = EINVAL;
+        LogPrint(LOG_ERR, "USB output transfer not supported: %d", transfer);
+        errno = ENOSYS;
         break;
     }
   }
@@ -404,37 +480,6 @@ usbSubmitRequest (
     }
   }
   return NULL;
-}
-
-static int
-usbReapUrb (
-  UsbDevice *device,
-  int wait
-) {
-  UsbDeviceExtension *devx = device->extension;
-  struct usbdevfs_urb *urb;
-
-  if (ioctl(devx->file,
-            wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
-            &urb) != -1) {
-    if (urb) {
-      UsbEndpoint *endpoint;
-
-      if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
-        UsbEndpointExtension *eptx = endpoint->extension;
-
-        if (enqueueItem(eptx->completedRequests, urb)) return 1;
-        LogError("USB completed request enqueue");
-        free(urb);
-      }
-    } else {
-      errno = EAGAIN;
-    }
-  } else {
-    if (wait || (errno != EAGAIN)) LogError("USB URB reap");
-  }
-
-  return 0;
 }
 
 int
