@@ -83,22 +83,28 @@ loadBrailleDriver (const char **driver, const char *driverDirectory) {
 }
 
 int
-listBrailleDrivers (void) {
-  char buf[64];
-  static const char *list_file = LIBRARY_DIRECTORY "/brltty-brl.lst";
-  int cnt, fd = open(list_file, O_RDONLY);
-  if (fd < 0) {
-    fprintf(stderr, "Error: can't access braille driver list file\n");
-    perror(list_file);
-    return 0;
+listBrailleDrivers (const char *directory) {
+  int ok = 0;
+  char *path = makePath(directory, "brltty-brl.lst");
+  if (path) {
+    int fd = open(path, O_RDONLY);
+    if (fd != -1) {
+      char buffer[0X40];
+      int count;
+      fprintf(stderr, "Available Braille Drivers:\n\n");
+      fprintf(stderr, "XX  Description\n");
+      fprintf(stderr, "--  -----------\n");
+      while ((count = read(fd, buffer, sizeof(buffer))))
+        fwrite(buffer, count, 1, stderr);
+      ok = 1;
+      close(fd);
+    } else {
+      LogPrint(LOG_ERR, "Cannot open braille driver list: %s: %s",
+               path, strerror(errno));
+    }
+    free(path);
   }
-  fprintf(stderr, "Available Braille Drivers:\n\n");
-  fprintf(stderr, "XX\tDescription\n");
-  fprintf(stderr, "--\t-----------\n");
-  while ((cnt = read(fd, buf, sizeof(buf))))
-    fwrite(buf, cnt, 1, stderr);
-  close(fd);
-  return 1;
+  return ok;
 }
 
 void

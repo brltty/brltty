@@ -580,7 +580,7 @@ getBrailleDriver (void) {
   } else {
     LogPrint(LOG_ERR, "Bad braille driver selection: %s", opt_brailleDriver);
     fprintf(stderr, "\n");
-    listBrailleDrivers();
+    listBrailleDrivers(opt_libraryDirectory);
     fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
 
     /* not fatal */
@@ -647,7 +647,7 @@ getSpeechDriver (void) {
   } else {
     LogPrint(LOG_ERR, "Bad speech driver selection: %s", opt_speechDriver);
     fprintf(stderr, "\n");
-    listSpeechDrivers();
+    listSpeechDrivers(opt_libraryDirectory);
     fprintf(stderr, "\nUse -s to specify one, and -h for quick help.\n\n");
 
     /* not fatal */
