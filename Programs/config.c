@@ -1084,7 +1084,7 @@ updatePreferences (void) {
       if (settingChanged) {
         settingChanged = 0;
         /* make sure the updated value is visible */
-        if (lineLength-lineIndent > brl.x*brl.y)
+        if ((lineLength-lineIndent > brl.x*brl.y) && (lineIndent < settingIndent))
           lineIndent = settingIndent;
       }
 
