@@ -77,6 +77,9 @@ scr_linux.$O:
 scr_hurd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_hurd.c
 
+scr_atspi.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_atspi.c
+
 ###############################################################################
 
 TUNE_OBJECTS = tunes.$O $(BEEPER_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
