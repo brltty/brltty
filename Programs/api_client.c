@@ -132,6 +132,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 
  /* Here update settings with the parameters from misc sources (files, env...) */
  updateSettings(&settings, clientSettings);
+ if (usedSettings!=NULL) updateSettings(usedSettings, &settings); 
 
  if (brlapi_loadAuthKey(settings.authKey,&authlength,(void *) &auth[0])<0)
  {
@@ -190,8 +191,13 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   fd = -1;
   return -1;
  }
- brlapi_waitForAck();
- if (usedSettings!=NULL) updateSettings(usedSettings, &settings); 
+ if (brlapi_waitForAck()!=0)
+ {
+  close(fd);
+  fd = -1;
+  return -1;
+ }
+
  return fd;
 }
 
