@@ -83,6 +83,14 @@ typedef union {
   unsigned char bytes[0XFF];
 } UsbDescriptor;
 
+typedef struct {
+  uint8_t bRequestType;
+  uint8_t bRequest;
+  uint16_t wValue;
+  uint16_t wIndex;
+  uint16_t wLength;
+} __attribute__((packed)) UsbSetupPacket;
+
 typedef struct UsbDeviceStruct UsbDevice;
 typedef int (*UsbDeviceChooser) (UsbDevice *device, void *data);
 

@@ -251,13 +251,7 @@ usbControlTransfer (
 ) {
   union {
     struct usbdevfs_ctrltransfer transfer;
-    struct {
-      uint8_t bRequestType;
-      uint8_t bRequest;
-      uint16_t wValue;
-      uint16_t wIndex;
-      uint16_t wLength;
-    } setup;
+    UsbSetupPacket setup;
   } arg;
   memset(&arg, 0, sizeof(arg));
   arg.setup.bRequestType = direction | type | recipient;
