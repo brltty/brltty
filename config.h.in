@@ -154,6 +154,10 @@ extern "C" {
 /* Define this to include PCM (soundcard audio) alert tunes support. */
 #undef ENABLE_PCM_TUNES
 
+/* Define only one of the following PCM interfaces. */
+#undef USE_PCM_TUNES_OSS
+#undef USE_PCM_TUNES_ALSA
+
 /* Define this to include MIDI (Musical Instrument Digital Interface) alert tunes support. */
 #undef ENABLE_MIDI_TUNES
 

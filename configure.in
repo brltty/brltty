@@ -438,10 +438,13 @@ esac])
 libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
+brltty_pcm_interfaces=""
 case "${host_os}"
 in
    linux*)
       system_object="linux"
+      brltty_pcm_interfaces="oss"
+      AC_CHECK_HEADER([alsa/asoundlib.h], [brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"])
       ;;
    solaris*)
       system_object="solaris"
@@ -517,7 +520,9 @@ BRLTTY_ARG_DISABLE(
    [tunes via PCM (soundcard digital audio)], [dnl
    AC_DEFINE([ENABLE_PCM_TUNES])
    pcm_tune_objects='pcm.$O'
-])
+],
+[],
+[${brltty_pcm_interfaces}])
 AC_SUBST([pcm_tune_objects])
 
 BRLTTY_ARG_DISABLE(

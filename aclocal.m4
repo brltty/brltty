@@ -89,17 +89,38 @@ var="${enableval}"
 BRLTTY_SUMMARY_ITEM([$1], var)dnl
 popdef([var])
 
-case "${enableval}" in
-   yes)
-      $5
-      ;;
-   no)
-      $6
-      ;;
-   *)
-      ifelse($7, [], [AC_MSG_ERROR([unexpected value for feature $1: ${enableval}])], [$7])
-      ;;
-esac])
+if test "${enableval}" = "no"
+then
+   ifelse(len([$6]), 0, [:], [$6])
+else
+   if test "${enableval}" == "yes"
+   then
+      brltty_ok=true
+   else
+      brltty_ok=false
+ifelse(len([$7]), 0, [], [dnl
+      set -- [$7]
+      test "${#}" -gt 0 && {
+         for brltty_selection
+         do
+            test "${brltty_selection}" = "${enableval}" && {
+               brltty_ok=true
+               brltty_uc="`echo "use_$1_${enableval}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz-%ABCDEFGHIJKLMNOPQRSTUVWXYZ_%'`"
+               AC_DEFINE_UNQUOTED([${brltty_uc}])
+               break
+            }
+         done
+      }
+])dnl
+   fi
+
+   if "${brltty_ok}"
+   then
+      ifelse(len([$5]), 0, [:], [$5])
+   else
+      AC_MSG_ERROR([invalid selection: --enable-$1=${enableval}])
+   fi
+fi])
 
 AC_DEFUN([BRLTTY_HELP_STRING], [dnl
 AC_HELP_STRING([$1], patsubst([$2], [
