@@ -202,6 +202,6 @@ void
 setHelpPageNumber (short page) {
 }
 int
-insertString (const char *string) {
+insertString (const unsigned char *string) {
   return 0;
 }

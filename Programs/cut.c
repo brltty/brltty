@@ -29,24 +29,24 @@
 #include "cut.h"
 
 /* Global state variables */
-char *cut_buffer = NULL;
+unsigned char *cut_buffer = NULL;
 static short int beginColumn = 0, beginRow = 0;
 static unsigned int previousLength = 0;
 
-static char *
+static unsigned char *
 cut (int fromColumn, int fromRow, int toColumn, int toRow) {
-  char *newBuffer = NULL;
+  unsigned char *newBuffer = NULL;
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
 
   if ((columns >= 1) && (rows >= 1)) {
-    unsigned char *fromBuffer = (unsigned char *)malloc(rows * columns);
+    unsigned char *fromBuffer = malloc(rows * columns);
     if (fromBuffer) {
-      char *toBuffer = (char *)malloc(rows * (columns + 1));
+      unsigned char *toBuffer = malloc(rows * (columns + 1));
       if (toBuffer) {
         if (readScreen(fromColumn, fromRow, columns, rows, fromBuffer, SCR_TEXT)) {
           unsigned char *fromAddress = fromBuffer;
-          char *toAddress = toBuffer;
+          unsigned char *toAddress = toBuffer;
           int row;
           /* remove spaces at end of line, add return (except to last line),
              and possibly remove non-printables... if any */
@@ -71,7 +71,7 @@ cut (int fromColumn, int fromRow, int toColumn, int toRow) {
           /* make a new permanent buffer of just the right size */
           {
             int length = toAddress - toBuffer;
-            if ((newBuffer = (char *)malloc(length))) {
+            if ((newBuffer = (unsigned char *)malloc(length))) {
               memcpy(newBuffer, toBuffer, length);
             }
           }
@@ -85,9 +85,9 @@ cut (int fromColumn, int fromRow, int toColumn, int toRow) {
 }
 
 static int
-append (char *buffer) {
+append (unsigned char *buffer) {
   if (cut_buffer) {
-    char *newBuffer = (char *)malloc(previousLength + strlen(buffer) + 1);
+    unsigned char *newBuffer = malloc(previousLength + strlen(buffer) + 1);
     if (!newBuffer) return 0;
     memcpy(newBuffer, cut_buffer, previousLength);
     strcpy(newBuffer+previousLength, buffer);
@@ -126,7 +126,7 @@ cut_append (int column, int row) {
 
 int
 cut_rectangle (int column, int row) {
-  char *buffer = cut(beginColumn, beginRow, column, row);
+  unsigned char *buffer = cut(beginColumn, beginRow, column, row);
   if (buffer) {
     if (append(buffer)) return 1;
     free(buffer);
@@ -141,16 +141,16 @@ cut_line (int column, int row) {
   {
     int width = screen.cols;
     int rightColumn = width - 1;
-    char *buffer = cut(0, beginRow, rightColumn, row);
+    unsigned char *buffer = cut(0, beginRow, rightColumn, row);
     if (buffer) {
       if (column < rightColumn) {
         int length = column + 1;
-        char *start = strrchr(buffer, '\r');
+        unsigned char *start = strrchr(buffer, '\r');
         start = start? start+1: buffer;
         if (length < strlen(start)) start[length] = 0;
       }
       if (beginColumn) {
-        char *start = strchr(buffer, '\r');
+        unsigned char *start = strchr(buffer, '\r');
         if (!start) start = buffer + strlen(buffer);
         if ((start - buffer) > beginColumn) start = buffer + beginColumn;
         if (start != buffer) memmove(buffer, start, strlen(start)+1);
