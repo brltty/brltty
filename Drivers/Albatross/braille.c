@@ -35,6 +35,9 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
+#define LOWER_ROUTING_DEFAULT CR_ROUTE
+#define UPPER_ROUTING_DEFAULT CR_DESCCHAR
+
 static int fileDescriptor = -1;
 static struct termios oldSettings;
 static struct termios newSettings;
@@ -84,8 +87,8 @@ acknowledgeDisplay (void) {
   LogPrint(LOG_INFO, "Albatross attribute byte: %02X", attributes);
 
   cellCount = (attributes & 0X80)? 80: 40;
-  lowerRoutingFunction = CR_ROUTE;
-  upperRoutingFunction = CR_DESCCHAR;
+  lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
+  upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
   LogPrint(LOG_INFO, "Albatross has %d columns.", cellCount);
   return 1;
@@ -210,20 +213,23 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       int base;
       int offset;
 
-      int lowerBase = lowerRoutingFunction;
-      int upperBase = (cellCount <= 46)? upperRoutingFunction: CMD_NOOP;
-      lowerRoutingFunction = CR_ROUTE;
-      upperRoutingFunction = CR_DESCCHAR;
+      int lower = lowerRoutingFunction;
+      int upper = upperRoutingFunction;
+      lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
+      upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
       if ((byte >= 2) && (byte <= 41)) {
-        base = lowerBase;
+        base = lower;
         offset = byte - 2;
-      } else if ((byte >= 111) && (byte <= 116)) {
-        base = lowerBase;
+      } else if ((byte >= 111) && (byte <= 150)) {
+        base = lower;
         offset = byte - 71;
+      } else if ((byte >= 43) && (byte <= 82)) {
+        base = upper;
+        offset = byte - 43;
       } else if ((byte >= 152) && (byte <= 157)) {
-        base = upperBase;
-        offset = byte - 106;
+        base = upper;
+        offset = byte - 112;
       } else {
         goto notRouting;
       }
