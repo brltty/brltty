@@ -182,7 +182,7 @@ typedef enum {
 #define CR_GOTOMARK  0XC00 /* go to remembered window position */
 
 /* For entering a special key. */
-#define VAL_PASSKEY 0x2000
+#define VAL_PASSKEY 0X2000
 typedef enum {
   VPK_RETURN,
   VPK_TAB,
@@ -201,14 +201,16 @@ typedef enum {
   VPK_FUNCTION
 } Key;
 
-#define VAL_PASSCHAR 0x2100 /* input a character by value */
-#define VAL_PASSDOTS 0x2200 /* input a character as braille dots */
+#define VAL_PASSCHAR 0X2100 /* input a character by value */
+#define VAL_PASSDOTS 0X2200 /* input a character as braille dots */
 
 /* For modifying a character to be typed. */
 #define VPC_CONTROL 0X010000
 #define VPC_META    0X020000
 #define VPC_UPPER   0X040000
 #define VPC_SHIFT   0X080000
+
+#define VAL_PASSAT2 0X2300 /* input an AT set 2 keyboard scan code */
 
 /* status cell styles */
 typedef enum {

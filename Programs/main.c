@@ -38,6 +38,7 @@
 #include "ctb.h"
 #include "route.h"
 #include "cut.h"
+#include "at2.h"
 #include "scr.h"
 #include "brl.h"
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1039,6 +1040,7 @@ main (int argc, char *argv[]) {
         }
       }
 
+    doCommand:
       if (!executeScreenCommand(command)) {
         switch (command & VAL_CMD_MASK) {
           case CMD_NOOP:        /* do nothing but loop */
@@ -1624,10 +1626,11 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
           default: {
-            int key = command & VAL_BLK_MASK;
+            int blk = command & VAL_BLK_MASK;
             int arg = command & VAL_ARG_MASK;
             int flags = command & VAL_FLG_MASK;
-            switch (key) {
+
+            switch (blk) {
               case VAL_PASSKEY: {
                 unsigned short key;
                 switch (arg) {
@@ -1683,16 +1686,23 @@ main (int argc, char *argv[]) {
                   playTune(&tune_command_rejected);
                 break;
               }
+
               case VAL_PASSCHAR:
                 if (!insertCharacter(arg, flags)) {
                   playTune(&tune_command_rejected);
                 }
                 break;
+
               case VAL_PASSDOTS:
                 if (!insertCharacter(untextTable[arg], flags)) {
                   playTune(&tune_command_rejected);
                 }
                 break;
+
+              case VAL_PASSAT2:
+                if (at2Process(&command, arg)) goto doCommand;
+                break;
+
               case CR_ROUTE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 0);

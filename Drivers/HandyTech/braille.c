@@ -164,6 +164,10 @@ static unsigned char rawStatus[MAX_STCELLS];		/* to hold status info */
 static unsigned char prevStatus[MAX_STCELLS];	/* to hold previous status */
 static const ModelDescription *model;		/* points to terminal model config struct */
 
+static unsigned char *at2Buffer;
+static int at2Size;
+static int at2Count;
+
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) ();
@@ -586,6 +590,9 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   at2Reset();
+  at2Buffer = NULL;
+  at2Size = 0;
+  at2Count = 0;
 
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
@@ -644,6 +651,12 @@ brl_close (BrailleDisplay *brl) {
     io->writeBytes(model->stopAddress, model->stopLength, NULL);
   }
   io->closePort();
+
+  if (at2Buffer) {
+    free(at2Buffer);
+    at2Buffer = NULL;
+  }
+
   deallocateBuffers();
 }
 
@@ -1360,6 +1373,12 @@ static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
   int timedOut = 1;
 
+  if (at2Count) {
+    unsigned char code = at2Buffer[0];
+    memcpy(at2Buffer, at2Buffer+1, --at2Count);
+    return VAL_PASSAT2 + code;
+  }
+
   while (1) {
     unsigned char byte;
     {
@@ -1423,9 +1442,18 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
 
                     switch (data[0]) {
                       case 0X09: {
-                        int command = EOF;
-                        while (length--) at2Process(&command, *bytes++);
-                        if (command != EOF) return command;
+                        if (length) {
+                          int code = *bytes++;
+                          if (--length) {
+                            int newCount = at2Count + length;
+                            if (newCount > at2Size) {
+                              at2Buffer = reallocWrapper(at2Buffer, newCount);
+                            }
+                            memcpy(at2Buffer+at2Count, bytes, length);
+                            at2Count = newCount;
+                          }
+                          return VAL_PASSAT2 + code;
+                        }
                         break;
                       }
                     }
