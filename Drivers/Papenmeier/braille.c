@@ -1083,9 +1083,9 @@ initializeTerminal2 (BrailleDisplay *brl) {
     data[size++] = 0;
     data[size++] = 0;
 
-    data[size++] = terminal->statusCount;
+    data[size++] = 0; /* vertical modules */
     data[size++] = terminal->leftKeys;
-    data[size++] = terminal->columns;
+    data[size++] = terminal->columns + terminal->statusCount;
     data[size++] = terminal->rightKeys;
 
     data[size++] = 2; /* routing keys per cell */
@@ -1096,7 +1096,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
     data[size++] = 1; /* routing keys mixed into braille data stream */
 
     LogBytes("Init Packet", data, size);
-    // writePacket2(brl, 1, size, data);
+    writePacket2(brl, 1, size, data);
   }
 }
 
