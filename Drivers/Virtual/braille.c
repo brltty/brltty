@@ -76,17 +76,17 @@ static unsigned char *previousVisual = NULL;
 static unsigned char previousStatus[StatusCellCount];
 
 static char *
-formatSocketAddress (const struct sockaddr *address) {
+formatAddress (const struct sockaddr *address) {
   switch (address->sa_family) {
     case AF_UNIX: {
-      const struct sockaddr_un *sa = (const struct sockaddr_un *)address;
-      return strdupWrapper(sa->sun_path);
+      const struct sockaddr_un *unixAddress = (const struct sockaddr_un *)address;
+      return strdupWrapper(unixAddress->sun_path);
     }
 
     case AF_INET: {
-      const struct sockaddr_in *sa = (const struct sockaddr_in *)address;
-      const char *host = inet_ntoa(sa->sin_addr);
-      unsigned short port = ntohs(sa->sin_port);
+      const struct sockaddr_in *inetAddress = (const struct sockaddr_in *)address;
+      const char *host = inet_ntoa(inetAddress->sin_addr);
+      unsigned short port = ntohs(inetAddress->sin_port);
       char buffer[strlen(host) + 7];
       snprintf(buffer, sizeof(buffer), "%s:%u", host, port);
       return strdupWrapper(buffer);
@@ -99,134 +99,205 @@ formatSocketAddress (const struct sockaddr *address) {
 
 static int
 acceptConnection (
-  int queueSocket,
+  int (*getSocket) (void),
+  int (*prepareQueue) (int socket),
+  void (*unbindAddress) (const struct sockaddr *address),
   const struct sockaddr *localAddress, socklen_t localSize,
   struct sockaddr *remoteAddress, socklen_t *remoteSize
 ) {
   int serverSocket = -1;
+  int queueSocket;
 
-  if (listen(queueSocket, 1) != -1) {
-    int attempts = 0;
+  if ((queueSocket = getSocket()) != -1) {
+    if (!prepareQueue || prepareQueue(queueSocket)) {
+      if (bind(queueSocket, localAddress, localSize) != -1) {
+        if (listen(queueSocket, 1) != -1) {
+          int attempts = 0;
 
-    {
-      char *address = formatSocketAddress(localAddress);
-      LogPrint(LOG_NOTICE, "Listening on: %s", address);
-      free(address);
-    }
-
-    while (1) {
-      fd_set readMask;
-      struct timeval timeout;
-
-      FD_ZERO(&readMask);
-      FD_SET(queueSocket, &readMask);
-
-      memset(&timeout, 0, sizeof(timeout));
-      timeout.tv_sec = 10;
-
-      ++attempts;
-      switch (select(queueSocket+1, &readMask, NULL, NULL, &timeout)) {
-        case -1:
-          if (errno == EINTR) continue;
-          LogError("select");
-          break;
-
-        case 0:
-          LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d).", attempts);
-          continue;
-
-        default: {
-          if (!FD_ISSET(queueSocket, &readMask)) continue;
-
-          if ((serverSocket = accept(queueSocket, remoteAddress, remoteSize)) != -1) {
-            char *address = formatSocketAddress(remoteAddress);
-            LogPrint(LOG_NOTICE, "Client is: %s", address);
+          {
+            char *address = formatAddress(localAddress);
+            LogPrint(LOG_NOTICE, "Listening on: %s", address);
             free(address);
-          } else {
-            LogError("accept");
           }
+
+          while (1) {
+            fd_set readMask;
+            struct timeval timeout;
+
+            FD_ZERO(&readMask);
+            FD_SET(queueSocket, &readMask);
+
+            memset(&timeout, 0, sizeof(timeout));
+            timeout.tv_sec = 10;
+
+            ++attempts;
+            switch (select(queueSocket+1, &readMask, NULL, NULL, &timeout)) {
+              case -1:
+                if (errno == EINTR) continue;
+                LogError("select");
+                break;
+
+              case 0:
+                LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d).", attempts);
+                continue;
+
+              default: {
+                if (!FD_ISSET(queueSocket, &readMask)) continue;
+
+                if ((serverSocket = accept(queueSocket, remoteAddress, remoteSize)) != -1) {
+                  char *address = formatAddress(remoteAddress);
+                  LogPrint(LOG_NOTICE, "Client is: %s", address);
+                  free(address);
+                } else {
+                  LogError("accept");
+                }
+              }
+            }
+            break;
+          }
+        } else {
+          LogError("listen");
         }
+
+        if (unbindAddress) unbindAddress(localAddress);
+      } else {
+        LogError("bind");
       }
-      break;
     }
+
+    close(queueSocket);
   } else {
-    LogError("listen");
+    LogError("socket");
   }
 
   return serverSocket;
+}
+
+static int
+requestConnection (
+  int (*getSocket) (void),
+  struct sockaddr *remoteAddress, socklen_t remoteSize
+) {
+  int clientSocket;
+
+  {
+    char *address = formatAddress(remoteAddress);
+    LogPrint(LOG_DEBUG, "Connecting to: %s", address);
+    free(address);
+  }
+
+  if ((clientSocket = getSocket()) != -1) {
+    if (connect(clientSocket, remoteAddress, remoteSize) != -1) {
+      {
+        char *address = formatAddress(remoteAddress);
+        LogPrint(LOG_NOTICE, "Connected to: %s", address);
+        free(address);
+      }
+
+      return clientSocket;
+    } else {
+      LogPrint(LOG_DEBUG, "connect error: %s", strerror(errno));
+    }
+
+    close(clientSocket);
+  } else {
+    LogError("socket");
+  }
+
+  return -1;
+}
+
+static int
+setReuseAddress (int socket) {
+  int yes = 1;
+  if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) != -1) {
+    return 1;
+  } else {
+    LogError("setsockopt REUSEADDR");
+  }
+  return 0;
+}
+
+static int
+getUnixSocket (void) {
+  return socket(PF_UNIX, SOCK_STREAM, 0);
+}
+
+static void
+setUnixAddress (struct sockaddr_un *address, const char *path) {
+  memset(address, 0, sizeof(*address));
+  address->sun_family = AF_UNIX;
+  strncpy(address->sun_path, path, sizeof(address->sun_path)-1);
+}
+
+static void
+unbindUnixAddress (const struct sockaddr *address) {
+  const struct sockaddr_un *unixAddress = (const struct sockaddr_un *)address;
+  if (unlink(unixAddress->sun_path) == -1) {
+    LogError("unlink");
+  }
 }
 
 static int
 acceptUnixConnection (const char *path) {
-  int serverSocket = -1;
-  int queueSocket;
+  struct sockaddr_un localAddress;
+  struct sockaddr_un remoteAddress;
+  socklen_t remoteSize = sizeof(remoteAddress);
 
-  if ((queueSocket = socket(PF_UNIX, SOCK_STREAM, 0)) != -1) {
-    struct sockaddr_un localAddress;
-    struct sockaddr_un remoteAddress;
-    socklen_t remoteSize = sizeof(remoteAddress);
-
-    memset(&localAddress, 0, sizeof(localAddress));
-    localAddress.sun_family = AF_UNIX;
-    strncpy(localAddress.sun_path, path, sizeof(localAddress.sun_path)-1);
-
-    if (bind(queueSocket, (struct sockaddr *)&localAddress, sizeof(localAddress)) != -1) {
-      serverSocket = acceptConnection(queueSocket,
-                                      (struct sockaddr *)&localAddress, sizeof(localAddress),
-                                      (struct sockaddr *)&remoteAddress, &remoteSize);
-      if (unlink(localAddress.sun_path) == -1) {
-        LogError("unlink");
-      }
-    } else {
-      LogError("bind");
-    }
-
-    close(queueSocket);
-  } else {
-    LogError("socket");
-  }
-
-  return serverSocket;
+  setUnixAddress(&localAddress, path);
+  return acceptConnection(getUnixSocket, NULL, unbindUnixAddress,
+                          (struct sockaddr *)&localAddress, sizeof(localAddress),
+                          (struct sockaddr *)&remoteAddress, &remoteSize);
 }
 
 static int
-acceptInetConnection (unsigned short port, unsigned long address) {
-  int serverSocket = -1;
-  int queueSocket;
+requestUnixConnection (const char *path) {
+  struct sockaddr_un remoteAddress;
 
-  if ((queueSocket = socket(PF_INET, SOCK_STREAM, 0)) != -1) {
-    struct sockaddr_in localAddress;
-    struct sockaddr_in remoteAddress;
-    socklen_t remoteSize = sizeof(remoteAddress);
+  setUnixAddress(&remoteAddress, path);
+  return requestConnection(getUnixSocket,
+                           (struct sockaddr *)&remoteAddress, sizeof(remoteAddress));
+}
 
-    /* lose the pesky "address already in use" error message */
-    {
-      int yes = 1;
-      if (setsockopt(queueSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
-        LogError("setsockopt");
-        /* non-fatal */
-      }
-    }
+static int
+getInetSocket (void) {
+  return socket(PF_INET, SOCK_STREAM, 0);
+}
 
-    memset(&localAddress, 0, sizeof(localAddress));
-    localAddress.sin_family = AF_INET;
-    localAddress.sin_addr.s_addr = address;
-    localAddress.sin_port = htons(port);
+static void
+setInetAddress (struct sockaddr_in *address, unsigned short port, unsigned long host) {
+  memset(address, 0, sizeof(*address));
+  address->sin_family = AF_INET;
+  address->sin_addr.s_addr = host;
+  address->sin_port = htons(port);
+}
 
-    if (bind(queueSocket, (struct sockaddr *)&localAddress, sizeof(localAddress)) != -1) {
-      serverSocket = acceptConnection(queueSocket,
-                                      (struct sockaddr *)&localAddress, sizeof(localAddress),
-                                      (struct sockaddr *)&remoteAddress, &remoteSize);
-    } else {
-      LogError("bind");
-    }
+static int
+prepareInetQueue (int socket) {
+  if (setReuseAddress(socket))
+    return 1;
+  return 0;
+}
 
-    close(queueSocket);
-  } else {
-    LogError("socket");
-  }
+static int
+acceptInetConnection (unsigned short port, unsigned long host) {
+  struct sockaddr_in localAddress;
+  struct sockaddr_in remoteAddress;
+  socklen_t remoteSize = sizeof(remoteAddress);
 
-  return serverSocket;
+  setInetAddress(&localAddress, port, host);
+  return acceptConnection(getInetSocket, prepareInetQueue, NULL,
+                          (struct sockaddr *)&localAddress, sizeof(localAddress),
+                          (struct sockaddr *)&remoteAddress, &remoteSize);
+}
+
+static int
+requestInetConnection (unsigned short port, unsigned long host) {
+  struct sockaddr_in remoteAddress;
+
+  setInetAddress(&remoteAddress, port, host);
+  return requestConnection(getInetSocket,
+                           (struct sockaddr *)&remoteAddress, sizeof(remoteAddress));
 }
 
 static char *
