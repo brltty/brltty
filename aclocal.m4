@@ -12,7 +12,7 @@ eval 'brltty_expanded="'$2'"'
 AC_DEFINE_UNQUOTED([$1], ["${brltty_expanded}"])])
 
 AC_DEFUN([BRLTTY_ARG_WITH], [dnl
-AC_ARG_WITH([$1], BRLTTY_STRING_HELP([--with-$1=$2], [$3]), [$4="${withval}"], [$4=$5])])
+AC_ARG_WITH([$1], BRLTTY_HELP_STRING([--with-$1=$2], [$3]), [$4="${withval}"], [$4=$5])])
 
 AC_DEFUN([BRLTTY_ARG_ENABLE], [dnl
 BRLTTY_ARG_FEATURE([$1], [$2], [enable], [no], [$3], [$4], [$5])])
@@ -21,7 +21,7 @@ AC_DEFUN([BRLTTY_ARG_DISABLE], [dnl
 BRLTTY_ARG_FEATURE([$1], [$2], [disable], [yes], [$3], [$4], [$5])])
 
 AC_DEFUN([BRLTTY_ARG_FEATURE], [dnl
-AC_ARG_ENABLE([$1], BRLTTY_STRING_HELP([--$3-$1], [$2]), [], [enableval="$4"])
+AC_ARG_ENABLE([$1], BRLTTY_HELP_STRING([--$3-$1], [$2]), [], [enableval="$4"])
 case "${enableval}" in
    yes)
       $5
@@ -38,16 +38,22 @@ var="${enableval}"
 BRLTTY_SUMMARY_ITEM([$1], var)dnl
 popdef([var])])
 
-AC_DEFUN([BRLTTY_STRING_HELP], [dnl
-pushdef([brltty_column], ifelse([$3], [], [32], [$3]))dnl
-builtin([format], [  %-]builtin([eval], brltty_column-3)[s ], [$1])dnl
-patsubst([$2], [
-], [\&builtin([format], [%]brltty_column[s], [])])[]dnl
-popdef([brltty_column])])dnl
+AC_DEFUN([BRLTTY_HELP_STRING], [dnl
+AC_HELP_STRING([$1], patsubst([$2], [
+.*$]), [brltty_help_prefix])dnl
+changequote(<, >)dnl
+patsubst(patsubst(<$2>, <\`[^
+]*>), <
+>, <\&brltty_help_prefix>)<>dnl
+changequote([, ])dnl
+])
+m4_define([brltty_help_indent], 32)
+m4_define([brltty_help_prefix], m4_format([%]brltty_help_indent[s], []))
+m4_define([brltty_help_width], m4_eval(79-brltty_help_indent))
 
 AC_DEFUN([BRLTTY_ITEM], [dnl
 define([brltty_item_list_$1], ifdef([brltty_item_list_$1], [brltty_item_list_$1])[
-- $2  $3])dnl
+m4_text_wrap([$3], [      ], [- $2  ], brltty_help_width)])dnl
 brltty_item_entries_$1="${brltty_item_entries_$1} $2-$3"
 brltty_item_codes_$1="${brltty_item_codes_$1} $2"
 brltty_item_names_$1="${brltty_item_names_$1} $3"])
@@ -132,6 +138,14 @@ then
 fi
 AC_SUBST([brltty_driver_targets_$1])
 AC_SUBST([brltty_driver_objects_$1])])
+
+AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl
+define([brltty_tables_text], ifdef([brltty_tables_text], [brltty_tables_text])[
+m4_text_wrap([$2], [                    ], [- m4_format([%-17s], [$1]) ], brltty_help_width)])])
+
+AC_DEFUN([BRLTTY_ATTRIBUTES_TABLE], [dnl
+define([brltty_tables_attributes], ifdef([brltty_tables_attributes], [brltty_tables_attributes])[
+m4_text_wrap([$2], [                 ], [- m4_format([%-14s], [$1]) ], brltty_help_width)])])
 
 AC_DEFUN([BRLTTY_SUMMARY_BEGIN], [dnl
 brltty_summary_lines="
