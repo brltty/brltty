@@ -1,5 +1,5 @@
-BRLTTY TODO - January 30, 1999
-==============================
+BRLTTY TODO - March 23, 1999
+============================
 
 (This concerns the main module of BRLTTY.  Individual Braille terminal
 drivers may have their own TODO lists.)
@@ -53,3 +53,6 @@ Your help is welcome.
   modules to make BRLTTY usable with the screen package or such and then 
   become available for any other Unix platform.  An experimental patch is 
   available in the Patches/ directory.
+
+- Installation boot disk HowTo
+

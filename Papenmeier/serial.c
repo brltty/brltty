@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
 static void finish(int sig)
 {
   endwin();
-  closebrl (dummy_brldim);
+  closebrl (&dummy_brldim);
   exit(sig);
 }
 

@@ -31,6 +31,15 @@ This software is maintained by Nicolas Pitre <nico@cam.org>.
 -----------------------------------------------------------------------------
 
 
+New in BRLTTY 2.1:
+- Improved readibility in config menu
+- Added support for EcoBraille displays
+- Added support for Alva Delphi
+- Added support for Alva parallel port communication
+- Added support for BrailleLite 18
+- Work-around for bug in Linux kernel 2.0.35 (beeps wouldn't turn off).
+
+
 INTRODUCTION FOR THOSE NEW TO SOFT BRAILLE
 ==========================================
 

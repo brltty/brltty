@@ -514,7 +514,7 @@ void writebrl (brldim *brl)
    * fix it.  So we close and reopen the library once in a while and hope 
    * for the best.
    */
-  if( ReadCycles >= 30 ){
+  if( ReadCycles >= 50 ){
     int x = brl->x;
     ReadCycles = 0;
     closebrl( brl );

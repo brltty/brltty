@@ -324,7 +324,7 @@ identbrl (const char *tty)
 {
   printf ("  %s\n", VERSION);
   LogPrint(LOG_NOTICE,"%s", VERSION);
-  printf ("    Copyright (C) 1996-98 by Stéphane Doyon "
+  printf ("    Copyright (C) 1996-99 by Stéphane Doyon "
 	  "<s.doyon@videotron.ca>\n");
   if (tty){
     printf ("    Using serial port %s\n", tty);

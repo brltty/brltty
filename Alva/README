@@ -202,7 +202,21 @@ Quick Tips
   with the PROG key.  The first line of the help screen will show it.
 
 
+Known Bugs
+==========
+
+There is a bug in the parallel port library that completely freezes the
+display after you've issued a certain number of keystrokes on the
+terminal.  However all keys apparently continue to be processed as the
+line wrap beeps still beeps.  So this doesn't seem to be an obvious
+communication problem and only occur if in parallel communication mode. 
+Since the library isn't Open Source, I can't fix it. The best I could do
+is to put an hugly hack that reinitializes the library after a certain
+number of keystrokes.  This creates a little flicker on the display once
+in a while but seems to go around the display freeze.
+
+
 
 Nicolas Pitre
 nico@cam.org
-February 25, 1999
+March 28, 1999

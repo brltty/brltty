@@ -1,33 +1,13 @@
 BRLTTY FAQ - last modified 26 June 1998
 ============================================
 
-Q. What are the supported Braille display models?
-A.
-   - Tieman B.V.: CombiBraille 25/45/85;
-   - Alva B.V.: ABT3xx series;
-   - Telesensory Systems Inc.: PowerBraille 40 / 65/81;
-     Navigator 20/40/80 (latest firmware version only?).
-   - Papenmeier Screen 2D Terminal
-   - EuroBraille family of displays (tested only on ClioBraille 40)
-
-   That's according to the specs we have. However, the Navigator 80 and
-   several Alva and Tieman models have not been tested yet.  The Eurobraille
-   is not very hard tested at all.
-
-Q. Does BRLTTY need a lot of CPU time? On what machines does it run?
-A. BRLTTY has been successfully tested on a 386SX20. It does not use much
-   than 1 percent of CPU time, and the response time is suprisingly good.
-
-  As well as many PCs, BRLTTY has been tested on a DEC Alpha running Alpha
-  Linux.
-
 Q. I'm the impatient type. How do I install this thing?
 A.
    - Uncomment one of the BRL_TARGET lines in the Makefile.
    - Type make.
    - As root, type make install.
    - Run /sbin/brltty.
-   - Optionally: run /sbin/brltty from /etc/rc.d/rc.S or equivalent.
+   - Optionally: run /sbin/brltty from /etc/rc.d/rc.Sysinit or equivalent.
    - That's all!
 
 Q. What if it works?
@@ -42,9 +22,9 @@ A. You should edit the Makefile and uncomment one of the BRL_TARGET lines.
    look at config.h.
 
 Q. Can I have BRLTTY running even before I login?
-A. Sure! We recommend that you do so by starting BRLTTY from your rc.S (or
-   any script executed at boot time). Start BRLTTY as early as possible in the
-   boot process.
+A. Sure! We recommend that you do so by starting BRLTTY from your rc.Sysinit
+    (or any script executed at boot time). Start BRLTTY as early as possible
+    in the boot process.
 
 Q. How do I find out and learn which key does what?
 A. See the brlttyh*.txt file in the subdirectory containing the sources of
@@ -62,7 +42,7 @@ A. Sure! Just go through the scrollback buffer using the
 Q. Can I use BRLTTY while in single user mode?
 A. Sure you can use BRLTTY in single user mode. If you start it up as the
    very first thing of the very first script that init runs when booting
-   (usually rc.S), then it will be on when you get to the prompt.
+   (usually rc.Sysinit), then it will be on when you get to the prompt.
 
 Q. Can I use BRLTTY with special video modes?
 A. Some kernel parameters allow using different video modes (provided by the
@@ -91,7 +71,7 @@ Q. What files do I have to copy to carry BRLTTY to a root disk or to another
 A. See the script called "install-brltty" generated automatically when you
    compile BRLTTY. The components are:
    - the executable
-   - the device file /dev/vcsa0 (character special 7,128)
+   - the device node /dev/vcsa0 (character special 7,128)
    - the /etc/brltty subdirectory (this is recommended but optional)
    - and make sure that adequate versions of the shared libraries will
      be available.

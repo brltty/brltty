@@ -1,8 +1,12 @@
 Note: this file should be read from bottom to top.
 
 
-  ...
-
+23 March 1999:
+  - BRLTTY 2.1 released.
+  - Completed updates to the manual (english version only) for 2.1.
+  - missing errno.h for some drivers when compiling on my RedHat (glibc),
+    I added the include to misc.h.
+  - Work-around for bug in Linux kernel 2.0.35: beeps wouldn't stop...
   - writebrl() and closebrl() now receive a pointer on the brldim structure,
     like inibrl().
   - Removed syslog warning when the default config file doesn't exist.

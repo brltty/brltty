@@ -223,7 +223,7 @@ menu;</P>
 setting options. Cursor routing keys can also be used to set the desired
 value.  To undo all the changes made since entering the menu use <EM>RESET</EM>.</P>
 <P>To leave the menu and return to normal operation, press  <EM>CONFMENU</EM> again,
-or any key not listed above.  If the <EM>save config</EM> option is on, the
+or any key not listed above.  If the <EM>save config on exit</EM> option is on, the
 current settings will be written to the <EM>configuration file</EM>.</P>
 <P>Most of the parameters available through the menu can also be set 
 using single key strokes (shortcut keys) to toggle them.</P>
@@ -231,30 +231,31 @@ using single key strokes (shortcut keys) to toggle them.</P>
 toggle certain parameters are also listed.</P>
 <P>
 <DL>
-<DT><B><EM>csr is visible</EM> (shortcut <EM>CSRVIS</EM>): Toggle cursor visibility</B><DD><P>Default: on.  This function, when enabled, shows the position of the
+<DT><B><EM>Cursor is visible</EM> (shortcut <EM>CSRVIS</EM>): Toggle cursor visibility</B><DD><P>Default: on.  This function, when enabled, shows the position of the
 cursor (either steady or blinking) on the display.  It is sometimes
 useful to turn this function off to examine text where a cursor symbol
 only serves to obscure reading.</P>
 <DT><B><EM>Block cursor</EM> (shortcut <EM>CSRSIZE</EM>): Toggle cursor shape</B><DD><P>Default: off.  This function switches the cursor shape: all eight dots (block)
 or just the bottom two (underline).  Choose the one you prefer.</P>
-<DT><B><EM>csr blink</EM> (shortcut <EM>CSRBLINK</EM>): Toggle blinking cursor</B><DD><P>Default: off.  If this function is enabled, the screen cursor will
+<DT><B><EM>Blinking cursor</EM> (shortcut <EM>CSRBLINK</EM>): Toggle blinking cursor</B><DD><P>Default: off.  If this function is enabled, the screen cursor will
 blink on the display, that is, it will only be present a portion of
 the time.  When the cursor is off, you will be able to view the
 character beneath the cursor.</P>
-<DT><B><EM>cap blink</EM> (shortcut <EM>CAPBLINK</EM>): Toggle blinking caps</B><DD><P>Default: off.  Similar to the cursor blinking function, if this
+<DT><B><EM>Blinking capitals</EM> (shortcut <EM>CAPBLINK</EM>): Toggle blinking caps</B><DD><P>Default: off.  Similar to the cursor blinking function, if this
 function is enabled, capital letters will blink on the display.  This
 is most useful when using 6 dot Braille.</P>
-<DT><B><EM>attr vis</EM> (shortcut <EM>ATTRVIS</EM>): Toggle attribute underlining
+<DT><B><EM>Attributes are visible</EM> (shortcut <EM>ATTRVIS</EM>): Toggle attribute underlining
     (NEW)</B><DD><P>Default off. When this mode is enabled, any characters with non plain
 attributes (inverse video, color, highlighting...) will be emphasized by
 superimposing either dots 7-8 or just dot 8 on the braille character. A
 seperate function controls whether the superimposed dots blink or not. Text
 marked with dots 7-8 is not in the same attribute as text marked only with dot
 8. This is still experimental.</P>
-<DT><B><EM>attr blink</EM> (shortcut <EM>ATTRBLINK</EM>): Toggle blinking of
+<DT><B><EM>Blinking attributes</EM> (shortcut <EM>ATTRBLINK</EM>): Toggle blinking of
     attribute underlining</B><DD><P>Default: on.  This controls whether or not dots superimposed on characters with
 special attributes will blink or not.</P>
-<DT><B><EM>csr blink on</EM> and <EM>csr blink off</EM>: Control rate of cursor
+<DT><B><EM>Blinking cursor visible period</EM> and
+   <EM>Blinking cursor invisible period</EM>: Control rate of cursor
     blinking</B><DD><P>These parameters are not toggles. The value of the settings for these items
 is an integer. Together, these parameters control the rate at which the cursor
 blinks (when the cursor is visible and blinking is enabled). The cursor will
@@ -265,28 +266,30 @@ duration of a blink round is therefore the sum on the <EM>csr on</EM> and <EM>cs
 off</EM> settings. The duration of a cycle of the main loop is variable: very
 roughly about 0.1 seconds. It may be helpful to set cursor, cap and attribute
 blinking to different rates.</P>
-<DT><B><EM>cap blink on</EM> and <EM>cap blink off</EM>: Control rate of
+<DT><B><EM>Blinking caps visible period</EM> and
+    <EM>Blinking caps invisible period</EM>: Control rate of
     capital letters' blinking</B><DD><P>This option works like the cursor blinking rate parameter.</P>
-<DT><B><EM>attr blink on</EM> and <EM>attr blink off</EM>: Control rate of
+<DT><B><EM>Blinking attributes visible period</EM> and
+      <EM>Blinking attributes invisible period</EM>: Control rate of
     attribute underlining blinking</B><DD><P>This option works like the cursor blinking rate parameter.</P>
-<DT><B><EM>six dot text</EM> (shortcut <EM>SIXDOTS</EM>): Braille representation</B><DD><P>Default: 8 dot.  This function switches between 6 and 8 dot Braille
+<DT><B><EM>Six dot text modet</EM> (shortcut <EM>SIXDOTS</EM>): Braille representation</B><DD><P>Default: 8 dot.  This function switches between 6 and 8 dot Braille
 codes.  When 6 dot mode is chosen, the bottom dots (7 and 8) of all
 ordinary characters are removed.</P>
-<DT><B><EM>sliding window</EM> (shortcut <EM>SLIDEWIN</EM>): Toggle sliding window</B><DD><P>Default: off.  This feature, in conjunction with <EM>cursor tracking</EM>,
+<DT><B><EM>Sliding window</EM> (shortcut <EM>SLIDEWIN</EM>): Toggle sliding window</B><DD><P>Default: off.  This feature, in conjunction with <EM>cursor tracking</EM>,
 moves the display window more smoothly when the physical cursor moves
 beyond the right edge of the window.  With <EM>sliding window</EM> off,
 whenever the cursor moves beyond the right edge of the window, the
 window moves by one window width.  When on, the window moves by a
 quarter of this width.</P>
-<DT><B><EM>skip ident lns</EM> (shortcut <EM>SKPIDLNS</EM>): Toggle skipping of
+<DT><B><EM>Skip identical lines</EM> (shortcut <EM>SKPIDLNS</EM>): Toggle skipping of
     identical lines</B><DD><P>Default: off.  This feature provides an alternative interface to line
 skipping on displays which do not provide the <EM>PRDIFLN</EM> and
 <EM>NXDIFLN</EM> keys.  When enabled, it makes the <EM>LNUP</EM> and <EM>LNDN</EM>
 keys skip identical lines.</P>
-<DT><B><EM>audio signals</EM> (shortcut <EM>SND</EM>): Toggle audio signals</B><DD><P>Default: on.  When on, BRLTTY beeps when certain events occur (such as
+<DT><B><EM>Audio signals</EM> (shortcut <EM>SND</EM>): Toggle audio signals</B><DD><P>Default: on.  When on, BRLTTY beeps when certain events occur (such as
 moving beyond the edge of the screen).  Beeps also confirm the
 settings of some toggle options.</P>
-<DT><B><EM>st cells style</EM>: Set status cell style</B><DD><P>The setting is an integer, rather than a toggle. This allows changing the
+<DT><B><EM>Status cells style</EM>: Set status cell style</B><DD><P>The setting is an integer, rather than a toggle. This allows changing the
 style in which status cells are used. There is roughly a style for each brand
 of displays, which reflects the preferences of the programmer of the driver
 for that brand. However it is possible to try out the status cell style
@@ -303,11 +306,11 @@ styles are:
 <LI> 4 = Papenmeier style</LI>
 </UL>
 </P>
-<DT><B><EM>save config</EM>: Save configuration on exit</B><DD><P>As indicated above, this controls whether or not the configuration should be
+<DT><B><EM>save config on exit</EM>: Save configuration on exit</B><DD><P>As indicated above, this controls whether or not the configuration should be
 saved to the configuration file upon exiting the configuration menu.</P>
 </DL>
 </P>
-<P>If <EM>save config</EM> is off or if you changed some settings by using shortcut
+<P>If <EM>save config on exit</EM> is off or if you changed some settings by using shortcut
 keys, you may want to manually save the current settings to the configuration
 file. To do so, type <EM>SAVECONF</EM>.</P>
 <P>The configuration file is currently a binary file and cannot

@@ -29,6 +29,8 @@
 #include <syslog.h>
 #endif
 
+#include <errno.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
