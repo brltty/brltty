@@ -357,7 +357,7 @@ openBluezPort (char **parameters, const char *device) {
         bacpy(&remote.rc_bdaddr, &address);
         if (connect(bluezSocket, (struct sockaddr *)&remote, sizeof(remote)) != -1) {
           return 1;
-        } else {
+        } else if (errno != EHOSTDOWN) {
           LogError("RFCOMM socket connection");
         }
       } else {
