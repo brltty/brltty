@@ -40,7 +40,6 @@ always 0 245
 # the letter a
 largesign a 1
 always a 1
-word A 1
 always A 1
 always about 1-12
 contraction ab
@@ -385,6 +384,7 @@ always hydro =
 
 # the letter i
 always i 24
+always I 24
 word i 24
 midendword iever 24-15-1236-12456
 always immediate 24-134-134
