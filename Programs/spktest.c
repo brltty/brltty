@@ -73,6 +73,7 @@ int
 main (int argc, char *argv[]) {
   int status;
   const char *driver = NULL;
+  int internal;
 
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, "[driver [parameter=value ...]]");
@@ -82,7 +83,7 @@ main (int argc, char *argv[]) {
     --argc;
   }
 
-  if ((speech = loadSpeechDriver(driver, opt_libraryDirectory))) {
+  if ((speech = loadSpeechDriver(driver, &internal, opt_libraryDirectory))) {
     const char *const *parameterNames = speech->parameters;
     char **parameterSettings;
     if (!parameterNames) {
