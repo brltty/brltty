@@ -574,14 +574,14 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
  * When something really wrong was done somewhere, like an out-of-bounds
  * argument, which is really a bug in either the implementation of BrlAPI or
  * in the application, an exception may be sent by the server. As soon as
- * libbrlapi receives it, an error handler prints it and \e exit()s the program,
+ * libbrlapi receives it, an exception handler prints it and \e exit()s the program,
  * since it means something went really wrong and that we shouldn't go further.
  *
- * This is hopefully a really rare event, but in the case of an editor, for
+ * This is hopefully a really seldom event, but in the case of an editor, for
  * instance, one would surely want to have files saved before actually
- * exit()ing. brlapi_setErrorHandler() lets the programmer to define another
+ * exit()ing. brlapi_setExceptionHandler() lets the programmer to define another
  * exception handler which would save files and then call the default handler
- * brlapi_defaultErrorHandler().
+ * brlapi_defaultExceptionHandler().
  *
  * @{ */
 
@@ -662,30 +662,30 @@ typedef uint32_t brl_type_t;
  */
 const char *brlapi_packetType(brl_type_t ptype);
 
-/* brlapi_errorHandler_t */
+/* brlapi_exceptionHandler_t */
 /** Type for error handlers
  *
  * Type to give to error handlers which are to be given to
- * brlapi_setErrorHandler()
+ * brlapi_setExceptionHandler()
  *
  * \param err is a BRLERR_ error code
- * \param type is the type of the guilt packet
- * \param buf points to the content of the guilt packet (might be a little bit truncated)
- * \param size gives the guilt packet's size
+ * \param type is the type of the guilty packet
+ * \param buf points to the content of the guilty packet (might be a little bit truncated)
+ * \param size gives the guilty packet's size
  */
-typedef void (*brlapi_errorHandler_t)(int err, brl_type_t type, const void *buf, size_t size);
+typedef void (*brlapi_exceptionHandler_t)(int err, brl_type_t type, const void *buf, size_t size);
 
-/* brlapi_setErrorHandler */
+/* brlapi_setExceptionHandler */
 /** Set a new exception handler
  *
- * brlapi_setErrorHandler() replaces the previous error handler by the handler
- * parameter. The previous error handler is returned so that chaining error
- * handlers might be possible.
+ * brlapi_setExceptionHandler() replaces the previous exception handler with the handler
+ * parameter. The previous exception handler is returned to make chaining error
+ * handlers possible.
  *
- * The default handler just prints the error and exit()s
+ * The default handler just prints the exception and exit()s
  */
-brlapi_errorHandler_t brlapi_setErrorHandler(brlapi_errorHandler_t handler);
-void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *buf, size_t size);
+brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t handler);
+void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *buf, size_t size);
 
 /** @} */
 

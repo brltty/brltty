@@ -124,8 +124,8 @@ static unsigned keybuf_next;
 static unsigned keybuf_nb;
 static pthread_mutex_t keybuf_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concurrent key buffering */
 
-static brlapi_errorHandler_t brlapi_errorHandler = brlapi_defaultErrorHandler;
-static pthread_mutex_t brlapi_errorHandler_mutex = PTHREAD_MUTEX_INITIALIZER;
+static brlapi_exceptionHandler_t brlapi_exceptionHandler = brlapi_defaultExceptionHandler;
+static pthread_mutex_t brlapi_exceptionHandler_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void handle_keycode(brl_keycode_t code)
 {
@@ -143,7 +143,7 @@ static void handle_keycode(brl_keycode_t code)
 /* Waits for the specified type of packet: must be called with brlapi_fd_mutex locked */
 /* If the right packet type arrives, returns its size */
 /* Returns -1 if a non-fatal error is encountered */
-/* Calls the error handler if an exception is encountered */
+/* Calls the exception handler if an exception is encountered */
 static ssize_t brlapi_waitForPacket(brl_type_t expectedPacketType, void *packet, size_t size)
 {
   unsigned char *localPacket[BRLAPI_MAXPACKETSIZE];
@@ -171,7 +171,7 @@ readNextPacket:
   if (type==BRLPACKET_EXCEPTION) {
     size_t esize;
     if (res<hdrSize) esize = 0; else esize = res-hdrSize;
-    brlapi_errorHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
+    brlapi_exceptionHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
     goto readNextPacket;
   }
   pthread_mutex_lock(&stateMutex);
@@ -979,17 +979,17 @@ int *brlapi_errno_location(void)
   return &brlapi_errno;
 }
 
-brlapi_errorHandler_t brlapi_setErrorHandler(brlapi_errorHandler_t new)
+brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
 {
-  brlapi_errorHandler_t tmp;
-  pthread_mutex_lock(&brlapi_errorHandler_mutex);
-  tmp = brlapi_errorHandler;
-  if (new!=NULL) brlapi_errorHandler = new;
-  pthread_mutex_unlock(&brlapi_errorHandler_mutex);
+  brlapi_exceptionHandler_t tmp;
+  pthread_mutex_lock(&brlapi_exceptionHandler_mutex);
+  tmp = brlapi_exceptionHandler;
+  if (new!=NULL) brlapi_exceptionHandler = new;
+  pthread_mutex_unlock(&brlapi_exceptionHandler_mutex);
   return tmp;
 }
 
-void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *packet, size_t size)
+void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)
 {
   const unsigned char *c;
   fprintf(stderr, "Error: %s on %s request:\n",brlapi_strerror(err),brlapi_packetType(type));
