@@ -223,7 +223,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
       const CommandEntry *last = NULL;
       const CommandEntry *command = commandTable;
       if (cmd == CMD_NOOP) continue;
-      if (cmd == CMD_LEARN) return;
+      if ((cmd == CMD_LEARN) && ((key & VAL_REPEAT_INITIAL) || !(key & VAL_REPEAT_DELAY))) return;
       while (command->name) {
         if ((command->code & VAL_BLK_MASK) == blk) {
           if (!last || (last->code < command->code)) last = command;
