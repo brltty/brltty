@@ -97,7 +97,6 @@
 
 #ifdef SCR_C			/* for scr.c */
 #undef SCR_C			/* only do once */
-#define FRZFILE "/tmp/vcsa.frz"	/* filename for frozen screen image */
 #define HLPFILE "brlttydev.hlp"	/* filename of help screen */
 #endif /* SCR_C */
 

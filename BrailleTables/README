@@ -5,7 +5,7 @@ All files with .tbl sufix are braille tables that may be used with
 BRLTTY.  Note that BRLTTY has its own braille table format and it may
 slightly differ from other braille table files.
 
-There are also few tools provided in this directory to manipulate
+There are a few tools provided in this directory to manipulate
 those braille tables.  To build the tools, simply run 'make'.  The
 following tools will be made:
 
@@ -39,6 +39,6 @@ This means that any braille terminal that accepts a direct mapping
 bits 01234567 = dots 12345678 or any other dot mapping convention
 must translate the dot pattern into its own mapping in its driver.
 
-Also note that the byte offset which is the ASCII character value is 
+Also note that the byte offset which is the character value is 
 assumed to be from the ISO-8859-1 character set by BRLTTY.
 

@@ -2,6 +2,9 @@ Note: this file should be read from bottom to top.
 
 
   ...
+  - Fixed Combibraille speech support (broken when BRLTTY moved to 
+    ISO-8859-1 base charset while the Combibraille expects an IBM CP437
+    charset).
   - Updated manual, FAQ and TODO.
   - Fixes (hopefully) to the cursor routing algorithm in csrjmp_sub.
   - Added syslog support functions, and messages in brltty.c.

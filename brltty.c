@@ -42,18 +42,18 @@
 #include "cut-n-paste.h"
 #include "misc.h"
 
-#define VERSION "BRLTTY 1.9.4 (pre-release)"
+#define VERSION "BRLTTY 1.9.5 (pre-release)"
 #define COPYRIGHT "\
 Copyright (C) 1995-1998 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
-Usage: %s [options]\n\
- -c config-file       use binary configuration file `config-file'\n\
- -d serial-device     use `serial-device' to access Braille terminal\n\
- -t text-trans-file   use translation table `text-trans-file'\n\
- -h, --help           print this usage message\n\
- -q, --quiet          suppress start-up messages\n\
- -l n                 debugging level for syslog (from 0 to 7, default 4)\n\
- -v, --version        print start-up messages and exit\n"
+Usage: %s [options] \n\
+ -c config-file       use binary configuration file `config-file' \n\
+ -d serial-device     use `serial-device' to access Braille terminal \n\
+ -t text-trans-file   use translation table `text-trans-file' \n\
+ -h, --help           print this usage message \n\
+ -q, --quiet          suppress start-up messages \n\
+ -l n                 debugging level for syslog (from 0 to 7, default 4) \n\
+ -v, --version        print start-up messages and exit \n"
 
 #define ENV_MAGICNUM 0x4004
 
@@ -1060,6 +1060,7 @@ main (int argc, char *argv[])
   delay (1000);
   closespk ();
   closebrl (brl);
+  play(snd_brloff);
   for (i = 0; i <= NBR_SCR; i++) 
     free (scrparam[i]);
   LogPrint(LOG_NOTICE,"Terminating");
@@ -1192,6 +1193,7 @@ csrjmp_sub (int x, int y)
       timeout_yet (0);		/* initialise stop-watch */
       sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
       inskey (dif > 0 ? DN_CSR : UP_CSR);
+      sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
       do
 	{
 #if CSRJMP_LOOP_DELAY > 0
@@ -1201,9 +1203,8 @@ csrjmp_sub (int x, int y)
 	  curx = scr.posx;
 	  scr = getstat_phys ();
 	}
-      while (scr.posy==cury && scr.posx==curx
-	     && !(t = timeout_yet (CSRJMP_TIMEOUT)));
-      sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
+      while (!(t = timeout_yet (CSRJMP_TIMEOUT)) &&
+	     scr.posy==cury && scr.posx==curx);
       if(t) break;
       if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
 	 || (y-scr.posy)*dif > dif*dif){
@@ -1224,6 +1225,7 @@ csrjmp_sub (int x, int y)
 	timeout_yet (0);		/* initialise stop-watch */
 	sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
 	inskey (dif > 0 ? RT_CSR : LT_CSR);
+	sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 	do
 	  {
 #if CSRJMP_LOOP_DELAY > 0
@@ -1232,14 +1234,22 @@ csrjmp_sub (int x, int y)
 	    curx = scr.posx;
 	    scr = getstat_phys ();
 	  }
-	while (scr.posx==curx && scr.posy == y &&
-	       !(t = timeout_yet (CSRJMP_TIMEOUT)));
-	sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
+	while (!(t = timeout_yet (CSRJMP_TIMEOUT)) &&
+	       scr.posx==curx && scr.posy == y);
 	if(t) break;
 	if(scr.posy != y || (x-scr.posx)*dif > dif*dif){
 	  delay(CSRJMP_SETTLE_DELAY);
 	  scr = getstat_phys ();
-	  if(scr.posy != y || (x-scr.posx)*dif > dif*dif) break;
+	  if (scr.posy != y) { 
+	    /* We probably wrapped on a short line... Try to get back
+	     * on the correct line going backward before exiting.
+	     */
+	    sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
+	    inskey (dif > 0 ? LT_CSR : RT_CSR);
+	    sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
+	    break;
+	  }
+	  if((x-scr.posx)*dif > dif*dif) break;
 	}
 	dif = x - scr.posx;
       }

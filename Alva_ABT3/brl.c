@@ -331,13 +331,13 @@ initbrl (const char *dev)
       cfsetispeed (&newtio, B0);
       cfsetospeed (&newtio, B0);
       tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
-      delay (100);
       tcflush (brl_fd, TCIOFLUSH);	/* clean line */
+      delay (400);
       /* DTR back on */
       cfsetispeed (&newtio, BAUDRATE);
       cfsetospeed (&newtio, BAUDRATE);
       tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
-      delay (400);		/* give time to send ID string */
+      delay (600);		/* give time to send ID string */
       /* The 2 next lines can be commented out to try autodetect once anyway */
       if (ModelID != ABT_AUTO)
 	break;

@@ -45,8 +45,8 @@ TEXTTRANS = text.us.tbl
 # Specify the device name for the serial port your Braille display will
 # normally be connected to.  For port com(n), use /dev/ttyS(n-1) -
 # e.g. for com1 use /dev/ttyS0
-# [Note that this port can be overridden from the brltty command-line.
-# See the documentation for further details.]
+# [Note that this port can be overridden from the brltty command-line 
+# parameter `-d'.  See the documentation for further details.]
 BRLDEV = /dev/ttyS0
 
 # NOTE: if you intend to have brltty start up automatically at
@@ -98,8 +98,8 @@ CC = gcc
 # To compile in a.out (if you use ELF by default), you may be able to use
 # `-b i486-linuxaout'; however, you may also need to use the -V flag, or
 # possibly a different gcc executable, depending on your setup.
-CFLAGS = -O2 -g -Wall -D_POSIX_C_SOURCE=2 -D$(BRL_TARGET) -D$(SPK_TARGET)
-UTILS_CFLAGS = -O2 -g -Wall -D_POSIX_C_SOURCE=2
+CFLAGS = -O2 -Wall -D_POSIX_C_SOURCE=2 -D$(BRL_TARGET) -D$(SPK_TARGET)
+UTILS_CFLAGS = -O2 -Wall -D_POSIX_C_SOURCE=2
 LD = $(CC)
 LDFLAGS = -s
 #LDFLAGS = -s -static
@@ -155,6 +155,7 @@ brltty: brltty.o brl.o speech.o scr.o scrdev.o $(SCR_O) $(INSKEY_O) \
 	  $(SPK_TARGET)/speech.o $(INSKEY_O) \
 	  scr.o scrdev.o $(SCR_O) \
 	  misc.o beeps.o cut-n-paste.o $(LDLIBS)
+	strip $@
 
 brltest: brltest.o brl.o misc.o
 	$(LD) $(LDFLAGS) -o $@ brltest.o $(BRL_TARGET)/brl.o misc.o $(LDLIBS)

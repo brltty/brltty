@@ -130,12 +130,16 @@ exist.
 You will have to install BRLTTY before you can use the test programs.
 
 BRLTTY will probably have to run with root privilege.  It needs to 
-access the virtual console screen information, the serial port 
-selected and, most awkwardly, the console (this is needed for 
-keystroke simulation during cursor routing, for the cut &amp paste 
-function and for beeps).  If you do manage to get BRLTTY running 
-without being root, please let us know (see section 
-<ref id="support" name="Support">).
+access the virtual console screen information (<tt>/dev/vcsa0</>), the serial
+port selected and, most awkwardly, the console (<tt>/dev/console</>), which is
+used for keystroke simulation during cursor routing, for the cut &amp paste 
+function, for arrow keys simulation using keys on the braille display and for
+beeps. Access to the serial port as well as to the <tt/vcsa0/ device can be
+granted to a non-root user by changing the permissions on the divice
+files. However, having access to the <tt/console/ device is not enough: you
+need to be root to sound beeps and simulate key strokes. So, if you're willing
+to give up cursor routing, beeps and all that, you can run BRLTTY without root
+priviledges.
 
 The programs <tt/brltest/ and <tt/scrtest/ can be used as diagnostic 
 tools if something goes wrong.  Both must be run as root.
@@ -708,14 +712,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 <p>BRLTTY represents the work of a team, which includes
 <itemize>
-  <item> <htmlurl url="mailto:nico@cam.org" name="Nicolas Pitre 
-    &lt;nico@cam.org&gt;"> (current maintainer);
-  <item> <htmlurl url="mailto:s.doyon@videotron.ca" name="St&eacute;phane
-    Doyon &lt;s.doyon@videotron.ca&gt;"> (active developer);
-  <item> <htmlurl url="mailto:nn201@cus.cam.ac.uk" name="Nikhil Nair
-    &lt;nn201@cus.cam.ac.uk&gt;"> (original author, no longer active);
-  <item> <htmlurl url="mailto:jrbowden@bcs.org.uk" name="James Bowden
-    &lt;jrbowden@bcs.org.uk&gt;"> (now acting in an advisory
+  <item> <htmlurl url="mailto:nico@cam.org"
+    name="Nicolas Pitre &lt;nico@cam.org&gt;"> (current maintainer);
+  <item> <htmlurl url="mailto:s.doyon@videotron.ca"
+    name="St&eacute;phane Doyon &lt;s.doyon@videotron.ca&gt;">
+    (active developer);
+  <item> <htmlurl url="mailto:nn201@cus.cam.ac.uk"
+    name="Nikhil Nair &lt;nn201@cus.cam.ac.uk&gt;">
+    (original author, no longer active);
+  <item> <htmlurl url="mailto:jrbowden@bcs.org.uk"
+    name="James Bowden &lt;jrbowden@bcs.org.uk&gt;">
+    (now acting in an advisory
     capacity).
 </itemize>
 
@@ -739,8 +746,12 @@ files) is not present, BRLTTY looks in <tt>/etc</> for the help file
 <tt/brlttydev.hlp/ and the configuration file <tt/brlttyconf.dat/.
 Even if these are not present, BRLTTY will still work!
 
-Note: The /dev/vcsa0 device is also required. It should already be present
-unless your Linux distribution is quite old. You can create it with:
+If, for some reason, you ever create the <tt>/etc/brltty</> directory by hand,
+it is important to set the permissions so that only root can create files
+in that directory.
+
+Note: The <tt>/dev/vcsa0</> device is also required. It should already be
+present unless your Linux distribution is quite old. You can create it with:
 <tscreen><verb>
 mknod /dev/vcsa0 c 7 128
 chown root.tty /dev/vcsa0
@@ -761,6 +772,10 @@ find the shared libraries it requires. Bootdisks often use smaller but outdated
 versions of the libraries which may not work. The solution is to compile
 BRLTTY with the <tt/-static/ flag (see Makefile). This removes any dependency
 on shared libraries, but unfortunately produces a larger executable.
+
+The executable is stripped during the <tt/make install/. If you take the
+executable straight from the compilation directory, don't forget to
+<tt/strip/ it.
 
 <sect1>Future Enhancements
 
