@@ -281,11 +281,7 @@ unsetInterface (UsbDevice *device) {
       devx->interfaceOpened = 0;
     }
 
-    result = (*devx->interface)->Release(devx->interface);
-    if (result != kIOReturnSuccess) {
-      setErrno(result, "USB interface release");
-      ok = 0;
-    }
+    (*devx->interface)->Release(devx->interface);
     devx->interface = NULL;
   }
 
@@ -566,7 +562,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     if ((eptx->completedRequests = newQueue(usbDeallocateAsynchronousRequest, NULL))) {
       IOReturn result;
       unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
-      unsigned char output = USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT;
+      unsigned char direction = USB_ENDPOINT_DIRECTION(endpoint->descriptor);
 
       for (eptx->pipeNumber=1; eptx->pipeNumber<=devx->pipeCount; ++eptx->pipeNumber) {
         result = (*devx->interface)->GetPipeProperties(devx->interface, eptx->pipeNumber,
@@ -574,7 +570,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
                                                        &eptx->transferMode, &eptx->packetSize, &eptx->pollInterval);
         if (result == kIOReturnSuccess) {
           if ((eptx->endpointNumber == number) &&
-              ((eptx->transferDirection == kUSBOut) == output)) {
+              (((eptx->transferDirection == kUSBIn) && (direction == USB_ENDPOINT_DIRECTION_INPUT)) ||
+               ((eptx->transferDirection == kUSBOut) && (direction == USB_ENDPOINT_DIRECTION_OUTPUT)))) {
             LogPrint(LOG_DEBUG, "USB: ept=%02X -> pip=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
                      endpoint->descriptor->bEndpointAddress, eptx->pipeNumber,
                      eptx->endpointNumber, eptx->transferDirection, eptx->transferMode,
@@ -876,8 +873,11 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
   if (devx->deviceOpened) {
     result = (*devx->device)->USBDeviceClose(devx->device);
     if (result != kIOReturnSuccess) setErrno(result, "USB device close");
+    devx->deviceOpened = 0;
   }
+
   (*devx->device)->Release(devx->device);
+  devx->device = NULL;
 
   free(devx);
 }
