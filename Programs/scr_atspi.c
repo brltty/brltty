@@ -512,7 +512,7 @@ insert_AtSPIScreen (ScreenKey key) {
     SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_SYM);
   if (modMeta)
     SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_SYM);
-  return 0;
+  return 1;
 }
 
 static int
