@@ -321,11 +321,12 @@ int brlapi_recvRaw(unsigned char *buf, size_t size)
 
 /* Function : brlapi_getDriverId */
 /* Identify the driver used by brltty */
-int brlapi_getDriverId(unsigned char *id)
+int brlapi_getDriverId(unsigned char *id, size_t n)
 {
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_type_t type;
   int res;
-  uint32_t *code = (uint32_t *) id;
+  uint32_t *code = (uint32_t *) packet;
   pthread_mutex_lock(&brlapi_fd_mutex);
   if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERID, NULL, 0)<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
@@ -333,7 +334,7 @@ int brlapi_getDriverId(unsigned char *id)
     return -1;
   }
   while (1) {
-    if ((res=brlapi_readPacket(fd,&type, id, 3))<0) {
+    if ((res=brlapi_readPacket(fd,&type, packet, sizeof(packet)))<0) {
       pthread_mutex_unlock(&brlapi_fd_mutex);
       brlapi_errno=BRLERR_LIBCERR;
       return -1;
@@ -342,7 +343,11 @@ int brlapi_getDriverId(unsigned char *id)
     switch (type) {
       case BRLPACKET_GETDRIVERID: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
-        id[res]='\0';
+        if (n<res) {
+          brlapi_errno = BRLERR_NOMEM;
+          return -1;
+        }
+        strcpy(id,packet);
         return 0;
       }
       case BRLPACKET_ERROR: {
@@ -359,11 +364,12 @@ int brlapi_getDriverId(unsigned char *id)
 
 /* Function : brlapi_getDriverName */
 /* Name of the driver used by brltty */
-int brlapi_getDriverName(unsigned char *name)
+int brlapi_getDriverName(unsigned char *name, size_t n)
 {
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_type_t type;
   int res;
-  uint32_t *code = (uint32_t *) name;
+  uint32_t *code = (uint32_t *) packet;
   pthread_mutex_lock(&brlapi_fd_mutex);
   if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERNAME, NULL, 0)<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
@@ -371,7 +377,7 @@ int brlapi_getDriverName(unsigned char *name)
     return -1;
   }
   while (1) {
-    if ((res=brlapi_readPacket(fd, &type, name,20))<0) {
+    if ((res=brlapi_readPacket(fd, &type, packet, sizeof(packet)))<0) {
       pthread_mutex_unlock(&brlapi_fd_mutex);
       brlapi_errno=BRLERR_LIBCERR;
       return -1;
@@ -380,7 +386,11 @@ int brlapi_getDriverName(unsigned char *name)
     switch (type) {
       case BRLPACKET_GETDRIVERNAME: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
-        name[res]='\0';
+        if (n<res) {
+          brlapi_errno = BRLERR_NOMEM;
+          return -1;
+        }
+        strcpy(name, packet);
         return 0;
       }
       case BRLPACKET_ERROR: {

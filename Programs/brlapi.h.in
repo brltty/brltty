@@ -203,9 +203,11 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth);
  * This function will fill its argument with the \e brltty 2-chars code of
  * the driver currently in use, to which it adds a '\0'.
  *
+ * \param n is the maximum size of the id buffer
+ *
  * \return 0 on success, -1 on error
 */
-int brlapi_getDriverId(unsigned char *id);
+int brlapi_getDriverId(unsigned char *id, size_t n);
 
 /* brlapi_getDriverName */
 /** return the complete name of the driver used by \e brltty
@@ -213,9 +215,11 @@ int brlapi_getDriverId(unsigned char *id);
  * This function fills its argument with the whole name of the braille
  * terminal if available, terminated with a '\0'.
  *
+ * \param n is the maximum size for the name buffer
+ *
  * \return 0 on success, -1 on error
 */
-int brlapi_getDriverName(unsigned char *name);
+int brlapi_getDriverName(unsigned char *name, size_t n);
 
 /* brlapi_getDisplaySize */
 /** return the size of the braille display */
@@ -323,12 +327,12 @@ int brlapi_writeBrlDots(const unsigned char *dots);
 /* brlapi_extWriteStruct */
 /** Structure containing arguments to be given to brlapi_extWrite */
 typedef struct {
-  int displayNumber; /* -1 means "don't specify" */
-  uint32_t regionBegin, regionEnd; /** Region of display to update */
+  int displayNumber; /** Display number -1 == unspecified */
+  uint32_t regionBegin, regionEnd; /** Region of display to update, 1st character of display is 1 */
   char *text; /** Text to display */
-  char *attrAnd; /** And attributes */
-  char *attrOr; /** Or attributes */
-  int cursor; /** Cursorposition. -1 means "don't touch" */
+  char *attrAnd; /** And attributes; applied first */
+  char *attrOr; /** Or attributes; applied after anding */
+  int cursor; /* -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
 } brlapi_extWriteStruct;
 
 /* BRLAPI_EXTWRITESTRUCT_INITIALIZER */
