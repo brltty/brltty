@@ -342,7 +342,7 @@ terminateProgram (int quickly) {
     int i;
     for (i=0; i<messageDelay; i+=updateInterval) {
       delay(updateInterval);
-      if (readBrailleCommand(&brl, CMDS_MESSAGE) != EOF) break;
+      if (readCommand(CMDS_MESSAGE) != EOF) break;
       if (awaitSilence) {
         speech->doTrack();
         if (!speech->isSpeaking()) break;
@@ -854,19 +854,24 @@ main (int argc, char *argv[]) {
       int oldmoty = p->winy;
 
       {
-        static int autorepeat = 0;
+        static int repeatTimer = 0;
+        static int repeatStarted = 0;
         int next = readBrailleCommand(&brl,
                                       infmode? CMDS_STATUS:
                                       ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
                                       CMDS_SCREEN);
-        if (!prefs.autorepeat) autorepeat = 0;
+        if (!prefs.autorepeat) repeatTimer = 0;
+        if (!repeatTimer) repeatStarted = 0;
 
         if (next == EOF) {
-          if (!autorepeat) break;
-          if ((autorepeat -= updateInterval) > 0) break;
-          autorepeat = PREFERENCES_TIME(prefs.autorepeatInterval);
+          if (!repeatTimer) break;
+          if ((repeatTimer -= updateInterval) > 0) break;
+          repeatTimer = PREFERENCES_TIME(prefs.autorepeatInterval);
+          repeatStarted = 1;
         } else {
+          int repeatFlags = next & VAL_REPEAT_MASK;
           LogPrint(LOG_DEBUG, "Command: %06X", next);
+          next &= ~VAL_REPEAT_MASK;
 
           if (prefs.skipIdenticalLines) {
             int real;
@@ -894,7 +899,10 @@ main (int argc, char *argv[]) {
             default:
               switch (next & VAL_CMD_MASK) {
                 default:
-                  next &= ~VAL_REPEAT_MASK;
+                  if (repeatFlags & VAL_REPEAT_DELAY)
+                    if (!(repeatFlags & VAL_REPEAT_INITIAL))
+                      next = CMD_NOOP;
+                  repeatFlags = 0;
                 case CMD_LNUP:
                 case CMD_LNDN:
                 case CMD_CHRLT:
@@ -912,19 +920,24 @@ main (int argc, char *argv[]) {
               break;
           }
 
-          if (command == (next & ~VAL_REPEAT_MASK)) {
-            command = CMD_NOOP;
-          } else {
-            command = next & ~VAL_REPEAT_MASK;
+          if (repeatStarted) {
+            repeatStarted = 0;
+            if (next == command) {
+              next = CMD_NOOP;
+              repeatFlags = 0;
+            }
           }
+          command = next;
 
-          if (next & VAL_REPEAT_DELAY) {
-            autorepeat = PREFERENCES_TIME(prefs.autorepeatDelay);
-            if (!(next & VAL_REPEAT_INITIAL)) continue;
-          } else if (next & VAL_REPEAT_INITIAL) {
-            autorepeat = PREFERENCES_TIME(prefs.autorepeatInterval);
+          if (repeatFlags & VAL_REPEAT_DELAY) {
+            repeatTimer = PREFERENCES_TIME(prefs.autorepeatDelay);
+            if (!(repeatFlags & VAL_REPEAT_INITIAL)) break;
+            repeatStarted = 1;
+          } else if (repeatFlags & VAL_REPEAT_INITIAL) {
+            repeatTimer = PREFERENCES_TIME(prefs.autorepeatInterval);
+            repeatStarted = 1;
           } else {
-            autorepeat = 0;
+            repeatTimer = 0;
           }     
         }
       }
@@ -2089,17 +2102,14 @@ message (const char *text, short flags) {
          writeBrailleBuffer(&brl);
 
          if (flags & MSG_WAITKEY)
-            getBrailleCommand(CMDS_MESSAGE);
+            getCommand(CMDS_MESSAGE);
          else if (length || !(flags & MSG_NODELAY)) {
             int i;
             for (i=0; i<messageDelay; i+=updateInterval) {
+               int command;
                delay(updateInterval);
-               {
-                  int command = readBrailleCommand(&brl, CMDS_MESSAGE);
-                  if (command == EOF) continue;
-                  command &= VAL_CMD_MASK;
-                  if (command != CMD_NOOP) break;
-               }
+               while ((command = readCommand(CMDS_MESSAGE)) == CMD_NOOP);
+               if (command != EOF) break;
             }
          }
       }

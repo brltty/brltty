@@ -541,17 +541,28 @@ dimensionsChanged (int rows, int columns) {
 }
 
 int
-getBrailleCommand (DriverCommandContext cmds) {
+readCommand (DriverCommandContext cmds) {
+   int command = readBrailleCommand(&brl, cmds);
+   if (command != EOF) {
+      LogPrint(LOG_DEBUG, "Command: %06X", command);
+      if (command & VAL_REPEAT_DELAY)
+         if (!(command & VAL_REPEAT_INITIAL))
+            command = CMD_NOOP;
+      command &= VAL_CMD_MASK;
+   }
+   return command;
+}
+
+int
+getCommand (DriverCommandContext cmds) {
    while (1) {
-      int command = readBrailleCommand(&brl, cmds);
-      if (command != EOF) {
-         command &= VAL_CMD_MASK;
-         LogPrint(LOG_DEBUG, "Command: %04X", command);
-         if (command == CMD_NOOP) continue;
+      int command = readCommand(cmds);
+      if (command == EOF) {
+         delay(updateInterval);
+         closeTuneDevice(0);
+      } else if (command != CMD_NOOP) {
          return command;
       }
-      delay(updateInterval);
-      closeTuneDevice(0);
    }
 }
 
@@ -1246,7 +1257,7 @@ updatePreferences (void) {
       drainBrailleOutput(&brl, updateInterval);
 
       /* Now process any user interaction */
-      switch (key = getBrailleCommand(CMDS_PREFS)) {
+      switch (key = getCommand(CMDS_PREFS)) {
         case CMD_TOP:
         case CMD_TOP_LEFT:
         case VAL_PASSKEY+VPK_PAGE_UP:
