@@ -747,7 +747,7 @@ int brlapi_leaveTty()
 /* Function : brlapi_writeBrl */
 /* Writes a string to the braille display */
 /* If the string is too long, it is cut. If it's to short, some spaces are added */
-int brlapi_writeBrl(uint32_t cursor,char *str)
+int brlapi_writeBrl(uint32_t cursor,const unsigned char *str)
 {
  static unsigned char disp[sizeof(uint32_t)+256];
  uint32_t *csr = (uint32_t *) &disp[0];

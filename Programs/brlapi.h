@@ -180,7 +180,7 @@ int brlapi_leaveTty();
 /* brlapi_writeBrl */
 /* Writes to the braille display */
 /* Be carefull, you must call GetTty first ! */
-int brlapi_writeBrl(uint32_t cursor, char *str);
+int brlapi_writeBrl(uint32_t cursor, const unsigned char *str);
 
 /* brlapi_readKey */
 /* Reads a key from the braille keyboard */
