@@ -23,6 +23,6 @@ Note
 ----
 Please note that the README file contains although version information and
 copyright notice, so if you find a bug that was not listed out in the README
-file, feel free to send an e-mail to me (plassi_y@epitech.net), because it's
+file, feel free to send an e-mail to me (yan@mistigri.org), because it's
 hard to test all possible functions, even if I use the driver 10 hours a day. 
 Thank you.

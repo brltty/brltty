@@ -45,3 +45,5 @@ static int	endblk(BrailleDisplay *);
 static int	Program(BrailleDisplay *brl);
 static int	ViewOn(BrailleDisplay *);
 static int	routing(BrailleDisplay *brl, int key);
+static int	enter_routing(BrailleDisplay *brl);
+static int	routing(BrailleDisplay *brl, int key);

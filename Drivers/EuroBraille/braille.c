@@ -16,7 +16,7 @@
  */
 
 /* EuroBraille/braille.c - Braille display library for the EuroBraille family.
- * Copyright (C) 1997-2003 by Yannick Plassiard <plassi_y@epitech.net>
+ * Copyright (C) 1997-2003 by Yannick Plassiard <yan@mistigri.org>
  *                        and Nicolas Pitre <nico@cam.org>
  * See the GNU General Public License for details in the ../../COPYING file
  * See the README file for details about copyrights and version informations
@@ -166,22 +166,26 @@ static t_key	*pclio_keys = pscriba_keys;
 static t_key	*nb_keys = azer80_keys;
 static t_key	*pnb_keys = pscriba_keys;
 
-static t_key	iris_keys[14] = {
+static t_key	iris_keys[16] = {
   {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
   {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
   {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
   {VAL_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
+  {CMD_NOOP, 10, Program},
+  {CMD_NOOP, 11, ViewOn},
   {CMD_FWINLT, 16, 0},
   {CMD_LNUP, 17, 0},
   {CMD_CSRVIS, 18, 0},
   {CMD_PREFMENU, 19, 0},
   {CMD_NOOP, 20, 0},
-  {CMD_NOOP, 21, 0},
+  {CMD_NOOP, 21, enter_routing},
   {CMD_TUNES, 22, 0},
   {CMD_LNDN, 23, 0},
   {CMD_FWINRT, 24, 0},
   {0, 0, 0}
 };
+
+static t_key	*piris_keys = pscriba_keys;
 
 /*
 ** Next bindings are keys that must be explicitly listed to allow function
@@ -387,7 +391,7 @@ static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
 
 static int brl_reset(BrailleDisplay *brl)
 {
-  return (brl_writePacket(brl, "\x02SI\x03MP\x37", 7) == 7);
+  return (brl_writePacket(brl, "\x02SI", 3) == 3);
 }
 
 static void brl_identify (void)
@@ -575,6 +579,10 @@ static int Program(BrailleDisplay *brl)
       else
 	p = pazer80_keys;
       break;
+    case 5:
+      message("Level 2 ...", MSG_NODELAY);
+      p = piris_keys;
+      break;
     default:
       message("P Unimplemented yet!", MSG_WAITKEY);
       break;
@@ -698,6 +706,11 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
     return (res);
   else
     return (key);
+}
+
+static int enter_routing(BrailleDisplay *brl)
+{
+  return (routing(brl, 0x83));
 }
 
 static int routing(BrailleDisplay *brl, int routekey)
@@ -965,7 +978,7 @@ static int readbrlkey(BrailleDisplay *brl)
   int		logfd;
 #endif
   unsigned char c;
-  static int DLEflag = 0, ErrFlag = 0, old_pktnbr = 0;
+  static int DLEflag = 0, ErrFlag = 0, old_pktnbr = 128; /* at first time */
   static unsigned char buf[DIM_INBUFSZ];
   static int pos = 0, p = 0, pktready = 0;
   
@@ -982,7 +995,7 @@ static int readbrlkey(BrailleDisplay *brl)
 	  DLEflag = 0;
 	  if (pos < DIM_INBUFSZ) buf[pos++] = c;
 	}
-      else if( ErrFlag )
+      else if (ErrFlag)
 	{
 	  ErrFlag = 0;
 	  /* Maybe should we check error code in c here? */
@@ -1014,11 +1027,6 @@ static int readbrlkey(BrailleDisplay *brl)
 		{
 		  sendbyte (NACK);
 		  sendbyte (PRT_E_PAR);
-		}
-	      else if (buf[pos - 2] < 0x80)
-		{
-		  sendbyte (NACK);
-		  sendbyte (PRT_E_NUM);
 		}
 	      else if (buf[pos - 2] == old_pktnbr)
 		{
