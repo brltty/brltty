@@ -1457,9 +1457,11 @@ brltty_summary_lines="${brltty_summary_lines}
 
 api_directory="${libdir}"
 
-if test -z "${execute_root}"
+if test "${exec_prefix}" = "NONE"
 then
-   if test "${exec_prefix}" = "NONE"
+   if test "${prefix}" = "NONE"
+then
+   if test -z "${execute_root}"
    then
       if test `expr "${api_directory} " : '\${exec_prefix}/[^/]*$'` -gt 0
       then
@@ -1467,9 +1469,10 @@ then
       fi
    fi
 fi
-if test -z "${execute_root}"
-then
+fi
    if test "${prefix}" = "NONE"
+then
+   if test -z "${execute_root}"
    then
       if test `expr "${includedir} " : '\${prefix}/[^/]*$'` -gt 0
       then
@@ -1477,9 +1480,9 @@ then
       fi
    fi
 fi
-if test -z "${execute_root}"
-then
    if test "${prefix}" = "NONE"
+then
+   if test -z "${execute_root}"
    then
       if test `expr "${mandir} " : '\${prefix}/[^/]*$'` -gt 0
       then

@@ -64,9 +64,9 @@ AC_SUBST([install_root])
 BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
 AC_SUBST([api_directory], ["${libdir}"])
-BRLTTY_EXEC_PREFIX_SUBDIRECTORY([api_directory], [/usr])
-BRLTTY_PREFIX_SUBDIRECTORY([includedir], [/usr])
-BRLTTY_PREFIX_SUBDIRECTORY([mandir], [/usr/share])
+BRLTTY_ARCHITECTURE_DIRECTORY([api_directory], [/usr])
+BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
+BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
 
 BRLTTY_SUMMARY_ITEM([bindir], [bindir])
 BRLTTY_SUMMARY_ITEM([libdir], [libdir])
