@@ -90,9 +90,8 @@ _	(   456)
 ,	(     6)
 
 # For convenience, lowercase alphabetic characters are also defined
-# so to have readable text when out of a .brf file content
+# so as to have readable text when not viewing a .brf file
 # (like BRLTTY's config menu for switching to another braille table).
-
 a	(1     )
 b	(12    )
 c	(1  4  )
@@ -120,3 +119,12 @@ x	(1 34 6)
 y	(1 3456)
 z	(1 3 56)
 
+# The following additional characters need to be defined
+# because some .brf files contain non-standard characters
+# and because some braille translators output non-standard characters.
+{	( 2 4 6)
+}	(12 456)
+|	(12  56)
+~	(   45 )
+`	(   4  )
+\X7F	(   456)
