@@ -85,7 +85,7 @@ typedef enum { NONE=0, STROKE=1, MOD=2, UNMOD=3 } actions;
 
 #define NBMAXMODS 32
 static uint32_t mods_state;
-pthread_mutex_t mods_mutex; /* to protect concurrent key reading */
+static pthread_mutex_t mods_mutex; /* to protect concurrent key reading */
 
 /* key binding */
 struct bind {
