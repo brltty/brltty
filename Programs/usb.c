@@ -564,7 +564,7 @@ static int
 usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
   return usbControlTransfer(device, USB_DIRECTION_OUTPUT,
                             USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR, 
-                            request, value, 0, NULL, 0, 1000);
+                            request, value, 0, NULL, 0, 1000) != -1;
 }
 static int
 usbSetBelkinBaud (UsbDevice *device, int rate) {
@@ -572,7 +572,7 @@ usbSetBelkinBaud (UsbDevice *device, int rate) {
   if (base % rate) {
     LogPrint(LOG_WARNING, "Unsupported Belkin baud: %d", rate);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   return usbSetBelkinAttribute(device, 0, base/rate);
 }
@@ -581,7 +581,7 @@ usbSetBelkinStopBits (UsbDevice *device, int bits) {
   if ((bits < 1) || (bits > 2)) {
     LogPrint(LOG_WARNING, "Unsupported Belkin stop bits: %d", bits);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   return usbSetBelkinAttribute(device, 1, bits-1);
 }
@@ -590,7 +590,7 @@ usbSetBelkinDataBits (UsbDevice *device, int bits) {
   if ((bits < 5) || (bits > 8)) {
     LogPrint(LOG_WARNING, "Unsupported Belkin data bits: %d", bits);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   return usbSetBelkinAttribute(device, 2, bits-5);
 }
@@ -606,7 +606,7 @@ usbSetBelkinParity (UsbDevice *device, UsbSerialParity parity) {
     default:
       LogPrint(LOG_WARNING, "Unsupported Belkin parity: %d", parity);
       errno = EINVAL;
-      return -1;
+      return 0;
   }
   return usbSetBelkinAttribute(device, 3, value);
 }
@@ -615,7 +615,7 @@ usbSetBelkinDtrState (UsbDevice *device, int state) {
   if ((state < 0) || (state > 1)) {
     LogPrint(LOG_WARNING, "Unsupported Belkin DTR state: %d", state);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   return usbSetBelkinAttribute(device, 10, state);
 }
@@ -624,7 +624,7 @@ usbSetBelkinRtsState (UsbDevice *device, int state) {
   if ((state < 0) || (state > 1)) {
     LogPrint(LOG_WARNING, "Unsupported Belkin RTS state: %d", state);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   return usbSetBelkinAttribute(device, 11, state);
 }
@@ -648,11 +648,11 @@ usbSetBelkinFlowControl (UsbDevice *device, int flow) {
 }
 static int
 usbSetBelkinDataFormat (UsbDevice *device, int dataBits, int stopBits, UsbSerialParity parity) {
-  if (usbSetBelkinDataBits(device, dataBits) != -1)
-    if (usbSetBelkinStopBits(device, stopBits) != -1)
-      if (usbSetBelkinParity(device, parity) != -1)
-        return 0;
-  return -1;
+  if (usbSetBelkinDataBits(device, dataBits))
+    if (usbSetBelkinStopBits(device, stopBits))
+      if (usbSetBelkinParity(device, parity))
+        return 1;
+  return 0;
 }
 static const UsbSerialOperations usbBelkinOperations = {
   usbSetBelkinBaud,
@@ -676,14 +676,14 @@ static int
 usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
   return usbControlTransfer(device, USB_DIRECTION_OUTPUT,
                             USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR, 
-                            request, value, index, NULL, 0, 1000);
+                            request, value, index, NULL, 0, 1000) != -1;
 }
 static int
 usbSetFtdiModemState (UsbDevice *device, int state, int shift, const char *name) {
   if ((state < 0) || (state > 1)) {
     LogPrint(LOG_WARNING, "Unsupported FTDI %s state: %d", name, state);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   return usbSetFtdiAttribute(device, 1, ((1 << (shift + 8)) | (state << shift)), 0);
 }
@@ -729,7 +729,7 @@ usbSetFtdiBaud_SIO (UsbDevice *device, int rate) {
     default:
       LogPrint(LOG_WARNING, "Unsupported FTDI SIO baud: %d", rate);
       errno = EINVAL;
-      return -1;
+      return 0;
   }
   return usbSetFtdiBaud(device, divisor);
 }
@@ -738,7 +738,7 @@ usbSetFtdiBaud_FT8U232AM (UsbDevice *device, int rate) {
   if (rate > 3000000) {
     LogPrint(LOG_WARNING, "Unsupported FTDI FT8U232AM baud: %d", rate);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   {
     const int base = 48000000;
@@ -759,7 +759,7 @@ usbSetFtdiBaud_FT232BM (UsbDevice *device, int rate) {
   if (rate > 3000000) {
     LogPrint(LOG_WARNING, "Unsupported FTDI FT232BM baud: %d", rate);
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   {
     static const unsigned char mask[8] = {00, 03, 02, 04, 01, 05, 06, 07};
@@ -803,7 +803,7 @@ usbSetFtdiDataFormat (UsbDevice *device, int dataBits, int stopBits, UsbSerialPa
   }
   if (!ok) {
     errno = EINVAL;
-    return -1;
+    return 0;
   }
   return usbSetFtdiAttribute(device, 4, value, 0);
 }
