@@ -1556,7 +1556,7 @@ startup (int argc, char *argv[]) {
     LogPrint(LOG_INFO, "Working Directory: %s",
              path? path: "path-too-long");
   }
-
+  LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
   LogPrint(LOG_INFO, "Configuration File: %s", opt_configurationFile);
   LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
   LogPrint(LOG_INFO, "Help Page: %s[%d]", brailleDriver->helpFile, getHelpPageNumber());
