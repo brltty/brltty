@@ -432,6 +432,20 @@ processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
   return !ferror(file);
 }
 
+void
+approximateDelay (int milliseconds) {
+  if (milliseconds > 0) {
+#ifdef WINDOWS
+    Sleep(milliseconds);
+#else /* WINDOWS */
+    struct timeval timeout;
+    timeout.tv_sec = milliseconds / 1000;
+    timeout.tv_usec = (milliseconds % 1000) * 1000;
+    select(0, NULL, NULL, NULL, &timeout);
+#endif /* WINDOWS */
+  }
+}
+
 #ifdef __MINGW32__
 void
 gettimeofday (struct timeval *tvp, void *tzp) {
@@ -444,23 +458,10 @@ gettimeofday (struct timeval *tvp, void *tzp) {
 void
 usleep (int usec) {
   if (usec > 0) {
-    struct timeval timeout;
-    timeout.tv_sec = usec / 1000000;
-    timeout.tv_usec = usec % 1000000;
-    select(0, NULL, NULL, NULL, &timeout);
+    approximateDelay((usec+999)/1000);
   }
 }
 #endif /* __MINGW32__ */
-
-void
-approximateDelay (int milliseconds) {
-  if (milliseconds > 0) {
-    struct timeval timeout;
-    timeout.tv_sec = milliseconds / 1000;
-    timeout.tv_usec = (milliseconds % 1000) * 1000;
-    select(0, NULL, NULL, NULL, &timeout);
-  }
-}
 
 long int
 millisecondsBetween (const struct timeval *from, const struct timeval *to) {
