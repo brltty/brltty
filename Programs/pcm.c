@@ -40,7 +40,7 @@ static size_t blockUsed = 0;
 
 static int openPcm (int errorLevel) {
    if (pcm) return 1;
-   if ((pcm = openPcmDevice(errorLevel))) {
+   if ((pcm = openPcmDevice(errorLevel, opt_pcmDevice))) {
       blockSize = getPcmBlockSize(pcm);
       sampleRate = getPcmSampleRate(pcm);
       channelCount = getPcmChannelCount(pcm);

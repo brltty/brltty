@@ -46,7 +46,7 @@ typedef enum {
   PCM_FMT_ULAW,
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
-extern PcmDevice *openPcmDevice (int errorLevel);
+extern PcmDevice *openPcmDevice (int errorLevel, const char *device);
 extern void closePcmDevice (PcmDevice *pcm);
 extern int writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count);
 extern int getPcmBlockSize (PcmDevice *pcm);
@@ -62,7 +62,7 @@ extern void cancelPcmOutput (PcmDevice *pcm);
 
 typedef struct MidiDeviceStruct MidiDevice;
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);
-extern MidiDevice *openMidiDevice (int errorLevel);
+extern MidiDevice *openMidiDevice (int errorLevel, const char *device);
 extern void closeMidiDevice (MidiDevice *midi);
 extern int flushMidiDevice (MidiDevice *midi);
 extern int setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument);

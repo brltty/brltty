@@ -28,7 +28,7 @@ logAlsaError (int level, const char *action, int code) {
 }
 
 PcmDevice *
-openPcmDevice (int errorLevel) {
+openPcmDevice (int errorLevel, const char *device) {
   PcmDevice *pcm;
   if ((pcm = malloc(sizeof(*pcm)))) {
     int result;

@@ -182,7 +182,7 @@ const unsigned int midiInstrumentCount = sizeof(midiInstrumentTable) / sizeof(mi
 
 static int openMidi (int errorLevel) {
    if (!midi) {
-      if (!(midi = openMidiDevice(errorLevel))) {
+      if (!(midi = openMidiDevice(errorLevel, opt_midiDevice))) {
          LogPrint(LOG_DEBUG, "Cannot open MIDI.");
          return 0;
       }

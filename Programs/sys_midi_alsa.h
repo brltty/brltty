@@ -26,7 +26,7 @@ struct MidiDeviceStruct {
 };
 
 MidiDevice *
-openMidiDevice (int errorLevel) {
+openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
 
   if ((midi = malloc(sizeof(*midi)))) {

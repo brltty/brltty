@@ -45,6 +45,14 @@ BEGIN_OPTION_TABLE
   {'i', "instrument", "instrument", NULL, 0,
    "Name of MIDI instrument."},
 #endif /* ENABLE_MIDI_SUPPORT */
+#ifdef ENABLE_MIDI_SUPPORT
+  {'m', "midi-device", "device", NULL, 0,
+   "Specifier (client:port for ALSA, else path) for accessing the Musical Instrument Digital Interface."},
+#endif /* ENABLE_MIDI_SUPPORT */
+#ifdef ENABLE_PCM_SUPPORT
+  {'p', "pcm-device", "device", NULL, 0,
+   "Specifier (path) for accessing the Pulse Code Modulation interface."},
+#endif /* ENABLE_PCM_SUPPORT */
   {'v', "level", "volume", NULL, 0,
    "Output volume."},
 END_OPTION_TABLE
@@ -52,10 +60,16 @@ END_OPTION_TABLE
 static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
 static unsigned int opt_tuneDevice;
+static short opt_outputVolume = 50;
+
+#ifdef ENABLE_PCM_SUPPORT
+const char *opt_pcmDevice = NULL;
+#endif /* ENABLE_PCM_SUPPORT */
+
 #ifdef ENABLE_MIDI_SUPPORT
+const char *opt_midiDevice = NULL;
 static unsigned char opt_midiInstrument = 0;
 #endif /* ENABLE_MIDI_SUPPORT */
-static short opt_outputVolume = 50;
 
 #ifdef ENABLE_MIDI_SUPPORT
 static unsigned char
@@ -102,14 +116,24 @@ handleOption (const int option) {
     case 'd':
       opt_tuneDevice = wordArgument(optarg, deviceNames, "device");
       break;
+    case 'v':
+      opt_outputVolume = integerArgument(optarg, 0, 100, "level");
+      break;
+
+#ifdef ENABLE_PCM_SUPPORT
+    case 'p':	/* --pcm-device */
+      opt_pcmDevice = optarg;
+      break;
+#endif /* ENABLE_PCM_SUPPORT */
+
 #ifdef ENABLE_MIDI_SUPPORT
+    case 'm':	/* --midi-device */
+      opt_midiDevice = optarg;
+      break;
     case 'i':
       opt_midiInstrument = instrumentArgument(optarg);
       break;
 #endif /* ENABLE_MIDI_SUPPORT */
-    case 'v':
-      opt_outputVolume = integerArgument(optarg, 0, 100, "level");
-      break;
   }
   return 1;
 }

@@ -22,12 +22,12 @@ struct PcmDeviceStruct {
 };
 
 PcmDevice *
-openPcmDevice (int errorLevel) {
+openPcmDevice (int errorLevel, const char *device) {
   PcmDevice *pcm;
   if ((pcm = malloc(sizeof(*pcm)))) {
-    const char *path = getenv("AUDIODEV");
-    if (!path) path = PCM_AUDIO_DEVICE_PATH;
-    if ((pcm->fileDescriptor = open(path, O_WRONLY|O_NONBLOCK)) != -1) {
+    if (!device) device = getenv("AUDIODEV");
+    if (!device) device = PCM_AUDIO_DEVICE_PATH;
+    if ((pcm->fileDescriptor = open(device, O_WRONLY|O_NONBLOCK)) != -1) {
       audio_info_t info;
       AUDIO_INITINFO(&info);
 #ifdef AUMODE_PLAY
@@ -46,7 +46,7 @@ openPcmDevice (int errorLevel) {
         LogPrint(errorLevel, "Cannot set audio info: %s", strerror(errno));
       return pcm;
     } else {
-      LogPrint(errorLevel, "Cannot open PCM device: %s: %s", path, strerror(errno));
+      LogPrint(errorLevel, "Cannot open PCM device: %s: %s", device, strerror(errno));
     }
     free(pcm);
   } else {

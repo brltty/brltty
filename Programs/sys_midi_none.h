@@ -18,7 +18,7 @@
 #warning MIDI support not available on this platform
 
 MidiDevice *
-openMidiDevice (int errorLevel) {
+openMidiDevice (int errorLevel, const char *device) {
   LogPrint(errorLevel, "MIDI device not supported.");
   return NULL;
 }

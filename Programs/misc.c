@@ -42,7 +42,7 @@ splitString (const char *string, char delimiter, int *count) {
 
   if (!string) {
     if (count) *count = 0;
-    return 0;
+    return NULL;
   }
 
   {

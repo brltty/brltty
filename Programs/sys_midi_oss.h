@@ -44,11 +44,11 @@ seqbuf_dump (void) {
 }
 
 MidiDevice *
-openMidiDevice (int errorLevel) {
+openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
   if ((midi = malloc(sizeof(*midi)))) {
-    const char *path = "/dev/sequencer";
-    if ((midi->fileDescriptor = open(path, O_WRONLY)) != -1) {
+    if (!device) device = MIDI_OSS_DEVICE_PATH;
+    if ((midi->fileDescriptor = open(device, O_WRONLY)) != -1) {
       {
         int count;
         int awe = -1;
@@ -116,7 +116,7 @@ openMidiDevice (int errorLevel) {
 
       return midi;
     } else {
-      LogPrint(errorLevel, "Cannot open MIDI device: %s: %s", path, strerror(errno));
+      LogPrint(errorLevel, "Cannot open MIDI device: %s: %s", device, strerror(errno));
     }
 
     free(midi);

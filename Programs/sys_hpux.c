@@ -96,7 +96,7 @@ getAudioAttributes (PcmDevice *pcm) {
 #endif /* HAVE_HPUX_AUDIO */
 
 PcmDevice *
-openPcmDevice (int errorLevel) {
+openPcmDevice (int errorLevel, const char *device) {
 #ifdef HAVE_HPUX_AUDIO
   PcmDevice *pcm;
   if ((pcm = malloc(sizeof(*pcm)))) {

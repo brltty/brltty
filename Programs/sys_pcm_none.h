@@ -18,7 +18,7 @@
 #warning sound card support not available on this platform
 
 PcmDevice *
-openPcmDevice (int errorLevel) {
+openPcmDevice (int errorLevel, const char *device) {
   LogPrint(errorLevel, "PCM device not supported.");
   return NULL;
 }

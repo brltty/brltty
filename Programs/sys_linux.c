@@ -124,6 +124,7 @@ endBeep (void) {
 
 #ifdef ENABLE_MIDI_SUPPORT
 #if defined(USE_MIDI_SUPPORT_OSS)
+#define MIDI_OSS_DEVICE_PATH "/dev/sequencer";
 #include "sys_midi_oss.h"
 #elif defined(USE_MIDI_SUPPORT_ALSA)
 #include "sys_midi_alsa.h"

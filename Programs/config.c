@@ -118,6 +118,14 @@ static short opt_noSpeech = 0;
 static char *opt_screenParameters = NULL;
 static char **screenParameters = NULL;
 
+#ifdef ENABLE_PCM_SUPPORT
+const char *opt_pcmDevice = NULL;
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+const char *opt_midiDevice = NULL;
+#endif /* ENABLE_MIDI_SUPPORT */
+
 static ConfigurationLineStatus
 getConfigurationOperand (char **operandAddress, const char *delimiters, int extend) {
   char *operand = strtok(NULL, delimiters);
@@ -258,8 +266,16 @@ BEGIN_OPTION_TABLE
    "Path to default parameters file."},
   {'l', "log-level", "level", NULL, 0,
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
+#ifdef ENABLE_MIDI_SUPPORT
+  {'m', "midi-device", "device", NULL, 0,
+   "Specifier (client:port for ALSA, else path) for accessing the Musical Instrument Digital Interface."},
+#endif /* ENABLE_MIDI_SUPPORT */
   {'n', "no-daemon", NULL, NULL, 0,
    "Remain a foreground process."},
+#ifdef ENABLE_PCM_SUPPORT
+  {'p', "pcm-device", "device", NULL, 0,
+   "Specifier (path) for accessing the Pulse Code Modulation interface."},
+#endif /* ENABLE_PCM_SUPPORT */
   {'q', "quiet", NULL, NULL, 0,
    "Suppress start-up messages."},
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1211,6 +1227,11 @@ savePreferences (void) {
   return ok;
 }
 
+static void
+exitTunes (void) {
+  closeTuneDevice(1);
+}
+
 static int
 testTunes (void) {
    return prefs.alertTunes;
@@ -1951,6 +1972,18 @@ handleOption (const int option) {
       extendParameters(&opt_screenParameters, optarg);
       break;
 
+#ifdef ENABLE_PCM_SUPPORT
+    case 'p':	/* --pcm-device */
+      opt_pcmDevice = optarg;
+      break;
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+    case 'm':	/* --midi-device */
+      opt_midiDevice = optarg;
+      break;
+#endif /* ENABLE_MIDI_SUPPORT */
+
     case 'U':	/* --update-interval */
       validateInterval(&updateInterval, "update interval", optarg);
       break;
@@ -1976,6 +2009,9 @@ startup (int argc, char *argv[]) {
   setPrintLevel((opt_version || opt_verify)?
                   (opt_quiet? LOG_NOTICE: LOG_INFO):
                   (opt_quiet? LOG_WARNING: LOG_NOTICE));
+
+  atexit(exitTunes);
+  suppressTuneDeviceOpenErrors();
 
   LogPrint(LOG_NOTICE, "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
   LogPrint(LOG_INFO, "%s", COPYRIGHT);
