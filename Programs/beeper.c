@@ -65,6 +65,7 @@ static int flushBeeper (void) {
 static void closeBeeper (void) {
    if (beeperOpened) {
       beeperOpened = 0;
+      endBeep();
       LogPrint(LOG_DEBUG, "Beeper closed.");
    }
 }

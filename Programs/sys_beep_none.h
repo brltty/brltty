@@ -34,3 +34,7 @@ int
 stopBeep (void) {
   return 0;
 }
+
+void
+endBeep (void) {
+}

@@ -72,8 +72,7 @@ getBootParameters (void) {
 
 int
 canBeep (void) {
-  if (getConsole() != -1) return 1;
-  return 0;
+  return getConsole() != -1;
 }
 
 int
@@ -104,6 +103,10 @@ stopBeep (void) {
     LogError("ioctl KIOCSOUND");
   }
   return 0;
+}
+
+void
+endBeep (void) {
 }
 
 #ifdef ENABLE_PCM_TUNES

@@ -43,8 +43,7 @@
 
 int
 canBeep (void) {
-  if (getConsole() != -1) return 1;
-  return 0;
+  return getConsole() != -1;
 }
 
 int
@@ -52,17 +51,12 @@ timedBeep (unsigned short frequency, unsigned short milliseconds) {
   int console = getConsole();
   if (console != -1) {
     struct wskbd_bell_data bell;
-    bell.which = WSKBD_BELL_DOALL;
+    if (!(bell.period = milliseconds)) return 1;
     bell.pitch = frequency;
-    bell.period = milliseconds;
     bell.volume = 100;
-    if (!bell.period) {
-      return 1;
-    } else if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) {
-      return 1;
-    } else {
-      LogPrint(LOG_WARNING, "ioctl WSKBDIO_COMPLEXBELL failed: %s", strerror(errno));
-    }
+    bell.which = WSKBD_BELL_DOALL;
+    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
+    LogError("ioctl WSKBDIO_COMPLEXBELL");
   }
   return 0;
 }
@@ -80,13 +74,14 @@ stopBeep (void) {
     bell.which = WSKBD_BELL_DOVOLUME | WSKBD_BELL_DOPERIOD;
     bell.volume = 0;
     bell.period = 0;
-    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) {
-      return 1;
-    } else {
-      LogPrint(LOG_WARNING, "ioctl WSKBDIO_COMPLEXBELL failed: %s", strerror(errno));
-    }
+    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
+    LogError("ioctl WSKBDIO_COMPLEXBELL");
   }
   return 0;
+}
+
+void
+endBeep (void) {
 }
 
 #ifdef ENABLE_PCM_TUNES

@@ -32,6 +32,7 @@ extern int canBeep (void);
 extern int timedBeep (unsigned short frequency, unsigned short milliseconds);
 extern int startBeep (unsigned short frequency);
 extern int stopBeep (void);
+extern void endBeep (void);
 
 typedef enum {
   PCM_FMT_U8,

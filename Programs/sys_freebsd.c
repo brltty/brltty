@@ -38,11 +38,12 @@
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
 
+static int speaker = -1;
+
 static int
 getSpeaker (void) {
-  static int speaker = -1;
   if (speaker == -1) {
-    if ((speaker = open("/dev/speaker", O_WRONLY)) != -1)
+    if ((speaker = open("/dev/speaker", O_WRONLY)) != -1) {
       LogPrint(LOG_DEBUG, "Speaker opened: fd=%d", speaker);
     } else {
       LogError("speaker open");
@@ -53,8 +54,7 @@ getSpeaker (void) {
 
 int
 canBeep (void) {
-  if (getSpeaker()) return 1;
-  return 0;
+  return 1;
 }
 
 int
@@ -79,6 +79,14 @@ startBeep (unsigned short frequency) {
 int
 stopBeep (void) {
   return 0;
+}
+
+void
+endBeep (void) {
+  if (speaker != -1) {
+    close(speaker);
+    speaker = -1;
+  }
 }
 
 #ifdef ENABLE_PCM_TUNES
