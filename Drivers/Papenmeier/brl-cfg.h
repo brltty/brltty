@@ -322,9 +322,17 @@ typedef struct {
                VAL_PASSKEY+VPK_PAGE_UP                         ), \
   CMDS_EASY_D( VAL_PASSKEY+VPK_CURSOR_DOWN  , NOKEY     , 0X04  , \
                VAL_PASSKEY+VPK_PAGE_DOWN                       ), \
-  CMDS_EASY_L( VAL_PASSKEY+VPK_CURSOR_LEFT  , NOKEY     , 0X04  , \
+  CMDS_EASY_L( CMD_FWINLT                   , NOKEY     , 0X04  , \
+               CMD_LNBEG                                       ), \
+  CMDS_EASY_R( CMD_FWINRT                   , NOKEY     , 0X04  , \
+               CMD_LNEND                                       ), \
+  CMDS_EASY_U( VAL_PASSKEY+VPK_CURSOR_UP    , NOKEY     , 0X05  , \
+               VAL_PASSKEY+VPK_PAGE_UP                         ), \
+  CMDS_EASY_D( VAL_PASSKEY+VPK_CURSOR_DOWN  , NOKEY     , 0X05  , \
+               VAL_PASSKEY+VPK_PAGE_DOWN                       ), \
+  CMDS_EASY_L( VAL_PASSKEY+VPK_CURSOR_LEFT  , NOKEY     , 0X05  , \
                VAL_PASSKEY+VPK_HOME                            ), \
-  CMDS_EASY_R( VAL_PASSKEY+VPK_CURSOR_RIGHT , NOKEY     , 0X04  , \
+  CMDS_EASY_R( VAL_PASSKEY+VPK_CURSOR_RIGHT , NOKEY     , 0X05  , \
                VAL_PASSKEY+VPK_END                             ), \
   CMDS_EASY_U( CMD_BACK                     , NOKEY     , 0X08  , \
                CMD_HOME                                        ), \
