@@ -343,11 +343,5 @@ usbVerifySerialNumber (UsbDevice *device, const char *string) {
 
 int
 isUsbDevice (const char **path) {
-  const char *prefix = "usb:";
-  int length = strlen(prefix);
-  if (strncmp(*path, prefix, length) == 0) {
-    *path += length;
-    return 1;
-  }
-  return 0;
+  return isQualifiedDevice(path, "usb");
 }

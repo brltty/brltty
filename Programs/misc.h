@@ -110,8 +110,10 @@ extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
 extern char *makePath (const char *directory, const char *file);
 
-extern void unsupportedDevice (const char *path);
+extern int isQualifiedDevice (const char **path, const char *qualifier);
 extern int isSerialDevice (const char **path);
+extern void unsupportedDevice (const char *path);
+
 extern int openSerialDevice (const char *path, int *descriptor, struct termios *attributes);
 extern void rawSerialDevice (struct termios *attributes);
 extern int setSerialDevice (int descriptor, struct termios *attributes, speed_t baud);

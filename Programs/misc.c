@@ -256,14 +256,23 @@ getDevicePath (const char *path) {
 }
 
 int
-isSerialDevice (const char **path) {
-  const char *prefix = "serial:";
-  int length = strlen(prefix);
-  if (strncmp(*path, prefix, length) == 0) {
-    *path += length;
-    return 1;
+isQualifiedDevice (const char **path, const char *qualifier) {
+  size_t count = strcspn(*path, ":");
+  if (count == strlen(*path)) return 0;
+  if (!qualifier) return 1;
+  if (!count) return 0;
+
+  {
+    int ok = strncmp(*path, qualifier, count) == 0;
+    if (ok) *path += count + 1;
+    return ok;
   }
-  return !strchr(*path, ':');
+}
+
+int
+isSerialDevice (const char **path) {
+  if (isQualifiedDevice(path, "serial")) return 1;
+  return !isQualifiedDevice(path, NULL);
 }
 
 void
