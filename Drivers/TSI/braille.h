@@ -56,15 +56,6 @@
    There is a minimum of a few milliseconds, so 0 means minimum delay */
 #define FLICKER_DELAY 0
 
-/* TSI models raise the CTS line of the RS232 wire when connected. Checking
-   for this line allows BRLTTY to easily determine whether a display is
-   connected, without actually sending anything. This was all fine until I
-   learned that Baum's Vario, which emulates PB40, does not raise CTS when
-   connected and turned ON. Commenting out the following define allows the
-   detection process to continue even if CTS is low, which should allow the
-   Vario to be detected. */
-/*#define CHECKCTS 1*/
-
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. How soon do we get nervous and send
    the ping? (in miliseconds) */

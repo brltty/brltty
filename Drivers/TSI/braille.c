@@ -319,18 +319,6 @@ brl_identify (void)
 
 
 static int
-CheckCTSLine(int fd)
-/* If supported (might not be portable) check that the CTS line (RS232)
-   is up. */
-{
-#ifdef CHECKCTS
-  return(testSerialClearToSend(fd));
-#else /* CHECKCTS */
-  return(1);
-#endif /* CHECKCTS */
-}
-
-static int
 myread(int fd, void *buf, unsigned len)
 /* This is a replacement for read for use in nonblocking mode: when
    c_cc[VTIME] = 1, c_cc[VMIN] = 0. We want to read len bytes into buf, but
@@ -421,16 +409,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* Try to detect display by sending query */
   while(1){
-    /* Check RS232 wires: we should have CTS if the device is connected and
-       ON. The NAV40 lowers CTS when off, the PB80 doesn't, and I don't know
-       about the others. */
-    if(!CheckCTSLine(brl_fd)){
-      LogPrint(LOG_INFO, "Display is off or not connected");
-      do{
-	delay(DETECT_DELAY);
-      }while(!CheckCTSLine(brl_fd));
-      LogPrint(LOG_DEBUG,"Display was connected or activated");
-    }
     LogPrint(LOG_DEBUG,"Sending query at 9600bps");
     if(!restartSerialDevice(brl_fd, &curtio, 9600)) goto failure;
     if(QueryDisplay(brl_fd,reply)) break;
@@ -997,8 +975,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
     if((i = millisecondsBetween(&last_ping, &now) > PING_INTRVL)){
       int ping_due = (pings==0 || (millisecondsBetween(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
-      if((pings>=PING_MAXNQUERY && ping_due)
-	 || !CheckCTSLine(brl_fd))
+      if((pings>=PING_MAXNQUERY && ping_due))
 	return BRL_CMD_RESTARTBRL;
       else if(ping_due){
 	LogPrint(LOG_DEBUG,"Display idle: sending query");
