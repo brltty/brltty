@@ -35,10 +35,10 @@ textTable="nabcc"
 invokeShell=false
 showUsage() {
    cat <<EOF
-Usage: ${programName} [-option ...] [original-image [modified-image]]
-The original (input) image defaults to "${originalImage}".
-The modified (output) image defaults to "${modifiedImage}".
+Usage: ${programName} [-option ...]
 The following options are supported:
+-i file         The original (input) image (default: ${originalImage}).
+-o file         The modified (output) image (default: ${modifiedImage}).
 -b driver,...   The braille driver(s) to include (default: ${brailleDrivers}).
 -t file         The text translation table to build in (default: ${textTable}).
 -s              Invoke an interactive shell to inspect the modified image.
@@ -47,10 +47,12 @@ EOF
    exit 0
 }
 
-while getopts ":b:t:sh" option
+while getopts ":i:o:b:t:sh" option
 do
    case "${option}"
    in
+      i) originalImage="${OPTARG}";;
+      o) modifiedImage="${OPTARG}";;
       b) brailleDrivers="${OPTARG}";;
       t) textTable="${OPTARG}";;
       s) invokeShell=true;;
@@ -61,17 +63,6 @@ do
    esac
 done
 shift $((OPTIND - 1))
-
-[ "${#}" -gt 0 ] && {
-   originalImage="${1}"
-   shift
-}
-
-[ "${#}" -gt 0 ] && {
-   modifiedImage="${1}"
-   shift
-}
-
 [ "${#}" -gt 0 ] && syntaxError "too many parameters."
 
 [ -f "${originalImage}" ] || programError "original image not found: ${originalImage}"

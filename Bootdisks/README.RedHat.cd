@@ -37,11 +37,15 @@ Fifth: Run the "rhmkiso" script with no options or parameters.
 Sixth: You should now have a new file, "brltty.iso", in the current directory. 
 Write this modified image to a CD.
 
-   cdrecord -dao dev=0,0,0 -v -data brltty.iso
+   cdrecord -v dev=0,0,0 -data brltty.iso
 
 If you're using a rewritable CD then you should erase it first.
 
-   cdrecord dev=0,0,0 -v blank=fast
+   cdrecord -v dev=0,0,0 blank=fast
+
+For more information on writing to a CD, please check the CD-Writing HOWTO at:
+
+   http://tldp.org/HOWTO/CD-Writing-HOWTO.html
 
 Seventh: Boot from the CD you've just written, and wait a few seconds after it
 starts to spin in order to give the boot loader enough time to get started and
@@ -94,22 +98,24 @@ Although its defaults are what usually needs to be done, the "rhmkiso" script
 offers a number of options so that you can customize what it does. It's general
 invocation syntax is:
 
-   rhmkiso [-option ...] [original-image [modified-image]]
-
-The first parameter is either the relative or the absolute path to the
-distribution-supplied original (input) image which is to be modified. It's
-optional, and defaults to "boot.iso" (the usual name for the basic installer CD
-image).
-
-The second parameter is either the relative or the absolute path to the file
-which is to contain the modified (output) image which the script creates. It's
-optional, and defaults to "brltty.iso".
+   rhmkiso [-option ...]
 
 The following options are provided:
+   -i file         The original (input) image (default: boot.iso).
+   -o file         The modified (output) image (default: brltty.iso).
    -b driver,...   The braille driver(s) to include (default: all).
    -t file         The text translation table to build in (default: nabcc).
    -s              Invoke an interactive shell to inspect the modified image.
    -h              Display usage information and exit.
+
+The -i option specifies the location of the distribution-supplied original
+(input) image which is to be modified. Either a relative or an absolute path
+may be supplied. It defaults to "boot.iso" (the usual name for the basic
+installer CD image).
+
+The -o option specifies the location of the file which is to contain the
+modified (output) image which the script will create. Either a relative or an
+absolute path may be supplied. It defaults to "brltty.iso".
 
 The -b option specifies which braille display drivers will be linked into the
 brltty executable as opposed to being built as dynamically loadable shared
