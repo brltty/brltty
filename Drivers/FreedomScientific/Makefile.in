@@ -23,7 +23,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = fs
 DRIVER_NAME = FreedomScientific
-BRAILLE_MODELS = Focus 44/70/84, PacMate 20/40
+BRAILLE_MODELS = Focus 40/44/70/80/84, PacMate 20/40
 HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk
