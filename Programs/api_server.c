@@ -1089,38 +1089,43 @@ void api_open(BrailleDisplay *brl, char **parameters)
   DisplaySize[0] = htonl(brl->x);
   DisplaySize[1] = htonl(brl->y);
 
-  api_link();
-
   res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH),
                            &authKeyLength,authKey);
   if (res==-1) {
     LogPrint(LOG_WARNING,"Unable to load API authentication key: no connections will be accepted.");
-    api_unlink();
-    connectionsAllowed = 0;
-    return;
+    goto out;
   }
   LogPrint(LOG_DEBUG, "Authentication key loaded");
-  if ((notty.connections = createConnection(-1,0,0,0)) == NULL)
-  {
+  if ((notty.connections = createConnection(-1,0,0,0)) == NULL) {
     LogPrint(LOG_WARNING, "Unable to create connections list");
-    pthread_exit(NULL);
+    goto out;
   }
   notty.connections->prev = notty.connections->next = notty.connections;
-  if ((ttys.connections = createConnection(-1,0,0,0)) == NULL)
-  {
+  if ((ttys.connections = createConnection(-1,0,0,0)) == NULL) {
     LogPrint(LOG_WARNING, "Unable to create ttys' connections list");
-    pthread_exit(NULL);
+    goto outalloc;
   }
   ttys.connections->prev = ttys.connections->next = ttys.connections;
 
   if (*parameters[PARM_HOST]) host = parameters[PARM_HOST];
   else host = "127.0.0.1";
 
+  TrueBraille=braille;
   if ((res = pthread_create(&serverThread,NULL,server,(void *) host)) != 0) {
     LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
-    api_unlink();
-    return;
-  } else connectionsAllowed = 1;
+    goto outallocs;
+  }
+  api_link();
+  connectionsAllowed = 1;
+  return;
+  
+outallocs:
+  freeConnection(ttys.connections);
+outalloc:
+  freeConnection(notty.connections);
+out:
+  connectionsAllowed = 0;
+  return;
 }
 
 /* Function : api_close */
