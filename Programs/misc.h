@@ -79,6 +79,11 @@ extern int processLines (FILE *file, /* The input file. */
 		         void *data); /* A pointer to caller-specific data. */
 extern int readLine (FILE *file, char **buffer, size_t *size);
 
+#ifdef __MINGW32__
+extern void gettimeofday (struct timeval *tvp, void *tzp);
+extern void usleep (int usec);
+#endif /* __MINGW32__ */
+
 extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
 extern void accurateDelay (int milliseconds);
 extern long int millisecondsBetween (const struct timeval *from, const struct timeval *to);
@@ -108,6 +113,9 @@ extern void LogPrint
 #endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
        ;
 extern void LogError (const char *action);
+#ifdef __MINGW32__
+extern void LogWindowsError (const char *action);
+#endif /* __MINGW32__ */
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
 extern int setLogLevel (int level);
 extern int setPrintLevel (int level);

@@ -29,6 +29,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#ifdef __MINGW32__
+#include <windows.h>
+#endif /* __MINGW32__ */
+
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
@@ -138,7 +142,9 @@ LogPrint (int level, char *format, ...) {
 #endif /* HAVE_SYSLOG_H */
     level = printLevel;
   }
+#ifdef HAVE_SYSLOG_H
 done:
+#endif /* HAVE_SYSLOG_H */
 
   if (level <= printLevel) {
     va_start(argp, format);
@@ -153,6 +159,13 @@ void
 LogError (const char *action) {
   LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
 }
+
+#ifdef __MINGW32__
+void
+LogWindowsError (const char *action) {
+  LogPrint(LOG_ERR, "%s error %ld.", action, GetLastError());
+}
+#endif /* __MINGW32__ */
 
 void
 LogBytes (const char *description, const unsigned char *data, unsigned int length) {
@@ -304,7 +317,11 @@ makeDirectory (const char *path) {
     LogPrint(LOG_ERR, "Directory status error: %s: %s", path, strerror(errno));
   } else {
     LogPrint(LOG_NOTICE, "Creating directory: %s", path);
-    if (mkdir(path, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) != -1) return 1;
+    if (mkdir(path
+#ifndef __MINGW32__
+              , S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+#endif /* __MINGW32__ */
+             ) != -1) return 1;
     LogPrint(LOG_ERR, "Directory creation error: %s: %s", path, strerror(errno));
   }
   return 0;
@@ -411,6 +428,26 @@ processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
   return !ferror(file);
 }
 
+#ifdef __MINGW32__
+void
+gettimeofday (struct timeval *tvp, void *tzp) {
+  DWORD time = GetTickCount();
+  /* this is not 49.7 days-proof ! */
+  tvp->tv_sec = time / 1000;
+  tvp->tv_usec = (time % 1000) * 1000;
+}
+
+void
+usleep (int usec) {
+  if (usec > 0) {
+    struct timeval timeout;
+    timeout.tv_sec = usec / 1000000;
+    timeout.tv_usec = usec % 1000000;
+    select(0, NULL, NULL, NULL, &timeout);
+  }
+}
+#endif /* __MINGW32__ */
+
 void
 approximateDelay (int milliseconds) {
   if (milliseconds > 0) {
@@ -438,9 +475,13 @@ accurateDelay (int milliseconds) {
   static int tickLength = 0;
   struct timeval start;
   gettimeofday(&start, NULL);
-  if (!tickLength)
-    if (!(tickLength = 1000 / sysconf(_SC_CLK_TCK)))
-      tickLength = 1;
+  if (!tickLength) {
+#ifdef __MINGW32__
+    tickLength = 1;
+#else /* __MINGW32__ */
+    if (!(tickLength = 1000 / sysconf(_SC_CLK_TCK))) tickLength = 1;
+#endif /* __MINGW32__ */
+  }
   if (milliseconds >= tickLength) approximateDelay(milliseconds / tickLength * tickLength);
   while (millisecondsSince(&start) < milliseconds);
 }
