@@ -180,14 +180,19 @@ usbBeginInput (
   int size,
   int count
 ) {
+  int actual = 0;
   device->inputRequest = NULL;
   device->inputEndpoint = endpoint | USB_DIR_IN;
   device->inputSize = size;
   device->inputFlags = 0;
-  while (count--) {
-    if (!usbAddInputElement(device)) return -1;
+  while (actual < count) {
+    if (!usbAddInputElement(device)) {
+      if (errno == ENXIO) break;
+      return -1;
+    }
+    actual++;
   }
-  return 0;
+  return actual;
 }
 
 int
