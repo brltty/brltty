@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
  
-/* brlapi.c : Main file for BrlApi library version 0.1 */
+/* brlapi.c : Main file for BrlApi library */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,7 +60,7 @@ typedef enum {
 
 const char *const api_parameters[] = { "port", "keyfile", NULL };
 
-#define VERSION "BRLTTY API Library: version 0.1, 2002"
+#define VERSION "BRLTTY API Library: version " BRLAPI_VERSION
 #define COPYRIGHT "   Copyright Sebastien HINDERER <shindere@ens-lyon.fr> \
 & Samuel THIBAULT <samuel.thibault@fnac.net>"
 

@@ -95,10 +95,10 @@ $(API_ARC): $(API_LIB_OBJS)
 	$(AR) rcs $@ $(API_LIB_OBJS)
 
 api_common.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_common.c
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_common.c
 
 api_client.o:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_client.c
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c
 
 api_server.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_server.c
@@ -348,6 +348,9 @@ uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INC_DIR)/brldefs.h
 
 ###############################################################################
+
+distclean::
+	-rm -f brlapi.h
 
 clean::
 	-rm -f brltty brltty-install txt2hlp tbl2hex *test *-static

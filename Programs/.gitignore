@@ -1,5 +1,6 @@
 Makefile
 reldeps.mk
+brlapi.h
 *.auto.h
 *.a
 *.so

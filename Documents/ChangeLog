@@ -3,8 +3,11 @@ Note: this file is in reversed chronological order (bottom to top).
 
  - BRLTTY 3.3 released:
    Enhancements to en-us-g2 contraction table. (jb)
-   Some Braille Lite driver initialization failures gobble resources. (dm)
-   Add Braille Lite Millennium support (wheels, advance bar combinations). (dm)
+   Braille Lite driver enhancements: (dm)
+      Some initialization failures gobble resources.
+      Add Millennium support (whiz wheels, advance bar combinations).
+      Change keyboard emulation mode default from off to on.
+      Allow chorded keyboard input when not in keyboard emulation mode.
    Check for the pow() function during autoconf. (dm)
    The global variable languageCount in the ViaVoice speech driver isn't used. (dm)
    Add basic support for Gnopernicus. (ml)
@@ -30,7 +33,10 @@ Note: this file is in reversed chronological order (bottom to top).
    Clean up the rpm spec file. (dm)
    Move default install directory for man pages from /man to /usr/share/man. (dm)
    Rename install-brltty to brltty-install. (dm)
-   Updated EuroBraille README. Yannick Plassiard <plassi_y@epita.fr>
+   EuroBraille driver enhancements: Yannick Plassiard <plassi_y@epita.fr>
+      Document cut&paste in README.
+      Initial support for file transfer.
+      Several bug fixes.
    Implement brlapi. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr> + Samuel Thibault <Samuel.Thibault@ens-lyon.fr>
    Core changes to support big5.ctb: (dm)
       Change ctb opcode "ignore" to "replace".

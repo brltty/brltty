@@ -26,6 +26,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* Define this to be a string containing the library version. */
+#undef BRLAPI_VERSION
+
 /* this is for UINT32_MAX */
 #include <inttypes.h>
 /* The type size_t is defined there! */

@@ -21,12 +21,16 @@ AC_INIT([brltty], [3.3], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 
+AC_SUBST([BRLAPI_VERSION], [0.1])
+AC_DEFINE_UNQUOTED([BRLAPI_VERSION], ["${BRLAPI_VERSION}"])
+
 AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
 
 AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADER([Programs/brlapi.h])
 AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([aux])
 AC_CANONICAL_SYSTEM
