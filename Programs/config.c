@@ -66,14 +66,16 @@
 
 char COPYRIGHT[] = "Copyright (C) 1995-2004 by The BRLTTY Team - all rights reserved.";
 
-static short opt_version = 0;
-static short opt_verify = 0;
-static short opt_quiet = 0;
-static short opt_noDaemon = 0;
-static short opt_standardError = 0;
-static short opt_logLevel = LOG_NOTICE;
+static int opt_version = 0;
+static int opt_verify = 0;
+static int opt_quiet = 0;
+static int opt_noDaemon = 0;
+static int opt_standardError = 0;
+static char *opt_logLevel;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables = 0;
+static char *opt_updateInterval;
+static char *opt_messageDelay;
 
 static char *opt_configurationFile = NULL;
 static char *opt_pidFile = NULL;
@@ -156,7 +158,7 @@ BEGIN_OPTION_TABLE
    "Path to default parameters file."},
 
   {"log-level", "level", 'l', 0, 0,
-   NULL, NULL,
+   &opt_logLevel, NULL,
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
 
 #ifdef ENABLE_MIDI_SUPPORT
@@ -228,7 +230,7 @@ BEGIN_OPTION_TABLE
    "Path to directory for loading drivers."},
 
   {"message-delay", "csecs", 'M', 0, 0,
-   NULL, NULL,
+   &opt_messageDelay, NULL,
    "Message hold time [400]."},
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -252,7 +254,7 @@ BEGIN_OPTION_TABLE
    "Path to directory for text and attributes tables."},
 
   {"update-interval", "csecs", 'U', 0, 0,
-   NULL, NULL,
+   &opt_updateInterval, NULL,
    "Braille window update interval [4]."},
 
   {"version", NULL, 'V', 0, 0,
@@ -1699,10 +1701,14 @@ background (void) {
 
 static int
 validateInterval (int *value, const char *description, const char *word) {
-  static const int minimum = 1;
-  int ok = validateInteger(value, description, word, &minimum, NULL);
-  if (ok) *value *= 10;
-  return ok;
+  if (!word || !*word) return 1;
+
+  {
+    static const int minimum = 1;
+    int ok = validateInteger(value, description, word, &minimum, NULL);
+    if (ok) *value *= 10;
+    return ok;
+  }
 }
 
 static int
@@ -1731,51 +1737,8 @@ handleOption (const int option) {
       opt_standardError = 1;
       break;
 
-    case 'l': {	/* --log-level */
-      if (*optarg) {
-        static char *valueTable[] = {
-          "emergency", "alert", "critical", "error",
-          "warning", "notice", "information", "debug"
-        };
-        static unsigned int valueCount = sizeof(valueTable) / sizeof(valueTable[0]);
-        unsigned int valueLength = strlen(optarg);
-        int value;
-        for (value=0; value<valueCount; ++value) {
-          char *word = valueTable[value];
-          unsigned int wordLength = strlen(word);
-          if (valueLength <= wordLength) {
-            if (strncasecmp(optarg, word, valueLength) == 0) {
-              break;
-            }
-          }
-        }
-        if (value < valueCount) {
-          opt_logLevel = value;
-          break;
-        }
-        {
-          char *endptr;
-          value = strtol(optarg, &endptr, 0);
-          if (!*endptr && value>=0 && value<valueCount) {
-            opt_logLevel = value;
-            break;
-          }
-        }
-      }
-      LogPrint(LOG_ERR, "Invalid log level: %s", optarg);
-      break;
-    }
-
     case 'E':	/* --environment-variables */
       opt_environmentVariables = 1;
-      break;
-
-    case 'U':	/* --update-interval */
-      validateInterval(&updateInterval, "update interval", optarg);
-      break;
-
-    case 'M':	/* --message-delay */
-      validateInterval(&messageDelay, "message delay", optarg);
       break;
   }
   return 1;
@@ -1789,12 +1752,51 @@ startup (int argc, char *argv[]) {
                  NULL);
   if (argc) LogPrint(LOG_ERR, "Excess parameter: %s", argv[0]);
 
+  validateInterval(&updateInterval, "update interval", opt_updateInterval);
+  validateInterval(&messageDelay, "message delay", opt_messageDelay);
+
   /* Set logging levels. */
-  if (opt_standardError) LogClose();
-  setLogLevel(opt_logLevel);
-  setPrintLevel((opt_version || opt_verify)?
-                  (opt_quiet? LOG_NOTICE: LOG_INFO):
-                  (opt_quiet? LOG_WARNING: LOG_NOTICE));
+  {
+    int level = LOG_NOTICE;
+
+    if (opt_logLevel && *opt_logLevel) {
+      static const char *const words[] = {
+        "emergency", "alert", "critical", "error",
+        "warning", "notice", "information", "debug"
+      };
+      static unsigned int count = sizeof(words) / sizeof(words[0]);
+
+      {
+        int length = strlen(opt_logLevel);
+        int index;
+        for (index=0; index<count; ++index) {
+          const char *word = words[index];
+          if ((length <= strlen(word)) &&
+              (strncasecmp(opt_logLevel, word, length) == 0)) {
+            level = index;
+            goto setLevel;
+          }
+        }
+      }
+
+      {
+        int value;
+        if (isInteger(&value, opt_logLevel) && (value >= 0) && (value < count)) {
+          level = value;
+          goto setLevel;
+        }
+      }
+
+      LogPrint(LOG_ERR, "Invalid log level: %s", opt_logLevel);
+    }
+  setLevel:
+
+    setLogLevel(level);
+    setPrintLevel((opt_version || opt_verify)?
+                    (opt_quiet? LOG_NOTICE: LOG_INFO):
+                    (opt_quiet? LOG_WARNING: LOG_NOTICE));
+    if (opt_standardError) LogClose();
+  }
 
   atexit(exitTunes);
   suppressTuneDeviceOpenErrors();

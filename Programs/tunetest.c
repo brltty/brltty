@@ -39,8 +39,8 @@
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 Preferences prefs;
 
-static unsigned int opt_tuneDevice;
-static short opt_outputVolume = 50;
+static char *opt_tuneDevice;
+static char *opt_outputVolume;
 
 #ifdef ENABLE_PCM_SUPPORT
 char *opt_pcmDevice = NULL;
@@ -48,17 +48,17 @@ char *opt_pcmDevice = NULL;
 
 #ifdef ENABLE_MIDI_SUPPORT
 char *opt_midiDevice = NULL;
-static unsigned char opt_midiInstrument = 0;
+static char *opt_midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE
   {"device", "device", 'd', 0, 0,
-   NULL, NULL,
+   &opt_tuneDevice, NULL,
    "Name of tune device."},
 
 #ifdef ENABLE_MIDI_SUPPORT
   {"instrument", "instrument", 'i', 0, 0,
-   NULL, NULL,
+   &opt_midiInstrument, NULL,
    "Name of MIDI instrument."},
 #endif /* ENABLE_MIDI_SUPPORT */
 
@@ -75,8 +75,8 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_PCM_SUPPORT */
 
   {"level", "volume", 'v', 0, 0,
-   NULL, NULL,
-   "Output volume."},
+   &opt_outputVolume, NULL,
+   "Output volume (percentage)."},
 END_OPTION_TABLE
 
 static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
@@ -123,31 +123,44 @@ handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-
-    case 'd':
-      opt_tuneDevice = wordArgument(optarg, deviceNames, "device");
-      break;
-
-    case 'v':
-      opt_outputVolume = integerArgument(optarg, 0, 100, "level");
-      break;
-
-#ifdef ENABLE_MIDI_SUPPORT
-    case 'i':
-      opt_midiInstrument = instrumentArgument(optarg);
-      break;
-#endif /* ENABLE_MIDI_SUPPORT */
   }
   return 1;
 }
 
 int
 main (int argc, char *argv[]) {
-  opt_tuneDevice = getDefaultTuneDevice();
+  TuneDevice tuneDevice;
+  unsigned char outputVolume;
+
+#ifdef ENABLE_MIDI_SUPPORT
+  unsigned char midiInstrument;
+#endif /* ENABLE_MIDI_SUPPORT */
+
   processOptions(optionTable, optionCount, handleOption,
                  "tunetest", &argc, &argv,
                  NULL, NULL, NULL,
                  "{note duration} ...");
+
+  if (opt_tuneDevice && *opt_tuneDevice) {
+    tuneDevice = wordArgument(opt_tuneDevice, deviceNames, "device");
+  } else {
+    tuneDevice = getDefaultTuneDevice();
+  }
+
+#ifdef ENABLE_MIDI_SUPPORT
+  if (opt_midiInstrument && *opt_midiInstrument) {
+    midiInstrument = instrumentArgument(opt_midiInstrument);
+  } else {
+    midiInstrument = 0;
+  }
+#endif /* ENABLE_MIDI_SUPPORT */
+
+  if (opt_outputVolume && *opt_outputVolume) {
+    outputVolume = integerArgument(opt_outputVolume, 0, 100, "level");
+  } else {
+    outputVolume = 50;
+  }
+
   if (!argc) {
     fprintf(stderr, "%s: Missing tune.\n", programName);
   } else if (argc % 2) {
@@ -165,8 +178,8 @@ main (int argc, char *argv[]) {
     }
     *element = TUNE_STOP();
 
-    if (!setTuneDevice(opt_tuneDevice)) {
-      fprintf(stderr, "%s: Unsupported tune device: %s\n", programName, deviceNames[opt_tuneDevice]);
+    if (!setTuneDevice(tuneDevice)) {
+      fprintf(stderr, "%s: Unsupported tune device: %s\n", programName, deviceNames[tuneDevice]);
       exit(3);
     }
 
@@ -174,21 +187,21 @@ main (int argc, char *argv[]) {
     prefs.alertMessages = 0;
     prefs.alertDots = 0;
     prefs.alertTunes = 1;
-    switch (opt_tuneDevice) {
+    switch (tuneDevice) {
       default:
         break;
       case tdPcm:
-        prefs.pcmVolume = opt_outputVolume;
+        prefs.pcmVolume = outputVolume;
         break;
       case tdMidi:
-        prefs.midiVolume = opt_outputVolume;
+        prefs.midiVolume = outputVolume;
         break;
       case tdFm:
-        prefs.fmVolume = opt_outputVolume;
+        prefs.fmVolume = outputVolume;
         break;
     }
 #ifdef ENABLE_MIDI_SUPPORT
-    prefs.midiInstrument = opt_midiInstrument;
+    prefs.midiInstrument = midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
     {
       TuneDefinition tune = {NULL, 0, elements};
