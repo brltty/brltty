@@ -307,8 +307,9 @@ brl_writePacket (BrailleDisplay *brl, const unsigned char *data, int length) {
   return count;
 }
 
-static void
+static int
 brl_reset (BrailleDisplay *brl) {
+  return 0;
 }
 
 static int

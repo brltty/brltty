@@ -378,11 +378,9 @@ static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
   return (WriteToBrlDisplay(brl, sz, p));
 }
 
-static void brl_reset(BrailleDisplay *brl)
+static int brl_reset(BrailleDisplay *brl)
 {
-  LogPrint(LOG_INFO, "Resetting braille display");
-  brl_close(brl);
-  brl_open(brl, 0, dev);
+  return 0;
 }
 
 static void brl_identify (void)

@@ -183,10 +183,11 @@ static int brl_readPacket(BrailleDisplay *brl, unsigned char *p, int size)
 /* This routine is called by the brlnet server, when an application that */
 /* requested a raw-mode communication with the braille terminal dies before */
 /* restoring a normal communication mode */
-static void brl_reset(BrailleDisplay *brl)
+static int brl_reset(BrailleDisplay *brl)
 {
  static unsigned char *RescuePacket = "#"; 
  brl_writePacket(brl,RescuePacket,strlen(RescuePacket));
+ return 1;
 }
 
 /* Function : brl_identify */

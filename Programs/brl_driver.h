@@ -44,7 +44,7 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 #ifdef BRL_HAVE_PACKET_IO
   static int brl_readPacket (BrailleDisplay *, unsigned char *, int);
   static int brl_writePacket (BrailleDisplay *, const unsigned char *, int);
-  static void brl_reset (BrailleDisplay *);
+  static int brl_reset (BrailleDisplay *);
 #endif /* BRL_HAVE_PACKET_IO */
 
 #ifdef BRL_HAVE_KEY_CODES
