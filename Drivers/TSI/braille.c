@@ -1017,7 +1017,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   int skip_this_cmd = 0;
 
   gettimeofday (&now, &dum_tz);
-  if (elapsedMilliseconds(&last_readbrl_time, &now) > READBRL_SKIP_TIME)
+  if (millisecondsBetween(&last_readbrl_time, &now) > READBRL_SKIP_TIME)
     /* if the key we get this time is the same as the one we returned at last
        call, and if it has been abnormally long since we were called
        (presumably sound was being played or a message displayed) then
@@ -1053,8 +1053,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   tcsetattr (brl_fd, TCSANOW, &curtio);
   /* Check for first byte */
   if (read (brl_fd, buf, 1) < 1){
-    if((i = elapsedMilliseconds(&last_ping, &now) > PING_INTRVL)){
-      int ping_due = (pings==0 || (elapsedMilliseconds(&last_ping_sent, &now)
+    if((i = millisecondsBetween(&last_ping, &now) > PING_INTRVL)){
+      int ping_due = (pings==0 || (millisecondsBetween(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
       if((pings>=PING_MAXNQUERY && ping_due)
 	 || CheckCTSLine(brl_fd) != 1)
@@ -1426,7 +1426,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     }else{
       /* if to short a time has elapsed since last command, ignore this one */
       gettimeofday (&now, &dum_tz);
-      if (elapsedMilliseconds(&lastcmd_time, &now) < NONREPEAT_TIMEOUT)
+      if (millisecondsBetween(&lastcmd_time, &now) < NONREPEAT_TIMEOUT)
 	res = EOF;
     }
   }

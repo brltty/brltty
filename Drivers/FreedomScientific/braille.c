@@ -790,13 +790,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     int count = readPacket(brl, &packet);
     if (count == -1) return CMD_RESTARTBRL;
     if (count == 0) {
-      if (writing) {
-        struct timeval now;
-        gettimeofday(&now, NULL);
-        if (elapsedMilliseconds(&writingTime, &now) > 500) {
-          LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
-          goto handleNegativeAcknowledgement;
-        }
+      if (writing && (millisecondsSince(&writingTime) > 500)) {
+        LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
+        goto handleNegativeAcknowledgement;
       }
       return EOF;
     }

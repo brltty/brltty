@@ -430,14 +430,14 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
     else if (button_waitcount > 0 &&
 	     button_waitcount < BUTTON_STEP)
       button_waitcount++;
-    else if (elapsedMilliseconds(&lastcmd_time, &now) > REPEAT_TIME &&
+    else if (millisecondsBetween(&lastcmd_time, &now) > REPEAT_TIME &&
 	     is_repeat_cmd(lastcmd)) {
       gettimeofday(&lastcmd_time, &dum_tz);
       return(lastcmd);
     }
 #ifdef USE_PING
-    else if ((i = elapsedMilliseconds(&last_ping, &now) > PING_INTRVL)){
-      int ping_due = (pings==0 || (elapsedMilliseconds(&last_ping_sent, &now)
+    else if ((i = millisecondsBetween(&last_ping, &now) > PING_INTRVL)){
+      int ping_due = (pings==0 || (millisecondsBetween(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
       if(pings>=PING_MAXNQUERY && ping_due)
 	return CMD_RESTARTBRL;

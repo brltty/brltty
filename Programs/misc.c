@@ -435,8 +435,15 @@ delay (int milliseconds) {
 }
 
 long int
-elapsedMilliseconds (const struct timeval *from, const struct timeval *to) {
+millisecondsBetween (const struct timeval *from, const struct timeval *to) {
   return ((to->tv_sec - from->tv_sec) * 1000) + ((to->tv_usec - from->tv_usec) / 1000);
+}
+
+long int
+millisecondsSince (const struct timeval *from) {
+  struct timeval now;
+  gettimeofday(&now, NULL);
+  return millisecondsBetween(from, &now);
 }
 
 void
@@ -447,14 +454,8 @@ shortdelay (int milliseconds) {
   if (!tickLength)
     if (!(tickLength = 1000 / sysconf(_SC_CLK_TCK)))
       tickLength = 1;
-  if (milliseconds >= tickLength) {
-    delay(milliseconds / tickLength * tickLength);
-  }
-  while (1) {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    if (elapsedMilliseconds(&start, &now) >= milliseconds) break;
-  }
+  if (milliseconds >= tickLength) delay(milliseconds / tickLength * tickLength);
+  while (millisecondsSince(&start) < milliseconds);
 }
 
 int
@@ -462,9 +463,7 @@ timeout_yet (int milliseconds) {
   static struct timeval start = {0, 0};
 
   if (milliseconds) {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    return elapsedMilliseconds(&start, &now) >= milliseconds;
+    return millisecondsSince(&start) >= milliseconds;
   }
 
   gettimeofday(&start, NULL);

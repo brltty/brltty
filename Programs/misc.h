@@ -84,7 +84,8 @@ extern void setCloseOnExec (int fileDescriptor);
 
 extern void delay (int milliseconds);		/* sleep for `msec' milliseconds */
 extern void shortdelay (int milliseconds);
-extern long int elapsedMilliseconds (const struct timeval *from, const struct timeval *to);
+extern long int millisecondsBetween (const struct timeval *from, const struct timeval *to);
+extern long int millisecondsSince (const struct timeval *from);
 extern int timeout_yet (int milliseconds);	/* test timeout condition */
 
 #ifdef HAVE_SYSLOG_H

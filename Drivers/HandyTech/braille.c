@@ -28,8 +28,6 @@
 #include <termios.h>
 #include <sys/time.h>
 
-#include "Programs/brl.h"
-#include "Programs/brltty.h"
 #include "Programs/misc.h"
 
 #define BRL_HAVE_PACKET_IO
@@ -358,7 +356,7 @@ typedef enum {
   BDS_WRITING
 } BrailleDisplayState;
 static BrailleDisplayState currentState = BDS_OFF;
-static unsigned long int stateTimer = 0;
+static struct timeval stateTime;
 static unsigned int retryCount = 0;
 static unsigned char updateRequired = 0;
 
@@ -433,7 +431,7 @@ setState (BrailleDisplayState state) {
     retryCount = 0;
     currentState = state;
   }
-  stateTimer = 0;
+  gettimeofday(&stateTime, NULL);
   // LogPrint(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
 }
 
@@ -519,10 +517,9 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   memset(rawStatus, 0, model->statusCells);
   memset(rawData, 0, model->columns);
 
-  currentState = BDS_OFF;
-  stateTimer = 0;
   retryCount = 0;
   updateRequired = 0;
+  currentState = BDS_OFF;
   setState(BDS_READY);
 
   return 1;
@@ -1303,8 +1300,6 @@ static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
   int timedOut = 1;
 
-  stateTimer += updateInterval;
-
   while (1) {
     unsigned char byte;
     {
@@ -1372,7 +1367,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
       case BDS_OFF:
         break;
       case BDS_RESETTING:
-        if (stateTimer > 3000) {
+        if (millisecondsSince(&stateTime) > 3000) {
           if (retryCount > 3) {
             setState(BDS_OFF);
           } else if (writeDescribe(brl)) {
@@ -1383,7 +1378,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
         }
         break;
       case BDS_IDENTIFYING:
-        if (stateTimer > 1000) {
+        if (millisecondsSince(&stateTime) > 1000) {
           if (writeDescribe(brl)) {
             setState(BDS_RESETTING);
           } else {
@@ -1394,7 +1389,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
       case BDS_READY:
         break;
       case BDS_WRITING:
-        if (stateTimer > 1000) {
+        if (millisecondsSince(&stateTime) > 1000) {
           if (retryCount > 3) {
             if (writeDescribe(brl)) {
               setState(BDS_RESETTING);
