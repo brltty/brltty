@@ -288,7 +288,12 @@ usbReadDeviceDescriptor (UsbDevice *device) {
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  usb_close(devx->handle);
+
+  if (devx->handle) {
+    usb_close(devx->handle);
+    devx->handle = NULL;
+  }
+
   free(devx);
 }
 

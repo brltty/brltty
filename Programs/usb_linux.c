@@ -261,8 +261,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
-  deallocateQueue(eptx->completedRequests);
-  endpoint->extension = NULL;
+
+  if (eptx->completedRequests) {
+    deallocateQueue(eptx->completedRequests);
+    eptx->completedRequests = NULL;
+  }
+
   free(eptx);
 }
 
@@ -402,21 +406,6 @@ usbSubmitRequest (
   return NULL;
 }
 
-int
-usbCancelRequest (
-  UsbDevice *device,
-  void *request
-) {
-  UsbDeviceExtension *devx = device->extension;
-  if (ioctl(devx->file, USBDEVFS_DISCARDURB, request) == -1) {
-    /* EINVAL is returned if the URB is already complete. */
-    if (errno != EINVAL) LogError("USB URB discard");
-    return 0;
-  }
-  free(request);
-  return 1;
-}
-
 static int
 usbReapUrb (
   UsbDevice *device,
@@ -443,6 +432,45 @@ usbReapUrb (
     }
   } else {
     if (wait || (errno != EAGAIN)) LogError("USB URB reap");
+  }
+
+  return 0;
+}
+
+int
+usbCancelRequest (
+  UsbDevice *device,
+  void *request
+) {
+  UsbDeviceExtension *devx = device->extension;
+
+  if (ioctl(devx->file, USBDEVFS_DISCARDURB, request) == -1)
+    if (errno != EINVAL)
+      LogError("USB URB discard");
+  
+  {
+    struct usbdevfs_urb *urb = request;
+    UsbEndpoint *endpoint;
+
+    if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
+      UsbEndpointExtension *eptx = endpoint->extension;
+      int found = 1;
+
+      while (!deleteItem(eptx->completedRequests, request)) {
+        if (!usbReapUrb(device, 0)) {
+          found = 0;
+          break;
+        }
+      }
+
+      if (found) {
+        free(request);
+        return 1;
+      }
+
+      LogPrint(LOG_ERR, "USB request not found: urb=%p ept=%02X",
+               urb, urb->endpoint);
+    }
   }
 
   return 0;
@@ -504,8 +532,17 @@ usbReadDeviceDescriptor (UsbDevice *device) {
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  close(devx->file);
-  free(devx->path);
+
+  if (devx->file != -1) {
+    close(devx->file);
+    devx->file = -1;
+  }
+
+  if (devx->path) {
+    free(devx->path);
+    devx->path = NULL;
+  }
+
   free(devx);
 }
 

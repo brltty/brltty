@@ -37,11 +37,12 @@ typedef int (*ItemProcessor) (void *item, void *data);
 extern Element *processQueue (Queue *queue, ItemProcessor processItem, void *data);
 extern void *findItem (Queue *queue, ItemProcessor testItem, void *data);
 
+extern void deleteElements (Queue *queue);
 extern void deleteElement (Element *element);
 
 extern Element *enqueueItem (Queue *queue, void *item);
 extern void *dequeueItem (Queue *queue);
-extern void deleteItem (Queue *queue, void *item);
+extern int deleteItem (Queue *queue, void *item);
 
 #ifdef __cplusplus
 }

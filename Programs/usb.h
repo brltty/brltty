@@ -276,13 +276,12 @@ extern int usbGetConfiguration (
   unsigned char *number
 );
 
-extern int usbClaimInterface (
+extern int usbOpenInterface (
   UsbDevice *device,
   unsigned char interface
 );
-extern int usbReleaseInterface (
-  UsbDevice *device,
-  unsigned char interface
+extern void usbCloseInterface (
+  UsbDevice *device
 );
 extern int usbSetAlternative (
   UsbDevice *device,

@@ -159,8 +159,13 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
 }
 
 void
-deallocateQueue (Queue *queue) {
+deleteElements (Queue *queue) {
   while (queue->head) deleteElement(queue->head);
+}
+
+void
+deallocateQueue (Queue *queue) {
+  deleteElements(queue);
   free(queue);
 }
 
@@ -204,13 +209,12 @@ testItemAddress (void *item, void *data) {
   return item == data;
 }
 
-void
+int
 deleteItem (Queue *queue, void *item) {
   Element *element = processQueue(queue, testItemAddress, item);
-  if (element) {
-    element->item = NULL;
-    deleteElement(element);
-  } else {
-    LogPrint(LOG_WARNING, "Item not found: %p", item);
-  }
+  if (!element) return 0;
+
+  element->item = NULL;
+  deleteElement(element);
+  return 1;
 }
