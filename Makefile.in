@@ -24,6 +24,7 @@ ITERATE = -for directory in $(PGM_DIR) $(TBL_DIR) $(UCD_DIR); do (cd $$directory
 clean::
 	$(ITERATE)
 distclean:: clean
+	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)
 	-rm -f brltty.spec brltty.lsm
 	-rm -f config.log config.cache config.status
