@@ -65,14 +65,6 @@
    Vario to be detected. */
 /*#define CHECKCTS 1*/
 
-/* Low battery warning
-   Comment it out if you don't want it */
-#define LOW_BATTERY_WARN
-#ifdef LOW_BATTERY_WARN
-  /* How long does the message stay on the display */
-  #define BATTERY_DELAY (1750) /* milliseconds */
-#endif /* LOW_BATTERY_WARN */
-
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. How soon do we get nervous and send
    the ping? (in miliseconds) */

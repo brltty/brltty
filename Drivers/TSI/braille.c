@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.73 (January 2004)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.74 (April 2004)"
 #define COPYRIGHT "Copyright (C) 1996-2004 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/braille.c - Braille display driver for TSI displays
@@ -23,9 +23,10 @@
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled into BRLTTY version 3.4.
+ * It is designed to be compiled into BRLTTY version 3.5.
  *
  * History:
+ * Version 2.74 apr2004: use message() to report low battery condition.
  * Version 2.73 jan2004: Fix key bindings for speech commands for PB80.
  *   Add CMD_SPKHOME to help.
  * Version 2.72 jan2003: brl->buffer now allocated by core.
@@ -91,6 +92,7 @@
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
+#include "Programs/message.h"
 
 #define BRLSTAT ST_PB80Style
 #include "Programs/brl_driver.h"
@@ -140,20 +142,6 @@ static int repeat_list[] =
  VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_CURSOR_UP,
  VAL_PASSKEY+VPK_CURSOR_DOWN,
  CMD_CSRTRK, 0};
-
-/* Low battery warning */
-#ifdef LOW_BATTERY_WARN
-/* We must code the dots forming the message, not its text since handling
-   of translation tables has been moved to the main module of brltty. */
-static unsigned char battery_msg_20[] =		/* "-><- Low batteries" */
-  {0x30, 0x1a, 0x25, 0x30, 0x00, 0x55, 0x19, 0x2e, 0x00, 0x05,
-     0x01, 0x1e, 0x1e, 0x09, 0x1d, 0x06, 0x09, 0x16, 0x00, 0x00},
-          battery_msg_40[] =	/* "-><-- Navigator:  Batteries are low" */
-  {0x30, 0x1a, 0x25, 0x30, 0x30, 0x00, 0x5b, 0x01, 0x35, 0x06,
-     0x0f, 0x01, 0x1e, 0x19, 0x1d, 0x29, 0x00, 0x00, 0x45, 0x01,
-     0x1e, 0x1e, 0x09, 0x1d, 0x06, 0x09, 0x16, 0x00, 0x01, 0x1d,
-     0x09, 0x00, 0x15, 0x19, 0x2e, 0x00, 0x00, 0x00, 0x00, 0x00};
-#endif /* LOW_BATTERY_WARN */
 
 /* This defines the mapping between brltty and Navigator's dots coding. */
 static TranslationTable outputTable;
@@ -321,9 +309,6 @@ static unsigned char has_sw,    /* flag: has routing keys or not */
 				   being 0). On PB80 this excludes the 81st. */
                      sw_bcnt;   /* bytes of sensor switch information */
 static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
-#ifdef LOW_BATTERY_WARN
-static unsigned char *battery_msg;     /* low battery warning msg */
-#endif /* LOW_BATTERY_WARN */
 
 static enum { NAV20_40=0, NAV80, PB40, PB65_80} displayType;
 
@@ -564,14 +549,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   no_multiple_updates = 1;
 #endif /* NO_MULTIPLE_UPDATES */
   if(slow_update == 2) no_multiple_updates = 1;
-
-#ifdef LOW_BATTERY_WARN
-  if (brl_cols == 20){
-      battery_msg = battery_msg_20;
-    }else{
-      battery_msg = battery_msg_40;
-    }
-#endif /* LOW_BATTERY_WARN */
 
 #ifdef HIGHBAUD
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
@@ -838,18 +815,6 @@ flicker ()
       free (buf);
     }
 }
-
-
-#ifdef LOW_BATTERY_WARN
-static void 
-do_battery_warn ()
-{
-  flicker ();
-  display_all (battery_msg);
-  delay (BATTERY_DELAY);
-  memset(prevdata, 255, ncells); /* force refreshing of the display */
-}
-#endif /* LOW_BATTERY_WARN */
 
 
 /* OK this one is pretty strange and ugly. readbrl() reads keys from
@@ -1130,7 +1095,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   }
 
   if(packtype == K_BATTERY){
-    do_battery_warn ();
+    message("-><- Display's battery is low", MSG_NODELAY);
     return (EOF);
   }else if(packtype == K_QUERYREP){
     /* flush the last 10bytes of the reply. */
