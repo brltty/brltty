@@ -401,7 +401,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   memcpy (disp_ver, &reply[Q_OFFSET_VER], Q_VER_LENGTH);
   ncells = reply[Q_OFFSET_COLS];
-  LogPrint(LOG_INFO,"Display replyed: %d cells, version %c%c%c%c", ncells,
+  LogPrint(LOG_INFO,"Display replied: %d cells, version %c%c%c%c", ncells,
 	   disp_ver[0], disp_ver[1], disp_ver[2], disp_ver[3]);
 
   brl_cols = ncells;
