@@ -77,6 +77,9 @@ scr_linux.$O:
 scr_hurd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_hurd.c
 
+scr_windows.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_windows.c
+
 scr_atspi.$O:
 	$(CC) $(CFLAGS) $(CSPI_INCLUDES) -c $(SRC_DIR)/scr_atspi.c
 

@@ -1040,6 +1040,9 @@ in
    gnu*)
       brltty_cv_default_screen_driver="hurd"
       ;;
+   cygwin*|mingw*)
+      brltty_cv_default_screen_driver="windows"
+      ;;
    *)
       brltty_cv_default_screen_driver="shm"
       AC_MSG_WARN([no default screen driver - using ${brltty_cv_default_screen_driver}])
