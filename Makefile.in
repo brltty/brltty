@@ -28,4 +28,5 @@ distclean:: clean
 	$(ITERATE)
 	-rm -f brltty.spec brltty.lsm
 	-rm -f config.log config.cache config.status
+	-rm -fr autom4te*.cache
 	-rm -f config.mk config.h

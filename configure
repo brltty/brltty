@@ -1455,6 +1455,18 @@ fi
 brltty_summary_lines="${brltty_summary_lines}
    install-root=${install_root}"
 
+api_directory="${libdir}"
+
+if test -z "${execute_root}"
+then
+   if test "${exec_prefix}" = "NONE"
+   then
+      if test `expr "${api_directory} " : '\${exec_prefix}/[^/]*$'` -gt 0
+      then
+         api_directory="`echo ${api_directory} | sed -e 's%/%/usr/%'`"
+      fi
+   fi
+fi
 if test -z "${execute_root}"
 then
    if test "${prefix}" = "NONE"
@@ -1475,6 +1487,7 @@ then
       fi
    fi
 fi
+
 brltty_summary_lines="${brltty_summary_lines}
    bindir=${bindir}"
 brltty_summary_lines="${brltty_summary_lines}
@@ -6583,6 +6596,7 @@ s,@target_vendor@,$target_vendor,;t t
 s,@target_os@,$target_os,;t t
 s,@execute_root@,$execute_root,;t t
 s,@install_root@,$install_root,;t t
+s,@api_directory@,$api_directory,;t t
 s,@program_directory@,$program_directory,;t t
 s,@library_directory@,$library_directory,;t t
 s,@data_directory@,$data_directory,;t t

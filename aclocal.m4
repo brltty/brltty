@@ -144,13 +144,15 @@ AC_DEFUN([BRLTTY_SUMMARY_ITEM], [dnl
 brltty_summary_lines="${brltty_summary_lines}
    $1=${$2}"])
 
-AC_DEFUN([BRLTTY_PREFIX_SUBDIRECTORY], [dnl
+AC_DEFUN([BRLTTY_PREFIX_SUBDIRECTORY], [BRLTTY_INSTALL_SUBDIRECTORY([$1], [$2], [prefix])])
+AC_DEFUN([BRLTTY_EXEC_PREFIX_SUBDIRECTORY], [BRLTTY_INSTALL_SUBDIRECTORY([$1], [$2], [exec_prefix])])
+AC_DEFUN([BRLTTY_INSTALL_SUBDIRECTORY], [dnl
 if test -z "${execute_root}"
 then
-   if test "${prefix}" = "NONE"
+   if test "${$3}" = "NONE"
    then
 changequote()dnl
-      if test `expr "${$1} " : '\${prefix}/[^/]*$'` -gt 0
+      if test `expr "${$1} " : '\${$3}/[^/]*$'` -gt 0
       then
          $1="`echo ${$1} | sed -e 's%/%$2/%'`"
       fi

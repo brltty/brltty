@@ -96,6 +96,7 @@ LIB_DIR = @library_directory@
 DATA_DIR = @data_directory@
 MAN_DIR = @manpage_directory@
 INC_DIR = @include_directory@
+API_DIR = @api_directory@
 
 BRL_TARGET = @brltty_item_name_braille@
 BRL_TARGETS = @brltty_item_names_braille@
