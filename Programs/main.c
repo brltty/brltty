@@ -990,12 +990,19 @@ main (int argc, char *argv[]) {
                     if (!(repeatFlags & VAL_REPEAT_INITIAL))
                       next = CMD_NOOP;
                   repeatFlags = 0;
+
                 case CMD_LNUP:
                 case CMD_LNDN:
                 case CMD_PRDIFLN:
                 case CMD_NXDIFLN:
                 case CMD_CHRLT:
                 case CMD_CHRRT:
+
+                case CMD_MENU_PREV_ITEM:
+                case CMD_MENU_NEXT_ITEM:
+                case CMD_MENU_PREV_SETTING:
+                case CMD_MENU_NEXT_SETTING:
+
                 case VAL_PASSKEY + VPK_BACKSPACE:
                 case VAL_PASSKEY + VPK_DELETE:
                 case VAL_PASSKEY + VPK_PAGE_UP:
@@ -1006,6 +1013,7 @@ main (int argc, char *argv[]) {
                 case VAL_PASSKEY + VPK_CURSOR_RIGHT:
                   break;
               }
+
             case VAL_PASSCHAR:
             case VAL_PASSDOTS:
               break;
