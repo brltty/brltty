@@ -80,7 +80,7 @@ void DisplayRangeList(Trangelist *l)
   Trangelist *c = l;
   while (1)
   {
-   printf("[%d..%d]",c->x,c->y);
+   printf("[%u..%u]",c->x,c->y);
    if (c->next==NULL) break;
    printf(",");
    c = c->next;
