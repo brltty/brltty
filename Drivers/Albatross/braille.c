@@ -214,87 +214,103 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         updateDisplay(NULL);
         continue;
 
-      case  83: /* top left first lower */
+      case  83: /* key: top left first lower */
         return CMD_LEARN;
 
-      case  84: /* top left first upper */
+      case  84: /* key: top left first upper */
         return CMD_HELP;
 
-      case  85: /* top left third upper */
+      case  85: /* key: top left third upper */
         return CMD_PASTE;
 
-      case  86: /* top left third lower */
+      case  86: /* key: top left third lower */
         return CMD_CSRTRK;
 
-      case  87: /* top left second */
+      case  87: /* key: top left second */
         cursorCommand = CR_CUTBEGIN;
         return CMD_NOOP;
 
-      case  88: /* top left fourth */
+      case  88: /* key: top left fourth */
         cursorCommand = CR_CUTAPPEND;
         return CMD_NOOP;
 
-      case  89: /* top left fifth upper */
+      case  89: /* key: top left fifth upper */
         return CMD_PREFMENU;
 
-      case  90: /* top left fifth lower */
+      case  90: /* key: top left fifth lower */
         return CMD_INFO;
 
-      case 193: /* top right first lower */
+      case 193: /* key: top right first lower */
         return CMD_NXPROMPT;
 
-      case 194: /* top right first upper */
+      case 194: /* key: top right first upper */
         return CMD_PRPROMPT;
 
-      case 195: /* top right third upper */
+      case 195: /* key: top right third upper */
         return CMD_PRDIFLN;
 
-      case 196: /* top right third lower */
+      case 196: /* key: top right third lower */
         return CMD_NXDIFLN;
 
-      case 198: /* top right second */
+      case 198: /* key: top right second */
         cursorCommand = CR_CUTRECT;
         return CMD_NOOP;
 
-      case 197: /* top right fourth */
+      case 197: /* key: top right fourth */
         cursorCommand = CR_CUTLINE;
         return CMD_NOOP;
 
-      case 199: /* top right fifth upper */
+      case 199: /* key: top right fifth upper */
         return CMD_PRPGRPH;
 
-      case 200: /* top right fifth lower */
+      case 200: /* key: top right fifth lower */
         return CMD_NXPGRPH;
 
-      case  91: /* front left first upper */
-      case 201: /* front right first upper */
+      case  91: /* key: front left first upper */
+      case 201: /* key: front right first upper */
         return CMD_TOP_LEFT;
 
-      case  92: /* front left first lower */
-      case 202: /* front right first lower */
+      case  92: /* key: front left first lower */
+      case 202: /* key: front right first lower */
         return CMD_BOT_LEFT;
 
-      case  93: /* front left second upper */
-      case 203: /* front right second upper */
+      case  93: /* key: front left second upper */
+      case 203: /* key: front right second upper */
         return CMD_BACK;
 
-      case  94: /* front left second lower */
-      case 204: /* front right second lower */
+      case  94: /* key: front left second lower */
+      case 204: /* key: front right second lower */
         return CMD_HOME;
 
-      case  95: /* front left third upper */
-      case 205: /* front right third upper */
+      case  95: /* key: front left third upper */
+      case 205: /* key: front right third upper */
         return CMD_LNUP;
 
-      case  96: /* front left third lower */
-      case 206: /* front right third lower */
+      case  96: /* key: front left third lower */
+      case 206: /* key: front right third lower */
         return CMD_LNDN;
 
-      case  97: /* front left fourth */
+      case  97: /* key: front left fourth */
         return CMD_FWINLT;
 
-      case 207: /* front right fourth */
+      case 207: /* key: front right fourth */
         return CMD_FWINRT;
+
+      case 103: /* wheel: front left right */
+      case 213: /* wheel: front right right */
+        return CMD_CHRRT;
+
+      case 104: /* wheel: front left left */
+      case 214: /* wheel: front right left */
+        return CMD_CHRLT;
+
+      case 105: /* wheel: side left backward */
+      case 215: /* wheel: side right backward */
+        return CMD_LNUP;
+
+      case 106: /* wheel: side left forward */
+      case 216: /* wheel: side right forward */
+        return CMD_LNDN;
     }
 
     LogPrint(LOG_WARNING, "Unexpected byte: %02X", byte);

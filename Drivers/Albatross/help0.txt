@@ -1,14 +1,14 @@
 BRLTTY Help Screen for Albatross models
 
 Front Keys:
-Top     move to top-left corner
-Bottom  move to bottom-left corner
-Back    move back (undo cursor tracking motion)
-Cursor  move to cursor
-Up      move up one line
-Down    move down one line
-Left    move left one window
-Right   move right one window
+Top     go to top-left corner
+Bottom  go to bottom-left corner
+Back    go back (undo cursor tracking motion)
+Cursor  go to cursor
+Up      go up one line
+Down    go down one line
+Left    go left one window
+Right   go right one window
 
 Top Keys:
 (* means then press routing key)
@@ -18,13 +18,20 @@ Paste  paste from cut buffer
 Track  toggle cursor tracking mode
 Prf    enter/leave preferences menu
 Stt    enter/leave status display
-PrU    move up to previous command prompt
-PrD    move down to next command prompt
-DifUp  move up to nearest line with different content
-DifDn  move down to nearest line with different content
-PgU    move up to last line of previous paragraph
-PgD    move down to first line of next paragraph
+PrU    go up to previous command prompt
+PrD    go down to next command prompt
+DifUp  go up to nearest line with different content
+DifDn  go down to nearest line with different content
+PgU    go up to last line of previous paragraph
+PgD    go down to first line of next paragraph
 CtB*   begin new cut buffer
 CtA*   append to cut buffer
 CtL*   linear cut
 CtR*   rectangular cut
+
+Side Wheels:
+   backward: move up by lines
+   forward:  move down by lines
+Front Wheels:
+   left:     move left by characters
+   right:    move right by characters
