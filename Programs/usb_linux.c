@@ -45,11 +45,15 @@ struct UsbInputElement {
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
   int file;
-  struct UsbInputElement *inputElements;
-  struct usbdevfs_urb *inputRequest;
+
   unsigned char inputEndpoint;
   int inputSize;
   unsigned int inputFlags;
+  struct UsbInputElement *inputElements;
+  struct usbdevfs_urb *inputRequest;
+  unsigned char *inputBuffer;
+  int inputLength;
+
   unsigned int stringLanguage;
 };
 
@@ -358,7 +362,7 @@ usbBulkWrite (
   return usbBulkTransfer(device, endpoint|USB_DIR_OUT, data, length, timeout);
 }
 
-struct usbdevfs_urb *
+void *
 usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpoint,
@@ -386,13 +390,19 @@ usbSubmitRequest (
   return NULL;
 }
 
-struct usbdevfs_urb *
-usbReapRequest (
+void *
+usbReapResponse (
   UsbDevice *device,
+  UsbResponse *response,
   int wait
 ) {
   struct usbdevfs_urb *urb;
   LogPrint(LOG_DEBUG, "reaping urb");
+
+  response->buffer = NULL;
+  response->length = 0;
+  response->context = NULL;
+
   if (ioctl(device->file,
             wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
             &urb) == -1) {
@@ -402,6 +412,9 @@ usbReapRequest (
   } else {
     LogPrint(LOG_DEBUG, "reaped urb: %p st=%d len=%d",
              urb, urb->status, urb->actual_length);
+    response->buffer = urb->buffer;
+    response->length = urb->actual_length;
+    response->context = urb->usercontext;
   }
   return urb;
 }
@@ -474,23 +487,27 @@ usbReapInput (
   unsigned char *target = bytes;
   while (length > 0) {
     if (!device->inputRequest) {
-      if (!(device->inputRequest = usbReapRequest(device, wait))) return -1;
-      usbDeleteInputElement(device, device->inputRequest->usercontext);
+      UsbResponse response;
+      if (!(device->inputRequest = usbReapResponse(device, &response, wait))) return -1;
       usbAddInputElement(device);
+      usbDeleteInputElement(device, response.context);
+      device->inputBuffer = response.buffer;
+      device->inputLength = response.length;
     }
 
     {
-      struct usbdevfs_urb *urb = device->inputRequest;
-      unsigned char *source = urb->buffer;
-      int count = urb->actual_length;
+      unsigned char *source = device->inputBuffer;
+      int count = device->inputLength;
       if (length < count) count = length;
       memcpy(target, source, count);
 
-      if ((urb->actual_length -= count)) {
-        urb->buffer = source + count;
+      if ((device->inputLength -= count)) {
+        device->inputBuffer = source + count;
       } else {
-        free(urb);
+        free(device->inputRequest);
         device->inputRequest = NULL;
+        device->inputBuffer = NULL;
+        device->inputLength = 0;
       }
 
       target += count;

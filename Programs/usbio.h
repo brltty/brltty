@@ -272,17 +272,23 @@ extern int usbBulkWrite (
   int timeout
 );
 
-extern struct usbdevfs_urb *usbSubmitRequest (
+typedef struct {
+  unsigned char *buffer;
+  int length;
+  void *context;
+} UsbResponse;
+extern void *usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpoint,
   unsigned char type,
   void *buffer,
   int length,
   unsigned int flags,
-  void *data
+  void *context
 );
-extern struct usbdevfs_urb *usbReapRequest (
+extern void *usbReapResponse (
   UsbDevice *device,
+  UsbResponse *response,
   int wait
 );
 
