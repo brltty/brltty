@@ -3698,22 +3698,24 @@ In addition to this default text translation table,
 several alternatives are provided:
 <descrip>
   <tag/cz/Czech (iso-8859-2)
-  <tag/da/Danish
-  <tag/de/German
-  <tag/es/Spanish
-  <tag/fr/French
-  <tag/fr-cbifs/French (Code Braille Informatique Français Standard)
-  <tag/it/Italian
-  <tag/nabcc/North American Braille Computer Code
-  <tag/no-h/Norwegian and German
-  <tag/no-p/Norwegian
+  <tag/da/Danish (iso-8859-1)
+  <tag/de/German (iso-8859-1)
+  <tag/es/Spanish (iso-8859-1)
+  <tag/fi1/Finnish (iso-8859-1)
+  <tag/fi2/Finnish (iso-8859-1)
+  <tag/fr/French (iso-8859-1)
+  <tag/fr-cbifs/Code Braille Informatique Français Standard (iso-8859-1)
+  <tag/it/Italian (iso-8859-1)
+  <tag/nabcc/North American Braille Computer Code (iso-8859-1)
+  <tag/no-h/Norwegian and German (iso-8859-1)
+  <tag/no-p/Norwegian (iso-8859-1)
   <tag/pl/Polish (iso-8859-2)
   <tag/ru/Russian (koi8-r)
-  <tag/se1/Swedish
-  <tag/se2/Swedish
-  <tag/uk/United Kingdom English
-  <tag/us/American English
-  <tag/vni/Vietnamese
+  <tag/se1/Swedish (iso-8859-1)
+  <tag/se2/Swedish (iso-8859-1)
+  <tag/uk/United Kingdom English (iso-8859-1)
+  <tag/us/American English (iso-8859-1)
+  <tag/vni/Vietnamese (iso-8859-1)
 </descrip>
 See the <ref id="options-text-table" name="-t"> command line option,
 the <ref id="configure-text-table" name="text-table"> configuration file directive,
