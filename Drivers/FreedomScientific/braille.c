@@ -1328,7 +1328,7 @@ brl_reset (BrailleDisplay *brl) {
 }
 
 static void
-brl_firmness (BrailleDisplay *brl, int setting) {
-  firmnessSetting = setting * 0XFF / BRL_MAXIMUM_FIRMNESS;
+brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
+  firmnessSetting = setting * 0XFF / BF_MAXIMUM;
   writeRequest(brl);
 }

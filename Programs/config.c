@@ -697,7 +697,6 @@ testBrailleFirmness (void) {
 
 static int
 changedBrailleFirmness (unsigned char setting) {
-  if (setting % 25) return 0;
   setBrailleFirmness(&brl, setting);
   return 1;
 }
@@ -889,7 +888,7 @@ loadPreferences (int change) {
 
         if (length == 42) {
           length++;
-          prefs.brailleFirmness = BRL_DEFAULT_FIRMNESS;
+          prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
         }
 
         if (change) changedPreferences();
@@ -943,13 +942,6 @@ static int
 changedTuneDevice (unsigned char setting) {
   return setTuneDevice(setting);
 }
-
-#if defined(ENABLE_PCM_TUNES) || defined(ENABLE_MIDI_TUNES) || defined(ENABLE_FM_TUNES)
-static int
-changedVolume (unsigned char setting) {
-  return (setting % 5) == 0;
-}
-#endif /* defined(ENABLE_PCM_TUNES) || defined(ENABLE_MIDI_TUNES) || defined(ENABLE_FM_TUNES) */
 
 #ifdef ENABLE_PCM_TUNES
 static int
@@ -1114,11 +1106,6 @@ changedWindowOverlap (unsigned char setting) {
 }
 
 static int
-changedTime (unsigned char setting) {
-  return (PREFERENCES_TIME(setting) % updateInterval) == 0;
-}
-
-static int
 testAutorepeat (void) {
   return prefs.autorepeat;
 }
@@ -1162,6 +1149,7 @@ updatePreferences (void) {
     static unsigned char exitSave = 0;                /* 1 == save preferences on exit */
     static const char *booleanValues[] = {"No", "Yes"};
     static const char *cursorStyles[] = {"Underline", "Block"};
+    static const char *firmnessLevels[] = {"Minimum", "Low", "Medium", "High", "Maximum"};
     static const char *metaModes[] = {"Escape Prefix", "High-order Bit"};
     static const char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
     static const char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Generic", "MDV", "Voyager"};
@@ -1210,12 +1198,13 @@ updatePreferences (void) {
        const char *const*names;                        /* 0 == numeric, 1 == bolean */
        unsigned char minimum;                        /* minimum range */
        unsigned char maximum;                        /* maximum range */
+       unsigned char multiple;                        /* maximum range */
     } MenuItem;
-    #define MENU_ITEM(setting, changed, test, description, values, minimum, maximum) {&setting, changed, test, description, values, minimum, maximum}
-    #define NUMERIC_ITEM(setting, changed, test, description, minimum, maximum) MENU_ITEM(setting, changed, test, description, NULL, minimum, maximum)
-    #define TIME_ITEM(setting, test, description) NUMERIC_ITEM(setting, changedTime, test, description, 1, 100)
-    #define VOLUME_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 0, 100)
-    #define TEXT_ITEM(setting, changed, test, description, names, count) MENU_ITEM(setting, changed, test, description, names, 0, count-1)
+    #define MENU_ITEM(setting, changed, test, description, values, minimum, maximum, multiple) {&setting, changed, test, description, values, minimum, maximum, multiple}
+    #define NUMERIC_ITEM(setting, changed, test, description, minimum, maximum, multiple) MENU_ITEM(setting, changed, test, description, NULL, minimum, maximum, multiple)
+    #define TIME_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 1, 100, updateInterval/10)
+    #define VOLUME_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 0, 100, 5)
+    #define TEXT_ITEM(setting, changed, test, description, names, count) MENU_ITEM(setting, changed, test, description, names, 0, count-1, 1)
     #define SYMBOLIC_ITEM(setting, changed, test, description, names) TEXT_ITEM(setting, changed, test, description, names, ((sizeof(names) / sizeof(names[0]))))
     #define BOOLEAN_ITEM(setting, changed, test, description) SYMBOLIC_ITEM(setting, changed, test, description, booleanValues)
     #define GLOB_ITEM(data, changed, test, description) TEXT_ITEM(data.setting, changed, test, description, data.paths, data.count)
@@ -1228,23 +1217,23 @@ updatePreferences (void) {
        SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
        BOOLEAN_ITEM(prefs.slidingWindow, NULL, NULL, "Sliding Window"),
        BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, "Eager Sliding Window"),
-       NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, "Window Overlap", 0, 20),
+       NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, "Window Overlap", 0, 20, 1),
        BOOLEAN_ITEM(prefs.autorepeat, NULL, NULL, "Autorepeat"),
-       TIME_ITEM(prefs.autorepeatDelay, testAutorepeat, "Autorepeat Delay"),
-       TIME_ITEM(prefs.autorepeatInterval, testAutorepeat, "Autorepeat Interval"),
+       TIME_ITEM(prefs.autorepeatDelay, NULL, testAutorepeat, "Autorepeat Delay"),
+       TIME_ITEM(prefs.autorepeatInterval, NULL, testAutorepeat, "Autorepeat Interval"),
        BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, "Show Cursor"),
        SYMBOLIC_ITEM(prefs.cursorStyle, NULL, testShowCursor, "Cursor Style", cursorStyles),
        BOOLEAN_ITEM(prefs.blinkingCursor, NULL, testShowCursor, "Blinking Cursor"),
-       TIME_ITEM(prefs.cursorVisibleTime, testBlinkingCursor, "Cursor Visible Time"),
-       TIME_ITEM(prefs.cursorInvisibleTime, testBlinkingCursor, "Cursor Invisible Time"),
+       TIME_ITEM(prefs.cursorVisibleTime, NULL, testBlinkingCursor, "Cursor Visible Time"),
+       TIME_ITEM(prefs.cursorInvisibleTime, NULL, testBlinkingCursor, "Cursor Invisible Time"),
        BOOLEAN_ITEM(prefs.showAttributes, NULL, NULL, "Show Attributes"),
        BOOLEAN_ITEM(prefs.blinkingAttributes, NULL, testShowAttributes, "Blinking Attributes"),
-       TIME_ITEM(prefs.attributesVisibleTime, testBlinkingAttributes, "Attributes Visible Time"),
-       TIME_ITEM(prefs.attributesInvisibleTime, testBlinkingAttributes, "Attributes Invisible Time"),
+       TIME_ITEM(prefs.attributesVisibleTime, NULL, testBlinkingAttributes, "Attributes Visible Time"),
+       TIME_ITEM(prefs.attributesInvisibleTime, NULL, testBlinkingAttributes, "Attributes Invisible Time"),
        BOOLEAN_ITEM(prefs.blinkingCapitals, NULL, NULL, "Blinking Capitals"),
-       TIME_ITEM(prefs.capitalsVisibleTime, testBlinkingCapitals, "Capitals Visible Time"),
-       TIME_ITEM(prefs.capitalsInvisibleTime, testBlinkingCapitals, "Capitals Invisible Time"),
-       NUMERIC_ITEM(prefs.brailleFirmness, changedBrailleFirmness, testBrailleFirmness, "Braille Firmness", 0, BRL_MAXIMUM_FIRMNESS),
+       TIME_ITEM(prefs.capitalsVisibleTime, NULL, testBlinkingCapitals, "Capitals Visible Time"),
+       TIME_ITEM(prefs.capitalsInvisibleTime, NULL, testBlinkingCapitals, "Capitals Invisible Time"),
+       SYMBOLIC_ITEM(prefs.brailleFirmness, changedBrailleFirmness, testBrailleFirmness, "Braille Firmness", firmnessLevels),
 #ifdef HAVE_LIBGPM
        BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, "Window Follows Pointer"),
        BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, "Pointer Follows Window"),
@@ -1252,22 +1241,22 @@ updatePreferences (void) {
        BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, "Alert Tunes"),
        SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, "Tune Device", tuneDevices),
 #ifdef ENABLE_PCM_TUNES
-       VOLUME_ITEM(prefs.pcmVolume, changedVolume, testTunesPcm, "PCM Volume"),
+       VOLUME_ITEM(prefs.pcmVolume, NULL, testTunesPcm, "PCM Volume"),
 #endif /* ENABLE_PCM_TUNES */
 #ifdef ENABLE_MIDI_TUNES
-       VOLUME_ITEM(prefs.midiVolume, changedVolume, testTunesMidi, "MIDI Volume"),
+       VOLUME_ITEM(prefs.midiVolume, NULL, testTunesMidi, "MIDI Volume"),
        TEXT_ITEM(prefs.midiInstrument, NULL, testTunesMidi, "MIDI Instrument", midiInstrumentTable, midiInstrumentCount),
 #endif /* ENABLE_MIDI_TUNES */
 #ifdef ENABLE_FM_TUNES
-       VOLUME_ITEM(prefs.fmVolume, changedVolume, testTunesFm, "FM Volume"),
+       VOLUME_ITEM(prefs.fmVolume, NULL, testTunesFm, "FM Volume"),
 #endif /* ENABLE_FM_TUNES */
        BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
        BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, "Alert Messages"),
 #ifdef ENABLE_SPEECH_SUPPORT
        SYMBOLIC_ITEM(prefs.sayLineMode, NULL, NULL, "Say-Line Mode", sayModes),
        BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, "Autospeak"),
-       NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, "Speech Rate", 0, SPK_MAXIMUM_RATE),
-       NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, "Speech Volume", 0, SPK_MAXIMUM_VOLUME),
+       NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, "Speech Rate", 0, SPK_MAXIMUM_RATE, 1),
+       NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, "Speech Volume", 0, SPK_MAXIMUM_VOLUME, 1),
 #endif /* ENABLE_SPEECH_SUPPORT */
        SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
@@ -1412,7 +1401,7 @@ updatePreferences (void) {
             do {
               if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
               if (!--count) break;
-            } while (item->changed && !item->changed(*item->setting));
+            } while ((*item->setting % item->multiple) || (item->changed && !item->changed(*item->setting)));
             if (count)
               settingChanged = 1;
             else
@@ -1429,7 +1418,7 @@ updatePreferences (void) {
             do {
               if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
               if (!--count) break;
-            } while (item->changed && !item->changed(*item->setting));
+            } while ((*item->setting % item->multiple) || (item->changed && !item->changed(*item->setting)));
             if (count)
               settingChanged = 1;
             else
@@ -1448,15 +1437,14 @@ updatePreferences (void) {
 
           default:
             if (command >= CR_ROUTE && command < CR_ROUTE+brl.x) {
-              /* Why not support setting a value with routing keys. */
               unsigned char oldSetting = *item->setting;
               int key = command - CR_ROUTE;
               if (item->names) {
                 *item->setting = key % (item->maximum + 1);
               } else {
-                *item->setting = key;
-                if (*item->setting > item->maximum) *item->setting = item->maximum;
-                if (*item->setting < item->minimum) *item->setting = item->minimum;
+                unsigned char highestKey = brl.x - 1;
+                unsigned char highestValue = item->maximum - item->minimum;
+                *item->setting = (highestValue * (key + (highestKey / (highestValue * 2))) / highestKey) + item->minimum;
               }
               if (*item->setting != oldSetting) {
                 if (item->changed && !item->changed(*item->setting)) {
@@ -1938,6 +1926,7 @@ startup (int argc, char *argv[]) {
     prefs.pointerFollowsWindow = DEFAULT_POINTER_FOLLOWS_WINDOW;
 
     prefs.textStyle = DEFAULT_TEXT_STYLE;
+    prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
     prefs.metaMode = DEFAULT_META_MODE;
 
     prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
@@ -1962,7 +1951,6 @@ startup (int argc, char *argv[]) {
     prefs.speechRate = SPK_DEFAULT_RATE;
     prefs.speechVolume = SPK_DEFAULT_VOLUME;
 
-    prefs.brailleFirmness = BRL_DEFAULT_FIRMNESS;
     prefs.statusStyle = brailleDriver->statusStyle;
   }
   setTuneDevice(prefs.tuneDevice);

@@ -795,8 +795,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
  * We are told 265V is normal operating voltage but we don't know the scale.
  */
 static void
-brl_firmness (BrailleDisplay *brl, int setting) {
+brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
   sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE,
-                      0XFF - (setting * 0XFF / BRL_MAXIMUM_FIRMNESS),
+                      0XFF - (setting * 0XFF / BF_MAXIMUM),
                       0, NULL, 0);
 }

@@ -1367,7 +1367,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 }
 
 static void
-brl_firmness (BrailleDisplay *brl, int setting) {
+brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
   writeParameter(brl, 3,
-                 setting * 4 / BRL_MAXIMUM_FIRMNESS);
+                 setting * 4 / BF_MAXIMUM);
 }

@@ -53,7 +53,7 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 #endif /* BRL_HAVE_KEY_CODES */
 
 #ifdef BRL_HAVE_FIRMNESS
-  static void brl_firmness (BrailleDisplay *brl, int setting);		/* mute speech */
+  static void brl_firmness (BrailleDisplay *brl, BrailleFirmness setting);		/* mute speech */
 #endif /* BRL_HAVE_FIRMNESS */
 
 #ifdef BRLPARMS

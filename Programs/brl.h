@@ -51,6 +51,14 @@ extern int readBrailleCommand (BrailleDisplay *, DriverCommandContext);
 extern void clearStatusCells (BrailleDisplay *brl);
 extern void setStatusText (BrailleDisplay *brl, const char *text);
 
+typedef enum {
+  BF_MINIMUM,
+  BF_LOW,
+  BF_MEDIUM,
+  BF_HIGH,
+  BF_MAXIMUM
+} BrailleFirmness;
+
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure
  * with pointers to all the functions and variables.
@@ -85,7 +93,7 @@ typedef struct {
   int (*keyToCommand) (BrailleDisplay *, DriverCommandContext, int);
 
   /* These require BRL_HAVE_FIRMNESS. */
-  void (*firmness) (BrailleDisplay *brl, int setting);		/* mute speech */
+  void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);		/* mute speech */
 } BrailleDriver;
 
 extern const BrailleDriver *loadBrailleDriver (const char *driver, const char *driverDirectory);
@@ -123,9 +131,6 @@ extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern void showDotPattern (unsigned char dots, unsigned char duration);
 extern void setBrailleFirmness (BrailleDisplay *brl, int setting);
-
-#define BRL_DEFAULT_FIRMNESS 50
-#define BRL_MAXIMUM_FIRMNESS 100
 
 #ifdef __cplusplus
 }

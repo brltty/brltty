@@ -22,19 +22,19 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* config.h - Configurable definitions
+/* defaults.h - Configurable default settings.
  *
  * Edit as necessary for your system.
  */
 
 /* Delay times, measured in milliseconds. */
-#define DEFAULT_UPDATE_INTERVAL 40	/* default sleep time per cycle - overall speed */
+#define DEFAULT_UPDATE_INTERVAL 40	/* sleep time per cycle - overall speed */
 
-#define DEFAULT_MESSAGE_DELAY 4000 /* Default time duration to display messages.
-                            * Under 5 seconds (init's SIGTERM-SIGKILL delay
-                            * during shutdown) is good as that allows "exiting" 
-                            * to be replaced by "terminated" on the display.
-                            */
+#define DEFAULT_MESSAGE_DELAY 4000 /* message hold time */
+/* Under 5 seconds (init's SIGTERM-SIGKILL delay during shutdown)
+ * is good as that allows "exiting" to be replaced by "terminated"
+ * on the display.
+ */
 
 /* Initialisation of BRLTTY environment settings: */
 
@@ -63,6 +63,7 @@ extern "C" {
 #define DEFAULT_POINTER_FOLLOWS_WINDOW 0		/* 1 for capital blink on, 0 for off */
 
 #define DEFAULT_TEXT_STYLE 0		/* 1 for six-dot mode, 0 for eight-dot */
+#define DEFAULT_BRAILLE_FIRMNESS BF_MEDIUM
 #define DEFAULT_META_MODE 0		/* 1 for six-dot mode, 0 for eight-dot */
 
 #define DEFAULT_WINDOW_OVERLAP 0
