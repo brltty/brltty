@@ -2254,13 +2254,6 @@ The following directives are recognized:
     <ref id="options-contraction-table" name="-c"> command line option.
     It isn't available if the
     <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
-  <tag><tt/preferences-file/ <em/file/<label id="configure-preferences-file"></tag>
-    Specify the location of the preferences file.
-    If it's not specified, then <tt>/etc/brltty-</tt><em/driver/<tt/.prefs/ is assumed,
-    where <em/driver/ is a two-letter <ref id="drivers" name="driver identification code">.
-    The preferences file doesn't need to exist.
-    This directive can be overridden with the
-    <ref id="options-preferences-file" name="-p"> command line option.
   <tag><tt/screen-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-screen-parameters"></tag>
     Specify parameters for the screen driver.
     If the same parameter is specified more than once,
@@ -2389,11 +2382,6 @@ The <tt/brltty/ command accepts the following options:
     Specify that BRLTTY is to remain in the foreground.
     If not specified, then BRLTTY becomes a background process (daemon)
     after initializing itself but before starting any of the selected drivers.
-  <tag><tt/-p/<em/file/ <tt/--preferences-file=/<em/file/<label id="options-preferences-file"></tag>
-    Specify the location of the preferences file.
-    The preferences file doesn't need to exist.
-    See the <ref id="configure-preferences-file" name="preferences-file">
-    configuration file directive for the default run-time setting.
   <tag><tt/-q/ <tt/--quiet/<label id="options-quiet"></tag>
     Log less information.
     This option changes the log level
@@ -2488,9 +2476,6 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_CONTRACTION_TABLE/</tag>
         The contraction table
         (see the <ref id="options-contraction-table" name="-c"> command line option).
-      <tag><tt/BRLTTY_PREFERENCES_FILE/</tag>
-        The preferences file
-        (see the <ref id="options-preferences-file" name="-p"> command line option).
       <tag><tt/BRLTTY_SCREEN_PARAMETERS/</tag>
         Parameters for the screen driver
         (see the <ref id="options-screen-parameters" name="-X"> command line option).
@@ -2826,11 +2811,8 @@ with the <ref id="command-PREFSAVE" name="PREFSAVE"> command.
 The most recently saved settings can be restored at any time
 with the <ref id="command-PREFLOAD" name="PREFLOAD"> command.
 
-The default name for this file is <tt>/etc/brltty.conf</tt>.
-A system default for its name can be established with
-the <ref id="configure-preferences-file" name="preferences-file"> configuration file directive.
-Its name can be explicitly set at run-time with
-the <ref id="options-preferences-file" name="-p"> command line option.
+The name for this file is <tt>/etc/brltty-</tt><em/driver/<tt/.prefs/.
+where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
 
 <sect2>The Preferences Menu<label id="preferences-menu"><p>
 The preferences settings are saved as binary data

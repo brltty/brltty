@@ -18,5 +18,10 @@
 
 cd "`dirname "${0}"`"
 rootDirectory="`pwd`"
-exec "${rootDirectory}/Programs/brltty" -L "${rootDirectory}/lib" -D "${rootDirectory}/data" -T "${rootDirectory}/BrailleTables" -C "${rootDirectory}/ContractionTables" "$@"
+exec "${rootDirectory}/Programs/brltty" \
+   -L "${rootDirectory}/lib" \
+   -D "${rootDirectory}/data" \
+   -T "${rootDirectory}/BrailleTables" \
+   -C "${rootDirectory}/ContractionTables" \
+   "$@"
 exit "${?}"

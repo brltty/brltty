@@ -99,10 +99,11 @@ void describeRoutingScreen (ScreenDescription *);
 void closeRoutingScreen (void);
 
 /* Routines which apply to the help screen. */
-int openHelpScreen (const char *);	/* open help screen file */
-void setHelpPageNumber (short);			/* set screen number (initial default 0) */
-short getHelpPageNumber (void);			/* set screen number (initial default 0) */
-short getHelpPageCount (void);			/* get number of help screens */
+extern int openHelpScreen (const char *);
+extern void closeHelpScreen (void);
+extern void setHelpPageNumber (short);
+extern short getHelpPageNumber (void);
+extern short getHelpPageCount (void);
 
 #ifdef __cplusplus
 }

@@ -247,6 +247,15 @@ openHelpScreen (const char *file) {
 
 
 void
+closeHelpScreen (void) {
+  if (helpOpened) {
+    helpScreen.close();
+    helpOpened = 0;
+  }
+}
+
+
+void
 setHelpPageNumber (short page) {
   helpScreen.setPageNumber(page);
 }

@@ -223,14 +223,6 @@
 # Miscellaneous Settings #
 ##########################
 
-# The preferences-file directive specifies the file which is used for
-# saving and restoring the preferred default settings. Relative paths
-# are anchored at "@DATA_DIRECTORY@". If not specified, "brltty-XX.prefs"
-# (where "XX" is the two-letter identifier of the braille driver) will
-# be used. 
-# (can be overridden with the -p [--preferences-file=] option)
-#preferences-file @CONFIGURATION_DIRECTORY@/brltty.prefs
-
 # The library-directory directive specifies the absolute path to the
 # directory which contains the dynamically loadable drivers. If not
 # specified, @LIBRARY_DIRECTORY@ will be used.

@@ -38,7 +38,7 @@ loadDriver (
   const void *driverAddress = NULL;
   *internal = 1;
 
-  if (!driverIdentifier) {
+  if (!driverIdentifier || !*driverIdentifier) {
     if (driverTable)
       if (driverTable->address)
         return driverTable->address;

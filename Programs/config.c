@@ -73,16 +73,20 @@ static short opt_logLevel = LOG_NOTICE;
 static short opt_environmentVariables = 0;
 
 static const char *opt_configurationFile = NULL;
-static const char *opt_preferencesFile = NULL;
 static const char *opt_pidFile = NULL;
 static const char *opt_dataDirectory = NULL;
 static const char *opt_libraryDirectory = NULL;
 
+static const char *opt_brailleDevice = NULL;
+static const char *const *brailleDevices;
+
 static const char *opt_brailleDriver = NULL;
-static const BrailleDriver *brailleDriver;
+static const char *const *brailleDrivers;
+static const BrailleDriver *brailleDriver = NULL;
+static int brailleInternal;
 static char *opt_brailleParameters = NULL;
 static char **brailleParameters = NULL;
-static const char *opt_brailleDevice = NULL;
+static char *preferencesFile = NULL;
 
 static const char *opt_tablesDirectory = NULL;
 static const char *opt_textTable = NULL;
@@ -101,7 +105,9 @@ static int apiOpened;
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static const char *opt_speechDriver = NULL;
-static const SpeechDriver *speechDriver;
+static const char *const *speechDrivers = NULL;
+static const SpeechDriver *speechDriver = NULL;
+static int speechInternal;
 static char *opt_speechParameters = NULL;
 static char **speechParameters = NULL;
 static const char *opt_speechFifo = NULL;
@@ -136,12 +142,6 @@ getConfigurationOperand (char **operandAddress, const char *delimiters, int exte
     }
     return status;
   }
-}
-
-static char *cfg_preferencesFile = NULL;
-static ConfigurationLineStatus
-configurePreferencesFile (const char *delimiters) {
-  return getConfigurationOperand(&cfg_preferencesFile, delimiters, 0);
 }
 
 static char *cfg_tablesDirectory = NULL;
@@ -259,8 +259,6 @@ BEGIN_OPTION_TABLE
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
   {'n', "no-daemon", NULL, NULL, 0,
    "Remain a foreground process."},
-  {'p', "preferences-file", "file", configurePreferencesFile, 0,
-   "Path to preferences file."},
   {'q', "quiet", NULL, NULL, 0,
    "Suppress start-up messages."},
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -585,15 +583,6 @@ fixTranslationTablePath (const char **path, const char *prefix) {
   fixFilePath(path, TRANSLATION_TABLE_EXTENSION, prefix);
 }
 
-static void
-dimensionsChanged (int rows, int columns) {
-  fwinshift = MAX(columns-prefs.windowOverlap, 1);
-  hwinshift = columns / 2;
-  vwinshift = (rows > 1)? rows: 5;
-  LogPrint(LOG_DEBUG, "Shifts: fwin=%d hwin=%d vwin=%d",
-           fwinshift, hwinshift, vwinshift);
-}
-
 int
 readCommand (BRL_DriverCommandContext context) {
    int command = readBrailleCommand(&brl, context);
@@ -618,6 +607,167 @@ getCommand (BRL_DriverCommandContext context) {
    }
 }
 
+static void
+dimensionsChanged (int rows, int columns) {
+  fwinshift = MAX(columns-prefs.windowOverlap, 1);
+  hwinshift = columns / 2;
+  vwinshift = (rows > 1)? rows: 5;
+  LogPrint(LOG_DEBUG, "Shifts: fwin=%d hwin=%d vwin=%d",
+           fwinshift, hwinshift, vwinshift);
+}
+
+static int
+changedWindowAttributes (void) {
+  dimensionsChanged(brl.y, brl.x);
+  return 1;
+}
+
+static void
+changedPreferences (void) {
+  changedWindowAttributes();
+  setTuneDevice(prefs.tuneDevice);
+  if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
+#ifdef ENABLE_SPEECH_SUPPORT
+  if (speech->rate) speech->rate(prefs.speechRate);
+  if (speech->volume) speech->volume(prefs.speechVolume);
+#endif /* ENABLE_SPEECH_SUPPORT */
+}
+
+int
+loadPreferences (int change) {
+  int ok = 0;
+  int fd = open(preferencesFile, O_RDONLY);
+  if (fd != -1) {
+    Preferences newPreferences;
+    int length = read(fd, &newPreferences, sizeof(newPreferences));
+    if (length >= 40) {
+      if ((newPreferences.magic[0] == (PREFS_MAGIC_NUMBER & 0XFF)) &&
+          (newPreferences.magic[1] == (PREFS_MAGIC_NUMBER >> 8))) {
+        prefs = newPreferences;
+        ok = 1;
+
+        if (prefs.version == 0) {
+          prefs.version++;
+          prefs.pcmVolume = DEFAULT_PCM_VOLUME;
+          prefs.midiVolume = DEFAULT_MIDI_VOLUME;
+          prefs.fmVolume = DEFAULT_FM_VOLUME;
+        }
+
+        if (prefs.version == 1) {
+          prefs.version++;
+          prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
+          prefs.autospeak = DEFAULT_AUTOSPEAK;
+        }
+
+        if (prefs.version == 2) {
+          prefs.version++;
+          prefs.autorepeat = DEFAULT_AUTOREPEAT;
+          prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+          prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
+
+          prefs.cursorVisibleTime *= 4;
+          prefs.cursorInvisibleTime *= 4;
+          prefs.attributesVisibleTime *= 4;
+          prefs.attributesInvisibleTime *= 4;
+          prefs.capitalsVisibleTime *= 4;
+          prefs.capitalsInvisibleTime *= 4;
+        }
+
+        if (length == 40) {
+          length++;
+          prefs.speechRate = SPK_DEFAULT_RATE;
+        }
+
+        if (length == 41) {
+          length++;
+          prefs.speechVolume = SPK_DEFAULT_VOLUME;
+        }
+
+        if (length == 42) {
+          length++;
+          prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
+        }
+
+        if (change) changedPreferences();
+      } else
+        LogPrint(LOG_ERR, "Invalid preferences file: %s", preferencesFile);
+    } else if (length == -1) {
+      LogPrint(LOG_ERR, "Cannot read preferences file: %s: %s",
+               preferencesFile, strerror(errno));
+    } else {
+      long int actualSize = sizeof(newPreferences);
+      LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %ld).",
+               preferencesFile, length, actualSize);
+    }
+    close(fd);
+  } else
+    LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
+             "Cannot open preferences file: %s: %s",
+             preferencesFile, strerror(errno));
+  return ok;
+}
+
+static void
+getPreferences (void) {
+  if (!loadPreferences(0)) {
+    memset(&prefs, 0, sizeof(prefs));
+
+    prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
+    prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
+    prefs.version = 3;
+
+    prefs.autorepeat = DEFAULT_AUTOREPEAT;
+    prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+    prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
+
+    prefs.showCursor = DEFAULT_SHOW_CURSOR;
+    prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
+    prefs.blinkingCursor = DEFAULT_BLINKING_CURSOR;
+    prefs.cursorVisibleTime = DEFAULT_CURSOR_VISIBLE_TIME;
+    prefs.cursorInvisibleTime = DEFAULT_CURSOR_INVISIBLE_TIME;
+
+    prefs.showAttributes = DEFAULT_SHOW_ATTRIBUTES;
+    prefs.blinkingAttributes = DEFAULT_BLINKING_ATTRIBUTES;
+    prefs.attributesVisibleTime = DEFAULT_ATTRIBUTES_VISIBLE_TIME;
+    prefs.attributesInvisibleTime = DEFAULT_ATTRIBUTES_INVISIBLE_TIME;
+
+    prefs.blinkingCapitals = DEFAULT_BLINKING_CAPITALS;
+    prefs.capitalsVisibleTime = DEFAULT_CAPITALS_VISIBLE_TIME;
+    prefs.capitalsInvisibleTime = DEFAULT_CAPITALS_INVISIBLE_TIME;
+
+    prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
+    prefs.pointerFollowsWindow = DEFAULT_POINTER_FOLLOWS_WINDOW;
+
+    prefs.textStyle = DEFAULT_TEXT_STYLE;
+    prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
+
+    prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
+    prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;
+    prefs.eagerSlidingWindow = DEFAULT_EAGER_SLIDING_WINDOW;
+
+    prefs.skipIdenticalLines = DEFAULT_SKIP_IDENTICAL_LINES;
+    prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
+    prefs.blankWindowsSkipMode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
+
+    prefs.alertMessages = DEFAULT_ALERT_MESSAGES;
+    prefs.alertDots = DEFAULT_ALERT_DOTS;
+    prefs.alertTunes = DEFAULT_ALERT_TUNES;
+    prefs.tuneDevice = getDefaultTuneDevice();
+    prefs.pcmVolume = DEFAULT_PCM_VOLUME;
+    prefs.midiVolume = DEFAULT_MIDI_VOLUME;
+    prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
+    prefs.fmVolume = DEFAULT_FM_VOLUME;
+
+    prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
+    prefs.autospeak = DEFAULT_AUTOSPEAK;
+    prefs.speechRate = SPK_DEFAULT_RATE;
+    prefs.speechVolume = SPK_DEFAULT_VOLUME;
+
+    prefs.statusStyle = brailleDriver->statusStyle;
+  }
+  setTuneDevice(prefs.tuneDevice);
+}
+
 void
 initializeBraille (void) {
   initializeBrailleDisplay(&brl);
@@ -625,158 +775,170 @@ initializeBraille (void) {
   brl.dataDirectory = opt_dataDirectory;
 }
 
-static char **
-processBrailleParameters (const BrailleDriver *driver) {
-  return processParameters(driver->parameters,
-                           "braille driver", driver->identifier,
-                           opt_brailleParameters, cfg_brailleParameters,
-                           "BRLTTY_BRAILLE_PARAMETERS", BRAILLE_PARAMETERS);
-}
+static int
+openBrailleDriver (void) {
+  const char *const *device = brailleDevices;
+  while (*device) {
+    const char *const *identifier;
+    int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
 
-static const BrailleDriver *
-findBrailleDriver (int *internal) {
-  char **devices;
-  if ((devices = splitString(opt_brailleDevice, ','))) {
-    char **device = devices;
-    while (*device) {
-      const char *const *identifier;
+    if (oneDriver && (strcmp(brailleDrivers[0], "auto") == 0)) {
+      const char *type;
+      const char *dev = *device;
 
-      {
-        const char *type;
-        const char *dev = *device;
-
-        if (isSerialDevice(&dev)) {
-          static const char *serialIdentifiers[] = {
-            "pm", "ts",
-            NULL
-          };
-          identifier = serialIdentifiers;
-          type = "serial";
+      if (isSerialDevice(&dev)) {
+        static const char *serialIdentifiers[] = {
+          "pm", "ts",
+          NULL
+        };
+        identifier = serialIdentifiers;
+        type = "serial";
 
 #ifdef ENABLE_USB_SUPPORT
-        } else if (isUsbDevice(&dev)) {
-          static const char *usbIdentifiers[] = {
-            "al", "fs", "ht", "pm", "vo",
-            NULL
-          };
-          identifier = usbIdentifiers;
-          type = "USB";
+      } else if (isUsbDevice(&dev)) {
+        static const char *usbIdentifiers[] = {
+          "al", "fs", "ht", "pm", "vo",
+          NULL
+        };
+        identifier = usbIdentifiers;
+        type = "USB";
 #endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-        } else if (isBluetoothDevice(&dev)) {
-          static const char *bluetoothIdentifiers[] = {
-            "ht",
-            NULL
-          };
-          identifier = bluetoothIdentifiers;
-          type = "bluetooth";
+      } else if (isBluetoothDevice(&dev)) {
+        static const char *bluetoothIdentifiers[] = {
+          "ht",
+          NULL
+        };
+        identifier = bluetoothIdentifiers;
+        type = "bluetooth";
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-        } else {
-          LogPrint(LOG_WARNING, "Braille display autodetection not supported for '%s'.", dev);
-          goto nextDevice;
-        }
-        LogPrint(LOG_NOTICE, "Looking for %s braille display on '%s'.", type, *device);
+      } else {
+        LogPrint(LOG_WARNING, "Braille display autodetection not supported for device '%s'.", dev);
+        goto nextDevice;
       }
-
-      while (*identifier) {
-        const BrailleDriver *driver;
-        LogPrint(LOG_INFO, "Checking for '%s' braille display.", *identifier);
-        if ((driver = loadBrailleDriver(*identifier, internal, opt_libraryDirectory))) {
-          char **parameters = processBrailleParameters(driver);
-          if (parameters) {
-            initializeBrailleDisplay(&brl);
-            if (driver->open(&brl, parameters, *device)) {
-              driver->close(&brl);
-              LogPrint(LOG_INFO, "Braille display found: %s[%s]",
-                       driver->identifier, driver->name);
-
-              opt_brailleDriver = driver->identifier;
-              opt_brailleDevice = strdupWrapper(*device);
-
-              deallocateStrings(parameters);
-              deallocateStrings(devices);
-              if (!*internal) unloadSharedObject(driver);
-              return driver;
-            }
-
-            deallocateStrings(parameters);
-          }
-
-          if (!*internal) unloadSharedObject(driver);
-        }
-
-        ++identifier;
-      }
-
-    nextDevice:
-      ++device;
+      LogPrint(LOG_DEBUG, "Looking for %s braille display on '%s'.", type, *device);
+    } else {
+      identifier = brailleDrivers;
+      LogPrint(LOG_DEBUG, "Looking for braille display on '%s'.", *device);
     }
 
-    deallocateStrings(devices);
+    while (*identifier) {
+      const BrailleDriver *driver;
+      int internal;
+      LogPrint(LOG_DEBUG, "Checking for '%s' braille display.", *identifier);
+      if ((driver = loadBrailleDriver(*identifier, &internal, opt_libraryDirectory))) {
+        char **parameters = processParameters(driver->parameters,
+                                              "braille driver", driver->identifier,
+                                              opt_brailleParameters, cfg_brailleParameters,
+                                              "BRLTTY_BRAILLE_PARAMETERS", BRAILLE_PARAMETERS);
+        if (parameters) {
+          initializeBraille();
+          LogPrint(LOG_DEBUG, "Initializing braille driver: %s -> %s",
+                   driver->identifier, *device);
+          if (driver->open(&brl, parameters, *device)) {
+            brailleDriver = driver;
+            brailleInternal = internal;
+            brailleParameters = parameters;
+
+            LogPrint(LOG_INFO, "Braille Device: %s", *device);
+            LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
+                     brailleDriver->identifier, brailleDriver->name,
+                     brailleDriver->date, brailleDriver->time);
+            brailleDriver->identify();
+            logParameters(brailleDriver->parameters, brailleParameters, "Braille");
+            LogPrint(LOG_INFO, "Help File: %s",
+                     brailleDriver->helpFile? brailleDriver->helpFile: "<NONE>");
+
+            /* Initialize the braille driver help screen. */
+            {
+              char *path = makePath(opt_dataDirectory, brailleDriver->helpFile);
+              if (path) {
+                if (openHelpScreen(path))
+                  LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
+                else
+                  LogPrint(LOG_WARNING, "Cannot open help file: %s", path);
+                free(path);
+              }
+            }
+
+            {
+              const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
+              const char *part2 = brailleDriver->identifier;
+              const char *part3 = ".prefs";
+              char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+              sprintf(path, "%s%s%s", part1, part2, part3);
+              preferencesFile = path;
+            }
+            LogPrint(LOG_INFO, "Preferences File: %s", preferencesFile);
+
+            return 1;
+          } else {
+            LogPrint(LOG_DEBUG, "Braille driver initialization failed: %s -> %s",
+                     driver->identifier, *device);
+          }
+
+          deallocateStrings(parameters);
+        }
+
+        if (!internal) unloadSharedObject(driver);
+      } else {
+        LogPrint(LOG_ERR, "Braille driver not loadable: %s", *identifier);
+      }
+
+      ++identifier;
+    }
+
+  nextDevice:
+    ++device;
   }
 
-  LogPrint(LOG_WARNING, "No braille display found.");
-  return NULL;
+  LogPrint(LOG_DEBUG, "No braille display found.");
+  return 0;
 }
 
 static void
-getBrailleDriver (void) {
-  int internal;
-  if (!opt_brailleDriver || (strcmp(opt_brailleDriver, "auto") != 0)) {
-    brailleDriver = loadBrailleDriver(opt_brailleDriver, &internal, opt_libraryDirectory);
-  } else {
-    brailleDriver = findBrailleDriver(&internal);
-  }
+closeBrailleDriver (void) {
+  closeHelpScreen();
 
   if (brailleDriver) {
-    brailleParameters = processBrailleParameters(brailleDriver);
-  } else {
-    LogPrint(LOG_ERR, "Bad braille driver selection: %s", opt_brailleDriver);
-    fprintf(stderr, "\n");
-    listBrailleDrivers(opt_libraryDirectory);
-    fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
-
-    /* not fatal */
-    brailleDriver = &noBraille;
+    brailleDriver->close(&brl);
+    if (!brailleInternal) unloadSharedObject(brailleDriver);
+    brailleDriver = NULL;
   }
-  if (!opt_brailleDriver) opt_brailleDriver = brailleDriver->identifier;
+
+  if (brailleParameters) {
+    deallocateStrings(brailleParameters);
+    brailleParameters = NULL;
+  }
+
+  if (preferencesFile) {
+    free(preferencesFile);
+    preferencesFile = NULL;
+  }
 }
 
 static void
 startBrailleDriver (void) {
-  char **devices;
-  if ((devices = splitString(opt_brailleDevice, ','))) {
-    char **device = devices;
+  while (1) {
+    if (brailleDriver || openBrailleDriver()) {
+      if (allocateBrailleBuffer(&brl)) {
+        braille = brailleDriver;
 
-    while (1) {
-      LogPrint(LOG_DEBUG, "Starting braille driver: %s -> %s",
-               brailleDriver->identifier, *device);
-      if (brailleDriver->open(&brl, brailleParameters, *device)) {
-        if (allocateBrailleBuffer(&brl)) {
-          braille = brailleDriver;
-          if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
+        getPreferences();
+        if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
 
-          clearStatusCells(&brl);
-          setHelpPageNumber(brl.helpPage);
-          playTune(&tune_braille_on);
-          return;
-        } else {
-          LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
-        }
-        brailleDriver->close(&brl);
+        clearStatusCells(&brl);
+        setHelpPageNumber(brl.helpPage);
+        playTune(&tune_braille_on);
+        return;
       } else {
-        LogPrint(LOG_DEBUG, "Braille driver initialization failed: %s -> %s",
-                 brailleDriver->identifier, *device);
+        LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
       }
-
-      initializeBraille();
-      if (!*++device) {
-        device = devices;
-        delay(5000);
-      }
+      closeBrailleDriver();
     }
+    delay(5000);
   }
 }
 
@@ -784,8 +946,8 @@ static void
 stopBrailleDriver (void) {
   braille = &noBraille;
   if (brl.isCoreBuffer) free(brl.buffer);
-  brailleDriver->close(&brl);
-  initializeBraille();
+  closeBrailleDriver();
+  playTune(&tune_braille_off);
 }
 
 void
@@ -795,7 +957,6 @@ restartBrailleDriver (void) {
 #endif /* ENABLE_API */
 
   stopBrailleDriver();
-  playTune(&tune_braille_off);
   LogPrint(LOG_INFO, "Reinitializing braille driver.");
   startBrailleDriver();
 
@@ -806,9 +967,9 @@ restartBrailleDriver (void) {
 
 static void
 exitBrailleDriver (void) {
-   clearStatusCells(&brl);
-   message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
-   stopBrailleDriver();
+  clearStatusCells(&brl);
+  message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
+  stopBrailleDriver();
 }
 
 static int
@@ -835,52 +996,101 @@ void
 initializeSpeech (void) {
 }
 
-static char **
-processSpeechParameters (const SpeechDriver *driver) {
-  return processParameters(driver->parameters,
-                           "speech driver", driver->identifier,
-                           opt_speechParameters, cfg_speechParameters,
-                           "BRLTTY_SPEECH_PARAMETERS", SPEECH_PARAMETERS);
+static int
+openSpeechDriver (void) {
+  const char *const *identifier;
+  int oneDriver = speechDrivers[0] && !speechDrivers[1];
+
+  if (oneDriver && (strcmp(speechDrivers[0], "auto") == 0)) {
+    static const char *speechIdentifiers[] = {
+      "al", "bl", "cb",
+      NULL
+    };
+    identifier = speechIdentifiers;
+  } else {
+    identifier = speechDrivers;
+  }
+  LogPrint(LOG_DEBUG, "Looking for speech synthesizer.");
+
+  while (*identifier) {
+    const SpeechDriver *driver;
+    int internal;
+    LogPrint(LOG_DEBUG, "Checking for '%s' speech synthesizer.", *identifier);
+    if ((driver = loadSpeechDriver(*identifier, &internal, opt_libraryDirectory))) {
+      char **parameters = processParameters(driver->parameters,
+                                            "speech driver", driver->identifier,
+                                            opt_speechParameters, cfg_speechParameters,
+                                            "BRLTTY_SPEECH_PARAMETERS", SPEECH_PARAMETERS);
+      if (parameters) {
+        initializeSpeech();
+        LogPrint(LOG_DEBUG, "Initializing speech driver: %s",
+                 driver->identifier);
+        if (driver->open(parameters)) {
+          speechDriver = driver;
+          speechInternal = internal;
+          speechParameters = parameters;
+
+          LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
+                   speechDriver->identifier, speechDriver->name,
+                   speechDriver->date, speechDriver->time);
+          speechDriver->identify();
+          logParameters(speechDriver->parameters, speechParameters, "Speech");
+
+          return 1;
+        } else {
+          LogPrint(LOG_DEBUG, "Speech driver initialization failed: %s",
+                   driver->identifier);
+        }
+
+        deallocateStrings(parameters);
+      }
+
+      if (!internal) unloadSharedObject(driver);
+    } else {
+      LogPrint(LOG_ERR, "Speech driver not loadable: %s", *identifier);
+    }
+
+    ++identifier;
+  }
+
+  LogPrint(LOG_DEBUG, "No speech synthesizer found.");
+  return 0;
 }
 
 static void
-getSpeechDriver (void) {
-  int internal;
-  if ((speechDriver = loadSpeechDriver(opt_speechDriver, &internal, opt_libraryDirectory))) {
-    speechParameters = processSpeechParameters(speechDriver);
-  } else {
-    LogPrint(LOG_ERR, "Bad speech driver selection: %s", opt_speechDriver);
-    fprintf(stderr, "\n");
-    listSpeechDrivers(opt_libraryDirectory);
-    fprintf(stderr, "\nUse -s to specify one, and -h for quick help.\n\n");
-
-    /* not fatal */
-    speechDriver = &noSpeech;
+closeSpeechDriver (void) {
+  if (speechDriver) {
+    speechDriver->close();
+    if (!speechInternal) unloadSharedObject(speechDriver);
+    speechDriver = NULL;
   }
-  if (!opt_speechDriver) opt_speechDriver = speechDriver->identifier;
+
+  if (speechParameters) {
+    deallocateStrings(speechParameters);
+    speechParameters = NULL;
+  }
 }
 
 static void
 startSpeechDriver (void) {
-   if (opt_noSpeech) {
-      LogPrint(LOG_INFO, "Automatic speech driver initialization disabled.");
-   } else if (speechDriver->open(speechParameters)) {
-      speech = speechDriver;
-      if (speech->rate) speech->rate(prefs.speechRate);
-      if (speech->volume) speech->volume(prefs.speechVolume);
-   }
+  if (opt_noSpeech) {
+    LogPrint(LOG_INFO, "Automatic speech driver initialization disabled.");
+  } else if (speechDriver || openSpeechDriver()) {
+    speech = speechDriver;
+    if (speech->rate) speech->rate(prefs.speechRate);
+    if (speech->volume) speech->volume(prefs.speechVolume);
+  }
 }
 
 static void
 stopSpeechDriver (void) {
-   if (opt_noSpeech) {
-      opt_noSpeech = 0;
-   } else {
-      speech->mute();
-      speech = &noSpeech;
-      speechDriver->close();
-      initializeSpeech();
-   }
+  if (opt_noSpeech) {
+    opt_noSpeech = 0;
+  } else {
+    speech->mute();
+    speech = &noSpeech;
+    closeSpeechDriver();
+  }
 }
 
 void
@@ -892,7 +1102,7 @@ restartSpeechDriver (void) {
 
 static void
 exitSpeechDriver (void) {
-   stopSpeechDriver();
+  stopSpeechDriver();
 }
 
 static int
@@ -947,114 +1157,23 @@ loadContractionTable (const char *file) {
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-static int
-changedWindowAttributes (void) {
-  dimensionsChanged(brl.y, brl.x);
-  return 1;
-}
-
-static void
-changedPreferences (void) {
-  changedWindowAttributes();
-  setTuneDevice(prefs.tuneDevice);
-  if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
-#ifdef ENABLE_SPEECH_SUPPORT
-  if (speech->rate) speech->rate(prefs.speechRate);
-  if (speech->volume) speech->volume(prefs.speechVolume);
-#endif /* ENABLE_SPEECH_SUPPORT */
-}
-
-int
-loadPreferences (int change) {
-  int ok = 0;
-  int fd = open(opt_preferencesFile, O_RDONLY);
-  if (fd != -1) {
-    Preferences newPreferences;
-    int length = read(fd, &newPreferences, sizeof(newPreferences));
-    if (length >= 40) {
-      if ((newPreferences.magic[0] == (PREFS_MAGIC_NUMBER & 0XFF)) &&
-          (newPreferences.magic[1] == (PREFS_MAGIC_NUMBER >> 8))) {
-        prefs = newPreferences;
-        ok = 1;
-
-        if (prefs.version == 0) {
-          prefs.version++;
-          prefs.pcmVolume = DEFAULT_PCM_VOLUME;
-          prefs.midiVolume = DEFAULT_MIDI_VOLUME;
-          prefs.fmVolume = DEFAULT_FM_VOLUME;
-        }
-
-        if (prefs.version == 1) {
-          prefs.version++;
-          prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
-          prefs.autospeak = DEFAULT_AUTOSPEAK;
-        }
-
-        if (prefs.version == 2) {
-          prefs.version++;
-          prefs.autorepeat = DEFAULT_AUTOREPEAT;
-          prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
-          prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
-
-          prefs.cursorVisibleTime *= 4;
-          prefs.cursorInvisibleTime *= 4;
-          prefs.attributesVisibleTime *= 4;
-          prefs.attributesInvisibleTime *= 4;
-          prefs.capitalsVisibleTime *= 4;
-          prefs.capitalsInvisibleTime *= 4;
-        }
-
-        if (length == 40) {
-          length++;
-          prefs.speechRate = SPK_DEFAULT_RATE;
-        }
-
-        if (length == 41) {
-          length++;
-          prefs.speechVolume = SPK_DEFAULT_VOLUME;
-        }
-
-        if (length == 42) {
-          length++;
-          prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
-        }
-
-        if (change) changedPreferences();
-      } else
-        LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
-    } else if (length == -1) {
-      LogPrint(LOG_ERR, "Cannot read preferences file: %s: %s",
-               opt_preferencesFile, strerror(errno));
-    } else {
-      long int actualSize = sizeof(newPreferences);
-      LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %ld).",
-               opt_preferencesFile, length, actualSize);
-    }
-    close(fd);
-  } else
-    LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
-             "Cannot open preferences file: %s: %s",
-             opt_preferencesFile, strerror(errno));
-  return ok;
-}
-
 #ifdef ENABLE_PREFERENCES_MENU
 int 
 savePreferences (void) {
   int ok = 0;
-  int fd = open(opt_preferencesFile, O_WRONLY | O_CREAT | O_TRUNC);
+  int fd = open(preferencesFile, O_WRONLY | O_CREAT | O_TRUNC);
   if (fd != -1) {
     fchmod(fd, S_IRUSR | S_IWUSR);
     if (write(fd, &prefs, sizeof(prefs)) == sizeof(prefs)) {
       ok = 1;
     } else {
       LogPrint(LOG_ERR, "Cannot write to preferences file: %s: %s",
-               opt_preferencesFile, strerror(errno));
+               preferencesFile, strerror(errno));
     }
     close(fd);
   } else {
     LogPrint(LOG_ERR, "Cannot open preferences file: %s: %s",
-             opt_preferencesFile, strerror(errno));
+             preferencesFile, strerror(errno));
   }
   if (!ok)
     message("not saved", 0);
@@ -1620,7 +1739,7 @@ updatePreferences (void) {
 
 static void
 exitTunes (void) {
-   closeTuneDevice(1);
+  closeTuneDevice(1);
 }
 
 static void
@@ -1738,9 +1857,6 @@ handleOption (const int option) {
 
     case 'f':	/* --configuration-file */
       opt_configurationFile = optarg;
-      break;
-    case 'p':	/* --preferences-file */
-      opt_preferencesFile = optarg;
       break;
     case 'P':	/* --pid-file */
       opt_pidFile = optarg;
@@ -1881,7 +1997,6 @@ startup (int argc, char *argv[]) {
                         NULL, "BRLTTY_CONFIGURATION_FILE", -1);
     processConfigurationFile(optionTable, optionCount, opt_configurationFile, optional);
   }
-  ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE", -1);
   ensureOptionSetting(&opt_dataDirectory, DATA_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
   ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
   ensureOptionSetting(&opt_tablesDirectory, DATA_DIRECTORY, cfg_tablesDirectory, "BRLTTY_TABLES_DIRECTORY", -1);
@@ -1971,126 +2086,20 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  screenParameters = processParameters(getScreenParameters(),
-                                       "screen driver", NULL,
-                                       opt_screenParameters, cfg_screenParameters,
-                                       "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
-  logParameters(getScreenParameters(), screenParameters, "Screen");
-
-#ifdef ENABLE_API
-  api_identify();
-  apiParameters = processParameters(api_parameters,
-                                    "application programming interface", NULL,
-                                    opt_apiParameters, cfg_apiParameters,
-                                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
-  logParameters(api_parameters, apiParameters, "API");
-#endif /* ENABLE_API */
-
   if (!*opt_brailleDevice) {
     LogPrint(LOG_CRIT, "No braille device specified.");
     fprintf(stderr, "Use -d to specify one.\n");
     exit(4);
   }
-  LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
-
-  getBrailleDriver();
-  LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
-           opt_brailleDriver, brailleDriver->name,
-           brailleDriver->date, brailleDriver->time);
-  brailleDriver->identify();
-  logParameters(brailleDriver->parameters, brailleParameters, "Braille");
-  LogPrint(LOG_INFO, "Help File: %s",
-           brailleDriver->helpFile? brailleDriver->helpFile: "<NONE>");
-
-  if (!opt_preferencesFile) {
-    const char *part1 = "brltty-";
-    const char *part2 = brailleDriver->identifier;
-    const char *part3 = ".prefs";
-    char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-    sprintf(path, "%s%s%s", part1, part2, part3);
-    opt_preferencesFile = path;
-  }
-  LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
-
-#ifdef ENABLE_SPEECH_SUPPORT
-  getSpeechDriver();
-  LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
-           opt_speechDriver, speechDriver->name,
-           speechDriver->date, speechDriver->time);
-  speechDriver->identify();
-  logParameters(speechDriver->parameters, speechParameters, "Speech");
-#endif /* ENABLE_SPEECH_SUPPORT */
 
   if (opt_version) exit(0);
-  if (brailleDriver == &noBraille)
-#ifdef ENABLE_SPEECH_SUPPORT
-    if (speechDriver == &noSpeech)
-#endif /* ENABLE_SPEECH_SUPPORT */
-      exit(0);
 
-  /* Load preferences file */
-  if (!loadPreferences(0)) {
-    memset(&prefs, 0, sizeof(prefs));
-
-    prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
-    prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
-    prefs.version = 3;
-
-    prefs.autorepeat = DEFAULT_AUTOREPEAT;
-    prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
-    prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
-
-    prefs.showCursor = DEFAULT_SHOW_CURSOR;
-    prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
-    prefs.blinkingCursor = DEFAULT_BLINKING_CURSOR;
-    prefs.cursorVisibleTime = DEFAULT_CURSOR_VISIBLE_TIME;
-    prefs.cursorInvisibleTime = DEFAULT_CURSOR_INVISIBLE_TIME;
-
-    prefs.showAttributes = DEFAULT_SHOW_ATTRIBUTES;
-    prefs.blinkingAttributes = DEFAULT_BLINKING_ATTRIBUTES;
-    prefs.attributesVisibleTime = DEFAULT_ATTRIBUTES_VISIBLE_TIME;
-    prefs.attributesInvisibleTime = DEFAULT_ATTRIBUTES_INVISIBLE_TIME;
-
-    prefs.blinkingCapitals = DEFAULT_BLINKING_CAPITALS;
-    prefs.capitalsVisibleTime = DEFAULT_CAPITALS_VISIBLE_TIME;
-    prefs.capitalsInvisibleTime = DEFAULT_CAPITALS_INVISIBLE_TIME;
-
-    prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
-    prefs.pointerFollowsWindow = DEFAULT_POINTER_FOLLOWS_WINDOW;
-
-    prefs.textStyle = DEFAULT_TEXT_STYLE;
-    prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
-
-    prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
-    prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;
-    prefs.eagerSlidingWindow = DEFAULT_EAGER_SLIDING_WINDOW;
-
-    prefs.skipIdenticalLines = DEFAULT_SKIP_IDENTICAL_LINES;
-    prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
-    prefs.blankWindowsSkipMode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
-
-    prefs.alertMessages = DEFAULT_ALERT_MESSAGES;
-    prefs.alertDots = DEFAULT_ALERT_DOTS;
-    prefs.alertTunes = DEFAULT_ALERT_TUNES;
-    prefs.tuneDevice = getDefaultTuneDevice();
-    prefs.pcmVolume = DEFAULT_PCM_VOLUME;
-    prefs.midiVolume = DEFAULT_MIDI_VOLUME;
-    prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
-    prefs.fmVolume = DEFAULT_FM_VOLUME;
-
-    prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
-    prefs.autospeak = DEFAULT_AUTOSPEAK;
-    prefs.speechRate = SPK_DEFAULT_RATE;
-    prefs.speechVolume = SPK_DEFAULT_VOLUME;
-
-    prefs.statusStyle = brailleDriver->statusStyle;
-  }
-  setTuneDevice(prefs.tuneDevice);
-  atexit(exitTunes);
-
-  /*
-   * Initialize screen library 
-   */
+  /* initialize screen driver */
+  screenParameters = processParameters(getScreenParameters(),
+                                       "screen driver", NULL,
+                                       opt_screenParameters, cfg_screenParameters,
+                                       "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
+  logParameters(getScreenParameters(), screenParameters, "Screen");
   if (!openLiveScreen(screenParameters)) {                                
     LogPrint(LOG_CRIT, "Cannot read screen.");
     exit(7);
@@ -2130,12 +2139,20 @@ startup (int argc, char *argv[]) {
    */
 
   /* Activate the braille display. */
-  initializeBraille();
-  startBrailleDriver();
+  brailleDevices = splitString(opt_brailleDevice, ',');
+  brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',');
   atexit(exitBrailleDriver);
+  atexit(exitTunes);
+  startBrailleDriver();
 
 #ifdef ENABLE_API
   /* Activate the application programming interface. */
+  api_identify();
+  apiParameters = processParameters(api_parameters,
+                                    "application programming interface", NULL,
+                                    opt_apiParameters, cfg_apiParameters,
+                                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
+  logParameters(api_parameters, apiParameters, "API");
   if ((apiOpened = api_open(&brl, apiParameters))) {
     atexit(exitApi);
   }
@@ -2143,25 +2160,13 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */
-  initializeSpeech();
-  startSpeechDriver();
+  speechDrivers = splitString(opt_speechDriver, ',');
   atexit(exitSpeechDriver);
+  startSpeechDriver();
 
   /* Create the speech pass-through FIFO. */
   if (opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
 #endif /* ENABLE_SPEECH_SUPPORT */
-
-  /* Initialize the braille driver help screen. */
-  {
-    char *path = makePath(opt_dataDirectory, brailleDriver->helpFile);
-    if (path) {
-      if (openHelpScreen(path))
-        LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
-      else
-        LogPrint(LOG_WARNING, "Cannot open help file: %s", path);
-      free(path);
-    }
-  }
 
   if (!opt_quiet) {
     char buffer[18 + 1];

@@ -46,7 +46,7 @@ splitString (const char *string, char delimiter) {
     while (*character)
       if (*character++ == delimiter)
         count++;
-    if (!(array = malloc(count * sizeof(*array)))) return NULL;
+    array = mallocWrapper(count * sizeof(*array));
   }
 
   {
@@ -55,12 +55,7 @@ splitString (const char *string, char delimiter) {
       const char *end = strchr(string, delimiter);
       int length = end? end-string: strlen(string);
 
-      if (!(*element = malloc(length+1))) {
-        *element = NULL;
-        deallocateStrings(array);
-        return NULL;
-      }
-
+      *element = mallocWrapper(length+1);
       memcpy(*element, string, length);
       (*element++)[length] = 0;
 
