@@ -28,8 +28,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <signal.h>
 #include <sys/types.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 #include "Programs/misc.h"
 
@@ -137,6 +138,7 @@ spk_mute (void)
     close(*writefd);
 
     kill(child, SIGKILL);
+    waitpid(child, NULL, 0);
     child = -1;
   }
 }

@@ -30,6 +30,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 #include "Programs/misc.h"
 
@@ -211,6 +212,7 @@ spk_mute (void) {
     close(*pipeOutput);
 
     kill(child, SIGKILL);
+    waitpid(child, NULL, 0);
     child = -1;
   }
 }
