@@ -194,12 +194,12 @@ static unsigned char *sendpacket, /* packet scratch pad */
 #define ACKPACKETLEN PACKET_HDR_LEN+NRCKSUMBYTES
 static int brl_cols, 	          /* Number of cells available for text */
            nrstatcells;           /* number of status cells */
-static char packet_to_process = 1, /* flag: if a packet is received while
-				      expecting ACK in writebrl */
-            *routing_were_pressed, /* flags for all the routing keys that
-				      have been pressed since the last time
-				      they were all unpressed. */
-            *which_routing_keys; /* ordered list of pressed routing keys */
+static unsigned char packet_to_process = 1, /* flag: if a packet is received while
+                                               expecting ACK in writebrl */
+                     *routing_were_pressed, /* flags for all the routing keys that
+                                               have been pressed since the last time
+                                               they were all unpressed. */
+                     *which_routing_keys; /* ordered list of pressed routing keys */
 
 
 static void 
@@ -325,9 +325,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   if(!serialRestartDevice(serialDevice, 19200)) goto failure;
  
 /* Allocate and init static packet buffers */
-  if((sendpacket = (unsigned char *)malloc(MAXTOTALPACKETLEN)) == NULL
-      || (recvpacket = (unsigned char *)malloc(MAXTOTALPACKETLEN)) == NULL
-      || (ackpacket = (unsigned char *)malloc(ACKPACKETLEN)) == NULL)
+  if((sendpacket = malloc(MAXTOTALPACKETLEN)) == NULL
+      || (recvpacket = malloc(MAXTOTALPACKETLEN)) == NULL
+      || (ackpacket = malloc(ACKPACKETLEN)) == NULL)
     goto failure;
   memcpy(sendpacket, packet_hdr, PACKET_HDR_LEN);
   memcpy(ackpacket, packet_hdr, PACKET_HDR_LEN);
@@ -397,11 +397,11 @@ detected:
 
      It might be best to just statically initialize all these arrays to
      the maximum possible size. */
-  if((statbuf = (unsigned char *)malloc(nrstatcells)) == NULL
-     || (prevdata = (unsigned char *) malloc (brl_cols)) == NULL
-     || (prevstatbuf = (unsigned char *)malloc(nrstatcells)) == NULL
-     || (routing_were_pressed = (char *)malloc(brl_cols+nrstatcells)) == NULL
-     || (which_routing_keys = (char *)malloc(brl_cols+nrstatcells)) == NULL)
+  if((statbuf = malloc(nrstatcells)) == NULL
+     || (prevdata = malloc(brl_cols)) == NULL
+     || (prevstatbuf = malloc(nrstatcells)) == NULL
+     || (routing_were_pressed = malloc(brl_cols+nrstatcells)) == NULL
+     || (which_routing_keys = malloc(brl_cols+nrstatcells)) == NULL)
     goto failure;
 
   /* Force rewrite of display on first writebrl */
