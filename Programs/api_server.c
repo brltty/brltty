@@ -764,6 +764,7 @@ static void handleTtyFds(fd_set *fds, long currentTime, Ttty *tty) {
       next = c->next;
       if (FD_ISSET(c->fd, fds)) remove = processRequest(c);
       else remove = c->auth==0 && currentTime-(c->upTime) > UNAUTH_DELAY;
+      FD_CLR(c->fd,fds);
       if (remove) removeFreeConnection(c);
       c = next;
     }
@@ -945,14 +946,36 @@ static void api_writeVisual(BrailleDisplay *brl)
   TrueBraille->writeVisual(brl);
 }
 
+/* Function: whoGetsKey */
+/* Returns the connection which gets that key */
+static Tconnection *whoGetsKey(Ttty *tty, brl_keycode_t command, brl_keycode_t keycode)
+{
+  Tconnection *c;
+  Ttty *t;
+  int masked;
+  for (c=tty->connections->next; c!=tty->connections; c = c->next) {
+    pthread_mutex_lock(&c->maskmutex);
+    if (c->how==BRLKEYCODES)
+      masked = (contains(c->unmaskedKeys,keycode) == NULL);
+    else
+      masked = (contains(c->unmaskedKeys,command) == NULL);
+    pthread_mutex_unlock(&c->maskmutex);
+    if (!masked) return c;
+  }
+  for (t = tty->subttys; t; t = t->next)
+    if (t->number == tty->focus)
+      return whoGetsKey(t, command, keycode);
+  return NULL;
+}
+
 /* Function : api_readCommand */
 static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
 {
-  int res,refresh = 0, masked;
+  int res, refresh = 0;
   ssize_t size;
   Tconnection *c;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  brl_keycode_t keycode = 0;
+  brl_keycode_t keycode, command;
 
   if (rawConnection!=NULL) {
     pthread_mutex_lock(&packet_mutex);
@@ -978,33 +1001,38 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
       c->brlbufstate = FULL;
     }
     pthread_mutex_unlock(&c->brlmutex);
-    if (c->how==BRLKEYCODES) res = TrueBraille->readKey(&c->brl);
-    else res = TrueBraille->readCommand(&c->brl,caller);
+  }
+  if (TrueBraille->readKey) {
+    res = TrueBraille->readKey(&c->brl);
     if (res==EOF) return EOF;
     keycode = (brl_keycode_t) res;
-    pthread_mutex_lock(&c->maskmutex);
-    masked = (contains(c->unmaskedKeys,keycode) == NULL);
-    pthread_mutex_unlock(&c->maskmutex);
-    if (!masked) {
-      if (c->how==BRLKEYCODES) {
-        LogPrint(LOG_DEBUG,"Transmitting unmasked key %u",keycode);
-        keycode = htonl(keycode);
-        brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
-      } else {
-        LogPrint(LOG_DEBUG,"Transmitting unmasked command %u",keycode);
-        keycode = htonl(keycode);
-        brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
-      }
-      return EOF;
-    }
-    if (c->how==BRLKEYCODES) keycode = TrueBraille->keyToCommand(&c->brl,caller,keycode);
+    command = TrueBraille->keyToCommand(&c->brl,caller,keycode);
+  } else {
+    /* we already ensured in GETTTY that no connection has how == KEYCODES */
+    res = TrueBraille->readCommand(&c->brl,caller);
+    if (res==EOF) return EOF;
+    keycode = 0;
+    command = (brl_keycode_t) res;
   }
-  if (keycode==0) {
+  c = whoGetsKey(&ttys,command,keycode);
+  if (c) {
+    if (c->how==BRLKEYCODES) {
+      LogPrint(LOG_DEBUG,"Transmitting unmasked key %u",keycode);
+      keycode = htonl(keycode);
+      brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
+    } else {
+      LogPrint(LOG_DEBUG,"Transmitting unmasked command %u",command);
+      keycode = htonl(command);
+      brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
+    }
+    return EOF;
+  }
+  if (command==0) {
     res = TrueBraille->readCommand(disp,caller);
     if (res==EOF) return EOF;
-    keycode = (brl_keycode_t) res;
+    command = (brl_keycode_t) res;
   }
-  return keycode;
+  return command;
 }
 
 /* Function : api_link */
