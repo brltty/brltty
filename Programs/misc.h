@@ -116,7 +116,10 @@ extern void LogOpen(int toConsole);
 extern void LogClose(void);
 extern void LogPrint
        (int level, char *format, ...)
-       __attribute__((format(printf, 2, 3)));
+#ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
+       __attribute__((format(printf, 2, 3)))
+#endif
+       ;
 extern void LogError (const char *action);
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
 extern int setLogLevel (int level);

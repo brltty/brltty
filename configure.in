@@ -275,6 +275,21 @@ AC_C_INLINE
 AC_OBJEXT
 AC_EXEEXT
 
+AC_CACHE_CHECK(
+   [if the compiler understands __attribute__((format(printf)))],
+   [brltty_cv_c_attribute_format_printf],
+   [AC_TRY_COMPILE([
+extern void conf_attribute_format_printf(const char *format, ...)
+       __attribute__((format(printf, 1, 2)));
+],
+[],
+[brltty_cv_c_attribute_format_printf=yes],
+[brltty_cv_c_attribute_format_printf=no])])
+if test "${brltty_cv_c_attribute_format_printf}" = "yes"
+then
+   AC_DEFINE([HAVE_ATTRIBUTE_FORMAT_PRINTF])
+fi
+
 AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
 case "${host_os}"
 in
