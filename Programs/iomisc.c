@@ -32,7 +32,7 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 
-#include "io.h"
+#include "iomisc.h"
 #include "misc.h"
 
 int

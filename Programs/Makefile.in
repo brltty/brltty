@@ -127,7 +127,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) io.$O queue.$O cut.$O route.$O cmd.$O at2.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) iomisc.$O queue.$O cut.$O route.$O cmd.$O at2.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -156,8 +156,8 @@ cmd.$O: cmds.auto.h
 at2.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/at2.c
 
-io.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/io.c
+iomisc.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/iomisc.c
 
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
@@ -227,7 +227,7 @@ bluez_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) io.$O queue.$O tbl.$O cmd.$O at2.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) iomisc.$O queue.$O tbl.$O cmd.$O at2.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -237,7 +237,7 @@ brltest.$O:
 
 ###############################################################################
 
-SPKTEST_OBJECTS = spktest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) io.$O queue.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
+SPKTEST_OBJECTS = spktest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) iomisc.$O queue.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -277,7 +277,7 @@ ctbtest.$O:
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.$O options.$O misc.$O $(SYSTEM_OBJECT) io.$O $(TUNE_OBJECTS)
+TUNETEST_OBJECTS = tunetest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O $(TUNE_OBJECTS)
 
 tunetest$X: $(TUNETEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(LDLIBS)

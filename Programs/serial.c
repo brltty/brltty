@@ -34,7 +34,7 @@
 #endif /* HAVE_SYS_MODEM_H */
 
 #include "serial.h"
-#include "io.h"
+#include "iomisc.h"
 #include "misc.h"
 
 struct SerialDeviceStruct {

@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "io.h"
+#include "iomisc.h"
 
 struct PcmDeviceStruct {
   int fileDescriptor;

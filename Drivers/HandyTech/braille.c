@@ -293,7 +293,7 @@ static const InputOutputOperations usbOperations = {
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
 #include "Programs/bluez.h"
-#include "Programs/io.h"
+#include "Programs/iomisc.h"
 
 static int bluezConnection = -1;
 

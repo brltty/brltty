@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _IO_H
-#define _IO_H
+#ifndef _IOMISC_H
+#define _IOMISC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,4 +44,4 @@ extern int setCloseOnExec (int fileDescriptor);
 }
 #endif /* __cplusplus */
 
-#endif /* _IO_H */
+#endif /* _IOMISC_H */
