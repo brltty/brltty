@@ -83,7 +83,7 @@ static int brlapi_waitForAck()
   }
   switch (type)
   {
-   case BRLPACKET_ACK: return 1;
+   case BRLPACKET_ACK: return 0;
    case BRLPACKET_ERROR:
    {
     fprintf(stderr,"BrlApi error %u !\n",ntohl(code));
@@ -106,8 +106,8 @@ static int brlapi_waitForAck()
 void updateSettings(brlapi_settings_t *s1, brlapi_settings_t *s2)
 {
   if (s2==NULL) return;
-  if ((s2->authentificationKey) && (*s2->authentificationKey))
-    s1->authentificationKey = s2->authentificationKey;
+  if ((s2->authKey) && (*s2->authKey))
+    s1->authKey = s2->authKey;
   if ((s2->hostName) && (*s2->hostName))
     s1->hostName = s2->hostName;
 }
@@ -133,9 +133,9 @@ int brlapi_initializeConnection(brlapi_settings_t *clientSettings)
  /* Here update settings with the parameters from misc sources (files, env...) */
  updateSettings(&settings, clientSettings);
 
- if (brlapi_loadAuthKey(settings.authentificationKey,&authlength,(void *) &auth[0])<0)
+ if (brlapi_loadAuthKey(settings.authKey,&authlength,(void *) &auth[0])<0)
  {
-  fprintf(stderr,"unable to load authentication key: %s\n",settings.authentificationKey);
+  fprintf(stderr,"unable to load authentication key: %s\n",settings.authKey);
   return -1;
  }
 

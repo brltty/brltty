@@ -293,7 +293,7 @@ void *ProcessConnection(void *arg)
   WriteAckPacket(c->fd);
   go_on = 1;
  } else {
-  LogPrint(LOG_WARNING,"Authentification failed for client %d",c->id);
+  LogPrint(LOG_WARNING,"Authentication failed for client %d",c->id);
   WriteErrorPacket(c->fd,BRLERR_CONNREFUSED);
  }
  while (go_on)

@@ -31,7 +31,7 @@ extern "C" {
 /* Usually, you can just pass NULL */
 typedef struct
 {
-  char *authentificationKey;
+  char *authKey;
   char *hostName; /* Host and port where the server is listening */
 } brlapi_settings_t;
 
@@ -43,7 +43,7 @@ typedef struct
 /* Default port of socket that allows to establish connections with BrlApi */
 #define BRLAPI_SOCKETPORT "35751"
 
-/* Name of file containing BrlApi's authentification key */
+/* Name of file containing BrlApi's authentication key */
 /* This name is relative to HOME_DIR */
 #define BRLAPI_AUTHFILE "brlapi-key"
 #define BRLAPI_ETCDIR "/etc/brltty"
@@ -82,7 +82,7 @@ typedef uint32_t brl_keycode_t;
 #define BRLPACKET_GETDRIVERID       'd'    /* Ask which driver is used    */
 #define BRLPACKET_GETDRIVERNAME     'n'    /*                             */
 #define BRLPACKET_GETDISPLAYSIZE    's'    /* Dimensions of brl display   */
-#define BRLPACKET_AUTHKEY           'K'    /* Authentification key        */
+#define BRLPACKET_AUTHKEY           'K'    /* Authentication key          */
 
 /* Arguments to GETTTY */
 /* When taking control of a tty, one must specify under which form */
