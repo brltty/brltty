@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <locale.h>
 
 #include "Programs/misc.h"
 
@@ -133,17 +134,24 @@ static char *model;
 #define BUTWIDTH 48
 #define BUTHEIGHT 32
 
-static Widget toplevel,vbox,keybox,display;
+static Widget toplevel,vbox,hbox,keybox,display[WHOLESIZE],displayb[WHOLESIZE];
 static XtAppContext app_con;
 #ifdef USE_XM
-static XmString display_cs;
+static XmString display_cs,displayb_cs;
 #endif
+static XFontSet fontset;
 
 static long keypressed;
 
 static void KeyPressCB(Widget w, XtPointer closure, XtPointer callData) {
  LogPrint(LOG_DEBUG,"keypress(%p)",closure);
  keypressed=(long)closure;
+}
+
+static void route(Widget w, XEvent *event, String *params, Cardinal *num_params) {
+ int index = atoi(params[0]);
+ LogPrint(LOG_DEBUG,"route(%u)", index);
+ keypressed = BRL_FLG_ROUTE | (index&BRL_MSK_ARG);
 }
 
 static inline Widget crKeyBut(String name, long keycode, int repeat,
@@ -246,12 +254,14 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
  return res;
 }
 
-static XrmOptionDescRec optionDescList[] = {
-};
+static XrmOptionDescRec optionDescList[] = { };
 
 static char *fallback_resources[] = {
+ "*display.font: -*-fixed-*-*-*-*-24-*-*-*-*-*-*-*",
  "*display.background: lightgreen",
  "*keybox.background: lightgrey",
+ "*displayb.background: black",
+ "*displayb.foreground: white",
  NULL
 };
 
@@ -261,13 +271,127 @@ static void brl_identify()
  LogPrint(LOG_INFO,   "   "XW_COPYRIGHT);
 }
 
+static void brl_display() {
+ char *disp,*dispb;
+ int y,x;
+ Widget tmp_vbox;
+
+ /* horizontal separation */
+ hbox = XtVaCreateManagedWidget("hbox",panedWidgetClass,vbox,
+   XtNorientation, XtEhorizontal,
+#ifdef USE_XM
+   XmNmarginHeight, 0,
+   XmNmarginWidth, 0,
+   XmNspacing, 0,
+#endif
+#ifdef USE_XAW
+   XtNshowGrip,False,
+#else
+   XmNpaneMaximum,20,
+   XmNpaneMinimum,20,
+   XmNskipAdjust, True,
+#endif
+   XtNresize, True,
+   NULL);
+
+ /* display Label */
+ disp=XtMalloc(2);
+ disp[0]=' ';
+ disp[1]=0;
+
+ dispb=XtMalloc(4);
+ dispb[0]=0xe0|((0x28>>4)&0x0f);
+ dispb[1]=0x80|((0x28<<2)&0x3f);
+ dispb[2]=0x80;
+ /*
+ dispb[0]='a';
+ dispb[1]=0;
+ */
+ dispb[3]=0;
+
+#ifdef USE_XM
+ display_cs = XmStringCreateLocalized(disp);
+ displayb_cs = XmStringCreateLocalized(dispb);
+#endif
+
+ for (x=0;x<cols;x++) {
+  /* vertical separation */
+  tmp_vbox = XtVaCreateManagedWidget("tmp_vbox",panedWidgetClass,hbox,
+#ifdef USE_XAW
+   XtNshowGrip,False,
+#else
+   XmNpaneMaximum,20,
+   XmNpaneMinimum,20,
+   XmNskipAdjust, True,
+#endif
+#ifdef USE_XM
+   XmNmarginHeight, 0,
+   XmNmarginWidth, 0,
+   XmNspacing, 0,
+#endif
+   XtNresize, True,
+   NULL);
+
+  for (y=0;y<lines;y++) {
+   char action[] = "<Btn1Up>: route(100)";
+   XtTranslations transl;
+
+   snprintf(action,sizeof(action),"<Btn1Up>: route(%u)",y*cols+x);
+   transl = XtParseTranslationTable(action);
+
+   display[y*cols+x] = XtVaCreateManagedWidget("display",labelWidgetClass,tmp_vbox,
+    XtNtranslations, transl,
+#ifdef USE_XAW
+    XtNshowGrip,False,
+#else
+    XmNpaneMaximum,20,
+    XmNpaneMinimum,20,
+    XmNskipAdjust, True,
+#endif
+#ifdef USE_XAW
+    XtNlabel, disp,
+#else
+    XmNlabelString, display_cs,
+#endif
+    NULL);
+
+   if (fontset) {
+    displayb[y*cols+x] = XtVaCreateManagedWidget("displayb",labelWidgetClass,tmp_vbox,
+    XtNtranslations, transl,
+    XtNinternational, True,
+    XNFontSet, fontset,
+#ifdef USE_XAW
+    XtNshowGrip,False,
+#else
+    XmNpaneMaximum,20,
+    XmNpaneMinimum,20,
+    XmNskipAdjust, True,
+#endif
+#ifdef USE_XAW
+    XtNlabel, dispb,
+#else
+    XmNlabelString, displayb_cs,
+#endif
+    NULL);
+   }
+  }
+ }
+#ifdef USE_XM
+ XmStringFree(display_cs);
+#endif
+ XtFree(disp);
+
+}
+
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
  int argc = 1;
  static char *defargv[]= { "brltty", NULL };
  char **argv = defargv;
- char *disp;
- int y;
+ char *def_string_return;
+ char **missing_charset_list_return;
+ int missing_charset_count_return;
+ XtActionsRec routeAction = { "route", route };
 
  lines=1;
  if (*parameters[PARM_LINES]) {
@@ -314,6 +438,8 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  if (argv != defargv)
   deallocateStrings(argv);
 
+ XtAppAddActions(app_con,&routeAction,1);
+
  /* vertical separation */
  vbox = XtVaCreateManagedWidget("vbox",panedWidgetClass,toplevel,
 #ifdef USE_XM
@@ -324,35 +450,10 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
    XtNresize, True,
    NULL);
 
- /* display Label */
- disp=XtMalloc((cols+1)*lines);
- for (y=0;y<lines;y++) {
-  memset(disp+y*(cols+1),' ',cols);
-  disp[(y+1)*(cols+1)-1]='\n';
- }
- disp[lines*(cols+1)-1]=0;
-#ifdef USE_XM
- display_cs = XmStringCreateLocalized(disp);
-#endif
- display = XtVaCreateManagedWidget("display",labelWidgetClass,vbox,
-#ifdef USE_XAW
-   XtNshowGrip,False,
-#else
-   XmNpaneMaximum,20,
-   XmNpaneMinimum,20,
-   XmNskipAdjust, True,
-#endif
-#ifdef USE_XAW
-   XtNlabel, disp,
-#else
-   XmNlabelString, display_cs,
-#endif
-   NULL);
- XtFree(disp);
-#ifdef USE_XM
- XmStringFree(display_cs);
-#endif
-
+ if (!(fontset = XCreateFontSet(XtDisplay(toplevel),"-*-clearlyu-*-*-*-*-17-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
+  LogPrint(LOG_ERR,"Error while loading braille font");
+ 
+ brl_display();
 
  if (!model || strcmp(model,"bare")) {
    /* key box */
@@ -375,48 +476,81 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 
 static void brl_close(BrailleDisplay *brl)
 {
+ if (fontset)
+  XFreeFontSet(XtDisplay(toplevel),fontset);
  XtDestroyApplicationContext(app_con);
 }
 
 static void brl_writeWindow(BrailleDisplay *brl)
 {
-}
-
-static void brl_writeVisual(BrailleDisplay *brl)
-{
- unsigned char data[brl->x*brl->y];
  static unsigned char displayed[WHOLESIZE];
- int y;
- unsigned char *c;
+ int i;
+ unsigned char data[4];
+ char c;
 
- for (y=0;y<brl->y;y++) {
-  memcpy(data+y*(brl->x+1),brl->buffer+y*brl->x,brl->x);
-  data[(y+1)*(brl->x+1)-1]='\n';
- }
+ if (!displayb[0] || !memcmp(brl->buffer,displayed,brl->y*brl->x)) return;
+ memcpy(displayed,brl->buffer,brl->y*brl->x);
 
- c=data;
- while ((c=memchr(c,0,(data+brl->y*(brl->x+1))-c))) *c++=' ';
-
- data[brl->y*(brl->x+1)-1]=0;
-
- if (!memcmp(data,displayed,brl->y*(brl->x+1)))
-  return;
-
- memcpy(displayed,data,brl->y*(brl->x+1));
+ for (i=0;i<brl->y*brl->x;i++) {
+  c = brl->buffer[i];
+  brl->buffer[i] =
+     (!!(c&BRL_DOT1))<<0
+    |(!!(c&BRL_DOT2))<<1
+    |(!!(c&BRL_DOT3))<<2
+    |(!!(c&BRL_DOT4))<<3
+    |(!!(c&BRL_DOT5))<<4
+    |(!!(c&BRL_DOT6))<<5
+    |(!!(c&BRL_DOT7))<<6
+    |(!!(c&BRL_DOT8))<<7;
+  data[0]=0xe0|((0x28>>4)&0x0f);
+  data[1]=0x80|((0x28<<2)&0x3f)|(brl->buffer[i]>>6);
+  data[2]=0x80                 |(brl->buffer[i]&0x3f);
+  data[3]=0;
 
 #ifdef USE_XM
- display_cs = XmStringCreateLocalized(displayed);
+  display_cs = XmStringCreateLocalized(data);
 #endif
- XtVaSetValues(display,
+  XtVaSetValues(displayb[i],
 #ifdef USE_XAW
-   XtNlabel, displayed,
+   XtNlabel, data,
 #else
    XmNlabelString, display_cs,
 #endif
    NULL);
 #ifdef USE_XM
- XmStringFree(display_cs);
+  XmStringFree(display_cs);
 #endif
+ }
+}
+
+static void brl_writeVisual(BrailleDisplay *brl)
+{
+ static unsigned char displayed[WHOLESIZE];
+ int i;
+ unsigned char data[2];
+
+ if (!displayb || !memcmp(brl->buffer,displayed,brl->y*brl->x)) return;
+ memcpy(displayed,brl->buffer,brl->y*brl->x);
+
+ for (i=0;i<brl->y*brl->x;i++) {
+  data[0]=brl->buffer[i];
+  if (data[0]==0) data[0]=' ';
+  data[1]=0;
+
+#ifdef USE_XM
+  display_cs = XmStringCreateLocalized(data);
+#endif
+  XtVaSetValues(display[i],
+#ifdef USE_XAW
+   XtNlabel, data,
+#else
+   XmNlabelString, display_cs,
+#endif
+   NULL);
+#ifdef USE_XM
+  XmStringFree(display_cs);
+#endif
+ }
 }
 
 static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)

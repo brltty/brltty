@@ -14,7 +14,15 @@ $ brltty -b xw
 Then you can launch a BrlAPI application:
 $ ~/brltty/Programs/apitest
 
-You may give serveral parameters to the driver:
+You may give several parameters to the driver:
 $ brltty -b xw -t identity -B xtparms="-geometry -0+0",lines=2,cols=20,model=bare
 will set a 20x2 braille display appear in the upper right corner of the
-display, without any navigation key.
+display, without any navigation key. There is also the vs model which will show
+up most of VisioBraille device's keys.
+
+If you want braille display as well, you'll need the ClearlyU font
+(included in recent xfonts-base packages) and a UTF-8 locale for
+characters: if your usual locale is en_US, launch brltty with a
+prepended LC_CTYPE:
+
+LC_CTYPE=en_US.UTF-8 brltty ...
