@@ -658,7 +658,7 @@ for any additional display-specific instructions.
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
     where the configuration files, tables, help pages,
-    and other architecture-dependent files are to be installed.
+    and other architecture-independent files are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
     then <tt>/etc</>, rooted at the directory specified by the
@@ -1236,18 +1236,16 @@ suitable for inclusion within a C array initializer
 is written to standard output.
 
 <sect2>brltest<label id="utility-brltest"><p>
-This utility tests the braille display driver,
+This utility tests a braille display driver,
 and also provides an interactive way to learn
 what the keys on the braille display do.
-It must be run as root.
+It should be run as root.
 <tscreen>brltest -<em/option/ ... [<em/driver/ [<em/name/=<em/value/ ...]]</tscreen>
 <descrip>
   <tag><em/driver/</tag>
     The driver for the braille display.
-    It may be
-    either a two-letter <ref id="drivers" name="driver identification code">
-    or the absolute path to a dynamically loadable shared object.
-    If it's not specified, then the driver configured via the
+    It must be a two-letter <ref id="drivers" name="driver identification code">.
+    If it's not specified, then the first driver configured via the
     <ref id="build-braille-driver" name="--with-braille-driver"> build option
     is assumed.
   <tag><em/name/<tt/=/<em/value/</tag>
@@ -1341,9 +1339,42 @@ The following is written to standard output:
     Unprintable characters are written as blanks.
 </enum>
 
+<sect2>spktest<label id="utility-spktest"><p>
+This utility tests a speech synthesizer driver.
+It may need to be run as root.
+<tscreen>spktest -<em/option/ ... [<em/driver/ [<em/name/=<em/value/ ...]]</tscreen>
+<descrip>
+  <tag><em/driver/</tag>
+    The driver for the speech synthesizer.
+    It must be a two-letter <ref id="drivers" name="driver identification code">.
+    If it's not specified, then the first driver configured via the
+    <ref id="build-speech-driver" name="--with-speech-driver"> build option
+    is assumed.
+  <tag><em/name/<tt/=/<em/value/</tag>
+    Set a speech synthesizer driver parameter.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+  <tag><tt/-t/<em/string/ <tt/--text-string=/<em/string/</tag>
+    The text to be spoken.
+    If it's not specified, then standard input is read.
+  <tag><tt/-D/<em/directory/ <tt/--data-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the driver data files reside.
+    If it's not specified, then the directory configured via the
+    <ref id="build-data-directory" name="--sysconfdir"> build option
+    is assumed.
+  <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the drivers reside.
+    If it's not specified, then the directory configured via the
+    <ref id="build-library-directory" name="--libdir"> build option
+    is assumed.
+  <tag><tt/-h/ <tt/--help/</tag>
+    Display a summary of the command line options, and then exit.
+</descrip>
+
 <sect2>tunetest<label id="utility-tunetest"><p>
 This utility tests the alert tunes facility,
 and also provides an easy way to compose new tunes.
+It may need to be run as root.
 <tscreen>tunetest -<em/option/ ... {<em/note/ <em/duration/} ...</tscreen>
 <descrip>
   <tag><em/note/</tag>
