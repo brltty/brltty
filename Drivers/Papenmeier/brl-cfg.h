@@ -344,10 +344,20 @@ typedef struct {
   CMDS_EASY_K(NOKEY, 0X08, \
               CMD_MENU_PREV_ITEM, CMD_MENU_NEXT_ITEM, CMD_MENU_FIRST_ITEM, CMD_MENU_LAST_ITEM, \
               CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING, CMD_PREFLOAD, CMD_PREFSAVE)
-#define CMDS_EASY_SWSIM \
-  CMDS_EASY_K(NOKEY, 0XA0, \
+#define CMDS_EASY_SWSIM_SWT(swt) \
+  CMDS_EASY_K(NOKEY, 0XA0|swt, \
               CMD_SWSIM_LC, CMD_SWSIM_RC, CMD_SWSIM_BQ, CMD_SWSIM_BC, \
-              CMD_SWSIM_LF, CMD_SWSIM_RF, CMD_SWSIM_LR, CMD_SWSIM_RR)
+              CMD_SWSIM_LR, CMD_SWSIM_RR, CMD_SWSIM_LF, CMD_SWSIM_RF)
+#define CMDS_EASY_SWSIM \
+  CMDS_EASY_SWSIM_SWT(0X0), \
+  CMDS_EASY_SWSIM_SWT(0X1), \
+  CMDS_EASY_SWSIM_SWT(0X2), \
+  CMDS_EASY_SWSIM_SWT(0X4), \
+  CMDS_EASY_SWSIM_SWT(0X5), \
+  CMDS_EASY_SWSIM_SWT(0X6), \
+  CMDS_EASY_SWSIM_SWT(0X8), \
+  CMDS_EASY_SWSIM_SWT(0X9), \
+  CMDS_EASY_SWSIM_SWT(0XA)
 
 
 /* what to show for 2 status cells */
@@ -634,8 +644,8 @@ static int16_t pm_modifiers_el_40_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_40_s[] = {
-  CMDS_EASY_SWSIM,
-  CMDS_EASY
+  CMDS_EASY,
+  CMDS_EASY_SWSIM
 };
 
 static uint16_t pm_status_el_80_s[] = {
@@ -645,9 +655,9 @@ static int16_t pm_modifiers_el_80_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_80_s[] = {
-  CMDS_EASY_SWSIM,
   CMDS_EASY,
-  CMDS_STAT_2
+  CMDS_STAT_2,
+  CMDS_EASY_SWSIM
 };
 
 static uint16_t pm_status_el_66_s[] = {
@@ -656,8 +666,8 @@ static int16_t pm_modifiers_el_66_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_66_s[] = {
-  CMDS_EASY_SWSIM,
-  CMDS_EASY
+  CMDS_EASY,
+  CMDS_EASY_SWSIM
 };
 
 
