@@ -34,7 +34,7 @@
 
 typedef struct {
   IOUSBDeviceInterface182 **device;
-  IOUSBInterfaceInterface182 **interface;
+  IOUSBInterfaceInterface190 **interface;
   unsigned opened:1;
 } UsbDeviceExtension;
 
@@ -239,7 +239,7 @@ closeInterface (UsbDevice *device) {
 }
 
 static int
-isInterface (IOUSBInterfaceInterface182 **interface, UInt8 number) {
+isInterface (IOUSBInterfaceInterface190 **interface, UInt8 number) {
   IOReturn result;
   UInt8 num;
 
@@ -258,7 +258,7 @@ setInterface (UsbDevice *device, UInt8 number) {
   UsbDeviceExtension *devx = device->extension;
   IOUSBFindInterfaceRequest request;
   io_iterator_t iterator;
-  IOUSBInterfaceInterface182 **interface = NULL;
+  IOUSBInterfaceInterface190 **interface = NULL;
   IOReturn result;
 
   if (devx->interface)
@@ -284,7 +284,7 @@ setInterface (UsbDevice *device, UInt8 number) {
                                                  &plugin, &score);
       if ((result == kIOReturnSuccess) && plugin) {
         result = (*plugin)->QueryInterface(plugin,
-                                           CFUUIDGetUUIDBytes(kIOUSBInterfaceInterfaceID182),
+                                           CFUUIDGetUUIDBytes(kIOUSBInterfaceInterfaceID190),
                                            (LPVOID)&interface);
         if ((result == kIOReturnSuccess) && interface) {
           if (isInterface(interface, number)) {
@@ -396,7 +396,7 @@ usbResetEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->ResetPipe(devx->interface, eptx->reference);
+    result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->reference);
     if (result == kIOReturnSuccess) return 1;
     setErrnoIo(result, "USB endpoint reset");
   }
@@ -526,9 +526,9 @@ usbReadEndpoint (
 
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     UsbEndpointExtension *eptx = endpoint->extension;
-    UInt32 count;
     IOReturn result;
-    int wasStalled = 0;
+    UInt32 count;
+    int stalled = 0;
 
   read:
     count = length;
@@ -548,14 +548,14 @@ usbReadEndpoint (
         break;
 
       case kIOUSBPipeStalled:
-        if (!wasStalled) {
+        if (!stalled) {
           result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->reference);
           if (result != kIOReturnSuccess) {
             setErrnoIo(result, "USB stall clear");
             return 0;
           }
 
-          wasStalled = 1;
+          stalled = 1;
           goto read;
         }
 
