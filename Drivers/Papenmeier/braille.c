@@ -134,19 +134,19 @@ static unsigned char currentLine[BRLCOLSMAX];
 
 static const TerminalDefinition *the_terminal = NULL;
 
-static int code_status_first = -1;
-static int code_status_last  = -1;
-static int code_cursor_first = -1;
-static int code_cursor_last  = -1;
-static int code_front_first = -1;
-static int code_front_last  = -1;
-static int code_easy_first = -1;
-static int code_easy_last  = -1;
-static int code_switch_first = -1;
-static int code_switch_last  = -1;
+static int rcvStatusFirst;
+static int rcvStatusLast;
+static int rcvCursorFirst;
+static int rcvCursorLast;
+static int rcvFrontFirst;
+static int rcvFrontLast;
+static int rcvBarFirst;
+static int rcvBarLast;
+static int rcvSwitchFirst;
+static int rcvSwitchLast;
 
-static int addr_status = -1;
-static int addr_text = -1;
+static unsigned char xmtStatusOffset;
+static unsigned char xmtTextOffset;
 
 static unsigned int pressed_modifiers = 0;
 static unsigned int saved_modifiers = 0;
@@ -225,7 +225,7 @@ resetTerminal (BrailleDisplay *brl) {
 }
 
 static int
-writeData (BrailleDisplay *brl, int offset, int count, const unsigned char *data) {
+writeData (BrailleDisplay *brl, int xmtAddress, int count, const unsigned char *data) {
   if (count) {
     unsigned char header[] = {
       cSTX,
@@ -238,8 +238,8 @@ writeData (BrailleDisplay *brl, int offset, int count, const unsigned char *data
     unsigned char buffer[size];
     int index = 0;
 
-    header[2] = offset >> 8;
-    header[3] = offset & 0XFF;
+    header[2] = xmtAddress >> 8;
+    header[3] = xmtAddress & 0XFF;
     header[4] = size >> 8;
     header[5] = size & 0XFF;
     memcpy(&buffer[index], header, sizeof(header));
@@ -258,7 +258,7 @@ writeData (BrailleDisplay *brl, int offset, int count, const unsigned char *data
 }
 
 static void
-updateData (BrailleDisplay *brl, int offset, int size, const unsigned char *data, unsigned char *buffer) {
+updateData (BrailleDisplay *brl, unsigned char xmtOffset, int size, const unsigned char *data, unsigned char *buffer) {
   if (memcmp(buffer, data, size) != 0) {
     int index;
     while (size) {
@@ -272,35 +272,35 @@ updateData (BrailleDisplay *brl, int offset, int size, const unsigned char *data
     if ((size -= index)) {
       buffer += index;
       data += index;
-      offset += index;
+      xmtOffset += index;
       memcpy(buffer, data, size);
-      writeData(brl, XMT_BRLDATA+offset, size, buffer);
+      writeData(brl, XMT_BRLDATA+xmtOffset, size, buffer);
     }
   }
 }
 
 static int
-disableOutputTranslation (BrailleDisplay *brl, int offset, int count) {
+disableOutputTranslation (BrailleDisplay *brl, unsigned char xmtOffset, int count) {
   unsigned char buffer[count];
   memset(buffer, 1, sizeof(buffer));
-  return writeData(brl, XMT_BRLWRITE+offset,
+  return writeData(brl, XMT_BRLWRITE+xmtOffset,
                    sizeof(buffer), buffer);
 }
 
 static void
 initializeTable (BrailleDisplay *brl) {
-  disableOutputTranslation(brl, addr_status, the_terminal->statusCount);
-  disableOutputTranslation(brl, addr_text, the_terminal->columns);
+  disableOutputTranslation(brl, xmtStatusOffset, the_terminal->statusCount);
+  disableOutputTranslation(brl, xmtTextOffset, the_terminal->columns);
 }
 
 static void
 writeLine (BrailleDisplay *brl) {
-  writeData(brl, XMT_BRLDATA+addr_text, the_terminal->columns, currentLine);
+  writeData(brl, XMT_BRLDATA+xmtTextOffset, the_terminal->columns, currentLine);
 }
 
 static void
 writeStatus (BrailleDisplay *brl) {
-  writeData(brl, XMT_BRLDATA+addr_status, the_terminal->statusCount, currentStatus);
+  writeData(brl, XMT_BRLDATA+xmtStatusOffset, the_terminal->statusCount, currentStatus);
 }
 
 static void
@@ -354,31 +354,31 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       BRLSYMBOL.helpFile = the_terminal->helpFile;
 
       /* routing key codes: 0X300 -> status -> cursor */
-      code_status_first = RCV_KEYROUTE;
-      code_status_last  = code_status_first + 3 * (the_terminal->statusCount - 1);
-      code_cursor_first = code_status_last + 3;
-      code_cursor_last  = code_cursor_first + 3 * (the_terminal->columns - 1);
+      rcvStatusFirst = RCV_KEYROUTE;
+      rcvStatusLast  = rcvStatusFirst + 3 * (the_terminal->statusCount - 1);
+      rcvCursorFirst = rcvStatusLast + 3;
+      rcvCursorLast  = rcvCursorFirst + 3 * (the_terminal->columns - 1);
       LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
-               code_status_first, code_status_last,
-               code_cursor_first, code_cursor_last);
+               rcvStatusFirst, rcvStatusLast,
+               rcvCursorFirst, rcvCursorLast);
 
       /* function key codes: 0X000 -> front -> bar -> switches */
-      code_front_first = RCV_KEYFUNC + 3;
-      code_front_last  = code_front_first + 3 * (the_terminal->frontKeys - 1);
-      code_easy_first = code_front_last + 3;
-      code_easy_last  = code_easy_first + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
-      code_switch_first = code_easy_last + 3;
-      code_switch_last  = code_switch_first + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+      rcvFrontFirst = RCV_KEYFUNC + 3;
+      rcvFrontLast  = rcvFrontFirst + 3 * (the_terminal->frontKeys - 1);
+      rcvBarFirst = rcvFrontLast + 3;
+      rcvBarLast  = rcvBarFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+      rcvSwitchFirst = rcvBarLast + 3;
+      rcvSwitchLast  = rcvSwitchFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
       LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
-               code_front_first, code_front_last,
-               code_easy_first, code_easy_last,
-               code_switch_first, code_switch_last);
+               rcvFrontFirst, rcvFrontLast,
+               rcvBarFirst, rcvBarLast,
+               rcvSwitchFirst, rcvSwitchLast);
 
-      /* cell block offsets: 0X00 -> status -> text */
-      addr_status = 0;
-      addr_text = addr_status + the_terminal->statusCount;
-      LogPrint(LOG_DEBUG, "Cell Block Offsets: status=%02X text=%02X",
-               addr_status, addr_text);
+      /* cell offsets: 0X00 -> status -> text */
+      xmtStatusOffset = 0;
+      xmtTextOffset = xmtStatusOffset + the_terminal->statusCount;
+      LogPrint(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
+               xmtStatusOffset, xmtTextOffset);
 
       sortCommands();
       return 1;
@@ -538,7 +538,7 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       if (debug_writes) LogBytes("Status", s, i);
       while (i < the_terminal->statusCount) cells[i++] = outputTable[0];
     }
-    updateData(brl, addr_status, the_terminal->statusCount, cells, currentStatus);
+    updateData(brl, xmtStatusOffset, the_terminal->statusCount, cells, currentStatus);
   }
 }
 
@@ -547,7 +547,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   int i;
   if (debug_writes) LogBytes("Window", brl->buffer, the_terminal->columns);
   for (i=0; i<the_terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
-  updateData(brl, addr_text, the_terminal->columns, brl->buffer, currentLine);
+  updateData(brl, xmtTextOffset, the_terminal->columns, brl->buffer, currentLine);
 }
 
 /* ------------------------------------------------------------ */
@@ -654,33 +654,33 @@ handleCode (int code, int press, int time) {
   /* attn: number starts with 1 */
   int num;
 
-  if (code_front_first <= code && 
-      code <= code_front_last) { /* front key */
-    num = 1 + (code - code_front_first) / 3;
+  if (rcvFrontFirst <= code && 
+      code <= rcvFrontLast) { /* front key */
+    num = 1 + (code - rcvFrontFirst) / 3;
     return handleKey(OFFS_FRONT + num, press, 0);
   }
 
-  if (code_status_first <= code && 
-      code <= code_status_last) { /* status key */
-    num = 1+ (code - code_status_first) / 3;
+  if (rcvStatusFirst <= code && 
+      code <= rcvStatusLast) { /* status key */
+    num = 1 + (code - rcvStatusFirst) / 3;
     return handleKey(OFFS_STAT + num, press, 0);
   }
 
-  if (code_easy_first <= code && 
-      code <= code_easy_last) { /* easy bar */
-    num = 1 + (code - code_easy_first) / 3;
+  if (rcvBarFirst <= code && 
+      code <= rcvBarLast) { /* easy bar */
+    num = 1 + (code - rcvBarFirst) / 3;
     return handleKey(OFFS_EASY + num, press, 0);
   }
 
-  if (code_switch_first <= code && 
-      code <= code_switch_last) { /* easy bar */
-    num = 1 + (code - code_switch_first) / 3;
+  if (rcvSwitchFirst <= code && 
+      code <= rcvSwitchLast) { /* easy bar */
+    num = 1 + (code - rcvSwitchFirst) / 3;
     return handleKey(OFFS_SWITCH + num, press, 0);
   }
 
-  if (code_cursor_first <= code && 
-      code <= code_cursor_last) { /* Routing Keys */ 
-    num = (code - code_cursor_first) / 3;
+  if (rcvCursorFirst <= code && 
+      code <= rcvCursorLast) { /* Routing Keys */ 
+    num = (code - rcvCursorFirst) / 3;
     return handleKey(ROUTINGKEY, press, num);
   }
 
