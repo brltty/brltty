@@ -21,27 +21,39 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "Programs/misc.h"
 #include "Programs/system.h"
+#include "Programs/brl.h"
 #include "braille.h"
 #include "vblow.h"
 
 #define LPTSTATUSPORT LPTPORT+1
 #define LPTCONTROLPORT LPTPORT+2
   
+static TranslationTable outputTable;
+
 int vbinit() {
-  char alldots[40];
-  int i;
-  if (!(enablePorts(LOG_ERR, LPTPORT, 3) && enablePorts(LOG_ERR, 0x80, 1))) {
-    LogPrint(LOG_ERR,"Error: must be superuser");
-    return -1;
+  {
+    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+    makeOutputTable(&dots, &outputTable);
   }
-  for (i = 0; i<40; i++) {
-    alldots[i] = 255;
+
+  if (enablePorts(LOG_ERR, LPTPORT, 3)) {
+    if (enablePorts(LOG_ERR, 0X80, 1)) {
+      char alldots[40];
+      memset(alldots, 0XFF, 40);
+      vbdisplay(alldots);
+      return 0;
+
+      disablePorts(0X80, 1);
+    }
+    disablePorts(LPTPORT, 3);
   }
-  vbdisplay(alldots);
-  return 0;
+
+  LogPrint(LOG_ERR, "Error: must be superuser");
+  return -1;
 }
 
 void vbsleep(long x) {
@@ -76,16 +88,9 @@ void vbdisplay(char *vbBuf) {
   vbclockpause();
 }
 
-void vbtranslate(char *vbBuf,char *vbDest,int size) {
+void vbtranslate(const unsigned char *vbBuf,unsigned char *vbDest,int size) {
   int i;
-  for (i = 0; i<size; i++) {
-    char c = vbBuf[i] & 0xe1;
-    c = c | ((vbBuf[i] << 2) & 0x8);
-    c = c | ((vbBuf[i] >> 1) & 0x2);
-    c = c | ((vbBuf[i] << 1) & 0x10);
-    c = c | ((vbBuf[i] >> 2) & 0x4);
-    vbDest[i] = c;
-  }
+  for (i=0; i<size; i++) vbDest[i] = outputTable[vbBuf[i]];
 }
 
 void BrButtons(vbButtons *dest) {

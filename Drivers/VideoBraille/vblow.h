@@ -32,7 +32,7 @@ typedef struct {
 } vbButtons;
 
 int vbinit();
-void vbtranslate(char *,char *,int);
+void vbtranslate(const unsigned char *,unsigned char *,int);
 void BrButtons(vbButtons *);
 void vbdisplay(char *);
 
