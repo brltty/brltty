@@ -299,8 +299,6 @@ usbAllocateDeviceExtension (UsbDevice *device) {
 
     device->extension = bsd;
     return 1;
-
-    free(bsd);
   }
 
   return 0;
