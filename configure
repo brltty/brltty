@@ -1455,6 +1455,14 @@ fi
 brltty_summary_lines="${brltty_summary_lines}
    install-root=${install_root}"
 
+configuration_file="${PACKAGE_NAME}.conf"
+
+eval 'brltty_expanded="'"${configuration_file}"'"'
+cat >>confdefs.h <<_ACEOF
+#define CONFIGURATION_FILE "${brltty_expanded}"
+_ACEOF
+
+
 api_directory="${libdir}"
 
 if test "${exec_prefix}" = "NONE"
@@ -1531,6 +1539,8 @@ eval 'brltty_expanded="'"${execute_root}${library_directory}"'"'
 cat >>confdefs.h <<_ACEOF
 #define LIBRARY_DIRECTORY "${brltty_expanded}"
 _ACEOF
+
+eval 'configuration_directory="'"${sysconfdir}"'"'
 
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
@@ -6009,6 +6019,9 @@ brltty_driver_names="`expr "${brltty_driver_names}" : ' *\(.*[^ ]\) *$'`"
 
 
 
+configuration_file_customization_script="Bootdisks/bp2cf"
+
+
 
 ac_config_commands="$ac_config_commands default-1"
 
@@ -6599,12 +6612,14 @@ s,@target_vendor@,$target_vendor,;t t
 s,@target_os@,$target_os,;t t
 s,@execute_root@,$execute_root,;t t
 s,@install_root@,$install_root,;t t
+s,@configuration_file@,$configuration_file,;t t
 s,@api_directory@,$api_directory,;t t
 s,@program_directory@,$program_directory,;t t
 s,@library_directory@,$library_directory,;t t
 s,@data_directory@,$data_directory,;t t
 s,@manpage_directory@,$manpage_directory,;t t
 s,@include_directory@,$include_directory,;t t
+s,@configuration_directory@,$configuration_directory,;t t
 s,@compiler_prefix@,$compiler_prefix,;t t
 s,@SET_MAKE@,$SET_MAKE,;t t
 s,@CC@,$CC,;t t
@@ -6666,6 +6681,8 @@ s,@screen_object@,$screen_object,;t t
 s,@library_prefix@,$library_prefix,;t t
 s,@library_name@,$library_name,;t t
 s,@brltty_driver_names@,$brltty_driver_names,;t t
+/@configuration_file_customization_script@/r $configuration_file_customization_script
+s,@configuration_file_customization_script@,,;t t
 s,@install_drivers@,$install_drivers,;t t
 CEOF
 

@@ -73,6 +73,9 @@ extern "C" {
 /* Define this to be a string containing the path to the configuration directory. */
 #undef CONFIGURATION_DIRECTORY
 
+/* Define this to be a string containing the name of the default configuration file. */
+#undef CONFIGURATION_FILE
+
 /* Define this to be a string containing the path to the library directory. */
 #undef LIBRARY_DIRECTORY
 

@@ -27,8 +27,6 @@ extern "C" {
  * Edit as necessary for your system.
  */
 
-#define DEFAULT_CONFIGURATION_FILE "brltty.conf"
-
 /* Delay times, measured in milliseconds.
  * Note that I found a large error in timing - 40 is nearer 50 ms.
  */

@@ -2,9 +2,10 @@ Name: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
 Release: 1
 
-Copyright: GPL
-Packager: Dave Mielke <dave@mielke.cc>
 Group: System Environment/Daemons
+Copyright: GPL
+Vendor: The BRLTTY Team
+Packager: Dave Mielke <dave@mielke.cc>
 URL: http://mielke.cc/brltty/
 Source: http://mielke.cc/brltty/releases/%{name}-%{version}.tar.gz
 
@@ -52,10 +53,6 @@ set -e
 make install
 install Documents/brltty.conf "${RPM_BUILD_ROOT}/etc"
 
-%post
-set -e
-
-
 %files
 %defattr(-,root,root)
 %doc COPYING
@@ -63,9 +60,21 @@ set -e
 %doc doc/*
 %config(noreplace) /etc/brltty.conf
 /bin/brltty
-/bin/brltty-install
+/bin/brltty-*
 /etc/brltty
 /lib/brltty
-/lib/libbrlapi.so
+/usr/lib/libbrlapi.*
 /usr/include/brltty
 /usr/share/man/man?/*
+
+%pre
+rm -f "@configuration_directory@/@configuration_file@.rpmnew"
+
+%post
+file="@configuration_directory@/@configuration_file@"
+new="${file}.rpmnew"
+[ -f "${new}" ] && file="${new}"
+(  set -- -u -f "${file}"
+   @configuration_file_customization_script@
+)
+

@@ -1436,7 +1436,7 @@ startup(int argc, char *argv[]) {
   {
     int optional = opt_configurationFile == NULL;
     ensureOptionSetting(&opt_configurationFile,
-                        CONFIGURATION_DIRECTORY "/" DEFAULT_CONFIGURATION_FILE,
+                        CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
                         NULL, "BRLTTY_CONFIGURATION_FILE", -1);
     processConfigurationFile(optionTable, optionCount, opt_configurationFile, optional);
   }

@@ -63,6 +63,10 @@ fi
 AC_SUBST([install_root])
 BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
+configuration_file="${PACKAGE_NAME}.conf"
+AC_SUBST([configuration_file])
+BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"])
+
 AC_SUBST([api_directory], ["${libdir}"])
 BRLTTY_ARCHITECTURE_DIRECTORY([api_directory], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
@@ -87,6 +91,8 @@ test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
 BRLTTY_DEFINE_EXPANDED([HOME_DIRECTORY], ["${execute_root}${data_directory}"])
 BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${sysconfdir}"])
 BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${execute_root}${library_directory}"])
+eval 'configuration_directory="'"${sysconfdir}"'"'
+AC_SUBST([configuration_directory])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
 
@@ -676,6 +682,9 @@ s% *$%%
 changequote([, ])dnl
 BRLTTY_VAR_TRIM([brltty_driver_names])
 AC_SUBST([brltty_driver_names])
+
+configuration_file_customization_script="Bootdisks/bp2cf"
+AC_SUBST_FILE([configuration_file_customization_script])
 
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
