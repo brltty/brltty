@@ -1,7 +1,7 @@
 Makefile
 reldeps.mk
 *.made
-api_doxy.cfg
+BrlAPIref.doxy
 man?
 brlapi_*.3
 *.txt

@@ -29,8 +29,8 @@ BrlAPI: BrlAPI.txt BrlAPI.made
 
 api: BrlAPIref.made
 
-BrlAPIref.made: $(SRC_TOP)$(PGM_DIR)/brlapi.h BrlAPIref_doxy.cfg
-	doxygen BrlAPIref_doxy.cfg
+BrlAPIref.made: $(SRC_TOP)$(PGM_DIR)/brlapi.h BrlAPIref.doxy
+	doxygen BrlAPIref.doxy
 	ln -sf man3/brlapi_*.3 .
 	touch $@
 
@@ -47,5 +47,5 @@ clean::
 	-rm -fr *-HTML man?
 
 distclean::
-	-rm -f BrlAPIref_doxy.cfg
+	-rm -f BrlAPIref.doxy
 
