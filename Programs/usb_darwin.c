@@ -256,7 +256,7 @@ unsetInterface (UsbDevice *device) {
     IOReturn result;
 
     if (devx->interfaceOpened) {
-      {
+      if (devx->runloopSource) {
         int pipe;
         for (pipe=1; pipe<=devx->pipeCount; ++pipe) {
           result = (*devx->interface)->AbortPipe(devx->interface, pipe);
@@ -305,7 +305,7 @@ setInterface (UsbDevice *device, UInt8 number) {
   UsbDeviceExtension *devx = device->extension;
   int found = 0;
   IOReturn result;
-  io_iterator_t iterator;
+  io_iterator_t iterator = NULL;
 
   if (devx->interface)
     if (isInterface(devx->interface, number))
@@ -322,7 +322,7 @@ setInterface (UsbDevice *device, UInt8 number) {
     result = (*devx->device)->CreateInterfaceIterator(devx->device, &request, &iterator);
   }
 
-  if (result == kIOReturnSuccess) {
+  if ((result == kIOReturnSuccess) && iterator) {
     io_service_t service;
 
     while ((service = IOIteratorNext(iterator))) {
@@ -881,47 +881,46 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
   kern_return_t kernelResult;
   IOReturn ioResult;
-  mach_port_t masterPort;
+  mach_port_t port;
 
-  kernelResult = IOMasterPort(MACH_PORT_NULL, &masterPort);
+  kernelResult = IOMasterPort(MACH_PORT_NULL, &port);
   if (kernelResult == KERN_SUCCESS) {
-    CFMutableDictionaryRef matchingDictionary;
+    CFMutableDictionaryRef dictionary;
 
-    if ((matchingDictionary = IOServiceMatching(kIOUSBDeviceClassName))) {
-      io_iterator_t serviceIterator;
+    if ((dictionary = IOServiceMatching(kIOUSBDeviceClassName))) {
+      io_iterator_t iterator = NULL;
 
-      kernelResult = IOServiceGetMatchingServices(masterPort,
-                                                  matchingDictionary,
-                                                  &serviceIterator);
-      matchingDictionary = NULL;
-      if (kernelResult == KERN_SUCCESS) {
+      kernelResult = IOServiceGetMatchingServices(port, dictionary, &iterator);
+      dictionary = NULL;
+
+      if ((kernelResult == KERN_SUCCESS) && iterator) {
         io_service_t service;
 
-        while ((service = IOIteratorNext(serviceIterator))) {
-          IOCFPlugInInterface **servicePlugin = NULL;
+        while ((service = IOIteratorNext(iterator))) {
+          IOCFPlugInInterface **plugin = NULL;
           SInt32 score;
 
           ioResult = IOCreatePlugInInterfaceForService(service,
                                                        kIOUSBDeviceUserClientTypeID,
                                                        kIOCFPlugInInterfaceID,
-                                                       &servicePlugin, &score);
+                                                       &plugin, &score);
           IOObjectRelease(service);
           service = NULL;
 
-          if ((ioResult == kIOReturnSuccess) && servicePlugin) {
-            IOUSBDeviceInterface182 **deviceInterface = NULL;
+          if ((ioResult == kIOReturnSuccess) && plugin) {
+            IOUSBDeviceInterface182 **interface = NULL;
 
-            ioResult = (*servicePlugin)->QueryInterface(servicePlugin,
-                                                        CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID182),
-                                                        (LPVOID)&deviceInterface);
-            (*servicePlugin)->Release(servicePlugin);
-            servicePlugin = NULL;
+            ioResult = (*plugin)->QueryInterface(plugin,
+                                                 CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID182),
+                                                 (LPVOID)&interface);
+            (*plugin)->Release(plugin);
+            plugin = NULL;
 
-            if ((ioResult == kIOReturnSuccess) && deviceInterface) {
+            if ((ioResult == kIOReturnSuccess) && interface) {
               UsbDeviceExtension *devx;
 
               if ((devx = malloc(sizeof(*devx)))) {
-                devx->device = deviceInterface;
+                devx->device = interface;
                 devx->deviceOpened = 0;
 
                 devx->interface = NULL;
@@ -932,15 +931,14 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
                 devx->runloopSource = NULL;
 
                 if ((device = usbTestDevice(devx, chooser, data))) break;
-
                 free(devx);
                 devx = NULL;
               } else {
                 LogError("USB device extension allocate");
               }
 
-              (*deviceInterface)->Release(deviceInterface);
-              deviceInterface = NULL;
+              (*interface)->Release(interface);
+              interface = NULL;
             } else {
               setErrno(ioResult, "USB device interface create");
             }
@@ -949,8 +947,8 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
           }
         }
 
-        IOObjectRelease(serviceIterator);
-        serviceIterator = NULL;
+        IOObjectRelease(iterator);
+        iterator = NULL;
       } else {
         setErrno(kernelResult, "USB device iterator create");
       }
@@ -958,7 +956,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
       LogPrint(LOG_ERR, "USB device matching dictionary create error.");
     }
 
-    mach_port_deallocate(mach_task_self(), masterPort);
+    mach_port_deallocate(mach_task_self(), port);
   } else {
     setErrno(kernelResult, "Darwin master port create");
   }
