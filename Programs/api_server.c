@@ -39,6 +39,7 @@
 #include <netdb.h>
 
 #include "api.h"
+#include "api_protocol.h"
 #include "api_common.h"
 #include "rangelist.h"
 #include "brl.h"

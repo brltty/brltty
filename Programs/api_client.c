@@ -58,6 +58,7 @@
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
 #include "api.h"
+#include "api_protocol.h"
 #include "brldefs.h"
 #include "api_common.h"
 

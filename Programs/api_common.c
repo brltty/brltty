@@ -36,6 +36,7 @@
 #include <arpa/inet.h>
 
 #include "api.h"
+#include "api_protocol.h"
 
 int brlapi_libcerrno;
 const char *brlapi_libcerrfun;
