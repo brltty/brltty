@@ -47,7 +47,7 @@ Official boot floppies tune
     read ret
     cd /
     tar xzf /dev/fd0
-    /sbin/brltty
+    /bin/brltty
     echo "Press enter to continue"
     read ret"
    (Leave double-quotes like each time in this tip file) Save and
@@ -83,7 +83,7 @@ Building the third floppy
    flag by the module name you want to use). After having run
    configure with these flags at least, do "make install" so that all
    BRLTTY's stuff goes to the temporary directory. Check it to
-   recognize etc, dev, lib and sbin dirs in it : "ls $HOME/tmpbrl".
+   recognize etc, dev, lib and bin dirs in it : "ls $HOME/tmpbrl".
 2) Create a tarball by first changing to the directory : "cd
    $HOME/tmpbrl", then "tar czf ../brltty.tar.gz *". You should have a
    file named "brltty.tar.gz" in the parent dir now. 
@@ -120,7 +120,7 @@ to do so. Here is an example :
      drive too.
    - Edit an INIT script so that BRLTTY will be run at boot time :
      "nano-tiny /target/etc/init.d/bootmisc.sh" and find a good place
-     to insert the line "/sbin/brltty" (vi is not available in minimal
+     to insert the line "/bin/brltty" (vi is not available in minimal
      boot stuff). 
 
    After this last step, nothing wrong can happen to you anymore ! But
