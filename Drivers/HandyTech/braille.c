@@ -248,57 +248,64 @@ static const InputOutputOperations serialOperations = {
 #include "Programs/usb.h"
 
 static UsbDevice *usbDevice = NULL;
-static const UsbSerialOperations *usbSerial;
+static unsigned char usbConfiguration;
 static unsigned char usbInterface;
-static unsigned char usbOutputEndpoint;
+static unsigned char usbAlternative;
 static unsigned char usbInputEndpoint;
+static unsigned char usbOutputEndpoint;
+
+static const UsbSerialOperations *usbSerial;
+static speed_t usbBaud;
+static int usbFlowControl;
+static int usbDataBits;
+static int usbStopBits;
+static UsbSerialParity usbParity;
 
 static int
 chooseUsbDevice (UsbDevice *device, void *data) {
   const char *serialNumber = data;
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-  if ((descriptor->idVendor == 0X921) &&
-      (descriptor->idProduct == 0X1200)) {
-    /* A true old generation HandyTech Braille Star 40 */
-    if (!usbVerifySerialNumber(device, serialNumber)) return 0;
 
+  if (USB_IS_PRODUCT(descriptor, 0X921, 0X1200)) {
+    usbConfiguration = 1;
     usbInterface = 0;
-    if (usbClaimInterface(device, usbInterface)) {
-      if (usbSetConfiguration(device, 1)) {
-        if (usbSetAlternative(device, usbInterface, 0)) {
-          usbSerial = usbGetSerialOperations(device);
-          usbSerial->setBaud(device, baud2integer(baud));
-          usbSerial->setFlowControl(device, 0);
-          usbSerial->setDataFormat(device, 8, 1, USB_SERIAL_PARITY_ODD);
+    usbAlternative = 0;
+    usbInputEndpoint = 1;
+    usbOutputEndpoint = 1;
 
-          usbOutputEndpoint = 1;
-          usbInputEndpoint = 1;
-          return 1;
-        }
-      }
-      usbReleaseInterface(device, usbInterface);
-    }
-  } else if ((descriptor->idVendor  == 0X0403) &&
-             (descriptor->idProduct == 0X6001)) {
-    /* A new generation HandyTech Braille Star 40/80 */
-    if (!usbVerifySerialNumber(device, serialNumber)) return 0;
-
+    usbBaud = baud;
+    usbFlowControl = 0;
+    usbDataBits = 8;
+    usbStopBits = 1;
+    usbParity = USB_SERIAL_PARITY_ODD;
+  } else if (USB_IS_PRODUCT(descriptor, 0X0403, 0X6001)) {
+    usbConfiguration = 1;
     usbInterface = 0;
-    if (usbClaimInterface(device, usbInterface)) {
-      if (usbSetConfiguration(device, 1)) {
-        if (usbSetAlternative(device, usbInterface, 0)) {
-          usbSerial = usbGetSerialOperations(device);
-          usbSerial->setBaud(device, baud2integer(baud));
-          usbSerial->setFlowControl(device, 0);
-          usbSerial->setDataFormat(device, 8, 1, USB_SERIAL_PARITY_ODD);
+    usbAlternative = 0;
+    usbInputEndpoint = 1;
+    usbOutputEndpoint = 2;
 
-          usbOutputEndpoint = 2;
-          usbInputEndpoint = 1;
-          return 1;
-        }
+    usbBaud = baud;
+    usbFlowControl = 0;
+    usbDataBits = 8;
+    usbStopBits = 1;
+    usbParity = USB_SERIAL_PARITY_ODD;
+  } else {
+    return 0;
+  }
+
+  if (!usbVerifySerialNumber(device, serialNumber)) return 0;
+  if (usbClaimInterface(device, usbInterface)) {
+    if (usbSetConfiguration(device, usbConfiguration)) {
+      if (usbSetAlternative(device, usbInterface, usbAlternative)) {
+        usbSerial = usbGetSerialOperations(device);
+        usbSerial->setBaud(device, baud2integer(usbBaud));
+        usbSerial->setFlowControl(device, usbFlowControl);
+        usbSerial->setDataFormat(device, usbDataBits, usbStopBits, usbParity);
+        return 1;
       }
-      usbReleaseInterface(device, usbInterface);
     }
+    usbReleaseInterface(device, usbInterface);
   }
   return 0;
 }
@@ -308,9 +315,6 @@ openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
     usbBeginInput(usbDevice, usbInputEndpoint, 8);
     return 1;
-
-    usbCloseDevice(usbDevice);
-    usbDevice = NULL;
   } else {
     LogPrint(LOG_DEBUG, "USB device not found%s%s",
              (*device? ": ": "."),

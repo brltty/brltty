@@ -365,8 +365,7 @@ static int
 chooseUsbDevice (UsbDevice *device, void *data) {
   const char *serialNumber = data;
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-  if ((descriptor->idVendor == 0X0403) &&
-      (descriptor->idProduct == 0Xf208)) {
+  if (USB_IS_PRODUCT(descriptor, 0X0403, 0Xf208)) {
     if (!usbVerifySerialNumber(device, serialNumber)) return 0;
 
     usbInterface = 0;

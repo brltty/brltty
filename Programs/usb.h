@@ -193,13 +193,15 @@ typedef struct {
 } __attribute__((packed)) UsbSetupPacket;
 
 typedef struct UsbDeviceStruct UsbDevice;
-typedef int (*UsbDeviceChooser) (UsbDevice *device, void *data);
-
 extern UsbDevice *usbOpenDevice (const char *path);
-extern UsbDevice *usbFindDevice (UsbDeviceChooser chooser, void *data);
 extern void usbCloseDevice (UsbDevice *device);
-extern const UsbDeviceDescriptor *usbDeviceDescriptor (UsbDevice *device);
 extern int usbResetDevice (UsbDevice *device);
+
+typedef int (*UsbDeviceChooser) (UsbDevice *device, void *data);
+extern UsbDevice *usbFindDevice (UsbDeviceChooser chooser, void *data);
+
+extern const UsbDeviceDescriptor *usbDeviceDescriptor (UsbDevice *device);
+#define USB_IS_PRODUCT(descriptor,vendor,product) (((descriptor)->idVendor == (vendor)) && ((descriptor)->idProduct == (product)))
 
 extern int usbSetConfiguration (
   UsbDevice *device,

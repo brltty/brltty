@@ -421,11 +421,6 @@ usbDeviceDescriptor (UsbDevice *device) {
   return &device->descriptor;
 }
 
-int
-isUsbDevice (const char **path) {
-  return isQualifiedDevice(path, "usb");
-}
-
 static void
 usbDeallocatePendingInputRequest (void *item, void *data) {
   void *request = item;
@@ -875,4 +870,9 @@ usbGetSerialOperations (UsbDevice *device) {
     ++sa;
   }
   return NULL;
+}
+
+int
+isUsbDevice (const char **path) {
+  return isQualifiedDevice(path, "usb");
 }

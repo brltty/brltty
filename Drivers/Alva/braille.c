@@ -500,7 +500,7 @@ static int
 chooseUsbDevice (UsbDevice *device, void *data) {
   const char *serialNumber = data;
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-  if ((descriptor->idVendor == 0X6b0) && (descriptor->idProduct == 1)) {
+  if (USB_IS_PRODUCT(descriptor, 0X6b0, 1)) {
     if (!usbVerifySerialNumber(device, serialNumber)) return 0;
 
     usbInterface = 0;
