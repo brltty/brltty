@@ -415,7 +415,9 @@ static const InputOutputOperations bluezOperations = {
 
 typedef enum {
   AT2_RELEASE,
-  AT2_NUM_LOCK,
+  AT2_SCROLL_LOCK,
+  AT2_NUMBER_LOCK,
+  AT2_NUMBER_SHIFT,
   AT2_CAPS_LOCK,
   AT2_LEFT_SHIFT,
   AT2_RIGHT_SHIFT,
@@ -448,6 +450,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X09] = {VAL_PASSKEY+VPK_FUNCTION+9},
   [0X78] = {VAL_PASSKEY+VPK_FUNCTION+10},
   [0X07] = {VAL_PASSKEY+VPK_FUNCTION+11},
+  [0X7E] = {AT2_SCROLL_LOCK},
   [0X0E] = {VAL_PASSCHAR+'`', VAL_PASSCHAR+'~'},
   [0X16] = {VAL_PASSCHAR+'1', VAL_PASSCHAR+'!'},
   [0X1E] = {VAL_PASSCHAR+'2', VAL_PASSCHAR+'@'},
@@ -504,7 +507,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X14] = {AT2_LEFT_CONTROL},
   [0X11] = {AT2_LEFT_ALT},
   [0X29] = {VAL_PASSCHAR+' '},
-  [0X77] = {AT2_NUM_LOCK},
+  [0X77] = {AT2_NUMBER_LOCK},
   [0X7C] = {VAL_PASSCHAR+'*'},
   [0X7B] = {VAL_PASSCHAR+'-'},
   [0X79] = {VAL_PASSCHAR+'+'},
@@ -522,6 +525,7 @@ static const At2KeyTable at2KeysOriginal = {
 };
 
 static const At2KeyTable at2KeysE0 = {
+  [0X12] = {AT2_NUMBER_SHIFT},
   [0X1F] = {AT2_LEFT_WINDOWS},
   [0X11] = {AT2_RIGHT_ALT},
   [0X27] = {AT2_RIGHT_WINDOWS},
@@ -573,13 +577,10 @@ at2Process (int *command, unsigned char byte) {
 
         if (!release) {
           if (key->alternate) {
-            int altcmd = key->alternate;
-            int altblk = altcmd & VAL_BLK_MASK;
-
-            if ((blk == VAL_PASSCHAR) && (altblk == VAL_PASSCHAR)) {
-              if (AT2_TST(AT2_LEFT_SHIFT) || AT2_TST(AT2_RIGHT_SHIFT)) cmd = altcmd;
-            } else if ((blk == VAL_PASSKEY) && (altblk == VAL_PASSCHAR)) {
-              if (AT2_TST(AT2_NUM_LOCK)) cmd = altcmd;
+            if (blk == VAL_PASSCHAR) {
+              if (AT2_TST(AT2_LEFT_SHIFT) || AT2_TST(AT2_RIGHT_SHIFT)) cmd = key->alternate;
+            } else if (blk == VAL_PASSKEY) {
+              if (AT2_TST(AT2_NUMBER_LOCK) || AT2_TST(AT2_NUMBER_SHIFT)) cmd = key->alternate;
             }
           }
 
@@ -594,7 +595,8 @@ at2Process (int *command, unsigned char byte) {
         }
       } else {
         switch (cmd) {
-          case AT2_NUM_LOCK:
+          case AT2_SCROLL_LOCK:
+          case AT2_NUMBER_LOCK:
           case AT2_CAPS_LOCK:
             if (!release) {
               if (AT2_TST(cmd)) {
@@ -605,6 +607,7 @@ at2Process (int *command, unsigned char byte) {
             }
             break;
 
+          case AT2_NUMBER_SHIFT:
           case AT2_LEFT_SHIFT:
           case AT2_RIGHT_SHIFT:
           case AT2_LEFT_CONTROL:
