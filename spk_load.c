@@ -31,25 +31,23 @@
 #include "spk.h"
 
 speech_driver *speech = NULL;	/* filled by dynamic libs */
-char *speech_libraryName = NULL;	/* name of library */
 static void *library = NULL;	/* handle to driver */
 #define SPK_SYMBOL "spk_driver"
 
 /* load driver from library */
 /* return true (nonzero) on success */
-int load_speech_driver(void)
-{
-  const char* error;
+int loadSpeechDriver (const char **libraryName) {
+  const char *error;
 
   #ifdef SPK_BUILTIN
     extern speech_driver spk_driver;
-    if (speech_libraryName != NULL)
-      if (strcmp(speech_libraryName, spk_driver.identifier) == 0)
-        speech_libraryName = NULL;
-    if (speech_libraryName == NULL)
+    if (*libraryName != NULL)
+      if (strcmp(*libraryName, spk_driver.identifier) == 0)
+        *libraryName = NULL;
+    if (*libraryName == NULL)
       {
 	speech = &spk_driver;
-	speech_libraryName = "built-in";
+	*libraryName = "built-in";
 	return 1;
       }
   #else
@@ -57,20 +55,19 @@ int load_speech_driver(void)
   #endif
 
   /* allow shortcuts */
-  if (strlen(speech_libraryName) == 2)
+  if (strlen(*libraryName) == 2)
     {
       static char name[] = "libbrlttys??.so.1"; /* two ? for shortcut */
-      char * pos = strchr(name, '?');
-      pos[0] = speech_libraryName[0];
-      pos[1] = speech_libraryName[1];
-      speech_libraryName = name;
+      char *pos = strchr(name, '?');
+      memcpy(pos, *libraryName, 2);
+      *libraryName = name;
     }
 
-  library = dlopen(speech_libraryName, RTLD_NOW);
+  library = dlopen(*libraryName, RTLD_NOW);
   if (library == NULL) 
     {
       LogPrint(LOG_ERR, "%s", dlerror());
-      LogPrint(LOG_ERR, "Cannot open speech driver library: %s", speech_libraryName);
+      LogPrint(LOG_ERR, "Cannot open speech driver library: %s", *libraryName);
       goto liberror;
     }
 
@@ -88,28 +85,25 @@ int load_speech_driver(void)
  liberror:
   /* fall back to built-in */
   speech = &spk_driver;
-  speech_libraryName = "built-in";
+  *libraryName = "built-in";
   return 0;
 }
 
 
-int list_speech_drivers(void)
-{
-	char buf[64];
-	static const char *list_file = LIB_PATH "/brltty-spk.lst";
-	int cnt, fd = open( list_file, O_RDONLY );
-	if (fd < 0) {
-		fprintf( stderr, "Error: can't access speech driver list file\n" );
-		perror( list_file );
-		return 0;
-	}
-	fprintf( stderr, "Available Speech Drivers:\n\n" );
-	fprintf( stderr, "XX\tDescription\n" );
-	fprintf( stderr, "--\t-----------\n" );
-	while( (cnt = read( fd, buf, sizeof(buf) )) )
-		fwrite( buf, cnt, 1, stderr );
-	close(fd);
-	return 1;
+int listSpeechDrivers (void) {
+  char buf[64];
+  static const char *list_file = LIB_PATH "/brltty-spk.lst";
+  int cnt, fd = open(list_file, O_RDONLY);
+  if (fd < 0) {
+    fprintf(stderr, "Error: can't access speech driver list file\n");
+    perror(list_file);
+    return 0;
+  }
+  fprintf(stderr, "Available Speech Drivers:\n\n");
+  fprintf(stderr, "XX\tDescription\n");
+  fprintf(stderr, "--\t-----------\n");
+  while ((cnt = read(fd, buf, sizeof(buf))))
+    fwrite(buf, cnt, 1, stderr);
+  close(fd);
+  return 1;
 }
-
-

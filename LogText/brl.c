@@ -54,6 +54,8 @@ typedef unsigned char ScreenImage[screenHeight][screenWidth];
 static ScreenImage sourceImage;
 static ScreenImage targetImage;
 
+static const char *downloadPath = "logtext-download";
+
 typedef enum {
    DEV_OFFLINE,
    DEV_ONLINE,
@@ -65,7 +67,6 @@ static DriverCommandContext currentContext;
 static unsigned char currentLine;
 static unsigned char cursorRow;
 static unsigned char cursorColumn;
-static unsigned char *selectedLine;
 
 static unsigned char inputTable[0X100] = {
    #include "input.h"
@@ -88,9 +89,33 @@ identbrl (void) {
    LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
 
+static int
+makeFifo (const char *path, mode_t mode) {
+   struct stat status;
+   if (lstat(path, &status) != -1) {
+      if (S_ISFIFO(status.st_mode)) return 1;
+      LogPrint(LOG_ERR, "Download object not a FIFO: %s", path);
+   } else if (errno == ENOENT) {
+      mode_t mask = umask(0);
+      int result = mkfifo(path, mode);
+      int error = errno;
+      umask(mask);
+      if (result != -1) return 1;
+      errno = error;
+      LogError("Download FIFO creation");
+   }
+   return 0;
+}
+
+static int
+makeDownloadFifo (void) {
+   return makeFifo(downloadPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
+}
+
 static void
 initbrl (char **parameters, brldim *brl, const char *device) {
-   if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+   makeDownloadFifo();
+   if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY)) != -1) {
       if (tcgetattr(fileDescriptor, &oldSettings) != -1) {
          memset(&newSettings, 0, sizeof(newSettings));
          newSettings.c_cflag = CS8 | CLOCAL | CREAD;
@@ -281,9 +306,34 @@ setbrlstat (const unsigned char *status) {
    }
 }
 
+static int
+readKey (void) {
+   unsigned char key;
+   unsigned char arg;
+   if (read(fileDescriptor, &key, 1) != 1) return EOF;
+   switch (key) {
+      default:
+         arg = 0;
+         break;
+      case KEY_FUNCTION:
+      case KEY_FUNCTION2:
+      case KEY_UPDATE:
+         while (read(fileDescriptor, &arg, 1) != 1) delay(1);
+         break;
+   }
+   {
+      int result = COMPOUND_KEY(key, arg);
+      LogPrint(LOG_DEBUG, "Key read: %4.4X", result);
+      return result;
+   }
+}
+
+/*askUser
+static unsigned char *selectedLine;
+
 static void
 replaceCharacters (const unsigned char *address, size_t count) {
-   while (*address) selectedLine[cursorColumn++] = inputTable[*address++];
+   while (count--) selectedLine[cursorColumn++] = inputTable[*address++];
 }
 
 static void
@@ -309,28 +359,6 @@ selectLine (unsigned char line) {
    selectedLine = &sourceImage[cursorRow = line][0];
    clearCharacters();
    deviceStatus = DEV_ONLINE;
-}
-
-static int
-readKey (void) {
-   unsigned char key;
-   unsigned char arg;
-   if (read(fileDescriptor, &key, 1) != 1) return EOF;
-   switch (key) {
-      default:
-         arg = 0;
-         break;
-      case KEY_FUNCTION:
-      case KEY_FUNCTION2:
-      case KEY_UPDATE:
-         while (read(fileDescriptor, &arg, 1) != 1) delay(1);
-         break;
-   }
-   {
-      int result = COMPOUND_KEY(key, arg);
-      LogPrint(LOG_DEBUG, "Key read: %4.4X", result);
-      return result;
-   }
 }
 
 static unsigned char *
@@ -431,19 +459,15 @@ askUser (const unsigned char *prompt) {
       sendCursorRow();
    }
 }
+*/
 
 static void
 downloadFile (void) {
-   char *path = askUser("File to download?");
-   if (path) {
-      int file = open(path, O_RDONLY);
+   if (makeDownloadFifo()) {
+      int file = open(downloadPath, O_RDONLY);
       if (file != -1) {
          struct stat status;
          if (fstat(file, &status) != -1) {
-            const size_t size = status.st_size;
-            size_t sent = 0;
-            const unsigned short low = 400;
-            const unsigned short high = 1000;
             unsigned char buffer[0X400];
             const unsigned char *address = buffer;
             int count = 0;
@@ -462,22 +486,18 @@ downloadFile (void) {
                   }
                   address = buffer;
                }
-               timedBeep((low + (sent * (high - low) / size)), 125);
                if ((newline = memchr(address, '\n', count))) {
                   static const char lineTrailer[] = {0X0D, 0X0A};
                   size_t length = newline - address;
-                  if (!sendBytes(address, length)) break;
+                  if (!sendBytes(address, length++)) break;
                   if (!sendBytes(lineTrailer, sizeof(lineTrailer))) break;
-                  sent += ++length;
                   address += length;
                   count -= length;
                } else {
                   if (!sendBytes(address, count)) break;
-                  sent += count;
                   count = 0;
                }
             }
-            timedBeep(high, 1000);
          } else {
             LogError("Download file status");
          }
@@ -487,7 +507,8 @@ downloadFile (void) {
       } else {
          LogError("Download file open");
       }
-      free(path);
+   } else {
+      LogPrint(LOG_WARNING, "Download path not specified.");
    }
 }
 
@@ -580,12 +601,6 @@ readbrl (DriverCommandContext cmds) {
                   return VAL_PASSKEY + VPK_PAGE_UP;
                case KEY_COMMAND_PAGE_DOWN:
                   return VAL_PASSKEY + VPK_PAGE_DOWN;
-               case KEY_COMMAND_CUT_BEG:
-                  return CMD_CUT_BEG;
-               case KEY_COMMAND_CUT_END:
-                  return CMD_CUT_END;
-               case KEY_COMMAND_PASTE:
-                  return CMD_PASTE;
                case KEY_COMMAND_PREFMENU:
                   currentLine = 0;
                   cursorRow = 0;

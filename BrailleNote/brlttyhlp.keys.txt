@@ -49,7 +49,7 @@ a+ 1      Display attributes of character.
 c  14     Change current preferences.
 d  145    Default preferences (restore from disk).
 e* 15     Exit braille terminal mode (Braille Note function).
-f  124    Enter function key.
+f? 124    Enter function key.
 h* 125    Help for braille terminal mode (Braille Note function).
 l  123    Bring cursor to current line without horizontal motion.
 m  134    Mute speech.
@@ -59,9 +59,9 @@ p  1234   Paste from cut buffer.
 r* 1235   Repeat last prompt (Braille Note function).
 s  234    Say contents of current line.
 u* 136    Uppercase for computer braille (Braille Note function).
-v  1236   Switch virtual terminal.
+v? 1236   Switch virtual terminal.
 w  2456   Write current preferences to disk.
-x  1346   Enter character by hexadecimal value.
+x? 1346   Enter character by hexadecimal value.
 z* 1356   Go to main menu (Braille Note function).
 =* 123456 Go to main menu (Braille Note function).
 (+ 12356  Set start of block (cut&paste, search).

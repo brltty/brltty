@@ -36,65 +36,84 @@ extern "C"
 #include "../brl_driver.h"
 }
 
-/* Braille display parameters */
+/* Communication codes */
+static unsigned char HandyDescribe[] = {0XFF};
+static unsigned char HandyDescription[] = {0XFE};
+static unsigned char HandyBrailleStart[] = {0X01};	/* general header to display braille */
+static unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to display braille */
 
+
+/* Braille display parameters */
+typedef int (GetCommandHandler) (DriverCommandContext cmds);
+static GetCommandHandler GetHandyCommand;
+static GetCommandHandler GetBookwormCommand;
 typedef struct
 {
-  char *Name;
+  const char *Name;
   int ID;
-  int Cols;
-  int NbStCells;
-}
-BRLPARAMS;
-
-BRLPARAMS Models[] =
+  int Columns;
+  int StatusCells;
+  GetCommandHandler *GetCommand;
+  int HelpPage;
+  unsigned char *BrailleStartAddress;
+  unsigned char BrailleStartLength;
+  unsigned char *BrailleEndAddress;
+  unsigned char BrailleEndLength;
+} ModelDescription;
+static const ModelDescription Models[] =
 {
   {
     /* ID == 0x80 */
-    "Modular 20+4",
-    HANDY_24,
-    20,
-    4
+    "Modular 20+4", 0X80,
+    20, 4,
+    GetHandyCommand, 0,
+    HandyBrailleStart, sizeof(HandyBrailleStart),
+    NULL, 0
   }
   ,
   {
     /* ID == 89 */
-    "Modular 40+4",
-    HANDY_44,
-    40,
-    4
+    "Modular 40+4", 0X89,
+    40, 4,
+    GetHandyCommand, 0,
+    HandyBrailleStart, sizeof(HandyBrailleStart),
+    NULL, 0
   }
   ,
   {
     /* ID == 0x88 */
-    "Modular 80+4",
-    HANDY_84,
-    80,
-    4
+    "Modular 80+4", 0X88,
+    80, 4,
+    GetHandyCommand, 0,
+    HandyBrailleStart, sizeof(HandyBrailleStart),
+    NULL, 0
   }
   ,
   {
     /* ID == 0x05 */
-    "Braille Wave",
-    HANDY_BRAILLE_WAVE,
-    40,
-    0
+    "Braille Wave", 0X05,
+    40, 0,
+    GetHandyCommand, 0,
+    HandyBrailleStart, sizeof(HandyBrailleStart),
+    NULL, 0
   }
   ,
   {
     /* ID == 0x90 */
-    "Book Worm",
-    HANDY_BOOK_WORM,
-    8,
-    0
+    "Bookworm", 0X90,
+    8, 0,
+    GetBookwormCommand, 1,
+    HandyBrailleStart, sizeof(HandyBrailleStart),
+    BookwormBrailleEnd, sizeof(BookwormBrailleEnd)
   }
   ,
   {
     /* end of table */
-    NULL,
-    0,
-    0,
-    0
+    NULL, 0,
+    0, 0,
+    NULL, 0,
+    NULL, 0,
+    NULL, 0
   }
 };
 static unsigned int CurrentKeys[0x81], LastKeys[0x81], ReleasedKeys[0x81], nullKeys[0x81];
@@ -145,26 +164,16 @@ static char TransTable[256] =
 
 
 /* Global variables */
-
-static char DefDev[] = BRLDEV;		/* default braille device */
-static unsigned char refdata[ 85 ]; /* reference data */
-static int brl_fd;			/* file descriptor for Braille display */
-static struct termios oldtio;		/* old terminal settings */
-static unsigned char *rawdata;		/* translated data to send to Braille */
-static unsigned char *prevdata;	/* previously sent raw data */
-static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
+static char DefaultDevice[] = BRLDEV;		/* default braille device */
+static int FileDescriptor;			/* file descriptor for Braille display */
+static struct termios OriginalAttributes;		/* old terminal settings */
+static unsigned char *RawData;		/* translated data to send to Braille */
+static unsigned char *PrevData;	/* previously sent raw data */
+static unsigned char RawStatus[MAX_STCELLS];		/* to hold status info */
 static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
-static BRLPARAMS *model;		/* points to terminal model config struct */
-static int ReWrite = 0;		/* 1 if display need to be rewritten */
+static const ModelDescription *model;		/* points to terminal model config struct */
+static unsigned char refdata[1 + 4 + 80 + 1]; /* reference data */
 
-
-
-/* Communication codes */
-
-static char BRL_START[] = "\001";	/* escape code to display braille */
-#define DIM_BRL_START 1
-static char BRL_ID[] = "þ";
-#define DIM_BRL_ID 1
 
 
 /* Key values */
@@ -212,18 +221,10 @@ identbrl (void)
 }
 
 
-/* SendToHandy() is shared with speech.c */
-extern "C" {
-  int SendToHandy( unsigned char *data, int len );
-}
-
-int SendToHandy( unsigned char *data, int len )
-{
-  if (memcmp(data,&refdata,len)!=0) {
-    memcpy(&refdata,data,len);
-    if( write( brl_fd, data, len ) != len ) return 0;
-  }
-  return 1;
+static int WriteData (unsigned char *data, int length) {
+  // LogBytes("Write", data, length);
+  if (write(FileDescriptor, data, length) == length) return 1;
+  return 0;
 }
 
 
@@ -232,23 +233,22 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
   int ModelID = 0;
-  unsigned char buffer[DIM_BRL_ID + 1];
+  unsigned char buffer[sizeof(HandyDescription) + 1];
   unsigned int i=0;
 
   /* renice because Handy is too slow!!! */
   nice(-10);
-  res.disp = rawdata = prevdata = NULL;		/* clear pointers */
+  res.disp = RawData = PrevData = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-  if (!dev)
-    dev = DefDev;
-  brl_fd = open (dev, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0) {
+  if (!dev) dev = DefaultDevice;
+  FileDescriptor = open (dev, O_RDWR | O_NOCTTY);
+  if (FileDescriptor < 0) {
     LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
     goto failure;
   }
 
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
+  tcgetattr (FileDescriptor, &OriginalAttributes);	/* save current settings */
   /* Set flow control and 8n1, enable reading */
   newtio.c_cflag = (CLOCAL|PARODD|PARENB|CREAD|CS8);
 
@@ -263,22 +263,22 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
       if(
 	 cfsetispeed(&newtio,B0) ||
 	 cfsetospeed(&newtio,B0) ||
-	 tcsetattr(brl_fd,TCSANOW,&newtio) ||
-	 tcflush(brl_fd, TCIOFLUSH) ||
+	 tcsetattr(FileDescriptor,TCSANOW,&newtio) ||
+	 tcflush(FileDescriptor, TCIOFLUSH) ||
 	 cfsetispeed(&newtio,B19200) ||
 	 cfsetospeed(&newtio,B19200) ||
-	 tcsetattr(brl_fd,TCSANOW,&newtio)
+	 tcsetattr(FileDescriptor,TCSANOW,&newtio)
 	 ) {
-	LogPrint(LOG_ERR,"Port init failed: %s: %s",dev,strerror(errno));
+	LogPrint(LOG_ERR,"Port initialization failed: %s: %s",dev,strerror(errno));
 	return;
       }
       usleep(500);
       /* autodetecting MODEL */
-      write (brl_fd, "ÿ",1);
-      if (read (brl_fd, &buffer, DIM_BRL_ID + 1) == DIM_BRL_ID + 1)
+      WriteData(HandyDescribe, sizeof(HandyDescribe));
+      if (read(FileDescriptor, &buffer, sizeof(buffer)) == sizeof(buffer))
 	{
-	  if (!strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID))
-	    ModelID = buffer[DIM_BRL_ID];
+	  if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0)
+	    ModelID = buffer[sizeof(HandyDescription)];
 	}
     }
   while (ModelID == 0);
@@ -292,22 +292,24 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
     LogPrint( LOG_WARNING, "*** Please fix Models[] in HandyTech/brlmain.cc and mail the maintainer." );
     goto failure;
   }
+  LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
+           model->Name,
+           model->Columns, (model->Columns == 1)? "cell": "cells",
+           model->StatusCells, (model->StatusCells == 1)? "cell": "cells");
 
   /* Set model params... */
-  setHelpPageNumber( model - Models );		/* position in the model list */
-  res.x = model->Cols;			/* initialise size of display */
+  setHelpPageNumber( model->HelpPage );		/* position in the model list */
+  res.x = model->Columns;			/* initialise size of display */
   res.y = BRLROWS;
 
   /* Allocate space for buffers */
   res.disp = (unsigned char *) malloc (res.x * res.y);
-  rawdata = (unsigned char *) malloc (res.x * res.y);
-  prevdata = (unsigned char *) malloc (res.x * res.y);
-  if (!res.disp || !rawdata || !prevdata) {
+  RawData = (unsigned char *) malloc (res.x * res.y);
+  PrevData = (unsigned char *) malloc (res.x * res.y);
+  if (!res.disp || !RawData || !PrevData) {
     LogPrint( LOG_ERR, "can't allocate braille buffers" );
     goto failure;
   }
-
-  ReWrite = 1;			/* To write whole display at first time */
 
   *brl = res;
 
@@ -317,72 +319,88 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
 
   return;
 
- failure:
-  if (res.disp)
-    free (res.disp);
-  if (rawdata)
-    free (rawdata);
-  if (prevdata)
-    free (prevdata);
-  brl->x = -1;
+failure:
+  if (res.disp) {
+    free(res.disp);
+    res.disp = NULL;
+  }
+  if (RawData) {
+    free(RawData);
+    RawData = NULL;
+  }
+  if (PrevData) {
+    free(PrevData);
+    PrevData = NULL;
+  }
+  brl->x = brl->y = -1;
   return;
 }
 
 
-static void closebrl (brldim *brl)
-{
-  free (brl->disp);
-  free (rawdata);
-  free (prevdata);
-  tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
-  close (brl_fd);
+static void closebrl (brldim *brl) {
+  free(brl->disp);
+  brl->disp = NULL;
+  brl->x = brl->y = -1;
+
+  free(RawData);
+  RawData = NULL;
+
+  free(PrevData);
+  PrevData = NULL;
+
+  tcsetattr(FileDescriptor, TCSADRAIN, &OriginalAttributes);		/* restore terminal settings */
+  close(FileDescriptor);
+  FileDescriptor = -1;
 }
 
 
-static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
-{
-  unsigned char outbuf[ DIM_BRL_START + 2 + Len ];
-  int outsz = 0;
+static int UpdateBrailleDisplay (void) {
+  unsigned char buffer[model->BrailleStartLength + model->StatusCells + model->Columns + model->BrailleEndLength];
+  int count = 0;
 
-  memcpy( outbuf, BRL_START, DIM_BRL_START );
-  outsz += DIM_BRL_START;
-  memcpy( outbuf+outsz, StatusCells , model->NbStCells);
-  outsz += model->NbStCells;
-  memcpy( outbuf+outsz, Data, Len );
-  outsz += Len;
-  return SendToHandy( outbuf, outsz );
+  if (model->BrailleStartLength) {
+    memcpy(buffer+count, model->BrailleStartAddress, model->BrailleStartLength);
+    count += model->BrailleStartLength;
+  }
+
+  memcpy(buffer+count, RawStatus, model->StatusCells);
+  count += model->StatusCells;
+
+  memcpy(buffer+count, RawData, model->Columns);
+  count += model->Columns;
+
+  if (model->BrailleEndLength) {
+    memcpy(buffer+count, model->BrailleEndAddress, model->BrailleEndLength);
+    count += model->BrailleEndLength;
+  }
+
+  if (memcmp(buffer, &refdata, count) != 0) {
+    if (!WriteData(buffer, count)) return 0;
+    memcpy(&refdata, buffer, count);
+  }
+  return 1;
 }
 
 
-static void writebrl (brldim *brl)
-{
-  int i, j, k;
-
-  i = 0;
-  j = model->Cols;
-  if (i < j)			/* there is something different */
-    {
-      for (k = 0;
-	   k < (j - i);
-	   rawdata[k++] = TransTable[(prevdata[i + k] = brl->disp[i + k])]);
-      WriteToBrlDisplay (model->NbStCells + i, j - i, rawdata);
-    }
+static void writebrl (brldim *brl) {
+  int i;
+  for (i=0; i<model->Columns; ++i) {
+    RawData[i] = TransTable[(PrevData[i] = brl->disp[i])];
+  }
+  UpdateBrailleDisplay();
 }
 
 
 static void
-setbrlstat (const unsigned char *st)
-{
-  int i;
-
+setbrlstat (const unsigned char *st) {
   /* Update status cells on braille display */
-  if (memcmp (st, PrevStatus, model->NbStCells))	/* only if it changed */
-    {
-      for (i = 0;
-	   i < model->NbStCells;
-	   StatusCells[i++] = TransTable[(PrevStatus[i] = st[i])]);
-      /*      WriteToBrlDisplay (0, model->NbStCells, StatusCells); */
+  if (memcmp(st, PrevStatus, model->StatusCells) != 0) {	/* only if it changed */
+    int i;
+    for (i=0; i<model->StatusCells; ++i) {
+      RawStatus[i] = TransTable[(PrevStatus[i] = st[i])];
+    /* UpdateBrailleDisplay(); writebrl will do this anyway */
     }
+  }
 }
 
 
@@ -391,7 +409,7 @@ static int GetHandyKey (unsigned int *Pos)
 {
   unsigned char c;
 
-  while (read (brl_fd, &c, 1) ==1)
+  if (read(FileDescriptor, &c, 1) ==1)
     {
       if (c == 126 )
 	return(0);
@@ -400,7 +418,7 @@ static int GetHandyKey (unsigned int *Pos)
 	CurrentKeys[0x80] =1;
       }
       if ((c >= KEY_ROUTING_OFFSET) &&
-	  (c < (KEY_ROUTING_OFFSET + model->Cols)))
+	  (c < (KEY_ROUTING_OFFSET + model->Columns)))
 	{
 	  /* make for display keys of Touch cursor */
 	  *Pos = c - KEY_ROUTING_OFFSET;
@@ -413,8 +431,7 @@ static int GetHandyKey (unsigned int *Pos)
   return (0);
 }
 
-
-static int readbrl (DriverCommandContext cmds)
+static int GetHandyCommand (DriverCommandContext cmds)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;
@@ -629,7 +646,6 @@ static int readbrl (DriverCommandContext cmds)
       }
       if (LastKeys[KEY_B1]) {
 	res = CMD_HOME;
-	ReWrite = 1;	/* force rewrite of whole display */
 	goto end_switch;
       }
       if (LastKeys[KEY_B8]) {
@@ -642,4 +658,91 @@ static int readbrl (DriverCommandContext cmds)
       LastKeys=nullKeys;
     }
   return (res);
+}
+
+static int GetBookwormCommand (DriverCommandContext cmds) {
+  unsigned char key;
+  if (read(FileDescriptor, &key, 1) == 1) {
+    const int BWK_BACKWARD = 0X01;
+    const int BWK_ESCAPE   = 0X02;
+    const int BWK_ENTER    = 0X04;
+    const int BWK_FORWARD  = 0X08;
+    // LogPrint(LOG_DEBUG, "Read: %02X", key);
+    switch (cmds) {
+      case CMDS_PREFS:
+        switch (key) {
+          case (BWK_BACKWARD):
+            return CMD_FWINLT;
+          case (BWK_FORWARD):
+            return CMD_FWINRT;
+          case (BWK_ESCAPE):
+            return CMD_PREFLOAD;
+          case (BWK_ESCAPE | BWK_BACKWARD):
+            return CMD_MENU_PREV_SETTING;
+          case (BWK_ESCAPE | BWK_FORWARD):
+            return CMD_MENU_NEXT_SETTING;
+          case (BWK_ENTER):
+            return CMD_PREFMENU;
+          case (BWK_ENTER | BWK_BACKWARD):
+            return CMD_MENU_PREV_ITEM;
+          case (BWK_ENTER | BWK_FORWARD):
+            return CMD_MENU_NEXT_ITEM;
+          case (BWK_ESCAPE | BWK_ENTER):
+            return CMD_PREFSAVE;
+          case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
+            return CMD_MENU_FIRST_ITEM;
+          case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
+            return CMD_MENU_LAST_ITEM;
+          case (BWK_BACKWARD | BWK_FORWARD):
+            return CMD_NOOP;
+          case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
+            return CMD_NOOP;
+          case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
+            return CMD_NOOP;
+          default:
+            break;
+        }
+        break;
+      default:
+        switch (key) {
+          case (BWK_BACKWARD):
+            return CMD_FWINLT;
+          case (BWK_FORWARD):
+            return CMD_FWINRT;
+          case (BWK_ESCAPE):
+            return CMD_CSRTRK;
+          case (BWK_ESCAPE | BWK_BACKWARD):
+            return CMD_BACK;
+          case (BWK_ESCAPE | BWK_FORWARD):
+            return CMD_DISPMD;
+          case (BWK_ENTER):
+            return CMD_CSRJMP;
+          case (BWK_ENTER | BWK_BACKWARD):
+            return CMD_LNUP;
+          case (BWK_ENTER | BWK_FORWARD):
+            return CMD_LNDN;
+          case (BWK_ESCAPE | BWK_ENTER):
+            return CMD_PREFMENU;
+          case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
+            return CMD_LNBEG;
+          case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
+            return CMD_LNEND;
+          case (BWK_BACKWARD | BWK_FORWARD):
+            return CMD_HELP;
+          case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
+            return CMD_CSRSIZE;
+          case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
+            return CMD_FREEZE;
+          default:
+            break;
+        }
+        break;
+    }
+  }
+  return EOF;
+}
+
+static int readbrl (DriverCommandContext cmds)
+{
+  return model->GetCommand (cmds);
 }

@@ -15,30 +15,34 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* comptable.c - filter to compile 256-byte table file into C code
- * $Id: comptable.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
+/* tbl2hex.c - filter to compile 256-byte table file into C code
+ * $Id: tbl2hex.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
  */
 
 /* The output of this filter can be #include'ed into C code to initialise
  * a static array.  Braces are not included.
  */
 
+#include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 
 int
-main (void)
-{
+main (void) {
   unsigned char buffer[8];
-  int i, j;
-
-  for (i = 0; i < 32; i++)
-    {
-      fread (buffer, 1, 8, stdin);
-      for (j = 0; j < 7; printf ("0x%02x, ", buffer[j++]));
-      if (i < 31)
-	printf ("0x%02x,\n", buffer[7]);
-      else
-	printf ("0x%02x\n", buffer[7]);
+  unsigned int columns = sizeof(buffer);
+  unsigned int rows = 0X100 / columns;
+  unsigned int row;
+  for (row=0; row<rows; row++) {
+    unsigned int column;
+    fread(buffer, 1, columns, stdin);
+    for (column=0; column<columns; column++) {
+      int newline = column == (columns - 1);
+      int comma = (row < (rows - 1)) || !newline;
+      printf("0X%02X", buffer[column]);
+      if (comma) putchar(',');
+      putchar(newline? '\n': ' ');
     }
+  }
   return 0;
 }

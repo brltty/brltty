@@ -15,23 +15,31 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: en_txt en_html ger_txt ger_html
+all: en ger
 
-clean:
-	rm Manual.txt Manual-ger.txt Manual-HTML/* Manual-ger-HTML/*
+en: en_txt en_html
 
-en_txt: Manual.sgml
-	sgml2txt -f -l Manual.sgml
+en_txt: Manual.txt
+
+en_chk: Manual.txt
+	ul -t dumb Manual.txt | spell -p en.dict -w 'é'
+
+Manual.txt: Manual.sgml
+	sgml2txt -l english -c latin Manual.sgml
 
 en_html: Manual.sgml
 	cd Manual-HTML; \
-	sgml2html -l ../Manual.sgml
+	sgml2html -l english -c ascii ../Manual.sgml
+
+ger: ger_txt ger_html
 
 ger_txt: Manual.sgml
-	sgml2txt -f -l Manual-ger.sgml
-#	sgml2txt -f -l de -c latin Manual-ger.sgml
+	sgml2txt -l german -c latin Manual-ger.sgml
 
 ger_html: Manual-ger.sgml
 	cd Manual-ger-HTML; \
-	sgml2html -l ../Manual-ger.sgml
-#	sgml2html -l de -c latin ../Manual-ger.sgml
+	sgml2html -l german -c ascii ../Manual-ger.sgml
+
+clean:
+	rm -f Manual.txt Manual-ger.txt Manual-HTML/* Manual-ger-HTML/*
+

@@ -468,7 +468,6 @@ static int readbrl(DriverCommandContext cmds) {
   /* Check for first byte */
   if (!read (brl_fd, buf, 1)){
     if (button_waitcount >= BUTTON_STEP) { 
-      LogPrint(LOG_ERR, "goto calcres");
       goto calcres;
     }
     else if (button_waitcount > 0 &&
@@ -576,10 +575,9 @@ static int readbrl(DriverCommandContext cmds) {
       }
       else if (button_waitcount < BUTTON_STEP) {
 	button_waitcount++;
-	LogPrint(LOG_ERR, "button_waitcount++");
 	return(EOF);
       }
-      LogPrint(LOG_ERR, "case BUTTON: c = %d, code=%d", c, code);
+      LogPrint(LOG_DEBUG, "case BUTTON: c = %d, code=%d", c, code);
 
       break;
     case FRONTKEY:   code = (c<<8);  break;
@@ -710,6 +708,6 @@ static int readbrl(DriverCommandContext cmds) {
 
   lastcmd = res;
   gettimeofday (&lastcmd_time, &dum_tz);
-  button_waitcount = 0;LogPrint(LOG_ERR, "button_waitcount = 0");
+  button_waitcount = 0;
   return(res);
 }

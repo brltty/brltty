@@ -58,14 +58,14 @@ typedef enum {
    CMD_NXDIFLN /* go down to line with different content */,
    CMD_ATTRUP /* go up to line with different attributes */,
    CMD_ATTRDN /* go down to line with different attributes */,
-   CMD_PRBLNKLN /* go to last line of previous paragraph */,
-   CMD_NXBLNKLN /* go to first line of next paragraph */,
-   CMD_PRSEARCH /* search up for content of cut buffer */,
-   CMD_NXSEARCH /* search down for content of cut buffer */,
    CMD_TOP /* go to top line */,
    CMD_BOT /* go to bottom line */,
    CMD_TOP_LEFT /* go to top-left corner */,
    CMD_BOT_LEFT /* go to bottom-left corner */,
+   CMD_PRBLNKLN /* go to last line of previous paragraph */,
+   CMD_NXBLNKLN /* go to first line of next paragraph */,
+   CMD_PRSEARCH /* search up for content of cut buffer */,
+   CMD_NXSEARCH /* search down for content of cut buffer */,
 
    /* horizontal motion */
    CMD_CHRLT /* go left one character */,
@@ -79,18 +79,11 @@ typedef enum {
    CMD_LNBEG /* go to beginning of line */,
    CMD_LNEND /* go to end of line */,
 
-   /* for displays without routing keys */
-   CMD_CSRJMP /* route cursor to top-left corner of braille window */,
-   CMD_CUT_BEG /* cut text from top-left corner of braille window */,
-   CMD_CUT_END /* cut text to bottom-right corner of braille window */,
-
-   /* miscellaneous */
+   /* implicit motion */
    CMD_HOME /* go to cursor */,
    CMD_BACK /* go to last motion */,
-   CMD_CSRJMP_VERT /* route cursor to top line of window */,
-   CMD_PASTE /* insert cut buffer at cursor */,
 
-   /* driver options */
+   /* feature activation and deactivation */
    CMD_FREEZE /* freeze/unfreeze screen */,
    CMD_DISPMD /* toggle display attributes/text */,
    CMD_SIXDOTS /* toggle text style 6-dot/8-dot */,
@@ -98,7 +91,7 @@ typedef enum {
    CMD_SKPIDLNS /* toggle skipping of identical lines on/off */,
    CMD_SKPBLNKWINS /* toggle skipping of blank windows on/off */,
    CMD_CSRVIS /* toggle cursor visibility on/off */,
-   CMD_CSRHIDE_QK /* toggle quick hide of cursor */,
+   CMD_CSRHIDE /* toggle quick hide of cursor */,
    CMD_CSRTRK /* toggle cursor tracking on/off */,
    CMD_CSRSIZE /* toggle cursor style underline/block */,
    CMD_CSRBLINK /* toggle cursor blinking on/off */,
@@ -110,31 +103,40 @@ typedef enum {
    /* mode selection */
    CMD_HELP /* display driver help */,
    CMD_INFO /* display status summary */,
+
+   /* preference setting */
    CMD_PREFMENU /* present preferences menu */,
    CMD_PREFSAVE /* save preferences */,
    CMD_PREFLOAD /* reload preferences */,
 
-   /* speech control */
+   /* menu navigation */
+   CMD_MENU_FIRST_ITEM /* go to first item in menu */,
+   CMD_MENU_LAST_ITEM /* go to last item in menu */,
+   CMD_MENU_PREV_ITEM /* go to previous item in menu */,
+   CMD_MENU_NEXT_ITEM /* go to next item in menu */,
+   CMD_MENU_PREV_SETTING /* change value to previous choice */,
+   CMD_MENU_NEXT_SETTING /* change value to next choice */,
+
+   /* speech */
    CMD_SAY /* speak current line */,
    CMD_SAYALL /* speak rest of screen */,
    CMD_MUTE /* stop speaking immediately */,
    CMD_SPKHOME /* goto current/last speech position */,
 
-   /* virtual terminal selection */
+   /* virtual terminal switching */
    CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
    CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
 
-   /* general control */
+   /* miscellaneous */
+   CMD_CSRJMP_VERT /* route cursor to top line of window */,
+   CMD_PASTE /* insert cut buffer at cursor */,
    CMD_RESTARTBRL /* reinitialize braille driver */,
    CMD_RESTARTSPEECH /* reinitialize speech driver */,
 
-   /* menu commands */
-   CMD_PREF_FIRST_ITEM /* go to first item in menu */,
-   CMD_PREF_LAST_ITEM /* go to last item in menu */,
-   CMD_PREF_PREV_ITEM /* go to previous item in menu */,
-   CMD_PREF_NEXT_ITEM /* go to next item in menu */,
-   CMD_PREF_PREV_SETTING /* change value to previous choice */,
-   CMD_PREF_NEXT_SETTING /* change value to next choice */,
+   /* for displays without routing keys */
+   CMD_CSRJMP /* route cursor to top-left corner of braille window */,
+   CMD_CUT_BEG /* cut text from top-left corner of braille window */,
+   CMD_CUT_END /* cut text to bottom-right corner of braille window */,
 
    /* internal (to the driver) use only */
    CMD_INPUTMODE /* toggle input mode */,
@@ -161,7 +163,8 @@ typedef enum {
 #define CR_SWITCHVT 0x400	/* switch virtual terminal */
 #define CR_NXINDENT 0x500	/* find next line not more indented than routing key indicates */
 #define CR_PRINDENT 0x600       /* find previous line not more indented than routing key indicates */
-#define CR_MSGATTRIB 0x700	/* message attributes of character */
+#define CR_MSGATTRIB 0x700	/* show attributes of character */
+#define CR_SETLEFT 0x800	/* bring left of window to character */
 
 /* For entering a special key. */
 #define VAL_PASSKEY	0xD00
@@ -236,10 +239,8 @@ typedef struct
 } braille_driver;
 
 extern braille_driver *braille;	/* filled by dynamic libs */
-extern char *braille_libraryName;	/* name of library */
-
-int load_braille_driver(void);
-int list_braille_drivers(void);
+extern int loadBrailleDriver (const char **libraryName);
+extern int listBrailleDrivers (void);
 
 /*
  * Please comment all STAT_* definitions. They are

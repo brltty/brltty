@@ -34,6 +34,5 @@ typedef struct {
 } speech_driver;
 
 extern speech_driver *speech;
-extern char *speech_libraryName;	/* name of library */
-int load_speech_driver(void);
-int list_speech_drivers(void);
+extern int loadSpeechDriver (const char **libraryName);
+extern int listSpeechDrivers (void);

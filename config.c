@@ -75,6 +75,7 @@
 
 static const char *opt_attributesTable = NULL;
 static const char *opt_brailleDevice = NULL;
+static const char *opt_brailleDriver = NULL;
 static char *opt_brailleParameters = NULL;
 static const char *opt_configurationFile = NULL;
 static char *opt_screenParameters = NULL;
@@ -85,6 +86,7 @@ static short opt_noSpeech = 0;
 static const char *opt_pidFile = NULL;
 static const char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
+static const char *opt_speechDriver = NULL;
 static char *opt_speechParameters = NULL;
 static short opt_standardError = 0;
 static const char *opt_textTable = NULL;
@@ -462,7 +464,7 @@ processOptions (int argc, char **argv)
         opt_attributesTable = optarg;
         break;
       case 'b':                        /* name of driver */
-        braille_libraryName = optarg;
+        opt_brailleDriver = optarg;
         break;
       case 'd':                /* serial device path */
         opt_brailleDevice = optarg;
@@ -520,7 +522,7 @@ processOptions (int argc, char **argv)
         opt_quiet = 1;
         break;
       case 's':                        /* name of speech driver */
-        speech_libraryName = optarg;
+        opt_speechDriver = optarg;
         break;
       case 't':                /* text translation table file name */
         opt_textTable = optarg;
@@ -869,7 +871,7 @@ updatePreferences (void)
   static char *metaModes[] = {"Escape Prefix", "High-order Bit"};
   static char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
   static char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Generic", "MDV", "Voyager"};
-  static char *textStyles[] = {"8 dot", "6 dot"};
+  static char *textStyles[] = {"8-dot", "6-dot"};
   static char *tuneDevices[] = {"PC Speaker", "Sound Card", "MIDI", "AdLib/OPL3/SB-FM"};
   typedef struct {
      unsigned char *setting;                        /* pointer to the item value */
@@ -907,7 +909,7 @@ updatePreferences (void)
      BOOLEAN_ITEM(env.capblink, NULL, NULL, "Blinking Capitals"),
      TIMING_ITEM(env.caponcnt, NULL, testBlinkingCapitals, "Capitals Visible Period"),
      TIMING_ITEM(env.capoffcnt, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
-     BOOLEAN_ITEM(env.sound, NULL, NULL, "Sound"),
+     BOOLEAN_ITEM(env.sound, NULL, NULL, "Alert Tunes"),
      SYMBOLIC_ITEM(env.tunedev, changedTuneDevice, testSound, "Tune Device", tuneDevices),
      MENU_ITEM(env.midiinstr, NULL, testSoundMidi, "MIDI Instrument", midiInstrumentTable, 0, midiInstrumentCount-1),
      SYMBOLIC_ITEM(env.stcellstyle, NULL, NULL, "Status Cells Style", statusStyles)
@@ -966,20 +968,20 @@ updatePreferences (void)
 
       /* Now process any user interaction */
       switch (key = readKey(CMDS_PREFS)) {
-        case CMD_PREF_FIRST_ITEM:
+        case CMD_MENU_FIRST_ITEM:
         case CMD_TOP:
         case CMD_TOP_LEFT:
           menuIndex = lineIndent = 0;
           break;
-        case CMD_PREF_LAST_ITEM:
+        case CMD_MENU_LAST_ITEM:
         case CMD_BOT:
         case CMD_BOT_LEFT:
           menuIndex = menuSize - 1;
           lineIndent = 0;
           break;
-        case CMD_PREF_PREV_ITEM:
-        case VAL_PASSKEY+VPK_CURSOR_UP:
+        case CMD_MENU_PREV_ITEM:
         case CMD_LNUP:
+        case VAL_PASSKEY+VPK_CURSOR_UP:
           do {
             if (menuIndex == 0)
               menuIndex = menuSize;
@@ -987,9 +989,9 @@ updatePreferences (void)
           } while (menu[menuIndex].test && !menu[menuIndex].test());
           lineIndent = 0;
           break;
-        case CMD_PREF_NEXT_ITEM:
-        case VAL_PASSKEY+VPK_CURSOR_DOWN:
+        case CMD_MENU_NEXT_ITEM:
         case CMD_LNDN:
+        case VAL_PASSKEY+VPK_CURSOR_DOWN:
           do {
             if (++menuIndex == menuSize)
               menuIndex = 0;
@@ -1008,7 +1010,7 @@ updatePreferences (void)
           else
             playTune(&tune_bounce);
           break;
-        case CMD_PREF_PREV_SETTING:
+        case CMD_MENU_PREV_SETTING:
         case CMD_WINUP:
         case CMD_CHRLT:
         case VAL_PASSKEY+VPK_CURSOR_LEFT:
@@ -1016,7 +1018,7 @@ updatePreferences (void)
             *item->setting = item->maximum;
           settingChanged = 1;
           break;
-        case CMD_PREF_NEXT_SETTING:
+        case CMD_MENU_NEXT_SETTING:
         case CMD_WINDN:
         case CMD_CHRRT:
         case VAL_PASSKEY+VPK_CURSOR_RIGHT:
@@ -1146,8 +1148,8 @@ startup(int argc, char *argv[])
   if (!opt_textTable) opt_textTable = cfg_textTable;
   if (!opt_attributesTable) opt_attributesTable = cfg_attributesTable;
   if (!opt_brailleDevice) opt_brailleDevice = cfg_brailleDevice;
-  if (!braille_libraryName) braille_libraryName = cfg_brailleDriver;
-  if (!speech_libraryName) speech_libraryName = cfg_speechDriver;
+  if (!opt_brailleDriver) opt_brailleDriver = cfg_brailleDriver;
+  if (!opt_speechDriver) opt_speechDriver = cfg_speechDriver;
 
   if (opt_brailleDevice == NULL)
     opt_brailleDevice = BRLDEV;
@@ -1158,28 +1160,26 @@ startup(int argc, char *argv[])
       exit(4);
     }
 
-  if (!load_braille_driver())
-    {
-      LogPrint(LOG_CRIT, "%s braille driver selection.",
-               braille_libraryName? "Bad": "No");
-      fprintf(stderr, "\n");
-      list_braille_drivers();
-      fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
-      exit(5);
-    }
+  if (!loadBrailleDriver(&opt_brailleDriver)) {
+    LogPrint(LOG_CRIT, "%s braille driver selection.",
+             opt_brailleDriver? "Bad": "No");
+    fprintf(stderr, "\n");
+    listBrailleDrivers();
+    fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
+    exit(5);
+  }
   parseBrailleParameters(cfg_brailleParameters);
   parseBrailleParameters(opt_brailleParameters);
 
-  if (!load_speech_driver())
-    {
-      LogPrint(LOG_ERR, "%s speech driver selection.",
-               speech_libraryName? "Bad": "No");
-      fprintf(stderr, "\n");
-      list_speech_drivers();
-      fprintf(stderr, "\nUse -s to specify one, and -h for quick help.\n\n");
-      LogPrint(LOG_WARNING, "Falling back to built-in speech driver.");
-      /* not fatal */
-    }
+  if (!loadSpeechDriver(&opt_speechDriver)) {
+    LogPrint(LOG_ERR, "%s speech driver selection.",
+             opt_speechDriver? "Bad": "No");
+    fprintf(stderr, "\n");
+    listSpeechDrivers();
+    fprintf(stderr, "\nUse -s to specify one, and -h for quick help.\n\n");
+    LogPrint(LOG_WARNING, "Falling back to built-in speech driver.");
+    /* not fatal */
+  }
   parseSpeechParameters(cfg_speechParameters);
   parseSpeechParameters(opt_speechParameters);
 
@@ -1228,10 +1228,10 @@ startup(int argc, char *argv[])
            opt_attributesTable? opt_attributesTable: "built-in");
   LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
   LogPrint(LOG_INFO, "Braille Driver: %s (%s)",
-           braille_libraryName, braille->name);
+           opt_brailleDriver, braille->name);
   logParameters(braille->parameters, brailleParameters, "Braille");
   LogPrint(LOG_INFO, "Speech Driver: %s (%s)",
-           speech_libraryName, speech->name);
+           opt_speechDriver, speech->name);
   logParameters(speech->parameters, speechParameters, "Speech");
   logParameters(getScreenParameters(), screenParameters, "Screen");
 

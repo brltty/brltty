@@ -29,12 +29,12 @@
 
 #define __EXTENSIONS__  /* for termios.h */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
-// #include <sys/termios.h>
+#include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <fcntl.h>
 #include <termios.h>
 
 #include "../brl.h"

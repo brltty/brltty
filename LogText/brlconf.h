@@ -37,9 +37,6 @@
 #define KEY_COMMAND_SWITCHVT_10   0X30 /* '0' dots-2458 */
 #define KEY_COMMAND_PAGE_UP       0X75 /* 'u' dots-136 */
 #define KEY_COMMAND_PAGE_DOWN     0X64 /* 'd' dots-145 */
-#define KEY_COMMAND_CUT_BEG       0X62 /* 'b' dots-12 */
-#define KEY_COMMAND_CUT_END       0X65 /* 'e' dots-15 */
-#define KEY_COMMAND_PASTE         0X70 /* 'p' dots-1234 */
 #define KEY_COMMAND_FREEZE_OFF    0X66 /* 'f' dots-124 */
 #define KEY_COMMAND_FREEZE_ON     0X46 /* 'F' dots-1247 */
 #define KEY_COMMAND_INFO          0X49 /* 'I' dots-247 */

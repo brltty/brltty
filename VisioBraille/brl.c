@@ -19,13 +19,15 @@
 #define VERSION "BRLTTY driver for VisioBraille, version 0.1, 2000"
 #define BRL_C 1
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/termios.h>
-#include <stdio.h>
-#include <string.h>
+#include <termios.h>
+
 #include "brlconf.h"
 #include "../brl.h"
 #include "../misc.h"

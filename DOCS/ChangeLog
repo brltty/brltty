@@ -37,9 +37,10 @@ Note: this file is in reversed chronological order (bottom to top).
    Add -P (--pid-file=) option. (dm)
    Add -R (--refresh-interval=) option. (dm)
    Add -X (--screen-parameters=) option. (dm)
-   Add the characterset= (latin1, vt100graphics, cp437, application) screen parameter. (dm)
+   Add the acm= (default, iso01, vt100, cp437, user) screen parameter. (dm)
    Implement BrailleNote driver. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
    Implement HandyTech driver. Andreas Gross <andi@andi-bika.de>
+   Add Bookworm support. (dm)
    Implement LogText driver. (dm) with help from Hans Schou <chlor@schou.dk>
    Implement Voyager driver. (sd) with help from Stephane Dalton <sdalton@videotron.ca>
    BrailleLite driver enhancements. (sd)
@@ -132,6 +133,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Add to Papenmeier driver. (dm)
       Add to TSI driver. (sd)
    Implement CR_MSGATTRIB (message attributes of character at routing key). (dm)
+   Implement CR_SETLEFT (left of window to routing key). (dm)
       Add to Alva driver. (np)
       Add to BrailleLite driver. (sd)
       Add to BrailleNote driver. (dm)
@@ -177,6 +179,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Ensure that subsequent lines of identification output use LOG_INFO.
       Remove new-lines from logged messages.
       Ensure that all output to braille display is drained before closing. 
+   Updated manual. (dm) with help from Cheryl Homiak <chomiak@shellworld.net>
 
 June 26, 2001:
  - BRLTTY 2.98 released:

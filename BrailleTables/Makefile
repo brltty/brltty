@@ -20,7 +20,7 @@
 ###############################################################################
 
 
-TOOLS = tbl2txt txt2tbl convtable ibm437toiso ibm850toiso
+TOOLS = tbl2txt txt2tbl tbl2tbl ibm437toiso ibm850toiso
 
 UCDIR = ../Unicode
 UCOBJ = $(UCDIR)/unicode.o
@@ -40,7 +40,7 @@ tbl2txt.o: tbl2txt.c $(UCHDR)
 
 txt2tbl: txt2tbl.c
 
-convtable: convtable.c
+tbl2tbl: tbl2tbl.c
 
 ibm437toiso: ibm437toiso.c
 

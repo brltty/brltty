@@ -42,15 +42,16 @@ class LinuxScreen:public RealScreen {
   int rebindConsole (void);
   int controlConsole (int operation, void *argument);
 
-  int setTranslationTable (int opening);
+  int setTranslationTable (int force);
   unsigned char translationTable[0X100];
 
-  unsigned short characterMap[0X100];
-  int (LinuxScreen::*setCharacterMap) (int opening);
-  int setApplicationCharacterMap (int opening);
-  void logCharacterMap (void);
+  unsigned short applicationCharacterMap[0X100];
+  int (LinuxScreen::*setApplicationCharacterMap) (int force);
+  int getUserAcm (int force);
+  int determineApplicationCharacterMap (int force);
+  void logApplicationCharacterMap (void);
 
-  int setScreenFontMap (int opening);
+  int setScreenFontMap (int force);
   struct unipair *screenFontMapTable;
   unsigned short screenFontMapCount;
   unsigned short screenFontMapSize;

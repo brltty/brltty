@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.4 (November 2001)"
+"Braille Lite driver, version 0.5.5 (December 2001)"
 
 #define BRL_C
 
@@ -387,7 +387,7 @@ readbrl (DriverCommandContext cmds)
   static int repeatNext = 0; /* flag to indicate  whether 0 we repeat the
 				same command or 1 we get the next command
 				and repeat that. */
-  static int hold, shift, shiftlck, ctrl;
+  static int hold, shift, shiftlck, ctrl, meta;
 #ifdef USE_TEXTTRANS
   static int dot8shift;
 #endif
@@ -444,7 +444,7 @@ readbrl (DriverCommandContext cmds)
 	  {
 	  case BLT_KBEMU:	/* set keyboard emulation */
 	    kbemu ^= 1;
-	    shift = shiftlck = ctrl = 0;
+	    shift = shiftlck = ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
@@ -522,20 +522,17 @@ readbrl (DriverCommandContext cmds)
 	    ctrl = 1;
 	    return CMD_NOOP;
 #ifdef USE_TEXTTRANS
-	  case BLT_DOT8SHIFT:	/* control next */
+	  case BLT_DOT8SHIFT:	/* add dot 8 to next pattern */
 	    dot8shift = 1;
 	    return CMD_NOOP;
 #endif
-#if 0
 	  case BLT_META:	/* meta next */
-	    outmsg[0] = 27;
-	    outmsg[1] = 0;
+	    meta = 1;
 	    return CMD_NOOP;
-#endif
 	  case BLT_ESCAPE:
 	    if (!shiftlck)
 	      shift = 0;
-	    ctrl = 0;
+	    ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
@@ -543,7 +540,7 @@ readbrl (DriverCommandContext cmds)
 	  case BLT_TAB:
 	    if (!shiftlck)
 	      shift = 0;
-	    ctrl = 0;
+	    ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
@@ -551,7 +548,7 @@ readbrl (DriverCommandContext cmds)
 	  case BLT_BACKSP:	/* remove backwards */
 	    if (!shiftlck)
 	      shift = 0;
-	    ctrl = 0;
+	    ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
@@ -559,7 +556,7 @@ readbrl (DriverCommandContext cmds)
 	  case BLT_DELETE:	/* remove forward */
 	    if (!shiftlck)
 	      shift = 0;
-	    ctrl = 0;
+	    ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
@@ -567,7 +564,7 @@ readbrl (DriverCommandContext cmds)
 	  case BLT_ENTER:	/* enter - do ^m, or ^j if control-enter */
 	    if (!shiftlck)
 	      shift = 0;
-	    ctrl = 0;
+	    ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
@@ -577,7 +574,7 @@ readbrl (DriverCommandContext cmds)
 	    message ("keyboard emu off", MSG_SILENT);
 	    return CMD_NOOP;
 	  default:		/* unrecognised command */
-	    shift = shiftlck = ctrl = 0;
+	    shift = shiftlck = ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif
@@ -587,26 +584,31 @@ readbrl (DriverCommandContext cmds)
       /* OK, it's an ordinary (non-chorded) keystroke, and kbemu is on. */
 #ifndef USE_TEXTTRANS
       if (ctrl && key.asc >= 96)
-	return VAL_PASSCHAR | (key.asc & 0x1f);
+	/* old code was (key.asc & 0x1f) */
+	temp = VAL_PASSCHAR | key.asc | VPC_CONTROL;
+      else if (meta && key.asc >= 96)
+	temp = VAL_PASSCHAR | key.asc | VPC_META;
       else if (shift && (key.asc & 0x40))
-	return VAL_PASSCHAR | (key.asc & 0xdf);
+	/* old code was (key.asc & 0xdf) */
+	temp = VAL_PASSCHAR | key.asc | VPC_SHIFT;
       else
-	return VAL_PASSCHAR | key.asc;
+	temp = VAL_PASSCHAR | key.asc;
 #else
-      return VAL_PASSDOTS |
+      temp = VAL_PASSDOTS |
 	(keys_to_dots[key.raw]
+	 | ((meta) ? VPC_META : 0)
 	 | ((ctrl) ? 0xC0 : 
 	    (shift) ? 0x40 : 
 	    (dot8shift) ? 0x80 : 0));
 #endif
       if (!shiftlck)
 	shift = 0;
-      ctrl = 0;
+      ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
       dot8shift = 0;
 #endif
       outmsg[0] = 0;
-      return CMD_NOOP;
+      return temp;
 
     case 1:			/* position internal cursor */
       switch (key.cmd)
@@ -714,8 +716,10 @@ readbrl (DriverCommandContext cmds)
       }
       return CMD_NOOP;
     case 3:			/* preferences options */
+#if 0 /* We remove this restriction. */
       if (!key.spcbar)		/* not chorded */
 	return CMD_NOOP;
+#endif
       switch (key.asc)
 	{
 	case 'm':		/* preferences menu */

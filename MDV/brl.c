@@ -673,9 +673,9 @@ readbrl (DriverCommandContext cmds)
 	  howmanykeys = 0;
 	}
       }else if(keycode == SHIFT_PRESS) {
-	cmd = CMD_CSRHIDE_QK | VAL_SWITCHON;
+	cmd = CMD_CSRHIDE | VAL_SWITCHON;
       }else if(keycode == SHIFT_RELEASE) {
-	cmd = CMD_CSRHIDE_QK | VAL_SWITCHOFF;
+	cmd = CMD_CSRHIDE | VAL_SWITCHOFF;
       }else if(modifier == 0){
 	switch(key) {
           case LF: cmd = CMD_FWINLT; break;
@@ -730,7 +730,7 @@ readbrl (DriverCommandContext cmds)
 	/* special handling for routing keys over status cells: currently
 	   only key 1 is mapped. */
 	if(whichkey == 1)
-	  return CMD_CSRHIDE_QK 
+	  return CMD_CSRHIDE 
 	    | ((code == REPORTROUTINGKEYPRESS) ? VAL_SWITCHOFF : VAL_SWITCHON);
 	else return EOF;
       }

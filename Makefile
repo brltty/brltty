@@ -16,15 +16,13 @@
 ###############################################################################
 
 
-INSTALL_ROOT = 
-PREFIX =
-
 
 # If you would like the driver for your Braille display built into the
 # program, then specify it by uncommenting one, and only one, of these
 # definitions of BRL_TARGET. If you do not specify the display here,
 # then a set of shared libraries, one for each driver, will be made,
-# and you will need to specify the display type at run-time via -b.
+# and you will need to specify the display type at run-time via
+# either the -b option or the braille-driver directive.
 # Note to maintainer:
 #    When adding a new target here, add it also to the "BRL_TARGETS =" line.
 #BRL_TARGET = Alva
@@ -46,16 +44,23 @@ PREFIX =
 #BRL_TARGET = VisioBraille
 #BRL_TARGET = Voyager
 
+# Specify the device path for the port your Braille display will
+# normally be connected to.  For port com(n), use /dev/ttyS(n-1) -
+# e.g. for com1 use /dev/ttyS0
+# This specification can be overridden by either the -d option or the
+# braille-device directive.
+BRLDEV = /dev/ttyS0
+
 # If you would like the driver for your speech interface built into the
 # program, then specify it by uncommenting one, and only one, of these
 # definitions of SPK_TARGET. If you do not specify the interface here,
 # then a set of shared libraries, one for each driver, will be made,
-# and you will need to specify the interface type at run-time via -s.
+# and you will need to specify the interface type at run-time via either
+# the -s option or the speech-driver directive.
+# It is safe to leave all of these entries commented out.
+# Note: Alva speech is available with Delphi models only.
 # Note to maintainer:
 #    When adding a new target here, add it also to the "SPK_TARGETS =" line.
-# PS: Alva speech is available with Delphi models only.
-# Note: All this is still experimental.  It is safe to leave all of
-# these entries commented out.
 #SPK_TARGET = Alva
 #SPK_TARGET = BrailleLite
 #SPK_TARGET = CombiBraille
@@ -65,8 +70,9 @@ PREFIX =
 #SPK_TARGET = Televox
 
 # Specify the default, compiled-in, text translation table.  This can be
-# overridden at run-time by giving brltty the -t option.
+# overridden at run-time by either the -t option or the text-table directive.
 # Uncomment exactly one of the following lines.
+# It is safe to leave all of them commented out.
 # See the content of the BrailleTables directory for more tables.
 #TEXTTRANS = text.danish.tbl      # Danish
 #TEXTTRANS = text.es.tbl          # Spanish
@@ -75,32 +81,42 @@ PREFIX =
 #TEXTTRANS = text.it.tbl          # Italian
 #TEXTTRANS = text.no-h.tbl        # Norwegian and German
 #TEXTTRANS = text.no-p.tbl        # Norwegian
+#TEXTTRANS = text.pl-iso02.tbl    # Polish (iso-8859-2)
 #TEXTTRANS = text.simple.tbl      # American English
 #TEXTTRANS = text.sweden.tbl      # Swedish
 #TEXTTRANS = text.swedish.tbl     # Swedish
 #TEXTTRANS = text.uk.tbl          # United Kingdom English
 #TEXTTRANS = text.us.tbl          # American English
 
-# Specify the device name for the serial port your Braille display will
-# normally be connected to.  For port com(n), use /dev/ttyS(n-1) -
-# e.g. for com1 use /dev/ttyS0
-# [Note that this port can be overridden from the brltty command-line 
-# parameter `-d'.  See the documentation for further details.]
-BRLDEV = /dev/ttyS0
+# Specify the default, compiled-in, attributes translation table.  This can be
+# overridden at run-time by either the -a option or the attributes-table directive.
+# Uncomment exactly one of the following lines.
+# See the content of the BrailleTables directory for more tables.
+ATTRTRANS = attributes.tbl
+#ATTRTRANS = attrib.tbl
 
+# Set INSTALL_ROOT if you need to install BRLTTY into a location which is
+# different from the one where it will be run from.
+INSTALL_ROOT = 
+
+# Specify the anchor for the installed file hierarchy. Even though this setting
+# only determines the location of the installed files, it's important to have
+# it set consistently throughout the entire build process so that the various
+# components of BRLTTY will know where to find each other.
 # NOTE: if you intend to have brltty start up automatically at
 # boot-time, the executable and all data files should be in your root
 # filesystem.
+PREFIX =
 
 # Specify the directory where the executable programs are to be placed:
 PROG_DIR = /sbin
 
 # Specify the directory where BRLTTY keeps its translation tables and its
 # help files.  If this directory doesn't exist it will be created.
-# (You may prefer somewhere under /usr/lib or /usr/local/lib ...)
 DATA_DIR = /etc/brltty
 
-# where to look for libs
+# Specify the directory where BRLTTY keeps its shared libraries.
+# If this directory doesn't exist it will be created.
 LIB_DIR = /lib/brltty
 
 # Edit this definition (options for install(1)) if you want to install
@@ -110,31 +126,29 @@ LIB_DIR = /lib/brltty
 INSTALL_USER = root
 INSTALL_GROUP = root
 INSTALL_MODE = 0744
-INSTALL_EXEC = --owner=$(INSTALL_USER) --group=$(INSTALL_GROUP) --mode=$(INSTALL_MODE)
-INSTALL_LIB = --owner=$(INSTALL_USER) --group=$(INSTALL_GROUP) --mode=$(INSTALL_MODE)
 
+# Screen access methods (OS dependent).  Uncomment exactly one of the
+# following screen driver definitions (if not sure, don't touch anything).
 
-# Screen access methods (OS dependent).  Uncomment only one of the
-# two following sets of options (if not sure, don't touch anything):
-
-# 1. These are the names by which the character device which BRLTTY uses
-# to read the screen under Linux is commonly known.
-# If none of them exist during the install, then the first one is created.
-# Don't modify this unless you know what you're doing!
+# The Linux screen driver.
 SCR_O = scr_linux.o
-VCSADEV = /dev/vcsa /dev/vcsa0 /dev/vcc/a
 
-# 2. You may define this as an alternative to Linux's vcsa device by using
-# the "screen" package along with BRLTTY through shared memory.  It is 
-# made available for any UNIX platform that supports IPC (like SVR4).
+# You may define this one as an alternative to the native screen driver for
+# your operating system. It works in conjunction with the "screen" package
+# to provide access for any UNIX platform which supports IPC (like SVR4).
 # See Patches/screen-x.x.x.txt for more information.
 # NOTE: This is completely experimental.
 #SCR_O = scr_shm.o
 
+# Parameter for the Linux screen driver:
+# These are the names by which the character device which BRLTTY uses
+# to read the screen under Linux is commonly known.
+# If none of them exist during the install, then the first one is created.
+# Don't modify this unless you know what you're doing!
+VCSADEV = /dev/vcsa /dev/vcsa0 /dev/vcc/a
 
 # The following are compiler settings.  If you don't know what they mean,
 # LEAVE THEM ALONE!
-MAKE = make
 
 # This is for the unlikely case where you would want to use a cross-compiler
 # (to compile for another archtecture).
@@ -167,11 +181,16 @@ LDFLAGS = $(COMMONLDFLAGS) -s
 #LDFLAGS = $(COMMONLDFLAGS) -g
 LDLIBS = -ldl -lpthread -lm -lc
 
+MAKE = make
+
 ###############################################################################
 
 ifeq ($(TEXTTRANS),)
    TEXTTRANS = text.simple.tbl
 endif
+
+INSTALL_EXEC = --owner=$(INSTALL_USER) --group=$(INSTALL_GROUP) --mode=$(INSTALL_MODE)
+INSTALL_LIB = --owner=$(INSTALL_USER) --group=$(INSTALL_GROUP) --mode=$(INSTALL_MODE)
 
 INSTALL_DRIVERS =
 
@@ -194,8 +213,12 @@ endif
 all: brltty install-brltty txt2hlp brltest scrtest
 
 install-brltty: install.template
-	sed -e 's%=P%$(PREFIX)$(PROG_DIR)%g' -e 's%=L%$(PREFIX)$(LIB_DIR)%g' \
-	  -e 's%=D%$(DATA_DIR)%g' -e 's%=V%$(VCSADEV)%g' install.template > $@
+	sed -e 's%=F%$(PREFIX)%g' \
+	    -e 's%=P%$(PROG_DIR)%g' \
+            -e 's%=L%$(LIB_DIR)%g' \
+	    -e 's%=D%$(DATA_DIR)%g' \
+            -e 's%=V%$(VCSADEV)%g' \
+            $< >$@
 
 SCREEN_OBJECTS = scr.o scr_base.o $(SCR_O)
 
@@ -335,17 +358,17 @@ check-braille: brltty dynamic-braille
 	   LD_RUN_PATH="./lib" ./brltty -v -b $$lib 2>&1 || exit 1; \
 	done
 
-text.auto.h: BrailleTables/$(TEXTTRANS) comptable Makefile
-	./comptable <$< >$@
+text.auto.h: BrailleTables/$(TEXTTRANS) tbl2hex Makefile
+	./tbl2hex <$< >$@
 
-attrib.auto.h: BrailleTables/attributes.tbl comptable Makefile
-	./comptable <$< >$@
+attrib.auto.h: BrailleTables/$(ATTRTRANS) tbl2hex Makefile
+	./tbl2hex <$< >$@
 
 txt2hlp: txt2hlp.c helphdr.h
 	$(HOSTCC) $(LDFLAGS) -o $@ txt2hlp.c $(LDLIBS)
 
-comptable: comptable.c
-	$(HOSTCC) $(LDFLAGS) -o $@ comptable.c $(LDLIBS)
+tbl2hex: tbl2hex.c
+	$(HOSTCC) $(LDFLAGS) -o $@ tbl2hex.c $(LDLIBS)
 
 install: install-programs install-help install-tables $(INSTALL_DRIVERS) install-devices
 
@@ -389,11 +412,11 @@ uninstall:
 	rmdir $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)
 
 clean:
-	rm -f *.o */*.o lib/* help/* install-brltty *.auto.h core
+	rm -f brltty install-brltty txt2hlp tbl2hex
+	rm -f *.o */*.o lib/* help/* *.auto.h core
 
 distclean: clean
-	rm -f brltty txt2hlp comptable *test
-	rm -f *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
+	rm -f *test *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
 	$(MAKE) -C BrailleLite distclean
 	$(MAKE) -C Papenmeier distclean
 	$(MAKE) -C Voyager distclean

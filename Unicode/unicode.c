@@ -291,11 +291,35 @@ static const CodePage iso_8859_16 = {
   }
 };
 
+static const CodePage cp_37 = {
+  name:"cp-37",
+  desc:"EBCDIC: US/Canada English",
+  table:{
+    #include "cp-37.h"
+  }
+};
+
+static const CodePage cp_424 = {
+  name:"cp-424",
+  desc:"EBCDIC: Hebrew",
+  table:{
+    #include "cp-424.h"
+  }
+};
+
 static const CodePage cp_437 = {
   name:"cp-437",
   desc:"US English",
   table:{
     #include "cp-437.h"
+  }
+};
+
+static const CodePage cp_500 = {
+  name:"cp-500",
+  desc:"EBCDIC: Belgium/Switzerland",
+  table:{
+    #include "cp-500.h"
   }
 };
 
@@ -317,7 +341,7 @@ static const CodePage cp_775 = {
 
 static const CodePage cp_850 = {
   name:"cp-850",
-  desc:"Multilingual (Latin-1)",
+  desc:"Multilingual (Latin 1)",
   table:{
     #include "cp-850.h"
   }
@@ -325,7 +349,7 @@ static const CodePage cp_850 = {
 
 static const CodePage cp_852 = {
   name:"cp-852",
-  desc:"Slavic (Latin-2)",
+  desc:"Slavic/Eastern Europe (Latin 2)",
   table:{
     #include "cp-852.h"
   }
@@ -333,9 +357,17 @@ static const CodePage cp_852 = {
 
 static const CodePage cp_855 = {
   name:"cp-855",
-  desc:"Cyrilic",
+  desc:"Cyrillic (1)",
   table:{
     #include "cp-855.h"
+  }
+};
+
+static const CodePage cp_856 = {
+  name:"cp-856",
+  desc:"EBCDIC:",
+  table:{
+    #include "cp-856.h"
   }
 };
 
@@ -349,7 +381,7 @@ static const CodePage cp_857 = {
 
 static const CodePage cp_860 = {
   name:"cp-860",
-  desc:"iPortugese",
+  desc:"Portugese",
   table:{
     #include "cp-860.h"
   }
@@ -381,7 +413,7 @@ static const CodePage cp_863 = {
 
 static const CodePage cp_864 = {
   name:"cp-864",
-  desc:"Arabic (Middle East)",
+  desc:"Arabic/Middle East",
   table:{
     #include "cp-864.h"
   }
@@ -397,7 +429,7 @@ static const CodePage cp_865 = {
 
 static const CodePage cp_866 = {
   name:"cp-866",
-  desc:"Russian",
+  desc:"Russian (Cyrillic 2)",
   table:{
     #include "cp-866.h"
   }
@@ -419,6 +451,126 @@ static const CodePage cp_874 = {
   }
 };
 
+static const CodePage cp_875 = {
+  name:"cp-875",
+  desc:"EBCDIC: Greek",
+  table:{
+    #include "cp-875.h"
+  }
+};
+
+static const CodePage cp_1006 = {
+  name:"cp-1006",
+  desc:"EBCDIC: Arabic",
+  table:{
+    #include "cp-1006.h"
+  }
+};
+
+static const CodePage cp_1026 = {
+  name:"cp-1026",
+  desc:"EBCDIC: Turkish (Latin 5)",
+  table:{
+    #include "cp-1026.h"
+  }
+};
+
+static const CodePage cp_1250 = {
+  name:"cp-1250",
+  desc:"MSWIN: Eastern Europe (Latin 2)",
+  table:{
+    #include "cp-1250.h"
+  }
+};
+
+static const CodePage cp_1251 = {
+  name:"cp-1251",
+  desc:"MSWIN: Cyrillic",
+  table:{
+    #include "cp-1251.h"
+  }
+};
+
+static const CodePage cp_1252 = {
+  name:"cp-1252",
+  desc:"MSWIN: English/Western Europe (Latin 1)",
+  table:{
+    #include "cp-1252.h"
+  }
+};
+
+static const CodePage cp_1253 = {
+  name:"cp-1253",
+  desc:"MSWIN: Greek (GRC)",
+  table:{
+    #include "cp-1253.h"
+  }
+};
+
+static const CodePage cp_1254 = {
+  name:"cp-1254",
+  desc:"MSWIN: Turkish",
+  table:{
+    #include "cp-1254.h"
+  }
+};
+
+static const CodePage cp_1255 = {
+  name:"cp-1255",
+  desc:"MSWIN: Hebrew",
+  table:{
+    #include "cp-1255.h"
+  }
+};
+
+static const CodePage cp_1256 = {
+  name:"cp-1256",
+  desc:"MSWIN: Arabic",
+  table:{
+    #include "cp-1256.h"
+  }
+};
+
+static const CodePage cp_1257 = {
+  name:"cp-1257",
+  desc:"MSWIN: Baltic (Estonian, Latvian, Lithuanian)",
+  table:{
+    #include "cp-1257.h"
+  }
+};
+
+static const CodePage cp_1258 = {
+  name:"cp-1258",
+  desc:"MSWIN: Vietnamese",
+  table:{
+    #include "cp-1258.h"
+  }
+};
+
+static const CodePage koi8_r = {
+  name:"koi8-r",
+  desc:"Russian",
+  table:{
+    #include "koi8-r.h"
+  }
+};
+
+static const CodePage koi8_ru = {
+  name:"koi8-ru",
+  desc:"Ukrainian, Russian, Belorus",
+  table:{
+    #include "koi8-ru.h"
+  }
+};
+
+static const CodePage koi8_u = {
+  name:"koi8-u",
+  desc:"Ukrainian",
+  table:{
+    #include "koi8-u.h"
+  }
+};
+
 const CodePage *const codePageTable[] = {
   &iso_8859_1,
   &iso_8859_2,
@@ -434,12 +586,16 @@ const CodePage *const codePageTable[] = {
   &iso_8859_14,
   &iso_8859_15,
   &iso_8859_16,
+  &cp_37,
+  &cp_424,
   &cp_437,
+  &cp_500,
   &cp_737,
   &cp_775,
   &cp_850,
   &cp_852,
   &cp_855,
+  &cp_856,
   &cp_857,
   &cp_860,
   &cp_861,
@@ -449,7 +605,22 @@ const CodePage *const codePageTable[] = {
   &cp_865,
   &cp_866,
   &cp_869,
-  &cp_874
+  &cp_874,
+  &cp_875,
+  &cp_1006,
+  &cp_1026,
+  &cp_1250,
+  &cp_1251,
+  &cp_1252,
+  &cp_1253,
+  &cp_1254,
+  &cp_1255,
+  &cp_1256,
+  &cp_1257,
+  &cp_1258,
+  &koi8_r,
+  &koi8_ru,
+  &koi8_u
 };
 const unsigned int codePageCount = sizeof(codePageTable) / sizeof(codePageTable[0]);
 

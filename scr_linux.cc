@@ -24,7 +24,7 @@
 
 #define SCR_C 1
 //#define DEBUG_TRANSLATION_TABLE
-//#define DEBUG_CHARACTER_MAP
+//#define DEBUG_APPLICATION_CHARACTER_MAP
 //#define DEBUG_SCREEN_FONT_MAP
 //#define DEBUG_SCREEN_TEXT_TRANSLATION
 
@@ -55,7 +55,7 @@ RealScreen *live = &screen;
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[0]
  * 8-bit Latin-1 mapped to Unicode -- trivial mapping
  */
-static const unsigned short iso_latin1_map[0X100] = {
+static const unsigned short iso01_map[0X100] = {
    0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
    0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x000f,
    0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x0017,
@@ -93,7 +93,7 @@ static const unsigned short iso_latin1_map[0X100] = {
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[1]
  * VT100 graphics mapped to Unicode
  */
-static const unsigned short vt100_graphics_map[0X100] = {
+static const unsigned short vt100_map[0X100] = {
    0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
    0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x000f,
    0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0016, 0x0017,
@@ -131,7 +131,7 @@ static const unsigned short vt100_graphics_map[0X100] = {
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[2]
  * IBM Codepage 437 mapped to Unicode
  */
-static const unsigned short ibm_cp437_map[0X100] = {
+static const unsigned short cp437_map[0X100] = {
    0x0000, 0x263a, 0x263b, 0x2665, 0x2666, 0x2663, 0x2660, 0x2022, 
    0x25d8, 0x25cb, 0x25d9, 0x2642, 0x2640, 0x266a, 0x266b, 0x263c,
    0x25b6, 0x25c0, 0x2195, 0x203c, 0x00b6, 0x00a7, 0x25ac, 0x21a8,
@@ -168,11 +168,11 @@ static const unsigned short ibm_cp437_map[0X100] = {
 
 
 static char *screenParameters[] = {
-  "characterset",
+  "acm",
   NULL
 };
 typedef enum {
-  PARM_CHARACTERSET
+  PARM_ACM
 } ScreenParameters;
 char **LinuxScreen::parameters (void) {
   return screenParameters;
@@ -180,22 +180,22 @@ char **LinuxScreen::parameters (void) {
 
 
 int LinuxScreen::prepare (char **parameters) {
+  setApplicationCharacterMap = &LinuxScreen::determineApplicationCharacterMap;
   {
-    static const unsigned short *maps[] = {iso_latin1_map, vt100_graphics_map, ibm_cp437_map, NULL};
-    static const unsigned short *map;
-    static const char *choices[] = {"latin1", "vt100graphics", "cp437", "application", NULL};
+    static const char *choices[] = {"default", "iso01", "vt100", "cp437", "user", NULL};
     unsigned int choice;
-    if (validateChoice(&choice, "character set", parameters[PARM_CHARACTERSET], choices)) {
-      map = maps[choice];
-    } else {
-      map = iso_latin1_map;
-    }
-    if (map) {
-      memcpy(characterMap, map, sizeof(characterMap));
-      setCharacterMap = NULL;
-      logCharacterMap();
-    } else {
-      setCharacterMap = &LinuxScreen::setApplicationCharacterMap;
+    if (validateChoice(&choice, "character set", parameters[PARM_ACM], choices)) {
+      if (choice) {
+        static const unsigned short *maps[] = {iso01_map, vt100_map, cp437_map, NULL};
+        const unsigned short *map = maps[choice-1];
+        if (map) {
+          memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
+          setApplicationCharacterMap = NULL;
+          logApplicationCharacterMap();
+        } else {
+          setApplicationCharacterMap = &LinuxScreen::getUserAcm;
+        }
+      }
     }
   }
   if (setScreenPath()) {
@@ -208,8 +208,8 @@ int LinuxScreen::prepare (char **parameters) {
   return 0;
 }
 
-void LinuxScreen::logCharacterMap (void) {
-#ifdef DEBUG_CHARACTER_MAP
+void LinuxScreen::logApplicationCharacterMap (void) {
+#ifdef DEBUG_APPLICATION_CHARACTER_MAP
   char buffer[0X80];
   char *address = NULL;
   unsigned char character = 0;
@@ -220,9 +220,9 @@ void LinuxScreen::logCharacterMap (void) {
         if (!character) break;
       }
       address = buffer;
-      address += sprintf(address, "c2u[%02X]:", character);
+      address += sprintf(address, "acm[%02X]:", character);
     }
-    address += sprintf(address, " %4.4X", characterMap[character++]);
+    address += sprintf(address, " %4.4X", applicationCharacterMap[character++]);
   }
 #endif
 }
@@ -372,15 +372,15 @@ int LinuxScreen::setup (void) {
  * We need to reverse this translation in order to get the character code in
  * the expected character set.
  */
-int LinuxScreen::setTranslationTable (int opening) {
+int LinuxScreen::setTranslationTable (int force) {
   int changed = 0;
-  if (setCharacterMap && (this->*setCharacterMap)(opening)) changed = 1;
-  if (setScreenFontMap(opening)) changed = 1;
+  if (setApplicationCharacterMap && (this->*setApplicationCharacterMap)(force)) changed = 1;
+  if (setScreenFontMap(force)) changed = 1;
   if (changed) {
     int character;
     memset(translationTable, '?', sizeof(translationTable));
     for (character=0XFF; character>=0; --character) {
-      unsigned short unicode = characterMap[character];
+      unsigned short unicode = applicationCharacterMap[character];
       int position;
       if ((unicode >> 8) == 0XF0) {
         position = unicode & 0XFF;
@@ -429,12 +429,13 @@ int LinuxScreen::setTranslationTable (int opening) {
   return 0;
 }
 
-int LinuxScreen::setApplicationCharacterMap (int opening) {
+int LinuxScreen::getUserAcm (int force) {
   unsigned short map[0X100];
   if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
-    if (opening || (memcmp(characterMap, map, sizeof(characterMap)) != 0)) {
-      memcpy(characterMap, map, sizeof(characterMap));
-      LogPrint(LOG_DEBUG, "Character map changed.");
+    if (force || (memcmp(applicationCharacterMap, map, sizeof(applicationCharacterMap)) != 0)) {
+      memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
+      LogPrint(LOG_DEBUG, "Application character map changed.");
+      logApplicationCharacterMap();
       return 1;
     }
   } else {
@@ -443,9 +444,29 @@ int LinuxScreen::setApplicationCharacterMap (int opening) {
   return 0;
 }
 
-int LinuxScreen::setScreenFontMap (int opening) {
+int LinuxScreen::determineApplicationCharacterMap (int force) {
+  if (!getUserAcm(force)) return 0;
+  const char *name = NULL;
+  for (unsigned short character=0; character<0X100; ++character) {
+    if (applicationCharacterMap[character] != (character | 0XF000)) {
+      setApplicationCharacterMap = &LinuxScreen::getUserAcm;
+      name = "user";
+      break;
+    }
+  }
+  if (!name) {
+    memcpy(applicationCharacterMap, iso01_map, sizeof(applicationCharacterMap));
+    setApplicationCharacterMap = NULL;
+    logApplicationCharacterMap();
+    name = "iso01";
+  }
+  LogPrint(LOG_INFO, "Selected Application Character Map: %s", name);
+  return 1;
+}
+
+int LinuxScreen::setScreenFontMap (int force) {
   struct unimapdesc sfm;
-  unsigned short size = opening? 0X100: screenFontMapCount;
+  unsigned short size = force? 0X100: screenFontMapCount;
   while (1) {
     sfm.entry_ct = size;
     if (!(sfm.entries = (struct unipair *)malloc(sfm.entry_ct * sizeof(*sfm.entries)))) {
@@ -463,7 +484,7 @@ int LinuxScreen::setScreenFontMap (int opening) {
       return 0;
     }
   }
-  if (!opening) {
+  if (!force) {
     if (sfm.entry_ct == screenFontMapCount) {
       if (memcmp(sfm.entries, screenFontMapTable, sfm.entry_ct*sizeof(sfm.entries[0])) == 0) {
         if (size == screenFontMapSize) {

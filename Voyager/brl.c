@@ -607,11 +607,11 @@ readbrl (DriverCommandContext cmds)
 	switch(keystate) {
 	case K_UP:
 	case K_RL:
-	  cmd = CMD_PREF_PREV_SETTING;
+	  cmd = CMD_MENU_PREV_SETTING;
 	  break;
 	case K_DOWN:
 	case K_RR:
-	  cmd = CMD_PREF_NEXT_SETTING;
+	  cmd = CMD_MENU_NEXT_SETTING;
 	  break;
 	};
       }

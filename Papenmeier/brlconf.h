@@ -62,6 +62,6 @@
 #define PREFSTYLE ST_Generic
 
 #define CONFIG_ENV   "BRLTTY_PM_CONF"
-//#define CONFIG_FILE  "/etc/brltty/brltty.pm.conf"
+//#define CONFIG_FILE  "/etc/brltty/brltty-pm.conf"
 
 #define MAXPATH  128

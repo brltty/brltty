@@ -40,7 +40,7 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99z";
+char VERSION[] = "BRLTTY 2.99.1";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 int refreshInterval = REFRESH_INTERVAL;
@@ -236,13 +236,15 @@ showInfo (void)
   unsigned char infbuf[22];
   setStatusText("info");
   if (brl.x*brl.y >= 21) /* 21 is current size of output ... */ {
-    sprintf (infbuf, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c", \
-             p->winx, p->winy, scr.posx, scr.posy, curscr, 
-             p->csrtrk ? 't' : ' ', \
-             env.csrvis ? (env.csrblink ? 'B' : 'v') : \
-             (env.csrblink ? 'b' : ' '), p->dispmode ? 'a' : 't', \
-             (dispmd & FROZ_SCRN) == FROZ_SCRN ? 'f' : ' ', \
-             env.sixdots ? '6' : '8', env.capblink ? 'B' : ' ');
+    sprintf(infbuf, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
+            p->winx, p->winy, scr.posx, scr.posy, curscr, 
+            p->csrtrk? 't': ' ',
+            env.csrvis? (env.csrblink? 'B': 'v'):
+                        (env.csrblink? 'b': ' '),
+            p->dispmode? 'a': 't',
+            ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f': ' ',
+            env.sixdots? '6': '8',
+            env.capblink? 'B': ' ');
     message(infbuf, MSG_SILENT|MSG_NODELAY);
   } else {
     int i;
@@ -251,21 +253,28 @@ showInfo (void)
      * cursor and display positions by a CombiBraille-style
      * status display.  This assumes brl.x * brl.y > 14 ...
      */
-    sprintf (infbuf, "xxxxx %02d %c%c%c%c%c%c     ", \
-             curscr, p->csrtrk ? 't' : ' ', \
-             env.csrvis ? (env.csrblink ? 'B' : 'v') : \
-             (env.csrblink ? 'b' : ' '), p->dispmode ? 'a' : 't', \
-             (dispmd & FROZ_SCRN) == FROZ_SCRN ? 'f' : ' ', \
-             env.sixdots ? '6' : '8', env.capblink ? 'B' : ' ');
-    infbuf[0] = num[(p->winx / 10) % 10] << 4 | \
-      num[(scr.posx / 10) % 10];
+    sprintf(infbuf, "xxxxx %02d %c%c%c%c%c%c     ",
+            curscr,
+            p->csrtrk? 't': ' ',
+            env.csrvis? (env.csrblink? 'B' : 'v'):
+                        (env.csrblink? 'b': ' '),
+            p->dispmode? 'a': 't',
+            ((dispmd & FROZ_SCRN) == FROZ_SCRN) ?'f': ' ',
+            env.sixdots? '6': '8',
+            env.capblink? 'B': ' ');
+    infbuf[0] = num[(p->winx / 10) % 10] << 4 |
+                num[(scr.posx / 10) % 10];
     infbuf[1] = num[p->winx % 10] << 4 | num[scr.posx % 10];
-    infbuf[2] = num[(p->winy / 10) % 10] << 4 | \
-      num[(scr.posy / 10) % 10];
+    infbuf[2] = num[(p->winy / 10) % 10] << 4 |
+                num[(scr.posy / 10) % 10];
     infbuf[3] = num[p->winy % 10] << 4 | num[scr.posy % 10];
-    infbuf[4] = env.csrvis << 1 | env.csrsize << 3 | \
-      env.csrblink << 5 | env.slidewin << 7 | p->csrtrk << 6 | \
-      env.sound << 4 | p->dispmode << 2;
+    infbuf[4] = env.csrvis << 1 |
+                env.csrsize << 3 |
+                env.csrblink << 5 |
+                env.slidewin << 7 |
+                p->csrtrk << 6 |
+                env.sound << 4 |
+                p->dispmode << 2;
     infbuf[4] |= (dispmd & FROZ_SCRN) == FROZ_SCRN ? 1 : 0;
 
     /* We have to do the Braille translation ourselves, since
@@ -956,7 +965,7 @@ main (int argc, char *argv[])
                is shown at all */
             TOGGLEPLAY ( TOGGLE(env.csrvis) );
             break;
-          case CMD_CSRHIDE_QK:
+          case CMD_CSRHIDE:
             /* This is for briefly hiding the cursor */
             TOGGLE(p->csrhide);
             /* no tune */
@@ -1249,6 +1258,12 @@ main (int argc, char *argv[])
                 } else
                   playTune(&tune_bad_command);
                 break;
+              case CR_SETLEFT:
+                if (arg < brl.x && p->winx+arg < scr.cols)
+                  p->winx += arg;
+                else
+                  playTune(&tune_bad_command);
+                break;
               case CR_SWITCHVT:
                   if (!switchVirtualTerminal(arg+1))
                        playTune(&tune_bad_command);
@@ -1405,7 +1420,7 @@ main (int argc, char *argv[])
       if (env.capblink && !capon)
         for (i = 0; i < winlen * brl.y; i++)
           if (BRL_ISUPPER (brl.disp[i]))
-       brl.disp[i] = ' ';
+            brl.disp[i] = ' ';
 
       /*
        * Do Braille translation using current table: 

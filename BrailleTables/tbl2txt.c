@@ -33,6 +33,7 @@
 
 /* Dot values for each byte in the table. */
 static unsigned char dotTable[8] = {0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80};
+static unsigned char dotOrder[8] = {6, 2, 1, 0, 3, 4, 5, 7};
 
 static char *characterNames[0X100] = {
   "NUL",
@@ -345,7 +346,7 @@ main (int argc, char *argv[])
 	for (byte=0; byte<0X100; ++byte) {
 	  int dots = fgetc(inputStream);
           const char *name = NULL;
-	  int dot;
+	  int dotIndex;
           unsigned short ubrl = 0X2800;
 	  if (ferror(inputStream)) {
 	    fprintf(stderr, "tbl2txt: Cannot read input file '%s': %s",
@@ -370,12 +371,13 @@ main (int argc, char *argv[])
             fprintf(outputStream, "%c%c", prefix, character);
           }
 	  fprintf(outputStream, " %02X %3d (", byte, byte);
-	  for (dot=0; dot<sizeof(dotTable); ++dot) {
+	  for (dotIndex=0; dotIndex<sizeof(dotOrder); ++dotIndex) {
+            unsigned char dot = dotOrder[dotIndex];
             unsigned char bit = dots & dotTable[dot];
 	    fputc((bit? dot+'1': ' '), outputStream);
             if (bit) ubrl |= 1 << dot;
 	  }
-	  fprintf(outputStream, ")%02X U+%04X", dots, ubrl);
+	  fprintf(outputStream, ")%02X B+%04X", dots, ubrl);
 	  if (codePage) {
             unsigned short unicode = codePage->table[byte];
 	    const UnicodeEntry *uc = getUnicodeEntry(unicode);

@@ -1,162 +1,286 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
-<TITLE>BRLTTY: Appendices</TITLE>
+ <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
+ <TITLE>BRLTTY: Translation Tables</TITLE>
+ <LINK HREF="Manual-5.html" REL=next>
+ <LINK HREF="Manual-3.html" REL=previous>
+ <LINK HREF="Manual.html#toc4" REL=contents>
 </HEAD>
 <BODY>
+<A HREF="Manual-5.html">Next</A>
 <A HREF="Manual-3.html">Previous</A>
-Next
-<A HREF="Manual.html#toc4">Table of Contents</A>
+<A HREF="Manual.html#toc4">Contents</A>
 <HR>
-<H2><A NAME="s4">4. Appendices</A></H2>
+<H2><A NAME="tables"></A> <A NAME="s4">4. Translation Tables</A></H2>
 
-<H2><A NAME="ss4.1">4.1 Disclaimer and License</A></H2>
+<P>BRLTTY uses two <B>translation tables</B> to govern
+the mapping from bytes to dot combinations.
+<P>
+<H2><A NAME="ss4.1">4.1 The Text Translation Table</A>
+</H2>
 
-<P>This program is free software; you can redistribute it and/or 
-modify it under the terms of the <EM>GNU General Public License</EM> as 
-published by the <EM>Free Software Foundation</EM>; either version 2 of 
-the License, or (at your option) any later version.</P>
-<P>This program is distributed in the hope that it will be useful, but 
-WITHOUT ANY WARRANTY; without even the implied warranty of 
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <EM>GNU 
-General Public License</EM> for more details.</P>
-<P>You should have received a copy of the <EM>GNU General Public License</EM> 
-along with this program; if not, write to the Free Software 
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.</P>
-<P>(A copy of the GNU General Public License can be found in the file 
-<CODE>COPYING</CODE> in the top-level directory.)</P>
+<P>The first, and most important, is the text translation table.
+BRLTTY is initially configured to use the
+<A HREF="Manual-6.html#nabcc">North American Braille Computer Code</A> (NABCC).
+In addition to this default text translation table,
+several alternatives are provided:
+<DL>
+<DT><B>text.danish.tbl</B><DD><P>Danish
+<DT><B>text.es.tbl</B><DD><P>Spanish
+<DT><B>text.french.tbl</B><DD><P>French
+<DT><B>text.german.tbl</B><DD><P>German
+<DT><B>text.it.tbl</B><DD><P>Italian
+<DT><B>text.no-h.tbl</B><DD><P>Norwegian and German
+<DT><B>text.no-p.tbl</B><DD><P>Norwegian
+<DT><B>text.pl-iso02.tbl</B><DD><P>Polish (iso-8859-2)
+<DT><B>text.simple.tbl</B><DD><P>American English
+<DT><B>text.sweden.tbl</B><DD><P>Swedish
+<DT><B>text.swedish.tbl</B><DD><P>Swedish
+<DT><B>text.uk.tbl</B><DD><P>United Kingdom English
+<DT><B>text.us.tbl</B><DD><P>American English
+</DL>
 
+See the 
+<A HREF="Manual-3.html#options-text-table">-t</A> command line option,
+the 
+<A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive,
+and the 
+<A HREF="Manual-2.html#make-tables-text">TEXTTRANS</A> make file variable
+for details regarding how to use an alternate text translation table.
+<P>
+<H2><A NAME="ss4.2">4.2 The Attributes Translation Table</A>
+</H2>
 
+<P>The attributes translation table is used when BRLTTY
+is displaying screen attributes rather than screen content
+(see the 
+<A HREF="Manual-3.html#command-DISPMD">DISPMD</A> command).
+Each of the eight braille dots represents one of the eight attribute bits.
+Two attributes translation tables are provided:
+<DL>
+<DT><B>attributes.tbl</B><DD><P>The lefthand column represents the background colours:
+<DL>
+<DT><B>Dot 1</B><DD><P>Red
+<DT><B>Dot 2</B><DD><P>Green
+<DT><B>Dot 3</B><DD><P>Blue
+<DT><B>Dot 7</B><DD><P>Blink
+</DL>
 
-<H2><A NAME="support"></A> <A NAME="ss4.2">4.2 Support</A>For up to date information, see our web page at<CODE>http://www.cam.org/~nico/brltty</CODE>.</H2>
+The righthand column represents the foreground colours:
+<DL>
+<DT><B>Dot 4</B><DD><P>Red
+<DT><B>Dot 5</B><DD><P>Green
+<DT><B>Dot 6</B><DD><P>Blue
+<DT><B>Dot 8</B><DD><P>Bright
+</DL>
 
-<P>BRLTTY represents the work of a team, which includes
-<UL>
-<LI> 
-<A HREF="mailto:nico@cam.org">Nicolas Pitre &lt;nico@cam.org&gt;</A> (current maintainer);</LI>
-<LI> 
-<A HREF="mailto:s.doyon@videotron.ca">St&eacute;phane Doyon &lt;s.doyon@videotron.ca&gt;</A>
-(active developer);</LI>
-<LI> 
-<A HREF="mailto:nn201@cus.cam.ac.uk">Nikhil Nair &lt;nn201@cus.cam.ac.uk&gt;</A>
-(original author, no longer active);</LI>
-<LI> 
-<A HREF="mailto:jrbowden@bcs.org.uk">James Bowden &lt;jrbowden@bcs.org.uk&gt;</A>
-(now acting in an advisory
-capacity).</LI>
-</UL>
-</P>
-<P>Comments, suggestions, criticisms and contributions are welcome.  We will
-try to respond promptly to all (sensible) mail, but give no guarantee.  In
-general, we suggest you send email messages to both active developers.</P>
-<P>If you have a query about a particular display type supported by
-BRLTTY, you may want to contact the author of that particular driver.
-See the <CODE>README</CODE> file in the relevant subdirectory for contact
-details.</P>
+A dot is raised when its corresponding attribute bit is on.
+This is the default attributes translation table
+because it's the most intuitive.
+One of its problems, though, is that it's difficult to discern
+the difference between normal (white on black)
+and reverse (black on white) video.
+<DT><B>attrib.tbl</B><DD><P>The lefthand column represents the background colours:
+<DL>
+<DT><B>Dot 1</B><DD><P>Red
+<DT><B>Dot 2</B><DD><P>Green
+<DT><B>Dot 3</B><DD><P>Blue
+<DT><B>Dot 7</B><DD><P>Blink
+</DL>
 
+The righthand column represents the foreground colours:
+<DL>
+<DT><B>Dot 4</B><DD><P>Red
+<DT><B>Dot 5</B><DD><P>Green
+<DT><B>Dot 6</B><DD><P>Blue
+<DT><B>Dot 8</B><DD><P>Bright
+</DL>
 
+A foreground bit being on triggers its corresponding dot,
+whereas a background bit being off triggers its corresponding dot.
+This unintuitive logic actually makes it easier
+to read the most commonly used attribute combinations.
+</DL>
 
-<H2><A NAME="ss4.3">4.3 BRLTTY on installation/rescue rootdisks</A></H2>
+See the 
+<A HREF="Manual-3.html#options-attributes-table">-a</A> command line option,
+the 
+<A HREF="Manual-3.html#configure-attributes-table">attributes-table</A> configuration file directive,
+and the 
+<A HREF="Manual-2.html#make-tables-attributes">ATTRTRANS</A> make file variable
+for details regarding how to use an alternate attributes translation table.
+<P>
+<H2><A NAME="ss4.3">4.3 Table Format</A>
+</H2>
 
-<P>From version 1.0.1, BRLTTY can run as a stand-alone executable,
-without any configuration files.  In this case the compiled-in
-defaults will be used.  If the directory <CODE>/etc/brltty</CODE> (used to
-store the configuration file, the online help file and the table
-files) is not present, BRLTTY looks in <CODE>/etc</CODE> for the help file
-<CODE>brlttydev.hlp</CODE> and the configuration file <CODE>brlttyconf.dat</CODE>.
-Even if these are not present, BRLTTY will still work!</P>
-<P>If, for some reason, you ever create the <CODE>/etc/brltty</CODE> directory by hand,
-it is important to set the permissions so that only root can create files
-in that directory.</P>
-<P>Note: The <CODE>/dev/vcsa0</CODE> device is also required. It should already be
-present unless your Linux distribution is quite old. You can create it with:
+<P>A translation table is a 256-byte binary file.
+It's indexed with either a character or an attributes byte,
+and the byte at that position contains the corresponding dot combination.
+The mapping from bit to dot is as follows:
+<DL>
+<DT><B>Bit 0</B><DD><P>Dot 1
+<DT><B>Bit 1</B><DD><P>Dot 4
+<DT><B>Bit 2</B><DD><P>Dot 2
+<DT><B>Bit 3</B><DD><P>Dot 5
+<DT><B>Bit 4</B><DD><P>Dot 3
+<DT><B>Bit 5</B><DD><P>Dot 6
+<DT><B>Bit 6</B><DD><P>Dot 7
+<DT><B>Bit 7</B><DD><P>Dot 8
+</DL>
+
+This particular mapping makes it easy and efficient for BRLTTY
+to vertically shift a dot pattern.
+<P>
+<H2><A NAME="ss4.4">4.4 Table Utilities</A>
+</H2>
+
+<P>These utilities reside within the <CODE>BrailleTables</CODE> subdirectory,
+and aren't built as part of the regular procedure.
+To build them, run <CODE>make</CODE> within the <CODE>BrailleTables</CODE> subdirectory.
 <BLOCKQUOTE><CODE>
 <PRE>
-mknod /dev/vcsa0 c 7 128
-chown root.tty /dev/vcsa0
-chmod 660 /dev/vcsa0
+cd BrailleTables
+make
 </PRE>
 </CODE></BLOCKQUOTE>
-</P>
-<P>When constructing floppy rootdisks for installation or rescue
-purposes, space is often of the essence.  This new resiliance allows
-BRLTTY to be installed as a single executable on such disks, reducing
-the space requirement.</P>
-<P>Note: The script <CODE>install-brltty</CODE> assumes a complete installation
-of BRLTTY is to be copied.</P>
-<P>One problem often encountered when trying to use BRLTTY in an uncertain
-environment like a bootdisk or an incomplete system is that BRLTTY might not
-find the shared libraries it requires. Bootdisks often use smaller but outdated
-versions of the libraries which may not work. The solution is to compile
-BRLTTY with the <CODE>-static</CODE> flag (see Makefile). This removes any dependency
-on shared libraries, but unfortunately produces a larger executable.</P>
-<P>The executable is stripped during the <CODE>make install</CODE>. If you take the
-executable straight from the compilation directory, don't forget to
-<CODE>strip</CODE> it.</P>
-
-
-<H2><A NAME="ss4.4">4.4 Future Enhancements</A></H2>
-
-<P>Apart from fixing bugs and supporting more types of Braille
-display, we hope, time permitting, to work on some or all of the
-following:</P>
 <P>
+<H3><A NAME="utility-tbl2txt"></A> tbl2txt</H3>
+
+<P>This utility converts (uncompiles) a translation table into a text file
+for readability and/or modification.
+<BLOCKQUOTE><CODE>
+tbl2txt -<EM>option</EM> ... <EM>table-file</EM> <EM>text-file</EM>
+</CODE></BLOCKQUOTE>
+
 <DL>
-<DT><B>Better attribute handling</B><DD><P>Attribute tracking, mixed text and
-attribute mode etc.</P>
-<DT><B>Revision of cut &amp; paste</B><DD><P>Linear (as opposed to rectangular)
-cut mode.</P>
-<DT><B>Revision of beeps</B><DD><P>A greater variety of beeps.</P>
-<DT><B>Scroll tracking</B><DD><P>Locking the Braille window on one line as it 
-scrolls on the screen.</P>
-<DT><B>Elementary speech support</B><DD><P>Mixed Braille and speech for faster
-reading of text.</P>
-<DT><B>On-the-fly grade II translation</B><DD><P>This would also allow faster
-reading of text.</P>
+<DT><B><EM>table-file</EM></B><DD><P>The translation table which is to be converted.
+<DT><B><EM>text-file</EM></B><DD><P>The file into which the text representing the table content is to be written.
+<DT><B><CODE>-c</CODE><EM>name</EM> <CODE>--code-page=</CODE><EM>name</EM></B><DD><P>The character set used to annotate each line of the text file.
 </DL>
-</P>
-<P>See the TODO file for a more complete list.</P>
+<P>The generated text file can, without modification, be recompiled back into a
+translation table with the 
+<A HREF="#utility-txt2tbl">txt2tbl</A> utility.
+Each of its lines contains lots of interesting information.
+<P>If the <CODE>-c</CODE> option isn't specified, each line looks like this:
+<BLOCKQUOTE><CODE>
+<EM>cc</EM> <EM>xx</EM> <EM>ddd</EM> (73214568)<EM>tt</EM> B+<EM>bbbb</EM> <EM>name</EM>
+</CODE></BLOCKQUOTE>
 
+If the <CODE>-c</CODE> option is specified, each line looks like this:
+<BLOCKQUOTE><CODE>
+<EM>cc</EM> <EM>xx</EM> <EM>ddd</EM> (73214568)<EM>tt</EM> B+<EM>bbbb</EM> U+<EM>uuuu</EM> <EM>description</EM>
+</CODE></BLOCKQUOTE>
 
-<H2><A NAME="ss4.5">4.5 Known Bugs</A></H2>
-
-<P>This software has been tested on
-<UL>
-<LI> a variety of PCs: both laptops and desktops; processors from
-386SX20 to Pentium with a huge range of memory sizes; Linux
-distributions including Debian, Slackware, Red Hat and SUSE; a number of Linux
-kernels, including 1.2.13, 2.0.0 and 2.0.34.</LI>
-<LI> a DEC Alpha: only tested once, under Red Hat Alpha Linux on a
-noname board kindly lent to the Cambridge University Computer
-Laboratory by DEC in Reading, England.</LI>
-</UL>
-
-It has proved stable so far, but if it isn't on your system, or if you
-find a bug not mentioned here, please let us know so that we can try
-to sort out the problem.</P>
-<P>At the time of writing (March 1999), the following problems are
-known:
 <DL>
-<DT><B>Cursor routing performance</B><DD><P>Routing is implemented by a looping
-sub-process which runs at lowered priority to avoid using too much cpu
-time.  Different system loads require different settings of the
-parameters here.  The defaults work excellently in a standard Unix
-editor on a fairly lightly loaded system, but very badly in other
-situations, e.g. over a slow serial link to a remote host.</P>
-<DT><B>Operation in DOSEmu</B><DD><P>Keystroke simulation of any kind does not
-work correctly in DOSEmu's raw keyboard mode.  This is because
-keystroke simulation must be done differently in this case, possibly
-by using scan codes.  This affects the cursor routing and cut &amp;
-paste functions.</P>
+<DT><B><EM>cc</EM></B><DD><P>The character itself.
+Unprintable characters are represented canonically.
+Control characters are flagged with a circumflex,
+e.g. Control-A (character 1) is <CODE>^A</CODE>. 
+Meta control characters are flagged with a tilde,
+e.g. Meta-Control-A (character 129) is <CODE>~A</CODE>. 
+<DT><B><EM>xx</EM></B><DD><P>The hexadecimal value of the character.
+<DT><B><EM>ddd</EM></B><DD><P>The decimal value of the character.
+<DT><B><CODE>(73214568)</CODE></B><DD><P>The braille dot numbers.
+If a dot isn't to be raised,
+then its number is replaced with a blank.
+The English letter <CODE>y</CODE>, for example, would be
+<CODE>(&nbsp;3&nbsp;1456&nbsp;)</CODE>.
+The dot numbers appear in the same order
+as on a standard braille keyboard
+so as to make it easier to visualize the braille character.
+<DT><B><EM>tt</EM></B><DD><P>The hexadecimal value of the byte representing the dot combination
+which is in the translation table.
+<DT><B><EM>bbbb</EM></B><DD><P>The hexadecimal value of the unicode number
+corresponding to the dot combination.
+<DT><B><EM>name</EM></B><DD><P>The ASCII name of the character
+(only shown if the <CODE>-c</CODE> option isn't specified).
+<DT><B><EM>uuuu</EM></B><DD><P>The hexadecimal value of the unicode number
+corresponding to the character
+(only shown if the <CODE>-c</CODE> option is specified).
+<DT><B><EM>description</EM></B><DD><P>The formal unicode description for the character
+(only shown if the <CODE>-c</CODE> option is specified).
 </DL>
-</P>
-<P>There is a bug in the Linux kernel 2.0.35 which causes console beeps to never
-stop once started. We have found a way to avoid this problem in the current
-version of BRLTTY.</P>
+<P>
+<H3><A NAME="utility-txt2tbl"></A> txt2tbl</H3>
 
+<P>This utility compiles a translation table.
+<BLOCKQUOTE><CODE>
+txt2tbl -<EM>option</EM> ... <EM>text-file</EM> <EM>table-file</EM>
+</CODE></BLOCKQUOTE>
 
+<DL>
+<DT><B><EM>text-file</EM></B><DD><P>The source file describing the table content.
+<DT><B><EM>table-file</EM></B><DD><P>The file into which the translation table is to be written.
+<DT><B><CODE>-d</CODE> <CODE>--duplicates</CODE></B><DD><P>Display a warning for each dot combination which has been used more than once.
+<DT><B><CODE>-m</CODE> <CODE>--missing</CODE></B><DD><P>Display a warning for each dot combination which hasn't been used.
+</DL>
+<P>A line which assigns a dot combination to a character
+must contain that dot combination within parenthesis, e.g. <CODE>(12)</CODE>.
+The text file must contain exactly 256 such lines, each one, in order,
+defining the braille representation for its corresponding character.
+The dot numbers may be specified in any order,
+but each must only be specified once.
+It's valid to specify no number at all, e.g. <CODE>()</CODE> (for a space).
+Any number of spaces may occur any number of times anywhere between the parentheses.
+All characters before the left parenthesis and after the right parenthesis are ignored.
+All lines which don't contain a left parenthesis are ignored.
+<P>The algorithm for locating the dot numbers is actually a bit more complicated
+because a line may contain more than one left and/or right parenthesis
+(the 
+<A HREF="#utility-tbl2txt">tbl2txt</A> utility does this).
+The first right parenthesis which is preceded by at least one left parenthesis is used.
+The nearest left parenthesis to the left of that right parenthesis is used.
+The line <CODE>)((12)</CODE>, for example, is valid.
+<P>
+<H3><A NAME="utility-tbl2tbl"></A> tbl2tbl</H3>
+
+<P>This utility converts a binary translation table from one dot mapping to another.
+<BLOCKQUOTE><CODE>
+tbl2tbl <EM>input-mapping</EM> <EM>output-mapping</EM>
+</CODE></BLOCKQUOTE>
+
+<DL>
+<DT><B><EM>input-mapping</EM></B><DD><P>The dot mapping used within the source table.
+<DT><B><EM>output-mapping</EM></B><DD><P>The dot mapping to be used within the table being generated.
+</DL>
+
+The source table is read from standard input,
+and the converted table is written to standard output.
+The following dot mappings are supported:
+<DL>
+<DT><B>standard</B><DD><P>BRLTTY's native mapping (described above).
+<DT><B>tieman</B><DD><P>The mapping used by 
+<A HREF="http://www.braillevoyager.nl/uk/index.html">Tieman B.V.</A>.
+<DL>
+<DT><B>Bit 0</B><DD><P>Dot 1
+<DT><B>Bit 1</B><DD><P>Dot 2
+<DT><B>Bit 2</B><DD><P>Dot 3
+<DT><B>Bit 3</B><DD><P>Dot 7
+<DT><B>Bit 4</B><DD><P>Dot 8
+<DT><B>Bit 5</B><DD><P>Dot 6
+<DT><B>Bit 6</B><DD><P>Dot 5
+<DT><B>Bit 7</B><DD><P>Dot 4
+</DL>
+<DT><B>alva</B><DD><P>The mapping used by 
+<A HREF="http://www.alva-bv.nl/alvacorp/alva_corp_home.html">Alva B.V.</A>
+and 
+<A HREF="http://www.telesensory.com">Telesensory Systems Inc.</A>.
+<DL>
+<DT><B>Bit 0</B><DD><P>Dot 1
+<DT><B>Bit 1</B><DD><P>Dot 2
+<DT><B>Bit 2</B><DD><P>Dot 3
+<DT><B>Bit 3</B><DD><P>Dot 4
+<DT><B>Bit 4</B><DD><P>Dot 5
+<DT><B>Bit 5</B><DD><P>Dot 6
+<DT><B>Bit 6</B><DD><P>Dot 7
+<DT><B>Bit 7</B><DD><P>Dot 8
+</DL>
+</DL>
+<P>
 <HR>
+<A HREF="Manual-5.html">Next</A>
 <A HREF="Manual-3.html">Previous</A>
-Next
-<A HREF="Manual.html#toc4">Table of Contents</A>
+<A HREF="Manual.html#toc4">Contents</A>
 </BODY>
 </HTML>

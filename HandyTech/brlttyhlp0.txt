@@ -1,4 +1,4 @@
-BRLTTY Help for Handy Tech Displays
+BRLTTY Help for Handy Tech Modular Displays
 From left to right, the front keys are:
 B1 B2 B3 B4 LEFT RIGHT B5 B6 B7 B8
 

@@ -54,6 +54,7 @@ by:
 u chord: uppercase (twice to lock)
 q chord: unlock
 26 chord: add 8th dot to next char typed
+35 chord: prepend ESCAPE to next character (ALT)
 x chord: control character
 z chord: cancel preceding meta/control
 
@@ -66,6 +67,7 @@ b chord: backspace
 d chord: delete
 t chord: tab
 46 chord: return
+246 chord: escape
 
 Other internals:
 
@@ -74,6 +76,6 @@ o chord: set repeat count for following command (up to 2digits).
   Type numbers, then type movement command or character (if in
     keyboard emulation).
   z chord: cancels special context.
-  e chord: confirms count and wais for key to repeat.
+  e chord: confirms count and waits for key to repeat.
 Goto virtual terminal: use o chord, followed by VT number,
   followed by v chord or # chord.

@@ -1,861 +1,3371 @@
 <!doctype linuxdoc system>
-
-<!-- BRLTTY manual, SGML version -->
-
 <article>
 
-<title>BRLTTY
-<subtitle>Access Software for Unix for a Blind Person Using a Soft Braille Terminal
-<author>Nikhil Nair <tt>&lt;nn201@cus.cam.ac.uk&gt;</> &nl;
-Nicolas Pitre <tt>&lt;nico@cam.org&gt;</> &nl;
-Stéphane Doyon <tt>&lt;s.doyon@videotron.ca&gt;</> &nl;
-Web page: <tt>http://www.cam.org/~nico/brltty</>
-<date>Version 2.1, March 1999
-<abstract>
-Copyright (C) 1995-99 by The BRLTTY Team, All Rights
-Reserved.  This is free software, placed under the terms of The GNU 
-General Public License.  BRLTTY comes with ABSOLUTELY NO WARRANTY.
-</abstract>
-
-
+<titlepag>
+  <title>BRLTTY
+    <subtitle>Access to the Linux Console for Blind Persons using Refreshable Braille Displays
+  <author>
+    <name>Nikhil Nair <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
+  <and>
+    <name>Nicolas Pitre <tt><htmlurl url="mailto:nico@cam.org" name="&lt;nico@cam.org&gt;"></tt>
+  <and>
+    <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
+  <and>
+    <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
+  <date>Version 2.99, December 2001
+  <abstract>
+    Copyright &copy; 1995-2001 by The BRLTTY Team - All Rights Reserved.
+    This is free software, placed under the terms of
+    <bf/The GNU General Public License/.
+    BRLTTY comes with ABSOLUTELY NO WARRANTY.
+  </abstract>
+</titlepag>
 <toc>
+<lof>
+<lot>
 
-<sect>Introduction
+<sect>Introduction<p>
+BRLTTY gives a braille user access to the text consoles of a Linux system.
+It runs as a background process (daemon)
+which operates a refreshable braille display,
+and can be started very early in the system boot sequence.
+It enables a braille user, therefore, to easily independently handle
+aspects of system administration such as
+single user mode entry,
+file system recovery,
+and boot problem analysis.
+It even greatly eases such routine tasks as logging in.
 
-<p>BRLTTY is intended to provide a Braille user with access to the 
-console of a Unix system.  In the past, the only way this could 
-effectively be done was through an appropriate terminal connected to 
-the host.  BRLTTY will run a soft Braille display, reproducing a part 
-of the screen image (referred to in this manual as `the window') as 
-Braille dots.
+BRLTTY reproduces a rectangular portion of the screen
+(referred to within this document as `the window')
+as braille text on the display.
+Controls on the display can be used to
+move the window around on the screen,
+to enable and disable various viewing options,
+and to perform special functions.
 
-<sect1>Brief History
+<sect1>A Brief History<p>
+The BRLTTY project started in July, 1995.
+The initial team consisted of Nikhil Nair and James Bowden.
+The first version ran with Blazie Engineering's Braille Lite.
+Since, at that time, the Braille Lite hadn't been designed to be
+a dedicated refreshable braille display for a computer,
+its response time was far too slow.
+This situation has now been corrected.
 
-<p>The BRLTTY project started in July 1995, the team then comprising
-Nikhil Nair and James Bowden.  The first version ran with Blazie
-Engineering's Braille Lite; however, since this was not designed to be
-a dedicated soft Braille display for a computer, the response time was
-far too slow.  The Braille Lite is no longer supported.
-
-In September 1995, the second version, 0.22 BETA, became the first to
-be released publicly.  As well as the Braille Lite, it supported
+The second version, BRLTTY 0.22 BETA, was released in September of 1995.
+It was the first to be released publicly.
+As well as the Braille Lite, it also supported
 Tieman B.V.'s CombiBraille series.
 
-Since then, much has changed.  James Bowden is no longer an active
-developer, although his help in other areas (including documentation)
-has been well appreciated.
+James Bowden stopped being an active developer,
+although his continued help in other areas (including documentation)
+was much appreciated.
+Two new members, Nicolas Pitre and Stéphane Doyon, joined the team.
+They added support for Alva and Telesensory Systems Inc. displays,
+as well as many excellent features for the system as a whole.
+A stable version (1.0) was released sometime around the end of 1996.
 
-The project has benefited greatly from the efforts of two new members,
-Nicolas Pitre and Stéphane Doyon.  Between them, they have brought
-support for Alva and TSI series of Braille displays, as well as many
-excellent ideas for the system as a whole.
+Support for Papenmeier displays has been contributed by a team from
+The Technical High School, Department of Electrical Engineering, Vienna, Austria.
+Support for the TSI displays was completed,
+and support for the EuroBraille brand was added.
+New features were also continually being added to the system.
+Regretably, Nikhil Nair stopped working on the BRLTTY project.
+Nicolas Pitre assumed the job of maintainer.
 
-A stable version (1.0) and a few updates were released sometime around the
-end of 1996.
+Version 2.0 was released during the summer of 1998,
+and version 2.1 was released in March of 1999.
+It added support for
+EcoBraille (thanks to Oscar Fernandez),
+Alva Delphi (thanks to Terry Barnaby),
+and Braille Lite 18 (from Nikhil Nair),
+as well as Some small improvements and fixes.
 
-Since then, support for the Papenmeier brand has been contributed by a team
-from the Technical High School, Department for electrical engineering,
-Vienna, Austria. The BRLTTY development team has completed support for TSI
-displays and added support for the Eurobraille brand. New features
-have also been added to the system. Regretably, Nikhil Nair has stopped
-working on the BRLTTY project. Nicolas Pitre assumes the job of
-maintainer. Version 2.0 has been released during summer 1998.
+Dave Mielke began to submit fixes and enhancements during 2000,
+and joined the team as the next maintainer in June of 2001.
+Thanks to Nicolas Pitre for his many years of service in this capacity.
 
-Version 2.1 is about to be released (March 1999). This new version adds
-support for Ecobraille (thanks to Oscar Fernandez), Alva Delphi (thanks to
-Terry Barnaby) and BrailleLite 18 (from Nikhil Nair). Some small improvements
-and fixes.
+BRLTTY now supports many braille displays
+(see section <ref id="displays" name="Supported Braille Displays"> for the full list),
+as well as some speech synthesizers
+(see section <ref id="synthesizers" name="Supported Speech Synthesizers"> for the full list).
+See section <ref id="contact" name="Contact Information"> for details regarding how to contact the BRLTTY team.
 
-See section <ref id="support" name="Support"> for contact details of
-the BRLTTY team.
+<sect1>System Requirements<p>
+To date, BRLTTY only runs under Linux.
+While ports to other Unix-like operating systems aren't currently planned,
+we do welcome any interest in such projects.
 
-<sect1>System Requirements
-
-<p>To date BRLTTY only runs under Linux (both PC and DEC Alpha).
-Ports to other Unix-like operating systems are not currently planned,
-but we do welcome any interest in such projects.
-
-An experimental patch for running BRLTTY from a program named <tt/screen/ is
-available. This would make porting possible to platforms that do not have
-Linux's vcsa devices.
-
-BRLTTY uses, apart from the standard serial 
-driver, the special device introduced in kernel version 1.1.92 which 
-provides easy access to the contents of the current virtual console.  
-This is normally called <tt>/dev/vcsa</> or <tt>/dev/vcsa0</> (the 
-name is configurable).  For this reason kernel 1.1.92 or later is 
-required.
-
-BRLTTY only works with text-based applications, so any form of
-graphics, including the X Window System, will not produce Braille
-output. To clarify, X can be installed but must not run simultaneously with
-BRLTTY.
-
-You must also, of course, possess an appropriate soft Braille display.  
-BRLTTY currently works with
+This software has been tested on a variety of Linux systems:
 <itemize>
-  <item> Tieman B.V.: CombiBraille 25/45/85;
-  <item> Alva B.V.: ABT3xx and Delphi series;
-  <item> Telesensory Systems Inc.: PowerBraille 40 / 65/81;
-    Navigator 20/40/80 (latest firmware version only?);
-  <item> Papenmeier Screen 2D Terminal;
-  <item> EuroBraille family of displays (tested only on ClioBraille 40);
-  <item> Blazie Engineering's BrailleLite;
-  <item> EcoBraille from La O.N.C.E.
+  <item>
+    Desktops, laptops, and some PDAs.
+  <item>
+    Processors from a 386SX20 to a Pentium.
+  <item>
+    A huge range of memory sizes.
+  <item>
+    Several distributions including Debian, Red Hat, Slackware, and SuSE.
+  <item>
+    Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
+  <item>
+    A DEC Alpha
+    (only tested once under Red Hat Alpha Linux on a noname board kindly lent
+    to the Cambridge University Computer Laboratory by DEC in Reading, England).
 </itemize>
 
-We hope that other devices will be supported in the future, so if you 
-have any vaguely technical programming information on a device you 
-would like to see supported, please let us know (see section
-<ref id="support" name="Support">).
-
-Finally, you need tools to build the executable from the sources: make, C and
-C++ compiler, etc. The tools provided in standard Linux distributions should
-do the trick. If you have problems, contact us and we will compile a binary
-for you.
-
-In the past, BRLTTY has been tested on many distributions, including
-Slackware, Debian and Red Hat. The current version is known to compile on
-Red Hat 5.0 and 5.1.
-
-<sect1>Initial Installation and Testing
-
-<p>Before compiling BRLTTY, you must configure it for your system.  
-Read through and edit the file <tt/Makefile/ in the top-level 
-directory, following the instructions.  Then read the <tt/README/ file 
-in the directory containing the driver for your Braille display and 
-check for any further display specific instructions.
-
-Type
-<tscreen><verb>
-   make clean; make
-</verb></tscreen>
-to compile BRLTTY, the test programs and other small utilities.  Then, 
-as root, type
-<tscreen><verb>
-   make install
-</verb></tscreen> to install the BRLTTY executable, together with the help
-and table files for your Braille display in the correct place.  This
-also creates <tt>/dev/vcsa0</> or equivalent if it does not already
-exist.
-
-You will have to install BRLTTY before you can use the test programs.
-
-BRLTTY will probably have to run with root privilege.  It needs to 
-access the virtual console screen information (<tt>/dev/vcsa0</>), the serial
-port selected and, most awkwardly, the console (<tt>/dev/console</>), which is
-used for keystroke simulation during cursor routing, for the cut &amp; paste 
-function, for arrow keys simulation using keys on the braille display and for
-beeps. Access to the serial port as well as to the <tt/vcsa0/ device can be
-granted to a non-root user by changing the permissions on the divice
-files. However, having access to the <tt/console/ device is not enough: you
-need to be root to sound beeps and simulate key strokes. So, if you're willing
-to give up cursor routing, beeps and all that, you can run BRLTTY without root
-priviledges.
-
-The programs <tt/brltest/ and <tt/scrtest/ can be used as diagnostic 
-tools if something goes wrong.  Both must be run as root.
-
-If you get the error message `brltty: Cannot read screen', try running 
-scrtest.  This should read a rectangle from the middle of the screen, 
-and after reporting the screen dimensions and cursor position, print 
-this block to standard output.
-
-If BRLTTY appears to load, but the Braille display doesn't seem to 
-work, try running brltest.  This program should print a short message 
-on the display, ask you to hit return, and exit.
-
-The shell script <tt/install-brltty/ copies a fully-functional, 
-installed BRLTTY to a new location; this can be used to copy BRLTTY to 
-or from a rootdisk.  For instance, if the rootdisk floppy is mounted 
-on <tt>/mnt</>, and BRLTTY is working on the main system, then typing
-<tscreen><verb>
-   install-brltty /mnt
-</verb></tscreen>
-copies BRLTTY, with all its data and configuration files, as well as 
-<tt>/dev/vcsa0</> or equivalent to the rootdisk.
-
-Usage:
-<tscreen><verb>
-   install-brltty dest-prefix [source-prefix]
-</verb></tscreen>
-
-Note: Some problems have been experienced when moving BRLTTY between
-systems with different versions of the shared C library.  This is
-worth investigating if you have difficulties.
-
-Also included are several small programs:
-<descrip>
-<tag/txt2hlp/ 
-  This produces files in the format needed for the help function from 
-standard ASCII files.  txt2hlp is compiled and used automatically 
-during installation.
-<tag/txt2tbl/
-  This program can be used to generate new Braille translation tables 
-from ASCII files.  See section <ref id="tbltools"
-name="Table Utilities"> for instructions.
-<tag/tbl2txt/
-  This program is the inverse of txt2tbl.  It can be used if you are 
-not sure of what a particular dot combination represents.
-</descrip>
-
-<sect1>Installation for Day-to-day Use
-
-<p>BRLTTY, once installed, is invoked by the single command
-<tt/brltty/.  Command line switches allow the default configuration
-file name, serial port and Braille translation table to be
-overridden---see section <ref id="switches" name="Command Line
-Options"> for full details.
-
-However, particularly if it is being used by a system's administrator,
-it should probably be loaded at boot-time before the filesystems are
-checked, so that if anything goes wrong during these checks and the
-system drops into single user mode, the Braille display will still be
-active.
-
-The way this is done will vary according to the type of system being 
-used.  For instance, on a Debian GNU/Linux 0.93R5 system, the 
-following code was inserted near the beginning of
-<tt>/etc/init.d/boot</>:
-<tscreen><verb>
-   if [ -x /sbin/brltty ]
-   then
-     /sbin/brltty
-   fi
-</verb></tscreen>
-
-This could be abbreviated to the rather less readable form:
-<tscreen><verb>
-   [ -x /sbin/brltty ] && /sbin/brltty
-</verb></tscreen>
-
-If you have installed the Red Hat distribution, modify the file
-<tt>/etc/rc.d/rc.sysinit</>.
-On a Slackware system, the file to edit is <tt>/etc/rc.d/rc.S</>.
-On a SuSE system the above code can be inserted at the top of
-<tt>/sbin/init.d/boot</>.
-
-One possible alternative is to start BRLTTY from <tt>/etc/inittab</>.
-
-Note: A <tt/killall5 -15/ command would be enough to stop BRLTTY in
-its tracks: if such a command is issued from an rc script when
-entering single user mode, this may be a problem which needs
-attention.
-
-<sect>Using BRLTTY
-
-<p>Before you activate the system, you should set up your Braille 
-display device.  In most cases this is simple: just connect it to an 
-appropriate serial port and turn the display on, if necessary 
-selecting the serial interface.
-
-Having set up your display, to run BRLTTY simply type the command
-<tt/brltty/ at a shell prompt (this must be done as root).  The
-program will load and a message giving the program name (BRLTTY) and
-current version number will appear briefly on the display device.
-After this, the display will show a small area of the console screen
-including a cursor.  By default the cursor is represented as dots 7
-and 8 superimposed over the character it is on.
-
-Any screen activity will be reflected in the Braille display.  The 
-display will also follow the progress of the cursor on the screen.  
-This feature is known as <em/cursor tracking/.
-
-However, just typing and reading the display is not enough: try 
-entering a command which will cause an error and press <em/enter/.  
-The error will appear on the screen, but unless you have a multi line 
-display, the chances are that the error message will not be visible on 
-the Braille display, all you will see is another shell prompt.  What 
-is needed then is some means of moving the Braille <em/window/ around 
-the screen.
-
-<sect1>Basic Movement Keys
-
-<p>All commands to BRLTTY are given using the Braille keys on the
-Braille display.  Unfortunately, there seems to be no standard set of
-controls available across different displays: some have six dot keys
-(like a Braille writing machine), others have thumb keys; some even
-have buttons above each character in the display.  Some displays have
-all three types.  Because the nature and layout of such keys is so
-varied, refer to the <tt/README/ file for your display for the keys
-you press for each operation.  In this manual functions will be indicated
-by name.
-
-Commands generally consist of a single Braille key or combination of
-Braille keys, which can be issued at any time BRLTTY is running.  The
-most important commands are those which move the Braille window around
-the console screen.  Most of them do not affect the console cursor, or
-any program you are running.
-
-<descrip>
-  <tag/Moving Vertically:/
-   <descrip>
-      <tag/TOP/ Move to top of screen
-      <tag/BOT/ Move to bottom of screen
-      <tag/WINUP/ Move up several lines
-      <tag/WINDN/ Move down several lines
-      <tag/LNUP/ Move up one line
-      <tag/LNDN/ Move down one line
-      <tag/PRDIFLN/ Skip to the previous different line
-      <tag/NXDIFLN/ Skip to the next different line
-      <tag/ATTRUP/ Skip to the previous line that contains characters with 
-	different attributes from those on the current line. (NEW)
-      <tag/ATTRDN/ Skip to the next line that contains characters with 
-	different attributes from those on the current line. (NEW)
-    </descrip>
-  <tag/Moving Horizontally:/
-    <descrip>
-      <tag/LNBEG/ Move to start of line
-      <tag/LNEND/ Move to end of line
-      <tag/HWINLT/ Move left half a window
-      <tag/HWINRT/ Move right half a window
-      <tag/CHRLT/ Move left one character
-      <tag/CHRRT/ Move right one character
-    </descrip>
-  <tag/Moving Both Horizontally and Vertically:/
-    <descrip>
-      <tag/TOP_LEFT/ Move to top left of screen
-      <tag/BOT_LEFT/ Move to bottom left of screen
-      <tag/HOME/ Move window to cursor
-      <tag/FWINLT/ Move left one window distance
-      <tag/FWINRT/ Move right one window distance
-    </descrip>
-</descrip>
-
-The <em/FWINLT/ and <em/FWINRT/ keys can be used to read backwards and
-forwards, as they scroll to the previous or next line respectively if
-invoked from the end of a line.  This makes them particularly useful
-when reading text.
-
-If you do not remember a command, help is available using the 
-<em/HELP/ command.  Use the movement keys as above to navigate the 
-help screen and <em/HELP/ again to quit.
-
-The behaviour of the <em/LNUP/ and <em/LNDN/ keys depends on whether
-the skipping of identical lines is enabled, either by the
-<em/SKPIDLNS/ key or from the configuration menu (see section <ref
-id="confmenu" name="The Online Configuration Menu">).  If this is
-enabled, they act like the <em/PRDIFLN/ and <em/NXDIFLN/ keys.  (Note
-that the line containing the cursor is considered to be different from
-other lines.)
-
-<sect1>Modes
-
-<p>In addition to the commands above, BRLTTY offers many other useful 
-features:
-
-<descrip>
-  <tag><em/CSRTRK/: Toggle cursor tracking</>
-Default: on.  When cursor tracking is on, movement of the console
-cursor will automatically adjust the display window position so that
-the cursor is always in the window.  It is sometimes useful to turn
-this feature off so you can monitor a particular region of the screen
-easily.
-  <tag><em/DISPMD/: Toggle attribute display</>
-Default: off.  If the attribute display is on, the attributes (colour
-information) of each character, rather than the characters themselves
-are displayed.  It can be useful to turn attribute display on to
-enable detection of highlighted items.
-  <tag><em/FREEZE/: Toggle screen freezing</>
-Default: off.  The freeze function exists to allow easy reading of
-changing screens.  When you turn freeze on, the current screen
-contents are stored temporarily and any new screen activity is not
-reflected in the Braille.  Remember to turn freezing off again when
-you wish to resume normal operation.
-  <tag><em/INFO/: Status information</>
-Default: off.  The status function switches the display to the status
-screen.  This shows information including the physical cursor
-position, the position of the start of the Braille display window and
-the settings of various flags.  Some display types have some of this
-information permanently shown in their <em/status cells/.  See the
-<tt/README/ file for information about your display.
-
-The window start position and physical cursor position are displayed 
-in the form <sl/cc:rr/, where <sl/cc/ is the current column and 
-<sl/rr/ is the current row.  Then follows a series of flags:
-    <enum>
-      <item> Cursor tracking.  When on <tt/t/, space otherwise
-      <item> Cursor visibility.
-        <descrip>
-          <tag><tt/v/</> Cursor visible, no blink
-          <tag><tt/B/</> Cursor is visible and blinking
-          <TAG><tt/b/</> Cursor not visible but blinking is on
-          <tag/space/ Cursor not visible and blinking is off
-        </descrip>
-      <item> Display mode.  <tt/a/ attribute, <tt/t/ text
-      <item> Screen state.  <tt/f/ frozen, space live
-      <item> Braille representation, 6 or 8 dot
-      <item> Blinking capitals.  <tt/B/ on, space otherwise
-    </enum>
-
-When in the status screen, all information may be updated by console 
-screen activity or BRLTTY commands.  Press <em/INFO/ to return to 
-normal operation.
-</descrip>
-
-<sect1>Cursor Routing
-
-<p>It often happens that you are moving the display window around the
-screen examining the text in, say, a text editor and you want to move
-the physical cursor to where your window display is.  Cursor routing
-provides just such a facility by simulating your keystrokes.  Type
-<em/CSRJMP/ and your cursor will be moved to the start position of the
-display window.  Some Braille displays have buttons above each cell:
-these may also be used to move the cursor to that position.  Others
-bind Braille keys to the cursor keys on the keyboard to allow a manual
-form of cursor routing.
-
-Note: Cursor routing is not yet completely reliable.  It currently
-uses hard-wired vt100 cursor key codes to move in the correct
-directions.  Also, this may not work as well on heavily loaded systems
-(see <tt/config.h/ for further details).
-
-Once you give a cursor routing command, BRLTTY will keep trying to
-route the cursor until either the cursor seems to go in the wrong direction
-or 2 seconds elapse without reaching the target position or you change
-virtual console. If you give another cursor routing command, BRLTTY gives up
-the first and attempts the second.
-
-A new command, called <em/CSRJMP_VERT/, routes the cursor to anywhere on the
-current line without adjusting the horizontal position. This is especially
-useful within lynx as left and right arrow keys are never simulated.
-
-<sect1>Cut &amp; Paste
-
-<p>This feature enables you to grab some text already on the screen 
-and re-enter it at the cursor, thus saving time and avoiding errors when
-copying complicated text. It is particularly useful for items such as long
-filenames, complicated commands, E-mail addresses or long URLs.
-
-First, mark the (rectangular) area on the screen to grab (cut): To
-mark the top left corner press <em/CUTBEG/.  The top left corner of
-the marked area is set to the extreme left position of the window and
-the <em/cut buffer/ is cleared.  To mark the bottom right corner press
-<em/CUTEND/: the bottom right corner of the area to cut is set to the last
-position of the braille window and the area you defined is then copied into
-the <em/cut buffer/.  BRLTTY removes excess white space at the end of each
-line in the <em/cut buffer/ so you don't get extra spaces after your cut text.
-Some displays support more accurate <em/cut &amp; paste/ using the
-buttons above the Braille cells, see the <tt/README/ file for your
-display.
-
-To paste the text, i.e. type it at the cursor position, press 
-<em/PASTE/.  You can paste the stored text any number of times without 
-re-cutting it.
-
-<sect1>The Online Configuration Menu<label id="confmenu">
-
-<p>When BRLTTY starts, it loads a configuration file from which it reads your
-preference settings. Several features of BRLTTY can be enabled, disabled or
-adjusted. BRLTTY has a simple menu from which you can change these settings
-conviniently. The menu is activated by pressing <em/CONFMENU/.  The 
-display will briefly show the menu title and then display the 
-current item and parameter.
-
-To move around in the menu, that is to go from an item to another, use the
-normal window movement keys as follows:
-<descrip>
-  <tag><em/LNUP/ and <em/LNDN/:</> move to the previous or next item in the
-    menu;
-  <tag><em/TOP/ or <em/TOP_LEFT/ or <em/HOME/:</> move to the first item;
-  <tag><em/BOT/ or <em/BOT_LEFT/:</> moves to the last item.
-</descrip>
-
-To adjust the setting of a parameter use either <em/KEY_LEFT/ and
-<em/KEY_RIGHT/ or <em/KEY_UP/ and <em/KEY_DOWN/: this selects alternative
-setting options. Cursor routing keys can also be used to set the desired
-value.  To undo all the changes made since entering the menu use <em/RESET/.
-
-To leave the menu and return to normal operation, press  <em/CONFMENU/ again,
-or any key not listed above.  If the <em/save config on exit/ option is on, the
-current settings will be written to the <em/configuration file/.
-
-Most of the parameters available through the menu can also be set 
-using single key strokes (shortcut keys) to toggle them.
-
-Here is a description of each configurable parameter. The shortcut keys that
-toggle certain parameters are also listed.
-
-<descrip>
-  <tag><em/Cursor is visible/ (shortcut <em/CSRVIS/): Toggle cursor visibility</>
-Default: on.  This function, when enabled, shows the position of the
-cursor (either steady or blinking) on the display.  It is sometimes
-useful to turn this function off to examine text where a cursor symbol
-only serves to obscure reading.
-  <tag><em/Block cursor/ (shortcut <em/CSRSIZE/): Toggle cursor shape</>
-Default: off.  This function switches the cursor shape: all eight dots (block)
-or just the bottom two (underline).  Choose the one you prefer.
-  <tag><em/Blinking cursor/ (shortcut <em/CSRBLINK/): Toggle blinking cursor</>
-Default: off.  If this function is enabled, the screen cursor will
-blink on the display, that is, it will only be present a portion of
-the time.  When the cursor is off, you will be able to view the
-character beneath the cursor.
-  <tag><em/Blinking capitals/ (shortcut <em/CAPBLINK/): Toggle blinking caps</>
-Default: off.  Similar to the cursor blinking function, if this
-function is enabled, capital letters will blink on the display.  This
-is most useful when using 6 dot Braille.
-  <tag><em/Attributes are visible/ (shortcut <em/ATTRVIS/): Toggle attribute underlining
-    (NEW)</>
-Default off. When this mode is enabled, any characters with non plain
-attributes (inverse video, color, highlighting...) will be emphasized by
-superimposing either dots 7-8 or just dot 8 on the braille character. A
-seperate function controls whether the superimposed dots blink or not. Text
-marked with dots 7-8 is not in the same attribute as text marked only with dot
-8. This is still experimental.
-  <tag><em/Blinking attributes/ (shortcut <em/ATTRBLINK/): Toggle blinking of
-    attribute underlining</>
-Default: on.  This controls whether or not dots superimposed on characters with
-special attributes will blink or not.
-  <tag><em/Blinking cursor visible period/ and
-   <em/Blinking cursor invisible period/: Control rate of cursor
-    blinking</> 
-These parameters are not toggles. The value of the settings for these items
-is an integer. Together, these parameters control the rate at which the cursor
-blinks (when the cursor is visible and blinking is enabled). The cursor will
-alternatingly be present (on) and absent (off). <em/csr on/ specifies how
-long, in BRLTTY main loop cycles, the cursor will be present (stay
-on). Similarly, <em/csr off/ specifies how long the cursor stays off. The
-duration of a blink round is therefore the sum on the <em/csr on/ and <em/csr
-off/ settings. The duration of a cycle of the main loop is variable: very
-roughly about 0.1 seconds. It may be helpful to set cursor, cap and attribute
-blinking to different rates.
-  <tag><em/Blinking caps visible period/ and
-    <em/Blinking caps invisible period/: Control rate of
-    capital letters' blinking</>
-This option works like the cursor blinking rate parameter.
-  <tag><em/Blinking attributes visible period/ and
-      <em/Blinking attributes invisible period/: Control rate of
-    attribute underlining blinking</>
-This option works like the cursor blinking rate parameter.
-  <tag><em/Six dot text modet/ (shortcut <em/SIXDOTS/): Braille representation</>
-Default: 8 dot.  This function switches between 6 and 8 dot Braille
-codes.  When 6 dot mode is chosen, the bottom dots (7 and 8) of all
-ordinary characters are removed.
-  <tag><em/Sliding window/ (shortcut <em/SLIDEWIN/): Toggle sliding window</>
-Default: off.  This feature, in conjunction with <em/cursor tracking/,
-moves the display window more smoothly when the physical cursor moves
-beyond the right edge of the window.  With <em/sliding window/ off,
-whenever the cursor moves beyond the right edge of the window, the
-window moves by one window width.  When on, the window moves by a
-quarter of this width.
-  <tag><em/Skip identical lines/ (shortcut <em/SKPIDLNS/): Toggle skipping of
-    identical lines</>
-Default: off.  This feature provides an alternative interface to line
-skipping on displays which do not provide the <em/PRDIFLN/ and
-<em/NXDIFLN/ keys.  When enabled, it makes the <em/LNUP/ and <em/LNDN/
-keys skip identical lines.
-  <tag><em/Audio signals/ (shortcut <em/SND/): Toggle audio signals</>
-Default: on.  When on, BRLTTY beeps when certain events occur (such as
-moving beyond the edge of the screen).  Beeps also confirm the
-settings of some toggle options.
-  <tag><em/Status cells style/: Set status cell style</>
-The setting is an integer, rather than a toggle. This allows changing the
-style in which status cells are used. There is roughly a style for each brand
-of displays, which reflects the preferences of the programmer of the driver
-for that brand. However it is possible to try out the status cell style
-intended for another brand. However, not all styles work on all displays,
-since not all displays have the same number of status cells: if you try a
-style designed for more status cells than your display has, some information
-will be missing. Some displays have no status cells at all. The available
-styles are:
-    <itemize>
-    <item> 0 = nothing is displayed on the status cells
-    <item> 1 = Alva style
-    <item> 2 = Tieman style
-    <item> 3 = PowerBraille 81 style (1 cell)
-    <item> 4 = Papenmeier style
-  </itemize>
-  <tag><em/save config on exit/: Save configuration on exit</>
-As indicated above, this controls whether or not the configuration should be
-saved to the configuration file upon exiting the configuration menu.
-</descrip>
-
-If <em/save config on exit/ is off or if you changed some settings by using shortcut
-keys, you may want to manually save the current settings to the configuration
-file. To do so, type <em/SAVECONF/.
-
-The configuration file is currently a binary file and cannot
-be edited by hand.
-
-To reload the configurable settings from the configuration file, press
-<em/RESET/.
-
-<sect1>Command Line Options<label id="switches">
-
-<p>BRLTTY has the following command line options.  Use these to start 
-BRLTTY using settings other than the defaults.
-<descrip>
-  <tag><tt/-c/ <em/config-file/</>     Use binary configuration file 
-<em/config-file/ instead of <tt/brlttyconf.dat/.
-  <tag><tt/-d/ <em/serial-device/</>   Use <em/serial-device/ to access 
-Braille terminal instead of the default (normally <tt>/dev/ttyS0</>)
-  <tag><tt/-t/ <em/text-trans-file/</>  Use translation table
-<em/text-trans-file/ instead of the default.  In VErsion 1.0.1 the
-default is compiled in; in previous versions the file <tt/us.tbl/ was
-loaded.
-  <tag><tt/-h/, <tt/--help/</>        Print a brief help message and exit
-  <tag><tt/-l/ <em/n/</> Set debugging level for syslog to <em/n/
-    (from 0 to 7, default 4)
-  <tag><tt/-q/, <tt/--quiet/</>       Suppress start-up messages
-  <tag><tt/-v/, <tt/--version/</>     Print start-up messages and exit
-</descrip>
-
-You can, of course, permanently configure the default settings of the
-first two options (as well as which text translation table to use as
-the default) at compilation.
-
-
-<sect>Configuring BRLTTY
-
-<p>Most if not all of the settings of BRLTTY are configurable through
-the configuration menu.  Those that are not (e.g. cursor routing
-performance) can be altered permanently by modifying the source and
-recompiling.
-
-<sect1>The Braille Translation Tables
-
-<p>BRLTTY uses two <em/Braille translation tables/ to govern the
-mapping from character/attribute number to dot combination.  The
-first, and most important, is the text translation table.
-
-BRLTTY is initially configured to use the North American Braille
-Computer Code (NABCC).  However, as well as the default text
-translation table file (<tt/us.tbl/), BRLTTY comes with four
-alternative tables: <tt/french.tbl/, <tt/german.tbl/, <tt/simple.tbl/
-and <tt/uk.tbl/.  See section <ref id="switches" name="Command Line
-Options"> for details of using alternative translation tables.
-
-The attribute translation table is used when BRLTTY is in attribute
-display mode.  There is currently only the default table,
-<tt/attrib.tbl/.  This was designed so that each dot represents one
-bit of the attribute byte, with the foreground colour on the right
-(dots 4, 5, 6, 8) and the background colour on the left.  A foreground
-bit being on or a background bit being off triggers the corresponding
-dot: this odd logic in practice aids readability of the most common
-attributes.
-
-These translation tables are 256-byte binary files.  The
-character/attribute value is used as an index into the file, and the
-byte at that position gives the corresponding dot combination.
-
-The mapping from bit number to physical dot position varies from
-display to display and can be fairly arbitrary.  An attempt has
-therefore been made to standardise by defining the action of each bit
-in a table entry.  The Braille display drivers then perform any
-necessary adjustment for the display.
-
-<descrip>
-  <tag/Bit 0/ Dot 1 (top left)
-  <tag/Bit 1/ Dot 4 (top right)
-  <tag/Bit 2/ Dot 2 (below 1)
-  <tag/Bit 3/ Dot 5 (below 4)
-  <tag/Bit 4/ Dot 3 (below 2)
-  <tag/Bit 5/ Dot 6 (below 5)
-  <tag/Bit 6/ Dot 7 (bottom left)
-  <tag/Bit 7/ Dot 8 (bottom right)
-</descrip>
-
-In each case, a bit being set means that the corresponding dot is
-present.
-
-Two small utilities, <tt/txt2tbl/ and <tt/tbl2txt/ are provided for 
-easy manipulation of these translation files, see below.
-
-The filenames of the compiled-in translation tables are defined in
-<tt/Makefile/.  Any changes you make to these will take effect on
-recompiling the software.  However, you can use an alternative text
-translation table, see section <ref id="switches" name="Command Line
-Options">.
-
-
-<sect1>Table Utilities<label id="tbltools">
-
-<p><tt/txt2tbl/ and <tt/tbl2txt/ are simple programs to convert
-between binary table files and a textual representation (as used by
-some DOS drivers).  They can be used to create or modify text
-translation table files without the need to plunge into binary editors
-and hexadecimal numbers.
-
-To use either of these programs, type:
-<tscreen><verb>
-   progname input output
-</verb></tscreen>
-There are no other command line options.
-
-In the textual representation, each table entry is written as a line.  
-The active part of the line is all the characters between the first 
-pair of parentheses---these utilities ignore all other characters.
-
-Between parentheses are numbers representing the setting of the 
-corresponding Braille dot (see above).  Offsets into the binary table 
-file are allocated sequentially from 0 to 255.
-
-For example, the 91th line (ASCII 90 = `Z') in the table might look 
-like:
+BRLTTY's main dependence on Linux is a special device (<tt/vcsa/)
+via which the screen contents and attributes can be read.
+An experimental patch for the <tt/screen/ program is provided.
+It allows BRLTTY to access <tt/screen/'s screen image via shared memory,
+and goes a long way toward making porting to other platforms possible
+(even to those which don't have their own screen content inspection facility).
+The main weakness of the <tt/screen/ approach is that 
+BRLTTY can't be started until the user has logged in.
+
+BRLTTY, as noted above, relies on a special device
+which provides easy access to the contents of the current virtual console.  
+This device was introduced in version 1.1.92 of the Linux kernel,
+and is normally called either <tt>/dev/vcsa</> or <tt>/dev/vcsa0</>
+(on systems with <tt/devfs/ it's called <tt>/dev/vcc/a</>).
+For this reason, Linux kernel 1.1.92 or later is required.
+
+In order for BRLTTY to successfully communicate with the refreshable braille display,
+the correct Linux driver (serial, parallel, USB) must be configured into the kernel.
+If the driver requires special options, then they must be supplied.
+If it's built into the kernel, then its options must be
+set during the kernel configuration procedure,
+supplied at the LILO boot prompt,
+or specified on an <tt/append/ directive in <tt>/etc/lilo.conf</>.
+If it's a module, then its options must be
+supplied as options to the <tt/modprobe/ (or <tt/insmod/) command,
+or specified on an <tt/options/ directive in <tt>/etc/modules.conf</>
+(called <tt>/etc/conf.modules</> by some older distributions).
+
+BRLTTY only works with text-based consoles and applications.
+It can be used with <tt/curses/-based applications,
+but not with any application which
+either uses special VGA features
+or requires a graphics console (like the X Window system).
+
+You must also, of course, possess a supported refreshable braille display
+(see section <ref id="displays" name="Supported Braille Displays"> for the complete list).
+We hope that additional displays will be supported in the future, so,
+if you have any vaguely technical programming information
+for a device which you'd like to see supported,
+then please let us know (see section <ref id="contact" name="Contact Information">).
+
+Finally, you need tools to build the executable from its source:
+<tt/make/, <tt/C/ and <tt/C++/ compiler, <tt/yacc/, <tt/awk/, etc.
+The development tools provided with standard Linux distributions should suffice.
+BRLTTY has been tested on many distributions,
+including Slackware, Debian, and Red Hat.
+If you have problems,
+then contact us and we'll compile a binary for you.
+
+<sect>The Build Procedure<p>
+Here's what to do if you trust that all of our defaults are correct,
+and just want to install BRLTTY as quickly as possible.
+<enum>
+  <item>
+    Download the source from BRLTTY's web site
+    (see <ref id="contact" name="Contact Information"> for its location).
+    You should end up with a file named <tt>brltty-<em/release/.tar.gz</tt>,
+    e.g. <tt/brltty-3.0.tar.gz/.
+  <item>
+    Unpack the source into its native hierarchical structure.
+    <tscreen>tar xzf brltty-<em/release/.tar.gz</tscreen>
+    This should create the directory <tt/brltty-/<em/release/.
+  <item>
+    Change to the source directory, and compile and install BRLTTY.
+    <tscreen>
+      cd brltty-<em/release/
+      <newline>
+      make install
+    </tscreen>
+    This should be done as <bf/rot/.
+  <item>
+    Start BRLTTY.
+    <tscreen>brltty -b<em/driver/ -d<em/device/</tscreen>
+    For <em/driver/, specify the
+    two-letter <ref id="codes" name="driver identification code">
+    corresponding to your braille display.
+    For <em/device/, specify the full path for the
+    device to which your braille display is connected.
+</enum>
+
+If you don't want to explicitly identify the driver and device
+each time you start BRLTTY, then you can take two approaches.
+You can establish system defaults
+via the <ref id="configure-braille-driver" name="braille-driver">
+and the <ref id="configure-braille-device" name="braille-device">
+configuration file directives,
+and/or compile your needs right into BRLTTY
+via the <ref id="make-braille-driver" name="BRL_TARGET">
+and the <ref id="make-braille-device" name="BRLDEV">
+make file variables.
+
+That's all there's to it.
+If you'd like to uninstall BRLTTY, then just do:
 <tscreen>
-  90  (1 3 567 )
+  cd brltty-<em/release/
+  <newline>
+  make uninstall
 </tscreen>
 
-<tt/convtable/ is a filter to convert Braille tables between different
-binary formats: BRLTTY standard, The standard used by Tieman B.V. and
-that used by both Alva B.V. and Telesensory Systems Inc.  For
-instance, type
-<tscreen><verb>
-   convtable src dest < input > output
-</verb></tscreen>
-where <em/src/ and <em/dest/ can be <em/s/ for standard (BRLTTY),
-<em/t/ for Tieman or <em/a/ for Alva/TSI mappings.
+Now, for those who really want to know what's going on, here are the details.
 
-<sect>Appendices
-
-<sect1>Disclaimer and License
-
-<p>This program is free software; you can redistribute it and/or 
-modify it under the terms of the <em/GNU General Public License/ as 
-published by the <em/Free Software Foundation/; either version 2 of 
-the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but 
-WITHOUT ANY WARRANTY; without even the implied warranty of 
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <em/GNU 
-General Public License/ for more details.
-
-You should have received a copy of the <em/GNU General Public License/ 
-along with this program; if not, write to the Free Software 
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-(A copy of the GNU General Public License can be found in the file 
-<tt/COPYING/ in the top-level directory.)
-
-
-<sect1>Support<label id="support">
-
-For up to date information, see our web page at
-<tt>http://www.cam.org/~nico/brltty</>.
-
-<p>BRLTTY represents the work of a team, which includes
-<itemize>
-  <item> <htmlurl url="mailto:nico@cam.org"
-    name="Nicolas Pitre &lt;nico@cam.org&gt;"> (current maintainer);
-  <item> <htmlurl url="mailto:s.doyon@videotron.ca"
-    name="Stéphane Doyon &lt;s.doyon@videotron.ca&gt;">
-    (active developer);
-  <item> <htmlurl url="mailto:nn201@cus.cam.ac.uk"
-    name="Nikhil Nair &lt;nn201@cus.cam.ac.uk&gt;">
-    (original author, no longer active);
-  <item> <htmlurl url="mailto:jrbowden@bcs.org.uk"
-    name="James Bowden &lt;jrbowden@bcs.org.uk&gt;">
-    (now acting in an advisory
-    capacity).
-</itemize>
-
-Comments, suggestions, criticisms and contributions are welcome.  We will
-try to respond promptly to all (sensible) mail, but give no guarantee.  In
-general, we suggest you send email messages to both active developers.
-
-If you have a query about a particular display type supported by
-BRLTTY, you may want to contact the author of that particular driver.
-See the <tt/README/ file in the relevant subdirectory for contact
-details.
-
-
-<sect1>BRLTTY on installation/rescue rootdisks
-
-<p>From version 1.0.1, BRLTTY can run as a stand-alone executable,
-without any configuration files.  In this case the compiled-in
-defaults will be used.  If the directory <tt>/etc/brltty</> (used to
-store the configuration file, the online help file and the table
-files) is not present, BRLTTY looks in <tt>/etc</> for the help file
-<tt/brlttydev.hlp/ and the configuration file <tt/brlttyconf.dat/.
-Even if these are not present, BRLTTY will still work!
-
-If, for some reason, you ever create the <tt>/etc/brltty</> directory by hand,
-it is important to set the permissions so that only root can create files
-in that directory.
-
-Note: The <tt>/dev/vcsa0</> device is also required. It should already be
-present unless your Linux distribution is quite old. You can create it with:
-<tscreen><verb>
-mknod /dev/vcsa0 c 7 128
-chown root.tty /dev/vcsa0
-chmod 660 /dev/vcsa0
-</verb></tscreen>
-
-When constructing floppy rootdisks for installation or rescue
-purposes, space is often of the essence.  This new resiliance allows
-BRLTTY to be installed as a single executable on such disks, reducing
-the space requirement.
-
-Note: The script <tt/install-brltty/ assumes a complete installation
-of BRLTTY is to be copied.
-
-One problem often encountered when trying to use BRLTTY in an uncertain
-environment like a bootdisk or an incomplete system is that BRLTTY might not
-find the shared libraries it requires. Bootdisks often use smaller but outdated
-versions of the libraries which may not work. The solution is to compile
-BRLTTY with the <tt/-static/ flag (see Makefile). This removes any dependency
-on shared libraries, but unfortunately produces a larger executable.
-
-The executable is stripped during the <tt/make install/. If you take the
-executable straight from the compilation directory, don't forget to
-<tt/strip/ it.
-
-<sect1>Future Enhancements
-
-<p>Apart from fixing bugs and supporting more types of Braille
-display, we hope, time permitting, to work on some or all of the
-following:
-
+<sect1>Installed File Hierarchy<label id="hierarchy"><p>
+It's probably helpful to start with a brief overview of what
+the result of the build procedure should be.
+It should install the following files:
 <descrip>
-  <tag/Better attribute handling/ Attribute tracking, mixed text and
-attribute mode etc.
-  <tag/Revision of cut &amp; paste/ Linear (as opposed to rectangular)
-cut mode.
-  <tag/Revision of beeps/ A greater variety of beeps.
-  <tag/Scroll tracking/ Locking the Braille window on one line as it 
-scrolls on the screen.
-  <tag/Elementary speech support/ Mixed Braille and speech for faster
-reading of text.
-  <tag/On-the-fly grade II translation/ This would also allow faster
-reading of text.
+  <tag>/sbin/</>
+    <descrip>
+      <tag/brltty/
+        The BRLTTY program.
+      <tag/install-brltty/
+        A <ref id="utility-install-brltty" name="utility"> for copying BRLTTY's
+        <ref id="hierarchy" name="installed file hierarchy">
+        from one location to another.
+    </descrip>
+  <tag>/etc/brltty/</>
+    Your installation of BRLTTY may not have all of the following types of files.
+    They're only created as needed based on your customization of the make file
+    (see <ref id="make-customize" name="Make File Customization">).
+    <descrip>
+      <tag/*.conf/
+        Driver-specific configuration data.
+        Their names look more or less like <tt/brltty-/<em/driver/<tt/.conf/,
+        where <em/driver/ is the two-letter <ref id="codes" name="driver identification code">.
+      <tag/*.hlp/
+        Driver-specific help pages.
+        Their names look more or less like <tt/brltty-/<em/driver/<tt/.hlp/,
+        where <em/driver/ is the two-letter <ref id="codes" name="driver identification code">.
+      <tag/*.tbl/
+        Dot translation tables.
+        Their names look like <tt/text./<em/language/<tt/.tbl/.
+        Tables designed for use with character sets other than <tt/iso-8859-1/
+        have names which indicate this fact.
+        There are also a couple of special tables which map
+        character highlighting attributes to braille dots:
+        <tt/attrib.tbl/ does it the original way,
+        and <tt/attributes.tbl/ does it the current way.
+    </descrip>
+  <tag>/lib/brltty/</>
+    Your installation of BRLTTY may not have all of the following types of files.
+    They're only created as needed based on your customization of the make file
+    (see <ref id="make-customize" name="Make File Customization">).
+    <descrip>
+      <tag/brltty-brl.lst/
+        A list of the braille display drivers which have been built
+        as dynamically loadable shared objects,
+        and, therefore, which can be selected at run time.
+        Each line consists of
+        the two-letter identification code for a driver,
+        a tab character,
+        and a description of the braille display which that driver is for.
+      <tag>libbrlttyb<em/driver/.so.1</tag>
+        The dynamically loadable driver for a braille display,
+        where <em/driver/ is the two-letter <ref id="codes" name="driver identification code">.
+      <tag/brltty-spk.lst/
+        A list of the speech synthesizer drivers which have been built
+        as dynamically loadable shared objects,
+        and, therefore, which can be selected at run time.
+        Each line consists of
+        the two-letter identification code for a driver,
+        a tab character,
+        and a description of the speech synthesizer which that driver is for.
+      <tag>libbrlttys<em/driver/.so.1</tag>
+        The dynamically loadable driver for a speech synthesizer,
+        where <em/driver/ is the two-letter <ref id="codes" name="driver identification code">.
+    </descrip>
 </descrip>
 
-See the TODO file for a more complete list.
-
-<sect1>Known Bugs
-
-<p>This software has been tested on
-<itemize>
-  <item> a variety of PCs: both laptops and desktops; processors from
-386SX20 to Pentium with a huge range of memory sizes; Linux
-distributions including Debian, Slackware, Red Hat and SUSE; a number of Linux
-kernels, including 1.2.13, 2.0.0 and 2.0.34.
-  <item> a DEC Alpha: only tested once, under Red Hat Alpha Linux on a
-noname board kindly lent to the Cambridge University Computer
-Laboratory by DEC in Reading, England.
-</itemize>
-It has proved stable so far, but if it isn't on your system, or if you
-find a bug not mentioned here, please let us know so that we can try
-to sort out the problem.
-
-At the time of writing (March 1999), the following problems are
-known:
+Some optional files which you should be aware of,
+although they aren't part of the installed file hierarchy, are:
 <descrip>
-  <tag/Cursor routing performance/ Routing is implemented by a looping
-sub-process which runs at lowered priority to avoid using too much cpu
-time.  Different system loads require different settings of the
-parameters here.  The defaults work excellently in a standard Unix
-editor on a fairly lightly loaded system, but very badly in other
-situations, e.g. over a slow serial link to a remote host.
-  <tag/Operation in DOSEmu/ Keystroke simulation of any kind does not
-work correctly in DOSEmu's raw keyboard mode.  This is because
-keystroke simulation must be done differently in this case, possibly
-by using scan codes.  This affects the cursor routing and cut &amp;
-paste functions.
+  <tag>/etc/brltty.conf</tag>
+    The system defaults configuration file.
+    See <ref id="configure" name="The Configuration File"> for details.
+  <tag>/etc/brltty-<em/driver/.prefs</tag>
+    The saved preferences settings file
+    (<em/driver/ is a two-letter <ref id="codes" name="driver identification code">).
+    See <ref id="preferences" name="Preferences Settings"> for details.
 </descrip>
 
-There is a bug in the Linux kernel 2.0.35 which causes console beeps to never
-stop once started. We have found a way to avoid this problem in the current
-version of BRLTTY.
+<sect1>Make File Customization<label id="make-customize"><p>
+Before compiling BRLTTY, you should check to see if it requires
+any special configuration for your system and/or your needs.  
+To do this,
+read the comments at the top of the file <tt/Makefile/ in the top-level directory,
+and, following the instructions contained therein, make any needed changes.
+Then read the <tt/README/ file in the subdirectory
+containing the driver for your braille display
+to check for any additional display-specific instructions.
+We've tried to make the defaults fit the most common case, so,
+assuming that you're not attempting to do anything out of the ordinary,
+you may not need to make any changes at all.
+
+The variables within the make file which you may wish to set and/or alter include:
+<descrip>
+  <tag>BRL_TARGET<label id="make-braille-driver"></tag>
+    There's one commented out assignment to this variable
+    for each supported braille display.
+    If you don't uncomment any of them,
+    then all of the braille display drivers are built
+    as dynamically loadable shared objects,
+    and the needed one can be selected at run time.
+    If you do uncomment one of them,
+    then ohly that driver is compiled,
+    and statically linked into the BRLTTY binary.
+    Don't uncomment more than one of them.
+  <tag>BRLDEV<label id="make-braille-device"></tag>
+    This variable specifies the path to the special file
+    for the device to which the braille display is connected.
+    It's initially set to <tt>/dev/ttyS0</> (the primary serial port).
+  <tag>SPK_TARGET<label id="make-speech-driver"></tag>
+    There's one commented out assignment to this variable
+    for each supported speech synthesizer.
+    If you don't uncomment any of them,
+    then all of the speech synthesizer drivers are built
+    as dynamically loadable shared objects,
+    and the needed one can be selected at run time.
+    If you do uncomment one of them,
+    then ohly that driver is compiled,
+    and statically linked into the BRLTTY binary.
+    Don't uncomment more than one of them.
+  <tag>TEXTTRANS<label id="make-tables-text"></tag>
+    There's one commented out assignment to this variable
+    for each provided text translation table.
+    If you don't uncomment any of them,
+    then a commonly (in North America) used 8-dot variant of the
+    <ref id="nabcc" name="North American Braille Computer Code">
+    is assumed.
+    Don't uncomment more than one of them.
+    This specification only establishes a default text translation table;
+    the needed one can always be selected at run time.
+  <tag>ATTRTRANS<label id="make-tables-attributes"></tag>
+    This variable specifies the attributes translation table which is to be used.
+    It's initially set to <tt/attributes.tbl/.
+    Change it to <tt/attrib.tbl/ if you'd like it done the old way.
+    This specification only establishes a default attributes translation table;
+    the needed one can always be selected at run time.
+  <tag>INSTALL_ROOT<label id="make-install-root"></tag>
+    Set this variable if you need to install BRLTTY in a different location
+    than the one from which it'll ultimately be used.
+    You need to use this feature, for example,
+    if you're building BRLTTY on one system for use on another.
+    If this variable is set, then the installed file hierarchy
+    is anchored at the directory which it specifies.
+    If it isn't set, then the installed file hierarchy
+    is anchored at the system's root directory.
+    It only applies to <tt/make install/ and <tt/make uninstall/.
+  <tag>PREFIX<label id="make-install-prefix"></tag>
+    Set this variable if you need to install
+    BRLTTY's run-time files in a non-standard location.
+    You need to use this feature, for example, if you'd like to have
+    more than one release of BRLTTY installed at the same time.
+    If this variable is set, then the installed file hierarchy
+    is anchored at the directory which it specifies.
+    If it isn't set, then the installed file hierarchy
+    is anchored at the system's root directory.
+    Even though its sole purpose is to determine
+    where the run-time files are to be installed,
+    it must be set (or not set) throughout the whole build process since
+    certain components of BRLTTY need to know exactly where to find others.
+  <tag>PROG_DIR<label id="make-install-program"></tag>
+    This variable specifies the directory
+    into which the binaries are installed.
+    It's initially set to <tt>/sbin</>.
+  <tag>DATA_DIR<label id="make-install-data"></tag>
+    This variable specifies the directory
+    into which the tables, help pages, and other data files are installed.
+    It's initially set to <tt>/etc/brltty</>.
+  <tag>LIB_DIR<label id="make-install-library"></tag>
+    This variable specifies the directory
+    into which the drivers and other architecture-dependent files are installed.
+    It's initially set to <tt>/lib/brltty</>.
+  <tag>INSTALL_USER<label id="make-install-user"></tag>
+    This variable specifies the user which is to own
+    the binaries and the drivers.
+    It's initially set to <tt/root/.
+  <tag>INSTALL_GRUOP<label id="make-install-group"></tag>
+    This variable specifies the group which is to own
+    the binaries and the drivers.
+    It's initially set to <tt/root/.
+  <tag>INSTALL_MODE<label id="make-install-mode"></tag>
+    This variable specifies the file permissions for
+    the binaries and the drivers.
+    It's initially set to <tt/744/
+    (see the man page for <tt/chmod(1)/).
+  <tag>SCR_O<label id="make-screen-driver"></tag>
+    This variable specifies which screen driver is to be used.
+    It's initially set to <tt/scr_linux.o/.
+    Another screen driver, <tt/scr_shm.o/, may also be used
+    in conjunction with the patch we provide for the <tt/screen/ program.
+  <tag>VCSADEV<label id="make-screen-device"></tag>
+    This variable tells the Linux screen driver
+    what all the possible paths to the screen content inspection device are.
+    It's initially set to <tt>/dev/vcsa /dev/vcsa0 /dev/vcc/a</>.
+  <tag>CROSSCOMP<label id="make-compile-cross"></tag>
+    Set this variable if you're cross-compiling for a different architecture.
+    This feature assumes that all of the commands within
+    the cross-compile suite for that architecrue have the same prefix,
+    and this variable should be set to that common prefix.
+</descrip>
+
+<sect1>Make File Targets<p>
+BRLTTY's make file supports most of the common application maintenance targets.
+They include:
+<descrip>
+  <tag/make/
+    A shortcut for <tt/make all/.
+  <tag/make all/
+    Compile and link the BRLTTY executable, its drivers and their help pages,
+    its test programs, and a few other small utilities.
+  <tag/make install/
+    Complete the compile and link phase (see <tt/make all/), and then install
+    the BRLTTY executable, its data files, drivers, and help pages,
+    in the correct places and with the correct permissions.
+    The screen content inspection device (<tt>/dev/vcsa</> or equivalent)
+    is created if it doesn't already exist.
+  <tag/make uninstall/
+    Remove the BRLTTY executable, its data files, drivers, and help pages,
+    from the system.
+  <tag/make clean/
+    Ensure that the next compile and link (see <tt/make all/)
+    will be done from scratch by removing the results of
+    compiling, linking, and testing from the source directory structure.
+    This includes the removal of object files, executables,
+    dynamically loadable shared objects, driver lists, help pages,
+    temporary header files, and core files.
+  <tag/make distclean/
+    In addition to removing the results of a build (see <tt/make clean/),
+    also remove other files from the source directory structure
+    which tend to accumulate over time but which don't belong there.
+    This includes the removal of editor backup files, test case results,
+    rejected patch hunks, and copies of original source files.
+</descrip>
+
+<sect1>Testing the Build<p>
+After compiling, linking, and installing BRLTTY,
+it's a good idea to give it a quick test before activating it permanently.
+To do so, invoke it with the command:
+<tscreen>brltty -b<em/driver/ -d<em/device/</tscreen>
+For <em/driver/, specify the two-letter
+<ref id="codes" name="driver identification code">
+corresponding to your braille display.
+For <em/device/, specify the full path
+for the device to which your braille display is connected.
+
+If all is well, BRLTTY's version identification message
+should appear on the braille display for a few seconds.
+After it goes away (which you can hasten by pressing any key on the display),
+the area of the screen where the cursor is should appear.
+This means that you should expect to see your shell's command prompt.
+Then, as you enter your next command,
+each character should appear on the display as it's typed on the keyboard.
+
+If this is your experience, then leave BRLTTY running, and enjoy it.
+If this isn't your experience, then it may be necessary
+to test each driver separately in order to isolate the source of the probledm.
+The screen driver can be tested with <ref id="utility-scrtest" name="scrtest">,
+and the braille display driver can be tested with <ref id="utility-brltest" name="brltest">.
+
+If you experience a problem which requires a lot of digging,
+then you may wish to use the following <tt/brltty/ command line options:
+<itemize>
+  <item>
+    <ref id="options-log-level" name="-ldebug">
+    to log lots of diagnostic messages.
+  <item>
+    <ref id="options-no-daemon" name="-n">
+    to keep BRLTTY in the foreground.
+  <item>
+    <ref id="options-standard-error" name="-e">
+    to direct diagnostic messages to standard error
+    rather than to the system log.
+</itemize>
+
+<sect1>Starting BRLTTY<p>
+BRLTTY, when properly installed, is invoked with the single command <tt/brltty/.
+A configuration file
+(see section <ref id="configure" name="The Configuration File"> for details)
+can be created in order to establish system defaults for such things as
+the location of the preferences file,
+the braille display driver to be used,
+the device to which the braille display is connected,
+and the text translation table to be used.
+Many options
+(see section <ref id="options" name="Command Line Options"> for details)
+allow explicit run-time specification of such things as
+the location of the configuration file,
+any defaults established within the configuration file,
+and some characteristics which have reasonable defaults
+but which those who think they know what they're doing may wish to play with.
+The <ref id="options-help" name="-h"> option
+displays a summary of all the options.
+The <ref id="options-version" name="-v"> option
+displays the current version of the program and the selected drivers.
+
+It's probably best to have the system automatically start BRLTTY
+as part of the boot sequence
+so that the braille display is already up and running when the login prompt appears.
+Most (probably all) distributions provide a script wherein
+user-supplied applications can be safely started near the end of the boot sequence.
+The name of this script is distribution-dependent.
+Here are the ones we know about so far:
+<descrip>
+  <tag/Red Hat/
+    <tt>/etc/rc.d/rc.local</>
+</descrip>
+
+Starting BRLTTY from this script is a good approach (especially for new users).
+Just add a set of lines like these:
+<tscreen><verb>
+if [ -x /sbin/brltty ]
+then
+   /sbin/brltty
+fi
+</verb></tscreen>
+This can usually be abbreviated to the somewhat less readable form:
+<tscreen><verb>
+[ -x /sbin/brltty ] && /sbin/brltty
+</verb></tscreen>
+Don't add these lines before the first line
+(which usually looks like <tt>&num;!/bin/sh</>).
+
+If the braille display is to be used by a system administrator,
+then it should probably be started as early as possible during the boot sequence
+(like before the file systems are checked)
+so that the display is usable
+in the event that something goes wrong during these checks
+and the system drops into single user mode.
+Again, exactly where it's best to do this is distribution-dependent.
+Here are the places we know about so far:
+<descrip>
+  <tag>Debian</tag>
+    <tt>/etc/init.d/boot</> for older releases,
+    and <tt>/etc/init.d/rcS</> for newer releases.
+  <tag>RedHat</tag>
+    <tt>/etc/rc.d/rc.sysinit</>
+    Beware that later releases,
+    in order to support a more user-oriented system initialization procedure,
+    have this script reinvoke itself such that
+    it's under the control of <tt/initlog/.
+    Look, probably right up near the top, for a set of lines like these:
+    <tscreen><verb>
+    # Rerun ourselves through initlog
+    if [ -z "$IN_INITLOG" ]; then
+     [ -f /sbin/initlog ] && exec /sbin/initlog $INITLOG_ARGS -r /etc/rc.sysinit
+    fi
+    </verb></tscreen>
+    Starting BRLTTY before this reinvocation
+    results in two BRLTTY processes running at the same time,
+    and that'll give you no end of problems.
+    If your version of this script has this feature,
+    then make sure you start BRLTTY after the lines which implement it.
+  <tag>Slackware</tag>
+    <tt>/etc/rc.d/rc.S</>
+  <tag>SuSE</tag>
+    <tt>/sbin/init.d/boot</>
+</descrip>
+
+An alternative is to start BRLTTY from <tt>/etc/inittab</>.
+You have two choices if you choose this route.
+<itemize>
+  <item>
+    If you want it to be started really early
+    but don't need it to be automatially restarted if it dies,
+    then add a line like this before the first <tt/:sysinit:/ line which is already in there.
+    <tscreen>bt::sysinit:/sbin/brltty</tscreen>
+  <item>
+    If you don't mind it being started later
+    but do want it to be automatially restarted if it dies,
+    then add a line like this anywhere within the file.
+    <tscreen>bt:12345:respawn:/sbin/brltty -n</tscreen>
+    The <ref id="options-no-daemon" name="-n"> (<tt/--nodaemon/) option is very
+    important when running BRLTTY with <bf/init/'s <tt/respawn/ facility.
+    You'll end up with hundreds of BRLTTY processes all running at the same time
+    if you forget to specify it.
+</itemize>
+Check that the identifier (<tt/bt/ in these examples)
+isn't already being used by another entry,
+and, if it is, choose a different one which isn't.
+
+Note that a command like <tt/kill -TERM/
+is sufficient to stop BRLTTY in its tracks.
+If it dies during entry into single user mode, for example,
+it may well be due to a problem of this nature.
+
+Some systems experience problems if an application tries to use
+the kernel's sound subsystem before it has been initialized.
+If your system is one of them, then
+you may need to disable the automatic starting of the speech synthesizer driver
+with the <ref id="options-no-speech" name="-N"> option.
+
+Some systems, as part of the boot sequence, probe the serial ports
+(usually in order to automatically find the mouse and deduce its type).
+If your braille display is using a serial port,
+this kind of probing may be enough to get it confused.
+If this happens to you, then try restarting the braille driver
+(see the <ref id="command-RESTARTBRL" name="RESTARTBRL"> command).
+Better yet, turn off the serial port probing.
+Here's what we know so far about how to do this:
+<descrip>
+  <tag/Red Hat/
+    The probing is done by a service named <tt/kudzu/.
+    Use the command <tscreen>chkconfig --list kudzu</tscreen> to see if it's been enabled.
+    Use the command <tscreen>chkconfig kudzu off</tscreen> to disable it.
+    Later releases allow you to let <tt/kudzu/ run
+    without probing the serial ports.
+    To do this, edit the file <tt>/etc/sysconfig/kudzu</>,
+    and set <tt/SAFE/ to <tt/yes/.
+</descrip>
+
+If you want to start BRLTTY before any file systems are mounted, then
+ensure that all of its components are installed within the root file system.
+See the <ref id="make-install-prefix" name="PREFIX">,
+<ref id="make-install-program" name="PROG_DIR">,
+<ref id="make-install-data" name="DATA_DIR">,
+<ref id="make-install-library" name="LIB_DIR">,
+and <ref id="make-screen-device" name="VCSADEV"> make file variables.
+
+<sect1>Security Considerations<p>
+BRLTTY needs to run with root privileges because it needs
+read and write access for the port to which the braille display is connected,
+read access to <tt>/dev/vcsa</> or equivalent
+(to query the screen dimensions and the cursor position,
+and to review the current screen content and highlighting),
+and read and write accesws to the system console
+(for arrow key entry during cursor routing,
+for input character insertion during paste,
+for special key simulation using keys on the braille display,
+for retrieving output character translation and screen font mapping tables,
+and for making the computer's speaker beep).
+Access to the needed devices can, of course, be granted to a non-root user
+by changing the file permissions associated with the devices.
+Merely having access to the console, however, isn't enough because
+making the speaker beep and simulating key strokes still require root privilege.
+So, if you're willing to give up cursor routing, cut&amp;paste, beeps,
+and all that, you can run BRLTTY without root priviledge.
+
+<sect1>Other Utilities<p>
+Building BRLTTY also results in the building of
+a few small helper and diagnostic utilities.
+
+<sect2>install-brltty<label id="utility-install-brltty"><p>
+This utility copies BRLTTY's
+<ref id="hierarchy" name="installed file hierarchy">
+from one location to another.
+<tscreen>install-brltty <em/to/ &lsqb;<em/from/&rsqb;</tscreen>
+<descrip>
+  <tag><em/to/</tag>
+    The location to which the
+    <ref id="hierarchy" name="installed file hierarchy">
+    is to be copied.
+    It must be an existing directory.
+  <tag><em/from/</tag>
+    The location from which the
+    <ref id="hierarchy" name="installed file hierarchy">
+    is to be taken.
+    If it's specified, then it must be an existing directory.
+    If it's not specified, then the location used for the build is assumed.
+</descrip>
+
+The screen content inspection device is also created
+(if it doesn't already exist)
+within the <em/to/ hierarchy.
+
+This utility can be used, for example, to copy BRLTTY to a root disk.
+If a root floppy is mounted as <tt>/mnt</>,
+and BRLTTY is installed on the main system,
+then typing <tscreen>install-brltty /mnt</tscreen>
+copies BRLTTY, along with all of its data and library files,
+to the root floppy.
+
+Some problems have been experienced when copying BRLTTY
+between systems with different versions of the shared C library.
+This is worth investigating if you have difficulties.
+
+<sect2>txt2hlp<p>
+This is a helper utility which is used during the build procedure
+to prepare the help pages for the drivers.
+<tscreen>txt2hlp <em/output-file/ <em/input-file/ ...</tscreen>
+<descrip>
+  <tag><em/output-file/</tag>
+    The file which is to contain all of the compiled help pages.
+    The pages are numbered, starting from zero,
+    in the same order as the input files are specified.
+  <tag><em/input-file/</tag>
+    At least one input file must be specified.
+    Each is the source for a single help page,
+    and should contain plain text.
+</descrip>
+
+<sect2>tbl2hex<p>
+This is a helper utility which is used during the build procedure
+to prepare the default text and attributes translation tables.
+<tscreen>tbl2hex</tscreen>
+The translation table is read from standard input,
+and a set of hexadecimal constants
+suitable for inclusion within a C array initializer
+is written to standard output.
+
+<sect2>brltest<label id="utility-brltest"><p>
+This utility tests the braille display driver,
+and also provides an interactive way to learn
+what the keys on the braille display do.
+It must be run as root.
+<tscreen>brltest -<em/optin/ ... [<em/driver/ [<em/name/=<em/value/] ...]</tscreen>
+<descrip>
+  <tag><em/driver/</tag>
+    The driver for the braille display.
+    It may be
+    either a two-letter <ref id="codes" name="driver identification code">
+    or the absolute path to a dynamically loadable shared object.
+    If it's not specified, then the driver configured within the
+    <ref id="make-braille-driver" name="make file"> is assumed.
+  <tag><em/name/<tt/=/<em/value/</tag>
+    Set a braille display driver parameter.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+  <tag><tt/-d/<em/device/ <tt/--device=/<em/device/</tag>
+    The absolute path for the device to which the braille display is connected.
+    If it's not specified, then the device configured within the
+    <ref id="make-braille-device" name="make file"> is assumed.
+</descrip>
+
+The message ``This is BRLTTY!'' should appear on the braille display.
+Then, as each key (or key combination) on the display is pressed,
+a short message describing its BRLTTY function appears.
+This utility exits, and the message ``done'' appears,
+if ten seconds pass without any key on the display being pressed.
+Note that some displays don't signal the driver
+and/or some drivers don't signal BRLTTY
+until the keys are released.
+
+If a message is longer than the braille display is wide,
+then it's displayed in segments.
+The length of each segment but the last is one less than the display's width,
+with the rightmost character on the display being set to a minus sign.
+Each such segment remains on the display
+either for four seconds
+or until a key on the display is pressed.
+
+<sect2>scrtest<label id="utility-scrtest"><p>
+This utility tests the screen driver.
+It must be run as root.
+<tscreen>scrtest -<em/option/ ...</tscreen>
+<descrip>
+  <tag><tt/-c/<em/column/ <tt/--column=/<em/column/</tag>
+    Specify the starting (left) column (zero-origin) of the region.
+    If this value isn't supplied,
+    then a default value, based on the specified width,
+    is selected such that the region is horizontally centred.
+  <tag><tt/-h/<em/rows/ <tt/--height=/<em/rows/</tag>
+    Specify the height of the region (in rows).
+    If this value isn't supplied,
+    then a default value, based on the specified starting row,
+    is selected such that the region is vertically centred.
+  <tag><tt/-p/<em/name/<tt/=/<em/value/ <tt/--parameter=/<em/name/<tt/=/<em/value/</tag>
+    Set a screen driver parameter.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+  <tag><tt/-r/<em/row/ <tt/--row=/<em/row/</tag>
+    Specify the starting (top) row (zero-origin) of the region.
+    If this value isn't supplied,
+    then a default value, based on the specified height,
+    is selected such that the region is vertically centred.
+  <tag><tt/-w/<em/columns/ <tt/--width=/<em/columns/</tag>
+    Specify the width of the region (in columns).
+    If this value isn't supplied,
+    then a default value, based on the specified starting column,
+    is selected such that the region is horizontally centred.
+</descrip>
+
+Notes:
+<itemize>
+  <item>
+    If neither a starting column nor a region width is specified,
+    then the region is horizontally-centred and starts at column 5.
+  <item>
+    If neither a starting row nor a region height is specified,
+    then the region is vertically-centred and starts at row 5.
+</itemize>
+
+The following is written to standard output:
+<enum>
+  <item>
+    A line detailing the dimensions of the screen.
+    <tscreen>Screen: <em/width/x<em/height/</tscreen>
+  <item>
+    A line detailing the position (zero-origin) of the cursor.
+    <tscreen>Cursor: &lsqb;<em/column/,<em/row/&rsqb;</tscreen>
+  <item>
+    A line detailing the size of the selected screen region,
+    and the position (zero-origin) of its top-left corner.
+    <tscreen>Region: <em/width/x<em/height/@&lsqb;<em/column/,<em/row/&rsqb;</tscreen>
+  <item>
+    The contents of the selected screen region.
+    Unprintable characters are written as blanks.
+</enum>
+
+<sect>Using BRLTTY<p>
+Before starting BRLTTY, you need to set up your braille display.
+In most cases this is done simply
+by connecting it to an available serial port,
+and then turning it on.
+After your display has been set up,
+run BRLTTY simply by typing the command <tt/brltty/ at a shell prompt
+(this must be done as root).
+Check the
+<ref id="options-braille-device" name="-d"> command line option,
+the <ref id="configure-braille-device" name="braille-device"> configuration file directive,
+and the <ref id="make-braille-device" name="BRLDEV"> make file variable
+for alternatives regarding how to tell BRLTTY which device your display is connected to.
+Check the
+<ref id="options-braille-driver" name="-b"> command line option,
+the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive,
+and the <ref id="make-braille-driver" name="BRL_TARGET"> make file variable
+for alternatives regarding how to tell BRLTTY which kind of braille display you have.
+Check the
+<ref id="options-braille-parameters" name="-B"> command line option,
+and the <ref id="configure-braille-parameters" name="braille-parameters"> configuration file directive
+for alternatives regarding how to pass parameters to the driver for your braille display.
+
+A message giving the program name (BRLTTY) and its version number
+will appear briefly
+(see the <ref id="options-message-delay" name="-M"> command line option)
+on the braille display.
+The display will then show a small area of the screen including the cursor.
+By default, the cursor is represented as
+dots 7 and 8 superimposed on the character it is on.
+
+Any screen activity will be reflected on the braille display.
+The display will also follow the progress of the cursor on the screen.  
+This feature is known as <bf/cursor tracking/.
+
+Just typing on the keyboard and reading the display, however, isn't enough.
+Try entering a command which will cause an error, and pressing <bf/enter/.  
+The error appears on the screen, but, unless you have a multi-line display,
+the chances are that it isn't visible on the braille display.
+All you see thereon is another shell prompt.
+What's needed, then, is some way to move
+the braille <em/window/ around the screen.
+The keys on the braille display itself can be used to send commands to BRLTTY
+which, in addition to a lot of other things, can also do exactly that.
+
+<sect1>Commands<p>
+Unfortunately, the various braille displays don't offer a standard set of controls.
+Some have the six standard dot keys, some have eight, and others have none.
+Some have thumb keys, but there's no standard number of them.
+Some have a button above each braille cell.
+Some have rocker switches.
+Some have an easy-to-reach bar which works much like a joystick.
+Most have varying combinations of the above.
+Because the nature and layout of each display is so different,
+please refer to the documentation for your particular display
+in order to find out exactly what its keys do.
+
+BRLTTY commands are referred to by name within this manual.
+If you forget which key(s) on your braille display to use
+for a paticular command, then refer to its driver's help page.
+The main key you should immediately commit to memory, therefore, is the one
+for the <ref id="command-HELP" name="HELP"> command.
+Use the regular motion keys (as described below) to navigate the help page,
+and press the <tt/help/ key again to quit.
+
+<sect2>Vertical Motion<label id="vertical"><p>
+See also the <ref id="command-NXINDENT" name="NXINDENT">
+and the <ref id="command-PRINDENT" name="PRINDENT"> routing key commands.
+<descrip>
+  <tag>LNUP<label id="command-LNUP"></tag>
+    Go up one line.
+    If identical line skipping has been activated
+    (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
+    then this command, rather than moving exactly one line,
+    is an alias for the <ref id="command-PRDIFLN" name="PRDIFLN"> command.
+  <tag>LNDN<label id="command-LNDN"></tag>
+    Go down one line.
+    If identical line skipping has been activated
+    (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
+    then this command, rather than moving exactly one line,
+    is an alias for the <ref id="command-NXDIFLN" name="NXDIFLN"> command.
+  <tag>WINUP<label id="command-WINUP"></tag>
+    Go up several lines.
+  <tag>WINDN<label id="command-WINDN"></tag>
+    Go down several lines.
+  <tag>PRDIFLN<label id="command-PRDIFLN"></tag>
+    Go up to the nearest previous line
+    with different content.
+  <tag>NXDIFLN<label id="command-NXDIFLN"></tag>
+    Go down to the nearest next line
+    with different content.
+  <tag>ATTRUP<label id="command-ATTRUP"></tag>
+    Go up to the nearest previous line
+    with different character highlighting (attributes).
+  <tag>ATTRDN<label id="command-ATTRDN"></tag>
+    Go down to the nearest next line
+    with different character highlighting (attributes).
+  <tag>TOP<label id="command-TOP"></tag>
+    Go up to the top line.
+  <tag>BOT<label id="command-BOT"></tag>
+    Go down to the bottom line.
+  <tag>TOP_LEFT<label id="command-TOP_LEFT"></tag>
+    Go to the top-left corner.
+  <tag>BOT_LEFT<label id="command-BOT_LEFT"></tag>
+    Go to the bottom-left corner.
+  <tag>PRBLNKLN<label id="command-PRBLNKLN"></tag>
+    Go up to the last line of the previous paragraph
+    (the first non-blank line beyond the nearest previous blank line).
+  <tag>NXBLNKLN<label id="command-NXBLNKLN"></tag>
+    Go down to the first line of the next paragraph
+    (the first non-blank line beyond the nearest next blank line).
+  <tag>PRSEARCH<label id="command-PRSEARCH"></tag>
+    Go up to the nearest previous line
+    whereon the character string within the cut buffer can be found.
+    See <ref id="cut" name="Cut and Paste"> for details.
+  <tag>NXSEARCH<label id="command-NXSEARCH"></tag>
+    Go down to the nearest next line
+    whereon the character string within the cut buffer can be found.
+    See <ref id="cut" name="Cut and Paste"> for details.
+</descrip>
+
+<sect2>Horizontal Motion<label id="horizontal"><p>
+<descrip>
+  <tag>CHRLT<label id="command-CHRLT"></tag>
+    Go left one character.
+  <tag>CHRRT<label id="command-CHRRT"></tag>
+    Go right one character.
+  <tag>HWINLT<label id="command-HWINLT"></tag>
+    Go left half a window.
+  <tag>HWINRT<label id="command-HWINRT"></tag>
+    Go right half a window.
+  <tag>FWINLT<label id="command-FWINLT"></tag>
+    Go left one window.
+    This command is particularly useful when reading backward
+    because it automatically wraps up to the end of the previous line
+    when invoked at the beginning of the current line.
+    Other features like its ability to skip blank windows
+    (see the <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command)
+    further enhance its usefulness for this purpose.
+  <tag>FWINRT<label id="command-FWINRT"></tag>
+    Go right one window.
+    This command is particularly useful when reading forward
+    because it automatically wraps down to the beginning of the next line
+    when invoked at the end of the current line.
+    Other features like its ability to skip blank windows
+    (see the <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command)
+    further enhance its usefulness for this purpose.
+  <tag>FWINLTSKIP<label id="command-FWINLTSKIP"></tag>
+    Go left to the nearest previous non-blank window.
+  <tag>FWINRTSKIP<label id="command-FWINRTSKIP"></tag>
+    Go right to the nearest next non-blank window.
+  <tag>LNBEG<label id="command-LNBEG"></tag>
+    Go to the beginning (left) of the line.
+  <tag>LNEND<label id="command-LNEND"></tag>
+    Go to the end (right) of the line.
+</descrip>
+
+<sect2>Implicit Motion<p>
+<descrip>
+  <tag>HOME<label id="command-HOME"></tag>
+    Go to where the cursor is.
+  <tag>BACK<label id="command-BACK"></tag>
+    Go back to where the most recent motion command put the braille window.
+    This is an easy way to get right back to where you were reading
+    after an unexpected event (like cursor tracking)
+    moves the braille window at an inopportune moment.
+</descrip>
+
+<sect2>Feature Activation and Deactivation<p>
+Each of these commands has three forms:
+<bf/activate/ (turn the feature on),
+<bf/deactivate/ (turn the feature off),
+and <bf/toggle/ (if it's off then turn it on, and if it's on then turn it off).
+Unless specifically noted, each of these features
+is initially <bf/off/, and, when <bf/on/, affects BRLTTY's operation as a whole.
+The initial setting of some of these features can be changed
+via the <ref id="preferences-menu" name="preferences menu">.
+<descrip>
+  <tag>FREEZE<label id="command-FREEZE"></tag>
+    Freeze the screen image.
+    BRLTTY makes a copy of the screen (content and attributes)
+    as of the moment when the screen image is frozen,
+    and then ignores all updating of the screen until it's unfrozen.
+    This feature makes it easy, for example,
+    to sample the output of an application which writes too much too quickly.
+  <tag>DISPMD<label id="command-DISPMD"></tag>
+    Show the highlighting (the attributes)
+    of each character within the braille window,
+    rather than the characters themselves (the content).
+    This feature is useful, for example,
+    when you need to locate a highlighted item.
+    When showing screen content, the text translation table is used
+    (see the <ref id="options-text-table" name="-t"> command line option,
+    the <ref id="configure-text-table" name="text-table"> configuration file directive,
+    and the <ref id="make-tables-text" name="TEXTTRANS"> make file variable).
+    When showing screen attributes, the attributes translation table is used
+    (see the <ref id="options-attributes-table" name="-a"> command line option,
+    the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,
+    and the <ref id="make-tables-attributes" name="ATTRTRANS"> make file variable).
+    This feature only affects the current virtual terminal.
+  <tag>SIXDOTS<label id="command-SIXDOTS"></tag>
+    Show characters using 6-dot, rather than 8-dot, braille.
+    Dots 7 and 8 are still used by other features
+    like cursor representation and attribute underlining.
+  <tag>SLIDEWIN<label id="command-SLIDEWIN"></tag>
+    If cursor tracking
+    (see the <ref id="command-CSRTRK" name="CSRTRK"> command)
+    is <bf/on/, then,
+    whenever the cursor moves too close to (or beyond)
+    either end of the braille window,
+    horizontally reposition the window such that the cursor,
+    while remaining on that side, is nearer the centre.
+    If this feature is <bf/off/,
+    then the braille window is always positioned such that
+    its left end is a multiple of its width from the left edge of the screen.
+  <tag>SKPIDLNS<label id="command-SKPIDLNS"></tag>
+    Rather than explicitly moving exactly one line either up or down,
+    skip passed lines which have the same content as the current line.
+    This feature affects the <ref id="command-LNUP" name="LNUP">
+    and <ref id="command-LNDN" name="LNDN"> commands,
+    as well as the line wrapping feature of
+    the <ref id="command-FWINLT" name="FWINLT">,
+    <ref id="command-FWINRT" name="FWINRT">,
+    <ref id="command-FWINLTSKIP" name="FWINLTSKIP">,
+    and <ref id="command-FWINRTSKIP" name="FWINRTSKIP"> commands.
+  <tag>SKPBLNKWINS<label id="command-SKPBLNKWINS"></tag>
+    Skip passed blank windows when reading either forward or backward.
+    This feature affects the <ref id="command-FWINLT" name="FWINLT">
+    and <ref id="command-FWINRT" name="FWINRT"> commands.
+  <tag>CSRVIS<label id="command-CSRVIS"></tag>
+    Show the cursor by superimposing a dot pattern
+    (see the <ref id="command-CSRSIZE" name="CSRSIZE"> command)
+    on top of the character where it is.
+    This feature is initially <bf/on/.
+  <tag>CSRHIDE<label id="command-CSRHIDE"></tag>
+    Hide the cursor (see the <ref id="command-CSRVIS" name="CSRVIS"> command)
+    in order to accurately read the character beneath it.
+    This feature only affects the current virtual terminal.
+  <tag>CSRTRK<label id="command-CSRTRK"></tag>
+    Track (follow) the cursor.
+    If the cursor moves to a location which isn't within the braille window,
+    then automatically move the braille window to the cursor's new location.
+    You'll usually want this feature turned on
+    since it minimizes the effects of screen scrolling,
+    and since, during input, the region wherein you're currently typing is always visible.
+    If this feature causes the braille window to jump at an inopportune moment,
+    then use the <ref id="command-BACK" name="BACK"> command
+    to get back to where you were reading.
+   You may need to turn this feature off when using an application which
+   continually updates the screen while maintaining a fixed data layout.
+    This feature is initially <bf/on/.
+    This feature only affects the current virtual terminal.
+  <tag>CSRSIZE<label id="command-CSRSIZE"></tag>
+    Represent the cursor with all eight dots (a solid block),
+    rather than with just dots 7 and 8 (an underline).
+  <tag>CSRBLINK<label id="command-CSRBLINK"></tag>
+    Blink (turn on and off according to a predefined interval)
+    the symbol representing the cursor
+    (see the <ref id="command-CSRVIS" name="CSRVIS"> command).
+  <tag>ATTRVIS<label id="command-ATTRVIS"></tag>
+    Underline (with combinations of dots 7 and 8) highlighted characters.
+    <descrip>
+      <tag/no underline/
+        White on black (normal),
+        gray on black,
+        white on blue,
+        black on cyan.
+      <tag/dots 7 and 8/
+        Black on white (reverse video).
+      <tag/dot 8/
+        Everything else.
+    </descrip>
+  <tag>ATTRBLINK<label id="command-ATTRBLINK"></tag>
+    Blink (turn on and off according to a predefined interval)
+    the attribute underline
+    (see the <ref id="command-ATTRVIS" name="ATTRVIS"> command).
+    This feature is initially <bf/on/.
+  <tag>CAPBLINK<label id="command-CAPBLINK"></tag>
+    Blink (turn on and off according to a predefined interval)
+    capital (uppercase) letters.
+  <tag>SND<label id="command-SND"></tag>
+    Play a short predefined tune (see <ref id="tunes" name="Alert Tunes">)
+    whenever a significant event occurs.
+    This feature is initially <bf/on/.
+</descrip>
+
+<sect2>Mode Selection<p>
+<descrip>
+  <tag>HELP<label id="command-HELP"></tag>
+    Switch to the braille display driver's help page.
+    This is where you can find an on-line summary of things like
+    what your braille display's keys do,
+    and how to interpret its status cells.
+    Use the regular <ref id="vertical" name="vertical">
+    and <ref id="horizontal" name="horizontal"> motion commands
+    to navigate the help page.
+    Invoke the <tt/help/ command again to return to the screen.
+  <tag>INFO<label id="command-INFO"></tag>
+    Switch to the status display, which presents a summary including
+    the position of the cursor,
+    the position of the braille window,
+    and the states of a nmber of BRLTTY's features.
+    See the section <ref id="status" name="The Status Display"> for full details.
+    Invoke the <tt/info/ command again to return to the screen.
+</descrip>
+
+<sect2>Preferences Settings<p>
+<descrip>
+  <tag>PREFMENU<label id="command-PREFMENU"></tag>
+    Switch to the preferences menu
+    (see <ref id="preferences-menu" name="The Preferences Menu"> for full details).
+    Invoke the <tt/PREFMENU/ command again to return to normal operation.
+  <tag>PREFSAVE<label id="command-PREFSAVE"></tag>
+    Save the current preferences settings
+    (see <ref id="preferences" name="Preferences"> for full details).
+  <tag>PREFLOAD<label id="command-PREFLOAD"></tag>
+    Restore the most recently saved preferences settings
+    (see <ref id="preferences" name="Preferences"> for full details).
+</descrip>
+
+<sect2>Menu Navigation<label id="menu"><p>
+<descrip>
+  <tag>MENU_FIRST_ITEM<label id="command-MENU_FIRST_ITEM"></tag>
+    Go to the first item in the menu.
+  <tag>MENU_LAST_ITEM<label id="command-MENU_LAST_ITEM"></tag>
+    Go to the last item in the menu.
+  <tag>MENU_PREV_ITEM<label id="command-MENU_PREV_ITEM"></tag>
+    Go to the previous item in the menu.
+  <tag>MENU_NEXT_ITEM<label id="command-MENU_NEXT_ITEM"></tag>
+    Go to the next item in the menu.
+  <tag>MENU_PREV_SETTING<label id="command-MENU_PREV_SETTING"></tag>
+    Decrement the current menu item's setting.
+  <tag>MENU_NEXT_SETTING<label id="command-MENU_NEXT_SETTING"></tag>
+    Increment the current menu item's setting.
+</descrip>
+
+<sect2>Speech<p>
+<descrip>
+  <tag>SAY<label id="command-SAY"></tag>
+    Speak the current line.
+  <tag>SAYALL<label id="command-SAYALL"></tag>
+    Speak the rest of the screen (starting with the current line).
+  <tag>MUTE<label id="command-MUTE"></tag>
+    Stop speaking immediately.
+  <tag>SPKHOME<label id="command-SPKHOME"></tag>
+    Go to where the speech cursor is.
+</descrip>
+
+<sect2>Virtual Terminal Switching<p>
+See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
+<descrip>
+  <tag>SWITCHVT_PREV<label id="command-SWITCHVT_PREV"></tag>
+    Switch to the previous virtual terminal
+    (the one whose number is one less than the current one).
+  <tag>SWITCHVT_NEXT<label id="command-SWITCHVT_NEXT"></tag>
+    Switch to the next virtual terminal
+    (the one whose number is one greater than the current one).
+</descrip>
+
+<sect2>Miscellaneous<p>
+<descrip>
+  <tag>CSRJMP_VERT<label id="command-CSRJMP_VERT"></tag>
+    Route (bring) the cursor to anywhere on the top line of the braille window
+    (see <ref id="routing" name="Cursor Routing"> for full details).
+    The cursor is moved by simulating vertical arrow-key presses.
+    This command doesn't always work because some applications
+    either move the cursor somewhat unpredictably
+    or use the arrow keys for purposes other than cursor motion.
+    It's somewhat safer than the other cursor routing commands, though,
+    because it makes no attempt to simulate the left- and right-arrows.
+  <tag>PASTE<label id="command-PASTE"></tag>
+    Insert the characters within the cut buffer at the current cursor location
+    (see <ref id="cut" name="Cut and Paste"> for full details).
+  <tag>RESTARTBRL<label id="command-RESTARTBRL"></tag>
+    Stop, and then restart the braille display driver.
+  <tag>RESTARTSPEECH<label id="command-RESTARTSPEECH"></tag>
+    Stop, and then restart the speech synthesizer driver.
+</descrip>
+
+<sect2>Routing Keys<p>
+<descrip>
+  <tag>ROUTEOFFSET<label id="command-ROUTEOFFSET"></tag>
+    Route (bring) the cursor to the character
+    associated with the routing key
+    (see <ref id="routing" name="Cursor Routing"> for full details).
+    The cursor is moved by simulating arrow-key presses.
+    This command doesn't always work because some applications
+    either move the cursor somewhat unpredictably
+    or use the arrow keys for purposes other than cursor motion.
+    Braille displays which don't have routing keys
+    should use the <ref id="command-CSRJMP" name="CSRJMP"> command.
+  <tag>BEGBLKOFFSET<label id="command-BEGBLKOFFSET"></tag>
+    Anchor the start of the cut block at the character
+    associated with the routing key
+    (see <ref id="cut" name="Cut and Paste"> for full details).
+    Braille displays which don't have routing keys
+    should use the <ref id="command-CUT_BEG" name="CUT_BEG"> command.
+  <tag>ENDBLKOFFSET<label id="command-ENDBLKOFFSET"></tag>
+    Anchor the end of the cut block at the character
+    associated with the routing key,
+    and copy the block into the cut buffer
+    (see <ref id="cut" name="Cut and Paste"> for full details).
+    Braille displays which don't have routing keys
+    should use the <ref id="command-CUT_END" name="CUT_END"> command.
+  <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
+    Switch to the virtual terminal whose number
+    (counting from 1) matches that of the routing key.
+  <tag>NXINDENT<label id="command-NXINDENT"></tag>
+    Go down to the nearest next line which isn't indented
+    more than the column associated with the routing key.
+  <tag>PRINDENT<label id="command-PRINDENT"></tag>
+    Go up to the nearest previous line which isn't indented
+    more than the column associated with the routing key.
+  <tag>MSGATTRIB<label id="command-MSGATTRIB"></tag>
+    Momentarily (see the <ref id="options-message-delay" name="-M"> command line option)
+    display a message describing the character associated with the routing key.
+    It reveals
+    the decimal and hexadecimal values of the character,
+    the foreground and background colours,
+    and, when present, special attributes (<tt/bright/ and <tt/blink/).
+    The message looks like this:
+    <tscreen>char 65 (0x41): white on black bright blink</tscreen>
+  <tag>SETLEFT<label id="command-SETLEFT"></tag>
+    Horizontally reposition the braille window so that
+    its left edge is at the column associated with the routing key.
+    This feature makes it very easy to put the window exactly where it's needed,
+    and, therefore, eliminates the need for a lot of elementary window motion
+    (like the <ref id="command-CHRLT" name="CHRLT">,
+    <ref id="command-CHRRT" name="CHRRT">,
+    <ref id="command-HWINLT" name="HWINLT">,
+    and <ref id="command-HWINRT" name="HWINRT"> commands).
+</descrip>
+
+<sect2>No Routing Keys<p>
+<descrip>
+  <tag>CSRJMP<label id="command-CSRJMP"></tag>
+    Route (bring) the cursor to the character
+    at the top-left corner of the braille window.
+    (see <ref id="routing" name="Cursor Routing"> for full details).
+    The cursor is moved by simulating arrow-key presses.
+    This command doesn't always work because some applications
+    either move the cursor somewhat unpredictably
+    or use the arrow keys for purposes other than cursor motion.
+    Braille displays which have routing keys
+    should use the <ref id="command-ROUTEOFFSET" name="ROUTEOFFSET">
+    command instead of this one.
+  <tag>CUT_BEG<label id="command-CUT_BEG"></tag>
+    Anchor the start of the cut block at the character
+    at the top-left corner of the braille window
+    (see <ref id="cut" name="Cut and Paste"> for full details).
+    Braille displays which have routing keys
+    should use the <ref id="command-BEGBLKOFFSET" name="BEGBLKOFFSET">
+    command instead of this one.
+  <tag>CUT_END<label id="command-CUT_END"></tag>
+    Anchor the end of the cut block at the character
+    at the bottom-right corner of the braille window,
+    and copy the block into the cut buffer
+    (see <ref id="cut" name="Cut and Paste"> for full details).
+    Braille displays which have routing keys
+    should use the <ref id="command-ENDBLKOFFSET" name="ENDBLKOFFSET">
+    command instead of this one.
+</descrip>
+
+<sect1>Cursor Routing<label id="routing"><p>
+When moving the braille window around the screen
+while examining the text, say, in an editor,
+you often need to bring the cursor
+to a specific character within the braille window.
+You'll probably find this to be a rather difficult task for a number of reasons.
+One is that you may not know where the cursor is,
+and that you may lose your place while trying to find it.
+Another is that the cursor may move unrpedictably as the arrow keys are pressed
+(some editors, for example, don't allow the cursor to be
+more to the right than the end of the line it's on).
+Cursor routing provides just such a capability
+by knowing where the cursor is,
+by simulating the same arrow-key presses which you'd have to enter manually,
+and by monitoring the progress of the cursor as it moves.
+
+Some braille displays have a button, known as a routing key, above each cell.
+These keys use the <ref id="command-ROUTEOFFSET" name="ROUTEOFFSET"> command
+to route the cursor right to the desired location.
+If your display doesn't have routing keys,
+then use the <ref id="command-CSRJMP" name="CSRJMP"> command
+to route the cursor to the top-left corner of the braille window,
+and then use the arrow keys on the keyboard to do the rest.
+Some drivers interpret certain keys on the braille display itself as arrow keys
+so that this can be done without having to remove your hands from the display.
+
+Cursor routing, while very convenient and effective,
+is, strictly speaking, not completely reliable.
+One reason for this is that its current implementation assumes
+VT100 cursor key escape sequences.
+Another is that some applications do non-standard things
+in response to detecting that a cursor key has been pressed.
+A minor problem found within some editors (like <tt/vi/),
+as already mentioned above,
+is that they throw in some unpredictable horizontal motion
+when vertical motion is requested
+because they don't allow the cursor to be to the right of the end of a line.
+A major problem found within some web browsers (like <tt/lynx/)
+is that the up- and down-arrow keys are used to move among the links
+(which may skip lines and/or move the cursor horizontally,
+but which rarely just moves the cursor one line in the desired diretion),
+and that the left- and right-arrow keys are used to select links
+(which has absolutely nothing to do with any form of cursor motion whatsoever,
+and which even totally changes the screen content).
+
+Cursor routing may not work very well on a heavily loaded system,
+and definitely doesn't work very well when working on a remote system over a slow link.
+This is so because of all of the checks which must be made along the way
+in order to deal with unpredictable cursor motion
+and in order to ensure that any mistake has at least a fighting chance to be undone.
+Even  though BRLTTY tries to be fairly clever,
+it must still essentially wait to see what happens after each simulated arrow-key press.
+
+Once a cursor routing request has been made,
+BRLTTY keeps trying to route the cursor to the desired location until
+a timeout expires before the cursor reaches that location,
+the cursor seems to be moving in the wrong direction,
+or you switch to a different virtual terminal.
+An attempt is first made to use virtical motion
+to bring the cursor to the right line,
+and, only if that succeeds, an attempt is then made
+to use horizontal motion to bring the cursor to the right column.
+If another request is made while one is still in progress,
+then the first one is aborted and the second one is initiated.
+
+A safer but less powerful cursor routing command,
+<ref id="command-CSRJMP_VERT" name="CSRJMP_VERT">,
+uses just vertical motion to bring the cursor
+to anywhere on the top line of the braille window.
+It's especially useful in conjunction with applications (like <tt/lynx/)
+wherein horizontal cursor motion must never be attempted.
+
+<sect1>Cut and Paste<label id="cut"><p>
+This feature enables you to grab some text which is already on the screen 
+and re-enter it at the current cursor position.
+Using it saves time and avoids errors
+when a long and/or complicated piece of text needs to be copied,
+and even when the same short and simple piece of text needs to be copied many times.
+It's particularly useful for things like
+long file names,
+complicated command lines,
+E-mail addresses,
+and URLs. Cutting and pasting text involves three simple steps:
+<enum>
+  <item>
+    Mark the top-left corner of the rectangular area on the screen
+    which is to be grabbed (cut).
+    If your display has routing keys,
+    then move the braille window so that
+    the first character to be cut appears anywhere within it,
+    and invoke the <ref id="command-BEGBLKOFFSET" name="BEGBLKOFFSET"> command
+    by holding down the key(s) associated with it
+    and pressing the routing key associated with the character.
+    If your display doesn't have routing keys,
+    then move the braille window so that
+    the first character to be cut appears at its top-left corner,
+    and invoke the <ref id="command-CUT_BEG" name="CUT_BEG"> command.
+    Marking the start of the cut area
+    clears the cut buffer.
+  <item>
+    Mark the bottom-right corner of the rectangular area on the screen
+    which is to be grabbed (cut).
+    If your display has routing keys,
+    then move the braille window so that
+    the last character to be cut appears anywhere within it,
+    and invoke the <ref id="command-ENDBLKOFFSET" name="ENDBLKOFFSET"> command
+    by holding down the key(s) associated with it
+    and pressing the routing key associated with the character.
+    If your display doesn't have routing keys,
+    then move the braille window so that
+    the last character to be cut appears at its bottom-right corner,
+    and invoke the <ref id="command-CUT_END" name="CUT_END"> command.
+    Marking the end of the cut area
+    copies the selected screen content into the cut buffer.
+    Excess white space is removed from the end of each line in the cut buffer
+    so that unwanted trailing spaces won't be pasted back in.
+  <item>
+    Insert (paste) the text where it's needed.
+    Place the cursor over the character where the text is to be pasted,
+    and invoke the <ref id="command-PASTE" name="PASTE"> command.
+    You can paste the same text any number of times without recutting it.
+    This description assumes that you're already in some sort of input mode.
+    If you paste when you're in some other kind of mode
+    (like <tt/vi/'s command mode),
+    then you'd better be aware of what the characters in the cut buffer will do.
+</enum>
+
+The cut buffer is also used by
+the <ref id="command-PRSEARCH" name="PRSEARCH">
+and <ref id="command-NXSEARCH" name="NXSEARCH"> commands.
+
+<sect1>Alert Tunes<label id="tunes"><p>
+BRLTTY alerts you to the occurrence of significant events
+by playing short predefined tunes on the PC speaker.
+Each such event has its own tune.
+These events include:
+<itemize>
+   <item>
+     When the braille display driver starts or stops.
+   <item>
+     When the start or end of the cut block is set.
+   <item>
+     When a feature is activated or deactivated.
+   <item>
+     When cursor tracking is turned on or off.
+   <item>
+     When the screen image is frozen or unfrozen.
+   <item>
+     When identical lines are skipped.
+   <item>
+     When the braille window wraps
+     either down to the beginning of the next line
+     or up to the end of the previous line.
+   <item>
+     When a requested motion cannot be performed.
+   <item>
+     When a command cannot be executed.
+   <item>
+     When a lengthy command completes.
+</itemize>
+
+<sect1>The Status Display<label id="status"><p>
+The status display is a summary of BRLTTY's current state
+which fits completely within the braille window.
+Some braille displays have a set of status cells
+which are used to permanently display some of this information as well
+(see the documentation for your display's driver).
+The data presented by this display isn't static, and may change at any time
+in response to screen updates and/or BRLTTY commands.
+
+Use the <ref id="command-INFO" name="INFO"> command
+to switch to the status display,
+and use it again to return to the screen.
+The layout of the information contained therein
+is dependent on the size of the braille window.
+
+<sect2>Displays with 21 Cells or More<p>
+Short pneumonics have been used, even though they're rather cryptic,
+in order to show the precise column layout.
+<tscreen><em/wx/:<em/wy/ <em/cx/:<em/cy/ <em/vt/ <em/tcmfdu/</tscreen>
+<descrip>
+  <tag><em/wx/<tt/:/<em/wy/</tag>
+    The column and row (counting from 0) on the screen corresponding
+    to the top-left corner of the braille window.
+  <tag><em/cx/<tt/:/<em/cy/</tag>
+    The column and row (counting from 0) on the screen corresponding
+    to the position of the cursor.
+  <tag><em/vt/</tag>
+    The number (counting from 1) of the current virtual terminal.
+  <tag><em/t/</tag>
+    The state of the cursor tracking feature
+    (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
+    <descrip>
+      <tag>blank</tag>Cursor tracking is off.
+      <tag><tt/t/</tag>Cursor tracking is on.
+    </descrip>
+  <tag><em/c/</tag>
+    The state of the cursor visibility features
+    (see the <ref id="command-CSRVIS" name="CSRVIS">
+    and <ref id="command-CSRBLINK" name="CSRBLINK"> commands).
+    <descrip>
+      <tag>blank</tag>The cursor isn't visible, and won't blink when made visible.
+      <tag><tt/b/</tag>The cursor isn't visible, and will blink when made visible.
+      <tag><tt/v/</tag>The cursor is visible, and isn't blinking.
+      <tag><tt/B/</tag>The cursor is visible, and is blinking.
+    </descrip>
+  <tag><em/m/</tag>
+    The current display mode
+    (see the <ref id="command-DISPMD" name="DISPMD"> command).
+    <descrip>
+      <tag><tt/t/</tag>Screen content (text) is being displayed.
+      <tag><tt/a/</tag>Screen highlighting (attributes) is being displayed.
+    </descrip>
+  <tag><em/f/</tag>
+    The state of the frozen screen feature
+    (see the <ref id="command-FREEZE" name="FREEZE"> command).
+    <descrip>
+      <tag>blank</tag>The screen isn't frozen.
+      <tag><tt/f/</tag>The screen is frozen.
+    </descrip>
+  <tag><em/d/</tag>
+    The number of braille dots being used to display each character
+    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command).
+    <descrip>
+      <tag><tt/8/</tag>All eight dots are being used.
+      <tag><tt/6/</tag>Only dots 1 through 6 are being used.
+    </descrip>
+  <tag><em/u/</tag>
+    The state of the uppercase (capital letter) display features
+    (see the <ref id="command-CAPBLINK" name="CAPBLINK"> command).
+    <descrip>
+      <tag>blank</tag>Uppercase letters don't blink.
+      <tag><tt/B/</tag>Uppercase letters blink.
+    </descrip>
+</descrip>
+
+<sect2>Displays with 20 Cells or Less<p>
+Short pneumonics have been used, even though they're rather cryptic,
+in order to show the precise column layout.
+<tscreen><em/xxyys/ <em/vt/ <em/tcmfdu/</tscreen>
+<descrip>
+  <tag><em/xx/</tag>
+    The columns (counting from 0) on the screen corresponding
+    to the position of the cursor (shown in the top half of the cells)
+    and to the top-left corner of the braille window (shown in the bottom half of the cells).
+  <tag><em/yy/</tag>
+    The rows (counting from 0) on the screen corresponding
+    to the position of the cursor (shown in the top half of the cells)
+    and to the top-left corner of the braille window (shown in the bottom half of the cells).
+  <tag><em/s/</tag>
+    The settings of some of BRLTTY's features.
+    A feature is turned on if its corresponding dot is raised.
+    <descrip>
+      <tag/Dot 2/
+        Display attributes
+        (see the <ref id="command-DISPMD" name="DISPMD"> command).
+      <tag/Dot 3/
+        Alert tunes
+        (see the <ref id="command-SND" name="SND"> command).
+      <tag/Dot 4/
+        Visible cursor
+        (see the <ref id="command-CSRVIS" name="CSRVIS"> command).
+      <tag/Dot 5/
+        Block cursor
+        (see the <ref id="command-CSRSIZE" name="CSRSIZE"> command).
+      <tag/Dot 6/
+        Blinking cursor
+        (see the <ref id="command-CSRBLINK" name="CSRBLINK"> command).
+      <tag/Dot 7/
+        Cursor tracking
+        (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
+      <tag/Dot 8/
+        Sliding window
+        (see the <ref id="command-SLIDEWIN" name="SLIDEWIN"> command).
+    </descrip>
+  <tag><em/vt/</tag>
+    The number (counting from 1) of the current virtual terminal.
+  <tag><em/t/</tag>
+    The state of the cursor tracking feature
+    (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
+    <descrip>
+      <tag>blank</tag>Cursor tracking is off.
+      <tag><tt/t/</tag>Cursor tracking is on.
+    </descrip>
+  <tag><em/c/</tag>
+    The state of the cursor visibility features
+    (see the <ref id="command-CSRVIS" name="CSRVIS">
+    and <ref id="command-CSRBLINK" name="CSRBLINK"> commands).
+    <descrip>
+      <tag>blank</tag>The cursor isn't visible, and won't blink when made visible.
+      <tag><tt/b/</tag>The cursor isn't visible, and will blink when made visible.
+      <tag><tt/v/</tag>The cursor is visible, and isn't blinking.
+      <tag><tt/B/</tag>The cursor is visible, and is blinking.
+    </descrip>
+  <tag><em/m/</tag>
+    The current display mode
+    (see the <ref id="command-DISPMD" name="DISPMD"> command).
+    <descrip>
+      <tag><tt/t/</tag>Screen content (text) is being displayed.
+      <tag><tt/a/</tag>Screen highlighting (attributes) is being displayed.
+    </descrip>
+  <tag><em/f/</tag>
+    The state of the frozen screen feature
+    (see the <ref id="command-FREEZE" name="FREEZE"> command).
+    <descrip>
+      <tag>blank</tag>The screen isn't frozen.
+      <tag><tt/f/</tag>The screen is frozen.
+    </descrip>
+  <tag><em/d/</tag>
+    The number of braille dots being used to display each character
+    (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command).
+    <descrip>
+      <tag><tt/8/</tag>All eight dots are being used.
+      <tag><tt/6/</tag>Only dots 1 through 6 are being used.
+    </descrip>
+  <tag><em/u/</tag>
+    The state of the uppercase (capital letter) display features
+    (see the <ref id="command-CAPBLINK" name="CAPBLINK"> command).
+    <descrip>
+      <tag>blank</tag>Uppercase letters don't blink.
+      <tag><tt/B/</tag>Uppercase letters blink.
+    </descrip>
+</descrip>
+
+<sect1>Preferences Settings<label id="preferences"><p>
+When BRLTTY starts, it loads a file which contains your preferences settings.
+The file doesn't need to exist,
+and is created the first time the settings are saved
+with the <ref id="command-PREFSAVE" name="PREFSAVE"> command.
+The most recently saved settings can be restored at any time
+with the <ref id="command-PREFLOAD" name="PREFLOAD"> command.
+
+The default name for this file is <tt>/etc/brltty.conf</tt>.
+A system default for its name can be established with
+the <ref id="configure-preferences-file" name="preferences-file"> configuration file directive.
+Its name can be explicitly set at run-time with
+the <ref id="options-preferences-file" name="-p"> command line option.
+
+<sect2>The Preferences Menu<label id="preferences-menu"><p>
+The preferences settings are saved as binary data
+which, therefore, can't be edited by hand.
+BRLTTY, however, has a simple menu from which you can easily change them.
+It's activated by the <ref id="command-PREFMENU" name="PREFMENU"> command.
+The braille display briefly
+(see the <ref id="options-message-delay" name="-M"> command line option)
+shows the menu title,
+and then presents the current item and its current setting.
+
+<Sect3>Navigating the Menu<p>
+See <ref id="menu" name="Menu Navigation Commands"> for the full list of
+commands which enable you to select items and change settings within the menu.
+For backward compatibility with old drivers, the window motion commands,
+which have modified meanings in this context, can also be used.
+<descrip>
+  <tag><tt/TOP/, <tt/TOP_LEFT/</tag>
+    Go to the first item in the menu
+    (same as <ref id="command-MENU_FIRST_ITEM" name="MENU_FIRST_ITEM">).
+  <tag><tt/BOT/, <tt/BOT_LEFT/</tag>
+    Go to the last item in the menu
+    (same as <ref id="command-MENU_LAST_ITEM" name="MENU_LAST_ITEM">).
+  <tag><tt/LNUP/, <tt/CURSOR_UP/</tag>
+    Go to the previous item in the menu
+    (same as <ref id="command-MENU_PREV_ITEM" name="MENU_PREV_ITEM">).
+  <tag><tt/LNDN/, <tt/CURSOR_DOWN/</tag>
+    Go to the next item in the menu
+    (same as <ref id="command-MENU_NEXT_ITEM" name="MENU_NEXT_ITEM">).
+  <tag><tt/WINUP/, <tt/CHRLT/, <tt/CURSOR_LEFT/</tag>
+    Decrement the current menu item's setting
+    (same as <ref id="command-MENU_PREV_SETTING" name="MENU_PREV_SETTING">).
+  <tag><tt/WINDN/, <tt/CHRRT/, <tt/CURSOR_RIGHT/, <tt/HOME/, <tt/RETURN/</tag>
+    Increment the current menu item's setting
+    (same as <ref id="command-MENU_NEXT_SETTING" name="MENU_NEXT_SETTING">).
+</descrip>
+
+Notes:
+<itemize>
+  <item>
+    The routing keys can also be used to select a setting for the current item.
+    If the item has numeric settings,
+    then each routing key represents an integer (starting from 0),
+    and a selection which is out of range is silently brought into range.
+    If the item has named settings,
+    then the routing keys correspond ordinally with the settings.
+  <item>
+    Use the <tt/PREFLOAD/ command to undo all of the changes
+    which were made since entering the menu.
+  <item>
+    Use the <tt/PREFMENU/ command (again) to leave the new settings in effect,
+    exit the menu, and resume normal operation.
+    If the <sq/Save Settings on Exit/ item is set, then, in addition,
+    the new settings are written to the preferences settings file.
+    Any command not recognized by the menu system also does these same things.
+</itemize>
+
+<sect3>The Menu Items<p>
+<descrip>
+  <tag/Save on Exit/
+    When exiting the preferences menu:
+    <descrip>
+      <tag/No/
+        Don't automatically save the preferences settings.
+      <tag/Yes/
+        Automatically save the preferences settings.
+    </descrip>
+    The initial setting is <tt/No/.
+  <tag/Text Style/
+    When displaying screen content
+    (see the id="options-DISPMD" name="DISPMD"> command),
+    show characters:
+    <descrip>
+      <tag/8-dot/
+        With all eight dots.
+      <tag/6-dot/
+        With only dots 1 through 6.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-SIXDOTS" name="SIXDOTS"> command.
+  <tag/Meta Mode/
+    Enter a meta character by:
+    <descrip>
+      <tag/Escape Prefix/
+        Prefixing it with an <tt/escape/ byte.
+      <tag/High-order Bit/
+        Setting its high-order bit.
+    </descrip>
+    The initial setting is <tt/Escape Prefix/.
+  <tag/Skip Identical Lines/
+    When moving either up or down exactly one line with
+    the <ref id="command-LNUP" name="LNUP">
+    and <ref id="command-LNDN" name="LNDN"> commands,
+    as well as the line wrapping feature of
+    the <ref id="command-FWINLT" name="FWINLT">,
+    <ref id="command-FWINRT" name="FWINRT">,
+    <ref id="command-FWINLTSKIP" name="FWINLTSKIP">,
+    and <ref id="command-FWINRTSKIP" name="FWINRTSKIP"> commands:
+    <descrip>
+      <tag/No/
+        Don't skip passed lines which have the same content as the current line.
+      <tag/Yes/
+        Skip passed lines which have the same content as the current line.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-SKPIDLNS" name="SKPIDLNS"> command.
+  <tag/Skip Blank Windows/
+    When moving either left or right with
+    the <ref id="command-FWINLT" name="FWINLT">
+    and <ref id="command-FWINRT" name="FWINRT"> commands:
+    <descrip>
+      <tag/No/
+        Don't skip passed blank windows.
+      <tag/Yes/
+        Skip passed blank windows.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command.
+  <tag/Which Blank Windows/
+    If blank windows are to be skipped:
+    <descrip>
+      <tag/All/
+        Skip all of them.
+      <tag/End of Line/
+        Only skip those which are at the end (on the right side) of a line.
+      <tag/Rest of Line/
+        Only skip those which are
+        at the end (on the right side) of a line when reading forward,
+        and at the beginning (on the left side) of a line when reading backward.
+    </descrip>
+  <tag/Sliding Window/
+    If the cursor is being tracked
+    (see the <ref id="command-CSRTRK" name="CSRTRK"> command),
+    and the cursor moves too close to (or beyond)
+    either end of the braille window:
+    <descrip>
+      <tag/No/
+        Horizontally reposition the window such that its left end
+        is a multiple of its width from the left edge of the screen.
+      <tag/Yes/
+        Horizontally reposition the window such that the cursor,
+        while remaining on that side of the window, is nearer the centre.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-SLIDEWIN" name="SLIDEWIN"> command.
+  <tag/Eager Sliding Window/
+    If the braille window is to slide:
+    <descrip>
+      <tag/No/
+        Reposition it whenever the cursor moves beyond either end.
+      <tag/Yes/
+        Reposition it whenever the cursor moves too close to either end.
+    </descrip>
+    The initial setting is <tt/off/.
+  <tag/Window Overlap/
+    When moving either left or right with
+    the <ref id="command-FWINLT" name="FWINLT">
+    and <ref id="command-FWINRT" name="FWINRT"> commands,
+    this setting specifies how many characters
+    horizontally adjacent braille windows should overlap each other by.
+    The initial setting is <tt/0/.
+  <tag/Show Cursor/
+    When displaying screen content
+    (see the id="options-DISPMD" name="DISPMD"> command):
+    <descrip>
+      <tag/No/
+        Don't show the cursor.
+      <tag/Yes/
+        Show the cursor.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-CSRVIS" name="CSRVIS"> command.
+  <tag/Cursor Style/
+    When showing the cursor, represent it:
+    <descrip>
+      <tag/Underline/
+        With dots 7 and 8.
+      <tag/Block/
+        With all eight dots.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-CSRSIZE" name="CSRSIZE"> command.
+  <tag/Blinking Cursor/
+    When the cursor is to be shown:
+    <descrip>
+      <tag/No/
+        Leave it visible all the time.
+      <tag/Yes/
+        Make it alternately visible and invisible
+        according to a predefined interval.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-CSRBLINK" name="CSRBLINK"> command.
+  <tag/Cursor Visible Period/
+    When the cursor is to be blinked, this setting specifies the length of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    during each cycle that it is to be visible.
+    The initial setting is <tt/10/.
+  <tag/Cursor Invisible Period/
+    When the cursor is to be blinked, this setting specifies the length of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    during each cycle that it is to be invisible.
+    The initial setting is <tt/10/.
+  <tag/Show Attributes/
+    When displaying screen content
+    (see the id="options-DISPMD" name="DISPMD"> command):
+    <descrip>
+      <tag/No/
+        Don't underline highlighted characters.
+      <tag/Yes/
+        Underline highlighted characters.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-ATTRVIS" name="ATTRVIS"> command.
+  <tag/Blinking Attributes/
+    When highlighted characters are to be underlined:
+    <descrip>
+      <tag/No/
+        Leave the indicator visible all the time.
+      <tag/Yes/
+        Make the indicator alternately visible and invisible
+        according to a predefined interval.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-ATTRBLINK" name="ATTRBLINK"> command.
+  <tag/Attributes Visible Period/
+    When the highlighted character underline is to be blinked,
+    this setting specifies the length of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    during each cycle that it is to be visible.
+    The initial setting is <tt/4/.
+  <tag/Attributes Invisible Period/
+    When the highlighted character underline is to be blinked,
+    this setting specifies the length of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    during each cycle that it is to be invisible.
+    The initial setting is <tt/12/.
+  <tag/Blinking Capitals/
+    When displaying screen content
+    (see the id="options-DISPMD" name="DISPMD"> command):
+    <descrip>
+      <tag/No/
+        Leave capital letters visible all the time.
+      <tag/Yes/
+        Make capital letters alternately visible and invisible
+        according to a predefined interval.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-CAPBLINK" name="CAPBLINK"> command.
+  <tag/Capitals Visible Period/
+    When capital letters are to be blinked,
+    this setting specifies the length of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    during each cycle that they're to be visible.
+    The initial setting is <tt/4/.
+  <tag/Capitals Invisible Period/
+    When capital letters are to be blinked,
+    this setting specifies the length of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    during each cycle that they're to be invisible.
+    The initial setting is <tt/2/.
+  <tag/Alert Tunes/
+    Whenever a significant event occurs (see id="tunes" name="Alert Tunes">):
+    <descrip>
+      <tag/No/
+        Don't play a short predefined tune.
+      <tag/Yes/
+        Play a short predefined tune.
+    </descrip>
+    This setting can also be changed with the
+    <ref id="command-SND" name="SND"> command.
+  <tag/Tune Device/
+    Play alert tunes via:
+    <descrip>
+      <tag/PC Speaker/
+        The PC speaker.
+        This setting is always safe to use,
+        although it may be a bit too soft.
+      <tag/Sound Card/
+        The Digital to Analog Converter on the sound card
+        (via <tt>/dev/dsp</>).
+        This setting doesn't work when the DAC is already being used
+        by another application.
+      <tag/MIDI/
+        The Musical Instrument Digital Interface on the sound card
+        (via <tt>/dev/sequencer</>).
+        This setting doesn't work when the MIDI is already being used
+        by another application.
+      <tag/AdLib/OPL3/SB-FM/
+        The FM synthesizer on an
+        AdLib, OPL3, Sound Blaster, or equivalent sound card.
+        This setting works even if the FM synthesizer
+        is already being used by another application.
+        The results are unpredictable, and potentially not very good,
+        if you use it with a sound card which doesn't support this feature.
+    </descrip>
+    The initial setting is <tt/PC Speaker/.
+  <tag/MIDI Instrument/
+    If the Musical Instrument Digital Interface of the sound card
+    is being used to play the alert tunes,
+    this setting specifies which instrument is to be used
+    (see the <ref id="midi" name="MIDI Instrument Table">).
+    The initial setting is <tt/Acoustic Grand Piano/.
+  <tag/Status Cells Style/
+    This setting specifies the way that the status cells are to be used.
+    You shuldn't normally need to play with it.
+    It enables BRLTTY's developers to test status cell configurations
+    for braille displays which they don't actually have.
+    <descrip>
+      <tag/None/
+        Don't use the status cells.
+        This setting is always safe, but it's also quite useless.
+      <tag/Alva/
+        The status cells contain:
+        <descrip>
+          <tag/1/
+            The location of the cursor (see below).
+          <tag/2/
+            The location of the top-left corner of the braille window (see below).
+          <tag/3/
+            A letter indicating BRLTTY's state.
+            In order of precedence:
+            <descrip>
+              <tag/a/
+                Screen attributes are being shown
+                (see the <ref id="command-DISPMD" name="DISPMD"> command).
+              <tag/f/
+                The screen image is frozen
+                (see the <ref id="command-FREEZE" name="FREEZE"> command).
+              <tag/f/
+                The cursor is being tracked
+                (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
+              <tag><em/blank/</tag>
+                Nothing special.
+            </descrip>
+        </descrip>
+        The locations of the cursor and the braille window
+        are presented in an interesting way.
+        Dots 1 through 6 represent the line number with a letter
+        from <tt/a/ (for 1) through <tt/y/ (for 25).
+        Dots 7 and 8 (the extra two at the bottom)
+        represent the horizontal braille window number as follows:
+        <descrip>
+          <tag/No Dots/The first (leftmost) window.
+          <tag/Dot 7/The second window.
+          <tag/Dot 8/The third window.
+          <tag/Dots 7 and 8/The fourth window.
+        </descrip>
+        In both cases, the indicators wrap:
+        line 26 is represented by the letter <tt/a/, and the fifth horizontal
+        braille window is represented by no dots at the bottom.
+      <tag/Tieman/
+        The status cells contain:
+        <descrip>
+          <tag/1-2/
+            The columns (counting from zero) of the cursor
+            (shown in the top half of the cells)
+            and the top-left corner of the braille window
+            (shown in the bottom half of the cells).
+          <tag/3-4/
+            The rows (counting from zero) of the cursor
+            (shown in the top half of the cells)
+            and the top-left corner of the braille window
+            (shown in the bottom half of the cells).
+          <tag/5/
+            Each dot indicates if a feature is turned on as follows:
+            <descrip>
+              <tag/Dot 1/
+                The screen image is frozen
+                (see the <ref id="command-FREEZE" name="FREEZE"> command).
+              <tag/Dot 2/
+                Screen attributes are being displayed
+                (see the <ref id="command-DISPMD" name="DISPMD"> command).
+              <tag/Dot 3/
+                Alert tunes are being played
+                (see the <ref id="command-SND" name="SND"> command).
+              <tag/Dot 4/
+                The cursor is being shown
+                (see the <ref id="command-CSRVIS" name="CSRVIS"> command).
+              <tag/Dot 5/
+                The cursor is a solid block
+                (see the <ref id="command-CSRSIZE" name="CSRSIZE"> command).
+              <tag/Dot 6/
+                The cursor is blinking
+                (see the <ref id="command-CSRBLINK" name="CSRBLINK"> command).
+              <tag/Dot 7/
+                The cursor is being tracked
+                (see the <ref id="command-CSRTRK" name="CSRTRK"> command).
+              <tag/Dot 8/
+                The braille window will slide
+                (see the <ref id="command-SLIDEWIN" name="SLIDEWIN"> command).
+            </descrip>
+        </descrip>
+      <tag/PowerBraille 80/
+        The status cells contain:
+        <descrip>
+          <tag/1/
+            The row (counting from 1) corresponding
+            to the top of the braille window.
+            The tens digit is shown in the top half of the cell,
+            and the units digit is shown in the bottom half of the cell.
+        </descrip>
+      <tag/Generic/
+        This setting passes a lot of information to the braille driver,
+        and the driver itself decides how to present it.
+      <tag/MDV/
+        The status cells contain:
+        <descrip>
+          <tag/1-2/
+            The location of the top-left corner of the braille window.
+            The row (counting from 1) is shown in the top half of the cells,
+            and the column (counting from 1) is shown in the bottom half of the cells.
+        </descrip>
+      <tag/Voyager/
+        The status cells contain:
+        <descrip>
+          <tag/1/
+            The row (counting from 0) corresponding to
+            the top of the braille window (see below).
+          <tag/2/
+            The row (counting from 0) whereon the cursor is (see below).
+          <tag/3/
+            If the screen is frozen
+            (see the <ref id="command-FREEZE" name="FREEZE"> command),
+            then the letter <tt/F/.
+            If it isn't, then
+            the column (counting from 0) wherein the cursor is (see below).
+        </descrip>
+        Row and column numbers are shown as two digits within a single cell.
+        The tens digit is shown in the top half of the cell,
+        and the units digit is shown in the bottom half of the cell.
+    </descrip>
+    It's initial setting is braille display driver dependent.
+</descrip>
+
+Notes:
+<itemize>
+  <item><label id="time-settings">
+    All time settings are in braille window refresh intervals
+    (see the <ref id="options-refresh-interval" name="-M"> command line option).
+    They are integers within the range 1 through 16.
+</itemize>
+
+<sect1>The Configuration File<label id="configure"><p>
+System defaults for many settings may be established within a configuration file.
+The default name for this file is <tt>/etc/brltty.conf</tt>,
+although it may be overridden with the
+<ref id="options-configuration-file" name="-f"> command line option.
+It doesn't need to exist.
+A template for it can be found within the <tt/DOCS/ subdirectory.
+
+Blank lines are ignored.
+A comment begin with a number sign (<tt/&num;/),
+and continues to the end of the line.
+The following directives are recognized:
+<descrip>
+  <tag><tt/attributes-table/ <em/file/<label id="configure-attributes-table"></tag>
+    Specify the attributes translation table
+    (see the section <ref id="tables" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="make-install-data" name="DATA_DIR">
+    and the <ref id="make-install-prefix" name="PREFIX">
+    make file variables for more details).
+    See the <ref id="make-tables-attributes" name="ATTRTRANS">
+    make file variable for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-attributes-table" name="-a"> command line option.
+  <tag><tt/braille-driver/ <em/driver/<label id="configure-braille-driver"></tag>
+    Specify the braille display driver.
+    Either a two-letter <ref id="codes" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="make-braille-driver" name="BRL_TARGET">
+    make file variable for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-attributes-table" name="-a"> command line option.
+  <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
+    Specify the device to which the braille display is connected.
+    The full path must be supplied.
+    See the <ref id="make-braille-device" name="BRLDEV">
+    make file variable for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-braille-device" name="-d"> command line option.
+  <tag><tt/braille-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-braille-parameters"></tag>
+    Specify parameters for the braille display driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    This directive can be overridden with the
+    <ref id="options-braille-parameters" name="-B"> command line option.
+  <tag><tt/preferences-file/ <em/file/<label id="configure-preferences-file"></tag>
+    Specify the location of the preferences file.
+    If it's not specified, then <tt>/etc/brltty-</tt><em/driver/<tt/.prefs/ is assumed,
+    where <em/driver/ is a two-letter <ref id="codes" name="driver identification code">.
+    The preferences file doesn't need to exist.
+    This directive can be overridden with the
+    <ref id="options-preferences-file" name="-p"> command line option.
+  <tag><tt/screen-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-screen-parameters"></tag>
+    Specify parameters for the screen driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    This directive can be overridden with the
+    <ref id="options-screen-parameters" name="-X"> command line option.
+  <tag><tt/speech-driver/ <em/driver/<label id="configure-speech-driver"></tag>
+    Specify the speech synthesizer driver.
+    Either a two-letter <ref id="codes" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="make-speech-driver" name="SPK_TARGET">
+    make file variable for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-speech-driver" name="-s"> command line option.
+  <tag><tt/speech-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
+    Specify parameters for the speech synthesizer driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    This directive can be overridden with the
+    <ref id="options-speech-parameters" name="-S"> command line option.
+  <tag><tt/text-table/ <em/file/<label id="configure-text-table"></tag>
+    Specify the text translation table
+    (see the section <ref id="tables" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="make-install-data" name="DATA_DIR">
+    and the <ref id="make-install-prefix" name="PREFIX">
+    make file variables for more details).
+    See the <ref id="make-tables-text" name="TEXTTRANS">
+    make file variable for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-text-table" name="-t"> command line option.
+</descrip>
+
+<sect1>Command Line Options<label id="options"><p>
+Many settings can be explicitly specified when invoking BRLTTY.
+The <tt/brltty/ command accepts the following options:
+<descrip>
+  <tag><tt/-a/<em/file/ <tt/--attributes-table=/<em/file/<label id="options-attributes-table"></tag>
+    Specify the attributes translation table
+    (see the section <ref id="tables" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="make-install-data" name="DATA_DIR">
+    and the <ref id="make-install-prefix" name="PREFIX">
+    make file variables for more details).
+    See the <ref id="configure-attributes-table" name="attributes-table">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-b/<em/driver/ <tt/--braille-driver=/<em/driver/<label id="options-braille-driver"></tag>
+    Specify the braille display driver.
+    Either a two-letter <ref id="codes" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="configure-braille-driver" name="braille-driver">
+    configuration file variable for the default run-time setting.
+  <tag><tt/-d/<em/device/ <tt/--braille-device=/<em/device/<label id="options-braille-device"></tag>
+    Specify the device to which the braille display is connected.
+    The full path must be supplied.
+    See the <ref id="configure-braille-device" name="braille-device">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-e/ <tt/--standard-error/<label id="options-standard-error"></tag>
+    Write diagnostic messages to standard error.
+    The default is to record them via <tt/syslog/.
+  <tag><tt/-f/<em/file/ <tt/--configuration-file=/<em/file/<label id="options-configuration-file"></tag>
+    Specify the location of the <ref id="configure" name="configuration file">
+    which is to be used for the establishing of default run-time settings.
+  <tag><tt/-h/ <tt/--help/<label id="options-help"></tag>
+    Display a summary of the command line options accepted by BRLTTY,
+    and then exit.
+  <tag><tt/-l/<em/level/ <tt/--log-level=/<em/level/<label id="options-log-level"></tag>
+    Specify the severity threshold for diagnostic message generation.
+    The following levels are recognized.
+    <descrip>
+      <tag/0/emergency
+      <tag/1/alert
+      <tag/2/critical
+      <tag/3/error
+      <tag/4/warning
+      <tag/5/notice
+      <tag/6/information
+      <tag/7/debug
+    </descrip>
+    Either the number or the name may be supplied,
+    and the name may be abbreviated.
+    If not specified,
+    then <tt/information/ is assumed
+    (see the <ref id="options-quiet" name="-q"> option for more details).
+  <tag><tt/-n/ <tt/--no-daemon/<label id="options-no-daemon"></tag>
+    Specify that BRLTTY is to remain in the foreground.
+    If not specified, then BRLTTY becomes a background process (daemon)
+    after initializing itself but before starting any of the selected drivers.
+  <tag><tt/-p/<em/file/ <tt/--preferences-file=/<em/file/<label id="options-preferences-file"></tag>
+    Specify the location of the preferences file.
+    The preferences file doesn't need to exist.
+    See the <ref id="configure-preferences-file" name="preferences-file">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-q/ <tt/--quiet/<label id="options-quiet"></tag>
+    Log less information.
+    This option changes the log level
+    (see the <ref id="options-log-level" name="-l"> option)
+    to <tt/notice/.
+  <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
+    Specify the speech synthesizer driver.
+    Either a two-letter <ref id="codes" name="driver identification code">
+    or the full path to a dynamically loadable shared object
+    may be supplied.
+    See the <ref id="configure-speech-driver" name="speech-driver">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/<label id="options-text-table"></tag>
+    Specify the text translation table
+    (see the section <ref id="tables" name="Translation Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="make-install-data" name="DATA_DIR">
+    and the <ref id="make-install-prefix" name="PREFIX">
+    make file variables for more details).
+    See the <ref id="configure-text-table" name="text-table">
+    configureation file directive for the default run-time setting.
+  <tag><tt/-v/ <tt/--version/<label id="options-version"></tag>
+    Display the current version of BRLTTY,
+    identify the selected drivers,
+    and then exit.
+    If the <ref id="options-quiet" name="-q"> option isn't specified, then
+    copyright information,
+    and the parameter settings for each of the selected drivers
+    are also displayed,
+    and the working directory, the preferences file,
+    the text and attributes translation tables,
+    and the braille display device and help file are identified.
+  <tag><tt/-B/<em/name/<tt/=/<em/value/<tt/,/... <tt/--braille-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-braille-parameters"></tag>
+    Specify parameters for the braille display driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-braille-parameters" name="braille-parameters">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
+    Specify the message hold time (in hundredths of a second).
+    If not specified, then <tt/400/ (4 seconds) is assumed.
+    This is the amount of time that BRLTTY keeps its own
+    internally generated messages on the braille display.
+  <tag><tt/-N/ <tt/--no-speech/<label id="options-no-speech"></tag>
+    Don't automatically start the speech synthesizer driver.
+    This option is unfortunately necessary on some systems when BRLTTY is
+    started before the sound subsystem within the kernel has been initialized.
+  <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
+    Specify the file wherein BRLTTY is to write its process identifier (pid).
+    If not specified, BRLTTY doesn't write its process identifier anywhere.
+  <tag><tt/-R/<em/csecs/ <tt/--refresh-interval=/<em/csecs/<label id="options-refresh-interval"></tag>
+    Specify the braille window refresh internal (in hundredths of a second).
+    If not specified, then <tt/4/ (40 milliseconds) is assumed.
+  <tag><tt/-S/<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
+    Specify parameters for the speech synthesizer driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-speech-parameters" name="speech-parameters">
+    configuration file directive for the default run-time setting.
+  <tag><tt/-X/<em/name/<tt/=/<em/value/<tt/,/... <tt/--screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-screen-parameters"></tag>
+    Specify parameters for the screen driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-screen-parameters" name="screen-parameters">
+    configuration file directive for the default run-time setting.
+</descrip>
+
+<sect>Translation Tables<label id="tables"><p>
+BRLTTY uses two <bf/translation tables/ to govern
+the mapping from bytes to dot combinations.
+
+<sect1>The Text Translation Table<p>
+The first, and most important, is the text translation table.
+BRLTTY is initially configured to use the
+<ref id="nabcc" name="North American Braille Computer Code"> (NABCC).
+In addition to this default text translation table,
+several alternatives are provided:
+<descrip>
+  <tag/text.danish.tbl/Danish
+  <tag/text.es.tbl/Spanish
+  <tag/text.french.tbl/French
+  <tag/text.german.tbl/German
+  <tag/text.it.tbl/Italian
+  <tag/text.no-h.tbl/Norwegian and German
+  <tag/text.no-p.tbl/Norwegian
+  <tag/text.pl-iso02.tbl/Polish (iso-8859-2)
+  <tag/text.simple.tbl/American English
+  <tag/text.sweden.tbl/Swedish
+  <tag/text.swedish.tbl/Swedish
+  <tag/text.uk.tbl/United Kingdom English
+  <tag/text.us.tbl/American English
+</descrip>
+See the <ref id="options-text-table" name="-t"> command line option,
+the <ref id="configure-text-table" name="text-table"> configuration file directive,
+and the <ref id="make-tables-text" name="TEXTTRANS"> make file variable
+for details regarding how to use an alternate text translation table.
+
+<sect1>The Attributes Translation Table<p>
+The attributes translation table is used when BRLTTY
+is displaying screen attributes rather than screen content
+(see the <ref id="command-DISPMD" name="DISPMD"> command).
+Each of the eight braille dots represents one of the eight attribute bits.
+Two attributes translation tables are provided:
+<descrip>
+  <tag/attributes.tbl/
+    The lefthand column represents the background colours:
+    <descrip>
+      <tag/Dot 1/Red
+      <tag/Dot 2/Green
+      <tag/Dot 3/Blue
+      <tag/Dot 7/Blink
+    </descrip>
+    The righthand column represents the foreground colours:
+    <descrip>
+      <tag/Dot 4/Red
+      <tag/Dot 5/Green
+      <tag/Dot 6/Blue
+      <tag/Dot 8/Bright
+    </descrip>
+    A dot is raised when its corresponding attribute bit is on.
+    This is the default attributes translation table
+    because it's the most intuitive.
+    One of its problems, though, is that it's difficult to discern
+    the difference between normal (white on black)
+    and reverse (black on white) video.
+  <tag/attrib.tbl/
+    The lefthand column represents the background colours:
+    <descrip>
+      <tag/Dot 1/Red
+      <tag/Dot 2/Green
+      <tag/Dot 3/Blue
+      <tag/Dot 7/Blink
+    </descrip>
+    The righthand column represents the foreground colours:
+    <descrip>
+      <tag/Dot 4/Red
+      <tag/Dot 5/Green
+      <tag/Dot 6/Blue
+      <tag/Dot 8/Bright
+    </descrip>
+    A foreground bit being on triggers its corresponding dot,
+    whereas a background bit being off triggers its corresponding dot.
+    This unintuitive logic actually makes it easier
+    to read the most commonly used attribute combinations.
+</descrip>
+See the <ref id="options-attributes-table" name="-a"> command line option,
+the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,
+and the <ref id="make-tables-attributes" name="ATTRTRANS"> make file variable
+for details regarding how to use an alternate attributes translation table.
+
+<sect1>Table Format<p>
+A translation table is a 256-byte binary file.
+It's indexed with either a character or an attributes byte,
+and the byte at that position contains the corresponding dot combination.
+The mapping from bit to dot is as follows:
+<descrip>
+  <tag/Bit 0/Dot 1
+  <tag/Bit 1/Dot 4
+  <tag/Bit 2/Dot 2
+  <tag/Bit 3/Dot 5
+  <tag/Bit 4/Dot 3
+  <tag/Bit 5/Dot 6
+  <tag/Bit 6/Dot 7
+  <tag/Bit 7/Dot 8
+</descrip>
+This particular mapping makes it easy and efficient for BRLTTY
+to vertically shift a dot pattern.
+
+<sect1>Table Utilities<p>
+These utilities reside within the <tt/BrailleTables/ subdirectory,
+and aren't built as part of the regular procedure.
+To build them, run <tt/make/ within the <tt/BrailleTables/ subdirectory.
+<tscreen><verb>
+cd BrailleTables
+make
+</verb></tscreen>
+
+<sect2>tbl2txt<label id="utility-tbl2txt"><p>
+This utility converts (uncompiles) a translation table into a text file
+for readability and/or modification.
+<tscreen>tbl2txt -<em/option/ ... <em/table-file/ <em/text-file/</tscreen>
+<descrip>
+  <tag><em/table-file/</tag>
+    The translation table which is to be converted.
+  <tag><em/text-file/</tag>
+    The file into which the text representing the table content is to be written.
+  <tag><tt/-c/<em/name/ <tt/--code-page=/<em/name/</tag>
+    The character set used to annotate each line of the text file.
+</descrip>
+
+The generated text file can, without modification, be recompiled back into a
+translation table with the <ref id="utility-txt2tbl" name="txt2tbl"> utility.
+Each of its lines contains lots of interesting information.
+
+If the <tt/-c/ option isn't specified, each line looks like this:
+<tscreen><em/cc/ <em/xx/ <em/ddd/ (73214568)<em/tt/ B+<em/bbbb/ <em/name/</tscreen>
+If the <tt/-c/ option is specified, each line looks like this:
+<tscreen><em/cc/ <em/xx/ <em/ddd/ (73214568)<em/tt/ B+<em/bbbb/ U+<em/uuuu/ <em/description/</tscreen>
+<descrip>
+  <tag><em/cc/</tag>
+    The character itself.
+    Unprintable characters are represented canonically.
+    Control characters are flagged with a circumflex,
+    e.g. Control-A (character 1) is <tt/&circ;A/. 
+    Meta control characters are flagged with a tilde,
+    e.g. Meta-Control-A (character 129) is <tt/&tilde;A/. 
+  <tag><em/xx/</tag>
+    The hexadecimal value of the character.
+  <tag><em/ddd/</tag>
+    The decimal value of the character.
+  <tag><tt/(73214568)/</tag>
+    The braille dot numbers.
+    If a dot isn't to be raised,
+    then its number is replaced with a blank.
+    The English letter <tt/y/, for example, would be
+    <tt/(&nbsp;3&nbsp;1456&nbsp;)/.
+    The dot numbers appear in the same order
+    as on a standard braille keyboard
+    so as to make it easier to visualize the braille character.
+  <tag><em/tt/</tag>
+    The hexadecimal value of the byte representing the dot combination
+    which is in the translation table.
+  <tag><em/bbbb/</tag>
+    The hexadecimal value of the unicode number
+    corresponding to the dot combination.
+  <tag><em/name/</tag>
+    The ASCII name of the character
+    (only shown if the <tt/-c/ option isn't specified).
+  <tag><em/uuuu/</tag>
+    The hexadecimal value of the unicode number
+    corresponding to the character
+    (only shown if the <tt/-c/ option is specified).
+  <tag><em/description/</tag>
+    The formal unicode description for the character
+    (only shown if the <tt/-c/ option is specified).
+</descrip>
+
+<sect2>txt2tbl<label id="utility-txt2tbl"><p>
+This utility compiles a translation table.
+<tscreen>txt2tbl -<em/option/ ... <em/text-file/ <em/table-file/</tscreen>
+<descrip>
+  <tag><em/text-file/</tag>
+    The source file describing the table content.
+  <tag><em/table-file/</tag>
+    The file into which the translation table is to be written.
+  <tag><tt/-d/ <tt/--duplicates/</tag>
+    Display a warning for each dot combination which has been used more than once.
+  <tag><tt/-m/ <tt/--missing/</tag>
+    Display a warning for each dot combination which hasn't been used.
+</descrip>
+
+A line which assigns a dot combination to a character
+must contain that dot combination within parenthesis, e.g. <tt/(12)/.
+The text file must contain exactly 256 such lines, each one, in order,
+defining the braille representation for its corresponding character.
+The dot numbers may be specified in any order,
+but each must only be specified once.
+It's valid to specify no number at all, e.g. <tt/()/ (for a space).
+Any number of spaces may occur any number of times anywhere between the parentheses.
+All characters before the left parenthesis and after the right parenthesis are ignored.
+All lines which don't contain a left parenthesis are ignored.
+
+The algorithm for locating the dot numbers is actually a bit more complicated
+because a line may contain more than one left and/or right parenthesis
+(the <ref id="utility-tbl2txt" name="tbl2txt"> utility does this).
+The first right parenthesis which is preceded by at least one left parenthesis is used.
+The nearest left parenthesis to the left of that right parenthesis is used.
+The line <tt/)((12)/, for example, is valid.
+
+<sect2>tbl2tbl<label id="utility-tbl2tbl"><p>
+This utility converts a binary translation table from one dot mapping to another.
+<tscreen>tbl2tbl <em/input-mapping/ <em/output-mapping/</tscreen>
+<descrip>
+  <tag><em/input-mapping/</tag>
+    The dot mapping used within the source table.
+  <tag><em/output-mapping/</tag>
+    The dot mapping to be used within the table being generated.
+</descrip>
+The source table is read from standard input,
+and the converted table is written to standard output.
+The following dot mappings are supported:
+<descrip>
+  <tag/standard/
+    BRLTTY's native mapping (described above).
+  <tag/tieman/
+    The mapping used by <htmlurl url="http://www.braillevoyager.nl/uk/index.html" name="Tieman B.V.">.
+    <descrip>
+      <tag/Bit 0/Dot 1
+      <tag/Bit 1/Dot 2
+      <tag/Bit 2/Dot 3
+      <tag/Bit 3/Dot 7
+      <tag/Bit 4/Dot 8
+      <tag/Bit 5/Dot 6
+      <tag/Bit 6/Dot 5
+      <tag/Bit 7/Dot 4
+    </descrip>
+  <tag/alva/
+    The mapping used by <htmlurl url="http://www.alva-bv.nl/alvacorp/alva_corp_home.html" name="Alva B.V.">
+    and <htmlurl url="http://www.telesensory.com" name="Telesensory Systems Inc.">.
+    <descrip>
+      <tag/Bit 0/Dot 1
+      <tag/Bit 1/Dot 2
+      <tag/Bit 2/Dot 3
+      <tag/Bit 3/Dot 4
+      <tag/Bit 4/Dot 5
+      <tag/Bit 5/Dot 6
+      <tag/Bit 6/Dot 7
+      <tag/Bit 7/Dot 8
+    </descrip>
+</descrip>
+
+<sect>Advanced Topics<p>
+
+<sect1>Installing Multiple Versions<p>
+It's easy to have more than one version of BRLTTY
+installed on the same system at the same time.
+This capability allows you to test a new version before removing the old one.
+
+As of version 3.0 of BRLTTY,
+the <ref id="make-install-prefix" name="PREFIX"> make file variable allows you
+to install the complete <ref id="hierarchy" name="installed file hierarchy">
+anywhere you want such that it's entirely self-contained.
+Remembering that it's best to keep all of BRLTTY's components
+within the root file system, you can build it like this:
+<tscreen>make PREFIX=/brltty-3.0 install</tscreen>
+You can then run it like this:
+<tscreen>/brltty-3.0/sbin/brltty</tscreen>
+When version 4.0 is released, just install it in a different location
+and run the new executable from there.
+<tscreen><verb>
+make PREFIX=/brltty-4.0 install
+/brltty-4.0/sbin/brltty
+</verb></tscreen>
+
+So far, this paradigm is somewhat awkward for at least two reasons.
+One is that these long path names are too hard to type,
+and the other is that you don't want to fiddle with your system's boot sequence
+each time you want to switch to a different version of BRLTTY.
+These problems are easily solved by adding a symbolic link for the executable.
+<tscreen>ln -s /brltty-3.0/sbin/brltty /sbin/brltty</tscreen>
+When it's time to switch to the newer version, just repoint the symbolc link.
+<tscreen>ln -sf /brltty-4.0/sbin/brltty /sbin/brltty</tscreen>
+
+If you'd like to get really fancy, then introduce another level of indirection
+in order to make all of BRLTTY's files for any given version
+look like they're in all of the standard places.
+First, create a symbolic link through a common repointable location
+from each of BRLTTY's standard locations.
+<tscreen><verb>
+ln -s /brltty/sbin/brltty /sbin/brltty
+ln -s /brltty/etc/brltty /etc/brltty
+ln -s /brltty/lib/brltty /lib/brltty
+</verb></tscreen>
+Then all you need to do is to point <tt>/brltty</> to the desired version.
+<tscreen>ln -s /brltty-3.0 /brltty</tscreen>
+
+<sect1>Installation/Rescue Root Disks<p>
+As of version 1.0.1, BRLTTY can run as a stand-alone executable.
+Everything it needs to know can be explicitly configured within its make file
+(see <ref id="make-customize" name="Make File Customization">).
+If the data directory
+(see the <ref id="make-install-data" name="DATA_DIR">
+and <ref id="make-install-prefix" name="PREFIX"> make file variables)
+doesn't exist, then BRLTTY looks in <tt>/etc</> for the files it needs.
+Even if any of these files don't exist at all, BRLTTY still works!
+
+If, for some reason, you ever create the data directory
+(usually <tt>/etc/brltty</>) by hand, it's important
+to set its permissions so that only root can create files within it.
+<tscreen>chmod 755 /etc/brltty</tscreen>
+
+The screen content inspection device (usually <tt>/dev/vcsa</>) is required
+(see the <ref id="make-screen-device" name="VCSADEV"> make file variable).
+It should already exist unless your Linux distribution is quite old.
+If necessary, you can create it with:
+<tscreen><verb>
+mknod /dev/vcsa c 7 128
+chmod 660 /dev/vcsa
+chown root.tty /dev/vcsa
+</verb></tscreen>
+
+One problem often encountered when trying to use BRLTTY
+in an uncertain environment like a root disk or an incomplete system is
+that it might not find the shared libraries (or parts thereof) which it needs.
+Root disks often use subset and/or outdated versions of the libraries
+which may be inadequate.
+The solution is to link BRLTTY with the <tt/-static/ flag
+(see the file <tt/Makefile/ in the top-level directory).
+This removes all dependencies on shared libraries,
+but, unfortunately, also creates a larger executable.
+
+The executable is stripped during the <tt/make install/.
+This significantly reduces its size by removing its symbol table.
+You'll get a much smaller executable, therefore,
+if you complete the full build procedure,
+and then copy it from its installed location.
+If, however, you copy it from the build directory, it'll be way too big.
+Don't forget to strip it.
+<tscreen>strip brltty</tscreen>
+
+<sect1>Future Enhancements<p>
+Apart from fixing bugs and supporting more types of braille displays,
+we hope, time permitting, to work on the following:
+<descrip>
+  <tag/Better Attribute Handling/
+    <itemize>
+      <item>Attribute tracking.
+      <item>Mixed text and attribute mode.
+    </itemize>
+  <tag/Enhanced Cut and Paste/
+    <itemize>
+      <item>Linear (as opposed to rectangular).
+    </itemize>
+  <tag/Scroll Tracking/
+    Locking the braille window to one line as it scrolls on the screen.
+  <tag/Better Speech Support/
+    Mixed braille and speech for faster reading of text.
+  <tag/On-the-fly Grade II Translation/
+    This would allow faster reading of text.
+</descrip>
+See the file <tt/TODO/ for a more complete list.
+
+<sect1>Known Bugs<p>
+At the time of writing (December 2001), the following problems are known:
+
+Cursor routing is implemented as a looping sub-process
+which runs at reduced priority to avoid using too much cpu time.
+Different system loads require different settings of its parameters.
+The defaults work very well
+in a typical Unix editor on a fairly lightly loaded system,
+but very poorly in some other situations,
+e.g. over a slow serial link to a remote host.
+
+There's a bug in the 2.0.35 Linux kernel
+which causes PC speaker beeps to remain on once started.
+We've found a way to avoid this problem in the current version of BRLTTY.
+
+<sect>Appendices<p>
+
+<sect1>Supported Braille Displays<label id="displays"><p>
+BRLTTY supports the following braille displays:
+<itemize>
+  <item>
+    <htmlurl url="http://www.alva-bv.nl/alvacorp/alva_corp_home.html" name="Alva B.V.">:
+    ABT3xx,
+    Delphi (serial and parallel ports),
+    Satellite
+  <item>
+    <htmlurl url="http://www.baum.de/English/homeeng1.htm" name="Baum">:
+    Vario/RBT 40/80 (emulation 1/2)
+  <item>
+    <htmlurl url="http://www.blazie.com/pages/main.html" name="Blazie Engineering">:
+    BrailleLite 18/40
+  <item>
+    <htmlurl url="http://www.eurobraille.fr/Indexuk.htm" name="EuroBraille">:
+    (tested on Clio-noteBraille 40)
+  <item>
+    <htmlurl url="http://www.handialog.com/indexuk.htm" name="Handialog">:
+    VisioBraille 2040
+  <item>
+    <htmlurl url="http://www.handytech.com/" name="Handy Tech Elektronik GmbH">:
+    BrailleWave,
+    mod20,
+    mod40,
+    mod80
+  <item>
+    <htmlurl url="http://cidat.once.es/" name="La O.N.C.E.">:
+    EcoBraille 20/40/80
+  <item>
+    <htmlurl url="http://www.cavazza.it/cnt/schede/scheda-mb408l-eng.html" name="MDV">:
+    MB208/MB408L/MB408S (protocol 5)
+  <item>
+    <htmlurl url="http://www.papenmeier.de/" name="Papenmeier">:
+    Tiny,
+    Compact,
+    Compact 486,
+    2D Lite,
+    2D Screen Soft,
+    EL 2D-40,
+    EL 2D-66,
+    EL-80,
+    IB 80 CR Soft
+  <item>
+    <htmlurl url="http://www.pulsedata.co.nz/" name="Pulse Data International">:
+    BrailleNote 18/32
+  <item>
+    <htmlurl url="http://www.telesensory.com/" name="Telesensory Systems Inc.">:
+    Navigator 20/40/80 (latest firmware version only),
+    PowerBraille 40/65/80
+  <item>
+    Tactilog:
+    LogText
+  <item>
+    <htmlurl url="http://www.braillevoyager.nl/uk/index.html" name="Tieman B.V.">:
+    CombiBraille 25/45/85,
+    MiniBraille 20,
+    MultiBraille MB125CR/MB145CR/MB185CR,
+    Voyager 44/70 (USB)
+  <item>
+    <htmlurl url="http://www.tinlecco.it/tiflosoft" name="Tiflosoft">:
+    VideoBraille 40
+</itemize>
+
+<sect1>Supported Speech Synthesizers<label id="synthesizers"><p>
+BRLTTY supports the following speech synthesizers:
+<itemize>
+  <item>
+    <htmlurl url="http://www.alva-bv.nl/alvacorp/alva_corp_home.html" name="Alva B.V.">:
+    Delphi
+  <item>
+    <htmlurl url="http://www.blazie.com/pages/main.html" name="Blazie Engineering">:
+    BrailleLite
+  <item>
+    <htmlurl url="http://www.elan.fr/" name="Elan Informatique">:
+    Televox
+  <item>
+    <htmlurl url="http://www.ibm.com/" name="International Business Machines (IBM)">:
+    <htmlurl url="http://www.ibm.com/software/speech/dev/ttssdk_linux.html" name="ViaVoice">
+  <item>
+    <htmlurl url="http://www.braillevoyager.nl/uk/index.html" name="Tieman B.V.">:
+    CombiBraille
+  <item>
+    <htmlurl url="http://www.ed.ac.uk/" name="The University of Edinburgh">
+    (<htmlurl url="http://www.cstr.ed.ac.uk/" name="Centre for Speech Technology Research">):
+    <htmlurl url="http://www.cstr.ed.ac.uk/projects/festival/" name="Festival">
+</itemize>
+
+<sect1>Driver Identification Codes<label id="codes"><p>
+<descrip>
+  <tag/al/Alva
+  <tag/bl/BrailleLite
+  <tag/bn/BrailleNote
+  <tag/cb/CombiBraille
+  <tag/ec/EcoBraille
+  <tag/es/ExternalSpeech
+  <tag/eu/EuroBraille
+  <tag/fv/Festival
+  <tag/gs/GenericSay
+  <tag/ht/HandyTech
+  <tag/lt/LogText
+  <tag/mb/MultiBraille
+  <tag/md/MDV
+  <tag/mn/MiniBraille
+  <tag/no/no driver
+  <tag/pm/Papenmeier
+  <tag/ts/TelesensorySystemsInc
+  <tag/tv/Televox
+  <tag/va/Vario/RBT (emulation 1)
+  <tag/vd/VideoBraille
+  <tag/vh/Vario/RBT (emulation 2)
+  <tag/vo/Voyager
+  <tag/vs/VisioBraille
+  <tag/vv/ViaVoice
+</descrip>
+
+<sect1>Braille Dot Numbering Convention<p>
+A standard braille cell consists of six dots
+arranged in two columns and three rows.
+Computer braille has introduced a fourth row at the bottom.
+Each dot can be specifically identified by its number as follows:
+<descrip>
+  <tag/1/Row 1 (top) left.
+  <tag/2/Row 2 left.
+  <tag/3/Row 3 left.
+  <tag/4/Row 1 (top) right.
+  <tag/5/Row 2 right.
+  <tag/6/Row 3 right.
+  <tag/7/Row 4 (bottom) left.
+  <tag/8/Row 4 (bottom) right.
+</descrip>
+Perhaps a picture will make this numbering convention easier to understand.
+<tscreen><verb>
+1 o o 4
+2 o o 5
+3 o o 6
+7 o o 8
+</verb></tscreen>
+
+<sect1>North American Braille Computer Code<label id="nabcc"><p>
+<tscreen><verb>
+  Num Hex     Dots     Description
++-----------------------------------------------------------------+
+|   0  00  [7   4  8]  NUL (null)                                 |
+|   1  01  [7  1   8]  SOH (start of header)                      |
+|   2  02  [7 21   8]  STX (start of text)                        |
+|   3  03  [7  14  8]  ETX (end of text)                          |
+|   4  04  [7  145 8]  EOT (end of transmission)                  |
+|   5  05  [7  1 5 8]  ENQ (enquiry)                              |
+|   6  06  [7 214  8]  ACK (acknowledge)                          |
+|   7  07  [7 2145 8]  BEL (bell)                                 |
+|   8  08  [7 21 5 8]  BS (back space)                            |
+|   9  09  [7 2 4  8]  HT (horizontal tab)                        |
+|  10  0A  [7 2 45 8]  LF (line feed)                             |
+|  11  0B  [73 1   8]  VT (vertical tab)                          |
+|  12  0C  [7321   8]  FF (form feed)                             |
+|  13  0D  [73 14  8]  CR (carriage return)                       |
+|  14  0E  [73 145 8]  SO (shift out)                             |
+|  15  0F  [73 1 5 8]  SI (shift in)                              |
+|  16  10  [73214  8]  DLE (data link escape)                     |
+|  17  11  [732145 8]  DC1 (direct control 1)                     |
+|  18  12  [7321 5 8]  DC2 (direct control 2)                     |
+|  19  13  [732 4  8]  DC3 (direct control 3)                     |
+|  20  14  [732 45 8]  DC4 (direct control 4)                     |
+|  21  15  [73 1  68]  NAK (negative acknowledge)                 |
+|  22  16  [7321  68]  SYN (synchronize)                          |
+|  23  17  [7 2 4568]  ETB (end of text block)                    |
+|  24  18  [73 14 68]  CAN (cancel)                               |
+|  25  19  [73 14568]  EM (end of medium)                         |
+|  26  1A  [73 1 568]  SUB (substitute)                           |
+|  27  1B  [7 2 4 68]  ESC (escape)                               |
+|  28  1C  [7 21 568]  FS (file separator)                        |
+|  29  1D  [7 214568]  GS (group separator)                       |
+|  30  1E  [7   45 8]  RS (record separator)                      |
+|  31  1F  [7   4568]  US (unit separator)                        |
+|  32  20  [        ]  space                                      |
+|  33  21  [ 32 4 6 ]  exclamation point                          |
+|  34  22  [     5  ]  quotation mark                             |
+|  35  23  [ 3  456 ]  number sign                                |
+|  36  24  [  214 6 ]  dollar sign                                |
+|  37  25  [   14 6 ]  percent sign                               |
+|  38  26  [ 3214 6 ]  ampersand                                  |
+|  39  27  [ 3      ]  acute accent                               |
+|  40  28  [ 321 56 ]  left parenthesis                           |
+|   4  291  [ 32 456 ) right parenthesis                          |
+|  42  2A  [   1  6 ]  asterisk                                   |
+|  43  2B  [ 3  4 6 ]  plus sign                                  |
+|  44  2C  [      6 ]  comma                                      |
+|  45  2D  [ 3    6 ]  minus sign                                 |
+|  46  2E  [    4 6 ]  period                                     |
+|  47  2F  [ 3  4   ]  forward slash                              |
+|  48  30  [ 3   56 ]  zero                                       |
+|  49  31  [  2     ]  one                                        |
+|  50  32  [ 32     ]  two                                        |
+|  51  33  [  2  5  ]  three                                      |
+|  52  34  [  2  56 ]  four                                       |
+|  53  35  [  2   6 ]  five                                       |
+|  54  36  [ 32  5  ]  six                                        |
+|  55  37  [ 32  56 ]  seven                                      |
+|  56  38  [ 32   6 ]  eight                                      |
+|  57  39  [ 3   5  ]  nine                                       |
+|  58  3A  [   1 56 ]  colon                                      |
+|  59  3B  [     56 ]  semicolon                                  |
+|  60  3C  [  21  6 ]  less-than sign                             |
+|  61  3D  [ 321456 ]  equals sign                                |
+|  62  3E  [ 3  45  ]  greater-than sign                          |
+|  63  3F  [   1456 ]  question mark                              |
+|  64  40  [7   4   ]  commercial at                              |
+|  65  41  [7  1    ]  capital a                                  |
+|  66  42  [7 21    ]  capital b                                  |
+|  67  43  [7  14   ]  capital c                                  |
+|  68  44  [7  145  ]  capital d                                  |
+|  69  45  [7  1 5  ]  capital e                                  |
+|  70  46  [7 214   ]  capital f                                  |
+|  71  47  [7 2145  ]  capital g                                  |
+|  72  48  [7 21 5  ]  capital h                                  |
+|  73  49  [7 2 4   ]  capital i                                  |
+|  74  4A  [7 2 45  ]  capital j                                  |
+|  75  4B  [73 1    ]  capital k                                  |
+|  76  4C  [7321    ]  capital l                                  |
+|  77  4D  [73 14   ]  capital m                                  |
+|  78  4E  [73 145  ]  capital n                                  |
+|  79  4F  [73 1 5  ]  capital o                                  |
+|  80  50  [73214   ]  capital p                                  |
+|  81  51  [732145  ]  capital q                                  |
+|  82  52  [7321 5  ]  capital r                                  |
+|  83  53  [732 4   ]  capital s                                  |
+|  84  54  [732 45  ]  capital t                                  |
+|  85  55  [73 1  6 ]  capital u                                  |
+|  86  56  [7321  6 ]  capital v                                  |
+|  87  57  [7 2 456 ]  capital w                                  |
+|  88  58  [73 14 6 ]  capital x                                  |
+|  89  59  [73 1456 ]  capital y                                  |
+|  90  5A  [73 1 56 ]  capital z                                  |
+|  91  5B  [7 2 4 6 ]  left bracket                               |
+|  92  5C  [7 21 56 ]  backward slash                             |
+|  93  5D  [7 21456 ]  right bracket                              |
+|  94  5E  [7   45  ]  circumflex accent                          |
+|  95  5F  [    456 ]  underscore                                 |
+|  96  60  [    4   ]  grave accent                               |
+|  97  61  [   1    ]  small a                                    |
+|  98  62  [  21    ]  small b                                    |
+|  99  63  [   14   ]  small c                                    |
+| 100  64  [   145  ]  small d                                    |
+| 101  65  [   1 5  ]  small e                                    |
+| 102  66  [  214   ]  small f                                    |
+| 103  67  [  2145  ]  small g                                    |
+| 104  68  [  21 5  ]  small h                                    |
+| 105  69  [  2 4   ]  small i                                    |
+| 106  6A  [  2 45  ]  small j                                    |
+| 107  6B  [ 3 1    ]  small k                                    |
+| 108  6C  [ 321    ]  small l                                    |
+| 109  6D  [ 3 14   ]  small m                                    |
+| 110  6E  [ 3 145  ]  small n                                    |
+| 111  6F  [ 3 1 5  ]  small o                                    |
+| 112  70  [ 3214   ]  small p                                    |
+| 113  71  [ 32145  ]  small q                                    |
+| 114  72  [ 321 5  ]  small r                                    |
+| 115  73  [ 32 4   ]  small s                                    |
+| 116  74  [ 32 45  ]  small t                                    |
+| 117  75  [ 3 1  6 ]  small u                                    |
+| 118  76  [ 321  6 ]  small v                                    |
+| 119  77  [  2 456 ]  small w                                    |
+| 120  78  [ 3 14 6 ]  small x                                    |
+| 121  79  [ 3 1456 ]  small y                                    |
+| 122  7A  [ 3 1 56 ]  small z                                    |
+| 123  7B  [  2 4 6 ]  left brace                                 |
+| 124  7C  [  21 56 ]  vertical bar                               |
+| 125  7D  [  21456 ]  right brace                                |
+| 126  7E  [    45  ]  tilde accent                               |
+| 127  7F  [7   456 ]  DEL (delete)                               |
+| 128  80  [7 2   6 ]  <control>                                  |
+| 129  81  [ 3 14 68]  <control>                                  |
+| 130  82  [  2  568]  BPH (break permitted here)                 |
+| 131  83  [  2  5 8]  NBH (no break here)                        |
+| 132  84  [73   5  ]  <control>                                  |
+| 133  85  [   1   8]  NL (next line)                             |
+| 134  86  [ 32 4  8]  SSA (start of selected area)               |
+| 135  87  [ 32 45 8]  ESA (end of selected area)                 |
+| 136  88  [ 3   568]  CTS (character tabulation set)             |
+| 137  89  [   145 8]  CTJ (character tabulation justification)   |
+| 138  8A  [ 32  5 8]  LTS (line tabulation set)                  |
+| 139  8B  [7    5 8]  PLD (partial line down)                    |
+| 140  8C  [   1 5 8]  PLU (partial line up)                      |
+| 141  8D  [732 4 68]  RLF (reverse line feed)                    |
+| 142  8E  [7     6 ]  SS2 (single shift two)                     |
+| 143  8F  [7 214 6 ]  SS3 (single shift three)                   |
+| 144  90  [732  56 ]  DCS (device control string)                |
+| 145  91  [  2   68]  PU1 (private use one)                      |
+| 146  92  [      68]  PU2 (private use two)                      |
+| 147  93  [73  4   ]  STS (set transmit state)                   |
+| 148  94  [73   5 8]  CC (cancel character)                      |
+| 149  95  [    45 8]  MW (message waiting)                       |
+| 150  96  [7  14 6 ]  SGA (start of guarded area)                |
+| 151  97  [    4  8]  EGA (end of guarded area)                  |
+| 152  98  [732 456 ]  SS (start of string)                       |
+| 153  99  [ 3 1 5 8]  <control>                                  |
+| 154  9A  [7 21  6 ]  SCI (single character introducer)          |
+| 155  9B  [     568]  CSI (control sequence introducer)          |
+| 156  9C  [ 3    68]  ST (string terminator)                     |
+| 157  9D  [73  4 6 ]  OSC (operating system command)             |
+| 158  9E  [732  5  ]  PM (privacy message)                       |
+| 159  9F  [7 214 68]  APC (application program command)          |
+| 160  A0  [7       ]  no-break space                             |
+| 161  A1  [73    6 ]  inverted exclamation mark                  |
+| 162  A2  [     5 8]  cent sign                                  |
+| 163  A3  [7   4 6 ]  pound sign                                 |
+| 164  A4  [73    68]  currency sign                              |
+| 165  A5  [    4 68]  yen sign                                   |
+| 166  A6  [7 2   68]  broken bar                                 |
+| 167  A7  [73214568]  section sign                               |
+| 168  A8  [7 2    8]  diaeresis                                  |
+| 169  A9  [7  1456 ]  copyright sign                             |
+| 170  AA  [  21 5 8]  feminine ordinal indicator                 |
+| 171  AB  [7321 568]  left-pointing double angle quotation mark  |
+| 172  AC  [7 2  568]  not sign                                   |
+| 173  AD  [732 4 6 ]  soft hyphen                                |
+| 174  AE  [7   4 68]  registered sign                            |
+| 175  AF  [  2145 8]  macron                                     |
+| 176  B0  [    4568]  degree sign                                |
+| 177  B1  [732  5 8]  plus-minus sign                            |
+| 178  B2  [  21   8]  superscript two                            |
+| 179  B3  [732     ]  superscript three                          |
+| 180  B4  [ 3 1 568]  acute accent                               |
+| 181  B5  [ 3 14  8]  micro sign                                 |
+| 182  B6  [73214568]  pilcrow sign                               |
+| 183  B7  [73      ]  middle dot                                 |
+| 184  B8  [   14  8]  cedilla                                    |
+| 185  B9  [7321 56 ]  superscript one                            |
+| 186  BA  [  2 45 8]  masculine ordinal indicator                |
+| 187  BB  [732 4568]  right-pointing double angle quotation mark |
+| 188  BC  [ 3 1  68]  vulgar fraction one quarter                |
+| 189  BD  [ 321  68]  vulgar fraction one half                   |
+| 190  BE  [73  4 68]  vulgar fraction three quarters             |
+| 191  BF  [ 3     8]  inverted question mark                     |
+| 192  C0  [73     8]  capital a grave                            |
+| 193  C1  [7 2     ]  capital a acute                            |
+| 194  C2  [ 3 1   8]  capital a circumflex                       |
+| 195  C3  [732   6 ]  capital a tilde                            |
+| 196  C4  [7    56 ]  capital a diaeresis                        |
+| 197  C5  [73  456 ]  capital a ring above                       |
+| 198  C6  [73  45  ]  capital ae                                 |
+| 199  C7  [73214 6 ]  capital c cedilla                          |
+| 200  C8  [732    8]  capital e grave                            |
+| 201  C9  [ 32    8]  capital e acute                            |
+| 202  CA  [       8]  capital e circumflex                       |
+| 203  CB  [ 32145 8]  capital e diaeresis                        |
+| 204  CC  [  214  8]  capital i grave                            |
+| 205  CD  [7 2  5 8]  capital i acute                            |
+| 206  CE  [7    568]  capital i circumflex                       |
+| 207  CF  [7  1  6 ]  capital i diaeresis                        |
+| 208  D0  [7    5  ]  capital eth                                |
+| 209  D1  [7 2  56 ]  capital n tilde                            |
+| 210  D2  [  2    8]  capital o grave                            |
+| 211  D3  [ 321   8]  capital o acute                            |
+| 212  D4  [  2 4  8]  capital o circumflex                       |
+| 213  D5  [ 3214 68]  capital o tilde                            |
+| 214  D6  [ 3   5 8]  capital o diaeresis                        |
+| 215  D7  [ 321 5 8]  multiplication sign                        |
+| 216  D8  [73   56 ]  capital o stroke                           |
+| 217  D9  [7     68]  capital u grave                            |
+| 218  DA  [7 2  5  ]  capital u acute                            |
+| 219  DB  [73214568]  capital u circumflex                       |
+| 220  DC  [ 32   68]  capital u diaeresis                        |
+| 221  DD  [732   68]  capital y acute                            |
+| 222  DE  [73   568]  capital thorn                              |
+| 223  DF  [ 3  4568]  small sharp s                              |
+| 224  E0  [ 321 568]  small a grave                              |
+| 225  E1  [   1  68]  small a acute                              |
+| 226  E2  [7  1  68]  small a circumflex                         |
+| 227  E3  [ 3214  8]  small a tilde                              |
+| 228  E4  [ 3  45 8]  small a diaeresis                          |
+| 229  E5  [73  4568]  small a ring above                         |
+| 230  E6  [73  45 8]  small ae                                   |
+| 231  E7  [73214 68]  small c cedilla                            |
+| 232  E8  [ 32 4 68]  small e grave                              |
+| 233  E9  [  21  68]  small e acute                              |
+| 234  EA  [7 21  68]  small e circumflex                         |
+| 235  EB  [  214 68]  small e diaeresis                          |
+| 236  EC  [ 3  4  8]  small i grave                              |
+| 237  ED  [   14 68]  small i acute                              |
+| 238  EE  [7  14 68]  small i circumflex                         |
+| 239  EF  [  214568]  small i diaeresis                          |
+| 240  F0  [ 32  568]  small eth                                  |
+| 241  F1  [ 3 145 8]  small n tilde                              |
+| 242  F2  [ 3  4 68]  small o grave                              |
+| 243  F3  [   14568]  small o acute                              |
+| 244  F4  [7  14568]  small o circumflex                         |
+| 245  F5  [7  1 56 ]  small o tilde                              |
+| 246  F6  [  2 4 68]  small o diaeresis                          |
+| 247  F7  [73  4  8]  division sign                              |
+| 248  F8  [7      8]  small o stroke                             |
+| 249  F9  [ 32 4568]  small u grave                              |
+| 250  FA  [   1 568]  small u acute                              |
+| 251  FB  [7  1 568]  small u circumflex                         |
+| 252  FC  [  21 568]  small u diaeresis                          |
+| 253  FD  [732  568]  small y acute                              |
+| 254  FE  [7321456 ]  small thorn                                |
+| 255  FF  [ 3214568]  small y diaeresis                          |
++-----------------------------------------------------------------+
+</verb></tscreen>
+
+<sect1>MIDI Instrument Table<label id="midi"><p>
+<descrip>
+  <tag/Piano/
+    Acoustic Grand Piano
+    <newline>
+    Bright Acoustic Piano
+    <newline>
+    Electric Grand Piano
+    <newline>
+    Honky-tonk Piano
+    <newline>
+    Electric Piano 1
+    <newline>
+    Electric Piano 2
+    <newline>
+    Harpsichord
+    <newline>
+    Clavi
+  <tag/Chromatic Percussion/
+    Celesta
+    <newline>
+    Glockenspiel
+    <newline>
+    Music Box
+    <newline>
+    Vibraphone
+    <newline>
+    Marimba
+    <newline>
+    Xylophone
+    <newline>
+    Tubular Bells
+    <newline>
+    Dulcimer
+  <tag/Organ/
+    Drawbar Organ
+    <newline>
+    Percussive Organ
+    <newline>
+    Rock Organ
+    <newline>
+    Church Organ
+    <newline>
+    Reed Organ
+    <newline>
+    Accordion
+    <newline>
+    Harmonica
+    <newline>
+    Tango Accordion
+  <tag/Guitar/
+    Nylon Acoustic Guitar
+    <newline>
+    Steel Acoustic Guitar
+    <newline>
+    Jazz Electric Guitar
+    <newline>
+    Clean Electric Guitar
+    <newline>
+    Muted Electric Guitar
+    <newline>
+    Overdriven Guitar
+    <newline>
+    Distortion Guitar
+    <newline>
+    Guitar Harmonics
+  <tag/Bass/
+    Acoustic Bass
+    <newline>
+    Finger Electric Bass
+    <newline>
+    Pick Electric Bass
+    <newline>
+    Fretless Bass
+    <newline>
+    Slap Bass 1
+    <newline>
+    Slap Bass 2
+    <newline>
+    Synth Bass 1
+    <newline>
+    Synth Bass 2
+  <tag/Strings/
+    Violin
+    <newline>
+    Viola
+    <newline>
+    Cello
+    <newline>
+    Contrabass
+    <newline>
+    Tremolo Strings
+    <newline>
+    Pizzicato Strings
+    <newline>
+    Orchestral Harp
+    <newline>
+    Timpani
+  <tag/Ensemble/
+    String Ensemble 1
+    <newline>
+    String Ensemble 2
+    <newline>
+    Synth Strings 1
+    <newline>
+    Synth Strings 2
+    <newline>
+    Choir Aahs
+    <newline>
+    Voice Oohs
+    <newline>
+    Synth Voice
+    <newline>
+    Orchestra Hit
+  <tag/Brass/
+    Trumpet
+    <newline>
+    Trombone
+    <newline>
+    Tuba
+    <newline>
+    Muted Trumpet
+    <newline>
+    French Horn
+    <newline>
+    Brass Section
+    <newline>
+    Synth Brass 1
+    <newline>
+    Synth Brass 2
+  <tag/Reed/
+    Soprano Saxophone
+    <newline>
+    Alto Saxophone
+    <newline>
+    Tenor Saxophone
+    <newline>
+    Baritone Saxophone
+    <newline>
+    Oboe
+    <newline>
+    English Horn
+    <newline>
+    Bassoon
+    <newline>
+    Clarinet
+  <tag/Pipe/
+    Piccolo
+    <newline>
+    Flute
+    <newline>
+    Recorder
+    <newline>
+    Pan Flute
+    <newline>
+    Blown Bottle
+    <newline>
+    Shakuhachi
+    <newline>
+    Whistle
+    <newline>
+    Ocarina
+  <tag/Synth Lead/
+    Lead 1 (square)
+    <newline>
+    Lead 2 (sawtooth)
+    <newline>
+    Lead 3 (calliope)
+    <newline>
+    Lead 4 (chiff)
+    <newline>
+    Lead 5 (charang)
+    <newline>
+    Lead 6 (voice)
+    <newline>
+    Lead 7 (fifths)
+    <newline>
+    Lead 8 (bass + lead)
+  <tag/Synth Pad/
+    Pad 1 (new age)
+    <newline>
+    Pad 2 (warm)
+    <newline>
+    Pad 3 (polysynth)
+    <newline>
+    Pad 4 (choir)
+    <newline>
+    Pad 5 (bowed)
+    <newline>
+    Pad 6 (metallic)
+    <newline>
+    Pad 7 (halo)
+    <newline>
+    Pad 8 (sweep)
+  <tag/Synth FM/
+    FX 1 (rain)
+    <newline>
+    FX 2 (soundtrack)
+    <newline>
+    FX 3 (crystal)
+    <newline>
+    FX 4 (atmosphere)
+    <newline>
+    FX 5 (brightness)
+    <newline>
+    FX 6 (goblins)
+    <newline>
+    FX 7 (echoes)
+    <newline>
+    FX 8 (science-fiction)
+  <tag/Ethnic/
+    Sitar
+    <newline>
+    Banjo
+    <newline>
+    Shamisen
+    <newline>
+    Koto
+    <newline>
+    Kalimba
+    <newline>
+    Bag Pipe
+    <newline>
+    Fiddle
+    <newline>
+    Shanai
+  <tag/Percussive/
+    Tinkle Bell
+    <newline>
+    Agogo
+    <newline>
+    Steel Drum
+    <newline>
+    Wooden Block
+    <newline>
+    Taiko Drum
+    <newline>
+    Melodic Tom
+    <newline>
+    Synth Drum
+    <newline>
+    Reverse Cymbal
+  <tag/Sound Effects/
+    Guitar Fret Noise
+    <newline>
+    Breath Noise
+    <newline>
+    Seashore
+    <newline>
+    Bird Tweet
+    <newline>
+    Telephone Ring
+    <newline>
+    Helicopter
+    <newline>
+    Applause
+    <newline>
+    Gunshot
+</descrip>
+
+<sect>Epilogue<p>
+
+<sect1>Contact Information<label id="contact"><p>
+For up-to-date information, see our web page at
+<htmlurl url="http://mielke.cc/brltty/" name="[http://mielke.cc/brltty/]">.
+
+BRLTTY represents the work of a team, which includes:
+<itemize>
+  <item>
+    <htmlurl url="http://mielke.cc/" name="Dave Mielke">
+    <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
+    (current maintainer, active developer)
+  <item>
+    <htmlurl url="http://www.cam.org/~nico/" name="Nicolas Pitre">
+    <tt><htmlurl url="mailto:nico@cam.org" name="&lt;nico@cam.org&gt;"></tt>
+    (active developer)
+  <item>
+    <htmlurl url="http://pages.infinit.net/sdoyon/" name="Stéphane Doyon">
+    <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
+    (active developer)
+  <item>
+    Nikhil Nair 
+    <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
+    (original author, no longer active)
+</itemize>
+
+Comments, suggestions, criticisms, and contributions are all welcome.
+We'll try to respond promptly to all (sensible) mail, but give no guarantee.
+In general, we recommend that you send e-mail messages to all active developers.
+If you have a question about a particular type of display supported by BRLTTY,
+you may wish to contact the author of its driver
+(see the <tt/README/ file in its subdirectory for details).
+
+<sect1>License<p>
+This program is free software.
+You may redistribute it and/or modify it under the terms of
+<htmlurl url="http://www.gnu.org/licenses/licenses.html#GPL" name="The GNU General Public License">
+as published by <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="The Free Software Foundation">.
+Version 2 (or any later version) of the license may be used.
+
+You should have received a copy of the license along with this program.
+It should be in the file <tt/COPYING/ in the top-level directory.
+If not, write to the Free Software Foundation Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
+
+<sect1>Disclaimer<p>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY - not even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the <bf/GNU General Public License/ for more details.
 
 </article>

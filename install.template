@@ -19,45 +19,113 @@
 # Installation script for binary BRLTTY distributions.
 # Usage: install-brltty dest-prefix [source-prefix]
 
-if [ "$1" != "$2" ]
-then
-   echo -n Installing executables...
-   cp -a $2=P/brltty $1=P
-   cp -a $2=P/install-brltty $1=P
-   echo done.
+programName="${0##*/}"
+programMessage()
+{
+   echo "${programName}: ${1}"
+}
+syntaxError()
+{
+   programMessage "${1}"
+   exit 2
+}
 
-   echo -n Installing library files...
-   cp -aR $2=L $1=L
-   echo done.
-
-   echo -n Installing data files...
-   cp -aR $2=D $1=D
-   echo done.
-
-   if [ -n "=V" ]
+execute()
+{
+   "${@}"
+   returnCode="${?}"
+   if [ "${returnCode}" -ne 0 ]
    then
-      install=true
-      for device in =V
-      do
-         if [ -c "$1$device" ]
-	 then
-	    install=false
-	    echo $device already exists - not reinstalled.
-	    break
-	 fi
-      done
-      if $install
-      then
-	 device=`set -- =V && echo $1`
-         echo -n Creating $device...
-         mknod -m o= $1$device c 7 128
-         chmod 660 $1$device
-         chown root.tty $1$device
-         echo done.
-      fi
+      exit "${returnCode}"
    fi
+   return 0
+}
+makeDirectory()
+{
+   if [ ! -a "${1}" ]
+   then
+      echo -n "Creating ${2} directory..."
+      execute mkdir -p -- "${1}"
+      echo "done."
+   elif [ ! -d "${1}" ]
+   then
+      syntaxError "not a directory: ${1}"
+   fi
+}
 
-   echo BRLTTY installation complete.
-else
-   echo Usage: install-brltty dest-prefix [source-prefix]
+if [ "${#}" -eq 0 ]
+then
+   syntaxError "missing destination directory."
 fi
+to="${1}"
+shift
+
+if [ "${#}" -eq 0 ]
+then
+   from="=F"
+elif [ "${#}" -eq 1 ]
+then
+   from="${1}"
+   if [ ! -a "${from}" ]
+   then
+      syntaxError "source does not exist."
+   fi
+   if [ ! -d "${from}" ]
+   then
+      syntaxError "source is not a directory."
+   fi
+else
+   syntaxError "too many parameters."
+fi
+
+if [ "${to}" = "${from}" ]
+then
+   syntaxError "source and destination are the same."
+fi
+makeDirectory "${to}" "destination"
+
+makeDirectory "${to}=P" "executables"
+echo -n "Installing executables..."
+for executable in brltty install-brltty
+do
+   execute cp -p -- "${from}=P/${executable}" "${to}=P"
+done
+unset executable
+echo "done."
+
+makeDirectory "${to}=L" "library"
+echo -n "Installing library files..."
+execute cp -pR "${from}=L" "${to}=L"
+echo "done."
+
+makeDirectory "${to}=D" "data"
+echo -n "Installing data files..."
+cp -pR "${from}=D" "${to}=D"
+echo "done."
+
+if [ -n "=V" ]
+then
+   install=true
+   for device in =V
+   do
+      if [ -c "${to}${device}" ]
+      then
+         install=false
+         break
+      fi
+   done
+   if $install
+   then
+      device="`set -- =V && echo "${1}"`"
+      makeDirectory "${to}${device%/*}" "device"
+      echo -n "Creating screen access device..."
+      execute mknod -m o= "${to}${device}" c 7 128
+      execute chmod 660 "${to}${device}"
+      execute chown root.tty "${to}${device}"
+      echo "done."
+   fi
+   unset device install
+fi
+
+echo "Installation complete."
+exit 0

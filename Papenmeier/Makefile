@@ -64,20 +64,20 @@ else
    READ_CONFIG_D = D
    READ_CONFIG_H = H
 endif
-brltty.pm.conf: read_config
+brltty-$(DRIVER_CODE).conf: read_config
 	./read_config $(READ_CONFIG_H)
-	./read_config $(READ_CONFIG_D) > brltty.pm.conf
+	./read_config $(READ_CONFIG_D) >$@
 
-braille-help: brltty.pm.conf
+braille-help: brltty-$(DRIVER_CODE).conf
 	for target in brltty-$(DRIVER_CODE)*.hlp; \
 	do ../txt2hlp $(HELPDIR)/$$target $$target; \
 	done
-	cp brltty.pm.conf $(HELPDIR)/
+	cp brltty-$(DRIVER_CODE).conf $(HELPDIR)/
 
 distclean:
 	rm -f serial simulate read_config dump-codes \
 		config.tab.c config.output cmd.h hlp.h \
-		brltty-$(DRIVER_CODE)*.hlp brltty.pm.conf \
+		brltty-$(DRIVER_CODE)*.hlp brltty-$(DRIVER_CODE).conf \
 		*.good *.diff *.out
 
 ###############################################################

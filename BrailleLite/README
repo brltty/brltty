@@ -27,6 +27,10 @@ when the unit is in its internal notetaker mode.
 See brltty_genhelp.txt for a description of the key bindings.
 
 History:
+Stéphane Doyon, December 2001, version 0.5.5:
+-META is back. Now use VPC modifiers on VALPASSCHAR when TEXTTRANS
+    not defined. Fixed uppercase that always locked active. Sub-commands
+    of 35-chord no longer need to be chorded.
 Stéphane Doyon, November 2001, version 0.5.4:
 -Now using new generic VAL_PASS* mechanism for typing in keys, rather
     than having the driver itself insert stuff into the console. We

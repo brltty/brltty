@@ -45,6 +45,48 @@ TuneDefinition tune_braille_off = {
    NULL, 0X0000, tones_braille_off
 };
 
+static ToneDefinition tones_cut_begin[] = {
+   {  595,  40},
+   { 1190,  20},
+   {    0,   0}
+};
+TuneDefinition tune_cut_begin = {
+   NULL, 0X0000, tones_cut_begin
+};
+
+static ToneDefinition tones_cut_end[] = {
+   { 1190,  50},
+   {  595,  30},
+   {    0,   0}
+};
+TuneDefinition tune_cut_end = {
+   NULL, 0X0000, tones_cut_end
+};
+
+static ToneDefinition tones_toggle_on[] = {
+   {  595,  30},
+   {    0,  30},
+   {  793,  30},
+   {    0,  30},
+   { 1190,  40},
+   {    0,   0}
+};
+TuneDefinition tune_toggle_on = {
+   NULL, 0X0000, tones_toggle_on
+};
+
+static ToneDefinition tones_toggle_off[] = {
+   { 1190,  30},
+   {    0,  30},
+   {  793,  30},
+   {    0,  30},
+   {  540,  30},
+   {    0,   0}
+};
+TuneDefinition tune_toggle_off = {
+   NULL, 0X0000, tones_toggle_off
+};
+
 static ToneDefinition tones_link[] = {
    {  850,   7},
    {  793,   7},
@@ -63,40 +105,6 @@ static ToneDefinition tones_unlink[] = {
 };
 TuneDefinition tune_unlink = {
    NULL, 0X0000, tones_unlink
-};
-
-static ToneDefinition tones_wrap_down[] = {
-   { 1200,   6},
-   {  600,   6},
-   {  300,   6},
-   {  150,  10},
-   {    0,   0}
-};
-TuneDefinition tune_wrap_down = {
-   NULL, 0X1455, tones_wrap_down
-};
-
-static ToneDefinition tones_wrap_up[] = {
-   {  150,   6},
-   {  300,   6},
-   {  600,   6},
-   { 1200,  10},
-   {    0,   0}
-};
-TuneDefinition tune_wrap_up = {
-   NULL, 0X14AA, tones_wrap_up
-};
-
-static ToneDefinition tones_bounce[] = {
-   { 2400,   6},
-   { 1200,   6},
-   {  600,   6},
-   {  300,   6},
-   {  150,  10},
-   {    0,   0}
-};
-TuneDefinition tune_bounce = {
-   NULL, 0X30FF, tones_bounce
 };
 
 static ToneDefinition tones_freeze[] = {
@@ -158,62 +166,6 @@ TuneDefinition tune_unfreeze = {
    "Unfrozen", 0X0000, tones_unfreeze
 };
 
-static ToneDefinition tones_cut_begin[] = {
-   {  595,  40},
-   { 1190,  20},
-   {    0,   0}
-};
-TuneDefinition tune_cut_begin = {
-   NULL, 0X0000, tones_cut_begin
-};
-
-static ToneDefinition tones_cut_end[] = {
-   { 1190,  50},
-   {  595,  30},
-   {    0,   0}
-};
-TuneDefinition tune_cut_end = {
-   NULL, 0X0000, tones_cut_end
-};
-
-static ToneDefinition tones_toggle_on[] = {
-   {  595,  30},
-   {    0,  30},
-   {  793,  30},
-   {    0,  30},
-   { 1190,  40},
-   {    0,   0}
-};
-TuneDefinition tune_toggle_on = {
-   NULL, 0X0000, tones_toggle_on
-};
-
-static ToneDefinition tones_toggle_off[] = {
-   { 1190,  30},
-   {    0,  30},
-   {  793,  30},
-   {    0,  30},
-   {  540,  30},
-   {    0,   0}
-};
-TuneDefinition tune_toggle_off = {
-   NULL, 0X0000, tones_toggle_off
-};
-
-static ToneDefinition tones_done[] = {
-   {  595,  40},
-   {    0,  30},
-   {  595,  40},
-   {    0,  40},
-   {  595, 140},
-   {    0,  20},
-   {  793,  50},
-   {    0,   0}
-};
-TuneDefinition tune_done = {
-   "Done", 0X0000, tones_done
-};
-
 static ToneDefinition tones_skip_first[] = {
    {    0,  40},
    {  297,   4},
@@ -244,12 +196,60 @@ TuneDefinition tune_skip_more = {
    NULL, 0X0000, tones_skip_more
 };
 
+static ToneDefinition tones_wrap_down[] = {
+   { 1200,   6},
+   {  600,   6},
+   {  300,   6},
+   {  150,  10},
+   {    0,   0}
+};
+TuneDefinition tune_wrap_down = {
+   NULL, 0X1455, tones_wrap_down
+};
+
+static ToneDefinition tones_wrap_up[] = {
+   {  150,   6},
+   {  300,   6},
+   {  600,   6},
+   { 1200,  10},
+   {    0,   0}
+};
+TuneDefinition tune_wrap_up = {
+   NULL, 0X14AA, tones_wrap_up
+};
+
+static ToneDefinition tones_bounce[] = {
+   { 2400,   6},
+   { 1200,   6},
+   {  600,   6},
+   {  300,   6},
+   {  150,  10},
+   {    0,   0}
+};
+TuneDefinition tune_bounce = {
+   NULL, 0X30FF, tones_bounce
+};
+
 static ToneDefinition tones_bad_command[] = {
    {  750, 100},
    {    0,   0}
 };
 TuneDefinition tune_bad_command = {
    NULL, 0X0000, tones_bad_command
+};
+
+static ToneDefinition tones_done[] = {
+   {  595,  40},
+   {    0,  30},
+   {  595,  40},
+   {    0,  40},
+   {  595, 140},
+   {    0,  20},
+   {  793,  50},
+   {    0,   0}
+};
+TuneDefinition tune_done = {
+   "Done", 0X0000, tones_done
 };
 
 static unsigned int closeTimer = 0;

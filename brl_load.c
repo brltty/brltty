@@ -30,47 +30,44 @@
 #include "misc.h"
 
 braille_driver *braille = NULL;	/* filled by dynamic libs */
-char *braille_libraryName = NULL;	/* name of library */
 static void *library = NULL;	/* handle to driver */
 #define BRL_SYMBOL "brl_driver"
 
 /* load driver from library */
 /* return true (nonzero) on success */
-int load_braille_driver(void)
-{
-  const char* error;
+int loadBrailleDriver (const char **libraryName) {
+  const char *error;
 
   #ifdef BRL_BUILTIN
     extern braille_driver brl_driver;
-    if (braille_libraryName != NULL)
-      if (strcmp(braille_libraryName, brl_driver.identifier) == 0)
-        braille_libraryName = NULL;
-    if (braille_libraryName == NULL)
+    if (*libraryName != NULL)
+      if (strcmp(*libraryName, brl_driver.identifier) == 0)
+        *libraryName = NULL;
+    if (*libraryName == NULL)
       {
 	braille = &brl_driver;
-	braille_libraryName = "built-in";
+	*libraryName = "built-in";
 	return 1;
       }
   #else
-    if (braille_libraryName == NULL)
+    if (*libraryName == NULL)
       return 0;
   #endif
 
   /* allow shortcuts */
-  if (strlen(braille_libraryName) == 2)
+  if (strlen(*libraryName) == 2)
     {
       static char name[] = "libbrlttyb??.so.1"; /* two ? for shortcut */
-      char * pos = strchr(name, '?');
-      pos[0] = braille_libraryName[0];
-      pos[1] = braille_libraryName[1];
-      braille_libraryName = name;
+      char *pos = strchr(name, '?');
+      memcpy(pos, *libraryName, 2);
+      *libraryName = name;
     }
 
-  library = dlopen(braille_libraryName, RTLD_NOW|RTLD_GLOBAL);
+  library = dlopen(*libraryName, RTLD_NOW|RTLD_GLOBAL);
   if (library == NULL) 
     {
-      LogPrint(LOG_ERR, "%s", dlerror()); 
-      LogPrint(LOG_ERR, "Cannot open braille driver library: %s", braille_libraryName);
+      LogPrint(LOG_ERR, "%s", dlerror());
+      LogPrint(LOG_ERR, "Cannot open braille driver library: %s", *libraryName);
       return 0;
     }
 
@@ -87,23 +84,20 @@ int load_braille_driver(void)
 }
 
 
-int list_braille_drivers(void)
-{
-	char buf[64];
-	static const char *list_file = LIB_PATH "/brltty-brl.lst";
-	int cnt, fd = open( list_file, O_RDONLY );
-	if (fd < 0) {
-		fprintf( stderr, "Error: can't access braille driver list file\n" );
-		perror( list_file );
-		return 0;
-	}
-	fprintf( stderr, "Available Braille Drivers:\n\n" );
-	fprintf( stderr, "XX\tDescription\n" );
-	fprintf( stderr, "--\t-----------\n" );
-	while( (cnt = read( fd, buf, sizeof(buf) )) )
-		fwrite( buf, cnt, 1, stderr );
-	close(fd);
-	return 1;
+int listBrailleDrivers (void) {
+  char buf[64];
+  static const char *list_file = LIB_PATH "/brltty-brl.lst";
+  int cnt, fd = open(list_file, O_RDONLY);
+  if (fd < 0) {
+    fprintf(stderr, "Error: can't access braille driver list file\n");
+    perror(list_file);
+    return 0;
+  }
+  fprintf(stderr, "Available Braille Drivers:\n\n");
+  fprintf(stderr, "XX\tDescription\n");
+  fprintf(stderr, "--\t-----------\n");
+  while ((cnt = read(fd, buf, sizeof(buf))))
+    fwrite(buf, cnt, 1, stderr);
+  close(fd);
+  return 1;
 }
-
-
