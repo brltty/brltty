@@ -46,7 +46,7 @@ Screen *current;
 int
 initscr (char *helpfile)
 {
-  if (live->open ())
+  if (live->open (0))
     return 1;
   help.open (helpfile);
   current = live;
@@ -62,7 +62,7 @@ initscr_phys (void)
    * in the main thread.  So we close and reopen the device.
    */
   live->close();
-  if (live->open ())
+  if (live->open (1))
     return 1;
   return 0;
 }

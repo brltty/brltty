@@ -42,7 +42,7 @@ class Screen
 class RealScreen : public Screen
 {
   public:
-  virtual int open (void) = 0;
+  virtual int open (int) = 0;
   virtual void close (void) = 0;
   virtual void getstat (scrstat &) = 0;
   virtual unsigned char *getscr (winpos, unsigned char *, short) = 0;
@@ -89,7 +89,5 @@ class HelpScreen:public Screen
  */
 
 extern RealScreen *live;
-
-void check_screen (void);
 
 #endif // !_SCRDEV_H

@@ -32,7 +32,7 @@ class shm_Screen:public RealScreen
   int shmid;
   char *shm;
     public:
-  int open (void);		// called once to initialise screen reading
+  int open (int);		// called once to initialise screen reading
   void getstat (scrstat &);
   unsigned char *getscr (winpos, unsigned char *, short);
   void close (void);		// called once to close screen reading

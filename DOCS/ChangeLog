@@ -3,8 +3,10 @@ Note: this file is in reversed chronological order (bottom to top).
 
   ...
 
-  - cursor routing has been broken -- fixed  (NP)
-  - fixed compilation warnings  (NP)
+  - Cursor routing has been broken -- fixed  (NP)
+  - Better fix for cursor routing which happened to re-open and redetect 
+    screen font, and incidentally writing to stderr.  Fixed  (NP)
+  - Fixed compilation warnings  (NP)
 
 01 April 2000:
   - Released BRLTTY 2.40 (beta)

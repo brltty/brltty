@@ -54,7 +54,7 @@ RealScreen *live = &shm;
 
 
 inline int
-shm_Screen::open (void)
+shm_Screen::open (int for_csr_routing)
 {
   /* this should be generated from ftok(), but... */
   key = 0xBACD072F;     /* random static IPC key */
