@@ -3929,9 +3929,6 @@ we hope, time permitting, to work on the following:
       <item>Better speech navigation.
       <item>More speech synthesizers.
     </itemize>
-  <tag/Socket Interface/
-    A mechanism allowing screen readers and X display interpreters
-    to easily make full use of all braille dsplays supported by BRLTTY.
   <tag/Screen Subregions/
     Ignore cursor motion outside the region,
     and set soft navigational boundaries at the edges of the region.
