@@ -84,7 +84,9 @@ readChunk (
     if (amount == -1) {
       if (errno == EINTR) continue;
       if (errno == EAGAIN) goto noInput;
+#ifdef EWOULDBLOCK
       if (errno == EWOULDBLOCK) goto noInput;
+#endif /* EWOULDBLOCK */
       LogError("Read");
       return 0;
     }
@@ -160,7 +162,9 @@ writeData (int fileDescriptor, const void *buffer, size_t size) {
     if (count == -1) {
       if (errno == EINTR) continue;
       if (errno == EAGAIN) goto noOutput;
+#ifdef EWOULDBLOCK
       if (errno == EWOULDBLOCK) goto noOutput;
+#endif /* EWOULDBLOCK */
       LogError("Write");
       return count;
     }

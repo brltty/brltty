@@ -53,7 +53,12 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
   ssize_t res=0;
   for (n=0;n<size;n+=res) {
     res=write(fd,buf+n,size-n);
-    if ((res<0) && (errno!=EINTR) && (errno!=EAGAIN) && (errno!=EWOULDBLOCK)) { /* EAGAIN shouldn't happen, but who knows... */
+    if ((res<0) &&
+        (errno!=EINTR) &&
+#ifdef EWOULDBLOCK
+        (errno!=EWOULDBLOCK) &&
+#endif /* EWOULDBLOCK */
+        (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       brlapi_libcerrno=errno;
       brlapi_libcerrfun="write in writeFile";
       brlapi_errno=BRLERR_LIBCERR;
@@ -74,7 +79,12 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
     if (res==0)
       /* Unexpected end of file ! */
       return n;
-    if ((res<0) && (errno!=EINTR) && (errno!=EAGAIN) && (errno!=EWOULDBLOCK)) { /* EAGAIN shouldn't happen, but who knows... */
+    if ((res<0) &&
+        (errno!=EINTR) &&
+#ifdef EWOULDBLOCK
+        (errno!=EWOULDBLOCK) &&
+#endif /* EWOULDBLOCK */
+        (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       brlapi_libcerrno=errno;
       brlapi_libcerrfun="read in readFile";
       brlapi_errno=BRLERR_LIBCERR;
