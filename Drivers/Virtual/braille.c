@@ -53,12 +53,14 @@ static int fileDescriptor = -1;
 
 #define INPUT_SIZE 0X200
 static char inputBuffer[INPUT_SIZE];
-static int inputLength;
+static size_t inputLength;
+static size_t inputStart;
+static int inputEnd;
 static const char *inputDelimiters = " ";
 
 #define OUTPUT_SIZE 0X200
 static char outputBuffer[OUTPUT_SIZE];
-static int outputLength;
+static size_t outputLength;
 
 typedef struct {
   const CommandEntry *entry;
@@ -313,53 +315,74 @@ copyString (const char *string) {
   return makeString(string, strlen(string));
 }
 
-static char *
-readCommandLine (void) {
-  fd_set readMask;
-  struct timeval timeout;
+static int
+fillInputBuffer (void) {
+  if ((inputLength < INPUT_SIZE) && !inputEnd) {
+    fd_set readMask;
+    struct timeval timeout;
 
-  FD_ZERO(&readMask);
-  FD_SET(fileDescriptor, &readMask);
+    FD_ZERO(&readMask);
+    FD_SET(fileDescriptor, &readMask);
 
-  memset(&timeout, 0, sizeof(timeout));
+    memset(&timeout, 0, sizeof(timeout));
 
-  switch (select(fileDescriptor+1, &readMask, NULL, NULL, &timeout)) {
-    case -1:
-      LogError("select");
-    case 0:
-      break;
-    
-    default: {
-      char *inputStart = &inputBuffer[inputLength];
-      int received = read(fileDescriptor, inputStart, INPUT_SIZE-inputLength);
+    switch (select(fileDescriptor+1, &readMask, NULL, NULL, &timeout)) {
+      case -1:
+        LogError("select");
+        return 0;
 
-      if (received == -1) {
-        LogError("read");
+      case 0:
         break;
-      }
+    
+      default: {
+        int received = read(fileDescriptor, &inputBuffer[inputLength], INPUT_SIZE-inputLength);
 
-      if (received == 0) {
-        LogPrint(LOG_NOTICE, "Remote closed connection.");
-        return copyString("quit");
-      }
-      inputLength += received;
-
-      while (received-- > 0) {
-        if (*inputStart == '\n') {
-          char *string;
-          int stringLength = inputStart - inputBuffer;
-          if ((inputStart != inputBuffer) && (*(inputStart-1) == '\r')) --stringLength;
-          string = makeString(inputBuffer, stringLength);
-          inputLength -= ++inputStart - inputBuffer;
-          memmove(inputBuffer, inputStart, inputLength);
-          return string;
+        if (received == -1) {
+          LogError("read");
+          return 0;
         }
 
-        ++inputStart;
+        if (received) 
+          inputLength += received;
+        else
+          inputEnd = 1;
+        break;
       }
     }
   }
 
+  return 1;
+}
+
+static char *
+readCommandLine (void) {
+  if (fillInputBuffer()) {
+    if (inputStart < inputLength) {
+      const char *newline = memchr(&inputBuffer[inputStart], '\n', inputLength-inputStart);
+      if (newline) {
+        char *string;
+        int stringLength = newline - inputBuffer;
+        if ((newline != inputBuffer) && (*(newline-1) == '\r')) --stringLength;
+        string = makeString(inputBuffer, stringLength);
+        inputLength -= ++newline - inputBuffer;
+        memmove(inputBuffer, newline, inputLength);
+        inputStart = 0;
+        return string;
+      } else {
+        inputStart = inputLength;
+      }
+    } else if (inputEnd) {
+      char *string;
+      if (inputLength) {
+        string = makeString(inputBuffer, inputLength);
+        inputLength = 0;
+        inputStart = 0;
+      } else {
+        string = copyString("quit");
+      }
+      return string;
+    }
+  }
   return NULL;
 }
 
@@ -427,14 +450,11 @@ writeString (const char *string) {
   return writeBytes(string, strlen(string));
 }
 
-/* Print the dots in buf in a humanly readable form into a string.
- * Caller is responsible for freeing string
- */
 static int
 writeDots (const unsigned char *cells, int count) {
   const unsigned char *cell = cells;
 
-  while (count--) {
+  while (count-- > 0) {
     char dots[9];
     char *d = dots;
 
@@ -468,7 +488,7 @@ getCommandCount (void) {
 }
 
 static void
-sortCommands (int (*compareCommands) (const void *command1, const void *command2)) {
+sortCommands (int (*compareCommands) (const void *item1, const void *item2)) {
   qsort(commandDescriptors, commandCount, commandSize, compareCommands);
 }
 
@@ -523,9 +543,11 @@ allocateCommandDescriptors (void) {
     {
       CommandDescriptor *descriptor = commandDescriptors + commandCount;
       int previousBlock = -1;
+
       while (descriptor-- != commandDescriptors) {
         int code = descriptor->entry->code;
         int currentBlock = code & VAL_BLK_MASK;
+
         if (currentBlock != previousBlock) {
           if (currentBlock) {
             descriptor->maximum = VAL_ARG_MASK - (code & VAL_ARG_MASK);
@@ -623,6 +645,8 @@ static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   allocateCommandDescriptors();
   inputLength = 0;
+  inputStart = 0;
+  inputEnd = 0;
   outputLength = 0;
 
   {
@@ -656,17 +680,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         const char *word;
         LogPrint(LOG_DEBUG, "Command received: %s", line);
 
-        word = strtok(line, inputDelimiters);
-        if (testWord(word, "cells")) {
-          if (dimensionsChanged(brl)) {
-            free(line);
-            return 1;
+        if ((word = strtok(line, inputDelimiters))) {
+          if (testWord(word, "cells")) {
+            if (dimensionsChanged(brl)) {
+              free(line);
+              return 1;
+            }
+          } else if (testWord(word, "quit")) {
+            break;
+          } else {
+            LogPrint(LOG_WARNING, "Unexpected command: %s", word);
           }
-        } else if (testWord(word, "quit")) {
-          LogPrint(LOG_NOTICE, "Client requested termination.");
-          break;
-        } else {
-          LogPrint(LOG_WARNING, "Unexpected command: %s", word);
         }
       } else {
         delay(1000);
@@ -718,7 +742,8 @@ brl_writeVisual (BrailleDisplay *brl) {
     {
       const unsigned char *address = brl->buffer;
       int cells = brailleCells;
-      while (cells--) {
+
+      while (cells-- > 0) {
         unsigned char character = *address++;
         if (iscntrl(character)) {
           char buffer[5];
@@ -787,10 +812,10 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
             char buffer[0X40];
             snprintf(buffer, sizeof(buffer), "%s %d\n", name, value);
             writeString(buffer);
-            flushOutput();
           }
         }
       }
+      flushOutput();
     } else {
       while (cells) {
         if (st[--cells]) {
@@ -858,6 +883,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
                   numberSpecified = 1;
                   command += number;
                   continue;
+                } else {
+                  LogPrint(LOG_WARNING, "Number out of range.");
                 }
               }
             }
