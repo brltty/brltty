@@ -1,7 +1,7 @@
 BRLTTY - Access software for Unix for a blind person
          using a soft Braille terminal
 
-Version 2.40 (beta), March 1st 2000
+Version 2.90 (beta), May 23rd 2000
 
 Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 
@@ -115,12 +115,13 @@ only for most of them):
   - Alva B.V.: ABT3 and Delphi series, serial and parallel ports;
   - Telesensory Systems Inc.: PowerBraille 40 / 65/81,
     Navigator 20/40/80 (latest firmware version only?);
-  - Papenmeier Screen 2D Terminal;
+  - Papenmeier Terminal;
   - EuroBraille family of displays (tested only on ClioBraille 40);
   - Blazie Engineering's BrailleLite 18 and 40;
   - EcoBraille from La O.N.C.E.;
   - BAUM Vario;
   - MDV braille displays;
+  - Tieman MultiBraille;
 
 Ability to add more Braille displays does depend on the level of
 cooperation from the manufacturer in providing programming information.
@@ -152,11 +153,26 @@ Simply invoking 'make' will build BRLTTY and all driver libraries.  To build
 BRLTTY with a specific built-in driver, just edit the main Makefile and 
 uncomment the driver specification you want to see linked with the main 
 executable before invoking 'make'.  Then, as root, 'make install' will
-install all files to their proper place.  
+install all files to their proper location.
 
 For information specific to a particular driver, please see the README
 file in the corresponding subdirectory.  Finally, see the DOC subdirectory
 for BRLTTY manuals and miscelaneous informations.
+
+
+EXECUTING BRLTTY
+================
+
+If you compiled BRLTTY with a braille driver built-in, simply invoking
+'brltty' should start BRLTTY with all defaults.  Alternatively you might
+need to specify a braille driver with the -b option.  Also 'brltty -h'
+will display a brief summary of all available options.
+
+You may use a configuration file with most options as well.  See the
+example configuration file in the DOC/ subdirectory.
+
+And don't forget to review the notes for your braille terminal. See the
+README file in the driver's subdirectory.
 
 
 THE BRLTTY TEAM

@@ -1,12 +1,12 @@
 ###############################################################################
+#
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Nicolas Pitre <nico@cam.org>
-# Stephane Doyon <doyons@jsp.umontreal.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Copyright (C) 1995-2000 by the BRLTTY team.  All rights reserved.
+# Web Page: http://www.cam.org/~nico/brltty
+#
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
 # This is free software, placed under the terms of the

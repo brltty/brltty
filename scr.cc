@@ -44,11 +44,10 @@ Screen *current;
 
 
 int
-initscr (char *helpfile)
+initscr (void)
 {
   if (live->open (0))
     return 1;
-  help.open (helpfile);
   current = live;
   return 0;
 }
@@ -162,6 +161,13 @@ selectdisp (int disp)
 	}
     }
   return dismd;
+}
+
+
+int
+inithlpscr (char *helpfile)
+{
+  return help.open (helpfile);
 }
 
 

@@ -51,7 +51,7 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.51 (beta)"
+#define VERSION "BRLTTY 2.90 (beta)"
 #define COPYRIGHT "\
 Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -631,9 +631,18 @@ main (int argc, char *argv[])
   if (opt_v)
     return 0;
 
+  /* Load configuration file */
+  loadconfig ();
+
   /*
-   * Initialize screen library ---> moved AH: TODO ??
+   * Initialize screen library 
    */
+  if (initscr ())
+    {				
+      LogAndStderr(LOG_ERR, "Cannot read screen.");
+      LogClose();
+      exit (2);
+    }
   
   /* allocate the first screen information structures */
   p = malloc (sizeof (*p));
@@ -649,24 +658,6 @@ main (int argc, char *argv[])
   for (i = 1; i <= NBR_SCR; i++)
     scrparam[i] = 0;
   curscr = 0;
-
-  /* moved from after becoming a daemon - AH: TODO ?? */
-
-  /* Load configuration file */
-  loadconfig ();
-
-  /* Initialise Braille and set text display: */
-  startbrl();
-  /*
-   * Initialize screen library -- moved from above AH: TODO ??
-   */
-  if (initscr (braille->helpfile))
-    {				
-      LogAndStderr(LOG_ERR, "Cannot read screen.");
-      LogClose();
-      exit (2);
-    }
-
 
   /*
    * Become a daemon:
@@ -701,8 +692,15 @@ main (int argc, char *argv[])
    * be used instead.
    */
 
+  /* Initialise Braille and set text display: */
+  startbrl();
+
   /* Initialise speech */
   speech->initialize();
+
+  /* Initialise help screen */
+  if (inithlpscr (braille->helpfile))
+    LogPrint(LOG_WARNING, "Cannot open help screen file '%s'.", braille->helpfile);
 
   /*
    * Establish signal handler to clean up before termination: 

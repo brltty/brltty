@@ -1,6 +1,13 @@
 Note: this file is in reversed chronological order (bottom to top).
 
-  ...
+23 May 2000:
+ - version 2.90 (beta):
+ - Tieman MultiBraille driver, contributed by Wolfgang Astleitner
+   <w.astleitner@jk.uni-linz.ac.at>
+ - Put startbrl() back after daemonized because some drivers expect to have
+   all life time to probe for a terminal.  Created inithlpscr() instead.
+ - Replaced 'g++' by 'gcc' in the Makefile eliminating dependencies 
+   with libstdc++
 
 24 April 2000:
  - version 2.51 (beta):

@@ -34,6 +34,7 @@
 #BRL_TARGET = Papenmeier
 #BRL_TARGET = TSI
 #BRL_TARGET = Vario
+#BRL_TARGET = MultiBraille
 
 # If you would like the driver for your speech interface built into the
 # program, then specify it by uncommenting one, and only one, of these
@@ -131,10 +132,10 @@ LIB_CFLAGS = $(CFLAGS) -fPIC
 LIB_SO_NAME = libbrltty
 LIB_VER = 1
 
-COMPCPP = g++
+COMPCPP = gcc
 
 #LD = gcc
-LD = g++
+LD = gcc
 COMMONLDFLAGS = -rdynamic
 LDFLAGS = $(COMMONLDFLAGS) -s
 #LDFLAGS = $(COMMONLDFLAGS) -g
@@ -144,8 +145,8 @@ PREFIX =
 
 INSTALL_DRIVERS =
 
-BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario
-BRL_LIBS = al b1 b4 cb ec eu md pm ts va
+BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario MultiBraille
+BRL_LIBS = al b1 b4 cb ec eu md pm ts va mb
 
 SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille Festival GenericSay Televox
 SPK_LIBS = no al bl cb fv gs tv

@@ -51,7 +51,7 @@
 
 #define BRL_C 1
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.2beta3 (October 99)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.3 (April 2000)"
 #define COPYRIGHT "Copyright (C) 1996-99 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 

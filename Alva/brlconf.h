@@ -18,7 +18,6 @@
 /* Alva/brlconf.h - Configurable definitions for the Alva driver
  * Copyright (C) 1995-1998 by Nicolas Pitre <nico@cam.org>
  *
- * Edit as necessary for your system.
  */
 
 #define BRLNAME	"Alva"
@@ -34,7 +33,7 @@
 #define DEL480		13 	/* Delphi Multimedia */
 
 
-/***** User Settings *****/
+/***** User Settings *****  Edit as necessary for your system. */
 
 
 /* Define next line to 1 if you have a firmware older than version 010495 */

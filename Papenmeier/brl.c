@@ -235,7 +235,10 @@ identify_terminal(brldim *brl)
 
 static void initbrlerror(brldim *brl)
 {
-  printf("\nInitbrl: failure at open\n");
+
+  /* printf replaced with LogPrint  (NP) */
+  LogPrint(LOG_ERR, "Initbrl: failure at open\n");
+
   if (brl->disp)
     free (brl->disp);
   brl->x = -1;

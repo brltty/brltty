@@ -96,7 +96,7 @@ and replace it:
 Finally we can close the initial ramdisk image:
 
 	umount /mnt
-	gzip initrd
+	gzip -9 initrd
 	mv initrd.gz initrd.img
 
 And hope that the resulting initrd.img file fits on a floppy (which it
