@@ -48,34 +48,34 @@ volatile pid_t csr_pid = 0;
 
 void csrjmp_sub(int x, int y, int curscr)
 {
-    ScreenStatus scr;		/* for screen state infos */
+    ScreenDescription scr;		/* for screen state infos */
     int curx, cury;		/* current cursor position */
     int dif, t = 0;
-    sigset_t mask;		/* for blocking of SIGUSR1 */
+    sigset_t new_mask, old_mask;		/* for blocking of SIGUSR1 */
 
     /* Set up signal mask: */
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGUSR1);
+    sigemptyset(&new_mask);
+    sigaddset(&new_mask, SIGUSR1);
+    sigprocmask(SIG_UNBLOCK, &new_mask, NULL);
 
     /* Initialise second thread of screen reading: */
     if (!initializeRoutingScreen()) return;
 
-    getRoutingScreenStatus(&scr);
+    describeRoutingScreen(&scr);
 
     /* Deal with vertical movement first, ignoring horizontal jumping ... */
-    dif = y - scr.posy;
-    while (dif != 0 && curscr == scr.no) {
+    while ((dif = y - scr.posy) && (curscr == scr.no)) {
 	timeout_yet(0);		/* initialise stop-watch */
-	sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
+	sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
 	insertKey(dif > 0 ? KEY_CURSOR_DOWN : KEY_CURSOR_UP);
-	sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
+	sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
 	do {
 #if CSRJMP_LOOP_DELAY > 0
 	    delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
 	    cury = scr.posy;
 	    curx = scr.posx;
-	    getRoutingScreenStatus(&scr);
+	    describeRoutingScreen(&scr);
 	} while (!(t = timeout_yet(CSRJMP_TIMEOUT)) &&
 		 scr.posy == cury && scr.posx == curx);
 	if (t)
@@ -84,7 +84,7 @@ void csrjmp_sub(int x, int y, int curscr)
 	    (scr.posy != cury && (y - scr.posy) * (y - scr.posy) >= dif * dif))
 	{
 	    delay(CSRJMP_SETTLE_DELAY);
-	    getRoutingScreenStatus(&scr);
+	    describeRoutingScreen(&scr);
 	    if ((scr.posy == cury && (scr.posx - curx) * dif <= 0) ||
 		(scr.posy != cury && (y - scr.posy) * (y - scr.posy) >= dif * dif))
 	    {
@@ -93,29 +93,27 @@ void csrjmp_sub(int x, int y, int curscr)
 		 * go back to the previous position wich was obviously the 
 		 * nearest ever reached to date before giving up.
 		 */
-		sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
+		sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
 		insertKey(dif < 0 ? KEY_CURSOR_DOWN : KEY_CURSOR_UP);
-		sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
+		sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
 		break;
 	    }
 	}
-	dif = y - scr.posy;
     }
 
     if (x >= 0) {	/* don't do this for vertical-only routing (x=-1) */
 	/* Now horizontal movement, quitting if the vertical position is wrong: */
-	dif = x - scr.posx;
-	while (dif != 0 && scr.posy == y && curscr == scr.no) {
+	while ((dif = x - scr.posx) && (scr.posy == y) && (curscr == scr.no)) {
 	    timeout_yet(0);	/* initialise stop-watch */
-	    sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
+	    sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
 	    insertKey(dif > 0 ? KEY_CURSOR_RIGHT : KEY_CURSOR_LEFT);
-	    sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
+	    sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
 	    do {
 #if CSRJMP_LOOP_DELAY > 0
 		delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
 		curx = scr.posx;
-		getRoutingScreenStatus(&scr);
+		describeRoutingScreen(&scr);
 	    }
 	    while (!(t = timeout_yet(CSRJMP_TIMEOUT)) &&
 		   scr.posx == curx && scr.posy == y);
@@ -125,7 +123,7 @@ void csrjmp_sub(int x, int y, int curscr)
 		(x - scr.posx) * (x - scr.posx) >= dif * dif)
 	    {
 		delay(CSRJMP_SETTLE_DELAY);
-		getRoutingScreenStatus(&scr);
+		describeRoutingScreen(&scr);
 		if (scr.posy != y ||
 		    (x - scr.posx) * (x - scr.posx) >= dif * dif)
 		{
@@ -135,51 +133,54 @@ void csrjmp_sub(int x, int y, int curscr)
 		     * position which was obviously the nearest ever reached
 		     * to date before we exit.
 		     */
-		    sigprocmask(SIG_BLOCK, &mask, NULL);  /* block SIGUSR1 */
+		    sigprocmask(SIG_BLOCK, &new_mask, &old_mask);  /* block SIGUSR1 */
 		    insertKey(dif > 0 ? KEY_CURSOR_LEFT : KEY_CURSOR_RIGHT);
-		    sigprocmask(SIG_UNBLOCK, &mask, NULL);  /* unblock SIGUSR1 */
+		    sigprocmask(SIG_SETMASK, &old_mask, NULL);  /* unblock SIGUSR1 */
 		    break;
 		}
 	    }
-	    dif = x - scr.posx;
 	}
     }
 
     closeRoutingScreen();		/* close second thread of screen reading */
 }
 
-void csrjmp(int x, int y, int scrno)
+int csrjmp(int x, int y, int scrno)
 {
-    sigset_t mask;
+    int started = 0;
+    sigset_t new_mask, old_mask;
+    sigemptyset(&new_mask);
+    sigaddset(&new_mask, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &new_mask, &old_mask);	/* block SIGUSR1 */
+
     /*
-     * Fork cursor routing subprocess. * First, we must check if a
-     * subprocess is already running: if so, we * send it a SIGUSR1 and
+     * Fork cursor routing subprocess. First, we must check if a
+     * subprocess is already running: if so, we send it a SIGUSR1 and
      * wait for it to die. 
      */
     /* NB According to man 2 wait, setting SIGCHLD handler to SIG_IGN may mean
-       that wait can't catch the dying child. */
+     * that wait can't catch the dying child.
+     */
     if (csr_active) {
 	kill(csr_pid, SIGUSR1);
-	while (csr_active)
-	    pause();
+        do {
+            sigsuspend(&old_mask);
+	} while (csr_active);
     }
 
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-
-    csr_active++;
-
     switch (csr_pid = fork()) {
-    case -1:			/* fork failed */
-	csr_active--;
+      case -1:			/* fork failed */
+        LogError("fork");
 	break;
-    case 0:			/* child, cursor routing process */
+      default:			/* parent waits for child to return */
+        csr_active++;
+        started = 1;
+	break;
+      case 0:			/* child, cursor routing process */
 	nice(CSRJMP_NICENESS);	/* reduce scheduling priority */
 	csrjmp_sub(x, y, scrno);
 	_exit(0);		/* terminate child process */
-    default:			/* parent waits for child to return */
-	break;
     }
-    sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
+    sigprocmask(SIG_SETMASK, &old_mask, NULL);	/* unblock SIGUSR1 */
+    return started;
 }

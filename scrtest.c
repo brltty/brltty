@@ -28,21 +28,21 @@
 int
 main (void)
 {
-  ScreenStatus test;
+  ScreenDescription description;
   unsigned char buffer[2048], *res;
   short i, j, c;
 
-  if (!initializeScreen(NULL))
+  if (!initializeLiveScreen(NULL))
     {
       fprintf (stderr, "scrtest: can't initialise screen reading\n");
       exit (1);
     }
-  getScreenStatus(&test);
-  res = getScreenContent((ScreenBox){5, 5, 70, 15},
-	                 buffer, SCR_TEXT);
-  closeScreen();
-  printf ("rows == %d, cols == %d\n", test.rows, test.cols);
-  printf ("posx == %d, posy == %d\n\n", test.posx, test.posy);
+  describeScreen(&description);
+  res = readScreen((ScreenBox){5, 5, 70, 15},
+	           buffer, SCR_TEXT);
+  closeAllScreens();
+  printf ("rows == %d, cols == %d\n", description.rows, description.cols);
+  printf ("posx == %d, posy == %d\n\n", description.posx, description.posy);
   if (res == NULL)
     {
       puts ("getscr failed");

@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 
 static const unsigned char dotBit[8] = {
@@ -99,6 +100,9 @@ main (int argc, char *argv[]) {
         } ByteEntry;
         ByteEntry byteTable[byteCount];
         unsigned int byte = 0;
+        unsigned char *buffer = NULL;
+        size_t bufferSize = 0;
+        size_t bufferUsed = 0;
         typedef enum {LEFT, MIDDLE, RIGHT} InputState;
         InputState inputState = LEFT;
         int inputCharacter;
@@ -107,7 +111,7 @@ main (int argc, char *argv[]) {
         while ((inputCharacter = fgetc(inputStream)) != EOF) {
           if (inputCharacter == '\n') {
             if (inputState == MIDDLE) {
-              fprintf(stderr, "txt2tbl: Incomplete dot combination for byte %2.2X.\n", byte);
+              fprintf(stderr, "txt2tbl: Incomplete dot combination for byte %02X.\n", byte);
               status = 10;
               goto done;
             }
@@ -117,52 +121,78 @@ main (int argc, char *argv[]) {
           switch (inputState) {
             case LEFT:
               if (inputCharacter == '(') {
-                if (byte == byteCount) {
-                  fprintf(stderr, "txt2tbl: Too many dot combinations.\n");
-                  status = 10;
-                  goto done;
-                }
                 inputState = MIDDLE;
               }
               break;
             case MIDDLE:
-              if (inputCharacter != ' ') {
-                if ((inputCharacter >= '1') && (inputCharacter <= '8')) {
-                  ByteEntry *b = &byteTable[byte];
-                  unsigned char dot = dotBit[inputCharacter - '1'];
-                  if (b->dots & dot) {
-                    fprintf(stderr, "txt2tbl: Dot %c specified more than once for byte %2.2X.\n",
-                            inputCharacter, byte);
-                    status = 10;
-                    goto done;
+              if (inputCharacter == ')') {
+                unsigned char dots = 0;
+                off_t bufferIndex;
+                for (bufferIndex=0; bufferIndex<bufferUsed; ++bufferIndex) {
+                  inputCharacter = buffer[bufferIndex];
+                  if (inputCharacter != ' ') {
+                    unsigned char dot;
+                    if ((inputCharacter < '1') || (inputCharacter > '8')) {
+                      fprintf(stderr, "txt2tbl: Invalid dot number specified for byte %02X: %c\n",
+                              byte, inputCharacter);
+                      status = 10;
+                      goto done;
+                    }
+                    dot = dotBit[inputCharacter - '1'];
+                    if (dots & dot) {
+                      fprintf(stderr, "txt2tbl: Dot %c specified more than once for byte %02X.\n",
+                              inputCharacter, byte);
+                      status = 10;
+                      goto done;
+                    }
+                    dots |= dot;
                   }
-                  b->dots |= dot;
-                } else if (inputCharacter == ')') {
-                  unsigned char dots = byteTable[byte].dots;
+                }
+                if (byte == byteCount) {
+                  fprintf(stderr, "txt2tbl: Too many dot combinations.\n");
+                  status = 10;
+                  goto done;
+                } else {
                   DotsEntry *d = &dotsTable[dots];
+                  ByteEntry *b = &byteTable[byte];
+                  b->dots = dots;
                   if (!d->defined) {
                     d->defined = 1;
                     d->byte = byte;
                   } else if (duplicates) {
                     fprintf(stderr, "Dot combination ");
                     putDots(stderr, dots);
-                    fprintf(stderr, " represents both bytes %2.2X and %2.2X.\n",
+                    fprintf(stderr, " represents both bytes %02X and %02X.\n",
                             d->byte, byte);
                   }
-                  inputState = RIGHT;
-                  byte++;
-                } else {
-                  fprintf(stderr, "txt2tbl: Invalid dot number for byte %2.2X: %c\n",
-                          byte, inputCharacter);
-                  status = 10;
-                  goto done;
                 }
+                byte++;
+                inputState = RIGHT;
+                bufferUsed = 0;
+              } else if (inputCharacter == '(') {
+                bufferUsed = 0;
+              } else {
+                if (bufferUsed == bufferSize) {
+                  size_t newSize = (bufferSize << 4) | 0XF;
+                  unsigned char *newBuffer = malloc(newSize);
+                  if (!newBuffer) {
+                    fprintf(stderr, "txt2tbl: Insufficient memory: %s\n", strerror(errno));
+                    status = 10;
+                    goto done;
+                  }
+                  memcpy(newBuffer, buffer, bufferUsed);
+                  if (buffer) free(buffer);
+                  buffer = newBuffer;
+                  bufferSize = newSize;
+                }
+                buffer[bufferUsed++] = inputCharacter;
               }
             case RIGHT:
               break;
           }
         }
       done:
+        if (buffer) free(buffer);
         if (!status) {
           if (!ferror(inputStream)) {
             if (byte == byteCount) {

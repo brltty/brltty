@@ -19,5 +19,5 @@
 extern volatile int csr_active;
 extern volatile pid_t csr_pid;
 
-void csrjmp (int x, int y, int scrno);
+int csrjmp (int x, int y, int scrno);
 

@@ -866,6 +866,7 @@ updatePreferences (void)
   static unsigned char exitSave = 0;                /* 1 == save preferences on exit */
   static char *booleanValues[] = {"No", "Yes"};
   static char *cursorStyles[] = {"Underline", "Block"};
+  static char *metaModes[] = {"Escape Prefix", "High-order Bit"};
   static char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
   static char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Generic", "MDV", "Voyager"};
   static char *textStyles[] = {"8 dot", "6 dot"};
@@ -887,6 +888,7 @@ updatePreferences (void)
   MenuItem menu[] = {
      BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
      SYMBOLIC_ITEM(env.sixdots, NULL, NULL, "Text Style", textStyles),
+     SYMBOLIC_ITEM(env.metamode, NULL, NULL, "Meta Mode", metaModes),
      BOOLEAN_ITEM(env.skpidlns, NULL, NULL, "Skip Identical Lines"),
      BOOLEAN_ITEM(env.skpblnkwins, NULL, NULL, "Skip Blank Windows"),
      SYMBOLIC_ITEM(env.skpblnkwinsmode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
@@ -964,15 +966,18 @@ updatePreferences (void)
 
       /* Now process any user interaction */
       switch (key = readKey(CMDS_PREFS)) {
+        case CMD_PREF_FIRST_ITEM:
         case CMD_TOP:
         case CMD_TOP_LEFT:
           menuIndex = lineIndent = 0;
           break;
+        case CMD_PREF_LAST_ITEM:
         case CMD_BOT:
         case CMD_BOT_LEFT:
           menuIndex = menuSize - 1;
           lineIndent = 0;
           break;
+        case CMD_PREF_PREV_ITEM:
         case VAL_PASSKEY+VPK_CURSOR_UP:
         case CMD_LNUP:
           do {
@@ -982,6 +987,7 @@ updatePreferences (void)
           } while (menu[menuIndex].test && !menu[menuIndex].test());
           lineIndent = 0;
           break;
+        case CMD_PREF_NEXT_ITEM:
         case VAL_PASSKEY+VPK_CURSOR_DOWN:
         case CMD_LNDN:
           do {
@@ -1002,6 +1008,7 @@ updatePreferences (void)
           else
             playTune(&tune_bounce);
           break;
+        case CMD_PREF_PREV_SETTING:
         case CMD_WINUP:
         case CMD_CHRLT:
         case VAL_PASSKEY+VPK_CURSOR_LEFT:
@@ -1009,6 +1016,7 @@ updatePreferences (void)
             *item->setting = item->maximum;
           settingChanged = 1;
           break;
+        case CMD_PREF_NEXT_SETTING:
         case CMD_WINDN:
         case CMD_CHRRT:
         case VAL_PASSKEY+VPK_CURSOR_RIGHT:
@@ -1083,7 +1091,7 @@ exitTunes (void) {
 
 static void
 exitScreen (void) {
-   closeScreen();
+   closeAllScreens();
 }
 
 static void
@@ -1259,6 +1267,7 @@ startup(int argc, char *argv[])
     env.capoffcnt = INIT_CAP_OFF_CNT;
 
     env.sixdots = INIT_SIXDOTS;
+    env.metamode = INIT_METAMODE;
     env.winovlp = INIT_WINOVLP;
     env.slidewin = INIT_SLIDEWIN;
     env.eager_slidewin = INIT_EAGER_SLIDEWIN;
@@ -1279,7 +1288,7 @@ startup(int argc, char *argv[])
   /*
    * Initialize screen library 
    */
-  if (!initializeScreen(screenParameters)) {                                
+  if (!initializeLiveScreen(screenParameters)) {                                
     LogPrint(LOG_CRIT, "Cannot read screen.");
     exit(7);
   }
@@ -1337,7 +1346,7 @@ startup(int argc, char *argv[])
   atexit(exitSpeechDriver);
 
   /* Initialise help screen */
-  if (initializeHelpScreen(braille->help_file))
+  if (!initializeHelpScreen(braille->help_file))
     LogPrint(LOG_ERR, "Cannot open help screen file '%s'.", braille->help_file);
 
   if (!opt_quiet)

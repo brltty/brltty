@@ -66,8 +66,8 @@ unsigned char statcells[MAXNSTATCELLS];        /* status cell buffer */
    #include <syslog.h>
    static int syslogOpened = 0;
 #endif
-static int logLevel;
-static int stderrLevel;
+static int logLevel = LOG_INFO;
+static int stderrLevel = LOG_NOTICE;
 int ProblemCount = 0;
 
 void
@@ -81,8 +81,6 @@ LogOpen(int toConsole)
     syslogOpened = 1;
   }
 #endif
-  logLevel = LOG_INFO;
-  stderrLevel = LOG_NOTICE;
 }
 
 void
@@ -129,6 +127,17 @@ void
 LogError (const char *action)
 {
   LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
+}
+
+void
+LogBytes (const char *description, const unsigned char *data, unsigned int length) {
+   if (length) {
+      unsigned char buffer[(length * 3) + 1];
+      unsigned char *out = buffer;
+      const unsigned char *in = data;
+      while (length--) out += sprintf(out, " %2.2X", *in++);
+      LogPrint(LOG_DEBUG, "%s:%s", description, buffer);
+   }
 }
 
 void

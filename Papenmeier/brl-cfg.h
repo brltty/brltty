@@ -124,23 +124,23 @@ typedef struct {
      { CMD_CHRLT      , OFFS_FRONT + 5, 0X4 }, \
      { CMD_CHRRT      , OFFS_FRONT + 5, 0X8 }, \
                                                \
-     { CMD_LNUP       , OFFS_FRONT + 4, 0X0 }, \
+     { CMD_WINUP      , OFFS_FRONT + 4, 0X0 }, \
      { CMD_PRDIFLN    , OFFS_FRONT + 4, 0X1 }, \
      { CMD_ATTRUP     , OFFS_FRONT + 4, 0X2 }, \
      { CMD_PRBLNKLN   , OFFS_FRONT + 4, 0X4 }, \
      { CMD_PRSEARCH   , OFFS_FRONT + 4, 0X8 }, \
                                                \
-     { CMD_LNDN       , OFFS_FRONT + 6, 0X0 }, \
+     { CMD_WINDN      , OFFS_FRONT + 6, 0X0 }, \
      { CMD_NXDIFLN    , OFFS_FRONT + 6, 0X1 }, \
      { CMD_ATTRDN     , OFFS_FRONT + 6, 0X2 }, \
      { CMD_NXBLNKLN   , OFFS_FRONT + 6, 0X4 }, \
      { CMD_NXSEARCH   , OFFS_FRONT + 6, 0X8 }, \
                                                \
-     { CMD_WINUP      , OFFS_FRONT + 3, 0X0 }, \
+     { CMD_LNUP       , OFFS_FRONT + 3, 0X0 }, \
      { CMD_TOP_LEFT   , OFFS_FRONT + 3, 0X1 }, \
      { CMD_TOP        , OFFS_FRONT + 3, 0X2 }, \
                                                \
-     { CMD_WINDN      , OFFS_FRONT + 7, 0X0 }, \
+     { CMD_LNDN       , OFFS_FRONT + 7, 0X0 }, \
      { CMD_BOT_LEFT   , OFFS_FRONT + 7, 0X1 }, \
      { CMD_BOT        , OFFS_FRONT + 7, 0X2 }, \
                                                \

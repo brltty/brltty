@@ -354,6 +354,7 @@ static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
 static unsigned char *battery_msg;     /* low battery warning msg */
 #endif
 
+static enum { NAV20_40=0, NAV80, PB40, PB65_80} displayType;
 
 static void 
 identbrl (void)
@@ -551,14 +552,14 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
   switch(brl_cols){
   case 20:
     /* nav 20 */
-    setHelpScreenNumber (0);
+    displayType = NAV20_40;
     has_sw = 0;
     LogPrint(LOG_INFO, "Detected Navigator 20");
     break;
   case 40:
     if(disp_ver[1] > '3'){
       /* pb 40 */
-      setHelpScreenNumber (2);
+      displayType = PB40;
       has_sw = 1;
       sw_bcnt = SW_CNT40;
       sw_lastkey = 39;
@@ -567,14 +568,14 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     }else{
       /* nav 40 */
       has_sw = 0;
-      setHelpScreenNumber (0);
+      displayType = NAV20_40;
       slow_update = 1;
       LogPrint(LOG_INFO, "Detected Navigator 40");
     }
     break;
   case 80:
     /* nav 80 */
-    setHelpScreenNumber (1);
+    displayType = NAV80;
     has_sw = 1;
     sw_bcnt = SW_CNT80;
     sw_lastkey = 79;
@@ -583,7 +584,7 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     break;
   case 65:
     /* pb65 */
-    setHelpScreenNumber (3);
+    displayType = PB65_80;
     has_sw = 1;
     sw_bcnt = SW_CNT81;
     sw_lastkey = 64;
@@ -593,7 +594,7 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     break;
   case 81:
     /* pb80 */
-    setHelpScreenNumber (3);
+    displayType = PB65_80;
     has_sw = 1;
     sw_bcnt = SW_CNT81;
     sw_lastkey = 79;
@@ -606,6 +607,7 @@ static void initbrl (char **parameters, brldim *brl, const char *tty)
     LogPrint(LOG_ERR,"Unrecognized braille display");
     goto failure;
   };
+  setHelpPageNumber(displayType);
 
   no_multiple_updates = 0;
 #ifdef FORCE_DRAIN_AFTER_SEND
@@ -1344,7 +1346,8 @@ readbrl (DriverCommandContext cmds)
 
     KEYAND(KEY_CNCV) KEY (KEY_BROUND, CMD_HOME);
     KEYAND(KEY_CNCV | KEY_CUP) KEY(KEY_BROUND | KEY_CUP, CMD_BACK);
-    KEY (KEY_CROUND, (cmds == CMDS_PREFS) ? CMD_CHRLT : CMD_CSRTRK);
+    KEY (KEY_CROUND, (cmds == CMDS_PREFS) ? CMD_PREF_PREV_SETTING
+	 : CMD_CSRTRK);
 
     KEYAND(KEY_BUT1 | KEY_BAR1) KEY (KEY_BLEFT | KEY_BUP, CMD_TOP_LEFT);
     KEYAND(KEY_BUT1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BDOWN, CMD_BOT_LEFT);
@@ -1370,8 +1373,10 @@ readbrl (DriverCommandContext cmds)
   /* keyboard cursor keys simulation */
     KEY (KEY_CLEFT, VAL_PASSKEY+VPK_CURSOR_LEFT);
     KEY (KEY_CRIGHT, VAL_PASSKEY+VPK_CURSOR_RIGHT);
-    KEY (KEY_CUP, VAL_PASSKEY+VPK_CURSOR_UP);
-    KEY (KEY_CDOWN, VAL_PASSKEY+VPK_CURSOR_DOWN);
+    KEY (KEY_CUP, (cmds == CMDS_PREFS && displayType == PB40)
+	 ? CMD_PREF_PREV_SETTING : VAL_PASSKEY+VPK_CURSOR_UP);
+    KEY (KEY_CDOWN, (cmds == CMDS_PREFS && displayType == PB40)
+	 ? CMD_PREF_NEXT_SETTING : VAL_PASSKEY+VPK_CURSOR_DOWN);
 
   /* special modes */
     KEY (KEY_CLEFT | KEY_CRIGHT, CMD_HELP);

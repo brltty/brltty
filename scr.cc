@@ -24,7 +24,7 @@
 
 #define SCR_C 1
 
-#include "scrdev.h"
+#include "scr_base.h"
 #include "config.h"
 
 
@@ -43,111 +43,16 @@ HelpScreen help;
 Screen *current;
 
 
-char **
-getScreenParameters (void)
-{
-  return live->parameters();
-}
-
-
-int
-initializeScreen (char **parameters)
-{
-  if (live->prepare(parameters)) {
-    if (live->open()) {
-      if (live->setup()) {
-        current = live;
-        return 1;
-      }
-      live->close();
-    }
-  }
-  return 0;
-}
-
-
-int
-initializeRoutingScreen (void)
-{
-  /* This function should be used in a forked process. Though we want to
-   * have a separate file descriptor for the live screen from the one used
-   * in the main thread.  So we close and reopen the device.
-   */
-  live->close();
-  return live->open();
-}
-
-
 void
-getScreenStatus (ScreenStatus *stat)
-{
-  current->getstat(*stat);
-}
-
-
-void
-getRoutingScreenStatus (ScreenStatus *stat)
-{
-  live->getstat(*stat);
-}
-
-
-unsigned char *
-getScreenContent (ScreenBox box, unsigned char *buffer, ScreenMode mode)
-{
-  return current->getscr(box, buffer, mode);
-}
-
-
-int
-insertKey (unsigned short key)
-{
-  return live->insert(key);
-}
-
-int
-insertString (const unsigned char *string)
-{
-  while (*string)
-    if (!insertKey(*string++))
-      return 0;
-  return 1;
-}
-
-
-int
-selectVirtualTerminal (int vt)
-{
-  return live->selectvt(vt);
-}
-
-
-int
-switchVirtualTerminal (int vt)
-{
-  return live->switchvt(vt);
-}
-
-
-void
-closeScreen (void)
-{
+closeAllScreens (void) {
   live->close();
   frozen.close();
   help.close();
 }
 
 
-void
-closeRoutingScreen (void)
-{
-  live->close();
-}
-
-
 int
-selectDisplay (int disp)
-{
+selectDisplay (int disp) {
   static int dismd = LIVE_SCRN;        /* current mode */
   static int curscrn = LIVE_SCRN;        /* current display screen */
 
@@ -156,14 +61,9 @@ selectDisplay (int disp)
       if (disp & HELP_SCRN)
         /* set help mode: */
         {
-          if (!help.open("??????"))
-            {
-              current = &help;
-              curscrn = HELP_SCRN;
-              return (dismd |= HELP_SCRN);
-            }
-          else
-            return dismd;
+          current = &help;
+          curscrn = HELP_SCRN;
+          return (dismd |= HELP_SCRN);
         }
       else
         /* clear help mode: */
@@ -178,7 +78,7 @@ selectDisplay (int disp)
     {
       if (disp & FROZ_SCRN)
         {
-          if (!frozen.open(live))
+          if (frozen.open(live))
             {
               if (curscrn == LIVE_SCRN)
                 {
@@ -205,22 +105,114 @@ selectDisplay (int disp)
 }
 
 
+void
+describeScreen (ScreenDescription *description) {
+  current->describe(*description);
+}
+
+
+unsigned char *
+readScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+  return current->read(box, buffer, mode);
+}
+
+
 int
-initializeHelpScreen (char *helpfile)
-{
-  return help.open(helpfile);
+insertKey (unsigned short key) {
+  return current->insert(key);
+}
+
+
+int
+insertString (const unsigned char *string) {
+  while (*string) {
+    if (!insertKey(*string++)) return 0;
+  }
+  return 1;
+}
+
+
+int
+routeCursor (int column, int row, int screen) {
+  return current->route(column, row, screen);
+}
+
+
+int
+selectVirtualTerminal (int vt) {
+  return current->selectvt(vt);
+}
+
+
+int
+switchVirtualTerminal (int vt) {
+  return current->switchvt(vt);
+}
+
+
+int
+executeScreenCommand (int cmd) {
+  return current->execute(cmd);
+}
+
+
+char **
+getScreenParameters (void) {
+  return live->parameters();
+}
+
+
+int
+initializeLiveScreen (char **parameters) {
+  if (live->prepare(parameters)) {
+    if (live->open()) {
+      if (live->setup()) {
+        current = live;
+        return 1;
+      }
+      live->close();
+    }
+  }
+  return 0;
+}
+
+
+int
+initializeRoutingScreen (void) {
+  /* This function should be used in a forked process. Though we want to
+   * have a separate file descriptor for the live screen from the one used
+   * in the main thread.  So we close and reopen the device.
+   */
+  live->close();
+  return live->open();
 }
 
 
 void
-setHelpScreenNumber (short x)
-{
-  help.setscrno(x);
+describeRoutingScreen (ScreenDescription *desscription) {
+  live->describe(*desscription);
+}
+
+
+void
+closeRoutingScreen (void) {
+  live->close();
+}
+
+
+int
+initializeHelpScreen (char *file) {
+  return help.open(file);
+}
+
+
+void
+setHelpPageNumber (short page) {
+  help.setPageNumber(page);
 }
 
 
 short
-getHelpScreenCount (void)
-{
-  return help.numscreens();
+getHelpPageCount (void) {
+  return help.getPageCount();
 }

@@ -131,17 +131,6 @@ closebrl (brldim *brl) {
    clearbrl(brl);
 }
 
-static void
-logData (const char *description, const unsigned char *data, unsigned int length) {
-   if (length) {
-      unsigned char buffer[(length * 3) + 1];
-      unsigned char *out = buffer;
-      const unsigned char *in = data;
-      while (length--) out += sprintf(out, " %2.2X", *in++);
-      LogPrint(LOG_DEBUG, "%s:%s", description, buffer);
-   }
-}
-
 static int
 checkData (const unsigned char *data, unsigned int length) {
    if ((length < 5) || (length != (data[4] + 5))) {
@@ -181,10 +170,10 @@ sendData (unsigned char line, unsigned char column, unsigned char count) {
    *target++ = (line == cursorRow)? cursorColumn+1: 0;
    *target++ = column + 1;
    *target++ = count;
-   logData("Output dots", source, count);
+   LogBytes("Output dots", source, count);
    while (count--) *target++ = outputTable[*source++];
    count = target - data;
-   logData("LogText write", data, count);
+   LogBytes("LogText write", data, count);
    if (checkData(data, count)) {
       if (sendBytes(data, count)) {
          return 1;

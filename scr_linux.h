@@ -16,18 +16,15 @@
  */
 
 /*
- * scr_vcsa.h - C++ header file for the Linux vcsa screen type library
+ * scr_linux.h - C++ header file for the Linux vcsa screen type library
  */
 
-#ifndef _SCR_VCSA_H
-#define _SCR_VCSA_H
+#ifndef _SCR_LINUX_H
+#define _SCR_LINUX_H
 
 #include <linux/kd.h>
 
-#include "scrdev.h"
-
-class VcsaScreen:public RealScreen
-{
+class LinuxScreen:public RealScreen {
   int setScreenPath (void);
   const char *screenPath;
 
@@ -42,26 +39,27 @@ class VcsaScreen:public RealScreen
   int openConsole (unsigned char vt);
   void closeConsole (void);
   int consoleDescriptor;
-  int rebindConsole(void);
-  int controlConsole(int operation, void *argument);
+  int rebindConsole (void);
+  int controlConsole (int operation, void *argument);
 
   int setTranslationTable (int opening);
   unsigned char translationTable[0X100];
 
   unsigned short characterMap[0X100];
-  int (VcsaScreen::*setCharacterMap) (int opening);
+  int (LinuxScreen::*setCharacterMap) (int opening);
   int setApplicationCharacterMap (int opening);
+  void logCharacterMap (void);
 
   int setScreenFontMap (int opening);
   struct unipair *screenFontMapTable;
   unsigned short screenFontMapCount;
   unsigned short screenFontMapSize;
 
-  void getScreenState (ScreenStatus &stat);
-  void getConsoleState (ScreenStatus &stat);
+  void getScreenDescription (ScreenDescription &desc);
+  void getConsoleDescription (ScreenDescription &desc);
 
   int insertCode (unsigned short key, int raw);
-  int insertMapped (unsigned short key, int (VcsaScreen::*byteInserter)(unsigned char byte));
+  int insertMapped (unsigned short key, int (LinuxScreen::*byteInserter)(unsigned char byte));
   int insertUtf8 (unsigned char byte);
   int insertByte (unsigned char byte);
 
@@ -70,12 +68,12 @@ public:
   int prepare (char **parameters);
   int open (void);
   int setup (void);
-  void getstat (ScreenStatus &);
-  unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode);
+  void close (void);
+  void describe (ScreenDescription &);
+  unsigned char *read (ScreenBox, unsigned char *, ScreenMode);
   int insert (unsigned short);
   int selectvt (int);
   int switchvt (int);
-  void close (void);
 };
 
-#endif  /* _SCR_VCSA_H */
+#endif  /* _SCR_LINUX_H */

@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include "../Unicode/unicode.h"
 
@@ -164,36 +165,36 @@ static char *characterNames[0X100] = {
   "DEL",
   "<80>",
   "<81>",
-  "<82>",
-  "<83>",
+  "BPH",
+  "NBH",
   "<84>",
-  "<85>",
-  "<86>",
-  "<87>",
-  "<88>",
-  "<89>",
-  "<8A>",
-  "<8B>",
-  "<8C>",
-  "<8D>",
-  "<8E>",
-  "<8F>",
-  "<90>",
-  "<91>",
-  "<92>",
-  "<93>",
-  "<94>",
-  "<95>",
-  "<96>",
-  "<97>",
-  "<98>",
+  "NL",
+  "SSA",
+  "ESA",
+  "CTS",
+  "CTJ",
+  "LTS",
+  "PLD",
+  "PLU",
+  "RLF",
+  "SS2",
+  "SS3",
+  "DCS",
+  "PU1",
+  "PU2",
+  "STS",
+  "CC",
+  "MW",
+  "SGA",
+  "EGA",
+  "SS",
   "<99>",
-  "<9A>",
-  "<9B>",
-  "<9C>",
-  "<9D>",
-  "<9E>",
-  "<9F>",
+  "SCI",
+  "CSI",
+  "ST",
+  "OSC",
+  "PM",
+  "APC",
   "space",
   "exclamdown",
   "cent",
@@ -342,22 +343,41 @@ main (int argc, char *argv[])
       if (outputStream) {
 	int byte;			/* Current byte being processed */
 	for (byte=0; byte<0X100; ++byte) {
-	  int character = fgetc(inputStream);
-     const char *name = NULL;
+	  int dots = fgetc(inputStream);
+          const char *name = NULL;
 	  int dot;
+          unsigned short ubrl = 0X2800;
 	  if (ferror(inputStream)) {
 	    fprintf(stderr, "tbl2txt: Cannot read input file '%s': %s",
 	            inputPath, strerror(errno));
 	    status = 5;
 	    break;
 	  }
-	  fprintf(outputStream, "%2.2X %3d (", byte, byte);
+          {
+            unsigned char character = byte;
+            unsigned char prefix;
+            if (!(character & 0X60) || (character == 0X7F) || (character == 0XA0)) {
+              if (character & 0X80) {
+                prefix = '~';
+                character &= 0X7F;
+              } else {
+                prefix = '^';
+              }
+              if (character != ' ') character ^= 0X40;
+            } else {
+              prefix = ' ';
+            }
+            fprintf(outputStream, "%c%c", prefix, character);
+          }
+	  fprintf(outputStream, " %02X %3d (", byte, byte);
 	  for (dot=0; dot<sizeof(dotTable); ++dot) {
-	    fputc(((character & dotTable[dot])? dot+'1': ' '), outputStream);
+            unsigned char bit = dots & dotTable[dot];
+	    fputc((bit? dot+'1': ' '), outputStream);
+            if (bit) ubrl |= 1 << dot;
 	  }
-	  fprintf(outputStream, ")%2.2X", character);
+	  fprintf(outputStream, ")%02X U+%04X", dots, ubrl);
 	  if (codePage) {
-       unsigned short unicode = codePage->table[byte];
+            unsigned short unicode = codePage->table[byte];
 	    const UnicodeEntry *uc = getUnicodeEntry(unicode);
 	    if (uc) name = uc->name;
 	    fprintf(outputStream, " U+%4.4X", unicode);

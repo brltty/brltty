@@ -243,13 +243,13 @@ initbrl (char **parameters, brldim *brl, const char *dev)
   }
   LogPrint(LOG_INFO,"Display has %u cells", ncells);
   if(ncells == 44)
-    setHelpScreenNumber(0);
+    setHelpPageNumber(0);
   else if(ncells == 70)
-    setHelpScreenNumber(1);
+    setHelpPageNumber(1);
   else{
     LogPrint(LOG_NOTICE, "Unexpected display length, unknown model, "
 	     "using Voyager 44 help file.");
-    setHelpScreenNumber(0);
+    setHelpPageNumber(0);
   }
 
   brl_cols = ncells -NRSTATCELLS;
@@ -315,6 +315,7 @@ setbrlstat (const unsigned char *s)
 static void 
 writebrl (brldim *brl)
 {
+  unsigned char buf[ncells];
   int i;
   int start, stop, len;
 
@@ -345,12 +346,12 @@ writebrl (brldim *brl)
 
   /* translate to voyager dot pattern coding */
   for(i=start; i<=stop; i++)
-    dispbuf[i] = brl2voyDotsTable[dispbuf[i]];
+    buf[i] = brl2voyDotsTable[dispbuf[i]];
 
 #ifdef PARTIAL_UPDATE
   lseek(brl_fd, start, SEEK_SET);
 #endif
-  write(brl_fd, dispbuf+start, len);
+  write(brl_fd, buf+start, len);
   /* The kernel driver currently never returns EAGAIN. If it did it would be
      wiser to select(). We don't bother to report failed writes because then
      we'd have to do rate limiting. Failures are caught in readbrl anyway. */
@@ -602,30 +603,44 @@ readbrl (DriverCommandContext cmds)
     if(!(keystate & 0xFF)) {
       /* No routing keys, no dots, only front keys (or possibly a spurious
          release) */
-      switch(keystate) {
-	HKEY2(101, K_A,K_D, "Move backward/forward", CMD_FWINLT,CMD_FWINRT );
-	HKEY2(101, K_B,K_C, "Move up/down", CMD_LNUP,CMD_LNDN );
-	HKEY2(101, K_A|K_B,K_A|K_C, "Goto top-left / bottom-left", 
-	      CMD_TOP_LEFT,CMD_BOT_LEFT );
-	HKEY(101, K_RR, "Goto cursor", CMD_HOME );
-	HKEY(101, K_RL, "Cursor tracking toggle", CMD_CSRTRK );
-	HKEY2(101, K_UP,K_DOWN, "Move cursor up/down (arrow keys)",
-	      VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN );
-	HKEY(201, K_RL|K_RR, "Freeze screen (toggle)", CMD_FREEZE);
-	HKEY(201, K_RL|K_UP, "Show attributes (toggle)", CMD_DISPMD);
-	HKEY(201, K_RR|K_UP,
-	     "Show position and status info (toggle)", CMD_INFO);
-	HKEY2(501, K_RL|K_B,K_RL|K_C, 
-	      "Previous/next line with different attributes",
-	      CMD_ATTRUP, CMD_ATTRDN);
-	HKEY2(501, K_RR|K_B,K_RR|K_C, "Previous/next different line",
-	      CMD_PRDIFLN, CMD_NXDIFLN);
-	HKEY2(501, K_RR|K_A,K_RR|K_D, "Previous/next non-blank window",
-	      CMD_FWINLTSKIP, CMD_FWINRTSKIP);
-	/* typing */
-	HLP0(601, "B+C: Space (spacebar)")
+      if(cmds == CMDS_PREFS) {
+	switch(keystate) {
+	case K_UP:
+	case K_RL:
+	  cmd = CMD_PREF_PREV_SETTING;
+	  break;
+	case K_DOWN:
+	case K_RR:
+	  cmd = CMD_PREF_NEXT_SETTING;
+	  break;
+	};
+      }
+      if(cmd == EOF) {
+	switch(keystate) {
+	  HKEY2(101, K_A,K_D, "Move backward/forward", CMD_FWINLT,CMD_FWINRT );
+	  HKEY2(101, K_B,K_C, "Move up/down", CMD_LNUP,CMD_LNDN );
+	  HKEY2(101, K_A|K_B,K_A|K_C, "Goto top-left / bottom-left", 
+		CMD_TOP_LEFT,CMD_BOT_LEFT );
+	  HKEY(101, K_RR, "Goto cursor", CMD_HOME );
+	  HKEY(101, K_RL, "Cursor tracking toggle", CMD_CSRTRK );
+	  HKEY2(101, K_UP,K_DOWN, "Move cursor up/down (arrow keys)",
+		VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN );
+	  HKEY(201, K_RL|K_RR, "Freeze screen (toggle)", CMD_FREEZE);
+	  HKEY(201, K_RL|K_UP, "Show attributes (toggle)", CMD_DISPMD);
+	  HKEY(201, K_RR|K_UP,
+	       "Show position and status info (toggle)", CMD_INFO);
+	  HKEY2(501, K_RL|K_B,K_RL|K_C, 
+		"Previous/next line with different attributes",
+		CMD_ATTRUP, CMD_ATTRDN);
+	  HKEY2(501, K_RR|K_B,K_RR|K_C, "Previous/next different line",
+		CMD_PRDIFLN, CMD_NXDIFLN);
+	  HKEY2(501, K_RR|K_A,K_RR|K_D, "Previous/next non-blank window",
+		CMD_FWINLTSKIP, CMD_FWINRTSKIP);
+	  /* typing */
+	  HLP0(601, "B+C: Space (spacebar)")
 	  case K_B|K_C: cmd = VAL_PASSDOTS +0; /* space: no dots */ break;
-      };
+	};
+      }
     }else if(!(keystate &~0xFF)) {
       /* no routing keys, some dots, no front keys */
       /* This is a character typed in braille */

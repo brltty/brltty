@@ -73,8 +73,9 @@ Note: this file is in reversed chronological order (bottom to top).
          Change 1+3 from TOP to TOP_LEFT.
          Change 1+7 from BOT to BOT_LEFT.
          Move cut begin/end from 2/8 to 1/9.
-         Add paste as 1+9 for displays with less than 13 status cells.
+         Add paste as 1+9 (for displays with less than 13 status cells).
          Move half window left/right from 1+5/9+5 to 2/8.
+         Switch lnup/lndn to 3/7 and winup/windn to 4/6.
          Add more horizontal motion commands.
       For displays with 13 front keys: (dm)
          Define keys 1-4 and 10-13 as modifiers.
@@ -141,6 +142,10 @@ Note: this file is in reversed chronological order (bottom to top).
    Make cursor routing work when keyboard is in raw mode. (dm)
    Search list of known screen device names (/dev/vcsa0 /dev/vcsa /dev/vcc/a)
       rather than just check for /dev/vcsa0. (dm)
+   Move key insertion, cursor routing, and virtual terminal switching into screen class. (dm)
+   Add cursor routing, cursor motion, and page switching to help screen. (dm)
+   Allow a screen driver to selectively override commands. (dm)
+   Fix holes in signal blocking during cursor routing. (dm)
    Don't use LOG_CONS option of syslog uhtil in the background. (dm)
    Convert CMD_ from defines to enum. (dm)
       CombiBraille: tables.h converted to cmdtrans.h, argtrans removed.
@@ -148,13 +153,12 @@ Note: this file is in reversed chronological order (bottom to top).
       BrailleLite cmdtrans[] and blkey.cmd changed from unsigned char to int.
    Rename VAL_PASSTHRU to VAL_PASSCHAR. (dm)
    Rename VAL_BRLKEY to VAL_PASSDOTS. (dm)
-   For VAL_PASSCHAR and VAL_PASSDOTS, add flags: (dm)
-      VAL_CONTROL, VAL_SHIFT, VAL_UPPER, VAL_META, VAL_ESCAPE
+   Add the following flags for VAL_PASSCHAR and VAL_PASSDOTS: (dm)
+      VPC_CONTROL, VPC_META, VPC_SHIFT, VPC_UPPER
    Inform readbrl of the current command context. (dm)
    Remove TBL_CMD and TBL_ARG. (dm)
    Log command line syntax errors to syslog. (dm)
    Make message delay by default; add MSG_NODELAY flag. (sd)
-   Close console file descriptor in switchvt. (dm)
    Fix problems with the skipping of blank windows and ends of liens. (sd)
    Change directory to right place if PREFIX is set. (dm)
    Disable speech tracking when CMD_SAY is used. (np)

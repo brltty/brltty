@@ -50,7 +50,7 @@ struct brltty_env {
 	unsigned char attroffcnt;
 	unsigned char spare12;
 	unsigned char sixdots;
-	unsigned char spare13;
+	unsigned char metamode;
 	unsigned char slidewin;
 	unsigned char eager_slidewin;
 	unsigned char sound;

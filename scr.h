@@ -22,7 +22,7 @@
 #define _SCR_H
 
 
-/* mode argument for getScreenContent() */
+/* mode argument for readScreen() */
 typedef enum {
   SCR_TEXT,		/* get screen text */
   SCR_ATTRIB		/* get screen attributes */
@@ -37,22 +37,12 @@ typedef struct {
   short rows, cols;	/* screen dimentions */
   short posx, posy;	/* cursor position */
   short no;		      /* screen number */
-} ScreenStatus;
+} ScreenDescription;
 
 typedef struct {
   short left, top;	/* top-left corner (offset from 0) */
   short width, height;	/* dimensions */
 } ScreenBox;
-
-/* Functions provided by this library */
-
-char **getScreenParameters (void);			/* initialise screen reading functions */
-int initializeScreen (char **parameters);			/* initialise screen reading functions */
-void getScreenStatus (ScreenStatus *);		/* get screen status */
-unsigned char *getScreenContent (ScreenBox, unsigned char *, ScreenMode);
-		/* Read a rectangle from the screen - text or attributes: */
-void closeScreen (void);		/* close screen reading */
-int selectDisplay (int);		/* select display page */
 
 typedef enum {
   KEY_RETURN = 0X100,
@@ -71,23 +61,37 @@ typedef enum {
   KEY_DELETE,
   KEY_FUNCTION
 } ConsoleKey;
+
+/* Routines which apply to all screens. */
+void closeAllScreens (void);		/* close screen reading */
+int selectDisplay (int);		/* select display page */
+
+/* Routines which apply to the current screen. */
+void describeScreen (ScreenDescription *);		/* get screen status */
+unsigned char *readScreen (ScreenBox, unsigned char *, ScreenMode);
 int insertKey (unsigned short);
 int insertString (const unsigned char *);
-
+int routeCursor (int, int, int);
 int selectVirtualTerminal (int);
 int switchVirtualTerminal (int);
+int executeScreenCommand (int);
 
-/* An extra `thread' for the cursor routing subprocess.
- * This is needed because the forked subprocess shares the parent's
- * filedescriptors.  A getScreenContent equivalent is not needed, and so not provided.
+/* Routines which apply to the live screen. */
+char **getScreenParameters (void);			/* initialise screen reading functions */
+int initializeLiveScreen (char **parameters);			/* initialise screen reading functions */
+
+/* Routines which apply to the routing screen.
+ * An extra `thread' for the cursor routing subprocess.
+ * This is needed because the forked subprocess shares its parent's
+ * file descriptors.  A readScreen equivalent is not needed.
  */
 int initializeRoutingScreen (void);
-void getRoutingScreenStatus (ScreenStatus *);
+void describeRoutingScreen (ScreenDescription *);
 void closeRoutingScreen (void);
 
-/* Manipulation of the help screen filename, help number, etc. */
-int initializeHelpScreen (char *helpfile);	/* open help screen file */
-void setHelpScreenNumber (short);			/* set screen number (initial default 0) */
-short getHelpScreenCount (void);			/* get number of help screens */
+/* Routines which apply to the help screen. */
+int initializeHelpScreen (char *);	/* open help screen file */
+void setHelpPageNumber (short);			/* set screen number (initial default 0) */
+short getHelpPageCount (void);			/* get number of help screens */
 
 #endif /* !_SCR_H */

@@ -26,87 +26,87 @@
 
 #define SCR_C 1
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
-#include "scrdev.h"
+#include "scr_base.h"
 #include "scr_shm.h"
 #include "config.h"
 
 
 
 /* Instanciation of the shm driver here */
-static shm_Screen shm;
+static ShmScreen shm;
 
 /* Pointer for external reference */
 RealScreen *live = &shm;
 
 
+static char *shmParameters[] = {
+  NULL
+};
 
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+char ** ShmScreen::parameters (void) {
+  return shmParameters;
+}
 
 
-inline int
-shm_Screen::open (int for_csr_routing)
-{
+int ShmScreen::prepare (char **parameters) {
+  return 1;
+}
+
+
+inline int ShmScreen::open (void) {
   /* this should be generated from ftok(), but... */
   key = 0xBACD072F;     /* random static IPC key */
   /* Allocation of shared mem for 18000 bytes (screen text and attributes
    * + few coord.).  We supose no screen will be wider than 132x66.
-   * 0x1C0 = [rwx------].
+   * 0700 = [rwx------].
    */
-  if( (shmid = shmget( key, 18000, 0x1C0 )) >= 0 )
-    {
-      if( (shm = shmat( shmid, 0, 0)) != (void*)-1)
-	{
-	  return( 0 );
-	}
+  if ((shmid = shmget(key, 18000, 0700)) != -1) {
+    if ((shm = (char *)shmat(shmid, NULL, 0)) != (char *)-1) {
+      return 1;
     }
-  return( 1 );
+  }
+  return 0;
 }
 
 
-void
-shm_Screen::getstat (ScreenStatus &stat)
-{
-  stat.cols = shm[0];	/* scrdim x */
-  stat.rows = shm[1];   /* scrdim y */
-  stat.posx = shm[2];   /* csrpos x */
-  stat.posy = shm[3];   /* csrpos y */
-  stat.no = 1;  /* not yet implemented */
+int ShmScreen::setup (void) {
+  return 1;
 }
 
 
-unsigned char *
-shm_Screen::getscr (winpos pos, unsigned char *buffer, short mode)
-{
-  ScreenStatus stat;                 /* screen statistics */
-  off_t start;                  /* start offset */
+void ShmScreen::describe (ScreenDescription &desc) {
+  desc.cols = shm[0];	/* scrdim x */
+  desc.rows = shm[1];   /* scrdim y */
+  desc.posx = shm[2];   /* csrpos x */
+  desc.posy = shm[3];   /* csrpos y */
+  desc.no = 1;  /* not yet implemented */
+}
 
-  getstat (stat);
-  if (pos.left < 0 || pos.top < 0 || pos.width < 1 || pos.height < 1 \
-      || mode < 0 || mode > 1 || pos.left + pos.width > stat.cols \
-      || pos.top + pos.height > stat.rows)
-    return NULL;
-  start = 4 + (mode * stat.cols * stat.rows) + (pos.top * stat.cols + pos.left);
-  for (int i = 0; i < pos.height; i++)
-    {
-      memcpy (buffer + i * pos.width, shm + start + i * stat.cols, pos.width);
+
+unsigned char *ShmScreen::read (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+  ScreenDescription description;                 /* screen statistics */
+  describe(description);
+  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= description.cols) &&
+      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= description.rows)) {
+    off_t start = 4 + (((mode == SCR_TEXT)? 0: 1) * description.cols * description.rows) + (box.top * description.cols) + box.left;
+    for (int row=0; row<box.height; row++) {
+      memcpy(buffer + (row * box.width), shm + start + (row * description.cols), box.width);
     }
-  return buffer;
+    return buffer;
+  }
+  return NULL;
 }
 
 
-inline void
-shm_Screen::close (void)
-{
-  shmdt( shm );
+inline void ShmScreen::close (void) {
+  shmdt(shm);
+  shm = NULL;
 }
-

@@ -128,6 +128,14 @@ typedef enum {
    CMD_RESTARTBRL /* reinitialize braille driver */,
    CMD_RESTARTSPEECH /* reinitialize speech driver */,
 
+   /* menu commands */
+   CMD_PREF_FIRST_ITEM /* go to first item in menu */,
+   CMD_PREF_LAST_ITEM /* go to last item in menu */,
+   CMD_PREF_PREV_ITEM /* go to previous item in menu */,
+   CMD_PREF_NEXT_ITEM /* go to next item in menu */,
+   CMD_PREF_PREV_SETTING /* change value to previous choice */,
+   CMD_PREF_NEXT_SETTING /* change value to next choice */,
+
    /* internal (to the driver) use only */
    CMD_INPUTMODE /* toggle input mode */,
 
@@ -179,9 +187,8 @@ typedef enum {
 #define VAL_PASSCHAR	0xE00
 #define VPC_CONTROL 0X010000
 #define VPC_META    0X020000
-#define VPC_ESCAPE  0X040000
+#define VPC_UPPER   0X040000
 #define VPC_SHIFT   0X080000
-#define VPC_UPPER   0X100000
 
 /* For typing a character -- use current translation table. */
 #define VAL_PASSDOTS      0xF00

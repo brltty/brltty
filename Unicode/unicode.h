@@ -24,7 +24,6 @@
 typedef struct {
   unsigned int unum;
   const char *name;
-  const char *desc;
 } UnicodeEntry;
 
 typedef struct {

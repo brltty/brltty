@@ -217,8 +217,8 @@ initbrl (char **parameters, brldim * brl, const char *brldev)
   if (waiting_ack) // no response, so it must be BLT40
   { // assuming BLT40 now
     BltLen=40;
-    setHelpScreenNumber(1);
-  }else setHelpScreenNumber(0);
+    setHelpPageNumber(1);
+  }else setHelpPageNumber(0);
   
   blitesz = res.x = BltLen;	/* initialise size of display - */
   res.y = 1;			/* Braille Lites are single line displays */

@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* scr_vcsa.cc - screen library for use with Linux vcsa devices.
+/* scr_linux.cc - screen library for use with Linux vcsa devices.
  *
  * Note: Although C++, this code requires no standard C++ library.
  * This is important as BRLTTY *must not* rely on too many
@@ -23,6 +23,10 @@
  */
 
 #define SCR_C 1
+//#define DEBUG_TRANSLATION_TABLE
+//#define DEBUG_CHARACTER_MAP
+//#define DEBUG_SCREEN_FONT_MAP
+//#define DEBUG_SCREEN_TEXT_TRANSLATION
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -37,16 +41,16 @@
 
 #include "misc.h"
 #include "scr.h"
-#include "scrdev.h"
-#include "scr_vcsa.h"
+#include "scr_base.h"
+#include "scr_linux.h"
 
 
 
-/* Instanciation of the vcsa driver here */
-static VcsaScreen vcsa;
+/* Instanciation of the Linux driver here */
+static LinuxScreen screen;
 
 /* Pointer for external reference */
-RealScreen *live = &vcsa;
+RealScreen *live = &screen;
 
 /* Copied from linux-2.2.17/drivers/char/consolemap.c: translations[0]
  * 8-bit Latin-1 mapped to Unicode -- trivial mapping
@@ -163,25 +167,25 @@ static const unsigned short ibm_cp437_map[0X100] = {
 };
 
 
-static char *vcsaParameters[] = {
+static char *screenParameters[] = {
   "characterset",
   NULL
 };
 typedef enum {
-  VCSA_CHARACTERSET
-} VcsaParameters;
-char **VcsaScreen::parameters (void) {
-  return vcsaParameters;
+  PARM_CHARACTERSET
+} ScreenParameters;
+char **LinuxScreen::parameters (void) {
+  return screenParameters;
 }
 
 
-int VcsaScreen::prepare (char **parameters) {
+int LinuxScreen::prepare (char **parameters) {
   {
     static const unsigned short *maps[] = {iso_latin1_map, vt100_graphics_map, ibm_cp437_map, NULL};
     static const unsigned short *map;
     static const char *choices[] = {"latin1", "vt100graphics", "cp437", "application", NULL};
     unsigned int choice;
-    if (validateChoice(&choice, "character set", parameters[VCSA_CHARACTERSET], choices)) {
+    if (validateChoice(&choice, "character set", parameters[PARM_CHARACTERSET], choices)) {
       map = maps[choice];
     } else {
       map = iso_latin1_map;
@@ -189,8 +193,9 @@ int VcsaScreen::prepare (char **parameters) {
     if (map) {
       memcpy(characterMap, map, sizeof(characterMap));
       setCharacterMap = NULL;
+      logCharacterMap();
     } else {
-      setCharacterMap = &VcsaScreen::setApplicationCharacterMap;
+      setCharacterMap = &LinuxScreen::setApplicationCharacterMap;
     }
   }
   if (setScreenPath()) {
@@ -201,6 +206,25 @@ int VcsaScreen::prepare (char **parameters) {
     }
   }
   return 0;
+}
+
+void LinuxScreen::logCharacterMap (void) {
+#ifdef DEBUG_CHARACTER_MAP
+  char buffer[0X80];
+  char *address = NULL;
+  unsigned char character = 0;
+  while (1) {
+    if (!(character % 8)) {
+      if (address) {
+        LogPrint(LOG_DEBUG, "%s", buffer);
+        if (!character) break;
+      }
+      address = buffer;
+      address += sprintf(address, "c2u[%02X]:", character);
+    }
+    address += sprintf(address, " %4.4X", characterMap[character++]);
+  }
+#endif
 }
 
 static const char *findDevice (char *devices) {
@@ -236,7 +260,7 @@ static const char *findDevice (char *devices) {
   return current;
 }
 
-int VcsaScreen::setScreenPath (void) {
+int LinuxScreen::setScreenPath (void) {
   char *devices = strdupWrapper(VCSADEV);
   LogPrint(LOG_DEBUG, "Screen device list: %s", devices);
   if ((screenPath = findDevice(devices))) {
@@ -248,13 +272,13 @@ int VcsaScreen::setScreenPath (void) {
   return 0;
 }
 
-int VcsaScreen::setConsolePath (void) {
+int LinuxScreen::setConsolePath (void) {
   consolePath = "/dev/tty0";
   return 1;
 }
 
 
-int VcsaScreen::open (void) {
+int LinuxScreen::open (void) {
   return openScreen(0);
 }
 
@@ -270,7 +294,7 @@ static char *makePath (const char *base, unsigned char vt) {
   return strdup(base);
 }
 
-int VcsaScreen::openScreen (unsigned char vt) {
+int LinuxScreen::openScreen (unsigned char vt) {
   char *path = makePath(screenPath, vt);
   if (path) {
     int screen = ::open(path, O_RDWR);
@@ -293,7 +317,7 @@ int VcsaScreen::openScreen (unsigned char vt) {
   return 0;
 }
 
-int VcsaScreen::openConsole (unsigned char vt) {
+int LinuxScreen::openConsole (unsigned char vt) {
   char *path = makePath(consolePath, vt);
   if (path) {
     int console = ::open(path, O_RDWR|O_NOCTTY);
@@ -312,11 +336,11 @@ int VcsaScreen::openConsole (unsigned char vt) {
   return 0;
 }
 
-int VcsaScreen::rebindConsole (void) {
+int LinuxScreen::rebindConsole (void) {
   return virtualTerminal? 1: openConsole(0);
 }
 
-int VcsaScreen::controlConsole(int operation, void *argument) {
+int LinuxScreen::controlConsole(int operation, void *argument) {
   int result = ioctl(consoleDescriptor, operation, argument);
   if (result == -1)
     if (errno == EIO)
@@ -326,7 +350,7 @@ int VcsaScreen::controlConsole(int operation, void *argument) {
 }
 
 
-int VcsaScreen::setup (void) {
+int LinuxScreen::setup (void) {
   if (setTranslationTable(1)) {
     return 1;
   }
@@ -348,7 +372,7 @@ int VcsaScreen::setup (void) {
  * We need to reverse this translation in order to get the character code in
  * the expected character set.
  */
-int VcsaScreen::setTranslationTable (int opening) {
+int LinuxScreen::setTranslationTable (int opening) {
   int changed = 0;
   if (setCharacterMap && (this->*setCharacterMap)(opening)) changed = 1;
   if (setScreenFontMap(opening)) changed = 1;
@@ -371,26 +395,41 @@ int VcsaScreen::setTranslationTable (int opening) {
             first = current + 1;
           else if (map->unicode > unicode)
             last = current - 1;
-          else if (map->fontpos <= 0XFF) {
-            position = map->fontpos;
+          else {
+            if (map->fontpos <= 0XFF) position = map->fontpos;
             break;
           }
         }
       }
       if (position < 0) {
-      //LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
+#ifdef DEBUG_TRANSLATION_TABLE
+        LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
+#endif
       } else {
         translationTable[position] = character;
-      //LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
-      //         character, unicode, position);
+#ifdef DEBUG_TRANSLATION_TABLE
+        LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
+                 character, unicode, position);
+#endif
       }
     }
+#ifdef DEBUG_TRANSLATION_TABLE
+    {
+      unsigned int position;
+      const unsigned int count = 0X10;
+      for (position=0; position<sizeof(translationTable); position+=count) {
+        char description[0X20];
+        sprintf(description, "c2f[%02X]", position);
+        LogBytes(description, &translationTable[position], count);
+      }
+    }
+#endif
     return 1;
   }
   return 0;
 }
 
-int VcsaScreen::setApplicationCharacterMap (int opening) {
+int LinuxScreen::setApplicationCharacterMap (int opening) {
   unsigned short map[0X100];
   if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
     if (opening || (memcmp(characterMap, map, sizeof(characterMap)) != 0)) {
@@ -404,7 +443,7 @@ int VcsaScreen::setApplicationCharacterMap (int opening) {
   return 0;
 }
 
-int VcsaScreen::setScreenFontMap (int opening) {
+int LinuxScreen::setScreenFontMap (int opening) {
   struct unimapdesc sfm;
   unsigned short size = opening? 0X100: screenFontMapCount;
   while (1) {
@@ -444,13 +483,49 @@ int VcsaScreen::setScreenFontMap (int opening) {
   screenFontMapSize = size;
   LogPrint(LOG_DEBUG, "Screen font map changed: %d %s.",
            screenFontMapCount, (screenFontMapCount==1? "entry": "entries"));
+#ifdef DEBUG_SCREEN_FONT_MAP
+  {
+    int i;
+    for (i=0; i<screenFontMapCount; ++i) {
+      const struct unipair *map = &screenFontMapTable[i];
+      LogPrint(LOG_DEBUG, "sfm[%03u]: unum=%4.4X fpos=%4.4X",
+               i, map->unicode, map->fontpos);
+    }
+  }
+#endif
   return 1;
 }
 
 
-void VcsaScreen::getstat (ScreenStatus &stat) {
-  getScreenState(stat);
-  getConsoleState(stat);
+void LinuxScreen::close (void) {
+  closeConsole();
+  closeScreen();
+}
+
+void LinuxScreen::closeScreen (void) {
+  if (screenDescriptor != -1) {
+    if (::close(screenDescriptor) == -1) {
+      LogError("Screen close");
+    }
+    LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screenDescriptor);
+    screenDescriptor = -1;
+  }
+}
+
+void LinuxScreen::closeConsole (void) {
+  if (consoleDescriptor != -1) {
+    if (::close(consoleDescriptor) == -1) {
+      LogError("Console close");
+    }
+    LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
+    consoleDescriptor = -1;
+  }
+}
+
+
+void LinuxScreen::describe (ScreenDescription &desc) {
+  getScreenDescription(desc);
+  getConsoleDescription(desc);
 
   /* Periodically recalculate font mapping. I don't know any way to be
    * notified when it changes, and the recalculation is not too
@@ -465,10 +540,10 @@ void VcsaScreen::getstat (ScreenStatus &stat) {
   }
 }
 
-void VcsaScreen::getScreenState (ScreenStatus &stat) {
+void LinuxScreen::getScreenDescription (ScreenDescription &stat) {
   if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
     unsigned char buffer[4];
-    if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
+    if (::read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
       stat.rows = buffer[0];
       stat.cols = buffer[1];
       stat.posx = buffer[2];
@@ -481,7 +556,7 @@ void VcsaScreen::getScreenState (ScreenStatus &stat) {
   }
 }
 
-void VcsaScreen::getConsoleState (ScreenStatus &stat) {
+void LinuxScreen::getConsoleDescription (ScreenDescription &stat) {
   if (virtualTerminal) {
     stat.no = virtualTerminal;
   } else {
@@ -495,40 +570,54 @@ void VcsaScreen::getConsoleState (ScreenStatus &stat) {
 }
 
 
-unsigned char *VcsaScreen::getscr (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
-  ScreenStatus stat;
-  getScreenState(stat);
-  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= stat.cols) &&
-      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= stat.rows)) {
+unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+  ScreenDescription description;
+  getScreenDescription(description);
+  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= description.cols) &&
+      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= description.rows)) {
     int text = mode == SCR_TEXT;
-    off_t start = 4 + (box.top * stat.cols + box.left) * 2 + (text? 0: 1);
+    off_t start = 4 + (box.top * description.cols + box.left) * 2 + (text? 0: 1);
     if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
       size_t length = box.width * 2 - 1;
       unsigned char line[length];
       unsigned char *target = buffer;
-      off_t increment = stat.cols * 2 - length;
-      int i;
-      for (i=0; i<box.height; ++i) {
-        if (i) {
+      off_t increment = description.cols * 2 - length;
+      int row;
+      for (row=0; row<box.height; ++row) {
+        if (row) {
           if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
             LogError("Screen seek");
             return NULL;
           }
         }
-        if (read(screenDescriptor, line, length) == -1) {
+        if (::read(screenDescriptor, line, length) == -1) {
           LogError("Screen read");
           return NULL;
         }
         unsigned char *source = line;
         if (text) {
-          int j;
-          for (j=0; j<box.width; ++j) {
+          int column;
+#ifdef DEBUG_SCREEN_TEXT_TRANSLATION
+          unsigned char src[box.width];
+          unsigned char *trg = target;
+#endif
+          for (column=0; column<box.width; ++column) {
+#ifdef DEBUG_SCREEN_TEXT_TRANSLATION
+            src[column] = *source;
+#endif
             *target++ = translationTable[*source];
             source += 2;
           }
+#ifdef DEBUG_SCREEN_TEXT_TRANSLATION
+          char desc[0X20];
+          sprintf(desc, "fpos[%03d,%03d]", box.left, box.top+row);
+          LogBytes(desc, src, box.width);
+          memcpy(desc, "char", 4);
+          LogBytes(desc, trg, box.width);
+#endif
         } else {
-          int j;
-          for (j=0; j<box.width; ++j) {
+          int column;
+          for (column=0; column<box.width; ++column) {
             *target++ = *source;
             source += 2;
           }
@@ -540,13 +629,14 @@ unsigned char *VcsaScreen::getscr (ScreenBox box, unsigned char *buffer, ScreenM
     }
   } else {
     LogPrint(LOG_ERR, "Invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
-             stat.cols, box.left, box.width, stat.rows, box.top, box.height);
+             description.cols, box.left, box.width,
+             description.rows, box.top, box.height);
   }
   return NULL;
 }
 
  
-int VcsaScreen::insert (unsigned short key) {
+int LinuxScreen::insert (unsigned short key) {
   int ok = 0;
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   if (rebindConsole()) {
@@ -560,10 +650,10 @@ int VcsaScreen::insert (unsigned short key) {
           if (insertCode(key, 0)) ok = 1;
           break;
         case K_XLATE:
-          if (insertMapped(key, &VcsaScreen::insertByte)) ok = 1;
+          if (insertMapped(key, &LinuxScreen::insertByte)) ok = 1;
           break;
         case K_UNICODE:
-          if (insertMapped(key, &VcsaScreen::insertUtf8)) ok = 1;
+          if (insertMapped(key, &LinuxScreen::insertUtf8)) ok = 1;
           break;
         default:
           LogPrint(LOG_WARNING, "Unsupported keyboard mode: %d", mode);
@@ -576,7 +666,7 @@ int VcsaScreen::insert (unsigned short key) {
   return ok;
 }
 
-int VcsaScreen::insertCode (unsigned short key, int raw) {
+int LinuxScreen::insertCode (unsigned short key, int raw) {
   unsigned char prefix = 0X00;
   unsigned char code;
   switch (key) {
@@ -696,7 +786,7 @@ int VcsaScreen::insertCode (unsigned short key, int raw) {
   return 1;
 }
 
-int VcsaScreen::insertMapped (unsigned short key, int (VcsaScreen::*byteInserter)(unsigned char byte)) {
+int LinuxScreen::insertMapped (unsigned short key, int (LinuxScreen::*byteInserter)(unsigned char byte)) {
   if (key < 0X100) {
     unsigned char character = key & 0XFF;
     if (!(this->*byteInserter)(character)) return 0;
@@ -816,7 +906,7 @@ int VcsaScreen::insertMapped (unsigned short key, int (VcsaScreen::*byteInserter
   return 1;
 }
 
-int VcsaScreen::insertUtf8 (unsigned char byte) {
+int LinuxScreen::insertUtf8 (unsigned char byte) {
   if (byte & 0X80) {
     if (!insertByte(0XC0 | (byte >> 6))) return 0;
     byte &= 0XBF;
@@ -825,7 +915,7 @@ int VcsaScreen::insertUtf8 (unsigned char byte) {
   return 1;
 }
 
-int VcsaScreen::insertByte (unsigned char byte) {
+int LinuxScreen::insertByte (unsigned char byte) {
   if (controlConsole(TIOCSTI, &byte) != -1) {
     return 1;
   } else {
@@ -841,13 +931,13 @@ static int validateVt (int vt) {
   return 0;
 }
 
-int VcsaScreen::selectvt (int vt) {
+int LinuxScreen::selectvt (int vt) {
   if (vt == virtualTerminal) return 1;
   if (vt && !validateVt(vt)) return 0;
   return openScreen(vt);
 }
 
-int VcsaScreen::switchvt (int vt) {
+int LinuxScreen::switchvt (int vt) {
   if (validateVt(vt)) {
     if (selectvt(0)) {
       if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
@@ -859,30 +949,4 @@ int VcsaScreen::switchvt (int vt) {
     }
   }
   return 0;
-}
-
-
-void VcsaScreen::close (void) {
-  closeConsole();
-  closeScreen();
-}
-
-void VcsaScreen::closeScreen (void) {
-  if (screenDescriptor != -1) {
-    if (::close(screenDescriptor) == -1) {
-      LogError("Screen close");
-    }
-    LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screenDescriptor);
-    screenDescriptor = -1;
-  }
-}
-
-void VcsaScreen::closeConsole (void) {
-  if (consoleDescriptor != -1) {
-    if (::close(consoleDescriptor) == -1) {
-      LogError("Console close");
-    }
-    LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
-    consoleDescriptor = -1;
-  }
 }

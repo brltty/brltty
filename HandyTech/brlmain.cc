@@ -101,13 +101,13 @@ static unsigned int CurrentKeys[0x81], LastKeys[0x81], ReleasedKeys[0x81], nullK
 
 
 #define BRLROWS		1
-#define MAX_STCELLS	4	/* hiest number of status cells */
+#define MAX_STCELLS	4	/* highest number of status cells */
 
 
 
 /* This is the brltty braille mapping standard to Handy's mapping table.
  */
-char TransTable[256] =
+static char TransTable[256] =
 {
   0x00, 0x01, 0x08, 0x09, 0x02, 0x03, 0x0A, 0x0B,
   0x10, 0x11, 0x18, 0x19, 0x12, 0x13, 0x1A, 0x1B,
@@ -146,26 +146,24 @@ char TransTable[256] =
 
 /* Global variables */
 
-char DefDev[] = BRLDEV;		/* default braille device */
-unsigned char refdata[ 85 ]; /* reference data */
-int brl_fd;			/* file descriptor for Braille display */
-struct termios oldtio;		/* old terminal settings */
-unsigned char *rawdata;		/* translated data to send to Braille */
-unsigned char *prevdata;	/* previously sent raw data */
-unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
-unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
-BRLPARAMS *model;		/* points to terminal model config struct */
-int ReWrite = 0;		/* 1 if display need to be rewritten */
+static char DefDev[] = BRLDEV;		/* default braille device */
+static unsigned char refdata[ 85 ]; /* reference data */
+static int brl_fd;			/* file descriptor for Braille display */
+static struct termios oldtio;		/* old terminal settings */
+static unsigned char *rawdata;		/* translated data to send to Braille */
+static unsigned char *prevdata;	/* previously sent raw data */
+static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
+static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
+static BRLPARAMS *model;		/* points to terminal model config struct */
+static int ReWrite = 0;		/* 1 if display need to be rewritten */
 
 
 
 /* Communication codes */
 
-char BRL_START[] = "\001";	/* escape code to display braille */
+static char BRL_START[] = "\001";	/* escape code to display braille */
 #define DIM_BRL_START 1
-char BRL_END[] = "";		/* to send after the braille sequence */
-#define DIM_BRL_END 0
-char BRL_ID[] = "þ";
+static char BRL_ID[] = "þ";
 #define DIM_BRL_ID 1
 
 
@@ -204,7 +202,7 @@ int StatusKeys[4] =
 
 
 
-void
+static void
 identbrl (void)
 {
   /* Hello display... */
@@ -229,7 +227,7 @@ int SendToHandy( unsigned char *data, int len )
 }
 
 
-void initbrl (char **parameters, brldim *brl, const char *dev)
+static void initbrl (char **parameters, brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -296,7 +294,7 @@ void initbrl (char **parameters, brldim *brl, const char *dev)
   }
 
   /* Set model params... */
-  setHelpScreenNumber( model - Models );		/* position in the model list */
+  setHelpPageNumber( model - Models );		/* position in the model list */
   res.x = model->Cols;			/* initialise size of display */
   res.y = BRLROWS;
 
@@ -331,7 +329,7 @@ void initbrl (char **parameters, brldim *brl, const char *dev)
 }
 
 
-void closebrl (brldim *brl)
+static void closebrl (brldim *brl)
 {
   free (brl->disp);
   free (rawdata);
@@ -341,7 +339,7 @@ void closebrl (brldim *brl)
 }
 
 
-int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
+static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
 {
   unsigned char outbuf[ DIM_BRL_START + 2 + Len ];
   int outsz = 0;
@@ -356,7 +354,7 @@ int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
 }
 
 
-void writebrl (brldim *brl)
+static void writebrl (brldim *brl)
 {
   int i, j, k;
 
@@ -372,7 +370,7 @@ void writebrl (brldim *brl)
 }
 
 
-void
+static void
 setbrlstat (const unsigned char *st)
 {
   int i;
@@ -389,7 +387,7 @@ setbrlstat (const unsigned char *st)
 
 
 
-int GetHandyKey (unsigned int *Pos)
+static int GetHandyKey (unsigned int *Pos)
 {
   unsigned char c;
 
@@ -416,7 +414,7 @@ int GetHandyKey (unsigned int *Pos)
 }
 
 
-int readbrl (DriverCommandContext cmds)
+static int readbrl (DriverCommandContext cmds)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;

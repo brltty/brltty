@@ -121,7 +121,7 @@ INSTALL_LIB = --owner=$(INSTALL_USER) --group=$(INSTALL_GROUP) --mode=$(INSTALL_
 # to read the screen under Linux is commonly known.
 # If none of them exist during the install, then the first one is created.
 # Don't modify this unless you know what you're doing!
-SCR_O = scr_vcsa.o
+SCR_O = scr_linux.o
 VCSADEV = /dev/vcsa /dev/vcsa0 /dev/vcc/a
 
 # 2. You may define this as an alternative to Linux's vcsa device by using
@@ -197,7 +197,7 @@ install-brltty: install.template
 	sed -e 's%=P%$(PREFIX)$(PROG_DIR)%g' -e 's%=L%$(PREFIX)$(LIB_DIR)%g' \
 	  -e 's%=D%$(DATA_DIR)%g' -e 's%=V%$(VCSADEV)%g' install.template > $@
 
-SCREEN_OBJECTS = scr.o scrdev.o $(SCR_O)
+SCREEN_OBJECTS = scr.o scr_base.o $(SCR_O)
 
 ifeq ($(SPK_TARGET),)
    SPK_TARGET = NoSpeech
@@ -297,17 +297,17 @@ dynamic-braille: txt2hlp
 static-braille: txt2hlp
 	$(MAKE) -C $(BRL_TARGET) brl.o braille-help
 
-scr.o: scr.cc scr.h scrdev.h helphdr.h config.h
+scr.o: scr.cc scr.h scr_base.h helphdr.h config.h
 	$(COMPCPP) $(CFLAGS) -c scr.cc
 
-scrdev.o: scrdev.cc scr.h scrdev.h helphdr.h config.h
-	$(COMPCPP) $(CFLAGS) -c scrdev.cc
+scr_base.o: scr_base.cc scr.h scr_base.h csrjmp.h helphdr.h misc.h config.h
+	$(COMPCPP) $(CFLAGS) -c scr_base.cc
 
-scr_vcsa.o: scr_vcsa.cc scr_vcsa.h scr.h scrdev.h
-	$(COMPCPP) $(CFLAGS) '-DVCSADEV="$(VCSADEV)"' -c scr_vcsa.cc
+scr_linux.o: scr_linux.cc scr_linux.h scr.h scr_base.h
+	$(COMPCPP) $(CFLAGS) '-DVCSADEV="$(VCSADEV)"' -c scr_linux.cc
 
-scr_shm.o: scr_shm.cc scr_shm.h scr.h scrdev.h config.h
-	$(COMPCPP) $(CFLAGS) -c scr_shm.cc
+scr_shm.o: scr_shm.cc scr_shm.h scr.h scr_base.h config.h
+	$(COMPCPP) -D_XOPEN_SOURCE $(CFLAGS) -c scr_shm.cc
 
 speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
@@ -319,7 +319,7 @@ brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 brltest.o: brltest.c brl.h config.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DBRLDEV="$(BRLDEV)"' -c brltest.c
 
-SCRTEST_OBJECTS = scrtest.o misc.o
+SCRTEST_OBJECTS = scrtest.o misc.o csrjmp.o
 scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
 

@@ -15,11 +15,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* scrdev.h - C++ header file for the screen types library
+/* scr_base.h - C++ header file for the screen drivers library
  */
 
-#ifndef _SCRDEV_H
-#define _SCRDEV_H
+#ifndef _SCR_BASE_H
+#define _SCR_BASE_H
 
 
 extern "C"
@@ -30,63 +30,62 @@ extern "C"
 
 
 // abstract base class - useful for pointers
-class Screen			
-{
-  public:
-  virtual void getstat (ScreenStatus &) = 0;
-  virtual unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode) = 0;
+class Screen {
+public:
+  virtual void describe (ScreenDescription &) = 0;
+  virtual unsigned char *read (ScreenBox, unsigned char *, ScreenMode) = 0;
+  virtual int insert (unsigned short);
+  virtual int route (int, int, int);
+  virtual int selectvt (int);
+  virtual int switchvt (int);
+  virtual int execute (int);
 };
 
 
 // abstract base class - useful for screen source driver pointers
-class RealScreen : public Screen
-{
+class RealScreen : public Screen {
 public:
   virtual char **parameters (void) = 0;
   virtual int prepare (char **parameters) = 0;
   virtual int open (void) = 0;
   virtual int setup (void) = 0;
   virtual void close (void) = 0;
-  virtual void getstat (ScreenStatus &) = 0;
-  virtual unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode) = 0;
-  virtual int insert (unsigned short) = 0;
-  virtual int selectvt (int) = 0;
-  virtual int switchvt (int) = 0;
+  int route (int, int, int);
 };
 
 
-
-class FrozenScreen:public Screen
-{
-  ScreenStatus stat;
+class FrozenScreen:public Screen {
+  ScreenDescription description;
   unsigned char *text;
-  unsigned char *attrib;
-    public:
-    FrozenScreen ();
+  unsigned char *attributes;
+public:
+  FrozenScreen ();
   int open (Screen *);		// called every time the screen is frozen
-  void getstat (ScreenStatus &);
-  unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode);
   void close (void);		// called to discard frozen screen image
+  void describe (ScreenDescription &);
+  unsigned char *read (ScreenBox, unsigned char *, ScreenMode);
 };
 
 
-class HelpScreen:public Screen
-{
-  int fd;
-  short numpages;
-  pageinfo *psz;
-  unsigned char **page;
-  unsigned char *buffer;
-  short scrno;
-  int gethelp (char *helpfile);
-    public:
+class HelpScreen:public Screen {
+  int fileDescriptor;
+  short pageCount;
+  short pageNumber;
+  unsigned char cursorRow, cursorColumn;
+  pageinfo *pageDescriptions;
+  unsigned char **pages;
+  unsigned char *characters;
+  int loadPages (char *);
+public:
   HelpScreen ();
-  void setscrno (short);
-  short numscreens (void);
   int open (char *helpfile);		// called every time the help screen is opened
-  void getstat (ScreenStatus &);
-  unsigned char *getscr (ScreenBox, unsigned char *, ScreenMode);
   void close (void);		// called once to close the help screen
+  void setPageNumber (short);
+  short getPageCount (void);
+  void describe (ScreenDescription &);
+  unsigned char *read (ScreenBox, unsigned char *, ScreenMode);
+  int insert (unsigned short);
+  int route (int, int, int);
 };
 
 
@@ -96,4 +95,4 @@ class HelpScreen:public Screen
 
 extern RealScreen *live;
 
-#endif // !_SCRDEV_H
+#endif // !_SCR_BASE_H

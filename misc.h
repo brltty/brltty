@@ -78,6 +78,7 @@ extern void LogOpen(int toConsole);
 extern void LogClose(void);
 extern void LogPrint(int level, char *format, ...);
 extern void LogError (const char *action);
+extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
 extern void SetLogLevel(int level);
 extern void SetStderrLevel(int level);
 extern void SetStderrOff(void);
