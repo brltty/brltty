@@ -126,7 +126,7 @@ getPcmDevice (int errorLevel) {
   if (status == AENoError) {
     int descriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (descriptor >= 0) {
-      if (connect(descriptor, &audioStream.tcp_sockaddr, sizeof(audioStream.tcp_sockaddr)) != -1) {
+      if (connect(descriptor, (struct sockaddr *)&audioStream.tcp_sockaddr, sizeof(audioStream.tcp_sockaddr)) != -1) {
         return descriptor;
       } else {
         LogError("socket connection");

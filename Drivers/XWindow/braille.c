@@ -84,14 +84,14 @@ static int cols,lines;
 static Widget toplevel,vbox,keybox,display;
 static XtAppContext app_con;
 
-static int keypressed;
+static long keypressed;
 
 static void KeyPressCB(Widget w, XtPointer closure, XtPointer callData) {
  LogPrint(LOG_DEBUG,"keypress(%p)",closure);
- keypressed=(int)closure;
+ keypressed=(long)closure;
 }
 
-static inline Widget crKeyBut(String name, int keycode, int repeat,
+static inline Widget crKeyBut(String name, long keycode, int repeat,
     int horizDistance, int vertDistance)
 {
   Widget button;

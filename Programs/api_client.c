@@ -41,6 +41,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 
 #ifdef HAVE_ALLOCA_H
@@ -502,8 +503,8 @@ int brlapi_leaveTty()
 int brlapi_setFocus(int tty)
 {
   uint32_t utty;
-  utty = htonl(tty);
   int res;
+  utty = htonl(tty);
   pthread_mutex_lock(&brlapi_fd_mutex);
   res = brlapi_writePacket(fd, BRLPACKET_SETFOCUS, &utty, sizeof(utty));
   pthread_mutex_unlock(&brlapi_fd_mutex);
