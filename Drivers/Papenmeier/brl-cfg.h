@@ -95,8 +95,14 @@ typedef struct {
 
 typedef struct {
   unsigned char ident;		/* identity of terminal */
+
+#ifdef ENABLE_PM_CONFIGURATION_FILE
   char name[NAMEMAX];		/* name of terminal */
   char helpfile[HELPLEN];	/* filename of local helpfile */
+#else /* ENABLE_PM_CONFIGURATION_FILE */
+  const char *name;		/* name of terminal */
+  const char *helpfile;		/* filename of local helpfile */
+#endif /* ENABLE_PM_CONFIGURATION_FILE */
 
   int x, y;			/* size of display */
   int statcells;		/* number of status cells */
