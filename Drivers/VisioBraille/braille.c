@@ -393,27 +393,26 @@ int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
    } else return VAL_PASSKEY+VPK_FUNCTION+ch; 
   }
   altpressed = 0;
-  switch (ch)
+  switch (code)
   {
-   case 0x01: return CMD_SIXDOTS;
-   case 0x08: return VAL_PASSKEY + VPK_BACKSPACE;
-   case 0x09: return VAL_PASSKEY + VPK_TAB;
-   case 0x0D: return VAL_PASSKEY + VPK_RETURN;
-   case 0xA1: return CMD_HELP;
-   case 0xA2: return CMD_TUNES; 
-   case 0xA3: return CMD_PREFMENU;
-   case 0xA4: return VAL_PASSKEY + VPK_PAGE_DOWN;
-   case 0xA5: return VAL_PASSKEY + VPK_END;
-   case 0xA6: return CMD_FREEZE;
-   case 0xA8: return VAL_PASSKEY + VPK_HOME;
-   case 0xA9: return CMD_INFO;
-   case 0xB2: return CMD_PREFLOAD;
-   case 0xB3: return CMD_PREFSAVE;
-   case 0xB5: return VAL_PASSKEY + VPK_PAGE_UP;
-   case 0xBA: return CMD_RESTARTBRL;
-   case 0xBE: ctrlpressed = VPC_CONTROL; break; 
-   case 0xBF: altpressed = VPC_META; break;   
-   case 0xe0: return VAL_PASSKEY + VPK_ESCAPE;
+   case PLOC_LT: return CMD_SIXDOTS;
+   case BACKSPACE: return VAL_PASSKEY + VPK_BACKSPACE;
+   case TAB: return VAL_PASSKEY + VPK_TAB;
+   case RETURN: return VAL_PASSKEY + VPK_RETURN;
+   case PLOC_PLOC_A: return CMD_HELP;
+   case PLOC_PLOC_B: return CMD_TUNES; 
+   case PLOC_PLOC_C: return CMD_PREFMENU;
+   case PLOC_PLOC_D: return VAL_PASSKEY + VPK_PAGE_DOWN;
+   case PLOC_PLOC_E: return VAL_PASSKEY + VPK_END;
+   case PLOC_PLOC_F: return CMD_FREEZE;
+   case PLOC_PLOC_H: return VAL_PASSKEY + VPK_HOME;
+   case PLOC_PLOC_I: return CMD_INFO;
+   case PLOC_PLOC_R: return CMD_PREFLOAD;
+   case PLOC_PLOC_S: return CMD_PREFSAVE;
+   case PLOC_PLOC_U: return VAL_PASSKEY + VPK_PAGE_UP;
+   case CONTROL: ctrlpressed = VPC_CONTROL; break; 
+   case ALT: altpressed = VPC_META; break;   
+   case ESCAPE: return VAL_PASSKEY + VPK_ESCAPE;
    default: return EOF;
   }
  }

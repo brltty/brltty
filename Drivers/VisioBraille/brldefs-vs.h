@@ -60,4 +60,40 @@
 #define keyD7 0x41e
 #define keyD8 0x41f
 
+#define PLOC_LT 0x801
+#define BACKSPACE 0x808
+#define TAB 0x809
+#define RETURN 0x80d
+
+#define PLOC_PLOC_A 0x8A1
+#define PLOC_PLOC_B 0x8A2
+#define PLOC_PLOC_C 0x8A3
+#define PLOC_PLOC_D 0x8A4
+#define PLOC_PLOC_E 0x8A5
+#define PLOC_PLOC_F 0x8A6
+#define PLOC_PLOC_G 0x8A7
+#define PLOC_PLOC_H 0x8A8
+#define PLOC_PLOC_I 0x8A9
+#define PLOC_PLOC_J 0x8AA
+#define PLOC_PLOC_K 0x8AB
+#define PLOC_PLOC_L 0x8AC
+#define PLOC_PLOC_M 0x8AD
+#define PLOC_PLOC_N 0x8AE
+#define PLOC_PLOC_O 0x8AF
+#define PLOC_PLOC_P 0x8B0
+#define PLOC_PLOC_Q 0x8B1
+#define PLOC_PLOC_R 0x8B2
+#define PLOC_PLOC_S 0x8B3
+#define PLOC_PLOC_T 0x8B4
+#define PLOC_PLOC_U 0x8B5
+#define PLOC_PLOC_V 0x8B6
+#define PLOC_PLOC_W 0x8B7
+#define PLOC_PLOC_X 0x8B8
+#define PLOC_PLOC_Y 0x8B9
+#define PLOC_PLOC_Z 0x8BA
+
+#define CONTROL 0x8BE
+#define ALT 0x8BF
+#define ESCAPE 0x8e0
+
 #endif /* _BRLKEYDEFS_H */ 
