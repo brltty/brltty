@@ -246,10 +246,13 @@ char *
 getWorkingDirectory (void) {
   char *buffer = NULL;
   size_t size = 0X100;
+
   while ((buffer = realloc(buffer, size<<=1))) {
     if (getcwd(buffer, size)) return buffer;
     if (errno != ERANGE) break;
   }
+
+  if (buffer) free(buffer);
   return NULL;
 }
 
