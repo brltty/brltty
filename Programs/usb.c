@@ -221,16 +221,25 @@ usbReadConfiguration (UsbDevice *device) {
     unsigned char configuration;
     if (usbGetConfiguration(device, &configuration) != -1) {
       UsbDescriptor descriptor;
-      int size = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_CONFIGURATION,
-                                  configuration, 0, &descriptor, 1000);
-      if (size != -1) {
+      unsigned char number;
+      for (number=0; number<device->descriptor.bNumConfigurations; number++) {
+        int size = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_CONFIGURATION,
+                                    number, 0, &descriptor, 1000);
+        if (size == -1) {
+          LogPrint(LOG_WARNING, "USB configuration descriptor not readable: %d", number);
+        } else if (descriptor.configuration.bConfigurationValue == configuration) {
+          break;
+        }
+      }
+
+      if (number < device->descriptor.bNumConfigurations) {
         int length = getLittleEndian(descriptor.configuration.wTotalLength);
         UsbDescriptor *descriptors = malloc(length);
         if (descriptors) {
-          size = usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
-                                USB_REQ_GET_DESCRIPTOR,
-                                (USB_DESCRIPTOR_TYPE_CONFIGURATION << 8) | configuration,
-                                0, descriptors, length, 1000);
+          int size = usbControlRead(device, USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
+                                    USB_REQ_GET_DESCRIPTOR,
+                                    (USB_DESCRIPTOR_TYPE_CONFIGURATION << 8) | number,
+                                    0, descriptors, length, 1000);
           if (size != -1) {
             device->configurationDescriptor = descriptors;
             device->configurationLength = length;
