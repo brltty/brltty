@@ -122,98 +122,98 @@ typedef enum {
 
 /* Braille display parameters */
 
-typedef struct
-  {
-    const char *Name;
-    unsigned char ID;
-    unsigned char Cols;
-    unsigned char NbStCells;
-    unsigned char HelpPage;
-  }
-BRLPARAMS;
+typedef struct {
+  const char *Name;
+  unsigned char ID;
+  unsigned char Flags;
+  unsigned char Cols;
+  unsigned char NbStCells;
+  unsigned char HelpPage;
+} BRLPARAMS;
+#define BPF_QUERIABLE_DIMENSIONS 0X01
 
 static BRLPARAMS Models[] =
 {
   {
     /* ID == 0 */
-    "ABT 320", ABT320,
+    "ABT 320", ABT320, 0,
     20, 3, 0
   }
   ,
   {
     /* ID == 1 */
-    "ABT 340", ABT340,
+    "ABT 340", ABT340, 0,
     40, 3, 0
   }
   ,
   {
     /* ID == 2 */
-    "ABT 340 Desktop", ABT34D,
+    "ABT 340 Desktop", ABT34D, 0,
     40, 5, 0
   }
   ,
   {
     /* ID == 3 */
-    "ABT 380", ABT380,
+    "ABT 380", ABT380, 0,
     80, 5, 0
   }
   ,
   {
     /* ID == 4 */
-    "ABT 382 Twin Space", ABT382,
+    "ABT 382 Twin Space", ABT382, 0,
     80, 5, 0
   }
   ,
   {
     /* ID == 10 */
-    "Delphi 420", DEL420,
+    "Delphi 420", DEL420, 0,
     20, 3, 0
   }
   ,
   {
     /* ID == 11 */
-    "Delphi 440", DEL440,
+    "Delphi 440", DEL440, 0,
     40, 3, 0
   }
   ,
   {
     /* ID == 12 */
-    "Delphi 440 Desktop", DEL44D,
+    "Delphi 440 Desktop", DEL44D, 0,
     40, 5, 0
   }
   ,
   {
     /* ID == 13 */
-    "Delphi 480", DEL480,
+    "Delphi 480", DEL480, 0,
     80, 5, 0
   }
   ,
   {
     /* ID == 14 */
-    "Satellite 544", SAT544,
+    "Satellite 544", SAT544, BPF_QUERIABLE_DIMENSIONS,
     40, 3, 1
   }
   ,
   {
     /* ID == 15 */
-    "Satellite 570 Pro", SAT570P,
+    "Satellite 570 Pro", SAT570P, BPF_QUERIABLE_DIMENSIONS,
     66, 3, 1
   }
   ,
   {
     /* ID == 16 */
-    "Satellite 584 Pro", SAT584P,
+    "Satellite 584 Pro", SAT584P, BPF_QUERIABLE_DIMENSIONS,
     80, 3, 1
   }
   ,
   {
     /* ID == 17 */
-    "Satellite 544 Traveller", SAT544T,
+    "Satellite 544 Traveller", SAT544T, BPF_QUERIABLE_DIMENSIONS,
     40, 3, 1
   }
   ,
   {
-    NULL, 0,
+    NULL, 0, 0,
     0, 0, 0
   }
 };
@@ -236,6 +236,7 @@ static unsigned char *rawdata = NULL;	/* translated data to send to Braille */
 static unsigned char *prevdata = NULL;	/* previously sent raw data */
 static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
+static unsigned char NbStCells;	/* number of status cells */
 static BRLPARAMS *model;		/* points to terminal model config struct */
 static int ReWrite = 0;		/* 1 if display need to be rewritten */
 
@@ -593,6 +594,16 @@ reallocateBuffer (unsigned char **buffer, int size) {
 }
 
 static int
+reallocateBuffers (BrailleDisplay *brl) {
+  if (reallocateBuffer(&rawdata, brl->x*brl->y))
+    if (reallocateBuffer(&prevdata, brl->x*brl->y))
+      return 1;
+
+  LogPrint(LOG_ERR, "Cannot allocate braille buffers.");
+  return 0;
+}
+
+static int
 identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   /* Find out which model we are connected to... */
   for (
@@ -614,17 +625,13 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->x = model->Cols;
   brl->y = BRLROWS;
   brl->helpPage = model->HelpPage;			/* initialise size of display */
+  NbStCells = model->NbStCells;
 
   /* Allocate space for buffers */
-  ;
-  ;
-  if (!(reallocateBuffer(&rawdata, brl->x*brl->y) &&
-        reallocateBuffer(&prevdata, brl->x*brl->y))) {
-    LogPrint(LOG_ERR, "Cannot allocate braille buffers.");
-    return 0;
-  }
-
+  if (!reallocateBuffers(brl)) return 0;
   ReWrite = 1;			/* To write whole display at first time */
+
+  if (model->Flags & BPF_QUERIABLE_DIMENSIONS) writeFunction(0X07);
   return 1;
 }
 
@@ -746,15 +753,15 @@ static void brl_writeWindow (BrailleDisplay *brl)
       ReWrite = Timeout = 0;
       /* We rewrite the whole display */
       i = 0;
-      j = model->Cols;
+      j = brl->x;
     }
   else
     {
       /* We update only the display part that has been changed */
       i = 0;
-      while ((brl->buffer[i] == prevdata[i]) && (i < model->Cols))
+      while ((brl->buffer[i] == prevdata[i]) && (i < brl->x))
 	i++;
-      j = model->Cols - 1;
+      j = brl->x - 1;
       while ((brl->buffer[j] == prevdata[j]) && (j >= i))
 	j--;
       j++;
@@ -764,7 +771,7 @@ static void brl_writeWindow (BrailleDisplay *brl)
       for (k = 0;
 	   k < (j - i);
 	   rawdata[k++] = outputTable[(prevdata[i + k] = brl->buffer[i + k])]);
-      WriteToBrlDisplay (model->NbStCells + i, j - i, rawdata);
+      WriteToBrlDisplay (NbStCells + i, j - i, rawdata);
     }
 }
 
@@ -775,12 +782,12 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
   int i;
 
   /* Update status cells on braille display */
-  if (memcmp (st, PrevStatus, model->NbStCells))	/* only if it changed */
+  if (memcmp (st, PrevStatus, NbStCells))	/* only if it changed */
     {
       for (i = 0;
-	   i < model->NbStCells;
+	   i < NbStCells;
 	   StatusCells[i++] = outputTable[(PrevStatus[i] = st[i])]);
-      WriteToBrlDisplay (0, model->NbStCells, StatusCells);
+      WriteToBrlDisplay (0, NbStCells, StatusCells);
     }
 }
 
@@ -852,6 +859,32 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
       return 1;
     }
 
+    case 0X7F:
+      switch (packet[1]) {
+        case 0X07: {
+          int count = packet[3];
+
+          if (count >= 3) {
+            unsigned char cells = packet[9];
+            if (cells != NbStCells) {
+              NbStCells = cells;
+              LogPrint(LOG_INFO, "Status cell count changed to %d", NbStCells);
+            }
+          }
+
+          if (count >= 4) {
+            unsigned char columns = packet[11];
+            if (columns != brl->x) {
+              brl->x = columns;
+              if (!reallocateBuffers(brl)) return -1;
+              brl->resizeRequired = 1;
+              return 0;
+            }
+          }
+        }
+      }
+      break;
+
     default:
       if (length > sizeof(BRL_ID)) {
         if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0) {
@@ -868,10 +901,10 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 #else /* ABT3_OLD_FIRMWARE */
 
   int key = packet[0];
-  if ((key >= (KEY_ROUTING_OFFSET + model->Cols)) &&
-      (key < (KEY_ROUTING_OFFSET + model->Cols + 6))) {
+  if ((key >= (KEY_ROUTING_OFFSET + brl->x)) &&
+      (key < (KEY_ROUTING_OFFSET + brl->x + 6))) {
     /* make for Status keys of Touch Cursor */
-    *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + model->Cols)];
+    *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->x)];
   } else if (key >= KEY_ROUTING_OFFSET) {
     /* make for display keys of Touch cursor */
     *Pos = key - KEY_ROUTING_OFFSET;
