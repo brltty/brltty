@@ -25,6 +25,8 @@ extern "C" {
 /* brl.h - Header file for the Braille display library
  */
 
+#include <unistd.h>
+
 #include "brldefs.h"
 
 /* Braille information structure. */

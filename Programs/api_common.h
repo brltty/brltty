@@ -24,6 +24,8 @@ extern "C" {
 
 /* api_common.h - private declarations shared by both server & client */
 
+#include <unistd.h>
+
 /* brlapi_writeFile */
 /* Exactly write a buffer in a file */
 ssize_t brlapi_writeFile(int fd, const unsigned char *buf, size_t size);

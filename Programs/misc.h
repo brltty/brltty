@@ -26,6 +26,7 @@ extern "C" {
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <sys/time.h>
 
