@@ -584,6 +584,49 @@ int SendToAlva( unsigned char *data, int len )
   return 0;
 }
 
+static int
+reallocateBuffer (unsigned char **buffer, int size) {
+  void *address = realloc(*buffer, size);
+  if (!address) return 0;
+  *buffer = address;
+  return 1;
+}
+
+static int
+identifyModel (BrailleDisplay *brl, unsigned char identifier) {
+  /* Find out which model we are connected to... */
+  for (
+    model = Models;
+    model->Name && (model->ID != identifier);
+    model++
+  );
+
+  if (!model->Name) {
+    /* Unknown model */
+    LogPrint(LOG_ERR, "Detected unknown Alva model with ID %02X (hex).", identifier);
+    LogPrint(LOG_WARNING, "Please fix Models[] in Alva/braille.c and mail the maintainer.");
+    return 0;
+  }
+  LogPrint(LOG_INFO, "Detected Alva %s: %d columns, %d status cells.",
+           model->Name, model->Cols, model->NbStCells);
+
+  /* Set model parameters... */
+  brl->x = model->Cols;
+  brl->y = BRLROWS;
+  brl->helpPage = model->HelpPage;			/* initialise size of display */
+
+  /* Allocate space for buffers */
+  ;
+  ;
+  if (!(reallocateBuffer(&rawdata, brl->x*brl->y) &&
+        reallocateBuffer(&prevdata, brl->x*brl->y))) {
+    LogPrint(LOG_ERR, "Cannot allocate braille buffers.");
+    return 0;
+  }
+
+  ReWrite = 1;			/* To write whole display at first time */
+  return 1;
+}
 
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
@@ -652,34 +695,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
     }
   } while (ModelID == ABT_AUTO);
 
-  /* Find out which model we are connected to... */
-  for( model = Models;
-       model->Name && model->ID != ModelID;
-       model++ );
-  if( !model->Name ) {
-    /* Unknown model */
-    LogPrint( LOG_ERR, "Detected unknown Alva model with ID %02X (hex).", ModelID );
-    LogPrint( LOG_WARNING, "Please fix Models[] in Alva/braille.c and mail the maintainer." );
-    goto failure;
-  }
-  LogPrint( LOG_INFO, "Detected Alva %s: %d columns, %d status cells.",
-            model->Name, model->Cols, model->NbStCells );
-
-  /* Set model params... */
-  brl->x = model->Cols;			/* initialise size of display */
-  brl->y = BRLROWS;
-  brl->helpPage = model->HelpPage;			/* initialise size of display */
-
-  /* Allocate space for buffers */
-  rawdata = (unsigned char *) malloc (brl->x * brl->y);
-  prevdata = (unsigned char *) malloc (brl->x * brl->y);
-  if (!rawdata || !prevdata) {
-    LogPrint( LOG_ERR, "Cannot allocate braille buffers." );
-    goto failure;
-  }
-
-  ReWrite = 1;			/* To write whole display at first time */
-
+  if (!identifyModel(brl, ModelID)) goto failure;
   return 1;
 
 failure:
@@ -770,7 +786,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 
 
 
-static int GetKey (unsigned int *Keys, unsigned int *Pos)
+static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 {
   unsigned char packet[0X40];
   int length = readPacket(packet, sizeof(packet));
@@ -839,11 +855,10 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
     default:
       if (length > sizeof(BRL_ID)) {
         if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0) {
-          /* The terminal has been turned off and back on.  To be
-           * sure we arrange for the driver to restart so
-           * model probing, etc. will take place.
-           */
-          return -1;
+          /* The terminal has been turned off and back on. */
+          if (!identifyModel(brl, packet[sizeof(BRL_ID)])) return -1;
+          brl->resizeRequired = 1;
+          return 0;
         }
       }
 
@@ -878,7 +893,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
   static int Typematic = 0, KeyDelay = 0, KeyRepeat = 0;
 
-  if (!(ProcessKey = GetKey (&CurrentKeys, &RoutingPos)))
+  if (!(ProcessKey = GetKey(brl, &CurrentKeys, &RoutingPos)))
     {
       if (Typematic)
 	{
