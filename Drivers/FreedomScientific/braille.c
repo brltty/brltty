@@ -269,25 +269,35 @@ static union {
 } inputBuffer;
 static int inputCount;
 
+static int realKeys;
+static int virtualKeys;
 static int pressedKeys;
 static int activeKeys;
-#define KEY_DOT1          0X000001
-#define KEY_DOT2          0X000002
-#define KEY_DOT3          0X000004
-#define KEY_DOT4          0X000008
-#define KEY_DOT5          0X000010
-#define KEY_DOT6          0X000020
-#define KEY_DOT7          0X000040
-#define KEY_DOT8          0X000080
-#define KEY_WHEEL_LEFT    0X000100
-#define KEY_WHEEL_RIGHT   0X000200
-#define KEY_SHIFT_LEFT    0X000400
-#define KEY_SHIFT_RIGHT   0X000800
-#define KEY_ADVANCE_LEFT  0X001000
-#define KEY_ADVANCE_RIGHT 0X002000
-#define KEY_SPACE         0X008000
-#define KEY_GDF_LEFT      0X010000
-#define KEY_GDF_RIGHT     0X020000
+#define KEY_DOT1          0X00000001
+#define KEY_DOT2          0X00000002
+#define KEY_DOT3          0X00000004
+#define KEY_DOT4          0X00000008
+#define KEY_DOT5          0X00000010
+#define KEY_DOT6          0X00000020
+#define KEY_DOT7          0X00000040
+#define KEY_DOT8          0X00000080
+#define KEY_WHEEL_LEFT    0X00000100
+#define KEY_WHEEL_RIGHT   0X00000200
+#define KEY_SHIFT_LEFT    0X00000400
+#define KEY_SHIFT_RIGHT   0X00000800
+#define KEY_ADVANCE_LEFT  0X00001000
+#define KEY_ADVANCE_RIGHT 0X00002000
+#define KEY_SPACE         0X00008000
+#define KEY_GDF_LEFT      0X00010000
+#define KEY_GDF_RIGHT     0X00020000
+#define KEY_HOT1          0X01000000
+#define KEY_HOT2          0X02000000
+#define KEY_HOT3          0X04000000
+#define KEY_HOT4          0X08000000
+#define KEY_HOT5          0X10000000
+#define KEY_HOT6          0X20000000
+#define KEY_HOT7          0X40000000
+#define KEY_HOT8          0X80000000
 
 static int wheelCommand;
 static int wheelCounter;
@@ -510,6 +520,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             writeFrom = 0;
             writeTo = model->totalCells - 1;
             writing = 0;
+
+            realKeys = 0;
+            virtualKeys = 0;
             pressedKeys = 0;
             activeKeys = 0;
             wheelCounter = 0;
@@ -554,6 +567,134 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 }
 
 static int
+interpretKeys (void) {
+  int keys = realKeys | virtualKeys;
+  int press = (keys & pressedKeys) != keys;
+  int command = CMD_NOOP;
+  int flags = 0;
+
+  pressedKeys = keys;
+  if (press) {
+    activeKeys = pressedKeys;
+    flags |= VAL_REPEAT_DELAY;
+  } else {
+    keys = activeKeys;
+    activeKeys = 0;
+    if (!keys) return command;
+  }
+
+  {
+    const int inputKeys = KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 |
+                          KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8 |
+                          KEY_SHIFT_LEFT | KEY_SHIFT_RIGHT;
+    if (!(keys & ~inputKeys)) {
+      command = VAL_PASSDOTS | flags;
+      if (keys & KEY_DOT1) command |= B1;
+      if (keys & KEY_DOT2) command |= B2;
+      if (keys & KEY_DOT3) command |= B3;
+      if (keys & KEY_DOT4) command |= B4;
+      if (keys & KEY_DOT5) command |= B5;
+      if (keys & KEY_DOT6) command |= B6;
+      if (keys & KEY_DOT7) command |= B7;
+      if (keys & KEY_DOT8) command |= B8;
+      if (keys & KEY_SHIFT_LEFT) command |= VPC_CONTROL;
+      if (keys & KEY_SHIFT_RIGHT) command |= VPC_UPPER;
+      return command;
+    }
+  }
+
+  switch (keys) {
+    default:
+      break;
+    case (KEY_WHEEL_LEFT):
+      command = CMD_LNBEG;
+      break;
+    case (KEY_WHEEL_RIGHT):
+      command = CMD_LNEND;
+      break;
+
+    case (KEY_ADVANCE_LEFT):
+      command = CMD_FWINLT;
+      break;
+    case (KEY_ADVANCE_RIGHT):
+      command = CMD_FWINRT;
+      break;
+    case (KEY_GDF_LEFT | KEY_ADVANCE_LEFT):
+      command = CMD_TOP_LEFT;
+      break;
+    case (KEY_GDF_LEFT | KEY_ADVANCE_RIGHT):
+      command = CMD_BOT_LEFT;
+      break;
+    case (KEY_GDF_RIGHT | KEY_ADVANCE_LEFT):
+      command = CMD_TOP;
+      break;
+    case (KEY_GDF_RIGHT | KEY_ADVANCE_RIGHT):
+      command = CMD_BOT;
+      break;
+
+    case (KEY_GDF_LEFT):
+      command = CMD_BACK;
+      break;
+    case (KEY_GDF_RIGHT):
+      command = CMD_HOME;
+      break;
+
+    case (KEY_HOT1):
+      command = CMD_SKPIDLNS;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT1):
+      command = CMD_SKPBLNKWINS;
+      break;
+    case (KEY_HOT2):
+      command = CMD_DISPMD;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT2):
+      command = CMD_ATTRVIS;
+      break;
+    case (KEY_HOT3):
+      command = CMD_CSRTRK;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT3):
+      command = CMD_CSRVIS;
+      break;
+    case (KEY_HOT4):
+      command = CMD_SIXDOTS;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT4):
+      command = CMD_AUTOREPEAT;
+      break;
+
+    case (KEY_HOT5):
+      command = CMD_HELP;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT5):
+      command = CMD_FREEZE;
+      break;
+    case (KEY_HOT6):
+      command = CMD_LEARN;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT6):
+      command = CMD_PREFLOAD;
+      break;
+    case (KEY_HOT7):
+      command = CMD_PREFMENU;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT7):
+      command = CMD_PREFSAVE;
+      break;
+    case (KEY_HOT8):
+      command = CMD_INFO;
+      break;
+    case (KEY_GDF_RIGHT | KEY_HOT8):
+      command = CMD_CSRJMP_VERT;
+      break;
+  }
+
+  if (command != CMD_NOOP) command |= flags;
+  return command;
+}
+
+static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   if (wheelCounter) {
     --wheelCounter;
@@ -585,47 +726,70 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         }
         continue;
 
-      case PKT_KEY: {
-        int keys = packet.header.arg1 |
+      case PKT_KEY:
+        realKeys = packet.header.arg1 |
                    (packet.header.arg2 << 8) |
                    (packet.header.arg3 << 16);
-        int command;
-
-        pressedKeys = keys;
-        if ((activeKeys & keys) != keys) {
-          activeKeys = keys;
-          command = VAL_REPEAT_DELAY;
-        } else {
-          keys = activeKeys;
-          activeKeys = 0;
-          command = 0;
-        }
-
-        switch (keys) {
-          default:
-            command |= CMD_NOOP;
-            break;
-          case (KEY_WHEEL_LEFT):
-            command |= CMD_BACK;
-            break;
-          case (KEY_WHEEL_RIGHT):
-            command |= CMD_HOME;
-            break;
-        }
-        return command;
-      }
+        return interpretKeys();
 
       case PKT_BUTTON: {
+        int button = packet.header.arg1;
+        unsigned char press = packet.header.arg2 & 0X01;
+        unsigned char row = packet.header.arg3;
         int command = CMD_NOOP;
+
+        if (row == 1) {
+          static int keys[] = {
+            KEY_GDF_LEFT,
+            KEY_HOT1, KEY_HOT2, KEY_HOT3, KEY_HOT4,
+            KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
+            KEY_GDF_RIGHT
+          };
+          static const int keyCount = sizeof(keys) / sizeof(keys[0]);
+
+          int key;
+          button -= (model->totalCells - keyCount) / 2;
+
+          if (button < 0) {
+            key = KEY_ADVANCE_LEFT;
+          } else if (button >= keyCount) {
+            key = KEY_ADVANCE_RIGHT;
+          } else {
+            key = keys[button];
+          }
+
+          if (press) {
+            virtualKeys |= key;
+          } else {
+            virtualKeys &= ~key;
+          }
+          return interpretKeys();
+        }
+
         activeKeys = 0;
-        if (packet.header.arg2 & 0X01) {
-          switch (packet.header.arg3) {
+        if (press) {
+          switch (row) {
             default:
               break;
 
             case 0:
               switch (pressedKeys) {
                 default:
+                  break;
+                case 0:
+                  command = CR_ROUTE;
+                  break;
+                case (KEY_ADVANCE_LEFT):
+                  command = CR_CUTBEGIN;
+                  break;
+                case (KEY_ADVANCE_RIGHT):
+                  command = CR_CUTRECT;
+                  break;
+                case (KEY_GDF_LEFT):
+                  command = CR_CUTAPPEND;
+                  break;
+                case (KEY_GDF_RIGHT):
+                  command = CR_CUTLINE;
                   break;
               }
               break;
@@ -634,16 +798,24 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               switch (pressedKeys) {
                 default:
                   break;
-
                 case 0:
-                  command = CR_ROUTE;
+                  command = CR_DESCCHAR;
+                  break;
+                case (KEY_ADVANCE_LEFT):
+                  command = CR_PRINDENT;
+                  break;
+                case (KEY_ADVANCE_RIGHT):
+                  command = CR_NXINDENT;
+                  break;
+                case (KEY_GDF_LEFT):
+                  command = CR_SETLEFT;
                   break;
               }
               break;
           }
         }
 
-        if (command != CMD_NOOP) command += packet.header.arg1;
+        if (command != CMD_NOOP) command += button;
         return command;
       }
 
@@ -668,6 +840,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               case (KEY_WHEEL_LEFT):
                 wheelCommand = CMD_PRDIFLN;
                 break;
+              case (KEY_GDF_LEFT):
+                wheelCommand = CMD_PRPROMPT;
+                break;
+              case (KEY_GDF_RIGHT):
+                wheelCommand = CMD_PRPGRPH;
+                break;
             }
             break;
 
@@ -680,6 +858,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
                 break;
               case (KEY_WHEEL_LEFT):
                 wheelCommand = CMD_NXDIFLN;
+                break;
+              case (KEY_GDF_LEFT):
+                wheelCommand = CMD_NXPROMPT;
+                break;
+              case (KEY_GDF_RIGHT):
+                wheelCommand = CMD_NXPGRPH;
                 break;
             }
             break;
