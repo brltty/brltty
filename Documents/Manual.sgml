@@ -3661,7 +3661,7 @@ BRLTTY supports the following braille displays:
     Vario/RBT 40/80 (emulation 1/2)
   <item>
     <htmlurl url="http://www.blazie.com/pages/main.html" name="Blazie Engineering">:
-    BrailleLite 18/40
+    BrailleLite 18/40/M40
   <item>
     <htmlurl url="http://www.eurobraille.fr/Indexuk.htm" name="EuroBraille">:
     AzerBraille,

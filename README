@@ -118,7 +118,7 @@ The following Braille displays are supported (serial communication only for
 most of them):
 
 *  Alva [ABT3xx, Delphi, Satellite]
-*  BrailleLite [18/40]
+*  BrailleLite [18/40/M40]
 *  BrailleNote [18/32]
 *  CombiBraille [25/45/85]
 *  EcoBraille [20/40/80]
