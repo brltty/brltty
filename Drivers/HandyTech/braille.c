@@ -383,6 +383,7 @@ readBluezBytes (unsigned char *buffer, int length, int wait) {
   int offset = 0;
   if (awaitInput(bluezSocket, (wait? timeout: 0))) {
     readChunk(bluezSocket, buffer, &offset, length, 0, timeout);
+    if (errno != EAGAIN) offset = -1;
   }
   return offset;
 }
