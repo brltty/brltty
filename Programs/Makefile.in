@@ -473,7 +473,7 @@ install-api-manpages:
 install-api-key:
 	file=$(sysconfdir)/$(API_AUTHFILE) && \
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
-	then umask 077 && mcookie >$$file; fi
+	then umask 077 && $(SRC_DIR)/brltty-genkey $$file; fi
 
 ###############################################################################
 

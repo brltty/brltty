@@ -1,0 +1,56 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2005 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Generate a key for BrlAPI.
+# Usage: brltty-genkey [/path/to/file]
+
+programName="${0}"
+programMessage()
+{
+   echo "${programName}: ${1}"
+}
+syntaxError()
+{
+   programMessage "${1}"
+   exit 2
+}
+
+if [ "${#}" -eq 0 ]
+then
+   . "`dirname "${0}"`/brltty-config" || exit "${?}" || exit "${?}"
+   file="${BRLTTY_EXECUTE_ROOT}${sysconfdir}/${BRLAPI_KEYFILE}"
+elif [ "${#}" -eq 1 ]
+then
+   file="${1}"
+else
+   syntaxError "too many parameters."
+fi
+
+umask 077
+
+mcookie >"${file}" 2>/dev/null && exit 0
+
+for device in "/dev/urandom" "/dev/random"
+do
+   [ -c "${device}" -a -r "${device}" ] && {
+      dd if="${device}" of="${file}" bs=32 count=1 2>/dev/null && exit 0
+   }
+done
+
+programMessage "no known mechanism is supported."
+exit 3
