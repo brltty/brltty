@@ -85,6 +85,7 @@ static const char *const opcodeNames[CTO_None] = {
   "contraction",
 
   "sufword",
+  "prfword",
   "begword",
   "begmidword",
   "midword",
@@ -602,6 +603,7 @@ doOpcode:
     case CTO_JoinableWord:
     case CTO_LowWord:
     case CTO_SuffixableWord:
+    case CTO_PrefixableWord:
     case CTO_BegWord:
     case CTO_BegMidWord:
     case CTO_MidWord:

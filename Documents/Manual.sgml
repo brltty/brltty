@@ -86,7 +86,7 @@ BRLTTY provides the following capabilities:
     Modular design allowing relatively easy addition of
     drivers for other braille displays and speech synthesizers.
   <item>
-    An application programming interface.
+    An Application Programming Interface.
 </itemize>
 
 <sect1>System Requirements<p>
@@ -693,9 +693,8 @@ for any additional display-specific instructions.
   <tag><tt/--libdir=/<em/directory/<label id="build-api-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
-    where BrlAPI's static archive and dynamically loadable object
-    (see section <ref id="api" name="The Application Programming Interface">)
-    are to be installed.
+    where the static archive and the dynamically loadable object
+    for the Application Programming Interface are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
     then the directory
@@ -768,8 +767,7 @@ for any additional display-specific instructions.
   <tag><tt/--with-include-directory=/<em/directory/<label id="build-include-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
-    where the C header files
-    (see section <ref id="api" name="The Application Programming Interface">)
+    where the C header files for the Application Programming Interface
     are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
@@ -833,14 +831,13 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     BRLTTY will interact with the pointer (mouse) device
     (see section <ref id="gpm" name="Pointer (Mouse) Support via GPM">).
   <tag><tt/--enable-api/<label id="build-api"></tag>
-    Include the application programming interface
-    (see section <ref id="api" name="The Application Programming Interface">).
+    Include the Application Programming Interface.
   <tag><tt/--with-api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="build-api-parameters"></tag>
-    Specify the default parameter settings for the application programming interface.
+    Specify the default parameter settings for the Application Programming Interface.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
     For a description of the parameters accepted by the interface,
-    please see section <ref id="api" name="The Application Programming Interface">.
+    please see the <bf/BrlAPI/ reference manual.
     See the <ref id="configure-api-parameters" name="api-parameters"> configuration file directive
     and the <ref id="options-api-parameters" name="-A"> command line option
     for run-time selection.
@@ -2121,11 +2118,11 @@ and continues to the end of the line.
 The following directives are recognized:
 <descrip>
   <tag><tt/api-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-api-parameters"></tag>
-    Specify parameters for the application programming interrface.
+    Specify parameters for the Application Programming Interrface.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
     For a description of the parameters accepted by the interface,
-    please see section <ref id="api" name="The Application Programming Interface">.
+    please see the <bf/BrlAPI/ reference manual.
     See the <ref id="build-api-parameters" name="--with-api-parameters">
     build option for the defaults established during the build procedure.
     This directive can be overridden with the
@@ -2357,11 +2354,11 @@ The <tt/brltty/ command accepts the following options:
     the text and attributes translation tables,
     and the braille display device and help file are identified.
   <tag><tt/-A/<em/name/<tt/=/<em/value/<tt/,/... <tt/--api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-api-parameters"></tag>
-    Specify parameters for the application programming interface.
+    Specify parameters for the Application Programming Interface.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
     For a description of the parameters accepted by the interface,
-    please see section <ref id="api" name="The Application Programming Interface">.
+    please see the <bf/BrlAPI/ reference manual.
     See the <ref id="configure-api-parameters" name="api-parameters">
     configuration file directive for the default run-time settings.
   <tag><tt/-B/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/... <tt/--braille-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="options-braille-parameters"></tag>
@@ -2395,7 +2392,7 @@ The <tt/brltty/ command accepts the following options:
     The following environment variables are supported:
     <descrip>
       <tag><tt/BRLTTY_API_PARAMETERS/</tag>
-        Parameters for the application programming interface
+        Parameters for the Application Programming Interface
         (see the <ref id="options-api-parameters" name="-A"> command line option).
       <tag><tt/BRLTTY_ATTRIBUTES_TABLE/</tag>
         The attributes translation table
@@ -3588,6 +3585,7 @@ BRLTTY is initially configured to use the
 In addition to this default text translation table,
 several alternatives are provided:
 <descrip>
+  <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
   <tag/cz/Czech (iso-8859-2)
   <tag/da/Danish (iso-8859-1)
   <tag/de/German (iso-8859-1)
@@ -3967,6 +3965,8 @@ Now, finally, here are the opcode descriptions themselves:
     if they're a word.
   <tag><tt/sufword/ <em/characters/ <em/dots/<label id="contraction-opcode-sufword"></tag>
     Translate the characters if they're either a word or at the beginning of a word.
+  <tag><tt/prfword/ <em/characters/ <em/dots/<label id="contraction-opcode-prfword"></tag>
+    Translate the characters if they're either a word or at the end of a word.
   <tag><tt/begword/ <em/characters/ <em/dots/<label id="contraction-opcode-begword"></tag>
     Translate the characters if they're at the beginning of a word.
   <tag><tt/begmidword/ <em/characters/ <em/dots/<label id="contraction-opcode-begmidword"></tag>
@@ -4034,9 +4034,6 @@ The opcodes which define and use character classes are:
     If this opcode is used more than once on the same line
     then the union of the characters in all the classes is used.
 </descrip>
-
-<sect>The Application Programming Interface<label id="api"><p>
-This section hasn't been written yet.
 
 <sect>Advanced Topics<p>
 

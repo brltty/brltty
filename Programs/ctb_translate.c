@@ -124,6 +124,11 @@ selectRule (int length) { /*check for valid contractions */
                 CTC(after, CTC_Space|CTC_Letter|CTC_Punctuation))
               return 1;
             break;
+          case CTO_PrefixableWord:
+            if (CTC(before, CTC_Space|CTC_Letter|CTC_Punctuation) &&
+                CTC(after, CTC_Space|CTC_Punctuation))
+              return 1;
+            break;
           case CTO_BegWord:
             if (CTC(before, CTC_Space|CTC_Punctuation) &&
                 CTC(after, CTC_Letter))
