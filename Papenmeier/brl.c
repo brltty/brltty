@@ -168,14 +168,14 @@ identify_terminal(brldim *brl)
       LogPrint(LOG_ERR,"len(%d) != size (%d)", len, sizeof(buf));
       continue;			/* try again */
     }
-    LogAndStderr(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
-		 buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8]);
+    LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
+	     buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8]);
     for(tn=0; tn < num_terminals; tn++)
       if (pm_terminals[tn].ident == buf[2])
 	{
 	  the_terminal = &pm_terminals[tn];
-	  LogAndStderr(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
-		       the_terminal->name,
+	  LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
+		   the_terminal->name,
 		       the_terminal->x, the_terminal->y,
 		       the_terminal->helpfile);
 	  brl->x = the_terminal->x;
@@ -210,8 +210,8 @@ identify_terminal(brldim *brl)
 	    code_easy_first = code_easy_last  = 
 	      code_switch_first = code_switch_last = -1;
 
-	  LogAndStderr(LOG_DEBUG, "s %x-%x r %x-%x f %x-%x e %x-%x sw %x-%x",
-		       code_status_first,
+	  LogPrint(LOG_DEBUG, "s %x-%x r %x-%x f %x-%x e %x-%x sw %x-%x",
+		   code_status_first,
 		       code_status_last,
 		       code_route_first,
 		       code_route_last,
@@ -225,8 +225,8 @@ identify_terminal(brldim *brl)
 	  // address of display
 	  addr_status = 0x0000;
 	  addr_display = addr_status + the_terminal->statcells;
-	  LogAndStderr(LOG_DEBUG, "addr: %d %d",
-		       addr_status,
+	  LogPrint(LOG_DEBUG, "addr: %d %d",
+		   addr_status,
 		       addr_display);
 	  return;
 	}
@@ -310,7 +310,7 @@ initbrl (brldim *brl, const char *dev)
   }
   if (the_terminal==NULL) {
     closebrl(brl);
-    LogAndStderr(LOG_ERR, "unknown braille terminal type");
+    LogPrint(LOG_ERR, "unknown braille terminal type");
     exit(9);
   }
 }
@@ -343,7 +343,7 @@ identbrl (void)
 
   /* read the config file for individual configurations */
 #ifdef READ_CONFIG
-  LogAndStderr(LOG_DEBUG, "look for config file");
+  LogPrint(LOG_DEBUG, "look for config file");
   read_config();
 #endif
 }
@@ -640,13 +640,13 @@ readbrl (DriverCommandContext cmds)
 
 static void read_file(char* name)
 {
-  LogAndStderr(LOG_DEBUG, "open config file %s", name);
+  LogPrint(LOG_DEBUG, "open config file %s", name);
   configfile = fopen(name, "r");
   if (configfile == NULL) {
     perror(name);
     return;
   }
-  LogAndStderr(LOG_DEBUG, "read config file %s", name);
+  LogPrint(LOG_DEBUG, "read config file %s", name);
   yyparse ();
   fclose(configfile);
 }

@@ -189,6 +189,89 @@ setwinxy (int x, int y)
 }
 
 
+int
+upDifferentLine(short mode) {
+   if (p->winy > 0) {
+      char buffer1[scr.cols], buffer2[scr.cols];
+      int skipped = 0;
+      if (mode==SCR_TEXT && p->dispmode)
+         mode = SCR_ATTRIB;
+      getscr((winpos){0, p->winy, scr.cols, 1},
+	     buffer1, mode);
+      do {
+	 getscr((winpos){0, --p->winy, scr.cols, 1},
+		buffer2, mode);
+	 if (memcmp(buffer1, buffer2, scr.cols) ||
+	     (mode==SCR_TEXT && env.csrvis && p->winy==scr.posy))
+	    return 1;
+
+	 /* lines are identical */
+	 if (skipped == 0)
+	    playTune(&tune_skip_first);
+	 else if (skipped <= 4)
+	    playTune(&tune_skip);
+	 else if (skipped % 4 == 0)
+	    playTune(&tune_skip_more);
+	 skipped++;
+      } while (p->winy > 0);
+   }
+
+   playTune(&tune_bounce);
+   return 0;
+}
+
+int
+downDifferentLine(short mode) {
+   if (p->winy < (scr.rows - brl.y)) {
+      char buffer1[scr.cols], buffer2[scr.cols];
+      int skipped = 0;
+      if (mode==SCR_TEXT && p->dispmode)
+         mode = SCR_ATTRIB;
+      getscr((winpos){0, p->winy, scr.cols, 1},
+	     buffer1, mode);
+      do {
+	 getscr((winpos){0, ++p->winy, scr.cols, 1},
+		buffer2, mode);
+	 if (memcmp(buffer1, buffer2, scr.cols) ||
+	     (mode==SCR_TEXT && env.csrvis && p->winy==scr.posy))
+	    return 1;
+
+	 /* lines are identical */
+	 if (skipped == 0)
+	    playTune(&tune_skip_first);
+	 else if (skipped <= 4)
+	    playTune(&tune_skip);
+	 else if (skipped % 4 == 0)
+	    playTune(&tune_skip_more);
+	 skipped++;
+      } while (p->winy < (scr.rows - brl.y));
+   }
+
+   playTune(&tune_bounce);
+   return 0;
+}
+
+void
+upLine(short mode) {
+   if (env.skpidlns)
+      upDifferentLine(mode);
+   else if (p->winy > 0)
+      p->winy--;
+   else
+      playTune(&tune_bounce);
+}
+
+void
+downLine(short mode) {
+   if (env.skpidlns)
+      downDifferentLine(mode);
+   else if (p->winy < (scr.rows - brl.y))
+      p->winy++;
+   else
+      playTune(&tune_bounce);
+}
+
+
 int 
 main (int argc, char *argv[])
 {
@@ -319,13 +402,13 @@ main (int argc, char *argv[])
 	      }
 	    wrapUp:
 	      if (p->winy == 0) {
-		p->winx = oldX;
 		playTune(&tune_bounce);
+		p->winx = oldX;
 		break;
 	      }
-	      p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
-	      p->winy--;
 	      playTune(&tune_wrap_up);
+	      p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+	      upLine(SCR_TEXT);
 	    skipEndOfLine:
 	      if (env.skpblnkwins && (env.skpblnkwinsmode == sbwEndOfLine)) {
 		int charIndex;
@@ -355,15 +438,15 @@ main (int argc, char *argv[])
 		p->winx = MAX(p->winx-fwinshift, 0);
 	      } else {
 		if (p->winy == 0) {
+		  playTune(&tune_bounce);
 		  p->winx = oldX;
 		  p->winy = oldY;
-		  playTune(&tune_bounce);
 		  break;
 		}
-		p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
-		p->winy--;
 		if (tuneLimit-- > 0)
 		  playTune(&tune_wrap_up);
+		p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+		upLine(SCR_TEXT);
 	      }
 	      charCount = MIN(brl.x, scr.cols-p->winx);
 	      getscr((winpos){p->winx, p->winy, charCount, 1},
@@ -384,57 +467,13 @@ main (int argc, char *argv[])
 	    break;
 	  }
 	  case CMD_LNUP:
-	    if (p->winy == 0)
-	      {
-		playTune (&tune_bounce);
-		break;
-	      }
-	    if (!env.skpidlns)
-	      {
-		p->winy = MAX (p->winy - 1, 0);
-		break;
-	      }
-	    /* no break here */
+	    upLine(SCR_TEXT);
+	    break;
 	  case CMD_PRDIFLN:
+	    upDifferentLine(SCR_TEXT);
+	    break;
 	  case CMD_ATTRUP:
-	    if (p->winy == 0)
-	      playTune (&tune_bounce);
-	    else
-	      {
-		char buffer1[scr.cols], buffer2[scr.cols];
-		int scrtype = (p->dispmode || keypress==CMD_ATTRUP)
-		  ? SCR_ATTRIB : SCR_TEXT;
-		int skipped = 0;
-		getscr ((winpos)
-			{
-			0, p->winy, scr.cols, 1
-			}
-			,buffer1, scrtype);
-		while (p->winy > 0)
-		  {
-		    getscr ((winpos)
-			    {
-			    0, --p->winy, scr.cols, 1
-			    }
-			    ,buffer2, scrtype);
-		    if (memcmp (buffer1, buffer2, scr.cols) || \
-			(keypress!=CMD_ATTRUP && p->winy == scr.posy))
-		      break;	/* lines are different */
-                    if(p->winy == 0){
-                      playTune(&tune_bounce);
-                      break;
-                    }
-		    /* lines are identical */
-		    if (skipped == 0)
-		      playTune (&tune_skip_first);
-		    else if (skipped <= 4)
-		      playTune (&tune_skip);
-		    else if (skipped % 4 == 0)
-		      playTune (&tune_skip_more);
-		    skipped++;	/* will sound only if lines are skipped,
-				   not if we just move by one line */
-		  }
-	      }
+	    upDifferentLine(SCR_ATTRIB);
 	    break;
 	  case CMD_FWINRT:
 	    if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
@@ -461,13 +500,13 @@ main (int argc, char *argv[])
 	      }
 	    wrapDown:
 	      if (p->winy >= (scr.rows - brl.y)) {
-		p->winx = oldX;
 		playTune(&tune_bounce);
+		p->winx = oldX;
 		break;
 	      }
-	      p->winx = 0;
-	      p->winy++;
 	      playTune(&tune_wrap_down);
+	      p->winx = 0;
+	      downLine(SCR_TEXT);
 	      break;
 	    }
 	  case CMD_FWINRTSKIP: {
@@ -482,15 +521,15 @@ main (int argc, char *argv[])
 		p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
 	      } else {
 		if (p->winy >= (scr.rows - brl.y)) {
+		  playTune(&tune_bounce);
 		  p->winx = oldX;
 		  p->winy = oldY;
-		  playTune(&tune_bounce);
 		  break;
 		}
-		p->winx = 0;
-		p->winy++;
 		if (tuneLimit-- > 0)
 		  playTune(&tune_wrap_down);
+		p->winx = 0;
+		downLine(SCR_TEXT);
 	      }
 	      charCount = MIN(brl.x, scr.cols-p->winx);
 	      getscr((winpos){p->winx, p->winy, charCount, 1},
@@ -511,57 +550,13 @@ main (int argc, char *argv[])
 	    break;
 	  }
 	  case CMD_LNDN:
-	    if (p->winy == scr.rows - brl.y)
-	      {
-		playTune (&tune_bounce);
-		break;
-	      }
-	    if (!env.skpidlns)
-	      {
-		p->winy = MIN (p->winy + 1, scr.rows - brl.y);
-		break;
-	      }
-	    /* no break here */
+	    downLine(SCR_TEXT);
+	    break;
 	  case CMD_NXDIFLN:
+	    downDifferentLine(SCR_TEXT);
+	    break;
 	  case CMD_ATTRDN:
-	    if (p->winy == scr.rows - brl.y)
-	      playTune (&tune_bounce);
-	    else
-	      {
-		char buffer1[scr.cols], buffer2[scr.cols];
-		int scrtype = (p->dispmode || keypress==CMD_ATTRDN)
-		  ? SCR_ATTRIB : SCR_TEXT;
-		int skipped = 0;
-		getscr ((winpos)
-			{
-			0, p->winy, scr.cols, 1
-			}
-			,buffer1, scrtype);
-		while (p->winy < scr.rows - brl.y)
-		  {
-		    getscr ((winpos)
-			    {
-			    0, ++p->winy, scr.cols, 1
-			    }
-			    ,buffer2, scrtype);
-		    if (memcmp (buffer1, buffer2, scr.cols) || \
-			(keypress!=CMD_ATTRDN && p->winy == scr.posy))
-		      break;	/* lines are different */
-		    if(p->winy == scr.rows-brl.y){
-		      playTune(&tune_bounce);
-		      break;
-		    }
-		    /* lines are identical */
-		    if (skipped == 0)
-		      playTune (&tune_skip_first);
-		    else if (skipped <= 4)
-		      playTune (&tune_skip);
-		    else if (skipped % 4 == 0)
-		      playTune (&tune_skip_more);
-		    skipped++;	/* will sound only if lines are skipped,
-				   not if we just move by one line */
-		  }
-	      }
+	    downDifferentLine(SCR_ATTRIB);
 	    break;
 	  case CMD_NXBLNKLN:
 	  case CMD_PRBLNKLN: {

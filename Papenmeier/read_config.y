@@ -425,7 +425,7 @@ int yylex ()
  /* yerror() calls exit() */
 static int yyerror (char* s)  /* Called by yyparse on error */
 {
-  LogAndStderr(LOG_ERR, "Error: Zeile %d: %s", linenumber, s);
+  LogPrint(LOG_ERR, "Error: Zeile %d: %s", linenumber, s);
   exit(99);
 }
 
