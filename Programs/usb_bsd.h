@@ -141,9 +141,10 @@ usbControlTransfer (
   USETW(arg.ucr_request.wLength, length);
   arg.ucr_data = buffer;
   arg.ucr_flags = USBD_SHORT_XFER_OK;
-  usbSetTimeout(device->file, timeout, NULL);
-  if (ioctl(device->file, USB_DO_REQUEST, &arg) != -1) return arg.ucr_actlen;
-  LogError("USB control transfer");
+  if (usbSetTimeout(device->file, timeout, NULL)) {
+    if (ioctl(device->file, USB_DO_REQUEST, &arg) != -1) return arg.ucr_actlen;
+    LogError("USB control transfer");
+  }
   return -1;
 }
 
@@ -155,10 +156,13 @@ usbOpenEndpoint (UsbEndpoint *endpoint) {
     const char *dot = strchr(prefix, '.');
     int length = dot? (dot - prefix): strlen(prefix);
     char path[PATH_MAX+1];
-    int flags;
+    int flags = O_RDWR;
     snprintf(path, sizeof(path), USB_ENDPOINT_PATH_FORMAT,
              length, prefix, USB_ENDPOINT_NUMBER(endpoint->descriptor));
-    flags = (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_INPUT)? O_RDONLY: O_WRONLY;
+    switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+      case USB_ENDPOINT_DIRECTION_INPUT : flags = O_RDONLY; break;
+      case USB_ENDPOINT_DIRECTION_OUTPUT: flags = O_WRONLY; break;
+    }
     if ((bsd->file = open(path, flags)) != -1) {
       if (usbSetShortTransfers(bsd->file, 1)) {
         bsd->timeout = -1;
