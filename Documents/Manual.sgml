@@ -2,7 +2,7 @@
 <article>
 
 <titlepag>
-  <title>BRLTTY
+  <title>BRLTTY Reference Manual
     <subtitle>Access to the Linux/Unix Console for Blind Persons using Refreshable Braille Displays
   <author>
     <name>Nikhil Nair <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
@@ -1857,7 +1857,7 @@ via the <ref id="preferences-menu" name="preferences menu">.
     <ref id="preference-sliding-window" name="Sliding Window"> preference.
   <tag>SKPIDLNS<label id="command-SKPIDLNS"></tag>
     Rather than explicitly moving exactly one line either up or down,
-    skip passed lines which have the same content as the current line.
+    skip past lines which have the same content as the current line.
     This feature affects
     the <ref id="command-LNUP-LNDN" name="LNUP/LNDN"> commands,
     as well as the line wrapping feature of
@@ -1866,7 +1866,7 @@ via the <ref id="preferences-menu" name="preferences menu">.
     This setting can also be changed with the
     <ref id="preference-skip-identical-lines" name="Skip Identical Lines"> preference.
   <tag>SKPBLNKWINS<label id="command-SKPBLNKWINS"></tag>
-    Skip passed blank windows when reading either forward or backward.
+    Skip past blank windows when reading either forward or backward.
     This feature affects the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> commands.
     This setting can also be changed with the
     <ref id="preference-skip-blank-windows" name="Skip Blank Windows"> preference.
@@ -2913,9 +2913,9 @@ Notes:
     and <ref id="command-FWINLTSKIP-FWINRTSKIP" name="FWINLTSKIP/FWINRTSKIP"> commands:
     <descrip>
       <tag/No/
-        Don't skip passed lines which have the same content as the current line.
+        Don't skip past lines which have the same content as the current line.
       <tag/Yes/
-        Skip passed lines which have the same content as the current line.
+        Skip past lines which have the same content as the current line.
     </descrip>
     This setting can also be changed with the
     <ref id="command-SKPIDLNS" name="SKPIDLNS"> command.
@@ -2924,9 +2924,9 @@ Notes:
     the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> commands:
     <descrip>
       <tag/No/
-        Don't skip passed blank windows.
+        Don't skip past blank windows.
       <tag/Yes/
-        Skip passed blank windows.
+        Skip past blank windows.
     </descrip>
     This setting can also be changed with the
     <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command.
