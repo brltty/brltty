@@ -33,7 +33,6 @@
 #include "ctb_definitions.h"
 #include "brl.h"
 
-
 typedef struct {
   BYTE length;
   BYTE bytes[0XFF];
@@ -45,9 +44,42 @@ static ContractionTableHeader *tableHeader;
 static ContractionTableOffset tableSize;
 static ContractionTableOffset tableUsed;
 
-static BYTE *opcodesTable;
-static int opcodesSize;
-static int opcodesUsed;
+static const char *const opcodeNames[CTO_None] = {
+  "include",
+  "locale",
+
+  "capsign",
+  "begcaps",
+  "endcaps",
+
+  "letsign",
+  "numsign",
+
+  "literal",
+  "replace",
+  "always",
+  "repeated",
+
+  "largesign",
+  "word",
+  "joinword",
+  "lowword",
+  "contraction",
+
+  "sufword",
+  "begword",
+  "midword",
+  "midendword",
+  "endword",
+
+  "prepunc",
+  "postpunc",
+
+  "begnum",
+  "midnum",
+  "endnum"
+};
+static unsigned char opcodeLengths[CTO_None] = {0};
 
 static const char *originalLocale;
 static int noLocale;
@@ -190,38 +222,13 @@ addRule (FileData *data, ContractionTableOpcode opcode, ByteString *find, ByteSt
 
 static ContractionTableOpcode
 getOpcode (FileData *data, const char *token, int length) {
-  BYTE *entry = opcodesTable;		/*pointer for looking things up in opcodesTable */
-  if (entry) {
-    const BYTE *end = entry + opcodesUsed;
-    while (entry < end) {
-      BYTE len = *entry++;
-      if (len == length)
-        if (memcmp(entry, token, length) == 0)
-          return *(entry + len);
-      entry += len + 1;
-    }
-  }
+  ContractionTableOpcode opcode;
+  for (opcode=0; opcode<CTO_None; ++opcode)
+    if (length == opcodeLengths[opcode])
+      if (memcmp(token, opcodeNames[opcode], length) == 0)
+        return opcode;
   compileError(data, "opcode not defined: %.*s", length, token);
   return CTO_None;
-}
-
-static int
-addOpcode (FileData *data, const char *token, int length, ContractionTableOpcode opcode) {
-  int size = opcodesUsed + length + 2;
-  if (size > opcodesSize) {
-    void *table = realloc(opcodesTable, size|=0XFF);
-    if (!table) {
-      compileError(data, "Not enough memory for opcodes table.");
-      return 0;
-    }
-    opcodesTable = table;
-    opcodesSize = size;
-  }
-  opcodesTable[opcodesUsed++] = length;
-  memcpy(&opcodesTable[opcodesUsed], token, length);
-  opcodesUsed += length;
-  opcodesTable[opcodesUsed++] = opcode;
-  return 1;
 }
 
 static int
@@ -438,38 +445,6 @@ getReplacePattern (FileData *data, ByteString *replace, const char **token, int 
   return 0;
 }
 
-static int
-integerToken (FileData *data, int *integer, const char *token, int length,
-              const char *description, const int *minimum, const int *maximum) {
-  char *end;
-  unsigned long value = strtol(token, &end, 0);
-  if (!minimum) {
-    static const int limit = 0;
-    minimum = &limit;
-  }
-  if (!maximum) {
-    static const int limit = 0X7FFFFFFF;
-    maximum = &limit;
-  }
-  if ((end != (token + length)) || (value < *minimum) || (value > *maximum)) {
-    compileError(data, "invalid %s: %.*s", description, length, token);
-    return 0;
-  }
-  *integer = value;
-  return 1;
-}
-
-static int
-opcodeToken (FileData *data, ContractionTableOpcode *opcode, const char *token, int length) {
-  static const int minimum = 0;
-  static const int maximum = CTO_None - 1;
-  int integer;
-  if (!integerToken(data, &integer, token, length, "opcode number", &minimum, &maximum))
-    return 0;
-  *opcode = integer;
-  return 1;
-}
-
 static const char *
 setLocale (const char *locale) {
   return setlocale(LC_CTYPE, locale);
@@ -508,11 +483,8 @@ processLine (FileData *data, const char *line) {
 
   if (!getToken(data, &token, &length, NULL)) return 1;			/*blank line */
   if (*token == '#') return 1;
+  opcode = getOpcode(data, token, length);
 
-  if (*token < '0' || *token > '9') { /*look up word in opcode table */
-    opcode = getOpcode(data, token, length);
-  } else if (!opcodeToken(data, &opcode, token, length))
-    return 1;
   switch (opcode) { /*Carry out operations */
     case CTO_None:
       break;
@@ -539,14 +511,6 @@ processLine (FileData *data, const char *line) {
         }
       break;
     }
-    case CTO_Synonym:
-      if (getToken(data, &token, &length, "opcode number"))
-        if (opcodeToken(data, &opcode, token, length))
-          if (getToken(data, &token, &length, "opcode name"))
-            if (opcode != CTO_None)
-              if (!addOpcode(data, token, length, opcode))
-                goto failure;
-      break;
     case CTO_Always:
     case CTO_WholeWord:
     case CTO_LowWord:
@@ -787,9 +751,11 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
   tableSize = 0;
   tableUsed = 0;
 
-  opcodesTable = NULL;
-  opcodesSize = 0;
-  opcodesUsed = 0;
+  if (!opcodeLengths[0]) {
+    ContractionTableOpcode opcode;
+    for (opcode=0; opcode<CTO_None; ++opcode)
+      opcodeLengths[opcode] = strlen(opcodeNames[opcode]);
+  }
 
   originalLocale = getLocale();
   setLocale("C");
@@ -814,11 +780,6 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
   }
 
   setLocale(originalLocale);
-
-  if (opcodesTable) {
-    free(opcodesTable);
-    opcodesTable = NULL;
-  }
 
   if (!ok) {
     free(tableHeader);

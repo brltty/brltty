@@ -16,7 +16,6 @@
 ###############################################################################
 
 # Multiple Blank, Tab, etc. Suppression Table
-1 opcodes.cti
 
 # Sequences which should be represented by no dots.
 repeated \s 0

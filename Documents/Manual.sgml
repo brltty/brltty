@@ -3534,16 +3534,6 @@ Each opcode has a specific number of operands,
 and any text following its last operand is treated as a comment.
 <tscreen><em/opcode/ <em/operand/ ... <em/comment/</tscreen>
 
-The opcode is a number which tells the translator how to interpret the operands.
-Opcode <tt/0/ can be used to assign a meaningful name to each needed opcode,
-e.g. <tt/opcode/ for <tt/0/ itself.
-If, for example, a table begins with:
-<tscreen>0 0 opcode</tscreen>
-then all the rest of the opcodes it needs can be defined like this:
-<tscreen>opcode 1 include</tscreen>
-This scheme, i.e. no built-in opcode names, was chosen in order to allow
-a table for some language's braille to be written solely in that language itself.
-
 The following operand types are supported:
 <descrip>
   <tag/string/
@@ -3588,85 +3578,19 @@ The following operand types are supported:
     A space may be specified via the special dot number <tt/0/.
 </descrip>
 
-<sect2>Opcode Summary by Number<label id="contraction-opcode-number"><p>
-First, here's a quick summary of all of the contraction table opcodes.
-For the details, see section
-<ref id="contraction-opcode-function" name="Opcodes by Function">.
-<descrip>
-  <tag><ref id="contraction-opcode-0" name="0"> <em/opcode/ <em/name/</tag>
-    Name opcode.
-  <tag><ref id="contraction-opcode-1" name="1"> <em/path/</tag>
-    Include file.
-  <tag><ref id="contraction-opcode-2" name="2"> <em/dots/</tag>
-    Define capital sign.
-  <tag><ref id="contraction-opcode-3" name="3"> <em/dots/</tag>
-    Define begin capitals sign.
-  <tag><ref id="contraction-opcode-4" name="4"> <em/dots/</tag>
-    Define letter sign.
-  <tag><ref id="contraction-opcode-5" name="5"> <em/dots/</tag>
-    Define number sign.
-  <tag><ref id="contraction-opcode-6" name="6"> <em/characters/ <em/dots/</tag>
-    Translate unconditionally.
-  <tag><ref id="contraction-opcode-7" name="7"> <em/characters/ <em/dots/</tag>
-    Translate unconditionally, remove repetitions.
-  <tag><ref id="contraction-opcode-8" name="8"> <em/characters/ <em/dots/</tag>
-    Translate if word.
-  <tag><ref id="contraction-opcode-9" name="9"> <em/characters/ <em/dots/</tag>
-    Translate if at beginning of word.
-  <tag><ref id="contraction-opcode-10" name="10"> <em/characters/ <em/dots/</tag>
-    Translate if in middle of word.
-  <tag><ref id="contraction-opcode-11" name="11"> <em/characters/ <em/dots/</tag>
-    Translate if at end of word.
-  <tag><ref id="contraction-opcode-12" name="12"> <em/characters/ <em/dots/</tag>
-    Translate if in middle or at end of word.
-  <tag><ref id="contraction-opcode-13" name="13"> <em/characters/ <em/dots/</tag>
-    Translate if in middle of number.
-  <tag><ref id="contraction-opcode-14" name="14"> <em/characters/ <em/dots/</tag>
-    Translate if white-space-bounded word.
-  <tag><ref id="contraction-opcode-15" name="15"> <em/characters/ <em/dots/</tag>
-    Translate unconditionally, join consecutive words of this type.
-  <tag><ref id="contraction-opcode-16" name="16"> <em/characters/ <em/dots/</tag>
-    Translate if word, join to next word.
-  <tag><ref id="contraction-opcode-17" name="17"> <em/characters/</tag>
-    Translate whole white-space-bounded sequence unconditionally into computer braille.
-  <tag><ref id="contraction-opcode-18" name="18"> <em/characters/</tag>
-    Prefix with letter sign if word.
-  <tag><ref id="contraction-opcode-19" name="19"> <em/characters/ <em/characters/</tag>
-    Replace the first set of characters with the second.
-  <tag><ref id="contraction-opcode-20" name="20"> <em/characters/ <em/dots/</tag>
-    Translate if at end of number.
-  <tag><ref id="contraction-opcode-21" name="21"> <em/characters/ <em/dots/</tag>
-    Translate if at beginning of number.
-  <tag><ref id="contraction-opcode-22" name="22"> <em/characters/ <em/dots/</tag>
-    Translate if part of leading punctuation.
-  <tag><ref id="contraction-opcode-23" name="23"> <em/characters/ <em/dots/</tag>
-    Translate if part of trailing punctuation.
-  <tag><ref id="contraction-opcode-24" name="24"> <em/characters/ <em/dots/</tag>
-    Translate if word or at beginning of word.
-  <tag><ref id="contraction-opcode-25" name="25"> <em/dots/</tag>
-    Define end capitals sign.
-  <tag><ref id="contraction-opcode-26" name="26"> <em/locale/</tag>
-    Define locale.
-</descrip>
-
-<sect2>Opcodes by Function<label id="contraction-opcode-function"><p>
-Now for all of the details.
-The opcodes here are grouped by function rather than sorted by number.
-For a numerically sorted list, see section
-<ref id="contraction-opcode-number" name="Opcode Summary by Number">.
+<sect2>Opcodes<label id="contraction-opcodes"><p>
+An opcode is a keyword which tells the translator how to interpret the operands.
+The opcodes are grouped here by function.
 
 <sect3>Table Administration<p>
 These opcodes make it easier to write contraction tables.
 They have no direct effect on the character translation.
 <descrip>
-  <tag>0 <em/opcode/ <em/name/<label id="contraction-opcode-0"></tag>
-    Assign a name to an opcode.
-    The name must be defined before it's used.
-  <tag>1 <em/path/<label id="contraction-opcode-1"></tag>
+  <tag><tt/include/ <em/path/<label id="contraction-opcode-include"></tag>
     Include the contents of another file.
     Nesting can be to any depth.
     Relative paths are anchored at the directory of the including file.
-  <tag>26 <em/locale/<label id="contraction-opcode-26"></tag>
+  <tag><tt/locale/ <em/locale/<label id="contraction-opcode-locale"></tag>
     Define the locale for character interpretation
     (lowercase, uppercase, numeric, etc.).
     The locale may be specified as:
@@ -3688,15 +3612,15 @@ They have no direct effect on the character translation.
 These opcodes define special symbols which must be
 inserted into the braille text in order to clarify it.
 <descrip>
-  <tag>2 <em/dots/<label id="contraction-opcode-2"></tag>
+  <tag><tt/capsign/ <em/dots/<label id="contraction-opcode-capsign"></tag>
     The symbol which capitalizes a single letter.
-  <tag>3 <em/dots/<label id="contraction-opcode-3"></tag>
+  <tag><tt/begcaps/ <em/dots/<label id="contraction-opcode-begcaps"></tag>
     The symbol which begins a block of capital letters within a word.
-  <tag>25 <em/dots/<label id="contraction-opcode-25"></tag>
+  <tag><tt/endcaps/ <em/dots/<label id="contraction-opcode-endcaps"></tag>
     The symbol which ends a block of capital letters within a word.
-  <tag>4 <em/dots/<label id="contraction-opcode-4"></tag>
+  <tag><tt/letsign/ <em/dots/<label id="contraction-opcode-letsign"></tag>
     The symbol which marks a letter which isn't part of a word.
-  <tag>5 <em/dots/<label id="contraction-opcode-5"></tag>
+  <tag><tt/numsign/ <em/dots/<label id="contraction-opcode-numsign"></tag>
     The symbol which marks the beginning of a number.
 </descrip>
 
@@ -3728,7 +3652,7 @@ and the <ref id="configure-text-table" name="text-table"> configuration file dir
 for that character is to be used.
 If it's for a multi-character sequence,
 then the default representation for each character
-(see <ref id="contraction-opcode-6" name="opcode 6">)
+(see <ref id="contraction-opcode-always" name="always">)
 within the sequence is to be used.
 
 Some special terms are used within the descriptions of these opcodes.
@@ -3739,53 +3663,53 @@ Some special terms are used within the descriptions of these opcodes.
 
 Now, finally, here are the opcode descriptions themselves:
 <descrip>
-  <tag>17 <em/characters/<label id="contraction-opcode-17"></tag>
+  <tag><tt/literal/ <em/characters/<label id="contraction-opcode-literal"></tag>
     Translate the entire white-space-bounded containing character sequence into computer braille
     (see the <ref id="options-text-table" name="-t"> command line option
     and the <ref id="configure-text-table" name="text-table"> configuration file directive).
-  <tag>19 <em/characters/ <em/characters/<label id="contraction-opcode-19"></tag>
+  <tag><tt/replace/ <em/characters/ <em/characters/<label id="contraction-opcode-replace"></tag>
     Replace the first set of characters, no matter where they appear, with the second.
     The replaced characters aren't reprocessed.
-  <tag>6 <em/characters/ <em/dots/<label id="contraction-opcode-6"></tag>
+  <tag><tt/always/ <em/characters/ <em/dots/<label id="contraction-opcode-always"></tag>
     Translate the characters no matter where they appear.
     If there's only one character, then, in addition,
     define the default representation for that character.
-  <tag>7 <em/characters/ <em/dots/<label id="contraction-opcode-7"></tag>
+  <tag><tt/repeated/ <em/characters/ <em/dots/<label id="contraction-opcode-repeated"></tag>
     Translate the characters no matter where they appear.
     Ignore any consecutive repetitions of the same sequence.
-  <tag>15 <em/characters/ <em/dots/<label id="contraction-opcode-15"></tag>
+  <tag><tt/largesign/ <em/characters/ <em/dots/<label id="contraction-opcode-largesign"></tag>
     Translate the characters no matter where they appear.
     Remove white-space between consecutive words matched by this opcode.
-  <tag>8 <em/characters/ <em/dots/<label id="contraction-opcode-8"></tag>
+  <tag><tt/word/ <em/characters/ <em/dots/<label id="contraction-opcode-word"></tag>
     Translate the characters if they're a word.
-  <tag>16 <em/characters/ <em/dots/<label id="contraction-opcode-16"></tag>
+  <tag><tt/joinword/ <em/characters/ <em/dots/<label id="contraction-opcode-joinword"></tag>
     Translate the characters if they're a word.
     Remove the following white-space if the first character after it is a letter.
-  <tag>14 <em/characters/ <em/dots/<label id="contraction-opcode-14"></tag>
+  <tag><tt/lowword/ <em/characters/ <em/dots/<label id="contraction-opcode-lowword"></tag>
     Translate the characters if they're a white-space-bounded word.
-  <tag>18 <em/characters/<label id="contraction-opcode-18"></tag>
+  <tag><tt/contraction/ <em/characters/<label id="contraction-opcode-contraction"></tag>
     Prefix the characters with a letter sign
-    (see <ref id="contraction-opcode-4" name="opcode 4">)
+    (see <ref id="contraction-opcode-letsign" name="letsign">)
     if they're a word.
-  <tag>24 <em/characters/ <em/dots/<label id="contraction-opcode-24"></tag>
+  <tag><tt/sufword/ <em/characters/ <em/dots/<label id="contraction-opcode-sufword"></tag>
     Translate the characters if they're either a word or at the beginning of a word.
-  <tag>9 <em/characters/ <em/dots/<label id="contraction-opcode-9"></tag>
+  <tag><tt/begword/ <em/characters/ <em/dots/<label id="contraction-opcode-begword"></tag>
     Translate the characters if they're at the beginning of a word.
-  <tag>10 <em/characters/ <em/dots/<label id="contraction-opcode-10"></tag>
+  <tag><tt/midword/ <em/characters/ <em/dots/<label id="contraction-opcode-midword"></tag>
     Translate the characters if they're in the middle of a word.
-  <tag>12 <em/characters/ <em/dots/<label id="contraction-opcode-12"></tag>
+  <tag><tt/midendword/ <em/characters/ <em/dots/<label id="contraction-opcode-midendword"></tag>
     Translate the characters if they're either in the middle or at the end of a word.
-  <tag>11 <em/characters/ <em/dots/<label id="contraction-opcode-11"></tag>
+  <tag><tt/endword/ <em/characters/ <em/dots/<label id="contraction-opcode-endword"></tag>
     Translate the characters if they're at the end of a word.
-  <tag>22 <em/characters/ <em/dots/<label id="contraction-opcode-22"></tag>
+  <tag><tt/prepunc/ <em/characters/ <em/dots/<label id="contraction-opcode-prepunc"></tag>
     Translate the characters if they're part of punctuation at the beginning of a word.
-  <tag>23 <em/characters/ <em/dots/<label id="contraction-opcode-23"></tag>
+  <tag><tt/postpunc/ <em/characters/ <em/dots/<label id="contraction-opcode-postpunc"></tag>
     Translate the characters if they're part of punctuation at the end of a word.
-  <tag>21 <em/characters/ <em/dots/<label id="contraction-opcode-21"></tag>
+  <tag><tt/begnum/ <em/characters/ <em/dots/<label id="contraction-opcode-begnum"></tag>
     Translate the characters if they're at the beginning of a number.
-  <tag>13 <em/characters/ <em/dots/<label id="contraction-opcode-13"></tag>
+  <tag><tt/midnum/ <em/characters/ <em/dots/<label id="contraction-opcode-midnum"></tag>
     Translate the characters if they're in the middle of a number.
-  <tag>20 <em/characters/ <em/dots/<label id="contraction-opcode-20"></tag>
+  <tag><tt/endnum/ <em/characters/ <em/dots/<label id="contraction-opcode-endnum"></tag>
     Translate the characters if they're at the end of a number.
 </descrip>
 

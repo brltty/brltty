@@ -19,8 +19,6 @@
 # Par Nicolas Pitre <nico@cam.org>
 # Référence: http://www.inlb.qc.ca/apropos/c2003unificationdubraille.aspx
 
-1 opcodes.cti
-
 locale french
 
 capsign 46		indicateur de majuscule

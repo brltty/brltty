@@ -21,7 +21,6 @@
 # Submitted to BRLTTY by: Samuel Yang <mison@bbs.ee.ntu.edu.tw>.
 # Converted to contraction table by: Dave Mielke <dave@mielke.cc>.
 
-1 opcodes.cti
 include allchars.cti
 locale -
 

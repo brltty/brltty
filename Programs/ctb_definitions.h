@@ -50,33 +50,40 @@ typedef struct {
 } ContractionTableCharacter;
 
 typedef enum { /*Op codes*/
-  CTO_Synonym=0, /*define numeric opcodes as words*/
   CTO_IncludeFile, /*include a file*/
+  CTO_Locale, /*locale specification for character interpretation*/
+
   CTO_CapitalSign, /*dot pattern for capital sign*/
   CTO_BeginCapitalSign, /*dot pattern for beginning capital block*/
+  CTO_EndCapitalSign, /*dot pattern for ending capital block*/
+
   CTO_EnglishLetterSign, /*dot pattern for english letter sign*/
   CTO_NumberSign, /*number sign*/
+
+  CTO_Literal, /*don't translate this string*/
+  CTO_Replace, /*replace this string with another*/
   CTO_Always, /*always use this contraction*/
   CTO_Repeated, /*take just the first, i.e. multiple blanks*/
+
+  CTO_LargeSign, /*and, for, the with a */
   CTO_WholeWord, /*whole word contraction*/
+  CTO_JoinableWord, /*to, by, into*/
+  CTO_LowWord, /*enough, were, was, etc.*/
+  CTO_Contraction, /*multiletter word sign that needs letsign*/
+
+  CTO_SuffixableWord, /*whole word or beginning of word*/
   CTO_BegWord, /*beginning of word only*/
   CTO_MidWord, /*middle of word only*/
-  CTO_EndWord, /*end of word only*/
   CTO_MidEndWord, /*middle or end of word*/
-  CTO_MidNum, /*middle of number, e.g., decimal point*/
-  CTO_LowWord, /*enough, were, was, etc.*/
-  CTO_LargeSign, /*and, for, the with a */
-  CTO_JoinableWord, /*to, by, into*/
-  CTO_Literal, /*don't translate this string*/
-  CTO_Contraction, /*multiletter word sign that needs letsign*/
-  CTO_Replace, /*replace this string with another*/
-  CTO_EndNum, /*end of number*/
-  CTO_BegNum, /*beginning of number*/
+  CTO_EndWord, /*end of word only*/
+
   CTO_PrePunc, /*punctuation in string at beginning of word*/
   CTO_PostPunc, /*punctuation in string at end of word*/
-  CTO_SuffixableWord, /*whole word or beginning of word*/
-  CTO_EndCapitalSign, /*dot pattern for ending capital block*/
-  CTO_Locale, /*locale specification for character interpretation*/
+
+  CTO_BegNum, /*beginning of number*/
+  CTO_MidNum, /*middle of number, e.g., decimal point*/
+  CTO_EndNum, /*end of number*/
+
   CTO_None /*For internal use only*/
 } ContractionTableOpcode;
 
