@@ -61,7 +61,6 @@ typedef enum {
 #define BRLCONST
 #include "Programs/brl_driver.h"
 #include "braille.h"
-#include "Programs/serial.h"
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
 #include "config.tab.c"
@@ -120,12 +119,178 @@ read_config (const char *directory, const char *name) {
  */
 static TranslationTable outputTable;
 
-static int brl_fd = -1;			/* file descriptor for Braille display */
-static int chars_per_sec;			/* file descriptor for Braille display */
+typedef struct {
+  const speed_t *baudRates;
+  unsigned char tryProtocol1;
+  unsigned char tryProtocol2;
+  int (*openPort) (char **parameters, const char *device);
+  void (*closePort) (void);
+  void (*flushPort) (BrailleDisplay *brl);
+  int (*awaitInput) (int milliseconds);
+  int (*readBytes) (void *buffer, int *offset, int length, int timeout);
+  int (*writeBytes) (const void *buffer, int length);
+} InputOutputOperations;
+
+static const InputOutputOperations *io;
+static const speed_t *baudRate;
+static int charactersPerSecond;
+
+#include "Programs/serial.h"
+static int serialDevice = -1;
+static struct termios oldSerialSettings;
+static const speed_t serialBaudRates[] = {B19200, B38400, B0};
+
+static int
+openSerialPort (char **parameters, const char *device) {
+  if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
+    struct termios newSerialSettings;
+
+    memset(&newSerialSettings, 0, sizeof(newSerialSettings));
+    newSerialSettings.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+    newSerialSettings.c_iflag = IGNPAR;
+    newSerialSettings.c_oflag = 0;		/* raw output */
+    newSerialSettings.c_lflag = 0;		/* don't echo or generate signals */
+    newSerialSettings.c_cc[VMIN] = 0;	/* set nonblocking read */
+    newSerialSettings.c_cc[VTIME] = 0;
+
+    if (resetSerialDevice(serialDevice, &newSerialSettings, *baudRate)) return 1;
+
+    close(serialDevice);
+    serialDevice = -1;
+  }
+  return 0;
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice != -1) {
+    tcsetattr(serialDevice, TCSADRAIN, &oldSerialSettings);		/* restore terminal settings */
+    close(serialDevice);
+    serialDevice = -1;
+  }
+}
+
+static void
+flushSerialPort (BrailleDisplay *brl) {
+  tcflush(serialDevice, TCOFLUSH);
+  drainBrailleOutput(brl, 100);
+  tcflush(serialDevice, TCIFLUSH);
+}
+
+static int
+awaitSerialInput (int milliseconds) {
+  return awaitInput(serialDevice, milliseconds);
+}
+
+static int
+readSerialBytes (void *buffer, int *offset, int length, int timeout) {
+  return readChunk(serialDevice, buffer, offset, length, timeout);
+}
+
+static int
+writeSerialBytes (const void *buffer, int length) {
+  int written = safe_write(serialDevice, buffer, length);
+  if (written == -1) LogError("Serial write");
+  return written;
+}
+
+static const InputOutputOperations serialOperations = {
+  serialBaudRates, 1, 1,
+  openSerialPort, closeSerialPort, flushSerialPort,
+  awaitSerialInput, readSerialBytes, writeSerialBytes
+};
+
+#ifdef ENABLE_USB
+#include "Programs/usb.h"
+static UsbDevice *usbDevice = NULL;
+static unsigned char usbInterface;
+static unsigned char usbOutputEndpoint;
+static unsigned char usbInputEndpoint;
+static const speed_t usbBaudRates[] = {B57600, B0};
+
+static int
+chooseUsbDevice (UsbDevice *device, void *data) {
+  const char *serialNumber = data;
+  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
+  if ((descriptor->idVendor == 0X0403) &&
+      (descriptor->idProduct == 0Xf208)) {
+    if (!usbVerifySerialNumber(device, serialNumber)) return 0;
+
+    usbInterface = 0;
+    if (usbClaimInterface(device, usbInterface)) {
+      if (usbSetConfiguration(device, 1)) {
+        if (usbSetAlternative(device, usbInterface, 0)) {
+          usbOutputEndpoint = 2;
+          usbInputEndpoint = 1;
+          return 1;
+        }
+      }
+      usbReleaseInterface(device, usbInterface);
+    }
+  }
+  return 0;
+}
+
+static int
+openUsbPort (char **parameters, const char *device) {
+  if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
+    if (usbBeginInput(usbDevice, usbInputEndpoint, 8)) {
+      return 1;
+    }
+
+    usbCloseDevice(usbDevice);
+    usbDevice = NULL;
+  } else {
+    LogPrint(LOG_DEBUG, "USB device not found%s%s",
+             (*device? ": ": "."),
+             device);
+  }
+  return 0;
+}
+
+static void
+closeUsbPort (void) {
+  if (usbDevice) {
+    usbReleaseInterface(usbDevice, usbInterface);
+    usbCloseDevice(usbDevice);
+    usbDevice = NULL;
+  }
+}
+
+static void
+flushUsbPort (BrailleDisplay *brl) {
+}
+
+static int
+awaitUsbInput (int milliseconds) {
+  return usbAwaitInput(usbDevice, usbInputEndpoint, milliseconds);
+}
+
+static int
+readUsbBytes (void *buffer, int *offset, int length, int timeout) {
+  int count = usbReapInput(usbDevice, usbInputEndpoint, buffer+*offset, length, timeout);
+  if (count == -1)
+    if (errno == EAGAIN)
+      return 0;
+  *offset += count;
+  return 1;
+}
+
+static int
+writeUsbBytes (const void *buffer, int length) {
+  return usbWriteEndpoint(usbDevice, usbOutputEndpoint, buffer, length, 1000);
+}
+
+static const InputOutputOperations usbOperations = {
+  usbBaudRates, 0, 1,
+  openUsbPort, closeUsbPort, flushUsbPort,
+  awaitUsbInput, readUsbBytes, writeUsbBytes
+};
+#endif /* ENABLE_USB */
+
 static unsigned int debug_keys = 0;
 static unsigned int debug_reads = 0;
 static unsigned int debug_writes = 0;
-static struct termios oldtio;		/* old terminal settings */
 
 static unsigned char currentStatus[PMSC];
 static unsigned char currentLine[BRLCOLSMAX];
@@ -194,19 +359,16 @@ findCommand (int *command, int key, int modifiers) {
   return 0;
 }
 
-static void
-flushTerminal (BrailleDisplay *brl) {
-  tcflush(brl_fd, TCOFLUSH);
-  drainBrailleOutput(brl, 100);
-  tcflush(brl_fd, TCIFLUSH);
-}
-
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   if (debug_writes) LogBytes("Write", bytes, count);
-  if (safe_write(brl_fd, bytes, count) != -1) return 1;
-  LogError("Write");
-  return 0;
+  if (io->writeBytes(bytes, count) != -1) {
+    brl->writeDelay += count * 1000 / charactersPerSecond;
+    return 1;
+  } else {
+    LogError("Write");
+    return 0;
+  }
 }
 
 static void
@@ -220,12 +382,12 @@ static void
 resetTerminal (BrailleDisplay *brl) {
   static const unsigned char sequence[] = {cSTX, 0X01, cETX};
   LogPrint(LOG_WARNING, "Resetting terminal.");
-  flushTerminal(brl);
+  io->flushPort(brl);
   if (writeBytes(brl, sequence, sizeof(sequence))) resetState();
 }
 
 static int
-writeData (BrailleDisplay *brl, int xmtAddress, int count, const unsigned char *data) {
+writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned char *data) {
   if (count) {
     unsigned char header[] = {
       cSTX,
@@ -245,16 +407,43 @@ writeData (BrailleDisplay *brl, int xmtAddress, int count, const unsigned char *
     memcpy(&buffer[index], header, sizeof(header));
     index += sizeof(header);
 
-    memcpy(&buffer[index], data, count);
-    index += count;
+    if (count) {
+      memcpy(&buffer[index], data, count);
+      index += count;
+    }
     
     memcpy(&buffer[index], trailer, sizeof(trailer));
     index += sizeof(trailer);
     
-    brl->writeDelay += count * 1000 / chars_per_sec;
     if (!writeBytes(brl, buffer, index)) return 0;
   }
   return 1;
+}
+
+static int
+readPacket2 (BrailleDisplay *brl, char *buffer, int size) {
+  return 0;
+}
+
+static int
+writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, const unsigned char *data) {
+  unsigned char buffer[(count * 2) + 5];
+  unsigned char *byte = buffer;
+
+  *byte++ = cSTX;
+  *byte++ = 0X40 | command;
+  *byte++ = 0X50 | (count >> 4);
+  *byte++ = 0X50 | (count & 0XF);
+
+  while (count-- > 0) {
+    *byte++ = 0X30 | (*data >> 4);
+    *byte++ = 0X30 | (*data & 0XF);
+    data++;
+  }
+
+  *byte++ = cETX;
+  io->flushPort(brl);
+  return writeBytes(brl, buffer, byte-buffer);
 }
 
 static void
@@ -274,7 +463,7 @@ updateData (BrailleDisplay *brl, unsigned char xmtOffset, int size, const unsign
       data += index;
       xmtOffset += index;
       memcpy(buffer, data, size);
-      writeData(brl, XMT_BRLDATA+xmtOffset, size, buffer);
+      writePacket1(brl, XMT_BRLDATA+xmtOffset, size, buffer);
     }
   }
 }
@@ -283,7 +472,7 @@ static int
 disableOutputTranslation (BrailleDisplay *brl, unsigned char xmtOffset, int count) {
   unsigned char buffer[count];
   memset(buffer, 1, sizeof(buffer));
-  return writeData(brl, XMT_BRLWRITE+xmtOffset,
+  return writePacket1(brl, XMT_BRLWRITE+xmtOffset,
                    sizeof(buffer), buffer);
 }
 
@@ -295,12 +484,12 @@ initializeTable (BrailleDisplay *brl) {
 
 static void
 writeLine (BrailleDisplay *brl) {
-  writeData(brl, XMT_BRLDATA+xmtTextOffset, the_terminal->columns, currentLine);
+  writePacket1(brl, XMT_BRLDATA+xmtTextOffset, the_terminal->columns, currentLine);
 }
 
 static void
 writeStatus (BrailleDisplay *brl) {
-  writeData(brl, XMT_BRLDATA+xmtStatusOffset, the_terminal->statusCount, currentStatus);
+  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset, the_terminal->statusCount, currentStatus);
 }
 
 static void
@@ -323,7 +512,7 @@ restartTerminal (BrailleDisplay *brl) {
 #define RBF_RESET 2
 static int
 readBytes (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, int flags) {
-  if (readChunk(brl_fd, buffer, &offset, count, 1000)) {
+  if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == cETX) return 1;
     LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
@@ -389,7 +578,7 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
 }
 
 static int
-identifyTerminal(BrailleDisplay *brl) {
+identifyTerminal1 (BrailleDisplay *brl) {
   static const unsigned char badPacket[] = { 
     cSTX,
     cIdSend,
@@ -398,9 +587,9 @@ identifyTerminal(BrailleDisplay *brl) {
     cETX
   };
 
-  flushTerminal(brl);
+  io->flushPort(brl);
   if (writeBytes(brl, badPacket, sizeof(badPacket))) {
-    if (awaitInput(brl_fd, 1000)) {
+    if (io->awaitInput(1000)) {
       unsigned char identity[IDENTITY_LENGTH];			/* answer has 10 chars */
       if (readBytes(brl, identity, 0, 1, 0)) {
         if (identity[0] == cSTX) {
@@ -420,37 +609,56 @@ identifyTerminal(BrailleDisplay *brl) {
   return 0;
 }
 
+static int
+identifyTerminal2 (BrailleDisplay *brl) {
+  io->flushPort(brl);
+  if (writePacket2(brl, 2, 0, NULL)) {
+    if (io->awaitInput(1000)) {
+      unsigned char identity[20];			/* answer has 10 chars */
+      if (readPacket2(brl, identity, sizeof(identity))) {
+        if (identity[0] == cSTX) {
+          if (readBytes(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
+            if (identity[1] == cIdIdentify) {
+              if (interpretIdentity(identity, brl)) return 1;
+            } else {
+              LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
+            }
+          } else {
+            LogPrint(LOG_WARNING, "Malformed identification packet.");
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+static int
+identifyTerminal (BrailleDisplay *brl) {
+  if (io->tryProtocol1 && identifyTerminal1(brl)) return 1;
+  if (io->tryProtocol2 && identifyTerminal2(brl)) return 1;
+  return 0;
+}
+
 /* ------------------------------------------------------------ */
 
 static int 
-initializeDisplay (BrailleDisplay *brl, const char *dev, speed_t baud) {
-  if (openSerialDevice(dev, &brl_fd, &oldtio)) {
-    struct termios newtio;	/* new terminal settings */
-    memset(&newtio, 0, sizeof(newtio));
-    newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
-    newtio.c_iflag = IGNPAR;
-    newtio.c_oflag = 0;		/* raw output */
-    newtio.c_lflag = 0;		/* don't echo or generate signals */
-    newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-    newtio.c_cc[VTIME] = 0;
-    LogPrint(LOG_DEBUG, "Trying %d baud.", baud2integer(baud));
-    if (resetSerialDevice(brl_fd, &newtio, baud)) {
-      chars_per_sec = baud2integer(baud) / 10;
-      if (identifyTerminal(brl)) {
-        initializeTable(brl);
+initializeDisplay (BrailleDisplay *brl, char **parameters, const char *device) {
+  if (io->openPort(parameters, device)) {
+    charactersPerSecond = baud2integer(*baudRate) / 10;
+    if (identifyTerminal(brl)) {
+      initializeTable(brl);
 
-        memset(currentStatus, outputTable[0], the_terminal->statusCount);
-        writeStatus(brl);
+      memset(currentStatus, outputTable[0], the_terminal->statusCount);
+      writeStatus(brl);
 
-        memset(currentLine, outputTable[0], the_terminal->columns);
-        writeLine(brl);
+      memset(currentLine, outputTable[0], the_terminal->columns);
+      writeLine(brl);
 
-        resetState();
-        return 1;
-      }
+      resetState();
+      return 1;
     }
-    close(brl_fd);
-    brl_fd = -1;
+    io->closePort();
   }
   return 0;
 }
@@ -472,27 +680,30 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     makeOutputTable(&dots, &outputTable);
   }
 
-  if (!isSerialDevice(&device)) {
+  if (isSerialDevice(&device)) {
+    io = &serialOperations;
+
+#ifdef ENABLE_USB
+  } else if (isUsbDevice(&device)) {
+    io = &usbOperations;
+#endif /* ENABLE_USB */
+
+  } else {
     unsupportedDevice(device);
     return 0;
   }
 
-  while (1) {
-    const static speed_t speeds[] = {B19200, B38400, B0};
-    const static speed_t *speed = speeds;
-    if (initializeDisplay(brl, device, *speed)) return 1;
-    brl_close(brl);
-    if (*++speed == B0) return 0;
+  baudRate = io->baudRates;
+  while (*baudRate != B0) {
+    if (initializeDisplay(brl, parameters, device)) return 1;
+    ++baudRate;
   }
+  return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
-  if (brl_fd != -1) {
-    tcsetattr(brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
-    close(brl_fd);
-    brl_fd = -1;
-  }
+  io->closePort();
 }
 
 static void
