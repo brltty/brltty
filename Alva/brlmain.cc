@@ -1,18 +1,18 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
- *          using a soft Braille terminal
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
  *
- * Web Page: http://www.cam.org/~nico/brltty
- *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nicolas Pitre <nico@cam.org>.
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
 /* Alva/brl.c - Braille display library for Alva braille displays
@@ -112,8 +112,14 @@ extern "C"
 #include "../brl_driver.h"
 }
 
-#if USE_PARALLEL_PORT
-#include "alva_api.library/alva_api.h"
+#if USE_PARALLEL_PORT == 0
+   static int brl_fd;			/* file descriptor for Braille display */
+   static struct termios oldtio;		/* old terminal settings */
+#endif
+
+#if USE_PARALLEL_PORT == 1
+   #include <sys/perm.h>
+   #include "alva_api.library/alva_api.h"
 #endif
 
 
@@ -254,8 +260,6 @@ static char TransTable[256] =
 
 /* Global variables */
 
-static int brl_fd;			/* file descriptor for Braille display */
-static struct termios oldtio;		/* old terminal settings */
 static unsigned char *rawdata;		/* translated data to send to Braille */
 static unsigned char *prevdata;	/* previously sent raw data */
 static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
@@ -367,10 +371,13 @@ int SendToAlva( unsigned char *data, int len )
 static void initbrl (brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
-  struct termios newtio;	/* new terminal settings */
   int ModelID = MODEL;
-  unsigned char alva_init[]="\033FUN\006\r";
   unsigned char buffer[DIM_BRL_ID + 1];
+
+#if USE_PARALLEL_PORT == 0
+  struct termios newtio;	/* new terminal settings */
+  unsigned char alva_init[]="\033FUN\006\r";
+#endif
 
   res.disp = rawdata = prevdata = NULL;		/* clear pointers */
 

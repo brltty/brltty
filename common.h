@@ -1,18 +1,18 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
- *          using a soft Braille terminal
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
  *
- * Web Page: http://www.cam.org/~nico/brltty
- *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nicolas Pitre <nico@cam.org>.
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
 /*
@@ -66,8 +66,8 @@ struct brltty_param {
  * Shared variables
  */
 
-extern char VERSION[];			/* BRLTTY version string */
-extern char COPYRIGHT[];		/* BRLTTY copyright banner */
+extern char VERSION[];			/* BrlTty version string */
+extern char COPYRIGHT[];		/* BrlTty copyright banner */
 extern short opt_q;			/* quiet mode */
 extern volatile int keep_going;		/* zero after reception of SIGTERM */
 
@@ -80,7 +80,8 @@ extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */
 extern short csr_offright;		/* used for sliding window */
 
-extern unsigned char texttrans[256];	/* current braille translation table */
+extern unsigned char texttrans[256];	/* current text to braille translation table */
+extern unsigned char untexttrans[256];	/* current braille to text translation table */
 extern unsigned char statcells[22];	/* status cell buffer */
 
 

@@ -1,18 +1,18 @@
 ###############################################################################
+# BrlTty - A daemon providing access to the Linux console (when in text
+#          mode) for a blind person using a refreshable braille display.
 #
-# BRLTTY - Access software for Unix for a blind person
-#          using a soft Braille terminal
+# Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
 #
-# Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
-#
-# Web Page: http://www.cam.org/~nico/brltty
-#
-# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+# BrlTty comes with ABSOLUTELY NO WARRANTY.
 #
 # This is free software, placed under the terms of the
 # GNU General Public License, as published by the Free Software
 # Foundation.  Please see the file COPYING for details.
 #
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
 ###############################################################################
@@ -21,9 +21,10 @@
 # This Makefile is passed the variables CC, CFLAGS, LD, LDFLAGS, and LDLIBS
 ###############################################################################
 
-DRIVER = bl
-BLR_NAME = $(BRL_SO_NAME)bl.so.$(LIB_VER)
-BRL_FILES = $(LIBDIR)/$(BRL_NAME)
+DRIVER_CODE = bl
+DRIVER_NAME = BrailleLite
+BRAILLE_MODELS = 18/40
+SPEECH_MODELS = 
 include ../driver.mk
 
 brl.o: brl.c ../brl.h ../misc.h ../inskey.h ../message.h \
@@ -32,10 +33,4 @@ brl.o: brl.c ../brl.h ../misc.h ../inskey.h ../message.h \
 
 speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h brlconf.h
 	$(CC) $(SPK_CFLAGS) -c speech.c
-
-brl-lib-name:
-	echo -e "bl\tBrailleLite 18 / 40" >> $(BRLNAMES)
-
-spk-lib-name:
-	echo -e "bl\tBrailleLite" >> $(SPKNAMES)
 

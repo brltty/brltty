@@ -1,19 +1,18 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
- *          using a soft Braille terminal
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
- * See the GNU Public license for details in the ../COPYING file
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
- *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
 /*
@@ -234,7 +233,7 @@ static one_terminal pm_terminals[] =
     },
   },
 
-  { // TODO: check against 2.51 ?
+  {
     3,				/* identity */
     "Papenmeier Screen 2D Soft", /* name of terminal */
     "brltty-pm4.hlp",		/* filename of local helpfile */
@@ -281,17 +280,17 @@ static one_terminal pm_terminals[] =
       { CMD_NXDIFLN,  OFFS_FRONT + 10, 0 },
       { CMD_WINDN,    OFFS_FRONT + 11, 0 },
       { CMD_ATTRDN,   OFFS_FRONT + 12, 0 },
-      { CMD_CUT_BEG,  OFFS_FRONT + 13, 0 },
+      { CMD_CUT_END,  OFFS_FRONT + 13, 0 },
 
  				/* commands for 22 status keys */
       { CMD_HELP,        OFFS_STAT +  1, 0 },
       { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 },
       { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0 },
 
-      { CMD_CSRTRK,      OFFS_STAT +  5, 0 },
-      { CMD_DISPMD,      OFFS_STAT +  6, 0 },
-      { CMD_INFO,        OFFS_STAT +  7, 0 },
-      { CMD_FREEZE,      OFFS_STAT +  8, 0 },
+      { CMD_CSRTRK,      OFFS_STAT +  6, 0 },
+      { CMD_DISPMD,      OFFS_STAT +  7, 0 },
+      { CMD_INFO,        OFFS_STAT +  8, 0 },
+      { CMD_FREEZE,      OFFS_STAT +  9, 0 },
 
       { CMD_CONFMENU,    OFFS_STAT + 10, 0 },
       { CMD_SAVECONF,    OFFS_STAT + 11, 0 },

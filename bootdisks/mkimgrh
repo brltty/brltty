@@ -1,0 +1,326 @@
+#!/bin/bash
+
+programPath="${0}"
+programDirectory="${0%/*}"
+programName="${0##*/}"
+
+function programMessage {
+   local message="${1}"
+   echo >&2 "${programName}: ${message}"
+}
+
+function syntaxError {
+   local message="${1}"
+   programMessage "${message}"
+   exit 2
+}
+
+function makeExt2 {
+   local blockSize="${1}"
+   local blockCount="${2}"
+
+   if dd if=/dev/zero of="${rootImage}" bs="${blockSize}" count="${blockCount}"
+   then
+      if mke2fs -q -m 0 -L brltty-boot -b"${blockSize}" -F "${rootImage}" "${blockCount}"
+      then
+	 return 0
+      fi
+   fi
+   return 1
+}
+
+function makeDevices {
+   local systemDevices=/dev
+   local rootDevices="${rootMount}${systemDevices}"
+
+   local deviceName
+   for deviceName in $(cd "${systemDevices}" && echo console tty[0-9]* ttyS* vcs*)
+   do
+      local devicePath="${rootDevices}/${deviceName}"
+      if [ ! -a "${devicePath}" ]
+      then
+	 cp -a "${systemDevices}/${deviceName}" "${rootDevices}"
+	 if let "$? != 0"
+	 then
+	    return 1
+	 fi
+      fi
+   done
+   return 0
+}
+
+function makeInit {
+   local initName=init
+   local initSource="${brlttyDirectory}/bootdisks/${initName}.c"
+   local targetPath="$(awk '$1=="#define" && $2=="REAL_INIT" && $3~/^".*"$/ {print substr($3, 2, length($3)-2)}' "${initSource}")"
+   local targetDirectory="${rootMount}/${targetPath%/*}"
+   local targetName="${targetPath##*/}"
+   local initBinary="${targetDirectory}/${initName}"
+
+   if mv "${initBinary}" "${targetDirectory}/${targetName}"
+   then
+      if gcc -o "${initBinary}" -s -static "${initSource}"
+      then
+         return 0
+      fi
+   fi
+   return 1
+}
+
+function makeBrltty {
+   local returnCode=1
+
+   if pushd "${brlttyDirectory}" >/dev/null
+   then
+      local makeFile="${programName}.mk"
+      local messageFile="${programName}.mg"
+      awk '
+	 BEGIN {
+	    driverFound = 0
+	 }
+	 /^ *INSTALL_ROOT *=/ {
+	    sub("=.*$", "= " installRoot)
+	 }
+	 /^ *LDFLAGS *=/ {
+	    if ($0 !~ / -static/) {
+	       $0 = $0 " -static"
+	    }
+	 }
+	 /^ *BRL_TARGET *=/ {
+	    driverFound = 1
+	    driver = $0
+	    sub("^[^=]*= *", "", driver)
+	    sub(" *$", "", driver)
+	    if (brailleDriver == "") {
+	       brailleDriver = driver
+	       print "braille driver: " brailleDriver >"/dev/stderr"
+	    } else if (brailleDriver != driver) {
+	       print "already configured for different braille driver: " driver >"/dev/stderr"
+	       exit 1
+	    }
+	 }
+	 /^ *# *BRL_TARGET *=/ {
+	    if (brailleDriver != "") {
+	       driver = $0
+	       sub("^[^=]*= *", "", driver)
+	       sub(" *$", "", driver)
+	       if (driver == brailleDriver) {
+		  sub("^ *# *", "")
+		  driverFound = 1
+	       }
+	    }
+	 }
+	 /^ *BRLDEV *=/ {
+	    if (brailleDevice == "") {
+	       device = $0
+	       sub("^[^=]*= *", "", device)
+	       sub(" *$", "", device)
+	       print "braille device: " device >"/dev/stderr"
+	    } else {
+	       sub("=.*$", "= " brailleDevice)
+	    }
+	 }
+	 /^ *TEXTTRANS *=/ {
+	    if (brailleTable == "") {
+	       table = $0
+	       sub("^[^=]*= *", "", table)
+	       sub(" *$", "", table)
+	       print "braille table: " table >"/dev/stderr"
+	    } else {
+	       sub("=.*$", "= " brailleTable)
+	    }
+	 }
+	 {print $0}
+	 END {
+	    if (!driverFound) {
+	       print "braille driver not specified." >"/dev/stderr"
+	       exit 1
+	    }
+	 }
+      ' "installRoot=$(dirs -l -0)/${rootMount}" \
+	"brailleDriver=${brailleDriver}" \
+	"brailleDevice=${brailleDevice}" \
+	"brailleTable=${brailleTable}" \
+	Makefile >"${makeFile}" 2>"${messageFile}"
+      local awkRc="${?}"
+
+      (
+         exec <"${messageFile}"
+	 while read line
+	 do
+	    programMessage "${line}"
+	 done
+      )
+      rm "${messageFile}"
+
+      if let "awkRc == 0"
+      then
+	 if make -s -f "${makeFile}" install
+	 then
+	    returnCode=0
+	 fi
+      fi
+
+      rm -f "${makeFile}"
+      popd >/dev/null
+   fi
+
+   return "${returnCode}"
+}
+
+function fixLabels {
+   local prefix="${bootMount}/syslinux"
+   local oldFile="${prefix}.cfg"
+   local newFile="${prefix}.new"
+
+   if awk '
+	 /^ *append / {
+	    sub(" initrd=[^ ]*", " root=/dev/fd0 load_ramdisk=1 prompt_ramdisk=1")
+	 }
+         {print $0}
+      ' "${oldFile}" >"${newFile}"
+   then
+      mv "${newFile}" "${oldFile}"
+      return 0
+   fi
+   return 1
+}
+
+brailleDriver=""
+brailleDevice=""
+brailleTable=""
+inspectImages=0
+while getopts ':b:d:t:i' option
+do
+   case "${option}"
+   in
+      'b')
+	 brailleDriver="${OPTARG}"
+         ;;
+      'd')
+	 brailleDevice="${OPTARG}"
+         ;;
+      'i')
+	 inspectImages=1
+         ;;
+      't')
+	 brailleTable="${OPTARG}"
+         ;;
+      '?')
+	 syntaxError "invalid option: -${OPTARG}"
+         ;;
+      ':')
+	 syntaxError "missing value: -${OPTARG}"
+         ;;
+      *)
+         syntaxError "unimplemented option: -${option}"
+	 ;;
+   esac
+done
+shift $((OPTIND - 1))
+if let "$# != 0"
+then
+   syntaxError "too many parameters."
+fi
+
+brlttyDirectory=brltty
+mountExtension=mnt
+imageExtension=img
+gzipExtension=gz
+
+bootName=boot
+bootMount="${bootName}.${mountExtension}"
+bootImage="${bootName}.${imageExtension}"
+
+initrdName=initrd
+initrdMount="${initrdName}.${mountExtension}"
+initrdImage="${initrdName}.${imageExtension}"
+initrdFile="${bootMount}/${initrdImage}"
+
+rootName=root
+rootMount="${rootName}.${mountExtension}"
+rootImage="${rootName}.${imageExtension}"
+rootCompressed="${rootImage}.${gzipExtension}"
+
+imagesReady=0
+if mkdir "${bootMount}"
+then
+   if mount -o loop -t msdos "${bootImage}" "${bootMount}"
+   then
+      if gunzip -c "${initrdFile}" >"${initrdImage}"
+      then
+	 if mkdir "${initrdMount}"
+	 then
+	    if mount -o loop -t ext2 "${initrdImage}" "${initrdMount}"
+	    then
+	       if makeExt2 1024 3072
+	       then
+		  if mkdir "${rootMount}"
+		  then
+		     if mount -o loop -t ext2 "${rootImage}" "${rootMount}"
+		     then
+			rm -fr "${rootMount}/lost+found"
+			if cp -a "${initrdMount}"/* "${rootMount}"
+			then
+			   if makeDevices
+			   then
+			      if makeInit
+			      then
+				 if makeBrltty
+				 then
+				    if gzip -9 -c "${rootImage}" >"${rootCompressed}"
+				    then
+				       if fixLabels
+				       then
+					  if let "inspectImages"
+					  then
+					     export PS1="${programName}> "
+					     "${SHELL:-/bin/sh}"
+					  fi
+					  imagesReady=1
+				       fi
+				    fi
+
+				    if let "!imagesReady"
+				    then
+				       rm -f "${rootCompressed}"
+				    fi
+				 fi
+			      fi
+			   fi
+			fi
+
+			umount "${rootMount}"
+		     fi
+
+		     rmdir "${rootMount}"
+		  fi
+
+		  if let "imagesReady"
+		  then
+		     mv "${rootCompressed}" "${rootImage}"
+		  else
+		     rm "${rootImage}"
+		  fi
+	       fi
+
+	       umount "${initrdMount}"
+	    fi
+
+	    rmdir "${initrdMount}"
+	 fi
+      fi
+
+      rm -f "${initrdImage}"
+      umount "${bootMount}"
+   fi
+
+   rmdir "${bootMount}"
+fi
+
+if let "!imagesReady"
+then
+   exit 9
+fi
+
+exit 0

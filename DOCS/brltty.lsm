@@ -1,6 +1,6 @@
 Begin3
-Title:          BRLTTY - Access software for Unix for a blind person
-		         using a soft Braille terminal
+Title:          BRLTTY - A daemon providing access to the Linux console (when in text
+		         mode) for a blind person using a refreshable braille display.
 Version:        2.1
 Entered-date:   23MAR99
 Description:    BRLTTY is a daemon which provides access to a Unix console

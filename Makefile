@@ -1,21 +1,23 @@
 ###############################################################################
+# BrlTty - A daemon providing access to the Linux console (when in text
+#          mode) for a blind person using a refreshable braille display.
 #
-# BRLTTY - Access software for Unix for a blind person
-#          using a soft Braille terminal
+# Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
 #
-# Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
-#
-# Web Page: http://www.cam.org/~nico/brltty
-#
-# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+# BrlTty comes with ABSOLUTELY NO WARRANTY.
 #
 # This is free software, placed under the terms of the
 # GNU General Public License, as published by the Free Software
 # Foundation.  Please see the file COPYING for details.
 #
-# This software is maintained by Nicolas Pitre <nico@cam.org>.
+# Web Page: http://mielke.cc/brltty/
 #
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
+
+
+INSTALL_ROOT = 
+PREFIX =
 
 
 # If you would like the driver for your Braille display built into the
@@ -25,11 +27,13 @@
 # and you will need to specify the display type at run-time via -b.
 # Note to maintainer:
 #    When adding a new target here, add it also to the "BRL_TARGETS =" line.
-#BRL_TARGET = Alva
+BRL_TARGET = Alva
 #BRL_TARGET = BrailleLite
+#BRL_TARGET = BrailleNote
 #BRL_TARGET = CombiBraille
 #BRL_TARGET = EcoBraille
 #BRL_TARGET = EuroBraille
+#BRL_TARGET = HandyTech
 #BRL_TARGET = MDV
 #BRL_TARGET = MiniBraille
 #BRL_TARGET = MultiBraille
@@ -37,7 +41,7 @@
 #BRL_TARGET = TSI
 #BRL_TARGET = Vario
 #BRL_TARGET = Vario-HT
-#BRL_TARGET = Videobraille
+#BRL_TARGET = VideoBraille
 #BRL_TARGET = VisioBraille
 
 # If you would like the driver for your speech interface built into the
@@ -58,10 +62,21 @@
 #SPK_TARGET = GenericSay
 #SPK_TARGET = Televox
 
-# Specify the default, compiled-in text translation table.  This can be
+# Specify the default, compiled-in, text translation table.  This can be
 # overridden at run-time by giving brltty the -t option.
-# See the content of the BrailleTable directory for available tables.
-TEXTTRANS = text.us.tbl
+# Uncomment exactly one of the following lines.
+# See the content of the BrailleTables directory for more tables.
+#TEXTTRANS = text.es.tbl      # Spanish
+#TEXTTRANS = text.french.tbl  # French
+#TEXTTRANS = text.german.tbl  # German
+#TEXTTRANS = text.it.tbl      # Italian
+#TEXTTRANS = text.no-h.tbl    # Norwegian and German
+#TEXTTRANS = text.no-p.tbl    # Norwegian
+#TEXTTRANS = text.simple.tbl  # American English
+#TEXTTRANS = text.sweden.tbl  # Swedish
+#TEXTTRANS = text.swedish.tbl # Swedish
+#TEXTTRANS = text.uk.tbl      # United Kingdom English
+#TEXTTRANS = text.us.tbl      # American English
 
 # Specify the device name for the serial port your Braille display will
 # normally be connected to.  For port com(n), use /dev/ttyS(n-1) -
@@ -74,12 +89,8 @@ BRLDEV = /dev/ttyS0
 # boot-time, the executable and all data files should be in your root
 # filesystem.
 
-# Specify the full path of the `brltty' executable:
-EXEC_PATH = /sbin/brltty
-
-# Specify the full path of the script used for reinstalling from a working
-# system:
-REINSTALL_PATH = /sbin/install-brltty
+# Specify the directory where the executable programs are to be placed:
+PROG_DIR = /sbin
 
 # Specify the directory where BRLTTY keeps its translation tables and its
 # help files.  If this directory doesn't exist it will be created.
@@ -87,7 +98,7 @@ REINSTALL_PATH = /sbin/install-brltty
 DATA_DIR = /etc/brltty
 
 # where to look for libs
-LIB_PATH = /lib/brltty
+LIB_DIR = /lib/brltty
 
 # Edit this definition (options for install(1)) if you want to install
 # setuid or setgid to allow ordinary users to start it.  For instance,
@@ -144,17 +155,20 @@ LD = gcc
 COMMONLDFLAGS = -rdynamic
 LDFLAGS = $(COMMONLDFLAGS) -s
 #LDFLAGS = $(COMMONLDFLAGS) -g
-LDLIBS = -ldl
+LDLIBS = -ldl -lpthread -lm -lc
 
-PREFIX =
+###############################################################################
+
+ifeq ($(TEXTTRANS),)
+   TEXTTRANS = text.simple.tbl
+endif
 
 INSTALL_DRIVERS =
 
-BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV MiniBraille MultiBraille Papenmeier TSI Vario Vario-HT Videobraille VisioBraille
-BRL_LIBS = al bl cb ec eu md mn mb pm ts va vh vd vs
+BRL_TARGETS = Alva BrailleLite BrailleNote CombiBraille EcoBraille EuroBraille HandyTech MDV MiniBraille MultiBraille Papenmeier TSI Vario Vario-HT VideoBraille VisioBraille
+BRL_LIBS = al bl bn cb ec eu ht md mn mb pm ts va vh vd vs
 
-SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival \
-   GenericSay Televox
+SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival GenericSay Televox
 SPK_LIBS = no al bl cb es fv gs tv
 
 # ------------------------ DO NOT EDIT BELOW THIS LINE ------------------------
@@ -165,7 +179,7 @@ SPK_LIBS = no al bl cb es fv gs tv
 all: brltty install-brltty txt2hlp brltest scrtest
 
 install-brltty: install.template
-	sed -e 's%=E%$(EXEC_PATH)%g' -e 's%=I%$(REINSTALL_PATH)%g' \
+	sed -e 's%=P%$(PREFIX)$(PROG_DIR)%g' -e 's%=L%$(PREFIX)$(LIB_DIR)%g' \
 	  -e 's%=D%$(DATA_DIR)%g' -e 's%=V%$(VCSADEV)%g' install.template > $@
 
 SCREEN_OBJECTS = scr.o scrdev.o $(SCR_O)
@@ -193,8 +207,15 @@ endif
 
 BRLTTY_OBJECTS = main.o config.o csrjmp.o misc.o beeps.o cut-n-paste.o $(INSKEY_O) spk_load.o brl_load.o
 
+brltty-static.o: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
+	ld -r -static -o $@ \
+	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
+
+brltty-static: brltty-static.o
+	$(LD) $(LDFAGS) -Wl,-rpath,$(LIB_DIR) -o $@ $<
+
 brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
-	$(LD) $(LDFLAGS) -Wl,-rpath,$(LIB_PATH) -o $@ \
+	$(LD) $(LDFLAGS) -Wl,-rpath,$(LIB_DIR) -o $@ \
 	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
 main.o: main.c brl.h spk.h scr.h csrjmp.h inskey.h beeps.h cut-n-paste.h \
@@ -203,7 +224,7 @@ main.o: main.c brl.h spk.h scr.h csrjmp.h inskey.h beeps.h cut-n-paste.h \
 
 config.o: config.c config.h brl.h spk.h scr.h beeps.h message.h misc.h common.h
 	$(CC) $(CFLAGS) \
-		'-DHOME_DIR="$(DATA_DIR)"' \
+		'-DHOME_DIR="$(PREFIX)$(DATA_DIR)"' \
 		'-DBRLLIBS="$(BRL_LIBS)"' \
 		'-DSPKLIBS="$(SPK_LIBS)"' \
 		'-DBRLDEV="$(BRLDEV)"' -c config.c
@@ -224,7 +245,7 @@ inskey_lnx.o: inskey_lnx.c inskey.h
 	$(CC) $(CFLAGS) -c inskey_lnx.c
 
 spk_load.o: spk_load.c spk.h brl.h misc.h
-	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' $(BUILTIN_SPEECH) -c spk_load.c 
+	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_DIR)"' $(BUILTIN_SPEECH) -c spk_load.c 
 
 dynamic-speech:
 	rm -f lib/brltty-spk.lst
@@ -236,7 +257,7 @@ static-speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
 brl_load.o: brl_load.c brl.h misc.h
-	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' $(BUILTIN_BRAILLE) -c brl_load.c 
+	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_DIR)"' $(BUILTIN_BRAILLE) -c brl_load.c 
 
 dynamic-braille: txt2hlp
 	rm -f lib/brltty-brl.lst
@@ -262,7 +283,7 @@ scr_shm.o: scr_shm.cc scr_shm.h scr.h scrdev.h config.h
 speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
-BRLTEST_OBJECTS = brltest.o misc.o brl_load.o
+BRLTEST_OBJECTS = brltest.o misc.o beeps.o brl_load.o
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 	$(LD) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
@@ -306,40 +327,41 @@ comptable.o: comptable.c
 install: install-programs install-help install-tables $(INSTALL_DRIVERS) install-devices
 
 install-programs: brltty install-brltty txt2hlp
-	install $(INSTALL_EXEC) --strip brltty $(PREFIX)$(EXEC_PATH) 
-	install $(INSTALL_EXEC) install-brltty $(PREFIX)$(REINSTALL_PATH) 
+	install --directory $(INSTALL_ROOT)$(PREFIX)$(PROG_DIR) 
+	install $(INSTALL_EXEC) --strip brltty $(INSTALL_ROOT)$(PREFIX)$(PROG_DIR) 
+	install $(INSTALL_EXEC) install-brltty $(INSTALL_ROOT)$(PREFIX)$(PROG_DIR) 
 
 install-help: brltty
-	install --directory $(PREFIX)$(DATA_DIR) 
-	install --mode=0644 help/* $(PREFIX)$(DATA_DIR) 
+	install --directory $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR) 
+	install --mode=0644 help/* $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR) 
 
 install-tables:
-	install --directory $(PREFIX)$(DATA_DIR) 
-	install -m 644 BrailleTables/*.tbl $(PREFIX)$(DATA_DIR)
+	install --directory $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR) 
+	install -m 644 BrailleTables/*.tbl $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)
 
 install-drivers: brltty
-	install --directory $(PREFIX)$(LIB_PATH)
-	install $(INSTALL_LIB) lib/* $(PREFIX)$(LIB_PATH)
+	install --directory $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)
+	install $(INSTALL_LIB) lib/* $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)
 
 install-devices:
 	if [ "$(VCSADEV)" ]; \
 	then \
-	  if [ ! -c $(PREFIX)$(VCSADEV) ]; \
+	  if [ ! -c $(INSTALL_ROOT)$(PREFIX)$(VCSADEV) ]; \
 	  then \
-	    mknod -m o= $(PREFIX)$(VCSADEV) c 7 128; \
-	    chown root.tty $(PREFIX)$(VCSADEV); \
-	    chmod 660 $(PREFIX)$(VCSADEV); \
+	    mknod -m o= $(INSTALL_ROOT)$(PREFIX)$(VCSADEV) c 7 128; \
+	    chown root.tty $(INSTALL_ROOT)$(PREFIX)$(VCSADEV); \
+	    chmod 660 $(INSTALL_ROOT)$(PREFIX)$(VCSADEV); \
 	  fi; \
 	fi
 
 uninstall:
-	rm -f $(PREFIX)$(EXEC_PATH) $(PREFIX)$(REINSTALL_PATH)
-	rm -f $(PREFIX)$(LIB_PATH)/$(LIB_SO_NAME)*
-	rm -f $(PREFIX)$(LIB_PATH)/brltty-*.lst
-	rmdir $(PREFIX)$(LIB_PATH)
-	rm -f $(PREFIX)$(DATA_DIR)/*.tbl
-	rm -f $(PREFIX)$(DATA_DIR)/brltty*
-	rmdir $(PREFIX)$(DATA_DIR)
+	rm -f $(INSTALL_ROOT)$(PREFIX)$(PROG_DIR)/brltty $(INSTALL_ROOT)$(PREFIX)$(PROG_DIR)/install-brltty
+	rm -f $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)/$(LIB_SO_NAME)*
+	rm -f $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)/brltty-*.lst
+	rmdir $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)
+	rm -f $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)/*.tbl
+	rm -f $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)/brltty*
+	rmdir $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)
 
 clean:
 	rm -f *.o */*.o lib/* help/* install-brltty *.auto.h core

@@ -1,6 +1,23 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   Add the HandyTech driver. Andreas Gross <andi@andi-bika.de>
+   Add cut-and-paste for VideoBraille. (Christian Comaschi)
+   List translation tables in make file. (dm)
+   Version 1.0 of the EuroBraille driver. Yannick Plassiard <Yannick.Plassiard@free.fr>
+   MiniBraille delay after write fixed. (dm)
+   BrailleNote driver added. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
+   Vario driver can now be statically linked. (dm)
+   Cleaned up Papenmeier log messages. (dm)
+   Log Papenmeier display type even if unknown. (dm)
+   Fixed Papenmeier type 3 status key assignments: 5-8 -> 6-9 (dm)
+   Redefined Papenmeier type 3 front key 13 to cut_end from cut_beg. (dm)
+   Rename environment variable BRLTTY_CONF to BRLTTY_PM_CONF. (dm)
+   Stop GenericSay from reannouncing brltty version during cursor routing. (dm)
+   Close console file descriptor in switchvt. (dm)
+   Change directory to right place if PREFIX is set. (dm)
+   INSTALL_ROOT added to make file. (dm)
+
 June 26, 2001:
  - BRLTTY 2.98 released:
  - fixes to the TSI driver for Navigator 80, by Stéphane Doyon
@@ -60,7 +77,7 @@ March 2001:
 23 May 2000:
  - version 2.90 (beta):
  - Tieman MultiBraille driver, contributed by Wolfgang Astleitner
-   <w.astleitner@jk.uni-linz.ac.at>
+   <wolfgang.astleitner@liwest.at>
  - Put startbrl() back after daemonized because some drivers expect to have
    all life time to probe for a terminal.  Created inithlpscr() instead.
  - Replaced 'g++' by 'gcc' in the Makefile eliminating dependencies 

@@ -1,19 +1,18 @@
 ###############################################################################
+# BrlTty - A daemon providing access to the Linux console (when in text
+#          mode) for a blind person using a refreshable braille display.
 #
-# BRLTTY - Access software for Unix for a blind person
-#          using a soft Braille terminal
+# Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
 #
-# Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
-#
-# Web Page: http://www.cam.org/~nico/brltty
-#
-# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+# BrlTty comes with ABSOLUTELY NO WARRANTY.
 #
 # This is free software, placed under the terms of the
 # GNU General Public License, as published by the Free Software
 # Foundation.  Please see the file COPYING for details.
 #
-# This software is maintained by Nicolas Pitre <nico@cam.org>
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
 ###############################################################################
@@ -24,7 +23,9 @@
 # and LDLIBS from the main Makefile
 ###############################################################################
 
-DRIVER = pm
+DRIVER_CODE = pm
+DRIVER_NAME = Papenmeier
+BRAILLE_MODELS = 
 TARGETS = brl.c brlconf.h brl-cfg.h \
 	read_config.c cmd.h hlp.h \
 	../brl_driver.h ../brl.h ../scr.h ../misc.h
@@ -42,9 +43,6 @@ read_confg: read_config.c
 
 serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c
 	$(CC) $(CFLAGS) serial.c -o serial -lncurses 
-
-brl-lib-name: $(HELPFILE1)
-	echo -e "pm\tPapenmeier displays" >> $(BRLNAMES)
 
 cmd.h: $(BRL_H)
 	awk '/#define CMD_/ { \
@@ -65,14 +63,14 @@ brltty.pm.conf: read_config
 	./read_config d > brltty.pm.conf
 
 braille-help: brltty.pm.conf
-	for target in brltty-$(DRIVER)?.hlp; \
+	for target in brltty-$(DRIVER_CODE)?.hlp; \
 	do ../txt2hlp $(HELPDIR)/$$target $$target; \
 	done
 	cp brltty.pm.conf $(HELPDIR)/
 
 distclean:
 	rm -f serial readconfig *.good *.diff  *.out read_config.c \
-		brltty-$(DRIVER)?.hlp brltty.pm.conf \
+		brltty-$(DRIVER_CODE)?.hlp brltty.pm.conf \
 		cmd.h hlp.h read_config dump-codes
 
 ###############################################################

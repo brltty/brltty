@@ -1,16 +1,18 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
- *          using a soft Braille terminal
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
  *
- * Web Page: http://www.cam.org/~nico/brltty
- *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
 /* This Driver was written as a project in the
@@ -166,14 +168,16 @@ identify_terminal(brldim *brl)
       LogPrint(LOG_ERR,"len(%d) != size (%d)", len, sizeof(buf));
       continue;			/* try again */
     }
+    LogAndStderr(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
+		 buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8]);
     for(tn=0; tn < num_terminals; tn++)
       if (pm_terminals[tn].ident == buf[2])
 	{
 	  the_terminal = &pm_terminals[tn];
-	  LogAndStderr(LOG_ERR, "%s  Version: %d.%d%d (%02x%02x%02x)", 
+	  LogAndStderr(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
 		       the_terminal->name,
-		       buf[3], buf[4], buf[5],
-		       buf[6], buf[7], buf[8]);
+		       the_terminal->x, the_terminal->y,
+		       the_terminal->helpfile);
 	  brl->x = the_terminal->x;
 	  brl->y = the_terminal->y;
 
@@ -182,8 +186,6 @@ identify_terminal(brldim *brl)
 
 	  // TODO: ?? HACK
 	  braille->helpfile = the_terminal->helpfile;
-	  LogAndStderr(LOG_NOTICE, "Braille Help File: changed to %s", 
-		       braille->helpfile);
 
 	  // key codes - starts at 0x300 
 	  // status keys - routing keys - step 3
@@ -308,10 +310,9 @@ initbrl (brldim *brl, const char *dev)
   }
   if (the_terminal==NULL) {
     closebrl(brl);
-    LogAndStderr(LOG_ERR, "unknown Terminal type - exit");
+    LogAndStderr(LOG_ERR, "unknown braille terminal type");
     exit(9);
   }
-  LogAndStderr(LOG_ERR, "Size: %d x %d", brl->x, brl->y);
 }
 
 
@@ -342,7 +343,7 @@ identbrl (void)
 
   /* read the config file for individual configurations */
 #ifdef READ_CONFIG
-  LogAndStderr(LOG_INFO, "look for config file");
+  LogAndStderr(LOG_DEBUG, "look for config file");
   read_config();
 #endif
 }
@@ -642,8 +643,7 @@ static void read_file(char* name)
   LogAndStderr(LOG_DEBUG, "open config file %s", name);
   configfile = fopen(name, "r");
   if (configfile == NULL) {
-    perror("open config");
-    LogPrint(LOG_ERR, "error: open config file %s", name);
+    perror(name);
     return;
   }
   LogAndStderr(LOG_DEBUG, "read config file %s", name);

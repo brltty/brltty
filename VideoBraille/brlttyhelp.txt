@@ -17,3 +17,10 @@ Other functions:
     Attr  Toggle attributes
     Menu+Curs  View info
     Attr+Down  View help
+
+Cut & Paste
+    Small button+Edit  Mark beginning of block
+    Small button+Menu  Mark the end of block
+    Attr+Menu  Paste
+Warning: small button stands for one of the 40 small buttons on the display.
+Warning: don't press Edit or Menu before the small button.

@@ -1,31 +1,64 @@
-This is the EuroBraille family driver for BRLTTY, version 0.6
+This is the EuroBraille family driver for BRLTTY, version 1.0
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
 This code is copyrighted under the GNU Public License.  See the file
 COPYING included with BRLTTY for details.
 
-This driver is currently maintained by Yannick Plassiard (me).
-It is currently tested on a Clio-noteBraille 40 with Linux Mandrake 6.0.
+This driver is currently maintained by Yannick Plassiard 
+	<Yannick.Plassiard@free.fr>
+
+SUPPORTED HARDWARE
+==================
+All EuroBraille's displays should be supported here. However it has been tested
+on the following hardware:
+   - a Clio-Notebraille display (20 and 40 cells);
+   - a Scriba display (40 cells only at this time);
+   - Someone reported that it worked pretty well with an Azerbraille display;
+   - The driver is although tested with a NoteBraille display in order to 
+     maintain backward compatibility.
+
 
 FIXES/ADDITIONS
 ===============
-1. Added possibility to enter letters directly from the Braille Keyboard
-   Note that the table implemented is the CBIFS (Code Braille International
-   French Standard). Other tables will be included in other versions.
-   If you want me to implement a specific table, just E-mkil me and I'll do
-   it for you. :)
+Version 1.0 :
+   - added an internal menu to allow console switching or to enter in the help 
+     Here, a Scriba-like interface was implemented. Read the "README.menu"
+     file if you didn't use a Scriba (or the Draculawin program) before to
+     learn more about this menu.
+   - When the drivers starts, it now plays a melody on the terminal's internal 
+     speaker. This was made to ensure the user that the driver is loaded and is
+     ready to be used.
 
-2. Changed configuration of the linear and keypad keyboard, the E key  is
-   now used to move the braille display to the left and the C key is used
-   to display the help screen.
+Version 0.9: 
+   - You can now view the internal date/time of your display, typing "#M" (or
+     "Alpha+L9" on a Scriba). This doesn't work very well - don't know why...
 
-3. Fix the "enter" bug ("\n" is now replaced by "\x0d").
+Version 0.8:
+   - Minor changes were made in the use of the "inskey()" function.
+   - Fixed bugs in the ViewOn() and the Program() functions.
 
-Comments are strongly welcomed, even if they are negatives :) because I
-don't know how many people use the EuroBraille version of BRLTTY in the world
-so if you use this driver, just e-mail me what are your suggestions for next
-versions.
+Version 0.7: 
+   - Added the "Programming" and the "View on" functions. Their respective 
+     behaviors are as in the DOS program (ReadBraille). See the "README.model"
+     file where "Model" is the name of your display. Actually, files are 
+     written for the Clio-Notebraille and the Scriba displays.
+
+Version 0.6:
+   - Fixed the "enter bug": The "\n" inserted code is now replaced by "\x0D".
+
+Version 0.5: 
+   - Added the ability for the user to type letters directly from his/her
+     terminal. The table implemented is the CBIFS (French) table.
+
+Comments are strongly welcomed, because I don't know how many people use the 
+EuroBraille version of BRLTTY in the world so if you use this driver, just 
+e-mail me what are your suggestions for next versions.
 
 Yannick Plassiard <Yannick.Plassiard@free.fr>
-    Jully 19 2000
+    Jully 02 2001
+
+
+
+
+

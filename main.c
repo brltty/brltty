@@ -1,18 +1,18 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
- *          using a soft Braille terminal
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
  *
- * Web Page: http://www.cam.org/~nico/brltty
- *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nicolas Pitre <nico@cam.org>.
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
 /*
@@ -41,8 +41,8 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.98 (beta)";
-char COPYRIGHT[] = "Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved.";
+char VERSION[] = "BrlTty 2.99 (beta)";
+char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BrlTty Team.  All rights reserved.";
 
 /*
  * Misc param variables
@@ -85,6 +85,7 @@ unsigned char texttrans[256] =
 {
   #include "text.auto.h"
 };
+unsigned char untexttrans[256];
 
 unsigned char attribtrans[256] =
 {
@@ -895,14 +896,12 @@ main (int argc, char *argv[])
 	      int arg = keypress &0xFF;
 	      switch(key) {
 	      case VAL_PASSTHRU: {
-		char buf[2] = { arg, 0 };
+		char buf[] = {arg, 0};
 		inskey (buf);
 		break;
 	      }
 	      case VAL_BRLKEY: {
-		char buf[2] = { keypress&0xFF, 0 };
-		int i;
-		for (i=0;i<256;i++) { if (texttrans[i]==(arg)) buf[0]=i; }
+		char buf[] = {untexttrans[arg], 0};
 		inskey(buf);
 		break;
 	      }
@@ -921,7 +920,7 @@ main (int argc, char *argv[])
 		cut_end (p->winx + arg, p->winy);
 		break;
 	      case CR_SWITCHVT:
-		if(arg < 12)
+		if(arg < 0X3F)
 		  switchvt(arg+1);
 		break;
 	      case CR_NXINDENT:
@@ -1103,7 +1102,6 @@ main (int argc, char *argv[])
 	      statcells [STAT_tracking] = p->csrtrk;
 	      statcells [STAT_dispmode] = p->dispmode;
 	      statcells [STAT_frozen] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
-	      statcells [STAT_visible] = 0;
 	      statcells [STAT_visible] = env.csrvis;
 	      statcells [STAT_size] = env.csrsize;
 	      statcells [STAT_blink] = env.csrblink;
@@ -1259,7 +1257,7 @@ main (int argc, char *argv[])
     }
 
   clrbrlstat ();
-  message ("BRLTTY terminating", 0);
+  message ("BrlTty terminating.", 0);
   closescr ();
 
   /*

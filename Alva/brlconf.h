@@ -1,18 +1,18 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
- *          using a soft Braille terminal
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
  *
- * Web Page: http://www.cam.org/~nico/brltty
- *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nicolas Pitre <nico@cam.org>.
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
 /* Alva/brlconf.h - Configurable definitions for the Alva driver
@@ -53,20 +53,25 @@
  * Nothe that this requires the appropriate extra library and modification
  * in the Makefile.  See the README file for details.
  */
-#define USE_PARALLEL_PORT 0
+#ifndef USE_PARALLEL_PORT
+   #define USE_PARALLEL_PORT 0
+#endif
 
 
-/* If you defined USE_PARALLEL_PORT to 1, this is where you should define
- * the address of the parallel port your ABT will be connected to.
- */
-#define LPT_PORT 0x378
+#if USE_PARALLEL_PORT == 0
+   /* If you defined USE_PARALLEL_PORT to 0, then the serial line baudrate
+    * is defined here.  Note that default braille serial device is defined 
+    * in ../Makefile
+    */
+   #define BAUDRATE B9600
+#endif
 
-
-/* If you defined USE_PARALLEL_PORT to 0, then the serial line baudrate
- * is defined here.  Note that default braille serial device is defined 
- * in ../Makefile
- */
-#define BAUDRATE B9600
+#if USE_PARALLEL_PORT == 1
+   /* If you defined USE_PARALLEL_PORT to 1, this is where you should define
+    * the address of the parallel port your ABT will be connected to.
+    */
+   #define LPT_PORT 0x378
+#endif
 
 
 /* typematic settings */

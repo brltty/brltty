@@ -1,7 +1,7 @@
-BRLTTY - Access software for Unix for a blind person
-         using a soft Braille terminal
+BrlTty - A daemon providing access to the Linux console (when in text
+         mode) for a blind person using a refreshable braille display.
 
-Version 2.90 (beta), May 23rd 2000
+Version 2.99 (beta), June 2001
 
 Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 

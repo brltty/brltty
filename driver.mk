@@ -1,20 +1,18 @@
 ###############################################################################
+# BrlTty - A daemon providing access to the Linux console (when in text
+#          mode) for a blind person using a refreshable braille display.
 #
-# BRLTTY - Access software for Unix for a blind person
-#          using a soft Braille terminal
+# Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
 #
-# Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
-#
-# Web Page: http://www.cam.org/~nico/brltty
-#
-# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+# BrlTty comes with ABSOLUTELY NO WARRANTY.
 #
 # This is free software, placed under the terms of the
 # GNU General Public License, as published by the Free Software
 # Foundation.  Please see the file COPYING for details.
 #
-# This software is maintained by Nicolas Pitre <nico@cam.org>.
+# Web Page: http://mielke.cc/brltty/
 #
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
 ###############################################################################
@@ -32,36 +30,46 @@ LIBDIR = ../lib
 BRLNAMES = $(LIBDIR)/brltty-brl.lst
 SPKNAMES = $(LIBDIR)/brltty-spk.lst
 
-HELPNAME = brltty-$(DRIVER).hlp
+HELPNAME = brltty-$(DRIVER_CODE).hlp
 HELPFILE = $(HELPDIR)/$(HELPNAME)
 $(HELPFILE): brlttyh*.txt
 	../txt2hlp $(HELPFILE) brlttyh*.txt
 
 braille-help: $(HELPFILE)
 
-BRL_CFLAGS = $(LIB_CFLAGS) '-DBRLDRIVER="$(DRIVER)"' '-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
+BRL_CFLAGS = $(LIB_CFLAGS) '-DBRLDRIVER="$(DRIVER_CODE)"' '-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
 BRL_LFLAGS = -shared
 BRL_SO_NAME = $(LIB_SO_NAME)b
-BRL_NAME = $(BRL_SO_NAME)$(DRIVER).so.$(LIB_VER)
+BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).so.$(LIB_VER)
 BRL_FILE = $(LIBDIR)/$(BRL_NAME)
 $(BRL_FILE): brl.o
 	$(LD) $(BRL_LFLAGS) -soname $(BRL_NAME) -o $(BRL_FILE) brl.o -lc
 
-ifeq ($(BRL_FILES),)
-   BRL_FILES = $(BRL_FILE)
-endif
-braille-driver: $(BRL_FILES)
+braille-driver: $(BRL_FILE)
 
-SPK_CFLAGS = $(LIB_CFLAGS) '-DSPKDRIVER="$(DRIVER)"'
+SPK_CFLAGS = $(LIB_CFLAGS) '-DSPKDRIVER="$(DRIVER_CODE)"'
 SPK_LFLAGS = -shared
 SPK_SO_NAME = $(LIB_SO_NAME)s
-SPK_NAME = $(SPK_SO_NAME)$(DRIVER).so.$(LIB_VER)
+SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).so.$(LIB_VER)
 SPK_FILE = $(LIBDIR)/$(SPK_NAME)
 $(SPK_FILE): speech.o
 	$(LD) $(SPK_LFLAGS) -soname $(SPK_NAME) -o $(SPK_FILE) speech.o -lc
 
-ifeq ($(SPK_FILES),)
-   SPK_FILES = $(SPK_FILE)
+speech-driver: $(SPK_FILE)
+
+ifeq ($(BRAILLE_MODELS),)
+   BRAILLE_DESCRIPTION = $(DRIVER_NAME)
+else
+   BRAILLE_DESCRIPTION = $(DRIVER_NAME) [$(BRAILLE_MODELS)]
 endif
-speech-driver: $(SPK_FILES)
+brl-lib-name:
+	echo -e "$(DRIVER_CODE)\t$(BRAILLE_DESCRIPTION)" >>$(BRLNAMES)
+
+ifeq ($(SPEECH_MODELS),)
+   SPEECH_DESCRIPTION = $(DRIVER_NAME)
+else
+   SPEECH_DESCRIPTION = $(DRIVER_NAME) [$(SPEECH_MODELS)]
+endif
+spk-lib-name:
+	echo -e "$(DRIVER_CODE)\t$(SPEECH_DESCRIPTION)" >>$(SPKNAMES)
 

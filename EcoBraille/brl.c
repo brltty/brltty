@@ -1,18 +1,18 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
- *          using a soft Braille terminal
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
  *
- * Web Page: http://www.cam.org/~nico/brltty
- *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nicolas Pitre <nico@cam.org>.
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
 /* EcoBraille/brl.c - Braille display library for ECO Braille series
@@ -133,7 +133,7 @@ static char BRL_ID[] = "\x10\x02\xF1";
 #define DIM_BRL_ID 3
 static char SYS_READY[] = "\x10\x02\xF1\x57\x57\x57\x10\x03";
 #define DIM_SYS_READY 8
-static char BRL_READY[] = "\x10\x02\x2E";
+static char BRL_READY[] __attribute__((unused)) = "\x10\x02\x2E";
 #define DIM_BRL_READY 3
 static char BRL_WRITE_PREFIX[] = "\x61\x10\x02\xBC";
 #define DIM_BRL_WRITE_PREFIX 4

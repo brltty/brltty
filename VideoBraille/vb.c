@@ -1,3 +1,20 @@
+/*
+ * BrlTty - A daemon providing access to the Linux console (when in text
+ *          mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ *
+ * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation.  Please see the file COPYING for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
+
 /* Thanks to the authors of the Vario-HT driver: the implementation of this
    driver is similar to the Vario-HT one. */
 #include <stdio.h>
@@ -13,7 +30,7 @@
 static unsigned char lastbuff[40];
 
 static void identbrl(void) {
-  LogAndStderr(LOG_NOTICE, "Videobraille Driver");
+  LogAndStderr(LOG_NOTICE, "VideoBraille Driver");
 }
 
 static void initbrl(brldim *brl, const char *dev) {
@@ -37,7 +54,6 @@ static void closebrl(brldim *brl) {
 static void writebrl(brldim *brl) {
   char outbuff[40];
   int i;
-  long j;
 
   if (!brl || !brl->disp) {
     return;
@@ -60,7 +76,7 @@ static void writebrl(brldim *brl) {
 }
 
 static void setbrlstat (const unsigned char *st) {
-// The Videobraille display has no status cells
+// The VideoBraille display has no status cells
 }
 
 static int readbrl(int type) {
@@ -82,8 +98,17 @@ static int readbrl(int type) {
     else if (buttons.bigbuttons==KEY_DOWN) return CMD_LNDN;
     else if (buttons.bigbuttons==KEY_ATTRIBUTES) return CMD_ATTRVIS;
     else if (buttons.bigbuttons==KEY_CURSOR) return CMD_CSRVIS;
-    else if (buttons.bigbuttons==KEY_HOME) return CMD_HOME;
-    else if (buttons.bigbuttons==KEY_MENU) return CMD_CONFMENU;
+    else if (buttons.bigbuttons==KEY_HOME) {
+      /* If a routing key has been pressed, then mark the beginning of a block;
+         go to cursor position otherwise */
+      return (buttons.routingkey>0) ? CR_BEGBLKOFFSET+buttons.routingkey-1 : CMD_HOME;
+    }
+    else if (buttons.bigbuttons==KEY_MENU) {
+      /* If a routing key has been pressed, then mark the end of a block;
+         go to configuration menu otherwise */
+      return (buttons.routingkey>0) ? CR_ENDBLKOFFSET+buttons.routingkey-1 : CMD_CONFMENU;
+    }
+    else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_MENU)) return CMD_PASTE;
     else if (buttons.bigbuttons==(KEY_CURSOR | KEY_LEFT)) return CMD_CHRLT;
     else if (buttons.bigbuttons==(KEY_HOME | KEY_RIGHT)) return CMD_CHRRT;
     else if (buttons.bigbuttons==(KEY_UP | KEY_LEFT)) return CMD_TOP_LEFT;

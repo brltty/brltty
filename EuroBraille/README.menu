@@ -1,0 +1,63 @@
+README.menu : How tu use the internal menu?
+
+HOW TO ACCESS IT
+================
+  To enter in the internal menu, you just have to press on the last right 
+routing key (named "I Z"). When this routing key is pressed, the menu will be
+presented to you (on the braille line) as follows:
+"-:tty help t"
+
+PRESENTATION OF THE MAIN MENU
+=============================
+  Elements of a menu are always separated by spaces ' '. 
+Clicking on the ":" character allows you to exit froom the menu. To 
+activate an item, you just have to click on the space located just after the 
+item's name. For example in the following menu:
+"-:tty help t"
+if you want to activate the item "tty" just click on the space located after 
+the item's name, i.e. the space located after the 'y' of 'tty'.
+The last character of a menu is always a 't'. This indicates the Termination of
+the menu and implies that there're no more elements after the "t" letter.
+
+
+DESCRIPTION OF EACH ELEMENT
+===========================
+
+1) The `tty' item
+-----------------
+  The "tty" element allows you to switch from a virtual terminal to another.
+In fact, in the Linux Operating System, there are six virtual terminals by 
+default. This is useful if you're logged in with your username and want to open
+another session as root to perform specific tasks. This is although useful if 
+you run a `ncurses' based program and want to have another shell to type other
+commands. 
+When you click on this item, a sub-menu is presented to you as follows:
+"switch:1 2 3 4 5 6 t"
+The word "switch" indicates that you're in the "tty" menu. The ":" character 
+allows you to exit from the menu. Numbers symbolize the differents terminals'
+numbers. As an example, clicking on the space after the "3" number will switch
+to the third virtual terminal. Clicking on the space after the "1" dumber will
+allow you to go back to the first virtual terminal.
+
+2) The `help' item
+------------------
+   The "help" item allows you to enter directly in the on-line help system. 
+When clicking on this item, a message "! On-line Help" will be displayed on the
+Braille line. Then, pressing a key will display its name and what action is 
+performed. To exit the on-line help, press two times on the "*" (Beta) key, or
+two times on the "#" (Alpha) key.
+
+Other menu items will be added in next versions.
+
+
+
+
+
+
+
+
+
+
+
+
+

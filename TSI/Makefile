@@ -1,20 +1,18 @@
 ###############################################################################
+# BrlTty - A daemon providing access to the Linux console (when in text
+#          mode) for a blind person using a refreshable braille display.
 #
-# BRLTTY - Access software for Unix for a blind person
-#          using a soft Braille terminal
+# Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
 #
-# Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
-#
-# Web Page: http://www.cam.org/~nico/brltty
-#
-# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+# BrlTty comes with ABSOLUTELY NO WARRANTY.
 #
 # This is free software, placed under the terms of the
 # GNU General Public License, as published by the Free Software
 # Foundation.  Please see the file COPYING for details.
 #
-# This software is maintained by Nicolas Pitre <nico@cam.org>.
+# Web Page: http://mielke.cc/brltty/
 #
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
 ###############################################################################
@@ -24,11 +22,11 @@
 #
 ###############################################################################
 
-DRIVER = ts
+DRIVER_CODE = ts
+DRIVER_NAME = TSI
+BRAILLE_MODELS = Navigator 20/40/80, PowerBraille 40/65/80
 include ../driver.mk
 
 brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
 	$(CC) $(BRL_CFLAGS) -c brl.c
 
-brl-lib-name:
-	echo -e "ts\tTSI (PowerBraille/Navigator)" >> $(BRLNAMES)

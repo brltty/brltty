@@ -14,3 +14,10 @@ Però, prima di contattarmi e scrivere che il driver non funziona, controllate ch
 - la vostra Videobraille non è PRO 9600 (se lo è e volete il driver, chiedete);
 - nel file brlconf.h LPTPORT è impostato correttamente: 0x378 per LPT1, 0x278 per LPT2,...
 Se tutto è giusto, provate a modificare in brlconf.h i valori VBDELAY, VBCLOCK e VBREFRESHDELAY: questi valori dipendono dalla velocità del computer, devono quindi essere adattati al vostro processore. Non penso che questo sia un buon modo di impostare i tempi di attesa, ma ho voluto rispettare l'implementazione originale, perché quando ho usato altri tipi di temporizzazione ho riscontrato problemi.
+
+Implementazione della funzione taglia/incolla
+
+Ho aggiornato in seguito il driver per implementare la funzione taglia/incolla in questo modo: si seleziona l'inizio di un blocco tenendo premuto uno dei 40 tastini dell'aggancio cursore e premendo Edit; si contrassegna la fine di un blocco tenendo premuto uno dei 40 tastini e premendo Menu.
+Il tastino da premere va selezionato come nella procedura di aggancio cursore.
+Quindi, per incollare il testo, basta premere contemporaneamente i tasti Attr e Menu.
+Per questa implementazione ho dovuto inventare le combinazioni dei tasti perché la funzione copia/incolla non esisteva nel driver DOS originale.

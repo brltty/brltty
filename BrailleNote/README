@@ -1,0 +1,61 @@
+This directory contains the BrlTty driver for the BrailleNote, which is
+manufactured by Pulse Data International of New Zealand. It was
+implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.  
+Thanks to Mike Pedersen <mpedersen@mindspring.com> for his help and
+advice.
+
+As a component of BrlTty, this driver is released under the terms of the
+GNU Public License. It has been tested with BraillNotes 18 and 32.
+
+There are a number of ways to put the BrailleNote into its Braille
+Terminal Mode. The quickest way is to use the direct keyboard shortcut
+backspace+enter+[2345]. Another way is to go to the Main Menu by pressing
+space+[123456], and then selecting Braille Terminal Mode by pressing the
+letter "t" [2345]. Yet another way is to go to the Options Menu by
+pressing space+[135], then going to the Task Menu by pressing the letter
+"c" [14], and then selecting Braille Terminal Mode by pressing the letter
+"t" [2345].
+
+The BrailleNote does not inform the computer that it has been switched
+into its Braille Terminal Mode. This means that it's display will not
+automatically refresh with the contents of the computer screen until
+something happens which requires an updating of the state of its braille
+cells, e.g. when content within the text window changes, or, on those
+models which have them, when the information represented by its status
+cells changes. This could be caused by new output from the computer,
+cursor motion, or window motion. One brutal, but benign, way to force a
+refresh of the braille cells is to enter the command to manually restart
+the braille drier.
+
+*  For a list of functions by command, see "brlttyhlp.cmds.txt".
+*  For a list of functions by key combination, see "brlttyhlp.keys.txt".
+
+The BrailleNote, at least as of the time of this writing, doesn't signal
+the pressing of dot 7 and/or dot 8 unless the space bar is also
+simultaneously pressed. This makes the straightforward entry of 8-dot
+computer braille impossible. A scheme has been implemented, therefore, to
+get around this problem. It allows the states (on or off) of both dot 7
+and dot 8 to be either temporarily (just for the next character) or
+permanently changed. It uses the chord of dot 4 and the space bar,
+together with all possible combinations of dots 5, 3, and 6. Dot 5
+requests a permanent state change, dot 3 represents dot 7, and dot 6
+represents dot 8.
+
+Input starts out with dots 7 and 8 both off, i.e. in 6-dot mode. Pressing
+dot 4 together with the space bar indicates that you wish to make a
+temporary change in the states of dots 7 and 8. Pressing them together
+with dot 3 turns dot 7 on for the next character, with dot 6 turns dot 8
+on for the next character, and with both dots 3 and 6 turns both dots 7
+and 8 on for the next character. A permanent change in the states of dots
+7 and 8 can be made by adding dot 5, e.g. to permanently turn on dot 7
+(like an uppercase lock would do) you would press the space bar together
+with dots 4, 5, and 3. Pressing just the space bar and dot 4 ensures that
+dots 7 and 8 are both off for the next character, and pressing just the
+space bar and dots 4 and 5 permanently turns dots 7 and 8 off again.
+
+When the BrailleNote's Visual Display is turned on via the serial port,
+then a free virtual console is activated and becomes the display.  When
+the Visual Display is subsequently either turned off or reassigned to a
+different port, then this virtual console is released, and, if it is
+active, then the virtual console which was active when the display was
+turned on via the serial port is reactivated.

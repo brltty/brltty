@@ -10,33 +10,58 @@
  * this program as -> /sbin/init (relative to the ramdisk, of course).
  */
 
-#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #define BRLTTY "/sbin/brltty"
 #define REAL_INIT "/sbin/real_init"
 
-int main( int argc, char *argv[] )
-{
-	static char *noarg[] = { BRLTTY, NULL };
+static char *argumentVector[16];
+static int argumentCount = 0;
 
-	switch( fork() ) {
-	    case -1:  /* can't fork */
-		perror( "fork()" );
-		exit( -1 );
-	    case 0:  /* child */
-		execv( BRLTTY, noarg );
-		/* execv() shoudn't return */
-		perror( "execv(): " BRLTTY );
-		exit( -1 );
-	    default:  /* parent */
-		wait( NULL );
-		execv( REAL_INIT, argv );
-		/* execv() shouldn't return */
-		perror( "execve(): " REAL_INIT );
-		exit( -1 );
-	}
-	return 0;
+static void
+addArgument(char *argument) {
+   argumentVector[argumentCount++] = argument;
+}
+
+static void
+addOption(char *variable, char *option) {
+   char *value = getenv(variable);
+   if (value) {
+      if (*value) {
+         addArgument(option);
+	 addArgument(value);
+      }
+   }
+}
+
+int
+main(int argc, char *argv[]) {
+
+   addArgument(BRLTTY);
+   addOption("BRLTTY_DEVICE", "-d");
+   addOption("BRLTTY_DRIVER", "-b");
+   addOption("BRLTTY_TABLE", "-t");
+   addArgument(NULL);
+
+   switch (fork()) {
+      case -1:  /* can't fork */
+         perror("fork");
+         exit(3);
+      case 0:  /* child */
+         execv(BRLTTY, argumentVector);
+         /* execv() shoudn't return */
+         perror("execv: " BRLTTY);
+         exit(4);
+      default:  /* parent */
+         wait(NULL);
+         execv(REAL_INIT, argv);
+         /* execv() shouldn't return */
+         perror("execv: " REAL_INIT);
+         exit(5);
+   }
+   return 0;
 }
