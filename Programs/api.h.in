@@ -327,7 +327,7 @@ int brlapi_leaveTty(void);
  */
 int brlapi_writeBrl(int cursor, const unsigned char *str);
 
-/* brlapi_writeBrlDots */
+/* brlapi_writeDots */
 /** Write the given dots array to the display
  *
  * \param dots points on an array of dot information, one per character. Its
@@ -335,7 +335,8 @@ int brlapi_writeBrl(int cursor, const unsigned char *str);
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_writeBrlDots(const unsigned char *dots);
+int brlapi_writeDots(const unsigned char *dots);
+int brlapi_writeBrlDots(const unsigned char *dots) __attribute__((__deprecated__));
 
 /* brlapi_extWriteStruct */
 /** Structure containing arguments to be given to brlapi_extWrite */
@@ -452,7 +453,7 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  * \return -1 on error and *code is then undefined, 0 if block was 0 and no
  *  key was pressed so far, or 1 and *code holds the command code.
  */
-int brlapi_readCommand(int block, brl_keycode_t *code);
+int brlapi_readCommand(int block, brl_keycode_t *code) __attribute__((__deprecated__));
 
 /* brlapi_ignoreKeyRange */
 /** Ignore some key presses from the braille keyboard
@@ -464,6 +465,7 @@ int brlapi_readCommand(int block, brl_keycode_t *code);
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
 int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
+int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((__deprecated__));
 
 /* brlapi_ignoreKeySet */
 /** Ignore some key presses from the braille keyboard
@@ -488,6 +490,7 @@ int brlapi_ignoreKeySet(const brl_keycode_t *s, uint32_t n);
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
 int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
+int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((__deprecated__));
 
 /* brlapi_unignoreKeySet */
 /** Unignore some key presses from the braille keyboard
@@ -560,7 +563,7 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_SUCCESS                  0  /**< Success */
 #define BRLERR_NOMEM                    1  /**< Not enough memory */
 #define BRLERR_TTYBUSY                  2  /**< Already a connection running in this tty */
-#define BRLERR_RAWMODEBUSY              3  /**< Already a connection running in this tty */
+#define BRLERR_RAWMODEBUSY              3  /**< Already a connection using RAW mode */
 #define BRLERR_UNKNOWN_INSTRUCTION      4  /**< Not implemented in protocol */
 #define BRLERR_ILLEGAL_INSTRUCTION      5  /**< Forbiden in current mode */
 #define BRLERR_INVALID_PARAMETER        6  /**< Out of range or have no sense */

@@ -94,13 +94,13 @@ int main(int argc, char *argv[])
   }
   fprintf(stderr, "done\n");
   for (i=1; i<argc; i++) {
-    if (!strcmp(argv[i],"-ds")) {
+    if (!strcmp(argv[i], "-ds")) {
       getDisplaySize();
       continue;
     } else if (!strcmp(argv[i], "-di")) {
       getDriverId();
       continue;
-    } else if (!strcmp(argv[i],"-dn")) {
+    } else if (!strcmp(argv[i], "-dn")) {
       getDriverName();
       continue;
     } else if (!strcmp(argv[i], "-lm")) {

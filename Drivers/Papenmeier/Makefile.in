@@ -37,7 +37,7 @@ braille.$O:
 read_config$X: read_config.$O $(BLD_TOP)$(PGM_DIR)/cmd.$O
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ read_config.$O $(BLD_TOP)$(PGM_DIR)/cmd.$O
 
-read_config.$O: $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
+read_config.$O:
 	$(HOSTCC) $(HOSTCFLAGS) $(YCFLAGS) -c $(SRC_DIR)/read_config.c
 
 config.tab.c: cmd.auto.h hlp.auto.h
@@ -48,9 +48,6 @@ cmd.auto.h: $(PM_CMD_SOURCES) $(SRC_DIR)/cmd.awk
 
 hlp.auto.h: $(PM_CMD_SOURCES) $(SRC_DIR)/hlp.awk
 	$(AWK) -f $(SRC_DIR)/hlp.awk $(PM_CMD_SOURCES) >hlp.auto.h
-
-$(BLD_TOP)$(PGM_DIR)/cmds.auto.h:
-	cd $(@D) && make $(@F)
 
 ###############################################################################
 

@@ -154,6 +154,6 @@ API_VERSION = @BRLAPI_VERSION@
 API_RELEASE = @BRLAPI_RELEASE@
 API_OBJECTS = @api_objects@
 API_KEYFILE = @api_keyfile@
-BUILD_API = @build_api@
+ALL_API = @all_api@
 INSTALL_API = @install_api@
 

@@ -539,6 +539,7 @@ int brlapi_writeDots(const unsigned char *dots)
   free(ews.attrOr);
   return res;
 }
+int brlapi_writeBrlDots(const unsigned char *dots) __attribute__((alias("brlapi_writeDots")));
 
 /* Function : brlapi_extWrite */
 /* Extended writes on braille displays */
@@ -638,10 +639,7 @@ int brlapi_readKey(int block, brl_keycode_t *code)
 
 /* Function : brlapi_readCommand */
 /* Reads a command from the braille keyboard */
-int brlapi_readCommand(int block, brl_keycode_t *code)
-{
-  return brlapi_readKey(block, code);
-}
+int brlapi_readCommand(int block, brl_keycode_t *code) __attribute__((alias("brlapi_readKey")));
 
 /* Function : ignore_unignore_key_range */
 /* Common tasks for ignoring and unignoring key ranges */
@@ -658,12 +656,16 @@ int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
   return ignore_unignore_key_range(0,x,y);
 }
+/* compatibility */
+int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((alias("brlapi_ignoreKeyRange")));
 
 /* Function : brlapi_unignoreKeyRange */
 int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
   return ignore_unignore_key_range(!0,x,y);
 }
+/* compatibility */
+int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y) __attribute__((alias("brlapi_unignoreKeyRange")));
 
 /* Function : ignore_unignore_key_set */
 /* Common tasks for ignoring and unignoring key sets */

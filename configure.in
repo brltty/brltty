@@ -465,13 +465,13 @@ BRLTTY_ARG_DISABLE(
    [the application programming interface], [dnl
    AC_DEFINE([ENABLE_API])
    api_objects='api_server.$O api_common.$O rangelist.$O'
-   build_api="api"
+   all_api="all-api"
    install_api="install-api"
    brltty_need_pthreads=true
    BRLTTY_ARG_PARAMETERS([api])
 ])
 AC_SUBST([api_objects])
-AC_SUBST([build_api])
+AC_SUBST([all_api])
 AC_SUBST([install_api])
 AC_SUBST([api_keyfile], [brlapi.key])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
@@ -589,10 +589,7 @@ BRLTTY_BRAILLE_DRIVER([va], [Vario])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
-if test "${brltty_enabled_learn_mode}" != "no"
-then
-   BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
-fi
+BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 BRLTTY_ARG_DRIVER([braille])
 

@@ -17,10 +17,11 @@
 
 include $(BLD_TOP)config.mk
 
-all: all-brltty all-brltest all-spktest scrtest$X tbltest$X ctbtest$X tunetest$X $(BUILD_API)
+all: all-brltty all-brltest all-spktest scrtest$X tbltest$X ctbtest$X tunetest$X $(ALL_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
+all-api: apitest$X
 
 ###############################################################################
 
