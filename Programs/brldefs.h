@@ -117,8 +117,8 @@ typedef enum {
   CMD_MENU_LAST_ITEM /* go to last item in menu */,
   CMD_MENU_PREV_ITEM /* go to previous item in menu */,
   CMD_MENU_NEXT_ITEM /* go to next item in menu */,
-  CMD_MENU_PREV_SETTING /* change value of current item in menu to previous choice */,
-  CMD_MENU_NEXT_SETTING /* change value of current item in menu to next choice */,
+  CMD_MENU_PREV_SETTING /* change current item in menu to previous choice */,
+  CMD_MENU_NEXT_SETTING /* change current item in menu to next choice */,
  
   /* speech */
   CMD_SAY_LINE /* speak current line */,
@@ -132,7 +132,7 @@ typedef enum {
   CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
   
   /* miscellaneous */
-  CMD_CSRJMP_VERT /* vertically route cursor to top line of window */,
+  CMD_CSRJMP_VERT /* bring cursor to line (no horizontal motion) */,
   CMD_PASTE /* insert cut buffer at cursor */,
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
@@ -154,15 +154,15 @@ typedef enum {
  * used during automatic help file generation.
  */
 #define CR_ROUTE     0X100   /* bring cursor to character */
-#define CR_CUTBEGIN  0X200 /* start new cut buffer */
-#define CR_CUTAPPEND 0X300 /* append to existing cut buffer */
-#define CR_CUTRECT   0X400 /* rectangular cut */
-#define CR_CUTLINE   0X500 /* linear cut */
+#define CR_CUTBEGIN  0X200 /* start new cut buffer at character */
+#define CR_CUTAPPEND 0X300 /* append to existing cut buffer from character */
+#define CR_CUTRECT   0X400 /* rectangular cut to character */
+#define CR_CUTLINE   0X500 /* linear cut to character */
 #define CR_SWITCHVT  0X600 /* switch to virtual terminal */
 #define CR_PRINDENT  0X700 /* go up to nearest line without greater indent */
 #define CR_NXINDENT  0X800 /* go down to nearest line without greater indent */
 #define CR_DESCCHAR  0X900 /* describe character */
-#define CR_SETLEFT   0XA00 /* position left end of window */
+#define CR_SETLEFT   0XA00 /* position left end of window at character */
 #define CR_SETMARK   0XB00 /* remember current window position */
 #define CR_GOTOMARK  0XC00 /* go to remembered window position */
 
