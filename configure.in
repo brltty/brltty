@@ -466,16 +466,16 @@ BRLTTY_ARG_ENABLE(
    AC_CHECK_LIB([gpm], [Gpm_Open])
 ])
 
-brltty_need_pthreads=false
 BRLTTY_ARG_DISABLE(
    [api],
    [the application programming interface], [dnl
-   AC_DEFINE([ENABLE_API])
-   api_objects='api_server.$O api_common.$O rangelist.$O'
-   all_api="all-api"
-   install_api="install-api"
-   brltty_need_pthreads=true
-   BRLTTY_ARG_PARAMETERS([api])
+   BRLTTY_CAP_PTHREADS([dnl
+      AC_DEFINE([ENABLE_API])
+      api_objects='api_server.$O api_common.$O rangelist.$O'
+      all_api="all-api"
+      install_api="install-api"
+      BRLTTY_ARG_PARAMETERS([api])
+   ])
 ])
 AC_SUBST([api_objects])
 AC_SUBST([all_api])
@@ -717,7 +717,7 @@ BRLTTY_ARG_DISABLE(
    ])
    BRLTTY_SPEECH_DRIVER([fv], [Festival])
    BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
-   BRLTTY_IF_PACKAGE([Mikropuhe], [mikropuhe], [mpwrfile.h], [BRLTTY_SPEECH_DRIVER([mp], [Mikropuhe], [-L$(MPLINUX_ROOT) -lmplinux])])
+   BRLTTY_IF_PACKAGE([Mikropuhe], [mikropuhe], [mpwrfile.h], [BRLTTY_CAP_PTHREADS([BRLTTY_SPEECH_DRIVER([mp], [Mikropuhe], [-L$(MPLINUX_ROOT) -lmplinux])])])
    BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
    BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
 ])
@@ -759,16 +759,6 @@ AC_SUBST([screen_driver_objects])
 BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 
 BRLTTY_ARG_PARAMETERS([screen])
-
-if "${brltty_need_pthreads}"
-then
-   case "${host_os}"
-   in
-      solaris*) AC_SEARCH_LIBS([_getfp], [pthread]);;
-      hpux*) AC_SEARCH_LIBS([__pthread_cancel_stack], [pthread]);;
-      *) AC_SEARCH_LIBS([pthread_create], [pthread c_r]);;
-   esac
-fi
 
 AC_SUBST([library_prefix], [lib])
 AC_SUBST([library_name], ["${library_prefix}${PACKAGE_NAME}"])

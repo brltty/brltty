@@ -432,3 +432,22 @@ then
    $4
 fi])
 
+AC_DEFUN([BRLTTY_CAP_PTHREADS], [dnl
+   AC_CACHE_CHECK([if pthreads are available], [brltty_cv_cap_pthreads], [dnl
+      AC_CHECK_HEADER([pthread.h], [dnl
+         brltty_cv_cap_pthreads=yes
+         case "${host_os}"
+         in
+            solaris*) AC_SEARCH_LIBS([_getfp], [pthread]);;
+            hpux*) AC_SEARCH_LIBS([__pthread_cancel_stack], [pthread]);;
+            *) AC_SEARCH_LIBS([pthread_create], [pthread c_r]);;
+         esac
+      ], [dnl
+         brltty_cv_cap_pthreads=no
+      ])
+   ])
+ifelse(len([$1]), 0, [], [dnl
+   test "${brltty_cv_cap_pthreads}" = "yes" && {
+      $1
+   }])
+])
