@@ -3,10 +3,111 @@ Note: this file is in reversed chronological order (bottom to top).
 
  - BRLTTY 3.7 released:
    New cursor routing algorithm (works with editors with wrapped lines).
-   Add automatic cursor routing to horizontal Papenmeier combined mode bindings.
-   Initial support for the HURD.
-   Add the Libbraille driver.
-   Add the TechniBraille driver.
+   Give the "beeps not supported" warning a little more of a standard look.
+   Get the fully qualified path to the executable.
+   getWorkingDirectory() should use reallocWrapper().
+   Correct a typo ("they're" -> "their") in text.nabcc.tbl.
+   Give better names to serialTestLines()'s arguments.
+   Operate serial devices in true nonblocking mode.
+   Force OSS PCM output to be blocking.
+      There appears to be a bug in ALSA OSS simulation.
+      Output is nonblocking if snd_seq_oss is loaded with nonblock_open=1.
+      In this case, write() always returns the full count even though
+      large chunks of sound are missing.
+   Papenmeier braille driver changes:
+      Add automatic cursor routing to horizontal combined mode bindings.
+   TTY braille driver changes:
+      Position the cursor correctly.
+      Build even if no curses package is available.
+   Virtual braille driver changes:
+      Use PF_LOCAL/AF_LOCAL instead of PF_UNIX/AF_UNIX.
+   XWindow braille driver changes:
+      Add a more advanced model (based on the VisioBraille mapping).
+      Xm isn't initernationalized.
+      Add cursor routing and displaying of dots.
+      Show the cursor position within the visual display.
+   API changes:
+      The API should automatically clean up its TTY tree.
+      Remove the ancestor loop from brlapi_getControllingTty().
+      Put back an important line of leaveTty().
+      Add void to argumentless routine prototypes where missing.
+      Move brlapi_fd_mutex from api.h to api_protocol.h.
+      Verify the result of gethostbyname().
+      Add conditional code for PF_LOCAL.
+      Split brlapi_readPacket() into brlapi_readPacketHeader() and brlapi_readPacketContent().
+      Only real commands (neither NOOP nor EOF) should be sent to clients.
+      The server side of the API should do non-blocked reads.
+      Report packet read errors from errno rather than from brlapi_libcerrno.
+   apitest learn mode changes:
+      Announce entry.
+      Write command descriptions to standard error.
+      Eliminate bogus error message when leaving.
+   USB changes:
+      Remove the assumption that a USB device maps to a file.
+      Add an endpoint parameter to usbReapResponse().
+      Allow reaping the URB for a specific USB endpoint on Linux.
+      Improve the timeout used for in-line USB endpoint reading when awaiting input.
+      Rename the USB constants to avoid conflicts with libusb.
+      Add support for libusb.
+   General code changes:
+      Update the copyright prologues from 2004 to 2005.
+      Change "Linux console" to "console screen" in the copyright prologues.
+      Change the nested inclusion protection convention from _NAME_H to BRLTTY_INCLUDED_NAME.
+      gcc-3.3 (at least on cygwin) doesn't like apostrophes in #error directives.
+      gcc-4 does a lot more checking for matching signnedness.
+      gcc-4 doesn't allow a variable to be declared global and then static.
+      Remove the casts from the results of malloc() calls.
+      Remove dummy timezone parameters to gettimeofday().
+      Prefix all driver identification #defines with the driver code.
+      Rename ctb_definitions.h to ctb_internal.h.
+   Build changes:
+      Rename the "aux" subdirectory to "acdir" (for Cygwin).
+      Pass the list of needed libraries to the linking of libbrlapi.so.
+      Link the API client library with only those dependencies which it actually needs.
+      Add autoconf detection for endhostent(), endservent(), gai_strerror(), and hstrerror().
+      EAFNOSUPORT isn't defined on all platforms.
+      Explicitly test for libX11, libXt, and the xt toolkit library.
+      Separate the concepts of dynamic library and loadable module.
+      Use <NAME> rather than <SONAME> in the MKLIB macro.
+      Use libusb, if available, if we don't provie native USB support.
+   Initial support for the Hurd platform.
+   Initial support for the Mac OS X (Darwin) platform.
+   Initial support for the Cygwin platform.
+   Initial support for the MinGW platform.
+   Add the Braudi braille driver.
+   Add the BrlAPI braille driver.
+   Add the Libbraille braille driver.
+   Add the TechniBraille braille driver.
+   Add the atspi screen driver.
+
+February 22, 2005:
+ - BRLTTY 3.6.2 released:
+   French braille uses dots 348 for the inverted question mark.
+   Don't build the TTY and XWindow drivers when braillifying a boot image.
+   If mcookie isn't available then use /dev/urandom or /dev/random to generate the API key.
+   The shared memory screen driver should primarily use a per user segment.
+   Update the screen patch to generate a per-user shared memory key.
+   Some platforms don't define PF_LOCAL.
+   FreedomScientific braille driver changes:
+      Add support for the Focus 2 series (40 and 80).
+   VisioBraille braille driver changes:
+      Return NOOP rather than EOF when CTRL or ALT is pressed.
+      Bind a key to BRL_CMD_LEARN.
+      Don't log timeouts when the display isn't connected.
+   Mikropuhe speech driver changes:
+      Lock the mutex while calling pthread_cond_signal().
+      Check for already enqueued speech before the first wait.
+   API changes:
+      The flags and protocol version fields weren't being maintained in network byte order.
+      brlapi_writeFile() and brlapi_readFile() are only for use within api_common.c.
+   Linux screen driver changes:
+      If KD_FONT_OP_GET fails or returns a character count of 0
+      then calculate the VGA character count from the screen font map.
+      Only reevaluate the VGA character count when necessary.
+   Queue facility changes:
+      Don't deallocate discarded elements when a queue is being deallocated.
+      Initialize queue data to NULL.
+      Deallocate an item beore discarding its element.
 
 December 22, 2004:
  - BRLTTY 3.6.1 released:
