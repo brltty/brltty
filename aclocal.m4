@@ -263,3 +263,37 @@ changequote([, ])dnl
 then
    $1="`pwd`/${$1}"
 fi])
+
+AC_DEFUN([BRLTTY_IF_PACKAGE], [dnl
+BRLTTY_ARG_WITH(
+   [$2], [DIRECTORY],
+   [where the $1 package is installed],
+   [$2_root], ["yes"]
+)
+if test "${$2_root}" = "no"
+then
+   $2_root=""
+elif test "${$2_root}" = "yes"
+then
+   $2_root=""
+   roots="/usr /usr/local"
+   for root in ${roots}
+   do
+      if test -f "${root}/$3"
+      then
+         $2_root="${root}"
+         break
+      fi
+   done
+   if test -z "${$2_root}"
+   then
+      AC_MSG_WARN([$1 package not found: ${roots}])
+   fi
+fi
+if test -n "${$2_root}"
+then
+   $4
+fi
+AC_SUBST([$2_root])
+BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])])
+

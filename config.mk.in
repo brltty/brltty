@@ -121,6 +121,7 @@ SPEECH_DRIVERS = @speech_drivers@
 SPEECH_EXTERNAL_DRIVER_NAMES = @brltty_external_names_speech@
 
 FLITE_ROOT = @flite_root@
+VIAVOICE_ROOT = @viavoice_root@
 
 INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@

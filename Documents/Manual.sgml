@@ -483,6 +483,34 @@ for any additional display-specific instructions.
     See the <ref id="configure-speech-driver" name="speech-driver"> configuration file directive
     and the <ref id="options-speech-driver" name="-s"> command line option
     for run-time selection.
+  <tag><tt/--with-flite=/<em/directory/<label id="build-flite"></tag>
+    Specify the installed location of the FestivalLite text-to-speech package,
+    and build the FestivalLite speech synthesizer driver.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't build the driver.
+        This is equivalent to specifying <tt/--without-flite/.
+      <tag/yes/
+        Build the driver if the package can be found in
+        either <tt>/usr</>
+        or <tt>/usr/local</>.
+        This is equivalent to specifying <tt/--with-flite/.
+    </descrip>
+  <tag><tt/--with-viavoice=/<em/directory/<label id="build-viavoice"></tag>
+    Specify the installed location of the ViaVoice text-to-speech package,
+    and build the ViaVoice speech synthesizer driver.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't build the driver.
+        This is equivalent to specifying <tt/--without-viavoice/.
+      <tag/yes/
+        Build the driver if the package can be found in
+        either <tt>/usr</>
+        or <tt>/usr/local</>.
+        This is equivalent to specifying <tt/--with-viavoice/.
+    </descrip>
   <tag><tt/--with-screen-driver=/<em/driver/<label id="build-screen-driver"></tag>
     Specify the screen driver.
     It may be one of the following:
@@ -639,13 +667,6 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     (see the <ref id="build-braille-driver" name="--with-braille-driver">
     and the <ref id="build-speech-driver" name="--with-speech-driver">
     build options) are compiled.
-  <tag><tt/--disable-tainted-components/<label id="build-tainted-components"></tag>
-    Exclude those components which have a build-time dependency
-    beyond what a standard system is expected to provide.
-    These include:
-    <itemize>
-      <item>The <bf/ViaVoice/ speech driver.
-    </itemize>
   <tag><tt/--disable-preferences-menu/<label id="build-preferences-menu"></tag>
     Reduce program size by excluding the preferences menu
     (see section <ref id="preferences-menu" name="The Preferences Menu">).

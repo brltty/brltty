@@ -29,5 +29,5 @@ SPK_OBJS = -libmeci50
 include $(SRC_TOP)driver.mk
 
 speech.$O:
-	$(CXX) $(SPK_CXXFLAGS) -c $(SRC_DIR)/speech.c
+	$(CXX) $(SPK_CXXFLAGS) -I$(VIAVOICE_ROOT) -c $(SRC_DIR)/speech.c
 
