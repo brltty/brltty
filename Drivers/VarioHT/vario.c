@@ -83,24 +83,22 @@ static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
 	static int shift_button_down=0;
+	int noop = 0;
 	int c;
 		/*	Since we are nonblocking this will happen quite a lot */ 
 	while((c=varioget())!=-1) {
 		switch(c) {
-				/*	Should be handled in a better manner, this will do for now tho */ 
-			case VARIO_DISPLAY_DATA_ACK:
-				continue;
-				/*	Always ignore press codes */ 
+			case VARIO_PUSHBUTTON_PRESS_3:
+				shift_button_down=1;
 			case VARIO_PUSHBUTTON_PRESS_1:
 			case VARIO_PUSHBUTTON_PRESS_2:
 			case VARIO_PUSHBUTTON_PRESS_4:
 			case VARIO_PUSHBUTTON_PRESS_5:
 			case VARIO_PUSHBUTTON_PRESS_6:
-				return CMD_NOOP;
-				/*	We define the button 3 as shift ... */ 
-			case VARIO_PUSHBUTTON_PRESS_3:
-				shift_button_down=1;
-				return CMD_NOOP;	
+				noop=1;	
+			case VARIO_DISPLAY_DATA_ACK:
+			case 0X89: /* identity code for modular 40 */
+				continue;	
 	
 			case VARIO_PUSHBUTTON_RELEASE_1:
 				return (shift_button_down?CMD_TOP_LEFT:CMD_LNUP);
@@ -108,18 +106,20 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 				return (shift_button_down?CMD_SKPIDLNS:CMD_FWINLT);
 			case VARIO_PUSHBUTTON_RELEASE_3:
 				shift_button_down=0;
-				return CMD_NOOP;
+				noop=1;
+				continue;
 			case VARIO_PUSHBUTTON_RELEASE_4:
 				return (shift_button_down?CMD_BOT_LEFT:CMD_LNDN);
 			case VARIO_PUSHBUTTON_RELEASE_5:
 				return (shift_button_down?CMD_CSRTRK:CMD_FWINRT);
 			case VARIO_PUSHBUTTON_RELEASE_6:
 				return (shift_button_down?CMD_PREFMENU:CMD_HOME);
+
 			default:
 				if(c>=VARIO_CURSOR_BASE&&c<=VARIO_CURSOR_BASE+VARIO_CURSOR_COUNT)
 					return CR_ROUTE+c-VARIO_CURSOR_BASE;
 				break;
 		}
 	}
-	return EOF;
+	return noop? CMD_NOOP: EOF;
 }
