@@ -307,7 +307,7 @@ awaitUsbInput (int milliseconds) {
 
 static int
 readUsbBytes (unsigned char *buffer, int length) {
-  int count = usbReapInput(usbDevice, usbInputEndpoint, buffer, length, 0);
+  int count = usbReapInput(usbDevice, usbInputEndpoint, buffer, length, 100);
   if (count == -1) {
     if (errno == EAGAIN)
       count = 0;

@@ -223,7 +223,8 @@ usbReapInput (
     unsigned char *bytes = buffer;
     unsigned char *target = bytes;
     while (length > 0) {
-      if (!usbAwaitInput(device, endpointNumber, timeout)) return -1;
+      if (!usbAwaitInput(device, endpointNumber,
+                         (target == bytes)? 0: timeout)) return -1;
 
       {
         int count = endpoint->direction.input.length;
