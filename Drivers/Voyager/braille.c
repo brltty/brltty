@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include <linux/types.h>
 #include <sys/ioctl.h>
 #include <string.h>
 #include <errno.h>
@@ -148,17 +147,15 @@ chooseUsbDevice (UsbDevice *device, void *data)
       if (usbSetConfiguration(device, 1) != -1)
         if (usbSetAlternative(device, usbInterface, 0) != -1)
           return 1;
-        else LogError("set USB alternative");
-      else LogError("set USB configuration");
       usbReleaseInterface(device, usbInterface);
-    } else LogError("claim USB interface");
+    }
   }
   return 0;
 }
 
 static int
-_sndcontrolmsg(char *reqname, __u8 request, __u16 value, __u16 index,
-	      unsigned char *buffer, __u16 size)
+_sndcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
+	      unsigned char *buffer, uint16_t size)
 {
   int ret, repeats = STALL_TRIES;
   do {
@@ -183,8 +180,8 @@ _sndcontrolmsg(char *reqname, __u8 request, __u16 value, __u16 index,
     })
 
 static int
-_rcvcontrolmsg(char *reqname, __u8 request, __u16 value, __u16 index,
-	      unsigned char *buffer, __u16 size)
+_rcvcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
+	      unsigned char *buffer, uint16_t size)
 {
   int ret, repeats = STALL_TRIES;
   do {
@@ -337,7 +334,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 
   LogPrint(LOG_DEBUG,"Starting input");
   if (usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8, 8) == -1) {
-    LogError("begin USB input");
     goto failure;
   }
   LogPrint(LOG_DEBUG,"input started");
