@@ -118,7 +118,7 @@ void updateSettings(brlapi_settings_t *s1, brlapi_settings_t *s2)
 /* Note: We return the file descriptor in case the client wants to */
 /* communicate with the server without using our routines, but, if he uses us, */
 /* He will not have to pass the fd later, since we keep a copy of it */
-int brlapi_initializeConnection(brlapi_settings_t *clientSettings)
+int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
  struct addrinfo *res,*cur;
  struct addrinfo hints;
@@ -190,7 +190,9 @@ int brlapi_initializeConnection(brlapi_settings_t *clientSettings)
   fd = -1;
   return -1;
  }
- return brlapi_waitForAck();
+ brlapi_waitForAck();
+ if (usedSettings!=NULL) updateSettings(usedSettings, &settings); 
+ return fd;
 }
 
 /* brlapi_closeConnection */

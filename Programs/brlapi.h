@@ -118,7 +118,7 @@ typedef uint32_t brl_keycode_t;
 /* Note: We return the file descriptor in case the client wants to */
 /* communicate with the server without using our routines, but, if he uses us, */
 /* He will not have to pass the fd later, since we keep a copy of it */
-int brlapi_initializeConnection(brlapi_settings_t *);
+int brlapi_initializeConnection(const brlapi_settings_t *, brlapi_settings_t *);
 
 /* brlapi_closeConnection */
 /* Cleanly close the socket */
