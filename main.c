@@ -41,7 +41,7 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99r (beta)";
+char VERSION[] = "BRLTTY 2.99s (beta)";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 int cycleDelay = CYCLE_DELAY;
@@ -127,37 +127,33 @@ switchto (unsigned int scrno)
 /* Number dot translation for status cells */
 const unsigned char num[10] = {0XE, 0X1, 0X5, 0X3, 0XB, 0X9, 0X7, 0XF, 0XD, 0X6};
 
-void clrbrlstat (void)
-{
-  memset (statcells, 0, sizeof(statcells));
-  braille->setstatus(statcells);
+void
+clearStatusCells (void) {
+   memset(statcells, 0, sizeof(statcells));
+   braille->setstatus(statcells);
 }
 
 static void
-terminateProgram (void) {
-  message("BRLTTY exiting.", MSG_NODELAY);
-  closescr();
-  if (speech)
-    speech->close();
-  if (braille)
-    braille->close(&brl);
-  playTune(&tune_braille_off);
-  closeTuneDevice();
-
-  /* don't forget that scrparam[0] is staticaly allocated */
-  {
-    int i;
-    for (i = 1; i <= NBR_SCR; i++) 
-      free(scrparam[i]);
-  }
-
+exitLog (void) {
   /* Reopen syslog (in case -e closed it) so that there will
    * be a "stopped" message to match the "starting" message.
    */
   LogOpen();
   LogPrint(LOG_INFO, "Terminated.");
   LogClose();
+}
 
+static void
+exitScreenParameters (void) {
+  int i;
+  /* don't forget that scrparam[0] is staticaly allocated */
+  for (i = 1; i <= NBR_SCR; i++) 
+    free(scrparam[i]);
+}
+
+static void
+terminateProgram (void) {
+  message("BRLTTY exiting.", 0);
   exit(0);
 }
 
@@ -310,6 +306,7 @@ main (int argc, char *argv[])
   /* Open the system log. */
   LogOpen();
   LogPrint(LOG_INFO, "Starting.");
+  atexit(exitLog);
 
   /* Initialize global data assumed to be ready by the termination handler. */
   *p = initparam;
@@ -317,6 +314,7 @@ main (int argc, char *argv[])
   for (i = 1; i <= NBR_SCR; i++)
     scrparam[i] = 0;
   curscr = 0;
+  atexit(exitScreenParameters);
   
   /* We install SIGPIPE handler before startup() so that speech drivers which
    * use pipes can't cause program termination (the call to message() in
@@ -325,6 +323,8 @@ main (int argc, char *argv[])
   signal(SIGPIPE, SIG_IGN);
 
   /* Install the program termination handler. */
+  initializeBraille();
+  initializeSpeech();
   signal(SIGTERM, terminationHandler);
   signal(SIGINT, terminationHandler);
 
@@ -348,7 +348,7 @@ main (int argc, char *argv[])
    */
   while (1)
     {
-      closeTuneDevice();
+      closeTuneDevice(0);
       TickCount++;
       /*
        * Process any Braille input 
@@ -358,19 +358,17 @@ main (int argc, char *argv[])
 				       CMDS_SCREEN)) != EOF) {
 	int oldmotx = p->winx;
 	int oldmoty = p->winy;
-	switch (keypress & ~VAL_SWITCHMASK)
-	  {
+	LogPrint(LOG_DEBUG, "Command: %5.5X", keypress);
+	switch (keypress & ~VAL_SWITCHMASK) {
 	  case CMD_NOOP:	/* do nothing but loop */
 	    continue;
 	  case CMD_RESTARTBRL:
-	    braille->close(&brl);
-	    playTune(&tune_braille_off);
+	    stopBrailleDriver();
 	    LogPrint(LOG_INFO, "Reinitializing braille driver.");
 	    startBrailleDriver();
 	    break;
 	  case CMD_RESTARTSPEECH:
-	    speech->mute();
-	    speech->close();
+	    stopSpeechDriver();
 	    LogPrint(LOG_INFO, "Reinitializing speech driver.");
 	    startSpeechDriver();
 	    break;
@@ -712,31 +710,15 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_CSRJMP:
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      csrjmp (p->winx, p->winy, curscr);
+	      csrjmp(p->winx, p->winy, curscr);
+	    else
+	      playTune(&tune_bad_command);
 	    break;
 	  case CMD_CSRJMP_VERT:
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      csrjmp (-1, p->winy, curscr);
-	    break;
-	  case CMD_KEY_UP:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      inskey (UP_CSR);
-	    break;
-	  case CMD_KEY_DOWN:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      inskey (DN_CSR);
-	    break;
-	  case CMD_KEY_RIGHT:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      inskey (RT_CSR);
-	    break;
-	  case CMD_KEY_LEFT:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      inskey (LT_CSR);
-	    break;
-	  case CMD_KEY_RETURN:
-	    if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	      inskey (KEY_RETURN);
+	      csrjmp(-1, p->winy, curscr);
+	    else
+	      playTune(&tune_bad_command);
 	    break;
 	  case CMD_CSRVIS:
 	    /* toggles the preferences option that decides whether cursor
@@ -783,7 +765,9 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_PASTE:
 	    if ((dispmd & HELP_SCRN) != HELP_SCRN && !csr_active)
-	      cut_paste ();
+	      cut_paste();
+	    else
+	      playTune(&tune_bad_command);
 	    break;
 	  case CMD_SND:
 	    TOGGLEPLAY ( TOGGLE(env.sound) );	/* toggle sound on/off */
@@ -808,7 +792,7 @@ main (int argc, char *argv[])
 	      infmode = 0;	/* ... and not in info mode */
 	      v = (dispmd & HELP_SCRN) ? 1 : 0;
 	      TOGGLE(v);
-	      if(v){
+	      if (v) {
 		dispmd = selectdisp (dispmd | HELP_SCRN);
 		if (dispmd & HELP_SCRN) /* help screen selection successful */
 		  {
@@ -818,7 +802,7 @@ main (int argc, char *argv[])
 		else	/* help screen selection failed */
 		    message ("can't find help", 0);
 	      }else
-		dispmd = selectdisp (dispmd & ~HELP_SCRN);
+		dispmd = selectdisp(dispmd & ~HELP_SCRN);
 	    }
 	    break;
 	  case CMD_CAPBLINK:
@@ -872,7 +856,7 @@ main (int argc, char *argv[])
 	    updatePreferences();
 	    break;
 	  case CMD_PREFLOAD:
-	    if (loadPreferences()) {
+	    if (loadPreferences(1)) {
 	      csron = 1;
 	      capon = 0;
 	      csrcntr = capcntr = 1;
@@ -926,23 +910,138 @@ main (int argc, char *argv[])
 	    speech->mute();
 	    break;
 	  case CMD_SWITCHVT_PREV:
-	    if(scr.no >0)
-	      switchvt( scr.no -1);
+	    if (!switchvt(scr.no-1))
+	      playTune(&tune_bad_command);
 	    break;
 	  case CMD_SWITCHVT_NEXT:
-	    if(scr.no < 0X3F-1)
-	      switchvt( scr.no +1);
+	    if (!switchvt(scr.no+1))
+	      playTune(&tune_bad_command);
 	    break;
 	  default: {
 	    int key = keypress & ~0xFF;
 	    int arg = keypress & 0xFF;
 	    switch (key) {
-	      case VAL_PASSTHRU: {
+	      case VAL_PASSKEY: {
+		char *sequence;
+		switch (arg) {
+		  case VPK_RETURN:
+                    sequence = INS_RETURN;
+                    break;
+		  case VPK_TAB:
+                    sequence = INS_TAB;
+                    break;
+		  case VPK_BACKSPACE:
+                    sequence = INS_BACKSPACE;
+                    break;
+		  case VPK_ESCAPE:
+                    sequence = INS_ESCAPE;
+                    break;
+		  case VPK_CURSOR_LEFT:
+                    sequence = INS_CURSOR_LEFT;
+                    break;
+		  case VPK_CURSOR_RIGHT:
+                    sequence = INS_CURSOR_RIGHT;
+                    break;
+		  case VPK_CURSOR_UP:
+                    sequence = INS_CURSOR_UP;
+                    break;
+		  case VPK_CURSOR_DOWN:
+                    sequence = INS_CURSOR_DOWN;
+                    break;
+		  case VPK_PAGE_UP:
+                    sequence = INS_PAGE_UP;
+                    break;
+		  case VPK_PAGE_DOWN:
+                    sequence = INS_PAGE_DOWN;
+                    break;
+		  case VPK_HOME:
+                    sequence = INS_HOME;
+                    break;
+		  case VPK_END:
+                    sequence = INS_END;
+                    break;
+		  case VPK_INSERT:
+                    sequence = INS_INSERT;
+                    break;
+		  case VPK_DELETE:
+                    sequence = INS_DELETE;
+                    break;
+                  case VPK_FUNCTION + 1:
+                    sequence = INS_F1;
+                    break;
+                  case VPK_FUNCTION + 2:
+                    sequence = INS_F2;
+                    break;
+                  case VPK_FUNCTION + 3:
+                    sequence = INS_F3;
+                    break;
+                  case VPK_FUNCTION + 4:
+                    sequence = INS_F4;
+                    break;
+                  case VPK_FUNCTION + 5:
+                    sequence = INS_F5;
+                    break;
+                  case VPK_FUNCTION + 6:
+                    sequence = INS_F6;
+                    break;
+                  case VPK_FUNCTION + 7:
+                    sequence = INS_F7;
+                    break;
+                  case VPK_FUNCTION + 8:
+                    sequence = INS_F8;
+                    break;
+                  case VPK_FUNCTION + 9:
+                    sequence = INS_F9;
+                    break;
+                  case VPK_FUNCTION + 10:
+                    sequence = INS_F10;
+                    break;
+                  case VPK_FUNCTION + 11:
+                    sequence = INS_F11;
+                    break;
+                  case VPK_FUNCTION + 12:
+                    sequence = INS_F12;
+                    break;
+                  case VPK_FUNCTION + 13:
+                    sequence = INS_F13;
+                    break;
+                  case VPK_FUNCTION + 14:
+                    sequence = INS_F14;
+                    break;
+                  case VPK_FUNCTION + 15:
+                    sequence = INS_F15;
+                    break;
+                  case VPK_FUNCTION + 16:
+                    sequence = INS_F16;
+                    break;
+                  case VPK_FUNCTION + 17:
+                    sequence = INS_F17;
+                    break;
+                  case VPK_FUNCTION + 18:
+                    sequence = INS_F18;
+                    break;
+                  case VPK_FUNCTION + 19:
+                    sequence = INS_F19;
+                    break;
+                  case VPK_FUNCTION + 20:
+                    sequence = INS_F20;
+                    break;
+                  default:
+                    sequence = NULL;
+                    break;
+		}
+		if (sequence)
+		  inskey(sequence);
+		else
+		  playTune(&tune_bad_command);
+	        break;
+	      }
+	      case VAL_PASSCHAR: {
 		char buf[] = {arg, 0};
 		inskey(buf);
 		break;
 	      }
-	      case VAL_BRLKEY: {
+	      case VAL_PASSDOTS: {
 		char buf[] = {untexttrans[arg], 0};
 		inskey(buf);
 		break;
@@ -950,17 +1049,23 @@ main (int argc, char *argv[])
 	      case CR_ROUTEOFFSET:
 		if (arg < brl.x && (dispmd & HELP_SCRN) != HELP_SCRN)
 		  csrjmp(MIN(p->winx+arg, scr.cols-1), p->winy, curscr);
+		else
+		  playTune(&tune_bad_command);
 		break;
 	      case CR_BEGBLKOFFSET:
 		if (arg < brl.x && p->winx+arg < scr.cols)
 		  cut_begin(p->winx+arg, p->winy);
+		else
+		  playTune(&tune_bad_command);
 		break;
 	      case CR_ENDBLKOFFSET:
-		if (arg < brl.x)
+		if (arg < brl.x && p->winx+arg < scr.cols)
 		  cut_end(MIN(p->winx+arg, scr.cols-1), p->winy);
+		else
+		  playTune(&tune_bad_command);
 		break;
 	      case CR_MSGATTRIB:
-		if (arg < brl.x || p->winx+arg < scr.cols) {
+		if (arg < brl.x && p->winx+arg < scr.cols) {
 		  static char *colours[] = {
 		    "black",   "red",     "green",   "yellow",
 		    "blue",    "magenta", "cyan",    "white"
@@ -977,11 +1082,12 @@ main (int argc, char *argv[])
 		  if (attributes & 0X80)
 		    strcat(buffer, " blink");
 		  message(buffer, 0);
-		}
+		} else
+		  playTune(&tune_bad_command);
 		break;
 	      case CR_SWITCHVT:
-		if (arg < 0X3F-1)
-		  switchvt(arg+1);
+		if (!switchvt(arg+1))
+		  playTune(&tune_bad_command);
 		break;
 	      {
 	        int increment;
@@ -1018,13 +1124,12 @@ main (int argc, char *argv[])
 		break;
 	      }
 	      default:
-		LogPrint(LOG_DEBUG,
-			 "Driver sent unrecognized command 0x%x.",
-			 keypress);
-	    };
-	      break;
+		playTune(&tune_bad_command);
+		LogPrint(LOG_WARNING, "Driver sent unrecognized command: %X", keypress);
 	    }
+	    break;
 	  }
+	}
 
 	if ((p->winx != oldmotx) || (p->winy != oldmoty))
 	  { // The window has been manually moved.
@@ -1050,8 +1155,8 @@ main (int argc, char *argv[])
        * Update Braille display and screen information.  Switch screen 
        * params if screen numver has changed.
        */
-      getstat (&scr);
-      if( !(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no)
+      getstat(&scr);
+      if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no)
 	switchto (scr.no);
 
       /* speech tracking */
@@ -1345,64 +1450,57 @@ main (int argc, char *argv[])
   return 0;
 }
 
-
-
 void 
-message (unsigned char *text, short flags)
-{
-  int length = strlen(text);
+message (unsigned char *text, short flags) {
+   int length = strlen(text);
 
-  if (env.sound && !(flags & MSG_SILENT))
-    {
+   if (env.sound && !(flags & MSG_SILENT)) {
       speech->mute();
       speech->say(text, length);
-    }
+   }
 
-  if (braille)
-    {
-      clrbrlstat();
-      while (length)
-	{
-	  int count;
-	  int index;
+   if (braille && brl.disp) {
+      clearStatusCells();
 
-	  /* strip leading spaces */
-	  while (*text == ' ')  text++, length--;
+      while (length) {
+	 int count;
+	 int index;
 
-	  if (length <= brl.x*brl.y) {
-	     count = length; /* the whole message fits on the braille window */
-	  } else {
-	     /* split the message across multiple windows on space characters */
-  	     for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
-	     if (count == 0)
-	       count = brl.x * brl.y - 1;
-	  }
+	 /* strip leading spaces */
+	 while (*text == ' ')  text++, length--;
 
-	  memset(brl.disp, ' ', brl.x*brl.y);
-	  for (index=0; index<count; brl.disp[index++]=*text++);
-	  if (length -= count) {
-	     for (; index<brl.x*brl.y; brl.disp[index++]='-');
-	     brl.disp[brl.x*brl.y - 1] = '>';
-	  }
+	 if (length <= brl.x*brl.y) {
+	    count = length; /* the whole message fits on the braille window */
+	 } else {
+	    /* split the message across multiple windows on space characters */
+	    for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
+	    if (!count) count = brl.x * brl.y - 1;
+	 }
 
-	  /*
-	   * Do Braille translation using text table. * Six-dot mode is
-	   * ignored, since case can be important, and * blinking caps won't 
-	   * work ... 
-	   */
-	  for (index=0; index<brl.x*brl.y; brl.disp[index]=texttrans[brl.disp[index]], index++);
+	 memset(brl.disp, ' ', brl.x*brl.y);
+	 for (index=0; index<count; brl.disp[index++]=*text++);
+	 if (length -= count) {
+	    while (index < brl.x*brl.y) brl.disp[index++] = '-';
+	    brl.disp[brl.x*brl.y - 1] = '>';
+	 }
 
-	  braille->write(&brl);
+	 /*
+	  * Do Braille translation using text table. * Six-dot mode is
+	  * ignored, since case can be important, and * blinking caps won't 
+	  * work ... 
+	  */
+	 for (index=0; index<brl.x*brl.y; ++index) brl.disp[index] = texttrans[brl.disp[index]];
+	 braille->write(&brl);
 
-	  if (flags & MSG_WAITKEY)
+	 if (flags & MSG_WAITKEY)
 	    while (braille->read(CMDS_MESSAGE) == EOF) delay(readDelay);
-	  else if (length || !(flags & MSG_NODELAY)) {
+	 else if (length || !(flags & MSG_NODELAY)) {
 	    int i;
 	    for (i=0; i<messageDelay; i+=readDelay) {
-	      delay(readDelay);
-	      if (braille->read(CMDS_MESSAGE) != EOF) break;
+	       delay(readDelay);
+	       if (braille->read(CMDS_MESSAGE) != EOF) break;
 	    }
-	  }
-	}
-    }
+	 }
+      }
+   }
 }

@@ -288,7 +288,7 @@ static int readbrl(DriverCommandContext cmds)
     case 0x01: return CMD_SIXDOTS;
     case 0x08: inskey("\x08"); break;
     case 0x09: inskey("\x09"); break;
-    case 0x0D: return CMD_KEY_RETURN;
+    case 0x0D: return VAL_PASSKEY + VPK_RETURN;
     case 0x91: routing=1; break;
     case 0xA1: return CMD_HELP;
     case 0xA2: return CMD_SND; // Toggle bips
@@ -317,10 +317,10 @@ static int readbrl(DriverCommandContext cmds)
     case keyC8: return CMD_FWINRT;
     case keyC6: return CMD_FWINLT;
     case keyC7: return CMD_HOME;
-    case keyB2: return CMD_KEY_UP;
-    case keyD2: return CMD_KEY_DOWN;
-    case keyC3: return CMD_KEY_RIGHT;
-    case keyC1: return CMD_KEY_LEFT;
+    case keyB2: return VAL_PASSKEY + VPK_CURSOR_UP;
+    case keyD2: return VAL_PASSKEY + VPK_CURSOR_DOWN;
+    case keyC3: return VAL_PASSKEY + VPK_CURSOR_RIGHT;
+    case keyC1: return VAL_PASSKEY + VPK_CURSOR_LEFT;
     case keyB3: return CMD_CSRVIS;
     case keyD1: inskey("\33[3~");
     default: return EOF;

@@ -81,6 +81,7 @@ static short opt_errors = 0;
 static short opt_help = 0;
 static short opt_logLevel = LOG_NOTICE;
 static short opt_noDaemon = 0;
+static char *opt_pidFile = NULL;
 static char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
 static char *opt_speechParameters = NULL;
@@ -214,6 +215,8 @@ static OptionEntry optionTable[] = {
     "Screen recheck interval [5]."},
    {'M', "message-delay", "csecs", NULL,
     "Message hold time [500]."},
+   {'P', "pid-file", "file", NULL,
+    "Path to process identifier file."},
    {'R', "read-delay", "csecs", NULL,
     "Key poll interval [4]."},
    {'S', "speech-parameters", "arg,...", configureSpeechParameters,
@@ -295,7 +298,8 @@ processConfigurationFile (char *path, int optional)
    FILE *file = fopen(path, "r");
    if (file != NULL)
      { // The configuration file has been successfully opened.
-       processLines(file, processConfigurationLine, NULL);
+       if (!processLines(file, processConfigurationLine, NULL))
+         LogPrint(LOG_ERR, "File '%s' processing error.", path);
        fclose(file);
      }
    else
@@ -306,87 +310,6 @@ processConfigurationFile (char *path, int optional)
        return 0;
      }
    return 1;
-}
-
-static void
-printHelp (FILE *outputStream, unsigned int lineWidth, char *programPath) {
-   char line[lineWidth+1];
-   unsigned int wordWidth = 0;
-   unsigned int argumentWidth = 0;
-   int optionIndex;
-   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
-      OptionEntry *option = &optionTable[optionIndex];
-      if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
-      if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
-   }
-
-   {
-      char *programName = strrchr(programPath, '/');
-      programName = programName? programName+1: programPath;
-      fprintf(outputStream, "Usage: %s [option ...]\n", programName);
-   }
-
-   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
-      OptionEntry *option = &optionTable[optionIndex];
-      unsigned int lineLength = 0;
-
-      line[lineLength++] = '-';
-      line[lineLength++] = option->letter;
-      line[lineLength++] = ' ';
-
-      {
-	 unsigned int end = lineLength + argumentWidth;
-	 if (option->argument) {
-	    size_t argumentLength = strlen(option->argument);
-	    memcpy(line+lineLength, option->argument, argumentLength);
-	    lineLength += argumentLength;
-	 }
-	 while (lineLength < end) line[lineLength++] = ' ';
-      }
-      line[lineLength++] = ' ';
-
-      {
-	 unsigned int end = lineLength + 2 + wordWidth + 1;
-	 if (option->word) {
-	    size_t wordLength = strlen(option->word);
-	    line[lineLength++] = '-';
-	    line[lineLength++] = '-';
-	    memcpy(line+lineLength, option->word, wordLength);
-	    lineLength += wordLength;
-	    if (option->argument) line[lineLength++] = '=';
-	 }
-	 while (lineLength < end) line[lineLength++] = ' ';
-      }
-      line[lineLength++] = ' ';
-
-      {
-	 unsigned int headerWidth = lineLength;
-	 unsigned int descriptionWidth = lineWidth - headerWidth;
-	 char *description = option->description;
-	 unsigned int charsLeft = strlen(description);
-	 while (1) {
-	    unsigned int charCount = charsLeft;
-	    if (charCount > descriptionWidth) {
-	       charCount = descriptionWidth;
-	       while (description[charCount] != ' ') --charCount;
-	       while (description[charCount] == ' ') --charCount;
-	       ++charCount;
-	    }
-	    memcpy(line+lineLength, description, charCount);
-	    lineLength += charCount;
-
-	    line[lineLength] = 0;
-	    fprintf(outputStream, "%s\n", line);
-
-	    while (description[charCount] == ' ') ++charCount;
-	    if (!(charsLeft -= charCount)) break;
-	    description += charCount;
-
-	    lineLength = 0;
-	    while (lineLength < headerWidth) line[lineLength++] = ' ';
-	 }
-      }
-   }
 }
 
 static void
@@ -608,6 +531,9 @@ processOptions (int argc, char **argv)
 	  messageDelay = value * 10;
 	break;
       }
+      case 'P':		/* process identifier file */
+        opt_pidFile = optarg;
+	break;
       case 'R': {	/* read delay */
 	int value;
 	int minimum = 1;
@@ -621,39 +547,88 @@ processOptions (int argc, char **argv)
     }
   }
   #undef get_option
-
-  if (opt_help)
-    {
-      printHelp(stdout, 79, argv[0]);
-      exit(0);
-    }
 }
 
-/* 
- * Default definition for settings that are saveable.
- */
-static struct brltty_env initenv = {
-	{ENV_MAGICNUM&0XFF, ENV_MAGICNUM>>8},
-	INIT_CSRVIS, 0,
-	INIT_ATTRVIS, 0,
-	INIT_CSRBLINK, 0,
-	INIT_CAPBLINK, 0,
-	INIT_ATTRBLINK, 0,
-	INIT_CSRSIZE, 0,
-	INIT_CSR_ON_CNT, 0,
-	INIT_CSR_OFF_CNT, 0,
-	INIT_CAP_ON_CNT, 0,
-	INIT_CAP_OFF_CNT, 0,
-	INIT_ATTR_ON_CNT, 0,
-	INIT_ATTR_OFF_CNT, 0,
-	INIT_SIXDOTS, 0,
-	INIT_SLIDEWIN, 0,
-	INIT_SOUND, INIT_TUNEDEV,
-	INIT_SKPIDLNS,  0,
-	INIT_SKPBLNKWINSMODE, 0,
-	INIT_SKPBLNKWINS, 0,
-	ST_None, INIT_WINOVLP
-};
+static void
+printHelp (FILE *outputStream, unsigned int lineWidth, char *programPath) {
+   char line[lineWidth+1];
+   unsigned int wordWidth = 0;
+   unsigned int argumentWidth = 0;
+   int optionIndex;
+   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
+      OptionEntry *option = &optionTable[optionIndex];
+      if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
+      if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
+   }
+
+   {
+      char *programName = strrchr(programPath, '/');
+      programName = programName? programName+1: programPath;
+      fprintf(outputStream, "Usage: %s [option ...]\n", programName);
+   }
+
+   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
+      OptionEntry *option = &optionTable[optionIndex];
+      unsigned int lineLength = 0;
+
+      line[lineLength++] = '-';
+      line[lineLength++] = option->letter;
+      line[lineLength++] = ' ';
+
+      {
+	 unsigned int end = lineLength + argumentWidth;
+	 if (option->argument) {
+	    size_t argumentLength = strlen(option->argument);
+	    memcpy(line+lineLength, option->argument, argumentLength);
+	    lineLength += argumentLength;
+	 }
+	 while (lineLength < end) line[lineLength++] = ' ';
+      }
+      line[lineLength++] = ' ';
+
+      {
+	 unsigned int end = lineLength + 2 + wordWidth + 1;
+	 if (option->word) {
+	    size_t wordLength = strlen(option->word);
+	    line[lineLength++] = '-';
+	    line[lineLength++] = '-';
+	    memcpy(line+lineLength, option->word, wordLength);
+	    lineLength += wordLength;
+	    if (option->argument) line[lineLength++] = '=';
+	 }
+	 while (lineLength < end) line[lineLength++] = ' ';
+      }
+      line[lineLength++] = ' ';
+
+      {
+	 unsigned int headerWidth = lineLength;
+	 unsigned int descriptionWidth = lineWidth - headerWidth;
+	 char *description = option->description;
+	 unsigned int charsLeft = strlen(description);
+	 while (1) {
+	    unsigned int charCount = charsLeft;
+	    if (charCount > descriptionWidth) {
+	       charCount = descriptionWidth;
+	       while (description[charCount] != ' ') --charCount;
+	       while (description[charCount] == ' ') --charCount;
+	       ++charCount;
+	    }
+	    memcpy(line+lineLength, description, charCount);
+	    lineLength += charCount;
+
+	    line[lineLength] = 0;
+	    fprintf(outputStream, "%s\n", line);
+
+	    while (description[charCount] == ' ') ++charCount;
+	    if (!(charsLeft -= charCount)) break;
+	    description += charCount;
+
+	    lineLength = 0;
+	    while (lineLength < headerWidth) line[lineLength++] = ' ';
+	 }
+      }
+   }
+}
 
 /* 
  * Default definition for volatile parameters
@@ -674,39 +649,75 @@ changedWindowAttributes (void)
 static void
 changedTuneDevice (void)
 {
-  setTuneDevice (env.tunedev);
+  setTuneDevice(env.tunedev);
 }
 
-void
-startBrailleDriver (void)
+static void
+changedPreferences (void)
 {
-  braille->initialize(brailleParameters, &brl, opt_brailleDevice);
-  if (brl.x == -1)
-    {
-      LogPrint(LOG_CRIT, "Braille driver initialization failed.");
-      closescr();
-      LogClose();
-      exit(5);
-    }
-#ifdef ALLOW_OFFRIGHT_POSITIONS
-  /* The braille display is allowed to stick out the right side of the
-     screen by brl.x-offr. This allows the feature: */
-  offr = 1;
-#else
-  /* This disallows it, as it was before. */
-  offr = brl.x;
-#endif
   changedWindowAttributes();
-  LogPrint(LOG_DEBUG, "Braille display has %d rows of %d cells.",
-	   brl.y, brl.x);
-  playTune(&tune_detected);
-  clrbrlstat ();
+  changedTuneDevice();
 }
 
 void
-startSpeechDriver (void)
-{
-  speech->initialize(speechParameters);
+initializeBraille (void) {
+   brl.disp = NULL;
+   brl.x = brl.y = -1;
+}
+
+void
+startBrailleDriver (void) {
+   braille->initialize(brailleParameters, &brl, opt_brailleDevice);
+   if (brl.x == -1) {
+      LogPrint(LOG_CRIT, "Braille driver initialization failed.");
+      exit(6);
+   }
+#ifdef ALLOW_OFFRIGHT_POSITIONS
+   /* The braille display is allowed to stick out the right side of the
+    * screen by brl.x-offr. This allows the feature:
+    */
+   offr = 1;
+#else
+   /* This disallows it, as it was before. */
+   offr = brl.x;
+#endif
+   changedWindowAttributes();
+   LogPrint(LOG_DEBUG, "Braille display has %d rows of %d cells.", brl.y, brl.x);
+   playTune(&tune_detected);
+   clearStatusCells();
+}
+
+void
+stopBrailleDriver (void) {
+   braille->close(&brl);
+   playTune(&tune_braille_off);
+   initializeBraille();
+}
+
+static void
+exitBrailleDriver (void) {
+   stopBrailleDriver();
+}
+
+void
+initializeSpeech (void) {
+}
+
+void
+startSpeechDriver (void) {
+   speech->initialize(speechParameters);
+}
+
+void
+stopSpeechDriver (void) {
+   speech->mute();
+   speech->close();
+   initializeSpeech();
+}
+
+static void
+exitSpeechDriver (void) {
+   stopSpeechDriver();
 }
 
 int
@@ -714,8 +725,11 @@ readKey (DriverCommandContext cmds)
 {
    while (1) {
       int key = braille->read(cmds);
-      if (key == CMD_NOOP) continue;
-      if (key != EOF) return key;
+      if (key != EOF) {
+	 LogPrint(LOG_DEBUG, "Command: %5.5X", key);
+	 if (key == CMD_NOOP) continue;
+	 return key;
+      }
       delay(readDelay);
    }
 }
@@ -742,7 +756,7 @@ loadTranslationTable (char *table, char **path, char *name)
 }
 
 int
-loadPreferences (void)
+loadPreferences (int change)
 {
   int ok = 0;
   int fd = open(opt_preferencesFile, O_RDONLY);
@@ -752,6 +766,7 @@ loadPreferences (void)
       if ((newenv.magicnum[0] == (ENV_MAGICNUM&0XFF)) && (newenv.magicnum[1] == (ENV_MAGICNUM>>8))) {
 	env = newenv;
 	ok = 1;
+	if (change) changedPreferences();
       } else
 	LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
     } else
@@ -762,7 +777,6 @@ loadPreferences (void)
     LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
              "Cannot open preferences file: %s: %s",
              opt_preferencesFile, strerror(errno));
-  setTuneDevice (env.tunedev);
   return ok;
 }
 
@@ -904,7 +918,7 @@ updatePreferences (void)
       int settingIndent;				/* braille window pos in buffer */
       MenuItem *item = &menu[menuIndex];
 
-      closeTuneDevice();
+      closeTuneDevice(0);
 
       /* First we draw the current menu item in the buffer */
       sprintf(line, "%s: ", item->description);
@@ -976,18 +990,18 @@ updatePreferences (void)
 	  break;
 	case CMD_WINUP:
 	case CMD_CHRLT:
-	case CMD_KEY_LEFT:
-	case CMD_KEY_UP:
+	case VAL_PASSKEY+VPK_CURSOR_LEFT:
+	case VAL_PASSKEY+VPK_CURSOR_UP:
 	  if ((*item->setting)-- <= item->minimum)
 	    *item->setting = item->maximum;
 	  settingChanged = 1;
 	  break;
 	case CMD_WINDN:
 	case CMD_CHRRT:
-	case CMD_KEY_RIGHT:
-	case CMD_KEY_DOWN:
+	case VAL_PASSKEY+VPK_CURSOR_RIGHT:
+	case VAL_PASSKEY+VPK_CURSOR_DOWN:
 	case CMD_HOME:
-	case CMD_KEY_RETURN:
+	case VAL_PASSKEY+VPK_RETURN:
 	  if ((*item->setting)++ >= item->maximum)
 	    *item->setting = item->minimum;
 	  settingChanged = 1;
@@ -1008,16 +1022,11 @@ updatePreferences (void)
 	      "Routing keys are available too! "
 	      "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
 	  break;
-	case CMD_PREFLOAD: {
-	  int index;
+	case CMD_PREFLOAD:
 	  env = oldEnvironment;
-	  for (index=0; index<menuSize; ++index) {
-	    void (*changed) (void) = menu[index].changed;
-	    if (changed) changed();
-	  }
+	  changedPreferences();
 	  message("changes discarded", 0);
 	  break;
-	}
 	case CMD_PREFSAVE:
 	  exitSave = 1;
 	  goto exitMenu;
@@ -1055,9 +1064,43 @@ updatePreferences (void)
     }
 }
 
-void startup(int argc, char *argv[])
+static void
+exitTunes (void) {
+   closeTuneDevice(1);
+}
+
+static void
+exitScreen (void) {
+   closescr();
+}
+
+static void
+exitPidFile (void) {
+   unlink(opt_pidFile);
+}
+
+static void
+background (void) {
+   switch (fork()) {
+      case -1: // error
+         LogPrint(LOG_CRIT, "process creation error: %s", strerror(errno));
+         exit(10);
+      case 0: // child
+         break;
+      default: // parent
+         _exit(0);
+   };
+}
+
+void
+startup(int argc, char *argv[])
 {
   processOptions(argc, argv);
+
+  if (opt_help) {
+    printHelp(stdout, 79, argv[0]);
+    exit(0);
+  }
 
   /* Set logging priority levels. */
   if (opt_errors)
@@ -1088,8 +1131,7 @@ void startup(int argc, char *argv[])
     {
       LogPrint(LOG_CRIT, "No braille device specified.");
       fprintf(stderr, "Use -d to specify one.\n");
-      /* this is fatal */
-      exit(10);
+      exit(4);
     }
 
   if (!load_braille_driver())
@@ -1099,8 +1141,7 @@ void startup(int argc, char *argv[])
       fprintf(stderr, "\n");
       list_braille_drivers();
       fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
-      /* this is fatal */
-      exit(10);
+      exit(5);
     }
   parseBrailleParameters(cfg_brailleParameters);
   parseBrailleParameters(opt_brailleParameters);
@@ -1126,9 +1167,6 @@ void startup(int argc, char *argv[])
       opt_preferencesFile = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
       sprintf(opt_preferencesFile, "%s%s%s", part1, part2, part3);
     }
-
-  /* copy default mode for status display */
-  initenv.stcellstyle = braille->status_style;
 
   if (chdir (HOME_DIR))		/* * change to directory containing data files  */
     {
@@ -1178,92 +1216,105 @@ void startup(int argc, char *argv[])
     exit(0);
 
   /* Load preferences file */
-  if (!loadPreferences())
-    env = initenv;
+  if (!loadPreferences(0)) {
+    memset(&env, 0, sizeof(env));
+
+    env.magicnum[0] = ENV_MAGICNUM&0XFF;
+    env.magicnum[1] = ENV_MAGICNUM>>8;
+
+    env.csrvis = INIT_CSRVIS;
+    env.csrsize = INIT_CSRSIZE;
+    env.csrblink = INIT_CSRBLINK;
+    env.csroncnt = INIT_CSR_ON_CNT;
+    env.csroffcnt = INIT_CSR_OFF_CNT;
+
+    env.attrvis = INIT_ATTRVIS;
+    env.attrblink = INIT_ATTRBLINK;
+    env.attroncnt = INIT_ATTR_ON_CNT;
+    env.attroffcnt = INIT_ATTR_OFF_CNT;
+
+    env.capblink = INIT_CAPBLINK;
+    env.caponcnt = INIT_CAP_ON_CNT;
+    env.capoffcnt = INIT_CAP_OFF_CNT;
+
+    env.sixdots = INIT_SIXDOTS;
+    env.winovlp = INIT_WINOVLP;
+    env.slidewin = INIT_SLIDEWIN;
+
+    env.skpidlns = INIT_SKPIDLNS;
+    env.skpblnkwins = INIT_SKPBLNKWINS;
+    env.skpblnkwinsmode = INIT_SKPBLNKWINSMODE;
+
+    env.sound = INIT_SOUND;
+    env.tunedev = INIT_TUNEDEV;
+    env.midiinstr = 0;
+
+    env.stcellstyle = braille->status_style;
+  }
+  changedTuneDevice();
+  atexit(exitTunes);
 
   /*
    * Initialize screen library 
    */
-  if (initscr())
-    {				
-      LogPrint(LOG_CRIT, "Cannot read screen.");
-      LogClose();
-      exit(2);
-    }
+  if (initscr()) {				
+    LogPrint(LOG_CRIT, "Cannot read screen.");
+    exit(7);
+  }
+  atexit(exitScreen);
   
-  if (!opt_noDaemon)
-    {
-      /*
-       * Become a daemon:
-       */
-      LogPrint(LOG_DEBUG, "Becoming daemon.");
-      switch (fork())
-        {
-        case -1:			/* can't fork */
-          LogPrint(LOG_CRIT, "fork: %s", strerror(errno));
-          closescr();
-          LogClose();
-          exit(3);
-        case 0: /* child, process becomes a daemon */
-	  {
-	    char *nullDevice = "/dev/null";
-	    SetStderrOff();
-	    freopen(nullDevice, "r", stdin);
-	    freopen(nullDevice, "a", stdout);
-	    if (opt_errors)
-	      fflush(stderr);
-	    else
-	      freopen(nullDevice, "a", stderr);
-	  }
+  if (!opt_noDaemon) {
+    LogPrint(LOG_DEBUG, "Becoming daemon.");
+    background();
+    SetStderrOff();
 
-	  /* request a new session (job control) */
-	  if (setsid() == -1) {			
-	    closescr();
-	    LogPrint(LOG_CRIT, "setsid: %s", strerror(errno));
-	    LogClose();
-	    exit(4);
-	  }
-
-          /* I read somewhere that the correct thing to do here is to fork
-	     again, so we are not a group leader and then can never be associated
-	     a controlling tty. Well... No harm I suppose. */
-          switch (fork()) {
-	    case -1:
-	      LogPrint(LOG_CRIT, "second fork: %s", strerror(errno));
-	      closescr();
-	      LogClose();
-	      exit(3);
-	    case 0:
-	      break;
-	    default:
-	      exit(0);
-          };
-          break;
-        default:			/* parent returns to calling process: */
-          exit(0);
-        }
+    /* request a new session (job control) */
+    if (setsid() == -1) {			
+      LogPrint(LOG_CRIT, "session creation error: %s", strerror(errno));
+      exit(11);
     }
 
+    {
+      char *nullDevice = "/dev/null";
+      freopen(nullDevice, "r", stdin);
+      freopen(nullDevice, "a", stdout);
+      if (opt_errors)
+	fflush(stderr);
+      else
+	freopen(nullDevice, "a", stderr);
+    }
+
+    background();
+  }
   /*
    * From this point, all IO functions as printf, puts, perror, etc. can't be
    * used anymore since we are a daemon.  The LogPrint facility should 
    * be used instead.
    */
 
+  /* Create the process identifier file. */
+  if (opt_pidFile) {
+    FILE *stream = fopen(opt_pidFile, "w");
+    if (stream) {
+      fprintf(stream, "%d\n", getpid());
+      fclose(stream);
+      atexit(exitPidFile);
+    } else {
+      LogPrint(LOG_ERR, "Cannot open process identifier file: %s: %s",
+               opt_pidFile, strerror(errno));
+    }
+  }
+
   /* Initialise Braille display: */
-  if (brailleParameters)
-    startBrailleDriver();
-  else
-    LogPrint(LOG_ERR, "Braille driver not started.");
+  startBrailleDriver();
+  atexit(exitBrailleDriver);
 
   /* Initialise speech */
-  if (speechParameters)
-    startSpeechDriver();
-  else
-    LogPrint(LOG_ERR, "Speech driver not started.");
+  startSpeechDriver();
+  atexit(exitSpeechDriver);
 
   /* Initialise help screen */
-  if (inithlpscr (braille->help_file))
+  if (inithlpscr(braille->help_file))
     LogPrint(LOG_ERR, "Cannot open help screen file '%s'.", braille->help_file);
 
   if (!opt_quiet)

@@ -27,6 +27,10 @@ when the unit is in its internal notetaker mode.
 See brltty_genhelp.txt for a description of the key bindings.
 
 History:
+Stéphane Doyon and Dave Mielke, September 2001, version 0.5.2:
+-closebrl: don't clear display, use TCSADRAIN.
+-Slight API and name changes for BRLTTY 3.0. Commands can no longer be
+    assumed to be chars, changed type of cmdtrans.
 Stéphane Doyon, September 2001, version 0.5.2:
 -Added baudrate parameter. Fixed up initialization, in particular a bug
     with use of qbase buffer unitialized.

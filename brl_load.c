@@ -80,7 +80,7 @@ int load_braille_driver(void)
     {
       LogPrint(LOG_ERR, "%s", error);
       LogPrint(LOG_ERR, "Braille driver symbol not found: %s", BRL_SYMBOL);
-      exit(10);
+      return 0;
     }
 
   return 1;

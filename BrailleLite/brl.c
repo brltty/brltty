@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.2 (September 2001)"
+"Braille Lite driver, version 0.5.3 (September 2001)"
 
 #define BRL_C
 
@@ -92,7 +92,7 @@ static int qlen = 0;		/* number of items in the queue */
 typedef struct
   {
     unsigned char raw;		/* raw value, after any keyboard reversal */
-    unsigned char cmd;		/* command code */
+    int cmd;			/* command code */
     unsigned char asc;		/* ASCII translation of Braille keys */
     unsigned char spcbar;	/* 1 = on, 0 = off */
     unsigned char routing;	/* routing key number */
@@ -273,17 +273,21 @@ failure:
 static void
 closebrl (brldim * brl)
 {
+#if 0 /* SDo: Let's leave the BRLTTY exit message there. */
   /* We just clear the display, using writebrl(): */
   memset (brl->disp, 0, brl->x);
   writebrl (brl);
+#endif
 
   free (brl->disp);
   free (prevdata);
   free (rawdata);
   free (qbase);
 
-  tcsetattr (blite_fd, TCSANOW, &oldtio);	/* restore terminal settings */
-  close (blite_fd);
+  if(blite_fd >= 0) {
+    tcsetattr (blite_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
+    close (blite_fd);
+  }
 }
 
 

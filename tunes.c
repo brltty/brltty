@@ -244,6 +244,14 @@ TuneDefinition tune_skip_more = {
    NULL, 0X0000, tones_skip_more
 };
 
+static ToneDefinition tones_bad_command[] = {
+   {  750, 100},
+   {    0,   0}
+};
+TuneDefinition tune_bad_command = {
+   NULL, 0X0000, tones_bad_command
+};
+
 static unsigned int closeTimer = 0;
 
 static ToneGenerator *toneGenerator = NULL;
@@ -267,11 +275,11 @@ void setTuneDevice (unsigned char device) {
    }
 }
 
-void closeTuneDevice (void) {
-   if (closeTimer)
-      if (!--closeTimer)
-	 if (toneGenerator)
-	    toneGenerator->close();
+void closeTuneDevice (int force) {
+   if (closeTimer) {
+      if (force) closeTimer = 1;
+      if (!--closeTimer) toneGenerator->close();
+   }
 }
  
 void playTune (TuneDefinition *tune) {

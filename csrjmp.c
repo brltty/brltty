@@ -69,7 +69,7 @@ void csrjmp_sub(int x, int y, int curscr)
     while (dif != 0 && curscr == scr.no) {
 	timeout_yet(0);		/* initialise stop-watch */
 	sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-	inskey(dif > 0 ? DN_CSR : UP_CSR);
+	inskey(dif > 0 ? INS_CURSOR_DOWN : INS_CURSOR_UP);
 	sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 	do {
 #if CSRJMP_LOOP_DELAY > 0
@@ -96,7 +96,7 @@ void csrjmp_sub(int x, int y, int curscr)
 		 * nearest ever reached to date before giving up.
 		 */
 		sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-		inskey(dif < 0 ? DN_CSR : UP_CSR);
+		inskey(dif < 0 ? INS_CURSOR_DOWN : INS_CURSOR_UP);
 		sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 		break;
 	    }
@@ -110,7 +110,7 @@ void csrjmp_sub(int x, int y, int curscr)
 	while (dif != 0 && scr.posy == y && curscr == scr.no) {
 	    timeout_yet(0);	/* initialise stop-watch */
 	    sigprocmask(SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-	    inskey(dif > 0 ? RT_CSR : LT_CSR);
+	    inskey(dif > 0 ? INS_CURSOR_RIGHT : INS_CURSOR_LEFT);
 	    sigprocmask(SIG_UNBLOCK, &mask, NULL);	/* unblock SIGUSR1 */
 	    do {
 #if CSRJMP_LOOP_DELAY > 0
@@ -138,7 +138,7 @@ void csrjmp_sub(int x, int y, int curscr)
 		     * to date before we exit.
 		     */
 		    sigprocmask(SIG_BLOCK, &mask, NULL);  /* block SIGUSR1 */
-		    inskey(dif > 0 ? LT_CSR : RT_CSR);
+		    inskey(dif > 0 ? INS_CURSOR_LEFT : INS_CURSOR_RIGHT);
 		    sigprocmask(SIG_UNBLOCK, &mask, NULL);  /* unblock SIGUSR1 */
 		    break;
 		}
@@ -179,7 +179,7 @@ void csrjmp(int x, int y, int scrno)
     case 0:			/* child, cursor routing process */
 	nice(CSRJMP_NICENESS);	/* reduce scheduling priority */
 	csrjmp_sub(x, y, scrno);
-	exit(0);		/* terminate child process */
+	_exit(0);		/* terminate child process */
     default:			/* parent waits for child to return */
 	break;
     }

@@ -20,10 +20,12 @@
  */
 
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -34,6 +36,7 @@
 #include <linux/vt.h>
 
 #include "config.h"
+#include "misc.h"
 #include "inskey.h"
 
 
@@ -67,11 +70,20 @@ void inskey (const unsigned char *string)
   close (ins_fd);
 }
 
-void switchvt(int n)
+int switchvt(int n)
 {
-  int fd;
-  fd = open (CONSOLE, O_RDONLY);
-  if (fd == -1) return;
-  ioctl(fd, VT_ACTIVATE, n);
-  close(fd);
+  int ok = 0;
+  if ((n >= 1) && (n <= 0X3F)) {
+    int fd = open (CONSOLE, O_RDONLY);
+    if (fd != -1) {
+      if (ioctl(fd, VT_ACTIVATE, n) != -1) {
+	LogPrint(LOG_DEBUG, "Switched to virtual tertminal %d.", n);
+	ok = 1;
+      }
+      close(fd);
+    } else {
+      LogPrint(LOG_ERR, "Cannot open console: %s: %s", CONSOLE, strerror(errno));
+    }
+  }
+  return ok;
 }

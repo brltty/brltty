@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <math.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -34,7 +35,9 @@ static int channelCount;
 #define QUERY_SOUND(v, f, d) (v = ((ioctl(fileDescriptor, f, &setting) != -1)? setting: (d)))
 static int openSoundCard (void) {
    if (fileDescriptor == -1) {
-      if ((fileDescriptor = open("/dev/dsp", O_WRONLY|O_NONBLOCK)) == -1) {
+      char *device = "/dev/dsp";
+      if ((fileDescriptor = open(device, O_WRONLY|O_NONBLOCK)) == -1) {
+         LogPrint(LOG_ERR, "Cannot open sound card: %s: %s", device, strerror(errno));
          return 0;
       }
       setCloseOnExec(fileDescriptor);
@@ -62,6 +65,7 @@ static int writeSample (unsigned char sample) {
 	 int count = write(fileDescriptor, &sample, 1);
 	 if (count == -1) {
 	    if (errno != EAGAIN) {
+	       LogPrint(LOG_ERR, "Cannot write to sound card: %s", strerror(errno));
 	       return 0;
 	    }
 	    count = 0;
@@ -79,7 +83,7 @@ static int generateSoundCard (int frequency, int duration) {
       double waveLength = frequency? (double)sampleRate / (double)frequency: HUGE_VAL;
       unsigned long int sampleCount = sampleRate * duration / 1000;
       int sampleNumber;
-      LogPrint(LOG_DEBUG, "Tone: ms=%d hz=%d wl=%.2E sc=%lu",
+      LogPrint(LOG_DEBUG, "Tone: msec=%d freq=%d wvln=%.2E smct=%lu",
                duration, frequency, waveLength, sampleCount);
       for (sampleNumber=0; sampleNumber<sampleCount; ++sampleNumber) {
          unsigned char sample = rint(sin(((double)sampleNumber / waveLength) * (2.0 * M_PI)) * 127.0) + 128;
@@ -90,15 +94,20 @@ static int generateSoundCard (int frequency, int duration) {
    return 0;
 }
 
-static int flushSoundCard (void) {
+static int flushFragment (void) {
    while (bytesWritten % blockSize) {
       if (!writeSample(0X80)) return 0;
    }
    return 1;
 }
 
+static int flushSoundCard (void) {
+   return (fileDescriptor != -1)? flushFragment(): 0;
+}
+
 static void closeSoundCard (void) {
    if (fileDescriptor != -1) {
+      flushFragment();
       close(fileDescriptor);
       LogPrint(LOG_DEBUG, "Sound card closed.");
       fileDescriptor = -1;

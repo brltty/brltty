@@ -458,8 +458,8 @@ static void initbrl (char **parameters, brldim *brl, const char *dev)
        model++ );
   if( !model->Name ) {
     /* Unknown model */
-    LogPrint( LOG_CRIT, "Detected unknown Alva model with ID %d.", ModelID );
-    LogPrint( LOG_CRIT, "Please fix Models[] in Alva/brlmain.cc and mail the maintainer." );
+    LogPrint( LOG_ERR, "Detected unknown Alva model with ID %d.", ModelID );
+    LogPrint( LOG_WARNING, "Please fix Models[] in Alva/brlmain.cc and mail the maintainer." );
     goto failure;
   }
 

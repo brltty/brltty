@@ -320,7 +320,7 @@ static void
 closebrl (brldim *brl)
 {
   free (brl->disp);
-  tcsetattr (brl_fd, TCSANOW, &oldtio);	/* restore terminal settings */
+  tcsetattr (brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
   close (brl_fd);
 }
 
@@ -626,7 +626,7 @@ readbrl (DriverCommandContext cmds)
       else  /* CSR Jump */
 	return CR_ROUTEOFFSET + num;
     } else
-      return CMD_NOOP;
+      return EOF;
   }
   LogPrint(LOG_ERR, "readbrl: Command Error - CmdKod:%d", code);
   return CMD_ERR;

@@ -109,11 +109,17 @@ extern int messageDelay;
  * Shared functions
  */
 
-void startup(int argc, char *argv[]);
-void startBrailleDriver(void);
-void startSpeechDriver(void);
-int loadPreferences(void);
-int savePreferences(void);
-void updatePreferences(void);
-void clrbrlstat(void);
+extern void startup (int argc, char *argv[]);
+extern int loadPreferences (int change);
+extern int savePreferences (void);
+extern void updatePreferences (void);
+
+extern void initializeBraille (void);
+extern void startBrailleDriver (void);
+extern void stopBrailleDriver (void);
+extern void clearStatusCells (void);
+
+extern void initializeSpeech (void);
+extern void startSpeechDriver (void);
+extern void stopSpeechDriver (void);
 

@@ -100,7 +100,7 @@ static struct timezone dum_tz;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
 {CMD_FWINRT, CMD_FWINLT, CMD_LNUP, CMD_LNDN, CMD_WINUP, CMD_WINDN,
- CMD_KEY_LEFT, CMD_KEY_RIGHT, CMD_KEY_UP, CMD_KEY_DOWN,
+ VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN,
  CMD_PRDIFLN, CMD_NXDIFLN, 0};
 
 static char DotsTable[256] =
@@ -609,12 +609,12 @@ static int readbrl(DriverCommandContext cmds) {
 	/* Define some special combinations. I only use dot 7 in combination
 	   with dot 2, 3, 4, 5 and 6. */
 	if (t == (1<<6)) t = 0;  /* Space is 00000000 */
-	else if (t == ((1<<6)|(1<<1))) return(CMD_KEY_RETURN);
-	else if (t == ((1<<6)|(1<<2))) return(VAL_PASSTHRU+127);
-	else if (t == ((1<<6)|(1<<3))) return(VAL_PASSTHRU+9);
-	else if (t == ((1<<6)|(1<<4))) return(CMD_KEY_LEFT);
-	else if (t == ((1<<6)|(1<<5))) return(CMD_KEY_RIGHT);
-	return(VAL_BRLKEY+t);
+	else if (t == ((1<<6)|(1<<1))) return(VAL_PASSKEY+VPK_RETURN);
+	else if (t == ((1<<6)|(1<<2))) return(VAL_PASSCHAR+127);
+	else if (t == ((1<<6)|(1<<3))) return(VAL_PASSCHAR+9);
+	else if (t == ((1<<6)|(1<<4))) return(VAL_PASSKEY+VPK_CURSOR_LEFT);
+	else if (t == ((1<<6)|(1<<5))) return(VAL_PASSKEY+VPK_CURSOR_RIGHT);
+	return(VAL_PASSDOTS+t);
       } else {
 	code |= (ck<<16);
 	ck = 0;
@@ -677,9 +677,9 @@ static int readbrl(DriverCommandContext cmds) {
 	KEY(KEY_TL1, CMD_LNUP);
 	KEY(KEY_TL2, CMD_FWINLT);
 	KEY(KEY_TL3, CMD_LNDN);
-	KEY(KEY_TR1, CMD_KEY_UP);
+	KEY(KEY_TR1, VAL_PASSKEY+VPK_CURSOR_UP);
 	KEY(KEY_TR2, CMD_FWINRT);
-	KEY(KEY_TR3, CMD_KEY_DOWN);
+	KEY(KEY_TR3, VAL_PASSKEY+VPK_CURSOR_DOWN);
       }
     } else if (brlcols == 80) {
       switch (code) {
@@ -687,21 +687,21 @@ static int readbrl(DriverCommandContext cmds) {
 	KEY(KEY_TL2, CMD_HOME);
 	KEY(KEY_TL3, CMD_BOT_LEFT);
 	KEY(KEY_TR1, CMD_LNUP);
-	KEY(KEY_TR2, CMD_KEY_RETURN);
+	KEY(KEY_TR2, VAL_PASSKEY+VPK_RETURN);
 	KEY(KEY_TR3, CMD_LNDN);
 	KEY(KEY_MU, CMD_LNUP);
 	KEY(KEY_MD, CMD_LNDN);
 	KEY(KEY_RU, CMD_DISPMD);
 	KEY(KEY_RD, CMD_CSRTRK);
 
-	KEY(KEY_LU, CMD_KEY_UP);
-	KEY(KEY_LD, CMD_KEY_DOWN);
-	KEY(KEY_CK4, CMD_KEY_RETURN);
+	KEY(KEY_LU, VAL_PASSKEY+VPK_CURSOR_UP);
+	KEY(KEY_LD, VAL_PASSKEY+VPK_CURSOR_DOWN);
+	KEY(KEY_CK4, VAL_PASSKEY+VPK_RETURN);
 
 	KEY(KEY_CK3 | KEY_CK5, CMD_PREFMENU);
 	KEY(KEY_CK1 | KEY_CK3 | KEY_CK7, CMD_ATTRVIS);
-	KEY(KEY_CK1, CMD_KEY_LEFT);
-	KEY(KEY_CK7, CMD_KEY_RIGHT);
+	KEY(KEY_CK1, VAL_PASSKEY+VPK_CURSOR_LEFT);
+	KEY(KEY_CK7, VAL_PASSKEY+VPK_CURSOR_RIGHT);
 	KEY(KEY_CK2 | KEY_CK3 | KEY_CK5, CMD_FREEZE);
 	KEY(KEY_CK2 | KEY_CK3 | KEY_CK6, CMD_HELP);
 	KEY(KEY_CK2           | KEY_CK5, CMD_INFO);

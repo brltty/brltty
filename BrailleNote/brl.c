@@ -42,7 +42,6 @@ static int displayTerminal;
 #include "../brl.h"
 #include "../config.h"
 #include "../misc.h"
-#include "../inskey.h"
 #include "../message.h"
 #include "brlconf.h"
 #include "../brl_driver.h"
@@ -448,12 +447,20 @@ initbrl (char **parameters, brldim *brl, const char *device)
 static void
 closebrl (brldim *brl)
 {
-   free(brl->disp);
-   free(outputBuffer);
-   free(cellBuffer);
-   tcflush(fileDescriptor,TCIOFLUSH);
-   tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
+   tcflush(fileDescriptor, TCIFLUSH);
+   tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
+
    close(fileDescriptor);
+   fileDescriptor = -1;
+
+   free(brl->disp);
+   brl->disp = NULL;
+
+   free(outputBuffer);
+   outputBuffer = NULL;
+
+   free(cellBuffer);
+   cellBuffer = NULL;
 }
 
 static void
@@ -579,23 +586,14 @@ getHexadecimalCharacter(unsigned char *character)
    }
 }
 
-static void
-enterFunctionKey(void)
+static int
+getFunctionKey(void)
 {
-   const char *keyTable[] = {
-      KEY_F1 , KEY_F2 , KEY_F3 , KEY_F4 ,
-      KEY_F5 , KEY_F6 , KEY_F7 , KEY_F8 ,
-      KEY_F9 , KEY_F10, KEY_F11, KEY_F12,
-      KEY_F13, KEY_F14, KEY_F15, KEY_F16,
-      KEY_F17, KEY_F18, KEY_F19, KEY_F20
-   };
-   const unsigned int keyCount = sizeof(keyTable) / sizeof(keyTable[0]);
    unsigned int keyNumber;
    if (getDecimalInteger(&keyNumber, 2, "function key")) {
-      if ((keyNumber > 0) && (keyNumber <= keyCount)) {
-         inskey(keyTable[keyNumber-1]);
-      }
+      return VAL_PASSKEY + VPK_FUNCTION + keyNumber;
    }
+   return EOF;
 }
 
 static int
@@ -688,7 +686,7 @@ interpretCharacter(unsigned char dots, DriverCommandContext cmds)
 	 mask |= 0X80;
 	 break;
    }
-   return VAL_BRLKEY + (inputTable[dots] | mask);
+   return VAL_PASSDOTS + (inputTable[dots] | mask);
 }
 
 static int
@@ -716,8 +714,7 @@ interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
       case BNC_D:
 	 return CMD_PREFLOAD;
       case BNC_F:
-	 enterFunctionKey();
-         return EOF;
+	 return getFunctionKey();
       case BNC_L:
 	 return CMD_CSRJMP_VERT;
       case BNC_M:
@@ -733,9 +730,8 @@ interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
       case BNC_V: {
 	 unsigned int vt;
 	 if (getDecimalInteger(&vt, 2, "virt term num")) {
-	    if ((vt > 0) && (vt <= 0x40)) {
-	       return CR_SWITCHVT + (vt - 1);
-	    }
+	    if (!vt) vt = 0X100;
+	    return CR_SWITCHVT + (vt - 1);
 	 }
          return EOF;
       }
@@ -746,7 +742,7 @@ interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
 	 if (!getHexadecimalCharacter(&character)) {
 	    return EOF;
 	 }
-	 return VAL_PASSTHRU + character;
+	 return VAL_PASSCHAR + character;
       }
       case BNC_LPAREN:
 	 temporaryRoutingOperation = CR_BEGBLKOFFSET;
@@ -755,41 +751,29 @@ interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
 	 temporaryRoutingOperation = CR_ENDBLKOFFSET;
 	 return CMD_NOOP;
       case (BND_2 | BND_3 | BND_5 | BND_6):
-	 inskey(KEY_TAB);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_TAB;
       case (BND_2 | BND_3):
-	 inskey(LT_CSR);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_CURSOR_LEFT;
       case (BND_5 | BND_6):
-	 inskey(RT_CSR);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_CURSOR_RIGHT;
       case (BND_2 | BND_5):
-	 inskey(UP_CSR);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_CURSOR_UP;
       case (BND_3 | BND_6):
-	 inskey(DN_CSR);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_CURSOR_DOWN;
       case (BND_2):
-	 inskey(KEY_HOME);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_HOME;
       case (BND_3):
-	 inskey(KEY_END);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_END;
       case (BND_5):
-	 inskey(UP_PAGE);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_PAGE_UP;
       case (BND_6):
-	 inskey(DN_PAGE);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_PAGE_DOWN;
       case (BND_3 | BND_5):
-	 inskey(KEY_INSERT);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_INSERT;
       case (BND_2 | BND_5 | BND_6):
-	 inskey(KEY_DELETE);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_DELETE;
       case (BND_2 | BND_6):
-	 inskey(KEY_ESCAPE);
-	 return EOF;
+	 return VAL_PASSKEY + VPK_ESCAPE;
       case (BND_4):
       case (BND_4 | BND_5):
          temporaryKeyboardMode = KBM_INPUT;
@@ -821,7 +805,7 @@ interpretBackspaceChord(unsigned char dots, DriverCommandContext cmds)
       default:
 	 break;
       case BNC_SPACE:
-	 inskey(KEY_BACKSPACE);
+	 return VAL_PASSKEY + VPK_BACKSPACE;
 	 return EOF;
       case BNC_A:
 	 return CMD_DISPMD | VAL_SWITCHON;
@@ -869,7 +853,7 @@ interpretEnterChord(unsigned char dots, DriverCommandContext cmds)
       case BNC_T: // display the time
 	 break;
       case BNC_SPACE:
-	 inskey(KEY_RETURN);
+	 return VAL_PASSKEY + VPK_RETURN;
 	 return EOF;
       case BNC_B:
          return CMD_SKPBLNKWINS | VAL_SWITCHON;

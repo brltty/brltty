@@ -694,8 +694,8 @@ readbrl (DriverCommandContext cmds)
 	};
       }else if(modifier == SHIFT_MOD){
 	switch(key) {
-	case UP: cmd = CMD_KEY_UP; break;
-	case DN: cmd = CMD_KEY_DOWN; break;
+	case UP: cmd = VAL_PASSKEY + VPK_CURSOR_UP; break;
+	case DN: cmd = VAL_PASSKEY + VPK_CURSOR_DOWN; break;
 	case 1: cmd = CMD_FREEZE; break;
 	case 2: cmd = CMD_INFO; break;
 	case 3: cmd = CMD_HWINLT; break;

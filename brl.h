@@ -116,13 +116,6 @@ typedef enum {
    CMD_PREFSAVE /* save preferences */,
    CMD_PREFLOAD /* reload preferences */,
 
-   /* key entry */
-   CMD_KEY_UP /* simulate up-arrow key */,
-   CMD_KEY_DOWN /* simulate down-arrow key */,
-   CMD_KEY_LEFT /* simulate left-arrow key */,
-   CMD_KEY_RIGHT /* simulate right-arrow key */,
-   CMD_KEY_RETURN /* simulate return key */,
-
    /* speech control */
    CMD_SAY /* speak current line */,
    CMD_SAYALL /* speak rest of screen */,
@@ -148,11 +141,31 @@ typedef enum {
 				/* not more indented than routing key indicates */
 #define	CR_MSGATTRIB 0x700	/* message attributes of character */
 
-/* For typing character -- pass through */
-#define	VAL_PASSTHRU	0xE00
+/* For entering a special key. */
+#define	VAL_PASSKEY	0xD00
+typedef enum {
+   VPK_RETURN,
+   VPK_TAB,
+   VPK_BACKSPACE,
+   VPK_ESCAPE,
+   VPK_CURSOR_LEFT,
+   VPK_CURSOR_RIGHT,
+   VPK_CURSOR_UP,
+   VPK_CURSOR_DOWN,
+   VPK_PAGE_UP,
+   VPK_PAGE_DOWN,
+   VPK_HOME,
+   VPK_END,
+   VPK_INSERT,
+   VPK_DELETE,
+   VPK_FUNCTION
+} Key;
 
-/* For typing character -- Using current translation table */
-#define VAL_BRLKEY      0xF00
+/* For typing a character -- pass through. */
+#define	VAL_PASSCHAR	0xE00
+
+/* For typing a character -- use current translation table. */
+#define VAL_PASSDOTS      0xF00
 
 /* For specifically turning on/off toggle commands */
 #define VAL_SWITCHMASK  0x30000
@@ -168,14 +181,15 @@ typedef struct
 brldim;				/* used for writing to a braille display */
 
 
-/* status cells modes */
-#define ST_None 0
-#define ST_AlvaStyle 1
-#define ST_TiemanStyle 2
-#define ST_PB80Style 3
-#define ST_Papenmeier 4
-#define ST_MDVStyle 5
-#define NB_STCELLSTYLES 5
+/* status cell styles */
+typedef enum {
+   ST_None,
+   ST_AlvaStyle,
+   ST_TiemanStyle,
+   ST_PB80Style,
+   ST_Papenmeier,
+   ST_MDVStyle
+} StatusCellStyles;
 
 /* Routines provided by the braille driver library */
 /* these are load dynamically at runtime into this structure with pointers to 

@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/soundcard.h>
@@ -314,19 +315,22 @@ SEQ_DEFINEBUF(0X80);
 
 void seqbuf_dump (void) {
    if (_seqbufptr) {
-      write(fileDescriptor,_seqbuf, _seqbufptr);
+      if (write(fileDescriptor,_seqbuf, _seqbufptr) == -1) {
+         LogPrint(LOG_ERR, "Cannot write to sequencer: %s", strerror(errno));
+      }
       _seqbufptr = 0;
    }
 }
 
 static int openSequencer (void) {
    if (fileDescriptor == -1) {
-      if ((fileDescriptor = open("/dev/sequencer", O_WRONLY)) == -1) {
+      char *device = "/dev/sequencer";
+      if ((fileDescriptor = open(device, O_WRONLY)) == -1) {
+         LogPrint(LOG_ERR, "Cannot open sequencer: %s: %s", device, strerror(errno));
          return 0;
       }
       setCloseOnExec(fileDescriptor);
       LogPrint(LOG_DEBUG, "Sequencer opened: fd=%d", fileDescriptor);
-      SEQ_START_TIMER();
    }
    SEQ_SET_PATCH(deviceNumber, channelNumber, env.midiinstr);
    return 1;
@@ -351,15 +355,21 @@ static int getDuration (int duration) {
 
 static int generateSequencer (int frequency, int duration) {
    if (fileDescriptor != -1) {
-      duration = getDuration(duration);
+      int time = getDuration(duration);
+      SEQ_START_TIMER();
       if (frequency) {
 	 int note = getNote(frequency);
+	 LogPrint(LOG_DEBUG, "Tone: msec=%d time=%d freq=%d note=%d",
+	          duration, time, frequency, note);
          SEQ_START_NOTE(deviceNumber, channelNumber, note, 0X7F);
-	 SEQ_DELTA_TIME(duration);
+	 SEQ_DELTA_TIME(time);
          SEQ_STOP_NOTE(deviceNumber, channelNumber, note, 0X7F);
       } else {
-	 SEQ_DELTA_TIME(duration);
+	 LogPrint(LOG_DEBUG, "Tone: msec=%d time=%d",
+	          duration, time);
+	 SEQ_DELTA_TIME(time);
       }
+      SEQ_STOP_TIMER();
       seqbuf_dump();
       ioctl(fileDescriptor, SNDCTL_SEQ_SYNC);
       return 1;

@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/kd.h>
@@ -28,7 +29,9 @@ static int fileDescriptor = -1;
 
 static int openSpeaker (void) {
    if (fileDescriptor == -1) {
-      if ((fileDescriptor = open("/dev/console", O_WRONLY)) == -1) {
+      char *device = "/dev/console";
+      if ((fileDescriptor = open(device, O_WRONLY)) == -1) {
+         LogPrint(LOG_ERR, "Cannot open speaker: %s: %s", device, strerror(errno));
          return 0;
       }
       setCloseOnExec(fileDescriptor);
@@ -39,6 +42,8 @@ static int openSpeaker (void) {
 
 static int generateSpeaker (int frequency, int duration) {
    if (fileDescriptor != -1) {
+      LogPrint(LOG_DEBUG, "Tone: msec=%d freq=%d",
+               duration, frequency);
       if (!frequency) {
          shortdelay(duration);
 	 return 1;
@@ -47,7 +52,11 @@ static int generateSpeaker (int frequency, int duration) {
          shortdelay(duration);
 	 if (ioctl(fileDescriptor, KDMKTONE, 0) != -1) {
 	    return 1;
+	 } else {
+	    LogPrint(LOG_ERR, "Cannot stop speaker: %s", strerror(errno));
 	 }
+      } else {
+	 LogPrint(LOG_ERR, "Cannot start speaker: %s", strerror(errno));
       }
    }
    return 0;

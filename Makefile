@@ -266,7 +266,7 @@ misc.o: misc.c misc.h text.auto.h attrib.auto.h config.h brl.h common.h
 cut-n-paste.o: cut-n-paste.c cut-n-paste.h tunes.h scr.h inskey.h
 	$(CC) $(CFLAGS) -c cut-n-paste.c
 
-inskey_lnx.o: inskey_lnx.c inskey.h
+inskey_lnx.o: inskey_lnx.c inskey.h config.h misc.h
 	$(CC) $(CFLAGS) -c inskey_lnx.c
 
 spk_load.o: spk_load.c spk.h brl.h misc.h

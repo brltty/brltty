@@ -43,6 +43,8 @@ static int openAdLib (void) {
 }
 
 static int generateAdLib (int frequency, int duration) {
+   LogPrint(LOG_DEBUG, "Tone: msec=%d freq=%d",
+	    duration, frequency);
    if (frequency)
       AL_playTone(channelNumber, frequency, duration, 100);
    else

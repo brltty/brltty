@@ -26,7 +26,7 @@
 // insuring that the input buffer is always big enough,
 // and calls a caller-supplied handler once for each line in the file.
 // The caller-supplied data pointer is passed straight through to the handler.
-void processLines (FILE *file, // The input file.
+extern int processLines (FILE *file, // The input file.
                     void (*handler) (char *line, void *data), // The input line handler.
 		    void *data); // A pointer to caller-specific data.
 

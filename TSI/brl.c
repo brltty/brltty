@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.59 (September 2001)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.60 (September 2001)"
 #define COPYRIGHT "Copyright (C) 1996-2001 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
@@ -23,9 +23,12 @@
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled into BRLTTY versions 2.99i-3.0.
+ * It is designed to be compiled into BRLTTY versions 3.0.
  *
  * History:
+ * Version 2.60: Use TCSADRAIN when closing serial port. Slight API and
+ *   name changes for BRLTTY 3.0. Argument to readbrl now ignore, instead
+ *   of being validated. 
  * Version 2.59: Added bindings for CMD_LNBEG/LNEND.
  * Version 2.58: Added bindings for CMD_BACK and CR_MSGATTRIB.
  * Version 2.57: Fixed help screen/file for Nav80. We finally have a
@@ -127,7 +130,7 @@ static struct timezone dum_tz;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
 {CMD_FWINRT, CMD_FWINLT, CMD_LNUP, CMD_LNDN, CMD_WINUP, CMD_WINDN,
- CMD_CHRLT, CMD_CHRRT, CMD_KEY_LEFT, CMD_KEY_RIGHT, CMD_KEY_UP, CMD_KEY_DOWN,
+ CMD_CHRLT, CMD_CHRRT, VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN,
  CMD_CSRTRK, 0};
 
 /* Low battery warning */
@@ -690,17 +693,13 @@ failure:;
 static void 
 closebrl (brldim *brl)
 {
-  if (brl_fd >= 0)
-    {
-      tcsetattr (brl_fd, TCSANOW, &oldtio);
-      close (brl_fd);
-    }
-  if (brl->disp)
-    free (brl->disp);
-  if (rawdata)
-    free (rawdata);
-  if (prevdata)
-    free (prevdata);
+  if (brl_fd >= 0) {
+    tcsetattr (brl_fd, TCSADRAIN, &oldtio);
+    close (brl_fd);
+  }
+  free (brl->disp);
+  free (rawdata);
+  free (prevdata);
 }
 
 static void 
@@ -978,16 +977,16 @@ cut_cursor ()
 	case CMD_LNDN:
 	  pos -= 5;
 	  break;
-	case CMD_KEY_RIGHT:
+	case VAL_PASSKEY+VPK_CURSOR_RIGHT:
 	  pos = brl_cols - 1;
 	  break;
-	case CMD_KEY_LEFT:
+	case VAL_PASSKEY+VPK_CURSOR_LEFT:
 	  pos = 0;
 	  break;
-	case CMD_KEY_UP:
+	case VAL_PASSKEY+VPK_CURSOR_UP:
 	  pos += 10;
 	  break;
-	case CMD_KEY_DOWN:
+	case VAL_PASSKEY+VPK_CURSOR_DOWN:
 	  pos -= 10;
 	  break;
 	case CMD_CUT_BEG:
@@ -1366,10 +1365,10 @@ readbrl (DriverCommandContext cmds)
     KEYAND(KEY_R1UP | KEY_BUT4) KEY(KEY_CUP | KEY_BRIGHT, CMD_LNEND);
 
   /* keyboard cursor keys simulation */
-    KEY (KEY_CLEFT, CMD_KEY_LEFT);
-    KEY (KEY_CRIGHT, CMD_KEY_RIGHT);
-    KEY (KEY_CUP, CMD_KEY_UP);
-    KEY (KEY_CDOWN, CMD_KEY_DOWN);
+    KEY (KEY_CLEFT, VAL_PASSKEY+VPK_CURSOR_LEFT);
+    KEY (KEY_CRIGHT, VAL_PASSKEY+VPK_CURSOR_RIGHT);
+    KEY (KEY_CUP, VAL_PASSKEY+VPK_CURSOR_UP);
+    KEY (KEY_CDOWN, VAL_PASSKEY+VPK_CURSOR_DOWN);
 
   /* special modes */
     KEY (KEY_CLEFT | KEY_CRIGHT, CMD_HELP);
