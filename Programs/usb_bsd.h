@@ -198,7 +198,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
-  close(eptx->file);
+
+  if (eptx->file != -1) {
+    close(eptx->file);
+    eptx->file = -1;
+  }
+
   free(eptx);
 }
 
@@ -300,7 +305,12 @@ usbReadDeviceDescriptor (UsbDevice *device) {
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  close(devx->file);
+
+  if (devx->file != -1) {
+    close(devx->file);
+    devx->file = -1;
+  }
+
   free(devx->path);
   free(devx);
 }
