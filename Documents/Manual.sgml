@@ -14,10 +14,13 @@
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
   <date>Version 3.5, June 2004
   <abstract>
-    Copyright &copy; 1995-2003 by The BRLTTY Team - All Rights Reserved.
-    This is free software, placed under the terms of
-    <bf/The GNU General Public License/.
-    BRLTTY comes with ABSOLUTELY NO WARRANTY.
+    Copyright &copy; 1995-2004 by The BRLTTY Team - All Rights Reserved.
+    BRLTTY is free software,
+    and comes with ABSOLUTELY NO WARRANTY.
+    It is placed under the terms of version 2 or later of
+    <bf/The GNU General Public License/
+    as published by
+    <bf/The Free Software Foundation/.
   </abstract>
 </titlepag>
 
