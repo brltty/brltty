@@ -174,6 +174,7 @@ typedef struct {
 
 static const InputOutputOperations *io;
 static const speed_t baud = B19200;
+static int charactersPerSecond;			/* file descriptor for Braille display */
 
 static void
 writeStopSequence (void) {
@@ -187,7 +188,6 @@ writeStopSequence (void) {
 
 static int serialDevice = -1;			/* file descriptor for Braille display */
 static struct termios oldSerialSettings;		/* old terminal settings */
-static int serialCharactersPerSecond;			/* file descriptor for Braille display */
 
 static int
 openSerialPort (char **parameters, const char *device) {
@@ -203,7 +203,6 @@ openSerialPort (char **parameters, const char *device) {
     newSerialSettings.c_cc[VTIME] = 0;
 
     if (resetSerialDevice(serialDevice, &newSerialSettings, baud)) {
-      serialCharactersPerSecond = baud2integer(baud) / 10;
       return 1;
     }
 
@@ -228,7 +227,7 @@ readSerialBytes (unsigned char *buffer, int count) {
 static int
 writeSerialBytes (const unsigned char *buffer, int length, int *delay) {
   int count = safe_write(serialDevice, buffer, length);
-  if (delay) *delay += length * 1000 / serialCharactersPerSecond;
+  if (delay) *delay += length * 1000 / charactersPerSecond;
   if (count != length) {
     if (count == -1) {
       LogError("HandyTech serial write");
@@ -331,6 +330,7 @@ readUsbBytes (unsigned char *buffer, int length) {
 
 static int
 writeUsbBytes (const unsigned char *buffer, int length, int *delay) {
+  if (delay) *delay += length * 1000 / charactersPerSecond;
   return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
 }
 
@@ -551,6 +551,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   rawData = prevData = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
+  charactersPerSecond = baud2integer(baud) / 10;
   if (!io->openPort(parameters, device)) goto failure;
 
   while (1) {
