@@ -17,8 +17,20 @@
 
 default: all
 
-include $(SRC_TOP)absdeps.mk
 include $(SRC_DIR)/reldeps.mk
+include $(SRC_TOP)absdeps.mk
+
+$(BLD_TOP)Drivers/VarioHT/braille.$O: $(BLD_TOP)Drivers/VarioHT/vario.$O
+$(BLD_TOP)Drivers/VarioHT/braille.$O: $(BLD_TOP)Drivers/VarioHT/variolow.$O
+	cd $(@D) && $(MAKE) $(@F)
+
+$(SRC_TOP)Drivers/VideoBraille/braille.$O: $(BLD_TOP)Drivers/VideoBraille/vb.$O
+$(BLD_TOP)Drivers/VideoBraille/braille.$O: $(BLD_TOP)Drivers/VideoBraille/vblow.$O
+	cd $(@D) && $(MAKE) $(@F)
+
+$(BLD_TOP)Drivers/Voyager/braille.$O: $(BLD_TOP)Drivers/Voyager/brlvger.auto.h
+$(BLD_TOP)Drivers/Voyager/brlvger.auto.h:
+	cd $(@D) && $(MAKE) $(@F)
 
 clean::
 	-rm -f *.$O *.auto.h core
