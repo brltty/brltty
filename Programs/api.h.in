@@ -224,7 +224,7 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth);
  * \return -1 on error, or a positive value giving the size of the needed
  * buffer, if the supplied one is to small (same as \e snprintf)
 */
-int brlapi_getDriverId(unsigned char *id, size_t n);
+int brlapi_getDriverId(char *id, size_t n);
 
 /* brlapi_getDriverName */
 /** return the complete name of the driver used by \e brltty
@@ -238,7 +238,7 @@ int brlapi_getDriverId(unsigned char *id, size_t n);
  * \return -1 on error, or a positive value giving the size of the needed
  * buffer, if the supplied one is to small (same as \e snprintf)
 */
-int brlapi_getDriverName(unsigned char *name, size_t n);
+int brlapi_getDriverName(char *name, size_t n);
 
 /* brlapi_getDisplaySize */
 /** return the size of the braille display */
@@ -348,7 +348,7 @@ int brlapi_setFocus(int tty);
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_writeText(int cursor, const unsigned char *str);
+int brlapi_writeText(int cursor, const char *str);
 
 /* brlapi_writeDots */
 /** Write the given dots array to the display

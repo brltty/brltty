@@ -49,7 +49,7 @@ END_OPTION_TABLE
 
 TranslationTable textTable;
 TranslationTable untextTable;
-static void *contractionTable;
+void *contractionTable;
 
 static void
 reportTextTableMessage (const char *message) {
@@ -66,7 +66,7 @@ processLine (char *line, void *data) {
   int bufferLength = sizeof(buffer);
   int lineLength = strlen(line);
   int offsets[0X100];
-  if (contractText(contractionTable, line, &lineLength, buffer, &bufferLength, offsets, -1)) {
+  if (contractText(contractionTable, (unsigned char *)line, &lineLength, buffer, &bufferLength, offsets, -1)) {
     int index;
     for (index=0; index<bufferLength; ++index)
       buffer[index] = untextTable[buffer[index]];

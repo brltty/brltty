@@ -958,9 +958,9 @@ insertCode (ScreenKey key, int raw) {
 
 static int
 insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
-  unsigned char buffer[2];
-  unsigned char *sequence;
-  unsigned char *end;
+  char buffer[2];
+  char *sequence;
+  char *end;
 
   if (key < SCR_KEY_ENTER) {
     sequence = end = buffer + sizeof(buffer);
@@ -1298,7 +1298,7 @@ static const At2KeyTable at2KeysE0 = {
   [0X5A] = KEY_KPENTER
 };
 
-static const char *at2Keys;
+static const unsigned char *at2Keys;
 static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
 

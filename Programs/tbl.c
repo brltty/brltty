@@ -420,7 +420,7 @@ setTable (InputData *input, TranslationTable *table) {
         if (!dotsDefined[byte->cell]) {
           dotsDefined[byte->cell] = 1;
         } else if (input->options & TBL_DUPLICATE) {
-          unsigned char dotsBuffer[DOT_COUNT];
+          char dotsBuffer[DOT_COUNT];
           int dotCount;
           putCell(byte->cell, dotsBuffer, &dotCount);
           reportError(input, "duplicate dots: %.*s [\\X%02X]", dotCount, dotsBuffer, byteIndex);
@@ -451,7 +451,7 @@ setTable (InputData *input, TranslationTable *table) {
     int cell;
     for (cell=0; cell<0X100; ++cell) {
       if (!dotsDefined[cell]) {
-        unsigned char dotsBuffer[DOT_COUNT];
+        char dotsBuffer[DOT_COUNT];
         int dotCount;
         putCell(cell, dotsBuffer, &dotCount);
         reportError(input, "unused dots: %.*s", dotCount, dotsBuffer);

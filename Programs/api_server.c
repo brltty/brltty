@@ -242,9 +242,9 @@ static void writeException(int fd, unsigned int err, brl_type_t type, const void
 /* Returns to report success, -1 on errors */
 int allocBrailleWindow(BrailleWindow *brailleWindow)
 {
-  if (!(brailleWindow->text = (char *) malloc(displaySize))) goto out;
-  if (!(brailleWindow->andAttr = (char *) malloc(displaySize))) goto outText;
-  if (!(brailleWindow->orAttr = (char *) malloc(displaySize))) goto outAnd;
+  if (!(brailleWindow->text = malloc(displaySize))) goto out;
+  if (!(brailleWindow->andAttr = malloc(displaySize))) goto outText;
+  if (!(brailleWindow->orAttr = malloc(displaySize))) goto outAnd;
 
   memset(brailleWindow->text, ' ', displaySize);
   memset(brailleWindow->andAttr, 0xFF, displaySize);
@@ -285,7 +285,7 @@ void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 /* Function: getDots */
 /* Returns the braille dots corresponding to a BrailleWindow structure */
 /* No allocation of buf is performed */
-void getDots(const BrailleWindow *brailleWindow, char *buf)
+void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
   int i;
   for (i=0; i<displaySize; i++)
@@ -298,7 +298,7 @@ void getDots(const BrailleWindow *brailleWindow, char *buf)
 /* Function: getText */
 /* Returns the text corresponding to a BrailleWindow structure */
 /* No allocation of buf is performed */
-void getText(const BrailleWindow *brailleWindow, char *buf)
+void getText(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
   memcpy(buf,brailleWindow->text,displaySize);
 }
@@ -315,7 +315,7 @@ void getText(const BrailleWindow *brailleWindow, char *buf)
 /* the socket before closing it */
 static Connection *createConnection(int fd, time_t currentTime)
 {
-  Connection *c =  (Connection *) malloc(sizeof(Connection));
+  Connection *c =  malloc(sizeof(Connection));
   if (c==NULL) goto out;
   c->auth = 0;
   c->fd = fd;
@@ -674,7 +674,7 @@ static int processRequest(Connection *c)
       writeStruct *ws = (writeStruct *) packet;
       BrailleWindow brailleWindow;
       /* Hack to avoid allocating fields with malloc */
-      char x[displaySize], y[displaySize], z[displaySize];
+      unsigned char x[displaySize], y[displaySize], z[displaySize];
       unsigned int rbeg, rend, strLen;
       unsigned char *p = &ws->data;
       LogPrintRequest(type, c->fd);
@@ -1429,7 +1429,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   if (c) {
     pthread_mutex_lock(&c->brlMutex);
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
-      char *oldbuf = disp->buffer, buf[displaySize];
+      unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
       if (trueBraille->writeVisual) {
         getText(&c->brailleWindow, buf);

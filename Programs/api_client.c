@@ -485,7 +485,7 @@ static ssize_t brlapi_request(brl_type_t request, void *packet, size_t size)
 
 /* Function : brlapi_getDriverId */
 /* Identify the driver used by brltty */
-int brlapi_getDriverId(unsigned char *id, size_t n)
+int brlapi_getDriverId(char *id, size_t n)
 {
   ssize_t res = brlapi_request(BRLPACKET_GETDRIVERID, id, n);
   if ((res>0) && (res<=n)) id[res-1] = '\0';
@@ -494,7 +494,7 @@ int brlapi_getDriverId(unsigned char *id, size_t n)
 
 /* Function : brlapi_getDriverName */
 /* Name of the driver used by brltty */
-int brlapi_getDriverName(unsigned char *name, size_t n)
+int brlapi_getDriverName(char *name, size_t n)
 {
   ssize_t res = brlapi_request(BRLPACKET_GETDRIVERNAME, name, n);
   if ((res>0) && (res<=n)) name[res-1] = '\0';
@@ -621,7 +621,7 @@ int brlapi_setFocus(int tty)
 
 /* Function : brlapi_writeText */
 /* Writes a string to the braille display */
-int brlapi_writeText(int cursor, const unsigned char *str)
+int brlapi_writeText(int cursor, const char *str)
 {
   int dispSize = brlx * brly;
   unsigned int min, i;
@@ -639,7 +639,7 @@ int brlapi_writeText(int cursor, const unsigned char *str)
   } else {
     ws->flags |= BRLAPI_WF_TEXT;
     min = MIN( strlen(str), dispSize);
-    strncpy(p,str,min);
+    memcpy(p,str,min);
     p += min;
     for (i = min; i<dispSize; i++,p++) *p = ' ';
   }

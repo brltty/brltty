@@ -119,7 +119,7 @@ listSpeechDrivers (const char *directory) {
 
 void
 sayString (const char *string) {
-  speech->say(string, strlen(string));
+  speech->say((unsigned char *)string, strlen(string));
 }
 
 void
