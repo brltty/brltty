@@ -1407,15 +1407,16 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
           case BDS_READY:
             switch (byte) {
               case 0X79: {
-                unsigned char buf[2];
-                io->readBytes(buf, sizeof(buf), 1);
-                if (buf[0] == model->identifier) {
-                  unsigned char codes[buf[1]+1];
-                  io->readBytes(codes, buf[1]+1, 1);
-                  if (codes[buf[1]] == 0X16) {
-                    LogBytes("Key code", codes, buf[1]);
+                unsigned char header[2];
+                io->readBytes(header, sizeof(header), 1);
+                if (header[0] == model->identifier) {
+                  unsigned char length = header[1];
+                  unsigned char data[length+1];
+                  io->readBytes(data, sizeof(data), 1);
+                  if (data[0] == 0X09 && data[length] == 0X16) {
+                    LogBytes("Key code", data+1, length-1);
                   } else {
-                    LogBytes("Malformed keycode packet", codes, buf[1]+1);
+                    LogBytes("Malformed keycode packet", data, sizeof(data));
                   }
                 } else {
                   LogError("Keycode packet ID mismatch");
