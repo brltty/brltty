@@ -328,6 +328,7 @@ readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int ti
     }
     if (amount == 0) {
     noInput:
+      errno = EAGAIN;
       if (*offset) {
         if (awaitInput(descriptor, timeout)) continue;
         LogPrint(LOG_WARNING, "Input byte missing at offset %d.", *offset);
