@@ -520,14 +520,11 @@ AC_DEFINE_UNQUOTED([MODULE_NAME], ["${module_name}"])
 AC_CACHE_CHECK([for loadable module extension], [brltty_cv_ext_mod], [dnl
 case "${host_os}"
 in
-   hpux*)
-      brltty_cv_ext_mod="sl"
-      ;;
    darwin*)
       brltty_cv_ext_mod="bundle"
       ;;
    *)
-      brltty_cv_ext_mod="so"
+      brltty_cv_ext_mod="${library_extension}"
       ;;
 esac])
 AC_SUBST([module_extension], ["${brltty_cv_ext_mod}"])
