@@ -51,13 +51,122 @@ static pthread_mutex_t updateMutex = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_t SPI_main_thread;
 
-static size_t mbslen(const char *s, size_t n) {
-  mbstate_t ps;
+/* having our own implementation is much more independant on locales */
+
+typedef struct {
+  int remaining;
+  wint_t current;
+} my_mbstate_t;
+
+static my_mbstate_t internal;
+
+static size_t my_mbrtowc(wchar_t *pwc, const char *s, size_t n, my_mbstate_t *ps) {
+  const unsigned char *c = (const unsigned char *) s;
+  int read = 0;
+  if (!c) {
+    if (ps->remaining) {
+      errno = EILSEQ;
+      return (size_t)(-1);
+    }
+    return 0;
+  }
+
+  if (n && !ps->remaining) {
+    /* initial state */
+    if (!(*c&0x80)) {
+      /* most frequent case: ascii */
+      if (pwc)
+	*pwc = *c;
+      if (!*c)
+	return 0;
+      return 1;
+    } else if (!(*c&0x40)) {
+      /* utf-8 char continuation, shouldn't happen with remaining == 0 ! */
+      goto error;
+    } else {
+      /* new utf-8 char, get remaining chars */
+      read = 1;
+      if (!(*c&0x20)) {
+	ps->remaining = 1;
+	ps->current = *c&((1<<5)-1);
+      } else if (!(*c&0x10)) {
+	ps->remaining = 2;
+	ps->current = *c&((1<<4)-1);
+      } else if (!(*c&0x08)) {
+	ps->remaining = 3;
+	ps->current = *c&((1<<3)-1);
+      } else if (!(*c&0x04)) {
+	ps->remaining = 4;
+	ps->current = *c&((1<<2)-1);
+      } else if (!(*c&0x02)) {
+	ps->remaining = 5;
+	ps->current = *c&((1<<1)-1);
+      } else
+	/* 0xff and 0xfe are not allowed */
+	goto error;
+      c++;
+    }
+  }
+  /* looking for continuation chars */
+  while (n-read) {
+    if ((*c&0xc0) != 0X80)
+      /* not continuation char, error ! */
+      goto error;
+    /* utf-8 char continuation */
+    ps->current = (ps->current<<6) | (*c&((1<<6)-1));
+    read++;
+    if (!(--ps->remaining)) {
+      if (pwc)
+	*pwc = ps->current;
+      if (!ps->current)
+	/* shouldn't coded this way, but well... */
+	return 0;
+      return read;
+    }
+    c++;
+  }
+  return (size_t)(-2);
+error:
+  errno = EILSEQ;
+  return (size_t)(-1);
+}
+
+static size_t my_mbsrtowcs(wchar_t *dest, const char **src, size_t len, my_mbstate_t *ps) {
+  int put = 0;
+  size_t skip;
+  wchar_t buf,*bufp;
+
+  if (!ps) ps = &internal;
+  if (dest)
+    bufp = dest;
+  else
+    bufp = &buf;
+
+  while (len-put || !dest) {
+    skip = my_mbrtowc(bufp, *src, 6, ps);
+    switch (skip) {
+      case (size_t)(-2): errno = EILSEQ; /* shouldn't happen ! */
+      case (size_t)(-1): return (size_t)(-1);
+      case 0: *src = NULL; return put;
+    }
+    *src += skip;
+    if (dest) bufp++;
+    put++;
+  }
+  return put;
+}
+
+static size_t my_mbrlen(const char *s, size_t n, my_mbstate_t *ps) {
+  return my_mbrtowc(NULL, s, n, ps?:&internal);
+}
+
+static size_t my_mbslen(const char *s, size_t n) {
+  my_mbstate_t ps;
   size_t ret=0;
   size_t eaten;
   memset(&ps,0,sizeof(ps));
   while(n) {
-    if ((eaten = mbrlen(s,n,&ps))<0)
+    if ((eaten = my_mbrlen(s,n,&ps))<0)
       return eaten;
     if (!(eaten)) return ret;
     s+=eaten;
@@ -97,13 +206,6 @@ parameters_AtSPIScreen (void) {
 
 static int
 prepare_AtSPIScreen (char **parameters) {
-  char *codeset;
-  setlocale(LC_ALL,"");
-  codeset = nl_langinfo(CODESET);
-  if (!codeset || strcmp(codeset,"UTF-8")) {
-    LogPrint(LOG_ERR,"no UTF-8 support !");
-    return 0;
-  }
   return 1;
 }
 
@@ -169,7 +271,7 @@ static void restartTerm(Accessible *newTerm) {
     if (d)
       *d = 0;
     e = c;
-    curRowLengths[i] = (len = mbsrtowcs(NULL,&e,0,NULL)) + (d != NULL);
+    curRowLengths[i] = (len = my_mbsrtowcs(NULL,&e,0,NULL)) + (d != NULL);
     if (len > curNumCols)
       curNumCols = len;
     else if (len < 0) {
@@ -181,7 +283,7 @@ static void restartTerm(Accessible *newTerm) {
     }
     curRows[i] = malloc((len + (d!=NULL)) * sizeof(*curRows[i]));
     e = c;
-    mbsrtowcs(curRows[i],&e,len,NULL);
+    my_mbsrtowcs(curRows[i],&e,len,NULL);
     if (d)
       curRows[i][len]='\n';
     else
@@ -287,7 +389,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	if (x && (c = strchr(adding,'\n'))) {
 	  /* splitting line */
 	  addRows(y,1);
-	  semilen=mbslen(adding,c+1-adding);
+	  semilen=my_mbslen(adding,c+1-adding);
 	  curRowLengths[y]=x+semilen;
 	  if (x+semilen-1>curNumCols)
 	    curNumCols=x+semilen-1;
@@ -296,7 +398,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	  curRows[y]=malloc(curRowLengths[y]*sizeof(*curRows[y]));
 	  memcpy(curRows[y],curRows[y+1],x*sizeof(*curRows[y]));
 	  /* add */
-	  mbsrtowcs(curRows[y]+x,&adding,semilen,NULL);
+	  my_mbsrtowcs(curRows[y]+x,&adding,semilen,NULL);
 	  len-=semilen;
 	  adding=c+1;
 	  /* shift end */
@@ -308,12 +410,12 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	while ((c = strchr(adding,'\n'))) {
 	  /* adding lines */
 	  addRows(y,1);
-	  semilen=mbslen(adding,c+1-adding);
+	  semilen=my_mbslen(adding,c+1-adding);
 	  curRowLengths[y]=semilen;
 	  if (semilen-1>curNumCols)
 	    curNumCols=semilen-1;
 	  curRows[y]=malloc(semilen*sizeof(*curRows[y]));
-	  mbsrtowcs(curRows[y],&adding,semilen,NULL);
+	  my_mbsrtowcs(curRows[y],&adding,semilen,NULL);
 	  len-=semilen;
 	  adding=c+1;
 	  y++;
@@ -329,7 +431,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	  curRowLengths[y] += len;
 	  curRows[y]=realloc(curRows[y],curRowLengths[y]*sizeof(*curRows[y]));
 	  memmove(curRows[y]+x+len,curRows[y]+x,(curRowLengths[y]-(x+len))*sizeof(*curRows[y]));
-	  mbsrtowcs(curRows[y]+x,&adding,len,NULL);
+	  my_mbsrtowcs(curRows[y]+x,&adding,len,NULL);
 	  if (curRowLengths[y]-(curRows[y][curRowLengths[y]-1]=='\n')>curNumCols)
 	    curNumCols=curRowLengths[y]-(curRows[y][curRowLengths[y]-1]=='\n');
 	}
