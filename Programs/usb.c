@@ -296,6 +296,8 @@ usbConfigureDevice (
   UsbDevice *device,
   unsigned char configuration
 ) {
+  usbCloseInterface(device);
+
   if (!usbSetConfiguration(device, configuration)) return 0;
 
   if (device->configuration) {
