@@ -391,7 +391,6 @@ openUsbPort (char **parameters, const char *device) {
     {0}
   };
 
-  LogPrint(LOG_DEBUG, "Attempting open: %s", device);
   if (!(usb = usbFindChannel(definitions, (void *)device))) return 0;
 
   /* start the input packet monitor */
