@@ -508,17 +508,20 @@ usbAwaitInput (
   unsigned char endpointNumber,
   int timeout
 ) {
-  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
-  if (!endpoint) return 0;
+  UsbEndpoint *endpoint;
+  int interval;
+
+  if (!(endpoint = usbGetInputEndpoint(device, endpointNumber))) return 0;
   if (endpoint->direction.input.completed) return 1;
+
+  interval = getLittleEndian(endpoint->descriptor->bInterval);
+  interval = MAX(20, interval);
 
   if (!(endpoint->direction.input.pending && getQueueSize(endpoint->direction.input.pending))) {
     int size = getLittleEndian(endpoint->descriptor->wMaxPacketSize);
     unsigned char *buffer = malloc(size);
     if (buffer) {
-      int interval = getLittleEndian(endpoint->descriptor->bInterval);
       int count;
-      interval = MAX(20, interval);
       while ((count = usbReadEndpoint(device, endpointNumber, buffer, size,
                                       MAX(interval, timeout))) != -1) {
         if (count) {
@@ -544,11 +547,8 @@ usbAwaitInput (
       if (errno != EAGAIN) return 0;
       if (timeout <= 0) return 0;
 
-      {
-        const int interval = 10;
-        approximateDelay(interval);
-        timeout -= interval;
-      }
+      approximateDelay(interval);
+      timeout -= interval;
     }
     usbAddPendingInputRequest(endpoint);
     deleteItem(endpoint->direction.input.pending, request);
