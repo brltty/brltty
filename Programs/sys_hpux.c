@@ -75,10 +75,14 @@ findSharedSymbol (void *object, const char *symbol, const void **address) {
 #ifdef ENABLE_PCM_TUNES
 #ifdef HAVE_HPUX_AUDIO
 static Audio *audioServer = NULL;
-static ATransID audioTransaction;
-static SStream audioStream;
 
-void
+struct PcmDeviceStruct {
+  ATransID transaction;
+  SStream stream;
+  int socket;
+};
+
+static void
 logAudioError (int level, long status, const char *action) {
   char message[132];
   AGetErrorText(audioServer, status, message, sizeof(message)-1);
@@ -86,103 +90,121 @@ logAudioError (int level, long status, const char *action) {
 }
 
 static const AudioAttributes *
-getAudioAttributes (void) {
-  return &audioStream.audio_attr;
+getAudioAttributes (PcmDevice *pcm) {
+  return &pcm->stream.audio_attr;
 }
 #endif /* HAVE_HPUX_AUDIO */
 
-int
-getPcmDevice (int errorLevel) {
+PcmDevice *
+openPcmDevice (int errorLevel) {
 #ifdef HAVE_HPUX_AUDIO
-  long status;
-  AudioAttrMask mask = 0;
-  AudioAttributes attributes;
-  SSPlayParams parameters;
-
-  if (!audioServer) {
-    char *server = "";
-    audioServer = AOpenAudio(server, &status);
-    if (status != AENoError) {
-      logAudioError(errorLevel, status, "AOpenAudio");
-      audioServer = NULL;
-      return -1;
-    }
-    LogPrint(LOG_DEBUG, "connected to audio server: %s", AAudioString(audioServer));
-
-    ASetCloseDownMode(audioServer, AKeepTransactions, &status);
-    if (status != AENoError) {
-      logAudioError(errorLevel, status, "ASetCloseDownMode");
-    }
-  }
-
-  memset(&attributes, 0, sizeof(attributes));
-
-  parameters.gain_matrix = *ASimplePlayer(audioServer);
-  parameters.play_volume = AUnityGain;
-  parameters.priority = APriorityUrgent;
-  parameters.event_mask = 0;
-
-  audioTransaction = APlaySStream(audioServer, mask, &attributes, &parameters, &audioStream, &status);
-  if (status == AENoError) {
-    int descriptor = socket(AF_INET, SOCK_STREAM, 0);
-    if (descriptor >= 0) {
-      if (connect(descriptor, (struct sockaddr *)&audioStream.tcp_sockaddr, sizeof(audioStream.tcp_sockaddr)) != -1) {
-        return descriptor;
-      } else {
-        LogError("socket connection");
+  PcmDevice *pcm;
+  if ((pcm = malloc(sizeof(*pcm)))) {
+    long status;
+    AudioAttrMask mask = 0;
+    AudioAttributes attributes;
+    SSPlayParams parameters;
+  
+    if (!audioServer) {
+      char *server = "";
+      audioServer = AOpenAudio(server, &status);
+      if (status != AENoError) {
+        logAudioError(errorLevel, status, "AOpenAudio");
+        audioServer = NULL;
+        goto noServer;
       }
-      close(descriptor);
-    } else {
-      LogError("socket creation");
+      LogPrint(LOG_DEBUG, "connected to audio server: %s", AAudioString(audioServer));
+  
+      ASetCloseDownMode(audioServer, AKeepTransactions, &status);
+      if (status != AENoError) {
+        logAudioError(errorLevel, status, "ASetCloseDownMode");
+      }
     }
+  
+    memset(&attributes, 0, sizeof(attributes));
+  
+    parameters.gain_matrix = *ASimplePlayer(audioServer);
+    parameters.play_volume = AUnityGain;
+    parameters.priority = APriorityUrgent;
+    parameters.event_mask = 0;
+  
+    pcm->transaction = APlaySStream(audioServer, mask, &attributes, &parameters, &pcm->stream, &status);
+    if (status == AENoError) {
+      if ((pcm->socket = socket(AF_INET, SOCK_STREAM, 0)) != -1) {
+        if (connect(pcm->socket, (struct sockaddr *)&pcm->stream.tcp_sockaddr, sizeof(pcm->stream.tcp_sockaddr)) != -1) {
+          return pcm;
+        } else {
+          LogError("PCM socket connection");
+        }
+        close(pcm->socket);
+      } else {
+        LogError("PCM socket creation");
+      }
+    } else {
+      logAudioError(errorLevel, status, "APlaySStream");
+    }
+
+  noServer:
+    free(pcm);
   } else {
-    logAudioError(errorLevel, status, "APlaySStream");
+    LogError("PCM device allocation");
   }
 #endif /* HAVE_HPUX_AUDIO */
-  return -1;
+  return NULL;
+}
+
+void
+closePcmDevice (PcmDevice *pcm) {
+  close(pcm->socket);
+  free(pcm);
 }
 
 int
-getPcmBlockSize (int descriptor) {
+writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
+  return safe_write(pcm->socket, buffer, count) != -1;
+}
+
+int
+getPcmBlockSize (PcmDevice *pcm) {
   int size = 0X100;
 #ifdef HAVE_HPUX_AUDIO
-  size = MIN(size, audioStream.max_block_size);
+  size = MIN(size, pcm->stream.max_block_size);
 #endif /* HAVE_HPUX_AUDIO */
   return size;
 }
 
 int
-getPcmSampleRate (int descriptor) {
+getPcmSampleRate (PcmDevice *pcm) {
 #ifdef HAVE_HPUX_AUDIO
-  return getAudioAttributes()->attr.sampled_attr.sampling_rate;
+  return getAudioAttributes(pcm)->attr.sampled_attr.sampling_rate;
 #else /* HAVE_HPUX_AUDIO */
   return 8000;
 #endif /* HAVE_HPUX_AUDIO */
 }
 
 int
-setPcmSampleRate (int descriptor, int rate) {
-  return getPcmSampleRate(descriptor);
+setPcmSampleRate (PcmDevice *pcm, int rate) {
+  return getPcmSampleRate(pcm);
 }
 
 int
-getPcmChannelCount (int descriptor) {
+getPcmChannelCount (PcmDevice *pcm) {
 #ifdef HAVE_HPUX_AUDIO
-  return getAudioAttributes()->attr.sampled_attr.channels;
+  return getAudioAttributes(pcm)->attr.sampled_attr.channels;
 #else /* HAVE_HPUX_AUDIO */
   return 1;
 #endif /* HAVE_HPUX_AUDIO */
 }
 
 int
-setPcmChannelCount (int descriptor, int channels) {
-  return getPcmChannelCount(descriptor);
+setPcmChannelCount (PcmDevice *pcm, int channels) {
+  return getPcmChannelCount(pcm);
 }
 
 PcmAmplitudeFormat
-getPcmAmplitudeFormat (int descriptor) {
+getPcmAmplitudeFormat (PcmDevice *pcm) {
 #ifdef HAVE_HPUX_AUDIO
-  switch (getAudioAttributes()->attr.sampled_attr.data_format) {
+  switch (getAudioAttributes(pcm)->attr.sampled_attr.data_format) {
     default:
       break;
     case ADFLin8:
@@ -199,20 +221,20 @@ getPcmAmplitudeFormat (int descriptor) {
 }
 
 PcmAmplitudeFormat
-setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
-  return getPcmAmplitudeFormat(descriptor);
+setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
+  return getPcmAmplitudeFormat(pcm);
 }
 
 void
-forcePcmOutput (int descriptor) {
+forcePcmOutput (PcmDevice *pcm) {
 }
 
 void
-awaitPcmOutput (int descriptor) {
+awaitPcmOutput (PcmDevice *pcm) {
 }
 
 void
-cancelPcmOutput (int descriptor) {
+cancelPcmOutput (PcmDevice *pcm) {
 }
 #endif /* ENABLE_PCM_TUNES */
 

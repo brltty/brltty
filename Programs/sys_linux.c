@@ -29,7 +29,7 @@
 #include <linux/soundcard.h>
 
 #ifdef HAVE_SYS_IO_H
-#  include <sys/io.h>
+#include <sys/io.h>
 #endif /* HAVE_SYS_IO_H */
 
 #include "misc.h"
@@ -111,7 +111,8 @@ endBeep (void) {
 }
 
 #ifdef ENABLE_PCM_TUNES
-#include "sys_pcm_dsp.h"
+#define PCM_OSS_DEVICE_PATH "/dev/dsp"
+#include "sys_pcm_oss.h"
 #endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES

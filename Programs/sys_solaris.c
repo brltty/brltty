@@ -37,6 +37,7 @@
 #include "sys_beep_none.h"
 
 #ifdef ENABLE_PCM_TUNES
+#define PCM_AUDIO_DEVICE_PATH "/dev/audio"
 #include "sys_pcm_audio.h"
 #endif /* ENABLE_PCM_TUNES */
 

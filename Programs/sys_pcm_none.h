@@ -17,55 +17,64 @@
 
 #warning sound card support not available on this platform
 
-int
-getPcmDevice (int errorLevel) {
+PcmDevice *
+openPcmDevice (int errorLevel) {
   LogPrint(errorLevel, "PCM device not supported.");
-  return -1;
+  return NULL;
+}
+
+void
+closePcmDevice (PcmDevice *pcm) {
 }
 
 int
-getPcmBlockSize (int descriptor) {
+writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
+  return 0;
+}
+
+int
+getPcmBlockSize (PcmDevice *pcm) {
   return 0X100;
 }
 
 int
-getPcmSampleRate (int descriptor) {
+getPcmSampleRate (PcmDevice *pcm) {
   return 8000;
 }
 
 int
-setPcmSampleRate (int descriptor, int rate) {
-  return getPcmSampleRate(descriptor);
+setPcmSampleRate (PcmDevice *pcm, int rate) {
+  return getPcmSampleRate(pcm);
 }
 
 int
-getPcmChannelCount (int descriptor) {
+getPcmChannelCount (PcmDevice *pcm) {
   return 1;
 }
 
 int
-setPcmChannelCount (int descriptor, int channels) {
-  return getPcmChannelCount(descriptor);
+setPcmChannelCount (PcmDevice *pcm, int channels) {
+  return getPcmChannelCount(pcm);
 }
 
 PcmAmplitudeFormat
-getPcmAmplitudeFormat (int descriptor) {
+getPcmAmplitudeFormat (PcmDevice *pcm) {
   return PCM_FMT_UNKNOWN;
 }
 
 PcmAmplitudeFormat
-setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
-  return getPcmAmplitudeFormat(descriptor);
+setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
+  return getPcmAmplitudeFormat(pcm);
 }
 
 void
-forcePcmOutput (int descriptor) {
+forcePcmOutput (PcmDevice *pcm) {
 }
 
 void
-awaitPcmOutput (int descriptor) {
+awaitPcmOutput (PcmDevice *pcm) {
 }
 
 void
-cancelPcmOutput (int descriptor) {
+cancelPcmOutput (PcmDevice *pcm) {
 }

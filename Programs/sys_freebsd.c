@@ -39,7 +39,8 @@
 #include "sys_beep_spkr.h"
 
 #ifdef ENABLE_PCM_TUNES
-#include "sys_pcm_dsp.h"
+#define PCM_OSS_DEVICE_PATH "/dev/dsp"
+#include "sys_pcm_oss.h"
 #endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES

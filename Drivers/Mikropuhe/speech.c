@@ -77,16 +77,15 @@ static pthread_t synthesisThread;
 
 static void *speechChannel = NULL;
 static MPINT_SpeakFileParams speechParameters;
-static volatile int soundDevice = -1;
+static PcmDevice *pcm = NULL;
 
 static int
 openSoundDevice (void) {
-  if (soundDevice == -1) {
-    if ((soundDevice = getPcmDevice(LOG_WARNING)) == -1) return 0;
-    LogPrint(LOG_DEBUG, "Sound device opened: fd=%d", soundDevice);
+  if (!pcm) {
+    if (!(pcm = openPcmDevice(LOG_WARNING))) return 0;
 
-    speechParameters.nChannels = setPcmChannelCount(soundDevice, 1);
-    speechParameters.nSampleFreq = setPcmSampleRate(soundDevice, 22050);
+    speechParameters.nChannels = setPcmChannelCount(pcm, 1);
+    speechParameters.nSampleFreq = setPcmSampleRate(pcm, 22050);
     {
       typedef struct {
         PcmAmplitudeFormat internal;
@@ -99,13 +98,13 @@ openSoundDevice (void) {
       };
       const FormatEntry *format = formatTable;
       while (format->internal != PCM_FMT_UNKNOWN) {
-        if (setPcmAmplitudeFormat(soundDevice, format->internal) == format->internal) break;
+        if (setPcmAmplitudeFormat(pcm, format->internal) == format->internal) break;
         ++format;
       }
       if (format->internal == PCM_FMT_UNKNOWN) {
         LogPrint(LOG_WARNING, "No supported sound format.");
-        close(soundDevice);
-        soundDevice = -1;
+        closePcmDevice(pcm);
+        pcm = NULL;
         return 0;
       }
       speechParameters.nBits = format->external;
@@ -118,10 +117,9 @@ openSoundDevice (void) {
 
 static void
 closeSoundDevice (void) {
-  if (soundDevice != -1) {
-    close(soundDevice);
-    LogPrint(LOG_DEBUG, "Sound device closed: fd=%d", soundDevice);
-    soundDevice = -1;
+  if (pcm) {
+    closePcmDevice(pcm);
+    pcm = NULL;
   }
 }
 
@@ -193,14 +191,8 @@ logSynthesisError (int code, const char *action) {
 static int
 writeSound (const void *bytes, unsigned int count, void *data, void *reserved) {
   if (synthesisThreadStarted) {
-    int written = safe_write(soundDevice, bytes, count);
-    if (written == count) return 0;
-
-    if (written == -1) {
-      LogError("Mikropuhe write");
-    } else {
-      LogPrint(LOG_ERR, "Mikropuhe incomplete write: %d < %d", written, count);
-    }
+    if (writePcmData(pcm, bytes, count)) return 0;
+    LogError("Mikropuhe write");
     return MPINT_ERR_GENERAL;
   }
   return 1;
@@ -228,7 +220,7 @@ processSpeechSegments (void *data) {
     int error;
     SpeechSegment *segment;
 
-    if (soundDevice != -1) {
+    if (pcm) {
       struct timeval now;
       struct timespec timeout;
       gettimeofday(&now, NULL);
@@ -452,7 +444,7 @@ spk_say (const unsigned char *buffer, int length) {
 static void
 spk_mute (void) {
   stopSynthesisThread();
-  if (soundDevice != -1) cancelPcmOutput(soundDevice);
+  if (pcm) cancelPcmOutput(pcm);
 }
 
 static void

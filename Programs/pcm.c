@@ -29,7 +29,7 @@
 #include "system.h"
 #include "notes.h"
 
-static int fileDescriptor = -1;
+static PcmDevice *pcm = NULL;
 static int blockSize;
 static int sampleRate;
 static int channelCount;
@@ -39,23 +39,22 @@ static unsigned char *blockAddress = NULL;
 static size_t blockUsed = 0;
 
 static int openPcm (int errorLevel) {
-   if (fileDescriptor != -1) return 1;
-   if ((fileDescriptor = getPcmDevice(errorLevel)) != -1) {
-      setCloseOnExec(fileDescriptor);
-      blockSize = getPcmBlockSize(fileDescriptor);
-      sampleRate = getPcmSampleRate(fileDescriptor);
-      channelCount = getPcmChannelCount(fileDescriptor);
-      amplitudeFormat = getPcmAmplitudeFormat(fileDescriptor);
+   if (pcm) return 1;
+   if ((pcm = openPcmDevice(errorLevel))) {
+      blockSize = getPcmBlockSize(pcm);
+      sampleRate = getPcmSampleRate(pcm);
+      channelCount = getPcmChannelCount(pcm);
+      amplitudeFormat = getPcmAmplitudeFormat(pcm);
       if ((blockAddress = malloc(blockSize))) {
          blockUsed = 0;
-         LogPrint(LOG_DEBUG, "PCM opened: fd=%d blk=%d rate=%d chan=%d fmt=%d",
-                  fileDescriptor, blockSize, sampleRate, channelCount, amplitudeFormat);
+         LogPrint(LOG_DEBUG, "PCM opened: blk=%d rate=%d chan=%d fmt=%d",
+                  blockSize, sampleRate, channelCount, amplitudeFormat);
          return 1;
       } else {
         LogError("PCM buffer allocation");
       }
-      close(fileDescriptor);
-      fileDescriptor = -1;
+      closePcmDevice(pcm);
+      pcm = NULL;
    } else {
       LogPrint(LOG_DEBUG, "Cannot open PCM.");
    }
@@ -63,23 +62,13 @@ static int openPcm (int errorLevel) {
 }
 
 static int flushBytes (void) {
-   const unsigned char *address = blockAddress;
-   size_t length = blockUsed;
-   while (length > 0) {
-      int written = write(fileDescriptor, address, length);
-      if (written == -1) {
-         if (errno != EAGAIN) {
-            LogError("PCM write");
-            return 0;
-         }
-         delay(10);
-      } else {
-         address += written;
-         length -= written;
-      }
+   int ok = writePcmData(pcm, blockAddress, blockUsed);
+   if (ok) {
+      blockUsed = 0;
+   } else {
+      LogError("PCM write");
    }
-   blockUsed = 0;
-   return 1;
+   return ok;
 }
 
 static int writeBytes (const unsigned char *address, size_t length) {
@@ -147,7 +136,7 @@ static int writeAmplitude (int amplitude) {
 }
 
 static int playPcm (int note, int duration) {
-   if (fileDescriptor != -1) {
+   if (pcm) {
       long int sampleCount = sampleRate * duration / 1000;
       if (note) {
          /* A triangle waveform sounds nice, is lightweight, and avoids
@@ -197,16 +186,16 @@ static int flushBlock (void) {
 }
 
 static int flushPcm (void) {
-   return (fileDescriptor != -1)? flushBlock(): 0;
+   return (pcm)? flushBlock(): 0;
 }
 
 static void closePcm (void) {
-   if (fileDescriptor != -1) {
+   if (pcm) {
       flushBlock();
       free(blockAddress);
       blockAddress = NULL;
-      close(fileDescriptor);
-      fileDescriptor = -1;
+      closePcmDevice(pcm);
+      pcm = NULL;
       LogPrint(LOG_DEBUG, "PCM closed.");
    }
 }

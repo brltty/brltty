@@ -35,6 +35,7 @@ extern int startBeep (unsigned short frequency);
 extern int stopBeep (void);
 extern void endBeep (void);
 
+typedef struct PcmDeviceStruct PcmDevice;
 typedef enum {
   PCM_FMT_U8,
   PCM_FMT_S8,
@@ -45,17 +46,19 @@ typedef enum {
   PCM_FMT_ULAW,
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
-extern int getPcmDevice (int errorLevel);
-extern int getPcmBlockSize (int descriptor);
-extern int getPcmSampleRate (int descriptor);
-extern int setPcmSampleRate (int descriptor, int rate);
-extern int getPcmChannelCount (int descriptor);
-extern int setPcmChannelCount (int descriptor, int channels);
-extern PcmAmplitudeFormat getPcmAmplitudeFormat (int descriptor);
-extern PcmAmplitudeFormat setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format);
-extern void forcePcmOutput (int descriptor);
-extern void awaitPcmOutput (int descriptor);
-extern void cancelPcmOutput (int descriptor);
+extern PcmDevice *openPcmDevice (int errorLevel);
+extern void closePcmDevice (PcmDevice *pcm);
+extern int writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count);
+extern int getPcmBlockSize (PcmDevice *pcm);
+extern int getPcmSampleRate (PcmDevice *pcm);
+extern int setPcmSampleRate (PcmDevice *pcm, int rate);
+extern int getPcmChannelCount (PcmDevice *pcm);
+extern int setPcmChannelCount (PcmDevice *pcm, int channels);
+extern PcmAmplitudeFormat getPcmAmplitudeFormat (PcmDevice *pcm);
+extern PcmAmplitudeFormat setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format);
+extern void forcePcmOutput (PcmDevice *pcm);
+extern void awaitPcmOutput (PcmDevice *pcm);
+extern void cancelPcmOutput (PcmDevice *pcm);
 
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);
 extern int getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer);
