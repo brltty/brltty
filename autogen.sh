@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+cd "${0%/*}"
 [ -f Makefile ] && make -s distclean
 autoconf-2.53
-rm -fr autom4te*.cache
 ./gendeps
 exit 0
