@@ -24,11 +24,11 @@
 
 # Specify your Braille display by uncommenting one and ONLY one of these
 # definitions of BRL_TARGET:
-BRL_TARGET = Alva_ABT3
+#BRL_TARGET = Alva_ABT3
 #BRL_TARGET = CombiBraille
 #BRL_TARGET = EuroBraille
-#BRL_TARGET = TSI
 #BRL_TARGET = Papenmeier
+#BRL_TARGET = TSI
 
 # Specify your speech support option.
 # Uncomment one of these lines and comment out the NoSpeech line 
@@ -42,9 +42,7 @@ SPK_TARGET = NoSpeech
 # Specify the default, compiled-in text translation table.  This can be
 # overridden at run-time by giving brltty the -t option.
 # See the content of the BrailleTable directory for available tables.
-# The Papenmeier terminal driver ignores this entry.
-#TEXTTRANS = text.us.tbl
-TEXTTRANS = nico.tbl
+TEXTTRANS = text.us.tbl
 
 # Specify the device name for the serial port your Braille display will
 # normally be connected to.  For port com(n), use /dev/ttyS(n-1) -
@@ -77,7 +75,7 @@ INSTALL_EXEC = --owner=root --group=root --mode=0744
 
 
 # Screen access methods (OS dependent).  Uncomment only one of the
-# two following sets of options:
+# two following sets of options (if not sure, don't touch anything):
 
 # 1. This is the name of the character device BRLTTY uses to read the screen
 # under Linux.

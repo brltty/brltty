@@ -1,5 +1,13 @@
-  -  Incorporated Papenmeier braille terminal driver
-  -  Alva driver fixes
+Note: this file should be read from bottom to top.
+
+
+  ...
+  -  Papenmeier driver update.
+  -  EuroBraille driver fixes.
+  -  Added attribute underlining/blinking functions.
+  -  Incorporated Papenmeier braille terminal driver + German manual.
+  -  Alva driver fixes.
+
 
 07 April 1998: BRLTTY 1.9.0 pre-release.
   -  Added absolute toggles (ON/OFF) flags to function defines.
@@ -17,7 +25,6 @@
   -  Made all different methods of handling status cells available
      within the configuration menu.  The default is determined by
      the compiled in braille driver.
-  -  Added very simple speech interface and few speech drivers.
   -  Incorporated patch from Joerg Korinek <korinek@ira.uka.de> which lets
      the main BRLTTY process continue while cursor routing is in progress.
      Thanks!
@@ -27,7 +34,6 @@
      the parent, and `clone (0, SIGCHLD | COPYVM | COPYFD)' (as documented
      in clone(2)) wouldn't compile.]
   -  CURSOR ROUTING NOW APPEARS TO BE STABLE!!!
-
   -  BRLTTY placed under CVS revision control - Id headers added to many
      files.
   -  Cursor routing timeout made an idle timeout of 2 seconds: routing
@@ -35,6 +41,7 @@
   -  Added CMD_SKPIDLNS.
   -  Speech support modularised.  Added speech.h, as well as SPK_TARGET in
      the Makefile and corresponding directories.
+  -  Added very simple speech interface and few speech drivers.
   -  Status cells standardised: two types (Alva/Tieman) or none, switch in
      configuration menu.  Hence another new config file format :-(.
   -  A few bugfixes.

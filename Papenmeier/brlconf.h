@@ -61,6 +61,8 @@
 #define offsetTable      512
 
 /* debug output to /tmp/brltty.log */
+#undef WR_DEBUG
+#undef RD_DEBUG
 /*
   #define WR_DEBUG
   #define RD_DEBUG

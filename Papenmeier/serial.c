@@ -54,6 +54,11 @@
 #define _SCR_H
 #include "brl.c"
 
+unsigned char texttrans[256] =
+{
+  #include "../text.auto.h"
+};
+
 brldim dummy_brldim;		// unused
 
 static void finish(int sig);
@@ -136,53 +141,67 @@ struct {
 
 const int max_data = sizeof(key_data)/sizeof(key_data[0]);
 
-/* decode statuscell to value -- needs update */
-int nibble(unsigned int i)
-{
-  switch (i) 
-    {
-    case 14: return 0;
-    case 1: return 1;
-    case 5: return 2;
-    case 3: return 3;
-    case 11: return 4;
-    case 9: return 5;
-    case 7: return 6;
-    case 15: return 7;
-    case 13: return 8;
-    case 6: return 9;
-    default:
-      return 100*i;
-    }
+// table to convert braille code to ascii
+// screen --> texttrans[] --> change_bits[] --> bits for display
+unsigned char conv_back[255] = { 0 };
+
+// table for status display - integers
+int numbers[255] = { 0 }; 
+
+void init_tables()
+{ 
+  int i;
+  for(i=0; i < 256; i++) 
+    conv_back[change_bits[texttrans[i]]] = i;
+   
+  for(i=0; i<100; i++)
+    numbers[pm_num(i)] = i;
 }
+
+
 
 int byte(unsigned int i)
 {
-  return 10*nibble(i/16) + nibble(i%16); 
+  return numbers[i]; 
 }
 
 void show_status(WINDOW* status, unsigned char* statcells)
 {
   unsigned char txt[200];
 
+#define IS_ON(i)     ((statcells[i] & B1) == B1)
+
   sprintf(txt, "\nline: (0x%02x) %d csr: (0x%02x) %d / (0x%02x) %d\n"
 	  "%s %s %s %s %s %s %s %02x/%d %s %s %s",
 	  statcells[0], byte(statcells[0]), 
           statcells[2], byte(statcells[2]), 
           statcells[3], byte(statcells[3]),
-	  statcells [6]  ? "TRK" : "   ",
-	  statcells [7]  ? "DISP" : "   ",
-	  statcells [9]  ? "FRZ" : "   ",
-	  statcells [13] ? "VIS" : "   ",
-	  statcells [14] ? "SIZ" : "   ",
-	  statcells [15] ? "BLNK" : "    ",
-	  statcells [16] ? "CAP" : "   ",
+	  IS_ON(6) ? "TRK" : "   ",
+	  IS_ON(7) ? "DISP" : "   ",
+	  IS_ON(9) ? "FRZ" : "   ",
+	  IS_ON(13) ? "VIS" : "   ",
+	  IS_ON(14) ? "SIZ" : "   ",
+	  IS_ON(15) ? "BLNK" : "    ",
+	  IS_ON(16) ? "CAP" : "   ",
 	  statcells[17], byte(statcells[17]),
-	  statcells [18] ? "WIN" : "   ",
-	  statcells [19] ? "SND" : "   ",
-	  statcells [20] ? "SKIP" : "    ");
+	  IS_ON(18) ? "WIN" : "   ",
+	  IS_ON(19) ? "SND" : "   ",
+	  IS_ON(20) ? "SKIP" : "    ");
   waddstr(status, txt);
   wrefresh(status);
+}
+
+// ----------------------------------------------------------
+
+void show_line(WINDOW* zeile, unsigned char* txt)
+{
+  int i;
+
+  waddch(zeile, '\n');
+  for(i=0; i < BRLCOLS; i++)
+    waddch(zeile, conv_back[txt[i]]);
+
+  wrefresh(zeile);
 }
 
 // search for key c in the key_data table
@@ -233,14 +252,11 @@ void delay (int msec)
   select (0, NULL, NULL, NULL, &del);
 }
 
-
-
 int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
 {
   unsigned char buf [100];
   unsigned char txt [500];
 
-  int bytes;
   int i, l, o;
 
   READ(0);
@@ -284,16 +300,12 @@ int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
       }
 
       if (o == offsetHorizontal && l == 87)
-	{
-	  sprintf(txt, "\n%80.80s",buf + 6);
-	  waddstr(zeile, txt);
-	  wrefresh(zeile);
-	}
+	show_line(zeile, buf+6);
       else if (o == offsetVertical && l == 29)
 	show_status(status, buf+6);
       else
 	{
-	  sprintf(txt, "\nunknown offset/length ", o);
+	  sprintf(txt, "\nunknown offset/length %d/%d", o, l);
 	  waddstr(debug, txt);
 	}
     }
@@ -312,6 +324,8 @@ int main(int argc, char* argv[])
   WINDOW * status;
   WINDOW * debug_key;
   WINDOW * debug_serial;
+
+  init_tables();
 
   signal(SIGINT, finish);
 
@@ -396,6 +410,7 @@ int main(int argc, char* argv[])
     } while (c != '#');
   
   finish(0);               /* we're done */
+  return 0;
 }
 
 static void finish(int sig)

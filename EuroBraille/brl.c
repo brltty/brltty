@@ -20,9 +20,7 @@
  */
 
 /* EuroBraille/brl.c - Braille display library for the EuroBraille family.
- * Written by Nicolas Pitre <nicolas@visuaide.qc.ca>
- * Copyright (C) 1997 by VisuAide, Inc. <visuinfo@visuaide.qc.ca>
- * (this code has been created with some VisuAide's ressources and routines)
+ * Copyright (C) 1997-1998 by Nicolas Pitre and VisuAide, Inc.
  * See the GNU Public license for details in the ../COPYING file
  *
  * $Id: brl.c,v 1.4 1996/10/03 08:08:13 nn201 Exp $
@@ -47,9 +45,8 @@
 
 
 static char StartupString[] =
-"  EuroBraille driver, version 0.1 \n"
-"  Copyright (C) 1997 by Nicolas Pitre and VisuAide, Inc. \n"
-"  <nicolas@visuaide.qc.ca>, <visuinfo@visuaide.qc.ca> \n";
+"  EuroBraille driver, version 0.2 \n"
+"  Copyright (C) 1997-1998 by Nicolas Pitre and VisuAide, Inc. \n";
 
 
 
@@ -129,7 +126,7 @@ short ReWrite = 0;		/* 1 if display need to be rewritten */
 
 
 
-int
+static int
 sendbyte (unsigned char c)
 {
   return (write (brl_fd, &c, 1));
@@ -139,8 +136,8 @@ sendbyte (unsigned char c)
 int
 WriteToBrlDisplay (int len, char *data)
 {
-  static int PktNbr = 128;
-  int parity = 0;
+  static int PktNbr = 127;  /* 127 at first time */
+  unsigned char parity = 0;
 
   if (!len)
     return (1);
@@ -156,6 +153,7 @@ WriteToBrlDisplay (int len, char *data)
 	case DLE:
 	case NACK:
 	  sendbyte (DLE);
+	  /* no break */
 	default:
 	  sendbyte (*data);
 	  parity ^= *data++;
@@ -173,6 +171,7 @@ WriteToBrlDisplay (int len, char *data)
     case DLE:
     case NACK:
       sendbyte (DLE);
+      /* no break */
     default:
       sendbyte (parity);
     }
@@ -208,8 +207,7 @@ initbrl (const char *dev)
 
   /* Set 8E1, enable reading, parity generation, etc. */
   newtio.c_cflag = CS8 | CLOCAL | CREAD | PARENB;
-  newtio.c_iflag &= ~(IGNPAR | PARMRK);
-  newtio.c_iflag |= INPCK;
+  newtio.c_iflag = INPCK;
   newtio.c_oflag = 0;		/* raw output */
   newtio.c_lflag = 0;		/* don't echo or generate signals */
   newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
@@ -282,30 +280,37 @@ writebrl (brldim brl)
   if (!ReWrite)
     {
       /* We update the display only if it has changed */
-      i = NbCols;
-      while (--i >= 0)
-	if (brl.disp[i] != prevdata[i])
-	  {
-	    ReWrite = 1;
-	    break;
-	  }
+      if( memcmp( brl.disp, prevdata, NbCols ) != 0 ) 
+	ReWrite = 1;
     }
   if (ReWrite)
     {
       /* right end cells don't have to be transmitted if all dots down */
       i = NbCols;
+#if 0   /* *** the ClioBraille doesn't seem to like this part... */
       while (--i > 0)		/* at least the first cell must go through... */
 	if (brl.disp[i] != 0)
 	  break;
       i++;
+#endif
 
       {
 	char OutBuf[2 * i + 6];
 	char *p = OutBuf;
+#if 0   /* *** don't know how to use DX correctly... */
+	/* This part should display on the LCD screen */
 	*p++ = i + 2;
 	*p++ = 'D';
 	*p++ = 'X';
-	for (j = 0; j < i; *p++ = ' ', j++);	/* fill LCD with whitespaces */
+	for (j = 0; j < 1; *p++ = ' ', j++);	/* fill LCD with whitespaces */
+#else
+	/* This is just to make the terminal accept the DY command */
+	*p++ = 2;
+	*p++ = 'D';
+	*p++ = 'X';
+#endif
+
+	/* This part displays on the braille line */
 	*p++ = i + 2;
 	*p++ = 'D';
 	*p++ = 'Y';
@@ -335,22 +340,35 @@ readbrl (int type)
   int res = EOF;
   unsigned char c;
   static unsigned char buf[DIM_INBUFSZ];
-  static int DLEflag = 0;
+  static int DLEflag = 0, ErrFlag = 0;
   static int pos = 0, p = 0, pktready = 0, OffsetType = CR_ROUTEOFFSET;
 
   /* here we process incoming data */
   while (!pktready && read (brl_fd, &c, 1))
     {
+{
+  int fd = open( "/tmp/clio.txt", O_CREAT|O_RDWR );
+  lseek( fd, 0, SEEK_END );
+  write( fd, &c, 1 );
+  close( fd );
+}
       if (DLEflag)
 	{
-	  buf[pos++] = c;
 	  DLEflag = 0;
+	  if( pos < DIM_INBUFSZ ) buf[pos++] = c;
+	}
+      else if( ErrFlag )
+	{
+	  ErrFlag = 0;
+	  /* Maybe should we check error code in c here? */
+	  ReWrite = 1;
 	}
       else
 	switch (c)
 	  {
 	  case NACK:
-	    ReWrite = 1;
+	    ErrFlag = 1;
+	    /* no break */
 	  case ACK:
 	  case SOH:
 	    pos = 0;
@@ -362,12 +380,12 @@ readbrl (int type)
 	    {
 	      /* end of packet, let's read it */
 	      int i;
-	      unsigned int parity = 0;
+	      unsigned char parity = 0;
 	      if (pos < 4)
 		break;		/* packets can't be shorter */
-	      for (i = 0; i < pos - 1; i++)
-		parity ^= buf[i];
-	      if (parity != buf[pos - 1])
+	      for( i = 0; i < pos-1; i++ ) 
+	         parity ^= buf[i];
+	      if ( parity != buf[pos - 1])
 		{
 		  sendbyte (NACK);
 		  sendbyte (PRT_E_PAR);

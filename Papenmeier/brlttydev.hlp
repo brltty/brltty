@@ -12,9 +12,10 @@ Zeile 14  Cursor Grösse
 Zeile 15  Cursor blinken
 Zeile 16  capital letter blink
 Zeile 17  6 or 8 dots
-Zeile 18  automatisches Fensternachführung
-Zeile 19  Tonausgabe
-Zeile 20  gleiche Zeilen überspringen
+Zeile 18  Tonausgabe
+Zeile 19  gleiche Zeilen überspringen
+Zeile 20  Attribute unterstrichen
+Zeile 21  Attribute unterstrichen - blinkend
 Fronttasten 
 Fronttaste  "up"  vorige Zeile (LNUP) 
 Fronttaste  "1"   vorige unterschiedliche Zeile (PRDIFLN) 
@@ -22,12 +23,14 @@ Fronttaste  "dwn" nächste Zeile (LNDN)
 Fronttaste  "4"   nächste unterschiedliche Zeile (NXDIFLN)
 Fronttaste  "2"   mehrere Zeilen nach oben (WINUP)
 Fronttaste  "5"   mehrere Zeilen nach unten (WINDN)
+Fronttaste  "3"   nach oben zu einer Zeile mit untersch. Attribut
+Fronttaste  "6"   nach unten zu einer Zeile mit untersch. Attribut
 Fronttaste  "H"   oberste Zeile (TOP)
 Fronttaste  "E"   unterste Zeile (BOT)
 Fronttaste  "S"   zum Cursor (HOME)     
-Fronttaste  "7" + Routing Taste: CUT Anfang (CUTBEG)
-Fronttaste  "3" + Routing Taste: CUT Ende (CUTEND)
-Fronttaste  "8"   Einfügen (PASTE)
+Fronttaste "7" + Routing Taste: CUT Anfang (CUTBEG)
+Fronttaste "8" + Routing Taste: CUT Ende (CUTEND)
+Statusspalte "22" Einfügen (PASTE)
 nur Routing Taste Cursor positionieren
 Statusspalte:
 Statusspalte "1"  Hilfe anzeigen (HELP)
@@ -44,9 +47,11 @@ Statusspalte "14" Umschalten Cursor Grösse (CSRSIZE)
 Statusspalte "15" Umschalten Cursor blinken (CSRBLINK)
 Statusspalte "16" Umschalten Großbuchstaben blinken (CAPBLINK)
 Statusspalte "17" Umschalten 6 Punkt Modus (BRLDOTS)
-Statusspalte "18" Umschalten automatisches Fensternachführung (SLIDEWIN)
-Statusspalte "19" Umschalten Tonausgabe on/off (SND)
-Statusspalte "20" Umschalten gleiche Zeilen überspringen (SKPIDLNS)
+Statusspalte "18" Umschalten Tonausgabe on/off (SND)
+Statusspalte "19" Umschalten gleiche Zeilen überspringen (SKPIDLNS)
+Statusspalte "20" Umschalten Attribute unterstreichen
+Statusspalte "21" Umschalten Attribute unterstreichen blinkend
+Statusspalte "22" Einfügen (PASTE)
 während der Konfiguration:
 Fronttaste "up"  nächster Eintrag
 Fronttaste "dwn" voriger Eintrag

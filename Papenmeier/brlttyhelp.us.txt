@@ -12,9 +12,10 @@ line 14  cursor size
 line 15  cursor blink
 line 16  capital letter blink
 line 17  6 or 8 dots
-line 18  sliding windows
-line 19  sound
-line 20  skip identical lines
+line 18  sound
+line 19  skip identical lines
+line 20  attribute underlining
+line 21  blinking of attribute underlining
 front keys are:
 front key  "up"  go up one line (LNUP) 
 front key  "1"   go to prev different screen line (PRDIFLN) 
@@ -22,12 +23,14 @@ front key  "dwn" go down one line (LNDN)
 front key  "4"   go to next different screen line (NXDIFLN)
 front key  "2"   go up several lines (WINUP)
 front key  "5"   go down several lines (WINDN)
+front key  "3"   previous line with differing attributes
+front key  "6"   next line with differing attributes
 front key  "H"   go to top of screen (TOP)
 front key  "E"   go to bottom of screen (BOT)
 front key  "S"   go back to cursor (HOME)     
-front key  "7" + routing key: cut begin (CUTBEG)
-front key  "3" + routing key: cut end (CUTEND)
-front key  "8"   paste (PASTE)
+front key "7" + routing key: CUT begin (CUTBEG)
+front key "8" + routing key: CUT end (CUTEND)
+status col "22" Einfügen (PASTE)
 routing key      cursor jump
 side keys (status column) are:
 status col "1"  display help (HELP)
@@ -44,9 +47,11 @@ status col "14" toggle cursor size (CSRSIZE)
 status col "15" toggle cursor blink (CSRBLINK)
 status col "16" toggle capital letter blink (CAPBLINK)
 status col "17" toggle six-dot mode (BRLDOTS)
-status col "18" toggle sliding window (SLIDEWIN)
-status col "19" toggle sound on/off (SND)
-status col "20" toggle skip identical lines (SKPIDLNS)
+status col "18" toggle sound on/off (SND)
+status col "19" toggle skip identical lines (SKPIDLNS)
+status col "20" toggle attribute underlining
+status col "21" toggle blinking of attribute underlining
+status col "22" paste (PASTE)
 during configuration:
 front key  "up"  next entry
 front key  "dwn" previos entry

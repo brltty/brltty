@@ -30,7 +30,7 @@
 brl.o: brl.c ../brl.h ../scr.h ../misc.h
 	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
 
-serial: serial.c ../brl.h
-	$(CC) $(CFLAGS) '-DBRLDEV=/dev/ttyS1' serial.c -o serial -lncurses 
+serial: serial.c ../brl.h brl.c ../text.auto.h
+	$(CC) $(CFLAGS) '-DBRLDEV="/dev/ttyS1"' serial.c -o serial -lncurses 
 
 

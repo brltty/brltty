@@ -1,6 +1,7 @@
-This is the EuroBraille family driver for BRLTTY, version 0.1
-Initial writing by Nicolas Pitre <nico@cam.org>, Copyright June 1997.
-Some routines are copyright VisuAide, Inc. <info@visuaide.qc.ca>.
+This is the EuroBraille family driver for BRLTTY, version 0.2
+
+Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
+
 This code is copyrighted under the GNU Public License.  See the file
 COPYING included with BRLTTY for details.
 

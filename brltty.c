@@ -159,12 +159,7 @@ scrstat scr;			/* For screen statistics */
  */
 unsigned char texttrans[256] =
 {
-#if defined(Papenmeier)
-  /* the papenmeier terminal driver uses the internal table of the terminal */
-  #include "Papenmeier/one.one.h"
-#else
   #include "text.auto.h"
-#endif
 };
 unsigned char attribtrans[256] =
 {
@@ -219,47 +214,17 @@ void loadconfig (void);
 void saveconfig (void);
 int nice (int);			/* should really be in a header file ... */
 
-
 #if defined (Papenmeier)
-
-void pm_notable();		/* only Papenmeier: don´t use internal table */
-/* spezial table for papenmeier */
-
-#define B1 1
-#define B2 2
-#define B3 4
-#define B4 8
-#define B5 16
-#define B6 32
-#define B7 64
-#define B8 128
-
-const unsigned char pm_ones[11] = { B1+B5+B4, B2, B2+B5, 
-				    B2+B1, B2+B1+B4, B2+B4, 
-				    B2+B5+B1, B2+B5+B4+B1, B2+B5+B4, 
-				    B5+B1, B1+B2+B4+B5 };
-const unsigned char pm_tens[11] = { B8+B6+B3, B7, B7+B8, 
-				    B7+B3, B7+B3+B6, B7+B6, 
-				    B7+B8+B3, B7+B8+B3+B6, B7+B8+B6,
-				    B8+B3, B3+B6+B7+B8};
-
-/* create bits for number 0..99 - special for papenmeier */
+int pm_num(int x);
+int pm_stat(int line, int on);
+#else
 int pm_num(int x)
-{
-  return pm_tens[(x / 10) % 10] | pm_ones[x % 10];  
-}
+{ return 0; }
 
-/* status cell   tens: line number    ones: no/all bits set */
 int pm_stat(int line, int on)
-{
-  if (on)
-    return pm_tens[line%10] | pm_ones[10];
-  else
-    return pm_tens[line];
-}
+{ return 0; }
 
 #endif
-
 
 int 
 main (int argc, char *argv[])
@@ -345,9 +310,6 @@ main (int argc, char *argv[])
 	  read (tbl_fd, curtbl, 256) == 256)
 	{
 	  memcpy (texttrans, curtbl, 256);
-#if defined (Papenmeier)
-	  pm_notable();
-#endif
 	}
       else if (!opt_q)
 	fprintf (stderr, "%s: Failed to read %s\n", argv[0], opt_t);
@@ -971,10 +933,10 @@ main (int argc, char *argv[])
 	      statcells [14] = pm_stat(5, env.csrblink);
 	      statcells [15] = pm_stat(6, env.capblink);
 	      statcells [16] = pm_stat(7, env.sixdots);
-	      statcells [17] = pm_stat(8, env.slidewin);
-	      statcells [18] = pm_stat(9, env.sound);
-	      statcells [19] = pm_stat(0, env.skpidlns);
-	      statcells [20] = 0;
+	      statcells [17] = pm_stat(8, env.sound);
+	      statcells [18] = pm_stat(9, env.skpidlns);
+	      statcells [19] = pm_stat(0, env.attrvis);
+	      statcells [20] = pm_stat(1, env.attrblink);
               statcells [21] = 0;
 	      break;
 	    default:
