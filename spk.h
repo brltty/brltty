@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -20,9 +18,15 @@
 /* speech.h - Header file for the speech library
  */
 
+typedef struct {
+   char *name;
+   void (*identify) (void);		/* print start-up messages */
+   void (*initialize) (void);		/* initialize speech device */
+   void (*say) (unsigned char *buffer, int len);	/* speak text */
+   void (*mute) (void);		/* mute speech */
+   void (*close) (void);		/* close speech device */
+} speech_driver;
 
-void identspk (void);		/* identify speech driver */
-void initspk (void);		/* initialise speech */
-void say (unsigned char *buffer, int len);	/* speak text */
-void mutespk (void);		/* mute speech */
-void closespk (void);		/* close speech driver */
+extern speech_driver *speech;
+extern char* speech_libname;	/* name of library */
+int load_speech_driver(void);

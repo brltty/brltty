@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -55,14 +53,14 @@ void message (char *s);
 int
 main (int argc, char *argv[])
 {
-  if(argv[2])
-    driver_libname= argv[2];
+  if(argc > 2)
+    braille_libname = argv[2];
   else
-    driver_libname= "as";
+    braille_libname = NULL;
 
-  if (load_driver() != 0)
+  if (!load_braille_driver())
     {
-      LogAndStderr(LOG_ERR, "unable to load driver library: %s", driver_libname);
+      LogAndStderr(LOG_ERR, "braille driver not specified.");
       exit(10);
     }
 
@@ -74,8 +72,8 @@ main (int argc, char *argv[])
     }
   else
     printf ("Changed to directory %s\n", HOME_DIR);
-  thedriver->identbrl ();		/* start-up messages */
-  thedriver->initbrl (&brl, argc > 1 ? argv[1] : BRLDEV);	/* initialise display */
+  braille->identify();		/* start-up messages */
+  braille->initialize(&brl, argc > 1 ? argv[1] : BRLDEV);	/* initialise display */
   if (brl.x == -1)
     {
       fprintf (stderr, "Initialisation error\n");
@@ -87,7 +85,7 @@ main (int argc, char *argv[])
 
   printf ("\nHit return to continue:\n");
   getchar ();
-  thedriver->closebrl (&brl);		/* finish with the display */
+  braille->close(&brl);		/* finish with the display */
   return 0;
 }
 
@@ -104,7 +102,7 @@ message (char *s)
 #endif
 
   memset (statcells, 0, sizeof(statcells));
-  thedriver->setbrlstat (statcells);
+  braille->setstatus(statcells);
 
   memset (brl.disp, ' ', brl.x * brl.y);
   l = strlen (s);
@@ -119,9 +117,9 @@ message (char *s)
       for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], \
 	   i++);
 
-      thedriver->writebrl (&brl);
+      braille->write(&brl);
       if (l)
-	while (thedriver->readbrl (TBL_ARG) == EOF)
+	while (braille->read(TBL_ARG) == EOF)
 	  delay (KEYDEL);
     }
 }

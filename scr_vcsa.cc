@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -38,6 +36,7 @@
 
 #include "misc.h"
 
+#include "scr.h"
 #include "scrdev.h"
 #include "scr_vcsa.h"
 #include "config.h"
@@ -52,17 +51,8 @@ RealScreen *live = &vcsa;
 
 
 
-/* Conversion from ibmpc==cp437 to iso-latin-1 for chars>=128
- * Note that this is a quick hack until we can get all this directly
- * from the kernel console.  We also need to find how to know if 
- * such a translation table is in use.  This translation may be disabled
- * if the next line is commented out.
- */
-
-#define CHARSET_CONV
-
-#ifdef CHARSET_CONV
-static unsigned char charset_conv[128] =
+// Conversion from ibmpc==cp437 to iso-latin-1 for chars>=128
+static const unsigned char cp437_to_latin1[128] =
 {199, 252, 233, 226, 228, 224, 229, 231, 234, 235, 232, 239, 238, 236,
  196, 197, 201, 230, 198, 244, 246, 242, 251, 249, 255, 214, 220, 162,
  163, 165, 158, 159, 225, 237, 243, 250, 241, 209, 170, 186, 191, 169,
@@ -73,8 +63,82 @@ static unsigned char charset_conv[128] =
  131, 227, 132, 134, 181, 135, 138, 130, 136, 137, 141, 173, 140, 139,
  240, 177, 149, 155, 147, 245, 247, 148, 176, 151, 183, 150, 129, 178,
  254, 160};
-#endif
 
+
+/* 
+ * The virtual console devices returns the actual font value used on the 
+ * screen.  Most PC video cards have built-in fonts defined for the CP437
+ * character set, but Linux (and most UNIXes) operates in  the ISO-Latin-1 
+ * character set.  So the kernel translates characters to be printed on the
+ * screen into CP437 character set to accomodate PC video cards.  When this,
+ * happens, we need to translate the screen capture back into ISO characters.
+ * 
+ * Since CP437 isn't used on all display devices, we need to probe the display
+ * to determine which character set is in use.  To accomplish this, we just
+ * print a well known character on the screen, and deduce the character set
+ * in use by looking at the resulting font index value.
+ */
+
+void vcsa_Screen::set_screen_translation_table (void) {
+    unsigned short old_character;	/* 'short' to hold char and attr */
+    unsigned char new_character;
+
+    // Save the current cursor position.
+    {
+	static const unsigned char save_cursor[] = {0X1B, '7'};
+	write(cons_fd, save_cursor, sizeof(save_cursor));
+    }
+
+    // Move the cursor to the top-left character.
+    {
+	static const unsigned char home[] = {0X1B, '[', 'H'};
+	write(cons_fd, home, sizeof(home));
+    }
+
+    // Get the current character at this position.
+    lseek(fd, 4, SEEK_SET);
+    read(fd, &old_character, 2);
+
+    // Change it to an ISO "nobreakspace".
+    new_character = 0xA0;
+    write(cons_fd, &new_character, 1);
+
+    // Get the new value of the character.
+    lseek(fd, -2, SEEK_CUR);
+    read(fd, &new_character, 1);
+
+    // Restore the character to its original value.
+    lseek(fd, -1, SEEK_CUR);
+    write(fd, &old_character, 2);
+
+    // Restore the cursor to its original position.
+    {
+	static const unsigned char restore_cursor[] = {0X1B, '8'};
+	write(cons_fd, restore_cursor, sizeof(restore_cursor));
+    }
+
+    // Determine which translation table to use when reading the screen.
+    {
+	int level = LOG_INFO;
+	const char *font;
+	switch (new_character) {
+	  default: // no translation
+	    level = LOG_WARNING;
+	    translation_table = NULL;
+	    font = "unknown";
+	    break;
+	  case 0XA0: // ISO-LATIN-1
+	    translation_table = NULL;
+	    font = "ISO-LATIN-1";
+	    break;
+	  case 0XFF: // CP-437
+	    translation_table = cp437_to_latin1;
+	    font = "CP-437";
+	    break;
+	}
+	LogAndStderr(level, "Screen Font: %s", font);
+    }
+}
 
 
 int vcsa_Screen::open (void)
@@ -97,13 +161,14 @@ int vcsa_Screen::open (void)
 		 VCSADEV, strerror(errno));
     return 1;
   }
-  if ((cons_fd = ::open (CONSOLE, O_RDONLY)) == -1)
+  if ((cons_fd = ::open (CONSOLE, O_RDWR)) == -1)
     {
       LogAndStderr(LOG_WARNING,"Can't open console device '%s': %s\n",
 		 CONSOLE, strerror(errno));
       ::close (fd);
       return 1;
     }
+  set_screen_translation_table();
   return 0;
 }
 
@@ -154,17 +219,12 @@ vcsa_Screen::getscr (winpos pos, unsigned char *buffer, short mode)
       src = linebuf;
       for (j = 0; j < pos.width; j++)
 	{
-          #ifdef CHARSET_CONV
-	  if (mode == SCR_TEXT && *src >= 128)
-	    /* Conversion from ibmpc==cp437 to iso-latin-1 for chars>=128 */
-	    *dst++ = charset_conv[ (*src) - 128];
+	  if ((mode == SCR_TEXT) && (*src >= 128) && (translation_table != NULL))
+	    /* Conversion to iso-latin-1 for chars>=128 */
+	    *dst++ = translation_table[(*src) - 128];
 	  else
 	    *dst++ = *src;
 	  src += 2;
-	  #else
-	  *dst++ = *src;
-	  src += 2;
-	  #endif
 	}
     }
   return buffer;

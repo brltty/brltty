@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -19,6 +17,8 @@
  * N. Nair, 3 September 1996
  * $Id: speech.h,v 1.2 1996/09/21 23:34:52 nn201 Exp $
  */
+
+#define SPKNAME "CombiBraille"
 
 /* These sequences are sent to the CombiBraille before and after the
  * speech data itself.  The first byte is the length, so embedded nuls are
@@ -37,7 +37,7 @@
  */
 
 #define MAX_TRANS 126
-unsigned char *vocab[MAX_TRANS - 32] =
+static unsigned char *vocab[MAX_TRANS - 32] =
 {
   " exclamation ",
   " double quote ",

@@ -2,6 +2,8 @@
  * N. Nair, 11 September 1998
  */
 
+#define SPKNAME "BrailleLite"
+
 #ifdef SPEECH_C
 #undef SPEECH_C
 

@@ -1,0 +1,181 @@
+#!/usr/bin/tclsh
+# BrlTTY GenericSay helper script for the Accent/SA Speech Synthesizer
+# It should be installed as "/usr/local/bin/say".
+set configurationFile /etc/say.conf
+set devicePath "/dev/ttyS0"
+set deviceTimeout 5; # seconds
+
+# Write a message, prefixed with the name of this script, to standard error.
+proc programMessage {message} {
+   global argv0
+   puts stderr "[file tail $argv0]: $message"
+}
+
+# Display an error message, and exit with the specified return code.
+proc programError {code {message ""}} {
+   if {[string length $message] > 0} {
+      programMessage $message
+   }
+   exit $code
+}
+
+# Standard exit routine when command line errors are detected.
+proc syntaxError {message} {
+   programError 2 $message
+}
+
+# Standard exit routine when configuration file errors are detected.
+proc configurationError {message} {
+   programError 3 "configuration file error: $message"
+}
+
+# Standard exit routine when something is wrong with the parameter values.
+proc semanticError {message} {
+   programError 4 $message
+}
+
+# Close the speech synthesizer device.
+proc closeDevice {} {
+   global deviceStream
+   close $deviceStream; unset deviceStream
+}
+
+# Maintain an event which automatically closes the speech synthesizer
+# device if no new data has arrived for a while.
+proc scheduleClose {} {
+   global deviceClose deviceTimeout
+   if {[info exists deviceClose]} {
+      after cancel $deviceClose; unset deviceClose
+   }
+   set deviceClose [after $deviceTimeout {unset deviceClose; closeDevice}]
+}
+
+# Open the speech synthesizer device.
+# If it's already open, then don't do anything.
+# If it can't be opened, then silently exit with a non-zero return code.
+proc openDevice {} {
+   global devicePath deviceStream
+   if {![info exists deviceStream]} {
+      if {[catch [list open $devicePath {WRONLY NOCTTY}] response] != 0} {
+         exit 10
+      }
+      set deviceStream $response
+   }
+}
+
+proc writeData {data} {
+   global deviceStream
+   puts -nonewline $deviceStream $data
+   flush $deviceStream
+}
+
+# Insure that the speech synthesizer device is open, and then
+# instruct it to speak the content of the supplied string.
+# Arrange for the device to be automatically closed if nothing more
+# needs to be spoken for a reasonable amount of time.
+proc sayString {string} {
+   openDevice
+   scheduleClose
+   writeData $string
+}
+
+# Tell the speech synthesizer to stop speaking immediately,
+# and to flush its input buffer.
+proc flushSynthesizer {} {
+   writeData "\x1b=x"
+}
+
+# Handle the "device" configuration file specification.
+# It must be either the absolute or the relative path to the speech synthesizer device.
+proc configure-device {path} {
+   global devicePath
+   set devicePath $path
+}
+
+# Handle the "timeout" configuration file specification.
+# It must be a non-negative integral number of seconds.
+proc configure-timeout {timeout} {
+   global deviceTimeout
+   set deviceTimeout $timeout
+}
+
+# Process the configuration file. For the list of configurable
+# parameters, see the configure-... handlers.
+# If the file does not exist, then silently continue.
+# If it does exist but cannot be opened, then display a warning.
+proc configureParameters {} {
+   global configurationFile
+   if {[catch [list open $configurationFile {RDONLY}] response] != 0} {
+      global errorCode
+      set type [lindex $errorCode 0]
+      set code [lindex $errorCode 1]
+      set warn 1
+      if {[string compare $type POSIX] == 0} {
+         if {[lsearch -exact {ENOENT} $code] >= 0} {
+	    set warn 0
+	 }
+      }
+      if {$warn} {
+	 programMessage $response
+      }
+   } else {
+      set file $response
+      while {[gets $file line] >= 0} {
+         if {[set length [string length [set line [string trim $line]]]] == 0} {
+	    continue
+	 }
+	 if {[string compare [string index $line 0] #] == 0} {
+	    continue
+	 }
+	 regexp {^([^ ]+)(.*)$} $line x name value
+	 set value [string trim $value]
+	 if {[set count [llength [set handlers [info procs "configure-[string tolower $name]*"]]]] == 0} {
+	    configurationError "invalid parameter name: $name"
+	 } elseif {$count > 1} {
+	    configurationError "ambiguous parameter name: $name"
+	 } else {
+	    eval [lindex $handlers 0] $value
+	 }
+      }
+      close $file; unset file
+   }
+}
+
+# Process the configuration file, and then validate the parameter settings.
+configureParameters
+if {![regexp {^(0|[1-9][0-9]*)$} $deviceTimeout]} {
+   syntaxError "invalid timeout: $deviceTimeout"
+}
+if {![file exists $devicePath]} {
+   semanticError "device not found: $devicePath"
+}
+if {[string compare [set deviceType [file type $devicePath]] characterSpecial] != 0} {
+   semanticError "incorrect device type: $devicePath: $deviceType"
+}
+if {![file writable $devicePath]} {
+   semanticError "device not writable: $devicePath"
+}
+
+# Adjust the configuration parameters such that they're more useful from an internal perspective.
+set deviceTimeout [expr {$deviceTimeout * 1000}]; # After wants milliseconds.
+
+# If no arguments have been supplied, then be a brltty GenericSay helper command. 
+if {[llength $argv] == 0} {
+   set inputStream stdin
+   fconfigure $inputStream -blocking 0
+   fileevent $inputStream readable {
+      if {[eof $inputStream]} {
+	 flushSynthesizer
+	 closeDevice
+	 set returnCode 0
+      } else {
+	 sayString [read $inputStream]
+      }
+   }
+   vwait returnCode
+   exit $returnCode
+}
+
+# Speak the positional arguments as a sequence of words.
+sayString [join $argv " "]
+exit 0

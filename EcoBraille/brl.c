@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -46,7 +44,7 @@
 #include "../scr.h"
 #include "../misc.h"
 #include "../config.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 
 static char StartupString[] =
 "  EcoBraille driver, version 1.00 \n"
@@ -59,7 +57,7 @@ typedef struct{
     int NbStCells;
 } BRLPARAMS;
 
-BRLPARAMS Models[NB_MODEL] ={
+static BRLPARAMS Models[NB_MODEL] ={
   {
     // ID == 0
     "ECO20",
@@ -87,7 +85,7 @@ BRLPARAMS Models[NB_MODEL] ={
 
 // Eco dot translate table. This Braille Line use Spanish Braille file 
 // text.es.tbl for default
-char TransTable[256] ={
+static char TransTable[256] ={
 	0x00, 0x10, 0x01, 0x11, 0x20, 0x30, 0x21, 0x31, 
 	0x02, 0x12, 0x03, 0x13, 0x22, 0x32, 0x23, 0x33, 
 	0x40, 0x50, 0x41, 0x51, 0x60, 0x70, 0x61, 0x71, 
@@ -123,29 +121,29 @@ char TransTable[256] ={
 };
 
 // Global variables
-int brl_fd;			// file descriptor for Braille display
-struct termios oldtio;		// old terminal settings
-unsigned char *rawdata;		// translated data to send to Braille
-unsigned char Status[MAX_STCELLS]; // to hold status
-BRLPARAMS *model;		// points to terminal model config struct
-int BrailleSize=0;		// Braille size of braille line
+static int brl_fd;			// file descriptor for Braille display
+static struct termios oldtio;		// old terminal settings
+static unsigned char *rawdata;		// translated data to send to Braille
+static unsigned char Status[MAX_STCELLS]; // to hold status
+static BRLPARAMS *model;		// points to terminal model config struct
+static int BrailleSize=0;		// Braille size of braille line
 
 #ifdef DEBUG
 int brl_log;
 #endif
 
 // Communication codes
-char BRL_ID[] = "\x10\x02\xF1";
+static char BRL_ID[] = "\x10\x02\xF1";
 #define DIM_BRL_ID 3
-char SYS_READY[] = "\x10\x02\xF1\x57\x57\x57\x10\x03";
+static char SYS_READY[] = "\x10\x02\xF1\x57\x57\x57\x10\x03";
 #define DIM_SYS_READY 8
-char BRL_READY[] = "\x10\x02\x2E";
+static char BRL_READY[] = "\x10\x02\x2E";
 #define DIM_BRL_READY 3
-char BRL_WRITE_PREFIX[] = "\x61\x10\x02\xBC";
+static char BRL_WRITE_PREFIX[] = "\x61\x10\x02\xBC";
 #define DIM_BRL_WRITE_PREFIX 4
-char BRL_WRITE_SUFIX[] = "\x10\x03";
+static char BRL_WRITE_SUFIX[] = "\x10\x03";
 #define DIM_BRL_WRITE_SUFIX 2
-char BRL_KEY[] = "\x10\x02\x88";
+static char BRL_KEY[] = "\x10\x02\x88";
 #define DIM_BRL_KEY 2
 
 
@@ -182,7 +180,7 @@ char BRL_KEY[] = "\x10\x02\x88";
 #define KEY_F8		0x80
 
 
-int WriteToBrlDisplay(char *Data)
+static int WriteToBrlDisplay(char *Data)
 {
   int size = DIM_BRL_WRITE_PREFIX + DIM_BRL_WRITE_SUFIX + BrailleSize;
   char *buffTmp;
@@ -205,14 +203,14 @@ return(0);
 }
 
 
-void identbrl(void)
+static void identbrl(void)
 {
   // Hello display
   printf (StartupString);
 }
 
 
-void initbrl(brldim *brl, const char *dev)
+static void initbrl(brldim *brl, const char *dev)
 {
   brldim res;			// return result
   struct termios newtio;	// new terminal settings
@@ -322,7 +320,7 @@ return;
 }
 
 
-void closebrl(brldim *brl)
+static void closebrl(brldim *brl)
 {
   free(brl->disp);
   free(rawdata);
@@ -335,7 +333,7 @@ void closebrl(brldim *brl)
 }
 
 
-void writebrl(brldim *brl)
+static void writebrl(brldim *brl)
 {
   int i, j;
 
@@ -356,14 +354,14 @@ void writebrl(brldim *brl)
 }
 
 
-void setbrlstat(const unsigned char *st)
+static void setbrlstat(const unsigned char *st)
 {
   // Update status cells
   memcpy(Status, st, model->NbStCells);
 }
 
 
-int readbrl(int type)
+static int readbrl(int type)
 {
   int res = EOF;
   long bytes = 0;

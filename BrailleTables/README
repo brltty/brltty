@@ -42,5 +42,5 @@ bits 01234567 = dots 12345678 or any other dot mapping convention
 must translate the dot pattern into its own mapping in its driver.
 
 Also note that the byte offset which is the character value is 
-assumed to be from the ISO-8859-1 character set by BRLTTY.
+assumed to be from the ISO-8859-1 (ISO-Latin1) character set by BRLTTY.
 

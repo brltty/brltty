@@ -1,0 +1,8 @@
+Braille display driver for MDV displays.
+
+Written by Stéphane Doyon (s.doyon@videotron.ca) in collaboration with
+Simone Dal Maso <sdalmaso@protec.it>.
+
+This is version 0.5 (June 99) of this driver.
+It is being tested on MB408S, should also support MB208 and MB408L.
+

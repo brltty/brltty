@@ -3,11 +3,9 @@
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
+# Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Nicolas Pitre <nico@cam.org>
-# Stéphane Doyon <s.doyon@videotron.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Web Page: http://www.cam.org/~nico/brltty
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -26,5 +24,8 @@
 # from the main Makefile...
 ###############################################################################
 
-speech.o: speech.c ../speech.h ../config.h
-	$(CC) $(CFLAGS) -c speech.c
+DRIVER = gs
+include ../driver.mk
+
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../config.h
+	$(CC) $(SPK_CFLAGS) -c speech.c

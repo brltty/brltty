@@ -1,4 +1,4 @@
-BRLTTY TODO - March 23, 1999
+BRLTTY TODO - March 30, 2000
 ============================
 
 (This concerns the main module of BRLTTY.  Individual Braille terminal
@@ -15,19 +15,12 @@ Your help is welcome.
   movement outside the current region would be ignored.  This would be
   useful if the screen was split into multiple `windows' (e.g. in ytalk).
 
-- Attribute tracking.
+- Attribute tracking (scroll bars, etc.)
 
 - Better support for mixed text + attribute mode i.e. underlined and/or 
   flashing attributes.
 
-- Make all braille display drivers dynamically linkable at run time,
-  to be able to choose between all different drivers on a distribution
-  installation disk for example.
-
 - Keypress simulation within dosemu.  See comments in inskey_lnx.c.
-
-- Linux console charset translation (actually bolted in). See comments
-  in scr_vcsa.cc.
 
 - Revision of cut & paste and implementation of linear mode cut (as opposed
   to rectangular mode).

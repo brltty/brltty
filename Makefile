@@ -5,9 +5,7 @@
 #
 # Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Nicolas Pitre <nico@cam.org>
-# Stéphane Doyon <s.doyon@videotron.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Web Page: http://www.cam.org/~nico/brltty
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -22,11 +20,11 @@
 
 # If you would like the driver for your Braille display built into the
 # program, then specify it by uncommenting one, and only one, of these
-# definitions of BRL_TARGET. If you do not specify your display here,
+# definitions of BRL_TARGET. If you do not specify the display here,
 # then a set of shared libraries, one for each driver, will be made,
-# and you will need to specify your display type at run-time via -m.
+# and you will need to specify the display type at run-time via -b.
 # Note to maintainer:
-#    When adding a new target here, add it also to the "TARGETS =" line.
+#    When adding a new target here, add it also to the "BRL_TARGETS =" line.
 #BRL_TARGET = Alva
 #BRL_TARGET = BrailleLite
 #BRL_TARGET = CombiBraille
@@ -37,17 +35,21 @@
 #BRL_TARGET = TSI
 #BRL_TARGET = Vario
 
-# Specify your speech support option.
-# Uncomment one of these lines and comment out the NoSpeech line 
-# if you have speech.
+# If you would like the driver for your speech interface built into the
+# program, then specify it by uncommenting one, and only one, of these
+# definitions of SPK_TARGET. If you do not specify the interface here,
+# then a set of shared libraries, one for each driver, will be made,
+# and you will need to specify the interface type at run-time via -s.
+# Note to maintainer:
+#    When adding a new target here, add it also to the "SPK_TARGETS =" line.
 # PS: Alva speech is available with Delphi models only.
-# Note: All this is still experimental.  It is safe to leave it as NoSpeech.
-SPK_TARGET = NoSpeech
+# Note: All this is still experimental.  It is safe to leave all of
+# these entries commented out.
 #SPK_TARGET = Alva
 #SPK_TARGET = BrailleLite
 #SPK_TARGET = CombiBraille
 #SPK_TARGET = Festival
-#SPK_TARGET = Generic_say
+#SPK_TARGET = GenericSay
 #SPK_TARGET = Televox
 
 # Specify the default, compiled-in text translation table.  This can be
@@ -120,8 +122,9 @@ CC = gcc
 # To compile in a.out (if you use ELF by default), you may be able to use
 # `-b i486-linuxaout'; however, you may also need to use the -V flag, or
 # possibly a different gcc executable, depending on your setup.
-COMMONCFLAGS = -O2 -Wall -D_POSIX_C_SOURCE=2 -D_BSD_SOURCE
-CFLAGS = $(COMMONCFLAGS) '-DBRL_TARGET="$(BRL_TARGET)"' -D$(SPK_TARGET)
+COMMONCFLAGS = -Wall -D_POSIX_C_SOURCE=2 -D_BSD_SOURCE
+CFLAGS = $(COMMONCFLAGS) -O2
+#CFLAGS = $(COMMONCFLAGS) -g
 UTILS_CFLAGS = $(CFLAGS)
 
 LIB_CFLAGS = $(CFLAGS) -fPIC
@@ -132,14 +135,19 @@ COMPCPP = g++
 
 #LD = gcc
 LD = g++
-LDFLAGS = -s
-#LDFLAGS = -g
-LDLIBS = -ldl -rdynamic
+COMMONLDFLAGS = -rdynamic
+LDFLAGS = $(COMMONLDFLAGS) -s
+#LDFLAGS = $(COMMONLDFLAGS) -g
+LDLIBS = -ldl
 
 PREFIX =
 
-TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario
-TRGLIBS = al b1 b4 cb ec eu md pm ts va
+BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario
+BRL_LIBS = al b1 b4 cb ec eu md pm ts va
+
+SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille Festival GenericSay Televox
+SPK_LIBS = no al bl cb fv gs tv
+
 # ------------------------ DO NOT EDIT BELOW THIS LINE ------------------------
 
 
@@ -178,7 +186,7 @@ install-devices:
 
 uninstall:
 	rm -f $(PREFIX)$(EXEC_PATH) $(PREFIX)$(REINSTALL_PATH)
-	rm -rf $(PREFIX)$(LIB_PATH)/$(LIB_SO_NAME)??.so.$(LIB_VER)
+	rm -rf $(PREFIX)$(LIB_PATH)
 	rm -rf $(PREFIX)$(DATA_DIR)
 
 install-brltty: install.template
@@ -187,25 +195,34 @@ install-brltty: install.template
 
 SCREEN_OBJECTS = scr.o scrdev.o $(SCR_O)
 
-SPEECH_TARGETS = speech
+ifeq ($(SPK_TARGET),)
+   SPK_TARGET = NoSpeech
+   SPEECH_TARGETS = dynamic-speech
+else
+   SPEECH_TARGETS = static-speech
+endif
 SPEECH_OBJECTS = $(SPK_TARGET)/speech.o 
+BUILTIN_SPEECH = -DSPK_BUILTIN
 
 ifeq ($(BRL_TARGET),)
-   DRIVER_TARGETS = brl_dynamic.o dynamic-drivers
-   DRIVER_OBJECTS = brl_dynamic.o
+   BRAILLE_TARGETS = dynamic-braille
+   BRAILLE_OBJECTS =
+   BUILTIN_BRAILLE =
 else
-   DRIVER_TARGETS = brl_static.o static-driver
-   DRIVER_OBJECTS = brl_static.o $(BRL_TARGET)/brl.o
+   BRAILLE_TARGETS = static-braille
+   BRAILLE_OBJECTS = $(BRL_TARGET)/brl.o
+   BUILTIN_BRAILLE = -DBRL_BUILTIN
 endif
 
-BRLTTY_OBJECTS = brltty.o misc.o beeps.o cut-n-paste.o $(INSKEY_O)
-brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(DRIVER_TARGETS)
+BRLTTY_OBJECTS = brltty.o misc.o beeps.o cut-n-paste.o $(INSKEY_O) spk_load.o brl_load.o
+
+brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	$(LD) $(LDFLAGS) -Wl,-rpath,$(LIB_PATH) -o $@ \
-	 $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(DRIVER_OBJECTS) $(LDLIBS)
+	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
 brltty.o: brltty.c brl.h scr.h inskey.h misc.h message.h config.h \
 	  text.auto.h attrib.auto.h
-	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DTRGLIBS="$(TRGLIBS)"' '-DBRLDEV="$(BRLDEV)"' -c brltty.c
+	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DBRLLIBS="$(BRL_LIBS)"' '-DSPKLIBS="$(SPK_LIBS)"' '-DBRLDEV="$(BRLDEV)"' -c brltty.c
 
 misc.o: misc.c misc.h
 	$(CC) $(CFLAGS) -c misc.c
@@ -219,19 +236,28 @@ cut-n-paste.o: cut-n-paste.c cut-n-paste.h beeps.h scr.h inskey.h
 inskey_lnx.o: inskey_lnx.c inskey.h
 	$(CC) $(CFLAGS) -c inskey_lnx.c
 
-brl_dynamic.o: brl_dynamic.c brl.h scr.h
-	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' -c brl_dynamic.c 
+spk_load.o: spk_load.c spk.h brl.h misc.h
+	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' $(BUILTIN_SPEECH) -c spk_load.c 
 
-dynamic-drivers: txt2hlp
-	for target in $(TARGETS); \
-	do $(MAKE) -C $$target lib help || exit 1; \
+dynamic-speech:
+	for target in $(SPK_TARGETS); \
+	do $(MAKE) -C $$target speech-driver || exit 1; \
 	done
 
-brl_static.o: brl_static.c brl.h scr.h
-	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' -c brl_static.c 
+static-speech:
+	$(MAKE) -C $(SPK_TARGET) speech.o
 
-static-driver: txt2hlp
-	$(MAKE) -C $(BRL_TARGET) brl.o help
+brl_load.o: brl_load.c brl.h misc.h
+	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' $(BUILTIN_BRAILLE) -c brl_load.c 
+
+dynamic-braille: txt2hlp
+	rm -f lib/brl_drivers.lst
+	for target in $(BRL_TARGETS); \
+	do $(MAKE) -C $$target braille-driver braille-help brl-lib-name || exit 1; \
+	done
+
+static-braille: txt2hlp
+	$(MAKE) -C $(BRL_TARGET) brl.o braille-help
 
 scr.o: scr.cc scr.h scrdev.h helphdr.h config.h
 	$(COMPCPP) $(CFLAGS) -c scr.cc
@@ -248,9 +274,9 @@ scr_shm.o: scr_shm.cc scr_shm.h scr.h scrdev.h config.h
 speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
-BRLTEST_OBJECTS = brltest.o misc.o
-brltest: $(BRLTEST_OBJECTS) $(DRIVER_TARGETS)
-	$(LD) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(DRIVER_OBJECTS) $(LDLIBS)
+BRLTEST_OBJECTS = brltest.o misc.o brl_load.o
+brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
+	$(LD) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
 brltest.o: brltest.c brl.h config.h text.auto.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DBRLDEV="$(BRLDEV)"' -c brltest.c
@@ -264,11 +290,11 @@ scrtest.o: scrtest.c
 
 # quick hack to check all libs
 # try to load all libs - start brltty with library
-checklibs: brltty dynamic-drivers
+check-braille: brltty dynamic-braille
 	if [ $$UID = 0 ]; then exit 99; fi
-	for lib in $(TRGLIBS); \
+	for lib in $(BRL_LIBS); \
 	do ls -al lib/*$$lib* || exit 1; \
-	   LD_RUN_PATH="./lib" ./brltty -v -m $$lib 2>&1 || exit 1; \
+	   LD_RUN_PATH="./lib" ./brltty -v -b $$lib 2>&1 || exit 1; \
 	done
 
 text.auto.h: Makefile BrailleTables/$(TEXTTRANS) comptable
@@ -294,7 +320,7 @@ clean:
 
 distclean: clean
 	rm -f brltty txt2hlp comptable *test
-	rm -f *~ */*~ *orig */*orig \#*\# */\#*\#
+	rm -f *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
 	rm -f Papenmeier/serial
 	$(MAKE) -C BrailleTables distclean
 

@@ -1,9 +1,3 @@
-
-BRLTTY - Access software for Unix for a blind person
-         using a soft Braille terminal
-
-Version 1.0.1, 13 September 1996
-
 Driver for Tieman B.V.'s CombiBraille series
 
 Copyright (C) 1995, 1996 by Nikhil Nair.  All rights reserved.
@@ -13,7 +7,7 @@ terms of the GNU General Public License, as published by the Free
 Software Foundation.  Please see the file COPYING in the top-level
 directory for details.
 
-This driver is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+This driver was maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
 
 -----------------------------------------------------------------------------
 

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -69,7 +67,7 @@
 #include "../brl.h"
 #include "../misc.h"
 #include "../scr.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 
 
 /* Braille display parameters that do not change */
@@ -77,10 +75,10 @@
 
 /* Type of delay the display requires after sending it commands.
    0 -> no delay, 1 -> tcdrain only, 2 -> tcdrain + wait for SEND_DELAY. */
-int slow_update;
+static int slow_update;
 
 /* Whether multiple packets can be sent for a single update. */
-int no_multiple_updates;
+static int no_multiple_updates;
 
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. */
@@ -94,7 +92,7 @@ static int pings; /* counts number of pings sent since last reply */
 #define PING_REPLY_DELAY 300
 
 /* for routing keys */
-int must_init_oldstat = 1;
+static int must_init_oldstat = 1;
 
 /* Definitions to avoid typematic repetitions of function keys other
    than movement keys */
@@ -220,12 +218,12 @@ struct inbytedesc {
 
 /* Description of bytes for navigator and pb40. */
 #define NAV_KEY_LEN 2
-struct inbytedesc nav_key_desc[NAV_KEY_LEN] =
+static struct inbytedesc nav_key_desc[NAV_KEY_LEN] =
   {{0x60, 0x1F, 0},
    {0xE0, 0x1F, 5}};
 /* Description of bytes for pb65/80 */
 #define PB_KEY_LEN 6
-struct inbytedesc pb_key_desc[PB_KEY_LEN] =
+static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
   {{0x40, 0x0F, 10},
    {0xC0, 0x0F, 14},
    {0x20, 0x05, 18},
@@ -324,11 +322,11 @@ static unsigned char has_sw,    /* flag: has routing keys or not */
                      sw_bcnt;   /* bytes of sensor switch information */
 static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
 #ifdef LOW_BATTERY_WARN
-unsigned char *battery_msg;     /* low battery warning msg */
+static unsigned char *battery_msg;     /* low battery warning msg */
 #endif
 
 
-void 
+static void 
 identbrl (void)
 {
   printf ("  %s\n", VERSION);
@@ -419,7 +417,7 @@ ResetTypematic (void)
 }
 
 
-void initbrl (brldim *brl, const char *tty)
+static void initbrl (brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
   int i=0;
@@ -661,7 +659,7 @@ failure:;
 }
 
 
-void 
+static void 
 closebrl (brldim *brl)
 {
   if (brl_fd >= 0)
@@ -757,7 +755,7 @@ display (const unsigned char *pattern,
   };
 }
 
-void setbrlstat (const unsigned char *s)
+static void setbrlstat (const unsigned char *s)
 /* Only the PB80, which actually has 81cells, can be considered to have status
    cells, and it has only one. We could also decide to devote some of
    the cells of the PB65? */
@@ -774,7 +772,7 @@ display_all (unsigned char *pattern)
 }
 
 
-void 
+static void 
 writebrl (brldim *brl)
 {
   if(no_multiple_updates){
@@ -1021,7 +1019,7 @@ cut_cursor ()
 /* read buffer size: maximum is query reply minus header */
 #define MAXREAD 10
 
-int 
+static int 
 readbrl (int type)
 {
   /* static bit vector recording currently pressed sensor switches (for

@@ -5,9 +5,7 @@
 #
 # Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Nicolas Pitre <nico@cam.org>
-# Stéphane Doyon <s.doyon@videotron.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Web Page: http://www.cam.org/~nico/brltty
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -24,30 +22,35 @@
 ###############################################################################
 
 DRIVER = bl
-LIBNAME18 = $(LIB_SO_NAME)b1.so.$(LIB_VER)
-LIBFILE18 = $(LIBDIR)/$(LIBNAME18)
-LIBNAME40 = $(LIB_SO_NAME)b4.so.$(LIB_VER)
-LIBFILE40 = $(LIBDIR)/$(LIBNAME40)
-LIB_TARGETS = $(LIBFILE18) $(LIBFILE40)
+BRL18_NAME = $(BRL_SO_NAME)b1.so.$(LIB_VER)
+BRL18_FILE = $(LIBDIR)/$(BRL18_NAME)
+BRL40_NAME = $(BRL_SO_NAME)b4.so.$(LIB_VER)
+BRL40_FILE = $(LIBDIR)/$(BRL40_NAME)
+BRL_FILES = $(BRL18_FILE) $(BRL40_FILE)
 include ../driver.mk
 
 TARGETS = brl.c ../brl.h ../misc.h ../inskey.h ../message.h \
-	../config.h brlconf.h ../driver.h bindings.h
+	../config.h brlconf.h ../brl_driver.h bindings.h
 
 brl.o: $(TARGETS)
-	$(CC) $(DRIVER_CFLAGS) -c brl.c
+	$(CC) $(BRL_CFLAGS) -c brl.c
 
 brl18.o: $(TARGETS)
-	$(CC) $(DRIVER_CFLAGS) -DBLITE_SIZE=18 -o brl18.o -c brl.c
+	$(CC) $(BRL_CFLAGS) -DBLITE_SIZE=18 -o brl18.o -c brl.c
 
-$(LIBFILE18): brl18.o
-	$(CC) -shared -Wl,-soname,$(LIBNAME18) -o $(LIBFILE18) brl18.o -lc
+$(BRL18_FILE): brl18.o
+	$(LD) $(BRL_LFLAGS) -soname $(BRL18_NAME) -o $(BRL18_FILE) brl18.o -lc
 
 brl40.o: $(TARGETS)
-	$(CC) $(DRIVER_CFLAGS) -DBLITE_SIZE=40 -o brl40.o -c brl.c
+	$(CC) $(BRL_CFLAGS) -DBLITE_SIZE=40 -o brl40.o -c brl.c
 
-$(LIBFILE40): brl40.o
-	$(CC) -shared -Wl,-soname,$(LIBNAME40) -o $(LIBFILE40) brl40.o -lc
+$(BRL40_FILE): brl40.o
+	$(LD) $(BRL_LFLAGS) -soname $(BRL40_NAME) -o $(BRL40_FILE) brl40.o -lc
 
-speech.o: speech.c ../speech.h brlconf.h speech.h
-	$(CC) $(DRIVER_CFLAGS) -c speech.c
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h brlconf.h
+	$(CC) $(SPK_CFLAGS) -c speech.c
+
+brl-lib-name:
+	echo -e "b1\tBrailleLite 18" >> $(LIBNAMES)
+	echo -e "b4\tBrailleLite 40" >> $(LIBNAMES)
+

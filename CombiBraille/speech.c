@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -29,9 +27,10 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "../speech.h"
 #include "brlconf.h"
 #include "speech.h"		/* for speech definitions */
+#include "../spk.h"
+#include "../spk_driver.h"
 
 /* These are shared with CombiBraille/brl.c: */
 extern int brl_fd;
@@ -60,20 +59,20 @@ static unsigned char latin2cp437[128] =
    176, 151, 163, 150, 129, 178, 254, 152};
 
 
-void
+static void
 identspk (void)
 {
-  puts ("Using the CombiBraille's in-built speech.");
+  puts ("Using the CombiBraille's in-built speech.\n");
 }
 
 
-void
+static void
 initspk (void)
 {
 }
 
 
-void
+static void
 say (unsigned char *buffer, int len)
 {
   unsigned char *pre_speech = PRE_SPEECH;
@@ -111,7 +110,7 @@ say (unsigned char *buffer, int len)
 }
 
 
-void
+static void
 mutespk (void)
 {
   unsigned char *mute_seq = MUTE_SEQ;
@@ -121,7 +120,7 @@ mutespk (void)
 }
 
 
-void
+static void
 closespk (void)
 {
 }

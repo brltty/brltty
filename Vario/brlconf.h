@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -17,7 +15,7 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-/* Vario/brlconf.h - Configurable definitions for the Eco Braille series
+/* Vario/brlconf.h - Configurable definitions
  *
  * Edit as necessary for your system.
  */

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -67,7 +65,7 @@
 #include "../misc.h"
 #include "../scr.h"
 #include "brlconf.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 
 
 /* Braille display parameters that do not change */
@@ -229,7 +227,7 @@ static char packet_to_process = 1, /* flag: if a packet is received while
             *which_routing_keys; /* ordered list of pressed routing keys */
 
 
-void 
+static void 
 identbrl (void)
 {
   printf ("  %s\n", VERSION);
@@ -358,7 +356,7 @@ peek_receive_packet(unsigned char *packet)
 }
 
 
-void initbrl (brldim *brl, const char *tty)
+static void initbrl (brldim *brl, const char *tty)
 {
   brldim res;			/* return result */
 
@@ -517,7 +515,7 @@ failure:;
 }
 
 
-void 
+static void 
 closebrl (brldim *brl)
 {
   if (brl_fd >= 0)
@@ -538,7 +536,7 @@ closebrl (brldim *brl)
 }
 
 
-void setbrlstat (const unsigned char *s)
+static void setbrlstat (const unsigned char *s)
 {
   if(nrstatcells >= EXPECTEDNRSTATCELLS)
     memcpy(statbuf, s, EXPECTEDNRSTATCELLS);
@@ -546,7 +544,7 @@ void setbrlstat (const unsigned char *s)
 }
 
 
-void 
+static void 
 writebrl (brldim *brl)
 {
   int i;
@@ -588,7 +586,7 @@ writebrl (brldim *brl)
 }
 
 
-int 
+static int 
 readbrl (int type)
 {
   static char

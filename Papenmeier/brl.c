@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -41,7 +39,7 @@
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 
 #define CMD_ERR	EOF
 
@@ -49,8 +47,8 @@
 /* see README for details */
 /* #define SEND_TWICE_HACK */
 
-int brl_fd = 0;			/* file descriptor for Braille display */
-struct termios oldtio;		/* old terminal settings */
+static int brl_fd = 0;			/* file descriptor for Braille display */
+static struct termios oldtio;		/* old terminal settings */
 
 static FILE* dbg = NULL;
 static char dbg_buffer[256];
@@ -58,7 +56,7 @@ static char dbg_buffer[256];
 static unsigned char prevline[PMSC] = "";
 static unsigned char prev[BRLCOLS+1]= "";
 
-void init_table();
+static void init_table();
 
 /* special table for papenmeier */
 #define B1 1
@@ -70,7 +68,7 @@ void init_table();
 #define B7 64
 #define B8 128
 
-void brl_debug(char * print_buffer)
+static void brl_debug(char * print_buffer)
 {
   if (! dbg)
     dbg =  fopen ("/tmp/brltty.log", "w");
@@ -78,7 +76,7 @@ void brl_debug(char * print_buffer)
   fflush(dbg);
 }
 
-void initbrlerror(brldim *brl)
+static void initbrlerror(brldim *brl)
 {
   printf("\nInitbrl: failure at open\n");
   if (brl->disp)
@@ -87,7 +85,7 @@ void initbrlerror(brldim *brl)
 }
 
 
-void initbrl (brldim *brl, const char *dev)
+static void initbrl (brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -128,7 +126,7 @@ void initbrl (brldim *brl, const char *dev)
   return;
 }
 
-void
+static void
 closebrl (brldim *brl)
 {
   free (brl->disp);
@@ -136,14 +134,14 @@ closebrl (brldim *brl)
   close (brl_fd);
 }
 
-void
+static void
 identbrl (void)
 {
   printf(BRLNAME " driver\n"
 	 "Copyright (C) 1998 HTL W1 <hoerandl@elina.htlw1.ac.at>\n");
 }
 
-void 
+static void 
 write_to_braille(int offset, int size, const char* data)
 {
   unsigned char BrlHead[] = 
@@ -171,7 +169,7 @@ write_to_braille(int offset, int size, const char* data)
 }
 
 
-void 
+static void 
 init_table()
 {
   char line[BRLCOLS];
@@ -188,7 +186,7 @@ init_table()
   write_to_braille(offsetTable+offsetHorizontal, BRLCOLS, line);
 }
 
-void
+static void
 setbrlstat(const unsigned char* s)
 {
  if (memcmp(s, prevline, PMSC) != 0)
@@ -205,7 +203,7 @@ setbrlstat(const unsigned char* s)
  *                             5 6           3 6
  *                             7 8           7 8
  */
-unsigned char change_bits[] = {
+static unsigned char change_bits[] = {
   0x00, 0x01, 0x08, 0x09, 0x02, 0x03, 0x0a, 0x0b,
   0x10, 0x11, 0x18, 0x19, 0x12, 0x13, 0x1a, 0x1b,
   0x04, 0x05, 0x0c, 0x0d, 0x06, 0x07, 0x0e, 0x0f,
@@ -240,7 +238,7 @@ unsigned char change_bits[] = {
   0xf4, 0xf5, 0xfc, 0xfd, 0xf6, 0xf7, 0xfe, 0xff
 };
 
-void
+static void
 writebrl (brldim *brl)
 {
   int i;
@@ -286,7 +284,7 @@ writebrl (brldim *brl)
 #endif
 
 
-int readbrl (int xx)
+static int readbrl (int xx)
 {
   unsigned char buf [20];
   int i, l;
@@ -329,8 +327,8 @@ int readbrl (int xx)
 	  /* Taste Seite - keys at the status column on left hand side */
 	  /* layout 7321 UP H S E DWN 4568 */
 
-	  KEY(0x0006, CMD_ATTRUP);   /* Taste Unten "3"  */ 
-	  KEY(0x0009, CMD_WINUP);    /* Taste Unten "2"  */    
+	  KEY(0x0006, beg_pressed? CMD_SAY: CMD_ATTRUP);   /* Taste Unten "3"  */ 
+	  KEY(0x0009, beg_pressed? CMD_MUTE: CMD_WINUP);    /* Taste Unten "2"  */    
 	  KEY(0x000c, CMD_PRDIFLN);  /* Taste Unten "1"  */
 	  KEY(0x000f, CMD_LNUP   );  /* Taste Unten /\   */
 

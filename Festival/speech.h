@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -18,6 +16,8 @@
 /* Festival/speech.h - definitions for rudimentary speech support
  * N. Nair, 4 October 1998
  */
+
+#define SPKNAME "Festival"
 
 /* These sequences are sent to Festival's command mode.
  * The first byte is the length, so embedded nuls are allowed.
@@ -42,7 +42,7 @@
  */
 
 #define MAX_TRANS 126
-unsigned char *vocab[MAX_TRANS - 32] =
+static unsigned char *vocab[MAX_TRANS - 32] =
 {
   " exclamation ",
   " double quote ",

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -111,7 +109,7 @@ extern "C"
 #include "../scr.h"
 #include "../misc.h"
 #include "../config.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 }
 
 #if USE_PARALLEL_PORT
@@ -136,7 +134,7 @@ typedef struct
   }
 BRLPARAMS;
 
-BRLPARAMS Models[] =
+static BRLPARAMS Models[] =
 {
   {
     /* ID == 0 */
@@ -207,7 +205,7 @@ BRLPARAMS Models[] =
 
 /* This is the brltty braille mapping standard to Alva's mapping table.
  */
-char TransTable[256] =
+static char TransTable[256] =
 {
   0x00, 0x01, 0x08, 0x09, 0x02, 0x03, 0x0A, 0x0B,
   0x10, 0x11, 0x18, 0x19, 0x12, 0x13, 0x1A, 0x1B,
@@ -246,24 +244,24 @@ char TransTable[256] =
 
 /* Global variables */
 
-int brl_fd;			/* file descriptor for Braille display */
-struct termios oldtio;		/* old terminal settings */
-unsigned char *rawdata;		/* translated data to send to Braille */
-unsigned char *prevdata;	/* previously sent raw data */
-unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
-unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
-BRLPARAMS *model;		/* points to terminal model config struct */
-int ReWrite = 0;		/* 1 if display need to be rewritten */
+static int brl_fd;			/* file descriptor for Braille display */
+static struct termios oldtio;		/* old terminal settings */
+static unsigned char *rawdata;		/* translated data to send to Braille */
+static unsigned char *prevdata;	/* previously sent raw data */
+static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
+static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
+static BRLPARAMS *model;		/* points to terminal model config struct */
+static int ReWrite = 0;		/* 1 if display need to be rewritten */
 
 
 
 /* Communication codes */
 
-char BRL_START[] = "\r\033B";	/* escape code to display braille */
+static char BRL_START[] = "\r\033B";	/* escape code to display braille */
 #define DIM_BRL_START 3
-char BRL_END[] = "\r";		/* to send after the braille sequence */
+static char BRL_END[] = "\r";		/* to send after the braille sequence */
 #define DIM_BRL_END 1
-char BRL_ID[] = "\033ID=";
+static char BRL_ID[] = "\033ID=";
 #define DIM_BRL_ID 4
 
 
@@ -299,11 +297,11 @@ char BRL_ID[] = "\033ID=";
 #define KEY_ROUTING_OFFSET 168
 
 /* Index for new firmware protocol */
-int OperatingKeys[10] =
+static int OperatingKeys[10] =
 {KEY_PROG, KEY_HOME, KEY_CURSOR,
  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
  KEY_CURSOR2, KEY_HOME2, KEY_PROG2};
-int StatusKeys[6] =
+static int StatusKeys[6] =
 {KEY_ROUTING_A, KEY_ROUTING_B, KEY_ROUTING_C,
  KEY_ROUTING_D, KEY_ROUTING_E, KEY_ROUTING_F};
 
@@ -311,7 +309,7 @@ int StatusKeys[6] =
 
 
 
-void
+static void
 identbrl (void)
 {
   /* Hello display... */
@@ -356,7 +354,7 @@ int SendToAlva( unsigned char *data, int len )
 }
 
 
-void initbrl (brldim *brl, const char *dev)
+static void initbrl (brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -473,7 +471,7 @@ failure:
 }
 
 
-void closebrl (brldim *brl)
+static void closebrl (brldim *brl)
 {
   free (brl->disp);
   free (rawdata);
@@ -487,7 +485,7 @@ void closebrl (brldim *brl)
 }
 
 
-int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
+static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
 {
   unsigned char outbuf[ DIM_BRL_START + 2 + Len + DIM_BRL_END ];
   int outsz = 0;
@@ -509,7 +507,7 @@ int ReadCycles = 0;		/* for hack below */
 int ShouldRestart = 0;
 #endif
 
-void writebrl (brldim *brl)
+static void writebrl (brldim *brl)
 {
   int i, j, k;
   static int Timeout = 0;
@@ -562,7 +560,7 @@ void writebrl (brldim *brl)
 }
 
 
-void
+static void
 setbrlstat (const unsigned char *st)
 {
   int i;
@@ -579,7 +577,7 @@ setbrlstat (const unsigned char *st)
 
 
 
-int GetABTKey (unsigned int *Keys, unsigned int *Pos)
+static int GetABTKey (unsigned int *Keys, unsigned int *Pos)
 {
   unsigned char c;
   static int KeyGroup = 0;
@@ -695,7 +693,7 @@ int GetABTKey (unsigned int *Keys, unsigned int *Pos)
 }
 
 
-int readbrl (int type)
+static int readbrl (int type)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;

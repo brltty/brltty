@@ -27,9 +27,11 @@
 DRIVER = pm
 include ../driver.mk
 
-brl.o: brl.c brlconf.h ../driver.h ../brl.h ../scr.h ../misc.h
-	$(CC) $(DRIVER_CFLAGS) -c brl.c
+brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../scr.h ../misc.h
+	$(CC) $(BRL_CFLAGS) -c brl.c
 
 serial: serial.c ../brl.h brl.c ../text.auto.h
-	$(CC) $(DRIVER_CFLAGS) serial.c -o serial -lncurses 
+	$(CC) $(CFLAGS) serial.c -o serial -lncurses 
 
+brl-lib-name:
+	echo -e "pm\tPapenmeier displays" >> $(LIBNAMES)

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -27,9 +25,10 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "../speech.h"
 #include "brlconf.h"
 #include "speech.h"		/* for speech definitions */
+#include "../spk.h"
+#include "../spk_driver.h"
 
 
 /* This is shared with brlmain.c */
@@ -58,32 +57,32 @@ static unsigned char latin2cp437[128] =
    176, 151, 163, 150, 129, 178, 254, 152};
 
 
-void
+static void
 identspk (void)
 {
-  puts ("  - Using the Alva Delphi's in-built speech.");
+  puts ("Using the Alva Delphi's in-built speech.\n");
 }
 
 
-void
+static void
 initspk (void)
 {
 }
 
 
-void
+static void
 say (unsigned char *buffer, int len)
 {
   static unsigned char *pre_speech = PRE_SPEECH;
   static unsigned char *post_speech = POST_SPEECH;
-  unsigned char buffer[256];
+  unsigned char buf[256];
   unsigned char c;
   int i;
 
   if (pre_speech[0])
     {
-      memcpy (buffer, pre_speech + 1, pre_speech[0]);
-      SendToAlva (buffer, pre_speech[0]);
+      memcpy (buf, pre_speech + 1, pre_speech[0]);
+      SendToAlva (buf, pre_speech[0]);
     }
   for (i = 0; i < len; i++)
     {
@@ -91,26 +90,26 @@ say (unsigned char *buffer, int len)
       if (c >= 128) c = latin2cp437[c];
       if (c < 33)	/* space or control character */
 	{
-	  buffer[0] = ' ';
-	  SendToAlva (buffer, 1);
+	  buf[0] = ' ';
+	  SendToAlva (buf, 1);
 	}
       else if (c > MAX_TRANS)
 	SendToAlva (&c, 1);
       else
 	{
-	  memcpy (buffer, vocab[c - 33], strlen (vocab[c - 33]));
-	  SendToAlva (buffer, strlen (vocab[c - 33]));
+	  memcpy (buf, vocab[c - 33], strlen (vocab[c - 33]));
+	  SendToAlva (buf, strlen (vocab[c - 33]));
 	}
     }
   if (post_speech[0])
     {
-      memcpy (buffer, post_speech + 1, post_speech[0]);
-      SendToAlva (buffer, post_speech[0]);
+      memcpy (buf, post_speech + 1, post_speech[0]);
+      SendToAlva (buf, post_speech[0]);
     }
 }
 
 
-void
+static void
 mutespk (void)
 {
   static unsigned char *mute_seq = MUTE_SEQ;
@@ -122,7 +121,7 @@ return;
 }
 
 
-void
+static void
 closespk (void)
 {
 }

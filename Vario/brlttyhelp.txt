@@ -1,16 +1,16 @@
 BRLTTY Help Screen (Vario)
 
 Movement keys:
-	B1		Up one line
-S	B1		Top left corner of screen
-	B2		Go left one window
-	B4		Down one line
-S	B4		Bottom left corner of screen
-	B5		Go right one window
-	B6		Go back to cursor
+    B1  Up one line
+S   B1  Top left corner of screen
+    B2  Go left one window
+    B4  Down one line
+S   B4  Bottom left corner of screen
+    B5  Go right one window
+    B6  Go back to cursor
 
 Other functions:
-B3		Shift
-S	B2		Toggle skipping of identical lines
-S	B5		Toggle cursor tracking
-S	B6		Enter configuration menu
+B3      Shift
+S   B2  Toggle skipping of identical lines
+S   B5  Toggle cursor tracking
+S   B6  Enter configuration menu

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -24,45 +22,53 @@
 #define SPEECH_C 1
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "../speech.h"
+#include "speech.h"
+#include "../spk.h"
+#include "../spk_driver.h"
 
 
-char CmdPath[] = "/usr/bin/say";	/* full path for the say command */
-FILE *cmd_fd;
+static char say_path[] = SAY_CMD;	/* full path for the say command */
+static FILE *say_fd = NULL;
 
-void
+static void
 identspk (void)
 {
-  printf ("  - Text to speech will be piped to the %s command\n", CmdPath);
+  printf ("Speech will be piped to the \"%s\" command.\n", say_path);
 }
 
-void
+static void
 initspk (void)
 {
-  cmd_fd = popen (CmdPath, "w");
 }
 
-void
+static void
 say (unsigned char *buffer, int len)
 {
-  if (cmd_fd)
+  if (!say_fd)
+    say_fd = popen (say_path, "w");
+  if (say_fd)
     {
-      fwrite (buffer, len, 1, cmd_fd);
-      fwrite (".\n", 2, 1, cmd_fd);
-      fflush (cmd_fd);
+      fwrite (buffer, len, 1, say_fd);
+      fwrite (".\n", 2, 1, say_fd);
+      fflush (say_fd);
     }
 }
 
-void
+static void
 mutespk (void)
 {
+  if (say_fd)
+    {
+       pclose(say_fd);
+       say_fd = NULL;
+    }
 }
 
-void
+static void
 closespk (void)
 {
-  if (cmd_fd)
-    pclose (cmd_fd);
+   mutespk();
 }

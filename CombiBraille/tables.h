@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -38,7 +36,7 @@
  */
 
 /* Command translation table: */
-unsigned char cmdtrans[256] =
+static unsigned char cmdtrans[256] =
 {
   0x00, 0x7d, 0x76, 0x65, 0x64, 0x29, 0x3e, 0x62,
   0x75, 0x6d, 0x00, 0x59, 0x63, 0x2a, 0x00, 0x00,
@@ -75,7 +73,7 @@ unsigned char cmdtrans[256] =
 };
 
 /* Argument translation table: */
-unsigned char argtrans[256] =
+static unsigned char argtrans[256] =
 {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x31, 0x31, 0x35, 0x35, 0x33, 0x33, 0x34, 0x34,

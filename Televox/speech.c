@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -32,26 +30,28 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../speech.h"
+#include "speech.h"
+#include "../spk.h"
+#include "../spk_driver.h"
 
 
-char DevPath[] = "/dev/tlvx";	/* full path for the tlvx fifo */
-int dev_fd;
-unsigned char ShutUp[] = "\033S";	/* stop string */
+static char DevPath[] = "/dev/tlvx";	/* full path for the tlvx fifo */
+static int dev_fd;
+static unsigned char ShutUp[] = "\033S";	/* stop string */
 
-void
+static void
 identspk (void)
 {
-  puts ("  - Speech support with Televox interface");
+  puts ("Using the Televox speech interface.\n");
 }
 
-void
+static void
 initspk (void)
 {
   dev_fd = open (DevPath, O_WRONLY | O_NOCTTY | O_NONBLOCK);
 }
 
-void
+static void
 say (unsigned char *buffer, int len)
 {
   if (dev_fd >= 0)
@@ -61,13 +61,13 @@ say (unsigned char *buffer, int len)
     }
 }
 
-void
+static void
 mutespk (void)
 {
   say (ShutUp, strlen (ShutUp));
 }
 
-void
+static void
 closespk (void)
 {
   if (dev_fd >= 0)

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -17,6 +15,8 @@
 
 /* Alva/speech.h - definitions for rudimentary speech support
  */
+
+#define SPKNAME "Alva"
 
 /* These sequences are sent to the Delphi before and after the
  * speech data itself.  The first byte is the length, so embedded nuls are
@@ -35,7 +35,7 @@
  */
 
 #define MAX_TRANS 126
-unsigned char *vocab[MAX_TRANS - 32] =
+static unsigned char *vocab[MAX_TRANS - 32] =
 {
   " exclamation ",
   " double quote ",

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -17,7 +15,7 @@
 
 /* CombiBraille/brl.c - Braille display library
  * For Tieman B.V.'s CombiBraille (serial interface only)
- * Maintained by Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Was maintained by Nikhil Nair <nn201@cus.cam.ac.uk>
  * $Id: brl.c,v 1.3 1996/09/24 01:04:29 nn201 Exp $
  */
 
@@ -33,22 +31,22 @@
 #include "../brl.h"
 #include "../misc.h"
 #include "brlconf.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 #include "tables.h"		/* for keybindings */
 
-unsigned char combitrans[256];	/* dot mapping table (output) */
+static unsigned char combitrans[256];	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
-unsigned char *prevdata;	/* previously received data */
-unsigned char status[5], oldstatus[5];	/* status cells - always five */
+static unsigned char *prevdata;	/* previously received data */
+static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
-short rawlen;			/* length of rawdata buffer */
-struct termios oldtio;		/* old terminal settings */
+static short rawlen;			/* length of rawdata buffer */
+static struct termios oldtio;		/* old terminal settings */
 
 /* Function prototypes: */
-int getbrlkey (void);		/* get a keystroke from the CombiBraille */
+static int getbrlkey (void);		/* get a keystroke from the CombiBraille */
 
 
-void
+static void
 identbrl (void)
 {
   printf ("\nTieman B.V. CombiBraille driver   ");
@@ -56,7 +54,7 @@ identbrl (void)
 }
 
 
-void initbrl (brldim *brl, const char *brldev)
+static void initbrl (brldim *brl, const char *brldev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -164,7 +162,7 @@ failure:;
 }
 
 
-void
+static void
 closebrl (brldim *brl)
 {
   unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
@@ -205,7 +203,7 @@ closebrl (brldim *brl)
 }
 
 
-void
+static void
 setbrlstat (const unsigned char *s)
 {
   short i;
@@ -215,7 +213,7 @@ setbrlstat (const unsigned char *s)
 }
 
 
-void
+static void
 writebrl (brldim *brl)
 {
   short i;			/* loop counter */
@@ -261,7 +259,7 @@ writebrl (brldim *brl)
 }
 
 
-int
+static int
 readbrl (int type)
 {
   int c;
@@ -293,7 +291,7 @@ readbrl (int type)
 }
 
 
-int
+static int
 getbrlkey (void)
 {
   static short ptr = 0;		/* input queue pointer */

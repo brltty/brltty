@@ -4,19 +4,19 @@
 #include "variolow.h"
 #include "brl.h"
 #include "brlconf.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 
 
 static unsigned char lastbuff[40];
 
-void
+static void
 identbrl (void)
 {
 		/*	Do nothing .. dumdidumm */ 
 	printf("HT Protocol driver\n");
 }
 
-void 
+static void 
 initbrl (brldim *brl, const char *dev)
 {
 		/*	Seems to signal en error */ 
@@ -32,14 +32,14 @@ initbrl (brldim *brl, const char *dev)
 	}
 }
 
-void 
+static void 
 closebrl (brldim *brl)
 {
 	varioclose();
 	free(brl->disp);
 }
 
-void 
+static void 
 writebrl (brldim *brl)
 {
 	char		outbuff[40];
@@ -64,13 +64,13 @@ writebrl (brldim *brl)
 	}
 }
 
-void
+static void
 setbrlstat (const unsigned char *st)
 {
 	/*	Dumdidummm */ 
 }
 
-int 
+static int 
 readbrl (int type)
 {
 	static int shift_button_down=0;

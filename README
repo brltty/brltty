@@ -1,16 +1,11 @@
 BRLTTY - Access software for Unix for a blind person
          using a soft Braille terminal
 
-Version 2.21 (beta), January 2000
+Version 2.40 (beta), March 1st 2000
 
 Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 
-Nicolas Pitre <nico@cam.org>
-Stéphane Doyon <s.doyon@videotron.ca>
-Nikhil Nair <nn201@cus.cam.ac.uk>
-(and many other contributors)
-
-Home Page: http://www.cam.org/~nico/brltty
+Web Page: http://www.cam.org/~nico/brltty
 
 If you have any interest in BRLTTY, please drop us a note. We are
 interested in knowing who BRLTTY users are and how many there are. Even if
@@ -29,15 +24,6 @@ Foundation.  Please see the file COPYING for details.
 This software is maintained by Nicolas Pitre <nico@cam.org>.
 
 -----------------------------------------------------------------------------
-
-
-New in BRLTTY 2.1:
-- Improved readibility in config menu
-- Added support for EcoBraille displays
-- Added support for Alva Delphi
-- Added support for Alva parallel port communication
-- Added support for BrailleLite 18
-- Work-around for bug in Linux kernel 2.0.35 (beeps wouldn't turn off).
 
 
 INTRODUCTION FOR THOSE NEW TO SOFT BRAILLE
@@ -74,7 +60,7 @@ enough utilised).
 INTRODUCTION TO BRLTTY
 ======================
 
-While soft Braille displays have been used for some years under MS-DOS,
+While soft Braille displays have been used for many years under MS-DOS,
 and are even being used under Windows now, it seems that they have
 not been used on Unix consoles so much.  This could well be because blind
 people have been able to access Unix systems through accessible terminals. 
@@ -115,55 +101,29 @@ CURRENTLY SUPPORTED HARDWARE
 
 BRLTTY requires Linux kernel 1.1.92 or later (for `/dev/vcsa0').  It has
 been tested on
-  -  a variety of PCs: both laptops and desktops; processors from
-     386SX20 to Pentium with a huge range of memory sizes; most
-     Linux distributions including Debian, Slackware and Red Hat;
-  -  a number of Linux kernels, including both 1.2.13 and 2.0.x.
-  -  a DEC Alpha: only tested once, under Red Hat Alpha Linux on a 
-     noname board kindly lent to the Cambridge University Computer 
-     Laboratory by DEC in Reading, England.
+
+  -  a variety of Intel based PCs: both laptops and desktops; 
+  -  an Alpha workstation;
+  -  a StrongARM based Netwinder;
+  -  a number of Linux kernels, from 1.2.13 to 2.2.x;
+  -  all major distributions, including Red Hat, Debian, Slackware;
 
 The following Braille displays are supported (serial communication
 only for most of them):
+
   - Tieman B.V.: CombiBraille 25/45/85;
   - Alva B.V.: ABT3 and Delphi series, serial and parallel ports;
-  - Telesensory Systems Inc.: PowerBraille 40 / 65/81;
-    Navigator 20/40/80 (latest firmware version only?).
-  - Papenmeier Screen 2D Terminal
-  - EuroBraille family of displays (tested only on ClioBraille 40)
-  - Blazie Engineering's BrailleLite
-  - EcoBraille from La O.N.C.E.
+  - Telesensory Systems Inc.: PowerBraille 40 / 65/81,
+    Navigator 20/40/80 (latest firmware version only?);
+  - Papenmeier Screen 2D Terminal;
+  - EuroBraille family of displays (tested only on ClioBraille 40);
+  - Blazie Engineering's BrailleLite 18 and 40;
+  - EcoBraille from La O.N.C.E.;
+  - BAUM Vario;
+  - MDV braille displays;
 
-
-If you want another Braille display to be supported, please contact
-the maintainer.  Ability to add more Braille displays does, however,
-depend on the level of cooperation from the manufacturer in providing
-programming information.
-
-
-THE BRLTTY TEAM
-===============
-
-There are currently two active developers:
-
-Nicolas Pitre: current maintainer of the BRLTTY project and author of
-             the driver for the Alva series as well as the driver for the
-             Eurobraille family.
-     E-Mail: nico@cam.org
-
-Stéphane Doyon: Author of the driver for the TSI displays (Navigator and
-             PowerBraille). Active developper.
-     E-Mail: s.doyon@videotron.ca
-
-Nikhil Nair: founder of the BRLTTY project and author of the
-             Tieman B.V. CombiBraille driver. Unreachable???
-     E-Mail: nn201@cus.cam.ac.uk
-
-Any comments and/or criticisms regarding BRLTTY in general should be
-addressed to all three of the above.
-
-In addition, James Bowden <jrbowden@bcs.org.uk>, the original coauthor, is
-now acting in an advisory capacity.
+Ability to add more Braille displays does depend on the level of
+cooperation from the manufacturer in providing programming information.
 
 
 LAYOUT OF THE ARCHIVE
@@ -183,3 +143,50 @@ documentation (in another README file).
 
 Finally, some braille definition tables are available in the BrailleTables
 subdirectory along with some tools to manipulate them.
+
+
+BUILDING THE PACKAGE
+====================
+
+Simply invoking 'make' will build BRLTTY and all driver libraries.  To build
+BRLTTY with a specific built-in driver, just edit the main Makefile and 
+uncomment the driver specification you want to see linked with the main 
+executable before invoking 'make'.  Then, as root, 'make install' will
+install all files to their proper place.  
+
+For information specific to a particular driver, please see the README
+file in the corresponding subdirectory.  Finally, see the DOC subdirectory
+for BRLTTY manuals and miscelaneous informations.
+
+
+THE BRLTTY TEAM
+===============
+
+Many people contributed to the development of BRLTTY, most notably:
+
+Nicolas Pitre <nico@cam.org>
+  Current BRLTTY project maintainer, core development, speech framework,
+  Alva and Eurobraille driver, BrailleLite driver tweaks.
+
+Stéphane Doyon <s.doyon@videotron.ca>
+  Driver for TSI displays (Navigator and PowerBraille), core development,
+  cut and paste function, beeps, and many other miscelaneous features.
+
+August Hörandl <august.hoerandl@gmx.at>
+  Papenmeier driver, initial run-time loadable driver module design.
+
+Dave Mielke <dave@mielke.cc>
+  Run-time loadable speech modules, Accent SA support, many tweaks.
+
+Nikhil Nair <nn201@cus.cam.ac.uk>
+  Founder of the BRLTTY project and author of the Tieman B.V. CombiBraille
+  driver, and the original BrailleLite driver. No more active developer.
+
+James Bowden <jrbowden@bcs.org.uk>
+  original BRLTTY coauthor, no longer active.
+
+And all other individual driver authors.
+
+Any comments and/or criticisms regarding BRLTTY in general should be
+addressed to Nicolas Pitre and/or Stéphane Doyon.
+

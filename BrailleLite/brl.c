@@ -21,7 +21,7 @@
 #include "../inskey.h"
 #include "../message.h"
 #include "brlconf.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 #include "bindings.h"		/* for keybindings */
 
 
@@ -76,7 +76,7 @@ static int qput (unsigned char);	/* add a byte to the input queue */
 static int qget (blkey *);	/* get a byte from the input queue */
 
 
-void
+static void
 identbrl (void)
 {
   printf ("  Braille Lite 18/40 driver (configured for %d)\n", BLITE_SIZE);
@@ -84,7 +84,7 @@ identbrl (void)
 }
 
 
-void
+static void
 initbrl (brldim * brl, const char *brldev)
 {
   brldim res;			/* return result */
@@ -169,7 +169,7 @@ failure:;
 }
 
 
-void
+static void
 closebrl (brldim * brl)
 {
   /* We just clear the display, using writebrl(): */
@@ -186,13 +186,13 @@ closebrl (brldim * brl)
 }
 
 
-void
+static void
 setbrlstat (const unsigned char *s)
 {
 }
 
 
-void
+static void
 writebrl (brldim * brl)
 {
   short i;			/* loop counter */
@@ -278,7 +278,7 @@ writebrl (brldim * brl)
 }
 
 
-int
+static int
 readbrl (int type)
 {
   static int kbemu = 0;		/* keyboard emulation flag */

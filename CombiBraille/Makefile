@@ -5,9 +5,7 @@
 #
 # Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Nicolas Pitre <nico@cam.org>
-# Stéphane Doyon <s.doyon@videotron.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Web Page: http://www.cam.org/~nico/brltty
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -27,8 +25,12 @@
 DRIVER = cb
 include ../driver.mk
 
-brl.o: brl.c ../brl.h ../misc.h brlconf.h ../driver.h tables.h
-	$(CC) $(DRIVER_CFLAGS) -c brl.c
+brl.o: brl.c ../brl.h ../misc.h brlconf.h ../brl_driver.h tables.h
+	$(CC) $(BRL_CFLAGS) -c brl.c
 
-speech.o: speech.c ../speech.h brlconf.h speech.h
-	$(CC) $(DRIVER_CFLAGS) -c speech.c
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h brlconf.h
+	$(CC) $(SPK_CFLAGS) -c speech.c
+
+brl-lib-name:
+	echo -e "cb\tTieman CombiBraille" >> $(LIBNAMES)
+

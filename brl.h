@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -156,18 +154,19 @@ typedef struct
   int pref_style;		/* prefered status cells mode */
 
   /* Routines provided by the braille driver library: */
-  void (*identbrl) (void);	/* print start-up messages */
-  void (*initbrl) (brldim *, const char *);	/* initialise Braille display */
-  void (*closebrl) (brldim *);		/* close braille display */
-  void (*writebrl) (brldim *);		/* write to braille display */
-  int (*readbrl) (int);		/* get key press from braille display */
-  void (*setbrlstat) (const unsigned char *);	/* set status cells */
+  void (*identify) (void);	/* print start-up messages */
+  void (*initialize) (brldim *, const char *);	/* initialise Braille display */
+  void (*close) (brldim *);		/* close braille display */
+  void (*write) (brldim *);		/* write to braille display */
+  int (*read) (int);		/* get key press from braille display */
+  void (*setstatus) (const unsigned char *);	/* set status cells */
 
-} driver;
+} braille_driver;
 
-extern driver *thedriver;	/* filled by dynamic libs */
-extern char* driver_libname;	/* name of library */
+extern braille_driver *braille;	/* filled by dynamic libs */
+extern char* braille_libname;	/* name of library */
 
-int load_driver(void);
+int load_braille_driver(void);
+int list_braille_driver(void);
 
 #endif /* !defined(_BRL_H) */

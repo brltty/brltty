@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -31,6 +29,8 @@
 class vcsa_Screen:public RealScreen
 {
   int fd, cons_fd;
+  unsigned char *translation_table;
+  void set_screen_translation_table (void);
     public:
   int open (void);		// called once to initialise screen reading
   void getstat (scrstat &);

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -38,21 +36,23 @@
 #include "brl.h"
 #include "scr.h"
 #include "inskey.h"
-#include "speech.h"
+#include "spk.h"
 #include "beeps.h"
 #include "cut-n-paste.h"
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.30 (beta)"
+#define VERSION "BRLTTY 2.40 (beta)"
 #define COPYRIGHT "\
-Copyright (C) 1995-1999 by The BRLTTY Team.  All rights reserved."
+Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
 Usage: %s [options] \n\
+ -b driver            which braille display driver to use: full library name\n\
+                      or shortcut ("##BRLLIBS##")\n\
  -c config-file       use binary configuration file `config-file' \n\
- -d serial-device     use `serial-device' to access Braille terminal \n\
- -m model             which driver to use\n\
-    full library name or a shortcut: "##TRGLIBS##"\n\
+ -d serial-device     use `serial-device' to access Braille terminal\n\
+ -s driver            which speech device driver to use: full library name\n\
+                      or shortcut ("##SPKLIBS##")\n\
  -t text-trans-file   use translation table `text-trans-file' \n\
  -h, --help           print this usage message \n\
  -q, --quiet          suppress start-up messages \n\
@@ -147,7 +147,7 @@ scrstat scr;			/* For screen statistics */
 
 
 /*
- * Output translation tables - the files *.auto.h are generated at *
+ * Output braille translation tables - the files *.auto.h are generated at *
  * compile-time: 
  */
 unsigned char texttrans[256] =
@@ -187,7 +187,7 @@ const unsigned char num[10] = {14, 1, 5, 3, 11, 9, 7, 15, 13, 6};
  * for csrjmp subprocess 
  */
 volatile int csr_active = 0;
-pid_t csr_pid;
+pid_t csr_pid = 0;
 
 /*
  * Function prototypes: 
@@ -221,16 +221,22 @@ main (int argc, char *argv[])
   short oldwinx, oldwiny;
 
   /* Parse command line using getopt(): */
-  while ((i = getopt (argc, argv, "c:d:t:hl:m:qv-:")) != -1)
+  while ((i = getopt (argc, argv, "b:c:d:hl:qs:t:v-:")) != -1)
     /* This will complain if an incorrect option is given but will still
        proceed. I assume this is intended? SD */
     switch (i)
       {
+      case 'b':			/* name of driver */
+	braille_libname = optarg;
+	break;
       case 'c':		/* configuration filename */
 	opt_c = optarg;
 	break;
       case 'd':		/* serial device name */
 	opt_d = optarg;
+	break;
+      case 's':			/* name of driver */
+	speech_libname = optarg;
 	break;
       case 't':		/* text translation table filename */
 	opt_t = optarg;
@@ -246,9 +252,6 @@ main (int argc, char *argv[])
 	  opt_l = 4;
 	}
       }
-	break;
-      case 'm':			/* name of driver */
-	driver_libname = optarg;
 	break;
       case 'q':		/* quiet */
 	opt_q = 1;
@@ -279,26 +282,26 @@ main (int argc, char *argv[])
     opt_d = BRLDEV;
   if (*opt_d == 0)
     {
-      LogAndStderr(LOG_ERR, "no device specified - use -d");
+      LogAndStderr(LOG_ERR, "no braille device specified - use -d");
       exit(10);
     }
 
-  /* check for driver */
-  if (driver_libname == NULL)
-    driver_libname = BRL_TARGET;
-  if (*driver_libname == 0)
+  if (!load_braille_driver())
     {
-      LogAndStderr(LOG_ERR, "no driver specified - use -m");
+      fprintf( stderr, "\nNo or bad braille driver selection -- use '-b XX' option to specify one.\n\n" );
+      list_braille_driver();
+      fprintf( stderr, "\nUse '%s -h' for quick help.\n\n", argv[0] );
       exit(10);
     }
-  if (load_driver() != 0)
+
+  if (!load_speech_driver())
     {
-      LogAndStderr(LOG_ERR, "unable to load driver library: %s", driver_libname);
+      fprintf( stderr, "no speech driver specified - use -s\n" );
       exit(10);
     }
 
   /* copy default mode for status display */
-  initenv.stcellstyle = thedriver->pref_style;
+  initenv.stcellstyle = braille->pref_style;
 
   /*
    * Print version and copyright information: 
@@ -310,17 +313,16 @@ main (int argc, char *argv[])
       LogPrint(LOG_NOTICE, "%s starting", VERSION);
       puts (COPYRIGHT);
 
-      LogAndStderr(LOG_INFO, "Driver Library: %s", driver_libname);
-      LogAndStderr(LOG_INFO, "Driver Device: %s", opt_d);
-      LogAndStderr(LOG_INFO, "Help File: %s", thedriver->helpfile);
+      LogAndStderr(LOG_INFO, "Braille Library: %s", braille_libname);
+      LogAndStderr(LOG_INFO, "Braille Device: %s", opt_d);
+      LogAndStderr(LOG_INFO, "Braille Help File: %s", braille->helpfile);
+      LogAndStderr(LOG_INFO, "Speech Library: %s", speech_libname);
 
       /*
-       * Give the Braille library a chance to print start-up messages. * 
-       * Pass the -d argument if present to override the default serial
-       * device. 
+       * Give braille and speech libraries a chance to introduce themselves.
        */
-      thedriver->identbrl ();
-      identspk ();
+      braille->identify();
+      speech->identify();
     }
   if (opt_v)
     return 0;
@@ -351,7 +353,7 @@ main (int argc, char *argv[])
   /*
    * Initialize screen library 
    */
-  if (initscr (thedriver->helpfile))
+  if (initscr (braille->helpfile))
     {				
       /* initialize screen reading */
       if (!opt_q){
@@ -417,7 +419,7 @@ main (int argc, char *argv[])
   startbrl();
 
   /* Initialise speech */
-  initspk ();
+  speech->initialize();
 
   /*
    * Establish signal handler to clean up before termination: 
@@ -451,13 +453,13 @@ main (int argc, char *argv[])
       /*
        * Process any Braille input 
        */
-      while ((keypress = thedriver->readbrl (TBL_CMD)) != EOF)
+      while ((keypress = braille->read(TBL_CMD)) != EOF)
 	switch (keypress & ~VAL_SWITCHMASK)
 	  {
 	  case CMD_NOOP:	/* do nothing but loop */
 	    continue;
 	  case CMD_RESTARTBRL:
-	    thedriver->closebrl(&brl);
+	    braille->close(&brl);
 	    play(snd_brloff);
 	    LogPrint(LOG_INFO,"Reinitializing braille driver");
 	    startbrl();
@@ -815,11 +817,11 @@ main (int argc, char *argv[])
 		      }
 		      ,buffer, \
 		      SCR_TEXT);
-	      say (buffer, scr.cols);
+	      speech->say(buffer, scr.cols);
 	    }
 	    break;
 	  case CMD_MUTE:
-	    mutespk ();
+	    speech->mute();
 	    break;
 	  default:
 	    if (keypress & VAL_PASSTHRU) 
@@ -996,7 +998,7 @@ main (int argc, char *argv[])
 	      memset (statcells, 0, sizeof(statcells));
 	      break;
 	    }
-	  thedriver->setbrlstat (statcells);
+	  braille->setstatus(statcells);
 
 	  getscr ((winpos)
 		  {
@@ -1056,7 +1058,7 @@ main (int argc, char *argv[])
 	      scr.posy < p->winy + brl.y && !(dispmd & HELP_SCRN))
 	    brl.disp[(scr.posy - p->winy) * brl.x + scr.posx - p->winx] |= \
 	      env.csrsize ? BIG_CSRCHAR : SMALL_CSRCHAR;
-	  thedriver->writebrl (&brl);
+	  braille->write(&brl);
 	}
       /*
        * If in info mode, send status information: 
@@ -1120,14 +1122,14 @@ main (int argc, char *argv[])
 	  statcells[2] = texttrans['f'];
 	  statcells[3] = texttrans['o'];
 	  statcells[4] = texttrans[' '];
-	  thedriver->setbrlstat (statcells);
+	  braille->setstatus(statcells);
 
 	  if (brl.x * brl.y >= 21)
 	    message (infbuf, MSG_SILENT);
 	  else
 	    {
 	      memcpy (brl.disp, infbuf, brl.x * brl.y);
-	      thedriver->writebrl (&brl);
+	      braille->write(&brl);
 	    }
 	}
 
@@ -1142,8 +1144,8 @@ main (int argc, char *argv[])
    * Hard-wired delay to try and stop us being killed prematurely ... 
    */
   delay (1000);
-  closespk ();
-  thedriver->closebrl (&brl);
+  speech->close();
+  braille->close(&brl);
   play(snd_brloff);
   for (i = 0; i <= NBR_SCR; i++) 
     free (scrparam[i]);
@@ -1156,7 +1158,7 @@ main (int argc, char *argv[])
 void
 startbrl()
 {
-  thedriver->initbrl (&brl, opt_d);
+  braille->initialize(&brl, opt_d);
   if (brl.x == -1)
     {
       LogPrint(LOG_ERR,"Braille driver initialization failed");
@@ -1235,7 +1237,8 @@ csrjmp (int x, int y)
   if (csr_active)
     {
       kill (csr_pid, SIGUSR1);
-      wait (NULL);
+      while (wait(NULL) != csr_pid);
+      csr_pid = 0;
       csr_active--;
     }
   signal (SIGCHLD, stop_child);	/* re-establish handler */
@@ -1365,8 +1368,8 @@ message (unsigned char *s, short flags)
 
   if (!silent && env.sound)
     {
-      mutespk ();
-      say (s, strlen (s));
+      speech->mute();
+      speech->say(s, strlen(s));
     }
 
   l = strlen (s);
@@ -1395,10 +1398,10 @@ message (unsigned char *s, short flags)
        * work ... 
        */
       for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], i++);
-      thedriver->writebrl( &brl );
+      braille->write( &brl );
 
       if ( l || (flags & MSG_WAITKEY) )
-	while (thedriver->readbrl (TBL_ARG) == EOF)
+	while (braille->read(TBL_ARG) == EOF)
 	  delay (KEYDEL);
     }
 }
@@ -1408,7 +1411,7 @@ void
 clrbrlstat (void)
 {
   memset (statcells, 0, sizeof(statcells));
-  thedriver->setbrlstat (statcells);
+  braille->setstatus(statcells);
 }
 
 
@@ -1423,9 +1426,14 @@ termination_handler (int signum)
 void 
 stop_child (int signum)
 {
+  pid_t pid;
   signal (signum, stop_child);
-  wait (NULL);
-  csr_active--;
+  pid = wait(NULL);
+  if (pid == csr_pid) 
+    {
+      csr_pid = 0;
+      csr_active--;
+    }
 }
 
 
@@ -1540,7 +1548,7 @@ configmenu (void)
   statcells[2] = texttrans['f'];
   statcells[3] = texttrans['i'];
   statcells[4] = texttrans['g'];
-  thedriver->setbrlstat (statcells);
+  braille->setstatus(statcells);
 
   message ("Configuration menu", 0);
   delay (DISPDEL);
@@ -1570,11 +1578,11 @@ configmenu (void)
       memset (brl.disp, 0, brl.x * brl.y);
       for (i = 0; i < MIN(brl.x * brl.y, l - x); i++)
 	brl.disp[i] = texttrans[buffer[i+x]];
-      thedriver->writebrl (&brl);
+      braille->write(&brl);
       delay (DELAY_TIME);
 
       /* Now process any user interaction */
-      while ((k = thedriver->readbrl (TBL_CMD)) != EOF)
+      while ((k = braille->read(TBL_CMD)) != EOF)
 	switch (k)
 	  {
 	  case CMD_NOOP:
@@ -1629,10 +1637,10 @@ configmenu (void)
 	    updated = 1;
 	    break;
 	  case CMD_SAY:
-	    say (buffer, l);
+	    speech->say(buffer, l);
 	    break;
 	  case CMD_MUTE:
-	    mutespk ();
+	    speech->mute();
 	    break;
 	  case CMD_HELP:
 	    /* This is quick and dirty... Something more intelligent 

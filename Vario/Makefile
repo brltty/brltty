@@ -5,9 +5,7 @@
 #
 # Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Nicolas Pitre <nico@cam.org>
-# Stéphane Doyon <s.doyon@videotron.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Web Page: http://www.cam.org/~nico/brltty
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -27,17 +25,18 @@
 ###############################################################################
 
 IFLAGS = -I..
-LD = ld
-
 DRIVER = va
 include ../driver.mk
 
 variolow.o:	variolow.c variolow.h
-	$(CC) $(DRIVER_CFLAGS) $(IFLAGS) -c variolow.c
+	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c variolow.c
 
-vario.o:	vario.c brlconf.h ../driver.h
-	$(CC) $(DRIVER_CFLAGS) $(IFLAGS) -c vario.c
+vario.o:	vario.c brlconf.h ../brl_driver.h
+	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c vario.c
 	
 brl.o:	vario.o	variolow.o
 	$(LD) -r -o brl.o variolow.o vario.o 
+
+brl-lib-name:
+	echo -e "va\tBAUM Vario" >> $(LIBNAMES)
 

@@ -1,13 +1,24 @@
-Note: this file should be read from bottom to top.
+Note: this file is in reversed chronological order (bottom to top).
 
 
   ...
+
+01 April 2000:
+  - Released BRLTTY 2.40 (beta)
+  - Work from Dave Mielke <dave@mielke.cc>:
+    - Speech driver are dynamically loadable.
+    - BRLTTY now has the ability to determine the character set used by 
+      the screen fonts.
+  - Credits owner for the previous item corrected (they actually should go to
+    August Hörandl).
+  - All possible dynamic loadable braille drivers are listed if there is no
+    valid selection provided.  (NP)
 
 28 March 2000:
   - Released BRLTTY 2.30 (beta)
   - Braille terminal drivers are now dynamically loadable.  This is a big
     change. Credits go to:
-      Roger Butenuth <butenuth@uni-paderborn.de>
+      August Hörandl <august.hoerandl@gmx.at>
         Original work
       Dave Mielke <dave@mielke.cc>
         Resynching with current BRLTTY version, cleanup, etc.

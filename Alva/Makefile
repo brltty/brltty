@@ -5,9 +5,7 @@
 #
 # Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Nicolas Pitre <nico@cam.org>
-# Stéphane Doyon <s.doyon@videotron.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Web Page: http://www.cam.org/~nico/brltty
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -34,18 +32,17 @@
 #ALVALIB = alva_api.library/alva_api.a
 ALVALIB =
 
-
-LD = ld
-
 DRIVER = al
 include ../driver.mk
 
-brlmain.o: brlmain.cc brlconf.h ../driver.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(COMPCPP) $(DRIVER_CFLAGS) -c brlmain.cc
+brlmain.o: brlmain.cc brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
+	$(COMPCPP) $(BRL_CFLAGS) -c brlmain.cc
 
 brl.o: brlmain.o $(ALVALIB)
 	$(LD) -r -o brl.o brlmain.o $(ALVALIB)
 
-speech.o: speech.c ../speech.h brlconf.h speech.h
-	$(CC) $(DRIVER_CFLAGS) -c speech.c
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h brlconf.h
+	$(CC) $(SPK_CFLAGS) -c speech.c
 
+brl-lib-name:
+	echo -e "al\tAlva (ABT3xx/Delphi)" >> $(LIBNAMES)

@@ -11,8 +11,9 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "../speech.h"
 #include "speech.h"		/* for BLite speech definitions */
+#include "../spk.h"
+#include "../spk_driver.h"
 
 /* This is shared with BrailleLite/brl.c: */
 extern int blite_fd;
@@ -42,20 +43,20 @@ static unsigned char latin2cp437[128] =
 #endif
 
 
-void
+static void
 identspk (void)
 {
-  puts ("  Using the Braille Lite's in-built speech.\n");
+  puts ("Using the Braille Lite's in-built speech.\n");
 }
 
 
-void
+static void
 initspk (void)
 {
 }
 
 
-void
+static void
 say (unsigned char *buffer, int len)
 {
   static unsigned char pre_speech[] = { PRE_SPEECH };
@@ -103,7 +104,7 @@ say (unsigned char *buffer, int len)
 }
 
 
-void
+static void
 mutespk (void)
 {
   unsigned char mute_seq[] = {MUTE_SEQ };
@@ -112,7 +113,7 @@ mutespk (void)
 }
 
 
-void
+static void
 closespk (void)
 {
 }

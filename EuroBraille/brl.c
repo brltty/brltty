@@ -4,9 +4,7 @@
  *
  * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
  *
- * Nicolas Pitre <nico@cam.org>
- * Stéphane Doyon <s.doyon@videotron.ca>
- * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Web Page: http://www.cam.org/~nico/brltty
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -39,7 +37,7 @@
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
-#include "../driver.h"
+#include "../brl_driver.h"
 
 
 static char StartupString[] =
@@ -55,7 +53,7 @@ static char StartupString[] =
 
 /* This is the brltty braille mapping standard to Eurobraille's mapping table.
  */
-char TransTable[256] =
+static char TransTable[256] =
 {
   0x00, 0x01, 0x08, 0x09, 0x02, 0x03, 0x0A, 0x0B,
   0x10, 0x11, 0x18, 0x19, 0x12, 0x13, 0x1A, 0x1B,
@@ -94,12 +92,12 @@ char TransTable[256] =
 
 /* Global variables */
 
-int brl_fd;			/* file descriptor for Braille display */
-struct termios oldtio;		/* old terminal settings */
-unsigned char *rawdata;		/* translated data to send to Braille */
-unsigned char *prevdata;	/* previously sent raw data */
-int NbCols = 0;			/* number of cells available */
-short ReWrite = 0;		/* 1 if display need to be rewritten */
+static int brl_fd;			/* file descriptor for Braille display */
+static struct termios oldtio;		/* old terminal settings */
+static unsigned char *rawdata;		/* translated data to send to Braille */
+static unsigned char *prevdata;	/* previously sent raw data */
+static int NbCols = 0;			/* number of cells available */
+static short ReWrite = 0;		/* 1 if display need to be rewritten */
 
 
 
@@ -130,7 +128,7 @@ sendbyte (unsigned char c)
 }
 
 
-int
+static int
 WriteToBrlDisplay (int len, char *data)
 {
   static int PktNbr = 127;  /* 127 at first time */
@@ -177,7 +175,7 @@ WriteToBrlDisplay (int len, char *data)
 }
 
 
-void
+static void
 identbrl (void)
 {
   /* Hello display... */
@@ -185,7 +183,7 @@ identbrl (void)
 }
 
 
-void initbrl (brldim *brl, const char *dev)
+static void initbrl (brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -259,7 +257,7 @@ failure:;
 }
 
 
-void
+static void
 closebrl (brldim *brl)
 {
   free (brl->disp);
@@ -270,7 +268,7 @@ closebrl (brldim *brl)
 }
 
 
-void
+static void
 writebrl (brldim *brl)
 {
   int i, j;
@@ -322,7 +320,7 @@ writebrl (brldim *brl)
 }
 
 
-void
+static void
 setbrlstat (const unsigned char *st)
 {
   /* sorry but the ClioBraille I got here doesn't have any status cells... 
@@ -332,7 +330,7 @@ setbrlstat (const unsigned char *st)
 
 
 
-int
+static int
 readbrl (int type)
 {
   int res = EOF;

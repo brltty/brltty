@@ -3,11 +3,9 @@
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
+# Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
 #
-# Nicolas Pitre <nico@cam.org>
-# Stéphane Doyon <s.doyon@videotron.ca>
-# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Web Page: http://www.cam.org/~nico/brltty
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -27,25 +25,42 @@
 #
 ###############################################################################
 
-HELPNAME = brltty-$(DRIVER).hlp
-HELPDIR = ../help
-HELPFILE = $(HELPDIR)/$(HELPNAME)
-DRIVER_CFLAGS = $(LIB_CFLAGS) '-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
+LD = ld
 
+HELPDIR = ../help
+LIBDIR = ../lib
+LIBNAMES = $(LIBDIR)/brl_drivers.lst
+
+HELPNAME = brltty-$(DRIVER).hlp
+HELPFILE = $(HELPDIR)/$(HELPNAME)
 $(HELPFILE): brlttyh*.txt
 	../txt2hlp $(HELPFILE) brlttyh*.txt
 
-help: $(HELPFILE)
+braille-help: $(HELPFILE)
 
-LIBNAME = $(LIB_SO_NAME)$(DRIVER).so.$(LIB_VER)
-LIBDIR = ../lib
-LIBFILE = $(LIBDIR)/$(LIBNAME)
+BRL_CFLAGS = $(LIB_CFLAGS) '-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
+BRL_LFLAGS = -shared
+BRL_SO_NAME = $(LIB_SO_NAME)b
+BRL_NAME = $(BRL_SO_NAME)$(DRIVER).so.$(LIB_VER)
+BRL_FILE = $(LIBDIR)/$(BRL_NAME)
+$(BRL_FILE): brl.o
+	$(LD) $(BRL_LFLAGS) -soname $(BRL_NAME) -o $(BRL_FILE) brl.o -lc
 
-$(LIBFILE): brl.o
-	$(CC) -shared -Wl,-soname,$(LIBNAME) -o $(LIBFILE) brl.o -lc
-
-ifeq ($(LIB_TARGETS),)
-   LIB_TARGETS = $(LIBFILE)
+ifeq ($(BRL_FILES),)
+   BRL_FILES = $(BRL_FILE)
 endif
-lib: $(LIB_TARGETS)
+braille-driver: $(BRL_FILES)
+
+SPK_CFLAGS = $(LIB_CFLAGS)
+SPK_LFLAGS = -shared
+SPK_SO_NAME = $(LIB_SO_NAME)s
+SPK_NAME = $(SPK_SO_NAME)$(DRIVER).so.$(LIB_VER)
+SPK_FILE = $(LIBDIR)/$(SPK_NAME)
+$(SPK_FILE): speech.o
+	$(LD) $(SPK_LFLAGS) -soname $(SPK_NAME) -o $(SPK_FILE) speech.o -lc
+
+ifeq ($(SPK_FILES),)
+   SPK_FILES = $(SPK_FILE)
+endif
+speech-driver: $(SPK_FILES)
 
