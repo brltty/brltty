@@ -1,9 +1,9 @@
 BEGIN {
   OFS = ""
 }
-/^ *CMD_/ {
+/^ *BRL_CMD_/ {
   if (x = match($0, "/.*/")) {
-    print "{", $1, ", \"", substr($1,5), "\", \"", substr($0, RSTART+3, RLENGTH-6), "\"},"
+    print "{", $1, ", \"", substr($1,9), "\", \"", substr($0, RSTART+3, RLENGTH-6), "\"},"
   }
   next
 }

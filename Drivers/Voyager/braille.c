@@ -824,7 +824,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   int routingCount = 0;
 
   /* recognized command */
-  int cmd = CMD_NOOP;
+  int cmd = BRL_CMD_NOOP;
   int keyPressed = 0;
 
   /* read buffer: packet[0] for DOT keys, packet[1] for keys A B C D UP DOWN
@@ -856,7 +856,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         size = 0;
       } else if (errno == ENODEV) {
         /* Display was disconnected */
-        return CMD_RESTARTBRL;
+        return BRL_CMD_RESTARTBRL;
       } else {
         LogPrint(LOG_ERR, "Voyager read error: %s", strerror(errno));
         firstRead = 1;
@@ -919,70 +919,70 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       if (cmds == CMDS_PREFS) {
 	switch (activeKeys.control) {
           HKEY2(891, K_DOWN, K_UP,
-                CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING,
+                BRL_CMD_MENU_PREV_SETTING, BRL_CMD_MENU_NEXT_SETTING,
                 "Select previous/next setting");
-          HKEY(892, K_RL|K_RR, CMD_PREFMENU, "Exit menu");
-          HKEY(892, K_RL|K_UP, CMD_PREFLOAD, "Discard changes");
-          HKEY(892, K_RL|K_DOWN, CMD_PREFSAVE, "Save changes and exit menu");
+          HKEY(892, K_RL|K_RR, BRL_CMD_PREFMENU, "Exit menu");
+          HKEY(892, K_RL|K_UP, BRL_CMD_PREFLOAD, "Discard changes");
+          HKEY(892, K_RL|K_DOWN, BRL_CMD_PREFSAVE, "Save changes and exit menu");
 	}
       }
 
-      if (cmd == CMD_NOOP) {
+      if (cmd == BRL_CMD_NOOP) {
 	switch (activeKeys.control) {
 	  HKEY2(101, K_A, K_D,
-                CMD_FWINLT, CMD_FWINRT,
+                BRL_CMD_FWINLT, BRL_CMD_FWINRT,
                 "Go backward/forward one window");
 	  HKEY2(501, K_RL|K_A, K_RL|K_D,
-                CMD_LNBEG, CMD_LNEND,
+                BRL_CMD_LNBEG, BRL_CMD_LNEND,
                 "Go to beginning/end of line");
 	  HKEY2(501, K_RR|K_A, K_RR|K_D,
-                CMD_CHRLT, CMD_CHRRT,
+                BRL_CMD_CHRLT, BRL_CMD_CHRRT,
                 "Go left/right one character");
 	  HKEY2(501, K_UP|K_A, K_UP|K_D,
-                CMD_FWINLTSKIP, CMD_FWINRTSKIP,
+                BRL_CMD_FWINLTSKIP, BRL_CMD_FWINRTSKIP,
                 "Go to previous/next non-blank window");
 	  HKEY2(501, K_DOWN|K_A, K_DOWN|K_D,
-                CMD_PRSEARCH, CMD_NXSEARCH,
+                BRL_CMD_PRSEARCH, BRL_CMD_NXSEARCH,
                 "Search screen backward/forward for cut text");
 
 	  HKEY2(101, K_B, K_C,
-                CMD_LNUP, CMD_LNDN,
+                BRL_CMD_LNUP, BRL_CMD_LNDN,
                 "Go up/down one line");
 	  HKEY2(101, K_A|K_B, K_A|K_C,
-                CMD_TOP_LEFT, CMD_BOT_LEFT,
+                BRL_CMD_TOP_LEFT, BRL_CMD_BOT_LEFT,
                 "Go to top-left/bottom-left corner");
 	  HKEY2(101, K_D|K_B, K_D|K_C,
-                CMD_TOP, CMD_BOT,
+                BRL_CMD_TOP, BRL_CMD_BOT,
                 "Go to top/bottom line");
 	  HKEY2(501, K_RL|K_B, K_RL|K_C,
-                CMD_ATTRUP, CMD_ATTRDN,
+                BRL_CMD_ATTRUP, BRL_CMD_ATTRDN,
 		"Go to previous/next line with different highlighting");
 	  HKEY2(501, K_RR|K_B, K_RR|K_C,
-                CMD_PRDIFLN, CMD_NXDIFLN,
+                BRL_CMD_PRDIFLN, BRL_CMD_NXDIFLN,
                 "Go to previous/next line with different content");
 	  HKEY2(501, K_UP|K_B, K_UP|K_C,
-                CMD_PRPGRPH, CMD_NXPGRPH,
+                BRL_CMD_PRPGRPH, BRL_CMD_NXPGRPH,
                 "Go to previous/next paragraph (blank line separation)");
 	  HKEY2(501, K_DOWN|K_B, K_DOWN|K_C,
-                CMD_PRPROMPT, CMD_NXPROMPT,
+                BRL_CMD_PRPROMPT, BRL_CMD_NXPROMPT,
                 "Go to previous/next prompt (same prompt as current line)");
 
-	  HKEY(101, K_RL, CMD_BACK, 
+	  HKEY(101, K_RL, BRL_CMD_BACK, 
                "Go back (undo unexpected cursor tracking motion)");
-	  HKEY(101, K_RR, CMD_HOME, "Go to cursor");
-	  HKEY(101, K_RL|K_RR, CMD_CSRTRK, "Cursor tracking (toggle)");
+	  HKEY(101, K_RR, BRL_CMD_HOME, "Go to cursor");
+	  HKEY(101, K_RL|K_RR, BRL_CMD_CSRTRK, "Cursor tracking (toggle)");
 
 	  HKEY2(101, K_UP, K_DOWN,
                 VAL_PASSKEY + VPK_CURSOR_UP,
                 VAL_PASSKEY + VPK_CURSOR_DOWN,
                 "Move cursor up/down (arrow keys)");
-	  HKEY(210, K_RL|K_UP, CMD_DISPMD, "Show attributes (toggle)");
-	  HKEY(210, K_RL|K_DOWN, CMD_SIXDOTS, "Six dots (toggle)");
-	  HKEY(210, K_RR|K_UP, CMD_AUTOREPEAT, "Autorepeat (toggle)");
-	  HKEY(210, K_RR|K_DOWN, CMD_AUTOSPEAK, "Autospeak (toggle)");
+	  HKEY(210, K_RL|K_UP, BRL_CMD_DISPMD, "Show attributes (toggle)");
+	  HKEY(210, K_RL|K_DOWN, BRL_CMD_SIXDOTS, "Six dots (toggle)");
+	  HKEY(210, K_RR|K_UP, BRL_CMD_AUTOREPEAT, "Autorepeat (toggle)");
+	  HKEY(210, K_RR|K_DOWN, BRL_CMD_AUTOSPEAK, "Autospeak (toggle)");
 
 	  HKEY(602, K_B|K_C, VAL_PASSDOTS+0, "Space bar")
-	  HKEY(302, K_A|K_D, CMD_CSRJMP_VERT,
+	  HKEY(302, K_A|K_D, BRL_CMD_CSRJMP_VERT,
 	       "Route cursor to current line");
 	}
       }
@@ -994,25 +994,25 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       switch (activeKeys.control & DOT_KEYS) {
         HLP(601, "Chord-1478", "Input mode (toggle)")
         case DOT1|DOT4|DOT7|DOT8:
-          if (!keyPressed) cmd = CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
+          if (!keyPressed) cmd = BRL_CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
           break;
 
-	CKEY(210, DOT1, CMD_ATTRVIS, "Attribute underlining (toggle)");
+	CKEY(210, DOT1, BRL_CMD_ATTRVIS, "Attribute underlining (toggle)");
 	CKEY(610, DOT1|DOT2, VAL_PASSKEY + VPK_BACKSPACE, "Backspace key");
-	CKEY(210, DOT1|DOT4, CMD_CSRVIS, "Cursor visibility (toggle)");
+	CKEY(210, DOT1|DOT4, BRL_CMD_CSRVIS, "Cursor visibility (toggle)");
 	CKEY(610, DOT1|DOT4|DOT5, VAL_PASSKEY + VPK_DELETE, "Delete key");
 	CKEY(610, DOT1|DOT5, VAL_PASSKEY + VPK_ESCAPE, "Escape key");
-	CKEY(210, DOT1|DOT2|DOT4, CMD_FREEZE, "Freeze screen (toggle)");
-	CKEY(201, DOT1|DOT2|DOT5, CMD_HELP, "Help screen (toggle)");
+	CKEY(210, DOT1|DOT2|DOT4, BRL_CMD_FREEZE, "Freeze screen (toggle)");
+	CKEY(201, DOT1|DOT2|DOT5, BRL_CMD_HELP, "Help screen (toggle)");
 	CKEY(610, DOT2|DOT4, VAL_PASSKEY + VPK_INSERT, "Insert key");
-	CKEY(201, DOT1|DOT2|DOT3, CMD_LEARN, "Learn mode (toggle)");
+	CKEY(201, DOT1|DOT2|DOT3, BRL_CMD_LEARN, "Learn mode (toggle)");
 	case DOT1|DOT2|DOT3|DOT4|DOT5|DOT6|DOT7|DOT8:
-	CKEY(205, DOT1|DOT3|DOT4, CMD_PREFMENU, "Preferences menu (toggle)");
-	CKEY(408, DOT1|DOT2|DOT3|DOT4, CMD_PASTE, "Paste cut text");
-	CKEY(206, DOT1|DOT2|DOT3|DOT5, CMD_PREFLOAD, "Reload preferences from disk");
-	CKEY(201, DOT2|DOT3|DOT4, CMD_INFO, "Status line (toggle)");
+	CKEY(205, DOT1|DOT3|DOT4, BRL_CMD_PREFMENU, "Preferences menu (toggle)");
+	CKEY(408, DOT1|DOT2|DOT3|DOT4, BRL_CMD_PASTE, "Paste cut text");
+	CKEY(206, DOT1|DOT2|DOT3|DOT5, BRL_CMD_PREFLOAD, "Reload preferences from disk");
+	CKEY(201, DOT2|DOT3|DOT4, BRL_CMD_INFO, "Status line (toggle)");
 	CKEY(610, DOT2|DOT3|DOT4|DOT5, VAL_PASSKEY + VPK_TAB, "Tab key");
-	CKEY(206, DOT2|DOT4|DOT5|DOT6, CMD_PREFSAVE, "Write preferences to disk");
+	CKEY(206, DOT2|DOT4|DOT5|DOT6, BRL_CMD_PREFSAVE, "Write preferences to disk");
 	CKEY(610, DOT4|DOT6, VAL_PASSKEY + VPK_RETURN, "Return key");
 	CKEY(610, DOT2, VAL_PASSKEY+VPK_PAGE_UP, "Page up");
 	CKEY(610, DOT5, VAL_PASSKEY+VPK_PAGE_DOWN, "Page down");
@@ -1046,22 +1046,22 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         switch (key) {
           case 0:
             HLP(881, "CRs1", "Help screen (toggle)")
-            cmd = CMD_HELP;
+            cmd = BRL_CMD_HELP;
             break;
 
           case 1:
             HLP(882, "CRs2", "Preferences menu (toggle)")
-            cmd = CMD_PREFMENU;
+            cmd = BRL_CMD_PREFMENU;
             break;
 
           case 2:
             HLP(883, "CRs3", "Learn mode (toggle)")
-            cmd = CMD_LEARN;
+            cmd = BRL_CMD_LEARN;
             break;
 
           case 3:
             HLP(884, "CRs4", "Route cursor to current line")
-            cmd = CMD_CSRJMP_VERT;
+            cmd = BRL_CMD_CSRJMP_VERT;
             break;
         }
       }
@@ -1083,9 +1083,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
           HLP(692, "UP+ CRa<CELLS-1>/CRa<CELLS>",
               "Switch to previous/next virtual console")
           if (routingKeys[0] == totalCells-1) {
-            cmd = CMD_SWITCHVT_NEXT;
+            cmd = BRL_CMD_SWITCHVT_NEXT;
           } else if (routingKeys[0] == totalCells-2) {
-            cmd = CMD_SWITCHVT_PREV;
+            cmd = BRL_CMD_SWITCHVT_PREV;
           } else {
             HLP(691, "UP+CRa#", "Switch to virtual console #")
             cmd = CR_SWITCHVT + routingKeys[0];

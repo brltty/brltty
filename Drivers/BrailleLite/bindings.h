@@ -22,7 +22,7 @@
 #ifndef _BINDINGS_H
 #define _BINDINGS_H
 
-#include "Programs/brl.h"		/* for CMD_* codes */
+#include "Programs/brl.h"		/* for BRL_CMD_* codes */
 
 /* When the Braille Lite sends braille key information, bits 0-5 represent
  * dots 1-6 and bit 6 represents the space bar.  For now, we mask out bit 6
@@ -71,14 +71,14 @@ static const unsigned char keys_to_dots[64] =
 
 static const int cmdtrans[64] =
 {
-  0, CMD_LNUP, VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_BACKSPACE, CMD_CHRLT, 0 /*k: kbemu*/, VAL_PASSKEY+VPK_CURSOR_UP, CMD_TOP_LEFT,
-  CMD_LNDN, CMD_CSRTRK, CMD_DISPMD, CMD_FREEZE, CMD_INFO, CMD_MUTE, CMD_NXSEARCH, CMD_PASTE,
-  VAL_PASSKEY+VPK_CURSOR_RIGHT, 0 /*e: endcmd*/, 0 /*25: prefs*/, CMD_HOME, 0 /*35: meta*/, 0 /*o: number*/, CMD_LNBEG, CMD_RESTARTBRL,
-  CMD_CSRJMP_VERT, VAL_PASSKEY+VPK_DELETE, CR_ROUTE, 0 /*g: internal cursor*/, 0 /*345: blite internal speechbox*/, CMD_NXPGRPH, VAL_PASSKEY+VPK_TAB, 0 /*q: finish uppercase*/,
-  CMD_CHRRT, CR_CUTLINE, 0 /*26: dot8shift*/, CR_CUTAPPEND, CMD_SAY_LINE, 0 /*u: uppsercase*/, CR_CUTBEGIN, CMD_SWITCHVT_NEXT,
-  VAL_PASSKEY+VPK_RETURN, 0 /*145: free*/, VAL_PASSKEY+VPK_ESCAPE, CMD_PRPGRPH, 0 /*346: free*/, 0 /*x: xtrl*/, CMD_SIXDOTS, 0 /*12346: free*/,
-  VAL_PASSKEY+VPK_CURSOR_DOWN, CMD_PRSEARCH, CMD_LNEND, CMD_BACK, CR_CUTRECT, 0 /*z: abort*/, 0 /*2356: rotate*/, CMD_NXPROMPT,
-  CMD_BOT_LEFT, CMD_HELP, 0 /*w: free*/, CMD_LEARN, CMD_SWITCHVT_PREV, 0 /*y: free*/, CMD_PRPROMPT, 0 /*123456: noop*/
+  0, BRL_CMD_LNUP, VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_BACKSPACE, BRL_CMD_CHRLT, 0 /*k: kbemu*/, VAL_PASSKEY+VPK_CURSOR_UP, BRL_CMD_TOP_LEFT,
+  BRL_CMD_LNDN, BRL_CMD_CSRTRK, BRL_CMD_DISPMD, BRL_CMD_FREEZE, BRL_CMD_INFO, BRL_CMD_MUTE, BRL_CMD_NXSEARCH, BRL_CMD_PASTE,
+  VAL_PASSKEY+VPK_CURSOR_RIGHT, 0 /*e: endcmd*/, 0 /*25: prefs*/, BRL_CMD_HOME, 0 /*35: meta*/, 0 /*o: number*/, BRL_CMD_LNBEG, BRL_CMD_RESTARTBRL,
+  BRL_CMD_CSRJMP_VERT, VAL_PASSKEY+VPK_DELETE, CR_ROUTE, 0 /*g: internal cursor*/, 0 /*345: blite internal speechbox*/, BRL_CMD_NXPGRPH, VAL_PASSKEY+VPK_TAB, 0 /*q: finish uppercase*/,
+  BRL_CMD_CHRRT, CR_CUTLINE, 0 /*26: dot8shift*/, CR_CUTAPPEND, BRL_CMD_SAY_LINE, 0 /*u: uppsercase*/, CR_CUTBEGIN, BRL_CMD_SWITCHVT_NEXT,
+  VAL_PASSKEY+VPK_RETURN, 0 /*145: free*/, VAL_PASSKEY+VPK_ESCAPE, BRL_CMD_PRPGRPH, 0 /*346: free*/, 0 /*x: xtrl*/, BRL_CMD_SIXDOTS, 0 /*12346: free*/,
+  VAL_PASSKEY+VPK_CURSOR_DOWN, BRL_CMD_PRSEARCH, BRL_CMD_LNEND, BRL_CMD_BACK, CR_CUTRECT, 0 /*z: abort*/, 0 /*2356: rotate*/, BRL_CMD_NXPROMPT,
+  BRL_CMD_BOT_LEFT, BRL_CMD_HELP, 0 /*w: free*/, BRL_CMD_LEARN, BRL_CMD_SWITCHVT_PREV, 0 /*y: free*/, BRL_CMD_PRPROMPT, 0 /*123456: noop*/
 };
 
 /* Dangerous commands; 1 bit per command, order as cmdtrans[], set if
@@ -95,31 +95,31 @@ const BarCmds *barcmds;
 static const BarCmds bar2cmds =
 {
 /* LeftBar\ RightBar> None         Right        Left         Both         */
-/*         None    */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
-/*         Right   */ CMD_LNUP   , CMD_ATTRDN , CMD_ATTRUP , 0          ,
-/*         Left    */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
-/*         Both    */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
+/*         None    */ 0          , BRL_CMD_FWINRT , BRL_CMD_LNDN   , BRL_CMD_HWINRT ,
+/*         Right   */ BRL_CMD_LNUP   , BRL_CMD_ATTRDN , BRL_CMD_ATTRUP , 0          ,
+/*         Left    */ BRL_CMD_FWINLT , BRL_CMD_NXDIFLN, BRL_CMD_PRDIFLN, 0          ,
+/*         Both    */ BRL_CMD_HWINLT , BRL_CMD_BOT    , BRL_CMD_TOP    , 0
 };
 
 /* One advance bar commands. */
 static const BarCmds bar1cmds =
 {
 /*          None         Left         Right        Both         */
-/* None  */ 0          , CMD_FWINLT , CMD_FWINRT , 0          ,
-/* Right */ CMD_FWINRT , 0          , 0          , 0          ,
-/* Left  */ CMD_FWINLT , 0          , 0          , 0          ,
+/* None  */ 0          , BRL_CMD_FWINLT , BRL_CMD_FWINRT , 0          ,
+/* Right */ BRL_CMD_FWINRT , 0          , 0          , 0          ,
+/* Left  */ BRL_CMD_FWINLT , 0          , 0          , 0          ,
 /* Both  */ 0          , 0          , 0          , 0
 };
 
 /* Left whiz wheel commands. */
 static const int lwwcmds[] =
 /* None         Up           Down         Press        */
-  {0          , CMD_LNUP   , CMD_LNDN   , CMD_ATTRVIS};
+  {0          , BRL_CMD_LNUP   , BRL_CMD_LNDN   , BRL_CMD_ATTRVIS};
 
 /* Right whiz wheel commands. */
 static const int rwwcmds[] =
 /* None         Up           Down         Press        */
-  {0          , CMD_FWINLT , CMD_FWINRT , CMD_CSRVIS };
+  {0          , BRL_CMD_FWINLT , BRL_CMD_FWINRT , BRL_CMD_CSRVIS };
 
 #endif /* BL_NEED_ARRAYS */
 
@@ -130,8 +130,8 @@ static const int rwwcmds[] =
  */
 
 /* BrailleLite 18 */
-#define BLT_BARLT CMD_FWINLT
-#define BLT_BARRT CMD_FWINRT
+#define BLT_BARLT BRL_CMD_FWINLT
+#define BLT_BARRT BRL_CMD_FWINRT
 
 
 /* Internal commands.  The definitions use the ASCII codes from brltrans[]

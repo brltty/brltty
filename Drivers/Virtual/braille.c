@@ -918,7 +918,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
       if (testWord(word, "cells")) {
         if (dimensionsChanged(brl)) brl->resizeRequired = 1;
       } else if (testWord(word, "quit")) {
-        command = CMD_RESTARTBRL;
+        command = BRL_CMD_RESTARTBRL;
       } else {
         const CommandDescriptor *descriptor = findCommand(word);
         if (descriptor) {

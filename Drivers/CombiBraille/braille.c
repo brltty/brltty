@@ -271,7 +271,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       int arg = cmd & VAL_ARG_MASK;
       if (arg == VAL_ARG_MASK) {
         status = rng;
-	return CMD_NOOP;
+	return BRL_CMD_NOOP;
       }
       if (arg == (VAL_ARG_MASK - 1)) {
         cmd += brl_cols - 1;

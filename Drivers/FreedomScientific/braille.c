@@ -830,7 +830,7 @@ static int
 interpretKeys (void) {
   int keys = realKeys | virtualKeys;
   int press = (keys & pressedKeys) != keys;
-  int command = CMD_NOOP;
+  int command = BRL_CMD_NOOP;
   int flags = 0;
 
   pressedKeys = keys;
@@ -865,116 +865,116 @@ interpretKeys (void) {
       break;
 
     case (KEY_WHEEL_LEFT):
-      command = CMD_LNBEG;
+      command = BRL_CMD_LNBEG;
       break;
     case (KEY_WHEEL_RIGHT):
-      command = CMD_LNEND;
+      command = BRL_CMD_LNEND;
       break;
 
     case (KEY_GDF_LEFT):
-      command = CMD_BACK;
+      command = BRL_CMD_BACK;
       break;
     case (KEY_GDF_RIGHT):
-      command = CMD_HOME;
+      command = BRL_CMD_HOME;
       break;
     case (KEY_GDF_LEFT | KEY_GDF_RIGHT):
-      command = CMD_PASTE;
+      command = BRL_CMD_PASTE;
       break;
 
     case (KEY_ADVANCE_LEFT):
-      command = CMD_FWINLT;
+      command = BRL_CMD_FWINLT;
       break;
     case (KEY_ADVANCE_RIGHT):
-      command = CMD_FWINRT;
+      command = BRL_CMD_FWINRT;
       break;
     case (KEY_GDF_LEFT | KEY_ADVANCE_LEFT):
-      command = CMD_TOP_LEFT;
+      command = BRL_CMD_TOP_LEFT;
       break;
     case (KEY_GDF_LEFT | KEY_ADVANCE_RIGHT):
-      command = CMD_BOT_LEFT;
+      command = BRL_CMD_BOT_LEFT;
       break;
     case (KEY_GDF_RIGHT | KEY_ADVANCE_LEFT):
-      command = CMD_TOP;
+      command = BRL_CMD_TOP;
       break;
     case (KEY_GDF_RIGHT | KEY_ADVANCE_RIGHT):
-      command = CMD_BOT;
+      command = BRL_CMD_BOT;
       break;
 
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT4):
     case (KEY_HOT1):
-      command = CMD_SKPIDLNS;
+      command = BRL_CMD_SKPIDLNS;
       break;
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2):
     case (KEY_GDF_RIGHT | KEY_HOT1):
-      command = CMD_SKPBLNKWINS;
+      command = BRL_CMD_SKPBLNKWINS;
       break;
 
     case (KEY_SPACE | KEY_DOT1):
     case (KEY_HOT2):
-      command = CMD_DISPMD;
+      command = BRL_CMD_DISPMD;
       break;
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT6):
     case (KEY_GDF_RIGHT | KEY_HOT2):
-      command = CMD_ATTRVIS;
+      command = BRL_CMD_ATTRVIS;
       break;
 
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5):
     case (KEY_HOT3):
-      command = CMD_CSRTRK;
+      command = BRL_CMD_CSRTRK;
       break;
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT3):
-      command = CMD_CSRVIS;
+      command = BRL_CMD_CSRVIS;
       break;
 
     case (KEY_HOT4):
-      command = CMD_SIXDOTS;
+      command = BRL_CMD_SIXDOTS;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
-      command = CMD_SIXDOTS | VAL_TOGGLE_ON;
+      command = BRL_CMD_SIXDOTS | VAL_TOGGLE_ON;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-      command = CMD_SIXDOTS | VAL_TOGGLE_OFF;
+      command = BRL_CMD_SIXDOTS | VAL_TOGGLE_OFF;
       break;
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
     case (KEY_GDF_RIGHT | KEY_HOT4):
-      command = CMD_AUTOREPEAT;
+      command = BRL_CMD_AUTOREPEAT;
       break;
 
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5):
     case (KEY_HOT5):
-      command = CMD_HELP;
+      command = BRL_CMD_HELP;
       break;
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT5):
-      command = CMD_FREEZE;
+      command = BRL_CMD_FREEZE;
       break;
 
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3):
     case (KEY_HOT6):
-      command = CMD_LEARN;
+      command = BRL_CMD_LEARN;
       break;
     case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT6):
-      command = CMD_PREFLOAD;
+      command = BRL_CMD_PREFLOAD;
       break;
 
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_HOT7):
-      command = CMD_PREFMENU;
+      command = BRL_CMD_PREFMENU;
       break;
     case (KEY_SPACE | KEY_SHIFT_RIGHT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_GDF_RIGHT | KEY_HOT7):
-      command = CMD_PREFSAVE;
+      command = BRL_CMD_PREFSAVE;
       break;
 
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
     case (KEY_HOT8):
-      command = CMD_INFO;
+      command = BRL_CMD_INFO;
       break;
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
     case (KEY_GDF_RIGHT | KEY_HOT8):
-      command = CMD_CSRJMP_VERT;
+      command = BRL_CMD_CSRJMP_VERT;
       break;
 
     case (KEY_SPACE):
@@ -1024,14 +1024,14 @@ interpretKeys (void) {
       break;
 
     case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-      command = CMD_SWITCHVT_PREV;
+      command = BRL_CMD_SWITCHVT_PREV;
       break;
     case (KEY_SPACE | KEY_SHIFT_RIGHT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-      command = CMD_SWITCHVT_NEXT;
+      command = BRL_CMD_SWITCHVT_NEXT;
       break;
   }
 
-  if (command != CMD_NOOP) command |= flags;
+  if (command != BRL_CMD_NOOP) command |= flags;
   return command;
 }
 
@@ -1045,7 +1045,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   while (1) {
     Packet packet;
     int count = getPacket(brl, &packet);
-    if (count == -1) return CMD_RESTARTBRL;
+    if (count == -1) return BRL_CMD_RESTARTBRL;
     if (count == 0) return EOF;
 
     switch (packet.header.type) {
@@ -1067,7 +1067,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         int button = packet.header.arg1;
         unsigned char press = packet.header.arg2 & 0X01;
         unsigned char row = packet.header.arg3;
-        int command = CMD_NOOP;
+        int command = BRL_CMD_NOOP;
 
         if (row == model->hotkeysRow) {
           static int keys[] = {
@@ -1153,7 +1153,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
                 }
                 break;
             }
-            if (command != CMD_NOOP) command += button;
+            if (command != BRL_CMD_NOOP) command += button;
           } else if ((button >= statusOffset) && (button < (statusOffset + statusCells))) {
             button -= statusOffset;
           }
@@ -1168,7 +1168,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         if (unit == WHEEL_RIGHT) motion ^= WHEEL_DOWN;
 
         activeKeys = 0;
-        wheelCommand = CMD_NOOP;
+        wheelCommand = BRL_CMD_NOOP;
         switch (motion) {
           default:
             break;
@@ -1178,22 +1178,22 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               default:
                 break;
               case 0:
-                wheelCommand = CMD_LNUP;
+                wheelCommand = BRL_CMD_LNUP;
                 break;
               case (KEY_WHEEL_LEFT):
-                wheelCommand = CMD_PRDIFLN;
+                wheelCommand = BRL_CMD_PRDIFLN;
                 break;
               case (KEY_ADVANCE_LEFT):
-                wheelCommand = CMD_PRPROMPT;
+                wheelCommand = BRL_CMD_PRPROMPT;
                 break;
               case (KEY_ADVANCE_RIGHT):
-                wheelCommand = CMD_PRPGRPH;
+                wheelCommand = BRL_CMD_PRPGRPH;
                 break;
               case (KEY_GDF_LEFT):
-                wheelCommand = CMD_ATTRUP;
+                wheelCommand = BRL_CMD_ATTRUP;
                 break;
               case (KEY_GDF_RIGHT):
-                wheelCommand = CMD_PRSEARCH;
+                wheelCommand = BRL_CMD_PRSEARCH;
                 break;
             }
             break;
@@ -1203,22 +1203,22 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               default:
                 break;
               case 0:
-                wheelCommand = CMD_LNDN;
+                wheelCommand = BRL_CMD_LNDN;
                 break;
               case (KEY_WHEEL_LEFT):
-                wheelCommand = CMD_NXDIFLN;
+                wheelCommand = BRL_CMD_NXDIFLN;
                 break;
               case (KEY_ADVANCE_LEFT):
-                wheelCommand = CMD_NXPROMPT;
+                wheelCommand = BRL_CMD_NXPROMPT;
                 break;
               case (KEY_ADVANCE_RIGHT):
-                wheelCommand = CMD_NXPGRPH;
+                wheelCommand = BRL_CMD_NXPGRPH;
                 break;
               case (KEY_GDF_LEFT):
-                wheelCommand = CMD_ATTRDN;
+                wheelCommand = BRL_CMD_ATTRDN;
                 break;
               case (KEY_GDF_RIGHT):
-                wheelCommand = CMD_NXSEARCH;
+                wheelCommand = BRL_CMD_NXSEARCH;
                 break;
             }
             break;
@@ -1228,10 +1228,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               default:
                 break;
               case 0:
-                wheelCommand = CMD_FWINLT;
+                wheelCommand = BRL_CMD_FWINLT;
                 break;
               case (KEY_WHEEL_RIGHT):
-                wheelCommand = CMD_CHRLT;
+                wheelCommand = BRL_CMD_CHRLT;
                 break;
             }
             break;
@@ -1241,16 +1241,16 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               default:
                 break;
               case 0:
-                wheelCommand = CMD_FWINRT;
+                wheelCommand = BRL_CMD_FWINRT;
                 break;
               case (KEY_WHEEL_RIGHT):
-                wheelCommand = CMD_CHRRT;
+                wheelCommand = BRL_CMD_CHRRT;
                 break;
             }
             break;
         }
 
-        if (wheelCommand != CMD_NOOP) wheelCounter = (packet.header.arg1 & WHEEL_COUNT) - 1;
+        if (wheelCommand != BRL_CMD_NOOP) wheelCounter = (packet.header.arg1 & WHEEL_COUNT) - 1;
         return wheelCommand;
       }
     }

@@ -587,7 +587,7 @@ readCommand (DriverCommandContext cmds) {
    int command = readBrailleCommand(&brl, cmds);
    if (command != EOF) {
       LogPrint(LOG_DEBUG, "Command: %06X", command);
-      if (IS_DELAYED_COMMAND(command)) command = CMD_NOOP;
+      if (IS_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
       command &= VAL_CMD_MASK;
    }
    return command;
@@ -600,7 +600,7 @@ getCommand (DriverCommandContext cmds) {
       if (command == EOF) {
          delay(updateInterval);
          closeTuneDevice(0);
-      } else if (command != CMD_NOOP) {
+      } else if (command != BRL_CMD_NOOP) {
          return command;
       }
    }
@@ -1330,7 +1330,7 @@ updatePreferences (void) {
 
         /* Now process any user interaction */
         switch (command = getCommand(CMDS_PREFS)) {
-          case CMD_HELP:
+          case BRL_CMD_HELP:
             /* This is quick and dirty... Something more intelligent 
              * and friendly needs to be done here...
              */
@@ -1342,57 +1342,57 @@ updatePreferences (void) {
             break;
 
           case VAL_PASSKEY+VPK_HOME:
-          case CMD_PREFLOAD:
+          case BRL_CMD_PREFLOAD:
             prefs = oldPreferences;
             changedPreferences();
             message("changes discarded", 0);
             break;
           case VAL_PASSKEY+VPK_RETURN:
-          case CMD_PREFSAVE:
+          case BRL_CMD_PREFSAVE:
             exitSave = 1;
             goto exitMenu;
 
-          case CMD_TOP:
-          case CMD_TOP_LEFT:
+          case BRL_CMD_TOP:
+          case BRL_CMD_TOP_LEFT:
           case VAL_PASSKEY+VPK_PAGE_UP:
-          case CMD_MENU_FIRST_ITEM:
+          case BRL_CMD_MENU_FIRST_ITEM:
             menuIndex = lineIndent = 0;
             break;
-          case CMD_BOT:
-          case CMD_BOT_LEFT:
+          case BRL_CMD_BOT:
+          case BRL_CMD_BOT_LEFT:
           case VAL_PASSKEY+VPK_PAGE_DOWN:
-          case CMD_MENU_LAST_ITEM:
+          case BRL_CMD_MENU_LAST_ITEM:
             menuIndex = menuSize - 1;
             lineIndent = 0;
             break;
 
-          case CMD_LNUP:
-          case CMD_PRDIFLN:
+          case BRL_CMD_LNUP:
+          case BRL_CMD_PRDIFLN:
           case VAL_PASSKEY+VPK_CURSOR_UP:
-          case CMD_MENU_PREV_ITEM:
+          case BRL_CMD_MENU_PREV_ITEM:
             do {
               if (menuIndex == 0) menuIndex = menuSize;
               --menuIndex;
             } while (menu[menuIndex].test && !menu[menuIndex].test());
             lineIndent = 0;
             break;
-          case CMD_LNDN:
-          case CMD_NXDIFLN:
+          case BRL_CMD_LNDN:
+          case BRL_CMD_NXDIFLN:
           case VAL_PASSKEY+VPK_CURSOR_DOWN:
-          case CMD_MENU_NEXT_ITEM:
+          case BRL_CMD_MENU_NEXT_ITEM:
             do {
               if (++menuIndex == menuSize) menuIndex = 0;
             } while (menu[menuIndex].test && !menu[menuIndex].test());
             lineIndent = 0;
             break;
 
-          case CMD_FWINLT:
+          case BRL_CMD_FWINLT:
             if (lineIndent > 0)
               lineIndent -= MIN(brl.x*brl.y, lineIndent);
             else
               playTune(&tune_bounce);
             break;
-          case CMD_FWINRT:
+          case BRL_CMD_FWINRT:
             if (lineLength-lineIndent > brl.x*brl.y)
               lineIndent += brl.x*brl.y;
             else
@@ -1402,19 +1402,19 @@ updatePreferences (void) {
           {
             void (*adjust) (MenuItem *item);
             int count;
-          case CMD_WINUP:
-          case CMD_CHRLT:
+          case BRL_CMD_WINUP:
+          case BRL_CMD_CHRLT:
           case VAL_PASSKEY+VPK_CURSOR_LEFT:
-          case CMD_BACK:
-          case CMD_MENU_PREV_SETTING:
+          case BRL_CMD_BACK:
+          case BRL_CMD_MENU_PREV_SETTING:
             adjust = previousSetting;
             goto adjustSetting;
-          case CMD_WINDN:
-          case CMD_CHRRT:
+          case BRL_CMD_WINDN:
+          case BRL_CMD_CHRRT:
           case VAL_PASSKEY+VPK_CURSOR_RIGHT:
-          case CMD_HOME:
-          case CMD_RETURN:
-          case CMD_MENU_NEXT_SETTING:
+          case BRL_CMD_HOME:
+          case BRL_CMD_RETURN:
+          case BRL_CMD_MENU_NEXT_SETTING:
             adjust = nextSetting;
           adjustSetting:
             count = item->maximum - item->minimum + 1;
@@ -1430,10 +1430,10 @@ updatePreferences (void) {
           }
 
   #ifdef ENABLE_SPEECH_SUPPORT
-          case CMD_SAY_LINE:
+          case BRL_CMD_SAY_LINE:
             speech->say(line, lineLength);
             break;
-          case CMD_MUTE:
+          case BRL_CMD_MUTE:
             speech->mute();
             break;
   #endif /* ENABLE_SPEECH_SUPPORT */
@@ -1464,7 +1464,7 @@ updatePreferences (void) {
             playTune(&tune_command_rejected);
           case VAL_PASSKEY+VPK_ESCAPE:
           case VAL_PASSKEY+VPK_END:
-          case CMD_PREFMENU:
+          case BRL_CMD_PREFMENU:
           exitMenu:
             if (exitSave) {
               if (savePreferences()) {

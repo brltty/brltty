@@ -111,11 +111,11 @@ static inline Widget crKeyBut(String name, int keycode, int repeat,
 }
 
 static void createKeyButtons(void) {
- crKeyBut("Up",	   CMD_LNUP,   1, BUTWIDTH+1,     0);
- crKeyBut("Left",  CMD_FWINLT, 1, 0,              BUTHEIGHT+1);
- crKeyBut("Home",  CMD_HOME,   0, BUTWIDTH+1,     BUTHEIGHT+1);
- crKeyBut("Right", CMD_FWINRT, 1, 2*(BUTWIDTH+1), BUTHEIGHT+1);
- crKeyBut("Down",  CMD_LNDN,   1, BUTWIDTH+1,     2*(BUTHEIGHT+1));
+ crKeyBut("Up",	   BRL_CMD_LNUP,   1, BUTWIDTH+1,     0);
+ crKeyBut("Left",  BRL_CMD_FWINLT, 1, 0,              BUTHEIGHT+1);
+ crKeyBut("Home",  BRL_CMD_HOME,   0, BUTWIDTH+1,     BUTHEIGHT+1);
+ crKeyBut("Right", BRL_CMD_FWINRT, 1, 2*(BUTWIDTH+1), BUTHEIGHT+1);
+ crKeyBut("Down",  BRL_CMD_LNDN,   1, BUTWIDTH+1,     2*(BUTHEIGHT+1));
 }
 
 static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext context)
@@ -125,7 +125,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext context)
   XtAppProcessEvent(app_con,XtIMAll);
   if (keypressed) {
    res=keypressed;
-   keypressed=CMD_NOOP;
+   keypressed=BRL_CMD_NOOP;
    break;
   }
  }

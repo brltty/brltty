@@ -226,11 +226,11 @@ AT2_interpretCode (int *command, unsigned char byte) {
             int arg = cmd & VAL_ARG_MASK;
             switch (arg) {
               case VPK_CURSOR_LEFT:
-                cmd = CMD_SWITCHVT_PREV;
+                cmd = BRL_CMD_SWITCHVT_PREV;
                 break;
 
               case VPK_CURSOR_RIGHT:
-                cmd = CMD_SWITCHVT_NEXT;
+                cmd = BRL_CMD_SWITCHVT_NEXT;
                 break;
 
               default:

@@ -238,8 +238,8 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 
       {
         int cmd = command & VAL_CMD_MASK;
-        if (cmd == CMD_NOOP) continue;
-        if (cmd == CMD_LEARN) return;
+        if (cmd == BRL_CMD_NOOP) continue;
+        if (cmd == BRL_CMD_LEARN) return;
       }
 
       {

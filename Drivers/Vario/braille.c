@@ -96,9 +96,9 @@ static struct timeval lastcmd_time;
 static struct timezone dum_tz;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
-{CMD_FWINRT, CMD_FWINLT, CMD_LNUP, CMD_LNDN, CMD_WINUP, CMD_WINDN,
+{BRL_CMD_FWINRT, BRL_CMD_FWINLT, BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_WINUP, BRL_CMD_WINDN,
  VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN,
- CMD_PRDIFLN, CMD_NXDIFLN, 0};
+ BRL_CMD_PRDIFLN, BRL_CMD_NXDIFLN, 0};
 
 static TranslationTable outputTable;
 
@@ -440,7 +440,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
       int ping_due = (pings==0 || (millisecondsBetween(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
       if(pings>=PING_MAXNQUERY && ping_due)
-	return CMD_RESTARTBRL;
+	return BRL_CMD_RESTARTBRL;
       else if (ping_due){
 	LogPrint(LOG_DEBUG, "Display idle: sending query");
 	write (brl_fd, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID));
@@ -597,15 +597,15 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
     } else if (sw_howmany == 2 && sw_which[1] == 81 && sw_which[0] < 80) {
       res = CR_CUTRECT + sw_which[0];
     } else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1) {
-      res = CMD_CHRLT;
+      res = BRL_CMD_CHRLT;
     } else if (sw_howmany == 2 && sw_which[0] == brlcols-2 && sw_which[1] == brlcols-1) {
-      res = CMD_CHRRT;
+      res = BRL_CMD_CHRRT;
     } else if ((sw_howmany == 1 && sw_which[0] == 83) /* Vario80 */ ||
 	       (sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2)) {
-      res = CMD_PASTE;
+      res = BRL_CMD_PASTE;
     } else if (sw_howmany == 2 &&
 	       sw_which[0] == 0 && sw_which[1] == brlcols-1) {
-      res = CMD_HELP;
+      res = BRL_CMD_HELP;
     } else if (sw_howmany == 1 && sw_which[0] < brlcols) {
       res = CR_ROUTE+sw_which[0];
     }
@@ -615,50 +615,50 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
      * The Vario40 keybindings are quite the same as in the DOS and Widnows drivers.
      * Feel free to change this to your needs. */
     switch (code) {
-      KEY(KEY_TL1|KEY_TR1, CMD_PREFMENU);
-      KEY(KEY_TL1|KEY_TL2|KEY_TR2, CMD_HELP);
-      KEY(KEY_TL1|KEY_TL2|KEY_TR1, CMD_FREEZE);
-      KEY(KEY_TL2|KEY_TR1, CMD_INFO);
-      KEY(KEY_TL1|KEY_TL3, CMD_HOME);
-      KEY(KEY_TL1 | KEY_TL2, CMD_TOP_LEFT);
-      KEY(KEY_TL3 | KEY_TL2, CMD_BOT_LEFT);
-      KEY(KEY_TL2|KEY_TL3|KEY_TR1|KEY_TR2, CMD_CSRTRK);
-      KEY(KEY_TL1|KEY_TL3|KEY_TR3, CMD_ATTRVIS);
-      KEY(KEY_TL1|KEY_TL2|KEY_TL3|KEY_TR3, CMD_DISPMD);
+      KEY(KEY_TL1|KEY_TR1, BRL_CMD_PREFMENU);
+      KEY(KEY_TL1|KEY_TL2|KEY_TR2, BRL_CMD_HELP);
+      KEY(KEY_TL1|KEY_TL2|KEY_TR1, BRL_CMD_FREEZE);
+      KEY(KEY_TL2|KEY_TR1, BRL_CMD_INFO);
+      KEY(KEY_TL1|KEY_TL3, BRL_CMD_HOME);
+      KEY(KEY_TL1 | KEY_TL2, BRL_CMD_TOP_LEFT);
+      KEY(KEY_TL3 | KEY_TL2, BRL_CMD_BOT_LEFT);
+      KEY(KEY_TL2|KEY_TL3|KEY_TR1|KEY_TR2, BRL_CMD_CSRTRK);
+      KEY(KEY_TL1|KEY_TL3|KEY_TR3, BRL_CMD_ATTRVIS);
+      KEY(KEY_TL1|KEY_TL2|KEY_TL3|KEY_TR3, BRL_CMD_DISPMD);
     }
     if (brlcols == 40) {
       switch (code) {
-	KEY(KEY_TL1, CMD_LNUP);
-	KEY(KEY_TL2, CMD_FWINLT);
-	KEY(KEY_TL3, CMD_LNDN);
+	KEY(KEY_TL1, BRL_CMD_LNUP);
+	KEY(KEY_TL2, BRL_CMD_FWINLT);
+	KEY(KEY_TL3, BRL_CMD_LNDN);
 	KEY(KEY_TR1, VAL_PASSKEY+VPK_CURSOR_UP);
-	KEY(KEY_TR2, CMD_FWINRT);
+	KEY(KEY_TR2, BRL_CMD_FWINRT);
 	KEY(KEY_TR3, VAL_PASSKEY+VPK_CURSOR_DOWN);
       }
     } else if (brlcols == 80) {
       switch (code) {
-	KEY(KEY_TL1, CMD_TOP_LEFT);
-	KEY(KEY_TL2, CMD_HOME);
-	KEY(KEY_TL3, CMD_BOT_LEFT);
-	KEY(KEY_TR1, CMD_LNUP);
+	KEY(KEY_TL1, BRL_CMD_TOP_LEFT);
+	KEY(KEY_TL2, BRL_CMD_HOME);
+	KEY(KEY_TL3, BRL_CMD_BOT_LEFT);
+	KEY(KEY_TR1, BRL_CMD_LNUP);
 	KEY(KEY_TR2, VAL_PASSKEY+VPK_RETURN);
-	KEY(KEY_TR3, CMD_LNDN);
-	KEY(KEY_MU, CMD_LNUP);
-	KEY(KEY_MD, CMD_LNDN);
-	KEY(KEY_RU, CMD_DISPMD);
-	KEY(KEY_RD, CMD_CSRTRK);
+	KEY(KEY_TR3, BRL_CMD_LNDN);
+	KEY(KEY_MU, BRL_CMD_LNUP);
+	KEY(KEY_MD, BRL_CMD_LNDN);
+	KEY(KEY_RU, BRL_CMD_DISPMD);
+	KEY(KEY_RD, BRL_CMD_CSRTRK);
 
 	KEY(KEY_LU, VAL_PASSKEY+VPK_CURSOR_UP);
 	KEY(KEY_LD, VAL_PASSKEY+VPK_CURSOR_DOWN);
 	KEY(KEY_CK4, VAL_PASSKEY+VPK_RETURN);
 
-	KEY(KEY_CK3 | KEY_CK5, CMD_PREFMENU);
-	KEY(KEY_CK1 | KEY_CK3 | KEY_CK7, CMD_ATTRVIS);
+	KEY(KEY_CK3 | KEY_CK5, BRL_CMD_PREFMENU);
+	KEY(KEY_CK1 | KEY_CK3 | KEY_CK7, BRL_CMD_ATTRVIS);
 	KEY(KEY_CK1, VAL_PASSKEY+VPK_CURSOR_LEFT);
 	KEY(KEY_CK7, VAL_PASSKEY+VPK_CURSOR_RIGHT);
-	KEY(KEY_CK2 | KEY_CK3 | KEY_CK5, CMD_FREEZE);
-	KEY(KEY_CK2 | KEY_CK3 | KEY_CK6, CMD_HELP);
-	KEY(KEY_CK2           | KEY_CK5, CMD_INFO);
+	KEY(KEY_CK2 | KEY_CK3 | KEY_CK5, BRL_CMD_FREEZE);
+	KEY(KEY_CK2 | KEY_CK3 | KEY_CK6, BRL_CMD_HELP);
+	KEY(KEY_CK2           | KEY_CK5, BRL_CMD_INFO);
       }
     }
   }

@@ -1,9 +1,8 @@
 BEGIN {
   OFS = ""
 }
-/^ *CMD_/ {
-  print "{\"", $1, "\", KEYCODE, ", $1, "},"
-# print "{\"", substr($1, 5), "\", KEYCODE, ", $1, "},"
+/^ *BRL_CMD_/ {
+  print "{\"", substr($1, 5), "\", KEYCODE, ", $1, "},"
   next
 }
 /^ *STAT_/ {

@@ -560,9 +560,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
                   /* pressing the escape command twice will pass it through */
                   return VAL_PASSDOTS + inputTable[KEY_COMMAND];
                case KEY_COMMAND_SWITCHVT_PREV:
-                  return CMD_SWITCHVT_PREV;
+                  return BRL_CMD_SWITCHVT_PREV;
                case KEY_COMMAND_SWITCHVT_NEXT:
-                  return CMD_SWITCHVT_NEXT;
+                  return BRL_CMD_SWITCHVT_NEXT;
                case KEY_COMMAND_SWITCHVT_1:
                   return CR_SWITCHVT + 0;
                case KEY_COMMAND_SWITCHVT_2:
@@ -592,17 +592,17 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
                   cursorRow = 0;
                   cursorColumn = 31;
                   sendCursorRow();
-                  return CMD_PREFMENU;
+                  return BRL_CMD_PREFMENU;
                case KEY_COMMAND_PREFSAVE:
-                  return CMD_PREFSAVE;
+                  return BRL_CMD_PREFSAVE;
                case KEY_COMMAND_PREFLOAD:
-                  return CMD_PREFLOAD;
+                  return BRL_CMD_PREFLOAD;
                case KEY_COMMAND_FREEZE_ON:
-                  return CMD_FREEZE | VAL_TOGGLE_ON;
+                  return BRL_CMD_FREEZE | VAL_TOGGLE_ON;
                case KEY_COMMAND_FREEZE_OFF:
-                  return CMD_FREEZE | VAL_TOGGLE_OFF;
+                  return BRL_CMD_FREEZE | VAL_TOGGLE_OFF;
                case KEY_COMMAND_RESTARTBRL:
-                  return CMD_RESTARTBRL;
+                  return BRL_CMD_RESTARTBRL;
                case KEY_COMMAND_DOWNLOAD:
                   downloadFile();
                   break;

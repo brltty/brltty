@@ -967,17 +967,17 @@ main (int argc, char *argv[]) {
               default:
                 real = next;
                 break;
-              case CMD_LNUP:
-                real = CMD_PRDIFLN;
+              case BRL_CMD_LNUP:
+                real = BRL_CMD_PRDIFLN;
                 break;
-              case CMD_LNDN:
-                real = CMD_NXDIFLN;
+              case BRL_CMD_LNDN:
+                real = BRL_CMD_NXDIFLN;
                 break;
-              case CMD_PRDIFLN:
-                real = CMD_LNUP;
+              case BRL_CMD_PRDIFLN:
+                real = BRL_CMD_LNUP;
                 break;
-              case CMD_NXDIFLN:
-                real = CMD_LNDN;
+              case BRL_CMD_NXDIFLN:
+                real = BRL_CMD_LNDN;
                 break;
             }
             if (real != next) next = (next & ~VAL_CMD_MASK) | real;
@@ -987,20 +987,20 @@ main (int argc, char *argv[]) {
             default:
               switch (next & VAL_CMD_MASK) {
                 default:
-                  if (IS_DELAYED_COMMAND(repeatFlags)) next = CMD_NOOP;
+                  if (IS_DELAYED_COMMAND(repeatFlags)) next = BRL_CMD_NOOP;
                   repeatFlags = 0;
 
-                case CMD_LNUP:
-                case CMD_LNDN:
-                case CMD_PRDIFLN:
-                case CMD_NXDIFLN:
-                case CMD_CHRLT:
-                case CMD_CHRRT:
+                case BRL_CMD_LNUP:
+                case BRL_CMD_LNDN:
+                case BRL_CMD_PRDIFLN:
+                case BRL_CMD_NXDIFLN:
+                case BRL_CMD_CHRLT:
+                case BRL_CMD_CHRRT:
 
-                case CMD_MENU_PREV_ITEM:
-                case CMD_MENU_NEXT_ITEM:
-                case CMD_MENU_PREV_SETTING:
-                case CMD_MENU_NEXT_SETTING:
+                case BRL_CMD_MENU_PREV_ITEM:
+                case BRL_CMD_MENU_NEXT_ITEM:
+                case BRL_CMD_MENU_PREV_SETTING:
+                case BRL_CMD_MENU_NEXT_SETTING:
 
                 case VAL_PASSKEY + VPK_BACKSPACE:
                 case VAL_PASSKEY + VPK_DELETE:
@@ -1021,7 +1021,7 @@ main (int argc, char *argv[]) {
           if (repeatStarted) {
             repeatStarted = 0;
             if (next == command) {
-              next = CMD_NOOP;
+              next = BRL_CMD_NOOP;
               repeatFlags = 0;
             }
           }
@@ -1043,62 +1043,62 @@ main (int argc, char *argv[]) {
     doCommand:
       if (!executeScreenCommand(command)) {
         switch (command & VAL_CMD_MASK) {
-          case CMD_NOOP:        /* do nothing but loop */
+          case BRL_CMD_NOOP:        /* do nothing but loop */
             if (command & VAL_TOGGLE_ON)
               playTune(&tune_toggle_on);
             else if (command & VAL_TOGGLE_OFF)
               playTune(&tune_toggle_off);
             break;
 
-          case CMD_TOP_LEFT:
+          case BRL_CMD_TOP_LEFT:
             p->winx = 0;
-          case CMD_TOP:
+          case BRL_CMD_TOP:
             p->winy = 0;
             break;
-          case CMD_BOT_LEFT:
+          case BRL_CMD_BOT_LEFT:
             p->winx = 0;
-          case CMD_BOT:
+          case BRL_CMD_BOT:
             p->winy = scr.rows - brl.y;
             break;
 
-          case CMD_WINUP:
+          case BRL_CMD_WINUP:
             if (p->winy == 0)
               playTune (&tune_bounce);
             p->winy = MAX (p->winy - vwinshift, 0);
             break;
-          case CMD_WINDN:
+          case BRL_CMD_WINDN:
             if (p->winy == scr.rows - brl.y)
               playTune (&tune_bounce);
             p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
             break;
 
-          case CMD_LNUP:
+          case BRL_CMD_LNUP:
             upOneLine(SCR_TEXT);
             break;
-          case CMD_LNDN:
+          case BRL_CMD_LNDN:
             downOneLine(SCR_TEXT);
             break;
 
-          case CMD_PRDIFLN:
+          case BRL_CMD_PRDIFLN:
             upDifferentLine(SCR_TEXT);
             break;
-          case CMD_NXDIFLN:
+          case BRL_CMD_NXDIFLN:
             downDifferentLine(SCR_TEXT);
             break;
 
-          case CMD_ATTRUP:
+          case BRL_CMD_ATTRUP:
             upDifferentLine(SCR_ATTRIB);
             break;
-          case CMD_ATTRDN:
+          case BRL_CMD_ATTRDN:
             downDifferentLine(SCR_ATTRIB);
             break;
 
           {
             int increment;
-          case CMD_PRPGRPH:
+          case BRL_CMD_PRPGRPH:
             increment = -1;
             goto findParagraph;
-          case CMD_NXPGRPH:
+          case BRL_CMD_NXPGRPH:
             increment = 1;
           findParagraph:
             {
@@ -1130,10 +1130,10 @@ main (int argc, char *argv[]) {
 
           {
             int increment;
-          case CMD_PRPROMPT:
+          case BRL_CMD_PRPROMPT:
             increment = -1;
             goto findPrompt;
-          case CMD_NXPROMPT:
+          case BRL_CMD_NXPROMPT:
             increment = 1;
           findPrompt:
             {
@@ -1151,10 +1151,10 @@ main (int argc, char *argv[]) {
 
           {
             int increment;
-          case CMD_PRSEARCH:
+          case BRL_CMD_PRSEARCH:
             increment = -1;
             goto doSearch;
-          case CMD_NXSEARCH:
+          case BRL_CMD_NXSEARCH:
             increment = 1;
           doSearch:
             if (cut_buffer) {
@@ -1204,45 +1204,45 @@ main (int argc, char *argv[]) {
             break;
           }
 
-          case CMD_LNBEG:
+          case BRL_CMD_LNBEG:
             if (p->winx)
               p->winx = 0;
             else
               playTune(&tune_bounce);
             break;
-          case CMD_LNEND:
+          case BRL_CMD_LNEND:
             if (p->winx == (scr.cols - brl.x))
               playTune(&tune_bounce);
             else
               p->winx = scr.cols - brl.x;
             break;
 
-          case CMD_CHRLT:
+          case BRL_CMD_CHRLT:
             if (p->winx == 0)
               playTune (&tune_bounce);
             p->winx = MAX (p->winx - 1, 0);
             break;
-          case CMD_CHRRT:
+          case BRL_CMD_CHRRT:
             if (p->winx < (scr.cols - 1))
               p->winx++;
             else
               playTune(&tune_bounce);
             break;
 
-          case CMD_HWINLT:
+          case BRL_CMD_HWINLT:
             if (p->winx == 0)
               playTune(&tune_bounce);
             else
               p->winx = MAX(p->winx-hwinshift, 0);
             break;
-          case CMD_HWINRT:
+          case BRL_CMD_HWINRT:
             if (p->winx < (scr.cols - hwinshift))
               p->winx += hwinshift;
             else
               playTune(&tune_bounce);
             break;
 
-          case CMD_FWINLT:
+          case BRL_CMD_FWINLT:
             if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
               if (p->winx > 0) {
@@ -1291,7 +1291,7 @@ main (int argc, char *argv[]) {
               }
               break;
             }
-          case CMD_FWINLTSKIP: {
+          case BRL_CMD_FWINLTSKIP: {
             int oldX = p->winx;
             int oldY = p->winy;
             int tuneLimit = 3;
@@ -1331,7 +1331,7 @@ main (int argc, char *argv[]) {
             break;
           }
 
-          case CMD_FWINRT:
+          case BRL_CMD_FWINRT:
             if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
               int rwinshift = getRightShift();
@@ -1365,7 +1365,7 @@ main (int argc, char *argv[]) {
               downLine(SCR_TEXT);
               break;
             }
-          case CMD_FWINRTSKIP: {
+          case BRL_CMD_FWINRTSKIP: {
             int oldX = p->winx;
             int oldY = p->winy;
             int tuneLimit = 3;
@@ -1406,46 +1406,46 @@ main (int argc, char *argv[]) {
             break;
           }
 
-          case CMD_RETURN:
+          case BRL_CMD_RETURN:
             if ((p->winx != p->motx) || (p->winy != p->moty)) {
-          case CMD_BACK:
+          case BRL_CMD_BACK:
               p->winx = p->motx;
               p->winy = p->moty;
               break;
             }
-          case CMD_HOME:
+          case BRL_CMD_HOME:
             trackCursor(1);
             break;
 
-          case CMD_RESTARTBRL:
+          case BRL_CMD_RESTARTBRL:
             restartBrailleDriver();
             break;
-          case CMD_PASTE:
+          case BRL_CMD_PASTE:
             if ((dispmd & HELP_SCRN) != HELP_SCRN && !routingProcess)
               if (cut_paste())
                 break;
             playTune(&tune_command_rejected);
             break;
-          case CMD_CSRJMP_VERT:
+          case BRL_CMD_CSRJMP_VERT:
             playTune(routeCursor(-1, p->winy, curscr)?
                      &tune_routing_started:
                      &tune_command_rejected);
             break;
 
-          case CMD_CSRVIS:
+          case BRL_CMD_CSRVIS:
             /* toggles the preferences option that decides whether cursor
                is shown at all */
             TOGGLE_PLAY(prefs.showCursor);
             break;
-          case CMD_CSRHIDE:
+          case BRL_CMD_CSRHIDE:
             /* This is for briefly hiding the cursor */
             TOGGLE_NOPLAY(p->hideCursor);
             /* no tune */
             break;
-          case CMD_CSRSIZE:
+          case BRL_CMD_CSRSIZE:
             TOGGLE_PLAY(prefs.cursorStyle);
             break;
-          case CMD_CSRTRK:
+          case BRL_CMD_CSRTRK:
             if (TOGGLE(p->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
 #ifdef ENABLE_SPEECH_SUPPORT
               if (speech->isSpeaking()) {
@@ -1455,7 +1455,7 @@ main (int argc, char *argv[]) {
                 trackCursor(1);
             }
             break;
-          case CMD_CSRBLINK:
+          case BRL_CMD_CSRBLINK:
             setBlinkingCursor(1);
             if (TOGGLE_PLAY(prefs.blinkingCursor)) {
               setBlinkingAttributes(1);
@@ -1463,10 +1463,10 @@ main (int argc, char *argv[]) {
             }
             break;
 
-          case CMD_ATTRVIS:
+          case BRL_CMD_ATTRVIS:
             TOGGLE_PLAY(prefs.showAttributes);
             break;
-          case CMD_ATTRBLINK:
+          case BRL_CMD_ATTRBLINK:
             setBlinkingAttributes(1);
             if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
               setBlinkingCapitals(1);
@@ -1474,7 +1474,7 @@ main (int argc, char *argv[]) {
             }
             break;
 
-          case CMD_CAPBLINK:
+          case BRL_CMD_CAPBLINK:
             setBlinkingCapitals(1);
             if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
               setBlinkingAttributes(0);
@@ -1482,30 +1482,30 @@ main (int argc, char *argv[]) {
             }
             break;
 
-          case CMD_SKPIDLNS:
+          case BRL_CMD_SKPIDLNS:
             TOGGLE_PLAY(prefs.skipIdenticalLines);
             break;
-          case CMD_SKPBLNKWINS:
+          case BRL_CMD_SKPBLNKWINS:
             TOGGLE_PLAY(prefs.skipBlankWindows);
             break;
-          case CMD_SLIDEWIN:
+          case BRL_CMD_SLIDEWIN:
             TOGGLE_PLAY(prefs.slidingWindow);
             break;
 
-          case CMD_DISPMD:
+          case BRL_CMD_DISPMD:
             setTranslationTable(TOGGLE_NOPLAY(p->showAttributes));
             break;
-          case CMD_SIXDOTS:
+          case BRL_CMD_SIXDOTS:
             TOGGLE_PLAY(prefs.textStyle);
             break;
 
-          case CMD_AUTOREPEAT:
+          case BRL_CMD_AUTOREPEAT:
             TOGGLE_PLAY(prefs.autorepeat);
             break;
-          case CMD_TUNES:
+          case BRL_CMD_TUNES:
             TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
             break;
-          case CMD_FREEZE: {
+          case BRL_CMD_FREEZE: {
             unsigned char frozen = (dispmd & FROZ_SCRN) != 0;
             if (TOGGLE(frozen, &tune_screen_unfrozen, &tune_screen_frozen)) {
               dispmd = selectDisplay(dispmd | FROZ_SCRN);
@@ -1516,23 +1516,23 @@ main (int argc, char *argv[]) {
           }
 
 #ifdef ENABLE_PREFERENCES_MENU
-          case CMD_PREFMENU:
+          case BRL_CMD_PREFMENU:
             updatePreferences();
             break;
-          case CMD_PREFSAVE:
+          case BRL_CMD_PREFSAVE:
             if (savePreferences()) {
               playTune(&tune_command_done);
             }
             break;
 #endif /* ENABLE_PREFERENCES_MENU */
-          case CMD_PREFLOAD:
+          case BRL_CMD_PREFLOAD:
             if (loadPreferences(1)) {
               resetBlinkingStates();
               playTune(&tune_command_done);
             }
             break;
 
-          case CMD_HELP: {
+          case BRL_CMD_HELP: {
             unsigned char help = (dispmd & HELP_SCRN) != 0;
             infmode = 0;        /* ... and not in info mode */
             if (TOGGLE_NOPLAY(help)) {
@@ -1547,61 +1547,61 @@ main (int argc, char *argv[]) {
             }
             break;
           }
-          case CMD_INFO:
+          case BRL_CMD_INFO:
             TOGGLE_NOPLAY(infmode);
             break;
 
 #ifdef ENABLE_LEARN_MODE
-          case CMD_LEARN:
+          case BRL_CMD_LEARN:
             learnMode(&brl, updateInterval, 10000);
             break;
 #endif /* ENABLE_LEARN_MODE */
 
-          case CMD_SWITCHVT_PREV:
+          case BRL_CMD_SWITCHVT_PREV:
             if (!switchVirtualTerminal(scr.no-1))
               playTune(&tune_command_rejected);
             break;
-          case CMD_SWITCHVT_NEXT:
+          case BRL_CMD_SWITCHVT_NEXT:
             if (!switchVirtualTerminal(scr.no+1))
               playTune(&tune_command_rejected);
             break;
 
 #ifdef ENABLE_SPEECH_SUPPORT
-          case CMD_RESTARTSPEECH:
+          case BRL_CMD_RESTARTSPEECH:
             restartSpeechDriver();
             break;
-          case CMD_SPKHOME:
+          case BRL_CMD_SPKHOME:
             if (scr.no == speechScreen) {
               trackSpeech(speech->getTrack());
             } else {
               playTune(&tune_command_rejected);
             }
             break;
-          case CMD_AUTOSPEAK:
+          case BRL_CMD_AUTOSPEAK:
             TOGGLE_PLAY(prefs.autospeak);
             break;
-          case CMD_MUTE:
+          case BRL_CMD_MUTE:
             speech->mute();
             break;
 
-          case CMD_SAY_LINE:
+          case BRL_CMD_SAY_LINE:
             sayLines(p->winy, 1, 0, prefs.sayLineMode);
             break;
-          case CMD_SAY_ABOVE:
+          case BRL_CMD_SAY_ABOVE:
             sayLines(0, p->winy+1, 1, sayImmediate);
             break;
-          case CMD_SAY_BELOW:
+          case BRL_CMD_SAY_BELOW:
             sayLines(p->winy, scr.rows-p->winy, 1, sayImmediate);
             break;
 
-          case CMD_SAY_SLOWER:
+          case BRL_CMD_SAY_SLOWER:
             if (speech->rate && (prefs.speechRate > 0)) {
               setSpeechRate(--prefs.speechRate);
             } else {
               playTune(&tune_command_rejected);
             }
             break;
-          case CMD_SAY_FASTER:
+          case BRL_CMD_SAY_FASTER:
             if (speech->rate && (prefs.speechRate < SPK_MAXIMUM_RATE)) {
               setSpeechRate(++prefs.speechRate);
             } else {
@@ -1609,14 +1609,14 @@ main (int argc, char *argv[]) {
             }
             break;
 
-          case CMD_SAY_SOFTER:
+          case BRL_CMD_SAY_SOFTER:
             if (speech->volume && (prefs.speechVolume > 0)) {
               setSpeechVolume(--prefs.speechVolume);
             } else {
               playTune(&tune_command_rejected);
             }
             break;
-          case CMD_SAY_LOUDER:
+          case BRL_CMD_SAY_LOUDER:
             if (speech->volume && (prefs.speechVolume < SPK_MAXIMUM_VOLUME)) {
               setSpeechVolume(++prefs.speechVolume);
             } else {
@@ -2243,7 +2243,7 @@ message (const char *text, short flags) {
             for (i=0; i<messageDelay; i+=updateInterval) {
                int command;
                delay(updateInterval);
-               while ((command = readCommand(CMDS_MESSAGE)) == CMD_NOOP);
+               while ((command = readCommand(CMDS_MESSAGE)) == BRL_CMD_NOOP);
                if (command != EOF) break;
             }
          }

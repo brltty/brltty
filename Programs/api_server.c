@@ -871,8 +871,8 @@ static int initializeUnmaskedKeys(Tconnection *c)
   if (c==NULL) return 0;
   if (c->how==BRLKEYCODES) return 0;
   if (addRange(0,BRL_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;
-  if (removeRange(CMD_SWITCHVT_PREV,CMD_SWITCHVT_NEXT,&c->unmaskedKeys)==-1) return -1;
-  if (removeRange(CMD_RESTARTBRL,CMD_RESTARTSPEECH,&c->unmaskedKeys)==-1) return -1;
+  if (removeRange(BRL_CMD_SWITCHVT_PREV,BRL_CMD_SWITCHVT_NEXT,&c->unmaskedKeys)==-1) return -1;
+  if (removeRange(BRL_CMD_RESTARTBRL,BRL_CMD_RESTARTSPEECH,&c->unmaskedKeys)==-1) return -1;
   if (removeRange(CR_SWITCHVT,CR_SWITCHVT|0XFF,&c->unmaskedKeys)==-1) return -1;
   return 0;
 }

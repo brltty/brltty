@@ -98,64 +98,64 @@ static t_key	scriba_keys[17] = {
   {0, 10, Program},
   {0, 11, ViewOn},
   {0, 13, 0},
-  {CMD_FWINLT, 16, 0},
-  {CMD_LNUP, 17, 0},
-  {CMD_PRPROMPT, 18, 0},
-  {CMD_PRSEARCH, 19, 0},
-  {CMD_INFO, 20, 0},
-  {CMD_NXSEARCH, 21, 0},
-  {CMD_NXPROMPT, 22, 0},
-  {CMD_LNDN, 23, 0},
-  {CMD_FWINRT, 24, 0},
+  {BRL_CMD_FWINLT, 16, 0},
+  {BRL_CMD_LNUP, 17, 0},
+  {BRL_CMD_PRPROMPT, 18, 0},
+  {BRL_CMD_PRSEARCH, 19, 0},
+  {BRL_CMD_INFO, 20, 0},
+  {BRL_CMD_NXSEARCH, 21, 0},
+  {BRL_CMD_NXPROMPT, 22, 0},
+  {BRL_CMD_LNDN, 23, 0},
+  {BRL_CMD_FWINRT, 24, 0},
   {0, 0, 0}
 };
 
 static t_key	pscriba_keys[7] = {
-  {CMD_PREFMENU, 2, 0},
-  {CMD_TUNES, 6, 0},
-  {CMD_CSRTRK, 8, 0},
+  {BRL_CMD_PREFMENU, 2, 0},
+  {BRL_CMD_TUNES, 6, 0},
+  {BRL_CMD_CSRTRK, 8, 0},
   {0, 16, begblk},
-  {CMD_PASTE, 23, 0},
+  {BRL_CMD_PASTE, 23, 0},
   {0, 24, endblk},
   {0, 0, 0}
 };
 
 static t_key	azer40_keys[8] = {
-  {CMD_FWINLT, 16, 0},
-  {CMD_LNUP, 17, 0},
-  {CMD_PRPROMPT, 18, 0},
-  {CMD_INFO, 20, 0},
-  {CMD_NXPROMPT, 22, 0},
-  {CMD_LNDN, 23, 0},
-  {CMD_FWINRT, 24, 0},
+  {BRL_CMD_FWINLT, 16, 0},
+  {BRL_CMD_LNUP, 17, 0},
+  {BRL_CMD_PRPROMPT, 18, 0},
+  {BRL_CMD_INFO, 20, 0},
+  {BRL_CMD_NXPROMPT, 22, 0},
+  {BRL_CMD_LNDN, 23, 0},
+  {BRL_CMD_FWINRT, 24, 0},
   {0, 0, 0}
 };
 
 static t_key	*pazer40_keys = pscriba_keys;
 
 static t_key	azer80_keys[23] = {
-  {CMD_TOP_LEFT, 1, 0},
+  {BRL_CMD_TOP_LEFT, 1, 0},
   {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
-  {CMD_PRDIFLN, 3, 0},
+  {BRL_CMD_PRDIFLN, 3, 0},
   {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
-  {CMD_HOME, 5, 0},
+  {BRL_CMD_HOME, 5, 0},
   {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
-  {CMD_BOT_LEFT, 7, 0},
+  {BRL_CMD_BOT_LEFT, 7, 0},
   {VAL_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
-  {CMD_NXDIFLN, 9, 0},
+  {BRL_CMD_NXDIFLN, 9, 0},
   {0, 10, Program},
-  {CMD_CSRTRK, 30, 0},
+  {BRL_CMD_CSRTRK, 30, 0},
   {0, 11, ViewOn},
-  {CMD_FREEZE, 12, 0},
-  {CMD_FWINLT, 16, 0},
-  {CMD_LNUP, 17, 0},
-  {CMD_PRPROMPT, 18, 0},
-  {CMD_PRSEARCH, 19, 0},
-  {CMD_INFO, 20, 0},
-  {CMD_NXSEARCH, 21, 0},
-  {CMD_NXPROMPT, 22, 0},
-  {CMD_LNDN, 23, 0},
-  {CMD_FWINRT, 24, 0},
+  {BRL_CMD_FREEZE, 12, 0},
+  {BRL_CMD_FWINLT, 16, 0},
+  {BRL_CMD_LNUP, 17, 0},
+  {BRL_CMD_PRPROMPT, 18, 0},
+  {BRL_CMD_PRSEARCH, 19, 0},
+  {BRL_CMD_INFO, 20, 0},
+  {BRL_CMD_NXSEARCH, 21, 0},
+  {BRL_CMD_NXPROMPT, 22, 0},
+  {BRL_CMD_LNDN, 23, 0},
+  {BRL_CMD_FWINRT, 24, 0},
   {0, 0, 0}
 };
 static t_key	*pazer80_keys = pscriba_keys;
@@ -171,17 +171,17 @@ static t_key	iris_keys[16] = {
   {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
   {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
   {VAL_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
-  {CMD_NOOP, 10, Program},
-  {CMD_NOOP, 11, ViewOn},
-  {CMD_FWINLT, 16, 0},
-  {CMD_LNUP, 17, 0},
-  {CMD_CSRVIS, 18, 0},
-  {CMD_PREFMENU, 19, 0},
-  {CMD_NOOP, 20, 0},
-  {CMD_NOOP, 21, enter_routing},
-  {CMD_TUNES, 22, 0},
-  {CMD_LNDN, 23, 0},
-  {CMD_FWINRT, 24, 0},
+  {BRL_CMD_NOOP, 10, Program},
+  {BRL_CMD_NOOP, 11, ViewOn},
+  {BRL_CMD_FWINLT, 16, 0},
+  {BRL_CMD_LNUP, 17, 0},
+  {BRL_CMD_CSRVIS, 18, 0},
+  {BRL_CMD_PREFMENU, 19, 0},
+  {BRL_CMD_NOOP, 20, 0},
+  {BRL_CMD_NOOP, 21, enter_routing},
+  {BRL_CMD_TUNES, 22, 0},
+  {BRL_CMD_LNDN, 23, 0},
+  {BRL_CMD_FWINRT, 24, 0},
   {0, 0, 0}
 };
 
@@ -603,7 +603,7 @@ static int Program(BrailleDisplay *brl)
 	      }
 	}
     }
-  return (CMD_NOOP);
+  return (BRL_CMD_NOOP);
 }
 
 
@@ -637,18 +637,18 @@ int ViewOn(BrailleDisplay *brl)
 	     exitviewon=1;
 	     break;
 	   case 3:
-	     res2 = CMD_TOP_LEFT;
+	     res2 = BRL_CMD_TOP_LEFT;
 	     exitviewon=1;
 	     break;
 	   case 9:
-	     res2 = CMD_BOT_LEFT;
+	     res2 = BRL_CMD_BOT_LEFT;
 	     exitviewon=1;
 	     break;
 	   case 11:
 	     exitviewon=1;
 	     break;
 	   case 12:
-	     res2 = CMD_DISPMD;
+	     res2 = BRL_CMD_DISPMD;
 	     exitviewon=1;
 	     break;
 	  case 16:
@@ -662,7 +662,7 @@ int ViewOn(BrailleDisplay *brl)
 	    exitviewon = 1;
 	    break;
 	   case 24:
-	     res2 = CMD_LEARN;
+	     res2 = BRL_CMD_LEARN;
 	     exitviewon=1;
 	     break;
 
@@ -728,7 +728,7 @@ static int routing(BrailleDisplay *brl, int routekey)
 	   case 0x02: /* exit menu */
 	     ReWrite = 1;
 	     context = 0;
-	     res = CMD_NOOP;
+	     res = BRL_CMD_NOOP;
 	     break;
 	   case 0x06: /* Console Switching */
  	     context = 0;
@@ -738,17 +738,17 @@ static int routing(BrailleDisplay *brl, int routekey)
 	       message("switch:1 2 3 4 5 6 7 t", MSG_NODELAY);
 	     context = 2;
 	     ReWrite = 0;
-	     res = CMD_NOOP;
+	     res = BRL_CMD_NOOP;
 	     break;
 	   case 0x0A: /* Help */
 	     context = 0;
 	     ReWrite = 1;
-	     res = CMD_LEARN;
+	     res = BRL_CMD_LEARN;
 	     break;
 	  case 0x0F: /* version information */
 	    context = 0;
 	    message(version_ID, MSG_WAITKEY);
-	    res = CMD_NOOP;
+	    res = BRL_CMD_NOOP;
 	    break;
 	  }
 	break;
@@ -758,7 +758,7 @@ static int routing(BrailleDisplay *brl, int routekey)
 	   case 0x07: /* exit */
 	     context = 0;
 	     ReWrite = 1;
-	     res = CMD_NOOP;
+	     res = BRL_CMD_NOOP;
 	     break;
 	   case 0x09: /* switch to console 1 */
 	     res = CR_SWITCHVT;   /* CR_WITCHVT + 0 */
@@ -817,7 +817,7 @@ static int routing(BrailleDisplay *brl, int routekey)
 	  {
 	    message("-:tty hlp info t", MSG_NODELAY);
 	    context = 1;
-	    res = CMD_NOOP;
+	    res = BRL_CMD_NOOP;
 	  }
 	break;
      }
@@ -876,7 +876,7 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
       context = 0;
       alt = 0;
       ReWrite = 1;
-      res = CMD_NOOP;
+      res = BRL_CMD_NOOP;
     }
   if (keys == 0x280 && !alt && !control) /* alt */
     {
@@ -884,7 +884,7 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
       context = 4;
       ReWrite = 0;
       alt = 1;
-      res = CMD_NOOP;
+      res = BRL_CMD_NOOP;
     }
   if (alt && control)
     {
@@ -896,7 +896,7 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
     {
       context = 0;
       ReWrite = 1;
-      res = CMD_NOOP;
+      res = BRL_CMD_NOOP;
       control = 0;
     }
   if (keys == 0x2c0 && !control) /* control */
@@ -905,7 +905,7 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
       message("! control ", MSG_NODELAY);
       context = 4;
       ReWrite = 0;
-      res = CMD_NOOP;
+      res = BRL_CMD_NOOP;
     }
   if (keys <= 0xff || keys == 0x200)
     {
@@ -1083,7 +1083,7 @@ static int readbrlkey(BrailleDisplay *brl)
 		  InDate = 0;
 		  ReWrite = 1; /* to refresh display */
 		  context = 0;
-		  res = CMD_NOOP;
+		  res = BRL_CMD_NOOP;
 		  break;
 		case 'V': /* Braille and Speech mode */
 		  message("! Speech unavailable", MSG_WAITKEY);

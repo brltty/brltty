@@ -510,63 +510,63 @@ interpretNavigation (unsigned char dots, DriverCommandContext cmds) {
       default:
          break;
       case BND_0:
-         return CMD_HOME;
+         return BRL_CMD_HOME;
       case (BND_1):
-	 return CMD_CHRLT;
+	 return BRL_CMD_CHRLT;
       case (BND_1 | BND_2):
-	 return CMD_HWINLT;
+	 return BRL_CMD_HWINLT;
       case (BND_2):
-	 return CMD_FWINLT;
+	 return BRL_CMD_FWINLT;
       case (BND_2 | BND_3):
-	 return CMD_FWINLTSKIP;
+	 return BRL_CMD_FWINLTSKIP;
       case (BND_3):
-	 return CMD_LNBEG;
+	 return BRL_CMD_LNBEG;
       case (BND_1 | BND_3):
-	 return CMD_LNUP;
+	 return BRL_CMD_LNUP;
       case (BND_1 | BND_2 | BND_3):
-	 return CMD_TOP_LEFT;
+	 return BRL_CMD_TOP_LEFT;
       case (BND_4):
-	 return CMD_CHRRT;
+	 return BRL_CMD_CHRRT;
       case (BND_4 | BND_5):
-	 return CMD_HWINRT;
+	 return BRL_CMD_HWINRT;
       case (BND_5):
-	 return CMD_FWINRT;
+	 return BRL_CMD_FWINRT;
       case (BND_5 | BND_6):
-	 return CMD_FWINRTSKIP;
+	 return BRL_CMD_FWINRTSKIP;
       case (BND_6):
-	 return CMD_LNEND;
+	 return BRL_CMD_LNEND;
       case (BND_4 | BND_6):
-	 return CMD_LNDN;
+	 return BRL_CMD_LNDN;
       case (BND_4 | BND_5 | BND_6):
-	 return CMD_BOT_LEFT;
+	 return BRL_CMD_BOT_LEFT;
       case (BND_1 | BND_4):
-	 return CMD_TOP;
+	 return BRL_CMD_TOP;
       case (BND_2 | BND_5):
-	 return CMD_HOME;
+	 return BRL_CMD_HOME;
       case (BND_3 | BND_6):
-	 return CMD_BOT;
+	 return BRL_CMD_BOT;
       case (BND_1 | BND_4 | BND_5):
-	 return CMD_PRDIFLN;
+	 return BRL_CMD_PRDIFLN;
       case (BND_2 | BND_5 | BND_6):
-	 return CMD_NXDIFLN;
+	 return BRL_CMD_NXDIFLN;
       case (BND_1 | BND_2 | BND_4):
-	 return CMD_PRSEARCH;
+	 return BRL_CMD_PRSEARCH;
       case (BND_2 | BND_3 | BND_5):
-	 return CMD_NXSEARCH;
+	 return BRL_CMD_NXSEARCH;
       case (BND_1 | BND_2 | BND_5):
-	 return CMD_ATTRUP;
+	 return BRL_CMD_ATTRUP;
       case (BND_2 | BND_3 | BND_6):
-	 return CMD_ATTRDN;
+	 return BRL_CMD_ATTRDN;
       case (BND_2 | BND_4):
 	 temporaryRoutingOperation = CR_PRINDENT;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case (BND_3 | BND_5):
 	 temporaryRoutingOperation = CR_NXINDENT;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case (BND_2 | BND_4 | BND_5):
-	 return CMD_WINUP;
+	 return BRL_CMD_WINUP;
       case (BND_3 | BND_5 | BND_6):
-	 return CMD_WINDN;
+	 return BRL_CMD_WINDN;
    }
    return EOF;
 }
@@ -613,24 +613,24 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
       case BNC_SPACE:
 	 return interpretCharacter(dots, cmds);
       case BNC_C:
-	 return CMD_PREFMENU;
+	 return BRL_CMD_PREFMENU;
       case BNC_D:
-	 return CMD_PREFLOAD;
+	 return BRL_CMD_PREFLOAD;
       case BNC_F:
 	 return getFunctionKey();
       case BNC_L:
 	 temporaryRoutingOperation = CR_SETLEFT;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_M:
-	 return CMD_MUTE;
+	 return BRL_CMD_MUTE;
       case BNC_N:
          persistentKeyboardMode = KBM_NAVIGATE;
 	 temporaryKeyboardMode = persistentKeyboardMode;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_P:
-	 return CMD_PASTE;
+	 return BRL_CMD_PASTE;
       case BNC_S:
-	 return CMD_SAY_LINE;
+	 return BRL_CMD_SAY_LINE;
       case BNC_V: {
 	 unsigned int vt;
 	 if (getDecimalInteger(&vt, 2, "virt term num")) {
@@ -640,7 +640,7 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
          return EOF;
       }
       case BNC_W:
-	 return CMD_PREFSAVE;
+	 return BRL_CMD_PREFSAVE;
       case BNC_X: {
 	 unsigned char character;
 	 if (!getHexadecimalCharacter(&character)) {
@@ -650,20 +650,20 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
       }
       case BNC_LPAREN:
 	 temporaryRoutingOperation = CR_CUTBEGIN;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_LBRACE:
 	 temporaryRoutingOperation = CR_CUTAPPEND;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_RPAREN:
 	 temporaryRoutingOperation = CR_CUTRECT;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_RBRACE:
 	 temporaryRoutingOperation = CR_CUTLINE;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_BAR:
-         return CMD_CSRJMP_VERT;
+         return BRL_CMD_CSRJMP_VERT;
       case BNC_QUESTION:
-         return CMD_LEARN;
+         return BRL_CMD_LEARN;
       case (BND_2 | BND_3 | BND_5 | BND_6):
 	 return VAL_PASSKEY + VPK_TAB;
       case (BND_2 | BND_3):
@@ -707,7 +707,7 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
 	 if (dots & BND_5) {
 	    persistentKeyboardMode = temporaryKeyboardMode;
 	 }
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
    }
    return EOF;
 }
@@ -721,35 +721,35 @@ interpretBackspaceChord (unsigned char dots, DriverCommandContext cmds) {
 	 return VAL_PASSKEY + VPK_BACKSPACE;
 	 return EOF;
       case BNC_A:
-	 return CMD_DISPMD | VAL_TOGGLE_ON;
+	 return BRL_CMD_DISPMD | VAL_TOGGLE_ON;
       case BNC_B:
-         return CMD_SKPBLNKWINS | VAL_TOGGLE_OFF;
+         return BRL_CMD_SKPBLNKWINS | VAL_TOGGLE_OFF;
       case BNC_D:
 	 temporaryRoutingOperation = CR_DESCCHAR;
-         return CMD_NOOP;
+         return BRL_CMD_NOOP;
       case BNC_F:
-         return CMD_FREEZE | VAL_TOGGLE_OFF;
+         return BRL_CMD_FREEZE | VAL_TOGGLE_OFF;
       case BNC_H:
-	 return CMD_HELP;
+	 return BRL_CMD_HELP;
       case BNC_I:
-         return CMD_SKPIDLNS | VAL_TOGGLE_OFF;
+         return BRL_CMD_SKPIDLNS | VAL_TOGGLE_OFF;
       case BNC_M:
 	 temporaryRoutingOperation = CR_SETMARK;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_S:
-	 return CMD_INFO;
+	 return BRL_CMD_INFO;
       case BNC_T:
-	 return CMD_DISPMD | VAL_TOGGLE_OFF;
+	 return BRL_CMD_DISPMD | VAL_TOGGLE_OFF;
       case BNC_V:
-	 return CMD_SWITCHVT_PREV;
+	 return BRL_CMD_SWITCHVT_PREV;
       case BNC_W:
-         return CMD_SLIDEWIN | VAL_TOGGLE_OFF;
+         return BRL_CMD_SLIDEWIN | VAL_TOGGLE_OFF;
       case BNC_6:
-         return CMD_SIXDOTS | VAL_TOGGLE_ON;
+         return BRL_CMD_SIXDOTS | VAL_TOGGLE_ON;
       case BNC_8:
-         return CMD_SIXDOTS | VAL_TOGGLE_OFF;
+         return BRL_CMD_SIXDOTS | VAL_TOGGLE_OFF;
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
-	 return CMD_RESTARTSPEECH;
+	 return BRL_CMD_RESTARTSPEECH;
    }
    return EOF;
 }
@@ -774,20 +774,20 @@ interpretEnterChord (unsigned char dots, DriverCommandContext cmds) {
 	 return VAL_PASSKEY + VPK_RETURN;
 	 return EOF;
       case BNC_B:
-         return CMD_SKPBLNKWINS | VAL_TOGGLE_ON;
+         return BRL_CMD_SKPBLNKWINS | VAL_TOGGLE_ON;
       case BNC_F:
-         return CMD_FREEZE | VAL_TOGGLE_ON;
+         return BRL_CMD_FREEZE | VAL_TOGGLE_ON;
       case BNC_I:
-         return CMD_SKPIDLNS | VAL_TOGGLE_ON;
+         return BRL_CMD_SKPIDLNS | VAL_TOGGLE_ON;
       case BNC_M:
 	 temporaryRoutingOperation = CR_GOTOMARK;
-	 return CMD_NOOP;
+	 return BRL_CMD_NOOP;
       case BNC_V:
-	 return CMD_SWITCHVT_NEXT;
+	 return BRL_CMD_SWITCHVT_NEXT;
       case BNC_W:
-         return CMD_SLIDEWIN | VAL_TOGGLE_ON;
+         return BRL_CMD_SLIDEWIN | VAL_TOGGLE_ON;
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
-	 return CMD_RESTARTBRL;
+	 return BRL_CMD_RESTARTBRL;
    }
    return EOF;
 }
@@ -798,25 +798,25 @@ interpretThumbKeys (unsigned char keys, DriverCommandContext cmds) {
       default:
 	 break;
       case (BNT_PREVIOUS):
-	 return CMD_FWINLT;
+	 return BRL_CMD_FWINLT;
       case (BNT_NEXT):
-	 return CMD_FWINRT;
+	 return BRL_CMD_FWINRT;
       case (BNT_BACK):
-	 return CMD_LNUP;
+	 return BRL_CMD_LNUP;
       case (BNT_ADVANCE):
-	 return CMD_LNDN;
+	 return BRL_CMD_LNDN;
       case (BNT_PREVIOUS | BNT_BACK):
-	 return CMD_LNBEG;
+	 return BRL_CMD_LNBEG;
       case (BNT_NEXT | BNT_ADVANCE):
-	 return CMD_LNEND;
+	 return BRL_CMD_LNEND;
       case (BNT_PREVIOUS | BNT_ADVANCE):
-	 return CMD_TOP_LEFT;
+	 return BRL_CMD_TOP_LEFT;
       case (BNT_PREVIOUS | BNT_NEXT):
-	 return CMD_BOT_LEFT;
+	 return BRL_CMD_BOT_LEFT;
       case (BNT_BACK | BNT_ADVANCE):
-	 return CMD_BACK;
+	 return BRL_CMD_BACK;
       case (BNT_BACK | BNT_NEXT):
-	 return CMD_CSRTRK;
+	 return BRL_CMD_CSRTRK;
    }
    return EOF;
 }

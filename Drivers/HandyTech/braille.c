@@ -724,7 +724,7 @@ interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command
 
   if ((byte >= KEY_ROUTING) &&
       (byte < (KEY_ROUTING + model->columns))) {
-    *command = CMD_NOOP;
+    *command = BRL_CMD_NOOP;
     if (!release) {
       currentKeys.column = byte - KEY_ROUTING;
       if (model->interpretKeys(context, &currentKeys, command)) {
@@ -736,7 +736,7 @@ interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command
 
   if ((byte >= KEY_STATUS) &&
       (byte < (KEY_STATUS + model->statusCells))) {
-    *command = CMD_NOOP;
+    *command = BRL_CMD_NOOP;
     if (!release) {
       currentKeys.status = byte - KEY_STATUS;
       if (model->interpretKeys(context, &currentKeys, command)) {
@@ -748,7 +748,7 @@ interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command
 
   if (byte < 0X20) {
     unsigned long int key = KEY(byte);
-    *command = CMD_NOOP;
+    *command = BRL_CMD_NOOP;
     if (release) {
       currentKeys.front &= ~key;
       if (pressedKeys.front) {
@@ -813,16 +813,16 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
       default:
         break;
       case 0:
-        *command = CMD_HELP;
+        *command = BRL_CMD_HELP;
         return 1;
       case 1:
-        *command = CMD_PREFMENU;
+        *command = BRL_CMD_PREFMENU;
         return 1;
       case 2:
-        *command = CMD_INFO;
+        *command = BRL_CMD_INFO;
         return 1;
       case 3:
-        *command = CMD_FREEZE;
+        *command = BRL_CMD_FREEZE;
         return 1;
     }
   } else {
@@ -838,52 +838,52 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
         *command = EOF;
         return 1;
       case (KEY_B9):
-        *command = CMD_SAY_ABOVE;
+        *command = BRL_CMD_SAY_ABOVE;
         return 1;
       case (KEY_B10):
-        *command = CMD_SAY_LINE;
+        *command = BRL_CMD_SAY_LINE;
         return 1;
       case (KEY_B11):
-        *command = CMD_SAY_BELOW;
+        *command = BRL_CMD_SAY_BELOW;
         return 1;
       case (KEY_B12):
-        *command = CMD_MUTE;
+        *command = BRL_CMD_MUTE;
         return 1;
       case (KEY_ZERO):
-        *command = CMD_SPKHOME;
+        *command = BRL_CMD_SPKHOME;
         return 1;
       case (KEY_B13):
-        *command = CMD_SWITCHVT_PREV;
+        *command = BRL_CMD_SWITCHVT_PREV;
         return 1;
       case (KEY_B14):
-        *command = CMD_SWITCHVT_NEXT;
+        *command = BRL_CMD_SWITCHVT_NEXT;
         return 1;
       case (KEY_SEVEN):
-        *command = CMD_LEARN;
+        *command = BRL_CMD_LEARN;
         return 1;
       case (KEY_EIGHT):
-        *command = CMD_MENU_PREV_ITEM;
+        *command = BRL_CMD_MENU_PREV_ITEM;
         return 1;
       case (KEY_NINE):
-        *command = CMD_MENU_FIRST_ITEM;
+        *command = BRL_CMD_MENU_FIRST_ITEM;
         return 1;
       case (KEY_FOUR):
-        *command = CMD_MENU_PREV_SETTING;
+        *command = BRL_CMD_MENU_PREV_SETTING;
         return 1;
       case (KEY_FIVE):
-        *command = CMD_PREFSAVE;
+        *command = BRL_CMD_PREFSAVE;
         return 1;
       case (KEY_SIX):
-        *command = CMD_MENU_NEXT_SETTING;
+        *command = BRL_CMD_MENU_NEXT_SETTING;
         return 1;
       case (KEY_ONE):
-        *command = CMD_PREFMENU;
+        *command = BRL_CMD_PREFMENU;
         return 1;
       case (KEY_TWO):
-        *command = CMD_MENU_NEXT_ITEM;
+        *command = BRL_CMD_MENU_NEXT_ITEM;
         return 1;
       case (KEY_THREE):
-        *command = CMD_MENU_LAST_ITEM;
+        *command = BRL_CMD_MENU_LAST_ITEM;
         return 1;
       case (KEY_ZERO | KEY_SEVEN):
         *command = VAL_PASSKEY + VPK_HOME;
@@ -1018,139 +1018,139 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
       default:
         break;
       case (KEY_UP):
-        *command = CMD_FWINLT;
+        *command = BRL_CMD_FWINLT;
         return 1;
       case (KEY_DOWN):
-        *command = CMD_FWINRT;
+        *command = BRL_CMD_FWINRT;
         return 1;
       case (KEY_B1):
-        *command = CMD_HOME;
+        *command = BRL_CMD_HOME;
         return 1;
       case (KEY_B1 | KEY_UP):
-        *command = CMD_LNBEG;
+        *command = BRL_CMD_LNBEG;
         return 1;
       case (KEY_B1 | KEY_DOWN):
-        *command = CMD_LNEND;
+        *command = BRL_CMD_LNEND;
         return 1;
       case (KEY_B2):
-        *command = CMD_TOP_LEFT;
+        *command = BRL_CMD_TOP_LEFT;
         return 1;
       case (KEY_B2 | KEY_UP):
-        *command = CMD_TOP;
+        *command = BRL_CMD_TOP;
         return 1;
       case (KEY_B2 | KEY_DOWN):
-        *command = CMD_BOT;
+        *command = BRL_CMD_BOT;
         return 1;
       case (KEY_B3):
-        *command = CMD_BACK;
+        *command = BRL_CMD_BACK;
         return 1;
       case (KEY_B3 | KEY_UP):
-        *command = CMD_HWINLT;
+        *command = BRL_CMD_HWINLT;
         return 1;
       case (KEY_B3 | KEY_DOWN):
-        *command = CMD_HWINRT;
+        *command = BRL_CMD_HWINRT;
         return 1;
       case (KEY_B6 | KEY_UP):
-        *command = CMD_CHRLT;
+        *command = BRL_CMD_CHRLT;
         return 1;
       case (KEY_B6 | KEY_DOWN):
-        *command = CMD_CHRRT;
+        *command = BRL_CMD_CHRRT;
         return 1;
       case (KEY_B4):
-        *command = CMD_LNUP;
+        *command = BRL_CMD_LNUP;
         return 1;
       case (KEY_B5):
-        *command = CMD_LNDN;
+        *command = BRL_CMD_LNDN;
         return 1;
       case (KEY_B1 | KEY_B4):
-        *command = CMD_PRPGRPH;
+        *command = BRL_CMD_PRPGRPH;
         return 1;
       case (KEY_B1 |  KEY_B5):
-        *command = CMD_NXPGRPH;
+        *command = BRL_CMD_NXPGRPH;
         return 1;
       case (KEY_B2 | KEY_B4):
-        *command = CMD_PRPROMPT;
+        *command = BRL_CMD_PRPROMPT;
         return 1;
       case (KEY_B2 |  KEY_B5):
-        *command = CMD_NXPROMPT;
+        *command = BRL_CMD_NXPROMPT;
         return 1;
       case (KEY_B3 | KEY_B4):
-        *command = CMD_PRSEARCH;
+        *command = BRL_CMD_PRSEARCH;
         return 1;
       case (KEY_B3 |  KEY_B5):
-        *command = CMD_NXSEARCH;
+        *command = BRL_CMD_NXSEARCH;
         return 1;
       case (KEY_B6 | KEY_B4):
-        *command = CMD_ATTRUP;
+        *command = BRL_CMD_ATTRUP;
         return 1;
       case (KEY_B6 |  KEY_B5):
-        *command = CMD_ATTRDN;
+        *command = BRL_CMD_ATTRDN;
         return 1;
       case (KEY_B7 | KEY_B4):
-        *command = CMD_WINUP;
+        *command = BRL_CMD_WINUP;
         return 1;
       case (KEY_B7 |  KEY_B5):
-        *command = CMD_WINDN;
+        *command = BRL_CMD_WINDN;
         return 1;
       case (KEY_B8 | KEY_B4):
-        *command = CMD_PRDIFLN;
+        *command = BRL_CMD_PRDIFLN;
         return 1;
       case (KEY_B8 | KEY_B5):
-        *command = CMD_NXDIFLN;
+        *command = BRL_CMD_NXDIFLN;
         return 1;
       case (KEY_B8):
-        *command = CMD_HELP;
+        *command = BRL_CMD_HELP;
         return 1;
       case (KEY_B8 | KEY_B1):
-        *command = CMD_CSRTRK;
+        *command = BRL_CMD_CSRTRK;
         return 1;
       case (KEY_B8 | KEY_B2):
-        *command = CMD_CSRVIS;
+        *command = BRL_CMD_CSRVIS;
         return 1;
       case (KEY_B8 | KEY_B3):
-        *command = CMD_ATTRVIS;
+        *command = BRL_CMD_ATTRVIS;
         return 1;
       case (KEY_B8 | KEY_B6):
-        *command = CMD_FREEZE;
+        *command = BRL_CMD_FREEZE;
         return 1;
       case (KEY_B8 | KEY_B7):
-        *command = CMD_TUNES;
+        *command = BRL_CMD_TUNES;
         return 1;
       case (KEY_B7):
-        *command = CMD_SIXDOTS;
+        *command = BRL_CMD_SIXDOTS;
         return 1;
       case (KEY_B7 | KEY_B1):
-        *command = CMD_PREFMENU;
+        *command = BRL_CMD_PREFMENU;
         return 1;
       case (KEY_B7 | KEY_B2):
-        *command = CMD_PREFLOAD;
+        *command = BRL_CMD_PREFLOAD;
         return 1;
       case (KEY_B7 | KEY_B3):
-        *command = CMD_PREFSAVE;
+        *command = BRL_CMD_PREFSAVE;
         return 1;
       case (KEY_B7 | KEY_B6):
-        *command = CMD_INFO;
+        *command = BRL_CMD_INFO;
         return 1;
       case (KEY_B6):
-        *command = CMD_DISPMD;
+        *command = BRL_CMD_DISPMD;
         return 1;
       case (KEY_B6 | KEY_B1):
-        *command = CMD_SKPIDLNS;
+        *command = BRL_CMD_SKPIDLNS;
         return 1;
       case (KEY_B6 | KEY_B2):
-        *command = CMD_SKPBLNKWINS;
+        *command = BRL_CMD_SKPBLNKWINS;
         return 1;
       case (KEY_B6 | KEY_B3):
-        *command = CMD_SLIDEWIN;
+        *command = BRL_CMD_SLIDEWIN;
         return 1;
       case (KEY_B2 | KEY_B3 | KEY_UP):
-        *command = CMD_MUTE;
+        *command = BRL_CMD_MUTE;
         return 1;
       case (KEY_B2 | KEY_B3 | KEY_DOWN):
-        *command = CMD_SAY_LINE;
+        *command = BRL_CMD_SAY_LINE;
         return 1;
       case (KEY_UP | KEY_DOWN):
-        *command = CMD_PASTE;
+        *command = BRL_CMD_PASTE;
         return 1;
     }
   }
@@ -1200,46 +1200,46 @@ interpretBrailleStarKeys (DriverCommandContext context, const Keys *keys, int *c
         *command = VAL_PASSKEY + VPK_CURSOR_UP;
         return 1;
       case (ROCKER_RIGHT_TOP):
-        *command = CMD_LNUP;
+        *command = BRL_CMD_LNUP;
         return 1;
       case (ROCKER_LEFT_BOTTOM):
         *command = VAL_PASSKEY + VPK_CURSOR_DOWN;
         return 1;
       case (ROCKER_RIGHT_BOTTOM):
-        *command = CMD_LNDN;
+        *command = BRL_CMD_LNDN;
         return 1;
       case (ROCKER_LEFT_MIDDLE):
-        *command = CMD_FWINLT;
+        *command = BRL_CMD_FWINLT;
         return 1;
       case (ROCKER_RIGHT_MIDDLE):
-        *command = CMD_FWINRT;
+        *command = BRL_CMD_FWINRT;
         return 1;
       case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_MIDDLE):
-        *command = CMD_HOME;
+        *command = BRL_CMD_HOME;
         return 1;
       case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_TOP):
-        *command = CMD_TOP_LEFT;
+        *command = BRL_CMD_TOP_LEFT;
         return 1;
       case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_BOTTOM):
-        *command = CMD_BOT_LEFT;
+        *command = BRL_CMD_BOT_LEFT;
         return 1;
       case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_TOP):
-        *command = CMD_TOP;
+        *command = BRL_CMD_TOP;
         return 1;
       case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_BOTTOM):
-        *command = CMD_BOT;
+        *command = BRL_CMD_BOT;
         return 1;
       case (ROCKER_LEFT_TOP | ROCKER_RIGHT_TOP):
-        *command = CMD_PRDIFLN;
+        *command = BRL_CMD_PRDIFLN;
         return 1;
       case (ROCKER_LEFT_TOP | ROCKER_RIGHT_BOTTOM):
-        *command = CMD_NXDIFLN;
+        *command = BRL_CMD_NXDIFLN;
         return 1;
       case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_TOP):
-        *command = CMD_ATTRUP;
+        *command = BRL_CMD_ATTRUP;
         return 1;
       case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_BOTTOM):
-        *command = CMD_ATTRDN;
+        *command = BRL_CMD_ATTRDN;
         return 1;
     }
   }
@@ -1270,46 +1270,46 @@ interpretBookwormByte (DriverCommandContext context, unsigned char byte, int *co
     case CMDS_PREFS:
       switch (byte) {
         case (BWK_BACKWARD):
-          *command = CMD_FWINLT;
+          *command = BRL_CMD_FWINLT;
           return 1;
         case (BWK_FORWARD):
-          *command = CMD_FWINRT;
+          *command = BRL_CMD_FWINRT;
           return 1;
         case (BWK_ESCAPE):
-          *command = CMD_PREFLOAD;
+          *command = BRL_CMD_PREFLOAD;
           return 1;
         case (BWK_ESCAPE | BWK_BACKWARD):
-          *command = CMD_MENU_PREV_SETTING;
+          *command = BRL_CMD_MENU_PREV_SETTING;
           return 1;
         case (BWK_ESCAPE | BWK_FORWARD):
-          *command = CMD_MENU_NEXT_SETTING;
+          *command = BRL_CMD_MENU_NEXT_SETTING;
           return 1;
         case (BWK_ENTER):
-          *command = CMD_PREFMENU;
+          *command = BRL_CMD_PREFMENU;
           return 1;
         case (BWK_ENTER | BWK_BACKWARD):
-          *command = CMD_MENU_PREV_ITEM;
+          *command = BRL_CMD_MENU_PREV_ITEM;
           return 1;
         case (BWK_ENTER | BWK_FORWARD):
-          *command = CMD_MENU_NEXT_ITEM;
+          *command = BRL_CMD_MENU_NEXT_ITEM;
           return 1;
         case (BWK_ESCAPE | BWK_ENTER):
-          *command = CMD_PREFSAVE;
+          *command = BRL_CMD_PREFSAVE;
           return 1;
         case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
-          *command = CMD_MENU_FIRST_ITEM;
+          *command = BRL_CMD_MENU_FIRST_ITEM;
           return 1;
         case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
-          *command = CMD_MENU_LAST_ITEM;
+          *command = BRL_CMD_MENU_LAST_ITEM;
           return 1;
         case (BWK_BACKWARD | BWK_FORWARD):
-          *command = CMD_NOOP;
+          *command = BRL_CMD_NOOP;
           return 1;
         case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
-          *command = CMD_NOOP;
+          *command = BRL_CMD_NOOP;
           return 1;
         case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
-          *command = CMD_NOOP;
+          *command = BRL_CMD_NOOP;
           return 1;
         default:
           break;
@@ -1318,46 +1318,46 @@ interpretBookwormByte (DriverCommandContext context, unsigned char byte, int *co
     default:
       switch (byte) {
         case (BWK_BACKWARD):
-          *command = CMD_FWINLT;
+          *command = BRL_CMD_FWINLT;
           return 1;
         case (BWK_FORWARD):
-          *command = CMD_FWINRT;
+          *command = BRL_CMD_FWINRT;
           return 1;
         case (BWK_ESCAPE):
-          *command = CMD_CSRTRK;
+          *command = BRL_CMD_CSRTRK;
           return 1;
         case (BWK_ESCAPE | BWK_BACKWARD):
-          *command = CMD_BACK;
+          *command = BRL_CMD_BACK;
           return 1;
         case (BWK_ESCAPE | BWK_FORWARD):
-          *command = CMD_DISPMD;
+          *command = BRL_CMD_DISPMD;
           return 1;
         case (BWK_ENTER):
           *command = CR_ROUTE;
           return 1;
         case (BWK_ENTER | BWK_BACKWARD):
-          *command = CMD_LNUP;
+          *command = BRL_CMD_LNUP;
           return 1;
         case (BWK_ENTER | BWK_FORWARD):
-          *command = CMD_LNDN;
+          *command = BRL_CMD_LNDN;
           return 1;
         case (BWK_ESCAPE | BWK_ENTER):
-          *command = CMD_PREFMENU;
+          *command = BRL_CMD_PREFMENU;
           return 1;
         case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
-          *command = CMD_LNBEG;
+          *command = BRL_CMD_LNBEG;
           return 1;
         case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
-          *command = CMD_LNEND;
+          *command = BRL_CMD_LNEND;
           return 1;
         case (BWK_BACKWARD | BWK_FORWARD):
-          *command = CMD_HELP;
+          *command = BRL_CMD_HELP;
           return 1;
         case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
-          *command = CMD_CSRSIZE;
+          *command = BRL_CMD_CSRSIZE;
           return 1;
         case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
-          *command = CMD_FREEZE;
+          *command = BRL_CMD_FREEZE;
           return 1;
         default:
           break;
@@ -1381,7 +1381,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
     unsigned char byte;
     {
       int count = readByte(brl, &byte, 0);
-      if (count == -1) return CMD_RESTARTBRL;
+      if (count == -1) return BRL_CMD_RESTARTBRL;
       if (count == 0) break;
     }
     timedOut = 0;
@@ -1393,7 +1393,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
           setState(BDS_OFF);
           continue;
         }
-        if (errno != EAGAIN) return CMD_RESTARTBRL;
+        if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
       }
     }
 

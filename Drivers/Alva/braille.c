@@ -944,9 +944,9 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
   if (ProcessKey < 0) {
     /* An input error occurred (perhaps disconnect of USB device) */
-    res = CMD_RESTARTBRL;
+    res = BRL_CMD_RESTARTBRL;
   } else if (ProcessKey > 0) {
-    res = CMD_NOOP;
+    res = BRL_CMD_NOOP;
 
     if (CurrentKeys > LastKeys) {
       /* These are the keys that should be processed when pressed */
@@ -956,94 +956,94 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
         case 0: /* ABT and Delphi models */
           switch (CurrentKeys) {
             case KEY_HOME | KEY_UP:
-              res = CMD_TOP;
+              res = BRL_CMD_TOP;
               break;
             case KEY_HOME | KEY_DOWN:
-              res = CMD_BOT;
+              res = BRL_CMD_BOT;
               break;
             case KEY_UP:
-              res = CMD_LNUP;
+              res = BRL_CMD_LNUP;
               break;
             case KEY_CURSOR | KEY_UP:
-              res = CMD_ATTRUP;
+              res = BRL_CMD_ATTRUP;
               break;
             case KEY_DOWN:
-              res = CMD_LNDN;
+              res = BRL_CMD_LNDN;
               break;
             case KEY_CURSOR | KEY_DOWN:
-              res = CMD_ATTRDN;
+              res = BRL_CMD_ATTRDN;
               break;
             case KEY_LEFT:
-              res = CMD_FWINLT;
+              res = BRL_CMD_FWINLT;
               break;
             case KEY_HOME | KEY_LEFT:
-              res = CMD_LNBEG;
+              res = BRL_CMD_LNBEG;
               break;
             case KEY_CURSOR | KEY_LEFT:
-              res = CMD_HWINLT;
+              res = BRL_CMD_HWINLT;
               break;
             case KEY_PROG | KEY_LEFT:
-              res = CMD_CHRLT;
+              res = BRL_CMD_CHRLT;
               break;
             case KEY_RIGHT:
-              res = CMD_FWINRT;
+              res = BRL_CMD_FWINRT;
               break;
             case KEY_HOME | KEY_RIGHT:
-              res = CMD_LNEND;
+              res = BRL_CMD_LNEND;
               break;
             case KEY_PROG | KEY_RIGHT:
-              res = CMD_CHRRT;
+              res = BRL_CMD_CHRRT;
               break;
             case KEY_CURSOR | KEY_RIGHT:
-              res = CMD_HWINRT;
+              res = BRL_CMD_HWINRT;
               break;
             case KEY_HOME | KEY_CURSOR | KEY_UP:
-              res = CMD_PRDIFLN;
+              res = BRL_CMD_PRDIFLN;
               break;
             case KEY_HOME | KEY_CURSOR | KEY_DOWN:
-              res = CMD_NXDIFLN;
+              res = BRL_CMD_NXDIFLN;
               break;
             case KEY_HOME | KEY_CURSOR | KEY_LEFT:
-              res = CMD_MUTE;
+              res = BRL_CMD_MUTE;
               break;
             case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
-              res = CMD_SAY_LINE;
+              res = BRL_CMD_SAY_LINE;
               break;
             case KEY_PROG | KEY_DOWN:
-              res = CMD_FREEZE;
+              res = BRL_CMD_FREEZE;
               break;
             case KEY_PROG | KEY_UP:
-              res = CMD_INFO;
+              res = BRL_CMD_INFO;
               break;
             case KEY_PROG | KEY_CURSOR | KEY_LEFT:
-              res = CMD_BACK;
+              res = BRL_CMD_BACK;
               break;
             case KEY_STATUS1_A:
-              res = CMD_CAPBLINK;
+              res = BRL_CMD_CAPBLINK;
               break;
             case KEY_STATUS1_B:
-              res = CMD_CSRVIS;
+              res = BRL_CMD_CSRVIS;
               break;
             case KEY_STATUS1_C:
-              res = CMD_CSRBLINK;
+              res = BRL_CMD_CSRBLINK;
               break;
             case KEY_CURSOR | KEY_STATUS1_A:
-              res = CMD_SIXDOTS;
+              res = BRL_CMD_SIXDOTS;
               break;
             case KEY_CURSOR | KEY_STATUS1_B:
-              res = CMD_CSRSIZE;
+              res = BRL_CMD_CSRSIZE;
               break;
             case KEY_CURSOR | KEY_STATUS1_C:
-              res = CMD_SLIDEWIN;
+              res = BRL_CMD_SLIDEWIN;
               break;
             case KEY_PROG | KEY_HOME | KEY_UP:
-              res = CMD_PRPROMPT;
+              res = BRL_CMD_PRPROMPT;
               break;
             case KEY_PROG | KEY_HOME | KEY_LEFT:
-              res = CMD_RESTARTSPEECH;
+              res = BRL_CMD_RESTARTSPEECH;
               break;
             case KEY_PROG | KEY_HOME | KEY_RIGHT:
-              res = CMD_SAY_BELOW;
+              res = BRL_CMD_SAY_BELOW;
               break;
             case KEY_ROUTING1:
               /* normal Cursor routing keys */
@@ -1058,7 +1058,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CR_CUTRECT + RoutingPos;
               break;
             case KEY_PROG | KEY_HOME | KEY_DOWN:
-              res = CMD_PASTE;
+              res = BRL_CMD_PASTE;
               break;
             case KEY_PROG | KEY_HOME | KEY_ROUTING1:
               /* attribute for pointed character */
@@ -1074,69 +1074,69 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
         case 1: /* Satellite models */
           switch (CurrentKeys) {
             case KEY_UP:
-              res = CMD_LNUP;
+              res = BRL_CMD_LNUP;
               break;
             case KEY_DOWN:
-              res = CMD_LNDN;
+              res = BRL_CMD_LNDN;
               break;
             case KEY_HOME | KEY_UP:
-              res = CMD_TOP_LEFT;
+              res = BRL_CMD_TOP_LEFT;
               break;
             case KEY_HOME | KEY_DOWN:
-              res = CMD_BOT_LEFT;
+              res = BRL_CMD_BOT_LEFT;
               break;
             case KEY_CURSOR | KEY_UP:
-              res = CMD_TOP;
+              res = BRL_CMD_TOP;
               break;
             case KEY_CURSOR | KEY_DOWN:
-              res = CMD_BOT;
+              res = BRL_CMD_BOT;
               break;
             case KEY_BRL_F1 | KEY_UP:
-              res = CMD_PRDIFLN;
+              res = BRL_CMD_PRDIFLN;
               break;
             case KEY_BRL_F1 | KEY_DOWN:
-              res = CMD_NXDIFLN;
+              res = BRL_CMD_NXDIFLN;
               break;
             case KEY_BRL_F2 | KEY_UP:
-              res = CMD_ATTRUP;
+              res = BRL_CMD_ATTRUP;
               break;
             case KEY_BRL_F2 | KEY_DOWN:
-              res = CMD_ATTRDN;
+              res = BRL_CMD_ATTRDN;
               break;
 
             case KEY_LEFT:
-              res = CMD_FWINLT;
+              res = BRL_CMD_FWINLT;
               break;
             case KEY_RIGHT:
-              res = CMD_FWINRT;
+              res = BRL_CMD_FWINRT;
               break;
             case KEY_TUMBLER2A:
             case KEY_HOME | KEY_LEFT:
-              res = CMD_LNBEG;
+              res = BRL_CMD_LNBEG;
               break;
             case KEY_TUMBLER2B:
             case KEY_HOME | KEY_RIGHT:
-              res = CMD_LNEND;
+              res = BRL_CMD_LNEND;
               break;
             case KEY_CURSOR | KEY_LEFT:
-              res = CMD_FWINLTSKIP;
+              res = BRL_CMD_FWINLTSKIP;
               break;
             case KEY_CURSOR | KEY_RIGHT:
-              res = CMD_FWINRTSKIP;
+              res = BRL_CMD_FWINRTSKIP;
               break;
             case KEY_TUMBLER1A:
             case KEY_BRL_F1 | KEY_LEFT:
-              res = CMD_CHRLT;
+              res = BRL_CMD_CHRLT;
               break;
             case KEY_TUMBLER1B:
             case KEY_BRL_F1 | KEY_RIGHT:
-              res = CMD_CHRRT;
+              res = BRL_CMD_CHRRT;
               break;
             case KEY_BRL_F2 | KEY_LEFT:
-              res = CMD_HWINLT;
+              res = BRL_CMD_HWINLT;
               break;
             case KEY_BRL_F2 | KEY_RIGHT:
-              res = CMD_HWINRT;
+              res = BRL_CMD_HWINRT;
               break;
 
             case KEY_ROUTING2:
@@ -1171,87 +1171,87 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               break;
 
             case KEY_STATUS1_A:
-              res = CMD_CSRVIS;
+              res = BRL_CMD_CSRVIS;
               break;
             case KEY_STATUS2_A:
-              res = CMD_SKPIDLNS;
+              res = BRL_CMD_SKPIDLNS;
               break;
             case KEY_STATUS1_B:
-              res = CMD_ATTRVIS;
+              res = BRL_CMD_ATTRVIS;
               break;
             case KEY_STATUS2_B:
-              res = CMD_DISPMD;
+              res = BRL_CMD_DISPMD;
               break;
             case KEY_STATUS1_C:
-              res = CMD_CAPBLINK;
+              res = BRL_CMD_CAPBLINK;
               break;
             case KEY_STATUS2_C:
-              res = CMD_SKPBLNKWINS;
+              res = BRL_CMD_SKPBLNKWINS;
               break;
 
             case KEY_BRL_LEFT:
-              res = CMD_PREFMENU;
+              res = BRL_CMD_PREFMENU;
               break;
             case KEY_BRL_RIGHT:
-              res = CMD_INFO;
+              res = BRL_CMD_INFO;
               break;
 
             case KEY_BRL_F1 | KEY_BRL_LEFT:
-              res = CMD_FREEZE;
+              res = BRL_CMD_FREEZE;
               break;
             case KEY_BRL_F1 | KEY_BRL_RIGHT:
-              res = CMD_SIXDOTS;
+              res = BRL_CMD_SIXDOTS;
               break;
 
             case KEY_BRL_F2 | KEY_BRL_LEFT:
-              res = CMD_PASTE;
+              res = BRL_CMD_PASTE;
               break;
             case KEY_BRL_F2 | KEY_BRL_RIGHT:
-              res = CMD_CSRJMP_VERT;
+              res = BRL_CMD_CSRJMP_VERT;
               break;
 
             case KEY_BRL_UP:
-              res = CMD_PRPROMPT;
+              res = BRL_CMD_PRPROMPT;
               break;
             case KEY_BRL_DOWN:
-              res = CMD_NXPROMPT;
+              res = BRL_CMD_NXPROMPT;
               break;
             case KEY_BRL_F1 | KEY_BRL_UP:
-              res = CMD_PRPGRPH;
+              res = BRL_CMD_PRPGRPH;
               break;
             case KEY_BRL_F1 | KEY_BRL_DOWN:
-              res = CMD_NXPGRPH;
+              res = BRL_CMD_NXPGRPH;
               break;
             case KEY_BRL_F2 | KEY_BRL_UP:
-              res = CMD_PRSEARCH;
+              res = BRL_CMD_PRSEARCH;
               break;
             case KEY_BRL_F2 | KEY_BRL_DOWN:
-              res = CMD_NXSEARCH;
+              res = BRL_CMD_NXSEARCH;
               break;
 
             case KEY_SPK_LEFT:
-              res = CMD_MUTE;
+              res = BRL_CMD_MUTE;
               break;
             case KEY_SPK_RIGHT:
-              res = CMD_SAY_LINE;
+              res = BRL_CMD_SAY_LINE;
               break;
             case KEY_SPK_UP:
-              res = CMD_SAY_ABOVE;
+              res = BRL_CMD_SAY_ABOVE;
               break;
             case KEY_SPK_DOWN:
-              res = CMD_SAY_BELOW;
+              res = BRL_CMD_SAY_BELOW;
               break;
             case KEY_SPK_F2 | KEY_SPK_LEFT:
-              res = CMD_SAY_SLOWER;
+              res = BRL_CMD_SAY_SLOWER;
               break;
             case KEY_SPK_F2 | KEY_SPK_RIGHT:
-              res = CMD_SAY_FASTER;
+              res = BRL_CMD_SAY_FASTER;
               break;
             case KEY_SPK_F2 | KEY_SPK_DOWN:
-              res = CMD_SAY_SOFTER;
+              res = BRL_CMD_SAY_SOFTER;
               break;
             case KEY_SPK_F2 | KEY_SPK_UP:
-              res = CMD_SAY_LOUDER;
+              res = BRL_CMD_SAY_LOUDER;
               break;
           }
           break;
@@ -1266,23 +1266,23 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
           case 0: /* ABT and Delphi models */
             switch (ReleasedKeys) {
               case KEY_HOME:
-                res = CMD_TOP_LEFT;
+                res = BRL_CMD_TOP_LEFT;
                 break;
               case KEY_CURSOR:
-                res = CMD_RETURN;
+                res = BRL_CMD_RETURN;
                 rewriteRequired = 1;	/* force rewrite of whole display */
                 break;
               case KEY_PROG:
-                res = CMD_HELP;
+                res = BRL_CMD_HELP;
                 break;
               case KEY_PROG | KEY_HOME:
-                res = CMD_DISPMD;
+                res = BRL_CMD_DISPMD;
                 break;
               case KEY_HOME | KEY_CURSOR:
-                res = CMD_CSRTRK;
+                res = BRL_CMD_CSRTRK;
                 break;
               case KEY_PROG | KEY_CURSOR:
-                res = CMD_PREFMENU;
+                res = BRL_CMD_PREFMENU;
                 break;
             }
             break;
@@ -1290,33 +1290,33 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
           case 1: /* Satellite models */
             switch (ReleasedKeys) {
               case KEY_HOME:
-                res = CMD_BACK;
+                res = BRL_CMD_BACK;
                 break;
               case KEY_CURSOR:
-                res = CMD_HOME;
+                res = BRL_CMD_HOME;
                 break;
               case KEY_HOME | KEY_CURSOR:
-                res = CMD_CSRTRK;
+                res = BRL_CMD_CSRTRK;
                 break;
 
               case KEY_BRL_F1:
-                res = CMD_HELP;
+                res = BRL_CMD_HELP;
                 break;
               case KEY_BRL_F2:
-                res = CMD_LEARN;
+                res = BRL_CMD_LEARN;
                 break;
               case KEY_BRL_F1 | KEY_BRL_F2:
-                res = CMD_RESTARTBRL;
+                res = BRL_CMD_RESTARTBRL;
                 break;
 
               case KEY_SPK_F1:
-                res = CMD_SPKHOME;
+                res = BRL_CMD_SPKHOME;
                 break;
               case KEY_SPK_F2:
-                res = CMD_AUTOSPEAK;
+                res = BRL_CMD_AUTOSPEAK;
                 break;
               case KEY_SPK_F1 | KEY_SPK_F2:
-                res = CMD_RESTARTSPEECH;
+                res = BRL_CMD_RESTARTSPEECH;
                 break;
             }
             break;
@@ -1329,7 +1329,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     }
   }
 
-  if (res == CMD_RESTARTBRL) {
+  if (res == BRL_CMD_RESTARTBRL) {
     CurrentKeys = LastKeys = ReleasedKeys = 0;
     RoutingPos = 0;
   }

@@ -124,7 +124,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 				case (KEY_6):
 					return CR_CUTRECT + key;
 				default:
-					return CMD_NOOP;
+					return BRL_CMD_NOOP;
 			}
 		}
 
@@ -156,27 +156,27 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 			activeKeys = 0;
 			switch (keys) {
 				case (KEY_1):
-					return CMD_LNUP;
+					return BRL_CMD_LNUP;
 				case (KEY_2):
-					return CMD_FWINLT;
+					return BRL_CMD_FWINLT;
 				case (KEY_3):
-					return CMD_HELP;
+					return BRL_CMD_HELP;
 				case (KEY_4):
-					return CMD_LNDN;
+					return BRL_CMD_LNDN;
 				case (KEY_5):
-					return CMD_FWINRT;
+					return BRL_CMD_FWINRT;
 				case (KEY_6):
-					return CMD_HOME;
+					return BRL_CMD_HOME;
 				case (KEY_3 | KEY_1):
-					return CMD_TOP_LEFT;
+					return BRL_CMD_TOP_LEFT;
 				case (KEY_3 | KEY_2):
-					return CMD_SKPIDLNS;
+					return BRL_CMD_SKPIDLNS;
 				case (KEY_3 | KEY_4):
-					return CMD_BOT_LEFT;
+					return BRL_CMD_BOT_LEFT;
 				case (KEY_3 | KEY_5):
-					return CMD_CSRTRK;
+					return BRL_CMD_CSRTRK;
 				case (KEY_3 | KEY_6):
-					return CMD_PREFMENU;
+					return BRL_CMD_PREFMENU;
 				default:
 					return EOF;
 			}

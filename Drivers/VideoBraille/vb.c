@@ -96,29 +96,29 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
       usleep(1);
     } while (b.keypressed);
     /* Test which buttons has been pressed */
-    if (buttons.bigbuttons==KEY_UP) return CMD_LNUP;
-    else if (buttons.bigbuttons==KEY_LEFT) return CMD_FWINLT;
-    else if (buttons.bigbuttons==KEY_RIGHT) return CMD_FWINRT;
-    else if (buttons.bigbuttons==KEY_DOWN) return CMD_LNDN;
-    else if (buttons.bigbuttons==KEY_ATTRIBUTES) return CMD_ATTRVIS;
-    else if (buttons.bigbuttons==KEY_CURSOR) return CMD_CSRVIS;
+    if (buttons.bigbuttons==KEY_UP) return BRL_CMD_LNUP;
+    else if (buttons.bigbuttons==KEY_LEFT) return BRL_CMD_FWINLT;
+    else if (buttons.bigbuttons==KEY_RIGHT) return BRL_CMD_FWINRT;
+    else if (buttons.bigbuttons==KEY_DOWN) return BRL_CMD_LNDN;
+    else if (buttons.bigbuttons==KEY_ATTRIBUTES) return BRL_CMD_ATTRVIS;
+    else if (buttons.bigbuttons==KEY_CURSOR) return BRL_CMD_CSRVIS;
     else if (buttons.bigbuttons==KEY_HOME) {
       /* If a routing key has been pressed, then mark the beginning of a block;
          go to cursor position otherwise */
-      return (buttons.routingkey>0) ? CR_CUTBEGIN+buttons.routingkey-1 : CMD_HOME;
+      return (buttons.routingkey>0) ? CR_CUTBEGIN+buttons.routingkey-1 : BRL_CMD_HOME;
     }
     else if (buttons.bigbuttons==KEY_MENU) {
       /* If a routing key has been pressed, then mark the end of a block;
          go to preferences menu otherwise */
-      return (buttons.routingkey>0) ? CR_CUTRECT+buttons.routingkey-1 : CMD_PREFMENU;
+      return (buttons.routingkey>0) ? CR_CUTRECT+buttons.routingkey-1 : BRL_CMD_PREFMENU;
     }
-    else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_MENU)) return CMD_PASTE;
-    else if (buttons.bigbuttons==(KEY_CURSOR | KEY_LEFT)) return CMD_CHRLT;
-    else if (buttons.bigbuttons==(KEY_HOME | KEY_RIGHT)) return CMD_CHRRT;
-    else if (buttons.bigbuttons==(KEY_UP | KEY_LEFT)) return CMD_TOP_LEFT;
-    else if (buttons.bigbuttons==(KEY_RIGHT | KEY_DOWN)) return CMD_BOT_LEFT;
-    else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_DOWN)) return CMD_HELP;
-    else if (buttons.bigbuttons==(KEY_MENU | KEY_CURSOR)) return CMD_INFO;
+    else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_MENU)) return BRL_CMD_PASTE;
+    else if (buttons.bigbuttons==(KEY_CURSOR | KEY_LEFT)) return BRL_CMD_CHRLT;
+    else if (buttons.bigbuttons==(KEY_HOME | KEY_RIGHT)) return BRL_CMD_CHRRT;
+    else if (buttons.bigbuttons==(KEY_UP | KEY_LEFT)) return BRL_CMD_TOP_LEFT;
+    else if (buttons.bigbuttons==(KEY_RIGHT | KEY_DOWN)) return BRL_CMD_BOT_LEFT;
+    else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_DOWN)) return BRL_CMD_HELP;
+    else if (buttons.bigbuttons==(KEY_MENU | KEY_CURSOR)) return BRL_CMD_INFO;
     else if (buttons.bigbuttons==0) {
       /* A cursor routing key has been pressed */
       if (buttons.routingkey>0) {

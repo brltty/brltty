@@ -355,19 +355,19 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
         /* Byte A. Check Status sensors */
 	switch(*(pBuff+3)){
 	   case KEY_ST_SENSOR1:
-	        res = CMD_HELP;
+	        res = BRL_CMD_HELP;
 	        break;
 
 	   case KEY_ST_SENSOR2:
-	        res = CMD_PREFMENU;
+	        res = BRL_CMD_PREFMENU;
 	        break;
 
 	   case KEY_ST_SENSOR3:
-	        res = CMD_DISPMD;
+	        res = BRL_CMD_DISPMD;
 	        break;
 
 	   case KEY_ST_SENSOR4:
-	        res = CMD_INFO;
+	        res = BRL_CMD_INFO;
 	        break;
         }
 
@@ -380,43 +380,43 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 	/* Byte B. Check Front Keys */
 	switch(*(pBuff+4)){
 	   case KEY_DOWN: /* Down */
-	        res = CMD_LNDN;
+	        res = BRL_CMD_LNDN;
 	        break;
 
 	   case KEY_RIGHT: /* Right */
-	        res = CMD_FWINRT;
+	        res = BRL_CMD_FWINRT;
 	        break;
 
 	   case KEY_CLICK: /* Eco20 Go to cursor */
 	   
 	        /* Only for ECO20, haven't function keys */
 		if(model->Cols==20){
-	           res = CMD_HOME;
+	           res = BRL_CMD_HOME;
 		}
 	        break;
 
 	   case KEY_LEFT: /* Left */
-	        res = CMD_FWINLT;
+	        res = BRL_CMD_FWINLT;
 	        break;
 
 	   case KEY_UP: /* Up  */
-	        res = CMD_LNUP;
+	        res = BRL_CMD_LNUP;
 	        break;
 
 	   case KEY_UP|KEY_CLICK: /* Top of screen  */
-	        return(CMD_TOP);
+	        return(BRL_CMD_TOP);
 	        break;
 
 	   case KEY_DOWN|KEY_CLICK: /* Bottom of screen */
-	        return(CMD_BOT);
+	        return(BRL_CMD_BOT);
 	        break;
 
 	   case KEY_LEFT|KEY_CLICK: /* Left one half window */
-	        return(CMD_HWINLT);
+	        return(BRL_CMD_HWINLT);
 	        break;
 
 	   case KEY_RIGHT|KEY_CLICK: /* Right one half window */
-	        return(CMD_HWINRT);
+	        return(BRL_CMD_HWINRT);
 	        break;
         }
 
@@ -436,7 +436,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 
 	   case KEY_SHIFT: /* Cursor traking */
 		if(*(pBuff+6)==KEY_F8){
-		     return(CMD_CSRTRK);
+		     return(BRL_CMD_CSRTRK);
 		}
 	        break;
         }
@@ -449,7 +449,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 	        break;
 
 	   case KEY_F2:  /* go to cursor */
-                res = CMD_HOME;
+                res = BRL_CMD_HOME;
 	        break;
 
 	   case KEY_F3:
@@ -461,7 +461,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 	        break;
 
 	   case KEY_F5: /* togle cursor visibility */
-	        res = CMD_CSRVIS;
+	        res = BRL_CMD_CSRVIS;
 	        break;
 
 	   case KEY_F6:
@@ -473,7 +473,7 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 	        break;
 
 	   case KEY_F8: /* Six dot mode */
-	        res = CMD_SIXDOTS;
+	        res = BRL_CMD_SIXDOTS;
 	        break;
         }
      }

@@ -537,7 +537,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 #endif /* USE_TEXTTRANS */
   static blkey key;
   static unsigned char outmsg[41];
-  int temp = CMD_NOOP;
+  int temp = BRL_CMD_NOOP;
 
  again:
   if(repeatNext || repeat == 0) {
@@ -614,31 +614,31 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	    if(kbemu)
 	      message ("keyboard emu on", MSG_SILENT);
 	    else message ("keyboard emu off", MSG_SILENT);
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case BLT_ROTATE:	/* rotate Braille Lite by 180 degrees */
 	    reverse_kbd ^= 1;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case BLT_POSITN:	/* position internal cursor */
 	    int_cursor = blitesz / 2;
 	    state = ST_CURSOR;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case BLT_REPEAT:	/* set repeat count */
 	    hold = 0;
 	    sprintf (outmsg, "Repeat count:");
 	    message (outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_REPEAT;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case BLT_CONFIG:	/* configuration menu */
 	    sprintf (outmsg, "Config? [m/s/r/z]");
 	    message (outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_CONFIG;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case ' ':		/* practical exception for */
-	    /* If keyboard mode off, space bar == CMD_HOME */
+	    /* If keyboard mode off, space bar == BRL_CMD_HOME */
 	    if (!kbemu || cmds != CMDS_SCREEN)
-	      return CMD_HOME;
+	      return BRL_CMD_HOME;
 	  }
 
       /* check for routing keys */
@@ -646,7 +646,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	return (CR_ROUTE + key.routing - 1);
 
       if (!kbemu)
-	return CMD_NOOP;
+	return BRL_CMD_NOOP;
 
       /* Now kbemu is definitely on. */
       switch (key.raw & 0xC0)
@@ -674,31 +674,31 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	      shiftlck = 1;
 	    else
 	      shift = 1;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case BLT_UPCOFF:	/* cancel upper case */
 	    shift = shiftlck = 0;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case BLT_CTRL:	/* control next */
 	    ctrl = 1;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 #ifdef USE_TEXTTRANS
 	  case BLT_DOT8SHIFT:	/* add dot 8 to next pattern */
 	    dot8shift = 1;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 #endif /* USE_TEXTTRANS */
 	  case BLT_META:	/* meta next */
 	    meta = 1;
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  case BLT_ABORT:	/* abort - quit keyboard emulation */
 	    kbemu = 0;
 	    message ("keyboard emu off", MSG_SILENT);
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  default:		/* unrecognised command */
 	    shift = shiftlck = ctrl = meta = 0;
 #ifdef USE_TEXTTRANS
 	    dot8shift = 0;
 #endif /* USE_TEXTTRANS */
-	    return CMD_NOOP;
+	    return BRL_CMD_NOOP;
 	  }
 
       /* OK, it's an ordinary (non-chorded) keystroke, and kbemu is on. */
@@ -733,26 +733,26 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     case ST_CURSOR:			/* position internal cursor */
       switch (key.cmd)
 	{
-	case CMD_HOME:		/* go to middle */
+	case BRL_CMD_HOME:		/* go to middle */
 	  int_cursor = blitesz / 2;
 	  break;
-	case CMD_LNBEG:	/* beginning of display */
+	case BRL_CMD_LNBEG:	/* beginning of display */
 	  int_cursor = 1;
 	  break;
-	case CMD_LNEND:	/* end of display */
+	case BRL_CMD_LNEND:	/* end of display */
 	  int_cursor = blitesz;
 	  break;
-	case CMD_FWINLT:	/* quarter left */
+	case BRL_CMD_FWINLT:	/* quarter left */
 	  int_cursor = MAX (int_cursor - blitesz / 4, 1);
 	  break;
-	case CMD_FWINRT:	/* quarter right */
+	case BRL_CMD_FWINRT:	/* quarter right */
 	  int_cursor = MIN (int_cursor + blitesz / 4, blitesz);
 	  break;
-	case CMD_CHRLT:	/* one character left */
+	case BRL_CMD_CHRLT:	/* one character left */
 	  if (int_cursor > 1)
 	    int_cursor--;
 	  break;
-	case CMD_CHRRT:	/* one character right */
+	case BRL_CMD_CHRRT:	/* one character right */
 	  if (int_cursor < blitesz)
 	    int_cursor++;
 	  break;
@@ -782,7 +782,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	      state = ST_NORMAL;
 	    }
 	  return temp;
-	case CMD_DISPMD: /* attribute info */
+	case BRL_CMD_DISPMD: /* attribute info */
 	  temp = CR_DESCCHAR + int_cursor - 1;
 	  int_cursor = 0;
 	  state = ST_NORMAL;
@@ -797,7 +797,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	}
       if (key.routing)
 	int_cursor = key.routing;
-      return CMD_NOOP;
+      return BRL_CMD_NOOP;
     case ST_REPEAT:			/* set repeat count */
       if (key.asc >= '0' && key.asc <= '9')
 	{
@@ -840,34 +840,34 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 		}
 		/* fall through */
 	      case BLT_ABORT:	/* abort or endcmd */
-		return CMD_NOOP;
+		return BRL_CMD_NOOP;
 	      }
 	  /* if the key is any other, start repeating it. */
 	  repeat = hold;
 	  goto again;
 	}
       }
-      return CMD_NOOP;
+      return BRL_CMD_NOOP;
     case ST_CONFIG:			/* preferences options */
       switch (key.asc)
 	{
 	case 'm':		/* preferences menu */
 	  intoverride = 0;
 	  state = ST_NORMAL;
-	  return CMD_PREFMENU;
+	  return BRL_CMD_PREFMENU;
 	case 's':		/* save preferences */
 	  intoverride = 0;
 	  state = ST_NORMAL;
-	  return CMD_PREFSAVE;
+	  return BRL_CMD_PREFSAVE;
 	case 'r':		/* restore saved preferences */
 	  intoverride = 0;
 	  state = ST_NORMAL;
-	  return CMD_PREFLOAD;
+	  return BRL_CMD_PREFLOAD;
 	case BLT_ABORT:	/* abort */
 	  intoverride = 0;
 	  state = ST_NORMAL;
 	default:		/* in any case */
-	  return CMD_NOOP;
+	  return BRL_CMD_NOOP;
 	}
     }
 

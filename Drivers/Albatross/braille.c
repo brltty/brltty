@@ -349,120 +349,120 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         continue;
 
       case  83: /* key: top left first lower */
-        return CMD_LEARN;
+        return BRL_CMD_LEARN;
 
       case  84: /* key: top left first upper */
-        return CMD_HELP;
+        return BRL_CMD_HELP;
 
       case  85: /* key: top left third upper */
-        return CMD_PASTE;
+        return BRL_CMD_PASTE;
 
       case  86: /* key: top left third lower */
-        return CMD_CSRTRK;
+        return BRL_CMD_CSRTRK;
 
       case  87: /* key: top left second */
         lowerRoutingFunction = CR_CUTBEGIN;
         upperRoutingFunction = CR_SETMARK;
-        return CMD_NOOP;
+        return BRL_CMD_NOOP;
 
       case  88: /* key: top left fourth */
         lowerRoutingFunction = CR_CUTAPPEND;
         upperRoutingFunction = CR_GOTOMARK;
-        return CMD_NOOP;
+        return BRL_CMD_NOOP;
 
       case  89: /* key: top left fifth upper */
-        return CMD_PREFMENU;
+        return BRL_CMD_PREFMENU;
 
       case  90: /* key: top left fifth lower */
-        return CMD_INFO;
+        return BRL_CMD_INFO;
 
       case 193: /* key: top right first lower */
-        return CMD_NXPROMPT;
+        return BRL_CMD_NXPROMPT;
 
       case 194: /* key: top right first upper */
-        return CMD_PRPROMPT;
+        return BRL_CMD_PRPROMPT;
 
       case 195: /* key: top right third upper */
-        return CMD_PRDIFLN;
+        return BRL_CMD_PRDIFLN;
 
       case 196: /* key: top right third lower */
-        return CMD_NXDIFLN;
+        return BRL_CMD_NXDIFLN;
 
       case 198: /* key: top right second */
         lowerRoutingFunction = CR_CUTRECT;
         upperRoutingFunction = CR_NXINDENT;
-        return CMD_NOOP;
+        return BRL_CMD_NOOP;
 
       case 197: /* key: top right fourth */
         lowerRoutingFunction = CR_CUTLINE;
         upperRoutingFunction = CR_PRINDENT;
-        return CMD_NOOP;
+        return BRL_CMD_NOOP;
 
       case 199: /* key: top right fifth upper */
-        return CMD_PRPGRPH;
+        return BRL_CMD_PRPGRPH;
 
       case 200: /* key: top right fifth lower */
-        return CMD_NXPGRPH;
+        return BRL_CMD_NXPGRPH;
 
       case  91: /* key: front left first upper */
       case 201: /* key: front right first upper */
-        return CMD_TOP_LEFT;
+        return BRL_CMD_TOP_LEFT;
 
       case  92: /* key: front left first lower */
       case 202: /* key: front right first lower */
-        return CMD_BOT_LEFT;
+        return BRL_CMD_BOT_LEFT;
 
       case  93: /* key: front left second upper */
       case 203: /* key: front right second upper */
-        return CMD_BACK;
+        return BRL_CMD_BACK;
 
       case  94: /* key: front left second lower */
       case 204: /* key: front right second lower */
-        return CMD_HOME;
+        return BRL_CMD_HOME;
 
       case  95: /* key: front left third upper */
       case 205: /* key: front right third upper */
       case  98:
-        return CMD_LNUP;
+        return BRL_CMD_LNUP;
 
       case  96: /* key: front left third lower */
       case 206: /* key: front right third lower */
       case 208:
-        return CMD_LNDN;
+        return BRL_CMD_LNDN;
 
       case  97: /* key: front left fourth */
-        return CMD_FWINLT;
+        return BRL_CMD_FWINLT;
 
       case 207: /* key: front right fourth */
-        return CMD_FWINRT;
+        return BRL_CMD_FWINRT;
 
       case 103: /* wheel: front left right */
       case 213: /* wheel: front right right */
-        return CMD_CHRRT;
+        return BRL_CMD_CHRRT;
 
       case 104: /* wheel: front left left */
       case 214: /* wheel: front right left */
-        return CMD_CHRLT;
+        return BRL_CMD_CHRLT;
 
       case 105: /* wheel: side left backward */
       case 215: /* wheel: side right backward */
-        return CMD_LNUP;
+        return BRL_CMD_LNUP;
 
       case 106: /* wheel: side left forward */
       case 216: /* wheel: side right forward */
-        return CMD_LNDN;
+        return BRL_CMD_LNDN;
 
       case  42: /* key: attribute left upper */
-        return CMD_FREEZE;
+        return BRL_CMD_FREEZE;
 
       case   1: /* key: attribute left lower */
-        return CMD_DISPMD;
+        return BRL_CMD_DISPMD;
 
       case 192: /* key: attribute right upper */
-        return CMD_ATTRUP;
+        return BRL_CMD_ATTRUP;
 
       case 151: /* key: attribute right lower */
-        return CMD_ATTRDN;
+        return BRL_CMD_ATTRDN;
     }
 
     LogPrint(LOG_WARNING, "Unexpected byte: %02X", byte);

@@ -616,47 +616,47 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  howmanykeys = 0;
 	}
       }else if(keycode == SHIFT_PRESS) {
-	cmd = CMD_CSRHIDE | VAL_TOGGLE_ON;
+	cmd = BRL_CMD_CSRHIDE | VAL_TOGGLE_ON;
       }else if(keycode == SHIFT_RELEASE) {
-	cmd = CMD_CSRHIDE | VAL_TOGGLE_OFF;
+	cmd = BRL_CMD_CSRHIDE | VAL_TOGGLE_OFF;
       }else if(modifier == 0){
 	switch(key) {
-          case LF: cmd = CMD_FWINLT; break;
-          case RG: cmd = CMD_FWINRT; break;
-          case UP: cmd = CMD_LNUP; break;
-          case DN: cmd = CMD_LNDN; break;
-	  case 1: cmd = CMD_TOP_LEFT; break;
-	  case 2: cmd = CMD_BOT_LEFT; break;
-	  case 3: cmd = CMD_CHRLT; break;
-	  case 4: cmd = CMD_HOME; break;
-	  case 5: cmd = CMD_CSRTRK; break;
-	  case 6: cmd = CMD_SKPIDLNS; break;
-	  case 7: cmd = CMD_SKPBLNKWINS; break;
-	  case 8: cmd = CMD_CHRRT; break;
-	  case 10: cmd = CMD_PREFMENU; break;
+          case LF: cmd = BRL_CMD_FWINLT; break;
+          case RG: cmd = BRL_CMD_FWINRT; break;
+          case UP: cmd = BRL_CMD_LNUP; break;
+          case DN: cmd = BRL_CMD_LNDN; break;
+	  case 1: cmd = BRL_CMD_TOP_LEFT; break;
+	  case 2: cmd = BRL_CMD_BOT_LEFT; break;
+	  case 3: cmd = BRL_CMD_CHRLT; break;
+	  case 4: cmd = BRL_CMD_HOME; break;
+	  case 5: cmd = BRL_CMD_CSRTRK; break;
+	  case 6: cmd = BRL_CMD_SKPIDLNS; break;
+	  case 7: cmd = BRL_CMD_SKPBLNKWINS; break;
+	  case 8: cmd = BRL_CMD_CHRRT; break;
+	  case 10: cmd = BRL_CMD_PREFMENU; break;
 	};
       }else if(modifier == SHIFT_MOD){
 	switch(key) {
 	case UP: cmd = VAL_PASSKEY + VPK_CURSOR_UP; break;
 	case DN: cmd = VAL_PASSKEY + VPK_CURSOR_DOWN; break;
-	case 1: cmd = CMD_FREEZE; break;
-	case 2: cmd = CMD_INFO; break;
-	case 3: cmd = CMD_HWINLT; break;
-	case 4: cmd = CMD_CSRSIZE; break;
-	case 5: cmd = CMD_CSRVIS; break;
-	case 6: cmd = CMD_DISPMD; break;
-	case 8: cmd = CMD_HWINRT; break;
-	case 10: cmd = CMD_PASTE; break;
+	case 1: cmd = BRL_CMD_FREEZE; break;
+	case 2: cmd = BRL_CMD_INFO; break;
+	case 3: cmd = BRL_CMD_HWINLT; break;
+	case 4: cmd = BRL_CMD_CSRSIZE; break;
+	case 5: cmd = BRL_CMD_CSRVIS; break;
+	case 6: cmd = BRL_CMD_DISPMD; break;
+	case 8: cmd = BRL_CMD_HWINRT; break;
+	case 10: cmd = BRL_CMD_PASTE; break;
 	};
       }else if(modifier == LONG_MOD){
 	switch(key) {
-	case 4: cmd = CMD_CSRBLINK; break;
-	case 5: cmd = CMD_CAPBLINK; break;
-	case 6: cmd = CMD_ATTRBLINK; break;
+	case 4: cmd = BRL_CMD_CSRBLINK; break;
+	case 5: cmd = BRL_CMD_CAPBLINK; break;
+	case 6: cmd = BRL_CMD_ATTRBLINK; break;
 	};
       }else if(modifier == (SHIFT_MOD|LONG_MOD)){
 	switch(key) {
-	case 6: cmd = CMD_ATTRVIS; break;
+	case 6: cmd = BRL_CMD_ATTRVIS; break;
 	};
       }
       return cmd;
@@ -673,7 +673,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	/* special handling for routing keys over status cells: currently
 	   only key 1 is mapped. */
 	if(whichkey == 1)
-	  return CMD_CSRHIDE 
+	  return BRL_CMD_CSRHIDE 
 	    | ((code == REPORTROUTINGKEYPRESS) ? VAL_TOGGLE_OFF : VAL_TOGGLE_ON);
 	else return EOF;
       }
@@ -716,10 +716,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 		  && which_routing_keys[3] == brl_cols-1)
 	       || (howmanykeys == 2 && which_routing_keys[0] == 1
 		   && which_routing_keys[1] == 2))
-	  cmd = CMD_PASTE;
+	  cmd = BRL_CMD_PASTE;
 	else if (howmanykeys == 2 && which_routing_keys[0] == 0
 		 && which_routing_keys[1] == brl_cols-1)
-	  cmd = CMD_HELP;
+	  cmd = BRL_CMD_HELP;
 	else if(howmanykeys == 3
 		&& which_routing_keys[0]+2 == which_routing_keys[1]){
 	  cmd = CR_CUTBEGIN + which_routing_keys[0];

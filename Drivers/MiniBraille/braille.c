@@ -157,67 +157,67 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 		case KEY_F1:
 			mode = F1_MODE;
 			message("F1 mode active", 0);
-			return CMD_NOOP;
+			return BRL_CMD_NOOP;
 		case KEY_F2:
 			mode = F2_MODE;
 			message("F2 mode active", 0);
-			return CMD_NOOP;
+			return BRL_CMD_NOOP;
 		case KEY_UP:
-			return CMD_LNUP;
+			return BRL_CMD_LNUP;
 		case KEY_DOWN:
-			return CMD_LNDN;
+			return BRL_CMD_LNDN;
 		case KEY_C:
-			return CMD_HOME;
+			return BRL_CMD_HOME;
 		case KEY_LEFT:
-			return CMD_FWINLT;
+			return BRL_CMD_FWINLT;
 		case KEY_RIGHT:
-			return CMD_FWINRT;
+			return BRL_CMD_FWINRT;
 		};
 		beep();
 		return EOF; /* cannot do anythink */
 	case F1_MODE:
-		if (rv == 0) { usleep(20000); return CMD_NOOP; };
+		if (rv == 0) { usleep(20000); return BRL_CMD_NOOP; };
 		mode = NORMAL_MODE;
-		if (rv == -1) return CMD_NOOP;
+		if (rv == -1) return BRL_CMD_NOOP;
 		switch (znak) {
 		case KEY_F1:
 			mode = MANAGE_MODE; /* F1-F1 prechod na management */
 			message("Management mode", 0);
-			return CMD_NOOP;
+			return BRL_CMD_NOOP;
 		case KEY_F2:
-			return CMD_CSRVIS;
+			return BRL_CMD_CSRVIS;
 		case KEY_LEFT:
-			return CMD_LNBEG;
+			return BRL_CMD_LNBEG;
 		case KEY_RIGHT:
-			return CMD_LNEND;
+			return BRL_CMD_LNEND;
 		case KEY_UP:
-			return CMD_TOP_LEFT;
+			return BRL_CMD_TOP_LEFT;
 		case KEY_DOWN:
-			return CMD_BOT_LEFT;
+			return BRL_CMD_BOT_LEFT;
 		case KEY_C:
-			return CMD_CAPBLINK;
+			return BRL_CMD_CAPBLINK;
 		};
 		beep();
 		return EOF;
 	case F2_MODE:
-		if (rv == 0) { usleep(20000); return CMD_NOOP; };
+		if (rv == 0) { usleep(20000); return BRL_CMD_NOOP; };
 		mode = NORMAL_MODE;
-		if (rv == -1) return CMD_NOOP;
+		if (rv == -1) return BRL_CMD_NOOP;
 		switch (znak) {
 		case KEY_F1:
-			return CMD_CSRSIZE;
+			return BRL_CMD_CSRSIZE;
 		case KEY_F2:
-			return CMD_SKPIDLNS;
+			return BRL_CMD_SKPIDLNS;
 		case KEY_C:
-			return CMD_CSRTRK;
+			return BRL_CMD_CSRTRK;
 		case KEY_RIGHT:
-			return CMD_SIXDOTS;
+			return BRL_CMD_SIXDOTS;
 		case KEY_DOWN:
-			return CMD_DISPMD;
+			return BRL_CMD_DISPMD;
 		case KEY_LEFT:
-			return CMD_INFO;
+			return BRL_CMD_INFO;
 		case KEY_UP: /* stepmode (by melo byt) */
-			return CMD_FREEZE;
+			return BRL_CMD_FREEZE;
 		};
 		beep();
 		return EOF;
@@ -230,30 +230,30 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 			strftime(t, sizeof t, "%e.%m %Y %H:%M:%S", c);
 			message(t, 0);
 		};
-		if (rv == 0) { usleep(500000); return CMD_NOOP; };
-		if (rv == -1) return CMD_NOOP;
+		if (rv == 0) { usleep(500000); return BRL_CMD_NOOP; };
+		if (rv == -1) return BRL_CMD_NOOP;
 		mode = NORMAL_MODE;
 		break;
 	case MANAGE_MODE:
-		if (rv == 0) { usleep(50000); return CMD_NOOP; };
+		if (rv == 0) { usleep(50000); return BRL_CMD_NOOP; };
 		mode =  NORMAL_MODE;
-		if (rv == -1) return CMD_NOOP;
+		if (rv == -1) return BRL_CMD_NOOP;
 		switch (znak) {
 		case KEY_F1:
-			return CMD_HELP;
+			return BRL_CMD_HELP;
 		case KEY_F2:
-			return CMD_INFO;
+			return BRL_CMD_INFO;
 		case KEY_C:
-			return CMD_PREFLOAD;
+			return BRL_CMD_PREFLOAD;
 		case KEY_LEFT:
-			return CMD_RESTARTBRL;
+			return BRL_CMD_RESTARTBRL;
 		case KEY_RIGHT:
 			mode = CLOCK_MODE;
-			return CMD_NOOP;
+			return BRL_CMD_NOOP;
 		case KEY_UP:
-			return CMD_PREFMENU;
+			return BRL_CMD_PREFMENU;
 		case KEY_DOWN:
-			return CMD_PREFSAVE;
+			return BRL_CMD_PREFSAVE;
 		};
 	};
 	return EOF; /* never should reach this */

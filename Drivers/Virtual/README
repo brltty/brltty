@@ -97,8 +97,8 @@ Quit
    wait for the first "cells" command from the display.
 
 <basic-command> [state]
-   A basic command for the BRLTTY core. It may be any of the CMD_ constants
-   (without the CMD_ prefix) defined within "brldefs.h", e.g. LnDn. The
+   A basic command for the BRLTTY core. It may be any of the BRL_CMD_ constants
+   (without the BRL_CMD_ prefix) defined within "brldefs.h", e.g. LnDn. The
    optional <state> operand (which may be either on or off), when applied to an
    attribute toggling command, forces that attribute to the specified state.
 

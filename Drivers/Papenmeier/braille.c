@@ -108,8 +108,6 @@ read_config (const char *directory, const char *name) {
 #include "brl-cfg.h"
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
 
-#define CMD_ERR	EOF
-
 static unsigned int debug_keys = 0;
 static unsigned int debug_reads = 0;
 static unsigned int debug_writes = 0;
@@ -184,19 +182,19 @@ changeModifiers (int remove, int add) {
   pressed_modifiers |= add;
   saved_modifiers = 0;
   logModifiers();
-  return CMD_NOOP;
+  return BRL_CMD_NOOP;
 }
 
 static int
 handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
-  if (cmd == CMD_INPUT) {
+  if (cmd == BRL_CMD_INPUT) {
     /* translate toggle -> ON/OFF */
     cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
   }
 
   if (!IS_DELAYED_COMMAND(repeat)) {
     switch (cmd) {
-      case CMD_INPUT | VAL_TOGGLE_ON:
+      case BRL_CMD_INPUT | VAL_TOGGLE_ON:
         input_mode = 1;
         cmd = VAL_TOGGLE_ON;
         if (debug_keys) {
@@ -204,7 +202,7 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
         }
         break;
 
-      case CMD_INPUT | VAL_TOGGLE_OFF:
+      case BRL_CMD_INPUT | VAL_TOGGLE_OFF:
         input_mode = 0;
         cmd = VAL_TOGGLE_OFF;
         if (debug_keys) {
@@ -212,28 +210,28 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
         }
         break;
 
-      case CMD_SWSIM_LC:
+      case BRL_CMD_SWSIM_LC:
         return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF, MOD_EASY_SLC);
-      case CMD_SWSIM_LR:
+      case BRL_CMD_SWSIM_LR:
         return changeModifiers(MOD_EASY_SLF, MOD_EASY_SLR);
-      case CMD_SWSIM_LF:
+      case BRL_CMD_SWSIM_LF:
         return changeModifiers(MOD_EASY_SLR, MOD_EASY_SLF);
-      case CMD_SWSIM_RC:
+      case BRL_CMD_SWSIM_RC:
         return changeModifiers(MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SRC);
-      case CMD_SWSIM_RR:
+      case BRL_CMD_SWSIM_RR:
         return changeModifiers(MOD_EASY_SRF, MOD_EASY_SRR);
-      case CMD_SWSIM_RF:
+      case BRL_CMD_SWSIM_RF:
         return changeModifiers(MOD_EASY_SRR, MOD_EASY_SRF);
-      case CMD_SWSIM_BC:
+      case BRL_CMD_SWSIM_BC:
         return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF|MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SLC|MOD_EASY_SRC);
-      case CMD_SWSIM_BQ: {
+      case BRL_CMD_SWSIM_BQ: {
         static const char *const states[] = {"center", "rear", "front", "?"};
         const char *left = states[pressed_modifiers & 0X3];
         const char *right = states[(pressed_modifiers >> 2) & 0X3];
         char buffer[20];
         snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
         showBrailleString(brl, buffer, 2000);
-        return CMD_NOOP;
+        return BRL_CMD_NOOP;
       }
     }
   }
@@ -243,7 +241,7 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
 
 static int
 handleModifier (BrailleDisplay *brl, int bit, int press) {
-  int command = CMD_NOOP;
+  int command = BRL_CMD_NOOP;
   int modifiers;
 
   if (press) {
@@ -302,7 +300,7 @@ handleKey (BrailleDisplay *brl, int code, int press, int offset) {
     /* no command found */
     LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, pressed_modifiers); 
   }
-  return CMD_NOOP;
+  return BRL_CMD_NOOP;
 }
 
 /*--- Input/Output Operations ---*/
@@ -691,7 +689,7 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
   }
 
   LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
-  return CMD_NOOP;
+  return BRL_CMD_NOOP;
 }
 
 static int
@@ -783,7 +781,7 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
         if (length != 10) {
           LogPrint(LOG_WARNING, "Unexpected input packet length: %d", length);
           resetTerminal1(brl);
-          return CMD_ERR;
+          return EOF;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
         if (debug_reads) LogBytes("Input Packet", buf, length);
@@ -1114,11 +1112,11 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
         break;
 
       case 0X0B: {
-        int command = CMD_NOOP;
+        int command = BRL_CMD_NOOP;
         int bytes = MIN(packet.length, inputBytes2);
         int byte;
 
-        /* Find out whihc keys have been released.
+        /* Find out which keys have been released.
          * The first one determines the command to be executed.
          */
         {
@@ -1182,7 +1180,7 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
     }
   }
 
-  if (errno != EAGAIN) return CMD_RESTARTBRL;
+  if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
   return EOF;
 }
 
