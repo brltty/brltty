@@ -44,7 +44,7 @@ typedef int *FlagSetting;
 typedef struct {
   const OptionEntry *optionTable;
   unsigned int optionCount;
-  unsigned char *ensuredSettings;
+  unsigned char ensuredSettings[0X100];
   int errorCount;
 } OptionProcessingInformation;
 
@@ -97,6 +97,270 @@ ensureSetting (
       }
     }
   }
+}
+
+static void
+printHelp (
+  OptionProcessingInformation *info,
+  FILE *outputStream,
+  unsigned int lineWidth,
+  const char *argumentsSummary,
+  int all
+) {
+  char line[lineWidth+1];
+  unsigned int argumentWidth = 0;
+  int optionIndex;
+
+#ifdef HAVE_GETOPT_LONG
+  unsigned int wordWidth = 0;
+#endif /* HAVE_GETOPT_LONG */
+
+  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+    const OptionEntry *option = &info->optionTable[optionIndex];
+
+#ifdef HAVE_GETOPT_LONG
+    if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
+#endif /* HAVE_GETOPT_LONG */
+
+    if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
+  }
+
+  fprintf(outputStream, "Usage: %s", programName);
+  if (info->optionCount)
+    fprintf(outputStream, " [option ...]");
+  if (argumentsSummary && *argumentsSummary)
+    fprintf(outputStream, " %s", argumentsSummary);
+  fprintf(outputStream, "\n");
+
+  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+    const OptionEntry *option = &info->optionTable[optionIndex];
+    unsigned int lineLength = 0;
+
+    if (!all && (option->flags & OPT_Hidden)) continue;
+
+    line[lineLength++] = '-';
+    line[lineLength++] = option->letter;
+    line[lineLength++] = ' ';
+
+    {
+      unsigned int end = lineLength + argumentWidth;
+      if (option->argument) {
+        size_t argumentLength = strlen(option->argument);
+        memcpy(line+lineLength, option->argument, argumentLength);
+        lineLength += argumentLength;
+      }
+      while (lineLength < end) line[lineLength++] = ' ';
+    }
+    line[lineLength++] = ' ';
+
+#ifdef HAVE_GETOPT_LONG
+    {
+      unsigned int end = lineLength + 2 + wordWidth + 1;
+      if (option->word) {
+        size_t wordLength = strlen(option->word);
+        line[lineLength++] = '-';
+        line[lineLength++] = '-';
+        memcpy(line+lineLength, option->word, wordLength);
+        lineLength += wordLength;
+        if (option->argument) line[lineLength++] = '=';
+      }
+      while (lineLength < end) line[lineLength++] = ' ';
+    }
+    line[lineLength++] = ' ';
+#endif /* HAVE_GETOPT_LONG */
+
+    line[lineLength++] = ' ';
+    {
+      unsigned int headerWidth = lineLength;
+      unsigned int descriptionWidth = lineWidth - headerWidth;
+      const char *description = option->description;
+      unsigned int charsLeft = strlen(description);
+
+      while (1) {
+        unsigned int charCount = charsLeft;
+        if (charCount > descriptionWidth) {
+          charCount = descriptionWidth;
+          while (description[charCount] != ' ') --charCount;
+          while (description[charCount] == ' ') --charCount;
+          ++charCount;
+        }
+        memcpy(line+lineLength, description, charCount);
+        lineLength += charCount;
+
+        line[lineLength] = 0;
+        fprintf(outputStream, "%s\n", line);
+
+        while (description[charCount] == ' ') ++charCount;
+        if (!(charsLeft -= charCount)) break;
+        description += charCount;
+
+        lineLength = 0;
+        while (lineLength < headerWidth) line[lineLength++] = ' ';
+      }
+    }
+  }
+}
+
+static void
+processCommandLine (
+  OptionProcessingInformation *info,
+  int *argumentCount,
+  char ***argumentVector,
+  const char *argumentsSummary
+) {
+  int opt_help = 0;
+  int opt_helpAll = 0;
+
+  const OptionEntry *optionEntries[0X100];
+  char shortOptions[1 + (info->optionCount * 2) + 1];
+  int index;
+
+#ifdef HAVE_GETOPT_LONG
+  struct option longOptions[(info->optionCount * 2) + 1];
+  int flagLetter;
+
+  {
+    struct option *opt = longOptions;
+    for (index=0; index<info->optionCount; ++index) {
+      const OptionEntry *entry = &info->optionTable[index];
+
+      opt->name = entry->word;
+      opt->has_arg = entry->argument? required_argument: no_argument;
+      opt->flag = NULL;
+      opt->val = entry->letter;
+      ++opt;
+
+      if (!entry->argument && entry->setting) {
+        static const char *prefix = "no-";
+        int length = strlen(prefix);
+
+        if (strncasecmp(prefix, entry->word, length) == 0) {
+          opt->name = strdupWrapper(entry->word + length);
+        } else {
+          char *name = mallocWrapper(length + strlen(entry->word) + 1);
+          sprintf(name, "%s%s", prefix, entry->word);
+          opt->name = name;
+        }
+
+        opt->has_arg = no_argument;
+        opt->flag = &flagLetter;
+        opt->val = entry->letter;
+        ++opt;
+      }
+    }
+
+    memset(opt, 0, sizeof(*opt));
+  }
+#endif /* HAVE_GETOPT_LONG */
+
+  for (index=0; index<0X100; ++index) optionEntries[index] = NULL;
+
+  {
+    char *opt = shortOptions;
+    *opt++ = '+';
+
+    for (index=0; index<info->optionCount; ++index) {
+      const OptionEntry *entry = &info->optionTable[index];
+      optionEntries[entry->letter] = entry;
+
+      *opt++ = entry->letter;
+      if (entry->argument) *opt++ = ':';
+
+      if (entry->setting) {
+        if (entry->argument) {
+          StringSetting setting = entry->setting;
+          *setting = NULL;
+        } else {
+          FlagSetting setting = entry->setting;
+          *setting = 0;
+        }
+      }
+    }
+
+    *opt = 0;
+  }
+
+  opterr = 0;
+  while (1) {
+    int option;
+
+#ifdef HAVE_GETOPT_LONG
+    option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
+#else /* HAVE_GETOPT_LONG */
+    option = getopt(*argumentCount, *argumentVector, shortOptions);
+#endif /* HAVE_GETOPT_LONG */
+    if (option == -1) break;
+
+    /* continue on error as much as possible, as often we are typing blind
+     * and won't even see the error message unless the display comes up.
+     */
+    switch (option) {
+      default: {
+        const OptionEntry *entry = optionEntries[option];
+
+        if (entry->argument) {
+          StringSetting setting = entry->setting;
+          if (entry->flags & OPT_Extend) {
+            extendSetting(setting, optarg, 0);
+          } else {
+            *setting = optarg;
+          }
+        } else {
+          FlagSetting setting = entry->setting;
+          if (entry->flags & OPT_Extend) {
+            ++*setting;
+          } else {
+            *setting = 1;
+          }
+        }
+
+        info->ensuredSettings[option] = 1;
+        break;
+      }
+
+#ifdef HAVE_GETOPT_LONG
+      case 0: {
+        const OptionEntry *entry = optionEntries[flagLetter];
+        FlagSetting setting = entry->setting;
+        *setting = 0;
+        info->ensuredSettings[flagLetter] = 1;
+        break;
+      }
+#endif /* HAVE_GETOPT_LONG */
+
+      case '?':
+        LogPrint(LOG_ERR, "Unknown option: -%c", optopt);
+        info->errorCount++;
+        break;
+
+      case ':': /* An invalid option has been specified. */
+        LogPrint(LOG_ERR, "Missing operand: -%c", optopt);
+        info->errorCount++;
+        break;
+
+      case 'H':                /* help */
+        opt_helpAll = 1;
+      case 'h':                /* help */
+        opt_help = 1;
+        break;
+    }
+  }
+  *argumentVector += optind, *argumentCount -= optind;
+
+  if (opt_help) {
+    printHelp(info, stdout, 79, argumentsSummary, opt_helpAll);
+    exit(0);
+  }
+
+#ifdef HAVE_GETOPT_LONG
+  {
+    struct option *opt = longOptions;
+    while (opt->name) {
+      if (opt->flag) free((char *)opt->name);
+      ++opt;
+    }
+  }
+#endif /* HAVE_GETOPT_LONG */
 }
 
 static void
@@ -282,101 +546,6 @@ processConfigurationFile (
   return 0;
 }
 
-static void
-printHelp (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
-  FILE *outputStream,
-  unsigned int lineWidth,
-  const char *argumentsDescription,
-  int all
-) {
-   char line[lineWidth+1];
-#ifdef HAVE_GETOPT_LONG
-   unsigned int wordWidth = 0;
-#endif /* HAVE_GETOPT_LONG */
-   unsigned int argumentWidth = 0;
-   int optionIndex;
-   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
-      const OptionEntry *option = &optionTable[optionIndex];
-#ifdef HAVE_GETOPT_LONG
-      if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
-#endif /* HAVE_GETOPT_LONG */
-      if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
-   }
-
-   fprintf(outputStream, "Usage: %s [option ...]", programName);
-   if (argumentsDescription && *argumentsDescription)
-     fprintf(outputStream, " %s", argumentsDescription);
-   fprintf(outputStream, "\n");
-
-   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
-      const OptionEntry *option = &optionTable[optionIndex];
-      unsigned int lineLength = 0;
-      if (!all && (option->flags & OPT_Hidden)) continue;
-
-      line[lineLength++] = '-';
-      line[lineLength++] = option->letter;
-      line[lineLength++] = ' ';
-
-      {
-         unsigned int end = lineLength + argumentWidth;
-         if (option->argument) {
-            size_t argumentLength = strlen(option->argument);
-            memcpy(line+lineLength, option->argument, argumentLength);
-            lineLength += argumentLength;
-         }
-         while (lineLength < end) line[lineLength++] = ' ';
-      }
-      line[lineLength++] = ' ';
-
-#ifdef HAVE_GETOPT_LONG
-      {
-         unsigned int end = lineLength + 2 + wordWidth + 1;
-         if (option->word) {
-            size_t wordLength = strlen(option->word);
-            line[lineLength++] = '-';
-            line[lineLength++] = '-';
-            memcpy(line+lineLength, option->word, wordLength);
-            lineLength += wordLength;
-            if (option->argument) line[lineLength++] = '=';
-         }
-         while (lineLength < end) line[lineLength++] = ' ';
-      }
-      line[lineLength++] = ' ';
-#endif /* HAVE_GETOPT_LONG */
-
-      line[lineLength++] = ' ';
-      {
-         unsigned int headerWidth = lineLength;
-         unsigned int descriptionWidth = lineWidth - headerWidth;
-         const char *description = option->description;
-         unsigned int charsLeft = strlen(description);
-         while (1) {
-            unsigned int charCount = charsLeft;
-            if (charCount > descriptionWidth) {
-               charCount = descriptionWidth;
-               while (description[charCount] != ' ') --charCount;
-               while (description[charCount] == ' ') --charCount;
-               ++charCount;
-            }
-            memcpy(line+lineLength, description, charCount);
-            lineLength += charCount;
-
-            line[lineLength] = 0;
-            fprintf(outputStream, "%s\n", line);
-
-            while (description[charCount] == ' ') ++charCount;
-            if (!(charsLeft -= charCount)) break;
-            description += charCount;
-
-            lineLength = 0;
-            while (lineLength < headerWidth) line[lineLength++] = ' ';
-         }
-      }
-   }
-}
-
 int
 processOptions (
   const OptionEntry *optionTable,
@@ -390,185 +559,32 @@ processOptions (
   const char *argumentsSummary
 ) {
   OptionProcessingInformation info;
-  const OptionEntry *optionEntries[0X100];
-  unsigned char ensuredSettings[0X100];
   int index;
-
-  int opt_help = 0;
-  int opt_helpAll = 0;
-
-  char shortOptions[1 + (optionCount * 2) + 1];
-
-#ifdef HAVE_GETOPT_LONG
-  struct option longOptions[(optionCount * 2) + 1];
-  int flagLetter;
-  {
-    struct option *opt = longOptions;
-    for (index=0; index<optionCount; ++index) {
-      const OptionEntry *entry = &optionTable[index];
-
-      opt->name = entry->word;
-      opt->has_arg = entry->argument? required_argument: no_argument;
-      opt->flag = NULL;
-      opt->val = entry->letter;
-      ++opt;
-
-      if (!entry->argument && entry->setting) {
-        static const char *prefix = "no-";
-        int length = strlen(prefix);
-        if (strncasecmp(prefix, entry->word, length) == 0) {
-          opt->name = strdupWrapper(entry->word + length);
-        } else {
-          char *name = mallocWrapper(length + strlen(entry->word) + 1);
-          sprintf(name, "%s%s", prefix, entry->word);
-          opt->name = name;
-        }
-        opt->has_arg = no_argument;
-        opt->flag = &flagLetter;
-        opt->val = entry->letter;
-        ++opt;
-      }
-    }
-    memset(opt, 0, sizeof(*opt));
-  }
-#endif /* HAVE_GETOPT_LONG */
-
-  for (index=0; index<0X100; ++index) {
-    optionEntries[index] = NULL;
-    ensuredSettings[index] = 0;
-  }
 
   info.optionTable = optionTable;
   info.optionCount = optionCount;
-  info.ensuredSettings = ensuredSettings;
+  for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
   info.errorCount = 0;
-
-  {
-    char *opt = shortOptions;
-    *opt++ = '+';
-    for (index=0; index<optionCount; ++index) {
-      const OptionEntry *entry = &optionTable[index];
-      optionEntries[entry->letter] = entry;
-
-      *opt++ = entry->letter;
-      if (entry->argument) *opt++ = ':';
-
-      if (entry->setting) {
-        if (entry->argument) {
-          StringSetting setting = entry->setting;
-          *setting = NULL;
-        } else {
-          FlagSetting setting = entry->setting;
-          *setting = 0;
-        }
-      }
-    }
-    *opt = 0;
-  }
 
   programPath = **argumentVector;
   programName = strrchr(programPath, '/');
   programName = programName? programName+1: programPath;
 
-  /* Parse command line using getopt(): */
-  opterr = 0;
-  while (1) {
-    int option;
-
-#ifdef HAVE_GETOPT_LONG
-    option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
-#else /* HAVE_GETOPT_LONG */
-    option = getopt(*argumentCount, *argumentVector, shortOptions);
-#endif /* HAVE_GETOPT_LONG */
-    if (option == -1) break;
-
-    /* continue on error as much as possible, as often we are typing blind
-     * and won't even see the error message unless the display comes up.
-     */
-    switch (option) {
-      default: {
-        const OptionEntry *entry = optionEntries[option];
-        if (entry->argument) {
-          StringSetting setting = entry->setting;
-          if (entry->flags & OPT_Extend) {
-            extendSetting(setting, optarg, 0);
-          } else {
-            *setting = optarg;
-          }
-        } else {
-          FlagSetting setting = entry->setting;
-          if (entry->flags & OPT_Extend) {
-            ++*setting;
-          } else {
-            *setting = 1;
-          }
-        }
-        ensuredSettings[option] = 1;
-        break;
-      }
-
-#ifdef HAVE_GETOPT_LONG
-      case 0: {
-        const OptionEntry *entry = optionEntries[flagLetter];
-        FlagSetting setting = entry->setting;
-        *setting = 0;
-        ensuredSettings[flagLetter] = 1;
-        break;
-      }
-#endif /* HAVE_GETOPT_LONG */
-
-      case '?':
-        LogPrint(LOG_ERR, "Unknown option: -%c", optopt);
-        info.errorCount++;
-        break;
-
-      case ':': /* An invalid option has been specified. */
-        LogPrint(LOG_ERR, "Missing operand: -%c", optopt);
-        info.errorCount++;
-        break;
-
-      case 'H':                /* help */
-        opt_helpAll = 1;
-      case 'h':                /* help */
-        opt_help = 1;
-        break;
-    }
-  }
-  *argumentVector += optind, *argumentCount -= optind;
-
-#ifdef HAVE_GETOPT_LONG
+  processCommandLine(&info, argumentCount, argumentVector, argumentsSummary);
   {
-    struct option *opt = longOptions;
-    while (opt->name) {
-      if (opt->flag) free((char *)opt->name);
-      ++opt;
-    }
-  }
-#endif /* HAVE_GETOPT_LONG */
+    int configurationFileSpecified = configurationFile && *configurationFile;
 
-  if (opt_help) {
-    printHelp(optionTable, optionCount,
-              stdout, 79,
-              argumentsSummary, opt_helpAll);
-    exit(0);
-  }
+    if (doBootParameters && *doBootParameters)
+      processBootParameters(&info, applicationName);
 
-  if (doBootParameters && *doBootParameters) {
-    processBootParameters(&info, applicationName);
-  }
+    if (doEnvironmentVariables && *doEnvironmentVariables)
+      processEnvironmentVariables(&info, applicationName);
 
-  if (doEnvironmentVariables && *doEnvironmentVariables) {
-    processEnvironmentVariables(&info, applicationName);
-  }
-
-  if (configurationFile) {
-    int optional = !*configurationFile;
     setDefaultOptions(&info, 0);
-    processConfigurationFile(&info, *configurationFile, optional);
-  } else {
-    setDefaultOptions(&info, 0);
+    if (configurationFile && *configurationFile)
+      processConfigurationFile(&info, *configurationFile, !configurationFileSpecified);
+    setDefaultOptions(&info, 1);
   }
-  setDefaultOptions(&info, 1);
 
   return info.errorCount == 0;
 }
