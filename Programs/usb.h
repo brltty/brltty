@@ -187,15 +187,9 @@ extern int usbSetConfiguration (
   unsigned int configuration
 );
 
-extern char *usbGetDriver (
+extern int usbIsSerialDevice (
   UsbDevice *device,
   unsigned int interface
-);
-extern int usbControlDriver (
-  UsbDevice *device,
-  unsigned int interface,
-  int code,
-  void *data
 );
 extern char *usbGetSerialDevice (
   UsbDevice *device,
@@ -309,18 +303,18 @@ extern int usbReapInput (
   int wait
 );
 
-typedef int (UsbStringVerifier) (const char *reference, const char *string);
+typedef int (UsbStringVerifier) (const char *reference, const char *value);
 extern UsbStringVerifier usbStringEquals;
 extern UsbStringVerifier usbStringMatches;
 extern int usbVerifyString (
   UsbDevice *device,
-  const char *value,
+  UsbStringVerifier verify,
   unsigned char index,
-  UsbStringVerifier verify
+  const char *value
 );
-extern int usbVerifyManufacturer (UsbDevice *device, const char *value);
-extern int usbVerifyProduct (UsbDevice *device, const char *value);
-extern int usbVerifySerialNumber (UsbDevice *device, const char *value);
+extern int usbVerifyManufacturer (UsbDevice *device, const char *eRegExp);
+extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
+extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
 #ifdef __cplusplus
 }

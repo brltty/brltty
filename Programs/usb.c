@@ -286,15 +286,15 @@ usbDeviceDescriptor (UsbDevice *device) {
 }
 
 int
-usbStringEquals (const char *reference, const char *string) {
-  return strcmp(reference, string) == 0;
+usbStringEquals (const char *reference, const char *value) {
+  return strcmp(reference, value) == 0;
 }
 
 int
-usbStringMatches (const char *reference, const char *string) {
+usbStringMatches (const char *reference, const char *value) {
   int ok = 0;
   regex_t expression;
-  if (regcomp(&expression, string, REG_EXTENDED|REG_NOSUB) == 0) {
+  if (regcomp(&expression, value, REG_EXTENDED|REG_NOSUB) == 0) {
     if (regexec(&expression, reference, 0, NULL, 0) == 0) {
       ok = 1;
     }
@@ -306,34 +306,37 @@ usbStringMatches (const char *reference, const char *string) {
 int
 usbVerifyString (
   UsbDevice *device,
-  const char *value,
+  UsbStringVerifier verify,
   unsigned char index,
-  UsbStringVerifier verify
+  const char *value
 ) {
   int ok = 0;
   if (!(value && *value)) return 1;
 
   if (index) {
-    char *string = usbGetString(device, index, 1000);
-    if (string) {
-      if (verify(string, value)) ok = 1;
-      free(string);
+    char *reference = usbGetString(device, index, 1000);
+    if (reference) {
+      if (verify(reference, value)) ok = 1;
+      free(reference);
     }
   }
   return ok;
 }
 
 int
-usbVerifyManufacturer (UsbDevice *device, const char *value) {
-  return usbVerifyString(device, value, device->descriptor.iManufacturer, usbStringMatches);
+usbVerifyManufacturer (UsbDevice *device, const char *eRegExp) {
+  return usbVerifyString(device, usbStringMatches,
+                         device->descriptor.iManufacturer, eRegExp);
 }
 
 int
-usbVerifyProduct (UsbDevice *device, const char *value) {
-  return usbVerifyString(device, value, device->descriptor.iProduct, usbStringMatches);
+usbVerifyProduct (UsbDevice *device, const char *eRegExp) {
+  return usbVerifyString(device, usbStringMatches,
+                         device->descriptor.iProduct, eRegExp);
 }
 
 int
-usbVerifySerialNumber (UsbDevice *device, const char *value) {
-  return usbVerifyString(device, value, device->descriptor.iSerialNumber, usbStringEquals);
+usbVerifySerialNumber (UsbDevice *device, const char *string) {
+  return usbVerifyString(device, usbStringEquals,
+                         device->descriptor.iSerialNumber, string);
 }

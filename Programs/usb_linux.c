@@ -50,7 +50,7 @@ usbSetConfiguration (
   return ioctl(device->file, USBDEVFS_SETCONFIGURATION, &configuration);
 }
 
-char *
+static char *
 usbGetDriver (
   UsbDevice *device,
   unsigned int interface
@@ -62,7 +62,7 @@ usbGetDriver (
   return strdup(arg.driver);
 }
 
-int
+static int
 usbControlDriver (
   UsbDevice *device,
   unsigned int interface,
@@ -77,33 +77,45 @@ usbControlDriver (
   return ioctl(device->file, USBDEVFS_IOCTL, &arg);
 }
 
+int
+usbIsSerialDevice (
+  UsbDevice *device,
+  unsigned int interface
+) {
+  int yes = 0;
+  char *driver = usbGetDriver(device, interface);
+  if (driver) {
+    if (strcmp(driver, "serial") == 0) {
+      yes = 1;
+    }
+    free(driver);
+  }
+  return yes;
+}
+
 char *
 usbGetSerialDevice (
   UsbDevice *device,
   unsigned int interface
 ) {
   char *path = NULL;
-  char *driver;
-  if ((driver = usbGetDriver(device, interface))) {
-    if (strcmp(driver, "serial") == 0) {
-      struct serial_struct serial;
-      if (usbControlDriver(device, interface, TIOCGSERIAL, &serial) != -1) {
-        static const char *const prefixTable[] = {"/dev/ttyUSB", "/dev/usb/tts/", NULL};
-        const char *const *prefix = prefixTable;
-        while (*prefix) {
-          char buffer[0X80];
-          snprintf(buffer, sizeof(buffer), "%s%d", *prefix, serial.line);
-          if (access(buffer, F_OK) != -1) {
-            path = strdup(buffer);
-            break;
-          }
-          ++prefix;
+  if (usbIsSerialDevice(device, interface)) {
+    struct serial_struct serial;
+    if (usbControlDriver(device, interface, TIOCGSERIAL, &serial) != -1) {
+      static const char *const prefixTable[] = {"/dev/ttyUSB", "/dev/usb/tts/", NULL};
+      const char *const *prefix = prefixTable;
+      while (*prefix) {
+        char buffer[0X80];
+        snprintf(buffer, sizeof(buffer), "%s%d", *prefix, serial.line);
+        if (access(buffer, F_OK) != -1) {
+          path = strdup(buffer);
+          break;
         }
-      } else {
-        LogError("USB control driver");
+        ++prefix;
       }
+    } else {
+      LogError("USB control driver");
     }
-    free(driver);
   }
   return path;
 }
