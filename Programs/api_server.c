@@ -475,7 +475,6 @@ static int processRequest(Tconnection *c)
 	}
       }
       c->tty = tty;
-      c->how = how;
       __removeConnection(c);
       __addConnection(c,tty->connections);
       pthread_mutex_unlock(&connections_mutex);

@@ -336,8 +336,8 @@ int brlapi_setFocus(int tty);
  *
  * If the string is too long, it is cut. If it's too short, spaces are appended.
  *
- * \param cursor gives the cursor position; if less than or
- * equal to 0 or greater than the display width, no cursor is shown at all;
+ * \param cursor gives the cursor position; if equal to 0, no cursor is shown at
+ * all;
  * \param str points on the string to be displayed.
  *
  * \return 0 on success, -1 on error.
