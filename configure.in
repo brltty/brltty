@@ -720,7 +720,7 @@ screen_driver_objects="scr_${screen_driver}."'$O'
 case "${screen_driver}"
 in
    linux|shm)
-      screen_driver_objects="${screen_driver_objects} "'scr_real.$O route.$O'
+      screen_driver_objects="${screen_driver_objects} "'scr_real.$O'
       ;;
 esac
 AC_SUBST([screen_driver_objects])

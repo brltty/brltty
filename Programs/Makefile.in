@@ -126,7 +126,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O cut.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O cut.$O route.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -217,7 +217,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SCREEN_OBJECTS)
+SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O route.$O $(SCREEN_OBJECTS)
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(LDLIBS)
