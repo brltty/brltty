@@ -125,7 +125,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  newtio.c_iflag = IGNPAR;
  newtio.c_oflag = 0;
  newtio.c_lflag = 0;
- resetSerialDevice(tty_fd,&newtio,B19200); 
+ restartSerialDevice(tty_fd,&newtio,19200); 
 
  if (!(tty_ffd=fdopen(tty_fd,"a+"))) {
   LogError("fdopen");

@@ -31,8 +31,8 @@
 #include "misc.h"
 
 typedef struct {
-  int integer;
-  speed_t baud;
+  int baud;
+  speed_t speed;
 } BaudEntry;
 static const BaudEntry baudTable[] = {
 #ifdef B50
@@ -159,53 +159,13 @@ static const BaudEntry baudTable[] = {
 };
 
 static const BaudEntry *
-getBaudEntry (int speed) {
+getBaudEntry (int baud) {
   const BaudEntry *entry = baudTable;
-  while (entry->integer) {
-    if (speed == entry->integer) return entry;
+  while (entry->baud) {
+    if (baud == entry->baud) return entry;
     ++entry;
   }
   return NULL;
-}
-
-int
-validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices) {
-  int speed;
-  if (!*word || isInteger(&speed, word)) {
-    const BaudEntry *entry = getBaudEntry(speed);
-    if (entry) {
-      if (choices) {
-        while (*choices) {
-          if (speed == *choices) break;
-          ++choices;
-        }
-
-        if (!*choices) {
-          LogPrint(LOG_ERR, "Unsupported %s: %d",
-                   description, speed);
-          return 0;
-        }
-      }
-
-      *value = entry->baud;
-      return 1;
-    }
-  }
-
-  LogPrint(LOG_ERR, "Invalid %s: %d",
-           description, speed);
-  return 0;
-}
-
-int
-baud2integer (speed_t baud) {
-  const BaudEntry *entry = baudTable;
-  while (entry->integer) {
-    if (baud == entry->baud)
-      return entry->integer;
-    ++entry;
-  }
-  return -1;
 }
 
 void
@@ -215,21 +175,29 @@ initializeSerialAttributes (struct termios *attributes) {
   attributes->c_iflag = IGNPAR | IGNBRK;
 }
 
-int
-setSerialSpeed (struct termios *attributes, int speed) {
-  const BaudEntry *entry = getBaudEntry(speed);
-  if (entry) {
-    if (cfsetispeed(attributes, entry->baud) != -1) {
-      if (cfsetospeed(attributes, entry->baud) != -1) {
-        return 1;
-      } else {
-        LogError("cfsetospeed");
-      }
+static int
+setSerialSpeed (struct termios *attributes, speed_t speed) {
+  if (cfsetispeed(attributes, speed) != -1) {
+    if (cfsetospeed(attributes, speed) != -1) {
+      return 1;
     } else {
-      LogError("cfsetispeed");
+      LogError("cfsetospeed");
     }
   } else {
-    LogPrint(LOG_WARNING, "Unknown serial speed: %d", speed);
+    LogError("cfsetispeed");
+  }
+  return 0;
+}
+
+int
+setSerialBaud (struct termios *attributes, int baud) {
+  const BaudEntry *entry = getBaudEntry(baud);
+  if (entry) {
+    if (setSerialSpeed(attributes, entry->speed)) {
+      return 1;
+    }
+  } else {
+    LogPrint(LOG_WARNING, "Unknown serial baud: %d", baud);
   }
   return 0;
 }
@@ -339,9 +307,29 @@ setSerialFlowControl (struct termios *attributes, SerialFlowControl flow) {
 }
 
 int
-applySerialAttributes (const struct termios *attributes, int descriptor) {
+getSerialAttributes (int descriptor, struct termios *attributes) {
+  if (tcgetattr(descriptor, attributes) != -1) return 1;
+  LogError("tcgetattr");
+  return 0;
+}
+
+int
+putSerialAttributes (int descriptor, const struct termios *attributes) {
   if (tcsetattr(descriptor, TCSANOW, attributes) != -1) return 1;
   LogError("tcsetattr");
+  return 0;
+}
+
+int
+putSerialBaud (int descriptor, int baud, struct termios *attributes) {
+  struct termios buffer;
+  if (!attributes)
+    if (!getSerialAttributes(descriptor, attributes=&buffer))
+      return 0;
+
+  if (setSerialBaud(attributes, baud))
+    if (putSerialAttributes(descriptor, attributes))
+      return 1;
   return 0;
 }
 
@@ -372,12 +360,10 @@ openSerialDevice (const char *path, int *descriptor, struct termios *attributes)
     if ((*descriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
       if (isatty(*descriptor)) {
         if (setBlockingIo(*descriptor, 1)) {
-          if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
+          if (!attributes || getSerialAttributes(*descriptor, attributes)) {
             LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", device, *descriptor);
             free(device);
             return 1;
-          } else {
-            LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", device, strerror(errno));
           }
         }
       } else {
@@ -394,35 +380,44 @@ openSerialDevice (const char *path, int *descriptor, struct termios *attributes)
 }
 
 int
-setSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
-  if (cfsetispeed(attributes, baud) != -1) {
-    if (cfsetospeed(attributes, baud) != -1) {
-      if (applySerialAttributes(attributes, descriptor)) {
-        return 1;
-      } else {
-        LogError("Serial device attributes set");
+restartSerialDevice (int descriptor, struct termios *attributes, int baud) {
+  if (flushSerialOutput(descriptor)) {
+    if (setSerialSpeed(attributes, B0)) {
+      if (putSerialAttributes(descriptor, attributes)) {
+        delay(500);
+        if (flushSerialInput(descriptor)) {
+          if (setSerialBaud(attributes, baud)) {
+            if (putSerialAttributes(descriptor, attributes)) {
+              return 1;
+            }
+          }
+        }
       }
-    } else {
-      LogError("Serial device output speed set");
     }
-  } else {
-    LogError("Serial device input speed set");
   }
   return 0;
 }
 
 int
-resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
-  if (flushSerialOutput(descriptor)) {
-    if (setSerialDevice(descriptor, attributes, B0)) {
-      delay(500);
-      if (flushSerialInput(descriptor)) {
-        if (setSerialDevice(descriptor, attributes, baud)) {
-          return 1;
-        }
+validateSerialBaud (int *baud, const char *description, const char *word, const int *choices) {
+  if (!*word || isInteger(baud, word)) {
+    const BaudEntry *entry = getBaudEntry(*baud);
+    if (entry) {
+      if (!choices) return 1;
+
+      while (*choices) {
+        if (*baud == *choices) return 1;
+        ++choices;
       }
+
+      LogPrint(LOG_ERR, "Unsupported %s: %d",
+               description, *baud);
+      return 0;
     }
   }
+
+  LogPrint(LOG_ERR, "Invalid %s: %d",
+           description, *baud);
   return 0;
 }
 

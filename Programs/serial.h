@@ -26,15 +26,12 @@ extern "C" {
 
 extern int isSerialDevice (const char **path);
 extern int openSerialDevice (const char *path, int *descriptor, struct termios *attributes);
-extern int setSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
-extern int resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
+extern int restartSerialDevice (int descriptor, struct termios *attributes, int baud);
+extern int validateSerialBaud (int *baud, const char *description, const char *word, const int *choices);
 extern void rawSerialDevice (struct termios *attributes);
 
-extern int validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices);
-extern int baud2integer (speed_t baud);
-
 extern void initializeSerialAttributes (struct termios *attributes);
-extern int setSerialSpeed (struct termios *attributes, int speed);
+extern int setSerialBaud (struct termios *attributes, int baud);
 extern int setSerialDataBits (struct termios *attributes, int bits);
 extern int setSerialStopBits (struct termios *attributes, int bits);
 
@@ -53,7 +50,9 @@ typedef enum {
 } SerialFlowControl;
 extern int setSerialFlowControl (struct termios *attributes, SerialFlowControl flow);
 
-extern int applySerialAttributes (const struct termios *attributes, int descriptor);
+extern int getSerialAttributes (int descriptor, struct termios *attributes);
+extern int putSerialAttributes (int descriptor, const struct termios *attributes);
+extern int putSerialBaud (int descriptor, int baud, struct termios *attributes);
 extern int flushSerialInput (int descriptor);
 extern int flushSerialOutput (int descriptor);
 

@@ -205,7 +205,7 @@ openSerialPort (char **parameters, const char *device) {
     initializeSerialAttributes(&newSerialSettings);
     setSerialFlowControl(&newSerialSettings, SERIAL_FLOW_HARDWARE);
 
-    if (resetSerialDevice(serialDevice, &newSerialSettings, B38400)) {
+    if (restartSerialDevice(serialDevice, &newSerialSettings, 38400)) {
       return 1;
     }
 

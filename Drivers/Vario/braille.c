@@ -63,7 +63,7 @@
 #define V40BRLCOLS 40
 #define V40NCELLS 40
 #define V40TSPDATACNT 5
-#define BAUDRATE B19200         /* But both run at 19k2 */
+#define BAUDRATE 19200         /* But both run at 19k2 */
 
 static int brlcols;
 static int ncells;
@@ -209,7 +209,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars on input */
   curtio.c_cc[VMIN] = 0; /* no minimum input. */
 
-  if(!resetSerialDevice(brl_fd, &curtio, BAUDRATE)) goto failure;
+  if(!restartSerialDevice(brl_fd, &curtio, BAUDRATE)) goto failure;
 
   /* Try to detect display by sending query */
   while(1) {

@@ -62,7 +62,7 @@ int varioinit(const char *device)
 		tiodata.c_lflag=0;
 		tiodata.c_cc[VMIN]=0;
 		tiodata.c_cc[VTIME]=0;
-		if (resetSerialDevice(devfd, &tiodata, B19200)) {
+		if (restartSerialDevice(devfd, &tiodata, 19200)) {
 			if (varioreset() == 0) return 0;
 		}
 

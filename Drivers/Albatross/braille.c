@@ -240,20 +240,20 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
-    speed_t speedTable[] = {B19200, B9600, B0};
-    const speed_t *speed = speedTable;
+    int baudTable[] = {19200, 9600, 0};
+    const int *baud = baudTable;
 
     memset(&newSettings, 0, sizeof(newSettings));
     newSettings.c_cflag = CS8 | CREAD;
     newSettings.c_iflag = IGNPAR | IGNBRK;
 
-    while (resetSerialDevice(fileDescriptor, &newSettings, *speed)) {
+    while (restartSerialDevice(fileDescriptor, &newSettings, *baud)) {
       time_t start = time(NULL);
       int count = 0;
       unsigned char byte;
 
-      charactersPerSecond = baud2integer(*speed) / 10;
-      LogPrint(LOG_DEBUG, "Trying Albatross at %d baud.", baud2integer(*speed));
+      charactersPerSecond = *baud / 10;
+      LogPrint(LOG_DEBUG, "Trying Albatross at %d baud.", *baud);
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;
@@ -267,7 +267,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         if (difftime(time(NULL), start) > 5.0) break;
       }
 
-      if (*++speed == B0) speed = speedTable;
+      if (!*++baud) baud = baudTable;
     }
 
     tcsetattr(fileDescriptor, TCSANOW, &oldSettings);

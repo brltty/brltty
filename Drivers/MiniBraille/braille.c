@@ -103,11 +103,11 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 	rawSerialDevice(&newtermios);
 	newtermios.c_cc[VMIN] = 0; /* non-blocking read */
 	newtermios.c_cc[VTIME] = 0;
-	resetSerialDevice(brl_fd, &newtermios, B9600);
+	restartSerialDevice(brl_fd, &newtermios, 9600);
 	/* hm, how to switch to 38400 ? 
 	write(brl_fd, "\eV\r", 3);
 	tcflush(brl_fd, TCIFLUSH);
-	setSerialDevice(brl_fd, &newtermios, B38400);
+	putSerialBaud(brl_fd, 38400, &newtermios);
 	*/
 
 	message("BRLTTY Ready", 0);

@@ -177,7 +177,7 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static const speed_t speed = B19200;
+static const int baud = 19200;
 static int charactersPerSecond;
 
 /* Serial IO */
@@ -194,7 +194,7 @@ openSerialPort (char **parameters, const char *device) {
     initializeSerialAttributes(&newSerialSettings);
     setSerialParity(&newSerialSettings, SERIAL_PARITY_ODD);
 
-    if (resetSerialDevice(serialDevice, &newSerialSettings, speed)) {
+    if (restartSerialDevice(serialDevice, &newSerialSettings, baud)) {
       return 1;
     }
 
@@ -255,7 +255,6 @@ static UsbChannel *usb = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
-  const int baud = baud2integer(speed);
   const UsbChannelDefinition definitions[] = {
     {0X0921, 0X1200, 1, 0, 0, 1, 1, baud, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* GoHubs chip */
     {0X0403, 0X6001, 1, 0, 0, 1, 2, baud, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* FTDI chip */
@@ -611,7 +610,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   rawData = prevData = NULL;		/* clear pointers */
-  charactersPerSecond = baud2integer(speed) / 10;
+  charactersPerSecond = baud / 10;
 
   if (io->openPort(parameters, device)) {
     int tries = 0;

@@ -63,19 +63,13 @@ static int serialCharactersPerSecond;
 static int
 openSerialPort (char **parameters, const char *device) {
   if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
-    speed_t baud = B57600;
+    int baud = 57600;
     struct termios newSerialSettings;
 
-    memset(&newSerialSettings, 0, sizeof(newSerialSettings));
-    newSerialSettings.c_cflag = CS8 | CLOCAL | CREAD;
-    newSerialSettings.c_iflag = IGNPAR;
-    newSerialSettings.c_oflag = 0;		/* raw output */
-    newSerialSettings.c_lflag = 0;		/* don't echo or generate signals */
-    newSerialSettings.c_cc[VMIN] = 0;	/* set nonblocking read */
-    newSerialSettings.c_cc[VTIME] = 0;
+    initializeSerialAttributes(&newSerialSettings);
 
-    if (resetSerialDevice(serialDevice, &newSerialSettings, baud)) {
-      serialCharactersPerSecond = baud2integer(baud) / 10;
+    if (restartSerialDevice(serialDevice, &newSerialSettings, baud)) {
+      serialCharactersPerSecond = baud / 10;
       return 1;
     }
 

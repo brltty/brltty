@@ -114,7 +114,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
    makeDownloadFifo();
    if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
       initializeSerialAttributes(&newSettings);
-      if (resetSerialDevice(fileDescriptor, &newSettings, B9600)) {
+      if (restartSerialDevice(fileDescriptor, &newSettings, 9600)) {
          if (tcflush(fileDescriptor, TCIOFLUSH) != -1) {
             brl->y = screenHeight;
             brl->x = screenWidth;

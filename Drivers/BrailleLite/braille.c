@@ -42,7 +42,7 @@
 #include "Programs/message.h"
 
 typedef enum {
-  PARM_BAUDRATE=0,
+  PARM_BAUDRATE,
   PARM_KBEMU
 } DriverParameter;
 #define BRLPARMS "baudrate", "kbemu"
@@ -297,13 +297,13 @@ write_prebrl (void) {
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
-  static const unsigned good_baudrates[] =
+  static const int good_baudrates[] =
     {300,600,1200,2400,4800,9600,19200,38400, 0};
-  speed_t baudrate;
+  int baudrate;
   /* Init string for Model detection */
 
   if (!*parameters[PARM_BAUDRATE] ||
-      !validateBaud(&baudrate, "baud rate",
+      !validateSerialBaud(&baudrate, "baud rate",
 		    parameters[PARM_BAUDRATE], good_baudrates))
     baudrate = BAUDRATE;
 
@@ -332,7 +332,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
 
       /* activate new settings */
-      if (resetSerialDevice(blite_fd, &newtio, baudrate)) {
+      if (restartSerialDevice(blite_fd, &newtio, baudrate)) {
         qflush();
         write_prebrl();
         if (await_ack()) {

@@ -213,7 +213,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   newtio.c_iflag = IGNPAR;
   newtio.c_oflag = 0;
   newtio.c_lflag = 0;
-  resetSerialDevice(brl_fd,&newtio,B57600); 
+  restartSerialDevice(brl_fd,&newtio,57600); 
 #ifdef SendIdReq
   {
     brl_writePacket(brl,(unsigned char *) &ch,1); 

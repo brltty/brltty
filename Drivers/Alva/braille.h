@@ -51,7 +51,7 @@
 #define MODEL   ABT_AUTO
 
 
-#define BAUDRATE B9600
+#define BAUDRATE 9600
 
 
 /* Delay in miliseconds between forced full refresh of the display.

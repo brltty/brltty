@@ -456,13 +456,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       LogPrint(LOG_DEBUG,"Device was connected or activated");
     }
     LogPrint(LOG_DEBUG,"Sending query at 9600bps");
-    if(!resetSerialDevice(brl_fd, &curtio, B9600)) goto failure;
+    if(!restartSerialDevice(brl_fd, &curtio, 9600)) goto failure;
     if(QueryDisplay(brl_fd,reply)) break;
 #ifdef HIGHBAUD
     /* Then send the query at 19200bps, in case a PB was left ON
        at that speed */
     LogPrint(LOG_DEBUG,"Sending query at 19200bps");
-    if(!setSerialDevice(brl_fd, &curtio, B19200)) goto failure;
+    if(!putSerialBaud(brl_fd, 19200, &curtio)) goto failure;
     if(QueryDisplay(brl_fd,reply)) break;
 #endif /* HIGHBAUD */
     delay(DETECT_DELAY);
@@ -555,14 +555,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     write (brl_fd, BRL_UART192, DIM_BRL_UART192);
     tcdrain(brl_fd);
     delay(BAUD_DELAY);
-    if(!setSerialDevice(brl_fd, &curtio, B19200)) goto failure;
+    if(!putSerialBaud(brl_fd, 19200, &curtio)) goto failure;
     LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
     if(QueryDisplay(brl_fd,reply))
       LogPrint(LOG_DEBUG,"Display responded at 19200bps.");
     else{
       LogPrint(LOG_INFO,"Display did not respond at 19200bps, "
 	       "falling back to 9600bps.");
-      if(!setSerialDevice(brl_fd, &curtio, B9600)) goto failure;
+      if(!putSerialBaud(brl_fd, 9600, &curtio)) goto failure;
       delay(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(brl_fd,reply)) {
 	LogPrint(LOG_INFO,"Found display again at 9600bps.");

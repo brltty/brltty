@@ -443,8 +443,8 @@ openSerialPort (char **parameters, const char *device) {
 
 static int
 resetSerialPort (void) {
-  if (!resetSerialDevice(serialDevice, &newSerialSettings, BAUDRATE)) return 0;
-  serialCharactersPerSecond = baud2integer(BAUDRATE) / 10;
+  if (!restartSerialDevice(serialDevice, &newSerialSettings, BAUDRATE)) return 0;
+  serialCharactersPerSecond = BAUDRATE / 10;
   return 1;
 }
 

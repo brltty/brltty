@@ -35,7 +35,7 @@
 /* serial line baudrate... 
  * Note that default braille device is defined in ../Makefile
  */
-#define BAUDRATE B19200
+#define BAUDRATE 19200
 
 /* typematic settings */
 #define TYPEMATIC_DELAY 10	/* nbr of cycles before a key is repeated */

@@ -378,7 +378,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* nonblocking input will be set in ..._receive_packet() functions */
 
-  if(!resetSerialDevice(brl_fd, &curtio, B19200)) goto failure;
+  if(!restartSerialDevice(brl_fd, &curtio, 19200)) goto failure;
  
 /* Allocate and init static packet buffers */
   if((sendpacket = (unsigned char *)malloc(MAXTOTALPACKETLEN)) == NULL

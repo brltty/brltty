@@ -214,7 +214,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   /* autodetecting ECO model */
   do{
       /* DTR back on */
-      resetSerialDevice(brl_fd, &newtio, BAUDRATE);	/* activate new settings */
+      restartSerialDevice(brl_fd, &newtio, BAUDRATE);	/* activate new settings */
       delay(600);				/* give time to send ID string */
       
       /* The 2 next lines can be commented out to try autodetect once anyway */

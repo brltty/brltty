@@ -432,8 +432,8 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    newtio.c_cc[VTIME] = 0;
 
   /* set speed */
-   chars_per_sec = baud2integer(BAUDRATE) / 10;
-   setSerialDevice(brl_fd, &newtio, BAUDRATE);
+   chars_per_sec = BAUDRATE / 10;
+   restartSerialDevice(brl_fd, &newtio, BAUDRATE);
 
   /* Set model params... */
    brl->helpPage = 0;

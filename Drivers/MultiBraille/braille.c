@@ -135,7 +135,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
         initializeSerialAttributes(&newtio);
 	setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
 
-	resetSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
+	restartSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
 
 	/* MultiBraille initialisation procedure:
 	 * [ESC][V][Braillelength][Software Version][CR]

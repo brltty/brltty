@@ -33,7 +33,7 @@
  */
 
 #define BRLROWS 1					/* number of rows on Braille display */
-#define BAUDRATE B38400		/* baud rate for Braille display */
+#define BAUDRATE 38400		/* baud rate for Braille display */
 
 /* The following sequences are sent at initialisation time, at termination
  * and before and after Braille data.  The first byte is the length of the

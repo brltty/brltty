@@ -20,7 +20,7 @@
 #include "Programs/brl.h"
 
 
-#define BAUDRATE	B9600
+#define BAUDRATE	9600
 #define CNTX_INTERNAL	0x80
 
 /*

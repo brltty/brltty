@@ -23,8 +23,8 @@
 
 /* We always expect 8 data bits, no parity, 1 stop bit. */
 /* Select baudrate to use */
-#define BAUDRATE B9600
-//#define BAUDRATE B38400
+#define BAUDRATE 9600
+//#define BAUDRATE 38400
 
 /* Define the following for dots to character mapping for input to use 
    the same (user-defined) table as is used for output, instead of the

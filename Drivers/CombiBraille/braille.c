@@ -100,8 +100,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   initializeSerialAttributes(&newtio);
   setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
 
-  resetSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
-  chars_per_sec = baud2integer(BAUDRATE) / 10;
+  restartSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
+  chars_per_sec = BAUDRATE / 10;
 
   /* CombiBraille initialisation procedure: */
   success = 0;
