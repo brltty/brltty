@@ -29,6 +29,13 @@ CtA*   append to cut buffer
 CtL*   linear cut
 CtR*   rectangular cut
 
+Left Attribute Keys:
+   upper: toggle screen freeze mode
+   lower: toggle text/attributes display mode
+Right Attribute Keys:
+   upper: go up to nearest line with different highlighting
+   lower: go down to nearest line with different highlighting
+
 Side Wheels:
    backward: move up by lines
    forward:  move down by lines

@@ -315,6 +315,18 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       case 106: /* wheel: side left forward */
       case 216: /* wheel: side right forward */
         return CMD_LNDN;
+
+      case  42: /* key: attribute left upper */
+        return CMD_FREEZE;
+
+      case   1: /* key: attribute left lower */
+        return CMD_DISPMD;
+
+      case 192: /* key: attribute right upper */
+        return CMD_ATTRUP;
+
+      case 151: /* key: attribute right lower */
+        return CMD_ATTRDN;
     }
 
     LogPrint(LOG_WARNING, "Unexpected byte: %02X", byte);
