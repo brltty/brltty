@@ -186,25 +186,29 @@ MKOBJ="${brltty_cv_prog_mkobj}"
 AC_SUBST([MKOBJ])
 
 AC_CACHE_CHECK([for make shared object command], [brltty_cv_prog_mklib], [dnl
+case "${host_os}"
+in
+   linux*|openbsd*)
+      brltty_ld_flag_shared="-shared"
+      brltty_ld_flag_soname="-soname"
+      ;;
+   solaris*)
+      brltty_ld_flag_shared="-G"
+      brltty_ld_flag_soname="-h"
+      ;;
+   hpux*)
+      brltty_ld_flag_shared="-b"
+      brltty_ld_flag_soname="+h"
+      ;;
+   *)
+      AC_MSG_ERROR([cannot make shared object for ${host_os}])
+      ;;
+esac
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_mklib="\$(CC) -shared -Wl,-soname,SONAME -o"
+   brltty_cv_prog_mklib="\$(CC) -shared -Wl,${brltty_ld_flag_soname},SONAME -o"
 else
-   case "${host_os}"
-   in
-      linux*|openbsd*)
-         brltty_cv_prog_mklib="\$(LD) -shared -soname SONAME -o"
-         ;;
-      solaris*)
-         brltty_cv_prog_mklib="\$(LD) -G -h SONAME -o"
-         ;;
-      hpux*)
-         brltty_cv_prog_mklib="\$(LD) -b +h SONAME -o"
-         ;;
-      *)
-         brltty_cv_prog_mklib="\$(LD) -o"
-         ;;
-   esac
+   brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname} SONAME -o"
 fi])
 AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 
