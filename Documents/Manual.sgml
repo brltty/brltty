@@ -1226,21 +1226,26 @@ In addition, the following standard <bf/autoconf/ environment variables are also
 <descrip>
   <tag/prefix/
     Subroot for architecture-independent files.
-    Configured via the <tt/--prefix/ build option.
+    Configured via the <ref id="build-portable-root" name="--prefix"> build option.
   <tag/exec_prefix/
     Subroot for architecture-dependent files.
-    Configured via the <tt/--exec-prefix/ build option.
+    Configured via the <ref id="build-architecture-root" name="--exec-prefix"> build option.
   <tag/bindir/
+    Default location for <ref id="build-program-directory" name="program directory">.
     Configured via the <tt/--bindir/ build option.
   <tag/libdir/
     Directory for BrlAPI's static archive and dynamically loadable object.
-    Configured via the <tt/--libdir/ build option.
+    Default anchor for <ref id="build-library-directory" name="library directory">.
+    Configured via the <ref id="build-api-directory" name="--libdir"> build option.
   <tag/sysconfdir/
     Directory for configuration files.
-    Configured via the <tt/--sysconfdir/ build option.
+    Default anchor for <ref id="build-data-directory" name="data directory">.
+    Configured via the <ref id="build-configuration-directory" name="--sysconfdir"> build option.
   <tag/mandir/
+    Default location for <ref id="build-manpage-directory" name="manual pages directory">.
     Configured via the <tt/--mandir/ build option.
   <tag/includedir/
+    Default anchor for <ref id="build-include-directory" name="header files directory">.
     Configured via the <tt/--includedir/ build option.
 </descrip>
 
