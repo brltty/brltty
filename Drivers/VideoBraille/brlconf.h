@@ -25,5 +25,3 @@
 #define VBLPTSTROBE 0x40
 #define VBLPTCLOCK 0x20
 #define VBLPTDATA 0x80
-#define BRLNAME "VideoBraille"
-#define PREFSTYLE ST_None

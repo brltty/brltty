@@ -68,12 +68,14 @@
 #include <string.h>
 #include <errno.h>
 
-/*#include "brlconf.h"*/
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "brlconf.h"
-#include "Programs/brl_driver.h"
 
+#define BRLNAME	"MDV"
+#define PREFSTYLE ST_MDVStyle
+
+#include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */

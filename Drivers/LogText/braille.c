@@ -37,12 +37,12 @@
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "brlconf.h"
 
 #define BRLNAME "LogText"
-#define BRLDRIVER "lt"
 #define PREFSTYLE ST_Generic
+
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 static int fileDescriptor = -1;
 static struct termios oldSettings;

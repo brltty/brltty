@@ -16,8 +16,6 @@
  */
 
 #define BRAILLEDISPLAYSIZE 40
-#define BRLNAME "VisioBraille"
-#define PREFSTYLE ST_None
 /* #define SENDIDREQ */
 #define BRLRAWCAPABLE /* We support raw mode communication */
 #define BRLKEY2CMD /* We support key to brltty commands conversion */

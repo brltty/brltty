@@ -27,11 +27,16 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include "vblow.h"
+
 #include "Programs/brl.h"
-#include "brlconf.h"
-#include "Programs/brl_driver.h"
 #include "Programs/misc.h"
+
+#define BRLNAME "VideoBraille"
+#define PREFSTYLE ST_None
+
+#include "Programs/brl_driver.h"
+#include "brlconf.h"
+#include "vblow.h"
 
 static unsigned char lastbuff[40];
 

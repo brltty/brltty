@@ -22,12 +22,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "variolow.h"
+
 #include "Programs/brl.h"
-#include "brlconf.h"
-#include "Programs/brl_driver.h"
 #include "Programs/misc.h"
 
+#define BRLNAME	"Vario"
+#define PREFSTYLE ST_None
+
+#include "Programs/brl_driver.h"
+#include "brlconf.h"
+#include "variolow.h"
 
 static unsigned char lastbuff[40];
 

@@ -20,8 +20,6 @@
  *
  */
 
-#define BRLNAME	"Alva"
-
 /* Known Device Identification Numbers (not to be changed) */
 #define ABT_AUTO	-1	/* for new firmware only */
 #define ABT320		0X00	/* ABT 320 */
@@ -65,6 +63,3 @@
  * This is to minimize garbage effects due to noise on the serial line.
  */
 #define REFRESH_RATE 1000
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_AlvaStyle

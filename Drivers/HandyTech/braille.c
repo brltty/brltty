@@ -27,10 +27,15 @@
 #include <sys/termios.h>
 #include <sys/time.h>
 
-#include "brlconf.h"
+#include "Programs/brl.h"
 #include "Programs/brltty.h"
 #include "Programs/misc.h"
+
+#define BRLNAME "HandyTech"
+#define PREFSTYLE ST_AlvaStyle
+
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 /* Communication codes */
 static unsigned char HandyDescribe[] = {0XFF};

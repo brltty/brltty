@@ -19,8 +19,3 @@
  *
  * Edit as necessary for your system.
  */
-
-#define BRLNAME	"Vario"
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_None

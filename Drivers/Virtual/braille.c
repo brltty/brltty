@@ -34,14 +34,18 @@
 
 #include "Programs/misc.h"
 #include "Programs/brl.h"
-#include "brlconf.h"
 
-#define BRL_HAVE_VISUAL_DISPLAY
+#define BRLNAME "Virtual"
+#define PREFSTYLE ST_Generic
+
 typedef enum {
   PARM_PORT
 } DriverParameter;
 #define BRLPARMS "port"
+
+#define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 #define BRLROWS		1
 

@@ -38,10 +38,14 @@
 #include <sys/termios.h>
 #include <string.h>
 
-#include "brlconf.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
+
+#define BRLNAME	"EcoBraille"
+#define PREFSTYLE ST_None
+
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 /* Braille display parameters */
 typedef struct{

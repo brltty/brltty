@@ -20,7 +20,3 @@
  * Edit as necessary for your system.
  */
 
-#define BRLNAME	"MDV"
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_MDVStyle

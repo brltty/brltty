@@ -64,8 +64,12 @@
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "brlconf.h"
+
+#define BRLNAME	"MultiBraille"
+#define PREFSTYLE ST_TiemanStyle
+
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 #include "tables.h"		/* for keybindings */
 
 #define ESC '\033'

@@ -15,17 +15,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define BRLNAME	"EuroBraille"
-
 /* serial line baudrate 
  */
 #include	"Programs/brl.h"
 
 
 #define BAUDRATE B9600
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_None
 
 /*
 ** main structure to alias braille keystrokes

@@ -20,5 +20,3 @@
  * Edit as necessary for your system.
  */
 
-#define BRLNAME "Virtual"
-#define PREFSTYLE ST_Generic

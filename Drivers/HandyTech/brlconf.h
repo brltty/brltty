@@ -21,10 +21,6 @@
  * Edit as necessary for your system.
  */
 
-
-#define BRLNAME "HandyTech"
-#define PREFSTYLE ST_AlvaStyle
-
 /***** User Settings *****/
 /* typematic settings */
 #define TYPEMATIC_DELAY 10	/* nbr of cycles before a key is repeated */

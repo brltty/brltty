@@ -39,16 +39,17 @@ static int displayDescriptor = -1;
 static int displayTerminal;
 
 #include "Programs/misc.h"
-#include "brlconf.h"
 
 #define BRLNAME "BrailleNote"
-#define BRLDRIVER "bn"
 #define PREFSTYLE ST_None
+
 typedef enum {
    PARM_STATUSCELLS
 } DriverParameter;
 #define BRLPARMS "statuscells"
+
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 static int fileDescriptor = -1;
 static struct termios oldSettings;

@@ -21,16 +21,10 @@
  * Edit as necessary for your system.
  */
 
-
-#define BRLNAME "BrailleLite"
-
 /* We always expect 8 data bits, no parity, 1 stop bit. */
 /* Select baudrate to use */
 #define BAUDRATE B9600
 //#define BAUDRATE B38400
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_None
 
 /* Define this if you want to keep trying to detect a display forever,
    instead of exiting when no display appears to be connected. */

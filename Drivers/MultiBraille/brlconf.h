@@ -32,8 +32,6 @@
  * Edit as necessary for your system.
  */
 
-#define BRLNAME	"MultiBraille"
-
 #define BRLROWS 1					/* number of rows on Braille display */
 #define BAUDRATE B38400		/* baud rate for Braille display */
 
@@ -50,7 +48,3 @@
 
 #define MB_CR_EXTRAKEYS 6  /* amount of extra cursor routing keys. */
                            /* should always be 6 (-> tech. docs) */ 
-
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_TiemanStyle

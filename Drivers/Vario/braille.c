@@ -48,12 +48,15 @@
 #include <string.h>
 #include <errno.h>
 
-#include "brlconf.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "Programs/brl_driver.h"
 
-		  
+#define BRLNAME	"Vario"
+#define PREFSTYLE ST_TiemanStyle
+
+#include "Programs/brl_driver.h"
+#include "brlconf.h"
+
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 

@@ -24,9 +24,6 @@
  * Edit as needed...
  */
 
-#define BRLNAME	"Vario"
-#define PREFSTYLE ST_TiemanStyle
-
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off.
    This is problematic at current Firmware versions, because the

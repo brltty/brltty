@@ -26,9 +26,4 @@
  * Edit as needed...
  */
 
-#define BRLNAME	"Minibraille"
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_TiemanStyle
-
 /* End of driver config */

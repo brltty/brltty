@@ -26,8 +26,6 @@
  * Edit as needed...
  */
 
-#define BRLNAME	"TSI"
-
 /* Delay before typematic key repetitions
    Time before a key you hold down will start being repeated */
 #define BRL_TYPEMATIC_DELAY 9
@@ -127,9 +125,6 @@
    "packet" per display update. It is implicitly activated whenever
    FORCE_FULL_SEND_DELAY is used. */
 /*#define NO_MULTIPLE_UPDATES 1*/
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_PB80Style
 
 /* TODO: an option that deactivates partial updates, so that the whole display
    is always updated... */

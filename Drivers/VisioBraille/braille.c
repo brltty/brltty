@@ -30,16 +30,20 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <errno.h>
-#include "brlconf.h"
-#include "brldefs-vs.h"
+
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/scr.h"
 #include "Programs/message.h"
 
+#define BRLNAME "VisioBraille"
+#define PREFSTYLE ST_None
+
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_KEY_CODES
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
+#include "brldefs-vs.h"
 
 #define MAXPKTLEN 512
 

@@ -40,9 +40,13 @@
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "brlconf.h"
-#include "Programs/brl_driver.h"
 #include "Programs/message.h"
+
+#define BRLNAME	"Minibraille"
+#define PREFSTYLE ST_TiemanStyle
+
+#include "Programs/brl_driver.h"
+#include "brlconf.h"
 #include "minibraille.h"
 
 /* types */

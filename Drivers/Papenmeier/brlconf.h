@@ -36,8 +36,6 @@
  * only the builtin table is used for character translation
  */
 
-#define BRLNAME	"Papenmeier"
-
 #define BRLCOLSMAX   80 
 
 #define BAUDRATE B19200
@@ -87,9 +85,6 @@
 #define XMT_TIMEK7K8 0X0608 /* key code suppression time for moving from K7 to K8 (down) */
 #define XMT_TIMEROUT 0X0609 /* routing time interval */
 #define XMT_TIMEOPPO 0X060A /* key code suppression time for opposite movements */
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_Generic
 
 #define PM_CONFIG_ENV   "BRLTTY_PM_CONF"
 #define PM_CONFIG_FILE  "brltty-pm.conf"

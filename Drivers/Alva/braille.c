@@ -109,10 +109,14 @@
 #include <sys/termios.h>
 #include <string.h>
 
-#include "brlconf.h"
 #include "Programs/misc.h"
 #include "Programs/brltty.h"
+
+#define BRLNAME	"Alva"
+#define PREFSTYLE ST_AlvaStyle
+
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 static int brl_fd;			/* file descriptor for Braille display */
 static struct termios oldtio;		/* old terminal settings */

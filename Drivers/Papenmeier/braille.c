@@ -54,9 +54,11 @@
 #include <termios.h>
 #include <sys/time.h>
 
-#include "brlconf.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
+
+#define BRLNAME	"Papenmeier"
+#define PREFSTYLE ST_Generic
 
 typedef enum {
    PARM_CONFIGFILE,
@@ -65,8 +67,10 @@ typedef enum {
    PARM_DEBUGWRITES
 } DriverParameter;
 #define BRLPARMS "configfile", "debugkeys", "debugreads", "debugwrites"
+
 #define BRLCONST
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
 #include "config.tab.c"

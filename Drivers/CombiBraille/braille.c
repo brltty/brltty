@@ -34,8 +34,12 @@
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "brlconf.h"
+
+#define BRLNAME	"CombiBraille"
+#define PREFSTYLE ST_TiemanStyle
+
 #include "Programs/brl_driver.h"
+#include "brlconf.h"
 
 /* Command translation table: */
 static int cmdtrans[0X100] = {

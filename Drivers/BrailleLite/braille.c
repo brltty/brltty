@@ -44,7 +44,8 @@
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
-#include "brlconf.h"
+#define BRLNAME "BrailleLite"
+#define PREFSTYLE ST_None
 
 typedef enum {
   PARM_BAUDRATE=0,
@@ -53,7 +54,7 @@ typedef enum {
 #define BRLPARMS "baudrate", "kbemu"
 
 #include "Programs/brl_driver.h"
-
+#include "brlconf.h"
 #include "bindings.h"		/* for keybindings */
 
 

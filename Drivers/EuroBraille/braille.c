@@ -46,13 +46,15 @@
 #include <sys/termios.h>
 #include <string.h>
 
-#include "brlconf.h"
 #include "Programs/brl.h"
 #include "Programs/message.h"
 #include "Programs/misc.h"
+
+#define BRLNAME	"EuroBraille"
+#define PREFSTYLE ST_None
+
 #include "Programs/brl_driver.h"
-
-
+#include "brlconf.h"
 
 
 t_key		num_keys[27] = {
