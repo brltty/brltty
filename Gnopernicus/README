@@ -37,6 +37,99 @@ Configuring Gnopernicus
 You need to activate Braille Support, and to change the Braille Device Type to
 "BRLTTY".
 
+When the focus is inside the Gnopernicus window, select
+
+    1 General Settings
+
+In this menu, check the checkbox with the label "Braille". This activates
+braille support, and makes the "Braille Settings" window available.
+
+Now click OK to apply the changes and close the window.
+
+In the main Gnopernicus window again, select
+
+    2 Input/Output Settings -> 2 Braille Settings -> 1 Braille Device
+
+In this dialog box, ensure that "BRLTTY" is the selected Braille device.
+
+After applyingJ your changes, "Close" the "Braille Settings" and "Input/Output
+Settings" windows.
+
+You might need to restart Gnopernicus to get working braille support.
+
+There's a command-line interface to the Gnome configuration system (gconf)
+called "gconftool-2". You can get verbose help for it with "gconftool-2 --help"
+or something shorter with "gconftool-2 --usage".
+
+èBefore accessibility will work across the desktop, you need to check this
+gconf key:
+
+    gconftool-2 --get /apps/desktop/gnome/interface/accessibility 
+
+If it's ialse, set it to true as follows (all one line):
+
+    gconftool-2 --type bool
+                --set /apps/desktop/gnome/interface/accessibility true
+
+Gnopernicus uses gconf to store its settings, so you can manually turn braille
+on (and turn speech off if you like). The relevant gconf keys are:
+
+[turn braille on]
+    gconftool-2 --type bool --set /apps/gnopernicus/srcore/br_active true
+
+[turn braille monitor display (for sighted users) off]
+    gconftool-2 --type bool --set /apps/gnopernicus/srcore/bm_active false
+
+[turn speech off]
+    gconftool-2 --type bool --set /apps/gnopernicus/srcore/sp_active false
+
+[set braille device to brltty]
+    gconftool-2 --type string --set /apps/gnopernicus/braille/device BRLTTY
+
+You can run "gconftool-2 --get ...." with any key (you don't need the "--type"
+parameter for the "get" function) to verify that that gconf key is set
+correctly.
+
+Here's a sample .xinitrc file for starting Gnome and Gnopernicus under the
+Garnome distribution. The accessibility key is set in the file to ensure that
+it is true. The environment variable GTK_MODULES seems to be necessary to make
+everything accessible. The .xinitrc file must be placed in your home directory
+and is used when you type "startx" to start the X-server.
+
+ ------------------------------------------------------------------------------
+ #!/bin/sh
+ gconftool-2 --type bool --set /apps/desktop/gnome/interface/accessibility true
+ GARNOME=$HOME/garnome
+ PATH=$GARNOME/bin:$PATH
+ LD_LIBRARY_PATH=$GARNOME/lib:$LD_LIBRARY_PATH
+ PYTHONPATH=$GARNOME/lib/python2.2/site-packages
+ PKG_CONFIG_PATH=$GARNOME/lib/pkgconfig:/usr/lib/pkgconfig
+ GDK_USE_XFT=1
+ GTK_MODULES=gail:atk-bridge
+ export PATH LD_LIBRARY_PATH PYTHONPATH PKG_CONFIG_PATH GDK_USE_XFT GTK_MODULES
+ exec $GARNOME/bin/gnome-session
+ ------------------------------------------------------------------------------
+
+Gnopernicus is started from a file in your home directory which Gnome reads
+when it starts up. While Gnome provides a GUI for adding startup programs,
+there's no proper command-line or script way to do so yet. You can, however,
+manually edit the session file as follows:
+
+1) Create the directory "~/.gnome2" if it doesn't exist yet.
+2) Create the file "~/.gnome2/session-manual" if it doesn't exist yet.
+3) Contents of the "session-manual" file (without the indentation):
+
+   <blank line>
+   [Default]
+   num_clients=1
+   0,RestartStyleHint=3
+   0,Priority=60
+   0,RestartCommand=gnopernicus
+
+
+Key Bindings
+============
+
 This driver assumes that Gnopernicus key bindings remain at their default
 settings. BRLTTY commands are mapped to Gnopernicus key bindings as follows:
 
