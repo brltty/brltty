@@ -35,3 +35,5 @@ distclean::
 	-rm -f *~ *orig \#*\# *.rej ? a.out
 	-rm -f Makefile
 
+.DELETE_ON_ERROR:
+
