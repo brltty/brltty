@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -17,38 +21,47 @@
 /* Alva_ABT3/brl.c - Braille display library for Alva ABT3xx series
  * Copyright (C) 1995-1996 by Nicolas Pitre <nico@cam.org>
  * See the GNU Public license for details in the ../COPYING file
- * (This code was originally inspired from the Braille Lite driver)
+ *
+ * $Id: brl.c,v 1.4 1996/10/03 08:08:13 nn201 Exp $
  */
 
 /* Changes:
- *    feb 19, 1996: (nico)
+ *    oct 02, 1996:
+ *		- bound CMD_SAY and CMD_MUTE
+ *    sep 22, 1996:
+ *		- bound CMD_PRDIFLN and CMD_NXDIFLN.
+ *    aug 15, 1996:
+ *              - adeded automatic model detection for new firmware.
+ *              - support for selectable help screen.
+ *    feb 19, 1996: 
  *              - added small hack for automatic rewrite of display when
  *                the terminal is turned off and back on, replugged, etc.
- *      feb 15, 1996: (nico)
+ *      feb 15, 1996:
  *              - Modified writebrl() for lower bandwith
  *              - Joined the forced ReWrite function to the CURSOR key
- *      jan 31, 1996: (nico)
+ *      jan 31, 1996:
  *              - moved user configurable parameters into brlconf.h
  *              - added identbrl()
  *              - added overide parameter for serial device
  *              - added keybindings for BRLTTY configuration menu
- *      jan 23, 1996: (nico)
+ *      jan 23, 1996:
  *              - modifications to be compatible with the BRLTTY braille
  *                mapping standard.
- *      dec 27, 1995: (nico)
+ *      dec 27, 1995:
  *              - Added conditions to support all ABT3xx series
  *              - changed directory Alva_ABT40 to Alva_ABT3
- *      dec 02, 1995: (nico)
+ *      dec 02, 1995:
  *              - made changes to support latest Alva ABT3 firmware (new
  *                serial protocol).
- *      nov 05, 1995: (nico)
+ *      nov 05, 1995:
  *              - added typematic facility
  *              - added key bindings for Stephane Doyon's cut'n paste.
  *                <doyons@jsp.umontreal.ca>
  *              - added cursor routing key block marking
  *              - fixed a bug in readbrl() about released keys
- *      sep 30' 1995: (nico)
- *              - initial Alva driver code.
+ *      sep 30' 1995:
+ *              - initial Alva driver code, inspired from the
+ *                BrailleLite code.
  */
 
 
@@ -64,44 +77,65 @@
 #include "brlconf.h"
 #include "../brl.h"
 #include "../scr.h"
-
+#include "../misc.h"
 
 
 static char StartupString[] =
-"  Alva ABT3xx driver, version 1.22 \n"
+"  Alva ABT3xx driver, version 1.33 \n"
 "  Copyright (C) 1995-1996 by Nicolas Pitre <nico@cam.org> \n";
 
 
 
 /* Braille display parameters */
 
-#if MODEL == ABT320
-#define BRLCOLS	20
-#define BRLROWS	1
-#define BRLSTCELLS	3
-#define BRLNAME	"ABT320"
-#elif MODEL == ABT340
-#define BRLCOLS	40
-#define BRLROWS	1
-#define BRLSTCELLS	3
-#define BRLNAME	"ABT340"
-#elif MODEL == ABT380
-#define BRLCOLS	80
-#define BRLROWS	1
-#define BRLSTCELLS	5
-#define BRLNAME	"ABT380"
-#elif MODEL == ABT34D
-#define BRLCOLS	40
-#define BRLROWS	1
-#define BRLSTCELLS	5
-#define BRLNAME	"ABT34D (ABT340 Desktop)"
-#elif MODEL == ABT38D
-#define BRLCOLS	80
-#define BRLROWS	1
-#define BRLSTCELLS	5
-#define BRLNAMW	"ABT38D (ABT380 Twin Space)"
-#endif
+typedef struct
+  {
+    char *Name;
+    int Cols;
+    int NbStCells;
+  }
+BRLPARAMS;
 
+BRLPARAMS Models[NB_MODEL] =
+{
+  {
+    /* ID == 0 */
+    "ABT320",
+    20,
+    3
+  }
+  ,
+  {
+    /* ID == 1 */
+    "ABT340",
+    40,
+    3
+  }
+  ,
+  {
+    /* ID == 2 */
+    "ABT380",
+    80,
+    5
+  }
+  ,
+  {
+    /* ID == 3 */
+    "ABT340 Desktop",
+    40,
+    5
+  }
+  ,
+  {
+    /* ID == 4 */
+    "ABT380 Twin Space",
+    80,
+    5
+  }
+};
+
+
+#define BRLROWS		1
 #define MAX_STCELLS	5	/* hiest number of status cells */
 
 
@@ -149,11 +183,12 @@ char TransTable[256] =
 
 char DefDev[] = BRLDEV;		/* default braille device */
 int brl_fd;			/* file descriptor for Braille display */
+struct termios oldtio;		/* old terminal settings */
 unsigned char *rawdata;		/* translated data to send to Braille */
 unsigned char *prevdata;	/* previously sent raw data */
-struct termios oldtio;		/* old terminal settings */
 unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
+BRLPARAMS *model;		/* points to terminal model config struct */
 short ReWrite = 0;		/* 1 if display need to be rewritten */
 
 
@@ -164,13 +199,8 @@ char BRL_START[] = "\r\033B";	/* escape code to display braille */
 #define DIM_BRL_START 3
 char BRL_END[] = "\r";		/* to send after the braille sequence */
 #define DIM_BRL_END 1
-char BRL_CLEAR[] =
-{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-#define DIM_BRL_CLEAR 43	/* string to fill the display with spaces */
-
-/* Identification string */
-char BRL_ID[] = "ID=";
-#define DIM_BRL_ID 3
+char BRL_ID[] = "\033ID=";
+#define DIM_BRL_ID 4
 
 
 /* Key values */
@@ -205,7 +235,8 @@ char BRL_ID[] = "ID=";
 #define KEY_ROUTING_OFFSET 168
 
 /* Index for new firmware protocol */
-int OperatingKeys[10] =
+int
+  OperatingKeys[10] =
 {KEY_PROG, KEY_HOME, KEY_CURSOR,
  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
  KEY_CURSOR2, KEY_HOME2, KEY_PROG2};
@@ -238,7 +269,11 @@ identbrl (const char *dev)
   /* Hello display... */
   printf (StartupString);
   printf ("  - compiled for %s with %s version \n",
-	  BRLNAME,
+#if MODEL == ABT_AUTO
+	  "terminal autodetection",
+#else
+	  Models[MODEL].Name,
+#endif
 #ifdef ABT3_OLD_FIRMWARE
 	  "old firmware"
 #else
@@ -254,13 +289,61 @@ initbrl (const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
+  short ModelID = MODEL;
+  unsigned char buffer[DIM_BRL_ID + 1];
 
-  sethlpscr (0);		/* always screen 0 for now since no model autodetection yet */
-  res.x = BRLCOLS;		/* initialise size of display */
-  res.y = BRLROWS;
   res.disp = rawdata = prevdata = NULL;		/* clear pointers */
-  if (res.x == -1)
-    return res;
+
+  /* Open the Braille display device for random access */
+  if (!dev)
+    dev = DefDev;
+  brl_fd = open (dev, O_RDWR | O_NOCTTY);
+  if (brl_fd < 0)
+    goto failure;
+  tcgetattr (brl_fd, &oldtio);	/* save current settings */
+
+  /* Set flow control and 8n1, enable reading */
+  newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+
+  /* Ignore bytes with parity errors and make terminal raw and dumb */
+  newtio.c_iflag = IGNPAR;
+  newtio.c_oflag = 0;		/* raw output */
+  newtio.c_lflag = 0;		/* don't echo or generate signals */
+  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
+  newtio.c_cc[VTIME] = 0;
+
+  /* autodetecting ABT model */
+  do
+    {
+      /* to force DTR off */
+      cfsetispeed (&newtio, B0);
+      cfsetospeed (&newtio, B0);
+      tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
+      delay (100);
+      tcflush (brl_fd, TCIOFLUSH);	/* clean line */
+      /* DTR back on */
+      cfsetispeed (&newtio, BAUDRATE);
+      cfsetospeed (&newtio, BAUDRATE);
+      tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
+      delay (400);		/* give time to send ID string */
+      /* The 2 next lines can be commented out to try autodetect once anyway */
+      if (ModelID != ABT_AUTO)
+	break;
+      if (read (brl_fd, &buffer, DIM_BRL_ID + 1) == DIM_BRL_ID + 1)
+	{
+	  if (!strncmp (buffer, BRL_ID, DIM_BRL_ID))
+	    ModelID = buffer[DIM_BRL_ID];
+	}
+    }
+  while (ModelID == ABT_AUTO);
+  if (ModelID >= NB_MODEL || ModelID < 0)
+    goto failure;		/* unknown model */
+
+  /* Set model params... */
+  model = &Models[ModelID];
+  sethlpscr (ModelID);
+  res.x = model->Cols;		/* initialise size of display */
+  res.y = BRLROWS;
 
   /* Allocate space for buffers */
   res.disp = (char *) malloc (res.x * res.y);
@@ -269,33 +352,7 @@ initbrl (const char *dev)
   if (!res.disp || !rawdata || !prevdata)
     goto failure;
 
-  /* Now open the Braille display device for random access */
-  if (!dev)
-    dev = DefDev;
-  brl_fd = open (dev, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0)
-    goto failure;
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
-
-  /* Set bps, flow control and 8n1, enable reading */
-  newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
-
-  /* Ignore bytes with parity errors and make terminal raw and dumb */
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;		/* raw output */
-  newtio.c_lflag = 0;		/* don't echo or generate signals */
-  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-  newtio.c_cc[VTIME] = 0;
-  tcflush (brl_fd, TCIFLUSH);	/* clean line */
-  tcsetattr (brl_fd, TCSANOW, &newtio);		/* activate new settings */
-
-  /* Send initialisation sequence */
-  if (!WriteToBrlDisplay (0, DIM_BRL_CLEAR, BRL_CLEAR))
-    {
-      tcsetattr (brl_fd, TCSANOW, &oldtio);
-      close (brl_fd);
-      goto failure;
-    }
+  ReWrite = 1;			/* To write whole display at first time */
 
   return res;
 
@@ -331,16 +388,16 @@ writebrl (brldim brl)
     {
       /* We rewrite the whole display */
       i = 0;
-      j = BRLCOLS;
+      j = model->Cols;
       ReWrite = 0;
     }
   else
     {
       /* We update only the display part that has been changed */
       i = 0;
-      while ((brl.disp[i] == prevdata[i]) && (i < BRLCOLS))
+      while ((brl.disp[i] == prevdata[i]) && (i < model->Cols))
 	i++;
-      j = BRLCOLS - 1;
+      j = model->Cols - 1;
       while ((brl.disp[j] == prevdata[j]) && (j >= i))
 	j--;
       j++;
@@ -350,23 +407,23 @@ writebrl (brldim brl)
       for (k = 0;
 	   k < (j - i);
 	   rawdata[k++] = TransTable[(prevdata[i + k] = brl.disp[i + k])]);
-      WriteToBrlDisplay (BRLSTCELLS + i, j - i, rawdata);
+      WriteToBrlDisplay (model->NbStCells + i, j - i, rawdata);
     }
 }
 
 
 void
-WriteBrlStatus (unsigned char *st)
+setbrlstat (const unsigned char *st)
 {
   int i;
 
   /* Update status cells on braille display */
-  if (memcmp (st, PrevStatus, BRLSTCELLS))	/* only if it changed */
+  if (memcmp (st, PrevStatus, model->NbStCells))	/* only if it changed */
     {
       for (i = 0;
-	   i < BRLSTCELLS;
+	   i < model->NbStCells;
 	   StatusCells[i++] = TransTable[(PrevStatus[i] = st[i])]);
-      WriteToBrlDisplay (0, BRLSTCELLS, StatusCells);
+      WriteToBrlDisplay (0, model->NbStCells, StatusCells);
     }
 }
 
@@ -429,11 +486,11 @@ GetABTKey (unsigned int *Keys, unsigned int *Pos)
 
 #else /* defined ABT3_OLD_FIRMWARE */
 
-      if ((c >= (KEY_ROUTING_OFFSET + BRLCOLS)) &&
-	  (c < (KEY_ROUTING_OFFSET + BRLCOLS + 6)))
+      if ((c >= (KEY_ROUTING_OFFSET + model->Cols)) &&
+	  (c < (KEY_ROUTING_OFFSET + model->Cols + 6)))
 	{
 	  /* make for Status keys of Touch Cursor */
-	  *Keys |= StatusKeys[c - (KEY_ROUTING_OFFSET + BRLCOLS)];
+	  *Keys |= StatusKeys[c - (KEY_ROUTING_OFFSET + model->Cols)];
 	}
       else if (c >= KEY_ROUTING_OFFSET)
 	{
@@ -542,8 +599,17 @@ readbrl (int type)
 	    case KEY_CURSOR | KEY_RIGHT:
 	      res = CMD_HWINRT;
 	      break;
-	    case KEY_HOME | KEY_CURSOR:
-	      res = CMD_CSRTRK;
+	    case KEY_HOME | KEY_CURSOR | KEY_UP:
+	      res = CMD_PRDIFLN;
+	      break;
+	    case KEY_HOME | KEY_CURSOR | KEY_DOWN:
+	      res = CMD_NXDIFLN;
+	      break;
+	    case KEY_HOME | KEY_CURSOR | KEY_LEFT:
+	      res = CMD_MUTE;
+	      break;
+	    case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
+	      res = CMD_SAY;
 	      break;
 	    case KEY_PROG | KEY_CURSOR:
 	      res = CMD_CONFMENU;
@@ -612,9 +678,13 @@ readbrl (int type)
 		  break;
 		case KEY_PROG:
 		  res = CMD_HELP;
+		  /*res = CMD_SAY;*/
 		  break;
 		case KEY_PROG | KEY_HOME:
 		  res = CMD_DISPMD;
+		  break;
+		case KEY_HOME | KEY_CURSOR:
+		  res = CMD_CSRTRK;
 		  break;
 		}
 	    }

@@ -2,7 +2,11 @@
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Version 1.0, 26 July 1996
+# Nikhil Nair <nn201@cus.cam.ac.uk>
+# Nicolas Pitre <nico@cam.org>
+# Stephane Doyon <doyons@jsp.umontreal.ca>
+#
+# Version 1.0.2, 17 September 1996
 #
 # Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +20,7 @@
 
 ###############################################################################
 # Makefile for BRLTTY
-# N. Nair, 24 January 1996
+# $Id: Makefile,v 1.5 1996/10/01 16:03:47 nn201 Exp $
 ###############################################################################
 
 # Specify your Braille display by uncommenting one and ONLY one of these
@@ -25,13 +29,25 @@
 #BRL_TARGET = CombiBraille
 #BRL_TARGET = TSI
 
+# Specify your speech support option.
+# Uncomment one of these lines and comment out the NoSpeech line 
+# if you have speech.
+# Note: All this is still experimental.  It is safe to leave it as NoSpeech.
+SPK_TARGET = NoSpeech
+#SPK_TARGET = CombiBraille
+#SPK_TARGET = Generic_say
+#SPK_TARGET = Televox
+
+# Specify the default, compiled-in text translation table.  This can be
+# overridden at run-time by giving brltty the -t option.
+TEXTTRANS = text.us.tbl
+
 # Specify the device name for the serial port your Braille display will
 # normally be connected to.  For port com(n), use /dev/ttyS(n-1) -
 # e.g. for com1 use /dev/ttyS0
-BRLDEV = /dev/ttyS0
-
 # [Note that this port can be overridden from the brltty command-line.
 # See the documentation for further details.]
+BRLDEV = /dev/ttyS0
 
 # NOTE: if you intend to have brltty start up automatically at
 # boot-time, the executable and all data files should be in your root
@@ -60,17 +76,13 @@ INSTALL_EXEC = --owner=root --group=root --mode=0744
 # Don't edit this unless you know what you're doing!
 SCRDEV = /dev/vcsa0
 
-# This is purely experimental ...
-SAY_CMD = NO_SAY_CMD
-#SAY_CMD = SAY_CMD
-
 # The following are compiler settings.  If you don't know what they mean,
 # LEAVE THEM ALONE!
 CC = gcc
 # To compile in a.out (if you use ELF by default), you may be able to use
 # `-b i486-linuxaout'; however, you may also need to use the -V flag, or
 # possibly a different gcc executable, depending on your setup.
-CFLAGS = -O2 -g -Wall -D_POSIX_C_SOURCE=2 -D$(BRL_TARGET) -D$(SAY_CMD)
+CFLAGS = -O2 -g -Wall -D_POSIX_C_SOURCE=2 -D$(BRL_TARGET) -D$(SPK_TARGET)
 UTILS_CFLAGS = -O2 -g -Wall -D_POSIX_C_SOURCE=2
 LD = $(CC)
 LDFLAGS =
@@ -80,16 +92,17 @@ PREFIX =
 
 # ------------------------ DO NOT EDIT BELOW THIS LINE ------------------------
 
-all: brltty install-brltty txt2scrn brltest scrtest tbl2txt txt2tbl convtable
+all: brltty install-brltty txt2hlp brltest scrtest tbl2txt txt2tbl \
+     convtable comptable
 
-install: brltty txt2scrn install-brltty
+install: brltty txt2hlp install-brltty
 	install $(INSTALL_EXEC) --strip brltty $(PREFIX)$(EXEC_PATH)
 	install $(INSTALL_EXEC) install-brltty $(PREFIX)$(REINSTALL_PATH)
 	install --directory $(PREFIX)$(DATA_DIR)
 	install -m 644 *.tbl $(PREFIX)$(DATA_DIR)
 	find $(BRL_TARGET) -name '*.dat' -exec install -m 644 {} \
 	  $(PREFIX)$(DATA_DIR) \;
-	./txt2scrn $(PREFIX)$(DATA_DIR)/brlttyhelp.scr \
+	./txt2hlp $(PREFIX)$(DATA_DIR)/brlttydev.hlp \
 	  $(BRL_TARGET)/brlttyh*.txt
 	if [ ! -c $(PREFIX)$(SCRDEV) ]; \
 	then \
@@ -106,29 +119,53 @@ install-brltty: install.template
 	sed -e 's%=E%$(EXEC_PATH)%g' -e 's%=I%$(REINSTALL_PATH)%g' \
 	  -e 's%=D%$(DATA_DIR)%g' -e 's%=V%$(SCRDEV)%g' install.template > $@
 
-brltty: brltty.o $(BRL_TARGET)/brl.o scr.o misc.o beeps.o cut-n-paste.o
-	$(LD) $(LDFLAGS) -o $@ brltty.o $(BRL_TARGET)/brl.o \
-	  scr.o misc.o beeps.o cut-n-paste.o $(LDLIBS)
+brltty: brltty.o brl.o speech.o scr.o scrdev.o misc.o beeps.o cut-n-paste.o
+	$(LD) $(LDFLAGS) -o $@ brltty.o $(BRL_TARGET)/brl.o scr.o scrdev.o \
+	  $(SPK_TARGET)/speech.o misc.o beeps.o cut-n-paste.o $(LDLIBS)
+	strip $@
 
-brltest: brltest.o $(BRL_TARGET)/brl.o misc.o
+brltest: brltest.o brl.o misc.o
 	$(LD) $(LDFLAGS) -o $@ brltest.o $(BRL_TARGET)/brl.o misc.o $(LDLIBS)
 	strip $@
 
-scrtest: scrtest.o scr.o
-	$(LD) $(LDFLAGS) -o $@ scrtest.o scr.o $(LDLIBS)
+scrtest: scrtest.o scr.o scrdev.o
+	$(LD) $(LDFLAGS) -o $@ scrtest.o scr.o scrdev.o $(LDLIBS)
 	strip $@
 
-$(BRL_TARGET)/brl.o: $(BRL_TARGET)/brl.c $(BRL_TARGET)/brlconf.h brl.h misc.h
+brl.o:
 	cd $(BRL_TARGET); \
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
+	if [ -f Makefile ]; \
+	then \
+	  $(MAKE) brl.o CC='$(CC)' CFLAGS='$(CFLAGS)' LD='$(LD)' \
+	    LDFLAGS='$(LDFLAGS)' LDLIBS='$(LDLIBS)' BRLDEV='$(BRLDEV)'; \
+	else \
+	  $(MAKE) -f ../Driver.Makefile brl.o CC='$(CC)' CFLAGS='$(CFLAGS)' \
+	    LD='$(LD)' LDFLAGS='$(LDFLAGS)' LDLIBS='$(LDLIBS)' \
+	    BRLDEV='$(BRLDEV)'; \
+	fi
 
-scr.o: scr.c scr.h config.h
-	$(CC) $(CFLAGS) '-DSCRDEV="$(SCRDEV)"' -c scr.c
+speech.o:
+	cd $(SPK_TARGET); \
+	if [ -f Makefile ]; \
+	then \
+	  $(MAKE) speech.o CC='$(CC)' CFLAGS='$(CFLAGS)' LD='$(LD)' \
+	    LDFLAGS='$(LDFLAGS)' LDLIBS='$(LDLIBS)' BRLDEV='$(BRLDEV)'; \
+	else \
+	  $(MAKE) -f ../Driver.Makefile speech.o CC='$(CC)' \
+	    CFLAGS='$(CFLAGS)' LD='$(LD)' LDFLAGS='$(LDFLAGS)' \
+	    LDLIBS='$(LDLIBS)' BRLDEV='$(BRLDEV)'; \
+	fi
+
+scr.o: scr.cc scr.h scrdev.h helphdr.h config.h
+	$(CC) $(CFLAGS) '-DSCRDEV="$(SCRDEV)"' -c scr.cc
+
+scrdev.o: scrdev.cc scr.h scrdev.h helphdr.h config.h
+	$(CC) $(CFLAGS) '-DSCRDEV="$(SCRDEV)"' -c scrdev.cc
 
 misc.o: misc.c misc.h
 	$(CC) $(CFLAGS) -c misc.c
 
-brltty.o: brltty.c brl.h scr.h misc.h config.h
+brltty.o: brltty.c brl.h scr.h misc.h config.h text.auto.h attrib.auto.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' -c brltty.c
 
 beeps.o: beeps.c beeps.h beeps-songs.h
@@ -140,14 +177,21 @@ cut-n-paste.o: cut-n-paste.c cut-n-paste.h beeps.h scr.h
 scrtest.o: scrtest.c 
 	$(CC) $(CFLAGS) -c scrtest.c
 
-brltest.o: brltest.c brl.h config.h
+brltest.o: brltest.c brl.h config.h text.auto.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' -c brltest.c
 
-txt2scrn: txt2scrn.o
-	$(LD) $(LDFLAGS) -o $@ txt2scrn.o $(LDLIBS)
+text.auto.h: $(TEXTTRANS) comptable
+	./comptable <$(TEXTTRANS) >text.auto.h
 
-txt2scrn.o: txt2scrn.c scr.h
-	$(CC) $(UTILS_CFLAGS) -c txt2scrn.c
+attrib.auto.h: attrib.tbl comptable
+	./comptable <attrib.tbl >attrib.auto.h
+
+txt2hlp: txt2hlp.o
+	$(LD) $(LDFLAGS) -o $@ txt2hlp.o $(LDLIBS)
+	strip $@
+
+txt2hlp.o: txt2hlp.c helphdr.h
+	$(CC) $(UTILS_CFLAGS) -c txt2hlp.c
 
 tbl2txt: tbl2txt.o
 	$(LD) $(LDFLAGS) -o $@ tbl2txt.o $(LDLIBS)
@@ -170,9 +214,16 @@ convtable: convtable.o
 convtable.o: convtable.c
 	$(CC) $(UTILS_CFLAGS) -c convtable.c
 
+comptable: comptable.o
+	$(LD) $(LDFLAGS) -o $@ comptable.o $(LDLIBS)
+	strip $@
+
+comptable.o: comptable.c
+	$(CC) $(UTILS_CFLAGS) -c comptable.c
+
 clean:
-	rm -f *.o */*.o install-brltty
+	rm -f *.o */*.o install-brltty *.auto.h
 
 distclean: clean
-	rm -f brltty txt2scrn *test tbl2txt txt2tbl convtable
+	rm -f brltty txt2hlp *test tbl2txt txt2tbl convtable comptable
 	rm -f *~ */*~ *orig */*orig \#*\# */\#*\#

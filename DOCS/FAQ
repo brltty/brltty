@@ -1,5 +1,5 @@
-BRLTTY FAQ - July 25 1996
-=========================
+BRLTTY FAQ - last modified 17 September 1996
+============================================
 
 Q. What are the supported Braille display models?
 A.
@@ -57,9 +57,7 @@ console driver is only available with SVGA video cards.)
 Q. Can I use BRLTTY while in single user mode?
 A. Sure you can use BRLTTY in single user mode. If you start it up as the
 very first thing of the very first script that init runs when booting
-(usually rc.S), then it will be on when you get to the prompt. You might
-not be able to freeze the screen though, since the partition might still be
-mounted read-only.
+(usually rc.S), then it will be on when you get to the prompt.
 
 Q. Can I use BRLTTY with special video modes?
 A. Some kernel parameters allow using different video modes (provided by the
@@ -88,7 +86,7 @@ A. See the script called "install-brltty" generated automatically when you
 compile BRLTTY. The components are:
   - the executable
   - the device file /dev/vcsa0 (character special 7,128)
-  - the /etc/brltty subdirectory
+  - the /etc/brltty subdirectory (this is recommended but optional)
   - and make sure that adequate versions of the shared libraries will
     be available.
 
@@ -97,14 +95,15 @@ A. There are several parameters you can tweek in BRLTTY. There initial
 defaults can be set before compilation in the config.h file. However, for
 more convenience, there is also a runtime configuration file from which the
 actual parameters will be loaded when BRLTTY starts up (if that file is
-present). Currently, that file is in a binary form. You can use the
-config menu function to alter the values of the parameters live. If you
-use the save command, the current profile will be saved to the binary
-configuration file, which means that they will be loaded automatically
-next time you start BRLTTY. The reset function simply reloads all settings
-from the file. The binary configuration file will be located in the
-/etc/brltty subdirectory. Note that the driver for your terminal might use
-some keys to toggle some of these options directly.
+present). Currently, that file is in a binary form. You can use the config
+menu function to alter the values of the parameters live. If you use the
+save command, the current profile will be saved to the binary configuration
+file, which means that they will be loaded automatically next time you
+start BRLTTY. The reset function simply reloads all settings from the
+file. The binary configuration file will be located in the /etc/brltty
+directory if it exists, or in the /etc directory if it does not. Note that
+the driver for your terminal might use some keys to toggle some of these
+options directly.
 
 Q. Some of the options in the online config menu have strange names. What do
    they mean?
@@ -124,15 +123,19 @@ self-explanatory.
     Using these options, you can not only determine the blinking speed
     but also change the proportions of visibility/invisibility time...
   - cap blink on/off : Works the same way.
-  - Sliding window : This determines the movement of the Braille window
+  - sliding window : This determines the movement of the Braille window
       when tracking the cursor. When off, the Braille window can only move
       left or right by increments of one full window size. For instance, if
       you use a 40 cell display on an 80 column screen, there are only two
       possible positions for the Braille window: it can either display
       columns 1-40 or 41-80. (Of course, the window can still be moved by
       less than that by using the relevant key - HWINLT, CHRRT etc.)
-      When ON, the Braille window is allowed to occupy any position in the line
-      and it's position will be determined from the cursor position.
+      When ON, the Braille window is allowed to occupy any position in the
+      line and it's position will be determined from the cursor position.
+  - skip ident lns : This determines the behaviour of the LNUP and LNDN
+      keys.  When on, they act like the PRDIFLN and NXDIFLN keys,
+      i.e. repeated lines are skipped.  Otherwise they simply move up and
+      down one line respectively.
 
 Q. Why does the cut & paste function leave out the beginning of some of the
    lines I try to cut?

@@ -1,0 +1,7 @@
+BRLTTY speech driver for 'GEneric_say'
+
+This driver is intended to be used with any speech synthesis program
+like the rsynth package.
+
+This is preliminary code, still experimental.  Need improovements...
+

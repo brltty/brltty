@@ -1,14 +1,10 @@
 Things that still need to be done
 
-- Rewrite the beginning of readbrl() for more reliability and less timing
-dependancy... readbrl() should not block whenever it receives a byte, it
-should return but conserve its state. That feature had been removed for
-easier development of the PowerBraille 40 support. However it's been causing
-me problems, so I think it's time to put it back!
-
 - A typematic (key repetition) feature for routing keys, which would be
 useful for commands like CMD_CHRLT and CMD_CHRRT that are bound to routing
 keys.
 
+- When entering confmenu, you're often kicked back out because the typematic repression timeout has elapsed during the time the "Configuration menu" message was displayed...
+
 - Support for PowerBraille 65/80, if I can get help from someone that has
-such a device.
+such a device. And lots of free time...

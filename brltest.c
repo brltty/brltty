@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -15,7 +19,7 @@
  */
 
 /* brltest.c - Test progrm for the Braille display library
- * J. Bowden, 24 July 1995
+ * $Id: brltest.c,v 1.3 1996/09/24 01:04:24 nn201 Exp $
  */
 
 #define BRLTTY_C 1
@@ -31,7 +35,19 @@
 #include "config.h"
 
 brldim brl;
-unsigned char texttrans[256];	/* text translation table (output) */
+
+/* Output translation tables - the files *.auto.h are generated at
+ * compile-time:
+ */
+unsigned char texttrans[256] =
+{
+#include "text.auto.h"
+};
+
+#ifdef SAY_CMD
+unsigned char say_buffer[140];
+#endif
+
 #if defined (Alva_ABT3)
 unsigned char StatusCells[4];	/* status character buffer */
 #elif defined (CombiBraille)
@@ -44,15 +60,14 @@ void message (char *s);
 int
 main (int argc, char *argv[])
 {
-  int tbl_fd;
-
   if (chdir (HOME_DIR))		/* change to directory containing data files */
     {
-      fprintf (stderr, "`%s': ", HOME_DIR);
-      perror (NULL);
-      exit (1);
+      fprintf (stderr, "Can't cd to %s, trying /etc\n", HOME_DIR);
+      if (chdir ("/etc"))
+	fprintf (stderr, "Can't cd to /etc, continuing anyway");
     }
-  printf ("Changed to directory %s\n", HOME_DIR);
+  else
+    printf ("Changed to directory %s\n", HOME_DIR);
   identbrl (argc > 1 ? argv[1] : NULL);		/* start-up messages */
   brl = initbrl (argc > 1 ? argv[1] : NULL);	/* initialise display */
   if (brl.x == -1)
@@ -62,18 +77,6 @@ main (int argc, char *argv[])
     }
   printf ("Display initialised successfully, ");
   printf ("it is %d rows by %d cols\n", brl.y, brl.x);
-  tbl_fd = open (TEXTTRN_NAME, O_RDONLY);
-  if (tbl_fd == -1)
-    {
-      perror (TEXTTRN_NAME);
-      exit (3);
-    }
-  if (read (tbl_fd, texttrans, 256) != 256)
-    {
-      close (tbl_fd);
-      perror (TEXTTRN_NAME);
-      exit (4);
-    }
   message ("Hello world, This is BRLTTY!");
 
   printf ("\nHit return to continue:\n");
@@ -88,6 +91,11 @@ message (char *s)
 {
   int i, j, l;
 
+#ifdef SAY_CMD
+  say_buffer[0] = strlen (s);
+  strcpy (say_buffer + 1, s);
+  say (say_buffer);
+#endif
 #ifdef CombiBraille
   memset (statcells, 0, 5);
   setbrlstat (statcells);

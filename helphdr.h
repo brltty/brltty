@@ -18,12 +18,20 @@
  * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
  */
 
-/* misc.h - Header file for miscellaneous all-purpose routines
- * $Id: misc.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
+/* helphdr.h - describes the helpfile format
+ * $Id: helphdr.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
  */
-#include <sys/time.h>
 
-unsigned elapsed_msec (struct timeval *t1, struct timeval *t2);
-void shortdelay (unsigned msec);
-void delay (int msec);		/* sleep for `msec' milliseconds */
-int timeout_yet (int msec);	/* test timeout condition */
+/* The compiled helpfile (brlttydev.hlp) has the following structure:
+ *   1. number of pages (short int numpages)
+ *   2. page info table: array of numpages pageinfo objects (described below)
+ *   3. numpages blocks of help data, space padded to give a constant line
+ *      length, no line termination character
+ */
+
+typedef struct
+  {
+    unsigned char rows;
+    unsigned char cols;
+  }
+pageinfo;

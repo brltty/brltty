@@ -21,6 +21,7 @@ Routing:
 Others:
   R-round : bring braille window to cursor
   L-round : toggle cursor tracking on/off (toggle)
+  R-down + R-left + R-right : toggle skipping of identical lines
   L-round + R-round : freeze / unfreeze screen (toggle)
   L-up + R-down : display attributes (toggle)
   L-down + R-up : give status information (toggle)

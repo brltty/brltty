@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -15,7 +19,7 @@
  */
 
 /* config.h - Configurable definitions
- * N. Nair, 25 January 1996
+ * $Id: config.h,v 1.4 1996/09/24 01:04:25 nn201 Exp $
  *
  * Edit as necessary for your system.
  */
@@ -45,10 +49,9 @@
 #define INIT_SIXDOTS 0		/* 1 for six-dot mode, 0 for eight-dot */
 #define INIT_SLIDEWIN 0		/* 1 for sliding window on, 0 for off */
 #define INIT_BEEPSON 1		/* 1 for beeps, 0 for no beeps */
+#define INIT_SKPIDLNS 0		/* 1 = skip all identical lines after first */
 
-/* Filenames of translation tables and configuration file: */
-#define TEXTTRN_NAME "us.tbl"	/* filename of text trans. table */
-#define ATTRIBTRN_NAME "attrib.tbl"	/* filename of attrib. table */
+/* Filenames needed by the main module: */
 #define CONFFILE_NAME "brlttyconf.dat"	/* filename of binary config. file */
 
 /* These control the speed of any blinking cursor or capital letters.
@@ -66,7 +69,7 @@
  * give up until the timeout has elapsed!
  */
 #define CSRJMP_NICENESS 10	/* niceness of cursor routing subprocess */
-#define CSRJMP_TIMEOUT 4000	/* cursor routing timeout in milliseconds */
+#define CSRJMP_TIMEOUT 2000	/* cursor routing idle timeout in ms */
 #define CSRJMP_LOOP_DELAY 0	/* delay to use in csrjmp_sub() loops (ms) */
 
 /* These are for inskey(): */
@@ -85,7 +88,7 @@
 #ifdef SCR_C			/* for scr.c */
 #undef SCR_C			/* only do once */
 #define FRZFILE "/tmp/vcsa.frz"	/* filename for frozen screen image */
-#define HLPFILE "brlttyhelp.scr"	/* filename of help screen */
+#define HLPFILE "brlttydev.hlp"	/* filename of help screen */
 #endif /* SCR_C */
 
 /* ------------------------------------------------------------------------- */

@@ -2,6 +2,10 @@
 BRLTTY - Access software for Unix for a blind person
          using a soft Braille terminal
 
+Nikhil Nair <nn201@cus.cam.ac.uk>
+Nicolas Pitre <nico@cam.org>
+Stephane Doyon <doyons@jsp.umontreal.ca>
+
 Version 1.0, 26 July 1996
 
 Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.

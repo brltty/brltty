@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -15,7 +19,7 @@
  */
 
 /* brl.h - Header file for the Braille display library
- * N. Nair, 25 January 1996
+ * $Id: brl.h,v 1.4 1996/09/24 01:04:24 nn201 Exp $
  */
 
 /* Arguments for readbrl() */
@@ -35,7 +39,9 @@
 
 /* braille window movement */
 #define CMD_LNUP 'u'		/* go up one line */
+#define CMD_PRDIFLN '-'		/* go to prev different screen line */
 #define CMD_LNDN 'd'		/* go down one line */
+#define CMD_NXDIFLN '+'		/* go to next different screen line */
 #define CMD_WINUP '<'		/* go up one window */
 #define CMD_WINDN '>'		/* go down one window */
 #define CMD_TOP 't'		/* go to top of screen */
@@ -83,6 +89,7 @@
 #define CMD_CAPBLINK '*'	/* toggle capital letter blink */
 #define CMD_SIXDOTS '6'		/* toggle six-dot mode */
 #define CMD_SLIDEWIN 'w'	/* toggle sliding window */
+#define CMD_SKPIDLNS 'I'	/* toggle skipping of identical lines */
 #define CMD_SND 'S'		/* toggle sound on/off */
 
 
@@ -93,10 +100,12 @@
 #define CMD_KEY_LEFT 'L'
 #define CMD_KEY_RETURN 'N'
 
-/* For external `say' command: */
+/* For speech devices: */
 #define CMD_SAY 'Y'
+#define CMD_MUTE 'm'
 
 
+/* Braille information structure */
 typedef struct
   {
     short x, y;			/* size of display */
@@ -104,14 +113,18 @@ typedef struct
   }
 brldim;				/* used for writing to a braille display */
 
-/* Routines provided by this library: */
+
+/* status cells modes */
+#define ST_None 0
+#define ST_AlvaStyle 1
+#define ST_TiemanStyle 2
+#define NB_STCELLSTYLES 2
+
+
+/* Routines provided by the braille driver library: */
 void identbrl (const char *);	/* print start-up messages */
 brldim initbrl (const char *);	/* initialise Braille display */
 void closebrl (brldim);		/* close braille display */
 void writebrl (brldim);		/* write to braille display */
 int readbrl (int);		/* get key press from braille display */
-#if defined (Alva_ABT3)
-void WriteBrlStatus (unsigned char *);	/* write to status cells */
-#elif defined (CombiBraille)
 void setbrlstat (const unsigned char *);	/* set status cells */
-#endif

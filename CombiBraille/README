@@ -2,7 +2,7 @@
 BRLTTY - Access software for Unix for a blind person
          using a soft Braille terminal
 
-Version 1.0, 26 July 1996
+Version 1.0.1, 13 September 1996
 
 Driver for Tieman B.V.'s CombiBraille series
 
@@ -26,8 +26,10 @@ B.V. <tieman@xs4all.nl>, it should work on the 20 and 80 cell models
 as well.  There is no support for the parallel interface, and so no
 possibility of a 2-dimensional setup using a second display.
 
-The internal speech synthesiser is not currently used by this
-software, although it will be in the future.
+There is now some very rudimentary support for the internal speech
+synthesiser.  This, however, leaves much to be desired: there are only
+`speak line' and `mute' functions, and the speed and pitch of the
+speech is not yet configurable.
 
 
 CONFIGURATION AND COMPILATION

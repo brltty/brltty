@@ -11,6 +11,12 @@ interface library, including standardisation of the use of status cells.
 
 Then (not necessarily in this order):
 
+- Setting marks at convenient places on the screen and jumping to them.
+
+- Defining smaller regions of the screen to be concentrated on.  Cursor
+movement outside the current region would be ignored.  This would be
+useful if the screen was split into multiple `windows' (e.g. in ytalk).
+
 - Attribute tracking.
 
 - Mixed text + attribute mode, like underlined and/or flashing attributes.
@@ -32,7 +38,7 @@ Like in IRC for instance...
 simply means some added functionality to plain Braille.  It would allow
 designating text (with the Braille terminal keys) and sending it to a
 speech synthesizer.  Intended to speed up reading of long texts.
-Preliminary tests have been done with the CombiBraille driver.
+This has been implemented for the CombiBraille, but needs generalising.
 
 - On-the-fly grade II translation: translating one line at a time into
 grade II Braille would speed up reading.  It may be possible to use some

@@ -18,12 +18,39 @@
  * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
  */
 
-/* misc.h - Header file for miscellaneous all-purpose routines
- * $Id: misc.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
+/* NoSpeech/speech.c - Dummy speech driver for speechless BRLTTY.
+ * $Id: speech.c,v 1.2 1996/09/24 01:04:30 nn201 Exp $
  */
-#include <sys/time.h>
 
-unsigned elapsed_msec (struct timeval *t1, struct timeval *t2);
-void shortdelay (unsigned msec);
-void delay (int msec);		/* sleep for `msec' milliseconds */
-int timeout_yet (int msec);	/* test timeout condition */
+#define SPEECH_C 1
+
+#include <stdio.h>
+
+#include "../speech.h"
+
+
+void
+identspk (void)
+{
+  puts ("- BRLTTY compiled without speech support");
+}
+
+void
+initspk (void)
+{
+}
+
+void
+say (unsigned char *buffer, int len)
+{
+}
+
+void
+mutespk (void)
+{
+}
+
+void
+closespk (void)
+{
+}

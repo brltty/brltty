@@ -1,0 +1,59 @@
+  -  Incorporated patch from Joerg Korinek <korinek@ira.uka.de> which lets
+     the main BRLTTY process continue while cursor routing is in progress.
+     Thanks!
+  -  Added some new functions to scr.cc, which add a new `thread' of
+     screen reading.  This is used by csrjmp_sub(), to avoid race conditions.
+     [The problem was that a forked subprocess shares filedescriptors with
+     the parent, and `clone (0, SIGCHLD | COPYVM | COPYFD)' (as documented
+     in clone(2)) wouldn't compile.]
+  -  CURSOR ROUTING NOW APPEARS TO BE STABLE!!!
+
+  -  BRLTTY placed under CVS revision control - Id headers added to many
+     files.
+  -  Cursor routing timeout made an idle timeout of 2 seconds: routing
+     continues until the cursor is idle for this length of time.
+  -  Added CMD_SKPIDLNS.
+  -  Speech support modularised.  Added speech.h, as well as SPK_TARGET in
+     the Makefile and corresponding directories.
+  -  Status cells standardised: two types (Alva/Tieman) or none, switch in
+     configuration menu.  Hence another new config file format :-(.
+  -  A few bugfixes.
+  -  Some job control finetuning in csrjmp() and csrjmp_sub() - now use
+     SIGUSR1 to kill child process before another child is forked; child
+     blocks this signal for most of the time.
+  -  Added support for (optional) Makefiles in driver subdirectories.
+
+
+17 September 1996: BRLTTY 1.0.2 released.
+  -  Incorporated skipping of identical lines.  Adapted to make a line
+     containing the cursor different to any other.
+  -  Config file format updated, so old config files won't work any more.
+  -  Some tidying up of the archive and of the documentation.
+
+
+13 September 1996: BRLTTY 1.0.1 released.
+  -  Speech support added for CombiBraille.
+  -  Documentation brought up to date.
+
+
+3 September 1996: prerelease of BRLTTY 1.0.1.
+  -  Screen reading library rewritten from scratch, in C++ (but without
+     using any class libraries, so no extra shared libraries are needed).
+     In particular, the dependence on the Linux vcsa format is gone: there
+     is a new help file format which is far more compact than the old one
+     (txt2hlp replaces txt2scrn, brlttydev.hlp replaces brlttyhelp.scr),
+     and freeze mode works properly, by using a dynamically allocated
+     memory buffer instead of the old /tmp/vcsa.frz hack.
+  -  BRLTTY can now survive as a stand-alone executable, with absolutely no
+     data files - even if /etc/brltty/ is not found.  This is done by
+     compiling in the default text translation table (now selected in the
+     Makefile) and the attribute translation table.  The compilation is done
+     by using the new filter comptable to generate text.auto.h and
+     attrib.auto.h.  A text translation table is now only loaded if the
+     -t option is specified.
+  -  -q|--quiet now surpresses the start-up message on the Braille display.
+
+  (Documentation still to be updated ...)
+     
+
+28 July 1996: BRLTTY 1.0 released.

@@ -1,42 +1,45 @@
-README file of the Alva_ABT3 braille library for BRLTTY
+README file for the Alva_ABT3 driver
 
-Version 1.21 (feb 15, 1996)
+Version 1.32 (September 22, 1996)
 
 
 Copyright
 =========
 
-This driver code is copyrighted under the GNU Public License.  It is free 
-software.  See the file 'COPYING' for more details.  Feel free to send me 
-comments and bug report (if any :)) to nico@cam.org.
+This driver is copyrighted under the GNU Public License.  It is free 
+software.  See the file '../COPYING' for more details.  Feel free to send 
+your comments and to report bugs (if any :)) to me at nico@cam.org.
 
 
-Supported hardware
+Supported Hardware
 ==================
 
 This driver is supposed to work with any Alva braille display from the 
-ABT3xx series, wich includes the ABT320, the ABT340, the ABT380, the 
-ABT34D and the ABT38D.  It alse supports the old and new protocol 
-according to the firmware version you have.  Keypad and spacepad are not 
-supported since I don't have them and got no idea of their use.
+ABT3xx series, including the ABT320, the ABT340, the ABT380, the 
+ABT34D and the ABT38D.  It also supports both the old and the new protocols 
+according to the firmware version you have.  Keypad and spacepad support is
+not implemented since I don't have them and have no idea regarding their use.
 
-Since I only have an ABT340, I just tested on that model with both old 
-and new firmware versions.  If somebody out there tested it on another 
-model, please tell me about it.  For the same raison, this doc might not 
-be accurate for all models, please send me corrections.
+Since I have an ABT340, I tested the driver on that model only with both the 
+old and the new firmware versions.  If anyone of you tested it on another 
+model, please advise me. For the same reason, as this README file might not 
+be accurate for all models, please send me any corrections required.
+
+If you want any information about Alva B.V. and its products, you can contact
+the company via e-mail at alva@xs4all.nl.
 
 
 ABT Connection
 ==============
 
-This driver supports serial communication only.  I don't have the doc for 
-parallel communication and I'm affraid it would need some kernel hacks 
+This driver supports serial communication only.  I don't have the documentation
+for parallel communication and I'm afraid it would need some kernel hacking
 anyway.
 
-The ABT serial port must be set to alva-mode (default), see the description
+The ABT serial port must be set to alva-mode (default); see the description
 of 'Local Mode' in the ABT manual. The ABT serial port has the same
-connections as a standard 9-pin serial port of an IBM PC.
-Therefore a cable connecting the ABT with a PC must have the following
+connections as the standard 9-pin serial port of an IBM PC.
+Therefore, a cable connecting the ABT with a PC must have the following
 connections:
 
 9 pin (ABT)        9 pin (PC)   or    25 pin (PC)
@@ -51,18 +54,17 @@ connections:
 8                  7                  4 (RTS)
 9                  9                  22 (RI)
 
-Such a cable can be purchased as a 'null-modem' cable.
+This kind of cable is called a 'null-modem' cable.
 All connectors are female D connectors.
 
-By default, the ABT communicates at 9600 Baud, 8 data bits, no parity, 1 
-stop bit.  However I already ran it to a hier baudrate but chances to get 
-serial errors increase.  The best baudrate I found is 19200 bauds.  Actual 
-default is 9600.
+By default, the ABT communicates at 9600 Baud, 8 data bits, no parity, 
+1 stop bit.  However,  I have run it to a higher baudrate, but chances to 
+get serial communication errors increase.  Actual default is 9600.
 
-NOTE:  I experienced some problems using the serial port while an other 
-computer was connected to the parallel port.  If BRLTTY seems to work 
-with a strange behavior, just make sure there is nothing plugged to the 
-parallel port connector.  It may help...
+NOTE:  I experienced some problems using the serial port while the
+computer was connected to the parallel port on the ABT.  If BRLTTY seems 
+to work but adopts a strange behavior, just make sure there is nothing plugged 
+to the parallel port connector.  At least give it a try, it may help...
 
 
 Before compiling
@@ -71,82 +73,120 @@ Before compiling
 Firmware Version
 ----------------
 Look in the file brlconf.h for a section commented as "User Settings".  You
-have to define ABT3_OLD_FIRMWARE (actually commented out) if your firmware
-version is older than 010495.  To find your firmware version, simply turn
-your ABT on while not plugged to your computer.  The last number that will
-appear on the braille display is the firmware version.  If the wrong
-firmware version is conpiled in, you won't have access to your ABT control
+have to define ABT3_OLD_FIRMWARE (actually commented out) if your 
+firmware version is older than 010495.  To get your firmware version, simply 
+turn your ABT on while not plugged to your computer.  The last digits that 
+will appear on the braille display is the firmware version.  If the wrong
+firmware version is compiled in, you won't have access to your ABT control
 keys. 
+
+If you have a firmware version dated 010495 or later, you normally don't have 
+to edit brlconf.h since it is the default.
 
 ABT Model
 ---------
-You should also specify the ABT model you'll be using on the line 
-"#define MODEL".  You should type ABT320, ABT340, ABT380, ABT34D or 
-ABT38D.  Actually configured for ABT340.
+As the new firmware version is set up by default, the terminal model is set
+to "autodetect" by default.  Specific model specification is optional with the
+new firmware version but it HAS TO BE done with the old firmware version.
+To specify the ABT model you'll be using, use the line "#define MODEL".  
+You should type ABT320, ABT340, ABT380, ABT34D or ABT38D.  
+ABT_AUTO is for autodetection (new firmware version only).  
+Actually configured for ABT_AUTO.
 
 Typematic Settings
 ------------------
 Some control keys are repeated automatically when held down.  You can change 
 the repeat rate as well as the delay before the key starts being 
-repeated.  The values of TYPEMATIC_REPEAT and TYPEMATIC_DELAY represents 
-the number of cycles between each repetitions and the number of cycles 
-before the first repetition respectively.  Cycle duration is based on 
-BRLTTY configuration.
+repeated.  The values of TYPEMATIC_REPEAT and TYPEMATIC_DELAY 
+represent respectively the number of cycles between each repetitions and the 
+number of cycles before the first repetition respectively.  Cycle duration is 
+based on BRLTTY configuration.
 
 Port Settings
 -------------
-In the file Makefile located in the BRLTTY home directory, there is a 
+In the file 'Makefile' located in the BRLTTY home directory, there is a 
 line where you can define the default (i.e. when not given on the command 
-line) serial port device (such as /dev/ttyS0).  The baudrate to use is 
+line) serial port device (such as /dev/ttyS0).  The baudrate setup is 
 still defined in the brlconf.h file.
 
 
-Running the driver
+Running the Driver
 ==================
 
-To compile and run BRLTTY, please refer to the documentation about BRLTTY 
-itself.  Just to mention that when BRLTTY will start, il will display on 
-the screen some copyright stuff, current configuration (model and firmware 
-version) and the serial port in use.  Those informations may be useful if 
-nothing appends with the braille terminal.  Remember that if you have wrong 
-firmware version, the ABT keys won't work byt it should display something 
-in braille anyway.
+To compile and run BRLTTY, please refer to the documentation about 
+BRLTTY itself.  One note though: when BRLTTY starts, it will display 
+on the screen some copyright stuff, current configuration (model and 
+firmware version setup) and the serial device in use.  That information 
+may be useful if nothing happens with the braille terminal.  Remember 
+that if you have the wrong firmware version set up, the ABT keys won't 
+work but some braille might be displayed anyway.
 
 You may run BRLTTY even if no ABT is plugged to the appropriate serial
-port.  No check is made to see if an ABT is present or not.
+port.  BRLTTY will wait for it.
 
 
-Key bindings
+What if it doesn't work
+=======================
+
+The code is actually using RTS/CTS control lines to detect the presence
+of any Alva terminal on the serial port and to perform model autodetection.
+If your cable doesn't have those wires, it might explain why it is 
+not working.  If it is the case, you have two alternatives: either you get
+another cable or you hack the code as follows:
+  - search for CRTSCTS in brl.c
+  - delete the CRTSCTS word
+  - define explicitly a terminal model in brlconf.h (see above)
+  - recompile
+Note that if you don't have the CRTSCTS flag, it is impossible to perform
+model autodetection.  My thanks to Jos Lemmens <jlemmens@inter.nl.net> 
+who identified that problem.
+
+If you think you have another kind of problem, please let me know.
+
+
+Key Bindings
 ============
 
-All the key definitions are listed in the file brlttyhelp.txt.  For more
-information on the functions listed, see the BRLTTY manual.  Basic keys are
-nearly the same as with the DOS software. 
+All the key definitions are listed in the files brlttyhlp*.txt.  Each file
+corresponds to an ABT model.  For more information on the functions listed, 
+see the BRLTTY manual.  Basic keys are nearly the same as with the DOS 
+software. 
 
 Some keys found on the ABT34D, the ABT380 and the ABT38D are not actually 
-bound to any functions, since I don't have those keys.  However, it's 
-pretty easy to add them in the code.  See the function readbrl() or send 
+bound to any function, since I don't have those keys.  However, it is 
+pretty easy to add them in the code.  See the function readbrl() and/or send 
 me your suggestions.
 
 
 Status Cells
 ============
 
-The three first cells are used for status information as with the DOS 
-software, except for the third one wich have the following meanings:
+The first three cells are used for status information as with the DOS 
+software, except for the third one which has the following meanings:
 
 	t = cursor tracking active
 	f = screen is frozen
 	a = the display is in attribute mode
 
-While the help screen is invoked, the status cells will display "hlp" and 
-" st" is displayed while in status mode.
+When the help screen is invoked, the status cells will display "hlp", 
+whereas "inf" is displayed when in info mode.
 
-Again, other models than mine have 5 status cells instead of 3 but the 
-two last cells are actually not used.
+Again, models other than mine have 5 status cells instead of 3 but the 
+last two cells are actually not used.
+
+
+Quick Tips
+==========
+
+- If you want to know the ABT model 
+  currently autodetected (or configured in), simply go into the help screen
+  with the PROG key.  The first line of the help screen will show it.
+- The whole braille display is refreshed each time the CURSOR key is pressed.
+  This can be useful if serial communication errors result in some garbage
+  on the display.
 
 
 
 Nicolas Pitre
 nico@cam.org
-Febuary 15, 1996
+September 22, 1996

@@ -1,13 +1,16 @@
 <!doctype linuxdoc system>
 
 <!-- BRLTTY manual, SGML version -->
+<!-- $Id: Manual.sgml,v 1.5 1996/09/24 20:23:10 nn201 Exp $ -->
 
 <article>
 
 <title>BRLTTY
 <subtitle>Access Software for Unix for a Blind Person Using a Soft Braille Terminal
-<author>Nikhil Nair <tt>&lt;nn201@cus.cam.ac.uk&gt;</> &amp others
-<date>Version 1.0, 26 July 1996
+<author>Nikhil Nair <tt>&lt;nn201@cus.cam.ac.uk&gt;</> &nl;
+Nicolas Pitre <tt>&lt;nico@cam.org&gt;</> &nl;
+Stephane Doyon <tt>&lt;doyons@jsp.umontreal.ca&gt;</>
+<date>Version 1.0.2, 17 September 1996
 <abstract>
 Copyright (C) 1995, 1996 by Nikhil Nair and others, All Rights
 Reserved.  This is free software, placed under the terms of The GNU 
@@ -30,10 +33,10 @@ Braille dots.
 
 <p>The BRLTTY project started in July 1995, the team then comprising
 Nikhil Nair and James Bowden.  The first version ran with Blazie
-Engineering's Braille Lite; however, since this is not designed to be
+Engineering's Braille Lite; however, since thiswas not designed to be
 a dedicated soft Braille display for a computer, the response time was
-far too slow.  The Braille Lite is no longer supported for this and
-other reasons.
+far too slow.  The Braille Lite is no longer supported, although this
+may be reviewed in the future.
 
 In September 1995, the second version, 0.22 BETA, became the first to
 be released publicly.  As well as the Braille Lite, it supported
@@ -92,7 +95,7 @@ check for any further display specific instructions.
 
 Type
 <tscreen><verb>
-   make
+   make clean; make
 </verb></tscreen>
 to compile BRLTTY, the test programs and other small utilities.  Then, 
 as root, type
@@ -146,9 +149,9 @@ worth investigating if you have difficulties.
 
 Also included are several small programs:
 <descrip>
-<tag/txt2scrn/ 
+<tag/txt2hlp/ 
   This produces files in the format needed for the help function from 
-standard ASCII files.  txt2scrn is compiled and used automatically 
+standard ASCII files.  txt2hlp is compiled and used automatically 
 during installation.
 <tag/txt2tbl/
   This program can be used to generate new Braille translation tables 
@@ -175,7 +178,8 @@ active.
 
 The way this is done will vary according to the type of system being 
 used.  For instance, on a Debian GNU/Linux 0.93R5 system, the 
-following code was inserted near the beginning of /etc/init.d/boot:
+following code was inserted near the beginning of
+<tt>/etc/init.d/boot</>:
 <tscreen><verb>
    if [ -x /sbin/brltty ]
    then
@@ -190,7 +194,7 @@ This could be abbreviated to the rather less readable form:
 
 (On a Slackware system, the file to edit is <tt>/etc/rc.d/rc.S</>.)
 
-One possible alternative is to start BRLTTY from /etc/inittab.
+One possible alternative is to start BRLTTY from <tt>/etc/inittab</>.
 
 Note: A <tt/killall5 -15/ command would be enough to stop BRLTTY in
 its tracks: if such a command is issued from an rc script when
@@ -204,13 +208,13 @@ display device.  In most cases this is simple: just connect it to an
 appropriate serial port and turn the display on, if necessary 
 selecting the serial interface.
 
-Having set up your display, to run BRLTTY simply type the command 
-<tt/brltty/ at a shell prompt.  The program will load and a message 
-giving the program name (BRLTTY) and current version number will 
-appear briefly on the display device.  After this, the display will 
-show a small area of the console screen including a cursor.  By 
-default the cursor is represented as dots 7 and 8 superimposed over 
-the character it is on.
+Having set up your display, to run BRLTTY simply type the command
+<tt/brltty/ at a shell prompt (this must be done as root).  The
+program will load and a message giving the program name (BRLTTY) and
+current version number will appear briefly on the display device.
+After this, the display will show a small area of the console screen
+including a cursor.  By default the cursor is represented as dots 7
+and 8 superimposed over the character it is on.
 
 Any screen activity will be reflected in the Braille display.  The 
 display will also follow the progress of the cursor on the screen.  
@@ -251,6 +255,8 @@ any program you are running.
       <tag/WINDN/ Move down several lines
       <tag/LNUP/ Move up one line
       <tag/LNDN/ Move down one line
+      <tag/PRDIFLN/ Skip to the previous different line
+      <tag/NXDIFLN/ Skip to the next different line
     </descrip>
   <tag/Moving Horizontally:/
     <descrip>
@@ -279,6 +285,14 @@ when reading text.
 If you do not remember a command, help is available using the 
 <em/HELP/ command.  Use the movement keys as above to navigate the 
 help screen and <em/HELP/ again to quit.
+
+The behaviour of the <em/LNUP/ and <em/LNDN/ keys depends on whether
+the skipping of identical lines is enabled, either by the
+<em/SKPIDLNS/ key or from the configuration menu (see section <ref
+id="confmenu" name="The Online Configuration Menu">).  If this is
+enabled, they act like the <em/PRDIFLN/ and <em/NXDIFLN/ keys.  (Note
+that the line containing the cursor is considered to be different to
+other lines.)
 
 <sect1>Other Controls
 
@@ -330,12 +344,17 @@ Default: on.  When on, BRLTTY beeps when certain events occur (such as
 moving beyond the edge of the screen).  Beeps also confirm the
 settings of some toggle options.
   <tag><em/SLIDEWIN/: Toggle sliding window</>
-Default: off.  This feature, in conjunction with <em/cursor tracking/
+Default: off.  This feature, in conjunction with <em/cursor tracking/,
 moves the display window more smoothly when the physical cursor moves
 beyond the right edge of the window.  With <em/sliding window/ off,
 whenever the cursor moves beyond the right edge of the window, the
 window moves by one window width.  When on, the window moves by a
 quarter of this width.
+  <tag><em/SKPIDLNS/: Toggle skipping of identical lines</>
+Default: off.  This feature provides an alternative interface to line
+skipping on displays which do not provide the <em/PRDIFLN/ and
+<em/NXDIFLN/ keys.  When enabled, it makes the <em/LNUP/ and <em/LNDN/
+keys skip identical lines.
   <tag><em/INFO/: Status information</>
 Default: off.  The status function switches the display to the status
 screen.  This shows information including the physical cursor
@@ -379,17 +398,16 @@ these may also be used to move the cursor to that position.  Others
 bind Braille keys to the cursor keys on the keyboard to allow a manual
 form of cursor routing.
 
-Note: Cursor routing is not yet completely reliable.  It currently 
-uses hard-wired vt100 cursor key codes to move in the correct 
-directions.  Also, this does not work well on heavily loaded systems 
+Note: Cursor routing is not yet completely reliable.  It currently
+uses hard-wired vt100 cursor key codes to move in the correct
+directions.  Also, this may not work as well on heavily loaded systems
 (see <tt/config.h/ for further details).
 
-Once you give a cursor routing command, BRLTTY will spend a
-pre-defined amount of time attempting to carry out your instruction, 
-before finally giving up if unsuccessful.  The default timeout is 4 
-seconds.  At present, any further commands you issue will only be 
-carried out after the timeout has elapsed---we may implement a `quit' 
-command to abort cursor routing in a future release.
+Once you give a cursor routing command, BRLTTY will keep trying to
+route the cursor until either the cursor remains stationary for 2
+seconds (in which case it gives up), or you give another cursor
+routing command (in which case it gives up the first and attempts the
+second).
 
 <sect1>Cut &amp Paste
 
@@ -412,7 +430,7 @@ To paste the text, i.e. type it at the cursor position, press
 <em/PASTE/.  You can paste the stored text any number of times without 
 re-cutting it.
 
-<sect1>The Online Configuration Menu
+<sect1>The Online Configuration Menu<label id="confmenu">
 
 <p>BRLTTY has a simple menu from which you can change some of the 
 settings.  The menu is activated by pressing <em/CONFMENU/.  The 
@@ -455,14 +473,17 @@ BRLTTY using settings other than the defaults.
   <tag>-d <em/serial-device/</>   Use <em/serial-device/ to access 
 Braille terminal instead of the default (normally <tt>/dev/ttyS0</>)
   <tag>-t <em/text-trans-file/</>  Use translation table
-<em/text-trans-file/ instead of the default of <tt/us.tbl/.
+<em/text-trans-file/ instead of the default.  In VErsion 1.0.1 the
+default is compiled in; in previous versions the file <tt/us.tbl/ was
+loaded.
   <tag/-h, --help/        Print a brief help message and exit
   <tag/-q, --quiet/       Suppress start-up messages
   <tag/-v, --version/     Print start-up messages and exit
 </descrip>
 
-You can, of course, permanently configure the default settings of the 
-first three options at compilation.
+You can, of course, permanently configure the default settings of the
+first two options (as well as which text translation table to use as
+the default) at compilation.
 
 
 <sect>Configuring BRLTTY
@@ -521,19 +542,20 @@ present.
 Two small utilities, <tt/txt2tbl/ and <tt/tbl2txt/ are provided for 
 easy manipulation of these translation files, see below.
 
-The default filenames of the data files are defined in <tt/config.h/.  
-Any changes you make to data files will take place on restarting the 
-software.  See section <ref id="switches"
-name="Command Line Options">.
+The filenames of the compiled-in translation tables are defined in
+<tt/config.h/.  Any changes you make to these will take effect on
+recompiling the software.  However, you can use an alternative text
+translation table, see section <ref id="switches" name="Command Line
+Options">.
 
 
 <sect1>Table Utilities<label id="tbltools">
 
 <p><tt/txt2tbl/ and <tt/tbl2txt/ are simple programs to convert
 between binary table files and a textual representation (as used by
-some DOS drivers).  They can be used to create or modify table files
-without the need to plunge into binary editors and hexadecimal
-numbers.
+some DOS drivers).  They can be used to create or modify text
+translation table files without the need to plunge into binary editors
+and hexadecimal numbers.
 
 To use either of these programs, type:
 <tscreen><verb>
@@ -618,6 +640,25 @@ See the <tt/README/ file in the relevant subdirectory for contact
 details.
 
 
+<sect1>BRLTTY on installation/rescue rootdisks
+
+<p>From version 1.0.1, BRLTTY can run as a stand-alone executable,
+without any configuration files.  In this case the compiled-in
+defaults will be used.  If the directory <tt>/etc/brltty</> (used to
+store the configuration file, the online help file and the table
+files) is not present, BRLTTY looks in <tt>/etc</> for the help file
+<tt/brlttydev.hlp/ and the configuration file <tt/brlttyconf.dat/.
+Even if these are not present, BRLTTY will still work!
+
+When constructing floppy rootdisks for installation or rescue
+purposes, space is often of the essence.  This new resiliance allows
+BRLTTY to be installed as a single executable on such disks, reducing
+the space requirement.
+
+Note: The script <tt/install-brltty/ assumes a complete installation
+of BRLTTY is to be copied.
+
+
 <sect1>Future Enhancements
 
 <p>Apart from fixing bugs and supporting more types of Braille
@@ -652,7 +693,7 @@ software.
   <item> a variety of PCs: both laptops and desktops; processors from
 386SX20 to Pentium with a huge range of memory sizes; Linux
 distributions including Debian and Slackware; a number of Linux
-kernels, including both 1.2.13 and 2.0.0.
+kernels, including 1.2.13, 2.0.0 and 2.0.17.
   <item> a DEC Alpha: only tested once, under RedHat Alpha Linux on a
 noname board kindly lent to the Cambridge University Computer
 Laboratory by DEC in Reading, England.
@@ -669,14 +710,12 @@ sub-process which runs at lowered priority to avoid using too much cpu
 time.  Different system loads require different settings of the
 parameters here.  The defaults work excellently in a standard Unix
 editor on a fairly lightly loaded system, but very badly in other
-applications, e.g. some applications working under DOSEmu (the MS-DOS
-emulator for Linux).
-  <tag/Operation in DOSEmu/ As well as the cursor routing problems
-outlined above, keystroke simulation of any kind does not work
-correctly in DOSEmu's raw keyboard mode.  This is because keystroke
-simulation must be done differently in this case, possibly by using
-scan codes.  This affects the cursor routing and cut &amp paste
-functions.
+situations, e.g. over a slow serial link to a remote host.
+  <tag/Operation in DOSEmu/ Keystroke simulation of any kind does not
+work correctly in DOSEmu's raw keyboard mode.  This is because
+keystroke simulation must be done differently in this case, possibly
+by using scan codes.  This affects the cursor routing and cut &amp
+paste functions.
   <tag/Pasting non-ASCII characters/ Unfortunately, due to the way the
 Linux kernel handles some operations, the character number stored in
 video memory for an accent mark etc. may not correspond to the

@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -16,6 +20,7 @@
 
 /* txt2tbl.c - Simple Braille table creator
  * James Bowden
+ * $Id: txt2tbl.c,v 1.2 1996/09/21 23:34:51 nn201 Exp $
  * March 1996
  * Version 1.0
  */

@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +18,15 @@
  * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
  */
 
-/* TSI/brl.c - Braille display driver for TSI displays
+/* $Id: brl.c,v 1.4 1996/09/26 10:02:38 nn201 Exp $ */
 
+/* TSI/brl.c - Braille display driver for TSI displays
+ *
  * Written by Stephane Doyon (doyons@JSP.UMonteal.CA)
  *
- * This is version 1.0 (July 10th 1996) of the TSI driver.
+ * This is version 1.1 (September 25ft 1996) of the TSI driver.
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40.
- * It is designed to be compiled into version 1.0 of BRLTTY.
+ * It is designed to be compiled into version 1.0.2 of BRLTTY.
  */
 
 #define BRL_C 1
@@ -107,7 +113,7 @@ static char DotsTable[256] =
   0xE4, 0xE5, 0xEC, 0xED, 0xE6, 0xE7, 0xEE, 0xEF,
   0xF4, 0xF5, 0xFC, 0xFD, 0xF6, 0xF7, 0xFE, 0xFF};
 
-#define RESET_DELAY (200)	/* msec */
+#define RESET_DELAY (1000)	/* msec */
 
 /* Communication codes */
 static char BRL_QUERY[] =
@@ -158,7 +164,8 @@ static char Q_HEADER[] =
 /* Global variables */
 
 static int brl_fd;		/* file descriptor for comm port */
-static struct termios oldtio;	/* old terminal settings for com port */
+static struct termios oldtio,	/* old terminal settings for com port */
+                      curtio;   /* current settings */
 static unsigned char *rawdata,	/* translated data to send to display */
  *prevdata;			/* previous data sent */
 static int brl_cols;		/* Number of cells on display */
@@ -184,7 +191,7 @@ ResetTypematic (void)
 void 
 identbrl (const char *tty)
 {
-  printf ("  BRLTTY driver for TSI displays, version 1.0\n");
+  printf ("  BRLTTY driver for TSI displays, version 1.1\n");
   printf ("  Copyright (C) 1996 by Stephane Doyon <doyons@JSP.UMontreal.CA>\n");
   if (tty)
     printf ("  Using serial port %s\n", tty);
@@ -196,7 +203,6 @@ brldim
 initbrl (const char *tty)
 {
   brldim res;			/* return result */
-  struct termios newtio;	/* new terminal settings */
   int i;
   char reply[Q_REPLY_LENGTH];
 
@@ -211,17 +217,32 @@ initbrl (const char *tty)
     goto failure;
   tcgetattr (brl_fd, &oldtio);	/* save current settings */
 
-  /* Set bps, flow control and 8n1, enable reading */
-  newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
+  /* Elaborate new settings by working from current state */
+  tcgetattr (brl_fd, &curtio);
+  /* Set bps */
+  if(cfsetispeed(&curtio,BAUDRATE) == -1) goto failure;
+  if(cfsetospeed(&curtio,BAUDRATE) == -1) goto failure;
+  cfmakeraw(&curtio);
+  /* should we use cfmakeraw ? */
+  /* local */
+  curtio.c_lflag &= ~TOSTOP; /* no SIGTTOU to backgrounded processes */
+  /* control */
+  curtio.c_cflag |= CLOCAL /* ignore status lines (carrier detect...) */
+                  | CREAD /* enable reading */
+                  | CRTSCTS; /* hardware flow control */
+  curtio.c_cflag &= ~( CSTOPB /* 1 stop bit */
+                      | PARENB /* disable parity generation and detection */
+                     );
+  /* input */
+  curtio.c_iflag &= ~( INPCK /* no input parity check */
+                      | ~IXOFF
+		     );
 
-  /* Ignore bytes with parity errors and make terminal raw and dumb */
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;		/* raw output */
-  newtio.c_lflag = 0;		/* don't echo or generate signals */
-  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-  newtio.c_cc[VTIME] = 0;
-  tcflush (brl_fd, TCIFLUSH);	/* clean line */
-  tcsetattr (brl_fd, TCSANOW, &newtio);		/* activate new settings */
+  /* noncanonical: for first operation */
+  curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars */
+  curtio.c_cc[VMIN] = Q_REPLY_LENGTH; /* fill buffer before read returns */
+  tcflush (brl_fd, TCIOFLUSH);	/* clean line */
+  tcsetattr (brl_fd, TCSANOW, &curtio);		/* activate new settings */
 
   /* Query display */
   do
@@ -229,13 +250,11 @@ initbrl (const char *tty)
       if (write (brl_fd, BRL_QUERY, DIM_BRL_QUERY) != DIM_BRL_QUERY)
 	{
 	  delay (RESET_DELAY);
-	  /* but anyway write is blocking currently... */
 	  continue;
 	}
-      delay (READ_DELAY * 5);	/* wait for the display to process and reply */
       if (read (brl_fd, reply, Q_REPLY_LENGTH) != Q_REPLY_LENGTH)
 	{
-	  delay (RESET_DELAY);
+	  tcflush(brl_fd,TCIOFLUSH);
 	  continue;
 	}
     }
@@ -285,6 +304,10 @@ initbrl (const char *tty)
 
   res.x = brl_cols;		/* initialise size of display */
   res.y = BRLROWS;		/* always 1 */
+
+  curtio.c_cc[VTIME] = 0;
+  curtio.c_cc[VMIN] = 0;
+  tcsetattr (brl_fd, TCSANOW, &curtio);         /* activate new settings */
 
   /* Mark time of last command to initialize typematic watch */
   gettimeofday (&lastcmd_time, &dum_tz);
@@ -337,6 +360,9 @@ closebrl (brldim brl)
   tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
   close (brl_fd);
 }
+
+/* no status cells */
+void setbrlstat (const unsigned char *s) {}
 
 
 static void 
@@ -582,8 +608,6 @@ cut_cursor ()
 int 
 readbrl (int type)
 {
-/* The beginning of this function needs to be rewritten: see TODO */
-
   static unsigned char sw_oldstat[SW_MAXHORIZ];
   unsigned char l, r, t;
   unsigned char sw_stat[SW_MAXHORIZ], sw_which[SW_MAXHORIZ * 8], sw_howmany = 0;
@@ -605,6 +629,11 @@ readbrl (int type)
    vertical routing keys and are ignored in this driver.
  */
 
+  /* reset to nonblocking */
+  curtio.c_cc[VTIME] = 0;
+  curtio.c_cc[VMIN] = 0;
+  tcsetattr (brl_fd, TCSANOW, &curtio);
+
   /* Get the first byte, or right panel key */
   if (!read (brl_fd, &r, 1))
     return (EOF);
@@ -619,14 +648,12 @@ readbrl (int type)
     if (!read (brl_fd, &r, 1))
       return (EOF);
   /* Now get left key or second byte of header. */
+  curtio.c_cc[VTIME] = 1;
+  curtio.c_cc[VMIN] = 1;
+  tcsetattr (brl_fd, TCSANOW, &curtio);
   if (!read (brl_fd, &l, 1))
-    {
-      /* Let's give the serial system ONE chance */
-      shortdelay (READ_DELAY);
-      if (!read (brl_fd, &l, 1))
-	return (EOF);
-      /* If it didn't work, it's a timeout: that was not a pair */
-    }
+    return (EOF);
+  /* If it didn't work, it's a timeout: that was not a pair */
 #ifdef LOW_BATTERY_WARN
   if (r == BATTERY_H1 && l == BATTERY_H2)
     {
@@ -641,13 +668,9 @@ readbrl (int type)
       r = l = 0;
 
       /* read next byte: it indicates length of sequence */
+      /* still VMIN = VTIME = 1 */
       if (!read (brl_fd, &t, 1))
-	{
-	  /* wait: only one chance */
-	  shortdelay (READ_DELAY);
-	  if (!read (brl_fd, &t, 1))
-	    return (EOF);
-	}
+	return (EOF);
 
       /* how long is the sequence supposed to be... */
       if (brl_cols == 40)
@@ -656,30 +679,26 @@ readbrl (int type)
 	cnt = SW_CNT80;
       else
 	return (EOF);
+      /* if cnt and brl_cols disagree, then must be garbage??? */
       if (t != cnt)
 	return (EOF);
-      /* if cnt and brl_cols disagree, then must be garbage??? */
 
+      /* skip the vertical keys info */
+      curtio.c_cc[VTIME] = 1;
+      curtio.c_cc[VMIN] = SW_NVERT;
+      tcsetattr (brl_fd, TCSANOW, &curtio);
+      if (read (brl_fd, &t, SW_NVERT) != SW_NVERT)
+	return (EOF);
       cnt -= SW_NVERT;
       /* cnt now gives the number of bytes describing horizontal
          routing keys only */
-      /* skip the vertical keys info */
-      for (i = 0; i < SW_NVERT; i++)
-	if (!read (brl_fd, &t, 1))
-	  {
-	    shortdelay (READ_DELAY);
-	    if (!read (brl_fd, &t, 1))
-	      return (EOF);
-	  }
 
       /* Finally, the horizontal keys */
-      for (i = 0; i < cnt; i++)
-	if (!read (brl_fd, &sw_stat[i], 1))
-	  {
-	    shortdelay (READ_DELAY);
-	    if (!read (brl_fd, &sw_stat[i], 1))
-	      return (EOF);
-	  }
+      curtio.c_cc[VTIME] = 1;
+      curtio.c_cc[VMIN] = cnt;
+      tcsetattr (brl_fd, TCSANOW, &curtio);
+      if (read (brl_fd, &sw_stat, cnt) != cnt)
+	return (EOF);
 
       /* if key press is maintained, then packet is resent by display
          every 0.5secs. process only if it has changed form alst time.
@@ -756,6 +775,7 @@ readbrl (int type)
 	  KEY (KEY_EXEC | KEY_RIGHT, CMD_LNEND)
 	  KEY (KEY_UP | KEY_DOWN, CMD_INFO)
 	  KEY (KEY_LEFT | KEY_RIGHT, CMD_CONFMENU)
+	  KEY (KEY_LEFT | KEY_RIGHT | KEY_DOWN, CMD_SKPIDLNS)
 	  KEY (KEY_LEFT | KEY_RIGHT | KEY_EXEC, CMD_SAVECONF)
       }
   else if (!r)			/* On the left panel only */
@@ -776,15 +796,15 @@ readbrl (int type)
 	  KEY (KEY_LEFT | KEY_RIGHT, CMD_HELP)
       }
   /* Combinations from both panels */
-  KEYS (KEY_DOWN, KEY_UP, CMD_INFO)
+    KEYS (KEY_DOWN, KEY_UP, CMD_INFO)
     KEYS (KEY_UP, KEY_DOWN, CMD_DISPMD)
     KEYS (KEY_EXEC, KEY_EXEC, CMD_FREEZE)
     KEYS (KEY_DOWN, KEY_DOWN, CMD_CSRJMP)
     KEYS (KEY_UP, KEY_UP, CR_ROUTEOFFSET + 3 * brl_cols / 4 - 1)
     KEYS (KEY_LEFT, KEY_EXEC, CMD_CUT_BEG)
     KEYS (KEY_RIGHT, KEY_EXEC, CMD_CUT_END)
-    KEYS (KEY_LEFT | KEY_RIGHT, KEY_EXEC, CMD_CUT_CURSOR)	/* special: see at the
-								   end of this fn */
+    KEYS (KEY_LEFT | KEY_RIGHT, KEY_EXEC, CMD_CUT_CURSOR)  /* special: see
+						    at the end of this fn */
     KEYS (KEY_DOWN, KEY_EXEC, CMD_PASTE)
     KEYS (KEY_EXEC | KEY_LEFT, KEY_LEFT | KEY_RIGHT, CMD_CSRSIZE)
     KEYS (KEY_EXEC | KEY_UP, KEY_LEFT | KEY_RIGHT, CMD_CSRVIS)

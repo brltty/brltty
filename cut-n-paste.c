@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -12,6 +16,10 @@
  * Foundation.  Please see the file COPYING for details.
  *
  * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+ */
+
+/* cut-n-paste.c - cut & paste functionality
+ * $Id: cut-n-paste.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
  */
 
 #include <stdlib.h>
@@ -74,7 +82,12 @@ cut (void)
       if (srcbuf && dstbuf)
 	{
 	  /* grab it */
-	  getscr (cut_begx, cut_begy, cols, rows, srcbuf, SCR_TEXT);
+	  getscr ((winpos)
+		  {
+		  cut_begx, cut_begy, cols, rows
+		  }
+		  ,srcbuf, \
+		  SCR_TEXT);
 	  srcptr = srcbuf;
 	  dstptr = dstbuf;
 	  /* remove spaces at end of line, add return (except to last line),

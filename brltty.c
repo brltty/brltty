@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -15,7 +19,7 @@
  */
 
 /* brltty.c - main() plus signal handling and cursor routing
- * N. Nair & J. Bowden, 22 September 1995
+ * $Id: brltty.c,v 1.9 1996/10/01 15:55:10 nn201 Exp $
  */
 
 #define BRLTTY_C 1
@@ -39,8 +43,9 @@
 #include "misc.h"
 #include "beeps.h"
 #include "cut-n-paste.h"
+#include "speech.h"
 
-#define VERSION "BRLTTY 1.0"
+#define VERSION "BRLTTY 1.0.2d"
 #define COPYRIGHT "Copyright (C) 1995, 1996 by Nikhil Nair and others.  \
 All rights reserved."
 #define USAGE "Usage: %s [options]\n\
@@ -50,14 +55,14 @@ All rights reserved."
  -h, --help           print this usage message\n\
  -q, --quiet          suppress start-up messages\n\
  -v, --version        print start-up messages and exit\n"
-#define ENV_MAGICNUM 0x4001
+#define ENV_MAGICNUM 0x4003
 
 /* Some useful macros: */
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define BRL_ISUPPER(c) (isupper (c) || (c) == '@' || (c) == '[' || (c) == '^' \
 			|| (c) == ']' || (c) == '\\')
-#define TOGGLEPLAY(var)  if(var) play(snd_toggleon); else play(snd_toggleoff);
+#define TOGGLEPLAY(var) play ((var) ? snd_toggleon : snd_toggleoff)
 
 /* Argument for usetable() */
 #define TBL_TEXT 0		/* use text translation table */
@@ -78,13 +83,23 @@ struct brltty_env		/* BRLTTY environment settings */
     short sixdots;
     short slidewin;
     short sound;
+    short skpidlns;
+    short stcellstyle;
   }
-env =
+env, initenv =
 {
   ENV_MAGICNUM, INIT_CSRVIS, INIT_CSRBLINK, INIT_CAPBLINK, INIT_CSRSIZE,
     INIT_CSR_ON_CNT, INIT_CSR_OFF_CNT, INIT_CAP_ON_CNT, INIT_CAP_OFF_CNT,
-    INIT_SIXDOTS, INIT_SLIDEWIN, INIT_BEEPSON
+    INIT_SIXDOTS, INIT_SLIDEWIN, INIT_BEEPSON, INIT_SKPIDLNS,
+#if defined (Alva_ABT3)
+    ST_AlvaStyle
+#elif defined (CombiBraille)
+    ST_TiemanStyle
+#else
+    ST_None
+#endif
 };
+
 short csrtrk = INIT_CSRTRK;
 short dispmode = 0;		/* start by displaying text */
 short dispmd = LIVE_SCRN;	/* freeze screen off */
@@ -97,33 +112,49 @@ short fwinshift;		/* Full window horizontal distance */
 short vwinshift;		/* Window vertical distance */
 brldim brl;			/* For the Braille routines */
 scrstat scr;			/* For screen statistics */
-unsigned char texttrans[256];	/* text translation table (output) */
-unsigned char attribtrans[256];	/* attribute translation table (output) */
-unsigned char *curtbl;		/* currently active translation table */
+
+/* Output translation tables - the files *.auto.h are generated at
+ * compile-time:
+ */
+unsigned char texttrans[256] =
+{
+#include "text.auto.h"
+};
+unsigned char attribtrans[256] =
+{
+#include "attrib.auto.h"
+};
+unsigned char *curtbl = NULL;	/* currently active translation table */
+
 volatile sig_atomic_t keep_going = 1;	/* controls program termination */
 int tbl_fd;			/* Translation table filedescriptor */
 short opt_h = 0, opt_q = 0, opt_v = 0;	/* -h, -q and -v options */
 char *opt_c = NULL, *opt_d = NULL, *opt_t = NULL;	/* filename options */
+short homedir_found = 0;	/* CWD status */
 
-#if defined (Alva_ABT3)
-unsigned char StatusCells[5];	/* status character buffer */
-int TickCount;			/* for blinking position if line > 25 */
-#elif defined (CombiBraille)
+unsigned int TickCount = 0;	/* incremented each cycle */
+
+/* status cells support */
 unsigned char statcells[5];	/* status cell buffer */
 unsigned char num[10] =
 {14, 1, 5, 3, 11, 9, 7, 15, 13, 6};	/* number translation */
-#endif
 
+/* for csrjmp subprocess */
+volatile int csr_active = 0;
+pid_t csr_pid;
 
 /* Function prototypes: */
 void csrjmp (int x, int y);	/* move cursor to (x,y) */
 void csrjmp_sub (int x, int y);	/* cursor routing subprocess */
 void setwinxy (int x, int y);	/* move window to include (x,y) */
 void inskey (unsigned char *string);	/* insert char into input buffer */
-void message (char *s);		/* write literal message on Braille display */
+void message (char *s, short silent);	/* write literal message on Braille display */
+void clrbrlstat (void);
 void termination_handler (int signum);	/* clean up before termination */
+void stop_child (int signum);	/* called at end of cursor routing */
 void usetable (int tbl);	/* set character translation table */
 void configmenu (void);		/* configuration menu */
+void loadconfig (void);
 void saveconfig (void);
 int nice (int);			/* should really be in a header file ... */
 
@@ -137,14 +168,11 @@ main (int argc, char *argv[])
   int old_winy = 0;
   char infbuf[20];		/* buffer for status information display */
   short csron = 1;		/* display cursor on (toggled during blink) */
-  short csrcntr = env.csroncnt;
-  short capon = 1;		/* display cursor on (toggled during blink) */
-  short capcntr = env.caponcnt;
-  struct brltty_env newenv;
-#ifdef SAY_CMD
-  unsigned char say_buffer[140];	/* to store current line of text */
-  FILE *say_prog;		/* for piping to `say' command */
-#endif /* SAY_CMD */
+  short csrcntr = 1;
+  short capon = 0;		/* display caps off (toggled during blink) */
+  short capcntr = 1;
+
+  env = initenv;
 
   /* Parse command line using getopt(): */
   while ((i = getopt (argc, argv, "c:d:t:hqv-:")) != -1)
@@ -194,53 +222,34 @@ main (int argc, char *argv[])
        * Pass the -d argument if present to override the default serial device.
        */
       identbrl (opt_d);
+      identspk ();
     }
   if (opt_v)
     return 0;
 
   if (chdir (HOME_DIR))		/* change to directory containing data files */
-    {
-      if (!opt_q)
-	{
-	  fprintf (stderr, "`%s': ", HOME_DIR);
-	  perror (NULL);
-	}
-      exit (1);
-    }
+    chdir ("/etc");		/* home directory not found, use backup */
 
-  /* Load braille tables */
-  tbl_fd = open (opt_t ? opt_t : TEXTTRN_NAME, O_RDONLY);
-  if (tbl_fd >= 0)
-    if (read (tbl_fd, texttrans, 256) != 256)
-      {
-	close (tbl_fd);
-	tbl_fd = -1;
-      }
-  if (tbl_fd >= 0)
+  /* Load text translation table: */
+  if (opt_t)
     {
-      close (tbl_fd);
-      tbl_fd = open (ATTRIBTRN_NAME, O_RDONLY);
+      if ((tbl_fd = open (opt_t, O_RDONLY)) >= 0 && \
+	  (curtbl = (unsigned char *) malloc (256)) && \
+	  read (tbl_fd, curtbl, 256) == 256)
+	memcpy (texttrans, curtbl, 256);
+      else if (!opt_q)
+	fprintf (stderr, "%s: Failed to read %s\n", argv[0], opt_t);
+      if (curtbl)
+	free (curtbl);
       if (tbl_fd >= 0)
-	if (read (tbl_fd, attribtrans, 256) != 256)
-	  {
-	    close (tbl_fd);
-	    tbl_fd = -1;
-	  }
+	close (tbl_fd);
     }
-  if (tbl_fd == -1)
-    {
-      if (!opt_q)
-	fprintf (stderr, "BRLTTY: ERROR: Cannot load braille data files\n");
-      exit (6);
-    }
-  else
-    close (tbl_fd);
 
   /* Initialize screen library */
   if (initscr ())		/* initialise screen reading */
     {
       if (!opt_q)
-	fprintf (stderr, "brltty: Cannot read screen\n");
+	fprintf (stderr, "%s: Cannot read screen\n", argv[0]);
       exit (2);
     }
 
@@ -273,20 +282,13 @@ main (int argc, char *argv[])
       closescr ();
       exit (5);
     }
+  clrbrlstat ();
+
+  /* Initialise speech */
+  initspk ();
 
   /* Load configuration file: */
-  tbl_fd = open (opt_c ? opt_c : CONFFILE_NAME, O_RDONLY);
-  if (tbl_fd >= 0)
-    {
-      if (read (tbl_fd, &newenv, sizeof (struct brltty_env)) == \
-	  sizeof (struct brltty_env))
-	if (newenv.magicnum == ENV_MAGICNUM)
-	  {
-	    memcpy (&env, &newenv, sizeof (struct brltty_env));
-	    soundstat (env.sound);
-	  }
-      close (tbl_fd);
-    }
+  loadconfig ();
 
   fwinshift = brl.x;
   hwinshift = fwinshift / 2;
@@ -298,9 +300,15 @@ main (int argc, char *argv[])
     signal (SIGTERM, SIG_IGN);
   signal (SIGINT, SIG_IGN);
   signal (SIGHUP, SIG_IGN);
+  signal (SIGCHLD, stop_child);
 
-  message (VERSION);		/* display initialisation message */
-  delay (DISPDEL);		/* sleep for a while */
+
+  usetable (TBL_TEXT);
+  if (!opt_q)
+    {
+      message (VERSION, 0);	/* display initialisation message */
+      delay (DISPDEL);		/* sleep for a while */
+    }
   scr = getstat ();
   setwinxy (scr.posx, scr.posy);	/* set initial window position */
   cox = scr.posx;
@@ -310,6 +318,7 @@ main (int argc, char *argv[])
   /* Main program loop */
   while (keep_going)
     {
+      TickCount++;
       /* Process any Braille input */
       while ((keypress = readbrl (TBL_CMD)) != EOF)
 	switch (keypress)
@@ -340,15 +349,80 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_LNUP:
 	    if (winy == 0)
+	      {
+		play (snd_bounce);
+		break;
+	      }
+	    if (!env.skpidlns)
+	      {
+		winy = MAX (winy - 1, 0);
+		break;
+	      }
+	    /* no break here */
+	  case CMD_PRDIFLN:
+	    if (winy == 0)
 	      play (snd_bounce);
-	    winy = MAX (winy - 1, 0);
+	    else
+	      {
+		char buffer1[scr.cols], buffer2[scr.cols];
+		scr = getstat ();
+		getscr ((winpos)
+			{
+			0, winy, scr.cols, 1
+			}
+			,buffer1, dispmode ? SCR_ATTRIB : SCR_TEXT);
+		while (winy > 0)
+		  {
+		    getscr ((winpos)
+			    {
+			    0, --winy, scr.cols, 1
+			    }
+			    ,buffer2, dispmode ? SCR_ATTRIB : SCR_TEXT);
+		    if (memcmp (buffer1, buffer2, scr.cols) || \
+			winy == scr.posy)
+		      break;	/* lines are different */
+		  }
+	      }
 	    break;
 	  case CMD_LNDN:
 	    if (winy == scr.rows - brl.y)
+	      {
+		play (snd_bounce);
+		break;
+	      }
+	    if (!env.skpidlns)
+	      {
+		winy = MIN (winy + 1, scr.rows - brl.y);
+		break;
+	      }
+	    /* no break here */
+	  case CMD_NXDIFLN:
+	    if (winy == scr.rows - brl.y)
 	      play (snd_bounce);
-	    winy = MIN (winy + 1, scr.rows - brl.y);
+	    else
+	      {
+		char buffer1[scr.cols], buffer2[scr.cols];
+		scr = getstat ();
+		getscr ((winpos)
+			{
+			0, winy, scr.cols, 1
+			}
+			,buffer1, dispmode ? SCR_ATTRIB : SCR_TEXT);
+		while (winy < scr.rows - brl.y)
+		  {
+		    getscr ((winpos)
+			    {
+			    0, ++winy, scr.cols, 1
+			    }
+			    ,buffer2, dispmode ? SCR_ATTRIB : SCR_TEXT);
+		    if (memcmp (buffer1, buffer2, scr.cols) || \
+			winy == scr.posy)
+		      break;	/* lines are different */
+		  }
+	      }
 	    break;
 	  case CMD_HOME:
+	    scr = getstat ();
 	    setwinxy (scr.posx, scr.posy);
 	    break;
 	  case CMD_LNBEG:
@@ -426,24 +500,23 @@ main (int argc, char *argv[])
 	      inskey (KEY_RETURN);
 	    break;
 	  case CMD_CSRVIS:
-	    env.csrvis ^= 1;
-	    TOGGLEPLAY (env.csrvis)
-	      break;
+	    TOGGLEPLAY (env.csrvis ^= 1);
+	    break;
 	  case CMD_CSRBLINK:
 	    csron = 1;
-	    env.csrblink ^= 1;
+	    TOGGLEPLAY (env.csrblink ^= 1);
 	    if (env.csrblink)
 	      {
 		csrcntr = env.csroncnt;
 		capon = 0;
 		capcntr = env.capoffcnt;
 	      }
-	    TOGGLEPLAY (env.csrblink)
-	      break;
+	    break;
 	  case CMD_CSRTRK:
 	    csrtrk ^= 1;
 	    if (csrtrk)
 	      {
+		scr = getstat ();
 		setwinxy (scr.posx, scr.posy);
 		play (snd_link);
 	      }
@@ -498,7 +571,7 @@ main (int argc, char *argv[])
 		else
 		  /* help screen selection failed */
 		  {
-		    message ("can't find help");
+		    message ("can't find help", 0);
 		    delay (DISPDEL);
 		  }
 		break;
@@ -511,30 +584,29 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_CAPBLINK:
 	    capon = 1;
-	    env.capblink ^= 1;
+	    TOGGLEPLAY (env.capblink ^= 1);
 	    if (env.capblink)
 	      {
 		capcntr = env.caponcnt;
 		csron = 0;
 		csrcntr = env.csroffcnt;
 	      }
-	    TOGGLEPLAY (env.capblink)
-	      break;
+	    break;
 	  case CMD_INFO:
 	    infmode ^= 1;
 	    break;
 	  case CMD_CSRSIZE:
-	    env.csrsize ^= 1;
-	    TOGGLEPLAY (env.csrsize)
-	      break;
+	    TOGGLEPLAY (env.csrsize ^= 1);
+	    break;
 	  case CMD_SIXDOTS:
-	    env.sixdots ^= 1;
-	    TOGGLEPLAY (env.sixdots)
-	      break;
+	    TOGGLEPLAY (env.sixdots ^= 1);
+	    break;
 	  case CMD_SLIDEWIN:
-	    env.slidewin ^= 1;
-	    TOGGLEPLAY (env.slidewin)
-	      break;
+	    TOGGLEPLAY (env.slidewin ^= 1);
+	    break;
+	  case CMD_SKPIDLNS:
+	    TOGGLEPLAY (env.skpidlns ^= 1);
+	    break;
 	  case CMD_SAVECONF:
 	    saveconfig ();
 	    play (snd_done);
@@ -544,47 +616,27 @@ main (int argc, char *argv[])
 	    soundstat (env.sound);
 	    break;
 	  case CMD_RESET:
-	    i = 1;
-	    /* Load configuration file: */
-	    tbl_fd = open (CONFFILE_NAME, O_RDONLY);
-	    if (tbl_fd >= 0)
-	      {
-		if (read (tbl_fd, &newenv, sizeof (struct brltty_env)) == \
-		    sizeof (struct brltty_env))
-		  if (newenv.magicnum == ENV_MAGICNUM)
-		    {
-		      memcpy (&env, &newenv, sizeof (struct brltty_env));
-		      soundstat (env.sound);
-		      i = 0;
-		    }
-		close (tbl_fd);
-	      }
-	    if (i)
-	      {
-		env.csrvis = INIT_CSRVIS;
-		env.csrblink = INIT_CSRBLINK;
-		env.capblink = INIT_CAPBLINK;
-		env.csrsize = INIT_CSRSIZE;
-		env.csroncnt = INIT_CSR_ON_CNT;
-		env.csroffcnt = INIT_CSR_OFF_CNT;
-		env.caponcnt = INIT_CAP_ON_CNT;
-		env.capoffcnt = INIT_CAP_OFF_CNT;
-		env.sixdots = INIT_SIXDOTS;
-		env.slidewin = INIT_SLIDEWIN;
-		env.sound = INIT_BEEPSON;
-	      }
+	    loadconfig ();
+	    csron = 1;
+	    capon = 0;
+	    csrcntr = capcntr = 1;
 	    play (snd_done);
 	    break;
-#ifdef SAY_CMD
 	  case CMD_SAY:
-	    getscr (0, winy, scr.cols, brl.y, say_buffer, SCR_TEXT);
-	    if ((say_prog = popen ("/usr/local/bin/say", "w")) != NULL)
-	      {
-		fwrite (say_buffer, scr.cols * brl.y, 1, say_prog);
-		pclose (say_prog);
-	      }
+	    {
+	      unsigned char buffer[scr.cols];
+	      getscr ((winpos)
+		      {
+		      0, winy, scr.cols, 1
+		      }
+		      ,buffer, \
+		      SCR_TEXT);
+	      say (buffer, scr.cols);
+	    }
 	    break;
-#endif /* SAY_CMD */
+	  case CMD_MUTE:
+	    mutespk ();
+	    break;
 	  default:
 	    if (keypress >= CR_ROUTEOFFSET && keypress < \
 		CR_ROUTEOFFSET + brl.x && (dispmd & HELP_SCRN) != HELP_SCRN)
@@ -602,51 +654,103 @@ main (int argc, char *argv[])
 	    break;
 	  }
 
-      /* Update Braille display */
+      /* Update blink counters: */
+      if (env.csrblink)
+	if (!--csrcntr)
+	  csrcntr = (csron ^= 1) ? env.csroncnt : env.csroffcnt;
+      if (env.capblink)
+	if (!--capcntr)
+	  capcntr = (capon ^= 1) ? env.caponcnt : env.capoffcnt;
+
+      /* Update Braille display. */
+
       scr = getstat ();
 
-      /* If cursor moves while blinking is on */
-      if (env.csrblink && csrtrk)
+      /* cursor tracking */
+      if (csrtrk)
 	{
-	  if (scr.posx != cox)
+	  /* If cursor moves while blinking is on */
+	  if (env.csrblink)
 	    {
-	      /* turn on cursor to see it moving on the line */
-	      csron = 1;
-	      csrcntr = env.csroncnt;
+	      if (scr.posy != coy)
+		{
+		  /* turn off cursor to see what's under it while changing lines */
+		  csron = 0;
+		  csrcntr = env.csroffcnt;
+		}
+	      if (scr.posx != cox)
+		{
+		  /* turn on cursor to see it moving on the line */
+		  csron = 1;
+		  csrcntr = env.csroncnt;
+		}
 	    }
-	  if (scr.posy != coy)
+
+	  /* If the cursor moves in cursor tracking mode: */
+	  if (!csr_active && (scr.posx != cox || scr.posy != coy))
 	    {
-	      /* turn off cursor to see what's under it while changing lines */
-	      csron = 0;
-	      csrcntr = env.csroffcnt;
+	      setwinxy (scr.posx, scr.posy);
+	      cox = scr.posx;
+	      coy = scr.posy;
 	    }
 	}
 
-      /* If the cursor moves in cursor tracking mode: */
-      if (csrtrk && (scr.posx != cox || scr.posy != coy))
-	{
-	  setwinxy (scr.posx, scr.posy);
-	  cox = scr.posx;
-	  coy = scr.posy;
-	}
       /* If not in info mode, get screen image: */
       if (!infmode)
 	{
-#ifdef CombiBraille
-	  /* Status cells: */
-	  statcells[0] = num[(winx / 10) % 10] << 4 | \
-	    num[(scr.posx / 10) % 10];
-	  statcells[1] = num[winx % 10] << 4 | num[scr.posx % 10];
-	  statcells[2] = num[(winy / 10) % 10] << 4 | \
-	    num[(scr.posy / 10) % 10];
-	  statcells[3] = num[winy % 10] << 4 | num[scr.posy % 10];
-	  statcells[4] = env.csrvis << 1 | env.csrsize << 3 | \
-	    env.csrblink << 5 | env.slidewin << 7 | csrtrk << 6 | \
-	    env.sound << 4 | dispmode << 2;
-	  statcells[4] |= (dispmd & FROZ_SCRN) == FROZ_SCRN ? 1 : 0;
+	  /* Update the Braille display.
+	   * For the sake of displays on which the status cells and the
+	   * main display have to be updated together, it is guaranteed
+	   * that setbrlstat() will be called just *before* writebrl().
+	   */
+	  switch (env.stcellstyle)
+	    {
+	    case ST_AlvaStyle:
+	      if ((dispmd & HELP_SCRN) == HELP_SCRN)
+		{
+		  statcells[0] = texttrans['h'];
+		  statcells[1] = texttrans['l'];
+		  statcells[2] = texttrans['p'];
+		  statcells[3] = 0;
+		  statcells[4] = 0;
+		}
+	      else
+		{
+		  /* The coords are given with letters as the DOS tsr */
+		  statcells[0] = ((TickCount / 16) % (scr.posy / 25 + 1)) ? \
+		    0 : texttrans[scr.posy % 25 + 'a'] | (scr.posx / brl.x) << 6;
+		  statcells[1] = ((TickCount / 16) % (winy / 25 + 1)) ? \
+		    0 : texttrans[winy % 25 + 'a'] | (winx / brl.x) << 6;
+		  statcells[2] = texttrans[(dispmode) ? 'a' : \
+			       ((dispmd & FROZ_SCRN) == FROZ_SCRN) ? 'f' : \
+					   (csrtrk) ? 't' : ' '];
+		  statcells[3] = 0;
+		  statcells[4] = 0;
+		}
+	      break;
+	    case ST_TiemanStyle:
+	      statcells[0] = num[(winx / 10) % 10] << 4 | \
+		num[(scr.posx / 10) % 10];
+	      statcells[1] = num[winx % 10] << 4 | num[scr.posx % 10];
+	      statcells[2] = num[(winy / 10) % 10] << 4 | \
+		num[(scr.posy / 10) % 10];
+	      statcells[3] = num[winy % 10] << 4 | num[scr.posy % 10];
+	      statcells[4] = env.csrvis << 1 | env.csrsize << 3 | \
+		env.csrblink << 5 | env.slidewin << 7 | csrtrk << 6 | \
+		env.sound << 4 | dispmode << 2;
+	      statcells[4] |= (dispmd & FROZ_SCRN) == FROZ_SCRN ? 1 : 0;
+	      break;
+	    default:
+	      memset (statcells, 0, 5);
+	      break;
+	    }
 	  setbrlstat (statcells);
-#endif
-	  getscr (winx, winy, brl.x, brl.y, brl.disp, \
+
+	  getscr ((winpos)
+		  {
+		  winx, winy, brl.x, brl.y
+		  }
+		  ,brl.disp, \
 		  dispmode ? SCR_ATTRIB : SCR_TEXT);
 	  if (env.capblink && !capon)
 	    for (i = 0; i < brl.x * brl.y; i++)
@@ -668,43 +772,6 @@ main (int argc, char *argv[])
 	    brl.disp[(scr.posy - winy) * brl.x + scr.posx - winx] |= \
 	      env.csrsize ? BIG_CSRCHAR : SMALL_CSRCHAR;
 	  writebrl (brl);
-
-	  /* Update status cells on braille display */
-#ifdef Alva_ABT3
-	  /* Yeah... looks like a funky hack for now  :(
-	   * It'll probably stay like that till we decide on a common standard
-	   * to support status cells.
-	   */
-	  TickCount++;
-	  if ((dispmd & HELP_SCRN) != HELP_SCRN)
-	    {
-	      /* The coords are given with letters as the DOS tsr */
-	      StatusCells[0] = ((TickCount / 16) % (scr.posy / 25 + 1)) ? \
-		' ' : (scr.posy % 25 + ((scr.posx < brl.x) ? 'a' : 'A'));
-	      StatusCells[1] = ((TickCount / 16) % (winy / 25 + 1)) ? \
-		' ' : ((char) winy % 25 + ((winx < brl.x) ? 'a' : 'A'));
-	      StatusCells[2] = (dispmode) ? 'a' : \
-		((dispmd & FROZ_SCRN) == FROZ_SCRN) ? 'f' : \
-		(csrtrk) ? 't' : ' ';
-	      StatusCells[3] = ' ';
-	      StatusCells[4] = ' ';
-	    }
-	  else
-	    {
-	      StatusCells[0] = 'h';
-	      StatusCells[1] = 'l';
-	      StatusCells[2] = 'p';
-	      StatusCells[3] = ' ';
-	      StatusCells[4] = ' ';
-	    }
-
-	  {
-	    int i;
-	    for (i = 0; i < 5; i++)
-	      StatusCells[i] = texttrans[StatusCells[i]];
-	  }
-	  WriteBrlStatus (StatusCells);
-#endif
 	}
 
       /* If in info mode, send status information: */
@@ -716,37 +783,28 @@ main (int argc, char *argv[])
 		   (env.csrblink ? 'b' : ' '), dispmode ? 'a' : 't', \
 		   (dispmd & FROZ_SCRN) == FROZ_SCRN ? 'f' : ' ', \
 		   env.sixdots ? '6' : '8', env.capblink ? 'B' : ' ');
-	  message (infbuf);
-#ifdef Alva_ABT3
-	  StatusCells[0] = ' ';
-	  StatusCells[1] = 's';
-	  StatusCells[2] = 't';
-	  StatusCells[3] = 'a';
-	  StatusCells[4] = 't';
-	  {
-	    int i;
-	    for (i = 0; i < 5; i++)
-	      StatusCells[i] = texttrans[StatusCells[i]];
-	  }
-	  WriteBrlStatus (StatusCells);
-#endif
+
+	  /* status cells */
+	  statcells[0] = texttrans['i'];
+	  statcells[1] = texttrans['n'];
+	  statcells[2] = texttrans['f'];
+	  statcells[3] = texttrans['o'];
+	  statcells[4] = texttrans[' '];
+	  setbrlstat (statcells);
+
+	  message (infbuf, 1);
 	}
 
-      /* Update blink counters: */
-      if (env.csrblink)
-	if (!--csrcntr)
-	  csrcntr = (csron ^= 1) ? env.csroncnt : env.csroffcnt;
-      if (env.capblink)
-	if (!--capcntr)
-	  capcntr = (capon ^= 1) ? env.caponcnt : env.capoffcnt;
       delay (DELAY_TIME);
     }
 
-  message ("BRLTTY terminating");
+  clrbrlstat ();
+  message ("BRLTTY terminating", 0);
   closescr ();
 
   /* Hard-wired delay to try and stop us being killed prematurely ... */
   delay (3000);
+  closespk ();
   closebrl (brl);
   return 0;
 }
@@ -783,11 +841,20 @@ setwinxy (int x, int y)
 void
 csrjmp (int x, int y)
 {
-  /* Fork cursor routing subprocess so that we can reversibly 
-   * reduce the scheduling priority even if not the super-user:
+  /* Fork cursor routing subprocess.
+   * First, we must check if a subprocess is already running: if so, we
+   * send it a SIGUSR1 and wait for it to die.
    */
+  signal (SIGCHLD, SIG_IGN);	/* ignore SIGCHLD for the moment */
+  if (csr_active)
+    {
+      kill (csr_pid, SIGUSR1);
+      wait (NULL);
+      csr_active--;
+    }
+  signal (SIGCHLD, stop_child);	/* re-establish handler */
 
-  switch (fork ())
+  switch (csr_pid = fork ())
     {
     case -1:			/* fork failed */
       break;
@@ -796,8 +863,7 @@ csrjmp (int x, int y)
       csrjmp_sub (x, y);
       exit (0);			/* terminate child process */
     default:			/* parent waits for child to return */
-      wait (NULL);
-      scr = getstat ();		/* update cursor information (parent's copy) */
+      csr_active++;
       break;
     }
 }
@@ -808,24 +874,36 @@ csrjmp_sub (int x, int y)
 {
   int curx, cury;		/* current cursor position */
   int difx, dify;		/* initial displacement to target */
+  sigset_t mask;		/* for blocking of SIGUSR1 */
+
+  /* Set up signal mask: */
+  sigemptyset (&mask);
+  sigaddset (&mask, SIGUSR1);
+
+  /* Initialise second thread of screen reading: */
+  if (initscr_phys ())
+    return;
 
   timeout_yet (0);		/* initialise stop-watch */
-  scr = getstat ();
+  scr = getstat_phys ();
 
   /* Deal with vertical movement first, ignoring horizontal jumping ... */
   dify = y - scr.posy;
   while (dify * (y - scr.posy) > 0 && !timeout_yet (CSRJMP_TIMEOUT))
     {
+      sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
       inskey (dify > 0 ? DN_CSR : UP_CSR);
+      timeout_yet (0);		/* initialise stop-watch */
       do
 	{
 #if CSRJMP_LOOP_DELAY > 0
 	  delay (CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
 	  cury = scr.posy;
-	  scr = getstat ();
+	  scr = getstat_phys ();
 	}
       while ((scr.posy - cury) * dify <= 0 && !timeout_yet (CSRJMP_TIMEOUT));
+      sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
     }
 
   /* Now horizontal movement, quitting if the vertical position is wrong: */
@@ -833,19 +911,23 @@ csrjmp_sub (int x, int y)
   while (difx * (x - scr.posx) > 0 && scr.posy == y && \
 	 !timeout_yet (CSRJMP_TIMEOUT))
     {
+      sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
       inskey (difx > 0 ? RT_CSR : LT_CSR);
+      timeout_yet (0);		/* initialise stop-watch */
       do
 	{
 #if CSRJMP_LOOP_DELAY > 0
 	  delay (CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
 	  curx = scr.posx;
-	  cury = scr.posy;
-	  scr = getstat ();
+	  scr = getstat_phys ();
 	}
       while ((scr.posx - curx) * difx <= 0 && scr.posy == y && \
 	     !timeout_yet (CSRJMP_TIMEOUT));
+      sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
     }
+
+  closescr_phys ();		/* close second thread of screen reading */
 }
 
 
@@ -865,15 +947,17 @@ inskey (unsigned char *string)
 
 
 void
-message (char *s)
+message (char *s, short silent)
 {
   int i, j, l;
 
+  if (!silent && env.sound)
+    {
+      mutespk ();
+      say (s, strlen (s));
+    }
+
   usetable (TBL_TEXT);
-#ifdef CombiBraille
-  memset (statcells, 0, 5);
-  setbrlstat (statcells);
-#endif
   memset (brl.disp, ' ', brl.x * brl.y);
   l = strlen (s);
   while (l)
@@ -899,10 +983,26 @@ message (char *s)
 
 
 void
+clrbrlstat (void)
+{
+  memset (statcells, 0, 5);
+  setbrlstat (statcells);
+}
+
+
+void
 termination_handler (int signum)
 {
   keep_going = 0;
   signal (signum, termination_handler);
+}
+
+void
+stop_child (int signum)
+{
+  signal (signum, stop_child);
+  wait (NULL);
+  csr_active--;
 }
 
 
@@ -925,7 +1025,7 @@ configmenu (void)
       short min;
       short max;
     }
-  menu[12] =
+  menu[14] =
   {
     {
       &savecfg, "save config   ", 1, 0, 1
@@ -972,30 +1072,31 @@ configmenu (void)
     }
     ,
     {
+      &env.skpidlns, "skip ident lns", 1, 0, 1
+    }
+    ,
+    {
       &env.sound, "audio signals ", 1, 0, 1
     }
+    ,
+    {
+      &env.stcellstyle, "st cells style", 0, 0, NB_STCELLSTYLES
+    }
   };
-  struct brltty_env oldenv;
+  struct brltty_env oldenv = env;
   int k;
   static short n = 0;
-  short maxn = 11;
+  short maxn = 13;
   char buffer[20];
 
-#ifdef Alva_ABT3
-  StatusCells[0] = 'c';
-  StatusCells[1] = 'n';
-  StatusCells[2] = 'f';
-  StatusCells[3] = 'i';
-  StatusCells[4] = 'g';
-  {
-    int i;
-    for (i = 0; i < 5; i++)
-      StatusCells[i] = texttrans[StatusCells[i]];
-  }
-  WriteBrlStatus (StatusCells);
-#endif
-  message ("Configuration menu");
-  memcpy (&oldenv, &env, sizeof (struct brltty_env));
+  /* status cells */
+  statcells[0] = texttrans['c'];
+  statcells[1] = texttrans['n'];
+  statcells[2] = texttrans['f'];
+  statcells[3] = texttrans['i'];
+  statcells[4] = texttrans['g'];
+  setbrlstat (statcells);
+  message ("Configuration menu", 0);
   delay (DISPDEL);
 
   while (keep_going)
@@ -1027,7 +1128,7 @@ configmenu (void)
 	      *menu[n].ptr = menu[n].min;
 	    break;
 	  case CMD_RESET:
-	    memcpy (&env, &oldenv, sizeof (struct brltty_env));
+	    env = oldenv;
 	    break;
 	  default:
 	    if (savecfg)
@@ -1043,9 +1144,33 @@ configmenu (void)
 	sprintf (buffer + 14, ": %s", *menu[n].ptr ? "on" : "off");
       else
 	sprintf (buffer + 14, ": %d", *menu[n].ptr);
-      message (buffer);
+      message (buffer, 1);
       delay (DELAY_TIME);
     }
+}
+
+
+void
+loadconfig (void)
+{
+  int i = 1;
+  struct brltty_env newenv;
+
+  tbl_fd = open (opt_c ? opt_c : CONFFILE_NAME, O_RDONLY);
+  if (tbl_fd >= 0)
+    {
+      if (read (tbl_fd, &newenv, sizeof (struct brltty_env)) == \
+	  sizeof (struct brltty_env))
+	if (newenv.magicnum == ENV_MAGICNUM)
+	  {
+	    env = newenv;
+	    soundstat (env.sound);
+	    i = 0;
+	  }
+      close (tbl_fd);
+    }
+  if (i)
+    env = initenv;
 }
 
 

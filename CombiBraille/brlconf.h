@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -17,6 +21,7 @@
 /* CombiBraille/brlconf.h - Configurable definitions for the
  * Tieman B.V. CombiBraille driver
  * N. Nair, 25 January 1996
+ * $Id: brlconf.h,v 1.2 1996/09/21 23:34:52 nn201 Exp $
  *
  * Edit as necessary for your system.
  */
@@ -29,10 +34,6 @@
   20 : ((id) == 1 ? 40 : ((id) == 2 ? 80 : -1)))
 #define BRLROWS 1		/* number of rows on Braille display */
 #define BAUDRATE B38400		/* baud rate for Braille display */
-
-/* Names of translation tables: */
-#define CMDTRN_NAME "cmdtrans.dat"	/* filename of command table */
-#define ARGTRN_NAME "argtrans.dat"	/* filename of argument table */
 
 /* The following sequences are sent at initialisation time, at termination
  * and before and after Braille data.  The first byte is the length of the

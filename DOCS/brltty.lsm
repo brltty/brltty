@@ -1,8 +1,8 @@
 Begin3
 Title:          BRLTTY - Access software for Unix for a blind person
 		         using a soft Braille terminal
-Version:        1.0, 26JUL96
-Entered-date:   28JUL96
+Version:        1.0.2, 17SEP96
+Entered-date:   17SEP96
 Description:    BRLTTY is a daemon which provides access to a Unix console
 		for a blind person using a soft Braille display (see the
 		README file for a full explanation).
@@ -18,9 +18,10 @@ Author:         nn201@cus.cam.ac.uk (Nikhil Nair)
 		doyons@jsp.umontreal.ca (Stephane Doyon)
 		jrbowden@bcs.org.uk (James Bowden)
 Maintained-by:  nn201@cus.cam.ac.uk (Nikhil Nair)
-Primary-site:   sunsite.unc.edu /pub/Linux/utils/console
-		105kb brltty-1.0.tar.gz (includes the README file)
-		  6kb brltty-1.0.README
+Primary-site:   sunsite.unc.edu /pub/Linux/system/Access
+		110kb brltty-1.0.2.tar.gz (includes the README file)
+		  6kb brltty-1.0.2.README
+		  1kb brltty-1.0.2.lsm
 Platforms:      Linux (kernel 1.1.92 or later) running on a PC or DEC Alpha.
 		Not X/graphics.
 		Supported Braille displays (serial communication only):

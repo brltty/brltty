@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -15,8 +19,8 @@
  */
 
 /* CombiBraille/brl.c - Braille display library
- * For Tieman B.V.'s CombiBraille (no speech support, serial only)
- * N. Nair, 25 January 1996
+ * For Tieman B.V.'s CombiBraille (serial interface only)
+ * $Id: brl.c,v 1.3 1996/09/24 01:04:29 nn201 Exp $
  */
 
 #include <stdio.h>
@@ -29,10 +33,9 @@
 #include "../brl.h"
 #include "../misc.h"
 #include "brlconf.h"
+#include "tables.h"		/* for keybindings */
 
 unsigned char combitrans[256];	/* dot mapping table (output) */
-unsigned char cmdtrans[256];	/* command translation table (input) */
-unsigned char argtrans[256];	/* argument translation table (input) */
 int brl_fd;			/* file descriptor for Braille display */
 unsigned char *prevdata;	/* previously received data */
 unsigned char status[5], oldstatus[5];	/* status cells - always five */
@@ -73,19 +76,9 @@ initbrl (const char *brldev)
 
   res.disp = prevdata = rawdata = NULL;		/* clear pointers */
 
-  /* Load in translation tables */
-  brl_fd = open (CMDTRN_NAME, O_RDONLY);
-  if (brl_fd == -1)
-    goto failure;
-  if (read (brl_fd, cmdtrans, 256) != 256)
-    goto failure;
-  close (brl_fd);
-  brl_fd = open (ARGTRN_NAME, O_RDONLY);
-  if (brl_fd == -1)
-    goto failure;
-  if (read (brl_fd, argtrans, 256) != 256)
-    goto failure;
-  close (brl_fd);
+  /* No need to load translation tables, as these are now
+   * defined in tables.h
+   */
 
   /* Now open the Braille display device for random access */
   if (brldev != NULL)

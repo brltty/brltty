@@ -18,7 +18,9 @@ Movement keys:
       6 (E)  right one full window
 
 Other functions:
- 21 45  (BD) route cursor to start of window
+  1  56 (AE) speak current line
+  1   6 (BD) mute speech
+ 21 45       route cursor to start of window
 32    6      cut start
 3    56      cut end
 321 4        paste
@@ -27,8 +29,9 @@ Other functions:
  2           cursor blink on/off
   1 4 6      capital letter blink on/off
  2   5       block/underline cursor
-32   5       six/eight dot braille
+32   5       six/eight dot braille text
  2  456      sliding window on/off
+ 2  45       skip identical lines on/off
 32  4        audio signals on/off
 3 1 4        attribute display on/off
  21 4        freeze mode on/off

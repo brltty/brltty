@@ -1,7 +1,7 @@
-This is the driver for TSI displays, version 1.0
-It is designed to be compiled into BRLTTY version 1.0.
+This is the driver for TSI displays, version 1.1
+It is designed to be compiled into BRLTTY version 1.0.2
 
-June 1996
+September 1996
 
 Author and maintainer:
         Stéphane Doyon
@@ -254,7 +254,7 @@ follow the cursor if it moves), but unlinking the braille display from the
 cursor can be done without bringing the braille window back to the cursor.
 
 Also note that there is no function to suppress blank spaces, combine lines
-and wrap words... yet...
+and wrap words... yet... There is however a function to skip identical lines.
 
 For Navigator 20/40 users:
     You will find one interesting addition to cursor routing: now you do not

@@ -18,12 +18,13 @@
  * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
  */
 
-/* misc.h - Header file for miscellaneous all-purpose routines
- * $Id: misc.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
+/* speech.h - Header file for the speech library
+ * $Id: speech.h,v 1.2 1996/09/24 01:04:27 nn201 Exp $
  */
-#include <sys/time.h>
 
-unsigned elapsed_msec (struct timeval *t1, struct timeval *t2);
-void shortdelay (unsigned msec);
-void delay (int msec);		/* sleep for `msec' milliseconds */
-int timeout_yet (int msec);	/* test timeout condition */
+
+void identspk (void);		/* identify speech driver */
+void initspk (void);		/* initialise speech */
+void say (unsigned char *buffer, int len);	/* speak text */
+void mutespk (void);		/* mute speech */
+void closespk (void);		/* close speech driver */

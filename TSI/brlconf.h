@@ -2,7 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.0, 26 July 1996
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Nicolas Pitre <nico@cam.org>
+ * Stephane Doyon <doyons@jsp.umontreal.ca>
+ *
+ * Version 1.0.2, 17 September 1996
  *
  * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +18,15 @@
  * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
  */
 
+/* $Id: brlconf.h,v 1.3 1996/09/26 10:02:38 nn201 Exp $ */
+
 /* TSI/brlconf.h - Braille display driver for TSI displays
  *
  * Written by Stephane Doyon (doyons@JSP.UMonteal.CA)
  *
- * This is version 1.0 (July 10th 1996) of the TSI driver.
+ * This is version 1.1 (September 25ft 1996) of the TSI driver.
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40.
- * It is designed to be compiled into version 1.0 of BRLTTY.
+ * It is designed to be compiled into version 1.0.2 of BRLTTY.
  */
 
 /* Configuration file for the TSI driver.
@@ -39,19 +45,6 @@
    with gateway. 9 and 9 is my favorite setting, which is quicker than
    navigator and gateway's default.
 */
-
-/* Keypress read timing
-   When the braille display informs the computer of key presses on its
-   panels, it will send packets of 2 or more bytes. This is the timeout
-   between each consecutive byte: if two consecutive bytes take longer
-   than that, the key is discarded. I thought this would simplify the
-   code. It seemed to work fine until just recently: I discovered that some
-   comm ports have a slower response time than others. If several key presses
-   get lost, increase this value. But don't increase it too much because
-   it might create small lags. This value worked fine for both a P-100 and
-   a 386SX20, so you should not have to change it. I plan to rewrite
-   the code to get around this. */
-#define READ_DELAY (10) /* msec */
 
 /* Cut-and-paste cursor
    Initial position (cell) of the special cut-and-paste cursor
