@@ -110,7 +110,7 @@ $(API_LIB): $(API_LIB_OBJS)
 	$(MKLIB:<soname>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS)
 
 $(API_ARC): $(API_LIB_OBJS)
-	$(AR) rc $@ $(API_LIB_OBJS)
+	ar rc $@ $(API_LIB_OBJS)
 	$(RANLIB) $@
 
 api_common.$O:
