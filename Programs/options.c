@@ -578,7 +578,7 @@ processOptions (
   if (!(programPath = getProgramPath())) {
     programPath = **argumentVector;
 
-#ifdef HAVE_REALPATH
+#if defined(HAVE_REALPATH) && defined(PATH_MAX)
     {
       char buffer[PATH_MAX];
       char *path = realpath(programPath, buffer);
@@ -589,7 +589,7 @@ processOptions (
         LogError("realpath");
       }
     }
-#endif /* HAVE_REALPATH */
+#endif /* defined(HAVE_REALPATH) && defined(PATH_MAX) */
 
     if (*programPath != '/') {
       char *directory = getWorkingDirectory();
