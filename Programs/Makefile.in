@@ -359,6 +359,8 @@ uninstall-manpages:
 uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brlapi.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
+	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
+	-rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
 ###############################################################################
 
