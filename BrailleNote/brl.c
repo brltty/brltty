@@ -706,10 +706,13 @@ interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
 	 break;
       case BNC_SPACE:
 	 return interpretCharacter(dots, cmds);
+      case BNC_A:
+	 temporaryRoutingOperation = CR_MSGATTRIB;
+         return CMD_NOOP;
       case BNC_C:
-	 return CMD_CONFMENU;
+	 return CMD_PREFMENU;
       case BNC_D:
-	 return CMD_RESET;
+	 return CMD_PREFLOAD;
       case BNC_F:
 	 enterFunctionKey();
          return EOF;
@@ -735,7 +738,7 @@ interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
          return EOF;
       }
       case BNC_W:
-	 return CMD_SAVECONF;
+	 return CMD_PREFSAVE;
       case BNC_X: {
 	 unsigned char character;
 	 if (!getHexadecimalCharacter(&character)) {
@@ -905,9 +908,9 @@ interpretThumbKeys(unsigned char keys, DriverCommandContext cmds)
       case (BNT_PREVIOUS | BNT_NEXT):
 	 return CMD_BOT_LEFT;
       case (BNT_BACK | BNT_ADVANCE):
-	 return CMD_CSRTRK;
+	 return CMD_BACK;
       case (BNT_BACK | BNT_NEXT):
-	 return CMD_CSRJMP_VERT;
+	 return CMD_CSRTRK;
    }
    return EOF;
 }

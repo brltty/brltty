@@ -13,4 +13,4 @@ Other functions:
 B3      Shift
 S   B2  Toggle skipping of identical lines
 S   B5  Toggle cursor tracking
-S   B6  Enter configuration menu
+S   B6  Enter preferences menu

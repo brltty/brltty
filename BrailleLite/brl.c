@@ -708,20 +708,20 @@ readbrl (DriverCommandContext cmds)
 	}
       }
       return CMD_NOOP;
-    case 3:			/* configuration options */
+    case 3:			/* preferences options */
       if (!key.spcbar)		/* not chorded */
 	return CMD_NOOP;
       switch (key.asc)
 	{
-	case 'm':		/* configuration menu */
+	case 'm':		/* preferences menu */
 	  intoverride = state = 0;
-	  return CMD_CONFMENU;
-	case 's':		/* save configuration */
+	  return CMD_PREFMENU;
+	case 's':		/* save preferences */
 	  intoverride = state = 0;
-	  return CMD_SAVECONF;
-	case 'r':		/* restore saved configuration */
+	  return CMD_PREFSAVE;
+	case 'r':		/* restore saved preferences */
 	  intoverride = state = 0;
-	  return CMD_RESET;
+	  return CMD_PREFLOAD;
 	case BLT_ABORT:	/* abort */
 	  intoverride = state = 0;
 	default:		/* in any case */

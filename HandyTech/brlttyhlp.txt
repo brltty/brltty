@@ -35,7 +35,7 @@ B8 + B3         toggle sliding window
 Functions of the 3 cursor routing buttons over the status cells:
 Button 1        toggle caps blinking
 Button 2        toggle cursor blinking
-Button 3        activate configuration menu
+Button 3        activate preferences menu
 
 Cut & Paste function keys:
 B4 + routing button  defines the beginning of a block

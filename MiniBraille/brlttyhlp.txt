@@ -53,9 +53,9 @@ Management mode:
 F1: help
 F2: show info
 Left: restart driver
-Up: enter config menu
-C: reset to default values
-Down: save config
+Up: enter preferences menu
+C: reset to preferences
+Down: save preferences
 Right: goto CLOCK mode
 
 Clock mode:

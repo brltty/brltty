@@ -667,7 +667,7 @@ static int readbrl(DriverCommandContext cmds) {
      * The Vario40 keybindings are quite the same as in the DOS and Widnows drivers.
      * Feel free to change this to your needs. */
     switch (code) {
-      KEY(KEY_TL1|KEY_TR1, CMD_CONFMENU);
+      KEY(KEY_TL1|KEY_TR1, CMD_PREFMENU);
       KEY(KEY_TL1|KEY_TL2|KEY_TR2, CMD_HELP);
       KEY(KEY_TL1|KEY_TL2|KEY_TR1, CMD_FREEZE);
       KEY(KEY_TL2|KEY_TR1, CMD_INFO);
@@ -704,7 +704,7 @@ static int readbrl(DriverCommandContext cmds) {
 	KEY(KEY_LD, CMD_KEY_DOWN);
 	KEY(KEY_CK4, CMD_KEY_RETURN);
 
-	KEY(KEY_CK3 | KEY_CK5, CMD_CONFMENU);
+	KEY(KEY_CK3 | KEY_CK5, CMD_PREFMENU);
 	KEY(KEY_CK1 | KEY_CK3 | KEY_CK7, CMD_ATTRVIS);
 	KEY(KEY_CK1, CMD_KEY_LEFT);
 	KEY(KEY_CK7, CMD_KEY_RIGHT);

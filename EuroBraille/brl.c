@@ -356,18 +356,18 @@ static int Program(void)
 	switch(touche)
 	  {
 	   case 1:
-	     res3 = CMD_CONFMENU;
+	     res3 = CMD_PREFMENU;
 	     exitprog=1;
 	     break;
 	   case 2:
 	     switch(model_ID)
 	       {
 		case 3: /* For SCRIBA only */
-		  res3 = CMD_CONFMENU;
+		  res3 = CMD_PREFMENU;
 		  exitprog=1;
 		  break;
 		default:
-		  res3 = CMD_RESET;
+		  res3 = CMD_PREFLOAD;
 		  exitprog=1;
 		  break;
 	       }
@@ -496,11 +496,11 @@ static int OnlineHelp(void)
 		  switch(touche)
 		    {
 		     case 1:
-		       message("*1 Config menu",0);
+		       message("*1 Preferences menu",0);
 		       exithelp1=1;
 		       break;
 		     case 2:
-		       message("*2 reset configuration",0);
+		       message("*2 reset preferences",0);
 		       exithelp1=1;
 		       break;
 		     case 10:

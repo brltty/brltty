@@ -46,9 +46,9 @@ Cut & paste:
   Mark region from m to n (linear, not rectangular): CRm+CR(m+2)+CRn
   Paste cut region: ST4
 
-Configuration:
-  Configuration menu:
-    Enter/exit configuration menu: CK3+CK5 (c)    (sort of a toggle)
+Preferences:
+  Preferences menu:
+    Enter/exit preferences menu: CK3+CK5 (c)    (sort of a toggle)
       In the menu:
       Previous/next setting option for this item: LU/RD
       Previous/next menu item: MU/MD or TR1/TR3

@@ -26,7 +26,7 @@ typedef enum {
    CMDS_SCREEN,
    CMDS_HELP,
    CMDS_STATUS,
-   CMDS_CONFIG,
+   CMDS_PREFS,
    CMDS_MESSAGE
 } DriverCommandContext;
 
@@ -81,6 +81,7 @@ typedef enum {
 
    /* cursor related */
    CMD_HOME /* go to cursor */,
+   CMD_BACK /* go to last motion */,
    CMD_CSRJMP /* route cursor to top-left corner of braille window */,
    CMD_CSRJMP_VERT /* route cursor to top line of window */,
 
@@ -109,11 +110,11 @@ typedef enum {
    /* mode selection */
    CMD_HELP /* display driver help */,
    CMD_INFO /* display status summary */,
-   CMD_CONFMENU /* present configuration menu */,
+   CMD_PREFMENU /* present preferences menu */,
 
-   /* persistent settings */
-   CMD_SAVECONF /* save current settings */,
-   CMD_RESET /* restore saved settings */,
+   /* preferences maintenance */
+   CMD_PREFSAVE /* save preferences */,
+   CMD_PREFLOAD /* reload preferences */,
 
    /* key entry */
    CMD_KEY_UP /* simulate up-arrow key */,
@@ -138,27 +139,25 @@ typedef enum {
 } DriverCommand;
 
 /* Cursor routing key offset values */
-#define	CR_ROUTEOFFSET 0x100	/* normal cursor routing */
-/* Cursor routing key offset values to be used to define a block */
-#define	CR_BEGBLKOFFSET	0x200	/* to define the beginning of a block */
-#define	CR_ENDBLKOFFSET 0x300	/* to define the end of the block */
+#define	CR_ROUTEOFFSET 0x100	/* route cursor to character */
+#define	CR_BEGBLKOFFSET	0x200	/* define the beginning of a block */
+#define	CR_ENDBLKOFFSET 0x300	/* define the end of a block */
+#define	CR_SWITCHVT 0x400	/* switch virtual terminal */
+#define	CR_NXINDENT 0x500	/* find next line */
+#define	CR_PRINDENT 0x600       /* or previous line */
+				/* not more indented than routing key indicates */
+#define	CR_MSGATTRIB 0x700	/* message attributes of character */
 
-#define	CR_SWITCHVT 0x400	/* switch virtual console */
+/* For typing character -- pass through */
+#define	VAL_PASSTHRU	0xE00
 
-#define	CR_NXINDENT 0x500	/* find next line not more indented
-				   than routing key indicates. */
-#define	CR_PRINDENT 0x600
+/* For typing character -- Using current translation table */
+#define VAL_BRLKEY      0xF00
 
 /* For specifically turning on/off toggle commands */
 #define VAL_SWITCHMASK  0x30000
 #define VAL_SWITCHON    0x10000
 #define VAL_SWITCHOFF   0x20000
-
-/* For typing character -- pass through */
-#define	VAL_PASSTHRU	0x700
-
-/* For typing character -- Using current translation table */
-#define VAL_BRLKEY      0x800
 
 /* Braille information structure */
 typedef struct

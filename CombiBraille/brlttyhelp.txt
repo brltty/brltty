@@ -38,7 +38,7 @@ Other functions:
  21  5       help display on/off
 3   4        status mode on/off
 
-Configuration control:
-321 456      save current configuration
-3 1 4 6      enter configuration menu
-321  5       restore default settings
+Preferences control:
+321 456      save current preferences
+3 1 4 6      enter preferences menu
+321  5       restore default preferences

@@ -1,6 +1,10 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   Implement CR_MSGATTRIB (message attributes of character at routing key). (dm)
+   Implement CMD_BACK (to go back after a cursor tracking motion). (dm)
+      Added to Papenmeier driver (status key 4). (dm)
+   Change -c to -p, --config= to --prefs=, and references to .dat file to "preferences". (dm)
    Inform readbrl of the current command context. (dm)
    Converted CMD_ defines to enum. (dm)
       CombiBraille: tables.h converted to cmdtrans.h, argtrans removed
@@ -18,7 +22,7 @@ Note: this file is in reversed chronological order (bottom to top).
    Maintain reverse text translation table for input from braille display. (dm,sd)
    Allow braille display to stick out to the right of the screen. (sd)
    Added commands to switch to the next and previous virtual terminals. (sd)
-   Cosss-compile support added to make file. (sd)
+   Cross-compile support added to make file. (sd)
    BrailleLite driver enhancements. (sd)
    Clean up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
    Add the HandyTech driver. Andreas Gross <andi@andi-bika.de>

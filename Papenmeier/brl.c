@@ -327,10 +327,10 @@ closebrl (brldim *brl)
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "Papenmeier driver");
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team" __DATE__ __TIME__);
-  LogAndStderr(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>.");
-  LogAndStderr(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>.");
+  LogAndStderr(LOG_NOTICE, "Papenmeier Driver (%s %s)", __DATE__, __TIME__);
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team.");
+  LogAndStderr(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
+  LogAndStderr(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
 # ifdef RD_DEBUG
   LogAndStderr(LOG_INFO, "   Input debugging enabled.");
 # endif

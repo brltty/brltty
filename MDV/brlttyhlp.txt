@@ -35,8 +35,8 @@ Cut & paste:
     For example, a region from cell 10 to cell 20: CR10+CR12+CR20
   Paste cut region: CR2+CR3 or shift-F10
 
-Configuration menu:
-  Enter/exit configuration menu: F10
+Preferences menu:
+  Enter/exit preferences menu: F10
     In the menu:
     Previous/next setting option for this item: F9/F10 or routing keys
     Previous/next menu item: UP / DOWN

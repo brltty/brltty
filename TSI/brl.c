@@ -47,7 +47,7 @@
  *   does not raise CTS when connected.
  * Version 2.2beta1: Exploring problems with emulators of TSI (PB40): BAUM
  *   and mdv mb408s. See if we can provide timing options for more flexibility.
- * Version 2.1: Help screen fix for new keys in config menu.
+ * Version 2.1: Help screen fix for new keys in preferences menu.
  * Version 2.1beta1: Less delays in writing braille to display for
  *   nav20/40 and pb40, delays still necessary for pb80 on probably for nav80.
  *   Additional routing keys for navigator. Cut&paste binding that combines
@@ -1397,12 +1397,12 @@ readbrl (DriverCommandContext cmds)
     KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
     KEY (KEY_BRIGHT | KEY_BUP | KEY_CUP | KEY_BLEFT, CMD_RESTARTSPEECH);
     
-  /* config menu */
-    KEYAND(KEY_BAR1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BRIGHT, CMD_CONFMENU);
+  /* preferences menu */
+    KEYAND(KEY_BAR1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BRIGHT, CMD_PREFMENU);
     KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNCV) 
-      KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_SAVECONF);
+      KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_PREFSAVE);
     KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNVX | KEY_CNCV) 
-      KEY (KEY_CROUND | KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_RESET);
+      KEY (KEY_CROUND | KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_PREFLOAD);
     KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND | KEY_BDOWN, CMD_SKPIDLNS);
     KEY (KEY_BLEFT | KEY_BRIGHT | KEY_CROUND | KEY_BDOWN, CMD_SKPIDLNS);
     KEY (KEY_CLEFT | KEY_BLEFT | KEY_BRIGHT, CMD_SLIDEWIN);

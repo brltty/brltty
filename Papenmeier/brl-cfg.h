@@ -135,12 +135,13 @@ typedef struct {
       { CMD_HELP,        OFFS_STAT +  1, 0 }, \
       { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 }, \
       { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0 }, \
+      { CMD_BACK,        OFFS_STAT +  4, 0 }, \
       { CMD_CSRTRK,      OFFS_STAT +  5, 0 }, \
       { CMD_DISPMD,      OFFS_STAT +  6, 0 }, \
       { CMD_INFO,        OFFS_STAT +  7, 0 }, \
       { CMD_FREEZE,      OFFS_STAT +  8, 0 }, \
-      { CMD_CONFMENU,    OFFS_STAT +  9, 0 }, \
-      { CMD_SAVECONF,    OFFS_STAT + 10, 0 }, \
+      { CMD_PREFMENU,    OFFS_STAT +  9, 0 }, \
+      { CMD_PREFSAVE,    OFFS_STAT + 10, 0 }, \
       { CMD_CSRVIS,      OFFS_STAT + 11, 0 }, \
       { CMD_CSRSIZE,     OFFS_STAT + 12, 0 }, \
       { CMD_PASTE,       OFFS_STAT + 13, 0 }
@@ -286,15 +287,16 @@ static one_terminal pm_terminals[] =
       { CMD_HELP,        OFFS_STAT +  1, 0 },
       { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 },
       { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0 },
+      { CMD_BACK,        OFFS_STAT +  4, 0 },
 
       { CMD_CSRTRK,      OFFS_STAT +  6, 0 },
       { CMD_DISPMD,      OFFS_STAT +  7, 0 },
       { CMD_INFO,        OFFS_STAT +  8, 0 },
       { CMD_FREEZE,      OFFS_STAT +  9, 0 },
 
-      { CMD_CONFMENU,    OFFS_STAT + 10, 0 },
-      { CMD_SAVECONF,    OFFS_STAT + 11, 0 },
-      { CMD_RESET,       OFFS_STAT + 12, 0 },
+      { CMD_PREFMENU,    OFFS_STAT + 10, 0 },
+      { CMD_PREFSAVE,    OFFS_STAT + 11, 0 },
+      { CMD_PREFLOAD,    OFFS_STAT + 12, 0 },
       { CMD_CSRVIS,      OFFS_STAT + 13, 0 },
       { CMD_CSRSIZE,     OFFS_STAT + 14, 0 },
  

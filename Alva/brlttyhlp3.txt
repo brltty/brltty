@@ -25,7 +25,7 @@ HOME + CURSOR + DOWN skip to next different screen line
 Other functions:
 PROG            toggle help display
 PROG + HOME     toggle attribute display
-PROG + CURSOR   activate configuration menu
+PROG + CURSOR   activate preferences menu
 PROG + UP       toggle status mode
 PROG + DOWN     toggle freeze mode
 HOME + CURSOR   toggle cursor tracking

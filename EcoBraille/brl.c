@@ -400,7 +400,7 @@ static int readbrl(DriverCommandContext cmds)
 	        break;
 
 	   case KEY_ST_SENSOR2:
-	        res = CMD_CONFMENU;
+	        res = CMD_PREFMENU;
 	        break;
 
 	   case KEY_ST_SENSOR3:

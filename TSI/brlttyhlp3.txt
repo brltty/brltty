@@ -57,14 +57,14 @@ Speech:
   Speak from here to bottom of screen: bar1+bar2+Rdn
   Stop speaking: bar2+Rup
 
-Configuration:
-  Configuration menu:
-    Enter/exit configuration menu: bar1+bar2 (sort of a toggle)
+Preferences:
+  Preferences menu:
+    Enter/exit preferences menu: bar1+bar2 (sort of a toggle)
       In the menu:
       Previous/next setting option for this item: but1 / but2
       Previous/next menu item: bar1 / bar2
-    Save current settings to config file: bar1+bar2+cncv
-    Load settings from config file: bar1+bar2+cncv+cnvx
+    Save preferences: bar1+bar2+cncv
+    Load preferences: bar1+bar2+cncv+cnvx
   Various options can be controlled directly (hotkeys):
     Skip identical lines (on/off): SW3 (toggle)
     Skip blank end-of-lines (on/off): bar2 +SW3 (toggle)

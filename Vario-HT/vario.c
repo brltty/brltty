@@ -132,7 +132,7 @@ readbrl (DriverCommandContext cmds)
 			decoded = (shift_button_down?CMD_CSRTRK:CMD_FWINRT);
 		break;
 		case VARIO_PUSHBUTTON_RELEASE_6:
-			decoded = (shift_button_down?CMD_CONFMENU:CMD_HOME);
+			decoded = (shift_button_down?CMD_PREFMENU:CMD_HOME);
 		break;
 		default:
 			if(c>=VARIO_CURSOR_BASE&&c<=VARIO_CURSOR_BASE+VARIO_CURSOR_COUNT) {

@@ -55,14 +55,14 @@ Speech:
   Speak from here to bottom of screen: dLt+dRt+dDn
   Stop speaking: dRt+dUp
 
-Configuration:
-  Configuration menu:
-    Enter/exit configuration menu: dLt+dRt (sort of a toggle)
+Preferences:
+  Preferences menu:
+    Enter/exit preferences menu: dLt+dRt (sort of a toggle)
       In the menu:
       Previous/next setting option for this item: cLt / cRt
       Previous/next menu item: dUp / dDn
-    Save current settings to config file: dLt+dRt+Rx
-    Load settings from config file: dLt+dRt+Rx+Lx
+    Save preferences: dLt+dRt+Rx
+    Load preferences: dLt+dRt+Rx+Lx
   Various options can be controlled directly (hotkeys):
     Skip identical lines (on/off): dLt+dRt +Rx+dDn (toggle)
     Skip blank end-of-lines (on/off): dLt+dRt +Lx+dDn (toggle)

@@ -78,11 +78,11 @@ char USAGE[] = "\
 Usage: %s [option ...]\n\
  -b driver  --braille=driver  Braille display driver to use: full library name\n\
                                 or shortcut (" BRLLIBS ")\n\
- -c file    --config=file     Path to settings save/restore file.\n\
  -d device  --device=device   Path to device for accessing braille display.\n\
  -f file    --file=file       Path to default parameters file.\n\
  -l n       --log=n           Syslog debugging level (from 0 to 7, default 5)\n\
  -n         --nodaemon        Remain a foreground process.\n\
+ -p file    --prefs=file      Path to preferences file.\n\
  -q         --quiet           Suppress start-up messages.\n\
  -s driver  --speech=driver   Speech interface driver to use: full library name\n\
                                 or shortcut (" SPKLIBS ")\n\
@@ -93,7 +93,7 @@ Usage: %s [option ...]\n\
 
 /* -h, -l, -q and -v options */
 short opt_h = 0, opt_n = 0, opt_q = 0, opt_v = 0, opt_l = LOG_INFO;
-char *opt_c = NULL, *opt_d = NULL, *opt_f = NULL, *opt_t = NULL;	/* filename options */
+char *opt_d = NULL, *opt_f = NULL, *opt_p = NULL, *opt_t = NULL;	/* filename options */
 short homedir_found = 0;	/* CWD status */
 
 // Define error codes for configuration file processing.
@@ -106,17 +106,17 @@ static void process_options (int argc, char **argv)
 {
   int option;
 
-  const char *short_options = "+b:c:d:f:hl:nqs:S:t:v-:";
+  const char *short_options = "+b:d:f:hl:np:qs:S:t:v-:";
   #ifdef no_argument
     const struct option long_options[] =
       {
         {"braille" , required_argument, NULL, 'b'},
-        {"config"  , required_argument, NULL, 'c'},
         {"device"  , required_argument, NULL, 'd'},
         {"file"    , required_argument, NULL, 'f'},
         {"help"    , no_argument      , NULL, 'h'},
         {"log"     , required_argument, NULL, 'l'},
         {"nodeamon", no_argument      , NULL, 'n'},
+        {"prefs"   , required_argument, NULL, 'p'},
         {"quiet"   , no_argument      , NULL, 'q'},
         {"speech"  , required_argument, NULL, 's'},
         {"speechparm" , required_argument, NULL, 'S'},
@@ -141,17 +141,17 @@ static void process_options (int argc, char **argv)
       case 'b':			/* name of driver */
 	braille_libname = optarg;
 	break;
-      case 'c':		/* configuration file path */
-	opt_c = optarg;
-	break;
       case 'd':		/* serial device path */
 	opt_d = optarg;
 	break;
       case 'f':		/* configuration file path */
 	opt_f = optarg;
 	break;
-      case 'n':		/* configuration file path */
+      case 'n':		/* don't go into the background */
 	opt_n = 1;
+	break;
+      case 'p':		/* preferences file path */
+	opt_p = optarg;
 	break;
       case 's':			/* name of speech driver */
 	speech_libname = optarg;
@@ -225,11 +225,6 @@ static int get_token (char **val, const char *delims)
   return CF_OK;
 }
 
-static int set_braille_configuration (const char *delims)
-{
-  return get_token(&opt_c, delims);
-}
-
 static int set_braille_device (const char *delims)
 {
   return get_token(&opt_d, delims);
@@ -255,6 +250,11 @@ static int set_dot_translation (const char *delims)
   return get_token(&opt_t, delims);
 }
 
+static int set_preferences_file (const char *delims)
+{
+  return get_token(&opt_p, delims);
+}
+
 static void process_configuration_line (char *line, void *data)
 {
   const char *word_delims = " \t"; // Characters which separate words.
@@ -268,12 +268,12 @@ static void process_configuration_line (char *line, void *data)
     } keyword_entry;
   const keyword_entry keyword_table[] =
     {
-      {"braille-configuration", set_braille_configuration},
       {"braille-device",        set_braille_device},
       {"braille-driver",        set_braille_driver},
       {"speech-driver",         set_speech_driver},
       {"speech-driverparm",         set_speech_driverparm},
       {"dot-translation",       set_dot_translation},
+      {"preferences-file",      set_preferences_file},
       {NULL,                    NULL}
     };
 
@@ -392,14 +392,14 @@ struct brltty_param initparam = {
 };
 
 void 
-loadconfig (void)
+loadPreferences (void)
 {
   int fd, OK = 0;
   struct brltty_env newenv;
 
-  fd = open (opt_c, O_RDONLY);
+  fd = open (opt_p, O_RDONLY);
   if(fd < 0){
-    LogPrint(LOG_WARNING, "Cannot open configuration file '%s'.", opt_c);
+    LogPrint(LOG_WARNING, "Cannot open preferences file '%s'.", opt_p);
   }else{
       if (read (fd, &newenv, sizeof (newenv)) == sizeof (newenv))
 	if ((newenv.magicnum[0] == (ENV_MAGICNUM&0XFF)) && (newenv.magicnum[1] == (ENV_MAGICNUM>>8)))
@@ -415,14 +415,14 @@ loadconfig (void)
 }
 
 void 
-saveconfig (void)
+savePreferences (void)
 {
   int fd;
 
-  fd = open (opt_c, O_WRONLY | O_CREAT | O_TRUNC);
+  fd = open (opt_p, O_WRONLY | O_CREAT | O_TRUNC);
   if (fd < 0){
-    LogPrint(LOG_WARNING, "Cannot save to configuration file '%s'.", opt_c);
-    message ("can't save config", 0);
+    LogPrint(LOG_WARNING, "Cannot save to preferences file '%s'.", opt_p);
+    message ("can't save preferences", 0);
   }
   else{
     fchmod (fd, S_IRUSR | S_IWUSR);
@@ -505,13 +505,13 @@ void startup(int argc, char *argv[])
       exit(10);
     }
 
-  if (!opt_c)
+  if (!opt_p)
     {
       char *part1 = "brltty-";
       char *part2 = braille->identifier;
       char *part3 = ".dat";
-      opt_c = malloc(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-      sprintf(opt_c, "%s%s%s", part1, part2, part3);
+      opt_p = malloc(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+      sprintf(opt_p, "%s%s%s", part1, part2, part3);
     }
 
   if (!load_speech_driver())
@@ -582,7 +582,7 @@ void startup(int argc, char *argv[])
 	         path ? path : "path-too-long");
   }
 
-  LogAndStderr(LOG_INFO, "Settings Save/Restore File: %s", opt_c);
+  LogAndStderr(LOG_INFO, "Preferences File: %s", opt_p);
   LogAndStderr(LOG_INFO, "Help File: %s", braille->helpfile);
   LogAndStderr(LOG_INFO, "Translation Table: %s",
                opt_t ? opt_t : "built-in");
@@ -601,8 +601,8 @@ void startup(int argc, char *argv[])
   if (opt_v)
     exit(0);
 
-  /* Load configuration file */
-  loadconfig ();
+  /* Load preferences file */
+  loadPreferences();
 
   /*
    * Initialize screen library 
@@ -683,9 +683,9 @@ void startup(int argc, char *argv[])
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b)) 
 	
 void 
-configmenu (void)
+updatePreferences (void)
 {
-  static unsigned char savecfg = 0;		/* 1 == save config on exit */
+  static unsigned char saveprefs = 0;		/* 1 == save preferences on exit */
   char *booleanValues[] = {"No", "Yes"};
   char *cursorStyles[] = {"Underline", "Block"};
   char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
@@ -705,7 +705,7 @@ configmenu (void)
   #define SYMBOLIC_ITEM(setting, description, names) MENU_ITEM(setting, description, names, 0, ((sizeof(names) / sizeof(names[0])) - 1))
   #define BOOLEAN_ITEM(setting, description) SYMBOLIC_ITEM(setting, description, booleanValues)
   MenuItem menu[] = {
-     BOOLEAN_ITEM(savecfg, "Save on Exit"),
+     BOOLEAN_ITEM(saveprefs, "Save on Exit"),
      SYMBOLIC_ITEM(env.sixdots, "Text Style", textStyles),
      BOOLEAN_ITEM(env.skpidlns, "Skip Identical Lines"),
      BOOLEAN_ITEM(env.skpblnkwins, "Skip Blank Windows"),
@@ -736,7 +736,7 @@ configmenu (void)
   int lineLength;				/* current menu item length */
   int lineIndent = 0;				/* braille window pos in buffer */
 
-  struct brltty_env oldEnvironment = env;	/* backup configuration */
+  struct brltty_env oldEnvironment = env;	/* backup preferences */
   int key;				/* readbrl() value */
 
   /* status cells */
@@ -747,7 +747,7 @@ configmenu (void)
   statcells[3] = texttrans['i'];
   statcells[4] = texttrans['g'];
   braille->setstatus(statcells);
-  message("Configuration Menu", 0);
+  message("Preferences Menu", 0);
 
   while (keep_going)
     {
@@ -783,7 +783,7 @@ configmenu (void)
       delay (DELAY_TIME);
 
       /* Now process any user interaction */
-      while ((key = braille->read(CMDS_CONFIG)) != EOF)
+      while ((key = braille->read(CMDS_PREFS)) != EOF)
 	switch (key)
 	  {
 	  case CMD_NOOP:
@@ -823,7 +823,7 @@ configmenu (void)
 	  case CMD_CHRLT:
 	  case CMD_KEY_LEFT:
 	  case CMD_KEY_UP:
-	    if (--*item->setting < item->minimum)
+	    if ((*item->setting)-- <= item->minimum)
 	      *item->setting = item->maximum;
 	    lineUpdated = 1;
 	    break;
@@ -833,7 +833,7 @@ configmenu (void)
 	  case CMD_KEY_DOWN:
 	  case CMD_HOME:
 	  case CMD_KEY_RETURN:
-	    if (++*item->setting > item->maximum)
+	    if ((*item->setting)++ >= item->maximum)
 	      *item->setting = item->minimum;
 	    lineUpdated = 1;
 	    break;
@@ -851,14 +851,14 @@ configmenu (void)
 		"Press UP and DOWN to select an item, "
 		"HOME to toggle the setting. "
 		"Routing keys are available too! "
-		"Press CONFIG again to quit.", MSG_WAITKEY |MSG_NODELAY);
+		"Press PREFS again to quit.", MSG_WAITKEY |MSG_NODELAY);
 	    break;
-	  case CMD_RESET:
+	  case CMD_PREFLOAD:
 	    env = oldEnvironment;
 	    message("Changes Discarded", 0);
 	    break;
-	  case CMD_SAVECONF:
-	    savecfg |= 1;
+	  case CMD_PREFSAVE:
+	    saveprefs |= 1;
 	    /*break;*/
 	  default:
 	    if (key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
@@ -878,9 +878,9 @@ configmenu (void)
 	    }
 
 	    /* For any other keystroke, we exit */
-	    if (savecfg)
+	    if (saveprefs)
 	      {
-		saveconfig();
+		savePreferences();
 		playTune(&tune_done);
 	      }
 	    return;

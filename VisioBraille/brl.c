@@ -291,13 +291,13 @@ static int readbrl(DriverCommandContext cmds)
     case 0x91: routing=1; break;
     case 0xA1: return CMD_HELP;
     case 0xA2: return CMD_SND; // Toggle bips
-    case 0xA3: return CMD_CONFMENU;
+    case 0xA3: return CMD_PREFMENU;
     case 0xA4: inskey("\33[6~"); break;
     case 0xA5: inskey("\33[4~"); break;
     case 0xA8: inskey("\33[1~"); break;
     case 0xA9: return CMD_INFO;
-    case 0xB2: return CMD_RESET;
-    case 0xB3: return CMD_SAVECONF;
+    case 0xB2: return CMD_PREFLOAD;
+    case 0xB3: return CMD_PREFSAVE;
     case 0xB5: inskey("\33[5~"); break;
     case 0xBE: ctrlpressed=!ctrlpressed; break; // toggle ctrl-state
     case 0xBF: altpressed=!altpressed; break; // toggle alt-state

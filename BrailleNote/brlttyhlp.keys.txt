@@ -10,8 +10,8 @@ prv+bak   Move to left end of line.
 nxt+adv   Move to right end of line.
 prv+adv   Move to top-left corner of screen.
 prv+nxt   Move to bottom-left corner of screen.
-bak+adv   Toggle cursor tracking on/off.
-bak+nxt   Bring cursor to current line without horizontal motion.
+bak+adv   Move to previously selected location (undo cursor tracking motion).
+bak+nxt   Toggle cursor tracking on/off.
 
 Dots 1-6 with No Modifiers (when in navigation mode):
    Dots   Description
@@ -38,15 +38,16 @@ f  124    Find previous match.
 6  235    Find next match.
 h  125    Move to previous line with different highlighting.
 8  236    Move to next line with different highlighting.
-i  24     Move to previous line with no more than specified indent.
-9  35     Move to next line with no more than specified indent.
+i+ 24     Move to previous line with no more than specified indent.
+9+ 35     Move to next line with no more than specified indent.
 j  245    Jump up a few lines.
 0  356    Jump down a few lines.
 
 Dots 1-6 with Space:
    Dots   Description
-c  14     Change current settings.
-d  145    Default settings (restore from disk).
+a+ 1      Display attributes of character.
+c  14     Change current preferences.
+d  145    Default preferences (restore from disk).
 e* 15     Exit braille terminal mode (Braille Note function).
 f  124    Enter function key.
 h* 125    Help for braille terminal mode (Braille Note function).
@@ -59,12 +60,12 @@ r* 1235   Repeat last prompt (Braille Note function).
 s  234    Say contents of current line.
 u* 136    Uppercase for computer braille (Braille Note function).
 v  1236   Switch virtual terminal.
-w  2456   Write current settings to disk.
+w  2456   Write current preferences to disk.
 x  1346   Enter character by hexadecimal value.
 z* 1356   Go to main menu (Braille Note function).
 =* 123456 Go to main menu (Braille Note function).
-(  12356  Set start of block (cut&paste, search).
-)  23456  Set end of block (cut&paste, search).
+(+ 12356  Set start of block (cut&paste, search).
+)+ 23456  Set end of block (cut&paste, search).
 7  2356   Tab key.
 2  23     Left arrow key.
 ;  56     Right arrow key.

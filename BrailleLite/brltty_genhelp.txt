@@ -32,7 +32,7 @@
 36: speak line
 134: mute speech
 
-25 chord: configuration options: menu, save or reset or cancel.
+25 chord: preferences options: menu, save, reset or cancel.
 1235 chord: restart Braille driver
 
 Insists on chord for *dangerous* commands, i.e. routing, cut/paste,

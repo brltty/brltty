@@ -105,8 +105,8 @@ static int readbrl(DriverCommandContext cmds) {
     }
     else if (buttons.bigbuttons==KEY_MENU) {
       /* If a routing key has been pressed, then mark the end of a block;
-         go to configuration menu otherwise */
-      return (buttons.routingkey>0) ? CR_ENDBLKOFFSET+buttons.routingkey-1 : CMD_CONFMENU;
+         go to preferences menu otherwise */
+      return (buttons.routingkey>0) ? CR_ENDBLKOFFSET+buttons.routingkey-1 : CMD_PREFMENU;
     }
     else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_MENU)) return CMD_PASTE;
     else if (buttons.bigbuttons==(KEY_CURSOR | KEY_LEFT)) return CMD_CHRLT;

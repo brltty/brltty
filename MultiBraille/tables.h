@@ -65,10 +65,10 @@
  * 0x16          21  5       help display on/off               CMD_HELP
  * 0x09         3   4        status mode on/off                CMD_INFO
 
-  Configuration control:
- * 0x3f         321 456      save current configuration        CMD_SAVECONF
- * 0x2d         3 1 4 6      enter configuration menu          CMD_CONFMENU
- * 0x17         321  5       restore default settings          CMD_RESET
+  Preferences control:
+ * 0x3f         321 456      save preferences        CMD_PREFSAVE
+ * 0x2d         3 1 4 6      enter preferences menu          CMD_PREFMENU
+ * 0x17         321  5       restore preferences          CMD_PREFLOAD
 
   Explanation:
 	A '?' before a line means that I was not sure if the used command is really OK.
@@ -109,17 +109,17 @@ unsigned char cmd_S_trans[0x40] = {
 /* 0x08 */  CMD_LNDN,     CMD_INFO,     0x00,         CMD_SND,        
 /* 0x0c */  CMD_CSRTRK,   CMD_DISPMD,   CMD_FREEZE,   CMD_PASTE, 
 /* 0x10 */  CMD_CSRVIS,   0x00,         CMD_ATTRVIS,  CMD_SIXDOTS,        
-/* 0x14 */  0x00,         CMD_HWINRT,   CMD_HELP,     CMD_RESET, 
+/* 0x14 */  0x00,         CMD_HWINRT,   CMD_HELP,     CMD_PREFLOAD, 
 /* 0x18 */  CMD_PRDIFLN,  0x00,         CMD_SKPIDLNS, 0x00,        
 /* 0x1c */  0x00,         0x00,         CMD_HOME,     0x00, 
 /* 0x20 */  CMD_FWINRT,   CMD_CSRJMP,   0x00,         CMD_CUT_BEG, 
 /* 0x24 */  CMD_MUTE,     0x00,         0x00,         0x00, 
 /* 0x28 */  CMD_CHRRT,    0x00,         CMD_HWINLT,   0x00,        
-/* 0x2c */  CMD_CAPBLINK, CMD_CONFMENU, 0x00,         0x00, 
+/* 0x2c */  CMD_CAPBLINK, CMD_PREFMENU, 0x00,         0x00, 
 /* 0x30 */  CMD_LNEND,    CMD_CUT_END,  0x00,         0x00,        
 /* 0x34 */  CMD_SAY,      0x00,         0x00,         0x00, 
 /* 0x38 */  CMD_BOT,      0x00,         CMD_SLIDEWIN, 0x00,        
-/* 0x3c */  0x00,         0x00,         0x00,         CMD_SAVECONF, 
+/* 0x3c */  0x00,         0x00,         0x00,         CMD_PREFSAVE, 
 };
 
 
@@ -127,5 +127,5 @@ unsigned char cmd_S_trans[0x40] = {
 /* only keys 3, 4, 5 (startindex: 0) can be customized!! others are
    ignored (hard-coded)! */
 unsigned char cmd_R_trans[MB_CR_EXTRAKEYS] = {
-/* 0x00 */ 0x00, 0x00, 0x00, CMD_CONFMENU, CMD_RESET, CMD_HELP
+/* 0x00 */ 0x00, 0x00, 0x00, CMD_PREFMENU, CMD_PREFLOAD, CMD_HELP
 };

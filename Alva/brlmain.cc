@@ -70,7 +70,7 @@
  *              - moved user configurable parameters into brlconf.h
  *              - added identbrl()
  *              - added overide parameter for serial device
- *              - added keybindings for BRLTTY configuration menu
+ *              - added keybindings for BRLTTY preferences menu
  *      jan 23, 1996:
  *              - modifications to be compatible with the BRLTTY braille
  *                mapping standard.
@@ -822,7 +822,7 @@ static int readbrl (DriverCommandContext cmds)
 	      res = CMD_SAY;
 	      break;
 	    case KEY_PROG | KEY_CURSOR:
-	      res = CMD_CONFMENU;
+	      res = CMD_PREFMENU;
 	      break;
 	    case KEY_PROG | KEY_DOWN:
 	      res = CMD_FREEZE;

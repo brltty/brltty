@@ -50,14 +50,14 @@ Speech:
   Speak from here to bottom of screen: lt+rt+Rdn
   Stop speaking: rt+Rup
 
-Configuration:
-  Configuration menu:
-    Enter/exit configuration menu: lt+rt (sort of a toggle)
+Preferences:
+  Preferences menu:
+    Enter/exit preferences menu: lt+rt (sort of a toggle)
       In the menu:
       Previous/next setting option for this item: Lup / Ldn or routing keys
       Previous/next menu item: Rup / Rdn
-    Save current settings to config file: lt+rt+cncv
-    Load settings from config file: lt+rt+cncv+cnvx
+    Save preferences: lt+rt+cncv
+    Load preferences: lt+rt+cncv+cnvx
   Various options can be controlled directly (hotkeys):
     Skip identical lines (on/off): lt+rt +cncv+Rdn (toggle)
     Skip blank end-of-lines (on/off): lt+rt +cnvx+Rdn (toggle)

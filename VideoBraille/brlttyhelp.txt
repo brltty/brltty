@@ -13,7 +13,7 @@ Movement keys:
 
 Other functions:
     Curs  Toggle cursor tracking
-    Menu  Enter configuration menu
+    Menu  Enter preferences menu
     Attr  Toggle attributes
     Menu+Curs  View info
     Attr+Down  View help

@@ -72,7 +72,7 @@
 /* 0X2A */ CMD_HWINRT,    // dots 1,3,5
 /* 0X2B */ CMD_NOOP,      // dots 1,3,5,6
 /* 0X2C */ CMD_DISPMD,    // dots 1,3,4
-/* 0X2D */ CMD_CONFMENU,  // dots 1,3,4,6
+/* 0X2D */ CMD_PREFMENU,  // dots 1,3,4,6
 /* 0X2E */ CMD_NOOP,      // dots 1,3,4,5
 /* 0X2F */ CMD_NOOP,      // dots 1,3,4,5,6
 /* 0X30 */ CMD_LNBEG,     // dots 2,3
@@ -85,12 +85,12 @@
 /* 0X37 */ CMD_NOOP,      // dots 2,3,4,5,6
 /* 0X38 */ CMD_TOP,       // dots 1,2,3
 /* 0X39 */ CMD_NOOP,      // dots 1,2,3,6
-/* 0X3A */ CMD_RESET,     // dots 1,2,3,5
+/* 0X3A */ CMD_PREFLOAD,  // dots 1,2,3,5
 /* 0X3B */ CMD_NOOP,      // dots 1,2,3,5,6
 /* 0X3C */ CMD_PASTE,     // dots 1,2,3,4
 /* 0X3D */ CMD_NOOP,      // dots 1,2,3,4,6
 /* 0X3E */ CMD_NOOP,      // dots 1,2,3,4,5
-/* 0X3F */ CMD_SAVECONF,  // dots 1,2,3,4,5,6
+/* 0X3F */ CMD_PREFSAVE,  // dots 1,2,3,4,5,6
 /* 0X40 */ CMD_NOOP,      // unexpected
 /* 0X41 */ CMD_NOOP,      // unexpected
 /* 0X42 */ CMD_NOOP,      // unexpected
@@ -157,8 +157,8 @@
 /* 0X7F */ CMD_NOOP,      // thumb keys A,B,C,D,E
 /* 0X80 */ CMD_ATTRVIS,   // status key 1
 /* 0X81 */ CMD_ATTRBLINK, // status key 2
-/* 0X82 */ CMD_CONFMENU,  // status key 3
-/* 0X83 */ CMD_RESET,     // status key 4
+/* 0X82 */ CMD_PREFMENU,  // status key 3
+/* 0X83 */ CMD_PREFLOAD,  // status key 4
 /* 0X84 */ CMD_FREEZE,    // status key 5
 /* 0X85 */ CMD_HELP,      // status key 6
 /* 0X86 */ 0X80,          // routing key 1

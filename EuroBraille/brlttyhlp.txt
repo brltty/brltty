@@ -6,7 +6,7 @@ Note: These key bindings can be improved a lot.  Feel free to help!!
 Key     Action
 Fn E    Move braille window left
 Fn F    Display the information status line
-Fn G    Enter the configuration menu
+Fn G    Enter the preferences menu
 Fn K    Next routing key will mark the beginning of a block
 Fn L    Next routing key will mark the end the block and copy it to memory
 Fn M    Paste previously copied block

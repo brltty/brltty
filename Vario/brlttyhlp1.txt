@@ -31,9 +31,9 @@ Cut & paste:
   Mark from m to n: CRm+CR(m+2)+CRn
   Paste cut region: CR2+CR3
 
-Configuration:
-  Configuration menu:
-    Enter/exit configuration menu: TL1+TR1
+Preferences:
+  Preferences menu:
+    Enter/exit preferences menu: TL1+TR1
       In the menu:
       Previous/next setting option
        for this item: TR1/TR3

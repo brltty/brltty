@@ -73,6 +73,7 @@ struct brltty_param {
 	short csrhide;		/* For temporarily hiding cursor */
 	short dispmode;		/* text or attributes display */
 	short winx, winy;	/* upper-left corner of braille window */
+	short motx, moty;	/* user motion of braille window */
 	short trkx, trky;	/* tracked cursor position */
 };
 
@@ -107,8 +108,8 @@ extern short csr_offright;		/* used for sliding window */
 
 void startup(int argc, char *argv[]);
 void startbrl(void);
-void loadconfig(void);
-void saveconfig(void);
-void configmenu(void);
+void loadPreferences(void);
+void savePreferences(void);
+void updatePreferences(void);
 void clrbrlstat(void);
 

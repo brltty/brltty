@@ -14,8 +14,8 @@ To move left or right one window (wrapping to previous or next line), use Previo
 To move up or down one line, use Back or Advance.
 To move to the left or right end of the line, use Previous+Back or Next+Advance.
 To move to the top-left or bottom-left corner of the screen, use Previous+Advance or Previous+Next.
-To toggle cursor tracking on and off, use Back+Advance.
-To bring the cursor to the current line without attempting to move it horizontally, use Back+Next.
+To move to the previously selected location (undo cursor tracking motion), use Back+Advance.
+To toggle cursor tracking on and off, use Back+Next.
 
 Input Mode Selection:
 To switch to (n)avigation mode, use space+[1345].
@@ -46,13 +46,14 @@ To bring the cursor to the current (l)ine without attempting to move it horizont
 General Commands:
 To enter or leave the (h)elp screen, use space+backspace+[125].
 To enter or leave the settings (s)ummary screen, use space+backspace+[234].
-To enter or leave the settings (c)onfiguration menu, use space+[14].
-To (w)rite the current settings to disk, use space+[2456].
-To restore the (d)efault settings from disk, use space+[145].
+To enter or leave the (c)hange preferences menu, use space+[14].
+To (w)rite the current preferences to disk, use space+[2456].
+To restore the (d)efault preferences from disk, use space+[145].
 
 Braille Driver Commands:
 To view the (t)ext (contents) within a window, use space+backspace+[2345].
 To view the (a)ttributes (highlighting) within a window, use space+backspace+[1].
+To view the (a)ttributes (highlighting) of a specific character, use space+[1]; then press routing key.
 To view text with (6)-dot braille, use space+backspace+[235].
 To view text with (8)-dot braille, use space+backspace+[236].
 To un(f)reeze or (f)reeze the screen, use space+backspace+[124] or space+enter+[124].

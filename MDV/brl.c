@@ -42,7 +42,7 @@
  *    always sends ACK + the response). Fixed bug that caused combiknation
  *    of routing and movement keys to fail.
  * 0.4: Fixed bug that put garbage instead of logging packet contents.
- *    Added key binding for showing attributes, and also for config menu
+ *    Added key binding for showing attributes, and also for preferences menu
  *    (might change).
  * 0.3: Fixed bug in interpreting query reply which caused nonsense number
  *    of content and status cells.
@@ -690,7 +690,7 @@ readbrl (DriverCommandContext cmds)
 	  case 6: cmd = CMD_SKPIDLNS; break;
 	  case 7: cmd = CMD_SKPBLNKWINS; break;
 	  case 8: cmd = CMD_CHRRT; break;
-	  case 10: cmd = CMD_CONFMENU; break;
+	  case 10: cmd = CMD_PREFMENU; break;
 	};
       }else if(modifier == SHIFT_MOD){
 	switch(key) {

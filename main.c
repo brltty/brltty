@@ -316,25 +316,24 @@ main (int argc, char *argv[])
      but we're not ready for it. */
   switchto( scr.no );			/* allocate current screen params */
   setwinxy (scr.posx, scr.posy);	/* set initial window position */
+  p->motx = p->winx; p->moty = p->winy;
+  p->trkx = scr.posx; p->trky = scr.posy;
   oldwinx = p->winx; oldwiny = p->winy;
-  p->trkx = scr.posx;
-  p->trky = scr.posy;
 
   /*
    * Main program loop 
    */
   while (keep_going)
     {
-      DriverCommandContext cmds =
-        infmode? CMDS_STATUS:
-	((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
-	CMDS_SCREEN;
-
       TickCount++;
       /*
        * Process any Braille input 
        */
-      while ((keypress = braille->read(cmds)) != EOF)
+      while ((keypress = braille->read(infmode? CMDS_STATUS:
+                                       ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
+				       CMDS_SCREEN)) != EOF) {
+	int oldmotx = p->winx;
+	int oldmoty = p->winy;
 	switch (keypress & ~VAL_SWITCHMASK)
 	  {
 	  case CMD_NOOP:	/* do nothing but loop */
@@ -648,6 +647,10 @@ main (int argc, char *argv[])
 	  case CMD_HOME:
 	    setwinxy (scr.posx, scr.posy);
 	    break;
+	  case CMD_BACK:
+	    p->winx = p->motx;
+	    p->winy = p->moty;
+	    break;
 	  case CMD_SPKHOME:
 	    if(scr.no == speaking_scrno) {
 	      int inx = speech->track();
@@ -712,7 +715,7 @@ main (int argc, char *argv[])
 	      inskey (KEY_RETURN);
 	    break;
 	  case CMD_CSRVIS:
-	    /* toggles the config option that decides whether cursor
+	    /* toggles the preferences option that decides whether cursor
 	       is shown at all */
 	    TOGGLEPLAY ( TOGGLE(env.csrvis) );
 	    break;
@@ -836,16 +839,16 @@ main (int argc, char *argv[])
 	  case CMD_SKPBLNKWINS:
 	    TOGGLEPLAY ( TOGGLE(env.skpblnkwins) );
 	    break;
-	  case CMD_SAVECONF:
-	    saveconfig ();
+	  case CMD_PREFSAVE:
+	    savePreferences();
 	    playTune (&tune_done);
 	    break;
-	  case CMD_CONFMENU:
-	    configmenu ();
+	  case CMD_PREFMENU:
+	    updatePreferences();
 	    setTuneDevice (env.tunedev);
 	    break;
-	  case CMD_RESET:
-	    loadconfig ();
+	  case CMD_PREFLOAD:
+	    loadPreferences();
 	    csron = 1;
 	    capon = 0;
 	    csrcntr = capcntr = 1;
@@ -906,12 +909,12 @@ main (int argc, char *argv[])
 	      switchvt( scr.no +1);
 	    break;
 	  default: {
-	      int key = (keypress & ~0xFF);
-	      int arg = keypress &0xFF;
-	      switch(key) {
+	    int key = keypress & ~0xFF;
+	    int arg = keypress & 0xFF;
+	    switch (key) {
 	      case VAL_PASSTHRU: {
 		char buf[] = {arg, 0};
-		inskey (buf);
+		inskey(buf);
 		break;
 	      }
 	      case VAL_BRLKEY: {
@@ -920,22 +923,45 @@ main (int argc, char *argv[])
 		break;
 	      }
 	      case CR_ROUTEOFFSET:
-		/* Cursor routing keys: */
-		if(arg >= brl.x || (dispmd & HELP_SCRN) == HELP_SCRN)
-		  break;
-		csrjmp (MIN(p->winx + arg, scr.cols-1), p->winy, curscr);
+		if (arg < brl.x && (dispmd & HELP_SCRN) != HELP_SCRN)
+		  csrjmp(MIN(p->winx+arg, scr.cols-1), p->winy, curscr);
 		break;
 	      case CR_BEGBLKOFFSET:
-		if(arg >= brl.x || p->winx +arg >= scr.cols)
-		  break;
-		cut_begin (p->winx + arg, p->winy);
+		if (arg < brl.x && p->winx+arg < scr.cols)
+		  cut_begin(p->winx+arg, p->winy);
 		break;
 	      case CR_ENDBLKOFFSET:
-		if(arg >= brl.x) break;
-		cut_end (MIN(p->winx + arg, scr.cols-1), p->winy);
+		if (arg < brl.x)
+		  cut_end(MIN(p->winx+arg, scr.cols-1), p->winy);
+		break;
+	      case CR_MSGATTRIB:
+		if (arg < brl.x || p->winx+arg < scr.cols) {
+		  char *colours[] = {
+		    "black",
+		    "red",
+		    "green",
+		    "yellow",
+		    "blue",
+		    "magenta",
+		    "cyan",
+		    "white"
+		  };
+		  char buffer[0X40];
+		  unsigned char attributes;
+		  getscr((winpos){p->winx+arg, p->winy, 1, 1},
+		         &attributes, SCR_ATTRIB);
+		  sprintf(buffer, "%s on %s",
+		          colours[attributes&0X07],
+		          colours[attributes&0X70]);
+		  if (attributes & 0X08)
+		    strcat(buffer, " bright");
+		  if (attributes & 0X80)
+		    strcat(buffer, " blink");
+		  message(buffer, 0);
+		}
 		break;
 	      case CR_SWITCHVT:
-		if(arg < 0X3F-1)
+		if (arg < 0X3F-1)
 		  switchvt(arg+1);
 		break;
 	      case CR_NXINDENT:
@@ -972,10 +998,17 @@ main (int argc, char *argv[])
 		LogPrint(LOG_DEBUG,
 			 "Driver sent unrecognized command 0x%x.",
 			 keypress);
-	      };
+	    };
 	      break;
 	    }
 	  }
+
+	if ((p->winx != oldmotx) || (p->winy != oldmoty))
+	  { // The window has been manually moved.
+	    p->motx = p->winx;
+	    p->moty = p->winy;
+	  }
+      }
 	  
       /*
        * Update blink counters: 

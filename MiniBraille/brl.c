@@ -252,16 +252,16 @@ static int readbrl(DriverCommandContext cmds)
 		case KEY_F2:
 			return CMD_INFO;
 		case KEY_C:
-			return CMD_RESET;
+			return CMD_PREFLOAD;
 		case KEY_LEFT:
 			return CMD_RESTARTBRL;
 		case KEY_RIGHT:
 			mode = CLOCK_MODE;
 			return CMD_NOOP;
 		case KEY_UP:
-			return CMD_CONFMENU;
+			return CMD_PREFMENU;
 		case KEY_DOWN:
-			return CMD_SAVECONF;
+			return CMD_PREFSAVE;
 		};
 	};
 	return EOF; // never should reach this

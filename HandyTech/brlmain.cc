@@ -552,7 +552,7 @@ int readbrl (DriverCommandContext cmds)
       }
       /* 1KYES */
       if (LastKeys[KEY_ROUTING_S3]) {
-	res = CMD_CONFMENU;
+	res = CMD_PREFMENU;
 	goto end_switch;
       }
       if (LastKeys[KEY_B6]) {
