@@ -76,7 +76,12 @@ canBeep (void) {
 }
 
 int
-timedBeep (unsigned short frequency, unsigned short milliseconds) {
+synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
+
+int
+asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
   int console = getConsole();
   if (console != -1) {
     if (ioctl(console, KDMKTONE, ((milliseconds << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;

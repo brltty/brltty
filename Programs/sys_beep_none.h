@@ -21,7 +21,12 @@ canBeep (void) {
 }
 
 int
-timedBeep (unsigned short frequency, unsigned short milliseconds) {
+asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
+
+int
+synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
   return 0;
 }
 

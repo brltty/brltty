@@ -47,7 +47,12 @@ canBeep (void) {
 }
 
 int
-timedBeep (unsigned short frequency, unsigned short milliseconds) {
+synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
+
+int
+asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
   int console = getConsole();
   if (console != -1) {
     struct wskbd_bell_data bell;

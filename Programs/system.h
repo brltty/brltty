@@ -29,7 +29,8 @@ extern void unloadSharedObject (void *object);
 extern int findSharedSymbol (void *object, const char *symbol, const void **address);
 
 extern int canBeep (void);
-extern int timedBeep (unsigned short frequency, unsigned short milliseconds);
+extern int synchronousBeep (unsigned short frequency, unsigned short milliseconds);
+extern int asynchronousBeep (unsigned short frequency, unsigned short milliseconds);
 extern int startBeep (unsigned short frequency);
 extern int stopBeep (void);
 extern void endBeep (void);

@@ -44,16 +44,25 @@ static int playBeeper (int note, int duration) {
    if (beeperOpened) {
       LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d",
                duration, note);
+
       if (!note) {
          shortdelay(duration);
 	 return 1;
       }
-      if (timedBeep((int)noteFrequencies[note], duration*4)) {
+
+      if (asynchronousBeep((int)noteFrequencies[note], duration*4)) {
          shortdelay(duration);
-	 if (stopBeep()) {
-	    return 1;
-	 }
+	 stopBeep();
+         return 1;
       }
+
+      if (startBeep((int)noteFrequencies[note])) {
+         shortdelay(duration);
+	 stopBeep();
+         return 1;
+      }
+
+      if (synchronousBeep((int)noteFrequencies[note], duration)) return 1;
    }
    return 0;
 }

@@ -58,7 +58,7 @@ canBeep (void) {
 }
 
 int
-timedBeep (unsigned short frequency, unsigned short milliseconds) {
+synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
   int speaker = getSpeaker();
   if (speaker != -1) {
     tone_t tone;
@@ -68,6 +68,11 @@ timedBeep (unsigned short frequency, unsigned short milliseconds) {
     if (ioctl(speaker, SPKRTONE, &tone) != -1) return 1;
     LogError("speaker tone");
   }
+  return 0;
+}
+
+int
+asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
   return 0;
 }
 
