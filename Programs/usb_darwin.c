@@ -606,8 +606,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
-  deallocateQueue(eptx->completedRequests);
-  endpoint->extension = NULL;
+
+  if (eptx->completedRequests) {
+    deallocateQueue(eptx->completedRequests);
+    eptx->completedRequests = NULL;
+  }
+
   free(eptx);
 }
 
