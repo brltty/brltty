@@ -134,21 +134,22 @@ static char* search_key(int code) {
    each terminaltype. Otherwise the procedure generates one
    big parameterfile via stdout                                    */
 
-void printkeys(FILE * fh, commands* cmd, int modifiers[])
-{
-  char* txtand = "";
-  int j;
-  if (cmd->keycode != NOKEY) {
-    fprintf(fh, "%s", search_key(cmd->keycode));
-    txtand = " and ";
-  }
-  for(j=0; j < MODMAX; j++)
-    if ( ((1<<j) & (cmd->modifiers))==(1<<j)) {
-      fprintf(fh, "%s%s",
-	      txtand, search_key(modifiers[j])); 
-      txtand = " and ";
+static void
+printkeys (FILE *fh, const commands *cmd, const int *modifiers) {
+  const char *delimiter = "";
+  int modifier;
+
+  for (modifier=0; modifier<MODMAX; modifier++) {
+    if (cmd->modifiers & (1 << modifier)) {
+      fprintf(fh, "%s%s", delimiter, search_key(modifiers[modifier])); 
+      delimiter = " and ";
     }
-} 
+  }
+
+  if (cmd->keycode != NOKEY) {
+    fprintf(fh, "%s%s", delimiter, search_key(cmd->keycode));
+  }
+}
 
 void terminals(int help, int verbose)
 {

@@ -44,7 +44,7 @@ static int yyerror(char*);
 static int yyparse();
 
 /* to be called: */
-static int parse();
+static int parse (void);
 
 static char *nameval = NULL;
 static int numval, keyindex, cmdval; 
@@ -66,15 +66,17 @@ static FILE* configfile = NULL;
  /* the number of defined commands - last entry use*/
  static int cmd_current = 0;
 
- static inline void set_assert(int cond, int line)
-   {
-     if (! cond) {
-       printf("assert failed at " __FILE__ " line %d\n", line);
-       yyerror("Range Check");
-     }
-   } 
+ static void
+ assert_condition (int condition, char *problem, int line) {
+   if (!condition) {
+     yyerror(problem);
+   }
+ }
 
- /* #define set_assert assert */
+ static void
+ assert_started (int line) {
+  assert_condition((set_current >= 0), "terminal not being defined", line);
+ }
 
  static inline void set_modifier(int code);
 
@@ -83,7 +85,7 @@ static FILE* configfile = NULL;
     int i;
 
     set_current++;
-    set_assert(set_current < num_terminals, __LINE__);
+    assert_condition((set_current < num_terminals), "too many terminals", __LINE__);
     mod_current = -1;
     cmd_current = -1;
     pm_terminals[set_current].ident = num;
@@ -103,7 +105,7 @@ static FILE* configfile = NULL;
 
  static inline void set_name(char* nameval)
   {
-    set_assert(set_current >= 0, __LINE__);
+    assert_started(__LINE__);
     strncpy(pm_terminals[set_current].name, nameval,
     	    sizeof(pm_terminals[set_current].name));
   }
@@ -111,70 +113,77 @@ static FILE* configfile = NULL;
 
  static inline void set_help(char* name)
    {
-     set_assert(set_current >= 0, __LINE__);
+     assert_started(__LINE__);
      strncpy(pm_terminals[set_current].helpfile, name,
      	     sizeof(pm_terminals[set_current].helpfile));
    }
 
  static inline void set_size(int code)
   {
-    set_assert(set_current >= 0, __LINE__);
+    assert_started(__LINE__);
     pm_terminals[set_current].x = code;
   }
 
  static inline void set_statcells(int code)
   {
-    set_assert(set_current >= 0, __LINE__);
+    assert_started(__LINE__);
     pm_terminals[set_current].statcells = code;
   }
 
  static inline void set_frontkeys(int code)
   {
-    set_assert(set_current >= 0, __LINE__);
+    assert_started(__LINE__);
     pm_terminals[set_current].frontkeys = code;
   }
 
  static inline void set_haseasybar(int code)
   {
-    set_assert(set_current >= 0, __LINE__);
+    assert_started(__LINE__);
     pm_terminals[set_current].haseasybar = code;
   }
 
  static inline void set_showstat(int pos, int code)
   {
-    set_assert(set_current >= 0, __LINE__);
-    set_assert(0 < pos && pos <= STATMAX, __LINE__);
+    assert_started(__LINE__);
+    assert_condition(((0 < pos) && (pos <= STATMAX)), "invalid status cell number", __LINE__);
     pm_terminals[set_current].statshow[pos-1] = code;
   }
 
  static inline void set_modifier(int code)
   {
-    set_assert(set_current >= 0, __LINE__);
+    assert_started(__LINE__);
     mod_current ++;
-    set_assert(0 <= mod_current && mod_current < MODMAX, __LINE__);
+    assert_condition((mod_current < MODMAX), "too many modifiers", __LINE__);
     pm_terminals[set_current].modifiers[mod_current] = code;
   }
 
  static inline void set_keycode(int code, int numkeys, int keys[])
   {
-    int i, j, chk;
+    int k, m;
     commands* curr;
-    set_assert(set_current >= 0, __LINE__);
+    assert_started(__LINE__);
     cmd_current++;
-    set_assert(0 <= cmd_current && cmd_current < CMDMAX, __LINE__);
+    assert_condition((cmd_current < CMDMAX), "too many commands", __LINE__);
     curr = &(pm_terminals[set_current].cmds[cmd_current]);
     curr->code = code;
-    curr->keycode=keys[0];
-    chk = 0;
-    for (i=0; i < numkeys; i++)
-      for(j=0; j <= mod_current; j++)
-	if (keys[i] == pm_terminals[set_current].modifiers[j]) {
-	  curr->modifiers |= (1 << j);
-	  chk++;
+    curr->keycode = NOKEY;
+    curr->modifiers = 0;
+    for (k=0; k<numkeys; k++) {
+      int key = keys[k];
+      int found = 0;
+      for(m=0; m<=mod_current; m++) {
+	if (key == pm_terminals[set_current].modifiers[m]) {
+          int bit = 1 << m;
+          assert_condition(!(curr->modifiers & bit), "duplicate modifier", __LINE__);
+          curr->modifiers |= bit;
+          found = 1;
+          break;
 	}
-    if (chk == numkeys) {
-      /* only modifiers  */
-      curr->keycode= NOKEY;
+      }
+      if (!found) {
+        assert_condition((curr->keycode == NOKEY), "more than one key", __LINE__);
+        curr->keycode = key;
+      }
     }
   }
 
@@ -424,8 +433,8 @@ int yylex ()
 
 /* --------------------------------------------------------------- */
 
-int parse()
-{
+int
+parse (void) {
   linenumber = 1;
   set_current = -1;
 

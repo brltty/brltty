@@ -74,14 +74,15 @@ typedef enum {
 #ifdef ENABLE_PM_CONFIGURATION_FILE
 #include "config.tab.c"
  
-int yyerror (char* s)  /* Called by yyparse on error */
+int
+yyerror (char *problem)  /* Called by yyparse on error */
 {
-  LogPrint(LOG_CRIT, "Error: line %d: %s", linenumber, s);
+  LogPrint(LOG_CRIT, "Configuration file error: line %d: %s", linenumber, problem);
   exit(99);
 }
 
-static void read_file(char* name)
-{
+static void
+read_file (const char *name) {
   LogPrint(LOG_DEBUG, "Opening config file: %s", name);
   if ((configfile = fopen(name, "r")) != NULL) {
     LogPrint(LOG_DEBUG, "Reading config file: %s", name);
@@ -453,7 +454,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   /* read the config file for individual configurations */
 #ifdef ENABLE_PM_CONFIGURATION_FILE
-  LogPrint(LOG_DEBUG, "Loading config file.");
+  LogPrint(LOG_DEBUG, "Loading configuration file.");
   read_config(brl->dataDirectory, parameters[PARM_CONFIGFILE]);
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
 
@@ -472,10 +473,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const static speed_t *speed = speeds;
     if (initializeDisplay(brl, device, *speed)) return 1;
     brl_close(brl);
-    if (*++speed == B0) {
-      speed = speeds;
-      delay(1000);
-    }
+    if (*++speed == B0) return 0;
   }
 }
 
