@@ -630,145 +630,146 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   inputCount = 0;
   outputPayloadLimit = 0XFF;
-  if (!io->openPort(parameters, device)) goto failure;
 
-  while (io->awaitInput(10)) {
-    Packet packet;
-    int count = readPacket(brl, &packet);
-    if (count == -1) goto failure;
-  }
-
-  while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0) {
-    int acknowledged = 0;
-    model = NULL;
-
-    while (io->awaitInput(100)) {
-      Packet response;
-      int count = readPacket(brl, &response);
+  if (io->openPort(parameters, device)) {
+    while (io->awaitInput(10)) {
+      Packet packet;
+      int count = readPacket(brl, &packet);
       if (count == -1) goto failure;
+    }
 
-      switch (response.header.type) {
-        case PKT_INFO:
-          model = modelTable;
-          while (model->identifier) {
-            if (strcmp(response.payload.info.model, model->identifier) == 0) break;
-            ++model;
-          }
+    while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0) {
+      int acknowledged = 0;
+      model = NULL;
 
-          if (!model->identifier) {
-            static ModelEntry generic;
-            model = &generic;
-            LogPrint(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
+      while (io->awaitInput(100)) {
+        Packet response;
+        int count = readPacket(brl, &response);
+        if (count == -1) goto failure;
 
-            memset(&generic, 0, sizeof(generic));
-            generic.identifier = "Generic";
-            generic.totalCells = 20;
-            generic.dotsTable = &dots12345678;
-            generic.hotkeysRow = 1;
+        switch (response.header.type) {
+          case PKT_INFO:
+            model = modelTable;
+            while (model->identifier) {
+              if (strcmp(response.payload.info.model, model->identifier) == 0) break;
+              ++model;
+            }
 
-            {
-              typedef struct {
-                const char *identifier;
-                const DotsTable *dotsTable;
-              } ExceptionEntry;
-              static const ExceptionEntry exceptionTable[] = {
-                {"Focus", &dots12374568},
-                {NULL   , NULL         }
-              };
-              const ExceptionEntry *exception = exceptionTable;
-              while (exception->identifier) {
-                if (strncmp(response.payload.info.model, exception->identifier, strlen(exception->identifier)) == 0) {
-                  generic.dotsTable = exception->dotsTable;
-                  break;
+            if (!model->identifier) {
+              static ModelEntry generic;
+              model = &generic;
+              LogPrint(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
+
+              memset(&generic, 0, sizeof(generic));
+              generic.identifier = "Generic";
+              generic.totalCells = 20;
+              generic.dotsTable = &dots12345678;
+              generic.hotkeysRow = 1;
+
+              {
+                typedef struct {
+                  const char *identifier;
+                  const DotsTable *dotsTable;
+                } ExceptionEntry;
+                static const ExceptionEntry exceptionTable[] = {
+                  {"Focus", &dots12374568},
+                  {NULL   , NULL         }
+                };
+                const ExceptionEntry *exception = exceptionTable;
+                while (exception->identifier) {
+                  if (strncmp(response.payload.info.model, exception->identifier, strlen(exception->identifier)) == 0) {
+                    generic.dotsTable = exception->dotsTable;
+                    break;
+                  }
+                  exception++;
                 }
-                exception++;
+              }
+
+              {
+                const char *word = strrchr(response.payload.info.model, ' ');
+                if (word) {
+                  int size;
+                  if (isInteger(&size, ++word)) {
+                    static char identifier[sizeof(response.payload.info.model)];
+                    generic.totalCells = size;
+                    snprintf(identifier, sizeof(identifier), "%s %d",
+                             generic.identifier, generic.totalCells);
+                    generic.identifier = identifier;
+                  }
+                }
               }
             }
 
-            {
-              const char *word = strrchr(response.payload.info.model, ' ');
-              if (word) {
-                int size;
-                if (isInteger(&size, ++word)) {
-                  static char identifier[sizeof(response.payload.info.model)];
-                  generic.totalCells = size;
-                  snprintf(identifier, sizeof(identifier), "%s %d",
-                           generic.identifier, generic.totalCells);
-                  generic.identifier = identifier;
+            if (model) {
+              makeOutputTable(model->dotsTable, &outputTable);
+              textCells = model->totalCells;
+              textOffset = statusOffset = 0;
+
+              {
+                int cells = model->statusCells;
+                const char *word = parameters[PARM_STATUSCELLS];
+                if (word && *word) {
+                  int maximum = textCells / 2;
+                  int minimum = -maximum;
+                  int value;
+                  if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
+                    cells = value;
+                  }
                 }
+
+                if (cells) {
+                  if (cells < 0) {
+                    statusOffset = textCells + cells;
+                    cells = -cells;
+                  } else {
+                    textOffset = cells + 1;
+                  }
+                  textCells -= cells + 1;
+                }
+                statusCells = cells;
               }
+
+              memset(outputBuffer, 0, model->totalCells);
+              writeFrom = 0;
+              writeTo = model->totalCells - 1;
+              writing = 0;
+
+              realKeys = 0;
+              virtualKeys = 0;
+              pressedKeys = 0;
+              activeKeys = 0;
+              wheelCounter = 0;
+
+              LogPrint(LOG_INFO, "Detected %s: text=%d, status=%d, firmware=%s",
+                       model->identifier,
+                       textCells, statusCells,
+                       response.payload.info.firmware);
             }
-          }
+            break;
 
-          if (model) {
-            makeOutputTable(model->dotsTable, &outputTable);
-            textCells = model->totalCells;
-            textOffset = statusOffset = 0;
+          case PKT_ACK:
+            acknowledged = 1;
+            break;
 
-            {
-              int cells = model->statusCells;
-              const char *word = parameters[PARM_STATUSCELLS];
-              if (word && *word) {
-                int maximum = textCells / 2;
-                int minimum = -maximum;
-                int value;
-                if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
-                  cells = value;
-                }
-              }
+          case PKT_NAK:
+            negativeAcknowledgement(&response);
+          default:
+            acknowledged = 0;
+            model = NULL;
+            break;
+        }
 
-              if (cells) {
-                if (cells < 0) {
-                  statusOffset = textCells + cells;
-                  cells = -cells;
-                } else {
-                  textOffset = cells + 1;
-                }
-                textCells -= cells + 1;
-              }
-              statusCells = cells;
-            }
-
-            memset(outputBuffer, 0, model->totalCells);
-            writeFrom = 0;
-            writeTo = model->totalCells - 1;
-            writing = 0;
-
-            realKeys = 0;
-            virtualKeys = 0;
-            pressedKeys = 0;
-            activeKeys = 0;
-            wheelCounter = 0;
-
-            LogPrint(LOG_INFO, "Detected %s: text=%d, status=%d, firmware=%s",
-                     model->identifier,
-                     textCells, statusCells,
-                     response.payload.info.firmware);
-          }
-          break;
-
-        case PKT_ACK:
-          acknowledged = 1;
-          break;
-
-        case PKT_NAK:
-          negativeAcknowledgement(&response);
-        default:
-          acknowledged = 0;
-          model = NULL;
-          break;
-      }
-
-      if (acknowledged && model) {
-        brl->x = textCells;
-        brl->y = 1;
-        return 1;
+        if (acknowledged && model) {
+          brl->x = textCells;
+          brl->y = 1;
+          return 1;
+        }
       }
     }
-  }
 
-failure:
-  brl_close(brl);
+  failure:
+    io->closePort();
+  }
   return 0;
 }
 
