@@ -116,6 +116,15 @@ brltty_brl_close_device ()
     brlapi_closeConnection();
 }
 
+static void
+sendKey (BRAILLE_EVENT_CODE bec, BRAILLE_EVENT_DATA *bed, const char *key)
+{
+    sprintf(&dd.key_codes[0], key);
+    bec = bec_key_codes;
+    bed->KeyCodes = dd.key_codes;						
+    ClientCallback(bec, bed);
+}
+
 static gboolean
 brltty_brl_glib_cb (GIOChannel *source, GIOCondition condition, gpointer data)
 {
@@ -130,38 +139,39 @@ brltty_brl_glib_cb (GIOChannel *source, GIOCondition condition, gpointer data)
 	switch (keypress & ~BRL_FLG_TOGGLE_MASK) 
 	{
 	    case BRL_CMD_LNUP:
-    		sprintf(&dd.key_codes[0], "DK00");
-    		bec = bec_key_codes;
-    		bed.KeyCodes = dd.key_codes;						
-    		ClientCallback (bec, &bed);
+    		sendKey(bec, &bed, "DK00");
     		break;
       
 	    case BRL_CMD_HOME:
-    		sprintf(&dd.key_codes[0], "DK01");
-    		bec = bec_key_codes;
-    		bed.KeyCodes = dd.key_codes;						
-    		ClientCallback (bec, &bed);
+    		sendKey(bec, &bed, "DK01");
     		break;
 
 	    case BRL_CMD_LNDN:
-    		sprintf(&dd.key_codes[0], "DK02");
-    		bec = bec_key_codes;
-    		bed.KeyCodes = dd.key_codes;						
-    		ClientCallback (bec, &bed);
+    		sendKey (bec, &bed, "DK02");
     		break;
       
 	    case BRL_CMD_FWINLT:
-    		sprintf(&dd.key_codes[0], "DK03");
-    		bec = bec_key_codes;
-    		bed.KeyCodes = dd.key_codes;						
-    		ClientCallback (bec, &bed);
+    		sendKey(bec, &bed, "DK03");
     		break;
       
 	    case BRL_CMD_FWINRT:
-    		sprintf(&dd.key_codes[0], "DK05");
-        	bec = bec_key_codes;
-    		bed.KeyCodes = dd.key_codes;						
-    		ClientCallback (bec, &bed);
+    		sendKey(bec, &bed, "DK05");
+    		break;
+      
+	    case BRL_CMD_CHRLT:
+    		sendKey(bec, &bed, "L09K01");
+    		break;
+      
+	    case BRL_CMD_CHRRT:
+    		sendKey(bec, &bed, "L09K03");
+    		break;
+      
+	    case BRL_CMD_HWINLT:
+    		sendKey(bec, &bed, "L09K04");
+    		break;
+      
+	    case BRL_CMD_HWINRT:
+    		sendKey(bec, &bed, "L09K06");
     		break;
       
     	    /* TBD: Default action (DK01DK02) and repeat last */
@@ -178,6 +188,7 @@ brltty_brl_glib_cb (GIOChannel *source, GIOCondition condition, gpointer data)
 			bed.Sensor.SensorCodes = dd.sensor_codes;
 			ClientCallback (bec, &bed);
 			break;
+
 		    default:
 			fprintf(stderr,"BRLTTY command code not bound to Gnopernicus key code: 0X%04X\n", keypress);
 			break;

@@ -257,16 +257,20 @@ This driver assumes that Gnopernicus key bindings remain at their default
 settings. BRLTTY commands are mapped to Gnopernicus key bindings as follows:
 
    BRLTTY       Gnopernicus
-   Command      Binding      Description
-   ----------   -----------  -----------
-   CMD_LNUP     DK00         Go To Parent
-   CMD_HOME     DK01         Go To Focus
-   CMD_LNDN     DK02         Go To Child
-   CMD_FWINLT   DK03         Go To Previous
-                DK04         Repeat Last
-   CMD_FWINRT   DK05         Go To Next
-                DK01DK02     Do Default Action
-   CR_ROUTE     HMSnn        Route Cursor
+   Command         Binding   Description
+   --------------  --------  -----------
+   BRL_CMD_LNUP    DK00      Go To Parent
+   BRL_CMD_HOME    DK01      Go To Focus
+   BRL_CMD_LNDN    DK02      Go To Child
+   BRL_CMD_FWINLT  DK03      Go To Previous
+                   DK04      Repeat Last
+   BRL_CMD_FWINRT  DK05      Go To Next
+                   DK01DK02  Do Default Action
+   BRL_CMD_CHRLT   L09K01    Left One Character
+   BRL_CMD_CHRRT   L09K03    Right One Character
+   BRL_CMD_HWINLT  L09K04    Left One Display Width
+   BRL_CMD_HWINRT  L09K06    Right One Display Width
+   BRL_BLK_ROUTE   HMSnn     Route Cursor
 
 
 What's Left
