@@ -656,8 +656,8 @@ readbrl (DriverCommandContext cmds)
 	ignore_next_release = 1;
 	if(howmanykeys == 1 && modifier == 0){
 	  switch(key){
-	    case RG: cmd = CR_BEGBLKOFFSET + which_routing_keys[0]; break;
-	    case LF: cmd = CR_ENDBLKOFFSET + which_routing_keys[0]; break;
+	    case RG: cmd = CR_CUTBEGIN + which_routing_keys[0]; break;
+	    case LF: cmd = CR_CUTRECT + which_routing_keys[0]; break;
 	  };
 	}
 	if(cmd == EOF){
@@ -760,13 +760,13 @@ readbrl (DriverCommandContext cmds)
 	/* We interpret the command when all keys have been released. */
 	if(ignore_next_release);
 	else if (howmanykeys == 1)
-	  cmd = CR_ROUTEOFFSET + which_routing_keys[0];
+	  cmd = CR_ROUTE + which_routing_keys[0];
 	else if (howmanykeys == 3 && which_routing_keys[1] == brl_cols-2
 		 && which_routing_keys[2] == brl_cols-1)
-	  cmd = CR_BEGBLKOFFSET + which_routing_keys[0];
+	  cmd = CR_CUTBEGIN + which_routing_keys[0];
 	else if (howmanykeys == 3 && which_routing_keys[0] == 0
 		 && which_routing_keys[1] == 1)
-	  cmd = CR_ENDBLKOFFSET + which_routing_keys[2];
+	  cmd = CR_CUTRECT + which_routing_keys[2];
 	else if ((howmanykeys == 4 && which_routing_keys[0] == 0
 		  && which_routing_keys[1] == 1
 		  && which_routing_keys[2] == brl_cols-2
@@ -779,8 +779,8 @@ readbrl (DriverCommandContext cmds)
 	  cmd = CMD_HELP;
 	else if(howmanykeys == 3
 		&& which_routing_keys[0]+2 == which_routing_keys[1]){
-	  cmd = CR_BEGBLKOFFSET + which_routing_keys[0];
-	  pending_cmd = CR_ENDBLKOFFSET + which_routing_keys[2];
+	  cmd = CR_CUTBEGIN + which_routing_keys[0];
+	  pending_cmd = CR_CUTRECT + which_routing_keys[2];
 	}
 	/* Reset to no keys pressed */
 	memset(routing_were_pressed, 0, brl_cols);

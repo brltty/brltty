@@ -948,7 +948,7 @@ int LinuxScreen::insertByte (unsigned char byte) {
 
 static int validateVt (int vt) {
   if ((vt >= 1) && (vt <= 0X3F)) return 1;
-  LogPrint(LOG_WARNING, "Virtual terminal %d is out of range.", vt);
+  LogPrint(LOG_DEBUG, "Virtual terminal %d is out of range.", vt);
   return 0;
 }
 

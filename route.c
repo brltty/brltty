@@ -16,7 +16,7 @@
  */
 
 /*
- * csrjmp.c - cursor routing functions
+ * route.c - cursor routing functions
  */
 
 #include <stdlib.h>
@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <signal.h>
 
-#include "csrjmp.h"
+#include "route.h"
 #include "scr.h"
 #include "misc.h"
 

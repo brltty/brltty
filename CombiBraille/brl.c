@@ -278,7 +278,7 @@ readbrl (DriverCommandContext cmds)
         status = rng;
 	return CMD_NOOP;
       }
-      if (status && (rng == CR_ROUTEOFFSET)) {
+      if (status && (rng == CR_ROUTE)) {
         cmd = status + arg;
       }
     }

@@ -675,14 +675,14 @@ readbrl (DriverCommandContext cmds)
 	    KEY( 3, CMD_CSRJMP_VERT );
 	default:
 	  HLP0(301,"CRt#: Route cursor to cell")
-	    cmd = CR_ROUTEOFFSET + rtk_which[0] -NRSTATCELLS;
+	    cmd = CR_ROUTE + rtk_which[0] -NRSTATCELLS;
 	};
       }else if(howmanykeys == 3
 	       && rtk_which[0] >= NRSTATCELLS
 	       && rtk_which[0]+2 == rtk_which[1]){
 	HLP0(405,"CRtx + CRt(x+2) + CRty : Cut text from x to y")
-	  cmd = CR_BEGBLKOFFSET + rtk_which[0] -NRSTATCELLS;
-           pending_cmd = CR_ENDBLKOFFSET + rtk_which[2] -NRSTATCELLS;
+	  cmd = CR_CUTBEGIN + rtk_which[0] -NRSTATCELLS;
+           pending_cmd = CR_CUTRECT + rtk_which[2] -NRSTATCELLS;
       }else if (howmanykeys == 2
 		&& ((rtk_which[0] == 1 && rtk_which[1] == 2)
 		    || (rtk_which[0] == NRSTATCELLS+1
@@ -719,9 +719,9 @@ readbrl (DriverCommandContext cmds)
       /* one text routing key with some other keys */
       switch(keystate){
 	PHKEY(401, "CRt#+",K_D, "Mark beginning of region to cut",
-	      CR_BEGBLKOFFSET + rtk_which[0] -NRSTATCELLS);
+	      CR_CUTBEGIN + rtk_which[0] -NRSTATCELLS);
 	PHKEY(401, "CRt#+",K_A, "Mark end of region and cut", 
-	      CR_ENDBLKOFFSET + rtk_which[0] -NRSTATCELLS);
+	      CR_CUTRECT + rtk_which[0] -NRSTATCELLS);
 	PHKEY2(501, "CRt#+",K_B,K_C, "Move to previous/next line indented "
 	       "no more than #",
 	       CR_PRINDENT + rtk_which[0] -NRSTATCELLS,

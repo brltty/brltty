@@ -776,7 +776,7 @@ static int readbrl(DriverCommandContext cmds)
 
 static int routing(int routekey)
 {
-   int OffsetType = CR_ROUTEOFFSET;
+   int OffsetType = CR_ROUTE;
    int res = EOF;
    switch (InMenu)
      {
@@ -860,7 +860,7 @@ static int routing(int routekey)
 	     break;
 	   default:
 	     res = OffsetType + routekey - 1;
-	     OffsetType = CR_ROUTEOFFSET;
+	     OffsetType = CR_ROUTE;
 	     break;
 	  }
 	break;
@@ -875,7 +875,7 @@ static int
    unsigned char c;
    static unsigned char buf[DIM_INBUFSZ];
    static int DLEflag = 0, ErrFlag = 0;
-   static int pos = 0, p = 0, pktready = 0, OffsetType = CR_ROUTEOFFSET;
+   static int pos = 0, p = 0, pktready = 0, OffsetType = CR_ROUTE;
    static int position = 2; /* to retrieve internal version */
   /* here we process incoming data */
    while (!pktready && read (brl_fd, &c, 1))
@@ -992,11 +992,11 @@ static int
 			    break;
 			  case 'J':
 			    res = 21;
-			    OffsetType = CR_BEGBLKOFFSET;
+			    OffsetType = CR_CUTBEGIN;
 			    break;
 			  case 'K':
 			    res = 22;
-			    OffsetType = CR_ENDBLKOFFSET;
+			    OffsetType = CR_CUTRECT;
 			    break;
 			  case 'L':
 			    res = 23;

@@ -15,12 +15,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
 /* config.h - Configurable definitions
  *
  * Edit as necessary for your system.
  */
 
-/* ------------------------ OVERALL CONFIGURATIONS ------------------------ */
+#include "common.h"
+#include "brl.h"
 
 #define CONFIG_FILE "/etc/brltty.conf"
 
@@ -34,27 +38,13 @@
                             * to be replaced by "terminated" on the display.
                             */
 
-
 /* Character cursor initialisation: */
-#define BIG_CSRCHAR 0xff	/* block cursor */
-#define SMALL_CSRCHAR 0xc0	/* underline cursor */
+#define BIG_CSRCHAR (B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8) /* block cursor */
+#define SMALL_CSRCHAR (B7 | B8) /* underline cursor */
 
 /* Dot super-imposition for attribute underlining */
-#define ATTR1CHAR 0xC0
-#define ATTR2CHAR 0x80
-
-typedef enum {
-   sbwAll,
-   sbwEndOfLine,
-   sbwRestOfLine
-} SkipBlankWindowsMode;
-
-typedef enum {
-   tdSpeaker,
-   tdSoundCard,
-   tdSequencer,
-   tdAdLib
-} TuneDevice;
+#define ATTR1CHAR (B7 | B8)
+#define ATTR2CHAR (B8)
 
 /* Initialisation of BRLTTY environment settings: */
 #define INIT_CSRVIS 1		/* 1 for cursor display, 0 for no cursor */
@@ -86,6 +76,4 @@ typedef enum {
 #define INIT_ATTR_ON_CNT 4      /* for attribute underlining */
 #define INIT_ATTR_OFF_CNT 12
 
-/* Define this to allow "offright" position: i.e. positions such that part
-   of the braille display goes beyond the right edge of the screen .*/
-#define ALLOW_OFFRIGHT_POSITIONS
+#endif /* !defined(_CONFIG_H) */

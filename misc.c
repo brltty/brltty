@@ -35,10 +35,7 @@
 
 #include "misc.h"
 #include "config.h"
-#include "brl.h"
 #include "common.h"
-
-struct brltty_env env;                /* environment (i.e. global) parameters */
 
 /*
  * Output braille translation tables.
@@ -627,98 +624,74 @@ validateYesNo (unsigned int *flag, const char *description, const char *value) {
    return validateFlag(flag, description, value, "yes", "no");
 }
 
+/* Reverse a 256x256 mapping, used for charset maps. */
+void reverseTable(unsigned char *origtab, unsigned char *revtab) {
+  int i;
+  memset(revtab, 0, 0X100);
+  for(i=0XFF; i>=0; i--) revtab[origtab[i]] = i;
+}
+
 /* Functions which support horizontal status cells, e.g. Papenmeier. */
 /* this stuff is real wired - dont try to understand */
 
-/* logical layout   real bits 
-    1 4               1 2
-    2 5         -->   3 4
-    3 6               5 6
-    7 8               7 8
-  Bx: x from logical layout, value from real layout  
-*/
-
-#define B1 1
-#define B2 4
-#define B3 16
-#define B4 2
-#define B5 8
-#define B6 32
-#define B7 64
-#define B8 128
-
 /* Dots for landscape (counterclockwise-rotated) digits. */
-const unsigned char landscape_digits[11] =
-{
+const unsigned char landscapeDigits[11] = {
   B1+B5+B2,    B4,          B4+B1,       B4+B5,       B4+B5+B2,
   B4+B2,       B4+B1+B5,    B4+B1+B5+B2, B4+B1+B2,    B1+B5,
   B1+B2+B4+B5
 };
 
 /* Format landscape representation of numbers 0 through 99. */
-int landscape_number(int x)
-{
-  return landscape_digits[(x / 10) % 10] | (landscape_digits[x % 10] << 4);  
+int
+landscapeNumber (int x) {
+  return landscapeDigits[(x / 10) % 10] | (landscapeDigits[x % 10] << 4);  
 }
 
 /* Format landscape flag state indicator. */
-int landscape_flag(int number, int on)
-{
-  int dots = landscape_digits[number % 10];
-  if (on)
-    dots |= landscape_digits[10] << 4;
+int
+landscapeFlag (int number, int on) {
+  int dots = landscapeDigits[number % 10];
+  if (on) dots |= landscapeDigits[10] << 4;
   return dots;
 }
 
 /* Dots for seascape (clockwise-rotated) digits. */
-const unsigned char seascape_digits[11] =
-{
+const unsigned char seascapeDigits[11] = {
   B5+B1+B4,    B2,          B2+B5,       B2+B1,       B2+B1+B4,
   B2+B4,       B2+B5+B1,    B2+B5+B1+B4, B2+B5+B4,    B5+B1,
   B1+B2+B4+B5
 };
 
 /* Format seascape representation of numbers 0 through 99. */
-int seascape_number(int x)
-{
-  return (seascape_digits[(x / 10) % 10] << 4) | seascape_digits[x % 10];  
+int
+seascapeNumber (int x) {
+  return (seascapeDigits[(x / 10) % 10] << 4) | seascapeDigits[x % 10];  
 }
 
 /* Format seascape flag state indicator. */
-int seascape_flag(int number, int on)
-{
-  int dots = seascape_digits[number % 10] << 4;
-  if (on)
-    dots |= seascape_digits[10];
+int
+seascapeFlag (int number, int on) {
+  int dots = seascapeDigits[number % 10] << 4;
+  if (on) dots |= seascapeDigits[10];
   return dots;
 }
 
 /* Dots for portrait digits - 2 numbers in one cells */
-const unsigned char portrait_digits[11] =
-{
+const unsigned char portraitDigits[11] = {
   B2+B4+B5, B1, B1+B2, B1+B4, B1+B4+B5, B1+B5, B1+B2+B4, 
   B1+B2+B4+B5, B1+B2+B5, B2+B4, B1+B2+B4+B5
 };
 
 /* Format portrait representation of numbers 0 through 99. */
-int portrait_number(int x)
-{
-  return portrait_digits[(x / 10) % 10] | (portrait_digits[x % 10]<<4);  
+int
+portraitNumber (int x) {
+  return portraitDigits[(x / 10) % 10] | (portraitDigits[x % 10]<<4);  
 }
 
 /* Format portrait flag state indicator. */
-int portrait_flag(int number, int on)
-{
-  int dots = portrait_digits[number % 10] << 4;
-  if (on)
-    dots |= portrait_digits[10];
+int
+portraitFlag (int number, int on) {
+  int dots = portraitDigits[number % 10] << 4;
+  if (on) dots |= portraitDigits[10];
   return dots;
-}
-
-/* Reverse a 256x256 mapping, used for charset maps. */
-void reverseTable(unsigned char *origtab, unsigned char *revtab)
-{
-  int i;
-  memset(revtab, 0, 0X100);
-  for(i=0XFF; i>=0; i--) revtab[origtab[i]] = i;
 }

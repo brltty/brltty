@@ -340,13 +340,13 @@ static int readbrl (DriverCommandContext cmds) {
 		}
 		switch (status) {
 			case 0:			/* ordinary cursor routing */
-				return keystroke.key + CR_ROUTEOFFSET - MB_CR_EXTRAKEYS;
+				return keystroke.key + CR_ROUTE - MB_CR_EXTRAKEYS;
 			case 1:			/* begin block */
 				status = 0;
-				return keystroke.key + CR_BEGBLKOFFSET - MB_CR_EXTRAKEYS;
+				return keystroke.key + CR_CUTBEGIN - MB_CR_EXTRAKEYS;
 			case 2:			/* end block */
 				status = 0;
-				return keystroke.key + CR_ENDBLKOFFSET - MB_CR_EXTRAKEYS;
+				return keystroke.key + CR_CUTRECT - MB_CR_EXTRAKEYS;
 		}
 		status = 0;
 	}

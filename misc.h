@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _MISC_H
+#define _MISC_H
+
 #include <stdio.h>
 #include <termios.h>
 
@@ -102,12 +105,15 @@ extern int validateOnOff (unsigned int *flag, const char *description, const cha
 extern int validateYesNo (unsigned int *flag, const char *description, const char *value);
 
 /* Formatting of status cells. */
-extern int landscape_number(int x);
-extern int landscape_flag(int number, int on);
-extern int seascape_number(int x);
-extern int seascape_flag(int number, int on);
-extern int portrait_number(int x);
-extern int portrait_flag(int number, int on);
+extern const unsigned char landscapeDigits[11];
+extern int landscapeNumber (int x);
+extern int landscapeFlag (int number, int on);
+extern const unsigned char seascapeDigits[11];
+extern int seascapeNumber (int x);
+extern int seascapeFlag (int number, int on);
+extern const unsigned char portraitDigits[11];
+extern int portraitNumber (int x);
+extern int portraitFlag (int number, int on);
 
 #define MAXNSTATCELLS 22
 extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
@@ -119,3 +125,5 @@ extern unsigned char attribtrans[0X100]; /* current attributes to braille transl
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* !defined(_MISC_H) */

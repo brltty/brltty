@@ -15,9 +15,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _CSRJMP_H
+#define _CSRJMP_H
 
 extern volatile int csr_active;
 extern volatile pid_t csr_pid;
 
 int csrjmp (int x, int y, int scrno);
 
+#endif /* !defined(_CSRJMP_H) */

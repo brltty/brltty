@@ -20,11 +20,6 @@ Your help is welcome.
 - Better support for mixed text + attribute mode i.e. underlined and/or 
   flashing attributes.
 
-- Keypress simulation within dosemu.  See comments in inskey_lnx.c.
-
-- Revision of cut & paste and implementation of linear mode cut (as opposed
-  to rectangular mode).
-
 - Revision of beeps.  Too many events have the same beeps, so we might want
   to add new ones. See if we could optimize the use of the console resource.
   Implement .au and .wav sounds (through a soundcard).
@@ -35,7 +30,7 @@ Your help is welcome.
 
 - Better speech support
 
-- On-the-fly grade II translation: translating one line at a time into
+- On-the-fly grade II translation: translating one window at a time into
   grade II Braille would speed up reading.  It may be possible to use some
   existing free translation software like nfbtrans.
 
@@ -46,6 +41,4 @@ Your help is welcome.
   modules to make BRLTTY usable with the screen package or such and then 
   become available for any other Unix platform.  An experimental patch is 
   available in the Patches/ directory.
-
-- Installation boot disk HowTo
 

@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _MESSAGE_H
+#define _MESSAGE_H
+
 /* message.h - send a message to Braille and speech */
 
 /* Prototype: */
@@ -26,3 +29,5 @@ void message (unsigned char *, short);
 #define MSG_WAITKEY 2		/* Wait for a key after the message is displayed */
 #define MSG_NODELAY 4 /* message now automatically delays for DISPDEL ms,
 			 unless this flag is set. */
+
+#endif /* !defined(_MESSAGE_H) */

@@ -39,10 +39,7 @@ static int consoleDescriptor = -1;
 static int displayDescriptor = -1;
 static int displayTerminal;
 
-#include "../brl.h"
-#include "../config.h"
 #include "../misc.h"
-#include "../message.h"
 #include "brlconf.h"
 
 #define BRLNAME "BrailleNote"
@@ -414,7 +411,7 @@ initbrl (char **parameters, brldim *brl, const char *device) {
 				 refreshCells();
 				 persistentKeyboardMode = KBM_NAVIGATE;
 				 temporaryKeyboardMode = persistentKeyboardMode;
-				 persistentRoutingOperation = CR_ROUTEOFFSET;
+				 persistentRoutingOperation = CR_ROUTE;
 				 temporaryRoutingOperation = persistentRoutingOperation;
 				 adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
 				 return;
@@ -706,14 +703,12 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
       case BNC_R: // repeat current prompt
       case BNC_U: // uppercase for computer braille
       case BNC_Z: // exit current operation
+      case BNC_PERCENT: // acknowledge alarm
       case BNC_6: // go to task menu
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6): // go to main menu
 	 break;
       case BNC_SPACE:
 	 return interpretCharacter(dots, cmds);
-      case BNC_A:
-	 temporaryRoutingOperation = CR_MSGATTRIB;
-         return CMD_NOOP;
       case BNC_C:
 	 return CMD_PREFMENU;
       case BNC_D:
@@ -721,7 +716,8 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
       case BNC_F:
 	 return getFunctionKey();
       case BNC_L:
-	 return CMD_CSRJMP_VERT;
+	 temporaryRoutingOperation = CR_SETLEFT;
+	 return CMD_NOOP;
       case BNC_M:
 	 return CMD_MUTE;
       case BNC_N:
@@ -750,11 +746,19 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
 	 return VAL_PASSCHAR + character;
       }
       case BNC_LPAREN:
-	 temporaryRoutingOperation = CR_BEGBLKOFFSET;
+	 temporaryRoutingOperation = CR_CUTBEGIN;
+	 return CMD_NOOP;
+      case BNC_LBRACE:
+	 temporaryRoutingOperation = CR_CUTAPPEND;
 	 return CMD_NOOP;
       case BNC_RPAREN:
-	 temporaryRoutingOperation = CR_ENDBLKOFFSET;
+	 temporaryRoutingOperation = CR_CUTRECT;
 	 return CMD_NOOP;
+      case BNC_RBRACE:
+	 temporaryRoutingOperation = CR_CUTLINE;
+	 return CMD_NOOP;
+      case BNC_BAR:
+         return CMD_CSRJMP_VERT;
       case (BND_2 | BND_3 | BND_5 | BND_6):
 	 return VAL_PASSKEY + VPK_TAB;
       case (BND_2 | BND_3):
@@ -815,12 +819,18 @@ interpretBackspaceChord (unsigned char dots, DriverCommandContext cmds) {
 	 return CMD_DISPMD | VAL_SWITCHON;
       case BNC_B:
          return CMD_SKPBLNKWINS | VAL_SWITCHOFF;
+      case BNC_D:
+	 temporaryRoutingOperation = CR_DESCCHAR;
+         return CMD_NOOP;
       case BNC_F:
          return CMD_FREEZE | VAL_SWITCHOFF;
       case BNC_H:
 	 return CMD_HELP;
       case BNC_I:
          return CMD_SKPIDLNS | VAL_SWITCHOFF;
+      case BNC_M:
+	 temporaryRoutingOperation = CR_SETMARK;
+	 return CMD_NOOP;
       case BNC_S:
 	 return CMD_INFO;
       case BNC_T:
@@ -864,6 +874,9 @@ interpretEnterChord (unsigned char dots, DriverCommandContext cmds) {
          return CMD_FREEZE | VAL_SWITCHON;
       case BNC_I:
          return CMD_SKPIDLNS | VAL_SWITCHON;
+      case BNC_M:
+	 temporaryRoutingOperation = CR_GOTOMARK;
+	 return CMD_NOOP;
       case BNC_V:
 	 return CMD_SWITCHVT_NEXT;
       case BNC_W:

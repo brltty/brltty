@@ -101,12 +101,12 @@ static int readbrl(DriverCommandContext cmds) {
     else if (buttons.bigbuttons==KEY_HOME) {
       /* If a routing key has been pressed, then mark the beginning of a block;
          go to cursor position otherwise */
-      return (buttons.routingkey>0) ? CR_BEGBLKOFFSET+buttons.routingkey-1 : CMD_HOME;
+      return (buttons.routingkey>0) ? CR_CUTBEGIN+buttons.routingkey-1 : CMD_HOME;
     }
     else if (buttons.bigbuttons==KEY_MENU) {
       /* If a routing key has been pressed, then mark the end of a block;
          go to preferences menu otherwise */
-      return (buttons.routingkey>0) ? CR_ENDBLKOFFSET+buttons.routingkey-1 : CMD_PREFMENU;
+      return (buttons.routingkey>0) ? CR_CUTRECT+buttons.routingkey-1 : CMD_PREFMENU;
     }
     else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_MENU)) return CMD_PASTE;
     else if (buttons.bigbuttons==(KEY_CURSOR | KEY_LEFT)) return CMD_CHRLT;
@@ -119,7 +119,7 @@ static int readbrl(DriverCommandContext cmds) {
       // A cursor routing key has been pressed
       if (buttons.routingkey>0) {
         usleep(5);
-        return CR_ROUTEOFFSET+buttons.routingkey-1;
+        return CR_ROUTE+buttons.routingkey-1;
       }
       else return EOF;
     } else

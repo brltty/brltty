@@ -238,7 +238,7 @@ static int readbrl(DriverCommandContext cmds)
    {
     routing=0; res=EOF;
     if (isinbounds(ibuf[1],0xc0,0xE7) && (int)(ibuf[1]-0xC0)<TAILLEPLAGETACTILE)
-     res=(int)(ibuf[1]-0xc0)+CR_ROUTEOFFSET;
+     res=(int)(ibuf[1]-0xc0)+CR_ROUTE;
     return res;
    }
    functionkey=isinbounds(ibuf[1],0xe1,0xea);

@@ -15,10 +15,14 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* cut-n-paste.h - cut & paste functionality
- */
+#ifndef _CUT_H
+#define _CUT_H
 
 unsigned char *cut_buffer; /* for CMD_NXSEARCH */
-void cut_begin (int x, int y);
-void cut_end (int x, int y);
-void cut_paste ();
+extern void cut_begin (int column, int row);
+extern void cut_append (int column, int row);
+extern int cut_rectangle (int column, int row);
+extern int cut_line (int column, int row);
+extern int cut_paste (void);
+
+#endif /* !defined(_CUT_H) */

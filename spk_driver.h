@@ -15,9 +15,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* this header file is used to create the driver structure */
-/* for a dynamically loadable speech driver. */
-/* SPKNAME must be defined - see spkconf.h */
+#ifndef _SPK_DRIVER_H
+#define _SPK_DRIVER_H
+
+/* this header file is used to create the driver structure
+ * for a dynamically loadable speech driver.
+ * SPKNAME must be defined - see spkconf.h
+ */
+
+#include "spk.h"
 
 /* Routines provided by this speech driver. */
 static void identspk (void); /* print start-up messages */
@@ -69,3 +75,5 @@ speech_driver spk_driver =
   trackspk,
   isSpeaking
 };
+
+#endif /* !defined(_SPK_DRIVER_H) */

@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _ADLIB_H
+#define _ADLIB_H
+
 /*
  * Miscellaneous FM chip soundcard routines for BRLTTY.
  * Implemented by Dave Mielke <dave@mielke.cc>.
@@ -132,3 +135,5 @@ extern const unsigned char AL_channelCount;
 #define ALR_FREQUENCY_MSB(channel) (0XB0 + (channel))
 #define AL_OCTAVE_SHIFT 2
 #define AL_FREQ_ON 0X20
+
+#endif /* !defined(_ADLIB_H) */

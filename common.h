@@ -15,94 +15,82 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _COMMON_H
+#define _COMMON_H
+
+#include "brl.h"
+
+typedef enum {
+  sbwAll,
+  sbwEndOfLine,
+  sbwRestOfLine
+} SkipBlankWindowsMode;
+
+typedef enum {
+  tdSpeaker,
+  tdSoundCard,
+  tdSequencer,
+  tdAdLib
+} TuneDevice;
+
 /*
- * struct definition of settings that are saveable.
- * ENV_MAGICNUM has to be bumped whenever the definition of
- * struct brltty_env is modified otherwise this structure could be
+ * Structure definition for preferences (settings which are saveable).
+ * PREFS_MAGICNUM has to be bumped whenever the definition of
+ * Preferences is modified otherwise this structure could be
  * filled with incompatible data from disk.
  */
-#define ENV_MAGICNUM 0x4005
+#define PREFS_MAGICNUM 0x4005
 
-struct brltty_env {
-	unsigned char magicnum[2];
-	unsigned char csrvis;
-	unsigned char spare1;
-	unsigned char attrvis;
-	unsigned char spare2;
-	unsigned char csrblink;
-	unsigned char spare3;
-	unsigned char capblink;
-	unsigned char spare4;
-	unsigned char attrblink;
-	unsigned char spare5;
-	unsigned char csrsize;
-	unsigned char spare6;
-	unsigned char csroncnt;
-	unsigned char spare7;
-	unsigned char csroffcnt;
-	unsigned char spare8;
-	unsigned char caponcnt;
-	unsigned char spare9;
-	unsigned char capoffcnt;
-	unsigned char spare10;
-	unsigned char attroncnt;
-	unsigned char spare11;
-	unsigned char attroffcnt;
-	unsigned char spare12;
-	unsigned char sixdots;
-	unsigned char metamode;
-	unsigned char slidewin;
-	unsigned char eager_slidewin;
-	unsigned char sound;
-	unsigned char tunedev;
-	unsigned char skpidlns;
-	unsigned char spare15;
-	unsigned char skpblnkwinsmode;
-	unsigned char spare16;
-	unsigned char skpblnkwins;
-	unsigned char midiinstr;
-	unsigned char stcellstyle;
-	unsigned char winovlp;
-} __attribute__((packed));
+typedef struct {
+  unsigned char magicnum[2];
+  unsigned char csrvis;
+  unsigned char spare1;
+  unsigned char attrvis;
+  unsigned char spare2;
+  unsigned char csrblink;
+  unsigned char spare3;
+  unsigned char capblink;
+  unsigned char spare4;
+  unsigned char attrblink;
+  unsigned char spare5;
+  unsigned char csrsize;
+  unsigned char spare6;
+  unsigned char csroncnt;
+  unsigned char spare7;
+  unsigned char csroffcnt;
+  unsigned char spare8;
+  unsigned char caponcnt;
+  unsigned char spare9;
+  unsigned char capoffcnt;
+  unsigned char spare10;
+  unsigned char attroncnt;
+  unsigned char spare11;
+  unsigned char attroffcnt;
+  unsigned char spare12;
+  unsigned char sixdots;
+  unsigned char metamode;
+  unsigned char slidewin;
+  unsigned char eager_slidewin;
+  unsigned char sound;
+  unsigned char tunedev;
+  unsigned char skpidlns;
+  unsigned char spare15;
+  unsigned char skpblnkwinsmode;
+  unsigned char spare16;
+  unsigned char skpblnkwins;
+  unsigned char midiinstr;
+  unsigned char stcellstyle;
+  unsigned char winovlp;
+} __attribute__((packed)) Preferences;
+extern Preferences prefs;		/* current preferences settings */
 
-/* 
- * struct definition for volatile parameters
- */
-struct brltty_param {
-	short csrtrk;		/* tracking mode */
-	short csrhide;		/* For temporarily hiding cursor */
-	short dispmode;		/* text or attributes display */
-	short winx, winy;	/* upper-left corner of braille window */
-	short motx, moty;	/* user motion of braille window */
-	short trkx, trky;	/* tracked cursor position */
-};
-
-
-#define TBL_TEXT 0		/* use text translation table */
-#define TBL_ATTRIB 1		/* use attribute translation table */
-
-
-/*
- * Shared variables
- */
-
-extern char VERSION[];			/* BRLTTY version string */
-extern char COPYRIGHT[];		/* BRLTTY copyright banner */
-
-extern struct brltty_param initparam;	/* defaults for new brltty_param */
-extern struct brltty_env env;		/* current env parameters */
 extern brldim brl;			/* braille driver reference */
-
 extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */
 
 extern int refreshInterval;
 extern int messageDelay;
-
-/*
- * Shared functions
- */
 
 extern void startup (int argc, char *argv[]);
 extern int loadPreferences (int change);
@@ -112,7 +100,6 @@ extern void updatePreferences (void);
 extern void initializeBraille (void);
 extern void startBrailleDriver (void);
 extern void stopBrailleDriver (void);
-
 extern void clearStatusCells (void);
 extern void setStatusText (const unsigned char *text);
 
@@ -120,3 +107,4 @@ extern void initializeSpeech (void);
 extern void startSpeechDriver (void);
 extern void stopSpeechDriver (void);
 
+#endif /* !defined(_COMMON_H) */

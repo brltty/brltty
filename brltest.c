@@ -252,14 +252,18 @@ main (int argc, char *argv[]) {
             default:
               argument = key & VAL_ARG_MASK;
               switch (key & VAL_BLK_MASK) {
-                SIMPLE(CR_ROUTEOFFSET, "cursor to column");
-                SIMPLE(CR_BEGBLKOFFSET, "cut from column");
-                SIMPLE(CR_ENDBLKOFFSET, "cut to column");
+                SIMPLE(CR_ROUTE, "cursor to column");
+                SIMPLE(CR_CUTBEGIN, "start new cut buffer from column");
+                SIMPLE(CR_CUTAPPEND, "append to cut buffer from column");
+                SIMPLE(CR_CUTRECT, "rectangular cut to column");
+                SIMPLE(CR_CUTLINE, "linear cut to column");
                 SIMPLE(CR_SWITCHVT, "select virtual terminal");
                 SIMPLE(CR_NXINDENT, "down to line indented no more than column");
                 SIMPLE(CR_PRINDENT, "up to line indented no more than column");
-                SIMPLE(CR_MSGATTRIB, "describe character at column");
+                SIMPLE(CR_DESCCHAR, "describe character at column");
                 SIMPLE(CR_SETLEFT, "set left of window to column");
+                SIMPLE(CR_SETMARK, "associate current window position with routing key");
+                SIMPLE(CR_GOTOMARK, "return to window position associated with routing key");
                 case VAL_PASSKEY:
                   if (argument < VPK_FUNCTION) {
                     switch (argument) {

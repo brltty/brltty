@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _TUNES_H
+#define _TUNES_H
+
 typedef struct {
    unsigned int frequency;
    unsigned int duration;
@@ -51,3 +54,5 @@ extern void playTune (TuneDefinition *tune);
 
 extern char *midiInstrumentTable[];
 extern unsigned int midiInstrumentCount;
+
+#endif /* !defined(_TUNES_H) */

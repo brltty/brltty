@@ -15,12 +15,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _SCR_LINUX_H
+#define _SCR_LINUX_H
+
 /*
  * scr_linux.h - C++ header file for the Linux vcsa screen type library
  */
-
-#ifndef _SCR_LINUX_H
-#define _SCR_LINUX_H
 
 #include <linux/kd.h>
 
@@ -77,4 +77,4 @@ public:
   int switchvt (int);
 };
 
-#endif  /* _SCR_LINUX_H */
+#endif /* !defined(_SCR_LINUX_H) */

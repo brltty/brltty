@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifndef _TONES_H
+#define _TONES_H
+
 typedef struct {
    int (*open) (void);
    int (*generate) (int frequency, int duration);
@@ -27,3 +30,5 @@ extern ToneProcedure toneSpeaker;
 extern ToneProcedure toneSoundCard;
 extern ToneProcedure toneSequencer;
 extern ToneProcedure toneAdLib;
+
+#endif /* !defined(_TONES_H) */

@@ -144,9 +144,9 @@ typedef struct {
      { CMD_BOT_LEFT   , OFFS_FRONT + 7, 0X1 }, \
      { CMD_BOT        , OFFS_FRONT + 7, 0X2 }, \
                                                \
-     { CR_ROUTEOFFSET , ROUTINGKEY    , 0X0 }, \
-     { CR_BEGBLKOFFSET, ROUTINGKEY    , 0X1 }, \
-     { CR_ENDBLKOFFSET, ROUTINGKEY    , 0X2 }, \
+     { CR_ROUTE       , ROUTINGKEY    , 0X0 }, \
+     { CR_CUTBEGIN    , ROUTINGKEY    , 0X1 }, \
+     { CR_CUTRECT     , ROUTINGKEY    , 0X2 }, \
      { CR_PRINDENT    , ROUTINGKEY    , 0X4 }, \
      { CR_NXINDENT    , ROUTINGKEY    , 0X8 }, \
      { CMD_PASTE      , NOKEY         , 0X3 }
@@ -188,7 +188,7 @@ typedef struct {
       { CMD_RESTARTSPEECH           , OFFS_FRONT +  8, 0010 }, \
       { CMD_SAY                     , OFFS_FRONT +  5, 0010 }, \
       { CMD_SAYALL                  , OFFS_FRONT +  9, 0010 }, \
-      { CR_MSGATTRIB                , ROUTINGKEY     , 0010 }, \
+      { CR_DESCCHAR                 , ROUTINGKEY     , 0010 }, \
                                                                \
       { VAL_PASSKEY+VPK_INSERT      , OFFS_FRONT +  7, 0002 }, \
       { VAL_PASSKEY+VPK_CURSOR_LEFT , OFFS_FRONT +  6, 0002 }, \
@@ -204,11 +204,11 @@ typedef struct {
       { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_FRONT +  9, 0020 }, \
       { VAL_PASSKEY+VPK_FUNCTION    , ROUTINGKEY     , 0020 }, \
                                                                \
-      { CR_ROUTEOFFSET              , ROUTINGKEY     , 0000 }, \
+      { CR_ROUTE                    , ROUTINGKEY     , 0000 }, \
       { CR_PRINDENT                 , ROUTINGKEY     , 0004 }, \
       { CR_NXINDENT                 , ROUTINGKEY     , 0040 }, \
-      { CR_BEGBLKOFFSET             , ROUTINGKEY     , 0100 }, \
-      { CR_ENDBLKOFFSET             , ROUTINGKEY     , 0200 }, \
+      { CR_CUTBEGIN                 , ROUTINGKEY     , 0100 }, \
+      { CR_CUTRECT                  , ROUTINGKEY     , 0200 }, \
       { CMD_PASTE                   , NOKEY          , 0300 }
 	
 
@@ -261,11 +261,11 @@ typedef struct {
      { CMD_CHRRT                   , NOKEY               , 0X28 }, \
      { CMD_HWINRT                  , OFFS_EASY + EASY_RI2, 0X28 }, \
                                                                    \
-     { CR_ROUTEOFFSET              , ROUTINGKEY          , 0X00 }, \
+     { CR_ROUTE                    , ROUTINGKEY          , 0X00 }, \
      { CR_PRINDENT                 , ROUTINGKEY          , 0X01 }, \
      { CR_NXINDENT                 , ROUTINGKEY          , 0X02 }, \
-     { CR_BEGBLKOFFSET             , ROUTINGKEY          , 0X04 }, \
-     { CR_ENDBLKOFFSET             , ROUTINGKEY          , 0X08 }
+     { CR_CUTBEGIN                 , ROUTINGKEY          , 0X04 }, \
+     { CR_CUTRECT                  , ROUTINGKEY          , 0X08 }
 
 
 /* what to show for 2 status cells */

@@ -26,7 +26,6 @@
 #include <string.h>
 #include <dlfcn.h>
 
-#include "brl.h"
 #include "misc.h"
 #include "spk.h"
 

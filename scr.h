@@ -15,12 +15,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* scr.h - C header file for the screen reading library
- */
-
 #ifndef _SCR_H
 #define _SCR_H
 
+/* scr.h - C header file for the screen reading library
+ */
 
 /* mode argument for readScreen() */
 typedef enum {
@@ -94,4 +93,4 @@ int initializeHelpScreen (char *);	/* open help screen file */
 void setHelpPageNumber (short);			/* set screen number (initial default 0) */
 short getHelpPageCount (void);			/* get number of help screens */
 
-#endif /* !_SCR_H */
+#endif /* !defined(_SCR_H) */

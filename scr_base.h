@@ -15,18 +15,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* scr_base.h - C++ header file for the screen drivers library
- */
-
 #ifndef _SCR_BASE_H
 #define _SCR_BASE_H
 
+/* scr_base.h - C++ header file for the screen drivers library
+ */
 
 extern "C"
 {
 #include "scr.h"
 }
-#include "helphdr.h"		// help file header format
+#include "help.h"		// help file header format
 
 
 // abstract base class - useful for pointers
@@ -95,4 +94,4 @@ public:
 
 extern RealScreen *live;
 
-#endif // !_SCR_BASE_H
+#endif /* !defined(_SCR_BASE_H) */

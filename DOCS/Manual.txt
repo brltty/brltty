@@ -9,7 +9,7 @@
 
   Dave Mielke <dave@mielke.cc>
 
-  Version 2.99, December 2001
+  Version 2.99.2, January 2002
 
   Copyright © 1995-2001 by The BRLTTY Team - All Rights Reserved.  This
   is free software, placed under the terms of TThhee GGNNUU GGeenneerraall PPuubblliicc
@@ -1091,6 +1091,7 @@
 
   33..11..22..  HHoorriizzoonnttaall MMoottiioonn
 
+  See also the ``SETLEFT'' routing key command.
 
      CCHHRRLLTT
         Go left one character.
@@ -1119,7 +1120,6 @@
         current line.  Other features like its ability to skip blank
         windows (see the ``SKPBLNKWINS'' command) further enhance its
         usefulness for this purpose.
-
      FFWWIINNLLTTSSKKIIPP
         Go left to the nearest previous non-blank window.
 
@@ -1135,6 +1135,7 @@
 
   33..11..33..  IImmpplliicciitt MMoottiioonn
 
+  See also the ``GOTOMARK'' routing key command.
 
      HHOOMMEE
         Go to where the cursor is.
@@ -1250,6 +1251,7 @@
         ddoott 88
            Everything else.
 
+
      AATTTTRRBBLLIINNKK
         Blink (turn on and off according to a predefined interval) the
         attribute underline (see the ``ATTRVIS'' command).  This feature
@@ -1315,6 +1317,7 @@
      MMEENNUU__NNEEXXTT__IITTEEMM
         Go to the next item in the menu.
 
+
      MMEENNUU__PPRREEVV__SSEETTTTIINNGG
         Decrement the current menu item's setting.
 
@@ -1378,7 +1381,7 @@
   33..11..1111..  RRoouuttiinngg KKeeyyss
 
 
-     RROOUUTTEEOOFFFFSSEETT
+     RROOUUTTEE
         Route (bring) the cursor to the character associated with the
         routing key (see ``Cursor Routing'' for full details).  The
         cursor is moved by simulating arrow-key presses.  This command
@@ -1387,17 +1390,28 @@
         other than cursor motion.  Braille displays which don't have
         routing keys should use the ``CSRJMP'' command.
 
-     BBEEGGBBLLKKOOFFFFSSEETT
+     CCUUTTBBEEGGIINN
         Anchor the start of the cut block at the character associated
         with the routing key (see ``Cut and Paste'' for full details).
-        Braille displays which don't have routing keys should use the
-        ``CUT_BEG'' command.
+        This command clears the cut buffer.  Braille displays which
+        don't have routing keys should use the ``CUT_BEG'' command.
 
-     EENNDDBBLLKKOOFFFFSSEETT
+     CCUUTTAAPPPPEENNDD
+        Anchor the start of the cut block at the character associated
+        with the routing key (see ``Cut and Paste'' for full details).
+        This command doesn't clear the cut buffer.
+
+     CCUUTTRREECCTT
         Anchor the end of the cut block at the character associated with
-        the routing key, and copy the block into the cut buffer (see
-        ``Cut and Paste'' for full details).  Braille displays which
-        don't have routing keys should use the ``CUT_END'' command.
+        the routing key, and append the rectangular region to the cut
+        buffer (see ``Cut and Paste'' for full details).  Braille
+        displays which don't have routing keys should use the
+        ``CUT_END'' command.
+
+     CCUUTTLLIINNEE
+        Anchor the end of the cut block at the character associated with
+        the routing key, and append the linear region to the cut buffer
+        (see ``Cut and Paste'' for full details).
 
      SSWWIITTCCHHVVTT
         Switch to the virtual terminal whose number (counting from 1)
@@ -1411,7 +1425,7 @@
         Go up to the nearest previous line which isn't indented more
         than the column associated with the routing key.
 
-     MMSSGGAATTTTRRIIBB
+     DDEESSCCCCHHAARR
         Momentarily (see the ``-M'' command line option) display a
         message describing the character associated with the routing
         key.  It reveals the decimal and hexadecimal values of the
@@ -1430,6 +1444,16 @@
         window motion (like the ``CHRLT'', ``CHRRT'', ``HWINLT'', and
         ``HWINRT'' commands).
 
+     SSEETTMMAARRKK
+        Mark (remember) the current position of the braille window in a
+        register associated with the routing key.  See the ``GOTOMARK''
+        command.
+
+
+     GGOOTTOOMMAARRKK
+        Move the braille window to the position formerly marked (see the
+        ``SETMARK'' command) with the same routing key.
+
 
   33..11..1122..  NNoo RRoouuttiinngg KKeeyyss
 
@@ -1441,21 +1465,22 @@
         This command doesn't always work because some applications
         either move the cursor somewhat unpredictably or use the arrow
         keys for purposes other than cursor motion.  Braille displays
-        which have routing keys should use the ``ROUTEOFFSET'' command
-        instead of this one.
+        which have routing keys should use the ``ROUTE'' command instead
+        of this one.
 
      CCUUTT__BBEEGG
         Anchor the start of the cut block at the character at the top-
         left corner of the braille window (see ``Cut and Paste'' for
-        full details).  Braille displays which have routing keys should
-        use the ``BEGBLKOFFSET'' command instead of this one.
+        full details).  This command clears the cut buffer.  Braille
+        displays which have routing keys should use the ``CUTBEGIN''
+        command instead of this one.
 
      CCUUTT__EENNDD
         Anchor the end of the cut block at the character at the bottom-
-        right corner of the braille window, and copy the block into the
-        cut buffer (see ``Cut and Paste'' for full details).  Braille
-        displays which have routing keys should use the ``ENDBLKOFFSET''
-        command instead of this one.
+        right corner of the braille window, and append the rectangular
+        region to the cut buffer (see ``Cut and Paste'' for full
+        details).  Braille displays which have routing keys should use
+        the ``CUTRECT'' command instead of this one.
 
 
   33..22..  CCuurrssoorr RRoouuttiinngg
@@ -1474,13 +1499,13 @@
   progress of the cursor as it moves.
 
   Some braille displays have a button, known as a routing key, above
-  each cell.  These keys use the ``ROUTEOFFSET'' command to route the
-  cursor right to the desired location.  If your display doesn't have
-  routing keys, then use the ``CSRJMP'' command to route the cursor to
-  the top-left corner of the braille window, and then use the arrow keys
-  on the keyboard to do the rest.  Some drivers interpret certain keys
-  on the braille display itself as arrow keys so that this can be done
-  without having to remove your hands from the display.
+  each cell.  These keys use the ``ROUTE'' command to route the cursor
+  right to the desired location.  If your display doesn't have routing
+  keys, then use the ``CSRJMP'' command to route the cursor to the top-
+  left corner of the braille window, and then use the arrow keys on the
+  keyboard to do the rest.  Some drivers interpret certain keys on the
+  braille display itself as arrow keys so that this can be done without
+  having to remove your hands from the display.
 
   Cursor routing, while very convenient and effective, is, strictly
   speaking, not completely reliable.  One reason for this is that its
@@ -1536,29 +1561,44 @@
   addresses, and URLs. Cutting and pasting text involves three simple
   steps:
 
-  1. Mark the top-left corner of the rectangular area on the screen
-     which is to be grabbed (cut).  If your display has routing keys,
-     then move the braille window so that the first character to be cut
-     appears anywhere within it, and invoke the ``BEGBLKOFFSET'' command
+  1. Mark either the top-left corner of the rectangular area or the
+     beginning of the linear area on the screen which is to be grabbed
+     (cut).  If your display has routing keys, then move the braille
+     window so that the first character to be cut appears anywhere
+     within it, and then:
+
+  ·  invoke the ``CUTBEGIN'' command to start a new cut buffer
+
+  ·  invoke the ``CUTAPPEND'' command to append to the existing cut
+     buffer
+
      by holding down the key(s) associated with it and pressing the
      routing key associated with the character.  If your display doesn't
      have routing keys, then move the braille window so that the first
-     character to be cut appears at its top-left corner, and invoke the
-     ``CUT_BEG'' command.  Marking the start of the cut area clears the
-     cut buffer.
+     character to be cut is at its top-left corner, and then invoke the
+     ``CUT_BEG'' command to start a new cut buffer (you can't append to
+     the existing cut buffer).
 
-  2. Mark the bottom-right corner of the rectangular area on the screen
-     which is to be grabbed (cut).  If your display has routing keys,
-     then move the braille window so that the last character to be cut
-     appears anywhere within it, and invoke the ``ENDBLKOFFSET'' command
+  2. Mark either the bottom-right corner of the rectangular area or the
+     end of the linear area on the screen which is to be grabbed (cut).
+     If your display has routing keys, then move the braille window so
+     that the last character to be cut appears anywhere within it, and
+     then
+
+  ·  invoke the ``CUTRECT'' command to cut a rectangular area
+
+  ·  invoke the ``CUTLINE'' command to cut a linear area
+
      by holding down the key(s) associated with it and pressing the
      routing key associated with the character.  If your display doesn't
      have routing keys, then move the braille window so that the last
-     character to be cut appears at its bottom-right corner, and invoke
-     the ``CUT_END'' command.  Marking the end of the cut area copies
-     the selected screen content into the cut buffer.  Excess white
-     space is removed from the end of each line in the cut buffer so
-     that unwanted trailing spaces won't be pasted back in.
+     character to be cut is at its bottom-right corner, and invoke the
+     ``CUT_END'' command to cut a rectangular area (you can't cut a
+     linear area).  Marking the end of the cut area appends the selected
+     screen content to the cut buffer.  Excess white space is removed
+     from the end of each line in the cut buffer so that unwanted
+     trailing spaces won't be pasted back in.  Control characters are
+     replaced with blanks.
 
   3. Insert (paste) the text where it's needed.  Place the cursor over
      the character where the text is to be pasted, and invoke the
@@ -1608,7 +1648,6 @@
   information as well (see the documentation for your display's driver).
   The data presented by this display isn't static, and may change at any
   time in response to screen updates and/or BRLTTY commands.
-
   Use the ``INFO'' command to switch to the status display, and use it
   again to return to the screen.  The layout of the information
   contained therein is dependent on the size of the braille window.
@@ -1647,7 +1686,6 @@
         bbllaannkk
            The cursor isn't visible, and won't blink when made visible.
 
-
         b  The cursor isn't visible, and will blink when made visible.
 
         v  The cursor is visible, and isn't blinking.
@@ -1674,6 +1712,7 @@
         8  All eight dots are being used.
 
         6  Only dots 1 through 6 are being used.
+
 
      _u  The state of the uppercase (capital letter) display features
         (see the ``CAPBLINK'' command).
@@ -1706,6 +1745,9 @@
      _s  The settings of some of BRLTTY's features.  A feature is turned
         on if its corresponding dot is raised.
 
+        DDoott 11
+           Frozen screen image (see the ``FREEZE'' command).
+
         DDoott 22
            Display attributes (see the ``DISPMD'' command).
 
@@ -1714,6 +1756,7 @@
 
         DDoott 44
            Visible cursor (see the ``CSRVIS'' command).
+
         DDoott 55
            Block cursor (see the ``CSRSIZE'' command).
 
@@ -1735,6 +1778,7 @@
            Cursor tracking is off.
 
         t  Cursor tracking is on.
+
 
      _c  The state of the cursor visibility features (see the ``CSRVIS''
         and ``CSRBLINK'' commands).
@@ -1776,8 +1820,6 @@
            Uppercase letters don't blink.
 
         B  Uppercase letters blink.
-
-
 
 
   33..66..  PPrreeffeerreenncceess SSeettttiinnggss
@@ -1870,7 +1912,6 @@
 
         88--ddoott
            With all eight dots.
-
         66--ddoott
            With only dots 1 through 6.
 
@@ -1885,7 +1926,8 @@
         HHiigghh--oorrddeerr BBiitt
            Setting its high-order bit.
 
-        The initial setting is Escape Prefix.
+        Use the setmetamode command to find out how your system has been
+        configured.  The initial setting is Escape Prefix.
 
      SSkkiipp IIddeennttiiccaall LLiinneess
         When moving either up or down exactly one line with the ``LNUP''
@@ -1911,8 +1953,8 @@
         YYeess
            Skip passed blank windows.
 
-        This setting can also be changed with the ``SKPBLNKWINS''
-        command.
+        This setting can also be changed with the ``SKPBLNKWINS'' com­
+        mand.
 
      WWhhiicchh BBllaannkk WWiinnddoowwss
         If blank windows are to be skipped:
@@ -1936,7 +1978,6 @@
 
         NNoo Horizontally reposition the window such that its left end is
            a multiple of its width from the left edge of the screen.
-
         YYeess
            Horizontally reposition the window such that the cursor,
            while remaining on that side of the window, is nearer the
@@ -2043,7 +2084,6 @@
         When displaying screen content (see the id="options-DISPMD"
         name="DISPMD"> command):
 
-
         NNoo Leave capital letters visible all the time.
 
         YYeess
@@ -2134,6 +2174,7 @@
 
               ff  The screen image is frozen (see the ``FREEZE''
                  command).
+
 
               ff  The cursor is being tracked (see the ``CSRTRK''
                  command).
@@ -2241,8 +2282,8 @@
               the letter F.  If it isn't, then the column (counting from
               0) wherein the cursor is (see below).
 
-           Row and column numbers are shown as two digits within a
-           single cell.  The tens digit is shown in the top half of the
+           Row and column numbers are shown as two digits within a sin­
+           gle cell.  The tens digit is shown in the top half of the
            cell, and the units digit is shown in the bottom half of the
            cell.
 
@@ -2373,7 +2414,6 @@
         Specify the location of the ``configuration file'' which is to
         be used for the establishing of default run-time settings.
 
-
      -h --help
         Display a summary of the command line options accepted by
         BRLTTY, and then exit.
@@ -2440,6 +2480,7 @@
         directory, the preferences file, the text and attributes
         translation tables, and the braille display device and help file
         are identified.
+
      -B_n_a_m_e=_v_a_l_u_e,... --braille-parameters=_n_a_m_e=_v_a_l_u_e,...
         Specify parameters for the braille display driver.  If the same
         parameter is specified more than once, then its rightmost
@@ -2505,7 +2546,6 @@
      tteexxtt..eess..ttbbll
         Spanish
 
-
      tteexxtt..ffrreenncchh..ttbbll
         French
 
@@ -2532,7 +2572,6 @@
 
      tteexxtt..sswweeddiisshh..ttbbll
         Swedish
-
      tteexxtt..uukk..ttbbll
         United Kingdom English
 
@@ -2571,7 +2610,6 @@
         DDoott 44
            Red
 
-
         DDoott 55
            Green
 
@@ -2598,6 +2636,7 @@
 
         DDoott 33
            Blue
+
 
         DDoott 77
            Blink
@@ -2637,7 +2676,6 @@
      BBiitt 00
         Dot 1
 
-
      BBiitt 11
         Dot 4
 
@@ -2661,6 +2699,9 @@
 
   This particular mapping makes it easy and efficient for BRLTTY to ver­
   tically shift a dot pattern.
+
+
+
 
 
   44..44..  TTaabbllee UUttiilliittiieess
@@ -2704,6 +2745,7 @@
 
        _c_c _x_x _d_d_d (73214568)_t_t B+_b_b_b_b _n_a_m_e
 
+
   If the -c option is specified, each line looks like this:
 
        _c_c _x_x _d_d_d (73214568)_t_t B+_b_b_b_b U+_u_u_u_u _d_e_s_c_r_i_p_t_i_o_n
@@ -2726,6 +2768,7 @@
         example, would be ( 3 1456 ).  The dot numbers appear in the
         same order as on a standard braille keyboard so as to make it
         easier to visualize the braille character.
+
 
      _t_t The hexadecimal value of the byte representing the dot
         combination which is in the translation table.
@@ -2769,7 +2812,6 @@
         Display a warning for each dot combination which hasn't been
         used.
 
-
   A line which assigns a dot combination to a character must contain
   that dot combination within parenthesis, e.g. (12).  The text file
   must contain exactly 256 such lines, each one, in order, defining the
@@ -2794,7 +2836,7 @@
   This utility converts a binary translation table from one dot mapping
   to another.
 
-       tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
+  tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
 
 
 
@@ -2835,7 +2877,6 @@
         BBiitt 66
            Dot 5
 
-
         BBiitt 77
            Dot 4
 
@@ -2859,6 +2900,7 @@
 
         BBiitt 55
            Dot 6
+
 
         BBiitt 66
            Dot 7
@@ -2901,7 +2943,6 @@
 
 
 
-
   So far, this paradigm is somewhat awkward for at least two reasons.
   One is that these long path names are too hard to type, and the other
   is that you don't want to fiddle with your system's boot sequence each
@@ -2925,9 +2966,11 @@
   of BRLTTY's standard locations.
 
 
-       ln -s /brltty/sbin/brltty /sbin/brltty
-       ln -s /brltty/etc/brltty /etc/brltty
-       ln -s /brltty/lib/brltty /lib/brltty
+
+
+  ln -s /brltty/sbin/brltty /sbin/brltty
+  ln -s /brltty/etc/brltty /etc/brltty
+  ln -s /brltty/lib/brltty /lib/brltty
 
 
 
@@ -2967,7 +3010,6 @@
 
 
 
-
   One problem often encountered when trying to use BRLTTY in an
   uncertain environment like a root disk or an incomplete system is that
   it might not find the shared libraries (or parts thereof) which it
@@ -2992,7 +3034,6 @@
 
   Apart from fixing bugs and supporting more types of braille displays,
   we hope, time permitting, to work on the following:
-
      BBeetttteerr AAttttrriibbuuttee HHaannddlliinngg
 
      ·  Attribute tracking.
@@ -3033,7 +3074,6 @@
   the current version of BRLTTY.
 
 
-
   66..  AAppppeennddiicceess
 
 
@@ -3060,7 +3100,6 @@
 
   ·  Papenmeier: Tiny, Compact, Compact 486, 2D Lite, 2D Screen Soft, EL
      2D-40, EL 2D-66, EL-80, IB 80 CR Soft
-
   ·  Pulse Data International: BrailleNote 18/32
 
   ·  Telesensory Systems Inc.: Navigator 20/40/80 (latest firmware
@@ -3098,7 +3137,6 @@
      aall Alva
 
      bbll BrailleLite
-
 
      bbnn BrailleNote
 
@@ -3182,44 +3220,6 @@
 
 
   66..55..  NNoorrtthh AAmmeerriiccaann BBrraaiillllee CCoommppuutteerr CCooddee
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

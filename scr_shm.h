@@ -15,12 +15,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* scr_shm.h - C++ header file for the screen drivers library
- */
-
 #ifndef _SCR_SHM_H
 #define _SCR_SHM_H
 
+/* scr_shm.h - C++ header file for the screen drivers library
+ */
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -43,4 +42,4 @@ public:
   void close (void);		// called once to close screen reading
 };
 
-#endif  /* _SCR_SHM_H */
+#endif /* !defined(_SCR_SHM_H) */

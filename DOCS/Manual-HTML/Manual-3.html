@@ -150,7 +150,8 @@ See
 <P>
 <H3><A NAME="horizontal"></A> Horizontal Motion</H3>
 
-<P>
+<P>See also the 
+<A HREF="#command-SETLEFT">SETLEFT</A> routing key command.
 <DL>
 <DT><B>CHRLT
 <A NAME="command-CHRLT"></A> </B><DD><P>Go left one character.
@@ -190,7 +191,8 @@ further enhance its usefulness for this purpose.
 <P>
 <H3>Implicit Motion</H3>
 
-<P>
+<P>See also the 
+<A HREF="#command-GOTOMARK">GOTOMARK</A> routing key command.
 <DL>
 <DT><B>HOME
 <A NAME="command-HOME"></A> </B><DD><P>Go to where the cursor is.
@@ -454,8 +456,8 @@ because it makes no attempt to simulate the left- and right-arrows.
 
 <P>
 <DL>
-<DT><B>ROUTEOFFSET
-<A NAME="command-ROUTEOFFSET"></A> </B><DD><P>Route (bring) the cursor to the character
+<DT><B>ROUTE
+<A NAME="command-ROUTE"></A> </B><DD><P>Route (bring) the cursor to the character
 associated with the routing key
 (see 
 <A HREF="#routing">Cursor Routing</A> for full details).
@@ -466,23 +468,36 @@ or use the arrow keys for purposes other than cursor motion.
 Braille displays which don't have routing keys
 should use the 
 <A HREF="#command-CSRJMP">CSRJMP</A> command.
-<DT><B>BEGBLKOFFSET
-<A NAME="command-BEGBLKOFFSET"></A> </B><DD><P>Anchor the start of the cut block at the character
+<DT><B>CUTBEGIN
+<A NAME="command-CUTBEGIN"></A> </B><DD><P>Anchor the start of the cut block at the character
 associated with the routing key
 (see 
 <A HREF="#cut">Cut and Paste</A> for full details).
+This command clears the cut buffer.
 Braille displays which don't have routing keys
 should use the 
 <A HREF="#command-CUT_BEG">CUT_BEG</A> command.
-<DT><B>ENDBLKOFFSET
-<A NAME="command-ENDBLKOFFSET"></A> </B><DD><P>Anchor the end of the cut block at the character
+<DT><B>CUTAPPEND
+<A NAME="command-CUTAPPEND"></A> </B><DD><P>Anchor the start of the cut block at the character
+associated with the routing key
+(see 
+<A HREF="#cut">Cut and Paste</A> for full details).
+This command doesn't clear the cut buffer.
+<DT><B>CUTRECT
+<A NAME="command-CUTRECT"></A> </B><DD><P>Anchor the end of the cut block at the character
 associated with the routing key,
-and copy the block into the cut buffer
+and append the rectangular region to the cut buffer
 (see 
 <A HREF="#cut">Cut and Paste</A> for full details).
 Braille displays which don't have routing keys
 should use the 
 <A HREF="#command-CUT_END">CUT_END</A> command.
+<DT><B>CUTLINE
+<A NAME="command-CUTLINE"></A> </B><DD><P>Anchor the end of the cut block at the character
+associated with the routing key,
+and append the linear region to the cut buffer
+(see 
+<A HREF="#cut">Cut and Paste</A> for full details).
 <DT><B>SWITCHVT
 <A NAME="command-SWITCHVT"></A> </B><DD><P>Switch to the virtual terminal whose number
 (counting from 1) matches that of the routing key.
@@ -492,8 +507,8 @@ more than the column associated with the routing key.
 <DT><B>PRINDENT
 <A NAME="command-PRINDENT"></A> </B><DD><P>Go up to the nearest previous line which isn't indented
 more than the column associated with the routing key.
-<DT><B>MSGATTRIB
-<A NAME="command-MSGATTRIB"></A> </B><DD><P>Momentarily (see the 
+<DT><B>DESCCHAR
+<A NAME="command-DESCCHAR"></A> </B><DD><P>Momentarily (see the 
 <A HREF="#options-message-delay">-M</A> command line option)
 display a message describing the character associated with the routing key.
 It reveals
@@ -515,6 +530,16 @@ and, therefore, eliminates the need for a lot of elementary window motion
 <A HREF="#command-HWINLT">HWINLT</A>,
 and 
 <A HREF="#command-HWINRT">HWINRT</A> commands).
+<DT><B>SETMARK
+<A NAME="command-SETMARK"></A> </B><DD><P>Mark (remember) the current position of the braille window
+in a register associated with the routing key.
+See the 
+<A HREF="#command-GOTOMARK">GOTOMARK</A> command.
+<DT><B>GOTOMARK
+<A NAME="command-GOTOMARK"></A> </B><DD><P>Move the braille window to the position formerly marked
+(see the 
+<A HREF="#command-SETMARK">SETMARK</A> command)
+with the same routing key.
 </DL>
 <P>
 <H3>No Routing Keys</H3>
@@ -532,26 +557,27 @@ either move the cursor somewhat unpredictably
 or use the arrow keys for purposes other than cursor motion.
 Braille displays which have routing keys
 should use the 
-<A HREF="#command-ROUTEOFFSET">ROUTEOFFSET</A>
+<A HREF="#command-ROUTE">ROUTE</A>
 command instead of this one.
 <DT><B>CUT_BEG
 <A NAME="command-CUT_BEG"></A> </B><DD><P>Anchor the start of the cut block at the character
 at the top-left corner of the braille window
 (see 
 <A HREF="#cut">Cut and Paste</A> for full details).
+This command clears the cut buffer.
 Braille displays which have routing keys
 should use the 
-<A HREF="#command-BEGBLKOFFSET">BEGBLKOFFSET</A>
+<A HREF="#command-CUTBEGIN">CUTBEGIN</A>
 command instead of this one.
 <DT><B>CUT_END
 <A NAME="command-CUT_END"></A> </B><DD><P>Anchor the end of the cut block at the character
 at the bottom-right corner of the braille window,
-and copy the block into the cut buffer
+and append the rectangular region to the cut buffer
 (see 
 <A HREF="#cut">Cut and Paste</A> for full details).
 Braille displays which have routing keys
 should use the 
-<A HREF="#command-ENDBLKOFFSET">ENDBLKOFFSET</A>
+<A HREF="#command-CUTRECT">CUTRECT</A>
 command instead of this one.
 </DL>
 <P>
@@ -574,7 +600,7 @@ by simulating the same arrow-key presses which you'd have to enter manually,
 and by monitoring the progress of the cursor as it moves.
 <P>Some braille displays have a button, known as a routing key, above each cell.
 These keys use the 
-<A HREF="#command-ROUTEOFFSET">ROUTEOFFSET</A> command
+<A HREF="#command-ROUTE">ROUTE</A> command
 to route the cursor right to the desired location.
 If your display doesn't have routing keys,
 then use the 
@@ -640,40 +666,57 @@ complicated command lines,
 E-mail addresses,
 and URLs. Cutting and pasting text involves three simple steps:
 <OL>
-<LI>Mark the top-left corner of the rectangular area on the screen
-which is to be grabbed (cut).
+<LI>Mark either the top-left corner of the rectangular area
+or the beginning of the linear area
+on the screen which is to be grabbed (cut).
 If your display has routing keys,
 then move the braille window so that
-the first character to be cut appears anywhere within it,
-and invoke the 
-<A HREF="#command-BEGBLKOFFSET">BEGBLKOFFSET</A> command
+the first character to be cut appears anywhere within it, and then:
+<UL>
+<LI>invoke the 
+<A HREF="#command-CUTBEGIN">CUTBEGIN</A> command
+to start a new cut buffer</LI>
+<LI>invoke the 
+<A HREF="#command-CUTAPPEND">CUTAPPEND</A> command
+to append to the existing cut buffer</LI>
+</UL>
+
 by holding down the key(s) associated with it
 and pressing the routing key associated with the character.
 If your display doesn't have routing keys,
 then move the braille window so that
-the first character to be cut appears at its top-left corner,
-and invoke the 
-<A HREF="#command-CUT_BEG">CUT_BEG</A> command.
-Marking the start of the cut area
-clears the cut buffer.</LI>
-<LI>Mark the bottom-right corner of the rectangular area on the screen
-which is to be grabbed (cut).
+the first character to be cut is at its top-left corner,
+and then invoke the 
+<A HREF="#command-CUT_BEG">CUT_BEG</A> command
+to start a new cut buffer (you can't append to the existing cut buffer).</LI>
+<LI>Mark either the bottom-right corner of the rectangular area
+or the end of the linear area
+on the screen which is to be grabbed (cut).
 If your display has routing keys,
 then move the braille window so that
-the last character to be cut appears anywhere within it,
-and invoke the 
-<A HREF="#command-ENDBLKOFFSET">ENDBLKOFFSET</A> command
+the last character to be cut appears anywhere within it, and then
+<UL>
+<LI>invoke the 
+<A HREF="#command-CUTRECT">CUTRECT</A> command
+to cut a rectangular area</LI>
+<LI>invoke the 
+<A HREF="#command-CUTLINE">CUTLINE</A> command
+to cut a linear area</LI>
+</UL>
+
 by holding down the key(s) associated with it
 and pressing the routing key associated with the character.
 If your display doesn't have routing keys,
 then move the braille window so that
-the last character to be cut appears at its bottom-right corner,
+the last character to be cut is at its bottom-right corner,
 and invoke the 
-<A HREF="#command-CUT_END">CUT_END</A> command.
+<A HREF="#command-CUT_END">CUT_END</A> command
+to cut a rectangular area (you can't cut a linear area).
 Marking the end of the cut area
-copies the selected screen content into the cut buffer.
+appends the selected screen content to the cut buffer.
 Excess white space is removed from the end of each line in the cut buffer
-so that unwanted trailing spaces won't be pasted back in.</LI>
+so that unwanted trailing spaces won't be pasted back in.
+Control characters are replaced with blanks.</LI>
 <LI>Insert (paste) the text where it's needed.
 Place the cursor over the character where the text is to be pasted,
 and invoke the 
@@ -796,7 +839,7 @@ and
 <P>Short pneumonics have been used, even though they're rather cryptic,
 in order to show the precise column layout.
 <BLOCKQUOTE><CODE>
-<EM>xxyys</EM> <EM>vt</EM> <EM>tcmfdu</EM>
+<EM>xx</EM><EM>yy</EM><EM>s</EM> <EM>vt</EM> <EM>tcmfdu</EM>
 </CODE></BLOCKQUOTE>
 
 <DL>
@@ -809,6 +852,9 @@ and to the top-left corner of the braille window (shown in the bottom half of th
 <DT><B><EM>s</EM></B><DD><P>The settings of some of BRLTTY's features.
 A feature is turned on if its corresponding dot is raised.
 <DL>
+<DT><B>Dot 1</B><DD><P>Frozen screen image
+(see the 
+<A HREF="#command-FREEZE">FREEZE</A> command).
 <DT><B>Dot 2</B><DD><P>Display attributes
 (see the 
 <A HREF="#command-DISPMD">DISPMD</A> command).
@@ -983,6 +1029,7 @@ This setting can also be changed with the
 <DT><B>High-order Bit</B><DD><P>Setting its high-order bit.
 </DL>
 
+Use the <CODE>setmetamode</CODE> command to find out how your system has been configured.
 The initial setting is <CODE>Escape Prefix</CODE>.
 <DT><B>Skip Identical Lines</B><DD><P>When moving either up or down exactly one line with
 the 

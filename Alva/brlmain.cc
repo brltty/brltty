@@ -863,22 +863,22 @@ static int readbrl (DriverCommandContext cmds)
 	      break;
 	    case KEY_ROUTING:
 	      /* normal Cursor routing keys */
-	      res = CR_ROUTEOFFSET + RoutingPos;
+	      res = CR_ROUTE + RoutingPos;
 	      break;
 	    case KEY_PROG | KEY_ROUTING:
 	      /* marking beginning of block */
-	      res = CR_BEGBLKOFFSET + RoutingPos;
+	      res = CR_CUTBEGIN + RoutingPos;
 	      break;
 	    case KEY_HOME | KEY_ROUTING:
 	      /* marking end of block */
-	      res = CR_ENDBLKOFFSET + RoutingPos;
+	      res = CR_CUTRECT + RoutingPos;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_DOWN:
 	      res = CMD_PASTE;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_ROUTING:
 	      /* attribute for pointed character */
-	      res = CR_MSGATTRIB + RoutingPos;
+	      res = CR_DESCCHAR + RoutingPos;
 	      break;
 	    }
 	}

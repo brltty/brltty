@@ -436,11 +436,11 @@ setbrlstat(const unsigned char* s)
 	if (code == STAT_empty)
 	  cells[i] = 0;
 	else if (code >= OFFS_NUMBER)
-	  cells[i] = change_bits[portrait_number(values[code-OFFS_NUMBER])];
+	  cells[i] = change_bits[portraitNumber(values[code-OFFS_NUMBER])];
 	else if (code >= OFFS_FLAG)
-	  cells[i] = change_bits[seascape_flag(i+1, values[code-OFFS_FLAG])];
+	  cells[i] = change_bits[seascapeFlag(i+1, values[code-OFFS_FLAG])];
 	else if (code >= OFFS_HORIZ)
-	  cells[i] = change_bits[seascape_number(values[code-OFFS_HORIZ])];
+	  cells[i] = change_bits[seascapeNumber(values[code-OFFS_HORIZ])];
 	else
 	  cells[i] = change_bits[values[code]];
       }

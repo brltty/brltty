@@ -22,7 +22,6 @@
 #include <sys/ioctl.h>
 #include <linux/soundcard.h>
 
-#include "brl.h"
 #include "common.h"
 #include "misc.h"
 #include "tones.h"
@@ -332,7 +331,7 @@ static int openSequencer (void) {
       setCloseOnExec(fileDescriptor);
       LogPrint(LOG_DEBUG, "Sequencer opened: fd=%d", fileDescriptor);
    }
-   SEQ_SET_PATCH(deviceNumber, channelNumber, env.midiinstr);
+   SEQ_SET_PATCH(deviceNumber, channelNumber, prefs.midiinstr);
    return 1;
 }
 

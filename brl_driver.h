@@ -15,9 +15,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* this header file is used to create the driver structure */
-/* for a dynamically loadable braille display driver. */
-/* BRLNAME, HELPNAME, and PREFSTYLE must be defined - see brlconf.h */
+#ifndef _BRL_DRIVER_H
+#define _BRL_DRIVER_H
+
+/* this header file is used to create the driver structure
+ * for a dynamically loadable braille display driver.
+ * BRLNAME, HELPNAME, and PREFSTYLE must be defined - see brlconf.h
+ */
+
+#include "brl.h"
 
 /* Routines provided by this braille display driver. */
 static void identbrl (void);/* print start-up messages */
@@ -49,3 +55,5 @@ braille_driver brl_driver =
   readbrl,
   setbrlstat
 };
+
+#endif /* !defined(_BRL_DRIVER_H) */

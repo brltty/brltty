@@ -136,7 +136,7 @@ readbrl (DriverCommandContext cmds)
 		break;
 		default:
 			if(c>=VARIO_CURSOR_BASE&&c<=VARIO_CURSOR_BASE+VARIO_CURSOR_COUNT) {
-				decoded = CR_ROUTEOFFSET+c-VARIO_CURSOR_BASE;
+				decoded = CR_ROUTE+c-VARIO_CURSOR_BASE;
 			}
 		break;
 	}

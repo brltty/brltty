@@ -27,13 +27,15 @@
 #include "tunes.h"
 #include "tones.h"
 
+#define TACTILE(duration,pattern) (((duration) << 8) | (pattern))
+
 static ToneDefinition tones_detected[] = {
    {  330,  60},
    {  440, 100},
    {    0,   0}
 };
 TuneDefinition tune_detected = {
-   NULL, 0X0000, tones_detected
+   NULL, 0, tones_detected
 };
 
 static ToneDefinition tones_braille_off[] = {
@@ -42,7 +44,7 @@ static ToneDefinition tones_braille_off[] = {
    {    0,   0}
 };
 TuneDefinition tune_braille_off = {
-   NULL, 0X0000, tones_braille_off
+   NULL, 0, tones_braille_off
 };
 
 static ToneDefinition tones_cut_begin[] = {
@@ -51,7 +53,7 @@ static ToneDefinition tones_cut_begin[] = {
    {    0,   0}
 };
 TuneDefinition tune_cut_begin = {
-   NULL, 0X0000, tones_cut_begin
+   NULL, 0, tones_cut_begin
 };
 
 static ToneDefinition tones_cut_end[] = {
@@ -60,7 +62,7 @@ static ToneDefinition tones_cut_end[] = {
    {    0,   0}
 };
 TuneDefinition tune_cut_end = {
-   NULL, 0X0000, tones_cut_end
+   NULL, 0, tones_cut_end
 };
 
 static ToneDefinition tones_toggle_on[] = {
@@ -72,7 +74,7 @@ static ToneDefinition tones_toggle_on[] = {
    {    0,   0}
 };
 TuneDefinition tune_toggle_on = {
-   NULL, 0X0000, tones_toggle_on
+   NULL, TACTILE(30,B1|B2|B4|B5), tones_toggle_on
 };
 
 static ToneDefinition tones_toggle_off[] = {
@@ -84,7 +86,7 @@ static ToneDefinition tones_toggle_off[] = {
    {    0,   0}
 };
 TuneDefinition tune_toggle_off = {
-   NULL, 0X0000, tones_toggle_off
+   NULL, TACTILE(30,B3|B7|B6|B8), tones_toggle_off
 };
 
 static ToneDefinition tones_link[] = {
@@ -94,7 +96,7 @@ static ToneDefinition tones_link[] = {
    {    0,   0}
 };
 TuneDefinition tune_link = {
-   NULL, 0X0000, tones_link
+   NULL, 0, tones_link
 };
 
 static ToneDefinition tones_unlink[] = {
@@ -104,7 +106,7 @@ static ToneDefinition tones_unlink[] = {
    {    0,   0}
 };
 TuneDefinition tune_unlink = {
-   NULL, 0X0000, tones_unlink
+   NULL, 0, tones_unlink
 };
 
 static ToneDefinition tones_freeze[] = {
@@ -134,7 +136,7 @@ static ToneDefinition tones_freeze[] = {
    {    0,   0}
 };
 TuneDefinition tune_freeze = {
-   "Frozen", 0X0000, tones_freeze
+   "Frozen", 0, tones_freeze
 };
 
 static ToneDefinition tones_unfreeze[] = {
@@ -163,7 +165,7 @@ static ToneDefinition tones_unfreeze[] = {
    {    0,   0}
 };
 TuneDefinition tune_unfreeze = {
-   "Unfrozen", 0X0000, tones_unfreeze
+   "Unfrozen", 0, tones_unfreeze
 };
 
 static ToneDefinition tones_skip_first[] = {
@@ -175,7 +177,7 @@ static ToneDefinition tones_skip_first[] = {
    {    0,   0}
 };
 TuneDefinition tune_skip_first = {
-   NULL, 0X20C3, tones_skip_first
+   NULL, TACTILE(30,B1|B4|B7|B8), tones_skip_first
 };
 
 static ToneDefinition tones_skip[] = {
@@ -184,7 +186,7 @@ static ToneDefinition tones_skip[] = {
    {    0,   0}
 };
 TuneDefinition tune_skip = {
-   NULL, 0X0000, tones_skip
+   NULL, 0, tones_skip
 };
 
 static ToneDefinition tones_skip_more[] = {
@@ -193,7 +195,7 @@ static ToneDefinition tones_skip_more[] = {
    {    0,   0}
 };
 TuneDefinition tune_skip_more = {
-   NULL, 0X0000, tones_skip_more
+   NULL, 0, tones_skip_more
 };
 
 static ToneDefinition tones_wrap_down[] = {
@@ -204,7 +206,7 @@ static ToneDefinition tones_wrap_down[] = {
    {    0,   0}
 };
 TuneDefinition tune_wrap_down = {
-   NULL, 0X1455, tones_wrap_down
+   NULL, TACTILE(20,B1|B2|B3|B7), tones_wrap_down
 };
 
 static ToneDefinition tones_wrap_up[] = {
@@ -215,7 +217,7 @@ static ToneDefinition tones_wrap_up[] = {
    {    0,   0}
 };
 TuneDefinition tune_wrap_up = {
-   NULL, 0X14AA, tones_wrap_up
+   NULL, TACTILE(20,B4|B5|B6|B8), tones_wrap_up
 };
 
 static ToneDefinition tones_bounce[] = {
@@ -227,7 +229,7 @@ static ToneDefinition tones_bounce[] = {
    {    0,   0}
 };
 TuneDefinition tune_bounce = {
-   NULL, 0X30FF, tones_bounce
+   NULL, TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), tones_bounce
 };
 
 static ToneDefinition tones_bad_command[] = {
@@ -235,7 +237,7 @@ static ToneDefinition tones_bad_command[] = {
    {    0,   0}
 };
 TuneDefinition tune_bad_command = {
-   NULL, 0X0000, tones_bad_command
+   NULL, TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), tones_bad_command
 };
 
 static ToneDefinition tones_done[] = {
@@ -249,7 +251,7 @@ static ToneDefinition tones_done[] = {
    {    0,   0}
 };
 TuneDefinition tune_done = {
-   "Done", 0X0000, tones_done
+   "Done", 0, tones_done
 };
 
 static unsigned int closeTimer = 0;
@@ -284,7 +286,7 @@ void closeTuneDevice (int force) {
  
 void playTune (TuneDefinition *tune) {
    int tunePlayed = 0;
-   if (env.sound) {
+   if (prefs.sound) {
       if (toneGenerator) {
 	 if (toneGenerator->open()) {
 	    ToneDefinition *tone = tune->tones;

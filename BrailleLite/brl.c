@@ -480,7 +480,7 @@ readbrl (DriverCommandContext cmds)
 
       /* check for routing keys */
       if (key.routing)
-	return (CR_ROUTEOFFSET + key.routing - 1);
+	return (CR_ROUTE + key.routing - 1);
 
       if (!kbemu)
 	return CMD_NOOP;
@@ -639,26 +639,26 @@ readbrl (DriverCommandContext cmds)
 	case CMD_CSRJMP:	/* route cursor */
 	  if (key.spcbar)
 	    {
-	      temp = CR_ROUTEOFFSET + int_cursor - 1;
+	      temp = CR_ROUTE + int_cursor - 1;
 	      int_cursor = state = 0;
 	    }
 	  return temp;
 	case CMD_CUT_BEG:	/* begin cut */
 	  if (key.spcbar)
 	    {
-	      temp = CR_BEGBLKOFFSET + int_cursor - 1;
+	      temp = CR_CUTBEGIN + int_cursor - 1;
 	      int_cursor = state = 0;
 	    }
 	  return temp;
 	case CMD_CUT_END:	/* end cut */
 	  if (key.spcbar)
 	    {
-	      temp = CR_ENDBLKOFFSET + int_cursor - 1;
+	      temp = CR_CUTRECT + int_cursor - 1;
 	      int_cursor = state = 0;
 	    }
 	  return temp;
 	case CMD_DISPMD: /* attribute info */
-	  temp = CR_MSGATTRIB + int_cursor - 1;
+	  temp = CR_DESCCHAR + int_cursor - 1;
 	  int_cursor = state = 0;
 	  return temp;
 	default:

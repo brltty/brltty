@@ -15,8 +15,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* helphdr.h - describes the helpfile format
- * $Id: helphdr.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
+#ifndef _HELP_H
+#define _HELP_H
+
+/* help.h - describes the helpfile format
+ * $Id: help.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
  */
 
 /* The compiled helpfile (brlttydev.hlp) has the following structure:
@@ -32,3 +35,5 @@ typedef struct
     unsigned char cols;
 } __attribute__((packed))
 pageinfo;
+
+#endif /* !defined(_HELP_H) */

@@ -625,20 +625,20 @@ static int readbrl(DriverCommandContext cmds) {
   if (sw_howmany) {  /* Some Routing keys were pressed */
     /* Cut-n-paste: */
     if (sw_howmany == 3 && sw_which[0]+2 == sw_which[1]) { /* Vario80 */
-      res = CR_BEGBLKOFFSET + sw_which[0];
-      pending_cmd = CR_ENDBLKOFFSET + sw_which[2];
+      res = CR_CUTBEGIN + sw_which[0];
+      pending_cmd = CR_CUTRECT + sw_which[2];
     } else if (sw_howmany == 3 && 
 	       sw_which[2] == brlcols-1 && sw_which[1] == brlcols-2 &&
 	       sw_which[0] < brlcols) {
-      res = CR_BEGBLKOFFSET + sw_which[0];
+      res = CR_CUTBEGIN + sw_which[0];
     } else if (sw_howmany == 3 &&
 	       sw_which[0] == 0 && sw_which[1] == 1 &&
 	       sw_which[2] < brlcols) {
-      res = CR_ENDBLKOFFSET + sw_which[2];
+      res = CR_CUTRECT + sw_which[2];
     } else if (sw_howmany == 2 && sw_which[1] == 80 && sw_which[0] < 80) {
-      res = CR_BEGBLKOFFSET + sw_which[0];
+      res = CR_CUTBEGIN + sw_which[0];
     } else if (sw_howmany == 2 && sw_which[1] == 81 && sw_which[0] < 80) {
-      res = CR_ENDBLKOFFSET + sw_which[0];
+      res = CR_CUTRECT + sw_which[0];
     } else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1) {
       res = CMD_CHRLT;
     } else if (sw_howmany == 2 && sw_which[0] == brlcols-2 && sw_which[1] == brlcols-1) {
@@ -650,7 +650,7 @@ static int readbrl(DriverCommandContext cmds) {
 	       sw_which[0] == 0 && sw_which[1] == brlcols-1) {
       res = CMD_HELP;
     } else if (sw_howmany == 1 && sw_which[0] < brlcols) {
-      res = CR_ROUTEOFFSET+sw_which[0];
+      res = CR_ROUTE+sw_which[0];
     }
   } else if (code) {
     /* Due to ergonomic reasons, I decided to use

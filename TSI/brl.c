@@ -995,10 +995,10 @@ cut_cursor ()
 	  pos -= 10;
 	  break;
 	case CMD_CUT_BEG:
-	  res = CR_BEGBLKOFFSET + pos;
+	  res = CR_CUTBEGIN + pos;
 	  break;
 	case CMD_CUT_END:
-	  res = CR_ENDBLKOFFSET + pos;
+	  res = CR_CUTRECT + pos;
 	  pos = -1;
 	  break;
 	case CMD_CUT_CURSOR:
@@ -1278,12 +1278,12 @@ readbrl (DriverCommandContext cmds)
     ignore_routing = 1;
     if(sw_howmany == 1){
       switch(code){
-	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, CR_BEGBLKOFFSET + sw_which[0]);
-	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, CR_ENDBLKOFFSET + sw_which[0]);
+	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, CR_CUTBEGIN + sw_which[0]);
+	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, CR_CUTRECT + sw_which[0]);
 	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CR_NXINDENT + sw_which[0]);
 	KEYAND(KEY_R2UP) KEY (KEY_BUP, CR_PRINDENT + sw_which[0]);
 	KEYAND(KEY_CDOWN | KEY_BUP) KEY(KEY_CUP | KEY_CDOWN,
-					CR_MSGATTRIB +sw_which[0]);
+					CR_DESCCHAR +sw_which[0]);
 	KEY (KEY_CDOWN, CR_SWITCHVT + sw_which[0]);
       }
     }else if(sw_howmany == 2 && sw_which[0]==0 && sw_which[1]==1){
@@ -1297,12 +1297,12 @@ readbrl (DriverCommandContext cmds)
   }else if (has_sw && sw_howmany)	/* routing key */
     {
       if (sw_howmany == 1)
-	res = CR_ROUTEOFFSET + sw_which[0];
+	res = CR_ROUTE + sw_which[0];
      else if (sw_howmany == 3 && sw_which[1] == sw_lastkey - 1
 	       && sw_which[2] == sw_lastkey)
-	res = CR_BEGBLKOFFSET + sw_which[0];
+	res = CR_CUTBEGIN + sw_which[0];
       else if (sw_howmany == 3 && sw_which[0] == 0 && sw_which[1] == 1)
- 	res = CR_ENDBLKOFFSET + sw_which[2];
+ 	res = CR_CUTRECT + sw_which[2];
       else if ((sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
 	       && sw_which[2] == sw_lastkey-1 && sw_which[3] == sw_lastkey)
 	       || (sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2))
@@ -1330,8 +1330,8 @@ readbrl (DriverCommandContext cmds)
 	}
 #endif
       else if(sw_howmany == 3 && sw_which[0]+2 == sw_which[1]){
-	  res = CR_BEGBLKOFFSET + sw_which[0];
-	  pending_cmd = CR_ENDBLKOFFSET + sw_which[2];
+	  res = CR_CUTBEGIN + sw_which[0];
+	  pending_cmd = CR_CUTRECT + sw_which[2];
 	}
     }
   else switch (code){
@@ -1391,7 +1391,7 @@ readbrl (DriverCommandContext cmds)
   /* Emulation of cursor routing */
     KEYAND(KEY_R1DN | KEY_R2DN) KEY (KEY_CDOWN | KEY_BDOWN, CMD_CSRJMP_VERT);
     KEY (KEY_CDOWN | KEY_BDOWN | KEY_BLEFT, CMD_CSRJMP);
-    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BRIGHT, CR_ROUTEOFFSET + 3 * brl_cols / 4 - 1);
+    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BRIGHT, CR_ROUTE + 3 * brl_cols / 4 - 1);
 
   /* Emulation of routing keys for cut&paste */
     KEY (KEY_CLEFT | KEY_BROUND, CMD_CUT_BEG);

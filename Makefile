@@ -263,7 +263,7 @@ tones_adlib.o: tones_adlib.c tones.h adlib.h misc.h
 adlib.o: adlib.c adlib.h misc.h
 	$(CC) $(CFLAGS) -c adlib.c
 
-BRLTTY_OBJECTS = main.o config.o csrjmp.o misc.o $(TUNE_OBJECTS) cut-n-paste.o spk_load.o brl_load.o
+BRLTTY_OBJECTS = main.o config.o route.o misc.o $(TUNE_OBJECTS) cut.o spk_load.o brl_load.o
 
 brltty-static.o: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	ld -r -static -o $@ \
@@ -276,7 +276,7 @@ brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -Wl,-rpath,$(LIB_DIR) -o $@ \
 	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
-main.o: main.c brl.h spk.h scr.h csrjmp.h tunes.h cut-n-paste.h \
+main.o: main.c brl.h spk.h scr.h tunes.h cut.h route.h \
 	misc.h message.h config.h common.h
 	$(CC) $(CFLAGS) -c main.c
 
@@ -287,14 +287,14 @@ config.o: config.c config.h brl.h spk.h scr.h tunes.h message.h misc.h common.h
 		'-DSPKLIBS="$(SPK_LIBS)"' \
 		'-DBRLDEV="$(BRLDEV)"' -c config.c
 
-csrjmp.o: csrjmp.c csrjmp.h scr.h misc.h
-	$(CC) $(CFLAGS) -c csrjmp.c
+route.o: route.c route.h scr.h misc.h
+	$(CC) $(CFLAGS) -c route.c
 
 misc.o: misc.c misc.h text.auto.h attrib.auto.h config.h brl.h common.h
 	$(CC) $(CFLAGS) -c misc.c
 
-cut-n-paste.o: cut-n-paste.c cut-n-paste.h tunes.h scr.h
-	$(CC) $(CFLAGS) -c cut-n-paste.c
+cut.o: cut.c cut.h tunes.h scr.h
+	$(CC) $(CFLAGS) -c cut.c
 
 spk_load.o: spk_load.c spk.h brl.h misc.h
 	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_DIR)"' $(BUILTIN_SPEECH) -c spk_load.c 
@@ -320,10 +320,10 @@ dynamic-braille: txt2hlp
 static-braille: txt2hlp
 	$(MAKE) -C $(BRL_TARGET) brl.o braille-help
 
-scr.o: scr.cc scr.h scr_base.h helphdr.h config.h
+scr.o: scr.cc scr.h scr_base.h config.h
 	$(COMPCPP) $(CFLAGS) -c scr.cc
 
-scr_base.o: scr_base.cc scr.h scr_base.h csrjmp.h helphdr.h misc.h config.h
+scr_base.o: scr_base.cc scr.h scr_base.h route.h help.h misc.h config.h
 	$(COMPCPP) $(CFLAGS) -c scr_base.cc
 
 scr_linux.o: scr_linux.cc scr_linux.h scr.h scr_base.h
@@ -342,7 +342,7 @@ brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 brltest.o: brltest.c brl.h config.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DBRLDEV="$(BRLDEV)"' -c brltest.c
 
-SCRTEST_OBJECTS = scrtest.o misc.o csrjmp.o
+SCRTEST_OBJECTS = scrtest.o misc.o route.o
 scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
 
@@ -364,7 +364,7 @@ text.auto.h: BrailleTables/$(TEXTTRANS) tbl2hex Makefile
 attrib.auto.h: BrailleTables/$(ATTRTRANS) tbl2hex Makefile
 	./tbl2hex <$< >$@
 
-txt2hlp: txt2hlp.c helphdr.h
+txt2hlp: txt2hlp.c help.h
 	$(HOSTCC) $(LDFLAGS) -o $@ txt2hlp.c $(LDLIBS)
 
 tbl2hex: tbl2hex.c

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "helphdr.h"
+#include "help.h"
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 

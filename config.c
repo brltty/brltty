@@ -47,6 +47,8 @@
 #include "misc.h"
 #include "common.h"
 
+char VERSION[] = "BRLTTY 2.99.2";
+char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 /*
  * Those should have been defined in the Makefile and passed along
@@ -645,30 +647,20 @@ printHelp (FILE *outputStream, unsigned int lineWidth, char *programPath) {
    }
 }
 
-/* 
- * Default definition for volatile parameters
- */
-struct brltty_param initparam = {
-        INIT_CSRTRK, INIT_CSRHIDE, TBL_TEXT, 0, 0, 0, 0, 0, 0
-};
-
 static void
-changedWindowAttributes (void)
-{
-  fwinshift = MAX(brl.x-env.winovlp, 1);
+changedWindowAttributes (void) {
+  fwinshift = MAX(brl.x-prefs.winovlp, 1);
   hwinshift = brl.x / 2;
   vwinshift = 5;
 }
 
 static void
-changedTuneDevice (void)
-{
-  setTuneDevice(env.tunedev);
+changedTuneDevice (void) {
+  setTuneDevice(prefs.tunedev);
 }
 
 static void
-changedPreferences (void)
-{
+changedPreferences (void) {
   changedWindowAttributes();
   changedTuneDevice();
 }
@@ -771,11 +763,11 @@ loadPreferences (int change)
   int ok = 0;
   int fd = open(opt_preferencesFile, O_RDONLY);
   if (fd != -1) {
-    struct brltty_env newenv;
-    int count = read(fd, &newenv, sizeof(newenv));
-    if (count == sizeof(newenv)) {
-      if ((newenv.magicnum[0] == (ENV_MAGICNUM&0XFF)) && (newenv.magicnum[1] == (ENV_MAGICNUM>>8))) {
-        env = newenv;
+    Preferences newPreferences;
+    int count = read(fd, &newPreferences, sizeof(newPreferences));
+    if (count == sizeof(newPreferences)) {
+      if ((newPreferences.magicnum[0] == (PREFS_MAGICNUM&0XFF)) && (newPreferences.magicnum[1] == (PREFS_MAGICNUM>>8))) {
+        prefs = newPreferences;
         ok = 1;
         if (change) changedPreferences();
       } else
@@ -785,7 +777,7 @@ loadPreferences (int change)
                opt_preferencesFile, strerror(errno));
     else
       LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %d).",
-               opt_preferencesFile, count, sizeof(newenv));
+               opt_preferencesFile, count, sizeof(newPreferences));
     close(fd);
   } else
     LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
@@ -801,7 +793,7 @@ savePreferences (void)
   int fd = open(opt_preferencesFile, O_WRONLY | O_CREAT | O_TRUNC);
   if (fd != -1) {
     fchmod(fd, S_IRUSR | S_IWUSR);
-    if (write(fd, &env, sizeof(env)) == sizeof(env)) {
+    if (write(fd, &prefs, sizeof(prefs)) == sizeof(prefs)) {
       ok = 1;
     } else {
       LogPrint(LOG_ERR, "Cannot write to preferences file: %s: %s",
@@ -819,47 +811,47 @@ savePreferences (void)
 
 static int
 testSkipBlankWindows () {
-   return env.skpblnkwins;
+   return prefs.skpblnkwins;
 }
 
 static int
 testSlidingWindow () {
-   return env.slidewin;
+   return prefs.slidewin;
 }
 
 static int
 testShowCursor () {
-   return env.csrvis;
+   return prefs.csrvis;
 }
 
 static int
 testBlinkingCursor () {
-   return testShowCursor() && env.csrblink;
+   return testShowCursor() && prefs.csrblink;
 }
 
 static int
 testShowAttributes () {
-   return env.attrvis;
+   return prefs.attrvis;
 }
 
 static int
 testBlinkingAttributes () {
-   return testShowAttributes() && env.attrblink;
+   return testShowAttributes() && prefs.attrblink;
 }
 
 static int
 testBlinkingCapitals () {
-   return env.capblink;
+   return prefs.capblink;
 }
 
 static int
 testSound () {
-   return env.sound;
+   return prefs.sound;
 }
 
 static int
 testSoundMidi () {
-   return testSound() && (env.tunedev == tdSequencer);
+   return testSound() && (prefs.tunedev == tdSequencer);
 }
 
 void
@@ -889,30 +881,30 @@ updatePreferences (void)
   #define BOOLEAN_ITEM(setting, changed, test, description) SYMBOLIC_ITEM(setting, changed, test, description, booleanValues)
   MenuItem menu[] = {
      BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
-     SYMBOLIC_ITEM(env.sixdots, NULL, NULL, "Text Style", textStyles),
-     SYMBOLIC_ITEM(env.metamode, NULL, NULL, "Meta Mode", metaModes),
-     BOOLEAN_ITEM(env.skpidlns, NULL, NULL, "Skip Identical Lines"),
-     BOOLEAN_ITEM(env.skpblnkwins, NULL, NULL, "Skip Blank Windows"),
-     SYMBOLIC_ITEM(env.skpblnkwinsmode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
-     BOOLEAN_ITEM(env.slidewin, NULL, NULL, "Sliding Window"),
-     BOOLEAN_ITEM(env.eager_slidewin, NULL, testSlidingWindow, "Eager Sliding Window"),
-     NUMERIC_ITEM(env.winovlp, changedWindowAttributes, NULL, "Window Overlap", 0, 20),
-     BOOLEAN_ITEM(env.csrvis, NULL, NULL, "Show Cursor"),
-     SYMBOLIC_ITEM(env.csrsize, NULL, testShowCursor, "Cursor Style", cursorStyles),
-     BOOLEAN_ITEM(env.csrblink, NULL, testShowCursor, "Blinking Cursor"),
-     TIMING_ITEM(env.csroncnt, NULL, testBlinkingCursor, "Cursor Visible Period"),
-     TIMING_ITEM(env.csroffcnt, NULL, testBlinkingCursor, "Cursor Invisible Period"),
-     BOOLEAN_ITEM(env.attrvis, NULL, NULL, "Show Attributes"),
-     BOOLEAN_ITEM(env.attrblink, NULL, testShowAttributes, "Blinking Attributes"),
-     TIMING_ITEM(env.attroncnt, NULL, testBlinkingAttributes, "Attributes Visible Period"),
-     TIMING_ITEM(env.attroffcnt, NULL, testBlinkingAttributes, "Attributes Invisible Period"),
-     BOOLEAN_ITEM(env.capblink, NULL, NULL, "Blinking Capitals"),
-     TIMING_ITEM(env.caponcnt, NULL, testBlinkingCapitals, "Capitals Visible Period"),
-     TIMING_ITEM(env.capoffcnt, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
-     BOOLEAN_ITEM(env.sound, NULL, NULL, "Alert Tunes"),
-     SYMBOLIC_ITEM(env.tunedev, changedTuneDevice, testSound, "Tune Device", tuneDevices),
-     MENU_ITEM(env.midiinstr, NULL, testSoundMidi, "MIDI Instrument", midiInstrumentTable, 0, midiInstrumentCount-1),
-     SYMBOLIC_ITEM(env.stcellstyle, NULL, NULL, "Status Cells Style", statusStyles)
+     SYMBOLIC_ITEM(prefs.sixdots, NULL, NULL, "Text Style", textStyles),
+     SYMBOLIC_ITEM(prefs.metamode, NULL, NULL, "Meta Mode", metaModes),
+     BOOLEAN_ITEM(prefs.skpidlns, NULL, NULL, "Skip Identical Lines"),
+     BOOLEAN_ITEM(prefs.skpblnkwins, NULL, NULL, "Skip Blank Windows"),
+     SYMBOLIC_ITEM(prefs.skpblnkwinsmode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
+     BOOLEAN_ITEM(prefs.slidewin, NULL, NULL, "Sliding Window"),
+     BOOLEAN_ITEM(prefs.eager_slidewin, NULL, testSlidingWindow, "Eager Sliding Window"),
+     NUMERIC_ITEM(prefs.winovlp, changedWindowAttributes, NULL, "Window Overlap", 0, 20),
+     BOOLEAN_ITEM(prefs.csrvis, NULL, NULL, "Show Cursor"),
+     SYMBOLIC_ITEM(prefs.csrsize, NULL, testShowCursor, "Cursor Style", cursorStyles),
+     BOOLEAN_ITEM(prefs.csrblink, NULL, testShowCursor, "Blinking Cursor"),
+     TIMING_ITEM(prefs.csroncnt, NULL, testBlinkingCursor, "Cursor Visible Period"),
+     TIMING_ITEM(prefs.csroffcnt, NULL, testBlinkingCursor, "Cursor Invisible Period"),
+     BOOLEAN_ITEM(prefs.attrvis, NULL, NULL, "Show Attributes"),
+     BOOLEAN_ITEM(prefs.attrblink, NULL, testShowAttributes, "Blinking Attributes"),
+     TIMING_ITEM(prefs.attroncnt, NULL, testBlinkingAttributes, "Attributes Visible Period"),
+     TIMING_ITEM(prefs.attroffcnt, NULL, testBlinkingAttributes, "Attributes Invisible Period"),
+     BOOLEAN_ITEM(prefs.capblink, NULL, NULL, "Blinking Capitals"),
+     TIMING_ITEM(prefs.caponcnt, NULL, testBlinkingCapitals, "Capitals Visible Period"),
+     TIMING_ITEM(prefs.capoffcnt, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
+     BOOLEAN_ITEM(prefs.sound, NULL, NULL, "Alert Tunes"),
+     SYMBOLIC_ITEM(prefs.tunedev, changedTuneDevice, testSound, "Tune Device", tuneDevices),
+     MENU_ITEM(prefs.midiinstr, NULL, testSoundMidi, "MIDI Instrument", midiInstrumentTable, 0, midiInstrumentCount-1),
+     SYMBOLIC_ITEM(prefs.stcellstyle, NULL, NULL, "Status Cells Style", statusStyles)
   };
   int menuSize = sizeof(menu) / sizeof(menu[0]);
   static int menuIndex = 0;                        /* current menu item */
@@ -921,7 +913,7 @@ updatePreferences (void)
   int lineIndent = 0;                                /* braille window pos in buffer */
   int settingChanged = 0;                        /* 1 when item's value has changed */
 
-  struct brltty_env oldEnvironment = env;        /* backup preferences */
+  Preferences oldPreferences = prefs;        /* backup preferences */
   int key;                                /* readbrl() value */
 
   /* status cells */
@@ -1045,7 +1037,7 @@ updatePreferences (void)
               "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
           break;
         case CMD_PREFLOAD:
-          env = oldEnvironment;
+          prefs = oldPreferences;
           changedPreferences();
           message("changes discarded", 0);
           break;
@@ -1053,9 +1045,9 @@ updatePreferences (void)
           exitSave = 1;
           goto exitMenu;
         default:
-          if (key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
+          if (key >= CR_ROUTE && key < CR_ROUTE+brl.x) {
              /* Why not setting a value with routing keys... */
-             key -= CR_ROUTEOFFSET;
+             key -= CR_ROUTE;
              if (item->names) {
                 *item->setting = key % (item->maximum + 1);
              } else {
@@ -1246,41 +1238,41 @@ startup(int argc, char *argv[])
 
   /* Load preferences file */
   if (!loadPreferences(0)) {
-    memset(&env, 0, sizeof(env));
+    memset(&prefs, 0, sizeof(prefs));
 
-    env.magicnum[0] = ENV_MAGICNUM&0XFF;
-    env.magicnum[1] = ENV_MAGICNUM>>8;
+    prefs.magicnum[0] = PREFS_MAGICNUM&0XFF;
+    prefs.magicnum[1] = PREFS_MAGICNUM>>8;
 
-    env.csrvis = INIT_CSRVIS;
-    env.csrsize = INIT_CSRSIZE;
-    env.csrblink = INIT_CSRBLINK;
-    env.csroncnt = INIT_CSR_ON_CNT;
-    env.csroffcnt = INIT_CSR_OFF_CNT;
+    prefs.csrvis = INIT_CSRVIS;
+    prefs.csrsize = INIT_CSRSIZE;
+    prefs.csrblink = INIT_CSRBLINK;
+    prefs.csroncnt = INIT_CSR_ON_CNT;
+    prefs.csroffcnt = INIT_CSR_OFF_CNT;
 
-    env.attrvis = INIT_ATTRVIS;
-    env.attrblink = INIT_ATTRBLINK;
-    env.attroncnt = INIT_ATTR_ON_CNT;
-    env.attroffcnt = INIT_ATTR_OFF_CNT;
+    prefs.attrvis = INIT_ATTRVIS;
+    prefs.attrblink = INIT_ATTRBLINK;
+    prefs.attroncnt = INIT_ATTR_ON_CNT;
+    prefs.attroffcnt = INIT_ATTR_OFF_CNT;
 
-    env.capblink = INIT_CAPBLINK;
-    env.caponcnt = INIT_CAP_ON_CNT;
-    env.capoffcnt = INIT_CAP_OFF_CNT;
+    prefs.capblink = INIT_CAPBLINK;
+    prefs.caponcnt = INIT_CAP_ON_CNT;
+    prefs.capoffcnt = INIT_CAP_OFF_CNT;
 
-    env.sixdots = INIT_SIXDOTS;
-    env.metamode = INIT_METAMODE;
-    env.winovlp = INIT_WINOVLP;
-    env.slidewin = INIT_SLIDEWIN;
-    env.eager_slidewin = INIT_EAGER_SLIDEWIN;
+    prefs.sixdots = INIT_SIXDOTS;
+    prefs.metamode = INIT_METAMODE;
+    prefs.winovlp = INIT_WINOVLP;
+    prefs.slidewin = INIT_SLIDEWIN;
+    prefs.eager_slidewin = INIT_EAGER_SLIDEWIN;
 
-    env.skpidlns = INIT_SKPIDLNS;
-    env.skpblnkwins = INIT_SKPBLNKWINS;
-    env.skpblnkwinsmode = INIT_SKPBLNKWINSMODE;
+    prefs.skpidlns = INIT_SKPIDLNS;
+    prefs.skpblnkwins = INIT_SKPBLNKWINS;
+    prefs.skpblnkwinsmode = INIT_SKPBLNKWINSMODE;
 
-    env.sound = INIT_SOUND;
-    env.tunedev = INIT_TUNEDEV;
-    env.midiinstr = 0;
+    prefs.sound = INIT_SOUND;
+    prefs.tunedev = INIT_TUNEDEV;
+    prefs.midiinstr = 0;
 
-    env.stcellstyle = braille->status_style;
+    prefs.stcellstyle = braille->status_style;
   }
   changedTuneDevice();
   atexit(exitTunes);
