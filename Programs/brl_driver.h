@@ -44,6 +44,7 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 #ifdef BRL_HAVE_PACKET_IO
   static int brl_readPacket (BrailleDisplay *, unsigned char *, int);
   static int brl_writePacket (BrailleDisplay *, const unsigned char *, int);
+  static void brl_reset (BrailleDisplay *);
 #endif /* BRL_HAVE_PACKET_IO */
 
 #ifdef BRL_HAVE_KEY_CODES
@@ -91,9 +92,11 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 #ifdef BRL_HAVE_PACKET_IO
   brl_readPacket,
   brl_writePacket,
+  brl_reset,
 #else /* BRL_HAVE_PACKET_IO */
   NULL, /* brl_readPacket */
   NULL, /* brl_writePacket */
+  NULL, /* brl_reset */
 #endif /* BRL_HAVE_PACKET_IO */
 
 #ifdef BRL_HAVE_KEY_CODES

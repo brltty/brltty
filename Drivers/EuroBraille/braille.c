@@ -363,14 +363,14 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
    return (write(brl_fd, buf, p - buf));
 }
 
-#ifdef		BRL_HAVE_PACKET_IO
-
 static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
 {
   return (WriteToBrlDisplay(brl, sz, p));
 }
 
-#endif
+static void brl_reset(BrailleDisplay *brl)
+{
+}
 
 static void brl_identify (void)
 {

@@ -307,6 +307,10 @@ brl_writePacket (BrailleDisplay *brl, const unsigned char *data, int length) {
   return count;
 }
 
+static void
+brl_reset (BrailleDisplay *brl) {
+}
+
 static int
 writeBytes (BrailleDisplay *brl, unsigned char *data, int length) {
   return brl_writePacket(brl, data, length) == length;
