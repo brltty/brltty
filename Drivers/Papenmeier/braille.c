@@ -362,7 +362,7 @@ openUsbPort (char **parameters, const char *device) {
   const int baud = baud2integer(*speed);
   const UsbChannelDefinition definitions[] = {
     {0X0403, 0Xf208, 1, 0, 0, 1, 2, baud, 0, 8, 1, USB_SERIAL_PARITY_NONE},
-    {}
+    {0}
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {

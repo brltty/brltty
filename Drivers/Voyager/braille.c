@@ -203,7 +203,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   {
     static const UsbChannelDefinition definitions[] = {
       {0X0798, 0X0001, 1, 0, 0, 1, 0, 0},
-      {}
+      {0}
     };
     LogPrint(LOG_DEBUG,"Attempting open");
     if (!(usb = usbFindChannel(definitions, (void *)dev))) {

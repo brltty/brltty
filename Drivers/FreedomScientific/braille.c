@@ -127,7 +127,7 @@ openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
     {0X0F4E, 0X0100, 1, 0, 0, 2, 1, 0}, /* Focus */
     {0X0F4E, 0X0111, 1, 0, 0, 2, 1, 0}, /* PAC Mate */
-    {}
+    {0}
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {

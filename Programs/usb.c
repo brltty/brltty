@@ -59,6 +59,7 @@ usbGetLanguage (
   if (size != -1) {
     if (size >= 4) {
       *language = getLittleEndian(descriptor.string.wData[0]);
+      LogPrint(LOG_DEBUG, "USB Language: %02X", *language);
       return 1;
     }
     errno = EIO;

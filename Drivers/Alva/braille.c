@@ -497,7 +497,7 @@ static int
 openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
     {0X06b0, 0X0001, 1, 0, 0, 1, 2, 0},
-    {}
+    {0}
   };
 
   rewriteInterval = 0;
