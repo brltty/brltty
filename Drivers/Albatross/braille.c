@@ -43,15 +43,17 @@ static int fileDescriptor = -1;
 static struct termios oldSettings;
 static struct termios newSettings;
 
+static TranslationTable inputMap;
 static TranslationTable outputTable;
+static int lowerRoutingFunction;
+static int upperRoutingFunction;
+
 static unsigned char displayContent[80];
 static int displaySize;
 static int windowWidth;
 static int windowStart;
 static int statusCount;
 static int statusStart;
-static int lowerRoutingFunction;
-static int upperRoutingFunction;
 
 static int
 readByte (unsigned char *byte) {
@@ -116,6 +118,44 @@ acknowledgeDisplay (void) {
     windowWidth = displaySize;
   }
 
+  {
+    int i;
+    for (i=0; i<sizeof(inputMap); ++i) inputMap[i] = i;
+
+    /* top keypad configuration */
+    {
+      static const unsigned char topLeftKeys[]  = { 84,  83,  87,  85,  86,  88,  89,  90};
+      static const unsigned char topRightKeys[] = {194, 193, 198, 195, 196, 197, 199, 200};
+      const unsigned char *left = NULL;
+      const unsigned char *right = NULL;
+
+      switch (description & 0X5) {
+        case 0X00: /* left right */
+          break;
+
+        case 0X10: /* right right */
+          left = topRightKeys;
+          break;
+
+        case 0X50: /* left left */
+          right = topLeftKeys;
+          break;
+
+        case 0X40: /* right left */
+          left = topRightKeys;
+          right = topLeftKeys;
+          break;
+      }
+
+      if (left)
+        for (i=0; i<8; ++i)
+          inputMap[topLeftKeys[i]] = left[i];
+      if (right)
+        for (i=0; i<8; ++i)
+          inputMap[topRightKeys[i]] = right[i];
+    }
+  }
+
   lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
   upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
@@ -134,6 +174,7 @@ clearDisplay (void) {
 
 static int
 updateDisplay (const unsigned char *cells, int count, int start) {
+  static time_t lastUpdate = 0;
   unsigned char bytes[count * 2 + 2];
   unsigned char *byte = bytes;
   int index;
@@ -150,9 +191,13 @@ updateDisplay (const unsigned char *cells, int count, int start) {
     *byte++ = start + index + 1;
     *byte++ = cell;
   }
-  if ((byte - bytes) == 1) return 1;
-  *byte++ = 0XFC;
-  return writeBytes(bytes, byte-bytes);
+
+  if (((byte - bytes) > 1) || (time(NULL) != lastUpdate)) {
+    *byte++ = 0XFC;
+    if (!writeBytes(bytes, byte-bytes)) return 0;
+    lastUpdate = time(NULL);
+  }
+  return 1;
 }
 
 static int
@@ -369,10 +414,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
       case  95: /* key: front left third upper */
       case 205: /* key: front right third upper */
+      case  98:
         return CMD_LNUP;
 
       case  96: /* key: front left third lower */
       case 206: /* key: front right third lower */
+      case 208:
         return CMD_LNDN;
 
       case  97: /* key: front left fourth */
