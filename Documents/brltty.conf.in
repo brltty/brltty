@@ -54,7 +54,7 @@
 
 # The braille-device directive specifies the port to which the braille
 # display is connected. Relative paths are anchored at "/dev". If not
-# specified, the first serial port will be used.
+# specified, "@braille_device@" will be used.
 # (can be overridden with the -d [--braille-device=] option)
 #braille-device	ttyS0	# Primary Linux serial port (old-style).
 #braille-device	tts/0	# Primary Linux serial port (devfs).
@@ -69,7 +69,7 @@
 
 # The text-table directive specifies which text translation table to
 # use. Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,
-# "nabcc" will be used.
+# "@text_table@" will be used.
 # (can be overridden with the -t [--text-table=] option)
 #text-table	cz	# Czech (iso-8859-2)
 #text-table	da	# Danish
@@ -91,7 +91,7 @@
 
 # The attributes-table directive specifies which attributes translation
 # table to use. Relative paths are anchored at "@DATA_DIRECTORY@". If not
-# specified, "attributes.tbl" will be used.
+# specified, "@attributes_table@" will be used.
 # (can be overridden with the -a [--attributes-table=] option)
 #attributes-table	attributes.tbl	#
 #attributes-table	attrib.tbl	#
