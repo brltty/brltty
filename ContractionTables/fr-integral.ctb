@@ -1,0 +1,179 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Définitions pour code braille français international unifié
+# Par Nicolas Pitre <nico@cam.org>
+# Référence: http://www.inlb.qc.ca/apropos/c2003unificationdubraille.aspx
+
+1 opcodes.cti
+
+locale french
+
+capsign 46		indicateur de majuscule
+begcaps 46-46		succession de majuscules
+
+numsign 6		préfixe pour les chiffres
+midnum \s 3		espace entre les chiffres
+midnum , 2
+midnum . 256
+midnum - 36
+midnum : 25
+endnum # 56-3456
+
+always a 1		lettre a
+always b 12		lettre b
+always c 14		lettre c
+always d 145		lettre d
+always e 15		lettre e
+always f 124		lettre f
+always g 1245		lettre g
+always h 125		lettre h
+always i 24		lettre i
+always j 245		lettre j
+always k 13		lettre k
+always l 123		lettre l
+always m 134		lettre m
+always n 1345		lettre n
+always o 135		lettre o
+always p 1234		lettre p
+always q 12345		lettre q
+always r 1235		lettre r
+always s 234		lettre s
+always t 2345		lettre t
+always u 136		lettre u
+always v 1236		lettre v
+always x 1346		lettre x
+always y 13456		lettre y
+always z 1356		lettre z
+always ç 12346		c cédille
+always é 123456		e accent aigu
+always à 12356		a accent grave
+always è 2346		e accent grave
+always ù 23456		u accent grave
+always â 16		a accent circonflexe
+always ê 126		e accent circonflexe
+always î 146		i accent circonflexe
+always ô 1456		o accent circonflexe
+always û 156		u accent circonflexe
+always ë 1246		e tréma
+always ï 12456		i tréma
+always ü 1256		u tréma
+always oe 246		oe ligatur
+always w 2456		lettre w
+
+always A 1		lettre A
+always B 12		lettre B
+always C 14		lettre C
+always D 145		lettre D
+always E 15		lettre E
+always F 124		lettre F
+always G 1245		lettre G
+always H 125		lettre H
+always I 24		lettre I
+always J 245		lettre J
+always K 13		lettre K
+always L 123		lettre L
+always M 134		lettre M
+always N 1345		lettre N
+always O 135		lettre O
+always P 1234		lettre P
+always Q 12345		lettre Q
+always R 1235		lettre R
+always S 234		lettre S
+always T 2345		lettre T
+always U 136		lettre U
+always V 1236		lettre V
+always X 1346		lettre X
+always Y 13456		lettre Y
+always Z 1356		lettre Z
+always Ç 12346		C cédille
+always É 123456		E accent aigu
+always À 12356		A accent grave
+always È 2346		E accent grave
+always Ù 23456		U accent grave
+always Â 16		A accent circonflexe
+always Ê 126		E accent circonflexe
+always Î 146		I accent circonflexe
+always Ô 1456		O accent circonflexe
+always Û 156		U accent circonflexe
+always Ë 1246		E tréma
+always Ï 12456		I tréma
+always Ü 1256		U tréma
+always Oe 246		Oe ligatur
+always W 2456		lettre w
+
+always , 2		virgule
+always ; 23		point-virgule
+always : 25		deux-points
+always . 256		point
+always ? 26		point d'interrogation
+always ! 235		point d'exclamation
+always " 2356		guillemet
+always ( 236		parenthèse ouvrante
+always * 35		astérisque
+always ) 356		parenthèse fermante
+always ' 3		apostrophe
+always / 34		barre oblique
+always @ 345		arobas
+always % 346		pour cent
+always - 36		trait d'union
+always # 3456		dièse
+
+always 0 3456		zéro
+always 1 16		un
+always 2 126		deux
+always 3 146		trois
+always 4 1456		quatre
+always 5 156		cinq
+always 6 1246		six
+always 7 12456		sept
+always 8 1256		huit
+always 9 246		neuf
+
+always ÷ 6-256		divisé par
+always + 6-235		plus
+always = 6-2356		égal
+always × 6-35		multiplié par
+always < 46-126		inférieur à
+always > 46-345		supérieur à
+
+always ° 5-135		degré
+always & 5-123456	perluète (et commercial)
+always ¢ 45-14		cent
+always ¤ 45-15		euro
+always £ 45-123		livre
+always $ 45-234		dollar
+always ¥ 45-13456	yen
+always ¹ 4-6-16		exposant 1
+always ² 4-6-126	exposant 2
+always ³ 4-6-146	exposant 3
+always ¼ 6-16-34-1456	un quart
+always ½ 6-16-34-126	un demi
+always ¾ 6-126-34-1456	trois quarts
+
+always _ 78		souligné
+
+repeated \s 0		espaces
+repeated \t 0		tabulations
+repeated \xa0 0		espaces insécables
+
+repeated ... 3-3-3		points de suite
+repeated --- 36-36-36
+repeated ___ 78-78-78
+
+always \s--\s 36-36	tiret
+
