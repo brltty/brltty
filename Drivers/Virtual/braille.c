@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/time.h>
@@ -401,7 +402,7 @@ compareCommandCodes (const void *item1, const void *item2) {
 }
 
 static void
-sortCommandCodes (void) {
+sortCommandsByCode (void) {
   sortCommands(compareCommandCodes);
 }
 
@@ -414,7 +415,7 @@ compareCommandNames (const void *item1, const void *item2) {
 }
 
 static void
-sortCommandNames (void) {
+sortCommandsByName (void) {
   sortCommands(compareCommandNames);
 }
 
@@ -434,7 +435,7 @@ allocateCommandDescriptors (void) {
       }
     }
 
-    sortCommandCodes();
+    sortCommandsByCode();
     {
       CommandDescriptor *descriptor = commandDescriptors + commandCount;
       int previousBlock = -1;
@@ -450,7 +451,7 @@ allocateCommandDescriptors (void) {
       }
     }
 
-    sortCommandNames();
+    sortCommandsByName();
   }
 }
 
@@ -615,13 +616,19 @@ brl_writeVisual (BrailleDisplay *brl) {
       int cells = brailleCells;
       while (cells--) {
         unsigned char character = *address++;
-        switch (character) {
-          case '"':
-          case '\\':
-            writeByte('\\');
-          default:
-            writeByte(character);
-            break;
+        if (iscntrl(character)) {
+          char buffer[5];
+          snprintf(buffer, sizeof(buffer), "\\X%02X", character);
+          writeString(buffer);
+        } else {
+          switch (character) {
+            case '"':
+            case '\\':
+              writeByte('\\');
+            default:
+              writeByte(character);
+              break;
+          }
         }
       }
     }
