@@ -570,6 +570,12 @@ then
 fi
 AC_SUBST([usb_objects])
 
+BRLTTY_ARG_DISABLE(
+   [bluetooth],
+   [support for bluetooth-capable devices], [dnl
+   AC_CHECK_HEADERS([bluetooth/bluetooth.h])
+])
+
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])

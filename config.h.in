@@ -46,6 +46,9 @@ extern "C" {
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 
+/* Define this if the header file bluetooth/bluetooth.h exists. */
+#undef HAVE_BLUETOOTH_BLUETOOTH_H
+
 /* Define this if the header file linux/vt.h exists. */
 #undef HAVE_LINUX_VT_H
 

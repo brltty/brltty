@@ -301,8 +301,8 @@ static const InputOutputOperations usbOperations = {
 };
 #endif /* ENABLE_USB */
 
+#ifdef HAVE_BLUETOOTH_BLUETOOTH_H
 /* Bluetooth IO */
-
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -394,6 +394,7 @@ static const InputOutputOperations bluezOperations = {
   openBluezPort, closeBluezPort,
   awaitBluezInput, readBluezBytes, writeBluezBytes
 };
+#endif /* HAVE_BLUETOOTH_BLUETOOTH_H */
 
 typedef enum {
   BDS_OFF,
@@ -579,8 +580,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     io = &usbOperations;
 #endif /* ENABLE_USB */
 
+#ifdef HAVE_BLUETOOTH_BLUETOOTH_H
   } else if (isQualifiedDevice(&device, "bluez:")) {
     io = &bluezOperations;
+#endif /* HAVE_BLUETOOTH_BLUETOOTH_H */
 
   } else {
     unsupportedDevice(device);
