@@ -11,13 +11,14 @@ Key Names:
     On the left (from left to right): 7 3 2 1
     On the right (from left to right): 4 5 6 8
   Cursor Routing Keys:
-    CRa1 to CRa70: all routing keys.
-    CRs1 to CRs4: routing keys over status cells.
-    CRt1 to CRt66: routing keys over text cells.
+    CRa1 to CRa70: all routing keys (numbered from left to right).
+    CRs1 to CRs4: routing keys over status cells (numbered from the end inward).
+    CRt1 to CRt66: routing keys over text cells (numbered from left to right).
 Chords:
   The prefix "Chord-" means that the space bar (B+C) must be pressed
   along with the associated dot combination (entered via the top keys).
-  Pressing either B or C alone is also valid.
+  Chording with either just B or just C is also valid.
+  Chording isn't necessary when input mode is off.
 
 Basic Navigation
 A/D: Go backward/forward one window

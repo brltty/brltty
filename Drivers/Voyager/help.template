@@ -11,13 +11,14 @@
 012:    On the left (from left to right): 7 3 2 1
 012:    On the right (from left to right): 4 5 6 8
 013:  Cursor Routing Keys:
-013:    CRa1 to CRa<CELLS>: all routing keys.
-013:    CRs1 to CRs4: routing keys over status cells.
-013:    CRt1 to CRt<COLS>: routing keys over text cells.
+013:    CRa1 to CRa<CELLS>: all routing keys (numbered from left to right).
+013:    CRs1 to CRs4: routing keys over status cells (numbered from the end inward).
+013:    CRt1 to CRt<COLS>: routing keys over text cells (numbered from left to right).
 020:Chords:
 021:  The prefix "Chord-" means that the space bar (B+C) must be pressed
 021:  along with the associated dot combination (entered via the top keys).
-021:  Pressing either B or C alone is also valid.
+021:  Chording with either just B or just C is also valid.
+021:  Chording isn't necessary when input mode is off.
 099:
 100:Basic Navigation
 199:

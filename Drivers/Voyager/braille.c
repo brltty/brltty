@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION \
-"BRLTTY user-space-only driver for Tieman Voyager, version 0.10 (March 2004)"
+"BRLTTY user-space-only driver for Tieman Voyager, version 0.20 (June 2004)"
 #define COPYRIGHT \
 "   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>"
 
@@ -24,9 +24,16 @@
  * Written by Stéphane Doyon  <s.doyon@videotron.ca>
  *
  * It is being tested on Voyager 44, should also support Voyager 70.
- * It is designed to be compiled in BRLTTY version 3.4.2.
+ * It is designed to be compiled in BRLTTY version 3.5.
  *
  * History:
+ * 0.20, June 2004:
+ *       Add statuscells parameter.
+ *       Rename brlinput parameter to inputmode.
+ *       Change default inputmode to no.
+ *       Chorded functions work without chording when inputmode is no.
+ *       Move complex routing key combinations to front/dot keys.
+ *       Duplicate status key bindings on front/dot keys.
  * 0.10, March 2004: Use BRLTTY core repeat functions. Add brlinput parameter
  *   and toggle to disallow braille typing.
  * 0.01, January 2004: fork from the original driver which relied on an
@@ -690,9 +697,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
         HLP(301,"CRt#", "Route cursor to cell")
         cmd = CR_ROUTE + rtk_which[0] - textOffset;
       } else {
-        int key = rtk_which[0] - statusOffset;
-        if (key == -1) key = statusCells;
-
+        int key = statusOffset? totalCells - 1 - rtk_which[0]:
+                                rtk_which[0] - statusOffset;
         switch (key) {
           case 0:
             HLP(881, "CRs1", "Help screen (toggle)")
