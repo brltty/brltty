@@ -144,7 +144,7 @@ usbAddInputElement (
   if ((input = malloc(sizeof(*input)))) {
     memset(input, 0, sizeof(*input));
     if ((input->request = usbSubmitRequest(device, device->inputEndpoint,
-                                           USB_ENDPOINT_TRANSFER_BULK,
+                                           USB_ENDPOINT_TRANSFER_INTERRUPT,
                                            NULL, device->inputSize,
                                            input))) {
       if (device->inputElements) {

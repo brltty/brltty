@@ -273,7 +273,7 @@ usbSubmitRequest (
         urb->type = USBDEVFS_URB_TYPE_BULK;
         break;
       case USB_ENDPOINT_TRANSFER_INTERRUPT:
-        urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
+        urb->type = USBDEVFS_URB_TYPE_BULK;
         break;
     }
     urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
@@ -287,7 +287,9 @@ usbSubmitRequest (
              urb->buffer, urb->buffer_length, urb->usercontext);
   submit:
     if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
-    if ((errno == EINVAL) && (urb->type == USBDEVFS_URB_TYPE_BULK)) {
+    if ((errno == EINVAL) &&
+        (transfer == USB_ENDPOINT_TRANSFER_INTERRUPT) &&
+        (urb->type == USBDEVFS_URB_TYPE_BULK)) {
       urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
       goto submit;
     }
