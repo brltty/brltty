@@ -268,7 +268,7 @@ handleKey (int code, int press, int offsroute) {
 /*--- Input/Output Operations ---*/
 
 typedef struct {
-  const speed_t *baudRates;
+  const speed_t *speeds;
   unsigned char protocol1;
   unsigned char protocol2;
   int (*openPort) (char **parameters, const char *device);
@@ -280,7 +280,7 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static const speed_t *baudRate;
+static const speed_t *speed;
 static int charactersPerSecond;
 
 /*--- Serial Operations ---*/
@@ -288,7 +288,7 @@ static int charactersPerSecond;
 #include "Programs/serial.h"
 static int serialDevice = -1;
 static struct termios oldSerialSettings;
-static const speed_t serialBaudRates[] = {B19200, B38400, B0};
+static const speed_t serialSpeeds[] = {B19200, B38400, B0};
 
 static int
 openSerialPort (char **parameters, const char *device) {
@@ -303,7 +303,7 @@ openSerialPort (char **parameters, const char *device) {
     newSerialSettings.c_cc[VMIN] = 0;	/* set nonblocking read */
     newSerialSettings.c_cc[VTIME] = 0;
 
-    if (resetSerialDevice(serialDevice, &newSerialSettings, *baudRate)) return 1;
+    if (resetSerialDevice(serialDevice, &newSerialSettings, *speed)) return 1;
 
     close(serialDevice);
     serialDevice = -1;
@@ -345,7 +345,7 @@ writeSerialBytes (const void *buffer, int length) {
 }
 
 static const InputOutputOperations serialOperations = {
-  serialBaudRates, 1, 1,
+  serialSpeeds, 1, 1,
   openSerialPort, closeSerialPort, flushSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
@@ -355,17 +355,18 @@ static const InputOutputOperations serialOperations = {
 #ifdef ENABLE_USB
 #include "Programs/usb.h"
 static UsbChannel *usb = NULL;
-static const speed_t usbBaudRates[] = {B57600, B0};
+static const speed_t usbSpeeds[] = {B57600, B0};
 
 static int
 openUsbPort (char **parameters, const char *device) {
-  static const UsbChannelDefinition definitions[] = {
-    {0X0403, 0Xf208, 1, 0, 0, 1, 2, 57600, 0, 8, 1, USB_SERIAL_PARITY_NONE},
+  const int baud = baud2integer(*speed);
+  const UsbChannelDefinition definitions[] = {
+    {0X0403, 0Xf208, 1, 0, 0, 1, 2, baud, 0, 8, 1, USB_SERIAL_PARITY_NONE},
     {}
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {
-    usbBeginInput(usb->device, usb->definition->inputEndpoint, 8);
+    usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
     return 1;
   } else {
     LogPrint(LOG_DEBUG, "USB device not found%s%s",
@@ -389,12 +390,12 @@ flushUsbPort (BrailleDisplay *brl) {
 
 static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition->inputEndpoint, milliseconds);
+  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (void *buffer, int *offset, int length, int timeout) {
-  int count = usbReapInput(usb->device, usb->definition->inputEndpoint, buffer+*offset, length, 
+  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer+*offset, length, 
                            (offset? timeout: 0), timeout);
   if (count == -1)
     if (errno == EAGAIN)
@@ -405,11 +406,11 @@ readUsbBytes (void *buffer, int *offset, int length, int timeout) {
 
 static int
 writeUsbBytes (const void *buffer, int length) {
-  return usbWriteEndpoint(usb->device, usb->definition->outputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
 static const InputOutputOperations usbOperations = {
-  usbBaudRates, 0, 5,
+  usbSpeeds, 0, 5,
   openUsbPort, closeUsbPort, flushUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
@@ -993,9 +994,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     return 0;
   }
 
-  baudRate = io->baudRates;
-  while (*baudRate != B0) {
-    charactersPerSecond = baud2integer(*baudRate) / 10;
+  speed = io->speeds;
+  while (*speed != B0) {
+    charactersPerSecond = baud2integer(*speed) / 10;
 
     if (io->openPort(parameters, device)) {
       if (identifyTerminal(brl)) {
@@ -1008,7 +1009,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       io->closePort();
     }
 
-    ++baudRate;
+    ++speed;
   }
 
   return 0;

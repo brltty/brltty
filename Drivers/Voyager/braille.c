@@ -268,7 +268,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   /* cause the display to beep */
   ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
 
-  usbBeginInput(usb->device, usb->definition->inputEndpoint, 8);
+  usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
 
   if(!(dispbuf = malloc(ncells))
      || !(prevdata = malloc(ncells)))
@@ -487,7 +487,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     return cmd;
   }
 
-  r = usbReapInput(usb->device, usb->definition->inputEndpoint, buf, 8, 0, 0);
+  r = usbReapInput(usb->device, usb->definition.inputEndpoint, buf, 8, 0, 0);
   if(r<0) {
     if(errno == EAGAIN) {
       /* no input */

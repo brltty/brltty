@@ -393,7 +393,7 @@ typedef struct {
   UsbSerialParity parity;
 } UsbChannelDefinition;
 typedef struct {
-  const UsbChannelDefinition *definition;
+  UsbChannelDefinition definition;
   UsbDevice *device;
 } UsbChannel;
 extern UsbChannel *usbFindChannel (const UsbChannelDefinition *definitions, const char *device);

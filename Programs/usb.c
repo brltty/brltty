@@ -932,7 +932,7 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *device) {
     memset(channel, 0, sizeof(*channel));
 
     if ((channel->device = usbFindDevice(usbChooseChannel, &choose))) {
-      channel->definition = choose.definition;
+      channel->definition = *choose.definition;
       return channel;
     }
 
@@ -943,7 +943,7 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *device) {
 
 void
 usbCloseChannel (UsbChannel *channel) {
-  usbReleaseInterface(channel->device, channel->definition->interface);
+  usbReleaseInterface(channel->device, channel->definition.interface);
   usbCloseDevice(channel->device);
   free(channel);
 }

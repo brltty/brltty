@@ -171,7 +171,7 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static const speed_t baud = B19200;
+static const speed_t speed = B19200;
 static int charactersPerSecond;
 
 /* Serial IO */
@@ -193,7 +193,7 @@ openSerialPort (char **parameters, const char *device) {
     newSerialSettings.c_cc[VMIN] = 0;
     newSerialSettings.c_cc[VTIME] = 0;
 
-    if (resetSerialDevice(serialDevice, &newSerialSettings, baud)) {
+    if (resetSerialDevice(serialDevice, &newSerialSettings, speed)) {
       return 1;
     }
 
@@ -251,14 +251,15 @@ static UsbChannel *usb = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
-  static const UsbChannelDefinition definitions[] = {
-    {0X0921, 0X1200, 1, 0, 0, 1, 1, 19200, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* GoHubs chip */
-    {0X0403, 0X6001, 1, 0, 0, 1, 2, 19200, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* FTDI chip */
+  const int baud = baud2integer(speed);
+  const UsbChannelDefinition definitions[] = {
+    {0X0921, 0X1200, 1, 0, 0, 1, 1, baud, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* GoHubs chip */
+    {0X0403, 0X6001, 1, 0, 0, 1, 2, baud, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* FTDI chip */
     {}
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {
-    usbBeginInput(usb->device, usb->definition->inputEndpoint, 8);
+    usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
     return 1;
   } else {
     LogPrint(LOG_DEBUG, "USB device not found%s%s",
@@ -270,12 +271,12 @@ openUsbPort (char **parameters, const char *device) {
 
 static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition->inputEndpoint, milliseconds);
+  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (unsigned char *buffer, int length) {
-  int count = usbReapInput(usb->device, usb->definition->inputEndpoint, buffer, length, 0, 100);
+  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length, 0, 100);
   if (count == -1) {
     if (errno == EAGAIN)
       count = 0;
@@ -286,7 +287,7 @@ readUsbBytes (unsigned char *buffer, int length) {
 static int
 writeUsbBytes (const unsigned char *buffer, int length, int *delay) {
   if (delay) *delay += length * 1000 / charactersPerSecond;
-  return usbWriteEndpoint(usb->device, usb->definition->outputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
 static void
@@ -514,7 +515,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   rawData = prevData = NULL;		/* clear pointers */
-  charactersPerSecond = baud2integer(baud) / 10;
+  charactersPerSecond = baud2integer(speed) / 10;
 
   if (io->openPort(parameters, device)) {
     int tries = 0;
