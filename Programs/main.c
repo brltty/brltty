@@ -397,13 +397,16 @@ exitScreenParameters (void) {
 static void
 terminateProgram (int quickly) {
   int flags = MSG_NODELAY;
+
 #ifdef ENABLE_SPEECH_SUPPORT
   int silently = quickly;
   if (speech == &noSpeech) silently = 1;
   if (silently) flags |= MSG_SILENT;
 #endif /* ENABLE_SPEECH_SUPPORT */
+
   clearStatusCells(&brl);
   message("BRLTTY exiting.", flags);
+
 #ifdef ENABLE_SPEECH_SUPPORT
   if (!silently) {
     int awaitSilence = speech->isSpeaking();
@@ -418,6 +421,7 @@ terminateProgram (int quickly) {
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
   exit(0);
 }
 
@@ -2242,7 +2246,7 @@ message (const char *text, short flags) {
             int i;
             for (i=0; i<messageDelay; i+=updateInterval) {
                int command;
-               delay(updateInterval);
+               drainBrailleOutput(&brl, updateInterval);
                while ((command = readCommand(BRL_CTX_MESSAGE)) == BRL_CMD_NOOP);
                if (command != EOF) break;
             }

@@ -585,26 +585,26 @@ fixTranslationTablePath (const char **path, const char *prefix) {
 
 int
 readCommand (BRL_DriverCommandContext context) {
-   int command = readBrailleCommand(&brl, context);
-   if (command != EOF) {
-      LogPrint(LOG_DEBUG, "Command: %06X", command);
-      if (IS_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
-      command &= BRL_MSK_CMD;
-   }
-   return command;
+  int command = readBrailleCommand(&brl, context);
+  if (command != EOF) {
+    LogPrint(LOG_DEBUG, "Command: %06X", command);
+    if (IS_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
+    command &= BRL_MSK_CMD;
+  }
+  return command;
 }
 
 int
 getCommand (BRL_DriverCommandContext context) {
-   while (1) {
-      int command = readCommand(context);
-      if (command == EOF) {
-         delay(updateInterval);
-         closeTuneDevice(0);
-      } else if (command != BRL_CMD_NOOP) {
-         return command;
-      }
-   }
+  while (1) {
+    int command = readCommand(context);
+    if (command == EOF) {
+      drainBrailleOutput(&brl, updateInterval);
+      closeTuneDevice(0);
+    } else if (command != BRL_CMD_NOOP) {
+      return command;
+    }
+  }
 }
 
 static void
@@ -778,6 +778,7 @@ initializeBraille (void) {
 static int
 openBrailleDriver (void) {
   const char *const *device = brailleDevices;
+  LogPrint(LOG_DEBUG, "Starting braille driver.");
   while (*device) {
     const char *const *identifier;
     int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
@@ -900,9 +901,11 @@ openBrailleDriver (void) {
 
 static void
 closeBrailleDriver (void) {
+  LogPrint(LOG_DEBUG, "Stopping braille driver.");
   closeHelpScreen();
 
   if (brailleDriver) {
+    drainBrailleOutput(&brl, 0);
     brailleDriver->close(&brl);
     if (!brailleInternal) unloadSharedObject(brailleDriver);
     brailleDriver = NULL;
@@ -945,7 +948,10 @@ startBrailleDriver (void) {
 static void
 stopBrailleDriver (void) {
   braille = &noBraille;
-  if (brl.isCoreBuffer) free(brl.buffer);
+  if (brl.isCoreBuffer) {
+    free(brl.buffer);
+    brl.buffer = NULL;
+  }
   closeBrailleDriver();
   playTune(&tune_braille_off);
 }
@@ -1000,6 +1006,7 @@ static int
 openSpeechDriver (void) {
   const char *const *identifier;
   int oneDriver = speechDrivers[0] && !speechDrivers[1];
+  LogPrint(LOG_DEBUG, "Starting speech driver.");
 
   if (oneDriver && (strcmp(speechDrivers[0], "auto") == 0)) {
     static const char *speechIdentifiers[] = {
@@ -1059,6 +1066,7 @@ openSpeechDriver (void) {
 
 static void
 closeSpeechDriver (void) {
+  LogPrint(LOG_DEBUG, "Stopping speech driver.");
   if (speechDriver) {
     speechDriver->close();
     if (!speechInternal) unloadSharedObject(speechDriver);
@@ -2141,8 +2149,8 @@ startup (int argc, char *argv[]) {
   /* Activate the braille display. */
   brailleDevices = splitString(opt_brailleDevice, ',');
   brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',');
-  atexit(exitBrailleDriver);
   atexit(exitTunes);
+  atexit(exitBrailleDriver);
   startBrailleDriver();
 
 #ifdef ENABLE_API
