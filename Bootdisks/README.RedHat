@@ -74,12 +74,13 @@ mkdir .../work
 mkdir .../work/etcbrltty
 
 Now copy relevant files from your BRLTTY build. Copy the executable, the
-translation table, and the help file(s) to your work directory.
+translation table, the contraction table (if you want it), and the help file(s)
+to your work directory.
 
 cp Programs/brltty .../work
-cp help/* .../work/etcbrltty
 cp BrailleTables/*.tbl .../work/etcbrltty
 cp ContractionTables/*.ctb .../work/etcbrltty
+cp help/* .../work/etcbrltty
 
 (You can also copy alternative translation tables from BrailleTables/
 to .../work/etcbrltty. These CAN be loaded dynamically.)
@@ -87,6 +88,12 @@ to .../work/etcbrltty. These CAN be loaded dynamically.)
 Now change to the work directory:
 
 cd .../work
+
+The executable is way too large for a boot disk because it contains lots of
+unneeded symbol table and debugging information.  Remove this excess data in
+order to make the executable as small as possible.
+
+strip brltty
 
 Next step is to select an installation boot floppy image from your
 distribution. This could be images/boot.img or images/bootnet.img from an

@@ -2,6 +2,7 @@ Note: this file is in reversed chronological order (bottom to top).
 
 
  - BRLTTY 3.3 released:
+   No longer strip executables in the build tree. (dm)
    Compile all drivers even if built-in ones are configured. (dm)
    Add the -L (--library-directory=) option to brltty and brltest. (dm)
    Wrap long output lines from configure --help. (dm)

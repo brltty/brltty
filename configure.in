@@ -449,13 +449,13 @@ AC_CACHE_CHECK([for linkage editor flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
    linux*)
-      brltty_cv_prog_ld_flags="-strip-all -export-dynamic -rpath ${execute_root}${library_directory}"
+      brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
       ;;
    solaris*)
-      brltty_cv_prog_ld_flags="-s -R ${execute_root}${library_directory}"
+      brltty_cv_prog_ld_flags="-R ${execute_root}${library_directory}"
       ;;
    hpux*)
-      brltty_cv_prog_ld_flags="-s -E +s +b ${execute_root}${library_directory}"
+      brltty_cv_prog_ld_flags="-E +s +b ${execute_root}${library_directory}"
       ;;
    *)
       brltty_cv_prog_ld_flags=""
