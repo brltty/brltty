@@ -191,13 +191,8 @@ openSerialPort (char **parameters, const char *device) {
   if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
     struct termios newSerialSettings;
 
-    memset(&newSerialSettings, 0, sizeof(newSerialSettings));
-    newSerialSettings.c_cflag = CLOCAL | PARODD | PARENB | CREAD | CS8;
-    newSerialSettings.c_iflag = IGNPAR; 
-    newSerialSettings.c_oflag = 0;
-    newSerialSettings.c_lflag = 0;
-    newSerialSettings.c_cc[VMIN] = 0;
-    newSerialSettings.c_cc[VTIME] = 0;
+    initializeSerialAttributes(&newSerialSettings);
+    setSerialParity(&newSerialSettings, SERIAL_PARITY_ODD);
 
     if (resetSerialDevice(serialDevice, &newSerialSettings, speed)) {
       return 1;

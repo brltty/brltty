@@ -101,7 +101,6 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 	if (!openSerialDevice(device, &brl_fd, &oldtermios)) goto __errexit;
 	memcpy(&newtermios, &oldtermios, sizeof(newtermios));
 	rawSerialDevice(&newtermios);
-	/* newtermios.c_iflag |= CRTSCTS; */
 	newtermios.c_cc[VMIN] = 0; /* non-blocking read */
 	newtermios.c_cc[VTIME] = 0;
 	resetSerialDevice(brl_fd, &newtermios, B9600);

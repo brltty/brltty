@@ -132,14 +132,9 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 	if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
 
 	/* Set flow control, enable reading */
-	newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+        initializeSerialAttributes(&newtio);
+	setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
 
-	/* Ignore bytes with parity errors and make terminal raw and dumb */
-	newtio.c_iflag = IGNPAR;
-	newtio.c_oflag = 0;		/* raw output */
-	newtio.c_lflag = 0;		/* don't echo or generate signals */
-	newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-	newtio.c_cc[VTIME] = 0;
 	resetSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
 
 	/* MultiBraille initialisation procedure:

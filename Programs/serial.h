@@ -36,6 +36,25 @@ extern int flushSerialOutput (int descriptor);
 extern int validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices);
 extern int baud2integer (speed_t baud);
 
+extern void initializeSerialAttributes (struct termios *attributes);
+extern int setSerialDataBits (struct termios *attributes, int bits);
+extern int setSerialStopBits (struct termios *attributes, int bits);
+
+typedef enum {
+  SERIAL_PARITY_NONE,
+  SERIAL_PARITY_ODD,
+  SERIAL_PARITY_EVEN
+} SerialParity;
+extern int setSerialParity (struct termios *attributes, SerialParity parity);
+
+typedef enum {
+  SERIAL_FLOW_HARDWARE          = 0X1,
+  SERIAL_FLOW_SOFTWARE_INPUT    = 0X2,
+  SERIAL_FLOW_SOFTWARE_OUTPUT   = 0X4,
+  SERIAL_FLOW_NONE              = 0X0
+} SerialFlowControl;
+extern int setSerialFlowControl (struct termios *attributes, SerialFlowControl flow);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

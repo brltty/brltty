@@ -124,7 +124,7 @@ typedef struct {
   int integer;
   speed_t baud;
 } BaudEntry;
-static BaudEntry baudTable[] = {
+static const BaudEntry baudTable[] = {
    #ifdef B50
    {     50, B50},
    #endif
@@ -222,7 +222,7 @@ int
 validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices) {
    int integer;
    if (!*word || isInteger(&integer, word)) {
-      BaudEntry *entry = baudTable;
+      const BaudEntry *entry = baudTable;
       while (entry->integer) {
          if (integer == entry->integer) {
             if (choices) {
@@ -251,11 +251,122 @@ validateBaud (speed_t *value, const char *description, const char *word, const u
 
 int
 baud2integer (speed_t baud) {
-  BaudEntry *entry = baudTable;
+  const BaudEntry *entry = baudTable;
   while (entry->integer) {
     if (baud == entry->baud)
       return entry->integer;
     ++entry;
   }
   return -1;
+}
+
+void
+initializeSerialAttributes (struct termios *attributes) {
+  memset(attributes, 0, sizeof(*attributes));
+  attributes->c_cflag = CREAD | CLOCAL | CS8;
+  attributes->c_iflag = IGNPAR | IGNBRK;
+}
+
+int
+setSerialDataBits (struct termios *attributes, int bits) {
+  tcflag_t size;
+  switch (bits) {
+#ifdef CS5
+    case 5: size = CS5; break;
+#endif /* CS5 */
+
+#ifdef CS6
+    case 6: size = CS6; break;
+#endif /* CS6 */
+
+#ifdef CS7
+    case 7: size = CS7; break;
+#endif /* CS7 */
+
+#ifdef CS8
+    case 8: size = CS8; break;
+#endif /* CS8 */
+
+    default:
+      LogPrint(LOG_WARNING, "Unknown serial data bit count: %d", bits);
+      return 0;
+  }
+
+  attributes->c_cflag &= ~CSIZE;
+  attributes->c_cflag |= size;
+  return 1;
+}
+
+int
+setSerialStopBits (struct termios *attributes, int bits) {
+  if (bits == 1) {
+    attributes->c_cflag &= ~CSTOPB;
+  } else if (bits == 2) {
+    attributes->c_cflag |= CSTOPB;
+  } else {
+    LogPrint(LOG_WARNING, "Unknown serial stop bit count: %d", bits);
+    return 0;
+  }
+  return 1;
+}
+
+int
+setSerialParity (struct termios *attributes, SerialParity parity) {
+  if (parity == SERIAL_PARITY_NONE) {
+    attributes->c_cflag &= ~(PARENB | PARODD);
+  } else {
+    if (parity == SERIAL_PARITY_EVEN) {
+      attributes->c_cflag &= ~PARODD;
+    } else if (parity == SERIAL_PARITY_ODD) {
+      attributes->c_cflag |= PARODD;
+    } else {
+      LogPrint(LOG_WARNING, "Unknown serial parity: %c", parity);
+      return 0;
+    }
+    attributes->c_cflag |= PARENB;
+  }
+  return 1;
+}
+
+int
+setSerialFlowControl (struct termios *attributes, SerialFlowControl flow) {
+#ifdef CRTSCTS
+  if (flow & SERIAL_FLOW_HARDWARE) {
+    attributes->c_cflag |= CRTSCTS;
+    flow &= ~SERIAL_FLOW_HARDWARE;
+  } else {
+    attributes->c_cflag &= ~CRTSCTS;
+  }
+#else /* CRTSCTS */
+#warning hardware flow control not settable on this platform
+#endif /* CRTSCTS */
+
+#ifdef IXOFF
+  if (flow & SERIAL_FLOW_SOFTWARE_INPUT) {
+    attributes->c_iflag |= IXOFF;
+    flow &= ~SERIAL_FLOW_SOFTWARE_INPUT;
+  } else {
+    attributes->c_iflag &= ~IXOFF;
+  }
+#else /* IXOFF */
+#warning software input flow control not settable on this platform
+#endif /* IXOFF */
+
+#ifdef IXON
+  if (flow & SERIAL_FLOW_SOFTWARE_OUTPUT) {
+    attributes->c_iflag |= IXON;
+    flow &= ~SERIAL_FLOW_SOFTWARE_OUTPUT;
+  } else {
+    attributes->c_iflag &= ~IXON;
+  }
+#else /* IXON */
+#warning software output flow control not settable on this platform
+#endif /* IXON */
+
+  if (flow) {
+    LogPrint(LOG_WARNING, "Unknown serial flow control: 0X%02X", flow);
+    return 0;
+  }
+
+  return 1;
 }

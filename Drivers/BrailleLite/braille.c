@@ -328,12 +328,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     LogPrint(LOG_DEBUG, "Opening serial port: %s", device);
     if (openSerialDevice(device, &blite_fd, &oldtio)) {
       struct termios newtio;	/* new terminal settings */
-      newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
-      newtio.c_iflag = IGNPAR;
-      newtio.c_oflag = 0;		/* raw output */
-      newtio.c_lflag = 0;		/* don't echo or generate signals */
-      newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-      newtio.c_cc[VTIME] = 0;
+      initializeSerialAttributes(&newtio);
+      setSerialFlowControl(&newtio, SERIAL_FLOW_HARDWARE);
 
       /* activate new settings */
       if (resetSerialDevice(blite_fd, &newtio, baudrate)) {

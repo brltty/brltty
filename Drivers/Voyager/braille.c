@@ -202,13 +202,8 @@ openSerialPort (char **parameters, const char *device) {
   if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
     struct termios newSerialSettings;
 
-    memset(&newSerialSettings, 0, sizeof(newSerialSettings));
-    newSerialSettings.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
-    newSerialSettings.c_iflag = IGNPAR;
-    newSerialSettings.c_oflag = 0;		/* raw output */
-    newSerialSettings.c_lflag = 0;		/* don't echo or generate signals */
-    newSerialSettings.c_cc[VMIN] = 0;	/* set nonblocking read */
-    newSerialSettings.c_cc[VTIME] = 0;
+    initializeSerialAttributes(&newSerialSettings);
+    setSerialFlowControl(&newSerialSettings, SERIAL_FLOW_HARDWARE);
 
     if (resetSerialDevice(serialDevice, &newSerialSettings, B38400)) {
       return 1;
