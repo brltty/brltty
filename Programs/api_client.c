@@ -200,8 +200,8 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   int err;
   char auth[BRLAPI_MAXPACKETSIZE];
 
-  brlapi_settings_t settings = { BRLAPI_AUTHNAME, ":" BRLAPI_SOCKETPORT };
-  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHNAME"), getenv("BRLAPI_HOSTNAME") };
+  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":" BRLAPI_SOCKETPORT };
+  brlapi_settings_t envsettings = { getenv("BRLAPI_DEFAUTHPATH"), getenv("BRLAPI_HOSTNAME") };
 
   /* Here update settings with the parameters from misc sources (files, env...) */
   updateSettings(&settings, &envsettings);

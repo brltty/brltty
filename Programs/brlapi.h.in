@@ -63,7 +63,7 @@ extern "C" {
 #undef BRLAPI_AUTHFILE
 
 /** Final path for default authentication key file */
-#define BRLAPI_AUTHNAME BRLAPI_ETCDIR "/" BRLAPI_AUTHFILE
+#define BRLAPI_DEFAUTHPATH BRLAPI_ETCDIR "/" BRLAPI_AUTHFILE
 
 /** \brief Settings structure for \e BrlAPI connection
  *
@@ -102,7 +102,7 @@ typedef struct
    * holds it; it will hence have to be readable by the application.
    *
    * Setting \c NULL defaults it to local installation setup or to the content
-   * of the BRLAPI_AUTHNAME environment variable, if it exists. */
+   * of the BRLAPI_DEFAUTHPATH environment variable, if it exists. */
   char *authKey;
 
   /** this tells where the \e BrlAPI server resides: it might be listening on

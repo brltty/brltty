@@ -830,7 +830,7 @@ void api_open(BrailleDisplay *brl, char **parameters)
 
   api_link();
 
-  res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_AUTHNAME),
+  res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH),
                            &authlength,auth);
   if (res==-1) {
     LogPrint(LOG_WARNING,"Unable to load API authentication key: no connections will be accepted.");
