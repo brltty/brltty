@@ -136,8 +136,8 @@ static const TerminalDefinition *the_terminal = NULL;
 
 static int code_status_first = -1;
 static int code_status_last  = -1;
-static int code_route_first = -1;
-static int code_route_last  = -1;
+static int code_cursor_first = -1;
+static int code_cursor_last  = -1;
 static int code_front_first = -1;
 static int code_front_last  = -1;
 static int code_easy_first = -1;
@@ -146,7 +146,7 @@ static int code_switch_first = -1;
 static int code_switch_last  = -1;
 
 static int addr_status = -1;
-static int addr_display = -1;
+static int addr_text = -1;
 
 static unsigned int pressed_modifiers = 0;
 static unsigned int saved_modifiers = 0;
@@ -274,36 +274,33 @@ updateData (BrailleDisplay *brl, int offset, int size, const unsigned char *data
       data += index;
       offset += index;
       memcpy(buffer, data, size);
-      writeData(brl, offset, size, buffer);
+      writeData(brl, XMT_BRLDATA+offset, size, buffer);
     }
   }
 }
 
+static int
+disableOutputTranslation (BrailleDisplay *brl, int offset, int count) {
+  unsigned char buffer[count];
+  memset(buffer, 1, sizeof(buffer));
+  return writeData(brl, XMT_BRLWRITE+offset,
+                   sizeof(buffer), buffer);
+}
+
 static void
 initializeTable (BrailleDisplay *brl) {
-  /* don´t use the internal table for the status cells */
-  {
-    char status[the_terminal->statusCount];
-    memset(status, 1, sizeof(status));
-    writeData(brl, XMT_BRLWRITE+addr_status, sizeof(status), status);
-  }
-
-  /* don´t use the internal table for the line */
-  {
-    char line[the_terminal->columns];
-    memset(line, 1, sizeof(line));
-    writeData(brl, XMT_BRLWRITE+addr_display, sizeof(line), line);
-  }
+  disableOutputTranslation(brl, addr_status, the_terminal->statusCount);
+  disableOutputTranslation(brl, addr_text, the_terminal->columns);
 }
 
 static void
 writeLine (BrailleDisplay *brl) {
-  writeData(brl, addr_display, the_terminal->columns, currentLine);
+  writeData(brl, XMT_BRLDATA+addr_text, the_terminal->columns, currentLine);
 }
 
 static void
 writeStatus (BrailleDisplay *brl) {
-  writeData(brl, addr_status, the_terminal->statusCount, currentStatus);
+  writeData(brl, XMT_BRLDATA+addr_status, the_terminal->statusCount, currentStatus);
 }
 
 static void
@@ -356,42 +353,32 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       /* TODO: ?? HACK */
       BRLSYMBOL.helpFile = the_terminal->helpFile;
 
-      /* key codes - starts at 0X300  */
-      /* status keys - routing keys - step 3 */
+      /* routing key codes: 0X300 -> status -> cursor */
       code_status_first = RCV_KEYROUTE;
       code_status_last  = code_status_first + 3 * (the_terminal->statusCount - 1);
-      code_route_first = code_status_last + 3;
-      code_route_last  = code_route_first + 3 * (the_terminal->columns - 1);
-      LogPrint(LOG_DEBUG, "Keys: status=%03X-%03X routing=%03X-%03X",
+      code_cursor_first = code_status_last + 3;
+      code_cursor_last  = code_cursor_first + 3 * (the_terminal->columns - 1);
+      LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
                code_status_first, code_status_last,
-               code_route_first, code_route_last);
+               code_cursor_first, code_cursor_last);
 
-      if (the_terminal->frontKeys > 0) {
-        code_front_first = RCV_KEYFUNC + 3;
-        code_front_last  = code_front_first + 3 * (the_terminal->frontKeys - 1);
-        LogPrint(LOG_DEBUG, "Keys: front=%03X-%03X",
-                 code_front_first, code_front_last);
-      } else {
-        code_front_first = code_front_last  = -1;
-      }
+      /* function key codes: 0X000 -> front -> bar -> switches */
+      code_front_first = RCV_KEYFUNC + 3;
+      code_front_last  = code_front_first + 3 * (the_terminal->frontKeys - 1);
+      code_easy_first = code_front_last + 3;
+      code_easy_last  = code_easy_first + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+      code_switch_first = code_easy_last + 3;
+      code_switch_last  = code_switch_first + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+      LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
+               code_front_first, code_front_last,
+               code_easy_first, code_easy_last,
+               code_switch_first, code_switch_last);
 
-      if (the_terminal->hasEasyBar) {
-        code_easy_first = RCV_KEYFUNC + 3;
-        code_easy_last  = 0X18;
-        code_switch_first = 0X1B;
-        code_switch_last = 0X30;
-        LogPrint(LOG_DEBUG, "Keys: bar=%03X-%03X switches=%03X-%03X",
-                 code_easy_first, code_easy_last,
-                 code_switch_first, code_switch_last);
-      } else {
-        code_easy_first = code_easy_last = code_switch_first = code_switch_last = -1;
-      }
-
-      /* address of display */
-      addr_status = XMT_BRLDATA;
-      addr_display = addr_status + the_terminal->statusCount;
-      LogPrint(LOG_DEBUG, "Cells: status=%04X display=%04X",
-               addr_status, addr_display);
+      /* cell block offsets: 0X00 -> status -> text */
+      addr_status = 0;
+      addr_text = addr_status + the_terminal->statusCount;
+      LogPrint(LOG_DEBUG, "Cell Block Offsets: status=%02X text=%02X",
+               addr_status, addr_text);
 
       sortCommands();
       return 1;
@@ -560,7 +547,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   int i;
   if (debug_writes) LogBytes("Window", brl->buffer, the_terminal->columns);
   for (i=0; i<the_terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
-  updateData(brl, addr_display, the_terminal->columns, brl->buffer, currentLine);
+  updateData(brl, addr_text, the_terminal->columns, brl->buffer, currentLine);
 }
 
 /* ------------------------------------------------------------ */
@@ -691,9 +678,9 @@ handleCode (int code, int press, int time) {
     return handleKey(OFFS_SWITCH + num, press, 0);
   }
 
-  if (code_route_first <= code && 
-      code <= code_route_last) { /* Routing Keys */ 
-    num = (code - code_route_first) / 3;
+  if (code_cursor_first <= code && 
+      code <= code_cursor_last) { /* Routing Keys */ 
+    num = (code - code_cursor_first) / 3;
     return handleKey(ROUTINGKEY, press, num);
   }
 
