@@ -48,8 +48,6 @@
 
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 int messageDelay = DEFAULT_MESSAGE_DELAY;
-int autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
-int autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
 
 /*
  * Misc param variables
@@ -710,6 +708,42 @@ getOffset (int arg, int end) {
   return arg;
 }
 
+static void
+setBlinkingState (int *state, int *timer, int visible, unsigned char invisibleTime, unsigned char visibleTime) {
+  *timer = PREFERENCES_TIME((*state = visible)? visibleTime: invisibleTime);
+}
+
+static int cursorState;                /* display cursor on (toggled during blink) */
+static int cursorTimer;
+static void
+setBlinkingCursor (int visible) {
+  setBlinkingState(&cursorState, &cursorTimer, visible,
+                   prefs.cursorInvisibleTime, prefs.cursorVisibleTime);
+}
+
+static int attributesState;
+static int attributesTimer;
+static void
+setBlinkingAttributes (int visible) {
+  setBlinkingState(&attributesState, &attributesTimer, visible,
+                   prefs.attributesInvisibleTime, prefs.attributesVisibleTime);
+}
+
+static int capitalsState;                /* display caps off (toggled during blink) */
+static int capitalsTimer;
+static void
+setBlinkingCapitals (int visible) {
+  setBlinkingState(&capitalsState, &capitalsTimer, visible,
+                   prefs.capitalsInvisibleTime, prefs.capitalsVisibleTime);
+}
+
+static void
+resetBlinkingStates (void) {
+  setBlinkingCursor(0);
+  setBlinkingAttributes(1);
+  setBlinkingCapitals(1);
+}
+
 static int
 toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const TuneDefinition *on) {
   const TuneDefinition *tune;
@@ -724,15 +758,6 @@ toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const T
 
 int
 main (int argc, char *argv[]) {
-  short csron = 1;                /* display cursor on (toggled during blink) */
-  short csrcntr = 1;
-
-  short capon = 0;                /* display caps off (toggled during blink) */
-  short capcntr = 1;
-
-  short attron = 0;
-  short attrcntr = 1;
-
   short oldwinx, oldwiny;
   int i;                        /* loop counter */
 
@@ -818,6 +843,7 @@ main (int argc, char *argv[]) {
   /*
    * Main program loop 
    */
+  resetBlinkingStates();
   while (1) {
     int pointerMoved = 0;
 
@@ -843,10 +869,12 @@ main (int argc, char *argv[]) {
                                       infmode? CMDS_STATUS:
                                       ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
                                       CMDS_SCREEN);
+        if (!prefs.autorepeat) autorepeat = 0;
+
         if (next == EOF) {
           if (!autorepeat) break;
           if ((autorepeat -= updateInterval) > 0) break;
-          autorepeat = autorepeatInterval;
+          autorepeat = PREFERENCES_TIME(prefs.autorepeatInterval);
         } else {
           LogPrint(LOG_DEBUG, "Command: %06X", next);
 
@@ -896,10 +924,10 @@ main (int argc, char *argv[]) {
 
           command = next & ~VAL_REPEAT_MASK;
           if (next & VAL_REPEAT_DELAY) {
-            autorepeat = autorepeatDelay;
+            autorepeat = PREFERENCES_TIME(prefs.autorepeatDelay);
             if (!(next & VAL_REPEAT_INITIAL)) continue;
           } else if (next & VAL_REPEAT_INITIAL) {
-            autorepeat = autorepeatInterval;
+            autorepeat = PREFERENCES_TIME(prefs.autorepeatInterval);
           } else {
             autorepeat = 0;
           }     
@@ -1289,14 +1317,10 @@ main (int argc, char *argv[]) {
             TOGGLE_PLAY(prefs.showAttributes);
             break;
           case CMD_CSRBLINK:
-            csron = 1;
-            TOGGLE_PLAY(prefs.blinkingCursor);
-            if (prefs.blinkingCursor) {
-              csrcntr = prefs.cursorVisiblePeriod;
-              attron = 1;
-              attrcntr = prefs.attributesVisiblePeriod;
-              capon = 0;
-              capcntr = prefs.capitalsInvisiblePeriod;
+            setBlinkingCursor(1);
+            if (TOGGLE_PLAY(prefs.blinkingCursor)) {
+              setBlinkingAttributes(1);
+              setBlinkingCapitals(0);
             }
             break;
           case CMD_CSRTRK:
@@ -1346,25 +1370,17 @@ main (int argc, char *argv[]) {
             break;
           }
           case CMD_CAPBLINK:
-            capon = 1;
-            TOGGLE_PLAY(prefs.blinkingCapitals);
-            if (prefs.blinkingCapitals) {
-              capcntr = prefs.capitalsVisiblePeriod;
-             attron = 0;
-             attrcntr = prefs.attributesInvisiblePeriod;
-             csron = 0;
-             csrcntr = prefs.cursorInvisiblePeriod;
+            setBlinkingCapitals(1);
+            if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
+              setBlinkingAttributes(0);
+              setBlinkingCursor(0);
             }
             break;
           case CMD_ATTRBLINK:
-            attron = 1;
-            TOGGLE_PLAY(prefs.blinkingAttributes);
-            if (prefs.blinkingAttributes) {
-              attrcntr = prefs.attributesVisiblePeriod;
-              capon = 1;
-              capcntr = prefs.capitalsVisiblePeriod;
-              csron = 0;
-              csrcntr = prefs.cursorInvisiblePeriod;
+            setBlinkingAttributes(1);
+            if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
+              setBlinkingCapitals(1);
+              setBlinkingCursor(0);
             }
             break;
           case CMD_INFO:
@@ -1397,9 +1413,7 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
           case CMD_PREFLOAD:
             if (loadPreferences(1)) {
-              csron = 1;
-              capon = 0;
-              csrcntr = capcntr = 1;
+              resetBlinkingStates();
               playTune(&tune_done);
             }
             break;
@@ -1628,14 +1642,14 @@ main (int argc, char *argv[]) {
      * Update blink counters: 
      */
     if (prefs.blinkingCursor)
-      if (!--csrcntr)
-        csrcntr = (csron ^= 1)? prefs.cursorVisiblePeriod: prefs.cursorInvisiblePeriod;
-    if (prefs.blinkingCapitals)
-      if (!--capcntr)
-        capcntr = (capon ^= 1)? prefs.capitalsVisiblePeriod: prefs.capitalsInvisiblePeriod;
+      if ((cursorTimer -= updateInterval) <= 0)
+        setBlinkingCursor(!cursorState);
     if (prefs.blinkingAttributes)
-      if (!--attrcntr)
-        attrcntr = (attron ^= 1)? prefs.attributesVisiblePeriod: prefs.attributesInvisiblePeriod;
+      if ((attributesTimer -= updateInterval) <= 0)
+        setBlinkingAttributes(!attributesState);
+    if (prefs.blinkingCapitals)
+      if ((capitalsTimer -= updateInterval) <= 0)
+        setBlinkingCapitals(!capitalsState);
 
     /*
      * Update Braille display and screen information.  Switch screen 
@@ -1691,12 +1705,10 @@ main (int argc, char *argv[]) {
         if (prefs.blinkingCursor) {
           if (scr.posy != p->trky) {
             /* turn off cursor to see what's under it while changing lines */
-            csron = 0;
-            csrcntr = prefs.cursorInvisiblePeriod;
+            setBlinkingCursor(0);
           } else if (scr.posx != p->trkx) {
             /* turn on cursor to see it moving on the line */
-            csron = 1;
-            csrcntr = prefs.cursorVisiblePeriod;
+            setBlinkingCursor(1);
           }
         }
         /* If the cursor moves in cursor tracking mode: */
@@ -1738,8 +1750,7 @@ main (int argc, char *argv[]) {
            We could check to see if we changed screen, but that doesn't
            really matter... this is mainly for when you are hunting up/down
            for the line with attributes. */
-        attron = 1;
-        attrcntr = prefs.attributesVisiblePeriod;
+        setBlinkingAttributes(1);
         /* problem: this still doesn't help when the braille window is
            stationnary and the attributes themselves are moving
            (example: tin). */
@@ -1819,7 +1830,7 @@ main (int argc, char *argv[]) {
           contractedTrack = 0;
           contracted = 1;
 
-          if (p->showAttributes || (prefs.showAttributes && (!prefs.blinkingAttributes || attron))) {
+          if (p->showAttributes || (prefs.showAttributes && (!prefs.blinkingAttributes || attributesState))) {
             int inputOffset;
             int outputOffset = 0;
             unsigned char attributes = 0;
@@ -1852,7 +1863,7 @@ main (int argc, char *argv[]) {
         if (braille->writeVisual) braille->writeVisual(&brl);
 
         /* blank out capital letters if they're blinking and should be off */
-        if (prefs.blinkingCapitals && !capon)
+        if (prefs.blinkingCapitals && !capitalsState)
           for (i=0; i<winlen*brl.y; i++)
             if (BRL_ISUPPER(brl.buffer[i]))
               brl.buffer[i] = ' ';
@@ -1885,7 +1896,7 @@ main (int argc, char *argv[]) {
         /* Attribute underlining: if viewing text (not attributes), attribute
            underlining is active and visible and we're not in help, then we
            get the attributes for the current region and OR the underline. */
-        if (!p->showAttributes && prefs.showAttributes && (!prefs.blinkingAttributes || attron)) {
+        if (!p->showAttributes && prefs.showAttributes && (!prefs.blinkingAttributes || attributesState)) {
           unsigned char attrbuf[winlen*brl.y];
           readScreen(p->winx, p->winy, winlen, brl.y, attrbuf, SCR_ATTRIB);
           overlayAttributes(attrbuf, winlen, brl.y);
@@ -1899,7 +1910,7 @@ main (int argc, char *argv[]) {
           cursorLocation = (scr.posy - p->winy) * brl.x + scr.posx - p->winx;
       }
       if (cursorLocation >= 0) {
-        if (prefs.showCursor && !p->hideCursor && (!prefs.blinkingCursor || csron)) {
+        if (prefs.showCursor && !p->hideCursor && (!prefs.blinkingCursor || cursorState)) {
           brl.buffer[cursorLocation] |= prefs.cursorStyle?
                                         (B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8):
                                         (B7 | B8);

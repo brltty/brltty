@@ -50,24 +50,24 @@ typedef struct {
   unsigned char showAttributes;
   unsigned char spare2;
   unsigned char blinkingCursor;
-  unsigned char spare3;
+  unsigned char autorepeat;
   unsigned char blinkingCapitals;
-  unsigned char spare4;
+  unsigned char autorepeatDelay;
   unsigned char blinkingAttributes;
-  unsigned char spare5;
+  unsigned char autorepeatInterval;
   unsigned char cursorStyle;
   unsigned char sayLineMode;
-  unsigned char cursorVisiblePeriod;
+  unsigned char cursorVisibleTime;
   unsigned char autospeak;
-  unsigned char cursorInvisiblePeriod;
+  unsigned char cursorInvisibleTime;
   unsigned char pcmVolume;
-  unsigned char capitalsVisiblePeriod;
+  unsigned char capitalsVisibleTime;
   unsigned char midiVolume;
-  unsigned char capitalsInvisiblePeriod;
+  unsigned char capitalsInvisibleTime;
   unsigned char fmVolume;
-  unsigned char attributesVisiblePeriod;
+  unsigned char attributesVisibleTime;
   unsigned char pointerFollowsWindow;
-  unsigned char attributesInvisiblePeriod;
+  unsigned char attributesInvisibleTime;
   unsigned char windowFollowsPointer;
   unsigned char textStyle;
   unsigned char metaMode;
@@ -85,6 +85,7 @@ typedef struct {
   unsigned char windowOverlap;
 } __attribute__((packed)) Preferences;
 extern Preferences prefs;		/* current preferences settings */
+#define PREFERENCES_TIME(time) ((time) * 10)
 
 extern BrailleDisplay brl;			/* braille driver reference */
 extern short fwinshift;			/* Full window horizontal distance */
@@ -93,8 +94,6 @@ extern short vwinshift;			/* Window vertical distance */
 
 extern int updateInterval;
 extern int messageDelay;
-extern int autorepeatDelay;
-extern int autorepeatInterval;
 
 extern void startup (int argc, char *argv[]);
 extern int loadPreferences (int change);

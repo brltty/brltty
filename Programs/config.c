@@ -259,8 +259,6 @@ BEGIN_OPTION_TABLE
    "Path to preferences file."},
   {'q', "quiet", NULL, NULL, 0,
    "Suppress start-up messages."},
-  {'r', "autorepeat-interval", "csecs", NULL, 0,
-   "Command autorepeat interval [10]."},
 #ifdef ENABLE_SPEECH_SUPPORT
   {'s', "speech-driver", "driver", configureSpeechDriver, 0,
    "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
@@ -293,8 +291,6 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_SPEECH_SUPPORT */
   {'P', "pid-file", "file", NULL, 0,
    "Path to process identifier file."},
-  {'R', "autorepeat-delay", "csecs", NULL, 0,
-   "Command autorepeat delay [50]."},
 #ifdef ENABLE_SPEECH_SUPPORT
   {'S', "speech-parameters", "arg,...", configureSpeechParameters, 0,
    "Parameters for the speech driver."},
@@ -536,8 +532,8 @@ fixTranslationTablePath (const char **path, const char *prefix) {
 }
 
 static int
-changedTuneDevice (void) {
-  return setTuneDevice(prefs.tuneDevice);
+changedTuneDevice (unsigned char setting) {
+  return setTuneDevice(setting);
 }
 
 static void
@@ -555,10 +551,15 @@ changedWindowAttributes (void) {
   return 1;
 }
 
+static int
+changedWindowOverlap (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
 static void
 changedPreferences (void) {
   changedWindowAttributes();
-  changedTuneDevice();
+  changedTuneDevice(prefs.tuneDevice);
 }
 
 int
@@ -771,6 +772,19 @@ loadPreferences (int change) {
           prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
           prefs.autospeak = DEFAULT_AUTOSPEAK;
         }
+        if (prefs.version == 2) {
+          prefs.version++;
+          prefs.autorepeat = DEFAULT_AUTOREPEAT;
+          prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+          prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
+
+          prefs.cursorVisibleTime *= 4;
+          prefs.cursorInvisibleTime *= 4;
+          prefs.attributesVisibleTime *= 4;
+          prefs.attributesInvisibleTime *= 4;
+          prefs.capitalsVisibleTime *= 4;
+          prefs.capitalsInvisibleTime *= 4;
+        }
         if (change) changedPreferences();
       } else
         LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
@@ -815,50 +829,35 @@ savePreferences (void)
 
 #ifdef ENABLE_PREFERENCES_MENU
 static int
-testTunes () {
+testTunes (void) {
    return prefs.alertTunes;
 }
 
 #if defined(ENABLE_PCM_TUNES) || defined(ENABLE_MIDI_TUNES) || defined(ENABLE_FM_TUNES)
 static int
-changedVolume (unsigned char volume) {
-  return (volume % 5) == 0;
+changedVolume (unsigned char setting) {
+  return (setting % 5) == 0;
 }
 #endif /* defined(ENABLE_PCM_TUNES) || defined(ENABLE_MIDI_TUNES) || defined(ENABLE_FM_TUNES) */
 
 #ifdef ENABLE_PCM_TUNES
 static int
-testTunesPcm () {
-   return testTunes() && (prefs.tuneDevice == tdPcm);
-}
-
-static int
-changedPcmVolume (void) {
-  return changedVolume(prefs.pcmVolume);
+testTunesPcm (void) {
+  return testTunes() && (prefs.tuneDevice == tdPcm);
 }
 #endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES
 static int
-testTunesMidi () {
-   return testTunes() && (prefs.tuneDevice == tdMidi);
-}
-
-static int
-changedMidiVolume (void) {
-  return changedVolume(prefs.midiVolume);
+testTunesMidi (void) {
+  return testTunes() && (prefs.tuneDevice == tdMidi);
 }
 #endif /* ENABLE_MIDI_TUNES */
 
 #ifdef ENABLE_FM_TUNES
 static int
-testTunesFm () {
-   return testTunes() && (prefs.tuneDevice == tdFm);
-}
-
-static int
-changedFmVolume (void) {
-  return changedVolume(prefs.fmVolume);
+testTunesFm (void) {
+  return testTunes() && (prefs.tuneDevice == tdFm);
 }
 #endif /* ENABLE_FM_TUNES */
 
@@ -968,12 +967,12 @@ globChanged (GlobData *data) {
 }
 
 static int
-changedTextTable (void) {
+changedTextTable (unsigned char setting) {
   return loadTextTable(globChanged(&glob_textTable));
 }
 
 static int
-changedAttributesTable (void) {
+changedAttributesTable (unsigned char setting) {
   return loadAttributesTable(globChanged(&glob_attributesTable));
 }
 
@@ -981,45 +980,55 @@ changedAttributesTable (void) {
 static GlobData glob_contractionTable;
 
 static int
-changedContractionTable (void) {
+changedContractionTable (unsigned char setting) {
   return loadContractionTable(globChanged(&glob_contractionTable));
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
 
 static int
-testSkipBlankWindows () {
-   return prefs.skipBlankWindows;
+testSkipBlankWindows (void) {
+  return prefs.skipBlankWindows;
 }
 
 static int
-testSlidingWindow () {
-   return prefs.slidingWindow;
+testSlidingWindow (void) {
+  return prefs.slidingWindow;
 }
 
 static int
-testShowCursor () {
-   return prefs.showCursor;
+changedTime (unsigned char setting) {
+  return (PREFERENCES_TIME(setting) % updateInterval) == 0;
 }
 
 static int
-testBlinkingCursor () {
-   return testShowCursor() && prefs.blinkingCursor;
+testAutorepeat (void) {
+  return prefs.autorepeat;
 }
 
 static int
-testShowAttributes () {
-   return prefs.showAttributes;
+testShowCursor (void) {
+  return prefs.showCursor;
 }
 
 static int
-testBlinkingAttributes () {
-   return testShowAttributes() && prefs.blinkingAttributes;
+testBlinkingCursor (void) {
+  return testShowCursor() && prefs.blinkingCursor;
 }
 
 static int
-testBlinkingCapitals () {
-   return prefs.blinkingCapitals;
+testShowAttributes (void) {
+  return prefs.showAttributes;
+}
+
+static int
+testBlinkingAttributes (void) {
+  return testShowAttributes() && prefs.blinkingAttributes;
+}
+
+static int
+testBlinkingCapitals (void) {
+  return prefs.blinkingCapitals;
 }
 
 void
@@ -1078,7 +1087,7 @@ updatePreferences (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
     typedef struct {
        unsigned char *setting;                        /* pointer to the item value */
-       int (*changed) (void);
+       int (*changed) (unsigned char setting);
        int (*test) (void);
        const char *description;                        /* item description */
        const char *const*names;                        /* 0 == numeric, 1 == bolean */
@@ -1087,7 +1096,7 @@ updatePreferences (void) {
     } MenuItem;
     #define MENU_ITEM(setting, changed, test, description, values, minimum, maximum) {&setting, changed, test, description, values, minimum, maximum}
     #define NUMERIC_ITEM(setting, changed, test, description, minimum, maximum) MENU_ITEM(setting, changed, test, description, NULL, minimum, maximum)
-    #define TIMING_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 1, 16)
+    #define TIME_ITEM(setting, test, description) NUMERIC_ITEM(setting, changedTime, test, description, 1, 100)
     #define VOLUME_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 0, 100)
     #define TEXT_ITEM(setting, changed, test, description, names, count) MENU_ITEM(setting, changed, test, description, names, 0, count-1)
     #define SYMBOLIC_ITEM(setting, changed, test, description, names) TEXT_ITEM(setting, changed, test, description, names, ((sizeof(names) / sizeof(names[0]))))
@@ -1102,19 +1111,22 @@ updatePreferences (void) {
        SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
        BOOLEAN_ITEM(prefs.slidingWindow, NULL, NULL, "Sliding Window"),
        BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, "Eager Sliding Window"),
-       NUMERIC_ITEM(prefs.windowOverlap, changedWindowAttributes, NULL, "Window Overlap", 0, 20),
+       NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, "Window Overlap", 0, 20),
+       BOOLEAN_ITEM(prefs.autorepeat, NULL, NULL, "Autorepeat"),
+       TIME_ITEM(prefs.autorepeatDelay, testAutorepeat, "Autorepeat Delay"),
+       TIME_ITEM(prefs.autorepeatInterval, testAutorepeat, "Autorepeat Interval"),
        BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, "Show Cursor"),
        SYMBOLIC_ITEM(prefs.cursorStyle, NULL, testShowCursor, "Cursor Style", cursorStyles),
        BOOLEAN_ITEM(prefs.blinkingCursor, NULL, testShowCursor, "Blinking Cursor"),
-       TIMING_ITEM(prefs.cursorVisiblePeriod, NULL, testBlinkingCursor, "Cursor Visible Period"),
-       TIMING_ITEM(prefs.cursorInvisiblePeriod, NULL, testBlinkingCursor, "Cursor Invisible Period"),
+       TIME_ITEM(prefs.cursorVisibleTime, testBlinkingCursor, "Cursor Visible Time"),
+       TIME_ITEM(prefs.cursorInvisibleTime, testBlinkingCursor, "Cursor Invisible Time"),
        BOOLEAN_ITEM(prefs.showAttributes, NULL, NULL, "Show Attributes"),
        BOOLEAN_ITEM(prefs.blinkingAttributes, NULL, testShowAttributes, "Blinking Attributes"),
-       TIMING_ITEM(prefs.attributesVisiblePeriod, NULL, testBlinkingAttributes, "Attributes Visible Period"),
-       TIMING_ITEM(prefs.attributesInvisiblePeriod, NULL, testBlinkingAttributes, "Attributes Invisible Period"),
+       TIME_ITEM(prefs.attributesVisibleTime, testBlinkingAttributes, "Attributes Visible Time"),
+       TIME_ITEM(prefs.attributesInvisibleTime, testBlinkingAttributes, "Attributes Invisible Time"),
        BOOLEAN_ITEM(prefs.blinkingCapitals, NULL, NULL, "Blinking Capitals"),
-       TIMING_ITEM(prefs.capitalsVisiblePeriod, NULL, testBlinkingCapitals, "Capitals Visible Period"),
-       TIMING_ITEM(prefs.capitalsInvisiblePeriod, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
+       TIME_ITEM(prefs.capitalsVisibleTime, testBlinkingCapitals, "Capitals Visible Time"),
+       TIME_ITEM(prefs.capitalsInvisibleTime, testBlinkingCapitals, "Capitals Invisible Time"),
 #ifdef HAVE_LIBGPM
        BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, "Window Follows Pointer"),
        BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, "Pointer Follows Window"),
@@ -1122,14 +1134,14 @@ updatePreferences (void) {
        BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, "Alert Tunes"),
        SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, "Tune Device", tuneDevices),
 #ifdef ENABLE_PCM_TUNES
-       VOLUME_ITEM(prefs.pcmVolume, changedPcmVolume, testTunesPcm, "PCM Volume"),
+       VOLUME_ITEM(prefs.pcmVolume, changedVolume, testTunesPcm, "PCM Volume"),
 #endif /* ENABLE_PCM_TUNES */
 #ifdef ENABLE_MIDI_TUNES
-       VOLUME_ITEM(prefs.midiVolume, changedMidiVolume, testTunesMidi, "MIDI Volume"),
+       VOLUME_ITEM(prefs.midiVolume, changedVolume, testTunesMidi, "MIDI Volume"),
        TEXT_ITEM(prefs.midiInstrument, NULL, testTunesMidi, "MIDI Instrument", midiInstrumentTable, midiInstrumentCount),
 #endif /* ENABLE_MIDI_TUNES */
 #ifdef ENABLE_FM_TUNES
-       VOLUME_ITEM(prefs.fmVolume, changedFmVolume, testTunesFm, "FM Volume"),
+       VOLUME_ITEM(prefs.fmVolume, changedVolume, testTunesFm, "FM Volume"),
 #endif /* ENABLE_FM_TUNES */
        BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
        BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, "Alert Messages"),
@@ -1247,7 +1259,7 @@ updatePreferences (void) {
           do {
             if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
             if (!--count) break;
-          } while (item->changed && !item->changed());
+          } while (item->changed && !item->changed(*item->setting));
           if (count)
             settingChanged = 1;
           else
@@ -1264,7 +1276,7 @@ updatePreferences (void) {
           do {
             if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
             if (!--count) break;
-          } while (item->changed && !item->changed());
+          } while (item->changed && !item->changed(*item->setting));
           if (count)
             settingChanged = 1;
           else
@@ -1310,7 +1322,7 @@ updatePreferences (void) {
               if (*item->setting < item->minimum) *item->setting = item->minimum;
             }
             if (*item->setting != oldSetting) {
-              if (item->changed && !item->changed()) {
+              if (item->changed && !item->changed(*item->setting)) {
                 *item->setting = oldSetting;
                 playTune(&tune_bad_command);
               } else {
@@ -1473,9 +1485,6 @@ handleOption (const int option) {
     case 'q':                /* quiet */
       opt_quiet = 1;
       break;
-    case 'r':          /* autorepeat interval */
-      validateInterval(&autorepeatInterval, "autorepeat interval", optarg);
-      break;
 #ifdef ENABLE_SPEECH_SUPPORT
     case 's':                        /* name of speech driver */
       opt_speechDriver = optarg;
@@ -1519,9 +1528,6 @@ handleOption (const int option) {
 #endif /* ENABLE_SPEECH_SUPPORT */
     case 'P':                /* process identifier file */
       opt_pidFile = optarg;
-      break;
-    case 'R':          /* autorepeat delay */
-      validateInterval(&autorepeatDelay, "autorepeat delay", optarg);
       break;
 #ifdef ENABLE_SPEECH_SUPPORT
     case 'S':                        /* parameters for speech driver */
@@ -1752,22 +1758,26 @@ startup (int argc, char *argv[]) {
 
     prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
     prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
-    prefs.version = 2;
+    prefs.version = 3;
+
+    prefs.autorepeat = DEFAULT_AUTOREPEAT;
+    prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+    prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
 
     prefs.showCursor = DEFAULT_SHOW_CURSOR;
     prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
     prefs.blinkingCursor = DEFAULT_BLINKING_CURSOR;
-    prefs.cursorVisiblePeriod = DEFAULT_CURSOR_VISIBLE_PERIOD;
-    prefs.cursorInvisiblePeriod = DEFAULT_CURSOR_INVISIBLE_PERIOD;
+    prefs.cursorVisibleTime = DEFAULT_CURSOR_VISIBLE_TIME;
+    prefs.cursorInvisibleTime = DEFAULT_CURSOR_INVISIBLE_TIME;
 
     prefs.showAttributes = DEFAULT_SHOW_ATTRIBUTES;
     prefs.blinkingAttributes = DEFAULT_BLINKING_ATTRIBUTES;
-    prefs.attributesVisiblePeriod = DEFAULT_ATTRIBUTES_VISIBLE_PERIOD;
-    prefs.attributesInvisiblePeriod = DEFAULT_ATTRIBUTES_INVISIBLE_PERIOD;
+    prefs.attributesVisibleTime = DEFAULT_ATTRIBUTES_VISIBLE_TIME;
+    prefs.attributesInvisibleTime = DEFAULT_ATTRIBUTES_INVISIBLE_TIME;
 
     prefs.blinkingCapitals = DEFAULT_BLINKING_CAPITALS;
-    prefs.capitalsVisiblePeriod = DEFAULT_CAPITALS_VISIBLE_PERIOD;
-    prefs.capitalsInvisiblePeriod = DEFAULT_CAPITALS_INVISIBLE_PERIOD;
+    prefs.capitalsVisibleTime = DEFAULT_CAPITALS_VISIBLE_TIME;
+    prefs.capitalsInvisibleTime = DEFAULT_CAPITALS_INVISIBLE_TIME;
 
     prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
     prefs.pointerFollowsWindow = DEFAULT_POINTER_FOLLOWS_WINDOW;
@@ -1797,7 +1807,7 @@ startup (int argc, char *argv[]) {
 
     prefs.statusStyle = brailleDriver->statusStyle;
   }
-  changedTuneDevice();
+  changedTuneDevice(prefs.tuneDevice);
   atexit(exitTunes);
 
   /*

@@ -36,27 +36,28 @@ extern "C" {
                             * to be replaced by "terminated" on the display.
                             */
 
-#define DEFAULT_AUTOREPEAT_DELAY 500
-#define DEFAULT_AUTOREPEAT_INTERVAL 100
-
 /* Initialisation of BRLTTY environment settings: */
+
+#define DEFAULT_AUTOREPEAT 0		/* 1 for on, 0 for off */
+#define DEFAULT_AUTOREPEAT_DELAY 50	/* hundredths of a second */
+#define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
 
 #define DEFAULT_SHOW_CURSOR 1		/* 1 for cursor display, 0 for no cursor */
 #define DEFAULT_CURSOR_STYLE 0		/* 1 for block, 0 for underline */
 #define DEFAULT_TRACK_CURSOR 1		/* 1 for cursor tracking on, 0 for off */
 #define DEFAULT_HIDE_CURSOR 0		/* 1 for hiding cursor, 0 for showing it */
 #define DEFAULT_BLINKING_CURSOR 0		/* 1 for cursor blink on, 0 for off */
-#define DEFAULT_CURSOR_VISIBLE_PERIOD 10	/* for blinking cursor */
-#define DEFAULT_CURSOR_INVISIBLE_PERIOD 10
+#define DEFAULT_CURSOR_VISIBLE_TIME 40	/* for blinking cursor */
+#define DEFAULT_CURSOR_INVISIBLE_TIME 40
 
 #define DEFAULT_SHOW_ATTRIBUTES 0          /* 1 for attribute underlining */
 #define DEFAULT_BLINKING_ATTRIBUTES 1        /* 1 for attr underlining that blinks */
-#define DEFAULT_ATTRIBUTES_VISIBLE_PERIOD 4      /* for attribute underlining */
-#define DEFAULT_ATTRIBUTES_INVISIBLE_PERIOD 12
+#define DEFAULT_ATTRIBUTES_VISIBLE_TIME 20      /* for attribute underlining */
+#define DEFAULT_ATTRIBUTES_INVISIBLE_TIME 60
 
 #define DEFAULT_BLINKING_CAPITALS 0		/* 1 for capital blink on, 0 for off */
-#define DEFAULT_CAPITALS_VISIBLE_PERIOD 4	/* for blinking caps */
-#define DEFAULT_CAPITALS_INVISIBLE_PERIOD 2
+#define DEFAULT_CAPITALS_VISIBLE_TIME 60	/* for blinking caps */
+#define DEFAULT_CAPITALS_INVISIBLE_TIME 20
 
 #define DEFAULT_WINDOW_FOLLOWS_POINTER 0		/* 1 for capital blink on, 0 for off */
 #define DEFAULT_POINTER_FOLLOWS_WINDOW 0		/* 1 for capital blink on, 0 for off */

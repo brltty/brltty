@@ -2182,12 +2182,6 @@ The <tt/brltty/ command accepts the following options:
     This option changes the log level
     (see the <ref id="options-log-level" name="-l"> option)
     to <tt/notice/.
-  <tag><tt/-r/<em/csecs/ <tt/--autorepeat-interval=/<em/csecs/<label id="options-autorepeat-interval"></tag>
-    Specify the interval (in hundredths of a second)
-    at which, after the initial delay
-    (see the <ref id="options-autorepeat-delay" name="-R"> command line option),
-    a command is autorepeated.
-    If not specified, then <tt/10/ (100 milliseconds) is assumed.
   <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
     Specify the speech synthesizer driver.
     The two-letter <ref id="drivers" name="driver identification code">
@@ -2300,11 +2294,6 @@ The <tt/brltty/ command accepts the following options:
   <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
     Specify the file wherein BRLTTY is to write its process identifier (pid).
     If not specified, BRLTTY doesn't write its process identifier anywhere.
-  <tag><tt/-R/<em/csecs/ <tt/--autorepeat-delay=/<em/csecs/<label id="options-autorepeat-delay"></tag>
-    Specify the amount of time (in hundredths of a second)
-    which must pass before a command begins to autorepeat
-    (see the <ref id="options-autorepeat-interval" name="-r"> command line option).
-.   If not specified, then <tt/50/ (500 milliseconds) is assumed.
   <tag><tt/-S/<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
     Specify parameters for the speech synthesizer driver.
     If the same parameter is specified more than once,
@@ -2772,6 +2761,49 @@ Notes:
     this setting specifies how many characters
     horizontally adjacent braille windows should overlap each other by.
     The initial setting is <tt/0/.
+  <tag>Autorepeat<label id="preference-autorepeat"></tag>
+    While the key (combination) for a command remains pressed:
+    <descrip>
+      <tag/No/
+        Don't automatically repeat the command.
+      <tag/Yes/
+        Automatically repeat the command at a regular interval after an initial delay.
+    </descrip>
+    The following commands are eligible for autorepeating:
+    <itemize>
+      <item>
+        The <ref id="command-LNUP" name="LNUP">
+        and <ref id="command-LNDN" name="LNDN">
+        commands.
+      <item>
+        The <ref id="command-CHRLT" name="CHRLT">
+        and <ref id="command-CHRRT" name="CHRRT">
+        commands.
+      <item>
+        The Page-Up and Page-Down operations.
+      <item>
+        The Cursor-Up and Cursor-Down operations.
+      <item>
+        The Cursor-Left and Cursor-Right operations.
+      <item>
+        Input characters.
+    </itemize>
+    Only some drivers support this functionality,
+    the primary limitation being that many braille displays
+    don't signal both key presses and key releases as distinctly separate events.
+    The initial setting is <tt/No/.
+  <tag>Autorepeat Delay<label id="preference-autorepeat-delay"></tag>
+    When a character is to be autorepeated,
+    this setting specifies the amount of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    which must pass before autorepeating begins.
+    The initial setting is <tt/50/.
+  <tag>Autorepeat Interval<label id="preference-autorepeat-interval"></tag>
+    When a character is being autorepeated,
+    this setting specifies the amount of time
+    (see the note on <ref id="time-settings" name="time settings"> below)
+    between each reexecution.
+    The initial setting is <tt/10/.
   <tag>Show Cursor<label id="preference-show-cursor"></tag>
     When displaying screen content
     (see the <ref id="command-DISPMD" name="DISPMD"> command):
@@ -2783,6 +2815,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-CSRVIS" name="CSRVIS"> command.
+    The initial setting is <tt/Yes/.
   <tag>Cursor Style<label id="preference-cursor-style"></tag>
     When showing the cursor, represent it:
     <descrip>
@@ -2804,16 +2837,16 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-CSRBLINK" name="CSRBLINK"> command.
-  <tag>Cursor Visible Period<label id="preference-cursor-visible-period"></tag>
+  <tag>Cursor Visible Time<label id="preference-cursor-visible-time"></tag>
     When the cursor is to be blinked, this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be visible.
-    The initial setting is <tt/10/.
-  <tag>Cursor Invisible Period<label id="preference-cursor-invisible-period"></tag>
+    The initial setting is <tt/40/.
+  <tag>Cursor Invisible Time<label id="preference-cursor-invisible-time"></tag>
     When the cursor is to be blinked, this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be invisible.
-    The initial setting is <tt/10/.
+    The initial setting is <tt/40/.
   <tag>Show Attributes<label id="preference-show-attributes"></tag>
     When displaying screen content
     (see the <ref id="command-DISPMD" name="DISPMD"> command):
@@ -2836,18 +2869,18 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-ATTRBLINK" name="ATTRBLINK"> command.
-  <tag>Attributes Visible Period<label id="preference-attributes-visible-period"></tag>
+  <tag>Attributes Visible Time<label id="preference-attributes-visible-time"></tag>
     When the highlighted character underline is to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be visible.
-    The initial setting is <tt/4/.
-  <tag>Attributes Invisible Period<label id="preference-attributes-invisible-period"></tag>
+    The initial setting is <tt/20/.
+  <tag>Attributes Invisible Time<label id="preference-attributes-invisible-time"></tag>
     When the highlighted character underline is to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that it is to be invisible.
-    The initial setting is <tt/12/.
+    The initial setting is <tt/60/.
   <tag>Blinking Capitals<label id="preference-blinking-capitals"></tag>
     When displaying screen content
     (see the <ref id="command-DISPMD" name="DISPMD"> command):
@@ -2860,18 +2893,18 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-CAPBLINK" name="CAPBLINK"> command.
-  <tag>Capitals Visible Period<label id="preference-capitals-visible-period"></tag>
+  <tag>Capitals Visible Time<label id="preference-capitals-visible-time"></tag>
     When capital letters are to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that they're to be visible.
-    The initial setting is <tt/4/.
-  <tag>Capitals Invisible Period<label id="preference-capitals-invisible-period"></tag>
+    The initial setting is <tt/60/.
+  <tag>Capitals Invisible Time<label id="preference-capitals-invisible-time"></tag>
     When capital letters are to be blinked,
     this setting specifies the length of time
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that they're to be invisible.
-    The initial setting is <tt/2/.
+    The initial setting is <tt/20/.
   <tag>Window Follows Pointer<label id="preference-window-follows-pointer"></tag>
     When moving the pointer device (mouse):
     <descrip>
@@ -3155,9 +3188,10 @@ Notes:
 Notes:
 <itemize>
   <item><label id="time-settings">
-    All time settings are in braille window update intervals
-    (see the <ref id="options-update-interval" name="-U"> command line option).
-    They are integers within the range 1 through 16.
+    All time settings are in hundredths of a second.
+    They are multiples of the braille window update interval
+    (see the <ref id="options-update-interval" name="-U"> command line option)
+    within the range 1 through 100.
 </itemize>
 
 <sect1>The Status Display<label id="status"><p>
