@@ -207,7 +207,7 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
           continue;
 
         case -ESTRPIPE:
-          while ((result = my_snd_pcm_resume(pcm->handle)) == -EAGAIN) sleep(1);
+          while ((result = my_snd_pcm_resume(pcm->handle)) == -EAGAIN) approximateDelay(1);
 
           if (result < 0) {
             if ((result = my_snd_pcm_prepare(pcm->handle)) < 0) {
