@@ -37,6 +37,8 @@
 #include "misc.h"
 #include "system.h"
 
+#include "sys_prog_none.h"
+
 #include "sys_boot_none.h"
 
 void *

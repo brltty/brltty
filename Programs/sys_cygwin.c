@@ -21,9 +21,12 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <windows.h>
 
 #include "misc.h"
 #include "system.h"
+
+#include "sys_prog_windows.h"
 
 #include "sys_boot_none.h"
 

@@ -15,31 +15,14 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+char *
+getProgramPath (void) {
+  CHAR path[MAX_PATH];
+  DWORD length = GetModuleFileName(GetModuleHandle(NULL), path, sizeof(path));
 
-#include <stdlib.h>
-#include <unistd.h>
+  while (length > 0)
+    if (path[--length] == '\\')
+      path[length] = '/';
 
-#include "misc.h"
-#include "system.h"
-
-#include "sys_prog_none.h"
-
-#include "sys_boot_none.h"
-
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_none.h"
+  return strdupWrapper(path);
+}

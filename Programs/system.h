@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern char *getProgramPath (void);
+
 extern char *getBootParameters (const char *name);
 
 extern void *loadSharedObject (const char *path);

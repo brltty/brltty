@@ -26,6 +26,7 @@
 #include <strings.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "options.h"
 #include "misc.h"
@@ -574,7 +575,20 @@ processOptions (
   for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
   info.errorCount = 0;
 
-  programPath = **argumentVector;
+  if (!(programPath = getProgramPath())) {
+    programPath = **argumentVector;
+
+    {
+      char buffer[PATH_MAX];
+      char *path = realpath(programPath, buffer);
+
+      if (path) {
+        programPath = strdupWrapper(path);
+      } else {
+        LogError("realpath");
+      }
+    }
+  }
   programName = strrchr(programPath, '/');
   programName = programName? programName+1: programPath;
 

@@ -36,6 +36,35 @@
 #include "system.h"
 
 char *
+getProgramPath (void) {
+  char *path = NULL;
+  size_t size = 0X80;
+  char *buffer = NULL;
+
+  while (1) {
+    buffer = reallocWrapper(buffer, size<<=1);
+
+    {
+      int length = readlink("/proc/self/exe", buffer, size);
+
+      if (length == -1) {
+        LogError("readlink");
+        break;
+      }
+
+      if (length < size) {
+        buffer[length] = 0;
+        path = strdupWrapper(buffer);
+        break;
+      }
+    }
+  }
+
+  free(buffer);
+  return path;
+}
+
+char *
 getBootParameters (const char *name) {
   size_t nameLength = strlen(name);
   const char *path = "/proc/cmdline";
