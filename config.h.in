@@ -130,6 +130,15 @@ extern "C" {
 /* Define this to include FM (soundcard synthesizer) alert tunes support. */
 #undef ENABLE_FM_TUNES
 
+/* Define this to be a string containing the path to the root of the FestivalLite package. */
+#undef FLITE_ROOT
+
+/* Define this to be a string containing the path to the root of the Theta package. */
+#undef THETA_ROOT
+
+/* Define this to be a string containing the path to the root of the ViaVoice package. */
+#undef VIAVOICE_ROOT
+
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
 

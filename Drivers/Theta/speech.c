@@ -50,10 +50,7 @@ typedef enum {
 #include "Programs/spk_driver.h"
 #include <theta.h>
 
-static theta_voice_desc *voiceList = NULL;
-static theta_voice_desc *voiceEntry = NULL;
 static cst_voice *voice = NULL;
-
 static pid_t child = -1;
 static int pipeDescriptors[2];
 static const int *pipeOutput = &pipeDescriptors[0];
@@ -63,6 +60,8 @@ static void
 initializeTheta (void) {
   static int initialized = 0;
   if (!initialized) {
+    const char *directory = THETA_ROOT "/voices";
+    setenv("THETA_VOXPATH", directory, 0);
     theta_init(NULL);
     initialized = 1;
   }
@@ -72,6 +71,19 @@ static void
 spk_identify (void) {
   initializeTheta();
   LogPrint(LOG_NOTICE, "Theta [%s] text to speech engine.", theta_version);
+}
+
+static void
+loadVoice (theta_voice_desc *descriptor) {
+  if ((voice = theta_load_voice(descriptor))) {
+    LogPrint(LOG_INFO, "Voice: %s(%s,%d)",
+             theta_voice_human(voice),
+             theta_voice_gender(voice),
+             theta_voice_age(voice));
+  } else {
+    LogPrint(LOG_WARNING, "Voice load error: %s [%s]",
+             descriptor->human, descriptor->voxname);
+  }
 }
 
 static int
@@ -102,53 +114,62 @@ spk_open (char **parameters) {
     }
   }
 
-  if ((voiceList = theta_enum_voices(theta_voxpath, &criteria))) {
-    for (voiceEntry=voiceList; voiceEntry; voiceEntry=voiceEntry->next) {
-      if (*parameters[PARM_NAME])
-        if (strcasecmp(parameters[PARM_NAME], voiceEntry->human) != 0)
-          continue;
-      if ((voice = theta_load_voice(voiceEntry))) {
-        LogPrint(LOG_INFO, "Voice: %s(%s,%d)",
-                 theta_voice_human(voice),
-                 theta_voice_gender(voice),
-                 theta_voice_age(voice));
-
-        {
-          double pitch = 0.0;
-          static const double minimumPitch = -2.0;
-          static const double maximumPitch = 2.0;
-          if (validateFloat(&pitch, "pitch shift", parameters[PARM_PITCH],
-                            &minimumPitch, &maximumPitch))
-            theta_set_pitch_shift(voice, pitch, NULL);
+  {
+    const char *name = parameters[PARM_NAME];
+    if (name && (*name == '/')) {
+      theta_voice_desc *descriptor = theta_try_voxdir(name, &criteria);
+      if (descriptor) {
+        loadVoice(descriptor);
+        theta_free_voice_desc(descriptor);
+      }
+    } else {
+      theta_voice_desc *descriptors = theta_enum_voices(theta_voxpath, &criteria);
+      if (descriptors) {
+        theta_voice_desc *descriptor;
+        for (descriptor=descriptors; descriptor; descriptor=descriptor->next) {
+          if (*name)
+            if (strcasecmp(name, descriptor->human) != 0)
+              continue;
+          loadVoice(descriptor);
+          if (voice) break;
         }
-
-        {
-          double rate = 1.0;
-          static const double minimumRate = 0.1;
-          static const double maximumRate = 10.0;
-          if (validateFloat(&rate, "rate adjustment", parameters[PARM_RATE],
-                            &minimumRate, &maximumRate))
-            theta_set_rate_stretch(voice, 1.0/rate, NULL);
-        }
-
-        {
-          double volume = 1.0;
-          static const double minimumVolume = 0.0;
-          static const double maximumVolume = 10.0;
-          if (validateFloat(&volume, "volume adjustment", parameters[PARM_VOLUME],
-                            &minimumVolume, &maximumVolume))
-            theta_set_rescale(voice, volume, NULL);
-        }
-
-        return 1;
-      } else {
-        LogPrint(LOG_WARNING, "Voice load error: %s", voiceEntry->human);
+        theta_free_voicelist(descriptors);
       }
     }
-  } else {
-    LogPrint(LOG_WARNING, "No voices found.");
   }
-  spk_close();
+
+  if (voice) {
+    {
+      double pitch = 0.0;
+      static const double minimumPitch = -2.0;
+      static const double maximumPitch = 2.0;
+      if (validateFloat(&pitch, "pitch shift", parameters[PARM_PITCH],
+                        &minimumPitch, &maximumPitch))
+        theta_set_pitch_shift(voice, pitch, NULL);
+    }
+
+    {
+      double rate = 1.0;
+      static const double minimumRate = 0.1;
+      static const double maximumRate = 10.0;
+      if (validateFloat(&rate, "rate adjustment", parameters[PARM_RATE],
+                        &minimumRate, &maximumRate))
+        theta_set_rate_stretch(voice, 1.0/rate, NULL);
+    }
+
+    {
+      double volume = 1.0;
+      static const double minimumVolume = 0.0;
+      static const double maximumVolume = 10.0;
+      if (validateFloat(&volume, "volume adjustment", parameters[PARM_VOLUME],
+                        &minimumVolume, &maximumVolume))
+        theta_set_rescale(voice, volume, NULL);
+    }
+
+    return 1;
+  }
+
+  LogPrint(LOG_WARNING, "No voices found.");
   return 0;
 }
 
@@ -208,14 +229,5 @@ spk_close (void) {
   if (voice) {
     theta_unload_voice(voice);
     voice = NULL;
-  }
-
-  if (voiceEntry) {
-    voiceEntry = NULL;
-  }
-
-  if (voiceList) {
-    theta_free_voicelist(voiceList);
-    voiceList = NULL;
   }
 }
