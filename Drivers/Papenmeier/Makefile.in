@@ -34,7 +34,7 @@ PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brldefs.h $(SRC_DIR)/brl-cfg.h
 braille.$O:
 	$(CC) $(BRL_CFLAGS) $(YCFLAGS) -c $(SRC_DIR)/braille.c
 
-read_config: read_config.$O
+read_config$X: read_config.$O
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ read_config.$O
 
 read_config.$O: $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
@@ -63,8 +63,8 @@ help-files: $(BLD_TOP)$(DAT_DIR)/$(PM_HELP_FILES)
 $(BLD_TOP)$(DAT_DIR)/$(PM_HELP_FILES): $(PM_HELP_FILES) $(TXT2HLP)
 	for file in brltty-$(DRIVER_CODE)-*.hlp; do $(TXT2HLP) $(BLD_TOP)$(DAT_DIR)/$$file $$file; done
 
-$(PM_HELP_FILES): read_config
-	./read_config h
+$(PM_HELP_FILES): read_config$X
+	./read_config$X h
 
 ###############################################################################
 
@@ -77,24 +77,24 @@ configuration-file: $(BLD_TOP)$(DAT_DIR)/$(PM_CONFIG_FILE)
 $(BLD_TOP)$(DAT_DIR)/$(PM_CONFIG_FILE): $(PM_CONFIG_FILE)
 	cp $(PM_CONFIG_FILE) $(BLD_TOP)$(DAT_DIR)/
 
-$(PM_CONFIG_FILE): read_config
-	./read_config d >$@
+$(PM_CONFIG_FILE): read_config$X
+	./read_config$X d >$@
 
 ###############################################################################
 
-dump-codes: dump-codes.$O
+dump-codes$X: dump-codes.$O
 	$(CC) $(LDFLAGS) -o $@ dump-codes.$O
 
 dump-codes.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/dump-codes.c
 
-serial: serial.$O
+serial$X: serial.$O
 	$(CC) $(LDFLAGS) -o $@ serial.$O -lncurses 
 
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
-simulate: simulate.$O
+simulate$X: simulate.$O
 	$(CC) $(LDFLAGS) -o $@ simulate.$O
 
 simulate.$O:
@@ -103,9 +103,9 @@ simulate.$O:
 ###############################################################################
 
 clean::
-	-rm -f read_config config.tab.c config.output
+	-rm -f read_config$X config.tab.c config.output
 	-rm -f brltty-$(DRIVER_CODE)-*.hlp $(PM_CONFIG_FILE)
-	-rm -f serial simulate dump-codes
+	-rm -f serial$X simulate$X dump-codes$X
 
 distclean::
 	-rm -f *.good *.diff *.out
@@ -118,17 +118,17 @@ TEST_RESULT = $(TEST_CASES:.in=.out)
 TEST_OK = $(TEST_CASES:.in=.good)
 TEST_DIFF = $(TEST_CASES:.in=.diff)
 
-dump: read_config
-	read_config d
+dump: read_config$X
+	read_config$X d
 
 good: $(TEST_OK)
-%.good: %.in read_config
-	./read_config d $< <$< >$@
+%.good: %.in read_config$X
+	./read_config$X d $< <$< >$@
 
 diff: $(TEST_DIFF)
 %.diff: %.in good
 	-diff -b $< $*.good >$@
 
 out: $(TEST_RESULT)
-%.out: %.in good read_config
-	./read_config d $< <$< | ./read_config d $< | diff -b $*.good - >$@
+%.out: %.in good read_config$X
+	./read_config$X d $< <$< | ./read_config$X d $< | diff -b $*.good - >$@
