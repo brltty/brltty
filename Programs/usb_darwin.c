@@ -44,9 +44,10 @@ typedef struct {
 
 typedef struct {
   IOUSBDeviceInterface182 **device;
-  unsigned opened:1;
+  unsigned deviceOpened:1;
 
   IOUSBInterfaceInterface190 **interface;
+  unsigned interfaceOpened:1;
   UInt8 pipeCount;
 
   CFRunLoopRef runloopReference;
@@ -219,7 +220,7 @@ openDevice (UsbDevice *device, int seize) {
   UsbDeviceExtension *devx = device->extension;
   IOReturn result;
 
-  if (!devx->opened) {
+  if (!devx->deviceOpened) {
     const char *action = "opened";
     int level = LOG_INFO;
 
@@ -240,7 +241,7 @@ openDevice (UsbDevice *device, int seize) {
 
     LogPrint(level, "USB device %s: vendor=%04X product=%4X",
              action, device->descriptor.idVendor, device->descriptor.idProduct);
-    devx->opened = 1;
+    devx->deviceOpened = 1;
   }
 
   return 1;
@@ -254,20 +255,23 @@ unsetInterface (UsbDevice *device) {
   if (devx->interface) {
     IOReturn result;
 
-    {
-      int pipe;
-      for (pipe=1; pipe<=devx->pipeCount; ++pipe) {
-        result = (*devx->interface)->AbortPipe(devx->interface, pipe);
-        if (result != kIOReturnSuccess) {
-          setErrno(result, "USB pipe abort");
+    if (devx->interfaceOpened) {
+      {
+        int pipe;
+        for (pipe=1; pipe<=devx->pipeCount; ++pipe) {
+          result = (*devx->interface)->AbortPipe(devx->interface, pipe);
+          if (result != kIOReturnSuccess) {
+            setErrno(result, "USB pipe abort");
+          }
         }
       }
-    }
 
-    result = (*devx->interface)->USBInterfaceClose(devx->interface);
-    if (result != kIOReturnSuccess) {
-      setErrno(result, "USB interface close");
-      ok = 0;
+      result = (*devx->interface)->USBInterfaceClose(devx->interface);
+      if (result != kIOReturnSuccess) {
+        setErrno(result, "USB interface close");
+        ok = 0;
+      }
+      devx->interfaceOpened = 0;
     }
 
     result = (*devx->interface)->Release(devx->interface);
@@ -275,7 +279,6 @@ unsetInterface (UsbDevice *device) {
       setErrno(result, "USB interface release");
       ok = 0;
     }
-
     devx->interface = NULL;
   }
 
@@ -300,64 +303,74 @@ isInterface (IOUSBInterfaceInterface190 **interface, UInt8 number) {
 static int
 setInterface (UsbDevice *device, UInt8 number) {
   UsbDeviceExtension *devx = device->extension;
-  IOUSBFindInterfaceRequest request;
-  io_iterator_t iterator;
-  IOUSBInterfaceInterface190 **interface = NULL;
+  int found = 0;
   IOReturn result;
+  io_iterator_t iterator;
 
   if (devx->interface)
     if (isInterface(devx->interface, number))
       return 1;
 
-  request.bInterfaceClass = kIOUSBFindInterfaceDontCare;
-  request.bInterfaceSubClass = kIOUSBFindInterfaceDontCare;
-  request.bInterfaceProtocol = kIOUSBFindInterfaceDontCare;
-  request.bAlternateSetting = kIOUSBFindInterfaceDontCare;
+  {
+    IOUSBFindInterfaceRequest request;
 
-  result = (*devx->device)->CreateInterfaceIterator(devx->device, &request, &iterator);
+    request.bInterfaceClass = kIOUSBFindInterfaceDontCare;
+    request.bInterfaceSubClass = kIOUSBFindInterfaceDontCare;
+    request.bInterfaceProtocol = kIOUSBFindInterfaceDontCare;
+    request.bAlternateSetting = kIOUSBFindInterfaceDontCare;
+
+    result = (*devx->device)->CreateInterfaceIterator(devx->device, &request, &iterator);
+  }
+
   if (result == kIOReturnSuccess) {
     io_service_t service;
 
     while ((service = IOIteratorNext(iterator))) {
-      IOCFPlugInInterface **plugin;
+      IOCFPlugInInterface **plugin = NULL;
       SInt32 score;
 
       result = IOCreatePlugInInterfaceForService(service,
                                                  kIOUSBInterfaceUserClientTypeID,
                                                  kIOCFPlugInInterfaceID,
                                                  &plugin, &score);
+      IOObjectRelease(service);
+      service = NULL;
+
       if ((result == kIOReturnSuccess) && plugin) {
+        IOUSBInterfaceInterface190 **interface = NULL;
+
         result = (*plugin)->QueryInterface(plugin,
                                            CFUUIDGetUUIDBytes(kIOUSBInterfaceInterfaceID190),
                                            (LPVOID)&interface);
+        (*plugin)->Release(plugin);
+        plugin = NULL;
+
         if ((result == kIOReturnSuccess) && interface) {
           if (isInterface(interface, number)) {
             unsetInterface(device);
             devx->interface = interface;
-          } else {
-            (*interface)->Release(interface);
-            interface = NULL;
+            found = 1;
+            break;
           }
+
+          (*interface)->Release(interface);
+          interface = NULL;
         } else {
           setErrno(result, "USB interface interface create");
         }
-
-        (*plugin)->Release(plugin);
       } else {
         setErrno(result, "USB interface service plugin create");
       }
-
-      IOObjectRelease(service);
-      if (interface) break;
     }
-    if (!interface) LogPrint(LOG_ERR, "USB interface not found: %d", number);
+    if (!found) LogPrint(LOG_ERR, "USB interface not found: %d", number);
 
     IOObjectRelease(iterator);
+    iterator = NULL;
   } else {
     setErrno(result, "USB interface iterator create");
   }
 
-  return interface != NULL;
+  return found;
 }
 
 static void
@@ -373,7 +386,7 @@ usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   UsbEndpointExtension *eptx = endpoint->extension;
 
   request->result = result;
-  request->count = (int)arg;
+  request->count = (UInt32)arg;
 
   if (!enqueueItem(eptx->completedRequests, request)) {
     LogError("USB completed request enqueue");
@@ -414,14 +427,16 @@ usbClaimInterface (
   unsigned char interface
 ) {
   UsbDeviceExtension *devx = device->extension;
+  IOReturn result;
 
   if (setInterface(device, interface)) {
-    IOReturn result;
+    if (devx->interfaceOpened) return 1;
 
     result = (*devx->interface)->USBInterfaceOpen(devx->interface);
     if (result == kIOReturnSuccess) {
       result = (*devx->interface)->GetNumEndpoints(devx->interface, &devx->pipeCount);
       if (result == kIOReturnSuccess) {
+        devx->interfaceOpened = 1;
         return 1;
       } else {
         setErrno(result, "USB pipe count query");
@@ -842,6 +857,7 @@ error:
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
+  IOReturn result;
 
   if (devx->runloopSource) {
     CFRunLoopRemoveSource(devx->runloopReference,
@@ -849,12 +865,14 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
                           devx->runloopMode);
   }
 
-  if (devx->opened) {
-    unsetInterface(device);
-    (*devx->device)->USBDeviceClose(devx->device);
-  }
+  unsetInterface(device);
 
+  if (devx->deviceOpened) {
+    result = (*devx->device)->USBDeviceClose(devx->device);
+    if (result != kIOReturnSuccess) setErrno(result, "USB device close");
+  }
   (*devx->device)->Release(devx->device);
+
   free(devx);
 }
 
@@ -880,50 +898,59 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
         io_service_t service;
 
         while ((service = IOIteratorNext(serviceIterator))) {
-          IOCFPlugInInterface **servicePlugin;
+          IOCFPlugInInterface **servicePlugin = NULL;
           SInt32 score;
 
           ioResult = IOCreatePlugInInterfaceForService(service,
                                                        kIOUSBDeviceUserClientTypeID,
                                                        kIOCFPlugInInterfaceID,
                                                        &servicePlugin, &score);
+          IOObjectRelease(service);
+          service = NULL;
+
           if ((ioResult == kIOReturnSuccess) && servicePlugin) {
-            IOUSBDeviceInterface182 **deviceInterface;
+            IOUSBDeviceInterface182 **deviceInterface = NULL;
 
             ioResult = (*servicePlugin)->QueryInterface(servicePlugin,
                                                         CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID182),
                                                         (LPVOID)&deviceInterface);
+            (*servicePlugin)->Release(servicePlugin);
+            servicePlugin = NULL;
+
             if ((ioResult == kIOReturnSuccess) && deviceInterface) {
               UsbDeviceExtension *devx;
+
               if ((devx = malloc(sizeof(*devx)))) {
                 devx->device = deviceInterface;
+                devx->deviceOpened = 0;
+
                 devx->interface = NULL;
+                devx->interfaceOpened = 0;
+
                 devx->runloopReference = NULL;
                 devx->runloopMode = NULL;
                 devx->runloopSource = NULL;
-                devx->opened = 0;
-                device = usbTestDevice(devx, chooser, data);
 
-                if (!device) free(devx);
+                if ((device = usbTestDevice(devx, chooser, data))) break;
+
+                free(devx);
+                devx = NULL;
               } else {
                 LogError("USB device extension allocate");
               }
 
-              if (!device) (*deviceInterface)->Release(deviceInterface);
+              (*deviceInterface)->Release(deviceInterface);
+              deviceInterface = NULL;
             } else {
               setErrno(ioResult, "USB device interface create");
             }
-
-            (*servicePlugin)->Release(servicePlugin);
           } else {
             setErrno(ioResult, "USB device service plugin create");
           }
-
-          IOObjectRelease(service);
-          if (device) break;
         }
 
         IOObjectRelease(serviceIterator);
+        serviceIterator = NULL;
       } else {
         setErrno(kernelResult, "USB device iterator create");
       }
