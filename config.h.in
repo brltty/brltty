@@ -52,6 +52,9 @@ extern "C" {
 /* Define this if the header file linux/vt.h exists. */
 #undef HAVE_LINUX_VT_H
 
+/* Define this if the header file linux/uinput.h exists. */
+#undef HAVE_LINUX_UINPUT_H
+
 /* Define this if the function dlopen is available. */
 #undef HAVE_FUNC_DLOPEN
 

@@ -248,7 +248,7 @@ AC_SEARCH_LIBS([socket], [socket])
 
 AC_CHECK_HEADERS([getopt.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])
-AC_CHECK_HEADERS([alloca.h sys/io.h linux/vt.h])
+AC_CHECK_HEADERS([alloca.h sys/io.h linux/vt.h linux/uinput.h])
 
 AC_C_BIGENDIAN
 AC_C_CONST

@@ -34,6 +34,7 @@
 #include "scr.h"
 #include "scr_real.h"
 #include "scr_linux.h"
+#include "brldefs.h"
 
 static unsigned int debugCharacterTranslationTable = 0;
 static unsigned int debugApplicationCharacterMap = 0;
@@ -1116,6 +1117,207 @@ currentvt_LinuxScreen (void) {
   return description.no;
 }
 
+#ifdef HAVE_LINUX_UINPUT_H
+#include <linux/input.h>
+#include <linux/uinput.h>
+
+typedef unsigned char At2KeyTable[0X100];
+
+static int uinputDevice = -1;
+
+static int
+openUinputDevice (void) {
+  if (uinputDevice != -1) return 1;
+
+  if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_RDWR, 10, 223)) != -1) {
+    struct uinput_user_dev device;
+    
+    memset(&device, 0, sizeof(device));
+    strcpy(device.name, "brltty");
+    if (write(uinputDevice, &device, sizeof(device)) == sizeof(device)) {
+      ioctl(uinputDevice, UI_SET_EVBIT, EV_KEY);
+
+      {
+        int key;
+        for (key=KEY_RESERVED; key<KEY_UNKNOWN; key++) {
+          ioctl(uinputDevice, UI_SET_KEYBIT, key);
+        }
+      }
+
+      if (ioctl(uinputDevice, UI_DEV_CREATE) != -1) {
+        return 1;
+      } else {
+        LogError("ioctl UI_DEV_CREATE");
+      }
+    } else {
+      LogError("uinput_user_dev write");
+    }
+
+    close(uinputDevice);
+    uinputDevice = -1;
+  }
+  return 0;
+}
+
+static const At2KeyTable at2KeysOriginal = {
+  [0X76] = KEY_ESC,
+  [0X05] = KEY_F1,
+  [0X06] = KEY_F2,
+  [0X04] = KEY_F3,
+  [0X0C] = KEY_F4,
+  [0X03] = KEY_F5,
+  [0X0B] = KEY_F6,
+  [0X83] = KEY_F7,
+  [0X0A] = KEY_F8,
+  [0X01] = KEY_F9,
+  [0X09] = KEY_F10,
+  [0X78] = KEY_F11,
+  [0X07] = KEY_F12,
+  [0X7E] = KEY_SCROLLLOCK,
+
+  [0X0E] = KEY_GRAVE,
+  [0X16] = KEY_1,
+  [0X1E] = KEY_2,
+  [0X26] = KEY_3,
+  [0X25] = KEY_4,
+  [0X2E] = KEY_5,
+  [0X36] = KEY_6,
+  [0X3D] = KEY_7,
+  [0X3E] = KEY_8,
+  [0X46] = KEY_9,
+  [0X45] = KEY_0,
+  [0X4E] = KEY_MINUS,
+  [0X55] = KEY_EQUAL,
+  [0X66] = KEY_BACKSPACE,
+
+  [0X0D] = KEY_TAB,
+  [0X15] = KEY_Q,
+  [0X1D] = KEY_W,
+  [0X24] = KEY_E,
+  [0X2D] = KEY_R,
+  [0X2C] = KEY_T,
+  [0X35] = KEY_Y,
+  [0X3C] = KEY_U,
+  [0X43] = KEY_I,
+  [0X44] = KEY_O,
+  [0X4D] = KEY_P,
+  [0X54] = KEY_LEFTBRACE,
+  [0X5B] = KEY_RIGHTBRACE,
+  [0X5D] = KEY_BACKSLASH,
+
+  [0X58] = KEY_CAPSLOCK,
+  [0X1C] = KEY_A,
+  [0X1B] = KEY_S,
+  [0X23] = KEY_D,
+  [0X2B] = KEY_F,
+  [0X34] = KEY_G,
+  [0X33] = KEY_H,
+  [0X3B] = KEY_J,
+  [0X42] = KEY_K,
+  [0X4B] = KEY_L,
+  [0X4C] = KEY_SEMICOLON,
+  [0X52] = KEY_APOSTROPHE,
+  [0X5A] = KEY_ENTER,
+
+  [0X12] = KEY_LEFTSHIFT,
+  [0X1A] = KEY_Z,
+  [0X22] = KEY_X,
+  [0X21] = KEY_C,
+  [0X2A] = KEY_V,
+  [0X32] = KEY_B,
+  [0X31] = KEY_N,
+  [0X3A] = KEY_M,
+  [0X41] = KEY_COMMA,
+  [0X49] = KEY_DOT,
+  [0X4A] = KEY_SLASH,
+  [0X59] = KEY_RIGHTSHIFT,
+
+  [0X14] = KEY_LEFTCTRL,
+  [0X11] = KEY_LEFTALT,
+  [0X29] = KEY_SPACE,
+
+  [0X77] = KEY_NUMLOCK,
+  [0X7C] = KEY_KPASTERISK,
+  [0X7B] = KEY_KPMINUS,
+  [0X79] = KEY_KPPLUS,
+
+  [0X6C] = KEY_KP7,
+  [0X75] = KEY_KP8,
+  [0X7D] = KEY_KP9,
+
+  [0X6B] = KEY_KP4,
+  [0X73] = KEY_KP5,
+  [0X74] = KEY_KP6,
+
+  [0X69] = KEY_KP1,
+  [0X72] = KEY_KP2,
+  [0X7A] = KEY_KP3,
+
+  [0X70] = KEY_KP0,
+  [0X71] = KEY_KPDOT,
+};
+
+static const At2KeyTable at2KeysE0 = {
+  [0X1F] = KEY_LEFTMETA,
+  [0X11] = KEY_RIGHTALT,
+  [0X27] = KEY_RIGHTMETA,
+  [0X2F] = KEY_COMPOSE,
+  [0X14] = KEY_RIGHTCTRL,
+  [0X70] = KEY_INSERT,
+  [0X71] = KEY_DELETE,
+  [0X6C] = KEY_HOME,
+  [0X69] = KEY_END,
+  [0X7D] = KEY_PAGEUP,
+  [0X7A] = KEY_PAGEDOWN,
+  [0X75] = KEY_UP,
+  [0X6B] = KEY_LEFT,
+  [0X72] = KEY_DOWN,
+  [0X74] = KEY_RIGHT,
+  [0X4A] = KEY_KPSLASH,
+  [0X5A] = KEY_KPENTER
+};
+
+static const char *at2Keys;
+static int at2Pressed;
+#endif /* HAVE_LINUX_UINPUT_H */
+
+int
+execute_LinuxScreen (int command) {
+  int blk = command & VAL_BLK_MASK;
+
+  switch (blk) {
+#ifdef HAVE_LINUX_UINPUT_H
+    case VAL_PASSAT2: {
+      int arg = command & VAL_ARG_MASK;
+      if (openUinputDevice()) {
+        if (arg == 0XF0) {
+          at2Pressed = 0;
+        } else if (arg == 0XE0) {
+          at2Keys = at2KeysE0;
+        } else {
+          unsigned char key = at2Keys[arg];
+          int pressed = at2Pressed;
+
+          at2Keys = at2KeysOriginal;
+          at2Pressed = 1;
+
+          if (key) {
+            struct input_event event;
+            event.type = EV_KEY;
+            event.code = key;
+            event.value = pressed;
+            write(uinputDevice, &event, sizeof(event));
+          }
+        }
+        return 1;
+      }
+      break;
+    }
+#endif /* HAVE_LINUX_UINPUT_H */
+  }
+  return 0;
+}
+
 void
 initializeLiveScreen (MainScreen *main) {
   initializeRealScreen(main);
@@ -1125,9 +1327,15 @@ initializeLiveScreen (MainScreen *main) {
   main->base.selectvt = selectvt_LinuxScreen;
   main->base.switchvt = switchvt_LinuxScreen;
   main->base.currentvt = currentvt_LinuxScreen;
+  main->base.execute = execute_LinuxScreen;
   main->parameters = parameters_LinuxScreen;
   main->prepare = prepare_LinuxScreen;
   main->open = open_LinuxScreen;
   main->setup = setup_LinuxScreen;
   main->close = close_LinuxScreen;
+
+#ifdef HAVE_LINUX_UINPUT_H
+  at2Keys = at2KeysOriginal;
+  at2Pressed = 1;
+#endif /* HAVE_LINUX_UINPUT_H */
 }
