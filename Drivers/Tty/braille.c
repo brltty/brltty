@@ -197,63 +197,72 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 {
 }
 
-int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
+int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int key)
 {
- switch (code) {
-  case KEY_LEFT: return CMD_FWINLT;
-  case KEY_RIGHT: return CMD_FWINRT;
-  case KEY_UP: return CMD_LNUP;
-  case KEY_DOWN: return CMD_LNDN;
-
-  case KEY_PPAGE: return CMD_TOP;
-  case KEY_NPAGE: return CMD_BOT;
-  case KEY_HOME: return CMD_TOP_LEFT;
-  case KEY_LL: return CMD_BOT_LEFT;
-  case KEY_IC: return CMD_HOME;
-  case KEY_DC: return CMD_CSRTRK;
-
-  case KEY_F(1): return CMD_HELP;
-  case KEY_F(2): return CMD_LEARN;
-  case KEY_F(3): return CMD_INFO;
-  case KEY_F(4): return CMD_PREFMENU;
-
-  case KEY_F(5): return CMD_LNBEG;
-  case KEY_F(6): return CMD_CHRLT;
-  case KEY_F(7): return CMD_CHRRT;
-  case KEY_F(8): return CMD_LNEND;
-
-  case KEY_F(9): return CMD_PRPROMPT;
-  case KEY_F(10): return CMD_NXPROMPT;
-  case KEY_F(11): return CMD_PRPGRPH;
-  case KEY_F(12): return CMD_NXPGRPH;
-
-  case KEY_BACKSPACE: return VAL_PASSKEY | VPK_BACKSPACE;
-
-  case EOF: return EOF;
+#define KEY(key,cmd) case (key): return (cmd)
+ switch (key) {
+  KEY(EOF, EOF);
   default:
-   if (code <= 0XFF) return VAL_PASSCHAR | code;
-   LogPrint(LOG_WARNING, "Unknown key: %02X", code);
+   if (key <= 0XFF) return VAL_PASSCHAR|key;
+   LogPrint(LOG_WARNING, "Unknown key: %d", key);
    return CMD_NOOP;
+
+  KEY(KEY_LEFT, CMD_FWINLT);
+  KEY(KEY_RIGHT, CMD_FWINRT);
+  KEY(KEY_UP, CMD_LNUP);
+  KEY(KEY_DOWN, CMD_LNDN);
+
+  KEY(KEY_PPAGE, CMD_TOP);
+  KEY(KEY_NPAGE, CMD_BOT);
+  KEY(KEY_HOME, CMD_TOP_LEFT);
+  KEY(KEY_END, CMD_BOT_LEFT);
+  KEY(KEY_IC, CMD_HOME);
+  KEY(KEY_DC, CMD_CSRTRK);
+
+  KEY(KEY_F(1), CMD_HELP);
+  KEY(KEY_F(2), CMD_LEARN);
+  KEY(KEY_F(3), CMD_INFO);
+  KEY(KEY_F(4), CMD_PREFMENU);
+
+  KEY(KEY_F(5), CMD_PRDIFLN);
+  KEY(KEY_F(6), CMD_NXDIFLN);
+  KEY(KEY_F(7), CMD_ATTRUP);
+  KEY(KEY_F(8), CMD_ATTRDN);
+
+  KEY(KEY_F(9), CMD_LNBEG);
+  KEY(KEY_F(10), CMD_CHRLT);
+  KEY(KEY_F(11), CMD_CHRRT);
+  KEY(KEY_F(12), CMD_LNEND);
+
+  KEY(KEY_F(17), CMD_PRPROMPT);
+  KEY(KEY_F(18), CMD_NXPROMPT);
+  KEY(KEY_F(19), CMD_PRPGRPH);
+  KEY(KEY_F(20), CMD_NXPGRPH);
+
+  KEY(KEY_BACKSPACE, VAL_PASSKEY|VPK_BACKSPACE);
  }
+#undef KEY
 }
 
 static int brl_readKey(BrailleDisplay *brl)
 {
- int key;
+ int key = getch();
 
- key=getch();
- if (key==ERR) {
+ if (key == ERR) {
   return EOF;
  }
- LogPrint(LOG_NOTICE,"key %d",key);
+
+ LogPrint(LOG_DEBUG, "key %d", key);
  return key;
 }
 
 static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext context)
 {
- int res;
- res=brl_keyToCommand(brl,context,brl_readKey(brl));
- if (res!=EOF)
-  LogPrint(LOG_NOTICE,"=> %4x",res);
- return res;
+ int command = brl_keyToCommand(brl, context, brl_readKey(brl));
+
+ if (command != EOF) {
+  LogPrint(LOG_DEBUG, "cmd %04X", command);
+ }
+
+ return command;
 }

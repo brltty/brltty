@@ -8,10 +8,12 @@ Home/End: Go to top-left/bottom-left corner.
 Insert: Go to cursor.
 
 Advanced Navigation:
-F5/F8: Go to beginning/end of line.
-F6/F7: Go left/right one character.
-F9/F10: Go to previous/next command prompt.
-F11/F12: Go to nearest line of previous/next paragraph.
+F5/F6: Go to previous/next line with different content.
+F7/F8: Go to previous/next line with different highlighting.
+F9/F12: Go to beginning/end of line.
+F10/F11: Go left/right one character.
+F17/F18: Go to previous/next command prompt.
+F19/F20: Go to nearest line of previous/next paragraph.
 
 Modes and Features:
 F1: Help screen (toggle).
