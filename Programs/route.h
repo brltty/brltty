@@ -30,7 +30,6 @@ typedef enum {
   ROUTE_OK,
   ROUTE_WRONG_COLUMN,
   ROUTE_WRONG_ROW,
-  ROUTE_TIMEOUT,
   ROUTE_ERROR
 } RoutingStatus;
 

@@ -81,7 +81,7 @@ doCursorRouting (int column, int row, int screen) {
       describeRoutingScreen(&scr);
       if ((scr.posy != oldy) || (scr.posx != oldx)) break;
 
-      if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_TIMEOUT;
+      if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_WRONG_ROW;
     }
 
     if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
@@ -113,7 +113,7 @@ doCursorRouting (int column, int row, int screen) {
         describeRoutingScreen(&scr);
         if ((scr.posx != oldx) || (scr.posy != row)) break;
 
-        if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_TIMEOUT;
+        if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) return ROUTE_WRONG_COLUMN;
       }
 
       if (scr.posy != row ||
