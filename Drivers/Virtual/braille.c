@@ -77,7 +77,7 @@ static unsigned char *previousVisual = NULL;
 static unsigned char previousStatus[BRL_MAX_STATUS_CELL_COUNT];
 
 typedef struct {
-  int (*getUnixConnection) (const struct sockaddr_un *address);
+  int (*getLocalConnection) (const struct sockaddr_un *address);
   int (*getInetConnection) (const struct sockaddr_in *address);
 } ModeEntry;
 static const ModeEntry *mode;
@@ -85,9 +85,9 @@ static const ModeEntry *mode;
 static char *
 formatAddress (const struct sockaddr *address) {
   switch (address->sa_family) {
-    case AF_UNIX: {
-      const struct sockaddr_un *unixAddress = (const struct sockaddr_un *)address;
-      return strdupWrapper(unixAddress->sun_path);
+    case AF_LOCAL: {
+      const struct sockaddr_un *localAddress = (const struct sockaddr_un *)address;
+      return strdupWrapper(localAddress->sun_path);
     }
 
     case AF_INET: {
@@ -226,48 +226,48 @@ setReuseAddress (int socket) {
 }
 
 static int
-setUnixAddress (const char *string, struct sockaddr_un *address) {
+setLocalAddress (const char *string, struct sockaddr_un *address) {
   int ok = 1;
 
   memset(address, 0, sizeof(*address));
-  address->sun_family = AF_UNIX;
+  address->sun_family = AF_LOCAL;
 
   if (strlen(string) < sizeof(address->sun_path)) {
     strncpy(address->sun_path, string, sizeof(address->sun_path)-1);
   } else {
     ok = 0;
-    LogPrint(LOG_WARNING, "Unix socket path too long: %s", string);
+    LogPrint(LOG_WARNING, "Local socket path too long: %s", string);
   }
 
   return ok;
 }
 
 static int
-getUnixSocket (void) {
-  return socket(PF_UNIX, SOCK_STREAM, 0);
+getLocalSocket (void) {
+  return socket(PF_LOCAL, SOCK_STREAM, 0);
 }
 
 static void
-unbindUnixAddress (const struct sockaddr *address) {
-  const struct sockaddr_un *unixAddress = (const struct sockaddr_un *)address;
-  if (unlink(unixAddress->sun_path) == -1) {
+unbindLocalAddress (const struct sockaddr *address) {
+  const struct sockaddr_un *localAddress = (const struct sockaddr_un *)address;
+  if (unlink(localAddress->sun_path) == -1) {
     LogError("unlink");
   }
 }
 
 static int
-acceptUnixConnection (const struct sockaddr_un *localAddress) {
+acceptLocalConnection (const struct sockaddr_un *localAddress) {
   struct sockaddr_un remoteAddress;
   socklen_t remoteSize = sizeof(remoteAddress);
 
-  return acceptConnection(getUnixSocket, NULL, unbindUnixAddress,
+  return acceptConnection(getLocalSocket, NULL, unbindLocalAddress,
                           (const struct sockaddr *)localAddress, sizeof(*localAddress),
                           (struct sockaddr *)&remoteAddress, &remoteSize);
 }
 
 static int
-requestUnixConnection (const struct sockaddr_un *remoteAddress) {
-  return requestConnection(getUnixSocket,
+requestLocalConnection (const struct sockaddr_un *remoteAddress) {
+  return requestConnection(getLocalSocket,
                            (const struct sockaddr *)remoteAddress, sizeof(*remoteAddress));
 }
 
@@ -717,13 +717,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (isQualifiedDevice(&device, "client")) {
     static const ModeEntry modeEntry = {
-      requestUnixConnection,
+      requestLocalConnection,
       requestInetConnection
     };
     mode = &modeEntry;
   } else if (isQualifiedDevice(&device, "server")) {
     static const ModeEntry modeEntry = {
-      acceptUnixConnection,
+      acceptLocalConnection,
       acceptInetConnection
     };
     mode = &modeEntry;
@@ -735,8 +735,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!*device) device = VR_DEFAULT_SOCKET;
   if (device[0] == '/') {
     struct sockaddr_un address;
-    if (setUnixAddress(device, &address)) {
-      fileDescriptor = mode->getUnixConnection(&address);
+    if (setLocalAddress(device, &address)) {
+      fileDescriptor = mode->getLocalConnection(&address);
     }
   } else {
     struct sockaddr_in address;
