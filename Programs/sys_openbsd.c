@@ -24,6 +24,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <machine/spkr.h>
 #include <sys/audioio.h>
 
 #ifdef HAVE_FUNC_DLOPEN 
@@ -68,12 +69,29 @@ findSharedSymbol (void *object, const char *symbol, const void **address) {
 
 int
 canBeep (void) {
-  return 0;
+  return 1;
 }
 
 int
 timedBeep (unsigned short frequency, unsigned short milliseconds) {
-  return 0;
+  int ok = 0;
+  int speaker;
+  if ((speaker = open("/dev/speaker", O_WRONLY)) != -1) {
+    tone_t tone;
+    tone.frequency = frequency;
+    tone.duration = milliseconds / 10;
+    if (!tone.duration) {
+      ok = 1;
+    } else if (ioctl(speaker, SPKRTONE, &tone) != -1) {
+      ok = 1;
+    } else {
+      LogPrint(LOG_WARNING, "ioctl SPKRTONE failed: %s", strerror(errno));
+    }
+    close(speaker);
+  } else {
+    LogPrint(LOG_WARNING, "Unable to open speaker device: %s", strerror(errno));
+  }
+  return ok;
 }
 
 int
@@ -83,7 +101,7 @@ startBeep (unsigned short frequency) {
 
 int
 stopBeep (void) {
-  return 0;
+  return 1;
 }
 
 #ifdef ENABLE_PCM_TUNES
@@ -95,12 +113,14 @@ getPcmDevice (int errorLevel) {
   if ((descriptor = open(path, O_WRONLY|O_NONBLOCK)) != -1) {
     audio_info_t info;
     AUDIO_INITINFO(&info);
-    info.play.encoding = AUDIO_ENCODING_LINEAR;
+    info.mode = AUMODE_PLAY;
+    info.play.encoding = AUDIO_ENCODING_SLINEAR;
     info.play.sample_rate = 16000;
     info.play.channels = 1;
     info.play.precision = 16;
-    /* info.play.gain = AUDIO_MAX_GAIN; */
-    ioctl(descriptor, AUDIO_SETINFO, &info);
+    info.play.gain = AUDIO_MAX_GAIN;
+    if (ioctl(descriptor, AUDIO_SETINFO, &info) == -1)
+      LogPrint(LOG_WARNING, "ioctl AUDIO_SETINFO failed: %s", strerror(errno));
   } else {
     LogPrint(errorLevel, "Cannot open PCM device: %s: %s", path, strerror(errno));
   }
@@ -109,6 +129,10 @@ getPcmDevice (int errorLevel) {
 
 int
 getPcmBlockSize (int descriptor) {
+  if (descriptor != -1) {
+    audio_info_t info;
+    if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) return info.play.buffer_size;
+  }
   return 0X100;
 }
 
@@ -138,9 +162,13 @@ getPcmAmplitudeFormat (int descriptor) {
       switch (info.play.encoding) {
 	default:
 	  break;
-	case AUDIO_ENCODING_LINEAR:
+	case AUDIO_ENCODING_SLINEAR_BE:
 	  if (info.play.precision == 8) return PCM_FMT_S8;
 	  if (info.play.precision == 16) return PCM_FMT_S16B;
+	  break;
+	case AUDIO_ENCODING_SLINEAR_LE:
+	  if (info.play.precision == 8) return PCM_FMT_S8;
+	  if (info.play.precision == 16) return PCM_FMT_S16L;
 	  break;
 	case AUDIO_ENCODING_ULAW:
 	  return PCM_FMT_ULAW;
