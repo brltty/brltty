@@ -144,6 +144,84 @@ switchto (unsigned int scrno) {
 }
 
 static void
+exitScreenParameters (void) {
+  int i;
+  /* don't forget that scrparam[0] is staticaly allocated */
+  for (i = 1; i <= MAX_SCR; i++) 
+    free(scrparam[i]);
+}
+
+static void
+exitLog (void) {
+  /* Reopen syslog (in case -e closed it) so that there will
+   * be a "stopped" message to match the "starting" message.
+   */
+  LogOpen(0);
+  setPrintOff();
+  LogPrint(LOG_INFO, "Terminated.");
+  LogClose();
+}
+
+static void
+handleSignal (int number, void (*handler) (int)) {
+  struct sigaction action;
+  memset(&action, 0, sizeof(action));
+  sigemptyset(&action.sa_mask);
+  action.sa_handler = handler;
+  if (sigaction(number, &action, NULL) == -1) {
+    LogError("signal set");
+  }
+}
+
+static void
+terminateProgram (int quickly) {
+  int flags = MSG_NODELAY;
+
+#ifdef ENABLE_SPEECH_SUPPORT
+  int silently = quickly;
+  if (speech == &noSpeech) silently = 1;
+  if (silently) flags |= MSG_SILENT;
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+  clearStatusCells(&brl);
+  message("BRLTTY exiting.", flags);
+
+#ifdef ENABLE_SPEECH_SUPPORT
+  if (!silently) {
+    int awaitSilence = speech->isSpeaking();
+    int i;
+    for (i=0; i<messageDelay; i+=updateInterval) {
+      approximateDelay(updateInterval);
+      if (readCommand(BRL_CTX_MESSAGE) != EOF) break;
+      if (awaitSilence) {
+        speech->doTrack();
+        if (!speech->isSpeaking()) break;
+      }
+    }
+  }
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+  exit(0);
+}
+
+static void 
+terminationHandler (int signalNumber) {
+  terminateProgram(signalNumber == SIGINT);
+}
+
+static void 
+childDeathHandler (int signalNumber) {
+  pid_t process;
+  int status;
+  while ((process = waitpid(-1, &status, WNOHANG)) > 0) {
+    if (process == routingProcess) {
+      routingProcess = 0;
+      routingStatus = WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
+    }
+  }
+}
+
+static void
 setDigitUpper (unsigned char *cell, int digit) {
   *cell |= portraitDigits[digit];
 }
@@ -361,84 +439,6 @@ showInfo (void) {
     for (i=5; status[i]; i++) status[i] = textTable[status[i]];
     memcpy(brl.buffer, status, brl.x*brl.y);
     braille->writeWindow(&brl);
-  }
-}
-
-static void
-handleSignal (int number, void (*handler) (int)) {
-  struct sigaction action;
-  memset(&action, 0, sizeof(action));
-  sigemptyset(&action.sa_mask);
-  action.sa_handler = handler;
-  if (sigaction(number, &action, NULL) == -1) {
-    LogError("signal set");
-  }
-}
-
-static void
-exitLog (void) {
-  /* Reopen syslog (in case -e closed it) so that there will
-   * be a "stopped" message to match the "starting" message.
-   */
-  LogOpen(0);
-  setPrintOff();
-  LogPrint(LOG_INFO, "Terminated.");
-  LogClose();
-}
-
-static void
-exitScreenParameters (void) {
-  int i;
-  /* don't forget that scrparam[0] is staticaly allocated */
-  for (i = 1; i <= MAX_SCR; i++) 
-    free(scrparam[i]);
-}
-
-static void
-terminateProgram (int quickly) {
-  int flags = MSG_NODELAY;
-
-#ifdef ENABLE_SPEECH_SUPPORT
-  int silently = quickly;
-  if (speech == &noSpeech) silently = 1;
-  if (silently) flags |= MSG_SILENT;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-  clearStatusCells(&brl);
-  message("BRLTTY exiting.", flags);
-
-#ifdef ENABLE_SPEECH_SUPPORT
-  if (!silently) {
-    int awaitSilence = speech->isSpeaking();
-    int i;
-    for (i=0; i<messageDelay; i+=updateInterval) {
-      approximateDelay(updateInterval);
-      if (readCommand(BRL_CTX_MESSAGE) != EOF) break;
-      if (awaitSilence) {
-        speech->doTrack();
-        if (!speech->isSpeaking()) break;
-      }
-    }
-  }
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-  exit(0);
-}
-
-static void 
-terminationHandler (int signalNumber) {
-  terminateProgram(signalNumber == SIGINT);
-}
-
-static void 
-childDeathHandler (int signalNumber) {
-  pid_t process;
-  int status;
-  while ((process = waitpid(-1, &status, WNOHANG)) > 0) {
-    if (process == routingProcess) {
-      routingProcess = 0;
-      routingStatus = WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
-    }
   }
 }
 
@@ -2233,11 +2233,6 @@ message (const char *text, short flags) {
         while (index < brl.x*brl.y) brl.buffer[index++] = '-';
         brl.buffer[brl.x*brl.y - 1] = '>';
       }
-
-      /*
-       * Do Braille translation using text table. Six-dot mode is ignored
-       * since case can be important, and blinking caps won't work. 
-       */
       writeBrailleBuffer(&brl);
 
       if (flags & MSG_WAITKEY) {

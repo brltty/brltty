@@ -142,9 +142,15 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 
 void
 writeBrailleBuffer (BrailleDisplay *brl) {
-  int i;
   if (braille->writeVisual) braille->writeVisual(brl);
-  for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = textTable[brl->buffer[i]];
+
+  {
+    int i;
+    /* Do Braille translation using text table. Six-dot mode is ignored
+     * since case can be important, and blinking caps won't work. 
+     */
+    for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = textTable[brl->buffer[i]];
+  }
   braille->writeWindow(brl);
 }
 
