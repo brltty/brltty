@@ -492,9 +492,9 @@ for any additional display-specific instructions.
     See the <ref id="configure-braille-parameters" name="braille-parameters"> configuration file directive
     and the <ref id="options-braille-parameters" name="-B"> command line option
     for run-time selection.
-  <tag><tt/--with-braille-device=/<em/device/<label id="build-braille-device"></tag>
+  <tag><tt/--with-braille-device=/<em/device/<tt/,/...<label id="build-braille-device"></tag>
     Specify the default device to which the braille display is connected
-    (see section <ref id="devices" name="Device Specification">).
+    (see section <ref id="operand-braille-device" name="Braille Device Specification">).
     If this option isn't specified,
     then an operating system appropriate path
     for the primary serial port is assumed.
@@ -877,9 +877,31 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--disable-pcm-support/<label id="build-pcm-support"></tag>
     Reduce program size by excluding support for
     the digital audio interface on the sound card.
+  <tag><tt/--enable-pcm-support=/<em/interface/</tag>
+    If a platform provides more than one digital audio interface
+    then the one which is to be used may be specified.
+    <table loc="h">
+      <tabular ca="lll">
+        Platform|Interface|Description@<hline>
+        Linux
+          |oss|Open Sound System@
+          |alsa|Advanced Linux Sound Architecture@
+      </tabular>
+    </table>
   <tag><tt/--disable-midi-support/<label id="build-midi-support"></tag>
     Reduce program size by excluding support for
     the Musical Instrument Digital Interface of the sound card.
+  <tag><tt/--enable-midi-support=/<em/interface/</tag>
+    If a platform provides more than one Musical Instrument Digital Interface
+    then the one which is to be used may be specified.
+    <table loc="h">
+      <tabular ca="lll">
+        Platform|Interface|Description@<hline>
+        Linux
+          |oss|Open Sound System@
+          |alsa|Advanced Linux Sound Architecture@
+      </tabular>
+    </table>
   <tag><tt/--disable-fm-support/<label id="build-fm-support"></tag>
     Reduce program size by excluding support for
     the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card.
@@ -1602,6 +1624,19 @@ It may need to be run as root.
     The device name may be abbreviated.
     See the <ref id="preference-tune-device" name="Tune Device"> preference
     for details regarding the default device and platform restrictions.
+  <tag><tt/-v/<em/loudness/ <tt/--volume=/<em/loudness/</tag>
+    Specify the output volume (loudness) as a percentage of the maximum.
+    The default output volume is <tt/50/.
+  <tag><tt/-p/<em/device/ <tt/--pcm-device=/<em/device/</tag>
+    Specify the device to use for digital audio
+    (see section <ref id="operand-pcm-device" name="PCM Device Specification">).
+    This option isn't available if the
+    <ref id="build-pcm-support" name="--disable-pcm-support"> build option was specified.
+  <tag><tt/-m/<em/device/ <tt/--midi-device=/<em/device/</tag>
+    Specify the device to use for the Musical Instrument Digital Interface
+    (see section <ref id="operand-midi-device" name="MIDI Device Specification">).
+    This option isn't available if the
+    <ref id="build-midi-support" name="--disable-midi-support"> build option was specified.
   <tag><tt/-i/<em/instrument/ <tt/--instrument=/<em/instrument/</tag>
     The instrument to use if the selected device is <tt/midi/.
     For the complete list of instruments,
@@ -2211,17 +2246,16 @@ The following directives are recognized:
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-attributes-table" name="-a"> command line option.
-  <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
+  <tag><tt/braille-device/ <em/device/<tt/,/...<label id="configure-braille-device"></tag>
     Specify the device to which the braille display is connected
-    (see section <ref id="devices" name="Device Specification">).
+    (see section <ref id="operand-braille-device" name="Braille Device Specification">).
     See the <ref id="build-braille-device" name="--with-braille-device">
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-braille-device" name="-d"> command line option.
-  <tag><tt/braille-driver/ <em/driver/<label id="configure-braille-driver"></tag>
-    Specify the braille display driver.
-    The two-letter <ref id="drivers" name="driver identification code">
-    must be supplied.
+  <tag><tt/braille-driver/ <em/driver/<tt/,/...|<tt/auto/<label id="configure-braille-driver"></tag>
+    Specify the braille display driver
+    (see section <ref id="operand-driver" name="Driver Specification">).
     See the <ref id="build-braille-driver" name="--with-braille-driver">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -2256,6 +2290,20 @@ The following directives are recognized:
     <ref id="options-contraction-table" name="-c"> command line option.
     It isn't available if the
     <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
+  <tag><tt/midi-device/ <em/device/<label id="configure-midi-device"></tag>
+    Specify the device to use for the Musical Instrument Digital Interface
+    (see section <ref id="operand-midi-device" name="MIDI Device Specification">).
+    This directive can be overridden with the
+    <ref id="options-midi-device" name="-m"> command line option.
+    It isn't available if the
+    <ref id="build-midi-support" name="--disable-midi-support"> build option was specified.
+  <tag><tt/pcm-device/ <em/device/<label id="configure-pcm-device"></tag>
+    Specify the device to use for digital audio
+    (see section <ref id="operand-pcm-device" name="PCM Device Specification">).
+    This directive can be overridden with the
+    <ref id="options-pcm-device" name="-p"> command line option.
+    It isn't available if the
+    <ref id="build-pcm-support" name="--disable-pcm-support"> build option was specified.
   <tag><tt/screen-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-screen-parameters"></tag>
     Specify parameters for the screen driver.
     If the same parameter is specified more than once,
@@ -2266,20 +2314,23 @@ The following directives are recognized:
     build option for the defaults established during the build procedure.
     This directive can be overridden with the
     <ref id="options-screen-parameters" name="-X"> command line option.
-  <tag><tt/speech-driver/ <em/driver/<label id="configure-speech-driver"></tag>
-    Specify the speech synthesizer driver.
-    The two-letter <ref id="drivers" name="driver identification code">
-    must be supplied.
+  <tag><tt/speech-driver/ <em/driver/<tt/,/...|<tt/auto/<label id="configure-speech-driver"></tag>
+    Specify the speech synthesizer driver
+    (see section <ref id="operand-driver" name="Driver Specification">).
     See the <ref id="build-speech-driver" name="--with-speech-driver">
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-speech-driver" name="-s"> command line option.
+    It isn't available if the
+    <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/speech-fifo/ <em/file/<label id="configure-speech-fifo"></tag>
     Specify the FIFO (a special file which works like a pipe)
     which is to be used by other applications
     that wish to gain access to BRLTTY's speech driver.
     This directive can be overridden with the
     <ref id="options-speech-fifo" name="-F"> command line option.
+    It isn't available if the
+    <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/speech-parameters/ [<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
     Specify parameters for the speech synthesizer drivers.
     If the same parameter is specified more than once,
@@ -2325,10 +2376,9 @@ The <tt/brltty/ command accepts the following options:
     configuration file directive for the default run-time setting.
     This setting can be changed with the
     <ref id="preference-attributes-table" name="Attributes Table"> preference.
-  <tag><tt/-b/<em/driver/ <tt/--braille-driver=/<em/driver/<label id="options-braille-driver"></tag>
-    Specify the braille display driver.
-    The two-letter <ref id="drivers" name="driver identification code">
-    must be supplied.
+  <tag><tt/-b/<em/driver/<tt/,/...|<tt/auto/ <tt/--braille-driver=/<em/driver/<tt/,/...|<tt/auto/<label id="options-braille-driver"></tag>
+    Specify the braille display driver
+    (see section <ref id="operand-driver" name="Driver Specification">).
     See the <ref id="configure-braille-driver" name="braille-driver">
     configuration file directive for the default run-time setting.
   <tag><tt/-c/<em/file/ <tt/--contraction-table=/<em/file/<label id="options-contraction-table"></tag>
@@ -2348,9 +2398,9 @@ The <tt/brltty/ command accepts the following options:
     <ref id="preference-contraction-table" name="Contraction Table"> preference.
     This option isn't available if the
     <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
-  <tag><tt/-d/<em/device/ <tt/--braille-device=/<em/device/<label id="options-braille-device"></tag>
+  <tag><tt/-d/<em/device/<tt/,/... <tt/--braille-device=/<em/device/<tt/,/...<label id="options-braille-device"></tag>
     Specify the device to which the braille display is connected
-    (see section <ref id="devices" name="Device Specification">).
+    (see section <ref id="operand-braille-device" name="Braille Device Specification">).
     See the <ref id="configure-braille-device" name="braille-device">
     configuration file directive for the default run-time setting.
   <tag><tt/-e/ <tt/--standard-error/<label id="options-standard-error"></tag>
@@ -2380,10 +2430,24 @@ The <tt/brltty/ command accepts the following options:
     If not specified,
     then <tt/information/ is assumed
     (see the <ref id="options-quiet" name="-q"> option for more details).
+  <tag><tt/-m/<em/device/ <tt/--midi-device=/<em/device/<label id="options-midi-device"></tag>
+    Specify the device to use for the Musical Instrument Digital Interface
+    (see section <ref id="operand-midi-device" name="MIDI Device Specification">).
+    See the <ref id="configure-midi-device" name="midi-device">
+    configuration file directive for the default run-time setting.
+    This option isn't available if the
+    <ref id="build-midi-support" name="--disable-midi-support"> build option was specified.
   <tag><tt/-n/ <tt/--no-daemon/<label id="options-no-daemon"></tag>
     Specify that BRLTTY is to remain in the foreground.
     If not specified, then BRLTTY becomes a background process (daemon)
     after initializing itself but before starting any of the selected drivers.
+  <tag><tt/-p/<em/device/ <tt/--pcm-device=/<em/device/<label id="options-pcm-device"></tag>
+    Specify the device to use for digital audio
+    (see section <ref id="operand-pcm-device" name="PCM Device Specification">).
+    See the <ref id="configure-pcm-device" name="pcm-device">
+    configuration file directive for the default run-time setting.
+    This option isn't available if the
+    <ref id="build-pcm-support" name="--disable-pcm-support"> build option was specified.
   <tag><tt/-q/ <tt/--quiet/<label id="options-quiet"></tag>
     Log less information.
     This option changes the default log level
@@ -2392,12 +2456,13 @@ The <tt/brltty/ command accepts the following options:
     either the <ref id="options-verify" name="-v">
     or the <ref id="options-version" name="-V">
     option is specified, and to <tt/warning/ otherwise.
-  <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
-    Specify the speech synthesizer driver.
-    The two-letter <ref id="drivers" name="driver identification code">
-    must be supplied.
+  <tag><tt/-s/<em/driver/<tt/,/...|<tt/auto/ <tt/--speech-driver=/<em/driver/<tt/,/...|<tt/auto/<label id="options-speech-driver"></tag>
+    Specify the speech synthesizer driver
+    (see section <ref id="operand-driver" name="Driver Specification">).
     See the <ref id="configure-speech-driver" name="speech-driver">
     configuration file directive for the default run-time setting.
+    This option isn't available if the
+    <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/<label id="options-text-table"></tag>
     Specify the text translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
@@ -2424,10 +2489,10 @@ The <tt/brltty/ command accepts the following options:
     (see the <ref id="options-braille-driver" name="-b"> command line option)
     and/or more than one braille device
     (see the <ref id="options-braille-device" name="-d"> command line option)
-    has been specified then braille driver autodetection is performed.
+    has been specified then braille display autodetection is performed.
     If more than one speech driver
     (see the <ref id="options-speech-driver" name="-s"> command line option)
-    has been specified then speech driver autodetection is performed.
+    has been specified then speech synthesizer autodetection is performed.
   <tag><tt/-A/<em/name/<tt/=/<em/value/<tt/,/... <tt/--api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-api-parameters"></tag>
     Specify parameters for the Application Programming Interface.
     If the same parameter is specified more than once,
@@ -2487,6 +2552,12 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_CONTRACTION_TABLE/</tag>
         The contraction table
         (see the <ref id="options-contraction-table" name="-c"> command line option).
+      <tag><tt/BRLTTY_MIDI_DEVICE/</tag>
+        The Musical Instrument Digital Interface device
+        (see the <ref id="options-midi-device" name="-m"> command line option).
+      <tag><tt/BRLTTY_PCM_DEVICE/</tag>
+        The digital audio device
+        (see the <ref id="options-pcm-device" name="-p"> command line option).
       <tag><tt/BRLTTY_SCREEN_PARAMETERS/</tag>
         Parameters for the screen driver
         (see the <ref id="options-screen-parameters" name="-X"> command line option).
@@ -2510,6 +2581,8 @@ The <tt/brltty/ command accepts the following options:
     If not specified, no FIFO is created.
     See the <ref id="configure-speech-fifo" name="speech-fifo">
     configuration file directive for the default run-time setting.
+    This option isn't available if the
+    <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
     Specify the amount of time (in hundredths of a second)
     that BRLTTY keeps its own internally generated messages on the braille display.
@@ -4407,8 +4480,22 @@ BRLTTY supports the following speech synthesizers:
   </tabular>
 </table>
 
-<sect>Device Specificationn<label id="devices"><p>
-The general form of a device specification
+<sect>Operand Syntax<p>
+
+<sect1>Driver Specificationn<label id="operand-driver"><p>
+A braille display or speech synthesizer driver must be specified
+via its two-letter <ref id="drivers" name="driver identification code">.
+
+A comma-delimited list of drivers may be specified.
+If this is done then autodetection is performed using each listed driver in sequence.
+You may need to experiment in order to determine the most reliable order
+since some drivers autodetect better than others.
+
+If the single word <tt/auto/ is specified then autodetection is performed
+using only those drivers which are known to be reliable for this purpose.
+
+<sect1>Braille Device Specificationn<label id="operand-braille-device"><p>
+The general form of a braille device specification
 (see the <ref id="options-braille-device" name="-d"> command line option,
 the <ref id="configure-braille-device" name="braille-device"> configuration file directive,
 and the <ref id="build-braille-device" name="--with-braille-device"> build option)
@@ -4449,6 +4536,61 @@ The following device types are supported:
     either don't set the USB serial number descriptor at all
     or do set it but not to a unique value.
 </descrip>
+
+A comma-delimited list of braille devices may be specified.
+If this is done then autodetection is performed on each listed device in sequence.
+This feature is particularly useful if you have
+a braille display with more than one interrface,
+e.g. both a serial and a USB port.
+In this case it's usually better to list the USB port first,
+e.g. <tt>usb:,serial:/dev/ttyS0</tt>,
+since the former tends to autodetect more reliably than the latter.
+
+<sect1>PCM Device Specificationn<label id="operand-pcm-device"><p>
+In most cases the PCM device is
+the full path to an appropriate system device.
+Exceptions are:
+<descrip>
+  <tag/ALSA/
+    The name of and arguments for the physical or logical device,
+    i.e. <em/name/[<tt/:/<em/argument/<tt/,/...].
+</descrip>
+
+The default PCM device is:
+<table loc="h">
+  <tabular ca="ll">
+    Platform|Device@<hline>
+    FreeBSD|/dev/dsp@
+    Linux/ALSA|hw:0,0@
+    Linux/OSS|/dev/dsp@
+    NetBSD|/dev/audio@
+    OpenBSD|/dev/audio@
+    Qnx|preferred PCM output device@
+    Solaris|/dev/audio@
+  </tabular>
+</table>
+
+<sect1>MIDI Device Specificationn<label id="operand-midi-device"><p>
+In most cases the MIDI device is
+the full path to an appropriate system device.
+Exceptions are:
+<descrip>
+  <tag/ALSA/
+    The client and port separated by a colon,
+    i.e. <em/client/<tt/:/<em/port/.
+    Each may be specified
+    either as a number
+    or as a case-sensitive substring of its name.
+</descrip>
+
+The default MIDI device is:
+<table loc="h">
+  <tabular ca="ll">
+    Platform|Device@<hline>
+    Linux/ALSA|the first available MIDI output port@
+    Linux/OSS|/dev/sequencer@
+  </tabular>
+</table>
 
 <sect>Standard Braille Dot Numbering Convention<label id="dots"><p>
 A standard braille cell consists of six dots

@@ -74,7 +74,7 @@ BEGIN_OPTION_TABLE
    "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
 
-  {"level", "volume", 'v', 0, 0,
+  {"volume", "loudness", 'v', 0, 0,
    &opt_outputVolume, NULL,
    "Output volume (percentage)."},
 END_OPTION_TABLE

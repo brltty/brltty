@@ -15,11 +15,11 @@ Author: dave@mielke.cc (Dave Mielke)
         nn201@cus.cam.ac.uk (Nikhil Nair)
 Maintained-by: dave@mielke.cc (Dave Mielke)
 Primary-site: ftp.ibiblio.org /pub/Linux/system/access
-               970KB brltty-3.5.tar.gz
-               715KB brltty-3.5-1.i386.rpm
-              1004KB brltty-3.5-1.src.rpm
-                12KB brltty-3.5.README
-                 3KB brltty-3.5.lsm
+              1053KB brltty-3.6.tar.gz
+               783KB brltty-3.6-1.i386.rpm
+              1086KB brltty-3.6-1.src.rpm
+                13KB brltty-3.6.README
+                 3KB brltty-3.6.lsm
 Alternate-site: ftp://leb.net /pub/blinux/brltty
 Original-site:
 Platforms: Linux (kernel 1.1.92 or later)
