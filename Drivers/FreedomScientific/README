@@ -33,8 +33,9 @@ as the right advance key. The following drawing depicts this layout visually:
 
 This driver recognizes the following parameters:
 
-   Parameter    Settings
-   statuscells  0 (none), positive (left), negative (right)
+   Parameter     Settings
+   debugpackets  no, yes
+   statuscells   0 (none), positive (left), negative (right)
 
 The "statuscells" parameter specifies how many of the braille cells are to be
 reserved for status indicators. Specify 0 (zero) if you'd like all the cells to

@@ -33,15 +33,14 @@
 #include "Programs/misc.h"
 
 typedef enum {
+  PARM_DEBUGPACKETS,
   PARM_STATUSCELLS
 } DriverParameter;
-#define BRLPARMS "statuscells"
+#define BRLPARMS "debugpackets", "statuscells"
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
-
-#define DEBUG_PACKETS
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -52,6 +51,7 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
+static int debugPackets = 0;
 static int outputPayloadLimit;
 
 #include "Programs/serial.h"
@@ -422,77 +422,6 @@ negativeAcknowledgement (const Packet *packet) {
 }
 
 static int
-readPacket (BrailleDisplay *brl, Packet *packet) {
-  while (1) {
-    int size = sizeof(PacketHeader);
-    int hasPayload = 0;
-
-    if (inputCount >= sizeof(PacketHeader)) {
-      if (inputBuffer.packet.header.type & 0X80) {
-        hasPayload = 1;
-        size += inputBuffer.packet.header.arg1 + 1;
-      }
-    }
-
-    if (size <= inputCount) {
-#ifdef DEBUG_PACKETS
-      LogBytes("Input Packet", inputBuffer.bytes, size);
-#endif /* DEBUG_PACKETS */
-
-      if (hasPayload) {
-        unsigned char checksum = 0;
-        int index;
-        for (index=0; index<size; ++index)
-          checksum -= inputBuffer.bytes[index];
-        if (checksum)
-          LogPrint(LOG_WARNING, "Input packet checksum error.");
-      }
-
-      memcpy(packet, &inputBuffer, size);
-      memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[size],
-             inputCount -= size);
-      return size;
-    }
-
-  retry:
-    {
-      int count = io->readBytes(&inputBuffer.bytes[inputCount], size-inputCount);
-      if (count < 1) {
-        if (count == -1) {
-          LogError("read");
-        } else if ((count == 0) && (inputCount > 0)) {
-          if (io->awaitInput(1000)) goto retry;
-          LogBytes("Aborted Input", inputBuffer.bytes, inputCount);
-          inputCount = 0;
-        }
-        return count;
-      }
-
-      if (!inputCount) {
-        static const unsigned char packets[] = {
-          PKT_ACK, PKT_NAK,
-          PKT_KEY, PKT_BUTTON, PKT_WHEEL,
-          PKT_INFO
-        };
-        int first;
-        for (first=0; first<count; ++first)
-          if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
-            break;
-        if (first) {
-          LogBytes("Discarded Input", inputBuffer.bytes, first);
-          memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
-        }
-      }
-
-#ifdef DEBUG_PACKETS
-      LogBytes("Input Bytes", &inputBuffer.bytes[inputCount], count);
-#endif /* DEBUG_PACKETS */
-      inputCount += count;
-    }
-  }
-}
-
-static int
 writePacket (
   BrailleDisplay *brl,
   unsigned char type,
@@ -519,9 +448,8 @@ writePacket (
     size += length + 1;
   }
 
-#ifdef DEBUG_PACKETS
-  LogBytes("Output Packet", (unsigned char *)&packet, size);
-#endif /* DEBUG_PACKETS */
+  if (debugPackets)
+    LogBytes("Output Packet", (unsigned char *)&packet, size);
   return io->writePacket(&packet, size, &brl->writeDelay) != -1;
 }
 
@@ -569,6 +497,114 @@ writeCells (
   }
 }
 
+static int
+readPacket (BrailleDisplay *brl, Packet *packet) {
+  while (1) {
+    int size = sizeof(PacketHeader);
+    int hasPayload = 0;
+
+    if (inputCount >= sizeof(PacketHeader)) {
+      if (inputBuffer.packet.header.type & 0X80) {
+        hasPayload = 1;
+        size += inputBuffer.packet.header.arg1 + 1;
+      }
+    }
+
+    if (size <= inputCount) {
+      if (debugPackets) LogBytes("Input Packet", inputBuffer.bytes, size);
+
+      if (hasPayload) {
+        unsigned char checksum = 0;
+        int index;
+        for (index=0; index<size; ++index)
+          checksum -= inputBuffer.bytes[index];
+        if (checksum)
+          LogPrint(LOG_WARNING, "Input packet checksum error.");
+      }
+
+      memcpy(packet, &inputBuffer, size);
+      memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[size],
+             inputCount -= size);
+      return size;
+    }
+
+  retry:
+    {
+      int count = io->readBytes(&inputBuffer.bytes[inputCount], size-inputCount);
+      if (count < 1) {
+        if (count == -1) {
+          LogError("read");
+        } else if ((count == 0) && (inputCount > 0)) {
+          if (io->awaitInput(1000)) goto retry;
+          LogBytes("Aborted Input", inputBuffer.bytes, inputCount);
+          inputCount = 0;
+        }
+        return count;
+      }
+
+      if (!inputCount) {
+        static const unsigned char packets[] = {
+          PKT_ACK, PKT_NAK,
+          PKT_KEY, PKT_BUTTON, PKT_WHEEL,
+          PKT_INFO
+        };
+        int first;
+        for (first=0; first<count; ++first)
+          if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
+            break;
+        if (first) {
+          LogBytes("Discarded Input", inputBuffer.bytes, first);
+          memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
+        }
+      }
+
+      if (debugPackets)
+        LogBytes("Input Bytes", &inputBuffer.bytes[inputCount], count);
+      inputCount += count;
+    }
+  }
+}
+
+static int
+getPacket (BrailleDisplay *brl, Packet *packet) {
+  while (1) {
+    int count = readPacket(brl, packet);
+    if (count > 0) {
+      switch (packet->header.type) {
+        case PKT_NAK:
+          negativeAcknowledgement(packet);
+          switch (packet->header.arg1) {
+            case PKT_ERR_TIMEOUT: {
+              int originalLimit = outputPayloadLimit;
+              if (outputPayloadLimit > model->totalCells)
+                outputPayloadLimit = model->totalCells;
+              if (outputPayloadLimit > 1)
+                outputPayloadLimit--;
+              if (outputPayloadLimit != originalLimit)
+                LogPrint(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
+                         originalLimit, outputPayloadLimit);
+              break;
+            }
+          }
+
+        handleNegativeAcknowledgement:
+          if (writing) {
+            if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
+            if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
+        case PKT_ACK:
+            writing = 0;
+            updateCells(brl);
+          }
+          continue;
+      }
+    } else if ((count == 0) && writing && (millisecondsSince(&writingTime) > 500)) {
+      LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
+      goto handleNegativeAcknowledgement;
+    }
+    return count;
+  }
+}
+
 static void
 brl_identify (void) {
   LogPrint(LOG_NOTICE, "Freedom Scientific Driver");
@@ -577,6 +613,8 @@ brl_identify (void) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+  validateYesNo(&debugPackets, "debug packets", parameters[PARM_DEBUGPACKETS]);
+
   if (isSerialDevice(&device)) {
     io = &serialOperations;
 
@@ -602,7 +640,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0) {
     int acknowledged = 0;
-    while (io->awaitInput(1000)) {
+    model = NULL;
+
+    while (io->awaitInput(100)) {
       Packet response;
       int count = readPacket(brl, &response);
       if (count == -1) goto failure;
@@ -718,12 +758,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           model = NULL;
           break;
       }
-    }
 
-    if (acknowledged && model) {
-      brl->x = textCells;
-      brl->y = 1;
-      return 1;
+      if (acknowledged && model) {
+        brl->x = textCells;
+        brl->y = 1;
+        return 1;
+      }
     }
   }
 
@@ -734,6 +774,11 @@ failure:
 
 static void
 brl_close (BrailleDisplay *brl) {
+  while (io->awaitInput(100)) {
+    Packet packet;
+    int count = getPacket(brl, &packet);
+    if (count == -1) break;
+  }
   io->closePort();
 }
 
@@ -966,15 +1011,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
   while (1) {
     Packet packet;
-    int count = readPacket(brl, &packet);
+    int count = getPacket(brl, &packet);
     if (count == -1) return CMD_RESTARTBRL;
-    if (count == 0) {
-      if (writing && (millisecondsSince(&writingTime) > 500)) {
-        LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
-        goto handleNegativeAcknowledgement;
-      }
-      return EOF;
-    }
+    if (count == 0) return EOF;
 
     switch (packet.header.type) {
       default:
@@ -983,32 +1022,6 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
                  packet.header.arg1,
                  packet.header.arg2,
                  packet.header.arg3);
-        continue;
-
-      case PKT_NAK:
-        negativeAcknowledgement(&packet);
-        switch (packet.header.arg1) {
-          case PKT_ERR_TIMEOUT: {
-            int originalLimit = outputPayloadLimit;
-            if (outputPayloadLimit > model->totalCells)
-              outputPayloadLimit = model->totalCells;
-            if (outputPayloadLimit > 1)
-              outputPayloadLimit--;
-            if (outputPayloadLimit != originalLimit)
-              LogPrint(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
-                       originalLimit, outputPayloadLimit);
-            break;
-          }
-        }
-
-      handleNegativeAcknowledgement:
-        if (writing) {
-          if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
-          if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
-      case PKT_ACK:
-          writing = 0;
-          updateCells(brl);
-        }
         continue;
 
       case PKT_KEY:
