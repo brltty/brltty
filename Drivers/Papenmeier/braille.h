@@ -27,7 +27,7 @@
  * Teacher:
  *   August Hörandl <hoerandl@elina.htlw1.ac.at>
  *
- * papenmeier/brlconf.h - Braille display library for Papenmeier Screen 2D
+ * papenmeier/braille.h - Braille display library for Papenmeier Screen 2D
  *
  * Edit as necessary for your system.
  */

@@ -47,7 +47,7 @@ For general information about configuring and compiling BRLTTY, please
 see the BRLTTY manual.
 
 Any MultiBraille-specific configuration is done by editing the
-brlconf.h file in this directory.  However, such configuration is
+braille.h file in this directory.  However, such configuration is
 probably unnecessary as the display size is autodetected during
 initialisation at run-time.
 

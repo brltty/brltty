@@ -72,14 +72,14 @@ Before compiling
 Firmware Version 
 ---------------- 
 
-Look in the file brlconf.h for a section identified as "User Settings".  
+Look in the file braille.h for a section identified as "User Settings".  
 You have to define ABT3_OLD_FIRMWARE to 1 (0 by default) if your firmware
 version is older than 010495.  To get your firmware version, simply turn
 your ABT on while not plugged to your computer.  The last digits that will
 appear on the braille display is the firmware version.  If the wrong
 firmware version support is compiled in, you won't have access to your ABT
 control keys. If you have a firmware version dated 010495 or later, you
-normally don't have to edit brlconf.h since support for the new firmware
+normally don't have to edit braille.h since support for the new firmware
 is the default.
 
 ABT Model
@@ -107,11 +107,11 @@ While running ./configure in the main BRLTTY directory you can specify a
 built-in default serial port device (such as /dev/ttyS0).  Preferably
 though, the serial port should be defined on the command line or the
 configuration file.  See BRLTTY's manual for more details.  The baudrate
-setup is however defined in the brlconf.h file.
+setup is however defined in the braille.h file.
 
 By default, the ABT communicates at 9600 Baud.  However, I have run it to
 a higher baudrate, but chances to get serial communication errors
-increase.  If you change the baudrate in brlconf.h, you must also change
+increase.  If you change the baudrate in braille.h, you must also change
 it in the local menu of your ABT.
 
 
@@ -139,7 +139,7 @@ another cable or you modify the code as follows:
 
   - search for CRTSCTS in braille.c
   - delete the CRTSCTS word
-  - define explicitly a terminal model in brlconf.h (see above)
+  - define explicitly a terminal model in braille.h (see above)
   - recompile
 
 Note that if you don't have the CRTSCTS flag, it is impossible to perform

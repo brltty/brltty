@@ -37,7 +37,7 @@
 
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for speech definitions */
-#include "brlconf.h"
+#include "braille.h"
 
 /* These are shared with CombiBraille/braille.c: */
 extern int brl_fd;

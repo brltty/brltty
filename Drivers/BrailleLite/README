@@ -10,7 +10,7 @@ further modifications by Stéphane Doyon <s.doyon@videotron.ca>,
 Both BrailleLite 18 and 40 should work, and there is now code that should
 auto-detect the display type.
 
-Edit brlconf.h to select baudrate and some features.
+Edit braille.h to select baudrate and some features.
 
 On the BrailleLite, you should type 345-chord and p-chord to enter the 
 "speech box mode" required by BRLTTY.  You should type the same sequence 
@@ -18,7 +18,7 @@ to exit that mode whenever you wish to return to the BrailleLite internal
 functions.
 
 Be sure your BrailleLite's serial port baudrate and the value configured
-in the brlconf.h file are the same.
+in the braille.h file are the same.
 
 The Braille Lite 40 has two advance bars on it.  Brltty has been set up
 so that moving the display left or right works the same as it does
@@ -71,10 +71,10 @@ Stéphane Doyon, August 2001
    bindings list from README.
 -Use separate help files for BL18 and BL40, automatically generated from
    brltty_genhelp.txt.
--DETECT_FOREVER in brlconf.h allows the driver to keep probing for a
+-DETECT_FOREVER in braille.h allows the driver to keep probing for a
    display forever (until you connect it) instead of giving up if no
    display is connected.
--Option USE_TEXTTRANS in brlconf.h, allows mapping of braille keyboard
+-Option USE_TEXTTRANS in braille.h, allows mapping of braille keyboard
    input to characters to be performed using the output text translation
    table (use definable) instead of the hardcoded US table. Useful if you
    don't use the US table or if you want to enter characters numbered

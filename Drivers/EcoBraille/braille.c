@@ -45,7 +45,7 @@
 #define PREFSTYLE ST_None
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 /* Braille display parameters */
 typedef struct{

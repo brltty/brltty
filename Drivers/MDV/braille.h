@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* Virtual/brlconf.h - Configurable definitions for the Virtual driver
+/* MDV/braille.h - Configurable definitions for the Eco Braille series
  *
  * Edit as necessary for your system.
  */

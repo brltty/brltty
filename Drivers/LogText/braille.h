@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* LogText/brlconf.h - Configurable definitions for the LogText driver
+/* LogText/braille.h - Configurable definitions for the LogText driver
  * Dave Mielke <dave@mielke.cc> (October 2001)
  *
  * Edit as necessary for your system.

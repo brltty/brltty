@@ -12,8 +12,8 @@ Per implementare il driver, ho contattato direttamente chi ha progettato questo 
 Se volete contattarmi per qualunque problema o suggerimento, il mio indirizzo e-mail è christian_comaschi@libero.it
 Però, prima di contattarmi e scrivere che il driver non funziona, controllate che:
 - la vostra Videobraille non è PRO 9600 (se lo è e volete il driver, chiedete);
-- nel file brlconf.h LPTPORT è impostato correttamente: 0x378 per LPT1, 0x278 per LPT2,...
-Se tutto è giusto, provate a modificare in brlconf.h i valori VBDELAY, VBCLOCK e VBREFRESHDELAY: questi valori dipendono dalla velocità del computer, devono quindi essere adattati al vostro processore. Non penso che questo sia un buon modo di impostare i tempi di attesa, ma ho voluto rispettare l'implementazione originale, perché quando ho usato altri tipi di temporizzazione ho riscontrato problemi.
+- nel file braille.h LPTPORT è impostato correttamente: 0x378 per LPT1, 0x278 per LPT2,...
+Se tutto è giusto, provate a modificare in braille.h i valori VBDELAY, VBCLOCK e VBREFRESHDELAY: questi valori dipendono dalla velocità del computer, devono quindi essere adattati al vostro processore. Non penso che questo sia un buon modo di impostare i tempi di attesa, ma ho voluto rispettare l'implementazione originale, perché quando ho usato altri tipi di temporizzazione ho riscontrato problemi.
 
 Implementazione della funzione taglia/incolla
 

@@ -77,7 +77,7 @@ typedef enum {
                  "dots_repeat_init_delay", "dots_repeat_inter_delay"
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 /* Kernel driver interface (symlink produced by Makefile) */
 #include "brlvger.auto.h"

@@ -21,10 +21,11 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include "brlconf.h"
-#include "vblow.h"
+
 #include "Programs/misc.h"
 #include "Programs/system.h"
+#include "braille.h"
+#include "vblow.h"
 
 #define LPTSTATUSPORT LPTPORT+1
 #define LPTCONTROLPORT LPTPORT+2

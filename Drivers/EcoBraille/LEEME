@@ -28,7 +28,7 @@ Configuracion de puertos
 ------------------------
 En el fichero 'Makefile' localizado en el directorio BRLTTY, se dispone de 
 una linea en donde se puede definir el puerto serie utilizado. Por ejemplo;
-/dev/ttyS0.  La velocidad de conexion viene definida en el fichero brlconf.h
+/dev/ttyS0.  La velocidad de conexion viene definida en el fichero braille.h
 
 Por defecto, la linea EcoBraille se comunica a 19200 baudios.
 

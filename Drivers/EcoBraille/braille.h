@@ -15,20 +15,33 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* Handy/brlconf.h - Configurable definitions for the Handy driver
- * Copyright (C) 1995-1998 by Nicolas Pitre <nico@cam.org>
+/* EcoBraille/braille.h - Configurable definitions for the Eco Braille series
+ * Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>
  *
  * Edit as necessary for your system.
  */
 
+/* Device Identification Numbers (not to be changed) */
+#define ECO_AUTO	-1
+#define ECO_20		1
+#define ECO_40		2
+#define ECO_80     	3
+#define NB_MODEL        4
+
+
 /***** User Settings *****/
+#define MODEL   ECO_AUTO
+
+/* serial line baudrate... 
+ * Note that default braille device is defined in ../Makefile
+ */
+#define BAUDRATE B19200
+
 /* typematic settings */
 #define TYPEMATIC_DELAY 10	/* nbr of cycles before a key is repeated */
 #define TYPEMATIC_REPEAT 2	/* nbr of cycles between each key repeat */
-
 
 /* Delay in miliseconds between forced full refresh of the display.
  * This is to minimize garbage effects due to noise on the serial line.
  */
 #define REFRESH_RATE 1000
-

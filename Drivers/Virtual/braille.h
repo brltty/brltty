@@ -15,22 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* BrailleLite/brlconf.h - Configurable definitions for the Braille Lite driver
- * N. Nair, 6 September 1998
+/* Virtual/braille.h - Configurable definitions for the Virtual driver
  *
  * Edit as necessary for your system.
  */
 
-/* We always expect 8 data bits, no parity, 1 stop bit. */
-/* Select baudrate to use */
-#define BAUDRATE B9600
-//#define BAUDRATE B38400
-
-/* Define this if you want to keep trying to detect a display forever,
-   instead of exiting when no display appears to be connected. */
-#define DETECT_FOREVER
-
-/* Define the following for dots to character mapping for input to use 
-   the same (user-defined) table as is used for output, instead of the
-   hard-coded US table. */
-#define USE_TEXTTRANS

@@ -15,7 +15,7 @@ organized that I could get a Vario 80, and later on a Vario 40
 to write the GPL driver for Linux.
 
 Basic things:
-You can twiddle some variables in brlconf.h.
+You can twiddle some variables in braille.h.
 e.g. the repeat time in ms, if you feel key repeation
 is too slow.
 Also, you can enable USE_PING there.

@@ -86,7 +86,7 @@ they are held). They are:
    of movement keys.
 -"dots_repeat_init_delay" and "dots_repeat_inter_delay": Same thing but
    for typed braille dots.
-The default values (given in brlconf.h) seem fine, but if you want to
+The default values (given in braille.h) seem fine, but if you want to
 change them, place a line like this in your brltty.conf:
 braille-parameters repeat_init_delay=300,repeat_inter_delay=150
 

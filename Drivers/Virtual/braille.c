@@ -45,7 +45,7 @@ typedef enum {
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 #define BRLROWS		1
 

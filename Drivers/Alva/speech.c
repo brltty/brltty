@@ -36,7 +36,7 @@
 
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for speech definitions */
-#include "brlconf.h"
+#include "braille.h"
 
 /* This is shared with brlmain.c */
 int SendToAlva( char *data, int len );

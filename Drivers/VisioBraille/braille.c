@@ -42,7 +42,7 @@
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_KEY_CODES
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 #include "brldefs-vs.h"
 
 #define MAXPKTLEN 512
@@ -202,7 +202,7 @@ static void brl_identify()
 /* Function : brl_open */
 /* Opens and configures the serial port properly */
 /* if brl->x <= 0 when brl_open is called, then brl->x is initialized */
-/* either with the BRAILLEDISPLAYSIZE constant, defined in brlconf.h */
+/* either with the BRAILLEDISPLAYSIZE constant, defined in braille.h */
 /* or with the size got through identification request if it succeeds */
 /* Else, brl->x is left unmodified by brl_open, so that */
 /* the braille display can be resized without reloading the driver */ 

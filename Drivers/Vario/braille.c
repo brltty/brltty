@@ -55,7 +55,7 @@
 #define PREFSTYLE ST_TiemanStyle
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
@@ -350,7 +350,7 @@ static void display(const unsigned char *buf)
 
 static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 /* We have 4 status cells. Unclear how to handle. 
-   I choose Tieman style in brlconf.h. Any other suggestions? */
+   I choose Tieman style. Any other suggestions? */
 {
   int i;
   if (ncells > brlcols) {  /* When we have status cells */

@@ -54,7 +54,7 @@ typedef enum {
 #define BRLPARMS "baudrate", "kbemu"
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 #include "bindings.h"		/* for keybindings */
 
 

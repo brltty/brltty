@@ -69,7 +69,7 @@
 #define PREFSTYLE ST_TiemanStyle
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 #include "tables.h"		/* for keybindings */
 
 #define ESC '\033'

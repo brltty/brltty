@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* Alva/brlconf.h - Configurable definitions for the Alva driver
+/* Alva/braille.h - Configurable definitions for the Alva driver
  * Copyright (C) 1995-1998 by Nicolas Pitre <nico@cam.org>
  *
  */

@@ -35,7 +35,7 @@
 #define PREFSTYLE ST_AlvaStyle
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 /* Communication codes */
 static unsigned char HandyDescribe[] = {0XFF};

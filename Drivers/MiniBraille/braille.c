@@ -46,7 +46,7 @@
 #define PREFSTYLE ST_TiemanStyle
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 #include "minibraille.h"
 
 /* types */

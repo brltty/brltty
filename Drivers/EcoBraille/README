@@ -29,7 +29,7 @@ Port Settings
 In the file 'Makefile' located in the BRLTTY home directory, there is a 
 line where you can define the default (i.e. when not given on the command 
 line) serial port device (such as /dev/ttyS0).  The baudrate setup is 
-however defined in the brlconf.h file.
+however defined in the braille.h file.
 
 By default, the ECO communicates at 19200 Baud. 
 

@@ -15,15 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* TSI/brlconf.h - Configuration file for the TSI braille
- *                 display driver (brl.c)
- * Written by Stéphane Doyon (s.doyon@videotron.ca)
+/* VarioHT/braille.h - Configurable definitions
  *
- * This file is intended for version 2.2beta3 of the driver.
+ * Edit as necessary for your system.
  */
-
-/* Configuration file for the TSI driver.
- * Edit as needed...
- */
-
-/* End of driver config */

@@ -39,7 +39,7 @@
 #define PREFSTYLE ST_TiemanStyle
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 /* Command translation table: */
 static int cmdtrans[0X100] = {

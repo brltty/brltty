@@ -116,7 +116,7 @@
 #define PREFSTYLE ST_AlvaStyle
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 static int brl_fd;			/* file descriptor for Braille display */
 static struct termios oldtio;		/* old terminal settings */

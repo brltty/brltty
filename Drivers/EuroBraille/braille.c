@@ -54,7 +54,7 @@
 #define PREFSTYLE ST_None
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 
 t_key		num_keys[27] = {

@@ -43,7 +43,7 @@ PowerBraille 40.
 - mdv mb408s: This display also emulates a PowerBraille 40 and it too is
     capable of operating only at 9600baud. However it also has additional
     timing constraints. Please uncomment the FORCE_FULL_SEND_DELAY option 
-    in brlconf.h before compiling. This has been tested by only one person.
+    in braille.h before compiling. This has been tested by only one person.
 However with both these emulators, there is another limitation: the key
 configurations are not the same as that of any TSI model and some key
 combinations for certain commands may be difficult or impossible to
@@ -81,7 +81,7 @@ on the PowerBraille.
 Configuration of the driver
 ===========================
 
-The file brlconf.h contains some few parameters specific to this driver
+The file braille.h contains some few parameters specific to this driver
 which you can modify, but you really don't have to. No adjustments are
 necessary: everything will be autodetected by the driver when you start BRLTTY.
 
@@ -92,12 +92,12 @@ the braille window moves several steps when you intended to press only once
 on a movement key, then you should increase the first two values: try 49 for
 both of them. These two options are the equivalent of the "/panelrep"
 options of the good old "gateway" DOS driver for the Navigator: the only
-difference is that the values in brlconf.h are the square of the "/panelrep"
+difference is that the values in braille.h are the square of the "/panelrep"
 values.
 
 Note that PowerBraille displays will operate at 19200baud. If you don't trust
 your COM port to operate at that speed, you can disable this feature in
-brlconf.h, and crawl at 9600baud.
+braille.h, and crawl at 9600baud.
 
 Initialization and reset
 ========================

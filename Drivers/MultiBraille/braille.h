@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* MultiBraille/brlconf.h - Configurable definitions for the
+/* MultiBraille/braille.h - Configurable definitions for the
  * following Tieman B.V. braille terminals
  * (infos out of a techn. product description sent to me from tieman by fax):
  *

@@ -16,7 +16,7 @@ Notes pour l'installation.
 ==========================
 
   Avant de compiler le driver et BRLTTY, pensez à éditer le fichier
-brlconf.h de ce même répertoire. Dans ce fichier, modifiez la ligne 
+braille.h de ce même répertoire. Dans ce fichier, modifiez la ligne 
 #define TAILLEPLAGETACTILE 
 de sorte à ce ru'elle corresponde à votre matériel.
 Ensuite, lisez le manuel fourni avec BRLTTY (dans le répertoire DOCS de

@@ -70,7 +70,7 @@ typedef enum {
 
 #define BRLCONST
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
 #include "config.tab.c"

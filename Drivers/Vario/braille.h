@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* Vario/brlconf.h - Configuration file for the BAUM Vario 40/80 braille
+/* Vario/braille.h - Configuration file for the BAUM Vario 40/80 braille
  *                   display driver (brl.c)
  * Written by Mario Lang (mlang@delysid.org)
  */

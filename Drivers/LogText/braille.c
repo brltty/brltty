@@ -42,7 +42,7 @@
 #define PREFSTYLE ST_Generic
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 static int fileDescriptor = -1;
 static struct termios oldSettings;

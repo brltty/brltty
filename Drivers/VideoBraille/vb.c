@@ -35,7 +35,7 @@
 #define PREFSTYLE ST_None
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 #include "vblow.h"
 
 static unsigned char lastbuff[40];

@@ -75,7 +75,7 @@
 #define PREFSTYLE ST_MDVStyle
 
 #include "Programs/brl_driver.h"
-#include "brlconf.h"
+#include "braille.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */

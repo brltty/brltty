@@ -12,8 +12,8 @@ To implement the driver, I contacted the designer and author of the display to h
 If you want to contact me for any kind of problem or suggestion, my e-mail address is christian_comaschi@libero.it
 But, before you contact me telling me that the driver doesn't work, check that:
 - your Videobraille is not PRO 9600 (if it is and you need the driver, just ask);
-- in brlconf.h LPTPORT is set to the correct address: 0x378 for LPT1, 0x278 for LPT2,...
-If all is correct, then try changing in brlconf.h the VBDELAY, VBCLOCK and VBREFRESHDELAY values: these values depend on computer speed, so they need to fit your computer. I think this is not a good way of timing, but I wanted to respect the original implementation, because when I used other kinds of timing I encountered problems.
+- in braille.h LPTPORT is set to the correct address: 0x378 for LPT1, 0x278 for LPT2,...
+If all is correct, then try changing in braille.h the VBDELAY, VBCLOCK and VBREFRESHDELAY values: these values depend on computer speed, so they need to fit your computer. I think this is not a good way of timing, but I wanted to respect the original implementation, because when I used other kinds of timing I encountered problems.
 
 About cut & paste
 

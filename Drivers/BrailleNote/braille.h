@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* BrailleNote/brlconf.h - Configurable definitions for the Braille Note driver
+/* BrailleNote/braille.h - Configurable definitions for the Braille Note driver
  * Dave Mielke <dave@mielke.cc> (June 2001)
  *
  * Edit as necessary for your system.
