@@ -427,6 +427,45 @@ usbBulkTransfer (
   return -1;
 }
 
+static struct usbdevfs_urb *
+usbInterruptTransfer (
+  UsbEndpoint *endpoint,
+  void *buffer,
+  int length,
+  int timeout
+) {
+  UsbDevice *device = endpoint->device;
+  struct usbdevfs_urb *urb = usbSubmitRequest(device,
+                                              endpoint->descriptor->bEndpointAddress,
+                                              buffer, length, NULL);
+
+  if (urb) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    int interval = endpoint->descriptor->bInterval + 1;
+
+    hasTimedOut(0);
+    do {
+      if (usbReapUrb(device, 0) &&
+          deleteItem(eptx->completedRequests, urb)) {
+        if (!urb->status) return urb;
+        if ((errno = urb->status) < 0) errno = -errno;
+        free(urb);
+        break;
+      }
+
+      if (hasTimedOut(timeout)) {
+        usbCancelRequest(device, urb);
+        errno = ETIMEDOUT;
+        break;
+      }
+
+      approximateDelay(interval);
+    } while (1);
+  }
+
+  return NULL;
+}
+
 int
 usbReadEndpoint (
   UsbDevice *device,
@@ -445,42 +484,14 @@ usbReadEndpoint (
         break;
 
       case UsbEndpointTransfer_Interrupt: {
-        struct usbdevfs_urb *urb = usbSubmitRequest(device,
-                                                    endpoint->descriptor->bEndpointAddress,
-                                                    NULL, length, NULL);
+        struct usbdevfs_urb *urb = usbInterruptTransfer(endpoint, NULL, length, timeout);
 
         if (urb) {
-          UsbEndpointExtension *eptx = endpoint->extension;
-          int interval = endpoint->descriptor->bInterval + 1;
-
-          hasTimedOut(0);
-          do {
-            if (usbReapUrb(device, 0) &&
-                deleteItem(eptx->completedRequests, urb)) {
-              if (!urb->status) {
-                count = urb->actual_length;
-                if (count > length) count = length;
-                memcpy(buffer, urb->buffer, count);
-              } else if ((errno = urb->status) < 0) {
-                errno = -errno;
-              }
-
-              break;
-            }
-
-            if (hasTimedOut(timeout)) {
-              usbCancelRequest(device, urb);
-              urb = NULL;
-
-              errno = ETIMEDOUT;
-              break;
-            }
-            approximateDelay(interval);
-          } while (1);
-
-          if (urb) free(urb);
+          count = urb->actual_length;
+          if (count > length) count = length;
+          memcpy(buffer, urb->buffer, count);
+          free(urb);
         }
-
         break;
       }
 
@@ -515,6 +526,17 @@ usbWriteEndpoint (
     switch (transfer) {
       case UsbEndpointTransfer_Bulk:
         return usbBulkTransfer(endpoint, (void *)buffer, length, timeout);
+
+      case UsbEndpointTransfer_Interrupt: {
+        struct usbdevfs_urb *urb = usbInterruptTransfer(endpoint, (void *)buffer, length, timeout);
+
+        if (urb) {
+          int count = urb->actual_length;
+          free(urb);
+          return count;
+        }
+        break;
+      }
 
       default:
         LogPrint(LOG_ERR, "USB output transfer not supported: %d", transfer);
