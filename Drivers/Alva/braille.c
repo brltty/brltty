@@ -112,9 +112,10 @@
 #include "Programs/brltty.h"
 
 typedef enum {
-  PARM_PORT
+  PARM_PORT,
+  PARM_SERIALNUMBER
 } DriverParameter;
-#define BRLPARMS "port"
+#define BRLPARMS "port", "serialnumber"
 #define BRLSTAT ST_AlvaStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
@@ -316,7 +317,7 @@ static int StatusKeys[6] =
 {KEY_ROUTING_A, KEY_ROUTING_B, KEY_ROUTING_C,
  KEY_ROUTING_D, KEY_ROUTING_E, KEY_ROUTING_F};
 
-static int (*openPort) (const char *device);
+static int (*openPort) (char **parameters, const char *device);
 static int (*resetPort) (void);
 static void (*closePort) (void);
 static int (*readPacket) (unsigned char *buffer, int length);
@@ -393,7 +394,7 @@ static struct termios oldSerialSettings;
 static struct termios newSerialSettings;
 
 static int
-openSerialPort (const char *device) {
+openSerialPort (char **parameters, const char *device) {
   if (!openSerialDevice(device, &serialDevice, &oldSerialSettings)) return 0;
 
   memset(&newSerialSettings, 0, sizeof(newSerialSettings));
@@ -447,21 +448,35 @@ static unsigned char usbOutputEndpoint;
 static unsigned char usbInputEndpoint;
 
 static void
-usbLogString (UsbDevice *device, int index, const char *description) {
+logUsbString (UsbDevice *device, int index, const char *description) {
   if (index) {
     char *string = usbGetString(device, index, 1000);
     if (string) {
-      LogPrint(LOG_INFO, "USB %s: %s", description, string);
+      LogPrint(LOG_INFO, "USB: %s: %s", description, string);
       free(string);
     }
   }
 }
 
 static int
-usbChooseDevice (UsbDevice *device, void *data) {
+chooseUsbDevice (UsbDevice *device, void *data) {
+  char **parameters = data;
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
   if ((descriptor->idVendor == 0X6b0) && (descriptor->idProduct == 1)) {
     const unsigned int interface = 0;
+
+    if (parameters[PARM_SERIALNUMBER] && *parameters[PARM_SERIALNUMBER]) {
+      int ok = 0;
+      if (descriptor->iSerialNumber) {
+        char *serialNumber;
+        if ((serialNumber = usbGetString(device, descriptor->iSerialNumber, 1000))) {
+          if (strcmp(serialNumber, parameters[PARM_SERIALNUMBER]) == 0) ok = 1;
+          free(serialNumber);
+        }
+      }
+      if (!ok) return 0;
+    }
+
     if (usbClaimInterface(device, interface) != -1) {
       if (usbSetConfiguration(device, 1) != -1) {
         if (usbSetAlternative(device, interface, 0) != -1) {
@@ -478,20 +493,19 @@ usbChooseDevice (UsbDevice *device, void *data) {
     } else {
       LogError("claim USB interface");
     }
-    return 0;
   }
   return 0;
 }
 
 static int
-openUsbPort (const char *device) {
-  if ((usbDevice = usbFindDevice(usbChooseDevice, NULL))) {
+openUsbPort (char **parameters, const char *device) {
+  if ((usbDevice = usbFindDevice(chooseUsbDevice, parameters))) {
     const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(usbDevice);
     LogPrint(LOG_INFO, "USB device: vendor=%04X product=%04X input=%02X output=%02X",
              descriptor->idVendor, descriptor->idProduct, usbInputEndpoint, usbOutputEndpoint);
-    usbLogString(usbDevice, descriptor->iManufacturer, "Manufacturer Name");
-    usbLogString(usbDevice, descriptor->iProduct, "Product Description");
-    usbLogString(usbDevice, descriptor->iSerialNumber, "Serial Number");
+    logUsbString(usbDevice, descriptor->iManufacturer, "Manufacturer Name");
+    logUsbString(usbDevice, descriptor->iProduct, "Product Description");
+    logUsbString(usbDevice, descriptor->iSerialNumber, "Serial Number");
 
     if (usbBeginInput(usbDevice, usbInputEndpoint, 8, 8) != -1) {
       return 1;
@@ -501,6 +515,8 @@ openUsbPort (const char *device) {
 
     usbCloseDevice(usbDevice);
     usbDevice = NULL;
+  } else {
+    LogPrint(LOG_DEBUG, "USB device not found.");
   }
   return 0;
 }
@@ -623,7 +639,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   inputUsed = 0;
 
   /* Open the Braille display device */
-  if (!openPort(dev)) goto failure;
+  if (!openPort(parameters, dev)) goto failure;
 
   /* autodetecting ABT model */
   do {
