@@ -38,6 +38,8 @@ extern "C" {
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
 #endif /* MAX */
 
+#define DEFINE_POINTER_TO(name,prefix) typeof(name) *prefix##name
+
 #define HIGH_NIBBLE(byte) ((byte) & 0XF0)
 #define LOW_NIBBLE(byte) ((byte) & 0XF)
 

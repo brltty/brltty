@@ -541,12 +541,6 @@ BRLTTY_ARG_DISABLE(
 [dnl
    AC_DEFINE([ENABLE_PCM_SUPPORT])
    pcm_tune_objects='pcm.$O'
-   case "${enableval}"
-   in
-      alsa)
-         AC_SEARCH_LIBS([snd_pcm_open], [asound], [], [AC_MSG_ERROR([ALSA PCM library not found])])
-         ;;
-   esac
 ])
 AC_SUBST([pcm_tune_objects])
 
