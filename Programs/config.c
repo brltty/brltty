@@ -1341,26 +1341,26 @@ updatePreferences (void) {
                 "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
             break;
 
-          case BRL_BLK_PASSKEY+VPK_HOME:
+          case BRL_BLK_PASSKEY+BRL_KEY_HOME:
           case BRL_CMD_PREFLOAD:
             prefs = oldPreferences;
             changedPreferences();
             message("changes discarded", 0);
             break;
-          case BRL_BLK_PASSKEY+VPK_RETURN:
+          case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
           case BRL_CMD_PREFSAVE:
             exitSave = 1;
             goto exitMenu;
 
           case BRL_CMD_TOP:
           case BRL_CMD_TOP_LEFT:
-          case BRL_BLK_PASSKEY+VPK_PAGE_UP:
+          case BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP:
           case BRL_CMD_MENU_FIRST_ITEM:
             menuIndex = lineIndent = 0;
             break;
           case BRL_CMD_BOT:
           case BRL_CMD_BOT_LEFT:
-          case BRL_BLK_PASSKEY+VPK_PAGE_DOWN:
+          case BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN:
           case BRL_CMD_MENU_LAST_ITEM:
             menuIndex = menuSize - 1;
             lineIndent = 0;
@@ -1368,7 +1368,7 @@ updatePreferences (void) {
 
           case BRL_CMD_LNUP:
           case BRL_CMD_PRDIFLN:
-          case BRL_BLK_PASSKEY+VPK_CURSOR_UP:
+          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP:
           case BRL_CMD_MENU_PREV_ITEM:
             do {
               if (menuIndex == 0) menuIndex = menuSize;
@@ -1378,7 +1378,7 @@ updatePreferences (void) {
             break;
           case BRL_CMD_LNDN:
           case BRL_CMD_NXDIFLN:
-          case BRL_BLK_PASSKEY+VPK_CURSOR_DOWN:
+          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN:
           case BRL_CMD_MENU_NEXT_ITEM:
             do {
               if (++menuIndex == menuSize) menuIndex = 0;
@@ -1404,14 +1404,14 @@ updatePreferences (void) {
             int count;
           case BRL_CMD_WINUP:
           case BRL_CMD_CHRLT:
-          case BRL_BLK_PASSKEY+VPK_CURSOR_LEFT:
+          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT:
           case BRL_CMD_BACK:
           case BRL_CMD_MENU_PREV_SETTING:
             adjust = previousSetting;
             goto adjustSetting;
           case BRL_CMD_WINDN:
           case BRL_CMD_CHRRT:
-          case BRL_BLK_PASSKEY+VPK_CURSOR_RIGHT:
+          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT:
           case BRL_CMD_HOME:
           case BRL_CMD_RETURN:
           case BRL_CMD_MENU_NEXT_SETTING:
@@ -1462,8 +1462,8 @@ updatePreferences (void) {
 
             /* For any other keystroke, we exit */
             playTune(&tune_command_rejected);
-          case BRL_BLK_PASSKEY+VPK_ESCAPE:
-          case BRL_BLK_PASSKEY+VPK_END:
+          case BRL_BLK_PASSKEY+BRL_KEY_ESCAPE:
+          case BRL_BLK_PASSKEY+BRL_KEY_END:
           case BRL_CMD_PREFMENU:
           exitMenu:
             if (exitSave) {

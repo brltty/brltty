@@ -637,8 +637,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	};
       }else if(modifier == SHIFT_MOD){
 	switch(key) {
-	case UP: cmd = BRL_BLK_PASSKEY + VPK_CURSOR_UP; break;
-	case DN: cmd = BRL_BLK_PASSKEY + VPK_CURSOR_DOWN; break;
+	case UP: cmd = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP; break;
+	case DN: cmd = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN; break;
 	case 1: cmd = BRL_CMD_FREEZE; break;
 	case 2: cmd = BRL_CMD_INFO; break;
 	case 3: cmd = BRL_CMD_HWINLT; break;

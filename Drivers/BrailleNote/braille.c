@@ -498,8 +498,8 @@ static int
 getFunctionKey (void) {
    unsigned int keyNumber;
    if (getDecimalInteger(&keyNumber, 2, "function key")) {
-      if (!keyNumber) keyNumber = 0X100 - VPK_FUNCTION;
-      return BRL_BLK_PASSKEY + VPK_FUNCTION + (keyNumber - 1);
+      if (!keyNumber) keyNumber = 0X100 - BRL_KEY_FUNCTION;
+      return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + (keyNumber - 1);
    }
    return EOF;
 }
@@ -665,29 +665,29 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
       case BNC_QUESTION:
          return BRL_CMD_LEARN;
       case (BND_2 | BND_3 | BND_5 | BND_6):
-	 return BRL_BLK_PASSKEY + VPK_TAB;
+	 return BRL_BLK_PASSKEY + BRL_KEY_TAB;
       case (BND_2 | BND_3):
-	 return BRL_BLK_PASSKEY + VPK_CURSOR_LEFT;
+	 return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
       case (BND_5 | BND_6):
-	 return BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT;
+	 return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
       case (BND_2 | BND_5):
-	 return BRL_BLK_PASSKEY + VPK_CURSOR_UP;
+	 return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
       case (BND_3 | BND_6):
-	 return BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
+	 return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
       case (BND_2):
-	 return BRL_BLK_PASSKEY + VPK_HOME;
+	 return BRL_BLK_PASSKEY + BRL_KEY_HOME;
       case (BND_3):
-	 return BRL_BLK_PASSKEY + VPK_END;
+	 return BRL_BLK_PASSKEY + BRL_KEY_END;
       case (BND_5):
-	 return BRL_BLK_PASSKEY + VPK_PAGE_UP;
+	 return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
       case (BND_6):
-	 return BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
+	 return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
       case (BND_3 | BND_5):
-	 return BRL_BLK_PASSKEY + VPK_INSERT;
+	 return BRL_BLK_PASSKEY + BRL_KEY_INSERT;
       case (BND_2 | BND_5 | BND_6):
-	 return BRL_BLK_PASSKEY + VPK_DELETE;
+	 return BRL_BLK_PASSKEY + BRL_KEY_DELETE;
       case (BND_2 | BND_6):
-	 return BRL_BLK_PASSKEY + VPK_ESCAPE;
+	 return BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
       case (BND_4):
       case (BND_4 | BND_5):
          temporaryKeyboardMode = KBM_INPUT;
@@ -718,7 +718,7 @@ interpretBackspaceChord (unsigned char dots, BRL_DriverCommandContext context) {
       default:
 	 break;
       case BNC_SPACE:
-	 return BRL_BLK_PASSKEY + VPK_BACKSPACE;
+	 return BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
 	 return EOF;
       case BNC_A:
 	 return BRL_CMD_DISPMD | BRL_FLG_TOGGLE_ON;
@@ -771,7 +771,7 @@ interpretEnterChord (unsigned char dots, BRL_DriverCommandContext context) {
       case BNC_T: /* display the time */
 	 break;
       case BNC_SPACE:
-	 return BRL_BLK_PASSKEY + VPK_RETURN;
+	 return BRL_BLK_PASSKEY + BRL_KEY_ENTER;
 	 return EOF;
       case BNC_B:
          return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_ON;

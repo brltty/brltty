@@ -380,13 +380,13 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
    case keyC8: return BRL_CMD_FWINRT;
    case keyC6: return BRL_CMD_FWINLT;
    case keyC7: return BRL_CMD_HOME;
-   case keyB2: return BRL_BLK_PASSKEY + VPK_CURSOR_UP;
-   case keyD2: return BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
-   case keyC3: return BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT;
-   case keyC1: return BRL_BLK_PASSKEY + VPK_CURSOR_LEFT;
+   case keyB2: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
+   case keyD2: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
+   case keyC3: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
+   case keyC1: return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
    case keyB3: return BRL_CMD_CSRVIS;
-   case keyD1: return BRL_BLK_PASSKEY + VPK_DELETE;  
-   case keyD3: return BRL_BLK_PASSKEY + VPK_INSERT;
+   case keyD1: return BRL_BLK_PASSKEY + BRL_KEY_DELETE;  
+   case keyD3: return BRL_BLK_PASSKEY + BRL_KEY_INSERT;
    case keyC5: return BRL_CMD_PASTE;
    case keyD5: descchar = 1; return EOF;
    case keyB4: printcode = 1; return EOF;
@@ -401,30 +401,30 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
    {
     altpressed = 0;
     return BRL_BLK_SWITCHVT + ch;
-   } else return BRL_BLK_PASSKEY+VPK_FUNCTION+ch; 
+   } else return BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+ch; 
   }
   /* altpressed = 0; */
   switch (code)
   {
    case PLOC_LT: return BRL_CMD_SIXDOTS;
-   case BACKSPACE: return BRL_BLK_PASSKEY + VPK_BACKSPACE;
-   case TAB: return BRL_BLK_PASSKEY + VPK_TAB;
-   case RETURN: return BRL_BLK_PASSKEY + VPK_RETURN;
+   case BACKSPACE: return BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
+   case TAB: return BRL_BLK_PASSKEY + BRL_KEY_TAB;
+   case RETURN: return BRL_BLK_PASSKEY + BRL_KEY_ENTER;
    case PLOC_PLOC_A: return BRL_CMD_HELP;
    case PLOC_PLOC_B: return BRL_CMD_TUNES; 
    case PLOC_PLOC_C: return BRL_CMD_PREFMENU;
-   case PLOC_PLOC_D: return BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
-   case PLOC_PLOC_E: return BRL_BLK_PASSKEY + VPK_END;
+   case PLOC_PLOC_D: return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
+   case PLOC_PLOC_E: return BRL_BLK_PASSKEY + BRL_KEY_END;
    case PLOC_PLOC_F: return BRL_CMD_FREEZE;
-   case PLOC_PLOC_H: return BRL_BLK_PASSKEY + VPK_HOME;
+   case PLOC_PLOC_H: return BRL_BLK_PASSKEY + BRL_KEY_HOME;
    case PLOC_PLOC_I: return BRL_CMD_INFO;
    case PLOC_PLOC_R: return BRL_CMD_PREFLOAD;
    case PLOC_PLOC_S: return BRL_CMD_PREFSAVE;
    case PLOC_PLOC_T: return BRL_CMD_CSRTRK;
-   case PLOC_PLOC_U: return BRL_BLK_PASSKEY + VPK_PAGE_UP;
+   case PLOC_PLOC_U: return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
    case CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; break; 
    case ALT: altpressed = BRL_FLG_CHAR_META; break;   
-   case ESCAPE: return BRL_BLK_PASSKEY + VPK_ESCAPE;
+   case ESCAPE: return BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
    default: return EOF;
   }
  }

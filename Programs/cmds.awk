@@ -13,10 +13,10 @@ BEGIN {
   }
   next
 }
-/^ *VPK_/ {
+/^ *BRL_KEY_/ {
   gsub(",", "", $1)
-  key = tolower(substr($1, 5))
+  key = tolower(substr($1, 9))
   gsub("_", "-", key)
-  print "{BRL_BLK_PASSKEY+", $1, ", \"", substr($1,5), "\", \"send ", key, " key\"},"
+  print "{BRL_BLK_PASSKEY+", $1, ", \"", substr($1,9), "\", \"send ", key, " key\"},"
   next
 }

@@ -973,8 +973,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 	  HKEY(101, K_RL|K_RR, BRL_CMD_CSRTRK, "Cursor tracking (toggle)");
 
 	  HKEY2(101, K_UP, K_DOWN,
-                BRL_BLK_PASSKEY + VPK_CURSOR_UP,
-                BRL_BLK_PASSKEY + VPK_CURSOR_DOWN,
+                BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP,
+                BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN,
                 "Move cursor up/down (arrow keys)");
 	  HKEY(210, K_RL|K_UP, BRL_CMD_DISPMD, "Show attributes (toggle)");
 	  HKEY(210, K_RL|K_DOWN, BRL_CMD_SIXDOTS, "Six dots (toggle)");
@@ -998,28 +998,28 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           break;
 
 	CKEY(210, DOT1, BRL_CMD_ATTRVIS, "Attribute underlining (toggle)");
-	CKEY(610, DOT1|DOT2, BRL_BLK_PASSKEY + VPK_BACKSPACE, "Backspace key");
+	CKEY(610, DOT1|DOT2, BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE, "Backspace key");
 	CKEY(210, DOT1|DOT4, BRL_CMD_CSRVIS, "Cursor visibility (toggle)");
-	CKEY(610, DOT1|DOT4|DOT5, BRL_BLK_PASSKEY + VPK_DELETE, "Delete key");
-	CKEY(610, DOT1|DOT5, BRL_BLK_PASSKEY + VPK_ESCAPE, "Escape key");
+	CKEY(610, DOT1|DOT4|DOT5, BRL_BLK_PASSKEY + BRL_KEY_DELETE, "Delete key");
+	CKEY(610, DOT1|DOT5, BRL_BLK_PASSKEY + BRL_KEY_ESCAPE, "Escape key");
 	CKEY(210, DOT1|DOT2|DOT4, BRL_CMD_FREEZE, "Freeze screen (toggle)");
 	CKEY(201, DOT1|DOT2|DOT5, BRL_CMD_HELP, "Help screen (toggle)");
-	CKEY(610, DOT2|DOT4, BRL_BLK_PASSKEY + VPK_INSERT, "Insert key");
+	CKEY(610, DOT2|DOT4, BRL_BLK_PASSKEY + BRL_KEY_INSERT, "Insert key");
 	CKEY(201, DOT1|DOT2|DOT3, BRL_CMD_LEARN, "Learn mode (toggle)");
 	case DOT1|DOT2|DOT3|DOT4|DOT5|DOT6|DOT7|DOT8:
 	CKEY(205, DOT1|DOT3|DOT4, BRL_CMD_PREFMENU, "Preferences menu (toggle)");
 	CKEY(408, DOT1|DOT2|DOT3|DOT4, BRL_CMD_PASTE, "Paste cut text");
 	CKEY(206, DOT1|DOT2|DOT3|DOT5, BRL_CMD_PREFLOAD, "Reload preferences from disk");
 	CKEY(201, DOT2|DOT3|DOT4, BRL_CMD_INFO, "Status line (toggle)");
-	CKEY(610, DOT2|DOT3|DOT4|DOT5, BRL_BLK_PASSKEY + VPK_TAB, "Tab key");
+	CKEY(610, DOT2|DOT3|DOT4|DOT5, BRL_BLK_PASSKEY + BRL_KEY_TAB, "Tab key");
 	CKEY(206, DOT2|DOT4|DOT5|DOT6, BRL_CMD_PREFSAVE, "Write preferences to disk");
-	CKEY(610, DOT4|DOT6, BRL_BLK_PASSKEY + VPK_RETURN, "Return key");
-	CKEY(610, DOT2, BRL_BLK_PASSKEY+VPK_PAGE_UP, "Page up");
-	CKEY(610, DOT5, BRL_BLK_PASSKEY+VPK_PAGE_DOWN, "Page down");
-	CKEY(610, DOT3, BRL_BLK_PASSKEY+VPK_HOME, "Home key");
-	CKEY(610, DOT6, BRL_BLK_PASSKEY+VPK_END, "End key");
-	CKEY(610, DOT7, BRL_BLK_PASSKEY+VPK_CURSOR_LEFT, "Left arrow");
-	CKEY(610, DOT8, BRL_BLK_PASSKEY+VPK_CURSOR_RIGHT, "Right arrow");
+	CKEY(610, DOT4|DOT6, BRL_BLK_PASSKEY + BRL_KEY_ENTER, "Enter key");
+	CKEY(610, DOT2, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, "Page up");
+	CKEY(610, DOT5, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, "Page down");
+	CKEY(610, DOT3, BRL_BLK_PASSKEY+BRL_KEY_HOME, "Home key");
+	CKEY(610, DOT6, BRL_BLK_PASSKEY+BRL_KEY_END, "End key");
+	CKEY(610, DOT7, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT, "Left arrow");
+	CKEY(610, DOT8, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, "Right arrow");
       }
     } else if (!(activeKeys.control & ~DOT_KEYS)) {
       /* Just dot keys */

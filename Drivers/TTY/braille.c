@@ -252,7 +252,7 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
   KEY(KEY_F(19), BRL_CMD_PRPGRPH);
   KEY(KEY_F(20), BRL_CMD_NXPGRPH);
 
-  KEY(KEY_BACKSPACE, BRL_BLK_PASSKEY|VPK_BACKSPACE);
+  KEY(KEY_BACKSPACE, BRL_BLK_PASSKEY|BRL_KEY_BACKSPACE);
  }
 #undef KEY
 }

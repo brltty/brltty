@@ -981,46 +981,46 @@ interpretKeys (void) {
       command = BRL_BLK_PASSDOTS;
       break;
     case (KEY_SPACE | KEY_SHIFT_LEFT):
-      command = BRL_BLK_PASSKEY + VPK_BACKSPACE;
+      command = BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
       break;
     case (KEY_SPACE | KEY_SHIFT_RIGHT):
-      command = BRL_BLK_PASSKEY + VPK_RETURN;
+      command = BRL_BLK_PASSKEY + BRL_KEY_ENTER;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + VPK_TAB;
+      command = BRL_BLK_PASSKEY + BRL_KEY_TAB;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3):
-      command = BRL_BLK_PASSKEY + VPK_CURSOR_LEFT;
+      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
       break;
     case (KEY_SPACE | KEY_DOT5 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT;
+      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT5):
-      command = BRL_BLK_PASSKEY + VPK_CURSOR_UP;
+      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
       break;
     case (KEY_SPACE | KEY_DOT3 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
+      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
       break;
     case (KEY_SPACE | KEY_DOT5):
-      command = BRL_BLK_PASSKEY + VPK_PAGE_UP;
+      command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
       break;
     case (KEY_SPACE | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
+      command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
       break;
     case (KEY_SPACE | KEY_DOT2):
-      command = BRL_BLK_PASSKEY + VPK_HOME;
+      command = BRL_BLK_PASSKEY + BRL_KEY_HOME;
       break;
     case (KEY_SPACE | KEY_DOT3):
-      command = BRL_BLK_PASSKEY + VPK_END;
+      command = BRL_BLK_PASSKEY + BRL_KEY_END;
       break;
     case (KEY_SPACE | KEY_DOT3 | KEY_DOT5):
-      command = BRL_BLK_PASSKEY + VPK_INSERT;
+      command = BRL_BLK_PASSKEY + BRL_KEY_INSERT;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT5 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + VPK_DELETE;
+      command = BRL_BLK_PASSKEY + BRL_KEY_DELETE;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + VPK_ESCAPE;
+      command = BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
       break;
 
     case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
@@ -1126,7 +1126,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                     break;
 
                   case (KEY_SPACE):
-                    command = BRL_BLK_PASSKEY + VPK_FUNCTION;
+                    command = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION;
                     break;
                   case (KEY_SHIFT_RIGHT):
                     command = BRL_BLK_SWITCHVT;

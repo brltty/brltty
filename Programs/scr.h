@@ -50,7 +50,7 @@ extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
 
 #define SCR_KEY_MOD_META 0X100
 typedef enum {
-  SCR_KEY_RETURN = 0X200,
+  SCR_KEY_ENTER = 0X200,
   SCR_KEY_TAB,
   SCR_KEY_BACKSPACE,
   SCR_KEY_ESCAPE,

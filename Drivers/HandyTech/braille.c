@@ -886,34 +886,34 @@ interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *c
         *command = BRL_CMD_MENU_LAST_ITEM;
         return 1;
       case (KEY_ZERO | KEY_SEVEN):
-        *command = BRL_BLK_PASSKEY + VPK_HOME;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_HOME;
         return 1;
       case (KEY_ZERO | KEY_EIGHT):
-        *command = BRL_BLK_PASSKEY + VPK_CURSOR_UP;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
         return 1;
       case (KEY_ZERO | KEY_NINE):
-        *command = BRL_BLK_PASSKEY + VPK_PAGE_UP;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
         return 1;
       case (KEY_ZERO | KEY_FOUR):
-        *command = BRL_BLK_PASSKEY + VPK_CURSOR_LEFT;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
         return 1;
       case (KEY_ZERO | KEY_SIX):
-        *command = BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
         return 1;
       case (KEY_ZERO | KEY_ONE):
-        *command = BRL_BLK_PASSKEY + VPK_END;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_END;
         return 1;
       case (KEY_ZERO | KEY_TWO):
-        *command = BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
         return 1;
       case (KEY_ZERO | KEY_THREE):
-        *command = BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
         return 1;
       case (KEY_ZERO | KEY_B13):
-        *command = BRL_BLK_PASSKEY + VPK_INSERT;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_INSERT;
         return 1;
       case (KEY_ZERO | KEY_B14):
-        *command = BRL_BLK_PASSKEY + VPK_DELETE;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_DELETE;
         return 1;
     }
 
@@ -932,7 +932,7 @@ interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *c
           *command = BRL_BLK_SWITCHVT;
           goto addOffset;
         case (KEY_B12):
-          *command = BRL_BLK_PASSKEY + VPK_FUNCTION;
+          *command = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION;
           goto addOffset;
         addOffset:
           switch (keys->front & ~functionKeys) {
@@ -1010,7 +1010,7 @@ interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *c
           *command = BRL_BLK_PASSDOTS;
           return 1;
         case (KEY_DOWN):
-          *command = BRL_BLK_PASSKEY + VPK_RETURN;
+          *command = BRL_BLK_PASSKEY + BRL_KEY_ENTER;
           return 1;
       }
     }
@@ -1172,7 +1172,7 @@ interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, in
         *command = BRL_BLK_CUTBEGIN + keys->column;
         return 1;
       case (ROCKER_LEFT_MIDDLE):
-        *command = BRL_BLK_PASSKEY + VPK_FUNCTION + keys->column;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + keys->column;
         return 1;
       case (ROCKER_LEFT_BOTTOM):
         *command = BRL_BLK_CUTAPPEND + keys->column;
@@ -1197,13 +1197,13 @@ interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, in
       default:
         break;
       case (ROCKER_LEFT_TOP):
-        *command = BRL_BLK_PASSKEY + VPK_CURSOR_UP;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
         return 1;
       case (ROCKER_RIGHT_TOP):
         *command = BRL_CMD_LNUP;
         return 1;
       case (ROCKER_LEFT_BOTTOM):
-        *command = BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
+        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
         return 1;
       case (ROCKER_RIGHT_BOTTOM):
         *command = BRL_CMD_LNDN;

@@ -1002,14 +1002,14 @@ main (int argc, char *argv[]) {
                 case BRL_CMD_MENU_PREV_SETTING:
                 case BRL_CMD_MENU_NEXT_SETTING:
 
-                case BRL_BLK_PASSKEY + VPK_BACKSPACE:
-                case BRL_BLK_PASSKEY + VPK_DELETE:
-                case BRL_BLK_PASSKEY + VPK_PAGE_UP:
-                case BRL_BLK_PASSKEY + VPK_PAGE_DOWN:
-                case BRL_BLK_PASSKEY + VPK_CURSOR_UP:
-                case BRL_BLK_PASSKEY + VPK_CURSOR_DOWN:
-                case BRL_BLK_PASSKEY + VPK_CURSOR_LEFT:
-                case BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT:
+                case BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE:
+                case BRL_BLK_PASSKEY + BRL_KEY_DELETE:
+                case BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP:
+                case BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN:
+                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP:
+                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
+                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
+                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
                   break;
               }
 
@@ -1634,51 +1634,51 @@ main (int argc, char *argv[]) {
               case BRL_BLK_PASSKEY: {
                 unsigned short key;
                 switch (arg) {
-                  case VPK_RETURN:
-                    key = SCR_KEY_RETURN;
+                  case BRL_KEY_ENTER:
+                    key = SCR_KEY_ENTER;
                     break;
-                  case VPK_TAB:
+                  case BRL_KEY_TAB:
                     key = SCR_KEY_TAB;
                     break;
-                  case VPK_BACKSPACE:
+                  case BRL_KEY_BACKSPACE:
                     key = SCR_KEY_BACKSPACE;
                     break;
-                  case VPK_ESCAPE:
+                  case BRL_KEY_ESCAPE:
                     key = SCR_KEY_ESCAPE;
                     break;
-                  case VPK_CURSOR_LEFT:
+                  case BRL_KEY_CURSOR_LEFT:
                     key = SCR_KEY_CURSOR_LEFT;
                     break;
-                  case VPK_CURSOR_RIGHT:
+                  case BRL_KEY_CURSOR_RIGHT:
                     key = SCR_KEY_CURSOR_RIGHT;
                     break;
-                  case VPK_CURSOR_UP:
+                  case BRL_KEY_CURSOR_UP:
                     key = SCR_KEY_CURSOR_UP;
                     break;
-                  case VPK_CURSOR_DOWN:
+                  case BRL_KEY_CURSOR_DOWN:
                     key = SCR_KEY_CURSOR_DOWN;
                     break;
-                  case VPK_PAGE_UP:
+                  case BRL_KEY_PAGE_UP:
                     key = SCR_KEY_PAGE_UP;
                     break;
-                  case VPK_PAGE_DOWN:
+                  case BRL_KEY_PAGE_DOWN:
                     key = SCR_KEY_PAGE_DOWN;
                     break;
-                  case VPK_HOME:
+                  case BRL_KEY_HOME:
                     key = SCR_KEY_HOME;
                     break;
-                  case VPK_END:
+                  case BRL_KEY_END:
                     key = SCR_KEY_END;
                     break;
-                  case VPK_INSERT:
+                  case BRL_KEY_INSERT:
                     key = SCR_KEY_INSERT;
                     break;
-                  case VPK_DELETE:
+                  case BRL_KEY_DELETE:
                     key = SCR_KEY_DELETE;
                     break;
                   default:
-                    if (arg < VPK_FUNCTION) goto badKey;
-                    key = SCR_KEY_FUNCTION + (arg - VPK_FUNCTION);
+                    if (arg < BRL_KEY_FUNCTION) goto badKey;
+                    key = SCR_KEY_FUNCTION + (arg - BRL_KEY_FUNCTION);
                     break;
                 }
                 if (!insertKey(key))

@@ -806,7 +806,7 @@ insertCode (ScreenKey key, int raw) {
   int modControl = 0;
   int modMeta = 0;
 
-  if (key < SCR_KEY_RETURN) {
+  if (key < SCR_KEY_ENTER) {
     if (key & SCR_KEY_MOD_META) {
       key &= ~SCR_KEY_MOD_META;
       modMeta = 1;
@@ -874,7 +874,7 @@ insertCode (ScreenKey key, int raw) {
     case 'l':                   code = 0X26; break;
     case ';':                   code = 0X27; break;
     case '\'':                  code = 0X28; break;
-    case SCR_KEY_RETURN:        code = 0X1C; break;
+    case SCR_KEY_ENTER:        code = 0X1C; break;
     case 'z':                   code = 0X2C; break;
     case 'x':                   code = 0X2D; break;
     case 'c':                   code = 0X2E; break;
@@ -953,7 +953,7 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
   unsigned char buffer[3];
   unsigned char *sequence;
 
-  if (key < SCR_KEY_RETURN) {
+  if (key < SCR_KEY_ENTER) {
     sequence = buffer + sizeof(buffer);
     *--sequence = 0;
     *--sequence = key & 0XFF;
@@ -978,7 +978,7 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
     }
   } else {
     switch (key) {
-      case SCR_KEY_RETURN:
+      case SCR_KEY_ENTER:
         sequence = "\r";
         break;
       case SCR_KEY_TAB:
