@@ -70,7 +70,7 @@ static int intoverride = 0;	/* internal override flag -
 				 * highly dubious behaviour ...
 				 */
 static int int_cursor = 0;	/* position of internal cursor: 0 = none */
-static int kbemu = 1; /* keyboard emulation (whether you can type) */
+static unsigned int kbemu = 1; /* keyboard emulation (whether you can type) */
 
 /* The input queue is only manipulated by the qput() and qget()
  * functions.
@@ -360,7 +360,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
             approximateDelay(200);
             qfill();
             if (qlen) {
-              unsigned char response[qlen + 1];
+              char response[qlen + 1];
               int length = 0;
               do {
                 unsigned char byte = qbase[qoff % QSZ];
@@ -524,7 +524,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   static int dot8shift;
 #endif /* USE_TEXTTRANS */
   static blkey key;
-  static unsigned char outmsg[41];
+  static char outmsg[41];
   int temp = BRL_CMD_NOOP;
 
  again:
