@@ -46,8 +46,7 @@ static int printLevel = LOG_NOTICE;
 int loggedProblemCount = 0;
 
 void
-LogOpen(int toConsole)
-{
+LogOpen (int toConsole) {
 #ifdef HAVE_SYSLOG_H
   if (!syslogOpened) {
     int flags = LOG_PID;
@@ -59,8 +58,7 @@ LogOpen(int toConsole)
 }
 
 void
-LogClose(void)
-{
+LogClose (void) {
 #ifdef HAVE_SYSLOG_H
   if (syslogOpened) {
     syslogOpened = 0;
@@ -70,8 +68,7 @@ LogClose(void)
 }
 
 void
-LogPrint (int level, char *format, ...)
-{
+LogPrint (int level, char *format, ...) {
   va_list argp;
   va_start(argp, format);
 
@@ -104,8 +101,7 @@ done:
 }
 
 void
-LogError (const char *action)
-{
+LogError (const char *action) {
   LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
 }
 
@@ -120,22 +116,23 @@ LogBytes (const char *description, const unsigned char *data, unsigned int lengt
    }
 }
 
-void
-setLogLevel(int level)
-{
+int
+setLogLevel (int level) {
+  int previous = logLevel;
   logLevel = level;
+  return previous;
 }
 
-void
-setPrintLevel(int level)
-{
+int
+setPrintLevel (int level) {
+  int previous = printLevel;
   printLevel = level;
+  return previous;
 }
 
-void
-setPrintOff(void)
-{
-  setPrintLevel(-1);
+int
+setPrintOff (void) {
+  return setPrintLevel(-1);
 }
 
 int

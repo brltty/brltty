@@ -500,7 +500,9 @@ openUsbPort (char **parameters, const char *device) {
     usbCloseDevice(usbDevice);
     usbDevice = NULL;
   } else {
-    LogPrint(LOG_DEBUG, "USB device not found.");
+    LogPrint(LOG_WARNING, "USB device not found%s%s",
+             (*device? ": ": "."),
+             device);
   }
   return 0;
 }

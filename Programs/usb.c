@@ -237,17 +237,6 @@ usbReapInput (
   return target - bytes;
 }
 
-int
-isUsbDevice (const char **path) {
-  const char *prefix = "usb:";
-  int length = strlen(prefix);
-  if (strncmp(*path, prefix, length) == 0) {
-    *path += length;
-    return 1;
-  }
-  return 0;
-}
-
 void
 usbCloseDevice (UsbDevice *device) {
   if (device->inputRequest) free(device->inputRequest);
@@ -350,4 +339,15 @@ int
 usbVerifySerialNumber (UsbDevice *device, const char *string) {
   return usbVerifyString(device, usbStringEquals,
                          device->descriptor.iSerialNumber, string);
+}
+
+int
+isUsbDevice (const char **path) {
+  const char *prefix = "usb:";
+  int length = strlen(prefix);
+  if (strncmp(*path, prefix, length) == 0) {
+    *path += length;
+    return 1;
+  }
+  return 0;
 }

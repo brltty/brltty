@@ -96,9 +96,9 @@ extern void LogPrint
        __attribute__((format(printf, 2, 3)));
 extern void LogError (const char *action);
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
-extern void setLogLevel(int level);
-extern void setPrintLevel(int level);
-extern void setPrintOff(void);
+extern int setLogLevel (int level);
+extern int setPrintLevel (int level);
+extern int setPrintOff (void);
 extern int loggedProblemCount;
 
 extern int getConsole (void);
