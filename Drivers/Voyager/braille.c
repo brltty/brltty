@@ -71,7 +71,7 @@ typedef enum {
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) (void);
-  int (*getDisplayLength) (unsigned char *length);
+  int (*getCellCount) (unsigned char *length);
   int (*logSerialNumber) (void);
   int (*logHardwareVersion) (void);
   int (*logFirmwareVersion) (void);
@@ -81,61 +81,309 @@ typedef struct {
   int (*setDisplayState) (unsigned char state);
   int (*writeBraille) (unsigned char *cells, unsigned char count, unsigned char start);
   int (*getKeys) (unsigned char *packet);
-  int (*soundBeep) (int duration);
+  int (*soundBeep) (unsigned char duration);
 } InputOutputOperations;
 static const InputOutputOperations *io;
 
 
 #include "Programs/serial.h"
 
+static int serialDevice = -1;
+static struct termios oldSerialSettings;
+static const char *serialDeviceNames[] = {"Adapter", "Base"};
+
+static int
+writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count) {
+  unsigned char buffer[2 + (count * 2)];
+  unsigned char size = 0;
+  unsigned char index;
+
+  buffer[size++] = 0X1B;
+  buffer[size++] = code;
+
+  for (index=0; index<count; ++index)
+    if ((buffer[size++] = data[index]) == buffer[0])
+      buffer[size++] = buffer[0];
+
+/*LogBytes("Output Packet", buffer, size);*/
+  return safe_write(serialDevice, buffer, size) != -1;
+}
+
+static int
+readSerialPacket (char *buffer, int size) {
+  int offset = 0;
+  int escape = 0;
+  int length = -1;
+
+  while ((offset < 1) || (offset < length)) {
+    if (offset == size) {
+      LogBytes("Large Packet", buffer, offset);
+      offset = 0;
+    }
+
+    if (!readChunk(serialDevice, buffer, &offset, 1, 100)) {
+      LogBytes("Partial Packet", buffer, offset);
+      return 0;
+    }
+
+    {
+      unsigned char byte = buffer[offset - 1];
+
+      if (byte == 0X1B) {
+        if ((escape = !escape)) {
+          offset--;
+          continue;
+        }
+      }
+
+      if (!escape) {
+        if (offset == 1) {
+          LogBytes("Discarded Byte", buffer, offset);
+          offset = 0;
+        }
+        continue;
+      }
+      escape = 0;
+
+      if (offset > 1) {
+        LogBytes("Truncated Packet", buffer, offset-1);
+        buffer[0] = byte;
+        offset = 1;
+      }
+
+      switch (byte) {
+        case 0X43:
+        case 0X47:
+          length = 2;
+          continue;
+
+        case 0X4C:
+          length = 3;
+          continue;
+
+        case 0X46:
+        case 0X48:
+          length = 5;
+          continue;
+
+        case 0X4B:
+          length = 9;
+          continue;
+
+        case 0X53:
+          length = 18;
+          continue;
+
+        default:
+          LogBytes("Unsupported Packet", buffer, offset);
+          offset = 0;
+          continue;
+      }
+    }
+  }
+
+/*LogBytes("Input Packet", buffer, offset);*/
+  return offset;
+}
+
+static int
+nextSerialPacket (unsigned char code, char *buffer, int size) {
+  int length;
+  while ((length = readSerialPacket(buffer, size))) {
+    if (buffer[0] == code) return length;
+    LogBytes("Ignored Packet", buffer, length);
+  }
+  return 0;
+}
+
+static int
+openSerialPort (char **parameters, const char *device) {
+  if (openSerialDevice(device, &serialDevice, &oldSerialSettings)) {
+    struct termios newSerialSettings;
+
+    memset(&newSerialSettings, 0, sizeof(newSerialSettings));
+    newSerialSettings.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+    newSerialSettings.c_iflag = IGNPAR;
+    newSerialSettings.c_oflag = 0;		/* raw output */
+    newSerialSettings.c_lflag = 0;		/* don't echo or generate signals */
+    newSerialSettings.c_cc[VMIN] = 0;	/* set nonblocking read */
+    newSerialSettings.c_cc[VTIME] = 0;
+
+    if (resetSerialDevice(serialDevice, &newSerialSettings, B38400)) return 1;
+
+    close(serialDevice);
+    serialDevice = -1;
+  }
+  return 0;
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice != -1) {
+    tcsetattr(serialDevice, TCSADRAIN, &oldSerialSettings);		/* restore terminal settings */
+    close(serialDevice);
+    serialDevice = -1;
+  }
+}
+
+static int
+getSerialCellCount (unsigned char *count) {
+  const unsigned int code = 0X4C;
+  if (writeSerialPacket(code, NULL, 0)) {
+    unsigned char buffer[3];
+    if (nextSerialPacket(code, buffer, sizeof(buffer))) {
+      *count = buffer[2];
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static int
+logSerialSerialNumber (void) {
+  unsigned char device;
+  for (device=0; device<=1; ++device) {
+    const unsigned char code = 0X53;
+    unsigned char buffer[18];
+    if (!writeSerialPacket(code, &device, 1)) return 0;
+    if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
+    if (buffer[1] != device) continue;
+    LogPrint(LOG_INFO, "Voyager %s Serial Number: %.*s", 
+             serialDeviceNames[device], 16, buffer+2);
+  }
+  return 1;
+}
+
+static int
+logSerialHardwareVersion (void) {
+  unsigned char device;
+  for (device=0; device<=1; ++device) {
+    const unsigned char code = 0X48;
+    unsigned char buffer[5];
+    if (!writeSerialPacket(code, &device, 1)) return 0;
+    if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
+    if (buffer[1] != device) continue;
+    LogPrint(LOG_INFO, "Voyager %s Hardware Version: %u.%u.%u", 
+             serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
+  }
+  return 1;
+}
+
+static int
+logSerialFirmwareVersion (void) {
+  unsigned char device;
+  for (device=0; device<=1; ++device) {
+    const unsigned char code = 0X46;
+    unsigned char buffer[5];
+    if (!writeSerialPacket(code, &device, 1)) return 0;
+    if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
+    if (buffer[1] != device) continue;
+    LogPrint(LOG_INFO, "Voyager %s Firmware Version: %u.%u.%u", 
+             serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
+  }
+  return 1;
+}
+
+static int
+setSerialDisplayVoltage (unsigned char voltage) {
+  return writeSerialPacket(0X56, &voltage, 1);
+}
+
+static int
+getSerialDisplayVoltage (unsigned char *voltage) {
+  const unsigned char code = 0X47;
+  if (writeSerialPacket(code, NULL, 0)) {
+    unsigned char buffer[2];
+    if (nextSerialPacket(code, buffer, sizeof(buffer))) {
+      *voltage = buffer[1];
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static int
+getSerialDisplayCurrent (unsigned char *current) {
+  const unsigned int code = 0X43;
+  if (writeSerialPacket(code, NULL, 0)) {
+    unsigned char buffer[2];
+    if (nextSerialPacket(code, buffer, sizeof(buffer))) {
+      *current = buffer[1];
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static int
+setSerialDisplayState (unsigned char state) {
+  return writeSerialPacket(0X44, &state, 1);
+}
+
+static int
+writeSerialBraille (unsigned char *cells, unsigned char count, unsigned char start) {
+  unsigned char buffer[2 + count];
+  unsigned char size = 0;
+  buffer[size++] = start;
+  buffer[size++] = count;
+  memcpy(&buffer[size], cells, count);
+  size += count;
+  return writeSerialPacket(0X42, buffer, size);
+}
+
+static int
+getSerialKeys (unsigned char *packet) {
+  unsigned char buffer[9];
+  int length = nextSerialPacket(0X4B, buffer, sizeof(buffer));
+  if (length) {
+    memcpy(packet, buffer+1, --length);
+    return length;
+  }
+  return -1;
+}
+
+static int
+soundSerialBeep (unsigned char duration) {
+  return writeSerialPacket(0X41, &duration, 1);
+}
+
+static const InputOutputOperations serialOperations = {
+  openSerialPort, closeSerialPort, getSerialCellCount,
+  logSerialSerialNumber, logSerialHardwareVersion, logSerialFirmwareVersion,
+  setSerialDisplayVoltage, getSerialDisplayVoltage, getSerialDisplayCurrent,
+  setSerialDisplayState, writeSerialBraille,
+  getSerialKeys, soundSerialBeep
+};
+
 
 #ifdef ENABLE_USB
 #include "Programs/usb.h"
 
 /* Workarounds for control transfer flakiness (at least in this demo model) */
-#define CONTROL_RETRIES 6
-
-/* control message request codes */
-#define CTL_REQ_SET_DISPLAY_STATE    0X00
-#define CTL_REQ_SET_DISPLAY_VOLTAGE  0X01
-#define CTL_REQ_GET_DISPLAY_VOLTAGE  0X02
-#define CTL_REQ_GET_SERIAL_NUMBER    0X03
-#define CTL_REQ_GET_HARDWARE_VERSION 0X04
-#define CTL_REQ_GET_FIRMWARE_VERSION 0X05
-#define CTL_REQ_GET_DISPLAY_LENGTH   0X06
-#define CTL_REQ_WRITE_BRAILLE        0X07
-#define CTL_REQ_GET_DISPLAY_CURRENT  0X08
-#define CTL_REQ_BEEP                 0X09
-#define CTL_REQ_GET_KEYS             0X0B
-#define CTL_REQ_SET_DISPLAY_LENGTH   0X0C
-#define CTL_REQ_READ_MEMORY          0X80
-#define CTL_REQ_WRITE_MEMORY         0X81
-#define CTL_REQ_READ_CODE            0X82
-#define CTL_REQ_WRITE_IO             0X83
-#define CTL_REQ_READ_IO              0X84
+#define USB_RETRIES 6
 
 static UsbChannel *usb = NULL;
 
 static int
-tellDisplay (uint8_t request, uint16_t value, uint16_t index,
-	     const unsigned char *buffer, uint16_t size) {
+writeUsbData (uint8_t request, uint16_t value, uint16_t index,
+	      const unsigned char *buffer, uint16_t size) {
   int retry = 0;
   while (1) {
     int ret = usbControlWrite(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                               request, value, index, buffer, size, 100);
-    if ((ret != -1) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) return ret;
+    if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
     LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
   }
 }
 
 static int
-askDisplay (uint8_t request, uint16_t value, uint16_t index,
-	    unsigned char *buffer, uint16_t size) {
+readUsbData (uint8_t request, uint16_t value, uint16_t index,
+	     unsigned char *buffer, uint16_t size) {
   int retry = 0;
   while (1) {
     int ret = usbControlRead(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                              request, value, index, buffer, size, 100);
-    if ((ret != -1) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) return ret;
+    if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
     LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
   }
 }
@@ -144,7 +392,7 @@ askDisplay (uint8_t request, uint16_t value, uint16_t index,
 #define RAW_STRING_SIZE (MAX_STRING_LENGTH * 2) + 2
 #define STRING_SIZE (MAX_STRING_LENGTH + 1)
 static unsigned char *
-decodeString (unsigned char *buffer) {
+decodeUsbString (unsigned char *buffer) {
   static unsigned char string[STRING_SIZE];
   int length = (buffer[0] - 2) / 2;
   int index;
@@ -177,7 +425,7 @@ openUsbPort (char **parameters, const char *device) {
     int retry = 0;
     while (1) {
       int ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
-      if ((ret != 0) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) break;
+      if ((ret != 0) || (errno != EPIPE) || (retry == USB_RETRIES)) break;
       LogPrint(LOG_WARNING, "begin input retry #%d.", ++retry);
     }
   }
@@ -194,30 +442,30 @@ closeUsbPort (void) {
 }
 
 static int
-getUsbDisplayLength (unsigned char *length) {
-  unsigned char data[2];
-  int size = askDisplay(CTL_REQ_GET_DISPLAY_LENGTH, 0, 0, data, sizeof(data));
+getUsbCellCount (unsigned char *count) {
+  unsigned char buffer[2];
+  int size = readUsbData(0X06, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
-  *length = data[1];
+  *count = buffer[1];
   return 1;
 }
 
 static int
 logUsbSerialNumber (void) {
   unsigned char buffer[RAW_STRING_SIZE];
-  int size = askDisplay(CTL_REQ_GET_SERIAL_NUMBER, 0, 0, buffer, sizeof(buffer));
+  int size = readUsbData(0X03, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   LogPrint(LOG_INFO, "Voyager Serial Number: %s",
-           decodeString(buffer));
+           decodeUsbString(buffer));
   return 1;
 }
 
 static int
 logUsbHardwareVersion (void) {
   unsigned char buffer[2];
-  int size = askDisplay(CTL_REQ_GET_HARDWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+  int size = readUsbData(0X04, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   LogPrint(LOG_INFO, "Voyager Hardware: %u.%u",
@@ -228,23 +476,23 @@ logUsbHardwareVersion (void) {
 static int
 logUsbFirmwareVersion (void) {
   unsigned char buffer[RAW_STRING_SIZE];
-  int size = askDisplay(CTL_REQ_GET_FIRMWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+  int size = readUsbData(0X05, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   LogPrint(LOG_INFO, "Voyager Firmware: %s",
-           decodeString(buffer));
+           decodeUsbString(buffer));
   return 1;
 }
 
 static int
 setUsbDisplayVoltage (unsigned char voltage) {
-  return tellDisplay(CTL_REQ_SET_DISPLAY_VOLTAGE, voltage, 0, NULL, 0) != -1;
+  return writeUsbData(0X01, voltage, 0, NULL, 0) != -1;
 }
 
 static int
 getUsbDisplayVoltage (unsigned char *voltage) {
   unsigned char buffer[1];
-  int size = askDisplay(CTL_REQ_GET_DISPLAY_VOLTAGE, 0, 0, buffer, sizeof(buffer));
+  int size = readUsbData(0X02, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   *voltage = buffer[0];
@@ -254,7 +502,7 @@ getUsbDisplayVoltage (unsigned char *voltage) {
 static int
 getUsbDisplayCurrent (unsigned char *current) {
   unsigned char buffer[1];
-  int size = askDisplay(CTL_REQ_GET_DISPLAY_CURRENT, 0, 0, buffer, sizeof(buffer));
+  int size = readUsbData(0X08, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   *current = buffer[0];
@@ -263,12 +511,12 @@ getUsbDisplayCurrent (unsigned char *current) {
 
 static int
 setUsbDisplayState (unsigned char state) {
-  return tellDisplay(CTL_REQ_SET_DISPLAY_STATE, state, 0, NULL, 0) != -1;
+  return writeUsbData(0X00, state, 0, NULL, 0) != -1;
 }
 
 static int
 writeUsbBraille (unsigned char *cells, unsigned char count, unsigned char start) {
-  return tellDisplay(CTL_REQ_WRITE_BRAILLE, 0, start, cells, count) != -1;
+  return writeUsbData(0X07, 0, start, cells, count) != -1;
 }
 
 static int
@@ -277,12 +525,12 @@ getUsbKeys (unsigned char *packet) {
 }
 
 static int
-soundUsbBeep (int duration) {
-  return tellDisplay(CTL_REQ_BEEP, duration, 0, NULL, 0) != -1;
+soundUsbBeep (unsigned char duration) {
+  return writeUsbData(0X09, duration, 0, NULL, 0) != -1;
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort, getUsbDisplayLength,
+  openUsbPort, closeUsbPort, getUsbCellCount,
   logUsbSerialNumber, logUsbHardwareVersion, logUsbFirmwareVersion,
   setUsbDisplayVoltage, getUsbDisplayVoltage, getUsbDisplayCurrent,
   setUsbDisplayState, writeUsbBraille,
@@ -317,8 +565,7 @@ brl_identify (void) {
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
-    LogPrint(LOG_WARNING, "Serial devices not supported yet: %s", device);
-    return 0;
+    io = &serialOperations;
 
 #ifdef ENABLE_USB
   } else if (isUsbDevice(&device)) {
@@ -339,9 +586,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     /* find out how big the display is */
     totalCells = 0;
     {
-      unsigned char length;
-      if (io->getDisplayLength(&length)) {
-        switch (length) {
+      unsigned char count;
+      if (io->getCellCount(&count)) {
+        switch (count) {
           case 48:
             totalCells = 44;
             brl->helpPage = 0;
@@ -353,14 +600,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             break;
 
           default:
-            LogPrint(LOG_ERR, "Unsupported Voyager length code: %u", length);
+            LogPrint(LOG_ERR, "Unsupported Voyager cell count: %u", count);
             break;
         }
       }
     }
 
     if (totalCells) {
-      LogPrint(LOG_INFO, "Voyager Length: %u", totalCells);
+      LogPrint(LOG_INFO, "Voyager Cell Count: %u", totalCells);
 
       /* position the text and status cells */
       textCells = totalCells;
