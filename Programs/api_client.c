@@ -114,11 +114,20 @@ pthread_mutex_t brlapi_fd_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concu
 static int state = 0;
 static pthread_mutex_t stateMutex = PTHREAD_MUTEX_INITIALIZER;
 
+/** key presses buffer size
+ *
+ * key presses won't be lost provided no more than BRL_KEYBUF_SIZE key presses
+ * are done between two calls to brlapi_read* if a call to another function is
+ * done in the meanwhile (which needs somewhere to put them before being able
+ * to get responses from the server)
+ */
+#define BRL_KEYBUF_SIZE 256
+
 /* key presses buffer, for when key presses are received instead of
  * acknowledgements for instance
  *
  * every function must hence be able to read at least sizeof(brl_keycode_t) */
-
+ 
 static brl_keycode_t keybuf[BRL_KEYBUF_SIZE];
 static unsigned keybuf_next;
 static unsigned keybuf_nb;
