@@ -1417,6 +1417,18 @@ It may need to be run as root.
     Display a summary of the command line options, and then exit.
 </descrip>
 
+<sect2>tbltest<label id="utility-tbltest"><p>
+This utility tests a translation table
+(see section <ref name="Translation Tables" id="translation">).
+<tscreen>tbltest -<em/option/ ... <em/table/</tscreen>
+<descrip>
+  <tag><em/table/</tag>
+    The file system path to the table.
+    If it's relative then it's anchored at the current working directory.
+  <tag><tt/-h/ <tt/--help/</tag>
+    Display a summary of the command line options, and then exit.
+</descrip>
+
 <sect2>tunetest<label id="utility-tunetest"><p>
 This utility tests the alert tunes facility,
 and also provides an easy way to compose new tunes.
@@ -3796,7 +3808,8 @@ The following directives are provided:
 
     <descrip>
       <tag><em/byte/</tag>
-        The byte being defined. It may be:
+        The byte being defined.
+        It may be:
         <itemize>
           <item>
             Any single character
@@ -3844,13 +3857,13 @@ The following directives are provided:
         It is a single digit within the range <tt/1/-<tt/8/ as defined by the standard
         <ref name="Braille Dot Numbering Convention" id="dots">.
       <tag><em/state/</tag>
-        When the dot is to be raised.
+        When the dot is raised.
         It may be:
         <descrip>
-          <tag><tt/on/</tag>The dot is to be raised.
-          <tag><tt/off/</tag>The dot isn't to be raised.
-          <tag><tt/=/<em/bit/</tag>The dot is to be raised if the named bit is set (1).
-          <tag><tt/&tilde;/<em/bit/</tag>The dot is to be raised if the named bit is clear (0).
+          <tag><tt/on/</tag>The dot is raised.
+          <tag><tt/off/</tag>The dot isn't raised.
+          <tag><tt/=/<em/bit/</tag>The dot is raised if the named bit is on (set to 1).
+          <tag><tt/&tilde;/<em/bit/</tag>The dot is raised if the named bit is off (set to 0).
         </descrip>
 
         The bit names are:
