@@ -54,16 +54,17 @@ copyContents()
 }
 copyFiles()
 {
-   for f in $3
+   for f in $4
    do
       if [ -f "${1}/${f}" ]
       then
+         echo "Installing ${3}: ${2}/${f}"
          execute cp -p -- "${1}/${f}" "${2}"
       elif [ -a "${1}/${f}" ]
       then
          programMessage "not a file: ${1}/${f}"
       else
-         programMessage "file not found: ${1}/${f}"
+         programMessage "${3} not found: ${1}/${f}"
       fi
    done
 }
@@ -83,7 +84,7 @@ then
    from="${1}"
    if [ ! -d "${from}" ]
    then
-      syntaxError "source does not exist."
+      syntaxError "source file hierarchy not found: ${from}"
    fi
    if [ ! -d "${from}" ]
    then
@@ -100,8 +101,16 @@ fi
 makeDirectory "${to}" "destination"
 
 makeDirectory "${to}=P" "executables"
-echo "Installing executables."
-copyFiles "${from}=P" "${to}=P" "brltty brltty-install"
+copyFiles "${from}=P" "${to}=P" "executable" "brltty brltty-install"
+
+conf="brltty.conf"
+if [ -f "${from}=C/${conf}" ]
+then
+   makeDirectory "${to}=C" "configuration"
+   copyFiles "${from}=C" "${to}=C" "configuration file" "${conf}"
+else
+   programMessage "no configuration file: ${from}=C/${conf}"
+fi
 
 makeDirectory "${to}=L" "library"
 echo "Installing library files."

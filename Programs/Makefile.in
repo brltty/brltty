@@ -243,6 +243,7 @@ brltty-install: $(SRC_DIR)/brltty-install.in
 	    -e 's%=P%$(PROG_DIR)%g' \
             -e 's%=L%$(LIB_DIR)%g' \
 	    -e 's%=D%$(DATA_DIR)%g' \
+	    -e 's%=C%$(sysconfdir)%g' \
             $(SRC_DIR)/brltty-install.in >$@
 	chmod a+rx $@
 
