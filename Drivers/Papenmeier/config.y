@@ -60,7 +60,8 @@ static int terminalsSize;
 static int commandsSize;
 
 static int
-reallocateTable (void **address, int size, int count) {
+reallocateTable (void *reference, int size, int count) {
+  void **address = reference;
   void *newAddress = realloc(*address, (count * size));
   if (!count || (newAddress != NULL)) {
     *address = newAddress;
@@ -72,7 +73,8 @@ reallocateTable (void **address, int size, int count) {
 }
 
 static int
-allocateTable (void **address, int size, int count) {
+allocateTable (void *reference, int size, int count) {
+  void **address = reference;
   *address = NULL;
   return reallocateTable(address, size, count);
 }
@@ -80,16 +82,16 @@ allocateTable (void **address, int size, int count) {
 static int
 duplicateString (char **address, const char *string) {
   int count = strlen(string) + 1;
-  if (!allocateTable((void **)address, 1, count)) return 0;
+  if (!allocateTable(address, 1, count)) return 0;
   memcpy(*address, string, count);
   return 1;
 }
 
 static int
-ensureTableSize (void **address, int size, int count, int *limit, int increment) {
+ensureTableSize (void *reference, int size, int count, int *limit, int increment) {
   if (count == *limit) {
     int newLimit = *limit + increment;
-    if (!reallocateTable(address, size, newLimit)) return 0;
+    if (!reallocateTable(reference, size, newLimit)) return 0;
     *limit = newLimit;
   }
   return 1;
@@ -106,9 +108,9 @@ static int
 finishCurrentTerminal (void) {
   if (pmTerminalCount) {
     TerminalDefinition *terminal = &pmTerminals[pmTerminalCount - 1];
-    if (!reallocateTable((void **)&terminal->statusCells, sizeof(*terminal->statusCells), terminal->statusCount)) return 0;
-    if (!reallocateTable((void **)&terminal->modifiers, sizeof(*terminal->modifiers), terminal->modifierCount)) return 0;
-    if (!reallocateTable((void **)&terminal->commands, sizeof(*terminal->commands), terminal->commandCount)) return 0;
+    if (!reallocateTable(&terminal->statusCells, sizeof(*terminal->statusCells), terminal->statusCount)) return 0;
+    if (!reallocateTable(&terminal->modifiers, sizeof(*terminal->modifiers), terminal->modifierCount)) return 0;
+    if (!reallocateTable(&terminal->commands, sizeof(*terminal->commands), terminal->commandCount)) return 0;
   }
   return 1;
 }
@@ -116,7 +118,7 @@ finishCurrentTerminal (void) {
 static TerminalDefinition *
 addTerminal (int identifier) {
   if (finishCurrentTerminal()) {
-    if (ensureTableSize((void **)&pmTerminals, sizeof(*pmTerminals),
+    if (ensureTableSize(&pmTerminals, sizeof(*pmTerminals),
                         pmTerminalCount, &terminalsSize, 4)) {
       TerminalDefinition *terminal = &pmTerminals[pmTerminalCount++];
       terminal->identifier = identifier;
@@ -198,7 +200,7 @@ setStatusCells (int count) {
   if (terminal) {
     if ((0 < count) && (count <= 0XFF)) {
       if (!terminal->statusCount) {
-        if (allocateTable((void **)&terminal->statusCells, sizeof(*terminal->statusCells), count)) {
+        if (allocateTable(&terminal->statusCells, sizeof(*terminal->statusCells), count)) {
           {
             int s;
             for (s=0; s<count; s++) terminal->statusCells[s] = OFFS_EMPTY;
@@ -284,7 +286,7 @@ addModifier (int key) {
 
     if (terminal->modifierCount < MODMAX) {
       if (terminal->modifiers ||
-          allocateTable((void **)&terminal->modifiers, sizeof(*terminal->modifiers), MODMAX)) {
+          allocateTable(&terminal->modifiers, sizeof(*terminal->modifiers), MODMAX)) {
         terminal->modifiers[terminal->modifierCount++] = key;
         return 1;
       }
@@ -299,7 +301,7 @@ static CommandDefinition *
 addCommand (int code) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    if (ensureTableSize((void **)&terminal->commands, sizeof(*terminal->commands),
+    if (ensureTableSize(&terminal->commands, sizeof(*terminal->commands),
                         terminal->commandCount, &commandsSize, 0X20)) {
       CommandDefinition *cmd = &terminal->commands[terminal->commandCount++];
       int k;
