@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "scr.h"
 #include "scr_frozen.h"
@@ -147,11 +148,16 @@ insertKey (ScreenKey key) {
 
 
 int
-insertString (const unsigned char *string) {
-  while (*string) {
-    if (!insertKey(*string++)) return 0;
-  }
+insertCharacters (const char *characters, int count) {
+  while (count-- > 0)
+    if (!insertKey(*characters++))
+      return 0;
   return 1;
+}
+
+int
+insertString (const char *string) {
+  return insertCharacters(string, strlen(string));
 }
 
 

@@ -410,46 +410,47 @@ showInfo (void) {
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
-  unsigned char status[22];
+  char text[22];
   setStatusText(&brl, "info");
+
   if (brl.x*brl.y >= 21) {
-    sprintf(status, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-            p->winx, p->winy, scr.posx, scr.posy, curscr, 
-            p->trackCursor? 't': ' ',
-            prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
-                              (prefs.blinkingCursor? 'b': ' '),
-            p->showAttributes? 'a': 't',
-            ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f': ' ',
-            prefs.textStyle? '6': '8',
-            prefs.blinkingCapitals? 'B': ' ');
-    writeBrailleString(&brl, status);
+    snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
+             p->winx, p->winy, scr.posx, scr.posy, curscr, 
+             p->trackCursor? 't': ' ',
+             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                               (prefs.blinkingCursor? 'b': ' '),
+             p->showAttributes? 'a': 't',
+             ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f': ' ',
+             prefs.textStyle? '6': '8',
+             prefs.blinkingCapitals? 'B': ' ');
+    writeBrailleString(&brl, text);
   } else {
-    int i;
-    sprintf(status, "xxxxx %02d %c%c%c%c%c%c     ",
-            curscr,
-            p->trackCursor? 't': ' ',
-            prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
-                              (prefs.blinkingCursor? 'b': ' '),
-            p->showAttributes? 'a': 't',
-            ((dispmd & FROZ_SCRN) == FROZ_SCRN) ?'f': ' ',
-            prefs.textStyle? '6': '8',
-            prefs.blinkingCapitals? 'B': ' ');
+    snprintf(text, sizeof(text), "xxxxx %02d %c%c%c%c%c%c     ",
+             curscr,
+             p->trackCursor? 't': ' ',
+             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                               (prefs.blinkingCursor? 'b': ' '),
+             p->showAttributes? 'a': 't',
+             ((dispmd & FROZ_SCRN) == FROZ_SCRN) ?'f': ' ',
+             prefs.textStyle? '6': '8',
+             prefs.blinkingCapitals? 'B': ' ');
     if (braille->writeVisual) {
-      memcpy(brl.buffer, status, brl.x*brl.y);
+      memcpy(brl.buffer, text, brl.x*brl.y);
       braille->writeVisual(&brl);
     }
 
-    memset(&status, 0, 5);
-    setCoordinateUpper(&status[0], scr.posx, scr.posy);
-    setCoordinateLower(&status[0], p->winx, p->winy);
-    setStateDots(&status[4]);
+    {
+      unsigned char dots[sizeof(text)];
+      int i;
 
-    /* We have to do the Braille translation ourselves since we
-     * don't want the first five characters to be translated.
-     */
-    for (i=5; status[i]; i++) status[i] = textTable[status[i]];
-    memcpy(brl.buffer, status, brl.x*brl.y);
-    braille->writeWindow(&brl);
+      memset(&dots, 0, 5);
+      setCoordinateUpper(&dots[0], scr.posx, scr.posy);
+      setCoordinateLower(&dots[0], p->winx, p->winy);
+      setStateDots(&dots[4]);
+      for (i=5; text[i]; i++) dots[i] = textTable[(unsigned char)text[i]];
+      memcpy(brl.buffer, dots, brl.x*brl.y);
+      braille->writeWindow(&brl);
+    }
   }
 }
 
@@ -661,7 +662,7 @@ findRow (int column, int increment, RowTester test, void *data) {
 static int
 testIndent (int column, int row, void *data) {
   int count = column+1;
-  char buffer[count];
+  unsigned char buffer[count];
   readScreen(0, row, count, 1, buffer, SCR_TEXT);
   while (column >= 0) {
     if ((buffer[column] != ' ') && (buffer[column] != 0)) return 1;
@@ -672,11 +673,33 @@ testIndent (int column, int row, void *data) {
 
 static int
 testPrompt (int column, int row, void *data) {
-  const char *prompt = data;
+  const unsigned char *prompt = data;
   int count = column+1;
-  char buffer[count];
+  unsigned char buffer[count];
   readScreen(0, row, count, 1, buffer, SCR_TEXT);
   return memcmp(buffer, prompt, count) == 0;
+}
+
+static int
+findBytes (const unsigned char **address, size_t *length, const unsigned char *bytes, size_t count) {
+  const unsigned char *ptr = *address;
+  size_t len = *length;
+
+  while (count <= len) {
+    const unsigned char *next = memchr(ptr, *bytes, len);
+    if (!next) break;
+
+    len -= next - ptr;
+    if (memcmp((ptr = next), bytes, count) == 0) {
+      *address = ptr;
+      *length = len;
+      return 1;
+    }
+
+    ++ptr, --len;
+  }
+
+  return 0;
 }
 
 static int
@@ -1170,38 +1193,35 @@ main (int argc, char *argv[]) {
           case BRL_CMD_NXSEARCH:
             increment = 1;
           doSearch:
-            if (cut_buffer) {
-              int length = strlen(cut_buffer);
+            if (cutBuffer) {
               int found = 0;
-              if (length <= scr.cols) {
+              size_t count = cutLength;
+              if (count <= scr.cols) {
                 int line = p->winy;
-                unsigned char buffer[scr.cols+1];
-                unsigned char string[length+1];
-                for (i=0; i<length; i++) string[i] = tolower(cut_buffer[i]);
-                string[length] = 0;
+                unsigned char buffer[scr.cols];
+                unsigned char bytes[count];
+                for (i=0; i<count; i++) bytes[i] = tolower(cutBuffer[i]);
                 while ((line >= 0) && (line <= (scr.rows - brl.y))) {
-                  unsigned char *address = buffer;
-                  readScreen(0, line, scr.cols, 1, buffer, SCR_TEXT);
-                  for (i=0; i<scr.cols; i++) buffer[i] = tolower(buffer[i]);
-                  buffer[scr.cols] = 0;
+                  const unsigned char *address = buffer;
+                  size_t length = scr.cols;
+                  readScreen(0, line, length, 1, buffer, SCR_TEXT);
+                  for (i=0; i<length; i++) buffer[i] = tolower(buffer[i]);
                   if (line == p->winy) {
                     if (increment < 0) {
-                      int end = p->winx + length - 1;
-                      if (end < scr.cols) buffer[end] = 0;
+                      int end = p->winx + count - 1;
+                      if (end < length) length = end;
                     } else {
                       int start = p->winx + brl.x;
-                      if (start > scr.cols) start = scr.cols;
-                      address = buffer + start;
+                      if (start > length) start = length;
+                      address += start;
+                      length -= start;
                     }
                   }
-                  if ((address = strstr(address, string))) {
-                    if (increment < 0) {
-                      while (1) {
-                        unsigned char *next = strstr(address+1, string);
-                        if (!next) break;
-                        address = next;
-                      }
-                    }
+                  if (findBytes(&address, &length, bytes, count)) {
+                    if (increment < 0)
+                      while (findBytes(&address, &length, bytes, count))
+                        ++address, --length;
+
                     p->winy = line;
                     p->winx = (address - buffer) / brl.x * brl.x;
                     found = 1;
@@ -1268,7 +1288,7 @@ main (int argc, char *argv[]) {
                       (scr.posx >= (p->winx + brl.x))) {
                     int charCount = MIN(scr.cols, p->winx+brl.x);
                     int charIndex;
-                    char buffer[charCount];
+                    unsigned char buffer[charCount];
                     readScreen(0, p->winy, charCount, 1, buffer, SCR_TEXT);
                     for (charIndex=0; charIndex<charCount; ++charIndex)
                       if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
@@ -1291,7 +1311,7 @@ main (int argc, char *argv[]) {
             skipEndOfLine:
               if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
                 int charIndex;
-                char buffer[scr.cols];
+                unsigned char buffer[scr.cols];
                 readScreen(0, p->winy, scr.cols, 1, buffer, SCR_TEXT);
                 for (charIndex=scr.cols-1; charIndex>=0; --charIndex)
                   if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
@@ -1310,7 +1330,7 @@ main (int argc, char *argv[]) {
             int tuneLimit = 3;
             int charCount;
             int charIndex;
-            char buffer[scr.cols];
+            unsigned char buffer[scr.cols];
             while (1) {
               if (p->winx > 0) {
                 p->winx = MAX(p->winx-fwinshift, 0);
@@ -1356,7 +1376,7 @@ main (int argc, char *argv[]) {
                       (scr.posx < p->winx)) {
                     int charCount = scr.cols - p->winx;
                     int charIndex;
-                    char buffer[charCount];
+                    unsigned char buffer[charCount];
                     readScreen(p->winx, p->winy, charCount, 1, buffer, SCR_TEXT);
                     for (charIndex=0; charIndex<charCount; ++charIndex)
                       if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
@@ -1384,7 +1404,7 @@ main (int argc, char *argv[]) {
             int tuneLimit = 3;
             int charCount;
             int charIndex;
-            char buffer[scr.cols];
+            unsigned char buffer[scr.cols];
             while (1) {
               int rwinshift = getRightShift();
               if (p->winx < (scr.cols - rwinshift)) {
@@ -1435,7 +1455,7 @@ main (int argc, char *argv[]) {
             break;
           case BRL_CMD_PASTE:
             if ((dispmd & HELP_SCRN) != HELP_SCRN && !routingProcess)
-              if (cut_paste())
+              if (cutPaste())
                 break;
             playTune(&tune_command_rejected);
             break;
@@ -1729,21 +1749,21 @@ main (int argc, char *argv[]) {
               case BRL_BLK_CUTBEGIN:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
-                  cut_begin(p->winx+arg, p->winy);
+                  cutBegin(p->winx+arg, p->winy);
                 } else
                   playTune(&tune_command_rejected);
                 break;
               case BRL_BLK_CUTAPPEND:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
-                  cut_append(p->winx+arg, p->winy);
+                  cutAppend(p->winx+arg, p->winy);
                 } else
                   playTune(&tune_command_rejected);
                 break;
               case BRL_BLK_CUTRECT:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 1);
-                  if (cut_rectangle(MIN(p->winx+arg, scr.cols-1), p->winy))
+                  if (cutRectangle(MIN(p->winx+arg, scr.cols-1), p->winy))
                     break;
                 }
                 playTune(&tune_command_rejected);
@@ -1751,7 +1771,7 @@ main (int argc, char *argv[]) {
               case BRL_BLK_CUTLINE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 1);
-                  if (cut_line(MIN(p->winx+arg, scr.cols-1), p->winy))
+                  if (cutLine(MIN(p->winx+arg, scr.cols-1), p->winy))
                     break;
                 }
                 playTune(&tune_command_rejected);
@@ -2230,7 +2250,7 @@ message (const char *text, short flags) {
 #ifdef ENABLE_SPEECH_SUPPORT
   if (prefs.alertTunes && !(flags & MSG_SILENT)) {
     speech->mute();
-    speech->say(text, length);
+    speech->say((unsigned char *)text, length);
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

@@ -22,12 +22,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-unsigned char *cut_buffer; /* for CMD_NXSEARCH */
-extern void cut_begin (int column, int row);
-extern void cut_append (int column, int row);
-extern int cut_rectangle (int column, int row);
-extern int cut_line (int column, int row);
-extern int cut_paste (void);
+extern unsigned char *cutBuffer;
+extern size_t cutLength;
+
+extern void cutBegin (int column, int row);
+extern void cutAppend (int column, int row);
+extern int cutRectangle (int column, int row);
+extern int cutLine (int column, int row);
+extern int cutPaste (void);
 
 #ifdef __cplusplus
 }
