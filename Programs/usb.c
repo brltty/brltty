@@ -763,6 +763,7 @@ usbGetSerialOperations (const UsbDevice *device) {
   static const UsbSerialAdapter usbSerialAdapters[] = {
     {0X0921, 0X1200, &usbBelkinOperations}, /* HandyTech GoHubs */
     {0X0403, 0X6001, &usbFtdiOperations_FT8U232AM}, /* HandyTech FTDI */
+    {0X0403, 0XF208, &usbFtdiOperations_FT8U232AM}, /* Papenmeier FTDI */
     {}
   };
   const UsbSerialAdapter *sa = usbSerialAdapters;

@@ -203,6 +203,7 @@ static const InputOutputOperations serialOperations = {
 #ifdef ENABLE_USB
 #include "Programs/usb.h"
 static UsbDevice *usbDevice = NULL;
+static const UsbSerialOperations *usbSerial;
 static unsigned char usbInterface;
 static unsigned char usbOutputEndpoint;
 static unsigned char usbInputEndpoint;
@@ -220,6 +221,11 @@ chooseUsbDevice (UsbDevice *device, void *data) {
     if (usbClaimInterface(device, usbInterface)) {
       if (usbSetConfiguration(device, 1)) {
         if (usbSetAlternative(device, usbInterface, 0)) {
+          usbSerial = usbGetSerialOperations(device);
+          usbSerial->setBaud(device, baud2integer(*baudRate));
+          usbSerial->setFlowControl(device, 0);
+          usbSerial->setDataFormat(device, 8, 1, USB_SERIAL_PARITY_NONE);
+
           usbOutputEndpoint = 2;
           usbInputEndpoint = 1;
           return 1;
