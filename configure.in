@@ -204,7 +204,7 @@ esac])
 MKOBJ="${brltty_cv_prog_mkobj}"
 AC_SUBST([MKOBJ])
 
-AC_CACHE_CHECK([for make shared object command], [brltty_cv_prog_mklib], [dnl
+AC_CACHE_CHECK([for linkage editor shared object flags], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
    linux*|openbsd*|freebsd*|netbsd*)
@@ -220,7 +220,7 @@ in
       brltty_ld_flag_soname="+h"
       ;;
    *)
-      AC_MSG_ERROR([cannot make shared object for ${host_os}])
+      AC_MSG_ERROR([linkage editor shared object flags not configured for ${host_os}])
       ;;
 esac
 if test "${GCC}" = "yes"
@@ -483,7 +483,7 @@ AC_SUBST([install_api])
 AC_SUBST([api_keyfile], [brlapi.key])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
 
-AC_CACHE_CHECK([for linkage editor flags], [brltty_cv_prog_ld_flags], [dnl
+AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
    linux*|openbsd*|freebsd*|netbsd*)
@@ -496,7 +496,7 @@ in
       brltty_cv_prog_ld_flags="-E +s +b ${execute_root}${library_directory}"
       ;;
    *)
-      brltty_cv_prog_ld_flags=""
+      AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
       ;;
 esac])
 brltty_link_flags="${brltty_cv_prog_ld_flags}"
@@ -569,6 +569,7 @@ in
       ;;
    *)
       usb_object=""
+      AC_MSG_WARN([no USB support on ${host_os}])
       ;;
 esac
 if test -n "${usb_object}"
