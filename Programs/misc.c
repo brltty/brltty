@@ -39,39 +39,41 @@
 
 char **
 splitString (const char *string, char delimiter, int *count) {
-  char **array;
+  char **array = NULL;
 
-  if (!string) {
-    if (count) *count = 0;
-    return NULL;
-  }
-
-  {
-    int size = 2;
-    const char *character = string;
-    while (*character)
-      if (*character++ == delimiter)
-        size++;
-    array = mallocWrapper(size * sizeof(*array));
-  }
-
-  {
-    char **element = array;
+  if (string) {
     while (1) {
-      const char *end = strchr(string, delimiter);
-      int length = end? end-string: strlen(string);
+      const char *start = string;
+      int index = 0;
 
-      *element = mallocWrapper(length+1);
-      memcpy(*element, string, length);
-      (*element++)[length] = 0;
+      while (1) {
+        const char *end = strchr(start, delimiter);
+        int length = end? end-start: strlen(start);
 
-      if (!end) break;
-      string = end + 1;
+        if (array) {
+          char *element = mallocWrapper(length+1);
+          memcpy(element, start, length);
+          element[length] = 0;
+          array[index] = element;
+        }
+        index++;
+
+        if (!end) break;
+        start = end + 1;
+      }
+
+      if (array) {
+        array[index] = NULL;
+        if (count) *count = index;
+        break;
+      }
+
+      array = mallocWrapper((index + 1) * sizeof(*array));
     }
-    *element = NULL;
-
-    if (count) *count = element - array;
+  } else if (count) {
+    *count = 0;
   }
+
   return array;
 }
 
