@@ -952,20 +952,26 @@ static Tconnection *whoGetsKey(Ttty *tty, brl_keycode_t command, brl_keycode_t k
 {
   Tconnection *c;
   Ttty *t;
-  int masked;
-  for (c=tty->connections->next; c!=tty->connections; c = c->next) {
-    pthread_mutex_lock(&c->maskmutex);
-    if (c->how==BRLKEYCODES)
-      masked = (contains(c->unmaskedKeys,keycode) == NULL);
-    else
-      masked = (contains(c->unmaskedKeys,command) == NULL);
-    pthread_mutex_unlock(&c->maskmutex);
-    if (!masked) return c;
+  {
+    int masked;
+    for (c=tty->connections->next; c!=tty->connections; c = c->next) {
+      pthread_mutex_lock(&c->maskmutex);
+      if (c->how==BRLKEYCODES)
+        masked = (contains(c->unmaskedKeys,keycode) == NULL);
+      else
+        masked = (contains(c->unmaskedKeys,command) == NULL);
+      pthread_mutex_unlock(&c->maskmutex);
+      if (!masked) goto found;
+    }
   }
+  c = NULL;
+found:
   for (t = tty->subttys; t; t = t->next)
-    if (t->number == tty->focus)
-      return whoGetsKey(t, command, keycode);
-  return NULL;
+    if (t->number == tty->focus) {
+      Tconnection *recur_c = whoGetsKey(t, command, keycode);
+      return recur_c ? recur_c : c;
+    }
+  return c;
 }
 
 /* Function : api_readCommand */
