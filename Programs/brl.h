@@ -128,6 +128,7 @@ typedef struct {
   const char *description;
 } CommandEntry;
 extern const CommandEntry commandTable[];
+extern void describeCommand (int command, char *buffer, int size);
 extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern void showDotPattern (unsigned char dots, unsigned char duration);
