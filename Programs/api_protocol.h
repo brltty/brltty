@@ -1,14 +1,18 @@
 /*
- * BRLTTY - A background process providing access to the Linux console (when in
- *          text mode) for a blind person using a refreshable braille display.
+ * libbrlapi - A library providing access to braille terminals for applications.
  *
- * Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 2002-2004 by
+ *   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
+ *   Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+ * All rights reserved.
  *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * libbrlapi comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
- * GNU General Public License, as published by the Free Software
- * Foundation.  Please see the file COPYING for details.
+ * GNU Lesser General Public License, as published by the Free Software
+ * Foundation; either version 2.1 of the License,
+ * or (at your option) any later version.
+ * Please see the file LGPL for details.
  *
  * Web Page: http://mielke.cc/brltty/
  *
@@ -45,7 +49,7 @@ extern "C" {
  *
  * @{ */
 
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 5) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 6) /** Communication protocol version */
 
 #define BRLPACKET_AUTHKEY           'K'    /**< Authentication key          */
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */

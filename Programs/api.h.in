@@ -290,10 +290,10 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  */
 int brlapi_getTty(int tty, int how);
 
+/** ask for \e brltty commands */
+#define BRLCOMMANDS 0
 /** ask for raw driver keycodes */
 #define BRLKEYCODES 1
-/** ask for \e brltty commands */
-#define BRLCOMMANDS 2
 
 /* brlapi_leaveTty */
 /** stop controlling the tty
@@ -449,10 +449,11 @@ typedef uint32_t brl_keycode_t;
 int brlapi_readKey(int block, brl_keycode_t *code);
 
 /* brlapi_readCommand */
-/** Read a command from the braille keyboard
+/** Read a command from the braille keyboard (deprecated!)
  *
  * This function returns \e brltty commands, as described in
  * \c <brltty/brldefs.h> .
+ * Use brlapi_readKey instead
  * These are hence pretty driver-independent, and should be used by default
  * when no other option is possible.
  *
