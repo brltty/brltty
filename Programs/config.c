@@ -79,10 +79,10 @@ static const char *opt_dataDirectory = NULL;
 static const char *opt_libraryDirectory = NULL;
 
 static const char *opt_brailleDevice = NULL;
-static const char *const *brailleDevices;
+static char **brailleDevices;
 
 static const char *opt_brailleDriver = NULL;
-static const char *const *brailleDrivers;
+static char **brailleDrivers;
 static const BrailleDriver *brailleDriver = NULL;
 static int brailleInternal;
 static char *opt_brailleParameters = NULL;
@@ -106,7 +106,7 @@ static int apiOpened;
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static const char *opt_speechDriver = NULL;
-static const char *const *speechDrivers = NULL;
+static char **speechDrivers = NULL;
 static const SpeechDriver *speechDriver = NULL;
 static int speechInternal;
 static char *opt_speechParameters = NULL;
@@ -783,7 +783,7 @@ openBrailleDriver (int verify) {
   int oneDevice = brailleDevices[0] && !brailleDevices[1];
   int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
   int autodetect = oneDriver && (strcmp(brailleDrivers[0], "auto") == 0);
-  const char *const *device = brailleDevices;
+  const char *const *device = (const char *const *)brailleDevices;
 
   if (!oneDevice || !oneDriver || autodetect) verify = 0;
 
@@ -795,7 +795,7 @@ openBrailleDriver (int verify) {
       const char *dev = *device;
 
       if (isSerialDevice(&dev)) {
-        static const char *serialIdentifiers[] = {
+        static const char *const serialIdentifiers[] = {
           "pm", "ts",
           NULL
         };
@@ -804,7 +804,7 @@ openBrailleDriver (int verify) {
 
 #ifdef ENABLE_USB_SUPPORT
       } else if (isUsbDevice(&dev)) {
-        static const char *usbIdentifiers[] = {
+        static const char *const usbIdentifiers[] = {
           "al", "fs", "ht", "pm", "vo",
           NULL
         };
@@ -828,7 +828,7 @@ openBrailleDriver (int verify) {
       }
       LogPrint(LOG_DEBUG, "Looking for %s braille display on '%s'.", type, *device);
     } else {
-      identifier = brailleDrivers;
+      identifier = (const char *const *)brailleDrivers;
       LogPrint(LOG_DEBUG, "Looking for braille display on '%s'.", *device);
     }
 
@@ -1025,13 +1025,13 @@ openSpeechDriver (int verify) {
   if (!oneDriver || autodetect) verify = 0;
 
   if (autodetect) {
-    static const char *speechIdentifiers[] = {
+    static const char *const speechIdentifiers[] = {
       "al", "bl", "cb",
       NULL
     };
     identifier = speechIdentifiers;
   } else {
-    identifier = speechDrivers;
+    identifier = (const char *const *)speechDrivers;
   }
   LogPrint(LOG_DEBUG, "Looking for speech synthesizer.");
 
