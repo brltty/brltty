@@ -29,7 +29,7 @@ HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk
 
-PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brl.h $(SRC_DIR)/brl-cfg.h
+PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brldefs.h $(SRC_DIR)/brl-cfg.h
 
 braille.o:
 	$(CC) $(BRL_CFLAGS) $(YCFLAGS) -c $(SRC_DIR)/braille.c

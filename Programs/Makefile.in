@@ -203,8 +203,8 @@ text.auto.h: $(SRC_TOP)$(TBL_DIR)/$(TEXTTRANS) tbl2hex
 attrib.auto.h: $(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) tbl2hex
 	./tbl2hex <$(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) >$@
 
-cmds.auto.h: $(SRC_DIR)/brl.h $(SRC_DIR)/cmds.awk
-	$(AWK) -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brl.h >$@
+cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/cmds.awk
+	$(AWK) -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
 
 ###############################################################################
 
