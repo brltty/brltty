@@ -416,6 +416,7 @@ static const InputOutputOperations usbOperations = {
 
 typedef struct {
   void (*initializeTerminal) (BrailleDisplay *brl);
+  void (*releaseResources) (void);
   int (*readCommand) (BrailleDisplay *brl, DriverCommandContext cmds);
   void (*writeText) (BrailleDisplay *brl, int start, int count);
   void (*writeStatus) (BrailleDisplay *brl, int start, int count);
@@ -743,8 +744,12 @@ readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
 #undef READ
 }
 
+static void
+releaseResources1 (void) {
+}
+
 static const ProtocolOperations protocolOperations1 = {
-  initializeTerminal1,
+  initializeTerminal1, releaseResources1,
   readCommand1,
   writeText1, writeStatus1, flushCells1
 };
@@ -803,20 +808,19 @@ typedef struct {
 #define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
-#define PM2_EASY_U2 0X01
-#define PM2_EASY_U1 0X02
-#define PM2_EASY_D1 0X04
-#define PM2_EASY_D2 0X08
-#define PM2_EASY_R1 0X10
-#define PM2_EASY_L1 0X20
-#define PM2_EASY_R2 0X40
-#define PM2_EASY_L2 0X80
-
 static int left2;
 static int right2;
 
 static int refresh2;
 static Packet2 state2;
+
+typedef struct {
+  int code;
+  int offset;
+} InputMapping2;
+static InputMapping2 *inputMap2 = NULL;
+static int inputBytes2;
+static int inputBits2;
 
 static int
 readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
@@ -1007,51 +1011,59 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
 
       case 0X0B: {
         int command = CMD_NOOP;
-        int offset = left2 + right2;
+        int bytes = MIN(packet.length, inputBytes2);
+        int release = 0;
+        int byte;
 
-        {
-          typedef struct {
-            unsigned char bit;
-            unsigned char code;
-          } EasyEntry;
-          static const EasyEntry easyTable[] = {
-            {PM2_EASY_L2, EASY_L2},
-            {PM2_EASY_R2, EASY_R2},
-            {PM2_EASY_U2, EASY_U2},
-            {PM2_EASY_D2, EASY_D2},
-            {PM2_EASY_L1, EASY_L1},
-            {PM2_EASY_R1, EASY_R1},
-            {PM2_EASY_U1, EASY_U1},
-            {PM2_EASY_D1, EASY_D1}
-          };
-          int index = 0;
-          unsigned char old = state2.data.bytes[offset];
-          unsigned char new = packet.data.bytes[offset];
+        for (byte=0; byte<bytes; ++byte) {
+          unsigned char old = state2.data.bytes[byte];
+          unsigned char new = packet.data.bytes[byte];
 
-          {
-            int found = 0;
-            while (index < 8) {
-              const EasyEntry *easy = &easyTable[index++];
-              if (!(new & easy->bit) && (old & easy->bit)) {
-                int cmd = handleKey(OFFS_EASY + easy->code, 0, 0);
-                if (!found) {
+          if (new != old) {
+            int index = byte * 8;
+            unsigned char bit = 0X01;
+
+            while (bit) {
+              if (!(new & bit) && (old & bit)) {
+                InputMapping2 *mapping = &inputMap2[index];
+                int cmd = handleKey(mapping->code, 0, mapping->offset);
+
+                if (!release) {
                   command = cmd;
-                  found = 1;
+                  release = 1;
                 }
-              }
-            }
-          }
 
-          while (index-- > 0) {
-            const EasyEntry *easy = &easyTable[index];
-            if ((new & easy->bit) && !(old & easy->bit)) {
-              command = handleKey(OFFS_EASY + easy->code, 1, 0);
+                state2.data.bytes[byte] &= ~bit;
+              }
+
+              index++;
+              bit <<= 1;
             }
           }
         }
-        offset++;
 
-        state2 = packet;
+        for (byte=0; byte<bytes; ++byte) {
+          unsigned char old = state2.data.bytes[byte];
+          unsigned char new = packet.data.bytes[byte];
+
+          if (new != old) {
+            int index = byte * 8;
+            unsigned char bit = 0X01;
+
+            while (bit) {
+              if ((new & bit) && !(old & bit)) {
+                InputMapping2 *mapping = &inputMap2[index];
+                command = handleKey(mapping->code, 1, mapping->offset);
+
+                state2.data.bytes[byte] |= bit;
+              }
+
+              index++;
+              bit <<= 1;
+            }
+          }
+        }
+
         return command;
       }
     }
@@ -1060,11 +1072,97 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
   return EOF;
 }
 
+static void
+releaseResources2 (void) {
+  if (inputMap2) {
+    free(inputMap2);
+    inputMap2 = NULL;
+  }
+}
+
 static const ProtocolOperations protocolOperations2 = {
-  initializeTerminal2,
+  initializeTerminal2, releaseResources2,
   readCommand2,
   writeText2, writeStatus2, flushCells2
 };
+
+static void
+addInputMapping2 (int byte, int bit, int code, int offset) {
+  InputMapping2 *mapping = &inputMap2[(byte * 8) + bit];
+  mapping->code = code;
+  mapping->offset = offset;
+}
+
+static void
+nextInputModule2 (int *byte, int *bit) {
+  if (!*bit) *bit = 8, *byte -= 1;
+  *bit -= 2;
+}
+
+static void
+mapSwitchKey2 (int count, int *byte, int *bit, int rear, int front) {
+  while (count--) {
+    nextInputModule2(byte, bit);
+    nextInputModule2(byte, bit);
+    addInputMapping2(*byte, *bit+1, front, 0);
+    addInputMapping2(*byte, *bit, rear, 0);
+  }
+}
+
+static int
+mapInputModules2 (void) {
+  inputBytes2 = left2 + right2 + 1 + (((((left2 + right2) * 4) + ((terminal->statusCount + terminal->columns) * 2)) + 7) / 8);
+  inputBits2 = inputBytes2 * 8;
+
+  if ((inputMap2 = malloc(inputBits2 * sizeof(*inputMap2)))) {
+    int byte = inputBytes2;
+    int bit = 0;
+
+    {
+      int i;
+      for (i=0; i<inputBits2; ++i) {
+        InputMapping2 *mapping = &inputMap2[i];
+        mapping->code = NOKEY;
+        mapping->offset = 0;
+      }
+    }
+
+    mapSwitchKey2(terminal->rightSwitches, &byte, &bit,
+                  OFFS_SWITCH+SWITCH_RIGHT_REAR,
+                  OFFS_SWITCH+SWITCH_RIGHT_FRONT);
+    mapSwitchKey2(terminal->rightKeys, &byte, &bit,
+                  OFFS_SWITCH+KEY_RIGHT_REAR,
+                  OFFS_SWITCH+KEY_RIGHT_FRONT);
+
+    {
+      unsigned char column = terminal->columns;
+      do {
+        nextInputModule2(&byte, &bit);
+        addInputMapping2(byte, bit, ROUTINGKEY, --column);
+      } while (column);
+    }
+
+    mapSwitchKey2(terminal->leftKeys, &byte, &bit,
+                  OFFS_SWITCH+KEY_LEFT_REAR,
+                  OFFS_SWITCH+KEY_LEFT_FRONT);
+    mapSwitchKey2(terminal->leftSwitches, &byte, &bit,
+                  OFFS_SWITCH+SWITCH_LEFT_REAR,
+                  OFFS_SWITCH+SWITCH_LEFT_FRONT);
+
+    byte--;
+    addInputMapping2(byte, 7, OFFS_EASY+EASY_L2, 0);
+    addInputMapping2(byte, 6, OFFS_EASY+EASY_R2, 0);
+    addInputMapping2(byte, 5, OFFS_EASY+EASY_L1, 0);
+    addInputMapping2(byte, 4, OFFS_EASY+EASY_R1, 0);
+    addInputMapping2(byte, 3, OFFS_EASY+EASY_D2, 0);
+    addInputMapping2(byte, 2, OFFS_EASY+EASY_D1, 0);
+    addInputMapping2(byte, 1, OFFS_EASY+EASY_U1, 0);
+    addInputMapping2(byte, 0, OFFS_EASY+EASY_U2, 0);
+
+    return 1;
+  }
+  return 0;
+}
 
 static int
 identifyTerminal2 (BrailleDisplay *brl) {
@@ -1085,7 +1183,9 @@ identifyTerminal2 (BrailleDisplay *brl) {
 
             left2 = terminal->leftSwitches + terminal->leftKeys;
             right2 = terminal->rightSwitches + terminal->rightKeys;
-            return 1;
+            if (mapInputModules2()) {
+              return 1;
+            }
           }
         }
       }
@@ -1166,6 +1266,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_close (BrailleDisplay *brl) {
   io->closePort();
+  protocol->releaseResources();
 }
 
 static void
