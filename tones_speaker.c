@@ -53,6 +53,10 @@ static int generateSpeaker (int frequency, int duration) {
    return 0;
 }
 
+static int flushSpeaker (void) {
+   return 1;
+}
+
 static void closeSpeaker (void) {
    if (fileDescriptor != -1) {
       close(fileDescriptor);
@@ -64,6 +68,7 @@ static void closeSpeaker (void) {
 static ToneGenerator toneGenerator = {
    openSpeaker,
    generateSpeaker,
+   flushSpeaker,
    closeSpeaker
 };
 

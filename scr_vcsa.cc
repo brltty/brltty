@@ -164,7 +164,7 @@ int vcsa_Screen::open (int for_csr_routing)
   }
   if ((cons_fd = ::open (CONSOLE, O_RDWR|O_NOCTTY)) == -1)
     {
-      LogPrint(LOG_WARNING, "Cannot open console device '%s': %s",
+      LogPrint(LOG_ERR, "Cannot open console device '%s': %s",
 	       CONSOLE, strerror(errno));
       ::close (fd);
       return 1;

@@ -416,30 +416,30 @@ initbrl (char **parameters, brldim *brl, const char *device)
 			   systemError("cell buffer allocation");
 			}
 		     } else {
-			LogPrint(LOG_ERR, "unexpected description: %2.2X %2.2X %2.2X",
+			LogPrint(LOG_ERR, "Unexpected BrailleNote description: %2.2X %2.2X %2.2X",
 				 response[0], response[1], response[2]);
 		     }
 		  } else if (count == -1) {
-		     systemError("device read");
+		     systemError("BrailleNote read");
 		  } else {
-		     LogPrint(LOG_ERR, "unexpected description size: %d", count);
+		     LogPrint(LOG_ERR, "Unexpected BrailleNote description size: %d", count);
 		  }
 	       } else {
-		  systemError("device write");
+		  systemError("BrailleNote write");
 	       }
 	    } else {
-	       systemError("device flush");
+	       systemError("BrailleNote flush");
 	    }
 	    tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
 	 } else {
-	    systemError("device attribute set");
+	    systemError("BrailleNote attribute set");
 	 }
       } else {
-	 systemError("device attribute query");
+	 systemError("BrailleNote attribute query");
       }
       close(fileDescriptor);
    } else {
-      systemError("device open");
+      systemError("BrailleNote open");
    }
    brl->x = -1;
    brl->y = -1;

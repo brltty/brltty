@@ -367,6 +367,10 @@ static int generateSequencer (int frequency, int duration) {
    return 0;
 }
 
+static int flushSequencer (void) {
+   return 1;
+}
+
 static void closeSequencer (void) {
    if (fileDescriptor != -1) {
       close(fileDescriptor);
@@ -378,6 +382,7 @@ static void closeSequencer (void) {
 static ToneGenerator toneGenerator = {
    openSequencer,
    generateSequencer,
+   flushSequencer,
    closeSequencer
 };
 

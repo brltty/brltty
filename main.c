@@ -41,7 +41,7 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99q (beta)";
+char VERSION[] = "BRLTTY 2.99r (beta)";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 int cycleDelay = CYCLE_DELAY;
@@ -1351,9 +1351,8 @@ void
 message (unsigned char *text, short flags)
 {
   int length = strlen(text);
-  int silent = flags & MSG_SILENT;
 
-  if (!silent && env.sound)
+  if (env.sound && !(flags & MSG_SILENT))
     {
       speech->mute();
       speech->say(text, length);

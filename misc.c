@@ -197,17 +197,17 @@ size_t safe_write (int fd, const unsigned char *buffer, size_t length)
   return address - buffer;
 }
 
-unsigned
+unsigned long
 elapsed_msec (struct timeval *t1, struct timeval *t2)
 {
-  unsigned diff, error = 0xFFFFFFFF;
+  unsigned long diff, error = 0xFFFFFFFF;
   if (t1->tv_sec > t2->tv_sec)
-    return (error);
+    return error;
   diff = (t2->tv_sec - t1->tv_sec) * 1000L;
   if (diff == 0 && t1->tv_usec > t2->tv_usec)
-    return (error);
+    return error;
   diff += (t2->tv_usec - t1->tv_usec) / 1000L;
-  return (diff);
+  return diff;
 }
 
 void
@@ -215,12 +215,12 @@ shortdelay (unsigned msec)
 {
   struct timeval start, now;
   struct timezone tz;
-  gettimeofday (&start, &tz);
+  gettimeofday(&start, &tz);
   do
     {
-      gettimeofday (&now, &tz);
+      gettimeofday(&now, &tz);
     }
-  while (elapsed_msec (&start, &now) < msec);
+  while (elapsed_msec(&start, &now) < msec);
 }
 
 void
@@ -230,24 +230,24 @@ delay (int msec)
 
   del.tv_sec = 0;
   del.tv_usec = msec * 1000;
-  select (0, NULL, NULL, NULL, &del);
+  select(0, NULL, NULL, NULL, &del);
 }
 
 int
 timeout_yet (int msec)
 {
-  static struct timeval tstart =
-  {0, 0};
-  struct timeval tnow;
+  static struct timeval start = {0, 0};
 
-  if (msec == 0)		/* initialiseation */
+  if (msec)		/* initialiseation */
     {
-      gettimeofday (&tstart, NULL);
-      return 0;
+      struct timeval now;
+      gettimeofday(&now, NULL);
+      return (now.tv_sec * 1000000 + now.tv_usec) -
+	     (start.tv_sec * 1000000 + start.tv_usec) >= (msec * 1000);
     }
-  gettimeofday (&tnow, NULL);
-  return ((tnow.tv_sec * 1e6 + tnow.tv_usec) - \
-	  (tstart.tv_sec * 1e6 + tstart.tv_usec) >= msec * 1e3);
+
+  gettimeofday(&start, NULL);
+  return 0;
 }
 
 #ifdef USE_SYSLOG
@@ -308,7 +308,7 @@ LogPrint (int priority, char *format, ...)
   va_list argp;
   va_start(argp, format);
 
-  if (priority <= LOG_WARNING)
+  if (priority <= LOG_ERR)
     ++ProblemCount;
 
   if (priority <= logPriority) {

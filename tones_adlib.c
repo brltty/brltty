@@ -50,6 +50,10 @@ static int generateAdLib (int frequency, int duration) {
    return 1;
 }
 
+static int flushAdLib (void) {
+   return 1;
+}
+
 static void closeAdLib (void) {
    if (cardOpen) {
       AL_disablePorts();
@@ -61,6 +65,7 @@ static void closeAdLib (void) {
 static ToneGenerator toneGenerator = {
    openAdLib,
    generateAdLib,
+   flushAdLib,
    closeAdLib
 };
 

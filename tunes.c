@@ -289,6 +289,7 @@ void playTune (TuneDefinition *tune) {
 	       }
 	       ++tone;
 	    }
+	    toneGenerator->flush();
 	 }
       }
    }

@@ -73,29 +73,6 @@
    #define SPKLIBS "???"
 #endif
 
-
-char USAGE[] = "\
-Usage: %s [option ...]\n\
--a file    --attributes-table=   Path to attributes translation table file.\n\
--b driver  --braille-driver=     Braille driver: full library path, or one of\n\
-                                 {" BRLLIBS "}\n\
--B arg,... --braille-parameters= Parameters to braille driver.\n\
--d device  --braille-device=     Path to device for accessing braille display.\n\
--e         --errors              Log to standard error instead of via syslog.\n\
--f file    --configuration-file= Path to default parameters file.\n\
--h         --help                Print this usage summary and exit.\n\
--l level   --log-level=          Diagnostic logging level: 0-7 [5], or one of\n\
-				 {emergency alert critical error warning\n\
-				 [notice] information debug}\n\
--n         --no-daemon           Remain a foreground process.\n\
--p file    --preferences-file=   Path to preferences file.\n\
--q         --quiet               Suppress start-up messages.\n\
--s driver  --speech-driver=      Speech driver: full library path, or one of\n\
-                                 {" SPKLIBS "}\n\
--S arg,... --speech-parameters=  Parameters to speech driver.\n\
--t file    --text-table=         Path to text translation table file.\n\
--v         --version             Print start-up messages and exit.\n";
-
 static char *opt_attributesTable = NULL;
 static char *opt_brailleDevice = NULL;
 static char *opt_brailleParameters = NULL;
@@ -133,6 +110,285 @@ static char **speechParameters = NULL;
 
 short homedir_found = 0;	/* CWD status */
 
+#define MIN(a, b)  (((a) < (b))? (a): (b)) 
+#define MAX(a, b)  (((a) > (b))? (a): (b)) 
+	
+static int
+getToken (char **val, const char *delimiters)
+{
+  char *v = strtok(NULL, delimiters);
+
+  if (!v) return CFG_NoValue;
+  if (strtok(NULL, delimiters)) return CFG_TooMany;
+  if (*val) return CFG_Duplicate;
+
+  *val = strdupWrapper(v);
+  return CFG_OK;
+}
+
+static int
+configurePreferencesFile (const char *delimiters)
+{
+  return getToken(&cfg_preferencesFile, delimiters);
+}
+
+static int
+configureTextTable (const char *delimiters)
+{
+  return getToken(&cfg_textTable, delimiters);
+}
+
+static int
+configureAttributesTable (const char *delimiters)
+{
+  return getToken(&cfg_attributesTable, delimiters);
+}
+
+static int
+configureBrailleDevice (const char *delimiters)
+{
+  return getToken(&cfg_brailleDevice, delimiters);
+}
+
+static int
+configureBrailleDriver (const char *delimiters)
+{
+  return getToken(&cfg_brailleDriver, delimiters);
+}
+
+static int
+configureBrailleParameters (const char *delimiters)
+{
+  return getToken(&cfg_brailleParameters, delimiters);
+}
+
+static int
+configureSpeechDriver (const char *delimiters)
+{
+  return getToken(&cfg_speechDriver, delimiters);
+}
+
+static int
+configureSpeechParameters (const char *delimiters)
+{
+  return getToken(&cfg_speechParameters, delimiters);
+}
+
+typedef struct {
+   char letter;
+   char *word;
+   char *argument;
+   int (*configure) (const char *delimiters); 
+   char *description;
+} OptionEntry;
+static OptionEntry optionTable[] = {
+   {'a', "attributes-table", "file", configureAttributesTable,
+    "Path to attributes translation table file."},
+   {'b', "braille-driver", "driver", configureBrailleDriver,
+    "Braille driver: full library path, or one of {" BRLLIBS "}"},
+   {'d', "braille-device", "device", configureBrailleDevice,
+    "Path to device for accessing braille display."},
+   {'e', "errors", NULL, NULL,
+    "Log to standard error instead of via syslog."},
+   {'f', "configuration-file", "file", NULL,
+    "Path to default parameters file."},
+   {'h', "help", NULL, NULL,
+    "Print this usage summary and exit."},
+   {'l', "log-level", "level", NULL,
+    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
+   {'n', "no-daemon", NULL, NULL,
+    "Remain a foreground process."},
+   {'p', "preferences-file", "file", configurePreferencesFile,
+    "Path to preferences file."},
+   {'q', "quiet", NULL, NULL,
+    "Suppress start-up messages."},
+   {'s', "speech-driver", "driver", configureSpeechDriver,
+    "Speech driver: full library path, or one of {" SPKLIBS "}"},
+   {'t', "text-table", "file", configureTextTable,
+    "Path to text translation table file."},
+   {'v', "version", NULL, NULL,
+    "Print start-up messages and exit."},
+   {'B', "braille-parameters", "arg,...", configureBrailleParameters,
+    "Parameters to braille driver."},
+   {'C', "cycle-delay", "csecs", NULL,
+    "Screen recheck interval [5]."},
+   {'M', "message-delay", "csecs", NULL,
+    "Message hold time [500]."},
+   {'R', "read-delay", "csecs", NULL,
+    "Key poll interval [4]."},
+   {'S', "speech-parameters", "arg,...", configureSpeechParameters,
+    "Parameters to speech driver."}
+};
+static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
+
+static void
+processConfigurationLine (char *line, void *data)
+{
+  const char *delimiters = " \t"; // Characters which separate words.
+  char *keyword; // Points to first word of each line.
+
+  // Remove comment from end of line.
+  {
+    char *comment = strchr(line, '#');
+    if (comment) *comment = 0;
+  }
+
+  keyword = strtok(line, delimiters);
+  if (keyword) // Ignore blank lines.
+    {
+      int optionIndex;
+      for (optionIndex=0; optionIndex<optionCount; ++optionIndex)
+        {
+	  OptionEntry *option = &optionTable[optionIndex];
+	  if (option->configure) {
+	    if (strcasecmp(keyword, option->word) == 0) {
+	      int code = option->configure(delimiters);
+	      switch (code)
+	        {
+		  case CFG_OK:
+		    break;
+
+		  case CFG_NoValue:
+		    LogPrint(LOG_ERR,
+		             "Operand not supplied for configuration item '%s'.",
+			     keyword);
+		    break;
+
+		  case CFG_BadValue:
+		    LogPrint(LOG_ERR,
+		             "Invalid operand specified"
+			     " for configuration item '%s'.",
+			      keyword);
+		    break;
+
+		  case CFG_TooMany:
+		    LogPrint(LOG_ERR,
+		             "Too many operands supplied"
+			     " for configuration item '%s'.",
+			     keyword);
+		    break;
+
+		  case CFG_Duplicate:
+		    LogPrint(LOG_ERR,
+		             "Configuration item '%s' specified more than once.",
+			     keyword);
+		    break;
+
+		  default:
+		    LogPrint(LOG_ERR,
+		             "Internal error: unsupported"
+			     " configuration file error code: %d",
+			     code);
+		    break;
+		}
+	      return;
+	    }
+	  }
+	}
+      LogPrint(LOG_ERR, "Unknown configuration item: '%s'.", keyword);
+    }
+}
+
+static int
+processConfigurationFile (char *path, int optional)
+{
+   FILE *file = fopen(path, "r");
+   if (file != NULL)
+     { // The configuration file has been successfully opened.
+       processLines(file, processConfigurationLine, NULL);
+       fclose(file);
+     }
+   else
+     {
+       LogPrint((optional && (errno == ENOENT)? LOG_DEBUG: LOG_ERR),
+                "Cannot open configuration file: %s: %s",
+                path, strerror(errno));
+       return 0;
+     }
+   return 1;
+}
+
+static void
+printHelp (FILE *outputStream, unsigned int lineWidth, char *programPath) {
+   char line[lineWidth+1];
+   unsigned int wordWidth = 0;
+   unsigned int argumentWidth = 0;
+   int optionIndex;
+   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
+      OptionEntry *option = &optionTable[optionIndex];
+      if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
+      if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
+   }
+
+   {
+      char *programName = strrchr(programPath, '/');
+      programName = programName? programName+1: programPath;
+      fprintf(outputStream, "Usage: %s [option ...]\n", programName);
+   }
+
+   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
+      OptionEntry *option = &optionTable[optionIndex];
+      unsigned int lineLength = 0;
+
+      line[lineLength++] = '-';
+      line[lineLength++] = option->letter;
+      line[lineLength++] = ' ';
+
+      {
+	 unsigned int end = lineLength + argumentWidth;
+	 if (option->argument) {
+	    size_t argumentLength = strlen(option->argument);
+	    memcpy(line+lineLength, option->argument, argumentLength);
+	    lineLength += argumentLength;
+	 }
+	 while (lineLength < end) line[lineLength++] = ' ';
+      }
+      line[lineLength++] = ' ';
+
+      {
+	 unsigned int end = lineLength + 2 + wordWidth + 1;
+	 if (option->word) {
+	    size_t wordLength = strlen(option->word);
+	    line[lineLength++] = '-';
+	    line[lineLength++] = '-';
+	    memcpy(line+lineLength, option->word, wordLength);
+	    lineLength += wordLength;
+	    if (option->argument) line[lineLength++] = '=';
+	 }
+	 while (lineLength < end) line[lineLength++] = ' ';
+      }
+      line[lineLength++] = ' ';
+
+      {
+	 unsigned int headerWidth = lineLength;
+	 unsigned int descriptionWidth = lineWidth - headerWidth;
+	 char *description = option->description;
+	 unsigned int charsLeft = strlen(description);
+	 while (1) {
+	    unsigned int charCount = charsLeft;
+	    if (charCount > descriptionWidth) {
+	       charCount = descriptionWidth;
+	       while (description[charCount] != ' ') --charCount;
+	       while (description[charCount] == ' ') --charCount;
+	       ++charCount;
+	    }
+	    memcpy(line+lineLength, description, charCount);
+	    lineLength += charCount;
+
+	    line[lineLength] = 0;
+	    fprintf(outputStream, "%s\n", line);
+
+	    while (description[charCount] == ' ') ++charCount;
+	    if (!(charsLeft -= charCount)) break;
+	    description += charCount;
+
+	    lineLength = 0;
+	    while (lineLength < headerWidth) line[lineLength++] = ' ';
+	 }
+      }
+   }
+}
+
 static void
 extendParameters (char **parameters, char *operand) {
    if (*parameters) {
@@ -166,9 +422,9 @@ parseParameters (char ***values, char **names, char *parameters, char *descripti
 	 if (*name) {
 	    char *value = strchr(name, '=');
 	    if (!value) {
-	       LogPrint(LOG_WARNING, "Missing %s parameter value: %s", description, name);
+	       LogPrint(LOG_ERR, "Missing %s parameter value: %s", description, name);
 	    } else if (value == name) {
-	       LogPrint(LOG_WARNING, "Missing %s parameter name: %s", description, name);
+	       LogPrint(LOG_ERR, "Missing %s parameter name: %s", description, name);
 	    } else {
 	       unsigned int length = value - name;
 	       unsigned int index = 0;
@@ -184,7 +440,7 @@ parseParameters (char ***values, char **names, char *parameters, char *descripti
 		  ++index;
 	       }
 	       if (!names[index]) {
-		  LogPrint(LOG_WARNING, "Unsupported %s parameter: %s", description, name);
+		  LogPrint(LOG_ERR, "Unsupported %s parameter: %s", description, name);
 	       }
 	    }
 	 }
@@ -216,38 +472,42 @@ logParameters (char **names, char **values, char *description) {
    }
 }
 
-static void processOptions (int argc, char **argv)
+static void
+processOptions (int argc, char **argv)
 {
   int option;
 
-  const char *short_options = "+a:b:d:ef:hl:np:qs:t:vB:C:M:R:S:";
+  char short_options[1 + (optionCount * 2) + 1];
   #ifdef no_argument
-    const struct option long_options[] =
-      {
-        {"attributes-table"  , required_argument, NULL, 'a'},
-        {"braille-driver"    , required_argument, NULL, 'b'},
-        {"braille-device"    , required_argument, NULL, 'd'},
-        {"errors"            , no_argument      , NULL, 'e'},
-        {"configuration-file", required_argument, NULL, 'f'},
-        {"help"              , no_argument      , NULL, 'h'},
-        {"log-level"         , required_argument, NULL, 'l'},
-        {"no-daemon"         , no_argument      , NULL, 'n'},
-        {"preferences-file"  , required_argument, NULL, 'p'},
-        {"quiet"             , no_argument      , NULL, 'q'},
-        {"speech-driver"     , required_argument, NULL, 's'},
-        {"text-table"        , required_argument, NULL, 't'},
-        {"version"           , no_argument      , NULL, 'v'},
-        {"braille-parameters", required_argument, NULL, 'B'},
-        {"cycle-delay"       , required_argument, NULL, 'C'},
-        {"message-delay"     , required_argument, NULL, 'M'},
-        {"read-delay"        , required_argument, NULL, 'R'},
-        {"speech-parameters" , required_argument, NULL, 'S'},
-        {NULL                , 0                , NULL, ' '}
-      };
+    struct option long_options[optionCount + 1];
+    {
+      struct option *opt = long_options;
+      int index;
+      for (index=0; index<optionCount; ++index) {
+	OptionEntry *option = &optionTable[index];
+        opt->name = option->word;
+        opt->has_arg = option->argument? required_argument: no_argument;
+        opt->flag = NULL;
+        opt->val = option->letter;
+	++opt;
+      }
+      memset(opt, 0, sizeof(*opt));
+    }
     #define get_option() getopt_long(argc, argv, short_options, long_options, NULL)
   #else
     #define get_option() getopt(argc, argv, short_options)
   #endif
+  {
+    char *opt = short_options;
+    int index;
+    *opt++ = '+';
+    for (index=0; index<optionCount; ++index) {
+      OptionEntry *option = &optionTable[index];
+      *opt++ = option->letter;
+      if (option->argument) *opt++ = ':';
+    }
+    *opt = 0;
+  }
 
   /* Parse command line using getopt(): */
   opterr = 0;
@@ -256,10 +516,10 @@ static void processOptions (int argc, char **argv)
        and won't even see the error message unless the display come up. */
     switch (option) {
       default:
-	LogPrint(LOG_WARNING, "Unimplemented invocation option: -%c", option);
+	LogPrint(LOG_ERR, "Unimplemented invocation option: -%c", option);
 	break;
       case '?': // An invalid option has been specified.
-	LogPrint(LOG_WARNING, "Unknown invocation option: -%c", optopt);
+	LogPrint(LOG_ERR, "Unknown invocation option: -%c", optopt);
 	return; /* not fatal */
       case 'a':		/* text translation table file name */
 	opt_attributesTable = optarg;
@@ -310,7 +570,7 @@ static void processOptions (int argc, char **argv)
 	    }
 	  }
 	}
-	LogPrint(LOG_WARNING, "Invalid log priority: %s", optarg);
+	LogPrint(LOG_ERR, "Invalid log priority: %s", optarg);
 	break;
       }
       case 'n':		/* don't go into the background */
@@ -364,167 +624,10 @@ static void processOptions (int argc, char **argv)
 
   if (opt_help)
     {
-      printf(USAGE, argv[0]);
+      printHelp(stdout, 79, argv[0]);
       exit(0);
     }
 }
-
-static int getToken (char **val, const char *delims)
-{
-  char *v = strtok(NULL, delims);
-
-  if (!v) return CFG_NoValue;
-  if (strtok(NULL, delims)) return CFG_TooMany;
-  if (*val) return CFG_Duplicate;
-
-  *val = strdupWrapper(v);
-  return CFG_OK;
-}
-
-static int setPreferencesFile (const char *delims)
-{
-  return getToken(&cfg_preferencesFile, delims);
-}
-
-static int setTextTable (const char *delims)
-{
-  return getToken(&cfg_textTable, delims);
-}
-
-static int setAttributesTable (const char *delims)
-{
-  return getToken(&cfg_attributesTable, delims);
-}
-
-static int setBrailleDevice (const char *delims)
-{
-  return getToken(&cfg_brailleDevice, delims);
-}
-
-static int setBrailleDriver (const char *delims)
-{
-  return getToken(&cfg_brailleDriver, delims);
-}
-
-static int setBrailleParameters (const char *delims)
-{
-  return getToken(&cfg_brailleParameters, delims);
-}
-
-static int setSpeechDriver (const char *delims)
-{
-  return getToken(&cfg_speechDriver, delims);
-}
-
-static int setSpeechParameters (const char *delims)
-{
-  return getToken(&cfg_speechParameters, delims);
-}
-
-static void processConfigurationLine (char *line, void *data)
-{
-  const char *word_delims = " \t"; // Characters which separate words.
-  char *keyword; // Points to first word of each line.
-
-  // Relate each keyword to its handler via a table.
-  typedef struct
-    {
-      const char *name;
-      int (*handler) (const char *delims); 
-    } keyword_entry;
-  const keyword_entry keyword_table[] =
-    {
-      {"preferences-file",      setPreferencesFile},
-      {"text-table",            setTextTable},
-      {"attributes-table",      setAttributesTable},
-      {"braille-device",        setBrailleDevice},
-      {"braille-driver",        setBrailleDriver},
-      {"braille-parameters",    setBrailleParameters},
-      {"speech-driver",         setSpeechDriver},
-      {"speech-parameters",     setSpeechParameters},
-      {NULL,                    NULL}
-    };
-
-  // Remove comment from end of line.
-  {
-    char *comment = strchr(line, '#');
-    if (comment != NULL)
-      *comment = '\0';
-  }
-
-  keyword = strtok(line, word_delims);
-  if (keyword != NULL) // Ignore blank lines.
-    {
-      const keyword_entry *kw = keyword_table;
-      while (kw->name != NULL)
-        {
-	  if (strcasecmp(keyword, kw->name) == 0)
-	    {
-	      int code = kw->handler(word_delims);
-	      switch (code)
-	        {
-		  case CFG_OK:
-		    break;
-
-		  case CFG_NoValue:
-		    LogPrint(LOG_WARNING,
-		             "Operand not supplied for configuration item '%s'.",
-			     keyword);
-		    break;
-
-		  case CFG_BadValue:
-		    LogPrint(LOG_WARNING,
-		             "Invalid operand specified"
-			     " for configuration item '%s'.",
-			      keyword);
-		    break;
-
-		  case CFG_TooMany:
-		    LogPrint(LOG_WARNING,
-		             "Too many operands supplied"
-			     " for configuration item '%s'.",
-			     keyword);
-		    break;
-
-		  case CFG_Duplicate:
-		    LogPrint(LOG_WARNING,
-		             "Configuration item '%s' specified more than once.",
-			     keyword);
-		    break;
-
-		  default:
-		    LogPrint(LOG_WARNING,
-		             "Internal error: unsupported"
-			     " configuration file error code: %d",
-			     code);
-		    break;
-		}
-	      return;
-	    }
-	  ++kw;
-	}
-      LogPrint(LOG_WARNING, "Unknown configuration item: '%s'.", keyword);
-    }
-}
-
-static int processConfigurationFile (char *path, int optional)
-{
-   FILE *file = fopen(path, "r");
-   if (file != NULL)
-     { // The configuration file has been successfully opened.
-       processLines(file, processConfigurationLine, NULL);
-       fclose(file);
-     }
-   else
-     {
-       LogPrint((optional && (errno == ENOENT)? LOG_DEBUG: LOG_WARNING),
-                "Cannot open configuration file: %s: %s",
-                path, strerror(errno));
-       return 0;
-     }
-   return 1;
-}
-
 
 /* 
  * Default definition for settings that are saveable.
@@ -559,9 +662,6 @@ struct brltty_param initparam = {
 	INIT_CSRTRK, INIT_CSRHIDE, TBL_TEXT, 0, 0, 0, 0, 0, 0
 };
 
-#define MIN(a, b)  (((a) < (b))? (a): (b)) 
-#define MAX(a, b)  (((a) > (b))? (a): (b)) 
-	
 static void
 changedWindowAttributes (void)
 {
@@ -630,12 +730,12 @@ loadTranslationTable (char *table, char **path, char *name)
       if (read(fd, buffer, sizeof(buffer)) == sizeof(buffer)) {
 	memcpy(table, buffer, sizeof(buffer));
       } else {
-	LogPrint(LOG_WARNING, "Cannot read %s translation table: %s", name, *path);
+	LogPrint(LOG_ERR, "Cannot read %s translation table: %s", name, *path);
 	*path = NULL;
       }
       close(fd);
     } else {
-      LogPrint(LOG_WARNING, "Cannot open %s translation table: %s", name, *path);
+      LogPrint(LOG_ERR, "Cannot open %s translation table: %s", name, *path);
       *path = NULL;
     }
   }
@@ -653,13 +753,13 @@ loadPreferences (void)
 	env = newenv;
 	ok = 1;
       } else
-	LogPrint(LOG_WARNING, "Invalid preferences file: %s", opt_preferencesFile);
+	LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
     } else
-      LogPrint(LOG_WARNING, "Cannot read preferences file: %s: %s",
+      LogPrint(LOG_ERR, "Cannot read preferences file: %s: %s",
 	       opt_preferencesFile, strerror(errno));
     close(fd);
   } else
-    LogPrint((errno==ENOENT? LOG_DEBUG: LOG_WARNING),
+    LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
              "Cannot open preferences file: %s: %s",
              opt_preferencesFile, strerror(errno));
   setTuneDevice (env.tunedev);
@@ -676,12 +776,12 @@ savePreferences (void)
     if (write(fd, &env, sizeof(env)) == sizeof(env)) {
       ok = 1;
     } else {
-      LogPrint(LOG_WARNING, "Cannot write to preferences file: %s: %s",
+      LogPrint(LOG_ERR, "Cannot write to preferences file: %s: %s",
 	       opt_preferencesFile, strerror(errno));
     }
     close(fd);
   } else {
-    LogPrint(LOG_WARNING, "Cannot open preferences file: %s: %s",
+    LogPrint(LOG_ERR, "Cannot open preferences file: %s: %s",
              opt_preferencesFile, strerror(errno));
   }
   if (!ok)
@@ -906,7 +1006,7 @@ updatePreferences (void)
 	      "Press UP and DOWN to select an item, "
 	      "HOME to toggle the setting. "
 	      "Routing keys are available too! "
-	      "Press PREFS again to quit.", MSG_WAITKEY |MSG_NODELAY);
+	      "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
 	  break;
 	case CMD_PREFLOAD: {
 	  int index;
@@ -1033,7 +1133,7 @@ void startup(int argc, char *argv[])
   if (chdir (HOME_DIR))		/* * change to directory containing data files  */
     {
       char *backup_dir = "/etc";
-      LogPrint(LOG_WARNING, "Cannot change directory to '%s': %s",
+      LogPrint(LOG_ERR, "Cannot change directory to '%s': %s",
                HOME_DIR, strerror(errno));
       LogPrint(LOG_WARNING, "Using backup directory '%s' instead.",
                backup_dir);
@@ -1164,7 +1264,7 @@ void startup(int argc, char *argv[])
 
   /* Initialise help screen */
   if (inithlpscr (braille->help_file))
-    LogPrint(LOG_WARNING, "Cannot open help screen file '%s'.", braille->help_file);
+    LogPrint(LOG_ERR, "Cannot open help screen file '%s'.", braille->help_file);
 
   if (!opt_quiet)
     message(VERSION, 0);	/* display initialisation message */
@@ -1175,5 +1275,3 @@ void startup(int argc, char *argv[])
     message(buffer, MSG_WAITKEY);
   }
 }
-
-

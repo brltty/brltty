@@ -487,7 +487,7 @@ handle_command(int cmd, int ispressed)
   if (ispressed)
     return cmd;
   else
-    return CMD_NOOP;
+    return EOF;
 }
 
 /* one key is pressed or released */

@@ -50,10 +50,10 @@ extern "C" {
 
 extern void setCloseOnExec (int fileDescriptor);
 
-unsigned elapsed_msec (struct timeval *t1, struct timeval *t2);
-void shortdelay (unsigned msec);
-void delay (int msec);		/* sleep for `msec' milliseconds */
-int timeout_yet (int msec);	/* test timeout condition */
+extern void delay (int msec);		/* sleep for `msec' milliseconds */
+extern void shortdelay (unsigned msec);
+extern unsigned long elapsed_msec (struct timeval *t1, struct timeval *t2);
+extern int timeout_yet (int msec);	/* test timeout condition */
 
 /* should syslog be used? may not be portable... */
 #define USE_SYSLOG 1

@@ -26,24 +26,50 @@
 #include "tones.h"
 
 static int fileDescriptor = -1;
+static int blockSize;
+static int bytesWritten;
 static int sampleRate;
 static int channelCount;
 
 #define QUERY_SOUND(v, f, d) (v = ((ioctl(fileDescriptor, f, &setting) != -1)? setting: (d)))
 static int openSoundCard (void) {
    if (fileDescriptor == -1) {
-      if ((fileDescriptor = open("/dev/dsp", O_WRONLY)) == -1) {
+      if ((fileDescriptor = open("/dev/dsp", O_WRONLY|O_NONBLOCK)) == -1) {
          return 0;
       }
       setCloseOnExec(fileDescriptor);
       {
-	 int setting = 0X7FFF0008;
+	 int fragmentCount = (1 << 0X10) - 1;
+	 int fragmentShift = 7;
+	 int fragmentSize = 1 << fragmentShift;
+	 int setting = (fragmentCount << 0X10) | fragmentShift;
 	 ioctl(fileDescriptor, SNDCTL_DSP_SETFRAGMENT, &setting);
+	 QUERY_SOUND(blockSize, SNDCTL_DSP_GETBLKSIZE, fragmentSize);
+	 bytesWritten = 0;
 	 QUERY_SOUND(sampleRate, SOUND_PCM_READ_RATE, 8000);
 	 QUERY_SOUND(channelCount, SOUND_PCM_READ_CHANNELS, 1);
       }
-      LogPrint(LOG_DEBUG, "Sound card opened: fd=%d rate=%d chan=%d",
-               fileDescriptor, sampleRate, channelCount);
+      LogPrint(LOG_DEBUG, "Sound card opened: fd=%d blk=%d rate=%d chan=%d",
+               fileDescriptor, blockSize, sampleRate, channelCount);
+   }
+   return 1;
+}
+
+static int writeSample (unsigned char sample) {
+   int channelNumber;
+   for (channelNumber=0; channelNumber<channelCount; ++channelNumber) {
+      while (1) {
+	 int count = write(fileDescriptor, &sample, 1);
+	 if (count == -1) {
+	    if (errno != EAGAIN) {
+	       return 0;
+	    }
+	    count = 0;
+	 }
+	 bytesWritten += count;
+	 if (count) break;
+	 delay(10);
+      }
    }
    return 1;
 }
@@ -51,20 +77,24 @@ static int openSoundCard (void) {
 static int generateSoundCard (int frequency, int duration) {
    if (fileDescriptor != -1) {
       double waveLength = frequency? (double)sampleRate / (double)frequency: HUGE_VAL;
-      unsigned int sampleCount = sampleRate * duration / 1000;
+      unsigned long int sampleCount = sampleRate * duration / 1000;
       int sampleNumber;
+      LogPrint(LOG_DEBUG, "Tone: ms=%d hz=%d wl=%.2E sc=%lu",
+               duration, frequency, waveLength, sampleCount);
       for (sampleNumber=0; sampleNumber<sampleCount; ++sampleNumber) {
-         unsigned char amplitude = rint(sin(((double)sampleNumber / waveLength) * (2.0 * M_PI)) * 127.0) + 128;
-	 int channelNumber;
-	 for (channelNumber=0; channelNumber<channelCount; ++channelNumber) {
-	    if (write(fileDescriptor, &amplitude, 1) == -1) {
-	       return 0;
-	    }
-	 }
+         unsigned char sample = rint(sin(((double)sampleNumber / waveLength) * (2.0 * M_PI)) * 127.0) + 128;
+	 if (!writeSample(sample)) return 0;
       }
       return 1;
    }
    return 0;
+}
+
+static int flushSoundCard (void) {
+   while (bytesWritten % blockSize) {
+      if (!writeSample(0X80)) return 0;
+   }
+   return 1;
 }
 
 static void closeSoundCard (void) {
@@ -78,6 +108,7 @@ static void closeSoundCard (void) {
 static ToneGenerator toneGenerator = {
    openSoundCard,
    generateSoundCard,
+   flushSoundCard,
    closeSoundCard
 };
 

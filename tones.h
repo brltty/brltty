@@ -18,6 +18,7 @@
 typedef struct {
    int (*open) (void);
    int (*generate) (int frequency, int duration);
+   int (*flush) (void);
    void (*close) (void);
 } ToneGenerator;
 
