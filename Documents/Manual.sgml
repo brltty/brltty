@@ -4028,6 +4028,7 @@ e.g. over a slow serial link to a remote host.
 <sect1>Supported Braille Displays<label id="displays"><p>
 BRLTTY supports the following braille displays:
 <descrip>
+  <tag/Albatross/ 40/80
   <tag/Alva/ ABT(3nn), Delphi(4nn), Satellite(5nn)
   <tag/BrailleLite/ 18/40/M40
   <tag/BrailleNote/ 18/32
@@ -4067,6 +4068,7 @@ BRLTTY supports the following speech synthesizers:
 <sect1>Driver Identification Codes<label id="drivers"><p>
 <descrip>
   <tag/al/Alva
+  <tag/at/Albatross
   <tag/bl/BrailleLite
   <tag/bn/BrailleNote
   <tag/cb/CombiBraille
