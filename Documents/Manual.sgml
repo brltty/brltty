@@ -389,7 +389,7 @@ for any additional display-specific instructions.
     or the proper name (full or abbreviated) of the driver
     may be used.
     If this option is specified, then the named driver
-    is statically linked into the BRLTTY binary.
+    is linked into the BRLTTY binary.
     See the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive
     and the <ref id="options-braille-driver" name="-b"> command line option
     for run-time selection.
@@ -439,7 +439,7 @@ for any additional display-specific instructions.
     or the proper name (full or abbreviated) of the driver
     may be used.
     If this option is specified, then the named driver
-    is statically linked into the BRLTTY binary.
+    is linked into the BRLTTY binary.
     See the <ref id="configure-speech-driver" name="speech-driver"> configuration file directive
     and the <ref id="options-speech-driver" name="-s"> command line option
     for run-time selection.
@@ -1813,9 +1813,8 @@ The following directives are recognized:
     <ref id="options-attributes-table" name="-a"> command line option.
   <tag><tt/braille-driver/ <em/driver/<label id="configure-braille-driver"></tag>
     Specify the braille display driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
+    The two-letter <ref id="drivers" name="driver identification code">
+    must be supplied.
     See the <ref id="build-braille-driver" name="--with-braille-driver">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -1867,9 +1866,8 @@ The following directives are recognized:
     <ref id="options-screen-parameters" name="-X"> command line option.
   <tag><tt/speech-driver/ <em/driver/<label id="configure-speech-driver"></tag>
     Specify the speech synthesizer driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
+    The two-letter <ref id="drivers" name="driver identification code">
+    must be supplied.
     See the <ref id="build-speech-driver" name="--with-speech-driver">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -1912,9 +1910,8 @@ The <tt/brltty/ command accepts the following options:
     <ref id="preference-attributes-table" name="Attributes Table"> preference.
   <tag><tt/-b/<em/driver/ <tt/--braille-driver=/<em/driver/<label id="options-braille-driver"></tag>
     Specify the braille display driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
+    The two-letter <ref id="drivers" name="driver identification code">
+    must be supplied.
     See the <ref id="configure-braille-driver" name="braille-driver">
     configuration file directive for the default run-time setting.
   <tag><tt/-c/<em/file/ <tt/--contraction-table=/<em/file/<label id="options-contraction-table"></tag>
@@ -1981,9 +1978,8 @@ The <tt/brltty/ command accepts the following options:
     to <tt/notice/.
   <tag><tt/-s/<em/driver/ <tt/--speech-driver=/<em/driver/<label id="options-speech-driver"></tag>
     Specify the speech synthesizer driver.
-    Either a two-letter <ref id="drivers" name="driver identification code">
-    or the full path to a dynamically loadable shared object
-    may be supplied.
+    The two-letter <ref id="drivers" name="driver identification code">
+    must be supplied.
     See the <ref id="configure-speech-driver" name="speech-driver">
     configuration file directive for the default run-time setting.
   <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/<label id="options-text-table"></tag>

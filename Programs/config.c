@@ -243,7 +243,7 @@ BEGIN_OPTION_TABLE
   {'a', "attributes-table", "file", configureAttributesTable, 0,
    "Path to attributes translation table file."},
   {'b', "braille-driver", "driver", configureBrailleDriver, 0,
-   "Braille driver: full library path, or one of {" BRAILLE_DRIVERS "}"},
+   "Braille driver: one of {" BRAILLE_DRIVERS "}"},
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {'c', "contraction-table", "file", configureContractionTable, 0,
    "Path to contraction table file."},
@@ -264,7 +264,7 @@ BEGIN_OPTION_TABLE
    "Suppress start-up messages."},
 #ifdef ENABLE_SPEECH_SUPPORT
   {'s', "speech-driver", "driver", configureSpeechDriver, 0,
-   "Speech driver: full library path, or one of {" SPEECH_DRIVERS "}"},
+   "Speech driver: one of {" SPEECH_DRIVERS "}"},
 #endif /* ENABLE_SPEECH_SUPPORT */
   {'t', "text-table", "file", configureTextTable, 0,
    "Path to text translation table file."},
