@@ -89,26 +89,27 @@ openSoundDevice (void) {
     speechParameters.nChannels = setPcmChannelCount(soundDevice, 1);
     speechParameters.nSampleFreq = setPcmSampleRate(soundDevice, 22050);
     {
-      static const PcmAmplitudeFormat formats[] = {PCM_FMT_S16L, PCM_FMT_U8, PCM_FMT_UNKNOWN};
-      const PcmAmplitudeFormat *format = formats;
-      while (*format != PCM_FMT_UNKNOWN) {
-        if (setPcmAmplitudeFormat(soundDevice, *format) == *format) break;
+      typedef struct {
+        PcmAmplitudeFormat internal;
+        int external;
+      } FormatEntry;
+      static const FormatEntry formatTable[] = {
+        {PCM_FMT_S16L   , 16},
+        {PCM_FMT_U8     ,  8},
+        {PCM_FMT_UNKNOWN,  0}
+      };
+      const FormatEntry *format = formatTable;
+      while (format->internal != PCM_FMT_UNKNOWN) {
+        if (setPcmAmplitudeFormat(soundDevice, format->internal) == format->internal) break;
         ++format;
       }
-
-      switch (*format) {
-        case PCM_FMT_U8:
-          speechParameters.nBits = 8;
-          break;
-        case PCM_FMT_S16L:
-          speechParameters.nBits = 16;
-          break;
-        default:
-          LogPrint(LOG_WARNING, "No supported sound format.");
-          close(soundDevice);
-          soundDevice = -1;
-          return 0;
+      if (format->internal == PCM_FMT_UNKNOWN) {
+        LogPrint(LOG_WARNING, "No supported sound format.");
+        close(soundDevice);
+        soundDevice = -1;
+        return 0;
       }
+      speechParameters.nBits = format->external;
     }
     LogPrint(LOG_DEBUG, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
              speechParameters.nChannels, speechParameters.nSampleFreq, speechParameters.nBits);
