@@ -74,7 +74,7 @@ typedef enum { /*Op codes*/
   CTO_Contraction, /*multiletter word sign that needs letsign*/
 
   CTO_SuffixableWord, /*whole word or beginning of word*/
-  CTO_PrefixableWord, /*whole word or beginning of word*/
+  CTO_PrefixableWord, /*whole word or end of word*/
   CTO_BegWord, /*beginning of word only*/
   CTO_BegMidWord, /*beginning or middle of word*/
   CTO_MidWord, /*middle of word only*/
