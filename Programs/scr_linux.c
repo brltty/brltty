@@ -1220,6 +1220,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X5A] = KEY_ENTER,
 
   [0X12] = KEY_LEFTSHIFT,
+  [0X61] = KEY_102ND,
   [0X1A] = KEY_Z,
   [0X22] = KEY_X,
   [0X21] = KEY_C,

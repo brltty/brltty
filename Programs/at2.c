@@ -95,6 +95,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X5D] = {VAL_PASSCHAR+'\\', VAL_PASSCHAR+'|'},
 
   [0X58] = {AT2_CAPS_LOCK},
+  [0X61] = {VAL_PASSCHAR+'<', VAL_PASSCHAR+'>'},
   [0X1C] = {VAL_PASSCHAR+'a', VAL_PASSCHAR+'A'},
   [0X1B] = {VAL_PASSCHAR+'s', VAL_PASSCHAR+'S'},
   [0X23] = {VAL_PASSCHAR+'d', VAL_PASSCHAR+'D'},
