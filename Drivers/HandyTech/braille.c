@@ -315,7 +315,6 @@ static const InputOutputOperations usbOperations = {
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
 #include <bluetooth/rfcomm.h>
 
 static int bluezSocket = -1;
