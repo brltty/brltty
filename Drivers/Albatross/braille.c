@@ -44,19 +44,14 @@ static struct termios oldSettings;
 static struct termios newSettings;
 
 static TranslationTable outputTable;
-static unsigned char cellContent[80];
+static unsigned char displayContent[80];
+static int displaySize;
+static int windowWidth;
+static int windowStart;
+static int statusCount;
+static int statusStart;
 static int lowerRoutingFunction;
 static int upperRoutingFunction;
-
-typedef struct {
-  unsigned char identifier;
-  unsigned char columns;
-} ModelEntry;
-static ModelEntry modelTable[] = {
-  {0X05, 46}
-};
-static unsigned int modelCount = sizeof(modelTable) / sizeof(modelTable[0]);
-static const ModelEntry *model;
 
 static int
 readByte (unsigned char *byte) {
@@ -83,34 +78,19 @@ writeBytes (unsigned char *bytes, int count) {
 
 static int
 acknowledgeDisplay (void) {
-  model = NULL;
+  unsigned char description;
+  if (!awaitByte(&description)) return 0;
+  if (description == 0XFF) return 0;
 
   {
-    unsigned char identifier;
-    if (!awaitByte(&identifier)) return 0;
-    if (identifier == 0XFF) return 0;
+    unsigned char byte;
 
-    {
-      unsigned char byte;
+    if (!awaitByte(&byte)) return 0;
+    if (byte != 0XFF) return 0;
 
-      if (!awaitByte(&byte)) return 0;
-      if (byte != 0XFF) return 0;
-
-      if (!awaitByte(&byte)) return 0;
-      if (byte != identifier) return 0;
-    }
-
-    model = modelTable + modelCount;
-    while ((--model)->identifier != identifier) {
-      if (model == modelTable) {
-        LogPrint(LOG_WARNING, "Detected unknown Albatross model: %02X", identifier);
-        model = NULL;
-        return 0;
-      }
-    }
+    if (!awaitByte(&byte)) return 0;
+    if (byte != description) return 0;
   }
-  lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
-  upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
   {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
@@ -121,7 +101,26 @@ acknowledgeDisplay (void) {
     tcflush(fileDescriptor, TCIFLUSH);
   }
 
-  LogPrint(LOG_INFO, "Albatross has %d columns.", model->columns);
+  windowStart = statusStart = 0;
+  displaySize = (description & 0X80)? 80: 46;
+  if ((statusCount = description & 0X0F)) {
+    windowWidth = displaySize - statusCount - 1;
+    if (description & 0X20) {
+      statusStart = windowWidth + 1;
+      displayContent[statusStart - 1] = 0;
+    } else {
+      windowStart = statusCount + 1;
+      displayContent[windowStart - 1] = 0;
+    }
+  } else {
+    windowWidth = displaySize;
+  }
+
+  lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
+  upperRoutingFunction = UPPER_ROUTING_DEFAULT;
+
+  LogPrint(LOG_INFO, "Albatross has %d columns.",
+           windowWidth);
   return 1;
 }
 
@@ -129,31 +128,46 @@ static int
 clearDisplay (void) {
   unsigned char bytes[] = {0XFA};
   int cleared = writeBytes(bytes, sizeof(bytes));
-  if (cleared) memset(cellContent, 0, model->columns);
+  if (cleared) memset(displayContent, 0, displaySize);
   return cleared;
 }
 
 static int
-updateDisplay (unsigned char *cells) {
-  unsigned char bytes[model->columns * 2 + 2];
+updateDisplay (const unsigned char *cells, int count, int start) {
+  unsigned char bytes[count * 2 + 2];
   unsigned char *byte = bytes;
-  int column;
+  int index;
   *byte++ = 0XFB;
-  for (column=0; column<model->columns; ++column) {
+  for (index=0; index<count; ++index) {
     unsigned char cell;
     if (!cells) {
-      cell = cellContent[column];
-    } else if ((cell = outputTable[cells[column]]) != cellContent[column]) {
-      cellContent[column] = cell;
+      cell = displayContent[start+index];
+    } else if ((cell = outputTable[cells[index]]) != displayContent[start+index]) {
+      displayContent[start+index] = cell;
     } else {
       continue;
     }
-    *byte++ = column + 1;
+    *byte++ = start + index + 1;
     *byte++ = cell;
   }
   if ((byte - bytes) == 1) return 1;
   *byte++ = 0XFC;
   return writeBytes(bytes, byte-bytes);
+}
+
+static int
+updateWindow (const unsigned char *cells) {
+  return updateDisplay(cells, windowWidth, windowStart);
+}
+
+static int
+updateStatus (const unsigned char *cells) {
+  return updateDisplay(cells, statusCount, statusStart);
+}
+
+static int
+refreshDisplay (void) {
+  return updateDisplay(NULL, displaySize, 0);
 }
 
 static void
@@ -192,7 +206,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay()) break;
           clearDisplay();
-          brl->x = model->columns;
+          brl->x = windowWidth;
           brl->y = 1;
           return 1;
         }
@@ -213,7 +227,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_close (BrailleDisplay *brl) {
-  model = NULL;
   tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
   close(fileDescriptor);
   fileDescriptor = -1;
@@ -221,15 +234,12 @@ brl_close (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
-  if (model) {
-    updateDisplay(brl->buffer);
-  }
+  updateWindow(brl->buffer);
 }
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  if (model) {
-  }
+  updateStatus(status);
 }
 
 static int
@@ -239,12 +249,13 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   while (readByte(&byte)) {
     if (byte == 0XFF) {
       if (acknowledgeDisplay())  {
-        updateDisplay(NULL);
+        refreshDisplay();
+        brl->x = windowWidth;
+        brl->y = 1;
         brl->resizeRequired = 1;
       }
       continue;
     }
-    if (!model) continue;
 
     {
       int base;
@@ -264,13 +275,15 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       } else if ((byte >= 43) && (byte <= 82)) {
         base = upper;
         offset = byte - 43;
-      } else if ((byte >= 152) && (byte <= 157)) {
+      } else if ((byte >= 152) && (byte <= 191)) {
         base = upper;
         offset = byte - 112;
       } else {
         goto notRouting;
       }
-      if ((offset >= 0) && (offset < model->columns)) return base + offset;
+      if ((offset >= windowStart) &&
+          (offset < (windowStart + windowWidth)))
+        return base + offset - windowStart;
     }
   notRouting:
 
@@ -279,7 +292,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         break;
 
       case 0XFB:
-        updateDisplay(NULL);
+        refreshDisplay();
         continue;
 
       case  83: /* key: top left first lower */
