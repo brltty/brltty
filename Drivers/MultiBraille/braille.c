@@ -103,8 +103,8 @@ static void brl_identify (void) {
 
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 	short n, success;		/* loop counters, flags, etc. */
-	unsigned char *init_seq = "\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
-	unsigned char *init_ack = "\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
+	unsigned char *init_seq = (unsigned char *)"\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
+	unsigned char *init_ack = (unsigned char *)"\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
 	unsigned char c;
 
 	{
@@ -187,9 +187,9 @@ failure:
 
 
 static void brl_close (BrailleDisplay *brl) {
-	unsigned char *pre_data = "\002\033Z";	/* string to send to */
-	unsigned char *post_data = "\001\015";
-	unsigned char *close_seq = "";
+	unsigned char *pre_data = (unsigned char *)"\002\033Z";	/* string to send to */
+	unsigned char *post_data = (unsigned char *)"\001\015";
+	unsigned char *close_seq = (unsigned char *)"";
 
 	rawlen = 0;
 	if (pre_data[0]) {
@@ -229,8 +229,8 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
 static void brl_writeWindow (BrailleDisplay *brl) {
 	short i;			/* loop counter */
-	unsigned char *pre_data = "\002\033Z";	/* bytewise accessible copies */
-	unsigned char *post_data = "\001\015";
+	unsigned char *pre_data = (unsigned char *)"\002\033Z";	/* bytewise accessible copies */
+	unsigned char *post_data = (unsigned char *)"\001\015";
 
 	/* Only refresh display if the data has changed: */
 	if (memcmp (brl->buffer, prevdata, brl->x * brl->y) || memcmp (status, oldstatus, 5)) {

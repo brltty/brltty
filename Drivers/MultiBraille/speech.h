@@ -37,7 +37,7 @@
  */
 
 #define MAX_TRANS 126
-static unsigned char *vocab[MAX_TRANS - 32] =
+static const char *vocab[MAX_TRANS - 32] =
 {
   " exclamation ",
   " double quote ",

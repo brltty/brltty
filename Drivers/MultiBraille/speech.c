@@ -76,8 +76,8 @@ spk_open (char **parameters)
 static void
 spk_say (const unsigned char *buffer, int len)
 {
-  unsigned char *pre_speech = PRE_SPEECH;
-  unsigned char *post_speech = POST_SPEECH;
+  unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
+  unsigned char *post_speech = (unsigned char *)POST_SPEECH;
   unsigned char c;
   int i;
 
@@ -98,7 +98,7 @@ spk_say (const unsigned char *buffer, int len)
 	serialWriteData (MB_serialDevice, &c, 1);
       else
 	{
-          char *word = vocab[c - 33];
+          const char *word = vocab[c - 33];
 	  serialWriteData (MB_serialDevice, word, strlen (word));
 	}
     }
@@ -112,7 +112,7 @@ spk_say (const unsigned char *buffer, int len)
 static void
 spk_mute (void)
 {
-  unsigned char *mute_seq = MUTE_SEQ;
+  unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
   serialWriteData (MB_serialDevice, mute_seq+1, mute_seq[0]);
 }
 
