@@ -44,10 +44,12 @@ static struct termios oldSettings;
 static struct termios newSettings;
 
 static TranslationTable inputMap;
-static TranslationTable outputTable;
+static const unsigned char topLeftKeys[]  = { 84,  83,  87,  85,  86,  88,  89,  90};
+static const unsigned char topRightKeys[] = {194, 193, 198, 195, 196, 197, 199, 200};
 static int lowerRoutingFunction;
 static int upperRoutingFunction;
 
+static TranslationTable outputTable;
 static unsigned char displayContent[80];
 static int displaySize;
 static int windowWidth;
@@ -102,6 +104,7 @@ acknowledgeDisplay (void) {
     delay(100);
     tcflush(fileDescriptor, TCIFLUSH);
   }
+  LogPrint(LOG_DEBUG, "Albatross description byte: %02X", description);
 
   windowStart = statusStart = 0;
   displaySize = (description & 0X80)? 80: 46;
@@ -122,14 +125,12 @@ acknowledgeDisplay (void) {
     int i;
     for (i=0; i<sizeof(inputMap); ++i) inputMap[i] = i;
 
-    /* top keypad configuration */
+    /* top keypad remapping */
     {
-      static const unsigned char topLeftKeys[]  = { 84,  83,  87,  85,  86,  88,  89,  90};
-      static const unsigned char topRightKeys[] = {194, 193, 198, 195, 196, 197, 199, 200};
       const unsigned char *left = NULL;
       const unsigned char *right = NULL;
 
-      switch (description & 0X5) {
+      switch (description & 0X50) {
         case 0X00: /* left right */
           break;
 
@@ -159,8 +160,11 @@ acknowledgeDisplay (void) {
   lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
   upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
-  LogPrint(LOG_INFO, "Albatross has %d columns.",
-           windowWidth);
+  LogPrint(LOG_INFO, "Albatross: %d cells (%d text, %d%s status), top keypads [%s,%s].",
+           displaySize, windowWidth, statusCount,
+           !statusCount? "": statusStart? " right": " left",
+           (inputMap[topLeftKeys[0]] == topLeftKeys[0])? "left": "right",
+           (inputMap[topRightKeys[0]] == topRightKeys[0])? "right": "left");
   return 1;
 }
 
@@ -302,6 +306,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       continue;
     }
 
+    byte = inputMap[byte];
     {
       int base;
       int offset;
