@@ -318,21 +318,11 @@ brl_identify (void)
 
 static int
 myread(int fd, void *buf, unsigned len)
-/* This is a replacement for read for use in nonblocking mode: when
-   c_cc[VTIME] = 1, c_cc[VMIN] = 0. We want to read len bytes into buf, but
-   return early if the timeout expires. I would have thought setting
-   c_cc[VMIN] to len would have done the trick, but apparently c_cc[VMIN]>0
-   means to wait indefinitly for at least 1byte, which we don't want. */
 {
-  char *ptr = (char *)buf;
-  int r, l = 0;
-  while(l < len){
-    r = read(fd,ptr+l,len-l);
-    if(r == 0) return(l);
-    if(r<0) return(r);
-    l += r;
-  }
-  return(l);
+  int l=0;
+  if(readChunk(fd,buf,&l,len,100,100)) return(len);
+  if(errno==EAGAIN) return(l);
+  return(-1);
 }
 
 
@@ -398,12 +388,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* Construct new settings */
   initializeSerialAttributes(&curtio);
-
-  /* noncanonical: for first operation */
-  curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars on input */
-  curtio.c_cc[VMIN] = 0; /* no minimum input. it would have been nice to set
-			    this to Q_REPLY_LENGTH except it waits
-			    indefinitly for the first char if VTIME != 0... */
 
   /* Try to detect display by sending query */
   LogPrint(LOG_DEBUG,"Sending query at 9600bps");
@@ -962,10 +946,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
    any keys in a certain time. That a 2byte header + 10 more bytes ignored.
  */
 
-  /* reset to nonblocking */
-  curtio.c_cc[VTIME] = 0;
-  curtio.c_cc[VMIN] = 0;
-  tcsetattr (brl_fd, TCSANOW, &curtio);
   /* Check for first byte */
   if (read (brl_fd, buf, 1) < 1){
     if((i = millisecondsBetween(&last_ping, &now) > PING_INTRVL)){
@@ -994,10 +974,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   gettimeofday(&last_ping, &dum_tz);
   pings=0;
 
-  /* further reads will wait a bit to get a complete sequence */
-  curtio.c_cc[VTIME] = 1;
-  curtio.c_cc[VMIN] = 0;
-  tcsetattr (brl_fd, TCSANOW, &curtio);
 #ifdef RECV_DELAY
   shortdelay(SEND_DELAY);
 #endif /* RECV_DELAY */
@@ -1084,24 +1060,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
     if (cnt != sw_bcnt)
       return (EOF);
 
-    /* skip the vertical keys info */
-#if 0
-    curtio.c_cc[VTIME] = 1;
-    curtio.c_cc[VMIN] = SW_NVERT;
-    tcsetattr (brl_fd, TCSANOW, &curtio);
-#endif /* 0 */
     if (myread (brl_fd, buf, SW_NVERT) != SW_NVERT)
       return (EOF);
     cnt -= SW_NVERT;
     /* cnt now gives the number of bytes describing horizontal
        routing keys only */
     
-    /* Finally, the horizontal keys */
-#if 0
-    curtio.c_cc[VTIME] = 1;
-    curtio.c_cc[VMIN] = cnt;
-    tcsetattr (brl_fd, TCSANOW, &curtio);
-#endif /* 0 */
     if (myread (brl_fd, sw_stat, cnt) != cnt)
       return (EOF);
 
