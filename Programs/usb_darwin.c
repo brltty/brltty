@@ -32,13 +32,30 @@
 #include "usb.h"
 #include "usb_internal.h"
 
+typedef struct UsbAsynchronousRequest {
+  struct UsbAsynchronousRequest *next;
+  UsbEndpoint *endpoint;
+  void *context;
+  void *buffer;
+  int length;
+  IOReturn result;
+  int count;
+} UsbAsynchronousRequest;
+
 typedef struct {
   IOUSBDeviceInterface182 **device;
   IOUSBInterfaceInterface190 **interface;
   unsigned opened:1;
+
+  CFRunLoopRef runloopReference;
+  CFStringRef runloopMode;
+  CFRunLoopSourceRef runloopSource;
 } UsbDeviceExtension;
 
 typedef struct {
+  UsbEndpoint *endpoint;
+  UsbAsynchronousRequest *requests;
+
   UInt8 reference;
   UInt8 number;
   UInt8 direction;
@@ -483,6 +500,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
                      eptx->number, eptx->direction, eptx->transfer,
                      eptx->interval, eptx->size);
 
+            eptx->requests = NULL;
+            eptx->endpoint = endpoint;
             endpoint->extension = eptx;
             return 1;
           }
@@ -593,16 +612,91 @@ usbWriteEndpoint (
   return -1;
 }
 
+static void
+usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
+  UsbAsynchronousRequest *request = context;
+  UsbEndpoint *endpoint = request->endpoint;
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  request->result = result;
+  request->count = (int)arg;
+
+  if (eptx->requests) {
+    request->next = eptx->requests->next;
+    eptx->requests->next = request;
+    eptx->requests = request;
+  } else {
+    eptx->requests = request->next = request;
+  }
+}
+
 void *
 usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpointAddress,
   void *buffer,
   int length,
-  void *data
+  void *context
 ) {
-  errno = ENOSYS;
-  LogError("USB request submit");
+  UsbDeviceExtension *devx = device->extension;
+  UsbEndpoint *endpoint;
+
+  if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    IOReturn result;
+    UsbAsynchronousRequest *request;
+
+    if (!devx->runloopSource) {
+      devx->runloopReference = CFRunLoopGetCurrent();
+      devx->runloopMode = kCFRunLoopDefaultMode;
+
+      result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
+                                                             &devx->runloopSource);
+      if (result != kIOReturnSuccess) {
+        setErrnoIo(result, "USB interface event source create");
+        return NULL;
+      }
+      CFRunLoopAddSource(devx->runloopReference,
+                         devx->runloopSource,
+                         devx->runloopMode);
+    }
+
+    if ((request = malloc(sizeof(*request) + length))) {
+      request->next = NULL;
+      request->endpoint = endpoint;
+      request->context = context;
+      request->buffer = (request->length = length)? (request + 1): NULL;
+
+      switch (eptx->direction) {
+        case kUSBIn:
+          result = (*devx->interface)->ReadPipeAsync(devx->interface, eptx->reference,
+                                                     request->buffer, request->length,
+                                                     usbAsynchronousRequestCallback, request);
+          if (result == kIOReturnSuccess) return request;
+          setErrnoIo(result, "USB endpoint asynchronous read");
+          break;
+
+        case kUSBOut:
+          if (request->buffer) memcpy(request->buffer, buffer, length);
+          result = (*devx->interface)->WritePipeAsync(devx->interface, eptx->reference,
+                                                      request->buffer, request->length,
+                                                      usbAsynchronousRequestCallback, request);
+          if (result == kIOReturnSuccess) return request;
+          setErrnoIo(result, "USB endpoint asynchronous write");
+          break;
+
+        default:
+          LogPrint(LOG_ERR, "USB endpoint direction not suppported: %d", eptx->direction);
+          errno = ENOSYS;
+          break;
+      }
+
+      free(request);
+    } else {
+      LogError("USB asynchronous request allocate");
+    }
+  }
+
   return NULL;
 }
 
@@ -612,18 +706,59 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancel");
   return 0;
 }
 
 void *
 usbReapResponse (
   UsbDevice *device,
+  unsigned char endpointAddress,
   UsbResponse *response,
   int wait
 ) {
-  errno = ENOSYS;
-  LogError("USB request reap");
+  UsbDeviceExtension *devx = device->extension;
+  UsbEndpoint *endpoint;
+
+  if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    UsbAsynchronousRequest *request;
+
+    while (!eptx->requests) {
+      switch (CFRunLoopRunInMode(devx->runloopMode, (wait? 60: 0), 1)) {
+        case kCFRunLoopRunTimedOut:
+          if (wait) continue;
+        case kCFRunLoopRunFinished:
+          errno = EAGAIN;
+          goto none;
+
+        case kCFRunLoopRunStopped:
+        case kCFRunLoopRunHandledSource:
+          continue;
+      }
+    }
+
+    if ((request = eptx->requests->next) == eptx->requests) {
+      eptx->requests = NULL;
+    } else {
+      eptx->requests->next = request->next;
+    }
+    request->next = NULL;
+
+    if (request->result == kIOReturnSuccess) {
+      int length = request->count;
+      if (usbApplyInputFilters(device, request->buffer, request->length, &length)) {
+        response->buffer = request->buffer;
+        response->length = length;
+        response->context = request->context;
+        return request;
+      }
+    } else {
+      setErrnoIo(request->result, "USB asynchronous response");
+    }
+    free(request);
+  }
+
+none:
   return NULL;
 }
 
@@ -670,6 +805,11 @@ error:
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
+  if (devx->runloopSource) {
+    CFRunLoopRemoveSource(devx->runloopReference,
+                          devx->runloopSource,
+                          devx->runloopMode);
+  }
   if (devx->opened) {
     closeInterface(device);
     (*devx->device)->USBDeviceClose(devx->device);
@@ -718,6 +858,9 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
               if ((devx = malloc(sizeof(*devx)))) {
                 devx->device = deviceInterface;
                 devx->interface = NULL;
+                devx->runloopReference = NULL;
+                devx->runloopMode = NULL;
+                devx->runloopSource = NULL;
                 devx->opened = 0;
                 device = usbTestDevice(devx, chooser, data);
 
