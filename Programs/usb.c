@@ -202,27 +202,43 @@ usbBeginInput (
 }
 
 int
+usbAwaitInput (
+  UsbDevice *device,
+  int timeout
+) {
+  if (!device->inputRequest) {
+    UsbResponse response;
+    while (!(device->inputRequest = usbReapResponse(device, &response, 0))) {
+      const int interval = 10;
+      if (timeout <= 0) return 0;
+      delay(interval);
+      timeout -= interval;
+    }
+    usbAddInputElement(device);
+
+    {
+      struct UsbInputElement *input = response.context;
+      input->request = NULL;
+      usbDeleteInputElement(device, input);
+    }
+
+    device->inputBuffer = response.buffer;
+    device->inputLength = response.length;
+  }
+  return 1;
+}
+
+int
 usbReapInput (
   UsbDevice *device,
   void *buffer,
   int length,
-  int wait
+  int timeout
 ) {
   unsigned char *bytes = buffer;
   unsigned char *target = bytes;
   while (length > 0) {
-    if (!device->inputRequest) {
-      UsbResponse response;
-      if (!(device->inputRequest = usbReapResponse(device, &response, wait))) return -1;
-      usbAddInputElement(device);
-      {
-        struct UsbInputElement *input = response.context;
-        input->request = NULL;
-        usbDeleteInputElement(device, input);
-      }
-      device->inputBuffer = response.buffer;
-      device->inputLength = response.length;
-    }
+    if (!usbAwaitInput(device, timeout)) return -1;
 
     {
       int count = device->inputLength;
@@ -424,8 +440,8 @@ usbGetSerialOperations (const UsbDevice *device) {
     uint16_t vendor;
     uint16_t product;
     const UsbSerialOperations *operations;
-  } UsbSerialDevice;
-  static const UsbSerialDevice usbSerialDevices[] = {
+  } UsbSerialAdapter;
+  static const UsbSerialAdapter usbSerialAdapters[] = {
     {0X050D, 0X1203, &usbBelkinOperations}, /* Belkin DockStation */
     {0X050D, 0X0103, &usbBelkinOperations}, /* Belkin Serial Adapter */
     {0X056C, 0X8007, &usbBelkinOperations}, /* Belkin Old Single Port Serial Converter */
@@ -434,12 +450,12 @@ usbGetSerialOperations (const UsbDevice *device) {
     {0X0921, 0X1200, &usbBelkinOperations}, /* GoHubs HandyLink */
     {}
   };
-  const UsbSerialDevice *serial = usbSerialDevices;
-  while (serial->vendor) {
-    if (serial->vendor == device->descriptor.idVendor)
-      if (!serial->product || (serial->product == device->descriptor.idProduct))
-        return serial->operations;
-    ++serial;
+  const UsbSerialAdapter *sa = usbSerialAdapters;
+  while (sa->vendor) {
+    if (sa->vendor == device->descriptor.idVendor)
+      if (!sa->product || (sa->product == device->descriptor.idProduct))
+        return sa->operations;
+    ++sa;
   }
   return NULL;
 }

@@ -167,7 +167,7 @@ static const ModelDescription *model;		/* points to terminal model config struct
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) ();
-  int (*awaitData) (int milliseconds);
+  int (*awaitInput) (int milliseconds);
   int (*readPacket) (unsigned char *buffer, int length);
   int (*writePacket) (const unsigned char *buffer, int length, int *delay);
 } InputOutputOperations;
@@ -214,7 +214,7 @@ openSerialPort (char **parameters, const char *device) {
 }
 
 static int
-awaitSerialData (int milliseconds) {
+awaitSerialInput (int milliseconds) {
   return awaitInput(serialDevice, milliseconds);
 }
 
@@ -250,7 +250,7 @@ closeSerialPort (void) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort, awaitSerialData,
+  openSerialPort, closeSerialPort, awaitSerialInput,
   readSerialPacket, writeSerialPacket
 };
 
@@ -315,9 +315,8 @@ openUsbPort (char **parameters, const char *device) {
 }
 
 static int
-awaitUsbData (int milliseconds) {
-  delay(milliseconds);
-  return 1; /* What to do here?  Can we do a select on a USB device? */
+awaitUsbInput (int milliseconds) {
+  return usbAwaitInput(usbDevice, milliseconds);
 }
 
 static int
@@ -346,7 +345,7 @@ closeUsbPort (void) {
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort, awaitUsbData,
+  openUsbPort, closeUsbPort, awaitUsbInput,
   readUsbPacket, writeUsbPacket
 };
 #endif /* ENABLE_USB */
@@ -557,7 +556,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   while (1) {
     /* autodetecting MODEL */
     if (writeDescribe(brl)) {
-      if (io->awaitData(1000)) {
+      if (io->awaitInput(1000)) {
         unsigned char buffer[sizeof(HandyDescription) + 1];
         if (readBytes(brl, buffer, sizeof(buffer))) {
           if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
@@ -1312,7 +1311,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
 
     if (byte == 0X06) {
       if (currentState != BDS_OFF) {
-        if (io->awaitData(10)) {
+        if (io->awaitInput(10)) {
           setState(BDS_OFF);
           continue;
         }

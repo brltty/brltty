@@ -295,11 +295,15 @@ extern int usbBeginInput (
   int size,
   int count
 );
+extern int usbAwaitInput (
+  UsbDevice *device,
+  int timeout
+);
 extern int usbReapInput (
   UsbDevice *device,
   void *buffer,
   int length,
-  int wait
+  int timeout
 );
 
 typedef int (UsbStringVerifier) (const char *reference, const char *value);
