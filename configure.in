@@ -958,6 +958,9 @@ in
    linux*)
       brltty_cv_default_screen_driver="linux"
       ;;
+   gnu*)
+      brltty_cv_default_screen_driver="hurd"
+      ;;
    *)
       brltty_cv_default_screen_driver="shm"
       AC_MSG_WARN([no default screen driver - using ${brltty_cv_default_screen_driver}])
@@ -979,7 +982,7 @@ fi
 screen_driver_objects="scr_${screen_driver}."'$O'
 case "${screen_driver}"
 in
-   linux|shm)
+   linux|hurd|shm)
       screen_driver_objects="${screen_driver_objects} "'scr_real.$O'
       ;;
 esac

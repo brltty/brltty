@@ -671,6 +671,9 @@ for any additional display-specific instructions.
     Specify the screen driver.
     It may be one of the following:
     <descrip>
+      <tag/hurd/
+        This driver provides direct access to the Hurd console screen.
+        It's only selectable, and is the default, on Hurd systems.
       <tag/linux/
         This driver provides direct access to the Linux console screen.
         It's only selectable, and is the default, on Linux systems.
