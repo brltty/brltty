@@ -349,7 +349,9 @@ serialFlushOutput (SerialDevice *serial) {
 int
 serialDrainOutput (SerialDevice *serial) {
   if (!serialFlushOutput(serial)) return 0;
-  if (tcdrain(serial->fileDescriptor) != -1) return 1;
+  do {
+    if (tcdrain(serial->fileDescriptor) != -1) return 1;
+  } while (errno == EINTR);
   LogError("tcdrain");
   return 0;
 }
