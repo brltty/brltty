@@ -853,11 +853,12 @@ int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 /* what = 0 for ignoring !0 for unignoring */
 static int ignore_unignore_key_set(int what, const brl_keycode_t *s, unsigned int n)
 {
-  size_t size = n*sizeof(brl_keycode_t);
-  if (size>BRLAPI_MAXPACKETSIZE) {
+  size_t size;
+  if (n>BRLAPI_MAXKEYSETSIZE) {
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
+  size = n*sizeof(brl_keycode_t);
   return brlapi_writePacketWaitForAck(fd,(what ? BRLPACKET_UNIGNOREKEYSET : BRLPACKET_IGNOREKEYSET),s,size);
 }
 

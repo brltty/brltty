@@ -268,7 +268,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  * - COMMANDS means that applications will get exactly the same values as
  *   \e brltty. This allows driver-independent clients, which will hopefully
  *   be nice to use with a lot of different terminals
- * \sa brlapi_readKey()
+ * \sa brlapi_readKeyl()
  * @{
  */
 
@@ -420,6 +420,11 @@ typedef uint32_t brl_keycode_t;
  *
  * As defined in \c <inttypes.h> */
 #define BRL_KEYCODE_MAX ((brl_keycode_t) (UINT32_MAX))
+
+/** Maximum keyset size, i.e. maximum number of keys */
+ * allowed in a key set
+ */
+#define BRLAPI_MAXKEYSETSIZE (BRLAPI_MAXPACKETSIZE / sizeof(brl_keycode_t))
 
 /* brlapi_readKey */
 /** Read a key from the braille keyboard
