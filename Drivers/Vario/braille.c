@@ -222,7 +222,6 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   return 1;
 
 failure:;
-  LogPrint(LOG_WARNING,"Baum Vario driver giving up");
   brl_close(brl);
   return 0;
 }

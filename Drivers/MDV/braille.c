@@ -415,7 +415,6 @@ detected:
   return 1;
 
 failure:;
-  LogPrint(LOG_WARNING,"MDV driver giving up");
   brl_close(brl);
   return 0;
 }
