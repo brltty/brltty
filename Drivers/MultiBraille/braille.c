@@ -58,7 +58,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <sys/termios.h>
 #include <string.h>
 
@@ -75,7 +74,7 @@
 #define ESC '\033'
 #define CR '\015'
 
-static unsigned char combitrans[256];	/* dot mapping table (output) */
+static TranslationTable outputTable;	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
 static int brlcols;		/* length of braille line (auto-detected) */
 static unsigned char *prevdata;	/* previously received data */
@@ -112,10 +111,11 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 	unsigned char *init_seq = "\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
 	unsigned char *init_ack = "\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
 	unsigned char c;
-	unsigned char standard[8] =
-	{0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
-	unsigned char Tieman[8] =
-	{0, 7, 1, 6, 2, 5, 3, 4};	/* Tieman standard */
+
+	{
+		static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
+		makeOutputTable(&dots, &outputTable);
+	}
 
 	brlcols = -1;		/* length of braille line (auto-detected) */
 	prevdata = rawdata = NULL;		/* clear pointers */
@@ -125,13 +125,10 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 	 */
 
 	/* Now open the Braille display device for random access */
-	brl_fd = open (brldev, O_RDWR | O_NOCTTY);
-	if (brl_fd < 0)
-		goto failure;
-	tcgetattr (brl_fd, &oldtio);	/* save current settings */
+	if (!openSerialDevice(brldev, &brl_fd, &oldtio)) goto failure;
 
-  /* Set bps, flow control and 8n1, enable reading */
-  newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
+	/* Set flow control, enable reading */
+	newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
 
 	/* Ignore bytes with parity errors and make terminal raw and dumb */
 	newtio.c_iflag = IGNPAR;
@@ -139,8 +136,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 	newtio.c_lflag = 0;		/* don't echo or generate signals */
 	newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
 	newtio.c_cc[VTIME] = 0;
-	tcflush (brl_fd, TCIFLUSH);	/* clean line */
-	tcsetattr (brl_fd, TCSANOW, &newtio);		/* activate new settings */
+	resetSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
 
 	/* MultiBraille initialisation procedure:
 	 * [ESC][V][Braillelength][Software Version][CR]
@@ -198,12 +194,6 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 	if (!prevdata || !rawdata)
 		goto failure;
 
-	/* Generate dot mapping table: */
-	memset (combitrans, 0, 256);
-	for (n = 0; n < 256; n++)
-		for (i = 0; i < 8; i++)
-			if (n & 1 << standard[i])
-				combitrans[n] |= 1 << Tieman[i];
 	return 1;
 
 failure:;
@@ -257,7 +247,7 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 	short i;
 
 	/* Dot mapping: */
-	for (i = 0; i < 5; status[i] = combitrans[s[i]], i++);
+	for (i = 0; i < 5; status[i] = outputTable[s[i]], i++);
 }
 
 
@@ -272,7 +262,7 @@ static void brl_writeWindow (BrailleDisplay *brl) {
 		memcpy (prevdata, brl->buffer, brl->x * brl->y);
 
 		/* Dot mapping from standard to MultiBraille: */
-		for (i = 0; i < brl->x * brl->y; brl->buffer[i] = combitrans[brl->buffer[i]], i++);
+		for (i = 0; i < brl->x * brl->y; brl->buffer[i] = outputTable[brl->buffer[i]], i++);
 
     rawlen = 0;
 		if (pre_data[0]) {
