@@ -191,12 +191,12 @@ openDevice (UsbDevice *device, int seize) {
 
     result = (*devx->device)->USBDeviceOpen(devx->device);
     if (result != kIOReturnSuccess) {
-      setErrnoIo(result, "device open");
+      setErrnoIo(result, "USB device open");
       if ((result != kIOReturnExclusiveAccess) || !seize) return 0;
 
       result = (*devx->device)->USBDeviceOpenSeize(devx->device);
       if (result != kIOReturnSuccess) {
-        setErrnoIo(result, "device seize");
+        setErrnoIo(result, "USB device seize");
         return 0;
       }
 
@@ -222,13 +222,13 @@ closeInterface (UsbDevice *device) {
 
     result = (*devx->interface)->USBInterfaceClose(devx->interface);
     if (result != kIOReturnSuccess) {
-      setErrnoIo(result, "interface close");
+      setErrnoIo(result, "USB interface close");
       ok = 0;
     }
 
     result = (*devx->interface)->Release(devx->interface);
     if (result != kIOReturnSuccess) {
-      setErrnoIo(result, "interface release");
+      setErrnoIo(result, "USB interface release");
       ok = 0;
     }
 
@@ -247,7 +247,7 @@ isInterface (IOUSBInterfaceInterface182 **interface, UInt8 number) {
   if (result == kIOReturnSuccess) {
     if (num == number) return 1;
   } else {
-    setErrnoIo(result, "get interface number");
+    setErrnoIo(result, "USB interface number query");
   }
 
   return 0;
@@ -294,21 +294,23 @@ setInterface (UsbDevice *device, UInt8 number) {
             (*interface)->Release(interface);
             interface = NULL;
           }
+        } else {
+          setErrnoIo(result, "USB interface interface create");
         }
 
         (*plugin)->Release(plugin);
       } else {
-        setErrnoIo(result, "service plugin create");
+        setErrnoIo(result, "USB interface service plugin create");
       }
 
       IOObjectRelease(service);
       if (interface) break;
     }
-    if (!interface) LogPrint(LOG_ERR, "USB: interface not found: %d", number);
+    if (!interface) LogPrint(LOG_ERR, "USB interface not found: %d", number);
 
     IOObjectRelease(iterator);
   } else {
-    setErrnoIo(result, "interface iterator create");
+    setErrnoIo(result, "USB interface iterator create");
   }
 
   return interface != NULL;
@@ -351,7 +353,7 @@ usbClaimInterface (
   if (setInterface(device, interface)) {
     IOReturn result = (*devx->interface)->USBInterfaceOpen(devx->interface);
     if (result == kIOReturnSuccess) return 1;
-    setErrnoIo(result, "interface open");
+    setErrnoIo(result, "USB interface open");
   }
 
   return 0;
@@ -376,7 +378,7 @@ usbSetAlternative (
   if (setInterface(device, interface)) {
     IOReturn result = (*devx->interface)->SetAlternateInterface(devx->interface, alternative);
     if (result == kIOReturnSuccess) return 1;
-    setErrnoIo(result, "USB set alternative");
+    setErrnoIo(result, "USB alternative set");
   }
 
   return 0;
@@ -476,21 +478,29 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
         if (result == kIOReturnSuccess) {
           if ((eptx->number == number) &&
               ((eptx->direction == kUSBOut) == output)) {
+            LogPrint(LOG_DEBUG, "USB: ept=%02X -> ref=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
+                     endpoint->descriptor->bEndpointAddress, eptx->reference,
+                     eptx->number, eptx->direction, eptx->transfer,
+                     eptx->interval, eptx->size);
+
             endpoint->extension = eptx;
             return 1;
           }
         } else {
-          setErrnoIo(result, "USB get endpoint properties");
+          setErrnoIo(result, "USB endpoint properties query");
         }
       }
 
       errno = EIO;
-      LogPrint(LOG_ERR, "USB endpoint properties not found.");
+      LogPrint(LOG_ERR, "USB endpoint not found: %02X",
+               endpoint->descriptor->bEndpointAddress);
     } else {
-      setErrnoIo(result, "get endpoint count");
+      setErrnoIo(result, "USB endpoint count query");
     }
 
     free(eptx);
+  } else {
+    LogError("USB endpoint extension allocate");
   }
 
   return 0;
@@ -516,18 +526,42 @@ usbReadEndpoint (
 
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     UsbEndpointExtension *eptx = endpoint->extension;
-    UInt32 count = length;
+    UInt32 count;
     IOReturn result;
+    int wasStalled = 0;
 
+  read:
+    count = length;
     result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->reference,
                                             buffer, &count,
                                             timeout, timeout);
-    if (result == kIOReturnSuccess) {
-      length = count;
-      if (usbApplyInputFilters(device, buffer, length, &length)) return length;
-      errno = EIO;
-    } else {
-      setErrnoIo(result, "USB endpoint read");
+
+    switch (result) {
+      case kIOReturnSuccess:
+        length = count;
+        if (usbApplyInputFilters(device, buffer, length, &length)) return length;
+        errno = EIO;
+        break;
+
+      case kIOUSBTransactionTimeout:
+        errno = EAGAIN;
+        break;
+
+      case kIOUSBPipeStalled:
+        if (!wasStalled) {
+          result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->reference);
+          if (result != kIOReturnSuccess) {
+            setErrnoIo(result, "USB stall clear");
+            return 0;
+          }
+
+          wasStalled = 1;
+          goto read;
+        }
+
+      default:
+        setErrnoIo(result, "USB endpoint read");
+        break;
     }
   }
 
@@ -568,7 +602,7 @@ usbSubmitRequest (
   void *data
 ) {
   errno = ENOSYS;
-  LogError("USB request submission");
+  LogError("USB request submit");
   return NULL;
 }
 
@@ -578,7 +612,7 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancellation");
+  LogError("USB request cancel");
   return 0;
 }
 
@@ -661,6 +695,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
       kernelResult = IOServiceGetMatchingServices(masterPort,
                                                   matchingDictionary,
                                                   &serviceIterator);
+      matchingDictionary = NULL;
       if (kernelResult == KERN_SUCCESS) {
         io_service_t service;
 
@@ -688,17 +723,17 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
                 if (!device) free(devx);
               } else {
-                LogPrint(LOG_ERR, "USB: cannot allocate device extension.");
+                LogError("USB device extension allocate");
               }
 
               if (!device) (*deviceInterface)->Release(deviceInterface);
             } else {
-              setErrnoIo(ioResult, "USB: device interface create");
+              setErrnoIo(ioResult, "USB device interface create");
             }
 
             (*servicePlugin)->Release(servicePlugin);
           } else {
-            setErrnoIo(ioResult, "USB: service plugin create");
+            setErrnoIo(ioResult, "USB device service plugin create");
           }
 
           IOObjectRelease(service);
@@ -707,15 +742,15 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
         IOObjectRelease(serviceIterator);
       } else {
-        setErrnoKernel(kernelResult, "USB: service iterator create");
+        setErrnoKernel(kernelResult, "USB device iterator create");
       }
     } else {
-      LogPrint(LOG_ERR, "USB: cannot create matching dictionary.");
+      LogPrint(LOG_ERR, "USB device matching dictionary create error.");
     }
 
     mach_port_deallocate(mach_task_self(), masterPort);
   } else {
-    setErrnoKernel(kernelResult, "USB: master port create");
+    setErrnoKernel(kernelResult, "Darwin master port create");
   }
 
   return device;
