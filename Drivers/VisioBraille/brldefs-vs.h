@@ -1,25 +1,27 @@
 /*
- * BRLTTY - A background process providing access to the Linux console (when in
- *          text mode) for a blind person using a refreshable braille display.
+ * libbrlapi - A library providing access to braille terminals for applications.
  *
- * Copyright (C) 1995-2004 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 2002-2004 Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+ * All rights reserved.
  *
- * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ * libbrlapi comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
- * GNU General Public License, as published by the Free Software
- * Foundation.  Please see the file COPYING for details.
+ * GNU Lesser General Public License, as published by the Free Software
+ * Foundation; either version 2.1 of the License,
+ * or (at your option) any later version.
+ * Please see the file LGPL for details.
  *
  * Web Page: http://mielke.cc/brltty/
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* brlkeydefs.h : Useful definitions to handle keys entered at */
+/* brldefs-vs.h : Useful definitions to handle keys entered at */
 /* VisioBraille's keyboard */ 
 
-#ifndef _BRLKEYDEFS_H
-#define _BRLKEYDEFS_H
+#ifndef _BRLDEFS_VS_H
+#define _BRLDEFS_VS_H
 
 #define BRLKEY_CHAR        0x100
 #define BRLKEY_ROUTING     0x200
@@ -96,4 +98,4 @@
 #define ALT 0x8BF
 #define ESCAPE 0x8e0
 
-#endif /* _BRLKEYDEFS_H */ 
+#endif /* _BRLDEFS_VS_H */ 
