@@ -125,7 +125,6 @@ setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instru
 
 int
 beginMidiBlock (MidiDevice *midi) {
-  midi->duration = 0;
   return 1;
 }
 
