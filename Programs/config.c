@@ -1001,8 +1001,11 @@ globPrepare (GlobData *data, const char *directory, const char *pattern, const c
 static void
 globBegin (GlobData *data) {
   int index;
+
   memset(&data->glob, 0, sizeof(data->glob));
   data->glob.gl_offs = (sizeof(data->pathsArea) / sizeof(data->pathsArea[0])) - 1;
+  data->paths = data->pathsArea;
+  data->paths[data->count = data->glob.gl_offs] = NULL;
 
   {
     int originalDirectory = open(".", O_RDONLY);
@@ -1014,12 +1017,9 @@ globBegin (GlobData *data) {
            * include the leading NULL pointers and some don't. Let's just
            * figure it out the hard way by finding the trailing NULL.
            */
-          data->count = data->glob.gl_offs;
           while (data->paths[data->count]) ++data->count;
-        } else {
-          data->paths = data->pathsArea;
-          data->paths[data->count = data->glob.gl_offs] = NULL;
         }
+
         if (fchdir(originalDirectory) == -1) {
           LogError("working directory restore");
         }
@@ -1027,6 +1027,7 @@ globBegin (GlobData *data) {
         LogPrint(LOG_ERR, "Cannot set working directory: %s: %s",
                  data->directory, strerror(errno));
       }
+
       close(originalDirectory);
     } else {
       LogError("working directory open");
