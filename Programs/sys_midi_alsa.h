@@ -21,9 +21,8 @@ struct MidiDeviceStruct {
   snd_seq_t    *handle;
   int           port;
   int           queue;
-  unsigned char notePlaying;
-  int           noteon_duration;
-  int           noteoff_duration;
+  unsigned char note;
+  int           duration;
 };
 
 MidiDevice *
@@ -45,7 +44,7 @@ openMidiDevice (int errorLevel) {
 	if ((midi->queue = snd_seq_alloc_queue(midi->handle)) >= 0) {
 	  if ((result = snd_seq_connect_to(midi->handle, midi->port, 65, 0)) == 0) {
 	    if ((result = snd_seq_start_queue(midi->handle, midi->queue, NULL)) >= 0) {
-	      midi->noteon_duration = midi->noteoff_duration = 0;
+	      midi->duration = 0;
 
 	      return midi;
 	    } else {
@@ -85,17 +84,28 @@ flushMidiDevice (MidiDevice *midi) {
 }
 
 static void
-setupEvent (MidiDevice *midi, snd_seq_event_t *ev) {
-  snd_seq_ev_clear(ev);
-  snd_seq_ev_set_source(ev, midi->port);
-  snd_seq_ev_set_subs(ev);
+prepareMidiEvent (MidiDevice *midi, snd_seq_event_t *event) {
+  snd_seq_ev_clear(event);
+  snd_seq_ev_set_source(event, midi->port);
+  snd_seq_ev_set_subs(event);
+}
+
+static void
+scheduleMidiEvent (MidiDevice *midi, snd_seq_event_t *event) {
+  if (midi->duration) {
+    snd_seq_real_time_t time;
+    time.tv_sec = midi->duration / 1000;
+    time.tv_nsec = (midi->duration % 1000) * 1000000;
+    snd_seq_ev_schedule_real(event, midi->queue, 1, &time);
+    midi->duration = 0;
+  }
 }
 
 static int
-sendEvent (MidiDevice *midi, snd_seq_event_t *ev) {
+sendMidiEvent (MidiDevice *midi, snd_seq_event_t *event) {
   int result;
 
-  if ((result = snd_seq_event_output(midi->handle, ev)) >= 0) {
+  if ((result = snd_seq_event_output(midi->handle, event)) >= 0) {
     snd_seq_drain_output(midi->handle);
     return 1;
   } else {
@@ -106,65 +116,37 @@ sendEvent (MidiDevice *midi, snd_seq_event_t *ev) {
 
 int
 setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument) {
-  snd_seq_event_t ev;
+  snd_seq_event_t event;
 
-  setupEvent(midi, &ev);
-  snd_seq_ev_set_pgmchange(&ev, channel, instrument);
-  return sendEvent(midi, &ev);
-}
-
-int
-beginMidiBlock (MidiDevice *midi) {
-  midi->noteoff_duration = midi->notePlaying = 0;
-  return 1;
-}
-
-int
-endMidiBlock (MidiDevice *midi) {
-  midi->noteoff_duration = 0;
-  return 1;
+  prepareMidiEvent(midi, &event);
+  snd_seq_ev_set_pgmchange(&event, channel, instrument);
+  return sendMidiEvent(midi, &event);
 }
 
 int
 startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
-  snd_seq_event_t ev;
+  snd_seq_event_t event;
 
-  setupEvent(midi, &ev);
-  snd_seq_ev_set_noteon(&ev, channel, note, volume);
-  midi->notePlaying = note;
-  if (midi->noteon_duration) {
-    snd_seq_real_time_t time;
-    time.tv_sec = (unsigned)(midi->noteon_duration / 1000);
-    time.tv_nsec = (unsigned)(midi->noteon_duration * 1000);
-    snd_seq_ev_schedule_real(&ev, midi->queue, 1, &time);
-    midi->noteon_duration = 0;
-  }
-  return sendEvent(midi, &ev);
+  prepareMidiEvent(midi, &event);
+  snd_seq_ev_set_noteon(&event, channel, note, volume);
+  midi->note = note;
+  scheduleMidiEvent(midi, &event);
+  return sendMidiEvent(midi, &event);
 }
 
 int
 stopMidiNote (MidiDevice *midi, unsigned char channel) {
-  snd_seq_event_t ev;
+  snd_seq_event_t event;
 
-  setupEvent(midi, &ev);
-  snd_seq_ev_set_noteoff(&ev, channel, midi->notePlaying, 0);
-  midi->notePlaying = 0;
-  if (midi->noteoff_duration) {
-    snd_seq_real_time_t time;
-    time.tv_sec = (unsigned)(midi->noteoff_duration / 1000);
-    time.tv_nsec = (unsigned)(midi->noteoff_duration * 1000);
-    snd_seq_ev_schedule_real(&ev, midi->queue, 1, &time);
-    midi->noteoff_duration = 0;
-  }
-  return sendEvent(midi, &ev);
+  prepareMidiEvent(midi, &event);
+  snd_seq_ev_set_noteoff(&event, channel, midi->note, 0);
+  midi->note = 0;
+  scheduleMidiEvent(midi, &event);
+  return sendMidiEvent(midi, &event);
 }
 
 int
 insertMidiWait (MidiDevice *midi, int duration) {
-  if (midi->notePlaying) {
-    midi->noteoff_duration = duration;
-  } else {
-    midi->noteon_duration = duration;
-  }
+  midi->duration += duration;
   return 1;
 }
