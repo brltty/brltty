@@ -1370,6 +1370,7 @@ updatePreferences (void) {
         case CMD_CHRRT:
         case VAL_PASSKEY+VPK_CURSOR_RIGHT:
         case CMD_HOME:
+        case CMD_RETURN:
         case VAL_PASSKEY+VPK_RETURN:
         case CMD_MENU_NEXT_SETTING: {
           int count = item->maximum - item->minimum + 1;
