@@ -243,7 +243,7 @@ BEGIN_OPTION_TABLE
   {'a', "attributes-table", "file", configureAttributesTable, 0,
    "Path to attributes translation table file."},
   {'b', "braille-driver", "driver", configureBrailleDriver, 0,
-   "Braille driver: one of {" BRAILLE_DRIVERS "}"},
+   "Braille driver: one of {" BRAILLE_DRIVER_CODES "}"},
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {'c', "contraction-table", "file", configureContractionTable, 0,
    "Path to contraction table file."},
@@ -264,7 +264,7 @@ BEGIN_OPTION_TABLE
    "Suppress start-up messages."},
 #ifdef ENABLE_SPEECH_SUPPORT
   {'s', "speech-driver", "driver", configureSpeechDriver, 0,
-   "Speech driver: one of {" SPEECH_DRIVERS "}"},
+   "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
 #endif /* ENABLE_SPEECH_SUPPORT */
   {'t', "text-table", "file", configureTextTable, 0,
    "Path to text translation table file."},
@@ -843,7 +843,6 @@ typedef struct {
 } GlobData;
 static GlobData glob_textTable;
 static GlobData glob_attributesTable;
-static GlobData glob_contractionTable;
 
 static void
 globPrepare (GlobData *data, const char *directory, const char *pattern, const char *initial, int none) {
@@ -945,6 +944,8 @@ changedAttributesTable (void) {
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
+static GlobData glob_contractionTable;
+
 static int
 changedContractionTable (void) {
   return loadContractionTable(globChanged(&glob_contractionTable));
@@ -992,7 +993,9 @@ updatePreferences (void) {
 #ifdef ENABLE_TABLE_SELECTION
   globBegin(&glob_textTable);
   globBegin(&glob_attributesTable);
+#ifdef ENABLE_CONTRACTED_BRAILLE
   globBegin(&glob_contractionTable);
+#endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
 
   {
@@ -1294,7 +1297,9 @@ updatePreferences (void) {
 #ifdef ENABLE_TABLE_SELECTION
           globEnd(&glob_textTable);
           globEnd(&glob_attributesTable);
+#ifdef ENABLE_CONTRACTED_BRAILLE
           globEnd(&glob_contractionTable);
+#endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
 
           return;

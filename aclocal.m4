@@ -118,7 +118,7 @@ AC_SUBST([brltty_item_code_$1])
 AC_SUBST([brltty_item_name_$1])
 AC_SUBST([brltty_item_codes_$1])
 AC_SUBST([brltty_item_names_$1])
-AC_DEFINE_UNQUOTED(translit([$1_$2s], [a-z], [A-Z]), ["${brltty_item_codes_$1}"])])
+AC_DEFINE_UNQUOTED(translit([$1_$2_codes], [a-z], [A-Z]), ["${brltty_item_codes_$1}"])])
 
 AC_DEFUN([BRLTTY_ARG_DRIVER], [dnl
 BRLTTY_ARG_ITEM([$1], [driver])

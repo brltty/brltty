@@ -92,7 +92,7 @@ extern "C" {
 #undef BRAILLE_BUILTIN
 
 /* Define this to be a string containing a list of the braille driver codes. */
-#undef BRAILLE_DRIVERS
+#undef BRAILLE_DRIVER_CODES
 
 /* Define this to be a string containing the path to the default braille device. */
 #undef BRAILLE_DEVICE
@@ -101,7 +101,7 @@ extern "C" {
 #undef SPEECH_BUILTIN
 
 /* Define this to be a string containing a list of the speech driver codes. */
-#undef SPEECH_DRIVERS
+#undef SPEECH_DRIVER_CODES
 
 /* Define this to be a string containing the path to the default text table. */
 #undef TEXT_TABLE
