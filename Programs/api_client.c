@@ -103,7 +103,7 @@ static int brlapi_waitForAck()
 /* Function : updateSettings */
 /* Updates the content of a brlapi_settings_t structure according to */
 /* another structure of th same type */
-void updateSettings(brlapi_settings_t *s1, brlapi_settings_t *s2)
+void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 {
   if (s2==NULL) return;
   if ((s2->authKey) && (*s2->authKey))
