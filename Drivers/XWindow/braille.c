@@ -261,7 +261,6 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 static XrmOptionDescRec optionDescList[] = { };
 
 static char *fallback_resources[] = {
- "*display.font: -*-fixed-*-*-*-*-*-*-*-*-*-*-*-*",
  "*display.background: lightgreen",
 #ifdef USE_XAW
  "*displayb.background: black",
