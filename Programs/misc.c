@@ -411,56 +411,51 @@ size_t safe_write (int fd, const unsigned char *buffer, size_t length)
   return address - buffer;
 }
 
-unsigned long
-elapsed_msec (struct timeval *t1, struct timeval *t2)
-{
-  unsigned long diff, error = 0xFFFFFFFF;
-  if (t1->tv_sec > t2->tv_sec)
-    return error;
-  diff = (t2->tv_sec - t1->tv_sec) * 1000L;
-  if (diff == 0 && t1->tv_usec > t2->tv_usec)
-    return error;
-  diff += (t2->tv_usec - t1->tv_usec) / 1000L;
-  return diff;
+void
+delay (int milliseconds) {
+  if (milliseconds > 0) {
+    struct timeval timeout;
+    timeout.tv_sec = milliseconds / 1000;
+    timeout.tv_usec = (milliseconds % 1000) * 1000;
+    select(0, NULL, NULL, NULL, &timeout);
+  }
+}
+
+long int
+elapsedMilliseconds (const struct timeval *from, const struct timeval *to) {
+  return ((to->tv_sec - from->tv_sec) * 1000) + ((to->tv_usec - from->tv_usec) / 1000);
 }
 
 void
-shortdelay (unsigned msec) {
+shortdelay (int milliseconds) {
+  static int tickLength = 0;
   struct timeval start;
-  struct timezone tz;
-  gettimeofday(&start, &tz);
+  gettimeofday(&start, NULL);
+  if (!tickLength) {
+    tickLength = 1000 / sysconf(_SC_CLK_TCK);
+  }
+  if (tickLength) {
+    delay(milliseconds / tickLength * tickLength);
+  }
   while (1) {
     struct timeval now;
-    gettimeofday(&now, &tz);
-    if (elapsed_msec(&start, &now) >= msec) break;
+    gettimeofday(&now, NULL);
+    if (elapsedMilliseconds(&start, &now) >= milliseconds) break;
 #ifdef HAVE_FUNC_SCHED_YIELD
     sched_yield();
 #endif /* HAVE_FUNC_SCHED_YIELD */
   }
 }
 
-void
-delay (int msec)
-{
-  struct timeval del;
-
-  del.tv_sec = 0;
-  del.tv_usec = msec * 1000;
-  select(0, NULL, NULL, NULL, &del);
-}
-
 int
-timeout_yet (int msec)
-{
+timeout_yet (int milliseconds) {
   static struct timeval start = {0, 0};
 
-  if (msec)                /* initialiseation */
-    {
-      struct timeval now;
-      gettimeofday(&now, NULL);
-      return (now.tv_sec * 1000000 + now.tv_usec) -
-             (start.tv_sec * 1000000 + start.tv_usec) >= (msec * 1000);
-    }
+  if (milliseconds) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return elapsedMilliseconds(&start, &now) >= milliseconds;
+  }
 
   gettimeofday(&start, NULL);
   return 0;

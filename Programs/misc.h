@@ -58,10 +58,10 @@ size_t safe_write (int fd, const unsigned char *buffer, size_t length);
 
 extern void setCloseOnExec (int fileDescriptor);
 
-extern void delay (int msec);		/* sleep for `msec' milliseconds */
-extern void shortdelay (unsigned msec);
-extern unsigned long elapsed_msec (struct timeval *t1, struct timeval *t2);
-extern int timeout_yet (int msec);	/* test timeout condition */
+extern void delay (int milliseconds);		/* sleep for `msec' milliseconds */
+extern void shortdelay (int milliseconds);
+extern long int elapsedMilliseconds (const struct timeval *from, const struct timeval *to);
+extern int timeout_yet (int milliseconds);	/* test timeout condition */
 
 #ifdef HAVE_SYSLOG_H
 #  include <syslog.h>

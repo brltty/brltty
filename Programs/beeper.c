@@ -48,7 +48,7 @@ static int playBeeper (int note, int duration) {
          shortdelay(duration);
 	 return 1;
       }
-      if (startBeep((int)noteFrequencies[note])) {
+      if (timedBeep((int)noteFrequencies[note], duration*4)) {
          shortdelay(duration);
 	 if (stopBeep()) {
 	    return 1;

@@ -543,9 +543,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     if(fastkey == 3)
       return EOF;
     gettimeofday(&now, NULL);
-    if(!((fastkey == 1 && elapsed_msec(&presstime, &now)
+    if(!((fastkey == 1 && elapsedMilliseconds(&presstime, &now)
 	  > ((fastdots) ? dots_repeat_init_delay : repeat_init_delay))
-	 || (fastkey > 1 && elapsed_msec(&presstime, &now)
+	 || (fastkey > 1 && elapsedMilliseconds(&presstime, &now)
 	     > ((fastdots) ? dots_repeat_inter_delay : repeat_inter_delay))))
       return EOF;
     fastkey = 2;
