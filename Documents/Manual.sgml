@@ -430,8 +430,8 @@ for any additional display-specific instructions.
     and the <ref id="options-braille-parameters" name="-B"> command line option
     for run-time selection.
   <tag><tt/--with-braille-device=/<em/device/<label id="build-braille-device"></tag>
-    Specify the default device to which the braille display is connected.
-    If a relative path is supplied, then it's anchored at <tt>/dev</>.
+    Specify the default device to which the braille display is connected
+    (see section <ref id="devices" name="Device Specification">).
     If this option isn't specified,
     then an operating system appropriate path
     for the primary serial port is assumed.
@@ -1997,15 +1997,19 @@ via the <ref id="preferences-menu" name="preferences menu">.
   <tag>SAY_SLOWER<label id="command-SAY_SLOWER"></tag>
     Decrease the speech rate
     (see also the <ref id="preference-speech-rate" name="Speech Rate"> preference).
+    This command is only available if a driver which supports it is being used.
   <tag>SAY_FASTER<label id="command-SAY_FASTER"></tag>
     Increase the speech rate
     (see also the <ref id="preference-speech-rate" name="Speech Rate"> preference).
+    This command is only available if a driver which supports it is being used.
   <tag>SAY_SOFTER<label id="command-SAY_SOFTER"></tag>
     Decrease the speech volume
     (see also the <ref id="preference-speech-volume" name="Speech Volume"> preference).
+    This command is only available if a driver which supports it is being used.
   <tag>SAY_LOUDER<label id="command-SAY_LOUDER"></tag>
     Increase the speech volume
     (see also the <ref id="preference-speech-volume" name="Speech Volume"> preference).
+    This command is only available if a driver which supports it is being used.
 </descrip>
 
 <sect2>Virtual Terminal Switching<p>
@@ -2153,8 +2157,8 @@ The following directives are recognized:
     This directive can be overridden with the
     <ref id="options-braille-driver" name="-b"> command line option.
   <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
-    Specify the device to which the braille display is connected.
-    If a relative path is supplied, then it's anchored at <tt>/dev</>.
+    Specify the device to which the braille display is connected
+    (see section <ref id="devices" name="Device Specification">).
     See the <ref id="build-braille-device" name="--with-braille-device">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -2283,8 +2287,8 @@ The <tt/brltty/ command accepts the following options:
     This option isn't available if the
     <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
   <tag><tt/-d/<em/device/ <tt/--braille-device=/<em/device/<label id="options-braille-device"></tag>
-    Specify the device to which the braille display is connected.
-    If a relative path is supplied, then it's anchored at <tt>/dev</>.
+    Specify the device to which the braille display is connected
+    (see section <ref id="devices" name="Device Specification">).
     See the <ref id="configure-braille-device" name="braille-device">
     configuration file directive for the default run-time setting.
   <tag><tt/-e/ <tt/--standard-error/<label id="options-standard-error"></tag>
@@ -4243,6 +4247,41 @@ BRLTTY supports the following speech synthesizers:
   <tag/vr/Virtual
   <tag/vs/VisioBraille
   <tag/vv/ViaVoice
+</descrip>
+
+<sect1>Device Specificationn<label id="devices"><p>
+The general form of a device specification
+(see the <ref id="options-braille-device" name="-d"> command line option,
+the <ref id="configure-braille-device" name="braille-device"> configuration file directive,
+and the <ref id="build-braille-device" name="--with-braille-device"> build option)
+is <tt/qualifier:/<em/data/.
+For backward compatibility with earlier releases,
+if the qualifier is omitted then <tt/serial:/ is assumed.
+
+The following device types are supported:
+<descrip>
+  <tag/Serial/
+    For a serial device, specify <tt>serial:/path/to/device</>.
+    The <tt/serial:/ qualifier is optional (for backward compatibility).
+    If a relative path is given then it's anchored at <tt>/dev</>
+    (the usual location where devices are defined on a Unix-like system).
+    The following device specifications all refer
+    to the first serial device on Linux:
+    <itemize>
+      <item><tt>serial:/dev/ttyS0</>
+      <item><tt>serial:ttyS0</>
+      <item><tt>/dev/ttyS0</>
+      <item><tt>ttyS0</>
+    </itemize>
+  <tag/USB/
+    For a USB device, specify <tt/usb:/.
+    BRLTTY will search for the first USB device which
+    matches the braille display driver being used.
+    If this is inadequate,
+    e.g. if you have more than one USB braille display which requires the same driver,
+    then you can refine the device specification
+    by appending the serial number of the display to it,
+    e.g. <tt/usb:12345/.
 </descrip>
 
 <sect1>Standard Braille Dot Numbering Convention<label id="dots"><p>
