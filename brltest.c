@@ -74,7 +74,7 @@ main (int argc, char *argv[])
       fprintf (stderr, "Initialisation error\n");
       exit (2);
     }
-  printf ("Display initialised successfully, ");
+  printf ("Display initialized successfully, ");
   printf ("it is %d rows by %d cols\n", brl.y, brl.x);
   message ("Hello world, This is BRLTTY!");
 

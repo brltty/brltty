@@ -142,7 +142,8 @@ brldim;				/* used for writing to a braille display */
 #define ST_TiemanStyle 2
 #define ST_PB80Style 3
 #define ST_Papenmeier 4
-#define NB_STCELLSTYLES 4
+#define ST_MDVStyle 5
+#define NB_STCELLSTYLES 5
 
 /* Routines provided by the braille driver library: */
 void identbrl (const char *);	/* print start-up messages */

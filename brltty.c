@@ -44,7 +44,7 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.11"
+#define VERSION "BRLTTY 2.20"
 #define COPYRIGHT "\
 Copyright (C) 1995-1999 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -115,6 +115,8 @@ env, initenv = {
     ST_TiemanStyle
 #elif defined (TSI)
     ST_PB80Style
+#elif defined (MDV)
+    ST_MDVStyle
 #elif defined (Papenmeier)
     ST_Papenmeier
 #else
@@ -337,7 +339,7 @@ main (int argc, char *argv[])
    */
   if (initscr ())
     {				
-      /* initialise screen reading */
+      /* initialize screen reading */
       if (!opt_q){
 	LogAndStderr(LOG_ERR, "Cannot read screen\n");
 	LogClose();
@@ -945,6 +947,12 @@ main (int argc, char *argv[])
 	      statcells[0] = num[(p->winy+1) % 10] << 4 | \
 		num[((p->winy+1) / 10) % 10];
 	      break;
+	    case ST_MDVStyle:
+	      statcells[0] = num[((p->winy+1) / 10) % 10] | \
+		(num[((p->winx+1) / 10) % 10] << 4);
+	      statcells[1] = num[(p->winy+1) % 10]
+		| (num[(p->winx+1) % 10] << 4);
+	      break;
 	    case ST_Papenmeier:
 	      statcells [0] = pm_num(p->winy+1);
 	      statcells [1] = 0;  /* empty for easier reading */
@@ -1159,11 +1167,12 @@ switchto( unsigned int scrno )
   curscr = scrno;
   if (scrno > NBR_SCR)
       scrno = 0;
-  if (!scrparam[scrno]) 	/* if not already allocated... */
+  if (!scrparam[scrno]){ 	/* if not already allocated... */
     if (!(scrparam[scrno] = malloc (sizeof (*p))))
       scrno = 0; 	/* unable to allocate a new structure */
     else
       *scrparam[scrno] = initparam;
+  }
   p = scrparam[scrno];
   usetable (p->dispmode ? TBL_ATTRIB : TBL_TEXT);
 }

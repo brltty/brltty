@@ -29,6 +29,8 @@
 #BRL_TARGET = EuroBraille
 #BRL_TARGET = Papenmeier
 #BRL_TARGET = TSI
+#BRL_TARGET = MDV
+#BRL_TARGET = Vario
 
 # Specify your speech support option.
 # Uncomment one of these lines and comment out the NoSpeech line 

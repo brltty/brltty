@@ -21,11 +21,15 @@
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
- * This is version 2.1 (February 99) of the TSI driver.
+ * This is version 2.2beta3 (October 99) of the TSI driver.
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
  * It is designed to be compiled in BRLTTY version 2.1.
  *
  * History:
+ * Version 2.2beta3: Option to disable CTS checking. Apparently, Vario
+ *   does not raise CTS when connected.
+ * Version 2.2beta1: Exploring problems with emulators of TSI (PB40): BAUM
+ *   and mdv mb408s. See if we can provide timing options for more flexibility.
  * Version 2.1: Help screen fix for new keys in config menu.
  * Version 2.1beta1: Less delays in writing braille to display for
  *   nav20/40 and pb40, delays still necessary for pb80 on probably for nav80.
@@ -44,7 +48,10 @@
 
 #define BRL_C 1
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.1"
+#define VERSION "BRLTTY driver for TSI displays, version 2.2beta3 (October 99)"
+#define COPYRIGHT "Copyright (C) 1996-99 by Stéphane Doyon " \
+                  "<s.doyon@videotron.ca>"
+
 /* see identbrl() */
 
 #define __EXTENSIONS__	/* for termios.h */
@@ -67,11 +74,12 @@
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 
-/* Delay on display update: needed on pb80 (surely on nav80 as well), see
- * display() */
+/* Type of delay the display requires after sending it commands.
+   0 -> no delay, 1 -> tcdrain only, 2 -> tcdrain + wait for SEND_DELAY. */
 int slow_update;
-/* sleep this long after sending a braille display update */
-#define SEND_DELAY 30
+
+/* Whether multiple packets can be sent for a single update. */
+int no_multiple_updates;
 
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. */
@@ -82,7 +90,7 @@ static struct timeval last_ping, last_ping_sent;
 #define PING_MAXNQUERY 2
 static int pings; /* counts number of pings sent since last reply */
 /* how long we wait for a reply */
-#define PING_REPLY_DELAY 200
+#define PING_REPLY_DELAY 300
 
 /* for routing keys */
 int must_init_oldstat = 1;
@@ -324,8 +332,7 @@ identbrl (const char *tty)
 {
   printf ("  %s\n", VERSION);
   LogPrint(LOG_NOTICE,"%s", VERSION);
-  printf ("    Copyright (C) 1996-99 by Stéphane Doyon "
-	  "<s.doyon@videotron.ca>\n");
+  printf ("    %s\n", COPYRIGHT);
   if (tty){
     printf ("    Using serial port %s\n", tty);
     LogPrint(LOG_NOTICE,"  Using serial port %s", tty);
@@ -341,7 +348,7 @@ CheckCTSLine(int fd)
 /* If supported (might not be portable) check that the CTS line (RS232)
    is up. */
 {
-#if defined(TIOCMGET) && defined(TIOCM_CTS)
+#if defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS)
   int flags;
   if (ioctl(fd, TIOCMGET, &flags) < 0){
     LogPrint(LOG_ERR, "TIOCMGET: %s", strerror(errno));
@@ -537,6 +544,7 @@ void initbrl (brldim *brl, const char *tty)
       /* nav 40 */
       has_sw = 0;
       sethlpscr (0);
+      slow_update = 1;
       LogPrint(LOG_NOTICE, "Detected Navigator 40");
     }
     break;
@@ -546,7 +554,7 @@ void initbrl (brldim *brl, const char *tty)
     has_sw = 1;
     sw_bcnt = SW_CNT80;
     sw_lastkey = 79;
-    slow_update = 1;
+    slow_update = 2;
     LogPrint(LOG_NOTICE, "Detected Navigator 80");
     break;
   case 65:
@@ -556,7 +564,7 @@ void initbrl (brldim *brl, const char *tty)
     sw_bcnt = SW_CNT81;
     sw_lastkey = 64;
     speed = 2;
-    slow_update = 1;
+    slow_update = 2;
     LogPrint(LOG_NOTICE, "Detected PowerBraille 65");
     break;
   case 81:
@@ -567,13 +575,25 @@ void initbrl (brldim *brl, const char *tty)
     sw_lastkey = 79;
     brl_cols = 80;
     speed = 2;
-    slow_update = 1;
+    slow_update = 2;
     LogPrint(LOG_NOTICE, "Detected PowerBraille 80");
     break;
   default:
     LogPrint(LOG_ERR,"Unrecognized braille display");
     goto failure;
   };
+
+  no_multiple_updates = 0;
+#ifdef FORCE_DRAIN_AFTER_SEND
+  slow_update = 1;
+#endif
+#ifdef FORCE_FULL_SEND_DELAY
+  slow_update = 2;
+#endif
+#ifdef NO_MULTIPLE_UPDATES
+  no_multiple_updates = 1;
+#endif
+  if(slow_update == 2) no_multiple_updates = 1;
 
 #ifdef LOW_BATTERY_WARN
   if (brl_cols == 20){
@@ -583,16 +603,28 @@ void initbrl (brldim *brl, const char *tty)
     }
 #endif
 
-  res.x = brl_cols;		/* initialise size of display */
-  res.y = BRLROWS;		/* always 1 */
-
 #ifdef HIGHBAUD
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
     write (brl_fd, BRL_UART192, DIM_BRL_UART192);
     tcdrain(brl_fd);
     delay(BAUD_DELAY);
     if(!SetSpeed(brl_fd,&curtio, B19200)) goto failure;
-    LogPrint(LOG_DEBUG,"Switched to 19200bps");
+    LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
+    if(QueryDisplay(brl_fd,reply))
+      LogPrint(LOG_DEBUG,"Display responded at 19200bps.");
+    else{
+      LogPrint(LOG_INFO,"Display did not respond at 19200bps, "
+	       "falling back to 9600bps.");
+      if(!SetSpeed(brl_fd,&curtio, B9600)) goto failure;
+      delay(BAUD_DELAY); /* just to be safe */
+      if(QueryDisplay(brl_fd,reply)) {
+	LogPrint(LOG_INFO,"Found display again at 9600bps.");
+	LogPrint(LOG_NOTICE, "Must be a TSI emulator.");
+      }else{
+	LogPrint(LOG_ERR,"Display lost after baud switching");
+	goto failure;
+      }
+    }
   }
 #endif
 
@@ -605,6 +637,9 @@ void initbrl (brldim *brl, const char *tty)
   must_init_oldstat = 1;
 
   ResetTypematic ();
+
+  res.x = brl_cols;		/* initialise size of display */
+  res.y = BRLROWS;		/* always 1 */
 
   /* Allocate space for buffers */
   dispbuf = res.disp = (unsigned char *) malloc (ncells);
@@ -627,6 +662,7 @@ void initbrl (brldim *brl, const char *tty)
   return;
 
 failure:;
+  LogPrint(LOG_WARNING,"TSI driver giving up");
   closebrl(&res);
   brl->x = -1;
   return;
@@ -668,42 +704,65 @@ display (const unsigned char *pattern,
   for (i = 0; i < length; i++)
     rawdata[DIM_BRL_SEND + 2 * i + 1] = DotsTable[pattern[start + i]];
 
-  /* If we update the display too often, then the packets queue up in the send
-     queue, the info displayed is not up to date, and the info displayed
-     continues to change after we stop updating while the queue empties. We
-     also risk overflows which put garbage on the display, also the pinging
-     fails and the display gets reinitialized... nav40 has no problems, but
-     pb80 (twice larger but twice as fast, it goes at 19200bps) is pretty bad.
-     Note that there is no flow control: apparently not supported properly
-     on at least pb80. There's some UART handshake mode that doesn't seem
-     to do much but break everything... */
+  /* Some displays apparently don't like rapid updating. Most or all apprently
+     don't do flow control. If we update the display too often and too fast,
+     then the packets queue up in the send queue, the info displayed is not up
+     to date, and the info displayed continues to change after we stop
+     updating while the queue empties (like when you release the arrow key and
+     the display continues changing for a second or two). We also risk
+     overflows which put garbage on the display, or often what happens is that
+     some cells from previously displayed lines will remain and not be cleared
+     or replaced; also the pinging fails and the display gets
+     reinitialized... To expose the problem skim/scroll through a long file
+     (with long lines) holding down the up/down arrow key on the PC keyboard.
 
-  /* If the queue is not empty then we're going at it too hard, so we'll
-     wait until  it drains. If the queue is empty then this is a wasted
-     syscall. */
-/*  tcdrain(brl_fd);*/
-  /* Apparently this is not even good enough when updating fast (holding down
-     an up/down arrow key on the PC KEYBOARD). ping replies get lost and we
-     think the display has been turned off... */
+     pb40 has no problems: it apparently can take whatever we throw at
+     it. Nav40 is good but we tcdrain just to be safe.
+
+     pb80 (twice larger but twice as fast as nav40) cannot take a continuous
+     full speed flow. There is no flow control: apparently not supported
+     properly on at least pb80. My pb80 is recent yet the hardware version is
+     v1.0a, so this may be a hardware problem that was fixed on pb40.  There's
+     some UART handshake mode that might be relevant but only seems to break
+     everything (on both pb40 and pb80)...
+
+     Nav80 is untested but as it receives at 9600, we probably need to
+     compensate there too.
+
+     Finally, some TSI emulators (at least the mdv mb408s) may have timing
+     limitations.
+
+     I no longer have access to a Nav40 and PB80 for testing: I only have a
+     PB40.  */
 
   write (brl_fd, rawdata, DIM_BRL_SEND + 2 * length);
 
-  /* So we extend the sleep for this cycle. Keeping the delay in the main
-     brltty loop low keeps the response time good, but SEND_DELAY give the
-     display time to show what we're sending. */
+  /* First a tcdrain after the write helps make sure we don't fill up the
+     buffer with info that will be overwritten immediately. This is not needed
+     on pb40, but it might be good on nav40 (which runs only at 9600bps).
 
-  if(slow_update){
-    /* nav40 and perhaps pb40 seem to work fine without this, and have a
-       better response time. */
+     Then for pb80 (and probably also needed for nav80 though untested) as
+     well as for some TSI emulators we add a supplementary delay: tcdrain
+     probably waits until the bytes are in the UART, but we still need a few
+     ms to send them out.  This delay will combine with the sleep for this
+     BRLTTY cycle (delay in the main program loop of 40ms).  Keeping the delay
+     in the main brltty loop low keeps the response time good, but SEND_DELAY
+     gives the display time to show what we're sending.
+
+     I found experimentally that a delay of 30ms seems best (at least for
+     pb80). A longer delay, or using delay instead of shortdelay is too
+     much. This makes the pb a little bit sluggish, but prevents any
+     communication problems.  */
+
+  switch(slow_update){
+  /* 0 does nothing */
+  case 1: /* nav 40 */
+    tcdrain(brl_fd); break;
+  case 2: /* nav80, pb80, some emulators */
     tcdrain(brl_fd);
     shortdelay(SEND_DELAY);
-  }
-  /* timing complications: when scrolllling through long files, the display
-     gets garbled with pb80. seems it cannot take a full speed continuous flow.
-     Now we drain, write, drain again, then shortdelay for 30ms. delay instead
-     of shortdelay is too long, longer delay is also too long. this seems OK,
-     no distortion or ping fault. But it's just a bit slow, and I don't know
-     for other displays. affraid about nav80. */
+    break;
+  };
 }
 
 void setbrlstat (const unsigned char *s)
@@ -726,36 +785,52 @@ display_all (unsigned char *pattern)
 void 
 writebrl (brldim *brl)
 {
-  int base = 0, i = 0, collecting = 0, simil = 0;
-
-  if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
-    return;
-
-  while (i < ncells)
-    if (brl->disp[i] == prevdata[i])
-      {
-	simil++;
-	if (collecting && 2 * simil > DIM_BRL_SEND)
-	  {
-	    display (brl->disp, base, i - simil, base);
-	    base = i;
-	    collecting = 0;
-	    simil = 0;
-	  }
-	if (!collecting)
-	  base++;
-	i++;
-      }
-    else
-      {
-	prevdata[i] = brl->disp[i];
-	collecting = 1;
-	simil = 0;
-	i++;
-      }
-
-  if (collecting)
-    display (brl->disp, base, i - simil - 1, base);
+  if(no_multiple_updates){
+    int start, stop;
+    
+    if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
+      return;
+    
+    for(start=0; start<ncells; start++)
+      if(brl->disp[start] != prevdata[start]) break;
+    if(start == ncells) return;
+    for(stop = ncells-1; stop > start; stop--)
+      if(brl->disp[stop] != prevdata[stop]) break;
+    
+    memcpy(prevdata+start, brl->disp+start, stop-start+1);
+    display (brl->disp, start, stop, start);
+  }else{
+    int base = 0, i = 0, collecting = 0, simil = 0;
+    
+    if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
+      return;
+    
+    while (i < ncells)
+      if (brl->disp[i] == prevdata[i])
+	{
+	  simil++;
+	  if (collecting && 2 * simil > DIM_BRL_SEND)
+	    {
+	      display (brl->disp, base, i - simil, base);
+	      base = i;
+	      collecting = 0;
+	      simil = 0;
+	    }
+	  if (!collecting)
+	    base++;
+	  i++;
+	}
+      else
+	{
+	  prevdata[i] = brl->disp[i];
+	  collecting = 1;
+	  simil = 0;
+	  i++;
+	}
+    
+    if (collecting)
+      display (brl->disp, base, i - simil - 1, base);
+  }
 }
 
 
@@ -1028,6 +1103,12 @@ readbrl (int type)
 	tcdrain(brl_fd);
 	delay(2*SEND_DELAY);
 	write (brl_fd, BRL_QUERY, DIM_BRL_QUERY);
+	if(slow_update == 1)
+	  tcdrain(brl_fd);
+	else if(slow_update == 2){
+	  tcdrain(brl_fd);
+	  delay(SEND_DELAY);
+	}
 	pings++;
 	gettimeofday(&last_ping_sent, &dum_tz);
       }
@@ -1042,6 +1123,9 @@ readbrl (int type)
   curtio.c_cc[VTIME] = 1;
   curtio.c_cc[VMIN] = 0;
   tcsetattr (brl_fd, TCSANOW, &curtio);
+#ifdef RECV_DELAY
+  shortdelay(SEND_DELAY);
+#endif
 
   /* read bytes */
   i=0;
