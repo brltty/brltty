@@ -1306,6 +1306,28 @@ updatePreferences (void) {
 
       /* Now process any user interaction */
       switch (command = getCommand(CMDS_PREFS)) {
+        case CMD_HELP:
+          /* This is quick and dirty... Something more intelligent 
+           * and friendly needs to be done here...
+           */
+          message( 
+              "Press UP and DOWN to select an item, "
+              "HOME to toggle the setting. "
+              "Routing keys are available too! "
+              "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
+          break;
+
+        case VAL_PASSKEY+VPK_HOME:
+        case CMD_PREFLOAD:
+          prefs = oldPreferences;
+          changedPreferences();
+          message("changes discarded", 0);
+          break;
+        case VAL_PASSKEY+VPK_RETURN:
+        case CMD_PREFSAVE:
+          exitSave = 1;
+          goto exitMenu;
+
         case CMD_TOP:
         case CMD_TOP_LEFT:
         case VAL_PASSKEY+VPK_PAGE_UP:
@@ -1319,6 +1341,7 @@ updatePreferences (void) {
           menuIndex = menuSize - 1;
           lineIndent = 0;
           break;
+
         case CMD_LNUP:
         case CMD_PRDIFLN:
         case VAL_PASSKEY+VPK_CURSOR_UP:
@@ -1338,6 +1361,7 @@ updatePreferences (void) {
           } while (menu[menuIndex].test && !menu[menuIndex].test());
           lineIndent = 0;
           break;
+
         case CMD_FWINLT:
           if (lineIndent > 0)
             lineIndent -= MIN(brl.x*brl.y, lineIndent);
@@ -1350,9 +1374,11 @@ updatePreferences (void) {
           else
             playTune(&tune_bounce);
           break;
+
         case CMD_WINUP:
         case CMD_CHRLT:
         case VAL_PASSKEY+VPK_CURSOR_LEFT:
+        case CMD_BACK:
         case CMD_MENU_PREV_SETTING: {
           int count = item->maximum - item->minimum + 1;
           do {
@@ -1370,7 +1396,6 @@ updatePreferences (void) {
         case VAL_PASSKEY+VPK_CURSOR_RIGHT:
         case CMD_HOME:
         case CMD_RETURN:
-        case VAL_PASSKEY+VPK_RETURN:
         case CMD_MENU_NEXT_SETTING: {
           int count = item->maximum - item->minimum + 1;
           do {
@@ -1383,6 +1408,7 @@ updatePreferences (void) {
             playTune(&tune_command_rejected);
           break;
         }
+
 #ifdef ENABLE_SPEECH_SUPPORT
         case CMD_SAY_LINE:
           speech->say(line, lineLength);
@@ -1391,24 +1417,7 @@ updatePreferences (void) {
           speech->mute();
           break;
 #endif /* ENABLE_SPEECH_SUPPORT */
-        case CMD_HELP:
-          /* This is quick and dirty... Something more intelligent 
-           * and friendly need to be done here...
-           */
-          message( 
-              "Press UP and DOWN to select an item, "
-              "HOME to toggle the setting. "
-              "Routing keys are available too! "
-              "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
-          break;
-        case CMD_PREFLOAD:
-          prefs = oldPreferences;
-          changedPreferences();
-          message("changes discarded", 0);
-          break;
-        case CMD_PREFSAVE:
-          exitSave = 1;
-          goto exitMenu;
+
         default:
           if (command >= CR_ROUTE && command < CR_ROUTE+brl.x) {
             /* Why not support setting a value with routing keys. */
@@ -1433,6 +1442,10 @@ updatePreferences (void) {
           }
 
           /* For any other keystroke, we exit */
+          playTune(&tune_command_rejected);
+        case VAL_PASSKEY+VPK_ESCAPE:
+        case VAL_PASSKEY+VPK_END:
+        case CMD_PREFMENU:
         exitMenu:
           if (exitSave) {
             if (savePreferences()) {
