@@ -91,20 +91,20 @@ popdef([var])
 
 if test "${enableval}" = "no"
 then
-   ifelse(len([$6]), 0, [:], [$6])
+   ifelse(len([$7]), 0, [:], [$7])
 else
-ifelse(len([$7]), 0, [], [dnl
-   set -- [$7]
+ifelse(len([$5]), 0, [], [dnl
+   set -- [$5]
 ])dnl
    if test "${enableval}" = "yes"
    then
       brltty_ok=true
-ifelse(len([$7]), 0, [], [dnl
+ifelse(len([$5]), 0, [], [dnl
       test "${#}" -gt 0 && enableval="${1}"
 ])dnl
    else
       brltty_ok=false
-ifelse(len([$7]), 0, [], [dnl
+ifelse(len([$5]), 0, [], [dnl
       test "${#}" -gt 0 && {
          for brltty_selection
          do
@@ -119,11 +119,13 @@ ifelse(len([$7]), 0, [], [dnl
 
    if "${brltty_ok}"
    then
-ifelse(len([$7]), 0, [], [dnl
-      brltty_uc="`echo "use_$1_${enableval}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz-%ABCDEFGHIJKLMNOPQRSTUVWXYZ_%'`"
-      AC_DEFINE_UNQUOTED([${brltty_uc}])
+ifelse(len([$5]), 0, [], [dnl
+      test "${#}" -gt 0 && {
+         brltty_uc="`echo "use_$1_${enableval}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz-%ABCDEFGHIJKLMNOPQRSTUVWXYZ_%'`"
+         AC_DEFINE_UNQUOTED([${brltty_uc}])
+      }
 ])dnl
-      ifelse(len([$5]), 0, [:], [$5])
+      ifelse(len([$6]), 0, [:], [$6])
    else
       AC_MSG_ERROR([invalid selection: --enable-$1=${enableval}])
    fi

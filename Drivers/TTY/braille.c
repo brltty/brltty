@@ -42,7 +42,7 @@
 #elif defined(HAVE_PKG_NCURSES)
 #include <ncurses.h>
 #else /* HAVE_PKG_ */
-#error unknown curses package
+#error curses package either unspecified or unsupported
 #endif /* HAVE_PKG_ */
 
 #ifdef HAVE_ICONV_H

@@ -479,13 +479,17 @@ AC_SUBST([system_object])
 
 BRLTTY_ARG_DISABLE(
    [preferences-menu],
-   [the preferences menu], [dnl
+   [the preferences menu],
+   [],
+[dnl
    AC_DEFINE([ENABLE_PREFERENCES_MENU])
 ])
 
 BRLTTY_ARG_DISABLE(
    [table-selection],
-   [text/attribute/contraction table selection in preferences menu], [dnl
+   [text/attribute/contraction table selection in preferences menu],
+   [],
+[dnl
    AC_DEFINE([ENABLE_TABLE_SELECTION])
 ])
 translation_table_objects='tbl.$O'
@@ -493,13 +497,17 @@ AC_SUBST([translation_table_objects])
 
 BRLTTY_ARG_DISABLE(
    [learn-mode],
-   [interactive command learn mode], [dnl
+   [interactive command learn mode],
+   [],
+[dnl
    AC_DEFINE([ENABLE_LEARN_MODE])
 ])
 
 BRLTTY_ARG_DISABLE(
    [contracted-braille],
-   [in-line contracted braille], [dnl
+   [in-line contracted braille],
+   [],
+[dnl
    AC_DEFINE([ENABLE_CONTRACTED_BRAILLE])
    contracted_braille_objects='ctb_compile.$O ctb_translate.$O'
    install_contraction_tables=install-contraction-tables
@@ -509,7 +517,9 @@ AC_SUBST([install_contraction_tables])
 
 BRLTTY_ARG_DISABLE(
    [beeper-support],
-   [support for the console tone generator], [dnl
+   [support for the console tone generator],
+   [],
+[dnl
    AC_DEFINE([ENABLE_BEEPER_SUPPORT])
    beeper_tune_objects='beeper.$O'
 ])
@@ -517,7 +527,9 @@ AC_SUBST([beeper_tune_objects])
 
 BRLTTY_ARG_DISABLE(
    [pcm-support],
-   [support for soundcard digital audio], [dnl
+   [support for soundcard digital audio],
+   [${brltty_pcm_interfaces}],
+[dnl
    AC_DEFINE([ENABLE_PCM_SUPPORT])
    pcm_tune_objects='pcm.$O'
    case "${enableval}"
@@ -526,14 +538,14 @@ BRLTTY_ARG_DISABLE(
          AC_SEARCH_LIBS([snd_pcm_open], [asound], [], [AC_MSG_ERROR([ALSA library not found])])
          ;;
    esac
-],
-[],
-[${brltty_pcm_interfaces}])
+])
 AC_SUBST([pcm_tune_objects])
 
 BRLTTY_ARG_DISABLE(
    [midi-support],
-   [support for the Musical Instrument Digital Interface], [dnl
+   [support for the Musical Instrument Digital Interface],
+   [],
+[dnl
    AC_DEFINE([ENABLE_MIDI_SUPPORT])
    midi_tune_objects='midi.$O'
 ])
@@ -541,7 +553,9 @@ AC_SUBST([midi_tune_objects])
 
 BRLTTY_ARG_DISABLE(
    [fm-support],
-   [support for the soundcard synthesizer], [dnl
+   [support for the soundcard synthesizer],
+   [],
+[dnl
    AC_DEFINE([ENABLE_FM_SUPPORT])
    fm_tune_objects='fm.$O adlib.$O'
 ])
@@ -549,7 +563,9 @@ AC_SUBST([fm_tune_objects])
 
 BRLTTY_ARG_DISABLE(
    [pm-configfile],
-   [user customization of Papenmeier driver], [dnl
+   [user customization of Papenmeier driver],
+   [],
+[dnl
    AC_DEFINE([ENABLE_PM_CONFIGURATION_FILE])
    PM_CONFIGFILE_DEPENDENCY=configuration-file
 ])
@@ -557,13 +573,17 @@ AC_SUBST([PM_CONFIGFILE_DEPENDENCY])
 
 BRLTTY_ARG_ENABLE(
    [gpm],
-   [mouse tracking via GPM], [dnl
+   [mouse tracking via GPM],
+   [],
+[dnl
    AC_CHECK_LIB([gpm], [Gpm_Open])
 ])
 
 BRLTTY_ARG_DISABLE(
    [api],
-   [the application programming interface], [dnl
+   [the application programming interface],
+   [],
+[dnl
    BRLTTY_CAP_PTHREADS([dnl
       AC_DEFINE([ENABLE_API])
       api_objects='api_server.$O api_common.$O rangelist.$O'
@@ -630,7 +650,9 @@ fi])
 brltty_static_flag="${brltty_cv_prog_ld_static}"
 BRLTTY_ARG_ENABLE(
    [standalone-programs],
-   [statically linked executables], [dnl
+   [statically linked executables],
+   [],
+[dnl
    brltty_standalone_programs="yes"
    LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
 ])
@@ -672,15 +694,19 @@ then
    usb_objects="usb."'$O'" usb_${usb_object}."'$O'
    BRLTTY_ARG_DISABLE(
       [usb-support],
-      [support for the Universal Serial Bus], [dnl
+      [support for the Universal Serial Bus],
+      [],
+[dnl
       AC_DEFINE([ENABLE_USB_SUPPORT])
-   ])
+])
 fi
 AC_SUBST([usb_objects])
 
 BRLTTY_ARG_DISABLE(
    [bluetooth-support],
-   [support for bluetooth-capable devices], [dnl
+   [support for bluetooth-capable devices],
+   [],
+[dnl
    AC_CHECK_HEADERS([bluetooth/bluetooth.h])
 ])
 
@@ -796,7 +822,9 @@ BRLTTY_ARG_TABLE([attributes], [attributes], [])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],
-   [support for speech synthesizers], [dnl
+   [support for speech synthesizers],
+   [],
+[dnl
    AC_DEFINE([ENABLE_SPEECH_SUPPORT])
    speech_support_object='spk.$O'
 
