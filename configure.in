@@ -603,7 +603,7 @@ BRLTTY_BRAILLE_DRIVER([md], [MDV])
 BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
-BRLTTY_BRAILLE_DRIVER([tt], [TTY])
+BRLTTY_BRAILLE_DRIVER([tt], [TTY], [-lcurses])
 BRLTTY_BRAILLE_DRIVER([va], [Vario])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
@@ -641,7 +641,7 @@ then
    xt_toolkit_uc="`echo "${xt_toolkit}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
    AC_DEFINE_UNQUOTED([HAVE_LIB_${xt_toolkit_uc}])
    test -n "${xt_toolkit}" && {
-      BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
+      BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(X_LIBS) -l$(XT_TOOLKIT) -lXt -lX11])
    }
 fi
 BRLTTY_ARG_DRIVER([braille])

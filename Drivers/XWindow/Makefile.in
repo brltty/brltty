@@ -28,7 +28,7 @@ DRIVER_CODE = xw
 DRIVER_NAME = XWindow
 BRAILLE_MODELS = X11
 HELP_DEPS = $(HELP_TEXT)
-BRL_OBJS = $(X_LIBS) -l$(XT_TOOLKIT) -lXt -lX11
+BRL_OBJS = @braille_libraries_xw@
 
 include $(SRC_TOP)driver.mk
 
