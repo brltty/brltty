@@ -940,7 +940,7 @@ static void *server(void *arg)
     pthread_exit(NULL);
   }
 
-  socketHosts = splitString(hosts,';',&numSockets);
+  socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
     LogPrint(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
     pthread_exit(NULL);
@@ -1246,7 +1246,7 @@ void api_identify(void)
 int api_open(BrailleDisplay *brl, char **parameters)
 {
   int res,i;
-  char *hosts=":0;127.0.0.1:0";
+  char *hosts=":0+127.0.0.1:0";
   pthread_attr_t attr;
 
   DisplaySize[0] = htonl(brl->x);
