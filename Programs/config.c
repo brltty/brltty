@@ -1657,6 +1657,8 @@ void
 startup (int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, NULL);
+  if (argc) LogPrint(LOG_ERR, "Excess parameter: %s", argv[0]);
+
   prepareBootParameters();
   initializeAllScreens();
 

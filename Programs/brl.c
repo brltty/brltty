@@ -212,7 +212,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
   int timer = 0;
   setStatusText(brl, "lrn");
   message("command learn mode", MSG_NODELAY);
-  while ((timer += drainBrailleOutput(brl, poll)) < timeout) {
+  do {
     int key;
     if ((key = readBrailleCommand(brl, CMDS_SCREEN)) != EOF) {
       int blk = key & VAL_BLK_MASK;
@@ -222,8 +222,12 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
       const CommandEntry *candidate = NULL;
       const CommandEntry *last = NULL;
       const CommandEntry *command = commandTable;
+
+      LogPrint(LOG_DEBUG, "Learn: key=%06X", key);
+      if ((key & VAL_REPEAT_DELAY) && !(key & VAL_REPEAT_INITIAL)) continue;
       if (cmd == CMD_NOOP) continue;
-      if ((cmd == CMD_LEARN) && ((key & VAL_REPEAT_INITIAL) || !(key & VAL_REPEAT_DELAY))) return;
+      if (cmd == CMD_LEARN) return;
+
       while (command->name) {
         if ((command->code & VAL_BLK_MASK) == blk) {
           if (!last || (last->code < command->code)) last = command;
@@ -289,9 +293,10 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         }
       }
       message(buffer, MSG_NODELAY|MSG_SILENT);
+      LogPrint(LOG_DEBUG, "Learn: %s", buffer);
       timer = 0;
     }
-  }
+  } while ((timer += drainBrailleOutput(brl, poll)) < timeout);
   message("done", 0);
 }
 #endif /* ENABLE_LEARN_MODE */
