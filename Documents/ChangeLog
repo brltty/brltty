@@ -1,6 +1,126 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+August 12, 2004:
+ - BRLTTY 3.6pre1 released:
+   Clarify the copyright statement in the top-level README.
+   Reorganize the startup logs.
+   Add support for braille display autodetection (-b auto).
+   Allow more than one braille device to be specified.
+   Access the driver directly if the API fails to start.
+   Convert PCM and MIDI devices from file descriptors into opaque types.
+   Add ALSa support for PCM and MIDI devices.
+   Introduce common serial device access routines.
+   A va_list (stdarg) must be reset before being reused on some platforms.
+   Use the type ScreenKey rather than unsigned short for screen key insertion.
+   Fix the handling of control characters when using scan codes.
+   Move the handling of meta character input entirely into the screen driver.
+   Implement Linux-specific AT2 support.
+   Failure to load the specified text table results in an uninitialized reverse text table.
+   Add an initial timeout parameter to readChunk().
+   Implement changeOpenFlags(), setOpenFlags(), and setBlockingIo().
+   Convert learn mode to use a better timeout mechanism.
+   Split describeCommand() out of learnMode().
+   The vertical window shift should be the number of lines on the display if greater than 1.
+   Add the TTY braille driver.
+   Add the XWindow braille driver.
+   Add ASCII characters 0X60,0X7B-0X7F to text.brf.tbl.
+   Support \s (space) for translation tables.
+   Update the Spanish text table to the O.N.C.E. standard.
+   Updated big5 contraction table.
+   Support FreeBSD installations which don't have speaker support.
+   Add support for NetBSD.
+   Support compilation on OSF.
+   Add compile-time warnings for features which aren't available.
+   Save our latest copy of Gnopernicus's brltty driver (ttybrl.c).
+   API changes:
+      Update version to 0.3.0.
+      Increment protocol number.
+      Change the license for all client-side files to the LGPL.
+      Prefix definitions in brldefs.h with BRL_.
+      Remove from brldefs.h what shouldn't be in there.
+      Split protocol-specific definitions from api.h out into api_protocol.h.
+      Added two packet types for (un)ignoring key sets.
+      Renamed brlapi_(un)ignoreKeys to brlapi_(un)ignoreKeyRange.
+      Added the brlapi_(un)ifnoreKeySet functions.
+      For (un)ignore, only consider the blk and arg fields of a command.
+      Protocol enhancements (some packets removed, certain operations faster).
+      Error management is now partly asynchronous.
+      Server partially rewritten to use select() system call.
+      Now only two threads: one for brltty, one for incoming connections.
+      Default client error handler with capability to define another one.
+      Some functions renamed.
+      apitest added.
+      Don't look at $WINDOW to determine the tty (yet).
+      Add support for drivers with brl_writeVisual().
+      Implement recursive windows.
+      Deprecate brlapi_readCommand() and replace it with brlapi_readKey().
+      Replace uses of uint32_t with unsigned int where possible.
+      Rename BRLAPI_EXTWRITESTRUCT_INITIALIZER to BRLAPI_WRITESTRUCT_INITIALIZER.
+   USB fixes:
+      Allow usbBeginInput() to be called more than once on the same endpoint.
+      Set the configuration before claiming the interface.
+      Configuration descriptors must be read by number rather than by value.
+      usbCancelRequest() shouldn't deallocate a completed request.
+      BSD systems only allow short transfer to be set for input endpoints.
+      OpenBSD endpoint read timeouts should be silent and non-fatal.
+   HandyTech driver changes:
+      Remove the no longer needed (read|write)Bytes() routines.
+      Turn brl_(read|write)Packet() into standalone routines for later enhancement.
+      Add bluetooth support.
+      Add support for keyboard input.
+   Papenmeier driver changes:
+      Change some BrailleX 2D Screen key bindings.
+      Implement simulated EL switches for those models which don't have them.
+      Simplify the EL command generation macros.
+      Reduce the volume of output logging.
+      Log the baud at which the driver is probing.
+      Make protocol I input packet logging more standard.
+      Fix the count for copying generic status cell data from the core-supplied buffer.
+      Remove unused definitions from the header.
+      Move protocol I definitions from the header into the protocol I section of the implementation.
+      Complete the implementation of protocol II.
+      Remove out-of-date debugging utilities.
+   TSI driver changes:
+      Remove CTS checking.
+      Remove the wait-for-connect loop.
+   VisioBraille driver changes:
+      Prefix public constants with BRL_VS.
+      Reindent the source to core conventions.
+      Don't remember display content until successfully written.
+   Voyager driver changes:
+      Fix an upper bound error in brl_writeWindow().
+      Remove the write retry loops.
+      Simplify the control request retry algorithm.
+      Act on first key release rather than after all keys are released.
+      Add support for the part232 serial interface.
+      Remove knowledge of USB string encoding.
+      Rename the BrlInput= parameter to InputMode=.
+      Change the default for InputMode= to no.
+      Change InputMode=no to mean don't require chording.
+      Add the StatusCells= parameter.
+      Simplify the help generation macros.
+      Reorganize the help template.
+   Build changes:
+      Rename --disable-usb to --disable-usb-support.
+      Add --disable-bluetooth-support.
+      Rename --disable-...-tunes to --disable-...-support.
+      Add --with-curses=.
+      Add --with-xt-toolkit=.
+      Reorder the arguments to BRLTTY_ARG_ENABLE/DISABLE.
+      Detect if Linux-specific AT2 support can be used.
+      Check for iconv.h.
+      Check for <sys/select.h>.
+      Detect if __attribute__((format(printf))) is supported.
+      Detect if __attribute__((packed)) is supported.
+      Detect if __attribute__((unused)) is supported.
+      Detect if the __alignof__ operator is supported.
+      Abort the configure if ld flags aren't known.
+      Completely rewrite install-sh to support more than one source operand.
+      Hard-code "ar" in the make file since HP-UX doesn't set "$(AR)".
+      The FestivalLite driver needs -lm.
+      Don't build the API or the Mikropuhe driver if pthreads isn't available.
+
 June 12, 2004:
  - BRLTTY 3.5 released:
    Don't include the Mikropuhe speech driver in the RPM. (dm)
