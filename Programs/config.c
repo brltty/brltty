@@ -1191,23 +1191,23 @@ updatePreferences (void) {
     static const char *sayModes[] = {"Immediate", "Enqueue"};
 #endif /* ENABLE_SPEECH_SUPPORT */
     typedef struct {
-       unsigned char *setting;                        /* pointer to the item value */
-       int (*changed) (unsigned char setting);
-       int (*test) (void);
-       const char *description;                        /* item description */
-       const char *const*names;                        /* 0 == numeric, 1 == bolean */
-       unsigned char minimum;                        /* minimum range */
-       unsigned char maximum;                        /* maximum range */
-       unsigned char multiple;                        /* maximum range */
+      unsigned char *setting;                 /* pointer to current value */
+      int (*changed) (unsigned char setting); /* called when value changes */
+      int (*test) (void);                     /* returns true if item should be presented */
+      const char *label;                      /* item name for presentation */
+      const char *const *names;               /* symbolic names of values */
+      unsigned char minimum;                  /* lowest valid value */
+      unsigned char maximum;                  /* highest valid value */
+      unsigned char divisor;                  /* present only multiples of this value */
     } MenuItem;
-    #define MENU_ITEM(setting, changed, test, description, values, minimum, maximum, multiple) {&setting, changed, test, description, values, minimum, maximum, multiple}
-    #define NUMERIC_ITEM(setting, changed, test, description, minimum, maximum, multiple) MENU_ITEM(setting, changed, test, description, NULL, minimum, maximum, multiple)
-    #define TIME_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 1, 100, updateInterval/10)
-    #define VOLUME_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 0, 100, 5)
-    #define TEXT_ITEM(setting, changed, test, description, names, count) MENU_ITEM(setting, changed, test, description, names, 0, count-1, 1)
-    #define SYMBOLIC_ITEM(setting, changed, test, description, names) TEXT_ITEM(setting, changed, test, description, names, ((sizeof(names) / sizeof(names[0]))))
-    #define BOOLEAN_ITEM(setting, changed, test, description) SYMBOLIC_ITEM(setting, changed, test, description, booleanValues)
-    #define GLOB_ITEM(data, changed, test, description) TEXT_ITEM(data.setting, changed, test, description, data.paths, data.count)
+    #define MENU_ITEM(setting, changed, test, label, values, minimum, maximum, divisor) {&setting, changed, test, label, values, minimum, maximum, divisor}
+    #define NUMERIC_ITEM(setting, changed, test, label, minimum, maximum, divisor) MENU_ITEM(setting, changed, test, label, NULL, minimum, maximum, divisor)
+    #define TIME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 1, 100, updateInterval/10)
+    #define VOLUME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 0, 100, 5)
+    #define TEXT_ITEM(setting, changed, test, label, names, count) MENU_ITEM(setting, changed, test, label, names, 0, count-1, 1)
+    #define SYMBOLIC_ITEM(setting, changed, test, label, names) TEXT_ITEM(setting, changed, test, label, names, ((sizeof(names) / sizeof(names[0]))))
+    #define BOOLEAN_ITEM(setting, changed, test, label) SYMBOLIC_ITEM(setting, changed, test, label, booleanValues)
+    #define GLOB_ITEM(data, changed, test, label) TEXT_ITEM(data.setting, changed, test, label, data.paths, data.count)
     MenuItem menu[] = {
        BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
        SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, "Text Style", textStyles),
@@ -1296,19 +1296,19 @@ updatePreferences (void) {
       }
 
       {
-        const char *description = item->description;
+        const char *label = item->label;
         const char *delimiter = ": ";
-        int settingIndent = strlen(description) + strlen(delimiter);
+        int settingIndent = strlen(label) + strlen(delimiter);
         int valueLength = strlen(value);
         int lineLength = settingIndent + valueLength;
         char line[lineLength + 1];
 
         /* First we draw the current menu item in the buffer */
         snprintf(line,  sizeof(line), "%s%s%s",
-                 description, delimiter, value);
+                 label, delimiter, value);
 
         /* Next we deal with the braille window position in the buffer.
-         * This is intended for small displays... or long item descriptions 
+         * This is intended for small displays and/or long item descriptions 
          */
         if (settingChanged) {
           settingChanged = 0;
@@ -1401,7 +1401,7 @@ updatePreferences (void) {
             do {
               if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
               if (!--count) break;
-            } while ((*item->setting % item->multiple) || (item->changed && !item->changed(*item->setting)));
+            } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
             if (count)
               settingChanged = 1;
             else
@@ -1418,7 +1418,7 @@ updatePreferences (void) {
             do {
               if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
               if (!--count) break;
-            } while ((*item->setting % item->multiple) || (item->changed && !item->changed(*item->setting)));
+            } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
             if (count)
               settingChanged = 1;
             else
