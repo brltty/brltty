@@ -44,10 +44,15 @@
 36: speak line
 134: mute speech
 
-25 chord: preferences options: menu, save, reset, cancel
 1235 chord: restart braille driver
 
-Chord required for *dangerous* commands, i.e. routing, cut/paste,
+25 chord: preferences options:
+  134: menu
+  1235: reset
+  234: save
+  1356: cancel
+
+Chord required for *dangerous* commands, e.g. routing, cut/paste,
 restart driver, etc.
 
 <x40>Advance Bar Combinations:
@@ -70,11 +75,24 @@ restart driver, etc.
 <x40>
 Internal:
 
-g chord: position internal cursor for routing or cutting.
-  Terminate with route, cutbeg, cutend or cancel.
-  To move cursor: chrlt/chrrt by 1; bar by (width+3)/4; lnbeg, home, lnend for
-    beginning, middle and end of display.
-  i gives attribute info of a character.
+1245 chord: position internal cursor for column-specific function:
+  To move internal cursor:
+    125: centre of window
+    235: left end of window
+    256: right end of window
+    3: character left
+    6: character right
+<x20>    Advance bar left/right: quarter window left/right
+<x40>    left bar left: quarter window left
+<x40>    right bar right: quarter window right
+<x40>    routing key: go to character
+  To terminate:
+    236 chord: cut start
+    126 chord: cut append
+    356 chord: cut end rectangular
+    16 chord: cut end linear
+    24: describe attributes of selected character
+    1356: cancel
 
 k chord toggles keyboard emulation mode - initially off.
 When on, unchorded characters passed directly to inskey(), unless prefixed

@@ -233,6 +233,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
             {
               static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
               delay(200);
+              getbrlkeys();
+              qlen = 0;
               write(blite_fd, request, sizeof(request));
               waiting_ack = 0;
               delay(200);
@@ -400,11 +402,12 @@ brl_writeWindow (BrailleDisplay * brl)
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
-  static int state = 0;		/* 0 = normal - transparent
-				 * 1 = positioning internal cursor
-				 * 2 = setting repeat count
-				 * 3 = configuration options
-				 */
+  static enum {
+    ST_NORMAL,	/* transparent */
+    ST_CURSOR,	/* position internal cursor */
+    ST_REPEAT,	/* set repeat count */
+    ST_CONFIG	/* preferences options */
+  } state = ST_NORMAL;
   static int repeat = 0;		/* repeat count for command */
   static int repeatNext = 0; /* flag to indicate  whether 0 we repeat the
 				same command or 1 we get the next command
@@ -431,7 +434,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   /* Our overall behaviour depends on the state variable (see above). */
   switch (state)
     {
-    case 0:			/* transparent */
+    case ST_NORMAL:			/* transparent */
       /* First we deal with external commands: */
       do
 	{
@@ -496,20 +499,20 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	    return CMD_NOOP;
 	  case BLT_POSITN:	/* position internal cursor */
 	    int_cursor = blitesz / 2;
-	    state = 1;
+	    state = ST_CURSOR;
 	    return CMD_NOOP;
 	  case BLT_REPEAT:	/* set repeat count */
 	    hold = 0;
 	    sprintf (outmsg, "Repeat count:");
 	    message (outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
-	    state = 2;
+	    state = ST_REPEAT;
 	    return CMD_NOOP;
 	  case BLT_CONFIG:	/* configuration menu */
 	    sprintf (outmsg, "Config? [m/s/r/z]");
 	    message (outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
-	    state = 3;
+	    state = ST_CONFIG;
 	    return CMD_NOOP;
 	  case ' ':		/* practical exception for */
 	    /* If keyboard mode off, space bar == CMD_HOME */
@@ -606,7 +609,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       outmsg[0] = 0;
       return temp;
 
-    case 1:			/* position internal cursor */
+    case ST_CURSOR:			/* position internal cursor */
       switch (key.cmd)
 	{
 	case CMD_HOME:		/* go to middle */
@@ -636,7 +639,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  if (key.spcbar)
 	    {
 	      temp = CR_ROUTE + int_cursor - 1;
-	      int_cursor = state = 0;
+	      int_cursor = 0;
+	      state = ST_NORMAL;
 	    }
 	  return temp;
 	case CR_CUTBEGIN:	/* begin cut */
@@ -644,7 +648,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;
-	      int_cursor = state = 0;
+	      int_cursor = 0;
+	      state = ST_NORMAL;
 	    }
 	  return temp;
 	case CR_CUTRECT:	/* end cut */
@@ -652,22 +657,27 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;
-	      int_cursor = state = 0;
+	      int_cursor = 0;
+	      state = ST_NORMAL;
 	    }
 	  return temp;
 	case CMD_DISPMD: /* attribute info */
 	  temp = CR_DESCCHAR + int_cursor - 1;
-	  int_cursor = state = 0;
+	  int_cursor = 0;
+	  state = ST_NORMAL;
 	  return temp;
 	default:
-	  if (key.asc == BLT_ABORT)	/* cancel cursor positioning */
-	    int_cursor = state = 0;
+	  if (key.asc == BLT_ABORT) {
+            /* cancel cursor positioning */
+	    int_cursor = 0;
+	    state = ST_NORMAL;
+          }
 	  break;
 	}
       if (key.routing)
 	int_cursor = key.routing;
       return CMD_NOOP;
-    case 2:			/* set repeat count */
+    case ST_REPEAT:			/* set repeat count */
       if (key.asc >= '0' && key.asc <= '9')
 	{
 	  hold = (hold * 10 + key.asc - '0') % 100;
@@ -686,20 +696,20 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  message (outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;
 	}
-      else{
+      else {
 	intoverride = 0;
 	outmsg[0] = 0;
-	state = 0;
-	if(hold > 0) {
-	  if(key.asc == SWITCHVT_NEXT || key.asc == SWITCHVT_PREV)
+	state = ST_NORMAL;
+	if (hold > 0) {
+	  if (key.asc == SWITCHVT_NEXT || key.asc == SWITCHVT_PREV)
 	    /* That's chorded or not... */
 	    return CR_SWITCHVT + (hold-1);
-	  else if(key.asc == O_SETMARK)
+	  else if (key.asc == O_SETMARK)
 	    return CR_SETMARK + (hold-1);
-	  else if(key.asc == O_GOTOMARK)
+	  else if (key.asc == O_GOTOMARK)
 	    return CR_GOTOMARK + (hold-1);
 	  else if (key.spcbar)		/* chorded */
-	    switch(key.asc)
+	    switch (key.asc)
 	      {
 	      case BLT_ENDCMD:	/* set repeat count */
 		if (hold > 1) {
@@ -717,20 +727,24 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	}
       }
       return CMD_NOOP;
-    case 3:			/* preferences options */
+    case ST_CONFIG:			/* preferences options */
       switch (key.asc)
 	{
 	case 'm':		/* preferences menu */
-	  intoverride = state = 0;
+	  intoverride = 0;
+	  state = ST_NORMAL;
 	  return CMD_PREFMENU;
 	case 's':		/* save preferences */
-	  intoverride = state = 0;
+	  intoverride = 0;
+	  state = ST_NORMAL;
 	  return CMD_PREFSAVE;
 	case 'r':		/* restore saved preferences */
-	  intoverride = state = 0;
+	  intoverride = 0;
+	  state = ST_NORMAL;
 	  return CMD_PREFLOAD;
 	case BLT_ABORT:	/* abort */
-	  intoverride = state = 0;
+	  intoverride = 0;
+	  state = ST_NORMAL;
 	default:		/* in any case */
 	  return CMD_NOOP;
 	}
