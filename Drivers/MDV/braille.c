@@ -63,6 +63,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -215,21 +216,11 @@ brl_identify (void)
 
 static int
 myread(int fd, void *buf, unsigned len)
-/* This is a replacement for read for use in nonblocking mode: when
-   c_cc[VTIME] = 1, c_cc[VMIN] = 0. We want to read len bytes into buf, but
-   return early if the timeout expires. I would have thought setting
-   c_cc[VMIN] to len would have done the trick, but apparently c_cc[VMIN]>0
-   means to wait indefinitly for at least 1byte, which we don't want. */
 {
-  char *ptr = (char *)buf;
-  int r, l = 0;
-  while(l < len){
-    r = read(fd,ptr+l,len-l);
-    if(r == 0) return(l);
-    else if(r<0) return(r);
-    l += r;
-  }
-  return(l);
+  int l=0;
+  if(readChunk(fd,buf,&l,len,100,100)) return(len);
+  if(errno==EAGAIN) return(l);
+  return(-1);
 }
 
 static int
@@ -285,27 +276,17 @@ expect_receive_packet(unsigned char *packet)
    packet, we skip it and try again. Returns 1 if a packet was successfully
    received, 0 otherwise. */
 {
-  /* timeout of 0.2sec */
-  curtio.c_cc[VTIME] = 2;
-  curtio.c_cc[VMIN] = 0;
-  tcsetattr (brl_fd, TCSANOW, &curtio);
-  /* get the first byte*/
-  if(read(brl_fd, packet, 1) <= 0) return 0;
-  /* now timeout of only 0.1sec, so that we get all bytes that were sent
-     together but we don't wait for more. */
-  curtio.c_cc[VTIME] = 1;
-  curtio.c_cc[VMIN] = 0;
-  tcsetattr (brl_fd, TCSANOW, &curtio);
+  if(!awaitInput(brl_fd, 200)) return 0;
   while(1) {
     /* Read until we get an SOH */
-    while(packet[0] != SOH)
-      if(read(brl_fd, packet, 1) <= 0) return 0;
+    do {
+      if(myread(brl_fd, packet, 1) <= 0) return 0;
+    } while(packet[0] != SOH);
     /* Now read and check the rest of the packet */
     if(receive_rest(packet)) break;
     /* Try to read another packet. We hunt for an SOH again. For now we don't
        bother to handle the case where the SOH of a valid packet was read
        and discarded in receive_rest(). */
-    if(read(brl_fd, packet, 1) <= 0) return 0;
   }
   /* success */
   return 1;
@@ -317,19 +298,10 @@ peek_receive_packet(unsigned char *packet)
    if not. */
 {
   do {
-    /* reset to nonblocking, timeout 0 */
-    curtio.c_cc[VTIME] = 0;
-    curtio.c_cc[VMIN] = 0;
-    tcsetattr (brl_fd, TCSANOW, &curtio);
     /* Check for first byte */
     do {
       if(read(brl_fd, packet, 1) <= 0) return 0;
     } while(packet[0] != SOH);
-    /* further reads will wait a bit to get a complete sequence */
-    /* timeout of 0.1sec */
-    curtio.c_cc[VTIME] = 1;
-    curtio.c_cc[VMIN] = 0;
-    tcsetattr (brl_fd, TCSANOW, &curtio);
   } while(!receive_rest(packet));
   return 1;
 }
@@ -359,8 +331,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* Construct new settings */
   initializeSerialAttributes(&curtio);
-
-  /* nonblocking input will be set in ..._receive_packet() functions */
 
   if(!restartSerialDevice(brl_fd, &curtio, 19200)) goto failure;
  
