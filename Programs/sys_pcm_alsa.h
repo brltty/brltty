@@ -22,7 +22,7 @@ struct PcmDeviceStruct {
   snd_pcm_hw_params_t *hwparams;
 };
 
-static void *alsa_library = NULL;
+static void *alsaLibrary;
 
 /* ALSA PCM function pointers */
 #define PCM_ALSA_SYMBOL(name) static DEFINE_POINTER_TO(snd_##name, my_)
@@ -58,34 +58,34 @@ PcmDevice *
 openPcmDevice (int errorLevel, const char *device) {
   PcmDevice *pcm;
 
-  if (!alsa_library) {
-    if (!(alsa_library = loadSharedObject("libasound.so.2"))) {
+  if (!alsaLibrary) {
+    if (!(alsaLibrary = loadSharedObject("libasound.so.2"))) {
       LogPrint(LOG_ERR, "Unable to load ALSA PCM library.");
       return NULL;
     }
 
-    findSharedSymbol(alsa_library, "snd_strerror", &my_snd_strerror);
-    findSharedSymbol(alsa_library, "snd_pcm_open", &my_snd_pcm_open);
-    findSharedSymbol(alsa_library, "snd_pcm_close", &my_snd_pcm_close);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_malloc", &my_snd_pcm_hw_params_malloc);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_any", &my_snd_pcm_hw_params_any);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_set_access", &my_snd_pcm_hw_params_set_access);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_get_channels", &my_snd_pcm_hw_params_get_channels);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_set_channels", &my_snd_pcm_hw_params_set_channels);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_get_format", &my_snd_pcm_hw_params_get_format);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_set_format", &my_snd_pcm_hw_params_set_format);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_get_rate", &my_snd_pcm_hw_params_get_rate);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_get_rate_max", &my_snd_pcm_hw_params_get_rate_max);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_get_period_size", &my_snd_pcm_hw_params_get_period_size);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_set_rate_near", &my_snd_pcm_hw_params_set_rate_near);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_set_buffer_time_near", &my_snd_pcm_hw_params_set_buffer_time_near);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params", &my_snd_pcm_hw_params);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_get_sbits", &my_snd_pcm_hw_params_get_sbits);
-    findSharedSymbol(alsa_library, "snd_pcm_hw_params_free", &my_snd_pcm_hw_params_free);
-    findSharedSymbol(alsa_library, "snd_pcm_prepare", &my_snd_pcm_prepare);
-    findSharedSymbol(alsa_library, "snd_pcm_writei", &my_snd_pcm_writei);
-    findSharedSymbol(alsa_library, "snd_pcm_drain", &my_snd_pcm_drain);
-    findSharedSymbol(alsa_library, "snd_pcm_resume", &my_snd_pcm_resume);
+    findSharedSymbol(alsaLibrary, "snd_strerror", &my_snd_strerror);
+    findSharedSymbol(alsaLibrary, "snd_pcm_open", &my_snd_pcm_open);
+    findSharedSymbol(alsaLibrary, "snd_pcm_close", &my_snd_pcm_close);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_malloc", &my_snd_pcm_hw_params_malloc);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_any", &my_snd_pcm_hw_params_any);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_access", &my_snd_pcm_hw_params_set_access);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_channels", &my_snd_pcm_hw_params_get_channels);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_channels", &my_snd_pcm_hw_params_set_channels);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_format", &my_snd_pcm_hw_params_get_format);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_format", &my_snd_pcm_hw_params_set_format);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_rate", &my_snd_pcm_hw_params_get_rate);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_rate_max", &my_snd_pcm_hw_params_get_rate_max);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_period_size", &my_snd_pcm_hw_params_get_period_size);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_rate_near", &my_snd_pcm_hw_params_set_rate_near);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_buffer_time_near", &my_snd_pcm_hw_params_set_buffer_time_near);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params", &my_snd_pcm_hw_params);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_sbits", &my_snd_pcm_hw_params_get_sbits);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_free", &my_snd_pcm_hw_params_free);
+    findSharedSymbol(alsaLibrary, "snd_pcm_prepare", &my_snd_pcm_prepare);
+    findSharedSymbol(alsaLibrary, "snd_pcm_writei", &my_snd_pcm_writei);
+    findSharedSymbol(alsaLibrary, "snd_pcm_drain", &my_snd_pcm_drain);
+    findSharedSymbol(alsaLibrary, "snd_pcm_resume", &my_snd_pcm_resume);
   }
 
   if ((pcm = malloc(sizeof(*pcm)))) {

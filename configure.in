@@ -551,12 +551,6 @@ BRLTTY_ARG_DISABLE(
 [dnl
    AC_DEFINE([ENABLE_MIDI_SUPPORT])
    midi_tune_objects='midi.$O'
-   case "${enableval}"
-   in
-      alsa)
-         AC_SEARCH_LIBS([snd_seq_open], [asound], [], [AC_MSG_ERROR([ALSA MIDI library not found])])
-         ;;
-   esac
 ])
 AC_SUBST([midi_tune_objects])
 
