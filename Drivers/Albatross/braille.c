@@ -123,7 +123,7 @@ brl_identify (void) {
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   {
-    static const DotsTable dots = {0X02, 0X40, 0X20, 0X10, 0X08, 0X04, 0X80, 0X01};
+    static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
     makeOutputTable(&dots, &outputTable);
   }
 
