@@ -1659,10 +1659,10 @@ static void *server(void *arg)
 
 /* Function : initializeUnmaskedKeys */
 /* Specify which keys should be passed to the client by default, as soon */
-/* as he controls the tty */
-/* If clients asked for commands, one lets him process routing cursor */
+/* as it controls the tty */
+/* If client asked for commands, one lets it process routing cursor */
 /* and screen-related commands */
-/* If the client is interested in braille codes, one passes him nothing */
+/* If the client is interested in braille codes, one passes it nothing */
 /* to let the user read the screen in case theree is an error */
 static int initializeUnmaskedKeys(Connection *c)
 {

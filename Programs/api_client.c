@@ -989,12 +989,29 @@ brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t n
   return tmp;
 }
 
+int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size)
+{
+  char hex[16] =
+    { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
+  int chars = 16; /* Number of bytes to dump */
+  char hexString[3*chars+1];
+  int i, nbChars = MAX(chars, size);
+  unsigned char *p = hexString;
+  for (i=0; i<nbChars; i++) {
+    char c = ((char *) packet)[i];
+    *p = hex[c >> 4]; p++;
+    *p = hex[c & (~0xf0)]; p++;
+    *p = ' '; p++;
+  }
+  p--; /* Don't keep last space */ *p = '\0';
+  return snprintf(buf, n, "%s on %s request (%s)",
+    brlapi_strerror(err), brlapi_packetType(type), hexString);
+}
+
 void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)
 {
-  const unsigned char *c;
-  fprintf(stderr, "Error: %s on %s request:\n",brlapi_strerror(err),brlapi_packetType(type));
-  if (size>16) size=16;
-  for (c=packet;c<(unsigned char *)packet+size;c++) fprintf(stderr,"%2x ", *c);
-  fprintf(stderr,"\n");
+  char str[0X100];
+  brlapi_strexception(str,0X100, err, type, packet, size);
+  fprintf(stderr, "BrlAPI exception: %s\n", str);
   exit(1);
 }
