@@ -283,7 +283,7 @@ AC_CHECK_HEADERS([iconv.h], [
    AC_HAVE_LIBRARY([iconv])
 ])
 
-AC_CHECK_FUNCS([endhostent endservent fchdir fchmod gai_strerror getaddrinfo getopt_long hstrerror shmget shm_open sigaction vsyslog])
+AC_CHECK_FUNCS([endhostent endservent fchdir fchmod gai_strerror getaddrinfo getopt_long hstrerror realpath shmget shm_open sigaction vsyslog])
 
 AC_C_BIGENDIAN
 AC_C_CONST

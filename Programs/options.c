@@ -578,6 +578,7 @@ processOptions (
   if (!(programPath = getProgramPath())) {
     programPath = **argumentVector;
 
+#ifdef HAVE_REALPATH
     {
       char buffer[PATH_MAX];
       char *path = realpath(programPath, buffer);
@@ -587,6 +588,15 @@ processOptions (
       } else {
         LogError("realpath");
       }
+    }
+#endif /* HAVE_REALPATH */
+
+    if (*programPath != '/') {
+      char *directory = getWorkingDirectory();
+      char buffer[strlen(directory) + 1 + strlen(programPath) + 1];
+      sprintf(buffer, "%s/%s", directory, programPath);
+      programPath = strdupWrapper(buffer);
+      free(directory);
     }
   }
   programName = strrchr(programPath, '/');
