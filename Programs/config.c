@@ -1217,7 +1217,7 @@ updatePreferences (void) {
     int settingChanged = 0;                        /* 1 when item's value has changed */
 
     Preferences oldPreferences = prefs;        /* backup preferences */
-    int key;                                /* readbrl() value */
+    int command;                                /* readbrl() value */
 
     /* status cells */
     setStatusText(&brl, "prf");
@@ -1257,7 +1257,7 @@ updatePreferences (void) {
       drainBrailleOutput(&brl, updateInterval);
 
       /* Now process any user interaction */
-      switch (key = getCommand(CMDS_PREFS)) {
+      switch (command = getCommand(CMDS_PREFS)) {
         case CMD_TOP:
         case CMD_TOP_LEFT:
         case VAL_PASSKEY+VPK_PAGE_UP:
@@ -1361,10 +1361,10 @@ updatePreferences (void) {
           exitSave = 1;
           goto exitMenu;
         default:
-          if (key >= CR_ROUTE && key < CR_ROUTE+brl.x) {
+          if (command >= CR_ROUTE && command < CR_ROUTE+brl.x) {
             /* Why not support setting a value with routing keys. */
             unsigned char oldSetting = *item->setting;
-            key -= CR_ROUTE;
+            int key = command - CR_ROUTE;
             if (item->names) {
               *item->setting = key % (item->maximum + 1);
             } else {

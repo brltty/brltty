@@ -335,11 +335,6 @@ openScreen (unsigned char vt) {
 }
 
 static int
-rebindConsole (void) {
-  return virtualTerminal? 1: openConsole(0);
-}
-
-static int
 controlConsole (int operation, void *argument) {
   int result = ioctl(consoleDescriptor, operation, argument);
   if (result == -1)
@@ -1056,30 +1051,28 @@ insertUtf8 (unsigned char byte) {
 static int
 insert_LinuxScreen (unsigned short key) {
   int ok = 0;
+  long mode;
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
-  if (rebindConsole()) {
-    long mode;
-    if (controlConsole(KDGKBMODE, &mode) != -1) {
-      switch (mode) {
-        case K_RAW:
-          if (insertCode(key, 1)) ok = 1;
-          break;
-        case K_MEDIUMRAW:
-          if (insertCode(key, 0)) ok = 1;
-          break;
-        case K_XLATE:
-          if (insertMapped(key, &insertByte)) ok = 1;
-          break;
-        case K_UNICODE:
-          if (insertMapped(key, &insertUtf8)) ok = 1;
-          break;
-        default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %ld", mode);
-          break;
-      }
-    } else {
-      LogError("ioctl KDGKBMODE");
+  if (controlConsole(KDGKBMODE, &mode) != -1) {
+    switch (mode) {
+      case K_RAW:
+        if (insertCode(key, 1)) ok = 1;
+        break;
+      case K_MEDIUMRAW:
+        if (insertCode(key, 0)) ok = 1;
+        break;
+      case K_XLATE:
+        if (insertMapped(key, &insertByte)) ok = 1;
+        break;
+      case K_UNICODE:
+        if (insertMapped(key, &insertUtf8)) ok = 1;
+        break;
+      default:
+        LogPrint(LOG_WARNING, "Unsupported keyboard mode: %ld", mode);
+        break;
     }
+  } else {
+    LogError("ioctl KDGKBMODE");
   }
   return ok;
 }
