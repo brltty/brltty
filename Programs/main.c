@@ -872,11 +872,13 @@ main (int argc, char *argv[]) {
   curscr = 0;
   atexit(exitScreenParameters);
   
+#ifdef SIGPIPE
   /* We install SIGPIPE handler before startup() so that drivers which
    * use pipes can't cause program termination (the call to message() in
    * startup() in particular).
    */
   handleSignal(SIGPIPE, SIG_IGN);
+#endif /* SIGPIPE */
 
   /* Install the program termination handler. */
   handleSignal(SIGTERM, terminationHandler);
