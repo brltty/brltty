@@ -71,27 +71,33 @@ typedef enum {
 
 /* Workarounds for control transfer flakiness (at least in this demo model) */
 #define STALL_TRIES 7
-#define SENDBRAILLE_REPEATS 2
 
 /* control message request codes */
-#define BRLVGER_SET_DISPLAY_ON       0
+#define BRLVGER_SET_DISPLAY_STATE    0
 #define BRLVGER_SET_DISPLAY_VOLTAGE  1
 #define BRLVGER_GET_DISPLAY_VOLTAGE  2
 #define BRLVGER_GET_SERIAL_NUMBER    3
 #define BRLVGER_GET_HARDWARE_VERSION 4
 #define BRLVGER_GET_FIRMWARE_VERSION 5
-#define BRLVGER_GET_DISPLAY_SIZE     6
-#define BRLVGER_SEND_BRAILLE         7
-#define BRLVGER_GET_CURRENT          8
+#define BRLVGER_GET_DISPLAY_LENGTH   6
+#define BRLVGER_WRITE_BRAILLE        7
+#define BRLVGER_GET_DISPLAY_CURRENT  8
 #define BRLVGER_BEEP                 9
+#define BRLVGER_GET_KEYS            11
+#define BRLVGER_SET_DISPLAY_LENGTH  12
+#define BRLVGER_READ_MEMORY        128
+#define BRLVGER_WRITE_MEMORY       129
+#define BRLVGER_READ_CODE          130
+#define BRLVGER_WRITE_IO           131
+#define BRLVGER_READ_IO            132
 
 /* Global variables */
 static UsbChannel *usb = NULL;
 static char firstRead; /* Flag to reinitialize brl_readCommand() function state. */
-static int inputMode = 0;
+static int inputMode;
 static TranslationTable outputTable;
-static unsigned char *previousCells; /* previous pattern displayed */
-static unsigned char *currentCells; /* buffer to prepare new pattern */
+static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
+static unsigned char *previousCells = NULL; /* previous pattern displayed */
 
 #define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
 static unsigned char totalCells;
@@ -146,6 +152,21 @@ _rcvcontrolmsg (const char *reqname, uint8_t request, uint16_t value, uint16_t i
 #define rcvcontrolmsg(request, value, index, buffer, size) \
   (_rcvcontrolmsg(#request, request, value, index, buffer, size))
 
+static int
+setDisplayState (uint16_t state) {
+  return sndcontrolmsg(BRLVGER_SET_DISPLAY_STATE, state, 0, NULL, 0) != -1;
+}
+
+static int
+writeBraille (unsigned char *cells, uint16_t count, uint16_t start) {
+  return sndcontrolmsg(BRLVGER_WRITE_BRAILLE, 0, start, cells, count) != -1;
+}
+
+static int
+soundBeep (uint16_t duration) {
+  return sndcontrolmsg(BRLVGER_BEEP, duration, 0, NULL, 0) != -1;
+}
+
 #define MAX_STRING_LENGTH 0XFF
 #define RAW_STRING_SIZE (MAX_STRING_LENGTH * 2) + 2
 #define STRING_SIZE (MAX_STRING_LENGTH + 1)
@@ -170,157 +191,169 @@ decodeString (unsigned char *buffer) {
 
 static void
 brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Tieman Voyager user-space driver: version " VERSION " (" DATE ")");
+  LogPrint(LOG_NOTICE, "Tieman Voyager User-space Driver: version " VERSION " (" DATE ")");
   LogPrint(LOG_INFO, COPYRIGHT);
 }
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  int ret;
-
-  if (*parameters[PARM_INPUTMODE])
-    validateYesNo(&inputMode, "Allow braille input",
-                  parameters[PARM_INPUTMODE]);
-  inputMode = !!inputMode;
-
   if (!isUsbDevice(&device)) {
-    LogPrint(LOG_ERR,"Unsupported port type. Must be USB.");
-    goto failure;
+    unsupportedDevice(device);
+    return 0;
   }
 
-  /* Open the Braille display device */
+  /* Open the braille display device */
   {
     static const UsbChannelDefinition definitions[] = {
       {0X0798, 0X0001, 1, 0, 0, 1, 0, 0},
       {0}
     };
-    LogPrint(LOG_DEBUG,"Attempting open");
-    if (!(usb = usbFindChannel(definitions, (void *)device))) goto failure;
-    LogPrint(LOG_DEBUG, "USB device opened.");
+
+    LogPrint(LOG_DEBUG, "Attempting open: %s", device);
+    usb = usbFindChannel(definitions, (void *)device);
   }
 
-  {
-    static const DotsTable dots
-      = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(&dots, &outputTable);
-  }
-
-  currentCells = previousCells = NULL;
-
-  /* find out how big the display is */
-  {
-    unsigned char data[2];
-    ret = rcvcontrolmsg(BRLVGER_GET_DISPLAY_SIZE, 0, 0, data, sizeof(data));
-    if (ret == -1) goto failure;
-
-    switch (data[1]) {
-      case 48:
-        totalCells = 44;
-        brl->helpPage = 0;
-        break;
-
-      case 72:
-        totalCells = 70;
-        brl->helpPage = 1;
-        break;
-
-      default:
-        LogPrint(LOG_ERR, "Unsupported display length code %u", data[1]);
-        goto failure;
+  if (usb) {
+    /* log the serial number of the display */
+    {
+      unsigned char buffer[RAW_STRING_SIZE];
+      int size = rcvcontrolmsg(BRLVGER_GET_SERIAL_NUMBER, 0, 0, buffer, sizeof(buffer));
+      if (size != -1)
+        LogPrint(LOG_INFO, "Voyager Serial Number: %s",
+                 decodeString(buffer));
     }
-    LogPrint(LOG_INFO, "Voyager Size: %u", totalCells);
-  }
 
-  /* position the text and status cells */
-  textCells = totalCells;
-  textOffset = statusOffset = 0;
-  {
-    int cells = 3;
-    const char *word = parameters[PARM_STATUSCELLS];
-    if (word && *word) {
-      int maximum = textCells / 2;
-      int minimum = -maximum;
-      int value;
-      if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
-        cells = value;
+    /* log the hardware version of the display */
+    {
+      unsigned char buffer[2];
+      int size = rcvcontrolmsg(BRLVGER_GET_HARDWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+      if (size != -1)
+        LogPrint(LOG_INFO, "Voyager Hardware: %u.%u",
+                 buffer[0], buffer[1]);
+    }
+
+    /* log the firmware version of the display */
+    {
+      unsigned char buffer[RAW_STRING_SIZE];
+      int size = rcvcontrolmsg(BRLVGER_GET_FIRMWARE_VERSION, 0, 0, buffer, sizeof(buffer));
+      if (size != -1)
+        LogPrint(LOG_INFO, "Voyager Firmware: %s",
+                 decodeString(buffer));
+    }
+
+    /* find out how big the display is */
+    totalCells = 0;
+    {
+      unsigned char data[2];
+      int size = rcvcontrolmsg(BRLVGER_GET_DISPLAY_LENGTH, 0, 0, data, sizeof(data));
+      if (size != -1) {
+        switch (data[1]) {
+          case 48:
+            totalCells = 44;
+            brl->helpPage = 0;
+            break;
+
+          case 72:
+            totalCells = 70;
+            brl->helpPage = 1;
+            break;
+
+          default:
+            LogPrint(LOG_ERR, "Unsupported Voyager length code: %u", data[1]);
+            break;
+        }
       }
     }
 
-    if (cells) {
-      if (cells < 0) {
-        statusOffset = textCells + cells;
-        cells = -cells;
-      } else {
-        textOffset = cells + 1;
+    if (totalCells) {
+      LogPrint(LOG_INFO, "Voyager Length: %u", totalCells);
+
+      /* position the text and status cells */
+      textCells = totalCells;
+      textOffset = statusOffset = 0;
+      {
+        int cells = 3;
+        const char *word = parameters[PARM_STATUSCELLS];
+        if (word && *word) {
+          int maximum = textCells / 2;
+          int minimum = -maximum;
+          int value;
+          if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
+            cells = value;
+          }
+        }
+
+        if (cells) {
+          if (cells < 0) {
+            statusOffset = textCells + cells;
+            cells = -cells;
+          } else {
+            textOffset = cells + 1;
+          }
+          textCells -= cells + 1;
+        }
+        statusCells = cells;
       }
-      textCells -= cells + 1;
+
+      /* currentCells holds the status cells and the text cells.
+       * We export directly to BRLTTY only the text cells.
+       */
+      brl->x = textCells;		/* initialize size of display */
+      brl->y = 1;		/* always 1 */
+
+      /* start the input packet monitor */
+      {
+        int ret, repeats = STALL_TRIES;
+        do {
+          if (repeats == STALL_TRIES)
+            LogPrint(LOG_DEBUG, "begin input");
+          else
+            LogPrint(LOG_WARNING, "begin input (try %d) failed: %s",
+                     STALL_TRIES+1-repeats, strerror(errno));
+          ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+        } while (ret==0 && errno==EPIPE && --repeats);
+        if (ret == 0)
+          LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
+      }
+
+      if ((currentCells = malloc(totalCells))) {
+        if ((previousCells = malloc(totalCells))) {
+          /* Force rewrite of display */
+          memset(currentCells, 0, totalCells); /* no dots */
+          memset(previousCells, 0XFF, totalCells); /* all dots */
+
+          if (setDisplayState(1)) {
+            soundBeep(200);
+
+            {
+              static const DotsTable dots
+                = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+              makeOutputTable(&dots, &outputTable);
+            }
+
+            inputMode = 0;
+            if (*parameters[PARM_INPUTMODE])
+              validateYesNo(&inputMode, "Allow braille input",
+                            parameters[PARM_INPUTMODE]);
+
+            firstRead = 1;
+            return 1;
+          }
+
+          free(previousCells);
+          previousCells = NULL;
+        }
+
+        free(currentCells);
+        currentCells = NULL;
+      }
     }
-    statusCells = cells;
+
+    usbCloseChannel(usb);
+    usb = NULL;
   }
 
-  /* log the serial number of the display */
-  {
-    unsigned char buffer[RAW_STRING_SIZE];
-    ret = rcvcontrolmsg(BRLVGER_GET_SERIAL_NUMBER, 0, 0,
-                        buffer, sizeof(buffer));
-    if (ret != -1)
-      LogPrint(LOG_INFO, "Voyager Serial Number: %s",
-               decodeString(buffer));
-  }
-
-  /* log the firmware version of the display */
-  {
-    unsigned char buffer[RAW_STRING_SIZE];
-    ret = rcvcontrolmsg(BRLVGER_GET_FIRMWARE_VERSION, 0, 0,
-                        buffer, sizeof(buffer));
-    if (ret != -1)
-      LogPrint(LOG_INFO, "Voyager Firmware: %s",
-               decodeString(buffer));
-  }
-
-  /* turn the display on */
-  ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_ON, 1, 0, NULL, 0);
-  if (ret == -1) goto failure;
-
-  /* cause the display to beep */
-  ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
-
-  /* start the input packet monitor */
-  {
-    int ret, repeats = STALL_TRIES;
-    do {
-      if (repeats == STALL_TRIES)
-        LogPrint(LOG_DEBUG, "begin input");
-      else
-        LogPrint(LOG_WARNING, "begin input (try %d) failed: %s",
-                 STALL_TRIES+1-repeats, strerror(errno));
-      ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
-    } while(ret==0 && errno==EPIPE && --repeats);
-    if (ret == 0)
-      LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
-  }
-
-  if(!(currentCells = malloc(totalCells))
-     || !(previousCells = malloc(totalCells)))
-    goto failure;
-
-  /* currentCells holds the status cells and the text cells.
-   * We export directly to BRLTTY only the text cells.
-   */
-  brl->x = textCells;		/* initialize size of display */
-  brl->y = 1;		/* always 1 */
-
-  /* Force rewrite of display on first writebrl */
-  memset(currentCells, 0, totalCells); /* no dots */
-  memset(previousCells, 0XFF, totalCells); /* all dots */
-
-  firstRead = 1;
-
-  return 1;
-
-failure:;
-  LogPrint(LOG_WARNING,"Voyager driver giving up");
-  brl_close(brl);
+  LogPrint(LOG_WARNING, "Voyager driver giving up.");
   return 0;
 }
 
@@ -349,9 +382,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
-  int repeats;
-  unsigned char buf[totalCells];
-  int i;
+  unsigned char buffer[totalCells];
 
   memcpy(currentCells+textOffset, brl->buffer, textCells);
 
@@ -362,36 +393,33 @@ brl_writeWindow (BrailleDisplay *brl) {
   memcpy(previousCells, currentCells, totalCells);
 
   /* translate to voyager dot pattern coding */
-  for (i=0; i<totalCells; i++)
-    buf[i] = outputTable[currentCells[i]];
-
-  /* Firmware supports multiples of 8cells, so there are extra cells
-     in the firmware's imagination that don't actually exist physically.
-     And for some reason there actually are holes! euurkkk! */
-  /* Old kernel driver had this dirty hack: sometimes some of the dots are
-     not updated somehow. Repeat the command and they right themselves.
-     I don't see this behavior anymore though... */
-  repeats = SENDBRAILLE_REPEATS;
-  switch(totalCells) {
-  case 44: {
-    /* Two ghost cells at the beginning of the display, plus
-       two more after the sixth physical cell. */
-    unsigned char hbuf[46];
-    hbuf[6] = hbuf[7] = 0;
-    memcpy(hbuf, buf, 6);
-    memcpy(hbuf+8, buf+6, 38);
-    while(repeats--)
-      sndcontrolmsg(BRLVGER_SEND_BRAILLE, 0,
-                    2, hbuf, 46);
-    break;
+  {
+    int i;
+    for (i=0; i<totalCells; i++)
+      buffer[i] = outputTable[currentCells[i]];
   }
-  case 70:
-    /* Two ghost cells at the beginning of the display. */
-    while(repeats--)
-      sndcontrolmsg(BRLVGER_SEND_BRAILLE, 0,
-		    2, buf, 70);
-    break;
-  };
+
+  /* The firmware supports multiples of 8 cells, so there are extra cells
+   * in the firmware's imagination that don't actually exist physically.
+   */
+  switch (totalCells) {
+    case 44: {
+      /* Two ghost cells at the beginning of the display,
+       * plus two more after the sixth physical cell.
+       */
+      unsigned char hbuf[46];
+      memcpy(hbuf, buffer, 6);
+      hbuf[6] = hbuf[7] = 0;
+      memcpy(hbuf+8, buffer+6, 38);
+      writeBraille(hbuf, 46, 2);
+      break;
+    }
+
+    case 70:
+      /* Two ghost cells at the beginning of the display. */
+      writeBraille(buffer, 70, 2);
+      break;
+  }
 }
 
 
