@@ -191,16 +191,22 @@ usbReadEndpoint (
   int length,
   int timeout
 ) {
+  int count = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
     BsdEndpoint *bsd = endpoint->system;
     if (usbSetTimeout(bsd->file, timeout, &bsd->timeout)) {
-      int count = read(bsd->file, buffer, length);
-      if (count != -1) return count;
-      LogError("USB endpoint read");
+      if ((count = read(bsd->file, buffer, length)) != -1) {
+        if (!usbApplyInputFilters(device, buffer, length, &count)) {
+          errno = EIO;
+          count = -1;
+        }
+      } else {
+        LogError("USB endpoint read");
+      }
     }
   }
-  return -1;
+  return count;
 }
 
 int

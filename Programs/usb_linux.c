@@ -255,18 +255,27 @@ usbReadEndpoint (
   int length,
   int timeout
 ) {
+  int count = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
     switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
       case USB_ENDPOINT_TRANSFER_BULK:
-        return usbBulkTransfer(endpoint, buffer, length, timeout);
+        count = usbBulkTransfer(endpoint, buffer, length, timeout);
+        break;
 
       default:
-        errno = EINVAL;
+        errno = EIO;
         break;
     }
+
+    if (count != -1) {
+      if (!usbApplyInputFilters(device, buffer, length, &count)) {
+        errno = EIO;
+        count = -1;
+      }
+    }
   }
-  return -1;
+  return count;
 }
 
 int
