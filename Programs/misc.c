@@ -244,13 +244,18 @@ strdupWrapper (const char *string) {
 
 char *
 getWorkingDirectory (void) {
-  char *buffer = NULL;
   size_t size = 0X100;
+  char *buffer = NULL;
 
-  while ((buffer = realloc(buffer, size<<=1))) {
+  do {
+    {
+      char *new = realloc(buffer, size<<=1);
+      if (!new) break;
+      buffer = new;
+    }
+
     if (getcwd(buffer, size)) return buffer;
-    if (errno != ERANGE) break;
-  }
+  } while (errno == ERANGE);
 
   if (buffer) free(buffer);
   return NULL;
