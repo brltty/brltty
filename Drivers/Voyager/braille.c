@@ -333,7 +333,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   if(ret<0) goto failure;
 
   LogPrint(LOG_DEBUG,"Starting input");
-  if (usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8, 8) == -1) {
+  if (!usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8, 8)) {
     goto failure;
   }
   LogPrint(LOG_DEBUG,"input started");
