@@ -40,8 +40,9 @@ AC_CONFIG_AUX_DIR([aux])
 AC_CANONICAL_SYSTEM
 
 BRLTTY_PACKAGE_CHOOSE([curses],
-   [curses initscr curses.h],
-   [ncurses initscr ncurses.h])
+   [ncursesw initscr ncurses.h],
+   [ncurses initscr ncurses.h],
+   [curses initscr curses.h])
 
 BRLTTY_PACKAGE_CHOOSE([xt_toolkit],
    [Xaw x X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
