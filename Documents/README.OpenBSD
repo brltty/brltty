@@ -1,0 +1,95 @@
+Setting up BRLTTY on OpenBSD
+----------------------------
+
+	This document describes how to get BRLTTY working on a
+recent OpenBSD system.  It assumes that you are working with a recent OpenBSD
+installation (3.4).
+
+1. Patching "screen"
+--------------------
+
+	Since OpenBSD (and in fact all the other BSDs) do not
+have a way for user-space applications to access the current text/attribute
+content of the virtual consoles, we have to use "screen" to make
+this information available to BRLTTY.  This also means that
+you can not use BRLTTY with the *BSD virtual consoles directly, you
+have to start "screen" first on some virtual terminal to be able
+to use BRLTTY.
+
+	You need to patch "screen" to enable the IPC_SHARED_IMAGE functionality
+which BRLTTY relies on.  Assuming your ports tree is in /usr/ports,
+you will need to copy the appropriate patch from 
+brltty/Patches into /usr/ports/misc/screen/patches.
+
+	OpenBSD 3.4 comes with screen-4.0.1.  You can
+check the screen version by reading /usr/ports/misc/screen/Makefile.
+
+	Now change into /usr/ports/misc/screen and run
+
+$ make
+
+followed by
+
+$ sudo make install
+
+If you successfully managed to compile and install the
+screen package, you can proceed to building BRLTTY.
+
+	There is a simple test you can use to verify if your screen
+installation does support the IPC_SHARED_IMAGE feature.  Start "screen" and
+execute the command
+
+# ipcs -m
+Shared Memory:
+T       ID     KEY        MODE       OWNER    GROUP
+m    65536 -1160968401 --rwa------     root     root
+
+If you see output which looks roughly like the above, 
+screen seems to be compiled with the IPC_SHARED_IMAGE feature.
+
+2. Compiling BRLTTY
+-------------------
+
+To compile BRLTTY, you do the following:
+
+$ ./configure
+$ gmake
+$ sudo gmake install
+
+Note that 'gmake' needs to be used to avoid a problem
+related to BSD and GNU Make incompatibilities.
+
+3. Configuring the serial ports
+-------------------------------
+
+By default, OpenBSD sets up terminals on the available
+serial ports.  This sort of prevents BRLTTY from working correclty.
+If your braille terminal is connected to the first serial port,
+this is called /dev/tty00 in OpenBSD.  You need to edit
+/etc/ttys and add the "local" flag to that device to make BRLTTY work.
+
+The default entry for tty00 in /etc/ttys looks like this:
+
+tty00   "/usr/libexec/getty std.9600"   unknown off
+
+And you need to change it to read:
+
+tty00   "/usr/libexec/getty std.9600"   unknown off local
+
+After editing /etc/ttys, run the command
+
+$ sudo ttyflags tty00
+
+to activate your changes.
+
+4. Running BRLTTY
+-----------------
+
+You need to have "screen" started before you try to run
+BRLTTY.  Inside screen, simply invoke BRLTTY as you would on
+other systems.  Note that the first serial port is /dev/tty00.
+So a typical invocation could look like this:
+
+# brltty -b ts -d /dev/tty00
+
+ -- Mario Lang <mlang@delysid.org>

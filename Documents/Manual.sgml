@@ -90,7 +90,7 @@ BRLTTY provides the following capabilities:
 </itemize>
 
 <sect1>System Requirements<p>
-To date, BRLTTY runs under Linux and Solaris.
+To date, BRLTTY runs under Linux, Solaris, and OpenBSD.
 While ports to other Unix-like operating systems aren't currently planned,
 we do welcome any interest in such projects.
 
@@ -112,6 +112,12 @@ we do welcome any interest in such projects.
         A DEC Alpha
         (only tested once under Red Hat Alpha Linux on a noname board kindly lent
         to the Cambridge University Computer Laboratory by DEC in Reading, England).
+    </itemize>
+  <tag/OpenBSD/
+    This software has been tested on the following OpenBSD systems:
+    <itemize>
+      <item>
+        The Intel architecture (release 3.4).
     </itemize>
   <tag/Solaris/
     This software has been tested on the following Solaris systems:
@@ -2688,7 +2694,8 @@ Notes:
     <descrip>
       <tag/Beeper/
         The internal beeper (console tone generator).
-        This setting is supported on Linux.
+        This setting is supported on Linux,
+        and on OpenBSD.
         It's always safe to use,
         although it may be somewhat soft.
         This device isn't available if the
@@ -2696,6 +2703,7 @@ Notes:
       <tag/PCM/
         The digital audio interface on the sound card.
         This setting is supported on Linux (via <tt>/dev/dsp</>),
+        on OpenBSD (via <tt>/dev/audio0</>),
         and on Solaris (via <tt>/dev/audio</>).
         It doesn't work when this device is already being used
         by another application.
