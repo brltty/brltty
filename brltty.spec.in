@@ -31,58 +31,49 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 
 AutoProv: 0
 
-AutoReq: 0
-Requires: /lib/ld-linux.so.2
-Requires: libc.so.6
-Requires: libpthread.so.0
-Requires: libdl.so.2
-Requires: libm.so.6
+AutoReq: 1
 Requires: /bin/sh
 
 Summary: Braille display driver for Linux/Unix.
 %description
-BRLTTY is a background process (daemon) which provides
-access to the Linux/Unix console (when in text mode)
-for a blind person using a refreshable braille display.
-It drives the braille display,
-and provides complete screen review functionality.
-Some speech capability has also been incorporated.
+BRLTTY is a background process (daemon) which provides access to the
+Linux/Unix console (when in text mode) for a blind person using a
+refreshable braille display.  It drives the braille display, and
+provides complete screen review functionality.  Some speech capability
+has also been incorporated.
+
+Install this package if you use a refreshable braille display.
 
 %package -n brlapi
 Version: @BRLAPI_RELEASE@
 Group: Applications/System
 
-AutoReq: 0
-Requires: /lib/ld-linux.so.2
-Requires: libc.so.6
+AutoReq: 1
 
 Summary: Appliation Programming Interface for BRLTTY.
 %description -n brlapi
-This package provides the run-time support
-for the Application Programming Interface to BRLTTY.
+This package provides the run-time support for the Application
+Programming Interface to BRLTTY.
 
-Install this package if you have an application
-which directly accesses a refreshable braille display.
+Install this package if you have an application which directly accesses
+a refreshable braille display.
 
 %package -n brlapi-devel
 Version: @BRLAPI_RELEASE@
 Group: Development/System
 
-AutoReq: 0
+AutoReq: 1
 Requires: brlapi = @BRLAPI_RELEASE@
 
 Summary: Headers, static archive, and documentation for BrlAPI.
 %description -n brlapi-devel
-This package provides the
-header files,
-static archive,
-shared object linker reference,
-and documentation
-for BrlAPI (the Application Programming Interface to BRLTTY).
-It enables the implementation of applications which
-take direct advantage of a refreshable braille display in order to
-present information in ways which are more appropriate for blind users
-and to provide user interfaces which are more specifically atuned to their needs.
+This package provides the header files, static archive, shared object
+linker reference, and reference documentation for BrlAPI (the
+Application Programming Interface to BRLTTY).  It enables the
+implementation of applications which take direct advantage of a
+refreshable braille display in order to present information in ways
+which are more appropriate for blind users and/or to provide user
+interfaces which are more specifically atuned to their needs.
 
 Install this package if you're developing or maintaining an application
 which directly accesses a refreshable braille display.
@@ -92,7 +83,7 @@ which directly accesses a refreshable braille display.
 %setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --with-install-root="${RPM_BUILD_ROOT}" --enable-api
+%configure --with-install-root="${RPM_BUILD_ROOT}" --disable-tainted-components --enable-api
 make
 
 directory="doc"
@@ -172,4 +163,66 @@ new="${file}.rpmnew"
    # Now run it by simply imbedding it right here.
    @configuration_file_customization_script@
 )
+
+%changelog
+* Sat Aug 02 2003 Dave Mielke <dave@mielke.cc> 3.3-1
+-  Let rpm determine requirements. (dm)
+-  Papenmeier driver enhancements: (dm,bd)
+      Write packet as single operation rather than in 3 parts (header, data, trailer).
+      Log output packets.
+      Log full identity packet rather than just first 4 bytes.
+-  Configuring with --without-screen-driver now uses scr_null. (dm)
+-  Remove the use of sched_yield() to restore tone length accuracy. (np)
+-  Add the "Say-Line Mode" (Immediate, Enqueue) preference. (np,dm)
+-  Rename the default for the Linux screen driver option acm from default to auto. (dm)
+-  No longer strip executables in the build tree. (dm)
+-  Compile all drivers even if built-in ones are configured. (dm)
+-  Add the -L (--library-directory=) option to brltty and brltest. (dm)
+-  Wrap long output lines from configure --help. (dm)
+-  Enhancements to en-us-g2 contraction table. (jb)
+-  Braille Lite driver enhancements: (dm)
+      Some initialization failures gobble resources.
+      Add Millennium support (whiz wheels, advance bar combinations).
+      Change keyboard emulation mode default from off to on.
+      Allow chorded keyboard input when not in keyboard emulation mode.
+-  Check for the pow() function during autoconf. (dm)
+-  The global variable languageCount in the ViaVoice speech driver isn't used. (dm)
+-  Add basic support for Gnopernicus. (ml)
+-  autogen.sh invokes autoconf (overridable by $BRLTTY_AUTOCONF) instead of autoconf-2.53. (dm)
+-  Clean up the make file in the Documents subdirectory. (dm)
+-  Remove the German BRLTTY manual since it's so out-of-date. (dm)
+-  Start implementing the Autospeak preference. (dm)
+-  README.Debian still had references to /sbin/brltty (now in /bin). (sh)
+-  Make the timing routines more robust. (dm)
+-  Stop console tones automatically if the system is too slow. (dm)
+-  Convert the screen drivers from C++ to C. (dm)
+-  Add the -n, -d and -o options to bp2cf for device path translation. (dm)
+-  A few changes to text.da-1252.tbl by Svend and his group. (hs)
+-  Reduce HandyTech driver data segment size. (ml)
+-  Reduce Papenmeier driver data segment size when configuration file support not included. (ml)
+-  bp2cf now records the boot parameter in the configuration file header. (dm)
+-  Installing the rpm now updates brltty.conf according to the boot parameter. (dm)
+-  bp2cf interpreted the boot parameter incorrectly if it contained no commas. (dm)
+-  Add the -f, -c, -u, -p, and -h options to bp2cf. (dm)
+-  Move the default install location for the API library from /lib to /usr/lib. (dm)
+-  Improve brltty-install's progress messages. (dm)
+-  brltty-install now copies brltty.conf if it exists. (dm)
+-  Clean up the rpm spec file. (dm)
+-  Move default install directory for man pages from /man to /usr/share/man. (dm)
+-  Rename install-brltty to brltty-install. (dm)
+-  EuroBraille driver enhancements: Yannick Plassiard <plassi_y@epita.fr>
+      Document cut&paste in README.
+      Initial support for file transfer.
+      Several bug fixes.
+-  Implement brlapi. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr> + Samuel Thibault <Samuel.Thibault@ens-lyon.fr>
+-  Core changes to support big5.ctb: (dm)
+      Change ctb opcode "ignore" to "replace".
+-  Add table for Chinese big5 character set (big5.ctb). Samuel Yang <mison@bbs.ee.ntu.edu.tw>
+-  Add Czech text table (text.cz.tbl). Jan Buchal <buchal@brailcom.org>
+-  Add alert messages preference. (dm)
+-  VisioBraille driver enhancements. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
+-  IA64 sizeof returns a long and needs a long printf format. (dm)
+-  Make install no longer installs unneeded tables. (dm)
+      (--without-text-table, --without-attributes-table, --disable-contracted-braille)
+-  Change text-table default from us to nabcc in brltty.conf. (dm)
 
