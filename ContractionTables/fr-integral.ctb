@@ -149,13 +149,22 @@ always × 6-35		multiplié par
 always < 46-126		inférieur à
 always > 46-345		supérieur à
 
+always © 5-14		copyright
 always ° 5-135		degré
 always & 5-123456	perluète (et commercial)
 always ¢ 45-14		cent
 always ¤ 45-15		euro
 always £ 45-123		livre
+always § 45-1234	paragraphe
 always $ 45-234		dollar
 always ¥ 45-13456	yen
+always « 45-2356	guillemet français ouvrant
+always » 2356-12	guillemet français fermant
+always [ 45-236		crochet droit ouvrant
+always ] 356-12		crochet droit fermant
+always { 6-236		accolade de gauche
+always } 356-3		accolade de droite
+
 always ¹ 4-6-16		exposant 1
 always ² 4-6-126	exposant 2
 always ³ 4-6-146	exposant 3
