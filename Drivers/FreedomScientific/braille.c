@@ -40,6 +40,7 @@ typedef enum {
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
+#define BRL_HAVE_FIRMNESS
 #include "Programs/brl_driver.h"
 
 typedef struct {
@@ -289,10 +290,10 @@ static unsigned char statusCells;
 
 static int writeFrom;
 static int writeTo;
-static int writing;
 static int writingFrom;
 static int writingTo;
-static struct timeval writingTime;
+
+static int firmnessSetting;
 
 static union {
   Packet packet;
@@ -342,8 +343,40 @@ static int wheelCounter;
 #define WHEEL_LEFT  0X00
 #define WHEEL_RIGHT 0X10
 
+static int
+writePacket (
+  BrailleDisplay *brl,
+  unsigned char type,
+  unsigned char arg1,
+  unsigned char arg2,
+  unsigned char arg3,
+  const unsigned char *data
+) {
+  Packet packet;
+  int size = sizeof(packet.header);
+  unsigned char checksum = 0;
+
+  checksum -= (packet.header.type = type);
+  checksum -= (packet.header.arg1 = arg1);
+  checksum -= (packet.header.arg2 = arg2);
+  checksum -= (packet.header.arg3 = arg3);
+
+  if (data) {
+    unsigned char length = packet.header.arg1;
+    int index;
+    for (index=0; index<length; ++index)
+      checksum -= (packet.payload.bytes[index] = data[index]);
+    packet.payload.bytes[length] = checksum;
+    size += length + 1;
+  }
+
+  if (debugPackets)
+    LogBytes("Output Packet", (unsigned char *)&packet, size);
+  return io->writePacket(&packet, size, &brl->writeDelay);
+}
+
 static void
-negativeAcknowledgement (const Packet *packet) {
+logNegativeAcknowledgement (const Packet *packet) {
   const char *problem;
   const char *component;
 
@@ -421,49 +454,47 @@ negativeAcknowledgement (const Packet *packet) {
            packet->header.arg2, component);
 }
 
-static int
-writePacket (
-  BrailleDisplay *brl,
-  unsigned char type,
-  unsigned char arg1,
-  unsigned char arg2,
-  unsigned char arg3,
-  const unsigned char *data
-) {
-  Packet packet;
-  int size = sizeof(packet.header);
-  unsigned char checksum = 0;
-
-  checksum -= (packet.header.type = type);
-  checksum -= (packet.header.arg1 = arg1);
-  checksum -= (packet.header.arg2 = arg2);
-  checksum -= (packet.header.arg3 = arg3);
-
-  if (data) {
-    unsigned char length = packet.header.arg1;
-    int index;
-    for (index=0; index<length; ++index)
-      checksum -= (packet.payload.bytes[index] = data[index]);
-    packet.payload.bytes[length] = checksum;
-    size += length + 1;
-  }
-
-  if (debugPackets)
-    LogBytes("Output Packet", (unsigned char *)&packet, size);
-  return io->writePacket(&packet, size, &brl->writeDelay) != -1;
+static void
+handleFirmnessAcknowledgement (int ok) {
+  firmnessSetting = -1;
 }
 
 static void
-updateCells (BrailleDisplay *brl) {
-  if (!writing) {
+handleWriteAcknowledgement (int ok) {
+  if (!ok) {
+    if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
+    if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
+  }
+}
+
+typedef void (*AcknowledgementHandler) (int ok);
+static AcknowledgementHandler acknowledgementHandler;
+static struct timeval acknowledgementTime;
+static void
+setAcknowledgementHandler (AcknowledgementHandler handler) {
+  acknowledgementHandler = handler;
+  gettimeofday(&acknowledgementTime, NULL);
+}
+
+static int
+writeRequest (BrailleDisplay *brl) {
+  if (!acknowledgementHandler) {
+    if (firmnessSetting >= 0) {
+      int size = writePacket(brl, PKT_HVADJ, firmnessSetting, 0, 0, NULL);
+      if (size != -1) {
+        setAcknowledgementHandler(handleFirmnessAcknowledgement);
+      }
+      return size;
+    }
+
     if (writeTo != -1) {
+      int size;
       int count = writeTo + 1 - writeFrom;
       int truncate = count > outputPayloadLimit;
       if (truncate) count = outputPayloadLimit;
-      if (writePacket(brl, PKT_WRITE, count, writeFrom, 0,
-                      &outputBuffer[writeFrom]) > 0) {
-        writing = 1;
-        gettimeofday(&writingTime, NULL);
+      if ((size = writePacket(brl, PKT_WRITE, count, writeFrom, 0,
+                              &outputBuffer[writeFrom])) != -1) {
+        setAcknowledgementHandler(handleWriteAcknowledgement);
         writingFrom = writeFrom;
         if (truncate) {
           writingTo = (writeFrom += count) - 1;
@@ -473,12 +504,14 @@ updateCells (BrailleDisplay *brl) {
           writeTo = -1;
         }
       }
+      return size;
     }
   }
+  return 0;
 }
 
 static void
-writeCells (
+updateCells (
   BrailleDisplay *brl,
   const unsigned char *cells,
   unsigned char count,
@@ -572,9 +605,12 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
     int count = readPacket(brl, packet);
     if (count > 0) {
       switch (packet->header.type) {
+        {
+          int ok;
+
         case PKT_NAK:
-          negativeAcknowledgement(packet);
-          if (!writing) {
+          logNegativeAcknowledgement(packet);
+          if (!acknowledgementHandler) {
             LogPrint(LOG_WARNING, "Unexpected NAK.");
             continue;
           }
@@ -594,19 +630,25 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           }
 
         handleNegativeAcknowledgement:
-          if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
-          if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
+          ok = 0;
+          goto handleAcknowledgement;
 
         case PKT_ACK:
-          if (writing) {
-            writing = 0;
-            updateCells(brl);
-          } else {
+          if (!acknowledgementHandler) {
             LogPrint(LOG_WARNING, "Unexpected ACK.");
+            continue;
           }
+
+          ok = 1;
+        handleAcknowledgement:
+          acknowledgementHandler(ok);
+          acknowledgementHandler = NULL;
+          writeRequest(brl);
           continue;
+        }
       }
-    } else if ((count == 0) && writing && (millisecondsSince(&writingTime) > 500)) {
+    } else if ((count == 0) && acknowledgementHandler &&
+               (millisecondsSince(&acknowledgementTime) > 500)) {
       LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
       goto handleNegativeAcknowledgement;
     }
@@ -744,7 +786,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
               memset(outputBuffer, 0, model->totalCells);
               writeFrom = 0;
               writeTo = model->totalCells - 1;
-              writing = 0;
+
+              acknowledgementHandler = NULL;
+              firmnessSetting = -1;
 
               realKeys = 0;
               virtualKeys = 0;
@@ -764,7 +808,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             break;
 
           case PKT_NAK:
-            negativeAcknowledgement(&response);
+            logNegativeAcknowledgement(&response);
           default:
             acknowledged = 0;
             model = NULL;
@@ -803,13 +847,13 @@ brl_close (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
-  writeCells(brl, brl->buffer, textCells, textOffset);
-  updateCells(brl);
+  updateCells(brl, brl->buffer, textCells, textOffset);
+  writeRequest(brl);
 }
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  writeCells(brl, status, statusCells, statusOffset);
+  updateCells(brl, status, statusCells, statusOffset);
 }
 
 static int
@@ -1282,4 +1326,10 @@ brl_writePacket (BrailleDisplay *brl, const unsigned char *buffer, int length) {
 static int
 brl_reset (BrailleDisplay *brl) {
   return 0;
+}
+
+static void
+brl_firmness (BrailleDisplay *brl, int setting) {
+  firmnessSetting = setting * 0XFF / BRL_MAXIMUM_FIRMNESS;
+  writeRequest(brl);
 }

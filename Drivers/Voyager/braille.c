@@ -56,18 +56,11 @@ typedef enum {
 #define BRLPARMS "brlinput"
 
 #define BRLSTAT ST_VoyagerStyle
+#define BRL_HAVE_FIRMNESS
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
 
 static int brlinput = 1;
-
-/* Voltage. Presumably this is voltage for cell dots. Presumably 0
-   makes dots hardest, 255 makes them softest. */
-/* from 0->300V to 255->200V, we are told 265V is normal operating voltage,
-   but we don't know the scale. Assuming it is linear. */
-#define DEFAULT_RAW_VOLTAGE 89
-/* IWBN to make this into a parameter, except it doesn't seem to
-   actually do much :-) */
 
 /* Workaround USB<->Voyager flakiness: repeat commands */
 #define STALL_TRIES 3
@@ -288,9 +281,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
       LogPrint(LOG_INFO, "Voyager Firmware Version: %s", decodeString(rawbuf));
     }
   }
-
-  ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE,
-                      DEFAULT_RAW_VOLTAGE, 0, NULL, 0);
 
   ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_ON, 1, 0, NULL, 0);
   if(ret<0) goto failure;
@@ -799,4 +789,16 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   }
 
   return cmd;
+}
+
+/* Voltage: from 0->300V to 255->200V.
+ * Presumably this is voltage for dot firmness.
+ * Presumably 0 makes dots hardest, 255 makes them softest.
+ * We are told 265V is normal operating voltage but we don't know the scale.
+ */
+static void
+brl_firmness (BrailleDisplay *brl, int setting) {
+  sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE,
+                      0XFF - (setting * 0XFF / BRL_MAXIMUM_FIRMNESS),
+                      0, NULL, 0);
 }

@@ -52,6 +52,10 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
   static int brl_keyToCommand (BrailleDisplay *, DriverCommandContext, int);
 #endif /* BRL_HAVE_KEY_CODES */
 
+#ifdef BRL_HAVE_FIRMNESS
+  static void brl_firmness (BrailleDisplay *brl, int setting);		/* mute speech */
+#endif /* BRL_HAVE_FIRMNESS */
+
 #ifdef BRLPARMS
   static const char *const brl_parameters[] = {BRLPARMS, NULL};
 #endif /* BRLPARMS */
@@ -109,11 +113,17 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 
 #ifdef BRL_HAVE_KEY_CODES
   brl_readKey,
-  brl_keyToCommand
+  brl_keyToCommand,
 #else /* BRL_HAVE_KEY_CODES */
   NULL, /* brl_readKey */
-  NULL  /* brl_keyToCommand */
+  NULL, /* brl_keyToCommand */
 #endif /* BRL_HAVE_KEY_CODES */
+
+#ifdef BRL_HAVE_FIRMNESS
+  brl_firmness
+#else /* BRL_HAVE_FIRMNESS */
+  NULL  /* brl_firmness */
+#endif /* BRL_HAVE_FIRMNESS */
 };
 
 #ifdef __cplusplus

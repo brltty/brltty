@@ -85,6 +85,7 @@ typedef struct {
   unsigned char windowOverlap;
   unsigned char speechRate;
   unsigned char speechVolume;
+  unsigned char brailleFirmness;
 } __attribute__((packed)) Preferences;
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)

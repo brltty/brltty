@@ -640,6 +640,7 @@ startBrailleDriver (void) {
       if (brailleDriver->open(&brl, brailleParameters, opt_brailleDevice)) {
          if (allocateBrailleBuffer(&brl)) {
             braille = brailleDriver;
+            if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
 
             clearStatusCells(&brl);
             setHelpPageNumber(brl.helpPage);
@@ -687,6 +688,17 @@ exitBrailleDriver (void) {
    clearStatusCells(&brl);
    message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
    stopBrailleDriver();
+}
+
+static int
+testBrailleFirmness (void) {
+  return braille->firmness != NULL;
+}
+
+static int
+changedBrailleFirmness (unsigned char setting) {
+  setBrailleFirmness(&brl, setting);
+  return 1;
 }
 
 #ifdef ENABLE_API
@@ -817,6 +829,7 @@ static void
 changedPreferences (void) {
   changedWindowAttributes();
   setTuneDevice(prefs.tuneDevice);
+  if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
 #ifdef ENABLE_SPEECH_SUPPORT
   if (speech->rate) speech->rate(prefs.speechRate);
   if (speech->volume) speech->volume(prefs.speechVolume);
@@ -871,6 +884,11 @@ loadPreferences (int change) {
         if (length == 41) {
           length++;
           prefs.speechVolume = SPK_DEFAULT_VOLUME;
+        }
+
+        if (length == 42) {
+          length++;
+          prefs.brailleFirmness = BRL_DEFAULT_FIRMNESS;
         }
 
         if (change) changedPreferences();
@@ -1224,6 +1242,7 @@ updatePreferences (void) {
        BOOLEAN_ITEM(prefs.blinkingCapitals, NULL, NULL, "Blinking Capitals"),
        TIME_ITEM(prefs.capitalsVisibleTime, testBlinkingCapitals, "Capitals Visible Time"),
        TIME_ITEM(prefs.capitalsInvisibleTime, testBlinkingCapitals, "Capitals Invisible Time"),
+       NUMERIC_ITEM(prefs.brailleFirmness, changedBrailleFirmness, testBrailleFirmness, "Braille Firmness", 0, BRL_MAXIMUM_FIRMNESS),
 #ifdef HAVE_LIBGPM
        BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, "Window Follows Pointer"),
        BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, "Pointer Follows Window"),
@@ -1933,6 +1952,7 @@ startup (int argc, char *argv[]) {
     prefs.speechRate = SPK_DEFAULT_RATE;
     prefs.speechVolume = SPK_DEFAULT_VOLUME;
 
+    prefs.brailleFirmness = BRL_DEFAULT_FIRMNESS;
     prefs.statusStyle = brailleDriver->statusStyle;
   }
   setTuneDevice(prefs.tuneDevice);

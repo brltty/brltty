@@ -81,6 +81,9 @@ typedef struct {
   /* These require BRL_HAVE_KEY_CODES. */
   int (*readKey) (BrailleDisplay *);
   int (*keyToCommand) (BrailleDisplay *, DriverCommandContext, int);
+
+  /* These require BRL_HAVE_FIRMNESS. */
+  void (*firmness) (BrailleDisplay *brl, int setting);		/* mute speech */
 } BrailleDriver;
 
 extern const BrailleDriver *loadBrailleDriver (const char *driver, const char *driverDirectory);
@@ -117,6 +120,10 @@ extern const CommandEntry commandTable[];
 extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern void showDotPattern (unsigned char dots, unsigned char duration);
+extern void setBrailleFirmness (BrailleDisplay *brl, int setting);
+
+#define BRL_DEFAULT_FIRMNESS 5
+#define BRL_MAXIMUM_FIRMNESS (BRL_DEFAULT_FIRMNESS * 2)
 
 #ifdef __cplusplus
 }

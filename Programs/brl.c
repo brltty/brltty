@@ -376,3 +376,8 @@ portraitFlag (int number, int on) {
   if (on) dots |= portraitDigits[10];
   return dots;
 }
+
+void
+setBrailleFirmness (BrailleDisplay *brl, int setting) {
+  braille->firmness(brl, setting);
+}
