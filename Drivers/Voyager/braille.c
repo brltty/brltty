@@ -185,7 +185,7 @@ brl_identify (void)
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
+brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int ret;
 
@@ -194,7 +194,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
                   parameters[PARM_BRLINPUT]);
   brlinput = !!brlinput;
 
-  if (!isUsbDevice(&dev)) {
+  if (!isUsbDevice(&device)) {
     LogPrint(LOG_ERR,"Unsupported port type. Must be USB.");
     goto failure;
   }
@@ -206,10 +206,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
       {0}
     };
     LogPrint(LOG_DEBUG,"Attempting open");
-    if (!(usb = usbFindChannel(definitions, (void *)dev))) {
-      LogPrint(LOG_INFO, "USB device not found.");
-      goto failure;
-    }
+    if (!(usb = usbFindChannel(definitions, (void *)device))) goto failure;
     LogPrint(LOG_DEBUG, "USB device opened.");
   }
 

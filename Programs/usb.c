@@ -935,6 +935,10 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *device) {
     if ((channel->device = usbFindDevice(usbChooseChannel, &choose))) {
       channel->definition = *choose.definition;
       return channel;
+    } else {
+      LogPrint(LOG_DEBUG, "USB device not found%s%s",
+               (*device? ": ": "."),
+               device);
     }
 
     free(channel);
