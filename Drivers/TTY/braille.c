@@ -88,7 +88,7 @@ static char *classificationLocale = NULL;
 static void
 brl_identify (void) {
   LogPrint(LOG_NOTICE, "TTY Driver: version " TT_VERSION " (" TT_DATE ")");
-  LogPrint(LOG_INFO,   TT_COPYRIGHT);
+  LogPrint(LOG_INFO,   "   "TT_COPYRIGHT);
 }
 
 static int

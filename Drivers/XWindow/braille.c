@@ -14,8 +14,8 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION "BRLTTY driver for X, version 0.1, 2004"
-#define COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
+#define XW_VERSION "BRLTTY driver for X, version 0.1, 2004"
+#define XW_COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -204,8 +204,8 @@ static char *fallback_resources[] = {
 
 static void brl_identify()
 {
- LogPrint(LOG_NOTICE, VERSION);
- LogPrint(LOG_INFO,   COPYRIGHT);
+ LogPrint(LOG_NOTICE, XW_VERSION);
+ LogPrint(LOG_INFO,   "   "XW_COPYRIGHT);
 }
 
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)

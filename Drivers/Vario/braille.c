@@ -31,8 +31,8 @@
  * Version 1.0: Initial patch submittion.
  */
 
-#define VERSION "BRLTTY driver for BAUM Vario (Emul. 1) displays, version 1.0 (September 2000)"
-#define COPYRIGHT "Copyright (C) 2000 by Mario Lang " \
+#define VA_VERSION "BRLTTY driver for BAUM Vario (Emul. 1) displays, version 1.0 (September 2000)"
+#define VA_COPYRIGHT "Copyright (C) 2000 by Mario Lang " \
                   "<mlang@delysid.org>"
 
 #ifdef HAVE_CONFIG_H
@@ -118,8 +118,8 @@ static unsigned char *rawdata,	/* translated data to send to display */
 
 static void brl_identify (void)
 {
-  LogPrint(LOG_NOTICE, VERSION);
-  LogPrint(LOG_INFO, "   "COPYRIGHT);
+  LogPrint(LOG_NOTICE, VA_VERSION);
+  LogPrint(LOG_INFO, "   "VA_COPYRIGHT);
 }
 
 static int myread(void *buf, unsigned len)

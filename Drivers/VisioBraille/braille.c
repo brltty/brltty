@@ -14,8 +14,8 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION "BRLTTY driver for VisioBraille, version 0.2, 2002"
-#define COPYRIGHT "Copyright Sebastien HINDERER <Sebastien.Hinderer@libertysurf.fr"
+#define VS_VERSION "BRLTTY driver for VisioBraille, version 0.2, 2002"
+#define VS_COPYRIGHT "Copyright Sebastien HINDERER <Sebastien.Hinderer@libertysurf.fr"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -171,8 +171,8 @@ static int brl_reset(BrailleDisplay *brl)
 /* Prints information about the driver in the system log and on stderr */
 static void brl_identify()
 {
-  LogPrint(LOG_NOTICE, VERSION);
-  LogPrint(LOG_INFO,   COPYRIGHT);
+  LogPrint(LOG_NOTICE, VS_VERSION);
+  LogPrint(LOG_INFO,   "   "VS_COPYRIGHT);
 }
 
 /* Function : brl_open */

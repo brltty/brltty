@@ -14,8 +14,8 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION "BRLTTY External Speech driver, version 0.8 (September 2004)"
-#define COPYRIGHT "Copyright (C) 2000-2001,2004 by Stéphane Doyon " \
+#define ES_VERSION "BRLTTY External Speech driver, version 0.8 (September 2004)"
+#define ES_COPYRIGHT "Copyright (C) 2000-2001,2004 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* ExternalSpeech/speech.c - Speech library (driver)
  * For external programs, using my own protocol. Features indexing.
@@ -56,8 +56,8 @@ static char speaking = 0;
 
 static void spk_identify (void)
 {
-  LogPrint(LOG_NOTICE, VERSION);
-  LogPrint(LOG_INFO, "   "COPYRIGHT);
+  LogPrint(LOG_NOTICE, ES_VERSION);
+  LogPrint(LOG_INFO, "   "ES_COPYRIGHT);
 }
 
 #define ERRBUFLEN 200
