@@ -812,9 +812,10 @@ typedef struct {
 #define PM2_EASY_R2 0X40
 #define PM2_EASY_L2 0X80
 
-static int refresh2;
 static int left2;
 static int right2;
+
+static int refresh2;
 static Packet2 state2;
 
 static int
@@ -893,7 +894,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
                 if (identity) {
                   packet->data.bytes[index] = byte;
                 } else {
-                  int high = !(index % 1);
+                  int high = !(index % 2);
                   index /= 2;
                   if (high) {
                     packet->data.bytes[index] = value << 4;
@@ -1027,11 +1028,17 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
           unsigned char old = state2.data.bytes[offset];
           unsigned char new = packet.data.bytes[offset];
 
-          while (index < 8) {
-            const EasyEntry *easy = &easyTable[index++];
-            if (!(new & easy->bit) && (old & easy->bit)) {
-              command = handleKey(OFFS_EASY + easy->code, 0, 0);
-              break;
+          {
+            int found = 0;
+            while (index < 8) {
+              const EasyEntry *easy = &easyTable[index++];
+              if (!(new & easy->bit) && (old & easy->bit)) {
+                int cmd = handleKey(OFFS_EASY + easy->code, 0, 0);
+                if (!found) {
+                  command = cmd;
+                  found = 1;
+                }
+              }
             }
           }
 
