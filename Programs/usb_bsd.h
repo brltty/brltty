@@ -173,7 +173,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     }
 
     if ((bsd->file = open(path, flags)) != -1) {
-      if (usbSetShortTransfers(bsd->file, 1)) {
+      if (((flags & O_ACCMODE) != O_RDONLY) || 
+          usbSetShortTransfers(bsd->file, 1)) {
         bsd->timeout = -1;
 
         endpoint->extension = bsd;
