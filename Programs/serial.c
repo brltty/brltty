@@ -679,7 +679,7 @@ serialOpenDevice (const char *path) {
     char *device;
     if ((device = getDevicePath(path))) {
 #ifdef __MINGW32__
-      if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL)) != INVALID_HANDLE_VALUE) {
+      if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
         serial->fileDescriptor = -1;
 #else /* __MINGW32__ */
       if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
