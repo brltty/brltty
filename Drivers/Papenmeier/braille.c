@@ -803,7 +803,19 @@ typedef struct {
 #define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
-static int refreshDisplay;
+#define PM2_EASY_U2 0X01
+#define PM2_EASY_U1 0X02
+#define PM2_EASY_D1 0X04
+#define PM2_EASY_D2 0X08
+#define PM2_EASY_R1 0X10
+#define PM2_EASY_L1 0X20
+#define PM2_EASY_R2 0X40
+#define PM2_EASY_L2 0X80
+
+static int refresh2;
+static int left2;
+static int right2;
+static Packet2 state2;
 
 static int
 readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
@@ -935,22 +947,27 @@ interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
 
 static void
 writeText2 (BrailleDisplay *brl, int start, int count) {
-  refreshDisplay = 1;
+  refresh2 = 1;
 }
 
 static void
 writeStatus2 (BrailleDisplay *brl, int start, int count) {
-  refreshDisplay = 1;
+  refresh2 = 1;
 }
 
 static void
 flushCells2 (BrailleDisplay *brl) {
-  if (refreshDisplay) {
+  if (refresh2) {
     unsigned char buffer[0XFF];
     unsigned int size = 0;
 
-    buffer[size++] = 0;
-    buffer[size++] = 0;
+    {
+      int modules = left2;
+      while (modules-- > 0) {
+        buffer[size++] = 0;
+        buffer[size++] = 0;
+      }
+    }
 
     memcpy(&buffer[size], currentStatus, terminal->statusCount);
     size += terminal->statusCount;
@@ -958,20 +975,81 @@ flushCells2 (BrailleDisplay *brl) {
     memcpy(&buffer[size], currentText, terminal->columns);
     size += terminal->columns;
 
-    buffer[size++] = 0;
-    buffer[size++] = 0;
+    {
+      int modules = right2;
+      while (modules-- > 0) {
+        buffer[size++] = 0;
+        buffer[size++] = 0;
+      }
+    }
 
     writePacket2(brl, 3, size, buffer);
-    refreshDisplay = 0;
+    refresh2 = 0;
   }
 }
 
 static void
 initializeTerminal2 (BrailleDisplay *brl) {
+  refresh2 = 1;
+  memset(&state2, 0, sizeof(state2));
 }
 
 static int 
 readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
+  Packet2 packet;
+
+  while (readPacket2(brl, &packet)) {
+    switch (packet.type) {
+      default:
+        LogPrint(LOG_DEBUG, "Packet ignored: %02X", packet.type);
+        break;
+
+      case 0X0B: {
+        int command = CMD_NOOP;
+        int offset = left2 + right2;
+
+        {
+          typedef struct {
+            unsigned char bit;
+            unsigned char code;
+          } EasyEntry;
+          static const EasyEntry easyTable[] = {
+            {PM2_EASY_L2, EASY_L2},
+            {PM2_EASY_R2, EASY_R2},
+            {PM2_EASY_U2, EASY_U2},
+            {PM2_EASY_D2, EASY_D2},
+            {PM2_EASY_L1, EASY_L1},
+            {PM2_EASY_R1, EASY_R1},
+            {PM2_EASY_U1, EASY_U1},
+            {PM2_EASY_D1, EASY_D1}
+          };
+          int index = 0;
+          unsigned char old = state2.data.bytes[offset];
+          unsigned char new = packet.data.bytes[offset];
+
+          while (index < 8) {
+            const EasyEntry *easy = &easyTable[index];
+            if (!(new & easy->bit) && (old & easy->bit)) {
+              command = handleKey(OFFS_EASY + easy->code, 0, 0);
+            }
+            index++;
+          }
+
+          while (index-- > 0) {
+            const EasyEntry *easy = &easyTable[index];
+            if ((new & easy->bit) && !(old & easy->bit)) {
+              command = handleKey(OFFS_EASY + easy->code, 1, 0);
+            }
+          }
+        }
+        offset++;
+
+        state2 = packet;
+        return command;
+      }
+    }
+  }
+
   return EOF;
 }
 
@@ -998,7 +1076,8 @@ identifyTerminal2 (BrailleDisplay *brl) {
               makeOutputTable(&dots, &outputTable);
             }
 
-            refreshDisplay = 1;
+            left2 = terminal->leftSwitches + terminal->leftKeys;
+            right2 = terminal->rightSwitches + terminal->rightKeys;
             return 1;
           }
         }
