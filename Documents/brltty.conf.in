@@ -128,11 +128,11 @@
 
 # TTY Braille Driver Parameters
 #braille-parameters tt:Baud=9600 # 
-#braille-parameters tt:Cols=40 # [1-80]
-#braille-parameters tt:CSet=ISO8859-1 # 
-#braille-parameters tt:Lines=1 # [1-3]
+#braille-parameters tt:CharSet=ISO8859-1 # 
+#braille-parameters tt:Height=1 # [1-3]
 #braille-parameters tt:Locale= # 
 #braille-parameters tt:Term=vt100 # [terminfo]
+#braille-parameters tt:Width=40 # [1-80]
 
 # VisioBraille Braille Driver Parameters
 #braille-parameters vs:DisplaySize=40 # [20-40]

@@ -36,8 +36,8 @@
 #include <ctype.h>
 #include <locale.h>
 
-#include <stdarg.h>
 #if defined(HAVE_PKG_CURSES)
+#include <stdarg.h>
 #include <curses.h>
 #elif defined(HAVE_PKG_NCURSES)
 #include <ncurses.h>
@@ -53,18 +53,18 @@ static iconv_t conversionDescriptor = NULL;
 typedef enum {
   PARM_TERM,
   PARM_BAUD,
-  PARM_LINES,
-  PARM_COLS,
+  PARM_HEIGHT,
+  PARM_WIDTH,
 #ifdef HAVE_ICONV_H
-  PARM_CSET,
+  PARM_CHARSET,
 #endif /* HAVE_ICONV_H */
   PARM_LOCALE
 } DriverParameter;
 
 #ifdef HAVE_ICONV_H
-#define BRLPARMS "term", "baud", "lines", "cols", "cset", "locale"
+#define BRLPARMS "term", "baud", "height", "width", "charset", "locale"
 #else /* HAVE_ICONV_H */
-#define BRLPARMS "term", "baud", "lines", "cols", "locale"
+#define BRLPARMS "term", "baud", "height", "width", "locale"
 #endif /* HAVE_ICONV_H */
 
 #define BRL_HAVE_KEY_CODES
@@ -113,7 +113,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     static const int maximum = MAX_WINDOW_HEIGHT;
     int height = windowHeight;
     if (validateInteger(&height, "window height (lines)",
-                        parameters[PARM_LINES], &minimum, &maximum))
+                        parameters[PARM_HEIGHT], &minimum, &maximum))
       windowHeight = height;
   }
 
@@ -122,13 +122,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     static const int maximum = MAX_WINDOW_WIDTH;
     int width = windowWidth;
     if (validateInteger(&width, "window width (columns)",
-                        parameters[PARM_COLS], &minimum, &maximum))
+                        parameters[PARM_WIDTH], &minimum, &maximum))
       windowWidth = width;
   }
 
 #ifdef HAVE_ICONV_H
-  if (*parameters[PARM_CSET])
-    characterSet = parameters[PARM_CSET];
+  if (*parameters[PARM_CHARSET])
+    characterSet = parameters[PARM_CHARSET];
 #endif /* HAVE_ICONV_H */
 
   if (*parameters[PARM_LOCALE])
