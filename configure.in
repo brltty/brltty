@@ -204,38 +204,71 @@ esac])
 MKOBJ="${brltty_cv_prog_mkobj}"
 AC_SUBST([MKOBJ])
 
-AC_CACHE_CHECK([for linkage editor shared object flags], [brltty_cv_prog_mklib], [dnl
+AC_CACHE_CHECK([for loadable module creation command], [brltty_cv_prog_mkmod], [dnl
 case "${host_os}"
 in
    linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*|cygwin*|mingw*)
-      brltty_ld_flag_shared="-shared"
-      brltty_ld_flag_soname="-soname"
+      brltty_mkmod_ld_make="-shared"
       ;;
    solaris*)
-      brltty_ld_flag_shared="-G"
-      brltty_ld_flag_soname="-h"
+      brltty_mkmod_ld_make="-G"
       ;;
    hpux*)
-      brltty_ld_flag_shared="-b"
-      brltty_ld_flag_soname="+h"
+      brltty_mkmod_ld_make="-b"
       ;;
    osf*)
-      brltty_ld_flag_shared="-shared"
-      brltty_ld_flag_soname="-expect_unresolved '*' -soname"
+      brltty_mkmod_ld_make="-shared"
       ;;
    darwin*)
-      brltty_ld_flag_shared="-bundle -flat_namespace -undefined suppress"
-      brltty_gcc_flag_shared="-bundle -flat_namespace -undefined suppress"
+      brltty_mkmod_ld_make="-bundle"
+      brltty_mkmod_ld_options="-flat_namespace -undefined suppress"
+      brltty_mkmod_gcc_make="-bundle"
       ;;
    *)
-      AC_MSG_ERROR([linkage editor shared object flags not configured for ${host_os}])
+      AC_MSG_ERROR([loadable module creation command not configured for ${host_os}])
       ;;
 esac
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_mklib="\$(CC) ${brltty_gcc_flag_shared=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_ld_flag_soname+${brltty_ld_flag_soname} <soname>}]) -o"
+   brltty_cv_prog_mkmod="\$(CC) ${brltty_mkmod_gcc_make=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_mkmod_ld_options}]) -o"
 else
-   brltty_cv_prog_mklib="\$(LD) ${brltty_ld_flag_shared} ${brltty_ld_flag_soname+${brltty_ld_flag_soname} <soname>} -o"
+   brltty_cv_prog_mkmod="\$(LD) ${brltty_mkmod_ld_make} ${brltty_mkmod_ld_options} -o"
+fi])
+AC_SUBST([MKMOD], ["${brltty_cv_prog_mkmod}"])
+
+AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
+case "${host_os}"
+in
+   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*|cygwin*|mingw*)
+      brltty_mklib_ld_make="-shared"
+      brltty_mklib_ld_options="-soname"
+      ;;
+   solaris*)
+      brltty_mklib_ld_make="-G"
+      brltty_mklib_ld_options="-h"
+      ;;
+   hpux*)
+      brltty_mklib_ld_make="-b"
+      brltty_mklib_ld_options="+h"
+      ;;
+   osf*)
+      brltty_mklib_ld_make="-shared"
+      brltty_mklib_ld_options="-expect_unresolved '*' -soname"
+      ;;
+   darwin*)
+      brltty_mklib_ld_make="-dylib"
+      brltty_mklib_ld_options="-single_module -install_name"
+      brltty_mklib_gcc_make="-dynamiclib"
+      ;;
+   *)
+      AC_MSG_ERROR([dynamic library creation command not configured for ${host_os}])
+      ;;
+esac
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_mklib="\$(CC) ${brltty_mklib_gcc_make=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_mklib_ld_options+${brltty_mklib_ld_options} <soname>}]) -o"
+else
+   brltty_cv_prog_mklib="\$(LD) ${brltty_mklib_ld_make} ${brltty_mklib_ld_options+${brltty_mklib_ld_options} <soname>} -o"
 fi])
 AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 
@@ -465,22 +498,40 @@ fi])
 LIBCXXFLAGS="${brltty_cv_prog_cxx_libflags}"
 AC_SUBST([LIBCXXFLAGS])
 
-AC_CACHE_CHECK([for shared object extension], [brltty_cv_ext_lib], [dnl
+AC_SUBST([library_prefix], [lib])
+AC_CACHE_CHECK([for dynamic library extension], [brltty_cv_ext_lib], [dnl
 case "${host_os}"
 in
    hpux*)
       brltty_cv_ext_lib="sl"
       ;;
    darwin*)
-      brltty_cv_ext_lib="bundle"
+      brltty_cv_ext_lib="dylib"
       ;;
    *)
       brltty_cv_ext_lib="so"
       ;;
 esac])
-library_extension="${brltty_cv_ext_lib}"
-AC_SUBST([library_extension])
+AC_SUBST([library_extension], ["${brltty_cv_ext_lib}"])
 AC_DEFINE_UNQUOTED([LIBRARY_EXTENSION], ["${library_extension}"])
+
+AC_SUBST([module_name], ["${library_prefix}${PACKAGE_NAME}"])
+AC_DEFINE_UNQUOTED([MODULE_NAME], ["${module_name}"])
+AC_CACHE_CHECK([for loadable module extension], [brltty_cv_ext_mod], [dnl
+case "${host_os}"
+in
+   hpux*)
+      brltty_cv_ext_mod="sl"
+      ;;
+   darwin*)
+      brltty_cv_ext_mod="bundle"
+      ;;
+   *)
+      brltty_cv_ext_mod="so"
+      ;;
+esac])
+AC_SUBST([module_extension], ["${brltty_cv_ext_mod}"])
+AC_DEFINE_UNQUOTED([MODULE_EXTENSION], ["${module_extension}"])
 
 AC_CACHE_CHECK([for static archive extension], [brltty_cv_ext_arc], [dnl
 case "${host_os}"
@@ -497,6 +548,9 @@ case "${host_os}"
 in
    hpux*)
       brltty_cv_env_libsearch="SHLIB_PATH"
+      ;;
+   darwin*)
+      brltty_cv_env_libsearch="DYLD_LIBRARY_PATH"
       ;;
    *)
       brltty_cv_env_libsearch="LD_LIBRARY_PATH"
@@ -1007,10 +1061,6 @@ AC_SUBST([screen_driver_objects])
 BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 
 BRLTTY_ARG_PARAMETERS([screen])
-
-AC_SUBST([library_prefix], [lib])
-AC_SUBST([library_name], ["${library_prefix}${PACKAGE_NAME}"])
-AC_DEFINE_UNQUOTED([LIBRARY_NAME], ["${library_name}"])
 
 brltty_driver_names=
 for brltty_driver in ${brltty_item_names_braille} ${brltty_item_names_speech}

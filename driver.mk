@@ -31,12 +31,12 @@ BRLNAMES = $(BLD_TOP)$(DRV_DIR)/brltty-brl.lst
 BRL_DEFS = '-DBRLNAME=$(DRIVER_NAME)' '-DBRLCODE=$(DRIVER_CODE)' '-DBRLHELP="$(HELP_NAME)"'
 BRL_CFLAGS = $(LIBCFLAGS) $(BRL_DEFS)
 BRL_CXXFLAGS = $(LIBCXXFLAGS) $(BRL_DEFS)
-BRL_SO_NAME = $(LIB_NAME)b
-BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
+BRL_SO_NAME = $(MOD_NAME)b
+BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).$(MOD_EXT)
 BRL_FILE = $(BLD_TOP)$(DRV_DIR)/$(BRL_NAME)
 $(BRL_FILE): braille.$O
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKLIB:<soname>=${BRL_NAME}) $(@) braille.$O $(BRL_OBJS)
+	$(MKMOD) $(@) braille.$O $(BRL_OBJS)
 braille-driver: $(BRL_FILE)
 
 brl-lib-name:
@@ -46,12 +46,12 @@ SPKNAMES = $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
 SPK_DEFS ='-DSPKNAME=$(DRIVER_NAME)' '-DSPKCODE=$(DRIVER_CODE)'
 SPK_CFLAGS = $(LIBCFLAGS) $(SPK_DEFS)
 SPK_CXXFLAGS = $(LIBCXXFLAGS) $(SPK_DEFS)
-SPK_SO_NAME = $(LIB_NAME)s
-SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
+SPK_SO_NAME = $(MOD_NAME)s
+SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).$(MOD_EXT)
 SPK_FILE = $(BLD_TOP)$(DRV_DIR)/$(SPK_NAME)
 $(SPK_FILE): speech.$O
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKLIB:<soname>=${SPK_NAME}) $(@) speech.$O $(SPK_OBJS)
+	$(MKMOD) $(@) speech.$O $(SPK_OBJS)
 speech-driver: $(SPK_FILE)
 
 spk-lib-name:
@@ -67,5 +67,5 @@ uninstall::
 	rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/*-$(DRIVER_CODE).h
 
 clean::
-	-rm -f $(BLD_TOP)$(DRV_DIR)/$(LIB_NAME)?$(DRIVER_CODE).*
+	-rm -f $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)?$(DRIVER_CODE).*
 	-rm -f $(BLD_TOP)$(DAT_DIR)/brltty-$(DRIVER_CODE)[-.]*

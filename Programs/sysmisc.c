@@ -63,10 +63,10 @@ loadDriver (
     const char *symbolName;
 
     {
-      int length = strlen(LIBRARY_NAME) + strlen(driverIdentifier) + strlen(LIBRARY_EXTENSION) + 3;
+      int length = strlen(MODULE_NAME) + strlen(driverIdentifier) + strlen(MODULE_EXTENSION) + 3;
       char *name = mallocWrapper(length);
       snprintf(name, length, "%s%c%s.%s",
-               LIBRARY_NAME, driverCharacter, driverIdentifier, LIBRARY_EXTENSION);
+               MODULE_NAME, driverCharacter, driverIdentifier, MODULE_EXTENSION);
       libraryName = name;
     }
     libraryPath = makePath(driverDirectory, libraryName);

@@ -143,8 +143,11 @@ extern "C" {
 /* Define this to be a string containing the path to the library directory. */
 #undef LIBRARY_DIRECTORY
 
-/* Define this to be a string containing the base library name. */
-#undef LIBRARY_NAME
+/* Define this to be a string containing the base module name. */
+#undef MODULE_NAME
+
+/* Define this to be a string containing the module extension. */
+#undef MODULE_EXTENSION
 
 /* Define this to be a string containing the library extension. */
 #undef LIBRARY_EXTENSION

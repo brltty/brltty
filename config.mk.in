@@ -56,6 +56,9 @@ LD = $(CROSSCOMP)@LD@
 HOSTMKOBJ = @MKOBJ@
 MKOBJ = $(CROSSCOMP)$(HOSTMKOBJ)
 
+HOSTMKMOD = @MKMOD@
+MKMOD = $(CROSSCOMP)$(HOSTMKMOD)
+
 HOSTMKLIB = @MKLIB@
 MKLIB = $(CROSSCOMP)$(HOSTMKLIB)
 
@@ -85,8 +88,9 @@ INSTALL_PROGRAM = $(INSTALL_SCRIPT) -s
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_DIRECTORY = $(INSTALL) -d
 
+MOD_NAME = @module_name@
+MOD_EXT = @module_extension@
 LIB_PFX = @library_prefix@
-LIB_NAME = @library_name@
 LIB_EXT = @library_extension@
 LIB_VAR = @libsearch_variable@
 ARC_EXT = @archive_extension@
