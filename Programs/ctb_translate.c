@@ -277,7 +277,8 @@ contractText (void *contractionTable,
       if (!putBytes(&textTable[*src], 1)) break;
       src++;
     } else if (selectRule(srcmax-src) || selectRule(1)) {
-      if ((cursorOffset >= (src - srcmin)) &&
+      if (table->locale &&
+          (cursorOffset >= (src - srcmin)) &&
           (cursorOffset < (src - srcmin + currentFindLength))) {
         currentOpcode = CTO_Literal;
       } else if (table->numberSign && previousOpcode != CTO_MidNum &&
