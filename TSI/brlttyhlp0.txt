@@ -1,0 +1,70 @@
+---BRLTTY Navigator 20/40 Help Screen---
+
+"L-" means left keypad and "R-" mean right keypad
+     (as in "R-down" which means the "down" button from the right keypad)
+
+Movement:
+  R-left / R-right : one braille window left/right
+  R-round+R-left / R-round+R-right : beginning/end of line
+  L-left+L-up / L-Right+L-up : half a braille window left/right
+  L-round+L-left / L-round+L-right : one character left/right
+  R-up / R-down : one line up/down
+  L-round+L-up / L-round+L-down : up/down several lines
+  R-round+R-up / R-round/R-down : top/bottom of screen
+  R-left+R-up / R-left+R-down : screen top-left / bottom-left
+
+Arrow key mappings:
+  L-left / L-right / L-up / L-down : mapped to computer keyboard arrow keys
+
+Others:
+  R-round : bring braille window to cursor
+  L-round : toggle cursor tracking on/off (toggle)
+  L-round + R-round : freeze / unfreeze screen (toggle)
+  L-up + L-down : display attributes (toggle)
+  R-up + R-down : give status information (toggle)
+  L-left + L-right : this help screen (toggle)
+
+Routing:
+  L-down + R-down : route cursor to first cell of display
+  L-up+R-up : route cursor to somewhere about 3/4 of the length of the display
+
+Cut & paste:
+  R-round + L-left : mark beginning of buffer at start of braille display
+  R-round + L-right : mark buffer end at end of braille display and cut
+  R-round + L-left + L-right : cut-cursor special mode
+     In this mode:
+     R-round + L-left + L-right : cancel and return to normal mode
+     R-left / R-right : move cursor left/right
+     L-left / R-right : bring special cursor to first/last cell
+     R-up / R-down : move cursor forward/backward by 5cells
+     L-up / L-down : move cursor forward/backward by 10cells
+     R-round + L-left  : mark beginning of buffer at cursor position
+     R-round + L-right : mark end of buffer at cursor position
+  R-round + L-down : paste buffer
+
+Online configuration facility:
+  R-left+R-right : enter/exit configuration menu (toggle)
+     In that menu:
+     R-right / R-left : next/previous settings for the current option
+     R-down / R-up : next/previous option
+  R-left+R-right + R-round : save active configuration
+  R-left+R-right + R-round + L-round : reset active config from saved settings
+
+Online configuration options shortcuts (toggles):
+(these key combinations all include R-left + R-right)
+  L-round + L-left : select 6dot cursor or dots7-8 cursor
+  L-round + L-up : cursor visible on/off
+  L-round + L-down : cursor blinking on/off
+  L-up : capitals blinking on/off
+  L-down : sliding window on/off
+  L-right : beeps on/off
+
+Special:
+  L-left + R-right : reset navigator's typematic rate
+
+Alternative key bindings for PowerBraille:
+(These less convinient alternatives have been defined
+for PowerBraille but still work for Navigator)
+  L-up + R-down : display attributes (toggle)
+  L-down + R-up : give status information (toggle)
+-----End of help screen-----

@@ -1,0 +1,41 @@
+BRLTTY TODO - 26 July 1996
+==========================
+
+(This concerns the main module of BRLTTY.  Individual Braille terminal
+drivers may have their own TODO lists.)
+
+Your help is welcome.
+
+Firstly, some restructuring: specification of a standard Braille display
+interface library, including standardisation of the use of status cells.
+
+Then (not necessarily in this order):
+
+- Attribute tracking.
+
+- Mixed text + attribute mode, like underlined and/or flashing attributes.
+
+- Keypress simulation within dosemu.
+
+- Revision of cut & paste and implementation of linear mode cut (as opposed
+to rectangular mode).
+
+- Revesion of beeps.  Too many events have the same beeps, so we might want
+to add new ones. See if we could optimize the use of the console resource.
+Implement .au and .wav sounds (through a soundcard).
+
+- Scroll tracking: wouldn't it be great if you could continue reading the
+line you're on even when new text is printed and the screen scrolls up?
+Like in IRC for instance...
+
+- Support for speech addition: this does not mean a screen reader, it
+simply means some added functionality to plain Braille.  It would allow
+designating text (with the Braille terminal keys) and sending it to a
+speech synthesizer.  Intended to speed up reading of long texts.
+Preliminary tests have been done with the CombiBraille driver.
+
+- On-the-fly grade II translation: translating one line at a time into
+grade II Braille would speed up reading.  It may be possible to use some
+existing free translation software...
+
+- Support for more Braille displays.

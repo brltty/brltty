@@ -1,0 +1,270 @@
+<HTML>
+<HEAD>
+<TITLE>BRLTTY: Using BRLTTY</TITLE>
+</HEAD>
+<BODY>
+<A HREF="manual-1.html">Previous</A>
+<A HREF="manual-3.html">Next</A>
+<A HREF="manual.html#toc2">Table of Contents</A>
+<HR>
+<H2><A NAME="s2">2. Using BRLTTY</A></H2>
+
+<P>Before you activate the system, you should set up your Braille 
+display device.  In most cases this is simple: just connect it to an 
+appropriate serial port and turn the display on, if necessary 
+selecting the serial interface.</P>
+<P>Having set up your display, to run BRLTTY simply type the command 
+<CODE>brltty</CODE> at a shell prompt.  The program will load and a message 
+giving the program name (BRLTTY) and current version number will 
+appear briefly on the display device.  After this, the display will 
+show a small area of the console screen including a cursor.  By 
+default the cursor is represented as dots 7 and 8 superimposed over 
+the character it is on.</P>
+<P>Any screen activity will be reflected in the Braille display.  The 
+display will also follow the progress of the cursor on the screen.  
+This feature is known as <EM>cursor tracking</EM>.</P>
+<P>However, just typing and reading the display is not enough: try 
+entering a command which will cause an error and press <EM>enter</EM>.  
+The error will appear on the screen, but unless you have a multi line 
+display, the chances are that the error message will not be visible on 
+the Braille display, all you will see is another shell prompt.  What 
+is needed then is some means of moving the Braille <EM>window</EM> around 
+the screen.</P>
+
+<H2><A NAME="ss2.1">2.1 Basic Movement Keys</A></H2>
+
+<P>All commands to BRLTTY are given using the Braille keys on the
+Braille display.  Unfortunately, there seems to be no standard set of
+controls available across different displays: some have six dot keys
+(like a Braille writing machine), others have thumb keys; some even
+have buttons above each character in the display.  Some displays have
+all three types.  Because the nature and layout of such keys is so
+varied, refer to the <CODE>README</CODE> file for your display for the keys
+you press for each operation.  In this manual keys will be indicated
+by name.</P>
+<P>Commands generally consist of a single Braille key or combination of
+Braille keys, which can be issued at any time BRLTTY is running.  The
+most important commands are those which move the Braille window around
+the console screen.  Most of them do not affect the console cursor, or
+any program you are running.</P>
+<P>
+<DL>
+<DT><B>Moving Vertically:</B><DD><P>
+<DL>
+<DT><B>TOP</B><DD><P>Move to top of screen</P>
+<DT><B>BOT</B><DD><P>Move to bottom of screen</P>
+<DT><B>WINUP</B><DD><P>Move up several lines</P>
+<DT><B>WINDN</B><DD><P>Move down several lines</P>
+<DT><B>LNUP</B><DD><P>Move up one line</P>
+<DT><B>LNDN</B><DD><P>Move down one line</P>
+</DL>
+</P>
+<DT><B>Moving Horizontally:</B><DD><P>
+<DL>
+<DT><B>LNBEG</B><DD><P>Move to start of line</P>
+<DT><B>LNEND</B><DD><P>Move to end of line</P>
+<DT><B>HWINLT</B><DD><P>Move left half a window</P>
+<DT><B>HWINRT</B><DD><P>Move right half a window</P>
+<DT><B>CHRLT</B><DD><P>Move left one character</P>
+<DT><B>CHRRT</B><DD><P>Move right one character</P>
+</DL>
+</P>
+<DT><B>Moving Both Horizontally and Vertically:</B><DD><P>
+<DL>
+<DT><B>TOP_LEFT</B><DD><P>Move to top left of screen</P>
+<DT><B>BOT_LEFT</B><DD><P>Move to bottom left of screen</P>
+<DT><B>HOME</B><DD><P>Move window to cursor</P>
+<DT><B>FWINLT</B><DD><P>Move left one window distance</P>
+<DT><B>FWINRT</B><DD><P>Move right one window distance</P>
+</DL>
+</P>
+</DL>
+</P>
+<P>The <EM>FWINLT</EM> and <EM>FWINRT</EM> keys can be used to read backwards and
+forwards, as they scroll to the previous or next line respectively if
+invoked from the end of a line.  This makes them particularly useful
+when reading text.</P>
+<P>If you do not remember a command, help is available using the 
+<EM>HELP</EM> command.  Use the movement keys as above to navigate the 
+help screen and <EM>HELP</EM> again to quit.</P>
+
+
+<H2><A NAME="ss2.2">2.2 Other Controls</A></H2>
+
+<P>In addition to the commands above, BRLTTY offers many other useful 
+features:</P>
+<P>
+<DL>
+<DT><B><EM>CSRTRK</EM>: Toggle cursor tracking</B><DD><P>Default: on.  When cursor tracking is on, movement of the console
+cursor will automatically adjust the display window position so that
+the cursor is always in the window.  It is sometimes useful to turn
+this feature off so you can monitor a particular region of the screen
+easily.</P>
+<DT><B><EM>DISPMD</EM>: Toggle attribute display</B><DD><P>Default: off.  If the attribute display is on, the attributes (colour
+information) of each character, rather than the characters themselves
+are displayed.  It can be useful to turn attribute display on to
+enable detection of highlighted items.</P>
+<DT><B><EM>FREEZE</EM>: Toggle screen freezing</B><DD><P>Default: off.  The freeze function exists to allow easy reading of
+changing screens.  When you turn freeze on, the current screen
+contents are stored temporarily and any new screen activity is not
+reflected in the Braille.  Remember to turn freezing off again when
+you wish to resume normal operation.</P>
+<DT><B><EM>CSRBLINK</EM>: Toggle blinking cursor</B><DD><P>Default: off.  If this function is enabled, the screen cursor will
+blink on the display, that is, it will only be present a proportion of
+the time.  When the cursor is off, you will be able to view the
+character beneath the cursor.</P>
+<DT><B><EM>CAPBLINK</EM>: Toggle blinking caps</B><DD><P>Default: off.  Similar to the cursor blinking function, if this
+function is enabled, capital letters will blink on the display.  This
+is most useful when using 6 dot Braille.</P>
+<DT><B><EM>CSRVIS</EM>: Toggle cursor visibility</B><DD><P>Default: on.  This function, when enabled, shows the position of the
+cursor (either steady or blinking) on the display.  It is sometimes
+useful to turn this function off to examine text where a cursor symbol
+only serves to obscure reading.</P>
+<DT><B><EM>CSRSIZE</EM>: Toggle cursor shape</B><DD><P>Default: underline cursor.  This function switches the cursor shape:
+all eight dots (block) or just the bottom two (underline).  Choose the
+one you prefer.</P>
+<DT><B><EM>BRLDOTS</EM>: Braille representation</B><DD><P>Default: 8 dot.  This function switches between 6 and 8 dot Braille
+codes.  When 6 dot mode is chosen, the bottom dots (7 and 8) of all
+ordinary characters are removed.</P>
+<DT><B><EM>SND</EM>: Toggle audio signals</B><DD><P>Default: on.  When on, BRLTTY beeps when certain events occur (such as
+moving beyond the edge of the screen).  Beeps also confirm the
+settings of some toggle options.</P>
+<DT><B><EM>SLIDEWIN</EM>: Toggle sliding window</B><DD><P>Default: off.  This feature, in conjunction with <EM>cursor tracking</EM>
+moves the display window more smoothly when the physical cursor moves
+beyond the right edge of the window.  With <EM>sliding window</EM> off,
+whenever the cursor moves beyond the right edge of the window, the
+window moves by one window width.  When on, the window moves by a
+quarter of this width.</P>
+<DT><B><EM>INFO</EM>: Status information</B><DD><P>Default: off.  The status function switches the display to the status
+screen.  This shows information including the physical cursor
+position, the position of the start of the Braille display window and
+the settings of various flags.  Some display types have some of this
+information permanently shown in their <EM>status cells</EM>.  See the
+<CODE>README</CODE> file for information about your display.</P>
+<P>The window start position and physical cursor position are displayed 
+in the form <I>cc:rr</I>, where <I>cc</I> is the current column and 
+<I>rr</I> is the current row.  Then follows a series of flags:
+<OL>
+<LI> Cursor tracking.  When on <CODE>t</CODE>, space otherwise</LI>
+<LI> Cursor visibility.
+<DL>
+<DT><B><CODE>v</CODE></B><DD><P>Cursor visible, no blink</P>
+<DT><B><CODE>B</CODE></B><DD><P>Cursor is visible and blinking</P>
+<DT><B><CODE>b</CODE></B><DD><P>Cursor not visible but blinking is on</P>
+<DT><B>space</B><DD><P>Cursor not visible and blinking is off</P>
+</DL>
+</LI>
+<LI> Display mode.  <CODE>a</CODE> attribute, <CODE>t</CODE> text</LI>
+<LI> Screen state.  <CODE>f</CODE> frozen, space live</LI>
+<LI> Braille representation, 6 or 8 dot</LI>
+<LI> Blinking capitals.  <CODE>B</CODE> on, space otherwise</LI>
+</OL>
+</P>
+<P>When in the status screen, all information may be updated by console 
+screen activity or BRLTTY commands.  Press <EM>INFO</EM> to return to 
+normal operation.</P>
+</DL>
+</P>
+
+
+<H2><A NAME="ss2.3">2.3 Cursor Routing</A></H2>
+
+<P>It often happens that you are moving the display window around the
+screen examining the text in, say, a text editor and you want to move
+the physical cursor to where your window display is.  Cursor routing
+provides just such a facility by simulating your keystrokes.  Type
+<EM>CSRJMP</EM> and your cursor will be moved to the start position of the
+display window.  Some Braille displays have buttons above each cell:
+these may also be used to move the cursor to that position.  Others
+bind Braille keys to the cursor keys on the keyboard to allow a manual
+form of cursor routing.</P>
+<P>Note: Cursor routing is not yet completely reliable.  It currently 
+uses hard-wired vt100 cursor key codes to move in the correct 
+directions.  Also, this does not work well on heavily loaded systems 
+(see <CODE>config.h</CODE> for further details).</P>
+<P>Once you give a cursor routing command, BRLTTY will spend a
+pre-defined amount of time attempting to carry out your instruction, 
+before finally giving up if unsuccessful.  The default timeout is 4 
+seconds.  At present, any further commands you issue will only be 
+carried out after the timeout has elapsed---we may implement a `quit' 
+command to abort cursor routing in a future release.</P>
+
+
+<H2><A NAME="ss2.4">2.4 Cut &amp; Paste</A></H2>
+
+<P>This feature enables you to grab some text already on the screen 
+and re-enter it at the cursor, thus saving time.  It is particularly 
+useful for items such as long filenames or complicated commands.</P>
+<P>First, mark the (rectangular) area on the screen to grab (cut): To
+mark the top left corner press <EM>CUTBEG</EM>.  The top left corner of
+the marked area is set to the extreme left position of the window and
+the <EM>cut buffer</EM> is cleared.  To mark the bottom right corner press
+<EM>CUTEND</EM>: the area you defined is then copied into the <EM>cut
+buffer</EM>.  BRLTTY removes excess white space at the end of each line in
+the <EM>cut buffer</EM> so you don't get extra spaces after your cut text.
+Some displays support more accurate <EM>cut &amp; paste</EM> using the
+buttons above the Braille cells, see the <CODE>README</CODE> file for your
+display.</P>
+<P>To paste the text, i.e. type it at the cursor position, press 
+<EM>PASTE</EM>.  You can paste the stored text any number of times without 
+re-cutting it.</P>
+
+
+<H2><A NAME="ss2.5">2.5 The Online Configuration Menu</A></H2>
+
+<P>BRLTTY has a simple menu from which you can change some of the 
+settings.  The menu is activated by pressing <EM>CONFMENU</EM>.  The 
+display will briefly display the menu title and then display the 
+current parameter.</P>
+<P>To move around in the menu, use the normal window movement keys as
+follows: <EM>LNUP</EM> and <EM>LNDN</EM> move up and down the menu; <EM>TOP</EM>
+and <EM>HOME</EM> move to the start; <EM>BOT</EM> moves to the end.  To adjust
+the setting of a parameter use <EM>FWINLT</EM> and <EM>FWINRT</EM>.  To undo
+all the changes made since entering the menu use <EM>RESET</EM>.</P>
+<P>Many of the parameters available through the menu can also be set 
+using single key strokes to toggle them (see above).  In addition, the 
+menu allows you to configure the speeds of the blinking features.</P>
+<P>To leave the menu and return to normal operation press any key not
+listed above.  If the <EM>save config</EM> option is on, the current
+settings will be written to the <EM>configuration file</EM> (see below).</P>
+
+
+<H2><A NAME="ss2.6">2.6 Storing the Current Configuration</A></H2>
+
+<P>When you load BRLTTY, a <EM>configuration file</EM> is loaded to
+determine the settings of the features available through the
+<EM>configuration menu</EM>.  You can save the current settings back to
+the <EM>configuration file</EM> using <EM>SAVECONF</EM>; this automatically
+happens when you exit the menu if the <EM>save config</EM> option is on.
+The <EM>configuration file</EM> is currently a binary file.</P>
+<P>To reload the configurable settings from the configuration file, press
+<EM>RESET</EM>.</P>
+
+
+<H2><A NAME="switches"></A> <A NAME="ss2.7">2.7 Command Line Options</A></H2>
+
+<P>BRLTTY has the following command line options.  Use these to start 
+BRLTTY using settings other than the defaults.
+<DL>
+<DT><B>-c <EM>config-file</EM></B><DD><P>Use binary configuration file 
+<EM>config-file</EM> instead of <CODE>brlttyconf.dat</CODE>.</P>
+<DT><B>-d <EM>serial-device</EM></B><DD><P>Use <EM>serial-device</EM> to access 
+Braille terminal instead of the default (normally <CODE>/dev/ttyS0</CODE>)</P>
+<DT><B>-t <EM>text-trans-file</EM></B><DD><P>Use translation table
+<EM>text-trans-file</EM> instead of the default of <CODE>us.tbl</CODE>.</P>
+<DT><B>-h, --help</B><DD><P>Print a brief help message and exit</P>
+<DT><B>-q, --quiet</B><DD><P>Suppress start-up messages</P>
+<DT><B>-v, --version</B><DD><P>Print start-up messages and exit</P>
+</DL>
+</P>
+<P>You can, of course, permanently configure the default settings of the 
+first three options at compilation.</P>
+
+
+
+<HR>
+<A HREF="manual-1.html">Previous</A>
+<A HREF="manual-3.html">Next</A>
+<A HREF="manual.html#toc2">Table of Contents</A>
+</BODY>
+</HTML>

@@ -1,0 +1,41 @@
+BRLTTY Help Screen (Alva ABT3xx series)
+From left to right, front keys are:
+PROG  HOME CURSOR  UP  LEFT  RIGHT  DOWN
+
+Movement keys:
+UP              up one line
+LEFT            left one full window
+RIGHT           right one full window
+DOWN            down one line
+CURSOR          goto cursor position
+CURSOR + UP     up several lines
+CURSOR + DOWN   down several lines
+CURSOR + LEFT   left one half window
+CURSOR + RIGHT  right one half window
+HOME            top left of screen
+HOME + UP       top of screen
+HOME + DOWN     bottom of screen
+HOME + LEFT     beginning of line
+HOME + RIGHT    end of line
+PROG + LEFT     left one character
+PROG + RIGHR    right one character
+
+Other functions:
+PROG            toggle help display
+PROG + HOME     toggle attribute display
+PROG + CURSOR   activate configuration menu
+PROG + UP       toggle status mode
+PROG + DOWN     toggle freeze mode
+HOME + CURSOR   toggle cursor tracking
+
+Functions of the 3 cursor routing buttons over the status cells:
+Button 1        toggle capital letter blink
+Button 2        toggle cursor visibility
+Button 3        toggle cursor blink
+
+Cut & Paste function keys:
+PROG + cursor routing button     defines the beginning of a block
+HOME + cursor routing button     defines the end of that block
+PROG + HOME + LEFT               begins block at start of braille display
+PROG + HOME + RIGHT              ends the block at the end of braille display
+PROG + HOME + DOWN               paste the block at cursor position

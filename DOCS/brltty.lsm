@@ -1,0 +1,32 @@
+Begin3
+Title:          BRLTTY - Access software for Unix for a blind person
+		         using a soft Braille terminal
+Version:        1.0, 26JUL96
+Entered-date:   28JUL96
+Description:    BRLTTY is a daemon which provides access to a Unix console
+		for a blind person using a soft Braille display (see the
+		README file for a full explanation).
+
+		BRLTTY only works with text-mode applications. 
+
+		We hope that this system will be expanded to support
+		other soft Braille displays, and possibly even other
+		Unix-like platforms.
+Keywords:       Braille console access visually impaired blind
+Author:         nn201@cus.cam.ac.uk (Nikhil Nair)
+		nico@cam.org (Nicolas Pitre)
+		doyons@jsp.umontreal.ca (Stephane Doyon)
+		jrbowden@bcs.org.uk (James Bowden)
+Maintained-by:  nn201@cus.cam.ac.uk (Nikhil Nair)
+Primary-site:   sunsite.unc.edu /pub/Linux/utils/console
+		105kb brltty-1.0.tar.gz (includes the README file)
+		  6kb brltty-1.0.README
+Platforms:      Linux (kernel 1.1.92 or later) running on a PC or DEC Alpha.
+		Not X/graphics.
+		Supported Braille displays (serial communication only):
+		  - Tieman B.V.: CombiBraille 25/45/85;
+		  - Alva B.V.: ABT3xx series;
+		  - Telesensory Systems Inc.: PowerBraille 40 (not 65/80),
+		    Navigator 20/40/80 (latest firmware version only?).
+Copying-policy: GPL
+End

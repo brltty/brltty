@@ -1,0 +1,51 @@
+---BRLTTY PowerBraille 40 Help Screen---
+
+Movement:
+  D-back / D-forw : one braille window left/right
+  R-round+D-back / R-round+D-forw : beginning/end of line
+  CR1+CR3 / CR38+CR40 : half a braille window left/right
+  CR1+CR2 / CR39+CR40 : one character left/right
+  R-up / R-down : one line up/down
+  L-round+L-up / L-round+L-down : up/down several lines
+  R-round+R-up / R-round/R-down : top/bottom of screen
+  D-back+R-up / D-back+R-down : screen top-left / bottom-left
+
+Arrow key mappings:
+  L-up / L-down : mapped to computer keyboard arrow keys
+
+Routing:
+  CR1 -- CR40 : route the cursor to the appropriate cell
+  L-down + R-down : route cursor to first cell of display
+  L-up+R-up : route cursor to somewhere about 3/4 of the length of the display
+
+Others:
+  R-round : bring braille window to cursor
+  L-round : toggle cursor tracking on/off (toggle)
+  L-round + R-round : freeze / unfreeze screen (toggle)
+  L-up + R-down : display attributes (toggle)
+  L-down + R-up : give status information (toggle)
+  CR1+CR40 : this help screen (toggle)
+
+Cut & paste:
+  CR39+CR40+CR# : mark beginning of buffer at cell #
+  CR1+CR2+CR#   : mark end of buffer at cell #
+  R-round + L-down : paste buffer
+
+Online configuration facility:
+  D-back+D-forw : enter/exit configuration menu (toggle)
+     In that menu:
+     D-forw / D-back : next/previous settings for the current option
+     R-down / R-up : next/previous option
+  D-back+D-forw + R-round : save active configuration
+  D-back+D-forw + R-round + L-round : reset active config from saved settings
+
+Online configuration options shortcuts (toggles):
+(these key combinations all include D-back + D-forw)
+  L-round + L-up : cursor visible on/off
+  L-round + L-down : cursor blinking on/off
+  L-up : capitals blinking on/off
+  L-down : sliding window on/off
+
+Special:
+  CR2+CR39 : reset navigator's typematic rate
+-----End of help screen-----

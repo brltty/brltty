@@ -1,0 +1,168 @@
+BRLTTY FAQ - July 25 1996
+=========================
+
+Q. What are the supported Braille display models?
+A.
+  - Tieman B.V.'s CombiBraille (25, 45 and 85 cell models)
+  - Alva B.V.'s ABT3xx series
+  - Telesensory Systems Inc.'s Navigator 20/40/80 and PowerBraille 40.
+    PowerBraille 65/80 is not supported yet (need testers!)
+That's according to the specs we have. However, the Navigator 80 and
+several Alva and Tieman models have not been tested yet.
+
+Q. Does BRLTTY need a lot of CPU time? On what machines does it run?
+A. BRLTTY has been successfully tested on a 386SX20. It does not use much
+of the system resources, and the response time is suprisingly good.
+
+As well as many PCs, BRLTTY has been tested on a DEC Alpha running Alpha
+Linux.
+
+Q. I'm the impatient type. How do I install this thing?
+A.
+  - Uncomment one of the BRL_TARGET lines in the Makefile.
+  - Type make.
+  - As root, type make install.
+  - Run /sbin/brltty.
+  - Optionally: run /sbin/brltty from rc.S or equivalent.
+  - That's all!
+
+Q. What if it works?
+A. Then tell us!!!
+
+Q. How do I select my Braille display and configure BRLTTY?
+A. You should edit the Makefile and uncomment one of the BRL_TARGET lines.
+You may also edit the file brlconf.h wich is located in the subdirectory
+corresponding to the Braille target you choose. In the same subdirectory
+should be an additionnal README file for specific Braille terminal
+information. Finally, although it is not necessary, you can have a
+look at config.h.
+
+Q. Can I have BRLTTY running even before I login?
+A. Sure! We recommend that you do so by starting BRLTTY from your rc.S (or
+any script executed at boot time).
+
+Q. How do I find out and learn which key does what?
+A. See the brlttyh*.txt file in the subdirectory containing the sources of
+the driver for your terminal. There is a help toggle key that will bring
+up that very file while you are running BRLTTY, so you can refer to it live.
+All you need to learn is which key brings up the help screen and which keys
+correspond to FWINLT and FWINRT (full window left and right respectively).
+
+Q. Can I look at boot time messages with BRLTTY even if they where printed
+on the screen before BRLTTY started?
+A. Sure! Just go through the scrollback buffer using the
+SHIFT+PAGEUP/SHIFT+PAGEDOWN keys. (Note that this functionality of the
+console driver is only available with SVGA video cards.)
+
+Q. Can I use BRLTTY while in single user mode?
+A. Sure you can use BRLTTY in single user mode. If you start it up as the
+very first thing of the very first script that init runs when booting
+(usually rc.S), then it will be on when you get to the prompt. You might
+not be able to freeze the screen though, since the partition might still be
+mounted read-only.
+
+Q. Can I use BRLTTY with special video modes?
+A. Some kernel parameters allow using different video modes (provided by the
+BIOS), like 80x50 for instance. See /usr/src/linux/Documentation/svga.txt if
+you have recent kernel sources installed. BRLTTY will adapt automatically
+to whatever screen size you are using.
+
+Q. Is it possible to use DOSEmu with BRLTTY?
+A. Yes, with some restrictions. First, to get it to work, pay attention to
+the following two points:
+  - The "video" option in your /etc/dosemu.conf file must not contain the
+    word "console". That keyword would bypass the kernel console driver and
+    DOS would write directly to the video card. BRLTTY would show a blank
+    screen.
+  - Make sure the appropriate com port is not declared for use by DOS and
+    remains in BRLTTY's control.
+Furthermore, if you use the "raw keyboard" option, then cursor movement
+keys, cursor routing and cut & paste functions will not work. This is because
+simulating key presses must be done differently within dosemu (most probably
+by using scan codes). We have not had time yet to investigate this problem
+further. Any help would be appreciated.
+
+Q. What files do I have to copy to carry BRLTTY to a root disk or to another
+   computer?
+A. See the script called "install-brltty" generated automatically when you
+compile BRLTTY. The components are:
+  - the executable
+  - the device file /dev/vcsa0 (character special 7,128)
+  - the /etc/brltty subdirectory
+  - and make sure that adequate versions of the shared libraries will
+    be available.
+
+Q. What is the config menu?
+A. There are several parameters you can tweek in BRLTTY. There initial
+defaults can be set before compilation in the config.h file. However, for
+more convenience, there is also a runtime configuration file from which the
+actual parameters will be loaded when BRLTTY starts up (if that file is
+present). Currently, that file is in a binary form. You can use the
+config menu function to alter the values of the parameters live. If you
+use the save command, the current profile will be saved to the binary
+configuration file, which means that they will be loaded automatically
+next time you start BRLTTY. The reset function simply reloads all settings
+from the file. The binary configuration file will be located in the
+/etc/brltty subdirectory. Note that the driver for your terminal might use
+some keys to toggle some of these options directly.
+
+Q. Some of the options in the online config menu have strange names. What do
+   they mean?
+A. Here is a brief discussion of the options that are the less
+self-explanatory.
+  - csr means cursor
+  - cap means capital letters
+  - save config: when set to ON, all settings are saved to the binary
+      configuration file upon exiting the config menu (that is all options
+      except the "save config" option itself...)
+  - block cursor: when ON, the cursor is formed of all 8 dots.
+      When off, the cursor is formed of dots 7-8.
+  - "csr blink on : #" The number # indicates the duration of the blinking
+      phase in which the cursor if visible.
+    "csr blink off : #" Indicates the duration of the linking phase in
+      which the cursor is not visible.
+    Using these options, you can not only determine the blinking speed
+    but also change the proportions of visibility/invisibility time...
+  - cap blink on/off : Works the same way.
+  - Sliding window : This determines the movement of the Braille window
+      when tracking the cursor. When off, the Braille window can only move
+      left or right by increments of one full window size. For instance, if
+      you use a 40 cell display on an 80 column screen, there are only two
+      possible positions for the Braille window: it can either display
+      columns 1-40 or 41-80. (Of course, the window can still be moved by
+      less than that by using the relevant key - HWINLT, CHRRT etc.)
+      When ON, the Braille window is allowed to occupy any position in the line
+      and it's position will be determined from the cursor position.
+
+Q. Why does the cut & paste function leave out the beginning of some of the
+   lines I try to cut?
+A. Currently, the cut function grabs a rectangular area from the screen, as
+opposed to grabbing linearly from the starting to the ending point. This has
+the advantage of allowing one to cut only certain columns: a quoted message
+for instance, or a column of a ps output... In the futur, there will be both
+a linear and a rectangular cut function.
+
+Q. Is it possible to use my own Braille dot translation table?
+A. Yes, if you can put it into the right format (use the -t option when
+invoking BRLTTY). The format of the Braille translation tables is outlined
+in section 3.1 of the BRLTTY manual. The utility txt2tbl may be useful if
+you have an ASCII Braille table. The utility convtable may be useful if you
+have a binary Braille table in another format. Both utilities are
+documented in section 3.2 of the manual.
+
+Q. Who do I contact if I have questions or problems?
+A. There is currently a team of three active developers. All three have
+worked on the main BRLTTY module and each has written a driver for a
+particular brand of Braille terminals. For general questions about the main
+module of BRLTTY, send your mail to any or all three of us; for questions
+about a specific Braille display device, contact the author of that driver.
+Here are the addresses:
+
+Nikhil Nair: founder of the BRLTTY project and author of the
+             Tieman B.V. CombiBraille driver
+     E-Mail: nn201@cus.cam.ac.uk
+Nicolas Pitre: Author of the driver for the Alva series
+     E-Mail: nico@cam.org
+Stephane Doyon: Author of the driver for the TSI displays (Navigator
+             and PowerBraille 40)
+     E-Mail: doyons@jsp.umontreal.ca

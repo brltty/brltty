@@ -1,0 +1,193 @@
+<HTML>
+<HEAD>
+<TITLE>BRLTTY: Introduction</TITLE>
+</HEAD>
+<BODY>
+Previous
+<A HREF="manual-2.html">Next</A>
+<A HREF="manual.html#toc1">Table of Contents</A>
+<HR>
+<H2><A NAME="s1">1. Introduction</A></H2>
+
+<P>BRLTTY is intended to provide a Braille user with access to the 
+console of a Unix system.  In the past, the only way this could 
+effectively be done was through an appropriate terminal connected to 
+the host.  BRLTTY will run a soft Braille display, reproducing a part 
+of the screen image (referred to in this manual as `the window') as 
+Braille dots.</P>
+
+<H2><A NAME="ss1.1">1.1 Brief History</A></H2>
+
+<P>The BRLTTY project started in July 1995, the team then comprising
+Nikhil Nair and James Bowden.  The first version ran with Blazie
+Engineering's Braille Lite; however, since this is not designed to be
+a dedicated soft Braille display for a computer, the response time was
+far too slow.  The Braille Lite is no longer supported for this and
+other reasons.</P>
+<P>In September 1995, the second version, 0.22 BETA, became the first to
+be released publicly.  As well as the Braille Lite, it supported
+Tieman B.V.'s CombiBraille series.</P>
+<P>Since then, much has changed.  James Bowden is no longer an active
+developer, although his help in other areas (including documentation)
+has been well appreciated.</P>
+<P>The project has benefited greatly from the efforts of two new members,
+Nicolas Pitre and Stephane Doyon.  Between them, they have brought
+support for two more brands of Braille displays, as well as many
+excellent ideas for the system as a whole.</P>
+<P>See section 
+<A HREF="manual-4.html#support">Support</A> for contact details of
+the BRLTTY team.</P>
+
+
+<H2><A NAME="ss1.2">1.2 System Requirements</A></H2>
+
+<P>To date BRLTTY only runs under Linux (both PC and DEC Alpha).
+Ports to other Unix-like operating systems are not currently planned,
+but we do welcome any interest in such projects.</P>
+<P>This Linux version of BRLTTY uses, apart from the standard serial 
+driver, the special device introduced in kernel version 1.1.92 which 
+provides easy access to the contents of the current virtual console.  
+This is normally called <CODE>/dev/vcsa</CODE> or <CODE>/dev/vcsa0</CODE> (the 
+name is configurable).  For this reason kernel 1.1.92 or later is 
+required.</P>
+<P>BRLTTY only works with text-based applications, so any form of
+graphics, including the X Window System, will not produce Braille
+output.</P>
+<P>You must also, of course, possess an appropriate soft Braille display.  
+BRLTTY currently works with
+<UL>
+<LI> Tieman B.V.: CombiBraille 25/45/85;</LI>
+<LI> Alva B.V.: ABT3xx series;</LI>
+<LI> Telesensory Systems Inc.: PowerBraille 40 (not 65/80);
+Navigator 20/40/80 (latest firmware version only?).</LI>
+</UL>
+</P>
+<P>We hope that other devices will be supported in the future, so if you 
+have any vaguely technical programming information on a device you 
+would like to see supported, please let us know (see section
+<A HREF="manual-4.html#support">Support</A>).</P>
+
+
+<H2><A NAME="ss1.3">1.3 Initial Installation and Testing</A></H2>
+
+<P>Before compiling BRLTTY, you must configure it for your system.  
+Read through and edit the file <CODE>Makefile</CODE> in the top-level 
+directory, following the instructions.  Then read the <CODE>README</CODE> file 
+in the directory containing the driver for your Braille display and 
+check for any further display specific instructions.</P>
+<P>Type
+<BLOCKQUOTE><CODE>
+<PRE>
+   make
+</PRE>
+</CODE></BLOCKQUOTE>
+
+to compile BRLTTY, the test programs and other small utilities.  Then, 
+as root, type
+<BLOCKQUOTE><CODE>
+<PRE>
+   make install
+</PRE>
+</CODE></BLOCKQUOTE>
+ to install the BRLTTY executable, together with the help
+and table files for your Braille display in the correct place.  This
+also creates <CODE>/dev/vcsa0</CODE> or equivalent if it does not already
+exist.</P>
+<P>You will have to install BRLTTY before you can use the test programs.</P>
+<P>BRLTTY will probably have to run with root privilege.  It needs to 
+access the virtual console screen information, the serial port 
+selected and, most awkwardly, the console (this is needed for 
+keystroke simulation during cursor routing, for the cut &amp; paste 
+function and for beeps).  If you do manage to get BRLTTY running 
+without being root, please let us know (see section 
+<A HREF="manual-4.html#support">Support</A>).</P>
+<P>The programs <CODE>brltest</CODE> and <CODE>scrtest</CODE> can be used as diagnostic 
+tools if something goes wrong.  Both must be run as root.</P>
+<P>If you get the error message `brltty: Cannot read screen', try running 
+scrtest.  This should read a rectangle from the middle of the screen, 
+and after reporting the screen dimensions and cursor position, print 
+this block to standard output.</P>
+<P>If BRLTTY appears to load, but the Braille display doesn't seem to 
+work, try running brltest.  This program should print a short message 
+on the display, ask you to hit return, and exit.</P>
+<P>The shell script <CODE>install-brltty</CODE> copies a fully-functional, 
+installed BRLTTY to a new location; this can be used to copy BRLTTY to 
+or from a rootdisk.  For instance, if the rootdisk floppy is mounted 
+on <CODE>/mnt</CODE>, and BRLTTY is working on the main system, then typing
+<BLOCKQUOTE><CODE>
+<PRE>
+   install-brltty /mnt
+</PRE>
+</CODE></BLOCKQUOTE>
+
+copies BRLTTY, with all its data and configuration files, as well as 
+<CODE>/dev/vcsa0</CODE> or equivalent to the rootdisk.</P>
+<P>Usage:
+<BLOCKQUOTE><CODE>
+<PRE>
+   install-brltty dest-prefix [source-prefix]
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Note: Some problems have been experienced when moving BRLTTY between
+systems with different versions of the shared C library.  This is
+worth investigating if you have difficulties.</P>
+<P>Also included are several small programs:
+<DL>
+<DT><B>txt2scrn</B><DD><P>This produces files in the format needed for the help function from 
+standard ASCII files.  txt2scrn is compiled and used automatically 
+during installation.</P>
+<DT><B>txt2tbl</B><DD><P>This program can be used to generate new Braille translation tables 
+from ASCII files.  See section 
+<A HREF="manual-3.html#tbltools">Table Utilities</A> for instructions.</P>
+<DT><B>tbl2txt</B><DD><P>This program is the inverse of txt2tbl.  It can be used if you are 
+not sure of what a particular dot combination represents.</P>
+</DL>
+</P>
+
+
+<H2><A NAME="ss1.4">1.4 Installation for Day-to-day Use</A></H2>
+
+<P>BRLTTY, once installed, is invoked by the single command
+<CODE>brltty</CODE>.  Command line switches allow the default configuration
+file name, serial device and Braille translation table to be
+overridden---see section 
+<A HREF="manual-2.html#switches">Command Line Options</A> for full details.</P>
+<P>However, particularly if it is being used by a system's administrator,
+it should probably be loaded at boot-time before the filesystems are
+checked, so that if anything goes wrong during these checks and the
+system drops into single user mode, the Braille display will still be
+active.</P>
+<P>The way this is done will vary according to the type of system being 
+used.  For instance, on a Debian GNU/Linux 0.93R5 system, the 
+following code was inserted near the beginning of /etc/init.d/boot:
+<BLOCKQUOTE><CODE>
+<PRE>
+   if [ -x /sbin/brltty ]
+   then
+     /sbin/brltty
+   fi
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>This could be abbreviated to the rather less readable form:
+<BLOCKQUOTE><CODE>
+<PRE>
+   [ -x /sbin/brltty ] && /sbin/brltty
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>(On a Slackware system, the file to edit is <CODE>/etc/rc.d/rc.S</CODE>.)</P>
+<P>One possible alternative is to start BRLTTY from /etc/inittab.</P>
+<P>Note: A <CODE>killall5 -15</CODE> command would be enough to stop BRLTTY in
+its tracks: if such a command is issued from an rc script when
+entering single user mode, this may be a problem which needs
+attention.</P>
+
+
+<HR>
+Previous
+<A HREF="manual-2.html">Next</A>
+<A HREF="manual.html#toc1">Table of Contents</A>
+</BODY>
+</HTML>

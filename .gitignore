@@ -1,0 +1,17 @@
+Makefile
+absdeps.mk
+reldeps.mk
+config.status
+config.log
+autom4te*.cache
+config.mk
+config.h
+brltty.spec
+configure
+*.pot
+*.tar
+*.gz
+*.bz2
+*.rpm
+data
+lib

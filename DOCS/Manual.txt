@@ -1,0 +1,775 @@
+  BRLTTY
+  Access Software for Unix for a Blind Person Using a Soft Braille Ter-
+  minal
+  Nikhil Nair <nn201@cus.cam.ac.uk> & others
+  Version 1.0, 26 July 1996
+
+  Copyright (C) 1995, 1996 by Nikhil Nair and others, All Rights
+  Reserved.  This is free software, placed under the terms of The GNU
+  General Public License.  BRLTTY comes with ABSOLUTELY NO WARRANTY.
+  ______________________________________________________________________
+
+  Table of Contents:
+
+  1.	Introduction
+
+  1.1.	Brief History
+
+  1.2.	System Requirements
+
+  1.3.	Initial Installation and Testing
+
+  1.4.	Installation for Day-to-day Use
+
+  2.	Using BRLTTY
+
+  2.1.	Basic Movement Keys
+
+  2.2.	Other Controls
+
+  2.3.	Cursor Routing
+
+  2.4.	Cut & Paste
+
+  2.5.	The Online Configuration Menu
+
+  2.6.	Storing the Current Configuration
+
+  2.7.	Command Line Options
+
+  3.	Configuring BRLTTY
+
+  3.1.	The Braille Translation Tables
+
+  3.2.	Table Utilities
+
+  4.	Appendices
+
+  4.1.	Disclaimer and License
+
+  4.2.	Support
+
+  4.3.	Future Enhancements
+
+  4.4.	Known Bugs
+  ______________________________________________________________________
+
+  1.  Introduction
+
+  BRLTTY is intended to provide a Braille user with access to the
+  console of a Unix system.  In the past, the only way this could
+  effectively be done was through an appropriate terminal connected to
+  the host.  BRLTTY will run a soft Braille display, reproducing a part
+  of the screen image (referred to in this manual as `the window') as
+  Braille dots.
+
+  1.1.	Brief History
+
+  The BRLTTY project started in July 1995, the team then comprising
+  Nikhil Nair and James Bowden.	The first version ran with Blazie
+  Engineering's Braille Lite; however, since this is not designed to be
+  a dedicated soft Braille display for a computer, the response time was
+  far too slow.	The Braille Lite is no longer supported for this and
+  other reasons.
+
+  In September 1995, the second version, 0.22 BETA, became the first to
+  be released publicly.	As well as the Braille Lite, it supported
+  Tieman B.V.'s CombiBraille series.
+
+  Since then, much has changed.	James Bowden is no longer an active
+  developer, although his help in other areas (including documentation)
+  has been well appreciated.
+
+  The project has benefited greatly from the efforts of two new members,
+  Nicolas Pitre and Stephane Doyon.  Between them, they have brought
+  support for two more brands of Braille displays, as well as many
+  excellent ideas for the system as a whole.
+
+  See section ``Support'' for contact details of the BRLTTY team.
+
+  1.2.	System Requirements
+
+  To date BRLTTY only runs under Linux (both PC and DEC Alpha).	Ports
+  to other Unix-like operating systems are not currently planned, but we
+  do welcome any interest in such projects.
+
+  This Linux version of BRLTTY uses, apart from the standard serial
+  driver, the special device introduced in kernel version 1.1.92 which
+  provides easy access to the contents of the current virtual console.
+  This is normally called /dev/vcsa or /dev/vcsa0 (the name is
+  configurable).  For this reason kernel 1.1.92 or later is required.
+
+  BRLTTY only works with text-based applications, so any form of
+  graphics, including the X Window System, will not produce Braille
+  output.
+
+  You must also, of course, possess an appropriate soft Braille display.
+  BRLTTY currently works with
+
+  o  Tieman B.V.: CombiBraille 25/45/85;
+
+  o  Alva B.V.: ABT3xx series;
+
+  o  Telesensory Systems Inc.: PowerBraille 40 (not 65/80); Navigator
+     20/40/80 (latest firmware version only?).
+
+  We hope that other devices will be supported in the future, so if you
+  have any vaguely technical programming information on a device you
+  would like to see supported, please let us know (see section
+  ``Support'').
+
+  1.3.	Initial Installation and Testing
+
+  Before compiling BRLTTY, you must configure it for your system.  Read
+  through and edit the file Makefile in the top-level directory,
+  following the instructions.  Then read the README file in the
+  directory containing the driver for your Braille display and check for
+  any further display specific instructions.
+
+  Type
+
+	  make
+
+  to compile BRLTTY, the test programs and other small utilities.  Then,
+  as root, type
+
+	  make install
+
+  to install the BRLTTY executable, together with the help and table
+  files for your Braille display in the correct place.	This also cre-
+  ates /dev/vcsa0 or equivalent if it does not already exist.
+
+  You will have to install BRLTTY before you can use the test programs.
+
+  BRLTTY will probably have to run with root privilege.	It needs to
+  access the virtual console screen information, the serial port
+  selected and, most awkwardly, the console (this is needed for
+  keystroke simulation during cursor routing, for the cut & paste
+  function and for beeps).  If you do manage to get BRLTTY running
+  without being root, please let us know (see section ``Support'').
+
+  The programs brltest and scrtest can be used as diagnostic tools if
+  something goes wrong.	Both must be run as root.
+
+  If you get the error message `brltty: Cannot read screen', try running
+  scrtest.  This should read a rectangle from the middle of the screen,
+  and after reporting the screen dimensions and cursor position, print
+  this block to standard output.
+
+  If BRLTTY appears to load, but the Braille display doesn't seem to
+  work, try running brltest.  This program should print a short message
+  on the display, ask you to hit return, and exit.
+
+  The shell script install-brltty copies a fully-functional, installed
+  BRLTTY to a new location; this can be used to copy BRLTTY to or from a
+  rootdisk.  For instance, if the rootdisk floppy is mounted on /mnt,
+  and BRLTTY is working on the main system, then typing
+
+	  install-brltty /mnt
+
+  copies BRLTTY, with all its data and configuration files, as well as
+  /dev/vcsa0 or equivalent to the rootdisk.
+
+  Usage:
+
+	  install-brltty dest-prefix [source-prefix]
+
+  Note: Some problems have been experienced when moving BRLTTY between
+  systems with different versions of the shared C library.  This is
+  worth investigating if you have difficulties.
+  Also included are several small programs:
+
+     txt2scrn
+	This produces files in the format needed for the help function
+	from standard ASCII files.  txt2scrn is compiled and used
+	automatically during installation.
+
+     txt2tbl
+	This program can be used to generate new Braille translation
+	tables from ASCII files.  See section ``Table Utilities'' for
+	instructions.
+
+     tbl2txt
+	This program is the inverse of txt2tbl.	It can be used if you
+	are not sure of what a particular dot combination represents.
+
+  1.4.	Installation for Day-to-day Use
+
+  BRLTTY, once installed, is invoked by the single command brltty.
+  Command line switches allow the default configuration file name,
+  serial device and Braille translation table to be overridden---see
+  section ``Command Line Options'' for full details.
+
+  However, particularly if it is being used by a system's administrator,
+  it should probably be loaded at boot-time before the filesystems are
+  checked, so that if anything goes wrong during these checks and the
+  system drops into single user mode, the Braille display will still be
+  active.
+
+  The way this is done will vary according to the type of system being
+  used.	For instance, on a Debian GNU/Linux 0.93R5 system, the
+  following code was inserted near the beginning of /etc/init.d/boot:
+
+	  if [ -x /sbin/brltty ]
+	  then
+	    /sbin/brltty
+	  fi
+
+  This could be abbreviated to the rather less readable form:
+
+	  [ -x /sbin/brltty ] && /sbin/brltty
+
+  (On a Slackware system, the file to edit is /etc/rc.d/rc.S.)
+
+  One possible alternative is to start BRLTTY from /etc/inittab.
+
+  Note: A killall5 -15 command would be enough to stop BRLTTY in its
+  tracks: if such a command is issued from an rc script when entering
+  single user mode, this may be a problem which needs attention.
+
+  2.  Using BRLTTY
+
+  Before you activate the system, you should set up your Braille display
+  device.  In most cases this is simple: just connect it to an
+  appropriate serial port and turn the display on, if necessary
+  selecting the serial interface.
+  Having set up your display, to run BRLTTY simply type the command
+  brltty at a shell prompt.  The program will load and a message giving
+  the program name (BRLTTY) and current version number will appear
+  briefly on the display device.  After this, the display will show a
+  small area of the console screen including a cursor.	By default the
+  cursor is represented as dots 7 and 8 superimposed over the character
+  it is on.
+
+  Any screen activity will be reflected in the Braille display.	The
+  display will also follow the progress of the cursor on the screen.
+  This feature is known as cursor tracking.
+
+  However, just typing and reading the display is not enough: try
+  entering a command which will cause an error and press enter.	The
+  error will appear on the screen, but unless you have a multi line
+  display, the chances are that the error message will not be visible on
+  the Braille display, all you will see is another shell prompt.  What
+  is needed then is some means of moving the Braille window around the
+  screen.
+
+  2.1.	Basic Movement Keys
+
+  All commands to BRLTTY are given using the Braille keys on the Braille
+  display.  Unfortunately, there seems to be no standard set of controls
+  available across different displays: some have six dot keys (like a
+  Braille writing machine), others have thumb keys; some even have
+  buttons above each character in the display.	Some displays have all
+  three types.	Because the nature and layout of such keys is so varied,
+  refer to the README file for your display for the keys you press for
+  each operation.  In this manual keys will be indicated by name.
+
+  Commands generally consist of a single Braille key or combination of
+  Braille keys, which can be issued at any time BRLTTY is running.  The
+  most important commands are those which move the Braille window around
+  the console screen.  Most of them do not affect the console cursor, or
+  any program you are running.
+
+     Moving Vertically:
+
+	TOP
+	   Move to top of screen
+
+	BOT
+	   Move to bottom of screen
+
+	WINUP
+	   Move up several lines
+
+	WINDN
+	   Move down several lines
+
+	LNUP
+	   Move up one line
+
+	LNDN
+	   Move down one line
+
+     Moving Horizontally:
+
+	LNBEG
+	   Move to start of line
+
+	LNEND
+	   Move to end of line
+	HWINLT
+	   Move left half a window
+
+	HWINRT
+	   Move right half a window
+
+	CHRLT
+	   Move left one character
+
+	CHRRT
+	   Move right one character
+
+     Moving Both Horizontally and Vertically:
+
+	TOP_LEFT
+	   Move to top left of screen
+
+	BOT_LEFT
+	   Move to bottom left of screen
+
+	HOME
+	   Move window to cursor
+
+	FWINLT
+	   Move left one window distance
+
+	FWINRT
+	   Move right one window distance
+
+  The FWINLT and FWINRT keys can be used to read backwards and forwards,
+  as they scroll to the previous or next line respectively if invoked
+  from the end of a line.  This makes them particularly useful when
+  reading text.
+
+  If you do not remember a command, help is available using the HELP
+  command.  Use the movement keys as above to navigate the help screen
+  and HELP again to quit.
+
+  2.2.	Other Controls
+
+  In addition to the commands above, BRLTTY offers many other useful
+  features:
+
+     CSRTRK: Toggle cursor tracking
+	Default: on.  When cursor tracking is on, movement of the
+	console cursor will automatically adjust the display window
+	position so that the cursor is always in the window.  It is
+	sometimes useful to turn this feature off so you can monitor a
+	particular region of the screen easily.
+
+     DISPMD: Toggle attribute display
+	Default: off.  If the attribute display is on, the attributes
+	(colour information) of each character, rather than the
+	characters themselves are displayed.  It can be useful to turn
+	attribute display on to enable detection of highlighted items.
+
+     FREEZE: Toggle screen freezing
+	Default: off.  The freeze function exists to allow easy reading
+	of changing screens.  When you turn freeze on, the current
+	screen contents are stored temporarily and any new screen
+	activity is not reflected in the Braille.  Remember to turn
+	freezing off again when you wish to resume normal operation.
+
+     CSRBLINK: Toggle blinking cursor
+	Default: off.  If this function is enabled, the screen cursor
+	will blink on the display, that is, it will only be present a
+	proportion of the time.	When the cursor is off, you will be
+	able to view the character beneath the cursor.
+
+     CAPBLINK: Toggle blinking caps
+	Default: off.  Similar to the cursor blinking function, if this
+	function is enabled, capital letters will blink on the display.
+	This is most useful when using 6 dot Braille.
+
+     CSRVIS: Toggle cursor visibility
+	Default: on.  This function, when enabled, shows the position of
+	the cursor (either steady or blinking) on the display.	It is
+	sometimes useful to turn this function off to examine text where
+	a cursor symbol only serves to obscure reading.
+
+     CSRSIZE: Toggle cursor shape
+	Default: underline cursor.  This function switches the cursor
+	shape: all eight dots (block) or just the bottom two
+	(underline).  Choose the one you prefer.
+
+     BRLDOTS: Braille representation
+	Default: 8 dot.	This function switches between 6 and 8 dot
+	Braille codes.	When 6 dot mode is chosen, the bottom dots (7
+	and 8) of all ordinary characters are removed.
+
+     SND: Toggle audio signals
+	Default: on.  When on, BRLTTY beeps when certain events occur
+	(such as moving beyond the edge of the screen).	Beeps also
+	confirm the settings of some toggle options.
+
+     SLIDEWIN: Toggle sliding window
+	Default: off.  This feature, in conjunction with cursor tracking
+	moves the display window more smoothly when the physical cursor
+	moves beyond the right edge of the window.  With sliding window
+	off, whenever the cursor moves beyond the right edge of the
+	window, the window moves by one window width.  When on, the
+	window moves by a quarter of this width.
+
+     INFO: Status information
+	Default: off.  The status function switches the display to the
+	status screen.	This shows information including the physical
+	cursor position, the position of the start of the Braille
+	display window and the settings of various flags.  Some display
+	types have some of this information permanently shown in their
+	status cells.  See the README file for information about your
+	display.
+
+	The window start position and physical cursor position are
+	displayed in the form cc:rr, where cc is the current column and
+	rr is the current row.	Then follows a series of flags:
+
+	1. Cursor tracking.  When on t, space otherwise
+
+	2. Cursor visibility.
+
+	   v  Cursor visible, no blink
+
+	   B  Cursor is visible and blinking
+
+	   b  Cursor not visible but blinking is on
+
+	   space
+	      Cursor not visible and blinking is off
+
+	3. Display mode.  a attribute, t text
+
+	4. Screen state.  f frozen, space live
+
+	5. Braille representation, 6 or 8 dot
+
+	6. Blinking capitals.  B on, space otherwise
+
+	When in the status screen, all information may be updated by
+	console screen activity or BRLTTY commands.  Press INFO to
+	return to normal operation.
+
+  2.3.	Cursor Routing
+
+  It often happens that you are moving the display window around the
+  screen examining the text in, say, a text editor and you want to move
+  the physical cursor to where your window display is.	Cursor routing
+  provides just such a facility by simulating your keystrokes.	Type
+  CSRJMP and your cursor will be moved to the start position of the
+  display window.  Some Braille displays have buttons above each cell:
+  these may also be used to move the cursor to that position.  Others
+  bind Braille keys to the cursor keys on the keyboard to allow a manual
+  form of cursor routing.
+
+  Note: Cursor routing is not yet completely reliable.	It currently
+  uses hard-wired vt100 cursor key codes to move in the correct
+  directions.  Also, this does not work well on heavily loaded systems
+  (see config.h for further details).
+
+  Once you give a cursor routing command, BRLTTY will spend a pre-
+  defined amount of time attempting to carry out your instruction,
+  before finally giving up if unsuccessful.  The default timeout is 4
+  seconds.  At present, any further commands you issue will only be
+  carried out after the timeout has elapsed---we may implement a `quit'
+  command to abort cursor routing in a future release.
+
+  2.4.	Cut & Paste
+
+  This feature enables you to grab some text already on the screen and
+  re-enter it at the cursor, thus saving time.	It is particularly
+  useful for items such as long filenames or complicated commands.
+
+  First, mark the (rectangular) area on the screen to grab (cut): To
+  mark the top left corner press CUTBEG.  The top left corner of the
+  marked area is set to the extreme left position of the window and the
+  cut buffer is cleared.  To mark the bottom right corner press CUTEND:
+  the area you defined is then copied into the cut buffer.  BRLTTY
+  removes excess white space at the end of each line in the cut buffer
+  so you don't get extra spaces after your cut text.  Some displays
+  support more accurate cut & paste using the buttons above the Braille
+  cells, see the README file for your display.
+
+  To paste the text, i.e. type it at the cursor position, press PASTE.
+  You can paste the stored text any number of times without re-cutting
+  it.
+
+  2.5.	The Online Configuration Menu
+
+  BRLTTY has a simple menu from which you can change some of the
+  settings.  The menu is activated by pressing CONFMENU.  The display
+  will briefly display the menu title and then display the current
+  parameter.
+
+  To move around in the menu, use the normal window movement keys as
+  follows: LNUP and LNDN move up and down the menu; TOP and HOME move to
+  the start; BOT moves to the end.  To adjust the setting of a parameter
+  use FWINLT and FWINRT.  To undo all the changes made since entering
+  the menu use RESET.
+
+  Many of the parameters available through the menu can also be set
+  using single key strokes to toggle them (see above).	In addition, the
+  menu allows you to configure the speeds of the blinking features.
+
+  To leave the menu and return to normal operation press any key not
+  listed above.	If the save config option is on, the current settings
+  will be written to the configuration file (see below).
+
+  2.6.	Storing the Current Configuration
+
+  When you load BRLTTY, a configuration file is loaded to determine the
+  settings of the features available through the configuration menu.
+  You can save the current settings back to the configuration file using
+  SAVECONF; this automatically happens when you exit the menu if the
+  save config option is on.  The configuration file is currently a
+  binary file.
+
+  To reload the configurable settings from the configuration file, press
+  RESET.
+
+  2.7.	Command Line Options
+
+  BRLTTY has the following command line options.  Use these to start
+  BRLTTY using settings other than the defaults.
+
+     -c config-file
+	Use binary configuration file config-file instead of
+	brlttyconf.dat.
+
+     -d serial-device
+	Use serial-device to access Braille terminal instead of the
+	default (normally /dev/ttyS0)
+
+     -t text-trans-file
+	Use translation table text-trans-file instead of the default of
+	us.tbl.
+
+     -h, --help
+	Print a brief help message and exit
+
+     -q, --quiet
+	Suppress start-up messages
+
+     -v, --version
+	Print start-up messages and exit
+
+  You can, of course, permanently configure the default settings of the
+  first three options at compilation.
+
+  3.  Configuring BRLTTY
+
+  Most if not all of the settings of BRLTTY are configurable through the
+  configuration menu.  Those that are not (e.g. cursor routing
+  performance) can be altered permanently by modifying the source and
+  recompiling.
+
+  3.1.	The Braille Translation Tables
+
+  BRLTTY uses two Braille translation tables to govern the mapping from
+  character/attribute number to dot combination.  The first, and most
+  important, is the text translation table.
+
+  BRLTTY is initially configured to use the North American Braille
+  Computer Code (NABCC).  However, as well as the default text
+  translation table file (us.tbl), BRLTTY comes with four alternative
+  tables: french.tbl, german.tbl, simple.tbl and uk.tbl.  See section
+  ``Command Line Options'' for details of using alternative translation
+  tables.
+
+  The attribute translation table is used when BRLTTY is in attribute
+  display mode.	There is currently only the default table, attrib.tbl.
+  This was designed so that each dot represents one bit of the attribute
+  byte, with the foreground colour on the right (dots 4, 5, 6, 8) and
+  the background colour on the left.  A foreground bit being on or a
+  background bit being off triggers the corresponding dot: this odd
+  logic in practice aids readability of the most common attributes.
+
+  These translation tables are 256-byte binary files.  The
+  character/attribute value is used as an index into the file, and the
+  byte at that position gives the corresponding dot combination.
+
+  The mapping from bit number to physical dot position varies from
+  display to display and can be fairly arbitrary.  An attempt has
+  therefore been made to standardise by defining the action of each bit
+  in a table entry.  The Braille display drivers then perform any
+  necessary adjustment for the display.
+
+     Bit 0
+	Dot 1 (top left)
+
+     Bit 1
+	Dot 4 (top right)
+
+     Bit 2
+	Dot 2 (below 1)
+
+     Bit 3
+	Dot 5 (below 4)
+
+     Bit 4
+	Dot 3 (below 2)
+
+     Bit 5
+	Dot 6 (below 5)
+
+     Bit 6
+	Dot 7 (bottom left)
+
+     Bit 7
+	Dot 8 (bottom right)
+
+  In each case, a bit being set means that the corresponding dot is
+  present.
+
+  Two small utilities, txt2tbl and tbl2txt are provided for easy
+  manipulation of these translation files, see below.
+
+  The default filenames of the data files are defined in config.h.  Any
+  changes you make to data files will take place on restarting the
+  software.  See section ``Command Line Options''.
+
+  3.2.	Table Utilities
+
+  txt2tbl and tbl2txt are simple programs to convert between binary
+  table files and a textual representation (as used by some DOS
+  drivers).  They can be used to create or modify table files without
+  the need to plunge into binary editors and hexadecimal numbers.
+
+  To use either of these programs, type:
+
+	  progname input output
+
+  There are no other command line options.
+
+  In the textual representation, each table entry is written as a line.
+  The active part of the line is all the characters between the first
+  pair of parentheses---these utilities ignore all other characters.
+
+  Between parentheses are numbers representing the setting of the
+  corresponding Braille dot (see above).  Offsets into the binary table
+  file are allocated sequentially from 0 to 255.
+
+  For example, the 91th line (ASCII 90 = `Z') in the table might look
+  like:
+
+       90  (1 3 567 )
+
+  convtable is a filter to convert Braille tables between different
+  binary formats: BRLTTY standard, The standard used by Tieman B.V. and
+  that used by both Alva B.V. and Telesensory Systems Inc.  For
+  instance, type
+
+	  convtable src dest < input > output
+
+  where src and dest can be s for standard (BRLTTY), t for Tieman or a
+  for Alva/TSI mappings.
+
+  4.  Appendices
+
+  4.1.	Disclaimer and License
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or (at
+  your option) any later version.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+  (A copy of the GNU General Public License can be found in the file
+  COPYING in the top-level directory.)
+  4.2.	Support
+
+  This software is being maintained by the original author, Nikhil Nair
+  <nn201@cus.cam.ac.uk>.  However, it now represents the work of a team,
+  which also includes
+
+  o  Nicolas Pitre	<nico@cam.org>;
+
+  o  Stephane	Doyon <doyons@jsp.umontreal.ca>;
+
+  o  James Bowden     <jrbowden@bcs.org.uk> (now acting in an advisory
+     capacity).
+
+  The maintainer can also be contacted at: Nikhil Nair, Trinity College,
+  CAMBRIDGE, CB2 1TQ, England; tel.: +44 1223 368353.
+
+  Comments and criticisms are welcome.	We will try to respond promptly
+  to all (sensible) mail, but give no guarantee.  In general, we suggest
+  you send email messages to all three active developers, rather than
+  just one; if you don't hear anything, please be patient---make sure
+  you copied the relevant addresses accurately, though.
+
+  If you have a query about a particular display type supported by
+  BRLTTY, you may want to contact the author of that particular driver.
+  See the README file in the relevant subdirectory for contact details.
+
+  4.3.	Future Enhancements
+
+  Apart from fixing bugs and supporting more types of Braille display,
+  we hope, time permitting, to work on some or all of the following:
+
+     Better attribute handling
+	Attribute tracking, mixed text and attribute mode etc.
+
+     Revision of cut & paste
+	Linear (as opposed to rectangular) cut mode.
+
+     Revision of beeps
+	A greater variety of beeps.
+
+     Scroll tracking
+	Locking the Braille window on one line as it scrolls on the
+	screen.
+
+     Elementary speech support
+	Mixed Braille and speech for faster reading of text.
+
+     On-the-fly grade II translation
+	This would also allow faster reading of text.
+
+  First, however, we plan to restructure BRLTTY, separating the low-
+  level Braille display handling from the high-level, device-independent
+  part; this would allow BRLTTY to coexist with other programs which
+  access the Braille display, e.g. any future X access software.
+
+  4.4.	Known Bugs
+
+  This software has been tested on
+
+  o  a variety of PCs: both laptops and desktops; processors from
+     386SX20 to Pentium with a huge range of memory sizes; Linux
+     distributions including Debian and Slackware; a number of Linux
+     kernels, including both 1.2.13 and 2.0.0.
+
+  o  a DEC Alpha: only tested once, under RedHat Alpha Linux on a noname
+     board kindly lent to the Cambridge University Computer Laboratory
+     by DEC in Reading, England.
+
+     It has proved stable so far, but if it isn't on your system, or if
+     you find a bug not mentioned here, please let us know so that we
+     can try to sort out the problem.
+
+  At the time of writing (26 July 1996), the following problems are
+  known:
+
+     Cursor routing performance
+	Routing is implemented by a looping sub-process which runs at
+	lowered priority to avoid using too much cpu time.  Different
+	system loads require different settings of the parameters here.
+	The defaults work excellently in a standard Unix editor on a
+	fairly lightly loaded system, but very badly in other
+	applications, e.g. some applications working under DOSEmu (the
+	MS-DOS emulator for Linux).
+
+     Operation in DOSEmu
+	As well as the cursor routing problems outlined above, keystroke
+	simulation of any kind does not work correctly in DOSEmu's raw
+	keyboard mode.	This is because keystroke simulation must be
+	done differently in this case, possibly by using scan codes.
+	This affects the cursor routing and cut & paste functions.
+
+     Pasting non-ASCII characters
+	Unfortunately, due to the way the Linux kernel handles some
+	operations, the character number stored in video memory for an
+	accent mark etc. may not correspond to the character value in
+	the keyboard buffer for the same symbol---they are represented
+	in different character sets.  As a result, pasting of non-ASCII
+	characters may give strange results.  BRLTTY should probably do
+	some internal character set translation---this needs further
+	investigation.
+

@@ -1,0 +1,143 @@
+
+BRLTTY - Access software for Unix for a blind person
+         using a soft Braille terminal
+
+Version 1.0, 26 July 1996
+
+Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
+BRLTTY comes with ABSOLUTELY NO WARRANTY.
+
+This is free software, placed under the terms of the
+GNU General Public License, as published by the Free Software
+Foundation.  Please see the file COPYING, included in the BRLTTY
+distribution, for details.
+
+This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+
+-----------------------------------------------------------------------------
+
+INTRODUCTION FOR THOSE NEW TO SOFT BRAILLE
+==========================================
+
+There are two common ways in which blind people access computers.  The 
+first, and more widely known, is synthesized speech, which, while having 
+many advantages (e.g. speed for reading plain text), does have its 
+drawbacks: speech output generally gives little information about 
+formatting, making tables, spreadsheets etc. difficult to use; it can also 
+be difficult to use speech output with particularly technical material 
+containing lots of symbols (though many determined people do use it for 
+such things).
+
+The other solution, which attempts to answer some of these problems, is 
+Braille output.  A soft (or refreshable) Braille display typically consists 
+of a single row of either 20, 40 or 80 characters, each made up of a matrix 
+of 4X2 (4 down, 2 across) dots.  Each dot is individually driven by a 
+separate motor, making the whole assembly extremely expensive.
+
+A soft Braille display would connect to a PC by either the serial or 
+parallel port.  Software on the PC drives the display, reproducing a 
+rectangle of the screen image (which we will call the window) in Braille.  
+Buttons on the Braille display itself are used to send signals back to the 
+software, instructing it to move the window around the screen, or some 
+other specialised function.
+
+With a soft Braille display of 40 or 80 cells, it is quite easy for a blind 
+user to appreciate the format of information on the screen, and even allows 
+the reading and editing of on-line Braille documents (a concept not widely 
+enough utilised).
+
+
+INTRODUCTION TO BRLTTY
+======================
+
+While soft Braille displays have been used for some years under MS-DOS, and 
+are even starting to be used under Windows, it seems that they have not 
+been used on Unix consoles.  This could well be because blind people have 
+been able to access Unix systems through accessible terminals.  With the 
+advent of PC-based Unix systems (such as Linux), the need becomes evident.
+
+BRLTTY attempts to fill this gap.  It runs as a daemon, possibly started at 
+boot-time, and allows a soft Braille user to access text mode applications.  
+Since BRLTTY is written as a daemon, it should allow a user a completely 
+free choice of application and development tools.
+
+
+FEATURES
+========
+
+  -  Full implementation of the standard screen review facilities.
+  -  A wide range of additional optional features, including blinking 
+     cursor and capital letters, screen freezing for leisurely review,
+     attribute display to locate highlighted text, hypertext links, etc.
+  -  `Intelligent' cursor routing.  This allows easy movement of the cursor
+     in text editors etc. without moving the hands from the Braille 
+     display.
+  -  A cut & paste function.  This is particularly useful for copying long
+     filenames, complicated commands etc.
+  -  An on-line help facility.
+  -  Support for multiple Braille codes.
+  -  Modular design allows relatively easy addition of drivers for other
+     Braille displays, or even (hopefully) porting to other Unix-like
+     platforms.
+
+
+CURRENTLY SUPPORTED HARDWARE
+============================
+
+BRLTTY requires Linux kernel 1.1.92 or later (for `/dev/vcsa0').  It has
+been tested on
+  -  a variety of PCs: both laptops and desktops; processors from
+     386SX20 to Pentium with a huge range of memory sizes; Linux
+     distributions including Debian and Slackware; a number of Linux
+     kernels, including both 1.2.13 and 2.0.0.
+  -  a DEC Alpha: only tested once, under RedHat Alpha Linux on a noname
+     board kindly lent to the Cambridge University Computer Laboratory
+     by DEC in Reading, England.
+
+The following Braille displays are supported (serial communication
+only):
+  -  Tieman B.V.: CombiBraille 25/45/85;
+  -  Alva B.V.: ABT3xx series;
+  -  Telesensory Systems Inc.: PowerBraille 40 (not 65/80),
+     Navigator 20/40/80 (latest firmware version only?).
+
+If you want another Braille display to be supported, please contact
+the maintainer.  Ability to add more Braille displays does, however,
+depend on the level of cooperation from the manufacturer in providing
+programming information.
+
+
+THE BRLTTY TEAM
+===============
+
+There are currently three active developers:
+  -  Nikhil Nair: founder of the BRLTTY project and author of the
+                  Tieman B.V. CombiBraille driver
+          E-Mail: nn201@cus.cam.ac.uk
+  -  Nicolas Pitre: Author of the driver for the Alva series
+          E-Mail: nico@cam.org
+  -  Stephane Doyon: Author of the driver for the TSI displays (Navigator
+                  and PowerBraille 40)
+          E-Mail: doyons@jsp.umontreal.ca
+
+Any comments and/or criticisms regarding BRLTTY in general should be
+addressed to all three of the above.
+
+In addition, James Bowden <jrbowden@bcs.org.uk>, the original coauthor, is
+now acting in an advisory capacity.
+
+
+LAYOUT OF THE ARCHIVE
+=====================
+
+BRLTTY is distributed as a single GNU compressed tarfile named
+   brltty-<version>.tar.gz
+where `<version>' is the version number.  When the archive is
+unpacked, there should be a subdirectory called DOCS: this contains
+all of the general BRLTTY documentation, including the manual in
+various formats and the list of frequently asked questions (FAQ).
+
+The source files for the main, device-independent core of BRLTTY is in
+the top-level directory.  There is also one subdirectory per Braille
+device type, containing display-specific source files and
+documentation (in another README file).
