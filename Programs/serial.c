@@ -272,6 +272,8 @@ serialInitializeAttributes (SerialAttributes *attributes) {
   attributes->fRtsControl = RTS_CONTROL_ENABLE;
   attributes->fDtrControl = DTR_CONTROL_ENABLE;
   attributes->fTXContinueOnXoff = TRUE;
+  attributes->XonChar = 0X11;
+  attributes->XoffChar = 0X13;
 #else /* __MINGW32__ */
   attributes->c_cflag = CREAD | CLOCAL | CS8;
   attributes->c_iflag = IGNPAR | IGNBRK;
@@ -467,26 +469,30 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 
   if (flow & SERIAL_FLOW_INPUT_XON) {
     flow &= ~SERIAL_FLOW_INPUT_XON;
-    serial->pendingAttributes.XonChar = 17;
-    serial->pendingAttributes.XoffChar = 19;
     serial->pendingAttributes.fInX = TRUE;
+  } else {
+    serial->pendingAttributes.fInX = FALSE;
   }
 
   if (flow & SERIAL_FLOW_OUTPUT_CTS) {
     flow &= ~SERIAL_FLOW_OUTPUT_CTS;
     serial->pendingAttributes.fOutxCtsFlow = TRUE;
+  } else {
+    serial->pendingAttributes.fOutxCtsFlow = FALSE;
   }
 
   if (flow & SERIAL_FLOW_OUTPUT_DSR) {
     flow &= ~SERIAL_FLOW_OUTPUT_DSR;
     serial->pendingAttributes.fOutxDsrFlow = TRUE;
+  } else {
+    serial->pendingAttributes.fOutxDsrFlow = FALSE;
   }
 
   if (flow & SERIAL_FLOW_OUTPUT_XON) {
     flow &= ~SERIAL_FLOW_OUTPUT_XON;
-    serial->pendingAttributes.XonChar = 17;
-    serial->pendingAttributes.XoffChar = 19;
     serial->pendingAttributes.fOutX = TRUE;
+  } else {
+    serial->pendingAttributes.fOutX = FALSE;
   }
 #else /* __MINGW32__ */
   typedef struct {
