@@ -726,8 +726,8 @@ main (int argc, char *argv[]) {
   short oldwinx, oldwiny;
 
 #ifdef INIT_PATH
-  if (getpid() == 1) {
-    fprintf(stderr, "BRLTTY started as INIT.\n");
+  if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
+    fprintf(stderr, "BRLTTY started as %s\n", argv[0]);
     fflush(stderr);
     switch (fork()) {
       case -1: /* failed */
@@ -736,6 +736,7 @@ main (int argc, char *argv[]) {
       default: /* parent */
         fprintf(stderr, "Executing the real INIT: %s\n", INIT_PATH);
         fflush(stderr);
+      exec_init:
         execv(INIT_PATH, argv);
         /* execv() shouldn't return */
         fprintf(stderr, "Execution of the real INIT failed: %s\n", strerror(errno));
@@ -748,6 +749,13 @@ main (int argc, char *argv[]) {
         break;
       }
     }
+  } else if (strstr(argv[0], "brltty") == NULL) {
+    /* 
+     * If we are substituting the real init binary, then we may consider
+     * when someone might want to call that binary even when pid != 1.
+     * One example is /sbin/telinit which is a symlink to /sbin/init.
+     */
+    goto exec_init;
   }
 #endif /* INIT_PATH */
 
