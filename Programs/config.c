@@ -1292,207 +1292,204 @@ updatePreferences (void) {
     message("Preferences Menu", 0);
 
     while (1) {
-      int lineLength;                                /* current menu item length */
-      int settingIndent;                                /* braille window pos in buffer */
       MenuItem *item = &menu[menuIndex];
+      char valueBuffer[0X10];
+      const char *value;
 
       closeTuneDevice(0);
 
+      if (!item->names) {
+        snprintf(valueBuffer, sizeof(valueBuffer),
+                 "%d", *item->setting);
+        value = valueBuffer;
+      } else if (!*(value = item->names[*item->setting - item->minimum])) {
+        value = "<off>";
+      }
+
       {
-        char valueBuffer[0X10];
-        const char *value;
-        if (!item->names) {
-          snprintf(valueBuffer, sizeof(valueBuffer),
-                   "%d", *item->setting);
-          value = valueBuffer;
-        } else if (!*(value = item->names[*item->setting - item->minimum])) {
-          value = "<off>";
+        const char *description = item->description;
+        const char *delimiter = ": ";
+        int settingIndent = strlen(description) + strlen(delimiter);
+        int valueLength = strlen(value);
+        int lineLength = settingIndent + valueLength;
+        char line[lineLength + 1];
+
+        /* First we draw the current menu item in the buffer */
+        snprintf(line,  sizeof(line), "%s%s%s",
+                 description, delimiter, value);
+
+        /* Next we deal with the braille window position in the buffer.
+         * This is intended for small displays... or long item descriptions 
+         */
+        if (settingChanged) {
+          settingChanged = 0;
+          /* make sure the updated value is visible */
+          if ((lineLength-lineIndent > brl.x*brl.y) && (lineIndent < settingIndent))
+            lineIndent = settingIndent;
         }
 
-        {
-          const char *description = item->description;
-          const char *delimiter = ": ";
-          int valueLength = strlen(value);
-          char line[strlen(description) + strlen(delimiter) + valueLength + 1];
+        /* Then draw the braille window */
+        writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent));
+        drainBrailleOutput(&brl, updateInterval);
 
-          /* First we draw the current menu item in the buffer */
-          snprintf(line,  sizeof(line), "%s%s%s",
-                   description, delimiter, value);
-          settingIndent = (lineLength = strlen(line)) - valueLength;
+        /* Now process any user interaction */
+        switch (command = getCommand(CMDS_PREFS)) {
+          case CMD_HELP:
+            /* This is quick and dirty... Something more intelligent 
+             * and friendly needs to be done here...
+             */
+            message( 
+                "Press UP and DOWN to select an item, "
+                "HOME to toggle the setting. "
+                "Routing keys are available too! "
+                "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
+            break;
 
-          /* Next we deal with the braille window position in the buffer.
-           * This is intended for small displays... or long item descriptions 
-           */
-          if (settingChanged) {
-            settingChanged = 0;
-            /* make sure the updated value is visible */
-            if ((lineLength-lineIndent > brl.x*brl.y) && (lineIndent < settingIndent))
-              lineIndent = settingIndent;
-          }
+          case VAL_PASSKEY+VPK_HOME:
+          case CMD_PREFLOAD:
+            prefs = oldPreferences;
+            changedPreferences();
+            message("changes discarded", 0);
+            break;
+          case VAL_PASSKEY+VPK_RETURN:
+          case CMD_PREFSAVE:
+            exitSave = 1;
+            goto exitMenu;
 
-          /* Then draw the braille window */
-          writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent));
-          drainBrailleOutput(&brl, updateInterval);
+          case CMD_TOP:
+          case CMD_TOP_LEFT:
+          case VAL_PASSKEY+VPK_PAGE_UP:
+          case CMD_MENU_FIRST_ITEM:
+            menuIndex = lineIndent = 0;
+            break;
+          case CMD_BOT:
+          case CMD_BOT_LEFT:
+          case VAL_PASSKEY+VPK_PAGE_DOWN:
+          case CMD_MENU_LAST_ITEM:
+            menuIndex = menuSize - 1;
+            lineIndent = 0;
+            break;
 
-          /* Now process any user interaction */
-          switch (command = getCommand(CMDS_PREFS)) {
-            case CMD_HELP:
-              /* This is quick and dirty... Something more intelligent 
-               * and friendly needs to be done here...
-               */
-              message( 
-                  "Press UP and DOWN to select an item, "
-                  "HOME to toggle the setting. "
-                  "Routing keys are available too! "
-                  "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
-              break;
+          case CMD_LNUP:
+          case CMD_PRDIFLN:
+          case VAL_PASSKEY+VPK_CURSOR_UP:
+          case CMD_MENU_PREV_ITEM:
+            do {
+              if (menuIndex == 0) menuIndex = menuSize;
+              --menuIndex;
+            } while (menu[menuIndex].test && !menu[menuIndex].test());
+            lineIndent = 0;
+            break;
+          case CMD_LNDN:
+          case CMD_NXDIFLN:
+          case VAL_PASSKEY+VPK_CURSOR_DOWN:
+          case CMD_MENU_NEXT_ITEM:
+            do {
+              if (++menuIndex == menuSize) menuIndex = 0;
+            } while (menu[menuIndex].test && !menu[menuIndex].test());
+            lineIndent = 0;
+            break;
 
-            case VAL_PASSKEY+VPK_HOME:
-            case CMD_PREFLOAD:
-              prefs = oldPreferences;
-              changedPreferences();
-              message("changes discarded", 0);
-              break;
-            case VAL_PASSKEY+VPK_RETURN:
-            case CMD_PREFSAVE:
-              exitSave = 1;
-              goto exitMenu;
+          case CMD_FWINLT:
+            if (lineIndent > 0)
+              lineIndent -= MIN(brl.x*brl.y, lineIndent);
+            else
+              playTune(&tune_bounce);
+            break;
+          case CMD_FWINRT:
+            if (lineLength-lineIndent > brl.x*brl.y)
+              lineIndent += brl.x*brl.y;
+            else
+              playTune(&tune_bounce);
+            break;
 
-            case CMD_TOP:
-            case CMD_TOP_LEFT:
-            case VAL_PASSKEY+VPK_PAGE_UP:
-            case CMD_MENU_FIRST_ITEM:
-              menuIndex = lineIndent = 0;
-              break;
-            case CMD_BOT:
-            case CMD_BOT_LEFT:
-            case VAL_PASSKEY+VPK_PAGE_DOWN:
-            case CMD_MENU_LAST_ITEM:
-              menuIndex = menuSize - 1;
-              lineIndent = 0;
-              break;
-
-            case CMD_LNUP:
-            case CMD_PRDIFLN:
-            case VAL_PASSKEY+VPK_CURSOR_UP:
-            case CMD_MENU_PREV_ITEM:
-              do {
-                if (menuIndex == 0) menuIndex = menuSize;
-                --menuIndex;
-              } while (menu[menuIndex].test && !menu[menuIndex].test());
-              lineIndent = 0;
-              break;
-            case CMD_LNDN:
-            case CMD_NXDIFLN:
-            case VAL_PASSKEY+VPK_CURSOR_DOWN:
-            case CMD_MENU_NEXT_ITEM:
-              do {
-                if (++menuIndex == menuSize) menuIndex = 0;
-              } while (menu[menuIndex].test && !menu[menuIndex].test());
-              lineIndent = 0;
-              break;
-
-            case CMD_FWINLT:
-              if (lineIndent > 0)
-                lineIndent -= MIN(brl.x*brl.y, lineIndent);
-              else
-                playTune(&tune_bounce);
-              break;
-            case CMD_FWINRT:
-              if (lineLength-lineIndent > brl.x*brl.y)
-                lineIndent += brl.x*brl.y;
-              else
-                playTune(&tune_bounce);
-              break;
-
-            case CMD_WINUP:
-            case CMD_CHRLT:
-            case VAL_PASSKEY+VPK_CURSOR_LEFT:
-            case CMD_BACK:
-            case CMD_MENU_PREV_SETTING: {
-              int count = item->maximum - item->minimum + 1;
-              do {
-                if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
-                if (!--count) break;
-              } while (item->changed && !item->changed(*item->setting));
-              if (count)
-                settingChanged = 1;
-              else
-                playTune(&tune_command_rejected);
-              break;
-            }
-            case CMD_WINDN:
-            case CMD_CHRRT:
-            case VAL_PASSKEY+VPK_CURSOR_RIGHT:
-            case CMD_HOME:
-            case CMD_RETURN:
-            case CMD_MENU_NEXT_SETTING: {
-              int count = item->maximum - item->minimum + 1;
-              do {
-                if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
-                if (!--count) break;
-              } while (item->changed && !item->changed(*item->setting));
-              if (count)
-                settingChanged = 1;
-              else
-                playTune(&tune_command_rejected);
-              break;
-            }
-
-    #ifdef ENABLE_SPEECH_SUPPORT
-            case CMD_SAY_LINE:
-              speech->say(line, lineLength);
-              break;
-            case CMD_MUTE:
-              speech->mute();
-              break;
-    #endif /* ENABLE_SPEECH_SUPPORT */
-
-            default:
-              if (command >= CR_ROUTE && command < CR_ROUTE+brl.x) {
-                /* Why not support setting a value with routing keys. */
-                unsigned char oldSetting = *item->setting;
-                int key = command - CR_ROUTE;
-                if (item->names) {
-                  *item->setting = key % (item->maximum + 1);
-                } else {
-                  *item->setting = key;
-                  if (*item->setting > item->maximum) *item->setting = item->maximum;
-                  if (*item->setting < item->minimum) *item->setting = item->minimum;
-                }
-                if (*item->setting != oldSetting) {
-                  if (item->changed && !item->changed(*item->setting)) {
-                    *item->setting = oldSetting;
-                    playTune(&tune_command_rejected);
-                  } else {
-                    settingChanged = 1;
-                  }
-                }
-                break;
-              }
-
-              /* For any other keystroke, we exit */
+          case CMD_WINUP:
+          case CMD_CHRLT:
+          case VAL_PASSKEY+VPK_CURSOR_LEFT:
+          case CMD_BACK:
+          case CMD_MENU_PREV_SETTING: {
+            int count = item->maximum - item->minimum + 1;
+            do {
+              if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
+              if (!--count) break;
+            } while (item->changed && !item->changed(*item->setting));
+            if (count)
+              settingChanged = 1;
+            else
               playTune(&tune_command_rejected);
-            case VAL_PASSKEY+VPK_ESCAPE:
-            case VAL_PASSKEY+VPK_END:
-            case CMD_PREFMENU:
-            exitMenu:
-              if (exitSave) {
-                if (savePreferences()) {
-                  playTune(&tune_command_done);
+            break;
+          }
+          case CMD_WINDN:
+          case CMD_CHRRT:
+          case VAL_PASSKEY+VPK_CURSOR_RIGHT:
+          case CMD_HOME:
+          case CMD_RETURN:
+          case CMD_MENU_NEXT_SETTING: {
+            int count = item->maximum - item->minimum + 1;
+            do {
+              if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
+              if (!--count) break;
+            } while (item->changed && !item->changed(*item->setting));
+            if (count)
+              settingChanged = 1;
+            else
+              playTune(&tune_command_rejected);
+            break;
+          }
+
+  #ifdef ENABLE_SPEECH_SUPPORT
+          case CMD_SAY_LINE:
+            speech->say(line, lineLength);
+            break;
+          case CMD_MUTE:
+            speech->mute();
+            break;
+  #endif /* ENABLE_SPEECH_SUPPORT */
+
+          default:
+            if (command >= CR_ROUTE && command < CR_ROUTE+brl.x) {
+              /* Why not support setting a value with routing keys. */
+              unsigned char oldSetting = *item->setting;
+              int key = command - CR_ROUTE;
+              if (item->names) {
+                *item->setting = key % (item->maximum + 1);
+              } else {
+                *item->setting = key;
+                if (*item->setting > item->maximum) *item->setting = item->maximum;
+                if (*item->setting < item->minimum) *item->setting = item->minimum;
+              }
+              if (*item->setting != oldSetting) {
+                if (item->changed && !item->changed(*item->setting)) {
+                  *item->setting = oldSetting;
+                  playTune(&tune_command_rejected);
+                } else {
+                  settingChanged = 1;
                 }
               }
+              break;
+            }
 
-    #ifdef ENABLE_TABLE_SELECTION
-              globEnd(&glob_textTable);
-              globEnd(&glob_attributesTable);
-    #ifdef ENABLE_CONTRACTED_BRAILLE
-              globEnd(&glob_contractionTable);
-    #endif /* ENABLE_CONTRACTED_BRAILLE */
-    #endif /* ENABLE_TABLE_SELECTION */
+            /* For any other keystroke, we exit */
+            playTune(&tune_command_rejected);
+          case VAL_PASSKEY+VPK_ESCAPE:
+          case VAL_PASSKEY+VPK_END:
+          case CMD_PREFMENU:
+          exitMenu:
+            if (exitSave) {
+              if (savePreferences()) {
+                playTune(&tune_command_done);
+              }
+            }
 
-              return;
-          }
+  #ifdef ENABLE_TABLE_SELECTION
+            globEnd(&glob_textTable);
+            globEnd(&glob_attributesTable);
+  #ifdef ENABLE_CONTRACTED_BRAILLE
+            globEnd(&glob_contractionTable);
+  #endif /* ENABLE_CONTRACTED_BRAILLE */
+  #endif /* ENABLE_TABLE_SELECTION */
+
+            return;
         }
       }
     }
