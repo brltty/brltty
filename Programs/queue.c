@@ -186,19 +186,19 @@ setQueueData (Queue *queue, void *data) {
 }
 
 Element *
-findElement (Queue *queue, ItemTester test, void *data) {
+processQueue (Queue *queue, ItemProcessor processItem, void *data) {
   Element *element = queue->head;
   while (element) {
     Element *next = element->next;
-    if (test(element->item, data)) return element;
+    if (processItem(element->item, data)) return element;
     element = (next != queue->head)? next: NULL;
   }
   return NULL;
 }
 
 void *
-findItem (Queue *queue, ItemTester test, void *data) {
-  Element *element = findElement(queue, test, data);
+findItem (Queue *queue, ItemProcessor testItem, void *data) {
+  Element *element = processQueue(queue, testItem, data);
   if (element) return element->item;
   return NULL;
 }
@@ -210,7 +210,7 @@ testItemAddress (void *item, void *data) {
 
 void
 deleteItem (Queue *queue, void *item) {
-  Element *element = findElement(queue, testItemAddress, item);
+  Element *element = processQueue(queue, testItemAddress, item);
   if (element) {
     element->item = NULL;
     deleteElement(element);

@@ -33,9 +33,9 @@ extern int getQueueSize (Queue *queue);
 extern void *getQueueData (Queue *queue);
 extern void *setQueueData (Queue *queue, void *data);
 
-typedef int (*ItemTester) (void *item, void *data);
-extern Element *findElement (Queue *queue, ItemTester test, void *data);
-extern void *findItem (Queue *queue, ItemTester test, void *data);
+typedef int (*ItemProcessor) (void *item, void *data);
+extern Element *processQueue (Queue *queue, ItemProcessor processItem, void *data);
+extern void *findItem (Queue *queue, ItemProcessor testItem, void *data);
 
 extern void deleteElement (Element *element);
 

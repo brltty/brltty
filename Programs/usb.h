@@ -299,6 +299,7 @@ extern int usbWriteEndpoint (
 
 typedef struct {
   void *buffer;
+  int size;
   int length;
   void *context;
 } UsbResponse;
@@ -337,6 +338,14 @@ extern int usbReapInput (
   int timeout
 );
 
+typedef struct {
+  void *const buffer;
+  int const size;
+  int length;
+} UsbInputFilterData;
+typedef int (*UsbInputFilter) (UsbInputFilterData *data);
+extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
+
 /* Serial adapter parity settings. */
 typedef enum {
   USB_SERIAL_PARITY_SPACE,
@@ -364,7 +373,7 @@ typedef struct {
   int (*setRtsState) (UsbDevice *device, int state);
 } UsbSerialOperations;
 
-extern const UsbSerialOperations *usbGetSerialOperations (const UsbDevice *device);
+extern const UsbSerialOperations *usbGetSerialOperations (UsbDevice *device);
 
 extern int isUsbDevice (const char **path);
 

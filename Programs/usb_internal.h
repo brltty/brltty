@@ -25,6 +25,10 @@ extern "C" {
 #include "queue.h"
 
 typedef struct {
+  UsbInputFilter filter;
+} UsbInputFilterEntry;
+
+typedef struct {
   UsbDevice *device;
   UsbEndpointDescriptor *descriptor;
   void *system;
@@ -48,6 +52,7 @@ struct UsbDeviceStruct {
   UsbDescriptor *configurationDescriptor;
   int configurationLength;
   Queue *endpoints;
+  Queue *inputFilters;
   int file;
   uint16_t language;
 };
@@ -65,6 +70,8 @@ extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpo
 
 extern int usbOpenEndpoint (UsbEndpoint *endpoint);
 extern void usbCloseEndpoint (UsbEndpoint *endpoint);
+
+extern int usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length);
 
 #ifdef __cplusplus
 }

@@ -318,8 +318,43 @@ usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber) {
   return usbGetEndpoint(device, endpointNumber|USB_ENDPOINT_DIRECTION_OUTPUT);
 }
 
+static void
+usbDeallocateInputFilter (void *item, void *data) {
+  UsbInputFilterEntry *entry = item;
+  free(entry);
+}
+
+int
+usbAddInputFilter (UsbDevice *device, UsbInputFilter filter) {
+  UsbInputFilterEntry *entry;
+  if ((entry = malloc(sizeof(*entry)))) {
+    entry->filter = filter;
+    if (enqueueItem(device->inputFilters, entry)) return 1;
+    free(entry);
+  }
+  return 0;
+}
+
+static int
+usbApplyInputFilter (void *item, void *data) {
+  UsbInputFilterEntry *entry = item;
+  return !entry->filter(data);
+}
+
+int
+usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length) {
+  UsbInputFilterData data = {buffer, size, *length};
+  if (processQueue(device->inputFilters, usbApplyInputFilter, &data)) {
+    errno = EIO;
+    return 0;
+  }
+  *length = data.length;
+  return 1;
+}
+
 void
 usbCloseDevice (UsbDevice *device) {
+  deallocateQueue(device->inputFilters);
   deallocateQueue(device->endpoints);
   close(device->file);
   free(device->path);
@@ -335,12 +370,15 @@ usbOpenDevice (const char *path) {
 
     if ((device->path = strdup(path))) {
       if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
-        if ((device->file = open(path, O_RDWR)) != -1) {
-          if (usbReadDeviceDescriptor(device))
-            if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
-              if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
-                return device;
-          close(device->file);
+        if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
+          if ((device->file = open(path, O_RDWR)) != -1) {
+            if (usbReadDeviceDescriptor(device))
+              if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
+                if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
+                  return device;
+            close(device->file);
+          }
+          deallocateQueue(device->inputFilters);
         }
         deallocateQueue(device->endpoints);
       }
@@ -597,6 +635,16 @@ static const UsbSerialOperations usbBelkinOperations = {
 };
 
 static int
+usbFtdiInputFilter (UsbInputFilterData *data) {
+  const int count = 2;
+  if (data->length > count) {
+    memmove(data->buffer, data->buffer+count, data->length-=count);
+  } else {
+    data->length = 0;
+  }
+  return 1;
+}
+static int
 usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
   return usbControlTransfer(device, USB_DIRECTION_OUTPUT,
                             USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR, 
@@ -754,23 +802,44 @@ static const UsbSerialOperations usbFtdiOperations_FT232BM = {
 };
 
 const UsbSerialOperations *
-usbGetSerialOperations (const UsbDevice *device) {
+usbGetSerialOperations (UsbDevice *device) {
   typedef struct {
     uint16_t vendor;
     uint16_t product;
     const UsbSerialOperations *operations;
+    UsbInputFilter inputFilter;
   } UsbSerialAdapter;
   static const UsbSerialAdapter usbSerialAdapters[] = {
-    {0X0921, 0X1200, &usbBelkinOperations}, /* HandyTech GoHubs */
-    {0X0403, 0X6001, &usbFtdiOperations_FT8U232AM}, /* HandyTech FTDI */
-    {0X0403, 0XF208, &usbFtdiOperations_FT8U232AM}, /* Papenmeier FTDI */
+    { /* HandyTech GoHubs */
+      0X0921, 0X1200,
+      &usbBelkinOperations,
+      NULL
+    }
+    ,
+    { /* HandyTech FTDI */
+      0X0403, 0X6001,
+      &usbFtdiOperations_FT8U232AM,
+      usbFtdiInputFilter
+    }
+    ,
+    { /* Papenmeier FTDI */
+      0X0403, 0XF208,
+      &usbFtdiOperations_FT8U232AM,
+      usbFtdiInputFilter
+    }
+    ,
     {}
   };
   const UsbSerialAdapter *sa = usbSerialAdapters;
   while (sa->vendor) {
-    if (sa->vendor == device->descriptor.idVendor)
-      if (!sa->product || (sa->product == device->descriptor.idProduct))
-        return sa->operations;
+    if (sa->vendor == device->descriptor.idVendor) {
+      if (!sa->product || (sa->product == device->descriptor.idProduct)) {
+        if (!sa->inputFilter || usbAddInputFilter(device, sa->inputFilter)) {
+          return sa->operations;
+        }
+        break;
+      }
+    }
     ++sa;
   }
   return NULL;

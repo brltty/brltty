@@ -377,20 +377,27 @@ usbReapResponse (
   if (ioctl(device->file,
             wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
             &urb) == -1) {
-    urb = NULL;
     if (wait || (errno != EAGAIN)) LogError("USB URB reap");
+    urb = NULL;
   } else if (!urb) {
     errno = EAGAIN;
   } else if (urb->status) {
     if ((errno = urb->status) < 0) errno = -errno;
     LogError("USB URB status");
-    urb = NULL;
   } else {
-    response->buffer = urb->buffer;
-    response->length = urb->actual_length;
-    response->context = urb->usercontext;
+    int length = urb->actual_length;
+    if (usbApplyInputFilters(device, urb->buffer, urb->buffer_length, &length)) {
+      response->buffer = urb->buffer;
+      response->length = length;
+      response->context = urb->usercontext;
+      return urb;
+    }
+
+    errno = EIO;
   }
-  return urb;
+
+  if (urb) free(urb);
+  return NULL;
 }
 
 int
