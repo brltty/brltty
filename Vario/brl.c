@@ -54,7 +54,7 @@
 #include "../misc.h"
 #include "../scr.h"
 #include "../brl_driver.h"
-#include "../beeps.h"
+#include "../tunes.h"
 #include "../inskey.h"
 
 		  
@@ -595,7 +595,7 @@ static int readbrl(int type) {
       if (ck == 127) {
 	typing_mode ^= 1;
 	ck = 0;
-	if (typing_mode) play(snd_detected); else play(snd_brloff);
+	if (typing_mode) playTune(&tune_detected); else playTune(&tune_braille_off);
 	return(EOF);
       }
       if (typing_mode) {

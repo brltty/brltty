@@ -127,8 +127,7 @@
 #define CMD_SIXDOTS '6'		/* toggle six-dot mode */
 #define CMD_SLIDEWIN 'w'	/* toggle sliding window */
 #define CMD_SKPIDLNS 'I'	/* toggle skipping of identical lines */
-#define CMD_SKPBLNKEOL 8	/* toggle skipping of blank end-of-lines */
-#define CMD_SKPBLNKWINS 10	/* toggle skipping of blank windows */
+#define CMD_SKPBLNKWINS 8	/* toggle skipping of blank windows */
 #define CMD_SND 'S'		/* toggle sound on/off */
 
 /* Key mappings: keys on the braille device are mapped to keyboard keys */

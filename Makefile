@@ -213,7 +213,24 @@ else
    BUILTIN_BRAILLE = -DBRL_BUILTIN
 endif
 
-BRLTTY_OBJECTS = main.o config.o csrjmp.o misc.o beeps.o cut-n-paste.o $(INSKEY_O) spk_load.o brl_load.o
+TUNE_OBJECTS = tunes.o tones_speaker.o tones_soundcard.o tones_adlib.o adlib.o
+
+tunes.o: tunes.c tunes.h tones.h common.h misc.h message.h brl.h
+	$(CC) $(CFLAGS) -c tunes.c
+
+tones_speaker.o: tones_speaker.c tones.h
+	$(CC) $(CFLAGS) -c tones_speaker.c
+
+tones_soundcard.o: tones_soundcard.c tones.h
+	$(CC) $(CFLAGS) -c tones_soundcard.c
+
+tones_adlib.o: tones_adlib.c tones.h adlib.h
+	$(CC) $(CFLAGS) -c tones_adlib.c
+
+adlib.o: adlib.c
+	$(CC) $(CFLAGS) -c adlib.c
+
+BRLTTY_OBJECTS = main.o config.o csrjmp.o misc.o $(TUNE_OBJECTS) cut-n-paste.o $(INSKEY_O) spk_load.o brl_load.o
 
 brltty-static.o: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	ld -r -static -o $@ \
@@ -226,11 +243,11 @@ brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -Wl,-rpath,$(LIB_DIR) -o $@ \
 	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
-main.o: main.c brl.h spk.h scr.h csrjmp.h inskey.h beeps.h cut-n-paste.h \
+main.o: main.c brl.h spk.h scr.h csrjmp.h inskey.h tunes.h cut-n-paste.h \
 	misc.h message.h config.h common.h
 	$(CC) $(CFLAGS) -c main.c
 
-config.o: config.c config.h brl.h spk.h scr.h beeps.h message.h misc.h common.h
+config.o: config.c config.h brl.h spk.h scr.h tunes.h message.h misc.h common.h
 	$(CC) $(CFLAGS) \
 		'-DHOME_DIR="$(PREFIX)$(DATA_DIR)"' \
 		'-DBRLLIBS="$(BRL_LIBS)"' \
@@ -240,13 +257,10 @@ config.o: config.c config.h brl.h spk.h scr.h beeps.h message.h misc.h common.h
 csrjmp.o: csrjmp.c csrjmp.h scr.h inskey.h misc.h
 	$(CC) $(CFLAGS) -c csrjmp.c
 
-misc.o: misc.c misc.h text.auto.h attrib.auto.h
+misc.o: misc.c misc.h text.auto.h attrib.auto.h config.h brl.h common.h
 	$(CC) $(CFLAGS) -c misc.c
 
-beeps.o: beeps.c beeps.h
-	$(CC) $(CFLAGS) -c beeps.c
-
-cut-n-paste.o: cut-n-paste.c cut-n-paste.h beeps.h scr.h inskey.h
+cut-n-paste.o: cut-n-paste.c cut-n-paste.h tunes.h scr.h inskey.h
 	$(CC) $(CFLAGS) -c cut-n-paste.c
 
 inskey_lnx.o: inskey_lnx.c inskey.h
@@ -291,7 +305,7 @@ scr_shm.o: scr_shm.cc scr_shm.h scr.h scrdev.h config.h
 speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
-BRLTEST_OBJECTS = brltest.o misc.o beeps.o brl_load.o
+BRLTEST_OBJECTS = brltest.o misc.o $(TUNE_OBJECTS) brl_load.o
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 

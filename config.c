@@ -42,7 +42,7 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
-#include "beeps.h"
+#include "tunes.h"
 #include "message.h"
 #include "misc.h"
 #include "common.h"
@@ -78,20 +78,22 @@ char USAGE[] = "\
 Usage: %s [option ...]\n\
  -b driver  --braille=driver  Braille display driver to use: full library name\n\
                                 or shortcut (" BRLLIBS ")\n\
- -c file    --config=file     Path to configuration save/restore file.\n\
+ -c file    --config=file     Path to settings save/restore file.\n\
  -d device  --device=device   Path to device for accessing braille display.\n\
+ -f file    --file=file       Path to default parameters file.\n\
  -l n       --log=n           Syslog debugging level (from 0 to 7, default 5)\n\
+ -n         --nodaemon        Remain a foreground process.\n\
  -q         --quiet           Suppress start-up messages.\n\
  -s driver  --speech=driver   Speech interface driver to use: full library name\n\
                                 or shortcut (" SPKLIBS ")\n\
- -p         --speechparm     Parameter to the speech driver
+ -S         --speechparm=arg  Parameter to speech driver.\n\
  -t file    --table=file      Path to dot translation table file.\n\
- -h         --help            Print this usage information.\n\
+ -h         --help            Print this usage summary.\n\
  -v         --version         Print start-up messages and exit.\n";
 
 /* -h, -l, -q and -v options */
-short opt_h = 0, opt_q = 0, opt_v = 0, opt_l = LOG_INFO;
-char *opt_c = NULL, *opt_d = NULL, *opt_t = NULL;	/* filename options */
+short opt_h = 0, opt_n = 0, opt_q = 0, opt_v = 0, opt_l = LOG_INFO;
+char *opt_c = NULL, *opt_d = NULL, *opt_f = NULL, *opt_t = NULL;	/* filename options */
 short homedir_found = 0;	/* CWD status */
 
 // Define error codes for configuration file processing.
@@ -99,6 +101,108 @@ short homedir_found = 0;	/* CWD status */
 #define CF_NOVAL 1	// Operand not specified.
 #define CF_INVAL 2	// Bad operand specified.
 #define CF_EXTRA 3	// Too many operands.
+
+static void process_options (int argc, char **argv)
+{
+  int option;
+
+  const char *short_options = "+b:c:d:f:hl:nqs:S:t:v-:";
+  #ifdef no_argument
+    const struct option long_options[] =
+      {
+        {"braille" , required_argument, NULL, 'b'},
+        {"config"  , required_argument, NULL, 'c'},
+        {"device"  , required_argument, NULL, 'd'},
+        {"file"    , required_argument, NULL, 'f'},
+        {"help"    , no_argument      , NULL, 'h'},
+        {"log"     , required_argument, NULL, 'l'},
+        {"nodeamon", no_argument      , NULL, 'n'},
+        {"quiet"   , no_argument      , NULL, 'q'},
+        {"speech"  , required_argument, NULL, 's'},
+        {"speechparm" , required_argument, NULL, 'S'},
+        {"table"   , required_argument, NULL, 't'},
+        {"version" , no_argument      , NULL, 'v'},
+        {NULL      , 0                , NULL, 0  }
+      };
+    #define get_option() getopt_long(argc, argv, short_options, long_options, NULL)
+  #else
+    #define get_option() getopt(argc, argv, short_options)
+  #endif
+
+  /* Parse command line using getopt(): */
+  while ((option = get_option()) != -1)
+    /* continue on error as much as possible, as often we are typing blind
+       and won't even see the error message unless the display come up. */
+    switch (option)
+      {
+      case '?': // An invalid option has been specified.
+	// An error message has already been displayed.
+	return; /* not fatal */
+      case 'b':			/* name of driver */
+	braille_libname = optarg;
+	break;
+      case 'c':		/* configuration file path */
+	opt_c = optarg;
+	break;
+      case 'd':		/* serial device path */
+	opt_d = optarg;
+	break;
+      case 'f':		/* configuration file path */
+	opt_f = optarg;
+	break;
+      case 'n':		/* configuration file path */
+	opt_n = 1;
+	break;
+      case 's':			/* name of speech driver */
+	speech_libname = optarg;
+	break;
+      case 'S':			/* parameter to speech driver */
+	speech_drvparm = optarg;
+	break;
+      case 't':		/* text translation table file name */
+	opt_t = optarg;
+	break;
+      case 'h':		/* help */
+	opt_h = 1;
+	break;
+      case 'l':	{  /* log level */
+	char *endptr;
+	opt_l = strtol(optarg,&endptr,0);
+	if(endptr==optarg || *endptr != 0 || opt_l<0 || opt_l>7){
+	  fprintf(stderr,"Invalid log level... ignored\n");
+	  /* not fatal */
+	  opt_l = 4;
+	}
+      }
+	break;
+      case 'q':		/* quiet */
+	opt_q = 1;
+	break;
+      case 'v':		/* version */
+	opt_v = 1;
+	break;
+      case '-':		/* long options */
+	if (strcmp (optarg, "help") == 0)
+	  opt_h = 1;
+	else if (strcmp (optarg, "quiet") == 0)
+	  opt_q = 1;
+	else if (strcmp (optarg, "version") == 0)
+	  opt_v = 1;
+	else
+	  {
+	    fprintf(stderr, "Unknown option -- %s\n", optarg);
+	    /* not fatal */
+	  }
+	break;
+      }
+  #undef get_option
+
+  if (opt_h)
+    {
+      printf (USAGE, argv[0]);
+      exit(0);
+    }
+}
 
 static int get_token (char **val, const char *delims)
 {
@@ -114,7 +218,10 @@ static int get_token (char **val, const char *delims)
       return CF_EXTRA;
     }
 
-  *val = strdup(v);
+  if (!*val)
+    {
+      *val = strdup(v);
+    }
   return CF_OK;
 }
 
@@ -229,7 +336,7 @@ static void process_configuration_line (char *line, void *data)
     }
 }
 
-static void process_configuration_file (char *path)
+static int process_configuration_file (char *path, int optional)
 {
    FILE *file = fopen(path, "r");
    if (file != NULL)
@@ -237,13 +344,17 @@ static void process_configuration_file (char *path)
        process_lines(file, process_configuration_line, NULL);
        fclose(file);
      }
-   else if (errno != ENOENT)
+   else
      {
+       if (optional && (errno == ENOENT))
+         return 0;
+
        LogAndStderr(LOG_WARNING,
                     "Cannot open configuration file '%s': %s",
                     path, strerror(errno));
        // Just a warning, don't exit.
      }
+   return 1;
 }
 
 
@@ -251,11 +362,26 @@ static void process_configuration_file (char *path)
  * Default definition for settings that are saveable.
  */
 static struct brltty_env initenv = {
-	ENV_MAGICNUM, INIT_CSRVIS, INIT_ATTRVIS, INIT_CSRBLINK, INIT_CAPBLINK,
-	INIT_ATTRBLINK, INIT_CSRSIZE, INIT_CSR_ON_CNT, INIT_CSR_OFF_CNT,
-	INIT_CAP_ON_CNT, INIT_CAP_OFF_CNT, INIT_ATTR_ON_CNT, INIT_ATTR_OFF_CNT,
-	INIT_SIXDOTS, INIT_SLIDEWIN, INIT_BEEPSON, INIT_SKPIDLNS, 
-	INIT_SKPBLNKEOL, INIT_SKPBLNKWINS, ST_None
+	{ENV_MAGICNUM&0XFF, ENV_MAGICNUM>>8},
+	INIT_CSRVIS, 0,
+	INIT_ATTRVIS, 0,
+	INIT_CSRBLINK, 0,
+	INIT_CAPBLINK, 0,
+	INIT_ATTRBLINK, 0,
+	INIT_CSRSIZE, 0,
+	INIT_CSR_ON_CNT, 0,
+	INIT_CSR_OFF_CNT, 0,
+	INIT_CAP_ON_CNT, 0,
+	INIT_CAP_OFF_CNT, 0,
+	INIT_ATTR_ON_CNT, 0,
+	INIT_ATTR_OFF_CNT, 0,
+	INIT_SIXDOTS, 0,
+	INIT_SLIDEWIN, 0,
+	INIT_SOUND, INIT_TUNEDEV,
+	INIT_SKPIDLNS,  0,
+	INIT_SKPBLNKWINSMODE, 0,
+	INIT_SKPBLNKWINS, 0,
+	ST_None, 0
 };
 
 /* 
@@ -276,7 +402,7 @@ loadconfig (void)
     LogPrint(LOG_WARNING, "Cannot open configuration file '%s'.", opt_c);
   }else{
       if (read (fd, &newenv, sizeof (newenv)) == sizeof (newenv))
-	if (newenv.magicnum == ENV_MAGICNUM)
+	if ((newenv.magicnum[0] == (ENV_MAGICNUM&0XFF)) && (newenv.magicnum[1] == (ENV_MAGICNUM>>8)))
 	  {
 	    env = newenv;
 	    OK = 1;
@@ -285,7 +411,7 @@ loadconfig (void)
     }
   if (!OK)
     env = initenv;
-  soundstat (env.sound);
+  setTuneDevice (env.tunedev);
 }
 
 void 
@@ -337,104 +463,23 @@ startbrl(void)
   vwinshift = 5;
   LogPrint(LOG_DEBUG, "Braille display has %d rows of %d cells.",
 	   brl.y, brl.x);
-  play(snd_detected);
+  playTune(&tune_detected);
   clrbrlstat ();
 }
 
 
 void startup(int argc, char *argv[])
 {
-  int i;
-  const char *short_options = "+b:c:d:hl:qs:p:t:v-:";
-  #ifdef no_argument
-    const struct option long_options[] =
-      {
-        {"braille", required_argument, NULL, 'b'},
-        {"config" , required_argument, NULL, 'c'},
-        {"device" , required_argument, NULL, 'd'},
-        {"help"   , no_argument      , NULL, 'h'},
-        {"log"    , required_argument, NULL, 'l'},
-        {"quiet"  , no_argument      , NULL, 'q'},
-        {"speech" , required_argument, NULL, 's'},
-        {"speechparm" , required_argument, NULL, 'p'},
-        {"table"  , required_argument, NULL, 't'},
-        {"version", no_argument      , NULL, 'v'},
-        {NULL     , 0                , NULL, 0  }
-      };
-    #define get_option() getopt_long(argc, argv, short_options, long_options, NULL)
-  #else
-    #define get_option() getopt(argc, argv, short_options)
-  #endif
+  process_options(argc, argv);
 
   /* Process the configuration file. */
-  process_configuration_file(CONFIG_FILE);
-
-  /* Parse command line using getopt(): */
-  while ((i = get_option()) != -1)
-    /* continue on error as much as possible, as often we are typing blind
-       and won't even see the error message unless the display come up. */
-    switch (i)
-      {
-      case '?': // An invalid option has been specified.
-	// An error message has already been displayed.
-	/* not fatal */
-      case 'b':			/* name of driver */
-	braille_libname = optarg;
-	break;
-      case 'c':		/* configuration filename */
-	opt_c = optarg;
-	break;
-      case 'd':		/* serial device name */
-	opt_d = optarg;
-	break;
-      case 's':			/* name of speech driver */
-	speech_libname = optarg;
-	break;
-      case 'p':			/* param to speech driver */
-	speech_drvparm = optarg;
-	break;
-      case 't':		/* text translation table filename */
-	opt_t = optarg;
-	break;
-      case 'h':		/* help */
-	opt_h = 1;
-	break;
-      case 'l':	{  /* log level */
-	char *endptr;
-	opt_l = strtol(optarg,&endptr,0);
-	if(endptr==optarg || *endptr != 0 || opt_l<0 || opt_l>7){
-	  fprintf(stderr,"Invalid log level... ignored\n");
-	  /* not fatal */
-	  opt_l = 4;
-	}
-      }
-	break;
-      case 'q':		/* quiet */
-	opt_q = 1;
-	break;
-      case 'v':		/* version */
-	opt_v = 1;
-	break;
-      case '-':		/* long options */
-	if (strcmp (optarg, "help") == 0)
-	  opt_h = 1;
-	else if (strcmp (optarg, "quiet") == 0)
-	  opt_q = 1;
-	else if (strcmp (optarg, "version") == 0)
-	  opt_v = 1;
-	else
-	  {
-	    fprintf(stderr, "Unknown option -- %s\n", optarg);
-	    /* not fatal */
-	  }
-	break;
-      }
-  #undef get_option
-
-  if (opt_h)
+  if (opt_f)
     {
-      printf (USAGE, argv[0]);
-      exit(0);
+      process_configuration_file(opt_f, 0);
+    }
+  else
+    {
+      process_configuration_file(CONFIG_FILE, 1);
     }
 
   /* Set logging priority levels. */
@@ -507,10 +552,8 @@ void startup(int argc, char *argv[])
 	memcpy (texttrans, tbl_p, 256);
       else
 	{
-	  if (!opt_q)
-	    LogAndStderr(LOG_WARNING,
-	                 "Cannot read dot translation table '%s'.",
-		         opt_t);
+	  LogAndStderr(LOG_WARNING,
+	               "Cannot read dot translation table '%s'.", opt_t);
 	  opt_t = NULL;
 	}
       if (tbl_p)
@@ -539,13 +582,13 @@ void startup(int argc, char *argv[])
 	         path ? path : "path-too-long");
   }
 
-  LogAndStderr(LOG_INFO, "Dot Translation Table: %s",
+  LogAndStderr(LOG_INFO, "Settings Save/Restore File: %s", opt_c);
+  LogAndStderr(LOG_INFO, "Help File: %s", braille->helpfile);
+  LogAndStderr(LOG_INFO, "Translation Table: %s",
                opt_t ? opt_t : "built-in");
   LogAndStderr(LOG_INFO, "Braille Device: %s", opt_d);
   LogAndStderr(LOG_INFO, "Braille Driver: %s (%s)",
                braille_libname, braille->name);
-  LogAndStderr(LOG_INFO, "Braille Help File: %s", braille->helpfile);
-  LogAndStderr(LOG_INFO, "Braille Configuration File: %s", opt_c);
   LogAndStderr(LOG_INFO, "Speech Driver: %s (%s)",
                speech_libname, speech->name);
 
@@ -571,46 +614,49 @@ void startup(int argc, char *argv[])
       exit (2);
     }
   
-  /*
-   * Become a daemon:
-   */
-  switch (fork ())
+  if (!opt_n)
     {
-    case -1:			/* can't fork */
-      LogAndStderr(LOG_ERR, "fork: %s", strerror(errno));
-      closescr ();
-      LogClose();
-      exit (3);
-    case 0:			/* child, process becomes a daemon: */
-      close (STDIN_FILENO);
-      close (STDOUT_FILENO);
-      close (STDERR_FILENO);
-      LogPrint(LOG_DEBUG, "Becoming daemon.");
-      if (setsid () == -1)
-	{			
-	  /* request a new session (job control) */
-	  closescr ();
-	  LogPrint(LOG_ERR, "setsid: %s", strerror(errno));
-	  LogClose();
-	  exit (4);
-	}
-      /* I read somewhere that the correct thing to do here is to fork
-	 again, so we are not a group leader and then can never be associated
-	 a controlling tty. Well... No harm I suppose. */
-      switch(fork()) {
-      case -1:
-	LogAndStderr(LOG_ERR, "second fork: %s", strerror(errno));
-	closescr ();
-	LogClose();
-	exit (3);
-      case 0:
-	break;
-      default:
-	exit(0);
-      };
-      break;
-    default:			/* parent returns to calling process: */
-      exit(0);
+      /*
+       * Become a daemon:
+       */
+      switch (fork ())
+        {
+        case -1:			/* can't fork */
+          LogAndStderr(LOG_ERR, "fork: %s", strerror(errno));
+          closescr ();
+          LogClose();
+          exit (3);
+        case 0:			/* child, process becomes a daemon: */
+          close (STDIN_FILENO);
+          close (STDOUT_FILENO);
+          close (STDERR_FILENO);
+          LogPrint(LOG_DEBUG, "Becoming daemon.");
+          if (setsid () == -1)
+    	{			
+    	  /* request a new session (job control) */
+    	  closescr ();
+    	  LogPrint(LOG_ERR, "setsid: %s", strerror(errno));
+    	  LogClose();
+    	  exit (4);
+    	}
+          /* I read somewhere that the correct thing to do here is to fork
+    	 again, so we are not a group leader and then can never be associated
+    	 a controlling tty. Well... No harm I suppose. */
+          switch(fork()) {
+          case -1:
+    	LogAndStderr(LOG_ERR, "second fork: %s", strerror(errno));
+    	closescr ();
+    	LogClose();
+    	exit (3);
+          case 0:
+    	break;
+          default:
+    	exit(0);
+          };
+          break;
+        default:			/* parent returns to calling process: */
+          exit(0);
+        }
     }
 
   /*
@@ -628,6 +674,9 @@ void startup(int argc, char *argv[])
   /* Initialise help screen */
   if (inithlpscr (braille->helpfile))
     LogPrint(LOG_WARNING, "Cannot open help screen file '%s'.", braille->helpfile);
+
+  if (!opt_q)
+    message (VERSION, 0);	/* display initialisation message */
 }
 
 
@@ -636,17 +685,19 @@ void startup(int argc, char *argv[])
 void 
 configmenu (void)
 {
-  static short savecfg = 0;		/* 1 == save config on exit */
+  static unsigned char savecfg = 0;		/* 1 == save config on exit */
   char *booleanValues[] = {"No", "Yes"};
-  char *cursorShapes[] = {"Underline", "Block"};
+  char *cursorStyles[] = {"Underline", "Block"};
+  char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
   char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Papenmeier", "MDV"};
   char *textStyles[] = {"8 dot", "6 dot"};
+  char *tuneDevices[] = {"PC Speaker", "Sound Card", "AdLib/OPL3/SB-FM"};
   typedef struct {
-     short *setting;			/* pointer to the item value */
+     unsigned char *setting;			/* pointer to the item value */
      char *description;			/* item description */
      char **names;			/* 0 == numeric, 1 == bolean */
-     short minimum;			/* minimum range */
-     short maximum;			/* maximum range */
+     unsigned char minimum;			/* minimum range */
+     unsigned char maximum;			/* maximum range */
   } MenuItem;
   #define MENU_ITEM(setting, description, values, minimum, maximum) {&setting, description, values, minimum, maximum}
   #define NUMERIC_ITEM(setting, description, minimum, maximum) MENU_ITEM(setting, description, NULL, minimum, maximum)
@@ -654,36 +705,38 @@ configmenu (void)
   #define SYMBOLIC_ITEM(setting, description, names) MENU_ITEM(setting, description, names, 0, ((sizeof(names) / sizeof(names[0])) - 1))
   #define BOOLEAN_ITEM(setting, description) SYMBOLIC_ITEM(setting, description, booleanValues)
   MenuItem menu[] = {
-     BOOLEAN_ITEM(savecfg, "Save Settings on Exit"),
+     BOOLEAN_ITEM(savecfg, "Save on Exit"),
      SYMBOLIC_ITEM(env.sixdots, "Text Style", textStyles),
      BOOLEAN_ITEM(env.skpidlns, "Skip Identical Lines"),
-     BOOLEAN_ITEM(env.skpblnkeol, "Skip Blank End-of-Lines"),
      BOOLEAN_ITEM(env.skpblnkwins, "Skip Blank Windows"),
+     SYMBOLIC_ITEM(env.skpblnkwinsmode, "Which Blank Windows", skipBlankWindowsModes),
      BOOLEAN_ITEM(env.slidewin, "Sliding Window"),
      BOOLEAN_ITEM(env.csrvis, "Show Cursor"),
-     SYMBOLIC_ITEM(env.csrsize, "Cursor Shape", cursorShapes),
+     SYMBOLIC_ITEM(env.csrsize, "Cursor Style", cursorStyles),
      BOOLEAN_ITEM(env.csrblink, "Blinking Cursor"),
-     TIMING_ITEM(env.csroncnt, "Blinking Cursor Visible Period"),
-     TIMING_ITEM(env.csroffcnt, "Blinking Cursor Invisible Period"),
+     TIMING_ITEM(env.csroncnt, "Cursor Visible Period"),
+     TIMING_ITEM(env.csroffcnt, "Cursor Invisible Period"),
      BOOLEAN_ITEM(env.attrvis, "Show Attributes"),
      BOOLEAN_ITEM(env.attrblink, "Blinking Attributes"),
-     TIMING_ITEM(env.attroncnt, "Blinking Attributes Visible Period"),
-     TIMING_ITEM(env.attroffcnt, "Blinking Attributes Invisible Period"),
+     TIMING_ITEM(env.attroncnt, "Attributes Visible Period"),
+     TIMING_ITEM(env.attroffcnt, "Attributes Invisible Period"),
      BOOLEAN_ITEM(env.capblink, "Blinking Capitals"),
-     TIMING_ITEM(env.caponcnt, "Blinking Capitals Visible Period"),
-     TIMING_ITEM(env.capoffcnt, "Blinking Capitals Invisible Period"),
-     BOOLEAN_ITEM(env.sound, "Audio Signals"),
+     TIMING_ITEM(env.caponcnt, "Capitals Visible Period"),
+     TIMING_ITEM(env.capoffcnt, "Capitals Invisible Period"),
+     BOOLEAN_ITEM(env.sound, "Sound"),
+     SYMBOLIC_ITEM(env.tunedev, "Tune Device", tuneDevices),
      SYMBOLIC_ITEM(env.stcellstyle, "Status Cells Style", statusStyles)
   };
   int menuSize = sizeof(menu) / sizeof(menu[0]);
   static int menuIndex = 0;			/* current menu item */
+
+  unsigned char line[40];		/* display buffer */
+  int lineUpdated = 0;			/* 1 when item's value has changed */
+  int lineLength;				/* current menu item length */
+  int lineIndent = 0;				/* braille window pos in buffer */
+
   struct brltty_env oldEnvironment = env;	/* backup configuration */
-  unsigned char buffer[40];		/* display buffer */
-  int length;				/* current menu item length */
-  int indent = 0;				/* braille window pos in buffer */
-  int index;				/* for loops */
   int key;				/* readbrl() value */
-  int updated = 0;			/* 1 when item's value has changed */
 
   /* status cells */
   memset(statcells, 0, sizeof(statcells));
@@ -700,28 +753,31 @@ configmenu (void)
       MenuItem *item = &menu[menuIndex];
 
       /* First we draw the current menu item in the buffer */
-      sprintf(buffer, "%s: ", item->description);
+      sprintf(line, "%s: ", item->description);
       if (item->names)
-         strcat(buffer, item->names[*item->setting]);
+         strcat(line, item->names[*item->setting - item->minimum]);
       else
-         sprintf(buffer+strlen(buffer), "%d", *item->setting);
+         sprintf(line+strlen(line), "%d", *item->setting);
+      lineLength = strlen(line);
 
       /* Next we deal with the braille window position in the buffer.
        * This is intended for small displays... or long item descriptions 
        */
-      length = strlen(buffer);
-      if (updated)
+      if (lineUpdated)
 	{
-	  updated = 0;
+	  lineUpdated = 0;
 	  /* make sure the updated value is visible */
-	  if (length-indent > brl.x*brl.y)
-	    indent = length - brl.x*brl.y;
+	  if (lineLength-lineIndent > brl.x*brl.y)
+	    lineIndent = lineLength - brl.x*brl.y;
 	}
 
       /* Then draw the braille window */
       memset(brl.disp, 0, brl.x*brl.y);
-      for (index=0; index<MIN(brl.x*brl.y, length-indent); index++)
-	brl.disp[index] = texttrans[buffer[indent+index]];
+      {
+	 int index;
+	 for (index=0; index<MIN(brl.x*brl.y, lineLength-lineIndent); index++)
+            brl.disp[index] = texttrans[line[lineIndent+index]];
+      }
       braille->write(&brl);
       delay (DELAY_TIME);
 
@@ -733,34 +789,34 @@ configmenu (void)
 	    continue;
 	  case CMD_TOP:
 	  case CMD_TOP_LEFT:
-	    menuIndex = indent = 0;
+	    menuIndex = lineIndent = 0;
 	    break;
 	  case CMD_BOT:
 	  case CMD_BOT_LEFT:
 	    menuIndex = menuSize - 1;
-	    indent = 0;
+	    lineIndent = 0;
 	    break;
 	  case CMD_LNUP:
 	    if (--menuIndex < 0)
 	      menuIndex = menuSize - 1;
-	    indent = 0;
+	    lineIndent = 0;
 	    break;
 	  case CMD_LNDN:
 	    if (++menuIndex >= menuSize)
 	      menuIndex = 0;
-	    indent = 0;
+	    lineIndent = 0;
 	    break;
 	  case CMD_FWINLT:
-	    if (indent > 0)
-	      indent -= MIN(brl.x*brl.y, indent);
+	    if (lineIndent > 0)
+	      lineIndent -= MIN(brl.x*brl.y, lineIndent);
 	    else
-	      play(snd_bounce);
+	      playTune(&tune_bounce);
 	    break;
 	  case CMD_FWINRT:
-	    if (length-indent > brl.x*brl.y)
-	      indent += brl.x*brl.y;
+	    if (lineLength-lineIndent > brl.x*brl.y)
+	      lineIndent += brl.x*brl.y;
 	    else
-	      play(snd_bounce);
+	      playTune(&tune_bounce);
 	    break;
 	  case CMD_WINUP:
 	  case CMD_CHRLT:
@@ -768,7 +824,7 @@ configmenu (void)
 	  case CMD_KEY_UP:
 	    if (--*item->setting < item->minimum)
 	      *item->setting = item->maximum;
-	    updated = 1;
+	    lineUpdated = 1;
 	    break;
 	  case CMD_WINDN:
 	  case CMD_CHRRT:
@@ -778,10 +834,10 @@ configmenu (void)
 	  case CMD_KEY_RETURN:
 	    if (++*item->setting > item->maximum)
 	      *item->setting = item->minimum;
-	    updated = 1;
+	    lineUpdated = 1;
 	    break;
 	  case CMD_SAY:
-	    speech->say(buffer, length);
+	    speech->say(line, lineLength);
 	    break;
 	  case CMD_MUTE:
 	    speech->mute();
@@ -804,29 +860,27 @@ configmenu (void)
 	    savecfg |= 1;
 	    /*break;*/
 	  default:
-	    if(key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
-		/* Why not setting a value with routing keys... */
-		if (item->names) {
-		   *item->setting = key % 2;
-		} else {
-		   *item->setting = key - CR_ROUTEOFFSET;
-		    if (*item->setting > item->maximum)
-		       *item->setting = item->maximum;
-		    if (*item->setting < item->minimum)
-		       *item->setting = item->minimum;
-		}
-		updated = 1;
-		break;
+	    if (key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
+               /* Why not setting a value with routing keys... */
+	       key -= CR_ROUTEOFFSET;
+	       if (item->names) {
+	          *item->setting = key % (item->maximum + 1);
+	       } else {
+	          *item->setting = key;
+		  if (*item->setting > item->maximum)
+		     *item->setting = item->maximum;
+		  if (*item->setting < item->minimum)
+        	     *item->setting = item->minimum;
+	       }
+	       lineUpdated = 1;
+               break;
 	    }
 
 	    /* For any other keystroke, we exit */
 	    if (savecfg)
 	      {
 		saveconfig();
-		if (env.sound)
-		   play(snd_done);
-		else
-		   message("Settings Saved", 0);
+		playTune(&tune_done);
 	      }
 	    return;
 	  }

@@ -147,7 +147,7 @@ const unsigned char inputTable[] = {
 static void
 systemError (const char *action)
 {
-   LogAndStderr(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
+   LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
 }
 
 static void
@@ -267,10 +267,10 @@ setVirtualTerminal(int vt)
 #ifdef VT_ACTIVATE
    openConsole();
    if (consoleDescriptor != -1) {
-      LogAndStderr(LOG_DEBUG, "switching to virtual terminal %d", vt);
+      LogPrint(LOG_DEBUG, "switching to virtual terminal %d", vt);
       if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
 	 if (ioctl(consoleDescriptor, VT_WAITACTIVE, vt) != -1) {
-	    LogAndStderr(LOG_INFO, "switched to virtual terminal %d", vt);
+	    LogPrint(LOG_INFO, "switched to virtual terminal %d", vt);
 	 } else {
 	    systemError("virtual console wait");
 	 }
@@ -292,7 +292,7 @@ openVisualDisplay(void)
 	    char path[0X20];
 	    snprintf(path, sizeof(path), "/dev/tty%d", displayTerminal);
 	    if ((displayDescriptor = open(path, O_WRONLY)) != -1) {
-	       LogAndStderr(LOG_INFO, "visual display is %s", path);
+	       LogPrint(LOG_INFO, "visual display is %s", path);
 	    }
 	 }
       }
@@ -361,8 +361,8 @@ visualDisplay(unsigned char character)
 static void
 identbrl (void)
 {
-   LogAndStderr(LOG_NOTICE, "BrailleNote driver, version 1.0");
-   LogAndStderr(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
+   LogPrint(LOG_NOTICE, "BrailleNote driver, version 1.0");
+   LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
 
 static void
@@ -416,7 +416,7 @@ initbrl (brldim *brl, const char *device)
 			   systemError("cell buffer allocation");
 			}
 		     } else {
-			LogAndStderr(LOG_ERR, "unexpected response: %2.2X %2.2X %2.2X",
+			LogPrint(LOG_ERR, "unexpected response: %2.2X %2.2X %2.2X",
 				     response[0], response[1], response[2]);
 		     }
 		  } else {
@@ -855,8 +855,6 @@ interpretEnterChord(unsigned char dots)
 	 return EOF;
       case BNC_B:
          return CMD_SKPBLNKWINS | VAL_SWITCHON;
-      case BNC_E:
-         return CMD_SKPBLNKEOL | VAL_SWITCHON;
       case BNC_F:
          return CMD_FREEZE | VAL_SWITCHON;
       case BNC_I:
@@ -876,13 +874,13 @@ interpretThumbKeys(unsigned char keys)
       default:
 	 break;
       case (BNT_PREVIOUS):
-	 return CMD_LNUP;
-      case (BNT_NEXT):
-	 return CMD_LNDN;
-      case (BNT_BACK):
 	 return CMD_FWINLT;
-      case (BNT_ADVANCE):
+      case (BNT_NEXT):
 	 return CMD_FWINRT;
+      case (BNT_BACK):
+	 return CMD_LNUP;
+      case (BNT_ADVANCE):
+	 return CMD_LNDN;
       case (BNT_PREVIOUS | BNT_BACK):
 	 return CMD_LNBEG;
       case (BNT_NEXT | BNT_ADVANCE):

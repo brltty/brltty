@@ -120,7 +120,7 @@ void vcsa_Screen::set_screen_translation_table (void)
 
     // Determine which translation table to use when reading the screen.
     {
-	int priority = LOG_NOTICE;
+	int priority = LOG_INFO;
 	const char *font;
 	switch (new_character) {
 	  default: // no translation

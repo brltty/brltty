@@ -24,26 +24,45 @@
 #define ENV_MAGICNUM 0x4005
 
 struct brltty_env {
-	short magicnum;
-	short csrvis;
-	short attrvis;
-	short csrblink;
-	short capblink;
-	short attrblink;
-	short csrsize;
-	short csroncnt;
-	short csroffcnt;
-	short caponcnt;
-	short capoffcnt;
-	short attroncnt;
-	short attroffcnt;
-	short sixdots;
-	short slidewin;
-	short sound;
-	short skpidlns;
-	short skpblnkeol;
-	short skpblnkwins;
-	short stcellstyle;
+	unsigned char magicnum[2];
+	unsigned char csrvis;
+	unsigned char spare1;
+	unsigned char attrvis;
+	unsigned char spare2;
+	unsigned char csrblink;
+	unsigned char spare3;
+	unsigned char capblink;
+	unsigned char spare4;
+	unsigned char attrblink;
+	unsigned char spare5;
+	unsigned char csrsize;
+	unsigned char spare6;
+	unsigned char csroncnt;
+	unsigned char spare7;
+	unsigned char csroffcnt;
+	unsigned char spare8;
+	unsigned char caponcnt;
+	unsigned char spare9;
+	unsigned char capoffcnt;
+	unsigned char spare10;
+	unsigned char attroncnt;
+	unsigned char spare11;
+	unsigned char attroffcnt;
+	unsigned char spare12;
+	unsigned char sixdots;
+	unsigned char spare13;
+	unsigned char slidewin;
+	unsigned char spare14;
+	unsigned char sound;
+	unsigned char tunedev;
+	unsigned char skpidlns;
+	unsigned char spare15;
+	unsigned char skpblnkwinsmode;
+	unsigned char spare16;
+	unsigned char skpblnkwins;
+	unsigned char spare17;
+	unsigned char stcellstyle;
+	unsigned char spare18;
 } __attribute__((packed));
 
 /* 
@@ -68,7 +87,6 @@ struct brltty_param {
 
 extern char VERSION[];			/* BrlTty version string */
 extern char COPYRIGHT[];		/* BrlTty copyright banner */
-extern short opt_q;			/* quiet mode */
 extern volatile int keep_going;		/* zero after reception of SIGTERM */
 
 extern struct brltty_param initparam;	/* defaults for new brltty_param */

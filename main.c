@@ -33,7 +33,7 @@
 #include "scr.h"
 #include "csrjmp.h"
 #include "inskey.h"
-#include "beeps.h"
+#include "tunes.h"
 #include "cut-n-paste.h"
 #include "misc.h"
 #include "message.h"
@@ -56,7 +56,6 @@ short offr; /* How much of the display must be kept onto the screen when
 	       beyond the right edge of the screen by brl.x-offr. */
 short fwinshift;		/* Full window horizontal distance */
 short vwinshift;		/* Window vertical distance */
-struct brltty_env env;		/* environment (i.e. global) parameters */
 brldim brl;			/* For the Braille routines */
 scrstat scr;			/* For screen state infos */
 unsigned int TickCount = 0;	/* incremented each main loop cycle */
@@ -73,11 +72,11 @@ unsigned int TickCount = 0;	/* incremented each main loop cycle */
 	(isupper (c) || (c) == '@' || (c) == '[' || (c) == '^' || \
 	 (c) == ']' || (c) == '\\')
 
-#define TOGGLEPLAY(var)  play((var) ? snd_toggleon : snd_toggleoff)
+#define TOGGLEPLAY(var)  playTune((var) ? &tune_toggle_on : &tune_toggle_off)
 #define TOGGLE(var) \
 	(var = (keypress & VAL_SWITCHON) \
 	       ? 1 : ((keypress & VAL_SWITCHOFF) \
-		      ? 0 : (var ^ 1)))
+		      ? 0 : (!var)))
 
 
 unsigned char *curtbl = texttrans;	/* active translation table */
@@ -217,13 +216,8 @@ main (int argc, char *argv[])
    */
   if (signal (SIGTERM, termination_handler) == SIG_IGN)
       signal (SIGTERM, SIG_IGN);
-  signal (SIGINT, SIG_IGN);
-  signal (SIGHUP, SIG_IGN);
   signal (SIGCHLD, child_stop_handler);
   signal (SIGPIPE, SIG_IGN);
-
-  if (!opt_q)
-    message (VERSION, 0);	/* display initialisation message */
 
   /*
    * Initialize state variables 
@@ -259,7 +253,7 @@ main (int argc, char *argv[])
 	    continue;
 	  case CMD_RESTARTBRL:
 	    braille->close(&brl);
-	    play(snd_brloff);
+	    playTune(&tune_braille_off);
 	    LogPrint(LOG_INFO,"Reinitializing braille driver.");
 	    startbrl();
 	    break;
@@ -285,52 +279,73 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_WINUP:
 	    if (p->winy == 0)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    p->winy = MAX (p->winy - vwinshift, 0);
 	    break;
 	  case CMD_WINDN:
 	    if (p->winy == scr.rows - brl.y)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
 	    break;
 	  case CMD_FWINLT:
-	    if(env.skpblnkwins)
-	      goto fwinltskip;
-	    if(env.skpblnkeol
-	       && p->winx>0
-	       && p->winy > 0
-	       && (scr.posy != p->winy || scr.posx >= p->winx)) {
-	      char buffer[scr.cols];
-	      int i;
-	      getscr ((winpos)
-	      {
-		0, p->winy, scr.cols, 1
-		  }
-		      ,buffer, SCR_TEXT);
-
-	      for(i=0; i<p->winx; i++)
-		if(buffer[i] != ' ' && buffer[i] != 0)
+	    if (!env.skpblnkwins) {
+	      if (p->winx == 0){
+		if(p->winy > 0){
+		  p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+		  p->winy--;
+		  playTune (&tune_wrap_up);
+		}else
+		  playTune (&tune_bounce);
+	      }else
+		p->winx = MAX (p->winx - fwinshift, 0);
+	      break;
+	    }
+	  case CMD_FWINLTSKIP: {
+	    int oldX = p->winx;
+	    int oldY = p->winy;
+	    int tuneLimit = 3;
+	    int charCount;
+	    int charIndex;
+	    char buffer[scr.cols];
+	    while (1) {
+	      if (p->winx > 0) {
+		p->winx = MAX(p->winx-fwinshift, 0);
+	      } else {
+		if (p->winy == 0) {
+		  p->winx = oldX;
+		  p->winy = oldY;
+		  playTune(&tune_bounce);
 		  break;
-	      if(i == p->winx) {
-		play (snd_wrap_up);
-		goto skip_back;
+		}
+		p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+		p->winy--;
+		if (tuneLimit-- > 0)
+		  playTune(&tune_wrap_up);
+		if (env.skpblnkwinsmode == sbwRestOfLine)
+		  break;
+	      }
+	      charCount = MIN(brl.x, scr.cols-p->winx);
+	      getscr((winpos){p->winx, p->winy, charCount, 1},
+		     buffer, SCR_TEXT);
+	      for (charIndex=(charCount-1); charIndex>=0; charIndex--)
+		if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+		  break;
+	      if (env.csrvis &&
+	          (scr.posy == p->winy) &&
+		  (scr.posx < (p->winx + charCount)))
+	        charIndex = MAX(charIndex, scr.posx-p->winx);
+	      if (charIndex >= 0) {
+		if (env.slidewin)
+		  p->winx = MAX(p->winx+charIndex-brl.x+1, 0);
+	        break;
 	      }
 	    }
-	    if (p->winx == 0){
-	      if(p->winy > 0){
-		p->winx = scr.cols - brl.x;
-		p->winy--;
-		play (snd_wrap_up);
-	      }else
-		play (snd_bounce);
-	    }else
-	      p->winx = MAX (p->winx - fwinshift, 0);
 	    break;
-	    skip_back: /* go on through */
+	  }
 	  case CMD_LNUP:
 	    if (p->winy == 0)
 	      {
-		play (snd_bounce);
+		playTune (&tune_bounce);
 		break;
 	      }
 	    if (!env.skpidlns)
@@ -342,7 +357,7 @@ main (int argc, char *argv[])
 	  case CMD_PRDIFLN:
 	  case CMD_ATTRUP:
 	    if (p->winy == 0)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    else
 	      {
 		char buffer1[scr.cols], buffer2[scr.cols];
@@ -365,60 +380,82 @@ main (int argc, char *argv[])
 			(keypress!=CMD_ATTRUP && p->winy == scr.posy))
 		      break;	/* lines are different */
                     if(p->winy == 0){
-                      play(snd_bounce);
+                      playTune(&tune_bounce);
                       break;
                     }
 		    /* lines are identical */
 		    if (skipped == 0)
-		      play (snd_skip_first);
+		      playTune (&tune_skip_first);
 		    else if (skipped <= 4)
-		      play (snd_skip);
+		      playTune (&tune_skip);
 		    else if (skipped % 4 == 0)
-		      play (snd_skipmore);
+		      playTune (&tune_skip_more);
 		    skipped++;	/* will sound only if lines are skipped,
 				   not if we just move by one line */
 		  }
 	      }
 	    break;
 	  case CMD_FWINRT:
-	    if(env.skpblnkwins)
-	      goto fwinrtskip;
-	    if(env.skpblnkeol 
-	       && p->winx+brl.x < scr.cols
-	       && p->winy < scr.rows - brl.y
-	       && (scr.posy != p->winy || scr.posx < brl.x)) {
-	      char buffer[scr.cols];
-	      int i;
-	      getscr ((winpos)
-	      {
-		0, p->winy, scr.cols, 1
-		  }
-		      ,buffer, SCR_TEXT);
-
-	      for(i=p->winx+brl.x; i<scr.cols; i++)
-		if(buffer[i] != ' ' && buffer[i] != 0)
-		  break;
-	      if(i == scr.cols) {
-		p->winx = 0;
-		play (snd_wrap_down);
-		goto skip_forw;
-	      }
+	    if (!env.skpblnkwins) {
+	      if (p->winx >= scr.cols - brl.x){
+		if (p->winy < scr.rows - brl.y){
+		  p->winx = 0;
+		  p->winy++;
+		  playTune (&tune_wrap_down);
+		}else
+		    playTune (&tune_bounce);
+	      }else
+		p->winx = MIN (p->winx + fwinshift, scr.cols - offr);
+	      break;
 	    }
-	    if (p->winx >= scr.cols - brl.x){
-	      if (p->winy < scr.rows - brl.y){
+	  case CMD_FWINRTSKIP: {
+	    int oldX = p->winx;
+	    int oldY = p->winy;
+	    int tuneLimit = 3;
+	    int charCount;
+	    int charIndex;
+	    char buffer[scr.cols];
+	    while (1) {
+	      if (p->winx < (scr.cols - brl.x)) {
+		p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
+	      } else {
+		if (p->winy >= (scr.rows - brl.y)) {
+		  p->winx = oldX;
+		  p->winy = oldY;
+		  playTune(&tune_bounce);
+		  break;
+		}
 		p->winx = 0;
 		p->winy++;
-		play (snd_wrap_down);
-	      }else
-		  play (snd_bounce);
-	    }else
-	      p->winx = MIN (p->winx + fwinshift, scr.cols - offr);
+		if (tuneLimit-- > 0)
+		  playTune(&tune_wrap_down);
+		if (env.skpblnkwinsmode == sbwRestOfLine)
+		  break;
+		if (env.skpblnkwinsmode == sbwEndOfLine)
+		  break;
+	      }
+	      charCount = MIN(brl.x, scr.cols-p->winx);
+	      getscr((winpos){p->winx, p->winy, charCount, 1},
+		     buffer, SCR_TEXT);
+	      for (charIndex=0; charIndex<charCount; charIndex++)
+		if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+		  break;
+	      if (env.csrvis &&
+	          (scr.posy == p->winy) &&
+		  (scr.posx >= p->winx))
+	        charIndex = MIN(charIndex, scr.posx-p->winx);
+	      if (charIndex < charCount) {
+		if (env.slidewin)
+		  p->winx = MIN(p->winx+charIndex, scr.cols-offr);
+	        break;
+	      }
+	    }
 	    break;
-	    skip_forw: /* go on through */
+	  }
 	  case CMD_LNDN:
 	    if (p->winy == scr.rows - brl.y)
 	      {
-		play (snd_bounce);
+		playTune (&tune_bounce);
 		break;
 	      }
 	    if (!env.skpidlns)
@@ -430,7 +467,7 @@ main (int argc, char *argv[])
 	  case CMD_NXDIFLN:
 	  case CMD_ATTRDN:
 	    if (p->winy == scr.rows - brl.y)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    else
 	      {
 		char buffer1[scr.cols], buffer2[scr.cols];
@@ -453,16 +490,16 @@ main (int argc, char *argv[])
 			(keypress!=CMD_ATTRDN && p->winy == scr.posy))
 		      break;	/* lines are different */
 		    if(p->winy == scr.rows-brl.y){
-		      play(snd_bounce);
+		      playTune(&tune_bounce);
 		      break;
 		    }
 		    /* lines are identical */
 		    if (skipped == 0)
-		      play (snd_skip_first);
+		      playTune (&tune_skip_first);
 		    else if (skipped <= 4)
-		      play (snd_skip);
+		      playTune (&tune_skip);
 		    else if (skipped % 4 == 0)
-		      play (snd_skipmore);
+		      playTune (&tune_skip_more);
 		    skipped++;	/* will sound only if lines are skipped,
 				   not if we just move by one line */
 		  }
@@ -509,77 +546,9 @@ main (int argc, char *argv[])
 	      }
 	    }
 	    if(!found) {
-	      play (snd_bounce);
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
+	      playTune (&tune_bounce);
 	    }
-	    break;
-	  }
-	  case CMD_FWINRTSKIP:
-	  fwinrtskip: {
-	    int y = p->winy, x = p->winx;
-	    int i,l, cnt=0;
-	    do {
-	      char buffer[scr.cols];
-	      if(p->winx >= scr.cols - brl.x) {
-		if (p->winy < scr.rows - brl.y){
-		  p->winx = 0;
-		  p->winy++;
-		  if(++cnt<=3)
-		    play (snd_wrap_down);
-		}else{
-		  p->winy = y;
-		  p->winx = x;
-		  play (snd_bounce);
-		  break;
-		}
-	      }else
-		p->winx = MIN (p->winx + fwinshift, scr.cols - offr);
-	      l = MIN(brl.x, scr.cols -p->winx);
-	      getscr ((winpos)
-	      {
-		p->winx, p->winy, l, 1
-		  }
-		      ,buffer, SCR_TEXT);
-	      for(i=0; i<l; i++)
-		if(buffer[i] != ' ' && buffer[i] != 0)
-		  break;
-	    } while(i == l
-		    && (p->winy != scr.posy
-			|| scr.posx < p->winx || scr.posx > p->winx+brl.x));
-	    break;
-	  }
-	  case CMD_FWINLTSKIP:
-	  fwinltskip: {
-	    int y = p->winy, x = p->winx;
-	    int i,l, cnt=0;
-	    do {
-	      char buffer[scr.cols];
-	      if(p->winx == 0) {
-		if (p->winy > 0) {
-		  p->winx = scr.cols - brl.x;
-		  p->winy--;
-		  if(++cnt<=3)
-		    play (snd_wrap_up);
-		}else{
-		  p->winy = y;
-		  p->winx = x;
-		  play (snd_bounce);
-		  break;
-		}
-	      }else
-		p->winx = MAX (p->winx - fwinshift, 0);
-	      l = MIN(brl.x, scr.cols -p->winx);
-	      getscr ((winpos)
-	      {
-		p->winx, p->winy, l, 1
-		  }
-		      ,buffer, SCR_TEXT);
-	      for(i=0; i<l; i++)
-		if(buffer[i] != ' ' && buffer[i] != 0)
-		  break;
-	    } while(i == l
-		    && (p->winy != scr.posy
-			|| scr.posx < p->winx || scr.posx > p->winx+brl.x));
 	    break;
 	  }
 	  case CMD_NXSEARCH:
@@ -618,8 +587,8 @@ main (int argc, char *argv[])
 	      l += dir;
 	    }
 	    if(!found) {
-	      play (snd_bounce);
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
+	      playTune (&tune_bounce);
 	    }
 	    break;
 	  }
@@ -643,22 +612,22 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_CHRLT:
 	    if (p->winx == 0)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    p->winx = MAX (p->winx - 1, 0);
 	    break;
 	  case CMD_CHRRT:
 	    if (p->winx >= scr.cols - offr)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    else p->winx++;
 	    break;
 	  case CMD_HWINLT:
 	    if (p->winx == 0)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    p->winx = MAX (p->winx - hwinshift, 0);
 	    break;
 	  case CMD_HWINRT:
 	    if (p->winx >= scr.cols - offr)
-	      play (snd_bounce);
+	      playTune (&tune_bounce);
 	    p->winx = MIN (p->winx + hwinshift, scr.cols - offr);
 	    break;
 	  case CMD_CSRJMP:
@@ -697,7 +666,7 @@ main (int argc, char *argv[])
 	  case CMD_CSRHIDE_QK:
 	    /* This is for briefly hiding the cursor */
 	    TOGGLE(p->csrhide);
-	    /* no sound */
+	    /* no tune */
 	    break;
 	  case CMD_ATTRVIS:
 	    TOGGLEPLAY ( TOGGLE(env.attrvis) );
@@ -721,10 +690,10 @@ main (int argc, char *argv[])
 		if(speech->isSpeaking())
 		  speaking_prev_inx = -1;
 		else setwinxy (scr.posx, scr.posy);
-		play (snd_link);
+		playTune (&tune_link);
 	      }
 	    else
-	      play (snd_unlink);
+	      playTune (&tune_unlink);
 	    break;
 	  case CMD_CUT_BEG:
 	    cut_begin (p->winx, p->winy);
@@ -737,26 +706,20 @@ main (int argc, char *argv[])
 	      cut_paste ();
 	    break;
 	  case CMD_SND:
-	    soundstat ( TOGGLE(env.sound) );	/* toggle sound on/off */
-	    play (snd_toggleon);  /* toggleoff wouldn't be played anyway :-) */
+	    TOGGLEPLAY ( TOGGLE(env.sound) );	/* toggle sound on/off */
 	    break;
 	  case CMD_DISPMD:
 	    usetable ((TOGGLE(p->dispmode)) ? TBL_ATTRIB : TBL_TEXT);
 	    break;
 	  case CMD_FREEZE:
-	    { int v;
-	      v = (dispmd & FROZ_SCRN) ? 1 : 0;
+	    { unsigned char v = (dispmd & FROZ_SCRN) ? 1 : 0;
 	      TOGGLE(v);
 	      if(v){
 		dispmd = selectdisp (dispmd | FROZ_SCRN);
-		if(env.sound)
-		  play (snd_freeze);
-		else message("Freezing", 0);
+		playTune (&tune_freeze);
 	      }else{
 		dispmd = selectdisp (dispmd & ~FROZ_SCRN);
-		if(env.sound)
-		  play (snd_unfreeze);
-		else message("Unfreezing", 0);
+		playTune (&tune_unfreeze);
 	      }
 	    }
 	    break;
@@ -817,30 +780,23 @@ main (int argc, char *argv[])
 	  case CMD_SKPIDLNS:
 	    TOGGLEPLAY ( TOGGLE(env.skpidlns) );
 	    break;
-	  case CMD_SKPBLNKEOL:
-	    TOGGLEPLAY ( TOGGLE(env.skpblnkeol) );
-	    break;
 	  case CMD_SKPBLNKWINS:
 	    TOGGLEPLAY ( TOGGLE(env.skpblnkwins) );
 	    break;
 	  case CMD_SAVECONF:
 	    saveconfig ();
-	    if(env.sound)
-	      play (snd_done);
-	    else message("Saved", 0);
+	    playTune (&tune_done);
 	    break;
 	  case CMD_CONFMENU:
 	    configmenu ();
-	    soundstat (env.sound);
+	    setTuneDevice (env.tunedev);
 	    break;
 	  case CMD_RESET:
 	    loadconfig ();
 	    csron = 1;
 	    capon = 0;
 	    csrcntr = capcntr = 1;
-	    if(env.sound)
-	      play (snd_done);
-	    else message("Reset", 0);
+	    playTune (&tune_done);
 	    break;
 	  case CMD_SAY:
 	  case CMD_SAYALL:
@@ -873,8 +829,16 @@ main (int argc, char *argv[])
 			SCR_ATTRIB);
 		speech->sayWithAttribs(buffer, i);
 	      }else speech->say(buffer, i);
-	      speaking_scrno = scr.no;
-	      speaking_start_line = p->winy;
+	      if ((keypress & ~VAL_SWITCHMASK) == CMD_SAYALL) {
+		speaking_scrno = scr.no;
+		speaking_start_line = p->winy;
+	      } else {
+		/* 
+		 * We don't want speech tracking to move the braille window 
+		 * for a single line reading.
+		 */ 
+		speaking_scrno = -1;
+	      }
 	    }
 	    break;
 	  case CMD_MUTE:
@@ -945,8 +909,8 @@ main (int argc, char *argv[])
 		    l += dir;
 		  }
 		  if(!found) {
-		    play (snd_bounce);
-		    play (snd_bounce);
+		    playTune (&tune_bounce);
+		    playTune (&tune_bounce);
 		  }
 		}
 		break;
@@ -1278,7 +1242,7 @@ main (int argc, char *argv[])
   delay (1000);
   speech->close();
   braille->close(&brl);
-  play(snd_brloff);
+  playTune(&tune_braille_off);
   /* don't forget that scrparam[0] is staticaly allocated */
   for (i = 1; i <= NBR_SCR; i++) 
     free (scrparam[i]);

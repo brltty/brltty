@@ -1,6 +1,14 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   Replaced CMD_SKPBLNKEOL with configurable skip blank windows mode. (dm)
+   Rename -p option to -S. (dm)
+   Added -n (--nodaemon) option to make debugging easier and to permit invocation from inittab. (dm)
+   Added -f (--file=) option to specify default parameters file (brltty.conf). (dm)
+   Added support for tunes via AdLib/OPL3/SB-FM. (dm)
+   Added support for tunes via sound card. (dm)
+   Configuration menu made more user-friendly. (dm)
+   Disable speech tracking when CMD_SAY is used. (np)
    Fix problems with the skipping of blank windows and end-of-liens. (sd)
    Make message delay by default; add option for no delay. (sd)
    Display message when sound is off for critical operations like freeze/unfreeze. (sd)

@@ -10,8 +10,8 @@ Common options can be turned on via combinations of dots 1 through 6 together wi
 Some special commands, due to the need for logical key combination sequences, and aggravated because the Braille Note itself intercepts certain key combinations for its own purposes, violate these conventions.
 
 Common Navigations:
-To move up or down one line, use Previous or Next.
-To move left or right one window, use Back or Advance.
+To move left or right one window (wrapping to previous or next line), use Previous or Next.
+To move up or down one line, use Back or Advance.
 To move to the left or right end of the line, use Previous+Back or Next+Advance.
 To move to the top-left or bottom-left corner of the screen, use Previous+Advance or Previous+Next.
 To toggle cursor tracking on and off, use Back+Advance.
@@ -28,7 +28,7 @@ Navigation Mode:
 To move to the cursor, use space.
 To move left or right one column, use [1] or [4].
 To move left or right half a window, use [12] or [45].
-To move left or right one window, use [2] or [5].
+To move left or right one window (wrapping to previous or next line), use [2] or [5].
 To move left or right to the next non-blank window, use [23] or [56].
 To move to the left or right end of the line, use [3] or [6].
 To move up or down one line, use [13] or [46].

@@ -29,6 +29,11 @@
 #include <errno.h>
 
 #include "misc.h"
+#include "config.h"
+#include "brl.h"
+#include "common.h"
+
+struct brltty_env env;		/* environment (i.e. global) parameters */
 
 /*
  * Output braille translation tables.

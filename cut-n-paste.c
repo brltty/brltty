@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "scr.h"
 #include "inskey.h"
-#include "beeps.h"
+#include "tunes.h"
 
 
 /* prototypes */
@@ -44,7 +44,7 @@ void cut_begin (int x, int y)
     }
   cut_begx = x;
   cut_begy = y;
-  play (snd_cut_beg);
+  playTune (&tune_cut_begin);
 }
 
 void cut_end (int x, int y)
@@ -112,7 +112,7 @@ static void cut (void)
 	  strcpy (cut_buffer, dstbuf);
 	  free (srcbuf);
 	  free (dstbuf);
-	  play (snd_cut_end);
+	  playTune (&tune_cut_end);
 	}
       else
 	{

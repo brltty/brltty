@@ -2,10 +2,10 @@ Braille Note Keys
 
 Thumb Keys:
 Keys      Description
-prv       Move up one line.
-nxt       Move down one line.
-bak       Move left one window.
-adv       Move right one window.
+prv       Move left one window (wrap to end of previous line).
+nxt       Move right one window (wrap to start of next line).
+bak       Move up one line.
+adv       Move down one line.
 prv+bak   Move to left end of line.
 nxt+adv   Move to right end of line.
 prv+adv   Move to top-left corner of screen.

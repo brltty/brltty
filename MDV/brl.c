@@ -688,7 +688,7 @@ readbrl (int type)
 	  case 4: cmd = CMD_HOME; break;
 	  case 5: cmd = CMD_CSRTRK; break;
 	  case 6: cmd = CMD_SKPIDLNS; break;
-	  case 7: cmd = CMD_SKPBLNKEOL; break;
+	  case 7: cmd = CMD_SKPBLNKWINS; break;
 	  case 8: cmd = CMD_CHRRT; break;
 	  case 10: cmd = CMD_CONFMENU; break;
 	};
