@@ -22,8 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void at2Reset (void);
-extern int at2Process (int *command, unsigned char byte);
+extern void AT2_resetState (void);
+extern int AT2_interpretCode (int *command, unsigned char byte);
 
 #ifdef __cplusplus
 }

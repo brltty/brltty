@@ -25,20 +25,20 @@
 #include "brldefs.h"
 
 typedef enum {
-  AT2_RELEASE,
+  AT2_RELEASE = 0, /* must be first */
+  AT2_LEFT_WINDOWS,
+  AT2_RIGHT_WINDOWS,
+  AT2_MENU,
+  AT2_CAPS_LOCK,
   AT2_SCROLL_LOCK,
   AT2_NUMBER_LOCK,
   AT2_NUMBER_SHIFT,
-  AT2_CAPS_LOCK,
   AT2_LEFT_SHIFT,
   AT2_RIGHT_SHIFT,
   AT2_LEFT_CONTROL,
   AT2_RIGHT_CONTROL,
   AT2_LEFT_ALT,
-  AT2_RIGHT_ALT,
-  AT2_LEFT_WINDOWS,
-  AT2_RIGHT_WINDOWS,
-  AT2_MENU
+  AT2_RIGHT_ALT
 } At2Modifier;
 
 typedef struct {
@@ -62,6 +62,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X78] = {VAL_PASSKEY+VPK_FUNCTION+10},
   [0X07] = {VAL_PASSKEY+VPK_FUNCTION+11},
   [0X7E] = {AT2_SCROLL_LOCK},
+
   [0X0E] = {VAL_PASSCHAR+'`', VAL_PASSCHAR+'~'},
   [0X16] = {VAL_PASSCHAR+'1', VAL_PASSCHAR+'!'},
   [0X1E] = {VAL_PASSCHAR+'2', VAL_PASSCHAR+'@'},
@@ -76,6 +77,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X4E] = {VAL_PASSCHAR+'-', VAL_PASSCHAR+'_'},
   [0X55] = {VAL_PASSCHAR+'=', VAL_PASSCHAR+'+'},
   [0X66] = {VAL_PASSKEY+VPK_BACKSPACE},
+
   [0X0D] = {VAL_PASSKEY+VPK_TAB},
   [0X15] = {VAL_PASSCHAR+'q', VAL_PASSCHAR+'Q'},
   [0X1D] = {VAL_PASSCHAR+'w', VAL_PASSCHAR+'W'},
@@ -90,6 +92,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X54] = {VAL_PASSCHAR+'[', VAL_PASSCHAR+'{'},
   [0X5B] = {VAL_PASSCHAR+']', VAL_PASSCHAR+'}'},
   [0X5D] = {VAL_PASSCHAR+'\\', VAL_PASSCHAR+'|'},
+
   [0X58] = {AT2_CAPS_LOCK},
   [0X1C] = {VAL_PASSCHAR+'a', VAL_PASSCHAR+'A'},
   [0X1B] = {VAL_PASSCHAR+'s', VAL_PASSCHAR+'S'},
@@ -103,6 +106,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X4C] = {VAL_PASSCHAR+';', VAL_PASSCHAR+':'},
   [0X52] = {VAL_PASSCHAR+'\'', VAL_PASSCHAR+'"'},
   [0X5A] = {VAL_PASSKEY+VPK_RETURN},
+
   [0X12] = {AT2_LEFT_SHIFT},
   [0X1A] = {VAL_PASSCHAR+'z', VAL_PASSCHAR+'Z'},
   [0X22] = {VAL_PASSCHAR+'x', VAL_PASSCHAR+'X'},
@@ -115,22 +119,28 @@ static const At2KeyTable at2KeysOriginal = {
   [0X49] = {VAL_PASSCHAR+'.', VAL_PASSCHAR+'>'},
   [0X4A] = {VAL_PASSCHAR+'/', VAL_PASSCHAR+'?'},
   [0X59] = {AT2_RIGHT_SHIFT},
+
   [0X14] = {AT2_LEFT_CONTROL},
   [0X11] = {AT2_LEFT_ALT},
   [0X29] = {VAL_PASSCHAR+' '},
+
   [0X77] = {AT2_NUMBER_LOCK},
   [0X7C] = {VAL_PASSCHAR+'*'},
   [0X7B] = {VAL_PASSCHAR+'-'},
   [0X79] = {VAL_PASSCHAR+'+'},
+
   [0X6C] = {VAL_PASSKEY+VPK_HOME, VAL_PASSCHAR+'7'},
   [0X75] = {VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSCHAR+'8'},
   [0X7D] = {VAL_PASSKEY+VPK_PAGE_UP, VAL_PASSCHAR+'9'},
+
   [0X6B] = {VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSCHAR+'4'},
   [0X73] = {VAL_PASSCHAR+'5'},
   [0X74] = {VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSCHAR+'6'},
+
   [0X69] = {VAL_PASSKEY+VPK_END, VAL_PASSCHAR+'1'},
   [0X72] = {VAL_PASSKEY+VPK_CURSOR_DOWN, VAL_PASSCHAR+'2'},
   [0X7A] = {VAL_PASSKEY+VPK_PAGE_DOWN, VAL_PASSCHAR+'3'},
+
   [0X70] = {VAL_PASSKEY+VPK_INSERT, VAL_PASSCHAR+'0'},
   [0X71] = {VAL_PASSKEY+VPK_DELETE, VAL_PASSCHAR+'.'}
 };
@@ -165,13 +175,13 @@ static int at2Modifiers;
 #define AT2_TST(modifier) (at2Modifiers & AT2_BIT((modifier)))
 
 void
-at2Reset (void) {
+AT2_resetState (void) {
   at2Keys = at2KeysOriginal;
   at2Modifiers = 0;
 }
 
 int
-at2Process (int *command, unsigned char byte) {
+AT2_interpretCode (int *command, unsigned char byte) {
   if (byte == 0XF0) {
     AT2_SET(AT2_RELEASE);
   } else if (byte == 0XE0) {
@@ -213,34 +223,34 @@ at2Process (int *command, unsigned char byte) {
           *command = cmd;
           return 1;
         }
-      }
+      } else {
+        switch (cmd) {
+          case AT2_SCROLL_LOCK:
+          case AT2_NUMBER_LOCK:
+          case AT2_CAPS_LOCK:
+            if (!release) {
+              if (AT2_TST(cmd)) {
+                AT2_CLR(cmd);
+              } else {
+                AT2_SET(cmd);
+              }
+            }
+            break;
 
-      switch (cmd) {
-        case AT2_SCROLL_LOCK:
-        case AT2_NUMBER_LOCK:
-        case AT2_CAPS_LOCK:
-          if (!release) {
-            if (AT2_TST(cmd)) {
+          case AT2_NUMBER_SHIFT:
+          case AT2_LEFT_SHIFT:
+          case AT2_RIGHT_SHIFT:
+          case AT2_LEFT_CONTROL:
+          case AT2_RIGHT_CONTROL:
+          case AT2_LEFT_ALT:
+          case AT2_RIGHT_ALT:
+            if (release) {
               AT2_CLR(cmd);
             } else {
               AT2_SET(cmd);
             }
-          }
-          break;
-
-        case AT2_NUMBER_SHIFT:
-        case AT2_LEFT_SHIFT:
-        case AT2_RIGHT_SHIFT:
-        case AT2_LEFT_CONTROL:
-        case AT2_RIGHT_CONTROL:
-        case AT2_LEFT_ALT:
-        case AT2_RIGHT_ALT:
-          if (release) {
-            AT2_CLR(cmd);
-          } else {
-            AT2_SET(cmd);
-          }
-          break;
+            break;
+        }
       }
     }
   }

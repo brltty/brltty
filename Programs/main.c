@@ -1700,7 +1700,7 @@ main (int argc, char *argv[]) {
                 break;
 
               case VAL_PASSAT2:
-                if (at2Process(&command, arg)) goto doCommand;
+                if (AT2_interpretCode(&command, arg)) goto doCommand;
                 break;
 
               case CR_ROUTE:

@@ -589,7 +589,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  at2Reset();
+  AT2_resetState();
   at2Buffer = NULL;
   at2Size = 0;
   at2Count = 0;

@@ -201,8 +201,8 @@ typedef enum {
   VPK_FUNCTION
 } Key;
 
-#define VAL_PASSCHAR 0X2100 /* input a character by value */
-#define VAL_PASSDOTS 0X2200 /* input a character as braille dots */
+#define VAL_PASSCHAR 0X2100 /* input character by value */
+#define VAL_PASSDOTS 0X2200 /* input character as braille dots */
 
 /* For modifying a character to be typed. */
 #define VPC_CONTROL 0X010000
@@ -210,7 +210,7 @@ typedef enum {
 #define VPC_UPPER   0X040000
 #define VPC_SHIFT   0X080000
 
-#define VAL_PASSAT2 0X2300 /* input an AT set 2 keyboard scan code */
+#define VAL_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
 
 /* status cell styles */
 typedef enum {
