@@ -219,7 +219,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for linkage editor shared object flags], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*)
+   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*|cygwin*)
       brltty_ld_flag_shared="-shared"
       brltty_ld_flag_soname="-soname"
       ;;
@@ -483,6 +483,9 @@ in
       system_object="qnx"
       AC_CHECK_LIB([asound], [snd_pcm_open])
       ;;
+   cygwin*)
+      system_object="cygwin"
+      ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
@@ -608,7 +611,7 @@ BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
-   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*)
+   linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*|cygwin*)
       brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
       ;;
    solaris*)
@@ -633,7 +636,7 @@ then
 else
    case "${host_os}"
    in
-      linux*|openbsd*|freebsd*|*qnx*|gnu*)
+      linux*|openbsd*|freebsd*|*qnx*|gnu*|cygwin*)
          brltty_cv_prog_ld_static="-static"
          ;;
       netbsd*)
@@ -667,7 +670,7 @@ LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 
 case "${host_os}"
 in
-   linux*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*|gnu*)
+   linux*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*|gnu*|cygwin*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -805,6 +808,9 @@ in
       ;;
    *qnx*)
       brltty_cv_device_serial_first="/dev/ser1"
+      ;;
+   cygwin*)
+      brltty_cv_device_serial_first="/dev/com1"
       ;;
    *)
       brltty_cv_device_serial_first=""
