@@ -1,0 +1,11 @@
+This directory contains the BRLTTY driver for the Focus and PacMate braille
+displays from Freedom Scientific [http://www.freedomscientific.com]. It has
+been implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
+
+The serial and USB ports are both supported. The following models are 
+recognized:
+*  Focus: 44, 70, 84
+*  PacMate: 20, 40
+
+If an unrecognized model is connected then the driver makes an attempt to
+determine its size and to provide generic capabilities.

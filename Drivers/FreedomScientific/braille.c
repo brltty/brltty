@@ -84,7 +84,7 @@ closeSerialPort (void) {
 
 static int
 readSerialBytes (void *buffer, int length) {
-  return 0;
+  return read(serialDevice, buffer, length);
 }
 
 static int
