@@ -503,12 +503,10 @@ int
 hasTimedOut (int milliseconds) {
   static struct timeval start = {0, 0};
 
-  if (milliseconds) {
-    return millisecondsSince(&start) >= milliseconds;
-  }
+  if (milliseconds) return millisecondsSince(&start) >= milliseconds;
 
   gettimeofday(&start, NULL);
-  return 0;
+  return 1;
 }
 
 int
