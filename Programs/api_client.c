@@ -233,8 +233,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   hints.ai_socktype = SOCK_STREAM;
 
   gai_error = getaddrinfo(hostname, port, &hints, &res);
-  if (hostname)
-    free(hostname);
+  free(hostname);
   free(port);
   if (gai_error) {
     brlapi_errno=BRLERR_GAIERR;
