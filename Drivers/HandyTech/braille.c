@@ -1447,7 +1447,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
                           if (--length) {
                             int newCount = at2Count + length;
                             if (newCount > at2Size) {
-                              at2Buffer = reallocWrapper(at2Buffer, newCount);
+                              int newSize = (newCount | 0XF) + 1;
+                              at2Buffer = reallocWrapper(at2Buffer, newSize);
+                              at2Size = newSize;
                             }
                             memcpy(at2Buffer+at2Count, bytes, length);
                             at2Count = newCount;
