@@ -448,8 +448,12 @@ in
       brltty_midi_interfaces="oss"
       test -d /proc/asound && {
          AC_CHECK_HEADER([alsa/asoundlib.h], [dnl
-            brltty_pcm_interfaces="alsa ${brltty_pcm_interfaces}"
-            brltty_midi_interfaces="alsa ${brltty_midi_interfaces}"
+            AC_SEARCH_LIBS([snd_pcm_open], [asound], [dnl
+               brltty_pcm_interfaces="alsa ${brltty_pcm_interfaces}"
+])
+            AC_SEARCH_LIBS([snd_seq_open], [asound], [dnl
+               brltty_midi_interfaces="alsa ${brltty_midi_interfaces}"
+])
 ])
       }
       ;;
@@ -539,12 +543,6 @@ BRLTTY_ARG_DISABLE(
 [dnl
    AC_DEFINE([ENABLE_PCM_SUPPORT])
    pcm_tune_objects='pcm.$O'
-   case "${enableval}"
-   in
-      alsa)
-         AC_SEARCH_LIBS([snd_pcm_open], [asound], [], [AC_MSG_ERROR([ALSA PCM library not found])])
-         ;;
-   esac
 ])
 AC_SUBST([pcm_tune_objects])
 
@@ -555,12 +553,6 @@ BRLTTY_ARG_DISABLE(
 [dnl
    AC_DEFINE([ENABLE_MIDI_SUPPORT])
    midi_tune_objects='midi.$O'
-   case "${enableval}"
-   in
-      alsa)
-         AC_SEARCH_LIBS([snd_seq_open], [asound], [], [AC_MSG_ERROR([ALSA MIDI library not found])])
-         ;;
-   esac
 ])
 AC_SUBST([midi_tune_objects])
 

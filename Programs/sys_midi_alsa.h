@@ -125,8 +125,8 @@ openMidiDevice (int errorLevel, const char *device) {
       snd_seq_set_client_name(midi->handle, PACKAGE_TITLE);
 
       if ((midi->port = snd_seq_create_simple_port(midi->handle, "out0",
-						   SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
-						   SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
+                                                   SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
+                                                   SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
         if ((midi->queue = snd_seq_alloc_queue(midi->handle)) >= 0) {
           int client;
           int port;
@@ -139,7 +139,7 @@ openMidiDevice (int errorLevel, const char *device) {
           }
 
           if (deviceOk) {
-	    LogPrint(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
+            LogPrint(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
 
             if ((result = snd_seq_connect_to(midi->handle, midi->port, client, port)) >= 0) {
               if ((result = snd_seq_start_queue(midi->handle, midi->queue, NULL)) >= 0) {
@@ -148,20 +148,20 @@ openMidiDevice (int errorLevel, const char *device) {
                 return midi;
               } else {
                 LogPrint(errorLevel, "Cannot start ALSA MIDI queue: %d:%d: %s",
-		         client, port, snd_strerror(result));
+                         client, port, snd_strerror(result));
               }
             } else {
               LogPrint(errorLevel, "Cannot connect to ALSA MIDI device: %d:%d: %s",
-	               client, port, snd_strerror(result));
+                       client, port, snd_strerror(result));
             }
           }
         } else {
           LogPrint(errorLevel, "Cannot allocate ALSA MIDI queue: %s",
-	           snd_strerror(result));
+                   snd_strerror(result));
         }
       } else {
         LogPrint(errorLevel, "Cannot create ALSA MIDI output port: %s",
-	         snd_strerror(midi->port));
+                 snd_strerror(midi->port));
       }
 
       snd_seq_close(midi->handle);
