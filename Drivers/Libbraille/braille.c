@@ -17,7 +17,7 @@
 
 /* Libbraille/braille.c - Braille display driver using libbraille
  *
- * Written by Sebastien Sablé <sable@users.sourceforge.net>
+ * Written by Sébastien Sablé <sable@users.sourceforge.net>
  *
  */
 
@@ -45,7 +45,7 @@ static void
 brl_identify(void)
 {
   LogPrint(LOG_NOTICE, "BRLTTY wrapper for Libbraille");
-  LogPrint(LOG_INFO, "   Copyright (C) 2004 by Sebastien Sablé <sable@users.sourceforge.net>");
+  LogPrint(LOG_INFO, "   Copyright (C) 2004 by Sébastien Sablé <sable@users.sourceforge.net>");
 }
 
 static int
