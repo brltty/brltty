@@ -28,6 +28,8 @@ extern "C" {
 
 #include <inttypes.h>
 
+#include "iodefs.h"
+
 /* Descriptor types. */
 #define USB_DESCRIPTOR_TYPE_DEVICE        0x01
 #define USB_DESCRIPTOR_TYPE_CONFIGURATION 0x02
@@ -392,29 +394,10 @@ typedef struct {
 typedef int (*UsbInputFilter) (UsbInputFilterData *data);
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
 
-/* Serial adapter parity settings. */
-typedef enum {
-  USB_SERIAL_PARITY_SPACE,
-  USB_SERIAL_PARITY_ODD,
-  USB_SERIAL_PARITY_EVEN,
-  USB_SERIAL_PARITY_MARK,
-  USB_SERIAL_PARITY_NONE
-} UsbSerialParity;
-
-/* Serial adapter flow control options. */
-#define USB_SERIAL_FLOW_OUTPUT_XON 0X01 /* output controlled by XON/XOFF */
-#define USB_SERIAL_FLOW_OUTPUT_CTS 0X02 /* output controlled by CTS(input) */
-#define USB_SERIAL_FLOW_OUTPUT_DSR 0X04 /* output controlled by DSR(input) */
-#define USB_SERIAL_FLOW_OUTPUT_RTS 0X08 /* output indicated by RTS(output) */
-#define USB_SERIAL_FLOW_INPUT_XON  0X10 /* input controlled by XON/XOFF */
-#define USB_SERIAL_FLOW_INPUT_RTS  0X20 /* input controlled by RTS(output) */
-#define USB_SERIAL_FLOW_INPUT_DTR  0X40 /* input controlled by DTR(output) */
-#define USB_SERIAL_FLOW_INPUT_DSR  0X80 /* input enabled by DSR(input) */
-
 typedef struct {
   int (*setBaud) (UsbDevice *device, int rate);
   int (*setFlowControl) (UsbDevice *device, int flow);
-  int (*setDataFormat) (UsbDevice *device, int dataBits, int stopBits, UsbSerialParity parity);
+  int (*setDataFormat) (UsbDevice *device, int dataBits, int stopBits, SerialParity parity);
   int (*setDtrState) (UsbDevice *device, int state);
   int (*setRtsState) (UsbDevice *device, int state);
 } UsbSerialOperations;
@@ -433,7 +416,7 @@ typedef struct {
   int flowControl;
   int dataBits;
   int stopBits;
-  UsbSerialParity parity;
+  SerialParity parity;
 } UsbChannelDefinition;
 typedef struct {
   UsbChannelDefinition definition;

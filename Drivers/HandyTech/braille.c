@@ -243,8 +243,8 @@ static UsbChannel *usb = NULL;
 static int
 openUsbPort (char **parameters, const char *device) {
   const UsbChannelDefinition definitions[] = {
-    {0X0921, 0X1200, 1, 0, 0, 1, 1, baud, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* GoHubs chip */
-    {0X0403, 0X6001, 1, 0, 0, 1, 2, baud, 0, 8, 1, USB_SERIAL_PARITY_ODD}, /* FTDI chip */
+    {0X0921, 0X1200, 1, 0, 0, 1, 1, baud, 0, 8, 1, SERIAL_PARITY_ODD}, /* GoHubs chip */
+    {0X0403, 0X6001, 1, 0, 0, 1, 2, baud, 0, 8, 1, SERIAL_PARITY_ODD}, /* FTDI chip */
     {0}
   };
 

@@ -279,9 +279,9 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 }
 
 int
-serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
+serialSetFlowControl (SerialDevice *serial, int flow) {
 #ifdef CRTSCTS
-  if (flow & SERIAL_FLOW_HARDWARE) {
+  if ((flow & SERIAL_FLOW_HARDWARE) == SERIAL_FLOW_HARDWARE) {
     serial->pendingAttributes.c_cflag |= CRTSCTS;
     flow &= ~SERIAL_FLOW_HARDWARE;
   } else {
@@ -292,25 +292,25 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 #endif /* CRTSCTS */
 
 #ifdef IXOFF
-  if (flow & SERIAL_FLOW_SOFTWARE_INPUT) {
+  if (flow & SERIAL_FLOW_INPUT_XON) {
     serial->pendingAttributes.c_iflag |= IXOFF;
-    flow &= ~SERIAL_FLOW_SOFTWARE_INPUT;
+    flow &= ~SERIAL_FLOW_INPUT_XON;
   } else {
     serial->pendingAttributes.c_iflag &= ~IXOFF;
   }
 #else /* IXOFF */
-#warning software input flow control not settable on this platform
+#warning X-ON/X-OFF input flow control not settable on this platform
 #endif /* IXOFF */
 
 #ifdef IXON
-  if (flow & SERIAL_FLOW_SOFTWARE_OUTPUT) {
+  if (flow & SERIAL_FLOW_OUTPUT_XON) {
     serial->pendingAttributes.c_iflag |= IXON;
-    flow &= ~SERIAL_FLOW_SOFTWARE_OUTPUT;
+    flow &= ~SERIAL_FLOW_OUTPUT_XON;
   } else {
     serial->pendingAttributes.c_iflag &= ~IXON;
   }
 #else /* IXON */
-#warning software output flow control not settable on this platform
+#warning X-ON/X-OFF output flow control not settable on this platform
 #endif /* IXON */
 
   if (flow) {

@@ -364,7 +364,7 @@ static const int usbBauds[] = {57600, 0};
 static int
 openUsbPort (char **parameters, const char *device) {
   const UsbChannelDefinition definitions[] = {
-    {0X0403, 0Xf208, 1, 0, 0, 1, 2, *baud, 0, 8, 1, USB_SERIAL_PARITY_NONE},
+    {0X0403, 0Xf208, 1, 0, 0, 1, 2, *baud, 0, 8, 1, SERIAL_PARITY_NONE},
     {0}
   };
 

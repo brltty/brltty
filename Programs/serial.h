@@ -22,7 +22,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdio.h>
+#include <unistd.h>
+
+#include "iodefs.h"
 
 typedef struct SerialDeviceStruct SerialDevice;
 
@@ -53,21 +55,8 @@ extern int serialWriteData (
 extern int serialSetBaud (SerialDevice *serial, int baud);
 extern int serialSetDataBits (SerialDevice *serial, int bits);
 extern int serialSetStopBits (SerialDevice *serial, int bits);
-
-typedef enum {
-  SERIAL_PARITY_NONE,
-  SERIAL_PARITY_ODD,
-  SERIAL_PARITY_EVEN
-} SerialParity;
 extern int serialSetParity (SerialDevice *serial, SerialParity parity);
-
-typedef enum {
-  SERIAL_FLOW_HARDWARE          = 0X1,
-  SERIAL_FLOW_SOFTWARE_INPUT    = 0X2,
-  SERIAL_FLOW_SOFTWARE_OUTPUT   = 0X4,
-  SERIAL_FLOW_NONE              = 0X0
-} SerialFlowControl;
-extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
+extern int serialSetFlowControl (SerialDevice *serial, int flow);
 
 extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);
