@@ -114,12 +114,12 @@ static const BarCmds bar1cmds =
 /* Left whiz wheel commands. */
 static const int lwwcmds[] =
 /* None         Up           Down         Press        */
-  {0          , CMD_FWINLT , CMD_FWINRT , CMD_CSRVIS };
+  {0          , CMD_LNUP   , CMD_LNDN   , CMD_ATTRVIS};
 
 /* Right whiz wheel commands. */
 static const int rwwcmds[] =
 /* None         Up           Down         Press        */
-  {0          , CMD_LNUP   , CMD_LNDN   , CMD_ATTRVIS};
+  {0          , CMD_FWINLT , CMD_FWINRT , CMD_CSRVIS };
 
 #endif /* BL_NEED_ARRAYS */
 
