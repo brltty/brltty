@@ -49,8 +49,7 @@ For more information on writing to a CD, please check the CD-Writing HOWTO at:
 
 Seventh: Boot from the CD you've just written, and wait a few seconds after it
 begins to spin in order to give the boot loader enough time to get started and
-to present its initial prompt. You should hear a beep when it's ready. Then
-enter:
+to present its initial prompt. Then enter:
 
    text brltty=<driver>,<device>,<table>
 e.g.
@@ -89,12 +88,14 @@ The Details
 The "rhmkiso" script can add BRLTTY to either a RedHat or a Fedora install CD. 
 It can be applied either to the basic installer CD or to the first CD of the
 full installation set, and makes the following modifications to the image:
-
 *  BRLTTY is added (all drivers, all tables).
-*  The initial boot loader prompt sounds the console beep.
 *  The timeout for the initial boot loader prompt is disabled.
-*  The default kernel configuration to be booted is changed to text.
-*  The use of frame buffers for the text consoles is disabled.
+*  The default kernel configuration to be booted is changed to "text".
+*  The use of frame buffers for the "text" consoles is disabled.
+
+For rescue images, the following additional modifications are made:
+*  Text consoles are used when "rescue" is selected.
+*  The use of frame buffers for the "rescue" consoles is disabled.
 
 Although its defaults are what usually needs to be done, the "rhmkiso" script
 offers a number of options so that you can customize what it does. It's general

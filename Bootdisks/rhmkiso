@@ -119,12 +119,13 @@ sed -n -e '
 /^\( *default  *\).*$/s//\1text/
 /^\( *timeout  *\).*$/s//\10/
 /^ *append.* text/s/$/ nofb/
+/^ *append.* rescue/s/$/ text nofb/
 p
 ' <"${originalRoot}/${loaderDirectory}/${configurationFile}" >"${modifiedRoot}/${loaderDirectory}/${configurationFile}"
 
-bootMessage="boot.msg"
-echo -n -e '\a' >"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
-cat "${originalRoot}/${loaderDirectory}/${bootMessage}" >>"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
+# bootMessage="boot.msg"
+# echo -n -e '\a' >"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
+# cat "${originalRoot}/${loaderDirectory}/${bootMessage}" >>"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
 
 initrdImage="${temporaryDirectory}/initrd.ext2"
 initrdPath="${modifiedRoot}/${loaderDirectory}/initrd.img"
