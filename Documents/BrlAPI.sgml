@@ -1183,8 +1183,8 @@ For Sets, Data simply consists of integers, one per key in the set.
 <sect2><tt/BRLPACKET_WRITE/ (see <em/brlapi_write()/)
 <p>
 To display text on the braille terminal and set the position of the cursor,
-the client can send a <tt/BRLPACKET_WRITE/ packet. This field of this packet
-is an integer holding flags (see <tt/BRLAPI_WF_*/). These flags indicate
+the client can send a <tt/BRLPACKET_WRITE/ packet. The packet begins
+with an integer holding flags (see <tt/BRLAPI_WF_*/). These flags indicate
 which data will then be available, in the following order (corresponding to
 flag weight):
 
