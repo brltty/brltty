@@ -1044,11 +1044,6 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
     }
     return EOF;
   }
-  if (command==0) {
-    res = TrueBraille->readCommand(disp,caller);
-    if (res==EOF) return EOF;
-    command = (brl_keycode_t) res;
-  }
   return command;
 }
 
