@@ -82,7 +82,7 @@ static unsigned int TickCount = 0;        /* incremented each main loop cycle */
 
 #define TOGGLEPLAY(var) playTune((var)? &tune_toggle_on: &tune_toggle_off)
 #define TOGGLE(var) \
-  (var = (keypress & VAL_SWITCHON)? 1: ((keypress & VAL_SWITCHOFF)? 0: (!var)))
+  (var = (command & VAL_SWITCHON)? 1: ((command & VAL_SWITCHOFF)? 0: (!var)))
 
 
 unsigned char *curtbl = textTable;        /* active translation table */
@@ -715,15 +715,20 @@ getOffset (int arg, int end) {
 
 int
 main (int argc, char *argv[]) {
-  int keypress;                        /* character received from braille display */
-  int i;                        /* loop counter */
+  int command = EOF;
+  int autorepeat = 0;
+
   short csron = 1;                /* display cursor on (toggled during blink) */
   short csrcntr = 1;
+
   short capon = 0;                /* display caps off (toggled during blink) */
   short capcntr = 1;
+
   short attron = 0;
   short attrcntr = 1;
+
   short oldwinx, oldwiny;
+  int i;                        /* loop counter */
 
 #ifdef INIT_PATH
   if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
@@ -821,19 +826,34 @@ main (int argc, char *argv[]) {
     /*
      * Process any Braille input 
      */
-    while ((keypress = readBrailleCommand(&brl,
-                                          infmode? CMDS_STATUS:
-                                          ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
-                                          CMDS_SCREEN)) != EOF) {
-      int oldmotx = p->winx;
-      int oldmoty = p->winy;
-      LogPrint(LOG_DEBUG, "Command: %5.5X", keypress);
-      if (!executeScreenCommand(keypress)) {
-        switch (keypress & ~VAL_SWITCHMASK) {
+    while (1) {
+      int oldmotx, oldmoty;
+
+      {
+        int next = readBrailleCommand(&brl,
+                                      infmode? CMDS_STATUS:
+                                      ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
+                                      CMDS_SCREEN);
+        if (next != EOF) {
+          autorepeat = (next & VAL_AUTOREPEAT)? 10: 0;
+          command = next & ~VAL_AUTOREPEAT;
+        } else {
+          if (!autorepeat) break;
+          if (--autorepeat) break;
+          autorepeat = 2;
+        }
+      }
+
+      LogPrint(LOG_DEBUG, "Command: %05X", command);
+      oldmotx = p->winx;
+      oldmoty = p->winy;
+
+      if (!executeScreenCommand(command)) {
+        switch (command & ~VAL_FLG_MASK) {
           case CMD_NOOP:        /* do nothing but loop */
-            if (keypress & VAL_SWITCHON)
+            if (command & VAL_SWITCHON)
               playTune(&tune_toggle_on);
-            else if (keypress & VAL_SWITCHOFF)
+            else if (command & VAL_SWITCHOFF)
               playTune(&tune_toggle_off);
             else
               continue;
@@ -1379,9 +1399,9 @@ main (int argc, char *argv[]) {
             break;
 #endif /* ENABLE_LEARN_MODE */
           default: {
-            int key = keypress & VAL_BLK_MASK;
-            int arg = keypress & VAL_ARG_MASK;
-            int flags = keypress & VAL_FLG_MASK;
+            int key = command & VAL_BLK_MASK;
+            int arg = command & VAL_ARG_MASK;
+            int flags = command & VAL_FLG_MASK;
             switch (key) {
               case VAL_PASSKEY: {
                 unsigned short key;
@@ -1547,7 +1567,7 @@ main (int argc, char *argv[]) {
               }
               default:
                 playTune(&tune_bad_command);
-                LogPrint(LOG_WARNING, "Driver sent unrecognized command: %X", keypress);
+                LogPrint(LOG_WARNING, "Unrecognized command: %05X", command);
             }
             break;
           }

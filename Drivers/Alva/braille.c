@@ -932,44 +932,23 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 
 static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
-  int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
-  static int Typematic = 0, KeyDelay = 0, KeyRepeat = 0;
-
-  if (!(ProcessKey = GetKey(brl, &CurrentKeys, &RoutingPos)))
-    {
-      if (Typematic)
-	{
-	  /* a key is being held */
-	  if (KeyDelay < TYPEMATIC_DELAY)
-	    KeyDelay++;
-	  else if (KeyRepeat < TYPEMATIC_REPEAT)
-	    KeyRepeat++;
-	  else
-	    {
-	      /* It's time to issue the command again */
-	      CurrentKeys = LastKeys;
-	      LastKeys = 0;
-	      KeyRepeat = 0;
-	      ProcessKey = 1;
-	    }
-	}
-    }
-  else
-    {
-      /* A new key is being pressed/released, we clear the typematic counters */
-      Typematic = KeyDelay = KeyRepeat = 0;
-    }
+  static int Typematic = 0;
+  int res = EOF;
+  int ProcessKey = GetKey(brl, &CurrentKeys, &RoutingPos);
 
   if (ProcessKey < 0) {
     /* Oops... seems we should restart from scratch... */
     RoutingPos = 0;
     CurrentKeys = LastKeys = ReleasedKeys = 0;
+    Typematic = 0;
     return CMD_RESTARTBRL;
   }
 
   if (ProcessKey > 0) {
+    if (Typematic) res = CMD_NOOP;
+
     if (CurrentKeys > LastKeys) {
       /* These are the keys that should be processed when pressed */
       LastKeys = CurrentKeys;	/* we keep it until it is released */
@@ -984,15 +963,13 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_BOT;
               break;
             case KEY_UP:
-              res = CMD_LNUP;
-              Typematic = 1;
+              res = CMD_LNUP | VAL_AUTOREPEAT;
               break;
             case KEY_CURSOR | KEY_UP:
               res = CMD_ATTRUP;
               break;
             case KEY_DOWN:
-              res = CMD_LNDN;
-              Typematic = 1;
+              res = CMD_LNDN | VAL_AUTOREPEAT;
               break;
             case KEY_CURSOR | KEY_DOWN:
               res = CMD_ATTRDN;
@@ -1007,8 +984,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_HWINLT;
               break;
             case KEY_PROG | KEY_LEFT:
-              res = CMD_CHRLT;
-              Typematic = 1;
+              res = CMD_CHRLT | VAL_AUTOREPEAT;
               break;
             case KEY_RIGHT:
               res = CMD_FWINRT;
@@ -1017,8 +993,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_LNEND;
               break;
             case KEY_PROG | KEY_RIGHT:
-              res = CMD_CHRRT;
-              Typematic = 1;
+              res = CMD_CHRRT | VAL_AUTOREPEAT;
               break;
             case KEY_CURSOR | KEY_RIGHT:
               res = CMD_HWINRT;
@@ -1096,12 +1071,10 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
         case 1: /* Satellite models */
           switch (CurrentKeys) {
             case KEY_UP:
-              res = CMD_LNUP;
-              Typematic = 1;
+              res = CMD_LNUP | VAL_AUTOREPEAT;
               break;
             case KEY_DOWN:
-              res = CMD_LNDN;
-              Typematic = 1;
+              res = CMD_LNDN | VAL_AUTOREPEAT;
               break;
             case KEY_HOME | KEY_UP:
               res = CMD_TOP_LEFT;
@@ -1135,12 +1108,10 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               res = CMD_HWINRT;
               break;
             case KEY_CURSOR | KEY_LEFT:
-              res = CMD_CHRLT;
-              Typematic = 1;
+              res = CMD_CHRLT | VAL_AUTOREPEAT;
               break;
             case KEY_CURSOR | KEY_RIGHT:
-              res = CMD_CHRRT;
-              Typematic = 1;
+              res = CMD_CHRRT | VAL_AUTOREPEAT;
               break;
             case KEY_HOME | KEY_CURSOR | KEY_LEFT:
               res = CMD_LNBEG;
@@ -1317,6 +1288,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       if (!CurrentKeys)
         ReleasedKeys = 0;
     }
+    Typematic = (res != EOF) && ((res & VAL_AUTOREPEAT) != 0);
   }
-  return (res);
+  return res;
 }

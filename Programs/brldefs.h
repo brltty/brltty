@@ -147,6 +147,7 @@ typedef enum {
 #define VAL_SWITCHON    0x10000
 #define VAL_SWITCHOFF   0x20000
 #define VAL_SWITCHMASK  (VAL_SWITCHON | VAL_SWITCHOFF)
+#define VAL_AUTOREPEAT  0x40000
   
 /* cursor routing keys block offset values */
 /*
