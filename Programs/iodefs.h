@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _IODEFS_H
-#define _IODEFS_H
+#ifndef BRLTTY_INCLUDED_IODEFS
+#define BRLTTY_INCLUDED_IODEFS
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,4 +52,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* _IODEFS_H */
+#endif /* BRLTTY_INCLUDED_IODEFS */

@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _NOTES_H
-#define _NOTES_H
+#ifndef BRLTTY_INCLUDED_NOTES
+#define BRLTTY_INCLUDED_NOTES
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,4 +41,4 @@ extern const unsigned int noteCount;
 }
 #endif /* __cplusplus */
 
-#endif /* _NOTES_H */
+#endif /* BRLTTY_INCLUDED_NOTES */

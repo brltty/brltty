@@ -23,8 +23,8 @@
  * \brief types, defines and functions prototypes for \e BrlAPI's library
  */
 
-#ifndef _API_H
-#define _API_H
+#ifndef BRLTTY_INCLUDED_API
+#define BRLTTY_INCLUDED_API
 
 #ifdef __cplusplus
 extern "C" {
@@ -689,4 +689,4 @@ void brlapi_defaultErrorHandler(int err, brl_type_t type, const void *buf, size_
 }
 #endif /* __cplusplus */
 
-#endif /* _API_H */
+#endif /* BRLTTY_INCLUDED_API */

@@ -20,8 +20,8 @@
 /* brldefs-vs.h : Useful definitions to handle keys entered at */
 /* VisioBraille's keyboard */ 
 
-#ifndef _BRLDEFS_VS_H
-#define _BRLDEFS_VS_H
+#ifndef BRLTTY_INCLUDED_VS_BRLDEFS
+#define BRLTTY_INCLUDED_VS_BRLDEFS
 
 #define BRL_VSMSK_CHAR        0x100
 #define BRL_VSMSK_ROUTING     0x200
@@ -98,4 +98,4 @@
 #define BRL_VSKEY_ALT 0x8BF
 #define BRL_VSKEY_ESCAPE 0x8e0
 
-#endif /* _BRLDEFS_VS_H */ 
+#endif /* BRLTTY_INCLUDED_VS_BRLDEFS */ 

@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _CMD_H
-#define _CMD_H
+#ifndef BRLTTY_INCLUDED_CMD
+#define BRLTTY_INCLUDED_CMD
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,4 +36,4 @@ extern void describeCommand (int command, char *buffer, int size);
 }
 #endif /* __cplusplus */
 
-#endif /* _CMD_H */
+#endif /* BRLTTY_INCLUDED_CMD */

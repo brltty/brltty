@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
  
-#ifndef _RANGELIST_H
-#define _RANGELIST_H
+#ifndef BRLTTY_INCLUDED_RANGELIST
+#define BRLTTY_INCLUDED_RANGELIST
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,4 +77,4 @@ int removeRange(uint32_t x0, uint32_t y0, rangeList **l);
 }
 #endif /* __cplusplus */
 
-#endif /* _RANGELIST_H */
+#endif /* BRLTTY_INCLUDED_RANGELIST */

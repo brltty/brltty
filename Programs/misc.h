@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _MISC_H
-#define _MISC_H
+#ifndef BRLTTY_INCLUDED_MISC
+#define BRLTTY_INCLUDED_MISC
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -151,4 +151,4 @@ extern int validateYesNo (unsigned int *value, const char *description, const ch
 }
 #endif /* __cplusplus */
 
-#endif /* _MISC_H */
+#endif /* BRLTTY_INCLUDED_MISC */

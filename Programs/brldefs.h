@@ -17,8 +17,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _BRLDEFS_H
-#define _BRLDEFS_H
+#ifndef BRLTTY_INCLUDED_BRLDEFS
+#define BRLTTY_INCLUDED_BRLDEFS
 
 #ifdef __cplusplus
 extern "C" {
@@ -282,4 +282,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* _BRLDEFS_H */
+#endif /* BRLTTY_INCLUDED_BRLDEFS */

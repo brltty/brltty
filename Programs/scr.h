@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_H
-#define _SCR_H
+#ifndef BRLTTY_INCLUDED_SCR
+#define BRLTTY_INCLUDED_SCR
 
 #ifdef __cplusplus
 extern "C" {
@@ -109,4 +109,4 @@ extern short getHelpPageCount (void);
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_H */
+#endif /* BRLTTY_INCLUDED_SCR */

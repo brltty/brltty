@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SPK_H
-#define _SPK_H
+#ifndef BRLTTY_INCLUDED_SPK
+#define BRLTTY_INCLUDED_SPK
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,4 +77,4 @@ extern void processSpeechFifo (void);
 }
 #endif /* __cplusplus */
 
-#endif /* _SPK_H */
+#endif /* BRLTTY_INCLUDED_SPK */

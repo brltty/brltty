@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_REAL_H
-#define _SCR_REAL_H
+#ifndef BRLTTY_INCLUDED_SCR_REAL
+#define BRLTTY_INCLUDED_SCR_REAL
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +30,4 @@ extern void initializeRealScreen (MainScreen *);
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_REAL_H */
+#endif /* BRLTTY_INCLUDED_SCR_REAL */

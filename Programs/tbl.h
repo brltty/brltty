@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _TBL_H
-#define _TBL_H
+#ifndef BRLTTY_INCLUDED_TBL
+#define BRLTTY_INCLUDED_TBL
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,4 +40,4 @@ extern void reverseTranslationTable (TranslationTable *from, TranslationTable *t
 }
 #endif /* __cplusplus */
 
-#endif /* _TBL_H */
+#endif /* BRLTTY_INCLUDED_TBL */

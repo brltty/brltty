@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SYSTEM_H
-#define _SYSTEM_H
+#ifndef BRLTTY_INCLUDED_SYSTEM
+#define BRLTTY_INCLUDED_SYSTEM
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,4 +83,4 @@ extern void writePort1 (unsigned short int port, unsigned char value);
 }
 #endif /* __cplusplus */
 
-#endif /* _SYSTEM_H */
+#endif /* BRLTTY_INCLUDED_SYSTEM */

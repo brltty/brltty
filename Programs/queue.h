@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _QUEUE_H
-#define _QUEUE_H
+#ifndef BRLTTY_INCLUDED_QUEUE
+#define BRLTTY_INCLUDED_QUEUE
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,4 +47,4 @@ extern void deleteItem (Queue *queue, void *item);
 }
 #endif /* __cplusplus */
 
-#endif /* _QUEUE_H */
+#endif /* BRLTTY_INCLUDED_QUEUE */

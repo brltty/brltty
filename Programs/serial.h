@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SERIAL_H
-#define _SERIAL_H
+#ifndef BRLTTY_INCLUDED_SERIAL
+#define BRLTTY_INCLUDED_SERIAL
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,4 +71,4 @@ extern int serialTestLineDSR (SerialDevice *serial);
 }
 #endif /* __cplusplus */
 
-#endif /* _SERIAL_H */
+#endif /* BRLTTY_INCLUDED_SERIAL */

@@ -19,8 +19,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _API_COMMON_H
-#define _API_COMMON_H
+#ifndef BRLTTY_INCLUDED_API_COMMON
+#define BRLTTY_INCLUDED_API_COMMON
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,4 +54,4 @@ int brlapi_splitHost(const char *host, char **hostname, char **port);
 }
 #endif /* __cplusplus */
 
-#endif /* _API_COMMON_H */
+#endif /* BRLTTY_INCLUDED_API_COMMON */

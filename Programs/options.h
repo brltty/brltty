@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _OPTIONS_H
-#define _OPTIONS_H
+#ifndef BRLTTY_INCLUDED_OPTIONS
+#define BRLTTY_INCLUDED_OPTIONS
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,4 +83,4 @@ extern unsigned int wordArgument (
 }
 #endif /* __cplusplus */
 
-#endif /* _OPTIONS_H */
+#endif /* BRLTTY_INCLUDED_OPTIONS */

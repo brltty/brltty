@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _TUNES_H
-#define _TUNES_H
+#ifndef BRLTTY_INCLUDED_TUNES
+#define BRLTTY_INCLUDED_TUNES
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,4 +81,4 @@ extern const unsigned int midiInstrumentCount;
 }
 #endif /* __cplusplus */
 
-#endif /* _TUNES_H */
+#endif /* BRLTTY_INCLUDED_TUNES */

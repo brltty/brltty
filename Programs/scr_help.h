@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_HELP_H
-#define _SCR_HELP_H
+#ifndef BRLTTY_INCLUDED_SCR_HELP
+#define BRLTTY_INCLUDED_SCR_HELP
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,4 +40,4 @@ extern void initializeHelpScreen (HelpScreen *);
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_HELP_H */
+#endif /* BRLTTY_INCLUDED_SCR_HELP */

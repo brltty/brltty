@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _CTB_DEFINITIONS_H
-#define _CTB_DEFINITIONS_H
+#ifndef BRLTTY_INCLUDED_CTB_DEFINITIONS
+#define BRLTTY_INCLUDED_CTB_DEFINITIONS
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,4 +120,4 @@ typedef struct { /*translation table*/
 }
 #endif /* __cplusplus */
 
-#endif /* _CTB_DEFINITIONS_H */
+#endif /* BRLTTY_INCLUDED_CTB_DEFINITIONS */

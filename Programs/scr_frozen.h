@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_FROZEN_H
-#define _SCR_FROZEN_H
+#ifndef BRLTTY_INCLUDED_SCR_FROZEN
+#define BRLTTY_INCLUDED_SCR_FROZEN
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,4 +36,4 @@ extern void initializeFrozenScreen (FrozenScreen *);
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_FROZEN_H */
+#endif /* BRLTTY_INCLUDED_SCR_FROZEN */

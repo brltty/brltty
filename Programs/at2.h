@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _AT2_H
-#define _AT2_H
+#ifndef BRLTTY_INCLUDED_AT2
+#define BRLTTY_INCLUDED_AT2
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,4 +29,4 @@ extern int AT2_interpretCode (int *command, unsigned char byte);
 }
 #endif /* __cplusplus */
 
-#endif /* _AT2_H */
+#endif /* BRLTTY_INCLUDED_AT2 */

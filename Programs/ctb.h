@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _CTB_H
-#define _CTB_H
+#ifndef BRLTTY_INCLUDED_CTB
+#define BRLTTY_INCLUDED_CTB
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,4 +38,4 @@ extern int contractText (
 }
 #endif /* __cplusplus */
 
-#endif /* _CTB_H */
+#endif /* BRLTTY_INCLUDED_CTB */

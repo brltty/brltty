@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _ADLIB_H
-#define _ADLIB_H
+#ifndef BRLTTY_INCLUDED_ADLIB
+#define BRLTTY_INCLUDED_ADLIB
 
 #ifdef __cplusplus
 extern "C" {
@@ -144,4 +144,4 @@ extern const unsigned char AL_channelCount;
 }
 #endif /* __cplusplus */
 
-#endif /* _ADLIB_H */
+#endif /* BRLTTY_INCLUDED_ADLIB */

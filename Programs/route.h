@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _ROUTE_H
-#define _ROUTE_H
+#ifndef BRLTTY_INCLUDED_ROUTE
+#define BRLTTY_INCLUDED_ROUTE
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,4 +37,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* _ROUTE_H */
+#endif /* BRLTTY_INCLUDED_ROUTE */

@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _BLUEZ_H
-#define _BLUEZ_H
+#ifndef BRLTTY_INCLUDED_BLUEZ
+#define BRLTTY_INCLUDED_BLUEZ
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,4 +29,4 @@ extern int openRfcommConnection (const char *address, unsigned char channel);
 }
 #endif /* __cplusplus */
 
-#endif /* _BLUEZ_H */
+#endif /* BRLTTY_INCLUDED_BLUEZ */

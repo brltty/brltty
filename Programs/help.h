@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _HELP_H
-#define _HELP_H
+#ifndef BRLTTY_INCLUDED_HELP
+#define BRLTTY_INCLUDED_HELP
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,4 +61,4 @@ typedef struct {
 }
 #endif /* __cplusplus */
 
-#endif /* _HELP_H */
+#endif /* BRLTTY_INCLUDED_HELP */

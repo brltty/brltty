@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _CUT_H
-#define _CUT_H
+#ifndef BRLTTY_INCLUDED_CUT
+#define BRLTTY_INCLUDED_CUT
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,4 +33,4 @@ extern int cut_paste (void);
 }
 #endif /* __cplusplus */
 
-#endif /* _CUT_H */
+#endif /* BRLTTY_INCLUDED_CUT */

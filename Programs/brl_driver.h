@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _BRL_DRIVER_H
-#define _BRL_DRIVER_H
+#ifndef BRLTTY_INCLUDED_BRL_DRIVER
+#define BRLTTY_INCLUDED_BRL_DRIVER
 
 #ifdef __cplusplus
 extern "C" {
@@ -130,4 +130,4 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 }
 #endif /* __cplusplus */
 
-#endif /* _BRL_DRIVER_H */
+#endif /* BRLTTY_INCLUDED_BRL_DRIVER */

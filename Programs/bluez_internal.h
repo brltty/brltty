@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _BLUEZ_INTERNAL_H
-#define _BLUEZ_INTERNAL_H
+#ifndef BRLTTY_INCLUDED_BLUEZ_INTERNAL
+#define BRLTTY_INCLUDED_BLUEZ_INTERNAL
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +30,4 @@ extern int parseBluetoothAddress (bdaddr_t *address, const char *string);
 }
 #endif /* __cplusplus */
 
-#endif /* _BLUEZ_INTERNAL_H */
+#endif /* BRLTTY_INCLUDED_BLUEZ_INTERNAL */

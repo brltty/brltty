@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_BASE_H
-#define _SCR_BASE_H
+#ifndef BRLTTY_INCLUDED_SCR_BASE
+#define BRLTTY_INCLUDED_SCR_BASE
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,4 +41,4 @@ extern void initializeBaseScreen (BaseScreen *);
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_BASE_H */
+#endif /* BRLTTY_INCLUDED_SCR_BASE */

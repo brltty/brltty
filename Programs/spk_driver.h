@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SPK_DRIVER_H
-#define _SPK_DRIVER_H
+#ifndef BRLTTY_INCLUDED_SPK_DRIVER
+#define BRLTTY_INCLUDED_SPK_DRIVER
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,4 +116,4 @@ SPKCONST SpeechDriver SPKSYMBOL = {
 }
 #endif /* __cplusplus */
 
-#endif /* _SPK_DRIVER_H */
+#endif /* BRLTTY_INCLUDED_SPK_DRIVER */

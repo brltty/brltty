@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _USB_H
-#define _USB_H
+#ifndef BRLTTY_INCLUDED_USB
+#define BRLTTY_INCLUDED_USB
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -431,4 +431,4 @@ extern int isUsbDevice (const char **path);
 }
 #endif /* __cplusplus */
 
-#endif /* _USB_H */
+#endif /* BRLTTY_INCLUDED_USB */

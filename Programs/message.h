@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _MESSAGE_H
-#define _MESSAGE_H
+#ifndef BRLTTY_INCLUDED_MESSAGE
+#define BRLTTY_INCLUDED_MESSAGE
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,4 +38,4 @@ extern void message (const char *, short);
 }
 #endif /* __cplusplus */
 
-#endif /* _MESSAGE_H */
+#endif /* BRLTTY_INCLUDED_MESSAGE */

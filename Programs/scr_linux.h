@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_LINUX_H
-#define _SCR_LINUX_H
+#ifndef BRLTTY_INCLUDED_SCR_LINUX
+#define BRLTTY_INCLUDED_SCR_LINUX
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,4 +32,4 @@ typedef UnicodeNumber ApplicationCharacterMap[0X100];
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_LINUX_H */
+#endif /* BRLTTY_INCLUDED_SCR_LINUX */

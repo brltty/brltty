@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_MAIN_H
-#define _SCR_MAIN_H
+#ifndef BRLTTY_INCLUDED_SCR_MAIN
+#define BRLTTY_INCLUDED_SCR_MAIN
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,4 +40,4 @@ extern void initializeLiveScreen (MainScreen *);
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_MAIN_H */
+#endif /* BRLTTY_INCLUDED_SCR_MAIN */

@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _BRLTTY_H
-#define _BRLTTY_H
+#ifndef BRLTTY_INCLUDED_BRLTTY
+#define BRLTTY_INCLUDED_BRLTTY
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -133,4 +133,4 @@ extern const char *const api_parameters[];
 }
 #endif /* __cplusplus */
 
-#endif /* _BRLTTY_H */
+#endif /* BRLTTY_INCLUDED_BRLTTY */

@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _USB_DEFINITIONS_H
-#define _USB_DEFINITIONS_H
+#ifndef BRLTTY_INCLUDED_USB_INTERNAL
+#define BRLTTY_INCLUDED_USB_INTERNAL
 
 #ifdef __cplusplus
 extern "C" {
@@ -93,4 +93,4 @@ extern int usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int 
 }
 #endif /* __cplusplus */
 
-#endif /* _USB_DEFINITIONS_H */
+#endif /* BRLTTY_INCLUDED_USB_INTERNAL */

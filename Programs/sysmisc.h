@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SYSMISC_H
-#define _SYSMISC_H
+#ifndef BRLTTY_INCLUDED_SYSMISC
+#define BRLTTY_INCLUDED_SYSMISC
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,4 +38,4 @@ extern const void *loadDriver (
 }
 #endif /* __cplusplus */
 
-#endif /* _SYSMISC_H */
+#endif /* BRLTTY_INCLUDED_SYSMISC */

@@ -19,8 +19,8 @@
  * N. Nair, 5 September 1998
  */
 
-#ifndef _BINDINGS_H
-#define _BINDINGS_H
+#ifndef BRLTTY_INCLUDED_BL_BINDINGS
+#define BRLTTY_INCLUDED_BL_BINDINGS
 
 #include "Programs/brl.h"		/* for BRL_CMD_* codes */
 
@@ -161,4 +161,4 @@ static const int rwwcmds[] =
 #endif /* USE_TEXTTRANS */
 #define BLT_META '9'
 
-#endif /* _BINDINGS_H */
+#endif /* BRLTTY_INCLUDED_BL_BINDINGS */

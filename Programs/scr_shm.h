@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _SCR_SHM_H
-#define _SCR_SHM_H
+#ifndef BRLTTY_INCLUDED_SCR_SHM
+#define BRLTTY_INCLUDED_SCR_SHM
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,4 +26,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* _SCR_SHM_H */
+#endif /* BRLTTY_INCLUDED_SCR_SHM */

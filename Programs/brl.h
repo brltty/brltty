@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _BRL_H
-#define _BRL_H
+#ifndef BRLTTY_INCLUDED_BRL
+#define BRLTTY_INCLUDED_BRL
 
 #ifdef __cplusplus
 extern "C" {
@@ -144,4 +144,4 @@ extern void setBrailleFirmness (BrailleDisplay *brl, int setting);
 }
 #endif /* __cplusplus */
 
-#endif /* _BRL_H */
+#endif /* BRLTTY_INCLUDED_BRL */

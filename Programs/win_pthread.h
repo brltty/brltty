@@ -20,8 +20,8 @@
  * BRLTTY running.
  */
 
-#ifndef _WIN_PTHREAD_H
-#define _WIN_PTHREAD_H
+#ifndef BRLTTY_INCLUDED_WIN_PTHREAD
+#define BRLTTY_INCLUDED_WIN_PTHREAD
 
 #ifdef __cplusplus
 extern "C" {
@@ -281,4 +281,4 @@ static inline int pthread_setspecific (pthread_key_t key, const void *data) {
 }
 #endif /* __cplusplus */
 
-#endif /* _WIN_PTHREAD_H */
+#endif /* BRLTTY_INCLUDED_WIN_PTHREAD */

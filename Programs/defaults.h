@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef _DEFAULTS_H
-#define _DEFAULTS_H
+#ifndef BRLTTY_INCLUDED_DEFAULTS
+#define BRLTTY_INCLUDED_DEFAULTS
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,4 +88,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* _DEFAULTS_H */
+#endif /* BRLTTY_INCLUDED_DEFAULTS */
