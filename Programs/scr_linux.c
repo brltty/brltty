@@ -494,14 +494,14 @@ setVgaCharacterCount (int force) {
   }
 
   if (!vgaCharacterCount) {
-    int i;
-    for (i=0; i<screenFontMapCount; ++i) {
-      const struct unipair *map = &screenFontMapTable[i];
+    int index;
+    for (index=0; index<screenFontMapCount; ++index) {
+      const struct unipair *map = &screenFontMapTable[index];
       if (vgaCharacterCount <= map->fontpos) vgaCharacterCount = map->fontpos + 1;
     }
   }
 
-  vgaCharacterCount = (vgaCharacterCount | 0XFF) + 1;
+  vgaCharacterCount = ((vgaCharacterCount - 1) | 0XFF) + 1;
   vgaLargeTable = vgaCharacterCount > 0X100;
 
   if (!force)
@@ -589,7 +589,7 @@ static int
 setTranslationTable (int force) {
   int acmChanged = setApplicationCharacterMap && setApplicationCharacterMap(force);
   int sfmChanged = setScreenFontMap(force);
-  int vccChanged = setVgaCharacterCount(force);
+  int vccChanged = (sfmChanged || force)? setVgaCharacterCount(force): 0;
 
   if (acmChanged || sfmChanged || vccChanged) {
     unsigned short directPosition = 0XFF;
