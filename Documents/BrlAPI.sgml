@@ -2,9 +2,12 @@
 <article>
 <title>BrlAPI Reference manual
 <author>
-<name>Sébastien Hinderer <tt><htmlurl url="mailto:sebastien.hinderer@libertysurf.fr" name="&lt;sebastien.hinderer@libertysurf.fr&gt;"></tt><newline></name>
+<name>Sébastien Hinderer <tt><htmlurl
+url="mailto:Sebastien.Hinderer@ens-lyon.org"
+name="&lt;Sebastien.Hinderer@ens-lyon.org&gt;"></tt><newline></name>
 <and>
-<name>Samuel Thibault <tt><htmlurl url="mailto:samuel.thibault@fnac.net" name="&lt;samuel.thibault@fnac.net&gt;"></tt><newline></name>
+<name>Samuel Thibault <tt><htmlurl url="mailto:Samuel.Thibault@ens-lyon.org"
+name="&lt;Samuel.Thibault@ens-lyon.org&gt;"></tt><newline></name>
 </author>
 <date>V1.2, July 2004
 <abstract>
@@ -429,21 +432,15 @@ The connection might fail, so testing is needed.
 
 <sect1>Getting driver id and name
 
-<p>Knowing the type of the braille device might be useful (<tt/p/ is defined as
-<tt/char */):
+<p>Knowing the type of the braille device might be useful:
 
 <tscreen><code>
- p = brlapi_getDriverId();
- if (!p)
-  brlapi_perror("brlapi_getDriverId");
- else
-  printf("Driver id: %s\n",p);
- 
- p = brlapi_getDriverName();
- if (!p)
-  brlapi_perror("brlapi_getDriverName");
- else
-  printf("Driver name: %s\n",p);
+ unsigned char id[3], name[21];
+ if (brlapi_getDriverId(id, sizeof(id))<0) {
+   brlapi_perror("getDriverId");
+ } else printf("Driver id: %s\n",id);
+ if (brlapi_getDriverName(name, sizeof(name))<0) {
+   brlapi_perror("getDriverName");
 </code></tscreen>
 
 This is particularly useful before entering raw mode to achieve file
