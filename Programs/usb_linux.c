@@ -28,6 +28,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <mntent.h>
+#include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/ioctl.h>
@@ -388,7 +389,7 @@ usbTestPath (const char *path) {
 }
 
 static char *
-usbGetRoot (void) {
+usbFindRoot (void) {
   char *root = NULL;
   const char *path = MOUNTED;
   FILE *table;
@@ -413,12 +414,42 @@ usbGetRoot (void) {
   return root;
 }
 
+static char *
+usbMakeRoot (void) {
+  char *root = makePath(DATA_DIRECTORY, "usbfs");
+
+  if (access(root, F_OK) == -1) {
+    if (errno != ENOENT) {
+      LogPrint(LOG_ERR, "USBFS root access error: %s: %s", root, strerror(errno));
+      goto error;
+    }
+
+    LogPrint(LOG_NOTICE, "Creating USBFS root: %s", root);
+    if (mkdir(root, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) == -1) {
+      LogPrint(LOG_ERR, "USBFS root creation error: %s: %s", root, strerror(errno));
+      goto error;
+    }
+  }
+
+  if (!usbTestPath(root)) {
+    LogPrint(LOG_NOTICE, "Mounting USBFS: %s", root);
+    if (mount("usbfs", root, "usbfs", 0, NULL) == -1) {
+      LogPrint(LOG_ERR, "USBFS mount error: %s: %s", root, strerror(errno));
+
+    error:
+      free(root);
+      root = NULL;
+    }
+  }
+  return root;
+}
+
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
   char *root;
-  if ((root = usbGetRoot())) {
-    device = usbSearchDevice("/proc/bus/usb", chooser, data);
+  if ((root = usbFindRoot()) || (root = usbMakeRoot())) {
+    device = usbSearchDevice(root, chooser, data);
     free(root);
   }
   return device;
