@@ -528,7 +528,7 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       values[STAT_INPUT] = input_mode;
 
       for (i=0; i<the_terminal->statusCount; i++) {
-	int code = the_terminal->statshow[i];
+	int code = the_terminal->statusCells[i];
 	if (code == OFFS_EMPTY)
 	  cells[i] = 0;
 	else if (code >= OFFS_NUMBER)

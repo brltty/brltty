@@ -193,10 +193,12 @@ void terminals(int help, int verbose)
 
       fprintf(fh, "%s = %d\n", 
 	      search_symbol(SIZE),      terminal->columns);
-      fprintf(fh, "%s = %d\n", 
-	      search_symbol(STATCELLS), terminal->statusCount);
-      fprintf(fh, "%s = %d\n", 
-	      search_symbol(FRONTKEYS), terminal->frontKeys);
+      if (terminal->statusCount)
+        fprintf(fh, "%s = %d\n", 
+                search_symbol(STATCELLS), terminal->statusCount);
+      if (terminal->frontKeys)
+        fprintf(fh, "%s = %d\n", 
+                search_symbol(FRONTKEYS), terminal->frontKeys);
       if (terminal->hasEasyBar)
 	fprintf(fh, "%s\n", search_symbol(EASYBAR));
 
@@ -204,8 +206,8 @@ void terminals(int help, int verbose)
         int first = 1;
         int s;
         for (s=0; s<terminal->statusCount; s++) {
-          uint16_t show = terminal->statshow[s];
-          if (show != OFFS_EMPTY) {
+          uint16_t code = terminal->statusCells[s];
+          if (code != OFFS_EMPTY) {
             if (first) {
               first = 0;
               fprintf(fh, "# Status Cells:\n");    
@@ -216,20 +218,20 @@ void terminals(int help, int verbose)
             }
 
             fprintf(fh, "%s %d = ", search_symbol(STAT), s+1);
-            if (show >= OFFS_NUMBER) {
+            if (code >= OFFS_NUMBER) {
               fprintf(fh, "%s", search_symbol(NUMBER));
-              show -= OFFS_NUMBER;
-            } else if (show >= OFFS_FLAG) {
+              code -= OFFS_NUMBER;
+            } else if (code >= OFFS_FLAG) {
               fprintf(fh, "%s", search_symbol(FLAG));
-              show -= OFFS_FLAG;
-            } else if (show >= OFFS_HORIZ) {
+              code -= OFFS_FLAG;
+            } else if (code >= OFFS_HORIZ) {
               fprintf(fh, "%s", search_symbol(HORIZ));
-              show -= OFFS_HORIZ;
+              code -= OFFS_HORIZ;
             }
 
             fprintf(fh, " %s # %s\n",
-                    search_code(STATCODE, show),
-                    search_help_text(show + OFFS_STAT));
+                    search_code(STATCODE, code),
+                    search_help_text(code + OFFS_STAT));
           }
         }
       }

@@ -32,13 +32,14 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 #include "brl-cfg.h"
 
+#define YYERROR_VERBOSE
 static int yylex(void);
 static int yyerror(char*);    
 static int yyparse();
@@ -71,6 +72,20 @@ reallocateTable (void **address, int size, int count) {
 }
 
 static int
+allocateTable (void **address, int size, int count) {
+  *address = NULL;
+  return reallocateTable(address, size, count);
+}
+
+static int
+duplicateString (char **address, const char *string) {
+  int count = strlen(string) + 1;
+  if (!allocateTable((void **)address, 1, count)) return 0;
+  memcpy(*address, string, count);
+  return 1;
+}
+
+static int
 ensureTableSize (void **address, int size, int count, int *limit, int increment) {
   if (count == *limit) {
     int newLimit = *limit + increment;
@@ -91,7 +106,7 @@ static int
 finishCurrentTerminal (void) {
   if (pmTerminalCount) {
     TerminalDefinition *terminal = &pmTerminals[pmTerminalCount - 1];
-    if (!reallocateTable((void **)&terminal->statshow, sizeof(*terminal->statshow), terminal->statusCount)) return 0;
+    if (!reallocateTable((void **)&terminal->statusCells, sizeof(*terminal->statusCells), terminal->statusCount)) return 0;
     if (!reallocateTable((void **)&terminal->modifiers, sizeof(*terminal->modifiers), terminal->modifierCount)) return 0;
     if (!reallocateTable((void **)&terminal->commands, sizeof(*terminal->commands), terminal->commandCount)) return 0;
   }
@@ -118,7 +133,7 @@ addTerminal (int identifier) {
       terminal->modifierCount = 0;
       terminal->commandCount = 0;
 
-      terminal->statshow = NULL;
+      terminal->statusCells = NULL;
       terminal->modifiers = NULL;
       terminal->commands = NULL;
 
@@ -134,8 +149,9 @@ setName (char *name) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
     if (!terminal->name) {
-      terminal->name = strdup(name);
-      return 1;
+      if (duplicateString(&terminal->name, name)) {
+        return 1;
+      }
     } else {
       yyerror("duplicate name");
     }
@@ -148,8 +164,9 @@ setHelp (char *file) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
     if (!terminal->helpFile) {
-      terminal->helpFile = strdup(file);
-      return 1;
+      if (duplicateString(&terminal->helpFile, file)) {
+        return 1;
+      }
     } else {
       yyerror("duplicate help file");
     }
@@ -161,8 +178,16 @@ static int
 setColumns (int columns) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    terminal->columns = columns;
-    return 1;
+    if ((0 < columns) && (columns <= 0XFF)) {
+      if (!terminal->columns) {
+        terminal->columns = columns;
+        return 1;
+      } else {
+        yyerror("duplicate column count");
+      }
+    } else {
+      yyerror("invalid column count");
+    }
   }
   return 0;
 }
@@ -171,15 +196,23 @@ static int
 setStatusCells (int count) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    terminal->statusCount = count;
-    terminal->statshow = malloc(count * sizeof(terminal->statshow[0]));
+    if ((0 < count) && (count <= 0XFF)) {
+      if (!terminal->statusCount) {
+        if (allocateTable((void **)&terminal->statusCells, sizeof(*terminal->statusCells), count)) {
+          {
+            int s;
+            for (s=0; s<count; s++) terminal->statusCells[s] = OFFS_EMPTY;
+          }
 
-    {
-      int s;
-      for (s=0; s<count; s++) terminal->statshow[s] = OFFS_EMPTY;
+          terminal->statusCount = count;
+          return 1;
+        }
+      } else {
+        yyerror("duplicate status cell count");
+      }
+    } else {
+      yyerror("invalid status cell count");
     }
-
-    return 1;
   }
   return 0;
 }
@@ -188,30 +221,42 @@ static int
 setFrontKeys (int count) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    terminal->frontKeys = count;
-    return 1;
+    if ((0 < count) && (count <= 0XFF)) {
+      if (!terminal->frontKeys) {
+        terminal->frontKeys = count;
+        return 1;
+      } else {
+        yyerror("duplicate front key count");
+      }
+    } else {
+      yyerror("invalid front key count");
+    }
   }
   return 0;
 }
 
 static int
-setHasEasyBar (int yes) {
+setHasEasyBar (void) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    terminal->hasEasyBar = yes;
-    return 1;
+    if (!terminal->hasEasyBar) {
+      terminal->hasEasyBar = 1;
+      return 1;
+    } else {
+      yyerror("duplicate easy bar specification");
+    }
   }
   return 0;
 }
 
 static int
-setStatusCell (int number, int format) {
+setStatusCell (int number, int code) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
     if ((0 < number) && (number <= terminal->statusCount)) {
-      uint16_t *cell = &terminal->statshow[number-1];
+      uint16_t *cell = &terminal->statusCells[number-1];
       if (*cell == OFFS_EMPTY) {
-        *cell = format;
+        *cell = code;
         return 1;
       } else {
         yyerror("duplicate status cell");
@@ -227,10 +272,19 @@ static int
 addModifier (int key) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
+    {
+      int m;
+      for (m=0; m<terminal->modifierCount; m++) {
+        if (terminal->modifiers[m] == key) {
+          yyerror("duplicate modifier");
+          return 0;
+        }
+      }
+    }
+
     if (terminal->modifierCount < MODMAX) {
-      if (!terminal->modifiers)
-        terminal->modifiers = malloc(MODMAX * sizeof(terminal->modifiers[0]));
-      if (terminal->modifiers) {
+      if (terminal->modifiers ||
+          allocateTable((void **)&terminal->modifiers, sizeof(*terminal->modifiers), MODMAX)) {
         terminal->modifiers[terminal->modifierCount++] = key;
         return 1;
       }
@@ -314,8 +368,7 @@ inputline:  '\n'
        | SIZE eq NUM '\n'           { setColumns(numval); }
        | STATCELLS eq NUM '\n'      { setStatusCells(numval); }
        | FRONTKEYS eq NUM '\n'      { setFrontKeys(numval); }
-       | EASYBAR '\n'               { setHasEasyBar(1); }
-       | EASYBAR eq NUM '\n'        { setHasEasyBar(numval != 0); }
+       | EASYBAR '\n'               { setHasEasyBar(); }
 
        | statdef eq statdisp '\n'  { setStatusCell(keyindex, numval);  }
        | MODIFIER eq anykey '\n'   { addModifier(keyindex); }
@@ -540,7 +593,7 @@ parse (void) {
       TerminalDefinition *terminal = &pmTerminals[--pmTerminalCount];
       if (terminal->name) free(terminal->name);
       if (terminal->helpFile) free(terminal->helpFile);
-      if (terminal->statshow) free(terminal->statshow);
+      if (terminal->statusCells) free(terminal->statusCells);
       if (terminal->modifiers) free(terminal->modifiers);
       if (terminal->commands) free(terminal->commands);
     }

@@ -109,7 +109,7 @@ typedef struct {
   uint8_t modifierCount;		/* number of modifier keys */
   uint16_t commandCount;		/* number of commands */
 
-  uint16_t *statshow;	/* status cells: info to show */
+  uint16_t *statusCells;	/* status cells: info to show */
   int16_t *modifiers;	/* keys used as modifier */
   CommandDefinition *commands;
 } TerminalDefinition; 
