@@ -14,10 +14,10 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VO_VERSION "0.20"
-#define VO_DATE "July 2004"
+#define VO_VERSION "0.21"
+#define VO_DATE "January 2005"
 #define VO_COPYRIGHT \
-"   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>"
+"   Copyright (C) 2005 by Stéphane Doyon  <s.doyon@videotron.ca>"
 
 /* Voyager/braille.c - Braille display driver for Tieman Voyager displays.
  *
@@ -27,6 +27,8 @@
  * It is designed to be compiled in BRLTTY version 3.5.
  *
  * History:
+ * 0.21, January 2005:
+ *       Remove gcc4 signedness/unsignedness incompatibilities.
  * 0.20, June 2004:
  *       Add statuscells parameter.
  *       Rename brlinput parameter to inputmode.
@@ -107,8 +109,8 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
 }
 
 static int
-readSerialPacket (char *buffer, int size) {
-  int offset = 0;
+readSerialPacket (unsigned char *buffer, int size) {
+  size_t offset = 0;
   int escape = 0;
   int length = -1;
 
@@ -184,7 +186,7 @@ readSerialPacket (char *buffer, int size) {
 }
 
 static int
-nextSerialPacket (unsigned char code, char *buffer, int size) {
+nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
   int length;
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
@@ -519,7 +521,7 @@ static const InputOutputOperations usbOperations = {
 
 /* Global variables */
 static char firstRead; /* Flag to reinitialize brl_readCommand() function state. */
-static int inputMode;
+static unsigned int inputMode;
 static TranslationTable outputTable;
 static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
