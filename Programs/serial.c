@@ -194,9 +194,14 @@ serialInitializeAttributes (struct termios *attributes) {
 #endif /* IEXTEN */
 
 #ifdef _POSIX_VDISABLE
-  memset(attributes->c_cc, _POSIX_VDISABLE, NCCS);
-  attributes->c_cc[VTIME] = 0;
-  attributes->c_cc[VMIN] = 0;
+  if (_POSIX_VDISABLE) {
+    int i;
+    for (i=0; i<NCCS; ++i) {
+      if (i == VTIME) continue;
+      if (i == VMIN) continue;
+      attributes->c_cc[i] = _POSIX_VDISABLE;
+    }
+  }
 #endif /* _POSIX_VDISABLE */
 }
 
