@@ -218,6 +218,11 @@ getPcmAmplitudeFormat (int descriptor) {
 #endif /* HAVE_HPUX_AUDIO */
   return PCM_FMT_UNKNOWN;
 }
+
+PcmAmplitudeFormat
+setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
+  return getPcmAmplitudeFormat(descriptor);
+}
 #endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES

@@ -204,7 +204,7 @@ static const AmplitudeFormatEntry amplitudeFormatTable[] = {
 };
 
 static PcmAmplitudeFormat
-pcmAmplitudeFormat (int descriptor, int format) {
+doPcmAmplitudeFormat (int descriptor, int format) {
   if (descriptor != -1) {
     if (ioctl(descriptor, SNDCTL_DSP_SETFMT, &format) != -1) {
       const AmplitudeFormatEntry *entry = amplitudeFormatTable;
@@ -219,7 +219,7 @@ pcmAmplitudeFormat (int descriptor, int format) {
 
 PcmAmplitudeFormat
 getPcmAmplitudeFormat (int descriptor) {
-  return pcmAmplitudeFormat(descriptor, AFMT_QUERY);
+  return doPcmAmplitudeFormat(descriptor, AFMT_QUERY);
 }
 
 PcmAmplitudeFormat
@@ -229,7 +229,7 @@ setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
     if (entry->internal == format) break;
     ++entry;
   }
-  return pcmAmplitudeFormat(descriptor, entry->external);
+  return doPcmAmplitudeFormat(descriptor, entry->external);
 }
 #endif /* ENABLE_PCM_TUNES */
 
