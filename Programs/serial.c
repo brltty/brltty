@@ -188,6 +188,10 @@ serialInitializeAttributes (struct termios *attributes) {
   memset(attributes, 0, sizeof(*attributes));
   attributes->c_cflag = CREAD | CLOCAL | CS8;
   attributes->c_iflag = IGNPAR | IGNBRK;
+
+#ifdef IEXTEN
+  attributes->c_lflag = IEXTEN;
+#endif /* IEXTEN */
 }
 
 static int
@@ -262,17 +266,31 @@ serialSetStopBits (SerialDevice *serial, int bits) {
 
 int
 serialSetParity (SerialDevice *serial, SerialParity parity) {
-  if (parity == SERIAL_PARITY_NONE) {
-    serial->pendingAttributes.c_cflag &= ~(PARENB | PARODD);
-  } else {
+  serial->pendingAttributes.c_cflag &= ~(PARENB | PARODD);
+
+#ifdef PARSTK
+  serial->pendingAttributes.c_cflag &= ~PARSTK;
+#endif /* PARSTK */
+
+  if (parity != SERIAL_PARITY_NONE) {
     if (parity == SERIAL_PARITY_EVEN) {
-      serial->pendingAttributes.c_cflag &= ~PARODD;
+
     } else if (parity == SERIAL_PARITY_ODD) {
       serial->pendingAttributes.c_cflag |= PARODD;
+
+#ifdef PARSTK
+    } else if (parity == SERIAL_PARITY_SPACE) {
+      serial->pendingAttributes.c_cflag |= PARSTK;
+
+    } else if (parity == SERIAL_PARITY_MARK) {
+      serial->pendingAttributes.c_cflag |= PARSTK | PARODD;
+#endif /* PARSTK */
+
     } else {
       LogPrint(LOG_WARNING, "Unknown serial parity: %c", parity);
       return 0;
     }
+
     serial->pendingAttributes.c_cflag |= PARENB;
   }
   return 1;
@@ -280,45 +298,49 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 
 int
 serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
+  typedef struct {
+    tcflag_t *field;
+    tcflag_t flag;
+    SerialFlowControl flow;
+  } FlowControlEntry;
+  const FlowControlEntry flowControlTable[] = {
 #ifdef CRTSCTS
-  if ((flow & SERIAL_FLOW_HARDWARE) == SERIAL_FLOW_HARDWARE) {
-    serial->pendingAttributes.c_cflag |= CRTSCTS;
-    flow &= ~SERIAL_FLOW_HARDWARE;
-  } else {
-    serial->pendingAttributes.c_cflag &= ~CRTSCTS;
-  }
-#else /* CRTSCTS */
-#warning hardware flow control not settable on this platform
+    {&serial->pendingAttributes.c_cflag, CRTSCTS, SERIAL_FLOW_INPUT_RTS | SERIAL_FLOW_OUTPUT_CTS},
 #endif /* CRTSCTS */
 
+#ifdef IHFLOW
+    {&serial->pendingAttributes.c_cflag, IHFLOW, SERIAL_FLOW_INPUT_RTS},
+#endif /* IHFLOW */
+
+#ifdef OHFLOW
+    {&serial->pendingAttributes.c_cflag, OHFLOW, SERIAL_FLOW_OUTPUT_CTS},
+#endif /* OHFLOW */
+
 #ifdef IXOFF
-  if (flow & SERIAL_FLOW_INPUT_XON) {
-    serial->pendingAttributes.c_iflag |= IXOFF;
-    flow &= ~SERIAL_FLOW_INPUT_XON;
-  } else {
-    serial->pendingAttributes.c_iflag &= ~IXOFF;
-  }
-#else /* IXOFF */
-#warning X-ON/X-OFF input flow control not settable on this platform
+    {&serial->pendingAttributes.c_iflag, IXOFF, SERIAL_FLOW_INPUT_XON},
 #endif /* IXOFF */
 
 #ifdef IXON
-  if (flow & SERIAL_FLOW_OUTPUT_XON) {
-    serial->pendingAttributes.c_iflag |= IXON;
-    flow &= ~SERIAL_FLOW_OUTPUT_XON;
-  } else {
-    serial->pendingAttributes.c_iflag &= ~IXON;
-  }
-#else /* IXON */
-#warning X-ON/X-OFF output flow control not settable on this platform
+    {&serial->pendingAttributes.c_iflag, IXON, SERIAL_FLOW_OUTPUT_XON},
 #endif /* IXON */
 
-  if (flow) {
-    LogPrint(LOG_WARNING, "Unknown serial flow control: 0X%02X", flow);
-    return 0;
+    {NULL, 0, 0}
+  };
+  const FlowControlEntry *entry = flowControlTable;
+
+  while (entry->field) {
+    if ((flow & entry->flow) == entry->flow) {
+      flow &= ~entry->flow;
+      *entry->field |= entry->flag;
+    } else if (!(flow & entry->flow)) {
+      *entry->field &= ~entry->flag;
+    }
+    ++entry;
   }
 
-  return 1;
+  if (!flow) return 1;
+  LogPrint(LOG_WARNING, "Unknown serial flow control: 0X%02X", flow);
+  return 0;
 }
 
 int
