@@ -34,17 +34,26 @@ then
    cp -aR $2=D $1=D
    echo done.
 
-   if [ "=V" ]
+   if [ -n "=V" ]
    then
-      if [ ! -c $1=V ]
+      install=true
+      for device in =V
+      do
+         if [ -c "$1$device" ]
+	 then
+	    install=false
+	    echo $device already exists - not reinstalled.
+	    break
+	 fi
+      done
+      if $install
       then
-         echo -n Creating =V...
-         mknod -m o= $1=V c 7 128
-         chown root.tty $1=V
-         chmod 660 $1=V
+	 device=`set -- =V && echo $1`
+         echo -n Creating $device...
+         mknod -m o= $1$device c 7 128
+         chmod 660 $1$device
+         chown root.tty $1$device
          echo done.
-      else
-         echo =V already exists - not reinstalled.
       fi
    fi
 

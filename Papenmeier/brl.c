@@ -18,7 +18,7 @@
 /* This Driver was written as a project in the
  *   HTL W1, Abteilung Elektrotechnik, Wien - Österreich
  *   (Technical High School, Department for electrical engineering,
- *     Vienna, Austria)
+ *     Vienna, Austria)  http://www.ee.htlw16.ac.at
  *  by
  *   Tibor Becker
  *   Michael Burger
@@ -295,8 +295,10 @@ try_init(brldim *brl, const char *dev, unsigned int baud)
 
   /* HACK - used with serial.c */
 #ifdef _SERIAL_C_
-  /* HACK - used with serial.c */
-  terminal_type = pm_2dscreen;
+  /* HACK - used with serial.c - 2d screen */
+  the_terminal = &pm_terminals[3];
+  addr_status = 0x0000;
+  addr_display = addr_status + the_terminal->statcells;
 #else
   identify_terminal(&res);
 #endif
@@ -322,10 +324,8 @@ initbrl (char **parameters, brldim *brl, const char *dev)
 
   /* read the config file for individual configurations */
 #ifdef READ_CONFIG
-  if (linenumber == 1) {
-    LogPrint(LOG_DEBUG, "look for config file");
-    read_config(parameters[PARM_CONFIGFILE]);
-  }
+  LogPrint(LOG_DEBUG, "look for config file");
+  read_config(parameters[PARM_CONFIGFILE]);
 #endif
 
   LogPrint(LOG_DEBUG,  "try 19200");
@@ -355,7 +355,7 @@ static void
 identbrl (void)
 {
   LogPrint(LOG_NOTICE, "Papenmeier Driver (%s %s)", __DATE__, __TIME__);
-  LogPrint(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team.");
+  LogPrint(LOG_INFO, "   Copyright (C) 1998-2001 by The BRLTTY Team.");
   LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
   LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
 }
@@ -471,12 +471,11 @@ writebrl (brldim *brl)
 /* ------------------------------------------------------------ */
 
 static unsigned char pressed_modifiers = 0;
-static int beg_pressed = 0;
-static int end_pressed = 0;
-
+static int saved_cmd = EOF;
+ 
 /* found command - some actions to be done within the driver */
 static int
-handle_command(int cmd, int ispressed)
+handle_command(int cmd)
 {
   switch(cmd) {
   case CMD_RESTARTBRL:
@@ -485,35 +484,58 @@ handle_command(int cmd, int ispressed)
       write_to_braille(addr_status, curr_stats, prevline);
     write_to_braille(addr_display, curr_cols, prev);
     break;
-
-  case CMD_CUT_BEG:
-    beg_pressed = ispressed;
-    if (dbgmd) {
-      LogPrint(LOG_DEBUG, "Cut Begin: %02x", beg_pressed);
-    }
-    cmd=CMD_NOOP;
-    break;
-
-  case CMD_CUT_END:
-    end_pressed = ispressed;
-    if (dbgmd) {
-      LogPrint(LOG_DEBUG, "Cut End: %02x",end_pressed );
-    }
-    cmd=CMD_NOOP;
-    break;
-
   }
-  if (ispressed)
-    return cmd;
-  else
-    return EOF;
+
+  saved_cmd = EOF;
+  return cmd;
 }
 
-/* one key is pressed or released */
+/*
+ * Handling of Modifiers
+ * command bound to modifiers only are remembered on press 
+ * and send on last modifier released
+ */
+ 
+/* handle modifier pressed */
 static int
-handle_key(int code, int ispressed)
+modifier_pressed(unsigned int bit)
 {
   int i;
+  pressed_modifiers |= bit;
+  
+  for(i=0; i < CMDMAX; i++)
+    if ((the_terminal->cmds[i].modifiers == pressed_modifiers) &&
+        (the_terminal->cmds[i].keycode == NOKEY)) {
+      saved_cmd = the_terminal->cmds[i].code;
+      if (dbgmd) {
+ 	LogPrint(LOG_DEBUG, "save cmd: %d", saved_cmd); 
+      }
+      break;
+    }
+  return CMD_NOOP;
+}
+ 
+/* handle modifier release */
+static int
+modifier_released(unsigned int bit)
+{
+  pressed_modifiers &= ~(bit);
+  if ( pressed_modifiers == 0 &&
+       saved_cmd != EOF ) {
+    if (dbgmd) {
+      LogPrint(LOG_DEBUG, "use saved cmd: %d", saved_cmd); 
+    }
+    return handle_command( saved_cmd );
+  }
+  return EOF;
+}
+ 
+/* one key is pressed or released */
+static int
+handle_key(int code, int ispressed, int offsroute)
+{
+  int i;
+  int cmd;
   /* look for modfier keys */
   for(i=0; i < MODMAX; i++) 
     if( the_terminal->modifiers[i] == code) {
@@ -521,28 +543,33 @@ handle_key(int code, int ispressed)
       /* pressed_modifiers ^= (1<<i);  
          could cause trouble if we miss one event */
       if (ispressed)
-	pressed_modifiers |= (1<<i);
+        /* found modifier: update bitfield */
+	cmd = modifier_pressed(1u<<i);
       else
-	pressed_modifiers &= ~(1<<i);
+	cmd = modifier_released(1u<<i);
 
       if (dbgmd) {
 	LogPrint(LOG_DEBUG, "Modifiers: %02x", pressed_modifiers);
       }
-      return CMD_NOOP;
+      return cmd;
     }
 
   /* must be a "normal key" - search for cmd on keypress */
+  if (!ispressed)
+    return EOF;
   for(i=0; i < CMDMAX; i++)
     if ( the_terminal->cmds[i].keycode == code && 
 	 the_terminal->cmds[i].modifiers == pressed_modifiers)
       {
-	LogPrint(LOG_DEBUG, "cmd: %d->%d", code, the_terminal->cmds[i].code); 
-	return handle_command( the_terminal->cmds[i].code, ispressed );
+	if (dbgmd)
+	  LogPrint(LOG_DEBUG, "cmd: %d->%d (+%d)", 
+		   code, the_terminal->cmds[i].code, offsroute); 
+	return handle_command( the_terminal->cmds[i].code + offsroute );
       }
 
   /* no command found */
   LogPrint(LOG_DEBUG, "cmd: %d mod = %02x ??", code, pressed_modifiers); 
-  return CMD_ERR;
+  return CMD_NOOP;
 }
 
 /* ------------------------------------------------------------ */
@@ -615,35 +642,27 @@ readbrl (DriverCommandContext cmds)
   if (code_front_first <= code && 
       code <= code_front_last) { /* front key */
     num = 1 + (code - code_front_first) / 3;
-    return handle_key(OFFS_FRONT + num, action);
+    return handle_key(OFFS_FRONT + num, action, 0);
   } 
   else if (code_status_first <= code && 
 	   code <= code_status_last) { /* status key */
     num = 1+ (code - code_status_first) / 3;
-    return handle_key(OFFS_STAT + num, action);
+    return handle_key(OFFS_STAT + num, action, 0);
   }
   else if (code_easy_first <= code && 
       code <= code_easy_last) { /* easy bar */
     num = 1 + (code - code_easy_first) / 3;
-    return handle_key(OFFS_EASY + num, action);
+    return handle_key(OFFS_EASY + num, action, 0);
   } 
   else if (code_switch_first <= code && 
       code <= code_switch_last) { /* easy bar */
     num = 1 + (code - code_switch_first) / 3;
-    return handle_key(OFFS_SWITCH + num, action);
+    return handle_key(OFFS_SWITCH + num, action, 0);
   } 
   else if (code_route_first <= code && 
 	   code <= code_route_last) { /* Routing Keys */ 
     num = (code - code_route_first) / 3;
-    if (action) {
-      if (beg_pressed) /* Cut Begin */
-	return CR_BEGBLKOFFSET + num;
-      else if (end_pressed) /* Cut End */
-	return CR_ENDBLKOFFSET + num;
-      else  /* CSR Jump */
-	return CR_ROUTEOFFSET + num;
-    } else
-      return EOF;
+    return handle_key(ROUTINGKEY, action, num);
   }
   LogPrint(LOG_ERR, "readbrl: Command Error - CmdKod:%d", code);
   return CMD_ERR;
@@ -664,7 +683,7 @@ static void read_file(char* name)
     return;
   }
   LogPrint(LOG_DEBUG, "read config file %s", name);
-  yyparse ();
+  parse ();
   fclose(configfile);
 }
 

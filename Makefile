@@ -114,11 +114,11 @@ INSTALL_LIB = --owner=$(INSTALL_USER) --group=$(INSTALL_GROUP) --mode=$(INSTALL_
 # Screen access methods (OS dependent).  Uncomment only one of the
 # two following sets of options (if not sure, don't touch anything):
 
-# 1. This is the name of the character device BRLTTY uses to read the screen
-# under Linux.
-# It is created during installation if it does not already exist.
+# 1. These are the names by which the character device which BRLTTY uses
+# to read the screen under Linux is commonly known.
+# If none of them exist during the install, then the first one is created.
 # Don't modify this unless you know what you're doing!
-VCSADEV = /dev/vcsa0
+VCSADEV = /dev/vcsa /dev/vcsa0 /dev/vcc/a
 SCR_O = scr_vcsa.o
 INSKEY_O = inskey_lnx.o
 
@@ -179,6 +179,11 @@ BRL_LIBS = al bl bn cb ec eu ht md mn mb pm ts va vh vd vs
 
 SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival GenericSay Televox
 SPK_LIBS = no al bl cb es fv gs tv
+
+ifneq (,$(wildcard /usr/include/eci.h))
+SPK_TARGETS += ViaVoice
+SPK_LIBS += vv
+endif
 
 # ------------------------ DO NOT EDIT BELOW THIS LINE ------------------------
 
@@ -332,11 +337,11 @@ check-braille: brltty dynamic-braille
 	   LD_RUN_PATH="./lib" ./brltty -v -b $$lib 2>&1 || exit 1; \
 	done
 
-text.auto.h: Makefile BrailleTables/$(TEXTTRANS) comptable
-	./comptable < BrailleTables/$(TEXTTRANS) > text.auto.h
+text.auto.h: BrailleTables/$(TEXTTRANS) comptable Makefile
+	./comptable <$< >$@
 
-attrib.auto.h: Makefile BrailleTables/attrib.tbl comptable
-	./comptable < BrailleTables/attrib.tbl > attrib.auto.h
+attrib.auto.h: BrailleTables/attributes.tbl comptable Makefile
+	./comptable <$< >$@
 
 txt2hlp: txt2hlp.c helphdr.h
 	$(HOSTCC) $(LDFLAGS) -o $@ txt2hlp.c $(LDLIBS)
@@ -363,16 +368,18 @@ install-drivers: brltty
 	install --directory $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)
 	install $(INSTALL_LIB) lib/* $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)
 
-install-devices:
-	if [ "$(VCSADEV)" ]; \
-	then \
-	  if [ ! -c $(INSTALL_ROOT)$(PREFIX)$(VCSADEV) ]; \
-	  then \
-	    mknod -m o= $(INSTALL_ROOT)$(PREFIX)$(VCSADEV) c 7 128; \
-	    chown root.tty $(INSTALL_ROOT)$(PREFIX)$(VCSADEV); \
-	    chmod 660 $(INSTALL_ROOT)$(PREFIX)$(VCSADEV); \
-	  fi; \
-	fi
+install-devices: install-screen-device
+
+SCREEN_DEVICE := $(firstword $(VCSADEV))
+install-screen-device:
+ifneq (0,$(words $(VCSADEV)))
+ifeq (,$(wildcard $(addprefix $(INSTALL_ROOT),$(VCSADEV))))
+	install --directory $(dir $(INSTALL_ROOT)$(SCREEN_DEVICE))
+	mknod -m o= $(INSTALL_ROOT)$(SCREEN_DEVICE) c 7 128
+	chmod 620 $(INSTALL_ROOT)$(SCREEN_DEVICE)
+	chown root.tty $(INSTALL_ROOT)$(SCREEN_DEVICE)
+endif
+endif
 
 uninstall:
 	rm -f $(INSTALL_ROOT)$(PREFIX)$(PROG_DIR)/brltty $(INSTALL_ROOT)$(PREFIX)$(PROG_DIR)/install-brltty

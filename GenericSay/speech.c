@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* Generic_say/speech.c - To use a generic 'say' command, like for the
+/* GenericSay/speech.c - To use a generic 'say' command, like for the
  * rsynth package.
  */
 
@@ -35,7 +35,7 @@ typedef enum {
 #define SPKPARMS "command"
 #include "../spk_driver.h"
 
-static char *commandPath = SAY_CMD;	/* full path for the say command */
+static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;
 
 static void
@@ -47,9 +47,8 @@ identspk (void)
 static void
 initspk (char **parameters)
 {
-  char *command = parameters[PARM_COMMAND];
-  if (*command)
-    commandPath = command;
+  const char *command = parameters[PARM_COMMAND];
+  commandPath = *command? command: SAY_CMD;
   LogPrint(LOG_INFO, "Speech Command: %s", commandPath);
 }
 

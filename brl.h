@@ -42,8 +42,8 @@ typedef enum {
  */
 
 /*
- * Please: comment all CMD_* - this info is used for the Papenmeier helpfile
- *
+ * Please comment all CMD_* definitions. They are
+ * used during automatic help file generation.
  */
 typedef enum {
    /* special commands which must be first and remain in order */
@@ -130,15 +130,24 @@ typedef enum {
    CMD_RESTARTBRL /* reinitialize braille driver */,
    CMD_RESTARTSPEECH /* reinitialize speech driver */,
 } DriverCommand;
+#define VAL_ARG_MASK 0XFF
 
-/* Cursor routing key offset values */
+/* For specifically turning on/off toggle commands */
+#define VAL_SWITCHON    0x10000
+#define VAL_SWITCHOFF   0x20000
+#define VAL_SWITCHMASK  (VAL_SWITCHON | VAL_SWITCHOFF)
+
+/* cursor routing keys block offset values */
+/*
+ * Please comment all CR_* definitions. They are
+ * used during automatic help file generation.
+ */
 #define	CR_ROUTEOFFSET 0x100	/* route cursor to character */
 #define	CR_BEGBLKOFFSET	0x200	/* define the beginning of a block */
 #define	CR_ENDBLKOFFSET 0x300	/* define the end of a block */
 #define	CR_SWITCHVT 0x400	/* switch virtual terminal */
-#define	CR_NXINDENT 0x500	/* find next line */
-#define	CR_PRINDENT 0x600       /* or previous line */
-				/* not more indented than routing key indicates */
+#define	CR_NXINDENT 0x500	/* find next line not more indented than routing key indicates */
+#define	CR_PRINDENT 0x600       /* find previous line not more indented than routing key indicates */
 #define	CR_MSGATTRIB 0x700	/* message attributes of character */
 
 /* For entering a special key. */
@@ -166,11 +175,6 @@ typedef enum {
 
 /* For typing a character -- use current translation table. */
 #define VAL_PASSDOTS      0xF00
-
-/* For specifically turning on/off toggle commands */
-#define VAL_SWITCHMASK  0x30000
-#define VAL_SWITCHON    0x10000
-#define VAL_SWITCHOFF   0x20000
 
 /* Braille information structure */
 typedef struct

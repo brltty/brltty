@@ -101,6 +101,7 @@ FrozenScreen::close (void)
   if (text)
     {
       delete text;
+      text = 0;
       delete attrib;
     }
 }

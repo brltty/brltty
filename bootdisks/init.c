@@ -36,7 +36,7 @@
 #define BRLTTY "/sbin/brltty"
 #define REAL_INIT "/sbin/real_init"
 
-static char *argumentVector[16];
+static char *argumentVector[30];
 static int argumentCount = 0;
 
 static void
@@ -57,11 +57,22 @@ addOption(char *variable, char *option) {
 
 int
 main(int argc, char *argv[]) {
-
    addArgument(BRLTTY);
-   addOption("BRLTTY_DEVICE", "-d");
-   addOption("BRLTTY_DRIVER", "-b");
-   addOption("BRLTTY_TABLE", "-t");
+
+   addOption("BRLTTY_CONFIGURATION_FILE", "-f");
+   addOption("BRLTTY_PREFERENCES_FILE", "-p");
+   addOption("BRLTTY_LOG_LEVEL", "-l");
+
+   addOption("BRLTTY_BRAILLE_DEVICE", "-d");
+   addOption("BRLTTY_BRAILLE_DRIVER", "-b");
+   addOption("BRLTTY_BRAILLE_PARAMETERS", "-B");
+
+   addOption("BRLTTY_SPEECH_DRIVER", "-s");
+   addOption("BRLTTY_SPEECH_PARAMETERS", "-S");
+
+   addOption("BRLTTY_TEXT_TABLE", "-t");
+   addOption("BRLTTY_ATTRIBUTES_TABLE", "-a");
+
    addArgument(NULL);
 
    switch (fork()) {
@@ -80,5 +91,6 @@ main(int argc, char *argv[]) {
          perror("execv: " REAL_INIT);
          exit(5);
    }
+
    return 0;
 }

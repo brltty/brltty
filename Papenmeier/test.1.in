@@ -31,3 +31,5 @@ HWINLT = f 3 and status 1
 CMD_HOME = front 4 front 3
 INFO f 5 f 3 s 1
 
+TOP = front 3 and routing
+SAY =  status 1 and front 3

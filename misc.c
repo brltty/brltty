@@ -69,11 +69,13 @@ static int stderrLevel;
 int ProblemCount = 0;
 
 void
-LogOpen(void)
+LogOpen(int toConsole)
 {
 #ifdef USE_SYSLOG
   if (!syslogOpened) {
-    openlog("brltty", LOG_PID|LOG_CONS, LOG_DAEMON);
+    int flags = LOG_PID;
+    if (toConsole) flags |= LOG_CONS;
+    openlog("brltty", flags, LOG_DAEMON);
     syslogOpened = 1;
   }
 #endif
@@ -168,10 +170,11 @@ reallocWrapper (void *address, size_t size) {
 }
 
 char *
-strdupWrapper (char *string) {
-   if (!(string = strdup(string)))
+strdupWrapper (const char *string) {
+   char *address = strdup(string);
+   if (!address)
       noMemory();
-   return string;
+   return address;
 }
 
 void
@@ -369,7 +372,7 @@ timeout_yet (int msec)
 }
 
 int
-validateInteger (int *integer, char *description, char *value, int *minimum, int *maximum) {
+validateInteger (int *integer, const char *description, const char *value, const int *minimum, const int *maximum) {
    char *end;
    *integer = strtol(value, &end, 0);
    if (*end) {
@@ -493,7 +496,7 @@ static BaudEntry baudTable[] = {
 };
 
 int
-validateBaud (speed_t *baud, char *description, char *value, unsigned int *choices) {
+validateBaud (speed_t *baud, const char *description, const char *value, const unsigned int *choices) {
    int integer;
    if (validateInteger(&integer, description, value, NULL, NULL)) {
       BaudEntry *entry = baudTable;
@@ -536,7 +539,7 @@ baud2integer (speed_t baud)
 }
 
 int
-validateChoice (unsigned int *choice, char *description, char *value, char **choices) {
+validateChoice (unsigned int *choice, const char *description, const char *value, const char *const *choices) {
    int length = strlen(value);
    if (length) {
       int index = 0;
@@ -557,18 +560,18 @@ validateChoice (unsigned int *choice, char *description, char *value, char **cho
 }
 
 int
-validateFlag (unsigned int *flag, char *description, char *value, char *on, char *off) {
-   char *choices[] = {off, on, NULL};
+validateFlag (unsigned int *flag, const char *description, const char *value, const char *on, const char *off) {
+   const char *choices[] = {off, on, NULL};
    return validateChoice(flag, description, value, choices);
 }
 
 int
-validateOnOff (unsigned int *flag, char *description, char *value) {
+validateOnOff (unsigned int *flag, const char *description, const char *value) {
    return validateFlag(flag, description, value, "on", "off");
 }
 
 int
-validateYesNo (unsigned int *flag, char *description, char *value) {
+validateYesNo (unsigned int *flag, const char *description, const char *value) {
    return validateFlag(flag, description, value, "yes", "no");
 }
 

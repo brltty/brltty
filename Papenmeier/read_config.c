@@ -22,7 +22,8 @@ static char* filename = "stdin";
 static int yyerror (char* s)  /* Called by yyparse on error */
 {
   printf("%s:%d: %s\n", filename, linenumber, s);
-  return 0;
+  exit(99);
+ return 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -72,6 +73,11 @@ static char* search_cmd(int cmd)
 
 static char* search_key(int code) {
   static char res[20];
+
+  if (code == ROUTINGKEY) {
+    strcpy(res, search_code(ROUTING, 0));
+    return res;
+  }
   if (code >= OFFS_SWITCH) {
     strcpy(res, "switch  ");
     res[7]= '0' + (code-OFFS_SWITCH) % 10;
@@ -126,13 +132,19 @@ void terminals(int help, int verbose)
 
       fprintf(fh, "# Terminal Parameter:\n");
      
-      fprintf(fh, "%s = %d\n", search_symbol(IDENT), pm_terminals[tn].ident);
-      fprintf(fh, "%s = \"%s\"\n", search_symbol(NAME), pm_terminals[tn].name);
-      fprintf(fh, "%s = \"%s\"\n", search_symbol(HELPFILE), pm_terminals[tn].helpfile);
+      fprintf(fh, "%s = %d\n", 
+	      search_symbol(IDENT), pm_terminals[tn].ident);
+      fprintf(fh, "%s = \"%s\"\n", 
+	      search_symbol(NAME), pm_terminals[tn].name);
+      fprintf(fh, "%s = \"%s\"\n", 
+	      search_symbol(HELPFILE), pm_terminals[tn].helpfile);
 
-      fprintf(fh, "%s = %d\n", search_symbol(SIZE),      pm_terminals[tn].x);
-      fprintf(fh, "%s = %d\n", search_symbol(STATCELLS), pm_terminals[tn].statcells);
-      fprintf(fh, "%s = %d\n", search_symbol(FRONTKEYS), pm_terminals[tn].frontkeys);
+      fprintf(fh, "%s = %d\n", 
+	      search_symbol(SIZE),      pm_terminals[tn].x);
+      fprintf(fh, "%s = %d\n", 
+	      search_symbol(STATCELLS), pm_terminals[tn].statcells);
+      fprintf(fh, "%s = %d\n", 
+	      search_symbol(FRONTKEYS), pm_terminals[tn].frontkeys);
       if (pm_terminals[tn].haseasybar)
 	fprintf(fh, "%s\n", search_symbol(EASYBAR));
 
@@ -164,27 +176,35 @@ void terminals(int help, int verbose)
 	      val -= OFFS_HORIZ;
 	    }
 
-	    fprintf(fh, " %s %s\n",
+	    fprintf(fh, " %s # %s\n",
 		    search_stat(val),
 		    search_help(val + OFFS_STAT));
 	  }
 
       fprintf(fh, "# Modifierkey settings:\n");    
       for(i=0; i < MODMAX; i++) 
-	if (pm_terminals[tn].modifiers[i] != 0) 
-	  fprintf(fh, "modifier = %s\n", search_key(pm_terminals[tn].modifiers[i]));
+	if (pm_terminals[tn].modifiers[i] != 0 &&
+	    pm_terminals[tn].modifiers[i] != ROUTINGKEY) 
+	  fprintf(fh, "modifier = %s\n", 
+		  search_key(pm_terminals[tn].modifiers[i]));
 
       fprintf(fh, "# Commandkey settings:\n");    
       for(i=0; i < CMDMAX; i++) {
 	if (pm_terminals[tn].cmds[i].code != 0) {
-	  fprintf(fh, "%s = %s",
-		  search_cmd(pm_terminals[tn].cmds[i].code),
-		  search_key(pm_terminals[tn].cmds[i].keycode));
+	  char* txtand = "";
+	  fprintf(fh, "%s = ",
+		  search_cmd(pm_terminals[tn].cmds[i].code));
+	  if (pm_terminals[tn].cmds[i].keycode != NOKEY) {
+	    fprintf(fh, "%s ", search_key(pm_terminals[tn].cmds[i].keycode));
+	    txtand = " and ";
+	  }
 	  for(j=0; j < MODMAX; j++)
-	    if ( ((1<<j) &pm_terminals[tn].cmds[i].modifiers)==(1<<j))
-		fprintf(fh, " and %s",
-			search_key(pm_terminals[tn].modifiers[j])); 
-	  fprintf(fh, " %s\n",
+	    if ( ((1<<j) &pm_terminals[tn].cmds[i].modifiers)==(1<<j)) {
+	      fprintf(fh, "%s%s",
+		      txtand, search_key(pm_terminals[tn].modifiers[j])); 
+	      txtand = " and ";
+	    }
+	  fprintf(fh, " # %s\n",
 		  search_help(pm_terminals[tn].cmds[i].code));
 	}
       }
@@ -223,7 +243,7 @@ int main(int argc, char* argv[])
 
   configfile = stdin;
   memset(&pm_terminals, 0, sizeof(pm_terminals));
-  yyparse ();
+  parse ();
   terminals(0, 1);
   return 0;
 }

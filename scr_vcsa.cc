@@ -85,38 +85,63 @@ int vcsa_Screen::set_screen_translation_tables (int force)
 
 int vcsa_Screen::open (int for_csr_routing)
 {
-  if ((fd = ::open (VCSADEV, O_RDWR)) == -1){
-#if 0
-    if(errno == ENOENT){
-      LogPrint(LOG_WARNING,
-               "Cannot find virtual screen device '%s' - creating it.",
-	       VCSADEV);
-      if(mknod(VCSADEV, S_IFCHR | 0600, (7<<8)|128) == 0)
-	fd = ::open (VCSADEV, O_RDONLY);
+  static char *screenDevice = NULL;
+  static char *screenDevices = NULL;
+  if (!screenDevices) {
+    screenDevices = strdupWrapper(VCSADEV);
+    LogPrint(LOG_DEBUG, "Screen device list: %s", screenDevices);
+  }
+  if (!screenDevice) {
+    const char *delimiters = " ";
+    char *devices = screenDevices;
+    char *device;
+    int exists = 0;
+    while ((device = strtok(devices, delimiters))) {
+      device = strdupWrapper(device);
+      LogPrint(LOG_DEBUG, "Checking screen device '%s'.", device);
+      if (access(device, R_OK|W_OK) != -1) {
+	if (screenDevice) free(screenDevice);
+        screenDevice = device;
+	break;
+      }
+      LogPrint(LOG_DEBUG, "Cannot access screen device '%s': %s",
+	       device, strerror(errno));
+      if (errno != ENOENT) {
+        if (!exists) {
+	  exists = 1;
+	  if (screenDevice) {
+	    free(screenDevice);
+	    screenDevice = NULL;
+	  }
+	}
+      }
+      if (screenDevice)
+	free(device);
       else
-	LogPrint(LOG_WARNING, "mknod: %s", strerror(errno));
+	screenDevice = device;
+      devices = NULL;
     }
-#endif
   }
-  if(fd<0){
-    LogPrint(LOG_ERR, "Cannot open virtual screen device '%s': %s",
-	     VCSADEV, strerror(errno));
-    return 1;
+  if (screenDevice) {
+    if ((fd = ::open(screenDevice, O_RDWR)) != -1) {
+      if ((cons_fd = ::open(CONSOLE, O_RDWR|O_NOCTTY)) != -1) {
+	if (for_csr_routing) return 0;
+	LogPrint(LOG_INFO, "Screen Device: %s", screenDevice);
+	if (set_screen_translation_tables(1)) return 0;
+	::close(cons_fd);
+      } else {
+	LogPrint(LOG_ERR, "Cannot open console device '%s': %s",
+		 CONSOLE, strerror(errno));
+      }
+      ::close(fd);
+    } else {
+      LogPrint(LOG_ERR, "Cannot open screen device '%s': %s",
+	       screenDevice, strerror(errno));
+    }
+  } else {
+    LogPrint(LOG_ERR, "Screen device not specified.");
   }
-  if ((cons_fd = ::open (CONSOLE, O_RDWR|O_NOCTTY)) == -1)
-    {
-      LogPrint(LOG_ERR, "Cannot open console device '%s': %s",
-	       CONSOLE, strerror(errno));
-      ::close (fd);
-      return 1;
-    }
-  if (!for_csr_routing)
-    if (!set_screen_translation_tables(1)) {
-      ::close (fd);
-      ::close(cons_fd);
-      return 1;
-    }
-  return 0;
+  return 1;
 }
 
 

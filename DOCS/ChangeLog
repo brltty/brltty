@@ -52,15 +52,20 @@ Note: this file is in reversed chronological order (bottom to top).
       Fixed day-one startup segfault bug.
       Added baudrate parameter.
       Portability fixes.
-   Papenmeier driver enhancements. (dm)
-      Cleaned up log messages.
-      Log display type even if unknown.
-      Fixed type 3 status key assignments: 5-8 -> 6-9.
-      Redefined type 3 front key 13 from cut_beg to cut_end.
-      Renamed environment variable BRLTTY_CONF to BRLTTY_PM_CONF.
-      Key releases no longer interrupt message waits.
-      Remove conditional compiling for debugging.
-      Add driver parameters: configfile, debugreads, debugwrites, debugmodifiers
+   Papenmeier driver enhancements:
+      Remove special case code for routing keys. (ah)
+      Recognize keyword "routing" in configuration file. (ah)
+      Allow routing keys to be bound to modifier keys. (ah)
+      Allow command to be bound to just modifier keys. (ah)
+      Remove yacc noise from make. (dm,ah)
+      Cleaned up log messages. (dm)
+      Log display type even if unknown. (dm)
+      Fixed type 3 status key assignments: 5-8 -> 6-9. (dm)
+      Redefined type 3 front key 13 from cut_beg to cut_end. (dm)
+      Renamed environment variable BRLTTY_CONF to BRLTTY_PM_CONF. (dm)
+      Key releases no longer interrupt message waits. (dm)
+      Remove conditional compiling for debugging. (dm)
+      Add driver parameters: configfile, debugreads, debugwrites, debugmodifiers. (dm)
    TSI driver enhancements. (sd)
       Added bindings for go to beginning/end of current line.
    Cleaned up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
@@ -72,9 +77,11 @@ Note: this file is in reversed chronological order (bottom to top).
    Stop GenericSay from reannouncing BRLTTY version during cursor routing. (dm)
    Add command parameter to GenericSay driver. (dm)
    Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
+   Add ViaVoice driver. (dm)
    List translation tables in make file. (dm)
    Cross-compile support added to make file. (sd,dm)
    INSTALL_ROOT added to make file. (dm)
+   Cleaned up screen device creation in make file. (dm)
    Configuration menu made more user-friendly. (dm,sd)
       Choices are words rather than numbers.
       Only present relevant items.
@@ -98,6 +105,11 @@ Note: this file is in reversed chronological order (bottom to top).
       Added to BrailleNote driver. (dm)
       Added to TSI driver. (sd)
    Maintain reverse text translation table for input from braille display. (dm,sd)
+   Get font data from kernel rather than guess at it by probing. (sd)
+   Handle font change and screen size change. (sd)
+   Search list of known screen device names (/dev/vcsa0 /dev/vcsa /dev/vcc/a)
+      rather than just check for /dev/vcsa0. (dm)
+   Don't use LOG_CONS option of syslog uhtil in the background. (dm)
    Converted CMD_ from defines to enum. (dm)
       CombiBraille: tables.h converted to cmdtrans.h, argtrans removed.
    Converted CMD_KEY_... commands to VAL_PASSKEY+VPK_... mechanism. (dm)

@@ -43,8 +43,9 @@ BRL_LFLAGS = -shared
 BRL_SO_NAME = $(LIB_SO_NAME)b
 BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).so.$(LIB_VER)
 BRL_FILE = $(LIBDIR)/$(BRL_NAME)
+BRL_OBJS =
 $(BRL_FILE): brl.o
-	$(LD) $(BRL_LFLAGS) -soname $(BRL_NAME) -o $(BRL_FILE) brl.o -lc
+	$(LD) $(BRL_LFLAGS) -soname $(BRL_NAME) -o $(BRL_FILE) brl.o $(BRL_OBJS) -lc
 
 braille-driver: $(BRL_FILE)
 
@@ -53,8 +54,9 @@ SPK_LFLAGS = -shared
 SPK_SO_NAME = $(LIB_SO_NAME)s
 SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).so.$(LIB_VER)
 SPK_FILE = $(LIBDIR)/$(SPK_NAME)
+SPK_OBJS =
 $(SPK_FILE): speech.o
-	$(LD) $(SPK_LFLAGS) -soname $(SPK_NAME) -o $(SPK_FILE) speech.o -lc
+	$(LD) $(SPK_LFLAGS) -soname $(SPK_NAME) -o $(SPK_FILE) speech.o $(SPK_OBJS) -lc
 
 speech-driver: $(SPK_FILE)
 

@@ -44,6 +44,11 @@ static int displayTerminal;
 #include "../misc.h"
 #include "../message.h"
 #include "brlconf.h"
+
+typedef enum {
+   PARM_STATUSCELLS
+} DriverParameter;
+#define BRLPARMS "statuscells"
 #include "../brl_driver.h"
 
 static int fileDescriptor = -1;
@@ -360,6 +365,20 @@ identbrl (void)
    LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
 
+static void adjustStatusCells (brldim *brl, const char *parameter)
+{
+   if (*parameter) {
+      const int minimum = 0;
+      const int maximum = MIN(MAXNSTATCELLS, brl->x-1);
+      if (validateInteger(&statusCells, "status cell count", parameter, &minimum, &maximum)) {
+         statusArea = dataArea;
+	 dataArea = statusArea + statusCells;
+	 brl->x -= statusCells;
+	 dataCells -= statusCells;
+      }
+   }
+}
+
 static void
 initbrl (char **parameters, brldim *brl, const char *device)
 {
@@ -400,6 +419,7 @@ initbrl (char **parameters, brldim *brl, const char *device)
 				 temporaryKeyboardMode = persistentKeyboardMode;
 				 persistentRoutingOperation = CR_ROUTEOFFSET;
 				 temporaryRoutingOperation = persistentRoutingOperation;
+				 adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
 				 return;
 			      }
 			      free(outputBuffer);

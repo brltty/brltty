@@ -1,7 +1,7 @@
 README file for the Papenmeier Driver
 =====================================
 
-Version 2.0 (April 2000)
+Version 2.1 (October 2001)
 
 Copyright
 =========
@@ -111,6 +111,7 @@ blinkattr - blinking of attribute underlining
 Key definition:
 status NUMBER     - key on status cell
 front NUMBER      - key on the front side of the terminal
+routing           - one of the routing keys is pressed
 easy DESCR        - easy bar key 
   DESCR may be: left, left2, up, up2, down, down2, right, right2
 switch NUMBER     - switches on the left and right side of the 
@@ -124,53 +125,80 @@ Commandkey settings:
 list of definitions:
  command = key 
  command = key and modifier
-a list of the possible commands (see brl.h and/or Papenmeier/hlp.h), the
-names may be used with or without the leading CMD_:
-NOOP - do nothing - a blank keystroke
+The command will generated on keypress; if you specify only modifiers 
+the command will be stored and be generated when the last modifier is 
+released.
+A list of the possible commands (the following list is sometimes out of 
+date - see brl.h and/or Papenmeier/hlp.h for the actual values), the names 
+may be used with or without the leading CMD_:
+NOOP - do nothing
 LNUP - go up one line
-PRDIFLN - go to prev different screen line
 LNDN - go down one line
-NXDIFLN - go to next different screen line
-ATTRUP - go to previous line with differing attributes
-ATTRDN - go to next line with differing attributes
-WINUP - go up one window
-WINDN - go down one window
-TOP - go to top of screen
-BOT - go to bottom of screen
+WINUP - go up several lines
+WINDN - go down several lines
+PRDIFLN - go up to line with different content
+NXDIFLN - go down to line with different content
+ATTRUP - go up to line with different attributes
+ATTRDN - go down to line with different attributes
+PRBLNKLN - go to last line of previous paragraph
+NXBLNKLN - go to first line of next paragraph
+PRSEARCH - search up for content of cut buffer
+NXSEARCH - search down for content of cut buffer
+TOP - go to top line
+BOT - go to bottom line
+TOP_LEFT - go to top-left corner
+BOT_LEFT - go to bottom-left corner
+CHRLT - go left one character
+CHRRT - go right one character
 HWINLT - go left one half window
 HWINRT - go right one half window
 FWINLT - go left one full window
 FWINRT - go right one full window
-LNBEG - go to beginning (start) of line
+FWINLTSKIP - go left to non-blank window
+FWINRTSKIP - go right to non-blank window
+LNBEG - go to beginning of line
 LNEND - go to end of line
-CHRLT - go left one character
-CHRRT - go right one character
-TOP_LEFT - go to top of screen
-BOT_LEFT - go to bottom of screen
-HOME - go back to cursor
-CSRTRK - toggle cursor tracking
-DISPMD - Toggle attribute display
-FREEZE - freeze the screen
-HELP - display help
-INFO - get status information
-RESTARTBRL - reinitialize braille display
-CSRJMP - jump cursor to window (cursor routing)
-CSRJMP_VERT - jump cursor to window's line (routing)
-CUT_BEG - cut text begin - use routing keys
-CUT_END - cut text end - use routing keys
-PASTE - insert text
-CONFMENU - enter configuration menu
-SAVECONF - save brltty configuration
-RESET - restore saved (or default) settings
-CSRVIS - toggle cursor visibility
-CSRSIZE - toggle cursor size
-CSRBLINK - toggle cursor blink
-CAPBLINK - toggle capital letter blink
-ATTRVIS - toggle attribute underlining
-ATTRBLINK - toggle blinking of attribute underlining
-SIXDOTS - toggle six-dot mode
-SLIDEWIN - toggle sliding window
-SKPIDLNS - toggle skipping of identical lines
+HOME - go to cursor
+BACK - go to last motion
+CSRJMP - route cursor to top-left corner of braille window
+CSRJMP_VERT - route cursor to top line of window
+CUT_BEG - cut text from top-left corner of braille window
+CUT_END - cut text to bottom-right corner of braille window
+PASTE - insert cut buffer at cursor
+FREEZE - freeze/unfreeze screen
+DISPMD - toggle display attributes/text
+SIXDOTS - toggle text style 6-dot/8-dot
+SLIDEWIN - toggle sliding window on/off
+SKPIDLNS - toggle skipping of identical lines on/off
+SKPBLNKWINS - toggle skipping of blank windows on/off
+CSRVIS - toggle cursor visibility on/off
+CSRHIDE_QK - toggle quick hide of cursor
+CSRTRK - toggle cursor tracking on/off
+CSRSIZE - toggle cursor style underline/block
+CSRBLINK - toggle cursor blinking on/off
+ATTRVIS - toggle attribute underlining on/off
+ATTRBLINK - toggle attribute blinking on/off
+CAPBLINK - toggle capital letter blinking on/off
 SND - toggle sound on/off
-SAY - sound on
-MUTE - sound off
+HELP - display driver help
+INFO - display status summary
+PREFMENU - present preferences menu
+PREFSAVE - save preferences
+PREFLOAD - reload preferences
+SAY - speak current line
+SAYALL - speak rest of screen
+MUTE - stop speaking immediately
+SPKHOME - goto current/last speech position
+SWITCHVT_PREV - switch to previous virtual terminal
+SWITCHVT_NEXT - switch to next virtual terminal
+RESTARTBRL - reinitialize braille driver
+RESTARTSPEECH - reinitialize speech driver
+Values to be used in combination with "routing":
+names may be used with or without the leading CR_:
+ROUTEOFFSET - route cursor to character
+BEGBLKOFFSET - define the beginning of a block
+ENDBLKOFFSET - define the end of a block
+SWITCHVT - switch virtual terminal
+NXINDENT - find next line not more indented than routing key indicates
+PRINDENT - find previous line not more indented than routing key indicates
+MSGATTRIB - message attributes of character

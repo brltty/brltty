@@ -1,4 +1,4 @@
-BRLTTY speech driver for 'GEneric_say'
+BRLTTY speech driver for "GEnericSay"
 
 This driver is intended to be used with any speech synthesis program
 like the rsynth package.

@@ -41,7 +41,7 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99u";
+char VERSION[] = "BRLTTY 2.99v";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 int cycleDelay = CYCLE_DELAY;
@@ -68,9 +68,6 @@ unsigned int TickCount = 0;	/* incremented each main loop cycle */
 /*
  * useful macros
  */
-
-#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 
 #define BRL_ISUPPER(c) \
 	(isupper (c) || (c) == '@' || (c) == '[' || (c) == '^' || \
@@ -138,7 +135,7 @@ exitLog (void) {
   /* Reopen syslog (in case -e closed it) so that there will
    * be a "stopped" message to match the "starting" message.
    */
-  LogOpen();
+  LogOpen(0);
   LogPrint(LOG_INFO, "Terminated.");
   LogClose();
 }
@@ -157,12 +154,12 @@ terminateProgram (int quickly) {
   message("BRLTTY exiting.", 
 	  MSG_NODELAY | (silently? MSG_SILENT: 0));
   if (!silently) {
-    int trackingSpeech = speech->isSpeaking();
+    int awaitSilence = speech->isSpeaking();
     int i;
     for (i=0; i<messageDelay; i+=readDelay) {
       delay(readDelay);
       if (braille->read(CMDS_MESSAGE) != EOF) break;
-      if (trackingSpeech) {
+      if (awaitSilence) {
 	speech->processSpkTracking();
 	if (!speech->isSpeaking()) break;
       }
@@ -318,7 +315,7 @@ main (int argc, char *argv[])
   short speaking_scrno = -1, speaking_prev_inx = -1, speaking_start_line = 0;
 
   /* Open the system log. */
-  LogOpen();
+  LogOpen(0);
   LogPrint(LOG_INFO, "Starting.");
   atexit(exitLog);
 
@@ -813,7 +810,7 @@ main (int argc, char *argv[])
 		dispmd = selectdisp (dispmd | HELP_SCRN);
 		if (dispmd & HELP_SCRN) /* help screen selection successful */
 		  {
-		    switchto( 0 );	/* screen 0 for help screen */
+		    switchto(0);	/* screen 0 for help screen */
 		    *p = initparam;	/* reset params for help screen */
 		  }
 		else	/* help screen selection failed */
@@ -1178,9 +1175,24 @@ main (int argc, char *argv[])
       /* NB: This should also accomplish screen resizing: scr.rows and
        * scr.cols may have changed.
        */
-      if (p->winy >= scr.rows || p->winx >= scr.cols)
-	/* just reset everything. */
-	*p = initparam;
+      {
+        short maximum = scr.rows - brl.y;
+	short *table[] = {&p->winy, &p->moty, NULL};
+	short **value = table;
+	while (*value) {
+	  if (**value > maximum) **value = maximum;
+	  ++value;
+	}
+      }
+      {
+        short maximum = scr.cols - offr;
+	short *table[] = {&p->winx, &p->motx, NULL};
+	short **value = table;
+	while (*value) {
+	  if (**value > maximum) **value = maximum;
+	  ++value;
+	}
+      }
 
       /* speech tracking */
       speech->processSpkTracking(); /* called continually even if we're not tracking

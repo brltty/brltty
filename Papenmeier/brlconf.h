@@ -36,6 +36,8 @@
  * only the builtin table is used for character translation
  */
 
+#include "../config.h"
+
 #define BRLNAME	"Papenmeier"
 
 #define BRLCOLSMAX   80 
@@ -60,6 +62,6 @@
 #define PREFSTYLE ST_Papenmeier
 
 #define CONFIG_ENV   "BRLTTY_PM_CONF"
-#define CONFIG_FILE  "/etc/brltty/brltty.pm.conf"
+//#define CONFIG_FILE  "/etc/brltty/brltty.pm.conf"
 
 #define MAXPATH  128

@@ -103,8 +103,8 @@ static void initspk (char **parameters)
     *s_uid = parameters[PARM_UID],
     *s_gid = parameters[PARM_GID];
 
-  if(!extProgPath) extProgPath = HELPER_PROG_PATH;
-  if(s_uid) {
+  if(!*extProgPath) extProgPath = HELPER_PROG_PATH;
+  if(*s_uid) {
     char *ptr;
     uid = strtol(s_uid, &ptr, 0);
     if(*ptr != 0) {
@@ -112,7 +112,7 @@ static void initspk (char **parameters)
       return;
     }
   }else uid = UID;
-  if(s_gid) {
+  if(*s_gid) {
     char *ptr;
     gid = strtol(s_gid, &ptr, 0);
     if(*ptr != 0) {

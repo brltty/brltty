@@ -36,9 +36,6 @@
    66, "BRAILLEX EL-80",	  '8', 80, 1,  2,  0,  1
  */
 
-//#define CUT_BEGIN 1000
-//#define CUT_END   1001
-
 #define STAT_empty     0
 /* other STAT_* moved to ../brl.h */
 
@@ -47,6 +44,10 @@
 #define OFFS_ROUTE   2000  
 #define OFFS_EASY    3000
 #define OFFS_SWITCH  4000
+#define OFFS_CR      5000
+
+#define ROUTINGKEY      -9999  /* virtual routing key */
+#define NOKEY           -1
 
 #define KEYMAX 8
 
@@ -101,30 +102,36 @@ typedef struct {
  /* commands for 9 front keys */
 #define MOD_FRONT_9 \
      OFFS_FRONT + 1, \
-     OFFS_FRONT + 9
+     OFFS_FRONT + 9, \
+     OFFS_FRONT + 2, \
+     OFFS_FRONT + 8
 
 #define CMD_FRONT_9 \
-     { CMD_CUT_BEG, OFFS_FRONT +  2, 0 }, \
+     { CR_BEGBLKOFFSET,  ROUTINGKEY, 4 }, \
      { CMD_WINUP,   OFFS_FRONT +  3, 0 }, \
-      { CMD_TOP,     OFFS_FRONT +  3, 1 }, \
-      { CMD_TOP,     OFFS_FRONT +  3, 2 }, \
+     { CMD_TOP,     OFFS_FRONT +  3, 1 }, \
+     { CMD_TOP,     OFFS_FRONT +  3, 2 }, \
      { CMD_LNUP,    OFFS_FRONT +  4, 0 }, \
-      { CMD_PRDIFLN, OFFS_FRONT +  4, 1 }, \
-      { CMD_ATTRUP, OFFS_FRONT +  4, 2 }, \
-   { CMD_HWINLT,    OFFS_FRONT +  5, 1 }, \
-  { CMD_HOME,    OFFS_FRONT +  5, 0 }, \
-   { CMD_HWINRT,    OFFS_FRONT +  5, 2 }, \
+     { CMD_PRDIFLN, OFFS_FRONT +  4, 1 }, \
+     { CMD_ATTRUP,  OFFS_FRONT +  4, 2 }, \
+     { CMD_HWINLT,  OFFS_FRONT +  5, 1 }, \
+     { CMD_HOME,    OFFS_FRONT +  5, 0 }, \
+     { CMD_HWINRT,  OFFS_FRONT +  5, 2 }, \
      { CMD_LNDN,    OFFS_FRONT +  6, 0 }, \
-      { CMD_NXDIFLN, OFFS_FRONT + 6, 1 }, \
-      { CMD_ATTRDN, OFFS_FRONT +  6, 2 }, \
+     { CMD_NXDIFLN, OFFS_FRONT + 6, 1 },  \
+     { CMD_ATTRDN,  OFFS_FRONT +  6, 2 }, \
      { CMD_WINDN,   OFFS_FRONT +  7, 0 }, \
-      { CMD_BOT,     OFFS_FRONT +  7, 1 }, \
-      { CMD_BOT,     OFFS_FRONT +  7, 2 }, \
-     { CMD_CUT_END, OFFS_FRONT +  8, 0 }
+     { CMD_BOT,     OFFS_FRONT +  7, 1 }, \
+     { CMD_BOT,     OFFS_FRONT +  7, 2 }, \
+     { CR_ENDBLKOFFSET,  ROUTINGKEY, 8 }, \
+     { CR_ROUTEOFFSET,   ROUTINGKEY, 0 }
+
 
 #define MOD_SWITCH    \
      OFFS_SWITCH + 1, \
-     OFFS_SWITCH + 2
+     OFFS_SWITCH + 2, \
+     OFFS_SWITCH + 7, \
+     OFFS_SWITCH + 8
 
 #define CMD_STAT_2 \
       { CMD_HELP,        OFFS_STAT +  1, 0 }, \
@@ -157,8 +164,9 @@ typedef struct {
      { CMD_HOME,    OFFS_EASY + EASY_LE2, 0 }, \
      { CMD_HOME,    OFFS_EASY + EASY_RI2, 0 }, \
      { CMD_PASTE,   OFFS_SWITCH + 6, 0 }, \
-     { CMD_CUT_BEG, OFFS_SWITCH + 7, 0 }, \
-     { CMD_CUT_END, OFFS_SWITCH + 8, 0 }
+     { CR_BEGBLKOFFSET, ROUTINGKEY, 4 },     \
+     { CR_ENDBLKOFFSET, ROUTINGKEY, 8 },  \
+     { CR_ROUTEOFFSET,   ROUTINGKEY, 0 }
 
 /* 13 status cells: info to show */
 #define SHOW_STAT_13 \
@@ -175,6 +183,81 @@ typedef struct {
       OFFS_FLAG + STAT_visible,  \
       OFFS_FLAG + STAT_size,     \
       STAT_empty               
+
+/* 22 status cells: info to show */
+#define SHOW_STAT_22 \
+      OFFS_HORIZ + STAT_current, \
+      STAT_empty,                \
+      OFFS_HORIZ + STAT_row,     \
+      OFFS_HORIZ + STAT_col,     \
+      STAT_empty,                \
+      OFFS_FLAG + STAT_tracking, \
+      OFFS_FLAG + STAT_dispmode, \
+      STAT_empty,                \
+      OFFS_FLAG + STAT_frozen,   \
+      STAT_empty,                \
+      STAT_empty,                \
+      STAT_empty,                \
+      OFFS_FLAG + STAT_visible,  \
+      OFFS_FLAG + STAT_size,     \
+      OFFS_FLAG + STAT_blink,    \
+      OFFS_FLAG + STAT_capitalblink,   \
+      OFFS_FLAG + STAT_dots,     \
+      OFFS_FLAG + STAT_sound,    \
+      OFFS_FLAG + STAT_skip,     \
+      OFFS_FLAG + STAT_underline, \
+      OFFS_FLAG + STAT_blinkattr, 
+
+	/* commands for 13 front keys */
+#define MOD_FRONT_13 \
+     OFFS_FRONT + 1, \
+     OFFS_FRONT + 13
+
+#define CMD_FRONT_13 \
+      { CR_BEGBLKOFFSET, ROUTINGKEY, 1 },   \
+      { CMD_ATTRUP,   OFFS_FRONT +  2, 0 }, \
+      { CMD_WINUP,    OFFS_FRONT +  3, 0 }, \
+      { CMD_PRDIFLN,  OFFS_FRONT +  4, 0 }, \
+      { CMD_LNUP,     OFFS_FRONT +  5, 0 }, \
+      { CMD_TOP,      OFFS_FRONT +  6, 0 }, \
+      { CMD_HOME,     OFFS_FRONT +  7, 0 }, \
+      { CMD_BOT,      OFFS_FRONT +  8, 0 }, \
+      { CMD_LNDN,     OFFS_FRONT +  9, 0 }, \
+      { CMD_NXDIFLN,  OFFS_FRONT + 10, 0 }, \
+      { CMD_WINDN,    OFFS_FRONT + 11, 0 }, \
+      { CMD_ATTRDN,   OFFS_FRONT + 12, 0 }, \
+      { CMD_PASTE, NOKEY, 3 }, \
+      { CR_ENDBLKOFFSET, ROUTINGKEY, 2 },   \
+      { CR_ROUTEOFFSET,  ROUTINGKEY, 0 }
+	
+	/* commands for 22 status keys */
+#define CMD_STAT_22 \
+      { CMD_HELP,        OFFS_STAT +  1, 0 }, \
+      { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 }, \
+      { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0 }, \
+      { CMD_BACK,        OFFS_STAT +  4, 0 }, \
+                                              \
+      { CMD_CSRTRK,      OFFS_STAT +  6, 0 }, \
+      { CMD_DISPMD,      OFFS_STAT +  7, 0 }, \
+      { CMD_INFO,        OFFS_STAT +  8, 0 }, \
+      { CMD_FREEZE,      OFFS_STAT +  9, 0 }, \
+                                              \
+      { CMD_PREFMENU,    OFFS_STAT + 10, 0 }, \
+      { CMD_PREFSAVE,    OFFS_STAT + 11, 0 }, \
+      { CMD_PREFLOAD,    OFFS_STAT + 12, 0 }, \
+      { CMD_CSRVIS,      OFFS_STAT + 13, 0 }, \
+      { CMD_CSRSIZE,     OFFS_STAT + 14, 0 }, \
+                                              \
+      { CMD_CSRBLINK,    OFFS_STAT + 15, 0 }, \
+      { CMD_CAPBLINK,    OFFS_STAT + 16, 0 }, \
+      { CMD_SIXDOTS,     OFFS_STAT + 17, 0 }, \
+      { CMD_SND,         OFFS_STAT + 18, 0 }, \
+      { CMD_SKPIDLNS,    OFFS_STAT + 19, 0 }, \
+                                              \
+      { CMD_ATTRVIS,     OFFS_STAT + 20, 0 }, \
+      { CMD_ATTRBLINK,   OFFS_STAT + 21, 0 }, \
+      { CMD_PASTE,       OFFS_STAT + 22, 0 }
+
 
 static one_terminal pm_terminals[] =
 {
@@ -243,72 +326,14 @@ static one_terminal pm_terminals[] =
     13,				/* number of frontkeys */
     0,				/* terminal has an easy bar */
     { /* 22 */			/* status cells: info to show */
-      OFFS_HORIZ + STAT_current,
-      STAT_empty,
-      OFFS_HORIZ + STAT_row,
-      OFFS_HORIZ + STAT_col,
-      STAT_empty,
-      OFFS_FLAG + STAT_tracking,
-      OFFS_FLAG + STAT_dispmode,
-      STAT_empty,
-      OFFS_FLAG + STAT_frozen,
-      STAT_empty,
-      STAT_empty,
-      STAT_empty,
-      OFFS_FLAG + STAT_visible,
-      OFFS_FLAG + STAT_size,
-      OFFS_FLAG + STAT_blink,
-      OFFS_FLAG + STAT_capitalblink,
-      OFFS_FLAG + STAT_dots,
-      OFFS_FLAG + STAT_sound,
-      OFFS_FLAG + STAT_skip,
-      OFFS_FLAG + STAT_underline,
-      OFFS_FLAG + STAT_blinkattr, 
+      SHOW_STAT_22
     },
     {				/* modifiers */
+      MOD_FRONT_13
     },
     {				/* commands + keys */
- 				/* commands for 13 front keys */
-      { CMD_CUT_BEG,  OFFS_FRONT +  1, 0 },
-      { CMD_ATTRUP,   OFFS_FRONT +  2, 0 },
-      { CMD_WINUP,    OFFS_FRONT +  3, 0 },
-      { CMD_PRDIFLN,  OFFS_FRONT +  4, 0 },
-      { CMD_LNUP,     OFFS_FRONT +  5, 0 },
-      { CMD_TOP,      OFFS_FRONT +  6, 0 },
-      { CMD_HOME,     OFFS_FRONT +  7, 0 },
-      { CMD_BOT,      OFFS_FRONT +  8, 0 },
-      { CMD_LNDN,     OFFS_FRONT +  9, 0 },
-      { CMD_NXDIFLN,  OFFS_FRONT + 10, 0 },
-      { CMD_WINDN,    OFFS_FRONT + 11, 0 },
-      { CMD_ATTRDN,   OFFS_FRONT + 12, 0 },
-      { CMD_CUT_END,  OFFS_FRONT + 13, 0 },
-
- 				/* commands for 22 status keys */
-      { CMD_HELP,        OFFS_STAT +  1, 0 },
-      { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 },
-      { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0 },
-      { CMD_BACK,        OFFS_STAT +  4, 0 },
-
-      { CMD_CSRTRK,      OFFS_STAT +  6, 0 },
-      { CMD_DISPMD,      OFFS_STAT +  7, 0 },
-      { CMD_INFO,        OFFS_STAT +  8, 0 },
-      { CMD_FREEZE,      OFFS_STAT +  9, 0 },
-
-      { CMD_PREFMENU,    OFFS_STAT + 10, 0 },
-      { CMD_PREFSAVE,    OFFS_STAT + 11, 0 },
-      { CMD_PREFLOAD,    OFFS_STAT + 12, 0 },
-      { CMD_CSRVIS,      OFFS_STAT + 13, 0 },
-      { CMD_CSRSIZE,     OFFS_STAT + 14, 0 },
- 
-      { CMD_CSRBLINK,    OFFS_STAT + 15, 0 },
-      { CMD_CAPBLINK,    OFFS_STAT + 16, 0 },
-      { CMD_SIXDOTS,     OFFS_STAT + 17, 0 },
-      { CMD_SND,         OFFS_STAT + 18, 0 },
-      { CMD_SKPIDLNS,    OFFS_STAT + 19, 0 },
- 
-      { CMD_ATTRVIS,     OFFS_STAT + 20, 0 },
-      { CMD_ATTRBLINK,   OFFS_STAT + 21, 0 },
-      { CMD_PASTE,       OFFS_STAT + 22, 0 }
+      CMD_FRONT_13,
+      CMD_STAT_22
     },
   },
 

@@ -36,7 +36,7 @@
 #include "../brl_driver.h"
 
 /* Command translation table: */
-static unsigned char cmdtrans[256] = {
+static int cmdtrans[0X100] = {
    #include "cmdtrans.h"		/* for keybindings */
 };
 
@@ -268,32 +268,23 @@ writebrl (brldim *brl)
 static int
 readbrl (DriverCommandContext cmds)
 {
-  int c;
-  static short status = 0;	/* cursor routing keys mode */
-
-  c = getbrlkey ();
-  if (c == EOF)
-    return EOF;
-  c = cmdtrans[c];
-  if (c == 1 || c == 2)
-    {
-      status = c;
-      return EOF;
-    }
-  if (c & 0x80)			/* cursor routing keys */
-    switch (status)
-      {
-      case 0:			/* ordinary cursor routing */
-	return (c ^ 0x80) + CR_ROUTEOFFSET;
-      case 1:			/* begin block */
-	status = 0;
-	return (c ^ 0x80) + CR_BEGBLKOFFSET;
-      case 2:			/* end block */
-	status = 0;
-	return (c ^ 0x80) + CR_ENDBLKOFFSET;
+  static int status = 0;	/* cursor routing keys mode */
+  int cmd = getbrlkey();
+  if (cmd != EOF) {
+    int rng = (cmd = cmdtrans[cmd]) & ~VAL_ARG_MASK;
+    if (rng) {
+      int arg = cmd & VAL_ARG_MASK;
+      if (arg == VAL_ARG_MASK) {
+        status = rng;
+	return CMD_NOOP;
       }
-  status = 0;
-  return c;
+      if (status && (rng == CR_ROUTEOFFSET)) {
+        cmd = status + arg;
+      }
+    }
+    status = 0;
+  }
+  return cmd;
 }
 
 

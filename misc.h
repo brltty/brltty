@@ -21,6 +21,9 @@
 /* misc.h - Header file for miscellaneous all-purpose routines
  */
 
+#define MIN(a, b)  (((a) < (b))? (a): (b)) 
+#define MAX(a, b)  (((a) > (b))? (a): (b)) 
+	
 // Process each line of an input text file safely.
 // This routine handles the actual reading of the file,
 // insuring that the input buffer is always big enough,
@@ -71,7 +74,7 @@ extern int timeout_yet (int msec);	/* test timeout condition */
       LOG_DEBUG
    } SyslogLevel;
 #endif
-extern void LogOpen(void);
+extern void LogOpen(int toConsole);
 extern void LogClose(void);
 extern void LogPrint(int level, char *format, ...);
 extern void LogError (const char *action);
@@ -82,15 +85,15 @@ extern int ProblemCount;
 
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
-extern char *strdupWrapper (char *string);
+extern char *strdupWrapper (const char *string);
 
-extern int validateInteger (int *integer, char *description, char *value, int *minimum, int *maximum);
-extern int validateBaud (speed_t *baud, char *description, char *value, unsigned int *choices);
+extern int validateInteger (int *integer, const char *description, const char *value, const int *minimum, const int *maximum);
+extern int validateBaud (speed_t *baud, const char *description, const char *value, const unsigned int *choices);
 extern int baud2integer (speed_t baud);
-extern int validateChoice (unsigned int *choice, char *description, char *value, char **choices);
-extern int validateFlag (unsigned int *flag, char *description, char *value, char *on, char *off);
-extern int validateOnOff (unsigned int *flag, char *description, char *value);
-extern int validateYesNo (unsigned int *flag, char *description, char *value);
+extern int validateChoice (unsigned int *choice, const char *description, const char *value, const char *const *choices);
+extern int validateFlag (unsigned int *flag, const char *description, const char *value, const char *on, const char *off);
+extern int validateOnOff (unsigned int *flag, const char *description, const char *value);
+extern int validateYesNo (unsigned int *flag, const char *description, const char *value);
 
 /* Formatting of status cells. */
 extern int landscape_number(int x);

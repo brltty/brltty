@@ -1,19 +1,9 @@
 BRLTTY - A background process providing access to the Linux console (when in
          text mode) for a blind person using a refreshable braille display.
 
-Version 2.99 (beta), June 2001
+Version 2.99v, October 2001
 
-Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
-
-Web Page: http://www.cam.org/~nico/brltty
-
-If you have any interest in BRLTTY, please drop us a note. We are
-interested in knowing who BRLTTY users are and how many there are. Even if
-all goes well and you have no problems with this package, please let us
-know you're there and tell us which brand of display you use. If you have
-problems, we will be happy to help.  If you have suggestions, comments or
-if you wish to contribute, you are welcome! 
-
+Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
 
 BRLTTY comes with ABSOLUTELY NO WARRANTY.
 
@@ -21,188 +11,209 @@ This is free software, placed under the terms of the
 GNU General Public License, as published by the Free Software
 Foundation.  Please see the file COPYING for details.
 
-This software is maintained by Nicolas Pitre <nico@cam.org>.
+Web Page: http://mielke.cc/brltty/
 
------------------------------------------------------------------------------
+This software is maintained by Dave Mielke <dave@mielke.cc>.
 
+If you have any interest in BRLTTY, please drop us a note. We're interested in
+knowing who the BRLTTY users are, and how many there are. Even if all goes well
+and you have no problems with this package, please let us know you're there,
+and tell us which brand of display you use. If you have problems, we will be
+happy to help. If you have suggestions or comments, or if you wish to
+contribute, you're welcome!
 
-INTRODUCTION FOR THOSE NEW TO SOFT BRAILLE
+-------------------------------------------------------------------------------
+
+Introduction for Those New to Soft Braille
 ==========================================
 
-There are two common ways in which blind people access computers.  The 
-first, and more widely known, is synthesized speech, which, while having 
-many advantages (e.g. speed for reading plain text), does have its 
-drawbacks: speech output generally gives little information about 
-formatting, making tables, spreadsheets etc. difficult to use; it can also 
-be difficult to use speech output with particularly technical material 
-containing lots of symbols (though many determined people do use it for 
-such things).
+There are two common ways in which blind people access computers. 
 
-The other solution, which attempts to answer some of these problems, is 
-Braille output.  A soft (or refreshable) Braille display typically consists 
-of a single row of either 20, 40 or 80 characters, each made up of a matrix 
-of 4X2 (4 down, 2 across) dots.  Each dot is individually driven by a 
-separate motor, making the whole assembly extremely expensive.
+The first, and more widely known, is synthesized speech. While having many
+advantages, e.g. speed for reading plain text, speech does have its drawbacks.
+Speech output generally gives little information about formatting, making
+tables, spreadsheets, etc. difficult to use. It can also be difficult to use
+speech output with particularly technical material containing lots of symbols
+(though many determined people do use it for such things).
 
-A soft Braille display would connect to a PC by either the serial or 
-parallel port.  Software on the PC drives the display, reproducing a 
-rectangle of the screen image (which we will call the window) in Braille.  
-Buttons on the Braille display itself are used to send signals back to the 
-software, instructing it to move the window around the screen, or some 
-other specialised function.
+The other solution, which attempts to answer some of these problems, is Braille
+output. A soft (or refreshable) Braille display typically consists of a single
+line of 20, 40 or 80 characters, each made up of a matrix of four rows and two
+columns of dots. Each dot is individually driven by a separate motor, making
+the whole assembly extremely expensive.
 
-With a soft Braille display of 40 or 80 cells, it is quite easy for a blind 
-user to appreciate the format of information on the screen, and even allows 
-the reading and editing of on-line Braille documents (a concept not widely 
-enough utilised).
+A soft Braille display is connected to the PC by a serial, parallel, or USB
+port. Software on the PC drives the display, reproducing a rectangle of the
+screen image (which we shall call the window) in Braille. Buttons on the
+Braille display itself are used to send signals back to the software,
+instructing it to move the window around the screen, or to perform some other
+specialized function.
 
+Using a soft Braille display with a 40- or 80-character line, it is quite easy
+for a blind user to appreciate the format of information on the screen, as well
+as to read and edit on-line Braille documents (a concept not widely enough
+utilized).
 
-INTRODUCTION TO BRLTTY
+-------------------------------------------------------------------------------
+
+Introduction to BRLTTY
 ======================
 
-While soft Braille displays have been used for many years under MS-DOS,
-and are even being used under Windows now, it seems that they have
-not been used on Unix consoles so much.  This could well be because blind
-people have been able to access Unix systems through accessible terminals. 
-With the advent of PC-based Unix systems (such as Linux), the need becomes
-evident. 
+While soft Braille displays have been used for many years under MS-DOS, and are
+now being used under Windows, it seems that they haven't been used on Unix
+consoles too much. This could well be because blind people have been able to
+access Unix systems through accessible terminals. With the advent of PC-based
+Unix systems, e.g. Linux, the need has become evident.
 
-BRLTTY attempts to fill this gap.  It runs as a daemon, possibly started
-at boot-time, and allows a soft Braille user to access text mode
-applications directly from the Linux's virtual consoles.  Since BRLTTY is
-written as a daemon, it should allow a user a completely free choice of
-application and development tools. 
+BRLTTY attempts to fill this gap. It runs as a background process, possibly
+started at boot-time, and allows a soft Braille user to access text mode
+applications directly from Linux's virtual consoles. Since BRLTTY runs as a
+background process, it gives the user complete freedom of choice regarding
+applications and development tools.
 
+-------------------------------------------------------------------------------
 
-FEATURES
+Features
 ========
 
-  -  Full implementation of the standard screen review facilities.
-  -  A wide range of additional optional features, including blinking 
-     cursor and capital letters, screen freezing for leisurely review,
-     attribute display and attribute underlining to locate highlighted text,
-     hypertext links, etc.
-  -  `Intelligent' cursor routing.  This allows easy movement of the cursor
-     in text editors etc. without moving the hands from the Braille 
-     display.
-  -  A cut & paste function.  This is particularly useful for copying long
-     filenames, complicated commands etc.
-  -  An on-line help facility.
-  -  A configuration menu.
-  -  Support for multiple Braille codes.
-  -  Modular design allows relatively easy addition of drivers for other
-     Braille displays, or even (hopefully) porting to other Unix-like
-     platforms.
-  -  Basic speech complement support.
+*  Full implementation of the usual screen review facilities.
+*  Choice between `block', `underline', or `no' cursor.
+*  Optional `underline' to indicate specially highlighted text.
+*  Optional use of `blinking' (rates individually settable) for cursor, special highlighting underline,
+   and/or capital letters.
+*  Screen freezing for leisurely review.
+*  `Intelligent' cursor routing, allowing easy fetching of cursor within text
+   editors, web browsers, etc., without moving ones hands from the Braille
+   display.
+*  A cut & paste function which is particularly useful for copying long file
+   names, copying text between virtual terminals, entering complicated
+   commands, etc.
+*  An on-line help facility.
+*  A preferences menu.
+*  Support for multiple Braille codes.
+*  Modular design allowing relatively easy addition of drivers for other
+   Braille displays, or even (hopefully) porting to other Unix-like platforms.
+*  Basic speech support.
 
+-------------------------------------------------------------------------------
 
-CURRENTLY SUPPORTED HARDWARE
+Currently Supported Hardware
 ============================
 
-BRLTTY requires Linux kernel 1.1.92 or later (for `/dev/vcsa0').  It has
-been tested on
+BRLTTY requires Linux kernel 1.1.92 or later (for /dev/vcsa0 (also known as
+/dev/vcsa and /dev/vcc/a)). It has been tested on
 
-  -  a variety of Intel based PCs: both laptops and desktops; 
-  -  an Alpha workstation;
-  -  a StrongARM based Netwinder;
-  -  a number of Linux kernels, from 1.2.13 to 2.2.x;
-  -  all major distributions, including Red Hat, Debian, Slackware;
+*  a variety of Intel based PCs: both laptops and desktops; 
+*  an Alpha workstation;
+*  a StrongARM based Netwinder;
+*  a number of Linux kernels, from 1.2.13 to 2.2.x;
+*  all major distributions, including Red Hat, Debian, Slackware;
 
-The following Braille displays are supported (serial communication
-only for most of them):
+The following Braille displays are supported (serial communication only for
+most of them):
 
-  - Tieman B.V.: CombiBraille 25/45/85;
-  - Alva B.V.: ABT3 and Delphi series, serial and parallel ports;
-  - Telesensory Systems Inc.: PowerBraille 40 / 65/81,
-    Navigator 20/40/80 (latest firmware version only?);
-  - Papenmeier Terminal;
-  - EuroBraille family of displays (tested only on ClioBraille 40);
-  - Blazie Engineering's BrailleLite 18 and 40;
-  - EcoBraille from La O.N.C.E.;
-  - BAUM Vario;
-  - MDV braille displays;
-  - Tieman MultiBraille;
+*  Alva B.V.: ABT3xx, Delphi (serial and parallel ports), Satellite;
+*  Baum: Vario 40/80 (emulation 1/2);
+*  Blazie Engineering: BrailleLite 18/40;
+*  EuroBraille: Clio-noteBraille 40;
+*  Handialog: VisioBraille 2040
+*  Handy Tech Elektronik GmbH: BrailleWave, mod20, mod40, mod80;
+*  La O.N.C.E.: EcoBraille 20/40/80;
+*  MDV: MB208/MB408L/MB408S (protocol 5);
+*  Papenmeier: Tiny, Compact, Compact 486, 2D Lite, 2D Screen Soft,
+               EL-2D 40, EL-2D 66, EL 80, IB 80 CR Soft;
+*  Pulse Data International: BrailleNote 18/32
+*  Telesensory Systems Inc.: Navigator 20/40/80 (latest firmware version only),
+                             PowerBraille 40/65/80;
+*  Tieman B.V.: CombiBraille 25/45/85, MiniBraille 20,
+                MultiBraille MB125CR/MB145CR/MB185CR;
+*  Tiflosoft: VideoBraille 40;
 
-Ability to add more Braille displays does depend on the level of
-cooperation from the manufacturer in providing programming information.
+The ability to add a new Braille display depends on the level of cooperation
+from its manufacturer in providing programming information.
 
+-------------------------------------------------------------------------------
 
-LAYOUT OF THE ARCHIVE
+Layout of the Archive
 =====================
 
-BRLTTY is distributed as a single GNU compressed tarfile named
+BRLTTY is distributed as a single GNU compressed tar file named
+
    brltty-<version>.tar.gz
-where `<version>' is the version number.  When the archive is
-unpacked, there should be a subdirectory called DOCS: this contains
-all of the general BRLTTY documentation, including the manual in
-various formats and the list of frequently asked questions (FAQ).
 
-The source files for the main, device-independent core of BRLTTY is in
-the top-level directory.  There is also one subdirectory per Braille
-device type, containing display-specific source files and
-documentation (in another README file).
+where `<version>' is the version number. When the archive is unpacked, there
+should be a subdirectory called `DOCS' which contains all of the general BRLTTY
+documentation including the manual in various formats, and the list of
+frequently asked questions (FAQ).
 
-Finally, some braille definition tables are available in the BrailleTables
-subdirectory along with some tools to manipulate them.
+The source files for the main, device-independent core of BRLTTY are in the
+top-level directory. There is one subdirectory for each Braille display type,
+containing display-specific source files and documentation.
 
+Finally, some Braille definition tables, along with tools to manipulate them,
+are available in the `BrailleTables' subdirectory.
 
-BUILDING THE PACKAGE
+-------------------------------------------------------------------------------
+
+Building the Package
 ====================
 
-Simply invoking 'make' will build BRLTTY and all driver libraries.  To build
-BRLTTY with a specific built-in driver, just edit the main Makefile and 
-uncomment the driver specification you want to see linked with the main 
-executable before invoking 'make'.  Then, as root, 'make install' will
-install all files to their proper location.
+Simply invoking `make' will build BRLTTY and all driver libraries. To build
+BRLTTY with a specific built-in driver, just edit the main `Makefile' and
+uncomment the driver specification you want to see linked with the main
+executable before invoking `make'. Then, as root, `make install' will install
+all files into their proper locations.
 
-For information specific to a particular driver, please see the README
-file in the corresponding subdirectory.  Finally, see the DOC subdirectory
-for BRLTTY manuals and miscelaneous informations.
+For information specific to a particular driver, please see the `README' file
+in the corresponding subdirectory. Finally, see the `DOCS' subdirectory for
+BRLTTY manuals and miscelaneous information.
 
+-------------------------------------------------------------------------------
 
-EXECUTING BRLTTY
+Executing BRLTTY
 ================
 
 If you compiled BRLTTY with a braille driver built-in, simply invoking
-'brltty' should start BRLTTY with all defaults.  Alternatively you might
-need to specify a braille driver with the -b option.  Also 'brltty -h'
+`brltty' should start BRLTTY with all defaults. Alternatively, you might
+need to specify a Braille driver with the -b option. Also, `brltty -h'
 will display a brief summary of all available options.
 
-You may use a configuration file with most options as well.  See the
-example configuration file in the DOC/ subdirectory.
+You may use a configuration file for most options as well. See the example
+configuration file `brltty.conf' in the `DOCS' subdirectory.
 
-And don't forget to review the notes for your braille terminal. See the
-README file in the driver's subdirectory.
+And don't forget to review the notes for your Braille display. See the `README'
+file in the driver's subdirectory.
 
+-------------------------------------------------------------------------------
 
-THE BRLTTY TEAM
+The BRLTTY Team
 ===============
 
-Many people contributed to the development of BRLTTY, most notably:
+Many people have contributed to the development of BRLTTY, most notably:
+
+Dave Mielke <dave@mielke.cc>
+  Current maintainer, run-time loadable driver modules,
+  GenericSay speech driver, Accent/SA support, BrailleNote driver,
+  tunes (sound card, sequencer, OPL3).
 
 Nicolas Pitre <nico@cam.org>
-  Current BRLTTY project maintainer, core development, speech framework,
-  Alva and Eurobraille driver, BrailleLite driver tweaks.
+  Core development, speech framework, Alva driver, EuroBraille driver,
+  Televox speech driver, BrailleLite driver tweaks.
 
 Stéphane Doyon <s.doyon@videotron.ca>
-  Driver for TSI displays (Navigator and PowerBraille), core development,
-  cut and paste function, beeps, and many other miscelaneous features.
+  TSI drivers (Navigator, PowerBraille), MDV driver, BrailleLite driver tweaks,
+  ExternalSpeech speech driver, core development, cut and paste,
+  tunes (PC speaker).
 
 August Hörandl <august.hoerandl@gmx.at>
   Papenmeier driver, initial run-time loadable driver module design.
 
-Dave Mielke <dave@mielke.cc>
-  Run-time loadable speech modules, Accent SA support, many tweaks.
-
 Nikhil Nair <nn201@cus.cam.ac.uk>
-  Founder of the BRLTTY project and author of the Tieman B.V. CombiBraille
-  driver, and the original BrailleLite driver. No more active developer.
+  Project founder, CombiBraille driver, BrailleLite driver.
 
-James Bowden <jrbowden@bcs.org.uk>
-  original BRLTTY coauthor, no longer active.
+All other individual driver authors.
 
-And all other individual driver authors.
+Any comments and/or criticisms regarding BRLTTY in general should be addressed
+to Dave Mielke, Nicolas Pitre, and/or Stéphane Doyon.
 
-Any comments and/or criticisms regarding BRLTTY in general should be
-addressed to Nicolas Pitre and/or Stéphane Doyon.
-
+-------------------------------------------------------------------------------

@@ -60,9 +60,6 @@ typedef enum {
 #define INT_CSR_SPEED 2		/* on/off time in cycles */
 #define ACK_TIMEOUT 1000	/* timeout in ms for an ACK to come back */
 
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-
 int blite_fd = -1;		/* file descriptor for Braille display */
 
 static unsigned char blitetrans[256];	/* dot mapping table (output) */
@@ -145,7 +142,7 @@ initbrl (char **parameters, brldim * brl, const char *brldev)
     return;
   }
 
-  if(!parameters[PARM_BAUDRATE]
+  if(!*parameters[PARM_BAUDRATE]
      || !validateBaud(&baudrate, "baud rate",
 		     parameters[PARM_BAUDRATE], good_baudrates))
     baudrate = BAUDRATE;

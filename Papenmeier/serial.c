@@ -18,7 +18,7 @@
 /* This Driver was written as a project in the
  *   HTL W1, Abteilung Elektrotechnik, Wien - Österreich
  *   (Technical High School, Department for electrical engineering,
- *     Vienna, Austria)
+ *     Vienna, Austria) http://www.ee.htlw16.ac.at
  *  by
  *   Tibor Becker
  *   Michael Burger
@@ -40,6 +40,7 @@
  *   routing keys  qwertzuiop  yxcvbnm,.-
  *   bottom keys   12345678 DOWN LEFT SPACE UP RIGHT  
  *
+ *   dont't forget: no CRTSCTS for testing !
  */
 
 #include <stdio.h>
@@ -60,15 +61,19 @@
 #include "brl.c"
 #include "../misc.c"
 
-unsigned char texttrans[256] =
-{
-  #include "../text.auto.h"
-};
+#define BRLCOLS   80
+
+braille_driver dummybraille;
+braille_driver *braille = &dummybraille;
+
+char* parameters[] = { "file", "y", "y", "y" };
 
 brldim dummy_brldim;		// unused
 
 static void finish(int sig);
 static void error(char* txt);
+
+static char **brailleParameters = NULL;
 
 struct {
   int key;			// curses keycode 
@@ -146,6 +151,9 @@ struct {
 };
 
 const int max_data = sizeof(key_data)/sizeof(key_data[0]);
+
+// array to hold key state: released=0, pressed=1
+int ispressed[sizeof(key_data)/sizeof(key_data[0])] = { 0 };
 
 // table to convert braille code to ascii
 // screen --> texttrans[] --> change_bits[] --> bits for display
@@ -316,19 +324,21 @@ int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
 	waddstr(debug, txt);
       }
 
-      if (o == offsetHorizontal && l == (BRLCOLS+7))
+      if (o == addr_display && l == (BRLCOLS+7))
 	show_line(zeile, buf+6);
-      else if (o == offsetVertical && l == (PMSC+7))
+      else if (o == addr_status && l == (PMSC+7))
 	show_status(status, buf+6);
-      else if ( (o == offsetTable+offsetVertical && l == (PMSC+7)) ||
-		(o == offsetTable+offsetHorizontal && l == (BRLCOLS+7)) )
+      else if ( (o == offsetTable+addr_status && l == (PMSC+7)) ||
+		(o == offsetTable+addr_display && l == (BRLCOLS+7)) )
 	{
 	  sprintf(txt, "\ninit table %d/%d\n", o, l);
 	  waddstr(debug, txt);
 	}
       else
 	{
-	  sprintf(txt, "\nunknown offset/length %d/%d", o, l);
+	  sprintf(txt, "\nunknown offset/length %d/%d  (%d/%d/%d)",
+		  o, l,
+		  addr_display, addr_status, offsetTable);
 	  waddstr(debug, txt);
 	}
     }
@@ -388,17 +398,19 @@ int main(int argc, char* argv[])
   scrollok(debug_serial, TRUE);
 
   // open serial
-  initbrl(&dummy_brldim, argv[1]);
+
+  initbrl(parameters, &dummy_brldim, argv[1]);
+
 
   if (! brl_fd)
     error("OOPS - cant open ");
 
   c = ' ';
   do {
-      char buffer[11];
+      char buffer[11+100];
       fd_set rfds;
       int retval;
-      int i;
+      int i, action;
 
       /* Watch stdin (fd 0) and brl_fd to see when it has input. */
       FD_ZERO(&rfds);
@@ -414,14 +426,17 @@ int main(int argc, char* argv[])
 	if (FD_ISSET(0, &rfds)) { // key pressed
 	  c = wgetch(debug_key);
 	  
-	  i = searchk(c);      
-	  sprintf(buffer, "%s ", key_data[i].txt);
-	  waddstr(debug_key, buffer);
-	  if (i)
-	    send_serial(key_data[i].code,1); // key pressed
-	  else
-	    send_serial(0,0); // dummy key release 
-
+	  i = searchk(c); 
+	  if (i) {
+	    action =  ! ispressed[i];
+	    ispressed[i] ^= 1;
+	    sprintf(buffer, "%s (%s) ", key_data[i].txt, action ? "press":"release");
+	    waddstr(debug_key, buffer);
+	    //	  if (i)
+	    send_serial(key_data[i].code, action); // key pressed
+	    //	  else
+	    //	    send_serial(0,0); // dummy key release 
+	  }
 	  wrefresh(debug_key);
 	} 
         if (FD_ISSET(brl_fd, &rfds)) // data from brl_fd

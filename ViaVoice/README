@@ -1,0 +1,38 @@
+This is BRLTTY's speech driver for IBM's ViaVoice text to speech system. It has
+been implemented, and is supported, by Dave Mielke <dave@mielke.cc>.
+
+This driver can be dynamically loaded (at run time), but cannot be statically
+linked into BRLTTY (at make time), because it relies on a shared object
+(libibmeci50.so) within ViaVoice's run time kit. BRLTTY's main make file
+automatically builds this driver if, and only if, ViaVoice's software
+development kit has been installed (it checks for the existence of
+/usr/include/eci.h).
+
+The path to the ini file is determined via the following huristic. If the
+driver parameter "inifile" is set, then that value is used. If it isn't, but if
+the environment variable "ECIINI" is set, then that value is used. If neither
+is set, then the default (/usr/lib/ViaVoiceTTS/eci.ini) is used.
+
+This driver recognizes the following additional parameters (see the file
+tts.pdf in the ViaVoice documentation directory for details):
+
+   Parameter         Settings
+   samplerate        8000, 11025, 22050
+   abbreviationmode  on, off
+   numbermode        word, year
+   synthmode         sentence, none
+   textmode          talk, spell, literal, phonetic
+   language          AmericanEnglish, BritishEnglish, CastilianSpanish,
+			MexicanSpanish, StandardFrench, CanadianFrench,
+			StandardGerman, StandardItalian,
+			SimplifiedChinese, BrazilianPortuguese
+   voice             AdultMale, AdultFemale, Child, ElderlyFemale,
+                        ElderlyMale
+   vocaltract        male, female
+   breathiness       0-100
+   headsize          0-100
+   pitchbaseline     0-100
+   pitchfluctuation  0-100
+   roughness         0-100
+   speed             0-250
+   volume            0-100

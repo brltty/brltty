@@ -38,7 +38,7 @@ brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../scr.h ../misc.h brl-cfg.h con
 config.tab.c: config.y
 	yacc -b config -v $<
 
-read_config.o: read_config.c config.tab.c cmd.h hlp.h
+read_config.o: read_config.c config.tab.c cmd.h hlp.h brl-cfg.h
 	$(HOSTCC) $(HOSTCFLAGS) $(PM_YACC_CFLAGS) -o $@ -c $<
 
 read_config: read_config.o
@@ -47,19 +47,25 @@ read_config: read_config.o
 serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c
 	$(CC) $(CFLAGS) serial.c -o serial -lncurses 
 
-cmd.h: $(BRL_H)
-	awk '/^ *CMD_/ { \
+cmd.h: $(BRL_H) Makefile
+	awk '\
+	/^ *CMD_/ { \
 		print "{ \""$$1"\", KEYCODE, " $$1 "},";\
-		print "{ \""substr($$1,5)"\", KEYCODE, " $$1 "},";\
-	}' < $(BRL_H) > cmd.h
+		print "{ \""substr($$1,5)"\", KEYCODE, " $$1 "},";} \
+	/#define[ \t]*CR_/ { \
+		print "{ \""$$2"\", KEYCODE, " $$2 "},";\
+		print "{ \""substr($$2,4)"\", KEYCODE, " $$2 "},";} \
+	' < $(BRL_H) > cmd.h
 
-hlp.h:  $(BRL_H)
+hlp.h:  $(BRL_H) Makefile
 	awk '/^ *CMD_/  { OFS="";if (x=match($$0,"\/.*\/")) \
-	  print "{ ",$$1,", \"#", substr($$0, RSTART+2, RLENGTH-4),"\" },"; \
+	  print "{ ",$$1,", \"", substr($$0, RSTART+3, RLENGTH-6),"\" },"; \
 	} \
-	/#define STAT_/  { OFS="";if (x=match($$0,"\/.*\/")) \
-	  print "{ OFFS_STAT +",$$2,", \"#", substr($$0, RSTART+2, RLENGTH-4),"\" },"; \
-}'  < $(BRL_H) > hlp.h
+	/#define[ \t]* STAT_/  { OFS="";if (x=match($$0,"\/.*\/")) \
+	  print "{ OFFS_STAT +",$$2,", \"", substr($$0, RSTART+3, RLENGTH-6),"\" },";} \
+	/#define[ \t]*CR_/  { OFS="";if (x=match($$0,"\/.*\/")) \
+	  print "{ ",$$2,", \"", substr($$0, RSTART+3, RLENGTH-6),"\" },";} \
+        '  < $(BRL_H) > hlp.h
 
 ifneq (,$(findstring s,$(MAKEFLAGS)))
    READ_CONFIG_D = d
@@ -89,6 +95,9 @@ distclean:
 # stuff related to read_config
 #  used for tests only
 #
+# call whitch HOSTCC=... set - like
+#  make HOSTCC="gcc" diff 
+#
 
 TEST_CASES := $(wildcard test*.in)
 
@@ -97,24 +106,25 @@ TEST_OK := $(patsubst %.in,%.good,$(TEST_CASES))
 TEST_DIFF := $(patsubst %.in,%.diff,$(TEST_CASES))
 
 test: read_config $(TEST_RESULT) 
-	read_config d > test.99.out
-	read_config d | read_config | read_config | read_config | diff - test.99.out
+	read_config D test > test.99.out
+	read_config D test | read_config test | read_config test | read_config test | diff -b - test.99.out
 
 diff: read_config $(TEST_DIFF)
 
 good: $(TEST_OK) read_config
 
 dump: read_config
-	read_config d 
+	read_config 
 
 %.out: %.in read_config
-	read_config $< < $<
-	read_config $< < $<  > $@
-	read_config $< < $< | read_config $< | diff - $@
+	read_config  $< < $<
+	read_config  $< < $<  > $@
+	read_config  $< < $< | read_config $< | diff -b - $@
 
 %.diff: %.out read_config
-	-diff $*.good $<
-	-diff $*.good $< > $*.diff
+	echo "diff: "
+	-diff -b $*.good $<
+	diff -b $*.good $< > $*.diff
 
 %.good: %.in
 	read_config $< < $<  > $@

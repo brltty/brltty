@@ -53,6 +53,7 @@ by:
 
 u chord: uppercase (twice to lock)
 q chord: unlock
+26 chord: add 8th dot to next char typed
 x chord: control character
 35 chord: meta or ALT (hardwired to `^[' for the time being)
 z chord: cancel preceding meta/control
@@ -60,7 +61,6 @@ z chord: cancel preceding meta/control
 <x40>Combinations with:
 <x40>dot 7: shift
 <x40>dot 78: control
-<x40>dot 8: alt (or meta) (if USE_TEXTTRANS is undefined in brlconf.h)
 <x40>
 In addition:
 b chord: backspace

@@ -77,10 +77,11 @@ static char *opt_attributesTable = NULL;
 static char *opt_brailleDevice = NULL;
 static char *opt_brailleParameters = NULL;
 static char *opt_configurationFile = NULL;
-static short opt_errors = 0;
+static short opt_standardError = 0;
 static short opt_help = 0;
 static short opt_logLevel = LOG_NOTICE;
-short opt_noDaemon = 0;
+static short opt_noDaemon = 0;
+static short opt_noSpeech = 0;
 static char *opt_pidFile = NULL;
 static char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
@@ -111,9 +112,6 @@ static char **speechParameters = NULL;
 
 short homedir_found = 0;	/* CWD status */
 
-#define MIN(a, b)  (((a) < (b))? (a): (b)) 
-#define MAX(a, b)  (((a) > (b))? (a): (b)) 
-	
 static int
 getToken (char **val, const char *delimiters)
 {
@@ -215,6 +213,8 @@ static OptionEntry optionTable[] = {
     "Screen recheck interval [5]."},
    {'M', "message-delay", "csecs", NULL,
     "Message hold time [500]."},
+   {'N', "no-speech", NULL, NULL,
+    "Defer speech until restarted by command."},
    {'P', "pid-file", "file", NULL,
     "Path to process identifier file."},
    {'R', "read-delay", "csecs", NULL,
@@ -454,7 +454,7 @@ processOptions (int argc, char **argv)
 	opt_brailleDevice = optarg;
 	break;
       case 'e':		/* help */
-	opt_errors = 1;
+	opt_standardError = 1;
 	break;
       case 'f':		/* configuration file path */
 	opt_configurationFile = optarg;
@@ -531,6 +531,9 @@ processOptions (int argc, char **argv)
 	  messageDelay = value * 10;
 	break;
       }
+      case 'N':		/* don't go into the background */
+	opt_noSpeech = 1;
+	break;
       case 'P':		/* process identifier file */
         opt_pidFile = optarg;
 	break;
@@ -1090,7 +1093,11 @@ background (void) {
          break;
       default: // parent
          _exit(0);
-   };
+   }
+   if (!opt_standardError) {
+      LogClose();
+      LogOpen(1);
+   }
 }
 
 void
@@ -1104,7 +1111,7 @@ startup(int argc, char *argv[])
   }
 
   /* Set logging levels. */
-  if (opt_errors)
+  if (opt_standardError)
     LogClose();
   SetLogLevel(opt_logLevel);
   SetStderrLevel(opt_version?
@@ -1279,10 +1286,11 @@ startup(int argc, char *argv[])
       char *nullDevice = "/dev/null";
       freopen(nullDevice, "r", stdin);
       freopen(nullDevice, "a", stdout);
-      if (opt_errors)
+      if (opt_standardError) {
 	fflush(stderr);
-      else
+      } else {
 	freopen(nullDevice, "a", stderr);
+      }
     }
 
     background();
