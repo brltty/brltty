@@ -610,9 +610,6 @@ in
    linux*|openbsd*|freebsd*|netbsd*|*qnx*|gnu*)
       brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
       ;;
-   gnu*)
-      brltty_cv_prog_ld_flags=""
-      ;;
    solaris*)
       brltty_cv_prog_ld_flags="-R ${execute_root}${library_directory}"
       ;;
