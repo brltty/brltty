@@ -56,6 +56,7 @@ Platforms: Linux (kernel 1.1.92 or later)
            - Festival [text to speech engine]
            - FestivalLite [text to speech engine]
            - GenericSay [pipes to /usr/local/bin/say]
+           - Mikropuhe [text to speech engine]
            - Televox
            - Theta [text to speech engine]
            - ViaVoice [text to speech engine]

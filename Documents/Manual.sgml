@@ -4079,6 +4079,7 @@ BRLTTY supports the following speech synthesizers:
   <tag/Festival/ text to speech engine
   <tag/FestivalLite/ text to speech engine
   <tag/GenericSay/ pipes to /usr/local/bin/say
+  <tag/Mikropuhe/ text to speech engine
   <tag/Televox/ -
   <tag/Theta/ text to speech engine
   <tag/ViaVoice/ text to speech engine
@@ -4102,6 +4103,7 @@ BRLTTY supports the following speech synthesizers:
   <tag/mb/MultiBraille
   <tag/md/MDV
   <tag/mn/MiniBraille
+  <tag/mp/Mikropuhe
   <tag/no/no driver
   <tag/pm/Papenmeier
   <tag/th/Theta
