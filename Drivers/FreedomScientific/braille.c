@@ -768,7 +768,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         }
       }
 
-      if (++tries == 5) break;
+      if (++tries == 5) {
+        LogPrint(LOG_WARNING, "No response from display.");
+        break;
+      }
     }
 
   failure:
