@@ -153,7 +153,6 @@
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)
 #speech-driver	mp	# Mikropuhe (text to speech engine)
 #speech-driver	th	# Theta (text to speech engine)
-#speech-driver	tv	# Televox
 #speech-driver	vv	# ViaVoice (text to speech engine)
 
 # The speech-fifo directive specifies the path to the FIFO used by the speech
