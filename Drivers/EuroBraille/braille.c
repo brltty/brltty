@@ -386,6 +386,8 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
     return (0);
   if (read(brl_fd, &c, 1) > 0 && c == ACK)
     return (1);
+  else
+    read(brl_fd, &c, 1); /* This is done to trap the error code */
   return (0);
 }
 
@@ -396,7 +398,7 @@ static int brl_reset(BrailleDisplay *brl)
 
 static void brl_identify (void)
 {
-   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.1");
+   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.2");
    LogPrint(LOG_INFO, "  Copyright (C) 1997-2003");
    LogPrint(LOG_INFO, "      - Yannick PLASSIARD <plassi_y@epitech.net>");
    LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
