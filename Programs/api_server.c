@@ -902,8 +902,8 @@ static void terminationHandler()
     }
     ttyTerminationHandler(&notty);
     ttyTerminationHandler(&ttys);
+    api_unlink();
   }
-  api_unlink();
 }
 
 /* Function: whoFillsTty */
@@ -1095,6 +1095,7 @@ void api_open(BrailleDisplay *brl, char **parameters)
                            &authKeyLength,authKey);
   if (res==-1) {
     LogPrint(LOG_WARNING,"Unable to load API authentication key: no connections will be accepted.");
+    api_unlink();
     connectionsAllowed = 0;
     return;
   }
@@ -1117,6 +1118,7 @@ void api_open(BrailleDisplay *brl, char **parameters)
 
   if ((res = pthread_create(&serverThread,NULL,server,(void *) host)) != 0) {
     LogPrint(LOG_WARNING,"pthread_create : %s",strerror(res));
+    api_unlink();
     return;
   } else connectionsAllowed = 1;
 }
