@@ -322,6 +322,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 #endif /* __MINGW32__ */
 
     memset(&addr,0,sizeof(addr));
+    addr.sin_family = AF_INET;
     if (!port)
       addr.sin_port = htons(BRLAPI_SOCKETPORTNUM);
     else {
@@ -340,7 +341,6 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     }
 
     if (!hostname) {
-      addr.sin_family = AF_INET;
       addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     } else {
       if (!(he = gethostbyname(hostname))) {
@@ -348,7 +348,16 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 	brlapi_errno = BRLERR_GAIERR;
 	goto out;
       }
-      addr.sin_family = he->h_addrtype;
+      if (he->h_addrtype != AF_INET) {
+        errno = EAFNOSUPPORT;
+	brlapi_libcerrfun = "gethostbyname";
+	goto outlibc;
+      }
+      if (he->h_length > sizeof(addr.sin_addr)) {
+        errno = EINVAL;
+	brlapi_libcerrfun = "gethostbyname";
+	goto outlibc;
+      }
       memcpy(&addr.sin_addr,he->h_addr,he->h_length);
     }
     
@@ -381,7 +390,8 @@ outlibc:
   brlapi_errno = BRLERR_LIBCERR;
   brlapi_libcerrno = errno;
 outfd:
-  close(fd);
+  if (fd>=0)
+    close(fd);
   fd = -1;
 out:
   pthread_mutex_unlock(&brlapi_fd_mutex);

@@ -34,16 +34,27 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifdef __MINGW32__
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <io.h>
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif /* __MINGW32__ */
 
 #include "api.h"
 #include "api_protocol.h"
 
 int brlapi_libcerrno;
 const char *brlapi_libcerrfun;
+
+#ifndef __MINGW32__
+#define _get_osfhandle(fd) (fd)
+#endif /* __MINGW32__ */
 
 /* brlapi_writeFile */
 /* Writes a buffer to a file */
@@ -52,7 +63,7 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
   size_t n;
   ssize_t res=0;
   for (n=0;n<size;n+=res) {
-    res=write(fd,buf+n,size-n);
+    res=send(fd,buf+n,size-n,0);
     if ((res<0) &&
         (errno!=EINTR) &&
 #ifdef EWOULDBLOCK
@@ -75,7 +86,21 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
   size_t n;
   ssize_t res=0;
   for (n=0;n<size && res>=0;n+=res) {
+#ifdef __MINGW32__
+    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,FALSE,FALSE,NULL)};
+    if ((!ReadFile((HANDLE) fd,buf+n,size-n,&res,&overl)
+      && GetLastError() != ERROR_IO_PENDING) ||
+      !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
+      CloseHandle(overl.hEvent);
+      errno = -1;
+      brlapi_libcerrfun="read in readFile";
+      brlapi_errno=BRLERR_LIBCERR;
+      res = -1;
+    }
+    CloseHandle(overl.hEvent);
+#else /* __MINGW32__ */
     res=read(fd,buf+n,size-n);
+#endif /* __MINGW32__ */
     if (res==0)
       /* Unexpected end of file ! */
       return n;
@@ -188,7 +213,7 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth)
     return -1;
   }
 
-  *authlength = brlapi_readFile(fd, auth, stsize);
+  *authlength = brlapi_readFile(_get_osfhandle(fd), auth, stsize);
 
   if (*authlength!=(size_t)stsize) {
     close(fd);
@@ -204,9 +229,15 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth)
 int brlapi_splitHost(const char *host, char **hostname, char **port) {
   const char *c;
   if (!host || !*host) {
+#ifdef PF_LOCAL
     *hostname = NULL;
     *port = strdup("0");
     return PF_LOCAL;
+#else /* PF_LOCAL */
+    *hostname = strdup("127.0.0.1");
+    *port = strdup(BRLAPI_SOCKETPORT);
+    return PF_UNSPEC;
+#endif /* PF_LOCAL */
   } else if ((c = strrchr(host,':'))) {
     if (c != host) {
       int porti = atoi(c+1);
@@ -218,9 +249,18 @@ int brlapi_splitHost(const char *host, char **hostname, char **port) {
       snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
       return PF_UNSPEC;
     } else {
+#ifdef PF_LOCAL
       *hostname = NULL;
       *port = strdup(c+1);
       return PF_LOCAL;
+#else /* PF_LOCAL */
+      int porti = atoi(c+1);
+      if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
+      *hostname = strdup("127.0.0.1");
+      *port = (char *)malloc(6);
+      snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
+      return PF_UNSPEC;
+#endif /* PF_LOCAL */
     }
   } else {
     *hostname = strdup(host);

@@ -824,13 +824,13 @@ static int initializeTcpSocket(char *hostname, char *port)
   err = getaddrinfo(hostname, port, &hints, &res);
   if (err) {
     LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): "
-#ifndef HAVE_GAI_STRERROR
+#ifdef HAVE_GAI_STRERROR
 	"%s"
 #else /* HAVE_GAI_STRERROR */
 	"%d"
 #endif /* HAVE_GAI_STRERROR */
 	,hostname,port
-#ifndef HAVE_GAI_STRERROR
+#ifdef HAVE_GAI_STRERROR
 	,gai_strerror(err)
 #else /* HAVE_GAI_STRERROR */
 	,err
@@ -880,6 +880,7 @@ cont:
   WSAStartup(MAKEWORD(2,0),&wsadata);
 #endif /* __MINGW32__ */
   memset(&addr,0,sizeof(addr));
+  addr.sin_family = AF_INET;
   if (!port)
     addr.sin_port = htons(BRLAPI_SOCKETPORTNUM);
   else {
@@ -890,16 +891,16 @@ cont:
 
       if (!(se = getservbyname(port,"tcp"))) {
         LogPrint(LOG_ERR,"port %s: "
-#ifndef __MINGW32__
-	  "%s"
-#else /* __MINGW32__ */
+#ifdef __MINGW32__
 	  "%d"
+#else /* __MINGW32__ */
+	  "%s"
 #endif /* __MINGW32__ */
 	  ,port,
-#ifndef __MINGW32__
-	  hstrerror(h_errno)
-#else /* __MINGW32__ */
+#ifdef __MINGW32__
 	  WSAGetLastError()
+#else /* __MINGW32__ */
+	  hstrerror(h_errno)
 #endif /* __MINGW32__ */
 	  );
 	return -1;
@@ -909,26 +910,32 @@ cont:
   }
 
   if (!hostname) {
-    addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   } else {
     if (!(he = gethostbyname(hostname))) {
       LogPrint(LOG_ERR,"gethostbyname(%s): "
-#ifndef __MINGW32__
-	"%s"
-#else /* __MINGW32__ */
+#ifdef __MINGW32__
 	"%d"
+#else /* __MINGW32__ */
+	"%s"
 #endif /* __MINGW32__ */
 	,hostname,
-#ifndef __MINGW32__
-	hstrerror(h_errno)
-#else /* __MINGW32__ */
+#ifdef __MINGW32__
 	WSAGetLastError()
+#else /* __MINGW32__ */
+	hstrerror(h_errno)
 #endif /* __MINGW32__ */
 	);
       return -1;
     }
-    addr.sin_family = he->h_addrtype;
+    if (he->h_addrtype != AF_INET) {
+      LogPrint(LOG_ERR,"unknown address type %d",he->h_addrtype);
+      return -1;
+    }
+    if (he->h_length > sizeof(addr.sin_addr)) {
+      LogPrint(LOG_ERR,"too big address: %d",he->h_length);
+      return -1;
+    }
     memcpy(&addr.sin_addr,he->h_addr,he->h_length);
   }
 
@@ -1492,7 +1499,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
   res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH),
                            &authKeyLength,authKey);
   if (res==-1) {
-    LogPrint(LOG_WARNING,"Unable to load API authentication key (%s): no connections will be accepted.", strerror(errno));
+    LogPrint(LOG_WARNING,"Unable to load API authentication key (%s): no connections will be accepted.", strerror(brlapi_libcerrno));
     goto out;
   }
   LogPrint(LOG_DEBUG, "Authentication key loaded");
