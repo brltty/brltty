@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/termios.h>
 #include <string.h>
 
 #define BL_NEED_ARRAYS

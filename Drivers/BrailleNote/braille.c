@@ -30,7 +30,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/termios.h>
 
 #ifdef HAVE_LINUX_VT_H
 #include <linux/vt.h>

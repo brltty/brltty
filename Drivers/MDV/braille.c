@@ -62,8 +62,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/termios.h>
-#include <sys/ioctl.h>
 #include <string.h>
 
 #include "Programs/brl.h"

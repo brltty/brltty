@@ -24,11 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <termios.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <fcntl.h>
 
 #include "variolow.h"
 #include "Programs/misc.h"

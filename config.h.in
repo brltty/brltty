@@ -49,6 +49,9 @@ extern "C" {
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 
+/* Define this if the header file sys/modem.h exists. */
+#undef HAVE_SYS_MODEM_H
+
 /* Define this if the header file machine/speaker.h exists. */
 #undef HAVE_MACHINE_SPEAKER_H
 

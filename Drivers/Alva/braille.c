@@ -110,7 +110,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/termios.h>
 
 #include "Programs/misc.h"
 #include "Programs/brltty.h"

@@ -248,7 +248,7 @@ AC_SEARCH_LIBS([socket], [socket])
 
 AC_CHECK_HEADERS([alloca.h getopt.h iconv.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])
-AC_CHECK_HEADERS([sys/io.h machine/speaker.h linux/vt.h linux/input.h])
+AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h linux/input.h])
 AC_CHECK_HEADERS([linux/uinput.h], [], [], [
 #include <linux/input.h>
 ])

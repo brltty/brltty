@@ -24,9 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <sys/time.h>
 
 #include "Programs/misc.h"
 #include "Programs/at2.h"
@@ -305,8 +302,6 @@ static const InputOutputOperations usbOperations = {
 
 #ifdef HAVE_BLUETOOTH_BLUETOOTH_H
 /* Bluetooth IO */
-#include <sys/ioctl.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>

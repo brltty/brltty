@@ -42,9 +42,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <sys/time.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"

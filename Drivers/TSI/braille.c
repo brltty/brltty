@@ -86,8 +86,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/termios.h>
-#include <sys/ioctl.h>
 #include <string.h>
 
 #include "Programs/brl.h"
@@ -325,17 +323,11 @@ CheckCTSLine(int fd)
 /* If supported (might not be portable) check that the CTS line (RS232)
    is up. */
 {
-#if defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS)
-  int flags;
-  if (ioctl(fd, TIOCMGET, &flags) < 0){
-    LogError("TIOCMGET");
-    return(-1);
-  }else if(flags & TIOCM_CTS)
-    return(1);
-  else return(0);
-#else /* defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS) */
+#ifdef CHECKCTS
+  return(testSerialClearToSend(fd));
+#else /* CHECKCTS */
   return(1);
-#endif /* defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS) */
+#endif /* CHECKCTS */
 }
 
 static int
@@ -430,9 +422,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     /* Check RS232 wires: we should have CTS if the device is connected and
        ON. The NAV40 lowers CTS when off, the PB80 doesn't, and I don't know
        about the others. */
-    if((i = CheckCTSLine(brl_fd)) == -1)
-      goto failure;
-    else if(!i){
+    if(!CheckCTSLine(brl_fd)){
       LogPrint(LOG_INFO, "Display is off or not connected");
       while(!i){
 	delay(DETECT_DELAY);

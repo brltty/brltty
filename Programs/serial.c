@@ -26,6 +26,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
+
+#ifdef HAVE_SYS_MODEM_H
+#include <sys/modem.h>
+#endif /* HAVE_SYS_MODEM_H */
 
 #include "serial.h"
 #include "misc.h"
@@ -421,11 +426,28 @@ validateSerialBaud (int *baud, const char *description, const char *word, const 
   return 0;
 }
 
-void
-rawSerialDevice (struct termios *attributes) {
-  attributes->c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-  attributes->c_oflag &= ~OPOST;
-  attributes->c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-  attributes->c_cflag &= ~(CSIZE | PARENB);
-  attributes->c_cflag |= CS8;
+static int
+getSerialControlLines (int descriptor, int *lines) {
+  if (ioctl(descriptor, TIOCMGET, lines) != -1) return 1;
+  LogError("TIOCMGET");
+  return 0;
+}
+
+static int
+testSerialControlLines (int descriptor, int set, int clear) {
+  int lines;
+  if (getSerialControlLines(descriptor, &lines))
+    if (((lines & set) == set) && ((~lines & clear) == clear))
+      return 1;
+  return 0;
+}
+
+int
+testSerialClearToSend (int descriptor) {
+  return testSerialControlLines(descriptor, TIOCM_CTS, 0);
+}
+
+int
+testSerialDataSetReady (int descriptor) {
+  return testSerialControlLines(descriptor, TIOCM_DSR, 0);
 }

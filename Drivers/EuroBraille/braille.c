@@ -30,7 +30,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/termios.h>
 
 #include "Programs/brl.h"
 #include "Programs/message.h"

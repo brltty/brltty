@@ -35,8 +35,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <fcntl.h>
-#include <termios.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -99,10 +97,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 
 	/* open device */
 	if (!openSerialDevice(device, &brl_fd, &oldtermios)) goto __errexit;
-	memcpy(&newtermios, &oldtermios, sizeof(newtermios));
-	rawSerialDevice(&newtermios);
-	newtermios.c_cc[VMIN] = 0; /* non-blocking read */
-	newtermios.c_cc[VTIME] = 0;
+	initializeSerialAttributes(&newtermios);
 	restartSerialDevice(brl_fd, &newtermios, 9600);
 	/* hm, how to switch to 38400 ? 
 	write(brl_fd, "\eV\r", 3);

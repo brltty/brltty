@@ -32,8 +32,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <sys/termios.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -246,22 +244,19 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 static int
 isOnline (void) {
-   int signals;
-   if (ioctl(fileDescriptor, TIOCMGET, &signals) == -1) {
-      LogError("TIOCMGET");
-   } else if (!(signals & TIOCM_DSR)) {
-      if (deviceStatus > DEV_OFFLINE) {
-         deviceStatus = DEV_OFFLINE;
-         LogPrint(LOG_WARNING, "LogText offline.");
-      }
-   } else {
+   int online = testSerialDataSetReady(fileDescriptor);
+   if (online) {
       if (deviceStatus < DEV_ONLINE) {
          deviceStatus = DEV_ONLINE;
          LogPrint(LOG_WARNING, "LogText online.");
       }
-      return 1;
+   } else {
+      if (deviceStatus > DEV_OFFLINE) {
+         deviceStatus = DEV_OFFLINE;
+         LogPrint(LOG_WARNING, "LogText offline.");
+      }
    }
-   return 0;
+   return online;
 }
 
 static void

@@ -28,7 +28,6 @@ extern int isSerialDevice (const char **path);
 extern int openSerialDevice (const char *path, int *descriptor, struct termios *attributes);
 extern int restartSerialDevice (int descriptor, struct termios *attributes, int baud);
 extern int validateSerialBaud (int *baud, const char *description, const char *word, const int *choices);
-extern void rawSerialDevice (struct termios *attributes);
 
 extern void initializeSerialAttributes (struct termios *attributes);
 extern int setSerialBaud (struct termios *attributes, int baud);
@@ -53,8 +52,12 @@ extern int setSerialFlowControl (struct termios *attributes, SerialFlowControl f
 extern int getSerialAttributes (int descriptor, struct termios *attributes);
 extern int putSerialAttributes (int descriptor, const struct termios *attributes);
 extern int putSerialBaud (int descriptor, int baud, struct termios *attributes);
+
 extern int flushSerialInput (int descriptor);
 extern int flushSerialOutput (int descriptor);
+
+extern int testSerialClearToSend (int descriptor);
+extern int testSerialDataSetReady (int descriptor);
 
 #ifdef __cplusplus
 }
