@@ -60,18 +60,29 @@ If you actually have more than one Voyager display connected at the same
 time, you can also specify the serial number of the device that you want
 to use.
 
-This driver knows one driver parameter, which you can pass using the
-braille-parameters clause in your BRLTTY configuration file.
-The parameter is "brlinput", a boolean (0 or 1), and determines whether
-braille typing will be allowed or not.
-Default is allowed. To disallow braille typing, place a line like
-this in your brltty.conf:
-braille-parameters brlinput=0
+This driver knows a number of driver parameters which you can pass via
+the braille-parameters clause in your BRLTTY configuration file
+(/etc/brltty.conf) or via brltty's -B (--braille-parameters=) command
+line option.
 
-There is only a handful of BRLTTY users, so if you are trying out this
+brlinput: This parameter specifies whether or not the eight top keys
+function as a braille keyboard. It may be set to either "yes" (the
+default) or "no".
+
+statuscells: This parameter specifies how many cells are to be reserved
+for status indicators. It may be an integer with an absolute value no
+greater than half the size of the display. If it's positive then the
+status cells are on the left, if it's negative then they're on the
+right, and if it's 0 then there are no status cells. The default is 3,
+i.e. three status cells on the left. If there's at least one status cell
+then an additional blank cell is reserved between the status and the
+text cells.
+
+There are only a handful of BRLTTY users, so if you are trying out this
 driver, please drop us a note, even if you have no problems!
 
 Note to BRLTTY developers: This is my first attempt at combining the key
 binding definitions with the help file text in one place, through
-annotations in the brl.c file. If you change the key bindings, currently
-you need python installed to be able to rebuild the help files.
+annotations in the braille.c file. If you change the key bindings,
+currently you need python installed to be able to rebuild the help
+files.

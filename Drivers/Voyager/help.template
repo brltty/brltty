@@ -1,11 +1,11 @@
 000:---BRLTTY Voyager <CELLS> Help Screen---
 000:
 050:Key Names:
-050:  Front Pannel keys:
-050:    Leftmost key is named A, second key from left is named B.
-050:    Rightmost key is named D, second key from right is named C.
-050:    Round extension to left of central keypad is named RL, to right is RR.
-050:    Up position of central keypad is named UP, down is DOWN.
+050:  Front Panel Keys:
+050:    Leftmost key is named A; second key from left is named B.
+050:    Rightmost key is named D; second key from right is named C.
+050:    Round extension to left of central keypad is named RL; right is RR.
+050:    Up position of central keypad is named UP; down is DOWN.
 050:  Round keys on top are used as a braille keyboard.
 050:  Cursor routing keys:
 050:    CRt1 to CRt<COLS>: routing keys over text cells.
@@ -14,13 +14,13 @@
 050:
 100:Basic Navigation
 199:
-200:Modes And Functions
+200:Modes and Functions
 299:
 300:Cursor Routing
 399:
-400:Cut & Paste
+400:Cut and Paste
 499:
 500:Fancy Navigation
 599:
-600:Typing In Braille
+600:Typing in Braille
 999:-----End of help screen-----

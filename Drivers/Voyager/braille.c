@@ -51,9 +51,10 @@
 #include "Programs/message.h"
 
 typedef enum {
-  PARM_BRLINPUT=0
+  PARM_BRLINPUT,
+  PARM_STATUSCELLS
 } DriverParameter;
-#define BRLPARMS "brlinput"
+#define BRLPARMS "brlinput", "statuscells"
 
 #define BRLSTAT ST_VoyagerStyle
 #define BRL_HAVE_FIRMNESS
@@ -87,14 +88,6 @@ static int brlinput = 1;
 #define BRLVGER_GET_CURRENT 8
 #endif
 
-/* We'll use 4cells as status cells, both on Voyager 44 and 70. (3cells have
-   content and the fourth is blank to mark the separation.)
-   NB: You can't just change this constant to vary the number of status
-   cells: some key bindings for cursor routing keys assign special
-   functions to routing keys over status cells.
-*/
-#define NRSTATCELLS 4
-
 /* Global variables */
 
 /* Mappings between Voyager's dot coding and brltty's coding. */
@@ -102,10 +95,17 @@ static TranslationTable inputTable, outputTable;
 
 static UsbChannel *usb = NULL;
 
+static unsigned char totalCells;
+static unsigned char textOffset;
+static unsigned char textCells;
+static unsigned char statusOffset;
+static unsigned char statusCells;
+#define IS_TEXT_KEYS(key1,key2) (((key1) >= textOffset) && ((key2) < (textOffset + textCells)))
+#define IS_TEXT_KEY(key) IS_TEXT_KEYS((key), (key))
+#define IS_STATUS_KEY(key) (((key) >= statusOffset) && ((key) < (statusOffset + statusCells)))
+
 static unsigned char *prevdata, /* previous pattern displayed */
                      *dispbuf; /* buffer to prepare new pattern */
-static unsigned brl_cols, /* Number of cells available for text */
-                ncells; /* total number of cells including status */
 static char readbrl_init; /* Flag to reinitialize readbrl function state. */
 
 
@@ -222,11 +222,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     if(ret<0) goto failure;
     switch(data[1]) {
     case 48:
-      ncells = 44;
+      totalCells = 44;
       brl->helpPage = 0;
       break;
     case 72:
-      ncells = 70;
+      totalCells = 70;
       brl->helpPage = 1;
       break;
     default:
@@ -234,8 +234,34 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       goto failure;
     };
   }
-  LogPrint(LOG_INFO,"Display has %u cells", ncells);
-  brl_cols = ncells -NRSTATCELLS;
+  LogPrint(LOG_INFO, "Display has %u cells", totalCells);
+
+  textCells = totalCells;
+  textOffset = statusOffset = 0;
+
+  {
+    int cells = 3;
+    const char *word = parameters[PARM_STATUSCELLS];
+    if (word && *word) {
+      int maximum = textCells / 2;
+      int minimum = -maximum;
+      int value;
+      if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
+        cells = value;
+      }
+    }
+
+    if (cells) {
+      if (cells < 0) {
+        statusOffset = textCells + cells;
+        cells = -cells;
+      } else {
+        textOffset = cells + 1;
+      }
+      textCells -= cells + 1;
+    }
+    statusCells = cells;
+  }
 
   {
     unsigned char rawbuf[RAW_STRING_SIZE];
@@ -275,17 +301,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
       LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
   }
 
-  if(!(dispbuf = malloc(ncells))
-     || !(prevdata = malloc(ncells)))
+  if(!(dispbuf = malloc(totalCells))
+     || !(prevdata = malloc(totalCells)))
     goto failure;
 
   /* dispbuf will hold the 4 status cells followed by the text cells.
      We export directly to BRLTTY only the text cells. */
-  brl->x = brl_cols;		/* initialize size of display */
+  brl->x = textCells;		/* initialize size of display */
   brl->y = BRLROWS;		/* always 1 */
 
   /* Force rewrite of display on first writebrl */
-  memset(prevdata, 0xFF, ncells); /* all dots */
+  memset(prevdata, 0xFF, totalCells); /* all dots */
 
   readbrl_init = 1; /* init state on first readbrl */
 
@@ -315,7 +341,7 @@ static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 {
   if(dispbuf)
-    memcpy(dispbuf, s, NRSTATCELLS);
+    memcpy(dispbuf+statusOffset, s, statusCells);
 }
 
 
@@ -323,20 +349,20 @@ static void
 brl_writeWindow (BrailleDisplay *brl)
 {
   int repeats;
-  unsigned char buf[ncells];
+  unsigned char buf[totalCells];
   int i;
 
-  memcpy(dispbuf +NRSTATCELLS, brl->buffer, brl_cols);
+  memcpy(dispbuf+textOffset, brl->buffer, textCells);
 
   /* If content hasn't changed, do nothing. */
-  if(memcmp(prevdata, dispbuf, ncells) == 0)
+  if(memcmp(prevdata, dispbuf, totalCells) == 0)
     return;
 
   /* remember current content */
-  memcpy(prevdata, dispbuf, ncells);
+  memcpy(prevdata, dispbuf, totalCells);
 
   /* translate to voyager dot pattern coding */
-  for(i=0; i<=ncells; i++)
+  for(i=0; i<totalCells; i++)
     buf[i] = outputTable[dispbuf[i]];
 
   /* Firmware supports multiples of 8cells, so there are extra cells
@@ -346,7 +372,7 @@ brl_writeWindow (BrailleDisplay *brl)
      not updated somehow. Repeat the command and they right themselves.
      I don't see this behavior anymore though... */
   repeats = SENDBRAILLE_REPEATS;
-  switch(ncells) {
+  switch(totalCells) {
   case 44: {
     /* Two ghost cells at the beginning of the display, plus
        two more after the sixth physical cell. */
@@ -523,7 +549,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     unsigned key = buf[i];
     if(!key)
       break;
-    if(key < 1 || key > ncells) {
+    if(key < 1 || key > totalCells) {
       LogPrint(LOG_NOTICE, "Invalid routing key number %u", key);
       continue;
     }
@@ -532,7 +558,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   }
 
   /* build rtk_which */
-  for(howmanykeys = 0, i = 0; i < ncells; i++)
+  for(howmanykeys = 0, i = 0; i < totalCells; i++)
     if(rtk_pressed[i])
       rtk_which[howmanykeys++] = i;
   /* rtk_pressed[i] tells if routing key i is pressed.
@@ -544,38 +570,40 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   /* A few keys trigger the repeat behavior: B, C, UP and DOWN,
      B+C (space bar), type dots patterns, or a dots pattern + B or C or both.
   */
-  if(howmanykeys==0
-     && (keystate == K_B || keystate == K_C
-	 || keystate == K_UP || keystate == K_DOWN
-	 || (keystate &(0xFF |K_B|K_C)) == keystate)) {
+  if (howmanykeys == 0 &&
+      (keystate == K_B || keystate == K_C ||
+       keystate == K_UP || keystate == K_DOWN ||
+       (keystate & (0xFF|K_B|K_C)) == keystate)) {
     /* Stand by to begin repeating */
     repeat = VAL_REPEAT_DELAY;
   }
 
-  if(!repeat && !release)
+  if (!repeat && !release) {
     /* wait until all keys are released to decide the effect */
     return EOF;
+  }
 
   /* Key effect */
 
-  if(howmanykeys == 0) {
-    if(!(keystate & 0xFF)) {
-      /* No routing keys, no dots, only front keys (or possibly a spurious
-         release) */
-      if(cmds == CMDS_PREFS) {
-	switch(keystate) {
-	case K_UP:
-	case K_RL:
-	  cmd = CMD_MENU_PREV_SETTING;
-	  break;
-	case K_DOWN:
-	case K_RR:
-	  cmd = CMD_MENU_NEXT_SETTING;
-	  break;
+  if (howmanykeys == 0) {
+    if (!(keystate & 0xFF)) {
+      /* No routing keys, no dots, only front keys */
+      if (cmds == CMDS_PREFS) {
+	switch (keystate) {
+          case K_UP:
+          case K_RL:
+            cmd = CMD_MENU_PREV_SETTING;
+            break;
+
+          case K_DOWN:
+          case K_RR:
+            cmd = CMD_MENU_NEXT_SETTING;
+            break;
 	}
       }
-      if(cmd == CMD_NOOP) {
-	switch(keystate) {
+
+      if (cmd == CMD_NOOP) {
+	switch (keystate) {
 	  HKEY2(101, K_A,K_D, "Move backward/forward", CMD_FWINLT,CMD_FWINRT );
 	  HKEY2(101, K_B,K_C, "Move up/down", CMD_LNUP,CMD_LNDN );
 	  HKEY2(101, K_A|K_B,K_A|K_C, "Goto top-left / bottom-left", 
@@ -595,23 +623,24 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 		CMD_PRDIFLN, CMD_NXDIFLN);
 	  HKEY2(501, K_RR|K_A,K_RR|K_D, "Previous/next non-blank window",
 		CMD_FWINLTSKIP, CMD_FWINRTSKIP);
+
 	  /* typing */
 	  HLP0(602, "B+C: Space (spacebar)")
 	  case K_B|K_C: cmd = VAL_PASSDOTS +0; /* space: no dots */ break;
 	}
       }
-    }else if(!(keystate &~0xFF)) {
+    } else if (!(keystate & ~0xFF)) {
       /* no routing keys, some dots, no front keys */
       /* This is a character typed in braille */
       cmd = VAL_PASSDOTS | inputTable[keystate];
-    }else if((keystate & (K_B|K_C)) && !(keystate & 0xFF00 & ~(K_B|K_C))) {
+    } else if ((keystate & (K_B|K_C)) && !(keystate & 0xFF00 & ~(K_B|K_C))) {
       /* no routing keys, some dots, combined with B or C or both but
 	 no other front key */
       /* This is a chorded character typed in braille */
-      switch(keystate &0xFF) {
+      switch (keystate &0xFF) {
         HLP0(601, "Chord-1478: Toggle braille input on/off")
         case DOT1|DOT4|DOT7|DOT8:
-          if(release) {
+          if (release) {
             brlinput ^= 1;
             /* ouch! message() will recurse in here. */
             keystate = 0;
@@ -620,6 +649,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             return CMD_NOOP;
           }
           break;
+
 	CKEY(610, DOT4|DOT6, "Return", VAL_PASSKEY + VPK_RETURN );
 	CKEY(610, DOT2|DOT3|DOT4|DOT5, "Tab", VAL_PASSKEY + VPK_TAB );
 	CKEY(610, DOT1|DOT2, "Backspace", VAL_PASSKEY + VPK_BACKSPACE );
@@ -629,54 +659,58 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	CKEY(610, DOT8, "Right arrow", VAL_PASSKEY+VPK_CURSOR_RIGHT);
       }
     }
-  }else{ /* Some routing keys */
-    if(!keystate) {
+  } else { /* Some routing keys */
+    if (!keystate) {
       /* routing keys, no other keys */
       if (howmanykeys == 1) {
-	switch(rtk_which[0]) {
-	  HLP0(201, "CRs1: Help screen (toggle)")
-	    KEY( 0, CMD_HELP );
-	  HLP0(205, "CRs2: Preferences menu (and again to exit)")
-	    KEY( 1, CMD_PREFMENU );
-	  HLP0(501, "CRs3: Go back to previous reading location "
-	       "(undo cursor tracking motion).")
-	    KEY( 2, CMD_BACK );
-	  HLP0(301, "CRs4: Route cursor to current line")
-	    KEY( 3, CMD_CSRJMP_VERT );
-	default:
+        if (IS_TEXT_KEY(rtk_which[0])) {
 	  HLP0(301,"CRt#: Route cursor to cell")
-	    cmd = CR_ROUTE + rtk_which[0] -NRSTATCELLS;
-	}
-      }else if(howmanykeys == 3
-	       && rtk_which[0] >= NRSTATCELLS
-	       && rtk_which[0]+2 == rtk_which[1]){
+	  cmd = CR_ROUTE + rtk_which[0] - textOffset;
+        } else if (rtk_which[0] == statusOffset+0) {
+          HLP0(201, "CRs1: Help screen (toggle)")
+          cmd = CMD_HELP;
+        } else if (rtk_which[0] == statusOffset+1) {
+          HLP0(205, "CRs2: Preferences menu (and again to exit)")
+          cmd = CMD_PREFMENU;
+        } else if (rtk_which[0] == statusOffset+2) {
+          HLP0(501, "CRs3: Go back to previous reading location "
+               "(undo cursor tracking motion).")
+          cmd = CMD_BACK;
+        } else if (rtk_which[0] == statusOffset+3) {
+          HLP0(301, "CRs4: Route cursor to current line")
+          cmd = CMD_CSRJMP_VERT;
+        }
+      } else if (howmanykeys == 3
+	         && IS_TEXT_KEYS(rtk_which[0], rtk_which[2])
+	         && rtk_which[0]+2 == rtk_which[1]) {
 	HLP0(405,"CRtx + CRt(x+2) + CRty : Cut text from x to y")
-	  cmd = CR_CUTBEGIN + rtk_which[0] -NRSTATCELLS;
-          pending_cmd = CR_CUTRECT + rtk_which[2] -NRSTATCELLS;
-      }else if (howmanykeys == 2 && rtk_which[0] == 0 && rtk_which[1] == 1)
-	HLP0(201,"CRs1+CRs2: Learn mode (key describer) (toggle)")
-	  cmd = CMD_LEARN;
-      else if (howmanykeys == 2	&& rtk_which[0] == NRSTATCELLS+1
-	       && rtk_which[1] == NRSTATCELLS+2)
+	cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
+        pending_cmd = CR_CUTRECT + rtk_which[2] - textOffset;
+      } else if (howmanykeys == 2	&& rtk_which[0] == textOffset+1
+	         && rtk_which[1] == textOffset+2) {
 	HLP0(408,"CRt2+CRt3: Paste cut text")
-	  cmd = CMD_PASTE;
-      else if (howmanykeys == 2 && rtk_which[0] == NRSTATCELLS
-	       && rtk_which[1] == NRSTATCELLS+1)
+	cmd = CMD_PASTE;
+      } else if (howmanykeys == 2 && rtk_which[0] == textOffset+0
+                 && rtk_which[1] == textOffset+1) {
 	HLP0(501,"CRt1+CRt2 / CRt<COLS-1>+CRt<COLS>: Move window left/right "
 	     "one character")
-	  cmd = CMD_CHRLT;
-      else if (howmanykeys == 2 && rtk_which[0] == ncells-2
-	       && rtk_which[1] == ncells-1)
+	cmd = CMD_CHRLT;
+      } else if (howmanykeys == 2 && rtk_which[0] == textOffset+textCells-2
+                 && rtk_which[1] == textOffset+textCells-1) {
 	cmd = CMD_CHRRT;
-    }
+      } else if (howmanykeys == 2 && rtk_which[0] == statusOffset+0
+                 && rtk_which[1] == statusOffset+1) {
+	HLP0(201,"CRs1+CRs2: Learn mode (key describer) (toggle)")
+	cmd = CMD_LEARN;
+      }
+    } else if (keystate & (K_UP|K_RL|K_RR)) {
     /* routing keys and other keys */
-    else if(keystate & (K_UP|K_RL|K_RR)) {
       /* Some routing keys combined with UP RL or RR (actually any key
 	 combo that has at least one of those) */
       /* Treated special because we use absolute routing key numbers
 	 (counting the status cell keys) */
-      if(howmanykeys == 1)
-	switch(keystate) {
+      if (howmanykeys == 1) {
+	switch (keystate) {
 	  PHKEY(205,"CRa#+", K_UP, "Switch to virtual console #",
 		CR_SWITCHVT + rtk_which[0]);
 	  PHKEY(501,"CRa#+", K_RL, "Remember current position as mark #",
@@ -684,68 +718,64 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	  PHKEY(501,"CRa#+", K_RR, "Goto mark #",
 		CR_GOTOMARK + rtk_which[0]);
 	}
-      else if(howmanykeys == 2 && rtk_which[0] == 0 && rtk_which[1] == 1) {
+      } else if (howmanykeys == 2 && rtk_which[0] == 0 && rtk_which[1] == 1) {
 	switch(keystate) {
 	  PHKEY2(205,"CRa1+CRa2+", K_RL,K_RR, "Switch to previous/next "
 		 "virtual console",
 		 CMD_SWITCHVT_PREV, CMD_SWITCHVT_NEXT);
 	}
       }
-    }
-    else if(howmanykeys == 1 && keystate == (K_A|K_D)) {
+    } else if (howmanykeys == 1 && keystate == (K_A|K_D)) {
       /* One absolute routing key with A+D */
       switch(rtk_which[0]) {
 	HLP0(205, "A+D +CRa1: Six dots mode (toggle)")
 	  KEY( 0, CMD_SIXDOTS );
       };
-    }
-    else if(howmanykeys == 1 && rtk_which[0] >= NRSTATCELLS) {
+    } else if (howmanykeys == 1 && IS_TEXT_KEY(rtk_which[0])) {
       /* one text routing key with some other keys */
       switch(keystate){
 	PHKEY(501,"CRt#+",K_DOWN,"Move right # cells",
-	      CR_SETLEFT + rtk_which[0] -NRSTATCELLS);
+	      CR_SETLEFT + rtk_which[0] - textOffset);
 	PHKEY(401, "CRt#+",K_D, "Mark beginning of region to cut",
-	      CR_CUTBEGIN + rtk_which[0] -NRSTATCELLS);
+	      CR_CUTBEGIN + rtk_which[0] - textOffset);
 	PHKEY(401, "CRt#+",K_A, "Mark bottom-right of rectangular "
 	      "region and cut", 
-	      CR_CUTRECT + rtk_which[0] -NRSTATCELLS);
+	      CR_CUTRECT + rtk_which[0] - textOffset);
 	PHKEY2(501, "CRt#+",K_B,K_C, "Move to previous/next line indented "
 	       "no more than #",
-	       CR_PRINDENT + rtk_which[0] -NRSTATCELLS,
-	       CR_NXINDENT + rtk_which[0] -NRSTATCELLS);
+	       CR_PRINDENT + rtk_which[0] - textOffset,
+	       CR_NXINDENT + rtk_which[0] - textOffset);
       }
-    }
-    else if(howmanykeys == 2 && (keystate & (K_A|K_D))
-	    && rtk_which[0] >= NRSTATCELLS
-	    && rtk_which[0]+1 == rtk_which[1])
+    } else if (howmanykeys == 2 && (keystate & (K_A|K_D))
+	    && IS_TEXT_KEYS(rtk_which[0], rtk_which[1])
+	    && rtk_which[0]+1 == rtk_which[1]) {
       /* two consecutive text routing keys combined with A or D */
-      switch(keystate){
+      switch (keystate) {
 	PHKEY(401, "CRt# + CRt(#+1) + ",K_D,
 	      "Mark beginning of cut region for append",
-	      CR_CUTAPPEND +rtk_which[0] -NRSTATCELLS);
+	      CR_CUTAPPEND + rtk_which[0] - textOffset);
 	PHKEY(401, "CRt# + CRt(#-1) + ",K_A,
 	      "Mark end of linear region and cut",
-	       CR_CUTLINE +rtk_which[1] -NRSTATCELLS);
+	       CR_CUTLINE + rtk_which[1] - textOffset);
       }
-    else if(howmanykeys == 2
-	    && rtk_which[0] == NRSTATCELLS && rtk_which[1] == NRSTATCELLS+1)
+    } else if (howmanykeys == 2
+	    && rtk_which[0] == textOffset+0 && rtk_which[1] == textOffset+1) {
       /* text routing keys 1 and 2, with B or C */
-      switch(keystate){
+      switch (keystate) {
 	PHKEY2(501, "CRt1+CRt2+",K_B,K_C, "Move to previous/next "
 	       "paragraph (blank line separation)",
 	       CMD_PRPGRPH, CMD_NXPGRPH);
       }
-    else if(howmanykeys == 2
-	    && rtk_which[0] == NRSTATCELLS && rtk_which[1] == NRSTATCELLS+2) {
+    } else if (howmanykeys == 2
+	    && rtk_which[0] == textOffset+0 && rtk_which[1] == textOffset+2) {
       /* text routing keys 1 and 3, with some other keys */
       switch(keystate){
 	PHKEY2(501, "CRt1+CRt3+",K_B,K_C, "Search screen "
 	       "backward/forward for cut text",
 	       CMD_PRSEARCH, CMD_NXSEARCH);
       }
-    }
-    else if(howmanykeys == 2
-	    && rtk_which[0] == NRSTATCELLS+1 && rtk_which[1] == NRSTATCELLS+2) {
+    } else if (howmanykeys == 2
+	    && rtk_which[0] == textOffset+1 && rtk_which[1] == textOffset+2) {
       /* text routing keys 2 and 3, with some other keys */
       switch(keystate){
 	PHKEY2(501, "CRt2+CRt3+",K_B,K_C, "Previous/next prompt "
@@ -767,7 +797,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   if(release) {
     /* keys were released, clear state */
     keystate = 0;
-    memset(rtk_pressed, 0, ncells);
+    memset(rtk_pressed, 0, totalCells);
   }
 
   return cmd;
