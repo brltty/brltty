@@ -24,7 +24,7 @@ TBL_DIR = BrailleTables
 UCD_DIR = Unicode
 CTB_DIR = ContractionTables
 DRV_DIR = lib
-HLP_DIR = help
+DAT_DIR = data
 
 CROSSCOMP = @compiler_prefix@
 INSTALL_ROOT = @install_root@

@@ -58,10 +58,10 @@ braille-help:: help-files
 
 PM_HELP_FILES = brltty-pm-*.hlp
 
-help-files: $(BLD_TOP)$(HLP_DIR)/$(PM_HELP_FILES)
+help-files: $(BLD_TOP)$(DAT_DIR)/$(PM_HELP_FILES)
 
-$(BLD_TOP)$(HLP_DIR)/$(PM_HELP_FILES): $(PM_HELP_FILES) $(TXT2HLP)
-	for file in brltty-$(DRIVER_CODE)-*.hlp; do $(TXT2HLP) $(BLD_TOP)$(HLP_DIR)/$$file $$file; done
+$(BLD_TOP)$(DAT_DIR)/$(PM_HELP_FILES): $(PM_HELP_FILES) $(TXT2HLP)
+	for file in brltty-$(DRIVER_CODE)-*.hlp; do $(TXT2HLP) $(BLD_TOP)$(DAT_DIR)/$$file $$file; done
 
 $(PM_HELP_FILES): read_config
 	./read_config h
@@ -72,10 +72,10 @@ braille-help:: @PM_CONFIGFILE_DEPENDENCY@
 
 PM_CONFIG_FILE = brltty-$(DRIVER_CODE).conf
 
-configuration-file: $(BLD_TOP)$(HLP_DIR)/$(PM_CONFIG_FILE)
+configuration-file: $(BLD_TOP)$(DAT_DIR)/$(PM_CONFIG_FILE)
 
-$(BLD_TOP)$(HLP_DIR)/$(PM_CONFIG_FILE): $(PM_CONFIG_FILE)
-	cp $(PM_CONFIG_FILE) $(BLD_TOP)$(HLP_DIR)/
+$(BLD_TOP)$(DAT_DIR)/$(PM_CONFIG_FILE): $(PM_CONFIG_FILE)
+	cp $(PM_CONFIG_FILE) $(BLD_TOP)$(DAT_DIR)/
 
 $(PM_CONFIG_FILE): read_config
 	./read_config d >$@

@@ -262,14 +262,14 @@ check-braille: brltty braille-drivers
 	for lib in $(BRL_LIBS); \
 	do test $$lib = no && continue; \
 	   ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$lib.$(LIB_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b $$lib -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(HLP_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
+	   ./brltty -v -q -N -e -f /dev/null -b $$lib -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
 	done
 
 check-speech: brltty speech-drivers
 	for lib in $(SPK_LIBS); \
 	do test $$lib = no && continue; \
 	   ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$lib.$(LIB_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b no -s $$lib -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(HLP_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
+	   ./brltty -v -q -N -e -f /dev/null -b no -s $$lib -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
 	done
 
 ###############################################################################
@@ -282,7 +282,7 @@ install-programs: brltty brltty-install
 	$(INSTALL_SCRIPT) brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_DRIVERS) install-data-directory
-	$(INSTALL_DATA) $(BLD_TOP)$(HLP_DIR)/* $(INSTALL_ROOT)$(DATA_DIR) 
+	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIR) 
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES)
 
@@ -376,7 +376,7 @@ distclean::
 clean::
 	-rm -f brltty brltty-install txt2hlp tbl2hex *test *-static
 	-rm -f $(API_LIB) $(API_ARC)
-	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(HLP_DIR)/*
+	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean clean install uninstall::
 	-for driver in $(CONFIGURED_DRIVERS); do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) $@); done

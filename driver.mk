@@ -20,7 +20,7 @@ $(TXT2HLP):
 	cd $(@D) && $(MAKE) $(@F)
 
 HELP_NAME = brltty-$(DRIVER_CODE).hlp
-HELP_FILE = $(BLD_TOP)$(HLP_DIR)/$(HELP_NAME)
+HELP_FILE = $(BLD_TOP)$(DAT_DIR)/$(HELP_NAME)
 HELP_TEXT = $(SRC_DIR)/help*.txt
 $(HELP_FILE): $(HELP_DEPS) $(TXT2HLP)
 	$(INSTALL_DIRECTORY) $(@D)
@@ -68,4 +68,4 @@ uninstall::
 
 clean::
 	-rm -f $(BLD_TOP)$(DRV_DIR)/$(LIB_NAME)?$(DRIVER_CODE).*
-	-rm -f $(BLD_TOP)$(HLP_DIR)/brltty-$(DRIVER_CODE)[-.]*
+	-rm -f $(BLD_TOP)$(DAT_DIR)/brltty-$(DRIVER_CODE)[-.]*
