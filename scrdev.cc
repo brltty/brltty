@@ -2,24 +2,24 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
+ * Version 1.9.0, 06 April 1998
+ *
+ * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ *
  * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <doyons@jsp.umontreal.ca>
+ * Stephane Doyon <s.doyon@videotron.ca>
  *
- * Version 1.0.2, 17 September 1996
- *
- * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+ * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
 /* scrdev.cc - screen types library
- * $Id: scrdev.cc,v 1.3 1996/09/24 01:04:27 nn201 Exp $
  *
  * Note: Although C++, this code requires no standard C++ library.
  * This is important as BRLTTY *must not* rely on too many
@@ -38,64 +38,9 @@
 #include "scrdev.h"
 #include "config.h"
 
+
+
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
-
-
-inline int
-LiveScreen::open (void)
-{
-  if ((fd = ::open (SCRDEV, O_RDONLY)) == -1)
-    return 1;
-  return 0;
-}
-
-
-void
-LiveScreen::getstat (scrstat &stat)
-{
-  unsigned char buffer[4];
-
-  lseek (fd, 0, SEEK_SET);      /* go to start of file */
-  read (fd, buffer, 4);         /* get screen status bytes */
-  stat.rows = buffer[0];
-  stat.cols = buffer[1];
-  stat.posx = buffer[2];
-  stat.posy = buffer[3];
-}
-
-
-unsigned char *
-LiveScreen::getscr (winpos pos, unsigned char *buffer, short mode)
-{
-  scrstat stat;                 /* screen statistics */
-  off_t start;                  /* start offset */
-  size_t linelen;               /* number of bytes to read for one */
-				/* complete line */
-  char linebuf[512];            /* line buffer; larger than is needed */
-
-  getstat (stat);
-  if (pos.left < 0 || pos.top < 0 || pos.width < 1 || pos.height < 1 \
-      || mode < 0 || mode > 1 || pos.left + pos.width > stat.cols \
-      || pos.top + pos.height > stat.rows)
-    return NULL;
-  start = 4 + (pos.top * stat.cols + pos.left) * 2 + mode;
-  linelen = 2 * pos.width - 1;
-  for (int i = 0; i < pos.height; i++)
-    {
-      lseek (fd, start + i * stat.cols * 2, SEEK_SET);
-      read (fd, linebuf, linelen);
-      for (int j = 1; j < pos.width; linebuf[j] = linebuf[j * 2], j++);
-      memcpy (buffer + i * pos.width, linebuf, pos.width);
-    }
-  return buffer;
-}
-
-
-inline void
-LiveScreen::close (void)
-{
-  ::close (fd);
-}
 
 
 inline
@@ -106,18 +51,19 @@ FrozenScreen::FrozenScreen ()
 
 
 int
-FrozenScreen::open (LiveScreen &live)
+FrozenScreen::open (Screen *src)
 {
-  live.getstat (stat);
+  src->getstat (stat);
   if (!(text = new unsigned char[stat.rows * stat.cols]))
     return 1;
   if (!(attrib = new unsigned char[stat.rows * stat.cols]))
     {
       delete text;
+      text = 0;
       return 1;
     }
-  if (!live.getscr ((winpos) { 0, 0, stat.cols, stat.rows }, text, SCR_TEXT) \
-      || !live.getscr ((winpos) { 0, 0, stat.cols, stat.rows }, attrib, \
+  if (!src->getscr ((winpos) { 0, 0, stat.cols, stat.rows }, text, SCR_TEXT) \
+      || !src->getscr ((winpos) { 0, 0, stat.cols, stat.rows }, attrib, \
 		       SCR_ATTRIB))
     {
       delete text;
@@ -265,6 +211,7 @@ HelpScreen::getstat (scrstat &stat)
   stat.posx = stat.posy = 0;
   stat.cols = psz[scrno].cols;
   stat.rows = psz[scrno].rows;
+  stat.no = 0;	/* 0 is reserved for help screen */
 }
 
 

@@ -1,3 +1,20 @@
+07 April 1998: BRLTTY 1.9.0 pre-release.
+  -  Added Stephane's absolute toggles (ON/OFF) flags to function defines.
+  -  Moved braille tables and tools to the BrailleTables directory.
+  -  Added Eurobraille terminal series driver.
+  -  Now BRLTTY knows which virtual console is active and preserves separate
+     information structures for each of them.  This means preserving 
+     current window position, tracking and display modes as you switch
+     from a virtual console to another. 
+  -  Nicolas Pitre now assumes maintenance of BRLTTY since Nikhil Nair
+     seems to be unreachable for quite a long time.
+  -  Modularized screen drivers, added experimental screen driver to get
+     screen image from the "screen" program.  A patch for "screen" is provided
+     in the Patches directory.
+  -  Made all different methods of handling status cells available
+     within the configuration menu.  The default is determined by
+     the compiled in braille driver.
+  -  Added very simple speech interface and few speech drivers.
   -  Incorporated patch from Joerg Korinek <korinek@ira.uka.de> which lets
      the main BRLTTY process continue while cursor routing is in progress.
      Thanks!

@@ -2,24 +2,24 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
+ * Version 1.9.0, 06 April 1998
+ *
+ * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ *
  * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <doyons@jsp.umontreal.ca>
+ * Stephane Doyon <s.doyon@videotron.ca>
  *
- * Version 1.0.2, 17 September 1996
- *
- * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+ * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
 /* brl.h - Header file for the Braille display library
- * $Id: brl.h,v 1.4 1996/09/24 01:04:24 nn201 Exp $
  */
 
 /* Arguments for readbrl() */
@@ -67,15 +67,16 @@
 
 /* Cursor routing */
 #define CMD_CSRJMP 'j'		/* jump cursor to window (cursor routing) */
-/* Cursor routing offset values */
+/* Cursor routing key offset values */
 #define	CR_ROUTEOFFSET 0x080	/* normal cursor routing */
 
 /* Cut and paste */
 #define CMD_CUT_BEG 'C'
 #define CMD_CUT_END 'E'
+#define CMD_PASTE 'P'
+/* Cursor routing key offset values to be used to define a block */
 #define	CR_BEGBLKOFFSET	0x100	/* to define the beginning of a block */
 #define	CR_ENDBLKOFFSET 0x180	/* to define the end of the block */
-#define CMD_PASTE 'P'
 
 /* Configuration commands */
 #define CMD_CONFMENU 'x'	/* enter configuration menu */
@@ -99,6 +100,11 @@
 #define CMD_KEY_RIGHT 'R'
 #define CMD_KEY_LEFT 'L'
 #define CMD_KEY_RETURN 'N'
+
+/* For specifically turning on/off toggle commands */
+#define VAL_SWITCHMASK  0x600
+#define VAL_SWITCHON    0x200
+#define VAL_SWITCHOFF   0x400
 
 /* For speech devices: */
 #define CMD_SAY 'Y'

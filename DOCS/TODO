@@ -1,4 +1,4 @@
-BRLTTY TODO - 26 July 1996
+BRLTTY TODO - 07 April 1998
 ==========================
 
 (This concerns the main module of BRLTTY.  Individual Braille terminal
@@ -11,6 +11,8 @@ interface library, including standardisation of the use of status cells.
 
 Then (not necessarily in this order):
 
+- Updating the documentation.
+
 - Setting marks at convenient places on the screen and jumping to them.
 
 - Defining smaller regions of the screen to be concentrated on.  Cursor
@@ -21,12 +23,15 @@ useful if the screen was split into multiple `windows' (e.g. in ytalk).
 
 - Mixed text + attribute mode, like underlined and/or flashing attributes.
 
-- Keypress simulation within dosemu.
+- Keypress simulation within dosemu.  See comments in inskey_lnx.c.
+
+- Linux console charset translation (actually bolted in). See comments
+in scr_vcsa.cc.
 
 - Revision of cut & paste and implementation of linear mode cut (as opposed
 to rectangular mode).
 
-- Revesion of beeps.  Too many events have the same beeps, so we might want
+- Revision of beeps.  Too many events have the same beeps, so we might want
 to add new ones. See if we could optimize the use of the console resource.
 Implement .au and .wav sounds (through a soundcard).
 
@@ -34,14 +39,17 @@ Implement .au and .wav sounds (through a soundcard).
 line you're on even when new text is printed and the screen scrolls up?
 Like in IRC for instance...
 
-- Support for speech addition: this does not mean a screen reader, it
-simply means some added functionality to plain Braille.  It would allow
-designating text (with the Braille terminal keys) and sending it to a
-speech synthesizer.  Intended to speed up reading of long texts.
-This has been implemented for the CombiBraille, but needs generalising.
+- Speech support improovement.
+In progress but not finished...
 
 - On-the-fly grade II translation: translating one line at a time into
 grade II Braille would speed up reading.  It may be possible to use some
-existing free translation software...
+existing free translation software like nfbtrans.
 
 - Support for more Braille displays.
+
+- Port to other Unix platforms.  Since all Linux dependent functions are now
+modularized in separate source files, it would be easy to write other 
+modules to make BRLTTY usable with the screen package and then become
+available for any platform.  An experimental patch is available in
+the Patches/ directory.

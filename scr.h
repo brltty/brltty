@@ -2,24 +2,24 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
+ * Version 1.9.0, 06 April 1998
+ *
+ * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ *
  * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <doyons@jsp.umontreal.ca>
+ * Stephane Doyon <s.doyon@videotron.ca>
  *
- * Version 1.0.2, 17 September 1996
- *
- * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+ * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
 /* scr.h - C header file for the screen reading library
- * $Id: scr.h,v 1.3 1996/09/24 01:04:27 nn201 Exp $
  */
 
 #ifndef _SCR_H
@@ -38,6 +38,7 @@ typedef struct
   {
     short rows, cols;		/* screen dimentions */
     short posx, posy;		/* cursor position */
+    short no;			/* screen number */
   }
 scrstat;
 
@@ -49,10 +50,11 @@ typedef struct
 winpos;
 
 /* Functions provided by this library */
+
 int initscr (void);		/* initialise screen reading functions */
 scrstat getstat (void);		/* get screen status */
-/* Read a rectangle from the screen - text or attributes: */
 unsigned char *getscr (winpos, unsigned char *, short);
+		/* Read a rectangle from the screen - text or attributes: */
 void closescr (void);		/* close screen reading */
 int selectdisp (int);		/* select display page */
 

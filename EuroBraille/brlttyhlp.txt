@@ -1,0 +1,31 @@
+BRLTTY help screen for EuroBraille terminals 
+
+Note: These key bindings can be improved a lot.  Feel free to help!!
+      See brltty/EuroBraille/README file for details.
+
+Key     Action
+Fn E    Show this help screen
+Fn F    Display the information status line
+Fn G    Enter the configuration menu
+Fn K    Next routing key will mark the beginning of a block
+Fn L    Next routing key will mark the end the block and copy it to memory
+Fn M    Paste previously copied block
+Kp 1    Move to top left of the screen
+Kp 2    Move up one line
+Kp 3    Move up to the next different screen line
+Kp 4    Move braille window left
+Kp 5    Move braille window to cursor position
+Kp 6    Move braille window right
+Kp 7    Move to bottom left of the screen
+Kp 8    Move down one line
+Kp 9    Move down to the next different screen line
+Kp 0    Toggle cursor tracking mode
+Kp *    Toggle attributes display mode
+Kp #    Toggle Freeze Screen
+
+Some functions are bound to the braille keyboard:
+Braille u   Move up one line
+Braille d   MOve down one line
+Braille l   Move braille window left
+Braille r   Move braille window right
+Braille h   Move to cursor position

@@ -2,27 +2,26 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
+ * Version 1.9.0, 06 April 1998
+ *
+ * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ *
  * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <doyons@jsp.umontreal.ca>
+ * Stephane Doyon <s.doyon@videotron.ca>
  *
- * Version 1.0.2, 17 September 1996
- *
- * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+ * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
-
-/* $Id: brl.c,v 1.4 1996/09/26 10:02:38 nn201 Exp $ */
 
 /* TSI/brl.c - Braille display driver for TSI displays
  *
- * Written by Stephane Doyon (doyons@JSP.UMonteal.CA)
+ * Written by Stephane Doyon (s.doyon@videotron.ca)
  *
  * This is version 1.1 (September 25ft 1996) of the TSI driver.
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40.
@@ -31,11 +30,13 @@
 
 #define BRL_C 1
 
+#define __EXTENSIONS__	/* for termios.h */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <termios.h>
+#include <sys/termios.h>
 #include <string.h>
 
 #include "brlconf.h"
@@ -192,7 +193,7 @@ void
 identbrl (const char *tty)
 {
   printf ("  BRLTTY driver for TSI displays, version 1.1\n");
-  printf ("  Copyright (C) 1996 by Stephane Doyon <doyons@JSP.UMontreal.CA>\n");
+  printf ("  Copyright (C) 1996 by Stephane Doyon <s.doyon@videotron.ca>\n");
   if (tty)
     printf ("  Using serial port %s\n", tty);
   else

@@ -2,44 +2,43 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
+ * Version 1.9.0, 06 April 1998
+ *
+ * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ *
  * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <doyons@jsp.umontreal.ca>
+ * Stephane Doyon <s.doyon@videotron.ca>
  *
- * Version 1.0.2, 17 September 1996
- *
- * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+ * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
 /* cut-n-paste.c - cut & paste functionality
- * $Id: cut-n-paste.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
  */
 
 #include <stdlib.h>
 #include "scr.h"
+#include "inskey.h"
 #include "beeps.h"
 
+
 /* prototypes */
-void inskey (unsigned char *string);
-void cut ();
+static void cut (void);
+
 
 /* Global state variables */
-unsigned char *cut_buffer = NULL;
-short cut_begx = 0, cut_begy = 0, cut_endx = 0, cut_endy = 0;
+static unsigned char *cut_buffer = NULL;
+static short cut_begx = 0, cut_begy = 0, cut_endx = 0, cut_endy = 0;
 
 
-/* Function prototypes: */
-void cut ();
 
-void
-cut_begin (int x, int y)
+void cut_begin (int x, int y)
 {
   if (cut_buffer)
     {
@@ -51,23 +50,20 @@ cut_begin (int x, int y)
   play (snd_cut_beg);
 }
 
-void
-cut_end (int x, int y)
+void cut_end (int x, int y)
 {
   cut_endx = x;
   cut_endy = y;
   cut ();
 }
 
-void
-cut_paste ()
+void cut_paste ()
 {
   if (cut_buffer)
     inskey (cut_buffer);
 }
 
-void
-cut (void)
+static void cut (void)
 {
   short cols, rows;
 

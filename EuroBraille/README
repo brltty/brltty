@@ -1,0 +1,23 @@
+This is the EuroBraille family driver for BRLTTY, version 0.1
+Initial writing by Nicolas Pitre <nico@cam.org>, Copyright June 1997.
+Some routines are copyright VisuAide, Inc. <info@visuaide.qc.ca>.
+This code is copyrighted under the GNU Public License.  See the file
+COPYING included with BRLTTY for details.
+
+This driver was developped and tested on a very short period of time on 
+the ClioBraille 40 from the EuroBraille family.  It should work with 
+other models too...  If you can confirm it, please tell me!  Since I 
+don't own such a terminal myself, I don't think I can maintain this 
+driver acurately.  If you are interrested in maintaining this PLEASE tell 
+the BRLTTY team and join us!
+
+There is only a basic key binding in the driver.  You can modify it very 
+easily in the brl.c file, near the end.  There is already a "case" 
+statement for each possible key.  You just have to insert function codes 
+from the ../brl.h file.  If you do so, please update the brlttyhlp.txt 
+file too!
+
+Comments, suggestions or patches are welcome!
+
+Nicolas Pitre
+nico@cam.org

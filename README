@@ -1,22 +1,21 @@
-
 BRLTTY - Access software for Unix for a blind person
          using a soft Braille terminal
 
+Version 1.9.0, 06 April 1998
+
+Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+
 Nikhil Nair <nn201@cus.cam.ac.uk>
 Nicolas Pitre <nico@cam.org>
-Stephane Doyon <doyons@jsp.umontreal.ca>
+Stephane Doyon <s.doyon@videotron.ca>
 
-Version 1.0, 26 July 1996
-
-Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
 BRLTTY comes with ABSOLUTELY NO WARRANTY.
 
 This is free software, placed under the terms of the
 GNU General Public License, as published by the Free Software
-Foundation.  Please see the file COPYING, included in the BRLTTY
-distribution, for details.
+Foundation.  Please see the file COPYING for details.
 
-This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+This software is maintained by Nicolas Pitre <nico@cam.org>.
 
 -----------------------------------------------------------------------------
 
@@ -93,7 +92,7 @@ been tested on
   -  a variety of PCs: both laptops and desktops; processors from
      386SX20 to Pentium with a huge range of memory sizes; Linux
      distributions including Debian and Slackware; a number of Linux
-     kernels, including both 1.2.13 and 2.0.0.
+     kernels, including both 1.2.13 and 2.0.x.
   -  a DEC Alpha: only tested once, under RedHat Alpha Linux on a noname
      board kindly lent to the Cambridge University Computer Laboratory
      by DEC in Reading, England.
@@ -104,6 +103,7 @@ only):
   -  Alva B.V.: ABT3xx series;
   -  Telesensory Systems Inc.: PowerBraille 40 (not 65/80),
      Navigator 20/40/80 (latest firmware version only?).
+  -  EuroBraille series
 
 If you want another Braille display to be supported, please contact
 the maintainer.  Ability to add more Braille displays does, however,
@@ -118,11 +118,12 @@ There are currently three active developers:
   -  Nikhil Nair: founder of the BRLTTY project and author of the
                   Tieman B.V. CombiBraille driver
           E-Mail: nn201@cus.cam.ac.uk
-  -  Nicolas Pitre: Author of the driver for the Alva series
+  -  Nicolas Pitre: current maintainer of the BRLTTY project and author of
+                  the driver for the Alva series 
           E-Mail: nico@cam.org
   -  Stephane Doyon: Author of the driver for the TSI displays (Navigator
                   and PowerBraille 40)
-          E-Mail: doyons@jsp.umontreal.ca
+          E-Mail: s.doyon@videotron.ca
 
 Any comments and/or criticisms regarding BRLTTY in general should be
 addressed to all three of the above.
@@ -145,3 +146,6 @@ The source files for the main, device-independent core of BRLTTY is in
 the top-level directory.  There is also one subdirectory per Braille
 device type, containing display-specific source files and
 documentation (in another README file).
+
+Finally, some braille definition tables are available in the BrailleTables
+subdirectory along with some tools to manipulate them.

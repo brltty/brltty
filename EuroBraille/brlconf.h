@@ -19,9 +19,8 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-/* cut-n-paste.h - cut & paste functionality
- */
 
-void cut_begin (int x, int y);
-void cut_end (int x, int y);
-void cut_paste ();
+/* serial line baudrate... 
+ */
+#define BAUDRATE B9600
+

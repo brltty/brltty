@@ -1,4 +1,4 @@
-BRLTTY FAQ - last modified 17 September 1996
+BRLTTY FAQ - last modified 07 April 1998
 ============================================
 
 Q. What are the supported Braille display models?
@@ -7,8 +7,10 @@ A.
   - Alva B.V.'s ABT3xx series
   - Telesensory Systems Inc.'s Navigator 20/40/80 and PowerBraille 40.
     PowerBraille 65/80 is not supported yet (need testers!)
+  - EuroBraille series
 That's according to the specs we have. However, the Navigator 80 and
-several Alva and Tieman models have not been tested yet.
+several Alva and Tieman models have not been tested yet.  The Eurobraille
+is not very hard tested at all.
 
 Q. Does BRLTTY need a lot of CPU time? On what machines does it run?
 A. BRLTTY has been successfully tested on a 386SX20. It does not use much
@@ -23,7 +25,7 @@ A.
   - Type make.
   - As root, type make install.
   - Run /sbin/brltty.
-  - Optionally: run /sbin/brltty from rc.S or equivalent.
+  - Optionally: run /sbin/brltty from /etc/rc.d/rc.S or equivalent.
   - That's all!
 
 Q. What if it works?
@@ -89,6 +91,11 @@ compile BRLTTY. The components are:
   - the /etc/brltty subdirectory (this is recommended but optional)
   - and make sure that adequate versions of the shared libraries will
     be available.
+As an absolute minimum, you could compile BRLTTY statically (with 
+LDFLAGS= -s -static in the Makefile) and configure any other parameters
+that correspond to your target system.  This way you'll have a single
+file (brltty) to carry.  Note however that compiling it statically makes 
+it much larger.
 
 Q. What is the config menu?
 A. There are several parameters you can tweek in BRLTTY. There initial
@@ -103,7 +110,7 @@ start BRLTTY. The reset function simply reloads all settings from the
 file. The binary configuration file will be located in the /etc/brltty
 directory if it exists, or in the /etc directory if it does not. Note that
 the driver for your terminal might use some keys to toggle some of these
-options directly.
+options directly without having to use the config menu.
 
 Q. Some of the options in the online config menu have strange names. What do
    they mean?
@@ -118,7 +125,7 @@ self-explanatory.
       When off, the cursor is formed of dots 7-8.
   - "csr blink on : #" The number # indicates the duration of the blinking
       phase in which the cursor if visible.
-    "csr blink off : #" Indicates the duration of the linking phase in
+  - "csr blink off : #" Indicates the duration of the blinking phase in
       which the cursor is not visible.
     Using these options, you can not only determine the blinking speed
     but also change the proportions of visibility/invisibility time...
@@ -136,6 +143,11 @@ self-explanatory.
       keys.  When on, they act like the PRDIFLN and NXDIFLN keys,
       i.e. repeated lines are skipped.  Otherwise they simply move up and
       down one line respectively.
+  - "st cells style : #" Indicates in wich way the braille status cells
+      are used.  The following styles are available:
+        0 = nothing is displayed on the status cells
+        1 = Alva style
+        2 = Tieman style
 
 Q. Why does the cut & paste function leave out the beginning of some of the
    lines I try to cut?
@@ -151,7 +163,8 @@ invoking BRLTTY). The format of the Braille translation tables is outlined
 in section 3.1 of the BRLTTY manual. The utility txt2tbl may be useful if
 you have an ASCII Braille table. The utility convtable may be useful if you
 have a binary Braille table in another format. Both utilities are
-documented in section 3.2 of the manual.
+documented in section 3.2 of the manual.  They can be found along with
+some braille tables in the BrailleTables subdirectory.
 
 Q. Who do I contact if I have questions or problems?
 A. There is currently a team of three active developers. All three have
@@ -164,8 +177,9 @@ Here are the addresses:
 Nikhil Nair: founder of the BRLTTY project and author of the
              Tieman B.V. CombiBraille driver
      E-Mail: nn201@cus.cam.ac.uk
-Nicolas Pitre: Author of the driver for the Alva series
+Nicolas Pitre: current maintainer of the BRLTTY project and author of
+             the driver for the Alva series
      E-Mail: nico@cam.org
 Stephane Doyon: Author of the driver for the TSI displays (Navigator
              and PowerBraille 40)
-     E-Mail: doyons@jsp.umontreal.ca
+     E-Mail: s.doyon@videotron.ca

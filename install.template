@@ -11,15 +11,18 @@ then
   echo -n Installing data files...
   cp -aR $2=D $1=D
   echo done.
-  if [ ! -c $1=V ]
+  if [ "=V" ]
   then
-    echo -n Creating =V...
-    mknod -m o= $1=V c 7 128
-    chown root.tty $1=V
-    chmod 660 $1=V
-    echo done.
-  else
-    echo =V already exists - not reinstalled.
+    if [ ! -c $1=V ]
+    then
+      echo -n Creating =V...
+      mknod -m o= $1=V c 7 128
+      chown root.tty $1=V
+      chmod 660 $1=V
+      echo done.
+    else
+      echo =V already exists - not reinstalled.
+    fi
   fi
   echo BRLTTY installation complete.
 else

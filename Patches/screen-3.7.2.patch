@@ -1,0 +1,167 @@
+diff -u -r screen-3.7.2.orig/Makefile.in screen-3.7.2/Makefile.in
+--- screen-3.7.2.orig/Makefile.in	Sun Sep  1 17:54:24 1996
++++ screen-3.7.2/Makefile.in	Tue Jan  7 23:30:09 1997
+@@ -47,7 +47,13 @@
+ # -DFORKDEBUG
+ #	Swap roles of father and son when forking the SCREEN process. 
+ #	Useful only for debugging.
+-OPTIONS=
++# -DIPC_EXPORT_IMAGE
++#       It allows another process to read the current window image through
++#       shared memory (IPC required).  Such process can be access software
++#       like speech or braille screen review programs.  For example: 
++#	BRLTTY uses it to display part of the screen on a braille terminal.
++#OPTIONS=
++OPTIONS= -DIPC_EXPORT_IMAGE
+ #OPTIONS= -DDEBUG -DTMPTEST
+ 
+ SHELL=/bin/sh
+diff -u -r screen-3.7.2.orig/extern.h screen-3.7.2/extern.h
+--- screen-3.7.2.orig/extern.h	Mon Nov 20 13:03:04 1995
++++ screen-3.7.2/extern.h	Tue Jan  7 23:08:16 1997
+@@ -120,6 +120,9 @@
+ extern int   execclone __P((char **));
+ #endif
+ extern void  nwin_compose __P((struct NewWindow *, struct NewWindow *, struct NewWindow *));
++#ifdef IPC_EXPORT_IMAGE
++extern void  CopyWinImage __P((struct win *, char *));
++#endif
+ 
+ /* utmp.c */
+ #ifdef UTMPOK
+diff -u -r screen-3.7.2.orig/screen.c screen-3.7.2/screen.c
+--- screen-3.7.2.orig/screen.c	Wed Jul 10 03:55:48 1996
++++ screen-3.7.2/screen.c	Tue Jan  7 23:18:20 1997
+@@ -67,6 +67,11 @@
+ # include <compat.h>
+ #endif
+ 
++#ifdef IPC_EXPORT_IMAGE
++# include <sys/ipc.h>
++# include <sys/shm.h>
++#endif
++
+ #include "screen.h"
+ 
+ #include "patchlevel.h"
+@@ -191,6 +196,9 @@
+ struct win *windows;
+ struct win *console_window;
+ 
++#ifdef IPC_EXPORT_IMAGE
++char *shm;              /* pointer to shared memory segment */
++#endif
+ 
+ 
+ /*
+@@ -449,6 +457,38 @@
+   MsgWait = MSGWAIT;
+   MsgMinWait = MSGMINWAIT;
+   SilenceWait = SILENCEWAIT;
++
++#ifdef IPC_EXPORT_IMAGE
++  {
++    key_t key = 0xBACD072F;     /* random static IPC key */
++    int shmid;
++
++    /* Allocation of shared mem for 18000 bytes (screen text and attributes
++     * + few coord.).  We supose no screen will be wider than 132x66.
++     * 0x1C0 = [rwx------].
++     */
++    shmid = shmget( key, 18000, IPC_CREAT | 0x1C0 );
++    if( shmid < 0 )
++      {
++        Panic( errno, "shmget" );
++        /* NOTRECHED */
++      }
++    shm = shmat( shmid, 0, 0);
++    if ( shm == (void*)-1 )
++      {
++        Panic( errno, "shmat" );
++        /* NOTRECHED */
++      }
++    /* minimal initialisation just to have valid data */
++    shm[0] = 80;   /* scrdim x */
++    shm[1] = 1;    /* scrdim y */
++    shm[2] = 0;    /* csrpos x */
++    shm[3] = 0;    /* csrpos y */
++    strcpy( shm+4, "screen is initializing..." );
++    memset( shm+4+strlen(shm+4), ' ', 80);
++  }
++#endif
++
+ #ifdef COPY_PASTE
+   CompileKeys((char *)NULL, mark_key_tab);
+ #endif
+@@ -1279,6 +1319,11 @@
+ 
+   for (;;)
+     {
++#ifdef IPC_EXPORT_IMAGE
++      /* export image from last used window wich is on top of the list */
++      CopyWinImage( windows, shm );
++#endif
++
+       tv.tv_sec = 0;
+       /*
+        * check for silence
+diff -u -r screen-3.7.2.orig/window.c screen-3.7.2/window.c
+--- screen-3.7.2.orig/window.c	Mon May 13 16:54:44 1996
++++ screen-3.7.2/window.c	Tue Jan  7 23:05:33 1997
+@@ -1116,3 +1116,56 @@
+ 
+ #endif
+ 
++
++#ifdef IPC_EXPORT_IMAGE
++
++void
++CopyWinImage( p, dest )
++struct win *p;
++char *dest;
++{
++  register char *s, *d = dest, *m;
++  register int x, y;
++  struct display *display = p->w_display;
++  int st = (display) ? D_status : 0;
++
++  if( p && p->w_mlines )
++    {
++      *d++ = p->w_width;                        /* scrdim x */
++      *d++ = p->w_height;                       /* scrdim y */
++      *d++ = (st) ? D_status_len : p->w_x;      /* csrpos x */
++      *d++ = (st) ? STATLINE : p->w_y;          /* csrpos y */
++      /* copy window image to buffer */
++      for( y = 0; y < p->w_height; y++ )
++        {
++          s = p->w_mlines[y].image;
++          x = p->w_width;
++          if( st && y == STATLINE )
++            for( m = D_status_lastmsg; *m && x; *d++ = *m++, s++, x-- );
++          for( ; x; *d++ = *s++, x-- );
++        }
++      /* copy attributes from window image to buffer */
++      for( y = 0; y < p->w_height; y++ )
++        {
++          s = p->w_mlines[y].attr;
++          x = p->w_width;
++          if( st && y == STATLINE )
++            for( ; x; *d++ = 0, s++, x-- );
++          for( ; x; *d++ = *s++, x-- );
++        }
++    }
++  else
++    {
++      /* no window pointer */
++      *d++ = 80;   /* scrdim x */
++      *d++ = 1;    /* scrdim y */
++      *d++ = 0;    /* csrpos x */
++      *d++ = 0;    /* csrpos y */
++      strcpy( d, "*** screen: no window pointer ***" );
++      memset( d+strlen(d), ' ', 80);
++    }
++}
++
++#endif	/* IPC_EXPORT_IMAGE */
++
++

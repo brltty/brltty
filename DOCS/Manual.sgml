@@ -1,7 +1,6 @@
 <!doctype linuxdoc system>
 
 <!-- BRLTTY manual, SGML version -->
-<!-- $Id: Manual.sgml,v 1.5 1996/09/24 20:23:10 nn201 Exp $ -->
 
 <article>
 
@@ -9,10 +8,10 @@
 <subtitle>Access Software for Unix for a Blind Person Using a Soft Braille Terminal
 <author>Nikhil Nair <tt>&lt;nn201@cus.cam.ac.uk&gt;</> &nl;
 Nicolas Pitre <tt>&lt;nico@cam.org&gt;</> &nl;
-Stephane Doyon <tt>&lt;doyons@jsp.umontreal.ca&gt;</>
+Stephane Doyon <tt>&lt;s.doyon@videotron.ca&gt;</>
 <date>Version 1.0.2, 17 September 1996
 <abstract>
-Copyright (C) 1995, 1996 by Nikhil Nair and others, All Rights
+Copyright (C) 1995, 1996 by The BRLTTY Team, All Rights
 Reserved.  This is free software, placed under the terms of The GNU 
 General Public License.  BRLTTY comes with ABSOLUTELY NO WARRANTY.
 </abstract>
@@ -611,22 +610,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 <sect1>Support<label id="support">
 
-<p>This software is being maintained by the original author, <htmlurl
+<p>This software was being maintained by the original author, <htmlurl
 url="mailto:nn201@cus.cam.ac.uk" name="Nikhil Nair
 &lt;nn201@cus.cam.ac.uk&gt;">.  However, it now represents the work
 of a team, which also includes
 <itemize>
   <item> <htmlurl url="mailto:nico@cam.org" name="Nicolas Pitre 
     &lt;nico@cam.org&gt;">;
-  <item> <htmlurl url="mailto:doyons@jsp.umontreal.ca" name="Stephane
-    Doyon &lt;doyons@jsp.umontreal.ca&gt;">;
+  <item> <htmlurl url="mailto:s.doyon@videotron.ca" name="Stephane
+    Doyon &lt;s.doyon@videotron.ca&gt;">;
   <item> <htmlurl url="mailto:jrbowden@bcs.org.uk" name="James Bowden
     &lt;jrbowden@bcs.org.uk&gt;"> (now acting in an advisory
     capacity).
 </itemize>
 
+<!::  Unfortunately, Nikhil Nair seems to be unreachable for some time...
+
 The maintainer can also be contacted at: Nikhil Nair, Trinity College,
-CAMBRIDGE, CB2 1TQ, England; tel.: +44 1223 368353.
+CAMBRIDGE, CB2 1TQ, England; tel.: +44 1223 368353.    ::>
 
 Comments and criticisms are welcome.  We will try to respond promptly
 to all (sensible) mail, but give no guarantee.  In general, we suggest

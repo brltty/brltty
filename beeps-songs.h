@@ -2,20 +2,21 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
+ * Version 1.9.0, 06 April 1998
+ *
+ * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ *
  * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <doyons@jsp.umontreal.ca>
+ * Stephane Doyon <s.doyon@videotron.ca>
  *
- * Version 1.0.2, 17 September 1996
- *
- * Copyright (C) 1995, 1996 by Nikhil Nair and others.  All rights reserved.
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  *
- * This software is maintained by Nikhil Nair <nn201@cus.cam.ac.uk>.
+ * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
 /* beeps-songs.h - definitions of different types of beeps
@@ -59,3 +60,7 @@ int snd_toggleoff[] =
 {1000, 20, 1, 30, 1500, 20, 1, 30, 2200, 20, 0};
 int snd_done[] =
 {2000, 40, 1, 30, 2000, 40, 1, 40, 2000, 140, 1, 20, 1500, 50, 0};
+int snd_skip[] =
+{2000, 10, 0, 40, 0};
+int snd_skipmore[] =
+{2100, 30, 0, 20, 0};
