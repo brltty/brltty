@@ -116,6 +116,7 @@
 #include "Programs/brltty.h"
 
 #define BRLSTAT ST_AlvaStyle
+#define BRL_HAVE_FIRMNESS
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
@@ -1359,4 +1360,12 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   }
 
   return res;
+}
+
+static void
+brl_firmness (BrailleDisplay *brl, int setting) {
+  if (model->Flags & BPF_CONFIGURABLE) {
+    writeParameter(brl, 3,
+                   setting * 4 / BRL_MAXIMUM_FIRMNESS);
+  }
 }
