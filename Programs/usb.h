@@ -108,6 +108,7 @@ extern "C" {
 /* Standard control requests. */
 #define USB_REQ_GET_STATUS        0X00
 #define USB_REQ_CLEAR_FEATURE     0X01
+#define USB_REQ_GET_STATE         0X02
 #define USB_REQ_SET_FEATURE       0X03
 #define USB_REQ_SET_ADDRESS       0X05
 #define USB_REQ_GET_DESCRIPTOR    0X06
@@ -117,6 +118,10 @@ extern "C" {
 #define USB_REQ_GET_INTERFACE     0X0A
 #define USB_REQ_SET_INTERFACE     0X0B
 #define USB_REQ_SYNCH_FRAME       0X0C
+
+/* Standard features. */
+#define USB_FEATURE_ENDPOINT_STALL       0X00
+#define USB_FEATURE_DEVICE_REMOTE_WAKEUP 0X01
 
 typedef struct {
   uint8_t bLength;         /* Descriptor size in bytes. */
