@@ -28,10 +28,9 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef __MINGW32__
-#include <windows.h>
+#ifdef WINDOWS
 #include <ws2tcpip.h>
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -43,7 +42,7 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 #if !defined(PF_LOCAL) && defined(PF_UNIX)
 #define PF_LOCAL PF_UNIX
@@ -408,14 +407,14 @@ fillInputBuffer (void) {
         break;
     
       default: {
-        int received = read(fileDescriptor, &inputBuffer[inputLength], INPUT_SIZE-inputLength);
+        int received = recv(fileDescriptor, &inputBuffer[inputLength], INPUT_SIZE-inputLength, 0);
 
         if (received == -1) {
-          LogError("read");
+          LogError("recv");
           return 0;
         }
 
-        if (received) 
+        if (received)
           inputLength += received;
         else
           inputEnd = 1;
@@ -484,17 +483,17 @@ flushOutput (void) {
   size_t length = outputLength;
 
   while (length) {
-    int written = write(fileDescriptor, buffer, length);
+    int sent = send(fileDescriptor, buffer, length, 0);
 
-    if (written == -1) {
+    if (sent == -1) {
       if (errno == EINTR) continue;
-      LogError("write");
+      LogError("send");
       memmove(outputBuffer, buffer, (outputLength = length));
       return 0;
     }
 
-    buffer += written;
-    length -= written;
+    buffer += sent;
+    length -= sent;
   }
 
   outputLength = 0;

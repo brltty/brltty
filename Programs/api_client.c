@@ -25,8 +25,18 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <inttypes.h>
+#include <sys/types.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+
 #ifdef WINDOWS
-#include <windows.h>
 #include <ws2tcpip.h>
 
 #ifdef __MINGW32__
@@ -40,6 +50,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
 #include <pthread.h>
 #include <syslog.h>
 
@@ -49,17 +60,6 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* WINDOWS */
-
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>

@@ -29,10 +29,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef WINDOWS
-#include <windows.h>
-#endif /* WINDOWS */
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */

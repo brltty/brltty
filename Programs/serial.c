@@ -32,7 +32,6 @@
 #endif /* HAVE_SYS_MODEM_H */
 
 #ifdef __MINGW32__
-#include <windows.h>
 #include <io.h>
 
 typedef DCB SerialAttributes;

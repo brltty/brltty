@@ -28,10 +28,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef __MINGW32__
-#include <windows.h>
-#endif /* __MINGW32__ */
-
 #include "misc.h"
 #include "sysmisc.h"
 #include "spk.h"

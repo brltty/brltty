@@ -21,9 +21,19 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <sys/types.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <signal.h>
+#include <time.h>
+
 #ifdef WINDOWS
-#define __USE_W32_SOCKETS
-#include <windows.h>
 #include <ws2tcpip.h>
 
 #ifdef __MINGW32__
@@ -35,6 +45,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
 #include <pthread.h>
 
 #ifdef HAVE_SYS_SELECT_H
@@ -43,18 +54,6 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* WINDOWS */
-
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <signal.h>
-#include <time.h>
 
 #include "api.h"
 #include "api_protocol.h"

@@ -26,10 +26,6 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef __MINGW32__
-#include <windows.h>
-#endif /* __MINGW32__ */
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */

@@ -24,6 +24,9 @@ extern "C" {
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define WINDOWS
+
+#define __USE_W32_SOCKETS
+#include <windows.h>
 #endif /* defined(__CYGWIN32__) || defined(__MINGW32__) */
 
 /* Define this if the host is big endian. */
