@@ -27,9 +27,8 @@ typedef struct {
   const char *const *identifier;
 } DriverEntry;
 
-extern const void *
-loadDriver (
-  const char *driver,
+extern const void *loadDriver (
+  const char *driverIdentifier,
   const char *driverDirectory, const char *driverSymbol,
   const char *driverType, char driverCharacter,
   const DriverEntry *driverTable,

@@ -52,7 +52,7 @@ typedef struct {
   void (*volume) (int setting);		/* mute speech */
 } SpeechDriver;
 
-extern const SpeechDriver *loadSpeechDriver (const char *driver, const char *driverDirectory);
+extern const SpeechDriver *loadSpeechDriver (const char *identifier, const char *driverDirectory);
 extern int listSpeechDrivers (const char *directory);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;

@@ -32,9 +32,9 @@ loadSharedObject (const char *path) {
 }
 
 void 
-unloadSharedObject (void *object) {
+unloadSharedObject (const void *object) {
 #ifdef HAVE_FUNC_DLOPEN 
-  dlclose(object);
+  dlclose((void *)object);
 #endif /* HAVE_FUNC_DLOPEN */
 }
 

@@ -23,7 +23,7 @@ loadSharedObject (const char *path) {
 }
 
 void 
-unloadSharedObject (void *object) {
+unloadSharedObject (const void *object) {
 }
 
 int 

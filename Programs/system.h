@@ -25,7 +25,7 @@ extern "C" {
 extern char *getBootParameters (void);
 
 extern void *loadSharedObject (const char *path);
-extern void unloadSharedObject (void *object);
+extern void unloadSharedObject (const void *object);
 extern int findSharedSymbol (void *object, const char *symbol, const void **address);
 
 extern int canBeep (void);

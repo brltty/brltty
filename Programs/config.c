@@ -53,6 +53,11 @@
 #include "options.h"
 #include "brltty.h"
 #include "defaults.h"
+#include "serial.h"
+
+#ifdef ENABLE_USB_SUPPORT
+#include "usb.h"
+#endif /* ENABLE_USB_SUPPORT */
 
 char COPYRIGHT[] = "Copyright (C) 1995-2004 by The BRLTTY Team - all rights reserved.";
 
@@ -461,9 +466,8 @@ parseParameters (
   }
 }
 
-static void
+static char **
 processParameters (
-  char ***values,
   const char *const *names,
   const char *description,
   const char *qualifier,
@@ -472,6 +476,8 @@ processParameters (
   const char *environmentVariable,
   const char *defaultParameters
 ) {
+  char **values;
+
   if (!names) {
     static const char *const noNames[] = {NULL};
     names = noNames;
@@ -480,17 +486,18 @@ processParameters (
   {
     unsigned int count = 0;
     while (names[count]) ++count;
-    *values = mallocWrapper((count + 1) * sizeof(**values));
-    (*values)[count] = NULL;
-    while (count--) (*values)[count] = strdupWrapper("");
+    values = mallocWrapper((count + 1) * sizeof(*values));
+    values[count] = NULL;
+    while (count--) values[count] = strdupWrapper("");
   }
 
-  parseParameters(*values, names, description, qualifier, defaultParameters);
-  parseParameters(*values, names, description, qualifier, configuredParameters);
+  parseParameters(values, names, description, qualifier, defaultParameters);
+  parseParameters(values, names, description, qualifier, configuredParameters);
   if (opt_environmentVariables && environmentVariable) {
-    parseParameters(*values, names, description, qualifier, getenv(environmentVariable));
+    parseParameters(values, names, description, qualifier, getenv(environmentVariable));
   }
-  parseParameters(*values, names, description, qualifier, optionParameters);
+  parseParameters(values, names, description, qualifier, optionParameters);
+  return values;
 }
 
 static void
@@ -609,18 +616,92 @@ getCommand (BRL_DriverCommandContext context) {
 
 void
 initializeBraille (void) {
-   initializeBrailleDisplay(&brl);
-   brl.bufferResized = &dimensionsChanged;
-   brl.dataDirectory = opt_dataDirectory;
+  initializeBrailleDisplay(&brl);
+  brl.bufferResized = &dimensionsChanged;
+  brl.dataDirectory = opt_dataDirectory;
+}
+
+static char **
+processBrailleParameters (const BrailleDriver *driver) {
+  return processParameters(driver->parameters,
+                           "braille driver", driver->identifier,
+                           opt_brailleParameters, cfg_brailleParameters,
+                           "BRLTTY_BRAILLE_PARAMETERS", BRAILLE_PARAMETERS);
+}
+
+static const BrailleDriver *
+findBrailleDriver (void) {
+  const char *const *identifier;
+
+  {
+    const char *type;
+    const char *device = opt_brailleDevice;
+
+    if (isSerialDevice(&device)) {
+      static const char *serialIdentifiers[] = {
+        "pm",
+        NULL
+      };
+      identifier = serialIdentifiers;
+      type = "serial";
+
+#ifdef ENABLE_USB_SUPPORT
+    } else if (isUsbDevice(&device)) {
+      static const char *usbIdentifiers[] = {
+        "al", "fs", "ht", "pm", "vo",
+        NULL
+      };
+      identifier = usbIdentifiers;
+      type = "USB";
+#endif /* ENABLE_USB_SUPPORT */
+
+    } else {
+      LogPrint(LOG_WARNING, "Braille display autodetection not supported for '%s'.",
+               opt_brailleDevice);
+      return NULL;
+    }
+    LogPrint(LOG_NOTICE, "Autodetecting %s braille display on '%s'.", type, opt_brailleDevice);
+  }
+
+  if (identifier) {
+    while (*identifier) {
+      const BrailleDriver *driver;
+      LogPrint(LOG_INFO, "Checking for '%s' braille display.", *identifier);
+      if ((driver = loadBrailleDriver(*identifier, opt_libraryDirectory))) {
+        char **parameters = processBrailleParameters(driver);
+        if (parameters) {
+          initializeBrailleDisplay(&brl);
+          if (driver->open(&brl, parameters, opt_brailleDevice)) {
+            LogPrint(LOG_INFO, "Braille display found: %s[%s]",
+                     driver->identifier, driver->name);
+            driver->close(&brl);
+            return driver;
+          }
+
+          deallocateStrings(parameters);
+        }
+
+        unloadSharedObject(driver);
+      }
+
+      ++identifier;
+    }
+  }
+
+  LogPrint(LOG_WARNING, "No braille display found.");
+  return NULL;
 }
 
 static void
 getBrailleDriver (void) {
-  if ((brailleDriver = loadBrailleDriver(opt_brailleDriver, opt_libraryDirectory))) {
-    processParameters(&brailleParameters, brailleDriver->parameters,
-                      "braille driver", brailleDriver->identifier,
-                      opt_brailleParameters, cfg_brailleParameters,
-                      "BRLTTY_BRAILLE_PARAMETERS", BRAILLE_PARAMETERS);
+  if (!opt_brailleDriver || (strcmp(opt_brailleDriver, "auto") != 0)) {
+    brailleDriver = loadBrailleDriver(opt_brailleDriver, opt_libraryDirectory);
+  } else if ((brailleDriver = findBrailleDriver())) {
+    opt_brailleDriver = brailleDriver->identifier;
+  }
+
+  if (brailleDriver) {
+    brailleParameters = processBrailleParameters(brailleDriver);
   } else {
     LogPrint(LOG_ERR, "Bad braille driver selection: %s", opt_brailleDriver);
     fprintf(stderr, "\n");
@@ -724,13 +805,18 @@ void
 initializeSpeech (void) {
 }
 
+static char **
+processSpeechParameters (const SpeechDriver *driver) {
+  return processParameters(driver->parameters,
+                           "speech driver", driver->identifier,
+                           opt_speechParameters, cfg_speechParameters,
+                           "BRLTTY_SPEECH_PARAMETERS", SPEECH_PARAMETERS);
+}
+
 static void
 getSpeechDriver (void) {
   if ((speechDriver = loadSpeechDriver(opt_speechDriver, opt_libraryDirectory))) {
-    processParameters(&speechParameters, speechDriver->parameters,
-                      "speech driver", speechDriver->identifier,
-                      opt_speechParameters, cfg_speechParameters,
-                      "BRLTTY_SPEECH_PARAMETERS", SPEECH_PARAMETERS);
+    speechParameters = processSpeechParameters(speechDriver);
   } else {
     LogPrint(LOG_ERR, "Bad speech driver selection: %s", opt_speechDriver);
     fprintf(stderr, "\n");
@@ -1792,15 +1878,15 @@ startup (int argc, char *argv[]) {
   getSpeechDriver();
 #endif /* ENABLE_SPEECH_SUPPORT */
 #ifdef ENABLE_API
-  processParameters(&apiParameters, api_parameters,
-                    "application programming interface", NULL,
-                    opt_apiParameters, cfg_apiParameters,
-                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
+  apiParameters = processParameters(api_parameters,
+                                    "application programming interface", NULL,
+                                    opt_apiParameters, cfg_apiParameters,
+                                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
 #endif /* ENABLE_API */
-  processParameters(&screenParameters, getScreenParameters(),
-                    "screen driver", NULL,
-                    opt_screenParameters, cfg_screenParameters,
-                    "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
+  screenParameters = processParameters(getScreenParameters(),
+                                       "screen driver", NULL,
+                                       opt_screenParameters, cfg_screenParameters,
+                                       "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
 
   if (!opt_preferencesFile) {
     const char *part1 = "brltty-";
