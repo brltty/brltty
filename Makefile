@@ -330,6 +330,6 @@ clean:
 distclean: clean
 	rm -f brltty txt2hlp comptable *test
 	rm -f *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
-	rm -f Papenmeier/serial
+	$(MAKE) -C Papenmeier distclean
 	$(MAKE) -C BrailleTables distclean
 

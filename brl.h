@@ -42,6 +42,11 @@
  * than waiting for the next cycle.  This can save internal nesting ...
  */
 
+/*
+ * Please: comment all CMD_* - this info is used for the Papenmeier helpfile
+ *
+ */
+
 #define CMD_NOOP '\0'		/* do nothing - a blank keystroke */
 
 /* braille window movement */
@@ -49,8 +54,8 @@
 #define CMD_PRDIFLN '-'		/* go to prev different screen line */
 #define CMD_LNDN 'd'		/* go down one line */
 #define CMD_NXDIFLN '+'		/* go to next different screen line */
-#define CMD_ATTRUP 3            /* previous line we differing attributes */
-#define CMD_ATTRDN 4
+#define CMD_ATTRUP 3            /* go to previous line with differing attributes */
+#define CMD_ATTRDN 4            /* go to next line with differing attributes */
 #define CMD_WINUP '<'		/* go up one window */
 #define CMD_WINDN '>'		/* go down one window */
 #define CMD_TOP 't'		/* go to top of screen */
@@ -82,9 +87,9 @@
 #define	CR_ROUTEOFFSET 0x080	/* normal cursor routing */
 
 /* Cut and paste */
-#define CMD_CUT_BEG 'C'
-#define CMD_CUT_END 'E'
-#define CMD_PASTE 'P'
+#define CMD_CUT_BEG 'C'		/* cut text begin - use routing keys */
+#define CMD_CUT_END 'E'		/* cut text end - use routing keys */
+#define CMD_PASTE 'P'		/* insert text */
 /* Cursor routing key offset values to be used to define a block */
 #define	CR_BEGBLKOFFSET	0x100	/* to define the beginning of a block */
 #define	CR_ENDBLKOFFSET 0x180	/* to define the end of the block */
@@ -114,8 +119,8 @@
 #define CMD_KEY_RETURN 'N'
 
 /* For speech devices: */
-#define CMD_SAY 'Y'
-#define CMD_MUTE 'm'
+#define CMD_SAY 'Y'		/* sound on */
+#define CMD_MUTE 'm'		/* sound off */
 
 /* For specifically turning on/off toggle commands */
 #define VAL_SWITCHMASK  0x600
@@ -169,5 +174,24 @@ extern char* braille_libname;	/* name of library */
 
 int load_braille_driver(void);
 int list_braille_drivers(void);
+
+/* Status display Papenmeier - comment 
+ * Please: comment all STAT_* - this info is used for the Papenmeier helpfile
+ */
+#define STAT_current   1	/* current line number */
+#define STAT_row       2	/* cursor position - row */
+#define STAT_col       3	/* cursor position - column */
+#define STAT_tracking  5	/* cursor tracking */
+#define STAT_dispmode  6	/* dispmode (text / attribut) */
+#define STAT_frozen    8	/* screen frozen */
+#define STAT_visible  12	/* cursor visible */
+#define STAT_size     13	/* cursor size */
+#define STAT_blink    14	/* cursor blink */
+#define STAT_capitalblink 15	/* capital letter blink */
+#define STAT_dots     16	/* 6 or 8 dots */
+#define STAT_sound    17	/* sound */
+#define STAT_skip     18	/* skip identical lines */
+#define STAT_underline 19	/* attribute underlining */
+#define STAT_blinkattr 20	/* blinking of attribute underlining */
 
 #endif /* !defined(_BRL_H) */

@@ -1,54 +1,24 @@
-README file for the Papenmeier Screen 2D
+README file for the Papenmeier Driver
+=====================================
 
-Version 1.0 (June 1998)
+Version 2.0 (April 2000)
 
 Copyright
 =========
 
 This driver is copyrighted under the GNU Public License.  It is free 
 software.  See the file '../COPYING' for more details.  Feel free to send 
-your comments and to report bugs (if any :)) to 
-me at hoerandl@elina.htlw1.ac.at
-
-This Driver was written as a project in the
-    HTL W1, Abteilung Elektrotechnik, Wien - Österreich
-    (Technical High School, Department for electrical engineering,
-      Vienna, Austria)
-  by
-    Tibor Becker
-    Michael Burger
-    Herbert Gruber
-    Heimo Schön
-  Teacher:
-    August Hörandl <hoerandl@elina.htlw1.ac.at>
-
-German translation of the manual: W. Schimann
+your comments and to report bugs (if any :)) to us at
+august.hoerandl@gmx.at or heimo.schoen@gmx.at
 
 Supported Hardware
 ==================
-This driver is supposed to work with the Papenmeier Screen 2D Terminal.
+This driver is supposed to work with all the Papenmeier Terminals.
+The driver is able to autodetect the connected terminal.
 
 Connection
 ==========
 This driver supports serial communication only.
-
-Before compiling
-================
-Select the Papenmeier Terminal in the Makefile
-
-  BRL_TARGET = Papenmeier
-
-There is also a german translation of the help file - move the symbolic link
-brlttyhelp.txt from help.us.txt to help.ger.txt with
-
-  ln -sf help.ger.txt brlttyhelp.txt
-
-in the Papenmeier subdirectory.
-
-Key Bindings and Status Cells
-=============================
-All the key definitions and Status Cells are listed in the file 
-brlttyhelp.txt.
 
 Running the Driver
 ==================
@@ -58,10 +28,149 @@ on the screen some copyright stuff, current configuration (model and
 firmware version setup) and the serial device in use.  That information 
 may be useful if nothing happens with the braille terminal.
 
-Known Problems
-==============
-Sometimes during our Test only the first part of the line was updated (this 
-could be caused by an old firmware eprom version). If you have similar 
-problems: please uncomment the line 
-  #define SEND_TWICE_HACK 
-near the top of the file brl.c (remove /* and */ ).
+
+Key Bindings and Status Cells
+=============================
+The driver is fully configurable - all key bindings and the status cells
+can be fully programmed:
+
+The configuration can be done by
+- changing the default configuration in the source file brl-cfg.h
+  any changes will be distributed to the online help during compile
+- edit the config file /etc/brltty/brltty.pm.conf; don't forget to supply 
+  a fitting help file
+
+If you dont want to use the config file you can safely remove the
+config file /etc/brltty/brltty.pm.conf and use the compiled in
+defaults. On default the driver is compiled with the READ_CONFIG
+symbol defined.  Without this symbols the code to read the config file
+won't be compiled into the library which gives a library with a much
+smaller size.
+
+Help File:
+==========
+The online help is generated from the compiled in defaults - ist uses
+the same syntax of the config file to give the user a short overview of
+the status cells and the keymapping.
+On default the help command is mapped to the key on the first status cell.
+
+Config File
+===========
+The configuration file may include the definition for several terminals.
+Look at Papenmeier/brltty.pm.conf and the Papenmeier/*.hlp files for 
+examples.
+
+Syntax:
+#     Comment to the end of line
+name = value   you can use 'is' instead of '='; actually you don't have to
+ write '=', 'is' and 'and' at all. The following lines are equal:
+name = val
+name is val
+name val
+
+Start a new terminal definition:
+identification = NUMBER
+the number is the code returned by the terminal on identification 
+request; this starts a new terminal defintion - no need to change this infos
+
+Info about the terminal - Name and size of the terminal:
+terminal = "String to describe the Terminal"
+helpfile = "brltty-pm1.hlp"   # name of the helpfile
+displaysize = 40       # number of cells  
+statuscells = 0        # number of status cells (horizontal or vertical)
+frontkeys = 9          # number of keys on the front of the terminal
+haseasybar             # terminal has an easybar (EL types)
+
+Terminal settings:
+Statusdisplay settings:
+there are different display modes:
+ flag: left half: line number, right half: no/all bits set - used with
+   vertical status cells
+ horiz: two digits on the vertical status-display
+ number: display two digits in one cell (status on horiz.display)
+example: 
+status 4 = horiz cursorcol
+status 6 = flag tracking
+a list of the possible info to display (see brl.h and/or Papenmeier/hlp.h)
+current - current line number
+row - cursor position - row
+col - cursor position - column
+tracking - cursor tracking
+dispmode - dispmode (text / attribut)
+frozen - screen frozen
+visible - cursor visible
+size - cursor size
+blink - cursor blink
+capitalblink - capital letter blink
+dots - 6 or 8 dots
+sound - sound
+skip - skip identical lines
+underline - attribute underlining
+blinkattr - blinking of attribute underlining
+
+Key definition:
+status NUMBER     - key on status cell
+front NUMBER      - key on the front side of the terminal
+easy DESCR        - easy bar key 
+  DESCR may be: left, left2, up, up2, down, down2, right, right2
+switch NUMBER     - switches on the left and right side of the 
+  display; numbered from 1 (leftmost switch up) to 8 (rightmost switch down)
+
+Modifier key settings:
+any key can be defined as a modifier (like the shift or alt key on the 
+standard keyboard)
+
+Commandkey settings:
+list of definitions:
+ command = key 
+ command = key and modifier
+a list of the possible commands (see brl.h and/or Papenmeier/hlp.h), the
+names may be used with or without the leading CMD_:
+NOOP - do nothing - a blank keystroke
+LNUP - go up one line
+PRDIFLN - go to prev different screen line
+LNDN - go down one line
+NXDIFLN - go to next different screen line
+ATTRUP - go to previous line with differing attributes
+ATTRDN - go to next line with differing attributes
+WINUP - go up one window
+WINDN - go down one window
+TOP - go to top of screen
+BOT - go to bottom of screen
+HWINLT - go left one half window
+HWINRT - go right one half window
+FWINLT - go left one full window
+FWINRT - go right one full window
+LNBEG - go to beginning (start) of line
+LNEND - go to end of line
+CHRLT - go left one character
+CHRRT - go right one character
+TOP_LEFT - go to top of screen
+BOT_LEFT - go to bottom of screen
+HOME - go back to cursor
+CSRTRK - toggle cursor tracking
+DISPMD - Toggle attribute display
+FREEZE - freeze the screen
+HELP - display help
+INFO - get status information
+RESTARTBRL - reinitialize braille display
+CSRJMP - jump cursor to window (cursor routing)
+CSRJMP_VERT - jump cursor to window's line (routing)
+CUT_BEG - cut text begin - use routing keys
+CUT_END - cut text end - use routing keys
+PASTE - insert text
+CONFMENU - enter configuration menu
+SAVECONF - save brltty configuration
+RESET - restore saved (or default) settings
+CSRVIS - toggle cursor visibility
+CSRSIZE - toggle cursor size
+CSRBLINK - toggle cursor blink
+CAPBLINK - toggle capital letter blink
+ATTRVIS - toggle attribute underlining
+ATTRBLINK - toggle blinking of attribute underlining
+SIXDOTS - toggle six-dot mode
+SLIDEWIN - toggle sliding window
+SKPIDLNS - toggle skipping of identical lines
+SND - toggle sound on/off
+SAY - sound on
+MUTE - sound off

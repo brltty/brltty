@@ -1,8 +1,18 @@
 Note: this file is in reversed chronological order (bottom to top).
 
-
   ...
 
+24 April 2000:
+ - version 2.51 (beta):
+ - added new driver for all Papenmeier terminals (AH)
+    - autodetection
+    - configuration via config file
+
+ - changed the startup order (AH) - new order:
+     loadconfig()
+     startbrl()     -- pm: autodetection, changes name of help file
+     intscr(helpfile)
+	
 08 April 2000:
   - Released BRLTTY 2.50 (beta)
   - Added Installation Bootdisk Hacking Mini-HowTo (SD, NP)

@@ -23,9 +23,20 @@
  *   Herbert Gruber
  *   Heimo Schön
  * Teacher:
- *   August Hörandl <hoerandl@elina.htlw1.ac.at>
- *
+ *   August Hörandl <august.hoerandl@gmx.at>
+ */
+/*
+ * Support for all Papenmeier Terminal + config file
+ *   Heimo.Schön <heimo.schoen@gmx.at>
+ *   August Hörandl <august.hoerandl@gmx.at>
+ */
+
+/*
  * papenmeier/brl.c - Braille display library for Papenmeier Screen 2D
+ *
+ * watch out:
+ *  the file read_config.c is included - HACK, but this gives easier test handling
+ *
  */
 
 #include <stdio.h>
@@ -40,6 +51,15 @@
 #include "../scr.h"
 #include "../misc.h"
 #include "../brl_driver.h"
+
+#ifdef READ_CONFIG
+#include "read_config.c"
+static void read_config();
+#else
+#include "brl-cfg.h"
+#endif
+
+static void init_table();
 
 #define CMD_ERR	EOF
 
@@ -92,31 +112,126 @@ static unsigned char change_bits[] = {
 static int brl_fd = 0;			/* file descriptor for Braille display */
 static struct termios oldtio;		/* old terminal settings */
 
-static FILE* dbg = NULL;
-static char dbg_buffer[256];
-
 static unsigned char prevline[PMSC] = "";
-static unsigned char prev[BRLCOLS+1]= "";
+static unsigned char prev[BRLCOLSMAX+1]= "";
 
-static void init_table();
+/* ------------------------------------------------------------ */
 
-/* special table for papenmeier */
-#define B1 1
-#define B2 2
-#define B3 4
-#define B4 8
-#define B5 16
-#define B6 32
-#define B7 64
-#define B8 128
+static one_terminal* the_terminal = NULL;
 
-static void brl_debug(char * print_buffer)
+static int curr_cols = -1;
+static int curr_stats = -1;
+
+static int code_status_first = -1;
+static int code_status_last  = -1;
+static int code_route_first = -1;
+static int code_route_last  = -1;
+static int code_front_first = -1;
+static int code_front_last  = -1;
+static int code_easy_first = -1;
+static int code_easy_last  = -1;
+static int code_switch_first = -1;
+static int code_switch_last  = -1;
+
+static int addr_status = -1;
+static int addr_display = -1;
+
+/* ------------------------------------------------------------ */
+
+//static char thehelpfilename[] = "brltty-pm@.hlp";
+
+static void
+identify_terminal(brldim *brl)
 {
-  if (! dbg)
-    dbg =  fopen ("/tmp/brltty-pm.log", "w");
-  fprintf(dbg, "%s\n", print_buffer);
-  fflush(dbg);
+  char badline[] = { 
+    cSTX,
+    cIdSend,
+    0, 0,			/* position */
+    0, 0,			/* wrong number of bytes */
+    cETX
+  };
+
+  unsigned char buf[10];			/* answer has 10 chars */
+  int tries = 5;
+  int len, tn;
+
+  for( ; tries > 0; tries --) {
+    LogPrint(LOG_DEBUG,"starting auto indentify - %d", tries);
+    //    tcflush (brl_fd, TCIFLUSH);	/* clean line */
+    write(brl_fd, badline, sizeof(badline));
+    delay(100);
+    len = read(brl_fd,buf,sizeof(buf));
+    if (len != sizeof(buf)) {	/* bad len */
+      delay(100);
+      LogPrint(LOG_ERR,"len(%d) != size (%d)", len, sizeof(buf));
+      continue;			/* try again */
+    }
+    for(tn=0; tn < num_terminals; tn++)
+      if (pm_terminals[tn].ident == buf[2])
+	{
+	  the_terminal = &pm_terminals[tn];
+	  LogAndStderr(LOG_ERR, "%s  Version: %d.%d%d (%02x%02x%02x)", 
+		       the_terminal->name,
+		       buf[3], buf[4], buf[5],
+		       buf[6], buf[7], buf[8]);
+	  brl->x = the_terminal->x;
+	  brl->y = the_terminal->y;
+
+	  curr_cols = the_terminal->x;
+	  curr_stats = the_terminal->statcells;
+
+	  // TODO: ?? HACK
+	  braille->helpfile = the_terminal->helpfile;
+	  LogAndStderr(LOG_NOTICE, "Braille Help File: changed to %s", 
+		       braille->helpfile);
+
+	  // key codes - starts at 0x300 
+	  // status keys - routing keys - step 3
+	  code_status_first = 0x300;
+	  code_status_last  = code_status_first + 3 * (curr_stats - 1);
+	  code_route_first = code_status_last + 3;
+	  code_route_last  = code_route_first + 3 * (curr_cols - 1);
+
+	  if (the_terminal->frontkeys > 0) {
+	    code_front_first = 0x03;
+	    code_front_last  = code_front_first + 
+	      3 * (the_terminal->frontkeys - 1);
+	  } else
+	    code_front_first = code_front_last  = -1;
+
+	  if (the_terminal->haseasybar) {
+	    code_easy_first = 0x03;
+	    code_easy_last  = 0x18;
+	    code_switch_first = 0x1b;
+	    code_switch_last = 0x30;
+	  } else
+	    code_easy_first = code_easy_last  = 
+	      code_switch_first = code_switch_last = -1;
+
+	  LogAndStderr(LOG_DEBUG, "s %x-%x r %x-%x f %x-%x e %x-%x sw %x-%x",
+		       code_status_first,
+		       code_status_last,
+		       code_route_first,
+		       code_route_last,
+		       code_front_first,
+		       code_front_last,
+		       code_easy_first,
+		       code_easy_last,
+		       code_switch_first,
+		       code_switch_last);
+
+	  // address of display
+	  addr_status = 0x0000;
+	  addr_display = addr_status + the_terminal->statcells;
+	  LogAndStderr(LOG_DEBUG, "addr: %d %d",
+		       addr_status,
+		       addr_display);
+	  return;
+	}
+  }
 }
+
+/* ------------------------------------------------------------ */
 
 static void initbrlerror(brldim *brl)
 {
@@ -126,14 +241,14 @@ static void initbrlerror(brldim *brl)
   brl->x = -1;
 }
 
-
-static void initbrl (brldim *brl, const char *dev)
+static void 
+try_init(brldim *brl, const char *dev, unsigned int baud)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
 
-  res.x = BRLCOLS;		/* initialise size of display */
-  res.y = BRLROWS;
+  res.x = BRLCOLSMAX;		/* initialise size of display - unknownown yet */
+  res.y = 1;
   res.disp = NULL;		/* clear pointers */
 
   /* Now open the Braille display device for random access */
@@ -146,7 +261,8 @@ static void initbrl (brldim *brl, const char *dev)
   tcgetattr (brl_fd, &oldtio);	/* save current settings */
 
   /* Set bps, flow control and 8n1, enable reading */
-  newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
+  newtio.c_cflag = baud | CRTSCTS | CS8 | CLOCAL | CREAD;
+  //newtio.c_cflag = baud | CS8 | CLOCAL | CREAD;
 
   /* Ignore bytes with parity errors and make terminal raw and dumb */
   newtio.c_iflag = IGNPAR;
@@ -156,6 +272,14 @@ static void initbrl (brldim *brl, const char *dev)
   newtio.c_cc[VTIME] = 0;
   tcflush (brl_fd, TCIFLUSH);	/* clean line */
   tcsetattr (brl_fd, TCSANOW, &newtio);		/* activate new settings */
+
+  /* HACK - used with serial.c */
+#ifdef _SERIAL_C_
+  /* HACK - used with serial.c */
+  terminal_type = pm_2dscreen;
+#else
+  identify_terminal(&res);
+#endif
 
   /* Allocate space for buffers */
   res.disp = (unsigned char *) malloc (res.x * res.y);
@@ -167,6 +291,26 @@ static void initbrl (brldim *brl, const char *dev)
   *brl = res;
   return;
 }
+
+
+static void 
+initbrl (brldim *brl, const char *dev)
+{
+  LogPrint(LOG_DEBUG,  "try 19200");
+  try_init(brl, dev, B19200);
+  if (the_terminal==NULL) {
+    closebrl(brl);
+    LogPrint(LOG_DEBUG,  "try 38400");
+    try_init(brl, dev, B38400);
+  }
+  if (the_terminal==NULL) {
+    closebrl(brl);
+    LogAndStderr(LOG_ERR, "unknown Terminal type - exit");
+    exit(9);
+  }
+  LogAndStderr(LOG_ERR, "Size: %d x %d", brl->x, brl->y);
+}
+
 
 static void
 closebrl (brldim *brl)
@@ -180,13 +324,24 @@ static void
 identbrl (void)
 {
   LogAndStderr(LOG_NOTICE, "Papenmeier driver");
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1998 HTL W1 <hoerandl@elina.htlw1.ac.at>.");
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team" __DATE__ __TIME__);
+  LogAndStderr(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>.");
+  LogAndStderr(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>.");
 # ifdef RD_DEBUG
   LogAndStderr(LOG_INFO, "   Input debugging enabled.");
 # endif
 # ifdef WR_DEBUG
   LogAndStderr(LOG_INFO, "   Output debugging enabled.");
 # endif
+#ifdef MOD_DEBUG
+  LogAndStderr(LOG_INFO, "   Modifier Keys debugging enabled.");
+# endif
+
+  /* read the config file for individual configurations */
+#ifdef READ_CONFIG
+  LogAndStderr(LOG_INFO, "look for config file");
+  read_config();
+#endif
 }
 
 static void 
@@ -220,52 +375,151 @@ write_to_braille(int offset, int size, const char* data)
 static void 
 init_table()
 {
-  char line[BRLCOLS];
+  char line[BRLCOLSMAX];
   char spalte[PMSC];
   int i;
   // don´t use the internal table for the status column 
-  for(i=0; i < PMSC; i++)
+  for(i=0; i < curr_stats; i++)
     spalte[i] = 1; /* 1 = no table */
-  write_to_braille(offsetTable+offsetVertical, PMSC, spalte);
+  write_to_braille(offsetTable+addr_status, curr_stats, spalte);
 
   // don´t use the internal table for the line
-  for(i=0; i < BRLCOLS; i++)
+  for(i=0; i < curr_cols; i++)
     line[i] = 1; // 1 = no table
-  write_to_braille(offsetTable+offsetHorizontal, BRLCOLS, line);
+  write_to_braille(offsetTable+addr_display, curr_cols, line);
+}
+
+static void
+writebrlstat(const unsigned char* s, int size)
+{
+ if (memcmp(s, prevline, size) != 0)
+   {
+     memcpy(prevline, s, size);
+     write_to_braille(addr_status, size, prevline);
+   }
 }
 
 static void
 setbrlstat(const unsigned char* s)
 {
- unsigned char buffer[PMSC];
- int i;
- for (i=0; i<PMSC; ++i)
-   buffer[i] = change_bits[s[i]];
- if (memcmp(buffer, prevline, PMSC) != 0)
-   {
-     memcpy(prevline, buffer, PMSC);
-     write_to_braille(offsetVertical, PMSC, prevline);
-   }
+  int i;
+  unsigned char statcells[PMSC] = { 0 };
+
+  LogPrint(LOG_DEBUG,"setbrlstat %d", curr_stats);
+
+  if (curr_stats==0)
+    return;
+  for (i=0; i < curr_stats; i++) {
+    int code = the_terminal->statshow[i];
+    if (code == STAT_empty)
+      statcells[i] = 0;
+    else if (code >= OFFS_NUMBER)
+      statcells [i] = change_bits[portrait_number(s[code-OFFS_NUMBER])];
+    else if (code >= OFFS_FLAG)
+      statcells[i] = change_bits[seascape_flag(i+1, s[code-OFFS_FLAG])];
+    else if (code >= OFFS_HORIZ)
+      statcells [i] = change_bits[seascape_number(s[code-OFFS_HORIZ])];
+    else
+      statcells [i] = change_bits[s[code]];
+  }
+  writebrlstat(statcells, curr_stats);
 }
 
 static void
 writebrl (brldim *brl)
 {
   int i;
-
 #ifdef WR_DEBUG
-  sprintf(dbg_buffer, "write %2d %2d %80s", brl->x, brl->y, brl->disp);
-  brl_debug(dbg_buffer);
+  LogPrint(LOG_ERR, "write %2d %2d %*s", 
+	   brl->x, brl->y, curr_cols, brl->disp);
 #endif
 
-  for(i=0; i < BRLCOLS; i++)
+  
+  for(i=0; i < curr_cols; i++)
     brl->disp[i] = change_bits[brl->disp[i]];
 
-  if (memcmp(prev,brl->disp,BRLCOLS) != 0)
+  if (memcmp(prev,brl->disp,curr_cols) != 0)
     {
-      memcpy(prev,brl->disp,BRLCOLS);
-      write_to_braille(offsetHorizontal, BRLCOLS, prev);
+      memcpy(prev,brl->disp,curr_cols);
+      write_to_braille(addr_display, curr_cols, prev);
     }
+}
+
+/* ------------------------------------------------------------ */
+
+static unsigned char pressed_modifiers = 0;
+static int beg_pressed = 0;
+static int end_pressed = 0;
+
+/* found command - some actions to be done within the driver */
+static int
+handle_command(int cmd, int ispressed)
+{
+  switch(cmd) {
+  case CMD_RESTARTBRL:
+    init_table();
+    if (curr_stats > 0)
+      write_to_braille(addr_status, curr_stats, prevline);
+    write_to_braille(addr_display, curr_cols, prev);
+    break;
+
+  case CMD_CUT_BEG:
+    beg_pressed = ispressed;
+#ifdef MOD_DEBUG
+      LogPrint(LOG_ERR, "Cut Begin: %02x",beg_pressed );
+#endif      
+    cmd=CMD_NOOP;
+    break;
+
+  case CMD_CUT_END:
+    end_pressed = ispressed;
+#ifdef MOD_DEBUG
+      LogPrint(LOG_ERR, "Cut End: %02x",end_pressed );
+#endif      
+    cmd=CMD_NOOP;
+    break;
+
+  }
+  if (ispressed)
+    return cmd;
+  else
+    return CMD_NOOP;
+}
+
+/* one key is pressed or released */
+static int
+handle_key(int code, int ispressed)
+{
+  int i;
+  /* look for modfier keys */
+  for(i=0; i < MODMAX; i++) 
+    if( the_terminal->modifiers[i] == code) {
+      /* found modifier: update bitfield */
+      /* pressed_modifiers ^= (1<<i);  
+         could cause trouble if we miss one event */
+      if (ispressed)
+	pressed_modifiers |= (1<<i);
+      else
+	pressed_modifiers &= ~(1<<i);
+
+#ifdef MOD_DEBUG
+      LogPrint(LOG_ERR, "Modifiers: %02x", pressed_modifiers);
+#endif      
+      return CMD_NOOP;
+    }
+
+  /* must be a "normal key" - search for cmd on keypress */
+  for(i=0; i < CMDMAX; i++)
+    if ( the_terminal->cmds[i].keycode == code && 
+	 the_terminal->cmds[i].modifiers == pressed_modifiers)
+      {
+	LogPrint(LOG_DEBUG, "cmd: %d->%d", code, the_terminal->cmds[i].code); 
+	return handle_command( the_terminal->cmds[i].code, ispressed );
+      }
+
+  /* no command found */
+  LogPrint(LOG_DEBUG, "cmd: %d mod = %02x ??", code, pressed_modifiers); 
+  return CMD_ERR;
 }
 
 /* ------------------------------------------------------------ */
@@ -276,39 +530,39 @@ writebrl (brldim *brl)
   if (safe_read(brl_fd,buf+OFFS,1) != 1) \
       return EOF;                   \
 
-/* read byte and check value */
-#define READ_CHK(OFFS, VAL)  \
-    { READ(OFFS);            \
-      if (buf[OFFS] != VAL)  \
-        return CMD_ERR;      \
-    }
-
-
-#ifdef RD_DEBUG
-#define KEY(CODE, VAL) \
-     case CODE: brl_debug("readbrl: " #VAL); \
-       return VAL;
-#else
-#define KEY(CODE, VAL) \
-     case CODE: return VAL;
-#endif
-
-
-static int readbrl (int xx)
+static int 
+readbrl (int xx)
 {
   unsigned char buf [20];
-  int i, l;
+  int i, l, code, num, action;
+  int error_handling;
 
-  static int beg_pressed = 0;
-  static int end_pressed = 0;
+  do {
+    error_handling = 0;
 
-  READ_CHK(0, cSTX);		/* STX - Start */
-# ifdef RD_DEBUG
-  sprintf(dbg_buffer, "read: STX");
-  brl_debug(dbg_buffer);
-# endif
+    READ(0);
+    if (buf[0] != cSTX)
+        return CMD_ERR;
+    LogPrint(LOG_DEBUG,  "read: STX");
 
-  READ_CHK(1, cIdReceive);	/* 'K' */
+    READ(1);
+    if (buf[1] != cIdReceive) {
+      if (3 <= buf[1] && buf[1] <= 6) /* valid error codes 3-6 */
+	READ(2);		/* read ETX */
+      /* else
+	 return CMD_ERR;
+      */
+      LogPrint(LOG_ERR, "error handling - code %d", buf[1]);
+      delay(100);
+      write_to_braille(addr_status, curr_stats, prevline);
+      delay(100);
+      write_to_braille(addr_display, curr_cols, prev);
+      error_handling = 1;
+      tcflush (brl_fd, TCIFLUSH);	/* clean line */
+
+    }
+  } while (error_handling);
+
   READ(2);			/* code - 2 bytes */
   READ(3); 
   READ(4);			/* length - 2 bytes */
@@ -320,110 +574,94 @@ static int readbrl (int xx)
     READ(i);			/* Data */
   
 # ifdef RD_DEBUG
+  {
+    char dbg_buffer[256];
     sprintf(dbg_buffer, "read: ");
     for(i=0; i<l; i++)
       sprintf(dbg_buffer + 6 + 3*i, " %02x",buf[i]);
-    brl_debug(dbg_buffer);
+    LogPrint(LOG_ERR, dbg_buffer);
+  }
 # endif
 
   if (buf[l-1] != cETX)		/* ETX - End */
     return CMD_ERR;
 
-  if( buf[6] == PRESSED) 
-    {
-      int Kod = 0x100*buf[2] + buf[3];
-      switch(Kod) 
-	{
-	  /* braille window movement */
-	  /* Taste Unten - keys at the front of papenmeier terminal */
-	  /* Taste Seite - keys at the status column on left hand side */
-	  /* layout 7321 UP H S E DWN 4568 */
+  code = 0x100*buf[2]+buf[3];
+  action = (buf[6] == PRESSED);
 
-	  KEY(0x0006, CMD_ATTRUP);   /* Taste Unten "3"  */ 
-	  KEY(0x0009, CMD_WINUP);    /* Taste Unten "2"  */    
-	  KEY(0x000c, CMD_PRDIFLN);  /* Taste Unten "1"  */
-	  KEY(0x000f, CMD_LNUP   );  /* Taste Unten /\   */
-
-	  KEY(0x0012, CMD_TOP);	     /* Taste Unten "H"  */
-	  KEY(0x0015, CMD_HOME);     /* Taste Unten "S"  */ 
-	  KEY(0x0018, CMD_BOT);	     /* Taste Unten "E"  */     
-
-	  KEY(0x001b, CMD_LNDN);     /* Taste Unten \/   */
-	  KEY(0x001e, CMD_NXDIFLN);  /* Taste Unten "4"  */
-	  KEY(0x0021, CMD_WINDN);    /* Taste Unten "5"  */
-	  KEY(0x0024, CMD_ATTRDN);   /* Taste Unten "6"  */ 
-
-	  /* misc */
-	  KEY(0x0300, CMD_HELP);    /* Taste Seite "1"  */
-	  KEY(0x306, CMD_CSRJMP_VERT); /* Taste Seite "3" */
-	  KEY(0x309, CMD_MUTE); /* Taste Seite "4" */
-	  KEY(0x30C, CMD_SAY); /* Taste Seite "5" */
-
-	  KEY(0x030F, CMD_CSRTRK);  /* Taste Seite "6"  */
-	  KEY(0x0312, CMD_DISPMD);  /* Taste Seite "7"  */
-	  KEY(0x0315, CMD_INFO);    /* Taste Seite "8"  */
-	  KEY(0x0318, CMD_FREEZE);  /* Taste Seite "9"  */
-
-	  /* Configuration commands */
-	  KEY(0x031B, CMD_CONFMENU);   /* Taste Seite "10" */
-	  KEY(0x031E, CMD_SAVECONF);   /* Taste Seite "11" */
-	  KEY(0x0321, CMD_RESET);      /* Taste Seite "12" */
-							  
-	  /* Configuration options */			  
-	  KEY(0x0324, CMD_CSRVIS);    /* Taste Seite"13" */
-	  KEY(0x0327, CMD_CSRSIZE);   /* Taste Seite"14" */
-	  KEY(0x032A, CMD_CSRBLINK);  /* Taste Seite"15" */
-	  KEY(0x032D, CMD_CAPBLINK);  /* Taste Seite"16" */
-	  KEY(0x0330, CMD_SIXDOTS);   /* Taste Seite"17" */
-	  KEY(0x0333, CMD_SND);       /* Taste Seite"18" */
-	  KEY(0x0336, CMD_SKPIDLNS);  /* Taste Seite"19" */
-	  KEY(0x0339, CMD_ATTRVIS);   /* Taste Seite"20" */
-	  KEY(0x033c, CMD_ATTRBLINK); /* Taste Seite"21" */
-	  /* Cut & Paste */
-	  KEY(0x033f, CMD_PASTE);     /*  Taste Seite"22" */
-
-	  /* reset status col */
-	case 0x303: 
-	  init_table();
-	  write_to_braille(offsetVertical, PMSC, prevline);
-	  write_to_braille(offsetHorizontal, BRLCOLS, prev);
-	  return CMD_RESTARTBRL;
-
-	  /* cut: begin, end - set flag */
-	case 0x0003: /* Taste Unten "7"  */
-	  beg_pressed = 1;
-	  return EOF;
-	case 0x0027: /* Taste Unten "8"  */
-	  end_pressed = 1;	  
-	  return EOF;
-
-	default:
-	  /* Routing Keys */
-	  if (0x342 <=  Kod && Kod <= 0x42f)  
-	    if (beg_pressed) /* Cut Begin */
-	      return (Kod - 0x342)/3 + CR_BEGBLKOFFSET;
-	    else if (end_pressed) /* Cut End */
-	      return (Kod - 0x342)/3 + CR_ENDBLKOFFSET;
-	    else  /* CSR Jump */
-	      return (Kod - 0x342)/3 + CR_ROUTEOFFSET;
-	  else
-	    {
-	      sprintf(dbg_buffer, "readbrl: Command Error - CmdKod:%d", Kod);
-	      brl_debug(dbg_buffer);
-	      return CMD_ERR;
-	    }
-	}
-    }
-  else {
-    beg_pressed = end_pressed = 0;
-    return EOF;	/* return key press from braille display */
+  /* which key -> translate to OFFS_* + number */
+  /* attn: number starts with 1 */
+  if (code_front_first <= code && 
+      code <= code_front_last) { /* front key */
+    num = 1 + (code - code_front_first) / 3;
+    return handle_key(OFFS_FRONT + num, action);
+  } 
+  else if (code_status_first <= code && 
+	   code <= code_status_last) { /* status key */
+    num = 1+ (code - code_status_first) / 3;
+    return handle_key(OFFS_STAT + num, action);
   }
+  else if (code_easy_first <= code && 
+      code <= code_easy_last) { /* easy bar */
+    num = 1 + (code - code_easy_first) / 3;
+    return handle_key(OFFS_EASY + num, action);
+  } 
+  else if (code_switch_first <= code && 
+      code <= code_switch_last) { /* easy bar */
+    num = 1 + (code - code_switch_first) / 3;
+    return handle_key(OFFS_SWITCH + num, action);
+  } 
+  else if (code_route_first <= code && 
+	   code <= code_route_last) { /* Routing Keys */ 
+    num = (code - code_route_first) / 3;
+    if (action) {
+      if (beg_pressed) /* Cut Begin */
+	return CR_BEGBLKOFFSET + num;
+      else if (end_pressed) /* Cut End */
+	return CR_ENDBLKOFFSET + num;
+      else  /* CSR Jump */
+	return CR_ROUTEOFFSET + num;
+    } else
+      return CMD_NOOP;
+  }
+  LogPrint(LOG_ERR, "readbrl: Command Error - CmdKod:%d", code);
+  return CMD_ERR;
 }
 
 
+#ifdef READ_CONFIG
 
+/* ------------------------------------------------------------ */
+/* read config */
 
+static void read_file(char* name)
+{
+  LogAndStderr(LOG_DEBUG, "open config file %s", name);
+  configfile = fopen(name, "r");
+  if (configfile == NULL) {
+    perror("open config");
+    LogPrint(LOG_ERR, "error: open config file %s", name);
+    return;
+  }
+  LogAndStderr(LOG_DEBUG, "read config file %s", name);
+  yyparse ();
+  fclose(configfile);
+}
 
+static void read_config()
+{
+  char* env;
 
+  /* 1. try environment BRLTTY_CONF */
+  env = getenv(CONFIG_ENV);
+  if (env != NULL) {
+    read_file(env);
+    return;
+  }
 
+  /* 2. try CONFIG_FILE */
+  read_file(CONFIG_FILE);
+}
+
+#endif
 

@@ -2,9 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
- * Web Page: http://www.cam.org/~nico/brltty
+ * Nicolas Pitre <nico@cam.org>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -26,6 +28,7 @@
  *   August Hörandl <hoerandl@elina.htlw1.ac.at>
  *
  * papenmeier/serial.c - Braille display test program
+ * the file brl.c is included - HACK, but this allows easier testing
  * 
  *  This program simulates a papenmeier screen 2d terminal
  *  Start it on a second pc (connected via a serial line)
@@ -37,7 +40,6 @@
  *   routing keys  qwertzuiop  yxcvbnm,.-
  *   bottom keys   12345678 DOWN LEFT SPACE UP RIGHT  
  *
- * See the GNU Public license for details in the ../COPYING file
  */
 
 #include <stdio.h>
@@ -48,8 +50,15 @@
 #include <curses.h>
 #include <signal.h>
 
+/* HACK - include brl.c - with little adjustments */
+
+#define  BRLDRIVER   NULL
+#define  HELPNAME "nohelp" 
+
+#define _SERIAL_C_
 #define _SCR_H
 #include "brl.c"
+#include "../misc.c"
 
 unsigned char texttrans[256] =
 {
@@ -151,11 +160,11 @@ void init_tables()
   for(i=0; i < 256; i++) 
     conv_back[change_bits[texttrans[i]]] = i;
    
-  for(i=0; i<100; i++)
-    numbers[pm_num(i)] = i;
+  for(i=0; i<100; i++) {
+    numbers[seascape_number(i)] = i;
+    printf("%d-%d/%02x ", i, seascape_number(i), seascape_number(i));
+  }
 }
-
-
 
 int byte(unsigned int i)
 {
@@ -166,7 +175,13 @@ void show_status(WINDOW* status, unsigned char* statcells)
 {
   unsigned char txt[200];
 
-#define IS_ON(i)     ((statcells[i] & B1) == B1)
+#define IS_ON(i)     ((statcells[i] & 1) == 1)
+
+  sprintf(txt, "\ndbg: %02x %02x %02x %02x %02x %02x",
+	  statcells[0], statcells[1],
+	  statcells[2], statcells[3],
+	  statcells[4], statcells[5]);
+  waddstr(status, txt);
 
   sprintf(txt, "\nline: (0x%02x) %d csr: (0x%02x) %d / (0x%02x) %d\n"
 	  "%s %s %s %s %s %s %s %02x/%d %s %s %s",
@@ -184,6 +199,7 @@ void show_status(WINDOW* status, unsigned char* statcells)
 	  IS_ON(18) ? "WIN" : "   ",
 	  IS_ON(19) ? "SND" : "   ",
 	  IS_ON(20) ? "SKIP" : "    ");
+
   waddstr(status, txt);
   wrefresh(status);
 }
@@ -202,7 +218,7 @@ void show_line(WINDOW* zeile, unsigned char* txt)
 }
 
 // search for key c in the key_data table
-int search(int c)
+int searchk(int c)
 {
   int i;
   for(i=1; i < max_data; i++)
@@ -240,15 +256,6 @@ void send_serial(int keycode, int pressed)
   */
 }
 
-void delay (int msec)
-{
-  struct timeval del;
-
-  del.tv_sec = 0;
-  del.tv_usec = msec * 1000;
-  select (0, NULL, NULL, NULL, &del);
-}
-
 int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
 {
   unsigned char buf [100];
@@ -277,7 +284,20 @@ int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
 	  buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], o, l);
   waddstr(debug, txt);
 
-  if (l > sizeof(buf))
+  if (l < 7)			/* short frame - send type */
+    {
+      char identity[] = {
+	cSTX,
+	'I',
+	3,			/* 2d screen */
+	2, 0, 0,		/* version 2.00 */
+	0x48,0x41,0x4C,		/* unused */
+	cETX
+      };
+      write(brl_fd, identity, sizeof(identity));
+      waddstr(debug, "Auto Identification\n");
+    }
+  else if (l > sizeof(buf))
     {
       sprintf(txt, "overflow %d", l);
       waddstr(debug, txt);
@@ -296,10 +316,16 @@ int read_serial(WINDOW* zeile, WINDOW* debug, WINDOW* status)
 	waddstr(debug, txt);
       }
 
-      if (o == offsetHorizontal && l == 87)
+      if (o == offsetHorizontal && l == (BRLCOLS+7))
 	show_line(zeile, buf+6);
-      else if (o == offsetVertical && l == 29)
+      else if (o == offsetVertical && l == (PMSC+7))
 	show_status(status, buf+6);
+      else if ( (o == offsetTable+offsetVertical && l == (PMSC+7)) ||
+		(o == offsetTable+offsetHorizontal && l == (BRLCOLS+7)) )
+	{
+	  sprintf(txt, "\ninit table %d/%d\n", o, l);
+	  waddstr(debug, txt);
+	}
       else
 	{
 	  sprintf(txt, "\nunknown offset/length %d/%d", o, l);
@@ -362,10 +388,10 @@ int main(int argc, char* argv[])
   scrollok(debug_serial, TRUE);
 
   // open serial
-  dummy_brldim = initbrl(argv[1]);
+  initbrl(&dummy_brldim, argv[1]);
 
   if (! brl_fd)
-    error("OOPS - cant open " BRLDEV);
+    error("OOPS - cant open ");
 
   c = ' ';
   do {
@@ -388,7 +414,7 @@ int main(int argc, char* argv[])
 	if (FD_ISSET(0, &rfds)) { // key pressed
 	  c = wgetch(debug_key);
 	  
-	  i = search(c);      
+	  i = searchk(c);      
 	  sprintf(buffer, "%s ", key_data[i].txt);
 	  waddstr(debug_key, buffer);
 	  if (i)

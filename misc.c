@@ -282,6 +282,16 @@ void LogAndStderr(int prio, char *fmt, ...) {}
 
 
 /* Functions which support horizontal status cells, e.g. Papenmeier. */
+/* this stuff is real wired - dont try to understand */
+
+/* logical layout   real bits 
+    1 4               1 2
+    2 5         -->   3 4
+    3 6               5 6
+    7 8               7 8
+  Bx: x from logical layout, value from real layout  
+*/
+
 #define B1 1
 #define B2 4
 #define B3 16
@@ -336,3 +346,26 @@ int seascape_flag(int number, int on)
     dots |= seascape_digits[10];
   return dots;
 }
+
+/* Dots for portrait digits - 2 numbers in one cells */
+const unsigned char portrait_digits[11] =
+{
+  B2+B4+B5, B1, B1+B2, B1+B4, B1+B4+B5, B1+B5, B1+B2+B4, 
+  B1+B2+B4+B5, B1+B2+B5, B2+B4, B1+B2+B4+B5
+};
+
+/* Format portrait representation of numbers 0 through 99. */
+int portrait_number(int x)
+{
+  return portrait_digits[(x / 10) % 10] | (portrait_digits[x % 10]<<4);  
+}
+
+/* Format portrait flag state indicator. */
+int portrait_flag(int number, int on)
+{
+  int dots = portrait_digits[number % 10] << 4;
+  if (on)
+    dots |= portrait_digits[10];
+  return dots;
+}
+

@@ -51,7 +51,7 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.50 (beta)"
+#define VERSION "BRLTTY 2.51 (beta)"
 #define COPYRIGHT "\
 Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -632,14 +632,8 @@ main (int argc, char *argv[])
     return 0;
 
   /*
-   * Initialize screen library 
+   * Initialize screen library ---> moved AH: TODO ??
    */
-  if (initscr (braille->helpfile))
-    {				
-      LogAndStderr(LOG_ERR, "Cannot read screen.");
-      LogClose();
-      exit (2);
-    }
   
   /* allocate the first screen information structures */
   p = malloc (sizeof (*p));
@@ -655,6 +649,24 @@ main (int argc, char *argv[])
   for (i = 1; i <= NBR_SCR; i++)
     scrparam[i] = 0;
   curscr = 0;
+
+  /* moved from after becoming a daemon - AH: TODO ?? */
+
+  /* Load configuration file */
+  loadconfig ();
+
+  /* Initialise Braille and set text display: */
+  startbrl();
+  /*
+   * Initialize screen library -- moved from above AH: TODO ??
+   */
+  if (initscr (braille->helpfile))
+    {				
+      LogAndStderr(LOG_ERR, "Cannot read screen.");
+      LogClose();
+      exit (2);
+    }
+
 
   /*
    * Become a daemon:
@@ -688,12 +700,6 @@ main (int argc, char *argv[])
    * used anymore since we are a daemon.  The LogPrint facility should 
    * be used instead.
    */
-
-  /* Load configuration file */
-  loadconfig ();
-
-  /* Initialise Braille and set text display: */
-  startbrl();
 
   /* Initialise speech */
   speech->initialize();
@@ -1248,28 +1254,23 @@ main (int argc, char *argv[])
 		| (num[(p->winx+1) % 10] << 4);
 	      break;
 	    case ST_Papenmeier:
-	      statcells [0] = seascape_number(p->winy+1);
-	      statcells [1] = 0;  /* empty for easier reading */
-	      statcells [2] =  seascape_number(scr.posy+1);
-	      statcells [3] =  seascape_number(scr.posx+1);
-	      statcells [4] = 0;     /* empty for easier reading */
-	      statcells [5] = seascape_flag(6, p->csrtrk);
-	      statcells [6] = seascape_flag(7, p->dispmode);
-	      statcells [7] = 0;     /* empty for easier reading */
-	      statcells [8] = seascape_flag(9, (dispmd & FROZ_SCRN) == FROZ_SCRN);
-	      statcells [9] = 0;
-	      statcells [10] = 0;
-	      statcells [11] = 0;
-	      statcells [12] = seascape_flag(3, env.csrvis);
-	      statcells [13] = seascape_flag(4, env.csrsize);
-	      statcells [14] = seascape_flag(5, env.csrblink);
-	      statcells [15] = seascape_flag(6, env.capblink);
-	      statcells [16] = seascape_flag(7, env.sixdots);
-	      statcells [17] = seascape_flag(8, env.sound);
-	      statcells [18] = seascape_flag(9, env.skpidlns);
-	      statcells [19] = seascape_flag(0, env.attrvis);
-	      statcells [20] = seascape_flag(1, env.attrblink);
-              statcells [21] = 0;
+	      memset (statcells, 0, sizeof(statcells));
+	      statcells [STAT_current] = p->winy+1;
+	      statcells [STAT_row] = scr.posy+1;
+	      statcells [STAT_col] = scr.posx+1;
+	      statcells [STAT_tracking] = p->csrtrk;
+	      statcells [STAT_dispmode] = p->dispmode;
+	      statcells [STAT_frozen] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
+	      statcells [STAT_visible] = 0;
+	      statcells [STAT_visible] = env.csrvis;
+	      statcells [STAT_size] = env.csrsize;
+	      statcells [STAT_blink] = env.csrblink;
+	      statcells [STAT_capitalblink] = env.capblink;
+	      statcells [STAT_dots] = env.sixdots;
+	      statcells [STAT_sound] = env.sound;
+	      statcells [STAT_skip] = env.skpidlns;
+	      statcells [STAT_underline] = env.attrvis;
+	      statcells [STAT_blinkattr] = env.attrblink;
 	      break;
 	    default:
 	      memset (statcells, 0, sizeof(statcells));

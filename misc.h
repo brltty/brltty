@@ -85,3 +85,5 @@ extern int landscape_number(int x);
 extern int landscape_flag(int number, int on);
 extern int seascape_number(int x);
 extern int seascape_flag(int number, int on);
+extern int portrait_number(int x);
+extern int portrait_flag(int number, int on);

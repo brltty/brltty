@@ -36,8 +36,7 @@
 
 #define BRLNAME	"Papenmeier"
 
-#define BRLCOLS	80
-#define BRLROWS	1
+#define BRLCOLSMAX   80 
 
 #define BAUDRATE B19200
 
@@ -48,22 +47,28 @@
 #define cIdReceive 'K'
 #define PRESSED 1
 
-/* number of status cells */
+/* maximum number of status cells */
 #define PMSC 22
 
 /* offset within data structure */
-#define offsetHorizontal 22
-#define offsetVertical   0
 /* additional offset - use internal table */
 #define offsetTable      512
 
-/* debug output to /tmp/brltty.log */
+/* debug output */
 #undef WR_DEBUG
 #undef RD_DEBUG
+#undef MOD_DEBUG
+
 /*
+  #define MOD_DEBUG
   #define WR_DEBUG
   #define RD_DEBUG
 */
 
 /* Define the preferred/default status cells mode. */
 #define PREFSTYLE ST_Papenmeier
+
+#define CONFIG_ENV   "BRLTTY_CONF"
+#define CONFIG_FILE  "/etc/brltty/brltty.pm.conf"
+
+#define MAXPATH  128
