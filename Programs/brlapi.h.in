@@ -418,10 +418,10 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  *
  * It can be called only if BRLCOMMANDS was given to brlapi_getTty()
  *
- * By default, only commands between CMD_LNUP and CMD_BACK, between CMD_HELP
- * and CMD_MENU_NEXT_SETTING, and CR_ROUTE* are returned to the application
- * and not to brltty. If the application needs other commands events, it
- * should call brlapi_unignoreKeys()
+ * By default, all commands but those which restart drivers and switch
+ * virtual terminals are returned to the application and not to brltty.
+ * If the application needs other commands events,
+ * it should call brlapi_unignoreKeys()
  *
  * \param block tells whether the call should block until a key is pressed (1)
  *  or should only probe key presses (0).
