@@ -420,8 +420,8 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  *
  * By default, all commands but those which restart drivers and switch
  * virtual terminals are returned to the application and not to brltty.
- * If the application needs other commands events,
- * it should call brlapi_unignoreKeys()
+ * If the application doesn't want to see some command events,
+ * it should call brlapi_ignoreKeys()
  *
  * \param block tells whether the call should block until a key is pressed (1)
  *  or should only probe key presses (0).
