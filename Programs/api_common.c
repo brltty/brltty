@@ -108,12 +108,12 @@ int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
   static unsigned char foo[BRLAPI_MAXPACKETSIZE];
 
   /* first read packet header (size+type) */
-  if ((res=brlapi_readFile(fd,&header[0],sizeof(header))) != sizeof(header))
+  if ((res=brlapi_readFile(fd,&header[0],sizeof(header))) != sizeof(header)) {
     /* If there is a real error, we return -1 */
     /* if we got not enough bytes for the header, we assume end of file */
     /* is reached and we return -2 */
     if (res<0) return -1; else return -2;
-
+  }
   n = ntohl(header[0]);
   *type = ntohl(header[1]);
 
