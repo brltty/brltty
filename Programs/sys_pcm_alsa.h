@@ -22,35 +22,50 @@ struct PcmDeviceStruct {
   snd_pcm_hw_params_t *hwparams;
 };
 
+static void
+logAlsaError (int level, const char *action, int code) {
+  LogPrint(level, "ALSA PCM %s error: %s", action, snd_strerror(code));
+}
+
 PcmDevice *
 openPcmDevice (int errorLevel) {
   PcmDevice *pcm;
   if ((pcm = malloc(sizeof(*pcm)))) {
-    int err;
+    int result;
 
-    if ((err = snd_pcm_open(&pcm->handle, "plughw:0,0", SND_PCM_STREAM_PLAYBACK, 0)) >= 0) {
-      int buffer_time = 1000000 / 4; /* usecs */
-      int dir;
-      snd_pcm_hw_params_alloca(&pcm->hwparams);
-      snd_pcm_hw_params_any(pcm->handle, pcm->hwparams);
-      snd_pcm_hw_params_set_access(pcm->handle, pcm->hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
-      setPcmSampleRate(pcm, 44100);
-      snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hwparams, &buffer_time, &dir);
-      snd_pcm_hw_params(pcm->handle, pcm->hwparams);
-      return pcm;
+    if ((result = snd_pcm_open(&pcm->handle, "plughw:0,0", SND_PCM_STREAM_PLAYBACK, 0)) >= 0) {
+      if ((result = snd_pcm_hw_params_malloc(&pcm->hwparams)) >= 0) {
+	int buffer_time = 1000000 / 4; /* usecs */
+	int dir;
+
+	snd_pcm_hw_params_any(pcm->handle, pcm->hwparams);
+	snd_pcm_hw_params_set_access(pcm->handle, pcm->hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
+	setPcmSampleRate(pcm, 44100);
+	snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hwparams, &buffer_time, &dir);
+	snd_pcm_hw_params(pcm->handle, pcm->hwparams);
+
+	return pcm;
+      } else {
+	logAlsaError(errorLevel, "hardware parameters allocation", result);
+      }
+
+      snd_pcm_close(pcm->handle);
     } else {
-      LogPrint(errorLevel, "Cannot open PCM device: %s", snd_strerror(err));
+      logAlsaError(errorLevel, "open", result);
     }
+
     free(pcm);
   } else {
     LogError("PCM device allocation");
   }
+
   return NULL;
 }
 
 void
 closePcmDevice (PcmDevice *pcm) {
   snd_pcm_close(pcm->handle);
+  snd_pcm_hw_params_free(pcm->hwparams);
   free(pcm);
 }
 
