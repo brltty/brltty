@@ -210,7 +210,10 @@ openSerialPort (char **parameters, const char *device) {
     newSerialSettings.c_cc[VMIN] = 0;	/* set nonblocking read */
     newSerialSettings.c_cc[VTIME] = 0;
 
-    if (resetSerialDevice(serialDevice, &newSerialSettings, B38400)) return 1;
+    if (resetSerialDevice(serialDevice, &newSerialSettings, B38400)) {
+      flushSerialInput(serialDevice);
+      return 1;
+    }
 
     close(serialDevice);
     serialDevice = -1;
@@ -432,9 +435,9 @@ getUsbCellCount (unsigned char *count) {
 }
 
 static int
-logUsbString (unsigned char code, const char *description) {
+logUsbString (uint8_t request, const char *description) {
   UsbDescriptor descriptor;
-  if (readUsbData(code, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
+  if (readUsbData(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
     char *string = usbDecodeString(&descriptor.string);
     if (string) {
       LogPrint(LOG_INFO, "Voyager %s: %s", description, string);

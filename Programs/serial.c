@@ -82,6 +82,20 @@ rawSerialDevice (struct termios *attributes) {
 }
 
 int
+flushSerialInput (int descriptor) {
+  if (tcflush(descriptor, TCIFLUSH) != -1) return 1;
+  LogError("TCIFLUSH");
+  return 0;
+}
+
+int
+flushSerialOutput (int descriptor) {
+  if (tcflush(descriptor, TCOFLUSH) != -1) return 1;
+  LogError("TCOFLUSH");
+  return 0;
+}
+
+int
 setSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
   if (cfsetispeed(attributes, baud) != -1) {
     if (cfsetospeed(attributes, baud) != -1) {
@@ -101,19 +115,15 @@ setSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
 
 int
 resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
-  if (tcflush(descriptor, TCOFLUSH) != -1) {
+  if (flushSerialOutput(descriptor)) {
     if (setSerialDevice(descriptor, attributes, B0)) {
       delay(500);
-      if (tcflush(descriptor, TCIFLUSH) != -1) {
+      if (flushSerialInput(descriptor)) {
         if (setSerialDevice(descriptor, attributes, baud)) {
           return 1;
         }
-      } else {
-        LogError("TCIFLUSH");
       }
     }
-  } else {
-    LogError("TCOFLUSH");
   }
   return 0;
 }

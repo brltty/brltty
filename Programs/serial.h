@@ -30,6 +30,9 @@ extern void rawSerialDevice (struct termios *attributes);
 extern int setSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
 extern int resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
 
+extern int flushSerialInput (int descriptor);
+extern int flushSerialOutput (int descriptor);
+
 extern int validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices);
 extern int baud2integer (speed_t baud);
 
