@@ -98,9 +98,9 @@ CRs3: Learn mode (toggle)
 CRs4: Route cursor to current line
 
 When in Preferences Menu
-UP/DOWN: Select previous/next setting
-RL: Discard changes
-RR: Exit menu
-RL+RR: Save changes and exit menu
+DOWN/UP: Select previous/next setting
+RL+RR: Exit menu
+RL+UP: Discard changes
+RL+DOWN: Save changes and exit menu
 
 -----End of help screen-----

@@ -118,20 +118,19 @@ static char readbrl_init; /* Flag to reinitialize readbrl function state. */
 
 
 static int
-_sndcontrolmsg(const char *reqname, uint8_t request, uint16_t value, uint16_t index,
-	       const unsigned char *buffer, uint16_t size)
-{
+_sndcontrolmsg (const char *reqname, uint8_t request, uint16_t value, uint16_t index,
+	        const unsigned char *buffer, uint16_t size) {
   int ret, repeats = STALL_TRIES;
   do {
-    if(repeats == STALL_TRIES)
+    if (repeats == STALL_TRIES)
       LogPrint(LOG_DEBUG, "ctl req 0X%X [%s]", request, reqname);
     else
-      LogPrint(LOG_DEBUG, "ctl req 0X%X (try %d) failed: %s",
+      LogPrint(LOG_WARNING, "ctl req 0X%X (try %d) failed: %s",
 	       request, STALL_TRIES+1-repeats, strerror(errno));
     ret = usbControlWrite(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                           request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
-  if(ret<0)
+  if (ret < 0)
     LogPrint(LOG_ERR, "ctl req 0X%X error: %s",
              request, strerror(errno));
   return ret;
@@ -141,20 +140,19 @@ _sndcontrolmsg(const char *reqname, uint8_t request, uint16_t value, uint16_t in
   (_sndcontrolmsg(#request, request, value, index, buffer, size))
 
 static int
-_rcvcontrolmsg(const char *reqname, uint8_t request, uint16_t value, uint16_t index,
-	       unsigned char *buffer, uint16_t size)
-{
+_rcvcontrolmsg (const char *reqname, uint8_t request, uint16_t value, uint16_t index,
+	        unsigned char *buffer, uint16_t size) {
   int ret, repeats = STALL_TRIES;
   do {
-    if(repeats == STALL_TRIES)
+    if (repeats == STALL_TRIES)
       LogPrint(LOG_DEBUG, "ctl req 0X%X [%s]", request, reqname);
     else
-      LogPrint(LOG_DEBUG, "ctl req 0X%X (try %d) failed: %s",
+      LogPrint(LOG_WARNING, "ctl req 0X%X (try %d) failed: %s",
 	       request, STALL_TRIES+1-repeats, strerror(errno));
     ret = usbControlRead(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                          request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
-  if(ret<0)
+  if (ret < 0)
     LogPrint(LOG_ERR, "ctl req 0X%X error: %s",
              request, strerror(errno));
   return ret;
@@ -182,8 +180,7 @@ decodeString(char *rawbuf)
 
 
 static void 
-brl_identify (void)
-{
+brl_identify (void) {
   LogPrint(LOG_NOTICE, VERSION);
   LogPrint(LOG_INFO, COPYRIGHT);
 }
@@ -297,14 +294,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   {
     int ret, repeats = STALL_TRIES;
     do {
-    if(repeats == STALL_TRIES)
-      LogPrint(LOG_DEBUG, "begin input");
-    else
-      LogPrint(LOG_DEBUG, "begin input (try %d) failed: %s",
-               STALL_TRIES+1-repeats, strerror(errno));
+      if (repeats == STALL_TRIES)
+        LogPrint(LOG_DEBUG, "begin input");
+      else
+        LogPrint(LOG_WARNING, "begin input (try %d) failed: %s",
+                 STALL_TRIES+1-repeats, strerror(errno));
       ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
     } while(ret==0 && errno==EPIPE && --repeats);
-    if(ret==0)
+    if (ret == 0)
       LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
   }
 
@@ -312,13 +309,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
      || !(prevdata = malloc(totalCells)))
     goto failure;
 
-  /* dispbuf will hold the 4 status cells followed by the text cells.
+  /* dispbuf will hold the status cells and the text cells.
      We export directly to BRLTTY only the text cells. */
   brl->x = textCells;		/* initialize size of display */
   brl->y = BRLROWS;		/* always 1 */
 
   /* Force rewrite of display on first writebrl */
-  memset(prevdata, 0xFF, totalCells); /* all dots */
+  memset(dispbuf, 0, totalCells); /* no dots */
+  memset(prevdata, 0XFF, totalCells); /* all dots */
 
   readbrl_init = 1; /* init state on first readbrl */
 
@@ -330,9 +328,8 @@ failure:;
   return 0;
 }
 
-static void 
-brl_close (BrailleDisplay *brl)
-{
+static void
+brl_close (BrailleDisplay *brl) {
   if (usb) {
     usbCloseChannel(usb);
     usb = NULL;
@@ -345,16 +342,13 @@ brl_close (BrailleDisplay *brl)
 
 
 static void
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
-{
-  if(dispbuf)
-    memcpy(dispbuf+statusOffset, s, statusCells);
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
+  memcpy(dispbuf+statusOffset, s, statusCells);
 }
 
 
-static void 
-brl_writeWindow (BrailleDisplay *brl)
-{
+static void
+brl_writeWindow (BrailleDisplay *brl) {
   int repeats;
   unsigned char buf[totalCells];
   int i;
@@ -362,14 +356,13 @@ brl_writeWindow (BrailleDisplay *brl)
   memcpy(dispbuf+textOffset, brl->buffer, textCells);
 
   /* If content hasn't changed, do nothing. */
-  if(memcmp(prevdata, dispbuf, totalCells) == 0)
-    return;
+  if (memcmp(prevdata, dispbuf, totalCells) == 0) return;
 
   /* remember current content */
   memcpy(prevdata, dispbuf, totalCells);
 
   /* translate to voyager dot pattern coding */
-  for(i=0; i<totalCells; i++)
+  for (i=0; i<totalCells; i++)
     buf[i] = outputTable[dispbuf[i]];
 
   /* Firmware supports multiples of 8cells, so there are extra cells
@@ -472,8 +465,7 @@ brl_writeWindow (BrailleDisplay *brl)
   KEY(keys2, command2)
 
 static int 
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
-{
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   /* Structure to remember which keys are pressed */
   typedef struct {
     unsigned int control; /* Front and dot keys */
@@ -588,12 +580,12 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
       if (cmds == CMDS_PREFS) {
 	switch (pressedKeys.control) {
-          HKEY2(891, K_UP, K_DOWN,
+          HKEY2(891, K_DOWN, K_UP,
                 CMD_MENU_PREV_SETTING, CMD_MENU_NEXT_SETTING,
                 "Select previous/next setting");
-          HKEY(892, K_RL, CMD_PREFLOAD, "Discard changes");
-          HKEY(892, K_RR, CMD_PREFLOAD, "Exit menu");
-          HKEY(892, K_RL|K_RR, CMD_PREFLOAD, "Save changes and exit menu");
+          HKEY(892, K_RL|K_RR, CMD_PREFMENU, "Exit menu");
+          HKEY(892, K_RL|K_UP, CMD_PREFLOAD, "Discard changes");
+          HKEY(892, K_RL|K_DOWN, CMD_PREFSAVE, "Save changes and exit menu");
 	}
       }
 
