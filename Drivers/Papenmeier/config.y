@@ -365,7 +365,7 @@ addCommand (int code) {
 %start input
 
 %token NUM STRING IS AND
-%token NAME IDENT HELPFILE SIZE STATCELLS FRONTKEYS EASYBAR
+%token NAME IDENT HELPFILE DISPLAYSIZE STATCELLS FRONTKEYS EASYBAR
 %token MODIFIER
 %token ROUTING EASY SWITCH KEY
 %token LEFT RIGHT REAR FRONT
@@ -384,7 +384,7 @@ inputline:  '\n'
        | IDENT eq NUM '\n'          { addTerminal(numval); }
        | NAME eq STRING '\n'        { setName(nameval); }
        | HELPFILE eq STRING '\n'    { setHelp(nameval); }
-       | SIZE eq NUM '\n'           { setColumns(numval); }
+       | DISPLAYSIZE eq NUM '\n'           { setColumns(numval); }
        | STATCELLS eq NUM '\n'      { setStatusCells(numval); }
        | FRONTKEYS eq NUM '\n'      { setFrontKeys(numval); }
        | EASYBAR '\n'               { setHasEasyBar(1, 1, 1, 1); }
@@ -469,7 +469,7 @@ static struct init_v symbols[]= {
 
   { "modifier",    MODIFIER, 0},
 
-  { "displaysize", SIZE, 0 },
+  { "displaysize", DISPLAYSIZE, 0 },
   { "statuscells", STATCELLS, 0 },
   { "frontkeys",   FRONTKEYS, 0 },
   { "haseasybar",  EASYBAR, 0 },

@@ -14,9 +14,9 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION "0.20"
-#define DATE "July 2004"
-#define COPYRIGHT \
+#define VO_VERSION "0.20"
+#define VO_DATE "July 2004"
+#define VO_COPYRIGHT \
 "   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>"
 
 /* Voyager/braille.c - Braille display driver for Tieman Voyager displays.
@@ -536,8 +536,8 @@ static unsigned char statusCells;
 
 static void
 brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Tieman Voyager User-space Driver: version " VERSION " (" DATE ")");
-  LogPrint(LOG_INFO, COPYRIGHT);
+  LogPrint(LOG_NOTICE, "Tieman Voyager User-space Driver: version " VO_VERSION " (" VO_DATE ")");
+  LogPrint(LOG_INFO, VO_COPYRIGHT);
 }
 
 static int

@@ -15,8 +15,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-TXT2HLP = $(BLD_TOP)$(PGM_DIR)/txt2hlp
-$(TXT2HLP):
+TXT2HLP = $(BLD_TOP)$(PGM_DIR)/txt2hlp$X
+$(TXT2HLP)$X:
 	cd $(@D) && $(MAKE) $(@F)
 
 HELP_NAME = brltty-$(DRIVER_CODE).hlp

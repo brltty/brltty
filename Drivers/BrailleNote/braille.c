@@ -29,9 +29,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
 
 #ifdef HAVE_LINUX_VT_H
+#include <sys/ioctl.h>
 #include <linux/vt.h>
 #endif /* HAVE_LINUX_VT_H */
 static int displayDescriptor = -1;
