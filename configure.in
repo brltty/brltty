@@ -276,6 +276,21 @@ AC_OBJEXT
 AC_EXEEXT
 
 AC_CACHE_CHECK(
+   [if the compiler understands the __alignof__ operator],
+   [brltty_cv_c_operator_alignof],
+   [AC_TRY_COMPILE([
+int a;
+int b = __alignof__(a);
+],
+[],
+[brltty_cv_c_operator_alignof=yes],
+[brltty_cv_c_operator_alignof=no])])
+if test "${brltty_cv_c_operator_alignof}" = "yes"
+then
+   AC_DEFINE([HAVE_OPERATOR_ALIGNOF])
+fi
+
+AC_CACHE_CHECK(
    [if the compiler understands __attribute__((format(printf)))],
    [brltty_cv_c_attribute_format_printf],
    [AC_TRY_COMPILE([

@@ -204,6 +204,12 @@ extern "C" {
 #undef HAVE_PKG_XAWPLUS
 #undef HAVE_PKG_XM
 
+/* Define this if the __alignof__ operator is supported. */
+#undef HAVE_OPERATOR_ALIGNOF
+#ifndef HAVE_OPERATOR_ALIGNOF
+#define __alignof__(x) 8
+#endif /* HAVE_OPERATOR_ALIGNOF */
+
 /* Define this if the printf format attribute is supported. */
 #undef HAVE_ATTRIBUTE_FORMAT_PRINTF
 
