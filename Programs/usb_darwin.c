@@ -56,7 +56,7 @@ typedef struct {
   UsbEndpoint *endpoint;
   UsbAsynchronousRequest *requests;
 
-  UInt8 reference;
+  UInt8 pipe;
   UInt8 number;
   UInt8 direction;
   UInt8 transfer;
@@ -237,6 +237,22 @@ closeInterface (UsbDevice *device) {
   if (devx->interface) {
     IOReturn result;
 
+    {
+      UInt8 count;
+      result = (*devx->interface)->GetNumEndpoints(devx->interface, &count);
+      if (result == kIOReturnSuccess) {
+        int pipe;
+        for (pipe=1; pipe<=count; ++pipe) {
+          result = (*devx->interface)->AbortPipe(devx->interface, pipe);
+          if (result != kIOReturnSuccess) {
+            setErrnoIo(result, "pipe abort");
+          }
+        }
+      } else {
+        setErrnoIo(result, "USB pipe count query");
+      }
+    }
+
     result = (*devx->interface)->USBInterfaceClose(devx->interface);
     if (result != kIOReturnSuccess) {
       setErrnoIo(result, "USB interface close");
@@ -333,6 +349,42 @@ setInterface (UsbDevice *device, UInt8 number) {
   return interface != NULL;
 }
 
+static UsbAsynchronousRequest *
+usbDequeueAsynchronousRequest (UsbEndpointExtension *eptx) {
+  if (eptx->requests) {
+    UsbAsynchronousRequest *request = eptx->requests->next;
+
+    if (request == eptx->requests) {
+      eptx->requests = NULL;
+    } else {
+      eptx->requests->next = request->next;
+    }
+
+    request->next = NULL;
+    return request;
+  }
+
+  return NULL;
+}
+
+static void
+usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
+  UsbAsynchronousRequest *request = context;
+  UsbEndpoint *endpoint = request->endpoint;
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  request->result = result;
+  request->count = (int)arg;
+
+  if (eptx->requests) {
+    request->next = eptx->requests->next;
+    eptx->requests->next = request;
+    eptx->requests = request;
+  } else {
+    eptx->requests = request->next = request;
+  }
+}
+
 int
 usbResetDevice (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
@@ -413,7 +465,7 @@ usbResetEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->reference);
+    result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipe);
     if (result == kIOReturnSuccess) return 1;
     setErrnoIo(result, "USB endpoint reset");
   }
@@ -433,7 +485,7 @@ usbClearEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->reference);
+    result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipe);
     if (result == kIOReturnSuccess) return 1;
     setErrnoIo(result, "USB endpoint clear");
   }
@@ -488,15 +540,15 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
       unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
       unsigned char output = USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_OUTPUT;
 
-      for (eptx->reference=1; eptx->reference<=count; ++eptx->reference) {
-        result = (*devx->interface)->GetPipeProperties(devx->interface, eptx->reference,
+      for (eptx->pipe=1; eptx->pipe<=count; ++eptx->pipe) {
+        result = (*devx->interface)->GetPipeProperties(devx->interface, eptx->pipe,
                                                        &eptx->direction, &eptx->number,
                                                        &eptx->transfer, &eptx->size, &eptx->interval);
         if (result == kIOReturnSuccess) {
           if ((eptx->number == number) &&
               ((eptx->direction == kUSBOut) == output)) {
             LogPrint(LOG_DEBUG, "USB: ept=%02X -> ref=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
-                     endpoint->descriptor->bEndpointAddress, eptx->reference,
+                     endpoint->descriptor->bEndpointAddress, eptx->pipe,
                      eptx->number, eptx->direction, eptx->transfer,
                      eptx->interval, eptx->size);
 
@@ -514,7 +566,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
       LogPrint(LOG_ERR, "USB endpoint not found: %02X",
                endpoint->descriptor->bEndpointAddress);
     } else {
-      setErrnoIo(result, "USB endpoint count query");
+      setErrnoIo(result, "USB pipe count query");
     }
 
     free(eptx);
@@ -528,6 +580,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
+
+  {
+    UsbAsynchronousRequest *request;
+    while ((request = usbDequeueAsynchronousRequest(eptx))) free(request);
+  }
+
   endpoint->extension = NULL;
   free(eptx);
 }
@@ -551,7 +609,7 @@ usbReadEndpoint (
 
   read:
     count = length;
-    result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->reference,
+    result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->pipe,
                                             buffer, &count,
                                             timeout, timeout);
 
@@ -568,7 +626,7 @@ usbReadEndpoint (
 
       case kIOUSBPipeStalled:
         if (!stalled) {
-          result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->reference);
+          result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipe);
           if (result != kIOReturnSuccess) {
             setErrnoIo(result, "USB stall clear");
             return 0;
@@ -602,7 +660,7 @@ usbWriteEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->WritePipeTO(devx->interface, eptx->reference,
+    result = (*devx->interface)->WritePipeTO(devx->interface, eptx->pipe,
                                              (void *)buffer, length,
                                              timeout, timeout);
     if (result == kIOReturnSuccess) return length;
@@ -610,24 +668,6 @@ usbWriteEndpoint (
   }
 
   return -1;
-}
-
-static void
-usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
-  UsbAsynchronousRequest *request = context;
-  UsbEndpoint *endpoint = request->endpoint;
-  UsbEndpointExtension *eptx = endpoint->extension;
-
-  request->result = result;
-  request->count = (int)arg;
-
-  if (eptx->requests) {
-    request->next = eptx->requests->next;
-    eptx->requests->next = request;
-    eptx->requests = request;
-  } else {
-    eptx->requests = request->next = request;
-  }
 }
 
 void *
@@ -669,7 +709,7 @@ usbSubmitRequest (
 
       switch (eptx->direction) {
         case kUSBIn:
-          result = (*devx->interface)->ReadPipeAsync(devx->interface, eptx->reference,
+          result = (*devx->interface)->ReadPipeAsync(devx->interface, eptx->pipe,
                                                      request->buffer, request->length,
                                                      usbAsynchronousRequestCallback, request);
           if (result == kIOReturnSuccess) return request;
@@ -678,7 +718,7 @@ usbSubmitRequest (
 
         case kUSBOut:
           if (request->buffer) memcpy(request->buffer, buffer, length);
-          result = (*devx->interface)->WritePipeAsync(devx->interface, eptx->reference,
+          result = (*devx->interface)->WritePipeAsync(devx->interface, eptx->pipe,
                                                       request->buffer, request->length,
                                                       usbAsynchronousRequestCallback, request);
           if (result == kIOReturnSuccess) return request;
@@ -723,7 +763,7 @@ usbReapResponse (
     UsbEndpointExtension *eptx = endpoint->extension;
     UsbAsynchronousRequest *request;
 
-    while (!eptx->requests) {
+    while (!(request = usbDequeueAsynchronousRequest(eptx))) {
       switch (CFRunLoopRunInMode(devx->runloopMode, (wait? 60: 0), 1)) {
         case kCFRunLoopRunTimedOut:
           if (wait) continue;
@@ -736,13 +776,6 @@ usbReapResponse (
           continue;
       }
     }
-
-    if ((request = eptx->requests->next) == eptx->requests) {
-      eptx->requests = NULL;
-    } else {
-      eptx->requests->next = request->next;
-    }
-    request->next = NULL;
 
     if (request->result == kIOReturnSuccess) {
       int length = request->count;
