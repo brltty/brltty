@@ -43,12 +43,35 @@ static char *usbDevice;
 static int
 albatrossChooser (UsbDevice *device, void *data) {
   const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
+  LogPrint(LOG_WARNING, "Checking USB device [%4X,%4X].",
+           descriptor->idVendor, descriptor->idProduct);
+  if (descriptor->iManufacturer) {
+    char *string = usbGetString(device, descriptor->iManufacturer, 1000);
+    if (string) {
+      LogPrint(LOG_WARNING, "Manufacturer name: %s", string);
+      free(string);
+    }
+  }
+  if (descriptor->iProduct) {
+    char *string = usbGetString(device, descriptor->iProduct, 1000);
+    if (string) {
+      LogPrint(LOG_WARNING, "Product description: %s", string);
+      free(string);
+    }
+  }
+  if (descriptor->iSerialNumber) {
+    char *string = usbGetString(device, descriptor->iSerialNumber, 1000);
+    if (string) {
+      LogPrint(LOG_WARNING, "Serial number: %s", string);
+      free(string);
+    }
+  }
   if ((descriptor->idVendor == 0X0403) && (descriptor->idProduct == 0X6001)) {
     char *serialDevice = usbGetSerialDevice(device, 0);
     if (serialDevice) {
       usbDevice = serialDevice;
-      return 1;
     }
+    return 1;
   }
   return 0;
 }
@@ -191,10 +214,18 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   usbDevice = NULL;
   {
     UsbDevice *device = usbFindDevice(albatrossChooser, NULL);
-    usbCloseDevice(device);
-    LogPrint(LOG_INFO, "Albatross USB serial device: %s", usbDevice);
-    free(usbDevice);
-    usbDevice = NULL;
+    if (device) {
+      if (usbDevice) {
+        LogPrint(LOG_INFO, "Albatross USB serial device: %s", usbDevice);
+        free(usbDevice);
+        usbDevice = NULL;
+      } else {
+        LogPrint(LOG_WARNING, "Albatross serial device not determined.");
+      }
+      usbCloseDevice(device);
+    } else {
+      LogPrint(LOG_WARNING, "Albatross USB bus device not found.");
+    }
   }
 #endif /* ENABLE_USB */
 
