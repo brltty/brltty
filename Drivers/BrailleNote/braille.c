@@ -54,9 +54,9 @@ static SerialDevice *serialDevice = NULL;
 static unsigned char *cellBuffer = NULL;
 static unsigned int cellCount = 0;
 static unsigned char *statusArea;
-static unsigned int statusCells;
+static int statusCells;
 static unsigned char *dataArea;
-static unsigned int dataCells;
+static int dataCells;
 static unsigned char *outputBuffer = NULL;
 
 typedef enum {
@@ -95,14 +95,14 @@ refreshCells (void) {
 }
 
 static void
-writePrompt (const unsigned char *prompt) {
-   unsigned int length = strlen(prompt);
-   unsigned int index = 0;
+writePrompt (const char *prompt) {
+   int length = strlen(prompt);
+   int index = 0;
    if (length > dataCells) {
       length = dataCells;
    }
    while (index < length) {
-      dataArea[index] = textTable[prompt[index]];
+      dataArea[index] = textTable[(unsigned char)prompt[index]];
       ++index;
    }
    while (index < dataCells) {
