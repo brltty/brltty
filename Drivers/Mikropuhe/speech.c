@@ -28,7 +28,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #include "Programs/misc.h"
 #include "Programs/system.h"
@@ -66,33 +68,35 @@ typedef struct {
   int tags;
   int length;
 } SpeechSegment;
-static Queue *speechQueue = NULL;
 
-static int speechThreadStarted = 0;
+static Queue *speechQueue = NULL;
 static pthread_mutex_t speechMutex;
 static pthread_cond_t speechConditional;
-static pthread_t speechThread;
+
+static int synthesisThreadStarted = 0;
+static pthread_t synthesisThread;
 
 static void *speechChannel = NULL;
 static MPINT_SpeakFileParams speechParameters;
-static volatile int speechDevice = -1;
+static volatile int soundDevice = -1;
 
 static int
-openDevice (void) {
-  if (speechDevice == -1) {
-    if ((speechDevice = getPcmDevice(LOG_WARNING)) == -1) return 0;
+openSoundDevice (void) {
+  if (soundDevice == -1) {
+    if ((soundDevice = getPcmDevice(LOG_WARNING)) == -1) return 0;
+    LogPrint(LOG_DEBUG, "Sound device opened: fd=%d", soundDevice);
 
-    speechParameters.nChannels = setPcmChannelCount(speechDevice, 1);
-    speechParameters.nSampleFreq = setPcmSampleRate(speechDevice, 22050);
+    speechParameters.nChannels = setPcmChannelCount(soundDevice, 1);
+    speechParameters.nSampleFreq = setPcmSampleRate(soundDevice, 22050);
     {
       static const PcmAmplitudeFormat formats[] = {PCM_FMT_S16L, PCM_FMT_U8, PCM_FMT_UNKNOWN};
       const PcmAmplitudeFormat *format = formats;
       while (*format != PCM_FMT_UNKNOWN) {
-        if (setPcmAmplitudeFormat(speechDevice, *format) == *format) break;
+        if (setPcmAmplitudeFormat(soundDevice, *format) == *format) break;
         ++format;
       }
 
-      switch (setPcmAmplitudeFormat(speechDevice, *format)) {
+      switch (*format) {
         case PCM_FMT_U8:
           speechParameters.nBits = 8;
           break;
@@ -100,20 +104,25 @@ openDevice (void) {
           speechParameters.nBits = 16;
           break;
         default:
-          speechParameters.nBits = 0;
-          break;
+          LogPrint(LOG_WARNING, "No supported sound format.");
+          close(soundDevice);
+          soundDevice = -1;
+          return 0;
       }
     }
-    LogPrint(LOG_INFO, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
+    LogPrint(LOG_DEBUG, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
              speechParameters.nChannels, speechParameters.nSampleFreq, speechParameters.nBits);
-
-    if (!speechParameters.nBits) {
-      close(speechDevice);
-      speechDevice = -1;
-      return 0;
-    }
   }
   return 1;
+}
+
+static void
+closeSoundDevice (void) {
+  if (soundDevice != -1) {
+    close(soundDevice);
+    LogPrint(LOG_DEBUG, "Sound device closed: fd=%d", soundDevice);
+    soundDevice = -1;
+  }
 }
 
 static SpeechSegment *
@@ -138,7 +147,7 @@ deallocateSpeechItem (void *item) {
 }
 
 static void
-speechError (int code, const char *action) {
+logSynthesisError (int code, const char *action) {
   const char *explanation;
   switch (code) {
     default:
@@ -182,9 +191,9 @@ speechError (int code, const char *action) {
 }
 
 static int
-speechWriter (const void *bytes, unsigned int count, void *data, void *reserved) {
-  if (speechThreadStarted) {
-    int written = safe_write(speechDevice, bytes, count);
+writeSound (const void *bytes, unsigned int count, void *data, void *reserved) {
+  if (synthesisThreadStarted) {
+    int written = safe_write(soundDevice, bytes, count);
     if (written == count) return 0;
 
     if (written == -1) {
@@ -198,7 +207,7 @@ speechWriter (const void *bytes, unsigned int count, void *data, void *reserved)
 }
 
 static int
-speechWrite (const unsigned char *bytes, int length, int tags) {
+synthesizeSpeech (const unsigned char *bytes, int length, int tags) {
   speechParameters.nTags = tags;
   if (mpChannelSpeakFile) {
     int code;
@@ -206,7 +215,7 @@ speechWrite (const unsigned char *bytes, int length, int tags) {
     memcpy(string, bytes, length);
     string[length] = 0;
     if (!(code = mpChannelSpeakFile(speechChannel, string, NULL, &speechParameters))) return 1;
-    if (code != 1) speechError(code, "channel speak");
+    if (code != 1) logSynthesisError(code, "channel speak");
   }
   return 0;
 }
@@ -215,15 +224,37 @@ static void *
 speechMain (void *data) {
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
   pthread_mutex_lock(&speechMutex);
-  while (speechThreadStarted) {
+  while (synthesisThreadStarted) {
+    int error;
     SpeechSegment *segment;
-    pthread_cond_wait(&speechConditional, &speechMutex);
+
+    if (soundDevice != -1) {
+      struct timeval now;
+      struct timespec timeout;
+      gettimeofday(&now, NULL);
+      timeout.tv_sec = now.tv_sec + 3;
+      timeout.tv_nsec = 0;
+      error = pthread_cond_timedwait(&speechConditional, &speechMutex, &timeout);
+    } else {
+      error = pthread_cond_wait(&speechConditional, &speechMutex);
+    }
+    switch (error) {
+      case 0:
+        break;
+      case ETIMEDOUT:
+        closeSoundDevice();
+        continue;
+      default:
+        LogError("pthread_cond_timedwait");
+        break;
+    }
+
     while ((segment = dequeueItem(speechQueue))) {
       if (segment->tags) {
-        speechWrite((unsigned char *)(segment+1), segment->length, segment->tags);
-      } else if (speechThreadStarted && openDevice()) {
+        synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
+      } else if (synthesisThreadStarted && openSoundDevice()) {
         pthread_mutex_unlock(&speechMutex);
-        speechWrite((unsigned char *)(segment+1), segment->length, segment->tags);
+        synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
         pthread_mutex_lock(&speechMutex);
       }
       deallocateSpeechSegment(segment);
@@ -234,17 +265,17 @@ speechMain (void *data) {
 }
 
 static int
-startSpeechThread (void) {
+startSynthesisThread (void) {
   int error;
-  if (speechThreadStarted) return 1;
+  if (synthesisThreadStarted) return 1;
 
-  speechThreadStarted = 1;
+  synthesisThreadStarted = 1;
   if (!(error = pthread_mutex_init(&speechMutex, NULL))) {
     if (!(error = pthread_cond_init(&speechConditional, NULL))) {
       pthread_attr_t attributes;
       if (!(error = pthread_attr_init(&attributes))) {
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-        error = pthread_create(&speechThread, &attributes, speechMain, NULL);
+        error = pthread_create(&synthesisThread, &attributes, speechMain, NULL);
         pthread_attr_destroy(&attributes);
         if (!error) {
           return 1;
@@ -264,24 +295,24 @@ startSpeechThread (void) {
   } else {
     LogPrint(LOG_ERR, "Cannot initialize speech mutex: %s", strerror(error));
   }
-  speechThreadStarted = 0;
+  synthesisThreadStarted = 0;
   return 0;
 }
 
 static void
-stopSpeechThread (void) {
-  if (speechThreadStarted) {
-    speechThreadStarted = 0;
+stopSynthesisThread (void) {
+  if (synthesisThreadStarted) {
+    synthesisThreadStarted = 0;
     pthread_cond_signal(&speechConditional);
-    pthread_join(speechThread, NULL);
+    pthread_join(synthesisThread, NULL);
     pthread_cond_destroy(&speechConditional);
     pthread_mutex_destroy(&speechMutex);
   }
 }
 
 static int
-writeSpeech (const unsigned char *bytes, int length, int tags) {
-  if (startSpeechThread()) {
+enqueueSpeech (const unsigned char *bytes, int length, int tags) {
+  if (startSynthesisThread()) {
     SpeechSegment *segment;
     if ((segment = allocateSpeechSegment(bytes, length, tags))) {
       Element *element;
@@ -299,12 +330,17 @@ writeSpeech (const unsigned char *bytes, int length, int tags) {
 }
 
 static int
-writeTag (const char *tag) {
-  return writeSpeech(tag, strlen(tag), MPINT_TAGS_OWN|MPINT_TAGS_SAPI5);
+enqueueText (const unsigned char *bytes, int length) {
+  return enqueueSpeech(bytes, length, 0);
+}
+
+static int
+enqueueTag (const char *tag) {
+  return enqueueSpeech(tag, strlen(tag), MPINT_TAGS_OWN|MPINT_TAGS_SAPI5);
 }
 
 static void
-loadLibrary (void) {
+loadSynthesisLibrary (void) {
   if (!speechLibrary) {
     static const char *name = "libmplinux." LIBRARY_EXTENSION;
     char *path = makePath(MIKROPUHE_ROOT, name);
@@ -336,14 +372,14 @@ spk_identify (void) {
 static int
 spk_open (char **parameters) {
   int code;
-  loadLibrary();
+  loadSynthesisLibrary();
 
   if ((speechQueue = newQueue(deallocateSpeechItem, NULL))) {
     if (mpChannelInitEx) {
       if (!(code = mpChannelInitEx(&speechChannel, NULL, NULL, NULL))) {
         memset(&speechParameters, 0, sizeof(speechParameters));
         speechParameters.nWriteWavHeader = 0;
-        speechParameters.pfnWrite = speechWriter;
+        speechParameters.pfnWrite = writeSound;
         speechParameters.pWriteData = NULL;
 
         {
@@ -351,7 +387,7 @@ spk_open (char **parameters) {
           if (name && *name) {
             char tag[0X100];
             snprintf(tag, sizeof(tag), "<voice name=\"%s\"/>", name);
-            writeTag(tag);
+            enqueueTag(tag);
           }
         }
 
@@ -364,14 +400,14 @@ spk_open (char **parameters) {
             if (validateInteger(&setting, "pitch", pitch, &minimum, &maximum)) {
               char tag[0X100];
               snprintf(tag, sizeof(tag), "<pitch absmiddle=\"%d\"/>", setting);
-              writeTag(tag);
+              enqueueTag(tag);
             }
           }
         }
 
         return 1;
       } else {
-        speechError(code, "channel initialization");
+        logSynthesisError(code, "channel initialization");
       }
     }
   } else {
@@ -384,12 +420,8 @@ spk_open (char **parameters) {
 
 static void
 spk_close (void) {
-  stopSpeechThread();
-
-  if (speechDevice != -1) {
-    close(speechDevice);
-    speechDevice = -1;
-  }
+  stopSynthesisThread();
+  closeSoundDevice();
 
   if (speechQueue) {
     deallocateQueue(speechQueue);
@@ -413,14 +445,14 @@ spk_close (void) {
 
 static void
 spk_say (const unsigned char *buffer, int length) {
-  if (writeSpeech(buffer, length, 0))
-    writeTag("<break time=\"none\"/>");
+  if (enqueueText(buffer, length))
+    enqueueTag("<break time=\"none\"/>");
 }
 
 static void
 spk_mute (void) {
-  stopSpeechThread();
-  if (speechDevice != -1) cancelPcmOutput(speechDevice);
+  stopSynthesisThread();
+  if (soundDevice != -1) cancelPcmOutput(soundDevice);
 }
 
 static void
@@ -428,7 +460,7 @@ spk_rate (int setting) {
   char tag[0X40];
   snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
            setting * 10 / SPK_DEFAULT_RATE - 10);
-  writeTag(tag);
+  enqueueTag(tag);
 }
 
 static void
@@ -437,5 +469,5 @@ spk_volume (int setting) {
   int percentage = setting * 50 / SPK_DEFAULT_VOLUME;
   snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
            MIN(100, MAX(1, percentage)));
-  writeTag(tag);
+  enqueueTag(tag);
 }
