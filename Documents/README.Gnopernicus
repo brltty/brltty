@@ -218,7 +218,7 @@ and is used when you type "startx" to start the X-server.
  export PATH LD_LIBRARY_PATH PYTHONPATH PKG_CONFIG_PATH GDK_USE_XFT GTK_MODULES
 
  # Configure Gnome.
- gconftool-2 --type bool --set /apps/desktop/gnome/interface/accessibility true
+ gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
 
  # Tell Gnopernicus which virtual terminal is being used by the X display.
  # This is a bit complicated so cut-and-paste (rather than retype) it.
