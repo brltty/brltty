@@ -57,7 +57,7 @@
 #define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
-#define STAT_empty       0
+#define STAT_Empty       0
 #define OFFS_HORIZ    1000	/* added to status show */
 #define OFFS_FLAG     2000
 #define OFFS_NUMBER   3000
@@ -294,8 +294,8 @@ typedef struct {
 
 /* what to show for 2 status cells */
 #define SHOW_STAT_2 \
-      OFFS_NUMBER + STAT_brlrow, \
-      OFFS_NUMBER + STAT_csrrow
+      OFFS_NUMBER + STAT_BrlRow, \
+      OFFS_NUMBER + STAT_CsrRow
 
 /* commands for 2 status keys */
 #define CMD_STAT_2 \
@@ -305,10 +305,10 @@ typedef struct {
 
 /* what to show for 4 status cells */
 #define SHOW_STAT_4 \
-      OFFS_NUMBER + STAT_brlrow, \
-      OFFS_NUMBER + STAT_csrrow, \
-      OFFS_NUMBER + STAT_csrcol, \
-      OFFS_FLAG   + STAT_dispmode
+      OFFS_NUMBER + STAT_BrlRow, \
+      OFFS_NUMBER + STAT_CsrRow, \
+      OFFS_NUMBER + STAT_CsrCol, \
+      OFFS_FLAG   + STAT_AttrDisp
 
 /* commands for 4 status keys */
 #define CMD_STAT_4 \
@@ -320,19 +320,19 @@ typedef struct {
 
 /* what to show for 13 status cells */
 #define SHOW_STAT_13 \
-      OFFS_HORIZ + STAT_brlrow,   \
-      STAT_empty,                 \
-      OFFS_HORIZ + STAT_csrrow,   \
-      OFFS_HORIZ + STAT_csrcol,   \
-      OFFS_FLAG  + STAT_tracking, \
-      OFFS_FLAG  + STAT_dispmode, \
-      STAT_empty,                 \
-      OFFS_FLAG  + STAT_frozen,   \
-      STAT_empty,                 \
-      STAT_empty,                 \
-      OFFS_FLAG  + STAT_visible,  \
-      OFFS_FLAG  + STAT_size,     \
-      STAT_empty
+      OFFS_HORIZ + STAT_BrlRow  , \
+      STAT_Empty                , \
+      OFFS_HORIZ + STAT_CsrRow  , \
+      OFFS_HORIZ + STAT_CsrCol  , \
+      OFFS_FLAG  + STAT_TrkCsr  , \
+      OFFS_FLAG  + STAT_AttrDisp, \
+      STAT_Empty                , \
+      OFFS_FLAG  + STAT_FrzScr  , \
+      STAT_Empty                , \
+      STAT_Empty                , \
+      OFFS_FLAG  + STAT_VisCsr  , \
+      OFFS_FLAG  + STAT_BlkCsr  , \
+      STAT_Empty
 
 /* commands for 13 status keys */
 #define CMD_STAT_13 \
@@ -353,28 +353,28 @@ typedef struct {
 
 /* what to show for 22 status cells */
 #define SHOW_STAT_22 \
-      OFFS_HORIZ + STAT_brlrow      , \
-      STAT_empty                    , \
-      OFFS_HORIZ + STAT_csrrow      , \
-      OFFS_HORIZ + STAT_csrcol      , \
-      STAT_empty                    , \
-      OFFS_FLAG  + STAT_tracking    , \
-      OFFS_FLAG  + STAT_dispmode    , \
-      STAT_empty                    , \
-      OFFS_FLAG  + STAT_frozen      , \
-      STAT_empty                    , \
-      OFFS_HORIZ + STAT_scrnum      , \
-      STAT_empty                    , \
-      OFFS_FLAG  + STAT_visible     , \
-      OFFS_FLAG  + STAT_size        , \
-      OFFS_FLAG  + STAT_blink       , \
-      OFFS_FLAG  + STAT_capitalblink, \
-      OFFS_FLAG  + STAT_dots        , \
-      OFFS_FLAG  + STAT_sound       , \
-      OFFS_FLAG  + STAT_skip        , \
-      OFFS_FLAG  + STAT_underline   , \
-      OFFS_FLAG  + STAT_blinkattr   , \
-      OFFS_FLAG  + STAT_input       ,
+      OFFS_HORIZ + STAT_BrlRow    , \
+      STAT_Empty                  , \
+      OFFS_HORIZ + STAT_CsrRow    , \
+      OFFS_HORIZ + STAT_CsrCol    , \
+      STAT_Empty                  , \
+      OFFS_FLAG  + STAT_TrkCsr    , \
+      OFFS_FLAG  + STAT_AttrDisp  , \
+      STAT_Empty                  , \
+      OFFS_FLAG  + STAT_FrzScr    , \
+      STAT_Empty                  , \
+      OFFS_HORIZ + STAT_ScrNum    , \
+      STAT_Empty                  , \
+      OFFS_FLAG  + STAT_VisCsr    , \
+      OFFS_FLAG  + STAT_BlkCsr    , \
+      OFFS_FLAG  + STAT_BlnkCsr   , \
+      OFFS_FLAG  + STAT_BlnkCaps  , \
+      OFFS_FLAG  + STAT_SixDot    , \
+      OFFS_FLAG  + STAT_AlertTunes, \
+      OFFS_FLAG  + STAT_IdentLines, \
+      OFFS_FLAG  + STAT_VisAttr   , \
+      OFFS_FLAG  + STAT_BlnkAttr  , \
+      OFFS_FLAG  + STAT_InputMode
 
 /* commands for 22 status keys */
 #define CMD_STAT_22 \
@@ -394,11 +394,11 @@ typedef struct {
       CHGONOFF( CMD_CSRBLINK   , OFFS_STAT + 15, 0200, 0100 ), \
       CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 16, 0200, 0100 ), \
       CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 17, 0200, 0100 ), \
-      CHGONOFF( CMD_SND        , OFFS_STAT + 18, 0200, 0100 ), \
+      CHGONOFF( CMD_TUNES      , OFFS_STAT + 18, 0200, 0100 ), \
       CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 19, 0200, 0100 ), \
       CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 20, 0200, 0100 ), \
       CHGONOFF( CMD_ATTRBLINK  , OFFS_STAT + 21, 0200, 0100 ), \
-      CHGONOFF( CMD_INPUTMODE  , OFFS_STAT + 22, 0200, 0100 )
+      CHGONOFF( CMD_INPUT      , OFFS_STAT + 22, 0200, 0100 )
 
 
 static one_terminal pm_terminals[] =

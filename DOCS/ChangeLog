@@ -100,6 +100,7 @@ Note: this file is in reversed chronological order (bottom to top).
    Vario driver can now be statically linked. (dm)
    Add cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
    Add identification output to VisioBraille driver. (dm)
+   Add PROM version 5.0q-UK support to VisioBraille driver. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
    Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
    Stop GenericSay from reannouncing BRLTTY version during cursor routing. (dm)
    Add command parameter to GenericSay driver. (dm)
@@ -142,7 +143,8 @@ Note: this file is in reversed chronological order (bottom to top).
    Implement CR_CUTAPPEND (start cut area without clearing cut buffer). (dm)
    Implement CR_SETMARK (remember window position). (dm)
    Implement CR_GOTOMARK (return to remembered window position). (dm)
-   Implement CMD_{PR,NX}PROMPT (find previous prompt). (dm)
+   Implement CMD_{PR,NX}PROMPT (find previous/next command prompt). (dm)
+   Implement CMD_LEARN (command learn mode). (dm)
    Remove special commands for displays without routing keys: (dm,sd)
       Use CR_ROUTE instead of CMD_CSRJMP.
       Use CR_CUTBEGIN instead of CMD_CUT_BEG.

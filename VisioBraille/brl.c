@@ -292,7 +292,7 @@ static int brl_read(DriverCommandContext cmds)
     case 0x0D: return VAL_PASSKEY + VPK_RETURN;
     case 0x91: routing=1; break;
     case 0xA1: return CMD_HELP;
-    case 0xA2: return CMD_SND; // Toggle bips
+    case 0xA2: return CMD_TUNES; // Toggle bips
     case 0xA3: return CMD_PREFMENU;
     case 0xA4: return VAL_PASSKEY + VPK_PAGE_DOWN;
     case 0xA5: return VAL_PASSKEY + VPK_END;

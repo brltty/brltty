@@ -79,7 +79,7 @@
 /* 0X31 */ CR_CUTBEGIN,                    // dots 2,3,6
 /* 0X32 */ CMD_SIXDOTS,                    // dots 2,3,5
 /* 0X33 */ CMD_NOOP,                       // dots 2,3,5,6
-/* 0X34 */ CMD_SND,                        // dots 2,3,4
+/* 0X34 */ CMD_TUNES,                      // dots 2,3,4
 /* 0X35 */ CMD_NOOP,                       // dots 2,3,4,6
 /* 0X36 */ CMD_NOOP,                       // dots 2,3,4,5
 /* 0X37 */ CMD_NOOP,                       // dots 2,3,4,5,6

@@ -47,7 +47,7 @@
 #include "misc.h"
 #include "common.h"
 
-char VERSION[] = "BRLTTY 2.99.4";
+char VERSION[] = "BRLTTY 2.99.5";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 /*
@@ -1236,7 +1236,7 @@ startup(int argc, char *argv[])
   }
 
   LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
-  LogPrint(LOG_INFO, "Help File: %s", braille->help_file);
+  LogPrint(LOG_INFO, "Help Page: %s[%d]", braille->help_file, getHelpPageNumber());
   LogPrint(LOG_INFO, "Text Table: %s",
            opt_textTable? opt_textTable: "built-in");
   LogPrint(LOG_INFO, "Attributes Table: %s",
@@ -1362,7 +1362,7 @@ startup(int argc, char *argv[])
 
   /* Initialise help screen */
   if (!initializeHelpScreen(braille->help_file))
-    LogPrint(LOG_ERR, "Cannot open help screen file '%s'.", braille->help_file);
+    LogPrint(LOG_WARNING, "Cannot open help screen file: %s", braille->help_file);
 
   if (!opt_quiet)
     message(VERSION, 0);        /* display initialisation message */

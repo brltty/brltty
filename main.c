@@ -183,23 +183,23 @@ setStatusCells (void) {
          break;
       case ST_Generic:
          statcells[FirstStatusCell] = FSC_GENERIC;
-         statcells[STAT_brlcol] = p->winx+1;
-         statcells[STAT_brlrow] = p->winy+1;
-         statcells[STAT_csrcol] = scr.posx+1;
-         statcells[STAT_csrrow] = scr.posy+1;
-         statcells[STAT_scrnum] = scr.no;
-         statcells[STAT_tracking] = p->trackCursor;
-         statcells[STAT_dispmode] = p->showAttributes;
-         statcells[STAT_frozen] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
-         statcells[STAT_visible] = prefs.csrvis;
-         statcells[STAT_size] = prefs.csrsize;
-         statcells[STAT_blink] = prefs.csrblink;
-         statcells[STAT_capitalblink] = prefs.capblink;
-         statcells[STAT_dots] = prefs.sixdots;
-         statcells[STAT_sound] = prefs.sound;
-         statcells[STAT_skip] = prefs.skpidlns;
-         statcells[STAT_underline] = prefs.attrvis;
-         statcells[STAT_blinkattr] = prefs.attrblink;
+         statcells[STAT_BrlCol] = p->winx+1;
+         statcells[STAT_BrlRow] = p->winy+1;
+         statcells[STAT_CsrCol] = scr.posx+1;
+         statcells[STAT_CsrRow] = scr.posy+1;
+         statcells[STAT_ScrNum] = scr.no;
+         statcells[STAT_TrkCsr] = p->trackCursor;
+         statcells[STAT_AttrDisp] = p->showAttributes;
+         statcells[STAT_FrzScr] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
+         statcells[STAT_VisCsr] = prefs.csrvis;
+         statcells[STAT_BlkCsr] = prefs.csrsize;
+         statcells[STAT_BlnkCsr] = prefs.csrblink;
+         statcells[STAT_BlnkCaps] = prefs.capblink;
+         statcells[STAT_SixDot] = prefs.sixdots;
+         statcells[STAT_AlertTunes] = prefs.sound;
+         statcells[STAT_IdentLines] = prefs.skpidlns;
+         statcells[STAT_VisAttr] = prefs.attrvis;
+         statcells[STAT_BlnkAttr] = prefs.attrblink;
          break;
       case ST_MDVStyle:
          statcells[0] = portraitDigits[((p->winy+1) / 10) % 10] |
@@ -349,8 +349,7 @@ terminationHandler (int signalNumber) {
 }
 
 static void 
-childDeathHandler (int signalNumber)
-{
+childDeathHandler (int signalNumber) {
   pid_t pid = wait(NULL);
   if (pid == csr_pid) {
     csr_pid = 0;
@@ -359,8 +358,7 @@ childDeathHandler (int signalNumber)
 }
 
 static void 
-slideWindowVertically (int y)
-{
+slideWindowVertically (int y) {
   if (y < p->winy)
     p->winy = y;
   else if  (y >= (p->winy + brl.y))
@@ -368,14 +366,12 @@ slideWindowVertically (int y)
 }
 
 static void 
-placeWindowHorizontally (int x)
-{
+placeWindowHorizontally (int x) {
   p->winx = x / brl.x * brl.x;
 }
 
 static void 
-trackCursor (int place)
-{
+trackCursor (int place) {
   if (prefs.slidewin) {
     int reset = brl.x * 3 / 10;
     int trigger = prefs.eager_slidewin? brl.x*3/20: 0;
@@ -588,16 +584,22 @@ main (int argc, char *argv[]) {
 
 #ifdef INIT_PATH
   if (getpid() == 1) {
+    fprintf(stderr, "BRLTTY started as INIT.\n");
+    fflush(stderr);
     switch (fork()) {
       case -1: /* failed */
-        perror("fork");
+        fprintf(stderr, "Fork for BRLTTY failed: %s\n", strerror(errno));
+        fflush(stderr);
       default: /* parent */
+        fprintf(stderr, "Executing the real INIT: %s\n", INIT_PATH);
+        fflush(stderr);
         execv(INIT_PATH, argv);
         /* execv() shouldn't return */
-        perror("execv: " INIT_PATH);
+        fprintf(stderr, "Execution of the real INIT failed: %s\n", strerror(errno));
+        fflush(stderr);
         exit(1);
       case 0: { /* child */
-        static char *arguments[] = {"brltty", "-E", NULL};
+        static char *arguments[] = {"brltty", "-E", "-linfo", "-v", NULL};
         argv = arguments;
         argc = (sizeof(arguments) / sizeof(arguments[0])) - 1;
         break;
@@ -898,46 +900,37 @@ main (int argc, char *argv[]) {
           case CMD_ATTRDN:
             downDifferentLine(SCR_ATTRIB);
             break;
+          {
+            int increment;
+          case CMD_PRPGRPH:
+            increment = -1;
+            goto findParagraph;
           case CMD_NXPGRPH:
-          case CMD_PRPGRPH: {
-            int dir = (keypress == CMD_NXPGRPH) ? +1 : -1;
-            int i;
-            int found = 0;
-            int l = p->winy +dir;
-            char buffer[scr.cols];
-            /* look for a blank line */
-            while(l>=0 && l <= scr.rows - brl.y) {
-                readScreen((ScreenBox){0, l, scr.cols, 1},
-                           buffer, SCR_TEXT);
-                for(i=0; i<scr.cols; i++)
-                  if(buffer[i] != ' ' && buffer[i] != 0)
+            increment = 1;
+          findParagraph:
+            {
+              int found = 0;
+              unsigned char buffer[scr.cols];
+              int findBlank = 1;
+              int line = p->winy;
+              int i;
+              while ((line >= 0) && (line <= (scr.rows - brl.y))) {
+                readScreen((ScreenBox){0, line, scr.cols, 1}, buffer, SCR_TEXT);
+                for (i=0; i<scr.cols; i++)
+                  if ((buffer[i] != ' ') && (buffer[i] != 0))
                     break;
-                if(i==scr.cols){
-                  found = 1;
-                  break;
-                }
-                l += dir;
-            }
-            if(found) {
-              /* look for a non-blank line */
-              found = 0;
-              while(l>=0 && l <= scr.rows - brl.y) {
-                readScreen((ScreenBox){0, l, scr.cols, 1},
-                           buffer, SCR_TEXT);
-                for(i=0; i<scr.cols; i++)
-                  if(buffer[i] != ' ' && buffer[i] != 0)
+                if ((i == scr.cols) == findBlank) {
+                  if (!findBlank) {
+                    found = 1;
+                    p->winy = line;
+                    p->winx = 0;
                     break;
-                if(i<scr.cols){
-                  p->winy = l;
-                  p->winx = 0;
-                  found = 1;
-                  break;
+                  }
+                  findBlank = 0;
                 }
-                l += dir;
+                line += increment;
               }
-            }
-            if(!found) {
-              playTune (&tune_bounce);
+              if (!found) playTune(&tune_bounce);
             }
             break;
           }
@@ -961,43 +954,53 @@ main (int argc, char *argv[]) {
             }
             break;
           }
+          {
+            int increment;
+          case CMD_PRSEARCH:
+            increment = -1;
+            goto doSearch;
           case CMD_NXSEARCH:
-          case CMD_PRSEARCH: {
-            int dir = (keypress == CMD_NXSEARCH) ? +1 : -1;
-            int found = 0, caseSens = 0;
-            int l = p->winy + dir;
-            char buffer[scr.cols+1];
-            char *ptr;
-            if(!cut_buffer || strlen(cut_buffer) > scr.cols)
-              break;
-            ptr = cut_buffer;
-            while(*ptr)
-              if(isupper(*(ptr++))) {
-                caseSens = 1;
-                break;
-              }
-            while(l>=0 && l <= scr.rows - brl.y) {
-              readScreen((ScreenBox){0, l, scr.cols, 1},
-                         buffer, SCR_TEXT);
-              buffer[scr.cols] = 0;
-              if(!caseSens) {
-                ptr = buffer;
-                while(*ptr) {
-                  *ptr = tolower(*ptr);
-                  ptr++;
+            increment = 1;
+          doSearch:
+            if (cut_buffer) {
+              int length = strlen(cut_buffer);
+              int found = 0;
+              if (length <= scr.cols) {
+                int line = p->winy;
+                unsigned char buffer[scr.cols+1];
+                while ((line >= 0) && (line <= (scr.rows - brl.y))) {
+                  unsigned char *address = buffer;
+                  readScreen((ScreenBox){0, line, scr.cols, 1}, buffer, SCR_TEXT);
+                  buffer[scr.cols] = 0;
+                  if (line == p->winy) {
+                    if (increment < 0) {
+                      int end = p->winx + length - 1;
+                      if (end < scr.cols) buffer[end] = 0;
+                    } else {
+                      int start = p->winx + brl.x;
+                      if (start > scr.cols) start = scr.cols;
+                      address = buffer + start;
+                    }
+                  }
+                  if ((address = strstr(address, cut_buffer))) {
+                    if (increment < 0) {
+                      while (1) {
+                        unsigned char *next = strstr(address+1, cut_buffer);
+                        if (!next) break;
+                        address = next;
+                      }
+                    }
+                    p->winy = line;
+                    p->winx = (address - buffer) / brl.x * brl.x;
+                    found = 1;
+                    break;
+                  }
+                  line += increment;
                 }
               }
-              if((ptr = strstr(buffer, cut_buffer))) {
-                p->winy = l;
-                p->winx = (ptr-buffer) / brl.x * brl.x;
-                found = 1;
-                break;
-              }
-              l += dir;
-            }
-            if(!found) {
-              playTune (&tune_bounce);
-              playTune (&tune_bounce);
+              if (!found) playTune(&tune_bounce);
+            } else {
+              playTune(&tune_bad_command);
             }
             break;
           }
@@ -1096,7 +1099,7 @@ main (int argc, char *argv[]) {
                 break;
             playTune(&tune_bad_command);
             break;
-          case CMD_SND:
+          case CMD_TUNES:
             TOGGLEPLAY ( TOGGLE(prefs.sound) );        /* toggle sound on/off */
             break;
           case CMD_DISPMD:
@@ -1126,7 +1129,7 @@ main (int argc, char *argv[]) {
                     switchto(0);        /* screen 0 for help screen */
                   }
                 else        /* help screen selection failed */
-                    message ("can't find help", 0);
+                    message ("help not available", 0);
               }else
                 dispmd = selectDisplay(dispmd & ~HELP_SCRN);
             }
@@ -1234,6 +1237,9 @@ main (int argc, char *argv[]) {
           case CMD_SWITCHVT_NEXT:
             if (!switchVirtualTerminal(scr.no+1))
               playTune(&tune_bad_command);
+            break;
+          case CMD_LEARN:
+            learnCommands(refreshInterval, 10000);
             break;
           default: {
             int key = keypress & VAL_BLK_MASK;

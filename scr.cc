@@ -51,6 +51,7 @@ closeAllScreens (void) {
 }
 
 
+static int helpOpened;
 int
 selectDisplay (int disp) {
   static int dismd = LIVE_SCRN;        /* current mode */
@@ -61,6 +62,7 @@ selectDisplay (int disp) {
       if (disp & HELP_SCRN)
         /* set help mode: */
         {
+          if (!helpOpened) return dismd;
           current = &help;
           curscrn = HELP_SCRN;
           return (dismd |= HELP_SCRN);
@@ -202,13 +204,19 @@ closeRoutingScreen (void) {
 
 int
 initializeHelpScreen (const char *file) {
-  return help.open(file);
+  return helpOpened = help.open(file);
 }
 
 
 void
 setHelpPageNumber (short page) {
   help.setPageNumber(page);
+}
+
+
+short
+getHelpPageNumber (void) {
+  return help.getPageNumber();
 }
 
 

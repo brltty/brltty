@@ -306,7 +306,7 @@ dynamic-speech:
 static-speech:
 	$(MAKE) -C $(SPK_TARGET) speech.o
 
-brl_load.o: brl_load.c brl.h misc.h text.auto.h attrib.auto.h
+brl_load.o: brl_load.c brl.h misc.h message.h text.auto.h attrib.auto.h cmds.auto.h
 	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_DIR)"' $(BUILTIN_BRAILLE) -c brl_load.c 
 
 dynamic-braille: txt2hlp
@@ -370,11 +370,14 @@ check-braille: brltty dynamic-braille
 	   LD_RUN_PATH="./lib" ./brltty -v -q -N -e -f /dev/null -b $$lib 2>&1 || exit 1; \
 	done
 
-text.auto.h: BrailleTables/$(TEXTTRANS) tbl2hex Makefile
+text.auto.h: BrailleTables/$(TEXTTRANS) tbl2hex
 	./tbl2hex <$< >$@
 
-attrib.auto.h: BrailleTables/$(ATTRTRANS) tbl2hex Makefile
+attrib.auto.h: BrailleTables/$(ATTRTRANS) tbl2hex
 	./tbl2hex <$< >$@
+
+cmds.auto.h: brl.h cmds.awk
+	awk -f cmds.awk $< >$@
 
 txt2hlp: txt2hlp.c help.h
 	$(HOSTCC) $(LDFLAGS) -o $@ txt2hlp.c $(LDLIBS)

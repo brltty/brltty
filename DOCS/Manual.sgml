@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 2.99.4, January 2002
+  <date>Version 2.99.5, January 2002
   <abstract>
     Copyright &copy; 1995-2001 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -738,10 +738,10 @@ It must be run as root.
     <ref id="make-braille-device" name="make file"> is assumed.
 </descrip>
 
-The message ``This is BRLTTY!'' should appear on the braille display.
+The message <tt/command learn mode/ should appear on the braille display.
 Then, as each key (or key combination) on the display is pressed,
 a short message describing its BRLTTY function appears.
-This utility exits, and the message ``done'' appears,
+This utility exits, and the message <tt/done/ appears,
 if ten seconds pass without any key on the display being pressed.
 Note that some displays don't signal the driver
 and/or some drivers don't signal BRLTTY
@@ -1107,7 +1107,7 @@ via the <ref id="preferences-menu" name="preferences menu">.
   <tag>CAPBLINK<label id="command-CAPBLINK"></tag>
     Blink (turn on and off according to a predefined interval)
     capital (uppercase) letters.
-  <tag>SND<label id="command-SND"></tag>
+  <tag>TUNES<label id="command-TUNES"></tag>
     Play a short predefined tune (see <ref id="tunes" name="Alert Tunes">)
     whenever a significant event occurs.
     This feature is initially <bf/on/.
@@ -1538,7 +1538,7 @@ in order to show the precise column layout.
         (see the <ref id="command-DISPMD" name="DISPMD"> command).
       <tag/Dot 3/
         Alert tunes
-        (see the <ref id="command-SND" name="SND"> command).
+        (see the <ref id="command-TUNES" name="TUNES"> command).
       <tag/Dot 4/
         Visible cursor
         (see the <ref id="command-CSRVIS" name="CSRVIS"> command).
@@ -1888,7 +1888,7 @@ Notes:
         Play a short predefined tune.
     </descrip>
     This setting can also be changed with the
-    <ref id="command-SND" name="SND"> command.
+    <ref id="command-TUNES" name="TUNES"> command.
   <tag/Tune Device/
     Play alert tunes via:
     <descrip>
@@ -1993,7 +1993,7 @@ Notes:
                 (see the <ref id="command-DISPMD" name="DISPMD"> command).
               <tag/Dot 3/
                 Alert tunes are being played
-                (see the <ref id="command-SND" name="SND"> command).
+                (see the <ref id="command-TUNES" name="TUNES"> command).
               <tag/Dot 4/
                 The cursor is being shown
                 (see the <ref id="command-CSRVIS" name="CSRVIS"> command).

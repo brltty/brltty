@@ -17,6 +17,12 @@
 
 #include "config.tab.c"
 
+/* taken from ../brl_load.c */
+const CommandEntry commandTable[] = {
+  #include "../cmds.auto.h"
+  {EOF, NULL, NULL}
+};
+
 static char* filename = "stdin";
 
 static int yyerror (char* s)  /* Called by yyparse on error */
@@ -28,7 +34,16 @@ static int yyerror (char* s)  /* Called by yyparse on error */
 
 /* --------------------------------------------------------------- */
 
-static char* search_help(int token)
+static const char* get_command_description(int code)
+{
+  int i;
+  for(i=0;commandTable[i].name; i++)
+    if (commandTable[i].code == code)
+	return commandTable[i].description;
+  return "";
+}
+
+static char* search_help_text(int token)
 {
   int i;
   for(i=0;hlptxt[i].txt; i++)
@@ -188,7 +203,7 @@ void terminals(int help, int verbose)
 	      "# number: display two digits in one cell "
 	      "when status on horiz.display\n");
       for(i=0; i < STATMAX; i++) 
-	if(pm_terminals[tn].statshow[i] != STAT_empty)
+	if(pm_terminals[tn].statshow[i] != STAT_Empty)
 	  {
 	    int val = pm_terminals[tn].statshow[i];
 
@@ -209,7 +224,7 @@ void terminals(int help, int verbose)
 
 	    fprintf(fh, " %s # %s\n",
 		    search_stat(val),
-		    search_help(val + OFFS_STAT));
+		    search_help_text(val + OFFS_STAT));
 	  }
 
       fprintf(fh, "# Modifierkey and input mode dots - settings:\n");    
@@ -244,7 +259,7 @@ void terminals(int help, int verbose)
 
 	  printkeys(fh, &pm_terminals[tn].cmds[i], pm_terminals[tn].modifiers);
 	  fprintf(fh, " # %s",
-		  search_help(pm_terminals[tn].cmds[i].code & CMDMASK));
+		  get_command_description(pm_terminals[tn].cmds[i].code & CMDMASK));
 	  if (pm_terminals[tn].cmds[i].code > CMDMASK) 
 	    fprintf(fh, " - set %s", search_onoff(pm_terminals[tn].cmds[i].code) );
 	  fprintf(fh, "\n");

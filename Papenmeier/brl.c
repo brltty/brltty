@@ -190,64 +190,17 @@ resetDisplay (void) {
   }
 }
 
-static int
-awaitByte (int milliseconds) {
-  fd_set mask;
-  struct timeval timeout;
-
-  FD_ZERO(&mask);
-  FD_SET(brl_fd, &mask);
-
-  memset(&timeout, 0, sizeof(timeout));
-  timeout.tv_sec = milliseconds / 1000;
-  timeout.tv_usec = (milliseconds % 1000) * 1000;
-
-  while (1) {
-    switch (select(brl_fd+1, &mask, NULL, NULL, &timeout)) {
-      case -1:
-        if (errno == EINTR) continue;
-        LogError("Input wait");
-        return 0;
-      case 0:
-        LogPrint(LOG_WARNING, "Input wait timed out after %d %s.",
-                 milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
-        return 0;
-      default:
-        return 1;
-    }
-  }
-}
-
 #define RBF_ETX 1
 #define RBF_RESET 2
 static int
 readBytes (unsigned char *buffer, int offset, int count, int flags) {
-  while (count > 0) {
-    int amount = read(brl_fd, buffer+offset, count);
-    if (amount == -1) {
-      if (errno == EINTR) continue;
-      LogError("read");
-      return 0;
-    }
-    if (amount == 0) {
-      if (offset > 0) {
-        if (awaitByte(100)) continue;
-        LogPrint(LOG_WARNING, "Input byte missing at offset %d.", offset);
-        if (flags & RBF_RESET) resetDisplay();
-      }
-      return 0;
-    }
-    offset += amount;
-    count -= amount;
+  if (readChunk(brl_fd, buffer, &offset, count, 100)) {
+    if (!(flags & RBF_ETX)) return 1;
+    if (*(buffer+offset-1) == cETX) return 1;
+    LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
   }
-  if (flags & RBF_ETX) {
-    if (*(buffer+offset-1) != cETX) {
-      LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
-      if (flags & RBF_RESET) resetDisplay();
-      return 0;
-    }
-  }
-  return 1;
+  if ((offset > 0) && (flags & RBF_RESET)) resetDisplay();
+  return 0;
 }
 
 static int
@@ -341,7 +294,7 @@ identifyTerminal(brldim *brl) {
     LogPrint(LOG_DEBUG, "Auto-indentify #%d.", try);
     flushInput();
     if (!writeBytes(badPacket, sizeof(badPacket))) break;
-    if (awaitByte(200 * try)) {
+    if (awaitInput(brl_fd, 200*try)) {
       unsigned char identity[10];			/* answer has 10 chars */
       if (readBytes(identity, 0, sizeof(identity), RBF_ETX)) {
         if (identity[1] == cIdIdentify) {
@@ -409,7 +362,7 @@ identifyTerminal(brldim *brl) {
           LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
         }
       } else {
-        LogPrint(LOG_WARNING, "Identification packet incomplete.");
+        LogPrint(LOG_WARNING, "Malformed identification packet.");
       }
     } else {
       LogPrint(LOG_WARNING, "Identification packet not received.");
@@ -433,7 +386,7 @@ static void initbrlerror(brldim *brl)
 }
 
 static int 
-try_init (brldim *brl, const char *dev, unsigned int baud)
+try_init (brldim *brl, const char *dev, speed_t baud)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -452,13 +405,13 @@ try_init (brldim *brl, const char *dev, unsigned int baud)
   tcgetattr(brl_fd, &oldtio);	/* save current settings */
 
   memset(&newtio, 0, sizeof(newtio));
-  newtio.c_cflag = baud | CRTSCTS | CS8 | CLOCAL | CREAD;
+  newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
   newtio.c_iflag = IGNPAR;
   newtio.c_oflag = 0;		/* raw output */
   newtio.c_lflag = 0;		/* don't echo or generate signals */
   newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
   newtio.c_cc[VTIME] = 0;
-  tcsetattr(brl_fd, TCSANOW, &newtio);		/* activate new settings */
+  if (!resetSerialDevice(brl_fd, &newtio, baud)) return 0;		/* activate new settings */
 
   /* HACK - used with serial.c */
 #ifdef _SERIAL_C_
@@ -548,11 +501,11 @@ brl_writeStatus(const unsigned char* s) {
 
       unsigned char values[InternalStatusCellCount];
       memcpy(values, s, sizeof(values));
-      values[STAT_input] = input_mode;
+      values[STAT_InputMode] = input_mode;
 
       for (i=0; i < curr_stats; i++) {
 	int code = the_terminal->statshow[i];
-	if (code == STAT_empty)
+	if (code == STAT_Empty)
 	  cells[i] = 0;
 	else if (code >= OFFS_NUMBER)
 	  cells[i] = change_bits[portraitNumber(values[code-OFFS_NUMBER])];
@@ -591,13 +544,13 @@ brl_writeWindow (brldim *brl) {
 static int
 handle_command(int cmd)
 {
-  if (cmd == CMD_INPUTMODE) {
+  if (cmd == CMD_INPUT) {
     // translate toggle -> ON/OFF
     cmd |= input_mode? VAL_SWITCHOFF: VAL_SWITCHON;
   }
 
   switch(cmd) {
-    case CMD_INPUTMODE | VAL_SWITCHON:
+    case CMD_INPUT | VAL_SWITCHON:
       input_mode = 1;
       input_dots = 0;
       cmd = EOF;
@@ -605,7 +558,7 @@ handle_command(int cmd)
         LogPrint(LOG_DEBUG, "input mode on"); 
       }
       break;
-    case CMD_INPUTMODE | VAL_SWITCHOFF:
+    case CMD_INPUT | VAL_SWITCHOFF:
       input_mode = 0;
       cmd = EOF;
       if (debug_keys) {

@@ -38,7 +38,7 @@ brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../scr.h ../misc.h brl-cfg.h con
 config.tab.c: config.y
 	yacc -b config -v $<
 
-read_config.o: read_config.c config.tab.c cmd.h hlp.h brl-cfg.h
+read_config.o: read_config.c config.tab.c cmd.h hlp.h ../cmds.auto.h brl-cfg.h
 	$(HOSTCC) $(HOSTCFLAGS) $(PM_YACC_CFLAGS) -o $@ -c $<
 
 read_config: read_config.o

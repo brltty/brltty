@@ -38,14 +38,14 @@ B8 B3     toggle show attributes
 B8 B6     toggle six-dot braille
 B8 B7     toggle alert tunes
 B7        toggle frozen screen
-B7 B1     toggle blinking capitals
-B7 B2     toggle blinking cursor
-B7 B3     toggle blinking attributes
-B7 B6     toggle sliding window
+B7 B1     toggle preferences menu
+B7 B2     load saved preferences
+B7 B3     save preferences
+B7 B6     toggle info mode
 B6        toggle display attributes
-B6 B1     toggle preferences menu
-B6 B2     load saved preferences
-B6 B3     save preferences
+B6 B1     toggle skip identical lines
+B6 B2     toggle skip blank windows
+B6 B3     toggle sliding window
 
 Speech Control:
 B2 B3 UP  stop speaking
@@ -54,7 +54,7 @@ B2 B3 DN  say current line
 Routing Key Functions:
 RK        bring cursor to character
 B1 RK     bring left end of window to column
-B2 RK     set mark
+B2 RK     describe character
 B3 RK     append to cut buffer from character
 B4 RK     start new cut buffer from character
 B4 B5     paste cut buffer at cursor position
@@ -62,5 +62,5 @@ UP RK     go up to line not indented more than column
 DN RK     go down to line not indented more than column
 B5 RK     rectangular cut to character
 B6 RK     linear cut to character
-B7 RK     go to mark
-B8 RK     describe character
+B7 RK     set mark
+B8 RK     go to mark

@@ -381,68 +381,58 @@ brl_initialize (char **parameters, brldim *brl, const char *device) {
 	 memset(&newSettings, 0, sizeof(newSettings));
 	 newSettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
 	 newSettings.c_iflag = IGNPAR;
-	 cfsetispeed(&newSettings, B38400);
-	 cfsetospeed(&newSettings, B38400);
-	 if (tcsetattr(fileDescriptor, TCSANOW, &newSettings) != -1) {
-	    if (tcflush(fileDescriptor, TCIOFLUSH) != -1) {
-	       unsigned char request[] = {BNO_BEGIN, BNO_DESCRIBE};
-	       if (safe_write(fileDescriptor, request, sizeof(request)) != -1) {
-		  unsigned char response[3];
-		  int count;
-		  delay(500);
-		  if ((count = safe_read(fileDescriptor, response, sizeof(response))) == sizeof(response)) {
-		     if (response[0] == 0X86) {
-			statusCells = response[1];
-			brl->x = response[2];
-			brl->y = 1;
-			if ((statusCells == 5) && (brl->x == 30)) {
-			   statusCells -= 2;
-			   brl->x += 2;
-			}
-			dataCells = brl->x * brl->y;
-			cellCount = statusCells + dataCells;
-			if ((cellBuffer = malloc(cellCount))) {
-			   memset(cellBuffer, 0, cellCount);
-			   statusArea = cellBuffer;
-			   dataArea = statusArea + statusCells;
-			   if ((outputBuffer = malloc(2 + (cellCount * 2)))) {
-			      if ((brl->disp = malloc(dataCells))) {
-				 memset(brl->disp, 0, dataCells);
-				 refreshCells();
-				 persistentKeyboardMode = KBM_NAVIGATE;
-				 temporaryKeyboardMode = persistentKeyboardMode;
-				 persistentRoutingOperation = CR_ROUTE;
-				 temporaryRoutingOperation = persistentRoutingOperation;
-				 adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
-				 return;
-			      }
-			      free(outputBuffer);
-			   } else {
-			      LogError("output buffer allocation");
-			   }
-			   free(cellBuffer);
-			} else {
-			   LogError("cell buffer allocation");
-			}
-		     } else {
-			LogPrint(LOG_ERR, "Unexpected BrailleNote description: %2.2X %2.2X %2.2X",
-				 response[0], response[1], response[2]);
-		     }
-		  } else if (count == -1) {
-		     LogError("BrailleNote read");
-		  } else {
-		     LogPrint(LOG_ERR, "Unexpected BrailleNote description size: %d", count);
-		  }
-	       } else {
-		  LogError("BrailleNote write");
-	       }
-	    } else {
-	       LogError("BrailleNote flush");
-	    }
-	    tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
-	 } else {
-	    LogError("BrailleNote attribute set");
+	 while (resetSerialDevice(fileDescriptor, &newSettings, B38400)) {
+            unsigned char request[] = {BNO_BEGIN, BNO_DESCRIBE};
+            if (safe_write(fileDescriptor, request, sizeof(request)) != -1) {
+               if (awaitInput(fileDescriptor, 1000)) {
+                  unsigned char response[3];
+                  int offset = 0;
+                  if (readChunk(fileDescriptor, response, &offset, sizeof(response), 100)) {
+                     if (response[0] == BNI_DESCRIBE) {
+                        statusCells = response[1];
+                        brl->x = response[2];
+                        brl->y = 1;
+                        if ((statusCells == 5) && (brl->x == 30)) {
+                           statusCells -= 2;
+                           brl->x += 2;
+                        }
+                        dataCells = brl->x * brl->y;
+                        cellCount = statusCells + dataCells;
+                        if ((cellBuffer = malloc(cellCount))) {
+                           memset(cellBuffer, 0, cellCount);
+                           statusArea = cellBuffer;
+                           dataArea = statusArea + statusCells;
+                           if ((outputBuffer = malloc(2 + (cellCount * 2)))) {
+                              if ((brl->disp = malloc(dataCells))) {
+                                 memset(brl->disp, 0, dataCells);
+                                 refreshCells();
+                                 persistentKeyboardMode = KBM_NAVIGATE;
+                                 temporaryKeyboardMode = persistentKeyboardMode;
+                                 persistentRoutingOperation = CR_ROUTE;
+                                 temporaryRoutingOperation = persistentRoutingOperation;
+                                 adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
+                                 return;
+                              }
+                              free(outputBuffer);
+                           } else {
+                              LogError("Output buffer allocation");
+                           }
+                           free(cellBuffer);
+                        } else {
+                           LogError("Cell buffer allocation");
+                        }
+                     } else {
+                        LogPrint(LOG_ERR, "Unexpected BrailleNote description: %02X %02X %02X",
+                                 response[0], response[1], response[2]);
+                     }
+                  }
+               }
+            } else {
+               LogError("Write");
+            }
+            delay(1000);
 	 }
+         tcsetattr(fileDescriptor, TCSANOW, &oldSettings);
       } else {
 	 LogError("BrailleNote attribute query");
       }
@@ -759,6 +749,8 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
 	 return CMD_NOOP;
       case BNC_BAR:
          return CMD_CSRJMP_VERT;
+      case BNC_QUESTION:
+         return CMD_LEARN;
       case (BND_2 | BND_3 | BND_5 | BND_6):
 	 return VAL_PASSKEY + VPK_TAB;
       case (BND_2 | BND_3):

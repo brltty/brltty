@@ -204,6 +204,91 @@ strdupWrapper (const char *string) {
    return address;
 }
 
+int
+setSerialDevice (int file, struct termios *attributes, speed_t baud) {
+  if (cfsetispeed(attributes, baud) != -1) {
+    if (cfsetospeed(attributes, baud) != -1) {
+      if (tcsetattr(file, TCSANOW, attributes) != -1) {
+        return 1;
+      } else {
+        LogError("Attributes set");
+      }
+    } else {
+      LogError("Output speed set");
+    }
+  } else {
+    LogError("Input speed set");
+  }
+  return 0;
+}
+
+int
+resetSerialDevice (int file, struct termios *attributes, speed_t baud) {
+  if (setSerialDevice(file, attributes, B0)) {
+    if (tcflush(file, TCIOFLUSH) != -1) {
+      if (setSerialDevice(file, attributes, baud)) {
+        return 1;
+      }
+    } else {
+      LogError("Flush");
+    }
+  }
+  return 0;
+}
+
+int
+awaitInput (int file, int milliseconds) {
+  fd_set mask;
+  struct timeval timeout;
+
+  FD_ZERO(&mask);
+  FD_SET(file, &mask);
+
+  memset(&timeout, 0, sizeof(timeout));
+  timeout.tv_sec = milliseconds / 1000;
+  timeout.tv_usec = (milliseconds % 1000) * 1000;
+
+  while (1) {
+    switch (select(file+1, &mask, NULL, NULL, &timeout)) {
+      case -1:
+        if (errno == EINTR) continue;
+        LogError("Input wait");
+        return 0;
+      case 0:
+        LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
+                 milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+        return 0;
+      default:
+        return 1;
+    }
+  }
+}
+
+int
+readChunk (int file, unsigned char *buffer, int *offset, int count, int timeout) {
+  while (count > 0) {
+    int amount = read(file, buffer+*offset, count);
+    if (amount == -1) {
+      if (errno == EINTR) continue;
+      if (errno == EAGAIN) goto noInput;
+      if (errno == EWOULDBLOCK) goto noInput;
+      LogError("Read");
+      return 0;
+    }
+    if (amount == 0) {
+    noInput:
+      if (*offset) {
+        if (awaitInput(file, timeout)) continue;
+        LogPrint(LOG_WARNING, "Input byte missing at offset %d.", *offset);
+      }
+      return 0;
+    }
+    *offset += amount;
+    count -= amount;
+  }
+  return 1;
+}
+
 void
 setCloseOnExec (int fileDescriptor) {
    fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC);
@@ -261,49 +346,6 @@ done:
   free(buff_addr);
 
   return ok;
-}
-
-// Read data safely by continually retrying the read system call until all
-// of the requested data has been transferred or an end-of-file is encountered.
-// This routine is a wrapper for the read system call which is fully compatible
-// with it except that the caller does not need to handle the various
-// scenarios which can occur when a signal interrupts the system call.
-size_t safe_read (int fd, unsigned char *buffer, size_t length)
-{
-  unsigned char *address = buffer;
-
-  // Keep looping while there's still some data to be read.
-  while (length > 0)
-    {
-      // Read the rest of the data.
-      size_t count = read(fd, address, length);
-
-      // Handle errors.
-      if (count == -1)
-        {
-          // If the system call was interrupted by a signal, then restart it.
-          if (errno == EINTR)
-            {
-              continue;
-            }
-
-          // Return all other errors to the caller.
-          return -1;
-        }
-
-      // Stop looping if the end of the file has been reached.
-      if (count == 0)
-        break;
-
-      // In case the system call was interrupted by a signal
-      // after some, but not all, of the data was read,
-      // point to the remainder of the buffer and try again.
-      address += count;
-      length -= count;
-    }
-
-  // Return the number of bytes which were actually read.
-  return address - buffer;
 }
 
 // Write data safely by continually retrying the write system call until

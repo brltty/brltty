@@ -284,8 +284,8 @@ static void
 brl_writeStatus (const unsigned char *status) {
    if (isOnline()) {
       if (status[FirstStatusCell] == FSC_GENERIC) {
-         unsigned char row = status[STAT_csrrow];
-         unsigned char column = status[STAT_csrcol];
+         unsigned char row = status[STAT_CsrRow];
+         unsigned char column = status[STAT_CsrCol];
          row = MAX(1, MIN(row, screenHeight)) - 1;
          column = MAX(1, MIN(column, screenWidth)) - 1;
          if (deviceStatus < DEV_READY) {

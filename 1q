@@ -23,7 +23,6 @@
 #include <dlfcn.h>
 
 #include "misc.h"
-#include "message.h"
 #include "brl.h"
 
 #define BRLSYMBOL noBraille
@@ -65,7 +64,7 @@ unsigned char attribtrans[0X100] = {
  */
 unsigned char statcells[MAXNSTATCELLS];        /* status cell buffer */
 
-const CommandEntry commandTable[] = {
+const CommandEntry commandTablew[] = {
   #include "cmds.auto.h"
   {EOF, NULL, NULL}
 };
@@ -146,49 +145,4 @@ int listBrailleDrivers (void) {
     fwrite(buf, cnt, 1, stderr);
   close(fd);
   return 1;
-}
-
-void
-learnCommands (int poll, int timeout) {
-  int timer = 0;
-  message("command learn mode", MSG_NODELAY);
-  while (1) {
-    int key = braille->read(CMDS_SCREEN);
-    if (key == EOF) {
-      if (timer > timeout) break;
-      delay(poll);
-      timer += poll;
-    } else {
-      int blk = key & VAL_BLK_MASK;
-      int arg = key & VAL_ARG_MASK;
-      int cmd = blk | arg;
-      unsigned char buffer[0X100];
-      const CommandEntry *candidate = NULL;
-      const CommandEntry *last = NULL;
-      const CommandEntry *command = commandTable;
-      if (cmd == CMD_LEARN) return;
-      while (command->name) {
-        if ((command->code & VAL_BLK_MASK) == blk) {
-          if (!last || (last->code < command->code)) last = command;
-          if (!candidate || (candidate->code < cmd)) candidate = command;
-        }
-        ++command;
-      }
-      if (candidate && (candidate->code != cmd))
-        if ((blk == 0) || (candidate->code < last->code))
-          candidate = NULL;
-      if (!candidate) {
-        snprintf(buffer, sizeof(buffer), "unknown: %06X", key);
-      } else if (candidate == last) {
-        snprintf(buffer, sizeof(buffer), "%s[%d]: %s",
-                 candidate->name, cmd-last->code+1, candidate->description);
-      } else {
-        snprintf(buffer, sizeof(buffer), "%s: %s",
-                 candidate->name, candidate->description);
-      }
-      message(buffer, MSG_NODELAY);
-      timer = 0;
-    }
-  }
-  message("done", 0);
 }

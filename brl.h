@@ -63,18 +63,18 @@ typedef enum {
   CMD_BOT_LEFT /* go to bottom-left corner */,
   CMD_PRPGRPH /* go to last line of previous paragraph */,
   CMD_NXPGRPH /* go to first line of next paragraph */,
-  CMD_PRPROMPT /* go to previous prompt */,
-  CMD_NXPROMPT /* go to next prompt */,
-  CMD_PRSEARCH /* search up for content of cut buffer */,
-  CMD_NXSEARCH /* search down for content of cut buffer */,
+  CMD_PRPROMPT /* go to previous command prompt */,
+  CMD_NXPROMPT /* go to next command prompt */,
+  CMD_PRSEARCH /* search backward for content of cut buffer */,
+  CMD_NXSEARCH /* search forward for content of cut buffer */,
   
   /* horizontal motion */
   CMD_CHRLT /* go left one character */,
   CMD_CHRRT /* go right one character */,
-  CMD_HWINLT /* go left one half window */,
-  CMD_HWINRT /* go right one half window */,
-  CMD_FWINLT /* go left one full window */,
-  CMD_FWINRT /* go right one full window */,
+  CMD_HWINLT /* go left half a window */,
+  CMD_HWINRT /* go right half a window */,
+  CMD_FWINLT /* go left one window */,
+  CMD_FWINRT /* go right one window */,
   CMD_FWINLTSKIP /* go left to non-blank window */,
   CMD_FWINRTSKIP /* go right to non-blank window */,
   CMD_LNBEG /* go to beginning of line */,
@@ -82,55 +82,56 @@ typedef enum {
   
   /* implicit motion */
   CMD_HOME /* go to cursor */,
-  CMD_BACK /* go to last motion */,
+  CMD_BACK /* return to destination of most recent explicit motion */,
   
   /* feature activation and deactivation */
-  CMD_FREEZE /* freeze/unfreeze screen */,
+  CMD_FREEZE /* toggle screen frozen/unfrozen */,
   CMD_DISPMD /* toggle display attributes/text */,
   CMD_SIXDOTS /* toggle text style 6-dot/8-dot */,
   CMD_SLIDEWIN /* toggle sliding window on/off */,
   CMD_SKPIDLNS /* toggle skipping of identical lines on/off */,
   CMD_SKPBLNKWINS /* toggle skipping of blank windows on/off */,
   CMD_CSRVIS /* toggle cursor visibility on/off */,
-  CMD_CSRHIDE /* toggle quick hide of cursor */,
+  CMD_CSRHIDE /* toggle hide of cursor on/off */,
   CMD_CSRTRK /* toggle cursor tracking on/off */,
   CMD_CSRSIZE /* toggle cursor style underline/block */,
   CMD_CSRBLINK /* toggle cursor blinking on/off */,
   CMD_ATTRVIS /* toggle attribute underlining on/off */,
   CMD_ATTRBLINK /* toggle attribute blinking on/off */,
   CMD_CAPBLINK /* toggle capital letter blinking on/off */,
-  CMD_SND /* toggle alert tunes on/off */,
+  CMD_TUNES /* toggle alert tunes on/off */,
  
   /* mode selection */
-  CMD_HELP /* display driver help */,
-  CMD_INFO /* display status summary */,
+  CMD_HELP /* toggle help mode */,
+  CMD_INFO /* toggle info mode */,
   
   /* preference setting */
   CMD_PREFMENU /* present preferences menu */,
-  CMD_PREFSAVE /* save preferences */,
-  CMD_PREFLOAD /* reload preferences */,
+  CMD_PREFSAVE /* save current preferences */,
+  CMD_PREFLOAD /* restore saved preferences */,
   
   /* menu navigation */
   CMD_MENU_FIRST_ITEM /* go to first item in menu */,
   CMD_MENU_LAST_ITEM /* go to last item in menu */,
   CMD_MENU_PREV_ITEM /* go to previous item in menu */,
   CMD_MENU_NEXT_ITEM /* go to next item in menu */,
-  CMD_MENU_PREV_SETTING /* change value to previous choice */,
-  CMD_MENU_NEXT_SETTING /* change value to next choice */,
+  CMD_MENU_PREV_SETTING /* change value of current item in menu to previous choice */,
+  CMD_MENU_NEXT_SETTING /* change value of current item in menu to next choice */,
  
   /* speech */
   CMD_SAY /* speak current line */,
   CMD_SAYALL /* speak rest of screen */,
   CMD_MUTE /* stop speaking immediately */,
-  CMD_SPKHOME /* goto current/last speech position */,
+  CMD_SPKHOME /* go to current/last speech position */,
   
   /* virtual terminal switching */
   CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
   CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
   
   /* miscellaneous */
-  CMD_CSRJMP_VERT /* route cursor to top line of window */,
+  CMD_CSRJMP_VERT /* vertically route cursor to top line of window */,
   CMD_PASTE /* insert cut buffer at cursor */,
+  CMD_LEARN /* enter key learn mode */,
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
   
@@ -151,13 +152,13 @@ typedef enum {
  * used during automatic help file generation.
  */
 #define CR_ROUTE     0X100   /* route cursor to character */
-#define CR_CUTBEGIN  0X200 /* begin cut area at character */
-#define CR_CUTAPPEND 0X300 /* append cut area at character */
-#define CR_CUTRECT   0X400 /* rectangular cut to area */
+#define CR_CUTBEGIN  0X200 /* start new cut buffer from character */
+#define CR_CUTAPPEND 0X300 /* append to cut buffer from character */
+#define CR_CUTRECT   0X400 /* rectangular cut to character */
 #define CR_CUTLINE   0X500 /* linear cut to character */
-#define CR_SWITCHVT  0X600 /* switch virtual terminal */
-#define CR_PRINDENT  0X700 /* find previous line not more indented than routing key indicates */
-#define CR_NXINDENT  0X800 /* find next line not more indented than routing key indicates */
+#define CR_SWITCHVT  0X600 /* switch to virtual terminal */
+#define CR_PRINDENT  0X700 /* go to previous line not more indented than column */
+#define CR_NXINDENT  0X800 /* go to next line not more indented than column */
 #define CR_DESCCHAR  0X900 /* describe character */
 #define CR_SETLEFT   0XA00 /* bring left of window to character */
 #define CR_SETMARK   0XB00 /* mark current window position */
@@ -215,25 +216,25 @@ typedef enum {
   #define FSC_GENERIC 0XFF
 
   /* numbers */
-  STAT_brlcol /* current line number */,
-  STAT_brlrow /* current line number */,
-  STAT_csrcol /* cursor position - column */,
-  STAT_csrrow /* cursor position - row */,
-  STAT_scrnum /* virtual screen number */,
+  STAT_BrlCol /* screen column where left of braille window is */,
+  STAT_BrlRow /* screen row where top of braille window is */,
+  STAT_CsrCol /* screen column where cursor is */,
+  STAT_CsrRow /* screen row where cursor is */,
+  STAT_ScrNum /* virtual screen number */,
 
   /* flags */
-  STAT_tracking /* cursor tracking */,
-  STAT_dispmode /* dispmode (text / attribut) */,
-  STAT_frozen /* screen frozen */,
-  STAT_visible /* cursor visible */,
-  STAT_size /* cursor size */,
-  STAT_blink /* cursor blink */,
-  STAT_capitalblink /* capital letter blink */,
-  STAT_dots /* 6 or 8 dots */,
-  STAT_sound /* sound */,
-  STAT_skip /* skip identical lines */,
-  STAT_underline /* attribute underlining */,
-  STAT_blinkattr /* blinking of attribute underlining */,
+  STAT_TrkCsr /* cursor tracking */,
+  STAT_AttrDisp /* attributes display */,
+  STAT_FrzScr /* frozen screen */,
+  STAT_VisCsr /* visible cursor */,
+  STAT_BlkCsr /* block cursor */,
+  STAT_BlnkCsr /* blinking cursor */,
+  STAT_BlnkCaps /* blinking capital letters */,
+  STAT_SixDot /* six-dot braille */,
+  STAT_AlertTunes /* alert tunes */,
+  STAT_IdentLines /* skip identical lines */,
+  STAT_VisAttr /* visible attributes underline */,
+  STAT_BlnkAttr /* blinking attributes underline */,
 
   StatusCellCount /* must be last */
 } StatusCell;
@@ -292,6 +293,14 @@ extern unsigned char attribtrans[0X100]; /* current attributes to braille transl
 
 #define MAXNSTATCELLS 22
 extern unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
+
+typedef struct {
+  int code;
+  const char *name;
+  const char *description;
+} CommandEntry;
+extern const CommandEntry commandTable[];
+extern void learnCommands (int poll, int timeout);
 
 extern void showDotPattern (unsigned char dots, unsigned char duration);
 

@@ -35,11 +35,11 @@
 
 #include "../brl.h"
 typedef enum {
-  CMD_INPUTMODE = DriverCommandCount /* toggle input mode */,
+  CMD_INPUT = DriverCommandCount /* toggle input mode */,
   CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
 } InternalDriverCommands;
 typedef enum {
-  STAT_input = StatusCellCount /* input mode */,
+  STAT_InputMode = StatusCellCount /* input mode */,
   InternalStatusCellCount
 } InternalStatusCell;
 #include "brl-cfg.h"

@@ -45,29 +45,36 @@ static unsigned char HandyBrailleStart[] = {0X01};	/* general header to display 
 static unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to display braille */
 static unsigned char BookwormStop[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
+typedef struct {
+  unsigned long int keys;
+  char column;
+  char status;
+} Keys;
+static Keys currentKeys, pressedKeys, nullKeys;
+static int inputMode;
 
 /* Braille display parameters */
 typedef int (GetCommandHandler) (DriverCommandContext context);
 static GetCommandHandler getHandyCommand;
 static GetCommandHandler getBookwormCommand;
-typedef int (InterpretCommandHandler) (DriverCommandContext context, int &command);
+typedef int (InterpretCommandHandler) (DriverCommandContext context, const Keys &keys, int &command);
 static InterpretCommandHandler interpretModularCommand;
 static InterpretCommandHandler interpretBrailleWaveCommand;
 static InterpretCommandHandler interpretBrailleStarCommand;
 typedef struct {
-  const char *Name;
-  int ID;
-  int Columns;
-  int StatusCells;
-  GetCommandHandler *GetCommand;
-  InterpretCommandHandler *InterpretCommand;
-  int HelpPage;
-  unsigned char *BrailleStartAddress;
-  unsigned char BrailleStartLength;
-  unsigned char *BrailleEndAddress;
-  unsigned char BrailleEndLength;
-  unsigned char *StopAddress;
-  unsigned char StopLength;
+  const char *name;
+  int identifier;
+  int columns;
+  int statusCells;
+  GetCommandHandler *getCommand;
+  InterpretCommandHandler *interpretCommand;
+  int helpPage;
+  unsigned char *brailleStartAddress;
+  unsigned char brailleStartLength;
+  unsigned char *brailleEndAddress;
+  unsigned char brailleEndLength;
+  unsigned char *stopAddress;
+  unsigned char stopLength;
 } ModelDescription;
 static const ModelDescription Models[] = {
   {
@@ -209,14 +216,6 @@ static unsigned long int stateTimer = 0;
 static unsigned int retryCount = 0;
 static unsigned int updateRequired = 0;
 
-typedef struct {
-  unsigned long int keys;
-  unsigned short int status;
-  char route;
-} Keys;
-static Keys currentKeys, pressedKeys, NullKeys;
-static int inputMode;
-
 /* common key constants */
 #define KEY_RELEASE 0X80
 #define KEY_ROUTING 0X20
@@ -303,19 +302,18 @@ awaitData (int milliseconds) {
 }
 
 static int
-readData (unsigned char *data, int length) {
-  int count = read(fileDescriptor, data, length);
-  if (count == length) return 1;
-  return 0;
+readBytes (unsigned char *bytes, int count) {
+  int offset = 0;
+  return readChunk(fileDescriptor, bytes, &offset, count, 100);
 }
 
 static int
 readByte (unsigned char &byte) {
-  return readData(&byte, 1);
+  return readBytes(&byte, 1);
 }
 
 static int
-writeData (unsigned char *data, int length) {
+writeBytes (unsigned char *data, int length) {
   // LogBytes("Write", data, length);
   int count = safe_write(fileDescriptor, data, length);
   if (count == length) return 1;
@@ -329,73 +327,62 @@ writeData (unsigned char *data, int length) {
 
 static void
 brl_initialize (char **parameters, brldim *brl, const char *dev) {
-  brldim res;			/* return result */
-  struct termios newtio;	/* new terminal settings */
-  int ModelID = 0;
-  unsigned char buffer[sizeof(HandyDescription) + 1];
+  int modelIdentifier = 0;
 
+  brldim res;			/* return result */
   res.disp = rawData = prevData = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
   if (!dev) dev = defaultDevice;
-  fileDescriptor = open (dev, O_RDWR | O_NOCTTY);
-  if (fileDescriptor < 0) {
-    LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
+  if ((fileDescriptor = open(dev, O_RDWR|O_NOCTTY)) == -1) {
+    LogPrint(LOG_ERR, "Open error: %s: %s", dev, strerror(errno));
     goto failure;
   }
+  tcgetattr(fileDescriptor, &originalAttributes);	/* save current settings */
 
-  tcgetattr (fileDescriptor, &originalAttributes);	/* save current settings */
-  /* Set flow control and 8n1, enable reading */
-  newtio.c_cflag = (CLOCAL|PARODD|PARENB|CREAD|CS8);
-
-  /* Ignore bytes with parity errors and make terminal raw and dumb */
+  struct termios newtio;	/* new terminal settings */
+  newtio.c_cflag = CLOCAL | PARODD | PARENB | CREAD|CS8;
   newtio.c_iflag = IGNPAR; 
-  newtio.c_oflag = 0;		/* raw output */
-  newtio.c_lflag = 0;		/* don't echo or generate signals */
-  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
+  newtio.c_oflag = 0;
+  newtio.c_lflag = 0;
+  newtio.c_cc[VMIN] = 0;
   newtio.c_cc[VTIME] = 0;
-  do
-    {
-      if(
-	 cfsetispeed(&newtio,B0) ||
-	 cfsetospeed(&newtio,B0) ||
-	 tcsetattr(fileDescriptor,TCSANOW,&newtio) ||
-	 tcflush(fileDescriptor, TCIOFLUSH) ||
-	 cfsetispeed(&newtio,B19200) ||
-	 cfsetospeed(&newtio,B19200) ||
-	 tcsetattr(fileDescriptor,TCSANOW,&newtio)
-	 ) {
-	LogPrint(LOG_ERR,"Port initialization failed: %s: %s",dev,strerror(errno));
-	return;
+
+  while (1) {
+    if (!resetSerialDevice(fileDescriptor, &newtio, B19200)) return;
+    /* autodetecting MODEL */
+    if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
+      if (awaitInput(fileDescriptor, 1000)) {
+        unsigned char buffer[sizeof(HandyDescription) + 1];
+        if (readBytes(buffer, sizeof(buffer))) {
+          if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
+            modelIdentifier = buffer[sizeof(HandyDescription)];
+            break;
+          }
+        }
       }
-      usleep(500);
-      /* autodetecting MODEL */
-      writeData(HandyDescribe, sizeof(HandyDescribe));
-      if (readData(buffer, sizeof(buffer)))
-	{
-	  if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0)
-	    ModelID = buffer[sizeof(HandyDescription)];
-	}
     }
-  while (ModelID == 0);
+    delay(1000);
+  }
+
   /* Find out which model we are connected to... */
   for( model = Models;
-       model->Name && model->ID != ModelID;
+       model->name && model->identifier != modelIdentifier;
        model++ );
-  if( !model->Name ) {
+  if( !model->name ) {
     /* Unknown model */
-    LogPrint( LOG_ERR, "*** Detected unknown HandyTech model with ID %d.", ModelID );
+    LogPrint( LOG_ERR, "*** Detected unknown HandyTech model with ID %d.", modelIdentifier );
     LogPrint( LOG_WARNING, "*** Please fix Models[] in HandyTech/brlmain.cc and mail the maintainer." );
     goto failure;
   }
   LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
-           model->Name,
-           model->Columns, (model->Columns == 1)? "cell": "cells",
-           model->StatusCells, (model->StatusCells == 1)? "cell": "cells");
+           model->name,
+           model->columns, (model->columns == 1)? "cell": "cells",
+           model->statusCells, (model->statusCells == 1)? "cell": "cells");
 
   /* Set model params... */
-  setHelpPageNumber( model->HelpPage );		/* position in the model list */
-  res.x = model->Columns;			/* initialise size of display */
+  setHelpPageNumber( model->helpPage );		/* position in the model list */
+  res.x = model->columns;			/* initialise size of display */
   res.y = BRLROWS;
 
   /* Allocate space for buffers */
@@ -407,14 +394,14 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
     goto failure;
   }
 
-  NullKeys.keys = 0;
-  NullKeys.status = 0;
-  NullKeys.route = -1;
-  currentKeys = pressedKeys = NullKeys;
+  nullKeys.keys = 0;
+  nullKeys.column = -1;
+  nullKeys.status = -1;
+  currentKeys = pressedKeys = nullKeys;
   inputMode = 0;
 
-  memset(rawStatus, 0, model->StatusCells);
-  memset(rawData, 0, model->Columns);
+  memset(rawStatus, 0, model->statusCells);
+  memset(rawData, 0, model->columns);
 
   currentState = BDS_OFF;
   stateTimer = 0;
@@ -444,8 +431,8 @@ failure:
 
 static void
 brl_close (brldim *brl) {
-  if (model->StopLength) {
-    writeData(model->StopAddress, model->StopLength);
+  if (model->stopLength) {
+    writeBytes(model->stopAddress, model->stopLength);
   }
 
   free(brl->disp);
@@ -466,27 +453,27 @@ brl_close (brldim *brl) {
 static int
 updateBrailleCells (void) {
   if (updateRequired && (currentState == BDS_READY)) {
-    unsigned char buffer[model->BrailleStartLength + model->StatusCells + model->Columns + model->BrailleEndLength];
+    unsigned char buffer[model->brailleStartLength + model->statusCells + model->columns + model->brailleEndLength];
     int count = 0;
 
-    if (model->BrailleStartLength) {
-      memcpy(buffer+count, model->BrailleStartAddress, model->BrailleStartLength);
-      count += model->BrailleStartLength;
+    if (model->brailleStartLength) {
+      memcpy(buffer+count, model->brailleStartAddress, model->brailleStartLength);
+      count += model->brailleStartLength;
     }
 
-    memcpy(buffer+count, rawStatus, model->StatusCells);
-    count += model->StatusCells;
+    memcpy(buffer+count, rawStatus, model->statusCells);
+    count += model->statusCells;
 
-    memcpy(buffer+count, rawData, model->Columns);
-    count += model->Columns;
+    memcpy(buffer+count, rawData, model->columns);
+    count += model->columns;
 
-    if (model->BrailleEndLength) {
-      memcpy(buffer+count, model->BrailleEndAddress, model->BrailleEndLength);
-      count += model->BrailleEndLength;
+    if (model->brailleEndLength) {
+      memcpy(buffer+count, model->brailleEndAddress, model->brailleEndLength);
+      count += model->brailleEndLength;
     }
 
     // LogBytes("Write", buffer, count);
-    if (!writeData(buffer, count)) return 0;
+    if (!writeBytes(buffer, count)) return 0;
     setState(BDS_WRITING);
     updateRequired = 0;
   }
@@ -495,8 +482,8 @@ updateBrailleCells (void) {
 
 static void
 brl_writeWindow (brldim *brl) {
-  if (memcmp(brl->disp, prevData, model->Columns) != 0) {
-    for (int i=0; i<model->Columns; ++i) {
+  if (memcmp(brl->disp, prevData, model->columns) != 0) {
+    for (int i=0; i<model->columns; ++i) {
       rawData[i] = TransTable[(prevData[i] = brl->disp[i])];
     }
     updateRequired = 1;
@@ -506,8 +493,8 @@ brl_writeWindow (brldim *brl) {
 
 static void
 brl_writeStatus (const unsigned char *st) {
-  if (memcmp(st, prevStatus, model->StatusCells) != 0) {	/* only if it changed */
-    for (int i=0; i<model->StatusCells; ++i) {
+  if (memcmp(st, prevStatus, model->statusCells) != 0) {	/* only if it changed */
+    for (int i=0; i<model->statusCells; ++i) {
       rawStatus[i] = TransTable[(prevStatus[i] = st[i])];
     }
     updateRequired = 1;
@@ -515,7 +502,8 @@ brl_writeStatus (const unsigned char *st) {
 }
 
 static int
-getHandyKey (int &release) {
+getHandyCommand (DriverCommandContext context) {
+  int release = 1;
   unsigned char byte;
   while (readByte(byte)) {
     if (byte == 0X7E) {
@@ -523,56 +511,116 @@ getHandyKey (int &release) {
       continue;
     }
     if ((release = ((byte & KEY_RELEASE) != 0))) byte &= ~KEY_RELEASE;
+    currentKeys.column = -1;
+    currentKeys.status = -1;
 
-    currentKeys.route = -1;
     if ((byte >= KEY_ROUTING) &&
-        (byte < (KEY_ROUTING + model->Columns))) {
-      if (release) return 0;
-      currentKeys.route = byte - KEY_ROUTING;
-      pressedKeys = currentKeys;
-      return 1;
+        (byte < (KEY_ROUTING + model->columns))) {
+      if (!release) {
+        currentKeys.column = byte - KEY_ROUTING;
+        int command;
+        if (model->interpretCommand(context, currentKeys, command)) {
+          pressedKeys = nullKeys;
+          return command;
+        }
+      }
+      break;
     }
 
-    if (!release) {
-      currentKeys.keys |= KEY(byte);
-      pressedKeys = currentKeys;
-      return 0;
+    if ((byte >= KEY_STATUS) &&
+        (byte < (KEY_STATUS + model->statusCells))) {
+      if (!release) {
+        currentKeys.status = byte - KEY_STATUS;
+        int command;
+        if (model->interpretCommand(context, currentKeys, command)) {
+          pressedKeys = nullKeys;
+          return command;
+        }
+      }
+      break;
     }
-    return (currentKeys.keys &= ~KEY(byte)) == 0;
-  }
 
-  release = 1;
-  return 0;
-}
-
-static int
-getHandyCommand (DriverCommandContext context) {
-  int release;
-  if (getHandyKey(release)) {
-    int command;
-    if (model->InterpretCommand(context, command)) return command;
+    if (byte < 0X20) {
+      unsigned long int key = KEY(byte);
+      if (!release) {
+        currentKeys.keys |= key;
+        pressedKeys = currentKeys;
+      } else if ((currentKeys.keys &= ~key) == 0) {
+        int command;
+        if (model->interpretCommand(context, pressedKeys, command)) {
+          return command;
+        }
+      }
+    } else {
+      LogPrint(LOG_WARNING, "Unexpected key %s: %02X",
+               (release? "release": "press"), byte);
+    }
+    break;
   }
   return release? EOF: CMD_NOOP;
 }
 
 static int
-interpretModularCommand (DriverCommandContext context, int &command) {
-  if (pressedKeys.route == -1) {
+interpretModularCommand (DriverCommandContext context, const Keys &keys, int &command) {
+  if (keys.column >= 0) {
+    switch (keys.keys) {
+      default:
+        break;
+      case 0:
+        command = CR_ROUTE + keys.column;
+        return 1;
+      case (KEY_B1):
+        command = CR_SETLEFT + keys.column;
+        return 1;
+      case (KEY_B2):
+        command = CR_DESCCHAR + keys.column;
+        return 1;
+      case (KEY_B3):
+        command = CR_CUTAPPEND + keys.column;
+        return 1;
+      case (KEY_B4):
+        command = CR_CUTBEGIN + keys.column;
+        return 1;
+      case (KEY_UP):
+        command = CR_PRINDENT + keys.column;
+        return 1;
+      case (KEY_DOWN):
+        command = CR_NXINDENT + keys.column;
+        return 1;
+      case (KEY_B5):
+        command = CR_CUTRECT + keys.column;
+        return 1;
+      case (KEY_B6):
+        command = CR_CUTLINE + keys.column;
+        return 1;
+      case (KEY_B7):
+        command = CR_SETMARK + keys.column;
+        return 1;
+      case (KEY_B8):
+        command = CR_GOTOMARK + keys.column;
+        return 1;
+    }
+  } else if (keys.status >= 0) {
+    switch (keys.keys) {
+      default:
+        break;
+    }
+  } else {
     if (inputMode) {
-      const unsigned int dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
-      if (!(pressedKeys.keys & ~dots)) {
+      const unsigned long int dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
+      if (!(keys.keys & ~dots)) {
         command = VAL_PASSDOTS;
-        if (pressedKeys.keys & KEY_B1) command |= B7;
-        if (pressedKeys.keys & KEY_B2) command |= B3;
-        if (pressedKeys.keys & KEY_B3) command |= B2;
-        if (pressedKeys.keys & KEY_B4) command |= B1;
-        if (pressedKeys.keys & KEY_B5) command |= B4;
-        if (pressedKeys.keys & KEY_B6) command |= B5;
-        if (pressedKeys.keys & KEY_B7) command |= B6;
-        if (pressedKeys.keys & KEY_B8) command |= B8;
+        if (keys.keys & KEY_B1) command |= B7;
+        if (keys.keys & KEY_B2) command |= B3;
+        if (keys.keys & KEY_B3) command |= B2;
+        if (keys.keys & KEY_B4) command |= B1;
+        if (keys.keys & KEY_B5) command |= B4;
+        if (keys.keys & KEY_B6) command |= B5;
+        if (keys.keys & KEY_B7) command |= B6;
+        if (keys.keys & KEY_B8) command |= B8;
         return 1;
       }
-      switch (pressedKeys.keys) {
+      switch (keys.keys) {
         default:
           break;
         case (KEY_UP):
@@ -581,7 +629,7 @@ interpretModularCommand (DriverCommandContext context, int &command) {
           return 1;
       }
     }
-    switch (pressedKeys.keys) {
+    switch (keys.keys) {
       default:
         break;
       case (KEY_UP):
@@ -681,34 +729,34 @@ interpretModularCommand (DriverCommandContext context, int &command) {
         command = CMD_SIXDOTS;
         return 1;
       case (KEY_B8 | KEY_B7):
-        command = CMD_SND;
+        command = CMD_TUNES;
         return 1;
       case (KEY_B7):
         command = CMD_FREEZE;
         return 1;
       case (KEY_B7 | KEY_B1):
-        command = CMD_CAPBLINK;
+        command = CMD_PREFMENU;
         return 1;
       case (KEY_B7 | KEY_B2):
-        command = CMD_CSRBLINK;
+        command = CMD_PREFLOAD;
         return 1;
       case (KEY_B7 | KEY_B3):
-        command = CMD_ATTRBLINK;
+        command = CMD_PREFSAVE;
         return 1;
       case (KEY_B7 | KEY_B6):
-        command = CMD_SLIDEWIN;
+        command = CMD_INFO;
         return 1;
       case (KEY_B6):
         command = CMD_DISPMD;
         return 1;
       case (KEY_B6 | KEY_B1):
-        command = CMD_PREFMENU;
+        command = CMD_SKPIDLNS;
         return 1;
       case (KEY_B6 | KEY_B2):
-        command = CMD_PREFLOAD;
+        command = CMD_SKPBLNKWINS;
         return 1;
       case (KEY_B6 | KEY_B3):
-        command = CMD_PREFSAVE;
+        command = CMD_SLIDEWIN;
         return 1;
       case (KEY_B2 | KEY_B3 | KEY_UP):
         command = CMD_MUTE;
@@ -728,57 +776,41 @@ interpretModularCommand (DriverCommandContext context, int &command) {
         command = EOF;
         return 1;
     }
-  } else {
-    switch (pressedKeys.keys) {
-      default:
-        break;
-      case 0:
-        command = CR_ROUTE + pressedKeys.route;
-        return 1;
-      case (KEY_B1):
-        command = CR_SETLEFT + pressedKeys.route;
-        return 1;
-      case (KEY_B2):
-        command = CR_SETMARK + pressedKeys.route;
-        return 1;
-      case (KEY_B3):
-        command = CR_CUTAPPEND + pressedKeys.route;
-        return 1;
-      case (KEY_B4):
-        command = CR_CUTBEGIN + pressedKeys.route;
-        return 1;
-      case (KEY_UP):
-        command = CR_PRINDENT + pressedKeys.route;
-        return 1;
-      case (KEY_DOWN):
-        command = CR_NXINDENT + pressedKeys.route;
-        return 1;
-      case (KEY_B5):
-        command = CR_CUTRECT + pressedKeys.route;
-        return 1;
-      case (KEY_B6):
-        command = CR_CUTLINE + pressedKeys.route;
-        return 1;
-      case (KEY_B7):
-        command = CR_GOTOMARK + pressedKeys.route;
-        return 1;
-      case (KEY_B8):
-        command = CR_DESCCHAR + pressedKeys.route;
-        return 1;
-    }
   }
   return 0;
 }
 
 static int
-interpretBrailleWaveCommand (DriverCommandContext context, int &command) {
-  return interpretModularCommand(context, command);
+interpretBrailleWaveCommand (DriverCommandContext context, const Keys &keys, int &command) {
+  return interpretModularCommand(context, keys, command);
 }
 
 static int
-interpretBrailleStarCommand (DriverCommandContext context, int &command) {
-  if (pressedKeys.route == -1) {
-    switch (pressedKeys.keys) {
+interpretBrailleStarCommand (DriverCommandContext context, const Keys &keys, int &command) {
+  if (keys.column >= 0) {
+    switch (keys.keys) {
+      default:
+        break;
+      case (ROCKER_LEFT_TOP):
+        command = CR_CUTBEGIN + keys.column;
+        return 1;
+      case (ROCKER_LEFT_BOTTOM):
+        command = CR_CUTAPPEND + keys.column;
+        return 1;
+      case (ROCKER_RIGHT_TOP):
+        command = CR_CUTLINE + keys.column;
+        return 1;
+      case (ROCKER_RIGHT_BOTTOM):
+        command = CR_CUTRECT + keys.column;
+        return 1;
+    }
+  } else if (keys.status >= 0) {
+    switch (keys.keys) {
+      default:
+        break;
+    }
+  } else {
+    switch (keys.keys) {
       default:
         break;
       case (ROCKER_LEFT_TOP):
@@ -822,42 +854,19 @@ interpretBrailleStarCommand (DriverCommandContext context, int &command) {
       case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_BOTTOM):
         command = CMD_ATTRDN;
         return 1;
-      case (KEY_SPACE_LEFT):
-      case (KEY_SPACE_RIGHT):
-        command = VAL_PASSCHAR + ' ';
-        return 1;
-    }
-  } else {
-    switch (pressedKeys.keys) {
-      default:
-        break;
-      case (ROCKER_LEFT_TOP):
-        command = CR_CUTBEGIN + pressedKeys.route;
-        return 1;
-      case (ROCKER_LEFT_BOTTOM):
-        command = CR_CUTAPPEND + pressedKeys.route;
-        return 1;
-      case (ROCKER_RIGHT_TOP):
-        command = CR_CUTLINE + pressedKeys.route;
-        return 1;
-      case (ROCKER_RIGHT_BOTTOM):
-        command = CR_CUTRECT + pressedKeys.route;
-        return 1;
     }
   }
-  if (!(pressedKeys.keys & (KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8 | KEY_SPACE_LEFT | KEY_SPACE_RIGHT))) {
-    Keys oldKeys = pressedKeys;
-    if (pressedKeys.keys & KEY_SPACE_LEFT) {
-      pressedKeys.keys &= ~KEY_SPACE_LEFT;
-      pressedKeys.keys |= KEY_UP;
+  if (!(keys.keys & ~(KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8 | KEY_SPACE_LEFT | KEY_SPACE_RIGHT))) {
+    Keys modularKeys = keys;
+    if (modularKeys.keys & KEY_SPACE_LEFT) {
+      modularKeys.keys &= ~KEY_SPACE_LEFT;
+      modularKeys.keys |= KEY_UP;
     }
-    if (pressedKeys.keys & KEY_SPACE_RIGHT) {
-      pressedKeys.keys &= ~KEY_SPACE_RIGHT;
-      pressedKeys.keys |= KEY_DOWN;
+    if (modularKeys.keys & KEY_SPACE_RIGHT) {
+      modularKeys.keys &= ~KEY_SPACE_RIGHT;
+      modularKeys.keys |= KEY_DOWN;
     }
-    int interpreted = interpretModularCommand(context, command);
-    pressedKeys = oldKeys;
-    if (interpreted) return 1;
+    if (interpretModularCommand(context, modularKeys, command)) return 1;
   }
   return 0;
 }
@@ -1042,7 +1051,7 @@ getBookwormCommand (DriverCommandContext context) {
         if (stateTimer > 3000) {
           if (retryCount > 3) {
             setState(BDS_OFF);
-          } else if (writeData(HandyDescribe, sizeof(HandyDescribe))) {
+          } else if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
             setState(BDS_RESETTING);
           } else {
             setState(BDS_OFF);
@@ -1051,7 +1060,7 @@ getBookwormCommand (DriverCommandContext context) {
         break;
       case BDS_IDENTIFYING:
         if (stateTimer > 1000) {
-          if (writeData(HandyDescribe, sizeof(HandyDescribe))) {
+          if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
             setState(BDS_RESETTING);
           } else {
             setState(BDS_OFF);
@@ -1063,7 +1072,7 @@ getBookwormCommand (DriverCommandContext context) {
       case BDS_WRITING:
         if (stateTimer > 1000) {
           if (retryCount > 3) {
-            if (writeData(HandyDescribe, sizeof(HandyDescribe))) {
+            if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
               setState(BDS_RESETTING);
             } else {
               setState(BDS_OFF);
@@ -1083,5 +1092,5 @@ static int
 brl_read (DriverCommandContext context) {
   stateTimer += refreshInterval;
   updateBrailleCells();
-  return model->GetCommand(context);
+  return model->getCommand(context);
 }

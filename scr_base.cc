@@ -291,6 +291,13 @@ HelpScreen::setPageNumber (short page)
 }
 
 
+inline short
+HelpScreen::getPageNumber (void)
+{
+  return pageNumber;
+}
+
+
 short
 HelpScreen::getPageCount (void)
 {

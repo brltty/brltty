@@ -59,7 +59,7 @@
  * 0x13         32   5       six/eight dot braille text        CMD_SIXDOTS
  * 0x3a          2  456      sliding window on/off             CMD_SLIDEWIN
  * 0x1a          2  45       skip identical lines on/off       CMD_SKPIDLNS
- * 0x0b         32  4        audio signals on/off              CMD_SND
+ * 0x0b         32  4        audio signals on/off              CMD_TUNES
  * 0x0d         3 1 4        attribute display on/off          CMD_DISPMD
  * 0x0e          21 4        freeze mode on/off                CMD_FREEZE
  * 0x16          21  5       help display on/off               CMD_HELP
@@ -106,7 +106,7 @@ int cmd_T_trans[23] = {
 int cmd_S_trans[0x40] = {
 /* 0x00 */  0x00,         CMD_FWINLT,   CMD_CSRBLINK, CMD_LNBEG,   
 /* 0x04 */  CMD_LNUP,     CMD_CHRLT,    CMD_NXDIFLN,  CMD_TOP,
-/* 0x08 */  CMD_LNDN,     CMD_INFO,     0x00,         CMD_SND,        
+/* 0x08 */  CMD_LNDN,     CMD_INFO,     0x00,         CMD_TUNES,      
 /* 0x0c */  CMD_CSRTRK,   CMD_DISPMD,   CMD_FREEZE,   CMD_PASTE, 
 /* 0x10 */  CMD_CSRVIS,   0x00,         CMD_ATTRVIS,  CMD_SIXDOTS,        
 /* 0x14 */  0x00,         CMD_HWINRT,   CMD_HELP,     CMD_PREFLOAD, 

@@ -80,6 +80,7 @@ public:
   int open (const char *helpfile);		// called every time the help screen is opened
   void close (void);		// called once to close the help screen
   void setPageNumber (short);
+  short getPageNumber (void);
   short getPageCount (void);
   void describe (ScreenDescription &);
   unsigned char *read (ScreenBox, unsigned char *, ScreenMode);
