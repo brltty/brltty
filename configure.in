@@ -653,7 +653,7 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([speech_support_object])
 
 BRLTTY_ARG_WITH(
-   [flite-root], [DIRECTORY],
+   [flite], [DIRECTORY],
    [where FestivalLite is installed],
    [flite_root], ["yes"]
 )
