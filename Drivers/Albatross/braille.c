@@ -51,7 +51,7 @@ readByte (unsigned char *byte) {
 
 static int
 awaitByte (unsigned char *byte) {
-  if (awaitInput(fileDescriptor, 1000))
+  if (awaitInput(fileDescriptor, 4000))
     if (readByte(byte))
       return 1;
   return 0;
@@ -65,30 +65,28 @@ writeBytes (unsigned char *bytes, int count) {
 }
 
 static int
-clearDisplay (void) {
-  unsigned char bytes[] = {0XFA};
-  return writeBytes(bytes, sizeof(bytes));
-}
-
-static int
 acknowledgeDisplay (void) {
   unsigned char attributes;
   cellCount = 0;
 
   if (!awaitByte(&attributes)) return 0;
-
   {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
     if (!writeBytes(acknowledgement, sizeof(acknowledgement))) return 0;
   }
 
-  if (!clearDisplay()) return 0;
   cellCount = (attributes & 0X80)? 80: 40;
-  memset(cellContent, 0, cellCount);
-
   LogPrint(LOG_INFO, "Albatross detected: %d columns",
            baud2integer(cellCount));
   return 1;
+}
+
+static int
+clearDisplay (void) {
+  unsigned char bytes[] = {0XFA};
+  int cleared = writeBytes(bytes, sizeof(bytes));
+  if (cleared) memset(cellContent, 0, cellCount);
+  return cleared;
 }
 
 static int
@@ -132,7 +130,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const speed_t *speed = speedTable;
 
     memset(&newSettings, 0, sizeof(newSettings));
-    newSettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
+    newSettings.c_cflag = CS8 | CREAD;
     newSettings.c_iflag = IGNPAR;
 
     while (resetSerialDevice(fileDescriptor, &newSettings, *speed)) {
@@ -140,6 +138,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
           if (acknowledgeDisplay()) {
+            clearDisplay();
             brl->x = cellCount;
             brl->y = 1;
             return 1;
@@ -181,7 +180,10 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   unsigned char byte;
   while (readByte(&byte)) {
     if (byte == 0XFF) {
-      if (acknowledgeDisplay()) brl->resizeRequired = 1;
+      if (acknowledgeDisplay())  {
+        updateDisplay(NULL);
+        brl->resizeRequired = 1;
+      }
       continue;
     }
     if (!cellCount) continue;
