@@ -45,6 +45,10 @@
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* __MINGW32__ */
 
+#if !defined(PF_LOCAL) && defined(PF_UNIX)
+#define PF_LOCAL PF_UNIX
+#endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
+ 
 #include "Programs/misc.h"
 #include "Programs/cmd.h"
 

@@ -30,6 +30,10 @@ extern "C" {
 
 #include <unistd.h>
 
+#if !defined(PF_LOCAL) && defined(PF_UNIX)
+#define PF_LOCAL PF_UNIX
+#endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
+ 
 /* brlapi_libcerrno */
 /* saves the libc errno */
 int brlapi_libcerrno;

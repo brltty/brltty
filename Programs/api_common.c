@@ -48,6 +48,7 @@
 
 #include "api.h"
 #include "api_protocol.h"
+#include "api_common.h"
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b))? (a): (b))
