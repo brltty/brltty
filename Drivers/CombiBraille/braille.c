@@ -266,17 +266,17 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   static int status = 0;	/* cursor routing keys mode */
   int cmd = getbrlkey();
   if (cmd != EOF) {
-    int rng = (cmd = cmdtrans[cmd]) & ~VAL_ARG_MASK;
-    if (rng) {
-      int arg = cmd & VAL_ARG_MASK;
-      if (arg == VAL_ARG_MASK) {
-        status = rng;
+    int blk = (cmd = cmdtrans[cmd]) & BRL_MSK_BLK;
+    if (blk) {
+      int arg = cmd & BRL_MSK_ARG;
+      if (arg == BRL_MSK_ARG) {
+        status = blk;
 	return BRL_CMD_NOOP;
       }
-      if (arg == (VAL_ARG_MASK - 1)) {
+      if (arg == (BRL_MSK_ARG - 1)) {
         cmd += brl_cols - 1;
       }
-      if (status && (rng == CR_ROUTE)) {
+      if (status && (blk == CR_ROUTE)) {
         cmd = status + arg;
       }
     }

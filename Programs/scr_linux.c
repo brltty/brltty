@@ -1339,8 +1339,8 @@ openUinputDevice (void) {
 
 static int
 execute_LinuxScreen (int command) {
-  int blk = command & VAL_BLK_MASK;
-  int arg __attribute__((unused)) = command & VAL_ARG_MASK;
+  int blk = command & BRL_MSK_BLK;
+  int arg __attribute__((unused)) = command & BRL_MSK_ARG;
 
   switch (blk) {
     case VAL_PASSAT2:

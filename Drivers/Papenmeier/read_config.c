@@ -68,7 +68,7 @@ static char* search_code(int code, int cmd)
 
 static char* search_cmd(int cmd)
 {
-  if ((cmd & ~VAL_ARG_MASK) == VAL_PASSKEY) {
+  if ((cmd & BRL_MSK_BLK) == VAL_PASSKEY) {
     return search_code(VPK, cmd);
   } else {
     return search_code(KEYCODE, cmd);
@@ -77,9 +77,9 @@ static char* search_cmd(int cmd)
 
 static char* search_onoff(int cmd)
 {
-  if (cmd & VAL_TOGGLE_ON)
+  if (cmd & BRL_FLG_TOGGLE_ON)
     return search_code(ON, 0);
-  if (cmd & VAL_TOGGLE_OFF)
+  if (cmd & BRL_FLG_TOGGLE_OFF)
     return search_code(OFF, 0);
   return "";
 }
@@ -256,18 +256,18 @@ void terminals(int help, int verbose)
         for (c=0; c<terminal->commandCount; c++) {
           const CommandDefinition *command = &terminal->commands[c];
           if (command->code) {
-            fprintf(fh, "%s", search_cmd(command->code & VAL_CMD_MASK));
-            if (command->code & VAL_TOGGLE_MASK) 
+            fprintf(fh, "%s", search_cmd(command->code & BRL_MSK_CMD));
+            if (command->code & BRL_FLG_TOGGLE_MASK) 
               fprintf(fh, " %s", search_onoff(command->code));
             fprintf(fh, " = ");
             printkeys(fh, terminal, command);
             fprintf(fh, " # ");
             {
-              const char *description = get_command_description(command->code & VAL_CMD_MASK);
+              const char *description = get_command_description(command->code & BRL_MSK_CMD);
               if (!*description) goto described;
 
-              if (command->code & VAL_TOGGLE_MASK)  {
-                int on = command->code & VAL_TOGGLE_ON;
+              if (command->code & BRL_FLG_TOGGLE_MASK)  {
+                int on = command->code & BRL_FLG_TOGGLE_ON;
                 const char *firstBlank = strchr(description, ' ');
                 if (firstBlank) {
                   {

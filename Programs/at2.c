@@ -193,7 +193,7 @@ AT2_interpretCode (int *command, unsigned char byte) {
     int release = AT2_TST(AT2_RELEASE);
 
     int cmd = key->command;
-    int blk = cmd & VAL_BLK_MASK;
+    int blk = cmd & BRL_MSK_BLK;
 
     AT2_CLR(AT2_RELEASE);
     at2Keys = at2KeysOriginal;
@@ -209,7 +209,7 @@ AT2_interpretCode (int *command, unsigned char byte) {
 
       if (alternate) {
         cmd = key->alternate;
-        blk = cmd & VAL_BLK_MASK;
+        blk = cmd & BRL_MSK_BLK;
       }
     }
 
@@ -217,13 +217,13 @@ AT2_interpretCode (int *command, unsigned char byte) {
       if (blk) {
         if (!release) {
           if (blk == VAL_PASSCHAR) {
-            if (AT2_TST(AT2_CAPS_LOCK)) cmd |= VPC_UPPER;
-            if (AT2_TST(AT2_LEFT_ALT)) cmd |= VPC_META;
-            if (AT2_TST(AT2_LEFT_CONTROL) || AT2_TST(AT2_RIGHT_CONTROL)) cmd |= VPC_CONTROL;
+            if (AT2_TST(AT2_CAPS_LOCK)) cmd |= BRL_FLG_CHAR_UPPER;
+            if (AT2_TST(AT2_LEFT_ALT)) cmd |= BRL_FLG_CHAR_META;
+            if (AT2_TST(AT2_LEFT_CONTROL) || AT2_TST(AT2_RIGHT_CONTROL)) cmd |= BRL_FLG_CHAR_CONTROL;
           }
 
           if ((blk == VAL_PASSKEY) && AT2_TST(AT2_LEFT_ALT)) {
-            int arg = cmd & VAL_ARG_MASK;
+            int arg = cmd & BRL_MSK_ARG;
             switch (arg) {
               case VPK_CURSOR_LEFT:
                 cmd = BRL_CMD_SWITCHVT_PREV;

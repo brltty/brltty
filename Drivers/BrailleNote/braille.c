@@ -721,33 +721,33 @@ interpretBackspaceChord (unsigned char dots, BRL_DriverCommandContext context) {
 	 return VAL_PASSKEY + VPK_BACKSPACE;
 	 return EOF;
       case BNC_A:
-	 return BRL_CMD_DISPMD | VAL_TOGGLE_ON;
+	 return BRL_CMD_DISPMD | BRL_FLG_TOGGLE_ON;
       case BNC_B:
-         return BRL_CMD_SKPBLNKWINS | VAL_TOGGLE_OFF;
+         return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_OFF;
       case BNC_D:
 	 temporaryRoutingOperation = CR_DESCCHAR;
          return BRL_CMD_NOOP;
       case BNC_F:
-         return BRL_CMD_FREEZE | VAL_TOGGLE_OFF;
+         return BRL_CMD_FREEZE | BRL_FLG_TOGGLE_OFF;
       case BNC_H:
 	 return BRL_CMD_HELP;
       case BNC_I:
-         return BRL_CMD_SKPIDLNS | VAL_TOGGLE_OFF;
+         return BRL_CMD_SKPIDLNS | BRL_FLG_TOGGLE_OFF;
       case BNC_M:
 	 temporaryRoutingOperation = CR_SETMARK;
 	 return BRL_CMD_NOOP;
       case BNC_S:
 	 return BRL_CMD_INFO;
       case BNC_T:
-	 return BRL_CMD_DISPMD | VAL_TOGGLE_OFF;
+	 return BRL_CMD_DISPMD | BRL_FLG_TOGGLE_OFF;
       case BNC_V:
 	 return BRL_CMD_SWITCHVT_PREV;
       case BNC_W:
-         return BRL_CMD_SLIDEWIN | VAL_TOGGLE_OFF;
+         return BRL_CMD_SLIDEWIN | BRL_FLG_TOGGLE_OFF;
       case BNC_6:
-         return BRL_CMD_SIXDOTS | VAL_TOGGLE_ON;
+         return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
       case BNC_8:
-         return BRL_CMD_SIXDOTS | VAL_TOGGLE_OFF;
+         return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
 	 return BRL_CMD_RESTARTSPEECH;
    }
@@ -774,18 +774,18 @@ interpretEnterChord (unsigned char dots, BRL_DriverCommandContext context) {
 	 return VAL_PASSKEY + VPK_RETURN;
 	 return EOF;
       case BNC_B:
-         return BRL_CMD_SKPBLNKWINS | VAL_TOGGLE_ON;
+         return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_ON;
       case BNC_F:
-         return BRL_CMD_FREEZE | VAL_TOGGLE_ON;
+         return BRL_CMD_FREEZE | BRL_FLG_TOGGLE_ON;
       case BNC_I:
-         return BRL_CMD_SKPIDLNS | VAL_TOGGLE_ON;
+         return BRL_CMD_SKPIDLNS | BRL_FLG_TOGGLE_ON;
       case BNC_M:
 	 temporaryRoutingOperation = CR_GOTOMARK;
 	 return BRL_CMD_NOOP;
       case BNC_V:
 	 return BRL_CMD_SWITCHVT_NEXT;
       case BNC_W:
-         return BRL_CMD_SLIDEWIN | VAL_TOGGLE_ON;
+         return BRL_CMD_SLIDEWIN | BRL_FLG_TOGGLE_ON;
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
 	 return BRL_CMD_RESTARTBRL;
    }

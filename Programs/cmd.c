@@ -36,8 +36,8 @@ const CommandEntry commandTable[] = {
 
 void
 describeCommand (int command, char *buffer, int size) {
-  int blk = command & VAL_BLK_MASK;
-  int arg = command & VAL_ARG_MASK;
+  int blk = command & BRL_MSK_BLK;
+  int arg = command & BRL_MSK_ARG;
   int cmd = blk | arg;
   const CommandEntry *candidate = NULL;
   const CommandEntry *last = NULL;
@@ -45,7 +45,7 @@ describeCommand (int command, char *buffer, int size) {
   {
     const CommandEntry *current = commandTable;
     while (current->name) {
-      if ((current->code & VAL_BLK_MASK) == blk) {
+      if ((current->code & BRL_MSK_BLK) == blk) {
         if (!last || (last->code < current->code)) last = current;
         if (!candidate || (candidate->code < cmd)) candidate = current;
       }
@@ -90,7 +90,7 @@ describeCommand (int command, char *buffer, int size) {
     snprintf(buffer, size, "%s: %n%s",
              candidate->name, &offset, candidate->description);
 
-    if ((blk == 0) && (command & VAL_TOGGLE_MASK)) {
+    if ((blk == 0) && (command & BRL_FLG_TOGGLE_MASK)) {
       char *description = buffer + offset;
       const char *oldVerb = "toggle";
       int oldLength = strlen(oldVerb);
@@ -99,7 +99,7 @@ describeCommand (int command, char *buffer, int size) {
         int newLength = strlen(newVerb);
         memmove(description+newLength, description+oldLength, strlen(description+oldLength)+1);
         memcpy(description, newVerb, newLength);
-        if (command & VAL_TOGGLE_ON) {
+        if (command & BRL_FLG_TOGGLE_ON) {
           char *end = strrchr(description, '/');
           if (end) *end = 0;
         } else {

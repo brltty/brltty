@@ -994,7 +994,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       switch (activeKeys.control & DOT_KEYS) {
         HLP(601, "Chord-1478", "Input mode (toggle)")
         case DOT1|DOT4|DOT7|DOT8:
-          if (!keyPressed) cmd = BRL_CMD_NOOP | ((inputMode = !inputMode)? VAL_TOGGLE_ON: VAL_TOGGLE_OFF);
+          if (!keyPressed) cmd = BRL_CMD_NOOP | ((inputMode = !inputMode)? BRL_FLG_TOGGLE_ON: BRL_FLG_TOGGLE_OFF);
           break;
 
 	CKEY(210, DOT1, BRL_CMD_ATTRVIS, "Attribute underlining (toggle)");
@@ -1127,7 +1127,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   if (keyPressed) {
     /* key was pressed, start the autorepeat delay */
-    cmd |= VAL_REPEAT_DELAY;
+    cmd |= BRL_FLG_REPEAT_DELAY;
   } else {
     /* key was released, clear state */
     memset(&activeKeys, 0, sizeof(activeKeys));

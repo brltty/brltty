@@ -915,13 +915,13 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
       res = (VAL_PASSDOTS | convert(keys));
       if (control)
 	{
-	  res |= VPC_CONTROL;
+	  res |= BRL_FLG_CHAR_CONTROL;
 	  control = 0;
 	  context = 0;
 	}
       if (alt)
 	{
-	  res |= VPC_META;
+	  res |= BRL_FLG_CHAR_META;
 	  context = 0;
 	  alt = 0;
 	}

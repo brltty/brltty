@@ -759,7 +759,7 @@ interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *com
       currentKeys.front |= key;
       pressedKeys = currentKeys;
       if (model->interpretKeys(context, &currentKeys, command)) {
-        *command |= VAL_REPEAT_DELAY;
+        *command |= BRL_FLG_REPEAT_DELAY;
       }
     }
     return 1;
@@ -995,11 +995,11 @@ interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *c
 
         if (modifiers & KEY_UP) {
           modifiers &= ~KEY_UP;
-          *command |= VPC_CONTROL;
+          *command |= BRL_FLG_CHAR_CONTROL;
         }
         if (modifiers & KEY_DOWN) {
           modifiers &= ~KEY_DOWN;
-          *command |= VPC_META;
+          *command |= BRL_FLG_CHAR_META;
         }
         if (!modifiers) return 1;
       }

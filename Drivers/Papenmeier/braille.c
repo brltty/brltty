@@ -189,22 +189,22 @@ static int
 handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
   if (cmd == BRL_CMD_INPUT) {
     /* translate toggle -> ON/OFF */
-    cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
+    cmd |= input_mode? BRL_FLG_TOGGLE_OFF: BRL_FLG_TOGGLE_ON;
   }
 
   if (!IS_DELAYED_COMMAND(repeat)) {
     switch (cmd) {
-      case BRL_CMD_INPUT | VAL_TOGGLE_ON:
+      case BRL_CMD_INPUT | BRL_FLG_TOGGLE_ON:
         input_mode = 1;
-        cmd = VAL_TOGGLE_ON;
+        cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
         if (debug_keys) {
           LogPrint(LOG_DEBUG, "input mode on"); 
         }
         break;
 
-      case BRL_CMD_INPUT | VAL_TOGGLE_OFF:
+      case BRL_CMD_INPUT | BRL_FLG_TOGGLE_OFF:
         input_mode = 0;
-        cmd = VAL_TOGGLE_OFF;
+        cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
         if (debug_keys) {
           LogPrint(LOG_DEBUG, "input mode off"); 
         }
@@ -272,7 +272,7 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
     }
   }
 
-  return handleCommand(brl, command, (press? VAL_REPEAT_DELAY: 0));
+  return handleCommand(brl, command, (press? BRL_FLG_REPEAT_DELAY: 0));
 }
 
 static int
@@ -294,7 +294,7 @@ handleKey (BrailleDisplay *brl, int code, int press, int offset) {
         LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
                  code, pressed_modifiers, command, offset); 
       return handleCommand(brl, command+offset,
-                           (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY));
+                           (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
     }
 
     /* no command found */

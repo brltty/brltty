@@ -661,8 +661,8 @@ overlayAttributes (const unsigned char *attributes, int width, int height) {
 static int
 insertCharacter (unsigned char character, int flags) {
   if (islower(character)) {
-    if (flags & (VPC_SHIFT | VPC_UPPER)) character = toupper(character);
-  } else if (flags & VPC_SHIFT) {
+    if (flags & (BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER)) character = toupper(character);
+  } else if (flags & BRL_FLG_CHAR_SHIFT) {
     switch (character) {
       case '1': character = '!'; break;
       case '2': character = '@'; break;
@@ -688,7 +688,7 @@ insertCharacter (unsigned char character, int flags) {
     }
   }
 
-  if (flags & VPC_CONTROL) {
+  if (flags & BRL_FLG_CHAR_CONTROL) {
     if ((character & 0X6F) == 0X2F)
       character |= 0X50;
     else
@@ -697,7 +697,7 @@ insertCharacter (unsigned char character, int flags) {
 
   {
     ScreenKey key = character;
-    if (flags & VPC_META) key |= SCR_KEY_MOD_META;
+    if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_MOD_META;
     return insertKey(key);
   }
 }
@@ -811,8 +811,8 @@ resetBlinkingStates (void) {
 static int
 toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const TuneDefinition *on) {
   const TuneDefinition *tune;
-  if ((command & VAL_TOGGLE_MASK) != VAL_TOGGLE_MASK)
-    *flag = (command & VAL_TOGGLE_ON)? 1: ((command & VAL_TOGGLE_OFF)? 0: !*flag);
+  if ((command & BRL_FLG_TOGGLE_MASK) != BRL_FLG_TOGGLE_MASK)
+    *flag = (command & BRL_FLG_TOGGLE_ON)? 1: ((command & BRL_FLG_TOGGLE_OFF)? 0: !*flag);
   if ((tune = *flag? on: off)) playTune(tune);
   return *flag;
 }
@@ -957,13 +957,13 @@ main (int argc, char *argv[]) {
           repeatTimer = PREFERENCES_TIME(prefs.autorepeatInterval);
           repeatStarted = 1;
         } else {
-          int repeatFlags = next & VAL_REPEAT_MASK;
+          int repeatFlags = next & BRL_FLG_REPEAT_MASK;
           LogPrint(LOG_DEBUG, "Command: %06X", next);
-          next &= ~VAL_REPEAT_MASK;
+          next &= ~BRL_FLG_REPEAT_MASK;
 
           if (prefs.skipIdenticalLines) {
             int real;
-            switch (next & VAL_CMD_MASK) {
+            switch (next & BRL_MSK_CMD) {
               default:
                 real = next;
                 break;
@@ -980,12 +980,12 @@ main (int argc, char *argv[]) {
                 real = BRL_CMD_LNDN;
                 break;
             }
-            if (real != next) next = (next & ~VAL_CMD_MASK) | real;
+            if (real != next) next = (next & ~BRL_MSK_CMD) | real;
           }
 
-          switch (next & VAL_BLK_MASK) {
+          switch (next & BRL_MSK_BLK) {
             default:
-              switch (next & VAL_CMD_MASK) {
+              switch (next & BRL_MSK_CMD) {
                 default:
                   if (IS_DELAYED_COMMAND(repeatFlags)) next = BRL_CMD_NOOP;
                   repeatFlags = 0;
@@ -1027,11 +1027,11 @@ main (int argc, char *argv[]) {
           }
           command = next;
 
-          if (repeatFlags & VAL_REPEAT_DELAY) {
+          if (repeatFlags & BRL_FLG_REPEAT_DELAY) {
             repeatTimer = PREFERENCES_TIME(prefs.autorepeatDelay);
-            if (!(repeatFlags & VAL_REPEAT_INITIAL)) break;
+            if (!(repeatFlags & BRL_FLG_REPEAT_INITIAL)) break;
             repeatStarted = 1;
-          } else if (repeatFlags & VAL_REPEAT_INITIAL) {
+          } else if (repeatFlags & BRL_FLG_REPEAT_INITIAL) {
             repeatTimer = PREFERENCES_TIME(prefs.autorepeatInterval);
             repeatStarted = 1;
           } else {
@@ -1042,11 +1042,11 @@ main (int argc, char *argv[]) {
 
     doCommand:
       if (!executeScreenCommand(command)) {
-        switch (command & VAL_CMD_MASK) {
+        switch (command & BRL_MSK_CMD) {
           case BRL_CMD_NOOP:        /* do nothing but loop */
-            if (command & VAL_TOGGLE_ON)
+            if (command & BRL_FLG_TOGGLE_ON)
               playTune(&tune_toggle_on);
-            else if (command & VAL_TOGGLE_OFF)
+            else if (command & BRL_FLG_TOGGLE_OFF)
               playTune(&tune_toggle_off);
             break;
 
@@ -1626,9 +1626,9 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
           default: {
-            int blk = command & VAL_BLK_MASK;
-            int arg = command & VAL_ARG_MASK;
-            int flags = command & VAL_FLG_MASK;
+            int blk = command & BRL_MSK_BLK;
+            int arg = command & BRL_MSK_ARG;
+            int flags = command & BRL_MSK_FLG;
 
             switch (blk) {
               case VAL_PASSKEY: {

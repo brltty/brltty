@@ -610,11 +610,11 @@ allocateCommandDescriptors (void) {
 
       while (descriptor-- != commandDescriptors) {
         int code = descriptor->entry->code;
-        int currentBlock = code & VAL_BLK_MASK;
+        int currentBlock = code & BRL_MSK_BLK;
 
         if (currentBlock != previousBlock) {
           if (currentBlock) {
-            descriptor->count = (VAL_ARG_MASK + 1) - (code & VAL_ARG_MASK);
+            descriptor->count = (BRL_MSK_ARG + 1) - (code & BRL_MSK_ARG);
           }
           previousBlock = currentBlock;
         }
@@ -928,20 +928,20 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           int block;
 
           command = descriptor->entry->code;
-          block = command & VAL_BLK_MASK;
+          block = command & BRL_MSK_BLK;
 
           while ((word = nextWord())) {
             if (block == 0) {
               if (!switchSpecified) {
                 if (testWord(word, "on")) {
                   switchSpecified = 1;
-                  command |= VAL_TOGGLE_ON;
+                  command |= BRL_FLG_TOGGLE_ON;
                   continue;
                 }
 
                 if (testWord(word, "off")) {
                   switchSpecified = 1;
-                  command |= VAL_TOGGLE_OFF;
+                  command |= BRL_FLG_TOGGLE_OFF;
                   continue;
                 }
               }

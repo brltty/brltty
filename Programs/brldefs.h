@@ -33,18 +33,18 @@ typedef enum {
   BRL_CTX_MESSAGE
 } BRL_DriverCommandContext;
 
-/* The following define command codes, which are return values for
- * readbrl().  The CMD_* codes are guaranteed to be between 1 and 127
- * inclusive, with the exception of CMD_NOOP = 0.
+/* The following command codes are return values for brl_readCommand().
+ * The BRL_CMD_* codes are guaranteed to be between 1 and 255
+ * inclusive, with the exception of BRL_CMD_NOOP = 0.
  *
- * readbrl() should return EOF if there are no keys to return.  If,
- * however, it has masked out the key for internal use, it may return
- * CMD_NOOP - in which case it will be called again immediately, rather
+ * brl_readCommand() should return EOF if there are no keys to return,  If,
+ * however, if it has masked out the key for internal use, it may return
+ * BRL_CMD_NOOP - in which case it will be called again immediately, rather
  * than waiting for the next cycle.  This can save internal nesting ...
  */
 
 /*
- * Please comment all CMD_* definitions. They are
+ * Please comment all BRL_CMD_* definitions. They are
  * used during automatic help file generation.
  */
 typedef enum {
@@ -148,20 +148,21 @@ typedef enum {
   
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;
-#define VAL_ARG_MASK 0XFF
-#define VAL_BLK_MASK 0XFF00
-#define VAL_FLG_MASK 0XFF0000
-#define VAL_CMD_MASK (VAL_BLK_MASK | VAL_ARG_MASK)
+
+#define BRL_MSK_ARG 0XFF
+#define BRL_MSK_BLK 0XFF00
+#define BRL_MSK_FLG 0XFF0000
+#define BRL_MSK_CMD (BRL_MSK_BLK | BRL_MSK_ARG)
   
 /* For explicitly setting toggles on/off. */
-#define VAL_TOGGLE_ON   0x010000
-#define VAL_TOGGLE_OFF  0x020000
-#define VAL_TOGGLE_MASK (VAL_TOGGLE_ON | VAL_TOGGLE_OFF)
+#define BRL_FLG_TOGGLE_ON   0x010000
+#define BRL_FLG_TOGGLE_OFF  0x020000
+#define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF)
 
-#define VAL_REPEAT_INITIAL 0x800000
-#define VAL_REPEAT_DELAY   0x400000
-#define VAL_REPEAT_MASK    (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY)
-#define IS_DELAYED_COMMAND(cmd) (((cmd) & VAL_REPEAT_DELAY) && !((cmd) & VAL_REPEAT_INITIAL))
+#define BRL_FLG_REPEAT_INITIAL 0x800000
+#define BRL_FLG_REPEAT_DELAY   0x400000
+#define BRL_FLG_REPEAT_MASK    (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY)
+#define IS_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
   
 /* cursor routing keys block offset values */
 /*
@@ -205,10 +206,10 @@ typedef enum {
 #define VAL_PASSDOTS 0X2200 /* input character as braille dots */
 
 /* For modifying a character to be typed. */
-#define VPC_CONTROL 0X010000
-#define VPC_META    0X020000
-#define VPC_UPPER   0X040000
-#define VPC_SHIFT   0X080000
+#define BRL_FLG_CHAR_CONTROL 0X010000
+#define BRL_FLG_CHAR_META    0X020000
+#define BRL_FLG_CHAR_UPPER   0X040000
+#define BRL_FLG_CHAR_SHIFT   0X080000
 
 #define VAL_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
 

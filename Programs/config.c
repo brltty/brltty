@@ -588,7 +588,7 @@ readCommand (BRL_DriverCommandContext context) {
    if (command != EOF) {
       LogPrint(LOG_DEBUG, "Command: %06X", command);
       if (IS_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
-      command &= VAL_CMD_MASK;
+      command &= BRL_MSK_CMD;
    }
    return command;
 }

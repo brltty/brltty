@@ -598,9 +598,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                case KEY_COMMAND_PREFLOAD:
                   return BRL_CMD_PREFLOAD;
                case KEY_COMMAND_FREEZE_ON:
-                  return BRL_CMD_FREEZE | VAL_TOGGLE_ON;
+                  return BRL_CMD_FREEZE | BRL_FLG_TOGGLE_ON;
                case KEY_COMMAND_FREEZE_OFF:
-                  return BRL_CMD_FREEZE | VAL_TOGGLE_OFF;
+                  return BRL_CMD_FREEZE | BRL_FLG_TOGGLE_OFF;
                case KEY_COMMAND_RESTARTBRL:
                   return BRL_CMD_RESTARTBRL;
                case KEY_COMMAND_DOWNLOAD:

@@ -1257,7 +1257,7 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
           break;
 
       }
-      res |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
+      res |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
     } else {
       /* These are the keys that should be processed when released */
       if (!ReleasedKeys) {

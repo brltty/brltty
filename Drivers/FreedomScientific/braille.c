@@ -836,7 +836,7 @@ interpretKeys (void) {
   pressedKeys = keys;
   if (press) {
     activeKeys = pressedKeys;
-    flags |= VAL_REPEAT_DELAY;
+    flags |= BRL_FLG_REPEAT_DELAY;
   } else {
     keys = activeKeys;
     activeKeys = 0;
@@ -854,8 +854,8 @@ interpretKeys (void) {
       if (keys & KEY_DOT6) command |= B6;
       if (keys & KEY_DOT7) command |= B7;
       if (keys & KEY_DOT8) command |= B8;
-      if (keys & KEY_SHIFT_LEFT) command |= VPC_UPPER;
-      if (keys & KEY_SHIFT_RIGHT) command |= VPC_CONTROL;
+      if (keys & KEY_SHIFT_LEFT) command |= BRL_FLG_CHAR_UPPER;
+      if (keys & KEY_SHIFT_RIGHT) command |= BRL_FLG_CHAR_CONTROL;
       return command;
     }
   }
@@ -931,10 +931,10 @@ interpretKeys (void) {
       command = BRL_CMD_SIXDOTS;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
-      command = BRL_CMD_SIXDOTS | VAL_TOGGLE_ON;
+      command = BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-      command = BRL_CMD_SIXDOTS | VAL_TOGGLE_OFF;
+      command = BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
       break;
     case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
     case (KEY_GDF_RIGHT | KEY_HOT4):

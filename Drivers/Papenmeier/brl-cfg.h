@@ -129,8 +129,8 @@ typedef struct {
 
 #define CHGONOFF(cmd, offs, on, off) \
       { cmd                 , offs, 0  }, \
-      { cmd | VAL_TOGGLE_OFF, offs, off}, \
-      { cmd | VAL_TOGGLE_ON , offs, on }
+      { cmd | BRL_FLG_TOGGLE_OFF, offs, off}, \
+      { cmd | BRL_FLG_TOGGLE_ON , offs, on }
 
 
 /* modifiers for 9 front keys */

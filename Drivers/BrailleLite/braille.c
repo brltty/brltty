@@ -571,7 +571,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	  if(key.cmd == CR_CUTRECT || key.cmd == CR_CUTLINE)
 	    key.cmd += blitesz-1;
 
-	  if(key.spcbar && (key.cmd &VAL_BLK_MASK) == VAL_PASSKEY) {
+	  if(key.spcbar && (key.cmd &BRL_MSK_BLK) == VAL_PASSKEY) {
           /*
 	    if(!kbemu)
 	      return EOF;
@@ -705,18 +705,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 #ifndef USE_TEXTTRANS
       if (ctrl && key.asc >= 96)
 	/* old code was (key.asc & 0x1f) */
-	temp = VAL_PASSCHAR | key.asc | VPC_CONTROL;
+	temp = VAL_PASSCHAR | key.asc | BRL_FLG_CHAR_CONTROL;
       else if (meta && key.asc >= 96)
-	temp = VAL_PASSCHAR | key.asc | VPC_META;
+	temp = VAL_PASSCHAR | key.asc | BRL_FLG_CHAR_META;
       else if (shift && (key.asc & 0x40))
 	/* old code was (key.asc & 0xdf) */
-	temp = VAL_PASSCHAR | key.asc | VPC_SHIFT;
+	temp = VAL_PASSCHAR | key.asc | BRL_FLG_CHAR_SHIFT;
       else
 	temp = VAL_PASSCHAR | key.asc;
 #else /* USE_TEXTTRANS */
       temp = VAL_PASSDOTS |
 	(keys_to_dots[key.raw &0x3F]
-	 | ((meta) ? VPC_META : 0)
+	 | ((meta) ? BRL_FLG_CHAR_META : 0)
 	 | ((ctrl) ? 0xC0 : 
 	    (shift) ? 0x40 : 
 	    (dot8shift) ? 0x80 : 0));

@@ -392,8 +392,8 @@ inputline:  '\n'
        | statdef eq statdisp '\n'  { setStatusCell(keyindex, numval);  }
        | MODIFIER eq anykey '\n'   { addModifier(keyindex); }
        | keycode eq modifiers '\n' { addCommand(cmdval); }
-       | keycode ON eq modifiers '\n' { addCommand(cmdval | VAL_TOGGLE_ON); }
-       | keycode OFF eq modifiers '\n' { addCommand(cmdval | VAL_TOGGLE_OFF); }
+       | keycode ON eq modifiers '\n' { addCommand(cmdval | BRL_FLG_TOGGLE_ON); }
+       | keycode OFF eq modifiers '\n' { addCommand(cmdval | BRL_FLG_TOGGLE_OFF); }
        ;
 
 eq:    '='

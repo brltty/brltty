@@ -873,14 +873,14 @@ cut_cursor (BrailleDisplay *brl)
       prevdata[pos] = oldchar;
 
       while ((key = brl_readCommand (brl, BRL_CTX_SCREEN)) == EOF) delay(1); /* just yield */
-      if((key &VAL_BLK_MASK) == CR_CUTBEGIN)
+      if((key &BRL_MSK_BLK) == CR_CUTBEGIN)
 	  res = CR_CUTBEGIN + pos;
-      else if((key &VAL_BLK_MASK) == CR_CUTAPPEND)
+      else if((key &BRL_MSK_BLK) == CR_CUTAPPEND)
 	  res = CR_CUTAPPEND + pos;
-      else if((key &VAL_BLK_MASK) == CR_CUTRECT) {
+      else if((key &BRL_MSK_BLK) == CR_CUTRECT) {
 	  res = CR_CUTRECT + pos;
 	  pos = -1;
-      }else if((key &VAL_BLK_MASK) == CR_CUTLINE) {
+      }else if((key &BRL_MSK_BLK) == CR_CUTLINE) {
 	  res = CR_CUTLINE + pos;
 	  pos = -1;
       }else switch (key)
@@ -936,8 +936,8 @@ cut_cursor (BrailleDisplay *brl)
 #define KEYSPECIAL(code,action) \
     case code: { action }; break;
 #define KEYSW(codeon, codeoff, result) \
-    case codeon: res = result | VAL_TOGGLE_ON; break; \
-    case codeoff: res = result | VAL_TOGGLE_OFF; break;
+    case codeon: res = result | BRL_FLG_TOGGLE_ON; break; \
+    case codeoff: res = result | BRL_FLG_TOGGLE_OFF; break;
 
 /* For cursor routing */
 /* lookup so find out if a certain key is active */
