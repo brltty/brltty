@@ -35,7 +35,7 @@
 #include <X11/Xlib.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
-#define HAVE_LIB_XAW
+
 #if defined(HAVE_LIB_XAW)
 #define USE_XAW
 #include <X11/Xaw/Form.h>
@@ -71,9 +71,11 @@
 #include <Xm/PanedW.h>
 #include <Xm/Label.h>
 #include <Xm/PushB.h>
-#endif
+#else /* HAVE_LIB_ */
+#error unknown Xt toolkit library
+#endif /* HAVE_LIB_ */
 
-#ifdef USE_XAW
+#if defined(USE_XAW)
 #define formWidgetClass     formWidgetClass
 #define panedWidgetClass    panedWidgetClass
 #define labelWidgetClass    labelWidgetClass
@@ -91,7 +93,7 @@
 #define ChainRight          XtChainLeft
 #define NvertDistance       XtNvertDistance
 #define NhorizDistance      XtNhorizDistance
-#else
+#elif defined(USE_XM)
 #define formWidgetClass     xmFormWidgetClass
 #define panedWidgetClass    xmPanedWindowWidgetClass
 #define labelWidgetClass    xmLabelWidgetClass
@@ -109,7 +111,9 @@
 #define ChainRight          XmATTACH_NONE
 #define NvertDistance       XmNtopOffset
 #define NhorizDistance      XmNleftOffset
-#endif
+#else /* USE_ */
+#error unknown Xt toolkit type
+#endif /* USE_ */
 
 typedef enum {
   PARM_DISPLAY,

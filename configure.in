@@ -612,7 +612,37 @@ BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 if test "${no_x}" != "yes"
 then
-   BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
+   AC_CACHE_CHECK([which Xt toolkit to use], [brltty_cv_toolkit_xt], [dnl
+      brltty_cv_toolkit_xt=""
+      brltty_headers_Xaw="X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h"
+      brltty_headers_Xaw3d="X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h"
+      brltty_headers_neXtaw="X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h"
+      brltty_headers_XawPlus="X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h"
+      brltty_headers_Xm="Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h"
+      brltty_packages="Xaw Xaw3d neXtaw XawPlus Xm"
+      for brltty_package in ${brltty_packages}
+      do
+         eval 'brltty_headers="${brltty_headers_'"${brltty_package}"'}"'
+         test -n "${brltty_headers}" && {
+            brltty_found=true
+            for brltty_header in ${brltty_headers}
+            do
+               AC_CHECK_HEADER([${brltty_header}], [], [brltty_found=false])
+               "${brltty_found}" || break
+            done
+            "${brltty_found}" && {
+               brltty_cv_toolkit_xt="${brltty_package}"
+               break
+            }
+         }
+      done
+   ])
+   AC_SUBST([xt_toolkit], [${brltty_cv_toolkit_xt}])
+   xt_toolkit_uc="`echo "${xt_toolkit}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
+   AC_DEFINE_UNQUOTED([HAVE_LIB_${xt_toolkit_uc}])
+   test -n "${xt_toolkit}" && {
+      BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
+   }
 fi
 BRLTTY_ARG_DRIVER([braille])
 

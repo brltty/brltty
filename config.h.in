@@ -187,6 +187,13 @@ extern "C" {
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 
+/* Define only one of the following Xt toolkits. */
+#undef HAVE_LIB_XAW
+#undef HAVE_LIB_XAW3D
+#undef HAVE_LIB_NEXTAW
+#undef HAVE_LIB_XAWPLUS
+#undef HAVE_LIB_XM
+
 #define DEVICE_DIRECTORY "/dev"
 #define TRANSLATION_TABLE_EXTENSION ".tbl"
 #define TEXT_TABLE_PREFIX "text."
