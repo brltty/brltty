@@ -3,6 +3,7 @@ Note: this file is in reversed chronological order (bottom to top).
 
 December 31, 2003:
  - BRLTTY 3.4 released:
+   Allow --with-...-driver= identifiers to be prefixed with a minus sign. (dm)
    Remove duplicate files from screen-3.9.11 patch. (TK)
    Add more build options to specify directories. (dm)
       --with-program-directory

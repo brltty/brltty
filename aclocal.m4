@@ -144,8 +144,22 @@ changequote(, )dnl
             brltty_items=""
             if test "${brltty_item}" = "all"
             then
-               brltty_internal_codes_$1="${brltty_internal_codes_$1}${brltty_external_codes_$1}"
-               brltty_internal_names_$1="${brltty_internal_names_$1}${brltty_external_names_$1}"
+               brltty_item_all=true
+               brltty_item_include=true
+            elif test "${brltty_item}" = "-all"
+            then
+               brltty_item_all=true
+               brltty_item_include=false
+            else
+               brltty_item_all=false
+            fi
+            if "${brltty_item_all}"
+            then
+               if "${brltty_item_include}"
+               then
+                  brltty_internal_codes_$1="${brltty_internal_codes_$1}${brltty_external_codes_$1}"
+                  brltty_internal_names_$1="${brltty_internal_names_$1}${brltty_external_names_$1}"
+               fi
                brltty_external_codes_$1=""
                brltty_external_names_$1=""
                break
@@ -153,6 +167,14 @@ changequote(, )dnl
          else
             brltty_item="`expr "${brltty_items}" : '\([^,]*\)'`"
             brltty_items="`expr "${brltty_items}" : '[^,]*,\(.*\)'`"
+         fi
+         brltty_item_suffix="${brltty_item#-}"
+         if test "${brltty_item}" = "${brltty_item_suffix}"
+         then
+            brltty_item_include=true
+         else
+            brltty_item_include=false
+            brltty_item="${brltty_item_suffix}"
          fi
          brltty_item_unknown=true
          if test -n "${brltty_item}"
@@ -194,8 +216,11 @@ changequote([, ])dnl
          fi
          brltty_external_codes_$1="`echo "${brltty_external_codes_$1}" | sed -e "s% ${brltty_item_code} % %"`"
          brltty_external_names_$1="`echo "${brltty_external_names_$1}" | sed -e "s% ${brltty_item_name} % %"`"
-         brltty_internal_codes_$1="${brltty_internal_codes_$1} ${brltty_item_code}"
-         brltty_internal_names_$1="${brltty_internal_names_$1} ${brltty_item_name}"
+         if "${brltty_item_include}"
+         then
+            brltty_internal_codes_$1="${brltty_internal_codes_$1} ${brltty_item_code}"
+            brltty_internal_names_$1="${brltty_internal_names_$1} ${brltty_item_name}"
+         fi
          test "${brltty_delimiter}" -eq 0 && break
       done
    fi

@@ -384,16 +384,18 @@ for any additional display-specific instructions.
   <tag><tt/--with-braille-driver=/<em/driver/<label id="build-braille-driver"></tag>
     Specify the braille display drivers
     which are to be linked into the BRLTTY binary.
+    Those drivers which aren't listed via this option
+    are built as dynamically loadable shared objects
+    and can still be selected at run-time.
     Each driver must be identified
     either by its two-letter <ref id="drivers" name="driver identification code">
     or by its proper name (full or abbreviated).
     The driver identifiers and/or names must be
     separated from one another by a single comma.
-    The first one becomes the default driver.
+    If a driver identifier is prefixed by a minus sign (<tt/-/),
+    then that driver is excluded from the build.
+    The first non-excluded driver becomes the default driver.
     There's no default driver if this option isn't used.
-    Those drivers which aren't listed via this option
-    are built as dynamically loadable shared objects
-    and can still be selected at run-time.
     Any of the following words can also be used as the operand of this option:
     <descrip>
       <tag/all/
@@ -401,6 +403,8 @@ for any additional display-specific instructions.
         Don't build any of them as dynamically loadable shared objects.
         This word may also be specified as the final element of a driver list.
         This is how to specify the dfault driver when all the drivers are to be linked in.
+      <tag/-all/
+        Only build those drivers which have been explicitly included via this option.
       <tag/no/
         Don't build any drivers at all.
         This is equivalent to specifying <tt/--without-braille-driver/.
@@ -459,16 +463,18 @@ for any additional display-specific instructions.
   <tag><tt/--with-speech-driver=/<em/driver/<label id="build-speech-driver"></tag>
     Specify the speech synthesizer drivers
     which are to be linked into the BRLTTY binary.
+    Those drivers which aren't listed via this option
+    are built as dynamically loadable shared objects
+    and can still be selected at run-time.
     Each driver must be identified
     either by its two-letter <ref id="drivers" name="driver identification code">
     or by its proper name (full or abbreviated).
     The driver identifiers and/or names must be
     separated from one another by a single comma.
-    The first one becomes the default driver.
+    If a driver identifier is prefixed by a minus sign (<tt/-/),
+    then that driver is excluded from the build.
+    The first non-excluded driver becomes the default driver.
     There's no default driver if this option isn't used.
-    Those drivers which aren't listed via this option
-    are built as dynamically loadable shared objects
-    and can still be selected at run-time.
     Any of the following words can also be used as the operand of this option:
     <descrip>
       <tag/all/
@@ -476,6 +482,8 @@ for any additional display-specific instructions.
         Don't build any of them as dynamically loadable shared objects.
         This word may also be specified as the final element of a driver list.
         This is how to specify the dfault driver when all the drivers are to be linked in.
+      <tag/-all/
+        Only build those drivers which have been explicitly included via this option.
       <tag/no/
         Don't build any drivers at all.
         This is equivalent to specifying <tt/--without-speech-driver/.
