@@ -531,7 +531,7 @@ prepare_LinuxScreen (char **parameters) {
   validateYesNo(&debugCharacterTranslationTable, "debug character translation table flag", parameters[PARM_DEBUGCTT]);
   setApplicationCharacterMap = &determineApplicationCharacterMap;
   {
-    static const char *choices[] = {"default", "iso01", "vt100", "cp437", "user", NULL};
+    static const char *choices[] = {"auto", "iso01", "vt100", "cp437", "user", NULL};
     unsigned int choice;
     if (validateChoice(&choice, "character set", parameters[PARM_ACM], choices)) {
       if (choice) {
