@@ -162,10 +162,8 @@ static int addr_status = -1;
 static int addr_display = -1;
 
 static unsigned int pressed_modifiers = 0;
-static int saved_command = EOF;
-
+static unsigned int saved_modifiers = 0;
 static int input_mode = 0;
-static unsigned char input_dots = 0;
  
 static void
 flushTerminal (BrailleDisplay *brl) {
@@ -183,16 +181,18 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
 }
 
 static void
+resetState (void) {
+  pressed_modifiers = 0;
+  saved_modifiers = 0;
+  input_mode = 0;
+}
+
+static void
 resetTerminal (BrailleDisplay *brl) {
-  const unsigned char sequence[] = {cSTX, 0X01, cETX};
+  static const unsigned char sequence[] = {cSTX, 0X01, cETX};
   LogPrint(LOG_WARNING, "Resetting terminal.");
   flushTerminal(brl);
-  if (writeBytes(brl, sequence, sizeof(sequence))) {
-    pressed_modifiers = 0;
-    saved_command = EOF;
-    input_mode = 0;
-    input_dots = 0;
-  }
+  if (writeBytes(brl, sequence, sizeof(sequence))) resetState();
 }
 
 static int
@@ -284,6 +284,8 @@ restartTerminal (BrailleDisplay *brl) {
 
   writeLine(brl);
   drainBrailleOutput(brl, 0);
+
+  resetState();
 }
 
 /* ------------------------------------------------------------ */
@@ -433,6 +435,7 @@ initializeDisplay (BrailleDisplay *brl, const char *dev, speed_t baud) {
         memset(currentLine, outputTable[0], curr_cols);
         writeLine(brl);
 
+        resetState();
         return 1;
       }
     }
@@ -546,8 +549,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 /* found command - some actions to be done within the driver */
 static int
-handle_command(int cmd, int repeat)
-{
+handleCommand (int cmd, int repeat) {
   if (cmd == CMD_INPUT) {
     /* translate toggle -> ON/OFF */
     cmd |= input_mode? VAL_TOGGLE_OFF: VAL_TOGGLE_ON;
@@ -556,7 +558,6 @@ handle_command(int cmd, int repeat)
   switch (cmd) {
     case CMD_INPUT | VAL_TOGGLE_ON:
       input_mode = 1;
-      input_dots = 0;
       cmd = VAL_TOGGLE_ON;
       if (debug_keys) {
         LogPrint(LOG_DEBUG, "input mode on"); 
@@ -571,118 +572,89 @@ handle_command(int cmd, int repeat)
       break;
   }
 
-  saved_command = EOF;
-  input_dots = 0;
-  if (repeat) cmd |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
-  return cmd;
+  return cmd | repeat;
 }
 
-/*
- * Handling of Modifiers
- * command bound to modifiers only are remembered on press 
- * and send on last modifier released
- */
-
-static void
-log_modifiers(void)
-{
-  if (debug_keys) {
-    LogPrint(LOG_DEBUG, "modifiers: %04x", pressed_modifiers);
-  }
-}
-
-/* handle modifier pressed - includes dots in input mode */
 static int
-modifier_pressed(unsigned int bit)
-{
-  pressed_modifiers |= bit;
-  log_modifiers();
+handleModifier (int bit, int press) {
+  int command = CMD_NOOP;
+  int modifiers;
 
-  saved_command = EOF;
-  if (input_mode && !(pressed_modifiers & ~0XFF)) {
-    input_dots = pressed_modifiers;
-    if (debug_keys) {
-      LogPrint(LOG_DEBUG, "input dots: %02x", input_dots); 
-    }
+  if (press) {
+    saved_modifiers = (pressed_modifiers |= bit);
+    modifiers = saved_modifiers;
   } else {
-    int i;
-    input_dots = 0;
-    for (i=0; i<CMDMAX; i++)
-      if ((the_terminal->cmds[i].modifiers == pressed_modifiers) &&
-	  (the_terminal->cmds[i].keycode == NOKEY)) {
-	saved_command = the_terminal->cmds[i].code;
-	LogPrint(LOG_DEBUG, "saving cmd: %d", saved_command); 
-	break;
-      }
+    pressed_modifiers &= ~bit;
+    modifiers = saved_modifiers;
+    saved_modifiers = 0;
   }
-  return CMD_NOOP;
-}
- 
-/* handle modifier release */
-static int
-modifier_released(unsigned int bit)
-{
-  pressed_modifiers &= ~bit;
-  log_modifiers();
 
-  if (saved_command != EOF) {
-    if (debug_keys) {
-      LogPrint(LOG_DEBUG, "saved cmd: %d", saved_command); 
+  if (debug_keys) {
+    LogPrint(LOG_DEBUG, "modifiers: %04X", pressed_modifiers);
+  }
+
+  if (modifiers) {
+    if (input_mode && !(modifiers & ~0XFF)) {
+      static const unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
+      const unsigned char *dot = dots;
+      int mod;
+      command = VAL_PASSDOTS;
+      for (mod=1; mod<0X100; ++dot, mod<<=1)
+        if (modifiers & mod)
+          command |= *dot;
+      if (debug_keys)
+        LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
+    } else {
+      int i;
+      for (i=0; i<CMDMAX; i++)
+        if ((the_terminal->cmds[i].modifiers == modifiers) &&
+            (the_terminal->cmds[i].keycode == NOKEY)) {
+          command = the_terminal->cmds[i].code;
+          if (debug_keys)
+            LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
+                     modifiers, command); 
+          break;
+        }
     }
-    return handle_command(saved_command, 0);
   }
 
-  if (input_mode && (input_dots != 0)) {
-    int cmd = VAL_PASSDOTS;
-    static unsigned char mod_to_dot[] = {B1, B2, B3, B4, B5, B6, B7, B8};
-    unsigned char *dot = mod_to_dot;
-    int mod;
-    for (mod=1; mod<0X100; ++dot, mod<<=1)
-      if (input_dots & mod)
-        cmd |= *dot;
-    if (debug_keys) {
-      LogPrint(LOG_DEBUG, "dots=%02X cmd=%04X", input_dots, cmd); 
-    }
-    return handle_command(cmd, 0);
-  }
-
-  return CMD_NOOP;
+  return handleCommand(command,
+                       press? VAL_REPEAT_DELAY: 0);
 }
 
 /* one key is pressed or released */
 static int
-handle_key (int code, int ispressed, int offsroute)
-{
+handleKey (int code, int press, int offsroute) {
   int i;
   int cmd;
 
   /* look for modfier keys */
-  for (i=0; i<MODMAX; i++) 
-    if (the_terminal->modifiers[i] == code) {
-      /* found modifier: update bitfield */
-      unsigned int bit = 1 << i;
-      return ispressed? modifier_pressed(bit): modifier_released(bit);
-    }
+  for (i=0; i<MODMAX; i++)
+    if (the_terminal->modifiers[i] == code)
+      return handleModifier(1<<i, press);
 
-  /* must be a "normal key" - search for cmd on keypress */
-  if (!ispressed) return CMD_NOOP;
-  input_dots = 0;
-  for (i=0; i<CMDMAX; i++)
-    if ((the_terminal->cmds[i].keycode == code) &&
-	(the_terminal->cmds[i].modifiers == pressed_modifiers)) {
-      if (debug_keys)
-        LogPrint(LOG_DEBUG, "cmd: %d->%d (+%d)", 
-                 code, the_terminal->cmds[i].code, offsroute); 
-      return handle_command(the_terminal->cmds[i].code + offsroute, 1);
-    }
+  /* must be a "normal key" - search for cmd on key press */
+  if (press) {
+    saved_modifiers = 0;
+    for (i=0; i<CMDMAX; i++)
+      if ((the_terminal->cmds[i].keycode == code) &&
+          (the_terminal->cmds[i].modifiers == pressed_modifiers)) {
+        if (debug_keys)
+          LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
+                   code, pressed_modifiers, the_terminal->cmds[i].code, offsroute); 
+        return handleCommand(the_terminal->cmds[i].code + offsroute,
+                             VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY);
+      }
+  } else {
+    /* no command found */
+    LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, pressed_modifiers); 
+  }
 
-  /* no command found */
-  LogPrint(LOG_DEBUG, "cmd: %d[%04x] ??", code, pressed_modifiers); 
   return CMD_NOOP;
 }
 
 static int
-handle_code (int code, int press, int time) {
+handleCode (int code, int press, int time) {
   /* which key -> translate to OFFS_* + number */
   /* attn: number starts with 1 */
   int num;
@@ -690,31 +662,31 @@ handle_code (int code, int press, int time) {
   if (code_front_first <= code && 
       code <= code_front_last) { /* front key */
     num = 1 + (code - code_front_first) / 3;
-    return handle_key(OFFS_FRONT + num, press, 0);
+    return handleKey(OFFS_FRONT + num, press, 0);
   }
 
   if (code_status_first <= code && 
       code <= code_status_last) { /* status key */
     num = 1+ (code - code_status_first) / 3;
-    return handle_key(OFFS_STAT + num, press, 0);
+    return handleKey(OFFS_STAT + num, press, 0);
   }
 
   if (code_easy_first <= code && 
       code <= code_easy_last) { /* easy bar */
     num = 1 + (code - code_easy_first) / 3;
-    return handle_key(OFFS_EASY + num, press, 0);
+    return handleKey(OFFS_EASY + num, press, 0);
   }
 
   if (code_switch_first <= code && 
       code <= code_switch_last) { /* easy bar */
     num = 1 + (code - code_switch_first) / 3;
-    return handle_key(OFFS_SWITCH + num, press, 0);
+    return handleKey(OFFS_SWITCH + num, press, 0);
   }
 
   if (code_route_first <= code && 
       code <= code_route_last) { /* Routing Keys */ 
     num = (code - code_route_first) / 3;
-    return handle_key(ROUTINGKEY, press, num);
+    return handleKey(ROUTINGKEY, press, num);
   }
 
   LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
@@ -770,7 +742,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         if (debug_reads) LogBytes("read", buf, length);
 
         {
-          int command = handle_code(((buf[2] << 8) | buf[3]),
+          int command = handleCode(((buf[2] << 8) | buf[3]),
                                     (buf[6] == PRESSED),
                                     ((buf[7] << 8) | buf[8]));
           if (command != EOF) return command;
