@@ -284,6 +284,10 @@ extern void *usbSubmitRequest (
   unsigned int flags,
   void *context
 );
+extern int usbCancelRequest (
+  UsbDevice *device,
+  void *request
+);
 extern void *usbReapResponse (
   UsbDevice *device,
   UsbResponse *response,

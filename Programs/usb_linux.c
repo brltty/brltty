@@ -249,6 +249,16 @@ usbSubmitRequest (
   return NULL;
 }
 
+int
+usbCancelRequest (
+  UsbDevice *device,
+  void *request
+) {
+  int result = ioctl(device->file, USBDEVFS_DISCARDURB, request);
+  if (result != -1) free(request);
+  return result;
+}
+
 void *
 usbReapResponse (
   UsbDevice *device,
