@@ -41,6 +41,7 @@
 
 #ifdef linux
 #include <linux/major.h>
+#include <linux/tty.h>
 #endif /* linux */
 
 #include "brlapi.h"
@@ -531,7 +532,7 @@ int brlapi_getControllingTty()
 #endif /* linux */
  }
 
- if ((vt < 1) || (vt >= 0X40)) return -1;
+ if ((vt < MIN_NR_CONSOLES) || (vt > MAX_NR_CONSOLES)) return -1;
  return vt;
 }
 
