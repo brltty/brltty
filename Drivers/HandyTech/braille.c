@@ -218,9 +218,10 @@ static int
 readSerialBytes (unsigned char *buffer, int count, int wait) {
   const int timeout = 100;
   int offset = 0;
-  readChunk(serialDevice, buffer, &offset, count,
-            (wait? timeout: 0), timeout);
-  return offset;
+  if (readChunk(serialDevice, buffer, &offset, count,
+                (wait? timeout: 0), timeout)) return offset;
+  if (errno == EAGAIN) return 0;
+  return -1;
 }
 
 static int
@@ -283,11 +284,9 @@ readUsbBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
   int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
                            (wait? timeout: 0), timeout);
-  if (count == -1) {
-    if (errno == EAGAIN)
-      count = 0;
-  }
-  return count;
+  if (count != -1) return count;
+  if (errno == EAGAIN) return 0;
+  return -1;
 }
 
 static int
@@ -387,10 +386,10 @@ readBluezBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
   int offset = 0;
   if (awaitInput(bluezSocket, (wait? timeout: 0))) {
-    readChunk(bluezSocket, buffer, &offset, length, 0, timeout);
-    if (errno != EAGAIN) offset = -1;
+    if (readChunk(bluezSocket, buffer, &offset, length, 0, timeout)) return offset;
+    if (errno != EAGAIN) return -1;
   }
-  return offset;
+  return 0;
 }
 
 static int
