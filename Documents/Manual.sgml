@@ -3726,23 +3726,23 @@ for details regarding how to use an alternate text translation table.
 The attributes translation table is used when BRLTTY
 is displaying screen attributes rather than screen content
 (see the <ref id="command-DISPMD" name="DISPMD"> command).
-Each of the eight braille dots represents one of the eight attribute bits.
+Each of the eight braille dots represents one of the eight <tt/VGA/ attribute bits.
 The following attributes translation tables are provided:
 <descrip>
   <tag/attributes/
-    The lefthand column represents the background colours:
+    The lefthand column represents the foreground colours:
     <descrip>
       <tag/Dot 1/Red
       <tag/Dot 2/Green
       <tag/Dot 3/Blue
-      <tag/Dot 7/Blink
+      <tag/Dot 7/Bright
     </descrip>
-    The righthand column represents the foreground colours:
+    The righthand column represents the background colours:
     <descrip>
       <tag/Dot 4/Red
       <tag/Dot 5/Green
       <tag/Dot 6/Blue
-      <tag/Dot 8/Bright
+      <tag/Dot 8/Blink
     </descrip>
     A dot is raised when its corresponding attribute bit is on.
     This is the default attributes translation table
@@ -3751,22 +3751,22 @@ The following attributes translation tables are provided:
     the difference between normal (white on black)
     and reverse (black on white) video.
   <tag/attrib/
-    The lefthand column represents the background colours:
+    The lefthand column represents the foreground colours:
     <descrip>
       <tag/Dot 1/Red
       <tag/Dot 2/Green
       <tag/Dot 3/Blue
-      <tag/Dot 7/Blink
+      <tag/Dot 7/Bright
     </descrip>
-    The righthand column represents the foreground colours:
+    The righthand column represents the background colours:
     <descrip>
       <tag/Dot 4/Red
       <tag/Dot 5/Green
       <tag/Dot 6/Blue
-      <tag/Dot 8/Bright
+      <tag/Dot 8/Blink
     </descrip>
-    A foreground bit being on triggers its corresponding dot,
-    whereas a background bit being off triggers its corresponding dot.
+    A background bit being on triggers its corresponding dot,
+    whereas a foreground bit being off triggers its corresponding dot.
     This unintuitive logic actually makes it easier
     to read the most commonly used attribute combinations.
 </descrip>
@@ -3776,167 +3776,103 @@ and the <ref id="build-attributes-table" name="--with-attributes-table"> build o
 for details regarding how to use an alternate attributes translation table.
 
 <sect1>Table Format<p>
-A translation table is a 256-byte binary file.
-It's indexed with either a character or an attributes byte,
-and the byte at that position contains the corresponding dot combination.
-The mapping from bit to dot is as follows:
+A translation table consists of a sequence of directives, one per line,
+which define how each byte is to be represented in braille.
+White-space (blanks, tabs) at the beginning of a line,
+as well as before and/or after any operand of any directive,
+is ignored.
+Lines containing only white-space are ignored.
+If the first non-white-space character of a line is "&num;"
+then that line is a comment and is ignored.
+
+The following directives are provided:
 <descrip>
-  <tag/Bit 0/Dot 1
-  <tag/Bit 1/Dot 4
-  <tag/Bit 2/Dot 2
-  <tag/Bit 3/Dot 5
-  <tag/Bit 4/Dot 3
-  <tag/Bit 5/Dot 6
-  <tag/Bit 6/Dot 7
-  <tag/Bit 7/Dot 8
-</descrip>
-This particular mapping makes it easy and efficient for BRLTTY
-to vertically shift a dot pattern.
+  <tag><tt/byte/ <em/byte/ <em/dots/ &num; <em/comment/</tag>
+    Use the <tt/byte/ directive to specify
+    how a byte (character) is to be represented in braille.
+    See the text translation tables for examples of its use.
+    Since this is the most commonly used directive by far,
+    the <tt/byte/ keyword itself is optional.
 
-<sect1>Table Utilities<p>
-These utilities reside within the <tt/BrailleTables/ subdirectory,
-and aren't built as part of the regular procedure.
-To build them,
-first ensure that BRLTTY has been configured
-(see section <ref id="build" name="Build Options">),
-and then run <tt/make/ within the <tt/BrailleTables/ subdirectory.
-<tscreen><verb>
-cd BrailleTables
-make
-</verb></tscreen>
-
-<sect2>tbl2txt<label id="utility-tbl2txt"><p>
-This utility converts (uncompiles) a translation table into a text file
-for readability and/or modification.
-<tscreen>tbl2txt -<em/option/ ... <em/table-file/ <em/text-file/</tscreen>
-<descrip>
-  <tag><em/table-file/</tag>
-    The translation table which is to be converted.
-  <tag><em/text-file/</tag>
-    The file into which the text representing the table content is to be written.
-  <tag><tt/-c/<em/name/ <tt/--code-page=/<em/name/</tag>
-    The character set used to annotate each line of the text file.
-</descrip>
-
-The generated text file can, without modification, be recompiled back into a
-translation table with the <ref id="utility-txt2tbl" name="txt2tbl"> utility.
-Each of its lines contains lots of interesting information.
-
-If the <tt/-c/ option isn't specified, each line looks like this:
-<tscreen><em/cc/ <em/xx/ <em/ddd/ (73214568)<em/tt/ B+<em/bbbb/ <em/name/</tscreen>
-If the <tt/-c/ option is specified, each line looks like this:
-<tscreen><em/cc/ <em/xx/ <em/ddd/ (73214568)<em/tt/ B+<em/bbbb/ U+<em/uuuu/ <em/description/</tscreen>
-<descrip>
-  <tag><em/cc/</tag>
-    The character itself.
-    Unprintable characters are represented canonically.
-    Control characters are flagged with a circumflex,
-    e.g. Control-A (character 1) is <tt/&circ;A/. 
-    Meta control characters are flagged with a tilde,
-    e.g. Meta-Control-A (character 129) is <tt/&tilde;A/. 
-  <tag><em/xx/</tag>
-    The hexadecimal value of the character.
-  <tag><em/ddd/</tag>
-    The decimal value of the character.
-  <tag><tt/(73214568)/</tag>
-    The braille dot numbers.
-    If a dot isn't to be raised,
-    then its number is replaced with a blank.
-    The English letter <tt/y/, for example, would be
-    <tt/(&nbsp;3&nbsp;1456&nbsp;)/.
-    The dot numbers appear in the same order
-    as on a standard braille keyboard
-    so as to make it easier to visualize the braille character.
-  <tag><em/tt/</tag>
-    The hexadecimal value of the byte representing the dot combination
-    which is in the translation table.
-  <tag><em/bbbb/</tag>
-    The hexadecimal value of the unicode number
-    corresponding to the dot combination.
-  <tag><em/name/</tag>
-    The ASCII name of the character
-    (only shown if the <tt/-c/ option isn't specified).
-  <tag><em/uuuu/</tag>
-    The hexadecimal value of the unicode number
-    corresponding to the character
-    (only shown if the <tt/-c/ option is specified).
-  <tag><em/description/</tag>
-    The formal unicode description for the character
-    (only shown if the <tt/-c/ option is specified).
-</descrip>
-
-<sect2>txt2tbl<label id="utility-txt2tbl"><p>
-This utility compiles a translation table.
-<tscreen>txt2tbl -<em/option/ ... <em/text-file/ <em/table-file/</tscreen>
-<descrip>
-  <tag><em/text-file/</tag>
-    The source file describing the table content.
-  <tag><em/table-file/</tag>
-    The file into which the translation table is to be written.
-  <tag><tt/-d/ <tt/--duplicates/</tag>
-    Display a warning for each dot combination which has been used more than once.
-  <tag><tt/-m/ <tt/--missing/</tag>
-    Display a warning for each dot combination which hasn't been used.
-</descrip>
-
-A line which assigns a dot combination to a character
-must contain that dot combination within parenthesis, e.g. <tt/(12)/.
-The text file must contain exactly 256 such lines, each one, in order,
-defining the braille representation for its corresponding character.
-The dot numbers may be specified in any order,
-but each must only be specified once.
-It's valid to specify no number at all, e.g. <tt/()/ (for a space).
-Any number of spaces may occur any number of times anywhere between the parentheses.
-All characters before the left parenthesis and after the right parenthesis are ignored.
-All lines which don't contain a left parenthesis are ignored.
-
-The algorithm for locating the dot numbers is actually a bit more complicated
-because a line may contain more than one left and/or right parenthesis
-(the <ref id="utility-tbl2txt" name="tbl2txt"> utility does this).
-The first right parenthesis which is preceded by at least one left parenthesis is used.
-The nearest left parenthesis to the left of that right parenthesis is used.
-The line <tt/)((12)/, for example, is valid.
-
-<sect2>tbl2tbl<label id="utility-tbl2tbl"><p>
-This utility converts a binary translation table from one dot mapping to another.
-<tscreen>tbl2tbl <em/input-mapping/ <em/output-mapping/</tscreen>
-<descrip>
-  <tag><em/input-mapping/</tag>
-    The dot mapping used within the source table.
-  <tag><em/output-mapping/</tag>
-    The dot mapping to be used within the table being generated.
-</descrip>
-The source table is read from standard input,
-and the converted table is written to standard output.
-The following dot mappings are supported:
-<descrip>
-  <tag/standard/
-    BRLTTY's native mapping (described above).
-  <tag/tieman/
-    The mapping used by <htmlurl url="http://www.braillevoyager.nl/uk/index.html" name="Tieman B.V.">.
     <descrip>
-      <tag/Bit 0/Dot 1
-      <tag/Bit 1/Dot 2
-      <tag/Bit 2/Dot 3
-      <tag/Bit 3/Dot 7
-      <tag/Bit 4/Dot 8
-      <tag/Bit 5/Dot 6
-      <tag/Bit 6/Dot 5
-      <tag/Bit 7/Dot 4
+      <tag><em/byte/</tag>
+        The byte being defined. It may be:
+        <itemize>
+          <item>
+            Any single character
+            other than a backslash
+            or a white-space character.
+          <item>
+            A special character (prefixed by a backslash).
+            These are:
+            <descrip>
+              <tag/\\/A literal backslash.
+              <tag/\x&num;&num;/The two-digit hexadecimal representation of any character.
+              <tag/\X&num;&num;/... (the case of the X and of the digits is ignored)
+            </descrip>
+        </itemize>
+      <tag><em/dots/</tag>
+        The braille representation of the byte.
+        It is a sequence of one to eight dot numbers.
+        If the dot number sequence is enclosed within parentheses
+        then the dot numbers may be separated from one another by white-space.
+        A dot number is a digit within the range <tt/1/-<tt/8/ as defined by the standard
+        <ref name="Braille Dot Numbering Convention" id="dots">.
+        The special dot number <tt/0/ is recognized
+        when not enclosed within parentheses,
+        and means no dots;
+        it may not be used in combination with any other dot numbers.
     </descrip>
-  <tag/alva/
-    The mapping used by <htmlurl url="http://www.alva-bv.nl/alvacorp/alva_corp_home.html" name="Alva B.V.">
-    and <htmlurl url="http://www.telesensory.com" name="Telesensory Systems Inc.">.
+
+    Examples:
+    <itemize>
+      <item>byte a 1
+      <item>b 12
+      <item>c (14)
+      <item>d ( 1  4   5    )
+      <item>\\ 12567
+      <item>\x20 0
+    </itemize>
+  <tag><tt/dot/ <em/dot/ <em/state/ &num; <em/comment/</tag>
+    Use the <tt/dot/ directive to specify
+    how an undefined byte is to be represented in braille.
+    See the attributes translation tables for examples of its use.
+
     <descrip>
-      <tag/Bit 0/Dot 1
-      <tag/Bit 1/Dot 2
-      <tag/Bit 2/Dot 3
-      <tag/Bit 3/Dot 4
-      <tag/Bit 4/Dot 5
-      <tag/Bit 5/Dot 6
-      <tag/Bit 6/Dot 7
-      <tag/Bit 7/Dot 8
+      <tag><em/dot/</tag>
+        The dot being defined.
+        It is a single digit within the range <tt/1/-<tt/8/ as defined by the standard
+        <ref name="Braille Dot Numbering Convention" id="dots">.
+      <tag><em/state/</tag>
+        When the dot is to be raised.
+        It may be:
+        <descrip>
+          <tag><tt/on/</tag>The dot is to be raised.
+          <tag><tt/off/</tag>The dot isn't to be raised.
+          <tag><tt/=/<em/bit/</tag>The dot is to be raised if the named bit is set (1).
+          <tag><tt/&tilde;/<em/bit/</tag>The dot is to be raised if the named bit is clear (0).
+        </descrip>
+
+        The bit names are:
+        <descrip>
+          <tag/0X01/fg-blue
+          <tag/0X02/fg-green
+          <tag/0X04/fg-red
+          <tag/0X08/fg-bright
+          <tag/0X10/bg-blue
+          <tag/0X20/bg-green
+          <tag/0X40/bg-red
+          <tag/0X80/blink
+        </descrip>
     </descrip>
+
+    Examples:
+    <itemize>
+      <item>dot 1 on
+      <item>dot 2 off
+      <item>dot 3 =fg-red
+      <item>dot 4 &tilde;bg-blue
+    </itemize>
 </descrip>
 
 <sect>The Application Programming Interface<label id="api"><p>
