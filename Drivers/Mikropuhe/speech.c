@@ -211,18 +211,18 @@ static int
 synthesizeSpeech (const unsigned char *bytes, int length, int tags) {
   speechParameters.nTags = tags;
   if (mpChannelSpeakFile) {
-    int code;
+    int error;
     char string[length+1];
     memcpy(string, bytes, length);
     string[length] = 0;
-    if (!(code = mpChannelSpeakFile(speechChannel, string, NULL, &speechParameters))) return 1;
-    if (code != 1) logSynthesisError(code, "channel speak");
+    if (!(error = mpChannelSpeakFile(speechChannel, string, NULL, &speechParameters))) return 1;
+    if (error != 1) logSynthesisError(error, "channel speak");
   }
   return 0;
 }
 
 static void *
-speechMain (void *data) {
+processSpeechSegments (void *data) {
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
   pthread_mutex_lock(&speechMutex);
   while (synthesisThreadStarted) {
@@ -234,7 +234,7 @@ speechMain (void *data) {
       struct timespec timeout;
       gettimeofday(&now, NULL);
       timeout.tv_sec = now.tv_sec + 3;
-      timeout.tv_nsec = 0;
+      timeout.tv_nsec = now.tv_usec * 1000;
       error = pthread_cond_timedwait(&speechConditional, &speechMutex, &timeout);
     } else {
       error = pthread_cond_wait(&speechConditional, &speechMutex);
@@ -276,7 +276,7 @@ startSynthesisThread (void) {
       pthread_attr_t attributes;
       if (!(error = pthread_attr_init(&attributes))) {
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-        error = pthread_create(&synthesisThread, &attributes, speechMain, NULL);
+        error = pthread_create(&synthesisThread, &attributes, processSpeechSegments, NULL);
         pthread_attr_destroy(&attributes);
         if (!error) {
           return 1;
