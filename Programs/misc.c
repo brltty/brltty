@@ -108,18 +108,20 @@ LogClose (void) {
 void
 LogPrint (int level, char *format, ...) {
   va_list argp;
-  va_start(argp, format);
-
   if (level <= LOG_ERR) ++loggedProblemCount;
 
   if (level <= logLevel) {
 #ifdef HAVE_SYSLOG_H
     if (syslogOpened) {
 #ifdef HAVE_VSYSLOG
+      va_start(argp, format);
       vsyslog(level, format, argp);
+      va_end(argp);
 #else /* HAVE_VSYSLOG */
       char buffer[0X100];
+      va_start(argp, format);
       vsnprintf(buffer, sizeof(buffer), format, argp);
+      va_end(argp);
       syslog(level, "%s", buffer);
 #endif /* HAVE_VSYSLOG */
       goto done;
@@ -130,12 +132,12 @@ LogPrint (int level, char *format, ...) {
 done:
 
   if (level <= printLevel) {
+    va_start(argp, format);
     vfprintf(stderr, format, argp);
+    va_end(argp);
     fprintf(stderr, "\n");
     fflush(stderr);
   }
-
-  va_end(argp);
 }
 
 void
