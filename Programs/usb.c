@@ -879,7 +879,7 @@ usbGetSerialOperations (UsbDevice *device) {
     ,
     { /* Papenmeier FTDI */
       0X0403, 0XF208,
-      &usbFtdiOperations_FT8U232AM,
+      &usbFtdiOperations_FT232BM,
       usbFtdiInputFilter
     }
     ,
