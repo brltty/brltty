@@ -806,8 +806,7 @@ in
       usb_object="darwin"
       ;;
    *)
-      usb_object=""
-      AC_MSG_WARN([no USB support on ${host_os}])
+      AC_CHECK_HEADERS([usb.h], [usb_object="libusb"])
       ;;
 esac
 if test -n "${usb_object}"
@@ -818,8 +817,16 @@ then
       [],
 [dnl
       AC_DEFINE([ENABLE_USB_SUPPORT])
+      case "${usb_object}"
+      in
+         libusb)
+            AC_HAVE_LIBRARY([usb])
+            ;;
+      esac
       usb_objects="usb."'$O'" usb_${usb_object}."'$O'
 ])
+else
+   AC_MSG_WARN([no USB support on ${host_os}])
 fi
 AC_SUBST([usb_objects])
 
