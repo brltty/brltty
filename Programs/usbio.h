@@ -17,6 +17,81 @@
 
 #include <stdint.h>
 
+/* Descriptor types. */
+#define USB_DT_DEVICE    0x01
+#define USB_DT_CONFIG    0x02
+#define USB_DT_STRING    0x03
+#define USB_DT_INTERFACE 0x04
+#define USB_DT_ENDPOINT  0x05
+#define USB_DT_HID       (USB_TYPE_CLASS | 0x01)
+#define USB_DT_REPORT    (USB_TYPE_CLASS | 0x02)
+#define USB_DT_PHYSICAL  (USB_TYPE_CLASS | 0x03)
+#define USB_DT_HUB       (USB_TYPE_CLASS | 0x09)
+
+/* Descriptor sizes. */
+#define USB_DT_DEVICE_SIZE         18
+#define USB_DT_CONFIG_SIZE          9
+#define USB_DT_INTERFACE_SIZE       9
+#define USB_DT_ENDPOINT_SIZE        7
+#define USB_DT_ENDPOINT_AUDIO_SIZE  9        /* Audio extension */
+#define USB_DT_HUB_NONVAR_SIZE      7
+#define USB_DT_HID_SIZE             9
+
+/* Device and interface classes. */
+#define USB_CLASS_PER_INTERFACE 0X00
+#define USB_CLASS_AUDIO         0X01
+#define USB_CLASS_COMM          0X02
+#define USB_CLASS_HID           0X03
+#define USB_CLASS_PHYSICAL      0X05
+#define USB_CLASS_PRINTER       0X07
+#define USB_CLASS_MASS_STORAGE  0X08
+#define USB_CLASS_HUB           0X09
+#define USB_CLASS_DATA          0X0A
+#define USB_CLASS_APP_SPEC      0XFE
+#define USB_CLASS_VENDOR_SPEC   0XFF
+
+/* Endpoint addresses. */
+#define USB_ENDPOINT_NUMBER_MASK 0X0F        /* in bEndpointAddress */
+#define USB_ENDPOINT_DIR_MASK    0X80
+
+/* Endpoint types. */
+#define USB_ENDPOINT_XFERTYPE_MASK 0X03        /* in bmAttributes */
+#define USB_ENDPOINT_XFER_CONTROL  0X00
+#define USB_ENDPOINT_XFER_ISOC     0X01
+#define USB_ENDPOINT_XFER_BULK     0X02
+#define USB_ENDPOINT_XFER_INT      0X03
+
+/* Control transfer recipients. */
+#define USB_RECIP_MASK      0X1F
+#define USB_RECIP_DEVICE    0X00
+#define USB_RECIP_INTERFACE 0X01
+#define USB_RECIP_ENDPOINT  0X02
+#define USB_RECIP_OTHER     0X03
+
+/* Control transfer types. */
+#define USB_TYPE_MASK     (0X03 << 5)
+#define USB_TYPE_STANDARD (0X00 << 5)
+#define USB_TYPE_CLASS    (0X01 << 5)
+#define USB_TYPE_VENDOR   (0X02 << 5)
+#define USB_TYPE_RESERVED (0X03 << 5)
+
+/* Transfer directions. */
+#define USB_DIR_OUT 0X00
+#define USB_DIR_IN  0X80
+
+/* Standard control requests. */
+#define USB_REQ_GET_STATUS        0X00
+#define USB_REQ_CLEAR_FEATURE     0X01
+#define USB_REQ_SET_FEATURE       0X03
+#define USB_REQ_SET_ADDRESS       0X05
+#define USB_REQ_GET_DESCRIPTOR    0X06
+#define USB_REQ_SET_DESCRIPTOR    0X07
+#define USB_REQ_GET_CONFIGURATION 0X08
+#define USB_REQ_SET_CONFIGURATION 0X09
+#define USB_REQ_GET_INTERFACE     0X0A
+#define USB_REQ_SET_INTERFACE     0X0B
+#define USB_REQ_SYNCH_FRAME       0X0C
+
 typedef struct {
   uint8_t bLength;         /* Descriptor size in bytes. */
   uint8_t bDescriptorType; /* Descriptor type. */

@@ -29,8 +29,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <asm/types.h>
-#include <linux/usb.h>
 #include <linux/usbdevice_fs.h>
 #include <linux/serial.h>
 
