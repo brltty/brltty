@@ -200,20 +200,22 @@ int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth);
 /* brlapi_getDriverId */
 /** Identify the driver used by \e brltty
  *
- * This function will return the \e brltty 2-chars code of the driver
- * currently in use.
+ * This function will fill its argument with the \e brltty 2-chars code of
+ * the driver currently in use, to which it adds a '\0'.
  *
- * \note The returned string is static, so that further calls will modify it */
-char *brlapi_getDriverId(void);
+ * \return 0 on success, -1 on error
+*/
+int brlapi_getDriverId(unsigned char *id);
 
 /* brlapi_getDriverName */
 /** return the complete name of the driver used by \e brltty
  *
- * This function will return the whole name of the braille terminal, if
- * available.
+ * This function fills its argument with the whole name of the braille
+ * terminal if available, terminated with a '\0'.
  *
- * \note The returned string is static, so that further calls will modify it */
-char *brlapi_getDriverName(void);
+ * \return 0 on success, -1 on error
+*/
+int brlapi_getDriverName(unsigned char *name);
 
 /* brlapi_getDisplaySize */
 /** return the size of the braille display */
@@ -306,7 +308,7 @@ int brlapi_leaveTty(void);
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_writeBrl(int cursor, const char *str);
+int brlapi_writeBrl(int cursor, const unsigned char *str);
 
 /* brlapi_writeBrlDots */
 /** Write the given dots array to the display
@@ -318,28 +320,37 @@ int brlapi_writeBrl(int cursor, const char *str);
  */
 int brlapi_writeBrlDots(const unsigned char *dots);
 
+/* brlapi_extWriteStruct */
+/** Structure containing arguments to be given to brlapi_extWrite */
+typedef struct {
+  int displayNumber; /* -1 means "don't specify" */
+  uint32_t regionBegin, regionEnd; /** Region of display to update */
+  char *text; /** Text to display */
+  char *attrAnd; /** And attributes */
+  char *attrOr; /** Or attributes */
+  int cursor; /** Cursorposition. -1 means "don't touch" */
+} brlapi_extWriteStruct;
+
+/* BRLAPI_EXTWRITESTRUCT_INITIALIZER */
+/** Allows to initialize a structure of type \e brlapi_extWriteStruct *
+ * with default values:
+ * displayNumber = -1;
+ * regionBegin = regionEnd = 0; (update the whole display)
+ * text = attrAnd = attrOr = NULL;
+ * cursor = -1;
+*/
+
+#define BRLAPI_EXTWRITESTRUCT_INITIALIZER \
+  { -1, 0, 0, NULL, NULL, NULL, -1};
+
 /* brlapi_extWriteBrl */
 /** Update a specific region of the braille display and apply and/or masks
  *
- * \param cursor gives the cursor position; if 0 or greater than the
- * display size, cursor is hidden. If -1, it is left where it was.
- *
- * \param rbeg
- * \param rend specify which part of the display should be updated.
- * If one of rbeg,rend is not in [1..displaySize], the whole display will
- * be updated.
- *
- * \param text Text to display; If NULL the previous text is kept.
- *
- * \param and applies an \e and mask to the text; the mask is an array of dots.
- * NUKL means no \e and mask.
- *
- * \param or dots to set; useful for underlining; NULL means no \e or mask.
+ * \param s gives information necesarry for the update
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_extWriteBrl(int cursor, int rbeg, int rend, const unsigned char *text, const
-unsigned char *and, const unsigned char *or);
+int brlapi_extWriteBrl(const brlapi_extWriteStruct *s);
 
 /** @} */
 
@@ -610,11 +621,17 @@ typedef uint32_t brl_type_t;
 
 /** Flags for extended write */
 #define BRLAPI_EWF_DISPLAYNUMBER 0X01   /**< Display number                 */
-#define BRLAPI_EWF_CURSOR        0X02   /**< Cursor position                */
-#define BRLAPI_EWF_REGION        0X04   /**< Region parameter               */
-#define BRLAPI_EWF_TEXT          0X08   /**< Contains some text             */
-#define BRLAPI_EWF_ATTR_AND      0X10   /**< And attributes                 */
-#define BRLAPI_EWF_ATTR_OR       0X20   /**< Or attributes                  */
+#define BRLAPI_EWF_REGION        0X02   /**< Region parameter               */
+#define BRLAPI_EWF_TEXT          0X04   /**< Contains some text             */
+#define BRLAPI_EWF_ATTR_AND      0X08   /**< And attributes                 */
+#define BRLAPI_EWF_ATTR_OR       0X10   /**< Or attributes                  */
+#define BRLAPI_EWF_CURSOR        0X20   /**< Cursor position                */
+
+/** Structure of extended write packets */
+typedef struct {
+  uint32_t flags;
+  unsigned char data;
+} extWriteStruct; 
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server

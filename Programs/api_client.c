@@ -321,35 +321,34 @@ int brlapi_recvRaw(unsigned char *buf, size_t size)
 
 /* Function : brlapi_getDriverId */
 /* Identify the driver used by brltty */
-char *brlapi_getDriverId()
+int brlapi_getDriverId(unsigned char *id)
 {
   brl_type_t type;
   int res;
-  static char id[3];
-  uint32_t *code = (uint32_t *) &id[0];
+  uint32_t *code = (uint32_t *) id;
   pthread_mutex_lock(&brlapi_fd_mutex);
   if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERID, NULL, 0)<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
     brlapi_errno=BRLERR_LIBCERR;
-    return NULL;
+    return -1;
   }
   while (1) {
-    if ((res=brlapi_readPacket(fd,&type, &id[0],sizeof(id)))<0) {
+    if ((res=brlapi_readPacket(fd,&type, id, 3))<0) {
       pthread_mutex_unlock(&brlapi_fd_mutex);
       brlapi_errno=BRLERR_LIBCERR;
-      return NULL;
+      return -1;
     }
     if (handle_keypress(type,code,res)) continue;
     switch (type) {
       case BRLPACKET_GETDRIVERID: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
         id[res]='\0';
-        return &id[0];
+        return 0;
       }
       case BRLPACKET_ERROR: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
         brlapi_errno=ntohl(*code);
-        return NULL;
+        return -1;
       }
       /* default is ignored, but logged */
       default:
@@ -360,35 +359,34 @@ char *brlapi_getDriverId()
 
 /* Function : brlapi_getDriverName */
 /* Name of the driver used by brltty */
-char *brlapi_getDriverName()
+int brlapi_getDriverName(unsigned char *name)
 {
   brl_type_t type;
   int res;
-  static char name[80]; /* should be enough */
-  uint32_t *code = (uint32_t *) &name[0];
+  uint32_t *code = (uint32_t *) name;
   pthread_mutex_lock(&brlapi_fd_mutex);
   if (brlapi_writePacket(fd, BRLPACKET_GETDRIVERNAME, NULL, 0)<0) {
     pthread_mutex_unlock(&brlapi_fd_mutex);
     brlapi_errno=BRLERR_LIBCERR;
-    return NULL;
+    return -1;
   }
   while (1) {
-    if ((res=brlapi_readPacket(fd, &type, &name[0],sizeof(name)))<0) {
+    if ((res=brlapi_readPacket(fd, &type, name,20))<0) {
       pthread_mutex_unlock(&brlapi_fd_mutex);
       brlapi_errno=BRLERR_LIBCERR;
-      return NULL;
+      return -1;
     }
     if (handle_keypress(type,code,res)) continue;
     switch (type) {
       case BRLPACKET_GETDRIVERNAME: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
         name[res]='\0';
-        return &name[0];
+        return 0;
       }
       case BRLPACKET_ERROR: {
         pthread_mutex_unlock(&brlapi_fd_mutex);
         brlapi_errno=ntohl(*code);
-        return NULL;
+        return -1;
       }
       /* default is ignored, but logged */
       default:
@@ -545,9 +543,9 @@ int brlapi_leaveTty()
 
 /* Function : brlapi_writeBrl */
 /* Writes a string to the braille display */
-int brlapi_writeBrl(int cursor, const char *str)
+int brlapi_writeBrl(int cursor, const unsigned char *str)
 {
-  static unsigned char disp[sizeof(uint32_t)+256];
+  unsigned char disp[sizeof(uint32_t)+256];
   uint32_t *csr = (uint32_t *) &disp[0];
   unsigned char *s = &disp[sizeof(uint32_t)];
   uint32_t tmp = brlx * brly, min, i;
@@ -566,7 +564,7 @@ int brlapi_writeBrl(int cursor, const char *str)
 /* Writes dot-matrix to the braille display */
 int brlapi_writeBrlDots(const unsigned char *dots)
 {
-  static unsigned char disp[256];
+  unsigned char disp[256];
   uint32_t size = brlx * brly;
   if ((size == 0) || (size > 256)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
@@ -578,61 +576,45 @@ int brlapi_writeBrlDots(const unsigned char *dots)
 
 /* Function : brlapi_extWrite */
 /* Extended writes on braille displays */
-int brlapi_extWriteBrl(int cursor, int rbeg, int rend, const unsigned char *text, const unsigned char *and, const unsigned char *or)
+int brlapi_extWriteBrl(const brlapi_extWriteStruct *s)
 {
-  uint32_t rmin, rmax, strSize;
-  unsigned int size = 4;
   int dispSize = brlx * brly;
-  static unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  uint32_t *flags = (uint32_t *) packet;
-  char *p = &packet[sizeof(uint32_t)];
-  unsigned int i, textlen, andlen, orlen;
-  if (text==NULL) textlen = 0; else textlen = strlen(text);
-  if (and==NULL) andlen = 0; else andlen = strlen(and);
-  if (or==NULL) orlen = 0; else orlen = strlen(or);
-  *flags = 0;
-  if (cursor>=0) {
-    *flags |= BRLAPI_EWF_CURSOR;
-    *((uint32_t *) p) = htonl(cursor);
-    p += sizeof(uint32_t); size += sizeof(uint32_t);
-  }
-  if ((1<=rbeg) && (rbeg<=dispSize) && (1<=rend) && (rend<=dispSize)) {
-    rmin = MIN(rbeg, rend);
-    rmax = MAX(rbeg, rend);
-    *flags |= BRLAPI_EWF_REGION;
-    *((uint32_t *) p) = htonl(rmin);
-    p += sizeof(uint32_t); size += sizeof(uint32_t);
-    *((uint32_t *) p) = htonl(rmax);
-    p += sizeof(uint32_t); size += sizeof(uint32_t);
+  uint32_t rbeg, rend, strLen;
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  extWriteStruct *ews = (extWriteStruct *) packet;
+  unsigned char *p = &ews->data;
+  ews->flags = 0;
+  if ((1<=s->regionBegin) && (s->regionBegin<=dispSize) && (1<=s->regionEnd) && (s->regionEnd<=dispSize)) {
+    if (s->regionBegin>s->regionEnd) return 0;
+    rbeg = s->regionBegin; rend = s->regionEnd;
+    ews->flags |= BRLAPI_EWF_REGION;
+    *((uint32_t *) p) = htonl(rbeg); p += sizeof(uint32_t);
+    *((uint32_t *) p) = htonl(rend); p += sizeof(uint32_t);
   } else {
-    rmin = 1; rmax = dispSize;
+    rbeg = 1; rend = dispSize;
   }
-  strSize = (rmax-rmin) + 1;
-  if (textlen) {
-    *flags |= BRLAPI_EWF_TEXT;
-    if (textlen<strSize) {
-      memcpy(p, text, textlen);
-      for (i=textlen; i<strSize; i++) *(p+i) = ' ';
-    } else memcpy(p, text, strSize);
-    p += strSize; size += strSize;
+  strLen = (rend-rbeg) + 1;
+  if (s->text) {
+    ews->flags |= BRLAPI_EWF_TEXT;
+    memcpy(p, s->text, strLen);
+    p += strLen;
   }
-  if (andlen) {
-    *flags |= BRLAPI_EWF_ATTR_AND;
-    if (andlen<strSize) {
-      memcpy(p, and, andlen);
-      for (i=andlen; i<strSize; i++) *(p+i) = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8;
-    } else memcpy(p, and, strSize);
-    p += strSize; size += strSize;
+  if (s->attrAnd) {
+    ews->flags |= BRLAPI_EWF_ATTR_AND;
+    memcpy(p, s->attrAnd, strLen);
+    p += strLen;
   }
-  if (orlen) {
-    *flags |= BRLAPI_EWF_ATTR_OR;
-    if (orlen<strSize) {
-      memcpy(p, or, orlen);
-      for (i=orlen; i<strSize; i++) *(p+i) = '\0';
-    } else memcpy(p, or, strSize);
-    p += strSize; size += strSize;
+  if (s->attrOr) {
+    ews->flags |= BRLAPI_EWF_ATTR_OR;
+    memcpy(p, s->attrOr, strLen);
+    p += strLen;
   }
-  return brlapi_writePacketWaitForAck(fd,BRLPACKET_EXTWRITE,packet,size);
+  if ((s->cursor>=0) && (s->cursor<=dispSize)) {
+    ews->flags |= BRLAPI_EWF_CURSOR;
+    *((uint32_t *) p) = htonl(s->cursor);
+    p += sizeof(uint32_t);
+  }
+  return brlapi_writePacketWaitForAck(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
 }
 
 /* Function : packetReady */

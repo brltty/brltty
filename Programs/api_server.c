@@ -429,26 +429,21 @@ void *ProcessConnection(void *arg)
         continue;
       }
       case BRLPACKET_EXTWRITE: {
-        uint32_t dispSize, cursor, rbeg, rend, strSize, flags = ints[0];
-        unsigned char *p = packet;
+        extWriteStruct *ews = (extWriteStruct *) packet;
+        uint32_t dispSize, cursor, rbeg, rend, strLen;
+        unsigned char *p = &ews->data;
         unsigned char buf[200]; /* dirty! */ 
         LogPrint(LOG_DEBUG,"Received Extended Write request...");
-        CHECK(size>=4, BRLERR_INVALID_PACKET);
+        CHECK(size>=sizeof(ews->flags), BRLERR_INVALID_PACKET);
         CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
         pthread_mutex_lock(&c->brlmutex);
         cursor = c->cursor;
         dispSize = c->brl.x*c->brl.y;
         memcpy(buf, c->brl.buffer, dispSize);
         pthread_mutex_unlock(&c->brlmutex);
-        p += sizeof(uint32_t); size -= sizeof(uint32_t); /* flags */
-        CHECK((flags & BRLAPI_EWF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP);
-        if (flags & BRLAPI_EWF_CURSOR) {
-          CHECK(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
-          cursor = ntohl( *((uint32_t *) p) );
-          p += sizeof(uint32_t); size -= sizeof(uint32_t); /* cursor */
-          if (cursor>dispSize) cursor = 0;
-        }
-        if (flags & BRLAPI_EWF_REGION) {
+        size -= sizeof(ews->flags); /* flags */
+        CHECK((ews->flags & BRLAPI_EWF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP);
+        if (ews->flags & BRLAPI_EWF_REGION) {
           CHECK(size>2*sizeof(uint32_t), BRLERR_INVALID_PACKET);
           rbeg = ntohl( *((uint32_t *) p) );
           p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region begin */
@@ -461,24 +456,30 @@ void *ProcessConnection(void *arg)
           rbeg = 1;
           rend = dispSize; 
         }
-        strSize = (rend-rbeg) + 1;
-        if (flags & BRLAPI_EWF_TEXT) {
-          CHECK(size>=strSize, BRLERR_INVALID_PACKET);
+        strLen = (rend-rbeg) + 1;
+        if (ews->flags & BRLAPI_EWF_TEXT) {
+          CHECK(size>=strLen, BRLERR_INVALID_PACKET);
           for (i=rbeg-1; i<rend; i++)
             buf[i] = textTable[*(p+i)];          
-          p += strSize; size -= strSize; /* text */
+          p += strLen; size -= strLen; /* text */
         }
-        if (flags & BRLAPI_EWF_ATTR_AND) {
-          CHECK(size>=strSize, BRLERR_INVALID_PACKET);
+        if (ews->flags & BRLAPI_EWF_ATTR_AND) {
+          CHECK(size>=strLen, BRLERR_INVALID_PACKET);
           for (i=rbeg-1; i<rend; i++)
             buf[i] &= *(p+i);          
-          p += strSize; size -= strSize; /* and attributes */
+          p += strLen; size -= strLen; /* and attributes */
         }
-        if (flags & BRLAPI_EWF_ATTR_OR) {
-          CHECK(size>=strSize, BRLERR_INVALID_PACKET);
+        if (ews->flags & BRLAPI_EWF_ATTR_OR) {
+          CHECK(size>=strLen, BRLERR_INVALID_PACKET);
           for (i=rbeg-1; i<rend; i++)
             buf[i] |= *(p+i);          
-          p += strSize; size -= strSize; /* or attributes */
+          p += strLen; size -= strLen; /* or attributes */
+        }
+        if (ews->flags & BRLAPI_EWF_CURSOR) {
+          CHECK(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
+          cursor = ntohl( *((uint32_t *) p) );
+          p += sizeof(uint32_t); size -= sizeof(uint32_t); /* cursor */
+          CHECK(cursor<=dispSize, BRLERR_INVALID_PACKET);
         }
         CHECK(size==0, BRLERR_INVALID_PACKET);
         /* Here all the packet has been processed. */
