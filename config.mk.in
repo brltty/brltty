@@ -150,6 +150,8 @@ INSTALL_DRIVERS = @install_drivers@
 CONFIGURED_DRIVERS = @brltty_driver_names@
 
 SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
+SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
+CSPI_INCLUDES = @cspi_includes@
 
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
