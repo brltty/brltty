@@ -234,9 +234,27 @@ makePath (const char *directory, const char *file) {
 
 int
 openSerialDevice (const char *path, int *descriptor, struct termios *attributes) {
-  if ((*descriptor = open(path, O_RDWR|O_NOCTTY)) != -1) {
-    if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) return 1;
-    LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", path, strerror(errno));
+  if ((*descriptor = open(path, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+    if (isatty(*descriptor)) {
+      int flags;
+      if ((flags = fcntl(*descriptor, F_GETFL)) != -1) {
+        flags &= ~O_NONBLOCK;
+        if (fcntl(*descriptor, F_SETFL, flags) != -1) {
+          if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
+            LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", path, *descriptor);
+            return 1;
+          } else {
+          }
+          LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", path, strerror(errno));
+        } else {
+          LogError("F_SETFL");
+        }
+      } else {
+        LogError("F_GETFL");
+      }
+    } else {
+      LogPrint(LOG_ERR, "Not a serial device: %s", path);
+    }
     close(*descriptor);
     *descriptor = -1;
   } else {

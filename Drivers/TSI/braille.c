@@ -462,19 +462,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
   rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  brl_fd = open (tty, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0){
-    LogPrint(LOG_ERR, "Open failed on port %s: %s", tty, strerror(errno));
+  if (!openSerialDevice(tty, &brl_fd, &oldtio)) {
     goto failure;
   }
-  if(!isatty(brl_fd)){
-    LogPrint(LOG_ERR,"Opened device %s is not a tty!", tty);
-    goto failure;
-  }
-  LogPrint(LOG_DEBUG,"Tty %s opened", tty);
-
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
-  /* we don't check the return code. could only be EBADF or ENOTTY. */
 
   /* Construct new settings by working from current state */
   memcpy(&curtio, &oldtio, sizeof(struct termios));
