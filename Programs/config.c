@@ -689,7 +689,7 @@ findBrailleDriver (int *internal) {
             initializeBrailleDisplay(&brl);
             if (driver->open(&brl, parameters, *device)) {
               driver->close(&brl);
-              LogPrint(LOG_DEBUG, "Braille display found: %s[%s]",
+              LogPrint(LOG_INFO, "Braille display found: %s[%s]",
                        driver->identifier, driver->name);
 
               opt_brailleDriver = driver->identifier;
