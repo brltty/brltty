@@ -722,6 +722,7 @@ baud2integer (speed_t baud) {
 int
 validateChoice (unsigned int *value, const char *description, const char *word, const char *const *choices) {
    int length = strlen(word);
+   *value = 0;
    if (length) {
       int index = 0;
       while (choices[index]) {
@@ -736,7 +737,6 @@ validateChoice (unsigned int *value, const char *description, const char *word, 
       LogPrint(LOG_ERR, "Unsupported %s: %s", description, word);
       return 0;
    }
-   *value = 0;
    return 1;
 }
 
