@@ -86,11 +86,17 @@ read_FrozenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   return NULL;
 }
 
+static int
+currentvt_FrozenScreen (void) {
+  return screenDescription.no;
+}
+
 void
 initializeFrozenScreen (FrozenScreen *frozen) {
   initializeBaseScreen(&frozen->base);
   frozen->base.describe = describe_FrozenScreen;
   frozen->base.read = read_FrozenScreen;
+  frozen->base.currentvt = currentvt_FrozenScreen;
   frozen->open = open_FrozenScreen;
   frozen->close = close_FrozenScreen;
   screenText = NULL;
