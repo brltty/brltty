@@ -919,8 +919,8 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 
 static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
-  static unsigned int RoutingPos = 0;
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
+  static unsigned int RoutingPos = 0;
   int res = EOF;
   int ProcessKey = GetKey(brl, &CurrentKeys, &RoutingPos);
 
@@ -1201,70 +1201,70 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
           break;
 
       }
+      res |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
     } else {
       /* These are the keys that should be processed when released */
-      if (!ReleasedKeys)
-        {
-          ReleasedKeys = LastKeys;
-          switch (brl->helpPage) {
-            case 0: /* ABT and Delphi models */
-              switch (ReleasedKeys) {
-                case KEY_HOME:
-                  res = CMD_TOP_LEFT;
-                  break;
-                case KEY_CURSOR:
-                  res = CMD_HOME;
-                  ReWrite = 1;	/* force rewrite of whole display */
-                  break;
-                case KEY_PROG:
-                  res = CMD_HELP;
-                  /*res = CMD_SAY_LINE;*/
-                  break;
-                case KEY_PROG | KEY_HOME:
-                  res = CMD_DISPMD;
-                  break;
-                case KEY_HOME | KEY_CURSOR:
-                  res = CMD_CSRTRK;
-                  break;
-                case KEY_PROG | KEY_CURSOR:
-                  res = CMD_PREFMENU;
-                  break;
-              }
-              break;
+      if (!ReleasedKeys) {
+        ReleasedKeys = LastKeys;
+        switch (brl->helpPage) {
+          case 0: /* ABT and Delphi models */
+            switch (ReleasedKeys) {
+              case KEY_HOME:
+                res = CMD_TOP_LEFT;
+                break;
+              case KEY_CURSOR:
+                res = CMD_HOME;
+                ReWrite = 1;	/* force rewrite of whole display */
+                break;
+              case KEY_PROG:
+                res = CMD_HELP;
+                /*res = CMD_SAY_LINE;*/
+                break;
+              case KEY_PROG | KEY_HOME:
+                res = CMD_DISPMD;
+                break;
+              case KEY_HOME | KEY_CURSOR:
+                res = CMD_CSRTRK;
+                break;
+              case KEY_PROG | KEY_CURSOR:
+                res = CMD_PREFMENU;
+                break;
+            }
+            break;
 
-            case 1: /* Satellite models */
-              switch (ReleasedKeys) {
-                case KEY_HOME:
-                  res = CMD_BACK;
-                  break;
-                case KEY_CURSOR:
-                  res = CMD_HOME;
-                  break;
-                case KEY_HOME | KEY_CURSOR:
-                  res = CMD_CSRTRK;
-                  break;
+          case 1: /* Satellite models */
+            switch (ReleasedKeys) {
+              case KEY_HOME:
+                res = CMD_BACK;
+                break;
+              case KEY_CURSOR:
+                res = CMD_HOME;
+                break;
+              case KEY_HOME | KEY_CURSOR:
+                res = CMD_CSRTRK;
+                break;
 
-                case KEY_BRL_F1:
-                  res = CMD_HELP;
-                  break;
-                case KEY_BRL_F2:
-                  res = CMD_LEARN;
-                  break;
-                case KEY_BRL_F1 | KEY_BRL_F2:
-                  res = CMD_RESTARTBRL;
-                  break;
+              case KEY_BRL_F1:
+                res = CMD_HELP;
+                break;
+              case KEY_BRL_F2:
+                res = CMD_LEARN;
+                break;
+              case KEY_BRL_F1 | KEY_BRL_F2:
+                res = CMD_RESTARTBRL;
+                break;
 
-                case KEY_SPK_F2:
-                  res = CMD_SPKHOME;
-                  break;
-                case KEY_SPK_F1 | KEY_SPK_F2:
-                  res = CMD_RESTARTSPEECH;
-                  break;
-              }
-              break;
+              case KEY_SPK_F2:
+                res = CMD_SPKHOME;
+                break;
+              case KEY_SPK_F1 | KEY_SPK_F2:
+                res = CMD_RESTARTSPEECH;
+                break;
+            }
+            break;
 
-          }
         }
+      }
       LastKeys = CurrentKeys;
       if (!CurrentKeys)
         ReleasedKeys = 0;
@@ -1274,8 +1274,6 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   if (res == CMD_RESTARTBRL) {
     CurrentKeys = LastKeys = ReleasedKeys = 0;
     RoutingPos = 0;
-  } else if (res != EOF) {
-    res |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
   }
 
   return res;
