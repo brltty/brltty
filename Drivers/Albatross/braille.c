@@ -179,13 +179,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       unsigned char byte;
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
-          LogPrint(LOG_INFO, "Albatross is at %d baud.", baud2integer(*speed));
-          if (acknowledgeDisplay()) {
-            clearDisplay();
-            brl->x = model->columns;
-            brl->y = 1;
-            return 1;
-          }
+          LogPrint(LOG_INFO, "Trying Albatross at %d baud.", baud2integer(*speed));
+          if (!acknowledgeDisplay()) break;
+          clearDisplay();
+          brl->x = model->columns;
+          brl->y = 1;
+          return 1;
         }
 
         if (++count == 100) break;
