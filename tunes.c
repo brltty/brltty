@@ -268,8 +268,9 @@ void setTuneDevice (unsigned char device) {
 }
 
 void closeTuneDevice (void) {
-   if (!--closeTimer)
-      toneGenerator->close();
+   if (closeTimer)
+      if (!--closeTimer)
+	 toneGenerator->close();
 }
  
 void playTune (TuneDefinition *tune) {

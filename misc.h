@@ -16,6 +16,7 @@
  */
 
 #include <stdio.h>
+#include <termios.h>
 
 /* misc.h - Header file for miscellaneous all-purpose routines
  */
@@ -78,7 +79,8 @@ void LogPrint(int priority, char *format, ...);
 void LogAndStderr(int priority, char *format, ...);
 
 extern int validateInteger (int *integer, char *description, char *value, int *minimum, int *maximum);
-extern int validateBaud (unsigned int *baud, char *description, char *value, unsigned int *choices);
+extern int validateBaud (speed_t *baud, char *description, char *value, unsigned int *choices);
+extern int baud2integer (speed_t baud);
 extern int validateChoice (unsigned int *choice, char *description, char *value, char **choices);
 extern int validateFlag (unsigned int *flag, char *description, char *value, char *on, char *off);
 extern int validateOnOff (unsigned int *flag, char *description, char *value);

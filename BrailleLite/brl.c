@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.1 (September 2001)"
+"Braille Lite driver, version 0.5.2 (September 2001)"
 
 #define BRL_C
 
@@ -42,9 +42,17 @@
 #include "../misc.h"
 #include "../inskey.h"
 #include "../message.h"
-#include "brlconf.h"
-#include "../brl_driver.h"
 #include "../scr.h"
+
+#include "brlconf.h"
+
+typedef enum {
+  PARM_BAUDRATE=0,
+} DriverParameter;
+#define BRLPARMS "baudrate"
+
+#include "../brl_driver.h"
+
 #include "bindings.h"		/* for keybindings */
 
 
@@ -112,6 +120,9 @@ identbrl (void)
 static void
 initbrl (char **parameters, brldim * brl, const char *brldev)
 {
+  static unsigned good_baudrates[]
+    = {300,600,1200,2400,4800,9600,19200,38400, 0};
+  speed_t baudrate;
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
   short i, n;			/* loop counters */
@@ -128,19 +139,34 @@ initbrl (char **parameters, brldim * brl, const char *brldev)
 #endif
   unsigned char BltLen;
 
-  res.disp = prevdata = rawdata = qbase = NULL;		/* clear pointers */
+  res.disp = prevdata = rawdata = NULL;		/* clear pointers */
+  if(!(qbase = (unsigned char *) malloc (QSZ))) {
+    LogPrint(LOG_ERR, "Cannot allocate qbase");
+    return;
+  }
+
+  if(!parameters[PARM_BAUDRATE]
+     || !validateBaud(&baudrate, "baud rate",
+		     parameters[PARM_BAUDRATE], good_baudrates))
+    baudrate = BAUDRATE;
 
   /* Open the Braille display device for random access */
+  LogPrint(LOG_DEBUG, "Opening serial port %s", brldev);
   blite_fd = open (brldev, O_RDWR | O_NOCTTY);
   if (blite_fd < 0)
     {
-      LogPrint (LOG_ERR, "%s: %s", brldev, strerror (errno));
-      goto failure;
+      LogPrint (LOG_ERR, "open %s: %s", brldev, strerror (errno));
+      return;
     }
-  tcgetattr (blite_fd, &oldtio);	/* save current settings */
+  if(tcgetattr (blite_fd, &oldtio) <0){	/* save current settings */
+    LogPrint(LOG_ERR, "tcgetattr: %s", strerror(errno));
+    return;
+  }
 
   /* Set bps, flow control and 8n1, enable reading */
-  newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
+  newtio.c_cflag = baudrate | CRTSCTS | CS8 | CLOCAL | CREAD;
+  LogPrint(LOG_DEBUG, "Selecting baudrate %d",
+	   baud2integer(baudrate));
 
   /* Ignore bytes with parity errors and make terminal raw and dumb */
   newtio.c_iflag = IGNPAR;
@@ -149,7 +175,10 @@ initbrl (char **parameters, brldim * brl, const char *brldev)
   newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
   newtio.c_cc[VTIME] = 0;
   tcflush (blite_fd, TCIFLUSH);	/* clean line */
-  tcsetattr (blite_fd, TCSANOW, &newtio);	/* activate new settings */
+  if(tcsetattr (blite_fd, TCSANOW, &newtio) <0){    /* activate new settings */
+    LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
+    goto failure;
+  }
 
 #ifndef DETECT_FOREVER
   /* Braille Lite identification */
@@ -181,6 +210,8 @@ initbrl (char **parameters, brldim * brl, const char *brldev)
   }
 #endif
 
+  LogPrint(LOG_DEBUG, "Got response");
+
   /* Next, let's detect the BLT-Model (18 || 40). */
   BltLen=18;
   write (blite_fd, InitData, BltLen);
@@ -201,8 +232,7 @@ initbrl (char **parameters, brldim * brl, const char *brldev)
   res.disp = (unsigned char *) malloc (res.x);
   prevdata = (unsigned char *) malloc (res.x);
   rawdata = (unsigned char *) malloc (res.x);
-  qbase = (unsigned char *) malloc (QSZ);
-  if (!res.disp || !prevdata || !rawdata || !qbase)
+  if (!res.disp || !prevdata || !rawdata)
     {
       LogPrint (LOG_ERR, "Cannot allocate braille buffers.");
       goto failure;
@@ -232,14 +262,11 @@ failure:
   free (prevdata);
   free (rawdata);
   free (qbase);
-
-#ifndef DETECT_FOREVER
-RestorePort:
-#endif
-  if (blite_fd >= 0)
+  if (blite_fd >= 0) {
+    tcsetattr (blite_fd, TCSANOW, &oldtio);	/* restore terminal settings */
     close (blite_fd);
+  }
   brl->x = -1;
-  tcsetattr (blite_fd, TCSANOW, &oldtio);	/* restore terminal settings */
 }
 
 

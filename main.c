@@ -286,21 +286,28 @@ main (int argc, char *argv[])
   short oldwinx, oldwiny;
   short speaking_scrno = -1, speaking_prev_inx = -1, speaking_start_line = 0;
 
+  /* We install SIGPIPE handler before startup() so that speech drivers which
+     use pipes can't cause program termination (the call to message() in
+     startup() in particular).
+  */
+  signal(SIGPIPE, SIG_IGN);
+
   /* open syslog (or output to stderr in -n) */
   LogOpen();
   LogPrint(LOG_NOTICE, "%s starting.", VERSION);
 
+  /* Setup everything required on startup */
+  startup(argc, argv);
+
   /*
    * Establish signal handler to clean up before termination:
+   * termination_handler is only effective during the main loop, so
+   * we wait after display detection before installing it. (problematic for
+   * RESTARTBRL).
    */
-  /* ?? Is the following correct? */
   signal(SIGTERM, termination_handler);
   signal(SIGINT, termination_handler);
   signal(SIGCHLD, child_stop_handler);
-  signal(SIGPIPE, SIG_IGN);
-
-  /* Setup everything required on startup */
-  startup(argc, argv);
 
   /*
    * Initialize state variables 

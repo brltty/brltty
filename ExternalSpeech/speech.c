@@ -42,7 +42,12 @@
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_SAYATTRIBS
 
+typedef enum {
+  PARM_PROGRAM=0,
+  PARM_UID, PARM_GID
+} DriverParameter;
 #define SPKPARMS "program", "uid", "gid"
+
 #include "../spk_driver.h"
 
 static int helper_fd_in = -1, helper_fd_out = -1;
@@ -94,9 +99,9 @@ static void initspk (char **parameters)
   int fd1[2], fd2[2];
   uid_t uid, gid;
   char
-    *extProgPath = parameters[0],
-    *s_uid = parameters[1],
-    *s_gid = parameters[2];
+    *extProgPath = parameters[PARM_PROGRAM],
+    *s_uid = parameters[PARM_UID],
+    *s_gid = parameters[PARM_GID];
 
   if(!extProgPath) extProgPath = HELPER_PROG_PATH;
   if(s_uid) {

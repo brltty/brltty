@@ -31,6 +31,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Introduce short option -a.
       Introduce long option --attributes-table=.
       Introduce brltty.conf directive attributes-table.
+   Implemented generic driver parameter facility. (dm,sd)
    BrailleNote driver added. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
    HandyTech driver added. Andreas Gross <andi@andi-bika.de>
    BrailleLite driver enhancements. (sd)
@@ -44,6 +45,8 @@ Note: this file is in reversed chronological order (bottom to top).
       Added shortcut for one-digit repeat count.
       Fixed bug causing internal cursor to go off display during g-chord with advance bar left.
       Fixed k-chord to toggle off keyboard emulation.
+      Fixed day-one startup segfault bug.
+      Added baudrate parameter.
       Portability fixes.
    Papenmeier driver enhancements. (dm)
       Cleaned up log messages.
@@ -60,6 +63,8 @@ Note: this file is in reversed chronological order (bottom to top).
    Added cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
    Added identification output to visioBraille driver. (dm)
    Stop GenericSay from reannouncing BRLTTY version during cursor routing. (dm)
+   Add command parameter to GenericSay driver. (dm)
+   Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
    List translation tables in make file. (dm)
    Cross-compile support added to make file. (sd)
    INSTALL_ROOT added to make file. (dm)
