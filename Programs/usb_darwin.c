@@ -201,58 +201,70 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
-  kern_return_t kret;
-  mach_port_t port;
+  kern_return_t kernelResult;
+  IOReturn ioResult;
+  mach_port_t masterPort;
 
-  if (!(kret = IOMasterPort(MACH_PORT_NULL, &port))) {
-    CFMutableDictionaryRef dictionary;
+  kernelResult = IOMasterPort(MACH_PORT_NULL, &masterPort);
+  if (!kernelResult) {
+    CFMutableDictionaryRef matchingDictionary;
 
-    if ((dictionary = IOServiceMatching(kIOUSBDeviceClassName))) {
-      io_iterator_t iterator;
+    if ((matchingDictionary = IOServiceMatching(kIOUSBDeviceClassName))) {
+      io_iterator_t serviceIterator;
 
-      if (!(kret = IOServiceGetMatchingServices(port, dictionary, &iterator))) {
+      kernelResult = IOServiceGetMatchingServices(masterPort,
+                                                  matchingDictionary,
+                                                  &serviceIterator);
+      if (!kernelResult) {
         io_service_t service;
 
-        while ((service = IOIteratorNext(iterator))) {
-          IOReturn ioret;
-          IOCFPlugInInterface **plugin;
+        while ((service = IOIteratorNext(serviceIterator))) {
+          IOCFPlugInInterface **servicePlugin;
           SInt32 score;
 
-          ioret = IOCreatePlugInInterfaceForService(service, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &plugin, &score);
-          if (!ioret && plugin) {
-            IOUSBInterfaceInterface **interface;
-            ioret = (*plugin)->QueryInterface(plugin, CFUUIDGetUUIDBytes(kIOUSBInterfaceInterfaceID), (LPVOID)&interface);
-            (*plugin)->Release(plugin);
-            if (!ioret && interface) {
-              if (!(ioret = (*interface)->USBInterfaceOpen(interface))) {
-                LogPrint(LOG_NOTICE, "intf=%p", (void*)interface);
+          ioResult = IOCreatePlugInInterfaceForService(service,
+                                                       kIOUSBDeviceUserClientTypeID,
+                                                       kIOCFPlugInInterfaceID,
+                                                       &servicePlugin, &score);
+          if (!ioResult && servicePlugin) {
+            IOUSBDeviceInterface **deviceInterface;
 
-                (*interface)->USBInterfaceClose(interface);
+            ioResult = (*servicePlugin)->QueryInterface(servicePlugin,
+                                                        CFUUIDGetUUIDBytes(kIOUSBInterfaceInterfaceID),
+                                                        (LPVOID)&deviceInterface);
+            if (!ioResult && deviceInterface) {
+              if (!(ioResult = (*deviceInterface)->USBDeviceOpen(deviceInterface))) {
+                LogPrint(LOG_NOTICE, "intf=%p", (void*)deviceInterface);
+
+                (*deviceInterface)->USBDeviceClose(deviceInterface);
               } else {
-                LogPrint(LOG_ERR, "USB: cannot open interface: err=%d", ioret);
+                LogPrint(LOG_ERR, "USB: cannot open device interface: err=%d", ioResult);
               }
 
-              (*interface)->Release(interface);
+              (*deviceInterface)->Release(deviceInterface);
             } else {
-              LogPrint(LOG_ERR, "USB: cannot create device interface: err=%d", ioret);
+              LogPrint(LOG_ERR, "USB: cannot create device interface: err=%d", ioResult);
             }
+
+            (*servicePlugin)->Release(servicePlugin);
           } else {
-            LogPrint(LOG_ERR, "USB: cannot create plugin: err=%d", ioret);
+            LogPrint(LOG_ERR, "USB: cannot create service plugin: err=%d", ioResult);
           }
 
           IOObjectRelease(service);
         }
-        IOObjectRelease(iterator);
+
+        IOObjectRelease(serviceIterator);
       } else {
-        LogPrint(LOG_ERR, "USB: cannot create iterator: err=%d", kret);
+        LogPrint(LOG_ERR, "USB: cannot create service iterator: err=%d", kernelResult);
       }
     } else {
       LogPrint(LOG_ERR, "USB: cannot create matching dictionary.");
     }
 
-    mach_port_deallocate(mach_task_self(), port);
+    mach_port_deallocate(mach_task_self(), masterPort);
   } else {
-    LogPrint(LOG_ERR, "USB: cannot create master port: err=%d", kret);
+    LogPrint(LOG_ERR, "USB: cannot create master port: err=%d", kernelResult);
   }
 
   return device;
