@@ -15,11 +15,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#define ALSA_PCM_NEW_HW_PARAMS_API
 #include <alsa/asoundlib.h>
 
 struct PcmDeviceStruct {
   snd_pcm_t *handle;
-  snd_pcm_hw_params_t *hwparams;
+  snd_pcm_hw_params_t *hardwareParameters;
+  unsigned int channelCount;
+  unsigned int sampleRate;
+  unsigned int bufferTime;
+  unsigned int periodTime;
 };
 
 static void *alsaLibrary;
@@ -29,17 +34,21 @@ static void *alsaLibrary;
 PCM_ALSA_SYMBOL(strerror);
 PCM_ALSA_SYMBOL(pcm_open);
 PCM_ALSA_SYMBOL(pcm_close);
+PCM_ALSA_SYMBOL(pcm_nonblock);
 PCM_ALSA_SYMBOL(pcm_hw_params_malloc);
 PCM_ALSA_SYMBOL(pcm_hw_params_any);
 PCM_ALSA_SYMBOL(pcm_hw_params_set_access);
 PCM_ALSA_SYMBOL(pcm_hw_params_get_rate);
+PCM_ALSA_SYMBOL(pcm_hw_params_get_sbits);
 PCM_ALSA_SYMBOL(pcm_hw_params_get_format);
 PCM_ALSA_SYMBOL(pcm_hw_params_set_format);
 PCM_ALSA_SYMBOL(pcm_hw_params_get_rate_max);
 PCM_ALSA_SYMBOL(pcm_hw_params_set_rate_near);
 PCM_ALSA_SYMBOL(pcm_hw_params_get_channels);
-PCM_ALSA_SYMBOL(pcm_hw_params_set_channels);
+PCM_ALSA_SYMBOL(pcm_hw_params_get_channels_min);
+PCM_ALSA_SYMBOL(pcm_hw_params_set_channels_near);
 PCM_ALSA_SYMBOL(pcm_hw_params_set_buffer_time_near);
+PCM_ALSA_SYMBOL(pcm_hw_params_set_period_time_near);
 PCM_ALSA_SYMBOL(pcm_hw_params);
 PCM_ALSA_SYMBOL(pcm_hw_params_get_sbits);
 PCM_ALSA_SYMBOL(pcm_hw_params_get_period_size);
@@ -47,6 +56,7 @@ PCM_ALSA_SYMBOL(pcm_hw_params_free);
 PCM_ALSA_SYMBOL(pcm_prepare);
 PCM_ALSA_SYMBOL(pcm_writei);
 PCM_ALSA_SYMBOL(pcm_drain);
+PCM_ALSA_SYMBOL(pcm_drop);
 PCM_ALSA_SYMBOL(pcm_resume);
 
 static void
@@ -67,24 +77,29 @@ openPcmDevice (int errorLevel, const char *device) {
     findSharedSymbol(alsaLibrary, "snd_strerror", &my_snd_strerror);
     findSharedSymbol(alsaLibrary, "snd_pcm_open", &my_snd_pcm_open);
     findSharedSymbol(alsaLibrary, "snd_pcm_close", &my_snd_pcm_close);
+    findSharedSymbol(alsaLibrary, "snd_pcm_nonblock", &my_snd_pcm_nonblock);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_malloc", &my_snd_pcm_hw_params_malloc);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_any", &my_snd_pcm_hw_params_any);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_access", &my_snd_pcm_hw_params_set_access);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_channels", &my_snd_pcm_hw_params_get_channels);
-    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_channels", &my_snd_pcm_hw_params_set_channels);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_channels_min", &my_snd_pcm_hw_params_get_channels_min);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_channels_near", &my_snd_pcm_hw_params_set_channels_near);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_format", &my_snd_pcm_hw_params_get_format);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_format", &my_snd_pcm_hw_params_set_format);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_rate", &my_snd_pcm_hw_params_get_rate);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_sbits", &my_snd_pcm_hw_params_get_sbits);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_rate_max", &my_snd_pcm_hw_params_get_rate_max);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_period_size", &my_snd_pcm_hw_params_get_period_size);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_rate_near", &my_snd_pcm_hw_params_set_rate_near);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_buffer_time_near", &my_snd_pcm_hw_params_set_buffer_time_near);
+    findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_set_period_time_near", &my_snd_pcm_hw_params_set_period_time_near);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params", &my_snd_pcm_hw_params);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_get_sbits", &my_snd_pcm_hw_params_get_sbits);
     findSharedSymbol(alsaLibrary, "snd_pcm_hw_params_free", &my_snd_pcm_hw_params_free);
     findSharedSymbol(alsaLibrary, "snd_pcm_prepare", &my_snd_pcm_prepare);
     findSharedSymbol(alsaLibrary, "snd_pcm_writei", &my_snd_pcm_writei);
     findSharedSymbol(alsaLibrary, "snd_pcm_drain", &my_snd_pcm_drain);
+    findSharedSymbol(alsaLibrary, "snd_pcm_drop", &my_snd_pcm_drop);
     findSharedSymbol(alsaLibrary, "snd_pcm_resume", &my_snd_pcm_resume);
   }
 
@@ -92,34 +107,55 @@ openPcmDevice (int errorLevel, const char *device) {
     int result;
 
     if (!device) device = "hw:0,0";
-    if ((result = my_snd_pcm_open(&pcm->handle, device, SND_PCM_STREAM_PLAYBACK, 0)) >= 0) {
-      if ((result = my_snd_pcm_hw_params_malloc(&pcm->hwparams)) >= 0) {
-        int buffer_time = 1000000 / 4; /* usecs */
-        int dir;
+    if ((result = my_snd_pcm_open(&pcm->handle, device,
+                                  SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK)) >= 0) {
+      my_snd_pcm_nonblock(pcm->handle, 0);
 
-        if ((result = my_snd_pcm_hw_params_any(pcm->handle, pcm->hwparams)) == 0) {
-          my_snd_pcm_hw_params_set_access(pcm->handle, pcm->hwparams,
-                                        SND_PCM_ACCESS_RW_INTERLEAVED);
-          {
-            int rate;
-            if ((result = my_snd_pcm_hw_params_get_rate_max(pcm->hwparams, &rate, 0)) == 0) {
-              if ((result = my_snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hwparams, &rate, 0)) == 0) {
-                LogPrint(LOG_DEBUG, "Using maximum rate of %d.", rate);
+      if ((result = my_snd_pcm_hw_params_malloc(&pcm->hardwareParameters)) >= 0) {
+        if ((result = my_snd_pcm_hw_params_any(pcm->handle, pcm->hardwareParameters)) >= 0) {
+          setPcmAmplitudeFormat(pcm, PCM_FMT_S16L);
+
+          if ((result = my_snd_pcm_hw_params_set_access(pcm->handle, pcm->hardwareParameters, SND_PCM_ACCESS_RW_INTERLEAVED)) >= 0) {
+            if ((result = my_snd_pcm_hw_params_get_channels_min(pcm->hardwareParameters, &pcm->channelCount)) >= 0) {
+              if ((result = my_snd_pcm_hw_params_set_channels_near(pcm->handle, pcm->hardwareParameters, &pcm->channelCount)) >= 0) {
+                if ((result = my_snd_pcm_hw_params_get_rate_max(pcm->hardwareParameters, &pcm->sampleRate, NULL)) >= 0) {
+                  if ((result = my_snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hardwareParameters, &pcm->sampleRate, NULL)) >= 0) {
+                    pcm->bufferTime = 500000;
+                    if ((result = my_snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hardwareParameters, &pcm->bufferTime, NULL)) >= 0) {
+                      pcm->periodTime = pcm->bufferTime / 8;
+                      if ((result = my_snd_pcm_hw_params_set_period_time_near(pcm->handle, pcm->hardwareParameters, &pcm->periodTime, NULL)) >= 0) {
+                        if ((result = my_snd_pcm_hw_params(pcm->handle, pcm->hardwareParameters)) >= 0) {
+                          LogPrint(LOG_DEBUG, "ALSA PCM: Chan=%u Rate=%u BufTim=%u PerTim=%u", pcm->channelCount, pcm->sampleRate, pcm->bufferTime, pcm->periodTime);
+                          return pcm;
+                        } else {
+                          logPcmError(errorLevel, "set hardware parameters", result);
+                        }
+                      } else {
+                        logPcmError(errorLevel, "set period time near", result);
+                      }
+                    } else {
+                      logPcmError(errorLevel, "set buffer time near", result);
+                    }
+                  } else {
+                    logPcmError(errorLevel, "set rate near", result);
+                  }
+                } else {
+                  logPcmError(errorLevel, "get rate max", result);
+                }
               } else {
-                logPcmError(errorLevel, "set rate near", result);
+                logPcmError(errorLevel, "set channels near", result);
               }
             } else {
-              logPcmError(errorLevel, "get rate max", result);
+              logPcmError(errorLevel, "get channels min", result);
             }
+          } else {
+            logPcmError(errorLevel, "set access", result);
           }
-          my_snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hwparams, &buffer_time, &dir);
-          setPcmAmplitudeFormat(pcm, PCM_FMT_S16L);
-          my_snd_pcm_hw_params(pcm->handle, pcm->hwparams);
-
-          return pcm;
         } else {
-          logPcmError(errorLevel, "getting hardware parameters", result);
+          logPcmError(errorLevel, "get hardware parameters", result);
         }
+
+        my_snd_pcm_hw_params_free(pcm->hardwareParameters);
       } else {
         logPcmError(errorLevel, "hardware parameters allocation", result);
       }
@@ -139,14 +175,20 @@ openPcmDevice (int errorLevel, const char *device) {
 
 void
 closePcmDevice (PcmDevice *pcm) {
+  awaitPcmOutput(pcm);
   my_snd_pcm_close(pcm->handle);
-  my_snd_pcm_hw_params_free(pcm->hwparams);
+  my_snd_pcm_hw_params_free(pcm->hardwareParameters);
   free(pcm);
+}
+
+static int
+getPcmFrameSize (PcmDevice *pcm) {
+  return getPcmChannelCount(pcm) * (my_snd_pcm_hw_params_get_sbits(pcm->hardwareParameters) / 8);
 }
 
 int
 writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
-  int frameSize = getPcmChannelCount(pcm) * (my_snd_pcm_hw_params_get_sbits(pcm->hwparams) / 8);
+  int frameSize = getPcmFrameSize(pcm);
   int framesLeft = count / frameSize;
 
   while (framesLeft > 0) {
@@ -182,53 +224,49 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
 
 int
 getPcmBlockSize (PcmDevice *pcm) {
-  snd_pcm_sframes_t buffer_size;
-  int result, dir;
+  snd_pcm_uframes_t frames;
+  int result;
 
-  if ((result = my_snd_pcm_hw_params_get_period_size(pcm->hwparams, &buffer_size,
-                                                   &dir)) == 0) {
-    return buffer_size;
+  if ((result = my_snd_pcm_hw_params_get_period_size(pcm->hardwareParameters, &frames, NULL)) >= 0) {
+    return frames * getPcmFrameSize(pcm);
   } else {
-    logPcmError(LOG_ERR, "set rate near", result);
+    logPcmError(LOG_ERR, "get period size", result);
   }
   return 65535;
 }
 
 int
 getPcmSampleRate (PcmDevice *pcm) {
-  int rate, dir, err;
-  err = my_snd_pcm_hw_params_get_rate(pcm->hwparams, &rate, &dir);
-  if (err < 0) {
-    LogPrint(LOG_ERR, "Sample rate %d unavailable: %s", rate, my_snd_strerror(err));
-    rate = 8000;
-  }
-  return rate;
+  return pcm->sampleRate;
 }
 
 int
 setPcmSampleRate (PcmDevice *pcm, int rate) {
-  my_snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hwparams, &rate, 0);
-  return rate;
+  int result;
+
+  pcm->sampleRate = rate;
+  if ((result = my_snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hardwareParameters, &pcm->sampleRate, NULL)) < 0) {
+    logPcmError(LOG_ERR, "set rate near", result);
+  }
+
+  return getPcmSampleRate(pcm);
 }
 
 int
 getPcmChannelCount (PcmDevice *pcm) {
-  int channels = my_snd_pcm_hw_params_get_channels(pcm->hwparams, 0);
-  if (channels > 0) return channels;
-  return 1;
+  return pcm->channelCount;
 }
 
 int
 setPcmChannelCount (PcmDevice *pcm, int channels) {
-  int err;
+  int result;
 
-  err = my_snd_pcm_hw_params_set_channels(pcm->handle, pcm->hwparams, channels);
-  if (err < 0) {
-    LogPrint(LOG_ERR, "Channels count (%i) not available for playback: %s",
-             channels, my_snd_strerror(err));
-    return 0;
+  pcm->channelCount = channels;
+  if ((result = my_snd_pcm_hw_params_set_channels_near(pcm->handle, pcm->hardwareParameters, &pcm->channelCount)) < 0) {
+    logPcmError(LOG_ERR, "set channels near", result);
   }
-  return channels;
+
+  return getPcmChannelCount(pcm);
 }
 
 typedef struct {
@@ -249,10 +287,10 @@ static const AmplitudeFormatEntry amplitudeFormatTable[] = {
 PcmAmplitudeFormat
 getPcmAmplitudeFormat (PcmDevice *pcm) {
   snd_pcm_format_t format;
-  int err;
-  err = my_snd_pcm_hw_params_get_format(pcm->hwparams, &format);
-  if (err < 0) {
-    LogPrint(LOG_ERR, "Unable to set format: %s", my_snd_strerror(err));
+  int result;
+
+  if ((result = my_snd_pcm_hw_params_get_format(pcm->hardwareParameters, &format)) < 0) {
+    logPcmError(LOG_ERR, "get format", result);
   } else {
     const AmplitudeFormatEntry *entry = amplitudeFormatTable;
     while (entry->internal != PCM_FMT_UNKNOWN) {
@@ -266,23 +304,31 @@ getPcmAmplitudeFormat (PcmDevice *pcm) {
 PcmAmplitudeFormat
 setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
   const AmplitudeFormatEntry *entry = amplitudeFormatTable;
+  int result;
+
   while (entry->internal != PCM_FMT_UNKNOWN) {
     if (entry->internal == format) break;
     ++entry;
   }
-  my_snd_pcm_hw_params_set_format(pcm->handle, pcm->hwparams, entry->external);
-  return entry->external;
+
+  if ((result = my_snd_pcm_hw_params_set_format(pcm->handle, pcm->hardwareParameters, entry->external)) < 0) {
+    logPcmError(LOG_ERR, "set format", result);
+    return getPcmAmplitudeFormat(pcm);
+  }
+
+  return entry->internal;
 }
 
 void
 forcePcmOutput (PcmDevice *pcm) {
-  my_snd_pcm_drain(pcm->handle);
 }
 
 void
 awaitPcmOutput (PcmDevice *pcm) {
+  my_snd_pcm_drain(pcm->handle);
 }
 
 void
 cancelPcmOutput (PcmDevice *pcm) {
+  my_snd_pcm_drop(pcm->handle);
 }
