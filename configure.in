@@ -736,7 +736,7 @@ BRLTTY_ARG_DISABLE(
          [flite_voice], ["cmu_us_kal16"]
       )
 
-      BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite])
+      BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite -lm])
    ])
    BRLTTY_SPEECH_DRIVER([fv], [Festival])
    BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
