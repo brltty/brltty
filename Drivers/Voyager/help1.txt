@@ -1,11 +1,11 @@
 ---BRLTTY Voyager 70 Help Screen---
 
 Key Names:
-  Front Pannel keys:
-    Leftmost key is named A, second key from left is named B.
-    Rightmost key is named D, second key from right is named C.
-    Round extension to left of central keypad is named RL, to right is RR.
-    Up position of central keypad is named UP, down is DOWN.
+  Front Panel Keys:
+    Leftmost key is named A; second key from left is named B.
+    Rightmost key is named D; second key from right is named C.
+    Round extension to left of central keypad is named RL; right is RR.
+    Up position of central keypad is named UP; down is DOWN.
   Round keys on top are used as a braille keyboard.
   Cursor routing keys:
     CRt1 to CRt66: routing keys over text cells.
@@ -20,7 +20,7 @@ RR: Goto cursor
 RL: Cursor tracking toggle
 UP / DOWN: Move cursor up/down (arrow keys)
 
-Modes And Functions
+Modes and Functions
 CRs1: Help screen (toggle)
 CRs1+CRs2: Learn mode (key describer) (toggle)
 RL+RR: Freeze screen (toggle)
@@ -29,18 +29,18 @@ RR+UP: Show position and status info (toggle)
 CRs2: Preferences menu (and again to exit)
 CRa#+UP: Switch to virtual console #
 CRa1+CRa2+RL / RR: Switch to previous/next virtual console
-A+D +CRa1: Six dots mode (toggle)
+A+D+CRa1: Six dots mode (toggle)
 
 Cursor Routing
-CRs4: Route cursor to current line
 CRt#: Route cursor to cell
+CRs4: Route cursor to current line
 
-Cut & Paste
+Cut and Paste
 CRt#+D: Mark beginning of region to cut
 CRt#+A: Mark bottom-right of rectangular region and cut
 CRt# + CRt(#+1) + D: Mark beginning of cut region for append
 CRt# + CRt(#-1) + A: Mark end of linear region and cut
-CRtx + CRt(x+2) + CRty : Cut text from x to y
+CRtx + CRt(x+2) + CRty: Cut text from x to y
 CRt2+CRt3: Paste cut text
 
 Fancy Navigation
@@ -57,7 +57,7 @@ CRt1+CRt2+B / C: Move to previous/next paragraph (blank line separation)
 CRt1+CRt3+B / C: Search screen backward/forward for cut text
 CRt2+CRt3+B / C: Previous/next prompt (same prompt as current line)
 
-Typing In Braille
+Typing in Braille
 Chord-1478: Toggle braille input on/off
 B+C: Space (spacebar)
 Chord-46: Return

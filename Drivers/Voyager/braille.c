@@ -425,58 +425,44 @@ brl_writeWindow (BrailleDisplay *brl)
 /* Rightmost */
 #define K_D     0x8000
 
-/* Convenience */
-#define KEY(v, rcmd) \
-    case v: cmd = rcmd; break;
-
 /* OK what follows is pretty hairy. I got tired of individually maintaining
-   the sources and help files so here's my first attempt at "automatic"
-   generation of help files. This is my first shot at it, so be kind with
-   me. */
+ * the sources and help files so here's my first attempt at "automatic"
+ * generation of help files. This is my first shot at it, so be kind with
+ * me.
+ */
 /* These macros include an ordering hint for the help file and the help
-   text. GENHLP is not defined during compilation, so at compilation the
-   macros are expanded in a way that just drops the help-related
-   information. */
-#ifndef GENHLP
-#define HKEY(n, kc, hlptxt, cmd) \
-    KEY(kc, cmd);
-#define PHKEY(n, prfx, kc, hlptxt, cmd) \
-    KEY(kc, cmd)
-#define CKEY(n, kc, hlptxt, cmd) \
-    KEY(kc, cmd)
-/* For pairs of symmetric commands */
-#define HKEY2(n, kc1,kc2, hlptxt, cmd1,cmd2) \
-    KEY(kc1, cmd1); \
-    KEY(kc2, cmd2);
-#define PHKEY2(n, prfx, kc1,kc2, hlptxt, cmd1,cmd2) \
-    KEY(kc1, cmd1); \
-    KEY(kc2, cmd2);
-/* Help text only, no code */
-#define HLP0(n, hlptxt)
-/* Watch out: HLP0 vanishes from code, but don't put a trailing semicolon! */
+ * text. GENHLP is not defined during compilation, so at compilation the
+ * macros are expanded in a way that just drops the help-related
+ * information.
+ */
+#define HKEY(where, key, help, cmd) \
+  HLP(where, #key, help) \
+  KEY(key, cmd)
+#define PHKEY(where, prefix, key, help, cmd) \
+  HLP(where, prefix #key, help) \
+  KEY(key, cmd)
+#define CKEY(where, key, help, cmd) \
+  HLP(where, "Chord-" #key, help) \
+  KEY(key, cmd)
+#define HKEY2(where, key1, key2, help, cmd1, cmd2) \
+  HLP(where, #key1 / #key2, help) \
+  KEY(key1, cmd1); \
+  KEY(key2, cmd2)
+#define PHKEY2(where, prefix, key1, key2, help, cmd1, cmd2) \
+  HLP(where, prefix #key1 / #key2, help) \
+  KEY(key1, cmd1); \
+  KEY(key2, cmd2)
 
-#else /* GENHLP */
-
+#ifdef GENHLP
 /* To generate the help files we do gcc -DGENHLP -E (and heavily post-process
-   the result). So these macros expand to something that is easily
-   searched/grepped for and "easily" post-processed. */
-/* Parameters are: ordering hint, keycode, help text, and command code. */
-#define HKEY(n, kc, hlptxt, cmd) \
-   <HLP> n: #kc : hlptxt </HLP>
-/* Add a prefix parameter, will be prepended to the key code. */
-#define PHKEY(n, prfx, kc, hlptxt, cmd) \
-   <HLP> n: prfx #kc : hlptxt </HLP>
-/* A special case of the above for chords. */
-#define CKEY(n, kc, hlptxt, cmd) \
-   <HLP> n: "Chord-" #kc : hlptxt </HLP>
-/* Now for pairs of symmetric commands */
-#define HKEY2(n, kc1,kc2, hlptxt, cmd1,cmd2) \
-   <HLP> n: #kc1 / #kc2 : hlptxt </HLP>
-#define PHKEY2(n, prfx, kc1,kc2, hlptxt, cmd1,cmd2) \
-   <HLP> n: prfx #kc1 / #kc2 : hlptxt </HLP>
-/* Just the text, no key code */
-#define HLP0(n, hlptxt) \
-   <HLP> n: : hlptxt </HLP>
+ * the result). So these macros expand to something that is easily
+ * searched/grepped for and "easily" post-processed.
+ */
+#define KEY(v, c)
+#define HLP(where, keys, help) <HLP> where: keys : help </HLP>
+#else /* GENHLP */
+#define KEY(v, c) case v: cmd = c; break;
+#define HLP(where, keys, help)
 #endif /* GENHLP */
 
 static int 
@@ -625,7 +611,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 		CMD_FWINLTSKIP, CMD_FWINRTSKIP);
 
 	  /* typing */
-	  HLP0(602, "B+C: Space (spacebar)")
+	  HLP(602, "B+C", "Space (spacebar)")
 	  case K_B|K_C: cmd = VAL_PASSDOTS +0; /* space: no dots */ break;
 	}
       }
@@ -638,7 +624,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	 no other front key */
       /* This is a chorded character typed in braille */
       switch (keystate &0xFF) {
-        HLP0(601, "Chord-1478: Toggle braille input on/off")
+        HLP(601, "Chord-1478", "Toggle braille input on/off")
         case DOT1|DOT4|DOT7|DOT8:
           if (release) {
             brlinput ^= 1;
@@ -664,35 +650,35 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       /* routing keys, no other keys */
       if (howmanykeys == 1) {
         if (IS_TEXT_KEY(rtk_which[0])) {
-	  HLP0(301,"CRt#: Route cursor to cell")
+	  HLP(301,"CRt#", "Route cursor to cell")
 	  cmd = CR_ROUTE + rtk_which[0] - textOffset;
         } else if (rtk_which[0] == statusOffset+0) {
-          HLP0(201, "CRs1: Help screen (toggle)")
+          HLP(201, "CRs1", "Help screen (toggle)")
           cmd = CMD_HELP;
         } else if (rtk_which[0] == statusOffset+1) {
-          HLP0(205, "CRs2: Preferences menu (and again to exit)")
+          HLP(205, "CRs2", "Preferences menu (and again to exit)")
           cmd = CMD_PREFMENU;
         } else if (rtk_which[0] == statusOffset+2) {
-          HLP0(501, "CRs3: Go back to previous reading location "
+          HLP(501, "CRs3", "Go back to previous reading location "
                "(undo cursor tracking motion).")
           cmd = CMD_BACK;
         } else if (rtk_which[0] == statusOffset+3) {
-          HLP0(301, "CRs4: Route cursor to current line")
+          HLP(301, "CRs4", "Route cursor to current line")
           cmd = CMD_CSRJMP_VERT;
         }
       } else if (howmanykeys == 3
 	         && IS_TEXT_KEYS(rtk_which[0], rtk_which[2])
 	         && rtk_which[0]+2 == rtk_which[1]) {
-	HLP0(405,"CRtx + CRt(x+2) + CRty : Cut text from x to y")
+	HLP(405,"CRtx + CRt(x+2) + CRty", "Cut text from x to y")
 	cmd = CR_CUTBEGIN + rtk_which[0] - textOffset;
         pending_cmd = CR_CUTRECT + rtk_which[2] - textOffset;
       } else if (howmanykeys == 2	&& rtk_which[0] == textOffset+1
 	         && rtk_which[1] == textOffset+2) {
-	HLP0(408,"CRt2+CRt3: Paste cut text")
+	HLP(408,"CRt2+CRt3", "Paste cut text")
 	cmd = CMD_PASTE;
       } else if (howmanykeys == 2 && rtk_which[0] == textOffset+0
                  && rtk_which[1] == textOffset+1) {
-	HLP0(501,"CRt1+CRt2 / CRt<COLS-1>+CRt<COLS>: Move window left/right "
+	HLP(501,"CRt1+CRt2 / CRt<COLS-1>+CRt<COLS>", "Move window left/right "
 	     "one character")
 	cmd = CMD_CHRLT;
       } else if (howmanykeys == 2 && rtk_which[0] == textOffset+textCells-2
@@ -700,7 +686,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	cmd = CMD_CHRRT;
       } else if (howmanykeys == 2 && rtk_which[0] == statusOffset+0
                  && rtk_which[1] == statusOffset+1) {
-	HLP0(201,"CRs1+CRs2: Learn mode (key describer) (toggle)")
+	HLP(201,"CRs1+CRs2", "Learn mode (key describer) (toggle)")
 	cmd = CMD_LEARN;
       }
     } else if (keystate & (K_UP|K_RL|K_RR)) {
@@ -728,7 +714,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     } else if (howmanykeys == 1 && keystate == (K_A|K_D)) {
       /* One absolute routing key with A+D */
       switch(rtk_which[0]) {
-	HLP0(205, "A+D +CRa1: Six dots mode (toggle)")
+	HLP(205, "A+D+CRa1", "Six dots mode (toggle)")
 	  KEY( 0, CMD_SIXDOTS );
       };
     } else if (howmanykeys == 1 && IS_TEXT_KEY(rtk_which[0])) {
