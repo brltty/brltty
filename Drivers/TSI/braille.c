@@ -376,14 +376,23 @@ static int
 QueryDisplay(int brl_fd, char *reply)
 /* For auto-detect: send query, read response and validate response header. */
 {
-  int r=-1;
-  if (write (brl_fd, BRL_QUERY, DIM_BRL_QUERY) == DIM_BRL_QUERY
-      && (r = myread (brl_fd, reply, Q_REPLY_LENGTH)) == Q_REPLY_LENGTH
-      && !memcmp (reply, Q_HEADER, Q_HEADER_LENGTH)){
-    LogPrint(LOG_DEBUG,"Valid reply received");
-    return 1;
+  if (write(brl_fd, BRL_QUERY, DIM_BRL_QUERY) == DIM_BRL_QUERY) {
+    if (awaitInput(brl_fd, 100)) {
+      int count;
+      if ((count = myread(brl_fd, reply, Q_REPLY_LENGTH)) != -1) {
+        if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
+          LogPrint(LOG_DEBUG, "Valid reply received.");
+          return 1;
+        } else {
+          LogBytes("Unexpected response", reply, count);
+        }
+      } else {
+        LogError("read");
+      }
+    }
+  } else {
+    LogError("write");
   }
-  LogPrint(LOG_DEBUG,"Invalid reply of %d bytes", r);
   return 0;
 }
 
