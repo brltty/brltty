@@ -39,13 +39,16 @@ unloadSharedObject (const void *object) {
 }
 
 int 
-findSharedSymbol (void *object, const char *symbol, void *address) {
+findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
 #ifdef HAVE_FUNC_DLOPEN 
-  const char *error;
-  void **pointerAddress = address;
-  *pointerAddress = dlsym(object, symbol);
-  if (!(error = dlerror())) return 1;
-  LogPrint(LOG_ERR, "%s", error);
+  void **address = pointerAddress;
+  *address = dlsym(object, symbol);
+
+  {
+    const char *error = dlerror();
+    if (!error) return 1;
+    LogPrint(LOG_ERR, "%s", error);
+  }
 #endif /* HAVE_FUNC_DLOPEN */
   return 0;
 }
