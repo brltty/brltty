@@ -1300,14 +1300,19 @@ interpretBookwormByte (DriverCommandContext context, unsigned char byte, int *co
 
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
-  int timeout = 1;
-  unsigned char byte;
+  int timedOut = 1;
 
   stateTimer += updateInterval;
 
-  while (readByte(brl, &byte)) {
+  while (1) {
+    unsigned char byte;
+    {
+      int count = readByte(brl, &byte);
+      if (count == -1) return CMD_RESTARTBRL;
+      if (count == 0) break;
+    }
+    timedOut = 0;
     /* LogPrint(LOG_DEBUG, "Read: %02X", byte); */
-    timeout = 0;
 
     if (byte == 0X06) {
       if (currentState != BDS_OFF) {
@@ -1361,7 +1366,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
     LogPrint(LOG_WARNING, "Unexpected byte: %02X (state %d)", byte, currentState);
   }
 
-  if (timeout) {
+  if (timedOut) {
     switch (currentState) {
       case BDS_OFF:
         break;
