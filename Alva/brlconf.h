@@ -31,7 +31,8 @@
 #define ABT38D          4	/* ABT380 Twin Space */
 #define DEL440		11	/* Alva Delphi 40 */
 #define DEL480		13 	/* Delphi Multimedia */
-#define SAT540		14	/* Alva Satellite 40 */
+#define SAT540		14	/* Alva Satellite 540 */
+#define SAT570 		15 	/* Alva Satellite 570 */
 
 
 /***** User Settings *****  Edit as necessary for your system. */

@@ -31,11 +31,14 @@
 #BRL_TARGET = EcoBraille
 #BRL_TARGET = EuroBraille
 #BRL_TARGET = MDV
+#BRL_TARGET = MiniBraille
+#BRL_TARGET = MultiBraille
 #BRL_TARGET = Papenmeier
 #BRL_TARGET = TSI
 #BRL_TARGET = Vario
 #BRL_TARGET = Vario-HT
-#BRL_TARGET = MultiBraille
+#BRL_TARGET = Videobraille
+#BRL_TARGET = VisioBraille
 
 # If you would like the driver for your speech interface built into the
 # program, then specify it by uncommenting one, and only one, of these
@@ -147,8 +150,8 @@ PREFIX =
 
 INSTALL_DRIVERS =
 
-BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario Vario-HT MultiBraille
-BRL_LIBS = al b1 b4 cb ec eu md pm ts va vh mb
+BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV MiniBraille MultiBraille Papenmeier TSI Vario Vario-HT Videobraille VisioBraille
+BRL_LIBS = al bl cb ec eu md mn mb pm ts va vh vd vs
 
 SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival \
    GenericSay Televox

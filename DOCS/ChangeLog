@@ -1,6 +1,17 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+June 26, 2001:
+ - BRLTTY 2.98 released:
+ - fixes to the TSI driver for Navigator 80, by Stéphane Doyon
+ - added driver for MiniBraille displays, by David Sauer <sauer@brailcom.cz>
+ - added driver for Videobraille displays, by Christian Comaschi
+   <christian_comaschi@libero.it>
+ - added driver for VisioBraille displays, by Sébastien Hinderer
+   <jrf3@wanadoo.fr>
+ - autodetection of BrailleLite 18 vs 40, by Willi Lutzenberger 
+   <willutz@gmx.net>
+ - support for Alva AS570 from Willi Lutzenberger <willutz@gmx.net>
 
 March 2001:
  - version 2.97 (beta):

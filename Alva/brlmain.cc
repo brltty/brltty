@@ -188,9 +188,17 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 14 */
-    "Alva Satellite 40",
+    "Alva Satellite 540",
     SAT540,
     40,
+    3
+  }
+  ,
+  {
+    /* ID == 15 */
+    "Alva Satellite 570",
+    SAT570,
+    66,
     3
   }
   ,
@@ -361,6 +369,7 @@ static void initbrl (brldim *brl, const char *dev)
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
   int ModelID = MODEL;
+  unsigned char alva_init[]="\033FUN\006\r";
   unsigned char buffer[DIM_BRL_ID + 1];
 
   res.disp = rawdata = prevdata = NULL;		/* clear pointers */
@@ -417,15 +426,19 @@ static void initbrl (brldim *brl, const char *dev)
       cfsetispeed (&newtio, BAUDRATE);
       cfsetospeed (&newtio, BAUDRATE);
       tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
-      delay (1000);		/* give time to send ID string */
+      delay (1000);		/* delay before 2nd line drop */
       /* This "if" statement can be commented out to try autodetect once anyway */
       if (ModelID != ABT_AUTO)
 	break;
-      if (read (brl_fd, &buffer, DIM_BRL_ID + 1) == DIM_BRL_ID + 1)
-	{
-	  if (!strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID))
-	    ModelID = buffer[DIM_BRL_ID];
-	}
+
+      if (!(read (brl_fd, &buffer, DIM_BRL_ID + 1) == DIM_BRL_ID +1))
+	{ // try init method for AD4MM and AS...
+          write (brl_fd,alva_init,DIM_BRL_ID + 2);
+          delay(200);
+          read (brl_fd, &buffer, DIM_BRL_ID + 1);         
+        }
+      if (!strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID))
+	ModelID = buffer[DIM_BRL_ID];
     }
   while (ModelID == ABT_AUTO);
 

@@ -15,7 +15,7 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.56 (March 2001)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.57 (June 2001)"
 #define COPYRIGHT "Copyright (C) 1996-2001 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
@@ -26,6 +26,8 @@
  * It is designed to be compiled into BRLTTY versions 2.97-3.0.
  *
  * History:
+ * Version 2.57: Fixed help screen/file for Nav80. We finally have a
+ *   user who confirms it works!
  * Version 2.56: Added key binding for NXSEARCH.
  * Version 2.55: Added key binding for NXINDENT and NXBLNKLNS.
  * Version 2.54: Added key binding for switchvt.

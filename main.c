@@ -41,7 +41,7 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.97 (beta)";
+char VERSION[] = "BRLTTY 2.98 (beta)";
 char COPYRIGHT[] = "Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved.";
 
 /*
@@ -993,6 +993,8 @@ main (int argc, char *argv[])
 	  int y,x;
 	  speaking_prev_inx = inx;
 	  y = inx / scr.cols + speaking_start_line;
+	  /* in case indexing data is wrong */
+	  y %= scr.rows;
 	  x = ((inx % scr.cols) / brl.x) * brl.x;
 	  setwinabsxy( x,y );
 	}
@@ -1267,7 +1269,8 @@ main (int argc, char *argv[])
   speech->close();
   braille->close(&brl);
   play(snd_brloff);
-  for (i = 0; i <= NBR_SCR; i++) 
+  /* don't forget that scrparam[0] is staticaly allocated */
+  for (i = 1; i <= NBR_SCR; i++) 
     free (scrparam[i]);
   LogPrint(LOG_NOTICE,"Terminating.");
   LogClose();

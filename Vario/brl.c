@@ -56,6 +56,8 @@
 #include "../brl_driver.h"
 #include "../beeps.h"
 #include "../inskey.h"
+
+		  
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 

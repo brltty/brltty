@@ -1,0 +1,81 @@
+Ceci est le fichier README relatif au driver VisioBraille pour BRLTTY,
+version 0.1. Driver testé avec un TVB 2040 équippé d'une PROM 4.0g.
+
+Auteur et mainteneur actuel: Sébastien HINDERER
+<sebastien.hinderer@libertysurf.fr>
+
+  Ceci est la première version publiée du driver permettant à VisioBraille
+de s'interfacer avec BRLTTY, offrant ainsi la possibilité à un utilisateur
+du TVB de travailler sous Linux.
+Bien que j'aie testé avec succès ce driver pendant plusieurs semaines et de
+manière intensive, il n'est pas impossible que certains bogues subsistent.
+Si vous en trouvez, ou si vous avez des commentaires/suggestions quant à
+l'évolution de ce driver, n'hésitez surtout pas à me contacter. 
+
+Notes pour l'installation.
+==========================
+
+  Avant de compiler le driver et BRLTTY, pensez à éditer le fichier
+brlconf.h de ce même répertoire. Dans ce fichier, modifiez la ligne 
+#define TAILLEPLAGETACTILE 
+de sorte à ce ru'elle corresponde à votre matériel.
+Ensuite, lisez le manuel fourni avec BRLTTY (dans le répertoire DOCS de
+BRLTTY), pour savoir comment paramétrer correctement le programme. Suivez
+les instruct,ons de ce manuel pour la compilation, et choisissez la table de
+caractères visiob.tbl, qui correspond à la représentation usuelle des
+caractères à laquelle les visiobraillistes sont habitués.
+
+
+Notes pour l'utilisation. 
+=========================
+
+  Voici la description des fonctions attachées aux touches des claviers
+auxiliaires ainsi qu'aux commandes ploc-ploc.
+
+~~a Active l'aide de BRLTTY
+~~b Active/désactive les bips
+~~c Menu de configuration BRLTTY (~~c pour le quitter)
+~~d page down
+~~e end
+~~h home 
+~~i Active/désactive le mode info (Cf le manuel BRLTTY pour en savoir plus)
+~~r Réinitialise les paramètres de BRLTTY
+~~s Sauvegarde la configuration des paramètres BRLTTY  
+~~u page up
+
+Clavier auxiliaire: 
+Les touches A1,A2,A3,A6,A7,A8 permettent d'activer les 6 premières consoles
+virtuelles (correspond à alt-f1 à alt-f6).
+B6 coin supérieur gauche de l'écran
+D6 coin inférieur gauche de l'écran
+A4 précédente fenêtre non vide 
+A5 prochaine fenêtre nonvide
+B7 Affiche la ligne précédente
+D7 Affiche la ligne suivante
+C6/C8 Fenêtre précédente/suivante
+C7 Fenêtre contenant le curseur
+C1/C3/B2/D2 flèches de direction
+B3 Inverse la visibilité du curseur
+D1 delete
+
+  En outre, vous avez accès aux fonctions auxquelles vous êtes habitués sous
+DOS/Windows pour la simulation des touches backspace, tab, contrôle, alt...
+
+
+Ce qu'il reste à faire
+======================
+
+  Pour les prochaines versions du driver, il serait peut-être souhaitable
+d'inclure la possibilité de reprohrammer les touches, un peu comme cela se
+fait sous DOS avec la commande ~~f.
+De plus, pour pouvoir disposer d'une solution VisioBraille-Linux la plus
+complète possible, il reste à développer un utilitaire de transfert de
+visiobases entre PC et TVB (type xfl), ainsi qu'un éditeur de visiobases tel
+que utb.
+
+  Voilà. Si vous avez envie d'ajouter des choses à faire à cette liste, ou
+si vous avez besoin de quelque information que ce soit, ou encore si vous
+souhaitez émettre des suggestions, participer au projet VisioBraille pour
+Linux, n'hésitez surtout pas à me contacter.
+Sébastien HINDERER <sebastien.hinderer@libertysurf.fr>
+

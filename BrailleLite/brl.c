@@ -27,7 +27,7 @@
 
 #define QSZ 256			/* size of internal input queue in bytes */
 #define INT_CSR_SPEED 2		/* on/off time in cycles */
-#define ACK_TIMEOUT 3000	/* timeout in ms for an ACK to come back */
+#define ACK_TIMEOUT 1000	/* timeout in ms for an ACK to come back */
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -79,7 +79,7 @@ static int qget (blkey *);	/* get a byte from the input queue */
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "Braille Lite %d driver", BLITE_SIZE);
+  LogAndStderr(LOG_NOTICE, "Braille Lite driver (BLT18/40)");
   LogAndStderr(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");
 }
 
@@ -94,6 +94,12 @@ initbrl (brldim * brl, const char *brldev)
   {0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
   static unsigned char Blazie[8] =
   {0, 3, 1, 4, 2, 5, 6, 7};	/* Blazie standard */
+  static unsigned char prebrl[2] =
+  {"\005D"};			/* code to send before Braille */
+  /* Init string for Model detection */
+  static unsigned char InitData[18]="";
+  int timeout;			/* while waiting for an ACK */
+  unsigned char BltLen;
 
   res.disp = prevdata = rawdata = qbase = NULL;		/* clear pointers */
 
@@ -118,14 +124,36 @@ initbrl (brldim * brl, const char *brldev)
   tcflush (blite_fd, TCIFLUSH);	/* clean line */
   tcsetattr (blite_fd, TCSANOW, &newtio);	/* activate new settings */
 
-  /* Braille Lite initialisation: leave this for a later version ... */
+  /* Braille Lite identification */
+  write (blite_fd, prebrl, 2);
+  /* Now we must wait for an acknowledgement ... */
+  waiting_ack = 1;
+  timeout = ACK_TIMEOUT / 10;
+  do {
+    getbrlkeys ();
+    delay (10);	/* sleep for 10 ms */
+    if (--timeout < 0)
+    {
+      LogAndStderr(LOG_NOTICE, "BLT doesn't seem to be connected, giving up!");
+      goto RestorePort;
+    }
+  }
+  while (waiting_ack);
 
-  blitesz = res.x = BLITE_SIZE;	/* initialise size of display - */
+  /* Next, let's detect the BLT-Model (18 || 40). */
+  BltLen=18;
+  write (blite_fd, InitData, BltLen);
+  waiting_ack = 1;
+  delay (400);
+  getbrlkeys();
+  if (waiting_ack) // no response, so it must be BLT40
+  { // assuming BLT40 now
+    BltLen=40;
+  }
+  
+  blitesz = res.x = BltLen;	/* initialise size of display - */
   res.y = 1;			/* Braille Lites are single line displays */
-#if 0
-  if ((brl->x = res.x) == -1)
-    return;
-#endif
+  LogAndStderr(LOG_NOTICE, "Braille Lite %d detected",BltLen);
 
   /* Allocate space for buffers */
   res.disp = (unsigned char *) malloc (res.x);
@@ -157,15 +185,16 @@ initbrl (brldim * brl, const char *brldev)
   *brl = res;
   return;
 
-failure:;
+failure:
   free (res.disp);
   free (prevdata);
   free (rawdata);
   free (qbase);
+RestorePort:
   if (blite_fd >= 0)
     close (blite_fd);
   brl->x = -1;
-  return;
+  tcsetattr (blite_fd, TCSANOW, &oldtio);	/* restore terminal settings */
 }
 
 
@@ -242,21 +271,16 @@ writebrl (brldim * brl)
 
       /* Next we send the ^eD sequence, and wait for an ACK */
       waiting_ack = 1;
-      do
-	{
-	  /* send the ^ED... */
-	  write (blite_fd, prebrl, 2);
+      /* send the ^ED... */
+      write (blite_fd, prebrl, 2);
 
-	  /* Now we must wait for an acknowledgement ... */
-	  timeout = ACK_TIMEOUT / 10;
-	  getbrlkeys ();
-	  while (waiting_ack)
-	    {
-	      delay (10);	/* sleep for 10 ms */
-	      getbrlkeys ();
-	      if (--timeout < 0)
-		break;		/* we'll try to send ^ED again... */
-	    }
+      /* Now we must wait for an acknowledgement ... */
+      timeout = ACK_TIMEOUT / 10;
+      do {
+	getbrlkeys ();
+        delay (10);	/* sleep for 10 ms */
+        if (--timeout < 0)
+	    return; // BLT doesn't seem to be connected any more!
 	}
       while (waiting_ack);
 
@@ -266,14 +290,13 @@ writebrl (brldim * brl)
       /* And once again we wait for acknowledgement. */
       waiting_ack = 1;
       timeout = ACK_TIMEOUT / 10;
-      getbrlkeys ();
-      while (waiting_ack)
-	{
-	  delay (10);		/* sleep for 10 ms */
+      do {
 	  getbrlkeys ();
+	  delay (10);		/* sleep for 10 ms */
 	  if (--timeout < 0)
-	    break;		/* just in case it'll never happen */
+	    return; // BLT doesn't seem to be connected any more!
 	}
+      while (waiting_ack);
     }
 }
 

@@ -41,7 +41,7 @@
 
 #include "../spk_driver.h"
 
-static char *extProgPath = HELPER_PROG_PATH;
+static char *extProgPath = NULL;
 static uid_t uid, gid;
 static int helper_fd_in = -1, helper_fd_out = -1;
 static unsigned short lastIndex, finalIndex;
@@ -112,6 +112,7 @@ static void initspk (char *speechparm)
 		"'<extProgramPath>,<numerical_uid>,<numerical_gid>'. "
 		"Got parameter '%s'", speechparm);
       free(parm);
+      extProgPath = NULL;
       return;
     }
   }else extProgPath = s_uid = s_gid = NULL;
@@ -119,6 +120,7 @@ static void initspk (char *speechparm)
   extProgPath = strdup(extProgPath);
   if(!extProgPath) {
     myperror("strdup -> out of memory");
+    if(parm) free(parm);
     return;
   }
   if(!s_uid) uid = UID;
@@ -286,6 +288,7 @@ static void mutespk (void)
 static void closespk (void)
 {
   if(extProgPath) free(extProgPath);
+  extProgPath = NULL;
   if(helper_fd_in >= 0)
     close(helper_fd_in);
   if(helper_fd_out >= 0)
