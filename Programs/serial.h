@@ -26,12 +26,9 @@ extern "C" {
 
 extern int isSerialDevice (const char **path);
 extern int openSerialDevice (const char *path, int *descriptor, struct termios *attributes);
-extern void rawSerialDevice (struct termios *attributes);
 extern int setSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
 extern int resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
-
-extern int flushSerialInput (int descriptor);
-extern int flushSerialOutput (int descriptor);
+extern void rawSerialDevice (struct termios *attributes);
 
 extern int validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices);
 extern int baud2integer (speed_t baud);
@@ -56,7 +53,9 @@ typedef enum {
 } SerialFlowControl;
 extern int setSerialFlowControl (struct termios *attributes, SerialFlowControl flow);
 
-extern int applySerialAttributes (const struct termios *attributes, int device);
+extern int applySerialAttributes (const struct termios *attributes, int descriptor);
+extern int flushSerialInput (int descriptor);
+extern int flushSerialOutput (int descriptor);
 
 #ifdef __cplusplus
 }

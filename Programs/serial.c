@@ -339,9 +339,23 @@ setSerialFlowControl (struct termios *attributes, SerialFlowControl flow) {
 }
 
 int
-applySerialAttributes (const struct termios *attributes, int device) {
-  if (tcsetattr(device, TCSANOW, attributes) != -1) return 1;
+applySerialAttributes (const struct termios *attributes, int descriptor) {
+  if (tcsetattr(descriptor, TCSANOW, attributes) != -1) return 1;
   LogError("tcsetattr");
+  return 0;
+}
+
+int
+flushSerialInput (int descriptor) {
+  if (tcflush(descriptor, TCIFLUSH) != -1) return 1;
+  LogError("TCIFLUSH");
+  return 0;
+}
+
+int
+flushSerialOutput (int descriptor) {
+  if (tcflush(descriptor, TCOFLUSH) != -1) return 1;
+  LogError("TCOFLUSH");
   return 0;
 }
 
@@ -379,29 +393,6 @@ openSerialDevice (const char *path, int *descriptor, struct termios *attributes)
   return 0;
 }
 
-void
-rawSerialDevice (struct termios *attributes) {
-  attributes->c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-  attributes->c_oflag &= ~OPOST;
-  attributes->c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-  attributes->c_cflag &= ~(CSIZE | PARENB);
-  attributes->c_cflag |= CS8;
-}
-
-int
-flushSerialInput (int descriptor) {
-  if (tcflush(descriptor, TCIFLUSH) != -1) return 1;
-  LogError("TCIFLUSH");
-  return 0;
-}
-
-int
-flushSerialOutput (int descriptor) {
-  if (tcflush(descriptor, TCOFLUSH) != -1) return 1;
-  LogError("TCOFLUSH");
-  return 0;
-}
-
 int
 setSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
   if (cfsetispeed(attributes, baud) != -1) {
@@ -433,4 +424,13 @@ resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
     }
   }
   return 0;
+}
+
+void
+rawSerialDevice (struct termios *attributes) {
+  attributes->c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+  attributes->c_oflag &= ~OPOST;
+  attributes->c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+  attributes->c_cflag &= ~(CSIZE | PARENB);
+  attributes->c_cflag |= CS8;
 }
