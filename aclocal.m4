@@ -34,6 +34,22 @@ fi
 AC_SUBST([$4])
 BRLTTY_SUMMARY_ITEM([$1], [$4])])
 
+AC_DEFUN([BRLTTY_ARG_PARAMETERS], [dnl
+BRLTTY_ARG_WITH(
+   [$1-parameters], [DRIVER:PARAMETER=SETTING... (comma-separated)],
+   [default parameters for the $1 driver(s)],
+   [$1_parameters], [""]
+)
+if test "${$1_parameters}" = "no"
+then
+   $1_parameters=""
+elif test "${$1_parameters}" = "yes"
+then
+   $1_parameters=""
+fi
+AC_DEFINE_UNQUOTED(translit([$1_parameters], [a-z], [A-Z]), ["${$1_parameters}"])
+BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
+
 AC_DEFUN([BRLTTY_ARG_ENABLE], [dnl
 BRLTTY_ARG_FEATURE([$1], [$2], [enable], [no], [$3], [$4], [$5])])
 
@@ -42,6 +58,12 @@ BRLTTY_ARG_FEATURE([$1], [$2], [disable], [yes], [$3], [$4], [$5])])
 
 AC_DEFUN([BRLTTY_ARG_FEATURE], [dnl
 AC_ARG_ENABLE([$1], BRLTTY_HELP_STRING([--$3-$1], [$2]), [], [enableval="$4"])
+
+pushdef([var], brltty_enabled_[]translit([$1], [-], [_]))dnl
+var="${enableval}"
+BRLTTY_SUMMARY_ITEM([$1], var)dnl
+popdef([var])
+
 case "${enableval}" in
    yes)
       $5
@@ -52,11 +74,7 @@ case "${enableval}" in
    *)
       ifelse($7, [], [AC_MSG_ERROR([unexpected value for feature $1: ${enableval}])], [$7])
       ;;
-esac
-pushdef([var], brltty_enabled_[]translit([$1], [-], [_]))dnl
-var="${enableval}"
-BRLTTY_SUMMARY_ITEM([$1], var)dnl
-popdef([var])])
+esac])
 
 AC_DEFUN([BRLTTY_HELP_STRING], [dnl
 AC_HELP_STRING([$1], patsubst([$2], [
@@ -262,6 +280,7 @@ changequote(, )dnl
 changequote([, ])dnl
       $1_help="$1-help"
    fi
+
    if test "${brltty_standalone_programs}" != "yes"
    then
       if test -n "${brltty_external_codes_$1}"
@@ -271,7 +290,9 @@ changequote([, ])dnl
       fi
       BRLTTY_SUMMARY_ITEM([external-$1-drivers], [brltty_external_codes_$1])
    fi
+
    BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
+   BRLTTY_ARG_PARAMETERS([$1])
 fi
 AC_SUBST([$1_driver_objects])
 AC_SUBST([$1_help])

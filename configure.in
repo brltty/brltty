@@ -459,6 +459,7 @@ BRLTTY_ARG_DISABLE(
    build_api="api"
    install_api="install-api"
    BRLTTY_SEARCH_LIBS([pthread_create], [pthread])
+   BRLTTY_ARG_PARAMETERS([api])
 ])
 AC_SUBST([api_objects])
 AC_SUBST([build_api])
@@ -689,11 +690,7 @@ BRLTTY_ARG_DISABLE(
    [speech synthesizer support], [dnl
    AC_DEFINE([ENABLE_SPEECH_SUPPORT])
    speech_support_object='spk.$O'
-])
-AC_SUBST([speech_support_object])
 
-if test "${brltty_enabled_speech_support}" != "no"
-then
    BRLTTY_SPEECH_DRIVER([al], [Alva])
    BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
    BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
@@ -725,7 +722,8 @@ then
    BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
    BRLTTY_SPEECH_DRIVER([tv], [Televox])
    BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
-fi
+])
+AC_SUBST([speech_support_object])
 BRLTTY_ARG_DRIVER([speech])
 
 AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
@@ -761,6 +759,8 @@ in
 esac
 AC_SUBST([screen_driver_objects])
 BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
+
+BRLTTY_ARG_PARAMETERS([screen])
 
 AC_SUBST([library_prefix], [lib])
 AC_SUBST([library_name], ["${library_prefix}${PACKAGE_NAME}"])

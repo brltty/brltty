@@ -416,6 +416,19 @@ for any additional display-specific instructions.
     See the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive
     and the <ref id="options-braille-driver" name="-b"> command line option
     for run-time selection.
+  <tag><tt/--with-braille-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="build-braille-parameters"></tag>
+    Specify the default parameter settings for the braille display drivers.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="drivers" name="Driver Identification Codes">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-braille-parameters" name="braille-parameters"> configuration file directive
+    and the <ref id="options-braille-parameters" name="-B"> command line option
+    for run-time selection.
   <tag><tt/--with-braille-device=/<em/device/<label id="build-braille-device"></tag>
     Specify the default device to which the braille display is connected.
     If a relative path is supplied, then it's anchored at <tt>/dev</>.
@@ -494,6 +507,19 @@ for any additional display-specific instructions.
     </descrip>
     See the <ref id="configure-speech-driver" name="speech-driver"> configuration file directive
     and the <ref id="options-speech-driver" name="-s"> command line option
+    for run-time selection.
+  <tag><tt/--with-speech-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="build-speech-parameters"></tag>
+    Specify the default parameter settings for the speech synthesizer drivers.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="drivers" name="Driver Identification Codes">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-speech-parameters" name="speech-parameters"> configuration file directive
+    and the <ref id="options-speech-parameters" name="-S"> command line option
     for run-time selection.
   <tag><tt/--with-flite=/<em/directory/<label id="build-flite"></tag>
     Specify the installed location of the FestivalLite text-to-speech package,
@@ -591,6 +617,15 @@ for any additional display-specific instructions.
     If a specific driver for the current operating system is available,
     then it's used.
     If not, then <tt/shm/ is used.
+  <tag><tt/--with-screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="build-screen-parameters"></tag>
+    Specify the default parameter settings for the screen driver.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+    See the <ref id="configure-screen-parameters" name="screen-parameters"> configuration file directive
+    and the <ref id="options-screen-parameters" name="-X"> command line option
+    for run-time selection.
 </descrip>
 
 <sect3>Directory Specification<label id="build-directoreis"><p>
@@ -804,6 +839,15 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--enable-api/<label id="build-api"></tag>
     Include the application programming interface
     (see section <ref id="api" name="The Application Programming Interface">).
+  <tag><tt/--with-api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="build-api-parameters"></tag>
+    Specify the default parameter settings for the application programming interface.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by the interface,
+    please see section <ref id="api" name="The Application Programming Interface">.
+    See the <ref id="configure-api-parameters" name="api-parameters"> configuration file directive
+    and the <ref id="options-api-parameters" name="-A"> command line option
+    for run-time selection.
 </descrip>
 
 <sect3>Miscellaneous Options<label id="build-miscellaneous"><p>
@@ -2033,6 +2077,8 @@ The following directives are recognized:
     then its rightmost assignment is used.
     For a description of the parameters accepted by the interface,
     please see section <ref id="api" name="The Application Programming Interface">.
+    See the <ref id="build-api-parameters" name="--with-api-parameters">
+    build option for the defaults established during the build procedure.
     This directive can be overridden with the
     <ref id="options-api-parameters" name="-A"> command line option.
   <tag><tt/attributes-table/ <em/file/<label id="configure-attributes-table"></tag>
@@ -2062,12 +2108,18 @@ The following directives are recognized:
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-braille-device" name="-d"> command line option.
-  <tag><tt/braille-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-braille-parameters"></tag>
-    Specify parameters for the braille display driver.
+  <tag><tt/braille-parameters/ [<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="configure-braille-parameters"></tag>
+    Specify parameters for the braille display drivers.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="drivers" name="Driver Identification Codes">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
+    See the <ref id="build-braille-parameters" name="--with-braille-parameters">
+    build option for the defaults established during the build procedure.
     This directive can be overridden with the
     <ref id="options-braille-parameters" name="-B"> command line option.
   <tag><tt/contraction-table/ <em/file/<label id="configure-contraction-table"></tag>
@@ -2099,6 +2151,8 @@ The following directives are recognized:
     then its rightmost assignment is used.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
+    See the <ref id="build-screen-parameters" name="--with-screen-parameters">
+    build option for the defaults established during the build procedure.
     This directive can be overridden with the
     <ref id="options-screen-parameters" name="-X"> command line option.
   <tag><tt/speech-driver/ <em/driver/<label id="configure-speech-driver"></tag>
@@ -2109,12 +2163,18 @@ The following directives are recognized:
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-speech-driver" name="-s"> command line option.
-  <tag><tt/speech-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
-    Specify parameters for the speech synthesizer driver.
+  <tag><tt/speech-parameters/ [<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
+    Specify parameters for the speech synthesizer drivers.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="drivers" name="Driver Identification Codes">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
+    See the <ref id="build-speech-parameters" name="--with-speech-parameters">
+    build option for the defaults established during the build procedure.
     This directive can be overridden with the
     <ref id="options-speech-parameters" name="-S"> command line option.
   <tag><tt/text-table/ <em/file/<label id="configure-text-table"></tag>
@@ -2254,15 +2314,19 @@ The <tt/brltty/ command accepts the following options:
     For a description of the parameters accepted by the interface,
     please see section <ref id="api" name="The Application Programming Interface">.
     See the <ref id="configure-api-parameters" name="api-parameters">
-    configuration file directive for the default run-time setting.
-  <tag><tt/-B/<em/name/<tt/=/<em/value/<tt/,/... <tt/--braille-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-braille-parameters"></tag>
-    Specify parameters for the braille display driver.
+    configuration file directive for the default run-time settings.
+  <tag><tt/-B/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/... <tt/--braille-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="options-braille-parameters"></tag>
+    Specify parameters for the braille display drivers.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="drivers" name="Driver Identification Codes">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
     See the <ref id="configure-braille-parameters" name="braille-parameters">
-    configuration file directive for the default run-time setting.
+    configuration file directive for the default run-time settings.
   <tag><tt/-E/ <tt/--environment-variables/<label id="options-environment-variables"></tag>
     Recognize environment variables when determining
     the default settings for unspecified command line options
@@ -2329,14 +2393,18 @@ The <tt/brltty/ command accepts the following options:
   <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
     Specify the file wherein BRLTTY is to write its process identifier (pid).
     If not specified, BRLTTY doesn't write its process identifier anywhere.
-  <tag><tt/-S/<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
-    Specify parameters for the speech synthesizer driver.
+  <tag><tt/-S/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
+    Specify parameters for the speech synthesizer drivers.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="drivers" name="Driver Identification Codes">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
     See the <ref id="configure-speech-parameters" name="speech-parameters">
-    configuration file directive for the default run-time setting.
+    configuration file directive for the default run-time settings.
   <tag><tt/-U/<em/csecs/ <tt/--update-interval=/<em/csecs/<label id="options-update-interval"></tag>
     Specify the interval (in hundredths of a second)
     at which the braille window is updated with new screen content.
@@ -2348,7 +2416,7 @@ The <tt/brltty/ command accepts the following options:
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
     See the <ref id="configure-screen-parameters" name="screen-parameters">
-    configuration file directive for the default run-time setting.
+    configuration file directive for the default run-time settings.
 </descrip>
 
 <sect>Feature Descriptions<p>

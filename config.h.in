@@ -94,17 +94,26 @@ extern "C" {
 /* Define this to be a string containing a list of the braille driver codes. */
 #undef BRAILLE_DRIVER_CODES
 
+/* Define this to be a string containing the default braille driver parameters. */
+#undef BRAILLE_PARAMETERS
+
 /* Define this to be a string containing the path to the default braille device. */
 #undef BRAILLE_DEVICE
-
-/* Define this to be a string containing a list of the speech driver codes. */
-#undef SPEECH_DRIVER_CODES
 
 /* Define this to be a string containing the path to the default text table. */
 #undef TEXT_TABLE
 
 /* Define this to be a string containing the path to the default attributes table. */
 #undef ATTRIBUTES_TABLE
+
+/* Define this to be a string containing a list of the speech driver codes. */
+#undef SPEECH_DRIVER_CODES
+
+/* Define this to be a string containing the default speech driver parameters. */
+#undef SPEECH_PARAMETERS
+
+/* Define this to be a string containing the default screen driver parameters. */
+#undef SCREEN_PARAMETERS
 
 /* Define this to include the preferences menu. */
 #undef ENABLE_PREFERENCES_MENU
@@ -147,6 +156,9 @@ extern "C" {
 
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
+
+/* Define this to be a string containing the default application programming interface parameters. */
+#undef API_PARAMETERS
 
 /* Define this if Universal Serial Bus support is to be included. */
 #undef ENABLE_USB

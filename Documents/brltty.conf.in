@@ -112,26 +112,26 @@
 # The braille-parameters directive passes non-generic parameters through
 # to the braille driver.
 # (can be overridden with the -B [--braille-parameters=] option)
-#braille-parameters parameter=setting,...
+#braille-parameters driver:parameter=setting,...
 
 # BrailleLite Braille Driver Parameters
-#braille-parameters BaudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
-#braille-parameters KbEmu=yes # [yes,no]
+#braille-parameters bl:BaudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
+#braille-parameters bl:KbEmu=yes # [yes,no]
 
 # BrailleNote Braille Driver Parameters
-#braille-parameters StatusCells=0
+#braille-parameters bn:StatusCells=0
 
 # Papenmeier Braille Driver Parameters
-#braille-parameters ConfigFile=@DATA_DIRECTORY@/brltty-pm.conf
-#braille-parameters DebugKeys=no # [no,yes]
-#braille-parameters DebugReads=no # [no,yes]
-#braille-parameters DebugWrites=no # [no,yes]
+#braille-parameters pm:ConfigFile=@DATA_DIRECTORY@/brltty-pm.conf
+#braille-parameters pm:DebugKeys=no # [no,yes]
+#braille-parameters pm:DebugReads=no # [no,yes]
+#braille-parameters pm:DebugWrites=no # [no,yes]
 
 # Voyager Braille Driver Parameters
-#braille-parameters Repeat_Init_Delay=120 # [milliseconds]
-#braille-parameters Repeat_Inter_Delay=60 # [milliseconds]
-#braille-parameters Dots_Repeat_Init_Delay=500 # [milliseconds]
-#braille-parameters Dots_Repeat_Inter_Delay=60 # [milliseconds]
+#braille-parameters vo:Repeat_Init_Delay=120 # [milliseconds]
+#braille-parameters vo:Repeat_Inter_Delay=60 # [milliseconds]
+#braille-parameters vo:Dots_Repeat_Init_Delay=500 # [milliseconds]
+#braille-parameters vo:Dots_Repeat_Inter_Delay=60 # [milliseconds]
 
 
 ###########################
@@ -161,49 +161,49 @@
 # The speech-parameters directive passes non-generic parameters through
 # to the speech driver.
 # (can be overridden with the -S [--speech-parameters=] option)
-#speech-parameters parameter=setting,...
+#speech-parameters driver:parameter=setting,...
 
 # ExternalSpeech Speech Driver Parameters
-#speech-parameters Program=/usr/local/bin/externalspeech
-#speech-parameters Uid=65534
-#speech-parameters Gid=65534
+#speech-parameters es:Program=/usr/local/bin/externalspeech
+#speech-parameters es:Uid=65534
+#speech-parameters es:Gid=65534
 
 # Festival Speech Driver Parameters
-#speech-parameters Command=festival # [/path/to/command]
-#speech-parameters Name= # [kevin,kal]
+#speech-parameters fv:Command=festival # [/path/to/command]
+#speech-parameters fv:Name= # [kevin,kal]
 
 # FestivalLite Speech Driver Parameters
-#speech-parameters Pitch=100 # [50-200]
+#speech-parameters fl:Pitch=100 # [50-200]
 
 # GenericSay Speech Driver Parameters
-#speech-parameters Command=/usr/local/bin/say
+#speech-parameters gs:Command=/usr/local/bin/say
 
 # Mikropuhe Speech Driver Parameters
-#speech-parameters Name= # [/path/to/mikropuhe/name.pu5]
-#speech-parameters Pitch=0 # [-10-10]
+#speech-parameters mp:Name= # [/path/to/mikropuhe/name.pu5]
+#speech-parameters mp:Pitch=0 # [-10-10]
 
 # Theta Speech Driver Parameters
-#speech-parameters Age= # [1-99,-1--99]
-#speech-parameters Gender= # [male,female,neuter]
-#speech-parameters Language= # [two-letter language code]
-#speech-parameters Name= # [voice,/path/to/voice]
-#speech-parameters Pitch=0.0 # [-2.0-2.0]
+#speech-parameters th:Age= # [1-99,-1--99]
+#speech-parameters th:Gender= # [male,female,neuter]
+#speech-parameters th:Language= # [two-letter language code]
+#speech-parameters th:Name= # [voice,/path/to/voice]
+#speech-parameters th:Pitch=0.0 # [-2.0-2.0]
 
 # ViaVoice Speech Driver Parameters
-#speech-parameters IniFile=/usr/lib/ViaVoiceTTS/eci.ini
-#speech-parameters SampleRate= # [8000,11025,22050]
-#speech-parameters AbbreviationMode= # [on,off]
-#speech-parameters NumberMode= # [word,year]
-#speech-parameters SynthMode= # [sentence,none]
-#speech-parameters TextMode= # [talk,spell,literal,phonetic]
-#speech-parameters Language= # [AmericanEnglish,BritishEnglish,CastilianSpanish,MexicanSpanish,StandardFrench,CanadianFrench,StandardGerman,StandardItalian,SimplifiedChinese,BrazilianPortuguese]
-#speech-parameters Voice= # [AdultMale,AdultFemale,Child,ElderlyFemale,ElderlyMale]
-#speech-parameters VocalTract= # [male,female]
-#speech-parameters Breathiness= # [0-100]
-#speech-parameters HeadSize= # [0-100]
-#speech-parameters PitchBaseline= # [0-100]
-#speech-parameters PitchFluctuation= # [0-100]
-#speech-parameters Roughness= # [0-100]
+#speech-parameters vv:IniFile=/usr/lib/ViaVoiceTTS/eci.ini
+#speech-parameters vv:SampleRate= # [8000,11025,22050]
+#speech-parameters vv:AbbreviationMode= # [on,off]
+#speech-parameters vv:NumberMode= # [word,year]
+#speech-parameters vv:SynthMode= # [sentence,none]
+#speech-parameters vv:TextMode= # [talk,spell,literal,phonetic]
+#speech-parameters vv:Language= # [AmericanEnglish,BritishEnglish,CastilianSpanish,MexicanSpanish,StandardFrench,CanadianFrench,StandardGerman,StandardItalian,SimplifiedChinese,BrazilianPortuguese]
+#speech-parameters vv:Voice= # [AdultMale,AdultFemale,Child,ElderlyFemale,ElderlyMale]
+#speech-parameters vv:VocalTract= # [male,female]
+#speech-parameters vv:Breathiness= # [0-100]
+#speech-parameters vv:HeadSize= # [0-100]
+#speech-parameters vv:PitchBaseline= # [0-100]
+#speech-parameters vv:PitchFluctuation= # [0-100]
+#speech-parameters vv:Roughness= # [0-100]
 
 
 ##########################

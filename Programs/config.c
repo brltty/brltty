@@ -375,73 +375,122 @@ ensureOptionSetting (const char **setting, const char *defaultSetting, const cha
 
 static void
 extendParameters (char **parameters, char *operand) {
-   if (*parameters) {
-      size_t length = strlen(*parameters);
-      *parameters = reallocWrapper(*parameters, length+1+strlen(operand)+1);
-      sprintf((*parameters)+length, ",%s", operand);
-   } else {
-      *parameters = strdupWrapper(operand);
-   }
-}
-
-static void
-parseParameters (char ***values, const char *const *names, const char *description, char *parameters) {
-   if (!names) {
-      static const char *const noNames[] = {NULL};
-      names = noNames;
-   }
-   if (!*values) {
-      unsigned int count = 0;
-      while (names[count]) ++count;
-      *values = mallocWrapper((count + 1) * sizeof(**values));
-      (*values)[count] = NULL;
-      while (count--) (*values)[count] = strdupWrapper("");
-   }
-   if (parameters && *parameters) {
-      const char *name = (parameters = strdupWrapper(parameters));
-      while (1) {
-         char *delimiter = strchr(name, ',');
-         int done = delimiter == NULL;
-         if (!done) *delimiter = 0;
-         if (*name) {
-            char *value = strchr(name, '=');
-            if (!value) {
-               LogPrint(LOG_ERR, "Missing %s parameter value: %s", description, name);
-            } else if (value == name) {
-               LogPrint(LOG_ERR, "Missing %s parameter name: %s", description, name);
-            } else {
-               unsigned int length = value - name;
-               unsigned int index = 0;
-               *value++ = 0;
-               while (names[index]) {
-                  if (length <= strlen(names[index])) {
-                     if (strncasecmp(name, names[index], length) == 0) {
-                        free((*values)[index]);
-                        (*values)[index] = strdupWrapper(value);
-                        break;
-                     }
-                  }
-                  ++index;
-               }
-               if (!names[index]) {
-                  LogPrint(LOG_ERR, "Unsupported %s parameter: %s", description, name);
-               }
-            }
-         }
-         if (done) break;
-         name = delimiter + 1;
-      }
-      free(parameters);
-   }
-}
-
-static void
-processParameters (char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable) {
-  parseParameters(values, names, description, configuredParameters);
-  if (opt_environmentVariables && environmentVariable) {
-    parseParameters(values, names, description, getenv(environmentVariable));
+  if (*parameters) {
+    size_t length = strlen(*parameters);
+    *parameters = reallocWrapper(*parameters, length+1+strlen(operand)+1);
+    sprintf((*parameters)+length, ",%s", operand);
+  } else {
+    *parameters = strdupWrapper(operand);
   }
-  parseParameters(values, names, description, optionParameters);
+}
+
+static void
+parseParameters (
+  char **values,
+  const char *const *names,
+  const char *description,
+  const char *qualifier,
+  const char *parameters
+) {
+  if (parameters && *parameters) {
+    char *copy = strdupWrapper(parameters);
+    char *name = copy;
+
+    while (1) {
+      char *end = strchr(name, ',');
+      int done = end == NULL;
+      if (!done) *end = 0;
+
+      if (*name) {
+        char *value = strchr(name, '=');
+        if (!value) {
+          LogPrint(LOG_ERR, "Missing %s parameter value: %s",
+                   description, name);
+        } else if (value == name) {
+        noName:
+          LogPrint(LOG_ERR, "Missing %s parameter name: %s",
+                   description, name);
+        } else {
+          int nameLength = value++ - name;
+          int eligible = 1;
+
+          if (qualifier) {
+            char *colon = memchr(name, ':', nameLength);
+            if (colon) {
+              int qualifierLength = colon - name;
+              int nameAdjustment = qualifierLength + 1;
+              eligible = 0;
+              if (!qualifierLength) {
+                LogPrint(LOG_ERR, "Missing %s identifier: %s",
+                         description, name);
+              } else if (!(nameLength -= nameAdjustment)) {
+                goto noName;
+              } else if ((qualifierLength == strlen(qualifier)) &&
+                         (memcmp(name, qualifier, qualifierLength) == 0)) {
+                name += nameAdjustment;
+                eligible = 1;
+              }
+            }
+          }
+
+          if (eligible) {
+            unsigned int index = 0;
+            while (names[index]) {
+              if (nameLength <= strlen(names[index])) {
+                if (strncasecmp(name, names[index], nameLength) == 0) {
+                  free(values[index]);
+                  values[index] = strdupWrapper(value);
+                  break;
+                }
+              }
+              ++index;
+            }
+
+            if (!names[index]) {
+              LogPrint(LOG_ERR, "Unsupported %s parameter: %s", description, name);
+            }
+          }
+        }
+      }
+
+      if (done) break;
+      name = end + 1;
+    }
+
+    free(copy);
+  }
+}
+
+static void
+processParameters (
+  char ***values,
+  const char *const *names,
+  const char *description,
+  const char *qualifier,
+  const char *optionParameters,
+  const char *configuredParameters,
+  const char *environmentVariable,
+  const char *defaultParameters
+) {
+  if (!names) {
+    static const char *const noNames[] = {NULL};
+    names = noNames;
+  }
+
+  {
+    unsigned int count = 0;
+    while (names[count]) ++count;
+    *values = mallocWrapper((count + 1) * sizeof(**values));
+    (*values)[count] = NULL;
+    while (count--) (*values)[count] = strdupWrapper("");
+  }
+
+  parseParameters(*values, names, description, qualifier, defaultParameters);
+  parseParameters(*values, names, description, qualifier, configuredParameters);
+  if (opt_environmentVariables && environmentVariable) {
+    parseParameters(*values, names, description, qualifier, getenv(environmentVariable));
+  }
+  parseParameters(*values, names, description, qualifier, optionParameters);
 }
 
 static void
@@ -570,8 +619,10 @@ initializeBraille (void) {
 static void
 getBrailleDriver (void) {
   if ((brailleDriver = loadBrailleDriver(opt_brailleDriver, opt_libraryDirectory))) {
-    processParameters(&brailleParameters, brailleDriver->parameters, "braille driver",
-                      opt_brailleParameters, cfg_brailleParameters, "BRLTTY_BRAILLE_PARAMETERS");
+    processParameters(&brailleParameters, brailleDriver->parameters,
+                      "braille driver", brailleDriver->identifier,
+                      opt_brailleParameters, cfg_brailleParameters,
+                      "BRLTTY_BRAILLE_PARAMETERS", BRAILLE_PARAMETERS);
   } else {
     LogPrint(LOG_ERR, "Bad braille driver selection: %s", opt_brailleDriver);
     fprintf(stderr, "\n");
@@ -654,8 +705,10 @@ initializeSpeech (void) {
 static void
 getSpeechDriver (void) {
   if ((speechDriver = loadSpeechDriver(opt_speechDriver, opt_libraryDirectory))) {
-    processParameters(&speechParameters, speechDriver->parameters, "speech driver",
-                      opt_speechParameters, cfg_speechParameters, "BRLTTY_SPEECH_PARAMETERS");
+    processParameters(&speechParameters, speechDriver->parameters,
+                      "speech driver", speechDriver->identifier,
+                      opt_speechParameters, cfg_speechParameters,
+                      "BRLTTY_SPEECH_PARAMETERS", SPEECH_PARAMETERS);
   } else {
     LogPrint(LOG_ERR, "Bad speech driver selection: %s", opt_speechDriver);
     fprintf(stderr, "\n");
@@ -1684,11 +1737,15 @@ startup (int argc, char *argv[]) {
   getSpeechDriver();
 #endif /* ENABLE_SPEECH_SUPPORT */
 #ifdef ENABLE_API
-  processParameters(&apiParameters, api_parameters, "application programming interface",
-                    opt_apiParameters, cfg_apiParameters, "BRLTTY_API_PARAMETERS");
+  processParameters(&apiParameters, api_parameters,
+                    "application programming interface", NULL,
+                    opt_apiParameters, cfg_apiParameters,
+                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
 #endif /* ENABLE_API */
-  processParameters(&screenParameters, getScreenParameters(), "screen driver",
-                    opt_screenParameters, cfg_screenParameters, "BRLTTY_SCREEN_PARAMETERS");
+  processParameters(&screenParameters, getScreenParameters(),
+                    "screen driver", NULL,
+                    opt_screenParameters, cfg_screenParameters,
+                    "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
 
   if (!opt_preferencesFile) {
     const char *part1 = "brltty-";
