@@ -247,14 +247,14 @@ statdisp: STATCODE            {  }
 anykey:   STAT   NUM         { keyindex= OFFS_STAT + numval; } 
         | FRONT  NUM         { keyindex= OFFS_FRONT + numval; } 
         | EASY   EASYCODE    { keyindex= OFFS_EASY + numval; } 
-        | SWITCH LEFT  REAR  { keyindex= OFFS_SWITCH + 1; }
-        | SWITCH LEFT  FRONT { keyindex= OFFS_SWITCH + 2; }
-        | SWITCH RIGHT REAR  { keyindex= OFFS_SWITCH + 7; }
-        | SWITCH RIGHT FRONT { keyindex= OFFS_SWITCH + 8; }
-        | KEY    LEFT  REAR  { keyindex= OFFS_SWITCH + 3; }
-        | KEY    LEFT  FRONT { keyindex= OFFS_SWITCH + 4; }
-        | KEY    RIGHT REAR  { keyindex= OFFS_SWITCH + 5; }
-        | KEY    RIGHT FRONT { keyindex= OFFS_SWITCH + 6; }
+        | SWITCH LEFT  REAR  { keyindex= OFFS_SWITCH + SWITCH_LEFT_REAR; }
+        | SWITCH LEFT  FRONT { keyindex= OFFS_SWITCH + SWITCH_LEFT_FRONT; }
+        | SWITCH RIGHT REAR  { keyindex= OFFS_SWITCH + SWITCH_RIGHT_REAR; }
+        | SWITCH RIGHT FRONT { keyindex= OFFS_SWITCH + SWITCH_RIGHT_FRONT; }
+        | KEY    LEFT  REAR  { keyindex= OFFS_SWITCH + KEY_LEFT_REAR; }
+        | KEY    LEFT  FRONT { keyindex= OFFS_SWITCH + KEY_LEFT_FRONT; }
+        | KEY    RIGHT REAR  { keyindex= OFFS_SWITCH + KEY_RIGHT_REAR; }
+        | KEY    RIGHT FRONT { keyindex= OFFS_SWITCH + KEY_RIGHT_FRONT; }
         | ROUTING            { keyindex= ROUTINGKEY; }
         ; 
 
