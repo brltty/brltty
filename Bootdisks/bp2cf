@@ -1,15 +1,171 @@
 #!/bin/sh
-# Boot Parameters to Configuration File
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
 
-# This script processes the brltty= boot parameters in /proc/cmdline and
-# writes a corresponding BRLTTY configuration file to standard output.
+# Convert the boot parameter to configuration file directives.
+# If /proc is mounted then use the brltty= boot parameter in /proc/cmdline.
+# If /proc is not mounted then use the brltty environment variable.
+# Invoke with -h for usage information.
 
-parse()
+programName="${0##*/}"
+programMessage()
 {
-   brailleDriver=""
-   brailleDevice=""
-   textTable=""
+   echo 2>&1 "${programName}: ${1}"
+}
+syntaxError()
+{
+   programMessage "${1}"
+   exit 2
+}
+internalError()
+{
+   programMessage "${1}"
+   exit 3
+}
 
+configurationFile=""
+requestedAction=create
+bootParameter=""
+OPTIND=1
+while getopts ":f:cup:h" option
+do
+   case "${option}"
+   in
+      f) configurationFile="${OPTARG}";;
+      c) requestedAction=create;;
+      u) requestedAction=update;;
+      p) bootParameter="${OPTARG}";;
+      h)
+         cat <<EOF
+Usage: ${programName} [option ...]
+-f file  The configuration file to create/update.
+-c       Create the configuration file (write to stdout if no -f).
+-u       Update the configuration file (copying from stdin to stdout if no -f).
+-p [driver][,[device][,[table]]]
+         Explicitly specify the boot parameter.
+-h       Display this usage summary.
+EOF
+         exit 0
+         ;;
+     \?) syntaxError "unknown option: -${OPTARG}";;
+      :) syntaxError "missing value: -${OPTARG}";;
+      *) internalError "unimplemented option: -${option}";;
+   esac
+done
+shift "`expr $OPTIND - 1`"
+[ "${#}" -eq 0 ] || syntaxError "too many parameters."
+case "${requestedAction}"
+in
+   create)
+      putConfigurationLine()
+      {
+         echo "${1}" || exit 4
+      }
+      startConfigurationFile()
+      {
+         [ -n "${configurationFile}" ] && exec >"${configurationFile}"
+         putConfigurationLine "`makeHeaderLine Created`"
+      }
+      putConfigurationDirective()
+      {
+         putConfigurationLine "${1} ${2}"
+      }
+      finalizeConfigurationFile()
+      {
+         :
+      }
+      ;;
+   update)
+      putSedCommand()
+      {
+         sedScript="${sedScript}
+${1}"
+      }
+      startConfigurationFile()
+      {
+         if [ -n "${configurationFile}" ]
+         then
+            [ -e "${configurationFile}" ] || syntaxError "file not found: ${configurationFile}"
+            [ -f "${configurationFile}" ] || syntaxError "not a file: ${configurationFile}"
+            [ -r "${configurationFile}" ] || syntaxError "file not readable: ${configurationFile}"
+            [ -w "${configurationFile}" ] || syntaxError "file not writable: ${configurationFile}"
+            outputFile="${configurationFile}.new"
+            exec <"${configurationFile}" >"${outputFile}"
+         fi
+         sedScript=""
+         putSedCommand "1i\\
+`makeHeaderLine Updated`\\
+
+"
+      }
+      putConfigurationDirective()
+      {
+         value="`echo "${2}" | sed -e 's%\\([/\\]\\)%\\\\\\1%g'`"
+         putSedCommand "/^ *#\\(${1} .*\\)/s//\\1/"
+         putSedCommand "/^ *\\(${1}\\) .*/s//\\1 ${value}/"
+      }
+      finalizeConfigurationFile()
+      {
+         sed -e "${sedScript}"
+         [ -n "${outputFile}" ] && mv -f "${outputFile}" "${configurationFile}"
+      }
+      ;;
+   *) internalError "unimplemented action: ${requestedAction}";;
+esac
+
+makeHeaderLine()
+{
+   echo "# ${1} by brltty-bp2cf`date +' on %Y-%m-%d at %H:%M:%S %Z (UTC%z)'`."
+}
+putConfigurationFile()
+{
+   startConfigurationFile
+   [ -n "${brailleDriver}" ] && putConfigurationDirective "braille-driver" "${brailleDriver}"
+   [ -n "${brailleDevice}" ] && putConfigurationDirective "braille-device" "${brailleDevice}"
+   [ -n "${textTable}" ] && putConfigurationDirective "text-table" "${textTable}"
+   finalizeConfigurationFile
+}
+parseBootOperands()
+{
+   number=1
+   while [ "${number}" -le 3 ]
+   do
+      cut="cut -d, -f${number}"
+      [ "${number}" -gt 1 ] && cut="${cut} -s"
+      operand="`echo ${1} | ${cut}`"
+      if [ -n "${operand}" ]
+      then
+         case "${number}"
+         in
+            1) brailleDriver="${operand}";;
+            2) brailleDevice="${operand}";;
+            3) textTable="${operand}";;
+         esac
+      fi
+      number="`expr ${number} + 1`"
+   done
+}
+parseBootParameter()
+{
+   parseBootOperands "${1}"
+   putConfigurationFile
+}
+parseBootCommand()
+{
    found=false
    while [ "${#}" -gt 0 ]
    do
@@ -17,44 +173,26 @@ parse()
       in
          "brltty="*)
             found=true
-            parameters="${1#*=}"
-
-            number=1
-            while [ "${number}" -le 3 ]
-            do
-               parameter="`echo ${parameters} | cut -d, -f${number}`"
-               if [ -n "${parameter}" ]
-               then
-                  case "${number}"
-                  in
-                     1)
-                        brailleDriver="${parameter}"
-                        ;;
-                     2)
-                        brailleDevice="${parameter}"
-                        ;;
-                     3)
-                        textTable="${parameter}"
-                        ;;
-                  esac
-               fi
-
-               number="`expr ${number} + 1`"
-            done
+            parseBootOperands "${1#*=}"
             ;;
       esac
-
       shift
    done
-
-   if "${found}"
-   then
-      echo "# Created by ${0##*/} `date +'on %Y-%m-%d at %H:%M:%S %Z (UTC%z)'`."
-      [ -n "${brailleDriver}" ] && echo "braille-driver ${brailleDriver}"
-      [ -n "${brailleDevice}" ] && echo "braille-device ${brailleDevice}"
-      [ -n "${textTable}" ] && echo "text-table ${textTable}"
-   fi
+   "${found}" && putConfigurationFile
 }
 
-file="/proc/cmdline"
-[ -f "${file}" ] && parse `cat "${file}"`
+brailleDriver=""
+brailleDevice=""
+textTable=""
+bootCommandFile="/proc/cmdline"
+if [ -n "${bootParameter}" ]
+then
+   parseBootParameter "${bootParameter}"
+elif [ -f "${bootCommandFile}" ]
+then
+   parseBootCommand `cat "${bootCommandFile}"`
+elif [ -n "${brltty}" ]
+then
+   parseBootParameter "${brltty}"
+fi
+exit 0
