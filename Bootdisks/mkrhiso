@@ -1,0 +1,135 @@
+#!/bin/bash -p
+
+originalImage="boot.iso"
+modifiedImage="bootbrl.iso"
+loaderDirectory="isolinux"
+configurationFile="isolinux.cfg"
+
+programName="${0##*/}"
+programMessage() {
+   echo >&2 "${programName}: ${1}"
+}
+programError() {
+   [ -n "${1}" ] && programMessage "${1}"
+   exit "${2:-2}"
+}
+
+[ -f "${originalImage}" ] || programError "original image not found: ${originalImage}"
+
+brlttyPattern="brltty-*"
+set -- $brlttyPattern
+[ "${#}" -eq 1 -a "${1}" = "${brlttyPattern}" ] && set --
+[ "${#}" -eq 0 ] && programError "brltty archive not found."
+[ "${#}" -gt 1 ] && {
+   brlttyArchives="$(echo "${*}" | sed -e 's% %,&%g')"
+   programError "more than one brltty archive: ${brlttyArchives}"
+}
+brlttyArchive="${1}"
+
+cleanup() {
+   set +e
+   cd /
+   "${initrdMounted}" && umount "${initrdRoot}"
+   "${originalMounted}" && umount "${originalRoot}"
+   [ -n "${temporaryDirectory}" ] && rm -r "${temporaryDirectory}"
+}
+set -e
+originalMounted=false
+initrdMounted=false
+trap "cleanup" 0
+
+temporaryDirectory="$(mktemp -d "${TMPDIR:-/tmp}/${0##*/}.XXXXXX")"
+
+originalRoot="${temporaryDirectory}/original"
+mkdir "${originalRoot}"
+mount -o loop -t iso9660 "${originalImage}" "${originalRoot}"
+originalMounted=true
+
+modifiedRoot="${temporaryDirectory}/modified"
+mkdir "${modifiedRoot}"
+cp -a "${originalRoot}/${loaderDirectory}" "${modifiedRoot}"
+
+sed -n -e '
+/^\( *default  *\).*$/s//\1text/
+/^\( *timeout  *\).*$/s//\10/
+/^ *append.* text/s/$/ video=vc:13/
+p
+' <"${originalRoot}/${loaderDirectory}/${configurationFile}" >"${modifiedRoot}/${loaderDirectory}/${configurationFile}"
+
+initrdImage="${temporaryDirectory}/initrd.ext2"
+initrdPath="${modifiedRoot}/${loaderDirectory}/initrd.img"
+gunzip -c "${initrdPath}" >"${initrdImage}"
+
+initrdRoot="${temporaryDirectory}/initrd"
+mkdir "${initrdRoot}"
+mount -o loop -t ext2 "${initrdImage}" "${initrdRoot}"
+initrdMounted=true
+
+linuxrcPath="${initrdRoot}/linuxrc"
+initPath="$(readlink "${linuxrcPath}")"
+rm "${linuxrcPath}"
+ln -s /bin/brltty "${linuxrcPath}"
+
+deviceDirectory="${initrdRoot}/dev"
+for device in /dev/vcs*
+do
+   deviceName="${device##*/}"
+   devicePath="${deviceDirectory}/${deviceName}"
+   set +e
+   [ -e "${deviceDirectory}/${deviceName}" ] && continue
+   set -e
+   cp -a "${device}" "${deviceDirectory}"
+done
+
+case "${brlttyArchive}"
+in
+   *.tar.gz|*.tgz)
+      tar x -z -C "${temporaryDirectory}" -f "${brlttyArchive}"
+      ;;
+   *.tar)
+      tar x -C "${temporaryDirectory}" -f "${brlttyArchive}"
+      ;;
+   *)
+      programError "unsupported brltty archive name: ${brlttyArchive}"
+      ;;
+esac
+
+brlttyPattern="${temporaryDirectory}/brltty*"
+set -- ${brlttyPattern}
+[ "${#}" -eq 1 -a "${1}" = "${brlttyPattern}" ] && set --
+[ "${#}" -eq 0 ] && programError "brltty directory not found."
+brlttyDirectory="${1}"
+
+(
+   set -e
+   trap "" 0
+   cd "${brlttyDirectory}"
+
+   ./autogen.sh
+   ./configure --quiet --with-install-root="${initrdRoot}" \
+	       --with-init-path="${initPath}" \
+	       --with-braille-driver=all --disable-speech-support \
+	       --disable-pcm-tunes --disable-fm-tunes --disable-midi-tunes \
+               --enable-standalone-programs --disable-api --disable-gpm
+   make -s -C Programs install-programs install-help install-tables
+) || exit "${?}"
+
+(
+   set +e
+   trap "" 0
+
+   cd "${temporaryDirectory}"
+   "${SHELL:-/bin/sh}"
+   exit 0
+)
+
+initrdMounted=false
+umount "${initrdRoot}"
+gzip -c -9 "${initrdImage}" >"${initrdPath}"
+
+mkisofs -quiet -R -T -boot-load-size 4 -boot-info-table -no-emul-boot \
+	-A "" \
+	-V "" \
+	-b "${loaderDirectory}/isolinux.bin" -c "${loaderDirectory}/boot.cat" -no-emul-boot \
+	-o "${modifiedImage}" "${modifiedRoot}"
+exit 0
