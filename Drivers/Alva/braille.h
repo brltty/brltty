@@ -57,4 +57,4 @@
 /* Delay in miliseconds between forced full refresh of the display.
  * This is to minimize garbage effects due to noise on the serial line.
  */
-#define REFRESH_RATE 1000
+#define REWRITE_INTERVAL 1000

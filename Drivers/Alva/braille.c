@@ -237,7 +237,9 @@ static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
 static unsigned char NbStCells;	/* number of status cells */
 static BRLPARAMS *model;		/* points to terminal model config struct */
-static int ReWrite = 0;		/* 1 if display need to be rewritten */
+static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
+static int rewriteInterval;
+static struct timeval rewriteTime;		/* 1 if display need to be rewritten */
 
 
 
@@ -428,6 +430,8 @@ static int serialCharactersPerSecond;			/* file descriptor for Braille display *
 
 static int
 openSerialPort (char **parameters, const char *device) {
+  rewriteInterval = REWRITE_INTERVAL;
+
   if (!openSerialDevice(device, &serialDevice, &oldSerialSettings)) return 0;
 
   memset(&newSerialSettings, 0, sizeof(newSerialSettings));
@@ -514,6 +518,8 @@ chooseUsbDevice (UsbDevice *device, void *data) {
 
 static int
 openUsbPort (char **parameters, const char *device) {
+  rewriteInterval = 0;
+
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
     if (usbBeginInput(usbDevice, usbInputEndpoint, USB_ENDPOINT_TRANSFER_INTERRUPT, 8, 8)) {
       return 1;
@@ -648,7 +654,8 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
   /* Allocate space for buffers */
   if (!reallocateBuffers(brl)) return 0;
-  ReWrite = 1;			/* To write whole display at first time */
+  rewriteRequired = 1;			/* To write whole display at first time */
+  gettimeofday(&rewriteTime, NULL);
 
   if (model->Flags & BPF_CONFIGURABLE) {
     writeFunction(brl, 0X07);
@@ -749,34 +756,38 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int Start, int Len, unsigned 
 
 static void brl_writeWindow (BrailleDisplay *brl)
 {
-  int i, j, k;
-  static int Timeout = 0;
+  int from, to;
 
-  if (ReWrite ||  ++Timeout > (REFRESH_RATE/updateInterval))
-    {
-      ReWrite = Timeout = 0;
+  {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    if (rewriteRequired ||
+        ((rewriteInterval > 0) &&
+         (millisecondsBetween(&rewriteTime, &now) > rewriteInterval))) {
+      rewriteRequired = 0;
+      rewriteTime = now;
+
       /* We rewrite the whole display */
-      i = 0;
-      j = brl->x;
-    }
-  else
-    {
+      from = 0;
+      to = brl->x;
+    } else {
       /* We update only the display part that has been changed */
-      i = 0;
-      while ((brl->buffer[i] == prevdata[i]) && (i < brl->x))
-	i++;
-      j = brl->x - 1;
-      while ((brl->buffer[j] == prevdata[j]) && (j >= i))
-	j--;
-      j++;
+
+      from = 0;
+      while ((brl->buffer[from] == prevdata[from]) && (from < brl->x)) from++;
+
+      to = brl->x - 1;
+      while ((brl->buffer[to] == prevdata[to]) && (to >= from)) to--;
+      to++;
     }
-  if (i < j)			/* there is something different */
-    {
-      for (k = 0;
-	   k < (j - i);
-	   rawdata[k++] = outputTable[(prevdata[i + k] = brl->buffer[i + k])]);
-      WriteToBrlDisplay (brl, NbStCells + i, j - i, rawdata);
-    }
+  }
+
+  if (from < to)			/* there is something different */ {
+    int index;
+    for (index=from; index<to; index++)
+      rawdata[index - from] = outputTable[(prevdata[index] = brl->buffer[index])];
+    WriteToBrlDisplay (brl, NbStCells + from, to - from, rawdata);
+  }
 }
 
 
@@ -885,7 +896,7 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
             }
           }
 
-          ReWrite = 1;
+          rewriteRequired = 1;
           return 0;
         }
 
@@ -1286,7 +1297,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 break;
               case KEY_CURSOR:
                 res = CMD_RETURN;
-                ReWrite = 1;	/* force rewrite of whole display */
+                rewriteRequired = 1;	/* force rewrite of whole display */
                 break;
               case KEY_PROG:
                 res = CMD_HELP;
