@@ -190,15 +190,15 @@ typedef struct {
                                                                \
       { CMD_PRDIFLN                 , NOKEY          , 0001 }, \
       { CMD_NXDIFLN                 , NOKEY          , 0010 }, \
-      { CMD_WINUP                   , NOKEY          , 0002 }, \
-      { CMD_WINDN                   , NOKEY          , 0020 }, \
-      { CMD_ATTRUP                  , NOKEY          , 0004 },         \
-      { CMD_ATTRDN                  , NOKEY          , 0040 },        \
+      { CMD_ATTRUP                  , NOKEY          , 0002 }, \
+      { CMD_ATTRDN                  , NOKEY          , 0020 }, \
+      { CMD_PRPGRPH                 , NOKEY          , 0004 },         \
+      { CMD_NXPGRPH                 , NOKEY          , 0040 },        \
       { CMD_PRPROMPT                , NOKEY          , 0100 },        \
       { CMD_NXPROMPT                , NOKEY          , 0200 },        \
                                                                \
-      { CMD_PRPGRPH                 , NOKEY          , 0003 },        \
-      { CMD_NXPGRPH                 , NOKEY          , 0030 },        \
+      { CMD_WINUP                   , NOKEY          , 0003 },        \
+      { CMD_WINDN                   , NOKEY          , 0030 },        \
       { CMD_PRSEARCH                , NOKEY          , 0104 },        \
       { CMD_NXSEARCH                , NOKEY          , 0240 },        \
       { CR_PRINDENT                 , ROUTINGKEY     , 0104 },        \
