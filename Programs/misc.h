@@ -33,8 +33,13 @@ extern "C" {
 /* misc.h - Header file for miscellaneous all-purpose routines
  */
 
+#ifndef MIN
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
+#endif /* MIN */
+
+#ifndef MAX
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
+#endif /* MAX */
 	
 /* Process each line of an input text file safely.
  * This routine handles the actual reading of the file,
