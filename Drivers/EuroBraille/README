@@ -1,4 +1,4 @@
-This is the EuroBraille family driver for BRLTTY, version 1.2
+This is the EuroBraille family driver for BRLTTY, version 1.3
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
@@ -16,12 +16,19 @@ on the following hardware:
    - a Scriba display (20 and 40);
    - an Azerbraille 40 and 80 display;
    - a Clio-PupiBraille display (80 cells)
+   - an IRIS display (init problems with Iris 40).
    - The driver is although tested with a NoteBraille display in order to 
      maintain backward compatibility.
 
 
 FIXES/ADDITIONS
 ===============
+Version 1.3 :
+	- Made the driver BrlAPI compatible
+	- The transfer code has been removed: it will be now in a separate 
+	  program, called `tp' (in progress).
+	- code cleanups;
+
 Version 1.2 :
 	- Significantly reduced the size of the sourcecode: propper and easier
 	  to understand/customize;
@@ -82,4 +89,4 @@ EuroBraille version of BRLTTY in the world so if you use this driver, just
 e-mail me what are your suggestions for next versions.
 
 Yannick Plassiard <plassi_y@epitech.net>
-    March 13 2003
+    September 04 2003

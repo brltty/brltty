@@ -18,7 +18,7 @@
 /* EuroBraille/braille.c - Braille display library for the EuroBraille family.
  * Copyright (C) 1997-2003 by Yannick Plassiard <plassi_y@epitech.net>
  *                        and Nicolas Pitre <nico@cam.org>
- * See the GNU General Public License for details in the ../COPYING file
+ * See the GNU General Public License for details in the ../../COPYING file
  * See the README file for details about copyrights and version informations
  */
 
@@ -26,25 +26,13 @@
 # include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-
-/*
-** the next define controls whichever you want the LCD support or not.
-** Please do not use this define if you use an IRIS, this terminal doesn't have
-** any LCD screen.
-*/
-
-#define		BRL_HAVE_VISUAL_DISPLAY
-/*
-** headers
-*/
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/termios.h>
-#include <string.h>
 
 #include "Programs/brl.h"
 #include "Programs/message.h"
@@ -53,6 +41,13 @@
 #define BRLNAME	"EuroBraille"
 #define PREFSTYLE ST_None
 
+/*
+** the next define controls whichever you want the LCD support or not.
+** Please do not use this define if you use an IRIS, this terminal doesn't have
+** any LCD screen.
+*/
+#define BRL_HAVE_VISUAL_DISPLAY
+#define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
@@ -311,6 +306,7 @@ static int	context = 0;   /* Input type test-value */
 static int	control = 0;
 static int	alt = 0;
 
+
 /* Communication codes */
 
 #define SOH     0x01
@@ -347,7 +343,7 @@ static int sendbyte(unsigned char c)
   return (write(brl_fd, &c, 1));
 }
 
-static int WriteToBrlDisplay (BrailleDisplay *brl, int len, char *data)
+static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
 {
   unsigned char	buf[1024];
   unsigned char		*p = buf;
@@ -394,9 +390,18 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, char *data)
    return (write(brl_fd, buf, p - buf));
 }
 
+#ifdef		BRL_HAVE_PACKET_IO
+
+static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
+{
+  return (WriteToBrlDisplay(brl, sz, p));
+}
+
+#endif
+
 static void brl_identify (void)
 {
-   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.2");
+   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3");
    LogPrint(LOG_INFO, "  Copyright (C) 1997-2003");
    LogPrint(LOG_INFO, "      - Yannick PLASSIARD <plassi_y@epitech.net>");
    LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
@@ -692,13 +697,13 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
     return (key);
 }
 
-static int routing(int routekey)
+static int routing(BrailleDisplay *brl, int routekey)
 {
    int res = EOF;
 
    switch (context)
      {
-      case 1:
+       case 1:
 	switch (routekey)
 	  {
 	   case 0x02: /* exit menu */
@@ -713,12 +718,12 @@ static int routing(int routekey)
 	     ReWrite = 0;
 	     res = CMD_NOOP;
 	     break;
-	   case 0x0B: /* Help */
+	   case 0x0A: /* Help */
 	     context = 0;
 	     ReWrite = 1;
 	     res = CMD_LEARN;
 	     break;
-	  case 0x13: /* version information */
+	  case 0x0F: /* version information */
 	    context = 0;
 	    message(version_ID, MSG_WAITKEY);
 	    res = CMD_NOOP;
@@ -771,7 +776,7 @@ static int routing(int routekey)
 	  case 0x57:
 	    /* no break */
 	   case 0x83: /* Entering in menu-mode */
-	     message("-:tty help version t", MSG_NODELAY);
+	     message("-:tty hlp info t", MSG_NODELAY);
 	     context = 1;
 	     res = CMD_NOOP;
 	     break;
@@ -800,6 +805,7 @@ static int	convert(int keys)
   res += (keys & 1) ? 1 : 0;
   return (res);
 }
+
 
 
 static int	key_handle(BrailleDisplay *brl, char *buf)
@@ -889,12 +895,115 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
   return (res);
 }
 
+#ifdef		BRL_HAVE_PACKET_IO
+
+static int brl_readPacket(BrailleDisplay *brl, unsigned char *bp, int size)
+{
+  int res = EOF;
+  unsigned char c;
+  static int DLEflag = 0, ErrFlag = 0;
+  static unsigned char buf[DIM_INBUFSZ];
+  static int pos = 0, p = 0, pktready = 0;
+  
+  /* here we process incoming data */
+  while (!pktready && read (brl_fd, &c, 1))
+    {
+      if (DLEflag)
+	{
+	  DLEflag = 0;
+	  if (pos < DIM_INBUFSZ) buf[pos++] = c;
+	}
+      else if( ErrFlag )
+	{
+	  ErrFlag = 0;
+	  /* Maybe should we check error code in c here? */
+	  ReWrite = 1;
+	}
+      else
+	switch (c)
+	  {
+	  case NACK:
+	    ErrFlag = 1;
+	    /* no break */
+	  case ACK:
+	  case SOH:
+	    pos = 0;
+	    break;
+	  case DLE:
+	    DLEflag = 1;
+	    break;
+	  case EOT:
+	    {
+	      /* end of packet, let's read it */
+	      int i;
+	      unsigned char parity = 0;
+	      if (pos < 4)
+		break;		/* packets can't be shorter */
+	      for( i = 0; i < pos-1; i++ )
+		parity ^= buf[i];
+	      if ( parity != buf[pos - 1])
+		{
+		  sendbyte (NACK);
+		  sendbyte (PRT_E_PAR);
+		}
+	      else if (buf[pos - 2] < 0x80)
+		{
+		  sendbyte (NACK);
+		  sendbyte (PRT_E_NUM);
+		}
+	      else
+		{
+		  /* packet is OK */
+		  sendbyte (ACK);
+		  pos -= 2;	/* now forget about packet number and parity */
+		  p = 0;
+		  pktready = 1;
+		}
+	      break;
+	    }
+	  default:
+	    if (pos < DIM_INBUFSZ)
+	      buf[pos++] = c;
+	    break;
+	  }
+    }
+  
+  /* Packet is OK, we go inside */
+  if (pktready)
+    {
+      int lg;
+      int i;
+      for (lg = 0; res == EOF; )
+	{
+	  /* let's look at the next message */
+	  lg = buf[p++];
+	  if (lg >= 0x80 || p + lg > pos)
+	    {
+	      pktready = 0;	/* we are done with this packet */
+	      break;
+	    }
+	  for (i = lg; buf[i] != EOT && buf[i - 1] != DLE; i++)
+	    ;
+	  if (i > size)
+	    p += i + 1;
+	  else
+	    {
+	      memcpy(bp, buf + p + 1, i);
+	      return (0);
+	    }
+	}
+    }
+  return (-1);
+}
+
+#endif
+
 static int readbrlkey(BrailleDisplay *brl)
 {
   int res = EOF;
   unsigned char c;
-  static unsigned char buf[DIM_INBUFSZ];
   static int DLEflag = 0, ErrFlag = 0;
+  static unsigned char buf[DIM_INBUFSZ];
   static int pos = 0, p = 0, pktready = 0;
   
   /* here we process incoming data */
@@ -1002,13 +1111,13 @@ static int readbrlkey(BrailleDisplay *brl)
 		  {
 		    int	p2;
 		    
-		    for (p2 = 0; num_keys[p2].brl_key; p2++)
+		   for (p2 = 0; num_keys[p2].brl_key; p2++)
 		      if (buf[p + 2] == num_keys[p2].brl_key)
 			res = num_keys[p2].res;
 		  }
 		  break;
 		case 'I':	/* Routing Key */
-		  res = routing(buf[p + 2]);
+		  res = routing(brl, buf[p + 2]);
 		  break;
 		case 'B':	/* Braille keyboard */
 		  res = key_handle(brl, buf + p + 2);

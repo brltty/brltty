@@ -17,10 +17,11 @@
 
 /* serial line baudrate 
  */
-#include	"Programs/brl.h"
+#include "Programs/brl.h"
 
 
-#define BAUDRATE B9600
+#define BAUDRATE	B9600
+#define CNTX_INTERNAL	0x80
 
 /*
 ** main structure to alias braille keystrokes
