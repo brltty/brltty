@@ -135,6 +135,7 @@ static char *model;
 #define BUTHEIGHT 32
 
 static Widget toplevel,vbox,hbox,keybox,display[WHOLESIZE];
+static Pixel displayForeground,displayBackground;
 #ifdef USE_XAW
 static Widget displayb[WHOLESIZE];
 static XFontSet fontset;
@@ -260,7 +261,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 static XrmOptionDescRec optionDescList[] = { };
 
 static char *fallback_resources[] = {
- "*display.font: -*-fixed-*-*-*-*-24-*-*-*-*-*-*-*",
+ "*display.font: -*-fixed-*-*-*-*-*-*-*-*-*-*-*-*",
  "*display.background: lightgreen",
 #ifdef USE_XAW
  "*displayb.background: black",
@@ -455,6 +456,11 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
  
  brl_display();
 
+ XtVaGetValues(display[0],
+   XtNforeground, &displayForeground,
+   XtNbackground, &displayBackground,
+   NULL);
+
  if (!model || strcmp(model,"bare")) {
    /* key box */
    keybox = XtVaCreateManagedWidget("keybox",formWidgetClass,vbox,
@@ -520,8 +526,25 @@ static void brl_writeWindow(BrailleDisplay *brl)
 static void brl_writeVisual(BrailleDisplay *brl)
 {
  static unsigned char displayed[WHOLESIZE];
+ static int lastcursor = -1;
  int i;
  unsigned char data[2];
+
+ if (lastcursor != brl->cursor) {
+  if (lastcursor>=0) {
+   XtVaSetValues(display[lastcursor],
+    XtNforeground, displayForeground,
+    XtNbackground, displayBackground,
+    NULL);
+  }
+  lastcursor = brl->cursor;
+  if (lastcursor>=0) {
+   XtVaSetValues(display[lastcursor],
+    XtNforeground, displayBackground,
+    XtNbackground, displayForeground,
+    NULL);
+  }
+ }
 
  if (!memcmp(brl->buffer,displayed,brl->y*brl->x)) return;
  memcpy(displayed,brl->buffer,brl->y*brl->x);
