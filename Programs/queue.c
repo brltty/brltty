@@ -46,16 +46,16 @@ static void
 discardElement (Element *element) {
   Queue *queue = element->queue;
 
+  if (element->item) {
+    if (queue->deallocate) queue->deallocate(element->item, queue->data);
+    element->item = NULL;
+  }
+
   element->queue = NULL;
   queue->size--;
 
   element->next = discardedElements;
   discardedElements = element;
-
-  if (element->item) {
-    if (queue->deallocate) queue->deallocate(element->item, queue->data);
-    element->item = NULL;
-  }
 }
 
 static Element *
