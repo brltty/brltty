@@ -888,9 +888,9 @@ void api_identify(void)
 /* Initializes BrlApi */
 /* One first initialize the driver */
 /* Then one creates the communication socket */
-static Tbinding binding;
 void api_open(BrailleDisplay *brl, char **parameters)
 {
+ static Tbinding binding;
  int res;
  
  DisplaySize[0] = htonl(brl->x); 

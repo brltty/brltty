@@ -152,7 +152,7 @@ int brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size)
  return n;
 }
 
-/* Fonction : brlapi_loadAuthKey */
+/* Function : brlapi_loadAuthKey */
 /* Loads an authentication key from the given file */
 /* It is stored in auth, and its size in authLength */
 /* If the file is too big, non-existant or unreadable, returns -1 */
