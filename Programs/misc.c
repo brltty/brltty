@@ -168,6 +168,12 @@ LogWindowsError (const char *action) {
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                 &message, 0, NULL);
+
+  {
+    char *end = strpbrk(message, "\r\n");
+    if (end) *end = 0;
+  }
+
   LogPrint(LOG_ERR, "%s error %ld: %s", action, error, message);
   LocalFree(message);
 }
