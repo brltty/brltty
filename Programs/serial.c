@@ -336,7 +336,19 @@ serialDiscardOutput (SerialDevice *serial) {
 }
 
 int
+serialFlushOutput (SerialDevice *serial) {
+  if (serial->stream) {
+    if (fflush(serial->stream) == EOF) {
+      LogError("fflush");
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int
 serialDrainOutput (SerialDevice *serial) {
+  if (!serialFlushOutput(serial)) return 0;
   if (tcdrain(serial->fileDescriptor) != -1) return 1;
   LogError("tcdrain");
   return 0;
@@ -362,7 +374,9 @@ serialReadAttributes (SerialDevice *serial) {
 static int
 serialWriteAttributes (SerialDevice *serial, const struct termios *attributes) {
   if (serialCompareAttributes(attributes, &serial->currentAttributes) != 0) {
-    if (tcsetattr(serial->fileDescriptor, TCSADRAIN, attributes) == -1) {
+    if (!serialDrainOutput(serial)) return 0;
+
+    if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) == -1) {
       LogError("tcsetattr");
       return 0;
     }
@@ -455,21 +469,16 @@ serialCloseDevice (SerialDevice *serial) {
 
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
-  if (serialDiscardOutput(serial)) {
-    if (serialSetSpeed(serial, B0)) {
-      if (serialFlushAttributes(serial)) {
-        delay(500);
-        if (serialDiscardInput(serial)) {
-          if (serialSetBaud(serial, baud)) {
-            if (serialFlushAttributes(serial)) {
-              return 1;
-            }
-          }
-        }
-      }
-    }
-  }
-  return 0;
+  if (!serialDiscardOutput(serial)) return 0;
+  if (!serialSetSpeed(serial, B0)) return 0;
+  if (!serialFlushAttributes(serial)) return 0;
+
+  delay(500);
+  if (!serialDiscardInput(serial)) return 0;
+
+  if (!serialSetBaud(serial, baud)) return 0;
+  if (!serialFlushAttributes(serial)) return 0;
+  return 1;
 }
 
 FILE *

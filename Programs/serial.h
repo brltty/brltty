@@ -60,6 +60,7 @@ extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
 
 extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);
+extern int serialFlushOutput (SerialDevice *serial);
 extern int serialDrainOutput (SerialDevice *serial);
 
 extern int serialTestLineCTS (SerialDevice *serial);
