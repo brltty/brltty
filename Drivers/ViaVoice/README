@@ -40,5 +40,3 @@ tts.pdf in the ViaVoice documentation directory for details):
    pitchbaseline     0-100
    pitchfluctuation  0-100
    roughness         0-100
-   speed             0-250
-   volume            0-100

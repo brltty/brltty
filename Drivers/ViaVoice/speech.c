@@ -27,7 +27,6 @@
 #include <ctype.h>
 #include <eci.h>
 
-#include "Programs/spk.h"
 #include "Programs/misc.h"
 
 typedef enum {
@@ -44,13 +43,13 @@ typedef enum {
    PARM_HeadSize,
    PARM_PitchBaseline,
    PARM_PitchFluctuation,
-   PARM_Roughness,
-   PARM_Speed,
-   PARM_Volume
+   PARM_Roughness
 } DriverParameter;
-#define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "vocaltract", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "speed", "volume"
+#define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "vocaltract", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness"
 
 #define SPK_HAVE_TRACK
+#define SPK_HAVE_RATE
+#define SPK_HAVE_VOLUME
 #include "Programs/spk_driver.h"
 #include "speech.h"
 
@@ -264,8 +263,6 @@ spk_open (char **parameters) {
 	       rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
 	       rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
 	       rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
-	       rangeVoiceParameter(eci, "speed", parameters[PARM_Speed], eciSpeed, 0, 250);
-	       rangeVoiceParameter(eci, "volume", parameters[PARM_Volume], eciVolume, 0, 100);
                return 1;
 	    } else {
 	       reportError(eci, "eciSetOutputDevice");
@@ -278,6 +275,14 @@ spk_open (char **parameters) {
       }
    }
    return 0;
+}
+
+static void
+spk_close (void) {
+   if (eci) {
+      eciDelete(eci);
+      eci = NULL_ECI_HAND;
+   }
 }
 
 static int
@@ -357,14 +362,6 @@ spk_mute (void) {
 }
 
 static void
-spk_close (void) {
-   if (eci) {
-      eciDelete(eci);
-      eci = NULL_ECI_HAND;
-   }
-}
-
-static void
 spk_doTrack (void) {
    if (eci) {
       eciSpeaking(eci);
@@ -389,4 +386,16 @@ spk_isSpeaking (void) {
       }
    }
    return 0;
+}
+
+static void
+spk_rate (int setting) {
+   eciSetVoiceParam(eci, 0, eciSpeed,
+                    setting * 125 / SPK_DEFAULT_RATE);
+}
+
+static void
+spk_volume (int setting) {
+   eciSetVoiceParam(eci, 0, eciVolume,
+                    setting * 50 / SPK_DEFAULT_VOLUME);
 }

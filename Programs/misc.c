@@ -401,44 +401,25 @@ processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
   return !ferror(file);
 }
 
-/* Write data safely by continually retrying the write system call until
- * all of the requested data has been transferred.
- * This routine is a wrapper for the write system call which is fully compatible
- * with it except that the caller does not need to handle the various
- * scenarios which can occur when a signal interrupts the system call.
- */
-size_t safe_write (int fd, const unsigned char *buffer, size_t length)
-{
+size_t safe_write (int fd, const unsigned char *buffer, size_t length) {
   const unsigned char *address = buffer;
 
-  /* Keep on looping while there's still some data to be written. */
-  while (length > 0)
-    {
-      /* Write the rest of the data. */
-      size_t count = write(fd, address, length);
+  while (length > 0) {
+    size_t count = write(fd, address, length);
 
-      /* Handle errors. */
-      if (count == -1)
-        {
-          /* If the system call was interrupted by a signal, then restart it. */
-          if (errno == EINTR)
-            {
-              continue;
-            }
-
-          /* Return all other errors to the caller. */
-          return -1;
-        }
-
-      /* In case the system call was interrupted by a signal
-       * after some, but not all, of the data was written,
-       * point to the remainder of the buffer and try again.
-       */
-      address += count;
-      length -= count;
+    if (count == -1) {
+      if (errno == EINTR) continue;
+      if (errno != EAGAIN) return -1;
+      count = 0;
     }
 
-  /* Return the number of bytes which were actually written. */
+    if (count) {
+      address += count;
+      length -= count;
+    } else {
+      delay(100);
+    }
+  }
   return address - buffer;
 }
 

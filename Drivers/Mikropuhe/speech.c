@@ -112,6 +112,7 @@ static int
 speechWriter (const void *bytes, unsigned int count, void *data, void *reserved) {
   int written = safe_write(speechDevice, bytes, count);
   if (written == count) return 0;
+
   if (written == -1) {
     LogError("Mikropuhe write");
   } else {
@@ -124,34 +125,37 @@ static int
 speechWrite (const char *text, int tags) {
   if (speechDevice == -1) {
     if ((speechDevice = getPcmDevice(LOG_WARNING)) == -1) return 0;
+
     speechParameters.nChannels = setPcmChannelCount(speechDevice, 1);
     speechParameters.nSampleFreq = setPcmSampleRate(speechDevice, 22050);
     {
-      static const PcmAmplitudeFormat formats[] = {PCM_FMT_S16L, PCM_FMT_S8, PCM_FMT_UNKNOWN};
+      static const PcmAmplitudeFormat formats[] = {PCM_FMT_S16L, PCM_FMT_U8, PCM_FMT_UNKNOWN};
       const PcmAmplitudeFormat *format = formats;
-LogPrint(LOG_NOTICE, "fmt=%d", *format);
       while (*format != PCM_FMT_UNKNOWN) {
-        switch (setPcmAmplitudeFormat(speechDevice, *format)) {
-          case PCM_FMT_S8:
-          case PCM_FMT_U8:
-            speechParameters.nBits = 8;
-            break;
-          case PCM_FMT_S16B:
-          case PCM_FMT_S16L:
-          case PCM_FMT_U16B:
-          case PCM_FMT_U16L:
-            speechParameters.nBits = 16;
-            break;
-          default:
-            speechParameters.nBits = 0;
-            break;
-        }
-        if (speechParameters.nBits) break;
+        if (setPcmAmplitudeFormat(speechDevice, *format) == *format) break;
         ++format;
       }
+
+      switch (setPcmAmplitudeFormat(speechDevice, *format)) {
+        case PCM_FMT_U8:
+          speechParameters.nBits = 8;
+          break;
+        case PCM_FMT_S16L:
+          speechParameters.nBits = 16;
+          break;
+        default:
+          speechParameters.nBits = 0;
+          break;
+      }
     }
-    LogPrint(LOG_NOTICE, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
+    LogPrint(LOG_INFO, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
              speechParameters.nChannels, speechParameters.nSampleFreq, speechParameters.nBits);
+
+    if (!speechParameters.nBits) {
+      close(speechDevice);
+      speechDevice = -1;
+      return 0;
+    }
   }
 
   speechParameters.nTags = tags;
@@ -214,6 +218,29 @@ spk_open (char **parameters) {
       speechParameters.pfnWrite = speechWriter;
       speechParameters.pWriteData = NULL;
 
+      {
+        const char *name = parameters[PARM_NAME];
+        if (name && *name) {
+          char tag[0X100];
+          snprintf(tag, sizeof(tag), "<voice name=\"%s\"/>", name);
+          writeTag(tag);
+        }
+      }
+
+      {
+        const char *pitch = parameters[PARM_PITCH];
+        if (pitch && *pitch) {
+          int setting = 0;
+          static const int minimum = -10;
+          static const int maximum = 10;
+          if (validateInteger(&setting, "pitch", pitch, &minimum, &maximum)) {
+            char tag[0X100];
+            snprintf(tag, sizeof(tag), "<pitch absmiddle=\"%d\"/>", setting);
+            writeTag(tag);
+          }
+        }
+      }
+
       return 1;
     } else {
       speechError(code, "channel initialization");
@@ -270,7 +297,8 @@ spk_rate (int setting) {
 static void
 spk_volume (int setting) {
   char tag[0X40];
+  int percentage = setting * 50 / SPK_DEFAULT_VOLUME;
   snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
-           setting * 50 / SPK_DEFAULT_VOLUME);
+           MIN(100, MAX(1, percentage)));
   writeTag(tag);
 }

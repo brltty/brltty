@@ -144,13 +144,14 @@
 #speech-driver	al	# Alva
 #speech-driver	bl	# BrailleLite
 #speech-driver	cb	# CombiBraille
-#speech-driver	es	# ExternalSpeech
-#speech-driver	fl	# FestivalLite Text to Speech Package
-#speech-driver	fv	# Festival Text to Speech Package
+#speech-driver	es	# ExternalSpeech (executes /usr/local/bin/externalspeech)
+#speech-driver	fl	# FestivalLite (text to speech engine)
+#speech-driver	fv	# Festival (text to speech engine)
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)
-#speech-driver	th	# Theta Text to Speech System
+#speech-driver	mp	# Mikropuhe (text to speech engine)
+#speech-driver	th	# Theta (text to speech engine)
 #speech-driver	tv	# Televox
-#speech-driver	vv	# ViaVoice Text to Speech System
+#speech-driver	vv	# ViaVoice (text to speech engine)
 
 
 ############################
@@ -177,6 +178,10 @@
 # GenericSay Speech Driver Parameters
 #speech-parameters Command=/usr/local/bin/say
 
+# Mikropuhe Speech Driver Parameters
+#speech-parameters Name= # [/path/to/mikropuhe/name.pu5]
+#speech-parameters Pitch=0 # [-10-10]
+
 # Theta Speech Driver Parameters
 #speech-parameters Age= # [1-99,-1--99]
 #speech-parameters Gender= # [male,female,neuter]
@@ -199,8 +204,6 @@
 #speech-parameters PitchBaseline= # [0-100]
 #speech-parameters PitchFluctuation= # [0-100]
 #speech-parameters Roughness= # [0-100]
-#speech-parameters Speed= # [0-250]
-#speech-parameters Volume= # [0-100]
 
 
 ##########################
