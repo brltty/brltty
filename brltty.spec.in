@@ -163,7 +163,7 @@ new="${file}.rpmnew"
 # Imbed it within a subshell to ensure that it won't impact this scriptlet.
 (
    # First, set bp2cf's command line arguments.
-   set -- -u -f "${file}"
+   set -u -f "${file}"
 
    # Now run it by simply imbedding it right here.
    @configuration_file_customization_script@
