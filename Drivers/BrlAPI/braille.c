@@ -1,0 +1,120 @@
+/*
+ * BRLTTY - A background process providing access to the console screen (when in
+ *          text mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2005 by The BRLTTY Team. All rights reserved.
+ *
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation.  Please see the file COPYING for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
+
+#define BA_VERSION "BRLTTY driver for BrlAPI, version 0.1, 2005"
+#define BA_COPYRIGHT "Copyright Sebastien HINDERER <Sebastien.Hinderer@libertysurf.fr"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "Programs/misc.h"
+#include "Programs/api.h"
+
+typedef enum {
+  PARM_HOSTNAME=0,
+  PARM_AUTHKEY=1
+} DriverParameter;
+#define BRLPARMS "host", "key"
+
+#include "Programs/brl_driver.h"
+
+#define CHECK(cond, label) \
+  do { \
+    if (!(cond)<0) { \
+      LogPrint(LOG_ERR, "%s", brlapi_strerror(brlapi_errno)); \
+      goto label; \
+    } \
+  } while (0);
+
+static int displaySize;
+static unsigned char *prevData;
+
+/* Function : brl_identify */
+/* Prints information about the driver in the system log and on stderr */
+static void brl_identify(void)
+{
+  LogPrint(LOG_NOTICE, BA_VERSION);
+  LogPrint(LOG_INFO, "   " BA_COPYRIGHT);
+}
+
+/* Function : brl_open */
+/* Opens a connection with BrlAPI's server */
+static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
+{
+  brlapi_settings_t settings;
+  settings.hostName = parameters[PARM_HOSTNAME];
+  settings.authKey = parameters[PARM_AUTHKEY];
+  CHECK((brlapi_initializeConnection(&settings, &settings)>=0), out);
+  LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.hostName, settings.authKey);
+  CHECK((brlapi_getTty(7, BRLCOMMANDS)>=0), out0);
+  LogPrint(LOG_DEBUG, "Got tty successfully");
+  CHECK((brlapi_getDisplaySize(&brl->x, &brl->y)==0), out1);
+  LogPrint(LOG_DEBUG,"Found out display size: %dx%d", brl->x, brl->y);
+  displaySize = brl->x*brl->y;
+  prevData = malloc(displaySize);
+  CHECK((prevData!=NULL), out1);
+  LogPrint(LOG_DEBUG, "Memory allocated, returning 1");
+  return 1;
+  
+out1:
+  brlapi_leaveTty();
+out0:
+  brlapi_closeConnection();
+out:
+  LogPrint(LOG_DEBUG, "Something went wrong, returning 0");
+  return 0;
+}
+
+/* Function : brl_close */
+/* Frees memory and closes the connection with BrlAPI */
+static void brl_close(BrailleDisplay *brl)
+{
+  free(prevData);
+  brlapi_closeConnection();
+}
+
+/* function : brl_writeWindow */
+/* Displays a text on the braille window, only if it's different from */
+/* the one already displayed */
+static void brl_writeWindow(BrailleDisplay *brl)
+{
+  if (memcmp(&prevData,brl->buffer,displaySize)==0) return;
+  if (brlapi_writeDots(brl->buffer)==0) {
+    memcpy(&prevData,brl->buffer,displaySize);
+  }
+}
+
+/* Function : brl_writeStatus */
+/* Not supported by BrlAPI yet */
+static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
+{
+}
+
+/* Function : brl_readCommand */
+/* Reads a command from the braille keyboard */
+static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
+{
+  brl_keycode_t command;
+  if (brlapi_readKey(0, &command)==1) return command;
+  return EOF;
+}

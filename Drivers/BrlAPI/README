@@ -1,0 +1,5 @@
+This driver allows BRLTTY to access braille displays through BrlAPI.
+Multiple instance of brltty can hence b run, one using thereal braille
+driver, the others accessing it through the API. Each instance of BRLTTY can
+use Adifferent screen driver thanks to the -x command-line option.
+
