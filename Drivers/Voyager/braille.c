@@ -224,7 +224,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 
   dispbuf = prevdata = NULL;
 
-  brl_fd = open (dev, O_RDWR | O_NOCTTY);
+  brl_fd = open (dev, O_RDWR);
   /* Kernel driver will block until a display is connected. */
   if (brl_fd < 0){
     LogPrint(LOG_ERR, "Open failed on device %s: %s", dev, strerror(errno));
