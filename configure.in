@@ -533,6 +533,7 @@ in
    *)
       ;;
 esac
+BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 BRLTTY_ARG_DRIVER([braille])
 
