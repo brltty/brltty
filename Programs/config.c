@@ -56,82 +56,50 @@
 
 char COPYRIGHT[] = "Copyright (C) 1995-2004 by The BRLTTY Team - all rights reserved.";
 
-#ifdef ENABLE_API
-static char *opt_apiParameters = NULL;
-#endif /* ENABLE_API */
-static const char *opt_attributesTable = NULL;
-static const char *opt_brailleDevice = NULL;
-static const char *opt_brailleDriver = NULL;
-static char *opt_brailleParameters = NULL;
+static short opt_version = 0;
+static short opt_quiet = 0;
+static short opt_noDaemon = 0;
+static short opt_standardError = 0;
+static short opt_logLevel = LOG_NOTICE;
+static short opt_environmentVariables = 0;
+
 static const char *opt_configurationFile = NULL;
+static const char *opt_preferencesFile = NULL;
+static const char *opt_pidFile = NULL;
+static const char *opt_dataDirectory = NULL;
+static const char *opt_libraryDirectory = NULL;
+
+static const char *opt_brailleDriver = NULL;
+static const BrailleDriver *brailleDriver;
+static char *opt_brailleParameters = NULL;
+static char **brailleParameters = NULL;
+static const char *opt_brailleDevice = NULL;
+
+static const char *opt_tablesDirectory = NULL;
+static const char *opt_textTable = NULL;
+static const char *opt_attributesTable = NULL;
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static const char *opt_contractionsDirectory = NULL;
 static const char *opt_contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-static const char *opt_dataDirectory = NULL;
-static short opt_environmentVariables = 0;
-static const char *opt_libraryDirectory = NULL;
-static short opt_logLevel = LOG_NOTICE;
-static short opt_noDaemon = 0;
-#ifdef ENABLE_SPEECH_SUPPORT
-#endif /* ENABLE_SPEECH_SUPPORT */
-static const char *opt_pidFile = NULL;
-static const char *opt_preferencesFile = NULL;
-static short opt_quiet = 0;
-static char *opt_screenParameters = NULL;
-
-#ifdef ENABLE_SPEECH_SUPPORT
-static const char *opt_speechDriver = NULL;
-static char *opt_speechParameters = NULL;
-static const char *opt_speechFifo = NULL;
-static short opt_noSpeech = 0;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-static short opt_standardError = 0;
-static const char *opt_tablesDirectory = NULL;
-static const char *opt_textTable = NULL;
-static short opt_version = 0;
-
-static char *cfg_preferencesFile = NULL;
-static char *cfg_tablesDirectory = NULL;
-static char *cfg_textTable = NULL;
-static char *cfg_attributesTable = NULL;
-#ifdef ENABLE_CONTRACTED_BRAILLE
-static char *cfg_contractionsDirectory = NULL;
-static char *cfg_contractionTable = NULL;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-#ifdef ENABLE_API
-static char *cfg_apiParameters = NULL;
-#endif /* ENABLE_API */
-static char *cfg_libraryDirectory = NULL;
-static char *cfg_dataDirectory = NULL;
-static char *cfg_brailleDriver = NULL;
-static char *cfg_brailleDevice = NULL;
-static char *cfg_brailleParameters = NULL;
-
-#ifdef ENABLE_SPEECH_SUPPORT
-static char *cfg_speechDriver = NULL;
-static char *cfg_speechParameters = NULL;
-static char *cfg_speechFifo = NULL;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-static char *cfg_screenParameters = NULL;
-
-static const BrailleDriver *brailleDriver;
-static char **brailleParameters = NULL;
 
 #ifdef ENABLE_API
+static char *opt_apiParameters = NULL;
 static char **apiParameters = NULL;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
+static const char *opt_speechDriver = NULL;
 static const SpeechDriver *speechDriver;
+static char *opt_speechParameters = NULL;
 static char **speechParameters = NULL;
+static const char *opt_speechFifo = NULL;
+static short opt_noSpeech = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static char *opt_screenParameters = NULL;
 static char **screenParameters = NULL;
-
-short homedir_found = 0;        /* CWD status */
 
 static ConfigurationLineStatus
 getConfigurationOperand (char **operandAddress, const char *delimiters, int extend) {
@@ -160,32 +128,38 @@ getConfigurationOperand (char **operandAddress, const char *delimiters, int exte
   }
 }
 
+static char *cfg_preferencesFile = NULL;
 static ConfigurationLineStatus
 configurePreferencesFile (const char *delimiters) {
   return getConfigurationOperand(&cfg_preferencesFile, delimiters, 0);
 }
 
+static char *cfg_tablesDirectory = NULL;
 static ConfigurationLineStatus
 configureTablesDirectory (const char *delimiters) {
   return getConfigurationOperand(&cfg_tablesDirectory, delimiters, 0);
 }
 
+static char *cfg_textTable = NULL;
 static ConfigurationLineStatus
 configureTextTable (const char *delimiters) {
   return getConfigurationOperand(&cfg_textTable, delimiters, 0);
 }
 
+static char *cfg_attributesTable = NULL;
 static ConfigurationLineStatus
 configureAttributesTable (const char *delimiters) {
   return getConfigurationOperand(&cfg_attributesTable, delimiters, 0);
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
+static char *cfg_contractionsDirectory = NULL;
 static ConfigurationLineStatus
 configureContractionsDirectory (const char *delimiters) {
   return getConfigurationOperand(&cfg_contractionsDirectory, delimiters, 0);
 }
 
+static char *cfg_contractionTable = NULL;
 static ConfigurationLineStatus
 configureContractionTable (const char *delimiters) {
   return getConfigurationOperand(&cfg_contractionTable, delimiters, 0);
@@ -193,54 +167,64 @@ configureContractionTable (const char *delimiters) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_API
+static char *cfg_apiParameters = NULL;
 static ConfigurationLineStatus
 configureApiParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_apiParameters, delimiters, 1);
 }
 #endif /* ENABLE_API */
 
+static char *cfg_libraryDirectory = NULL;
 static ConfigurationLineStatus
 configureLibraryDirectory (const char *delimiters) {
   return getConfigurationOperand(&cfg_libraryDirectory, delimiters, 0);
 }
 
+static char *cfg_dataDirectory = NULL;
 static ConfigurationLineStatus
 configureDataDirectory (const char *delimiters) {
   return getConfigurationOperand(&cfg_dataDirectory, delimiters, 0);
 }
 
+static char *cfg_brailleDriver = NULL;
 static ConfigurationLineStatus
 configureBrailleDriver (const char *delimiters) {
   return getConfigurationOperand(&cfg_brailleDriver, delimiters, 0);
 }
 
+static char *cfg_brailleDevice = NULL;
 static ConfigurationLineStatus
 configureBrailleDevice (const char *delimiters) {
   return getConfigurationOperand(&cfg_brailleDevice, delimiters, 0);
 }
 
+static char *cfg_brailleParameters = NULL;
 static ConfigurationLineStatus
 configureBrailleParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_brailleParameters, delimiters, 1);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
+static char *cfg_speechDriver = NULL;
 static ConfigurationLineStatus
 configureSpeechDriver (const char *delimiters) {
   return getConfigurationOperand(&cfg_speechDriver, delimiters, 0);
 }
 
+static char *cfg_speechParameters = NULL;
 static ConfigurationLineStatus
 configureSpeechParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_speechParameters, delimiters, 1);
 }
 
+static char *cfg_speechFifo = NULL;
 static ConfigurationLineStatus
 configureSpeechFifo (const char *delimiters) {
   return getConfigurationOperand(&cfg_speechFifo, delimiters, 0);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static char *cfg_screenParameters = NULL;
 static ConfigurationLineStatus
 configureScreenParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_screenParameters, delimiters, 1);
@@ -1538,27 +1522,20 @@ handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-    case 'a':                /* text translation table file name */
-      opt_attributesTable = optarg;
+
+    case 'v':	/* --version */
+      opt_version = 1;
       break;
-    case 'b':                        /* name of driver */
-      opt_brailleDriver = optarg;
+    case 'q':	/* --quiet */
+      opt_quiet = 1;
       break;
-#ifdef ENABLE_CONTRACTED_BRAILLE
-    case 'c':                        /* name of driver */
-      opt_contractionTable = optarg;
+    case 'n':	/* --no-daemon */
+      opt_noDaemon = 1;
       break;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-    case 'd':                /* serial device path */
-      opt_brailleDevice = optarg;
-      break;
-    case 'e':                /* help */
+    case 'e':	/* --standard-error */
       opt_standardError = 1;
       break;
-    case 'f':                /* configuration file path */
-      opt_configurationFile = optarg;
-      break;
-    case 'l':        {  /* log level */
+    case 'l': {	/* --log-level */
       if (*optarg) {
         static char *valueTable[] = {
           "emergency", "alert", "critical", "error",
@@ -1592,77 +1569,85 @@ handleOption (const int option) {
       LogPrint(LOG_ERR, "Invalid log level: %s", optarg);
       break;
     }
-    case 'n':                /* don't go into the background */
-      opt_noDaemon = 1;
+    case 'E':	/* --environment-variables */
+      opt_environmentVariables = 1;
       break;
-    case 'p':                /* preferences file path */
+
+    case 'f':	/* --configuration-file */
+      opt_configurationFile = optarg;
+      break;
+    case 'p':	/* --preferences-file */
       opt_preferencesFile = optarg;
       break;
-    case 'q':                /* quiet */
-      opt_quiet = 1;
+    case 'P':	/* --pid-file */
+      opt_pidFile = optarg;
       break;
-#ifdef ENABLE_SPEECH_SUPPORT
-    case 's':                        /* name of speech driver */
-      opt_speechDriver = optarg;
+    case 'D':	/* --data-directory */
+      opt_dataDirectory = optarg;
       break;
-#endif /* ENABLE_SPEECH_SUPPORT */
-    case 't':                /* text translation table file name */
+    case 'L':	/* --library-directory */
+      opt_libraryDirectory = optarg;
+      break;
+
+    case 'b':	/* --braille-driver */
+      opt_brailleDriver = optarg;
+      break;
+    case 'B':	/* --braille-parameters */
+      extendParameters(&opt_brailleParameters, optarg);
+      break;
+    case 'd':	/* --braille-device */
+      opt_brailleDevice = optarg;
+      break;
+
+    case 'T':	/* --tables-directory */
+      opt_tablesDirectory = optarg;
+      break;
+    case 't':	/* --text-table */
       opt_textTable = optarg;
       break;
-    case 'v':                /* version */
-      opt_version = 1;
+    case 'a':	/* --attributes-table */
+      opt_attributesTable = optarg;
       break;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+    case 'C':	/* --contractions-directory */
+      opt_contractionsDirectory = optarg;
+      break;
+    case 'c':	/* --contractgion-table */
+      opt_contractionTable = optarg;
+      break;
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
 #ifdef ENABLE_API
-    case 'A':	/* parameters for application programming interface */
+    case 'A':	/* --api-parameters */
       extendParameters(&opt_apiParameters, optarg);
       break;
 #endif /* ENABLE_API */
-    case 'B':                        /* parameters for braille driver */
-      extendParameters(&opt_brailleParameters, optarg);
-      break;
-#ifdef ENABLE_CONTRACTED_BRAILLE
-    case 'C':                        /* path to contraction tables directory */
-      opt_contractionsDirectory = optarg;
-      break;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-    case 'D':                        /* path to driver help/configuration files directory */
-      opt_dataDirectory = optarg;
-      break;
-    case 'E':                        /* parameter to speech driver */
-      opt_environmentVariables = 1;
-      break;
+
 #ifdef ENABLE_SPEECH_SUPPORT
-    case 'F':                        /* name of speech driver */
+    case 's':	/* --speech-driver */
+      opt_speechDriver = optarg;
+      break;
+    case 'S':	/* --speech-parameters */
+      extendParameters(&opt_speechParameters, optarg);
+      break;
+    case 'F':	/* --speech-fifo */
       opt_speechFifo = optarg;
       break;
-#endif /* ENABLE_SPEECH_SUPPORT */
-    case 'L':                        /* path to drivers directory */
-      opt_libraryDirectory = optarg;
-      break;
-    case 'M':                        /* message delay */
-      validateInterval(&messageDelay, "message delay", optarg);
-      break;
-#ifdef ENABLE_SPEECH_SUPPORT
-    case 'N':                /* defer speech until restarted by command */
+    case 'N':	/* --no-speech */
       opt_noSpeech = 1;
       break;
 #endif /* ENABLE_SPEECH_SUPPORT */
-    case 'P':                /* process identifier file */
-      opt_pidFile = optarg;
+
+    case 'X':	/* --screen-parameters */
+      extendParameters(&opt_screenParameters, optarg);
       break;
-#ifdef ENABLE_SPEECH_SUPPORT
-    case 'S':                        /* parameters for speech driver */
-      extendParameters(&opt_speechParameters, optarg);
-      break;
-#endif /* ENABLE_SPEECH_SUPPORT */
-    case 'T':                        /* path to text/attributes tables directory */
-      opt_tablesDirectory = optarg;
-      break;
-    case 'U':          /* update interval */
+
+    case 'U':	/* --update-interval */
       validateInterval(&updateInterval, "update interval", optarg);
       break;
-    case 'X':                        /* parameters for screen driver */
-      extendParameters(&opt_screenParameters, optarg);
+    case 'M':	/* --message-delay */
+      validateInterval(&messageDelay, "message delay", optarg);
       break;
   }
   return 1;
