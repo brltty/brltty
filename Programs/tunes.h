@@ -40,10 +40,8 @@ typedef struct {
 
 extern TuneDefinition tune_braille_on;
 extern TuneDefinition tune_braille_off;
-extern TuneDefinition tune_command_rejected;
 extern TuneDefinition tune_command_done;
-extern TuneDefinition tune_routing_succeeded;
-extern TuneDefinition tune_routing_failed;
+extern TuneDefinition tune_command_rejected;
 extern TuneDefinition tune_mark_set;
 extern TuneDefinition tune_cut_begin;
 extern TuneDefinition tune_cut_end;
@@ -59,6 +57,9 @@ extern TuneDefinition tune_skip_first;
 extern TuneDefinition tune_skip;
 extern TuneDefinition tune_skip_more;
 extern TuneDefinition tune_bounce;
+extern TuneDefinition tune_routing_started;
+extern TuneDefinition tune_routing_succeeded;
+extern TuneDefinition tune_routing_failed;
 
 typedef enum {
   tdBeeper,

@@ -49,14 +49,6 @@ TuneDefinition tune_braille_off = {
    NULL, 0, elements_braille_off
 };
 
-static TuneElement elements_command_rejected[] = {
-   TUNE_NOTE(100,  78),
-   TUNE_STOP()
-};
-TuneDefinition tune_command_rejected = {
-   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_command_rejected
-};
-
 static TuneElement elements_command_done[] = {
    TUNE_NOTE( 40,  74),
    TUNE_REST( 30),
@@ -71,28 +63,12 @@ TuneDefinition tune_command_done = {
    "Done", 0, elements_command_done
 };
 
-static TuneElement elements_routing_succeeded[] = {
-   TUNE_NOTE( 80,  64),
-   TUNE_NOTE( 60,  76),
-   TUNE_STOP()
-};
-TuneDefinition tune_routing_succeeded = {
-   NULL, 0, elements_routing_succeeded
-};
-
-static TuneElement elements_routing_failed[] = {
-   TUNE_NOTE( 80,  80),
-   TUNE_NOTE( 90,  79),
+static TuneElement elements_command_rejected[] = {
    TUNE_NOTE(100,  78),
-   TUNE_NOTE(100,  77),
-   TUNE_REST( 20),
-   TUNE_NOTE(100,  77),
-   TUNE_REST( 20),
-   TUNE_NOTE(150,  77),
    TUNE_STOP()
 };
-TuneDefinition tune_routing_failed = {
-   NULL, 0, elements_routing_failed
+TuneDefinition tune_command_rejected = {
+   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_command_rejected
 };
 
 static TuneElement elements_mark_set[] = {
@@ -292,6 +268,40 @@ static TuneElement elements_bounce[] = {
 };
 TuneDefinition tune_bounce = {
    NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_bounce
+};
+
+static TuneElement elements_routing_started[] = {
+   TUNE_NOTE( 10,  55),
+   TUNE_REST( 60),
+   TUNE_NOTE( 15,  60),
+   TUNE_STOP()
+};
+TuneDefinition tune_routing_started = {
+   NULL, 0, elements_routing_started
+};
+
+static TuneElement elements_routing_succeeded[] = {
+   TUNE_NOTE( 60,  64),
+   TUNE_NOTE( 20,  76),
+   TUNE_STOP()
+};
+TuneDefinition tune_routing_succeeded = {
+   NULL, 0, elements_routing_succeeded
+};
+
+static TuneElement elements_routing_failed[] = {
+   TUNE_NOTE( 80,  80),
+   TUNE_NOTE( 90,  79),
+   TUNE_NOTE(100,  78),
+   TUNE_NOTE(100,  77),
+   TUNE_REST( 20),
+   TUNE_NOTE(100,  77),
+   TUNE_REST( 20),
+   TUNE_NOTE(150,  77),
+   TUNE_STOP()
+};
+TuneDefinition tune_routing_failed = {
+   NULL, 0, elements_routing_failed
 };
 
 const double noteFrequencies[] = {
