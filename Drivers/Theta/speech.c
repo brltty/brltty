@@ -15,9 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* FestivalLite/speech.c - Speech library
- * For the Festival Lite text to speech package
- * Maintained by Mario Lang <mlang@delysid.org>
+/* Theta/speech.c - Speech library
+ * For the Theta text to speech package
+ * Maintained by Dave Mielke <dave@mielke.cc>
  */
 
 #ifdef HAVE_CONFIG_H
