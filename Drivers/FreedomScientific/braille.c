@@ -262,6 +262,7 @@ static int writeTo;
 static int writing;
 static int writingFrom;
 static int writingTo;
+static struct timeval writingTime;
 
 static union {
   Packet packet;
@@ -381,7 +382,7 @@ negativeAcknowledgement (const Packet *packet) {
       break;
   }
 
-  LogPrint(LOG_WARNING, "Negative Acknowledgement: %02X [%s] in %02X [%s]",
+  LogPrint(LOG_WARNING, "Negative Acknowledgement: [%02X] %s in [%02X] %s",
            packet->header.arg1, problem,
            packet->header.arg2, component);
 }
@@ -478,6 +479,7 @@ updateCells (BrailleDisplay *brl) {
                       writeTo-writeFrom+1, writeFrom,
                       0, &outputBuffer[writeFrom])) {
         writing = 1;
+        gettimeofday(&writingTime, NULL);
         writingFrom = writeFrom;
         writingTo = writeTo;
         writeFrom = -1;
@@ -787,7 +789,17 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     Packet packet;
     int count = readPacket(brl, &packet);
     if (count == -1) return CMD_RESTARTBRL;
-    if (count == 0) return EOF;
+    if (count == 0) {
+      if (writing) {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+        if (elapsedMilliseconds(&writingTime, &now) > 500) {
+          LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
+          goto handleNegativeAcknowledgement;
+        }
+      }
+      return EOF;
+    }
 
     switch (packet.header.type) {
       default:
@@ -800,6 +812,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
       case PKT_NAK:
         negativeAcknowledgement(&packet);
+      handleNegativeAcknowledgement:
         if (writing) {
           if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
           if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
