@@ -255,6 +255,8 @@ usbReapResponse (
     urb = NULL;
   } else if (!urb) {
     errno = EAGAIN;
+  } else if (urb->status) {
+    if ((errno = urb->status) < 0) errno = -errno;
   } else {
     response->buffer = urb->buffer;
     response->length = urb->actual_length;
