@@ -630,7 +630,7 @@ processBrailleParameters (const BrailleDriver *driver) {
 }
 
 static const BrailleDriver *
-findBrailleDriver (void) {
+findBrailleDriver (int *internal) {
   const char *const *identifier;
 
   {
@@ -660,19 +660,19 @@ findBrailleDriver (void) {
                opt_brailleDevice);
       return NULL;
     }
-    LogPrint(LOG_NOTICE, "Autodetecting %s braille display on '%s'.", type, opt_brailleDevice);
+    LogPrint(LOG_NOTICE, "Looking for %s braille display on '%s'.", type, opt_brailleDevice);
   }
 
   if (identifier) {
     while (*identifier) {
       const BrailleDriver *driver;
       LogPrint(LOG_INFO, "Checking for '%s' braille display.", *identifier);
-      if ((driver = loadBrailleDriver(*identifier, opt_libraryDirectory))) {
+      if ((driver = loadBrailleDriver(*identifier, internal, opt_libraryDirectory))) {
         char **parameters = processBrailleParameters(driver);
         if (parameters) {
           initializeBrailleDisplay(&brl);
           if (driver->open(&brl, parameters, opt_brailleDevice)) {
-            LogPrint(LOG_INFO, "Braille display found: %s[%s]",
+            LogPrint(LOG_DEBUG, "Braille display found: %s[%s]",
                      driver->identifier, driver->name);
             driver->close(&brl);
             return driver;
@@ -681,7 +681,7 @@ findBrailleDriver (void) {
           deallocateStrings(parameters);
         }
 
-        unloadSharedObject(driver);
+        if (!*internal) unloadSharedObject(driver);
       }
 
       ++identifier;
@@ -694,9 +694,10 @@ findBrailleDriver (void) {
 
 static void
 getBrailleDriver (void) {
+  int internal;
   if (!opt_brailleDriver || (strcmp(opt_brailleDriver, "auto") != 0)) {
-    brailleDriver = loadBrailleDriver(opt_brailleDriver, opt_libraryDirectory);
-  } else if ((brailleDriver = findBrailleDriver())) {
+    brailleDriver = loadBrailleDriver(opt_brailleDriver, &internal, opt_libraryDirectory);
+  } else if ((brailleDriver = findBrailleDriver(&internal))) {
     opt_brailleDriver = brailleDriver->identifier;
   }
 
@@ -815,7 +816,8 @@ processSpeechParameters (const SpeechDriver *driver) {
 
 static void
 getSpeechDriver (void) {
-  if ((speechDriver = loadSpeechDriver(opt_speechDriver, opt_libraryDirectory))) {
+  int internal;
+  if ((speechDriver = loadSpeechDriver(opt_speechDriver, &internal, opt_libraryDirectory))) {
     speechParameters = processSpeechParameters(speechDriver);
   } else {
     LogPrint(LOG_ERR, "Bad speech driver selection: %s", opt_speechDriver);
@@ -1867,36 +1869,6 @@ startup (int argc, char *argv[]) {
   ensureOptionSetting(&opt_speechFifo, NULL, cfg_speechFifo, "BRLTTY_SPEECH_FIFO", -1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  if (*opt_brailleDevice == 0) {
-    LogPrint(LOG_CRIT, "No braille device specified.");
-    fprintf(stderr, "Use -d to specify one.\n");
-    exit(4);
-  }
-
-  getBrailleDriver();
-#ifdef ENABLE_SPEECH_SUPPORT
-  getSpeechDriver();
-#endif /* ENABLE_SPEECH_SUPPORT */
-#ifdef ENABLE_API
-  apiParameters = processParameters(api_parameters,
-                                    "application programming interface", NULL,
-                                    opt_apiParameters, cfg_apiParameters,
-                                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
-#endif /* ENABLE_API */
-  screenParameters = processParameters(getScreenParameters(),
-                                       "screen driver", NULL,
-                                       opt_screenParameters, cfg_screenParameters,
-                                       "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
-
-  if (!opt_preferencesFile) {
-    const char *part1 = "brltty-";
-    const char *part2 = brailleDriver->identifier;
-    const char *part3 = ".prefs";
-    char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-    sprintf(path, "%s%s%s", part1, part2, part3);
-    opt_preferencesFile = path;
-  }
-
   {
     const char *directories[] = {DATA_DIRECTORY, "/etc", "/", NULL};
     const char **directory = directories;
@@ -1908,6 +1880,18 @@ startup (int argc, char *argv[]) {
     }
   }
 
+  {
+    char buffer[PATH_MAX+1];
+    char *path = getcwd(buffer, sizeof(buffer));
+    LogPrint(LOG_INFO, "Working Directory: %s",
+             path? path: "path-too-long");
+  }
+
+  LogPrint(LOG_INFO, "Configuration File: %s", opt_configurationFile);
+  LogPrint(LOG_INFO, "Data Directory: %s", opt_dataDirectory);
+  LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
+  LogPrint(LOG_INFO, "Tables Directory: %s", opt_tablesDirectory);
+
   if (opt_textTable) {
     fixTranslationTablePath(&opt_textTable, TEXT_TABLE_PREFIX);
     if (!replaceTextTable(opt_textTable)) opt_textTable = NULL;
@@ -1916,6 +1900,7 @@ startup (int argc, char *argv[]) {
     opt_textTable = TEXT_TABLE;
     reverseTranslationTable(&textTable, &untextTable);
   }
+  LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_textTable, opt_tablesDirectory,
@@ -1930,6 +1915,7 @@ startup (int argc, char *argv[]) {
   } else {
     opt_attributesTable = ATTRIBUTES_TABLE;
   }
+  LogPrint(LOG_INFO, "Attributes Table: %s", opt_attributesTable);
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_attributesTable, opt_tablesDirectory,
@@ -1939,11 +1925,14 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
+  LogPrint(LOG_INFO, "Contractions Directory: %s", opt_contractionsDirectory);
   if (opt_contractionTable) {
     fixFilePath(&opt_contractionTable, CONTRACTION_TABLE_EXTENSION, CONTRACTION_TABLE_PREFIX);
     loadContractionTable(opt_contractionTable);
   }
   atexit(exitContractionTable);
+  LogPrint(LOG_INFO, "Contraction Table: %s",
+           opt_contractionTable? opt_contractionTable: "none");
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_contractionTable, opt_contractionsDirectory,
@@ -1953,48 +1942,54 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  {
-    char buffer[PATH_MAX+1];
-    char *path = getcwd(buffer, sizeof(buffer));
-    LogPrint(LOG_INFO, "Working Directory: %s",
-             path? path: "path-too-long");
-  }
-  LogPrint(LOG_INFO, "Configuration File: %s", opt_configurationFile);
-  LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
-  LogPrint(LOG_INFO, "Tables Directory: %s", opt_tablesDirectory);
-  LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
-  LogPrint(LOG_INFO, "Attributes Table: %s", opt_attributesTable);
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  LogPrint(LOG_INFO, "Contractions Directory: %s", opt_contractionsDirectory);
-  LogPrint(LOG_INFO, "Contraction Table: %s",
-           opt_contractionTable? opt_contractionTable: "none");
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-#ifdef ENABLE_API
-  logParameters(api_parameters, apiParameters, "API");
-#endif /* ENABLE_API */
-  LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
-  LogPrint(LOG_INFO, "Data Directory: %s", opt_dataDirectory);
-  LogPrint(LOG_INFO, "Help File: %s",
-           brailleDriver->helpFile? brailleDriver->helpFile: "<NONE>");
-  LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
-           opt_brailleDriver, brailleDriver->name,
-           brailleDriver->date, brailleDriver->time);
-  LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
-  logParameters(brailleDriver->parameters, brailleParameters, "Braille");
-#ifdef ENABLE_SPEECH_SUPPORT
-  LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
-           opt_speechDriver, speechDriver->name,
-           speechDriver->date, speechDriver->time);
-  logParameters(speechDriver->parameters, speechParameters, "Speech");
-#endif /* ENABLE_SPEECH_SUPPORT */
+  screenParameters = processParameters(getScreenParameters(),
+                                       "screen driver", NULL,
+                                       opt_screenParameters, cfg_screenParameters,
+                                       "BRLTTY_SCREEN_PARAMETERS", SCREEN_PARAMETERS);
   logParameters(getScreenParameters(), screenParameters, "Screen");
 
 #ifdef ENABLE_API
   api_identify();
+  apiParameters = processParameters(api_parameters,
+                                    "application programming interface", NULL,
+                                    opt_apiParameters, cfg_apiParameters,
+                                    "BRLTTY_API_PARAMETERS", API_PARAMETERS);
+  logParameters(api_parameters, apiParameters, "API");
 #endif /* ENABLE_API */
+
+  if (!*opt_brailleDevice) {
+    LogPrint(LOG_CRIT, "No braille device specified.");
+    fprintf(stderr, "Use -d to specify one.\n");
+    exit(4);
+  }
+  LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
+
+  getBrailleDriver();
+  LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
+           opt_brailleDriver, brailleDriver->name,
+           brailleDriver->date, brailleDriver->time);
   brailleDriver->identify();
+  logParameters(brailleDriver->parameters, brailleParameters, "Braille");
+  LogPrint(LOG_INFO, "Help File: %s",
+           brailleDriver->helpFile? brailleDriver->helpFile: "<NONE>");
+
+  if (!opt_preferencesFile) {
+    const char *part1 = "brltty-";
+    const char *part2 = brailleDriver->identifier;
+    const char *part3 = ".prefs";
+    char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+    sprintf(path, "%s%s%s", part1, part2, part3);
+    opt_preferencesFile = path;
+  }
+  LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
+
 #ifdef ENABLE_SPEECH_SUPPORT
+  getSpeechDriver();
+  LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
+           opt_speechDriver, speechDriver->name,
+           speechDriver->date, speechDriver->time);
   speechDriver->identify();
+  logParameters(speechDriver->parameters, speechParameters, "Speech");
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (opt_version) exit(0);

@@ -30,13 +30,13 @@
 
 const void *
 loadDriver (
-  const char *driverIdentifier,
-  const char *driverDirectory, const char *driverSymbol,
-  const char *driverType, char driverCharacter,
-  const DriverEntry *driverTable,
+  const char *driverIdentifier, int *internal,
+  const char *driverDirectory, const DriverEntry *driverTable,
+  const char *driverType, char driverCharacter, const char *driverSymbol,
   const void *nullAddress, const char *nullIdentifier
 ) {
   const void *driverAddress = NULL;
+  *internal = 1;
 
   if (!driverIdentifier) {
     if (driverTable)
@@ -45,9 +45,7 @@ loadDriver (
     return nullAddress;
   }
 
-  if (strcmp(driverIdentifier, nullIdentifier) == 0) {
-    return nullAddress;
-  }
+  if (strcmp(driverIdentifier, nullIdentifier) == 0) return nullAddress;
 
   if (driverTable) {
     const DriverEntry *driverEntry = driverTable;
@@ -84,7 +82,9 @@ loadDriver (
     {
       void *libraryHandle = loadSharedObject(libraryPath);
       if (libraryHandle) {
-        if (!findSharedSymbol(libraryHandle, symbolName, &driverAddress)) {
+        if (findSharedSymbol(libraryHandle, symbolName, &driverAddress)) {
+          *internal = 0;
+        } else {
           LogPrint(LOG_ERR, "Cannot find %s driver symbol: %s", driverType, symbolName);
           unloadSharedObject(libraryHandle);
           driverAddress = NULL;

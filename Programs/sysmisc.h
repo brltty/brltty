@@ -28,10 +28,9 @@ typedef struct {
 } DriverEntry;
 
 extern const void *loadDriver (
-  const char *driverIdentifier,
-  const char *driverDirectory, const char *driverSymbol,
-  const char *driverType, char driverCharacter,
-  const DriverEntry *driverTable,
+  const char *driverIdentifier, int *internal,
+  const char *driverDirectory, const DriverEntry *driverTable,
+  const char *driverType, char driverCharacter, const char *driverSymbol,
   const void *nullAddress, const char *nullIdentifier
 );
 

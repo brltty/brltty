@@ -80,11 +80,10 @@ TranslationTable attributesTable = {
 void *contractionTable = NULL;
 
 const BrailleDriver *
-loadBrailleDriver (const char *identifier, const char *driverDirectory) {
-  return loadDriver(identifier,
-                    driverDirectory, "brl_driver",
-                    "braille", 'b',
-                    driverTable,
+loadBrailleDriver (const char *identifier, int *internal, const char *driverDirectory) {
+  return loadDriver(identifier, internal,
+                    driverDirectory, driverTable,
+                    "braille", 'b', "brl_driver",
                     &noBraille, noBraille.identifier);
 }
 
