@@ -114,7 +114,7 @@ static unsigned int debug_keys = 0;
 static unsigned int debug_reads = 0;
 static unsigned int debug_writes = 0;
 
-/*--- Command Utilities ---*/
+/*--- Command Determination ---*/
 
 static const TerminalDefinition *terminal = NULL;
 static TranslationTable outputTable;
@@ -269,9 +269,8 @@ handleKey (int code, int press, int offsroute) {
 
 typedef struct {
   const speed_t *baudRates;
-  unsigned char identifyCount;
-  unsigned char tryProtocol1;
-  unsigned char tryProtocol2;
+  unsigned char protocol1;
+  unsigned char protocol2;
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) (void);
   void (*flushPort) (BrailleDisplay *brl);
@@ -346,7 +345,7 @@ writeSerialBytes (const void *buffer, int length) {
 }
 
 static const InputOutputOperations serialOperations = {
-  serialBaudRates, 1, 1, 1,
+  serialBaudRates, 1, 1,
   openSerialPort, closeSerialPort, flushSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
@@ -442,7 +441,7 @@ writeUsbBytes (const void *buffer, int length) {
 }
 
 static const InputOutputOperations usbOperations = {
-  usbBaudRates, 5, 0, 1,
+  usbBaudRates, 0, 5,
   openUsbPort, closeUsbPort, flushUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
@@ -971,7 +970,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
     }
     if (errno != EAGAIN) break;
 
-    if (++tries == io->identifyCount) {
+    if (++tries == io->protocol2) {
       LogPrint(LOG_WARNING, "No response from display.");
       break;
     }
@@ -982,49 +981,17 @@ identifyTerminal2 (BrailleDisplay *brl) {
 /*--- Driver Operations ---*/
 
 static void
-updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned char *cells,
-             void (*writeCells) (BrailleDisplay *brl, int start, int count)) {
-  if (memcmp(cells, data, size) != 0) {
-    int index;
-    while (size) {
-      index = size - 1;
-      if (cells[index] != data[index]) break;
-      size = index;
-    }
-    for (index=0; index<size; ++index) {
-      if (cells[index] != data[index]) break;
-    }
-    if ((size -= index)) {
-      memcpy(cells+index, data+index, size);
-      writeCells(brl, index, size);
-    }
-  }
+brl_identify (void) {
+  LogPrint(LOG_NOTICE, "Papenmeier Driver (compiled on %s at %s)", __DATE__, __TIME__);
+  LogPrint(LOG_INFO, "   Copyright (C) 1998-2001 by The BRLTTY Team.");
+  LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
+  LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
 }
-
-/* ------------------------------------------------------------ */
 
 static int
 identifyTerminal (BrailleDisplay *brl) {
-  if (io->tryProtocol1 && identifyTerminal1(brl)) return 1;
-  if (io->tryProtocol2 && identifyTerminal2(brl)) return 1;
-  return 0;
-}
-
-/* ------------------------------------------------------------ */
-
-static int 
-initializeTerminal (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (io->openPort(parameters, device)) {
-    charactersPerSecond = baud2integer(*baudRate) / 10;
-    if (identifyTerminal(brl)) {
-      memset(currentStatus, outputTable[0], terminal->statusCount);
-      memset(currentText, outputTable[0], terminal->columns);
-      resetState();
-      protocol->initializeTerminal(brl);
-      return 1;
-    }
-    io->closePort();
-  }
+  if (io->protocol1 && identifyTerminal1(brl)) return 1;
+  if (io->protocol2 && identifyTerminal2(brl)) return 1;
   return 0;
 }
 
@@ -1034,8 +1001,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   validateYesNo(&debug_reads, "debug reads flag", parameters[PARM_DEBUGREADS]);
   validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
 
-  /* read the config file for individual configurations */
 #ifdef ENABLE_PM_CONFIGURATION_FILE
+  /* read the config file for individual configurations */
   LogPrint(LOG_DEBUG, "Loading configuration file.");
   read_config(brl->dataDirectory, parameters[PARM_CONFIGFILE]);
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
@@ -1060,9 +1027,22 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   baudRate = io->baudRates;
   while (*baudRate != B0) {
-    if (initializeTerminal(brl, parameters, device)) return 1;
+    charactersPerSecond = baud2integer(*baudRate) / 10;
+
+    if (io->openPort(parameters, device)) {
+      if (identifyTerminal(brl)) {
+        memset(currentText, outputTable[0], terminal->columns);
+        memset(currentStatus, outputTable[0], terminal->statusCount);
+        resetState();
+        protocol->initializeTerminal(brl);
+        return 1;
+      }
+      io->closePort();
+    }
+
     ++baudRate;
   }
+
   return 0;
 }
 
@@ -1072,11 +1052,31 @@ brl_close (BrailleDisplay *brl) {
 }
 
 static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Papenmeier Driver (compiled on %s at %s)", __DATE__, __TIME__);
-  LogPrint(LOG_INFO, "   Copyright (C) 1998-2001 by The BRLTTY Team.");
-  LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
-  LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
+updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned char *cells,
+             void (*writeCells) (BrailleDisplay *brl, int start, int count)) {
+  if (memcmp(cells, data, size) != 0) {
+    int index;
+    while (size) {
+      index = size - 1;
+      if (cells[index] != data[index]) break;
+      size = index;
+    }
+    for (index=0; index<size; ++index) {
+      if (cells[index] != data[index]) break;
+    }
+    if ((size -= index)) {
+      memcpy(cells+index, data+index, size);
+      writeCells(brl, index, size);
+    }
+  }
+}
+
+static void
+brl_writeWindow (BrailleDisplay *brl) {
+  int i;
+  if (debug_writes) LogBytes("Window", brl->buffer, terminal->columns);
+  for (i=0; i<terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
+  updateCells(brl, terminal->columns, brl->buffer, currentText, protocol->writeText);
 }
 
 static void
@@ -1117,16 +1117,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
     updateCells(brl, terminal->statusCount, cells, currentStatus, protocol->writeStatus);
   }
 }
-
-static void
-brl_writeWindow (BrailleDisplay *brl) {
-  int i;
-  if (debug_writes) LogBytes("Window", brl->buffer, terminal->columns);
-  for (i=0; i<terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
-  updateCells(brl, terminal->columns, brl->buffer, currentText, protocol->writeText);
-}
-
-/* ------------------------------------------------------------ */
 
 static int 
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
