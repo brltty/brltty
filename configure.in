@@ -41,16 +41,14 @@ AC_CANONICAL_SYSTEM
 
 BRLTTY_PACKAGE_CHOOSE([curses],
    [curses curses.h],
-   [ncurses ncurses.h]
-)
+   [ncurses ncurses.h])
 
 BRLTTY_PACKAGE_CHOOSE([xaw],
    [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
    [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
    [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
    [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
-   [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h]
-)
+   [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
 
 brltty_default_execute_root="/${PACKAGE_NAME}-${PACKAGE_VERSION}"
 BRLTTY_ARG_WITH(

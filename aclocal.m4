@@ -456,7 +456,7 @@ ifelse(len([$1]), 0, [], [dnl
 AC_DEFUN([BRLTTY_PACKAGE_CHOOSE], [dnl
 BRLTTY_ARG_WITH(
    [$1], [PACKAGE],
-   [which $1 package to use],
+   [which $1 package to use (]BRLTTY_PACKAGE_LIST(m4_shift($@))[)],
    [$1_package], ["yes"]
 )
 if test "${$1_package}" = "no"
@@ -467,7 +467,8 @@ then
 AC_CACHE_CHECK([which $1 package to use], [brltty_cv_package_$1], [dnl
    brltty_cv_package_$1=""
    brltty_packages=""
-   BRLTTY_PACKAGE_ADD(m4_shift($@))
+   BRLTTY_PACKAGE_DEFINE(m4_shift($@))
+
    for brltty_package in ${brltty_packages}
    do
       eval 'brltty_headers="${brltty_headers_'"${brltty_package}"'}"'
@@ -478,13 +479,14 @@ AC_CACHE_CHECK([which $1 package to use], [brltty_cv_package_$1], [dnl
             AC_CHECK_HEADER([${brltty_header}], [], [brltty_found=false])
             "${brltty_found}" || break
          done
+
          "${brltty_found}" && {
             brltty_cv_package_$1="${brltty_package}"
             break
          }
       }
    done
-])
+])dnl
    $1_package="${brltty_cv_package_$1}"
 fi
 AC_SUBST([$1_package])
@@ -494,7 +496,7 @@ test -n "${$1_package}" && {
 }
 BRLTTY_SUMMARY_ITEM([$1-package], [$1_package])
 ])
-AC_DEFUN([BRLTTY_PACKAGE_ADD], [dnl
+AC_DEFUN([BRLTTY_PACKAGE_DEFINE], [dnl
 ifelse($#, 0, [], [dnl
 
 set -- [$1]
@@ -502,6 +504,7 @@ brltty_package="${1}"
 shift
 eval "brltty_headers_${brltty_package}"'="${*}"'
 brltty_packages="${brltty_packages} ${brltty_package}"
-ifelse($#, 1, [], [BRLTTY_PACKAGE_ADD(m4_shift($@))])
-])dnl
-])
+ifelse($#, 1, [], [BRLTTY_PACKAGE_DEFINE(m4_shift($@))])])])
+AC_DEFUN([BRLTTY_PACKAGE_LIST], [dnl
+ifelse($#, 0, [], $#, 1, [BRLTTY_PACKAGE_NAME([$1])], [BRLTTY_PACKAGE_NAME([$1]) BRLTTY_PACKAGE_LIST(m4_shift($@))])])
+AC_DEFUN([BRLTTY_PACKAGE_NAME], [patsubst([$1], [^ *\(\w+\).*], [\1])])
