@@ -1,36 +1,26 @@
 Introduction
 ============
 
-This subdirectory contains what's necessary to integrate BRLTTY's BrlAPI as a
-"braille device" into Gnopernicus. YOu can now use Gnopernicus via this new
-driver with every braille display that is supported by BRLTTY. Be forewarned
-that it is far from finished, but basic braille displaying, as wel as key
-transmission, work fine.
-
-N.B.: This patch has been integrated into version 0.3.4 of Gnopernicus. From
-that version on, please use whatever is in Gnopernicus itself rather than this
-patch.
+As of version 0.3.4 (released in July of 2003), Gnopernicus contains a braille
+driver for BRLTTY. This means that you can now use Gnopernicus with any braille
+display that is supported by BRLTTY. Although support is far from complete,
+basic braille displaying, as well as key transmission, work fine.
 
 
 Building BRLTTY
 ===============
 
-Compile BRLTTY with ./configure --enable-api in order to enable the compilation
-and installation of libbrlapi and the necessary header files. After
-installation, but *before* launching the new BRLTTY, you need to generate an
-authentication key. The easiest way to do this is:
+Configure BRLTTY with --enable-api in order to enable the compilation and
+installation of libbrlapi and its header files.
+
+    ./configure --enable-api
+    make
+    make install
+
+After installation, but *before* launching the new BRLTTY, you need to generate
+an authentication key. The easiest way to do this is:
 
     echo some-string >/etc/brltty/brlapi-key
-
-
-Building Gnopernicus
-====================
-
-Gnopernicus must be modified with two files which can both be found within this
-subdirectory. The first is "patch", which needs to be applied in
-"Gnopernicus/braille/libbrl/" and modifies "braille.c" and "Makefile.am". The
-second is "ttybrl.c", which is a new file that needs to be copied into
-"Gnopernicus/braille/libbrl/".
 
 
 Configuring Gnopernicus
@@ -48,15 +38,15 @@ When the focus is inside the Gnopernicus window, select
 In this menu, check the checkbox with the label "Braille". This activates
 braille support, and makes the "Braille Settings" window available.
 
-Now click OK to apply the changes and close the window.
+Now click OK to apply the change and close the window.
 
 In the main Gnopernicus window again, select
 
     2 Input/Output Settings -> 2 Braille Settings -> 1 Braille Device
 
-In this dialog box, ensure that "BRLTTY" is the selected Braille device.
+In this dialog box, ensure that "BRLTTY" is the selected braille device.
 
-After applyingJ your changes, "Close" the "Braille Settings" and "Input/Output
+After applying your changes, "Close" the "Braille Settings" and "Input/Output
 Settings" windows.
 
 You might need to restart Gnopernicus to get working braille support.
@@ -66,12 +56,12 @@ There's a command-line interface to the Gnome configuration system (gconf)
 called "gconftool-2". You can get verbose help for it with "gconftool-2 --help"
 or something shorter with "gconftool-2 --usage".
 
-èBefore accessibility will work across the desktop, you need to check this
+èBefore accessibility will work across the desktop, you need to check thi
 gconf key:
 
-    gconftool-2 --get /apps/desktop/gnome/interface/accessibility 
+    gconftool-2 --get /apps/desktop/gnome/interface/accessibility
 
-If it's ialse, set it to true as follows (all one line):
+If it's false, set it to true as follows (all one line):
 
     gconftool-2 --type bool
                 --set /apps/desktop/gnome/interface/accessibility true
@@ -82,22 +72,26 @@ on (and turn speech off if you like). The relevant gconf keys are:
 [turn braille on]
     gconftool-2 --type bool --set /apps/gnopernicus/srcore/br_active true
 
+[set braille device to brltty]
+    gconftool-2 --type string --set /apps/gnopernicus/braille/device BRLTTY
+
 [turn braille monitor display (for sighted users) off]
     gconftool-2 --type bool --set /apps/gnopernicus/srcore/bm_active false
 
 [turn speech off]
     gconftool-2 --type bool --set /apps/gnopernicus/srcore/sp_active false
 
-[set braille device to brltty]
-    gconftool-2 --type string --set /apps/gnopernicus/braille/device BRLTTY
-
 You can run "gconftool-2 --get ...." with any key (you don't need the "--type"
 parameter for the "get" function) to verify that that gconf key is set
 correctly.
 
-Here's a sample .xinitrc file for starting Gnome and Gnopernicus under the
-Garnome distribution. The accessibility key is set in the file to ensure that
-it is true. The environment variable GTK_MODULES seems to be necessary to make
+
+Starting Gnome
+==============
+
+Here's a sample .xinitrc file for starting Gnome under the Garnome
+distribution. The accessibility key is set in the file to ensure that it is
+true. The environment variable GTK_MODULES seems to be necessary to make
 everything accessible. The .xinitrc file must be placed in your home directory
 and is used when you type "startx" to start the X-server.
 
@@ -115,6 +109,9 @@ and is used when you type "startx" to start the X-server.
  exec $GARNOME/bin/gnome-session
  ------------------------------------------------------------------------------
 
+
+Starting Gnopernicus
+====================
 
 Gnopernicus is started from a file in your home directory which Gnome reads
 when it starts up. While Gnome provides a GUI for adding startup programs,
@@ -155,16 +152,12 @@ settings. BRLTTY commands are mapped to Gnopernicus key bindings as follows:
 What's Left
 ===========
 
-What's left is to write some autoconf magic to allow for auto-detection of the
-existence of BrlAPI on the build machine. This patch currently adds an
-unconditional build-time dependency on BRLTTY.
-
-Also, we still need some way to figure out the tty on which the X server is
-currently running. Some investigation didn't really show any way to get this
-information via the X protocol. We will probably need to add a BrlAPI-specific
-configuration entry which at least lets the user set this. The downside would
-be that this would make it very hard to use Gnopernicus for more than one X
-server concurrently.
+We need some way to figure out the tty on which the X server is currently
+running. Some investigation didn't really show any way to get this information
+via the X protocol. We'll probably need to add a BrlAPI-specific configuration
+entry which at least lets the user set this. The downside would be that this
+would make it very hard to use Gnopernicus for more than one X server
+concurrently.
 
 Any input on these issues would be highly appreciated.
 
