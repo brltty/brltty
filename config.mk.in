@@ -126,6 +126,7 @@ FLITE_ROOT = @flite_root@
 FLITE_LANGUAGE = @flite_language@
 FLITE_LEXICON = @flite_lexicon@
 FLITE_VOICE = @flite_voice@
+MIKROPUHE_ROOT = @mikropuhe_root@
 THETA_ROOT = @theta_root@
 VIAVOICE_ROOT = @viavoice_root@
 

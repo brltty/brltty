@@ -136,6 +136,9 @@ extern "C" {
 /* Define this to be a string containing the path to the root of the FestivalLite package. */
 #undef FLITE_ROOT
 
+/* Define this to be a string containing the path to the root of the Mikropuhe package. */
+#undef MIKROPUHE_ROOT
+
 /* Define this to be a string containing the path to the root of the Theta package. */
 #undef THETA_ROOT
 

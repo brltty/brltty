@@ -1,0 +1,32 @@
+This directory contains the BRLTTY speech driver for the Mikropuhe text to
+speech engine [http://www.mikropuhe.com] from TimeHouse
+[http://www.timehouse.fi/oy/en/]. It was implemented, and is being maintained,
+by Dave Mielke <dave@mielke.cc>.
+
+BRLTTY's configure script automatically includes this driver if Mikropuhe has
+been installed. The default is to check the directories /usr, /usr/local, and
+/opt/theta. The actual location can be explicitly specified via --with-mplinux.
+
+This driver can be either dynamically loaded (at run time) or built directly
+into a dynamically linked BRLTTY binary (via --with-speech-driver), but it
+cannot be built into a statically linked BRLTTY binary (via
+--enable-standalone-programs) because the Mikropuhe package doesn't contain a
+static archive. 
+
+If this driver is built as a dynamically loaded shared object (the default),
+i.e. it isn't linked into BRLTTY's binary via --with-speech-driver, then the
+directory $THETA_HOME/lib must be added to the colon-delimited list of
+directories in the LD_LIBRARY_PATH environment variable before BRLTTY is
+started because Theta's own shared objects don't contain run-time search paths
+for their internal dependencies.
+
+This driver recognizes the following parameters:
+
+   Parameter Settings
+   name      name (human), /path/to/directory
+   pitch     -2.0-2.0 (octaves relative to default)
+
+If the human name of the voice is specified then the voice path is searched. 
+This path can be explicitly defined by storing a colon-delimited list of
+directories in the THETA_VOXPATH environment variable. The default is to look
+in $THETA_HOME/voices.
