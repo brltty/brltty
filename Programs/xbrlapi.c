@@ -19,6 +19,9 @@
  * gcc -O3 -Wall xbrlapi.c -L/usr/X11R6/lib -lbrlapi -lX11 -o xbrlapi
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -26,14 +29,29 @@
 #include <getopt.h>
 #include <signal.h>
 #include <string.h>
-#include <sys/select.h>
 #include <netinet/in.h>
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
+#include <sys/time.h>
+#endif /* HAVE_SYS_SELECT_H */
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/XTest.h>
+#include <X11/XKBlib.h>
+#include <X11/keysym.h>
 
 #include "api.h"
+#include "brldefs.h"
+
+//#define DEBUG
+#ifdef DEBUG
+#define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
+#else
+#define debugf(fmt, ...) (void)0
+#endif
 
 #define _(s) (s)
 #define _n(s,sp,n) ((n)>1?(sp):(s))
@@ -77,13 +95,13 @@ void fatal(const char *fmt, ...) {
  */
 
 
-/*#define DEBUG */
-
 #ifndef MIN
 #define MIN(a, b) (((a) < (b))? (a): (b))
 #endif /* MIN */
 
-void apimux_cleanExit(int foo) {
+static int brlapi_fd;
+
+void api_cleanExit(int foo) {
   brlapi_closeConnection();
   exit(0);
 }
@@ -94,13 +112,13 @@ void tobrltty_init(char *authKey, char *hostName) {
   settings.hostName=hostName;
   settings.authKey=authKey;
 
-  signal(SIGTERM,apimux_cleanExit);
-  signal(SIGHUP,apimux_cleanExit);
-  signal(SIGINT,apimux_cleanExit);
-  signal(SIGQUIT,apimux_cleanExit);
-  signal(SIGPIPE,apimux_cleanExit);
+  signal(SIGTERM,api_cleanExit);
+  signal(SIGHUP,api_cleanExit);
+  signal(SIGINT,api_cleanExit);
+  signal(SIGQUIT,api_cleanExit);
+  signal(SIGPIPE,api_cleanExit);
 
-  if ((brlapi_initializeConnection(&settings,&settings))<0)
+  if ((brlapi_fd = brlapi_initializeConnection(&settings,&settings))<0)
     fatal_brlapi_errno("initializeConnection",_("couldn't connect to brltty at %s\n"),settings.hostName);
 
   if (brlapi_getDisplaySize(&x,&y)<0)
@@ -112,14 +130,16 @@ void vtno(int vtno) {
     fatal_brlapi_errno("getTty",_("getting tty %d\n"),vtno);
   if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",_("ignoring every key %d\n"),vtno);
+  if (brlapi_unignoreKeyRange(BRL_BLK_PASSCHAR,BRL_BLK_PASSCHAR|BRL_MSK_ARG))
+    fatal_brlapi_errno("unignoreKeyRange",NULL);
+  if (brlapi_unignoreKeyRange(BRL_BLK_PASSKEY, BRL_BLK_PASSKEY |BRL_MSK_ARG))
+    fatal_brlapi_errno("unignoreKeyRange",NULL);
 }
 
-void apimux_setName(const unsigned char *wm_name) {
+void api_setName(const unsigned char *wm_name) {
   static char *last_name;
 
-#ifdef DEBUG
-  fprintf(stderr,"%s got focus\n",wm_name);
-#endif
+  debugf("%s got focus\n",wm_name);
   if (last_name) {
     if (!strcmp(wm_name,last_name)) return;
     free(last_name);
@@ -132,10 +152,8 @@ void apimux_setName(const unsigned char *wm_name) {
   }
 }
 
-void apimux_setFocus(int win) {
-#ifdef DEBUG
-  fprintf(stderr,"%#010x (%d) got focus\n",win,win);
-#endif
+void api_setFocus(int win) {
+  debugf("%#010x (%d) got focus\n",win,win);
   if (brlapi_setFocus(win)<0)
     fatal_brlapi_errno("setFocus",_("setting focus to %#010x\n"),win);
 }
@@ -143,8 +161,6 @@ void apimux_setFocus(int win) {
 /******************************************************************************
  * X handling
  */
-
-/*#define DEBUG */
 
 static const char *Xdisplay;
 static Display *dpy;
@@ -201,7 +217,8 @@ static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
     grabFailed=1;
     return 0;
   }
-  if (!XGetErrorText(dpy, ev->error_code, buffer, sizeof(buffer))) fatal("XGetErrorText");
+  if (!XGetErrorText(dpy, ev->error_code, buffer, sizeof(buffer)))
+    fatal("XGetErrorText");
   fprintf(stderr,_("X Error %d, %s on display %s\n"), ev->type, buffer, XDisplayName(Xdisplay));
   fprintf(stderr,_("resource %#010lx, req %u:%u\n"),ev->resourceid,ev->request_code,ev->minor_code);
   exit(1);
@@ -257,7 +274,7 @@ static int grabWindow(Window win,int level) {
 #ifdef DEBUG
   memset(spaces,' ',level);
   spaces[level]='\0';
-  fprintf(stderr,"%sgrabbed %#010lx\n",spaces,win);
+  debugf("%sgrabbed %#010lx\n",spaces,win);
 #endif
   return 1;
 }
@@ -277,9 +294,7 @@ static unsigned char *getWindowTitle(Window win) {
   } while (bytes_after && ({if (!XFree(wm_name)) fatal("tempo_XFree(wm_name)"); 1;}));
   if (actual_type==None) return NULL;
   else {
-#ifdef DEBUG
-    fprintf(stderr,"type %lx name %s",actual_type,wm_name);
-#endif
+    debugf("type %lx name %s",actual_type,wm_name);
     return wm_name;
   }
 }
@@ -309,33 +324,44 @@ static int grabWindows(Window win,int level) {
 
 static void setName(const struct window *window) {
   if (!window->wm_name)
-    if (window->win==window->root) apimux_setName("root");
-    else apimux_setName("unknown");
-  else apimux_setName(window->wm_name);
+    if (window->win==window->root) api_setName("root");
+    else api_setName("unknown");
+  else api_setName(window->wm_name);
 }
 
 static void setFocus(Window win) {
   struct window *window;
 
   curWindow=win;
-  apimux_setFocus((uint32_t)win);
+  api_setFocus((uint32_t)win);
 
   if (!(window=window_of_Window(win))) {
     fprintf(stderr,_("didn't grab window %#010lx but got focus !\n"),win);
-    apimux_setName("unknown");
+    api_setName("unknown");
   } else setName(window);
 }
 
 void toX_f(const char *display) {
   Window root;
   XEvent ev;
-  int i;
+  int i,res;
+  int X_fd;
+  fd_set fds,readfds;
+  int maxfd;
+  brl_keycode_t code;
+  unsigned int keysym, keycode, modifiers;
 
   Xdisplay = display;
   if (!Xdisplay) Xdisplay=getenv("DISPLAY");
   if (!(dpy=XOpenDisplay(Xdisplay))) fatal(_("couldn't connect to %s\n"),Xdisplay);
 
   if (!XSetErrorHandler(ErrorHandler)) fatal(_("strange old error handler\n"));
+
+  X_fd = XConnectionNumber(dpy);
+  FD_ZERO(&fds);
+  FD_SET(brlapi_fd, &fds);
+  FD_SET(X_fd, &fds);
+  maxfd = X_fd>brlapi_fd ? X_fd+1 : brlapi_fd+1;
 
   getVTnb();
   
@@ -352,95 +378,181 @@ void toX_f(const char *display) {
     setFocus(win);
   }
   while(1) {
-    if ((i=XNextEvent(dpy,&ev)))
-      fatal("XNextEvent: %d\n",i);
-    switch (ev.type) {
+    XFlush(dpy);
+    memcpy(&readfds,&fds,sizeof(readfds));
+    if (select(maxfd,&readfds,NULL,NULL,NULL)<0)
+      fatal_errno("select",NULL);
+    if (FD_ISSET(X_fd,&readfds))
+    while (XPending(dpy)) {
+      if ((i=XNextEvent(dpy,&ev)))
+	fatal("XNextEvent: %d\n",i);
+      switch (ev.type) {
 
-    /* focus events */
-    case FocusIn:
-      switch (ev.xfocus.detail) {
-      case NotifyAncestor:
-      case NotifyInferior:
-      case NotifyNonlinear:
-      case NotifyPointerRoot:
-      case NotifyDetailNone:
-	setFocus(ev.xfocus.window); break;
-      } break;
-    case FocusOut:
-      /* ignore
-      switch (ev.xfocus.detail) {
-      case NotifyAncestor:
-      case NotifyInferior:
-      case NotifyNonlinear:
-      case NotifyPointerRoot:
-      case NotifyDetailNone:
-      printf("win %#010lx lost focus\n",ev.xfocus.window);
-      break;
-      }
-      */
-      break;
-
-    /* create & destroy events */
-    case CreateNotify: {
-    /* there's a race condition here : a window may get the focus or change
-     * its title between it is created and we achieve XSelectInput on it */
-      Window win = ev.xcreatewindow.window;
-      struct window *window;
-      if (!grabWindow(win,0)) break; /* window already disappeared ! */
-#ifdef DEBUG
-      fprintf(stderr,"win %#010lx created\n",win);
-#endif
-      if (!(window = window_of_Window(ev.xcreatewindow.parent))) {
-        fprintf(stderr,_("didn't grab parent of %#010lx ?!\n"),win);
-        add_window(win,None,getWindowTitle(win));
-      } else add_window(win,window->root,getWindowTitle(win));
-    } break;
-    case DestroyNotify:
-#ifdef DEBUG
-      fprintf(stderr,"win %#010lx destroyed\n",ev.xdestroywindow.window);
-#endif
-      if (del_window(ev.xdestroywindow.window))
-#ifdef DEBUG
-        fprintf(stderr,"destroy: didn't grab window %#010lx\n",ev.xdestroywindow.window)
-#endif
-	;
-      break;
-
-    /* Property change: WM_NAME ? */
-    case PropertyNotify:
-      if (ev.xproperty.atom==XA_WM_NAME) {
-	Window win = ev.xproperty.window;
-#ifdef DEBUG
-        fprintf(stderr,"WM_NAME property of %#010lx changed\n",win);
-#endif
-	struct window *window;
-	if (!(window=window_of_Window(win))) {
-	  fprintf(stderr,_("didn't grab window %#010lx\n"),win);
-	  add_window(win,None,getWindowTitle(win));
-	} else {
-	  if (window->wm_name)
-	    if (!XFree(window->wm_name)) fatal(_("XFree(wm_name) for change"));
-	  if ((window->wm_name=getWindowTitle(win))) {
-	    if (win==curWindow)
-	      apimux_setName(window->wm_name);
-	  } else fprintf(stderr,_("uhu, window %#010lx changed to NULL name ?!\n"),win);
+      /* focus events */
+      case FocusIn:
+	switch (ev.xfocus.detail) {
+	case NotifyAncestor:
+	case NotifyInferior:
+	case NotifyNonlinear:
+	case NotifyPointerRoot:
+	case NotifyDetailNone:
+	  setFocus(ev.xfocus.window); break;
+	} break;
+      case FocusOut:
+	/* ignore
+	switch (ev.xfocus.detail) {
+	case NotifyAncestor:
+	case NotifyInferior:
+	case NotifyNonlinear:
+	case NotifyPointerRoot:
+	case NotifyDetailNone:
+	printf("win %#010lx lost focus\n",ev.xfocus.window);
+	break;
 	}
-      }
-      break;
-    /* ignored events */
-    case UnmapNotify:
-    case MapNotify:
-    case MapRequest:
-    case ReparentNotify:
-    case ConfigureNotify:
-    case GravityNotify:
-    case ConfigureRequest:
-    case CirculateNotify:
-    case CirculateRequest:
-      break;
+	*/
+	break;
 
-    /* "shouldn't happen" events */
-    default: fprintf(stderr,_("unhandled %d type\n"),ev.type); break;
+      /* create & destroy events */
+      case CreateNotify: {
+      /* there's a race condition here : a window may get the focus or change
+       * its title between it is created and we achieve XSelectInput on it */
+	Window win = ev.xcreatewindow.window;
+	struct window *window;
+	if (!grabWindow(win,0)) break; /* window already disappeared ! */
+	debugf("win %#010lx created\n",win);
+	if (!(window = window_of_Window(ev.xcreatewindow.parent))) {
+	  fprintf(stderr,_("didn't grab parent of %#010lx ?!\n"),win);
+	  add_window(win,None,getWindowTitle(win));
+	} else add_window(win,window->root,getWindowTitle(win));
+      } break;
+      case DestroyNotify:
+	debugf("win %#010lx destroyed\n",ev.xdestroywindow.window);
+	if (del_window(ev.xdestroywindow.window))
+	  debugf("destroy: didn't grab window %#010lx\n",ev.xdestroywindow.window);
+	break;
+
+      /* Property change: WM_NAME ? */
+      case PropertyNotify:
+	if (ev.xproperty.atom==XA_WM_NAME) {
+	  Window win = ev.xproperty.window;
+	  debugf("WM_NAME property of %#010lx changed\n",win);
+	  struct window *window;
+	  if (!(window=window_of_Window(win))) {
+	    fprintf(stderr,_("didn't grab window %#010lx\n"),win);
+	    add_window(win,None,getWindowTitle(win));
+	  } else {
+	    if (window->wm_name)
+	      if (!XFree(window->wm_name)) fatal(_("XFree(wm_name) for change"));
+	    if ((window->wm_name=getWindowTitle(win))) {
+	      if (win==curWindow)
+		api_setName(window->wm_name);
+	    } else fprintf(stderr,_("uhu, window %#010lx changed to NULL name ?!\n"),win);
+	  }
+	}
+	break;
+      /* ignored events */
+      case UnmapNotify:
+      case MapNotify:
+      case MapRequest:
+      case ReparentNotify:
+      case ConfigureNotify:
+      case GravityNotify:
+      case ConfigureRequest:
+      case CirculateNotify:
+      case CirculateRequest:
+	break;
+
+      /* "shouldn't happen" events */
+      default: fprintf(stderr,_("unhandled %d type\n"),ev.type); break;
+      }
+    }
+    if (FD_ISSET(brlapi_fd,&readfds)) {
+      while ((res = brlapi_readKey(0, &code)==1)) {
+	modifiers = 0;
+	if (code & BRL_FLG_CHAR_CONTROL) modifiers |= ControlMask;
+	if (code & BRL_FLG_CHAR_META) modifiers |= Mod1Mask;
+	if (code & BRL_FLG_CHAR_UPPER) modifiers |= ShiftMask;
+	if (code & BRL_FLG_CHAR_SHIFT) modifiers |= ShiftMask;
+
+	switch (code&BRL_MSK_BLK) {
+	  case BRL_BLK_PASSCHAR:
+	    if (((code&BRL_MSK_ARG) >= 'A') && ((code&BRL_MSK_ARG) <= 'Z')) {
+	      code = code + 'a' - 'A';
+	      modifiers |= ShiftMask;
+	    }
+	    keysym = code&BRL_MSK_ARG;
+	    break;
+
+	  case BRL_BLK_PASSKEY:
+	    switch (code&BRL_MSK_ARG) {
+	      case BRL_KEY_ENTER:         keysym = XK_KP_Enter;  break;
+	      case BRL_KEY_TAB:           keysym = XK_Tab;       break;
+	      case BRL_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
+	      case BRL_KEY_ESCAPE:        keysym = XK_Escape;    break;
+	      case BRL_KEY_CURSOR_LEFT:   keysym = XK_Left;      break;
+	      case BRL_KEY_CURSOR_RIGHT:  keysym = XK_Right;     break;
+	      case BRL_KEY_CURSOR_UP:     keysym = XK_Up;        break;
+	      case BRL_KEY_CURSOR_DOWN:   keysym = XK_Down;      break;
+	      case BRL_KEY_PAGE_UP:       keysym = XK_Page_Up;   break;
+	      case BRL_KEY_PAGE_DOWN:     keysym = XK_Page_Down; break;
+	      case BRL_KEY_HOME:          keysym = XK_Home;      break;
+	      case BRL_KEY_END:           keysym = XK_End;       break;
+	      case BRL_KEY_INSERT:        keysym = XK_Insert;    break;
+	      case BRL_KEY_DELETE:        keysym = XK_Delete;    break;
+	      case BRL_KEY_FUNCTION + 0:  keysym = XK_F1;        break;
+	      case BRL_KEY_FUNCTION + 1:  keysym = XK_F2;        break;
+	      case BRL_KEY_FUNCTION + 2:  keysym = XK_F3;        break;
+	      case BRL_KEY_FUNCTION + 3:  keysym = XK_F4;        break;
+	      case BRL_KEY_FUNCTION + 4:  keysym = XK_F5;        break;
+	      case BRL_KEY_FUNCTION + 5:  keysym = XK_F6;        break;
+	      case BRL_KEY_FUNCTION + 6:  keysym = XK_F7;        break;
+	      case BRL_KEY_FUNCTION + 7:  keysym = XK_F8;        break;
+	      case BRL_KEY_FUNCTION + 8:  keysym = XK_F9;        break;
+	      case BRL_KEY_FUNCTION + 9:  keysym = XK_F10;       break;
+	      case BRL_KEY_FUNCTION + 10: keysym = XK_F11;       break;
+	      case BRL_KEY_FUNCTION + 11: keysym = XK_F12;       break;
+	      case BRL_KEY_FUNCTION + 12: keysym = XK_F13;       break;
+	      case BRL_KEY_FUNCTION + 13: keysym = XK_F14;       break;
+	      case BRL_KEY_FUNCTION + 14: keysym = XK_F15;       break;
+	      case BRL_KEY_FUNCTION + 15: keysym = XK_F16;       break;
+	      case BRL_KEY_FUNCTION + 16: keysym = XK_F17;       break;
+	      case BRL_KEY_FUNCTION + 17: keysym = XK_F18;       break;
+	      case BRL_KEY_FUNCTION + 18: keysym = XK_F19;       break;
+	      case BRL_KEY_FUNCTION + 19: keysym = XK_F20;       break;
+	      case BRL_KEY_FUNCTION + 20: keysym = XK_F21;       break;
+	      case BRL_KEY_FUNCTION + 21: keysym = XK_F22;       break;
+	      case BRL_KEY_FUNCTION + 22: keysym = XK_F23;       break;
+	      case BRL_KEY_FUNCTION + 23: keysym = XK_F24;       break;
+	      case BRL_KEY_FUNCTION + 24: keysym = XK_F25;       break;
+	      case BRL_KEY_FUNCTION + 25: keysym = XK_F26;       break;
+	      case BRL_KEY_FUNCTION + 26: keysym = XK_F27;       break;
+	      case BRL_KEY_FUNCTION + 27: keysym = XK_F28;       break;
+	      case BRL_KEY_FUNCTION + 28: keysym = XK_F29;       break;
+	      case BRL_KEY_FUNCTION + 29: keysym = XK_F30;       break;
+	      case BRL_KEY_FUNCTION + 30: keysym = XK_F31;       break;
+	      case BRL_KEY_FUNCTION + 31: keysym = XK_F32;       break;
+	      case BRL_KEY_FUNCTION + 32: keysym = XK_F33;       break;
+	      case BRL_KEY_FUNCTION + 33: keysym = XK_F34;       break;
+	      case BRL_KEY_FUNCTION + 34: keysym = XK_F35;       break;
+	      default:
+		fprintf(stderr,"uh, unexpected key %x\n",code);
+		continue;
+	    }
+	  default:
+	    fprintf(stderr,"uh, unexpected block type %x\n",code&BRL_MSK_BLK);
+	    continue;
+	}
+	keycode = XKeysymToKeycode(dpy,keysym);
+	if (modifiers)
+	  XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, modifiers);
+	debugf("key %x\n",code);
+	XTestFakeKeyEvent(dpy,keycode,True,CurrentTime);
+	XTestFakeKeyEvent(dpy,keycode,False,CurrentTime);
+	if (modifiers)
+	  XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, 0);
+      }
+      if (res<0)
+	fatal_brlapi_errno("brlapi_readKey",NULL);
     }
   }
 }
