@@ -137,7 +137,7 @@ static const ModelDescription Models[] = {
   ,
   {
     "Braille Star 80", 0X78,
-    80, 0, 2,
+    80, 0, 3,
     interpretKeyByte, interpretBrailleStarKeys,
     HandyBrailleStart,         NULL, NULL,
     sizeof(HandyBrailleStart), 0,    0
@@ -625,6 +625,54 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
         inputMode = 1;
         *command = EOF;
         return 1;
+      case (KEY_B9):
+        *command = CMD_SAY_ABOVE;
+        return 1;
+      case (KEY_B10):
+        *command = CMD_SAY_LINE;
+        return 1;
+      case (KEY_B11):
+        *command = CMD_SAY_BELOW;
+        return 1;
+      case (KEY_B12):
+        *command = CMD_MUTE;
+        return 1;
+      case (KEY_ZERO):
+        *command = CMD_SPKHOME;
+        return 1;
+      case (KEY_B13):
+        *command = CMD_SWITCHVT_PREV;
+        return 1;
+      case (KEY_B14):
+        *command = CMD_SWITCHVT_NEXT;
+        return 1;
+      case (KEY_SEVEN):
+        *command = CMD_LEARN;
+        return 1;
+      case (KEY_EIGHT):
+        *command = CMD_MENU_PREV_ITEM;
+        return 1;
+      case (KEY_NINE):
+        *command = CMD_MENU_FIRST_ITEM;
+        return 1;
+      case (KEY_FOUR):
+        *command = CMD_MENU_PREV_SETTING;
+        return 1;
+      case (KEY_FIVE):
+        *command = CMD_PREFSAVE;
+        return 1;
+      case (KEY_SIX):
+        *command = CMD_MENU_NEXT_SETTING;
+        return 1;
+      case (KEY_ONE):
+        *command = CMD_PREFMENU;
+        return 1;
+      case (KEY_TWO):
+        *command = CMD_MENU_NEXT_ITEM;
+        return 1;
+      case (KEY_THREE):
+        *command = CMD_MENU_LAST_ITEM;
+        return 1;
     }
     if (inputMode) {
       const unsigned long int dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
@@ -891,7 +939,13 @@ interpretBrailleStarKeys (DriverCommandContext context, const Keys *keys, int *c
         return 1;
     }
   }
-  if (!(keys->front & ~(KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8 | KEY_SPACE_LEFT | KEY_SPACE_RIGHT))) {
+  if (!(keys->front & ~(KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 |
+                        KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8 |
+                        KEY_SPACE_LEFT | KEY_SPACE_RIGHT |
+                        KEY_B9 | KEY_SEVEN | KEY_EIGHT | KEY_NINE |
+                        KEY_B10 | KEY_FOUR | KEY_FIVE | KEY_SIX |
+                        KEY_B11 | KEY_ONE | KEY_TWO | KEY_THREE |
+                        KEY_B12 | KEY_ZERO | KEY_B13 | KEY_B14))) {
     Keys modularKeys = *keys;
     if (modularKeys.front & KEY_SPACE_LEFT) {
       modularKeys.front &= ~KEY_SPACE_LEFT;
