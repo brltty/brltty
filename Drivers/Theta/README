@@ -25,7 +25,6 @@ This driver recognizes the following parameters:
    language  two-letter language code
    name      name (human), /path/to/directory
    pitch     -2.0-2.0 (octaves relative to default)
-   volume    0.0-10.0 (relative to default)
 
 If the human name of the voice is specified then the voice path is searched. 
 This path can be explicitly defined by storing a colon-delimited list of
