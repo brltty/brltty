@@ -311,7 +311,7 @@ static int sendbyte(unsigned char c)
   return (serialWriteData(serialDevice, &c, 1));
 }
 
-static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
+static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char *data)
 {
   unsigned char	buf[1024];
   unsigned char		*p = buf;
@@ -385,7 +385,8 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
 
 static int brl_reset(BrailleDisplay *brl)
 {
-  return (brl_writePacket(brl, "\x02SI", 3) == 3);
+  static const unsigned char packet[] = {0X02, 'S', 'I'};
+  return (brl_writePacket(brl, packet, sizeof(packet)) == sizeof(packet));
 }
 
 static void brl_identify (void)
@@ -482,8 +483,8 @@ static void brl_writeWindow (BrailleDisplay *brl)
 	i = NbCols;
 
 	  {
-	     char OutBuf[2 * i + 6];
-	     char *p = OutBuf;
+	     unsigned char OutBuf[2 * i + 6];
+	     unsigned char *p = OutBuf;
 
 	     *p++ = i + 2;
 	     *p++ = 'D';
@@ -506,8 +507,8 @@ static void brl_writeWindow (BrailleDisplay *brl)
 static void	brl_writeVisual(BrailleDisplay *brl)
 {
   int		i = NbCols;
-  char		OutBuf[2 * NbCols + 6];
-  char	        *p = OutBuf;
+  unsigned char OutBuf[2 * NbCols + 6];
+  unsigned char *p = OutBuf;
   int		j;
 
   if (ReWrite_LCD == 0)
@@ -818,7 +819,7 @@ static int	convert(int keys)
 
 
 
-static int	key_handle(BrailleDisplay *brl, char *buf)
+static int	key_handle(BrailleDisplay *brl, unsigned char *buf)
 {
   int	res = EOF;
   /* here the braille keys are bitmapped into an int with
@@ -1052,10 +1053,10 @@ static int readbrlkey(BrailleDisplay *brl)
 		case 'B': /* PC-BRAILLE mode */
 		  if (JustIdentified == 0)
 		  {
-		    char AskIdent[3] = {2, 'S', 'I'};
+		    unsigned char AskIdent[] = {2, 'S', 'I'};
 
 		    LogPrint(LOG_INFO, "EuroBraille terminal came in PC mode.");
-		    WriteToBrlDisplay(brl, 3, AskIdent);
+		    WriteToBrlDisplay(brl, sizeof(AskIdent), AskIdent);
 		    JustIdentified = 0;
 		    ReWrite = 1; /* to refresh display */
 		    context = 0;
@@ -1115,9 +1116,9 @@ static int readbrlkey(BrailleDisplay *brl)
 		    model_ID = 5;
 		  else
 		    model_ID = 0;
-		  if (strncmp(version_ID, buf + p + 2, 3))
+		  if (strncmp(version_ID, (char *)(buf + p + 2), 3))
 		    {
-		      strncpy(version_ID, buf + p + 2, 20);
+		      strncpy(version_ID, (char *)(buf + p + 2), 20);
 		      NbCols = (buf[p + 4] - '0') * 10;
 		      if (model_ID == 5 && NbCols == 30)
 			NbCols += 2;
