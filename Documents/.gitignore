@@ -3,5 +3,6 @@ reldeps.mk
 *.made
 api_doxy.cfg
 man?
+brlapi_*.3
 *.txt
 *-HTML
