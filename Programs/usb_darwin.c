@@ -36,10 +36,146 @@ typedef struct {
   IOUSBDeviceInterface182 **interface;
 } UsbDeviceExtension;
 
+static void
+setErrnoIo (IOReturn result, const char *action) {
+#define SET(to) errno = E##to; break;
+#define MAP(from,to) case kIOReturn##from: SET(to)
+
+  LogPrint(LOG_WARNING, "Darwin I/O error 0X%X.", result);
+  switch (result) {
+    default: SET(IO)
+  //MAP(Success, )
+  //MAP(Error, )
+    MAP(NoMemory, NOMEM)
+    MAP(NoResources, AGAIN)
+  //MAP(IPCError, )
+    MAP(NoDevice, NODEV)
+    MAP(NotPrivileged, ACCES)
+    MAP(BadArgument, INVAL)
+    MAP(LockedRead, NOLCK)
+    MAP(LockedWrite, NOLCK)
+    MAP(ExclusiveAccess, BUSY)
+  //MAP(BadMessageID, )
+    MAP(Unsupported, NOTSUP)
+  //MAP(VMError, )
+  //MAP(InternalError, )
+    MAP(IOError, IO)
+    MAP(CannotLock, NOLCK)
+    MAP(NotOpen, BADF)
+    MAP(NotReadable, ACCES)
+    MAP(NotWritable, ROFS)
+  //MAP(NotAligned, )
+    MAP(BadMedia, NXIO)
+  //MAP(StillOpen, )
+  //MAP(RLDError, )
+    MAP(DMAError, DEVERR)
+    MAP(Busy, BUSY)
+    MAP(Timeout, TIMEDOUT)
+    MAP(Offline, NXIO)
+    MAP(NotReady, NXIO)
+    MAP(NotAttached, NXIO)
+    MAP(NoChannels, DEVERR)
+    MAP(NoSpace, NOSPC)
+    MAP(PortExists, ADDRINUSE)
+    MAP(CannotWire, NOMEM)
+  //MAP(NoInterrupt, )
+    MAP(NoFrames, DEVERR)
+    MAP(MessageTooLarge, MSGSIZE)
+    MAP(NotPermitted, PERM)
+    MAP(NoPower, PWROFF)
+    MAP(NoMedia, NXIO)
+    MAP(UnformattedMedia, NXIO)
+    MAP(UnsupportedMode, NOSYS)
+    MAP(Underrun, DEVERR)
+    MAP(Overrun, DEVERR)
+    MAP(DeviceError, DEVERR)
+  //MAP(NoCompletion, )
+    MAP(Aborted, CANCELED)
+    MAP(NoBandwidth, DEVERR)
+    MAP(NotResponding, DEVERR)
+    MAP(IsoTooOld, DEVERR)
+    MAP(IsoTooNew, DEVERR)
+    MAP(NotFound, NOENT)
+  //MAP(Invalid, )
+  }
+  if (action) LogError(action);
+
+#undef MAP
+#undef SET
+}
+
+static void
+setErrnoKernel (kern_return_t result, const char *action) {
+#define SET(to) errno = E##to; break;
+#define MAP(from,to) case KERN_##from: SET(to)
+
+  LogPrint(LOG_WARNING, "Darwin kernel error 0X%X.", result);
+  switch (result) {
+    default: SET(IO)
+  //MAP(SUCCESS, )
+    MAP(INVALID_ADDRESS, INVAL)
+    MAP(PROTECTION_FAILURE, FAULT)
+    MAP(NO_SPACE, NOSPC)
+    MAP(INVALID_ARGUMENT, INVAL)
+  //MAP(FAILURE, )
+    MAP(RESOURCE_SHORTAGE, AGAIN)
+  //MAP(NOT_RECEIVER, )
+    MAP(NO_ACCESS, ACCES)
+    MAP(MEMORY_FAILURE, FAULT)
+    MAP(MEMORY_ERROR, FAULT)
+  //MAP(ALREADY_IN_SET, )
+  //MAP(NOT_IN_SET, )
+    MAP(NAME_EXISTS, EXIST)
+    MAP(ABORTED, CANCELED)
+    MAP(INVALID_NAME, INVAL)
+    MAP(INVALID_TASK, INVAL)
+    MAP(INVALID_RIGHT, INVAL)
+    MAP(INVALID_VALUE, INVAL)
+  //MAP(UREFS_OVERFLOW, )
+    MAP(INVALID_CAPABILITY, INVAL)
+  //MAP(RIGHT_EXISTS, )
+    MAP(INVALID_HOST, INVAL)
+  //MAP(MEMORY_PRESENT, )
+  //MAP(MEMORY_DATA_MOVED, )
+  //MAP(MEMORY_RESTART_COPY, )
+    MAP(INVALID_PROCESSOR_SET, INVAL)
+  //MAP(POLICY_LIMIT, )
+    MAP(INVALID_POLICY, INVAL)
+    MAP(INVALID_OBJECT, INVAL)
+  //MAP(ALREADY_WAITING, )
+  //MAP(DEFAULT_SET, )
+  //MAP(EXCEPTION_PROTECTED, )
+    MAP(INVALID_LEDGER, INVAL)
+    MAP(INVALID_MEMORY_CONTROL, INVAL)
+    MAP(INVALID_SECURITY, INVAL)
+  //MAP(NOT_DEPRESSED, )
+  //MAP(TERMINATED, )
+  //MAP(LOCK_SET_DESTROYED, )
+  //MAP(LOCK_UNSTABLE, )
+  //MAP(LOCK_OWNED, )
+  //MAP(LOCK_OWNED_SELF, )
+  //MAP(SEMAPHORE_DESTROYED, )
+  //MAP(RPC_SERVER_TERMINATED, )
+  //MAP(RPC_TERMINATE_ORPHAN, )
+  //MAP(RPC_CONTINUE_ORPHAN, )
+    MAP(NOT_SUPPORTED, NOTSUP)
+    MAP(NODE_DOWN, HOSTDOWN)
+  //MAP(NOT_WAITING, )
+    MAP(OPERATION_TIMED_OUT, TIMEDOUT)
+  }
+  if (action) LogError(action);
+
+#undef MAP
+#undef SET
+}
+
 int
 usbResetDevice (UsbDevice *device) {
-  errno = ENOSYS;
-  LogError("USB device reset");
+  UsbDeviceExtension *devx = device->extension;
+  IOReturn result = (*devx->interface)->ResetDevice(devx->interface);
+  if (result == kIOReturnSuccess) return 1;
+
+  setErrnoIo(result, "USB device reset");
   return 0;
 }
 
@@ -48,8 +184,12 @@ usbSetConfiguration (
   UsbDevice *device,
   unsigned char configuration
 ) {
-  errno = ENOSYS;
-  LogError("USB configuration set");
+  UsbDeviceExtension *devx = device->extension;
+  UInt8 arg = configuration;
+  IOReturn result = (*devx->interface)->SetConfiguration(devx->interface, arg);
+  if (result == kIOReturnSuccess) return 1;
+
+  setErrnoIo(result, "USB configuration set");
   return 0;
 }
 
@@ -194,13 +334,11 @@ usbReapResponse (
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-
-  device->descriptor.bLength = USB_DESCRIPTOR_SIZE_DEVICE;
-  device->descriptor.bDescriptorType = USB_DESCRIPTOR_TYPE_DEVICE;
+  IOReturn result;
 
   {
     uint8_t speed;
-    (*devx->interface)->GetDeviceSpeed(devx->interface, &speed);
+    if ((result = (*devx->interface)->GetDeviceSpeed(devx->interface, &speed)) != kIOReturnSuccess) goto error;
     switch (speed) {
       default                 : device->descriptor.bcdUSB = 0X0000; break;
       case kUSBDeviceSpeedLow : device->descriptor.bcdUSB = 0X0100; break;
@@ -209,22 +347,28 @@ usbReadDeviceDescriptor (UsbDevice *device) {
     }
   }
 
-  (*devx->interface)->GetDeviceClass(devx->interface, &device->descriptor.bDeviceClass);
-  (*devx->interface)->GetDeviceSubClass(devx->interface, &device->descriptor.bDeviceSubClass);
-  (*devx->interface)->GetDeviceProtocol(devx->interface, &device->descriptor.bDeviceProtocol);
+  if ((result = (*devx->interface)->GetDeviceClass(devx->interface, &device->descriptor.bDeviceClass)) != kIOReturnSuccess) goto error;
+  if ((result = (*devx->interface)->GetDeviceSubClass(devx->interface, &device->descriptor.bDeviceSubClass)) != kIOReturnSuccess) goto error;
+  if ((result = (*devx->interface)->GetDeviceProtocol(devx->interface, &device->descriptor.bDeviceProtocol)) != kIOReturnSuccess) goto error;
 
-  (*devx->interface)->GetDeviceVendor(devx->interface, &device->descriptor.idVendor);
-  (*devx->interface)->GetDeviceProduct(devx->interface, &device->descriptor.idProduct);
-  (*devx->interface)->GetDeviceReleaseNumber(devx->interface, &device->descriptor.bcdDevice);
+  if ((result = (*devx->interface)->GetDeviceVendor(devx->interface, &device->descriptor.idVendor)) != kIOReturnSuccess) goto error;
+  if ((result = (*devx->interface)->GetDeviceProduct(devx->interface, &device->descriptor.idProduct)) != kIOReturnSuccess) goto error;
+  if ((result = (*devx->interface)->GetDeviceReleaseNumber(devx->interface, &device->descriptor.bcdDevice)) != kIOReturnSuccess) goto error;
 
-  (*devx->interface)->USBGetManufacturerStringIndex(devx->interface, &device->descriptor.iManufacturer);
-  (*devx->interface)->USBGetProductStringIndex(devx->interface, &device->descriptor.iProduct);
-  (*devx->interface)->USBGetSerialNumberStringIndex(devx->interface, &device->descriptor.iSerialNumber);
+  if ((result = (*devx->interface)->USBGetManufacturerStringIndex(devx->interface, &device->descriptor.iManufacturer)) != kIOReturnSuccess) goto error;
+  if ((result = (*devx->interface)->USBGetProductStringIndex(devx->interface, &device->descriptor.iProduct)) != kIOReturnSuccess) goto error;
+  if ((result = (*devx->interface)->USBGetSerialNumberStringIndex(devx->interface, &device->descriptor.iSerialNumber)) != kIOReturnSuccess) goto error;
 
-  (*devx->interface)->GetNumberOfConfigurations(devx->interface, &device->descriptor.bNumConfigurations);
+  if ((result = (*devx->interface)->GetNumberOfConfigurations(devx->interface, &device->descriptor.bNumConfigurations)) != kIOReturnSuccess) goto error;
   device->descriptor.bMaxPacketSize0 = 0;
 
+  device->descriptor.bLength = USB_DESCRIPTOR_SIZE_DEVICE;
+  device->descriptor.bDescriptorType = USB_DESCRIPTOR_TYPE_DEVICE;
   return 1;
+
+error:
+  setErrnoIo(result, "USB device descriptor read");
+  return 0;
 }
 
 void
@@ -283,17 +427,17 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
                 if (!device) (*deviceInterface)->USBDeviceClose(deviceInterface);
               } else {
-                LogPrint(LOG_ERR, "USB: cannot open device interface: err=%d", ioResult);
+                setErrnoIo(ioResult, "USB: device interface open");
               }
 
               if (!device) (*deviceInterface)->Release(deviceInterface);
             } else {
-              LogPrint(LOG_ERR, "USB: cannot create device interface: err=%d", ioResult);
+              setErrnoIo(ioResult, "USB: device interface create");
             }
 
             (*servicePlugin)->Release(servicePlugin);
           } else {
-            LogPrint(LOG_ERR, "USB: cannot create service plugin: err=%d", ioResult);
+            setErrnoIo(ioResult, "USB: service plugin create");
           }
 
           IOObjectRelease(service);
@@ -302,7 +446,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
         IOObjectRelease(serviceIterator);
       } else {
-        LogPrint(LOG_ERR, "USB: cannot create service iterator: err=%d", kernelResult);
+        setErrnoKernel(kernelResult, "USB: service iterator create");
       }
     } else {
       LogPrint(LOG_ERR, "USB: cannot create matching dictionary.");
@@ -310,7 +454,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
     mach_port_deallocate(mach_task_self(), masterPort);
   } else {
-    LogPrint(LOG_ERR, "USB: cannot create master port: err=%d", kernelResult);
+    setErrnoKernel(kernelResult, "USB: master port create");
   }
 
   return device;
