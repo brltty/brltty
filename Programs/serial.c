@@ -667,6 +667,7 @@ serialOpenDevice (const char *path) {
     if ((device = getDevicePath(path))) {
 #ifdef __MINGW32__
       if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL)) != INVALID_HANDLE_VALUE) {
+        serial->fileDescriptor = -1;
 #else /* __MINGW32__ */
       if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
         if (isatty(serial->fileDescriptor)) {
@@ -716,12 +717,12 @@ serialCloseDevice (SerialDevice *serial) {
 
   if (serial->stream) {
     fclose(serial->stream);
-  } else {
 #ifdef __MINGW32__
+  } else if (serial->fileDescriptor == -1) {
     CloseHandle(serial->fileHandle);
-#else /* __MINGW32__ */
-    close(serial->fileDescriptor);
 #endif /* __MINGW32__ */
+  } else {
+    close(serial->fileDescriptor);
   }
 
   free(serial);
@@ -749,9 +750,11 @@ FILE *
 serialGetStream (SerialDevice *serial) {
   if (!serial->stream) {
 #ifdef __MINGW32__
-    if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
-      LogError("open_osfhandle");
-      return NULL;
+    if (serial->fileDescriptor < 0) {
+      if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
+        LogError("open_osfhandle");
+        return NULL;
+      }
     }
 #endif /* __MINGW32__ */
 
