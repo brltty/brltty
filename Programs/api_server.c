@@ -599,13 +599,6 @@ static void doLeaveTty(Connection *c) {
   pthread_mutex_lock(&connectionsMutex);
   __removeConnection(c);
   __addConnection(c,notty.connections);
-  for (;tty!=&ttys;tty=tty->father) {
-    if (tty->connections->next != tty->connections || tty->subttys)
-      break;
-    LogPrint(LOG_DEBUG,"freeing tty %#010x",tty->number);
-    removeTty(tty);
-    freeTty(tty);
-  }
   pthread_mutex_unlock(&connectionsMutex);
   freeRangeList(&c->unmaskedKeys);
   freeBrailleWindow(&c->brailleWindow);
@@ -1453,8 +1446,19 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
     }
   }
   {
-    Tty *t;
-    for (t = tty->subttys; t; t = t->next) handleTtyFds(fds,currentTime,t);
+    Tty *t,*next;
+    for (t = tty->subttys; t; t = next) {
+      next = t->next;
+      handleTtyFds(fds,currentTime,t);
+    }
+  }
+  if (tty!=&ttys && tty!=&notty
+      && tty->connections->next == tty->connections && !tty->subttys) {
+    LogPrint(LOG_DEBUG,"freeing tty %#010x",tty->number);
+    pthread_mutex_lock(&connectionsMutex);
+    removeTty(tty);
+    freeTty(tty);
+    pthread_mutex_unlock(&connectionsMutex);
   }
 }
 
