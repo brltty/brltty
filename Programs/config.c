@@ -865,7 +865,7 @@ openBrailleDriver (void) {
             }
 
             {
-              const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
+              const char *part1 = "brltty-";
               const char *part2 = brailleDriver->identifier;
               const char *part3 = ".prefs";
               char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
