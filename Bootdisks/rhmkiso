@@ -47,14 +47,14 @@ EOF
    exit 0
 }
 
-while getopts ":b:t:hs" option
+while getopts ":b:t:sh" option
 do
    case "${option}"
    in
       b) brailleDrivers="${OPTARG}";;
       t) textTable="${OPTARG}";;
-      h) showUsage;;
       s) invokeShell=true;;
+      h) showUsage;;
      \?) syntaxError "unknown option: -${OPTARG}";;
       :) syntaxError "missing operand: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
@@ -73,9 +73,6 @@ shift $((OPTIND - 1))
 }
 
 [ "${#}" -gt 0 ] && syntaxError "too many parameters."
-
-loaderDirectory="isolinux"
-configurationFile="isolinux.cfg"
 
 [ -f "${originalImage}" ] || programError "original image not found: ${originalImage}"
 
@@ -101,7 +98,7 @@ originalMounted=false
 initrdMounted=false
 trap "cleanup" 0
 
-temporaryDirectory="$(mktemp -d "${TMPDIR:-/tmp}/${0##*/}.XXXXXX")"
+temporaryDirectory="$(mktemp -d "${TMPDIR:-/tmp}/${programName}.XXXXXX")"
 
 originalRoot="${temporaryDirectory}/original"
 mkdir "${originalRoot}"
@@ -112,12 +109,28 @@ modifiedRoot="${temporaryDirectory}/modified"
 mkdir "${modifiedRoot}"
 cp -a "${originalRoot}/." "${modifiedRoot}"
 
+loaderDirectory=""
+set +e
+for directory in boot/isolinux isolinux
+do
+   [ -d "${originalRoot}/${directory}" ] && {
+      loaderDirectory="${directory}"
+      break
+   }
+done
+set -e
+
+configurationFile="isolinux.cfg"
 sed -n -e '
 /^\( *default  *\).*$/s//\1text/
 /^\( *timeout  *\).*$/s//\10/
 /^ *append.* text/s/$/ nofb/
 p
 ' <"${originalRoot}/${loaderDirectory}/${configurationFile}" >"${modifiedRoot}/${loaderDirectory}/${configurationFile}"
+
+bootMessage="boot.msg"
+echo -n -e '\a' >"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
+cat "${originalRoot}/${loaderDirectory}/${bootMessage}" >>"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
 
 initrdImage="${temporaryDirectory}/initrd.ext2"
 initrdPath="${modifiedRoot}/${loaderDirectory}/initrd.img"

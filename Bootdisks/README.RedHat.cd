@@ -24,16 +24,11 @@ desired RedHat or Fedora release, or the image for the first CD of the full
 installation set ("disc1.iso"), into the current directory.
 
    cp /path/to/boot.iso .
-or
-   wget http://download.fedora.redhat.com/pub/fedora/linux/core/1/i386/os/
-        images/boot.iso
 
 Fourth: Copy or download the tarball for the desired BRLTTY release into the
 current directory.
 
    cp /path/to/brltty-3.5.tar.gz .
-or
-   wget http://mielke.cc/brltty/releases/brltty-3.5.tar.gz
 
 Fifth: Run the "rhmkiso" script with no options or parameters.
 
@@ -46,7 +41,7 @@ Write this modified image to a CD.
 
 Seventh: Boot from the CD you've just written, and wait a few seconds after it
 starts to spin in order to give the boot loader enough time to get started and
-present its initial prompt. Then enter:
+present its initial prompt. You should hear a beep when it's ready. Then enter:
 
    text brltty=<driver>,<device>,<table>
 e.g.
@@ -86,8 +81,10 @@ It can be applied either to the basic installer CD or to the first CD of the
 full installation set, and makes the following modifications to the image:
 
 *  BRLTTY is added (all drivers, all tables).
+*  The initial boot loader prompt sounds the console beep.
 *  The timeout for the initial boot loader prompt is disabled.
-*  The use of a frame buffer for the console is disabled.
+*  The default kernel configuration to be booted is changed to text.
+*  The use of frame buffers for the text consoles is disabled.
 
 Although its defaults are what usually needs to be done, the "rhmkiso" script
 offers a number of options so that you can customize what it does. It's general
@@ -111,8 +108,8 @@ The following options are provided:
    -h              Display usage information and exit.
 
 The -b option specifies which braille display drivers will be linked into the
-brltty executable (as opposed to being built as dynamically loadable shared
-objects). If more than one driver is specified then their specifiers must be
+brltty executable as opposed to being built as dynamically loadable shared
+objects. If more than one driver is specified then their specifiers must be
 separated from one another by a comma. Either the two-letter identifier or the
 proper name (full or abbreviated) for each driver must be supplied. If a driver
 specifier is prefixed by a minus sign (-) then that driver is excluded from the
