@@ -37,26 +37,26 @@ extern int serialRestartDevice (SerialDevice *serial, int baud);
 extern FILE *serialGetStream (SerialDevice *serial);
 
 extern int serialAwaitInput (SerialDevice *serial, int timeout);
-extern int serialReadData (
+extern ssize_t serialReadData (
   SerialDevice *serial,
-  void *buffer, int size,
+  void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
 extern int serialReadChunk (
   SerialDevice *serial,
-  unsigned char *buffer, int *offset, int count,
+  unsigned char *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 );
-extern int serialWriteData (
+extern ssize_t serialWriteData (
   SerialDevice *serial,
-  const void *data, int size
+  const void *data, size_t size
 );
 
 extern int serialSetBaud (SerialDevice *serial, int baud);
 extern int serialSetDataBits (SerialDevice *serial, int bits);
 extern int serialSetStopBits (SerialDevice *serial, int bits);
 extern int serialSetParity (SerialDevice *serial, SerialParity parity);
-extern int serialSetFlowControl (SerialDevice *serial, int flow);
+extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
 
 extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);

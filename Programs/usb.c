@@ -676,7 +676,7 @@ usbSetBelkinRtsState (UsbDevice *device, int state) {
   return usbSetBelkinAttribute(device, 11, state);
 }
 static int
-usbSetBelkinFlowControl (UsbDevice *device, int flow) {
+usbSetBelkinFlowControl (UsbDevice *device, SerialFlowControl flow) {
   int value = 0;
 #define BELKIN_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), value |= (to)
   BELKIN_FLOW(SERIAL_FLOW_OUTPUT_CTS, 0X0001);
@@ -742,7 +742,7 @@ usbSetFtdiRtsState (UsbDevice *device, int state) {
   return usbSetFtdiModemState(device, state, 1, "RTS");
 }
 static int
-usbSetFtdiFlowControl (UsbDevice *device, int flow) {
+usbSetFtdiFlowControl (UsbDevice *device, SerialFlowControl flow) {
   int index = 0;
 #define FTDI_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), index |= (to)
   FTDI_FLOW(SERIAL_FLOW_OUTPUT_CTS|SERIAL_FLOW_INPUT_RTS, 0X0100);

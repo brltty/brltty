@@ -36,19 +36,19 @@
 #include "misc.h"
 
 int
-awaitInput (int descriptor, int milliseconds) {
+awaitInput (int fileDescriptor, int milliseconds) {
   fd_set mask;
   struct timeval timeout;
 
   FD_ZERO(&mask);
-  FD_SET(descriptor, &mask);
+  FD_SET(fileDescriptor, &mask);
 
   memset(&timeout, 0, sizeof(timeout));
   timeout.tv_sec = milliseconds / 1000;
   timeout.tv_usec = (milliseconds % 1000) * 1000;
 
   while (1) {
-    switch (select(descriptor+1, &mask, NULL, NULL, &timeout)) {
+    switch (select(fileDescriptor+1, &mask, NULL, NULL, &timeout)) {
       case -1:
         if (errno == EINTR) continue;
         LogError("Input wait");
@@ -69,12 +69,12 @@ awaitInput (int descriptor, int milliseconds) {
 
 int
 readChunk (
-  int descriptor,
-  unsigned char *buffer, int *offset, int count,
+  int fileDescriptor,
+  unsigned char *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 ) {
   while (count > 0) {
-    int amount = read(descriptor, buffer+*offset, count);
+    ssize_t amount = read(fileDescriptor, buffer+*offset, count);
 
     if (amount == -1) {
       if (errno == EINTR) continue;
@@ -88,7 +88,7 @@ readChunk (
       int timeout;
     noInput:
       if ((timeout = *offset? subsequentTimeout: initialTimeout)) {
-        if (awaitInput(descriptor, timeout)) continue;
+        if (awaitInput(fileDescriptor, timeout)) continue;
         LogPrint(LOG_WARNING, "Input byte missing at offset %d.", *offset);
       } else {
         errno = EAGAIN;
@@ -102,23 +102,23 @@ readChunk (
   return 1;
 }
 
-int
-timedRead (
-  int descriptor, unsigned char *buffer, int count,
+ssize_t
+readData (
+  int fileDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
   int length = 0;
-  if (readChunk(descriptor, buffer, &length, count, initialTimeout, subsequentTimeout)) return count;
+  if (readChunk(fileDescriptor, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
   if (errno == EAGAIN) return length;
   return -1;
 }
 
 ssize_t
-writeData (int fd, const void *buffer, size_t size) {
+writeData (int fileDescriptor, const void *buffer, size_t size) {
   const unsigned char *address = buffer;
 
   while (size > 0) {
-    ssize_t count = write(fd, address, size);
+    ssize_t count = write(fileDescriptor, address, size);
 
     if (count == -1) {
       if (errno == EINTR) continue;

@@ -22,18 +22,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int awaitInput (int descriptor, int milliseconds);
+extern int awaitInput (int fileDescriptor, int milliseconds);
 extern int readChunk (
-  int descriptor,
-  unsigned char *buffer, int *offset, int count,
+  int fileDescriptor,
+  unsigned char *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 );
-extern int timedRead (
-  int descriptor, unsigned char *buffer, int count,
+extern ssize_t readData (
+  int fileDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
 
-extern ssize_t writeData (int fd, const void *buffer, size_t size);
+extern ssize_t writeData (int fileDescriptor, const void *buffer, size_t size);
 
 extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);
 extern int setOpenFlags (int fileDescriptor, int state, int flags);

@@ -310,12 +310,9 @@ awaitBluezInput (int milliseconds) {
 static int
 readBluezBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  int offset = 0;
-  if (awaitInput(bluezConnection, (wait? timeout: 0))) {
-    if (readChunk(bluezConnection, buffer, &offset, length, 0, timeout)) return offset;
-    if (errno != EAGAIN) return -1;
-  }
-  return 0;
+  if (!awaitInput(bluezConnection, (wait? timeout: 0)))
+    return (errno == EAGAIN)? 0: -1;
+  return readData(bluezConnection, buffer, length, 0, timeout);
 }
 
 static int

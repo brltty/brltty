@@ -396,7 +396,7 @@ extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
 
 typedef struct {
   int (*setBaud) (UsbDevice *device, int rate);
-  int (*setFlowControl) (UsbDevice *device, int flow);
+  int (*setFlowControl) (UsbDevice *device, SerialFlowControl flow);
   int (*setDataFormat) (UsbDevice *device, int dataBits, int stopBits, SerialParity parity);
   int (*setDtrState) (UsbDevice *device, int state);
   int (*setRtsState) (UsbDevice *device, int state);
@@ -413,7 +413,7 @@ typedef struct {
   unsigned char inputEndpoint;
   unsigned char outputEndpoint;
   int baud;
-  int flowControl;
+  SerialFlowControl flowControl;
   int dataBits;
   int stopBits;
   SerialParity parity;

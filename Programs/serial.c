@@ -279,7 +279,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 }
 
 int
-serialSetFlowControl (SerialDevice *serial, int flow) {
+serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 #ifdef CRTSCTS
   if ((flow & SERIAL_FLOW_HARDWARE) == SERIAL_FLOW_HARDWARE) {
     serial->pendingAttributes.c_cflag |= CRTSCTS;
@@ -489,30 +489,30 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
   return awaitInput(serial->fileDescriptor, timeout);
 }
 
-int
+ssize_t
 serialReadData (
   SerialDevice *serial,
-  void *buffer, int size,
+  void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
   if (!serialFlushAttributes(serial)) return -1;
-  return timedRead(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+  return readData(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
 }
 
 int
 serialReadChunk (
   SerialDevice *serial,
-  unsigned char *buffer, int *offset, int count,
+  unsigned char *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 ) {
   if (!serialFlushAttributes(serial)) return 0;
   return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
 }
 
-int
+ssize_t
 serialWriteData (
   SerialDevice *serial,
-  const void *data, int size
+  const void *data, size_t size
 ) {
   if (serialFlushAttributes(serial)) {
     if (writeData(serial->fileDescriptor, data, size) != -1) return size;
