@@ -33,14 +33,6 @@
  *   August Hörandl <august.hoerandl@gmx.at>
  */
 
-/*
- * papenmeier/braille.c - Braille display library for Papenmeier Screen 2D
- *
- * watch out:
- *  the file read_config.c is included - HACK, but this gives easier test handling
- *
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -119,10 +111,6 @@ read_config (const char *directory, const char *name) {
 
 #define CMD_ERR	EOF
 
-/* HACK - send all data twice - HACK */
-/* see README for details */
-/* #define SEND_TWICE_HACK */
-
 /*
  * change bits for the papenmeier terminal
  *                             1 2           1 4
@@ -146,9 +134,6 @@ static unsigned char currentLine[BRLCOLSMAX];
 
 static const TerminalDefinition *the_terminal = NULL;
 
-static int curr_cols = -1;
-static int curr_stats = -1;
-
 static int code_status_first = -1;
 static int code_status_last  = -1;
 static int code_route_first = -1;
@@ -167,6 +152,48 @@ static unsigned int pressed_modifiers = 0;
 static unsigned int saved_modifiers = 0;
 static int input_mode = 0;
  
+static int
+compareCommands (const void *item1, const void *item2) {
+  const CommandDefinition *cmd1 = item1;
+  const CommandDefinition *cmd2 = item2;
+  if (cmd1->key < cmd2->key) return -1;
+  if (cmd1->key > cmd2->key) return 1;
+  if (cmd1->modifiers < cmd2->modifiers) return -1;
+  if (cmd1->modifiers > cmd2->modifiers) return 1;
+  return 0;
+}
+
+static void
+sortCommands (void) {
+  qsort(the_terminal->commands, the_terminal->commandCount, sizeof(*the_terminal->commands), compareCommands);
+}
+
+static int
+findCommand (int *command, int key, int modifiers) {
+  int first = 0;
+  int last = the_terminal->commandCount - 1;
+  CommandDefinition ref;
+  ref.key = key;
+  ref.modifiers = modifiers;
+  while (first <= last) {
+    int current = (first + last) / 2;
+    CommandDefinition *cmd = &the_terminal->commands[current];
+    int relation = compareCommands(cmd, &ref);
+
+    if (!relation) {
+      *command = cmd->code;
+      return 1;
+    }
+
+    if (relation > 0) {
+      last = current - 1;
+    } else {
+      first = current + 1;
+    }
+  }
+  return 0;
+}
+
 static void
 flushTerminal (BrailleDisplay *brl) {
   tcflush(brl_fd, TCOFLUSH);
@@ -254,26 +281,29 @@ updateData (BrailleDisplay *brl, int offset, int size, const unsigned char *data
 
 static void
 initializeTable (BrailleDisplay *brl) {
-  char line[curr_cols];
-  char status[curr_stats];
-
   /* don´t use the internal table for the status cells */
-  memset(status, 1, sizeof(status));
-  writeData(brl, XMT_BRLWRITE+addr_status, sizeof(status), status);
+  {
+    char status[the_terminal->statusCount];
+    memset(status, 1, sizeof(status));
+    writeData(brl, XMT_BRLWRITE+addr_status, sizeof(status), status);
+  }
 
   /* don´t use the internal table for the line */
-  memset(line, 1, sizeof(line));
-  writeData(brl, XMT_BRLWRITE+addr_display, sizeof(line), line);
+  {
+    char line[the_terminal->columns];
+    memset(line, 1, sizeof(line));
+    writeData(brl, XMT_BRLWRITE+addr_display, sizeof(line), line);
+  }
 }
 
 static void
 writeLine (BrailleDisplay *brl) {
-  writeData(brl, addr_display, curr_cols, currentLine);
+  writeData(brl, addr_display, the_terminal->columns, currentLine);
 }
 
 static void
 writeStatus (BrailleDisplay *brl) {
-  writeData(brl, addr_status, curr_stats, currentStatus);
+  writeData(brl, addr_status, the_terminal->statusCount, currentStatus);
 }
 
 static void
@@ -323,18 +353,15 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       brl->x = the_terminal->columns;
       brl->y = the_terminal->rows;
 
-      curr_cols = the_terminal->columns;
-      curr_stats = the_terminal->statusCount;
-
       /* TODO: ?? HACK */
       BRLSYMBOL.helpFile = the_terminal->helpFile;
 
       /* key codes - starts at 0X300  */
       /* status keys - routing keys - step 3 */
       code_status_first = RCV_KEYROUTE;
-      code_status_last  = code_status_first + 3 * (curr_stats - 1);
+      code_status_last  = code_status_first + 3 * (the_terminal->statusCount - 1);
       code_route_first = code_status_last + 3;
-      code_route_last  = code_route_first + 3 * (curr_cols - 1);
+      code_route_last  = code_route_first + 3 * (the_terminal->columns - 1);
       LogPrint(LOG_DEBUG, "Keys: status=%03X-%03X routing=%03X-%03X",
                code_status_first, code_status_last,
                code_route_first, code_route_last);
@@ -344,8 +371,9 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
         code_front_last  = code_front_first + 3 * (the_terminal->frontKeys - 1);
         LogPrint(LOG_DEBUG, "Keys: front=%03X-%03X",
                  code_front_first, code_front_last);
-      } else
+      } else {
         code_front_first = code_front_last  = -1;
+      }
 
       if (the_terminal->hasEasyBar) {
         code_easy_first = RCV_KEYFUNC + 3;
@@ -355,8 +383,9 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
         LogPrint(LOG_DEBUG, "Keys: bar=%03X-%03X switches=%03X-%03X",
                  code_easy_first, code_easy_last,
                  code_switch_first, code_switch_last);
-      } else
+      } else {
         code_easy_first = code_easy_last = code_switch_first = code_switch_last = -1;
+      }
 
       /* address of display */
       addr_status = XMT_BRLDATA;
@@ -364,6 +393,7 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       LogPrint(LOG_DEBUG, "Cells: status=%04X display=%04X",
                addr_status, addr_display);
 
+      sortCommands();
       return 1;
     }
   }
@@ -419,22 +449,13 @@ initializeDisplay (BrailleDisplay *brl, const char *dev, speed_t baud) {
     LogPrint(LOG_DEBUG, "Trying %d baud.", baud2integer(baud));
     if (resetSerialDevice(brl_fd, &newtio, baud)) {
       chars_per_sec = baud2integer(baud) / 10;
-/* HACK - used with serial.c */
-#ifdef _SERIAL_C_
-      /* HACK - used with serial.c - 2d screen */
-      the_terminal = &pmTerminals[3];
-      addr_status = XMT_BRLDATA;
-      addr_display = addr_status + the_terminal->statusCount;
-      if (1) {
-#else /* _SERIAL_C_ */
       if (identifyTerminal(brl)) {
-#endif /* _SERIAL_C_ */
         initializeTable(brl);
 
-        memset(currentStatus, outputTable[0], curr_stats);
+        memset(currentStatus, outputTable[0], the_terminal->statusCount);
         writeStatus(brl);
 
-        memset(currentLine, outputTable[0], curr_cols);
+        memset(currentLine, outputTable[0], the_terminal->columns);
         writeLine(brl);
 
         resetState();
@@ -479,8 +500,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 static void
-brl_close (BrailleDisplay *brl)
-{
+brl_close (BrailleDisplay *brl) {
   if (brl_fd != -1) {
     tcsetattr(brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
     close(brl_fd);
@@ -489,8 +509,7 @@ brl_close (BrailleDisplay *brl)
 }
 
 static void
-brl_identify (void)
-{
+brl_identify (void) {
   LogPrint(LOG_NOTICE, "Papenmeier Driver (compiled on %s at %s)", __DATE__, __TIME__);
   LogPrint(LOG_INFO, "   Copyright (C) 1998-2001 by The BRLTTY Team.");
   LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
@@ -499,8 +518,8 @@ brl_identify (void)
 
 static void
 brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
-  if (curr_stats) {
-    unsigned char cells[curr_stats];
+  if (the_terminal->statusCount) {
+    unsigned char cells[the_terminal->statusCount];
     if (s[FirstStatusCell] == FSC_GENERIC) {
       int i;
 
@@ -508,7 +527,7 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       memcpy(values, s, sizeof(values));
       values[STAT_INPUT] = input_mode;
 
-      for (i=0; i<curr_stats; i++) {
+      for (i=0; i<the_terminal->statusCount; i++) {
 	int code = the_terminal->statshow[i];
 	if (code == OFFS_EMPTY)
 	  cells[i] = 0;
@@ -524,24 +543,24 @@ brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
       if (debug_writes) LogBytes("Status", s, InternalStatusCellCount);
     } else {
       int i = 0;
-      while (i < curr_stats) {
+      while (i < the_terminal->statusCount) {
 	unsigned char dots = s[i];
 	if (!dots) break;
         cells[i++] = outputTable[dots];
       }
       if (debug_writes) LogBytes("Status", s, i);
-      while (i < curr_stats) cells[i++] = outputTable[0];
+      while (i < the_terminal->statusCount) cells[i++] = outputTable[0];
     }
-    updateData(brl, addr_status, curr_stats, cells, currentStatus);
+    updateData(brl, addr_status, the_terminal->statusCount, cells, currentStatus);
   }
 }
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
   int i;
-  if (debug_writes) LogBytes("Window", brl->buffer, curr_cols);
-  for (i=0; i<curr_cols; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
-  updateData(brl, addr_display, curr_cols, brl->buffer, currentLine);
+  if (debug_writes) LogBytes("Window", brl->buffer, the_terminal->columns);
+  for (i=0; i<the_terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
+  updateData(brl, addr_display, the_terminal->columns, brl->buffer, currentLine);
 }
 
 /* ------------------------------------------------------------ */
@@ -603,24 +622,14 @@ handleModifier (int bit, int press) {
           command |= *dot;
       if (debug_keys)
         LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
-    } else {
-      int i;
-      for (i=0; i<the_terminal->commandCount; i++) {
-        const CommandDefinition *cmd = &the_terminal->commands[i];
-        if ((cmd->modifiers == modifiers) &&
-            (cmd->key == NOKEY)) {
-          command = cmd->code;
-          if (debug_keys)
-            LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
-                     modifiers, command); 
-          break;
-        }
-      }
+    } else if (findCommand(&command, NOKEY, modifiers)) {
+      if (debug_keys)
+        LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
+                 modifiers, command); 
     }
   }
 
-  return handleCommand(command,
-                       press? VAL_REPEAT_DELAY: 0);
+  return handleCommand(command, (press? VAL_REPEAT_DELAY: 0));
 }
 
 /* one key is pressed or released */
@@ -636,17 +645,14 @@ handleKey (int code, int press, int offsroute) {
 
   /* must be a "normal key" - search for cmd on key press */
   if (press) {
+    int command;
     saved_modifiers = 0;
-    for (i=0; i<the_terminal->commandCount; i++) {
-      const CommandDefinition *cmd = &the_terminal->commands[i];
-      if ((cmd->key == code) &&
-          (cmd->modifiers == pressed_modifiers)) {
-        if (debug_keys)
-          LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
-                   code, pressed_modifiers, cmd->code, offsroute); 
-        return handleCommand(cmd->code + offsroute,
-                             VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY);
-      }
+    if (findCommand(&command, code, pressed_modifiers)) {
+      if (debug_keys)
+        LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
+                 code, pressed_modifiers, command, offsroute); 
+      return handleCommand(command + offsroute,
+                           (VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY));
     }
 
     /* no command found */
