@@ -44,6 +44,7 @@
 #braille-driver	md	# MDV (protocol 5)
 #braille-driver	mn	# MiniBraille
 #braille-driver	pm	# Papenmeier
+#braille-driver	tb	# TechniBraille
 #braille-driver	ts	# TSI
 #braille-driver	tt	# TTY
 #braille-driver	va	# Vario/RBT (emulation 1)
