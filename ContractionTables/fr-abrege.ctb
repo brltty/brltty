@@ -148,8 +148,8 @@ before con begword indis 35-256
 before con begword intrans 35-356
 begword ines 35-156
 
-class tv tvTV
-after tv endword ient 256-2345
+prfword tient 2345-256-2345
+prfword vient 1236-256-2345
 endword ient 24-126
 word balbutient 12-1-123-12-136-2345-24-126
 word initient 35-24-2345-24-126
