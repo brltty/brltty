@@ -1,6 +1,32 @@
 Note: this file should be read from bottom to top.
 
 
+  ...
+
+  - writebrl() and closebrl() now receive a pointer on the brldim structure,
+    like inibrl().
+  - Removed syslog warning when the default config file doesn't exist.
+  - Added EcoBraille support.  Thanks to Oscar Fernandez <ofa@once.es>.
+  - Minor update to TSI driver (2.1).
+  - Added some bindings for switching settings in config menu. Quickly
+    fixed the manual. Regenerated the german manual using latin-1 source
+    though not with all suggested options.
+  - Some tweaks to the BrailleLite driver (Nico)
+  - Rework of the config menu so small braille displays can use it.
+  - Alva Delphi support added (thanks to Terry Barnaby 
+    <terry@beam.demon.co.uk>).
+    Now Alva_ABT3 is called Alva.
+  - Alva parallel port support added using J. lemmens 
+    <jlemmens@inter.nl.net> 's library.
+
+22 December 1998:
+  - BrailleLite 18 and Festival support from Nikhil added.
+    Also eliminated the need for a fixed menu item length
+    and it's now possible to use a display smaller than any menu item i.e.
+    the BrailleLite 18.
+  - Contribution of Norwegian braille tables and ibm850toiso from 
+    Helge Havnegjerde <helge.havnegjerde@c2i.net>
+
 22 July 1998: BRLTTY 2.0 released!
   - Another fix to the cursor routing algorithm
   - Web pages online at http://www.cam.org/~nico/brltty

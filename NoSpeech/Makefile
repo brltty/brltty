@@ -3,10 +3,10 @@
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+# Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
 #
 # Nicolas Pitre <nico@cam.org>
-# Stephane Doyon <s.doyon@videotron.ca>
+# Stéphane Doyon <s.doyon@videotron.ca>
 # Nikhil Nair <nn201@cus.cam.ac.uk>
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -20,17 +20,11 @@
 ###############################################################################
 
 ###############################################################################
-# Default Makefile for BRLTTY Braille/speech drivers
+# Makefile for BRLTTY speechless drivers
 #
-# This can be overridden by a Makefile in the relevant subdirectory.
 # It is passed the variables CC, CFLAGS, LD, LDFLAGS, LDLIBS and BRLDEV
-# on the command line.
-#
-# Targets are brl.o and/or speech.o.
+# from the main Makefile...
 ###############################################################################
-
-brl.o: brl.c brlconf.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
 
 speech.o: speech.c ../speech.h ../config.h
 	$(CC) $(CFLAGS) -c speech.c

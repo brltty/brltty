@@ -17,6 +17,8 @@ convtable	converts braille table files between different dot
 		mappings.
 ibm437toiso	converts braille table files from the IBM code page 437
 		to the ISO-8859-1 character set.
+ibm850toiso	converts braille table files from the IBM code page 850
+		to the ISO-8859-1 character set.
 
 
 BRLTTY Braille Table Format

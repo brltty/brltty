@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -54,10 +54,23 @@ snd (int freq, int del, int consolefd)
 }
 
 void
+snd_ndelay (int freq, int del, int consolefd)
+{
+/* KDMKTONE is non-blocking. Appropriate for last beep of a sound. Should
+   work around the kernel 2.0.35 beep bug */
+  (void) ioctl (consolefd, KDMKTONE, (del<<16) | freq );
+}
+
+#if 0
+void
 nosnd (int consolefd)
 {
   (void) ioctl (consolefd, KIOCSOUND, 0);
+/* alternatively??
+  (void) ioctl (consolefd, KDMKTONE, 0);
+*/
 }
+#endif
 
 void
 play (int song[])
@@ -73,9 +86,17 @@ play (int song[])
 	  int freq, del;
 	  freq = *(song++);
 	  del = *(song++);
-	  snd (freq, del, consolefd);
+	  if(*song != 0)
+	    snd (freq, del, consolefd);
+	  else{
+	    if(del >= 10)
+	      snd_ndelay (freq, del, consolefd);
+	    else{
+	      snd(freq, del, consolefd);
+	      snd_ndelay(1, 10, consolefd);
+	    }
+	  }
 	}
-      nosnd (consolefd);
       close (consolefd);
     }
 }
@@ -94,11 +115,12 @@ int snd_detected[] =
 {3600, 60, 2700, 100, 0};
 int snd_brloff[] =
 {3600, 60, 5400, 60, 0};
+
 int snd_link[] =
-{1400, 7, 1500, 7, 1600, 10, 0};
+{1400, 7, 1500, 7, 1800, 12, 0};
 
 int snd_unlink[] =
-{1600, 7, 1500, 7, 1400, 7, 0};
+{1600, 7, 1500, 7, 1200, 20, 0};
 
 /*int snd_wrap_down[] = {8000, 5, 4000, 7, 2000, 9, 1000, 9, 500, 5,0}; */
 
@@ -149,7 +171,7 @@ int snd_done[] =
 {2000, 40, 1, 30, 2000, 40, 1, 40, 2000, 140, 1, 20, 1500, 50, 0};
 
 int snd_skip[] =
-{2000, 10, 0, 40, 0};
+{2000, 10, 1, 40, 0};
 
 int snd_skipmore[] =
-{2100, 30, 0, 20, 0};
+{2100, 30, 1, 20, 0};

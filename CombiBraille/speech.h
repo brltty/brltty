@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>

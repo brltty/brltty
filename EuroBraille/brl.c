@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -21,7 +21,6 @@
  * Copyright (C) 1997-1998 by Nicolas Pitre and VisuAide, Inc.
  * See the GNU Public license for details in the ../COPYING file
  *
- * $Id: brl.c,v 1.4 1996/10/03 08:08:13 nn201 Exp $
  */
 
 
@@ -198,8 +197,10 @@ void initbrl (brldim *brl, const char *dev)
   if (!dev)
     dev = DefDev;
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0)
+  if (brl_fd < 0) {
+    LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );
     goto failure;
+  }
   tcgetattr (brl_fd, &oldtio);	/* save current settings */
 
   /* Set 8E1, enable reading, parity generation, etc. */
@@ -239,8 +240,10 @@ void initbrl (brldim *brl, const char *dev)
   res.disp = (char *) malloc (res.x * res.y);
   rawdata = (unsigned char *) malloc (res.x * res.y);
   prevdata = (unsigned char *) malloc (res.x * res.y);
-  if (!res.disp || !rawdata || !prevdata)
+  if (!res.disp || !rawdata || !prevdata) {
+    LogPrint( LOG_ERR, "can't allocate braille buffers\n" );
     goto failure;
+  }
 
   ReWrite = 1;			/* To write whole display at first time */
 
@@ -260,9 +263,9 @@ failure:;
 
 
 void
-closebrl (brldim brl)
+closebrl (brldim *brl)
 {
-  free (brl.disp);
+  free (brl->disp);
   free (rawdata);
   free (prevdata);
   tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
@@ -271,14 +274,14 @@ closebrl (brldim brl)
 
 
 void
-writebrl (brldim brl)
+writebrl (brldim *brl)
 {
   int i, j;
 
   if (!ReWrite)
     {
       /* We update the display only if it has changed */
-      if( memcmp( brl.disp, prevdata, NbCols ) != 0 ) 
+      if( memcmp( brl->disp, prevdata, NbCols ) != 0 ) 
 	ReWrite = 1;
     }
   if (ReWrite)
@@ -287,7 +290,7 @@ writebrl (brldim brl)
       i = NbCols;
 #if 0   /* *** the ClioBraille doesn't seem to like this part... */
       while (--i > 0)		/* at least the first cell must go through... */
-	if (brl.disp[i] != 0)
+	if (brl->disp[i] != 0)
 	  break;
       i++;
 #endif
@@ -314,7 +317,7 @@ writebrl (brldim brl)
 	*p++ = 'Y';
 	for (j = 0;
 	     j < i;
-	     *p++ = TransTable[(prevdata[j++] = brl.disp[j])]);
+	     *p++ = TransTable[(prevdata[j++] = brl->disp[j])]);
 	WriteToBrlDisplay (p - OutBuf, OutBuf);
       }
       ReWrite = 0;

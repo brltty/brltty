@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -18,7 +18,7 @@
  */
 
 /*
- * brltty.c - main() plus signal handling and cursor routing 
+ * brltty.c - Main loop plus signal handling and cursor routing 
  */
 
 #define BRLTTY_C 1
@@ -42,10 +42,11 @@
 #include "beeps.h"
 #include "cut-n-paste.h"
 #include "misc.h"
+#include "message.h"
 
-#define VERSION "BRLTTY version 2.0"
+#define VERSION "BRLTTY 2.1"
 #define COPYRIGHT "\
-Copyright (C) 1995-1998 by The BRLTTY Team.  All rights reserved."
+Copyright (C) 1995-1999 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
 Usage: %s [options] \n\
  -c config-file       use binary configuration file `config-file' \n\
@@ -204,9 +205,6 @@ void switchto (unsigned int scrno); /* activate params for specified screen */
 void csrjmp (int x, int y);	/* move cursor to (x,y) */
 void csrjmp_sub (int x, int y);	/* cursor routing subprocess */
 void setwinxy (int x, int y);	/* move window to include (x,y) */
-void message (char *s, short silent);	/* write literal message on
-					 * Braille display 
-					 */
 void clrbrlstat (void);
 void termination_handler (int signum);	/* clean up before termination */
 void stop_child (int signum);	/* called at end of cursor routing */
@@ -326,8 +324,10 @@ main (int argc, char *argv[])
       else if (!opt_q)
 	LogAndStderr(LOG_WARNING, "Failed to read dot translation table %s",
 		 opt_t);
-      if (curtbl)
+      if (curtbl) {
 	free (curtbl);
+	curtbl = NULL;
+      }
       if (tbl_fd >= 0)
 	close (tbl_fd);
     }
@@ -361,7 +361,7 @@ main (int argc, char *argv[])
   curscr = 0;
 
   /*
-   * Become a daemon: 
+   * Become a daemon:
    */
   switch (fork ())
     {
@@ -388,6 +388,11 @@ main (int argc, char *argv[])
     default:			/* parent returns to calling process: */
       return 0;
     }
+
+  /* From this point, all IO functions as printf, puts, perror, etc. can't be
+   * used anymore since we are a daemon.  The LogPrint facility should 
+   * be used instead.
+   */
 
   /* Load configuration file */
   loadconfig ();
@@ -433,8 +438,10 @@ main (int argc, char *argv[])
       while ((keypress = readbrl (TBL_CMD)) != EOF)
 	switch (keypress & ~VAL_SWITCHMASK)
 	  {
+	  case CMD_NOOP:	/* do nothing but loop */
+	    continue;
 	  case CMD_RESTARTBRL:
-	    closebrl(brl);
+	    closebrl(&brl);
 	    play(snd_brloff);
 	    LogPrint(LOG_INFO,"Reinitializing braille driver");
 	    startbrl();
@@ -799,19 +806,28 @@ main (int argc, char *argv[])
 	    mutespk ();
 	    break;
 	  default:
-	    if (keypress >= CR_ROUTEOFFSET && keypress < \
-		CR_ROUTEOFFSET + brl.x && (dispmd & HELP_SCRN) != HELP_SCRN)
+	    if (keypress & VAL_PASSTHRU) 
+	      {
+		char buf[2] = { keypress&0xFF, 0 };
+		inskey (buf);
+	      }
+	    else if (keypress >= CR_ROUTEOFFSET && 
+		     keypress < CR_ROUTEOFFSET + brl.x && 
+		     (dispmd & HELP_SCRN) != HELP_SCRN)
 	      {
 		/* Cursor routing keys: */
 		csrjmp (p->winx + keypress - CR_ROUTEOFFSET, p->winy);
-		break;
 	      }
-	    else if (keypress >= CR_BEGBLKOFFSET && \
+	    else if (keypress >= CR_BEGBLKOFFSET && 
 		     keypress < CR_BEGBLKOFFSET + brl.x)
-	      cut_begin (p->winx + keypress - CR_BEGBLKOFFSET, p->winy);
-	    else if (keypress >= CR_ENDBLKOFFSET && \
+	      {
+		cut_begin (p->winx + keypress - CR_BEGBLKOFFSET, p->winy);
+	      }
+	    else if (keypress >= CR_ENDBLKOFFSET && 
 		     keypress < CR_ENDBLKOFFSET + brl.x)
-	      cut_end (p->winx + keypress - CR_ENDBLKOFFSET, p->winy);
+	      {
+		cut_end (p->winx + keypress - CR_ENDBLKOFFSET, p->winy);
+	      }
 	    else
 	      LogPrint(LOG_DEBUG,
 		       "Driver sent unrecognized command 0x%x\n", keypress);
@@ -1018,21 +1034,60 @@ main (int argc, char *argv[])
 	      scr.posy < p->winy + brl.y && !(dispmd & HELP_SCRN))
 	    brl.disp[(scr.posy - p->winy) * brl.x + scr.posx - p->winx] |= \
 	      env.csrsize ? BIG_CSRCHAR : SMALL_CSRCHAR;
-	  writebrl (brl);
+	  writebrl (&brl);
 	}
       /*
        * If in info mode, send status information: 
        */
       else
 	{
-	  char infbuf[20];
-	  sprintf (infbuf, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c", \
-		   p->winx, p->winy, scr.posx, scr.posy, curscr, 
-		   p->csrtrk ? 't' : ' ', \
-		   env.csrvis ? (env.csrblink ? 'B' : 'v') : \
-		   (env.csrblink ? 'b' : ' '), p->dispmode ? 'a' : 't', \
-		   (dispmd & FROZ_SCRN) == FROZ_SCRN ? 'f' : ' ', \
-		   env.sixdots ? '6' : '8', env.capblink ? 'B' : ' ');
+	  /* Here we must be careful - some displays (e.g. Braille Lite 18)
+	   * are very small ...
+	   *
+	   * NB: large displays use message(), small use writebrl()
+	   * directly.
+	   */
+	  unsigned char infbuf[22];
+	  if (brl.x * brl.y >= 21) /* 21 is current size of output ... */
+	    {
+	      sprintf (infbuf, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c", \
+		       p->winx, p->winy, scr.posx, scr.posy, curscr, 
+		       p->csrtrk ? 't' : ' ', \
+		       env.csrvis ? (env.csrblink ? 'B' : 'v') : \
+		       (env.csrblink ? 'b' : ' '), p->dispmode ? 'a' : 't', \
+		       (dispmd & FROZ_SCRN) == FROZ_SCRN ? 'f' : ' ', \
+		       env.sixdots ? '6' : '8', env.capblink ? 'B' : ' ');
+	    }
+	  else
+	    {
+	      /* Hmm, what to do for small displays ...
+	       * Rather arbitrarily, we'll save 6 cells by replacing the
+	       * cursor and display positions by a CombiBraille-style
+	       * status display.  This assumes brl.x * brl.y > 14 ...
+	       */
+	      sprintf (infbuf, "xxxxx %02d %c%c%c%c%c%c     ", \
+		       curscr, p->csrtrk ? 't' : ' ', \
+		       env.csrvis ? (env.csrblink ? 'B' : 'v') : \
+		       (env.csrblink ? 'b' : ' '), p->dispmode ? 'a' : 't', \
+		       (dispmd & FROZ_SCRN) == FROZ_SCRN ? 'f' : ' ', \
+		       env.sixdots ? '6' : '8', env.capblink ? 'B' : ' ');
+	      infbuf[0] = num[(p->winx / 10) % 10] << 4 | \
+		num[(scr.posx / 10) % 10];
+	      infbuf[1] = num[p->winx % 10] << 4 | num[scr.posx % 10];
+	      infbuf[2] = num[(p->winy / 10) % 10] << 4 | \
+		num[(scr.posy / 10) % 10];
+	      infbuf[3] = num[p->winy % 10] << 4 | num[scr.posy % 10];
+	      infbuf[4] = env.csrvis << 1 | env.csrsize << 3 | \
+		env.csrblink << 5 | env.slidewin << 7 | p->csrtrk << 6 | \
+		env.sound << 4 | p->dispmode << 2;
+	      infbuf[4] |= (dispmd & FROZ_SCRN) == FROZ_SCRN ? 1 : 0;
+
+	      /* We have to do the Braille translation ourselves, since
+	       * we don't want the first five characters translated ...
+	       */
+	      for (i = 5; infbuf[i]; i++)
+		infbuf[i] = texttrans[infbuf[i]];
+	    }
 
 	  /*
 	   * status cells 
@@ -1045,7 +1100,13 @@ main (int argc, char *argv[])
 	  statcells[4] = texttrans[' '];
 	  setbrlstat (statcells);
 
-	  message (infbuf, 1);
+	  if (brl.x * brl.y >= 21)
+	    message (infbuf, MSG_SILENT);
+	  else
+	    {
+	      memcpy (brl.disp, infbuf, brl.x * brl.y);
+	      writebrl (&brl);
+	    }
 	}
 
       delay (DELAY_TIME);
@@ -1060,7 +1121,7 @@ main (int argc, char *argv[])
    */
   delay (1000);
   closespk ();
-  closebrl (brl);
+  closebrl (&brl);
   play(snd_brloff);
   for (i = 0; i <= NBR_SCR; i++) 
     free (scrparam[i]);
@@ -1271,38 +1332,50 @@ csrjmp_sub (int x, int y)
 
 
 void 
-message (char *s, short silent)
+message (unsigned char *s, short flags)
 {
-  int i, j, l;
+  int i, j, l, silent;
+
+  silent = (flags & MSG_SILENT);
 
   if (!silent && env.sound)
     {
       mutespk ();
       say (s, strlen (s));
     }
-  usetable (TBL_TEXT);
-  memset (brl.disp, ' ', brl.x * brl.y);
+
   l = strlen (s);
   while (l)
     {
-      j = l <= brl.x * brl.y ? l : brl.x * brl.y - 1;
+      memset (brl.disp, ' ', brl.x * brl.y);
+
+      /* strip leading spaces */
+      while( *s == ' ' )  s++, l--;
+
+      if (l <= brl.x * brl.y) {
+	 j = l;	/* the whole message fits on the braille window */
+      }else{
+	 /* split the message on multiple window on space characters */
+	 for( j = (brl.x * brl.y - 2); j > 0 && s[j] != ' '; j-- );
+	 if( j == 0 ) j = brl.x * brl.y - 1;
+      }
       for (i = 0; i < j; brl.disp[i++] = *s++);
-      if (l -= j)
-	brl.disp[brl.x * brl.y - 1] = '-';
+      if (l -= j) {
+	 brl.disp[brl.x * brl.y - 1] = '-';
+      }
 
       /*
-       * Do Braille translation using current table. * Six-dot mode is
+       * Do Braille translation using text table. * Six-dot mode is
        * ignored, since case can be important, and * blinking caps won't 
        * work ... 
        */
-      for (i = 0; i < brl.x * brl.y; brl.disp[i] = curtbl[brl.disp[i]], i++);
+      for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], i++);
+      writebrl( &brl );
 
-      writebrl (brl);
-      if (l)
+      if ( l || (flags & MSG_WAITKEY) )
 	while (readbrl (TBL_ARG) == EOF)
 	  delay (KEYDEL);
     }
-  usetable (p->dispmode ? TBL_ATTRIB : TBL_TEXT);
 }
 
 
@@ -1341,71 +1414,71 @@ usetable (int tbl)
 void 
 configmenu (void)
 {
-  static short savecfg = 0;
-  struct item
+  static short savecfg = 0;		/* 1 == save config on exit */
+  static struct item
     {
-      short *ptr;
-      char desc[16];
-      short bool;
-      short min;
-      short max;
+      short *ptr;			/* pointer to the item value */
+      char *desc;			/* item description */
+      short bool;			/* 0 == numeric, 1 == bolean */
+      short min;			/* minimum range */
+      short max;			/* maximum range */
     }
-  menu[18] =
+  menu[] =
   {
     {
-      &savecfg, "save config   ", 1, 0, 1
+      &savecfg, "save config on exit", 1, 0, 1
     }
     ,
     {
-      &env.csrvis, "csr is visible", 1, 0, 1
+      &env.csrvis, "cursor is visible", 1, 0, 1
     }
     ,
     {
-      &env.csrsize, "block cursor  ", 1, 0, 1
+      &env.csrsize, "block cursor", 1, 0, 1
     }
     ,
     {
-      &env.csrblink, "csr blink     ", 1, 0, 1
+      &env.csrblink, "blinking cursor", 1, 0, 1
     }
     ,
     {
-      &env.capblink, "cap blink     ", 1, 0, 1
+      &env.capblink, "blinking capitals", 1, 0, 1
     }
     ,
     {
-      &env.attrvis, "attr visible  ", 1, 0, 1
+      &env.attrvis, "attributes are visible", 1, 0, 1
     }
     ,
     {
-      &env.attrblink, "attr blink    ", 1, 0, 1
+      &env.attrblink, "blinking attributes", 1, 0, 1
     }
     ,
     {
-      &env.csroncnt, "csr blink on  ", 0, 1, 16
+      &env.csroncnt, "blinking cursor visible period", 0, 1, 16
     }
     ,
     {
-      &env.csroffcnt, "csr blink off ", 0, 1, 16
+      &env.csroffcnt, "blinking cursor invisible period", 0, 1, 16
     }
     ,
     {
-      &env.caponcnt, "cap blink on  ", 0, 1, 16
+      &env.caponcnt, "blinking caps visible period", 0, 1, 16
     }
     ,
     {
-      &env.capoffcnt, "cap blink off ", 0, 1, 16
+      &env.capoffcnt, "blinking caps invisible period", 0, 1, 16
     }
     ,
     {
-      &env.attroncnt, "attr blink on ", 0, 1, 16
+      &env.attroncnt, "blinking attributes visible period", 0, 1, 16
     }
     ,
     {
-      &env.attroffcnt, "attr blink off", 0, 1, 16
+      &env.attroffcnt, "blinking attributes invisible period", 0, 1, 16
     }
     ,
     {
-      &env.sixdots, "six dot text  ", 1, 0, 1
+      &env.sixdots, "six dot text mode", 1, 0, 1
     }
     ,
     {
@@ -1413,22 +1486,27 @@ configmenu (void)
     }
     ,
     {
-      &env.skpidlns, "skip ident lns", 1, 0, 1
+      &env.skpidlns, "skip identical lines", 1, 0, 1
     }
     ,
     {
-      &env.sound, "audio signals ", 1, 0, 1
+      &env.sound, "audio signals", 1, 0, 1
     }
     ,
     {
-      &env.stcellstyle, "st cells style", 0, 0, NB_STCELLSTYLES
+      &env.stcellstyle, "status cells style", 0, 0, NB_STCELLSTYLES
     }
   };
-  struct brltty_env oldenv = env;
-  int k;
-  static short n = 0;
-  short maxn = 17;
-  char buffer[20];
+  struct brltty_env oldenv = env;	/* backup configuration */
+  int i;				/* for loops */
+  int k;				/* readbrl() value */
+  int l;				/* current menu item length */
+  int x = 0;				/* braille window pos in buffer */
+  static int n = 0;			/* current menu item */
+  int maxn = sizeof(menu)/sizeof(struct item) - 1;
+					/* hiest menu item index */
+  int updated = 0;			/* 1 when item's value has changed */
+  unsigned char buffer[40];		/* display buffer */
 
   /* status cells */
   memset (statcells, 0, sizeof(statcells));
@@ -1438,48 +1516,132 @@ configmenu (void)
   statcells[3] = texttrans['i'];
   statcells[4] = texttrans['g'];
   setbrlstat (statcells);
+
   message ("Configuration menu", 0);
   delay (DISPDEL);
 
   while (keep_going)
     {
+      /* First we draw the current menu item in the buffer */
+      strcpy (buffer, menu[n].desc);
+      if (menu[n].bool)
+	sprintf (buffer + strlen(buffer), ": %s", *menu[n].ptr ? "on" : "off");
+      else
+	sprintf (buffer + strlen(buffer), ": %d", *menu[n].ptr);
+
+      /* Next we deal with the braille window position in the buffer.
+       * This is intended for small displays... or long item descriptions 
+       */
+      l = strlen (buffer);
+      if (updated) 
+	{
+	  updated = 0;
+	  /* make sure the updated value is visible */
+	  if (l - x > brl.x * brl.y)
+	    x = l - brl.x * brl.y;
+	}
+
+      /* Then draw the braille window */
+      memset (brl.disp, 0, brl.x * brl.y);
+      for (i = 0; i < MIN(brl.x * brl.y, l - x); i++)
+	brl.disp[i] = texttrans[buffer[i+x]];
+      writebrl (&brl);
+      delay (DELAY_TIME);
+
+      /* Now process any user interaction */
       while ((k = readbrl (TBL_CMD)) != EOF)
 	switch (k)
 	  {
+	  case CMD_NOOP:
+	    continue;
 	  case CMD_TOP:
 	  case CMD_TOP_LEFT:
-	  case CMD_HOME:
-	    n = 0;
+	    n = x = 0;
 	    break;
 	  case CMD_BOT:
 	  case CMD_BOT_LEFT:
 	    n = maxn;
+	    x = 0;
 	    break;
 	  case CMD_LNUP:
 	    if (--n < 0)
 	      n = maxn;
+	    x = 0;
 	    break;
 	  case CMD_LNDN:
 	    if (++n > maxn)
 	      n = 0;
+	    x = 0;
+	    break;
+	  case CMD_FWINLT:
+	    if( x > 0 )
+	      x -= MIN( brl.x * brl.y, x );
+	    else
+	      play (snd_bounce);
+	    break;
+	  case CMD_FWINRT:
+	    if( l - x > brl.x * brl.y )
+	      x += brl.x * brl.y;
+	    else
+	      play (snd_bounce);
 	    break;
 	  case CMD_WINUP:
-	  case CMD_FWINLT:
+	  case CMD_CHRLT:
+	  case CMD_KEY_LEFT:
+	  case CMD_KEY_UP:
 	    if (--*menu[n].ptr < menu[n].min)
 	      *menu[n].ptr = menu[n].max;
+	    updated = 1;
 	    break;
 	  case CMD_WINDN:
-	  case CMD_FWINRT:
+	  case CMD_CHRRT:
+	  case CMD_KEY_RIGHT:
+	  case CMD_KEY_DOWN:
+	  case CMD_HOME:
+	  case CMD_KEY_RETURN:
 	    if (++*menu[n].ptr > menu[n].max)
 	      *menu[n].ptr = menu[n].min;
+	    updated = 1;
+	    break;
+	  case CMD_SAY:
+	    say (buffer, l);
+	    break;
+	  case CMD_MUTE:
+	    mutespk ();
+	    break;
+	  case CMD_HELP:
+	    /* This is quick and dirty... Something more intelligent 
+	     * and friendly need to be done here...
+	     */
+	    message( 
+		"Press UP and DOWN to select an item, "
+		"HOME to toggle the setting. "
+		"Routing keys are available too! "
+		"Press CONFIG again to quit.", MSG_WAITKEY);
 	    break;
 	  case CMD_RESET:
 	    env = oldenv;
+	    message ("changes undone", 0);
+	    delay (DISPDEL);
 	    break;
 	  case CMD_SAVECONF:
 	    savecfg |= 1;
 	    /*break;*/
 	  default:
+	    if( k >= CR_ROUTEOFFSET && k < CR_ROUTEOFFSET + brl.x ) {
+		/* Why not setting a value with routing keys... */
+		if( menu[n].bool ) {
+		    *menu[n].ptr = k % 2;
+		}else{
+		    *menu[n].ptr = k - CR_ROUTEOFFSET;
+		    if( *menu[n].ptr > menu[n].max ) *menu[n].ptr = menu[n].max;
+		    if( *menu[n].ptr < menu[n].min ) *menu[n].ptr = menu[n].min;
+		}
+		updated = 1;
+		break;
+	    }
+
+	    /* For any other keystroke, we exit */
 	    if (savecfg)
 	      {
 		saveconfig ();
@@ -1487,14 +1649,6 @@ configmenu (void)
 	      }
 	    return;
 	  }
-
-      memcpy (buffer, menu[n].desc, 14);
-      if (menu[n].bool)
-	sprintf (buffer + 14, ": %s", *menu[n].ptr ? "on" : "off");
-      else
-	sprintf (buffer + 14, ": %d", *menu[n].ptr);
-      message (buffer, 1);
-      delay (DELAY_TIME);
     }
 }
 
@@ -1508,9 +1662,10 @@ loadconfig (void)
 
   fname = opt_c ? opt_c : CONFFILE_NAME;
   tbl_fd = open (fname, O_RDONLY);
-  if(tbl_fd < 0)
-    LogPrint(LOG_WARNING,"Could not open config file %s", fname);
-  else{
+  if(tbl_fd < 0){
+    if(opt_c)
+      LogPrint(LOG_WARNING,"Could not open config file %s", fname);
+  }else{
       if (read (tbl_fd, &newenv, sizeof (struct brltty_env)) == \
 	  sizeof (struct brltty_env))
 	if (newenv.magicnum == ENV_MAGICNUM)
@@ -1533,8 +1688,11 @@ saveconfig (void)
 
   fname = opt_c ? opt_c : CONFFILE_NAME;
   tbl_fd = open (fname, O_WRONLY | O_CREAT | O_TRUNC);
-  if (tbl_fd < 0)
+  if (tbl_fd < 0){
     LogPrint(LOG_WARNING,"Could not save to config file %s", fname);
+    message ("can't save config", 0);
+    delay (DISPDEL);
+  }
   else{
     fchmod (tbl_fd, S_IRUSR | S_IWUSR);
     if (write (tbl_fd, &env, sizeof (struct brltty_env)) != \

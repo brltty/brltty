@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -41,6 +41,8 @@
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
+
+#define CMD_ERR	EOF
 
 /* HACK - send all data twice - HACK */
 /* see README for details */
@@ -154,9 +156,9 @@ void initbrl (brldim *brl, const char *dev)
 }
 
 void
-closebrl (brldim brl)
+closebrl (brldim *brl)
 {
-  free (brl.disp);
+  free (brl->disp);
   tcsetattr (brl_fd, TCSANOW, &oldtio);	/* restore terminal settings */
   close (brl_fd);
 }
@@ -267,21 +269,21 @@ unsigned char change_bits[] = {
 };
 
 void
-writebrl (brldim brl)
+writebrl (brldim *brl)
 {
   int i;
 
 #ifdef WR_DEBUG
-  sprintf(dbg_buffer, "write %2d %2d %80s", brl.x, brl.y, brl.disp);
+  sprintf(dbg_buffer, "write %2d %2d %80s", brl->x, brl->y, brl->disp);
   brl_debug(dbg_buffer);
 #endif
 
   for(i=0; i < BRLCOLS; i++)
-    brl.disp[i] = change_bits[brl.disp[i]];
+    brl->disp[i] = change_bits[brl->disp[i]];
 
-  if (memcmp(prev,brl.disp,BRLCOLS) != 0)
+  if (memcmp(prev,brl->disp,BRLCOLS) != 0)
     {
-      memcpy(prev,brl.disp,BRLCOLS);
+      memcpy(prev,brl->disp,BRLCOLS);
       write_to_braille(offsetHorizontal, BRLCOLS, prev);
     }
 }

@@ -17,6 +17,9 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
+#ifndef _BRL_H
+#define _BRL_H
+
 /* brl.h - Header file for the Braille display library
  */
 
@@ -31,11 +34,17 @@
 #define ARG_QUIT 'q'		/* cancel command */
 
 
-/* The following define command codes: */
+/* The following define command codes, which are return values for
+ * readbrl().  The CMD_* codes are guaranteed to be between 1 and 127
+ * inclusive, with the exception of CMD_NOOP = 0.
+ *
+ * readbrl() should return EOF if there are no keys to return.  If,
+ * however, it has masked out the key for internal use, it may return
+ * CMD_NOOP - in which case it will be called again immediately, rather
+ * than waiting for the next cycle.  This can save internal nesting ...
+ */
 
-/* Note: the value 0xF0F0 is reserved for internal use by the drivers. */
-
-#define CMD_ERR '\0'		/* invalid code */
+#define CMD_NOOP '\0'		/* do nothing - a blank keystroke */
 
 /* braille window movement */
 #define CMD_LNUP 'u'		/* go up one line */
@@ -106,20 +115,23 @@
 #define CMD_KEY_LEFT 'L'
 #define CMD_KEY_RETURN 'N'
 
+/* For speech devices: */
+#define CMD_SAY 'Y'
+#define CMD_MUTE 'm'
+
 /* For specifically turning on/off toggle commands */
 #define VAL_SWITCHMASK  0x600
 #define VAL_SWITCHON    0x200
 #define VAL_SWITCHOFF   0x400
 
-/* For speech devices: */
-#define CMD_SAY 'Y'
-#define CMD_MUTE 'm'
+/* For typing character -- pass through */
+#define	VAL_PASSTHRU	0x800
 
 /* Braille information structure */
 typedef struct
   {
     unsigned char *disp;	/* contents of the display */
-    short x, y;			/* size of display */
+    int x, y;			/* size of display */
   }
 brldim;				/* used for writing to a braille display */
 
@@ -135,7 +147,9 @@ brldim;				/* used for writing to a braille display */
 /* Routines provided by the braille driver library: */
 void identbrl (const char *);	/* print start-up messages */
 void initbrl (brldim *, const char *);	/* initialise Braille display */
-void closebrl (brldim);		/* close braille display */
-void writebrl (brldim);		/* write to braille display */
+void closebrl (brldim *);		/* close braille display */
+void writebrl (brldim *);		/* write to braille display */
 int readbrl (int);		/* get key press from braille display */
 void setbrlstat (const unsigned char *);	/* set status cells */
+
+#endif /* !defined(_BRL_H) */

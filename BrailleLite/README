@@ -1,0 +1,100 @@
+Braille Lite Driver for BRLTTY
+
+This is a preliminary driver for the Blazie Engineering's Braille Lite.
+written by Nikhil Nair, with small addition by Nicolas Pitre.
+
+It should work with the BrailleLite 18 and the BrailleLite 40, but I'm
+affraid the later is lacking a proper keyboard support.  I only have access
+to a BrailleLite 18 so complete BrailleLite 40 suport would require some
+help and testing from someone else.  If you have one, please tell me!
+
+On the BrailleLite, you should type 345-chord and p-chord to enter the 
+"speech box mode" required by BRLTTY.  You should type the same sequence 
+to exit that mode whenever you wish to return to the BrailleLite internal
+functions.
+
+Be sure your BrailleLite's serial port baudrate and the value configured
+in the brlconf.h file are the same.
+
+Enjoy!
+Nicolas Pitre <nico@cam.org>
+-----
+
+
+Key bindings:
+
+advance bar: full window left/right
+1: line up
+4: line down
+23: keyboard up arrow
+56: keyboard down arrow
+2: keyboard left arrow
+5: keyboard right arrow
+3: window character left
+6: window character right
+235: line start
+256: line end
+123: top left
+456: bottom left
+
+125: home
+14: toggle cursor tracking
+124 chord: (un)freeze screen
+1456: toggle help mode
+34: toggle status mode
+24: toggle attribute display
+
+245 chord: route cursor to beginning of line
+45 chord: route cursor to current line
+236 chord: cut start
+356 chord: cut end
+1234 chord: paste
+
+36: speak line
+134: mute speech
+
+25 chord: configuration options: menu, save or reset (cancel).
+1235: restart Braille driver
+
+Insist on chord for *dangerous* commands, i.e. routing, cut/paste etc.
+These are also available if chorded while in keyboard emulation mode.
+
+TODO: prdifln nxdifln attrup attrdn top bot hwinlt hwinrt dispmd
+  csrvis etc
+
+INTERNAL:
+
+g chord: position internal (alternate inversion?) cursor for routing or
+  cutting.  Terminate with route, cutbeg, cutend or cancel.  To move
+  cursor: chrlt, chrrt by 1; bar by (width+3)/4; lnbeg, home, lnend for
+  beginning, middle and end of display.
+
+k chord toggles keyboard emulation mode - initially off.
+
+When on, unchorded characters passed directly to inskey(), unless prefixed
+by:
+
+u chord: uppercase (twice to lock)
+q chord: unlock
+x chord: control character
+35 chord: meta or ALT (hardwire to `^[' for the time being)
+z chord: cancel preceding meta/control
+
+In addition:
+b chord: backspace
+d chord: delete
+t chord: tab
+46 chord: return
+
+Could get away without cursor keys - use routing - but we do need virtual
+console controls: incr, decr and spawn.
+
+Other internals:
+
+2356 chord: rotate BrailleLite by 180 degrees
+o chord: set two digit (00-99) repeat count for following command.  Starts
+  at 00 (default 01), new digits scroll in from right.  Either terminate
+  with e chord, or z chord to cancel, or chorded command.  Works with
+  cursor movement as well as keyboard emulation.
+
+Enough to be going on with ...

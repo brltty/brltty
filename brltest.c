@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -80,7 +80,7 @@ main (int argc, char *argv[])
 
   printf ("\nHit return to continue:\n");
   getchar ();
-  closebrl (brl);		/* finish with the display */
+  closebrl (&brl);		/* finish with the display */
   return 0;
 }
 
@@ -112,7 +112,7 @@ message (char *s)
       for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], \
 	   i++);
 
-      writebrl (brl);
+      writebrl (&brl);
       if (l)
 	while (readbrl (TBL_ARG) == EOF)
 	  delay (KEYDEL);
@@ -121,7 +121,12 @@ message (char *s)
 
 
 /* dummy function to allow brl.o to link... */
-void
-sethlpscr (short x)
+
+void sethlpscr (short x)
 {
 }
+
+void inskey( unsigned char *s, short f )
+{
+}
+

@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -21,11 +21,16 @@
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
- * This is version 2.0 (June 1998) of the TSI driver.
+ * This is version 2.1 (February 99) of the TSI driver.
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled in BRLTTY version 2.0.
+ * It is designed to be compiled in BRLTTY version 2.1.
  *
  * History:
+ * Version 2.1: Help screen fix for new keys in config menu.
+ * Version 2.1beta1: Less delays in writing braille to display for
+ *   nav20/40 and pb40, delays still necessary for pb80 on probably for nav80.
+ *   Additional routing keys for navigator. Cut&paste binding that combines
+ *   routing key and normal key.
  * Version 2.0: Tested with Nav40 PB40 PB80. Support for functions added
  *   in BRLTTY 2.0: added key bindings for new fonctions (attributes and
  *   routing). Support for PB at 19200baud. Live detection of display, checks
@@ -39,7 +44,7 @@
 
 #define BRL_C 1
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.0"
+#define VERSION "BRLTTY driver for TSI displays, version 2.1"
 /* see identbrl() */
 
 #define __EXTENSIONS__	/* for termios.h */
@@ -62,6 +67,12 @@
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 
+/* Delay on display update: needed on pb80 (surely on nav80 as well), see
+ * display() */
+int slow_update;
+/* sleep this long after sending a braille display update */
+#define SEND_DELAY 30
+
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. */
 /* We record the time at which the last ping reply was received,
@@ -72,9 +83,6 @@ static struct timeval last_ping, last_ping_sent;
 static int pings; /* counts number of pings sent since last reply */
 /* how long we wait for a reply */
 #define PING_REPLY_DELAY 200
-
-/* sleep this long after sending a braille display update */
-#define SEND_DELAY 30
 
 /* for routing keys */
 int must_init_oldstat = 1;
@@ -157,6 +165,11 @@ static char BRL_TYPEMATIC[] = {0xFF, 0xFF, 0x0D};
 /* Command to put the PB at 19200baud */
 static char BRL_UART192[] = {0xFF, 0xFF, 0x05, 0x04};
 #define DIM_BRL_UART192 4
+#endif
+#if 0
+/* Activate handshake ? */
+static char BRL_UART_HANDSHAK[] = {0xFF, 0xFF, 0x05, 0x01};
+#define DIM_BRL_UART_HANDSHAK 4
 #endif
 /* Normal header for sending dots, with cursor always off */
 static char BRL_SEND_HEAD[] = {0xFF, 0xFF, 0x04, 0x00, 0x00, 0x01};
@@ -502,6 +515,7 @@ void initbrl (brldim *brl, const char *tty)
   brl_cols = ncells;
   sw_lastkey = brl_cols-1;
   speed = 1;
+  slow_update = 0;
 
   switch(brl_cols){
   case 20:
@@ -532,6 +546,7 @@ void initbrl (brldim *brl, const char *tty)
     has_sw = 1;
     sw_bcnt = SW_CNT80;
     sw_lastkey = 79;
+    slow_update = 1;
     LogPrint(LOG_NOTICE, "Detected Navigator 80");
     break;
   case 65:
@@ -541,6 +556,7 @@ void initbrl (brldim *brl, const char *tty)
     sw_bcnt = SW_CNT81;
     sw_lastkey = 64;
     speed = 2;
+    slow_update = 1;
     LogPrint(LOG_NOTICE, "Detected PowerBraille 65");
     break;
   case 81:
@@ -551,6 +567,7 @@ void initbrl (brldim *brl, const char *tty)
     sw_lastkey = 79;
     brl_cols = 80;
     speed = 2;
+    slow_update = 1;
     LogPrint(LOG_NOTICE, "Detected PowerBraille 80");
     break;
   default:
@@ -610,22 +627,22 @@ void initbrl (brldim *brl, const char *tty)
   return;
 
 failure:;
-  closebrl(res);
+  closebrl(&res);
   brl->x = -1;
   return;
 }
 
 
 void 
-closebrl (brldim brl)
+closebrl (brldim *brl)
 {
   if (brl_fd >= 0)
     {
       tcsetattr (brl_fd, TCSANOW, &oldtio);
       close (brl_fd);
     }
-  if (brl.disp)
-    free (brl.disp);
+  if (brl->disp)
+    free (brl->disp);
   if (rawdata)
     free (rawdata);
   if (prevdata)
@@ -654,23 +671,33 @@ display (const unsigned char *pattern,
   /* If we update the display too often, then the packets queue up in the send
      queue, the info displayed is not up to date, and the info displayed
      continues to change after we stop updating while the queue empties. We
-     also risk overflows which put garbage on the display. If the queue is
-     not empty then we're going at it too hard, so we'll wait until
-     it drains. If the queue is empty then this is a wasted syscall. */
+     also risk overflows which put garbage on the display, also the pinging
+     fails and the display gets reinitialized... nav40 has no problems, but
+     pb80 (twice larger but twice as fast, it goes at 19200bps) is pretty bad.
+     Note that there is no flow control: apparently not supported properly
+     on at least pb80. There's some UART handshake mode that doesn't seem
+     to do much but break everything... */
 
+  /* If the queue is not empty then we're going at it too hard, so we'll
+     wait until  it drains. If the queue is empty then this is a wasted
+     syscall. */
+/*  tcdrain(brl_fd);*/
   /* Apparently this is not even good enough when updating fast (holding down
-     an up/down arrow key). ping replies get lost and we think the display
-     has been turned off... */
+     an up/down arrow key on the PC KEYBOARD). ping replies get lost and we
+     think the display has been turned off... */
 
-  tcdrain(brl_fd);
   write (brl_fd, rawdata, DIM_BRL_SEND + 2 * length);
 
   /* So we extend the sleep for this cycle. Keeping the delay in the main
      brltty loop low keeps the response time good, but SEND_DELAY give the
      display time to show what we're sending. */
 
-  tcdrain(brl_fd);
-  shortdelay(SEND_DELAY);
+  if(slow_update){
+    /* nav40 and perhaps pb40 seem to work fine without this, and have a
+       better response time. */
+    tcdrain(brl_fd);
+    shortdelay(SEND_DELAY);
+  }
   /* timing complications: when scrolllling through long files, the display
      gets garbled with pb80. seems it cannot take a full speed continuous flow.
      Now we drain, write, drain again, then shortdelay for 30ms. delay instead
@@ -697,20 +724,20 @@ display_all (unsigned char *pattern)
 
 
 void 
-writebrl (brldim brl)
+writebrl (brldim *brl)
 {
   int base = 0, i = 0, collecting = 0, simil = 0;
 
-  if (brl.x != brl_cols || brl.y != BRLROWS || brl.disp != dispbuf)
+  if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
     return;
 
   while (i < ncells)
-    if (brl.disp[i] == prevdata[i])
+    if (brl->disp[i] == prevdata[i])
       {
 	simil++;
 	if (collecting && 2 * simil > DIM_BRL_SEND)
 	  {
-	    display (brl.disp, base, i - simil, base);
+	    display (brl->disp, base, i - simil, base);
 	    base = i;
 	    collecting = 0;
 	    simil = 0;
@@ -721,14 +748,14 @@ writebrl (brldim brl)
       }
     else
       {
-	prevdata[i] = brl.disp[i];
+	prevdata[i] = brl->disp[i];
 	collecting = 1;
 	simil = 0;
 	i++;
       }
 
   if (collecting)
-    display (brl.disp, base, i - simil - 1, base);
+    display (brl->disp, base, i - simil - 1, base);
 }
 
 
@@ -933,9 +960,12 @@ readbrl (int type)
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
   static unsigned char sw_oldstat[SW_MAXHORIZ];
-  unsigned char sw_stat[SW_MAXHORIZ], /* received switch data */
-                sw_which[SW_MAXHORIZ * 8], /* list of pressed keys */
-                sw_howmany = 0; /* length of that list */
+  unsigned char sw_stat[SW_MAXHORIZ]; /* received switch data */
+  static unsigned char sw_which[SW_MAXHORIZ * 8], /* list of pressed keys */
+                       sw_howmany = 0; /* length of that list */
+  static unsigned char ignore_routing = 0;
+     /* flag: after combo between routing and non-routing keys, don't act
+	on any key until routing resets (releases). */
   unsigned int code = 0; /* 32bits code representing pressed keys once the
 			    input bytes are interpreted */
   int res = EOF; /* command code to return. code is mapped to res. */
@@ -1046,6 +1076,14 @@ readbrl (int type)
       return (EOF);
   }/* while */
 
+  if(has_sw && must_init_oldstat){
+    must_init_oldstat = 0;
+    ignore_routing = 0;
+    sw_howmany = 0;
+    for(i=0;i<SW_MAXHORIZ; i++)
+      sw_oldstat[i] = 0;
+  }
+
   if(packtype == K_BATTERY){
     do_battery_warn ();
     return (EOF);
@@ -1106,12 +1144,6 @@ readbrl (int type)
     if (myread (brl_fd, sw_stat, cnt) != cnt)
       return (EOF);
 
-    if(must_init_oldstat){
-      must_init_oldstat=0;
-      for(i=0;i<SW_MAXHORIZ; i++)
-	sw_oldstat[i] = 0;
-    }
-
     /* if key press is maintained, then packet is resent by display
        every 0.5secs. When the key is released, then display sends a packet
        with all info bits at 0. */
@@ -1130,11 +1162,21 @@ readbrl (int type)
 	return (EOF);
       }
     must_init_oldstat = 1;
+    if(ignore_routing) return(EOF);
   }
 
   /* Now associate a command (in res) to the key(s) (in code and sw_...) */
 
-  if (has_sw && !code)	/* routing key */
+  if(has_sw && code && sw_howmany){
+    if(ignore_routing) return(EOF);
+    if(sw_howmany == 1){
+      ignore_routing = 1;
+      switch(code){
+	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, CR_BEGBLKOFFSET + sw_which[0]);
+	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, CR_ENDBLKOFFSET + sw_which[0]);
+      }
+    }
+  }else if (has_sw && sw_howmany)	/* routing key */
     {
       if (sw_howmany == 1)
 	res = CR_ROUTEOFFSET + sw_which[0];

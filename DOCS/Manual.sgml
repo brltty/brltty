@@ -8,7 +8,7 @@
 <subtitle>Access Software for Unix for a Blind Person Using a Soft Braille Terminal
 <author>Nikhil Nair <tt>&lt;nn201@cus.cam.ac.uk&gt;</> &nl;
 Nicolas Pitre <tt>&lt;nico@cam.org&gt;</> &nl;
-St&eacute;phane Doyon <tt>&lt;s.doyon@videotron.ca&gt;</> &nl;
+Stéphane Doyon <tt>&lt;s.doyon@videotron.ca&gt;</> &nl;
 Web page: <tt>http://www.cam.org/~nico/brltty</>
 <date>Version 2.0, June 1998
 <abstract>
@@ -46,7 +46,7 @@ developer, although his help in other areas (including documentation)
 has been well appreciated.
 
 The project has benefited greatly from the efforts of two new members,
-Nicolas Pitre and St&eacute;phane Doyon.  Between them, they have brought
+Nicolas Pitre and Stéphane Doyon.  Between them, they have brought
 support for Alva and TSI series of Braille displays, as well as many
 excellent ideas for the system as a whole.
 
@@ -454,9 +454,10 @@ normal window movement keys as follows:
   <tag><em/BOT/ or <em/BOT_LEFT/:</> moves to the last item.
 </descrip>
 
-To adjust the setting of a parameter use <em/FWINLT/ and <em/FWINRT/: this
-selects alternative setting options. To undo all the changes made since
-entering the menu use <em/RESET/.
+To adjust the setting of a parameter use either <em/KEY_LEFT/ and
+<em/KEY_RIGHT/ or <em/KEY_UP/ and <em/KEY_DOWN/: this selects alternative
+setting options. Cursor routing keys can also be used to set the desired
+value.  To undo all the changes made since entering the menu use <em/RESET/.
 
 To leave the menu and return to normal operation, press  <em/CONFMENU/ again,
 or any key not listed above.  If the <em/save config/ option is on, the
@@ -727,7 +728,7 @@ For up to date information, see our web page at
   <item> <htmlurl url="mailto:nico@cam.org"
     name="Nicolas Pitre &lt;nico@cam.org&gt;"> (current maintainer);
   <item> <htmlurl url="mailto:s.doyon@videotron.ca"
-    name="St&eacute;phane Doyon &lt;s.doyon@videotron.ca&gt;">
+    name="Stéphane Doyon &lt;s.doyon@videotron.ca&gt;">
     (active developer);
   <item> <htmlurl url="mailto:nn201@cus.cam.ac.uk"
     name="Nikhil Nair &lt;nn201@cus.cam.ac.uk&gt;">

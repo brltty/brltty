@@ -1,9 +1,9 @@
 BRLTTY - Access software for Unix for a blind person
          using a soft Braille terminal
 
-Version 2.0, July 1998
+Version 2.1, March 1999
 
-Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
 
 Nicolas Pitre <nico@cam.org>
 Stéphane Doyon <s.doyon@videotron.ca>
@@ -66,7 +66,7 @@ INTRODUCTION TO BRLTTY
 ======================
 
 While soft Braille displays have been used for some years under MS-DOS,
-and are even starting to be used under Windows, it seems that they have
+and are even being used under Windows now, it seems that they have
 not been used on Unix consoles so much.  This could well be because blind
 people have been able to access Unix systems through accessible terminals. 
 With the advent of PC-based Unix systems (such as Linux), the need becomes
@@ -115,13 +115,16 @@ been tested on
      Laboratory by DEC in Reading, England.
 
 The following Braille displays are supported (serial communication
-only):
+only for most of them):
   - Tieman B.V.: CombiBraille 25/45/85;
-  - Alva B.V.: ABT3xx series;
+  - Alva B.V.: ABT3 and Delphi series, serial and parallel ports;
   - Telesensory Systems Inc.: PowerBraille 40 / 65/81;
     Navigator 20/40/80 (latest firmware version only?).
   - Papenmeier Screen 2D Terminal
   - EuroBraille family of displays (tested only on ClioBraille 40)
+  - Blazie Engineering's BrailleLite
+  - EcoBraille from La O.N.C.E.
+
 
 If you want another Braille display to be supported, please contact
 the maintainer.  Ability to add more Braille displays does, however,

@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -171,7 +171,7 @@ failure:;
 
 
 void
-closebrl (brldim brl)
+closebrl (brldim *brl)
 {
   unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = POST_DATA;
@@ -184,8 +184,8 @@ closebrl (brldim brl)
       rawlen += pre_data[0];
     }
   /* Clear the five status cells and the main display: */
-  memset (rawdata + rawlen, 0, 5 + brl.x * brl.y);
-  rawlen += 5 + brl.x * brl.y;
+  memset (rawdata + rawlen, 0, 5 + brl->x * brl->y);
+  rawlen += 5 + brl->x * brl->y;
   if (post_data[0])
     {
       memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
@@ -200,7 +200,7 @@ closebrl (brldim brl)
     }
   write (brl_fd, rawdata, rawlen);
 
-  free (brl.disp);
+  free (brl->disp);
   free (prevdata);
   free (rawdata);
 
@@ -222,21 +222,21 @@ setbrlstat (const unsigned char *s)
 
 
 void
-writebrl (brldim brl)
+writebrl (brldim *brl)
 {
   short i;			/* loop counter */
   unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = POST_DATA;
 
   /* Only refresh display if the data has changed: */
-  if (memcmp (brl.disp, prevdata, brl.x * brl.y) || \
+  if (memcmp (brl->disp, prevdata, brl->x * brl->y) || \
       memcmp (status, oldstatus, 5))
     {
       /* Save new Braille data: */
-      memcpy (prevdata, brl.disp, brl.x * brl.y);
+      memcpy (prevdata, brl->disp, brl->x * brl->y);
 
       /* Dot mapping from standard to CombiBraille: */
-      for (i = 0; i < brl.x * brl.y; brl.disp[i] = combitrans[brl.disp[i]], \
+      for (i = 0; i < brl->x * brl->y; brl->disp[i] = combitrans[brl->disp[i]], \
 	   i++);
 
       rawlen = 0;
@@ -251,11 +251,11 @@ writebrl (brldim brl)
 	  if (status[i] == 0x1b)	/* CombiBraille hack */
 	    rawdata[rawlen++] = 0x1b;
 	}
-      for (i = 0; i < brl.x * brl.y; i++)
+      for (i = 0; i < brl->x * brl->y; i++)
 	{
-	  rawdata[rawlen++] = brl.disp[i];
-	  if (brl.disp[i] == 0x1b)	/* CombiBraille hack */
-	    rawdata[rawlen++] = brl.disp[i];
+	  rawdata[rawlen++] = brl->disp[i];
+	  if (brl->disp[i] == 0x1b)	/* CombiBraille hack */
+	    rawdata[rawlen++] = brl->disp[i];
 	}
       if (post_data[0])
 	{

@@ -18,7 +18,7 @@ Movement:
   One character left/right: CR1+CR2 / CR39+CR40
   Goto beginning/end of line: cncv+lt / cncv+rt
   Half-window left/right: CR1+CR3 / CR38+CR40
-  Several lines up/down: cnvx+Rup / cnvx+Rdn
+  Several lines up/down: cnvx+Lup / cnvx+Ldn
 
 Simulation of keyboard arrow keys:
   up/dn arrow : Lup/Ldn
@@ -46,15 +46,15 @@ Configuration:
   Configuration menu:
     Enter/exit configuration menu: lt+rt (sort of a toggle)
       In the menu:
-      Previous/next setting option for this item: lt / rt
+      Previous/next setting option for this item: Lup / Ldn or routing keys
       Previous/next menu item: Rup / Rdn
     Save current settings to config file: lt+rt+cncv
     Load settings from config file: lt+rt+cncv+cnvx
   Various options can be controlled directly (hotkeys):
     Skip identical lines (on/off): lt+rt +Rdn (toggle)
     Show/hide cursor: lt+rt +Lup (toggle)
-    Cursor blinking (on/off): lt+rt +Lup+Lrn (toggle)
-    Blink capital letters (on/off): lt+rt +Ldn+Lrn (toggle)
+    Cursor blinking (on/off): lt+rt +Lup+cnvx (toggle)
+    Blink capital letters (on/off): lt+rt +Ldn+cnvx (toggle)
     Attribute underlining (on/off): treated in section on special modes
-    Attribute underlining blinks (on/off): lt+rt +Lrn+Rup (toggle)
+    Attribute underlining blinks (on/off): lt+rt +cnvx+Rup (toggle)
 -----End of help screen-----

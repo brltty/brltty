@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
  *
  * Nicolas Pitre <nico@cam.org>
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -17,19 +17,36 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-/* Alva_ABT3/brl.c - Braille display library for Alva ABT3xx series
- * Copyright (C) 1995-1996 by Nicolas Pitre <nico@cam.org>
+/* Alva/brl.c - Braille display library for Alva braille displays
+ * Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org>
  * See the GNU Public license for details in the ../COPYING file
  *
- * $Id: brl.c,v 1.4 1996/10/03 08:08:13 nn201 Exp $
  */
 
 /* Changes:
+ *    mar 14, 1999:
+ *		- Added LogPrint's (which is a good thing...)
+ *		- Ugly ugly hack for parallel port support:  seems there
+ *		  is a bug in the parallel port library so that the display
+ *		  completely hang after an arbitrary period of time.
+ *		  J. Lemmens didn't respond to my query yet... and since
+ *		  the F***ing library isn't Open Source, I can't fix it.
+ *    feb 05, 1999:
+ *		- Added Alva Delphi support  (thanks to Terry Barnaby 
+ *		  <terry@beam.demon.co.uk>).
+ *		- Renamed Alva_ABT3 to Alva.
+ *		- Some improvements to the autodetection stuff.
+ *    dec 06, 1998:
+ *		- added parallel port communication support using
+ *		  J. lemmens <jlemmens@inter.nl.net> 's library.
+ *		  This required brl.o to be sourced with C++ for the parallel 
+ *		  stuff to link.  Now brl.o is a partial link of brlmain.o 
+ *		  and the above library.
  *    jun 21, 1998:
- *    apr 23, 1998:
  *		- replaced CMD_WINUP/DN with CMD_ATTRUP/DN wich seems
  *		  to be a more useful binding.  Modified help files 
- *		  appropriately.
+ *		  acordingly.
+ *    apr 23, 1998:
  *		- I finally had the chance to test with an ABT380... and
  *		  corrected the ABT380 model ID for autodetection.
  *		- Added a refresh delay to force redrawing the whole display
@@ -65,12 +82,11 @@
  *      nov 05, 1995:
  *              - added typematic facility
  *              - added key bindings for Stephane Doyon's cut'n paste.
- *                <doyons@jsp.umontreal.ca>
  *              - added cursor routing key block marking
  *              - fixed a bug in readbrl() about released keys
  *      sep 30' 1995:
  *              - initial Alva driver code, inspired from the
- *                BrailleLite code.
+ *                (old) BrailleLite code.
  */
 
 
@@ -85,16 +101,23 @@
 #include <sys/termios.h>
 #include <string.h>
 
+extern "C" 
+{
 #include "brlconf.h"
 #include "../brl.h"
 #include "../scr.h"
 #include "../misc.h"
 #include "../config.h"
+}
+
+#if USE_PARALLEL_PORT
+#include "alva_api.library/alva_api.h"
+#endif
 
 
 static char StartupString[] =
-"  Alva ABT3xx driver, version 1.50 \n"
-"  Copyright (C) 1995-1998 by Nicolas Pitre <nico@cam.org> \n";
+"  Alva driver, version 2.0 \n"
+"  Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org> \n";
 
 
 
@@ -103,16 +126,18 @@ static char StartupString[] =
 typedef struct
   {
     char *Name;
+    int ID;
     int Cols;
     int NbStCells;
   }
 BRLPARAMS;
 
-BRLPARAMS Models[NB_MODEL] =
+BRLPARAMS Models[] =
 {
   {
     /* ID == 0 */
     "ABT320",
+    ABT320,
     20,
     3
   }
@@ -120,6 +145,7 @@ BRLPARAMS Models[NB_MODEL] =
   {
     /* ID == 1 */
     "ABT340",
+    ABT340,
     40,
     3
   }
@@ -127,6 +153,7 @@ BRLPARAMS Models[NB_MODEL] =
   {
     /* ID == 2 */
     "ABT340 Desktop",
+    ABT34D,
     40,
     5
   }
@@ -134,6 +161,7 @@ BRLPARAMS Models[NB_MODEL] =
   {
     /* ID == 3 */
     "ABT380",
+    ABT380,
     80,
     5
   }
@@ -141,8 +169,21 @@ BRLPARAMS Models[NB_MODEL] =
   {
     /* ID == 4 */
     "ABT380 Twin Space",
+    ABT38D,
     80,
     5
+  }
+  ,
+  {
+    /* ID == 11 */
+    "Alva Delphi 40",
+    DEL440,
+    40,
+    3
+  }
+  ,
+  {
+    0,
   }
 };
 
@@ -201,7 +242,7 @@ unsigned char *prevdata;	/* previously sent raw data */
 unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
 BRLPARAMS *model;		/* points to terminal model config struct */
-short ReWrite = 0;		/* 1 if display need to be rewritten */
+int ReWrite = 0;		/* 1 if display need to be rewritten */
 
 
 
@@ -247,8 +288,7 @@ char BRL_ID[] = "\033ID=";
 #define KEY_ROUTING_OFFSET 168
 
 /* Index for new firmware protocol */
-int
-  OperatingKeys[10] =
+int OperatingKeys[10] =
 {KEY_PROG, KEY_HOME, KEY_CURSOR,
  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
  KEY_CURSOR2, KEY_HOME2, KEY_PROG2};
@@ -258,21 +298,6 @@ int StatusKeys[6] =
 
 
 
-
-
-int
-WriteToBrlDisplay (short Start, short Len, char *Data)
-{
-  char Coor[2] =
-  {(char) Start, (char) Len};
-
-  if (write (brl_fd, BRL_START, DIM_BRL_START) == DIM_BRL_START)
-    if (write (brl_fd, Coor, 2) == 2)
-      if (write (brl_fd, Data, Len) == Len)
-	if (write (brl_fd, BRL_END, DIM_BRL_END) == DIM_BRL_END)
-	  return (1);
-  return (0);
-}
 
 
 void
@@ -286,13 +311,39 @@ identbrl (const char *dev)
 #else
 	  Models[MODEL].Name,
 #endif
-#ifdef ABT3_OLD_FIRMWARE
+#if ABT3_OLD_FIRMWARE
 	  "old firmware"
 #else
 	  "new firmware"
 #endif
     );
+#if USE_PARALLEL_PORT
+  printf ("  - device = LPT at 0x%03X\n", LPT_PORT );
+#else
   printf ("  - device = %s\n", (dev) ? dev : DefDev);
+#endif
+}
+
+
+/* SendToAlva() is shared with speech.c */
+extern "C" {
+int SendToAlva( unsigned char *data, int len );
+}
+
+int SendToAlva( unsigned char *data, int len )
+{
+#if USE_PARALLEL_PORT
+  BrailleWrite (data, len);
+  BrailleProcess ();
+  BrailleProcess ();
+  BrailleProcess ();
+  BrailleProcess ();
+  BrailleProcess ();
+  return 1;
+#else
+  if( write( brl_fd, data, len ) == len ) return 1;
+  return 0;
+#endif
 }
 
 
@@ -300,17 +351,39 @@ void initbrl (brldim *brl, const char *dev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
-  short ModelID = MODEL;
+  int ModelID = MODEL;
   unsigned char buffer[DIM_BRL_ID + 1];
 
   res.disp = rawdata = prevdata = NULL;		/* clear pointers */
+
+#if USE_PARALLEL_PORT
+
+  if( ioperm( LPT_PORT, 3, 1 ) ) {
+    LogPrint( LOG_ERR, "unable to acquire IO permission at 0x%03X\n", LPT_PORT );
+    if( geteuid() != 0 )
+      LogPrint( LOG_ERR, "you must run BRLTTY as root for this to work\n" );
+    goto failure;
+  }
+  BrailleOpen( (unsigned char *) LPT_PORT );
+  BrailleProcess();
+  if ((BrailleRead( buffer, DIM_BRL_ID+1) != DIM_BRL_ID+1 ) ||
+      (strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID) != 0)) {
+    LogPrint( LOG_ERR, "can't get braille terminal ID\n" );
+    goto failure;
+  }
+  if (ModelID == ABT_AUTO)
+    ModelID = buffer[DIM_BRL_ID];
+
+#else
 
   /* Open the Braille display device for random access */
   if (!dev)
     dev = DefDev;
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0)
+  if (brl_fd < 0) {
+    LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );
     goto failure;
+  }
   tcgetattr (brl_fd, &oldtio);	/* save current settings */
 
   /* Set flow control and 8n1, enable reading */
@@ -330,45 +403,58 @@ void initbrl (brldim *brl, const char *dev)
       cfsetispeed (&newtio, B0);
       cfsetospeed (&newtio, B0);
       tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
+      delay (500);
       tcflush (brl_fd, TCIOFLUSH);	/* clean line */
-      delay (400);
+      delay (500);
       /* DTR back on */
       cfsetispeed (&newtio, BAUDRATE);
       cfsetospeed (&newtio, BAUDRATE);
       tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
-      delay (600);		/* give time to send ID string */
-      /* The 2 next lines can be commented out to try autodetect once anyway */
+      delay (1000);		/* give time to send ID string */
+      /* This "if" statement can be commented out to try autodetect once anyway */
       if (ModelID != ABT_AUTO)
 	break;
       if (read (brl_fd, &buffer, DIM_BRL_ID + 1) == DIM_BRL_ID + 1)
 	{
-	  if (!strncmp (buffer, BRL_ID, DIM_BRL_ID))
+	  if (!strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID))
 	    ModelID = buffer[DIM_BRL_ID];
 	}
     }
   while (ModelID == ABT_AUTO);
-  if (ModelID >= NB_MODEL || ModelID < 0)
-    goto failure;		/* unknown model */
+
+#endif	/* !PARALLEL */
+
+  /* Find out which model we are connected to... */
+  for( model = Models;
+       model->Name && model->ID != ModelID;
+       model++ );
+  if( !model->Name ) {
+    /* Unknown model */
+    LogPrint( LOG_CRIT, "*** Detected unknown Alva model which ID is %d.\n", ModelID );
+    LogPrint( LOG_CRIT, "*** Please fix Models[] in Alva/brlmain.c and mail the maintainer\n" );
+    goto failure;
+  }
 
   /* Set model params... */
-  model = &Models[ModelID];
-  sethlpscr (ModelID);
-  res.x = model->Cols;		/* initialise size of display */
+  sethlpscr( model - Models );		/* position in the model list */
+  res.x = model->Cols;			/* initialise size of display */
   res.y = BRLROWS;
 
   /* Allocate space for buffers */
-  res.disp = (char *) malloc (res.x * res.y);
+  res.disp = (unsigned char *) malloc (res.x * res.y);
   rawdata = (unsigned char *) malloc (res.x * res.y);
   prevdata = (unsigned char *) malloc (res.x * res.y);
-  if (!res.disp || !rawdata || !prevdata)
+  if (!res.disp || !rawdata || !prevdata) {
+    LogPrint( LOG_ERR, "can't allocate braille buffers\n" );
     goto failure;
+  }
 
   ReWrite = 1;			/* To write whole display at first time */
 
   *brl = res;
   return;
 
-failure:;
+failure:
   if (res.disp)
     free (res.disp);
   if (rawdata)
@@ -380,22 +466,66 @@ failure:;
 }
 
 
-void
-closebrl (brldim brl)
+void closebrl (brldim *brl)
 {
-  free (brl.disp);
+  free (brl->disp);
   free (rawdata);
   free (prevdata);
+#if USE_PARALLEL_PORT
+  BrailleClose();
+#else
   tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
   close (brl_fd);
+#endif
 }
 
 
-void
-writebrl (brldim brl)
+int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
+{
+  unsigned char outbuf[ DIM_BRL_START + 2 + Len + DIM_BRL_END ];
+  int outsz = 0;
+
+  memcpy( outbuf, BRL_START, DIM_BRL_START );
+  outsz += DIM_BRL_START;
+  outbuf[outsz++] = (char)Start;
+  outbuf[outsz++] = (char)Len;
+  memcpy( outbuf+outsz, Data, Len );
+  outsz += Len;
+  memcpy( outbuf+outsz, BRL_END, DIM_BRL_END );
+  outsz += DIM_BRL_END;
+  return SendToAlva( outbuf, outsz );
+}
+
+
+#if USE_PARALLEL_PORT
+int ReadCycles = 0;		/* for hack below */
+int ShouldRestart = 0;
+#endif
+
+void writebrl (brldim *brl)
 {
   int i, j, k;
   static int Timeout = 0;
+
+#if USE_PARALLEL_PORT
+  /* HACK ALERT!
+   * The parallel port library is buggy:  the display just hang after
+   * a period of time.  Sources aren't available to let any honest person
+   * fix it.  So we close and reopen the library once in a while and hope 
+   * for the best.
+   */
+  if( ReadCycles >= 30 ){
+    int x = brl->x;
+    ReadCycles = 0;
+    closebrl( brl );
+    initbrl( brl, NULL );
+    if( brl->x != x ) {
+      ShouldRestart = 1;
+      return;
+    }
+    ReWrite = 1;
+  }
+#endif
 
   if (ReWrite ||  ++Timeout > (REFRESH_RATE/DELAY_TIME))
     {
@@ -408,10 +538,10 @@ writebrl (brldim brl)
     {
       /* We update only the display part that has been changed */
       i = 0;
-      while ((brl.disp[i] == prevdata[i]) && (i < model->Cols))
+      while ((brl->disp[i] == prevdata[i]) && (i < model->Cols))
 	i++;
       j = model->Cols - 1;
-      while ((brl.disp[j] == prevdata[j]) && (j >= i))
+      while ((brl->disp[j] == prevdata[j]) && (j >= i))
 	j--;
       j++;
     }
@@ -419,7 +549,7 @@ writebrl (brldim brl)
     {
       for (k = 0;
 	   k < (j - i);
-	   rawdata[k++] = TransTable[(prevdata[i + k] = brl.disp[i + k])]);
+	   rawdata[k++] = TransTable[(prevdata[i + k] = brl->disp[i + k])]);
       WriteToBrlDisplay (model->NbStCells + i, j - i, rawdata);
     }
 }
@@ -442,16 +572,39 @@ setbrlstat (const unsigned char *st)
 
 
 
-int
-GetABTKey (unsigned int *Keys, unsigned int *Pos)
+int GetABTKey (unsigned int *Keys, unsigned int *Pos)
 {
   unsigned char c;
   static int KeyGroup = 0;
+  static int id_l = 0;
 
-  while (read (brl_fd, &c, 1))
+#if USE_PARALLEL_PORT
+  static unsigned char buffer[16];
+  static unsigned char *b = buffer;
+  static int l = 0;
+
+  if( ShouldRestart ) {
+    ShouldRestart = 0;
+    return -1;
+  }
+
+  if( !l ){
+    BrailleProcess ();
+    l = BrailleRead( buffer, sizeof(buffer) );
+    b = buffer;
+    if( l ) ReadCycles++;
+  }
+
+  while( l )
     {
+      l--;
+      c = *b++;
+#else
+  while (read (brl_fd, &c, 1) > 0)
+    {
+#endif
 
-#ifndef ABT3_OLD_FIRMWARE
+#if ! ABT3_OLD_FIRMWARE
 
       switch (KeyGroup)
 	{
@@ -485,19 +638,32 @@ GetABTKey (unsigned int *Keys, unsigned int *Pos)
 	  return (1);
 
 	default:
-	  /* Key group selection */
-	  if ((c == 0x71) || (c == 0x72))
-	    KeyGroup = c;
-	  else
-	    {
-	      /* Let's reset the keys and rewrite the display */
-	      *Keys = 0;
-	      ReWrite = 1;
-	    }
+	  if ((c == 0x71) || (c == 0x72)) {
+	     /* Key group selection */
+	     KeyGroup = c;
+	     id_l = 0;
+	  }else if( c == BRL_ID[id_l] ) {
+	     id_l++;
+	     if( id_l >= DIM_BRL_ID ) {
+		/* The terminal has been turned off and back on.  To be
+		 * sure we arrange for the driver to restart so
+		 * model probing, etc. will take place.
+		 */
+		id_l = 0;
+		return -1;
+	     }
+	  }else{
+	     /* Probably garbage came on the line.
+	      * Let's reset the keys and state.
+	      */
+	     *Keys = 0;
+	     ReWrite = 1;
+	     return 0;
+	  }
 	  break;
 	}
 
-#else /* defined ABT3_OLD_FIRMWARE */
+#else /* ABT3_OLD_FIRMWARE */
 
       if ((c >= (KEY_ROUTING_OFFSET + model->Cols)) &&
 	  (c < (KEY_ROUTING_OFFSET + model->Cols + 6)))
@@ -515,22 +681,21 @@ GetABTKey (unsigned int *Keys, unsigned int *Pos)
 	*Keys = c;		/* check comments where KEY_xxxx are defined */
       return (1);
 
-#endif /* defined ABT3_OLD_FIRMWARE */
+#endif /* ABT3_OLD_FIRMWARE */
 
     }
   return (0);
 }
 
 
-int
-readbrl (int type)
+int readbrl (int type)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;
-  static unsigned int ActualKeys = 0, LastKeys = 0, ReleasedKeys = 0;
+  static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
   static int Typematic = 0, KeyDelay = 0, KeyRepeat = 0;
 
-  if (!(ProcessKey = GetABTKey (&ActualKeys, &RoutingPos)))
+  if (!(ProcessKey = GetABTKey (&CurrentKeys, &RoutingPos)))
     {
       if (Typematic)
 	{
@@ -542,7 +707,7 @@ readbrl (int type)
 	  else
 	    {
 	      /* It's time to issue the command again */
-	      ActualKeys = LastKeys;
+	      CurrentKeys = LastKeys;
 	      LastKeys = 0;
 	      KeyRepeat = 0;
 	      ProcessKey = 1;
@@ -551,18 +716,25 @@ readbrl (int type)
     }
   else
     {
-      /* A new key is being pressed/released, we clear the typematic dounters */
+      /* A new key is being pressed/released, we clear the typematic counters */
       Typematic = KeyDelay = KeyRepeat = 0;
     }
 
-  if (ProcessKey)
+  if (ProcessKey < 0)
     {
-      if (ActualKeys > LastKeys)
+      /* Oops... seems we should restart from scratch... */
+      RoutingPos = 0;
+      CurrentKeys = LastKeys = ReleasedKeys = 0;
+      return CMD_RESTARTBRL;
+    }
+  else if(ProcessKey > 0)
+    {
+      if (CurrentKeys > LastKeys)
 	{
 	  /* These are the keys that should be processed when pressed */
-	  LastKeys = ActualKeys;	/* we keep it until it is released */
+	  LastKeys = CurrentKeys;	/* we keep it until it is released */
 	  ReleasedKeys = 0;
-	  switch (ActualKeys)
+	  switch (CurrentKeys)
 	    {
 	    case KEY_HOME | KEY_UP:
 	      res = CMD_TOP;
@@ -699,8 +871,8 @@ readbrl (int type)
 		  break;
 		}
 	    }
-	  LastKeys = ActualKeys;
-	  if (!ActualKeys)
+	  LastKeys = CurrentKeys;
+	  if (!CurrentKeys)
 	    ReleasedKeys = 0;
 	}
     }

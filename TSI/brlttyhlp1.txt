@@ -46,7 +46,7 @@ Configuration:
   Configuration menu:
     Enter/exit configuration menu: Rlt+Rrt (sort of a toggle)
       In the menu:
-      Previous/next setting option for this item: Rlt / Rrt
+      Previous/next setting option for this item: Llt / Lrt
       Previous/next menu item: Rup / Rdn
     Save current settings to config file: Rlt+Rrt+Rrn
     Load settings from config file: Rlt+Rrt+Rrn+Lrn

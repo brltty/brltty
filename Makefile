@@ -3,7 +3,7 @@
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
+# Copyright (C) 1995-1999 by The BRLTTY Team, All rights reserved.
 #
 # Nicolas Pitre <nico@cam.org>
 # Stéphane Doyon <s.doyon@videotron.ca>
@@ -22,8 +22,10 @@
 
 # Specify your Braille display by uncommenting one and ONLY one of these
 # definitions of BRL_TARGET:
-#BRL_TARGET = Alva_ABT3
+#BRL_TARGET = Alva
+#BRL_TARGET = BrailleLite
 #BRL_TARGET = CombiBraille
+#BRL_TARGET = EcoBraille
 #BRL_TARGET = EuroBraille
 #BRL_TARGET = Papenmeier
 #BRL_TARGET = TSI
@@ -31,9 +33,13 @@
 # Specify your speech support option.
 # Uncomment one of these lines and comment out the NoSpeech line 
 # if you have speech.
+# PS: Alva speech is available with Delphi models only.
 # Note: All this is still experimental.  It is safe to leave it as NoSpeech.
 SPK_TARGET = NoSpeech
+#SPK_TARGET = Alva
+#SPK_TARGET = BrailleLite
 #SPK_TARGET = CombiBraille
+#SPK_TARGET = Festival
 #SPK_TARGET = Generic_say
 #SPK_TARGET = Televox
 
@@ -96,6 +102,7 @@ INSKEY_O = inskey_lnx.o
 # LEAVE THEM ALONE!
 CC = gcc
 COMPCPP = g++
+MAKE = make
 # To compile in a.out (if you use ELF by default), you may be able to use
 # `-b i486-linuxaout'; however, you may also need to use the -V flag, or
 # possibly a different gcc executable, depending on your setup.
@@ -112,6 +119,8 @@ PREFIX =
 # ------------------------ DO NOT EDIT BELOW THIS LINE ------------------------
 
 
+.EXPORT_ALL_VARIABLES:
+
 all:
 ifndef BRL_TARGET
 	@echo BRL_TARGET not defined in the Makefile
@@ -119,7 +128,7 @@ else
 ifndef SPK_TARGET
 	@echo SPK_TARGET not defined in the Makefile
 else
-	make do_it
+	$(MAKE) do_it
 endif
 endif
 
@@ -167,28 +176,10 @@ scrtest: scrtest.o scr.o scrdev.o misc.o $(SCR_O)
 	$(LD) $(LDFLAGS) -o $@ scrtest.o scr.o scrdev.o misc.o $(SCR_O) $(LDLIBS)
 
 brl.o: Makefile
-	cd $(BRL_TARGET); \
-	if [ -f Makefile ]; \
-	then \
-	  $(MAKE) brl.o CC='$(CC)' CFLAGS='$(CFLAGS)' LD='$(LD)' \
-	    LDFLAGS='$(LDFLAGS)' LDLIBS='$(LDLIBS)' BRLDEV='$(BRLDEV)'; \
-	else \
-	  $(MAKE) -f ../Driver.Makefile brl.o CC='$(CC)' CFLAGS='$(CFLAGS)' \
-	    LD='$(LD)' LDFLAGS='$(LDFLAGS)' LDLIBS='$(LDLIBS)' \
-	    BRLDEV='$(BRLDEV)'; \
-	fi
+	$(MAKE) -C $(BRL_TARGET) brl.o 
 
-speech.o:
-	cd $(SPK_TARGET); \
-	if [ -f Makefile ]; \
-	then \
-	  $(MAKE) speech.o CC='$(CC)' CFLAGS='$(CFLAGS)' LD='$(LD)' \
-	    LDFLAGS='$(LDFLAGS)' LDLIBS='$(LDLIBS)' BRLDEV='$(BRLDEV)'; \
-	else \
-	  $(MAKE) -f ../Driver.Makefile speech.o CC='$(CC)' \
-	    CFLAGS='$(CFLAGS)' LD='$(LD)' LDFLAGS='$(LDFLAGS)' \
-	    LDLIBS='$(LDLIBS)' BRLDEV='$(BRLDEV)'; \
-	fi
+speech.o: Makefile
+	$(MAKE) -C $(SPK_TARGET) speech.o
 
 scr.o: scr.cc scr.h scrdev.h helphdr.h config.h
 	$(COMPCPP) $(CFLAGS) -c scr.cc
@@ -208,7 +199,7 @@ inskey_lnx.o: inskey_lnx.c inskey.h
 misc.o: misc.c misc.h
 	$(CC) $(CFLAGS) -c misc.c
 
-brltty.o: brltty.c brl.h scr.h inskey.h misc.h config.h \
+brltty.o: brltty.c brl.h scr.h inskey.h misc.h message.h config.h \
 	  text.auto.h attrib.auto.h
 	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' -c brltty.c
 
@@ -249,5 +240,5 @@ distclean: clean
 	rm -f brltty txt2hlp comptable *test
 	rm -f *~ */*~ *orig */*orig \#*\# */\#*\#
 	rm -f Papenmeier/serial
-	cd BrailleTables; make distclean
+	$(MAKE) -C BrailleTables distclean
 
