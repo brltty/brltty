@@ -567,24 +567,33 @@ at2Process (int *command, unsigned char byte) {
     at2Keys = at2KeysE0;
   } else {
     const At2KeyEntry *key = &at2Keys[byte];
+    int release = AT2_TST(AT2_RELEASE);
+
     int cmd = key->command;
+    int blk = cmd & VAL_BLK_MASK;
+
+    AT2_CLR(AT2_RELEASE);
+    at2Keys = at2KeysOriginal;
+
+    if (key->alternate) {
+      int alternate = 0;
+
+      if (blk == VAL_PASSCHAR) {
+        if (AT2_TST(AT2_LEFT_SHIFT) || AT2_TST(AT2_RIGHT_SHIFT)) alternate = 1;
+      } else {
+        if (AT2_TST(AT2_NUMBER_LOCK) || AT2_TST(AT2_NUMBER_SHIFT)) alternate = 1;
+      }
+
+      if (alternate) {
+        cmd = key->alternate;
+        blk = cmd & VAL_BLK_MASK;
+      }
+    }
+
     if (cmd) {
-      int release = AT2_TST(AT2_RELEASE);
-      int blk = cmd & VAL_BLK_MASK;
       if (blk) {
-        AT2_CLR(AT2_RELEASE);
-        at2Keys = at2KeysOriginal;
-
         if (!release) {
-          if (key->alternate) {
-            if (blk == VAL_PASSCHAR) {
-              if (AT2_TST(AT2_LEFT_SHIFT) || AT2_TST(AT2_RIGHT_SHIFT)) cmd = key->alternate;
-            } else if (blk == VAL_PASSKEY) {
-              if (AT2_TST(AT2_NUMBER_LOCK) || AT2_TST(AT2_NUMBER_SHIFT)) cmd = key->alternate;
-            }
-          }
-
-          if ((cmd & VAL_BLK_MASK) == VAL_PASSCHAR) {
+          if (blk == VAL_PASSCHAR) {
             if (AT2_TST(AT2_CAPS_LOCK)) cmd |= VPC_UPPER;
             if (AT2_TST(AT2_LEFT_ALT)) cmd |= VPC_META;
             if (AT2_TST(AT2_LEFT_CONTROL) || AT2_TST(AT2_RIGHT_CONTROL)) cmd |= VPC_CONTROL;
@@ -593,34 +602,34 @@ at2Process (int *command, unsigned char byte) {
           *command = cmd;
           return 1;
         }
-      } else {
-        switch (cmd) {
-          case AT2_SCROLL_LOCK:
-          case AT2_NUMBER_LOCK:
-          case AT2_CAPS_LOCK:
-            if (!release) {
-              if (AT2_TST(cmd)) {
-                AT2_CLR(cmd);
-              } else {
-                AT2_SET(cmd);
-              }
-            }
-            break;
+      }
 
-          case AT2_NUMBER_SHIFT:
-          case AT2_LEFT_SHIFT:
-          case AT2_RIGHT_SHIFT:
-          case AT2_LEFT_CONTROL:
-          case AT2_RIGHT_CONTROL:
-          case AT2_LEFT_ALT:
-          case AT2_RIGHT_ALT:
-            if (release) {
+      switch (cmd) {
+        case AT2_SCROLL_LOCK:
+        case AT2_NUMBER_LOCK:
+        case AT2_CAPS_LOCK:
+          if (!release) {
+            if (AT2_TST(cmd)) {
               AT2_CLR(cmd);
             } else {
               AT2_SET(cmd);
             }
-            break;
-        }
+          }
+          break;
+
+        case AT2_NUMBER_SHIFT:
+        case AT2_LEFT_SHIFT:
+        case AT2_RIGHT_SHIFT:
+        case AT2_LEFT_CONTROL:
+        case AT2_RIGHT_CONTROL:
+        case AT2_LEFT_ALT:
+        case AT2_RIGHT_ALT:
+          if (release) {
+            AT2_CLR(cmd);
+          } else {
+            AT2_SET(cmd);
+          }
+          break;
       }
     }
   }
