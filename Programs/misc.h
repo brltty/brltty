@@ -18,13 +18,13 @@
 #ifndef _MISC_H
 #define _MISC_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <unistd.h>
 #include <stdio.h>

@@ -207,6 +207,9 @@ extern "C" {
 /* Define this if the printf format attribute is supported. */
 #undef HAVE_ATTRIBUTE_FORMAT_PRINTF
 
+/* Define this if the packed attribute is supported. */
+#undef HAVE_ATTRIBUTE_PACKED
+
 #define DEVICE_DIRECTORY "/dev"
 #define TRANSLATION_TABLE_EXTENSION ".tbl"
 #define TEXT_TABLE_PREFIX "text."

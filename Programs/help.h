@@ -18,6 +18,10 @@
 #ifndef _HELP_H
 #define _HELP_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -38,12 +42,20 @@ extern "C" {
 typedef struct {
   unsigned char pages;
   unsigned char unused;
-} __attribute__((packed)) HelpFileHeader;
+}
+#ifdef HAVE_ATTRIBUTE_PACKED
+  __attribute__((packed))
+#endif /* HAVE_ATTRIBUTE_PACKED */
+  HelpFileHeader;
 
 typedef struct {
   uint16_t height;
   uint16_t width;
-} __attribute__((packed)) HelpPageEntry;
+}
+#ifdef HAVE_ATTRIBUTE_PACKED
+  __attribute__((packed))
+#endif /* HAVE_ATTRIBUTE_PACKED */
+  HelpPageEntry;
 
 #ifdef __cplusplus
 }

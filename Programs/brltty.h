@@ -18,6 +18,10 @@
 #ifndef _BRLTTY_H
 #define _BRLTTY_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -86,7 +90,11 @@ typedef struct {
   unsigned char speechRate;
   unsigned char speechVolume;
   unsigned char brailleFirmness;
-} __attribute__((packed)) Preferences;
+}
+#ifdef HAVE_ATTRIBTE_PACKED
+  __attribute__((packed))
+#endif /* HAVE_ATTRIBTE_PACKED */
+  Preferences;
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
 

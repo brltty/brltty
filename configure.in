@@ -290,6 +290,23 @@ then
    AC_DEFINE([HAVE_ATTRIBUTE_FORMAT_PRINTF])
 fi
 
+AC_CACHE_CHECK(
+   [if the compiler understands __attribute__((packed))],
+   [brltty_cv_c_attribute_packed],
+   [AC_TRY_COMPILE([
+typedef struct {
+  char c;
+  int i;
+} __attribute__((packed)) conf_attribute_packed;
+],
+[],
+[brltty_cv_c_attribute_packed=yes],
+[brltty_cv_c_attribute_packed=no])])
+if test "${brltty_cv_c_attribute_packed}" = "yes"
+then
+   AC_DEFINE([HAVE_ATTRIBUTE_PACKED])
+fi
+
 AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
 case "${host_os}"
 in
