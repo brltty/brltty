@@ -752,14 +752,14 @@ Here are the ones we know about so far:
 Starting BRLTTY from this script is a good approach (especially for new users).
 Just add a set of lines like these:
 <tscreen><verb>
-if [ -x /bin/brltty ]
+if [ -x /bin/brltty -a -f /etc/brltty.conf ]
 then
    /bin/brltty
 fi
 </verb></tscreen>
 This can usually be abbreviated to the somewhat less readable form:
 <tscreen><verb>
-[ -x /bin/brltty ] && /bin/brltty
+[ -x /bin/brltty -a -f /etc/brltty.conf ] && /bin/brltty
 </verb></tscreen>
 Don't add these lines before the first line
 (which usually looks like <tt>&num;!/bin/sh</>).
