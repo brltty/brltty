@@ -36,7 +36,7 @@ BRL_NAME = $(BRL_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
 BRL_FILE = $(BLD_TOP)$(DRV_DIR)/$(BRL_NAME)
 $(BRL_FILE): braille.o
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKLIB) $(@) braille.o $(BRL_OBJS)
+	$(MKLIB:SONAME=$(BRL_NAME)) $(@) braille.o $(BRL_OBJS)
 braille-driver: $(BRL_FILE)
 
 brl-lib-name:
@@ -51,20 +51,20 @@ SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).$(LIB_EXT)
 SPK_FILE = $(BLD_TOP)$(DRV_DIR)/$(SPK_NAME)
 $(SPK_FILE): speech.o
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKLIB) $(@) speech.o $(SPK_OBJS)
+	$(MKLIB:SONAME=$(SPK_NAME)) $(@) speech.o $(SPK_OBJS)
 speech-driver: $(SPK_FILE)
 
 spk-lib-name:
 	echo "$(DRIVER_CODE)  $(DRIVER_NAME) [$(SPEECH_MODELS)]" >>$(SPKNAMES)
 
 install-api:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INC_DIR)
-	for file in *-$(DRIVER_CODE).h; do test -f $$file && $(INSTALL_DATA) $$file $(INSTALL_ROOT)$(INC_DIR); done || :
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	for file in *-$(DRIVER_CODE).h; do test -f $$file && $(INSTALL_DATA) $$file $(INSTALL_ROOT)$(INCLUDE_DIRECTORY); done || :
 
 install:: $(INSTALL_API)
 
 uninstall::
-	rm -f $(INSTALL_ROOT)$(INC_DIR)/*-$(DRIVER_CODE).h
+	rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/*-$(DRIVER_CODE).h
 
 clean::
 	-rm -f $(BLD_TOP)$(DRV_DIR)/$(LIB_NAME)?$(DRIVER_CODE).*

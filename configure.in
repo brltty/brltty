@@ -154,8 +154,10 @@ then
 fi
 AC_PROG_CXX
 AC_CHECK_PROGS([LD], [ld], [ld])
+AC_PROG_RANLIB
 AC_PROG_YACC
 AC_PROG_AWK
+AC_PROG_LN_S
 
 AC_PROG_INSTALL
 BRLTTY_EXECUTABLE_PATH([INSTALL])
@@ -173,18 +175,18 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for make shared object command], [brltty_cv_prog_mklib], [dnl
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_mklib="\$(CC) -shared -o"
+   brltty_cv_prog_mklib="\$(CC) -shared -Wl,-soname,SONAME -o"
 else
    case "${host_os}"
    in
       linux*)
-         brltty_cv_prog_mklib="\$(LD) -shared -o"
+         brltty_cv_prog_mklib="\$(LD) -shared -soname SONAME -o"
          ;;
       solaris*)
-         brltty_cv_prog_mklib="\$(LD) -G -o"
+         brltty_cv_prog_mklib="\$(LD) -G -h SONAME -o"
          ;;
       hpux*)
-         brltty_cv_prog_mklib="\$(LD) -b -o"
+         brltty_cv_prog_mklib="\$(LD) -b +h SONAME -o"
          ;;
       *)
          brltty_cv_prog_mklib="\$(LD) -o"

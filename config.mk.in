@@ -60,9 +60,13 @@ MKOBJ = $(CROSSCOMP)$(HOSTMKOBJ)
 HOSTMKLIB = @MKLIB@
 MKLIB = $(CROSSCOMP)$(HOSTMKLIB)
 
-AWK = @AWK@
+RANLIB = @RANLIB@
 
 YACC = @YACC@
+
+AWK = @AWK@
+
+SYMLINK = @LN_S@
 
 INSTALL = @INSTALL@
 INSTALL_SCRIPT = $(INSTALL)
@@ -91,12 +95,12 @@ oldincludedir = @oldincludedir@
 infodir = @infodir@
 mandir = @mandir@
 
-PROG_DIR = @program_directory@
-LIB_DIR = @library_directory@
+PROGRAM_DIRECTORY = @program_directory@
+LIBRARY_DIRECTORY = @library_directory@
 DATA_DIR = @data_directory@
-MAN_DIR = @manpage_directory@
-INC_DIR = @include_directory@
-API_DIR = @api_directory@
+MANPAGE_DIRECTORY = @manpage_directory@
+INCLUDE_DIRECTORY = @include_directory@
+API_DIRECTORY = @api_directory@
 
 BRL_TARGET = @brltty_item_name_braille@
 BRL_TARGETS = @brltty_item_names_braille@
@@ -131,6 +135,7 @@ PCM_OBJECTS = @pcm_tune_objects@
 MIDI_OBJECTS = @midi_tune_objects@
 FM_OBJECTS = @fm_tune_objects@
 
+API_VERSION = @BRLAPI_VERSION@
 API_OBJECTS = @api_objects@
 API_KEYFILE = @api_keyfile@
 BUILD_API = @build_api@

@@ -89,10 +89,11 @@ API_ARC = $(API_NAME).$(ARC_EXT)
 api: $(API_LIB) $(API_ARC)
 
 $(API_LIB): $(API_LIB_OBJS)
-	$(MKLIB) $@ $(API_LIB_OBJS)
+	$(MKLIB:SONAME=$(API_LIB).$(API_VERSION)) $@ $(API_LIB_OBJS)
 
 $(API_ARC): $(API_LIB_OBJS)
-	$(AR) rcs $@ $(API_LIB_OBJS)
+	$(AR) rc $@ $(API_LIB_OBJS)
+	$(RANLIB) $@
 
 api_common.o:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_common.c
@@ -240,8 +241,8 @@ tbl2hex.o:
 
 brltty-install: $(SRC_DIR)/brltty-install.in
 	sed -e 's%=F%$(EXECUTE_ROOT)%g' \
-	    -e 's%=P%$(PROG_DIR)%g' \
-            -e 's%=L%$(LIB_DIR)%g' \
+	    -e 's%=P%$(PROGRAM_DIRECTORY)%g' \
+            -e 's%=L%$(LIBRARY_DIRECTORY)%g' \
 	    -e 's%=D%$(DATA_DIR)%g' \
 	    -e 's%=C%$(sysconfdir)%g' \
             $(SRC_DIR)/brltty-install.in >$@
@@ -268,9 +269,9 @@ check-speech: brltty dynamic-speech
 install:: install-programs install-help install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
 install-programs: brltty brltty-install
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROG_DIR) 
-	$(INSTALL_PROGRAM) brltty $(INSTALL_ROOT)$(PROG_DIR) 
-	$(INSTALL_SCRIPT) brltty-install $(INSTALL_ROOT)$(PROG_DIR) 
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_SCRIPT) brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_TARGETS) install-data-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(HLP_DIR)/* $(INSTALL_ROOT)$(DATA_DIR) 
@@ -291,24 +292,26 @@ install-data-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIR) 
 
 install-drivers: brltty
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIB_DIR)
-	$(INSTALL) $(BLD_TOP)$(DRV_DIR)/* $(INSTALL_ROOT)$(LIB_DIR)
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
+	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(LIB_EXT) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
+	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/*.lst $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 
 install-manpages:
 	-for page in $(SRC_TOP)$(DOC_DIR)/*.[1-9]; do \
 	   section=$${page##*.} && \
-	   directory=$(INSTALL_ROOT)$(MAN_DIR)/man$${section} && \
+	   directory=$(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man$${section} && \
 	   $(INSTALL_DIRECTORY) $${directory} && \
-	   $(INSTALL) $${page} $${directory}; \
+	   $(INSTALL_DATA) $${page} $${directory}; \
 	done
 
 install-api: $(API_LIB) $(API_ARC)
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INC_DIR)
-	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(INC_DIR)
-	$(INSTALL_DATA) brldefs.h $(INSTALL_ROOT)$(INC_DIR)
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(API_DIR)
-	$(INSTALL) $(API_LIB) $(INSTALL_ROOT)$(API_DIR)
-	$(INSTALL) $(API_ARC) $(INSTALL_ROOT)$(API_DIR)
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(API_DIRECTORY)
+	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB).$(API_VERSION)
+	$(SYMLINK) $(API_LIB).$(API_VERSION) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB)
+	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(API_DIRECTORY)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIR)
 	file=$(INSTALL_ROOT)$(DATA_DIR)/$(API_KEYFILE) && \
 	if test ! -f $$file; then umask 077 && mcookie >$$file; fi
@@ -318,8 +321,8 @@ install-api: $(API_LIB) $(API_ARC)
 uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers
 
 uninstall-programs:
-	-rm -f $(INSTALL_ROOT)$(PROG_DIR)/brltty
-	-rm -f $(INSTALL_ROOT)$(PROG_DIR)/brltty-install
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install
 
 uninstall-data:
 	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.tbl
@@ -330,22 +333,23 @@ uninstall-data:
 	-rmdir $(INSTALL_ROOT)$(DATA_DIR)
 
 uninstall-libraries:
-	-rm -f $(INSTALL_ROOT)$(LIB_DIR)/$(LIB_NAME)*
-	-rm -f $(INSTALL_ROOT)$(LIB_DIR)/brltty-*.lst
-	-rmdir $(INSTALL_ROOT)$(LIB_DIR)
-	-rm -f $(INSTALL_ROOT)$(API_DIR)/$(API_LIB)
-	-rm -f $(INSTALL_ROOT)$(API_DIR)/$(API_ARC)
+	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
+	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/brltty-*.lst
+	-rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
+	-rm -f $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB)
+	-rm -f $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB).$(API_VERSION)
+	-rm -f $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_ARC)
 
 uninstall-manpages:
 	-for page in $(SRC_TOP)$(DOC_DIR)/*.[1-9]; do \
 	   section=$${page##*.} && \
-	   directory=$(INSTALL_ROOT)$(MAN_DIR)/man$${section} && \
+	   directory=$(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man$${section} && \
 	   rm -f $${directory}/$${page##*/}; \
 	done
 
 uninstall-headers:
-	-rm -f $(INSTALL_ROOT)$(INC_DIR)/brlapi.h
-	-rm -f $(INSTALL_ROOT)$(INC_DIR)/brldefs.h
+	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brlapi.h
+	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 
 ###############################################################################
 
