@@ -48,11 +48,11 @@ static int cmdtrans[0X100] = {
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
-int brl_cols;			/* file descriptor for Braille display */
+static int brl_cols;			/* file descriptor for Braille display */
 int chars_per_sec;			/* file descriptor for Braille display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
-unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
+static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
 static short rawlen;			/* length of rawdata buffer */
 static struct termios oldtio;		/* old terminal settings */
 

@@ -80,7 +80,7 @@ static int brlcols;		/* length of braille line (auto-detected) */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
-short rawlen;			/* length of rawdata buffer */
+static short rawlen;			/* length of rawdata buffer */
 static struct termios oldtio;		/* old terminal settings */
 
 /* message event coming from the braille line to the PC */
