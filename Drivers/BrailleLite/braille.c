@@ -51,6 +51,7 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "bindings.h"		/* for keybindings */
+#include "Programs/serial.h"
 
 
 #define QSZ 256			/* size of internal input queue in bytes */
@@ -294,7 +295,7 @@ write_prebrl (void) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
+brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   static const unsigned good_baudrates[] =
     {300,600,1200,2400,4800,9600,19200,38400, 0};
@@ -317,10 +318,15 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
     reverseTranslationTable(&outputTable, &inputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   if ((qbase = (unsigned char *) malloc(QSZ))) {
     /* Open the Braille display device for random access */
-    LogPrint(LOG_DEBUG, "Opening serial port: %s", brldev);
-    if (openSerialDevice(brldev, &blite_fd, &oldtio)) {
+    LogPrint(LOG_DEBUG, "Opening serial port: %s", device);
+    if (openSerialDevice(device, &blite_fd, &oldtio)) {
       struct termios newtio;	/* new terminal settings */
       newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
       newtio.c_iflag = IGNPAR;

@@ -121,7 +121,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS) $(SPEECH_DRIVER_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) serial.$O brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS) $(SPEECH_DRIVER_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -137,6 +137,9 @@ misc.$O:
 
 sysmisc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sysmisc.c
+
+serial.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
 cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
@@ -171,7 +174,7 @@ usb_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) serial.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(USB_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)

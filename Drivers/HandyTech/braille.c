@@ -35,6 +35,7 @@
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 /* Communication codes */
 static unsigned char HandyDescribe[] = {0XFF};
@@ -377,7 +378,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   struct termios newtio;	/* new terminal settings */
 
   {
@@ -385,10 +386,15 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
     makeOutputTable(&dots, &outputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   rawData = prevData = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(dev, &fileDescriptor, &originalAttributes)) goto failure;
+  if (!openSerialDevice(device, &fileDescriptor, &originalAttributes)) goto failure;
 
   newtio.c_cflag = CLOCAL | PARODD | PARENB | CREAD|CS8;
   newtio.c_iflag = IGNPAR; 

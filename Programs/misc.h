@@ -27,11 +27,7 @@ extern "C" {
 #endif /* HAVE_CONFIG_H */
 
 #include <stdio.h>
-#include <termios.h>
 #include <sys/time.h>
-
-/* misc.h - Header file for miscellaneous all-purpose routines
- */
 
 #ifndef MIN
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
@@ -110,14 +106,10 @@ extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
 extern char *makePath (const char *directory, const char *file);
 
+extern char *getDevicePath (const char *path);
 extern int isQualifiedDevice (const char **path, const char *qualifier);
-extern int isSerialDevice (const char **path);
 extern void unsupportedDevice (const char *path);
 
-extern int openSerialDevice (const char *path, int *descriptor, struct termios *attributes);
-extern void rawSerialDevice (struct termios *attributes);
-extern int setSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
-extern int resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud);
 extern int awaitInput (int descriptor, int milliseconds);
 extern int readChunk (int descriptor, unsigned char *buffer, int *offset, int count, int timeout);
 
@@ -125,8 +117,6 @@ extern int isInteger (int *value, const char *word);
 extern int isFloat (double *value, const char *word);
 extern int validateInteger (int *value, const char *description, const char *word, const int *minimum, const int *maximum);
 extern int validateFloat (double *value, const char *description, const char *word, const double *minimum, const double *maximum);
-extern int validateBaud (speed_t *value, const char *description, const char *word, const unsigned int *choices);
-extern int baud2integer (speed_t baud);
 extern int validateChoice (unsigned int *value, const char *description, const char *word, const char *const *choices);
 extern int validateFlag (unsigned int *value, const char *description, const char *word, const char *on, const char *off);
 extern int validateOnOff (unsigned int *value, const char *description, const char *word);

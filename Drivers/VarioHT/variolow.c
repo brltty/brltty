@@ -33,6 +33,7 @@
 #include "variolow.h"
 #include "Programs/misc.h"
 #include "Programs/brl.h"
+#include "Programs/serial.h"
 
 
 	/*	The filedescriptor of the open port, sorry to say, wee need a global
@@ -40,7 +41,7 @@
 static int devfd=-1;
 static TranslationTable outputTable;
 
-int varioinit(char *dev) 
+int varioinit(const char *device) 
 {
 	struct 	termios		tiodata;
 
@@ -49,7 +50,12 @@ int varioinit(char *dev)
 		makeOutputTable(&dots, &outputTable);
 	}
 
-	if(openSerialDevice(dev, &devfd, &tiodata)) {
+	if (!isSerialDevice(&device)) {
+		unsupportedDevice(device);
+		return -1;
+	}
+
+	if(openSerialDevice(device, &devfd, &tiodata)) {
 		tiodata.c_cflag=(CLOCAL|PARODD|PARENB|CREAD|CS8);
 		tiodata.c_iflag=IGNPAR;
 		tiodata.c_oflag=0;

@@ -34,6 +34,7 @@
 
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 #define LOWER_ROUTING_DEFAULT CR_ROUTE
 #define UPPER_ROUTING_DEFAULT CR_DESCCHAR
@@ -166,6 +167,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   {
     static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
     makeOutputTable(&dots, &outputTable);
+  }
+
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
   }
 
   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {

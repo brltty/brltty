@@ -93,6 +93,7 @@
 #define BRLSTAT ST_PB80Style
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
@@ -407,7 +408,7 @@ ResetTypematic (void)
 
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
+brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int i=0;
   char reply[Q_REPLY_LENGTH];
@@ -418,10 +419,15 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
     makeOutputTable(&dots, &outputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(tty, &brl_fd, &oldtio)) goto failure;
+  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
 
   /* Construct new settings by working from current state */
   memcpy(&curtio, &oldtio, sizeof(struct termios));

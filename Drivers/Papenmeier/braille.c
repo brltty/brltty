@@ -69,6 +69,7 @@ typedef enum {
 #define BRLCONST
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
 #include "config.tab.c"
@@ -442,7 +443,7 @@ initializeDisplay (BrailleDisplay *brl, const char *dev, speed_t baud) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   validateYesNo(&debug_keys, "debug keys flag", parameters[PARM_DEBUGKEYS]);
   validateYesNo(&debug_reads, "debug reads flag", parameters[PARM_DEBUGREADS]);
   validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
@@ -458,10 +459,15 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
     makeOutputTable(&dots, &outputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   while (1) {
     const static speed_t speeds[] = {B19200, B38400, B0};
     const static speed_t *speed = speeds;
-    if (initializeDisplay(brl, dev, *speed)) return 1;
+    if (initializeDisplay(brl, device, *speed)) return 1;
     brl_close(brl);
     if (*++speed == B0) {
       speed = speeds;

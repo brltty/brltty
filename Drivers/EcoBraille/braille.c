@@ -43,6 +43,7 @@
 
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 /* Braille display parameters */
 typedef struct{
@@ -172,7 +173,7 @@ static void brl_identify(void)
 }
 
 
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *dev)
+static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
   struct termios newtio;	/* new terminal settings */
   short ModelID = MODEL;
@@ -183,10 +184,15 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *dev)
     makeOutputTable(&dots, &outputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   rawdata = NULL;	/* clear pointers */
 
   /* Open the Braille display device */
-  if (!openSerialDevice(dev, &brl_fd, &oldtio)) goto failure;
+  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
   
 #ifdef DEBUG
   brl_log = open("/tmp/brllog", O_CREAT | O_WRONLY);

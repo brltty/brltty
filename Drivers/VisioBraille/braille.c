@@ -39,6 +39,7 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "brldefs-vs.h"
+#include "Programs/serial.h"
 
 #define MAXPKTLEN 512
 
@@ -202,13 +203,17 @@ static void brl_identify()
 /* or with the size got through identification request if it succeeds */
 /* Else, brl->x is left unmodified by brl_open, so that */
 /* the braille display can be resized without reloading the driver */ 
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *tty)
+static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
 #ifdef SendIdReq
  unsigned char ch = '?';
  int i;
 #endif /* SendIdReq */
- if (!openSerialDevice(tty, &brl_fd, &oldtio)) return 0;
+ if (!isSerialDevice(&device)) {
+  unsupportedDevice(device);
+  return 0;
+ }
+ if (!openSerialDevice(device, &brl_fd, &oldtio)) return 0;
  memset(&newtio, 0, sizeof(newtio)); 
  newtio.c_cflag = CS8 | PARENB | PARODD | CLOCAL | CREAD;
  newtio.c_iflag = IGNPAR;

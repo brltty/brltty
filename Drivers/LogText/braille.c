@@ -41,6 +41,7 @@
 #define BRLSTAT ST_Generic
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 static int fileDescriptor = -1;
 static struct termios oldSettings;
@@ -105,6 +106,11 @@ makeDownloadFifo (void) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+   if (!isSerialDevice(&device)) {
+      unsupportedDevice(device);
+      return 0;
+   }
+
    makeDownloadFifo();
    if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
       memset(&newSettings, 0, sizeof(newSettings));

@@ -47,6 +47,7 @@ typedef enum {
 
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 static int fileDescriptor = -1;
 static struct termios oldSettings;
@@ -295,6 +296,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
       makeOutputTable(&dots, &outputTable);
       reverseTranslationTable(&outputTable, &inputTable);
+   }
+
+   if (!isSerialDevice(&device)) {
+      unsupportedDevice(device);
+      return 0;
    }
 
    if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {

@@ -72,6 +72,7 @@
 #define BRLSTAT ST_MDVStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
@@ -337,7 +338,7 @@ peek_receive_packet(unsigned char *packet)
 
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
+brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int hasrouting, dotspercell, version1, version2;
 
@@ -346,12 +347,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
     makeOutputTable(&dots, &outputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   sendpacket = recvpacket = ackpacket
     = prevdata = statbuf = prevstatbuf
       = routing_were_pressed = which_routing_keys = NULL;
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(tty, &brl_fd, &oldtio)) goto failure;
+  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
 
   /* Construct new settings by working from current state */
   memcpy(&curtio, &oldtio, sizeof(struct termios));

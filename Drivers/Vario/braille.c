@@ -52,6 +52,7 @@
 #define BRLSTAT ST_TiemanStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
@@ -164,7 +165,7 @@ static int QueryDisplay(int brl_fd, char *reply)
   return 0;
 }
 
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int i = 0;
   char reply[VARIO_DEVICE_ID_REPLY_LEN+1];
@@ -174,10 +175,15 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
     makeOutputTable(&dots, &outputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   brl->buffer = rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(tty, &brl_fd, &oldtio)) goto failure;
+  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
 
   /* Construct new settings by working from current state */
   memcpy(&curtio, &oldtio, sizeof(struct termios));

@@ -38,6 +38,7 @@
 #define BRLSTAT ST_TiemanStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 /* Command translation table: */
 static int cmdtrans[0X100] = {
@@ -67,7 +68,7 @@ brl_identify (void)
 
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
+brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
   struct termios newtio;	/* new terminal settings */
   short n, success;		/* loop counters, flags, etc. */
@@ -81,6 +82,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
     makeOutputTable(&dots, &outputTable);
   }
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   prevdata = rawdata = NULL;		/* clear pointers */
 
   /* No need to load translation tables, as these are now
@@ -88,7 +94,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
    */
 
   /* Now open the Braille display device for random access */
-  if (!openSerialDevice(brldev, &brl_fd, &oldtio)) goto failure;
+  if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
 
   /* Set bps, flow control and 8n1, enable reading */
   newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;

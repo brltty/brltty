@@ -45,6 +45,7 @@
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "braille.h"
+#include "Programs/serial.h"
 
 /*
 ** For debugging only
@@ -383,7 +384,7 @@ static void brl_identify (void)
    LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
 }
 
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
    struct termios newtio;	/* new terminal settings */
 
@@ -392,10 +393,15 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
      makeOutputTable(&dots, &outputTable);
    }
 
+   if (!isSerialDevice(&device)) {
+     unsupportedDevice(device);
+     return 0;
+   }
+
    rawdata = prevdata = lcd_data = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-   if (!openSerialDevice(dev, &brl_fd, &oldtio)) return 0;
+   if (!openSerialDevice(device, &brl_fd, &oldtio)) return 0;
 
   /* Set 8E1, enable reading, parity generation, etc. */
    newtio.c_cflag = CS8 | CLOCAL | CREAD | PARENB;

@@ -48,10 +48,10 @@ brl_identify (void)
 }
 
 static int 
-brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
+brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
 		/*	Seems to signal en error */ 
-	if(!varioinit((char*)dev)) {
+	if(!varioinit(device)) {
 		memset(lastWindow, 0, 40);
 		pressedKeys = 0;
 		activeKeys = 0;

@@ -45,7 +45,7 @@
 #define VARIO_PUSHBUTTON_6	0X0f
 
 	/*	Open and set the serial port right */ 
-int varioinit(char *dev) ;
+int varioinit(const char *device);
 	/*	Close the serial comm and flush buffers */ 
 int varioclose();
 	/*	Send reset */ 

@@ -401,6 +401,7 @@ writeFunction (unsigned char code) {
   return writePacket(bytes, sizeof(bytes));
 }
 
+#include "Programs/serial.h"
 static int serialDevice = -1;
 static struct termios oldSerialSettings;
 static struct termios newSerialSettings;

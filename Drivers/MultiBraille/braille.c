@@ -68,6 +68,7 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "tables.h"		/* for keybindings */
+#include "Programs/serial.h"
 
 #define ESC '\033'
 #define CR '\015'
@@ -103,7 +104,7 @@ static void brl_identify (void) {
 }
 
 
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *brldev) {
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 	struct termios newtio;	/* new terminal settings */
 	short i, n, success;		/* loop counters, flags, etc. */
 	unsigned char *init_seq = "\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
@@ -115,6 +116,11 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 		makeOutputTable(&dots, &outputTable);
 	}
 
+	if (!isSerialDevice(&device)) {
+		unsupportedDevice(device);
+		return 0;
+	}
+
 	brlcols = -1;		/* length of braille line (auto-detected) */
 	prevdata = rawdata = NULL;		/* clear pointers */
 
@@ -123,7 +129,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 	 */
 
 	/* Now open the Braille display device for random access */
-	if (!openSerialDevice(brldev, &brl_fd, &oldtio)) goto failure;
+	if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
 
 	/* Set flow control, enable reading */
 	newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;

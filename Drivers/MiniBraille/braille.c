@@ -46,6 +46,7 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "minibraille.h"
+#include "Programs/serial.h"
 
 /* types */
 enum mode_t { NORMAL_MODE, F1_MODE, F2_MODE, MANAGE_MODE, CLOCK_MODE };
@@ -77,7 +78,7 @@ static void brl_identify(void)
 	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Brailcom o.p.s. <technik@brailcom.cz>"); 
 }
 
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *brldev)
+static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
 	__label__ __errexit;
 	struct termios newtermios;
@@ -87,13 +88,17 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *brldev)
 		makeOutputTable(&dots, &outputTable);
 	}
 
+	if (!isSerialDevice(&device)) {
+		unsupportedDevice(device);
+		return 0;
+	}
+
 	/* init geometry */
 	brl->x = 20;
 	brl->y = 1;
 
 	/* open device */
-	if (brldev == NULL)  goto __errexit;
-	if (!openSerialDevice(brldev, &brl_fd, &oldtermios)) goto __errexit;
+	if (!openSerialDevice(device, &brl_fd, &oldtermios)) goto __errexit;
 	memcpy(&newtermios, &oldtermios, sizeof(newtermios));
 	rawSerialDevice(&newtermios);
 	/* newtermios.c_iflag |= CRTSCTS; */
