@@ -64,7 +64,7 @@ static unsigned char latin2cp437[128] =
 static void
 identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, "Using the Braille Lite's built-in speech.");
+  LogPrint(LOG_NOTICE, "Using the Braille Lite's built-in speech.");
 }
 
 

@@ -190,8 +190,8 @@ static int
 
 static void identbrl (void)
 {
-   LogAndStderr(LOG_NOTICE, StartupNotice);
-   LogAndStderr(LOG_INFO, StartupInfo);
+   LogPrint(LOG_NOTICE, StartupNotice);
+   LogPrint(LOG_INFO, StartupInfo);
 }
 
 static void initbrl (char **parameters, brldim *brl, const char *dev)

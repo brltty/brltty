@@ -32,7 +32,7 @@
 static void
 identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, "No speech support.");
+  LogPrint(LOG_NOTICE, "No speech support.");
 }
 
 static void

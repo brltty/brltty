@@ -41,7 +41,7 @@ static FILE *commandStream = NULL;
 static void
 identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, "Generic Say Driver");
+  LogPrint(LOG_NOTICE, "Generic Say Driver");
 }
 
 static void

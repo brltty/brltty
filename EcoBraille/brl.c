@@ -201,8 +201,8 @@ return(0);
 
 static void identbrl(void)
 {
-  LogAndStderr(LOG_NOTICE, "EcoBraille driver, version 1.00");
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>.");
+  LogPrint(LOG_NOTICE, "EcoBraille driver, version 1.00");
+  LogPrint(LOG_INFO, "   Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>.");
 }
 
 

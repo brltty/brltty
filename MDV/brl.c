@@ -247,8 +247,8 @@ static char packet_to_process = 1, /* flag: if a packet is received while
 static void 
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, VERSION);
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1996-2000 by Stéphane Doyon <s.doyon@videotron.ca>.");
+  LogPrint(LOG_NOTICE, VERSION);
+  LogPrint(LOG_INFO, "   Copyright (C) 1996-2000 by Stéphane Doyon <s.doyon@videotron.ca>.");
 }
 
 

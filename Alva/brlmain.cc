@@ -326,9 +326,9 @@ static int StatusKeys[6] =
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "Alva driver, version 2.1");
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1995-2000 by Nicolas Pitre <nico@cam.org>.");
-  LogAndStderr(LOG_INFO, "   Compiled for %s with %s version.",
+  LogPrint(LOG_NOTICE, "Alva driver, version 2.1");
+  LogPrint(LOG_INFO, "   Copyright (C) 1995-2000 by Nicolas Pitre <nico@cam.org>.");
+  LogPrint(LOG_INFO, "   Compiled for %s with %s version.",
 #if MODEL == ABT_AUTO
 	  "terminal autodetection",
 #else
@@ -341,7 +341,7 @@ identbrl (void)
 #endif
     );
 #if USE_PARALLEL_PORT
-  LogAndStderr(LOG_INFO, "   Device = LPT at 0x%03X", LPT_PORT);
+  LogPrint(LOG_INFO, "   Device = LPT at 0x%03X", LPT_PORT);
 #endif
 }
 

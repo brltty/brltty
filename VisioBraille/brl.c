@@ -123,7 +123,7 @@ static int isinbounds(unsigned char x,unsigned char a,unsigned char b)
 
 static void identbrl(void)
 {
-  LogAndStderr(LOG_NOTICE, "VisioBraille Driver");
+  LogPrint(LOG_NOTICE, "VisioBraille Driver");
 }
 
 static void initbrl(char **parameters, brldim *brl,const char *tty)

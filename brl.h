@@ -200,7 +200,7 @@ typedef struct
 } braille_driver;
 
 extern braille_driver *braille;	/* filled by dynamic libs */
-extern char *braille_libname;	/* name of library */
+extern char *braille_libraryName;	/* name of library */
 
 int load_braille_driver(void);
 int list_braille_drivers(void);

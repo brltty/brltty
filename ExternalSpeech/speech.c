@@ -56,8 +56,8 @@ static char speaking = 0;
 
 static void identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, VERSION);
-  LogAndStderr(LOG_INFO, "   "COPYRIGHT);
+  LogPrint(LOG_NOTICE, VERSION);
+  LogPrint(LOG_INFO, "   "COPYRIGHT);
 }
 
 #define ERRBUFLEN 200

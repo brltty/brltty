@@ -71,12 +71,17 @@ int timeout_yet (int msec);	/* test timeout condition */
       LOG_DEBUG
    } SyslogPriority;
 #endif
-void LogOpen(void);
-void LogClose(void);
-void SetLogPriority(int priority);
-void SetStderrPriority(int priority);
-void LogPrint(int priority, char *format, ...);
-void LogAndStderr(int priority, char *format, ...);
+extern void LogOpen(void);
+extern void LogClose(void);
+extern void SetLogPriority(int priority);
+extern void SetStderrPriority(int priority);
+extern void SetStderrOff(void);
+extern void LogPrint(int priority, char *format, ...);
+extern int ProblemCount;
+
+extern void *mallocWrapper (size_t size);
+extern void *reallocWrapper (void *address, size_t size);
+extern char *strdupWrapper (char *string);
 
 extern int validateInteger (int *integer, char *description, char *value, int *minimum, int *maximum);
 extern int validateBaud (speed_t *baud, char *description, char *value, unsigned int *choices);

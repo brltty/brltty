@@ -352,8 +352,8 @@ static unsigned char *battery_msg;     /* low battery warning msg */
 static void 
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, VERSION);
-  LogAndStderr(LOG_INFO, "   "COPYRIGHT);
+  LogPrint(LOG_NOTICE, VERSION);
+  LogPrint(LOG_INFO, "   "COPYRIGHT);
 }
 
 

@@ -109,11 +109,11 @@ static int qget (blkey *);	/* get a byte from the input queue */
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, VERSION);
+  LogPrint(LOG_NOTICE, VERSION);
   /* I don't mean to take away anyone's copyright, but now that significant
      modifs have been made in more recent years by 2-3 others... it'd become
      bulky IMHO so let's just live without the copyright notice. */
-  /*LogAndStderr(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");*/
+  /*LogPrint(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");*/
 }
 
 

@@ -327,18 +327,18 @@ closebrl (brldim *brl)
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "Papenmeier Driver (%s %s)", __DATE__, __TIME__);
-  LogAndStderr(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team.");
-  LogAndStderr(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
-  LogAndStderr(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
+  LogPrint(LOG_NOTICE, "Papenmeier Driver (%s %s)", __DATE__, __TIME__);
+  LogPrint(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team.");
+  LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
+  LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
 # ifdef RD_DEBUG
-  LogAndStderr(LOG_INFO, "   Input debugging enabled.");
+  LogPrint(LOG_INFO, "   Input debugging enabled.");
 # endif
 # ifdef WR_DEBUG
-  LogAndStderr(LOG_INFO, "   Output debugging enabled.");
+  LogPrint(LOG_INFO, "   Output debugging enabled.");
 # endif
 #ifdef MOD_DEBUG
-  LogAndStderr(LOG_INFO, "   Modifier Keys debugging enabled.");
+  LogPrint(LOG_INFO, "   Modifier Keys debugging enabled.");
 # endif
 
   /* read the config file for individual configurations */

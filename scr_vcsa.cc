@@ -137,7 +137,7 @@ void vcsa_Screen::set_screen_translation_table (void)
 	    font = "CP-437";
 	    break;
 	}
-	LogAndStderr(priority, "Screen Font: %s", font);
+	LogPrint(priority, "Screen Font: %s", font);
     }
 }
 
@@ -147,28 +147,25 @@ int vcsa_Screen::open (int for_csr_routing)
   if ((fd = ::open (VCSADEV, O_RDWR)) == -1){
 #if 0
     if(errno == ENOENT){
-      LogAndStderr(LOG_WARNING,
-                   "Cannot find virtual screen device '%s'"
-		   " - creating it.",
-		   VCSADEV);
+      LogPrint(LOG_WARNING,
+               "Cannot find virtual screen device '%s' - creating it.",
+	       VCSADEV);
       if(mknod(VCSADEV, S_IFCHR | 0600, (7<<8)|128) == 0)
 	fd = ::open (VCSADEV, O_RDONLY);
       else
-	LogAndStderr(LOG_WARNING, "mknod: %s", strerror(errno));
+	LogPrint(LOG_WARNING, "mknod: %s", strerror(errno));
     }
 #endif
   }
   if(fd<0){
-    LogAndStderr(LOG_ERR,
-                 "Cannot open virtual screen device '%s': %s",
-		 VCSADEV, strerror(errno));
+    LogPrint(LOG_ERR, "Cannot open virtual screen device '%s': %s",
+	     VCSADEV, strerror(errno));
     return 1;
   }
   if ((cons_fd = ::open (CONSOLE, O_RDWR|O_NOCTTY)) == -1)
     {
-      LogAndStderr(LOG_WARNING,
-                   "Cannot open console device '%s': %s",
-		   CONSOLE, strerror(errno));
+      LogPrint(LOG_WARNING, "Cannot open console device '%s': %s",
+	       CONSOLE, strerror(errno));
       ::close (fd);
       return 1;
     }

@@ -162,8 +162,8 @@ static unsigned char *rawdata,	/* translated data to send to display */
 
 static void identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, VERSION);
-  LogAndStderr(LOG_INFO, "   "COPYRIGHT);
+  LogPrint(LOG_NOTICE, VERSION);
+  LogPrint(LOG_INFO, "   "COPYRIGHT);
 }
 
 static int myread(int fd, void *buf, unsigned len)

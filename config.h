@@ -29,7 +29,7 @@
  */
 #define DELAY_TIME 40		/* sleep time per cycle - overall speed */
 #define KEYDEL 40		/* sleep time when awaiting a keypress */
-#define DISPDEL 2000		/* time duration to display messages */
+#define DISPDEL 10000		/* time duration to display messages */
 
 
 /* Character cursor initialisation: */

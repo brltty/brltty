@@ -44,13 +44,13 @@ int
 main (int argc, char *argv[])
 {
   if(argc > 2)
-    braille_libname = argv[2];
+    braille_libraryName = argv[2];
   else
-    braille_libname = NULL;
+    braille_libraryName = NULL;
 
   if (!load_braille_driver())
     {
-      LogAndStderr(LOG_ERR, "Braille driver not specified.");
+      LogPrint(LOG_ERR, "Braille driver not specified.");
       exit(10);
     }
 

@@ -43,7 +43,7 @@ static unsigned char ShutUp[] = "\033S";	/* stop string */
 static void
 identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, "Using the Televox speech interface.");
+  LogPrint(LOG_NOTICE, "Using the Televox speech interface.");
 }
 
 static void

@@ -95,8 +95,8 @@ static struct KeyStroke getbrlkey (void);		/* get a keystroke from the MultiBrai
 
 
 static void identbrl (void) {
-	LogAndStderr(LOG_NOTICE, "Tieman B.V. MultiBraille driver");
-	LogAndStderr(LOG_INFO, "   Copyright (C) 2000 by Wolfgang Astleitner."); 
+	LogPrint(LOG_NOTICE, "Tieman B.V. MultiBraille driver");
+	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Wolfgang Astleitner."); 
 }
 
 

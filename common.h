@@ -88,7 +88,6 @@ struct brltty_param {
 
 extern char VERSION[];			/* BRLTTY version string */
 extern char COPYRIGHT[];		/* BRLTTY copyright banner */
-extern volatile int keep_going;		/* zero after reception of SIGTERM */
 
 extern struct brltty_param initparam;	/* defaults for new brltty_param */
 extern struct brltty_env env;		/* current env parameters */
@@ -109,8 +108,8 @@ extern short csr_offright;		/* used for sliding window */
 void startup(int argc, char *argv[]);
 void startBrailleDriver(void);
 void startSpeechDriver(void);
-void loadPreferences(void);
-void savePreferences(void);
+int loadPreferences(void);
+int savePreferences(void);
 void updatePreferences(void);
 void clrbrlstat(void);
 

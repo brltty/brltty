@@ -184,9 +184,9 @@ void
 identbrl (void)
 {
   /* Hello display... */
-  LogAndStderr(LOG_NOTICE, "Handy Tech Driver, version 0.1");
-  LogAndStderr(LOG_INFO, "  Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de>");
-  LogAndStderr(LOG_INFO, "  - compiled for terminal autodetection");
+  LogPrint(LOG_NOTICE, "Handy Tech Driver, version 0.1");
+  LogPrint(LOG_INFO, "  Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de>");
+  LogPrint(LOG_INFO, "  - compiled for terminal autodetection");
 }
 
 

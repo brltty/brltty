@@ -30,7 +30,7 @@ static unsigned char lastbuff[40];
 static void
 identbrl (void)
 {
-  LogAndStderr(LOG_NOTICE, "HT Protocol driver");
+  LogPrint(LOG_NOTICE, "HT Protocol driver");
 }
 
 static void 

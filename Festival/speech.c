@@ -37,7 +37,7 @@ static FILE *festival;
 static void
 identspk (void)
 {
-  LogAndStderr(LOG_NOTICE, "Using the Festival text to speech package.");
+  LogPrint(LOG_NOTICE, "Using the Festival text to speech package.");
 }
 
 

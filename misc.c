@@ -251,14 +251,15 @@ timeout_yet (int msec)
 }
 
 #ifdef USE_SYSLOG
-#include <syslog.h>
-static int syslogOpened = 0;
+   #include <syslog.h>
+   static int syslogOpened = 0;
 #endif
-
 static int logPriority;
 static int stderrPriority;
+int ProblemCount = 0;
 
-void LogOpen(void)
+void
+LogOpen(void)
 {
 #ifdef USE_SYSLOG
   if (!syslogOpened) {
@@ -272,7 +273,8 @@ void LogOpen(void)
   stderrPriority = LOG_NOTICE;
 }
 
-void LogClose(void)
+void
+LogClose(void)
 {
 #ifdef USE_SYSLOG
   if (syslogOpened) {
@@ -282,39 +284,32 @@ void LogClose(void)
 #endif
 }
 
-void SetLogPriority(int priority)
+void
+SetLogPriority(int priority)
 {
   logPriority = priority;
 }
 
-void SetStderrPriority(int priority)
+void
+SetStderrPriority(int priority)
 {
   stderrPriority = priority;
 }
 
-void LogPrint(int priority, char *format, ...)
+void
+SetStderrOff(void)
 {
-  if (priority <= logPriority) {
-    va_list argp;
-    va_start(argp, format);
-#ifdef USE_SYSLOG
-    if (syslogOpened) {
-      vsyslog(priority, format, argp);
-      goto done;
-    }
-#endif
-    vfprintf(stderr, format, argp);
-    fprintf(stderr, "\n");
-    fflush(stderr);
-  done:
-    va_end(argp);
-  }
+  SetStderrPriority(-1);
 }
 
-void LogAndStderr(int priority, char *format, ...)
+void
+LogPrint (int priority, char *format, ...)
 {
   va_list argp;
   va_start(argp, format);
+
+  if (priority <= LOG_WARNING)
+    ++ProblemCount;
 
   if (priority <= logPriority) {
 #ifdef USE_SYSLOG
@@ -334,6 +329,35 @@ done:
   }
 
   va_end(argp);
+}
+
+static void
+noMemory (void)
+{
+   LogPrint(LOG_CRIT, "Insufficient memory: %s", strerror(errno));
+   exit(3);
+}
+
+void *
+mallocWrapper (size_t size) {
+   void *address = malloc(size);
+   if (!address)
+      noMemory();
+   return address;
+}
+
+void *
+reallocWrapper (void *address, size_t size) {
+   if (!(address = realloc(address, size)))
+      noMemory();
+   return address;
+}
+
+char *
+strdupWrapper (char *string) {
+   if (!(string = strdup(string)))
+      noMemory();
+   return string;
 }
 
 int

@@ -31,7 +31,7 @@
 #include "spk.h"
 
 speech_driver *speech = NULL;	/* filled by dynamic libs */
-char *speech_libname = NULL;	/* name of library */
+char *speech_libraryName = NULL;	/* name of library */
 static void *library = NULL;	/* handle to driver */
 #define SPK_SYMBOL "spk_driver"
 
@@ -43,13 +43,13 @@ int load_speech_driver(void)
 
   #ifdef SPK_BUILTIN
     extern speech_driver spk_driver;
-    if (speech_libname != NULL)
-      if (strcmp(speech_libname, spk_driver.identifier) == 0)
-        speech_libname = NULL;
-    if (speech_libname == NULL)
+    if (speech_libraryName != NULL)
+      if (strcmp(speech_libraryName, spk_driver.identifier) == 0)
+        speech_libraryName = NULL;
+    if (speech_libraryName == NULL)
       {
 	speech = &spk_driver;
-	speech_libname = "built-in";
+	speech_libraryName = "built-in";
 	return 1;
       }
   #else
@@ -57,20 +57,20 @@ int load_speech_driver(void)
   #endif
 
   /* allow shortcuts */
-  if (strlen(speech_libname) == 2)
+  if (strlen(speech_libraryName) == 2)
     {
       static char name[] = "libbrlttys??.so.1"; /* two ? for shortcut */
       char * pos = strchr(name, '?');
-      pos[0] = speech_libname[0];
-      pos[1] = speech_libname[1];
-      speech_libname = name;
+      pos[0] = speech_libraryName[0];
+      pos[1] = speech_libraryName[1];
+      speech_libraryName = name;
     }
 
-  library = dlopen(speech_libname, RTLD_NOW);
+  library = dlopen(speech_libraryName, RTLD_NOW);
   if (library == NULL) 
     {
-      LogAndStderr(LOG_ERR, "%s", dlerror());
-      LogAndStderr(LOG_ERR, "Cannot open speech driver library: %s", speech_libname);
+      LogPrint(LOG_ERR, "%s", dlerror());
+      LogPrint(LOG_ERR, "Cannot open speech driver library: %s", speech_libraryName);
       goto liberror;
     }
 
@@ -78,8 +78,8 @@ int load_speech_driver(void)
   error = dlerror();
   if (error)
     {
-      LogAndStderr(LOG_ERR, "%s", error);
-      LogAndStderr(LOG_ERR, "Speech driver symbol not found: %s", SPK_SYMBOL);
+      LogPrint(LOG_ERR, "%s", error);
+      LogPrint(LOG_ERR, "Speech driver symbol not found: %s", SPK_SYMBOL);
       goto liberror;
     }
 
@@ -88,7 +88,7 @@ int load_speech_driver(void)
  liberror:
   /* fall back to built-in */
   speech = &spk_driver;
-  speech_libname = "built-in";
+  speech_libraryName = "built-in";
   return 0;
 }
 

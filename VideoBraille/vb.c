@@ -30,7 +30,7 @@
 static unsigned char lastbuff[40];
 
 static void identbrl(void) {
-  LogAndStderr(LOG_NOTICE, "VideoBraille Driver");
+  LogPrint(LOG_NOTICE, "VideoBraille Driver");
 }
 
 static void initbrl(char **parameters, brldim *brl, const char *dev) {

@@ -101,27 +101,27 @@ struct brltty_param *scrparam[NBR_SCR+1] = { &scr0, };
 struct brltty_param *p = &scr0;	/* pointer to current param structure */
 int curscr;			/* current screen number */
 
-void
-switchto( unsigned int scrno )
+static void
+switchto (unsigned int scrno)
 {
   curscr = scrno;
   if (scrno > NBR_SCR)
-      scrno = 0;
-  if (!scrparam[scrno]){ 	/* if not already allocated... */
+    scrno = 0;
+  if (!scrparam[scrno]) { 	/* if not already allocated... */
     {
-      if (!(scrparam[scrno] = malloc (sizeof (*p))))
+      if (!(scrparam[scrno] = malloc(sizeof(*p))))
         scrno = 0; 	/* unable to allocate a new structure */
       else
         *scrparam[scrno] = initparam;
     }
   }
   p = scrparam[scrno];
-  usetable (p->dispmode ? TBL_ATTRIB : TBL_TEXT);
+  usetable(p->dispmode? TBL_ATTRIB: TBL_TEXT);
 }
 
 
 /* Number dot translation for status cells */
-const unsigned char num[10] = {14, 1, 5, 3, 11, 9, 7, 15, 13, 6};
+const unsigned char num[10] = {0XE, 0X1, 0X5, 0X3, 0XB, 0X9, 0X7, 0XF, 0XD, 0X6};
 
 void clrbrlstat (void)
 {
@@ -129,24 +129,44 @@ void clrbrlstat (void)
   braille->setstatus(statcells);
 }
 
+static void
+terminateProgram (void) {
+  message("BRLTTY exiting.", 0);
+  closescr();
+  if (speech)
+    speech->close();
+  if (braille)
+    braille->close(&brl);
+  playTune(&tune_braille_off);
+  closeTuneDevice();
 
-/*
- * controls program termination
- */
-volatile int keep_going = 1;
-	
-void 
-termination_handler (int signum)
-{
-  keep_going = 0;
-  signal (signum, termination_handler);
+  /* don't forget that scrparam[0] is staticaly allocated */
+  {
+    int i;
+    for (i = 1; i <= NBR_SCR; i++) 
+      free(scrparam[i]);
+  }
+
+  /* Reopen syslog (in case -e closed it) so that there will
+   * be a "stopped" message to match the "starting" message.
+   */
+  LogOpen();
+  LogPrint(LOG_INFO, "Terminated.");
+  LogClose();
+
+  exit(0);
 }
 
-void 
-child_stop_handler (int signum)
+static void 
+terminationHandler (int signum) {
+  terminateProgram();
+}
+
+static void 
+childDeathHandler (int signum)
 {
   pid_t pid;
-  signal (signum, child_stop_handler);
+  signal (signum, childDeathHandler);
   pid = wait(NULL);
   if (pid == csr_pid) 
     {
@@ -155,8 +175,7 @@ child_stop_handler (int signum)
     }
 }
 
-
-void 
+static void 
 setwinabsxy (int x, int y)
 {
   if (x < p->winx || x >= p->winx + brl.x)
@@ -166,7 +185,7 @@ setwinabsxy (int x, int y)
     p->winy = y < brl.y - 1 ? 0 : y - (brl.y - 1);
 }
 
-void 
+static void 
 setwinxy (int x, int y)
 {
   if (env.slidewin)
@@ -188,8 +207,7 @@ setwinxy (int x, int y)
     setwinabsxy(x,y);
 }
 
-
-int
+static int
 upDifferentLine(short mode) {
    if (p->winy > 0) {
       char buffer1[scr.cols], buffer2[scr.cols];
@@ -220,7 +238,7 @@ upDifferentLine(short mode) {
    return 0;
 }
 
-int
+static int
 downDifferentLine(short mode) {
    if (p->winy < (scr.rows - brl.y)) {
       char buffer1[scr.cols], buffer2[scr.cols];
@@ -251,7 +269,7 @@ downDifferentLine(short mode) {
    return 0;
 }
 
-void
+static void
 upLine(short mode) {
    if (env.skpidlns)
       upDifferentLine(mode);
@@ -261,7 +279,7 @@ upLine(short mode) {
       playTune(&tune_bounce);
 }
 
-void
+static void
 downLine(short mode) {
    if (env.skpidlns)
       downDifferentLine(mode);
@@ -270,7 +288,6 @@ downLine(short mode) {
    else
       playTune(&tune_bounce);
 }
-
 
 int 
 main (int argc, char *argv[])
@@ -286,38 +303,33 @@ main (int argc, char *argv[])
   short oldwinx, oldwiny;
   short speaking_scrno = -1, speaking_prev_inx = -1, speaking_start_line = 0;
 
-  /* We install SIGPIPE handler before startup() so that speech drivers which
-     use pipes can't cause program termination (the call to message() in
-     startup() in particular).
-  */
-  signal(SIGPIPE, SIG_IGN);
-
-  /* open syslog (or output to stderr in -n) */
+  /* Open the system log. */
   LogOpen();
-  LogPrint(LOG_NOTICE, "%s starting.", VERSION);
+  LogPrint(LOG_INFO, "Starting.");
 
-  /* Setup everything required on startup */
-  startup(argc, argv);
-
-  /*
-   * Establish signal handler to clean up before termination:
-   * termination_handler is only effective during the main loop, so
-   * we wait after display detection before installing it. (problematic for
-   * RESTARTBRL).
-   */
-  signal(SIGTERM, termination_handler);
-  signal(SIGINT, termination_handler);
-  signal(SIGCHLD, child_stop_handler);
-
-  /*
-   * Initialize state variables 
-   */
+  /* Initialize global data assumed to be ready by the termination handler. */
   *p = initparam;
   scrparam[0] = p;
   for (i = 1; i <= NBR_SCR; i++)
     scrparam[i] = 0;
   curscr = 0;
   
+  /* We install SIGPIPE handler before startup() so that speech drivers which
+   * use pipes can't cause program termination (the call to message() in
+   * startup() in particular).
+   */
+  signal(SIGPIPE, SIG_IGN);
+
+  /* Install the program termination handler. */
+  signal(SIGTERM, terminationHandler);
+  signal(SIGINT, terminationHandler);
+
+  /* Install the handler which monitors the death of child processes. */
+  signal(SIGCHLD, childDeathHandler);
+
+  /* Setup everything required on startup */
+  startup(argc, argv);
+
   getstat (&scr);
   /* I don't know if runtime screen resizing is something that can happen,
      but we're not ready for it. */
@@ -330,7 +342,7 @@ main (int argc, char *argv[])
   /*
    * Main program loop 
    */
-  while (keep_going)
+  while (1)
     {
       closeTuneDevice();
       TickCount++;
@@ -848,18 +860,20 @@ main (int argc, char *argv[])
 	    TOGGLEPLAY ( TOGGLE(env.skpblnkwins) );
 	    break;
 	  case CMD_PREFSAVE:
-	    savePreferences();
-	    playTune (&tune_done);
+	    if (savePreferences()) {
+	      playTune(&tune_done);
+	    }
 	    break;
 	  case CMD_PREFMENU:
 	    updatePreferences();
 	    break;
 	  case CMD_PREFLOAD:
-	    loadPreferences();
-	    csron = 1;
-	    capon = 0;
-	    csrcntr = capcntr = 1;
-	    playTune (&tune_done);
+	    if (loadPreferences()) {
+	      csron = 1;
+	      capon = 0;
+	      csrcntr = capcntr = 1;
+	      playTune(&tune_done);
+	    }
 	    break;
 	  case CMD_SAY:
 	  case CMD_SAYALL:
@@ -1323,25 +1337,7 @@ main (int argc, char *argv[])
       delay (DELAY_TIME);
     }
 
-  clrbrlstat();
-  message("BRLTTY exiting.", 0);
-  closescr();
-  speech->close();
-  braille->close(&brl);
-  playTune(&tune_braille_off);
-  closeTuneDevice();
-
-  /* don't forget that scrparam[0] is staticaly allocated */
-  for (i = 1; i <= NBR_SCR; i++) 
-    free(scrparam[i]);
-
-  /* Reopen syslog (in case -e closed it) so that there will
-   * be a "stopped" message to match the "starting" message.
-   */
-  LogOpen();
-  LogPrint(LOG_NOTICE, "%s stopped.", VERSION);
-  LogClose();
-
+  terminateProgram();
   return 0;
 }
 
@@ -1359,43 +1355,52 @@ message (unsigned char *text, short flags)
       speech->say(text, length);
     }
 
-  while (length)
+  if (braille)
     {
-      int count;
-      int index;
+      clrbrlstat();
+      while (length)
+	{
+	  int count;
+	  int index;
 
-      /* strip leading spaces */
-      while (*text == ' ')  text++, length--;
+	  /* strip leading spaces */
+	  while (*text == ' ')  text++, length--;
 
-      if (length <= brl.x*brl.y) {
-	 count = length; /* the whole message fits on the braille window */
-      } else {
-	 /* split the message across multiple windows on space characters */
-	 for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
-	 if (count == 0)
-	   count = brl.x * brl.y - 1;
-      }
+	  if (length <= brl.x*brl.y) {
+	     count = length; /* the whole message fits on the braille window */
+	  } else {
+	     /* split the message across multiple windows on space characters */
+  	     for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
+	     if (count == 0)
+	       count = brl.x * brl.y - 1;
+	  }
 
-      memset(brl.disp, ' ', brl.x*brl.y);
-      for (index=0; index<count; brl.disp[index++]=*text++);
-      if (length -= count) {
-         for (; index<brl.x*brl.y; brl.disp[index++]='-');
-	 brl.disp[brl.x*brl.y - 1] = '>';
-      }
+	  memset(brl.disp, ' ', brl.x*brl.y);
+	  for (index=0; index<count; brl.disp[index++]=*text++);
+	  if (length -= count) {
+	     for (; index<brl.x*brl.y; brl.disp[index++]='-');
+	     brl.disp[brl.x*brl.y - 1] = '>';
+	  }
 
-      /*
-       * Do Braille translation using text table. * Six-dot mode is
-       * ignored, since case can be important, and * blinking caps won't 
-       * work ... 
-       */
-      for (index=0; index<brl.x*brl.y; brl.disp[index]=texttrans[brl.disp[index]], index++);
+	  /*
+	   * Do Braille translation using text table. * Six-dot mode is
+	   * ignored, since case can be important, and * blinking caps won't 
+	   * work ... 
+	   */
+	  for (index=0; index<brl.x*brl.y; brl.disp[index]=texttrans[brl.disp[index]], index++);
 
-      braille->write(&brl);
+	  braille->write(&brl);
 
-      if (length || (flags & MSG_WAITKEY))
-	while (braille->read(CMDS_MESSAGE) == EOF)
-	  delay(KEYDEL);
-      else if (!(flags & MSG_NODELAY))
-	delay(DISPDEL);
+	  if (flags & MSG_WAITKEY)
+	    while (braille->read(CMDS_MESSAGE) == EOF)
+	      delay(KEYDEL);
+	  else if (length || !(flags & MSG_NODELAY)) {
+	    int i;
+	    for (i=0; i<DISPDEL; i+=KEYDEL) {
+	      delay(KEYDEL);
+	      if (braille->read(CMDS_MESSAGE) != EOF) break;
+	    }
+	  }
+	}
     }
 }

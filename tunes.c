@@ -270,22 +270,25 @@ void setTuneDevice (unsigned char device) {
 void closeTuneDevice (void) {
    if (closeTimer)
       if (!--closeTimer)
-	 toneGenerator->close();
+	 if (toneGenerator)
+	    toneGenerator->close();
 }
  
 void playTune (TuneDefinition *tune) {
    int tunePlayed = 0;
    if (env.sound) {
-      if (toneGenerator->open()) {
-         ToneDefinition *tone = tune->tones;
-	 tunePlayed = 1;
-	 closeTimer = 2000 / DELAY_TIME;
-	 while (tone->duration) {
-	    if (!toneGenerator->generate(tone->frequency, tone->duration)) {
-	       tunePlayed = 0;
-	       break;
+      if (toneGenerator) {
+	 if (toneGenerator->open()) {
+	    ToneDefinition *tone = tune->tones;
+	    tunePlayed = 1;
+	    closeTimer = 2000 / DELAY_TIME;
+	    while (tone->duration) {
+	       if (!toneGenerator->generate(tone->frequency, tone->duration)) {
+		  tunePlayed = 0;
+		  break;
+	       }
+	       ++tone;
 	    }
-	    ++tone;
 	 }
       }
    }

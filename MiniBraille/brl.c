@@ -70,8 +70,8 @@ static void beep(void)
 /* interface */
 static void identbrl(void)
 {
-	LogAndStderr(LOG_NOTICE, "Tieman B.V. MiniBraille driver");
-	LogAndStderr(LOG_INFO, "   Copyright (C) 2000 by Brailcom o.p.s. <technik@brailcom.cz>"); 
+	LogPrint(LOG_NOTICE, "Tieman B.V. MiniBraille driver");
+	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Brailcom o.p.s. <technik@brailcom.cz>"); 
 }
 
 static void initbrl(char **parameters, brldim *brl, const char *brldev)
