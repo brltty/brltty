@@ -24,6 +24,9 @@
  */
 
 /* Changes:
+ *    may 21, 1999:
+ *		- Added Alva Delphi 80 support.  Thanks to ???
+*		  <cstrobel@crosslink.net>.
  *    mar 14, 1999:
  *		- Added LogPrint's (which is a good thing...)
  *		- Ugly ugly hack for parallel port support:  seems there
@@ -114,11 +117,11 @@ extern "C"
 #include "alva_api.library/alva_api.h"
 #endif
 
-#include "../brl_lib.h"
 
 static char StartupString[] =
 "  Alva driver, version 2.0 \n"
 "  Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org> \n";
+
 
 
 /* Braille display parameters */
@@ -180,6 +183,14 @@ BRLPARAMS Models[] =
     DEL440,
     40,
     3
+  }
+  ,
+  {
+    /* ID == 13 */
+    "Alva Delphi 80",
+    DEL480,
+    80,
+    5
   }
   ,
   {
@@ -431,7 +442,7 @@ void initbrl (brldim *brl, const char *dev)
   if( !model->Name ) {
     /* Unknown model */
     LogPrint( LOG_CRIT, "*** Detected unknown Alva model which ID is %d.\n", ModelID );
-    LogPrint( LOG_CRIT, "*** Please fix Models[] in Alva/brlmain.c and mail the maintainer\n" );
+    LogPrint( LOG_CRIT, "*** Please fix Models[] in Alva/brlmain.cc and mail the maintainer\n" );
     goto failure;
   }
 

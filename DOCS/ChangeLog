@@ -1,0 +1,142 @@
+Note: this file should be read from bottom to top.
+
+
+  ...
+
+21 June 1999:
+  - Released BRLTTY 2.11 (beta)
+  - Added support for BrailleLite 40 (nico).
+  - Added autodetection of some extra CombiBraille models.  Thanks to
+    William Blokland <William_Blokland@tieman.nl>.
+  - Added Alva Delphi 80 support.  Thanks to ??? <cstrobel@crosslink.net>.
+
+23 March 1999:
+  - BRLTTY 2.1 released.
+  - Completed updates to the manual (english version only) for 2.1.
+  - missing errno.h for some drivers when compiling on my RedHat (glibc),
+    I added the include to misc.h.
+  - Work-around for bug in Linux kernel 2.0.35: beeps wouldn't stop...
+  - writebrl() and closebrl() now receive a pointer on the brldim structure,
+    like inibrl().
+  - Removed syslog warning when the default config file doesn't exist.
+  - Added EcoBraille support.  Thanks to Oscar Fernandez <ofa@once.es>.
+  - Minor update to TSI driver (2.1).
+  - Added some bindings for switching settings in config menu. Quickly
+    fixed the manual. Regenerated the german manual using latin-1 source
+    though not with all suggested options.
+  - Some tweaks to the BrailleLite driver (Nico)
+  - Rework of the config menu so small braille displays can use it.
+  - Alva Delphi support added (thanks to Terry Barnaby 
+    <terry@beam.demon.co.uk>).
+    Now Alva_ABT3 is called Alva.
+  - Alva parallel port support added using J. lemmens 
+    <jlemmens@inter.nl.net> 's library.
+
+22 December 1998:
+  - BrailleLite 18 and Festival support from Nikhil added.
+    Also eliminated the need for a fixed menu item length
+    and it's now possible to use a display smaller than any menu item i.e.
+    the BrailleLite 18.
+  - Contribution of Norwegian braille tables and ibm850toiso from 
+    Helge Havnegjerde <helge.havnegjerde@c2i.net>
+
+22 July 1998: BRLTTY 2.0 released!
+  - Another fix to the cursor routing algorithm
+  - Web pages online at http://www.cam.org/~nico/brltty
+  - Fixes to compile with egcs and glibc (RH5.1)
+  - Fixed Combibraille speech support (broken when BRLTTY moved to 
+    ISO-8859-1 base charset while the Combibraille expects an IBM CP437
+    charset).
+  - Updated manual, FAQ and TODO.
+  - Fixes (hopefully) to the cursor routing algorithm in csrjmp_sub.
+  - Added syslog support functions, and messages in brltty.c.
+  - Added CMD_RESTARTBRL command to reinitialize braille driver when
+    the braille display is turned off.
+  -  Additions to TSI driver: support for PB65/80, support for all PB models
+     at 19200baud, detects when display is turned off and reinitializes itself.
+  -  Papenmeier driver update.
+  -  EuroBraille driver fixes.
+  - Added CMD_CSRJMP_VERT command which routes the cursor to the current line
+    but does not try to change the horizontal position. Hopefully will be
+    useful in lynx!
+  -  Added attribute underlining/blinking functions (experimental).
+  -  Incorporated Papenmeier braille terminal driver + German manual.
+     Thanks to August Hörandl <hoerandl@elina.htlw1.ac.at> and his team!
+  -  Alva driver fixes.
+
+
+07 April 1998: BRLTTY 1.9.0 pre-release.
+  -  Added absolute toggles (ON/OFF) flags to function defines.
+  -  Moved braille tables and tools to the BrailleTables directory.
+  -  Added Eurobraille terminal series driver.
+  -  Now BRLTTY knows which virtual console is active and preserves separate
+     information structures for each of them.  This means preserving 
+     current window position, tracking and display modes as you switch
+     from a virtual console to another. 
+  -  Nicolas Pitre now assumes maintenance of BRLTTY since Nikhil Nair
+     seems to be unreachable for quite a long time.
+  -  Modularized screen drivers, added experimental screen driver to get
+     screen image from the "screen" program.  A patch for "screen" is provided
+     in the Patches directory.
+  -  Made all different methods of handling status cells available
+     within the configuration menu.  The default is determined by
+     the compiled in braille driver.
+  -  Incorporated patch from Joerg Korinek <korinek@ira.uka.de> which lets
+     the main BRLTTY process continue while cursor routing is in progress.
+     Thanks!
+  -  Added some new functions to scr.cc, which add a new `thread' of
+     screen reading.  This is used by csrjmp_sub(), to avoid race conditions.
+     [The problem was that a forked subprocess shares filedescriptors with
+     the parent, and `clone (0, SIGCHLD | COPYVM | COPYFD)' (as documented
+     in clone(2)) wouldn't compile.]
+  -  CURSOR ROUTING NOW APPEARS TO BE STABLE!!!
+  -  BRLTTY placed under CVS revision control - Id headers added to many
+     files.
+  -  Cursor routing timeout made an idle timeout of 2 seconds: routing
+     continues until the cursor is idle for this length of time.
+  -  Added CMD_SKPIDLNS.
+  -  Speech support modularised.  Added speech.h, as well as SPK_TARGET in
+     the Makefile and corresponding directories.
+  -  Added very simple speech interface and few speech drivers.
+  -  Status cells standardised: two types (Alva/Tieman) or none, switch in
+     configuration menu.  Hence another new config file format :-(.
+  -  A few bugfixes.
+  -  Some job control finetuning in csrjmp() and csrjmp_sub() - now use
+     SIGUSR1 to kill child process before another child is forked; child
+     blocks this signal for most of the time.
+  -  Added support for (optional) Makefiles in driver subdirectories.
+
+
+17 September 1996: BRLTTY 1.0.2 released.
+  -  Incorporated skipping of identical lines.  Adapted to make a line
+     containing the cursor different to any other.
+  -  Config file format updated, so old config files won't work any more.
+  -  Some tidying up of the archive and of the documentation.
+
+
+13 September 1996: BRLTTY 1.0.1 released.
+  -  Speech support added for CombiBraille.
+  -  Documentation brought up to date.
+
+
+3 September 1996: prerelease of BRLTTY 1.0.1.
+  -  Screen reading library rewritten from scratch, in C++ (but without
+     using any class libraries, so no extra shared libraries are needed).
+     In particular, the dependence on the Linux vcsa format is gone: there
+     is a new help file format which is far more compact than the old one
+     (txt2hlp replaces txt2scrn, brlttydev.hlp replaces brlttyhelp.scr),
+     and freeze mode works properly, by using a dynamically allocated
+     memory buffer instead of the old /tmp/vcsa.frz hack.
+  -  BRLTTY can now survive as a stand-alone executable, with absolutely no
+     data files - even if /etc/brltty/ is not found.  This is done by
+     compiling in the default text translation table (now selected in the
+     Makefile) and the attribute translation table.  The compilation is done
+     by using the new filter comptable to generate text.auto.h and
+     attrib.auto.h.  A text translation table is now only loaded if the
+     -t option is specified.
+  -  -q|--quiet now surpresses the start-up message on the Braille display.
+
+  (Documentation still to be updated ...)
+     
+
+28 July 1996: BRLTTY 1.0 released.

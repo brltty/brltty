@@ -23,12 +23,14 @@
  * Edit as necessary for your system.
  */
 
-/* So far, there is only support for serial communications, and the
- * in-built speech synthesizer is not yet used.
- */
-
-#define BRLCOLS(id) ((id) == 0 ? \
-  20 : ((id) == 1 ? 40 : ((id) == 2 ? 80 : -1)))
+#define BRLCOLS(id) 	\
+	((id) == 0 ? 20 : \
+	((id) == 1 ? 40 : \
+	((id) == 2 ? 80 : \
+	((id) == 7 ? 20 : \
+	((id) == 8 ? 40 : \
+	((id) == 9 ? 80 : \
+	-1))))))
 #define BRLROWS 1		/* number of rows on Braille display */
 #define BAUDRATE B38400		/* baud rate for Braille display */
 
@@ -48,8 +50,3 @@
 #define PRE_DATA "\002\033B"	/* string to send to */
 				/*  Braille before dat */
 #define POST_DATA ""		/* string to send to Braille after data */
-
-
-
-/* prefered/default status cells mode */
-#define DEF_MODE    ST_TiemanStyle

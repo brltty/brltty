@@ -63,7 +63,6 @@
 #include "../misc.h"
 #include "../scr.h"
 
-#include "../brl_lib.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */

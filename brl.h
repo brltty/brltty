@@ -20,8 +20,6 @@
 #ifndef _BRL_H
 #define _BRL_H
 
-#include "scr.h"
-
 /* brl.h - Header file for the Braille display library
  */
 
@@ -138,9 +136,6 @@ typedef struct
 brldim;				/* used for writing to a braille display */
 
 
-/* just to be sure */
-extern unsigned char statcells[22];	/* status cell buffer */
-
 /* status cells modes */
 #define ST_None 0
 #define ST_AlvaStyle 1
@@ -149,28 +144,12 @@ extern unsigned char statcells[22];	/* status cell buffer */
 #define ST_Papenmeier 4
 #define NB_STCELLSTYLES 4
 
-/* Routines provided by the braille driver library */
-/* these are load dynamically at runtime into this structure with pointers to 
-   all the functions and vars */
-
-typedef struct 
-{
-  char* name;			/* name of driver */
-  char* helpfile;		/* name of help file */
-  int pref_style;		/* prefered status cells mode */
-
-  void (*identbrl) (const char *); /* print start-up messages */
-  void (*initbrl) (brldim *, const char *);	/* initialise Braille display */
-  void (*closebrl) (brldim *);	/* close braille display */
-  void (*writebrl) (brldim *);	/* write to braille display */
-  int  (*readbrl) (int);	/* get key press from braille display */
-  void (*setbrlstat) (const unsigned char *);	/* set status cells */
-
-} driver;
-
-extern driver *thedriver;	/* filled by dynamic libs */
-extern char* driver_libname;	/* name of library */
-
-int driver_load();
+/* Routines provided by the braille driver library: */
+void identbrl (const char *);	/* print start-up messages */
+void initbrl (brldim *, const char *);	/* initialise Braille display */
+void closebrl (brldim *);		/* close braille display */
+void writebrl (brldim *);		/* write to braille display */
+int readbrl (int);		/* get key press from braille display */
+void setbrlstat (const unsigned char *);	/* set status cells */
 
 #endif /* !defined(_BRL_H) */

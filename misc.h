@@ -58,7 +58,3 @@ void LogAndStderr(int prio, char *fmt, ...);
 #define LOG_INFO        0
 #define LOG_DEBUG       0
 #endif
-
-/* calc status cells */
-int pm_num(int x);
-int pm_stat(int line, int on);

@@ -24,24 +24,10 @@
 # BRLDEV from the main Makefile
 ###############################################################################
 
-HELP = pm
-HELPNAME = brltty-$(HELP).hlp
-
-help:
-	../txt2hlp $(HELPNAME) brlttyh*.txt
-
 brl.o: brl.c ../brl.h ../scr.h ../misc.h
-	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' \
-	'-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"' -c brl.c
+	$(CC) $(CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brl.c
 
-serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c 
-	$(CC) $(CFLAGS) '-DBRLDEV="/dev/ttyS1"' serial.c ../misc.c -o serial -lncurses 
+serial: serial.c ../brl.h brl.c ../text.auto.h
+	$(CC) $(CFLAGS) '-DBRLDEV="/dev/ttyS1"' serial.c -o serial -lncurses 
 
-# shared library
-# name of library - 2 char
-LIB_DESC = pm
-LIB_NAME = $(LIB_SO_NAME)$(LIB_DESC).so.$(LIB_VER)
 
-lib: brl.o
-	$(CC) -g -shared -Wl,-soname,$(LIB_NAME) -o $(LIB_NAME) brl.o -lc
-	touch lib

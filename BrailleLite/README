@@ -1,12 +1,12 @@
 Braille Lite Driver for BRLTTY
 
-This is a preliminary driver for the Blazie Engineering's Braille Lite.
-written by Nikhil Nair, with small addition by Nicolas Pitre.
+This is a beta driver for the Blazie Engineering's Braille Lite.
+written by Nikhil Nair, with additions from Nicolas Pitre.
 
-It should work with the BrailleLite 18 and the BrailleLite 40, but I'm
-affraid the later is lacking a proper keyboard support.  I only have access
-to a BrailleLite 18 so complete BrailleLite 40 suport would require some
-help and testing from someone else.  If you have one, please tell me!
+Both BrailleLite 18 and 40 should work.  However you must edit brlconf.h
+to select which one you want to compile for.  It seems that there is no way
+of autodetecting what is plugged on the serial cable...  If you know a way
+to do so, please tell me.
 
 On the BrailleLite, you should type 345-chord and p-chord to enter the 
 "speech box mode" required by BRLTTY.  You should type the same sequence 
@@ -85,6 +85,12 @@ b chord: backspace
 d chord: delete
 t chord: tab
 46 chord: return
+
+Also, on the BrailleLite 40, combinations with ...
+dot 7: shift
+dot 78: control
+dot 8: alt (or meta)
+
 
 Could get away without cursor keys - use routing - but we do need virtual
 console controls: incr, decr and spawn.

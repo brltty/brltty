@@ -37,6 +37,7 @@
 #include "config.h"
 
 
+
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 
@@ -118,14 +119,14 @@ HelpScreen::HelpScreen ()
 
 
 int
-HelpScreen::gethelp (char* helpfile)
+HelpScreen::gethelp (void)
 {
   long bufsz = 0;		// total length of formatted help screens
   unsigned char maxcols = 0;	// width of the widest page
   unsigned char linelen;	// length of an individual line
   short i, j, k;		// loop counters
 
-  if ((fd = ::open (helpfile, O_RDONLY)) == -1)
+  if ((fd = ::open (HLPFILE, O_RDONLY)) == -1)
     return 1;
   if (read (fd, &numpages, sizeof numpages) != sizeof numpages || \
       numpages < 1)
@@ -158,7 +159,6 @@ HelpScreen::gethelp (char* helpfile)
 	  page[i][j * psz[i].cols + k] = ' ';
       }
   ::close (fd);
-
   return 0;
 
  failure:
@@ -193,9 +193,9 @@ HelpScreen::numscreens (void)
 
 
 inline int
-HelpScreen::open (char* helpfile)
+HelpScreen::open (void)
 {
-  if (fd == -1 && gethelp (helpfile))
+  if (fd == -1 && gethelp ())
     return 1;
   if (scrno < 0 || scrno >= numpages)
     scrno = 0;

@@ -80,7 +80,3 @@
 #define HIGHBAUD 1
 
 /* End of driver config */
-
-/* prefered/default status cells mode */
-#define DEF_MODE      ST_PB80Style
-

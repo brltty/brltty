@@ -1,11 +1,12 @@
 /* BrailleLite/brl.c - Braille display library
  * For Blazie Engineering's Braille Lite series
- * Maintained by Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Author: Nikhil Nair <nn201@cus.cam.ac.uk>
+ * Some additions by: Nicolas Pitre <nico@cam.org>
  */
 
 #define BRL_C
 
-#define __EXTENSIONS__  /* for termios.h */
+#define __EXTENSIONS__		/* for termios.h */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,8 +24,6 @@
 #include "bindings.h"		/* for keybindings */
 
 
-#include "../brl_lib.h"
-
 #define QSZ 256			/* size of internal input queue in bytes */
 #define INT_CSR_SPEED 2		/* on/off time in cycles */
 #define ACK_TIMEOUT 3000	/* timeout in ms for an ACK to come back */
@@ -34,12 +33,12 @@
 
 int blite_fd = -1;		/* file descriptor for Braille display */
 
-static unsigned char blitetrans[256]; /* dot mapping table (output) */
-static unsigned char revtrans[256]; /* mapping for reversed display */
+static unsigned char blitetrans[256];	/* dot mapping table (output) */
+static unsigned char revtrans[256];	/* mapping for reversed display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char *rawdata;	/* writebrl() buffer for raw Braille data */
 static struct termios oldtio;	/* old terminal settings */
-static int blitesz;		/* set to 18 or 40 */
+static unsigned int blitesz;	/* set to 18 or 40 */
 static int waiting_ack = 0;	/* waiting acknowledgement flag */
 static int reverse_kbd = 0;	/* reverse keyboard flag */
 static int intoverride = 0;	/* internal override flag -
@@ -58,20 +57,21 @@ static int repeat = 0;		/* repeat count for next qget() */
 
 /* Data type for a Braille Lite key, including translation into command
  * codes:
- */ 
+ */
 typedef struct
-{
-  unsigned char raw;		/* raw value, after any keyboard reversal */
-  unsigned char cmd;		/* command code */
-  unsigned char asc;		/* ASCII translation of Braille keys */
-  unsigned char spcbar;		/* 1 = on, 0 = off */
-}
+  {
+    unsigned char raw;		/* raw value, after any keyboard reversal */
+    unsigned char cmd;		/* command code */
+    unsigned char asc;		/* ASCII translation of Braille keys */
+    unsigned char spcbar;	/* 1 = on, 0 = off */
+    unsigned char routing;	/* routing key number */
+  }
 blkey;
 
 
 /* Local function prototypes: */
 static void getbrlkeys (void);	/* process keystrokes from the Braille Lite */
-static int qput (unsigned char); /* add a byte to the input queue */
+static int qput (unsigned char);	/* add a byte to the input queue */
 static int qget (blkey *);	/* get a byte from the input queue */
 
 
@@ -87,7 +87,8 @@ identbrl (const char *brldev)
 }
 
 
-void initbrl (brldim *brl, const char *brldev)
+void
+initbrl (brldim * brl, const char *brldev)
 {
   brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
@@ -103,10 +104,11 @@ void initbrl (brldim *brl, const char *brldev)
   if (brldev == NULL)
     brldev = BRLDEV;
   blite_fd = open (brldev, O_RDWR | O_NOCTTY);
-  if (blite_fd < 0){
-    LogPrint( LOG_ERR, "%s: %s\n", brldev, strerror(errno) );
-    goto failure;
-  }
+  if (blite_fd < 0)
+    {
+      LogPrint (LOG_ERR, "%s: %s\n", brldev, strerror (errno));
+      goto failure;
+    }
   tcgetattr (blite_fd, &oldtio);	/* save current settings */
 
   /* Set bps, flow control and 8n1, enable reading */
@@ -119,11 +121,11 @@ void initbrl (brldim *brl, const char *brldev)
   newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
   newtio.c_cc[VTIME] = 0;
   tcflush (blite_fd, TCIFLUSH);	/* clean line */
-  tcsetattr (blite_fd, TCSANOW, &newtio); /* activate new settings */
+  tcsetattr (blite_fd, TCSANOW, &newtio);	/* activate new settings */
 
   /* Braille Lite initialisation: leave this for a later version ... */
 
-  blitesz = res.x = BLITE_SIZE; 	/* initialise size of display - */
+  blitesz = res.x = BLITE_SIZE;	/* initialise size of display - */
   res.y = 1;			/* Braille Lites are single line displays */
 #if 0
   if ((brl->x = res.x) == -1)
@@ -135,10 +137,11 @@ void initbrl (brldim *brl, const char *brldev)
   prevdata = (unsigned char *) malloc (res.x);
   rawdata = (unsigned char *) malloc (res.x);
   qbase = (unsigned char *) malloc (QSZ);
-  if (!res.disp || !prevdata || !rawdata || !qbase) {
-    LogPrint( LOG_ERR, "can't allocate braille buffers\n" );
-    goto failure;
-  }
+  if (!res.disp || !prevdata || !rawdata || !qbase)
+    {
+      LogPrint (LOG_ERR, "can't allocate braille buffers\n");
+      goto failure;
+    }
   memset (prevdata, 0, res.x);
 
   /* Generate dot mapping tables: */
@@ -172,7 +175,7 @@ failure:;
 
 
 void
-closebrl (brldim *brl)
+closebrl (brldim * brl)
 {
   /* We just clear the display, using writebrl(): */
   memset (brl->disp, 0, brl->x);
@@ -183,7 +186,7 @@ closebrl (brldim *brl)
   free (rawdata);
   free (qbase);
 
-  tcsetattr (blite_fd, TCSANOW, &oldtio);		/* restore terminal settings */
+  tcsetattr (blite_fd, TCSANOW, &oldtio);	/* restore terminal settings */
   close (blite_fd);
 }
 
@@ -195,10 +198,11 @@ setbrlstat (const unsigned char *s)
 
 
 void
-writebrl (brldim *brl)
+writebrl (brldim * brl)
 {
   short i;			/* loop counter */
-  static unsigned char prebrl[2] = { "\005D" }; /* code to send before Braille */
+  static unsigned char prebrl[2] =
+  {"\005D"};			/* code to send before Braille */
   static int timer = 0;		/* for internal cursor */
   int timeout;			/* while waiting for an ACK */
 
@@ -233,7 +237,7 @@ writebrl (brldim *brl)
       memcpy (prevdata, rawdata, blitesz);
 
       /* Dot mapping from standard to BrailleLite: */
-      for (i = 0; i < blitesz; rawdata[i++] = blitetrans[rawdata[i]] );
+      for (i = 0; i < blitesz; rawdata[i++] = blitetrans[rawdata[i]]);
 
       /* First we process any pending keystrokes, just in case any of them
        * are ^e ...
@@ -243,20 +247,22 @@ writebrl (brldim *brl)
 
       /* Next we send the ^eD sequence, and wait for an ACK */
       waiting_ack = 1;
-      do{
-	 /* send the ^ED... */
-	 write (blite_fd, prebrl, 2);
+      do
+	{
+	  /* send the ^ED... */
+	  write (blite_fd, prebrl, 2);
 
-	 /* Now we must wait for an acknowledgement ... */
-	 timeout = ACK_TIMEOUT/10;
-	 getbrlkeys ();
-	 while (waiting_ack)
-	   {
-	     delay (10);		/* sleep for 10 ms */
-	     getbrlkeys ();
-	     if( --timeout < 0 ) break;	/* we'll try to send ^ED again... */
-	   }
-	} 
+	  /* Now we must wait for an acknowledgement ... */
+	  timeout = ACK_TIMEOUT / 10;
+	  getbrlkeys ();
+	  while (waiting_ack)
+	    {
+	      delay (10);	/* sleep for 10 ms */
+	      getbrlkeys ();
+	      if (--timeout < 0)
+		break;		/* we'll try to send ^ED again... */
+	    }
+	}
       while (waiting_ack);
 
       /* OK, now we'll suppose we're all clear to send Braille data. */
@@ -264,13 +270,14 @@ writebrl (brldim *brl)
 
       /* And once again we wait for acknowledgement. */
       waiting_ack = 1;
-      timeout = ACK_TIMEOUT/10;
+      timeout = ACK_TIMEOUT / 10;
       getbrlkeys ();
       while (waiting_ack)
 	{
 	  delay (10);		/* sleep for 10 ms */
 	  getbrlkeys ();
-	  if (--timeout < 0) break;	/* just in case it'll never happen */
+	  if (--timeout < 0)
+	    break;		/* just in case it'll never happen */
 	}
     }
 }
@@ -300,14 +307,32 @@ readbrl (int type)
     {
     case 0:			/* transparent */
       /* First we deal with external commands: */
-      if (key.cmd &&		/* it is an external command, but ... */
-	  (key.asc == 0 ||	/* advance bar, or */
-	   key.spcbar ||	/* always OK if chorded, but if not,
-				 * kbemu could be on, or it could be
-				 * a dangerous command ... */
-	   !(kbemu || (dangcmd[(key.raw & 0x38) >> 3] &
-		       (1 << (key.raw & 0x07))))))
-	return key.cmd;
+      do
+	{
+	  /* if it's not an external command, go on */
+	  if (!key.cmd)
+	    break;
+
+	  /* if advance bar, return with corresponding command */
+	  if (key.asc == 0)
+	    return key.cmd;
+
+	  /* always OK if chorded */
+	  if (key.spcbar)
+	    return key.cmd;
+
+	  /* kbemu could be on, then go on */
+	  if (kbemu)
+	    break;
+
+	  /* if it's a dangerous command it should have been chorded */
+	  if (dangcmd[(key.raw & 0x38) >> 3] & (1 << (key.raw & 0x07)))
+	    break;
+
+	  /* finally we are OK */
+	  return key.cmd;
+	}
+      while (0);
 
       /* Next, internal commands: */
       if (key.spcbar)
@@ -317,7 +342,7 @@ readbrl (int type)
 	    kbemu = 1;
 	    shift = shiftlck = ctrl = 0;
 	    outmsg[0] = 0;
-	    message( "keyboard emu on", MSG_SILENT );
+	    message ("keyboard emu on", MSG_SILENT);
 	    delay (DISPDEL);	/* sleep for a while */
 	    return CMD_NOOP;
 	  case BLT_ROTATE:	/* rotate Braille Lite by 180 degrees */
@@ -340,16 +365,34 @@ readbrl (int type)
 	    intoverride = 1;
 	    state = 3;
 	    return CMD_NOOP;
-	  case ' ':	/* practical exception for */
+	  case ' ':		/* practical exception for */
 	    /* If keyboard mode off, space bar == CMD_HOME */
-	    if( !kbemu ) 
+	    if (!kbemu)
 	      return CMD_HOME;
 	  }
+
+      /* check for routing keys */
+      if (key.routing)
+	return (CR_ROUTEOFFSET + key.routing - 1);
 
       if (!kbemu)
 	return CMD_NOOP;
 
       /* Now kbemu is definitely on. */
+      switch (key.raw & 0xC0)
+	{
+	case 0x40:		/* dot 7 */
+	  shift = 1;
+	  break;
+	case 0xC0:		/* dot 78 */
+	  ctrl = 1;
+	  break;
+	case 0x80:		/* dot 8 */
+	  outmsg[0] = 27;
+	  outmsg[1] = 0;
+	  break;
+	}
+
       if (key.spcbar && key.asc != ' ')
 	switch (key.asc)
 	  {
@@ -411,7 +454,7 @@ readbrl (int type)
 	    return CMD_NOOP;
 	  case BLT_ABORT:	/* abort - quit keyboard emulation */
 	    kbemu = 0;
-	    message( "keyboard emu off", MSG_SILENT );
+	    message ("keyboard emu off", MSG_SILENT);
 	    delay (DISPDEL);	/* sleep for a while */
 	    return CMD_NOOP;
 	  default:		/* unrecognised command */
@@ -421,7 +464,7 @@ readbrl (int type)
 	  }
 
       /* OK, it's an ordinary (non-chorded) keystroke, and kbemu is on. */
-      temp = (outmsg[0] == 0) ? 0 : 1; /* just checking for a meta character */
+      temp = (outmsg[0] == 0) ? 0 : 1;	/* just checking for a meta character */
       if (ctrl && key.asc >= 96)
 	outmsg[temp] = key.asc & 0x1f;
       else if (shift && (key.asc & 0x40))
@@ -435,16 +478,17 @@ readbrl (int type)
       ctrl = 0;
       outmsg[0] = 0;
       return CMD_NOOP;
+
     case 1:			/* position internal cursor */
       switch (key.cmd)
 	{
 	case CMD_HOME:		/* go to middle */
 	  int_cursor = blitesz / 2;
 	  break;
-	case CMD_LNBEG:		/* beginning of display */
+	case CMD_LNBEG:	/* beginning of display */
 	  int_cursor = 1;
 	  break;
-	case CMD_LNEND:		/* end of display */
+	case CMD_LNEND:	/* end of display */
 	  int_cursor = blitesz;
 	  break;
 	case CMD_FWINLT:	/* quarter left */
@@ -453,11 +497,11 @@ readbrl (int type)
 	case CMD_FWINRT:	/* quarter right */
 	  int_cursor = MIN (int_cursor + blitesz / 4, blitesz);
 	  break;
-	case CMD_CHRLT:		/* one character left */
+	case CMD_CHRLT:	/* one character left */
 	  if (int_cursor > 1)
 	    int_cursor--;
 	  break;
-	case CMD_CHRRT:		/* one character right */
+	case CMD_CHRRT:	/* one character right */
 	  if (int_cursor < blitesz)
 	    int_cursor++;
 	  break;
@@ -483,10 +527,12 @@ readbrl (int type)
 	    }
 	  return temp;
 	default:
-	  if (key.asc == BLT_ABORT) /* cancel cursor positioning */
+	  if (key.asc == BLT_ABORT)	/* cancel cursor positioning */
 	    int_cursor = state = 0;
 	  break;
 	}
+      if (key.routing)
+	int_cursor = key.routing;
       return CMD_NOOP;
     case 2:			/* set repeat count */
       if (key.spcbar)		/* chorded */
@@ -495,7 +541,7 @@ readbrl (int type)
 	  case BLT_ENDCMD:	/* set repeat count */
 	    if (hold > 1)
 	      repeat = hold - 1;
-	  case BLT_ABORT:		/* abort or endcmd */
+	  case BLT_ABORT:	/* abort or endcmd */
 	    outmsg[0] = 0;
 	    state = 0;
 	    intoverride = 0;
@@ -509,6 +555,14 @@ readbrl (int type)
 	    sprintf (outmsg, "Repeat count: %d", hold);
 	  else
 	    sprintf (outmsg, "Repeat count:");
+	  intoverride = 0;
+	  message (outmsg, MSG_SILENT);
+	  intoverride = 1;
+	}
+      else if (key.routing)
+	{
+	  hold = key.routing;
+	  sprintf (outmsg, "Repeat count: %d", hold);
 	  intoverride = 0;
 	  message (outmsg, MSG_SILENT);
 	  intoverride = 1;
@@ -528,7 +582,7 @@ readbrl (int type)
 	case 'r':		/* restore saved configuration */
 	  intoverride = state = 0;
 	  return CMD_RESET;
-	case BLT_ABORT:		/* abort */
+	case BLT_ABORT:	/* abort */
 	  intoverride = state = 0;
 	default:		/* in any case */
 	  return CMD_NOOP;
@@ -547,7 +601,7 @@ getbrlkeys (void)
 
   while (read (blite_fd, &c, 1))
     {
-      if (waiting_ack && c == 5) /* ^e is the acknowledgement character ... */
+      if (waiting_ack && c == 5)	/* ^e is the acknowledgement character ... */
 	waiting_ack = 0;
       else
 	qput (c);
@@ -566,52 +620,132 @@ qput (unsigned char c)
 
 
 static int
-qget (blkey *kp)
+qget (blkey * kp)
 {
-  unsigned char c;
+  unsigned char c, c2, c3;
+  int ext;
 
   if (qlen == 0)
     return EOF;
   c = qbase[qoff];
-  if (repeat > 0)		/* we'll have to repeat this ... */
-    repeat--;
-  else				/* adjust queue variables for next member */
-    {
-      qoff = (qoff + 1) % QSZ;
-      qlen--;
-    }
 
-  if (c > 0x80 && c != 0x83)	/* unrecognised keypress */
-    {
-      kp->raw = 0;
-      return 0;
-    }
+  /* extended sequences start with a zero */
+  ext = (c == 0);
 
-  /* We must deal with keyboard reversal here: */
-  if (reverse_kbd)
+  /* extended sequences requires 3 bytes */
+  if (ext && qlen < 3)
+    return EOF;
+
+  memset (kp, 0, sizeof (*kp));
+
+  if (!ext)
     {
+      /* non-extended sequences (BL18) */
+
+      /* We must deal with keyboard reversal here: */
+      if (reverse_kbd)
+	{
+	  if (c >= 0x80)	/* advance bar */
+	    c ^= 0x03;
+	  else
+	    c = (c & 0x40) | ((c & 0x38) >> 3) | ((c & 0x07) << 3);
+	}
+
+      /* Now we fill in all the info about the keypress: */
       if (c >= 0x80)		/* advance bar */
-	c ^= 0x03;
+	{
+	  kp->raw = c;
+	  switch (c)
+	    {
+	    case 0x83:		/* left */
+	      kp->cmd = BLT_BARLT;
+	      break;
+	    case 0x80:		/* right */
+	      kp->cmd = BLT_BARRT;
+	      break;
+	    default:		/* unrecognised keypress */
+	      kp->cmd = 0;
+	    }
+	}
       else
-	c = (c & 0x40) | ((c & 0x38) >> 3) | ((c & 0x07) << 3);
-    }
-
-  /* Now we fill in all the info about the keypress: */
-  kp->raw = c;
-  if (c >= 0x80)		/* advance bar */
-    {
-      kp->asc = kp->spcbar = 0;
-      if (c == 0x83)		/* left */
-	kp->cmd = BLT_BARLT;
-      else			/* right */
-	kp->cmd = BLT_BARRT;
+	{
+	  kp->spcbar = ((c & 0x40) ? 1 : 0);
+	  c &= 0x3f;		/* leave only dot key info */
+	  kp->raw = c;
+	  kp->cmd = cmdtrans[c];
+	  kp->asc = brltrans[c];
+	}
     }
   else
     {
-      kp->spcbar = (c & 0x40) > 0;
-      c &= 0x3f;		/* leave only dot key info */
-      kp->cmd = cmdtrans[c];
-      kp->asc = brltrans[c];
+      /* extended sequences (BL40) */
+
+      c2 = qbase[((qoff + 1) % QSZ)];
+      c3 = qbase[((qoff + 2) % QSZ)];
+
+      /* We must deal with keyboard reversal here: */
+      if (reverse_kbd)
+	{
+	  if (c2 == 0)
+	    {			/* advance bars or routing keys */
+	      if (c3 & 0x80)	/* advance bars */
+		c3 = ((c3 & 0xF0) |
+		      ((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) |
+		      ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3));
+	      else if (c3 > 0 && c3 <= blitesz)
+		c3 = blitesz - c3 + 1;
+	    }
+	  else
+	    c2 = (((c2 & 0x38) >> 3) | ((c2 & 0x07) << 3) |
+		  ((c2 & 0x40) << 1) | ((c2 & 0x80) >> 1));
+	  c3 = ((c3 & 0x40) | ((c3 & 0x38) >> 3) | ((c3 & 0x07) << 3));
+	}
+
+      /* Now we fill in all the info about the keypress: */
+      if (c2 == 0)		/* advance bars or routing keys */
+	{
+	  kp->raw = c3;
+	  if (c3 & 0x80)
+	    {			/* advance bars */
+	      switch (c3 & 0xF)
+		{
+		case 0x8:	/* left 1 */
+		  kp->cmd = BLT_BARLT1;
+		  break;
+		case 0x4:	/* right 1 */
+		  kp->cmd = BLT_BARRT1;
+		  break;
+		case 0x2:	/* left 2 */
+		  kp->cmd = BLT_BARLT2;
+		  break;
+		case 0x1:	/* right 2 */
+		  kp->cmd = BLT_BARRT2;
+		  break;
+		default:	/* unrecognised keypress */
+		  kp->cmd = 0;
+		}
+	    }
+	  else if (c3 > 0 && c3 <= blitesz)
+	    kp->routing = c3;
+	}
+      else
+	{
+	  kp->raw = c2;
+	  kp->spcbar = ((c3 & 0x40) ? 1 : 0);
+	  c3 &= 0x3f;		/* leave only dot key info */
+	  kp->cmd = cmdtrans[c3];
+	  kp->asc = brltrans[c3];
+	}
     }
+
+  if (repeat > 0)		/* we'll have to repeat this ... */
+    repeat--;
+  else
+    /* adjust queue variables for next member */
+    {
+      qoff = (qoff + (ext ? 3 : 1)) % QSZ;
+      qlen -= (ext ? 3 : 1);
+    }
+
   return 0;
 }

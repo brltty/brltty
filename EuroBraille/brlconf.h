@@ -22,5 +22,3 @@
  */
 #define BAUDRATE B9600
 
-/* prefered/default status cells mode */
-#define DEF_MODE  ST_None

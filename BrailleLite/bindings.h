@@ -58,12 +58,21 @@ static unsigned char dangcmd[8] =
 
 #endif /* defined(BRL_C) */
 
-/* Functions for the advance bar.  Currently, these are passed straight
+
+/*
+ * Functions for the advance bar.  Currently, these are passed straight
  * back to the main module, so have to be global commands.
  */
 
+/* BrailleLite 18 */
 #define BLT_BARLT CMD_FWINLT
 #define BLT_BARRT CMD_FWINRT
+
+/* BrailleLite 40 */
+#define BLT_BARLT1 CMD_LNUP
+#define BLT_BARRT1 CMD_LNDN
+#define BLT_BARLT2 CMD_FWINLT
+#define BLT_BARRT2 CMD_FWINRT
 
 
 /* Internal commands.  The definitions use the ASCII codes from brltrans[]

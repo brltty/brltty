@@ -33,6 +33,7 @@
 #define ABT380          3	/* ABT340 Desktop */
 #define ABT38D          4	/* ABT380 Twin Space */
 #define DEL440		11	/* Alva Delphi 40 */
+#define DEL480		13 	/* Delphi Multimedia */
 
 
 /***** User Settings *****/
@@ -53,7 +54,7 @@
  * Nothe that this requires the appropriate extra library and modification
  * in the Makefile.  See the README file for details.
  */
-/* #define USE_PARALLEL_PORT 0 */
+#define USE_PARALLEL_PORT 0
 
 
 /* If you defined USE_PARALLEL_PORT to 1, this is where you should define
@@ -79,6 +80,3 @@
  */
 #define REFRESH_RATE 1000
 
-
-/* prefered/default status cells mode */
-#define DEF_MODE  ST_AlvaStyle

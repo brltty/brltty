@@ -47,24 +47,18 @@ unsigned char texttrans[256] =
 unsigned char say_buffer[140];
 #endif
 
-unsigned char statcells[22];	/* status cell buffer */
+#if defined (Alva_ABT3)
+unsigned char StatusCells[4];	/* status character buffer */
+#elif defined (CombiBraille)
+unsigned char statcells[5];	/* status cell buffer */
+#endif
 
 void message (char *s);
+
 
 int
 main (int argc, char *argv[])
 {
-  if(argv[2])
-    driver_libname= argv[2];
-  else
-    driver_libname= "as";
-
-  if (driver_load() != 0)
-    {
-      LogAndStderr(LOG_ERR, "unable to load driver library: %s", driver_libname);
-      exit(10);
-    }
-
   if (chdir (HOME_DIR))		/* change to directory containing data files */
     {
       fprintf (stderr, "Can't cd to %s, trying /etc\n", HOME_DIR);
@@ -73,8 +67,8 @@ main (int argc, char *argv[])
     }
   else
     printf ("Changed to directory %s\n", HOME_DIR);
-  thedriver->identbrl (argc > 1 ? argv[1] : NULL);		/* start-up messages */
-  thedriver->initbrl (&brl, argc > 1 ? argv[1] : NULL);	/* initialise display */
+  identbrl (argc > 1 ? argv[1] : NULL);		/* start-up messages */
+  initbrl (&brl, argc > 1 ? argv[1] : NULL);	/* initialise display */
   if (brl.x == -1)
     {
       fprintf (stderr, "Initialisation error\n");
@@ -86,7 +80,7 @@ main (int argc, char *argv[])
 
   printf ("\nHit return to continue:\n");
   getchar ();
-  thedriver->closebrl (&brl);		/* finish with the display */
+  closebrl (&brl);		/* finish with the display */
   return 0;
 }
 
@@ -101,10 +95,10 @@ message (char *s)
   strcpy (say_buffer + 1, s);
   say (say_buffer);
 #endif
-
-  memset (statcells, 0, sizeof(statcells));
-  thedriver->setbrlstat (statcells);
-
+#ifdef CombiBraille
+  memset (statcells, 0, 5);
+  setbrlstat (statcells);
+#endif
   memset (brl.disp, ' ', brl.x * brl.y);
   l = strlen (s);
   while (l)
@@ -118,9 +112,9 @@ message (char *s)
       for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], \
 	   i++);
 
-      thedriver->writebrl (&brl);
+      writebrl (&brl);
       if (l)
-	while (thedriver->readbrl (TBL_ARG) == EOF)
+	while (readbrl (TBL_ARG) == EOF)
 	  delay (KEYDEL);
     }
 }

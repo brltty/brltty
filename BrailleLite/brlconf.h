@@ -6,12 +6,11 @@
 
 
 /* BrailleLite size (18/40) */
-/* #define BLITE_SIZE 18 */
+#define BLITE_SIZE 18
+//#define BLITE_SIZE 40
 
 /* We always expect 8 data bits, no parity, 1 stop bit. */
-#define BAUDRATE B9600		/* baud rate */
-
-
-/* prefered/default status cells mode */
-#define DEF_MODE  ST_None
+/* Select baudrate to use */
+#define BAUDRATE B9600
+//#define BAUDRATE B38400
 

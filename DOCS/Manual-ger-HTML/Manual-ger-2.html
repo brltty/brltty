@@ -1,0 +1,433 @@
+<HTML>
+<HEAD>
+<TITLE>BRLTTY: Ben&uuml;tzung von BRLTTY</TITLE>
+</HEAD>
+<BODY>
+<A HREF="Manual-ger-1.html">Previous</A>
+<A HREF="Manual-ger-3.html">Next</A>
+<A HREF="Manual-ger.html#toc2">Table of Contents</A>
+<HR>
+<H2><A NAME="s2">2. Ben&uuml;tzung von BRLTTY</A></H2>
+
+<P>Bevor Sie das System aktivieren, sollten Sie Ihr
+Braille-Anzeigeger&auml;t einrichten. In den meisten F&auml;llen ist das
+einfach: Verbinden Sie es blo&szlig; an eine geeignete serielle
+Schnittstelle und drehen Sie die Anzeige auf, falls notwendig, w&auml;hlen
+Sie dabei die serielle Schnittstelle. Nachdem Sie Ihre Anzeige
+eingerichtet haben, um mit BRLTTY zu arbeiten, tippen Sie einfach das
+Kommando <CODE>brltty</CODE> bei einem Shellprompt ein (das mu&szlig; als Root getan
+werden).  Das Programm wird laden, und eine Mitteilung, die den
+Programmnamen (BRLTTY) und die aktuelle Versionsnummer anzeigt, wird
+kurz auf dem Anzeigeger&auml;t erscheinen. Danach zeigt die Anzeige eine
+kleine Fl&auml;che des Konsolenschirms einschlie&szlig;lich eines Cursors. Als
+Standard wird der Cursor als Punkte 7 und 8 gezeigt, die das Zeichen
+&uuml;berlagern, &uuml;ber dem er ist.</P>
+<P>Jede Schirmaktivit&auml;t spiegelt sich in der Braille-Anzeige wider. Die
+Anzeige folgt auch dem Fortschreiten des Cursors auf dem Schirm. Diese
+Eigenschaft ist als Cursorverfolgung (<EM>Cursor Tracking</EM>)bekannt.</P>
+<P>Ein blo&szlig;es Tippen und Lesen der Anzeige ist jedoch nicht genug:
+Versuchen Sie das Eingeben eines Kommandos, das einen Fehler
+verursacht, und dr&uuml;cken Sie <EM>ENTER</EM>. Der Fehler wird auf dem Schirm
+erscheinen, aber wenn Sie keine Mehrzeilenanzeige haben, wird alles,
+was Sie sehen, ein weiteres Shellprompt sein. Was dann ben&ouml;tigt wird,
+ist ein Mittel, das Braille-<EM>Fenster</EM> auf dem Schirm
+umherzubewegen.</P>
+
+<H2><A NAME="ss2.1">2.1 Grundlegende Bewegungstasten</A></H2>
+
+<P>Alle BRLTTY-Kommandos werden dadurch gegeben, da&szlig; man die
+Braille-Tasten auf der Braille-Anzeige ben&uuml;tzt. Ungl&uuml;cklicherweise
+scheint es keine genormte Steuerungsserie zu geben, die bei
+verschiedenen Steuerungsanzeigen verf&uuml;gbar ist: einige haben Sechs
+Punkttasten (wie z.B. eine Braille-Schreibmaschine), andere haben
+Daumentasten; einige haben sogar Kn&ouml;pfe &uuml;ber jedem Zeichen in der
+Anzeige. Einige haben alle drei Typen. Da die Art und die Anordnung
+solcher Tasten so verschieden ist, konsultieren Sie die <CODE>README</CODE> -
+Datei f&uuml;r Ihre Anzeige hinsichtlich der Tasten, die Sie f&uuml;r jeden
+Arbeitsgang dr&uuml;cken. In dieser Beschreibung werden die Funktionen mit
+Namen erl&auml;utert.</P>
+<P>Die Kommandos bestehen im allgemeinen aus einer einzelnen
+Braille-Taste oder aus einer Kombination von Braille-Tasten, die
+immer, wenn BRLTTY l&auml;uft, verwendet werden k&ouml;nnen. Die wichtigsten
+Kommandos sind jene, die das Braille-Fenster auf dem Konsolenschirm
+umherbewegen. Die meisten von ihnen beeinflussen den Konsolencursor
+oder irgendein Programm, das gerade l&auml;uft, nicht.</P>
+<P>
+<DL>
+<DT><B>Vertikales Bewegen:</B><DD><P>
+<DL>
+<DT><B>TOP</B><DD><P>Zeige die oberste Zeile  des Bildschirms</P>
+
+<DT><B>BOT</B><DD><P>Zeige die unterste Zeile  des Bildschirms</P>
+
+<DT><B>WINUP</B><DD><P>Gehe  einige Zeilen nach oben</P>
+
+<DT><B>WINDN</B><DD><P>Gehe  einige Zeilen nach unten</P>
+
+<DT><B>LNUP</B><DD><P>Gehe eine Zeile hinauf</P>
+
+<DT><B>LNDN</B><DD><P>Gehe eine Zeile hinunter</P>
+
+<DT><B>PRDIFLN</B><DD><P>Springe zur vorhergehenden verschiedenen Zeile</P>
+
+<DT><B>NXDIFLN</B><DD><P>Springe zur n&auml;chsten verschiedenen Zeile</P>
+
+<DT><B>ATTRUP</B><DD><P>Springe zu einer vorhergehenden Zeile mit Zeichen mit
+anderen Attributen als die aktuelle Zeile (NEU)</P>
+
+<DT><B>ATTRDN</B><DD><P>Springe zu einer n&auml;chsten Zeile mit Zeichen mit anderen
+Attributen als die aktuelle Zeile (NEU)</P>
+
+</DL>
+</P>
+
+<DT><B>Horizontales Bewegen:</B><DD><P>
+<DL>
+<DT><B>LNBEG</B><DD><P>Gehe  zum Start der Zeile</P>
+<DT><B>LNEND</B><DD><P>Gehe  zum Ende der Zeile</P>
+<DT><B>HWINLT</B><DD><P>Bewege die Anzeige um ein halbes Fenster nach links</P>
+<DT><B>HWINRT</B><DD><P>Bewege die Anzeige  um ein halbes Fenster nach rechts</P>
+<DT><B>CHRLT</B><DD><P>Bewege die Anzeige um ein Zeichen nach links</P>
+<DT><B>CHRRT</B><DD><P>Bewege die Anzeige um ein Zeichen nach rechts</P>
+</DL>
+</P>
+<DT><B>Sowohl horizontales als auch vertikales Bewegen:</B><DD><P>
+<DL>
+<DT><B>TOP LEFT</B><DD><P>Bewege die Anzeige  nach ganz links oben auf dem Bildschirm</P>
+<DT><B>BOT LEFT</B><DD><P>Bewege die Anzeige nach ganz links unten auf dem Bildschirm</P>
+<DT><B>HOME</B><DD><P>Bewege das Fenster zum Cursor </P>
+<DT><B>FWINLT</B><DD><P>Bewege die Anzeige  um ein Fenster nach links</P>
+<DT><B>FWINRT</B><DD><P>Bewege dich um ein Fenster nach rechts</P>
+</DL>
+</P>
+</DL>
+</P>
+<P>Die <EM>FWINLT</EM> und <EM>FWINRT</EM> Tasten k&ouml;nnen ben&uuml;tzt werden, um nach
+hinten und nach vorne zu lesen, da sie zur vorhergehenden
+bzw. folgenden Zeile wechseln, falls vom Ende einer Zeile
+angerufen. Das macht die Kommandos besonders n&uuml;tzlich, wenn man Text
+liest.</P>
+<P>Wenn Sie sich nicht an ein Kommando erinnern, ist Hilfe &uuml;ber das
+Kommando <EM>HELP</EM> abrufbar. Ben&uuml;tzen Sie die Bewegungstasten, wie
+oben erw&auml;hnt, um den Hilfebildschirm zu dirigieren, und bet&auml;tigen Sie
+HELP wieder, um auszusteigen.</P>
+<P>Das Verhalten der <EM>LNUP</EM> und <EM>LNDN</EM> Tasten h&auml;ngt davon ab, ob
+das &Uuml;berspringen von identischen Zeilen durch das Konfigurationsmen&uuml;
+m&ouml;glich gemacht wird (s. Abschnitt Das Online- 
+<A HREF="#confmenu">Konfigurationsmen&uuml;</A>). Falls das m&ouml;glich ist wirken diese Tasten
+wie <EM>PRDIFLN</EM> und <EM>NXDIFLN</EM> Tasten. (Beachten Sie, da&szlig; die
+Zeile, die den Cursor enth&auml;lt, als von den anderen verschieden
+angesehen wird.)</P>
+
+
+<H2><A NAME="ss2.2">2.2 Andere Steuerungen</A></H2>
+
+<P>Zus&auml;tzlich zu den obigen Kommandos hat BRLTTY viele andere n&uuml;tzliche 
+Merkmale:</P>
+<P>
+<DL>
+<DT><B><EM>CSRTRK</EM>: Umschalten der Cursorverfolgung</B><DD><P>Standard:
+eingeschaltet. Wenn die Cursorverfolgung eingeschaltet ist, stellt
+eine Bewegung des Konsolencursors automatisch die
+Anzeigefensterposition ein, so da&szlig; der Cursor immer im Fenster ist. Es
+ist manchmal n&uuml;tzlich, dieses Merkmal abzuschalten, so k&ouml;nnen Sie
+n&auml;mlich einen besonderen Abschnitt Ihres Bildschirms leicht
+&uuml;berwachen.</P>
+
+<DT><B><EM>DISPMD</EM>: Umschalten der Attributanzeige</B><DD><P>Standard:
+ausgeschaltet. Falls die Merkmalanzeige eingeschaltet ist, werden eher
+die Merkmale (Farbinformation) jedes Zeichens, nicht die Zeichen
+selbst gezeigt. Es kann n&uuml;tzlich sein, die Merkmalanzeige aufzudrehen,
+um die Entdeckung hervorgehobener Pun te zu erm&ouml;glichen.</P>
+
+<DT><B><EM>FREEZE</EM>: Umschalten des Bildschirms und Einfrieren</B><DD><P>Standard: ausgeschaltet. Die Einfrierfunktion existiert, um leichtes
+Lesen eines wechselnden Bildschirms zu erm&ouml;glichen. Wenn Sie FREEZE
+aufdrehen, wird der momentane Bildschirminhalt f&uuml;r kurze Zeit
+gespeichert, und irgendeine neue Bildschirmaktivit&auml;t wird nicht in
+Braille wiedergegeben. Denken Sie daran, das Einfrieren abzuschalten,
+wenn Sie die normale T&auml;tigkeit wieder aufnehmen wollen.</P>
+
+<DT><B><EM>INFO</EM>: Zustandsinformation</B><DD><P>Standard: ausgeschaltet.  Die
+Zustandsfunktion schaltet die Anzeige auf den
+Zustandsbildschirm. Dieser zeigt Informationen einschlie&szlig;lich der
+physischen Cursorposition, der Position des Startes des Braille-
+Anzeigefensters und der Einstellungen. Einige Anzeigetypen lassen
+einige dieser Informationen andauernd in ihren <EM>Status Cells</EM>
+aufscheinen. S. die <CODE>README</CODE> -Datei zwecks Information &uuml;ber Ihre
+Anzeige.</P>
+<P>Die Fensterstartposition und die physische Cursorposition werden in
+der Form <I>cc:rr</I> gezeigt, wobei <I>cc</I> die aktuelle S&auml;ule und
+<I>rr</I> die aktuelle Reihe darstellt. Dann folgen die Einstellungen
+<OL>
+<LI>Cursorverfolgung (Cursor Tracking). Wenn eingeschaltet, wird 
+<CODE>t</CODE> gezeigt; sonst ein Leerzeichen  </LI>
+<LI>Cursorsichtbarkeit.
+<DL>
+<DT><B><CODE>v</CODE></B><DD><P>Cursor ist sichbar, kein Blinken</P>
+
+<DT><B><CODE>B</CODE></B><DD><P>Cursor ist sichtbar und blinkt</P>
+
+<DT><B><CODE>b</CODE></B><DD><P>Cursor ist nicht sichtbar, aber er blinkt </P>
+<DT><B>space</B><DD><P>Leerzeichen (space) Cursor ist nicht sichtbar und das 
+Blinken ist weg</P>
+</DL>
+</LI>
+<LI> Anzeigeweise. <CODE>a</CODE> Attribut, <CODE>t</CODE> Text</LI>
+<LI> Bildschirmzustand. <CODE>f</CODE> eingefroren,  Leerzeichen direkt</LI>
+<LI> Braille-Darstellung, sechs-oder achtpunktig</LI>
+<LI> Blinkende Gro&szlig;buchstaben. <CODE>B</CODE> eingeschaltet, sonst ein Leerzeichen. </LI>
+</OL>
+</P>
+<P>Im Zustandsbildschirm k&ouml;nnen alle Informationen mittels
+Konsolenschirmaktivit&auml;t oder mittels BRLTTY-Kommandos auf den neuesten
+Stand gebracht werden. Durch bet&auml;tigen von <EM>INFO</EM> kehrt man in den
+Normalmodus zur&uuml;ck.</P>
+</DL>
+</P>
+
+
+<H2><A NAME="ss2.3">2.3 Cursorbewegung</A></H2>
+
+<P>Es passiert oft, da&szlig; Sie das Anzeigefenster auf dem Bildschirm
+umherbewegen, da Sie den Text in einem Texteditor &uuml;berpr&uuml;fen, und Sie
+wollen den physischen Cursor dorthin bewegen, wo die Fensteranzeige
+ist. Die Cursorbewegung stellt eine ebensolche Gelegenheit mittels
+Simulieren Ihrer Anschl&auml;ge bereit.</P>
+<P>Tippen Sie <EM>CSRJMP</EM>, und Ihr Cursor bewegt sich zur Startposition
+Ihres Anzeigefensters. Einige Braille-Anzeigen haben Kn&ouml;pfe &uuml;ber jeder
+Zelle: diese k&ouml;nnen auch ben&uuml;tzt werden, um den Cursor in jene
+Position zu bringen. Andere binden Braille-Tasten an die Cursortasten
+auf der Tastatur, um eine h&auml;ndische Form der Cursorbewegung zu
+erm&ouml;glichen.</P>
+<P>Beachten Sie: Die Cursorbewegung ist noch nicht v&ouml;llig verl&auml;&szlig;lich. Sie
+ben&uuml;tzt im Moment "hardcoded" vt100 Cursortastencodes, um sich in die
+richtigen Richtungen zu bewegen. Auch geht sie auf Systemen mit hoher
+Last nicht gut (s. <CODE>config.h</CODE> f&uuml;r weitere Details).</P>
+<P>Wenn Sie ein Cursorbewegungskommando geben, wird BRLTTY weiter versuchen 
+den Cursor zu bewegen bis sich der Cursor entweder in die falsche Richtung 
+bewegt, oder nach f&uuml;r zwei Sekunden die Zielposition nicht erreicht hat oder
+die virtuelle Konsole gewechsetlt wird. Wenn Sie ein anderes 
+Cursorbewegungskommando geben, bricht BRLTTY den ersten Versuch ab und 
+versucht das neue Ziel zu erreichen.</P>
+<P>Ein neues Kommando <EM>CSRJMP_VERT</EM>, bewegt den Cursor in die
+aktuelle Zeile ohne die horizontale Position zu &auml;ndern. Das ist
+besonders innerhalb von lynx hilfreich, da die Cursortasten Links und Rechts
+nicht verwendet werden.</P>
+
+
+<H2><A NAME="ss2.4">2.4 Ausschneiden und Einf&uuml;gen</A></H2>
+
+<P>Diese Option erm&ouml;glicht es Ihnen, auf einen Text zuzugreifen, der
+schon auf dem Bildschirm ist, und ihn beim Cursor wieder einzugeben,
+soda&szlig; Zeit gespart wird. Das ist besonders n&uuml;tzlich bei langen
+Dateinamen, komplizierten Kommandos, E-Mail Adressen oder langen URLs.</P>
+<P>Markieren Sie zuerst die rechteckige Fl&auml;che auf dem Bildschirm, auf
+die zugegriffen werden soll (ausschneiden): Um die oberste linke Ecke
+zu markieren, dr&uuml;cken Sie <EM>CUTBEG</EM>. Die oberste linke Ecke der
+markierten Fl&auml;che wird in die &auml;u&szlig;erste linke Position des Fensters
+verlegt, und der <EM>Cut Buffer</EM> wird beseitigt. Um die unterste
+rechte Ecke zu markieren, dr&uuml;cken Sie <EM>CUTEND</EM>: der Bereich, den
+Sie festlegten, wird dann in den <EM>Cut Buffer</EM> hineinkopiert. BRLTTY
+entfernt &uuml;berfl&uuml;ssige Leerzeichen am Ende jeder Zeile im <EM>Cut
+Buffer</EM>, soda&szlig; Sie nach Ihrem Ausschneidetext keine &uuml;berfl&uuml;ssige
+Leerzeichen haben. Einige Anzeigen unterst&uuml;tzen genaueres
+<EM>Ausschneiden und Einf&uuml;gen</EM>, indem sie die Kn&ouml;pfe &uuml;ber den
+Braille-Zellen ben&uuml;tzen; s. die <CODE>README</CODE> -Datei f&uuml;r Ihre Anzeige.</P>
+<P>Um den Text einzuf&uuml;gen, d.h., ihn bei der Cursor-Position zu
+schreiben, dr&uuml;cken Sie <EM>PASTE</EM>. Sie k&ouml;nnen den gespeicherten Test
+beliebig oft ohne Wiederausschneiden einf&uuml;gen.</P>
+
+
+
+<H2><A NAME="confmenu"></A> <A NAME="ss2.5">2.5 Das Online-Konfigurationsmen&uuml;</A></H2>
+
+
+<P>Wenn Sie BRLTTY  laden, wird eine <EM>Konfigurationsdatei</EM> geladen mit 
+Ihren Einstellungen geladen. Viele EInstellungen von BRLTTY k&ouml;nnen ein- und
+ausgeschaltet bzw. eingestellt werden. BRLTTY hat ein einfaches Men&uuml; um diese 
+Einstellungen einfach zu &auml;ndern. Das Men&uuml; ist wird mit <EM>CONFMENU</EM> aktiviert.
+Das Terminal zeigt den Men&uuml;titel und zeigt den aktuellen Parameter und den 
+Wert.</P>
+<P>Um sich im Men&uuml; zu bewegen d.h. sich von einer Einstellung zur
+n&auml;chsten zu gelangen, werden die normalen Bewegungstasten verwendet:</P>
+<P>
+<DL>
+<DT><B><EM>LNUP</EM> und <EM>LNDN</EM>:</B><DD><P>n&auml;chste bzw. vorige Einstellung</P>
+<DT><B><EM>TOP</EM> oder <EM>TOP_LEFT</EM> oder <EM>HOME</EM>:</B><DD><P>erste Einstellung;</P>
+<DT><B><EM>BOT</EM> oder <EM>BOT_LEFT</EM>:</B><DD><P>letzte Einstellung</P>
+</DL>
+</P>
+<P>Der Wert einer Einstellung wird mit <EM>FWINLT</EM> und <EM>FWINRT</EM> ge&auml;ndert:
+dabei werden alternative Einstellungsm&ouml;glichkeiten ausgew&auml;hlt. Um die
+&Auml;nderungen zu verwerfen kann <EM>RESET</EM> verwendet werden.</P>
+<P>Um das Men&uuml; zu verlassen und den Normalbetrieb wider aufzunehmen, kann
+<EM>CONFMENU</EM> oder jede andere nicht angef&uuml;hrte Taste verwendet werden. Falls
+<EM>save config</EM> gesetzt ist, werden die Einstellungen in der 
+Konfigurationsdatei gespeichert.</P>
+<P>Die meisten der Einstellungen, die im Men&uuml; verf&uuml;gbar sind,  k&ouml;nnen auch 
+durch einzelne Tasten () umgeschaltet werden.</P>
+<P>Es folgt eine Beschreibung der einzelnen Einstellungen. Die Tasten zur
+schnellen &Auml;nderung sind ebenfalls angef&uuml;hrt.</P>
+<P>
+<DL>
+<DT><B><EM>cur is visible</EM> (Taste: <EM>CSRVIS</EM>):Umschalten der
+Cursorsichtbarkeit </B><DD><P>Standard: eingeschaltet. Diese Funktion, wenn
+sie m&ouml;glich ist, zeigt die Position des Cursors (entweder in Ruhe oder
+blinkend) auf der Anzeige. Es ist manchmal n&uuml;tzlich, diese Funktion
+auszuschalten, um Text zu &uuml;berpr&uuml;fen, in dem das Cursorsymbol nur das
+Lesen zu erschwert.</P>
+
+<DT><B><EM>Block cursor</EM> (Taste: <EM>CSRSIZE</EM>): Umschalten der
+Cursorform</B><DD><P>Standard: hebt den Cursor hervor. Diese Funktion
+schaltet die Cursorform: alle acht Punkte (Block) oder nur die unteren
+zwei (hervorheben). W&auml;hle die Form, die du vorziehst.</P>
+
+<DT><B><EM>csr blink</EM> (Taste: <EM>CSRBLINK</EM>): Umschalten des blinkenden
+Cursors</B><DD><P>Standard: ausgeschaltet. Falls diese Funktion erm&ouml;glicht
+wird, blinkt der Bildschirmcursor auf der Anzeige, d.h., er ist nur
+einen Teil der Zeit dort.Wenn der Cursor weggeht, k&ouml;nnen Sie das
+Zeichen unter dem Cursor sehen.</P>
+
+<DT><B><EM>cap blink</EM> (Taste: <EM>CAPBLINK</EM>): Umschalten der blinkenden
+Gro&szlig;buchstaben</B><DD><P>Standard: ausgeschaltet. &Auml;hnlich wie bei der
+Cursorblinkfunktion - falls diese Funktion m&ouml;glich ist, blinken
+Gro&szlig;buchstaben auf der Anzeige. Dies ist h&ouml;chst n&uuml;tzlich, wenn man
+Sechspunkte-Braille ben&uuml;tzt.</P>
+
+<DT><B><EM>attr vis</EM> (Taste <EM>ATTRVIS</EM>): Umschalten der
+Attributanzeige durch Unterstreichen (NEU)</B><DD><P>Standard:
+ausgeschaltet. Wenn dieser Modus eingeschaltet ist, werden alle
+Zeichen, die nicht den Standardattributen entprechen (inverse
+Darstellung, Farbe, Hervorhebung ...), durch zus&auml;tzliche Ansteuerung
+der Punkte 7-8 bzw. Punkt 8 des Braille Zeichens dargestellt. Eine
+zus&auml;tzliche Funktion bestimmt, ob diese zus&auml;tzlichen Punkte blinken
+oder nicht. Text mit gesetztem Punkten 7-8 hat andere Attribute als
+Text mit gesetztem Punkt 8. Diese Anzeige ist derzeit experimentell.</P>
+
+<DT><B><EM>attr blink</EM> (shortcut <EM>ATTRBLINK</EM>): Toggle blinking of
+    attribute underlining</B><DD><P>Default: on.  This controls whether or not dots superimposed on characters with
+special attributes will blink or not.</P>
+
+<DT><B><EM>attr blink</EM> (Taste <EM>ATTRBLINK</EM>): Umschalten Attribut
+  blinken </B><DD><P>Standard: ein. Damit wird das Blinken der zus&auml;tzlichen
+Punkte zur Darstellung der Attribute ein- bzw. ausgeschaltet.</P>
+
+<DT><B><EM>csr blink on</EM> und <EM>csr blink off</EM>: Einstellen der
+Geschwindigkeit des Cursorblinkens</B><DD><P>Diese Einstellungen sind keine
+"Umschalter" sondern Zahlenwerte. Diese Einstellung bestimmt, wie
+schnell der Cursor blinkt (wenn der Cursor sichtbar ist und Cursor
+blinken eingeschaltet ist). Der Cursor ist abwechselnd ein (on) und
+ausgeschaltet (off). <EM>csr on</EM> bestimmt wie lange (Anzahl der
+Schleifendurchl&auml;ufe im Treiber) BRLLTTY den Cursor sichtbar
+anzeigt. Die Periode ergibt sich damit aus der Summe der <EM>csr on</EM>
+and <EM>csr off</EM> Einstellungen. Die Dauer einer Schleife ist variabel:
+ungef&auml;hr 0.1 Sekunde. Es kann hilfreich sein, die Werte f&uuml;r den
+Cursor, Gro&szlig;buchstaben und Attribute auf verschiedene Werte zu setzen.</P>
+
+<DT><B><EM>cap blink on</EM> und <EM>cap blink off</EM>: Einstellen der
+  Geschwindigkeit des Blinkens der Gro&szlig;buchstaben</B><DD><P>Diese
+Einstellungen funktionieren wie die Einstellungen zum Cursorblinken.</P>
+
+<DT><B><EM>attr blink on</EM> and <EM>attr blink off</EM>: Einstellen der
+  Geschwindigkeit des Blinkens der Attribute</B><DD><P>Diese Einstellungen
+funktionieren wie die Einstellungen zum Cursorblinken.</P>
+
+<DT><B><EM>six dot text</EM> (Taste <EM>SIXDOTS</EM>): Braille-Darstellung</B><DD><P>Standard: 8punktig. Diese Funktion schaltet zwischen sechs- und
+achtpunktigen Braillecodes. Wenn die sechspunktige Art gew&auml;hlt wird,
+werden die unteren Punkte (7 und 8) aller normalen Zeichen entfernt.</P>
+
+<DT><B><EM>sliding window</EM> (Taste <EM>SLIDEWIN</EM>): Umschalten des
+  Gleitfensters</B><DD><P>Standard: ausgeschaltet. Dieses Merkmal bewegt in
+Zusammenhang mit der Cursorverfolgung (Cursor Tracking) das
+Anzeigefenster sanfter, wenn sich der physische Cursor jenseits der
+rechten Kante des Fensters bewegt. Wenn sliding window ausgeschaltet
+ist und der Cursor sich jenseits der rechten Kante des Fensters
+bewegt, bewegt sich das Fenster um eine Fensterbreite. Wenn
+eingeschaltet, bewegt sich das Fenster um ein Viertel dieser Breite.</P>
+
+<DT><B><EM>skip ident lns</EM> (Taste <EM>SKPIDLNS</EM>): Umschalten des
+  &Uuml;berspringens von identischen Zeilen</B><DD><P>Standard:
+ausgeschaltet. Dies ist eine alternative M&ouml;glichkeit des Umschaltens
+zum &Uuml;berspringen von identischen Zeilen, wenn das Terminal die
+Tasten <EM>PRDIFLN</EM> und <EM>NXDIFLN</EM> nicht besitzt. Wenn aktiv,
+&uuml;berspringen die Tasten <EM>LNUP</EM> und <EM>LNDN</EM> identische Zeilen.</P>
+
+<DT><B><EM>audio signals</EM> (Taste <EM>SND</EM>): Umschalten der
+  Audiosignale</B><DD><P>Standard: eingeschaltet. Wenn eingeschaltet, gibt
+BRLTTY, wenn bestimmte Ereignisse auftauchen (z.B. Bewegen jenseits
+des Bildschirmrandes), ein akustisches Signal. Dieses Signal
+best&auml;tigt auch die Einstellungen einiger Umschaltwahlm&ouml;glichkeiten.</P>
+
+<DT><B><EM>st cells style</EM>: Status Zellen Anzeige</B><DD><P>Diese Einstellung
+ist ein Zahlenwert. Damit kann die Art der Statusanzeige
+umgeschaltet werden. Es gibt im wesentlichen einen Anzeigemodus f&uuml;r
+jede Art von Anzeige und der dort vom Entwickler des Treibers
+bevorzugten Einstellung. Trotzdem ist es m&ouml;glich, die Anzeigen der
+anderen Terminaltypen einzustellen. Es funktionieren aber nicht alle
+Arten der Anzeige auf allen Terminaltypen, da nicht alle Terminals
+die gleiche Anzahl an Statuszellen haben: wenn Sie eine Einstellung
+f&uuml;r einen anderen Terminaltyp mit mehr Statuszellen als Ihr Terminal
+w&auml;hlen, kann eventuell Information verloren gehen. Die m&ouml;glichen
+Anzeigearten sind:</P>
+<P>
+<UL>
+<LI> 0 = keine Anzeige auf den Statuszellen</LI>
+<LI> 1 = Alva Stil</LI>
+<LI> 2 = Tieman Stil</LI>
+<LI> 3 = PowerBraille 81 Stil (1 Zelle)</LI>
+<LI> 4 = Papenmeier Stil</LI>
+</UL>
+</P>
+
+<DT><B><EM>save config</EM>: Speichern der Konfiguration beim Verlassen</B><DD><P>Wie oben beschrieben, wird damt eingestellt, ob die Konfiguration beim
+Verlassen des Men&uuml;s in der Konfigurationsdatei gespeichert werden
+soll.</P>
+</DL>
+</P>
+<P>Wenn <EM>save config</EM> augeschaltet ist oder Einstellungen durch die
+Tastenk&uuml;rzel ge&auml;ndert wurden, kann die aktuelle Konfiguration mit
+<EM>SAVECONF</EM> abgespeichert werden.</P>
+<P>Die Konfigurationsdatei ist derzeit eine Bin&auml;rdatei und kann nicht
+editiert werden.</P>
+<P>Um die konfigurierbaren Einstellungen von der Konfigurationsdatei
+ausgehend wiederzuladen, dr&uuml;cken Sie <EM>RESET</EM>.</P>
+
+
+<H2><A NAME="switches"></A> <A NAME="ss2.6">2.6 Befehl f&uuml;r Zeilenoptionen</A></H2>
+
+<P>BRLTTY hat die folgenden Kommandozeilenoptionen. Ben&uuml;tzen Sie
+diese, um BRLTTY zu starten, wenn Sie andere Einstellungen als die
+Standards ben&uuml;tzen.</P>
+<P>
+<DL>
+<DT><B><CODE>-c</CODE> <EM>config-file</EM></B><DD><P>Ben&uuml;tze die Bin&auml;rkonfigurationsdatei
+<EM>config-file</EM> anstatt von <CODE>brlttyconf.dat</CODE>.</P>
+
+<DT><B><CODE>-d</CODE> <EM>serial-device</EM></B><DD><P>Ben&uuml;tzen Sie <EM>serial-device</EM>,
+wenn Sie anstatt auf den Standard auf ein Braille-Terminal zugreifen
+(normalerweise <CODE>/dev/ttySO</CODE>)</P>
+
+<DT><B><CODE>-t</CODE> <EM>text-trans-file</EM></B><DD><P>Ben&uuml;tze das &Uuml;bersetzungsprogramm
+<EM>text-trans-file</EM> anstatt des Standards. In der Version 1.0.1 ist
+der Standard bei der &Uuml;bersetzung festgelegt; in vorhergehenden
+Versionen wurde die Datei <CODE>us.tbl</CODE> geladen.</P>
+
+<DT><B><CODE>-h</CODE>, <CODE>--help</CODE></B><DD><P>Drucke eine kurze Hilfemitteilung und steige aus</P>
+<DT><B><CODE>-l</CODE> <EM>n</EM></B><DD><P>Setze den Debuglevel f&uuml;r syslog auf <EM>n</EM> (von 0 
+bis 7, Standard 4) </P>
+<DT><B><CODE>-q</CODE>, <CODE>--quiet</CODE></B><DD><P>Unterdr&uuml;cke Startmitteilungen</P>
+<DT><B><CODE>-v</CODE>, <CODE>--version</CODE></B><DD><P>Drucke Startmitteilungen und steige aus</P>
+
+</DL>
+</P>
+<P>Sie k&ouml;nnen nat&uuml;rlich die Standardeinstellungen der ersten zwei Angaben
+bei der &Uuml;bersetzung dauerhaft &auml;ndern (ebenso wie welches
+Text&uuml;bersetzungsprogramm als Standard zu ben&uuml;tzen ist)</P>
+
+
+<HR>
+<A HREF="Manual-ger-1.html">Previous</A>
+<A HREF="Manual-ger-3.html">Next</A>
+<A HREF="Manual-ger.html#toc2">Table of Contents</A>
+</BODY>
+</HTML>

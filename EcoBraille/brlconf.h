@@ -50,5 +50,3 @@
  */
 #define REFRESH_RATE 1000
 
-/* prefered/default status cells mode */
-#define DEF_MODE  ST_None

@@ -46,12 +46,11 @@ Screen *current;
 
 
 int
-initscr (char* helpfile)
+initscr (void)
 {
   if (live->open ())
     return 1;
-
-  help.open (helpfile);
+  help.open ();
   current = live;
   return 0;
 }
@@ -119,7 +118,7 @@ selectdisp (int disp)
       if (disp & HELP_SCRN)
 	/* set help mode: */
 	{
-	  if (!help.open ("??????"))
+	  if (!help.open ())
 	    {
 	      current = &help;
 	      curscrn = HELP_SCRN;

@@ -49,7 +49,7 @@ winpos;
 
 /* Functions provided by this library */
 
-int initscr (char* helpfile);		/* initialise screen reading functions */
+int initscr (void);		/* initialise screen reading functions */
 void getstat (scrstat *);		/* get screen status */
 unsigned char *getscr (winpos, unsigned char *, short);
 		/* Read a rectangle from the screen - text or attributes: */
