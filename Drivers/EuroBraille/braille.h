@@ -35,9 +35,9 @@ typedef struct	s_alias
 
 typedef struct	s_key
 {
-  int		brl_key;
+  short int	res;
+  unsigned char	brl_key;
   int		(*f)(BrailleDisplay *);
-  int		res;
 }		t_key;
 
 static int	begblk(BrailleDisplay *);
