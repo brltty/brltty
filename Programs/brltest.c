@@ -43,12 +43,15 @@ static unsigned char statusCells[StatusCellCount];        /* status cell buffer 
 BEGIN_OPTION_TABLE
   {'d', "device", "device", NULL, 0,
    "Path to device for accessing braille display."},
+  {'D', "data-directory", "directory", NULL, 0,
+   "Path to directory for driver help and configuration files."},
   {'L', "library-directory", "directory", NULL, 0,
    "Path to directory for loading drivers."},
 END_OPTION_TABLE
 
 static const char *opt_brailleDevice = NULL;
 static const char *opt_libraryDirectory = LIBRARY_DIRECTORY;
+static const char *opt_dataDirectory = DATA_DIRECTORY;
 
 static int
 handleOption (const int option) {
@@ -57,6 +60,9 @@ handleOption (const int option) {
       return 0;
     case 'd':
       opt_brailleDevice = optarg;
+      break;
+    case 'D':
+      opt_dataDirectory = optarg;
       break;
     case 'L':
       opt_libraryDirectory = optarg;
@@ -157,7 +163,7 @@ main (int argc, char *argv[]) {
       --argc;
     }
 
-    if (chdir(DATA_DIRECTORY) != -1) {
+    if (chdir(opt_dataDirectory) != -1) {
       reverseTable(&textTable, &untextTable);
       initializeBrailleDisplay(&brl);
       braille->identify();		/* start-up messages */
@@ -179,7 +185,8 @@ main (int argc, char *argv[]) {
         status = 5;
       }
     } else {
-      LogPrint(LOG_ERR, "Can't change directory to '%s': %s", DATA_DIRECTORY, strerror(errno));
+      LogPrint(LOG_ERR, "Can't change directory to '%s': %s",
+               opt_dataDirectory, strerror(errno));
       status = 4;
     }
   } else {
