@@ -516,8 +516,11 @@ usbAwaitInput (
     int size = getLittleEndian(endpoint->descriptor->wMaxPacketSize);
     unsigned char *buffer = malloc(size);
     if (buffer) {
+      int interval = getLittleEndian(endpoint->descriptor->bInterval);
       int count;
-      while ((count = usbReadEndpoint(device, endpointNumber, buffer, size, MAX(10, timeout))) != -1) {
+      interval = MAX(20, interval);
+      while ((count = usbReadEndpoint(device, endpointNumber, buffer, size,
+                                      MAX(interval, timeout))) != -1) {
         if (count) {
           endpoint->direction.input.buffer = buffer;
           endpoint->direction.input.length = count;
