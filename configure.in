@@ -274,7 +274,7 @@ AC_CHECK_HEADERS([iconv.h], [
    AC_HAVE_LIBRARY([iconv])
 ])
 
-AC_CHECK_FUNCS([fchdir fchmod getaddrinfo getopt_long shmget shm_open vsyslog])
+AC_CHECK_FUNCS([fchdir fchmod getaddrinfo getopt_long shmget shm_open sigaction vsyslog])
 
 AC_C_BIGENDIAN
 AC_C_CONST

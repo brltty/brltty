@@ -167,13 +167,19 @@ exitLog (void) {
 
 static void
 handleSignal (int number, void (*handler) (int)) {
+#ifdef HAVE_SIGACTION
   struct sigaction action;
   memset(&action, 0, sizeof(action));
   sigemptyset(&action.sa_mask);
   action.sa_handler = handler;
   if (sigaction(number, &action, NULL) == -1) {
-    LogError("signal set");
+    LogError("sigaction");
   }
+#else /* HAVE_SIGACTION */
+  if (signal(number, handler) == SIG_ERR) {
+    LogError("signal");
+  }
+#endif /* HAVE_SIGACTION */
 }
 
 static void

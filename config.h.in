@@ -92,6 +92,9 @@ extern "C" {
 /* Define this if the function shm_open exists. */
 #undef HAVE_SHM_OPEN
 
+/* Define this if the function sigaction exists. */
+#undef HAVE_SIGACTION
+
 /* Define this if the function vsyslog exists. */
 #undef HAVE_VSYSLOG
 
