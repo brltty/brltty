@@ -3833,7 +3833,8 @@ BRLTTY supports the following braille displays:
     <htmlurl url="http://www.handytech.com/" name="Handy Tech Elektronik GmbH">:
     Bookworm,
     Braille Star 40/80,
-    Braille Wave,
+    Braille Wave 40,
+    Braillino 20,
     Modular 20/40/80
   <item>
     <htmlurl url="http://cidat.once.es/" name="La O.N.C.E.">:

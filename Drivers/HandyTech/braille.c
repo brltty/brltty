@@ -105,7 +105,7 @@ static const ModelDescription Models[] = {
   }
   ,
   {
-    "Braille Wave", 0X05,
+    "Braille Wave 40", 0X05,
     40, 0, 0,
     interpretKeyByte, interpretBrailleWaveKeys,
     HandyBrailleStart,         NULL, NULL,
@@ -121,7 +121,7 @@ static const ModelDescription Models[] = {
   }
   ,
   {
-    "Braillino", 0X72,
+    "Braillino 20", 0X72,
     20, 0, 2,
     interpretKeyByte, interpretBrailleStarKeys,
     HandyBrailleStart,         NULL, NULL,
