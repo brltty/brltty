@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning boot parameter retrieval not available on this platform
+
 char *
 getBootParameters (void) {
   return NULL;

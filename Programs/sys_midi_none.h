@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning MIDI support not available on this platform
+
 int
 getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
   LogPrint(errorLevel, "MIDI device not supported.");

@@ -26,10 +26,6 @@
 #include <fcntl.h>
 #include <sys/audioio.h>
 
-#ifdef HAVE_FUNC_DLOPEN 
-#  include <dlfcn.h>
-#endif /* HAVE_FUNC_DLOPEN */
-
 #include "misc.h"
 #include "system.h"
 

@@ -4423,6 +4423,8 @@ The following device types are supported:
 <descrip>
   <tag/Bluetooth/
     For a bluetooth device, specify <tt/bluez:/<em/address/.
+    The address must be six two-digit hexadecimal numbers separated by colons,
+    e.g. <tt/01:23:45:67:89:AB/.
   <tag/Serial/
     For a serial device, specify <tt/serial:/<em>/path/to/device</>.
     The <tt/serial:/ qualifier is optional (for backward compatibility).

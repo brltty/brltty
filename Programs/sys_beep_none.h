@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning beeps not available on this platform
+
 int
 canBeep (void) {
   return 0;

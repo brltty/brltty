@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning shared object support not available on this platform
+
 void *
 loadSharedObject (const char *path) {
   return NULL;

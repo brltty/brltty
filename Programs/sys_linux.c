@@ -28,10 +28,6 @@
 #include <linux/kd.h>
 #include <linux/soundcard.h>
 
-#ifdef HAVE_FUNC_DLOPEN 
-#  include <dlfcn.h>
-#endif /* HAVE_FUNC_DLOPEN */
-
 #ifdef HAVE_SYS_IO_H
 #  include <sys/io.h>
 #endif /* HAVE_SYS_IO_H */

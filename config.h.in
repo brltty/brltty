@@ -31,6 +31,9 @@ extern "C" {
 /* Define this if the compiler doesn't fully support the inline keyword. */
 #undef inline
 
+/* Define this if the header file alloca.h exists. */
+#undef HAVE_ALLOCA_H
+
 /* Define this if the header file getopt.h exists. */
 #undef HAVE_GETOPT_H
 
@@ -43,14 +46,11 @@ extern "C" {
 /* Define this if the function vsyslog exists. */
 #undef HAVE_VSYSLOG
 
-/* Define this if the header file alloca.h exists. */
-#undef HAVE_ALLOCA_H
-
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 
-/* Define this if the header file bluetooth/bluetooth.h exists. */
-#undef HAVE_BLUETOOTH_BLUETOOTH_H
+/* Define this if the header file machine/speaker.h exists. */
+#undef HAVE_MACHINE_SPEAKER_H
 
 /* Define this if the header file linux/vt.h exists. */
 #undef HAVE_LINUX_VT_H
@@ -60,6 +60,9 @@ extern "C" {
 
 /* Define this if the header file linux/uinput.h exists. */
 #undef HAVE_LINUX_UINPUT_H
+
+/* Define this if the header file bluetooth/bluetooth.h exists. */
+#undef HAVE_BLUETOOTH_BLUETOOTH_H
 
 /* Define this if the function dlopen is available. */
 #undef HAVE_FUNC_DLOPEN

@@ -15,6 +15,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifdef HAVE_FUNC_DLOPEN 
+#include <dlfcn.h>
+#else /* HAVE_FUNC_DLOPEN */
+#warning shared object support not available on this installation: no <dlfcn.h>
+#endif /* HAVE_FUNC_DLOPEN */
+
 void *
 loadSharedObject (const char *path) {
 #ifdef HAVE_FUNC_DLOPEN 

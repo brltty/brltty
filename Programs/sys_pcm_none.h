@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning sound card support not available on this platform
+
 int
 getPcmDevice (int errorLevel) {
   LogPrint(errorLevel, "PCM device not supported.");

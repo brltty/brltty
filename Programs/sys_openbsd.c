@@ -27,11 +27,6 @@
 #include <sys/ioctl.h>
 #include <sys/audioio.h>
 #include <sys/time.h>
-#include <dev/wscons/wsconsio.h>
-
-#ifdef HAVE_FUNC_DLOPEN 
-#  include <dlfcn.h>
-#endif /* HAVE_FUNC_DLOPEN */
 
 #include "misc.h"
 #include "system.h"
@@ -41,53 +36,7 @@
 #define SHARED_OBJECT_LOAD_FLAGS (DL_LAZY)
 #include "sys_shlib_dlfcn.h"
 
-int
-canBeep (void) {
-  return getConsole() != -1;
-}
-
-int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  return 0;
-}
-
-int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  int console = getConsole();
-  if (console != -1) {
-    struct wskbd_bell_data bell;
-    if (!(bell.period = milliseconds)) return 1;
-    bell.pitch = frequency;
-    bell.volume = 100;
-    bell.which = WSKBD_BELL_DOALL;
-    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
-    LogError("ioctl WSKBDIO_COMPLEXBELL");
-  }
-  return 0;
-}
-
-int
-startBeep (unsigned short frequency) {
-  return 0;
-}
-
-int
-stopBeep (void) {
-  int console = getConsole();
-  if (console != -1) {
-    struct wskbd_bell_data bell;
-    bell.which = WSKBD_BELL_DOVOLUME | WSKBD_BELL_DOPERIOD;
-    bell.volume = 0;
-    bell.period = 0;
-    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
-    LogError("ioctl WSKBDIO_COMPLEXBELL");
-  }
-  return 0;
-}
-
-void
-endBeep (void) {
-}
+#include "sys_beep_wskbd.h"
 
 #ifdef ENABLE_PCM_TUNES
 #include "sys_pcm_audio.h"

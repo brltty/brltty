@@ -246,9 +246,9 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 AC_PATH_XTRA
 AC_SEARCH_LIBS([socket], [socket])
 
-AC_CHECK_HEADERS([getopt.h iconv.h syslog.h])
+AC_CHECK_HEADERS([alloca.h getopt.h iconv.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])
-AC_CHECK_HEADERS([alloca.h sys/io.h linux/vt.h linux/input.h])
+AC_CHECK_HEADERS([sys/io.h machine/speaker.h linux/vt.h linux/input.h])
 AC_CHECK_HEADERS([linux/uinput.h], [], [], [
 #include <linux/input.h>
 ])

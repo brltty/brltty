@@ -24,10 +24,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <dlfcn.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <machine/speaker.h>
 #include <sys/soundcard.h>
 
 #include "misc.h"
@@ -38,61 +36,7 @@
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
 
-static int speaker = -1;
-
-static int
-getSpeaker (void) {
-  if (speaker == -1) {
-    if ((speaker = open("/dev/speaker", O_WRONLY)) != -1) {
-      LogPrint(LOG_DEBUG, "Speaker opened: fd=%d", speaker);
-    } else {
-      LogError("speaker open");
-    }
-  }
-  return speaker;
-}
-
-int
-canBeep (void) {
-  return 1;
-}
-
-int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  int speaker = getSpeaker();
-  if (speaker != -1) {
-    tone_t tone;
-    memset(&tone, 0, sizeof(tone));
-    tone.frequency = frequency;
-    tone.duration = (milliseconds + 9) / 10;
-    if (ioctl(speaker, SPKRTONE, &tone) != -1) return 1;
-    LogError("speaker tone");
-  }
-  return 0;
-}
-
-int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  return 0;
-}
-
-int
-startBeep (unsigned short frequency) {
-  return 0;
-}
-
-int
-stopBeep (void) {
-  return 0;
-}
-
-void
-endBeep (void) {
-  if (speaker != -1) {
-    close(speaker);
-    speaker = -1;
-  }
-}
+#include "sys_beep_spkr.h"
 
 #ifdef ENABLE_PCM_TUNES
 #include "sys_pcm_dsp.h"

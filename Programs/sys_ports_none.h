@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning I/O port access not available on this platform
+
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
   LogPrint(errorLevel, "I/O ports not supported.");
