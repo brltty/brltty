@@ -902,6 +902,8 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
               writeParameter(brl, 6, newSetting);
             }
           }
+
+          return 0;
         }
       }
       break;
