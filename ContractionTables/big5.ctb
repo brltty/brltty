@@ -378,7 +378,7 @@ always	\xA3\x63	34567-14	θ
 always	\xA3\x64	34567-145	ι
 always	\xA3\x65	34567-15	κ
 always	\xA3\x66	34567-124	λ
-always	\xA3\x67	34567-1245	μ
+always	\xA3\x67	46-134	μ
 always	\xA3\x68	34567-125	ν
 always	\xA3\x69	34567-24	ξ
 always	\xA3\x6A	34567-245	ο
@@ -502,6 +502,7 @@ always	\xA4\x42	145-13456-3	丁
 always	\xA4\x43	245-16-3	七
 always	\xA4\x44	1345-2456-4	乃
 always	\xA4\x45	13-234-4	九
+always	\xA4\x46\xB8\xD1	14-246-4-13-346-4	了解
 always	\xA4\x46	14-2346-1	了
 always	\xA4\x47	156-5	二
 always	\xA4\x48	1245-136-2	人
@@ -565,6 +566,9 @@ always	\xA4\x7E	245-2456-2	才
 always	\xA4\xA1	12-12356-4	丑
 always	\xA4\xA2	13-2456-5	丐
 always	\xA4\xA3	135-34-5	不
+always	\xA4\xA4\xAC\x72	1-12346-5-145-34-2	中毒
+always	\xA4\xA4\xAD\xB7	1-12346-5-12345-1356-3	中風
+always	\xA4\xA4\xB4\xBB	1-12346-5-24-34-4	中暑
 always	\xA4\xA4	1-12346-3	中
 always	\xA4\xA5	12345-1356-3	丰
 always	\xA4\xA6	145-1236-3	丹
@@ -594,6 +598,7 @@ always	\xA4\xBC	15-16-3	兮
 always	\xA4\xBD	13-12346-3	公
 always	\xA4\xBE	1245-12346-4	冗
 always	\xA4\xBF	15-235-3	凶
+always	\xA4\xD1\xA4\xC0	124-2345-3-12345-136-5	天分
 always	\xB3\xA1\xA4\xC0	135-34-5-12345-136-5	部分
 always	\xA4\xC0	12345-136-3	分
 always	\xA4\xC1\xA8\xAD	245-346-5-24-136-3	切身
@@ -951,7 +956,8 @@ always	\xA6\xE2	15-2346-5	色
 always	\xA6\xE3	2456-5	艾
 always	\xA6\xE4	12-12346-2	虫
 always	\xA6\xE5	15-346-4	血
-always	\xA6\xE6	15-13456-2	行
+always	\xA6\xE6\xA4\x46	15-13456-2-14-2346-1	行了
+always	\xA6\xE6	1235-1346-2	行
 always	\xA6\xE7	16-3	衣
 always	\xA6\xE8	15-16-3	西
 always	\xA6\xE9	245-2345-3	阡
@@ -1121,6 +1127,7 @@ always	\xA7\xEF	13-2456-4	改
 always	\xA7\xF0	13-12346-3	攻
 always	\xA7\xF1	234-3	攸
 always	\xA7\xF2	1235-1236-5	旱
+always	\xC5\xDC\xA7\xF3	135-2345-5-13-1356-3	變更
 always	\xA7\xF3	13-1356-5	更
 always	\xA7\xF4	24-34-5	束
 always	\xA7\xF5	14-16-4	李
@@ -1548,6 +1555,7 @@ always	\xAA\xC1	15-156-5	祀
 always	\xAA\xC2	245-16-2	祁
 always	\xAA\xC3	135-13456-4	秉
 always	\xAA\xC4	15-2345-3	秈
+always	\xAA\xC5\xA5\xD5	123-12346-5-135-2456-2	空白
 always	\xAA\xC5	123-12346-3	空
 always	\xAA\xC6	245-235-3	穹
 always	\xAA\xC7	1-34-2	竺
@@ -1599,8 +1607,8 @@ always	\xAA\xF4	245-234-3	邱
 always	\xAA\xF5	135-356-5	邶
 always	\xAA\xF6	245-2456-4	采
 always	\xAA\xF7	13-1456-3	金
-always	\xAE\x61\xAA\xF8	13-23456-3-1-1346-4	家長
-always	\xAA\xF8	12-1346-2	長
+always	\xAA\xF8\xA6\xEA	12-1346-2-12-12456-5	長串
+always	\xAA\xF8	1-1346-4	長
 always	\xAA\xF9	134-136-2	門
 always	\xAA\xFA	12345-34-5	阜
 always	\xAA\xFB	124-25-2	陀
@@ -1843,10 +1851,8 @@ always	\xAC\xAC	15-256-2	洵
 always	\xAC\xAD	13-16-5	洎
 always	\xAC\xAE	15-1256-5	洫
 always	\xAC\xAF	15-45-5	炫
-always	\xAC\xB0\xA4\x46	1246-5-14-2346-1	為了
-always	\xAC\xB0\xA4\xB0	1246-5-24-2346-2	為什
-always	\xA6\x5D\xAC\xB0	1456-3-1246-5	因為
-always	\xAC\xB0	1246-2	為
+always	\xBA\xD9\xAC\xB0	12-1356-3-1246-2	稱為
+always	\xAC\xB0	1246-5	為
 always	\xAC\xB1	135-13456-4	炳
 always	\xAC\xB2	13-1256-5	炬
 always	\xAC\xB3	13-235-4	炯
@@ -2666,11 +2672,7 @@ always	\xB1\xCC	1345-345-5	捺
 always	\xB1\xCD	135-16-5	敝
 always	\xB1\xCE	146-2	敖
 always	\xB1\xCF	13-234-5	救
-always	\xB1\xD0\xA7\xF7	13-246-5-245-2456-2	教材
-always	\xB1\xD0\xA8\x7C	13-246-5-1256-5	教育
-always	\xB1\xD0\xAE\x76	13-246-5-24-156-3	教師
-always	\xB1\xD0\xAE\xD7	13-246-5-1236-5	教案
-always	\xB1\xD0	13-246-3	教
+always	\xB1\xD0	13-246-5	教
 always	\xB1\xD1	135-2456-5	敗
 always	\xB1\xD2	245-16-4	啟
 always	\xB1\xD3	134-1456-4	敏
@@ -3311,6 +3313,7 @@ always	\xB5\xD7	13-13456-3	菁
 always	\xB5\xD8	1235-35-2	華
 always	\xB5\xD9	14-13456-2	菱
 always	\xB5\xDA	1236-3	菴
+always	\xB5\xDB\xA4\xE2	1-25-2-24-12356-4	著手
 always	\xB5\xDB	1-2346-1	著
 always	\xB5\xDC	14-2456-2	萊
 always	\xB5\xDD	13-34-3	菰
@@ -4096,6 +4099,7 @@ always	\xBA\xD5	1-136-3	禎
 always	\xBA\xD6	12345-34-2	福
 always	\xBA\xD7	1235-25-5	禍
 always	\xBA\xD8	1-12346-4	種
+always	\xBA\xD9\xC2\xBE	12-1356-5-1-156-2	稱職
 always	\xBA\xD9	12-1356-3	稱
 always	\xBA\xDA	35-3	窪
 always	\xBA\xDB	25-3	窩
@@ -4407,6 +4411,7 @@ always	\xBC\xD2	134-126-2	模
 always	\xBC\xD3	14-12356-2	樓
 always	\xBC\xD4	12345-1236-2	樊
 always	\xBC\xD5	13-46-4	槳
+always	\xA7\xD6\xBC\xD6	123-2356-5-14-2346-5	快樂
 always	\xBC\xD6	236-5	樂
 always	\xBC\xD7	245-12346-3	樅
 always	\xBC\xD8	245-16-3	槭
@@ -4563,6 +4568,7 @@ always	\xBD\xD1	1-34-3	諸
 always	\xBD\xD2	123-2346-5	課
 always	\xBD\xD3	1246-4	諉
 always	\xBD\xD4	12-1236-4	諂
+always	\xBD\xD5\xB8\x60	124-246-2-13-346-2	調節
 always	\xBD\xD5\xBE\xE3	124-246-2-1-1356-4	調整
 always	\xBD\xD5\xC0\x57	124-246-2-12345-1456-2	調頻
 always	\xBD\xD5\xC5\xDC	124-246-2-135-2345-5	調變
@@ -5004,9 +5010,7 @@ always	\xC0\xAF	1245-12346-2	嶸
 always	\xC0\xB0	135-1346-3	幫
 always	\xC0\xB1	134-16-2	彌
 always	\xC0\xB2	1235-1246-3	徽
-always	\xA4\xCF\xC0\xB3	12345-1236-4-13456-5	反應
-always	\xC0\xB3\xA5\xCE	13456-5-235-5	應用
-always	\xC0\xB3	13456-3	應
+always	\xC0\xB3	13456-5	應
 always	\xC0\xB4	145-12346-4	懂
 always	\xC0\xB5	123-136-4	懇
 always	\xC0\xB6	1345-25-5	懦
@@ -5336,7 +5340,9 @@ always	\xC2\xBF	1345-346-5	聶
 always	\xC2\xC0	245-16-2	臍
 always	\xC2\xC1	135-1456-5	臏
 always	\xC2\xC2	13-234-5	舊
-always	\xC2\xC3	245-1346-2	藏
+always	\xC1\xF4\xC2\xC3	1456-4-245-1346-2	隱藏
+always	\xC2\xC3\xC0\x73	245-1346-2-14-12346-2	藏龍
+always	\xC2\xC3	125-1346-5	藏
 always	\xC2\xC4	15-345-5	薩
 always	\xC2\xC5	14-1236-2	藍
 always	\xC2\xC6	134-246-4	藐
@@ -5632,6 +5638,7 @@ always	\xC4\xAD	256-5	蘊
 always	\xC4\xAE	1235-146-2	蠔
 always	\xC4\xAF	1245-34-2	蠕
 always	\xC4\xB0	14-1236-2	襤
+always	\xBA\xCE\xC4\xB1	24-1246-5-13-246-5	睡覺
 always	\xC4\xB1	13-236-2	覺
 always	\xC4\xB2	12-34-5	觸
 always	\xC4\xB3	16-5	議
