@@ -47,7 +47,7 @@ static int activeKeys;
 static void
 brl_identify (void)
 {
-	LogPrint(LOG_NOTICE, "HT Protocol driver");
+	LogPrint(LOG_NOTICE, "Vario Driver for HandyTech Emulation Mode");
 }
 
 static int 
@@ -162,6 +162,8 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 					return CMD_LNUP;
 				case (KEY_2):
 					return CMD_FWINLT;
+				case (KEY_3):
+					return CMD_HELP;
 				case (KEY_4):
 					return CMD_LNDN;
 				case (KEY_5):
