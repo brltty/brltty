@@ -107,7 +107,7 @@ Features
 *  A cut & paste function which is particularly useful for copying long file
    names, copying text between virtual terminals, entering complicated
    commands, etc.
-*  Table driven in-line contracted braille (english grade 2 provided).
+*  Table driven in-line contracted braille (English and French provided).
 *  Support for multiple braille codes.
 *  Ability to identify an unknown character.
 *  Ability to inspect character highlighting.

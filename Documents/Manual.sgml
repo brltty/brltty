@@ -124,7 +124,7 @@ BRLTTY provides the following capabilities:
     entering complicated commands,
     etc.
   <item>
-    Table driven in-line contracted braille (english grade 2 provided).
+    Table driven in-line contracted braille (English and French provided).
   <item>
     Support for multiple braille codes.
   <item>
