@@ -1051,6 +1051,8 @@ elif test "${screen_driver}" = "yes"
 then
    screen_driver="${brltty_cv_default_screen_driver}"
 fi
+BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
+
 screen_driver_objects="scr_${screen_driver}."'$O'
 case "${screen_driver}"
 in
@@ -1059,7 +1061,33 @@ in
       ;;
 esac
 AC_SUBST([screen_driver_objects])
-BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
+
+screen_driver_libraries=""
+cspi_includes=""
+case "${screen_driver}"
+in
+   atspi)
+      found=false
+      for package in cspi-1.0
+      do
+         pkg-config --exists "${package}" && {
+            cspi_libdirs="`pkg-config --libs-only-L "${package}"`"
+            cspi_libraries="`pkg-config --libs-only-l "${package}"`"
+            cspi_includes="`pkg-config --cflags-only-I "${package}"`"
+            found=true
+            break
+         }
+      done
+
+      "${found}" || {
+         AC_MSG_ERROR([cspi not found.])
+      }
+
+      screen_driver_libraries="${cspi_libdirs} ${cspi_libraries}"
+      ;;
+esac
+AC_SUBST([screen_driver_libraries])
+AC_SUBST([cspi_includes])
 
 BRLTTY_ARG_PARAMETERS([screen])
 
