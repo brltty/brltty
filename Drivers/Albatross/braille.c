@@ -101,7 +101,9 @@ updateDisplay (unsigned char *cells) {
     unsigned char cell;
     if (!cells) {
       cell = cellContent[column];
-    } else if ((cell = outputTable[cells[column]]) == cellContent[column]) {
+    } else if ((cell = outputTable[cells[column]]) != cellContent[column]) {
+      cellContent[column] = cell;
+    } else {
       continue;
     }
     *byte++ = column + 1;
