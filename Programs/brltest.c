@@ -157,7 +157,7 @@ main (int argc, char *argv[]) {
       --argc;
     }
 
-    if (chdir(HOME_DIRECTORY) != -1) {
+    if (chdir(DATA_DIRECTORY) != -1) {
       reverseTable(&textTable, &untextTable);
       initializeBrailleDisplay(&brl);
       braille->identify();		/* start-up messages */
@@ -179,7 +179,7 @@ main (int argc, char *argv[]) {
         status = 5;
       }
     } else {
-      LogPrint(LOG_ERR, "Can't change directory to '%s': %s", HOME_DIRECTORY, strerror(errno));
+      LogPrint(LOG_ERR, "Can't change directory to '%s': %s", DATA_DIRECTORY, strerror(errno));
       status = 4;
     }
   } else {

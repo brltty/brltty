@@ -1555,15 +1555,15 @@ startup (int argc, char *argv[]) {
     processConfigurationFile(optionTable, optionCount, opt_configurationFile, optional);
   }
   ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE", -1);
-  ensureOptionSetting(&opt_tablesDirectory, HOME_DIRECTORY, cfg_tablesDirectory, "BRLTTY_TABLES_DIRECTORY", -1);
+  ensureOptionSetting(&opt_tablesDirectory, DATA_DIRECTORY, cfg_tablesDirectory, "BRLTTY_TABLES_DIRECTORY", -1);
   ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE", 2);
   ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE", -1);
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  ensureOptionSetting(&opt_contractionsDirectory, HOME_DIRECTORY, cfg_contractionsDirectory, "BRLTTY_CONTRACTIONS_DIRECTORY", -1);
+  ensureOptionSetting(&opt_contractionsDirectory, DATA_DIRECTORY, cfg_contractionsDirectory, "BRLTTY_CONTRACTIONS_DIRECTORY", -1);
   ensureOptionSetting(&opt_contractionTable, NULL, cfg_contractionTable, "BRLTTY_CONTRACTION_TABLE", -1);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
-  ensureOptionSetting(&opt_dataDirectory, HOME_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
+  ensureOptionSetting(&opt_dataDirectory, DATA_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
   ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER", 0);
   ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1603,10 +1603,10 @@ startup (int argc, char *argv[]) {
     opt_preferencesFile = path;
   }
 
-  if (chdir(HOME_DIRECTORY) == -1) {                /* * change to directory containing data files  */
+  if (chdir(DATA_DIRECTORY) == -1) {                /* * change to directory containing data files  */
     char *backup_dir = "/etc";
     LogPrint(LOG_ERR, "Cannot change directory to '%s': %s",
-             HOME_DIRECTORY, strerror(errno));
+             DATA_DIRECTORY, strerror(errno));
     LogPrint(LOG_WARNING, "Using backup directory '%s' instead.",
              backup_dir);
     chdir(backup_dir);                /* home directory not found, use backup */

@@ -93,7 +93,7 @@ original_prefix="${prefix}"
 test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
-BRLTTY_DEFINE_EXPANDED([HOME_DIRECTORY], ["${execute_root}${data_directory}"])
+BRLTTY_DEFINE_EXPANDED([DATA_DIRECTORY], ["${execute_root}${data_directory}"])
 BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${sysconfdir}"])
 BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${execute_root}${library_directory}"])
 eval 'configuration_directory="'"${sysconfdir}"'"'

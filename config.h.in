@@ -68,7 +68,7 @@ extern "C" {
 #undef INIT_PATH
 
 /* Define this to be a string containing the desired working directory. */
-#undef HOME_DIRECTORY
+#undef DATA_DIRECTORY
 
 /* Define this to be a string containing the path to the configuration directory. */
 #undef CONFIGURATION_DIRECTORY
