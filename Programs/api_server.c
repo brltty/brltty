@@ -1081,7 +1081,7 @@ void api_identify(void)
 /* Initializes BrlApi */
 /* One first initialize the driver */
 /* Then one creates the communication socket */
-void api_open(BrailleDisplay *brl, char **parameters)
+int api_open(BrailleDisplay *brl, char **parameters)
 {
   static char *host;
   int res;
@@ -1117,7 +1117,7 @@ void api_open(BrailleDisplay *brl, char **parameters)
   }
   api_link();
   connectionsAllowed = 1;
-  return;
+  return 1;
   
 outallocs:
   freeConnection(ttys.connections);
@@ -1125,7 +1125,7 @@ outalloc:
   freeConnection(notty.connections);
 out:
   connectionsAllowed = 0;
-  return;
+  return 0;
 }
 
 /* Function : api_close */

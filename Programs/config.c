@@ -87,6 +87,7 @@ static const char *opt_contractionTable = NULL;
 #ifdef ENABLE_API
 static char *opt_apiParameters = NULL;
 static char **apiParameters = NULL;
+static int apiOpened;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -679,7 +680,7 @@ stopBrailleDriver (void) {
 void
 restartBrailleDriver (void) {
 #ifdef ENABLE_API
-  api_unlink();
+  if (apiOpened) api_unlink();
 #endif /* ENABLE_API */
 
   stopBrailleDriver();
@@ -688,7 +689,7 @@ restartBrailleDriver (void) {
   startBrailleDriver();
 
 #ifdef ENABLE_API
-  api_link();
+  if (apiOpened) api_link();
 #endif /* ENABLE_API */
 }
 
@@ -713,7 +714,8 @@ changedBrailleFirmness (unsigned char setting) {
 #ifdef ENABLE_API
 static void
 exitApi (void) {
-   api_close(&brl);
+  api_close(&brl);
+  apiOpened = 0;
 }
 #endif /* ENABLE_API */
 
@@ -2024,8 +2026,9 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_API
   /* Activate the application programming interface. */
-  api_open(&brl, apiParameters);
-  atexit(exitApi);
+  if ((apiOpened = api_open(&brl, apiParameters))) {
+    atexit(exitApi);
+  }
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT

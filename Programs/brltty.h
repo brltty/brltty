@@ -120,7 +120,7 @@ extern int getCommand (BRL_DriverCommandContext context);
 extern int readCommand (BRL_DriverCommandContext context);
 
 extern void api_identify (void);
-extern void api_open (BrailleDisplay *brl, char **parameters);
+extern int api_open (BrailleDisplay *brl, char **parameters);
 extern void api_close (BrailleDisplay *brl);
 extern void api_link (void);
 extern void api_unlink (void);
