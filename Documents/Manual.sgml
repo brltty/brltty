@@ -108,10 +108,6 @@ we do welcome any interest in such projects.
         Several distributions including Debian, Red Hat, Slackware, and SuSE.
       <item>
         Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
-      <item>
-        A DEC Alpha
-        (only tested once under Red Hat Alpha Linux on a noname board kindly lent
-        to the Cambridge University Computer Laboratory by DEC in Reading, England).
     </itemize>
   <tag/OpenBSD/
     This software has been tested on the following OpenBSD systems:
@@ -1228,36 +1224,6 @@ To uninstall BRLTTY, do:
 Building BRLTTY also results in the building of
 a few small helper and diagnostic utilities.
 
-<sect2>brltty-install<label id="utility-brltty-install"><p>
-This utility copies BRLTTY's
-<ref id="hierarchy" name="installed file hierarchy">
-from one location to another.
-<tscreen>brltty-install <em/to/ &lsqb;<em/from/&rsqb;</tscreen>
-<descrip>
-  <tag><em/to/</tag>
-    The location to which the
-    <ref id="hierarchy" name="installed file hierarchy">
-    is to be copied.
-    It must be an existing directory.
-  <tag><em/from/</tag>
-    The location from which the
-    <ref id="hierarchy" name="installed file hierarchy">
-    is to be taken.
-    If it's specified, then it must be an existing directory.
-    If it's not specified, then the location used for the build is assumed.
-</descrip>
-
-This utility can be used, for example, to copy BRLTTY to a root disk.
-If a root floppy is mounted as <tt>/mnt</>,
-and BRLTTY is installed on the main system,
-then typing <tscreen>brltty-install /mnt</tscreen>
-copies BRLTTY, along with all of its data and library files,
-to the root floppy.
-
-Some problems have been experienced when copying BRLTTY
-between systems with different versions of the shared C library.
-This is worth investigating if you have difficulties.
-
 <sect2>brltty-config<label id="utility-brltty-config"><p>
 This utility sets a number of environment variables to values
 which reflect the current installation of BRLTTY
@@ -1324,29 +1290,35 @@ In addition, the following standard <bf/autoconf/ environment variables are also
     Configured via the <tt/--includedir/ build option.
 </descrip>
 
-<sect2>txt2hlp<p>
-This is a helper utility which is used during the build procedure
-to prepare the help pages for the drivers.
-<tscreen>txt2hlp <em/output-file/ <em/input-file/ ...</tscreen>
+<sect2>brltty-install<label id="utility-brltty-install"><p>
+This utility copies BRLTTY's
+<ref id="hierarchy" name="installed file hierarchy">
+from one location to another.
+<tscreen>brltty-install <em/to/ &lsqb;<em/from/&rsqb;</tscreen>
 <descrip>
-  <tag><em/output-file/</tag>
-    The file which is to contain all of the compiled help pages.
-    The pages are numbered, starting from zero,
-    in the same order as the input files are specified.
-  <tag><em/input-file/</tag>
-    At least one input file must be specified.
-    Each is the source for a single help page,
-    and should contain plain text.
+  <tag><em/to/</tag>
+    The location to which the
+    <ref id="hierarchy" name="installed file hierarchy">
+    is to be copied.
+    It must be an existing directory.
+  <tag><em/from/</tag>
+    The location from which the
+    <ref id="hierarchy" name="installed file hierarchy">
+    is to be taken.
+    If it's specified, then it must be an existing directory.
+    If it's not specified, then the location used for the build is assumed.
 </descrip>
 
-<sect2>tbl2hex<p>
-This is a helper utility which is used during the build procedure
-to prepare the default text and attributes translation tables.
-<tscreen>tbl2hex</tscreen>
-The translation table is read from standard input,
-and a set of hexadecimal constants
-suitable for inclusion within a C array initializer
-is written to standard output.
+This utility can be used, for example, to copy BRLTTY to a root disk.
+If a root floppy is mounted as <tt>/mnt</>,
+and BRLTTY is installed on the main system,
+then typing <tscreen>brltty-install /mnt</tscreen>
+copies BRLTTY, along with all of its data and library files,
+to the root floppy.
+
+Some problems have been experienced when copying BRLTTY
+between systems with different versions of the shared C library.
+This is worth investigating if you have difficulties.
 
 <sect2>brltest<label id="utility-brltest"><p>
 This utility tests a braille display driver,
@@ -1391,6 +1363,38 @@ is <tt/10/ seconds.
 The message hold time
 (used for non-final segments of long messages)
 is <tt/4/ seconds.
+
+<sect2>spktest<label id="utility-spktest"><p>
+This utility tests a speech synthesizer driver.
+It may need to be run as root.
+<tscreen>spktest -<em/option/ ... [<em/driver/ [<em/name/=<em/value/ ...]]</tscreen>
+<descrip>
+  <tag><em/driver/</tag>
+    The driver for the speech synthesizer.
+    It must be a two-letter <ref id="drivers" name="driver identification code">.
+    If it's not specified, then the first driver configured via the
+    <ref id="build-speech-driver" name="--with-speech-driver"> build option
+    is assumed.
+  <tag><em/name/<tt/=/<em/value/</tag>
+    Set a speech synthesizer driver parameter.
+    For a description of the parameters accepted by a specific driver,
+    please see the documentation for that driver.
+  <tag><tt/-t/<em/string/ <tt/--text-string=/<em/string/</tag>
+    The text to be spoken.
+    If it's not specified, then standard input is read.
+  <tag><tt/-D/<em/directory/ <tt/--data-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the driver data files reside.
+    If it's not specified, then the directory configured via the
+    <ref id="build-data-directory" name="--with-data-directory"> build option
+    is assumed.
+  <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the drivers reside.
+    If it's not specified, then the directory configured via the
+    <ref id="build-library-directory" name="--libdir"> build option
+    is assumed.
+  <tag><tt/-h/ <tt/--help/</tag>
+    Display a summary of the command line options, and then exit.
+</descrip>
 
 <sect2>scrtest<label id="utility-scrtest"><p>
 This utility tests the screen driver.
@@ -1451,38 +1455,6 @@ The following is written to standard output:
     The contents of the selected screen region.
     Unprintable characters are written as blanks.
 </enum>
-
-<sect2>spktest<label id="utility-spktest"><p>
-This utility tests a speech synthesizer driver.
-It may need to be run as root.
-<tscreen>spktest -<em/option/ ... [<em/driver/ [<em/name/=<em/value/ ...]]</tscreen>
-<descrip>
-  <tag><em/driver/</tag>
-    The driver for the speech synthesizer.
-    It must be a two-letter <ref id="drivers" name="driver identification code">.
-    If it's not specified, then the first driver configured via the
-    <ref id="build-speech-driver" name="--with-speech-driver"> build option
-    is assumed.
-  <tag><em/name/<tt/=/<em/value/</tag>
-    Set a speech synthesizer driver parameter.
-    For a description of the parameters accepted by a specific driver,
-    please see the documentation for that driver.
-  <tag><tt/-t/<em/string/ <tt/--text-string=/<em/string/</tag>
-    The text to be spoken.
-    If it's not specified, then standard input is read.
-  <tag><tt/-D/<em/directory/ <tt/--data-directory=/<em/directory/</tag>
-    The absolute path for the directory wherein the driver data files reside.
-    If it's not specified, then the directory configured via the
-    <ref id="build-data-directory" name="--with-data-directory"> build option
-    is assumed.
-  <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
-    The absolute path for the directory wherein the drivers reside.
-    If it's not specified, then the directory configured via the
-    <ref id="build-library-directory" name="--libdir"> build option
-    is assumed.
-  <tag><tt/-h/ <tt/--help/</tag>
-    Display a summary of the command line options, and then exit.
-</descrip>
 
 <sect2>tbltest<label id="utility-tbltest"><p>
 This utility tests a translation table
@@ -3605,275 +3577,6 @@ either for a few seconds
 (see the <ref id="options-message-delay" name="-M"> command line option)
 or until any key on the display is pressed.
 
-<sect1>Contracted Braille<label id="contraction"><p>
-BRLTTY can display in-line contracted braille.
-It does this if:
-<itemize>
-  <item>
-    A contraction table has been selected.
-    See the <ref id="options-contraction-table" name="-c"> command line option
-    and the <ref id="configure-contraction-table" name="contraction-table"> configuration file directive
-    for details.
-  <item>
-    The 6-dot braille feature has been activated.
-    See the <ref id="command-SIXDOTS" name="SIXDOTS"> command
-    and the <ref id="preference-text-style" name="Text Style"> preference
-    for details.
-</itemize>
-This feature isn't available if the
-<ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
-
-The following contraction tables are provided:
-<descrip>
-  <tag/big5.ctb/Chinese big5.
-  <tag/big5/Chinese
-  <tag/compress/Remove excessive white-space.
-  <tag/en-us-g2/Grade 2 American English.
-  <tag/fr-abrege/Contracted Unified French.
-  <tag/fr-integral/Uncontracted Unified French.
-</descrip>
-
-<sect2>File Format<p>
-Blank lines are ignored.
-Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
-Lines which begin with a number sign (<tt/&num;/) are ignored,
-i.e. they're comments.
-<tscreen>&num; This is a comment.</tscreen>
-All other lines define table entries.
-
-The general form of a table entry is an opcode followed by its operands.
-The opcode and its operands are separated from one another by white-space.
-Each opcode has a specific number of operands,
-and any text following its last operand is treated as a comment.
-<tscreen><em/opcode/ <em/operand/ ... <em/comment/</tscreen>
-
-The following operand types are supported:
-<descrip>
-  <tag/string/
-    A sequence of characters other than
-    white-space (which terminates the string)
-    and backslashes (<tt/&bsol;/).
-    The following special representations are also supported:
-    <descrip>
-      <tag><tt/&bsol;&bsol;/</tag>backslash
-      <tag><tt/&bsol;f/</tag>form feed
-      <tag><tt/&bsol;n/</tag>new line
-      <tag><tt/&bsol;o/<em/ooo/</tag>3-digit octal value
-      <tag><tt/&bsol;r/</tag>carriage return
-      <tag><tt/&bsol;s/</tag>blank (space)
-      <tag><tt/&bsol;t/</tag>horizontal tab
-      <tag><tt/&bsol;v/</tag>vertical tab
-      <tag><tt/&bsol;x/<em/xx/</tag>2-digit hexadecimal value
-    </descrip>
-  <tag/number/
-    An integer.
-    It may be specified in any of the following ways:
-    <descrip>
-      <tag/decimal/
-        A sequence of decimal digits (<tt/0/-<tt/9/),
-        with the first digit being nonzero (<tt/1/-<tt/9/).
-      <tag/hexadecimal/
-        A sequence of hexadecimal digits (<tt/0/-<tt/9/, and either <tt/a/-<tt/f/ or <tt/A/-<tt/F/),
-        preceded by either <tt/0x/ or <tt/0X/.
-      <tag/octal/
-        A sequence of octal digits (<tt/0/-<tt/7/),
-        with the first digit being zero (<tt/0/).
-    </descrip>
-  <tag/dots/
-    A braille symbol.
-    The braille dots must be specified via their standard numbers
-    (see section <ref id="dots" name="Standard Braille Dot Numbering Convention">),
-    and, for a multi-cell symbol, the cell specifications
-    must be separated from one another by a dash (<tt/-/).
-    For example, the contraction for the English word <tt/lord/
-    (the letter <tt/l/ prefixed with dot 5)
-    would be specified as <tt/5-123/.
-    A space may be specified via the special dot number <tt/0/.
-</descrip>
-
-<sect2>Opcodes<label id="contraction-opcodes"><p>
-An opcode is a keyword which tells the translator how to interpret the operands.
-The opcodes are grouped here by function.
-
-<sect3>Table Administration<label id="contraction-opcodes-administration"><p>
-These opcodes make it easier to write contraction tables.
-They have no direct effect on the character translation.
-<descrip>
-  <tag><tt/include/ <em/path/<label id="contraction-opcode-include"></tag>
-    Include the contents of another file.
-    Nesting can be to any depth.
-    Relative paths are anchored at the directory of the including file.
-  <tag><tt/locale/ <em/locale/<label id="contraction-opcode-locale"></tag>
-    Define the locale for character interpretation
-    (lowercase, uppercase, numeric, etc.).
-    The locale may be specified as:
-    <descrip>
-      <tag><em/language/[<tt/_/<em/country/][<tt/./<em/charset/][<tt/@/<em/modifier/]</tag>
-        The <em/language/ component is required and should be a two-letter <tt/ISO-639/ language code.
-        The <em/country/ component is optional and should be a two-letter <tt/ISO-3166/ country code.
-        The <em/charset/ component is optional and should be a character set name, e.g. <tt/ISO-8859-1/.
-      <tag/C/
-        7-bit ASCII.
-      <tag/-/
-        No locale.
-    </descrip>
-    The last locale specification applies to the entire table.
-    If this opcode isn't used then the <tt/C/ locale is assumed.
-</descrip>
-
-<sect3>Special Symbol Definition<label id="contraction-opcodes-symbols"><p>
-These opcodes define special symbols which must be
-inserted into the braille text in order to clarify it.
-<descrip>
-  <tag><tt/capsign/ <em/dots/<label id="contraction-opcode-capsign"></tag>
-    The symbol which capitalizes a single letter.
-  <tag><tt/begcaps/ <em/dots/<label id="contraction-opcode-begcaps"></tag>
-    The symbol which begins a block of capital letters within a word.
-  <tag><tt/endcaps/ <em/dots/<label id="contraction-opcode-endcaps"></tag>
-    The symbol which ends a block of capital letters within a word.
-  <tag><tt/letsign/ <em/dots/<label id="contraction-opcode-letsign"></tag>
-    The symbol which marks a letter which isn't part of a word.
-  <tag><tt/numsign/ <em/dots/<label id="contraction-opcode-numsign"></tag>
-    The symbol which marks the beginning of a number.
-</descrip>
-
-<sect3>Character Translation<label id="contraction-opcodes-translation"><p>
-These opcodes define the braille representations for character sequences.
-Each of them defines an entry within the contraction table.
-These entries may be defined in any order except, as noted below,
-when they define alternate representations for the same character sequence.
-
-Each of these opcodes has
-a <em/characters/ operand (which must be specified as a <em/string/),
-and a built-in condition governing its eligibility for use.
-The text is processed strictly from left to right, character by character,
-with the most eligible entry for each position being used.
-If there's more than one eligible entry for a given position,
-then the one with the longest character string is used.
-If there's more than one eligible entry for the same character string,
-then the one defined nearest to the beginning of the table is used
-(this is the only order dependency).
-
-Many of these opcodes have a <em/dots/ operand
-which defines the braille representation for its <em/characters/ operand.
-It may also be specified as an equals sign (<tt/=/),
-in which case it means one of two things.
-If the entry is for a single character,
-then it means that the currently selected computer braille representation
-(see the <ref id="options-text-table" name="-t"> command line option
-and the <ref id="configure-text-table" name="text-table"> configuration file directive)
-for that character is to be used.
-If it's for a multi-character sequence,
-then the default representation for each character
-(see <ref id="contraction-opcode-always" name="always">)
-within the sequence is to be used.
-
-Some special terms are used within the descriptions of these opcodes.
-<descrip>
-  <tag/word/
-    A maximal sequence of one or more consecutive letters.
-</descrip>
-
-Now, finally, here are the opcode descriptions themselves:
-<descrip>
-  <tag><tt/literal/ <em/characters/<label id="contraction-opcode-literal"></tag>
-    Translate the entire white-space-bounded containing character sequence into computer braille
-    (see the <ref id="options-text-table" name="-t"> command line option
-    and the <ref id="configure-text-table" name="text-table"> configuration file directive).
-  <tag><tt/replace/ <em/characters/ <em/characters/<label id="contraction-opcode-replace"></tag>
-    Replace the first set of characters, no matter where they appear, with the second.
-    The replaced characters aren't reprocessed.
-  <tag><tt/always/ <em/characters/ <em/dots/<label id="contraction-opcode-always"></tag>
-    Translate the characters no matter where they appear.
-    If there's only one character, then, in addition,
-    define the default representation for that character.
-  <tag><tt/repeated/ <em/characters/ <em/dots/<label id="contraction-opcode-repeated"></tag>
-    Translate the characters no matter where they appear.
-    Ignore any consecutive repetitions of the same sequence.
-  <tag><tt/largesign/ <em/characters/ <em/dots/<label id="contraction-opcode-largesign"></tag>
-    Translate the characters no matter where they appear.
-    Remove white-space between consecutive words matched by this opcode.
-  <tag><tt/word/ <em/characters/ <em/dots/<label id="contraction-opcode-word"></tag>
-    Translate the characters if they're a word.
-  <tag><tt/joinword/ <em/characters/ <em/dots/<label id="contraction-opcode-joinword"></tag>
-    Translate the characters if they're a word.
-    Remove the following white-space if the first character after it is a letter.
-  <tag><tt/lowword/ <em/characters/ <em/dots/<label id="contraction-opcode-lowword"></tag>
-    Translate the characters if they're a white-space-bounded word.
-  <tag><tt/contraction/ <em/characters/<label id="contraction-opcode-contraction"></tag>
-    Prefix the characters with a letter sign
-    (see <ref id="contraction-opcode-letsign" name="letsign">)
-    if they're a word.
-  <tag><tt/sufword/ <em/characters/ <em/dots/<label id="contraction-opcode-sufword"></tag>
-    Translate the characters if they're either a word or at the beginning of a word.
-  <tag><tt/begword/ <em/characters/ <em/dots/<label id="contraction-opcode-begword"></tag>
-    Translate the characters if they're at the beginning of a word.
-  <tag><tt/begmidword/ <em/characters/ <em/dots/<label id="contraction-opcode-begmidword"></tag>
-    Translate the characters if they're either at the beginning or in the middle of a word.
-  <tag><tt/midword/ <em/characters/ <em/dots/<label id="contraction-opcode-midword"></tag>
-    Translate the characters if they're in the middle of a word.
-  <tag><tt/midendword/ <em/characters/ <em/dots/<label id="contraction-opcode-midendword"></tag>
-    Translate the characters if they're either in the middle or at the end of a word.
-  <tag><tt/endword/ <em/characters/ <em/dots/<label id="contraction-opcode-endword"></tag>
-    Translate the characters if they're at the end of a word.
-  <tag><tt/prepunc/ <em/characters/ <em/dots/<label id="contraction-opcode-prepunc"></tag>
-    Translate the characters if they're part of punctuation at the beginning of a word.
-  <tag><tt/postpunc/ <em/characters/ <em/dots/<label id="contraction-opcode-postpunc"></tag>
-    Translate the characters if they're part of punctuation at the end of a word.
-  <tag><tt/begnum/ <em/characters/ <em/dots/<label id="contraction-opcode-begnum"></tag>
-    Translate the characters if they're at the beginning of a number.
-  <tag><tt/midnum/ <em/characters/ <em/dots/<label id="contraction-opcode-midnum"></tag>
-    Translate the characters if they're in the middle of a number.
-  <tag><tt/endnum/ <em/characters/ <em/dots/<label id="contraction-opcode-endnum"></tag>
-    Translate the characters if they're at the end of a number.
-</descrip>
-
-<sect3>Character Classes<label id="contraction-opcodes-classes"><p>
-These opcodes define and use character classes.
-A character class associates a set of characters with a name.
-The name then refers to any character within the class.
-A character may belong to more than one class.
-
-The following character classes are automatically predefined
-basdd on the selected locale:
-<descrip>
-  <tag/digit/
-    Numeric characters.
-  <tag/letter/
-    Both uppercase and lowercase alphabetic characters.
-    Some locales have additional letters which are neither uppercase nor lowercase.
-  <tag/lowercase/
-    Lowercase alphabetic characters.
-  <tag/punctuation/
-    Printable characters which are neither white-space nor alphanumeric.
-  <tag/space/
-    White-space characters.
-    In the default locale these are:
-    space, horizontal tab, vertical tab, carriage return, new line, form feed.
-  <tag/uppercase/
-    Uppercase alphabetic characters.
-</descrip>
-
-The opcodes which define and use character classes are:
-<descrip>
-  <tag><tt/class/ <em/name/ <em/characters/<label id="contraction-opcode-class"></tag>
-    Define a new character class.
-    The <em/characters/ operand must be specified as a <em/string/.
-    A character class may not be used until it's been defined.
-  <tag><tt/after/ <em/class/ <em/opcode/ ...<label id="contraction-opcode-after"></tag>
-    The specified opcode is further constrained in that
-    the matched character sequence must be immediately preceded by
-    a character belonging to the specified class.
-    If this opcode is used more than once on the same line
-    then the union of the characters in all the classes is used.
-  <tag><tt/before/ <em/class/ <em/opcode/ ...<label id="contraction-opcode-before"></tag>
-    The specified opcode is further constrained in that
-    the matched character sequence must be immediately followed by
-    a character belonging to the specified class.
-    If this opcode is used more than once on the same line
-    then the union of the characters in all the classes is used.
-</descrip>
-
 <sect>Translation Tables<label id="translation"><p>
 BRLTTY uses two <bf/translation tables/ to govern
 the mapping from bytes to dot combinations.
@@ -4062,6 +3765,274 @@ The following directives are provided:
       <item>dot 3 =fg-red
       <item>dot 4 &tilde;bg-blue
     </itemize>
+</descrip>
+
+<sect>Contracted Braille<label id="contraction"><p>
+BRLTTY can display in-line contracted braille.
+It does this if:
+<itemize>
+  <item>
+    A contraction table has been selected.
+    See the <ref id="options-contraction-table" name="-c"> command line option
+    and the <ref id="configure-contraction-table" name="contraction-table"> configuration file directive
+    for details.
+  <item>
+    The 6-dot braille feature has been activated.
+    See the <ref id="command-SIXDOTS" name="SIXDOTS"> command
+    and the <ref id="preference-text-style" name="Text Style"> preference
+    for details.
+</itemize>
+This feature isn't available if the
+<ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
+
+The following contraction tables are provided:
+<descrip>
+  <tag/big5/Chinese
+  <tag/compress/Remove excessive white-space.
+  <tag/en-us-g2/Grade 2 American English.
+  <tag/fr-abrege/Contracted Unified French.
+  <tag/fr-integral/Uncontracted Unified French.
+</descrip>
+
+<sect1>File Format<p>
+Blank lines are ignored.
+Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
+Lines which begin with a number sign (<tt/&num;/) are ignored,
+i.e. they're comments.
+<tscreen>&num; This is a comment.</tscreen>
+All other lines define table entries.
+
+The general form of a table entry is an opcode followed by its operands.
+The opcode and its operands are separated from one another by white-space.
+Each opcode has a specific number of operands,
+and any text following its last operand is treated as a comment.
+<tscreen><em/opcode/ <em/operand/ ... <em/comment/</tscreen>
+
+The following operand types are supported:
+<descrip>
+  <tag/string/
+    A sequence of characters other than
+    white-space (which terminates the string)
+    and backslashes (<tt/&bsol;/).
+    The following special representations are also supported:
+    <descrip>
+      <tag><tt/&bsol;&bsol;/</tag>backslash
+      <tag><tt/&bsol;f/</tag>form feed
+      <tag><tt/&bsol;n/</tag>new line
+      <tag><tt/&bsol;o/<em/ooo/</tag>3-digit octal value
+      <tag><tt/&bsol;r/</tag>carriage return
+      <tag><tt/&bsol;s/</tag>blank (space)
+      <tag><tt/&bsol;t/</tag>horizontal tab
+      <tag><tt/&bsol;v/</tag>vertical tab
+      <tag><tt/&bsol;x/<em/xx/</tag>2-digit hexadecimal value
+    </descrip>
+  <tag/number/
+    An integer.
+    It may be specified in any of the following ways:
+    <descrip>
+      <tag/decimal/
+        A sequence of decimal digits (<tt/0/-<tt/9/),
+        with the first digit being nonzero (<tt/1/-<tt/9/).
+      <tag/hexadecimal/
+        A sequence of hexadecimal digits (<tt/0/-<tt/9/, and either <tt/a/-<tt/f/ or <tt/A/-<tt/F/),
+        preceded by either <tt/0x/ or <tt/0X/.
+      <tag/octal/
+        A sequence of octal digits (<tt/0/-<tt/7/),
+        with the first digit being zero (<tt/0/).
+    </descrip>
+  <tag/dots/
+    A braille symbol.
+    The braille dots must be specified via their standard numbers
+    (see section <ref id="dots" name="Standard Braille Dot Numbering Convention">),
+    and, for a multi-cell symbol, the cell specifications
+    must be separated from one another by a dash (<tt/-/).
+    For example, the contraction for the English word <tt/lord/
+    (the letter <tt/l/ prefixed with dot 5)
+    would be specified as <tt/5-123/.
+    A space may be specified via the special dot number <tt/0/.
+</descrip>
+
+<sect1>Opcodes<label id="contraction-opcodes"><p>
+An opcode is a keyword which tells the translator how to interpret the operands.
+The opcodes are grouped here by function.
+
+<sect2>Table Administration<label id="contraction-opcodes-administration"><p>
+These opcodes make it easier to write contraction tables.
+They have no direct effect on the character translation.
+<descrip>
+  <tag><tt/include/ <em/path/<label id="contraction-opcode-include"></tag>
+    Include the contents of another file.
+    Nesting can be to any depth.
+    Relative paths are anchored at the directory of the including file.
+  <tag><tt/locale/ <em/locale/<label id="contraction-opcode-locale"></tag>
+    Define the locale for character interpretation
+    (lowercase, uppercase, numeric, etc.).
+    The locale may be specified as:
+    <descrip>
+      <tag><em/language/[<tt/_/<em/country/][<tt/./<em/charset/][<tt/@/<em/modifier/]</tag>
+        The <em/language/ component is required and should be a two-letter <tt/ISO-639/ language code.
+        The <em/country/ component is optional and should be a two-letter <tt/ISO-3166/ country code.
+        The <em/charset/ component is optional and should be a character set name, e.g. <tt/ISO-8859-1/.
+      <tag/C/
+        7-bit ASCII.
+      <tag/-/
+        No locale.
+    </descrip>
+    The last locale specification applies to the entire table.
+    If this opcode isn't used then the <tt/C/ locale is assumed.
+</descrip>
+
+<sect2>Special Symbol Definition<label id="contraction-opcodes-symbols"><p>
+These opcodes define special symbols which must be
+inserted into the braille text in order to clarify it.
+<descrip>
+  <tag><tt/capsign/ <em/dots/<label id="contraction-opcode-capsign"></tag>
+    The symbol which capitalizes a single letter.
+  <tag><tt/begcaps/ <em/dots/<label id="contraction-opcode-begcaps"></tag>
+    The symbol which begins a block of capital letters within a word.
+  <tag><tt/endcaps/ <em/dots/<label id="contraction-opcode-endcaps"></tag>
+    The symbol which ends a block of capital letters within a word.
+  <tag><tt/letsign/ <em/dots/<label id="contraction-opcode-letsign"></tag>
+    The symbol which marks a letter which isn't part of a word.
+  <tag><tt/numsign/ <em/dots/<label id="contraction-opcode-numsign"></tag>
+    The symbol which marks the beginning of a number.
+</descrip>
+
+<sect2>Character Translation<label id="contraction-opcodes-translation"><p>
+These opcodes define the braille representations for character sequences.
+Each of them defines an entry within the contraction table.
+These entries may be defined in any order except, as noted below,
+when they define alternate representations for the same character sequence.
+
+Each of these opcodes has
+a <em/characters/ operand (which must be specified as a <em/string/),
+and a built-in condition governing its eligibility for use.
+The text is processed strictly from left to right, character by character,
+with the most eligible entry for each position being used.
+If there's more than one eligible entry for a given position,
+then the one with the longest character string is used.
+If there's more than one eligible entry for the same character string,
+then the one defined nearest to the beginning of the table is used
+(this is the only order dependency).
+
+Many of these opcodes have a <em/dots/ operand
+which defines the braille representation for its <em/characters/ operand.
+It may also be specified as an equals sign (<tt/=/),
+in which case it means one of two things.
+If the entry is for a single character,
+then it means that the currently selected computer braille representation
+(see the <ref id="options-text-table" name="-t"> command line option
+and the <ref id="configure-text-table" name="text-table"> configuration file directive)
+for that character is to be used.
+If it's for a multi-character sequence,
+then the default representation for each character
+(see <ref id="contraction-opcode-always" name="always">)
+within the sequence is to be used.
+
+Some special terms are used within the descriptions of these opcodes.
+<descrip>
+  <tag/word/
+    A maximal sequence of one or more consecutive letters.
+</descrip>
+
+Now, finally, here are the opcode descriptions themselves:
+<descrip>
+  <tag><tt/literal/ <em/characters/<label id="contraction-opcode-literal"></tag>
+    Translate the entire white-space-bounded containing character sequence into computer braille
+    (see the <ref id="options-text-table" name="-t"> command line option
+    and the <ref id="configure-text-table" name="text-table"> configuration file directive).
+  <tag><tt/replace/ <em/characters/ <em/characters/<label id="contraction-opcode-replace"></tag>
+    Replace the first set of characters, no matter where they appear, with the second.
+    The replaced characters aren't reprocessed.
+  <tag><tt/always/ <em/characters/ <em/dots/<label id="contraction-opcode-always"></tag>
+    Translate the characters no matter where they appear.
+    If there's only one character, then, in addition,
+    define the default representation for that character.
+  <tag><tt/repeated/ <em/characters/ <em/dots/<label id="contraction-opcode-repeated"></tag>
+    Translate the characters no matter where they appear.
+    Ignore any consecutive repetitions of the same sequence.
+  <tag><tt/largesign/ <em/characters/ <em/dots/<label id="contraction-opcode-largesign"></tag>
+    Translate the characters no matter where they appear.
+    Remove white-space between consecutive words matched by this opcode.
+  <tag><tt/word/ <em/characters/ <em/dots/<label id="contraction-opcode-word"></tag>
+    Translate the characters if they're a word.
+  <tag><tt/joinword/ <em/characters/ <em/dots/<label id="contraction-opcode-joinword"></tag>
+    Translate the characters if they're a word.
+    Remove the following white-space if the first character after it is a letter.
+  <tag><tt/lowword/ <em/characters/ <em/dots/<label id="contraction-opcode-lowword"></tag>
+    Translate the characters if they're a white-space-bounded word.
+  <tag><tt/contraction/ <em/characters/<label id="contraction-opcode-contraction"></tag>
+    Prefix the characters with a letter sign
+    (see <ref id="contraction-opcode-letsign" name="letsign">)
+    if they're a word.
+  <tag><tt/sufword/ <em/characters/ <em/dots/<label id="contraction-opcode-sufword"></tag>
+    Translate the characters if they're either a word or at the beginning of a word.
+  <tag><tt/begword/ <em/characters/ <em/dots/<label id="contraction-opcode-begword"></tag>
+    Translate the characters if they're at the beginning of a word.
+  <tag><tt/begmidword/ <em/characters/ <em/dots/<label id="contraction-opcode-begmidword"></tag>
+    Translate the characters if they're either at the beginning or in the middle of a word.
+  <tag><tt/midword/ <em/characters/ <em/dots/<label id="contraction-opcode-midword"></tag>
+    Translate the characters if they're in the middle of a word.
+  <tag><tt/midendword/ <em/characters/ <em/dots/<label id="contraction-opcode-midendword"></tag>
+    Translate the characters if they're either in the middle or at the end of a word.
+  <tag><tt/endword/ <em/characters/ <em/dots/<label id="contraction-opcode-endword"></tag>
+    Translate the characters if they're at the end of a word.
+  <tag><tt/prepunc/ <em/characters/ <em/dots/<label id="contraction-opcode-prepunc"></tag>
+    Translate the characters if they're part of punctuation at the beginning of a word.
+  <tag><tt/postpunc/ <em/characters/ <em/dots/<label id="contraction-opcode-postpunc"></tag>
+    Translate the characters if they're part of punctuation at the end of a word.
+  <tag><tt/begnum/ <em/characters/ <em/dots/<label id="contraction-opcode-begnum"></tag>
+    Translate the characters if they're at the beginning of a number.
+  <tag><tt/midnum/ <em/characters/ <em/dots/<label id="contraction-opcode-midnum"></tag>
+    Translate the characters if they're in the middle of a number.
+  <tag><tt/endnum/ <em/characters/ <em/dots/<label id="contraction-opcode-endnum"></tag>
+    Translate the characters if they're at the end of a number.
+</descrip>
+
+<sect2>Character Classes<label id="contraction-opcodes-classes"><p>
+These opcodes define and use character classes.
+A character class associates a set of characters with a name.
+The name then refers to any character within the class.
+A character may belong to more than one class.
+
+The following character classes are automatically predefined
+basdd on the selected locale:
+<descrip>
+  <tag/digit/
+    Numeric characters.
+  <tag/letter/
+    Both uppercase and lowercase alphabetic characters.
+    Some locales have additional letters which are neither uppercase nor lowercase.
+  <tag/lowercase/
+    Lowercase alphabetic characters.
+  <tag/punctuation/
+    Printable characters which are neither white-space nor alphanumeric.
+  <tag/space/
+    White-space characters.
+    In the default locale these are:
+    space, horizontal tab, vertical tab, carriage return, new line, form feed.
+  <tag/uppercase/
+    Uppercase alphabetic characters.
+</descrip>
+
+The opcodes which define and use character classes are:
+<descrip>
+  <tag><tt/class/ <em/name/ <em/characters/<label id="contraction-opcode-class"></tag>
+    Define a new character class.
+    The <em/characters/ operand must be specified as a <em/string/.
+    A character class may not be used until it's been defined.
+  <tag><tt/after/ <em/class/ <em/opcode/ ...<label id="contraction-opcode-after"></tag>
+    The specified opcode is further constrained in that
+    the matched character sequence must be immediately preceded by
+    a character belonging to the specified class.
+    If this opcode is used more than once on the same line
+    then the union of the characters in all the classes is used.
+  <tag><tt/before/ <em/class/ <em/opcode/ ...<label id="contraction-opcode-before"></tag>
+    The specified opcode is further constrained in that
+    the matched character sequence must be immediately followed by
+    a character belonging to the specified class.
+    If this opcode is used more than once on the same line
+    then the union of the characters in all the classes is used.
 </descrip>
 
 <sect>The Application Programming Interface<label id="api"><p>
