@@ -18,7 +18,5 @@
 /* ViaVoice/speech.h - definitions for rudimentary speech support
  */
 
-#define SPKNAME "ViaVoice"
-
 #define INI_VARIABLE "ECIINI"
 #define INI_DEFAULT "/usr/lib/ViaVoiceTTS/eci.ini"

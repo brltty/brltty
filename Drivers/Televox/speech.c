@@ -33,11 +33,13 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "speech.h"
 #include "Programs/spk.h"
-#include "Programs/spk_driver.h"
 #include "Programs/misc.h"
 
+#define SPKNAME "Televox"
+
+#include "Programs/spk_driver.h"
+#include "speech.h"
 
 static char DevPath[] = "/dev/tlvx";	/* full path for the tlvx fifo */
 static int dev_fd;

@@ -37,11 +37,9 @@
 #include <stdarg.h>
 
 #include "Programs/misc.h"
-#include "speech.h"
 #include "Programs/spk.h"
 
-#define SPK_HAVE_TRACK
-#define SPK_HAVE_EXPRESS
+#define SPKNAME "ExternalSpeech"
 
 typedef enum {
   PARM_PROGRAM=0,
@@ -49,7 +47,10 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "program", "uid", "gid"
 
+#define SPK_HAVE_TRACK
+#define SPK_HAVE_EXPRESS
 #include "Programs/spk_driver.h"
+#include "speech.h"
 
 static int helper_fd_in = -1, helper_fd_out = -1;
 static unsigned short lastIndex, finalIndex;

@@ -19,8 +19,6 @@
  * N. Nair, 4 October 1998
  */
 
-#define SPKNAME "Festival"
-
 /* These sequences are sent to Festival's command mode.
  * The first byte is the length, so embedded nuls are allowed.
  */

@@ -31,10 +31,13 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "brlconf.h"
-#include "speech.h"		/* for speech definitions */
 #include "Programs/spk.h"
+
+#define SPKNAME "MultiBraille"
+
 #include "Programs/spk_driver.h"
+#include "speech.h"		/* for speech definitions */
+#include "brlconf.h"
 
 /* These are shared with CombiBraille/braille.c: */
 extern int brl_fd;

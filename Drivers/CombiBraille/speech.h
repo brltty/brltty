@@ -20,8 +20,6 @@
  * $Id: speech.h,v 1.2 1996/09/21 23:34:52 nn201 Exp $
  */
 
-#define SPKNAME "CombiBraille"
-
 /* These sequences are sent to the CombiBraille before and after the
  * speech data itself.  The first byte is the length, so embedded nuls are
  * allowed.

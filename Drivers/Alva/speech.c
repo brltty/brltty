@@ -29,12 +29,14 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "brlconf.h"
-#include "speech.h"		/* for speech definitions */
 #include "Programs/spk.h"
-#include "Programs/spk_driver.h"
 #include "Programs/misc.h"
 
+#define SPKNAME "Alva"
+
+#include "Programs/spk_driver.h"
+#include "speech.h"		/* for speech definitions */
+#include "brlconf.h"
 
 /* This is shared with brlmain.c */
 int SendToAlva( char *data, int len );

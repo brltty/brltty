@@ -27,15 +27,18 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "speech.h"
 #include "Programs/spk.h"
 #include "Programs/misc.h"
+
+#define SPKNAME "GenericSay"
 
 typedef enum {
    PARM_COMMAND
 } DriverParameter;
 #define SPKPARMS "command"
+
 #include "Programs/spk_driver.h"
+#include "speech.h"
 
 static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;

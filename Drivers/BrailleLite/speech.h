@@ -19,8 +19,6 @@
  * N. Nair, 11 September 1998
  */
 
-#define SPKNAME "BrailleLite"
-
 /* These sequences are sent to the Braille Lite before and after the
  * speech data itself.  The first byte is the length, so embedded nuls are
  * allowed.

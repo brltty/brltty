@@ -18,8 +18,6 @@
 /* Alva/speech.h - definitions for rudimentary speech support
  */
 
-#define SPKNAME "Alva"
-
 /* These sequences are sent to the Delphi before and after the
  * speech data itself.  The first byte is the length, so embedded nuls are
  * allowed.

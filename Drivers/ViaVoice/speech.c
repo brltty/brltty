@@ -25,10 +25,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <eci.h>
 
-#include "speech.h"
 #include "Programs/spk.h"
 #include "Programs/misc.h"
+
+#define SPKNAME "ViaVoice"
 
 typedef enum {
    PARM_IniFile,
@@ -49,10 +51,11 @@ typedef enum {
    PARM_Volume
 } DriverParameter;
 #define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "vocaltract", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "speed", "volume"
+
 #define SPK_HAVE_TRACK
 #include "Programs/spk_driver.h"
+#include "speech.h"
 
-#include <eci.h>
 static ECIHand eci = NULL_ECI_HAND;
 
 static char *sayBuffer = NULL;

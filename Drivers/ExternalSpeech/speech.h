@@ -17,8 +17,6 @@
 
 /* ExternalSpeech/speech.h */
 
-#define SPKNAME "ExternalSpeech"
-
 /* The following are the default parameters that will be used if no parameter
    is specified on the command-line (-p) or in the brltty.conf file
    (speech-driverparm option). */

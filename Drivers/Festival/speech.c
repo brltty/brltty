@@ -27,11 +27,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "speech.h"		/* for speech definitions */
 #include "Programs/spk.h"
-#include "Programs/spk_driver.h"
 #include "Programs/misc.h"
 
+#define SPKNAME "Festival"
+
+#include "Programs/spk_driver.h"
+#include "speech.h"		/* for speech definitions */
 
 static FILE *festival;
 
