@@ -41,9 +41,11 @@ extern "C" {
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
 #endif /* MAX */
 
-#define CONCATENATE1(a,b) a##b
-#define CONCATENATE(a,b) CONCATENATE1(a,b)
-#define STRINGIFY(a) #a
+#define _CONCATENATE(a,b) a##b
+#define CONCATENATE(a,b) _CONCATENATE(a,b)
+
+#define _STRINGIFY(a) #a
+#define STRINGIFY(a) _STRINGIFY(a)
 
 /* Process each line of an input text file safely.
  * This routine handles the actual reading of the file,

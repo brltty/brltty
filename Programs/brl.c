@@ -30,10 +30,11 @@
 #include "sysmisc.h"
 #include "message.h"
 #include "brl.h"
+#include "brl.auto.h"
 
 #define BRLSYMBOL noBraille
 #define BRLNAME "NoBraille"
-#define BRLDRIVER "no"
+#define BRLDRIVER no
 #define BRLHELP "/dev/null"
 #define PREFSTYLE ST_None
 #include "brl_driver.h"
@@ -65,20 +66,10 @@ void *contractionTable = NULL;
 
 const BrailleDriver *
 loadBrailleDriver (const char **driver, const char *driverDirectory) {
-#ifdef BRAILLE_BUILTIN
-# define BRL_DRIVER CONCATENATE(brl_driver_,BRAILLE_BUILTIN)
-  extern BrailleDriver BRL_DRIVER;
-  const void *builtinAddress = &BRL_DRIVER;
-  const char *builtinIdentifier = BRL_DRIVER.identifier;
-# undef BRL_DRIVER
-#else /* BRAILLE_BUILTIN */
-  const void *builtinAddress = NULL;
-  const char *builtinIdentifier = NULL;
-#endif /* BRAILLE_BUILTIN */
   return loadDriver(driver,
                     driverDirectory, "brl_driver",
                     "braille", 'b',
-                    builtinAddress, builtinIdentifier,
+                    driverTable,
                     &noBraille, noBraille.identifier);
 }
 

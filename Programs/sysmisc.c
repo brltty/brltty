@@ -33,25 +33,34 @@ loadDriver (
   const char **driver,
   const char *driverDirectory, const char *driverSymbol,
   const char *driverType, char driverCharacter,
-  const void *builtinAddress, const char *builtinIdentifier,
+  const DriverEntry *driverTable,
   const void *nullAddress, const char *nullIdentifier
 ) {
   const void *driverAddress = NULL;
 
-  if (*driver)
+  if (*driver) {
     if (strcmp(*driver, nullIdentifier) == 0) {
       *driver = NULL;
       return nullAddress;
     }
 
-  if (builtinAddress) {
-    if (*driver)
-      if (strcmp(*driver, builtinIdentifier) == 0)
-        *driver = NULL;
-    if (!*driver)
-      return builtinAddress;
-  } else if (!*driver)
+    {
+      const DriverEntry *driverEntry = driverTable;
+      while (driverEntry->address) {
+        if (strcmp(*driver, *driverEntry->identifier) == 0) {
+          *driver = NULL;
+          return driverEntry->address;
+        }
+        ++driverEntry;
+      }
+    }
+  } else if (!driverTable[0].address) {
     return nullAddress;
+  } else if (!driverTable[1].address) {
+    return driverTable[0].address;
+  } else {
+    return nullAddress;
+  }
 
   {
     const char *libraryName;

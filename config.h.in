@@ -88,17 +88,11 @@ extern "C" {
 /* Define this to be a string containing the library extension. */
 #undef LIBRARY_EXTENSION
 
-/* Define this to be the code of the braille driver if it is built in. */
-#undef BRAILLE_BUILTIN
-
 /* Define this to be a string containing a list of the braille driver codes. */
 #undef BRAILLE_DRIVER_CODES
 
 /* Define this to be a string containing the path to the default braille device. */
 #undef BRAILLE_DEVICE
-
-/* Define this to be the code of the speech driver if it is built in. */
-#undef SPEECH_BUILTIN
 
 /* Define this to be a string containing a list of the speech driver codes. */
 #undef SPEECH_DRIVER_CODES

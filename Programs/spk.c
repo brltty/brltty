@@ -29,10 +29,11 @@
 #include "misc.h"
 #include "sysmisc.h"
 #include "spk.h"
+#include "spk.auto.h"
 
 #define SPKSYMBOL noSpeech
 #define SPKNAME "NoSpeech"
-#define SPKDRIVER "no"
+#define SPKDRIVER no
 #include "spk_driver.h"
 static void spk_identify (void) {
   LogPrint(LOG_NOTICE, "No speech support.");
@@ -46,20 +47,10 @@ const SpeechDriver *speech = &noSpeech;
 
 const SpeechDriver *
 loadSpeechDriver (const char **driver, const char *driverDirectory) {
-#ifdef SPEECH_BUILTIN
-# define SPK_DRIVER CONCATENATE(spk_driver_,SPEECH_BUILTIN)
-  extern SpeechDriver SPK_DRIVER;
-  const void *builtinAddress = &SPK_DRIVER;
-  const char *builtinIdentifier = SPK_DRIVER.identifier;
-# undef SPK_DRIVER
-#else /* SPEECH_BUILTIN */
-  const void *builtinAddress = NULL;
-  const char *builtinIdentifier = NULL;
-#endif /* SPEECH_BUILTIN */
   return loadDriver(driver,
                     driverDirectory, "spk_driver",
                     "speech", 's',
-                    builtinAddress, builtinIdentifier,
+                    driverTable,
                     &noSpeech, noSpeech.identifier);
 }
 

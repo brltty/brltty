@@ -105,22 +105,20 @@ DATA_DIRECTORY = @data_directory@
 MANPAGE_DIRECTORY = @manpage_directory@
 INCLUDE_DIRECTORY = @include_directory@
 
-BRL_TARGET = @brltty_item_name_braille@
-BRL_TARGETS = @brltty_item_names_braille@
-BRL_LIBS = @brltty_item_codes_braille@
-
-SPK_TARGET = @brltty_item_name_speech@
-SPK_TARGETS = @brltty_item_names_speech@
-SPK_LIBS = @brltty_item_codes_speech@
-
-BRAILLE_DRIVER_NAME = @braille_driver_name@
-BRAILLE_DRIVER_OBJECT = @braille_driver_object@
-BRAILLE_DRIVERS = @braille_drivers@
+BRAILLE_DRIVER_CODES = @brltty_item_codes_braille@
+BRAILLE_DRIVER_OBJECTS = @braille_driver_objects@
 BRAILLE_HELP = @braille_help@
+BRAILLE_INTERNAL_DRIVER_CODES = @brltty_internal_codes_braille@
+BRAILLE_INTERNAL_DRIVER_NAMES = @brltty_internal_names_braille@
+BRAILLE_DRIVERS = @braille_drivers@
+BRAILLE_EXTERNAL_DRIVER_NAMES = @brltty_external_names_braille@
 
-SPEECH_DRIVER_NAME = @speech_driver_name@
-SPEECH_DRIVER_OBJECT = @speech_driver_object@
+SPEECH_DRIVER_CODES = @brltty_item_codes_speech@
+SPEECH_DRIVER_OBJECTS = @speech_driver_objects@
+SPEECH_INTERNAL_DRIVER_CODES = @brltty_internal_codes_speech@
+SPEECH_INTERNAL_DRIVER_NAMES = @brltty_internal_names_speech@
 SPEECH_DRIVERS = @speech_drivers@
+SPEECH_EXTERNAL_DRIVER_NAMES = @brltty_external_names_speech@
 
 INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@

@@ -65,81 +65,125 @@ AC_DEFUN([BRLTTY_SPEECH_DRIVER], [dnl
 BRLTTY_ITEM([speech], [$1], [$2])])
 
 AC_DEFUN([BRLTTY_ARG_ITEM], [dnl
-BRLTTY_ITEM([$1], [no], [])
-brltty_item_entries_$1=" ${brltty_item_entries_$1} "
 BRLTTY_VAR_TRIM([brltty_item_codes_$1])
 BRLTTY_VAR_TRIM([brltty_item_names_$1])
 BRLTTY_ARG_WITH(
    [$1-$2], translit([$2], [a-z], [A-Z]),
-   [$1 $2 to build in]brltty_item_list_$1,
-   [brltty_item], ["no"]
+   [$1 $2(s) to build in]brltty_item_list_$1,
+   [brltty_items], ["yes"]
 )
+if test "${brltty_items}" = "no"
+then
+   brltty_external_codes_$1=""
+   brltty_external_names_$1=""
+   brltty_internal_codes_$1=""
+   brltty_internal_names_$1=""
+elif test "${brltty_items}" = "all"
+then
+   brltty_external_codes_$1=""
+   brltty_external_names_$1=""
+   brltty_internal_codes_$1="${brltty_item_codes_$1}"
+   brltty_internal_names_$1="${brltty_item_names_$1}"
+else
+   brltty_external_codes_$1=" ${brltty_item_codes_$1} "
+   brltty_external_names_$1=" ${brltty_item_names_$1} "
+   brltty_internal_codes_$1=""
+   brltty_internal_names_$1=""
+   if test "${brltty_items}" != "yes"
+   then
+      while :
+      do
 changequote(, )dnl
-brltty_item_unknown=true
-brltty_item_length="`expr "${brltty_item}" : '[a-zA-Z0-9]*$'`"
-if test ${brltty_item_length} -eq 2
-then
-   brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item}"'-[^ ]*\)'`"
-   if test -n "${brltty_item_entry}"
-   then
-      brltty_item_code_$1="${brltty_item}"
-      brltty_item_name_$1="`expr "${brltty_item_entry}" : '[^-]*-\(.*\)$'`"
-      brltty_item_unknown=false
-   fi
-elif test ${brltty_item_length} -gt 2
-then
-   brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`"
-   if test -z "${brltty_item_entry}"
-   then
-      brltty_lowercase="`echo "${brltty_item_entries_$1}" | sed 'y%ABCDEFGHIJKLMNOPQRSTUVWXYZ%abcdefghijklmnopqrstuvwxyz%'`"
-      brltty_item_code="`expr "${brltty_lowercase}" : '.* \([^- ]*\)-'"${brltty_item}"`"
-      if test -n "${brltty_item_code}"
-      then
-         brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item_code}"'-[^ ]*\)'`"
-      fi
-   fi
-   if test -n "${brltty_item_entry}"
-   then
-      brltty_item_code_$1="`expr "${brltty_item_entry}" : '\([^-]*\)'`"
-      brltty_item_name_$1="`expr "${brltty_item_entry}" : '[^-]*-\(.*\)$'`"
-      brltty_item_unknown=false
-   fi
-fi
+         brltty_delimiter="`expr "${brltty_items}" : '[^,]*,'`"
+         if test "${brltty_delimiter}" -eq 0
+         then
+            brltty_item="${brltty_items}"
+            brltty_items=""
+         else
+            brltty_item="`expr "${brltty_items}" : '\([^,]*\)'`"
+            brltty_items="`expr "${brltty_items}" : '[^,]*,\(.*\)'`"
+         fi
+         brltty_item_unknown=true
+         if test -n "${brltty_item}"
+         then
+            brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item}"'-[^ ]*\)'`"
+            if test -n "${brltty_item_entry}"
+            then
+               brltty_item_code="${brltty_item}"
+               brltty_item_name="`expr "${brltty_item_entry}" : '[^-]*-\(.*\)$'`"
+               brltty_item_unknown=false
+            else
+               brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`"
+               if test -z "${brltty_item_entry}"
+               then
+                  brltty_lowercase="`echo "${brltty_item_entries_$1}" | sed 'y%ABCDEFGHIJKLMNOPQRSTUVWXYZ%abcdefghijklmnopqrstuvwxyz%'`"
+                  brltty_item_code="`expr "${brltty_lowercase}" : '.* \([^- ]*\)-'"${brltty_item}"`"
+                  if test -n "${brltty_item_code}"
+                  then
+                     brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item_code}"'-[^ ]*\)'`"
+                  fi
+               fi
+               if test -n "${brltty_item_entry}"
+               then
+                  brltty_item_code="`expr "${brltty_item_entry}" : '\([^-]*\)'`"
+                  brltty_item_name="`expr "${brltty_item_entry}" : '[^-]*-\(.*\)$'`"
+                  brltty_item_unknown=false
+               fi
+            fi
+         fi
 changequote([, ])dnl
-if "${brltty_item_unknown}"
-then
-   AC_MSG_ERROR([unknown $1 $2: ${brltty_item}])
+         if "${brltty_item_unknown}"
+         then
+            AC_MSG_ERROR([unknown $1 $2: ${brltty_item}])
+         fi
+         brltty_item_found="`expr "${brltty_external_codes_$1}" : ".* ${brltty_item_code} "`"
+         if test "${brltty_item_found}" -eq 0
+         then
+            AC_MSG_ERROR([duplicate $1 $2: ${brltty_item}])
+         fi
+         brltty_external_codes_$1="`echo "${brltty_external_codes_$1}" | sed -e "s% ${brltty_item_code} % %"`"
+         brltty_external_names_$1="`echo "${brltty_external_names_$1}" | sed -e "s% ${brltty_item_name} % %"`"
+         brltty_internal_codes_$1="${brltty_internal_codes_$1} ${brltty_item_code}"
+         brltty_internal_names_$1="${brltty_internal_names_$1} ${brltty_item_name}"
+         test "${brltty_delimiter}" -eq 0 && break
+      done
+   fi
+   BRLTTY_VAR_TRIM([brltty_external_codes_$1])
+   BRLTTY_VAR_TRIM([brltty_external_names_$1])
+   BRLTTY_VAR_TRIM([brltty_internal_codes_$1])
+   BRLTTY_VAR_TRIM([brltty_internal_names_$1])
 fi
-if test "${brltty_item_code_$1}" = "no"
-then
-   brltty_item_name_$1=""
-fi
-AC_SUBST([brltty_item_code_$1])
-AC_SUBST([brltty_item_name_$1])
 AC_SUBST([brltty_item_codes_$1])
 AC_SUBST([brltty_item_names_$1])
+AC_SUBST([brltty_external_codes_$1])
+AC_SUBST([brltty_external_names_$1])
+AC_SUBST([brltty_internal_codes_$1])
+AC_SUBST([brltty_internal_names_$1])
 AC_DEFINE_UNQUOTED(translit([$1_$2_codes], [a-z], [A-Z]), ["${brltty_item_codes_$1}"])])
 
 AC_DEFUN([BRLTTY_ARG_DRIVER], [dnl
 BRLTTY_ARG_ITEM([$1], [driver])
-BRLTTY_SUMMARY_ITEM([$1-driver], [brltty_item_name_$1])
+BRLTTY_SUMMARY_ITEM([external-$1-drivers], [brltty_external_codes_$1])
+BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
 if test "${brltty_enabled_$1_support}" != "no"
 then
-   if test -n "${brltty_item_name_$1}"
+   if test -n "${brltty_internal_codes_$1}"
    then
-      $1_driver_name="${brltty_item_name_$1}"
-      $1_driver_object='$(BLD_TOP)Drivers/'"${brltty_item_name_$1}"'/$1.$O'
-      AC_DEFINE_UNQUOTED(translit([$1_builtin], [a-z], [A-Z]), [${brltty_item_code_$1}])
+changequote(, )dnl
+      $1_driver_objects="`echo "${brltty_internal_names_$1}" | sed -e 's%\([^ ][^ ]*\)%$(BLD_TOP)Drivers/\1/$1.$O%g'`"
+changequote([, ])dnl
       $1_help="$1-help"
    fi
    if test "${brltty_standalone_programs}" != "yes"
    then
-      $1_drivers="$1-drivers"
-      install_drivers="install-drivers"
+      if test -n "${brltty_external_codes_$1}"
+      then
+         $1_drivers="$1-drivers"
+         install_drivers="install-drivers"
+      fi
    fi
 fi
-AC_SUBST([$1_driver_name])
-AC_SUBST([$1_driver_object])
+AC_SUBST([$1_driver_objects])
 AC_SUBST([$1_help])
 AC_SUBST([$1_drivers])])
 
@@ -184,7 +228,7 @@ AC_OUTPUT_COMMANDS([echo "${brltty_summary_lines}"], [brltty_summary_lines="${br
 
 AC_DEFUN([BRLTTY_SUMMARY_ITEM], [dnl
 brltty_summary_lines="${brltty_summary_lines}
-   $1=${$2}"])
+   $1: ${$2}"])
 
 AC_DEFUN([BRLTTY_PORTABLE_DIRECTORY], [dnl
    BRLTTY_TOPLEVEL_DIRECTORY([$1], [$2], [prefix])])

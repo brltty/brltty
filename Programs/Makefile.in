@@ -120,7 +120,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECT) $(SPEECH_DRIVER_OBJECT)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) cut.$O $(CTB_OBJECTS) brl.$O $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_DRIVER_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(LDLIBS)
@@ -149,15 +149,15 @@ sys_hpux.$O:
 cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
 
-brl.$O: text.auto.h attrib.auto.h cmds.auto.h
+brl.$O: brl.auto.h text.auto.h attrib.auto.h cmds.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
 
-spk.$O:
+spk.$O: spk.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) brl.$O $(BRAILLE_DRIVER_OBJECT)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) brl.$O $(BRAILLE_DRIVER_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(LDLIBS)
@@ -189,19 +189,21 @@ tunetest.$O:
 
 braille-drivers: txt2hlp
 	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-brl.lst
-	for target in $(BRL_TARGETS); \
-	do (cd $(BLD_TOP)Drivers/$$target && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
+	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
+	do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
 	done
 
 braille-help: txt2hlp
-	cd $(BLD_TOP)Drivers/$(BRAILLE_DRIVER_NAME) && $(MAKE) braille-help
+	for driver in $(BRAILLE_INTERNAL_DRIVER_NAMES); \
+	do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) braille-help) || exit 1; \
+	done
 
 ###############################################################################
 
 speech-drivers:
 	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
-	for target in $(SPK_TARGETS); \
-	do (cd $(BLD_TOP)Drivers/$$target && $(MAKE) speech-driver spk-lib-name) || exit 1; \
+	for driver in $(SPEECH_EXTERNAL_DRIVER_NAMES); \
+	do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) speech-driver spk-lib-name) || exit 1; \
 	done
 
 ###############################################################################
@@ -214,6 +216,12 @@ attrib.auto.h: $(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) tbl2hex
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
+
+brl.auto.h: $(SRC_DIR)/mkdrvtab
+	$(SRC_DIR)/mkdrvtab BrailleDriver brl_driver_ $(BRAILLE_INTERNAL_DRIVER_CODES) >$@
+
+spk.auto.h: $(SRC_DIR)/mkdrvtab
+	$(SRC_DIR)/mkdrvtab SpeechDriver spk_driver_ $(SPEECH_INTERNAL_DRIVER_CODES) >$@
 
 ###############################################################################
 
@@ -248,16 +256,14 @@ tbl2hex.$O:
 ###############################################################################
 
 check-braille: brltty braille-drivers
-	for lib in $(BRL_LIBS); \
-	do test $$lib = no && continue; \
-	   ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$lib.$(LIB_EXT) || exit 10; \
+	for lib in $(BRAILLE_DRIVER_CODES); \
+	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$lib.$(LIB_EXT) || exit 10; \
 	   ./brltty -v -q -N -e -f /dev/null -b $$lib -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
 	done
 
 check-speech: brltty speech-drivers
-	for lib in $(SPK_LIBS); \
-	do test $$lib = no && continue; \
-	   ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$lib.$(LIB_EXT) || exit 10; \
+	for lib in $(SPEECH_DRIVER_CODES); \
+	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$lib.$(LIB_EXT) || exit 10; \
 	   ./brltty -v -q -N -e -f /dev/null -b no -s $$lib -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
 	done
 
