@@ -34,14 +34,18 @@
 
 #include "Programs/brl_driver.h"
 
-#undef DEBUG_PACKETS
+#define DEBUG_PACKETS
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) (void);
+  int (*awaitInput) (int milliseconds);
   int (*readBytes) (void *buffer, int length);
   int (*writePacket) (const void *buffer, int length, int *delay);
 } InputOutputOperations;
+
+static const InputOutputOperations *io;
+static int outputMaximum;
 
 #include "Programs/serial.h"
 static int serialDevice = -1;
@@ -64,6 +68,7 @@ openSerialPort (char **parameters, const char *device) {
 
     if (resetSerialDevice(serialDevice, &newSerialSettings, baud)) {
       serialCharactersPerSecond = baud2integer(baud) / 10;
+      outputMaximum = 11;
       return 1;
     }
 
@@ -83,6 +88,11 @@ closeSerialPort (void) {
 }
 
 static int
+awaitSerialInput (int milliseconds) {
+  return awaitInput(serialDevice, milliseconds);
+}
+
+static int
 readSerialBytes (void *buffer, int length) {
   return read(serialDevice, buffer, length);
 }
@@ -90,12 +100,14 @@ readSerialBytes (void *buffer, int length) {
 static int
 writeSerialPacket (const void *buffer, int length, int *delay) {
   if (delay) *delay += length * 1000 / serialCharactersPerSecond;
-  return safe_write(serialDevice, buffer, length);
+  int written = safe_write(serialDevice, buffer, length);
+  if (written == -1) LogError("Serial write");
+  return written;
 }
 
 static const InputOutputOperations serialOperations = {
   openSerialPort, closeSerialPort,
-  readSerialBytes, writeSerialPacket
+  awaitSerialInput, readSerialBytes, writeSerialPacket
 };
 
 #ifdef ENABLE_USB
@@ -157,6 +169,11 @@ closeUsbPort (void) {
 }
 
 static int
+awaitUsbInput (int milliseconds) {
+  return usbAwaitInput(usbDevice, milliseconds);
+}
+
+static int
 readUsbBytes (void *buffer, int length) {
   int count = usbReapInput(usbDevice, buffer, length, 0);
   if (count == -1)
@@ -172,7 +189,7 @@ writeUsbPacket (const void *buffer, int length, int *delay) {
 
 static const InputOutputOperations usbOperations = {
   openUsbPort, closeUsbPort,
-  readUsbBytes, writeUsbPacket
+  awaitUsbInput, readUsbBytes, writeUsbPacket
 };
 #endif /* ENABLE_USB */
 
@@ -192,7 +209,7 @@ typedef enum {
 } PacketType;
 
 typedef enum {
-  PKT_ERR_TIMEOUT   = 0X30, /* no request received from host for a while */
+  PKT_ERR_TIMEOUT   = 0X30, /* no data received from host for a while */
   PKT_ERR_CHECKSUM  = 0X31, /* incorrect checksum */
   PKT_ERR_TYPE      = 0X32, /* unsupported packet type */
   PKT_ERR_PARAMETER = 0X33, /* invalid parameter */
@@ -240,31 +257,29 @@ typedef struct {
   unsigned char totalCells;
   unsigned char textCells;
   unsigned char statusCells;
-  const DotsTable *dots;
-  int options;
+  const DotsTable *dotsTable;
+  int hotkeysRow;
 } ModelEntry;
 
 static const DotsTable dots12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
 static const DotsTable dots12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
 
-#define OPT_HOT_KEYS 0X01
-
 static const ModelEntry modelTable[] = {
-  {"Focus 44"     , 44, 40, 3, &dots12374568, 0},
-  {"Focus 70"     , 70, 66, 3, &dots12374568, 0},
-  {"Focus 84"     , 84, 80, 3, &dots12374568, 0},
-  {"pm display 20", 20, 20, 0, &dots12345678, OPT_HOT_KEYS},
-  {"pm display 40", 40, 40, 0, &dots12345678, OPT_HOT_KEYS},
-  {NULL           ,  0,  0, 0, NULL         , 0}
+  {"Focus 44"     , 44, 40, 3, &dots12374568, -1},
+  {"Focus 70"     , 70, 66, 3, &dots12374568, -1},
+  {"Focus 84"     , 84, 80, 3, &dots12374568, -1},
+  {"pm display 20", 20, 20, 0, &dots12345678,  1},
+  {"pm display 40", 40, 40, 0, &dots12345678,  1},
+  {NULL           ,  0,  0, 0, NULL         , -1}
 };
 static const ModelEntry *model;
 
-static const InputOutputOperations *io;
-
 static TranslationTable outputTable;
 static unsigned char outputBuffer[84];
+
 static unsigned char textOffset;
 static unsigned char statusOffset;
+
 static int writeFrom;
 static int writeTo;
 static int writing;
@@ -330,7 +345,7 @@ negativeAcknowledgement (const Packet *packet) {
       problem = "unknown problem";
       break;
     case PKT_ERR_TIMEOUT:
-      problem = "no response from host";
+      problem = "timeout during packet transmission";
       break;
     case PKT_ERR_CHECKSUM:
       problem = "incorrect checksum";
@@ -401,52 +416,72 @@ negativeAcknowledgement (const Packet *packet) {
 
 static int
 readPacket (BrailleDisplay *brl, Packet *packet) {
-  int first = 1;
   while (1) {
-    int count = sizeof(PacketHeader);
+    int size = sizeof(PacketHeader);
     int hasPayload = 0;
 
     if (inputCount >= sizeof(PacketHeader)) {
       if (inputBuffer.packet.header.type & 0X80) {
         hasPayload = 1;
-        count += inputBuffer.packet.header.arg1 + 1;
+        size += inputBuffer.packet.header.arg1 + 1;
       }
     }
 
-    if (count <= inputCount) {
+    if (size <= inputCount) {
 #ifdef DEBUG_PACKETS
-      LogBytes("Input Packet", inputBuffer.bytes, count);
+      LogBytes("Input Packet", inputBuffer.bytes, size);
 #endif /* DEBUG_PACKETS */
 
       if (hasPayload) {
         unsigned char checksum = 0;
         int index;
-        for (index=0; index<count; ++index)
+        for (index=0; index<size; ++index)
           checksum -= inputBuffer.bytes[index];
         if (checksum)
           LogPrint(LOG_WARNING, "Input packet checksum error.");
       }
 
-      memcpy(packet, &inputBuffer, count);
-      memcpy(&inputBuffer.bytes[0], &inputBuffer.bytes[count],
-             inputCount -= count);
-      return count;
+      memcpy(packet, &inputBuffer, size);
+      memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[size],
+             inputCount -= size);
+      return size;
     }
 
-    if (first) {
-      first = 0;
-    } else {
-      delay(1);
-    }
+  retry:
+    {
+      int count = io->readBytes(&inputBuffer.bytes[inputCount], size-inputCount);
+      if (count < 1) {
+        if (count == -1) {
+          LogError("read");
+        } else if ((count == 0) && (inputCount > 0)) {
+          if (io->awaitInput(1000)) goto retry;
+        }
+        return count;
+      }
 
-    if ((count = io->readBytes(&inputBuffer.bytes[inputCount],
-                               count - inputCount)) < 1) {
-      return count;
-    }
+      if (!inputCount) {
+        static const unsigned char packets[] = {
+          PKT_ACK, PKT_NAK,
+          PKT_KEY, PKT_BUTTON, PKT_WHEEL,
+          PKT_INFO
+        };
+        int first;
+        for (first=0; first<count; ++first)
+          if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
+            break;
+        if (first) {
 #ifdef DEBUG_PACKETS
-    LogBytes("Input Bytes", &inputBuffer.bytes[inputCount], count);
+          LogBytes("Discarded Input", inputBuffer.bytes, first);
 #endif /* DEBUG_PACKETS */
-    inputCount += count;
+          memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
+        }
+      }
+
+#ifdef DEBUG_PACKETS
+      LogBytes("Input Bytes", &inputBuffer.bytes[inputCount], count);
+#endif /* DEBUG_PACKETS */
+      inputCount += count;
+    }
   }
 }
 
@@ -485,18 +520,27 @@ writePacket (
 
 static void
 updateCells (BrailleDisplay *brl) {
-  if (!writing)
-    if (writeTo != -1)
-      if (writePacket(brl, PKT_WRITE,
-                      writeTo-writeFrom+1, writeFrom,
-                      0, &outputBuffer[writeFrom])) {
+  if (!writing) {
+    if (writeTo != -1) {
+      int count = writeTo + 1 - writeFrom;
+      const int maximum = 11;
+      int truncate = count > outputMaximum;
+      if (truncate) count = maximum;
+      if (writePacket(brl, PKT_WRITE, count, writeFrom, 0,
+                      &outputBuffer[writeFrom])) {
         writing = 1;
         gettimeofday(&writingTime, NULL);
         writingFrom = writeFrom;
-        writingTo = writeTo;
-        writeFrom = -1;
-        writeTo = -1;
+        if (truncate) {
+          writingTo = (writeFrom += count) - 1;
+        } else {
+          writingTo = writeTo;
+          writeFrom = -1;
+          writeTo = -1;
+        }
       }
+    }
+  }
 }
 
 static void
@@ -540,6 +584,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     return 0;
   }
   inputCount = 0;
+  outputMaximum = 0XFF;
 
   if (!io->openPort(parameters, device)) goto failure;
   while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL)) {
@@ -594,7 +639,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                      model->textCells, model->statusCells,
                      response.payload.info.firmware);
 
-            makeOutputTable(model->dots, &outputTable);
+            makeOutputTable(model->dotsTable, &outputTable);
 
             textOffset = statusOffset = 0;
             if (model->statusCells) {
@@ -896,6 +941,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
           if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
       case PKT_ACK:
           writing = 0;
+          updateCells(brl);
         }
         continue;
 
@@ -911,34 +957,32 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         unsigned char row = packet.header.arg3;
         int command = CMD_NOOP;
 
-        if (model->options & OPT_HOT_KEYS) {
-          if (row == 1) {
-            static int keys[] = {
-              KEY_GDF_LEFT,
-              KEY_HOT1, KEY_HOT2, KEY_HOT3, KEY_HOT4,
-              KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
-              KEY_GDF_RIGHT
-            };
-            static const int keyCount = sizeof(keys) / sizeof(keys[0]);
+        if (row == model->hotkeysRow) {
+          static int keys[] = {
+            KEY_GDF_LEFT,
+            KEY_HOT1, KEY_HOT2, KEY_HOT3, KEY_HOT4,
+            KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
+            KEY_GDF_RIGHT
+          };
+          static const int keyCount = sizeof(keys) / sizeof(keys[0]);
 
-            int key;
-            button -= (model->totalCells - keyCount) / 2;
+          int key;
+          button -= (model->totalCells - keyCount) / 2;
 
-            if (button < 0) {
-              key = KEY_ADVANCE_LEFT;
-            } else if (button >= keyCount) {
-              key = KEY_ADVANCE_RIGHT;
-            } else {
-              key = keys[button];
-            }
-
-            if (press) {
-              virtualKeys |= key;
-            } else {
-              virtualKeys &= ~key;
-            }
-            return interpretKeys();
+          if (button < 0) {
+            key = KEY_ADVANCE_LEFT;
+          } else if (button >= keyCount) {
+            key = KEY_ADVANCE_RIGHT;
+          } else {
+            key = keys[button];
           }
+
+          if (press) {
+            virtualKeys |= key;
+          } else {
+            virtualKeys &= ~key;
+          }
+          return interpretKeys();
         }
 
         activeKeys = 0;
