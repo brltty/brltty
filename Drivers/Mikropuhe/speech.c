@@ -143,7 +143,7 @@ deallocateSpeechSegment (SpeechSegment *segment) {
 }
 
 static void
-deallocateSpeechItem (void *item) {
+deallocateSpeechItem (void *item, void *data) {
   deallocateSpeechSegment(item);
 }
 
