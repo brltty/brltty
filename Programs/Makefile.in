@@ -279,10 +279,10 @@ spk.auto.h: $(SRC_DIR)/mkdrvtab
 
 HOSTOPTS_OBJECTS = host_misc.$O hostopts.$O
 
-hostopts.$O:
+hostopts.$O: options.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/options.c
 
-host_misc.$O:
+host_misc.$O: misc.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/misc.c
 
 ###############################################################################
@@ -305,7 +305,7 @@ tbl2hex: $(TBL2HEX_OBJECTS)
 tbl2hex.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
 
-host_tbl.$O:
+host_tbl.$O: tbl.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/tbl.c
 
 ###############################################################################
