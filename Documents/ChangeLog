@@ -80,6 +80,7 @@ August 12, 2004:
       Remove unused definitions from the header.
       Move protocol I definitions from the header into the protocol I section of the implementation.
       Complete the implementation of protocol II.
+      Support the EL 40/66/80 Slimline models.
       Remove out-of-date debugging utilities.
    TSI driver changes:
       Remove CTS checking.
