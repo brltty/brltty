@@ -45,7 +45,7 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static int outputMaximum;
+static int maximumPayloadLength;
 
 #include "Programs/serial.h"
 static int serialDevice = -1;
@@ -68,7 +68,6 @@ openSerialPort (char **parameters, const char *device) {
 
     if (resetSerialDevice(serialDevice, &newSerialSettings, baud)) {
       serialCharactersPerSecond = baud2integer(baud) / 10;
-      outputMaximum = 11;
       return 1;
     }
 
@@ -523,9 +522,8 @@ updateCells (BrailleDisplay *brl) {
   if (!writing) {
     if (writeTo != -1) {
       int count = writeTo + 1 - writeFrom;
-      const int maximum = 11;
-      int truncate = count > outputMaximum;
-      if (truncate) count = maximum;
+      int truncate = count > maximumPayloadLength;
+      if (truncate) count = maximumPayloadLength;
       if (writePacket(brl, PKT_WRITE, count, writeFrom, 0,
                       &outputBuffer[writeFrom])) {
         writing = 1;
@@ -584,7 +582,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     return 0;
   }
   inputCount = 0;
-  outputMaximum = 0XFF;
+  maximumPayloadLength = 0XFF;
 
   if (!io->openPort(parameters, device)) goto failure;
   while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL)) {
@@ -935,6 +933,20 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
       case PKT_NAK:
         negativeAcknowledgement(&packet);
+        switch (packet.header.arg1) {
+          case PKT_ERR_TIMEOUT: {
+            int originalLimit = maximumPayloadLength;
+            if (maximumPayloadLength > model->totalCells)
+              maximumPayloadLength = model->totalCells;
+            if (maximumPayloadLength > 1)
+              maximumPayloadLength--;
+            if (maximumPayloadLength != originalLimit)
+              LogPrint(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
+                       originalLimit, maximumPayloadLength);
+            break;
+          }
+        }
+
       handleNegativeAcknowledgement:
         if (writing) {
           if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
