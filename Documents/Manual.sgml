@@ -436,11 +436,8 @@ for any additional display-specific instructions.
     for run-time selection.
   <tag><tt/--with-text-table=/<em/file/<label id="build-text-table"></tag>
     Specify the default text translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--with-data-directory">
-    and the <ref id="build-execute-root" name="--with-execute-root">
-    build options for more details).
+    (see section <ref id="translation-text" name="Text Translation"> for details).
+    The absolute path to a table outside the source tree may be specified.
     The <tt/.tbl/ extension is optional.
     For a simple file name, the <tt/text./ prefix is optional.
     If this option isn't specified,
@@ -455,11 +452,8 @@ for any additional display-specific instructions.
     <ref id="preference-text-table" name="Text Table"> preference.
   <tag><tt/--with-attributes-table=/<em/file/<label id="build-attributes-table"></tag>
     Specify the default attributes translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
-    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-data-directory" name="--with-data-directory">
-    and the <ref id="build-execute-root" name="--with-execute-root">
-    build options for more details).
+    (see section <ref id="translation-attributes" name="Attributes Translation"> for details).
+    The absolute path to a table outside the source tree may be specified.
     The <tt/.tbl/ extension is optional.
     If this option isn't specified,
     then <tt/attributes/ is assumed.

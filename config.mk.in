@@ -137,8 +137,8 @@ CONFIGURED_DRIVERS = @brltty_driver_names@
 
 SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
 
-TEXTTRANS = @text_table@
-ATTRTRANS = @attributes_table@
+TEXT_TABLE = @text_table@
+ATTRIBUTES_TABLE = @attributes_table@
 
 SYSTEM_OBJECT = @system_object@
 USB_OBJECTS = @usb_objects@

@@ -642,49 +642,11 @@ BRLTTY_TEXT_TABLE([se2], [Swedish (iso-8859-1)])
 BRLTTY_TEXT_TABLE([uk], [United Kingdom English (iso-8859-1)])
 BRLTTY_TEXT_TABLE([us], [American English (iso-8859-1)])
 BRLTTY_TEXT_TABLE([vni], [Vietnamese (iso-8859-1)])
-brltty_default_text_table=nabcc
-BRLTTY_ARG_WITH(
-   [text-table], [FILE],
-   [default text table]brltty_tables_text,
-   [text_table], ["${brltty_default_text_table}"]
-)
-install_text_tables=install-text-tables
-if test "${text_table}" = "no"
-then
-   install_text_tables=
-   text_table="${brltty_default_text_table}"
-elif test "${text_table}" = "yes"
-then
-   text_table="${brltty_default_text_table}"
-fi
-BRLTTY_TABLE_PATH([text_table], [text])
-AC_SUBST([install_text_tables])
-AC_SUBST([text_table])
-AC_DEFINE_UNQUOTED([TEXT_TABLE], ["${text_table}"])
-BRLTTY_SUMMARY_ITEM([text-table], [text_table])
+BRLTTY_ARG_TABLE([text], [nabcc], [text])
 
 BRLTTY_ATTRIBUTES_TABLE([attributes], [])
 BRLTTY_ATTRIBUTES_TABLE([attrib], [])
-brltty_default_attributes_table=attributes
-BRLTTY_ARG_WITH(
-   [attributes-table], [FILE],
-   [default attributes table]brltty_tables_attributes,
-   [attributes_table], ["${brltty_default_attributes_table}"]
-)
-install_attributes_tables=install-attributes-tables
-if test "${attributes_table}" = "no"
-then
-   install_attributes_tables=
-   attributes_table="${brltty_default_attributes_table}"
-elif test "${attributes_table}" = "yes"
-then
-   attributes_table="${brltty_default_attributes_table}"
-fi
-BRLTTY_TABLE_PATH([attributes_table], [])
-AC_SUBST([install_attributes_tables])
-AC_SUBST([attributes_table])
-AC_DEFINE_UNQUOTED([ATTRIBUTES_TABLE], ["${attributes_table}"])
-BRLTTY_SUMMARY_ITEM([attributes-table], [attributes_table])
+BRLTTY_ARG_TABLE([attributes], [attributes], [])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],

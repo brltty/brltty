@@ -1,3 +1,5 @@
+AC_DEFUN([BRLTTY_UPPERCASE], [translit([$1], [a-z], [A-Z])])
+
 AC_DEFUN([BRLTTY_SEARCH_LIBS], [dnl
 brltty_uc="`echo "$1" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
 AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_FUNC_${brltty_uc})])])
@@ -34,6 +36,29 @@ fi
 AC_SUBST([$4])
 BRLTTY_SUMMARY_ITEM([$1], [$4])])
 
+AC_DEFUN([BRLTTY_ARG_TABLE], [dnl
+brltty_default_table="$2"
+BRLTTY_ARG_WITH(
+   [$1-table], [FILE],
+   [default $1 table]brltty_tables_$1,
+   [$1_table], ["${brltty_default_table}"]
+)
+install_$1_tables=install-$1-tables
+if test "${$1_table}" = "no"
+then
+   install_$1_tables=
+   $1_table="${brltty_default_table}"
+elif test "${$1_table}" = "yes"
+then
+   $1_table="${brltty_default_table}"
+fi
+AC_SUBST([install_$1_tables])
+BRLTTY_FILE_PATH([$1_table], [tbl], [$3])
+BRLTTY_SUMMARY_ITEM([$1-table], [$1_table])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_table]), ["${$1_table}"])
+BRLTTY_FILE_PATH([$1_table], [], [], [$(SRC_TOP)$(TBL_DIR)])
+AC_SUBST([$1_table])])
+
 AC_DEFUN([BRLTTY_ARG_PARAMETERS], [dnl
 BRLTTY_ARG_WITH(
    [$1-parameters], [DRIVER:PARAMETER=SETTING... (comma-separated)],
@@ -47,7 +72,7 @@ elif test "${$1_parameters}" = "yes"
 then
    $1_parameters=""
 fi
-AC_DEFINE_UNQUOTED(translit([$1_parameters], [a-z], [A-Z]), ["${$1_parameters}"])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_parameters]), ["${$1_parameters}"])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
 AC_DEFUN([BRLTTY_ARG_ENABLE], [dnl
@@ -135,7 +160,7 @@ BRLTTY_VAR_TRIM([brltty_item_names_$1])
 AC_SUBST([brltty_item_names_$1])
 
 BRLTTY_ARG_WITH(
-   [$1-$2], translit([$2], [a-z], [A-Z]),
+   [$1-$2], BRLTTY_UPPERCASE([$2]),
    [$1 $2(s) to build in]brltty_item_list_$1,
    [brltty_items], ["yes"]
 )
@@ -251,7 +276,7 @@ AC_SUBST([brltty_external_codes_$1])
 AC_SUBST([brltty_external_names_$1])
 AC_SUBST([brltty_internal_codes_$1])
 AC_SUBST([brltty_internal_names_$1])
-AC_DEFINE_UNQUOTED(translit([$1_$2_codes], [a-z], [A-Z]), ["${brltty_item_codes_$1}"])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_$2_codes]), ["${brltty_item_codes_$1}"])
 
 $1_driver_libraries=""
 if test -n "${brltty_internal_codes_$1}"
@@ -308,13 +333,17 @@ then
    fi
 fi
 ])dnl
+ifelse(len([$4]), 0, [], [dnl
+if test "${$1}" = "${$1#/}"
+then
+   $1='$4/'"${$1}"
+fi
+])dnl
 ifelse(len([$2]), 0, [], [dnl
 if test `expr "${$1}" : '.*\.$2$'` -eq 0
 then
    $1="${$1}.$2"
 fi])])
-
-AC_DEFUN([BRLTTY_TABLE_PATH], [BRLTTY_FILE_PATH([$1], [tbl], [$2])])
 
 AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl
 define([brltty_tables_text], ifdef([brltty_tables_text], [brltty_tables_text])[
@@ -399,7 +428,7 @@ AC_SUBST([$2_root])
 BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])
 if test -n "${$2_root}"
 then
-   AC_DEFINE_UNQUOTED(translit([$2_root], [a-z], [A-Z]), ["${$2_root}"])
+   AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$2_root]), ["${$2_root}"])
    $4
 fi])
 
