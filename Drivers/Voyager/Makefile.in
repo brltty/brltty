@@ -28,45 +28,10 @@ HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk
 
-KERNEL_INCLUDES = /usr/include/linux
-ifneq (,$(wildcard $(KERNEL_INCLUDES)/brlvger.h))
-# The USB driver is in the kernel.
-VGERHDR = $(KERNEL_INCLUDES)/brlvger.h
-else
-# The USB driver is not in the kernel: we use the module in kernel/.
-VGERHDR = $(SRC_DIR)/kernel/linux/brlvger.h
-endif
-
-MINOR := $(shell grep BRLVGER_MINOR $(VGERHDR) | ${AWK} '{print $$3;}')
-VOYAGERDEV=/dev/brlvger
-
-.PHONY : brlvger.h
-brlvger.auto.h:
-	ln -sf $(VGERHDR) $@
-
-braille.$O: brlvger.auto.h
+braille.$O:
 	$(CC) $(BRL_CFLAGS) $(KDRIVER) -c $(SRC_DIR)/braille.c
 
 #Let's not rebuild the help unless the user wants to as it requires python.
-remakehelp: mkhlp $(SRC_DIR)/hlptrans.py $(SRC_DIR)/braille.c $(SRC_DIR)/help.template brlvger.auto.h
+remakehelp: mkhlp $(SRC_DIR)/hlptrans.py $(SRC_DIR)/braille.c $(SRC_DIR)/help.template
 	chmod u+x mkhlp
 	./mkhlp
-
-install-device:
-	@if [ -c ${INSTALL_ROOT}${VOYAGERDEV} ]; \
-        then \
-          echo "Voyager device ${INSTALL_ROOT}${VOYAGERDEV}" \
-             "already exists." ; \
-        else \
-          echo "Creating character device" \
-            "${INSTALL_ROOT}${VOYAGERDEV}" \
-            "with major 180 and minor ${MINOR}" ; \
-          mknod -m 0660 ${INSTALL_ROOT}${VOYAGERDEV} c 180 ${MINOR}; \
-        fi
-
-clean::
-	-rm -f brlvger.auto.h
-
-distclean::
-	-rm mkhlp
-	-cd kernel && $(MAKE) clean distclean

@@ -28,10 +28,6 @@ $(SRC_TOP)Drivers/VideoBraille/braille.$O: $(BLD_TOP)Drivers/VideoBraille/vb.$O
 $(BLD_TOP)Drivers/VideoBraille/braille.$O: $(BLD_TOP)Drivers/VideoBraille/vblow.$O
 	cd $(@D) && $(MAKE) $(@F)
 
-$(BLD_TOP)Drivers/Voyager/braille.$O: $(BLD_TOP)Drivers/Voyager/brlvger.auto.h
-$(BLD_TOP)Drivers/Voyager/brlvger.auto.h:
-	cd $(@D) && $(MAKE) $(@F)
-
 clean::
 	-rm -f *.$O *.auto.h core
 

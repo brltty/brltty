@@ -774,7 +774,7 @@ changequote(, )dnl
 brltty_setup_files="`echo "${brltty_driver_names}" | sed -e '
 s%  *% %g
 s% \([^ ][^ ]*\)% Drivers/\1%g
-s%^%. Programs Documents BrailleTables Unicode Drivers/Voyager/kernel%
+s%^%. Programs Documents BrailleTables Unicode%
 s%\([^ ][^ ]*\) %\1/Makefile:setup.mk.in:\1/Makefile.in %g
 s% *$%%
 '`"

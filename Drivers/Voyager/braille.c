@@ -15,36 +15,20 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION \
-"BRLTTY driver for Tieman Voyager, version 0.71 (January 2003)"
+"BRLTTY user-space-only driver for Tieman Voyager, version 0.01 (January 2004)"
 #define COPYRIGHT \
-"   Copyright (C) 2001-2003 by Stéphane Doyon  <s.doyon@videotron.ca>\n" \
-"                          and Stéphane Dalton <sdalton@videotron.ca>"
+"   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>\n"
+
 /* Voyager/braille.c - Braille display driver for Tieman Voyager displays.
  *
- * Written by:
- *   Stéphane Doyon  <s.doyon@videotron.ca>
- *   Stéphane Dalton <sdalton@videotron.ca>
+ * Written by Stéphane Doyon  <s.doyon@videotron.ca>
  *
  * It is being tested on Voyager 44, should also support Voyager 70.
- * It is designed to be compiled in BRLTTY version 3.2.
+ * It is designed to be compiled in BRLTTY version 3.4.
  *
  * History:
- * 0.71, January 2003: brl->buffer now allocated by core.
- * 0.7, April 2002: The name of the kernel module changed from
- *   voyager to brlvger, so some stuff (header file name, structure
- *   name, constants...) were renamed. Note that the character device
- *   file changed from /dev/voyager major 180 minor 144 to /dev/brlvger
- *   major 180 minor 128 (now official). The kernel module is being
- *   integrated into the mainstream kernel tree. The Makefile
- *   causes us to use /usr/include/linux/brlvger.h if it exists,
- *   and kernel/linux/brlvger.h otherwise.
- * 0.6, February 2002: Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and
- *   CMD_SIXDITS. Some key bindings identification cleanups.
- * 0.5, January 2002: Added key bindings for CR_CUTAPPEND, CR_CUTLINE,
- *   CR_SETMARK, CR_GOTOMARK and CR_SETLEFT. Changed binding for NXSEARCH.
- * 0.4.1, November 2001: Added typematic repeat for braille dots typing.
- * 0.4, October 2001: First public release. Should be usable. Key bindings
- *   might benefit from some fine-tuning.
+ * 0.01, January 2004: fork from the original driver which relied on an
+ *   in-kernel USB driver.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -61,6 +45,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "Programs/usb.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
@@ -68,62 +53,53 @@ typedef enum {
   PARM_REPEAT_INIT_DELAY=0,
   PARM_REPEAT_INTER_DELAY,
   PARM_DOTS_REPEAT_INIT_DELAY,
-  PARM_DOTS_REPEAT_INTER_DELAY
+  PARM_DOTS_REPEAT_INTER_DELAY,
 } DriverParameter;
 #define BRLPARMS "repeat_init_delay", "repeat_inter_delay", \
                  "dots_repeat_init_delay", "dots_repeat_inter_delay"
 
 #define BRLSTAT ST_VoyagerStyle
 #include "Programs/brl_driver.h"
-#include "braille.h"
 
-/* Kernel driver interface (symlink produced by Makefile) */
-#include "brlvger.auto.h"
+#define DEFAULT_REPEAT_INIT_DELAY  120
+#define DEFAULT_REPEAT_INTER_DELAY  60
+#define DEFAULT_DOTS_REPEAT_INIT_DELAY  500
+#define DEFAULT_DOTS_REPEAT_INTER_DELAY  60
+/* Voltage. Presumably this is voltage for cell dots. Presumably 0
+   makes dots hardest, 255 makes them softest. */
+/* from 0->300V to 255->200V, we are told 265V is normal operating voltage,
+   but we don't know the scale. Assuming it is linear. */
+#define DEFAULT_RAW_VOLTAGE 89
+/* IWBN to make this into a parameter, except it doesn't seem to
+   actually do much :-) */
 
-/* This defines the mapping from brltty coding to Voyager's dot coding. */
-static TranslationTable outputTable;
-
-/* This is the reverse: mapping from Voyager to brltty dot cofing. */
-static unsigned char voy2brlDotsTable[256] =
-{
-  0x0, 0x1, 0x4, 0x5, 0x10, 0x11, 0x14, 0x15, 
-  0x2, 0x3, 0x6, 0x7, 0x12, 0x13, 0x16, 0x17, 
-  0x8, 0x9, 0xc, 0xd, 0x18, 0x19, 0x1c, 0x1d, 
-  0xa, 0xb, 0xe, 0xf, 0x1a, 0x1b, 0x1e, 0x1f, 
-  0x20, 0x21, 0x24, 0x25, 0x30, 0x31, 0x34, 0x35, 
-  0x22, 0x23, 0x26, 0x27, 0x32, 0x33, 0x36, 0x37, 
-  0x28, 0x29, 0x2c, 0x2d, 0x38, 0x39, 0x3c, 0x3d, 
-  0x2a, 0x2b, 0x2e, 0x2f, 0x3a, 0x3b, 0x3e, 0x3f, 
-  0x40, 0x41, 0x44, 0x45, 0x50, 0x51, 0x54, 0x55, 
-  0x42, 0x43, 0x46, 0x47, 0x52, 0x53, 0x56, 0x57, 
-  0x48, 0x49, 0x4c, 0x4d, 0x58, 0x59, 0x5c, 0x5d, 
-  0x4a, 0x4b, 0x4e, 0x4f, 0x5a, 0x5b, 0x5e, 0x5f, 
-  0x60, 0x61, 0x64, 0x65, 0x70, 0x71, 0x74, 0x75, 
-  0x62, 0x63, 0x66, 0x67, 0x72, 0x73, 0x76, 0x77, 
-  0x68, 0x69, 0x6c, 0x6d, 0x78, 0x79, 0x7c, 0x7d, 
-  0x6a, 0x6b, 0x6e, 0x6f, 0x7a, 0x7b, 0x7e, 0x7f, 
-  0x80, 0x81, 0x84, 0x85, 0x90, 0x91, 0x94, 0x95, 
-  0x82, 0x83, 0x86, 0x87, 0x92, 0x93, 0x96, 0x97, 
-  0x88, 0x89, 0x8c, 0x8d, 0x98, 0x99, 0x9c, 0x9d, 
-  0x8a, 0x8b, 0x8e, 0x8f, 0x9a, 0x9b, 0x9e, 0x9f, 
-  0xa0, 0xa1, 0xa4, 0xa5, 0xb0, 0xb1, 0xb4, 0xb5, 
-  0xa2, 0xa3, 0xa6, 0xa7, 0xb2, 0xb3, 0xb6, 0xb7, 
-  0xa8, 0xa9, 0xac, 0xad, 0xb8, 0xb9, 0xbc, 0xbd, 
-  0xaa, 0xab, 0xae, 0xaf, 0xba, 0xbb, 0xbe, 0xbf, 
-  0xc0, 0xc1, 0xc4, 0xc5, 0xd0, 0xd1, 0xd4, 0xd5, 
-  0xc2, 0xc3, 0xc6, 0xc7, 0xd2, 0xd3, 0xd6, 0xd7, 
-  0xc8, 0xc9, 0xcc, 0xcd, 0xd8, 0xd9, 0xdc, 0xdd, 
-  0xca, 0xcb, 0xce, 0xcf, 0xda, 0xdb, 0xde, 0xdf, 
-  0xe0, 0xe1, 0xe4, 0xe5, 0xf0, 0xf1, 0xf4, 0xf5, 
-  0xe2, 0xe3, 0xe6, 0xe7, 0xf2, 0xf3, 0xf6, 0xf7, 
-  0xe8, 0xe9, 0xec, 0xed, 0xf8, 0xf9, 0xfc, 0xfd, 
-  0xea, 0xeb, 0xee, 0xef, 0xfa, 0xfb, 0xfe, 0xff
-};
+/* Workaround USB<->Voyager flakiness: repeat commands */
+#define STALL_TRIES 3
+#define SENDBRAILLE_REPEATS 2
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 
-#define MAXNRCELLS 120 /* arbitrary max for allocations */
+#define MAXNRCELLS 70 /* arbitrary max for allocations */
+
+/* control message request types */
+#define BRLVGER_READ_REQ 0xC2
+#define BRLVGER_WRITE_REQ 0x42
+/* control message request codes */
+#define BRLVGER_SET_DISPLAY_ON 0
+#define BRLVGER_SET_DISPLAY_VOLTAGE 1
+#define BRLVGER_GET_SERIAL 3
+#define BRLVGER_GET_FWVERSION 5
+#define BRLVGER_GET_LENGTH 6
+#define BRLVGER_SEND_BRAILLE 7
+#define BRLVGER_BEEP 9
+#if 0 /* not used and not sure they're working */
+/* hw ver is either 0.0 or unspecified on the prototype I have.
+  Not sure how to decode it properly. */
+#define BRLVGER_GET_HWVERSION 4
+#define BRLVGER_GET_DISPLAY_VOLTAGE 2
+#define BRLVGER_GET_CURRENT 8
+#endif
 
 /* We'll use 4cells as status cells, both on Voyager 44 and 70. (3cells have
    content and the fourth is blank to mark the separation.)
@@ -133,9 +109,18 @@ static unsigned char voy2brlDotsTable[256] =
 */
 #define NRSTATCELLS 4
 
+#define USB_VENDOR_ID 0X0798
+#define USB_PRODUCT_ID 1
+
+#define USB_INPUT_ENDPOINT 1
+
 /* Global variables */
 
-static int brl_fd; /* to kernel driver */
+/* Mappings between Voyager's dot coding and brltty's coding. */
+static TranslationTable inputTable, outputTable;
+
+static UsbDevice *usbDevice;
+static unsigned char usbInterface;
 
 static unsigned char *prevdata, /* previous pattern displayed */
                      *dispbuf; /* buffer to prepare new pattern */
@@ -145,6 +130,100 @@ static char readbrl_init; /* Flag to reinitialize readbrl function state. */
 static int repeat_init_delay, repeat_inter_delay; /* key repeat rate params */
 /* repeat rate params for braile dots being typed */
 static int dots_repeat_init_delay, dots_repeat_inter_delay;
+
+
+
+static int
+chooseUsbDevice (UsbDevice *device, void *data)
+{
+  const char *serialNumber = data;
+  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
+  if ((descriptor->idVendor == USB_VENDOR_ID) 
+      && (descriptor->idProduct == USB_PRODUCT_ID)) {
+    if (!usbVerifySerialNumber(device, serialNumber))
+      return 0;
+
+    usbInterface = 0;
+    if (usbClaimInterface(device, usbInterface) != -1) {
+      if (usbSetConfiguration(device, 1) != -1)
+        if (usbSetAlternative(device, usbInterface, 0) != -1)
+          return 1;
+        else LogError("set USB alternative");
+      else LogError("set USB configuration");
+      usbReleaseInterface(device, usbInterface);
+    } else LogError("claim USB interface");
+  }
+  return 0;
+}
+
+static int
+_sndcontrolmsg(char *reqname, __u8 request, __u16 value, __u16 index,
+	      unsigned char *buffer, __u16 size)
+{
+  int ret, repeats = STALL_TRIES;
+  do {
+    if(repeats == STALL_TRIES)
+      LogPrint(LOG_DEBUG, "control req %s 0x%x", reqname, request);
+    else
+      LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
+	       request, strerror(errno), STALL_TRIES+1-repeats);
+    ret = usbControlTransfer(usbDevice, 0, USB_DIR_OUT, 
+			     BRLVGER_WRITE_REQ,
+			     request, value, index, buffer, size,
+			     100);
+  } while(ret<0 && errno==EPIPE && --repeats);
+  return ret;
+}
+
+#define sndcontrolmsg(request, value, index, buffer, size) \
+    ({ int ret = _sndcontrolmsg(#request, request, value, index, buffer, size); \
+       if(ret<0) LogPrint(LOG_ERR, "%s control op " \
+			  "got error %s", #request, strerror(errno)); \
+       ret; \
+    })
+
+static int
+_rcvcontrolmsg(char *reqname, __u8 request, __u16 value, __u16 index,
+	      unsigned char *buffer, __u16 size)
+{
+  int ret, repeats = STALL_TRIES;
+  do {
+    if(repeats == STALL_TRIES)
+      LogPrint(LOG_DEBUG, "control req %s 0x%x", reqname, request);
+    else
+      LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
+	       request, strerror(errno), STALL_TRIES+1-repeats);
+    ret = usbControlTransfer(usbDevice, 0, USB_DIR_IN, 
+			     BRLVGER_READ_REQ,
+			     request, value, index, buffer, size,
+			     100);
+  } while(ret<0 && errno==EPIPE && --repeats);
+  return ret;
+}
+
+#define rcvcontrolmsg(request, value, index, buffer, size) \
+    ({ int ret = _rcvcontrolmsg(#request, request, value, index, buffer, size); \
+       if(ret<0) LogPrint(LOG_ERR, "%s query op " \
+			  "got error %s", #request, strerror(errno)); \
+       ret; \
+    })
+
+#define RAW_STRING_SIZE 500
+#define STRING_SIZE (2*RAW_STRING_SIZE +1)
+static unsigned char *
+decodeString(char *rawbuf)
+{
+  static unsigned char str[STRING_SIZE];
+  int i, len = (rawbuf[0]-2)/2;
+  if(len<0)
+    len = 0;
+  else if(len+1 > STRING_SIZE)
+    len = STRING_SIZE-1;
+  for(i=0; i<len; i++)
+    str[i] = rawbuf[2+2*i];
+  str[i] = 0;
+  return str;
+}
 
 
 static void 
@@ -157,11 +236,25 @@ brl_identify (void)
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
-  struct brlvger_info vi;
+  int ret;
+
+  if (!isUsbDevice(&dev)) {
+    LogPrint(LOG_ERR,"Unsupported port type. Must be USB.");
+    goto failure;
+  }
+  /* Open the Braille display device */
+  LogPrint(LOG_DEBUG,"Attempting open");
+  if (!(usbDevice = usbFindDevice(chooseUsbDevice, (void *)dev))) {
+    LogPrint(LOG_INFO, "USB device not found.");
+    goto failure;
+  }
+  LogPrint(LOG_DEBUG, "USB device opened.");
 
   {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+    static const DotsTable dots
+      = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
     makeOutputTable(&dots, &outputTable);
+    reverseTranslationTable(&outputTable, &inputTable);
   }
 
   /* use user parameters */
@@ -193,64 +286,61 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 
   dispbuf = prevdata = NULL;
 
-  brl_fd = open (dev, O_RDWR);
-  /* Kernel driver will block until a display is connected. */
-  if (brl_fd < 0){
-    LogPrint(LOG_ERR, "Open failed on device %s: %s", dev, strerror(errno));
-    goto failure;
-  }
-  LogPrint(LOG_DEBUG,"Device %s opened", dev);
-
-  /* Get display and USB kernel driver info */
-  if(ioctl(brl_fd, BRLVGER_GET_INFO, &vi) <0) {
-    LogPrint(LOG_ERR, "ioctl BRLVGER_GET_INFO failed on device %s: %s",
-	     dev, strerror(errno));
-    goto failure;
-  }
-  vi.driver_version[sizeof(vi.driver_version)-1] = 0;
-  vi.driver_banner[sizeof(vi.driver_banner)-1] = 0;
-  LogPrint(LOG_INFO, "Kernel driver version: %s", vi.driver_version);
-  LogPrint(LOG_DEBUG, "Kernel driver identification: %s", vi.driver_banner);
-  vi.hwver[sizeof(vi.hwver)-1] = 0;
-  vi.fwver[sizeof(vi.fwver)-1] = 0;
-  vi.serialnum[sizeof(vi.serialnum)-1] = 0;
-  LogPrint(LOG_DEBUG, "Display hardware version: %u.%u",
-	   vi.hwver[0],vi.hwver[1]);
-  LogPrint(LOG_DEBUG, "Display firmware version: %s", vi.fwver);
-  LogPrint(LOG_DEBUG, "Display serial number: %s", vi.serialnum);
-
-  ncells = vi.display_length;
-  if(ncells < NRSTATCELLS +5 || ncells > MAXNRCELLS) {
-    LogPrint(LOG_ERR, "Returned unlikely number of cells %u", ncells);
-    goto failure;
+  {
+    /* query for length */
+    unsigned char data[2];
+    ret = rcvcontrolmsg(BRLVGER_GET_LENGTH, 0, 0, data, 2);
+    if(ret<0) goto failure;
+    switch(data[1]) {
+    case 48:
+      ncells = 44;
+      brl->helpPage = 0;
+      break;
+    case 72:
+      ncells = 70;
+      brl->helpPage = 1;
+      break;
+    default:
+      LogPrint(LOG_ERR,"Unsupported display length code %u", data[1]);
+      goto failure;
+    };
   }
   LogPrint(LOG_INFO,"Display has %u cells", ncells);
-  if(ncells == 44)
-    brl->helpPage = 0;
-  else if(ncells == 70)
-    brl->helpPage = 1;
-  else{
-    LogPrint(LOG_NOTICE, "Unexpected display length, unknown model, "
-	     "using Voyager 44 help file.");
-    brl->helpPage = 0;
-  }
 
   brl_cols = ncells -NRSTATCELLS;
 
-  /* cause the display to beep */
   {
-    __u16 duration = 200;
-    if(ioctl(brl_fd, BRLVGER_BUZZ, &duration) <0) {
-      LogError("ioctl BRLVGER_BUZZ");
-      goto failure;
-    }
+    unsigned char rawbuf[RAW_STRING_SIZE];
+    ret = rcvcontrolmsg(BRLVGER_GET_SERIAL, 0,
+			0, rawbuf, sizeof(rawbuf));
+    if(ret<0) goto failure;
+    LogPrint(LOG_INFO,"Serial number: %s", decodeString(rawbuf));
+  }
+  {
+    unsigned char rawbuf[RAW_STRING_SIZE];
+    ret = rcvcontrolmsg(BRLVGER_GET_FWVERSION, 0,
+			0, rawbuf, sizeof(rawbuf));
+    if(ret<0) goto failure;
+    LogPrint(LOG_INFO,"Fw ver: %s", decodeString(rawbuf));
   }
 
-  /* readbrl will want to do non-blocking reads. */
-  if(fcntl(brl_fd, F_SETFL, O_NONBLOCK) <0) {
-    LogError("fcntl F_SETFL O_NONBLOCK");
+  ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE,
+                      DEFAULT_RAW_VOLTAGE, 0, NULL, 0);
+  if(ret<0) goto failure;
+
+  ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_ON, 1, 0, NULL, 0);
+  if(ret<0) goto failure;
+
+  /* cause the display to beep */
+  ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
+  if(ret<0) goto failure;
+
+  LogPrint(LOG_DEBUG,"Starting input");
+  if (usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8, 8) == -1) {
+    LogError("begin USB input");
     goto failure;
   }
+  LogPrint(LOG_DEBUG,"input started");
 
   if(!(dispbuf = (unsigned char *)malloc(ncells))
      || !(prevdata = (unsigned char *) malloc (ncells)))
@@ -277,9 +367,12 @@ failure:;
 static void 
 brl_close (BrailleDisplay *brl)
 {
-  if (brl_fd >= 0)
-    close(brl_fd);
-  brl_fd = -1;
+  if (usbDevice) {
+    usbReleaseInterface(usbDevice, usbInterface);
+    usbCloseDevice(usbDevice);
+    usbDevice = NULL;
+  }
+
   free(dispbuf);
   free(prevdata);
   dispbuf = prevdata = NULL;
@@ -297,46 +390,52 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 static void 
 brl_writeWindow (BrailleDisplay *brl)
 {
+  int repeats;
   unsigned char buf[ncells];
   int i;
-  int start, stop, len;
 
-  /* assert:   brl->x == brl_cols */
-    
   memcpy(dispbuf +NRSTATCELLS, brl->buffer, brl_cols);
 
   /* If content hasn't changed, do nothing. */
   if(memcmp(prevdata, dispbuf, ncells) == 0)
     return;
 
-  start = 0;
-  stop = ncells-1;
-  /* Whether or not to do partial updates... Not clear to me that it
-     is worth the cycles. */
-#define PARTIAL_UPDATE
-#ifdef PARTIAL_UPDATE
-  while(start <= stop && dispbuf[start] == prevdata[start])
-    start++;
-  while(stop >= start && dispbuf[stop] == prevdata[stop])
-    stop--;
-#endif /* PARTIAL_UPDATE */
-
-  len = stop-start+1;
   /* remember current content */
-  memcpy(prevdata+start, dispbuf+start, len);
+  memcpy(prevdata, dispbuf, ncells);
 
   /* translate to voyager dot pattern coding */
-  for(i=start; i<=stop; i++)
+  for(i=0; i<=ncells; i++)
     buf[i] = outputTable[dispbuf[i]];
 
-#ifdef PARTIAL_UPDATE
-  lseek(brl_fd, start, SEEK_SET);
-#endif /* PARTIAL_UPDATE */
-  write(brl_fd, buf+start, len);
-  /* The kernel driver currently never returns EAGAIN. If it did it would be
-     wiser to select(). We don't bother to report failed writes because then
-     we'd have to do rate limiting. Failures are caught in readbrl anyway. */
+  /* Firmware supports multiples of 8cells, so there are extra cells
+     in the firmware's imagination that don't actually exist physically.
+     And for some reason there actually are holes! euurkkk! */
+  /* Old kernel driver had this dirty hack: sometimes some of the dots are
+     not updated somehow. Repeat the command and they right themselves.
+     I don't see this behavior anymore though... */
+  repeats = SENDBRAILLE_REPEATS;
+  switch(ncells) {
+  case 44: {
+    /* Two ghost cells at the beginning of the display, plus
+       two more after the sixth physical cell. */
+    unsigned char hbuf[46];
+    hbuf[6] = hbuf[7] = 0;
+    memcpy(hbuf, buf, 6);
+    memcpy(hbuf+8, buf+6, 38);
+    while(repeats--)
+      sndcontrolmsg(BRLVGER_SEND_BRAILLE, 0,
+                    2, hbuf, 46);
+    break;
+  }
+  case 70:
+    /* Two ghost cells at the beginning of the display. */
+    while(repeats--)
+      sndcontrolmsg(BRLVGER_SEND_BRAILLE, 0,
+		    2, buf, 70);
+    break;
+  };
 }
+
 
 /* Names and codes for display keys */
 
@@ -373,7 +472,7 @@ brl_writeWindow (BrailleDisplay *brl)
     case v: cmd = rcmd; break;
 
 /* OK what follows is pretty hairy. I got tired of individually maintaining
-   the sources and help files so here's might first attempt at "automatic"
+   the sources and help files so here's my first attempt at "automatic"
    generation of help files. This is my first shot at it, so be kind with
    me. */
 /* These macros include an ordering hint for the help file and the help
@@ -476,31 +575,27 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     return cmd;
   }
 
-  r = read(brl_fd, buf, 8);
+  r = usbReapInput(usbDevice, buf, 8, 0);
   if(r<0) {
-    if(errno == ENOLINK)
+    if(errno == EAGAIN) {
+      /* no input */
+      r = 0;
+    }else if(errno == ENODEV) {
       /* Display was disconnected */
       return CMD_RESTARTBRL;
-    if(errno != EAGAIN && errno != EINTR) {
-      LogPrint(LOG_NOTICE,"Read error: %s", strerror(errno));
+    }else{
+      LogPrint(LOG_NOTICE,"Read error: %s.", strerror(errno));
       readbrl_init = 1;
       return EOF;
-      /* If some errors are discovered to occur and are fatal we should
-	 return CMD_RESTARTBRL for those. For now, this shouldn't happen. */
     }
-  }else if(r==0) {
-    /* Should not happen */
-    LogPrint(LOG_NOTICE,"Read returns EOF!");
-    readbrl_init = 1;
-    return EOF;
-  }else if(r<8) {
+  }else if(r>0 && r<8) {
     /* The driver wants and handles read requests of only and exactly 8bytes */
-    LogPrint(LOG_NOTICE,"Read returns short count %d", r);
+    LogPrint(LOG_NOTICE,"Short read %d", r);
     readbrl_init = 1;
     return EOF;
   }
 
-  if(r<0) { /* no new key */
+  if(r==0) { /* no new key */
     /* handle key repetition */
     struct timeval now;
     /* If no repeatable keys are pressed then do nothing. */
@@ -625,7 +720,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     }else if(!(keystate &~0xFF)) {
       /* no routing keys, some dots, no front keys */
       /* This is a character typed in braille */
-      cmd = VAL_PASSDOTS | voy2brlDotsTable[keystate];
+      cmd = VAL_PASSDOTS | inputTable[keystate];
     }else if((keystate & (K_B|K_C)) && !(keystate & 0xFF00 & ~(K_B|K_C))) {
       /* no routing keys, some dots, combined with B or C or both but
 	 no other front keys. */
