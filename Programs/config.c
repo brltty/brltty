@@ -1878,7 +1878,8 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_API */
   LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
   LogPrint(LOG_INFO, "Data Directory: %s", opt_dataDirectory);
-  LogPrint(LOG_INFO, "Help File: %s", brailleDriver->helpFile);
+  LogPrint(LOG_INFO, "Help File: %s",
+           brailleDriver->helpFile? brailleDriver->helpFile: "<NONE>");
   LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
            opt_brailleDriver, brailleDriver->name,
            brailleDriver->date, brailleDriver->time);
@@ -1901,6 +1902,7 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (opt_version) exit(0);
+  if ((brailleDriver == &noBraille) && (speechDriver == &noSpeech)) exit(0);
 
   /* Load preferences file */
   if (!loadPreferences(0)) {

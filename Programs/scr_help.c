@@ -44,14 +44,17 @@ close_HelpScreen (void) {
     free(characters);
     characters = NULL;
   }
+
   if (pages) {
     free(pages);
     pages = NULL;
   }
+
   if (pageDescriptions) {
     free(pageDescriptions);
     pageDescriptions = NULL;
   }
+
   if (fileDescriptor != -1) {
     close(fileDescriptor);
     fileDescriptor = -1;
@@ -60,8 +63,9 @@ close_HelpScreen (void) {
 
 static int
 loadPages (const char *file) {
+  int empty = 0;
+  unsigned long characterCount = 0;
   int bytesRead;
-  unsigned long characterCount = 0; /* total length of formatted help screens */
 
   if ((fileDescriptor = open(file, O_RDONLY)) == -1) {
     LogError("Help file open");
@@ -72,31 +76,49 @@ loadPages (const char *file) {
     LogError("Help file read");
     goto failure;
   }
-  if (bytesRead != sizeof(fileHeader)) {
+
+  if (bytesRead == 0) {
+    LogPrint(LOG_WARNING, "Help file is empty.");
+    empty = 1;
+    fileHeader.pages = 1;
+  } else if (bytesRead != sizeof(fileHeader)) {
     LogPrint(LOG_ERR, "Help file corrupt");
     goto failure;
   }
+
   if (fileHeader.pages < 1) {
     LogPrint(LOG_ERR, "Help file corrupt");
     goto failure;
   }
 
-  if (!(pageDescriptions = calloc(fileHeader.pages, sizeof(*pageDescriptions)))) {
-    LogError("Help page descriptions allocation");
-    goto failure;
+  {
+    int size = sizeof(*pageDescriptions) * fileHeader.pages;
+
+    if (!(pageDescriptions = malloc(size))) {
+      LogError("Help page descriptions allocation");
+      goto failure;
+    }
+
+    if (empty) {
+      putBigEndian(&pageDescriptions->height, 1);
+      putBigEndian(&pageDescriptions->width, 1);
+    } else {
+      if ((bytesRead = read(fileDescriptor, pageDescriptions, size)) == -1) {
+        LogError("Help file read");
+        goto failure;
+      }
+
+      if (bytesRead != size) {
+        LogPrint(LOG_ERR, "Help file corrupt");
+        goto failure;
+      }
+    }
   }
+
   {
     int page;
     for (page=0; page<fileHeader.pages; page++) {
       HelpPageEntry *description = &pageDescriptions[page];
-      if ((bytesRead = read(fileDescriptor, description, sizeof(*description))) == -1) {
-        LogError("Help file read");
-        goto failure;
-      }
-      if (bytesRead != sizeof(*description)) {
-        LogPrint(LOG_ERR, "Help file corrupt");
-        goto failure;
-      }
       characterCount += getBigEndian(description->height) * getBigEndian(description->width);
     }
   }
@@ -109,6 +131,7 @@ loadPages (const char *file) {
     LogError("Help page buffer allocation");
     goto failure;
   }
+
   pages[0] = characters;
   {
     int page;
@@ -128,22 +151,34 @@ loadPages (const char *file) {
         for (row=0; row<getBigEndian(description->height); row++) {
           unsigned char lineLength;
           unsigned char *line = &buffer[row * getBigEndian(description->width)];
-          if ((bytesRead = read(fileDescriptor, &lineLength, sizeof(lineLength))) == -1) {
-            LogError("Help line length read");
-            goto failure;
-          }
-          if (bytesRead != sizeof(lineLength)) {
-            LogPrint(LOG_ERR, "Help file corrupt.");
-            goto failure;
-          }
-          if (lineLength) {
-            if ((bytesRead = read(fileDescriptor, line, lineLength)) == -1) {
-              LogError("Help line read");
+
+          if (empty) {
+            lineLength = 1;
+          } else {
+            if ((bytesRead = read(fileDescriptor, &lineLength, sizeof(lineLength))) == -1) {
+              LogError("Help line length read");
               goto failure;
             }
-            if (bytesRead != lineLength) {
-              LogPrint(LOG_ERR, "Help file corrupt");
+
+            if (bytesRead != sizeof(lineLength)) {
+              LogPrint(LOG_ERR, "Help file corrupt.");
               goto failure;
+            }
+          }
+
+          if (lineLength) {
+            if (empty) {
+              memset(line, ' ', lineLength);
+            } else {
+              if ((bytesRead = read(fileDescriptor, line, lineLength)) == -1) {
+                LogError("Help line read");
+                goto failure;
+              }
+
+              if (bytesRead != lineLength) {
+                LogPrint(LOG_ERR, "Help file corrupt");
+                goto failure;
+              }
             }
           }
           memset(&line[lineLength], ' ', getBigEndian(description->width)-lineLength);

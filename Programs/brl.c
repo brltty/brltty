@@ -37,14 +37,29 @@
 #define BRLCODE no
 #define BRLHELP "/dev/null"
 #include "brl_driver.h"
-static void brl_identify (void) {
+static void
+brl_identify (void) {
   LogPrint(LOG_NOTICE, "No braille support.");
 }
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) { return 0; }
-static void brl_close (BrailleDisplay *brl) { }
-static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) { return EOF; }
-static void brl_writeWindow (BrailleDisplay *brl) { }
-static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) { }
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+  brl->x = 80;
+  brl->y = 1;
+  return 1;
+}
+static void
+brl_close (BrailleDisplay *brl) {
+}
+static int
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+  return EOF;
+}
+static void
+brl_writeWindow (BrailleDisplay *brl) {
+}
+static void
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
+}
 
 const BrailleDriver *braille = &noBraille;
 
