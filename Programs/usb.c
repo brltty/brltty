@@ -473,9 +473,30 @@ usbAwaitInput (
 ) {
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (!endpoint) return 0;
-  while (!endpoint->direction.input.completed) {
+  if (endpoint->direction.input.completed) return 1;
+
+  if (!(endpoint->direction.input.pending && getQueueSize(endpoint->direction.input.pending))) {
+    int size = getLittleEndian(endpoint->descriptor->wMaxPacketSize);
+    unsigned char *buffer = malloc(size);
+    if (buffer) {
+      int count;
+      while ((count = usbReadEndpoint(device, endpointNumber, buffer, size, MAX(10, timeout))) != -1) {
+        if (count) {
+          endpoint->direction.input.buffer = buffer;
+          endpoint->direction.input.length = count;
+          endpoint->direction.input.completed = buffer;
+          return 1;
+        }
+      }
+      free(buffer);
+    }
+    return 0;
+  }
+
+  while (1) {
     UsbResponse response;
-    while (!(endpoint->direction.input.completed = usbReapResponse(device, &response, 0))) {
+    void *request;
+    while (!(request = usbReapResponse(device, &response, 0))) {
       if (errno != EAGAIN) return 0;
       if (timeout <= 0) return 0;
 
@@ -486,17 +507,17 @@ usbAwaitInput (
       }
     }
     usbAddPendingInputRequest(endpoint);
-    deleteItem(endpoint->direction.input.pending, endpoint->direction.input.completed);
+    deleteItem(endpoint->direction.input.pending, request);
 
     if (response.length) {
       endpoint->direction.input.buffer = response.buffer;
       endpoint->direction.input.length = response.length;
-    } else {
-      free(endpoint->direction.input.completed);
-      endpoint->direction.input.completed = NULL;
+      endpoint->direction.input.completed = request;
+      return 1;
     }
+
+    free(request);
   }
-  return 1;
 }
 
 int

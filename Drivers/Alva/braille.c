@@ -521,9 +521,8 @@ openUsbPort (char **parameters, const char *device) {
   rewriteInterval = 0;
 
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    if (usbBeginInput(usbDevice, usbInputEndpoint, 8)) {
-      return 1;
-    }
+    usbBeginInput(usbDevice, usbInputEndpoint, 8);
+    return 1;
 
     usbCloseDevice(usbDevice);
     usbDevice = NULL;

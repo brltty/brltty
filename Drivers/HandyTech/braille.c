@@ -306,11 +306,9 @@ chooseUsbDevice (UsbDevice *device, void *data) {
 static int
 openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    if (usbBeginInput(usbDevice, usbInputEndpoint, 8)) {
-      return 1;
-    } else {
-      LogError("USB Begin Input");
-    }
+    usbBeginInput(usbDevice, usbInputEndpoint, 8);
+    return 1;
+
     usbCloseDevice(usbDevice);
     usbDevice = NULL;
   } else {

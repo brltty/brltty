@@ -288,9 +288,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   /* cause the display to beep */
   ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
 
-  LogPrint(LOG_DEBUG, "Starting input");
-  if (!usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8)) goto failure;
-  LogPrint(LOG_DEBUG, "input started");
+  usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8);
 
   if(!(dispbuf = malloc(ncells))
      || !(prevdata = malloc(ncells)))
