@@ -27,6 +27,7 @@ extern "C" {
 typedef struct {
   UsbDevice *device;
   UsbEndpointDescriptor *descriptor;
+  void *system;
 
   union {
     struct {
@@ -60,6 +61,9 @@ extern int usbReadDeviceDescriptor (UsbDevice *device);
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
+
+extern int usbOpenEndpoint (const UsbEndpointDescriptor *descriptor, void **system);
+extern void usbCloseEndpoint (void *system);
 
 #ifdef __cplusplus
 }

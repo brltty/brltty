@@ -60,9 +60,8 @@ usbGetLanguage (
     if (size >= 4) {
       *language = getLittleEndian(descriptor.string.wData[0]);
       return 1;
-    } else {
-      errno = ENODATA;
     }
+    errno = ENODATA;
   }
   return 0;
 }
@@ -228,6 +227,7 @@ usbDeallocateEndpoint (void *item, void *data) {
       break;
   }
 
+  usbCloseEndpoint(endpoint->system);
   free(endpoint);
 }
 
@@ -281,6 +281,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         memset(endpoint, 0, sizeof(*endpoint));
         endpoint->device = device;
         endpoint->descriptor = descriptor;
+        endpoint->system = NULL;
 
         switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
           case USB_ENDPOINT_DIRECTION_INPUT:
@@ -291,7 +292,10 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
             break;
         }
 
-        if (enqueueItem(device->endpoints, endpoint)) return endpoint;
+        if (usbOpenEndpoint(endpoint->descriptor, &endpoint->system)) {
+          if (enqueueItem(device->endpoints, endpoint)) return endpoint;
+          usbCloseEndpoint(endpoint->system);
+        }
 
         free(endpoint);
       }

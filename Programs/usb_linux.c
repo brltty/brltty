@@ -383,6 +383,15 @@ usbReapResponse (
 }
 
 int
+usbOpenEndpoint (const UsbEndpointDescriptor *descriptor, void **system) {
+  return 1;
+}
+
+void
+usbCloseEndpoint (void *system) {
+}
+
+int
 usbReadDeviceDescriptor (UsbDevice *device) {
   int count = read(device->file, &device->descriptor, USB_DESCRIPTOR_SIZE_DEVICE);
   if (count == -1) {

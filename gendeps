@@ -141,7 +141,10 @@ foreach buildDirectory [lsort $buildDirectories] {
             puts $absoluteStream "\$(BLD_TOP)$objectFile: \$(${tree}_TOP)$dependency"
             puts -nonewline $relativeStream "$objectName: "
             if {[cequal $buildDirectory [file dirname $dependency]]} {
-               puts $relativeStream "\$(${tree}_DIR)/[file tail $dependency]"
+               if {![cequal $tree BLD]} {
+                  puts -nonewline $relativeStream "\$(${tree}_DIR)/"
+               }
+               puts $relativeStream [file tail $dependency]
             } else {
                puts $relativeStream "\$(${tree}_TOP)$dependency"
             }

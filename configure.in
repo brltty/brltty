@@ -533,6 +533,9 @@ in
    linux*)
       usb_object="linux"
       ;;
+   openbsd*)
+      usb_object="openbsd"
+      ;;
    *)
       usb_object=""
       ;;
