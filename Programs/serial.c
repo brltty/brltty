@@ -27,21 +27,31 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef __MINGW32__
-#include <windows.h>
-#include <io.h>
-typedef DWORD SerialSpeed;
-typedef DCB SerialAttributes;
-#else /* __MINGW32__ */
-#include <sys/ioctl.h>
-#include <termios.h>
-typedef speed_t SerialSpeed;
-typedef struct termios SerialAttributes;
-#endif /* __MINGW32__ */
-
 #ifdef HAVE_SYS_MODEM_H
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
+
+#ifdef __MINGW32__
+#include <windows.h>
+#include <io.h>
+
+typedef DWORD SerialSpeed;
+typedef DCB SerialAttributes;
+
+typedef DWORD SerialLines;
+#define SERIAL_LINE_CTS MS_CTS_ON
+#define SERIAL_LINE_DSR MS_DSR_ON
+#else /* __MINGW32__ */
+#include <sys/ioctl.h>
+#include <termios.h>
+
+typedef speed_t SerialSpeed;
+typedef struct termios SerialAttributes;
+
+typedef int SerialLines;
+#define SERIAL_LINE_CTS TIOCM_CTS
+#define SERIAL_LINE_DSR TIOCM_DSR
+#endif /* __MINGW32__ */
 
 #include "serial.h"
 #include "iomisc.h"
@@ -910,16 +920,9 @@ serialWriteData (
 }
 
 static int
-serialGetLines (SerialDevice *serial, int *lines) {
+serialGetLines (SerialDevice *serial, SerialLines *lines) {
 #ifdef __MINGW32__
-#define TIOCM_CTS 0
-#define TIOCM_DSR 1
-  /* appropriate data flow control bits need to be set for this to work */
-  COMSTAT comstat;
-
-  if (ClearCommError(serial->fileHandle,  NULL, &comstat))
-    return comstat.fCtsHold | (comstat.fDsrHold < 1);
-
+  if (GetCommModemStatus(serial->fileHandle, lines)) return 1;
   LogWindowsError("getting modem lines");
 #else /* __MINGW32__ */
   if (ioctl(serial->fileDescriptor, TIOCMGET, lines) != -1) return 1;
@@ -929,8 +932,8 @@ serialGetLines (SerialDevice *serial, int *lines) {
 }
 
 static int
-serialTestLines (SerialDevice *serial, int set, int clear) {
-  int lines;
+serialTestLines (SerialDevice *serial, SerialLines set, SerialLines clear) {
+  SerialLines lines;
   if (serialGetLines(serial, &lines))
     if (((lines & set) == set) && ((~lines & clear) == clear))
       return 1;
@@ -939,10 +942,10 @@ serialTestLines (SerialDevice *serial, int set, int clear) {
 
 int
 serialTestLineCTS (SerialDevice *serial) {
-  return serialTestLines(serial, TIOCM_CTS, 0);
+  return serialTestLines(serial, SERIAL_LINE_CTS, 0);
 }
 
 int
 serialTestLineDSR (SerialDevice *serial) {
-  return serialTestLines(serial, TIOCM_DSR, 0);
+  return serialTestLines(serial, SERIAL_LINE_DSR, 0);
 }
