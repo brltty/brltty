@@ -606,11 +606,22 @@ interpretKeys (void) {
   switch (keys) {
     default:
       break;
+
     case (KEY_WHEEL_LEFT):
       command = CMD_LNBEG;
       break;
     case (KEY_WHEEL_RIGHT):
       command = CMD_LNEND;
+      break;
+
+    case (KEY_GDF_LEFT):
+      command = CMD_BACK;
+      break;
+    case (KEY_GDF_RIGHT):
+      command = CMD_HOME;
+      break;
+    case (KEY_GDF_LEFT | KEY_GDF_RIGHT):
+      command = CMD_PASTE;
       break;
 
     case (KEY_ADVANCE_LEFT):
@@ -630,13 +641,6 @@ interpretKeys (void) {
       break;
     case (KEY_GDF_RIGHT | KEY_ADVANCE_RIGHT):
       command = CMD_BOT;
-      break;
-
-    case (KEY_GDF_LEFT):
-      command = CMD_BACK;
-      break;
-    case (KEY_GDF_RIGHT):
-      command = CMD_HOME;
       break;
 
     case (KEY_HOT1):
@@ -687,6 +691,10 @@ interpretKeys (void) {
       break;
     case (KEY_GDF_RIGHT | KEY_HOT8):
       command = CMD_CSRJMP_VERT;
+      break;
+
+    case (KEY_SPACE):
+      command = VAL_PASSDOTS;
       break;
   }
 
@@ -840,11 +848,17 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               case (KEY_WHEEL_LEFT):
                 wheelCommand = CMD_PRDIFLN;
                 break;
-              case (KEY_GDF_LEFT):
+              case (KEY_ADVANCE_LEFT):
                 wheelCommand = CMD_PRPROMPT;
                 break;
-              case (KEY_GDF_RIGHT):
+              case (KEY_ADVANCE_RIGHT):
                 wheelCommand = CMD_PRPGRPH;
+                break;
+              case (KEY_GDF_LEFT):
+                wheelCommand = CMD_ATTRUP;
+                break;
+              case (KEY_GDF_RIGHT):
+                wheelCommand = CMD_PRSEARCH;
                 break;
             }
             break;
@@ -859,11 +873,17 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
               case (KEY_WHEEL_LEFT):
                 wheelCommand = CMD_NXDIFLN;
                 break;
-              case (KEY_GDF_LEFT):
+              case (KEY_ADVANCE_LEFT):
                 wheelCommand = CMD_NXPROMPT;
                 break;
-              case (KEY_GDF_RIGHT):
+              case (KEY_ADVANCE_RIGHT):
                 wheelCommand = CMD_NXPGRPH;
+                break;
+              case (KEY_GDF_LEFT):
+                wheelCommand = CMD_ATTRDN;
+                break;
+              case (KEY_GDF_RIGHT):
+                wheelCommand = CMD_NXSEARCH;
                 break;
             }
             break;

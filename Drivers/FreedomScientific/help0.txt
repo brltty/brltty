@@ -4,33 +4,36 @@ Whiz Wheel Navigation:
 Left Wheel Away/Toward:
   Alone: go up/down one line
   While Pressed: go up/down to nearest line with different content
-  With Left GDF: go to previous/next command prompt
-  With Right GDF: go to nearest line of previous/next paragraph
+  With Left Advance: go to previous/next command prompt
+  With Right Advance: go to nearest line of previous/next paragraph
+  With Left GDF: go to previous/next line with different highlighting
+  With Right GDF: search backward/forward for content of cut buffer
 Right Wheel Away/Toward:
   Alone: go left/right one window
   While Pressed: go left/right one character
 
-Key Navigation:
+Common Keys:
+Left/Right Wheel: go to beginning/end of line
 Left GDF: go back (undo cursor tracking)
 Right GDF: go to cursor
+Left and Right GDF: paste cut buffer at cursor location
 Left/Right Advance: go left/right one window
 Left/Right Advance with Left GDF: go to top-left/bottom-left corner
 Left/Right Advance with Right GDF: go to top/bottom line
-Left/Right Wheel: go to beginning/end of line
 
-Lower Routing Keys:
+Lower Routing Buttons:
 Alone: bring cursor to character
 With Left Advance: start new cut buffer at character
 With Left GDF: append to existing cut buffer from character
 With Right GDF: linear cut to character
 With Right Advance: rectangular cut to character
 
-Upper Routing Keys (Focus only):
+Upper Routing Buttons (Focus only):
 Alone: describe character
 With Left/Right Advance: go up/down to nearest line without greater indent
 With Left GDF: position left end of window at character
 
-PAC Mate modes and features:
+PAC Mate Modes and Features:
      Alone                    With Right GDF
 HK1: toggle skip ident lines  toggle skip blank wins
 HK2: toggle text/attributes   toggle attr underlining
