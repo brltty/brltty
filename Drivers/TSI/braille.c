@@ -83,11 +83,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <sys/termios.h>
 #include <sys/ioctl.h>
 #include <string.h>
-#include <errno.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -378,7 +376,7 @@ CheckCTSLine(int fd)
 #if defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS)
   int flags;
   if (ioctl(fd, TIOCMGET, &flags) < 0){
-    LogPrint(LOG_ERR, "TIOCMGET: %s", strerror(errno));
+    LogError("TIOCMGET");
     return(-1);
   }else if(flags & TIOCM_CTS)
     return(1);
@@ -387,23 +385,6 @@ CheckCTSLine(int fd)
   return(1);
 #endif /* defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS) */
 }
-
-
-static int
-SetSpeed(int fd, struct termios *tio, int code)
-{
-  if(cfsetispeed(tio,code) == -1
-     || cfsetospeed(tio,code) == -1
-     || tcsetattr (fd, TCSAFLUSH, tio) == -1){
-      LogPrint(LOG_ERR, "Failed to set baudrate to %s",
-	       (code == B9600) ? "9600"
-	       : (code == B19200) ? "19200"
-	       : "???");
-      return(0);
-    }
-  return(1);
-}
-
 
 static int
 myread(int fd, void *buf, unsigned len)
@@ -462,9 +443,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
   rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  if (!openSerialDevice(tty, &brl_fd, &oldtio)) {
-    goto failure;
-  }
+  if (!openSerialDevice(tty, &brl_fd, &oldtio)) goto failure;
 
   /* Construct new settings by working from current state */
   memcpy(&curtio, &oldtio, sizeof(struct termios));
@@ -489,15 +468,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
 			    this to Q_REPLY_LENGTH except it waits
 			    indefinitly for the first char if VTIME != 0... */
 
-  /* Speed (baud rate) will be set in detection loop below. */
-
-  /* Make the settings active and flush the input/output queues. This time we
-     check the return code in case somehow the settings are invalid. */
-  if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1){
-    LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
-    goto failure;
-  }
-
   /* Try to detect display by sending query */
   while(1){
     /* Check RS232 wires: we should have CTS if the device is connected and
@@ -514,21 +484,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
       }
       LogPrint(LOG_DEBUG,"Device was connected or activated");
     }
-    /* Reset serial port config, in case some other program interfered and
-       BRLTTY is resetting... */
-    if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1){
-      LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
-      goto failure;
-    }
-    /* Set speed / baud rate / bps */
     LogPrint(LOG_DEBUG,"Sending query at 9600bps");
-    if(!SetSpeed(brl_fd,&curtio, B9600)) goto failure;
+    if(!resetSerialDevice(brl_fd, &curtio, B9600)) goto failure;
     if(QueryDisplay(brl_fd,reply)) break;
 #ifdef HIGHBAUD
     /* Then send the query at 19200bps, in case a PB was left ON
        at that speed */
     LogPrint(LOG_DEBUG,"Sending query at 19200bps");
-    if(!SetSpeed(brl_fd,&curtio, B19200)) goto failure;
+    if(!setSerialDevice(brl_fd, &curtio, B19200)) goto failure;
     if(QueryDisplay(brl_fd,reply)) break;
 #endif /* HIGHBAUD */
     delay(DETECT_DELAY);
@@ -629,14 +592,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
     write (brl_fd, BRL_UART192, DIM_BRL_UART192);
     tcdrain(brl_fd);
     delay(BAUD_DELAY);
-    if(!SetSpeed(brl_fd,&curtio, B19200)) goto failure;
+    if(!setSerialDevice(brl_fd, &curtio, B19200)) goto failure;
     LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
     if(QueryDisplay(brl_fd,reply))
       LogPrint(LOG_DEBUG,"Display responded at 19200bps.");
     else{
       LogPrint(LOG_INFO,"Display did not respond at 19200bps, "
 	       "falling back to 9600bps.");
-      if(!SetSpeed(brl_fd,&curtio, B9600)) goto failure;
+      if(!setSerialDevice(brl_fd, &curtio, B9600)) goto failure;
       delay(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(brl_fd,reply)) {
 	LogPrint(LOG_INFO,"Found display again at 9600bps.");
