@@ -1183,8 +1183,8 @@ For Sets, Data simply consists of integers, one per key in the set.
 <sect2><tt/BRLPACKET_WRITE/ (see <em/brlapi_write()/)
 <p>
 To display text on the braille terminal and set the position of the cursor,
-the client can send a <tt/BRLPACKET_WRITE/ packet. This packet first
-holds an integer holding flags (see <tt/BRLAPI_WF_*/). These flags indicate
+the client can send a <tt/BRLPACKET_WRITE/ packet. This field of this packet
+is an integer holding flags (see <tt/BRLAPI_WF_*/). These flags indicate
 which data will then be available, in the following order (corresponding to
 flag weight):
 
@@ -1192,8 +1192,8 @@ flag weight):
 <item> A display number can be given as a integer, in case the braille
 display has several. If not given, usual display is used.
 <item> A region can be given as two integers indicating the beginning and the
-end of the part of the braille display which is to be updated (included).
-1 represents the first character of display. If not given, the whole display
+end of the part of the braille display which is to be updated (included),
+the first cell of the display being numberd 1. If not given, the whole display
 is considered to be updated (and hence the following three fields should exactly
 fit the braille display ie hold <em/height/*<em/width/
 bytes, where <em/height/ and <em/width/ must be get by sending a
