@@ -360,7 +360,7 @@ install-api-libraries: $(API_LIB) $(API_ARC)
 
 install-api-headers:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
 install-api-manpages:
@@ -405,7 +405,7 @@ uninstall-manpages:
 	done
 
 uninstall-headers:
-	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brlapi.h
+	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
 	-[ -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
@@ -413,7 +413,7 @@ uninstall-headers:
 ###############################################################################
 
 distclean::
-	-rm -f brlapi.h
+	-rm -f api.h
 
 clean::
 	-rm -f brltty$X txt2hlp$X tbl2hex$X *test$X *-static$X

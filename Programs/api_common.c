@@ -33,7 +33,7 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 
-#include "brlapi.h"
+#include "api.h"
 
 int brlapi_libcerrno;
 const char *brlapi_libcerrfun;

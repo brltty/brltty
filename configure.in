@@ -34,7 +34,7 @@ AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
 AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
 AC_CONFIG_HEADER([config.h])
-AC_CONFIG_HEADER([Programs/brlapi.h])
+AC_CONFIG_HEADER([Programs/api.h])
 AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([aux])
 AC_CANONICAL_SYSTEM

@@ -57,7 +57,7 @@
 #define MAXIMUM_VIRTUAL_CONSOLE 1
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
-#include "brlapi.h"
+#include "api.h"
 #include "brldefs.h"
 #include "api_common.h"
 

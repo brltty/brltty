@@ -555,7 +555,7 @@ void brlapi_perror(const char *s);
 
 /** Get per-thread errno location
  *
- * In multithreaded software, brlapi_errno is thread specific, so brlapi.h
+ * In multithreaded software, brlapi_errno is thread specific, so api.h
  * cheats about the brlapi_errno token and actually calls
  * brlapi_errno_location()
  *

@@ -557,7 +557,7 @@ again...
 <tscreen><code>
 #include <stdio.h>
 #include <stdlib.h>
-#include <brltty/brlapi.h>
+#include <brltty/api.h>
 
 int main()
 {
@@ -970,7 +970,7 @@ are transmitted this way:
 <p>
 The size does not include the { size, type } header, so that packets which
 don't need any data have a size of 0 byte. The type of the packet can be
-either of <tt/BRLPACKET_*/ constants defined in <tt/brlapi.h/. Each type of
+either of <tt/BRLPACKET_*/ constants defined in <tt/api.h/. Each type of
 packet will be further discussed below.
 
 <p>

@@ -37,7 +37,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include "brlapi.h"
+#include "api.h"
 #include "api_common.h"
 #include "rangelist.h"
 #include "brl.h"
