@@ -16,16 +16,16 @@ CFLAGS := -D__KERNEL__ -DMODULE -O2 \
 CFLAGS += -I$(SRC_DIR)
 CFLAGS += -I$(KERNEL_INCLUDE)
 
-all: brlvger.o
+all: brlvger.$O
 
-brlvger.o: $(SRC_DIR)/brlvger.c $(SRC_DIR)/linux/brlvger.h
+brlvger.$O: $(SRC_DIR)/brlvger.c $(SRC_DIR)/linux/brlvger.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brlvger.c
 
-install: brlvger.o
+install: brlvger.$O
 	@if [ ! -d ${MODULE_PATH} ]; then \
 	  mkdir -m 755 ${MODULE_PATH} ; \
         fi
-	install -m 644 brlvger.o ${MODULE_PATH}
+	install -m 644 brlvger.$O ${MODULE_PATH}
 	depmod -a ${KERNEL_VERSION}
 
 vgertest: $(SRC_DIR)/vgertest.c

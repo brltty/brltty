@@ -128,7 +128,7 @@ then
    if test -n "${brltty_item_name_$1}"
    then
       $1_driver_name="${brltty_item_name_$1}"
-      $1_driver_object='$(BLD_TOP)Drivers/'"${brltty_item_name_$1}/$1.o"
+      $1_driver_object='$(BLD_TOP)Drivers/'"${brltty_item_name_$1}"'/$1.$O'
       AC_DEFINE_UNQUOTED(translit([$1_builtin], [a-z], [A-Z]), [${brltty_item_code_$1}])
       $1_help="$1-help"
    fi
