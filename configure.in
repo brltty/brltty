@@ -307,6 +307,21 @@ then
    AC_DEFINE([HAVE_ATTRIBUTE_PACKED])
 fi
 
+AC_CACHE_CHECK(
+   [if the compiler understands __attribute__((unused))],
+   [brltty_cv_c_attribute_unused],
+   [AC_TRY_COMPILE([
+static void conf_attribute_unused (void)
+       __attribute__((unused));
+],
+[],
+[brltty_cv_c_attribute_unused=yes],
+[brltty_cv_c_attribute_unused=no])])
+if test "${brltty_cv_c_attribute_unused}" = "yes"
+then
+   AC_DEFINE([HAVE_ATTRIBUTE_UNUSED])
+fi
+
 AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
 case "${host_os}"
 in

@@ -210,6 +210,9 @@ extern "C" {
 /* Define this if the packed attribute is supported. */
 #undef HAVE_ATTRIBUTE_PACKED
 
+/* Define this if the unused attribute is supported. */
+#undef HAVE_ATTRIBUTE_UNUSED
+
 #define DEVICE_DIRECTORY "/dev"
 #define TRANSLATION_TABLE_EXTENSION ".tbl"
 #define TEXT_TABLE_PREFIX "text."
