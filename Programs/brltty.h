@@ -31,9 +31,9 @@ typedef enum {
 } SkipBlankWindowsMode;
 
 typedef enum {
-  slaMute,
-  slaQueue
-} SayLineAction;
+  sayImmediate,
+  sayEnqueue
+} SayMode;
 
 /*
  * Structure definition for preferences (settings which are saveable).
@@ -56,7 +56,7 @@ typedef struct {
   unsigned char blinkingAttributes;
   unsigned char spare5;
   unsigned char cursorStyle;
-  unsigned char sayLineAction;
+  unsigned char sayLineMode;
   unsigned char cursorVisiblePeriod;
   unsigned char autospeak;
   unsigned char cursorInvisiblePeriod;
