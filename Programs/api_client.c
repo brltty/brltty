@@ -525,15 +525,22 @@ int brlapi_writeText(int cursor, const unsigned char *str)
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
-  ews->flags = BRLAPI_EWF_TEXT;
-  min = MIN( strlen(str), dispSize);
-  strncpy(p,str,min);
-  p += min;
-  for (i = min; i<dispSize; i++,p++) *p = ' ';
+  if (str==NULL) {
+    if (cursor==-1) return brlapi_extWriteBrl(NULL);
+  } else {
+    ews->flags = BRLAPI_EWF_TEXT;
+    min = MIN( strlen(str), dispSize);
+    strncpy(p,str,min);
+    p += min;
+    for (i = min; i<dispSize; i++,p++) *p = ' ';
+  }
   if ((cursor>=0) && (cursor<=dispSize)) {
     ews->flags |= BRLAPI_EWF_CURSOR;
     *((uint32_t *) p) = htonl(cursor);
     p += sizeof(cursor);
+  } else {
+    brlapi_errno = BRLERR_INVALID_PARAMETER;
+    return -1;
   }
   pthread_mutex_lock(&brlapi_fd_mutex);
   res=brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
@@ -586,6 +593,7 @@ int brlapi_extWriteBrl(const brlapi_extWriteStruct *s)
   unsigned char *p = &ews->data;
   int res;
   ews->flags = 0;
+  if (s==NULL) goto send;
   if ((1<=s->regionBegin) && (s->regionBegin<=dispSize) && (1<=s->regionEnd) && (s->regionEnd<=dispSize)) {
     if (s->regionBegin>s->regionEnd) return 0;
     rbeg = s->regionBegin; rend = s->regionEnd;
@@ -616,6 +624,7 @@ int brlapi_extWriteBrl(const brlapi_extWriteStruct *s)
     *((uint32_t *) p) = htonl(s->cursor);
     p += sizeof(uint32_t);
   }
+  send:
   pthread_mutex_lock(&brlapi_fd_mutex);
   res = brlapi_writePacket(fd,BRLPACKET_EXTWRITE,packet,sizeof(ews->flags)+(p-&ews->data));
   pthread_mutex_unlock(&brlapi_fd_mutex);

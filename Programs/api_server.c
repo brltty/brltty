@@ -398,7 +398,8 @@ static int processRequest(Tconnection *c)
       CHECKEXC((!(size%sizeof(uint32_t))),BRLERR_INVALID_PACKET);
       CHECKEXC(((size<(MAXTTYRECUR+1)*sizeof(uint32_t))),BRLERR_TOORECURSE);
       how = ntohl(ints[size/sizeof(uint32_t)-1]);
-      if (how!=0) how = BRLKEYCODES;
+      CHECKEXC(((how == BRLKEYCODES) || (how == BRLCOMMANDS)),BRLERR_INVALID_PARAMETER);
+      c->how = how;
       if (how==BRLKEYCODES) { /* We must check if the braille driver supports that */
         if ((TrueBraille->readKey==NULL) || (TrueBraille->keyToCommand==NULL)) {
           WEXC(c->fd, BRLERR_KEYSNOTSUPP);
@@ -558,6 +559,11 @@ static int processRequest(Tconnection *c)
       CHECKEXC(size>=sizeof(ews->flags), BRLERR_INVALID_PACKET);
       CHECKEXC(((!c->raw)&&c->tty),BRLERR_ILLEGAL_INSTRUCTION);
       pthread_mutex_lock(&c->brlmutex);
+      if ((size==sizeof(ews->flags))&&(ews->flags==0)) {
+        c->brlbufstate = EMPTY;
+        pthread_mutex_unlock(&c->brlmutex);
+        return 0;
+      }
       cursor = c->cursor;
       dispSize = c->brl.x*c->brl.y;
       memcpy(buf, c->brl.buffer, dispSize);
@@ -864,12 +870,13 @@ static void *server(void *arg)
 /* as he controls the tty */
 /* If clients asked for commands, one lets him process routing cursor */
 /* and screen-related commands */
-/* If the client is interested in braille codes, one passes him every key */
+/* If the client is interested in braille codes, one passes him nothing */
+/* to let the user read the screen in case theree is an error */
 static int initializeUnmaskedKeys(Tconnection *c)
 {
   if (c==NULL) return 0;
-  if (addRange(0,BRL_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;
   if (c->how==BRLKEYCODES) return 0;
+  if (addRange(0,BRL_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;
   if (removeRange(CMD_SWITCHVT_PREV,CMD_SWITCHVT_NEXT,&c->unmaskedKeys)==-1) return -1;
   if (removeRange(CMD_RESTARTBRL,CMD_RESTARTSPEECH,&c->unmaskedKeys)==-1) return -1;
   if (removeRange(CR_SWITCHVT,CR_SWITCHVT|0XFF,&c->unmaskedKeys)==-1) return -1;
