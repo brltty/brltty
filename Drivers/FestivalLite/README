@@ -1,0 +1,23 @@
+This directory contains the BRLTTY speech driver for the Festival Lite text
+to speech engine from CMU Speech Center [http://www.speech.cs.cmu.edu/flite/].
+It has been implemented, and is being maintained, by Mario Lang
+<mlang@delysid.org>.
+
+BRLTTY's configure script automatically includes this driver if Festival Lite
+has been installed. The default is to check the directories /usr, /usr/local,
+and /opt/flite.  The actual location can be explicitly specified via
+--with-flite.  Additionally, Festival Lite's language, lexicon and voice
+can be specified using the configure script options --with-flite-language,
+--with-flite-lexicon and --with-flite-voice.  The default voice is
+cmu_us_kal16.
+
+This driver and that for the Theta text to speech engine cannot be linked into
+BRLTTY's binary at the same time (via --enable-speech-driver) because their
+run-time libraries contain conflicting symbols.
+
+This driver recognizes the following parameters:
+
+   Parameter Settings
+   pitch     50-200 (percent from default)
+   wpm       50-400 (words per minute talking speed)
+
