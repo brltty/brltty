@@ -21,7 +21,7 @@ include $(BLD_TOP)config.mk
 # Makefile for BRLTTY's driver for TechniBraille displays.
 ###############################################################################
 
-DRIVER_CODE = tb
+DRIVER_CODE = tn
 DRIVER_NAME = TechniBraille
 BRAILLE_MODELS = Manager 40
 HELP_DEPS = $(HELP_TEXT)
