@@ -389,7 +389,7 @@ for any additional display-specific instructions.
     or by its proper name (full or abbreviated).
     The driver identifiers and/or names must be
     separated from one another by a single comma.
-    The first listed driver becomes the default driver.
+    The first one becomes the default driver.
     There's no default driver if this option isn't used.
     Those drivers which aren't listed via this option
     are built as dynamically loadable shared objects
@@ -399,6 +399,8 @@ for any additional display-specific instructions.
       <tag/all/
         Link all of the drivers into the binary.
         Don't build any of them as dynamically loadable shared objects.
+        This word may also be specified as the final element of a driver list.
+        This is how to specify the dfault driver when all the drivers are to be linked in.
       <tag/no/
         Don't build any drivers at all.
         This is equivalent to specifying <tt/--without-braille-driver/.
@@ -462,7 +464,7 @@ for any additional display-specific instructions.
     or by its proper name (full or abbreviated).
     The driver identifiers and/or names must be
     separated from one another by a single comma.
-    The first listed driver becomes the default driver.
+    The first one becomes the default driver.
     There's no default driver if this option isn't used.
     Those drivers which aren't listed via this option
     are built as dynamically loadable shared objects
@@ -472,6 +474,8 @@ for any additional display-specific instructions.
       <tag/all/
         Link all of the drivers into the binary.
         Don't build any of them as dynamically loadable shared objects.
+        This word may also be specified as the final element of a driver list.
+        This is how to specify the dfault driver when all the drivers are to be linked in.
       <tag/no/
         Don't build any drivers at all.
         This is equivalent to specifying <tt/--without-speech-driver/.
@@ -485,7 +489,8 @@ for any additional display-specific instructions.
     for run-time selection.
   <tag><tt/--with-flite=/<em/directory/<label id="build-flite"></tag>
     Specify the installed location of the FestivalLite text-to-speech package,
-    and build the FestivalLite speech synthesizer driver.
+    and build the FestivalLite speech synthesizer driver
+    (see <ref id="restrictions-flite" name="Build Restrictions">).
     Any of the following words can also be used as the operand of this option:
     <descrip>
       <tag/no/
@@ -498,9 +503,19 @@ for any additional display-specific instructions.
         or <tt>/opt/flite</>.
         This is equivalent to specifying <tt/--with-flite/.
     </descrip>
+  <tag><tt/--with-flite-language=/<em/language/<label id="build-flite-language"></tag>
+    Specify the language which the FestivalLite text to speech engine is to use.
+    The default language is <tt/usenglish/.
+  <tag><tt/--with-flite-lexicon=/<em/lexicon/<label id="build-flite-lexicon"></tag>
+    Specify the lexicon which the FestivalLite text to speech engine is to use.
+    The default lexicon is <tt/cmulex/.
+  <tag><tt/--with-flite-voice=/<em/voice/<label id="build-flite-voice"></tag>
+    Specify the voice which the FestivalLite text to speech engine is to use.
+    The default voice is <tt/cmu_us_kal16/.
   <tag><tt/--with-theta=/<em/directory/<label id="build-theta"></tag>
     Specify the installed location of the Theta text-to-speech package,
-    and build the Theta speech synthesizer driver.
+    and build the Theta speech synthesizer driver
+    (see <ref id="restrictions-theta" name="Build Restrictions">).
     Any of the following words can also be used as the operand of this option:
     <descrip>
       <tag/no/
@@ -515,7 +530,8 @@ for any additional display-specific instructions.
     </descrip>
   <tag><tt/--with-viavoice=/<em/directory/<label id="build-viavoice"></tag>
     Specify the installed location of the ViaVoice text-to-speech package,
-    and build the ViaVoice speech synthesizer driver.
+    and build the ViaVoice speech synthesizer driver
+    (see <ref id="restrictions-viavoice" name="Build Restrictions">).
     Any of the following words can also be used as the operand of this option:
     <descrip>
       <tag/no/
@@ -1030,23 +1046,46 @@ and all that, you can run BRLTTY without root priviledge.
 
 <sect1>Build and Run-Time Restrictions<p>
 <descrip>
-  <tag/Alert Tunes/
+  <tag/Alert Tunes/<label id="restrictions-tunes">
     Some platforms don't support all of the tune devices.
     See the <ref id="preference-tune-device" name="Tune Device">
     preference for details.
-  <tag/FestivalLite Driver/
-    The driver for the FestivalLite software speech synthesizer
+  <tag/FestivalLite Speech Synthesizer Driver/<label id="restrictions-flite">
+    The driver for the FestivalLite text to speech engine
     is only built if that package has been installed.
-  <tag/Theta Driver/
-    The driver for the Theta software speech synthesizer
+
+    This driver and the driver for the Theta text to speech engine
+    (see the <ref id="build-theta" name="--with-theta"> build option)
+    cannot be simultaneously linked into the BRLTTY binary
+    (see the <ref id="build-speech-driver" name="--with-speech-driver"> build option)
+    because their run-time libraries contain conflicting symbols.
+  <tag/Theta Speech Synthesizer Driver/<label id="restrictions-theta">
+    The driver for the Theta text to speech engine
     is only built if that package has been installed.
-  <tag/ViaVoice Driver/
-    The driver for the ViaVoice software speech synthesizer
+
+    This driver and the driver for the FestivalLite text to speech engine
+    (see the <ref id="build-flite" name="--with-flite"> build option)
+    cannot be simultaneously linked into the BRLTTY binary
+    (see the <ref id="build-speech-driver" name="--with-speech-driver"> build option)
+    because their run-time libraries contain conflicting symbols.
+
+    If this driver is built as a dynamically loadable shared object
+    then <tt>$THETA_HOME/lib</> must be added
+    to the <tt/LD_LIBRARY_PATH/ environment variable
+    before BRLTTY is invoked
+    because the shared objects within the package don't contain
+    run-time search paths for their dependencies.
+  <tag/ViaVoice Speech Synthesizer Driver/<label id="restrictions-viavoice">
+    The driver for the ViaVoice text to speech engine
     is only built if that package has been installed.
-  <tag/VideoBraille Driver/
+
+    This driver cannot be included if the BRLTTY binary is statically linked
+    (see the <ref id="build-standalone-programs" name="--enable-standalone-programs"> build option)
+    because a static archive isn't included with the package.
+  <tag/VideoBraille Braille Display Driver/<label id="restrictions-videobraille">
     The driver for the VideoBraille braille display is built on all systems,
     but only works on Linux.
-  <tag/Voyager Driver/
+  <tag/Voyager Braille Display Driver/<label id="restrictions-voyager">
     The driver for the Voyager braille display is only built
     on the Linux operating system.
 </descrip>
