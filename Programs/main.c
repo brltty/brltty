@@ -1451,28 +1451,28 @@ main (int argc, char *argv[]) {
             break;
           case CMD_SAY_SLOWER:
             if (speech->rate && (prefs.speechRate > 0)) {
-              speech->rate(--prefs.speechRate);
+              setSpeechRate(--prefs.speechRate);
             } else {
               playTune(&tune_bad_command);
             }
             break;
           case CMD_SAY_FASTER:
             if (speech->rate && (prefs.speechRate < SPK_MAXIMUM_RATE)) {
-              speech->rate(++prefs.speechRate);
+              setSpeechRate(++prefs.speechRate);
             } else {
               playTune(&tune_bad_command);
             }
             break;
           case CMD_SAY_SOFTER:
             if (speech->volume && (prefs.speechVolume > 0)) {
-              speech->volume(--prefs.speechVolume);
+              setSpeechVolume(--prefs.speechVolume);
             } else {
               playTune(&tune_bad_command);
             }
             break;
           case CMD_SAY_LOUDER:
             if (speech->volume && (prefs.speechVolume < SPK_MAXIMUM_VOLUME)) {
-              speech->volume(++prefs.speechVolume);
+              setSpeechVolume(++prefs.speechVolume);
             } else {
               playTune(&tune_bad_command);
             }

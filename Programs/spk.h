@@ -57,6 +57,11 @@ extern int listSpeechDrivers (const char *directory);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
+extern void sayString (const char *string);
+extern void saySpeechSetting (int setting, const char *name);
+extern void setSpeechRate (int setting);
+extern void setSpeechVolume (int setting);
+
 #define SPK_DEFAULT_RATE 10
 #define SPK_MAXIMUM_RATE (SPK_DEFAULT_RATE * 2)
 extern double spkDurationStretchTable[];

@@ -705,7 +705,7 @@ testSpeechRate (void) {
 
 static int
 changedSpeechRate (unsigned char setting) {
-  speech->rate(setting);
+  setSpeechRate(setting);
   return 1;
 }
 
@@ -716,7 +716,7 @@ testSpeechVolume (void) {
 
 static int
 changedSpeechVolume (unsigned char setting) {
-  speech->volume(setting);
+  setSpeechVolume(setting);
   return 1;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
