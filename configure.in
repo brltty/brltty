@@ -381,17 +381,25 @@ AC_SUBST([YCFLAGS])
 AC_CACHE_CHECK([for c compiler shared object flags], [brltty_cv_prog_cc_libflags], [dnl
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_cc_libflags="-fPIC"
+   case "${host_os}"
+   in
+      cygwin*|mingw32*)
+         brltty_cv_prog_cc_libflags=""
+         ;;
+      *)
+         brltty_cv_prog_cc_libflags="-fPIC"
+         ;;
+   esac
 else
    case "${host_os}"
    in
       *)
          brltty_cv_prog_cc_libflags=""
+         AC_MSG_WARN([library flags not configured for ${host_os}])
          ;;
    esac
 fi])
-LIBCFLAGS="${brltty_cv_prog_cc_libflags}"
-AC_SUBST([LIBCFLAGS])
+AC_SUBST([LIBCFLAGS], ["${brltty_cv_prog_cc_libflags}"])
 
 AC_CACHE_CHECK([for c++ compiler shared object flags], [brltty_cv_prog_cxx_libflags], [dnl
 if test "$GXX" = "yes"
