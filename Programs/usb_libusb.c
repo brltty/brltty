@@ -37,7 +37,10 @@ typedef struct {
 int
 usbResetDevice (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  if (usb_reset(devx->handle) >= 0) return 1;
+  int result = usb_reset(devx->handle);
+  if (result >= 0) return 1;
+
+  errno = -result;
   LogError("USB device reset");
   return 0;
 }
@@ -48,7 +51,10 @@ usbSetConfiguration (
   unsigned char configuration
 ) {
   UsbDeviceExtension *devx = device->extension;
-  if (usb_set_configuration(devx->handle, configuration) >= 0) return 1;
+  int result = usb_set_configuration(devx->handle, configuration);
+  if (result >= 0) return 1;
+
+  errno = -result;
   LogError("USB configuration set");
   return 0;
 }
@@ -59,7 +65,10 @@ usbClaimInterface (
   unsigned char interface
 ) {
   UsbDeviceExtension *devx = device->extension;
-  if (usb_claim_interface(devx->handle, interface) >= 0) return 1;
+  int result = usb_claim_interface(devx->handle, interface);
+  if (result >= 0) return 1;
+
+  errno = -result;
   LogError("USB interface claim");
   return 0;
 }
@@ -70,7 +79,10 @@ usbReleaseInterface (
   unsigned char interface
 ) {
   UsbDeviceExtension *devx = device->extension;
-  if (usb_release_interface(devx->handle, interface) >= 0) return 1;
+  int result = usb_release_interface(devx->handle, interface);
+  if (result >= 0) return 1;
+
+  errno = -result;
   LogError("USB interface release");
   return 0;
 }
@@ -82,7 +94,10 @@ usbSetAlternative (
   unsigned char alternative
 ) {
   UsbDeviceExtension *devx = device->extension;
-  if (usb_set_altinterface(devx->handle, alternative) >= 0) return 1;
+  int result = usb_set_altinterface(devx->handle, alternative);
+  if (result >= 0) return 1;
+
+  errno = -result;
   LogError("USB alternative set");
   return 0;
 }
@@ -93,7 +108,10 @@ usbResetEndpoint (
   unsigned char endpointAddress
 ) {
   UsbDeviceExtension *devx = device->extension;
-  if (usb_resetep(devx->handle, endpointAddress) >= 0) return 1;
+  int result = usb_resetep(devx->handle, endpointAddress);
+  if (result >= 0) return 1;
+
+  errno = -result;
   LogError("USB endpoint reset");
   return 0;
 }
@@ -104,7 +122,10 @@ usbClearEndpoint (
   unsigned char endpointAddress
 ) {
   UsbDeviceExtension *devx = device->extension;
-  if (usb_clear_halt(devx->handle, endpointAddress) >= 0) return 1;
+  int result = usb_clear_halt(devx->handle, endpointAddress);
+  if (result >= 0) return 1;
+
+  errno = -result;
   LogError("USB endpoint clear");
   return 0;
 }
@@ -123,9 +144,11 @@ usbControlTransfer (
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
-  int count = usb_control_msg(devx->handle, direction|recipient|type, request,
-                              value, index, buffer, length, timeout);
-  if (count >= 0) return count;
+  int result = usb_control_msg(devx->handle, direction|recipient|type, request,
+                               value, index, buffer, length, timeout);
+  if (result >= 0) return result;
+
+  errno = -result;
   LogError("USB control transfer");
   return -1;
 }
@@ -153,29 +176,30 @@ usbReadEndpoint (
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(descriptor);
-    int count = -1;
+    int result = -1;
 
     switch (transfer) {
       case UsbEndpointTransfer_Bulk:
-        count = usb_bulk_read(devx->handle, descriptor->bEndpointAddress,
-                              buffer, length, count);
+        result = usb_bulk_read(devx->handle, descriptor->bEndpointAddress,
+                               buffer, length, timeout);
         break;
 
       case UsbEndpointTransfer_Interrupt:
-        count = usb_interrupt_read(devx->handle, descriptor->bEndpointAddress,
-                                   buffer, length, count);
+        result = usb_interrupt_read(devx->handle, descriptor->bEndpointAddress,
+                                    buffer, length, timeout);
         break;
 
       default:
         LogPrint(LOG_ERR, "USB endpoint input transfer not supported: 0X%02X", transfer);
-        errno = ENOSYS;
+        result = -ENOSYS;
         break;
     }
 
-    if (count >= 0) return count;
+    if (result >= 0) return result;
+    errno = -result;
   }
 
-  if (errno != EAGAIN) LogError("USB endpoint read");
+  if ((errno != EAGAIN) && (errno != ETIMEDOUT)) LogError("USB endpoint read");
   return -1;
 }
 
@@ -193,26 +217,27 @@ usbWriteEndpoint (
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(descriptor);
-    int count = -1;
+    int result = -1;
 
     switch (transfer) {
       case UsbEndpointTransfer_Bulk:
-        count = usb_bulk_write(devx->handle, descriptor->bEndpointAddress,
-                               (char *)buffer, length, count);
+        result = usb_bulk_write(devx->handle, descriptor->bEndpointAddress,
+                                (char *)buffer, length, timeout);
         break;
 
       case UsbEndpointTransfer_Interrupt:
-        count = usb_interrupt_write(devx->handle, descriptor->bEndpointAddress,
-                                    (char *)buffer, length, count);
+        result = usb_interrupt_write(devx->handle, descriptor->bEndpointAddress,
+                                     (char *)buffer, length, timeout);
         break;
 
       default:
         LogPrint(LOG_ERR, "USB endpoint output transfer not supported: 0X%02X", transfer);
-        errno = ENOSYS;
+        result = -ENOSYS;
         break;
     }
 
-    if (count >= 0) return count;
+    if (result >= 0) return result;
+    errno = -result;
   }
 
   LogError("USB endpoint write");
@@ -271,6 +296,7 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
+  int result;
 
   {
     static int initialized = 0;
@@ -280,8 +306,8 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
     }
   }
 
-  if (usb_find_busses() >= 0) {
-    if (usb_find_devices() >= 0) {
+  if ((result = usb_find_busses()) >= 0) {
+    if ((result = usb_find_devices()) >= 0) {
       struct usb_bus *bus = usb_get_busses();
 
       if (bus) {
@@ -317,10 +343,12 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
         } while (bus);
       }
     } else {
-      LogPrint(LOG_ERR, "USB device find error.");
+      errno = -result;
+      LogError("USB devices find");
     }
   } else {
-    LogPrint(LOG_ERR, "USB bus find error.");
+    errno = -result;
+    LogError("USB busses find");
   }
 
   return device;
