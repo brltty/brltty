@@ -632,6 +632,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   outputPayloadLimit = 0XFF;
 
   if (io->openPort(parameters, device)) {
+    int tries = 0;
+
     while (io->awaitInput(10)) {
       Packet packet;
       int count = readPacket(brl, &packet);
@@ -765,6 +767,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           return 1;
         }
       }
+
+      if (++tries == 5) break;
     }
 
   failure:
