@@ -104,18 +104,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/termios.h>
 #include <string.h>
+#include <errno.h>
+#include <sys/termios.h>
 
 #include "Programs/misc.h"
 #include "Programs/brltty.h"
 
+typedef enum {
+  PARM_PORT
+} DriverParameter;
+#define BRLPARMS "port"
 #define BRLSTAT ST_AlvaStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
-
-static int brl_fd;			/* file descriptor for Braille display */
-static struct termios oldtio;		/* old terminal settings */
 
 /* Braille display parameters */
 
@@ -253,8 +255,8 @@ static TranslationTable outputTable;
 
 /* Global variables */
 
-static unsigned char *rawdata;		/* translated data to send to Braille */
-static unsigned char *prevdata;	/* previously sent raw data */
+static unsigned char *rawdata = NULL;	/* translated data to send to Braille */
+static unsigned char *prevdata = NULL;	/* previously sent raw data */
 static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
 static BRLPARAMS *model;		/* points to terminal model config struct */
@@ -268,8 +270,7 @@ static char BRL_START[] = "\r\033B";	/* escape code to display braille */
 #define DIM_BRL_START 3
 static char BRL_END[] = "\r";		/* to send after the braille sequence */
 #define DIM_BRL_END 1
-static char BRL_ID[] = "\033ID=";
-#define DIM_BRL_ID 4
+static const char BRL_ID[] = {0X1B, 'I', 'D', '='};
 
 
 /* Key values */
@@ -303,18 +304,246 @@ static char BRL_ID[] = "\033ID=";
 /* first cursor routing offset on main display (old firmware only) */
 #define KEY_ROUTING_OFFSET 168
 
+#if ! ABT3_OLD_FIRMWARE
 /* Index for new firmware protocol */
 static int OperatingKeys[10] =
 {KEY_PROG, KEY_HOME, KEY_CURSOR,
  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
  KEY_CURSOR2, KEY_HOME2, KEY_PROG2};
+#endif /* ! ABT3_OLD_FIRMWARE */
+
 static int StatusKeys[6] =
 {KEY_ROUTING_A, KEY_ROUTING_B, KEY_ROUTING_C,
  KEY_ROUTING_D, KEY_ROUTING_E, KEY_ROUTING_F};
 
+static int (*openPort) (const char *device);
+static int (*resetPort) (void);
+static void (*closePort) (void);
+static int (*readPacket) (unsigned char *buffer, int length);
+static int (*writePacket) (const unsigned char *buffer, int length);
+static unsigned char inputBuffer[0X40];
+static int inputUsed;
 
+static int
+verifyInputPacket (unsigned char *buffer, int *length) {
+  int size = 0;
+#if ! ABT3_OLD_FIRMWARE
+  while (inputUsed > 0) {
+    if (inputBuffer[0] == 0X7F) {
+      if (inputUsed < 3) break;
+      if (inputBuffer[2] != 0X7E) goto corrupt;
+      if (inputUsed < 4) break;
+      {
+        int count = (inputBuffer[3] * 2) + 4;
+        int complete = inputUsed >= count;
+        int index;
+        if (!complete) count = inputUsed;
+        for (index=4; index<count; index+=2)
+          if (inputBuffer[index] != 0X7E)
+            goto corrupt;
+        if (complete) size = count;
+        break;
+      }
+    }
 
+    if ((inputBuffer[0] & 0XF0) == 0X70) {
+      if (inputUsed >= 2) size = 2;
+      break;
+    }
 
+    {
+      int count = sizeof(BRL_ID);
+      if (inputUsed < count) count = inputUsed;
+      if (memcmp(&inputBuffer[0], BRL_ID, count) != 0) goto corrupt;
+      if (inputUsed >= 6) {
+        if (inputBuffer[5] != '\r') goto corrupt;
+        size = 6;
+      }
+      break;
+    }
+
+  corrupt:
+    memcpy(&inputBuffer[0], &inputBuffer[1], --inputUsed);
+  }
+#else /* ABT3_OLD_FIRMWARE */
+  if (inputUsed) size = 1;
+#endif /* ! ABT3_OLD_FIRMWARE */
+  if (!size) return 0;
+  // LogBytes("Input packet", inputBuffer, size);
+
+  if (*length < size) {
+    LogPrint(LOG_WARNING, "Truncted input packet: %d < %d", *length, size);
+    size = *length;
+  } else {
+    *length = size;
+  }
+  memcpy(buffer, &inputBuffer[0], *length);
+  memcpy(&inputBuffer[0], &inputBuffer[*length], inputUsed-=*length);
+  return 1;
+}
+
+static int
+writeFunction (unsigned char code) {
+  unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
+  return writePacket(bytes, sizeof(bytes));
+}
+
+static int serialDevice = -1;
+static struct termios oldSerialSettings;
+static struct termios newSerialSettings;
+
+static int
+openSerialPort (const char *device) {
+  if (!openSerialDevice(device, &serialDevice, &oldSerialSettings)) return 0;
+
+  memset(&newSerialSettings, 0, sizeof(newSerialSettings));
+  newSerialSettings.c_cflag = CS8 | CLOCAL | CREAD;
+  newSerialSettings.c_iflag = IGNPAR;
+  newSerialSettings.c_oflag = 0;		/* raw output */
+  newSerialSettings.c_lflag = 0;		/* don't echo or generate signals */
+  newSerialSettings.c_cc[VMIN] = 0;	/* set nonblocking read */
+  newSerialSettings.c_cc[VTIME] = 0;
+
+  return 1;
+}
+
+static int
+resetSerialPort (void) {
+  return resetSerialDevice(serialDevice, &newSerialSettings, BAUDRATE);	/* activate new settings */
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice != -1) {
+    tcsetattr(serialDevice, TCSADRAIN, &oldSerialSettings);		/* restore terminal settings */
+    close(serialDevice);
+    serialDevice = -1;
+  }
+}
+
+static int
+readSerialPacket (unsigned char *buffer, int length) {
+  while (1) {
+    unsigned char byte;
+    int count = read(serialDevice, &byte, 1);
+    if (count < 1) {
+      if (count == -1) LogError("serial read");
+      return count;
+    }
+    inputBuffer[inputUsed++] = byte;
+    if (verifyInputPacket(buffer, &length)) return length;
+  }
+}
+
+static int
+writeSerialPacket (const unsigned char *buffer, int length) {
+  return safe_write(serialDevice, buffer, length);
+}
+#ifdef ENABLE_USB
+#include "Programs/usbio.h"
+
+static UsbDevice *usbDevice = NULL;
+static unsigned char usbOutputEndpoint;
+static unsigned char usbInputEndpoint;
+
+static void
+usbLogString (UsbDevice *device, int index, const char *description) {
+  if (index) {
+    char *string = usbGetString(device, index, 1000);
+    if (string) {
+      LogPrint(LOG_INFO, "USB %s: %s", description, string);
+      free(string);
+    }
+  }
+}
+
+static int
+usbChooseDevice (UsbDevice *device, void *data) {
+  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
+  if ((descriptor->idVendor == 0X6b0) && (descriptor->idProduct == 1)) {
+    const unsigned int interface = 0;
+    if (usbClaimInterface(device, interface) != -1) {
+      if (usbSetConfiguration(device, 1) != -1) {
+        if (usbSetAlternative(device, interface, 0) != -1) {
+          usbInputEndpoint = 1;
+          usbOutputEndpoint = 2;
+          return 1;
+        } else {
+          LogError("set USB alternative");
+        }
+      } else {
+        LogError("set USB configuration");
+      }
+      usbReleaseInterface(device, interface);
+    } else {
+      LogError("claim USB interface");
+    }
+    return 0;
+  }
+  return 0;
+}
+
+static int
+openUsbPort (const char *device) {
+  if ((usbDevice = usbFindDevice(usbChooseDevice, NULL))) {
+    const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(usbDevice);
+    LogPrint(LOG_INFO, "USB device: vendor=%04X product=%04X input=%02X output=%02X",
+             descriptor->idVendor, descriptor->idProduct, usbInputEndpoint, usbOutputEndpoint);
+    usbLogString(usbDevice, descriptor->iManufacturer, "Manufacturer Name");
+    usbLogString(usbDevice, descriptor->iProduct, "Product Description");
+    usbLogString(usbDevice, descriptor->iSerialNumber, "Serial Number");
+
+    if (usbBeginInput(usbDevice, usbInputEndpoint, 8, 8) != -1) {
+      return 1;
+    } else {
+      LogError("begin USB input");
+    }
+
+    usbCloseDevice(usbDevice);
+    usbDevice = NULL;
+  }
+  return 0;
+}
+
+static int
+resetUsbPort (void) {
+  return 1;
+}
+
+static void
+closeUsbPort (void) {
+  if (usbDevice) {
+    usbCloseDevice(usbDevice);
+    usbDevice = NULL;
+  }
+}
+
+static int
+readUsbPacket (unsigned char *buffer, int length) {
+  while (1) {
+    unsigned char bytes[2];
+    int count = usbReapInput(usbDevice, bytes, sizeof(bytes), 0);
+    if (count == -1) {
+      if (errno == EAGAIN) return 0;
+      LogError("USB read");
+      return count;
+    }
+
+    if (bytes[0] || bytes[1]) {
+      memcpy(&inputBuffer[inputUsed], bytes, count);
+      inputUsed += count;
+      if (verifyInputPacket(buffer, &length)) return length;
+    } else {
+      inputUsed = 0;
+    }
+  }
+}
+
+static int
+writeUsbPacket (const unsigned char *buffer, int length) {
+  return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
+}
+#endif /* ENABLE_USB */
 
 static void
 brl_identify (void)
@@ -341,7 +570,7 @@ extern int SendToAlva( unsigned char *data, int len );
 
 int SendToAlva( unsigned char *data, int len )
 {
-  if( safe_write( brl_fd, data, len ) == len ) return 1;
+  if (writePacket(data, len) == len) return 1;
   return 0;
 }
 
@@ -349,49 +578,68 @@ int SendToAlva( unsigned char *data, int len )
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
   int ModelID = MODEL;
-  unsigned char buffer[DIM_BRL_ID + 1];
-  struct termios newtio;	/* new terminal settings */
-  unsigned char alva_init[]="\033FUN\006\r";
 
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
     makeOutputTable(&dots, &outputTable);
   }
 
-  rawdata = prevdata = NULL;		/* clear pointers */
+  {
+    static const char *const serialPort = "serial";
+#ifdef ENABLE_USB
+    static const char *const usbPort = "usb";
+#endif /* ENABLE_USB */
+    const char *const ports[] = {
+      serialPort,
+#ifdef ENABLE_USB
+      usbPort,
+#endif /* ENABLE_USB */
+      NULL
+    };
+    unsigned int port;
+    validateChoice(&port, "port type", parameters[PARM_PORT], ports);
 
-  /* Open the Braille display device for random access */
-  if (!openSerialDevice(dev, &brl_fd, &oldtio)) goto failure;
+    if (ports[port] == serialPort) {
+      openPort = openSerialPort;
+      resetPort = resetSerialPort;
+      closePort = closeSerialPort;
+      readPacket = readSerialPacket;
+      writePacket = writeSerialPacket;
 
-  /* Set flow control and 8n1, enable reading */
-  newtio.c_cflag = CS8 | CLOCAL | CREAD;
+#ifdef ENABLE_USB
+    } else if (ports[port] == usbPort) {
+      openPort = openUsbPort;
+      resetPort = resetUsbPort;
+      closePort = closeUsbPort;
+      readPacket = readUsbPacket;
+      writePacket = writeUsbPacket;
+#endif /* ENABLE_USB */
 
-  /* Ignore bytes with parity errors and make terminal raw and dumb */
-  newtio.c_iflag = IGNPAR;
-  newtio.c_oflag = 0;		/* raw output */
-  newtio.c_lflag = 0;		/* don't echo or generate signals */
-  newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
-  newtio.c_cc[VTIME] = 0;
+    } else {
+      LogPrint(LOG_WARNING, "Unsupported port type: %s", ports[port]);
+      return 0;
+    }
+  }
+  inputUsed = 0;
+
+  /* Open the Braille display device */
+  if (!openPort(dev)) goto failure;
 
   /* autodetecting ABT model */
-  do
-    {
-      resetSerialDevice(brl_fd, &newtio, BAUDRATE);	/* activate new settings */
-      delay (1000);		/* delay before 2nd line drop */
-      /* This "if" statement can be commented out to try autodetect once anyway */
-      if (ModelID != ABT_AUTO)
-	break;
+  do {
+    if (!resetPort()) goto failure;
+    delay (1000);		/* delay before 2nd line drop */
+    /* This "if" statement can be commented out to try autodetect once anyway */
+    if (ModelID != ABT_AUTO) break;
 
-      if (!(read (brl_fd, buffer, DIM_BRL_ID + 1) == DIM_BRL_ID +1))
-	{ /* try init method for AD4MM and AS... */
-          write (brl_fd,alva_init,DIM_BRL_ID + 2);
-          delay(200);
-          read (brl_fd, buffer, DIM_BRL_ID + 1);         
-        }
-      if (!strncmp ((char *)buffer, BRL_ID, DIM_BRL_ID))
-	ModelID = buffer[DIM_BRL_ID];
+    if (!writeFunction(0X06)) goto failure;
+    delay(200);
+    {
+      unsigned char packet[6];
+      if (readPacket(packet, sizeof(packet)) <= sizeof(BRL_ID)) continue;
+      if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0) ModelID = packet[sizeof(BRL_ID)];
     }
-  while (ModelID == ABT_AUTO);
+  } while (ModelID == ABT_AUTO);
 
   /* Find out which model we are connected to... */
   for( model = Models;
@@ -425,20 +673,24 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   return 1;
 
 failure:
-  if (rawdata)
-    free (rawdata);
-  if (prevdata)
-    free (prevdata);
+  brl_close(brl);
   return 0;
 }
 
 
 static void brl_close (BrailleDisplay *brl)
 {
-  free (rawdata);
-  free (prevdata);
-  tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
-  close (brl_fd);
+  if (rawdata) {
+    free(rawdata);
+    rawdata = NULL;
+  }
+
+  if (prevdata) {
+    free(prevdata);
+    prevdata = NULL;
+  }
+
+  closePort();
 }
 
 
@@ -455,7 +707,7 @@ static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
   outsz += Len;
   memcpy( outbuf+outsz, BRL_END, DIM_BRL_END );
   outsz += DIM_BRL_END;
-  return SendToAlva( outbuf, outsz );
+  return writePacket(outbuf, outsz);
 }
 
 static void brl_writeWindow (BrailleDisplay *brl)
@@ -508,96 +760,73 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 
 
 
-static int GetABTKey (unsigned int *Keys, unsigned int *Pos)
+static int GetKey (unsigned int *Keys, unsigned int *Pos)
 {
-  unsigned char c;
-  static int KeyGroup = 0;
-  static int id_l = 0;
-
-  while (read (brl_fd, &c, 1) > 0)
-    {
-
+  unsigned char packet[0X40];
+  int length = readPacket(packet, sizeof(packet));
+  if (length == 0) return 0;
 #if ! ABT3_OLD_FIRMWARE
 
-      switch (KeyGroup)
-	{
-	case 0x71:		/* Operating keys and Status keys of Touch Cursor */
-	  /* make keys */
-	  if (c <= 0x09)
-	    *Keys |= OperatingKeys[c];
-	  else if ((c >= 0x20) && (c <= 0x25))
-	    *Keys |= StatusKeys[c - 0x20];
-	  /* break keys */
-	  else if ((c >= 0x80) && (c <= 0x89))
-	    *Keys &= ~OperatingKeys[c - 0x80];
-	  else if ((c >= 0xA0) && (c <= 0xA5))
-	    *Keys &= ~StatusKeys[c - 0xA0];
-	  else
-	    *Keys = 0;
-	  KeyGroup = 0;
-	  return (1);
+  switch (packet[0]) {
+    case 0X71:		/* Operating keys and Status keys of Touch Cursor */ {
+      unsigned char key = packet[1];
+      if (key <= 0X09) {
+        *Keys |= OperatingKeys[key];
+      } else if ((key >= 0X80) && (key <= 0X89)) {
+        *Keys &= ~OperatingKeys[key - 0X80];
+      } else if ((key >= 0X20) && (key <= 0X25)) {
+        *Keys |= StatusKeys[key - 0X20];
+      } else if ((key >= 0XA0) && (key <= 0XA5)) {
+        *Keys &= ~StatusKeys[key - 0XA0];
+      } else {
+        *Keys = 0;
+      }
+      return 1;
+    }
 
-	case 0x72:		/* Display keys of Touch Cursor */
-	  /* make keys */
-	  if (c <= 0x5F)
-	    {			/* make */
-	      *Pos = c;
-	      *Keys |= KEY_ROUTING;
-	    }
-	  /* break keys */
-	  else
-	    *Keys &= ~KEY_ROUTING;
-	  KeyGroup = 0;
-	  return (1);
+    case 0X72: {
+      unsigned char key = packet[1];
+      if (key <= 0X5F) {			/* make */
+        *Pos = key;
+        *Keys |= KEY_ROUTING;
+      } else {
+        *Keys &= ~KEY_ROUTING;
+      }
+      return 1;
+    }
 
-	default:
-	  if ((c == 0x71) || (c == 0x72)) {
-	     /* Key group selection */
-	     KeyGroup = c;
-	     id_l = 0;
-	  }else if( c == BRL_ID[id_l] ) {
-	     id_l++;
-	     if( id_l >= DIM_BRL_ID ) {
-		/* The terminal has been turned off and back on.  To be
-		 * sure we arrange for the driver to restart so
-		 * model probing, etc. will take place.
-		 */
-		id_l = 0;
-		return -1;
-	     }
-	  }else{
-	     /* Probably garbage came on the line.
-	      * Let's reset the keys and state.
-	      */
-	     *Keys = 0;
-	     ReWrite = 1;
-	     return 0;
-	  }
-	  break;
-	}
+    default:
+      if (length > sizeof(BRL_ID)) {
+        if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0) {
+          /* The terminal has been turned off and back on.  To be
+           * sure we arrange for the driver to restart so
+           * model probing, etc. will take place.
+           */
+          return -1;
+        }
+      }
+
+      break;
+  }
 
 #else /* ABT3_OLD_FIRMWARE */
 
-      if ((c >= (KEY_ROUTING_OFFSET + model->Cols)) &&
-	  (c < (KEY_ROUTING_OFFSET + model->Cols + 6)))
-	{
-	  /* make for Status keys of Touch Cursor */
-	  *Keys |= StatusKeys[c - (KEY_ROUTING_OFFSET + model->Cols)];
-	}
-      else if (c >= KEY_ROUTING_OFFSET)
-	{
-	  /* make for display keys of Touch cursor */
-	  *Pos = c - KEY_ROUTING_OFFSET;
-	  *Keys |= KEY_ROUTING;
-	}
-      else
-	*Keys = c;		/* check comments where KEY_xxxx are defined */
-      return (1);
+  int key = packet[0];
+  if ((key >= (KEY_ROUTING_OFFSET + model->Cols)) &&
+      (key < (KEY_ROUTING_OFFSET + model->Cols + 6))) {
+    /* make for Status keys of Touch Cursor */
+    *Keys |= StatusKeys[key - (KEY_ROUTING_OFFSET + model->Cols)];
+  } else if (key >= KEY_ROUTING_OFFSET) {
+    /* make for display keys of Touch cursor */
+    *Pos = key - KEY_ROUTING_OFFSET;
+    *Keys |= KEY_ROUTING;
+  } else {
+    *Keys = key;		/* check comments where KEY_xxxx are defined */
+  }
+  return 1;
 
 #endif /* ! ABT3_OLD_FIRMWARE */
-
-    }
-  return (0);
+  return 0;
 }
 
 
@@ -608,7 +837,7 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
   static int Typematic = 0, KeyDelay = 0, KeyRepeat = 0;
 
-  if (!(ProcessKey = GetABTKey (&CurrentKeys, &RoutingPos)))
+  if (!(ProcessKey = GetKey (&CurrentKeys, &RoutingPos)))
     {
       if (Typematic)
 	{
