@@ -2148,6 +2148,13 @@ The following directives are recognized:
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-attributes-table" name="-a"> command line option.
+  <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
+    Specify the device to which the braille display is connected
+    (see section <ref id="devices" name="Device Specification">).
+    See the <ref id="build-braille-device" name="--with-braille-device">
+    build option for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-braille-device" name="-d"> command line option.
   <tag><tt/braille-driver/ <em/driver/<label id="configure-braille-driver"></tag>
     Specify the braille display driver.
     The two-letter <ref id="drivers" name="driver identification code">
@@ -2156,13 +2163,6 @@ The following directives are recognized:
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-braille-driver" name="-b"> command line option.
-  <tag><tt/braille-device/ <em/device/<label id="configure-braille-device"></tag>
-    Specify the device to which the braille display is connected
-    (see section <ref id="devices" name="Device Specification">).
-    See the <ref id="build-braille-device" name="--with-braille-device">
-    build option for the default established during the build procedure.
-    This directive can be overridden with the
-    <ref id="options-braille-device" name="-d"> command line option.
   <tag><tt/braille-parameters/ [<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="configure-braille-parameters"></tag>
     Specify parameters for the braille display drivers.
     If the same parameter is specified more than once,
@@ -2218,6 +2218,12 @@ The following directives are recognized:
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-speech-driver" name="-s"> command line option.
+  <tag><tt/speech-fifo/ <em/file/<label id="configure-speech-fifo"></tag>
+    Specify the FIFO (a special file which works like a pipe)
+    which is to be used by other applications
+    that wish to gain access to BRLTTY's speech driver.
+    This directive can be overridden with the
+    <ref id="options-speech-fifo" name="-F"> command line option.
   <tag><tt/speech-parameters/ [<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
     Specify parameters for the speech synthesizer drivers.
     If the same parameter is specified more than once,
@@ -2430,6 +2436,9 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_SPEECH_DRIVER/</tag>
         The speech synthesizer driver
         (see the <ref id="options-speech-driver" name="-s"> command line option).
+      <tag><tt/BRLTTY_SPEECH_FIFO/</tag>
+        The speech pass-through FIFO
+        (see the <ref id="options-speech-fifo" name="-F"> command line option).
       <tag><tt/BRLTTY_SPEECH_PARAMETERS/</tag>
         Parameters for the speech synthesizer driver
         (see the <ref id="options-speech-parameters" name="-S"> command line option).
@@ -2437,6 +2446,13 @@ The <tt/brltty/ command accepts the following options:
         The text translation table
         (see the <ref id="options-text-table" name="-a"> command line option).
     </descrip>
+  <tag><tt/-F/<em/file/ <tt/--speech-fifo=/<em/file/<label id="options-speech-fifo"></tag>
+    Specify the FIFO (a special file which works like a pipe)
+    which is to be used by other applications
+    that wish to gain access to BRLTTY's speech driver.
+    If not specified, no FIFO is created.
+    See the <ref id="configure-speech-fifo" name="speech-fifo">
+    configuration file directive for the default run-time setting.
   <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
     Specify the amount of time (in hundredths of a second)
     that BRLTTY keeps its own internally generated messages on the braille display.
@@ -4288,6 +4304,10 @@ The following device types are supported:
     then you can refine the device specification
     by appending the serial number of the display to it,
     e.g. <tt/usb:12345/.
+    N.B.: The "identification by serial number" feature
+    doesn't work for some models because some manufacturers
+    either don't set the USB serial number descriptor at all
+    or do set it but not to a unique value.
 </descrip>
 
 <sect1>Standard Braille Dot Numbering Convention<label id="dots"><p>
