@@ -1020,9 +1020,11 @@ static void *server(void *arg)
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
 
+  for (i=0;i<numSockets;i++)
+    sockets[i]=-1;
+
   pthread_cleanup_push(closeSockets,NULL);
   for (i=0;i<numSockets;i++) {
-    sockets[i]=-1;
     if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *) i)) != 0) {
       LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
       for (;i>=0;i--)
@@ -1035,6 +1037,7 @@ static void *server(void *arg)
   while (1) {
     /* Compute sockets set and fdmax */
     FD_ZERO(&sockset);
+    fdmax=0;
     for (i=0;i<numSockets;i++)
       if (sockets[i]>=0) {
 	FD_SET(sockets[i], &sockset);
