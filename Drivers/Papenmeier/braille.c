@@ -324,7 +324,7 @@ interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
       curr_stats = the_terminal->statcells;
 
       /* TODO: ?? HACK */
-      brl_driver.helpFile = the_terminal->helpfile;
+      BRLSYMBOL.helpFile = the_terminal->helpfile;
 
       /* key codes - starts at 0X300  */
       /* status keys - routing keys - step 3 */

@@ -63,14 +63,14 @@ TranslationTable attributesTable = {
 
 void *contractionTable = NULL;
 
-/* load driver from library */
-/* return true (nonzero) on success */
 const BrailleDriver *
 loadBrailleDriver (const char **driver, const char *driverDirectory) {
 #ifdef BRAILLE_BUILTIN
-  extern BrailleDriver brl_driver;
-  const void *builtinAddress = &brl_driver;
-  const char *builtinIdentifier = brl_driver.identifier;
+# define BRL_DRIVER CONCATENATE(brl_driver_,BRAILLE_BUILTIN)
+  extern BrailleDriver BRL_DRIVER;
+  const void *builtinAddress = &BRL_DRIVER;
+  const char *builtinIdentifier = BRL_DRIVER.identifier;
+# undef BRL_DRIVER
 #else /* BRAILLE_BUILTIN */
   const void *builtinAddress = NULL;
   const char *builtinIdentifier = NULL;

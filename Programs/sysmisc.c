@@ -54,45 +54,43 @@ loadDriver (
     return nullAddress;
 
   {
-    const char *libraryName = *driver;
+    const char *libraryName;
+    const char *libraryPath;
+    const char *symbolName;
 
-    /* allow shortcuts */
-    if (strlen(libraryName) == 2) {
-      int nameLength = strlen(LIBRARY_NAME) + strlen(libraryName) + strlen(LIBRARY_EXTENSION) + 3;
-      char *name = mallocWrapper(nameLength);
-      snprintf(name, nameLength, "%s%c%s.%s",
-               LIBRARY_NAME, driverCharacter, libraryName, LIBRARY_EXTENSION);
+    {
+      int length = strlen(LIBRARY_NAME) + strlen(*driver) + strlen(LIBRARY_EXTENSION) + 3;
+      char *name = mallocWrapper(length);
+      snprintf(name, length, "%s%c%s.%s",
+               LIBRARY_NAME, driverCharacter, *driver, LIBRARY_EXTENSION);
       libraryName = name;
+    }
+    libraryPath = makePath(driverDirectory, libraryName);
+
+    {
+      int length = strlen(driverSymbol) + strlen(*driver) + 2;
+      char *name = mallocWrapper(length);
+      snprintf(name, length, "%s_%s",
+               driverSymbol, *driver);
+      symbolName = name;
     }
 
     {
-      const char *libraryPath;
-      if (driverDirectory && (libraryName[0] != '/')) {
-        int pathLength = strlen(driverDirectory) + strlen(libraryName) + 2;
-        char *path = mallocWrapper(pathLength);
-        snprintf(path, pathLength, "%s/%s", driverDirectory, libraryName);
-        libraryPath = path;
-      } else {
-        libraryPath = libraryName;
-      }
-
-      {
-        void *libraryHandle = loadSharedObject(libraryPath);
-        if (libraryHandle) {
-          if (!findSharedSymbol(libraryHandle, driverSymbol, &driverAddress)) {
-            LogPrint(LOG_ERR, "Cannot find %s driver symbol: %s", driverType, driverSymbol);
-            unloadSharedObject(libraryHandle);
-            driverAddress = NULL;
-          }
-        } else {
-          LogPrint(LOG_ERR, "Cannot load %s driver: %s", driverType, libraryPath);
+      void *libraryHandle = loadSharedObject(libraryPath);
+      if (libraryHandle) {
+        if (!findSharedSymbol(libraryHandle, symbolName, &driverAddress)) {
+          LogPrint(LOG_ERR, "Cannot find %s driver symbol: %s", driverType, symbolName);
+          unloadSharedObject(libraryHandle);
+          driverAddress = NULL;
         }
+      } else {
+        LogPrint(LOG_ERR, "Cannot load %s driver: %s", driverType, libraryPath);
       }
-
-      if (libraryPath != libraryName) free((void *)libraryPath);
     }
 
-    if (libraryName != *driver) free((void *)libraryName);
+    free((void *)symbolName);
+    free((void *)libraryPath);
+    free((void *)libraryName);
   }
 
   return driverAddress;

@@ -44,14 +44,14 @@ static void spk_close (void) { }
 
 const SpeechDriver *speech = &noSpeech;
 
-/* load driver from library */
-/* return true (nonzero) on success */
 const SpeechDriver *
 loadSpeechDriver (const char **driver, const char *driverDirectory) {
 #ifdef SPEECH_BUILTIN
-  extern SpeechDriver spk_driver;
-  const void *builtinAddress = &spk_driver;
-  const char *builtinIdentifier = spk_driver.identifier;
+# define SPK_DRIVER CONCATENATE(spk_driver_,SPEECH_BUILTIN)
+  extern SpeechDriver SPK_DRIVER;
+  const void *builtinAddress = &SPK_DRIVER;
+  const char *builtinIdentifier = SPK_DRIVER.identifier;
+# undef SPK_DRIVER
 #else /* SPEECH_BUILTIN */
   const void *builtinAddress = NULL;
   const char *builtinIdentifier = NULL;

@@ -55,7 +55,7 @@ static void spk_close (void);
 #endif /* SPKPARMS */
 
 #ifndef SPKSYMBOL
-#  define SPKSYMBOL spk_driver
+#  define SPKSYMBOL CONCATENATE(spk_driver_,SPKDRIVER)
 #endif /* SPKSYMBOL */
 #ifndef SPKCONST
 #  define SPKCONST const
@@ -63,7 +63,7 @@ static void spk_close (void);
 extern SPKCONST SpeechDriver SPKSYMBOL;
 SPKCONST SpeechDriver SPKSYMBOL = {
   SPKNAME,
-  SPKDRIVER,
+  STRINGIFY(SPKDRIVER),
 
   #ifdef SPKPARMS
     spk_parameters,

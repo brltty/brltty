@@ -56,15 +56,15 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 #endif /* BRLPARMS */
 
 #ifndef BRLSYMBOL
-#  define BRLSYMBOL brl_driver
+#  define BRLSYMBOL CONCATENATE(brl_driver_,BRLDRIVER)
 #endif /* BRLSYMBOL */
 #ifndef BRLCONST
-#   define BRLCONST const
+#  define BRLCONST const
 #endif /* BRLCONST */
 extern BRLCONST BrailleDriver BRLSYMBOL;
 BRLCONST BrailleDriver BRLSYMBOL = {
   BRLNAME,
-  BRLDRIVER,
+  STRINGIFY(BRLDRIVER),
 
 #ifdef BRLPARMS
   brl_parameters,
