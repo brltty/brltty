@@ -113,37 +113,25 @@ static unsigned char statusCells;
 static int
 tellDisplay (uint8_t request, uint16_t value, uint16_t index,
 	     const unsigned char *buffer, uint16_t size) {
-  int try = 0;
+  int retry = 0;
   while (1) {
     int ret = usbControlWrite(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                               request, value, index, buffer, size, 100);
-    if (ret != -1) return ret;
-    if (errno != EPIPE) break;
-    if (++try > CONTROL_RETRIES) break;
-    LogPrint(LOG_WARNING, "Voyager request 0X%X (try %d) failed: %s",
-             request, try, strerror(errno));
+    if ((ret != -1) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) return ret;
+    LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
   }
-  LogPrint(LOG_ERR, "Voyager request 0X%X error: %s",
-           request, strerror(errno));
-  return -1;
 }
 
 static int
 askDisplay (uint8_t request, uint16_t value, uint16_t index,
 	    unsigned char *buffer, uint16_t size) {
-  int try = 0;
+  int retry = 0;
   while (1) {
     int ret = usbControlRead(usb->device, USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
                              request, value, index, buffer, size, 100);
-    if (ret != -1) return ret;
-    if (errno != EPIPE) break;
-    if (++try > CONTROL_RETRIES) break;
-    LogPrint(LOG_WARNING, "Voyager request 0X%X (try %d) failed: %s",
-             request, try, strerror(errno));
+    if ((ret != -1) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) return ret;
+    LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
   }
-  LogPrint(LOG_ERR, "Voyager request 0X%X error: %s",
-           request, strerror(errno));
-  return -1;
 }
 
 static int
@@ -297,18 +285,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
       /* start the input packet monitor */
       {
-        int try = 0;
-        int ret;
+        int retry = 0;
         while (1) {
-          ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
-          if (ret != 0) break;
-          if (errno != EPIPE) break;
-          if (++try > CONTROL_RETRIES) break;
-          LogPrint(LOG_WARNING, "begin input (try %d) failed: %s",
-                   try, strerror(errno));
+          int ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+          if ((ret != 0) || (errno != EPIPE) || (retry == CONTROL_RETRIES)) break;
+          LogPrint(LOG_WARNING, "begin input retry #%d.", ++retry);
         }
-        if (ret == 0)
-          LogPrint(LOG_ERR, "begin input error: %s", strerror(errno));
       }
 
       if ((currentCells = malloc(totalCells))) {
