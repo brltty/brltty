@@ -144,7 +144,7 @@ static ssize_t brlapi_waitForPacket(brl_type_t expectedPacketType, void *packet,
     if (type==BRLPACKET_EXCEPTION) {
       size_t esize;
       if (res<hdrSize) esize = 0; else esize = res-hdrSize;
-      brlapi_errorHandler(ntohl(errorPacket->code), errorPacket->type, &errorPacket->packet, esize);
+      brlapi_errorHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
       continue;
     }
     pthread_mutex_lock(&stateMutex);
