@@ -20,6 +20,9 @@ ABS_SRC_DIR = @abs_srcdir@
 
 programs: Manual BrlAPI $(BUILD_API)
 
+LOCALE = C
+SETLOCALE = LC_ALL=$(LOCALE)
+
 Manual: Manual.txt Manual.made
 
 BrlAPI: BrlAPI.txt BrlAPI.made
@@ -32,11 +35,11 @@ api.made: $(SRC_TOP)$(PGM_DIR)/brlapi.h api_doxy.cfg
 	touch $@
 
 %.txt: $(SRC_DIR)/%.sgml
-	sgml2txt -l english -c latin $<
+	$(SETLOCALE) sgml2txt -l english -c latin $<
 
 %.made: $(ABS_SRC_DIR)/%.sgml
 	$(INSTALL_DIRECTORY) Manual-HTML
-	cd Manual-HTML && sgml2html -l english -c ascii $<
+	cd Manual-HTML && $(SETLOCALE) sgml2html -l english -c ascii $<
 	touch $@
 
 clean::
