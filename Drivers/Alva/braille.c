@@ -648,7 +648,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
     /* This "if" statement can be commented out to try autodetect once anyway */
     if (ModelID != ABT_AUTO) break;
 
-    if (!writeFunction(0X06)) goto failure;
+    if (writeFunction(0X06) == -1) goto failure;
     delay(200);
     {
       unsigned char packet[6];
@@ -663,11 +663,11 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
        model++ );
   if( !model->Name ) {
     /* Unknown model */
-    LogPrint( LOG_ERR, "Detected unknown Alva model with ID %d.", ModelID );
+    LogPrint( LOG_ERR, "Detected unknown Alva model with ID %02X (hex).", ModelID );
     LogPrint( LOG_WARNING, "Please fix Models[] in Alva/braille.c and mail the maintainer." );
     goto failure;
   }
-  LogPrint( LOG_INFO, "Detected Alva model %s: %d columns, %d status cells.",
+  LogPrint( LOG_INFO, "Detected Alva %s: %d columns, %d status cells.",
             model->Name, model->Cols, model->NbStCells );
 
   /* Set model params... */
@@ -780,7 +780,7 @@ static int GetKey (unsigned int *Keys, unsigned int *Pos)
 {
   unsigned char packet[0X40];
   int length = readPacket(packet, sizeof(packet));
-  if (length == 0) return 0;
+  if (length < 1) return length;
 #if ! ABT3_OLD_FIRMWARE
 
   switch (packet[0]) {
