@@ -317,7 +317,6 @@ usbReapResponse (
   } else if (urb->status) {
     if ((errno = urb->status) < 0) errno = -errno;
     LogError("USB URB status");
-    free(urb);
     urb = NULL;
   } else {
     response->buffer = urb->buffer;

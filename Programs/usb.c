@@ -187,7 +187,6 @@ usbBeginInput (
   device->inputRequest = NULL;
   device->inputEndpoint = endpoint | USB_DIR_IN;
   device->inputSize = size;
-  device->inputFlags = 0;
 
   while (actual < count) {
     if (!usbAddInputElement(device)) break;
@@ -244,20 +243,8 @@ usbReapInput (
 void
 usbCloseDevice (UsbDevice *device) {
   if (device->inputRequest) free(device->inputRequest);
+  while (device->inputElements) usbDeleteInputElement(device, device->inputElements);
   close(device->file);
-
-  /* The URBs must be deallocated after the USBFS device file is closed
-   * because the kernel writes to them during the close. They can't be
-   * discarded before the close if the device has been disconnected
-   * because that operation, given that state, returns ENODEV.
-   */
-  while (device->inputElements) {
-    struct UsbInputElement *input = device->inputElements;
-    free(input->request);
-    input->request = NULL;
-    usbDeleteInputElement(device, input);
-  }
-
   free(device);
 }
 
