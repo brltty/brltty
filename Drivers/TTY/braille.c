@@ -48,10 +48,16 @@ typedef enum {
   PARM_TERM,
   PARM_LINES,
   PARM_COLS,
+#ifdef HAVE_ICONV_H
   PARM_CSET,
+#endif /* HAVE_ICONV_H */
   PARM_LOCALE
 } DriverParameter;
+#ifdef HAVE_ICONV_H
 #define BRLPARMS "term", "lines", "cols", "cset", "locale"
+#else /* HAVE_ICONV_H */
+#define BRLPARMS "term", "lines", "cols", "locale"
+#endif /* HAVE_ICONV_H */
 
 #define BRL_HAVE_KEY_CODES
 #include "Programs/brl_driver.h"
@@ -77,13 +83,17 @@ static void brl_identify()
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
  char *term="vt100";
+#ifdef HAVE_ICONV_H
  char *cset="ISO8859-1";
+#endif /* HAVE_ICONV_H */
 
  if (*parameters[PARM_TERM])
   term=parameters[PARM_TERM];
 
+#ifdef HAVE_ICONV_H
  if (*parameters[PARM_CSET])
   cset=parameters[PARM_CSET];
+#endif /* HAVE_ICONV_H */
 
  if (*parameters[PARM_LOCALE])
   locale=parameters[PARM_LOCALE];
