@@ -152,6 +152,7 @@
 #speech-driver	fl	# FestivalLite Text to Speech Package
 #speech-driver	fv	# Festival Text to Speech Package
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)
+#speech-driver	th	# Theta Text to Speech System
 #speech-driver	tv	# Televox
 #speech-driver	vv	# ViaVoice Text to Speech System
 

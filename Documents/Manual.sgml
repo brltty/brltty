@@ -497,6 +497,20 @@ for any additional display-specific instructions.
         or <tt>/usr/local</>.
         This is equivalent to specifying <tt/--with-flite/.
     </descrip>
+  <tag><tt/--with-theta=/<em/directory/<label id="build-theta"></tag>
+    Specify the installed location of the Theta text-to-speech package,
+    and build the Theta speech synthesizer driver.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't build the driver.
+        This is equivalent to specifying <tt/--without-theta/.
+      <tag/yes/
+        Build the driver if the package can be found in
+        either <tt>/usr</>
+        or <tt>/usr/local</>.
+        This is equivalent to specifying <tt/--with-theta/.
+    </descrip>
   <tag><tt/--with-viavoice=/<em/directory/<label id="build-viavoice"></tag>
     Specify the installed location of the ViaVoice text-to-speech package,
     and build the ViaVoice speech synthesizer driver.
@@ -1017,6 +1031,12 @@ and all that, you can run BRLTTY without root priviledge.
     Some platforms don't support all of the tune devices.
     See the <ref id="preference-tune-device" name="Tune Device">
     preference for details.
+  <tag/FestivalLite Driver/
+    The driver for the FestivalLite software speech synthesizer
+    is only built if that package has been installed.
+  <tag/Theta Driver/
+    The driver for the Theta software speech synthesizer
+    is only built if that package has been installed.
   <tag/ViaVoice Driver/
     The driver for the ViaVoice software speech synthesizer
     is only built if that package has been installed.
@@ -3972,18 +3992,25 @@ BRLTTY supports the following speech synthesizers:
     <htmlurl url="http://www.blazie.com/pages/main.html" name="Blazie Engineering">:
     BrailleLite
   <item>
-    <htmlurl url="http://www.elan.fr/" name="Elan Informatique">:
-    Televox
-  <item>
-    <htmlurl url="http://www.ibm.com/" name="International Business Machines (IBM)">:
-    <htmlurl url="http://www.ibm.com/software/speech/dev/ttssdk_linux.html" name="ViaVoice">
-  <item>
     <htmlurl url="http://www.braillevoyager.nl/uk/index.html" name="Tieman B.V.">:
     CombiBraille
   <item>
     <htmlurl url="http://www.ed.ac.uk/" name="The University of Edinburgh">
     (<htmlurl url="http://www.cstr.ed.ac.uk/" name="Centre for Speech Technology Research">):
     <htmlurl url="http://www.cstr.ed.ac.uk/projects/festival/" name="Festival">
+  <item>
+    <htmlurl url="http://www.cmu.edu" name="Carnegie Mellon University">
+    (<htmlurl url="http://www.cs.cmu.edu" name="School of Computer Science">):
+    <htmlurl url="http://www.speech.cs.cmu.edu/flite/index.html" name="FestivalLite">
+  <item>
+    <htmlurl url="http://www.elan.fr/" name="Elan Informatique">:
+    Televox
+  <item>
+    <htmlurl url="http://www.cepstral.com/" name="Cepstral">:
+    Theta
+  <item>
+    <htmlurl url="http://www.ibm.com/" name="International Business Machines (IBM)">:
+    <htmlurl url="http://www.ibm.com/software/speech/dev/ttssdk_linux.html" name="ViaVoice">
 </itemize>
 
 <sect1>Driver Identification Codes<label id="drivers"><p>
@@ -4005,6 +4032,7 @@ BRLTTY supports the following speech synthesizers:
   <tag/mn/MiniBraille
   <tag/no/no driver
   <tag/pm/Papenmeier
+  <tag/th/Theta
   <tag/ts/Telesensory Systems Inc.
   <tag/tv/Televox
   <tag/va/Vario/RBT (emulation 1)
