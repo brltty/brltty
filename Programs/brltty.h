@@ -108,8 +108,8 @@ extern void updatePreferences (void);
 extern void restartBrailleDriver (void);
 extern void restartSpeechDriver (void);
 
-extern int getCommand (DriverCommandContext cmds);
-extern int readCommand (DriverCommandContext cmds);
+extern int getCommand (BRL_DriverCommandContext context);
+extern int readCommand (BRL_DriverCommandContext context);
 
 extern void api_identify (void);
 extern void api_open (BrailleDisplay *brl, char **parameters);

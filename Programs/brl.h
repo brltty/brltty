@@ -50,7 +50,7 @@ extern void showBrailleString (BrailleDisplay *, const char *, unsigned int);
 extern void clearStatusCells (BrailleDisplay *brl);
 extern void setStatusText (BrailleDisplay *brl, const char *text);
 extern int allocateBrailleBuffer (BrailleDisplay *);
-extern int readBrailleCommand (BrailleDisplay *, DriverCommandContext);
+extern int readBrailleCommand (BrailleDisplay *, BRL_DriverCommandContext);
 
 typedef enum {
   BF_MINIMUM,
@@ -77,7 +77,7 @@ typedef struct {
   void (*identify) (void);	/* print start-up messages */
   int (*open) (BrailleDisplay *, char **parameters, const char *);	/* initialise Braille display */
   void (*close) (BrailleDisplay *);		/* close braille display */
-  int (*readCommand) (BrailleDisplay *, DriverCommandContext);		/* get key press from braille display */
+  int (*readCommand) (BrailleDisplay *, BRL_DriverCommandContext);		/* get key press from braille display */
   void (*writeWindow) (BrailleDisplay *);		/* write to braille display */
   void (*writeStatus) (BrailleDisplay *brl, const unsigned char *);	/* set status cells */
 
@@ -91,7 +91,7 @@ typedef struct {
   
   /* These require BRL_HAVE_KEY_CODES. */
   int (*readKey) (BrailleDisplay *);
-  int (*keyToCommand) (BrailleDisplay *, DriverCommandContext, int);
+  int (*keyToCommand) (BrailleDisplay *, BRL_DriverCommandContext, int);
 
   /* These require BRL_HAVE_FIRMNESS. */
   void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);		/* mute speech */

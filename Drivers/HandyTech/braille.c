@@ -52,10 +52,10 @@ static Keys currentKeys, pressedKeys, nullKeys;
 static unsigned char inputMode;
 
 /* Braille display parameters */
-typedef int (ByteInterpreter) (DriverCommandContext context, unsigned char byte, int *command);
+typedef int (ByteInterpreter) (BRL_DriverCommandContext context, unsigned char byte, int *command);
 static ByteInterpreter interpretKeyByte;
 static ByteInterpreter interpretBookwormByte;
-typedef int (KeysInterpreter) (DriverCommandContext context, const Keys *keys, int *command);
+typedef int (KeysInterpreter) (BRL_DriverCommandContext context, const Keys *keys, int *command);
 static KeysInterpreter interpretModularKeys;
 static KeysInterpreter interpretBrailleWaveKeys;
 static KeysInterpreter interpretBrailleStarKeys;
@@ -715,7 +715,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 }
 
 static int
-interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command) {
+interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
   int release = (byte & KEY_RELEASE) != 0;
   if (release) byte &= ~KEY_RELEASE;
 
@@ -769,7 +769,7 @@ interpretKeyByte (DriverCommandContext context, unsigned char byte, int *command
 }
 
 static int
-interpretModularKeys (DriverCommandContext context, const Keys *keys, int *command) {
+interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *command) {
   if (keys->column >= 0) {
     switch (keys->front) {
       default:
@@ -1158,12 +1158,12 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
 }
 
 static int
-interpretBrailleWaveKeys (DriverCommandContext context, const Keys *keys, int *command) {
+interpretBrailleWaveKeys (BRL_DriverCommandContext context, const Keys *keys, int *command) {
   return interpretModularKeys(context, keys, command);
 }
 
 static int
-interpretBrailleStarKeys (DriverCommandContext context, const Keys *keys, int *command) {
+interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, int *command) {
   if (keys->column >= 0) {
     switch (keys->front) {
       default:
@@ -1265,9 +1265,9 @@ interpretBrailleStarKeys (DriverCommandContext context, const Keys *keys, int *c
 }
 
 static int
-interpretBookwormByte (DriverCommandContext context, unsigned char byte, int *command) {
+interpretBookwormByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
   switch (context) {
-    case CMDS_PREFS:
+    case BRL_CTX_PREFS:
       switch (byte) {
         case (BWK_BACKWARD):
           *command = BRL_CMD_FWINLT;
@@ -1368,7 +1368,7 @@ interpretBookwormByte (DriverCommandContext context, unsigned char byte, int *co
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int timedOut = 1;
 
   if (at2Count) {

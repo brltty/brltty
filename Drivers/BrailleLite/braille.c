@@ -519,7 +519,7 @@ brl_writeWindow (BrailleDisplay * brl)
 
 
 static int
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   static enum {
     ST_NORMAL,	/* transparent */
@@ -589,7 +589,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	    return key.cmd;
 
 	  /* kbemu could be on, then go on */
-	  if (kbemu && cmds == CMDS_SCREEN)
+	  if (kbemu && context == BRL_CTX_SCREEN)
 	    break;
 
 	  /* if it's a dangerous command it should have been chorded */
@@ -637,7 +637,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 	    return BRL_CMD_NOOP;
 	  case ' ':		/* practical exception for */
 	    /* If keyboard mode off, space bar == BRL_CMD_HOME */
-	    if (!kbemu || cmds != CMDS_SCREEN)
+	    if (!kbemu || context != BRL_CTX_SCREEN)
 	      return BRL_CMD_HOME;
 	  }
 

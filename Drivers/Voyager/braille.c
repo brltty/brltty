@@ -801,7 +801,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   KEY(keys2, command2)
 
 static int
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   /* Structure to remember which keys are pressed */
   typedef struct {
     unsigned int control; /* Front and dot keys */
@@ -916,7 +916,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
     if (!(activeKeys.control & ~FRONT_KEYS)) {
       /* Just front keys */
 
-      if (cmds == CMDS_PREFS) {
+      if (context == BRL_CTX_PREFS) {
 	switch (activeKeys.control) {
           HKEY2(891, K_DOWN, K_UP,
                 BRL_CMD_MENU_PREV_SETTING, BRL_CMD_MENU_NEXT_SETTING,

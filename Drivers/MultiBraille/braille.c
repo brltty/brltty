@@ -301,7 +301,7 @@ static void brl_writeWindow (BrailleDisplay *brl) {
 }
 
 
-static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 	static short status = 0;	/* cursor routing keys mode */
 	
 	KeyStroke keystroke;

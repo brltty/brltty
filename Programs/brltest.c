@@ -91,7 +91,7 @@ message (const char *string, short flags) {
 
     if (length) {
       int timer = 0;
-      while (braille->readCommand(&brl, CMDS_MESSAGE) == EOF) {
+      while (braille->readCommand(&brl, BRL_CTX_MESSAGE) == EOF) {
         if (timer > 4000) break;
         delay(updateInterval);
         timer += updateInterval;

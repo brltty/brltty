@@ -935,7 +935,7 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 }
 
 
-static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
+static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
   static unsigned int RoutingPos = 0;

@@ -872,7 +872,7 @@ cut_cursor (BrailleDisplay *brl)
       display_all (prevdata);
       prevdata[pos] = oldchar;
 
-      while ((key = brl_readCommand (brl, CMDS_SCREEN)) == EOF) delay(1); /* just yield */
+      while ((key = brl_readCommand (brl, BRL_CTX_SCREEN)) == EOF) delay(1); /* just yield */
       if((key &VAL_BLK_MASK) == CR_CUTBEGIN)
 	  res = CR_CUTBEGIN + pos;
       else if((key &VAL_BLK_MASK) == CR_CUTAPPEND)
@@ -960,7 +960,7 @@ cut_cursor (BrailleDisplay *brl)
 #define MAXREAD 10
 
 static int 
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
@@ -1274,7 +1274,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
     KEYAND(KEY_CNCV) KEY (KEY_BROUND, BRL_CMD_HOME);
     KEYAND(KEY_CNCV | KEY_CUP) KEY(KEY_BROUND | KEY_CUP, BRL_CMD_BACK);
-    KEY (KEY_CROUND, (cmds == CMDS_PREFS) ? BRL_CMD_MENU_PREV_SETTING
+    KEY (KEY_CROUND, (context == BRL_CTX_PREFS) ? BRL_CMD_MENU_PREV_SETTING
 	 : BRL_CMD_CSRTRK);
 
     KEYAND(KEY_BUT1 | KEY_BAR1) KEY (KEY_BLEFT | KEY_BUP, BRL_CMD_TOP_LEFT);
@@ -1301,9 +1301,9 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
   /* keyboard cursor keys simulation */
     KEY (KEY_CLEFT, VAL_PASSKEY+VPK_CURSOR_LEFT);
     KEY (KEY_CRIGHT, VAL_PASSKEY+VPK_CURSOR_RIGHT);
-    KEY (KEY_CUP, (cmds == CMDS_PREFS && displayType == PB40)
+    KEY (KEY_CUP, (context == BRL_CTX_PREFS && displayType == PB40)
 	 ? BRL_CMD_MENU_PREV_SETTING : VAL_PASSKEY+VPK_CURSOR_UP);
-    KEY (KEY_CDOWN, (cmds == CMDS_PREFS && displayType == PB40)
+    KEY (KEY_CDOWN, (context == BRL_CTX_PREFS && displayType == PB40)
 	 ? BRL_CMD_MENU_NEXT_SETTING : VAL_PASSKEY+VPK_CURSOR_DOWN);
 
   /* special modes */

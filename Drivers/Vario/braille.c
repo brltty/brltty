@@ -351,7 +351,7 @@ static int is_repeat_cmd (int cmd) {
   return (0);
 }
 
-static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
+static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #define TSP 0x22
 #define BUTTON 0x24
 #define KEY_TL1 (1<<0)

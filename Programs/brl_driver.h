@@ -33,7 +33,7 @@ extern "C" {
 static void brl_identify (void);
 static int brl_open (BrailleDisplay *, char **parameters, const char *);
 static void brl_close (BrailleDisplay *);
-static int brl_readCommand (BrailleDisplay *, DriverCommandContext);
+static int brl_readCommand (BrailleDisplay *, BRL_DriverCommandContext);
 static void brl_writeWindow (BrailleDisplay *);
 static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 
@@ -49,7 +49,7 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 
 #ifdef BRL_HAVE_KEY_CODES
   static int brl_readKey (BrailleDisplay *);
-  static int brl_keyToCommand (BrailleDisplay *, DriverCommandContext, int);
+  static int brl_keyToCommand (BrailleDisplay *, BRL_DriverCommandContext, int);
 #endif /* BRL_HAVE_KEY_CODES */
 
 #ifdef BRL_HAVE_FIRMNESS

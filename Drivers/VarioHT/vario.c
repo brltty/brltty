@@ -90,7 +90,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 }
 
 static int 
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
 	int code;
 		/*	Since we are nonblocking this will happen quite a lot */ 

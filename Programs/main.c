@@ -410,7 +410,7 @@ terminateProgram (int quickly) {
     int i;
     for (i=0; i<messageDelay; i+=updateInterval) {
       delay(updateInterval);
-      if (readCommand(CMDS_MESSAGE) != EOF) break;
+      if (readCommand(BRL_CTX_MESSAGE) != EOF) break;
       if (awaitSilence) {
         speech->doTrack();
         if (!speech->isSpeaking()) break;
@@ -945,9 +945,9 @@ main (int argc, char *argv[]) {
         static int repeatTimer = 0;
         static int repeatStarted = 0;
         int next = readBrailleCommand(&brl,
-                                      infmode? CMDS_STATUS:
-                                      ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
-                                      CMDS_SCREEN);
+                                      infmode? BRL_CTX_STATUS:
+                                      ((dispmd & HELP_SCRN) == HELP_SCRN)? BRL_CTX_HELP:
+                                      BRL_CTX_SCREEN);
         if (!prefs.autorepeat) repeatTimer = 0;
         if (!repeatTimer) repeatStarted = 0;
 
@@ -2237,13 +2237,13 @@ message (const char *text, short flags) {
          writeBrailleBuffer(&brl);
 
          if (flags & MSG_WAITKEY)
-            getCommand(CMDS_MESSAGE);
+            getCommand(BRL_CTX_MESSAGE);
          else if (length || !(flags & MSG_NODELAY)) {
             int i;
             for (i=0; i<messageDelay; i+=updateInterval) {
                int command;
                delay(updateInterval);
-               while ((command = readCommand(CMDS_MESSAGE)) == BRL_CMD_NOOP);
+               while ((command = readCommand(BRL_CTX_MESSAGE)) == BRL_CMD_NOOP);
                if (command != EOF) break;
             }
          }

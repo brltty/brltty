@@ -144,7 +144,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
 }
 
 
-static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
+static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
 	unsigned char znak;
 	int rv;

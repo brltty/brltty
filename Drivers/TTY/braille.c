@@ -210,7 +210,7 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 {
 }
 
-int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int key)
+int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int key)
 {
 #define KEY(key,cmd) case (key): return (cmd)
  switch (key) {
@@ -269,7 +269,7 @@ static int brl_readKey(BrailleDisplay *brl)
  return key;
 }
 
-static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext context)
+static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
  int command = brl_keyToCommand(brl, context, brl_readKey(brl));
 

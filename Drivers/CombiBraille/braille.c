@@ -261,7 +261,7 @@ brl_writeWindow (BrailleDisplay *brl)
 
 
 static int
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   static int status = 0;	/* cursor routing keys mode */
   int cmd = getbrlkey();

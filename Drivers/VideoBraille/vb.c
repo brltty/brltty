@@ -83,7 +83,7 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 /* The VideoBraille display has no status cells */
 }
 
-static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
+static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context) {
   vbButtons buttons;
   BrButtons(&buttons);
   if (!buttons.keypressed) {

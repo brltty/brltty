@@ -549,7 +549,7 @@ brl_writeWindow (BrailleDisplay *brl)
 
 
 static int 
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   static char
     ignore_next_release = 0; /* when a command is triggered by combining

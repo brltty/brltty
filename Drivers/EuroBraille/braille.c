@@ -446,7 +446,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 	while (!NbCols)
 	  {
 	     drainBrailleOutput (brl, 100);
-	     brl_readCommand (brl, CMDS_SCREEN);       /* to get the answer */
+	     brl_readCommand (brl, BRL_CTX_SCREEN);       /* to get the answer */
 	     if (++i >= 10)
 	       break;
 	  }
@@ -671,7 +671,7 @@ int ViewOn(BrailleDisplay *brl)
    return res2;
 }
 
-static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
+static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   int		res;
   int		i;

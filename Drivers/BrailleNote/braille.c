@@ -239,7 +239,7 @@ writeVisualDisplay (unsigned char c) {
 }
 
 static int
-visualDisplay (unsigned char character, DriverCommandContext cmds) {
+visualDisplay (unsigned char character, BRL_DriverCommandContext context) {
    int vt = getVirtualTerminal();
    const unsigned char end[] = {0X1B, 0};
    unsigned int state = 0;
@@ -505,7 +505,7 @@ getFunctionKey (void) {
 }
 
 static int
-interpretNavigation (unsigned char dots, DriverCommandContext cmds) {
+interpretNavigation (unsigned char dots, BRL_DriverCommandContext context) {
    switch (dots) {
       default:
          break;
@@ -572,14 +572,14 @@ interpretNavigation (unsigned char dots, DriverCommandContext cmds) {
 }
 
 static int
-interpretCharacter (unsigned char dots, DriverCommandContext cmds) {
+interpretCharacter (unsigned char dots, BRL_DriverCommandContext context) {
    int mask = 0X00;
-   if (cmds != CMDS_SCREEN) {
-      return interpretNavigation(dots, cmds);
+   if (context != BRL_CTX_SCREEN) {
+      return interpretNavigation(dots, context);
    }
    switch (currentKeyboardMode) {
       case KBM_NAVIGATE:
-         return interpretNavigation(dots, cmds);
+         return interpretNavigation(dots, context);
       case KBM_INPUT:
 	 break;
       case KBM_INPUT_7:
@@ -596,7 +596,7 @@ interpretCharacter (unsigned char dots, DriverCommandContext cmds) {
 }
 
 static int
-interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
+interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
    switch (dots) {
       default:
       /* These are overridden by the Braille Note itself. */
@@ -611,7 +611,7 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6): /* go to main menu */
 	 break;
       case BNC_SPACE:
-	 return interpretCharacter(dots, cmds);
+	 return interpretCharacter(dots, context);
       case BNC_C:
 	 return BRL_CMD_PREFMENU;
       case BNC_D:
@@ -713,7 +713,7 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
 }
 
 static int
-interpretBackspaceChord (unsigned char dots, DriverCommandContext cmds) {
+interpretBackspaceChord (unsigned char dots, BRL_DriverCommandContext context) {
    switch (dots & 0X3F) {
       default:
 	 break;
@@ -755,7 +755,7 @@ interpretBackspaceChord (unsigned char dots, DriverCommandContext cmds) {
 }
 
 static int
-interpretEnterChord (unsigned char dots, DriverCommandContext cmds) {
+interpretEnterChord (unsigned char dots, BRL_DriverCommandContext context) {
    switch (dots) {
       default:
       /* These are overridden by the Braille Note itself. */
@@ -793,7 +793,7 @@ interpretEnterChord (unsigned char dots, DriverCommandContext cmds) {
 }
 
 static int
-interpretThumbKeys (unsigned char keys, DriverCommandContext cmds) {
+interpretThumbKeys (unsigned char keys, BRL_DriverCommandContext context) {
    switch (keys) {
       default:
 	 break;
@@ -822,15 +822,15 @@ interpretThumbKeys (unsigned char keys, DriverCommandContext cmds) {
 }
 
 static int
-interpretRoutingKey (unsigned char key, DriverCommandContext cmds) {
+interpretRoutingKey (unsigned char key, BRL_DriverCommandContext context) {
    return currentRoutingOperation + key;
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
    unsigned char character;
    int count = read(fileDescriptor, &character, 1);
-   int (*handler)(unsigned char, DriverCommandContext);
+   int (*handler)(unsigned char, BRL_DriverCommandContext);
 
    if (count != 1) {
       if (count == -1) {
@@ -875,5 +875,5 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
    currentRoutingOperation = temporaryRoutingOperation;
    temporaryRoutingOperation = persistentRoutingOperation;
 
-   return handler(character, cmds);
+   return handler(character, context);
 }

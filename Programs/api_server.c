@@ -980,7 +980,7 @@ found:
 }
 
 /* Function : api_readCommand */
-static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
+static int api_readCommand(BrailleDisplay *disp, BRL_DriverCommandContext caller)
 {
   int res, refresh = 0;
   ssize_t size;

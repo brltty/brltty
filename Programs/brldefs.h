@@ -26,12 +26,12 @@ extern "C" {
 
 /* Argument for brl_readCommand() */
 typedef enum {
-  CMDS_SCREEN,
-  CMDS_HELP,
-  CMDS_STATUS,
-  CMDS_PREFS,
-  CMDS_MESSAGE
-} DriverCommandContext;
+  BRL_CTX_SCREEN,
+  BRL_CTX_HELP,
+  BRL_CTX_STATUS,
+  BRL_CTX_PREFS,
+  BRL_CTX_MESSAGE
+} BRL_DriverCommandContext;
 
 /* The following define command codes, which are return values for
  * readbrl().  The CMD_* codes are guaranteed to be between 1 and 127

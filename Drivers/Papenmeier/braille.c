@@ -453,7 +453,7 @@ static const InputOutputOperations usbOperations = {
 typedef struct {
   void (*initializeTerminal) (BrailleDisplay *brl);
   void (*releaseResources) (void);
-  int (*readCommand) (BrailleDisplay *brl, DriverCommandContext cmds);
+  int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
   void (*writeText) (BrailleDisplay *brl, int start, int count);
   void (*writeStatus) (BrailleDisplay *brl, int start, int count);
   void (*flushCells) (BrailleDisplay *brl);
@@ -739,7 +739,7 @@ restartTerminal1 (BrailleDisplay *brl) {
 }
 
 static int
-readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
+readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #define READ(offset,count,flags) { if (!readBytes1(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
   while (1) {
     unsigned char buf[0X100];
@@ -1102,7 +1102,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
 }
 
 static int 
-readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
+readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   Packet2 packet;
 
   while (readPacket2(brl, &packet)) {
@@ -1460,6 +1460,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
 }
 
 static int 
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
-  return protocol->readCommand(brl, cmds);
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  return protocol->readCommand(brl, context);
 }

@@ -1036,7 +1036,7 @@ interpretKeys (void) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   if (wheelCounter) {
     --wheelCounter;
     return wheelCommand;

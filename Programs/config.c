@@ -583,8 +583,8 @@ dimensionsChanged (int rows, int columns) {
 }
 
 int
-readCommand (DriverCommandContext cmds) {
-   int command = readBrailleCommand(&brl, cmds);
+readCommand (BRL_DriverCommandContext context) {
+   int command = readBrailleCommand(&brl, context);
    if (command != EOF) {
       LogPrint(LOG_DEBUG, "Command: %06X", command);
       if (IS_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
@@ -594,9 +594,9 @@ readCommand (DriverCommandContext cmds) {
 }
 
 int
-getCommand (DriverCommandContext cmds) {
+getCommand (BRL_DriverCommandContext context) {
    while (1) {
-      int command = readCommand(cmds);
+      int command = readCommand(context);
       if (command == EOF) {
          delay(updateInterval);
          closeTuneDevice(0);
@@ -1329,7 +1329,7 @@ updatePreferences (void) {
         drainBrailleOutput(&brl, updateInterval);
 
         /* Now process any user interaction */
-        switch (command = getCommand(CMDS_PREFS)) {
+        switch (command = getCommand(BRL_CTX_PREFS)) {
           case BRL_CMD_HELP:
             /* This is quick and dirty... Something more intelligent 
              * and friendly needs to be done here...

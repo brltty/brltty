@@ -118,7 +118,7 @@ static void createKeyButtons(void) {
  crKeyBut("Down",  BRL_CMD_LNDN,   1, BUTWIDTH+1,     2*(BUTHEIGHT+1));
 }
 
-static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext context)
+static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
  int res=EOF;
  while (XtAppPending(app_con)) {

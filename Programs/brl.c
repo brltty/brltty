@@ -52,7 +52,7 @@ static void
 brl_close (BrailleDisplay *brl) {
 }
 static int
-brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return EOF;
 }
 static void
@@ -217,8 +217,8 @@ allocateBrailleBuffer (BrailleDisplay *brl) {
 }
 
 int
-readBrailleCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
-  int command = braille->readCommand(brl, cmds);
+readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  int command = braille->readCommand(brl, context);
   resizeBrailleBuffer(brl);
   return command;
 }
@@ -231,7 +231,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 
   timeout_yet(0);
   do {
-    int command = readBrailleCommand(brl, CMDS_SCREEN);
+    int command = readBrailleCommand(brl, BRL_CTX_SCREEN);
     if (command != EOF) {
       LogPrint(LOG_DEBUG, "Learn: command=%06X", command);
       if (IS_DELAYED_COMMAND(command)) continue;
