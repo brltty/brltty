@@ -197,8 +197,8 @@ usbClearEndpoint (
 int
 usbControlTransfer (
   UsbDevice *device,
-  unsigned char recipient,
   unsigned char direction,
+  unsigned char recipient,
   unsigned char type,
   unsigned char request,
   unsigned short value,
@@ -212,7 +212,7 @@ usbControlTransfer (
     UsbSetupPacket setup;
   } arg;
   memset(&arg, 0, sizeof(arg));
-  arg.setup.bRequestType = direction | type | recipient;
+  arg.setup.bRequestType = direction | recipient | type;
   arg.setup.bRequest = request;
   putLittleEndian(&arg.setup.wValue, value);
   putLittleEndian(&arg.setup.wIndex, index);

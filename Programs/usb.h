@@ -216,8 +216,8 @@ extern int usbClearEndpoint (
 
 extern int usbControlTransfer (
   UsbDevice *device,
-  unsigned char recipient,
   unsigned char direction,
+  unsigned char recipient,
   unsigned char type,
   unsigned char request,
   unsigned short value,

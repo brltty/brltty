@@ -78,9 +78,6 @@ static int brlinput = 1;
 
 #define MAXNRCELLS 70 /* arbitrary max for allocations */
 
-/* control message request types */
-#define BRLVGER_READ_REQ 0xC2
-#define BRLVGER_WRITE_REQ 0x42
 /* control message request codes */
 #define BRLVGER_SET_DISPLAY_ON 0
 #define BRLVGER_SET_DISPLAY_VOLTAGE 1
@@ -92,8 +89,8 @@ static int brlinput = 1;
 #if 0 /* not used and not sure they're working */
 /* hw ver is either 0.0 or unspecified on the prototype I have.
   Not sure how to decode it properly. */
-#define BRLVGER_GET_HWVERSION 4
 #define BRLVGER_GET_DISPLAY_VOLTAGE 2
+#define BRLVGER_GET_HWVERSION 4
 #define BRLVGER_GET_CURRENT 8
 #endif
 
@@ -157,10 +154,9 @@ _sndcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
     else
       LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
 	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usbDevice, 0, USB_DIRECTION_OUTPUT, 
-			     BRLVGER_WRITE_REQ,
-			     request, value, index, buffer, size,
-			     100);
+    ret = usbControlTransfer(usbDevice, USB_DIRECTION_OUTPUT, 
+			     USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+                             request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
   return ret;
 }
@@ -183,10 +179,9 @@ _rcvcontrolmsg(char *reqname, uint8_t request, uint16_t value, uint16_t index,
     else
       LogPrint(LOG_DEBUG, "control req 0x%x, got error %s, try %d",
 	       request, strerror(errno), STALL_TRIES+1-repeats);
-    ret = usbControlTransfer(usbDevice, 0, USB_DIRECTION_INPUT, 
-			     BRLVGER_READ_REQ,
-			     request, value, index, buffer, size,
-			     100);
+    ret = usbControlTransfer(usbDevice, USB_DIRECTION_INPUT, 
+			     USB_RECIPIENT_ENDPOINT, USB_TYPE_VENDOR,
+                             request, value, index, buffer, size, 100);
   } while(ret<0 && errno==EPIPE && --repeats);
   return ret;
 }
@@ -274,43 +269,41 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
     };
   }
   LogPrint(LOG_INFO,"Display has %u cells", ncells);
-
   brl_cols = ncells -NRSTATCELLS;
 
   {
     unsigned char rawbuf[RAW_STRING_SIZE];
-    ret = rcvcontrolmsg(BRLVGER_GET_SERIAL, 0,
-			0, rawbuf, sizeof(rawbuf));
-    if(ret<0) goto failure;
-    LogPrint(LOG_INFO,"Serial number: %s", decodeString(rawbuf));
+    ret = rcvcontrolmsg(BRLVGER_GET_SERIAL, 0, 0,
+                        rawbuf, sizeof(rawbuf));
+    if (ret != -1) {
+      LogPrint(LOG_INFO, "Voyager Serial Number: %s", decodeString(rawbuf));
+    }
   }
+
   {
     unsigned char rawbuf[RAW_STRING_SIZE];
-    ret = rcvcontrolmsg(BRLVGER_GET_FWVERSION, 0,
-			0, rawbuf, sizeof(rawbuf));
-    if(ret<0) goto failure;
-    LogPrint(LOG_INFO,"Fw ver: %s", decodeString(rawbuf));
+    ret = rcvcontrolmsg(BRLVGER_GET_FWVERSION, 0, 0,
+                        rawbuf, sizeof(rawbuf));
+    if (ret != -1) {
+      LogPrint(LOG_INFO, "Voyager Firmware Version: %s", decodeString(rawbuf));
+    }
   }
 
   ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE,
                       DEFAULT_RAW_VOLTAGE, 0, NULL, 0);
-  if(ret<0) goto failure;
 
   ret = sndcontrolmsg(BRLVGER_SET_DISPLAY_ON, 1, 0, NULL, 0);
   if(ret<0) goto failure;
 
   /* cause the display to beep */
   ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
-  if(ret<0) goto failure;
 
-  LogPrint(LOG_DEBUG,"Starting input");
-  if (!usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, USB_ENDPOINT_TRANSFER_INTERRUPT, 8, 8)) {
-    goto failure;
-  }
-  LogPrint(LOG_DEBUG,"input started");
+  LogPrint(LOG_DEBUG, "Starting input");
+  if (!usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, USB_ENDPOINT_TRANSFER_INTERRUPT, 8, 8)) goto failure;
+  LogPrint(LOG_DEBUG, "input started");
 
-  if(!(dispbuf = (unsigned char *)malloc(ncells))
-     || !(prevdata = (unsigned char *) malloc (ncells)))
+  if(!(dispbuf = malloc(ncells))
+     || !(prevdata = malloc(ncells)))
     goto failure;
 
   /* dispbuf will hold the 4 status cells followed by the text cells.

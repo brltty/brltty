@@ -41,7 +41,8 @@ usbGetDescriptor (
   UsbDescriptor *descriptor,
   int timeout
 ) {
-  return usbControlTransfer(device, USB_RECIPIENT_DEVICE, USB_DIRECTION_INPUT, USB_TYPE_STANDARD,
+  return usbControlTransfer(device, USB_DIRECTION_INPUT,
+                            USB_RECIPIENT_DEVICE, USB_TYPE_STANDARD,
                             USB_REQ_GET_DESCRIPTOR, (type << 8) | number, index,
                             descriptor->bytes, sizeof(descriptor->bytes), timeout);
 }
@@ -377,8 +378,8 @@ isUsbDevice (const char **path) {
 
 static int
 usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
-  return usbControlTransfer(device,
-                            USB_RECIPIENT_DEVICE, USB_DIRECTION_OUTPUT, USB_TYPE_VENDOR, 
+  return usbControlTransfer(device, USB_DIRECTION_OUTPUT,
+                            USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR, 
                             request, value, 0, NULL, 0, 1000);
 }
 static int
@@ -479,8 +480,8 @@ static const UsbSerialOperations usbBelkinOperations = {
 
 static int
 usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
-  return usbControlTransfer(device,
-                            USB_RECIPIENT_DEVICE, USB_DIRECTION_OUTPUT, USB_TYPE_VENDOR, 
+  return usbControlTransfer(device, USB_DIRECTION_OUTPUT,
+                            USB_RECIPIENT_DEVICE, USB_TYPE_VENDOR, 
                             request, value, index, NULL, 0, 1000);
 }
 static int
