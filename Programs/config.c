@@ -484,7 +484,7 @@ loadTranslationTable (TranslationTable *table, const char *file, const char *nam
 static int
 loadTextTable (const char *file) {
   if (!loadTranslationTable(&textTable, file, "text")) return 0;
-  reverseTable(&textTable, &untextTable);
+  reverseTranslationTable(&textTable, &untextTable);
   return 1;
 }
 
@@ -1622,7 +1622,7 @@ startup (int argc, char *argv[]) {
     loadTextTable(opt_textTable);
   } else {
     opt_textTable = TEXT_TABLE;
-    reverseTable(&textTable, &untextTable);
+    reverseTranslationTable(&textTable, &untextTable);
   }
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION

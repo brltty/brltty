@@ -62,8 +62,8 @@ typedef enum {
 
 int blite_fd = -1;		/* file descriptor for Braille display */
 
-static unsigned char blitetrans[256];	/* dot mapping table (output) */
-static unsigned char revtrans[256];	/* mapping for reversed display */
+static TranslationTable outputTable;	/* dot mapping table (output) */
+static TranslationTable inputTable;	/* mapping for reversed display */
 static unsigned char *prevdata = NULL;	/* previously received data */
 static unsigned char *rawdata = NULL;	/* writebrl() buffer for raw Braille data */
 static struct termios oldtio;	/* old terminal settings */
@@ -278,28 +278,6 @@ brl_identify (void)
   /*LogPrint(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");*/
 }
 
-static void
-init_maps (void) {
-  static const unsigned char standard[] = {0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
-  static const unsigned char Blazie[]   = {0, 3, 1, 4, 2, 5, 6, 7};	/* Blazie standard */
-  int byte;			/* loop counters */
-
-  memset(blitetrans, 0, 256);	/* ordinary dot mapping */
-  memset(revtrans, 0, 256);	/* display reversal - extra mapping */
-
-  for (byte = 0; byte < 256; byte++) {
-    int bit;
-    for (bit = 0; bit < 8; bit++)
-      if (byte & (1 << standard[bit]))
-        blitetrans[byte] |= 1 << Blazie[bit];
-    for (bit = 0; bit < 8; bit++) {
-      revtrans[byte] <<= 1;
-      if (byte & (1 << bit))
-        revtrans[byte] |= 1;
-    }
-  }
-}
-
 static int
 await_ack (void) {
   timeout_yet(0);
@@ -335,6 +313,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
     validateYesNo(&kbemu, "keyboard emulation initial state",
 		  parameters[PARM_KBEMU]);
   kbemu = !!kbemu;
+
+  {
+    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+    makeOutputTable(&dots, &outputTable);
+    reverseTranslationTable(&outputTable, &inputTable);
+  }
 
   if ((qbase = (unsigned char *) malloc(QSZ))) {
     /* Open the Braille display device for random access */
@@ -417,7 +401,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
           if ((prevdata = (unsigned char *) malloc(brl->x))) {
             memset(prevdata, 0, brl->x);
             if ((rawdata = (unsigned char *) malloc(brl->x))) {
-              init_maps();
               return 1;
             /*
               free(rawdata);
@@ -505,7 +488,7 @@ brl_writeWindow (BrailleDisplay * brl)
   /* Next we must handle display reversal: */
   if (reverse_kbd)
     for (i = 0; i < blitesz; i++)
-      rawdata[i] = revtrans[brl->buffer[blitesz - 1 - i]];
+      rawdata[i] = inputTable[brl->buffer[blitesz - 1 - i]];
   else
     memcpy (rawdata, brl->buffer, blitesz);
 
@@ -517,7 +500,7 @@ brl_writeWindow (BrailleDisplay * brl)
 
       /* Dot mapping from standard to BrailleLite: */
       for (i = 0; i < blitesz; i++)
-	rawdata[i] = blitetrans[rawdata[i]];
+	rawdata[i] = outputTable[rawdata[i]];
 
       /* First we process any pending keystrokes, just in case any of them
        * are ^e ...

@@ -84,11 +84,14 @@ extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;
 
 typedef unsigned char TranslationTable[0X100];
-extern void reverseTable (TranslationTable *origtab, TranslationTable *revtab);
+extern void reverseTranslationTable (TranslationTable *from, TranslationTable *to);
 extern TranslationTable textTable;	 /* current text to braille translation table */
 extern TranslationTable untextTable;     /* current braille to text translation table */
 extern TranslationTable attributesTable; /* current attributes to braille translation table */
 extern void *contractionTable; /* current braille contraction table */
+
+typedef unsigned char DotsTable[8];
+extern void makeOutputTable (const DotsTable *dots, TranslationTable *table);
 
 /* Formatting of status cells. */
 extern const unsigned char landscapeDigits[11];

@@ -289,10 +289,21 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 
 /* Reverse a 256x256 mapping, used for charset maps. */
 void
-reverseTable (TranslationTable *origtab, TranslationTable *revtab) {
-  int i;
-  memset(revtab, 0, sizeof(*revtab));
-  for (i=sizeof(*revtab)-1; i>=0; i--) (*revtab)[(*origtab)[i]] = i;
+reverseTranslationTable (TranslationTable *from, TranslationTable *to) {
+  int byte;
+  memset(to, 0, sizeof(*to));
+  for (byte=sizeof(*to)-1; byte>=0; byte--) (*to)[(*from)[byte]] = byte;
+}
+
+void
+makeOutputTable (const DotsTable *dots, TranslationTable *table) {
+  static const DotsTable internalDots = {B1, B2, B3, B4, B5, B6, B7, B8};
+  int byte, dot;
+  memset(table, 0, sizeof(*table));
+  for (byte=0; byte<0X100; byte++)
+    for (dot=0; dot<sizeof(*dots); dot++)
+      if (byte & internalDots[dot])
+        (*table)[byte] |= (*dots)[dot];
 }
 
 /* Functions which support horizontal status cells, e.g. Papenmeier. */

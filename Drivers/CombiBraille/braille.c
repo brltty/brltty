@@ -46,7 +46,7 @@ static int cmdtrans[0X100] = {
    #include "cmdtrans.h"		/* for keybindings */
 };
 
-static unsigned char combitrans[256];	/* dot mapping table (output) */
+static TranslationTable outputTable;	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
 int brl_cols;			/* file descriptor for Braille display */
 int chars_per_sec;			/* file descriptor for Braille display */
@@ -72,15 +72,16 @@ static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 {
   struct termios newtio;	/* new terminal settings */
-  short i, n, success;		/* loop counters, flags, etc. */
+  short n, success;		/* loop counters, flags, etc. */
   unsigned char *init_seq = INIT_SEQ;	/* bytewise accessible copies */
   unsigned char *init_ack = INIT_ACK;
   unsigned char c;
   char id = -1;
-  unsigned char standard[8] =
-  {0, 1, 2, 3, 4, 5, 6, 7};	/* BRLTTY standard mapping */
-  unsigned char Tieman[8] =
-  {0, 7, 1, 6, 2, 5, 3, 4};	/* Tieman standard */
+
+  {
+    static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
+    makeOutputTable(&dots, &outputTable);
+  }
 
   prevdata = rawdata = NULL;		/* clear pointers */
 
@@ -148,12 +149,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
   if (!prevdata || !rawdata)
     goto failure;
 
-  /* Generate dot mapping table: */
-  memset (combitrans, 0, 256);
-  for (n = 0; n < 256; n++)
-    for (i = 0; i < 8; i++)
-      if (n & 1 << standard[i])
-	combitrans[n] |= 1 << Tieman[i];
   return 1;
 
 failure:;
@@ -213,7 +208,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
   short i;
 
   /* Dot mapping: */
-  for (i = 0; i < 5; status[i] = combitrans[s[i]], i++);
+  for (i = 0; i < 5; status[i] = outputTable[s[i]], i++);
 }
 
 
@@ -232,7 +227,7 @@ brl_writeWindow (BrailleDisplay *brl)
       memcpy (prevdata, brl->buffer, brl->x * brl->y);
 
       /* Dot mapping from standard to CombiBraille: */
-      for (i = 0; i < brl->x * brl->y; brl->buffer[i] = combitrans[brl->buffer[i]], \
+      for (i = 0; i < brl->x * brl->y; brl->buffer[i] = outputTable[brl->buffer[i]], \
 	   i++);
 
       rawlen = 0;
