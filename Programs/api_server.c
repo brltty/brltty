@@ -102,7 +102,7 @@ typedef struct Tconnection {
   int auth;
   struct Ttty *tty;
   int raw;
-  uint32_t how; /* how keys must be delivered to clients */
+  unsigned int how; /* how keys must be delivered to clients */
   BrailleDisplay brl;
   unsigned int cursor;
   TBrlBufState brlbufstate;
@@ -169,22 +169,22 @@ static inline void writeAck(int fd)
 
 /* Function : writeError */
 /* Sends the given non-fatal error on the given socket */
-static void writeError(int fd, uint32_t err)
+static void writeError(int fd, unsigned int err)
 {
   uint32_t code = htonl(err);
-  LogPrint(LOG_DEBUG,"error %d on fd %d", err, fd);
+  LogPrint(LOG_DEBUG,"error %u on fd %d", err, fd);
   brlapi_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
 }
 
 
 /* Function : writeException */
 /* Sends the given error code on the given socket */
-static void writeException(int fd, uint32_t err, brl_type_t type, const void *packet, size_t size)
+static void writeException(int fd, unsigned int err, brl_type_t type, const void *packet, size_t size)
 {
   int hdrsize, esize;
   unsigned char epacket[BRLAPI_MAXPACKETSIZE];
-  LogPrint(LOG_DEBUG,"exception %d for packet type %d on fd %d", err, type, fd);
   errorPacket_t * errorPacket = (errorPacket_t *) epacket;
+  LogPrint(LOG_DEBUG,"exception %u for packet type %u on fd %d", err, type, fd);
   hdrsize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
   errorPacket->code = htonl(err);
   errorPacket->type = htonl(type);
@@ -390,7 +390,7 @@ static int processRequest(Tconnection *c)
   }
   switch (type) {
     case BRLPACKET_GETTTY: {
-      uint32_t how;
+      unsigned int how;
       Ttty *tty,*tty2,*tty3;
       uint32_t *ptty;
       LogPrintRequest(type, c->fd);
@@ -526,7 +526,7 @@ static int processRequest(Tconnection *c)
     case BRLPACKET_IGNOREKEYSET:
     case BRLPACKET_UNIGNOREKEYSET: {
       int i = 0, res = 0;
-      uint32_t nbkeys;
+      unsigned int nbkeys;
       brl_keycode_t *k = (brl_keycode_t *) &packet;
       int (*fptr)(uint32_t, uint32_t, rangeList **);
       LogPrintRequest(type, c->fd);
@@ -546,7 +546,7 @@ static int processRequest(Tconnection *c)
     }
     case BRLPACKET_WRITE: {
       writeStruct *ws = (writeStruct *) packet;
-      uint32_t dispSize, cursor, rbeg, rend, strLen;
+      unsigned int dispSize, cursor, rbeg, rend, strLen;
       unsigned char *p = &ws->data;
       unsigned char buf[200]; /* dirty! */
       LogPrintRequest(type, c->fd);
@@ -615,7 +615,7 @@ static int processRequest(Tconnection *c)
       return 0;
     }
     case BRLPACKET_GETRAW: {
-      uint32_t rawMagic;
+      unsigned int rawMagic;
       LogPrintRequest(type, c->fd);
       CHECKEXC(((TrueBraille->readPacket!=NULL) && (TrueBraille->writePacket!=NULL)), BRLERR_RAWNOTSUPP);
       if (c->raw) {

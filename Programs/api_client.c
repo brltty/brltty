@@ -83,8 +83,8 @@
 static int gai_error;
 
 /* Some useful global variables */
-static uint32_t brlx = 0;
-static uint32_t brly = 0;
+static unsigned int brlx = 0;
+static unsigned int brly = 0;
 static int fd = -1; /* Descriptor of the socket connected to BrlApi */
 static int truetty = -1;
 
@@ -515,7 +515,7 @@ int brlapi_setFocus(int tty)
 int brlapi_writeText(int cursor, const unsigned char *str)
 {
   int dispSize = brlx * brly;
-  uint32_t min, i;
+  unsigned int min, i;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *p = &ws->data;
@@ -554,7 +554,7 @@ int brlapi_writeText(int cursor, const unsigned char *str)
 int brlapi_writeDots(const unsigned char *dots)
 {
   int res;
-  uint32_t size = brlx * brly;
+  unsigned int size = brlx * brly;
   brlapi_writeStruct ws;
   if (size == 0) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
@@ -588,7 +588,7 @@ int brlapi_writeDots(const unsigned char *dots)
 int brlapi_write(const brlapi_writeStruct *s)
 {
   int dispSize = brlx * brly;
-  uint32_t rbeg, rend, strLen;
+  unsigned int rbeg, rend, strLen;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *p = &ws->data;
@@ -710,7 +710,7 @@ int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 /* Function : ignore_unignore_key_set */
 /* Common tasks for ignoring and unignoring key sets */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_unignore_key_set(int what, const brl_keycode_t *s, uint32_t n)
+static int ignore_unignore_key_set(int what, const brl_keycode_t *s, unsigned int n)
 {
   size_t size = n*sizeof(brl_keycode_t);
   if (size>BRLAPI_MAXPACKETSIZE) {
@@ -721,13 +721,13 @@ static int ignore_unignore_key_set(int what, const brl_keycode_t *s, uint32_t n)
 }
 
 /* Function : brlapi_ignoreKeySet */
-int brlapi_ignoreKeySet(const brl_keycode_t *s, uint32_t n)
+int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n)
 {
   return ignore_unignore_key_set(0,s,n);
 }
 
 /* Function : brlapi_unignoreKeySet */
-int brlapi_unignoreKeySet(const brl_keycode_t *s, uint32_t n)
+int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n)
 {
   return ignore_unignore_key_set(!0,s,n);
 }

@@ -358,7 +358,7 @@ int brlapi_writeDots(const unsigned char *dots);
 /** Structure containing arguments to be given to brlapi_write() */
 typedef struct {
   int displayNumber; /** Display number -1 == unspecified */
-  uint32_t regionBegin, regionEnd; /** Region of display to update, 1st character of display is 1 */
+  unsigned int regionBegin, regionEnd; /** Region of display to update, 1st character of display is 1 */
   char *text; /** Text to display */
   char *attrAnd; /** And attributes; applied first */
   char *attrOr; /** Or attributes; applied \e after ANDing */
@@ -477,7 +477,7 @@ int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
-int brlapi_ignoreKeySet(const brl_keycode_t *s, uint32_t n);
+int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n);
 
 /* brlapi_unignoreKeyRange */
 /** Unignore some key presses from the braille keyboard
@@ -503,7 +503,7 @@ int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
-int brlapi_unignoreKeySet(const brl_keycode_t *s, uint32_t n);
+int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
 
 /** @} */
 
