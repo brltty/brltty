@@ -87,7 +87,7 @@ which directly accesses a refreshable braille display.
 %setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --with-install-root="${RPM_BUILD_ROOT}" --without-flite --without-theta --without-viavoice
+%configure --with-install-root="${RPM_BUILD_ROOT}" --without-flite --without-mikropuhe --without-theta --without-viavoice
 make
 
 directory="doc"
@@ -168,8 +168,27 @@ new="${file}.rpmnew"
 )
 
 %changelog
-* Mon Jun 14 2004 Dave Mielke <dave@mielke.cc> 3.5-1
+* Mon Jun 12 2004 Dave Mielke <dave@mielke.cc> 3.5-1
 +  BRLTTY 3.5 released:
+-  Don't include the Mikropuhe speech driver in the RPM. (dm)
+-  Fix up the lists of supported Papenmeier models. (dm)
+-  Update brltty's LSM (Linux Software Map) for 3.5. (dm)
+-  Documentation updates: (dm)
+      Move the last section ("Epilogue") to the beginning (as "Formalities").
+      Letter (rather than number) the appendices.
+      Convert some descriptive lists into tables.
+      Add some more alert tune events.
+      Describe the Braille Firmness feature.
+      Remove the mention of USB from the Voyager driver.
+      Routing keys now function as a scroll bar for numeric preferences.
+-  Document the speech FIFO: (dm)
+      -F (--speech-fifo=) command line option
+      speech-fifo configuration file directive
+      BRLTTY_SPEECH_FIFO environment variable
+-  Document the fact that identification by USB serial number may not work. (dm)
+-  Restore the default status cell style for the HandyTech driver to "Alva". (dm)
+-  Bring the change log up-to-date (3.4.1 to 3.5). (dm)
+-  Only refer to libpthread if necessary. (dm)
 +  BRLTTY 3.5pre4 released:
 -  Increase the Voyager driver's STALL_TRIES setting from 3 to 7. (sd)
 -  Split usbControlTransfer() into usbControlRead() and usbControlWrite(). (dm)

@@ -1,8 +1,27 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
-June 14, 2004:
+June 12, 2004:
  - BRLTTY 3.5 released:
+   Don't include the Mikropuhe speech driver in the RPM. (dm)
+   Fix up the lists of supported Papenmeier models. (dm)
+   Update brltty's LSM (Linux Software Map) for 3.5. (dm)
+   Documentation updates: (dm)
+      Move the last section ("Epilogue") to the beginning (as "Formalities").
+      Letter (rather than number) the appendices.
+      Convert some descriptive lists into tables.
+      Add some more alert tune events.
+      Describe the Braille Firmness feature.
+      Remove the mention of USB from the Voyager driver.
+      Routing keys now function as a scroll bar for numeric preferences.
+   Document the speech FIFO: (dm)
+      -F (--speech-fifo=) command line option
+      speech-fifo configuration file directive
+      BRLTTY_SPEECH_FIFO environment variable
+   Document the fact that identification by USB serial number may not work. (dm)
+   Restore the default status cell style for the HandyTech driver to "Alva". (dm)
+   Bring the change log up-to-date (3.4.1 to 3.5). (dm)
+   Only refer to libpthread if necessary. (dm)
 
 June 8, 2004:
  - BRLTTY 3.5pre4 released:
