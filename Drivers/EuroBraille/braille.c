@@ -44,6 +44,10 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
+/*
+** For debugging only
+** #define		LOG_IO
+*/
 
 static t_key	num_keys[27] = {
   {1, '1', 0},
@@ -307,6 +311,9 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
   unsigned char	buf[1024];
   unsigned char		*p = buf;
   unsigned char parity = 0;
+#ifdef	LOG_IO
+  int		logfd;
+#endif
 
    if (!len)
      return (1);
@@ -346,6 +353,13 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
      }
    *p++ = EOT;
    brl->writeDelay += (p - buf) * 1000 / chars_per_sec;
+#ifdef		LOG_IO
+   logfd = open("/tmp/eb-log.out", O_CREAT | O_APPEND | O_WRONLY, 0600);
+   write(logfd, "WritePacket: ", 13);
+   write(logfd, buf, p - buf);
+   write(logfd, "\n", 1);
+   close(logfd);
+#endif
    return (write(brl_fd, buf, p - buf));
 }
 
@@ -360,7 +374,7 @@ static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int sz)
 
 static void brl_identify (void)
 {
-   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3");
+   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.1");
    LogPrint(LOG_INFO, "  Copyright (C) 1997-2003");
    LogPrint(LOG_INFO, "      - Yannick PLASSIARD <plassi_y@epitech.net>");
    LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
@@ -534,7 +548,10 @@ static int Program(BrailleDisplay *brl)
       break;
     case 4:
       message("P PROGRAMMING      x", MSG_NODELAY);
-      p = pazer80_keys;
+      if (NbCols == 40)
+	p = pazer40_keys;
+      else
+	p = pazer80_keys;
       break;
     default:
       message("P Unimplemented yet!", MSG_WAITKEY);
@@ -602,13 +619,21 @@ int ViewOn(BrailleDisplay *brl)
 	     res2 = CMD_DISPMD;
 	     exitviewon=1;
 	     break;
-	   case 19:
+	  case 16:
+	  case 17:
+	  case 18:
+	  case 19:
+	  case 20:
+	  case 21:
+	  case 22:
+	    res2 = CR_SWITCHVT + touche - 16;
+	    exitviewon = 1;
+	    break;
+	   case 24:
 	     res2 = CMD_LEARN;
 	     exitviewon=1;
 	     break;
-	   case 24:
-	     res2 = CMD_NOOP;
-	     break;
+
 	  }
      }
    return res2;
@@ -669,7 +694,7 @@ static int routing(BrailleDisplay *brl, int routekey)
 	     break;
 	   case 0x06: /* Console Switching */
 	     context = 0;
-	     message("switch:1 2 3 4 5 6 t", MSG_NODELAY);
+	     message("switch:1 2 3 4 5 6 7 t", MSG_NODELAY);
 	     context = 2;
 	     ReWrite = 0;
 	     res = CMD_NOOP;
@@ -721,6 +746,11 @@ static int routing(BrailleDisplay *brl, int routekey)
 	     break;
 	   case 0x13: /* switch to console 6 */
 	     res = CR_SWITCHVT + 5;
+	     context = 0;
+	     ReWrite = 1;
+	     break;
+	   case 0x15: /* switch to console 6 */
+	     res = CR_SWITCHVT + 6;
 	     context = 0;
 	     ReWrite = 1;
 	     break;
@@ -957,6 +987,9 @@ static int brl_readPacket(BrailleDisplay *brl, unsigned char *bp, int size)
 static int readbrlkey(BrailleDisplay *brl)
 {
   int res = EOF;
+#ifdef		LOG_IO
+  int		logfd;
+#endif
   unsigned char c;
   static int DLEflag = 0, ErrFlag = 0;
   static unsigned char buf[DIM_INBUFSZ];
@@ -965,6 +998,11 @@ static int readbrlkey(BrailleDisplay *brl)
   /* here we process incoming data */
   while (!pktready && read (brl_fd, &c, 1))
     {
+#ifdef		LOG_IO
+      logfd = open("/tmp/eb-log.in", O_CREAT |  O_APPEND | O_WRONLY, 0600);
+      write(logfd, &c, 1);
+      close(logfd);
+#endif
       if (DLEflag)
 	{
 	  DLEflag = 0;
