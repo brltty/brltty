@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <sys/io.h>
-#include <asm/io.h>
 #include "brlconf.h"
 #include "vblow.h"
 #include "../misc.h"
