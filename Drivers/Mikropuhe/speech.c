@@ -28,9 +28,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <sys/wait.h>
 
 #include "Programs/misc.h"
 #include "Programs/system.h"
@@ -65,28 +62,7 @@ static const SymbolEntry symbolTable[] = {
 
 static void *speechChannel = NULL;
 static MPINT_SpeakFileParams speechParameters;
-
-static const char *devicePath = "/dev/dsp";
-static int deviceDescriptor = -1;
-
-static pid_t childProcess = -1;
-static int pipeDescriptors[2];
-static const int *pipeOutput = &pipeDescriptors[0];
-static const int *pipeInput = &pipeDescriptors[1];
-
-static int
-speechWriter (const void *bytes, unsigned int count, void *data, void *reserved) {
-  if (deviceDescriptor != -1) {
-    int written = write(deviceDescriptor, bytes, count);
-    if (written == count) return 0;
-    if (written == -1) {
-      LogError("Mikropuhe write");
-    } else {
-      LogPrint(LOG_ERR, "Mikropuhe incomplete write: %d < %d", written, count);
-    }
-  }
-  return 1;
-}
+static volatile int speechDevice = -1;
 
 static void
 speechError (int code, const char *action) {
@@ -132,6 +108,46 @@ speechError (int code, const char *action) {
   LogPrint(LOG_ERR, "Mikropuhe %s error: %s", action, explanation);
 }
 
+static int
+speechWriter (const void *bytes, unsigned int count, void *data, void *reserved) {
+  int written = safe_write(speechDevice, bytes, count);
+  if (written == count) return 0;
+  if (written == -1) {
+    LogError("Mikropuhe write");
+  } else {
+    LogPrint(LOG_ERR, "Mikropuhe incomplete write: %d < %d", written, count);
+  }
+  return MPINT_ERR_GENERAL;
+}
+
+static int
+speechWrite (const char *text, int tags) {
+  if (speechDevice == -1) {
+    if ((speechDevice = getPcmDevice(LOG_WARNING)) == -1) return 0;
+    speechParameters.nSampleFreq = getPcmSampleRate(speechDevice);
+    speechParameters.nBits = 8;
+    speechParameters.nChannels = getPcmChannelCount(speechDevice);
+  }
+
+  speechParameters.nTags = tags;
+  if (mpChannelSpeakFile) {
+    int code = mpChannelSpeakFile(speechChannel, text, NULL, &speechParameters);
+    if (!code) return 1;
+    speechError(code, "channel speak");
+  }
+  return 0;
+}
+
+static int
+writeText (const char *text) {
+  return speechWrite(text, 0);
+}
+
+static int
+writeTag (const char *tag) {
+  return speechWrite(tag, MPINT_TAGS_OWN|MPINT_TAGS_SAPI5);
+}
+
 static void
 loadLibrary (void) {
   if (!speechLibrary) {
@@ -167,12 +183,8 @@ spk_open (char **parameters) {
   int code;
   loadLibrary();
   if (mpChannelInitEx) {
-    if ((code = mpChannelInitEx(&speechChannel, NULL, NULL, NULL)) == 0) {
+    if (!(code = mpChannelInitEx(&speechChannel, NULL, NULL, NULL))) {
       memset(&speechParameters, 0, sizeof(speechParameters));
-      speechParameters.nTags = MPINT_TAGS_SAPI5;
-      speechParameters.nSampleFreq = 22050;
-      speechParameters.nBits = 16;
-      speechParameters.nChannels = 1;
       speechParameters.nWriteWavHeader = 0;
       speechParameters.pfnWrite = speechWriter;
       speechParameters.pWriteData = NULL;
@@ -189,11 +201,14 @@ spk_open (char **parameters) {
 
 static void
 spk_close (void) {
-  spk_mute();
-
   if (speechChannel) {
     if (mpChannelExit) mpChannelExit(speechChannel, NULL, 0);
     speechChannel = NULL;
+  }
+
+  if (speechDevice != -1) {
+    close(speechDevice);
+    speechDevice = -1;
   }
 
   if (speechLibrary) {
@@ -206,64 +221,31 @@ spk_close (void) {
   }
 }
 
-static int
-doChildProcess (void) {
-  FILE *stream = fdopen(*pipeOutput, "r");
-  char buffer[0X400];
-  char *line;
-  while ((line = fgets(buffer, sizeof(buffer), stream))) {
-    if (mpChannelSpeakFile) {
-      int code;
-      if ((code = mpChannelSpeakFile(speechChannel, line, NULL, &speechParameters)) != 0)
-        speechError(code, "channel speak");
-    }
-  }
-  return 0;
-}
-
 static void
 spk_say (const unsigned char *buffer, int length) {
-  if (speechChannel) {
-    if (childProcess != -1) goto ready;
-
-    if (pipe(pipeDescriptors) != -1) {
-      if ((childProcess = fork()) == -1) {
-        LogError("fork");
-      } else if (childProcess == 0) {
-        _exit(doChildProcess());
-      } else
-      ready: {
-        unsigned char text[length + 1];
-        memcpy(text, buffer, length);
-        text[length] = '\n';
-        write(*pipeInput, text, sizeof(text));
-        return;
-      }
-
-      close(*pipeInput);
-      close(*pipeOutput);
-    } else {
-      LogError("pipe");
-    }
-  }
+  unsigned char text[length + 1];
+  memcpy(text, buffer, length);
+  text[length] = 0;
+  if (writeText(text))
+    writeTag("<break time=\"none\"/>");
 }
 
 static void
 spk_mute (void) {
-  if (childProcess != -1) {
-    close(*pipeInput);
-    close(*pipeOutput);
-
-    kill(childProcess, SIGKILL);
-    waitpid(childProcess, NULL, 0);
-    childProcess = -1;
-  }
 }
 
 static void
 spk_rate (int setting) {
+  char tag[0X40];
+  snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
+           setting * 10 / SPK_DEFAULT_RATE - 10);
+  writeTag(tag);
 }
 
 static void
 spk_volume (int setting) {
+  char tag[0X40];
+  snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
+           setting * 50 / SPK_DEFAULT_VOLUME);
+  writeTag(tag);
 }
