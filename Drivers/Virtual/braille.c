@@ -38,12 +38,6 @@
 #include "Programs/misc.h"
 #include "Programs/brl.h"
 
-typedef enum {
-  PARM_SOCKET,
-  PARM_MODE
-} DriverParameter;
-#define BRLPARMS "socket", "mode"
-
 #define BRLSTAT ST_Generic
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
@@ -77,6 +71,12 @@ static int brailleCells;
 static unsigned char *previousBraille = NULL;
 static unsigned char *previousVisual = NULL;
 static unsigned char previousStatus[StatusCellCount];
+
+typedef struct {
+  int (*getUnixConnection) (const struct sockaddr_un *address);
+  int (*getInetConnection) (const struct sockaddr_in *address);
+} ModeEntry;
+const ModeEntry *mode;
 
 static char *
 formatAddress (const struct sockaddr *address) {
@@ -707,44 +707,39 @@ brl_identify (void) {
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   allocateCommandDescriptors();
+
   inputLength = 0;
   inputStart = 0;
   inputEnd = 0;
   outputLength = 0;
 
-  {
-    typedef struct {
-      int (*getUnixConnection) (const struct sockaddr_un *address);
-      int (*getInetConnection) (const struct sockaddr_in *address);
-    } ModeEntry;
-    const ModeEntry *mode;
+  if (isQualifiedDevice(&device, "client")) {
+    static const ModeEntry modeEntry = {
+      requestUnixConnection,
+      requestInetConnection
+    };
+    mode = &modeEntry;
+  } else if (isQualifiedDevice(&device, "server")) {
+    static const ModeEntry modeEntry = {
+      acceptUnixConnection,
+      acceptInetConnection
+    };
+    mode = &modeEntry;
+  } else {
+    unsupportedDevice(device);
+    return 0;
+  }
 
-    {
-      static const ModeEntry modeTable[] = {
-        {requestUnixConnection, requestInetConnection},
-        {acceptUnixConnection , acceptInetConnection }
-      };
-      const char *modes[] = {"client", "server", NULL};
-      int modeIndex;
-      mode = validateChoice(&modeIndex, "mode", parameters[PARM_MODE], modes)?
-               &modeTable[modeIndex]:
-               NULL;
+  if (!*device) device = VR_DEFAULT_SOCKET;
+  if (device[0] == '/') {
+    struct sockaddr_un address;
+    if (setUnixAddress(device, &address)) {
+      fileDescriptor = mode->getUnixConnection(&address);
     }
-
-    if (mode) {
-      const char *socket = parameters[PARM_SOCKET];
-      if (!*socket) socket = VR_DEFAULT_SOCKET;
-      if (socket[0] == '/') {
-        struct sockaddr_un address;
-        if (setUnixAddress(socket, &address)) {
-          fileDescriptor = mode->getUnixConnection(&address);
-        }
-      } else {
-        struct sockaddr_in address;
-        if (setInetAddress(socket, &address)) {
-          fileDescriptor = mode->getInetConnection(&address);
-        }
-      }
+  } else {
+    struct sockaddr_in address;
+    if (setInetAddress(device, &address)) {
+      fileDescriptor = mode->getInetConnection(&address);
     }
   }
 

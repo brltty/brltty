@@ -11,29 +11,28 @@ display"). The intention of this driver is two-fold:
    which allows a sighted person to see, and even to experience, how a blind
    person uses a braille display to work with a computer.
 
-This driver supports the following parameters:
-   mode={client | server}
-      This parameter determines which end of the socket connection is owned by
-      the driver. If it's "client" then the driver periodically tries to
-      connect to the display. If it's "server" then the driver waits for a
-      connection request from the display. The default mode is "client".
-   socket=<address>
-      This parameter specifies the network address of the display. The default
-      address is a TCP/IP connection on the default port on the local host. The
-      address may be:
-      /path/to/unix-socket-file
-         If the address starts with a slash (/) then it's interpreted as the
-         path to a unix socket file. If the driver is in "client" mode then the
-         specified file must already exist. If the driver is in "server" mode
-         then the specified file is created by the driver and must not already
-         exist.
-      [host][:[port]]
-         An IP address. The TCP/IP protocol is used. Both the host and port
-         components of the address are optional. The delimiting colon (:) is
-         only required if the port is being specified. The host may be a name,
-         an alias, or an IPV4 address (in dotted-decimal form); if it's omitted
-         then the local host is assumed. The port may be a service name or a
-         port number; if it's omitted then 35752 is assumed.
+This driver supports the following devices:
+   client:[address]
+      The driver periodically tries to connect to the display at the specified 
+      network address.
+   server:[address]
+      The driver waits on the specified network address for a connection 
+      request from the display.
+
+If the network address isn't specified then the driver's default TCP/IP port on
+the local host is used. The address may be:
+   /path/to/unix-socket-file
+      If the address starts with a slash (/) then it's interpreted as the path 
+      to a Unix socket file. If the driver is the client then the socket file 
+      must already exist. If the driver is the server then the socket file is 
+      created by the driver and must not already exist.
+   [host][:[port]]
+      A TCP/IP address. Both the host and port components of the address are 
+      optional. The delimiting colon (:) is only required if the port is being 
+      specified. The host may be a name, an alias, or an IPV4 address (in 
+      dotted-decimal form); if it's omitted then the local host is assumed. The 
+      port may be a service name or a port number; if it's omitted then 35752 
+      is assumed.
 
 
 The Protocol

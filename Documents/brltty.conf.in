@@ -127,10 +127,6 @@
 #braille-parameters DebugReads=no # [no,yes]
 #braille-parameters DebugWrites=no # [no,yes]
 
-# Virtual Braille Driver Parameters
-#braille-parameters Mode=client # [client,server]
-#braille-parameters Socket=localhost:35752 # [/path/to/socket, host:port]
-
 # Voyager Braille Driver Parameters
 #braille-parameters Repeat_Init_Delay=120 # [milliseconds]
 #braille-parameters Repeat_Inter_Delay=60 # [milliseconds]
