@@ -585,7 +585,7 @@ int InitializeSocket(const Tbinding *binding)
   /* Specifies that address can be reused */
   if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes))!=0)
   {
-   LogPrint(LOG_ERR,"setsockopt : %s",strerror(errno));
+   LogError("setsockopt");
    close(fd);
    continue;
   }

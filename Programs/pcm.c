@@ -73,7 +73,7 @@ static int flushBytes (void) {
       int written = write(fileDescriptor, address, length);
       if (written == -1) {
          if (errno != EAGAIN) {
-            LogPrint(LOG_ERR, "Cannot write to PCM: %s", strerror(errno));
+            LogError("PCM write");
             return 0;
          }
          delay(10);

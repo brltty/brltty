@@ -183,7 +183,7 @@ const unsigned int midiInstrumentCount = sizeof(midiInstrumentTable) / sizeof(mi
 static void flushBuffer (unsigned char *buffer, int length) {
    if (length) {
       if (write(fileDescriptor, buffer, length) == -1) {
-         LogPrint(LOG_ERR, "Cannot write to MIDI: %s", strerror(errno));
+         LogError("MIDI write");
       }
    }
 }

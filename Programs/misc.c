@@ -243,8 +243,9 @@ openSerialDevice (const char *path, int *descriptor, struct termios *attributes)
           if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
             LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", path, *descriptor);
             return 1;
+          } else {
+            LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", path, strerror(errno));
           }
-          LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", path, strerror(errno));
         } else {
           LogError("F_SETFL");
         }
@@ -291,15 +292,19 @@ setSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
 
 int
 resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
-  if (setSerialDevice(descriptor, attributes, B0)) {
-    delay(500);
-    if (tcflush(descriptor, TCIOFLUSH) != -1) {
-      if (setSerialDevice(descriptor, attributes, baud)) {
-        return 1;
+  if (tcflush(descriptor, TCOFLUSH) != -1) {
+    if (setSerialDevice(descriptor, attributes, B0)) {
+      delay(500);
+      if (tcflush(descriptor, TCIFLUSH) != -1) {
+        if (setSerialDevice(descriptor, attributes, baud)) {
+          return 1;
+        }
+      } else {
+        LogError("TCIFLUSH");
       }
-    } else {
-      LogError("Serial device flush");
     }
+  } else {
+    LogError("TCOFLUSH");
   }
   return 0;
 }
@@ -382,7 +387,7 @@ readLine (FILE *file, char **buffer, size_t *size) {
       /* Read the rest of the line into the end of the buffer. */
       if (!(line = fgets(&(*buffer)[length], *size-length, file))) {
         if (!ferror(file)) return 1;
-        LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
+        LogError("read");
         return 0;
       }
 
@@ -393,7 +398,7 @@ readLine (FILE *file, char **buffer, size_t *size) {
     line[--length] = 0; /* Remove trailing new-line. */
     return 1;
   } else if (ferror(file)) {
-    LogPrint(LOG_ERR, "File read error: %s", strerror(errno));
+    LogError("read");
   }
 
   return 0;

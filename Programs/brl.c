@@ -164,7 +164,7 @@ resizeBrailleBuffer (BrailleDisplay *brl) {
       int size = brl->x * brl->y;
       unsigned char *buffer = realloc(brl->buffer, size);
       if (!buffer) {
-        LogPrint(LOG_ERR, "Braille buffer allocation error: %s", strerror(errno));
+        LogError("braille buffer allocation");
         return 0;
       }
       brl->buffer = buffer;
