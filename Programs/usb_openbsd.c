@@ -34,4 +34,5 @@
 #include "usb_internal.h"
 
 #define USB_CONTROL_PATH_FORMAT "/dev/%s.00"
+#define USB_ENDPOINT_PATH_FORMAT "%.*s.%02d"
 #include "usb_bsd.h"

@@ -15,12 +15,22 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+typedef struct {
+  int file;
+  int timeout;
+} BsdEndpoint;
+
 static int
-usbSetTimeout (int file, int timeout) {
-  int arg = timeout;
-  if (ioctl(file, USB_SET_TIMEOUT, &arg) != -1) return 1;
-  LogError("USB set timeout");
-  return 0;
+usbSetTimeout (int file, int new, int *old) {
+  if (!old || (new != *old)) {
+    int arg = new;
+    if (ioctl(file, USB_SET_TIMEOUT, &arg) == -1) {
+      LogError("USB timeout set");
+      return 0;
+    }
+    if (old) *old = new;
+  }
+  return 1;
 }
 
 static int
@@ -131,7 +141,7 @@ usbControlTransfer (
   USETW(arg.ucr_request.wLength, length);
   arg.ucr_data = buffer;
   arg.ucr_flags = USBD_SHORT_XFER_OK;
-  usbSetTimeout(device->file, timeout);
+  usbSetTimeout(device->file, timeout, NULL);
   if (ioctl(device->file, USB_DO_REQUEST, &arg) != -1) return arg.ucr_actlen;
   LogError("USB control transfer");
   return -1;
@@ -139,11 +149,34 @@ usbControlTransfer (
 
 int
 usbOpenEndpoint (UsbEndpoint *endpoint) {
-  return 1;
+  BsdEndpoint *bsd;
+  if ((bsd = malloc(sizeof(*bsd)))) {
+    const char *prefix = endpoint->device->path;
+    const char *dot = strchr(prefix, '.');
+    int length = dot? (dot - prefix): strlen(prefix);
+    char path[PATH_MAX+1];
+    int flags;
+    snprintf(path, sizeof(path), USB_ENDPOINT_PATH_FORMAT,
+             length, prefix, USB_ENDPOINT_NUMBER(endpoint->descriptor));
+    flags = (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == USB_ENDPOINT_DIRECTION_INPUT)? O_RDONLY: O_WRONLY;
+    if ((bsd->file = open(path, flags)) != -1) {
+      if (usbSetShortTransfers(bsd->file, 1)) {
+        bsd->timeout = -1;
+        endpoint->system = bsd;
+        return 1;
+      }
+      close(bsd->file);
+    }
+    free(bsd);
+  }
+  return 0;
 }
 
 void
 usbCloseEndpoint (UsbEndpoint *endpoint) {
+  BsdEndpoint *bsd = endpoint->system;
+  close(bsd->file);
+  free(bsd);
 }
 
 int
@@ -154,8 +187,15 @@ usbReadEndpoint (
   int length,
   int timeout
 ) {
-  errno = ENOSYS;
-  LogError("USB bulk read");
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+  if (endpoint) {
+    BsdEndpoint *bsd = endpoint->system;
+    if (usbSetTimeout(bsd->file, timeout, &bsd->timeout)) {
+      int count = read(bsd->file, buffer, length);
+      if (count != -1) return count;
+      LogError("USB endpoint read");
+    }
+  }
   return -1;
 }
 
@@ -167,8 +207,15 @@ usbWriteEndpoint (
   int length,
   int timeout
 ) {
-  errno = ENOSYS;
-  LogError("USB bulk write");
+  UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
+  if (endpoint) {
+    BsdEndpoint *bsd = endpoint->system;
+    if (usbSetTimeout(bsd->file, timeout, &bsd->timeout)) {
+      int count = write(bsd->file, buffer, length);
+      if (count != -1) return count;
+      LogError("USB endpoint write");
+    }
+  }
   return -1;
 }
 
@@ -230,35 +277,35 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
     if ((bus = open(busPath, O_RDONLY)) != -1) {
       int deviceNumber;
       for (deviceNumber=1; deviceNumber<USB_MAX_DEVICES; deviceNumber++) {
-	struct usb_device_info info;
-	memset(&info, 0, sizeof(info));
-	info.udi_addr = deviceNumber;
-	if (ioctl(bus, USB_DEVICEINFO, &info) != -1) {
-	  static const char *driver = "ugen";
-	  const char *deviceName = info.udi_devnames[0];
+        struct usb_device_info info;
+        memset(&info, 0, sizeof(info));
+        info.udi_addr = deviceNumber;
+        if (ioctl(bus, USB_DEVICEINFO, &info) != -1) {
+          static const char *driver = "ugen";
+          const char *deviceName = info.udi_devnames[0];
 
-	  LogPrint(LOG_DEBUG, "USB device [%d,%d]: vendor=%s product=%s",
-		   busNumber, deviceNumber, info.udi_vendor, info.udi_product);
-	  {
-	    int nameNumber;
-	    for (nameNumber=0; nameNumber<USB_MAX_DEVNAMES; nameNumber++) {
-	      const char *name = info.udi_devnames[nameNumber];
-	      if (*name)
-	        LogPrint(LOG_DEBUG, "USB name %d: %s", nameNumber, name);
-	    }
-	  }
+          LogPrint(LOG_DEBUG, "USB device [%d,%d]: vendor=%s product=%s",
+                   busNumber, deviceNumber, info.udi_vendor, info.udi_product);
+          {
+            int nameNumber;
+            for (nameNumber=0; nameNumber<USB_MAX_DEVNAMES; nameNumber++) {
+              const char *name = info.udi_devnames[nameNumber];
+              if (*name)
+                LogPrint(LOG_DEBUG, "USB name %d: %s", nameNumber, name);
+            }
+          }
 
-	  if (strncmp(deviceName, driver, strlen(driver)) == 0) {
-	    char devicePath[PATH_MAX+1];
-	    snprintf(devicePath, sizeof(devicePath), USB_CONTROL_PATH_FORMAT, deviceName);
-	    if ((device = usbTestDevice(devicePath, chooser, data))) {
-	      close(bus);
-	      return device;
-	    }
-	  }
-	} else if (errno != ENXIO) {
-	  LogError("USB device query");
-	}
+          if (strncmp(deviceName, driver, strlen(driver)) == 0) {
+            char devicePath[PATH_MAX+1];
+            snprintf(devicePath, sizeof(devicePath), USB_CONTROL_PATH_FORMAT, deviceName);
+            if ((device = usbTestDevice(devicePath, chooser, data))) {
+              close(bus);
+              return device;
+            }
+          }
+        } else if (errno != ENXIO) {
+          LogError("USB device query");
+        }
       }
       close(bus);
     } else if (errno == ENOENT) {
