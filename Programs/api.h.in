@@ -439,7 +439,7 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  * By default, all commands but those which restart drivers and switch
  * virtual terminals are returned to the application and not to brltty.
  * If the application doesn't want to see some command events,
- * it should call brlapi_ignoreKeys()
+ * it should call either brlapi_ignoreKeySet() or brlapi_ignoreKeyRange()
  *
  * \param block tells whether the call should block until a key is pressed (1)
  *  or should only probe key presses (0).
@@ -450,7 +450,7 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  */
 int brlapi_readCommand(int block, brl_keycode_t *code);
 
-/* brlapi_ignoreKeys */
+/* brlapi_ignoreKeyRange */
 /** Ignore some key presses from the braille keyboard
  *
  * This function asks the server to give keys between x and y to \e brltty,
@@ -459,9 +459,20 @@ int brlapi_readCommand(int block, brl_keycode_t *code);
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
-int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y);
+int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
 
-/* brlapi_unignoreKeys */
+/* brlapi_ignoreKeySet */
+/** Ignore some key presses from the braille keyboard
+ *
+ * This function asks the server to give the n keys in set s to \e brltty,
+ * rather than returning them to the application via
+ * brlapi_read(Key|Command)()
+ *
+ * \note The given codes are either raw keycodes if BRLKEYCODES was given to
+ * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
+int brlapi_ignoreKeySet(const brl_keycode_t *s, uint32_t n);
+
+/* brlapi_unignoreKeyRange */
 /** Unignore some key presses from the braille keyboard
  *
  * This function asks the server to return keys between x and y to the
@@ -472,7 +483,20 @@ int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y);
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
-int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y);
+int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
+
+/* brlapi_unignoreKeySet */
+/** Unignore some key presses from the braille keyboard
+ *
+ * This function asks the server to return all n keys in set s to the
+ * application, and not give them to \e brltty.
+ *
+ * \note You shouldn't ask the server to give you key presses which are usually
+ * used to switch between TTYs, unless you really know what you are doing !
+ *
+ * \note The given codes are either raw keycodes if BRLKEYCODES was given to
+ * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
+int brlapi_unignoreKeySet(const brl_keycode_t *s, uint32_t n);
 
 /** @} */
 
@@ -610,7 +634,7 @@ extern const char *brlapi_strerror(void);
 /** type for packet type. Only unsigned can cross networks, 32bits */
 typedef uint32_t brl_type_t;
 
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 2) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 3) /** Communication protocol version */
 
 #define BRLPACKET_AUTHKEY           'K'    /**< Authentication key          */
 #define BRLPACKET_BYE               'B'    /**< Bye                         */
@@ -621,8 +645,10 @@ typedef uint32_t brl_type_t;
 #define BRLPACKET_LEAVETTY          'L'    /**< Release the tty             */
 #define BRLPACKET_KEY               'k'    /**< Braille key                 */
 #define BRLPACKET_COMMAND           'c'    /**< Braille command             */
-#define BRLPACKET_MASKKEYS          'm'    /**< Mask a key-range            */
-#define BRLPACKET_UNMASKKEYS        'u'    /**< Unmask key range            */
+#define BRLPACKET_IGNOREKEYRANGE    'm'    /**< Mask key-range              */
+#define BRLPACKET_IGNOREKEYSET      'M'    /**< Mask key-set                */
+#define BRLPACKET_UNIGNOREKEYRANGE  'u'    /**< Unmask key range            */
+#define BRLPACKET_UNIGNOREKEYSET    'U'    /**< Unmask key set              */
 #define BRLPACKET_WRITEDOTS         'D'    /**< Write Dots On Braille Display */
 #define BRLPACKET_STATWRITE         'S'    /**< Write Status Cells          */
 #define BRLPACKET_EXTWRITE          'e'    /**< Extended Write              */

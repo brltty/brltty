@@ -367,20 +367,46 @@ static void *processConnection(void *arg)
         writeAckPacket(c->fd);
         continue;
       }
-      case BRLPACKET_MASKKEYS:
-      case BRLPACKET_UNMASKKEYS: {
+      case BRLPACKET_IGNOREKEYRANGE:
+      case BRLPACKET_UNIGNOREKEYRANGE: {
         int res;
         brl_keycode_t x,y;
-        if (type==BRLPACKET_MASKKEYS) LogPrint(LOG_DEBUG,"Received MaskKeys request");
-        else LogPrint(LOG_DEBUG,"Received UnmaskKeys request");
+        if (type==BRLPACKET_IGNOREKEYRANGE) LogPrint(LOG_DEBUG,"Received IgnoreKeyRange request");
+        else LogPrint(LOG_DEBUG,"Received UnignoreKeyRange request");
         CHECK(( (!c->raw) && (c->tty!=-1) ),BRLERR_ILLEGAL_INSTRUCTION);
         CHECK(size==2*sizeof(brl_keycode_t),BRLERR_INVALID_PACKET);
         x = ntohl(ints[0]);
         y = ntohl(ints[1]);
         LogPrint(LOG_DEBUG,"range: [%u..%u]",x,y);
         pthread_mutex_lock(&c->maskmutex);
-        if (type==BRLPACKET_MASKKEYS) res = RemoveRange(x,y,&c->UnmaskedKeys);
+        if (type==BRLPACKET_IGNOREKEYRANGE) res = RemoveRange(x,y,&c->UnmaskedKeys);
         else res = AddRange(x,y,&c->UnmaskedKeys);
+        pthread_mutex_unlock(&c->maskmutex);
+        if (res==-1) writeErrorPacket(c->fd,BRLERR_NOMEM);
+        else writeAckPacket(c->fd);
+        continue;
+      }
+      case BRLPACKET_IGNOREKEYSET:
+      case BRLPACKET_UNIGNOREKEYSET: {
+        int i = 0, res = 0;
+        uint32_t nbkeys;
+        brl_keycode_t *k = (brl_keycode_t *) &packet;
+        int (*fptr)(uint32_t, uint32_t, Trangelist **);
+        if (type==BRLPACKET_IGNOREKEYSET) {
+          LogPrint(LOG_DEBUG,"Received IgnoreKeySet request");
+          fptr = RemoveRange;
+        } else {
+          LogPrint(LOG_DEBUG,"Received UnignoreKeySet request");
+          fptr = AddRange;
+        }
+        CHECK(( (!c->raw) && (c->tty!=-1) ),BRLERR_ILLEGAL_INSTRUCTION);
+        CHECK(size % sizeof(brl_keycode_t)==0,BRLERR_INVALID_PACKET);
+        nbkeys = size/sizeof(brl_keycode_t);
+        pthread_mutex_lock(&c->maskmutex);
+        while ((res!=-1) && (i<nbkeys)) {
+          res = fptr(k[i],k[i],&c->UnmaskedKeys);
+          i++;
+        }
         pthread_mutex_unlock(&c->maskmutex);
         if (res==-1) writeErrorPacket(c->fd,BRLERR_NOMEM);
         else writeAckPacket(c->fd);

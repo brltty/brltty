@@ -712,26 +712,51 @@ int brlapi_readCommand(int block, brl_keycode_t *code)
   }
 }
 
-/* Function : Mask_Unmask */
-/* Common tasks for masking and unmasking keys */
-/* what = 0 for masing, !0 for unmasking */
-static int Mask_Unmask(int what, brl_keycode_t x, brl_keycode_t y)
+/* Function : ignore_unignore_key_range */
+/* Common tasks for ignoring and unignoring key ranges */
+/* what = 0 for ignoring !0 for unignoring */
+static int ignore_unignore_key_range(int what, brl_keycode_t x, brl_keycode_t y)
 {
   brl_keycode_t ints[2] = { htonl(x), htonl(y) };
 
-  return brlapi_writePacketWaitForAck(fd,(what ? BRLPACKET_UNMASKKEYS : BRLPACKET_MASKKEYS),ints,sizeof(ints));
+  return brlapi_writePacketWaitForAck(fd,(what ? BRLPACKET_UNIGNOREKEYRANGE : BRLPACKET_IGNOREKEYRANGE),ints,sizeof(ints));
 }
 
-/* Function : brlapi_ignoreKeys */
-int brlapi_ignoreKeys(brl_keycode_t x, brl_keycode_t y)
+/* Function : brlapi_ignoreKeyRange */
+int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
-  return Mask_Unmask(0,x,y);
+  return ignore_unignore_key_range(0,x,y);
 }
 
-/* Function : brlapi_unignoreKeys */
-int brlapi_unignoreKeys(brl_keycode_t x, brl_keycode_t y)
+/* Function : brlapi_unignoreKeyRange */
+int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
-  return Mask_Unmask(!0,x,y);
+  return ignore_unignore_key_range(!0,x,y);
+}
+
+/* Function : ignore_unignore_key_set */
+/* Common tasks for ignoring and unignoring key sets */
+/* what = 0 for ignoring !0 for unignoring */
+static int ignore_unignore_key_set(int what, const brl_keycode_t *s, uint32_t n)
+{
+  size_t size = n*sizeof(brl_keycode_t);
+  if (size>BRLAPI_MAXPACKETSIZE) {
+    brlapi_errno = BRLERR_INVALID_PARAMETER;
+    return -1;
+  }
+  return brlapi_writePacketWaitForAck(fd,(what ? BRLPACKET_UNIGNOREKEYSET : BRLPACKET_IGNOREKEYSET),s,size);
+}
+
+/* Function : brlapi_ignoreKeySet */
+int brlapi_ignoreKeySet(const brl_keycode_t *s, uint32_t n)
+{
+  return ignore_unignore_key_set(0,s,n);
+}
+
+/* Function : brlapi_unignoreKeySet */
+int brlapi_unignoreKeySet(const brl_keycode_t *s, uint32_t n)
+{
+  return ignore_unignore_key_set(!0,s,n);
 }
 
 /* Error code handling */
