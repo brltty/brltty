@@ -365,8 +365,7 @@ showInfo (void) {
 }
 
 static void
-handleSignal (int number, void (*handler) (int))
-{
+handleSignal (int number, void (*handler) (int)) {
   struct sigaction action;
   memset(&action, 0, sizeof(action));
   sigemptyset(&action.sa_mask);
@@ -634,76 +633,6 @@ downLine (short mode) {
   }
 }
 
-static void
-overlayAttributes (const unsigned char *attributes, int width, int height) {
-  int row;
-  for (row=0; row<height; row++) {
-    int column;
-    for (column=0; column<width; column++) {
-      switch (attributes[row*width + column]) {
-        /* Experimental! Attribute values are hardcoded... */
-        case 0x08: /* dark-gray on black */
-        case 0x07: /* light-gray on black */
-        case 0x17: /* light-gray on blue */
-        case 0x30: /* black on cyan */
-          break;
-        case 0x70: /* black on light-gray */
-          brl.buffer[row*brl.x + column] |= (BRL_DOT7 | BRL_DOT8);
-          break;
-        case 0x0F: /* white on black */
-        default:
-          brl.buffer[row*brl.x + column] |= (BRL_DOT8);
-          break;
-      }
-    }
-  }
-}
-
-
-static int
-insertCharacter (unsigned char character, int flags) {
-  if (islower(character)) {
-    if (flags & (BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER)) character = toupper(character);
-  } else if (flags & BRL_FLG_CHAR_SHIFT) {
-    switch (character) {
-      case '1': character = '!'; break;
-      case '2': character = '@'; break;
-      case '3': character = '#'; break;
-      case '4': character = '$'; break;
-      case '5': character = '%'; break;
-      case '6': character = '^'; break;
-      case '7': character = '&'; break;
-      case '8': character = '*'; break;
-      case '9': character = '('; break;
-      case '0': character = ')'; break;
-      case '-': character = '_'; break;
-      case '=': character = '+'; break;
-      case '[': character = '{'; break;
-      case ']': character = '}'; break;
-      case'\\': character = '|'; break;
-      case ';': character = ':'; break;
-      case'\'': character = '"'; break;
-      case '`': character = '~'; break;
-      case ',': character = '<'; break;
-      case '.': character = '>'; break;
-      case '/': character = '?'; break;
-    }
-  }
-
-  if (flags & BRL_FLG_CHAR_CONTROL) {
-    if ((character & 0X6F) == 0X2F)
-      character |= 0X50;
-    else
-      character &= 0X9F;
-  }
-
-  {
-    ScreenKey key = character;
-    if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_MOD_META;
-    return insertKey(key);
-  }
-}
-
 typedef int (*RowTester) (int column, int row, void *data);
 static void
 findRow (int column, int increment, RowTester test, void *data) {
@@ -769,6 +698,31 @@ getOffset (int arg, int end) {
   return arg;
 }
 
+static void
+overlayAttributes (const unsigned char *attributes, int width, int height) {
+  int row;
+  for (row=0; row<height; row++) {
+    int column;
+    for (column=0; column<width; column++) {
+      switch (attributes[row*width + column]) {
+        /* Experimental! Attribute values are hardcoded... */
+        case 0x08: /* dark-gray on black */
+        case 0x07: /* light-gray on black */
+        case 0x17: /* light-gray on blue */
+        case 0x30: /* black on cyan */
+          break;
+        case 0x70: /* black on light-gray */
+          brl.buffer[row*brl.x + column] |= (BRL_DOT7 | BRL_DOT8);
+          break;
+        case 0x0F: /* white on black */
+        default:
+          brl.buffer[row*brl.x + column] |= (BRL_DOT8);
+          break;
+      }
+    }
+  }
+}
+
 unsigned char
 cursorDots (void) {
   return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
@@ -821,6 +775,50 @@ toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const T
 #define TOGGLE(flag, off, on) toggleFlag(&flag, command, off, on)
 #define TOGGLE_NOPLAY(flag) TOGGLE(flag, NULL, NULL)
 #define TOGGLE_PLAY(flag) TOGGLE(flag, &tune_toggle_off, &tune_toggle_on)
+
+static int
+insertCharacter (unsigned char character, int flags) {
+  if (islower(character)) {
+    if (flags & (BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER)) character = toupper(character);
+  } else if (flags & BRL_FLG_CHAR_SHIFT) {
+    switch (character) {
+      case '1': character = '!'; break;
+      case '2': character = '@'; break;
+      case '3': character = '#'; break;
+      case '4': character = '$'; break;
+      case '5': character = '%'; break;
+      case '6': character = '^'; break;
+      case '7': character = '&'; break;
+      case '8': character = '*'; break;
+      case '9': character = '('; break;
+      case '0': character = ')'; break;
+      case '-': character = '_'; break;
+      case '=': character = '+'; break;
+      case '[': character = '{'; break;
+      case ']': character = '}'; break;
+      case'\\': character = '|'; break;
+      case ';': character = ':'; break;
+      case'\'': character = '"'; break;
+      case '`': character = '~'; break;
+      case ',': character = '<'; break;
+      case '.': character = '>'; break;
+      case '/': character = '?'; break;
+    }
+  }
+
+  if (flags & BRL_FLG_CHAR_CONTROL) {
+    if ((character & 0X6F) == 0X2F)
+      character |= 0X50;
+    else
+      character &= 0X9F;
+  }
+
+  {
+    ScreenKey key = character;
+    if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_MOD_META;
+    return insertKey(key);
+  }
+}
 
 int
 main (int argc, char *argv[]) {
