@@ -47,14 +47,12 @@ typedef struct {
 } UsbEndpoint;
 
 struct UsbDeviceStruct {
-  char *path;
   UsbDeviceDescriptor descriptor;
   void *extension;
   UsbDescriptor *configurationDescriptor;
   int configurationLength;
   Queue *endpoints;
   Queue *inputFilters;
-  int file;
   uint16_t language;
 };
 
@@ -72,12 +70,11 @@ extern int usbControlTransfer (
 );
 
 extern UsbDevice *usbTestDevice (
-  const char *path,
+  void *extension,
   UsbDeviceChooser chooser,
   void *data
 );
 extern int usbReadDeviceDescriptor (UsbDevice *device);
-extern int usbAllocateDeviceExtension (UsbDevice *device);
 extern void usbDeallocateDeviceExtension (UsbDevice *device);
 
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);

@@ -397,40 +397,29 @@ usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length) {
 
 void
 usbCloseDevice (UsbDevice *device) {
-  usbDeallocateDeviceExtension(device);
   deallocateQueue(device->inputFilters);
   deallocateQueue(device->endpoints);
-  close(device->file);
-  free(device->path);
   if (device->configurationDescriptor) free(device->configurationDescriptor);
+  usbDeallocateDeviceExtension(device);
   free(device);
 }
 
-UsbDevice *
-usbOpenDevice (const char *path) {
+static UsbDevice *
+usbOpenDevice (void *extension) {
   UsbDevice *device;
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
+    device->extension = extension;
 
-    if ((device->path = strdup(path))) {
-      if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
-        if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
-          if ((device->file = open(path, O_RDWR)) != -1) {
-            device->extension = NULL;
-            if (usbAllocateDeviceExtension(device)) {
-              if (usbReadDeviceDescriptor(device))
-                if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
-                  if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
-                    return device;
-              usbDeallocateDeviceExtension(device);
-            }
-            close(device->file);
-          }
-          deallocateQueue(device->inputFilters);
-        }
-        deallocateQueue(device->endpoints);
+    if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
+      if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
+        if (usbReadDeviceDescriptor(device))
+          if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
+            if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
+              return device;
+        deallocateQueue(device->inputFilters);
       }
-      free(device->path);
+      deallocateQueue(device->endpoints);
     }
     free(device);
   }
@@ -440,9 +429,9 @@ usbOpenDevice (const char *path) {
 }
 
 UsbDevice *
-usbTestDevice (const char *path, UsbDeviceChooser chooser, void *data) {
+usbTestDevice (void *extension, UsbDeviceChooser chooser, void *data) {
   UsbDevice *device;
-  if ((device = usbOpenDevice(path))) {
+  if ((device = usbOpenDevice(extension))) {
     LogPrint(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",
              device->descriptor.idVendor,
              device->descriptor.idProduct);

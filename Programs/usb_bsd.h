@@ -16,13 +16,15 @@
  */
 
 typedef struct {
+  char *path;
+  int file;
   int timeout;
-} BsdDeviceExtension;
+} UsbDeviceExtension;
 
 typedef struct {
   int file;
   int timeout;
-} BsdEndpointExtension;
+} UsbEndpointExtension;
 
 static int
 usbSetTimeout (int file, int new, int *old) {
@@ -56,8 +58,9 @@ usbSetConfiguration (
   UsbDevice *device,
   unsigned char configuration
 ) {
+  UsbDeviceExtension *devx = device->extension;
   int arg = configuration;
-  if (ioctl(device->file, USB_SET_CONFIG, &arg) != -1) return 1;
+  if (ioctl(devx->file, USB_SET_CONFIG, &arg) != -1) return 1;
   LogError("USB configuration set");
   return 0;
 }
@@ -94,11 +97,12 @@ usbSetAlternative (
   unsigned char interface,
   unsigned char alternative
 ) {
+  UsbDeviceExtension *devx = device->extension;
   struct usb_alt_interface arg;
   memset(&arg, 0, sizeof(arg));
   arg.uai_interface_index = interface;
   arg.uai_alt_no = alternative;
-  if (ioctl(device->file, USB_SET_ALTINTERFACE, &arg) != -1) return 1;
+  if (ioctl(devx->file, USB_SET_ALTINTERFACE, &arg) != -1) return 1;
   LogError("USB alternative set");
   return 0;
 }
@@ -136,7 +140,7 @@ usbControlTransfer (
   int length,
   int timeout
 ) {
-  BsdDeviceExtension *bsd = device->extension;
+  UsbDeviceExtension *devx = device->extension;
   struct usb_ctl_request arg;
   memset(&arg, 0, sizeof(arg));
   arg.ucr_request.bmRequestType = direction | recipient | type;
@@ -146,8 +150,8 @@ usbControlTransfer (
   USETW(arg.ucr_request.wLength, length);
   arg.ucr_data = buffer;
   arg.ucr_flags = USBD_SHORT_XFER_OK;
-  if (usbSetTimeout(device->file, timeout, &bsd->timeout)) {
-    if (ioctl(device->file, USB_DO_REQUEST, &arg) != -1) return arg.ucr_actlen;
+  if (usbSetTimeout(devx->file, timeout, &devx->timeout)) {
+    if (ioctl(devx->file, USB_DO_REQUEST, &arg) != -1) return arg.ucr_actlen;
     LogError("USB control transfer");
   }
   return -1;
@@ -155,10 +159,11 @@ usbControlTransfer (
 
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
-  BsdEndpointExtension *bsd;
+  UsbDeviceExtension *devx = endpoint->device->extension;
+  UsbEndpointExtension *eptx;
 
-  if ((bsd = malloc(sizeof(*bsd)))) {
-    const char *prefix = endpoint->device->path;
+  if ((eptx = malloc(sizeof(*eptx)))) {
+    const char *prefix = devx->path;
     const char *dot = strchr(prefix, '.');
     int length = dot? (dot - prefix): strlen(prefix);
     char path[PATH_MAX+1];
@@ -172,19 +177,19 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
       case USB_ENDPOINT_DIRECTION_OUTPUT: flags = O_WRONLY; break;
     }
 
-    if ((bsd->file = open(path, flags)) != -1) {
+    if ((eptx->file = open(path, flags)) != -1) {
       if (((flags & O_ACCMODE) != O_RDONLY) || 
-          usbSetShortTransfers(bsd->file, 1)) {
-        bsd->timeout = -1;
+          usbSetShortTransfers(eptx->file, 1)) {
+        eptx->timeout = -1;
 
-        endpoint->extension = bsd;
+        endpoint->extension = eptx;
         return 1;
       }
 
-      close(bsd->file);
+      close(eptx->file);
     }
 
-    free(bsd);
+    free(eptx);
   }
 
   return 0;
@@ -192,9 +197,9 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-  BsdEndpointExtension *bsd = endpoint->extension;
-  close(bsd->file);
-  free(bsd);
+  UsbEndpointExtension *eptx = endpoint->extension;
+  close(eptx->file);
+  free(eptx);
 }
 
 int
@@ -208,9 +213,9 @@ usbReadEndpoint (
   int count = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
-    BsdEndpointExtension *bsd = endpoint->extension;
-    if (usbSetTimeout(bsd->file, timeout, &bsd->timeout)) {
-      if ((count = read(bsd->file, buffer, length)) != -1) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    if (usbSetTimeout(eptx->file, timeout, &eptx->timeout)) {
+      if ((count = read(eptx->file, buffer, length)) != -1) {
         if (!usbApplyInputFilters(device, buffer, length, &count)) {
           errno = EIO;
           count = -1;
@@ -233,9 +238,9 @@ usbWriteEndpoint (
 ) {
   UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
   if (endpoint) {
-    BsdEndpointExtension *bsd = endpoint->extension;
-    if (usbSetTimeout(bsd->file, timeout, &bsd->timeout)) {
-      int count = write(bsd->file, buffer, length);
+    UsbEndpointExtension *eptx = endpoint->extension;
+    if (usbSetTimeout(eptx->file, timeout, &eptx->timeout)) {
+      int count = write(eptx->file, buffer, length);
       if (count != -1) return count;
       LogError("USB endpoint write");
     }
@@ -279,7 +284,8 @@ usbReapResponse (
 
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
-  if (ioctl(device->file, USB_GET_DEVICE_DESC, &device->descriptor) != -1) {
+  UsbDeviceExtension *devx = device->extension;
+  if (ioctl(devx->file, USB_GET_DEVICE_DESC, &device->descriptor) != -1) {
     device->descriptor.bcdUSB = getLittleEndian(device->descriptor.bcdUSB);
     device->descriptor.idVendor = getLittleEndian(device->descriptor.idVendor);
     device->descriptor.idProduct = getLittleEndian(device->descriptor.idProduct);
@@ -290,24 +296,12 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 0;
 }
 
-int
-usbAllocateDeviceExtension (UsbDevice *device) {
-  BsdDeviceExtension *bsd;
-
-  if ((bsd = malloc(sizeof(*bsd)))) {
-    bsd->timeout = -1;
-
-    device->extension = bsd;
-    return 1;
-  }
-
-  return 0;
-}
-
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
-  BsdDeviceExtension *bsd = device->extension;
-  free(bsd);
+  UsbDeviceExtension *devx = device->extension;
+  close(devx->file);
+  free(devx->path);
+  free(devx);
 }
 
 UsbDevice *
@@ -342,9 +336,23 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
           if (strncmp(deviceName, driver, strlen(driver)) == 0) {
             char devicePath[PATH_MAX+1];
             snprintf(devicePath, sizeof(devicePath), USB_CONTROL_PATH_FORMAT, deviceName);
-            if ((device = usbTestDevice(devicePath, chooser, data))) {
-              close(bus);
-              return device;
+
+            {
+              UsbDeviceExtension *devx;
+              if ((devx = malloc(sizeof(*devx)))) {
+                if ((devx->path = strdup(devicePath))) {
+                  if ((devx->file = open(devx->path, O_RDWR)) != -1) {
+                    devx->timeout = -1;
+                    if ((device = usbTestDevice(devx, chooser, data))) {
+                      close(bus);
+                      return device;
+                    }
+                    close(devx->file);
+                  }
+                  free(devx->path);
+                }
+                free(devx);
+              }
             }
           }
         } else if (errno != ENXIO) {

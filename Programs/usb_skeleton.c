@@ -190,11 +190,6 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 0;
 }
 
-int
-usbAllocateDeviceExtension (UsbDevice *device) {
-  return 1;
-}
-
 void
 usbDeallocateDeviceExtension (UsbDevice *device) {
 }
