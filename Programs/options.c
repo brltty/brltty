@@ -231,7 +231,7 @@ processConfigurationLine (
   void *data
 ) {
   const ConfigurationFileProcessingData *conf = data;
-  const char *delimiters = " \t"; /* Characters which separate words. */
+  static const char *delimiters = " \t"; /* Characters which separate words. */
   char *keyword; /* Points to first word of each line. */
 
   /* Remove comment from end of line. */
@@ -240,15 +240,14 @@ processConfigurationLine (
     if (comment) *comment = 0;
   }
 
-  if (!(keyword = strtok(line, delimiters))) return;
-  {
+  if ((keyword = strtok(line, delimiters))) {
     int optionIndex;
     for (optionIndex=0; optionIndex<conf->optionCount; ++optionIndex) {
       const OptionEntry *option = &conf->optionTable[optionIndex];
       if (option->configure) {
         if (strcasecmp(keyword, option->word) == 0) {
-          int code = option->configure(delimiters);
-          switch (code) {
+          ConfigurationLineStatus status = option->configure(delimiters);
+          switch (status) {
             case CFG_OK:
               return;
 
@@ -280,9 +279,8 @@ processConfigurationLine (
 
             default:
               LogPrint(LOG_ERR,
-                       "Internal error: unsupported"
-                       " configuration file error code: %d",
-                       code);
+                       "Internal error: unsupported configuration line status: %d",
+                       status);
               break;
           }
           return;
@@ -290,7 +288,6 @@ processConfigurationLine (
       }
     }
     LogPrint(LOG_ERR, "Unknown configuration item: '%s'.", keyword);
-    return;
   }
 }
 
@@ -314,9 +311,11 @@ processConfigurationFile (
     if (processed) return 1;
     LogPrint(LOG_ERR, "File '%s' processing error.", path);
   } else {
-    LogPrint((optional && (errno == ENOENT)? LOG_DEBUG: LOG_ERR),
+    int ok = optional && (errno == ENOENT);
+    LogPrint((ok? LOG_DEBUG: LOG_ERR),
              "Cannot open configuration file: %s: %s",
              path, strerror(errno));
+    if (ok) return 1;
   }
   return 0;
 }

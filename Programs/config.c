@@ -125,82 +125,97 @@ static char **screenParameters = NULL;
 
 short homedir_found = 0;        /* CWD status */
 
-static int
-getToken (char **val, const char *delimiters) {
-  char *v = strtok(NULL, delimiters);
+static ConfigurationLineStatus
+getConfigurationOperand (char **operandAddress, const char *delimiters, int extend) {
+  char *operand = strtok(NULL, delimiters);
 
-  if (!v) return CFG_NoValue;
+  if (!operand) return CFG_NoValue;
   if (strtok(NULL, delimiters)) return CFG_TooMany;
-  if (*val) return CFG_Duplicate;
 
-  *val = strdupWrapper(v);
-  return CFG_OK;
+  {
+    ConfigurationLineStatus status = CFG_OK;
+    if (*operandAddress && !extend) {
+      status = CFG_Duplicate;
+      free(*operandAddress);
+      *operandAddress = NULL;
+    }
+    if (!*operandAddress) {
+      *operandAddress = strdupWrapper(operand);
+    } else if (extend) {
+      int size = strlen(*operandAddress) + strlen(operand) + 2;
+      char *buffer = mallocWrapper(size);
+      snprintf(buffer, size, "%s,%s", *operandAddress, operand);
+      free(*operandAddress);
+      *operandAddress = buffer;
+    }
+    return status;
+  }
 }
 
-static int
+static ConfigurationLineStatus
 configurePreferencesFile (const char *delimiters) {
-  return getToken(&cfg_preferencesFile, delimiters);
+  return getConfigurationOperand(&cfg_preferencesFile, delimiters, 0);
 }
 
-static int
+static ConfigurationLineStatus
 configureTextTable (const char *delimiters) {
-  return getToken(&cfg_textTable, delimiters);
+  return getConfigurationOperand(&cfg_textTable, delimiters, 0);
 }
 
-static int
+static ConfigurationLineStatus
 configureAttributesTable (const char *delimiters) {
-  return getToken(&cfg_attributesTable, delimiters);
+  return getConfigurationOperand(&cfg_attributesTable, delimiters, 0);
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-static int
+static ConfigurationLineStatus
 configureContractionTable (const char *delimiters) {
-  return getToken(&cfg_contractionTable, delimiters);
+  return getConfigurationOperand(&cfg_contractionTable, delimiters, 0);
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_API
-static int
+static ConfigurationLineStatus
 configureApiParameters (const char *delimiters) {
-  return getToken(&cfg_apiParameters, delimiters);
+  return getConfigurationOperand(&cfg_apiParameters, delimiters, 1);
 }
 #endif /* ENABLE_API */
 
-static int
+static ConfigurationLineStatus
 configureBrailleDriver (const char *delimiters) {
-  return getToken(&cfg_brailleDriver, delimiters);
+  return getConfigurationOperand(&cfg_brailleDriver, delimiters, 0);
 }
 
-static int
+static ConfigurationLineStatus
 configureBrailleDevice (const char *delimiters) {
-  return getToken(&cfg_brailleDevice, delimiters);
+  return getConfigurationOperand(&cfg_brailleDevice, delimiters, 0);
 }
 
-static int
+static ConfigurationLineStatus
 configureBrailleParameters (const char *delimiters) {
-  return getToken(&cfg_brailleParameters, delimiters);
+  return getConfigurationOperand(&cfg_brailleParameters, delimiters, 1);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static int
+static ConfigurationLineStatus
 configureSpeechDriver (const char *delimiters) {
-  return getToken(&cfg_speechDriver, delimiters);
+  return getConfigurationOperand(&cfg_speechDriver, delimiters, 0);
 }
 
-static int
+static ConfigurationLineStatus
 configureSpeechParameters (const char *delimiters) {
-  return getToken(&cfg_speechParameters, delimiters);
+  return getConfigurationOperand(&cfg_speechParameters, delimiters, 1);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static int
+static ConfigurationLineStatus
 configureScreenParameters (const char *delimiters) {
-  return getToken(&cfg_screenParameters, delimiters);
+  return getConfigurationOperand(&cfg_screenParameters, delimiters, 1);
 }
 
-static int
+static ConfigurationLineStatus
 configureLibraryDirectory (const char *delimiters) {
-  return getToken(&cfg_libraryDirectory, delimiters);
+  return getConfigurationOperand(&cfg_libraryDirectory, delimiters, 0);
 }
 
 BEGIN_OPTION_TABLE

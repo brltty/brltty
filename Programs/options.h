@@ -22,15 +22,24 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef enum {
+  CFG_OK,              /* No error. */
+  CFG_NoValue,         /* Operand not specified. */
+  CFG_BadValue,        /* Bad operand specified. */
+  CFG_TooMany,         /* Too many operands. */
+  CFG_Duplicate        /* Directive specified more than once. */
+} ConfigurationLineStatus;
+
+#define OPT_Hidden 0X1
+
 typedef struct {
    char letter;
    const char *word;
    const char *argument;
-   int (*configure) (const char *delimiters); 
+   ConfigurationLineStatus (*configure) (const char *delimiters); 
    int flags;
    const char *description;
 } OptionEntry;
-#define OPT_Hidden 0X1
 
 #define BEGIN_OPTION_TABLE static const OptionEntry optionTable[] = {
 #define END_OPTION_TABLE \
@@ -49,16 +58,6 @@ extern int processOptions (
   char ***argv,
   const char *argumentsSummary
 );
-extern const char *programPath;
-extern const char *programName;
-
-typedef enum {
-  CFG_OK,              /* No error. */
-  CFG_NoValue,         /* Operand not specified. */
-  CFG_BadValue,        /* Bad operand specified. */
-  CFG_TooMany,         /* Too many operands. */
-  CFG_Duplicate        /* Directive specified more than once. */
-} ConfigurationFileError;
 
 extern int processConfigurationFile (
   const OptionEntry *optionTable,
@@ -66,6 +65,9 @@ extern int processConfigurationFile (
   const char *path,
   int optional
 );
+
+extern const char *programPath;
+extern const char *programName;
 
 extern short integerArgument (
   const char *argument,
