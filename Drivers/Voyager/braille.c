@@ -352,8 +352,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     usbCloseChannel(usb);
     usb = NULL;
   }
-
-  LogPrint(LOG_WARNING, "Voyager driver giving up.");
   return 0;
 }
 
@@ -840,7 +838,23 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
  */
 static void
 brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE,
-                      0XFF - (setting * 0XFF / BF_MAXIMUM),
-                      0, NULL, 0);
+  unsigned char value = 0XFF - (setting * 0XFF / BF_MAXIMUM);
+  LogPrint(LOG_DEBUG, "Setting voltage: %02X", value);
+  sndcontrolmsg(BRLVGER_SET_DISPLAY_VOLTAGE, value, 0, NULL, 0);
+
+  /* log the display voltage */
+  {
+    unsigned char buffer[2];
+    int size = rcvcontrolmsg(BRLVGER_GET_DISPLAY_VOLTAGE, 0, 0, buffer, sizeof(buffer));
+    if (size != -1)
+      LogBytes("Display Voltage", buffer, size);
+  }
+
+  /* log the display current */
+  {
+    unsigned char buffer[2];
+    int size = rcvcontrolmsg(BRLVGER_GET_DISPLAY_CURRENT, 0, 0, buffer, sizeof(buffer));
+    if (size != -1)
+      LogBytes("Display Current", buffer, size);
+  }
 }
