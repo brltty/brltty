@@ -63,7 +63,7 @@ typedef enum {
 static int brlinput = 1;
 
 /* Workaround USB<->Voyager flakiness: repeat commands */
-#define STALL_TRIES 3
+#define STALL_TRIES 7
 #define SENDBRAILLE_REPEATS 2
 
 /* Braille display parameters that do not change */
