@@ -45,6 +45,30 @@ static void spk_close (void) { }
 
 const SpeechDriver *speech = &noSpeech;
 
+double spkDurationStretchTable[] = {
+  3.0000,
+  2.6879,
+  2.4082,
+  2.1577,
+  1.9332,
+  1.7320,
+  1.5518,
+  1.3904,
+  1.2457,
+  1.1161,
+  1.0000,
+  0.8960,
+  0.8027,
+  0.7192,
+  0.6444,
+  0.5774,
+  0.5173,
+  0.4635,
+  0.4152,
+  0.3720,
+  0.3333
+};
+
 const SpeechDriver *
 loadSpeechDriver (const char *driver, const char *driverDirectory) {
   return loadDriver(driver,

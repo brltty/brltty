@@ -1417,6 +1417,15 @@ main (int argc, char *argv[]) {
               playTune(&tune_done);
             }
             break;
+          case CMD_SWITCHVT_PREV:
+            if (!switchVirtualTerminal(scr.no-1))
+              playTune(&tune_bad_command);
+            break;
+          case CMD_SWITCHVT_NEXT:
+            if (!switchVirtualTerminal(scr.no+1))
+              playTune(&tune_bad_command);
+            break;
+
 #ifdef ENABLE_SPEECH_SUPPORT
           case CMD_SAY_LINE:
             sayLines(p->winy, 1, 0, prefs.sayLineMode);
@@ -1440,15 +1449,22 @@ main (int argc, char *argv[]) {
           case CMD_RESTARTSPEECH:
             restartSpeechDriver();
             break;
+          case CMD_SAY_SLOWER:
+            if (speech->rate && (prefs.speechRate > 0)) {
+              speech->rate(--prefs.speechRate);
+            } else {
+              playTune(&tune_bad_command);
+            }
+            break;
+          case CMD_SAY_FASTER:
+            if (speech->rate && (prefs.speechRate < SPK_MAXIMUM_RATE)) {
+              speech->rate(++prefs.speechRate);
+            } else {
+              playTune(&tune_bad_command);
+            }
+            break;
 #endif /* ENABLE_SPEECH_SUPPORT */
-          case CMD_SWITCHVT_PREV:
-            if (!switchVirtualTerminal(scr.no-1))
-              playTune(&tune_bad_command);
-            break;
-          case CMD_SWITCHVT_NEXT:
-            if (!switchVirtualTerminal(scr.no+1))
-              playTune(&tune_bad_command);
-            break;
+
 #ifdef ENABLE_LEARN_MODE
           case CMD_LEARN:
             learnMode(&brl, updateInterval, 10000);

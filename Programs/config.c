@@ -718,6 +718,17 @@ static void
 exitSpeechDriver (void) {
    stopSpeechDriver();
 }
+
+static int
+testSpeechRate (void) {
+  return speech->rate != NULL;
+}
+
+static int
+changedSpeechRate (unsigned char setting) {
+  speech->rate(setting);
+  return 1;
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -755,23 +766,26 @@ loadPreferences (int change) {
   int fd = open(opt_preferencesFile, O_RDONLY);
   if (fd != -1) {
     Preferences newPreferences;
-    int count = read(fd, &newPreferences, sizeof(newPreferences));
-    if (count == sizeof(newPreferences)) {
+    int length = read(fd, &newPreferences, sizeof(newPreferences));
+    if (length >= 40) {
       if ((newPreferences.magic[0] == (PREFS_MAGIC_NUMBER & 0XFF)) &&
           (newPreferences.magic[1] == (PREFS_MAGIC_NUMBER >> 8))) {
         prefs = newPreferences;
         ok = 1;
+
         if (prefs.version == 0) {
           prefs.version++;
           prefs.pcmVolume = DEFAULT_PCM_VOLUME;
           prefs.midiVolume = DEFAULT_MIDI_VOLUME;
           prefs.fmVolume = DEFAULT_FM_VOLUME;
         }
+
         if (prefs.version == 1) {
           prefs.version++;
           prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
           prefs.autospeak = DEFAULT_AUTOSPEAK;
         }
+
         if (prefs.version == 2) {
           prefs.version++;
           prefs.autorepeat = DEFAULT_AUTOREPEAT;
@@ -785,16 +799,22 @@ loadPreferences (int change) {
           prefs.capitalsVisibleTime *= 4;
           prefs.capitalsInvisibleTime *= 4;
         }
+
+        if (length == 40) {
+          length++;
+          prefs.speechRate = SPK_DEFAULT_RATE;
+        }
+
         if (change) changedPreferences();
       } else
         LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
-    } else if (count == -1) {
+    } else if (length == -1) {
       LogPrint(LOG_ERR, "Cannot read preferences file: %s: %s",
                opt_preferencesFile, strerror(errno));
     } else {
       long int actualSize = sizeof(newPreferences);
       LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %ld).",
-               opt_preferencesFile, count, actualSize);
+               opt_preferencesFile, length, actualSize);
     }
     close(fd);
   } else
@@ -1148,6 +1168,7 @@ updatePreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
        SYMBOLIC_ITEM(prefs.sayLineMode, NULL, NULL, "Say-Line Mode", sayModes),
        BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, "Autospeak"),
+       NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, "Speech Rate", 0, SPK_MAXIMUM_RATE),
 #endif /* ENABLE_SPEECH_SUPPORT */
        SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
 #ifdef ENABLE_TABLE_SELECTION

@@ -68,4 +68,6 @@ Left              stop speaking immediately
 Right             say current line
 Up                say from top of screen through current line
 Down              say from current line through bottom of screen
+F2 Left           decrease speech rate
+F2 Right          increase speech rate
 F1 F2             restart speech driver

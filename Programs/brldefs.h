@@ -137,6 +137,9 @@ typedef enum {
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
   
+  CMD_SAY_SLOWER /* decrease speech rate */,
+  CMD_SAY_FASTER /* increase speech rate */,
+
   DriverCommandCount /* must be last */
 } DriverCommand;
 #define VAL_ARG_MASK 0XFF

@@ -1197,6 +1197,12 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             case KEY_SPK_DOWN:
               res = CMD_SAY_BELOW;
               break;
+            case KEY_SPK_F2 | KEY_SPK_LEFT:
+              res = CMD_SAY_SLOWER;
+              break;
+            case KEY_SPK_F2 | KEY_SPK_RIGHT:
+              res = CMD_SAY_FASTER;
+              break;
           }
           break;
 

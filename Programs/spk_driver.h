@@ -50,6 +50,10 @@ static void spk_close (void);
   static int spk_isSpeaking () { return 0; }
 #endif /* SPK_HAVE_TRACK */
 
+#ifdef SPK_HAVE_RATE
+  static void spk_rate (int setting);		/* mute speech */
+#endif /* SPK_HAVE_RATE */
+
 #ifdef SPKPARMS
   static const char *const spk_parameters[] = {SPKPARMS, NULL};
 #endif /* SPKPARMS */
@@ -77,9 +81,9 @@ SPKCONST SpeechDriver SPKSYMBOL = {
 
   spk_identify,
   spk_open,
+  spk_close,
   spk_say,
   spk_mute,
-  spk_close,
 
 #ifdef SPK_HAVE_EXPRESS
   spk_express,
@@ -89,7 +93,13 @@ SPKCONST SpeechDriver SPKSYMBOL = {
 
   spk_doTrack,
   spk_getTrack,
-  spk_isSpeaking
+  spk_isSpeaking,
+
+#ifdef SPK_HAVE_RATE
+  spk_rate
+#else /* SPK_HAVE_RATE */
+  NULL
+#endif /* SPK_HAVE_RATE */
 };
 
 #ifdef __cplusplus
