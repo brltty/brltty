@@ -956,7 +956,7 @@ static int api_readCommand(BrailleDisplay *disp, DriverCommandContext caller)
 
   if (rawConnection!=NULL) {
     pthread_mutex_lock(&packet_mutex);
-    size = TrueBraille->readPacket(&c->brl,packet,BRLAPI_MAXPACKETSIZE);
+    size = TrueBraille->readPacket(&rawConnection->brl,packet,BRLAPI_MAXPACKETSIZE);
     pthread_mutex_unlock(&packet_mutex);
     if (size>0) {
       brlapi_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
