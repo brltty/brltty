@@ -99,10 +99,174 @@ typedef struct
 blkey;
 
 
-/* Local function prototypes: */
-static void getbrlkeys (void);	/* process keystrokes from the Braille Lite */
-static int qput (unsigned char);	/* add a byte to the input queue */
-static int qget (blkey *);	/* get a byte from the input queue */
+static int
+qput (unsigned char c)
+{
+  if (qlen == QSZ)
+    return EOF;
+  qbase[(qoff + qlen++) % QSZ] = c;
+  return 0;
+}
+
+
+static int
+qget (blkey * kp)
+{
+  unsigned char c;
+  int how;
+  static const unsigned char counts[] = {1, 3, 3};
+  unsigned char count;
+
+  if (qlen == 0)
+    return EOF;
+  c = qbase[qoff];
+
+  /* extended sequences start with a zero */
+  how = (c == 0)? 1:
+        (c == 0x80 && blitesz != 18)? 2:
+        0;
+  count = counts[how];
+  if (qlen < count)
+    return EOF;
+
+  memset (kp, 0, sizeof (*kp));
+  switch (how) {
+    case 0: /* non-extended sequences (BL18) */
+      /* We must deal with keyboard reversal here: */
+      if (reverse_kbd)
+	{
+	  if (c >= 0x80)	/* advance bar */
+	    c ^= 0x03;
+	  else
+	    c = (c & 0x40) | ((c & 0x38) >> 3) | ((c & 0x07) << 3);
+	}
+
+      /* Now we fill in all the info about the keypress: */
+      if (c >= 0x80)		/* advance bar */
+	{
+	  kp->raw = c;
+	  switch (c) {
+	    case 0x83:		/* left */
+	      kp->cmd = BLT_BARLT;
+	      break;
+
+	    case 0x80:		/* right */
+	      kp->cmd = BLT_BARRT;
+	      break;
+
+	    default:		/* unrecognised keypress */
+	      kp->cmd = 0;
+              break;
+	  }
+	}
+      else
+	{
+	  kp->spcbar = ((c & 0x40)? 1: 0);
+	  c &= 0x3f;		/* leave only dot key info */
+	  kp->raw = c;
+	  kp->cmd = cmdtrans[c];
+	  kp->asc = brltrans[c];
+	}
+      break;
+
+    case 1: { /* extended sequences (BL40) */
+      unsigned char c2 = qbase[((qoff + 1) % QSZ)];
+      unsigned char c3 = qbase[((qoff + 2) % QSZ)];
+
+      /* We must deal with keyboard reversal here: */
+      if (reverse_kbd)
+	{
+	  if (c2 == 0)
+	    {			/* advance bars or routing keys */
+	      if (c3 & 0x80)	/* advance bars */
+		c3 = ((c3 & 0xF0) |
+		      ((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) |
+		      ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3));
+	      else if (c3 > 0 && c3 <= blitesz)
+		c3 = blitesz - c3 + 1;
+	    }
+	  else
+            {
+              c2 = (((c2 & 0x38) >> 3) | ((c2 & 0x07) << 3) |
+                    ((c2 & 0x40) << 1) | ((c2 & 0x80) >> 1));
+              c3 = ((c3 & 0x40) | ((c3 & 0x38) >> 3) | ((c3 & 0x07) << 3));
+            }
+	}
+
+      /* Now we fill in all the info about the keypress: */
+      if (c2 == 0)		/* advance bars or routing keys */
+	{
+	  kp->raw = c3;
+	  if (c3 & 0x80)
+            kp->cmd = barcmds[c3 & 0xF];
+	  else if (c3 > 0 && c3 <= blitesz)
+	    kp->routing = c3;
+	}
+      else
+	{
+	  kp->spcbar = ((c3 & 0x40)? 1: 0);
+	  c3 &= 0x3f;		/* leave only dot key info */
+	  kp->raw = (c2 & 0xC0) | c3; /* combine info for all 8 dots */
+	  /* c2&0x3F and c3&0x3F are the same, i.e. dots 1-6. */
+	  kp->cmd = cmdtrans[c3];
+	  kp->asc = brltrans[c3];
+	}
+      break;
+    }
+
+    case 2: { /* extended sequences (millennium) */
+      unsigned char c3 = qbase[((qoff + 2) % QSZ)];
+
+      /* We must deal with keyboard reversal here: */
+      if (reverse_kbd)
+        c3 = ((c3 & 0x11) << 3) | ((c3 & 0x22) << 1) | ((c3 & 0x44) >> 1) | ((c3 & 0x88) >> 3);
+      kp->raw = c3;
+
+      if (c3 & 0x0f)
+        kp->cmd = barcmds[((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3)];
+      else if (c3 & 0x30)
+        kp->cmd = rwwcmds[(c3 >> 4) & 0x3];
+      else if (c3 & 0xc0)
+        kp->cmd = lwwcmds[(c3 >> 6) & 0x3];
+      else
+        kp->cmd = 0;
+      break;
+    }
+
+    default:
+      kp->cmd = 0;
+      break;
+  }
+
+  /* adjust queue variables for next member */
+  qoff = (qoff + count) % QSZ;
+  qlen -= count;
+
+  return 0;
+}
+
+
+static void
+qfill (void)
+{
+  unsigned char c;		/* character buffer */
+
+  while (read (blite_fd, &c, 1))
+    {
+      if (waiting_ack && c == 5)	/* ^e is the acknowledgement character ... */
+	waiting_ack = 0;
+      else
+	qput (c);
+    }
+}
+
+
+static void
+qflush (void)
+{
+  qfill();
+  qlen = 0;
+}
 
 
 static void
@@ -138,30 +302,21 @@ init_maps (void) {
 }
 
 static int
-send_prebrl (int forever) {
+await_ack (void) {
+  timeout_yet(0);
+  waiting_ack = 1;
+  do {
+    delay(10);	/* sleep for 10 ms */
+    qfill();
+    if (!waiting_ack) return 1;
+  } while (!timeout_yet(ACK_TIMEOUT));
+  return 0;
+}
+
+static void
+write_prebrl (void) {
   static const unsigned char request[] = {0X05, 0X44};			/* code to send before Braille */
-  if (forever) {
-    /* wait forever method */
-    while (1) {
-      write(blite_fd, request, sizeof(request));
-      waiting_ack = 1;
-      delay(100);
-      getbrlkeys();
-      if (!waiting_ack) break;
-      delay(2000);
-    }
-  } else {
-    int timeout = ACK_TIMEOUT / 10;
-    write(blite_fd, request, sizeof(request));
-    waiting_ack = 1;
-    while (1) {
-      delay(10);	/* sleep for 10 ms */
-      getbrlkeys();
-      if (!waiting_ack) break;
-      if (--timeout < 0) return 0;
-    }
-  }
-  return 1;
+  write(blite_fd, request, sizeof(request));
 }
 
 static int
@@ -206,9 +361,21 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
         /* activate new settings */
         if (tcsetattr(blite_fd, TCSANOW, &newtio) != -1) {
 #ifdef DETECT_FOREVER
-          if (send_prebrl(1)) {
+          /* wait forever method */
+          while (1) {
+            qflush();
+            write_prebrl();
+            waiting_ack = 1;
+            delay(100);
+            qfill();
+            if (!waiting_ack) break;
+            delay(2000);
+          }
+          if (1) {
 #else /* DETECT_FOREVER */
-          if (send_prebrl(0)) {
+          qflush();
+          write_prebrl();
+          if (await_ack()) {
 #endif /* DETECT_FOREVER */
             LogPrint(LOG_DEBUG, "Got response.");
 
@@ -219,7 +386,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
               write(blite_fd, cells, sizeof(cells));
               waiting_ack = 1;
               delay(400);
-              getbrlkeys();
+              qfill();
               if (waiting_ack) {
                 /* no response, so it must be BLT40 */
                 blitesz = 40;
@@ -233,12 +400,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
             {
               static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
               delay(200);
-              getbrlkeys();
-              qlen = 0;
+              qflush();
               write(blite_fd, request, sizeof(request));
               waiting_ack = 0;
               delay(200);
-              getbrlkeys();
+              qfill();
               if (qlen) {
                 unsigned char response[qlen + 1];
                 int length = 0;
@@ -335,8 +501,6 @@ static void
 brl_writeWindow (BrailleDisplay * brl)
 {
   short i;			/* loop counter */
-  static int timer = 0;		/* for internal cursor */
-  int timeout;			/* while waiting for an ACK */
 
   /* If the intoverride flag is set, then calls to writebrl() from the main
    * module are ignored, because the display is in internal use.
@@ -348,6 +512,7 @@ brl_writeWindow (BrailleDisplay * brl)
   /* First, the internal cursor: */
   if (int_cursor)
     {
+      static int timer = 0;		/* for internal cursor */
       timer = (timer + 1) % (INT_CSR_SPEED * 2);
       brl->buffer[int_cursor - 1] = (timer < INT_CSR_SPEED)?
                                       (B1 | B2 | B3 | B7):
@@ -375,26 +540,17 @@ brl_writeWindow (BrailleDisplay * brl)
        * are ^e ...
        */
       waiting_ack = 0;		/* Not really necessary, but ... */
-      getbrlkeys ();
+      qfill ();
 
       /* Next we send the ^eD sequence, and wait for an ACK */
       waiting_ack = 1;
       /* send the ^ED... */
-      if (!send_prebrl(0)) return;
+      write_prebrl();
+      if (!await_ack()) return;
 
       /* OK, now we'll suppose we're all clear to send Braille data. */
-      write (blite_fd, rawdata, blitesz);
-
-      /* And once again we wait for acknowledgement. */
-      waiting_ack = 1;
-      timeout = ACK_TIMEOUT / 10;
-      do {
-	  getbrlkeys ();
-	  delay (10);		/* sleep for 10 ms */
-	  if (--timeout < 0)
-	    return; /* BLT doesn't seem to be connected any more! */
-	}
-      while (waiting_ack);
+      write(blite_fd, rawdata, blitesz);
+      await_ack();
     }
 }
 
@@ -423,7 +579,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
  again:
   if(repeatNext || repeat == 0) {
     /* Process any new keystrokes: */
-    getbrlkeys ();
+    qfill ();
     if (qget (&key) == EOF)	/* no keys to process */
       return EOF;
     repeatNext = 0;
@@ -754,166 +910,4 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 
   /* We should never reach this point ... */
   return EOF;
-}
-
-
-static void
-getbrlkeys (void)
-{
-  unsigned char c;		/* character buffer */
-
-  while (read (blite_fd, &c, 1))
-    {
-      if (waiting_ack && c == 5)	/* ^e is the acknowledgement character ... */
-	waiting_ack = 0;
-      else
-	qput (c);
-    }
-}
-
-
-static int
-qput (unsigned char c)
-{
-  if (qlen == QSZ)
-    return EOF;
-  qbase[(qoff + qlen++) % QSZ] = c;
-  return 0;
-}
-
-
-static int
-qget (blkey * kp)
-{
-  unsigned char c;
-  int how;
-  static const unsigned char counts[] = {1, 3, 3};
-  unsigned char count;
-
-  if (qlen == 0)
-    return EOF;
-  c = qbase[qoff];
-
-  /* extended sequences start with a zero */
-  how = (c == 0)? 1:
-        (c == 0x80 && blitesz != 18)? 2:
-        0;
-  count = counts[how];
-  if (qlen < count)
-    return EOF;
-
-  memset (kp, 0, sizeof (*kp));
-  switch (how) {
-    case 0: /* non-extended sequences (BL18) */
-      /* We must deal with keyboard reversal here: */
-      if (reverse_kbd)
-	{
-	  if (c >= 0x80)	/* advance bar */
-	    c ^= 0x03;
-	  else
-	    c = (c & 0x40) | ((c & 0x38) >> 3) | ((c & 0x07) << 3);
-	}
-
-      /* Now we fill in all the info about the keypress: */
-      if (c >= 0x80)		/* advance bar */
-	{
-	  kp->raw = c;
-	  switch (c) {
-	    case 0x83:		/* left */
-	      kp->cmd = BLT_BARLT;
-	      break;
-
-	    case 0x80:		/* right */
-	      kp->cmd = BLT_BARRT;
-	      break;
-
-	    default:		/* unrecognised keypress */
-	      kp->cmd = 0;
-              break;
-	  }
-	}
-      else
-	{
-	  kp->spcbar = ((c & 0x40)? 1: 0);
-	  c &= 0x3f;		/* leave only dot key info */
-	  kp->raw = c;
-	  kp->cmd = cmdtrans[c];
-	  kp->asc = brltrans[c];
-	}
-      break;
-
-    case 1: { /* extended sequences (BL40) */
-      unsigned char c2 = qbase[((qoff + 1) % QSZ)];
-      unsigned char c3 = qbase[((qoff + 2) % QSZ)];
-
-      /* We must deal with keyboard reversal here: */
-      if (reverse_kbd)
-	{
-	  if (c2 == 0)
-	    {			/* advance bars or routing keys */
-	      if (c3 & 0x80)	/* advance bars */
-		c3 = ((c3 & 0xF0) |
-		      ((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) |
-		      ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3));
-	      else if (c3 > 0 && c3 <= blitesz)
-		c3 = blitesz - c3 + 1;
-	    }
-	  else
-            {
-              c2 = (((c2 & 0x38) >> 3) | ((c2 & 0x07) << 3) |
-                    ((c2 & 0x40) << 1) | ((c2 & 0x80) >> 1));
-              c3 = ((c3 & 0x40) | ((c3 & 0x38) >> 3) | ((c3 & 0x07) << 3));
-            }
-	}
-
-      /* Now we fill in all the info about the keypress: */
-      if (c2 == 0)		/* advance bars or routing keys */
-	{
-	  kp->raw = c3;
-	  if (c3 & 0x80)
-            kp->cmd = barcmds[c3 & 0xF];
-	  else if (c3 > 0 && c3 <= blitesz)
-	    kp->routing = c3;
-	}
-      else
-	{
-	  kp->spcbar = ((c3 & 0x40)? 1: 0);
-	  c3 &= 0x3f;		/* leave only dot key info */
-	  kp->raw = (c2 & 0xC0) | c3; /* combine info for all 8 dots */
-	  /* c2&0x3F and c3&0x3F are the same, i.e. dots 1-6. */
-	  kp->cmd = cmdtrans[c3];
-	  kp->asc = brltrans[c3];
-	}
-      break;
-    }
-
-    case 2: { /* extended sequences (millennium) */
-      unsigned char c3 = qbase[((qoff + 2) % QSZ)];
-
-      /* We must deal with keyboard reversal here: */
-      if (reverse_kbd)
-        c3 = ((c3 & 0x11) << 3) | ((c3 & 0x22) << 1) | ((c3 & 0x44) >> 1) | ((c3 & 0x88) >> 3);
-      kp->raw = c3;
-
-      if (c3 & 0x0f)
-        kp->cmd = barcmds[((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3)];
-      else if (c3 & 0x30)
-        kp->cmd = rwwcmds[(c3 >> 4) & 0x3];
-      else if (c3 & 0xc0)
-        kp->cmd = lwwcmds[(c3 >> 6) & 0x3];
-      else
-        kp->cmd = 0;
-      break;
-    }
-
-    default:
-      kp->cmd = 0;
-      break;
-  }
-
-  /* adjust queue variables for next member */
-  qoff = (qoff + count) % QSZ;
-  qlen -= count;
-
-  return 0;
 }
