@@ -60,6 +60,7 @@
 #include "brl.h"
 #include "brltty.h"
 #include "misc.h"
+#include "iomisc.h"
 #include "scr.h"
 #include "tunes.h"
 
@@ -1331,8 +1332,8 @@ static void *server(void *arg)
         unauthConnLog++;
       } else {
         unauthConnections++;
-        if (fcntl(res, F_SETFL, O_NONBLOCK)<0) {
-          LogPrint(LOG_WARNING, "Failed to switch t) non-blocking mode: %s",strerror(errno));
+        if (!setBlockingIo(res, 0)) {
+          LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
           break;
         }
         c = createConnection(res, currentTime);
