@@ -1055,10 +1055,20 @@ static int readbrlkey(BrailleDisplay *brl)
 	      switch(buf[p + 1])
 		{
 		case 'B': /* PC-BRAILLE mode */
-		  InDate = 0;
-		  ReWrite = 1; /* to refresh display */
-		  context = 0;
-		  res = BRL_CMD_NOOP;
+		  {
+		    char AskIdent[3] = {2, 'S', 'I'};
+
+		    LogPrint(LOG_INFO, "EuroBraille terminal came in PC mode.");
+		    WriteToBrlDisplay(brl, 3, AskIdent);
+		    InDate = 0;
+		    ReWrite = 1; /* to refresh display */
+		    context = 0;
+		  
+		    res = BRL_CMD_NOOP;
+		  }
+		  break;
+		case 'K': /* Leaving PC-Braille mode */
+		  LogPrint(LOG_INFO, "EuroBraille terminal is quitting PC mode.");
 		  break;
 		case 'V': /* Braille and Speech mode */
 		  message("! Speech unavailable", MSG_WAITKEY);

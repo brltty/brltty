@@ -40,6 +40,11 @@ char **
 splitString (const char *string, char delimiter, int *count) {
   char **array;
 
+  if (!string) {
+    if (count) *count = 0;
+    return 0;
+  }
+
   {
     int size = 2;
     const char *character = string;

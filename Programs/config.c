@@ -2205,7 +2205,7 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */
-  speechDrivers = splitString(opt_speechDriver, ',', NULL);
+  speechDrivers = splitString(opt_speechDriver? opt_speechDriver: "", ',', NULL);
   if (opt_verify) {
     if (openSpeechDriver(1)) closeSpeechDriver();
   } else {
