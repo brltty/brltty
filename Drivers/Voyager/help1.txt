@@ -6,11 +6,14 @@ Key Names:
     Rightmost key is named D; second key from right is named C.
     Round extension to left of central keypad is named RL; right is RR.
     Up position of central keypad is named UP; down is DOWN.
-  Round keys on top are used as a braille keyboard.
-  Cursor routing keys:
-    CRt1 to CRt66: routing keys over text cells.
+  Round Top Keys:
+    Named according to standard braille dot numbering convention.
+    On the left (from left to right): 7 3 2 1
+    On the right (from left to right): 4 5 6 8
+  Cursor Routing Keys:
+    CRa1 to CRa70: all routing keys.
     CRs1 to CRs4: routing keys over status cells.
-    CRa1 to CRa70: all routing keys counting from left extremity.
+    CRt1 to CRt66: routing keys over text cells.
 
 Basic Navigation
 A / D: Move backward/forward
@@ -21,15 +24,15 @@ RL: Cursor tracking toggle
 UP / DOWN: Move cursor up/down (arrow keys)
 
 Modes and Functions
+RR+UP: Show position and status info (toggle)
 CRs1: Help screen (toggle)
 CRs1+CRs2: Learn mode (key describer) (toggle)
+CRs2: Preferences menu (and again to exit)
 RL+RR: Freeze screen (toggle)
 RL+UP: Show attributes (toggle)
-RR+UP: Show position and status info (toggle)
-CRs2: Preferences menu (and again to exit)
+A+D+CRa1: Six dots mode (toggle)
 CRa#+UP: Switch to virtual console #
 CRa1+CRa2+RL / RR: Switch to previous/next virtual console
-A+D+CRa1: Six dots mode (toggle)
 
 Cursor Routing
 CRt#: Route cursor to cell
