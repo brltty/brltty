@@ -38,8 +38,8 @@ api.made: $(SRC_TOP)$(PGM_DIR)/brlapi.h api_doxy.cfg
 	$(SETLOCALE) sgml2txt -l english -c latin $<
 
 %.made: $(ABS_SRC_DIR)/%.sgml
-	$(INSTALL_DIRECTORY) Manual-HTML
-	cd Manual-HTML && $(SETLOCALE) sgml2html -l english -c ascii $<
+	$(INSTALL_DIRECTORY) $*-HTML
+	cd $*-HTML && $(SETLOCALE) sgml2html -l english -c ascii $<
 	touch $@
 
 clean::
