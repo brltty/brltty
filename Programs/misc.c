@@ -476,11 +476,16 @@ accurateDelay (int milliseconds) {
   struct timeval start;
   gettimeofday(&start, NULL);
   if (!tickLength) {
-#ifdef __MINGW32__
-    tickLength = 1;
-#else /* __MINGW32__ */
-    if (!(tickLength = 1000 / sysconf(_SC_CLK_TCK))) tickLength = 1;
-#endif /* __MINGW32__ */
+#if defined(_SC_CLK_TCK)
+    tickLength = 1000 / sysconf(_SC_CLK_TCK);
+#elif defined(CLK_TCK)
+    tickLength = 1000 / CLK_TCK;
+#elif defined(HZ)
+    tickLength = 1000 / HZ;
+#else
+#error can't determine tick length
+#endif /* tick length */
+    if (!tickLength) tickLength = 1;
   }
   if (milliseconds >= tickLength) approximateDelay(milliseconds / tickLength * tickLength);
   while (millisecondsSince(&start) < milliseconds);
