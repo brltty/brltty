@@ -30,14 +30,6 @@ extern "C" {
 
 #include <unistd.h>
 
-/* brlapi_writeFile */
-/* Exactly write a buffer in a file */
-ssize_t brlapi_writeFile(int fd, const unsigned char *buf, size_t size);
-
-/* brlapi_readFile */
-/* Exactly read a buffer from a file */
-ssize_t brlapi_readFile(int fd, unsigned char *buf, size_t size);
-
 /* brlapi_libcerrno */
 /* saves the libc errno */
 int brlapi_libcerrno;
