@@ -64,7 +64,7 @@ main (int argc, char *argv[]) {
   if ((path = makePath(opt_dataDirectory, path))) {
     TranslationTable table;
     if (loadTranslationTable(path, &table, reportMessage,
-                             TBL_UNDEFINED | TBL_DUPLICATE)) {
+                             TBL_UNDEFINED | TBL_DUPLICATE | TBL_UNUSED)) {
       status = 0;
     } else {
       status = 3;
