@@ -14,8 +14,8 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define VERSION "BRLTTY External Speech driver, version 0.7 (September 2001)"
-#define COPYRIGHT "Copyright (C) 2000-2001 by Stéphane Doyon " \
+#define VERSION "BRLTTY External Speech driver, version 0.8 (September 2004)"
+#define COPYRIGHT "Copyright (C) 2000-2001,2004 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* ExternalSpeech/speech.c - Speech library (driver)
  * For external programs, using my own protocol. Features indexing.
@@ -46,6 +46,7 @@ typedef enum {
 
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_EXPRESS
+#define SPK_HAVE_RATE
 #include "Programs/spk_driver.h"
 #include "speech.h"
 
@@ -287,6 +288,22 @@ static void spk_mute (void)
   LogPrint(LOG_DEBUG,"mute");
   speaking = 0;
   mywrite(helper_fd_out, &c,1);
+}
+
+static void spk_rate (int setting)
+{
+  float expand = spkDurationStretchTable[setting]; 
+  unsigned char *p = (unsigned char *)&expand;
+  unsigned char l[5];
+  if(helper_fd_out < 0) return;
+  LogPrint(LOG_DEBUG,"set rate to %d (time scale %f)", setting, expand);
+  l[0] = 3; /* time scale code */
+#ifdef WORDS_BIGENDIAN
+  l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];
+#else /* WORDS_BIGENDIAN */
+  l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
+#endif /* WORDS_BIGENDIAN */
+  mywrite(helper_fd_out, &l, 5);
 }
 
 static void spk_close (void)
