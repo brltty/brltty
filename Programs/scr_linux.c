@@ -445,7 +445,7 @@ setFontTableSize (void) {
              "ioctl KDFONTOP[GET]: %s", strerror(errno));
   }
 
-  LogPrint(LOG_DEBUG, "Font table size: %d(%s)",
+  LogPrint(LOG_INFO, "Font Table Size: %d(%s)",
            fontTableSize,
            isBigFontTable? "big": "small");
   return ok;
@@ -457,7 +457,8 @@ static unsigned short screenFontMapSize;
 static int
 setScreenFontMap (int force) {
   struct unimapdesc sfm;
-  unsigned short size = force? 0X100: screenFontMapCount;
+  unsigned short size = force? 0: screenFontMapCount;
+  if (!size) size = 0X100;
   while (1) {
     sfm.entry_ct = size;
     if (!(sfm.entries = (struct unipair *)malloc(sfm.entry_ct * sizeof(*sfm.entries)))) {
@@ -493,8 +494,7 @@ setScreenFontMap (int force) {
   screenFontMapTable = sfm.entries;
   screenFontMapCount = sfm.entry_ct;
   screenFontMapSize = size;
-  LogPrint(LOG_DEBUG, "Screen font map changed: %d %s.",
-           screenFontMapCount, (screenFontMapCount==1? "entry": "entries"));
+  LogPrint(LOG_INFO, "Screen Font Map Size: %d", screenFontMapCount);
   if (debugScreenFontMap) {
     int i;
     for (i=0; i<screenFontMapCount; ++i) {
@@ -595,13 +595,14 @@ setTranslationTable (int force) {
        int character;
        for (character=0XFF; character>=0; --character) {
          unsigned short unicode = applicationCharacterMap[character];
-         int position;
-         if ((unicode & ~directPosition) == 0XF000) {
+         int position = -1;
+         if (!screenFontMapCount) {
+           if (unicode < 0X100) position = unicode;
+         } else if ((unicode & ~directPosition) == 0XF000) {
            position = unicode & directPosition;
          } else {
            int first = 0;
            int last = screenFontMapCount-1;
-           position = -1;
            while (first <= last) {
              int current = (first + last) / 2;
              struct unipair *map = &screenFontMapTable[current];
