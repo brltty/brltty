@@ -221,7 +221,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         return CMD_HELP;
 
       case  85: /* top left third upper */
-        return CMD_CSRJMP_VERT;
+        return CMD_PASTE;
 
       case  86: /* top left third lower */
         return CMD_CSRTRK;
@@ -266,41 +266,33 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
       case 200: /* top right fifth lower */
         return CMD_NXPGRPH;
 
-      /* home */
       case  91: /* front left first upper */
       case 201: /* front right first upper */
         return CMD_TOP_LEFT;
 
-      /* end */
       case  92: /* front left first lower */
       case 202: /* front right first lower */
         return CMD_BOT_LEFT;
 
-      /* cursor */
       case  93: /* front left second upper */
       case 203: /* front right second upper */
         return CMD_BACK;
 
-      /* extra cursor */
       case  94: /* front left second lower */
       case 204: /* front right second lower */
         return CMD_HOME;
 
-      /* up */
       case  95: /* front left third upper */
       case 205: /* front right third upper */
         return CMD_LNUP;
 
-      /* down */
       case  96: /* front left third lower */
       case 206: /* front right third lower */
         return CMD_LNDN;
 
-      /* left */
       case  97: /* front left fourth */
         return CMD_FWINLT;
 
-      /* right */
       case 207: /* front right fourth */
         return CMD_FWINRT;
     }

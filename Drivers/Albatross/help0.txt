@@ -1,33 +1,30 @@
 BRLTTY Help Screen for Albatross models
 
 Front Keys:
-Top    move to top-left corner
-Bot    move to bottom-left corner
-Bak    move back (undo cursor tracking motion)
-Hom    move to cursor
-Up     move up one line
-Down   move down one line
-Left   move left one window
-Right  move right one window
+Top     move to top-left corner
+Bottom  move to bottom-left corner
+Back    move back (undo cursor tracking motion)
+Cursor  move to cursor
+Up      move up one line
+Down    move down one line
+Left    move left one window
+Right   move right one window
 
-Top Left Keys:
+Top Keys:
 (* means then press routing key)
-F1    enter/leave help screen
-F2    enter/leave learn mode
-F3    route cursor to current line without horizontal motion
-F4    toggle cursor tracking mode
-F5*   start cut buffer
-F6*   append to cut buffer
-F7    enter/leave preferences menu
-F8    enter/leave status display
-
-Top Right Keys:
-(* means then press routing key)
-F9    move up to last line of previous paragraph
-F10   move down to first line of next paragraph
-F11   move up to nearest line with different content
-F12   move down to nearest line with different content
-F13*  linear cut
-F14*  rectangular cut
-F15   move up to previous command prompt
-F16   move down to next command prompt
+Hlp    enter/leave help screen
+Lrn    enter/leave learn mode
+Paste  paste from cut buffer
+Track  toggle cursor tracking mode
+Prf    enter/leave preferences menu
+Stt    enter/leave status display
+PrU    move up to previous command prompt
+PrD    move down to next command prompt
+DifUp  move up to nearest line with different content
+DifDn  move down to nearest line with different content
+PgU    move up to last line of previous paragraph
+PgD    move down to first line of next paragraph
+CtB*   begin new cut buffer
+CtA*   append to cut buffer
+CtL*   linear cut
+CtR*   rectangular cut

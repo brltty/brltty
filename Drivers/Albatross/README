@@ -8,13 +8,13 @@ The keys on the front of the display are named as depicted below within the
 documentation for this driver. See the help file for how this driver puts them
 to use.
 
-   +---+ +---+ +-------+ +-----------+    +-----------+ +-------+ +---+ +---+
-   |Top| |Bak| |  Up   | |           |    |           | |  Up   | |Bak| |Top|
-   +---+ +---+ +-------+ |           |    |           | +-------+ +---+ +---+
-                         |   Left    |    |   Right   |                      
-   +---+ +---+ +-------+ |           |    |           | +-------+ +---+ +---+
-   |Bot| |Hom| | Down  | |           |    |           | | Down  | |Hom| |Bot|
-   +---+ +---+ +-------+ +-----------+    +-----------+ +-------+ +---+ +---+
+   +---+ +---+ +------+ +-----------+      +-----------+ +------+ +---+ +---+
+   |Top| |Bak| |  Up  | |           |      |           | |  Up  | |Bak| |Top|
+   +---+ +---+ +------+ |           |      |           | +------+ +---+ +---+
+                        |   Left    |      |   Right   |
+   +---+ +---+ +------+ |           |      |           | +------+ +---+ +---+
+   |Bot| |Csr| | Down | |           |      |           | | Down | |Csr| |Bot|
+   +---+ +---+ +------+ +-----------+      +-----------+ +------+ +---+ +---+
 
 
 The keys on the top of the display are named F1 through F16, as depicted below,
@@ -22,11 +22,11 @@ within the documentation for this driver. See the help file for how this driver
 puts them to use.
 
    +---+       +-------+       +---+        +---+       +-------+       +---+
-   |F1 | +---+ |  F3   | +---+ |F7 |        |F15| +---+ |  F11  | +---+ |F9 |
+   |Hlp| +---+ | Paste | +---+ |Prf|        |PrU| +---+ | DifUp | +---+ |PgU|
    +---+ |   | +-------+ |   | +---+        +---+ |   | +-------+ |   | +---+
-         |F5 |           |F6 |                    |F14|           |F13|
+         |CtB|           |CtA|                    |CtL|           |CtR|
    +---+ |   | +-------+ |   | +---+        +---+ |   | +-------+ |   | +---+
-   |F2 | +---+ |  F4   | +---+ |F8 |        |F16| +---+ |  F12  | +---+ |F10|
+   |Lrn| +---+ | Track | +---+ |Stt|        |PrD| +---+ | DifDn | +---+ |PgD|
    +---+       +-------+       +---+        +---+       +-------+       +---+
 
 
