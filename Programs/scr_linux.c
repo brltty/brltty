@@ -1181,7 +1181,7 @@ static int
 openUinputDevice (void) {
   if (uinputDevice != -1) return 1;
 
-  if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_RDWR, 10, 223)) != -1) {
+  if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
     struct uinput_user_dev device;
     
     memset(&device, 0, sizeof(device));
