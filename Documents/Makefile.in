@@ -47,5 +47,5 @@ clean::
 	-rm -fr *-HTML man?
 
 distclean::
-	-rm -f BrlAPIref.doxy
+	-rm -f brltty.conf BrlAPIref.doxy
 
