@@ -213,6 +213,7 @@ extern "C" {
 /* Define only one of the following curses packages. */
 #undef HAVE_PKG_CURSES
 #undef HAVE_PKG_NCURSES
+#undef HAVE_PKG_NCURSESW
 
 /* Define only one of the following Xaw packages. */
 #undef HAVE_PKG_XAW
