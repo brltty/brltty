@@ -54,18 +54,18 @@ typedef enum {
   CMD_LNDN /* go down one line */,
   CMD_WINUP /* go up several lines */,
   CMD_WINDN /* go down several lines */,
-  CMD_PRDIFLN /* go up to line with different content */,
-  CMD_NXDIFLN /* go down to line with different content */,
-  CMD_ATTRUP /* go up to line with different attributes */,
-  CMD_ATTRDN /* go down to line with different attributes */,
+  CMD_PRDIFLN /* go up to nearest line with different content */,
+  CMD_NXDIFLN /* go down to nearest line with different content */,
+  CMD_ATTRUP /* go up to nearest line with different highlighting */,
+  CMD_ATTRDN /* go down to nearest line with different highlighting */,
   CMD_TOP /* go to top line */,
   CMD_BOT /* go to bottom line */,
   CMD_TOP_LEFT /* go to top-left corner */,
   CMD_BOT_LEFT /* go to bottom-left corner */,
-  CMD_PRPGRPH /* go to last line of previous paragraph */,
-  CMD_NXPGRPH /* go to first line of next paragraph */,
-  CMD_PRPROMPT /* go to previous command prompt */,
-  CMD_NXPROMPT /* go to next command prompt */,
+  CMD_PRPGRPH /* go up to last line of previous paragraph */,
+  CMD_NXPGRPH /* go down to first line of next paragraph */,
+  CMD_PRPROMPT /* go up to previous command prompt */,
+  CMD_NXPROMPT /* go down to next command prompt */,
   CMD_PRSEARCH /* search backward for content of cut buffer */,
   CMD_NXSEARCH /* search forward for content of cut buffer */,
   
@@ -76,39 +76,39 @@ typedef enum {
   CMD_HWINRT /* go right half a window */,
   CMD_FWINLT /* go left one window */,
   CMD_FWINRT /* go right one window */,
-  CMD_FWINLTSKIP /* go left to non-blank window */,
-  CMD_FWINRTSKIP /* go right to non-blank window */,
+  CMD_FWINLTSKIP /* go left to nearest non-blank window */,
+  CMD_FWINRTSKIP /* go right to nearest non-blank window */,
   CMD_LNBEG /* go to beginning of line */,
   CMD_LNEND /* go to end of line */,
   
   /* implicit motion */
   CMD_HOME /* go to cursor */,
-  CMD_BACK /* return to destination of most recent explicit motion */,
+  CMD_BACK /* go back (undo unexpected cursor tracking motion) */,
   
   /* feature activation and deactivation */
-  CMD_FREEZE /* toggle screen frozen/unfrozen */,
-  CMD_DISPMD /* toggle display attributes/text */,
-  CMD_SIXDOTS /* toggle text style 6-dot/8-dot */,
-  CMD_SLIDEWIN /* toggle sliding window on/off */,
-  CMD_SKPIDLNS /* toggle skipping of identical lines on/off */,
-  CMD_SKPBLNKWINS /* toggle skipping of blank windows on/off */,
-  CMD_CSRVIS /* toggle cursor visibility on/off */,
-  CMD_CSRHIDE /* toggle hide of cursor on/off */,
-  CMD_CSRTRK /* toggle cursor tracking on/off */,
-  CMD_CSRSIZE /* toggle cursor style block/underline */,
-  CMD_CSRBLINK /* toggle cursor blinking on/off */,
-  CMD_ATTRVIS /* toggle attribute underlining on/off */,
-  CMD_ATTRBLINK /* toggle attribute blinking on/off */,
-  CMD_CAPBLINK /* toggle capital letter blinking on/off */,
-  CMD_TUNES /* toggle alert tunes on/off */,
+  CMD_FREEZE /* toggle screen mode [live/frozen] */,
+  CMD_DISPMD /* toggle display mode [text/attributes] */,
+  CMD_SIXDOTS /* toggle text style [8-dot/6-dot] */,
+  CMD_SLIDEWIN /* toggle sliding window [off/on] */,
+  CMD_SKPIDLNS /* toggle skipping of lines with identical content [off/on] */,
+  CMD_SKPBLNKWINS /* toggle skipping of blank windows [off/on] */,
+  CMD_CSRVIS /* toggle cursor visibility [on/off] */,
+  CMD_CSRHIDE /* toggle hidden cursor [off/on] */,
+  CMD_CSRTRK /* toggle cursor tracking [on/off] */,
+  CMD_CSRSIZE /* toggle cursor style [underline,block] */,
+  CMD_CSRBLINK /* toggle cursor blinking [off/on] */,
+  CMD_ATTRVIS /* toggle attribute underlining [off/on] */,
+  CMD_ATTRBLINK /* toggle attribute blinking [on/off] */,
+  CMD_CAPBLINK /* toggle capital letter blinking [off/on] */,
+  CMD_TUNES /* toggle alert tunes [on/off] */,
  
   /* mode selection */
-  CMD_HELP /* toggle help mode on/off */,
-  CMD_INFO /* toggle info mode on/off */,
-  CMD_LEARN /* enter command learn mode */,
+  CMD_HELP /* enter/leave help display */,
+  CMD_INFO /* enter/leave status display */,
+  CMD_LEARN /* enter/leave command learn mode */,
   
   /* preference setting */
-  CMD_PREFMENU /* present preferences menu */,
+  CMD_PREFMENU /* enter/leave preferences menu */,
   CMD_PREFSAVE /* save current preferences */,
   CMD_PREFLOAD /* restore saved preferences */,
   
@@ -122,10 +122,10 @@ typedef enum {
  
   /* speech */
   CMD_SAY_LINE /* speak current line */,
-  CMD_SAY_ABOVE /* speak from top through current line */,
-  CMD_SAY_BELOW /* speak from current through bottom line */,
+  CMD_SAY_ABOVE /* speak from top of screen through current line */,
+  CMD_SAY_BELOW /* speak from current line through bottom of screen */,
   CMD_MUTE /* stop speaking immediately */,
-  CMD_SPKHOME /* go to current/last speech position */,
+  CMD_SPKHOME /* go to current (most recent) speech position */,
   
   /* virtual terminal switching */
   CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
@@ -153,18 +153,18 @@ typedef enum {
  * Please comment all CR_* definitions. They are
  * used during automatic help file generation.
  */
-#define CR_ROUTE     0X100   /* route cursor to character */
-#define CR_CUTBEGIN  0X200 /* start new cut buffer from character */
-#define CR_CUTAPPEND 0X300 /* append to cut buffer from character */
-#define CR_CUTRECT   0X400 /* rectangular cut to character */
-#define CR_CUTLINE   0X500 /* linear cut to character */
+#define CR_ROUTE     0X100   /* bring cursor to character */
+#define CR_CUTBEGIN  0X200 /* start new cut buffer */
+#define CR_CUTAPPEND 0X300 /* append to existing cut buffer */
+#define CR_CUTRECT   0X400 /* rectangular cut */
+#define CR_CUTLINE   0X500 /* linear cut */
 #define CR_SWITCHVT  0X600 /* switch to virtual terminal */
-#define CR_PRINDENT  0X700 /* go to previous line not more indented than column */
-#define CR_NXINDENT  0X800 /* go to next line not more indented than column */
+#define CR_PRINDENT  0X700 /* go up to nearest line without greater indent */
+#define CR_NXINDENT  0X800 /* go down to nearest line without greater indent */
 #define CR_DESCCHAR  0X900 /* describe character */
-#define CR_SETLEFT   0XA00 /* bring left of window to character */
-#define CR_SETMARK   0XB00 /* mark current window position */
-#define CR_GOTOMARK  0XC00 /* return to marked window position */
+#define CR_SETLEFT   0XA00 /* position left end of window */
+#define CR_SETMARK   0XB00 /* remember current window position */
+#define CR_GOTOMARK  0XC00 /* go to remembered window position */
 
 /* For entering a special key. */
 #define VAL_PASSKEY 0x2000
