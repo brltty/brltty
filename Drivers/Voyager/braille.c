@@ -552,7 +552,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     memset(&currentKeys, 0, sizeof(currentKeys));
 
     /* We combine dot and front key info in keystate */
-    currentKeys.control= (packet[1] << 8) | packet[0];
+    currentKeys.control = (packet[1] << 8) | packet[0];
     if (currentKeys.control & ~pressedKeys.control) key_pressed = 1;
     
     for (i=2; i<8; i++) {
@@ -566,11 +566,17 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
       key--;
 
       currentKeys.routing[key] = 1;
-      rtk_which[rtk_count++] = key;
       if (!pressedKeys.routing[key]) key_pressed = 1;
     }
 
     if (key_pressed) pressedKeys = currentKeys;
+  }
+
+  {
+    int key;
+    for (key=0; key<totalCells; key++)
+      if (pressedKeys.routing[key])
+        rtk_which[rtk_count++] = key;
   }
 
   if (rtk_count == 0) {
