@@ -74,8 +74,8 @@ spk_open (char **parameters)
 static void
 spk_say (const unsigned char *buffer, int len)
 {
-  static unsigned char *pre_speech = PRE_SPEECH;
-  static unsigned char *post_speech = POST_SPEECH;
+  static unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
+  static unsigned char *post_speech = (unsigned char *)POST_SPEECH;
   unsigned char buf[256];
   unsigned char c;
   int i;
@@ -113,7 +113,7 @@ spk_say (const unsigned char *buffer, int len)
 static void
 spk_mute (void)
 {
-  static unsigned char *mute_seq = MUTE_SEQ;
+  static unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
   unsigned char buffer[32];
 
 return;

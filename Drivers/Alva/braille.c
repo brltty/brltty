@@ -347,7 +347,7 @@ typedef struct {
   int (*resetPort) (void);
   void (*closePort) (void);
   int (*readPacket) (unsigned char *buffer, int length);
-  int (*writePacket) (const unsigned char *buffer, int length, int *delay);
+  int (*writePacket) (const unsigned char *buffer, int length, unsigned int *delay);
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
@@ -466,7 +466,7 @@ readSerialPacket (unsigned char *buffer, int length) {
 }
 
 static int
-writeSerialPacket (const unsigned char *buffer, int length, int *delay) {
+writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay) {
   if (delay) *delay += length * 1000 / serialCharactersPerSecond;
   return serialWriteData(serialDevice, buffer, length);
 }
@@ -531,7 +531,7 @@ readUsbPacket (unsigned char *buffer, int length) {
 }
 
 static int
-writeUsbPacket (const unsigned char *buffer, int length, int *delay) {
+writeUsbPacket (const unsigned char *buffer, int length, unsigned int *delay) {
   return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
@@ -757,9 +757,8 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
   /* Update status cells on braille display */
   if (memcmp (st, PrevStatus, NbStCells))	/* only if it changed */
     {
-      for (i = 0;
-	   i < NbStCells;
-	   StatusCells[i++] = outputTable[(PrevStatus[i] = st[i])]);
+      for (i=0; i<NbStCells; ++i)
+        StatusCells[i] = outputTable[(PrevStatus[i] = st[i])];
       WriteToBrlDisplay (brl, 0, NbStCells, StatusCells);
     }
 }
