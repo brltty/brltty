@@ -548,8 +548,8 @@ sayLines (int line, int count, int track, SayMode mode) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static int
-upDifferentLine (short mode) {
-  if (p->winy > 0) {
+toDifferentLine (short mode, int (*canMove) (void), int amount) {
+  if (canMove()) {
     unsigned char buffer1[scr.cols], buffer2[scr.cols];
     int skipped = 0;
 
@@ -557,7 +557,7 @@ upDifferentLine (short mode) {
     readScreen(0, p->winy, scr.cols, 1, buffer1, mode);
 
     do {
-      readScreen(0, --p->winy, scr.cols, 1, buffer2, mode);
+      readScreen(0, p->winy+=amount, scr.cols, 1, buffer2, mode);
       if ((memcmp(buffer1, buffer2, scr.cols) != 0) ||
           ((mode == SCR_TEXT) && prefs.showCursor && (p->winy == scr.posy)))
         return 1;
@@ -571,7 +571,7 @@ upDifferentLine (short mode) {
         playTune(&tune_skip_more);
       }
       skipped++;
-    } while (p->winy > 0);
+    } while (canMove());
   }
 
   playTune(&tune_bounce);
@@ -579,34 +579,23 @@ upDifferentLine (short mode) {
 }
 
 static int
+canMoveUp (void) {
+  return p->winy > 0;
+}
+
+static int
+canMoveDown (void) {
+  return p->winy < (scr.rows - brl.y);
+}
+
+static int
+upDifferentLine (short mode) {
+  return toDifferentLine(mode, canMoveUp, -1);
+}
+
+static int
 downDifferentLine (short mode) {
-  if (p->winy < (scr.rows - brl.y)) {
-    unsigned char buffer1[scr.cols], buffer2[scr.cols];
-    int skipped = 0;
-
-    if ((mode == SCR_TEXT) && p->showAttributes) mode = SCR_ATTRIB;
-    readScreen(0, p->winy, scr.cols, 1, buffer1, mode);
-
-    do {
-      readScreen(0, ++p->winy, scr.cols, 1, buffer2, mode);
-      if ((memcmp(buffer1, buffer2, scr.cols) != 0) ||
-          ((mode == SCR_TEXT) && prefs.showCursor && (p->winy == scr.posy)))
-        return 1;
-
-      /* lines are identical */
-      if (skipped == 0) {
-        playTune(&tune_skip_first);
-      } else if (skipped <= 4) {
-        playTune(&tune_skip);
-      } else if (skipped % 4 == 0) {
-        playTune(&tune_skip_more);
-      }
-      skipped++;
-    } while (p->winy < (scr.rows - brl.y));
-  }
-
-  playTune(&tune_bounce);
-  return 0;
+  return toDifferentLine(mode, canMoveDown, 1);
 }
 
 static void
