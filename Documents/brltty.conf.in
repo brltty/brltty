@@ -17,7 +17,7 @@
 # processing is not case sensitive. Examples of valid entries are:
 #
 #	Braille-Driver	pm	# Papenmeier braille displays.
-#	braille-device	ttyS0	# The first Linux serial port.
+#	braille-device	ttyS0	# The first Linux serial device.
 #	SPEECH-DRIVER	fv	# The Festival Text to Speech System.
 
 # The default settings given within the following descriptions assume no
@@ -53,19 +53,11 @@
 #braille-driver	vr	# Virtual
 #braille-driver	vs	# VisioBraille
 
-# The braille-device directive specifies the port to which the braille
+# The braille-device directive specifies the device to which the braille
 # display is connected. Relative paths are anchored at "/dev". If not
 # specified, "@braille_device@" will be used.
 # (can be overridden with the -d [--braille-device=] option)
-#braille-device	serial:ttyS0	# Primary Linux serial port (old-style).
-#braille-device	serial:tts/0	# Primary Linux serial port (devfs).
-#braille-device	serial:ttya	# Primary Solaris serial port.
-#braille-device	serial:tty0p0	# Primary HP-UX serial port.
-#braille-device	serial:cua00	# Primary OpenBSD serial port.
-#braille-device	serial:cuaa0	# Primary FreeBSD serial port.
-#braille-device	serial:dty00	# Primary NetBSD serial port.
-#braille-device	serial:ttyUSB0	# Primary Linux USB serial converter (old-style).
-#braille-device	serial:usb/tts/0	# Primary Linux USB serial converter (devfs).
+#braille-device	serial:@first_serial_device@	# First serial device.
 #braille-device	usb:		# First USB device matching braille driver.
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
 #braille-device	bluez:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.

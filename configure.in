@@ -616,44 +616,51 @@ then
 fi
 BRLTTY_ARG_DRIVER([braille])
 
-AC_CACHE_CHECK([for default braille device], [brltty_cv_default_braille_device], [dnl
+AC_CACHE_CHECK([for default braille device], [brltty_cv_device_serial_first], [dnl
 case "${host_os}"
 in
    linux*)
-      brltty_cv_default_braille_device="/dev/ttyS0"
+      for brltty_device in "/dev/ttyS0" "/dev/tts/0"
+      do
+         test -c "${brltty_device}" && {
+            brltty_cv_device_serial_first="${brltty_device}"
+            break
+         }
+      done
       ;;
    solaris*)
-      brltty_cv_default_braille_device="/dev/ttya"
+      brltty_cv_device_serial_first="/dev/ttya"
       ;;
    hpux*)
-      brltty_cv_default_braille_device="/dev/tty0p0"
+      brltty_cv_device_serial_first="/dev/tty0p0"
       ;;
    openbsd*)
-      brltty_cv_default_braille_device="/dev/cua00"
+      brltty_cv_device_serial_first="/dev/cua00"
       ;;
    freebsd*)
-      brltty_cv_default_braille_device="/dev/cuaa0"
+      brltty_cv_device_serial_first="/dev/cuaa0"
       ;;
    netbsd*)
-      brltty_cv_default_braille_device="/dev/dty00"
+      brltty_cv_device_serial_first="/dev/dty00"
       ;;
    *)
-      brltty_cv_default_braille_device=""
+      brltty_cv_device_serial_first=""
       AC_MSG_WARN([no default braille device])
       ;;
 esac])
+AC_SUBST([first_serial_device], [${brltty_cv_device_serial_first}])
 
 BRLTTY_ARG_WITH(
    [braille-device], [DEVICE],
    [default braille display device],
-   [braille_device], ["${brltty_cv_default_braille_device}"]
+   [braille_device], ["${brltty_cv_device_serial_first}"]
 )
 if test "${braille_device}" = "no"
 then
    braille_device=""
 elif test "${braille_device}" = "yes"
 then
-   braille_device="${brltty_cv_default_braille_device}"
+   braille_device="${brltty_cv_device_serial_first}"
 fi
 AC_SUBST([braille_device])
 AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"])
