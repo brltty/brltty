@@ -35,48 +35,6 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
-#ifdef ENABLE_USB
-#include "Programs/usbio.h"
-
-static char *usbDevice;
-
-static int
-albatrossChooser (UsbDevice *device, void *data) {
-  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-  LogPrint(LOG_WARNING, "Checking USB device [%4X,%4X].",
-           descriptor->idVendor, descriptor->idProduct);
-  if (descriptor->iManufacturer) {
-    char *string = usbGetString(device, descriptor->iManufacturer, 1000);
-    if (string) {
-      LogPrint(LOG_WARNING, "Manufacturer name: %s", string);
-      free(string);
-    }
-  }
-  if (descriptor->iProduct) {
-    char *string = usbGetString(device, descriptor->iProduct, 1000);
-    if (string) {
-      LogPrint(LOG_WARNING, "Product description: %s", string);
-      free(string);
-    }
-  }
-  if (descriptor->iSerialNumber) {
-    char *string = usbGetString(device, descriptor->iSerialNumber, 1000);
-    if (string) {
-      LogPrint(LOG_WARNING, "Serial number: %s", string);
-      free(string);
-    }
-  }
-  if ((descriptor->idVendor == 0X0403) && (descriptor->idProduct == 0X6001)) {
-    char *serialDevice = usbGetSerialDevice(device, 0);
-    if (serialDevice) {
-      usbDevice = serialDevice;
-    }
-    return 1;
-  }
-  return 0;
-}
-#endif /* ENABLE_USB */
-
 #define LOWER_ROUTING_DEFAULT CR_ROUTE
 #define UPPER_ROUTING_DEFAULT CR_DESCCHAR
 
@@ -209,25 +167,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
     makeOutputTable(&dots, &outputTable);
   }
-
-#ifdef ENABLE_USB
-  usbDevice = NULL;
-  {
-    UsbDevice *device = usbFindDevice(albatrossChooser, NULL);
-    if (device) {
-      if (usbDevice) {
-        LogPrint(LOG_INFO, "Albatross USB serial device: %s", usbDevice);
-        free(usbDevice);
-        usbDevice = NULL;
-      } else {
-        LogPrint(LOG_WARNING, "Albatross serial device not determined.");
-      }
-      usbCloseDevice(device);
-    } else {
-      LogPrint(LOG_WARNING, "Albatross USB bus device not found.");
-    }
-  }
-#endif /* ENABLE_USB */
 
   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
     speed_t speedTable[] = {B19200, B9600, B0};
