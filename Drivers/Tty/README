@@ -1,14 +1,48 @@
-This driver allows to use any classical tty as peripheral for BrlTTY: for
-instance, for my Ampex 232, whose terminfo entry is in
-/usr/share/terminfo/a/ampex232 in debian, I just launch:
+This driver allows to use any tty as peripheral for BrlTTY. There are many ways
+to use it.
 
-brltty -b ty -B term=ampex232,cset=CP850 -t identity
+By ssh-ing from another machine
+-------------------------------
 
-identity is necessary to really get characters and not dots. If a BrlAPI
-application writes dots, you'll get garbage though. CP850 is there because that
-ampex uses that code page. Actually, one might even launch it in a xterm:
+ssh from machB to machA, look which pty was used, and give it as device
+to brltty:
 
-brltty -b ty -B term=$TERM -d /dev/pts/345 -t identity
+samy@machB$ ssh machA
+samy@machA$ who am i
+samy     pts/76       Jul 17 16:41 (machB)
+samy@machA$ su -
+Password:
+root@machA# brltty -b ty -t identity -d /dev/pts/76 -B term=$TERM -n
 
-(where /dev/pts/345 is the pseudo-terminal of the xterm, see the output of the
-'who' command)
+By using an Xterm
+-----------------
+
+Just give the pty used by the xterm to brltty.
+
+$ who am i
+samy     pts/71       Jul 17 16:33 (:0.0)
+$ su -
+Password:
+# brltty -b ty -t identity -d /dev/pts/71 -B term=$TERM -n
+
+By using a real tty
+-------------------
+
+Just give the serial port on which it is connected to brltty:
+
+# brltty -b ty -t identity -d /dev/ttyS0 -B term=ampex232,cset=CP850
+
+I here had to precise the type of terminal (I have an Ampex232, see somewhere
+like /usr/share/terminfo for your own's. I also had to tell that it uses the
+CP850 codepage table.
+
+
+Notes
+-----
+
+Another machine connected by a null-modem can be used as a tty: just run
+minicom on it, and use vt100 as type of terminal.
+
+-t identity is necessary to bypass dots translation and really get text. If a
+BrlAPI application write dots (Gnopernicus for instance) you'll get garbage,
+though.
