@@ -451,13 +451,11 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
   if (flow & SERIAL_FLOW_INPUT_RTS) {
     flow &= ~SERIAL_FLOW_INPUT_RTS;
     serial->pendingAttributes.fRtsControl = RTS_CONTROL_HANDSHAKE;
-    serial->pendingAttributes.fInX = TRUE;
   }
 
   if (flow & SERIAL_FLOW_INPUT_DTR) {
     flow &= ~SERIAL_FLOW_INPUT_DTR;
     serial->pendingAttributes.fDtrControl = DTR_CONTROL_HANDSHAKE;
-    serial->pendingAttributes.fInX = TRUE;
   }
 
   if (flow & SERIAL_FLOW_INPUT_XON) {
@@ -470,13 +468,11 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
   if (flow & SERIAL_FLOW_OUTPUT_CTS) {
     flow &= ~SERIAL_FLOW_OUTPUT_CTS;
     serial->pendingAttributes.fOutxCtsFlow = TRUE;
-    serial->pendingAttributes.fOutX = TRUE;
   }
 
   if (flow & SERIAL_FLOW_OUTPUT_DSR) {
     flow &= ~SERIAL_FLOW_OUTPUT_DSR;
     serial->pendingAttributes.fOutxDsrFlow = TRUE;
-    serial->pendingAttributes.fOutX = TRUE;
   }
 
   if (flow & SERIAL_FLOW_OUTPUT_XON) {
@@ -753,7 +749,7 @@ FILE *
 serialGetStream (SerialDevice *serial) {
   if (!serial->stream) {
 #ifdef __MINGW32__
-    if ((serial->fileDescriptor = _open_osfhandle(serial->fileHandle, O_RDWR)) < 0) {
+    if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
       LogError("open_osfhandle");
       return NULL;
     }
