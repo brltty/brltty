@@ -51,12 +51,12 @@ extern "C" {
  *
  * This is where authentication key and driver-dependent key names are found
  * for instance. */
-#define BRLAPI_ETCDIR "/etc/brltty"
+#undef BRLAPI_ETCDIR
 
 /** Default name of the file containing \e BrlAPI 's authentication key
  *
  * This name is relative to BRLAPI_ETCDIR */
-#define BRLAPI_AUTHFILE "brlapi-key"
+#undef BRLAPI_AUTHFILE
 
 /** Final path for default authentication key file */
 #define BRLAPI_AUTHNAME BRLAPI_ETCDIR "/" BRLAPI_AUTHFILE

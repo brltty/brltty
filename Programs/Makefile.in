@@ -307,18 +307,24 @@ install-manpages:
 	   $(INSTALL_DATA) $${page} $${directory}; \
 	done
 
-install-api: $(API_LIB) $(API_ARC)
+install-api: install-api-headers install-api-libraries install-api-key
+
+install-api-headers:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+
+install-api-libraries: $(API_LIB) $(API_ARC)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(API_DIRECTORY)
 	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB).$(API_RELEASE)
-	$(SYMLINK) $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB)
+	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(API_DIRECTORY)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(API_DIRECTORY)
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIR)
-	file=$(INSTALL_ROOT)$(DATA_DIR)/$(API_KEYFILE) && \
-	if test ! -f $$file; then umask 077 && mcookie >$$file; fi
+
+install-api-key:
+	file=$(sysconfdir)/$(API_KEYFILE) && \
+	if test ! -f $$file -a -w $(sysconfdir); \
+	then umask 077 && mcookie >$$file; fi
 
 ###############################################################################
 
@@ -333,7 +339,6 @@ uninstall-data:
 	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.ctb
 	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.cti
 	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/brltty*
-	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/$(API_KEYFILE)
 	-rmdir $(INSTALL_ROOT)$(DATA_DIR)
 
 uninstall-libraries:

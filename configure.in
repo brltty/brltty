@@ -71,8 +71,7 @@ fi
 AC_SUBST([install_root])
 BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
-configuration_file="${PACKAGE_NAME}.conf"
-AC_SUBST([configuration_file])
+AC_SUBST([configuration_file], ["${PACKAGE_NAME}.conf"])
 BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"])
 
 AC_SUBST([api_directory], ["${libdir}"])
@@ -101,6 +100,7 @@ BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${sysconfdir}"])
 BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${execute_root}${library_directory}"])
 eval 'configuration_directory="'"${sysconfdir}"'"'
 AC_SUBST([configuration_directory])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${configuration_directory}"])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
 
@@ -439,8 +439,8 @@ BRLTTY_ARG_ENABLE(
 AC_SUBST([api_objects])
 AC_SUBST([build_api])
 AC_SUBST([install_api])
-AC_SUBST([api_keyfile], [brlapi-key])
-BRLTTY_DEFINE_EXPANDED([API_KEYFILE], ["${api_keyfile}"])
+AC_SUBST([api_keyfile], [brlapi.key])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_keyfile}"])
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])

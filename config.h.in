@@ -139,9 +139,6 @@ extern "C" {
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
 
-/* Define this to be a string containing the path to the file containing the API access key. */
-#undef API_KEYFILE
-
 /* Define this to include Papenmeier configuration file support. */
 #undef ENABLE_PM_CONFIGURATION_FILE
 

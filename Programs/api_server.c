@@ -898,7 +898,7 @@ void api_open(BrailleDisplay *brl, char **parameters)
 
  api_link();
 
- res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:API_KEYFILE),
+ res = brlapi_loadAuthKey((*parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_AUTHNAME),
   &authlength,auth);
  if (res==-1)
  {
