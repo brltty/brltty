@@ -167,16 +167,68 @@ static inline Widget crKeyBut(String name, long keycode, int repeat,
   return button;
 }
 
-static void createKeyButtons(void) {
- crKeyBut("Up",	   BRL_CMD_LNUP,   1, BUTWIDTH+1,     0);
- crKeyBut("Left",  BRL_CMD_FWINLT, 1, 0,              BUTHEIGHT+1);
- crKeyBut("Home",  BRL_CMD_HOME,   0, BUTWIDTH+1,     BUTHEIGHT+1);
- crKeyBut("Right", BRL_CMD_FWINRT, 1, 2*(BUTWIDTH+1), BUTHEIGHT+1);
- crKeyBut("Down",  BRL_CMD_LNDN,   1, BUTWIDTH+1,     2*(BUTHEIGHT+1));
- crKeyBut("alt-a", BRL_FLG_CHAR_META | BRL_BLK_PASSCHAR | 'a', 0, 0, 3*(BUTHEIGHT+1));
- crKeyBut("ctrl-a", BRL_FLG_CHAR_CONTROL | BRL_BLK_PASSCHAR | 'a', 0, BUTWIDTH+1, 3*(BUTHEIGHT+1));
- crKeyBut("a", BRL_BLK_PASSCHAR | 'a', 0, 2*(BUTWIDTH)+1, 3*(BUTHEIGHT+1));
- crKeyBut("A", BRL_BLK_PASSCHAR | 'A', 0, 3*(BUTWIDTH)+1, 3*(BUTHEIGHT+1));
+struct button{
+ String label;
+ long keycode;
+ int repeat;
+ int x,y;
+};
+
+static struct button buttons_simple[] = {
+ { "^",     BRL_CMD_LNUP,   1, 1, 0 },
+ { "<",   BRL_CMD_FWINLT, 1, 0, 1 },
+ { "Home",   BRL_CMD_HOME,   0, 1, 1 },
+ { ">",  BRL_CMD_FWINRT, 1, 2, 1 },
+ { "v",   BRL_CMD_LNDN,   1, 1, 2 },
+ { "alt-a",  BRL_FLG_CHAR_META    | BRL_BLK_PASSCHAR | 'a', 0, 0, 3 },
+ { "ctrl-a", BRL_FLG_CHAR_CONTROL | BRL_BLK_PASSCHAR | 'a', 0, 1, 3 },
+ { "a",      BRL_BLK_PASSCHAR                        | 'a', 0, 2, 3 },
+ { "A",      BRL_BLK_PASSCHAR                        | 'A', 0, 3, 3 },
+ { NULL,     0,              0, 0, 0},
+};
+
+static struct button buttons_vs[] = {
+	/*
+ { "VT1", BRL_BLK_SWITCHVT,   1, 0, 1 },
+ { "VT2", BRL_BLK_SWITCHVT+1, 1, 1, 1 },
+ { "VT3", BRL_BLK_SWITCHVT+2, 1, 2, 1 },
+ { "VT4", BRL_BLK_SWITCHVT+3, 1, 6, 1 },
+ { "VT5", BRL_BLK_SWITCHVT+4, 1, 7, 1 },
+ { "VT6", BRL_BLK_SWITCHVT+5, 1, 8, 1 },
+	*/
+ //{ "B5", EOF, /* cut */      1, 5, 2 },
+ { "TOP", BRL_CMD_TOP_LEFT,   1, 6, 2 },
+ { "BOT", BRL_CMD_BOT_LEFT,   1, 6, 4 },
+ { "<=", BRL_CMD_FWINLTSKIP, 1, 1, 0 },
+ { "<=", BRL_CMD_FWINLTSKIP, 1, 8, 2 },
+ { "=>", BRL_CMD_FWINRTSKIP, 1, 2, 0 },
+ { "=>", BRL_CMD_FWINRTSKIP, 1, 8, 4 },
+ { "-^-",  BRL_CMD_LNUP,       1, 7, 2 },
+ { "-v-",  BRL_CMD_LNDN,       1, 7, 4 },
+ { "->", BRL_CMD_FWINRT,     1, 8, 3 },
+ { "<-", BRL_CMD_FWINLT,     1, 6, 3 },
+ { "HOME", BRL_CMD_HOME,       1, 7, 3 },
+ { "^", BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP,    1, 1, 2 },
+ { "v", BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN,  1, 1, 4 },
+ { ">", BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT, 1, 2, 3 },
+ { "<", BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT,  1, 0, 3 },
+ //{ "B3", BRL_CMD_CSRVIS,     1, 2, 2 },
+ { "DEL", BRL_BLK_PASSKEY + BRL_KEY_DELETE,       1, 0, 4 },
+ { "INS", BRL_BLK_PASSKEY + BRL_KEY_INSERT,       1, 2, 4 },
+ //{ "C5", BRL_CMD_PASTE,      1, 5, 3 },
+ //{ "D5", EOF,                1, 5, 4 },
+ //{ "B4", EOF,                1, 3, 2 },
+
+ //{ "B1", EOF,                1, 0, 2 },
+ //{ "C2", EOF,                1, 1, 3 },
+ //{ "C4", EOF,                1, 3, 3 },
+ //{ "D4", EOF,                1, 3, 4 },
+};
+
+static void createKeyButtons(struct button *buttons) {
+ struct button *b;
+ for (b=buttons; b->label; b++)
+  crKeyBut(b->label, b->keycode, b->repeat, b->x*(BUTWIDTH+1), b->y*(BUTHEIGHT+1));
 }
 
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
@@ -308,7 +360,10 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
      XtNdefaultDistance,0,
 #endif
      NULL);
-   createKeyButtons();
+   if (model && !strcmp(model,"vs"))
+    createKeyButtons(buttons_vs);
+   else
+    createKeyButtons(buttons_simple);
  }
 
  /* go go go */
