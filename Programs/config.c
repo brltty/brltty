@@ -1813,8 +1813,9 @@ startup (int argc, char *argv[]) {
 
   if (opt_textTable) {
     fixTranslationTablePath(&opt_textTable, TEXT_TABLE_PREFIX);
-    replaceTextTable(opt_textTable);
-  } else {
+    if (!replaceTextTable(opt_textTable)) opt_textTable = NULL;
+  }
+  if (!opt_textTable) {
     opt_textTable = TEXT_TABLE;
     reverseTranslationTable(&textTable, &untextTable);
   }
