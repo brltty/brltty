@@ -24,8 +24,8 @@ A/D: Go backward/forward one window
 B/C: Go up/down one line
 A+ B/C: Go to top-left/bottom-left corner
 D+ B/C: Go to top/bottom line
-RR: Go to cursor
 RL: Go back to previous reading location (undo cursor tracking motion).
+RR: Go to cursor
 RL+RR: Cursor tracking (toggle)
 UP/DOWN: Move cursor up/down (arrow keys)
 
@@ -51,14 +51,14 @@ CRtx + CRt(x+2) + CRty: Cut text from x to y
 Chord-1234: Paste cut text
 
 Fancy Navigation
-RL+ B/C: Go to previous/next line with different attributes
-RR+ B/C: Go to previous/next different line
-UP+ B/C: Go to previous/next paragraph (blank line separation)
-DOWN+ B/C: Go to previous/next prompt (same prompt as current line)
 RL+ A/D: Go to beginning/end of line
 RR+ A/D: Go left/right one character
 UP+ A/D: Go to previous/next non-blank window
 DOWN+ A/D: Search screen backward/forward for cut text
+RL+ B/C: Go to previous/next line with different attributes
+RR+ B/C: Go to previous/next different line
+UP+ B/C: Go to previous/next paragraph (blank line separation)
+DOWN+ B/C: Go to previous/next prompt (same prompt as current line)
 CRa#+RL: Remember current position as mark #
 CRa#+RR: Go to mark #
 CRt#+DOWN: Go right # cells

@@ -39,7 +39,8 @@ re_adjacentStrings = re.compile('" *"')
 
 # To  find common prefixes in key pairs
 re_keyPair = re.compile('^((?P<prefix>.*) +)?(?P<common>.*\\+)(?P<first>.*)/(?P=common)(?P<second>.*)')
-# (?P<name>...) names a gruop
+# (?P<name>...) names a group
+# (?P=name) retreives a group
 
 def concatenateLines(first, second):
     if first and first[-1] == '\n':
