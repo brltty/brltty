@@ -1040,23 +1040,18 @@ main (int argc, char *argv[]) {
             else if (command & VAL_TOGGLE_OFF)
               playTune(&tune_toggle_off);
             break;
-          case CMD_RESTARTBRL:
-            restartBrailleDriver();
-            break;
+
+          case CMD_TOP_LEFT:
+            p->winx = 0;
           case CMD_TOP:
             p->winy = 0;
             break;
-          case CMD_TOP_LEFT:
-            p->winy = 0;
+          case CMD_BOT_LEFT:
             p->winx = 0;
-            break;
           case CMD_BOT:
             p->winy = scr.rows - brl.y;
             break;
-          case CMD_BOT_LEFT:
-            p->winy = scr.rows - brl.y;
-            p->winx = 0;
-            break;
+
           case CMD_WINUP:
             if (p->winy == 0)
               playTune (&tune_bounce);
@@ -1067,6 +1062,177 @@ main (int argc, char *argv[]) {
               playTune (&tune_bounce);
             p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
             break;
+
+          case CMD_LNUP:
+            upOneLine(SCR_TEXT);
+            break;
+          case CMD_LNDN:
+            downOneLine(SCR_TEXT);
+            break;
+
+          case CMD_PRDIFLN:
+            upDifferentLine(SCR_TEXT);
+            break;
+          case CMD_NXDIFLN:
+            downDifferentLine(SCR_TEXT);
+            break;
+
+          case CMD_ATTRUP:
+            upDifferentLine(SCR_ATTRIB);
+            break;
+          case CMD_ATTRDN:
+            downDifferentLine(SCR_ATTRIB);
+            break;
+
+          {
+            int increment;
+          case CMD_PRPGRPH:
+            increment = -1;
+            goto findParagraph;
+          case CMD_NXPGRPH:
+            increment = 1;
+          findParagraph:
+            {
+              int found = 0;
+              unsigned char buffer[scr.cols];
+              int findBlank = 1;
+              int line = p->winy;
+              int i;
+              while ((line >= 0) && (line <= (scr.rows - brl.y))) {
+                readScreen(0, line, scr.cols, 1, buffer, SCR_TEXT);
+                for (i=0; i<scr.cols; i++)
+                  if ((buffer[i] != ' ') && (buffer[i] != 0))
+                    break;
+                if ((i == scr.cols) == findBlank) {
+                  if (!findBlank) {
+                    found = 1;
+                    p->winy = line;
+                    p->winx = 0;
+                    break;
+                  }
+                  findBlank = 0;
+                }
+                line += increment;
+              }
+              if (!found) playTune(&tune_bounce);
+            }
+            break;
+          }
+
+          {
+            int increment;
+          case CMD_PRPROMPT:
+            increment = -1;
+            goto findPrompt;
+          case CMD_NXPROMPT:
+            increment = 1;
+          findPrompt:
+            {
+              unsigned char buffer[scr.cols];
+              unsigned char *blank;
+              readScreen(0, p->winy, scr.cols, 1, buffer, SCR_TEXT);
+              if ((blank = memchr(buffer, ' ', scr.cols))) {
+                findRow(blank-buffer, increment, testPrompt, buffer);
+              } else {
+                playTune(&tune_command_rejected);
+              }
+            }
+            break;
+          }
+
+          {
+            int increment;
+          case CMD_PRSEARCH:
+            increment = -1;
+            goto doSearch;
+          case CMD_NXSEARCH:
+            increment = 1;
+          doSearch:
+            if (cut_buffer) {
+              int length = strlen(cut_buffer);
+              int found = 0;
+              if (length <= scr.cols) {
+                int line = p->winy;
+                unsigned char buffer[scr.cols+1];
+                unsigned char string[length+1];
+                for (i=0; i<length; i++) string[i] = tolower(cut_buffer[i]);
+                string[length] = 0;
+                while ((line >= 0) && (line <= (scr.rows - brl.y))) {
+                  unsigned char *address = buffer;
+                  readScreen(0, line, scr.cols, 1, buffer, SCR_TEXT);
+                  for (i=0; i<scr.cols; i++) buffer[i] = tolower(buffer[i]);
+                  buffer[scr.cols] = 0;
+                  if (line == p->winy) {
+                    if (increment < 0) {
+                      int end = p->winx + length - 1;
+                      if (end < scr.cols) buffer[end] = 0;
+                    } else {
+                      int start = p->winx + brl.x;
+                      if (start > scr.cols) start = scr.cols;
+                      address = buffer + start;
+                    }
+                  }
+                  if ((address = strstr(address, string))) {
+                    if (increment < 0) {
+                      while (1) {
+                        unsigned char *next = strstr(address+1, string);
+                        if (!next) break;
+                        address = next;
+                      }
+                    }
+                    p->winy = line;
+                    p->winx = (address - buffer) / brl.x * brl.x;
+                    found = 1;
+                    break;
+                  }
+                  line += increment;
+                }
+              }
+              if (!found) playTune(&tune_bounce);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          case CMD_LNBEG:
+            if (p->winx)
+              p->winx = 0;
+            else
+              playTune(&tune_bounce);
+            break;
+          case CMD_LNEND:
+            if (p->winx == (scr.cols - brl.x))
+              playTune(&tune_bounce);
+            else
+              p->winx = scr.cols - brl.x;
+            break;
+
+          case CMD_CHRLT:
+            if (p->winx == 0)
+              playTune (&tune_bounce);
+            p->winx = MAX (p->winx - 1, 0);
+            break;
+          case CMD_CHRRT:
+            if (p->winx < (scr.cols - 1))
+              p->winx++;
+            else
+              playTune(&tune_bounce);
+            break;
+
+          case CMD_HWINLT:
+            if (p->winx == 0)
+              playTune(&tune_bounce);
+            else
+              p->winx = MAX(p->winx-hwinshift, 0);
+            break;
+          case CMD_HWINRT:
+            if (p->winx < (scr.cols - hwinshift))
+              p->winx += hwinshift;
+            else
+              playTune(&tune_bounce);
+            break;
+
           case CMD_FWINLT:
             if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
@@ -1155,15 +1321,7 @@ main (int argc, char *argv[]) {
             }
             break;
           }
-          case CMD_LNUP:
-            upOneLine(SCR_TEXT);
-            break;
-          case CMD_PRDIFLN:
-            upDifferentLine(SCR_TEXT);
-            break;
-          case CMD_ATTRUP:
-            upDifferentLine(SCR_ATTRIB);
-            break;
+
           case CMD_FWINRT:
             if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
@@ -1238,169 +1396,32 @@ main (int argc, char *argv[]) {
             }
             break;
           }
-          case CMD_LNDN:
-            downOneLine(SCR_TEXT);
-            break;
-          case CMD_NXDIFLN:
-            downDifferentLine(SCR_TEXT);
-            break;
-          case CMD_ATTRDN:
-            downDifferentLine(SCR_ATTRIB);
-            break;
-          {
-            int increment;
-          case CMD_PRPGRPH:
-            increment = -1;
-            goto findParagraph;
-          case CMD_NXPGRPH:
-            increment = 1;
-          findParagraph:
-            {
-              int found = 0;
-              unsigned char buffer[scr.cols];
-              int findBlank = 1;
-              int line = p->winy;
-              int i;
-              while ((line >= 0) && (line <= (scr.rows - brl.y))) {
-                readScreen(0, line, scr.cols, 1, buffer, SCR_TEXT);
-                for (i=0; i<scr.cols; i++)
-                  if ((buffer[i] != ' ') && (buffer[i] != 0))
-                    break;
-                if ((i == scr.cols) == findBlank) {
-                  if (!findBlank) {
-                    found = 1;
-                    p->winy = line;
-                    p->winx = 0;
-                    break;
-                  }
-                  findBlank = 0;
-                }
-                line += increment;
-              }
-              if (!found) playTune(&tune_bounce);
+
+          case CMD_RETURN:
+            if ((p->winx != p->motx) || (p->winy != p->moty)) {
+          case CMD_BACK:
+              p->winx = p->motx;
+              p->winy = p->moty;
+              break;
             }
-            break;
-          }
-          {
-            int increment;
-          case CMD_PRPROMPT:
-            increment = -1;
-            goto findPrompt;
-          case CMD_NXPROMPT:
-            increment = 1;
-          findPrompt:
-            {
-              unsigned char buffer[scr.cols];
-              unsigned char *blank;
-              readScreen(0, p->winy, scr.cols, 1, buffer, SCR_TEXT);
-              if ((blank = memchr(buffer, ' ', scr.cols))) {
-                findRow(blank-buffer, increment, testPrompt, buffer);
-              } else {
-                playTune(&tune_command_rejected);
-              }
-            }
-            break;
-          }
-          {
-            int increment;
-          case CMD_PRSEARCH:
-            increment = -1;
-            goto doSearch;
-          case CMD_NXSEARCH:
-            increment = 1;
-          doSearch:
-            if (cut_buffer) {
-              int length = strlen(cut_buffer);
-              int found = 0;
-              if (length <= scr.cols) {
-                int line = p->winy;
-                unsigned char buffer[scr.cols+1];
-                unsigned char string[length+1];
-                for (i=0; i<length; i++) string[i] = tolower(cut_buffer[i]);
-                string[length] = 0;
-                while ((line >= 0) && (line <= (scr.rows - brl.y))) {
-                  unsigned char *address = buffer;
-                  readScreen(0, line, scr.cols, 1, buffer, SCR_TEXT);
-                  for (i=0; i<scr.cols; i++) buffer[i] = tolower(buffer[i]);
-                  buffer[scr.cols] = 0;
-                  if (line == p->winy) {
-                    if (increment < 0) {
-                      int end = p->winx + length - 1;
-                      if (end < scr.cols) buffer[end] = 0;
-                    } else {
-                      int start = p->winx + brl.x;
-                      if (start > scr.cols) start = scr.cols;
-                      address = buffer + start;
-                    }
-                  }
-                  if ((address = strstr(address, string))) {
-                    if (increment < 0) {
-                      while (1) {
-                        unsigned char *next = strstr(address+1, string);
-                        if (!next) break;
-                        address = next;
-                      }
-                    }
-                    p->winy = line;
-                    p->winx = (address - buffer) / brl.x * brl.x;
-                    found = 1;
-                    break;
-                  }
-                  line += increment;
-                }
-              }
-              if (!found) playTune(&tune_bounce);
-            } else {
-              playTune(&tune_command_rejected);
-            }
-            break;
-          }
           case CMD_HOME:
             trackCursor(1);
             break;
-          case CMD_BACK:
-            p->winx = p->motx;
-            p->winy = p->moty;
+
+          case CMD_RESTARTBRL:
+            restartBrailleDriver();
             break;
-          case CMD_LNBEG:
-            if (p->winx)
-              p->winx = 0;
-            else
-              playTune(&tune_bounce);
-            break;
-          case CMD_LNEND:
-            if (p->winx == (scr.cols - brl.x))
-              playTune(&tune_bounce);
-            else
-              p->winx = scr.cols - brl.x;
-            break;
-          case CMD_CHRLT:
-            if (p->winx == 0)
-              playTune (&tune_bounce);
-            p->winx = MAX (p->winx - 1, 0);
-            break;
-          case CMD_CHRRT:
-            if (p->winx < (scr.cols - 1))
-              p->winx++;
-            else
-              playTune(&tune_bounce);
-            break;
-          case CMD_HWINLT:
-            if (p->winx == 0)
-              playTune(&tune_bounce);
-            else
-              p->winx = MAX(p->winx-hwinshift, 0);
-            break;
-          case CMD_HWINRT:
-            if (p->winx < (scr.cols - hwinshift))
-              p->winx += hwinshift;
-            else
-              playTune(&tune_bounce);
+          case CMD_PASTE:
+            if ((dispmd & HELP_SCRN) != HELP_SCRN && !routingProcess)
+              if (cut_paste())
+                break;
+            playTune(&tune_command_rejected);
             break;
           case CMD_CSRJMP_VERT:
             if (!routeCursor(-1, p->winy, curscr))
               playTune(&tune_command_rejected);
             break;
+
           case CMD_CSRVIS:
             /* toggles the preferences option that decides whether cursor
                is shown at all */
@@ -1411,15 +1432,8 @@ main (int argc, char *argv[]) {
             TOGGLE_NOPLAY(p->hideCursor);
             /* no tune */
             break;
-          case CMD_ATTRVIS:
-            TOGGLE_PLAY(prefs.showAttributes);
-            break;
-          case CMD_CSRBLINK:
-            setBlinkingCursor(1);
-            if (TOGGLE_PLAY(prefs.blinkingCursor)) {
-              setBlinkingAttributes(1);
-              setBlinkingCapitals(0);
-            }
+          case CMD_CSRSIZE:
+            TOGGLE_PLAY(prefs.cursorStyle);
             break;
           case CMD_CSRTRK:
             if (TOGGLE(p->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
@@ -1431,17 +1445,55 @@ main (int argc, char *argv[]) {
                 trackCursor(1);
             }
             break;
-          case CMD_PASTE:
-            if ((dispmd & HELP_SCRN) != HELP_SCRN && !routingProcess)
-              if (cut_paste())
-                break;
-            playTune(&tune_command_rejected);
+          case CMD_CSRBLINK:
+            setBlinkingCursor(1);
+            if (TOGGLE_PLAY(prefs.blinkingCursor)) {
+              setBlinkingAttributes(1);
+              setBlinkingCapitals(0);
+            }
+            break;
+
+          case CMD_ATTRVIS:
+            TOGGLE_PLAY(prefs.showAttributes);
+            break;
+          case CMD_ATTRBLINK:
+            setBlinkingAttributes(1);
+            if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
+              setBlinkingCapitals(1);
+              setBlinkingCursor(0);
+            }
+            break;
+
+          case CMD_CAPBLINK:
+            setBlinkingCapitals(1);
+            if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
+              setBlinkingAttributes(0);
+              setBlinkingCursor(0);
+            }
+            break;
+
+          case CMD_SKPIDLNS:
+            TOGGLE_PLAY(prefs.skipIdenticalLines);
+            break;
+          case CMD_SKPBLNKWINS:
+            TOGGLE_PLAY(prefs.skipBlankWindows);
+            break;
+          case CMD_SLIDEWIN:
+            TOGGLE_PLAY(prefs.slidingWindow);
+            break;
+
+          case CMD_DISPMD:
+            setTranslationTable(TOGGLE_NOPLAY(p->showAttributes));
+            break;
+          case CMD_SIXDOTS:
+            TOGGLE_PLAY(prefs.textStyle);
+            break;
+
+          case CMD_AUTOREPEAT:
+            TOGGLE_PLAY(prefs.autorepeat);
             break;
           case CMD_TUNES:
             TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
-            break;
-          case CMD_DISPMD:
-            setTranslationTable(TOGGLE_NOPLAY(p->showAttributes));
             break;
           case CMD_FREEZE: {
             unsigned char frozen = (dispmd & FROZ_SCRN) != 0;
@@ -1452,56 +1504,6 @@ main (int argc, char *argv[]) {
             }
             break;
           }
-          case CMD_HELP: {
-            unsigned char help = (dispmd & HELP_SCRN) != 0;
-            infmode = 0;        /* ... and not in info mode */
-            if (TOGGLE_NOPLAY(help)) {
-              dispmd = selectDisplay(dispmd | HELP_SCRN);
-              if (dispmd & HELP_SCRN) { /* help screen selection successful */
-                switchto(0);        /* screen 0 for help screen */
-              } else {      /* help screen selection failed */
-                message("help not available", 0);
-              }
-            } else {
-              dispmd = selectDisplay(dispmd & ~HELP_SCRN);
-            }
-            break;
-          }
-          case CMD_CAPBLINK:
-            setBlinkingCapitals(1);
-            if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
-              setBlinkingAttributes(0);
-              setBlinkingCursor(0);
-            }
-            break;
-          case CMD_ATTRBLINK:
-            setBlinkingAttributes(1);
-            if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
-              setBlinkingCapitals(1);
-              setBlinkingCursor(0);
-            }
-            break;
-          case CMD_INFO:
-            TOGGLE_NOPLAY(infmode);
-            break;
-          case CMD_CSRSIZE:
-            TOGGLE_PLAY(prefs.cursorStyle);
-            break;
-          case CMD_SIXDOTS:
-            TOGGLE_PLAY(prefs.textStyle);
-            break;
-          case CMD_SLIDEWIN:
-            TOGGLE_PLAY(prefs.slidingWindow);
-            break;
-          case CMD_SKPIDLNS:
-            TOGGLE_PLAY(prefs.skipIdenticalLines);
-            break;
-          case CMD_SKPBLNKWINS:
-            TOGGLE_PLAY(prefs.skipBlankWindows);
-            break;
-          case CMD_AUTOREPEAT:
-            TOGGLE_PLAY(prefs.autorepeat);
-            break;
 
 #ifdef ENABLE_PREFERENCES_MENU
           case CMD_PREFMENU:
@@ -1520,6 +1522,31 @@ main (int argc, char *argv[]) {
             }
             break;
 
+          case CMD_HELP: {
+            unsigned char help = (dispmd & HELP_SCRN) != 0;
+            infmode = 0;        /* ... and not in info mode */
+            if (TOGGLE_NOPLAY(help)) {
+              dispmd = selectDisplay(dispmd | HELP_SCRN);
+              if (dispmd & HELP_SCRN) { /* help screen selection successful */
+                switchto(0);        /* screen 0 for help screen */
+              } else {      /* help screen selection failed */
+                message("help not available", 0);
+              }
+            } else {
+              dispmd = selectDisplay(dispmd & ~HELP_SCRN);
+            }
+            break;
+          }
+          case CMD_INFO:
+            TOGGLE_NOPLAY(infmode);
+            break;
+
+#ifdef ENABLE_LEARN_MODE
+          case CMD_LEARN:
+            learnMode(&brl, updateInterval, 10000);
+            break;
+#endif /* ENABLE_LEARN_MODE */
+
           case CMD_SWITCHVT_PREV:
             if (!switchVirtualTerminal(scr.no-1))
               playTune(&tune_command_rejected);
@@ -1530,6 +1557,23 @@ main (int argc, char *argv[]) {
             break;
 
 #ifdef ENABLE_SPEECH_SUPPORT
+          case CMD_RESTARTSPEECH:
+            restartSpeechDriver();
+            break;
+          case CMD_SPKHOME:
+            if (scr.no == speechScreen) {
+              trackSpeech(speech->getTrack());
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          case CMD_AUTOSPEAK:
+            TOGGLE_PLAY(prefs.autospeak);
+            break;
+          case CMD_MUTE:
+            speech->mute();
+            break;
+
           case CMD_SAY_LINE:
             sayLines(p->winy, 1, 0, prefs.sayLineMode);
             break;
@@ -1539,22 +1583,7 @@ main (int argc, char *argv[]) {
           case CMD_SAY_BELOW:
             sayLines(p->winy, scr.rows-p->winy, 1, sayImmediate);
             break;
-          case CMD_MUTE:
-            speech->mute();
-            break;
-          case CMD_SPKHOME:
-            if (scr.no == speechScreen) {
-              trackSpeech(speech->getTrack());
-            } else {
-              playTune(&tune_command_rejected);
-            }
-            break;
-          case CMD_RESTARTSPEECH:
-            restartSpeechDriver();
-            break;
-          case CMD_AUTOSPEAK:
-            TOGGLE_PLAY(prefs.autospeak);
-            break;
+
           case CMD_SAY_SLOWER:
             if (speech->rate && (prefs.speechRate > 0)) {
               setSpeechRate(--prefs.speechRate);
@@ -1569,6 +1598,7 @@ main (int argc, char *argv[]) {
               playTune(&tune_command_rejected);
             }
             break;
+
           case CMD_SAY_SOFTER:
             if (speech->volume && (prefs.speechVolume > 0)) {
               setSpeechVolume(--prefs.speechVolume);
@@ -1585,11 +1615,6 @@ main (int argc, char *argv[]) {
             break;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-#ifdef ENABLE_LEARN_MODE
-          case CMD_LEARN:
-            learnMode(&brl, updateInterval, 10000);
-            break;
-#endif /* ENABLE_LEARN_MODE */
           default: {
             int key = command & VAL_BLK_MASK;
             int arg = command & VAL_ARG_MASK;

@@ -84,6 +84,7 @@ typedef enum {
   /* implicit motion */
   CMD_HOME /* go to cursor */,
   CMD_BACK /* go back (undo unexpected cursor tracking motion) */,
+  CMD_RETURN /* go back (after cursor tracking) or to cursor (cursor not in window) */,
   
   /* feature activation and deactivation */
   CMD_FREEZE /* toggle screen mode frozen/live */,
@@ -101,6 +102,8 @@ typedef enum {
   CMD_ATTRBLINK /* toggle attribute blinking on/off */,
   CMD_CAPBLINK /* toggle capital letter blinking on/off */,
   CMD_TUNES /* toggle alert tunes on/off */,
+  CMD_AUTOREPEAT /* toggle autorepeat on/off */,
+  CMD_AUTOSPEAK /* toggle autospeak on/off */,
  
   /* mode selection */
   CMD_HELP /* enter/leave help display */,
@@ -120,12 +123,16 @@ typedef enum {
   CMD_MENU_PREV_SETTING /* change current item in menu to previous choice */,
   CMD_MENU_NEXT_SETTING /* change current item in menu to next choice */,
  
-  /* basic speech controls */
+  /* speech controls */
+  CMD_MUTE /* stop speaking immediately */,
+  CMD_SPKHOME /* go to current (most recent) speech position */,
   CMD_SAY_LINE /* speak current line */,
   CMD_SAY_ABOVE /* speak from top of screen through current line */,
   CMD_SAY_BELOW /* speak from current line through bottom of screen */,
-  CMD_MUTE /* stop speaking immediately */,
-  CMD_SPKHOME /* go to current (most recent) speech position */,
+  CMD_SAY_SLOWER /* decrease speech rate */,
+  CMD_SAY_FASTER /* increase speech rate */,
+  CMD_SAY_SOFTER /* decrease speech volume */,
+  CMD_SAY_LOUDER /* increase speech volume */,
   
   /* virtual terminal switching */
   CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
@@ -136,15 +143,7 @@ typedef enum {
   CMD_PASTE /* insert cut buffer at cursor */,
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
-  CMD_AUTOREPEAT /* toggle autorepeat on/off */,
   
-  /* advanced speech controls */
-  CMD_AUTOSPEAK /* toggle autospeak on/off */,
-  CMD_SAY_SLOWER /* decrease speech rate */,
-  CMD_SAY_FASTER /* increase speech rate */,
-  CMD_SAY_SOFTER /* decrease speech volume */,
-  CMD_SAY_LOUDER /* increase speech volume */,
-
   DriverCommandCount /* must be last */
 } DriverCommand;
 #define VAL_ARG_MASK 0XFF

@@ -1745,6 +1745,18 @@ See also the <ref id="command-GOTOMARK" name="GOTOMARK"> routing key command.
     This is an easy way to get right back to where you were reading
     after an unexpected event (like cursor tracking)
     moves the braille window at an inopportune moment.
+  <tag>RETURN<label id="command-RETURN"></tag>
+    <itemize>
+      <item>
+        If the most recent motion of the braille window was automatic,
+        e.g. as a result of cursor tracking,
+        then go back to where the most recent motion command put it
+        (see the <ref id="command-BACK" name="BACK"> command).
+      <item>
+        If the cursor isn't within the braille window
+        then go to where the cursor is
+        (see the <ref id="command-HOME" name="HOME"> command).
+    </itemize>
 </descrip>
 
 <sect2>Feature Activation<p>
