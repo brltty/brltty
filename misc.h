@@ -41,13 +41,6 @@ size_t safe_write (int fd, const unsigned char *buffer, size_t length);
 
 #define __EXTENSIONS__
 #include <sys/time.h>
-
-/* should syslog be used? may not be portable... */
-#define USE_SYSLOG 1
-#ifdef USE_SYSLOG
-#include <syslog.h>
-#endif
-
 #include <errno.h>
 
 #ifdef __cplusplus
@@ -61,26 +54,32 @@ void shortdelay (unsigned msec);
 void delay (int msec);		/* sleep for `msec' milliseconds */
 int timeout_yet (int msec);	/* test timeout condition */
 
+/* should syslog be used? may not be portable... */
+#define USE_SYSLOG 1
+#ifdef USE_SYSLOG
+   #include <syslog.h>
+#else
+   typedef enum {
+      LOG_EMERG,
+      LOG_ALERT,
+      LOG_CRIT,
+      LOG_ERR,
+      LOG_WARNING,
+      LOG_NOTICE,
+      LOG_INFO,
+      LOG_DEBUG
+   } SyslogPriority;
+#endif
 void LogOpen(void);
 void LogClose(void);
-void SetLogPrio(int prio);
-void SetErrPrio(int prio);
-void LogPrint(int prio, char *fmt, ...);
-void LogAndStderr(int prio, char *fmt, ...);
+void SetLogPriority(int priority);
+void SetStderrPriority(int priority);
+void LogPrint(int priority, char *format, ...);
+void LogAndStderr(int priority, char *format, ...);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#ifndef USE_SYSLOG
-/* provide dummy definitions for log priorities so it will compile */
-#define LOG_EMERG       0
-#define LOG_ALERT       0
-#define LOG_CRIT        0
-#define LOG_ERR         0
-#define LOG_WARNING     0
-#define LOG_NOTICE      0
-#define LOG_INFO        0
-#define LOG_DEBUG       0
-#endif
 
 /* Formatting of status cells. */
 extern int landscape_number(int x);

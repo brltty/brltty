@@ -32,6 +32,7 @@ static int openSpeaker (void) {
          return 0;
       }
       setCloseOnExec(fileDescriptor);
+      LogPrint(LOG_DEBUG, "Speaker opened: fd=%d", fileDescriptor);
    }
    return 1;
 }
@@ -55,6 +56,7 @@ static int generateSpeaker (int frequency, int duration) {
 static void closeSpeaker (void) {
    if (fileDescriptor != -1) {
       close(fileDescriptor);
+      LogPrint(LOG_DEBUG, "Speaker closed.");
       fileDescriptor = -1;
    }
 }

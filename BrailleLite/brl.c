@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5 (August 2001)"
+"Braille Lite driver, version 0.5.1 (September 2001)"
 
 #define BRL_C
 
@@ -653,6 +653,10 @@ readbrl (DriverCommandContext cmds)
 	      temp = CR_ENDBLKOFFSET + int_cursor - 1;
 	      int_cursor = state = 0;
 	    }
+	  return temp;
+	case CMD_DISPMD: /* attribute info */
+	  temp = CR_MSGATTRIB + int_cursor - 1;
+	  int_cursor = state = 0;
 	  return temp;
 	default:
 	  if (key.asc == BLT_ABORT)	/* cancel cursor positioning */

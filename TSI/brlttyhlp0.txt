@@ -9,12 +9,14 @@ Movement:
   Left/right one window: Rlt / Rrt
   One line up/down: Rup / Rdn
   Goto cursor: Rrn
+  Goto cursor previous position: Rrn+Lup
   Cursor tracking (link/unlink): Lrn (toggle)
   Goto top left of screen: RUP+RLT
   Goto bottom left of screen: RDN+RLT
   Previous/next non-identical line: Rrn+Rup / Rrn+Rdn
   Previous/next line with different attributes: Lrn+Rup / Lrn+Rdn
   One character left/right: Lrn+Llt / Lrn+Lrt
+  Beginning/end of line: Lup+Llt / Lup+Lrt
   Half-window left/right: Lup+Llt / Lup+Lrt
   Several lines up/down: Lrn+Rup / Lrn+Rdn
 

@@ -76,24 +76,27 @@
 
 char USAGE[] = "\
 Usage: %s [option ...]\n\
- -b driver  --braille=driver  Braille display driver to use: full library name\n\
-                                or shortcut (" BRLLIBS ")\n\
+ -a file    --attribs=file    Path to attributes translation table file.\n\
+ -b driver  --braille=driver  Braille display driver to use: full library path\n\
+                                or shortcut (" BRLLIBS ").\n\
+ -B         --brailleparm=arg Parameter to braille driver.\n\
  -d device  --device=device   Path to device for accessing braille display.\n\
+ -e         --errors          Log to standard error instead of via syslog.\n\
  -f file    --file=file       Path to default parameters file.\n\
- -l n       --log=n           Syslog debugging level (from 0 to 7, default 5)\n\
+ -h         --help            Print this usage summary and exit.\n\
+ -l n       --log=n           Syslog reporting level (0-7, default 5).\n\
  -n         --nodaemon        Remain a foreground process.\n\
  -p file    --prefs=file      Path to preferences file.\n\
  -q         --quiet           Suppress start-up messages.\n\
- -s driver  --speech=driver   Speech interface driver to use: full library name\n\
-                                or shortcut (" SPKLIBS ")\n\
+ -s driver  --speech=driver   Speech interface driver to use: full library path\n\
+                                or shortcut (" SPKLIBS ").\n\
  -S         --speechparm=arg  Parameter to speech driver.\n\
- -t file    --table=file      Path to dot translation table file.\n\
- -h         --help            Print this usage summary.\n\
+ -t file    --text=file       Path to text translation table file.\n\
  -v         --version         Print start-up messages and exit.\n";
 
 /* -h, -l, -q and -v options */
-short opt_h = 0, opt_n = 0, opt_q = 0, opt_v = 0, opt_l = LOG_INFO;
-char *opt_d = NULL, *opt_f = NULL, *opt_p = NULL, *opt_t = NULL;	/* filename options */
+short opt_e = 0, opt_h = 0, opt_n = 0, opt_q = 0, opt_v = 0, opt_l = LOG_NOTICE;
+char *opt_a = NULL, *opt_d = NULL, *opt_f = NULL, *opt_p = NULL, *opt_t = NULL;	/* filename options */
 short homedir_found = 0;	/* CWD status */
 
 // Define error codes for configuration file processing.
@@ -106,23 +109,26 @@ static void processOptions (int argc, char **argv)
 {
   int option;
 
-  const char *short_options = "+b:d:f:hl:np:qs:S:t:v-:";
+  const char *short_options = "+a:b:B:d:ef:hl:np:qs:S:t:v";
   #ifdef no_argument
     const struct option long_options[] =
       {
-        {"braille" , required_argument, NULL, 'b'},
-        {"device"  , required_argument, NULL, 'd'},
-        {"file"    , required_argument, NULL, 'f'},
-        {"help"    , no_argument      , NULL, 'h'},
-        {"log"     , required_argument, NULL, 'l'},
-        {"nodeamon", no_argument      , NULL, 'n'},
-        {"prefs"   , required_argument, NULL, 'p'},
-        {"quiet"   , no_argument      , NULL, 'q'},
-        {"speech"  , required_argument, NULL, 's'},
+        {"attribs"    , required_argument, NULL, 'a'},
+        {"braille"    , required_argument, NULL, 'b'},
+        {"brailleparm", required_argument, NULL, 'B'},
+        {"device"     , required_argument, NULL, 'd'},
+        {"errors"     , no_argument      , NULL, 'e'},
+        {"file"       , required_argument, NULL, 'f'},
+        {"help"       , no_argument      , NULL, 'h'},
+        {"log"        , required_argument, NULL, 'l'},
+        {"nodeamon"   , no_argument      , NULL, 'n'},
+        {"prefs"      , required_argument, NULL, 'p'},
+        {"quiet"      , no_argument      , NULL, 'q'},
+        {"speech"     , required_argument, NULL, 's'},
         {"speechparm" , required_argument, NULL, 'S'},
-        {"table"   , required_argument, NULL, 't'},
-        {"version" , no_argument      , NULL, 'v'},
-        {NULL      , 0                , NULL, 0  }
+        {"text"       , required_argument, NULL, 't'},
+        {"version"    , no_argument      , NULL, 'v'},
+        {NULL         , 0                , NULL, ' '}
       };
     #define get_option() getopt_long(argc, argv, short_options, long_options, NULL)
   #else
@@ -130,76 +136,100 @@ static void processOptions (int argc, char **argv)
   #endif
 
   /* Parse command line using getopt(): */
+  opterr = 0;
   while ((option = get_option()) != -1)
     /* continue on error as much as possible, as often we are typing blind
        and won't even see the error message unless the display come up. */
     switch (option)
       {
+      default:
+	LogAndStderr(LOG_WARNING, "Unimplemented invocation option: -%c", option);
+	break;
       case '?': // An invalid option has been specified.
-	// An error message has already been displayed.
+	LogAndStderr(LOG_WARNING, "Unknown invocation option: -%c", optopt);
 	return; /* not fatal */
+      case 'a':		/* text translation table file name */
+	opt_a = optarg;
+	break;
       case 'b':			/* name of driver */
 	braille_libname = optarg;
+	break;
+      case 'B':			/* parameter to speech driver */
+	braille_parameter = optarg;
 	break;
       case 'd':		/* serial device path */
 	opt_d = optarg;
 	break;
+      case 'e':		/* help */
+	opt_e = 1;
+	break;
       case 'f':		/* configuration file path */
 	opt_f = optarg;
 	break;
+      case 'h':		/* help */
+	opt_h = 1;
+	break;
+      case 'l':	{  /* log level */
+        if (*optarg) {
+	  static char *valueTable[] = {
+	    "emergency", "alert", "critical", "error",
+	    "warning", "notice", "information", "debug"
+	  };
+	  static unsigned int valueCount = sizeof(valueTable) / sizeof(valueTable[0]);
+	  unsigned int valueLength = strlen(optarg);
+	  int value;
+	  for (value=0; value<valueCount; ++value) {
+	    char *word = valueTable[value];
+	    unsigned int wordLength = strlen(word);
+	    if (valueLength <= wordLength) {
+	      if (strncasecmp(optarg, word, valueLength) == 0) {
+		break;
+	      }
+	    }
+	  }
+	  if (value < valueCount) {
+	    opt_l = value;
+	    break;
+	  }
+	  {
+	    char *endptr;
+	    value = strtol(optarg, &endptr, 0);
+	    if (!*endptr && value>=0 && value<valueCount) {
+	      opt_l = value;
+	      break;
+	    }
+	  }
+	}
+	LogAndStderr(LOG_WARNING, "Invalid log priority: %s", optarg);
+	break;
+      }
       case 'n':		/* don't go into the background */
 	opt_n = 1;
 	break;
       case 'p':		/* preferences file path */
 	opt_p = optarg;
 	break;
+      case 'q':		/* quiet */
+	opt_q = 1;
+	break;
       case 's':			/* name of speech driver */
 	speech_libname = optarg;
 	break;
       case 'S':			/* parameter to speech driver */
-	speech_drvparm = optarg;
+	speech_parameter = optarg;
 	break;
       case 't':		/* text translation table file name */
 	opt_t = optarg;
 	break;
-      case 'h':		/* help */
-	opt_h = 1;
-	break;
-      case 'l':	{  /* log level */
-	char *endptr;
-	opt_l = strtol(optarg,&endptr,0);
-	if(endptr==optarg || *endptr != 0 || opt_l<0 || opt_l>7){
-	  fprintf(stderr,"Invalid log level... ignored\n");
-	  /* not fatal */
-	  opt_l = 4;
-	}
-      }
-	break;
-      case 'q':		/* quiet */
-	opt_q = 1;
-	break;
       case 'v':		/* version */
 	opt_v = 1;
-	break;
-      case '-':		/* long options */
-	if (strcmp (optarg, "help") == 0)
-	  opt_h = 1;
-	else if (strcmp (optarg, "quiet") == 0)
-	  opt_q = 1;
-	else if (strcmp (optarg, "version") == 0)
-	  opt_v = 1;
-	else
-	  {
-	    fprintf(stderr, "Unknown option -- %s\n", optarg);
-	    /* not fatal */
-	  }
 	break;
       }
   #undef get_option
 
   if (opt_h)
     {
-      printf (USAGE, argv[0]);
+      printf(USAGE, argv[0]);
       exit(0);
     }
 }
@@ -235,6 +265,11 @@ static int setBrailleDriver (const char *delims)
   return getToken(&braille_libname, delims);
 }
 
+static int setBrailleParameter (const char *delims)
+{
+  return getToken(&braille_parameter, delims);
+}
+
 static int setSpeechDriver (const char *delims)
 {
   return getToken(&speech_libname, delims);
@@ -242,12 +277,17 @@ static int setSpeechDriver (const char *delims)
 
 static int setSpeechParameter (const char *delims)
 {
-  return getToken(&speech_drvparm, delims);
+  return getToken(&speech_parameter, delims);
 }
 
-static int setDotTranslation (const char *delims)
+static int setTextTable (const char *delims)
 {
   return getToken(&opt_t, delims);
+}
+
+static int setAttributesTable (const char *delims)
+{
+  return getToken(&opt_a, delims);
 }
 
 static int setPreferencesFile (const char *delims)
@@ -270,9 +310,11 @@ static void processConfigurationLine (char *line, void *data)
     {
       {"braille-device",        setBrailleDevice},
       {"braille-driver",        setBrailleDriver},
+      {"braille-parameter",     setBrailleParameter},
       {"speech-driver",         setSpeechDriver},
       {"speech-parameter",      setSpeechParameter},
-      {"dot-translation",       setDotTranslation},
+      {"text-table",            setTextTable},
+      {"attributes-table",      setAttributesTable},
       {"preferences-file",      setPreferencesFile},
       {NULL,                    NULL}
     };
@@ -399,7 +441,7 @@ loadPreferences (void)
 
   fd = open (opt_p, O_RDONLY);
   if(fd < 0){
-    LogPrint(LOG_WARNING, "Cannot open preferences file '%s'.", opt_p);
+    LogPrint(LOG_WARNING, "Cannot open preferences file '%s': %s", opt_p, strerror(errno));
   }else{
       if (read (fd, &newenv, sizeof (newenv)) == sizeof (newenv))
 	if ((newenv.magicnum[0] == (ENV_MAGICNUM&0XFF)) && (newenv.magicnum[1] == (ENV_MAGICNUM>>8)))
@@ -499,7 +541,7 @@ testSoundMidi () {
 void
 updatePreferences (void)
 {
-  static unsigned char saveprefs = 0;		/* 1 == save preferences on exit */
+  static unsigned char exitSave = 0;		/* 1 == save preferences on exit */
   static char *booleanValues[] = {"No", "Yes"};
   static char *cursorStyles[] = {"Underline", "Block"};
   static char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
@@ -667,7 +709,7 @@ updatePreferences (void)
   #define SYMBOLIC_ITEM(setting, changed, test, description, names) MENU_ITEM(setting, changed, test, description, names, 0, ((sizeof(names) / sizeof(names[0])) - 1))
   #define BOOLEAN_ITEM(setting, changed, test, description) SYMBOLIC_ITEM(setting, changed, test, description, booleanValues)
   static MenuItem menu[] = {
-     BOOLEAN_ITEM(saveprefs, NULL, NULL, "Save on Exit"),
+     BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
      SYMBOLIC_ITEM(env.sixdots, NULL, NULL, "Text Style", textStyles),
      BOOLEAN_ITEM(env.skpidlns, NULL, NULL, "Skip Identical Lines"),
      BOOLEAN_ITEM(env.skpblnkwins, NULL, NULL, "Skip Blank Windows"),
@@ -717,13 +759,15 @@ updatePreferences (void)
       int settingIndent;				/* braille window pos in buffer */
       MenuItem *item = &menu[menuIndex];
 
+      closeTuneDevice();
+
       /* First we draw the current menu item in the buffer */
       sprintf(line, "%s: ", item->description);
       settingIndent = strlen(line);
       if (item->names)
          strcat(line, item->names[*item->setting - item->minimum]);
       else
-         sprintf(line+strlen(line), "%d", *item->setting);
+         sprintf(line+settingIndent, "%d", *item->setting);
       lineLength = strlen(line);
 
       /* Next we deal with the braille window position in the buffer.
@@ -828,7 +872,7 @@ updatePreferences (void)
 	    message("Changes Discarded", 0);
 	    break;
 	  case CMD_PREFSAVE:
-	    saveprefs |= 1;
+	    exitSave |= 1;
 	    /*break;*/
 	  default:
 	    if (key >= CR_ROUTEOFFSET && key < CR_ROUTEOFFSET+brl.x) {
@@ -848,7 +892,7 @@ updatePreferences (void)
 	    }
 
 	    /* For any other keystroke, we exit */
-	    if (saveprefs)
+	    if (exitSave)
 	      {
 		savePreferences();
 		playTune(&tune_done);
@@ -868,10 +912,10 @@ startbrl(void)
   braille->initialize(&brl, opt_d);
   if (brl.x == -1)
     {
-      LogPrint(LOG_ERR, "Braille driver initialization failed.");
-      closescr ();
+      LogPrint(LOG_CRIT, "Braille driver initialization failed.");
+      closescr();
       LogClose();
-      exit (5);
+      exit(5);
     }
 #ifdef ALLOW_OFFRIGHT_POSITIONS
   /* The braille display is allowed to stick out the right side of the
@@ -888,10 +932,38 @@ startbrl(void)
   clrbrlstat ();
 }
 
+static void
+loadTranslationTable (char *table, char **path, char *name)
+{
+  if (*path) {
+    int fd = open(*path, O_RDONLY);
+    if (fd >= 0) {
+      char buffer[0X100];
+      if (read(fd, buffer, sizeof(buffer)) == sizeof(buffer)) {
+	memcpy(table, buffer, sizeof(buffer));
+      } else {
+	LogAndStderr(LOG_WARNING, "Cannot read %s translation table: %s", name, *path);
+	*path = NULL;
+      }
+      close(fd);
+    } else {
+      LogAndStderr(LOG_WARNING, "Cannot open %s translation table: %s", name, *path);
+      *path = NULL;
+    }
+  }
+}
 
 void startup(int argc, char *argv[])
 {
   processOptions(argc, argv);
+
+  /* Set logging priority levels. */
+  if (opt_e)
+    LogClose();
+  SetLogPriority(opt_l);
+  SetStderrPriority(opt_q? LOG_WARNING: LOG_NOTICE);
+
+  LogPrint(LOG_NOTICE, "%s starting.", VERSION);
 
   /* Process the configuration file. */
   if (opt_f)
@@ -903,25 +975,23 @@ void startup(int argc, char *argv[])
       processConfigurationFile(CONFIG_FILE, 1);
     }
 
-  /* Set logging priority levels. */
-  SetLogPrio(opt_l);
-  SetErrPrio(opt_q ? LOG_WARNING : LOG_INFO);
-
   if (opt_d == NULL)
     opt_d = BRLDEV;
   if (*opt_d == 0)
     {
-      LogAndStderr(LOG_ERR, "No braille device specified - use -d.");
+      LogAndStderr(LOG_CRIT, "No braille device specified.");
+      fprintf(stderr, "Use -d to specify one.\n");
       /* this is fatal */
       exit(10);
     }
 
   if (!load_braille_driver())
     {
-      fprintf(stderr, "%s braille driver selection -- use '-b XX' option to specify one.\n\n",
-              braille_libname ? "Bad" : "No");
+      LogAndStderr(LOG_CRIT, "%s braille driver selection.",
+                   braille_libname? "Bad": "No");
+      fprintf(stderr, "\n");
       list_braille_drivers();
-      fprintf( stderr, "\nUse '%s -h' for quick help.\n\n", argv[0] );
+      fprintf(stderr, "\nUse -b to specify one, and -h for quick help.\n\n");
       /* this is fatal */
       exit(10);
     }
@@ -937,11 +1007,12 @@ void startup(int argc, char *argv[])
 
   if (!load_speech_driver())
     {
-      fprintf(stderr, "%s speech driver selection -- use '-s XX' option to specify one.\n\n",
-              speech_libname ? "Bad" : "No");
+      LogAndStderr(LOG_ERR, "%s speech driver selection.",
+                   speech_libname? "Bad": "No");
+      fprintf(stderr, "\n");
       list_speech_drivers();
-      fprintf( stderr, "\nUse '%s -h' for quick help.\n\n", argv[0] );
-      LogAndStderr(LOG_NOTICE, "Falling back to built-in speech driver.");
+      fprintf(stderr, "\nUse -s to specify one, and -h for quick help.\n\n");
+      LogAndStderr(LOG_WARNING, "Falling back to built-in speech driver.");
       /* not fatal */
     }
 
@@ -963,27 +1034,9 @@ void startup(int argc, char *argv[])
   /*
    * Load text translation table: 
    */
-  if (opt_t)
-    {
-      int tbl_fd = -1;
-      unsigned char *tbl_p = NULL;
-      if ((tbl_fd = open (opt_t, O_RDONLY)) >= 0 &&
-	  (tbl_p = (unsigned char *) malloc (256)) && \
-	  read (tbl_fd, tbl_p, 256) == 256)
-	memcpy (texttrans, tbl_p, 256);
-      else
-	{
-	  LogAndStderr(LOG_WARNING,
-	               "Cannot read dot translation table '%s'.", opt_t);
-	  opt_t = NULL;
-	}
-      if (tbl_p)
-	  free (tbl_p);
-      if (tbl_fd >= 0)
-	  close (tbl_fd);
-    }
 
-  /* Find dots to char mapping by reversing braille translation table. */
+  loadTranslationTable(attribtrans, &opt_a, "attributes");
+  loadTranslationTable(texttrans, &opt_t, "text");
   reverseTable(texttrans, untexttrans);
 
   /*
@@ -1005,8 +1058,10 @@ void startup(int argc, char *argv[])
 
   LogAndStderr(LOG_INFO, "Preferences File: %s", opt_p);
   LogAndStderr(LOG_INFO, "Help File: %s", braille->helpfile);
-  LogAndStderr(LOG_INFO, "Translation Table: %s",
-               opt_t ? opt_t : "built-in");
+  LogAndStderr(LOG_INFO, "Text Table: %s",
+               opt_t? opt_t: "built-in");
+  LogAndStderr(LOG_INFO, "Attributes Table: %s",
+               opt_a? opt_a: "built-in");
   LogAndStderr(LOG_INFO, "Braille Device: %s", opt_d);
   LogAndStderr(LOG_INFO, "Braille Driver: %s (%s)",
                braille_libname, braille->name);
@@ -1030,9 +1085,9 @@ void startup(int argc, char *argv[])
    */
   if (initscr ())
     {				
-      LogAndStderr(LOG_ERR, "Cannot read screen.");
+      LogAndStderr(LOG_CRIT, "Cannot read screen.");
       LogClose();
-      exit (2);
+      exit(2);
     }
   
   if (!opt_n)
@@ -1043,36 +1098,43 @@ void startup(int argc, char *argv[])
       switch (fork ())
         {
         case -1:			/* can't fork */
-          LogAndStderr(LOG_ERR, "fork: %s", strerror(errno));
-          closescr ();
+          LogAndStderr(LOG_CRIT, "fork: %s", strerror(errno));
+          closescr();
           LogClose();
-          exit (3);
-        case 0:			/* child, process becomes a daemon: */
-          close (STDIN_FILENO);
-          close (STDOUT_FILENO);
-          close (STDERR_FILENO);
-          LogPrint(LOG_DEBUG, "Becoming daemon.");
-          if (setsid () == -1)
-    	{			
-    	  /* request a new session (job control) */
-    	  closescr ();
-    	  LogPrint(LOG_ERR, "setsid: %s", strerror(errno));
-    	  LogClose();
-    	  exit (4);
-    	}
+          exit(3);
+        case 0: /* child, process becomes a daemon */
+	  {
+	    char *nullDevice = "/dev/null";
+	    freopen(nullDevice, "r", stdin);
+	    freopen(nullDevice, "a", stdout);
+	    if (opt_e)
+	      fflush(stderr);
+	    else
+	      freopen(nullDevice, "a", stderr);
+	  }
+	  LogPrint(LOG_DEBUG, "Becoming daemon.");
+
+	  /* request a new session (job control) */
+	  if (setsid() == -1) {			
+	    closescr();
+	    LogPrint(LOG_CRIT, "setsid: %s", strerror(errno));
+	    LogClose();
+	    exit(4);
+	  }
+
           /* I read somewhere that the correct thing to do here is to fork
-    	 again, so we are not a group leader and then can never be associated
-    	 a controlling tty. Well... No harm I suppose. */
-          switch(fork()) {
-          case -1:
-    	LogAndStderr(LOG_ERR, "second fork: %s", strerror(errno));
-    	closescr ();
-    	LogClose();
-    	exit (3);
-          case 0:
-    	break;
-          default:
-    	exit(0);
+	     again, so we are not a group leader and then can never be associated
+	     a controlling tty. Well... No harm I suppose. */
+          switch (fork()) {
+	    case -1:
+	      LogAndStderr(LOG_CRIT, "second fork: %s", strerror(errno));
+	      closescr();
+	      LogClose();
+	      exit(3);
+	    case 0:
+	      break;
+	    default:
+	      exit(0);
           };
           break;
         default:			/* parent returns to calling process: */
@@ -1090,7 +1152,7 @@ void startup(int argc, char *argv[])
   startbrl();
 
   /* Initialise speech */
-  speech->initialize(speech_drvparm);
+  speech->initialize(speech_parameter);
 
   /* Initialise help screen */
   if (inithlpscr (braille->helpfile))

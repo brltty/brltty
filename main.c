@@ -286,21 +286,20 @@ main (int argc, char *argv[])
   short oldwinx, oldwiny;
   short speaking_scrno = -1, speaking_prev_inx = -1, speaking_start_line = 0;
 
-
-  /* Open the system log. */
+  /* open syslog (or output to stderr in -n) */
   LogOpen();
-  LogPrint(LOG_NOTICE, "%s starting.", VERSION);
-
-  /* Setup everything required on startup */
-  startup(argc, argv);
 
   /*
    * Establish signal handler to clean up before termination:
    */
-  if (signal (SIGTERM, termination_handler) == SIG_IGN)
-      signal (SIGTERM, SIG_IGN);
-  signal (SIGCHLD, child_stop_handler);
-  signal (SIGPIPE, SIG_IGN);
+  /* ?? Is the following correct? */
+  signal(SIGTERM, termination_handler);
+  signal(SIGINT, termination_handler);
+  signal(SIGCHLD, child_stop_handler);
+  signal(SIGPIPE, SIG_IGN);
+
+  /* Setup everything required on startup */
+  startup(argc, argv);
 
   /*
    * Initialize state variables 
@@ -342,14 +341,14 @@ main (int argc, char *argv[])
 	  case CMD_RESTARTBRL:
 	    braille->close(&brl);
 	    playTune(&tune_braille_off);
-	    LogPrint(LOG_INFO,"Reinitializing braille driver.");
+	    LogPrint(LOG_INFO, "Reinitializing braille driver.");
 	    startbrl();
 	    break;
 	  case CMD_RESTARTSPEECH:
 	    speech->mute();
 	    speech->close();
-	    LogPrint(LOG_INFO,"Reinitializing speech driver.");
-	    speech->initialize(speech_drvparm);
+	    LogPrint(LOG_INFO, "Reinitializing speech driver.");
+	    speech->initialize(speech_parameter);
 	    break;
 	  case CMD_TOP:
 	    p->winy = 0;
@@ -946,7 +945,7 @@ main (int argc, char *argv[])
 		         &attributes, SCR_ATTRIB);
 		  sprintf(buffer, "%s on %s",
 		          colours[attributes&0X07],
-		          colours[attributes&0X70]);
+		          colours[(attributes&0X70)>>4]);
 		  if (attributes & 0X08)
 		    strcat(buffer, " bright");
 		  if (attributes & 0X80)
@@ -1317,21 +1316,17 @@ main (int argc, char *argv[])
     }
   closeTuneDevice();
 
-  clrbrlstat ();
-  message ("BRLTTY terminating.", 0);
-  closescr ();
-
-  /*
-   * Hard-wired delay to try and stop us being killed prematurely ... 
-   */
-  delay (1000);
+  clrbrlstat();
+  message("BRLTTY stopping.", 0);
+  closescr();
   speech->close();
   braille->close(&brl);
   playTune(&tune_braille_off);
   /* don't forget that scrparam[0] is staticaly allocated */
   for (i = 1; i <= NBR_SCR; i++) 
-    free (scrparam[i]);
-  LogPrint(LOG_NOTICE,"Terminating.");
+    free(scrparam[i]);
+  closeTuneDevice();
+  LogPrint(LOG_NOTICE, "Stopped.");
   LogClose();
   return 0;
 }
@@ -1339,36 +1334,39 @@ main (int argc, char *argv[])
 
 
 void 
-message (unsigned char *s, short flags)
+message (unsigned char *text, short flags)
 {
-  int i, j, l, silent;
-
-  silent = (flags & MSG_SILENT);
-  l = strlen (s);
+  int length = strlen(text);
+  int silent = flags & MSG_SILENT;
 
   if (!silent && env.sound)
     {
       speech->mute();
-      speech->say(s, l);
+      speech->say(text, length);
     }
 
-  while (l)
+  while (length)
     {
-      memset (brl.disp, ' ', brl.x * brl.y);
+      int count;
+      int index;
 
       /* strip leading spaces */
-      while( *s == ' ' )  s++, l--;
+      while (*text == ' ')  text++, length--;
 
-      if (l <= brl.x * brl.y) {
-	 j = l;	/* the whole message fits on the braille window */
-      }else{
-	 /* split the message on multiple window on space characters */
-	 for( j = (brl.x * brl.y - 2); j > 0 && s[j] != ' '; j-- );
-	 if( j == 0 ) j = brl.x * brl.y - 1;
+      if (length <= brl.x*brl.y) {
+	 count = length; /* the whole message fits on the braille window */
+      } else {
+	 /* split the message across multiple windows on space characters */
+	 for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
+	 if (count == 0)
+	   count = brl.x * brl.y - 1;
       }
-      for (i = 0; i < j; brl.disp[i++] = *s++);
-      if (l -= j) {
-	 brl.disp[brl.x * brl.y - 1] = '-';
+
+      memset(brl.disp, ' ', brl.x*brl.y);
+      for (index=0; index<count; brl.disp[index++]=*text++);
+      if (length -= count) {
+         for (; index<brl.x*brl.y; brl.disp[index++]='-');
+	 brl.disp[brl.x*brl.y - 1] = '>';
       }
 
       /*
@@ -1376,14 +1374,14 @@ message (unsigned char *s, short flags)
        * ignored, since case can be important, and * blinking caps won't 
        * work ... 
        */
-      for (i = 0; i < brl.x * brl.y; brl.disp[i] = texttrans[brl.disp[i]], i++);
+      for (index=0; index<brl.x*brl.y; brl.disp[index]=texttrans[brl.disp[index]], index++);
 
-      braille->write( &brl );
+      braille->write(&brl);
 
-      if ( l || (flags & MSG_WAITKEY) )
+      if (length || (flags & MSG_WAITKEY))
 	while (braille->read(CMDS_MESSAGE) == EOF)
-	  delay (KEYDEL);
-      else if(!(flags & MSG_NODELAY))
+	  delay(KEYDEL);
+      else if (!(flags & MSG_NODELAY))
 	delay(DISPDEL);
     }
 }

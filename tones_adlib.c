@@ -36,6 +36,7 @@ static int openAdLib (void) {
       if (!ready) {
          return 0;
       }
+      LogPrint(LOG_DEBUG, "AdLib opened.");
       cardOpen = 1;
    }
    return cardOpen;
@@ -52,6 +53,7 @@ static int generateAdLib (int frequency, int duration) {
 static void closeAdLib (void) {
    if (cardOpen) {
       AL_disablePorts();
+      LogPrint(LOG_DEBUG, "AdLib closed.");
       cardOpen = 0;
    }
 }

@@ -16,6 +16,7 @@ CR81 is not used. "last cell" always refers to cell 80.
 Movement:
   One line up/down: Rup / Rdn or bar1 / bar234
   Goto cursor: cncv
+  Goto cursor previous position: cncv+Lup
   Cursor tracking (link/unlink): cnvx (toggle)
   Goto top left of screen: but1+bar1
   Goto bottom left of screen: but1+bar2
@@ -23,6 +24,7 @@ Movement:
   Previous/next line with different attributes: but2+Rup / but2+Rdn
   One character left/right: CR1+CR2 / CR79+CR80
   Left/right one window (useful if line longer than 80chars): but3 / but4
+  Beginning/end of line: Lup+but3 / Lup+but4
   Half-window left/right: CR1+CR3 / CR78+CR80
   Several lines up/down: but1+but2+bar1 / but1+but2+bar2
   Prev/next paragraph (line after blank lines): CR1+CR2 + Rup / CR1+CR2 + Rdn
@@ -38,6 +40,7 @@ Special modes
   Attribute underlining on/off: SW1 (toggle)
   Show attribute representations: SW4 (toggle)
   Info mode: but3+but4 (toggle)
+  Attribute info for a char: CR#+Ldn+Rup
 
 Cursor routing:
   Route cursor to anywhere on current line: Ldn+Rdn

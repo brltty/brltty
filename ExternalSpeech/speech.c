@@ -134,6 +134,8 @@ static void initspk (char *speechparm)
     myperror("pipe");
     return;
   }
+  LogPrint(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d\n",
+	   fd1[0],fd1[1], fd2[0],fd2[1]);
   switch(fork()) {
   case -1:
     myperror("fork");

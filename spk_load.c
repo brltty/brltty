@@ -31,9 +31,9 @@
 #include "spk.h"
 
 speech_driver *speech = NULL;	/* filled by dynamic libs */
-char* speech_libname = NULL;	/* name of library */
-char* speech_drvparm = NULL;	/* arbitrary init parameter */
-static void* library = NULL;	/* handle to driver */
+char *speech_libname = NULL;	/* name of library */
+char *speech_parameter = NULL;	/* arbitrary init parameter */
+static void *library = NULL;	/* handle to driver */
 #define SPK_SYMBOL "spk_driver"
 
 /* load driver from library */

@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.57 (June 2001)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.59 (September 2001)"
 #define COPYRIGHT "Copyright (C) 1996-2001 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
@@ -23,9 +23,11 @@
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled into BRLTTY versions 2.97-3.0.
+ * It is designed to be compiled into BRLTTY versions 2.99i-3.0.
  *
  * History:
+ * Version 2.59: Added bindings for CMD_LNBEG/LNEND.
+ * Version 2.58: Added bindings for CMD_BACK and CR_MSGATTRIB.
  * Version 2.57: Fixed help screen/file for Nav80. We finally have a
  *   user who confirms it works!
  * Version 2.56: Added key binding for NXSEARCH.
@@ -1280,6 +1282,8 @@ readbrl (DriverCommandContext cmds)
 	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, CR_ENDBLKOFFSET + sw_which[0]);
 	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CR_NXINDENT + sw_which[0]);
 	KEYAND(KEY_R2UP) KEY (KEY_BUP, CR_PRINDENT + sw_which[0]);
+	KEYAND(KEY_CDOWN | KEY_BUP) KEY(KEY_CUP | KEY_CDOWN,
+					CR_MSGATTRIB +sw_which[0]);
 	KEY (KEY_CDOWN, CR_SWITCHVT + sw_which[0]);
       }
     }else if(sw_howmany == 2 && sw_which[0]==0 && sw_which[1]==1){
@@ -1341,6 +1345,7 @@ readbrl (DriverCommandContext cmds)
     KEYAND(KEY_BUT4) KEY (KEY_BRIGHT, CMD_FWINRT);
 
     KEYAND(KEY_CNCV) KEY (KEY_BROUND, CMD_HOME);
+    KEYAND(KEY_CNCV | KEY_CUP) KEY(KEY_BROUND | KEY_CUP, CMD_BACK);
     KEY (KEY_CROUND, CMD_CSRTRK);
 
     KEYAND(KEY_BUT1 | KEY_BAR1) KEY (KEY_BLEFT | KEY_BUP, CMD_TOP_LEFT);
@@ -1360,6 +1365,9 @@ readbrl (DriverCommandContext cmds)
 
     KEYAND(KEY_BUT1|KEY_BUT2|KEY_BAR1)  KEY (KEY_CROUND | KEY_CUP, CMD_WINUP);
     KEYAND(KEY_BUT1|KEY_BUT2|KEY_BAR2) KEY (KEY_CROUND | KEY_CDOWN, CMD_WINDN);
+
+    KEYAND(KEY_R1UP | KEY_BUT3) KEY(KEY_CUP | KEY_BLEFT, CMD_LNBEG);
+    KEYAND(KEY_R1UP | KEY_BUT4) KEY(KEY_CUP | KEY_BRIGHT, CMD_LNEND);
 
   /* keyboard cursor keys simulation */
     KEY (KEY_CLEFT, CMD_KEY_LEFT);
@@ -1391,10 +1399,12 @@ readbrl (DriverCommandContext cmds)
     KEY (KEY_CDOWN | KEY_BROUND, CMD_PASTE);
 
   /* speech */
-    KEY (KEY_BRIGHT | KEY_BDOWN, CMD_SAY);
+  /* experimental speech support */
+    KEYAND(KEY_CRIGHT | KEY_BLEFT) KEY (KEY_BRIGHT | KEY_BDOWN, CMD_SAY);
     KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SAYALL);
     KEY (KEY_BROUND | KEY_BRIGHT, CMD_SPKHOME);
-    KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
+    KEYAND(KEY_CRIGHT | KEY_CUP | KEY_BLEFT | KEY_BUP)
+      KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
     KEY (KEY_BRIGHT | KEY_BUP | KEY_CUP | KEY_BLEFT, CMD_RESTARTSPEECH);
     
   /* preferences menu */
@@ -1433,10 +1443,6 @@ readbrl (DriverCommandContext cmds)
 		display_all (prevdata);
     );
 #endif
-
-  /* experimental speech support */
-    KEY (KEY_CRIGHT | KEY_BLEFT, CMD_SAY);
-    KEY (KEY_CRIGHT | KEY_CUP | KEY_BLEFT | KEY_BUP, CMD_MUTE);
   };
 
   /* If this is a typematic repetition of some key other than movement keys */

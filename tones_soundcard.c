@@ -42,6 +42,8 @@ static int openSoundCard (void) {
 	 QUERY_SOUND(sampleRate, SOUND_PCM_READ_RATE, 8000);
 	 QUERY_SOUND(channelCount, SOUND_PCM_READ_CHANNELS, 1);
       }
+      LogPrint(LOG_DEBUG, "Sound card opened: fd=%d rate=%d chan=%d",
+               fileDescriptor, sampleRate, channelCount);
    }
    return 1;
 }
@@ -68,6 +70,7 @@ static int generateSoundCard (int frequency, int duration) {
 static void closeSoundCard (void) {
    if (fileDescriptor != -1) {
       close(fileDescriptor);
+      LogPrint(LOG_DEBUG, "Sound card closed.");
       fileDescriptor = -1;
    }
 }

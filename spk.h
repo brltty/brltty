@@ -33,7 +33,7 @@ typedef struct {
 } speech_driver;
 
 extern speech_driver *speech;
-extern char* speech_libname;	/* name of library */
-extern char* speech_drvparm;	/* arbitraty init parameter */
+extern char *speech_libname;	/* name of library */
+extern char *speech_parameter;	/* arbitraty initialization parameter */
 int load_speech_driver(void);
 int list_speech_drivers(void);

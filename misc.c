@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -183,11 +184,6 @@ size_t safe_write (int fd, const unsigned char *buffer, size_t length)
   return address - buffer;
 }
 
-#ifdef USE_SYSLOG
-#include <syslog.h>
-#include <stdarg.h>
-#endif
-
 unsigned
 elapsed_msec (struct timeval *t1, struct timeval *t2)
 {
@@ -245,73 +241,90 @@ timeout_yet (int msec)
 }
 
 #ifdef USE_SYSLOG
+#include <syslog.h>
+static int syslogOpened = 0;
+#endif
 
-static int LogOpened = 0;
-static int LogPrio;
-static int ErrPrio;
+static int logPriority;
+static int stderrPriority;
 
 void LogOpen(void)
 {
-  static char name[0X20]; // Must be static as syslog points at it.
-  sprintf(name, "brltty[%d]", getpid());
-  openlog(name,LOG_CONS,LOG_DAEMON);
-  LogPrio = LOG_INFO;
-  ErrPrio = LOG_INFO;
-  LogOpened = 1;
+#ifdef USE_SYSLOG
+  if (!syslogOpened) {
+    static char name[0X20]; // Must be static as syslog points at it.
+    snprintf(name, sizeof(name), "brltty[%d]", getpid());
+    openlog(name, LOG_CONS, LOG_DAEMON);
+    syslogOpened = 1;
+  }
+#endif
+  logPriority = LOG_INFO;
+  stderrPriority = LOG_NOTICE;
 }
 
 void LogClose(void)
 {
-  closelog();
-  LogOpened = 0;
+#ifdef USE_SYSLOG
+  if (syslogOpened) {
+    syslogOpened = 0;
+    closelog();
+  }
+#endif
 }
 
-void SetLogPrio(int prio)
+void SetLogPriority(int priority)
 {
-  LogPrio = prio;
+  logPriority = priority;
 }
 
-void SetErrPrio(int prio)
+void SetStderrPriority(int priority)
 {
-  ErrPrio = prio;
+  stderrPriority = priority;
 }
 
-void LogPrint(int prio, char *fmt, ...)
+void LogPrint(int priority, char *format, ...)
 {
-  va_list argp;
-
-  if(LogOpened && (prio <= LogPrio)){
-    va_start(argp, fmt);
-    vsyslog(prio, fmt, argp);
+  if (priority <= logPriority) {
+    va_list argp;
+    va_start(argp, format);
+#ifdef USE_SYSLOG
+    if (syslogOpened) {
+      vsyslog(priority, format, argp);
+      goto done;
+    }
+#endif
+    vfprintf(stderr, format, argp);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+  done:
     va_end(argp);
   }
 }
 
-void LogAndStderr(int prio, char *fmt, ...)
+void LogAndStderr(int priority, char *format, ...)
 {
   va_list argp;
+  va_start(argp, format);
 
-  va_start(argp, fmt);
-
-  if(prio <= ErrPrio){
-    vfprintf(stderr, fmt, argp);
-    fprintf(stderr,"\n");
+  if (priority <= logPriority) {
+#ifdef USE_SYSLOG
+    if (syslogOpened) {
+      vsyslog(priority, format, argp);
+      goto done;
+    }
+#endif
+    priority = stderrPriority;
   }
-  if(LogOpened && (prio <= LogPrio))
-    vsyslog(prio, fmt, argp);
+done:
+
+  if (priority <= stderrPriority) {
+    vfprintf(stderr, format, argp);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+  }
 
   va_end(argp);
 }
-
-#else /* don't USE_SYSLOG */
-
-void LogOpen(void) {}
-void LogClose(void) {}
-void SetLogPrio(int prio) {}
-void SetErrPrio(int prio) {}
-void LogPrint(int prio, char *fmt, ...) {}
-void LogAndStderr(int prio, char *fmt, ...) {}
-#endif
 
 
 /* Functions which support horizontal status cells, e.g. Papenmeier. */

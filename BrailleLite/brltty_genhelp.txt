@@ -16,7 +16,8 @@
 234 search forward / 156 search backward (use cut to set search string)
 1246 previous paragraph / 1345 next paragraph (line after blank line)
 
-125: home
+125: home (goto cursor)
+1256: goto cursor previous position
 14: cursor tracking (toggle)
 124 chord: freeze screen (toggle)
 1456: help mode (toggle)
@@ -44,6 +45,7 @@ g chord: position internal cursor for routing or cutting.
   Terminate with route, cutbeg, cutend or cancel.
   To move cursor: chrlt/chrrt by 1; bar by (width+3)/4; lnbeg, home, lnend for
     beginning, middle and end of display.
+  i gives attribute info of a character.
 
 k chord toggles keyboard emulation mode - initially off.
 When on, unchorded characters passed directly to inskey(), unless prefixed

@@ -177,6 +177,7 @@ static int openSequencer (void) {
          return 0;
       }
       setCloseOnExec(fileDescriptor);
+      LogPrint(LOG_DEBUG, "Sequencer opened: fd=%d", fileDescriptor);
       SEQ_START_TIMER();
    }
    SEQ_SET_PATCH(deviceNumber, channelNumber, env.midiinstr);
@@ -222,6 +223,7 @@ static void closeSequencer (void) {
    if (fileDescriptor != -1) {
       ioctl(fileDescriptor, SNDCTL_SEQ_SYNC);
       close(fileDescriptor);
+      LogPrint(LOG_DEBUG, "Sequencer closed.");
       fileDescriptor = -1;
    }
 }

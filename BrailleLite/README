@@ -27,6 +27,8 @@ when the unit is in its internal notetaker mode.
 See brltty_genhelp.txt for a description of the key bindings.
 
 History:
+Stéphane Doyon, September 2001, version 0.5.1:
+-Added bindings for CMD_BACK and CR_MSGATTRIB.
 Stéphane Doyon, August 2001
 -Added a version number, as many people have been playing with this
    driver. Arbitrarily started at 0.5.
