@@ -912,7 +912,12 @@ main (int argc, char *argv[]) {
               break;
           }
 
-          command = next & ~VAL_REPEAT_MASK;
+          if (command == (next & ~VAL_REPEAT_MASK)) {
+            command = CMD_NOOP;
+          } else {
+            command = next & ~VAL_REPEAT_MASK;
+          }
+
           if (next & VAL_REPEAT_DELAY) {
             autorepeat = PREFERENCES_TIME(prefs.autorepeatDelay);
             if (!(next & VAL_REPEAT_INITIAL)) continue;
