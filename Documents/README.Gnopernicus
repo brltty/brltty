@@ -21,7 +21,7 @@ the compilation and installation of libbrlapi and its header files.
 After installation, but *before* launching the new BRLTTY, you need to generate
 an authentication key for its API. The easiest way to do this is:
 
-    echo some-string >/etc/bbrlapi.key
+    echo some-string >/etc/brlapi.key
 
 Easiest, of course and as usual, doesn't necessarily mean best. It's much
 better for this kind of data to be unpredictable. If, therefore, a random data
