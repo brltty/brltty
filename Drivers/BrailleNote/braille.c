@@ -305,9 +305,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
    }
 
    if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
-      memset(&newSettings, 0, sizeof(newSettings));
-      newSettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
-      newSettings.c_iflag = IGNPAR;
+      initializeSerialAttributes(&newSettings);
       while (restartSerialDevice(fileDescriptor, &newSettings, 38400)) {
          unsigned char request[] = {BNO_BEGIN, BNO_DESCRIBE};
          if (safe_write(fileDescriptor, request, sizeof(request)) != -1) {

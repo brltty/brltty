@@ -416,22 +416,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   /* Open the Braille display device for random access */
   if (!openSerialDevice(device, &brl_fd, &oldtio)) goto failure;
 
-  /* Construct new settings by working from current state */
-  memcpy(&curtio, &oldtio, sizeof(struct termios));
-  rawSerialDevice(&curtio);
-  /* local */
-  curtio.c_lflag &= ~TOSTOP; /* no SIGTTOU to backgrounded processes */
-  /* control */
-  curtio.c_cflag |= CLOCAL /* ignore status lines (carrier detect...) */
-                  | CREAD; /* enable reading */
-  curtio.c_cflag &= ~( CSTOPB /* 1 stop bit */
-		      | CRTSCTS /* disable hardware flow control */
-                      | PARENB /* disable parity generation and detection */
-                     );
-  /* input */
-  curtio.c_iflag &= ~( INPCK /* no input parity check */
-                      | IXOFF /* don't send XON/XOFF */
-		     );
+  /* Construct new settings */
+  initializeSerialAttributes(&curtio);
 
   /* noncanonical: for first operation */
   curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars on input */

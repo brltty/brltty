@@ -449,5 +449,6 @@ AC_DEFUN([BRLTTY_CAP_PTHREADS], [dnl
 ifelse(len([$1]), 0, [], [dnl
    test "${brltty_cv_cap_pthreads}" = "yes" && {
       $1
-   }])
+   }
+])dnl
 ])
