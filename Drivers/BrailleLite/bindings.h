@@ -90,11 +90,11 @@ static unsigned char dangcmd[8] =
 
 static int barcmds[16] =
 {
-/*          none         right        left         both         */
-/* none  */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
-/* right */ CMD_LNUP   , CMD_ATTRDN , CMD_ATTRUP , 0          ,
-/* left  */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
-/* both  */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
+/* Left Bar\  Right Bar> None         Right        Left         Both         */
+/*         None       */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
+/*         Right      */ CMD_LNUP   , CMD_ATTRDN , CMD_ATTRUP , 0          ,
+/*         Left       */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
+/*         Both       */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
 };
 
 #endif /* BL_NEED_ARRAYS */
