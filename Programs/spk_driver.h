@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -30,19 +30,19 @@ extern "C" {
 #include "spk.h"
 
 /* Routines provided by this speech driver. */
-static void spk_identify (void); /* print start-up messages */
-static void spk_initialize (char **parameters); /* initialize speech device */
-static void spk_say (const unsigned char *buffer, int len); /* speak text */
-static void spk_mute (void); /* mute speech */
-static void spk_close (void); /* close speech device */
+static void spk_identify (void);
+static void spk_open (char **parameters);
+static void spk_say (const unsigned char *buffer, int len);
+static void spk_mute (void);
+static void spk_close (void);
 
 #ifdef SPK_HAVE_EXPRESS
-  static void spk_express (const unsigned char *buffer, int len); /* speak text */
+  static void spk_express (const unsigned char *buffer, int len);
 #endif /* SPK_HAVE_EXPRESS */
 
 #ifdef SPK_HAVE_TRACK
-  static void spk_doTrack (void); /* Get current speaking position */
-  static int spk_getTrack (void); /* Get current speaking position */
+  static void spk_doTrack (void);
+  static int spk_getTrack (void);
   static int spk_isSpeaking (void);
 #else
   static void spk_doTrack (void) { }
@@ -72,16 +72,16 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   #endif
 
   spk_identify,
-  spk_initialize,
+  spk_open,
   spk_say,
   spk_mute,
   spk_close,
 
-  #ifdef SPK_HAVE_EXPRESS
-    spk_express,
-  #else
-    NULL,
-  #endif
+#ifdef SPK_HAVE_EXPRESS
+  spk_express,
+#else /* SPK_HAVE_EXPRESS */
+  NULL,
+#endif /* SPK_HAVE_EXPRESS */
 
   spk_doTrack,
   spk_getTrack,

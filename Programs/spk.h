@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -30,11 +30,15 @@ typedef struct {
   const char *identifier;
   const char *const *parameters;
   void (*identify) (void);		/* print start-up messages */
-  void (*initialize) (char **parameters);		/* initialize speech device */
+  void (*open) (char **parameters);		/* initialize speech device */
   void (*say) (const unsigned char *buffer, int len);	/* speak text */
   void (*mute) (void);		/* mute speech */
   void (*close) (void);		/* close speech device */
+
+  /* These require SPK_HAVE_EXPRESS. */
   void (*express) (const unsigned char *buffer, int len);	/* speak text */
+
+  /* These require SPK_HAVE_TRACK. */
   void (*doTrack) (void);		/* get current speaking position */
   int (*getTrack) (void);		/* get current speaking position */
   int (*isSpeaking) (void);		/* get current speaking position */

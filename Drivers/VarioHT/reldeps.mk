@@ -1,15 +1,15 @@
 # Dependencies for vario.o:
-vario.o: vario.c
-vario.o: $(TOP_DIR)/config.h
-vario.o: variolow.h
-vario.o: $(TOP_DIR)/Programs/brl.h
-vario.o: brlconf.h
-vario.o: $(TOP_DIR)/Programs/brl_driver.h
-vario.o: $(TOP_DIR)/Programs/misc.h
+vario.o: $(SRC_DIR)/vario.c
+vario.o: $(BLD_TOP)config.h
+vario.o: $(SRC_DIR)/variolow.h
+vario.o: $(SRC_TOP)Programs/brl.h
+vario.o: $(SRC_DIR)/brlconf.h
+vario.o: $(SRC_TOP)Programs/brl_driver.h
+vario.o: $(SRC_TOP)Programs/misc.h
 
 # Dependencies for variolow.o:
-variolow.o: variolow.c
-variolow.o: $(TOP_DIR)/config.h
-variolow.o: variolow.h
-variolow.o: $(TOP_DIR)/Programs/misc.h
+variolow.o: $(SRC_DIR)/variolow.c
+variolow.o: $(BLD_TOP)config.h
+variolow.o: $(SRC_DIR)/variolow.h
+variolow.o: $(SRC_TOP)Programs/misc.h
 

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <fcntl.h>
 
 #include "misc.h"
@@ -39,11 +40,11 @@
 static void brl_identify (void) {
   LogPrint(LOG_NOTICE, "No braille support.");
 }
-static void brl_initialize (char **parameters, brldim *brl, const char *device) { }
-static void brl_close (brldim *brl) { }
-static void brl_writeWindow (brldim *brl) { }
-static void brl_writeStatus (const unsigned char *status) { }
-static int brl_read (DriverCommandContext cmds) { return EOF; }
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) { return 0; }
+static void brl_close (BrailleDisplay *brl) { }
+static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) { return EOF; }
+static void brl_writeWindow (BrailleDisplay *brl) { }
+static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) { }
 
 static const char *symbolName = "brl_driver";
 const BrailleDriver *braille = &noBraille;
@@ -52,23 +53,16 @@ const BrailleDriver *braille = &noBraille;
  * Output braille translation tables.
  * The files *.auto.h (the default tables) are generated at compile-time.
  */
-unsigned char textTable[0X100] = {
+TranslationTable textTable = {
   #include "text.auto.h"
 };
-unsigned char untextTable[0X100];
+TranslationTable untextTable;
 
-unsigned char attributesTable[0X100] = {
+TranslationTable attributesTable = {
   #include "attrib.auto.h"
 };
 
 void *contractionTable = NULL;
-
-#ifdef ENABLE_LEARN_MODE
-const CommandEntry commandTable[] = {
-  #include "cmds.auto.h"
-  {EOF, NULL, NULL}
-};
-#endif /* ENABLE_LEARN_MODE */
 
 /* load driver from library */
 /* return true (nonzero) on success */
@@ -92,11 +86,11 @@ loadBrailleDriver (const char **driver) {
         return &brl_driver;
       }
     }
-  #else
+  #else /* BRAILLE_BUILTIN */
     if (*driver == NULL) {
       return &noBraille;
     }
-  #endif
+  #endif /* BRAILLE_BUILTIN */
 
   {
     const char *libraryName = *driver;
@@ -128,7 +122,6 @@ loadBrailleDriver (const char **driver) {
   return symbolAddress;
 }
 
-
 int
 listBrailleDrivers (void) {
   char buf[64];
@@ -148,18 +141,103 @@ listBrailleDrivers (void) {
   return 1;
 }
 
-#ifdef ENABLE_LEARN_MODE
 void
-learnMode (int poll, int timeout) {
+initializeBrailleDisplay (BrailleDisplay *brl) {
+   brl->x = brl->y = -1;
+   brl->helpPage = 0;
+   brl->buffer = NULL;
+   brl->writeDelay = 0;
+   brl->bufferResized = NULL;
+}
+
+unsigned int
+drainBrailleOutput (BrailleDisplay *brl, unsigned int minimumDelay) {
+  unsigned int duration = MAX(minimumDelay, brl->writeDelay);
+  brl->writeDelay = 0;
+  delay(duration);
+  return duration;
+}
+
+void
+writeBrailleBuffer (BrailleDisplay *brl) {
+  int i;
+  if (braille->writeVisual) braille->writeVisual(brl);
+  for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = textTable[brl->buffer[i]];
+  braille->writeWindow(brl);
+}
+
+void
+writeBrailleText (BrailleDisplay *brl, const char *text, int length) {
+  int width = brl->x * brl->y;
+  if (length > width) length = width;
+  memcpy(brl->buffer, text, length);
+  memset(&brl->buffer[length], ' ', width-length);
+  writeBrailleBuffer(brl);
+}
+
+void
+writeBrailleString (BrailleDisplay *brl, const char *string) {
+  writeBrailleText(brl, string, strlen(string));
+}
+
+static void
+brailleBufferResized (BrailleDisplay *brl) {
+  memset(brl->buffer, 0, brl->x*brl->y);
+  LogPrint(LOG_INFO, "Braille display has %d %s of %d %s.",
+           brl->y, (brl->y == 1)? "row": "rows",
+           brl->x, (brl->x == 1)? "column": "columns");
+  if (brl->bufferResized) brl->bufferResized(brl->y, brl->x);
+}
+
+static int
+resizeBrailleBuffer (BrailleDisplay *brl) {
+  if (brl->resizeRequired) {
+    brl->resizeRequired = 0;
+    if (brl->isCoreBuffer) {
+      int size = brl->x * brl->y;
+      unsigned char *buffer = realloc(brl->buffer, size);
+      if (!buffer) {
+        LogPrint(LOG_ERR, "Braille buffer allocation error: %s", strerror(errno));
+        return 0;
+      }
+      brl->buffer = buffer;
+    }
+    brailleBufferResized(brl);
+  }
+  return 1;
+}
+
+int
+allocateBrailleBuffer (BrailleDisplay *brl) {
+  if ((brl->isCoreBuffer = brl->resizeRequired = brl->buffer == NULL)) {
+    if (!resizeBrailleBuffer(brl)) return 0;
+  } else {
+    brailleBufferResized(brl);
+  }
+  return 1;
+}
+
+int
+readBrailleCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
+  int command = braille->readCommand(brl, cmds);
+  resizeBrailleBuffer(brl);
+  return command;
+}
+
+#ifdef ENABLE_LEARN_MODE
+const CommandEntry commandTable[] = {
+  #include "cmds.auto.h"
+  {EOF, NULL, NULL}
+};
+
+void
+learnMode (BrailleDisplay *brl, int poll, int timeout) {
   int timer = 0;
   message("command learn mode", MSG_NODELAY);
   while (1) {
-    int key = braille->read(CMDS_SCREEN);
-    if (key == EOF) {
-      if (timer > timeout) break;
-      delay(poll);
-      timer += poll;
-    } else {
+    int key;
+    timer += drainBrailleOutput(brl, poll);
+    if ((key = readBrailleCommand(brl, CMDS_SCREEN)) != EOF) {
       int blk = key & VAL_BLK_MASK;
       int arg = key & VAL_ARG_MASK;
       int cmd = blk | arg;
@@ -232,10 +310,85 @@ learnMode (int poll, int timeout) {
           }
         }
       }
-      message(buffer, MSG_NODELAY);
+      message(buffer, MSG_NODELAY|MSG_SILENT);
       timer = 0;
+    } else if (timer > timeout) {
+      break;
     }
   }
   message("done", 0);
 }
 #endif /* ENABLE_LEARN_MODE */
+
+/* Reverse a 256x256 mapping, used for charset maps. */
+void
+reverseTable (TranslationTable *origtab, TranslationTable *revtab) {
+  int i;
+  memset(revtab, 0, sizeof(*revtab));
+  for (i=sizeof(*revtab)-1; i>=0; i--) (*revtab)[(*origtab)[i]] = i;
+}
+
+/* Functions which support horizontal status cells, e.g. Papenmeier. */
+/* this stuff is real wired - dont try to understand */
+
+/* Dots for landscape (counterclockwise-rotated) digits. */
+const unsigned char landscapeDigits[11] = {
+  B1+B5+B2,    B4,          B4+B1,       B4+B5,       B4+B5+B2,
+  B4+B2,       B4+B1+B5,    B4+B1+B5+B2, B4+B1+B2,    B1+B5,
+  B1+B2+B4+B5
+};
+
+/* Format landscape representation of numbers 0 through 99. */
+int
+landscapeNumber (int x) {
+  return landscapeDigits[(x / 10) % 10] | (landscapeDigits[x % 10] << 4);  
+}
+
+/* Format landscape flag state indicator. */
+int
+landscapeFlag (int number, int on) {
+  int dots = landscapeDigits[number % 10];
+  if (on) dots |= landscapeDigits[10] << 4;
+  return dots;
+}
+
+/* Dots for seascape (clockwise-rotated) digits. */
+const unsigned char seascapeDigits[11] = {
+  B5+B1+B4,    B2,          B2+B5,       B2+B1,       B2+B1+B4,
+  B2+B4,       B2+B5+B1,    B2+B5+B1+B4, B2+B5+B4,    B5+B1,
+  B1+B2+B4+B5
+};
+
+/* Format seascape representation of numbers 0 through 99. */
+int
+seascapeNumber (int x) {
+  return (seascapeDigits[(x / 10) % 10] << 4) | seascapeDigits[x % 10];  
+}
+
+/* Format seascape flag state indicator. */
+int
+seascapeFlag (int number, int on) {
+  int dots = seascapeDigits[number % 10] << 4;
+  if (on) dots |= seascapeDigits[10];
+  return dots;
+}
+
+/* Dots for portrait digits - 2 numbers in one cells */
+const unsigned char portraitDigits[11] = {
+  B2+B4+B5, B1, B1+B2, B1+B4, B1+B4+B5, B1+B5, B1+B2+B4, 
+  B1+B2+B4+B5, B1+B2+B5, B2+B4, B1+B2+B4+B5
+};
+
+/* Format portrait representation of numbers 0 through 99. */
+int
+portraitNumber (int x) {
+  return portraitDigits[(x / 10) % 10] | (portraitDigits[x % 10]<<4);  
+}
+
+/* Format portrait flag state indicator. */
+int
+portraitFlag (int number, int on) {
+  int dots = portraitDigits[number % 10] << 4;
+  if (on) dots |= portraitDigits[10];
+  return dots;
+}

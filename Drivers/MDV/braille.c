@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -73,7 +73,6 @@
 /*#include "brlconf.h"*/
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "Programs/scr.h"
 #include "brlconf.h"
 #include "Programs/brl_driver.h"
 
@@ -233,8 +232,7 @@ static unsigned char *sendpacket, /* packet scratch pad */
                      *ackpacket,  /* code ACK len 0 prepared packet */
                      *prevdata,   /* previous data sent */
                      *prevstatbuf,/* record status cells content */
-                     *statbuf,    /* record status cells content */
-                     *dispbuf;    /* we keep a pointer on brl.disp... */
+                     *statbuf;    /* record status cells content */
 #define ACKPACKETLEN PACKET_HDR_LEN+NRCKSUMBYTES
 static int brl_cols, 	          /* Number of cells available for text */
            nrstatcells;           /* number of status cells */
@@ -376,14 +374,12 @@ peek_receive_packet(unsigned char *packet)
 }
 
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *tty)
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
 {
-  brldim res;			/* return result */
-
   int hasrouting, dotspercell, version1, version2;
 
-  res.disp = dispbuf = sendpacket = recvpacket = ackpacket
+  sendpacket = recvpacket = ackpacket
     = prevdata = statbuf = prevstatbuf
       = routing_were_pressed = which_routing_keys = NULL;
 
@@ -495,9 +491,9 @@ detected:
     goto failure;
   }
 
-  setHelpPageNumber (0);
-  res.x = brl_cols;		/* initialize size of display */
-  res.y = BRLROWS;		/* always 1 */
+  brl->helpPage = 0;
+  brl->x = brl_cols;		/* initialize size of display */
+  brl->y = BRLROWS;		/* always 1 */
 
   /* Allocate space for buffers */
   /* For portability we want to avoid declarations such as char array[v]
@@ -508,8 +504,7 @@ detected:
 
      It might be best to just statically initialize all these arrays to
      the maximum possible size. */
-  if((res.disp = dispbuf = (unsigned char *)malloc(brl_cols)) == NULL
-     || (statbuf = (unsigned char *)malloc(nrstatcells)) == NULL
+  if((statbuf = (unsigned char *)malloc(nrstatcells)) == NULL
      || (prevdata = (unsigned char *) malloc (brl_cols)) == NULL
      || (prevstatbuf = (unsigned char *)malloc(nrstatcells)) == NULL
      || (routing_were_pressed = (char *)malloc(brl_cols+nrstatcells)) == NULL
@@ -524,27 +519,23 @@ detected:
 							    flags negative. */
   /* which_routing_keys does not require initialization */
 
-  *brl = res;
-  return;
+  return 1;
 
 failure:;
   LogPrint(LOG_WARNING,"MDV driver giving up");
-  brl_close(&res);
-  brl->x = -1;
-  return;
+  brl_close(brl);
+  return 0;
 }
 
 
 static void 
-brl_close (brldim *brl)
+brl_close (BrailleDisplay *brl)
 {
   if (brl_fd >= 0)
     {
       tcsetattr (brl_fd, TCSADRAIN, &oldtio);
       close (brl_fd);
     }
-  if (brl->disp) free (brl->disp);
-  /* what if dispbuf != brl.disp ? */
   if (prevdata) free (prevdata);
   if (statbuf) free (statbuf);
   if (prevstatbuf) free (prevstatbuf);
@@ -557,7 +548,7 @@ brl_close (brldim *brl)
 
 
 static void
-brl_writeStatus (const unsigned char *s)
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 {
   if(nrstatcells >= EXPECTEDNRSTATCELLS)
     memcpy(statbuf, s, EXPECTEDNRSTATCELLS);
@@ -566,18 +557,18 @@ brl_writeStatus (const unsigned char *s)
 
 
 static void 
-brl_writeWindow (brldim *brl)
+brl_writeWindow (BrailleDisplay *brl)
 {
   int i;
   unsigned char *p;
 
-  if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
+  if (brl->x != brl_cols || brl->y != BRLROWS)
     return;
     
-  if(memcmp(prevdata, dispbuf, brl_cols) == 0
+  if(memcmp(prevdata, brl->buffer, brl_cols) == 0
      && memcmp(prevstatbuf, statbuf, nrstatcells) == 0)
     return;
-  memcpy(prevdata, dispbuf, brl_cols);
+  memcpy(prevdata, brl->buffer, brl_cols);
   memcpy(prevstatbuf, statbuf, nrstatcells);
 
   sendpacket[OFF_CODE] = FULLREFRESH;
@@ -586,7 +577,7 @@ brl_writeWindow (brldim *brl)
   for(i=0; i<nrstatcells; i++)
     *(p++) = DotsTable[statbuf[i]];
   for(i=0; i < brl_cols; i++)
-     *(p++) = DotsTable[dispbuf[i]];
+     *(p++) = DotsTable[brl->buffer[i]];
   put_cksum(sendpacket);
 
   write(brl_fd, sendpacket, PACKET_HDR_LEN+nrstatcells+brl_cols+NRCKSUMBYTES);
@@ -609,7 +600,7 @@ brl_writeWindow (brldim *brl)
 
 
 static int 
-brl_read (DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
   static char
     ignore_next_release = 0; /* when a command is triggered by combining

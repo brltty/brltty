@@ -1,17 +1,17 @@
 # Dependencies for vb.o:
-vb.o: vb.c
-vb.o: $(TOP_DIR)/config.h
-vb.o: vblow.h
-vb.o: $(TOP_DIR)/Programs/brl.h
-vb.o: brlconf.h
-vb.o: $(TOP_DIR)/Programs/brl_driver.h
-vb.o: $(TOP_DIR)/Programs/misc.h
+vb.o: $(SRC_DIR)/vb.c
+vb.o: $(BLD_TOP)config.h
+vb.o: $(SRC_DIR)/vblow.h
+vb.o: $(SRC_TOP)Programs/brl.h
+vb.o: $(SRC_DIR)/brlconf.h
+vb.o: $(SRC_TOP)Programs/brl_driver.h
+vb.o: $(SRC_TOP)Programs/misc.h
 
 # Dependencies for vblow.o:
-vblow.o: vblow.c
-vblow.o: $(TOP_DIR)/config.h
-vblow.o: brlconf.h
-vblow.o: vblow.h
-vblow.o: $(TOP_DIR)/Programs/misc.h
-vblow.o: $(TOP_DIR)/Programs/system.h
+vblow.o: $(SRC_DIR)/vblow.c
+vblow.o: $(BLD_TOP)config.h
+vblow.o: $(SRC_DIR)/brlconf.h
+vblow.o: $(SRC_DIR)/vblow.h
+vblow.o: $(SRC_TOP)Programs/misc.h
+vblow.o: $(SRC_TOP)Programs/system.h
 

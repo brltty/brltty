@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -124,8 +124,9 @@ typedef enum {
   CMD_MENU_NEXT_SETTING /* change value of current item in menu to next choice */,
  
   /* speech */
-  CMD_SAY /* speak current line */,
-  CMD_SAYALL /* speak rest of screen */,
+  CMD_SAY_LINE /* speak current line */,
+  CMD_SAY_ABOVE /* speak from top through current line */,
+  CMD_SAY_BELOW /* speak from current through bottom line */,
   CMD_MUTE /* stop speaking immediately */,
   CMD_SPKHOME /* go to current/last speech position */,
   
@@ -264,9 +265,22 @@ typedef enum {
 
 /* Braille information structure. */
 typedef struct {
-  unsigned char *disp;	/* contents of the display */
-  int x, y;			/* size of display */
-} brldim;				/* used for writing to a braille display */
+  int x, y;			/* the dimensions of the display */
+  int helpPage;			/* the page number within the help file */
+  unsigned char *buffer;	/* the contents of the display */
+  unsigned isCoreBuffer:1;	/* the core allocated the buffer */
+  unsigned resizeRequired:1;	/* the display size has changed */
+  unsigned int writeDelay;
+  void (*bufferResized) (int rows, int columns);
+} BrailleDisplay;				/* used for writing to a braille display */
+
+extern void initializeBrailleDisplay (BrailleDisplay *);
+extern unsigned int drainBrailleOutput (BrailleDisplay *, unsigned int minimumDelay);
+extern void writeBrailleBuffer (BrailleDisplay *);
+extern void writeBrailleText (BrailleDisplay *, const char *, int);
+extern void writeBrailleString (BrailleDisplay *, const char *);
+extern int allocateBrailleBuffer (BrailleDisplay *);
+extern int readBrailleCommand (BrailleDisplay *, DriverCommandContext);
 
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure
@@ -281,11 +295,20 @@ typedef struct {
 
   /* Routines provided by the braille driver library: */
   void (*identify) (void);	/* print start-up messages */
-  void (*initialize) (char **parameters, brldim *, const char *);	/* initialise Braille display */
-  void (*close) (brldim *);		/* close braille display */
-  void (*writeWindow) (brldim *);		/* write to braille display */
-  int (*read) (DriverCommandContext);		/* get key press from braille display */
-  void (*writeStatus) (const unsigned char *);	/* set status cells */
+  int (*open) (BrailleDisplay *, char **parameters, const char *);	/* initialise Braille display */
+  void (*close) (BrailleDisplay *);		/* close braille display */
+  int (*readCommand) (BrailleDisplay *, DriverCommandContext);		/* get key press from braille display */
+  void (*writeWindow) (BrailleDisplay *);		/* write to braille display */
+  void (*writeStatus) (BrailleDisplay *brl, const unsigned char *);	/* set status cells */
+
+  /* These require BRL_HAVE_VISUAL_DISPLAY. */
+  void (*writeVisual) (BrailleDisplay *);		/* write to braille display */
+
+  /* These require BRL_HAVE_PACKET_IO. */
+  int (*brl_readPacket) (BrailleDisplay *, unsigned char *, int);
+  int (*brl_writePacket) (BrailleDisplay *, unsigned char *, int);
+  int (*brl_readKey) (BrailleDisplay *);
+  int (*brl_keyCommand) (BrailleDisplay *, DriverCommandContext, int);
 } BrailleDriver;
 
 extern const BrailleDriver *loadBrailleDriver (const char **libraryName);
@@ -293,10 +316,23 @@ extern int listBrailleDrivers (void);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;
 
-extern unsigned char textTable[0X100];	 /* current text to braille translation table */
-extern unsigned char untextTable[0X100]; /* current braille to text translation table */
-extern unsigned char attributesTable[0X100]; /* current attributes to braille translation table */
+typedef unsigned char TranslationTable[0X100];
+extern TranslationTable textTable;	 /* current text to braille translation table */
+extern TranslationTable untextTable;     /* current braille to text translation table */
+extern TranslationTable attributesTable; /* current attributes to braille translation table */
 extern void *contractionTable; /* current braille contraction table */
+extern void reverseTable (TranslationTable *origtab, TranslationTable *revtab);
+
+/* Formatting of status cells. */
+extern const unsigned char landscapeDigits[11];
+extern int landscapeNumber (int x);
+extern int landscapeFlag (int number, int on);
+extern const unsigned char seascapeDigits[11];
+extern int seascapeNumber (int x);
+extern int seascapeFlag (int number, int on);
+extern const unsigned char portraitDigits[11];
+extern int portraitNumber (int x);
+extern int portraitFlag (int number, int on);
 
 typedef struct {
   int code;
@@ -304,7 +340,7 @@ typedef struct {
   const char *description;
 } CommandEntry;
 extern const CommandEntry commandTable[];
-extern void learnMode (int poll, int timeout);
+extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern void showDotPattern (unsigned char dots, unsigned char duration);
 

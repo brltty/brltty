@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -36,7 +36,7 @@
 static void spk_identify (void) {
   LogPrint(LOG_NOTICE, "No speech support.");
 }
-static void spk_initialize (char **parameters) { }
+static void spk_open (char **parameters) { }
 static void spk_say (const unsigned char *buffer, int len) { }
 static void spk_mute (void) { }
 static void spk_close (void) { }
@@ -66,11 +66,11 @@ loadSpeechDriver (const char **driver) {
         return &spk_driver;
       }
     }
-  #else
+  #else /* SPEECH_BUILTIN */
     if (*driver == NULL) {
       return &noSpeech;
     }
-  #endif
+  #endif /* SPEECH_BUILTIN */
 
   {
     const char *libraryName = *driver;
@@ -101,7 +101,6 @@ loadSpeechDriver (const char **driver) {
 
   return symbolAddress;
 }
-
 
 int
 listSpeechDrivers (void) {

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -16,7 +16,7 @@
  */
 
 /* EuroBraille/braille.c - Braille display library for the EuroBraille family.
- * Copyright (C) 1997-2001 by Yannick Plassiard <Yannick.Plassiard@free.fr>
+ * Copyright (C) 1997-2003 by Yannick Plassiard <plassi_y@epitech.net>
  *                        and Nicolas Pitre <nico@cam.org>
  * See the GNU General Public License for details in the ../COPYING file
  * See the README file for details about copyrights and version informations
@@ -25,8 +25,20 @@
 #define BRL_C 1
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+# include "config.h"
 #endif /* HAVE_CONFIG_H */
+
+
+/*
+** the next define controls whichever you want the LCD support or not.
+** Please do not use this define if you use an IRIS, this terminal doesn't have
+** any LCD screen.
+*/
+
+#define		BRL_HAVE_VISUAL_DISPLAY
+/*
+** headers
+*/
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -39,27 +51,209 @@
 #include "brlconf.h"
 #include "Programs/brl.h"
 #include "Programs/message.h"
-#include "Programs/scr.h"
 #include "Programs/misc.h"
 #include "Programs/brl_driver.h"
 
+
+
+
+t_key		num_keys[27] = {
+  {'1', 0, 1},
+  {'2', 0, 2},
+  {'3', 0, 3},
+  {'4', 0, 4},
+  {'5', 0, 5},
+  {'6', 0, 6},
+  {'7', 0, 7},
+  {'8', 0, 8},
+  {'9', 0, 9},
+  {'*', 0, 10},
+  {'0', 0, 30},
+  {'#', 0, 11},
+  {'A', 0, 12},
+  {'B', 0, 13},
+  {'C', 0, 14},
+  {'D', 0, 15},
+  {'E', 0, 16},
+  {'F', 0, 17},
+  {'G', 0, 18},
+  {'H', 0, 19},
+  {'I', 0, 20},
+  {'J', 0, 21},
+  {'K', 0, 22},
+  {'L', 0, 23},
+  {'M', 0, 24},
+  {'Z', 0, 25},
+  {0, 0, 0}
+};
+
+/*
+** next tables define assigmenss bitween keys and HLLTTY commands depending on
+** the terminal type (Scriba, Clio)NoteBraille, or AzerBraille).
+**
+** If you make changes to those tables I'd like to be informed in order to
+** update the driver for next releases.
+*/
+
+t_key		scriba_keys[17] = {		
+  {2, 0, VAL_PASSKEY | VPK_CURSOR_UP},
+  {4, 0, VAL_PASSKEY | VPK_CURSOR_LEFT},
+  {6, 0, VAL_PASSKEY | VPK_CURSOR_RIGHT},
+  {8, 0, VAL_PASSKEY | VPK_CURSOR_DOWN},
+  {10, Program, 0},
+  {11, ViewOn, 0},
+  {13, 0, 0},
+  {16, 0, CMD_FWINLT},
+  {17, 0, CMD_LNUP},
+  {18, 0, CMD_PRPROMPT},
+  {19, 0, CMD_PRSEARCH},
+  {20, 0, CMD_INFO},
+  {21, 0, CMD_NXSEARCH},
+  {22, 0, CMD_NXPROMPT},
+  {23, 0, CMD_LNDN},
+  {24, 0, CMD_FWINRT},
+  {0, 0, 0}
+};
+
+t_key		pscriba_keys[7] = {
+  {2, 0, CMD_PREFMENU},
+  {6, 0, CMD_TUNES},
+  {8, 0, CMD_CSRTRK},
+  {16, begblk, 0},
+  {23, 0, CMD_PASTE},
+  {24, endblk, 0},
+  {0, 0, 0}
+};
+
+t_key		azer40_keys[8] = {
+  {16, 0, CMD_FWINLT},
+  {17, 0, CMD_LNUP},
+  {18, 0, CMD_PRPROMPT},
+  {20, 0, CMD_INFO},
+  {22, 0, CMD_NXPROMPT},
+  {23, 0, CMD_LNDN},
+  {24, 0, CMD_FWINRT},
+  {0, 0, 0}
+};
+
+t_key		*pazer40_keys = pscriba_keys;
+
+t_key		azer80_keys[23] = {
+  {1, 0, CMD_TOP_LEFT},
+  {2, 0, VAL_PASSKEY | VPK_CURSOR_UP},
+  {3, 0, CMD_PRDIFLN},
+  {4, 0, VAL_PASSKEY | VPK_CURSOR_LEFT},
+  {5, 0, CMD_HOME},
+  {6, 0, VAL_PASSKEY | VPK_CURSOR_RIGHT},
+  {7, 0, CMD_BOT_LEFT},
+  {8, 0, VAL_PASSKEY | VPK_CURSOR_DOWN},
+  {9, 0, CMD_NXDIFLN},
+  {10, Program, 0},
+  {30, 0, CMD_CSRTRK},
+  {11, ViewOn, 0},
+  {12, 0, CMD_FREEZE},
+  {16, 0, CMD_FWINLT},
+  {17, 0, CMD_LNUP},
+  {18, 0, CMD_PRPROMPT},
+  {19, 0, CMD_PRSEARCH},
+  {20, 0, CMD_INFO},
+  {21, 0, CMD_NXSEARCH},
+  {22, 0, CMD_NXPROMPT},
+  {23, 0, CMD_LNDN},
+  {24, 0, CMD_FWINRT},
+  {0, 0, 0}
+};
+t_key		*pazer80_keys = pscriba_keys;
+
+t_key		*clio_keys = azer80_keys;
+t_key		*pclio_keys = pscriba_keys;
+
+t_key		*nb_keys = azer80_keys;
+t_key		*pnb_keys = pscriba_keys;
+
+t_key		iris_keys[14] = {
+  {2, 0, VAL_PASSKEY | VPK_CURSOR_UP},
+  {4, 0, VAL_PASSKEY | VPK_CURSOR_LEFT},
+  {6, 0, VAL_PASSKEY | VPK_CURSOR_RIGHT},
+  {8, 0, VAL_PASSKEY | VPK_CURSOR_DOWN},
+  {16, 0, CMD_FWINLT},
+  {17, 0, CMD_LNUP},
+  {18, 0, CMD_CSRVIS},
+  {19, 0, CMD_NOOP},
+  {20, 0, CMD_NOOP},
+  {21, 0, CMD_NOOP},
+  {22, 0, CMD_TUNES},
+  {23, 0, CMD_LNDN},
+  {24, 0, CMD_FWINRT},
+  {0, 0, 0}
+};
+
+/*
+** Next bindings are keys that must be explicitly listed to allow function
+** keys, escape, page-down, enter, backspace ...
+** The first part is a 10-bits code representing the key. Format is :
+**
+** Braille -> decimal value
+** 1		1
+** 2		2
+** 3		4
+** 4		8
+** 5		16
+** 6		32
+** 7		64
+** 8		128
+** bkspace	256
+** space	512
+*/
+
+t_alias		brl_key[] = {
+  {0x100,	VAL_PASSKEY + VPK_BACKSPACE},
+  {0x300,	VAL_PASSKEY + VPK_RETURN},
+  {0x232,	VAL_PASSKEY + VPK_TAB},
+  {0x208,	VAL_PASSKEY + VPK_CURSOR_UP},
+  {0x220,	VAL_PASSKEY + VPK_CURSOR_DOWN},
+  {0x210,	VAL_PASSKEY + VPK_CURSOR_RIGHT},
+  {0x202,	VAL_PASSKEY + VPK_CURSOR_LEFT},
+  {0x205,	VAL_PASSKEY + VPK_PAGE_UP},
+  {0x228,	VAL_PASSKEY + VPK_PAGE_DOWN},
+  {0x207,	VAL_PASSKEY + VPK_HOME},
+  {0x238,	VAL_PASSKEY + VPK_END},
+  {0x224,	VAL_PASSKEY + VPK_DELETE},
+  {0x21b,	VAL_PASSKEY + VPK_ESCAPE},
+  {0x215,	VAL_PASSKEY + VPK_INSERT},
+  {0x101,	VAL_PASSKEY + VPK_FUNCTION},
+  {0x103,	VAL_PASSKEY + VPK_FUNCTION + 1},
+  {0x109,	VAL_PASSKEY + VPK_FUNCTION + 2},
+  {0x119,	VAL_PASSKEY + VPK_FUNCTION + 3},
+  {0x111,	VAL_PASSKEY + VPK_FUNCTION + 4},
+  {0x10b,	VAL_PASSKEY + VPK_FUNCTION + 5},
+  {0x11b,	VAL_PASSKEY + VPK_FUNCTION + 6},
+  {0x113,	VAL_PASSKEY + VPK_FUNCTION + 7},
+  {0x10a,	VAL_PASSKEY + VPK_FUNCTION + 8},
+  {0x11a,	VAL_PASSKEY + VPK_FUNCTION + 9},
+  {0x105,	VAL_PASSKEY + VPK_FUNCTION + 10},
+  {0x107,	VAL_PASSKEY + VPK_FUNCTION + 11},
+  {0,		0}
+};
+
 static int model_ID = 0;
 /* model identification string. possible values :
- * 0 - Unknown model name
- * 1 - NoteBRAILLE
- * 2 - Clio-NoteBRAILLE
- * 3 - SCRIBA
- * 4 - AzerBRAILLE
- */
+** 0 - Unknown model name
+** 1 - NoteBRAILLE
+** 2 - Clio-NoteBRAILLE
+** 3 - SCRIBA
+** 4 - AzerBRAILLE
+** 5 - Iris (not defined yet, will come soon...)
+*/
 
-static char version_ID[] = "Unknown";
+static char version_ID[21] = "Unknown";
 /* This is where the driver will store the internal ROM version of the
- * terminal. It is used when the user asks the version of BRLTTY and his
- * terminal.
- */
+** terminal. It is used when the user asks the version of BRLTTY and his
+** terminal.
+*/
 
 #define BRLROWS		1
-#define MAX_STCELLS	5	/* hiest number of status cells, if ever... */
+#define MAX_STCELLS	5	/* hiest number of status cells */
 
 /* This is the brltty braille mapping standard to Eurobraille's mapping table.
  */
@@ -102,14 +296,18 @@ char TransTable[256] =
 /* Global variables */
 
 int InDate = 0;
+int chars_per_sec;
 int brl_fd;			/* file descriptor for Braille display */
 struct termios oldtio;		/* old terminal settings */
-unsigned char *rawdata;		/* translated data to send to Braille */
-unsigned char *prevdata;	/* previously sent raw data */
+unsigned char *rawdata = NULL;		/* translated data to send to Braille */
+unsigned char *prevdata = NULL;	/* previously sent raw data */
+unsigned char *lcd_data = NULL;	/* previously sent to LCD */
 int NbCols = 0;			/* number of cells available */
 static short ReWrite = 0;		/* 1 if display need to be rewritten */
+static short ReWrite_LCD = 0;		/* same as rewrite, for LCD */
+static int OffsetType = CR_ROUTE;
 static int PktNbr = 127; /* 127 at first time */
-static int InMenu = 0;   /* Internal Date test-value */
+static int context = 0;   /* Input type test-value */
 
 /* Communication codes */
 
@@ -128,23 +326,35 @@ static int InMenu = 0;   /* Internal Date test-value */
 
 #define DIM_INBUFSZ 256
 
-static int readbrlkey(int type);
+static int readbrlkey(BrailleDisplay *brl);
 
-static int
-  sendbyte (unsigned char c)
+static int begblk(BrailleDisplay *brl)
 {
-   return (write (brl_fd, &c, 1));
+  OffsetType = CR_CUTBEGIN;
+  return (CMD_NOOP);
 }
 
-static int
-  WriteToBrlDisplay (int len, char *data)
+static int endblk(BrailleDisplay *brl)
 {
-   unsigned char parity = 0;
+  OffsetType = CR_CUTLINE;
+  return (CMD_NOOP);
+}
+
+static int sendbyte(unsigned char c)
+{
+  return (write(brl_fd, &c, 1));
+}
+
+static int WriteToBrlDisplay (BrailleDisplay *brl, int len, char *data)
+{
+  unsigned char	buf[1024];
+  unsigned char		*p = buf;
+  unsigned char parity = 0;
 
    if (!len)
      return (1);
 
-   sendbyte (SOH);
+   *p++ = SOH;
    while (len--)
      {
 	switch (*data)
@@ -154,14 +364,14 @@ static int
 	   case ACK:
 	   case DLE:
 	   case NACK:
-	     sendbyte (DLE);
+	     *p++ = DLE;
 	  /* no break */
 	   default:
-	     sendbyte (*data);
+	     *p++ = *data;
 	     parity ^= *data++;
 	  }
      }
-   sendbyte (PktNbr);
+   *p++ = PktNbr;
    parity ^= PktNbr;
    if (++PktNbr >= 256)
      PktNbr = 128;
@@ -172,36 +382,36 @@ static int
       case ACK:
       case DLE:
       case NACK:
-	sendbyte (DLE);
+	*p++ = DLE;
       /* no break */
       default:
-	sendbyte (parity);
+	*p++ = parity;
      }
-   sendbyte (EOT);
-   return (1);
+   *p++ = EOT;
+   brl->writeDelay += (p - buf) * 1000 / chars_per_sec;
+   return (write(brl_fd, buf, p - buf));
 }
 
 static void brl_identify (void)
 {
-   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.0");
-   LogPrint(LOG_INFO, "  Copyright (C) 1997-2001");
-   LogPrint(LOG_INFO, "      - Yannick PLASSIARD <Yannick.Plassiard@free.fr>");
+   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.2");
+   LogPrint(LOG_INFO, "  Copyright (C) 1997-2003");
+   LogPrint(LOG_INFO, "      - Yannick PLASSIARD <plassi_y@epitech.net>");
    LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
 }
 
-static void brl_initialize (char **parameters, brldim *brl, const char *dev)
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
-   brldim res;			/* return result */
    struct termios newtio;	/* new terminal settings */
 
-   res.disp = rawdata = prevdata = NULL;		/* clear pointers */
+   rawdata = prevdata = lcd_data = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
    brl_fd = open (dev, O_RDWR | O_NOCTTY);
    if (brl_fd < 0)
      {
 	LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
-	goto failure;
+        return 0;
      }
    tcgetattr (brl_fd, &oldtio);	/* save current settings */
 
@@ -214,408 +424,178 @@ static void brl_initialize (char **parameters, brldim *brl, const char *dev)
    newtio.c_cc[VTIME] = 0;
 
   /* set speed */
+   chars_per_sec = baud2integer(BAUDRATE) / 10;
    cfsetispeed (&newtio, BAUDRATE);
    cfsetospeed (&newtio, BAUDRATE);
-   tcsetattr (brl_fd, TCSANOW, &newtio);		/* activate new settings */
+   tcsetattr (brl_fd, TCSANOW, &newtio);	   /* activate new settings */
 
   /* Set model params... */
-  /* should be autodetected here... */
+   brl->helpPage = 0;
+   brl->y = BRLROWS;
    while (!NbCols)
      {
 	int i = 0;
 	unsigned char AskIdent[] =
 	  {2, 'S', 'I',3,'M','P','\x37'};
-	WriteToBrlDisplay (7, AskIdent);
+	WriteToBrlDisplay (brl, 7, AskIdent);
 	while (!NbCols)
 	  {
-	     delay (100);
-	     brl_read (CMDS_SCREEN);		/* to get the answer */
+	     drainBrailleOutput (brl, 100);
+	     brl_readCommand (brl, CMDS_SCREEN);       /* to get the answer */
 	     if (++i >= 10)
 	       break;
 	  }
      }
-   setHelpPageNumber (0);
-   res.x = NbCols;		/* initialise size of display */
-   res.y = BRLROWS;
 
-  /* Allocate space for buffers */
-   res.disp = (char *) malloc (res.x * res.y);
-   rawdata = (unsigned char *) malloc (res.x * res.y);
-   prevdata = (unsigned char *) malloc (res.x * res.y);
-   if (!res.disp || !rawdata || !prevdata)
-     {
-	LogPrint( LOG_ERR, "can't allocate braille buffers" );
-	goto failure;
-     }
-
-   ReWrite = 1;			/* To write whole display at first time */
-
-   *brl = res;
-   return;
-
-   failure:;
-   if (res.disp)
-     free (res.disp);
-   if (rawdata)
-     free (rawdata);
-   if (prevdata)
-     free (prevdata);
-   brl->x = -1;
-   return;
+   ReWrite = 1;  /* To write whole display at first time */
+   ReWrite_LCD = 1;
+   return 1;
 }
 
-static void brl_close (brldim *brl)
+static void brl_close (BrailleDisplay *brl)
 {
-   free (brl->disp);
-   free (rawdata);
-   free (prevdata);
-   tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
-   close (brl_fd);
+   if (rawdata)
+     {
+       free (rawdata);
+       rawdata = NULL;
+     }
+   if (prevdata)
+     {
+       free (prevdata);
+       prevdata = NULL;
+     }
+   if (lcd_data)
+     {
+       free (lcd_data);
+       lcd_data = NULL;
+     }
+   if (brl_fd >= 0)
+     {
+       tcsetattr (brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
+       close (brl_fd);
+       brl_fd = -1;
+     }
 }
 
-static void brl_writeWindow (brldim *brl)
+static void brl_writeWindow (BrailleDisplay *brl)
 {
    int i, j;
-   if (InMenu != 0) return;
+
+   if (context) 
+     return ;
    if (!ReWrite)
      {
       /* We update the display only if it has changed */
-	if( memcmp( brl->disp, prevdata, NbCols ) != 0 )
+	if (memcmp(brl->buffer, prevdata, NbCols) != 0)
 	  ReWrite = 1;
      }
    if (ReWrite)
      {
       /* right end cells don't have to be transmitted if all dots down */
 	i = NbCols;
-#if 0   /* *** the ClioBraille doesn't seem to like this part... */
-	while (--i > 0)		/* at least the first cell must go through... */
-	  if (brl->disp[i] != 0)
-	    break;
-	i++;
-#endif /* 0 */
 
 	  {
 	     char OutBuf[2 * i + 6];
 	     char *p = OutBuf;
-#if 0   /* *** don't know how to use DX correctly... */
-	/* This part should display on the LCD screen */
-	     *p++ = i + 2;
-	     *p++ = 'D';
-	     *p++ = 'X';
-	     for (j = 0; j < 1; *p++ = ' ', j++);	/* fill LCD with whitespaces */
-#else
-	/* This is just to make the terminal accept the DY command */
-	     *p++ = 2;
-	     *p++ = 'D';
-	     *p++ = 'X';
-#endif /* 0 */
 
-	/* This part displays on the braille line */
 	     *p++ = i + 2;
 	     *p++ = 'D';
-	     *p++ = 'Y';
+	     *p++ = 'P';
 	     for (j = 0;
 		  j < i;
-		  *p++ = TransTable[(prevdata[j++] = brl->disp[j])]);
-	     WriteToBrlDisplay (p - OutBuf, OutBuf);
-	  }
-	ReWrite = 0;
-     }
-}
-
-static void brl_writeStatus (const unsigned char *st)
-{
-  /* sorry but the ClioBraille I got here doesn't have any status cells...
-   * Don't know either if any EuroBraille terminal have some.
-   */
-}
-
-static int Program(void)
-{
-   int touche;
-   static int exitprog = 0;
-   static int res3 = 0;
-   switch (model_ID)
-     {
-      case 3:
-	message("Beta level ...",0);
-	break;
-      default:
-	message("P PROGRAMMING      x",0);
-	break;
-     }
-   exitprog=0;
-   while (!exitprog)
-     {
-	touche=readbrlkey(0);
-	switch(touche)
-	  {
-	   case 1:
-	     res3 = CMD_PREFMENU;
-	     exitprog=1;
-	     break;
-	   case 2:
-	     switch(model_ID)
-	       {
-		case 3: /* For SCRIBA only */
-		  res3 = CMD_PREFMENU;
-		  exitprog=1;
-		  break;
-		default:
-		  res3 = CMD_PREFLOAD;
-		  exitprog=1;
-		  break;
-	       }
-	     break;
-	   case 8: 
-	     if (model_ID == 3) {
-		res3 = CMD_CSRTRK;
-		exitprog=1;
-	     }
-	     break;
-	   case 10:
-	     exitprog=1;
-	     ReWrite=1;
-	     break;
+		  *p++ = TransTable[(prevdata[j++] = brl->buffer[j])]);
+	     WriteToBrlDisplay (brl, p - OutBuf, OutBuf);
+	     ReWrite = 0;
 	  }
      }
-   return res3;
 }
 
-static int stopmode(void) __attribute__((unused));
-static int stopmode(void)
+/*
+** If defined, the next routine will print informations on the LCD screen
+*/
+
+#ifdef		BRL_HAVE_VISUAL_DISPLAY
+
+static void	brl_writeVisual(BrailleDisplay *brl)
 {
-   unsigned char parity = 0;
-   sendbyte(SOH);
-   sendbyte(2);
-   parity ^= 2;
-   sendbyte('K');
-   parity ^= 'K';
-   sendbyte('r');
-   parity ^= 'r';
-   sendbyte(PktNbr - 2);
-   parity ^= (PktNbr - 2);
-   sendbyte(parity);
-   sendbyte(EOT);
-   return (0);
+  int		i = NbCols;
+  char		OutBuf[2 * NbCols + 6];
+  char	        *p = OutBuf;
+  int		j;
+
+  if (ReWrite_LCD == 0)
+    if (memcmp(brl->buffer, lcd_data, NbCols) != 0)
+      {
+	ReWrite_LCD = 1;
+	memcpy(lcd_data, brl->buffer, NbCols);
+      }
+  if (ReWrite_LCD)
+    {
+      memset(OutBuf, 0, NbCols + 2);
+      *p++ = i + 2;
+      *p++ = 'D';
+      *p++ = 'L';
+      for (j = 0; j < i; j++)
+	*p++ = brl->buffer[j];
+      WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
+      ReWrite_LCD = 0;
+    }
 }
 
-static int DisplayDate(void)
+#endif
+
+static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 {
-   unsigned char parity = 0;
-   sendbyte(SOH);
-   sendbyte(2);
-   parity ^= 2;
-   sendbyte('R');
-   parity ^= 'R';
-   sendbyte('D');
-   parity ^= 'D';
-   sendbyte(PktNbr);
-   parity ^= PktNbr;
-   if (PktNbr == 256) PktNbr = 0x80;
-   sendbyte(parity);
-   sendbyte(EOT);
-   return 0;
+  
 }
 
-static int startmode(void) __attribute__((unused));
-static int startmode(void)
+static int Program(BrailleDisplay *brl)
 {
-   static unsigned char parity = 0;
-   sendbyte(SOH);
-   sendbyte(2);
-   parity ^= 2;
-   sendbyte('K');
-   parity ^= 'K';
-   sendbyte('R');
-   parity ^= 'R';
-   sendbyte(PktNbr);
-   parity ^= PktNbr;
-   if (++PktNbr == 256 ) PktNbr = 0x80;
-   sendbyte(parity);
-   sendbyte(EOT);
-   return (0);
+  int		key;
+  t_key		*p = 0;
+  short		i;
+
+  switch (model_ID)
+    {
+    case 1:
+      message("P PROGRAMMING      x", MSG_NODELAY);
+      p = pnb_keys;
+      break;
+    case 2:
+      message("P PROGRAMMING      x", MSG_NODELAY);
+      p = pclio_keys;
+      break;
+    case 3:
+      message("Beta level ...",MSG_NODELAY);
+      p = pscriba_keys;
+      break;
+    case 4:
+      message("P PROGRAMMING      x", MSG_NODELAY);
+      p = pazer80_keys;
+      break;
+    default:
+      message("P Unimplemented yet!", MSG_WAITKEY);
+      break;
+    }
+  if (p)
+    {
+      while ((key = readbrlkey(brl)) != 10)
+	{
+	  for (i = 0; p[i].brl_key; i++)
+	    if (key == p[i].brl_key)
+	      {
+		if (p[i].f)
+		  return (p[i].f(brl));
+		else
+		  return (p[i].res);
+	      }
+	}
+    }
+  return (CMD_NOOP);
 }
 
-/* On-line help function */
 
-static int OnlineHelp(void)
-{
-   int touche;
-   static int exithelp = 0;
-   static int exithelp1 = 0;
-   static int exithelp2 = 0;
-   message("! On-line Help",0);
-   exithelp=0;
-   exithelp1=0;
-   exithelp2=0;
-   while (!exithelp)
-     {
-	exithelp1=0;
-	exithelp2=0;
-	touche=readbrlkey(0);
-	switch(touche)
-	  {
-	   case 1:
-	     message("1 undefined key",0);
-	     break;
-	   case 2:
-	     message("2 previous line",0);
-	     break;
-	   case 3:
-	     message("3 previous diff line",0);
-	     break;
-	   case 4:
-	     message("4 view on cursor",0);
-	     break;
-	   case 5:
-	     message("5 undefined key",0);
-	     break;
-	   case 6:
-	     message("6 undefined key",0);
-	     break;
-	   case 7:
-	     message("7 undefined key",0);
-	     break;
-	   case 8:
-	     message("8 next line ",0);
-	     break;
-	   case 9:
-	     message("9 next diff line",0);
-	     break;
-	   case 10:
-	     message("* programming/cancel",0);
-	     while (!exithelp1)
-	       {
-		  touche=readbrlkey(0);
-		  switch(touche)
-		    {
-		     case 1:
-		       message("*1 Preferences menu",0);
-		       exithelp1=1;
-		       break;
-		     case 2:
-		       message("*2 reset preferences",0);
-		       exithelp1=1;
-		       break;
-		     case 10:
-		       exithelp1=1;
-		       exithelp=1;
-		       break;
-		    }
-	       }
-	     break;
-	   case 11:
-	     message("# view on (validate)",0);
-	     while (!exithelp2)
-	       {
-		  touche=readbrlkey(0);
-		  switch(touche)
-		    {
-		     case 1:
-		       message("#1 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 2:
-		       message("#2 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 3:
-		       message("#3 top-left corner",0);
-		       exithelp2=1;
-		       break;
-		     case 4:
-		       message("#4 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 5:
-		       message("#5 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 6:
-		       message("#6 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 7:
-		       message("#7 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 8:
-		       message("#8 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 9:
-		       message("#9 BottomLeft corner",0);
-		       exithelp2=1;
-		       break;
-		     case 30:
-		       message("#0 undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 10:
-		       message("#* undefined key",0);
-		       exithelp2=1;
-		       break;
-		     case 11:
-		       exithelp2=1;
-		       exithelp=1;
-		       break;
-		     case 12:
-		       message("#A toggle attributes",0);
-		       exithelp2=1;
-		       break;
-		    }
-	       }
-	     break;
-	   case 12:
-	     message("A undefined key",0);
-	     break;
-	   case 13:
-	     message("B mode selection",0);
-	     break;
-	   case 14:
-	     message("C undefined key",0);
-	     break;
-	   case 15:
-	     message("D repeat braille comb",0);
-	     break;
-	   case 16:
-	     message("E move display left",0);
-	     break;
-	   case 17:
-	     message("F top-left corner",0);
-	     break;
-	   case 18:
-	     message("G cursor invis/visib",0);
-	     break;
-	   case 19:
-	     message("H undefined key",0);
-	     break;
-	   case 20:
-	     message("I show coordinates",0);
-	     break;
-	   case 21:
-	     message("J start of block",0);
-	     break;
-	   case 22:
-	     message("K end of block",0);
-	     break;
-	   case 23:
-	     message("L paste block",0);
-	     break;
-	   case 24:
-	     message("M move display right",0);
-	     break;
-	   case 30:
-	     message("0 TrackCursor on/off",0);
-	     break;
-	  }
-     }
-
-   return 0;
-}
-
-static int ViewOn(void)
+int ViewOn(BrailleDisplay *brl)
 {
    int touche;
    static int res2 = 0;
@@ -629,10 +609,10 @@ static int ViewOn(void)
    switch (model_ID)
      {
       case 3:
-	message("Alpha level ...",0);
+	message("Alpha level ...", MSG_NODELAY);
 	break;
       default:
-	message("V VIEW ON          x",0);
+	message("V VIEW ON          x", MSG_NODELAY);
 	break;
      }
    exitviewon=0;
@@ -660,188 +640,125 @@ static int ViewOn(void)
 	     exitviewon=1;
 	     break;
 	   case 19:
-	     OnlineHelp();
+	     res2 = CMD_LEARN;
 	     exitviewon=1;
 	     break;
 	   case 24:
-	     res2 = DisplayDate();
+	     res2 = CMD_NOOP;
 	     break;
 	  }
      }
    return res2;
 }
 
-static int brl_read(DriverCommandContext cmds)
+static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 {
-   int result;
-   result=readbrlkey(0);
-   switch (result)
-     {
-      case 30: /* '0' key was pressed */
-	result = CMD_CSRTRK;
-	break;
-      case 1: /* '1' key was pressed */
-	result = EOF;
-	break;
-      case 2: /* '2' key was pressed */
-	result = CMD_LNUP;
-	break;
-      case 3: /* '3' key was pressed */
-	result = CMD_PRDIFLN;
-	break;
-      case 4: /* '4' key was pressed */
-	result = CMD_HOME;
-	break;
-      case 5: /* '5' key was pressed */
-	result = CMD_NOOP;
-	break;
-      case 6: /* '6' key was pressed */
-	result = CMD_NOOP;
-	break;
-      case 7: /* '7' key was pressed */
-	break;
-      case 8: /* '8 key was pressed */
-	result = CMD_LNDN;
-	break;
-      case 9: /* '9' key was pressed */
-	result = CMD_NXDIFLN;
-	break;
-      case 10: /* '*' key was pressed */
-	result = Program();
-	break;
-      case 11: /* '#' key was pressed */
-	result = ViewOn(); /* Lunch the View On  procedure */
-	break;
-      case 12: /* 'a' key was pressed */
-	break;
-      case 13: /* 'b' key was pressed */
-	break;
-      case 14: /* 'c' key was pressed */
-	break;
-      case 15: /* 'd' key was pressed */
-	break;
-      case 16: /* 'e' key pressed */
-	result = CMD_FWINLT;
-	break;
-      case 17: /* 'f' key was pressed */
-	switch(model_ID)
+  int		res;
+  int		i;
+  t_key		*p;
+  int		key;
+
+  res = 0;
+  key = readbrlkey(brl);
+  p = 0;
+  if (model_ID == 1)
+    p = nb_keys;
+  else if (model_ID == 2)
+    p = clio_keys;
+  else if (model_ID == 3)
+    p = scriba_keys;
+  else if (model_ID == 4 && NbCols == 40)
+    p = azer40_keys;
+  else if (model_ID == 4 && NbCols == 80)
+    p = azer80_keys;
+  else if (model_ID == 5)
+    p = iris_keys;
+  if (p)
+    {
+      for (i = 0; p[i].brl_key; i++)
+	if (p[i].brl_key == key)
 	  {
-	   case 4: /* AzerBRAILLE model */
-	     result = CMD_LNUP;
-	     break;
-	   default:
-	     result = CMD_TOP_LEFT;
-	     break;
+	    if (p[i].f)
+	      res = p[i].f(brl);
+	    else
+	      res = p[i].res;
 	  }
-	break;
-      case 18: /* 'g' key was pressed */
-	result = CMD_CSRVIS;
-	break;
-      case 19: /* 'h' key was pressed */
-	break;
-      case 20: /* 'i' kew was pressed */
-	result = CMD_INFO;
-	break;
-      case 21: /* 'j' key was pressed */
-	break;
-      case 22: /* 'k' key was pressed */
-	break;
-      case 23: /* 'l' key was pressed */
-	switch(model_ID)
-	  {
-	   case 1: /* NoteBRAILLE model */
-	     result = CMD_LNDN;
-	     break;
-	   case 4: /* AzerBRAILLE model */
-	     result = CMD_LNDN;
-	     break;
-	   default:
-	     result = CMD_PASTE;
-	     break;
-	  }
-	break;
-      case 24: /* 'm' key was pressed */
-	result = CMD_FWINRT;
-	break;
-      case 31:
-	message(version_ID, MSG_WAITKEY);
-	break;
-     }
-   return result;
+    }
+  if (res)
+    return (res);
+  else
+    return (key);
 }
 
 static int routing(int routekey)
 {
-   int OffsetType = CR_ROUTE;
    int res = EOF;
-   switch (InMenu)
+
+   switch (context)
      {
       case 1:
 	switch (routekey)
 	  {
-	   case 0x02: /* exit menu */     
+	   case 0x02: /* exit menu */
 	     ReWrite = 1;
-	     InMenu = 0;
+	     context = 0;
 	     res = CMD_NOOP;
 	     break;
 	   case 0x06: /* Console Switching */
-	     InMenu = 0;
-	     message("switch:1 2 3 4 5 6 t", 0);
-	     InMenu = 2;
+	     context = 0;
+	     message("switch:1 2 3 4 5 6 t", MSG_NODELAY);
+	     context = 2;
 	     ReWrite = 0;
 	     res = CMD_NOOP;
 	     break;
 	   case 0x0B: /* Help */
-	     InMenu = 0;
-	     OnlineHelp();
-	     
+	     context = 0;
 	     ReWrite = 1;
-	     res = CMD_NOOP;
+	     res = CMD_LEARN;
 	     break;
+	  case 0x13: /* version information */
+	    context = 0;
+	    message(version_ID, MSG_WAITKEY);
+	    res = CMD_NOOP;
+	    break;
 	  }
 	break;
       case 2:
 	switch(routekey)
 	  {
 	   case 0x07: /* exit */
-	     InMenu = 0;
-	     
+	     context = 0;
 	     ReWrite = 1;
 	     res = CMD_NOOP;
 	     break;
 	   case 0x09: /* switch to console 1 */
 	     res = CR_SWITCHVT;   /* CR_WITCHVT + 0 */
-	     InMenu = 0;
-	     
+	     context = 0;
 	     ReWrite = 1;
 	     break;
 	   case 0x0B: /* switch to console 2 */
 	     res = CR_SWITCHVT + 1;
 	     ReWrite = 1;
-	     InMenu = 0;
-	     
+	     context = 0;
 	     break;
 	   case 0x0D: /* switch to console 3 */
 	     res = CR_SWITCHVT + 2;
-	     InMenu = 0;
+	     context = 0;
 	     ReWrite = 1;
-	     
 	     break;
 	   case 0x0F: /* switch to console 4 */
 	     res = CR_SWITCHVT + 3;
 	     ReWrite = 1;
-	     InMenu = 0;
-	     
+	     context = 0;
 	     break;
 	   case 0x11: /* switch to console 5 */
 	     res = CR_SWITCHVT + 4;
-	     InMenu = 0;
+	     context = 0;
 	     ReWrite = 1;
-	     
 	     break;
 	   case 0x13: /* switch to console 6 */
 	     res = CR_SWITCHVT + 5;
-	     InMenu = 0;
+	     context = 0;
 	     ReWrite = 1;
 	     break;
 	  }
@@ -850,8 +767,8 @@ static int routing(int routekey)
 	switch (routekey)
 	  {
 	   case 0x83: /* Entering in menu-mode */
-	     message("-:tty Help t", 0);
-	     InMenu = 1;
+	     message("-:tty help version t", MSG_NODELAY);
+	     context = 1;
 	     res = CMD_NOOP;
 	     break;
 	   default:
@@ -864,22 +781,40 @@ static int routing(int routekey)
    return res;
 }
 
-static int
-   readbrlkey(int type)
+static int	convert(int keys)
 {
+  int		res;
+
+  res = 0;
+  res = (keys & 128) ? 128 : 0;
+  res += (keys & 64) ? 64 : 0;
+  res += (keys & 32) ? 32 : 0;
+  res += (keys & 16) ? 8 : 0;
+  res += (keys & 8) ? 2 : 0;
+  res += (keys & 4) ? 16 : 0;
+  res += (keys & 2) ? 4 : 0;
+  res += (keys & 1) ? 1 : 0;
+  return (res);
+}
+
+
+static int readbrlkey(BrailleDisplay *brl)
+{
+  static int	control = 0;
+  static int	alt = 0;
    int res = EOF;
    unsigned char c;
    static unsigned char buf[DIM_INBUFSZ];
    static int DLEflag = 0, ErrFlag = 0;
-   static int pos = 0, p = 0, pktready = 0, OffsetType = CR_ROUTE;
-   static int position = 2; /* to retrieve internal version */
+   static int pos = 0, p = 0, pktready = 0;
+
   /* here we process incoming data */
    while (!pktready && read (brl_fd, &c, 1))
      {
 	if (DLEflag)
 	  {
 	     DLEflag = 0;
-	     if( pos < DIM_INBUFSZ ) buf[pos++] = c;
+	     if (pos < DIM_INBUFSZ) buf[pos++] = c;
 	  }
 	else if( ErrFlag )
 	  {
@@ -940,7 +875,7 @@ static int
    if (pktready)
      {
 	int lg;
-	while (res == EOF)
+	for (lg = 0; res == EOF; )
 	  {
 	  /* let's look at the next message */
 	     lg = buf[p++];
@@ -948,6 +883,12 @@ static int
 	       {
 		  pktready = 0;	/* we are done with this packet */
 		  break;
+	       }
+	     if (buf[p] == 'K' && buf[p + 1] != 'B' && context == 4)
+	       {
+		 context = 0;
+		 alt = 0;
+		 control = 0;
 	       }
 	     switch (buf[p])
 	       {
@@ -957,7 +898,7 @@ static int
 		     case 'B': /* PC-BRAILLE mode */
 		       InDate = 0;
 		       ReWrite = 1; /* to refresh display */
-		       InMenu = 0;
+		       context = 0;
 		       res = CMD_NOOP;
 		       break;
 		     case 'V': /* Braille and Speech mode */
@@ -965,96 +906,19 @@ static int
 		       break;
 		    }
 		  break;
-		case 'K':		/* Keyboard -- here are the key bindings */
-		  switch (buf[p + 1])
-		    {
-		     case 'T':	/* Control Keyboard */
-		       switch (buf[p + 2])
-			 {
-			  case 'E':
-			    res = 16;
-			    break;
-			  case 'F':
-			    res = 17;
-			    break;
-			  case 'G':
-			    res = 18;
-			    break;
-			  case 'H':
-			    res = 19;
-			    break;
-			  case 'I':
-			    res = 20;
-			    break;
-			  case 'J':
-			    res = 21;
-			    OffsetType = CR_CUTBEGIN;
-			    break;
-			  case 'K':
-			    res = 22;
-			    OffsetType = CR_CUTRECT;
-			    break;
-			  case 'L':
-			    res = 23;
-			    break;
-			  case 'M':
-			    res = 24;
-			    break;
+	       case 'K':      /* Keyboard -- here are the key bindings */
+		 switch (buf[p + 1])
+		   {
+		     case 'T':
+		       {
+			 int	p2;
 
-			  case 'A':
-			    res = 12;
-			    break;
-			  case 'B':
-			    res = 13;
-			    break;
-			  case 'C':
-			    res = 14;
-			    break;
-			  case 'D':
-			    res = 15;
-			    break;
-			  case 'Z': /* ABCD Keys */
-			    res = 31;
-			    break;
-			  case '1':
-			    res = 1;
-			    break;
-			  case '2':
-			    res = 2;
-			    break;
-			  case '3':
-			    res = 3;
-			    break;
-			  case '4':
-			    res = 4;
-			    break;
-			  case '5':
-			    res = 5;
-			    break;
-			  case '6':
-			    res = 6;
-			    break;
-			  case '7':
-			    res = 7;
-			    break;
-			  case '8':
-			    res = 8;
-			    break;
-			  case '9':
-			    res = 9;
-			    break;
-			  case '*':
-			    res = 10;
-			    break;
-			  case '0':
-			    res = 30;
-			    break;
-			  case '#':
-			    res = 11;
-			    break;
-			 }
+			 for (p2 = 0; num_keys[p2].brl_key; p2++)
+			   if (buf[p + 2] == num_keys[p2].brl_key)
+			     res = num_keys[p2].res;
+		       }
 		       break;
-		     case 'I':	/* Routing Key */
+		   case 'I':	/* Routing Key */
 		       res = routing(buf[p + 2]);
 		       break;
 		     case 'B':	/* Braille keyboard */
@@ -1067,650 +931,121 @@ static int
 			    unsigned int keys = (buf[p + 2] & 0x3F) |
 			      ((buf[p + 3] & 0x03) << 6) |
 			      ((int) (buf[p + 2] & 0xC0) << 2);
-			    switch (keys)
+			    if (keys >= 0xff && keys != 0x280 && keys != 0x2c0
+				&& keys != 0x200)
 			      {
-			       case 0x001: /* braille 'a' */
-				 insertString("a");
-				 break;
-			       case 0x003: /* braille 'b' */
-				 insertString("b");
-				 break;
-			       case 0x009: /* braille 'c' */
-				 insertString("c");
-				 break;
-			       case 0x019: /* braille 'd' */
-				 insertString("d");
-				 break;
-			       case 0x011: /* braille 'e' */
-				 insertString("e");
-				 break;
-			       case 0x00b: /* braille 'f' */
-				 insertString("f");
-				 break;
-			       case 0x01b: /* braille 'g' */
-				 insertString("g");
-				 break;
-			       case 0x013: /* braille 'h' */
-				 insertString("h");
-				 break;
-			       case 0x00a: /* braille 'i' */
-				 insertString("i");
-				 break;
-			       case 0x01a: /* braille 'j' */
-				 insertString("j");
-				 break;
-			       case 0x005: /* braille 'k' */
-				 insertString("k");
-				 break;
-			       case 0x007: /* braille 'l' */
-				 insertString("l");
-				 break;
-			       case 0x00d: /* braille 'm' */
-				 insertString("m");
-				 break;
-			       case 0x01d: /* braille 'n' */
-				 insertString("n");
-				 break;
-			       case 0x015: /* braille 'o' */
-				 insertString("o");
-				 break;
-			       case 0x00f: /* braille 'p' */
-				 insertString("p");
-				 break;
-			       case 0x01f: /* braille 'q' */
-				 insertString("q");
-				 break;
-			       case 0x017: /* braille 'r' */
-				 insertString("r");
-				 break;
-			       case 0x00e: /* braille 's' */
-				 insertString("s");
-				 break;
-			       case 0x01e: /* braille 't' */
-				 insertString("t");
-				 break;
-			       case 0x025:	/* braille 'u' */
-				 insertString("u");
-				 break;
-			       case 0x027: /* braille 'v' */
-				 insertString("v");
-				 break;
-			       case 0x03a: /* braille 'w' */
-				 insertString("w");
-				 break;
-			       case 0x02d: /* braille 'x' */
-				 insertString("x");
-				 break;
-			       case 0x03d: /* braille 'y' */
-				 insertString("y");
-				 break;
-			       case 0x035: /* braille 'z' */
-				 insertString("z");
-				 break;
-            /* Upperfase letters mapping */
-			       case 0x041: /* braille 'A' */
-				 insertString("A");
-				 break;
-			       case 0x043: /* braille 'B' */
-				 insertString("B");
-				 break;
-			       case 0x049: /* braille 'C' */
-				 insertString("C");
-				 break;
-			       case 0x059: /* braille 'D' */
-				 insertString("D");
-				 break;
-			       case 0x051: /* braille 'E' */
-				 insertString("E");
-				 break;
-			       case 0x04b: /* braille 'F' */
-				 insertString("F");
-				 break;
-			       case 0x05b: /* braille 'G' */
-				 insertString("G");
-				 break;
-			       case 0x053: /* braille 'H' */
-				 insertString("H");
-				 break;
-			       case 0x04a: /* braille 'I' */
-				 insertString("I");
-				 break;
-			       case 0x05a: /* braille 'J' */
-				 insertString("J");
-				 break;
-			       case 0x045: /* braille 'K' */
-				 insertString("K");
-				 break;
-			       case 0x047: /* braille 'L' */
-				 insertString("L");
-				 break;
-			       case 0x04d: /* braille 'M' */
-				 insertString("M");
-				 break;
-			       case 0x05d: /* braille 'N' */
-				 insertString("N");
-				 break;
-			       case 0x055: /* braille 'O' */
-				 insertString("O");
-				 break;
-			       case 0x04f: /* braille 'P' */
-				 insertString("P");
-				 break;
-			       case 0x05f: /* braille 'Q' */
-				 insertString("Q");
-				 break;
-			       case 0x057: /* braille 'R' */
-				 insertString("R");
-				 break;
-			       case 0x04e: /* braille 'S' */
-				 insertString("S");
-				 break;
-			       case 0x05e: /* braille 'T' */
-				 insertString("T");
-				 break;
-			       case 0x065: /* braille 'U' */
-				 insertString("U");
-				 break;
-			       case 0x067: /* braille 'V' */
-				 insertString("V");
-				 break;
-			       case 0x07a: /* braille 'W' */
-				 insertString("W");
-				 break;
-			       case 0x06d: /* braille 'X' */
-				 insertString("X");
-				 break;
-			       case 0x07d: /* braille 'Y' */
-				 insertString("Y");
-				 break;
-			       case 0x075: /* braille 'Z' */
-				 insertString("Z");
-				 break;
-            /* The following codes are depending of the table you use.
-             * These are digits mapping for CBISF table.
-            */
-			       case 0x03c: /* braille '0' */
-				 insertString("0");
-				 break;
-			       case 0x021: /* braille '1' */
-				 insertString("1");
-				 break;
-			       case 0x023: /* braille '2' */
-				 insertString("2");
-				 break;
-			       case 0x029: /* braille '3' */
-				 insertString("3");
-				 break;
-			       case 0x039: /* braille '4' */
-				 insertString("4");
-				 break;
-			       case 0x031: /* braille '5' */
-				 insertString("5");
-				 break;
-			       case 0x02b: /* braille '6' */
-				 insertString("6");
-				 break;
-			       case 0x03b: /* braille '7' */
-				 insertString("7");
-				 break;
-			       case 0x033: /* braille '8' */
-				 insertString("8");
-				 break;
-			       case 0x02a: /* braille '9' */
-				 insertString("9");
-				 break;
-            /* other chars */
-			       case 0x016: /* braille '!' */
-				 insertString("!");
-				 break;
-			       case 0x022: /* braille '?' */
-				 insertString("?");
-				 break;
-			       case 0x02c: /* braille '#' */
-				 insertString("#");
-				 break;
-			       case 0x002: /* braille ',' */
-				 insertString(",");
-				 break;
-			       case 0x006: /* braille ';' */
-				 insertString(";");
-				 break;
-			       case 0x095: /* braille 'ø' */
-				 insertString("\xf8");
-				 break;
-			       case 0x01c: /* braille '@' */
-				 insertString("@");
-				 break;
-			       case 0x014: /* braille '*' */
-				 insertString("*");
-				 break;
-			       case 0x032: /* braille '/' */
-				 insertString("/");
-				 break;
-			       case 0x0d6: /* braille '+' */
-				 insertString("+");
-				 break;
-			       case 0x024: /* braille '-' */
-				 insertString("-");
-				 break;
-			       case 0x012: /* braille ':' */
-				 insertString(":");
-				 break;
-			       case 0x004: /* braille '.' */
-				 insertString(".");
-				 break;
-			       case 0x026: /* braille '(' */
-				 insertString("(");
-				 break;
-			       case 0x034: /* braille ')' */
-				 insertString(")");
-				 break;
-			       case 0x036: /* braille '"' */
-				 insertString("\x22");
-				 break;
-			       case 0x037: /* braille '[' */
-				 insertString("[");
-				 break;
-			       case 0x03e: /* braille ']' */
-				 insertString("]");
-				 break;
-			       case 0x077: /* braille '{' */
-				 insertString("{");
-				 break;
-			       case 0x07e: /* braille '}' */
-				 insertString("}");
-				 break;
-			       case 0x00c: /* braille '^' */
-				 insertString("^");
-				 break;
-			       case 0x038: /* braille '$' */
-				 insertString("$");
-				 break;
-			       case 0x020: /* braille ['] */
-				 insertString("'");
-				 break;
-			       case 0x02e: /* braille '\' */
-				 insertString("\\");
-				 break;
-			       case 0x02f: /* braille '%' */
-				 insertString("%");
-				 break;
-			       case 0x018: /* braille '>' */
-				 insertString(">");
-				 break;
-			       case 0x030: /* braille '<' */
-				 insertString("<");
-				 break;
-			       case 0x0f6: /* braille '=' */
-				 insertString("=");
-				 break;
-			       case 0x03f: /* braille '&' */
-				 insertString("&");
-				 break;
-			       case 0x05c: /* ascii code 96 */
-				 insertString("\x60");
-				 break;
-			       case 0x078: /* braille '_' */
-				 insertString("_");
-				 break;
-			       case 0x04c: /* braille '~' */
-				 insertString("~");
-				 break;
-            /* char accents */
-			       case 0x0b7: /* braille '…' */
-				 insertString("…");
-				 break;
-			       case 0x0e1: /* braille 'ƒ' */
-				 insertString("ƒ");
-				 break;
-			       case 0x0ae: /* braille 'Š' */
-				 insertString("Š");
-				 break;
-			       case 0x0e3: /* braille 'ˆ' */
-				 insertString("ˆ");
-				 break;
-			       case 0x0ab: /* braille '‰' */
-				 insertString("‰");
-				 break;
-			       case 0x0bf: /* braille '‚' */
-				 insertString("\x82");
-				 break;
-			       case 0x0e9: /* braille 'Œ' */
-				 insertString("Œ");
-				 break;
-			       case 0x0f9: /* braille '“' */
-				 insertString("“");
-				 break;
-			       case 0x0f1: /* braille '–' */
-				 insertString("–");
-				 break;
-			       case 0x0be: /* braille '—' */
-				 insertString("—");
-				 break;
-			       case 0x0b3: /* braille '' */
-				 insertString("");
-				 break;
-			       case 0x0af: /* braille '‡' */
-				 insertString("‡");
-				 break;
-			       case 0x06e: /* braille '|' */
-				 insertString("|");
-				 break;
-			       case 0x200: /* braille ' ' */
-				 insertString(" ");
-				 break;
-			       case 0x100: /* braille backspace */
-				 insertString("\x7f");
-				 break;
-			       case 0x300: /* braille enter */
-				 insertString("\x0D");
-				 break;
-            /* the following codes define extended keys (ie. control, alt...)
-             * The table used here is the eurobraille "!config.f" file.
-            */
-            /* braille mapping for functions keys */
-			       case 0x208: /* Braille up key */
-				 insertString("\33[A");
-				 break;
-			       case 0x220: /* braille down key */
-				 insertString("\33[B");
-				 break;
-			       case 0x202: /* braille left key */
-				 insertString("\33[D");
-				 break;
-			       case 0x210: /* braille right key */
-				 insertString("\33[C");
-				 break;
-			       case 0x101: /* braille f1 */
-				 insertString("\33[[A");
-				 break;
-			       case 0x103: /* braille f2 */
-				 insertString("\33[[B");
-				 break;
-			       case 0x109: /* braille f3 */
-				 insertString("\33[[C");
-				 break;
-			       case 0x119: /* braille f4 */
-				 insertString("\33[[D");
-				 break;
-			       case 0x111: /* braille f5 */
-				 insertString("\33[[E");
-				 break;
-			       case 0x10b: /* braille f6 */
-				 insertString("\33[17~");
-				 break;
-			       case 0x11b: /* braille f7 */
-				 insertString("\33[18~");
-				 break;
-			       case 0x112: /* braille f8 */
-				 insertString("\33[19~");
-				 break;
-			       case 0x10a: /* braille f9 */
-				 insertString("\33[20~");
-				 break;
-			       case 0x11a: /* braille f10 */
-				 insertString("\33[21~");
-				 break;
-			       case 0x105: /* braille f11 */
-				 insertString("\33[22~");
-				 break;
-			       case 0x107: /* braille f12 */
-				 insertString("\33[24~");
-				 break;
-			       case 0x3ff: /* braille ctrl+alt+del */
-				 insertString("reboot\x0d");
-				 break;
-			       case 0x207: /* home key */
-				 insertString("\33[1~");
-				 break;
-			       case 0x238: /* end key */
-				 insertString("\33[4~");
-				 break;
-			       case 0x205: /* braille page-up */
-				 insertString("\33[5~");
-				 break;
-			       case 0x232: /* braille tab */
-				 insertString("\x09");
-				 break;
-			       case 0x216: /* shift+tab key */
-				 insertString("\x09");
-				 break;
-			       case 0x21b: /* braille esc key */
-				 insertString("\x1b");
-				 break;
-			       case 0x228: /* braille page-down */
-				 insertString("\33[6~");
-				 break;
-	    /* Control + char */
-			       case 0x0c1: /* ctrl+a */
-				 insertString("\x01");
-				 break;
-			       case 0x0c3: /* ctrl+b */
-				 insertString("\x02");
-				 break;
-			       case 0x0c9: /* ctlr+c */
-				 insertString("\x03");
-				 break;
-			       case 0x0d9: /* ctrl+d */
-				 insertString("\x04");
-				 break;
-			       case 0x0d1: /* ctrl+e */
-				 insertString("\x05");
-				 break;
-			       case 0x0cb: /* ctrl+f */
-				 insertString("\x06");
-				 break;
-			       case 0x0db: /* ctrl+g */
-				 insertString("\x07");
-				 break;
-			       case 0x0d3: /* ctrl+h */
-				 insertString("\x08");
-				 break;
-			       case 0x0ca: /* ctrl+i */
-				 insertString("\x09");
-				 break;
-			       case 0x0da: /* ctrl+j */
-				 insertString("\x0a");
-				 break;
-			       case 0x0c5: /* ctrl+k */
-				 insertString("\x0b");
-				 break;
-			       case 0x0c7: /* ctrl+l */
-				 insertString("\x0c");
-				 break;
-			       case 0x0cd: /* ctrl+m */
-				 insertString("\x0d");
-				 break;
-			       case 0x0dd: /* ctrl+n */
-				 insertString("\x0e");
-				 break;
-			       case 0x0d5: /* ctrl+o */
-				 insertString("\x0f");
-				 break;
-			       case 0x0cf: /* ctrl+p */
-				 insertString("\x10");
-				 break;
-			       case 0x0df: /* ctrl+q */
-				 insertString("\x11");
-				 break;
-			       case 0x0d7: /* ctrl+r */
-				 insertString("\x12");
-				 break;
-			       case 0x0ce: /* ctrl+s */
-				 insertString("\x13");
-				 break;
-			       case 0x0de: /* ctrl+t */
-				 insertString("\x14");
-				 break;
-			       case 0x0e5: /* ctrl+u */
-				 insertString("\x15");
-				 break;
-			       case 0x0e7: /* ctrl+v */
-				 insertString("\x16");
-				 break;
-			       case 0x0fa: /* ctrl+w */
-				 insertString("\x17");
-				 break;
-			       case 0x0ed: /* ctrl+x */
-				 insertString("\x18");
-				 break;
-			       case 0x0fd: /* ctrl+y */
-				 insertString("\x19");
-				 break;
-			       case 0x0f5: /* ctrl+z */
-				 insertString("\x1a");
-				 break;
-	    /* alt + char */
-			       case 0x301: /* alt+a */
-				 insertString("\x1b\x61");
-				 break;
-			       case 0x303: /* alt+b */
-				 insertString("\x1b\x62");
-				 break;
-			       case 0x309: /* alt+c */
-				 insertString("\x1b\x63");
-				 break;
-			       case 0x319: /* alt+d */
-				 insertString("\x1b\x64");
-				 break;
-			       case 0x311: /* alt+e */
-				 insertString("\x1b\x65");
-				 break;
-			       case 0x30b: /* alt+f */
-				 insertString("\x1b\x66");
-				 break;
-			       case 0x31b: /* alt+g */
-				 insertString("\x1b\x67");
-				 break;
-			       case 0x313: /* alt+h */
-				 insertString("\x1b\x68");
-				 break;
-			       case 0x30a: /* alt+i */
-				 insertString("\x1b\x69");
-				 break;
-			       case 0x31a: /* alt+j */
-				 insertString("\x1b\x6a");
-				 break;
-			       case 0x305: /* alt+k */
-				 insertString("\x1b\x6b");
-				 break;
-			       case 0x307: /* alt+l */
-				 insertString("\x1b\x6c");
-				 break;
-			       case 0x30d: /* alt+m */
-				 insertString("\x1b\x6d");
-				 break;
-			       case 0x31d: /* alt+n */
-				 insertString("\x1b\x6e");
-				 break;
-			       case 0x315: /* alt+o */
-				 insertString("\x1b\x6f");
-				 break;
-			       case 0x30f: /* alt+p */
-				 insertString("\x1b\x70");
-				 break;
-			       case 0x31f: /* alt+q */
-				 insertString("\x1b\x71");
-				 break;
-			       case 0x317: /* alt+r */
-				 insertString("\x1b\x72");
-				 break;
-			       case 0x30e: /* alt+s */
-				 insertString("\x1b\x73");
-				 break;
-			       case 0x31e: /* alt+t */
-				 insertString("\x1b\x74");
-				 break;
-			       case 0x325: /* alt+u */
-				 insertString("\x1b\x75");
-				 break;
-			       case 0x327: /* alt+v */
-				 insertString("\x1b\x76");
-				 break;
-			       case 0x33a: /* alt+w */
-				 insertString("\x1b\x77");
-				 break;
-			       case 0x32d: /* alt+x */
-				 insertString("\x1b\x78");
-				 break;
-			       case 0x33d: /* alt+y */
-				 insertString("\x1b\x79");
-				 break;
-			       case 0x335: /* alt+z */
-				 insertString("\x1b\x7a");
-				 break;
-			       case 0x321: /* alt+1 */
-				 insertString("\x1b\x31");
-				 break;
-			       case 0x323: /* alt+2 */
-				 insertString("\x1b\x32");
-				 break;
-			       case 0x329: /* alt+3 */
-				 insertString("\x1b\x33");
-				 break;
-			       case 0x339: /* alt+4 */
-				 insertString("\x1b\x34");
-				 break;
-			       case 0x331: /* alt+5 */
-				 insertString("\x1b\x35");
-				 break;
-			       case 0x32b: /* alt+6 */
-				 insertString("\x1b\x36");
-				 break;
-			       case 0x33b: /* alt+7 */
-				 insertString("\x1b\x37");
-				 break;
-			       case 0x333: /* alt+8 */
-				 insertString("\x1b\x38");
-				 break;
-			       case 0x32a: /* alt+9 */
-				 insertString("\x1b\x39");
-				 break;
-			       case 0x33c: /* alt+0 */
-				 insertString("\x1b\x30");
-				 break;
-			       case 0x224: /* del key */
-				 insertString("\33[3~");
-				 break;
-			       default:
-				 message("! Undef Braille key ", 0);
-				 break;
+				/*
+				** keys that must be explicitly listed
+				*/
+				int	h;
+				for (h = 0; brl_key[h].brl; h++)
+				  if (brl_key[h].brl == keys)
+				    res = brl_key[h].key;
+				if (control || alt)
+				  {
+				    control = 0;
+				    alt = 0;
+				    context = 0;
+				    ReWrite = 1;
+				  }
 			      }
-			    break;
+			    if (keys == 0x280 && alt)
+			      {
+				 context = 0;
+				 alt = 0;
+				 ReWrite = 1;
+				 res = CMD_NOOP;
+			      }
+			    if (keys == 0x280 && !alt && !control) /* alt */
+			      {
+				 message("! alt", MSG_NODELAY);
+				 context = 4;
+				 ReWrite = 0;
+				 alt = 1;
+				 res = CMD_NOOP;
+			      }
+			    if (alt && control)
+			      {
+				context = 0;
+				message("! alt control", MSG_NODELAY);
+				context = 4;
+			      }
+			    if (keys == 0x2c0 && control)
+			      {
+				 context = 0;
+				 ReWrite = 1;
+				 res = CMD_NOOP;
+				 control = 0;
+			      }
+			    if (keys == 0x2c0 && !control) /* control */
+			      {
+				 control = 1;
+				 message("! control ", MSG_NODELAY);
+				 context = 4;
+				 ReWrite = 0;
+				 res = CMD_NOOP;
+			      }
+			    if (keys <= 0xff || keys == 0x200)
+			      {
+				/*
+				** we pass a char
+				*/
+				 res = (VAL_PASSDOTS | convert(keys));
+				 if (control)
+				   {
+				      res |= VPC_CONTROL;
+				      control = 0;
+				      context = 0;
+				   }
+				 if (alt)
+				   {
+				      res |= VPC_META;
+				      context = 0;
+				      alt = 0;
+				   }
+			      }
 			 }
+		       break;
 		    }
 		  break;
 		case 'S':		/* status information */
 		  if (buf[p + 1] == 'I')
+		    {
 		/* we take the third letter from the model identification
 		 * string as the amount of cells available and the two first letters
 		 * for the model name in order to optimize the key configuration.
 		 */
-		    if (!NbCols)
-		      {
-			 if (buf[p + 2] == 'N')
-			   if (buf[p + 3] == 'B')
-			     model_ID = 1;
-			 if (buf[p + 2] == 'C')
-			   if (buf[p + 3] == 'N')
-			     model_ID = 2;
-			 if (buf[p + 2] == 'S')
-			   if (buf[p + 3] == 'C')
-			     model_ID = 3;
-			 if (buf[p + 2] == 'C')
-			   if (buf[p + 3] == 'Z')
-			     model_ID = 4;
-			 NbCols = (buf[p + 4] - '0') * 10;
-		  /* Looking now at the internal version of the terminal... */
-			 for (position=24; position<44; position++)
-			   version_ID[position - 24] = buf[position];
-		      }
+		      if (buf[p + 2] == 'N' && buf[p + 3] == 'B')
+			model_ID = 1;
+                      else if (buf[p + 2] == 'C' && buf[p + 3] == 'N')
+			model_ID = 2;
+                      else if (buf[p + 2] == 'S' && 
+			       ((buf[p + 3] == 'C') || (buf[p + 3] == 'B')))
+			model_ID = 3;
+                      else if (buf[p + 2] == 'C' && (buf[p + 3] == 'Z' || buf[p + 3] == 'P'))
+			model_ID = 4;
+                      else if (buf[p + 2] == 'I' && buf[p + 3] == 'R')
+			model_ID = 5;
+                      else
+			model_ID = 0;
+		      if (strncmp(version_ID, buf + p + 2, 3))
+			{
+			  strncpy(version_ID, buf + p + 2, 20);
+			  NbCols = (buf[p + 4] - '0') * 10;
+			  LogPrint(LOG_INFO, "Detected EuroBraille version %s: %d columns",
+                                   version_ID, NbCols);
+			  brl->x = NbCols;
+			  rawdata = realloc(rawdata, brl->y * brl->x);
+			  prevdata = realloc(prevdata, brl->x * brl->y);
+			  lcd_data = realloc(lcd_data, brl->x * brl->y);
+			  brl->resizeRequired = 1;
+			}
+		    }
 		  ReWrite = 1;
-		  break;
 	       }
-	     p += lg;
+	     break;
 	  }
+	p += lg;
      }
-
    return (res);
 }

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -24,8 +24,6 @@
  * run-time shared libraries, nor be a huge executable.
  */
 
-#define SCR_C 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -39,7 +37,6 @@
 #include <sys/types.h>
 
 #include "scr.h"
-#include "scr_base.h"
 #include "scr_shm.h"
 
 

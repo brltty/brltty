@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -40,6 +40,17 @@
    70, "BRAILLEX Elba 20",	  '8', 20, 1,  0,  0,  1
  */
 
+#include "Programs/brl.h"
+typedef enum {
+  CMD_INPUT = DriverCommandCount /* toggle input mode */,
+  CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
+} InternalDriverCommands;
+
+typedef enum {
+  STAT_INPUT = StatusCellCount /* input mode */,
+  InternalStatusCellCount
+} InternalStatusCell;
+
 #define OFFS_FRONT      0
 #define OFFS_STAT    1000
 #define OFFS_ROUTE   2000  
@@ -61,7 +72,7 @@
 #define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
-#define STAT_EMPTY       0
+#define OFFS_EMPTY       0
 #define OFFS_HORIZ    1000	/* added to status show */
 #define OFFS_FLAG     2000
 #define OFFS_NUMBER   3000
@@ -116,7 +127,7 @@ typedef struct {
      OFFS_FRONT + 8
 
 /* commands for 9 front keys */
-#define CMD_FRONT_9 \
+#define CMDS_FRONT_9 \
      { CMD_FWINLT     , NOKEY         , 0X1 }, \
      { CMD_FWINRT     , NOKEY         , 0X2 }, \
      { CMD_HWINLT     , NOKEY         , 0X4 }, \
@@ -168,7 +179,7 @@ typedef struct {
      OFFS_FRONT + 13
 
 /* commands for 13 front keys */
-#define CMD_FRONT_13 \
+#define CMDS_FRONT_13 \
       { CMD_HOME                    , OFFS_FRONT +  7, 0000 }, \
       { CMD_TOP                     , OFFS_FRONT +  6, 0000 }, \
       { CMD_BOT                     , OFFS_FRONT +  8, 0000 }, \
@@ -226,10 +237,10 @@ typedef struct {
       { VAL_PASSKEY+VPK_RETURN      , OFFS_FRONT +  9, 0004 }, \
                                                                \
       { CMD_SPKHOME                 , OFFS_FRONT +  7, 0040 }, \
-      { CMD_MUTE                    , OFFS_FRONT +  6, 0040 }, \
-      { CMD_RESTARTSPEECH           , OFFS_FRONT +  8, 0040 }, \
-      { CMD_SAY                     , OFFS_FRONT +  5, 0040 }, \
-      { CMD_SAYALL                  , OFFS_FRONT +  9, 0040 }, \
+      { CMD_SAY_ABOVE               , OFFS_FRONT +  6, 0040 }, \
+      { CMD_SAY_BELOW               , OFFS_FRONT +  8, 0040 }, \
+      { CMD_MUTE                    , OFFS_FRONT +  5, 0040 }, \
+      { CMD_SAY_LINE                , OFFS_FRONT +  9, 0040 }, \
                                                                \
       { CR_CUTBEGIN                 , ROUTINGKEY     , 0100 }, \
       { CR_CUTAPPEND                , ROUTINGKEY     , 0004 }, \
@@ -241,58 +252,93 @@ typedef struct {
 
 /* modifiers for switches */
 #define MOD_EASY \
-     OFFS_EASY   + EASY_UP, \
-     OFFS_EASY   + EASY_DO, \
-     OFFS_EASY   + EASY_LE, \
-     OFFS_EASY   + EASY_RI, \
-     OFFS_SWITCH + 1      , \
-     OFFS_SWITCH + 2      , \
-     OFFS_SWITCH + 7      , \
-     OFFS_SWITCH + 8
+     OFFS_SWITCH + 1       , \
+     OFFS_SWITCH + 2       , \
+     OFFS_SWITCH + 7       , \
+     OFFS_SWITCH + 8       , \
+     OFFS_SWITCH + 3       , \
+     OFFS_SWITCH + 4       , \
+     OFFS_SWITCH + 5       , \
+     OFFS_SWITCH + 6       , \
+     OFFS_EASY   + EASY_UP , \
+     OFFS_EASY   + EASY_DO , \
+     OFFS_EASY   + EASY_LE , \
+     OFFS_EASY   + EASY_RI , \
+     OFFS_EASY   + EASY_UP2, \
+     OFFS_EASY   + EASY_DO2, \
+     OFFS_EASY   + EASY_LE2, \
+     OFFS_EASY   + EASY_RI2
 
 /* commands for easy bar + switches */
-#define CMD_EASY \
-     { CMD_LNUP                    , NOKEY               , 0X01 }, \
-     { CMD_TOP                     , OFFS_EASY + EASY_UP2, 0X01 }, \
-     { CMD_LNDN                    , NOKEY               , 0X02 }, \
-     { CMD_BOT                     , OFFS_EASY + EASY_DO2, 0X02 }, \
-     { CMD_FWINLT                  , NOKEY               , 0X04 }, \
-     { CMD_LNBEG                   , OFFS_EASY + EASY_LE2, 0X04 }, \
-     { CMD_FWINRT                  , NOKEY               , 0X08 }, \
-     { CMD_LNEND                   , OFFS_EASY + EASY_RI2, 0X08 }, \
-     { CMD_BACK                    , OFFS_SWITCH + 3     , 0X00 }, \
-     { CMD_HOME                    , OFFS_SWITCH + 4     , 0X00 }, \
-     { CMD_CSRJMP_VERT             , OFFS_SWITCH + 5     , 0X00 }, \
-     { CMD_PASTE                   , OFFS_SWITCH + 6     , 0X00 }, \
-                                                                   \
-     { VAL_PASSKEY+VPK_CURSOR_UP   , NOKEY               , 0X11 }, \
-     { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_EASY + EASY_UP2, 0X11 }, \
-     { VAL_PASSKEY+VPK_CURSOR_DOWN , NOKEY               , 0X12 }, \
-     { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_EASY + EASY_DO2, 0X12 }, \
-                                                                   \
-     { VAL_PASSKEY+VPK_CURSOR_UP   , NOKEY               , 0X11 }, \
-     { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_EASY + EASY_UP2, 0X11 }, \
-     { VAL_PASSKEY+VPK_CURSOR_DOWN , NOKEY               , 0X12 }, \
-     { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_EASY + EASY_DO2, 0X12 }, \
-     { VAL_PASSKEY+VPK_CURSOR_LEFT , NOKEY               , 0X14 }, \
-     { VAL_PASSKEY+VPK_HOME        , OFFS_EASY + EASY_LE2, 0X14 }, \
-     { VAL_PASSKEY+VPK_CURSOR_RIGHT, NOKEY               , 0X18 }, \
-     { VAL_PASSKEY+VPK_END         , OFFS_EASY + EASY_RI2, 0X18 }, \
-                                                                   \
-     { CMD_PRDIFLN                 , NOKEY               , 0X21 }, \
-     { CMD_ATTRUP                  , OFFS_EASY + EASY_UP2, 0X21 }, \
-     { CMD_NXDIFLN                 , NOKEY               , 0X22 }, \
-     { CMD_ATTRDN                  , OFFS_EASY + EASY_DO2, 0X22 }, \
-     { CMD_CHRLT                   , NOKEY               , 0X24 }, \
-     { CMD_HWINLT                  , OFFS_EASY + EASY_LE2, 0X24 }, \
-     { CMD_CHRRT                   , NOKEY               , 0X28 }, \
-     { CMD_HWINRT                  , OFFS_EASY + EASY_RI2, 0X28 }, \
-                                                                   \
-     { CR_ROUTE                    , ROUTINGKEY          , 0X00 }, \
-     { CR_PRINDENT                 , ROUTINGKEY          , 0X01 }, \
-     { CR_NXINDENT                 , ROUTINGKEY          , 0X02 }, \
-     { CR_CUTBEGIN                 , ROUTINGKEY          , 0X04 }, \
-     { CR_CUTRECT                  , ROUTINGKEY          , 0X08 }
+#define CMDS_EASY_XX(cmd1, key, mod, cmd2, eab) \
+  { cmd1, key, mod|(eab<<0X8) }, \
+  { cmd2, key, mod|(eab<<0XC) }
+#define CMDS_EASY_UP(cmd1, key, mod, cmd2) CMDS_EASY_XX(cmd1, key, mod, cmd2, 0X1)
+#define CMDS_EASY_DO(cmd1, key, mod, cmd2) CMDS_EASY_XX(cmd1, key, mod, cmd2, 0X2)
+#define CMDS_EASY_LE(cmd1, key, mod, cmd2) CMDS_EASY_XX(cmd1, key, mod, cmd2, 0X4)
+#define CMDS_EASY_RI(cmd1, key, mod, cmd2) CMDS_EASY_XX(cmd1, key, mod, cmd2, 0X8)
+#define CMDS_EASY \
+  CMDS_EASY_UP( CMD_LNUP                    , NOKEY     , 0X00  , \
+                CMD_TOP                                        ), \
+  CMDS_EASY_DO( CMD_LNDN                    , NOKEY     , 0X00  , \
+                CMD_BOT                                        ), \
+  CMDS_EASY_LE( CMD_FWINLT                  , NOKEY     , 0X00  , \
+                CMD_LNBEG                                      ), \
+  CMDS_EASY_RI( CMD_FWINRT                  , NOKEY     , 0X00  , \
+                CMD_LNEND                                      ), \
+              { CR_ROUTE                    , ROUTINGKEY, 0X00 }, \
+  CMDS_EASY_UP( CR_PRINDENT                 , ROUTINGKEY, 0X00  , \
+                CR_SETLEFT                                     ), \
+  CMDS_EASY_DO( CR_NXINDENT                 , ROUTINGKEY, 0X00  , \
+                CR_DESCCHAR                                    ), \
+  CMDS_EASY_LE( CR_CUTAPPEND                , ROUTINGKEY, 0X00  , \
+                CR_CUTBEGIN                                    ), \
+  CMDS_EASY_RI( CR_CUTLINE                  , ROUTINGKEY, 0X00  , \
+                CR_CUTRECT                                     ), \
+  CMDS_EASY_UP( CMD_PRDIFLN                 , NOKEY     , 0X01  , \
+                CMD_ATTRUP                                     ), \
+  CMDS_EASY_DO( CMD_NXDIFLN                 , NOKEY     , 0X01  , \
+                CMD_ATTRDN                                     ), \
+  CMDS_EASY_LE( CMD_PRPROMPT                , NOKEY     , 0X01  , \
+                CMD_PRPGRPH                                    ), \
+  CMDS_EASY_RI( CMD_NXPROMPT                , NOKEY     , 0X01  , \
+                CMD_NXPGRPH                                    ), \
+  CMDS_EASY_UP( VAL_PASSKEY+VPK_CURSOR_UP   , NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_PAGE_UP                        ), \
+  CMDS_EASY_DO( VAL_PASSKEY+VPK_CURSOR_DOWN , NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_PAGE_DOWN                      ), \
+  CMDS_EASY_LE( VAL_PASSKEY+VPK_CURSOR_LEFT , NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_HOME                           ), \
+  CMDS_EASY_RI( VAL_PASSKEY+VPK_CURSOR_RIGHT, NOKEY     , 0X04  , \
+                VAL_PASSKEY+VPK_END                            ), \
+  CMDS_EASY_UP( CMD_BACK                    , NOKEY     , 0X08  , \
+                CMD_HOME                                       ), \
+  CMDS_EASY_DO( CMD_PASTE                   , NOKEY     , 0X08  , \
+                CMD_CSRJMP_VERT                                ), \
+  CMDS_EASY_LE( CMD_CHRLT                   , NOKEY     , 0X08  , \
+                CMD_HWINLT                                     ), \
+  CMDS_EASY_RI( CMD_CHRRT                   , NOKEY     , 0X08  , \
+                CMD_HWINRT                                     ), \
+              { CMD_PREFMENU                , NOKEY     , 0X10 }, \
+              { CMD_INFO                    , NOKEY     , 0X20 }, \
+              { CMD_HELP                    , NOKEY     , 0X40 }, \
+              { CMD_LEARN                   , NOKEY     , 0X80 }, \
+  CMDS_EASY_UP( CMD_SIXDOTS  | VAL_SWITCHOFF, NOKEY     , 0X40  , \
+                CMD_FREEZE   | VAL_SWITCHOFF                   ), \
+  CMDS_EASY_DO( CMD_SKPIDLNS | VAL_SWITCHOFF, NOKEY     , 0X40  , \
+                CMD_SKPBLNKWINS | VAL_SWITCHOFF                ), \
+  CMDS_EASY_LE( CMD_ATTRVIS  | VAL_SWITCHOFF, NOKEY     , 0X40  , \
+                CMD_DISPMD   | VAL_SWITCHOFF                   ), \
+  CMDS_EASY_RI( CMD_CSRVIS   | VAL_SWITCHOFF, NOKEY     , 0X40  , \
+                CMD_CSRTRK   | VAL_SWITCHOFF                   ), \
+  CMDS_EASY_UP( CMD_SIXDOTS  | VAL_SWITCHON , NOKEY     , 0X80  , \
+                CMD_FREEZE   | VAL_SWITCHON                    ), \
+  CMDS_EASY_DO( CMD_SKPIDLNS | VAL_SWITCHON , NOKEY     , 0X80  , \
+                CMD_SKPBLNKWINS | VAL_SWITCHON                 ), \
+  CMDS_EASY_LE( CMD_ATTRVIS  | VAL_SWITCHON , NOKEY     , 0X80  , \
+                CMD_DISPMD   | VAL_SWITCHON                    ), \
+  CMDS_EASY_RI( CMD_CSRVIS   | VAL_SWITCHON , NOKEY     , 0X80  , \
+                CMD_CSRTRK   | VAL_SWITCHON                    )
 
 
 /* what to show for 2 status cells */
@@ -301,7 +347,7 @@ typedef struct {
       OFFS_NUMBER + STAT_CSRROW
 
 /* commands for 2 status keys */
-#define CMD_STAT_2 \
+#define CMDS_STAT_2 \
       { CMD_HELP,       OFFS_STAT + 1, 0 }, \
       { CMD_RESTARTBRL, OFFS_STAT + 2, 0 }
 
@@ -314,7 +360,7 @@ typedef struct {
       OFFS_FLAG   + STAT_DISPMD
 
 /* commands for 4 status keys */
-#define CMD_STAT_4 \
+#define CMDS_STAT_4 \
       { CMD_HELP       , OFFS_STAT + 1, 0 }, \
       { CMD_RESTARTBRL , OFFS_STAT + 2, 0 }, \
       { CMD_CSRJMP_VERT, OFFS_STAT + 3, 0 }, \
@@ -324,21 +370,21 @@ typedef struct {
 /* what to show for 13 status cells */
 #define SHOW_STAT_13 \
       OFFS_HORIZ + STAT_BRLROW  , \
-      STAT_EMPTY                , \
+      OFFS_EMPTY                , \
       OFFS_HORIZ + STAT_CSRROW  , \
       OFFS_HORIZ + STAT_CSRCOL  , \
-      STAT_EMPTY                , \
+      OFFS_EMPTY                , \
       OFFS_FLAG  + STAT_CSRTRK  , \
       OFFS_FLAG  + STAT_DISPMD  , \
       OFFS_FLAG  + STAT_FREEZE  , \
-      STAT_EMPTY                , \
-      STAT_EMPTY                , \
+      OFFS_EMPTY                , \
+      OFFS_EMPTY                , \
       OFFS_FLAG  + STAT_CSRVIS  , \
       OFFS_FLAG  + STAT_ATTRVIS , \
-      STAT_EMPTY
+      OFFS_EMPTY
 
 /* commands for 13 status keys */
-#define CMD_STAT_13 \
+#define CMDS_STAT_13 \
       CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 2, 1), \
               { CMD_RESTARTBRL , OFFS_STAT +  2, 0   }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0   }, \
@@ -357,16 +403,16 @@ typedef struct {
 /* what to show for 20 status cells */
 #define SHOW_STAT_20 \
       OFFS_HORIZ + STAT_BRLROW   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_HORIZ + STAT_CSRROW   , \
       OFFS_HORIZ + STAT_CSRCOL   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_FLAG  + STAT_CSRTRK   , \
       OFFS_FLAG  + STAT_DISPMD   , \
       OFFS_FLAG  + STAT_FREEZE   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_HORIZ + STAT_SCRNUM   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_FLAG  + STAT_CSRVIS   , \
       OFFS_FLAG  + STAT_CSRSIZE  , \
       OFFS_FLAG  + STAT_CSRBLINK , \
@@ -378,7 +424,7 @@ typedef struct {
       OFFS_FLAG  + STAT_ATTRBLINK
 
 /* commands for 20 status keys */
-#define CMD_STAT_20 \
+#define CMDS_STAT_20 \
               { CMD_HELP       , OFFS_STAT +  1, 0000       }, \
               { CMD_RESTARTBRL , OFFS_STAT +  2, 0000       }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
@@ -404,17 +450,17 @@ typedef struct {
 /* what to show for 22 status cells */
 #define SHOW_STAT_22 \
       OFFS_HORIZ + STAT_BRLROW   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_HORIZ + STAT_CSRROW   , \
       OFFS_HORIZ + STAT_CSRCOL   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_FLAG  + STAT_CSRTRK   , \
       OFFS_FLAG  + STAT_DISPMD   , \
       OFFS_FLAG  + STAT_INPUT    , \
       OFFS_FLAG  + STAT_FREEZE   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_HORIZ + STAT_SCRNUM   , \
-      STAT_EMPTY                 , \
+      OFFS_EMPTY                 , \
       OFFS_FLAG  + STAT_CSRVIS   , \
       OFFS_FLAG  + STAT_CSRSIZE  , \
       OFFS_FLAG  + STAT_CSRBLINK , \
@@ -424,10 +470,10 @@ typedef struct {
       OFFS_FLAG  + STAT_SKPIDLNS , \
       OFFS_FLAG  + STAT_ATTRVIS  , \
       OFFS_FLAG  + STAT_ATTRBLINK, \
-      STAT_EMPTY
+      OFFS_EMPTY
 
 /* commands for 22 status keys */
-#define CMD_STAT_22 \
+#define CMDS_STAT_22 \
       CHGONOFF( CMD_HELP       , OFFS_STAT +  1, 0200, 0100 ), \
               { CMD_RESTARTBRL , OFFS_STAT +  2, 0000       }, \
               { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
@@ -468,7 +514,7 @@ static one_terminal pm_terminals[] =
       MOD_FRONT_9
     },
     {				/* commands + keys */
-      CMD_FRONT_9
+      CMDS_FRONT_9
     },
   },
 
@@ -487,8 +533,8 @@ static one_terminal pm_terminals[] =
       MOD_FRONT_9
     },
     {				/* commands + keys */
-      CMD_FRONT_9,
-      CMD_STAT_13
+      CMDS_FRONT_9,
+      CMDS_STAT_13
     },
   },
 
@@ -506,7 +552,7 @@ static one_terminal pm_terminals[] =
       MOD_FRONT_9
     },
     {				/* commands + keys */
-      CMD_FRONT_9
+      CMDS_FRONT_9
     },
   },
 
@@ -525,8 +571,8 @@ static one_terminal pm_terminals[] =
       MOD_FRONT_13
     },
     {				/* commands + keys */
-      CMD_FRONT_13,
-      CMD_STAT_22
+      CMDS_FRONT_13,
+      CMDS_STAT_22
     },
   },
 
@@ -545,8 +591,8 @@ static one_terminal pm_terminals[] =
       MOD_FRONT_9
     },
     {				/* commands + keys */
-      CMD_FRONT_9,
-      CMD_STAT_4
+      CMDS_FRONT_9,
+      CMDS_STAT_4
     },
   },
 
@@ -565,8 +611,8 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMD_STAT_13,
-      CMD_EASY
+      CMDS_STAT_13,
+      CMDS_EASY
     },
   },
 
@@ -585,8 +631,8 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMD_STAT_13,
-      CMD_EASY
+      CMDS_STAT_13,
+      CMDS_EASY
     },
   },
 
@@ -605,8 +651,8 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMD_EASY,
-      CMD_STAT_2
+      CMDS_EASY,
+      CMDS_STAT_2
     },
   },
 
@@ -625,8 +671,8 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMD_EASY,
-      CMD_STAT_20
+      CMDS_EASY,
+      CMDS_STAT_20
     },
   },
 
@@ -644,7 +690,7 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMD_EASY
+      CMDS_EASY
     },
   },
 
@@ -662,7 +708,7 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMD_EASY
+      CMDS_EASY
     },
   },
 
@@ -680,7 +726,7 @@ static one_terminal pm_terminals[] =
       MOD_EASY
     },
     {				/* commands + keys */
-      CMD_EASY
+      CMDS_EASY
     },
   },
 };

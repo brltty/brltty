@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -29,245 +29,245 @@
 #include "brl.h"
 #include "brltty.h"
 #include "tunes.h"
-#include "tones.h"
+#include "notes.h"
 
-static ToneDefinition tones_detected[] = {
-   TONE_NOTE( 60,  64),
-   TONE_NOTE(100,  69),
-   TONE_STOP()
+static TuneElement elements_detected[] = {
+   TUNE_NOTE( 60,  64),
+   TUNE_NOTE(100,  69),
+   TUNE_STOP()
 };
 TuneDefinition tune_detected = {
-   NULL, 0, tones_detected
+   NULL, 0, elements_detected
 };
 
-static ToneDefinition tones_braille_off[] = {
-   TONE_NOTE( 60,  64),
-   TONE_NOTE( 60,  57),
-   TONE_STOP()
+static TuneElement elements_braille_off[] = {
+   TUNE_NOTE( 60,  64),
+   TUNE_NOTE( 60,  57),
+   TUNE_STOP()
 };
 TuneDefinition tune_braille_off = {
-   NULL, 0, tones_braille_off
+   NULL, 0, elements_braille_off
 };
 
-static ToneDefinition tones_cut_begin[] = {
-   TONE_NOTE( 40,  74),
-   TONE_NOTE( 20,  86),
-   TONE_STOP()
+static TuneElement elements_cut_begin[] = {
+   TUNE_NOTE( 40,  74),
+   TUNE_NOTE( 20,  86),
+   TUNE_STOP()
 };
 TuneDefinition tune_cut_begin = {
-   NULL, 0, tones_cut_begin
+   NULL, 0, elements_cut_begin
 };
 
-static ToneDefinition tones_cut_end[] = {
-   TONE_NOTE( 50,  86),
-   TONE_NOTE( 30,  74),
-   TONE_STOP()
+static TuneElement elements_cut_end[] = {
+   TUNE_NOTE( 50,  86),
+   TUNE_NOTE( 30,  74),
+   TUNE_STOP()
 };
 TuneDefinition tune_cut_end = {
-   NULL, 0, tones_cut_end
+   NULL, 0, elements_cut_end
 };
 
-static ToneDefinition tones_toggle_on[] = {
-   TONE_NOTE( 30,  74),
-   TONE_WAIT( 30),
-   TONE_NOTE( 30,  79),
-   TONE_WAIT( 30),
-   TONE_NOTE( 40,  86),
-   TONE_STOP()
+static TuneElement elements_toggle_on[] = {
+   TUNE_NOTE( 30,  74),
+   TUNE_REST( 30),
+   TUNE_NOTE( 30,  79),
+   TUNE_REST( 30),
+   TUNE_NOTE( 40,  86),
+   TUNE_STOP()
 };
 TuneDefinition tune_toggle_on = {
-   NULL, TUNE_TACTILE(30,B1|B2|B4|B5), tones_toggle_on
+   NULL, TUNE_TACTILE(30,B1|B2|B4|B5), elements_toggle_on
 };
 
-static ToneDefinition tones_toggle_off[] = {
-   TONE_NOTE( 30,  86),
-   TONE_WAIT( 30),
-   TONE_NOTE( 30,  79),
-   TONE_WAIT( 30),
-   TONE_NOTE( 30,  74),
-   TONE_STOP()
+static TuneElement elements_toggle_off[] = {
+   TUNE_NOTE( 30,  86),
+   TUNE_REST( 30),
+   TUNE_NOTE( 30,  79),
+   TUNE_REST( 30),
+   TUNE_NOTE( 30,  74),
+   TUNE_STOP()
 };
 TuneDefinition tune_toggle_off = {
-   NULL, TUNE_TACTILE(30,B3|B7|B6|B8), tones_toggle_off
+   NULL, TUNE_TACTILE(30,B3|B7|B6|B8), elements_toggle_off
 };
 
-static ToneDefinition tones_link[] = {
-   TONE_NOTE(  7,  80),
-   TONE_NOTE(  7,  79),
-   TONE_NOTE( 12,  76),
-   TONE_STOP()
+static TuneElement elements_link[] = {
+   TUNE_NOTE(  7,  80),
+   TUNE_NOTE(  7,  79),
+   TUNE_NOTE( 12,  76),
+   TUNE_STOP()
 };
 TuneDefinition tune_link = {
-   NULL, 0, tones_link
+   NULL, 0, elements_link
 };
 
-static ToneDefinition tones_unlink[] = {
-   TONE_NOTE(  7,  78),
-   TONE_NOTE(  7,  79),
-   TONE_NOTE( 20,  83),
-   TONE_STOP()
+static TuneElement elements_unlink[] = {
+   TUNE_NOTE(  7,  78),
+   TUNE_NOTE(  7,  79),
+   TUNE_NOTE( 20,  83),
+   TUNE_STOP()
 };
 TuneDefinition tune_unlink = {
-   NULL, 0, tones_unlink
+   NULL, 0, elements_unlink
 };
 
-static ToneDefinition tones_freeze[] = {
-   TONE_NOTE(  5,  58),
-   TONE_NOTE(  5,  59),
-   TONE_NOTE(  5,  60),
-   TONE_NOTE(  5,  61),
-   TONE_NOTE(  5,  62),
-   TONE_NOTE(  5,  63),
-   TONE_NOTE(  5,  64),
-   TONE_NOTE(  5,  65),
-   TONE_NOTE(  5,  66),
-   TONE_NOTE(  5,  67),
-   TONE_NOTE(  5,  68),
-   TONE_NOTE(  5,  69),
-   TONE_NOTE(  5,  70),
-   TONE_NOTE(  5,  71),
-   TONE_NOTE(  5,  72),
-   TONE_NOTE(  5,  73),
-   TONE_NOTE(  5,  74),
-   TONE_NOTE(  5,  76),
-   TONE_NOTE(  5,  78),
-   TONE_NOTE(  5,  80),
-   TONE_NOTE(  5,  83),
-   TONE_NOTE(  5,  86),
-   TONE_NOTE(  5,  90),
-   TONE_NOTE(  5,  95),
-   TONE_STOP()
+static TuneElement elements_freeze[] = {
+   TUNE_NOTE(  5,  58),
+   TUNE_NOTE(  5,  59),
+   TUNE_NOTE(  5,  60),
+   TUNE_NOTE(  5,  61),
+   TUNE_NOTE(  5,  62),
+   TUNE_NOTE(  5,  63),
+   TUNE_NOTE(  5,  64),
+   TUNE_NOTE(  5,  65),
+   TUNE_NOTE(  5,  66),
+   TUNE_NOTE(  5,  67),
+   TUNE_NOTE(  5,  68),
+   TUNE_NOTE(  5,  69),
+   TUNE_NOTE(  5,  70),
+   TUNE_NOTE(  5,  71),
+   TUNE_NOTE(  5,  72),
+   TUNE_NOTE(  5,  73),
+   TUNE_NOTE(  5,  74),
+   TUNE_NOTE(  5,  76),
+   TUNE_NOTE(  5,  78),
+   TUNE_NOTE(  5,  80),
+   TUNE_NOTE(  5,  83),
+   TUNE_NOTE(  5,  86),
+   TUNE_NOTE(  5,  90),
+   TUNE_NOTE(  5,  95),
+   TUNE_STOP()
 };
 TuneDefinition tune_freeze = {
-   "Frozen", 0, tones_freeze
+   "Frozen", 0, elements_freeze
 };
 
-static ToneDefinition tones_unfreeze[] = {
-   TONE_NOTE(  5,  95),
-   TONE_NOTE(  5,  90),
-   TONE_NOTE(  5,  86),
-   TONE_NOTE(  5,  83),
-   TONE_NOTE(  5,  80),
-   TONE_NOTE(  5,  78),
-   TONE_NOTE(  5,  76),
-   TONE_NOTE(  5,  74),
-   TONE_NOTE(  5,  73),
-   TONE_NOTE(  5,  72),
-   TONE_NOTE(  5,  71),
-   TONE_NOTE(  5,  70),
-   TONE_NOTE(  5,  69),
-   TONE_NOTE(  5,  68),
-   TONE_NOTE(  5,  67),
-   TONE_NOTE(  5,  66),
-   TONE_NOTE(  5,  65),
-   TONE_NOTE(  5,  64),
-   TONE_NOTE(  5,  63),
-   TONE_NOTE(  5,  62),
-   TONE_NOTE(  5,  61),
-   TONE_NOTE(  5,  60),
-   TONE_NOTE(  5,  59),
-   TONE_NOTE(  5,  58),
-   TONE_STOP()
+static TuneElement elements_unfreeze[] = {
+   TUNE_NOTE(  5,  95),
+   TUNE_NOTE(  5,  90),
+   TUNE_NOTE(  5,  86),
+   TUNE_NOTE(  5,  83),
+   TUNE_NOTE(  5,  80),
+   TUNE_NOTE(  5,  78),
+   TUNE_NOTE(  5,  76),
+   TUNE_NOTE(  5,  74),
+   TUNE_NOTE(  5,  73),
+   TUNE_NOTE(  5,  72),
+   TUNE_NOTE(  5,  71),
+   TUNE_NOTE(  5,  70),
+   TUNE_NOTE(  5,  69),
+   TUNE_NOTE(  5,  68),
+   TUNE_NOTE(  5,  67),
+   TUNE_NOTE(  5,  66),
+   TUNE_NOTE(  5,  65),
+   TUNE_NOTE(  5,  64),
+   TUNE_NOTE(  5,  63),
+   TUNE_NOTE(  5,  62),
+   TUNE_NOTE(  5,  61),
+   TUNE_NOTE(  5,  60),
+   TUNE_NOTE(  5,  59),
+   TUNE_NOTE(  5,  58),
+   TUNE_STOP()
 };
 TuneDefinition tune_unfreeze = {
-   "Unfrozen", 0, tones_unfreeze
+   "Unfrozen", 0, elements_unfreeze
 };
 
-static ToneDefinition tones_skip_first[] = {
-   TONE_WAIT( 40),
-   TONE_NOTE(  4,  62),
-   TONE_NOTE(  6,  67),
-   TONE_NOTE(  8,  74),
-   TONE_WAIT( 25),
-   TONE_STOP()
+static TuneElement elements_skip_first[] = {
+   TUNE_REST( 40),
+   TUNE_NOTE(  4,  62),
+   TUNE_NOTE(  6,  67),
+   TUNE_NOTE(  8,  74),
+   TUNE_REST( 25),
+   TUNE_STOP()
 };
 TuneDefinition tune_skip_first = {
-   NULL, TUNE_TACTILE(30,B1|B4|B7|B8), tones_skip_first
+   NULL, TUNE_TACTILE(30,B1|B4|B7|B8), elements_skip_first
 };
 
-static ToneDefinition tones_skip[] = {
-   TONE_NOTE( 10,  74),
-   TONE_WAIT( 18),
-   TONE_STOP()
+static TuneElement elements_skip[] = {
+   TUNE_NOTE( 10,  74),
+   TUNE_REST( 18),
+   TUNE_STOP()
 };
 TuneDefinition tune_skip = {
-   NULL, 0, tones_skip
+   NULL, 0, elements_skip
 };
 
-static ToneDefinition tones_skip_more[] = {
-   TONE_NOTE( 20,  73),
-   TONE_WAIT(  1),
-   TONE_STOP()
+static TuneElement elements_skip_more[] = {
+   TUNE_NOTE( 20,  73),
+   TUNE_REST(  1),
+   TUNE_STOP()
 };
 TuneDefinition tune_skip_more = {
-   NULL, 0, tones_skip_more
+   NULL, 0, elements_skip_more
 };
 
-static ToneDefinition tones_wrap_down[] = {
-   TONE_NOTE(  6,  86),
-   TONE_NOTE(  6,  74),
-   TONE_NOTE(  6,  62),
-   TONE_NOTE( 10,  50),
-   TONE_STOP()
+static TuneElement elements_wrap_down[] = {
+   TUNE_NOTE(  6,  86),
+   TUNE_NOTE(  6,  74),
+   TUNE_NOTE(  6,  62),
+   TUNE_NOTE( 10,  50),
+   TUNE_STOP()
 };
 TuneDefinition tune_wrap_down = {
-   NULL, TUNE_TACTILE(20,B1|B2|B3|B7), tones_wrap_down
+   NULL, TUNE_TACTILE(20,B1|B2|B3|B7), elements_wrap_down
 };
 
-static ToneDefinition tones_wrap_up[] = {
-   TONE_NOTE(  6,  50),
-   TONE_NOTE(  6,  62),
-   TONE_NOTE(  6,  74),
-   TONE_NOTE( 10,  86),
-   TONE_STOP()
+static TuneElement elements_wrap_up[] = {
+   TUNE_NOTE(  6,  50),
+   TUNE_NOTE(  6,  62),
+   TUNE_NOTE(  6,  74),
+   TUNE_NOTE( 10,  86),
+   TUNE_STOP()
 };
 TuneDefinition tune_wrap_up = {
-   NULL, TUNE_TACTILE(20,B4|B5|B6|B8), tones_wrap_up
+   NULL, TUNE_TACTILE(20,B4|B5|B6|B8), elements_wrap_up
 };
 
-static ToneDefinition tones_bounce[] = {
-   TONE_NOTE(  6,  98),
-   TONE_NOTE(  6,  86),
-   TONE_NOTE(  6,  74),
-   TONE_NOTE(  6,  62),
-   TONE_NOTE( 10,  50),
-   TONE_STOP()
+static TuneElement elements_bounce[] = {
+   TUNE_NOTE(  6,  98),
+   TUNE_NOTE(  6,  86),
+   TUNE_NOTE(  6,  74),
+   TUNE_NOTE(  6,  62),
+   TUNE_NOTE( 10,  50),
+   TUNE_STOP()
 };
 TuneDefinition tune_bounce = {
-   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), tones_bounce
+   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_bounce
 };
 
-static ToneDefinition tones_bad_command[] = {
-   TONE_NOTE(100,  78),
-   TONE_STOP()
+static TuneElement elements_bad_command[] = {
+   TUNE_NOTE(100,  78),
+   TUNE_STOP()
 };
 TuneDefinition tune_bad_command = {
-   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), tones_bad_command
+   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_bad_command
 };
 
-static ToneDefinition tones_done[] = {
-   TONE_NOTE( 40,  74),
-   TONE_WAIT( 30),
-   TONE_NOTE( 40,  74),
-   TONE_WAIT( 40),
-   TONE_NOTE(140,  74),
-   TONE_WAIT( 20),
-   TONE_NOTE( 50,  79),
-   TONE_STOP()
+static TuneElement elements_done[] = {
+   TUNE_NOTE( 40,  74),
+   TUNE_REST( 30),
+   TUNE_NOTE( 40,  74),
+   TUNE_REST( 40),
+   TUNE_NOTE(140,  74),
+   TUNE_REST( 20),
+   TUNE_NOTE( 50,  79),
+   TUNE_STOP()
 };
 TuneDefinition tune_done = {
-   "Done", 0, tones_done
+   "Done", 0, elements_done
 };
 
-static ToneDefinition tones_mark_set[] = {
-   TONE_NOTE( 20,  83),
-   TONE_NOTE( 15,  81),
-   TONE_NOTE( 15,  79),
-   TONE_NOTE( 25,  84),
-   TONE_STOP()
+static TuneElement elements_mark_set[] = {
+   TUNE_NOTE( 20,  83),
+   TUNE_NOTE( 15,  81),
+   TUNE_NOTE( 15,  79),
+   TUNE_NOTE( 25,  84),
+   TUNE_STOP()
 };
 TuneDefinition tune_mark_set = {
-   NULL, 0, tones_mark_set
+   NULL, 0, elements_mark_set
 };
 
 const double noteFrequencies[] = {
@@ -402,77 +402,90 @@ const double noteFrequencies[] = {
 };
 const unsigned int noteCount = sizeof(noteFrequencies) / sizeof(noteFrequencies[0]);
 
-static const ToneGenerator *toneGenerator = NULL;
+static const NoteGenerator *noteGenerator = NULL;
 static unsigned int closeTimer = 0;
+static int openErrorLevel = LOG_ERR;
 
 TuneDevice
 getDefaultTuneDevice (void) {
-  return canBeep()? tdSpeaker: tdDac;
+  return canBeep()? tdBeeper: tdPcm;
 }
 
 void
+suppressTuneDeviceOpenErrors (void) {
+  openErrorLevel = LOG_DEBUG;
+}
+
+int
 setTuneDevice (TuneDevice device) {
-   if (toneGenerator) toneGenerator->close();
-   closeTimer = 0;
+   const NoteGenerator *generator;
    switch (device) {
       default:
+         generator = NULL;
+         break;
 
-#ifdef ENABLE_SPEAKER_TUNES
-      case tdSpeaker:
-         toneGenerator = &speakerToneGenerator;
+#ifdef ENABLE_BEEPER_TUNES
+      case tdBeeper:
+         generator = &beeperNoteGenerator;
 	 break;
-#endif /* ENABLE_SPEAKER_TUNES */
+#endif /* ENABLE_BEEPER_TUNES */
 
-#ifdef ENABLE_DAC_TUNES
-      case tdDac:
-         toneGenerator = &dacToneGenerator;
+#ifdef ENABLE_PCM_TUNES
+      case tdPcm:
+         generator = &pcmNoteGenerator;
 	 break;
-#endif /* ENABLE_DAC_TUNES */
+#endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES
       case tdMidi:
-         toneGenerator = &midiToneGenerator;
+         generator = &midiNoteGenerator;
 	 break;
 #endif /* ENABLE_MIDI_TUNES */
 
-#ifdef ENABLE_ADLIB_TUNES
-      case tdAdlib:
-         toneGenerator = &adlibToneGenerator;
+#ifdef ENABLE_FM_TUNES
+      case tdFm:
+         generator = &fmNoteGenerator;
 	 break;
-#endif /* ENABLE_ADLIB_TUNES */
+#endif /* ENABLE_FM_TUNES */
    }
+
+   if (!generator) return 0;
+   if (noteGenerator) noteGenerator->close();
+   closeTimer = 0;
+   noteGenerator = generator;
+   return 1;
 }
 
 void
 closeTuneDevice (int force) {
    if (closeTimer) {
       if (force) closeTimer = 1;
-      if (!--closeTimer) toneGenerator->close();
+      if (!--closeTimer) noteGenerator->close();
    }
 }
  
 void
 playTune (TuneDefinition *tune) {
    int tunePlayed = 0;
-   if (prefs.tunes && tune->tones) {
-      if (toneGenerator) {
-	 if (toneGenerator->open()) {
-	    ToneDefinition *tone = tune->tones;
+   if (prefs.alertTunes && tune->elements) {
+      if (noteGenerator) {
+	 if (noteGenerator->open(openErrorLevel)) {
+	    TuneElement *element = tune->elements;
 	    tunePlayed = 1;
 	    closeTimer = 2000 / refreshInterval;
-	    while (tone->duration) {
-	       if (!toneGenerator->generate(tone->note, tone->duration)) {
+	    while (element->duration) {
+	       if (!noteGenerator->play(element->note, element->duration)) {
 		  tunePlayed = 0;
 		  break;
 	       }
-	       ++tone;
+	       ++element;
 	    }
-	    toneGenerator->flush();
+	    noteGenerator->flush();
 	 }
       }
    }
    if (!tunePlayed) {
-      if (prefs.dots && tune->tactile) {
+      if (prefs.alertDots && tune->tactile) {
 	 unsigned char dots = tune->tactile & 0XFF;
 	 unsigned char duration = tune->tactile >> 8;
          showDotPattern(dots, duration);

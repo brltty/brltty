@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -61,7 +61,7 @@
  *		  in order to minimize garbage due to noise on the 
  *		  serial line
  *    oct 02, 1996:
- *		- bound CMD_SAY and CMD_MUTE
+ *		- bound CMD_SAY_LINE and CMD_MUTE
  *    sep 22, 1996:
  *		- bound CMD_PRDIFLN and CMD_NXDIFLN.
  *    aug 15, 1996:
@@ -113,7 +113,6 @@
 #include <string.h>
 
 #include "brlconf.h"
-#include "Programs/scr.h"
 #include "Programs/misc.h"
 #include "Programs/brltty.h"
 #include "Programs/brl_driver.h"
@@ -136,7 +135,7 @@ static BRLPARAMS Models[] =
 {
   {
     /* ID == 0 */
-    "ABT320",
+    "ABT 320",
     ABT320,
     20,
     3
@@ -144,7 +143,7 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 1 */
-    "ABT340",
+    "ABT 340",
     ABT340,
     40,
     3
@@ -152,7 +151,7 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 2 */
-    "ABT340 Desktop",
+    "ABT 340 Desktop",
     ABT34D,
     40,
     5
@@ -160,7 +159,7 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 3 */
-    "ABT380",
+    "ABT 380",
     ABT380,
     80,
     5
@@ -168,23 +167,39 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 4 */
-    "ABT380 Twin Space",
-    ABT38D,
+    "ABT 382 Twin Space",
+    ABT382,
     80,
     5
   }
   ,
   {
+    /* ID == 10 */
+    "Delphi 20",
+    DEL420,
+    20,
+    3
+  }
+  ,
+  {
     /* ID == 11 */
-    "Alva Delphi 40",
+    "Delphi 40",
     DEL440,
     40,
     3
   }
   ,
   {
+    /* ID == 12 */
+    "Delphi 40 Desktop",
+    DEL44D,
+    40,
+    5
+  }
+  ,
+  {
     /* ID == 13 */
-    "Alva Delphi 80",
+    "Delphi 80",
     DEL480,
     80,
     5
@@ -192,17 +207,33 @@ static BRLPARAMS Models[] =
   ,
   {
     /* ID == 14 */
-    "Alva Satellite 540",
-    SAT540,
+    "Satellite 544",
+    SAT544,
     40,
     3
   }
   ,
   {
     /* ID == 15 */
-    "Alva Satellite 570",
-    SAT570,
+    "Satellite 570 Pro",
+    SAT570P,
     66,
+    3
+  }
+  ,
+  {
+    /* ID == 16 */
+    "Satellite 584 Pro",
+    SAT584P,
+    80,
+    3
+  }
+  ,
+  {
+    /* ID == 17 */
+    "Satellite 544 Traveller",
+    SAT544T,
+    40,
     3
   }
   ,
@@ -329,12 +360,12 @@ brl_identify (void)
   LogPrint(LOG_INFO, "   Compiled for %s with %s version.",
 #if MODEL == ABT_AUTO
 	  "terminal autodetection",
-#else
+#else /* MODEL == ABT_AUTO */
 	  Models[MODEL].Name,
 #endif /* MODEL == ABT_AUTO */
 #if ABT3_OLD_FIRMWARE
 	  "old firmware"
-#else
+#else /* ABT3_OLD_FIRMWARE */
 	  "new firmware"
 #endif /* ABT3_OLD_FIRMWARE */
     );
@@ -351,15 +382,14 @@ int SendToAlva( unsigned char *data, int len )
 }
 
 
-static void brl_initialize (char **parameters, brldim *brl, const char *dev)
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
-  brldim res;			/* return result */
   int ModelID = MODEL;
   unsigned char buffer[DIM_BRL_ID + 1];
   struct termios newtio;	/* new terminal settings */
   unsigned char alva_init[]="\033FUN\006\r";
 
-  res.disp = rawdata = prevdata = NULL;		/* clear pointers */
+  rawdata = prevdata = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
@@ -399,7 +429,7 @@ static void brl_initialize (char **parameters, brldim *brl, const char *dev)
 	break;
 
       if (!(read (brl_fd, buffer, DIM_BRL_ID + 1) == DIM_BRL_ID +1))
-	{ // try init method for AD4MM and AS...
+	{ /* try init method for AD4MM and AS... */
           write (brl_fd,alva_init,DIM_BRL_ID + 2);
           delay(200);
           read (brl_fd, buffer, DIM_BRL_ID + 1);         
@@ -416,45 +446,41 @@ static void brl_initialize (char **parameters, brldim *brl, const char *dev)
   if( !model->Name ) {
     /* Unknown model */
     LogPrint( LOG_ERR, "Detected unknown Alva model with ID %d.", ModelID );
-    LogPrint( LOG_WARNING, "Please fix Models[] in Alva/brlmain.cc and mail the maintainer." );
+    LogPrint( LOG_WARNING, "Please fix Models[] in Alva/braille.c and mail the maintainer." );
     goto failure;
   }
+  LogPrint( LOG_INFO, "Detected Alva model %s: %d columns, %d status cells.",
+            model->Name, model->Cols, model->NbStCells );
 
   /* Set model params... */
-  // too many help screens, too little difference between them, so for now...
-  //setHelpPageNumber( model - Models );		/* position in the model list */
-  res.x = model->Cols;			/* initialise size of display */
-  res.y = BRLROWS;
+  /* too many help screens, too little difference between them, so for now... */
+  /* brl->helpPage = model - Models; */
+  brl->x = model->Cols;			/* initialise size of display */
+  brl->y = BRLROWS;
 
   /* Allocate space for buffers */
-  res.disp = (unsigned char *) malloc (res.x * res.y);
-  rawdata = (unsigned char *) malloc (res.x * res.y);
-  prevdata = (unsigned char *) malloc (res.x * res.y);
-  if (!res.disp || !rawdata || !prevdata) {
+  rawdata = (unsigned char *) malloc (brl->x * brl->y);
+  prevdata = (unsigned char *) malloc (brl->x * brl->y);
+  if (!rawdata || !prevdata) {
     LogPrint( LOG_ERR, "Cannot allocate braille buffers." );
     goto failure;
   }
 
   ReWrite = 1;			/* To write whole display at first time */
 
-  *brl = res;
-  return;
+  return 1;
 
 failure:
-  if (res.disp)
-    free (res.disp);
   if (rawdata)
     free (rawdata);
   if (prevdata)
     free (prevdata);
-  brl->x = -1;
-  return;
+  return 0;
 }
 
 
-static void brl_close (brldim *brl)
+static void brl_close (BrailleDisplay *brl)
 {
-  free (brl->disp);
   free (rawdata);
   free (prevdata);
   tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
@@ -478,7 +504,7 @@ static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
   return SendToAlva( outbuf, outsz );
 }
 
-static void brl_writeWindow (brldim *brl)
+static void brl_writeWindow (BrailleDisplay *brl)
 {
   int i, j, k;
   static int Timeout = 0;
@@ -494,10 +520,10 @@ static void brl_writeWindow (brldim *brl)
     {
       /* We update only the display part that has been changed */
       i = 0;
-      while ((brl->disp[i] == prevdata[i]) && (i < model->Cols))
+      while ((brl->buffer[i] == prevdata[i]) && (i < model->Cols))
 	i++;
       j = model->Cols - 1;
-      while ((brl->disp[j] == prevdata[j]) && (j >= i))
+      while ((brl->buffer[j] == prevdata[j]) && (j >= i))
 	j--;
       j++;
     }
@@ -505,14 +531,14 @@ static void brl_writeWindow (brldim *brl)
     {
       for (k = 0;
 	   k < (j - i);
-	   rawdata[k++] = TransTable[(prevdata[i + k] = brl->disp[i + k])]);
+	   rawdata[k++] = TransTable[(prevdata[i + k] = brl->buffer[i + k])]);
       WriteToBrlDisplay (model->NbStCells + i, j - i, rawdata);
     }
 }
 
 
 static void
-brl_writeStatus (const unsigned char *st)
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 {
   int i;
 
@@ -621,7 +647,7 @@ static int GetABTKey (unsigned int *Keys, unsigned int *Pos)
 }
 
 
-static int brl_read (DriverCommandContext cmds)
+static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
   int ProcessKey, res = EOF;
   static unsigned int RoutingPos = 0;
@@ -725,7 +751,7 @@ static int brl_read (DriverCommandContext cmds)
 	      res = CMD_MUTE;
 	      break;
 	    case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
-	      res = CMD_SAY;
+	      res = CMD_SAY_LINE;
 	      break;
 	    case KEY_PROG | KEY_DOWN:
 	      res = CMD_FREEZE;
@@ -761,7 +787,7 @@ static int brl_read (DriverCommandContext cmds)
 	      res = CMD_RESTARTSPEECH;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_RIGHT:
-	      res = CMD_SAYALL;
+	      res = CMD_SAY_BELOW;
 	      break;
 	    case KEY_ROUTING:
 	      /* normal Cursor routing keys */
@@ -801,7 +827,7 @@ static int brl_read (DriverCommandContext cmds)
 		  break;
 		case KEY_PROG:
 		  res = CMD_HELP;
-		  /*res = CMD_SAY;*/
+		  /*res = CMD_SAY_LINE;*/
 		  break;
 		case KEY_PROG | KEY_HOME:
 		  res = CMD_DISPMD;

@@ -1,0 +1,286 @@
+.TH "BRLTTY" "1" "January 2003" "BRLTTY-3.2" "The BRLTTY Team"
+.SH "NAME"
+.B "brltty"
+-
+refreshable braille display driver for Linux/Unix
+.SH "SYNOPSIS"
+.B brltty
+.RI "[" option " ...]"
+.SH "DESCRIPTION"
+.B "brltty"
+is a background process (daemon) which provides access
+to the Linux/Unix console (when in text mode)
+for a blind person using a refreshable braille display.
+It drives the braille display,
+and provides complete screen review functionality.
+Some speech capability has also been incorporated.
+.PP
+Parameters can be passed to
+.B "brltty"
+in a number of ways.
+From most to least influential, these are:
+.TP
+.B 1
+command line options
+.TP
+.B 2
+boot parameters
+.TP
+.B 3
+environment variables
+.RB "(if the " "-E" " (" "--environment-variables" ") option is in effect)"
+.TP
+.B 4
+the configuration file
+.TP
+.B 5
+built-in defaults
+.SS "Command Line Options"
+The options are processed sequentially from left to right.
+If an option is specified more than once,
+or in case of a conflict,
+the rightmost specification takes precedence.
+.PP
+The supported options are:
+.TP
+.BI "-a " "table" " (--attributes-table=)"
+The path to the attributes translation table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".tbl" " extension is optional."
+.RB "The built-in default is " "attributes.tbl" "."
+.TP
+.BI "-b " "driver" " (--braille-driver=)"
+The driver for the braille display
+as either a two-letter driver identification code
+or the full path to the shared object.
+The built-in default is the driver which was configured in at build-time.
+.TP
+.BI "-c " "table" " (--contraction-table=)"
+The path to the contraction table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".ctb" " extension is optional."
+.TP
+.BI "-d " "device" " (--braille-device=)"
+The path to the device for accessing the braille display.
+.RB "Relative paths are anchored at " "/dev/" "."
+The built-in default is the first serial port.
+.TP
+.B "-e (--standard-error)"
+Write logs to standard error rather than to the system log (useful for debugging).
+.TP
+.BI "-f " "file" " (--configuration-file=)"
+The full path to the configuration file.
+.RB "The built-in default is " "/etc/brltty.conf" "."
+.TP
+.B "-h (--help)"
+Print a command line usage summary and exit.
+.TP
+.BI "-l " "level" " (--log-level=)"
+The minimum severity level for messages written to the log.
+Any of the following numbers,
+or any abbreviation of their corresponding names,
+may be specified:
+.RS
+.TP
+.B "0"
+.B "emergency"
+.TP
+.B "1"
+.B "alert"
+.TP
+.B "2"
+.B "critical"
+.TP
+.B "3"
+.B "error"
+.TP
+.B "4"
+.B "warning"
+.TP
+.B "5"
+.B "notice"
+.TP
+.B "6"
+.B "information"
+.TP
+.B "7"
+.B "debug"
+.RE
+.PP
+.RB "The built-in default is " "notice" "."
+.TP
+.B "-n (--no-daemon)"
+Remain in the foreground (useful for debugging).
+.TP
+.BI "-p " "file" " (--preferences-file=)"
+The full path to the preferences file.
+The built-in default is
+.BI "/etc/brltty-" "driver" ".prefs"
+(where
+.I "driver"
+is the two-letter driver identification code).
+.TP
+.B "-q (--quiet)"
+Suppress start-up messages.
+The default log level (see the
+.BR "-l" " (" "--log-level=" ")"
+option) is changed to
+.BR "warning" " (" "information" " if " "-v" " (" "--version" ") is also specified)."
+.TP
+.BI "-s " "driver" " (--speech-driver=)"
+The driver for the speech synthesizer
+as either a two-letter driver identification code
+or the full path to the shared object.
+The built-in default is the driver which was configured in at build-time.
+.TP
+.BI "-t " "table" " (--text-table=)"
+The path to the text translation table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".tbl" " extension is optional."
+.RB "For simple file names, the " "text." " prefix is optional."
+.RB "The built-in default is " "text.simple.tbl" "."
+.TP
+.B "-v (--version)"
+Print start-up messages and exit.
+The default log level (see the
+.BR "-l" " (" "--log-level=" ")"
+option) is changed to
+.BR "information" "."
+.TP
+.BI "-B " "name" "=" "value" ",... (--braille-parameters=)"
+Specify parameters for the braille display driver.
+.TP
+'B "-E (--environment-variables)"
+Recognize environment variables.
+.TP
+.BI "-M " "csecs" " (--message-delay=)"
+The message hold time in hundredths of a second.
+.RB "The built-in default is " "400" " (4 seconds)."
+.TP
+.B "-N (--no-speech)"
+Do not automatically start the speech synthesizer driver.
+It can still be manually started with the
+.B "restart speech"
+command at any time.
+This option should only be used if
+.B "brltty"
+is started before the sound subsystem of the kernel is initialized
+and problems with sound are encountered.
+.TP
+.BI "-P " "file" " (--pid-file=)"
+The full path to the process identifier file.
+If this option is supplied,
+.B "brltty"
+writes its process identifier (pid) into the specified file on start-up.
+.TP
+.BI "-R " "csecs" " (--refresh-interval=)"
+The braille window refresh interval in hundredths of a second.
+.RB "The built-in default is " "4" " (25 times per second)."
+.TP
+.BI "-S " "name" "=" "value" ",... (--speech-parameters=)"
+Specify parameters for the speech synthesizer driver.
+.TP
+.BI "-X " "name" "=" "value" ",... (--screen-parameters=)"
+Specify parameters for the screen driver.
+.SS "Environment Variables"
+The following environment variables are recognized if the
+.BR "-E" " (" "--environment-variables" ")"
+option is in effect:
+.TP
+.BI "BRLTTY_ATTRIBUTES_TABLE=" "table"
+The path to the attributes translation table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".tbl" " extension is optional."
+.TP
+.BI "BRLTTY_BRAILLE_DEVICE=" "device"
+The path to the device for accessing the braille display.
+.RB "Relative paths are anchored at " "/dev/" "."
+.TP
+.BI "BRLTTY_BRAILLE_DRIVER=" "driver"
+The driver for the braille display
+as either a two-letter driver identification code
+or the full path to the shared object.
+.TP
+.BI "BRLTTY_BRAILLE_PARAMETERS=" "name" "=" "value" ",..."
+Specify parameters for the braille display driver.
+.TP
+.BI "BRLTTY_CONFIGURATION_FILE=" "file"
+The full path to the configuration file.
+.TP
+.BI "BRLTTY_CCONTRACTION_TABLE=" "table"
+The path to the contraction table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".ctb" " extension is optional."
+.TP
+.BI "BRLTTY_PREFERENCES_FILE=" "file"
+The full path to the preferences file.
+.TP
+.BI "BRLTTY_SCREEN_PARAMETERS=" "name" "=" "value" ",..."
+Specify parameters for the screen driver.
+.TP
+.BI "BRLTTY_SPEECH_DRIVER=" "driver"
+The driver for the speech synthesizer
+as either a two-letter driver identification code
+or the full path to the shared object.
+.TP
+.BI "BRLTTY_SPEECH_PARAMETERS=" "name" "=" "value" ",..."
+Specify parameters for the speech synthesizer driver.
+.TP
+.BI "BRLTTY_TEXT_TABLE=" "table"
+The path to the text translation table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".tbl" " extension is optional."
+.RB "For simple file names, the " "text." " prefix is optional."
+.SS "Configuration File"
+Blank lines are ignored.
+If the character
+.B "#"
+occurs on any line then
+all characters from it to the end of that line are treated as a comment.
+.PP
+The following configuration directives are supported:
+.TP
+.BI "attributes-table " "table"
+The path to the attributes translation table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".tbl" " extension is optional."
+.TP
+.BI "braille-device " "device"
+The path to the device for accessing the braille display.
+.RB "Relative paths are anchored at " "/dev/" "."
+.TP
+.BI "braille-driver " "driver"
+The driver for the braille display
+as either a two-letter driver identification code
+or the full path to the shared object.
+.TP
+.BI "braille-parameters " "name" "=" "value" ",..."
+Specify parameters for the braille display driver.
+.TP
+.BI "ccontraction-table " "table"
+The path to the contraction table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".ctb" " extension is optional."
+.TP
+.BI "preferences-file " "file"
+The full path to the preferences file.
+.TP
+.BI "screen-parameters " "name" "=" "value" ",..."
+Specify parameters for the screen driver.
+.TP
+.BI "speech-driver " "driver"
+The driver for the speech synthesizer
+as either a two-letter driver identification code
+or the full path to the shared object.
+.TP
+.BI "speech-parameters " "name" "=" "value" ",..."
+Specify parameters for the speech synthesizer driver.
+.TP
+.BI "text-table " "table"
+The path to the text translation table.
+.RB "Relative paths are anchored at " "/etc/brltty/" "."
+.RB "The " ".tbl" " extension is optional."
+.RB "For simple file names, the " "text." " prefix is optional."
+.SH "SEE ALSO"
+For full documentation, see the on-line manual at
+.RB "[" "http://mielke.cc/brltty/doc/Manual-HTML/Manual.html" "]."

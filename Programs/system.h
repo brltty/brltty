@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern char *getBootParameters (void);
+
 extern void *loadSharedObject (const char *path);
 extern void unloadSharedObject (void *object);
 extern int findSharedSymbol (void *object, const char *symbol, const void **address);
@@ -32,31 +34,31 @@ extern int startBeep (unsigned short frequency);
 extern int stopBeep (void);
 
 typedef enum {
-  DAC_FMT_U8,
-  DAC_FMT_S8,
-  DAC_FMT_U16B,
-  DAC_FMT_S16B,
-  DAC_FMT_U16L,
-  DAC_FMT_S16L,
-  DAC_FMT_ULAW,
-  DAC_FMT_UNKNOWN
-} DacAmplitudeFormat;
-extern int getDacDevice (void);
-extern int getDacBlockSize (int descriptor);
-extern int getDacSampleRate (int descriptor);
-extern int getDacChannelCount (int descriptor);
-extern DacAmplitudeFormat getDacAmplitudeFormat (int descriptor);
+  PCM_FMT_U8,
+  PCM_FMT_S8,
+  PCM_FMT_U16B,
+  PCM_FMT_S16B,
+  PCM_FMT_U16L,
+  PCM_FMT_S16L,
+  PCM_FMT_ULAW,
+  PCM_FMT_UNKNOWN
+} PcmAmplitudeFormat;
+extern int getPcmDevice (int errorLevel);
+extern int getPcmBlockSize (int descriptor);
+extern int getPcmSampleRate (int descriptor);
+extern int getPcmChannelCount (int descriptor);
+extern PcmAmplitudeFormat getPcmAmplitudeFormat (int descriptor);
 
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);
-extern int getMidiDevice (MidiBufferFlusher flushBuffer);
-extern void setMidiInstrument (unsigned char device, unsigned char channel, unsigned char instrument);
+extern int getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer);
+extern void setMidiInstrument (unsigned char channel, unsigned char instrument);
 extern void beginMidiBlock (int descriptor);
 extern void endMidiBlock (int descriptor);
-extern void startMidiNote (unsigned char device, unsigned char channel, unsigned char note);
-extern void stopMidiNote (unsigned char device, unsigned char channel, unsigned char note);
+extern void startMidiNote (unsigned char channel, unsigned char note, unsigned char volume);
+extern void stopMidiNote (unsigned char channel);
 extern void insertMidiWait (int duration);
 
-extern int enablePorts (unsigned short int base, unsigned short int count);
+extern int enablePorts (int errorLevel, unsigned short int base, unsigned short int count);
 extern int disablePorts (unsigned short int base, unsigned short int count);
 extern unsigned char readPort1 (unsigned short int port);
 extern void writePort1 (unsigned short int port, unsigned char value);

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -86,7 +86,7 @@ LogPrint (int level, char *format, ...)
     if (syslogOpened) {
 #ifdef HAVE_VSYSLOG
       vsyslog(level, format, argp);
-#else
+#else /* HAVE_VSYSLOG */
       char buffer[0X100];
       vsnprintf(buffer, sizeof(buffer), format, argp);
       syslog(level, "%s", buffer);
@@ -668,76 +668,4 @@ validateOnOff (unsigned int *flag, const char *description, const char *value) {
 int
 validateYesNo (unsigned int *flag, const char *description, const char *value) {
    return validateFlag(flag, description, value, "yes", "no");
-}
-
-/* Reverse a 256x256 mapping, used for charset maps. */
-void reverseTable(unsigned char *origtab, unsigned char *revtab) {
-  int i;
-  memset(revtab, 0, 0X100);
-  for(i=0XFF; i>=0; i--) revtab[origtab[i]] = i;
-}
-
-/* Functions which support horizontal status cells, e.g. Papenmeier. */
-/* this stuff is real wired - dont try to understand */
-
-/* Dots for landscape (counterclockwise-rotated) digits. */
-const unsigned char landscapeDigits[11] = {
-  B1+B5+B2,    B4,          B4+B1,       B4+B5,       B4+B5+B2,
-  B4+B2,       B4+B1+B5,    B4+B1+B5+B2, B4+B1+B2,    B1+B5,
-  B1+B2+B4+B5
-};
-
-/* Format landscape representation of numbers 0 through 99. */
-int
-landscapeNumber (int x) {
-  return landscapeDigits[(x / 10) % 10] | (landscapeDigits[x % 10] << 4);  
-}
-
-/* Format landscape flag state indicator. */
-int
-landscapeFlag (int number, int on) {
-  int dots = landscapeDigits[number % 10];
-  if (on) dots |= landscapeDigits[10] << 4;
-  return dots;
-}
-
-/* Dots for seascape (clockwise-rotated) digits. */
-const unsigned char seascapeDigits[11] = {
-  B5+B1+B4,    B2,          B2+B5,       B2+B1,       B2+B1+B4,
-  B2+B4,       B2+B5+B1,    B2+B5+B1+B4, B2+B5+B4,    B5+B1,
-  B1+B2+B4+B5
-};
-
-/* Format seascape representation of numbers 0 through 99. */
-int
-seascapeNumber (int x) {
-  return (seascapeDigits[(x / 10) % 10] << 4) | seascapeDigits[x % 10];  
-}
-
-/* Format seascape flag state indicator. */
-int
-seascapeFlag (int number, int on) {
-  int dots = seascapeDigits[number % 10] << 4;
-  if (on) dots |= seascapeDigits[10];
-  return dots;
-}
-
-/* Dots for portrait digits - 2 numbers in one cells */
-const unsigned char portraitDigits[11] = {
-  B2+B4+B5, B1, B1+B2, B1+B4, B1+B4+B5, B1+B5, B1+B2+B4, 
-  B1+B2+B4+B5, B1+B2+B5, B2+B4, B1+B2+B4+B5
-};
-
-/* Format portrait representation of numbers 0 through 99. */
-int
-portraitNumber (int x) {
-  return portraitDigits[(x / 10) % 10] | (portraitDigits[x % 10]<<4);  
-}
-
-/* Format portrait flag state indicator. */
-int
-portraitFlag (int number, int on) {
-  int dots = portraitDigits[number % 10] << 4;
-  if (on) dots |= portraitDigits[10];
-  return dots;
 }

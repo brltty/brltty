@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -38,7 +38,7 @@
 /* 0X08 */ CMD_LNUP,                       // dot 1
 /* 0X09 */ CMD_MUTE,                       // dots 1,6
 /* 0X0A */ CMD_NOOP,                       // dots 1,5
-/* 0X0B */ CMD_SAY,                        // dots 1,5,6
+/* 0X0B */ CMD_SAY_LINE,                   // dots 1,5,6
 /* 0X0C */ CMD_CSRTRK,                     // dots 1,4
 /* 0X0D */ CMD_CAPBLINK,                   // dots 1,4,6
 /* 0X0E */ CMD_NOOP,                       // dots 1,4,5
@@ -140,7 +140,7 @@
 /* 0X6E */ CMD_NOOP,                       // thumb keys B,C,D
 /* 0X6F */ CMD_NOOP,                       // thumb keys A,B,C,D
 /* 0X70 */ CMD_FWINRT,                     // thumb key E
-/* 0X71 */ CMD_SAY,                        // thumb keys A,E
+/* 0X71 */ CMD_SAY_LINE,                   // thumb keys A,E
 /* 0X72 */ CMD_HWINRT,                     // thumb keys B,E
 /* 0X73 */ CMD_NOOP,                       // thumb keys A,B,E
 /* 0X74 */ CMD_LNEND,                      // thumb keys C,E

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <limits.h>
 
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
@@ -41,17 +42,25 @@
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #include "brl.h"
+#ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
+#endif /* ENABLE_SPEECH_SUPPORT */
 #include "scr.h"
 #include "contract.h"
 #include "tunes.h"
 #include "message.h"
 #include "misc.h"
+#include "system.h"
 #include "options.h"
 #include "brltty.h"
 #include "defaults.h"
 
-char COPYRIGHT[] = "Copyright (C) 1995-2002 by The BRLTTY Team - all rights reserved.";
+char COPYRIGHT[] = "Copyright (C) 1995-2003 by The BRLTTY Team - all rights reserved.";
+
+#define DEVICE_DIRECTORY "/dev"
+#define TABLE_EXTENSION ".tbl"
+#define TEXT_TABLE_PREFIX "text."
+#define ATTRIBUTES_TABLE_PREFIX "attr."
 
 static const char *opt_attributesTable = NULL;
 static const char *opt_brailleDevice = NULL;
@@ -69,8 +78,10 @@ static const char *opt_pidFile = NULL;
 static const char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
 static char *opt_screenParameters = NULL;
+#ifdef ENABLE_SPEECH_SUPPORT
 static const char *opt_speechDriver = NULL;
 static char *opt_speechParameters = NULL;
+#endif /* ENABLE_SPEECH_SUPPORT */
 static short opt_standardError = 0;
 static const char *opt_textTable = NULL;
 static short opt_version = 0;
@@ -84,15 +95,19 @@ static char *cfg_contractionTable = NULL;
 static char *cfg_brailleDevice = NULL;
 static char *cfg_brailleDriver = NULL;
 static char *cfg_brailleParameters = NULL;
+#ifdef ENABLE_SPEECH_SUPPORT
 static char *cfg_speechDriver = NULL;
 static char *cfg_speechParameters = NULL;
+#endif /* ENABLE_SPEECH_SUPPORT */
 static char *cfg_screenParameters = NULL;
 
 static const BrailleDriver *brailleDriver;
 static char **brailleParameters = NULL;
 
+#ifdef ENABLE_SPEECH_SUPPORT
 static const SpeechDriver *speechDriver;
 static char **speechParameters = NULL;
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 static char **screenParameters = NULL;
 
@@ -147,6 +162,7 @@ configureBrailleParameters (const char *delimiters) {
   return getToken(&cfg_brailleParameters, delimiters);
 }
 
+#ifdef ENABLE_SPEECH_SUPPORT
 static int
 configureSpeechDriver (const char *delimiters) {
   return getToken(&cfg_speechDriver, delimiters);
@@ -156,6 +172,7 @@ static int
 configureSpeechParameters (const char *delimiters) {
   return getToken(&cfg_speechParameters, delimiters);
 }
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 static int
 configureScreenParameters (const char *delimiters) {
@@ -174,7 +191,7 @@ BEGIN_OPTION_TABLE
   {'d', "braille-device", "device", configureBrailleDevice, 0,
    "Path to device for accessing braille display."},
   {'e', "standard-error", NULL, NULL, 0,
-   "Log to standard error instead of via syslog."},
+   "Log to standard error rather than to syslog."},
   {'f', "configuration-file", "file", NULL, 0,
    "Path to default parameters file."},
   {'l', "log-level", "level", NULL, 0,
@@ -185,8 +202,10 @@ BEGIN_OPTION_TABLE
    "Path to preferences file."},
   {'q', "quiet", NULL, NULL, 0,
    "Suppress start-up messages."},
+#ifdef ENABLE_SPEECH_SUPPORT
   {'s', "speech-driver", "driver", configureSpeechDriver, 0,
    "Speech driver: full library path, or one of {" SPEECH_DRIVERS "}"},
+#endif /* ENABLE_SPEECH_SUPPORT */
   {'t', "text-table", "file", configureTextTable, 0,
    "Path to text translation table file."},
   {'v', "version", NULL, NULL, 0,
@@ -203,17 +222,82 @@ BEGIN_OPTION_TABLE
    "Path to process identifier file."},
   {'R', "refresh-interval", "csecs", NULL, 0,
    "Braille window refresh interval [4]."},
+#ifdef ENABLE_SPEECH_SUPPORT
   {'S', "speech-parameters", "arg,...", configureSpeechParameters, 0,
    "Parameters to speech driver."},
+#endif /* ENABLE_SPEECH_SUPPORT */
   {'X', "screen-parameters", "arg,...", configureScreenParameters, 0,
    "Parameters to screen driver."},
 END_OPTION_TABLE
 
+static const char **bootParameters = NULL;
+static int bootParameterCount = 0;
+static char *
+nextBootParameter (char **parameters) {
+  const char delimiter = ',';
+  char *parameter = *parameters;
+  char *next;
+  if (!*parameter) return NULL;
+  if ((next = strchr(parameter, delimiter))) {
+    *next = 0;
+    parameter = strdupWrapper(parameter);
+    *next = delimiter;
+    *parameters = next + 1;
+  } else {
+    parameter = strdupWrapper(parameter);
+    *parameters += strlen(parameter);
+  }
+  return parameter;
+}
+
 static void
-ensureOptionSetting (const char **setting, const char *defaultSetting, const char *configuredSetting, const char *environmentVariable) {
+prepareBootParameters (void) {
+  char *string;
+  int allocated = 0;
+  if ((string = getBootParameters())) {
+    allocated = 1;
+  } else if (!(string = getenv("brltty"))) {
+    return;
+  }
+
+  {
+    int count = 0;
+    char *parameters = string;
+    char *parameter;
+    while ((parameter = nextBootParameter(&parameters))) {
+      ++count;
+      if (*parameter) bootParameterCount = count;
+      free(parameter);
+    }
+  }
+
+  if (bootParameterCount) {
+    int count = 0;
+    char *parameters = string;
+    char *parameter;
+    bootParameters = mallocWrapper(bootParameterCount * sizeof(*bootParameters));
+    while ((parameter = nextBootParameter(&parameters))) {
+      if (*parameter) {
+        bootParameters[count] = parameter;
+      } else {
+        bootParameters[count] = NULL;
+        free(parameter);
+      }
+      if (++count == bootParameterCount) break;
+    }
+  }
+
+  if (allocated) free(string);
+}
+
+static void
+ensureOptionSetting (const char **setting, const char *defaultSetting, const char *configuredSetting, const char *environmentVariable, int bootParameter) {
   if (!*setting) {
-    if (opt_environmentVariables && environmentVariable) *setting = getenv(environmentVariable);
-    if (!*setting) *setting = configuredSetting? configuredSetting: defaultSetting;
+    if ((bootParameter >= 0) && (bootParameter < bootParameterCount)) *setting = bootParameters[bootParameter];
+    if (!*setting) {
+      if (opt_environmentVariables && environmentVariable) *setting = getenv(environmentVariable);
+      if (!*setting) *setting = configuredSetting? configuredSetting: defaultSetting;
+    }
   }
 }
 
@@ -299,13 +383,15 @@ logParameters (const char *const *names, char **values, char *description) {
    }
 }
 
-static void
-loadTranslationTable (char *table, const char *path, const char *name) {
+static int
+loadTranslationTable (TranslationTable *table, const char *path, const char *name) {
+  int ok = 0;
   int fd = open(path, O_RDONLY);
   if (fd >= 0) {
-    char buffer[0X100];
-    if (read(fd, buffer, sizeof(buffer)) == sizeof(buffer)) {
-      memcpy(table, buffer, sizeof(buffer));
+    TranslationTable buffer;
+    if (read(fd, &buffer, sizeof(buffer)) == sizeof(buffer)) {
+      memcpy(table, &buffer, sizeof(buffer));
+      ok = 1;
     } else {
       LogPrint(LOG_ERR, "Cannot read %s translation table: %s", name, path);
     }
@@ -313,29 +399,72 @@ loadTranslationTable (char *table, const char *path, const char *name) {
   } else {
     LogPrint(LOG_ERR, "Cannot open %s translation table: %s", name, path);
   }
+  return ok;
 }
 
-static void
+static int
 loadTextTable (const char *path) {
-  loadTranslationTable(textTable, path, "text");
-  reverseTable(textTable, untextTable);
+  if (!loadTranslationTable(&textTable, path, "text")) return 0;
+  reverseTable(&textTable, &untextTable);
+  return 1;
 }
 
-static void
+static int
 loadAttributesTable (const char *path) {
-  loadTranslationTable(attributesTable, path, "attributes");
+  return loadTranslationTable(&attributesTable, path, "attributes");
 }
 
 static void
-changedWindowAttributes (void) {
-  fwinshift = MAX(brl.x-prefs.winovlp, 1);
-  hwinshift = brl.x / 2;
-  vwinshift = 5;
+fixTablePath (const char **path, const char *prefix) {
+  const char *extension = TABLE_EXTENSION;
+  const unsigned int prefixLength = strlen(prefix);
+  const unsigned int pathLength = strlen(*path);
+  const unsigned int extensionLength = strlen(extension);
+  char buffer[prefixLength + pathLength + extensionLength + 1];
+  unsigned int length = 0;
+
+  if (prefixLength) {
+    if (!strchr(*path, '/')) {
+      if (strncmp(*path, prefix, prefixLength) != 0) {
+        memcpy(&buffer[length], prefix, prefixLength);
+        length += prefixLength;
+      }
+    }
+  }
+
+  memcpy(&buffer[length], *path, pathLength);
+  length += pathLength;
+
+  if ((pathLength < extensionLength) ||
+      (memcmp(&buffer[length-extensionLength], extension, extensionLength) != 0)) {
+    memcpy(&buffer[length], extension, extensionLength);
+    length += extensionLength;
+  }
+
+  if (length > pathLength) {
+    buffer[length] = 0;
+    *path = strdupWrapper(buffer);
+  }
 }
 
-static void
+static int
 changedTuneDevice (void) {
-  setTuneDevice(prefs.tunedev);
+  return setTuneDevice(prefs.tuneDevice);
+}
+
+static void
+dimensionsChanged (int rows, int columns) {
+  fwinshift = MAX(columns-prefs.windowOverlap, 1);
+  hwinshift = columns / 2;
+  vwinshift = 5;
+  LogPrint(LOG_DEBUG, "fwin=%d hwin=%d vwin=%d",
+           fwinshift, hwinshift, vwinshift);
+}
+
+static int
+changedWindowAttributes (void) {
+  dimensionsChanged(brl.y, brl.x);
+  return 1;
 }
 
 static void
@@ -344,10 +473,24 @@ changedPreferences (void) {
   changedTuneDevice();
 }
 
+int
+getBrailleCommand (DriverCommandContext cmds) {
+   while (1) {
+      int key = readBrailleCommand(&brl, cmds);
+      if (key != EOF) {
+         LogPrint(LOG_DEBUG, "Command: %5.5X", key);
+         if (key == CMD_NOOP) continue;
+         return key;
+      }
+      delay(refreshInterval);
+      closeTuneDevice(0);
+   }
+}
+
 void
 initializeBraille (void) {
-   brl.disp = NULL;
-   brl.x = brl.y = -1;
+   initializeBrailleDisplay(&brl);
+   brl.bufferResized = &dimensionsChanged;
 }
 
 static void
@@ -369,25 +512,29 @@ getBrailleDriver (void) {
 
 void
 startBrailleDriver (void) {
-   brailleDriver->initialize(brailleParameters, &brl, opt_brailleDevice);
-   if (brl.x == -1) {
+   if (brailleDriver->open(&brl, brailleParameters, opt_brailleDevice)) {
+      if (allocateBrailleBuffer(&brl)) {
+         braille = brailleDriver;
+         clearStatusCells();
+         setHelpPageNumber(brl.helpPage);
+         playTune(&tune_detected);
+         return;
+      } else {
+         LogPrint(LOG_CRIT, "Braille buffer allocation failed.");
+      }
+      brailleDriver->close(&brl);
+   } else {
       LogPrint(LOG_CRIT, "Braille driver initialization failed.");
-      exit(6);
    }
-   braille = brailleDriver;
 
-   changedWindowAttributes();
-   playTune(&tune_detected);
-
-   LogPrint(LOG_DEBUG, "Braille display has %d %s of %d %s.",
-            brl.y, (brl.y == 1)? "row": "rows",
-            brl.x, (brl.x == 1)? "column": "columns");
-   clearStatusCells();
+   initializeBraille();
+   exit(6);
 }
 
 void
 stopBrailleDriver (void) {
    braille = &noBraille;
+   if (brl.isCoreBuffer) free(brl.buffer);
    brailleDriver->close(&brl);
    initializeBraille();
 }
@@ -399,6 +546,7 @@ exitBrailleDriver (void) {
    stopBrailleDriver();
 }
 
+#ifdef ENABLE_SPEECH_SUPPORT
 void
 initializeSpeech (void) {
 }
@@ -425,7 +573,7 @@ startSpeechDriver (void) {
    if (opt_noSpeech) {
       LogPrint(LOG_INFO, "Automatic speech driver initialization disabled.");
    } else {
-      speechDriver->initialize(speechParameters);
+      speechDriver->open(speechParameters);
       speech = speechDriver;
    }
 }
@@ -446,6 +594,7 @@ static void
 exitSpeechDriver (void) {
    stopSpeechDriver();
 }
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static void
@@ -458,31 +607,23 @@ exitContractionTable (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 int
-readKey (DriverCommandContext cmds) {
-   while (1) {
-      int key = braille->read(cmds);
-      if (key != EOF) {
-         LogPrint(LOG_DEBUG, "Command: %5.5X", key);
-         if (key == CMD_NOOP) continue;
-         return key;
-      }
-      delay(refreshInterval);
-      closeTuneDevice(0);
-   }
-}
-
-int
-loadPreferences (int change)
-{
+loadPreferences (int change) {
   int ok = 0;
   int fd = open(opt_preferencesFile, O_RDONLY);
   if (fd != -1) {
     Preferences newPreferences;
     int count = read(fd, &newPreferences, sizeof(newPreferences));
     if (count == sizeof(newPreferences)) {
-      if ((newPreferences.magicnum[0] == (PREFS_MAGICNUM&0XFF)) && (newPreferences.magicnum[1] == (PREFS_MAGICNUM>>8))) {
+      if ((newPreferences.magic[0] == (PREFS_MAGIC_NUMBER & 0XFF)) &&
+          (newPreferences.magic[1] == (PREFS_MAGIC_NUMBER >> 8))) {
         prefs = newPreferences;
         ok = 1;
+        if (prefs.version == 0) {
+          prefs.version++;
+          prefs.pcmVolume = DEFAULT_PCM_VOLUME;
+          prefs.midiVolume = DEFAULT_MIDI_VOLUME;
+          prefs.fmVolume = DEFAULT_FM_VOLUME;
+        }
         if (change) changedPreferences();
       } else
         LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
@@ -524,6 +665,54 @@ savePreferences (void)
 }
 
 #ifdef ENABLE_PREFERENCES_MENU
+static int
+testTunes () {
+   return prefs.alertTunes;
+}
+
+#if defined(ENABLE_PCM_TUNES) || defined(ENABLE_MIDI_TUNES) || defined(ENABLE_FM_TUNES)
+static int
+changedVolume (unsigned char volume) {
+  return (volume % 5) == 0;
+}
+#endif /* defined(ENABLE_PCM_TUNES) || defined(ENABLE_MIDI_TUNES) || defined(ENABLE_FM_TUNES) */
+
+#ifdef ENABLE_PCM_TUNES
+static int
+testTunesPcm () {
+   return testTunes() && (prefs.tuneDevice == tdPcm);
+}
+
+static int
+changedPcmVolume (void) {
+  return changedVolume(prefs.pcmVolume);
+}
+#endif /* ENABLE_PCM_TUNES */
+
+#ifdef ENABLE_MIDI_TUNES
+static int
+testTunesMidi () {
+   return testTunes() && (prefs.tuneDevice == tdMidi);
+}
+
+static int
+changedMidiVolume (void) {
+  return changedVolume(prefs.midiVolume);
+}
+#endif /* ENABLE_MIDI_TUNES */
+
+#ifdef ENABLE_FM_TUNES
+static int
+testTunesFm () {
+   return testTunes() && (prefs.tuneDevice == tdFm);
+}
+
+static int
+changedFmVolume (void) {
+  return changedVolume(prefs.fmVolume);
+}
+#endif /* ENABLE_FM_TUNES */
+
 #ifdef ENABLE_TABLE_SELECTION
 typedef struct {
   const char *pattern;
@@ -601,80 +790,77 @@ globEnd (GlobData *data) {
 
 static const char *
 globChanged (GlobData *data) {
-  char *path = strdupWrapper(data->paths[data->setting]);
-  free(data->current);
-  return data->current = path;
+  char *path = strdup(data->paths[data->setting]);
+  if (path) {
+    free(data->current);
+    return data->current = path;
+  } else {
+    LogError("Memory allocation");
+  }
+  return NULL;
 }
 
-static void
+static int
 changedTextTable (void) {
-  const char *path = globChanged(&glob_textTable);
-  loadTextTable(path);
+  return loadTextTable(globChanged(&glob_textTable));
 }
 
-static void
+static int
 changedAttributesTable (void) {
-  const char *path = globChanged(&glob_attributesTable);
-  loadAttributesTable(path);
+  return loadAttributesTable(globChanged(&glob_attributesTable));
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-static void
+static int
 changedContractionTable (void) {
   const char *path = globChanged(&glob_contractionTable);
-  void *table = *path? compileContractionTable(path): NULL;
+  void *table;
+  if (*path) {
+    if (!(table = compileContractionTable(path))) return 0;
+  } else {
+    table = NULL;
+  }
   if (contractionTable) destroyContractionTable(contractionTable);
   contractionTable = table;
+  return 1;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
 
 static int
 testSkipBlankWindows () {
-   return prefs.skpblnkwins;
+   return prefs.skipBlankWindows;
 }
 
 static int
 testSlidingWindow () {
-   return prefs.slidewin;
+   return prefs.slidingWindow;
 }
 
 static int
 testShowCursor () {
-   return prefs.csrvis;
+   return prefs.showCursor;
 }
 
 static int
 testBlinkingCursor () {
-   return testShowCursor() && prefs.csrblink;
+   return testShowCursor() && prefs.blinkingCursor;
 }
 
 static int
 testShowAttributes () {
-   return prefs.attrvis;
+   return prefs.showAttributes;
 }
 
 static int
 testBlinkingAttributes () {
-   return testShowAttributes() && prefs.attrblink;
+   return testShowAttributes() && prefs.blinkingAttributes;
 }
 
 static int
 testBlinkingCapitals () {
-   return prefs.capblink;
+   return prefs.blinkingCapitals;
 }
-
-static int
-testTunes () {
-   return prefs.tunes;
-}
-
-#ifdef ENABLE_MIDI_TUNES
-static int
-testTunesMidi () {
-   return testTunes() && (prefs.tunedev == tdMidi);
-}
-#endif /* ENABLE_MIDI_TUNES */
 
 void
 updatePreferences (void) {
@@ -692,10 +878,42 @@ updatePreferences (void) {
     static const char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
     static const char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Generic", "MDV", "Voyager"};
     static const char *textStyles[] = {"8-dot", "6-dot"};
-    static const char *tuneDevices[] = {"PC Speaker", "Sound Card", "MIDI", "Adlib/OPL3/SB-FM"};
+    static const char *tuneDevices[] = {
+      "Beeper ("
+#ifdef ENABLE_BEEPER_TUNES
+        "console tone generator"
+#else /* ENABLE_BEEPER_TUNES */
+        "unsupported"
+#endif /* ENABLE_BEEPER_TUNES */
+        ")",
+
+      "PCM ("
+#ifdef ENABLE_PCM_TUNES
+        "soundcard digital audio"
+#else /* ENABLE_PCM_TUNES */
+        "unsupported"
+#endif /* ENABLE_PCM_TUNES */
+        ")",
+
+      "MIDI ("
+#ifdef ENABLE_MIDI_TUNES
+        "Musical Instrument Digital Interface"
+#else /* ENABLE_MIDI_TUNES */
+        "unsupported"
+#endif /* ENABLE_MIDI_TUNES */
+        ")",
+
+      "FM ("
+#ifdef ENABLE_FM_TUNES
+        "soundcard synthesizer"
+#else /* ENABLE_FM_TUNES */
+        "unsupported"
+#endif /* ENABLE_FM_TUNES */
+        ")"
+    };
     typedef struct {
        unsigned char *setting;                        /* pointer to the item value */
-       void (*changed) (void);
+       int (*changed) (void);
        int (*test) (void);
        const char *description;                        /* item description */
        const char *const*names;                        /* 0 == numeric, 1 == bolean */
@@ -705,43 +923,51 @@ updatePreferences (void) {
     #define MENU_ITEM(setting, changed, test, description, values, minimum, maximum) {&setting, changed, test, description, values, minimum, maximum}
     #define NUMERIC_ITEM(setting, changed, test, description, minimum, maximum) MENU_ITEM(setting, changed, test, description, NULL, minimum, maximum)
     #define TIMING_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 1, 16)
+    #define VOLUME_ITEM(setting, changed, test, description) NUMERIC_ITEM(setting, changed, test, description, 0, 100)
     #define TEXT_ITEM(setting, changed, test, description, names, count) MENU_ITEM(setting, changed, test, description, names, 0, count-1)
     #define SYMBOLIC_ITEM(setting, changed, test, description, names) TEXT_ITEM(setting, changed, test, description, names, ((sizeof(names) / sizeof(names[0]))))
     #define BOOLEAN_ITEM(setting, changed, test, description) SYMBOLIC_ITEM(setting, changed, test, description, booleanValues)
     #define GLOB_ITEM(data, changed, test, description) TEXT_ITEM(data.setting, changed, test, description, data.paths, data.count)
     MenuItem menu[] = {
        BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
-       SYMBOLIC_ITEM(prefs.sixdots, NULL, NULL, "Text Style", textStyles),
-       SYMBOLIC_ITEM(prefs.metamode, NULL, NULL, "Meta Mode", metaModes),
-       BOOLEAN_ITEM(prefs.skpidlns, NULL, NULL, "Skip Identical Lines"),
-       BOOLEAN_ITEM(prefs.skpblnkwins, NULL, NULL, "Skip Blank Windows"),
-       SYMBOLIC_ITEM(prefs.skpblnkwinsmode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
-       BOOLEAN_ITEM(prefs.slidewin, NULL, NULL, "Sliding Window"),
-       BOOLEAN_ITEM(prefs.eager_slidewin, NULL, testSlidingWindow, "Eager Sliding Window"),
-       NUMERIC_ITEM(prefs.winovlp, changedWindowAttributes, NULL, "Window Overlap", 0, 20),
-       BOOLEAN_ITEM(prefs.csrvis, NULL, NULL, "Show Cursor"),
-       SYMBOLIC_ITEM(prefs.csrsize, NULL, testShowCursor, "Cursor Style", cursorStyles),
-       BOOLEAN_ITEM(prefs.csrblink, NULL, testShowCursor, "Blinking Cursor"),
-       TIMING_ITEM(prefs.csroncnt, NULL, testBlinkingCursor, "Cursor Visible Period"),
-       TIMING_ITEM(prefs.csroffcnt, NULL, testBlinkingCursor, "Cursor Invisible Period"),
-       BOOLEAN_ITEM(prefs.attrvis, NULL, NULL, "Show Attributes"),
-       BOOLEAN_ITEM(prefs.attrblink, NULL, testShowAttributes, "Blinking Attributes"),
-       TIMING_ITEM(prefs.attroncnt, NULL, testBlinkingAttributes, "Attributes Visible Period"),
-       TIMING_ITEM(prefs.attroffcnt, NULL, testBlinkingAttributes, "Attributes Invisible Period"),
-       BOOLEAN_ITEM(prefs.capblink, NULL, NULL, "Blinking Capitals"),
-       TIMING_ITEM(prefs.caponcnt, NULL, testBlinkingCapitals, "Capitals Visible Period"),
-       TIMING_ITEM(prefs.capoffcnt, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
+       SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, "Text Style", textStyles),
+       SYMBOLIC_ITEM(prefs.metaMode, NULL, NULL, "Meta Mode", metaModes),
+       BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, "Skip Identical Lines"),
+       BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, "Skip Blank Windows"),
+       SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
+       BOOLEAN_ITEM(prefs.slidingWindow, NULL, NULL, "Sliding Window"),
+       BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, "Eager Sliding Window"),
+       NUMERIC_ITEM(prefs.windowOverlap, changedWindowAttributes, NULL, "Window Overlap", 0, 20),
+       BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, "Show Cursor"),
+       SYMBOLIC_ITEM(prefs.cursorStyle, NULL, testShowCursor, "Cursor Style", cursorStyles),
+       BOOLEAN_ITEM(prefs.blinkingCursor, NULL, testShowCursor, "Blinking Cursor"),
+       TIMING_ITEM(prefs.cursorVisiblePeriod, NULL, testBlinkingCursor, "Cursor Visible Period"),
+       TIMING_ITEM(prefs.cursorInvisiblePeriod, NULL, testBlinkingCursor, "Cursor Invisible Period"),
+       BOOLEAN_ITEM(prefs.showAttributes, NULL, NULL, "Show Attributes"),
+       BOOLEAN_ITEM(prefs.blinkingAttributes, NULL, testShowAttributes, "Blinking Attributes"),
+       TIMING_ITEM(prefs.attributesVisiblePeriod, NULL, testBlinkingAttributes, "Attributes Visible Period"),
+       TIMING_ITEM(prefs.attributesInvisiblePeriod, NULL, testBlinkingAttributes, "Attributes Invisible Period"),
+       BOOLEAN_ITEM(prefs.blinkingCapitals, NULL, NULL, "Blinking Capitals"),
+       TIMING_ITEM(prefs.capitalsVisiblePeriod, NULL, testBlinkingCapitals, "Capitals Visible Period"),
+       TIMING_ITEM(prefs.capitalsInvisiblePeriod, NULL, testBlinkingCapitals, "Capitals Invisible Period"),
 #ifdef HAVE_LIBGPM
        BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, "Window Follows Pointer"),
        BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, "Pointer Follows Window"),
 #endif /* HAVE_LIBGPM */
-       BOOLEAN_ITEM(prefs.tunes, NULL, NULL, "Alert Tunes"),
-       SYMBOLIC_ITEM(prefs.tunedev, changedTuneDevice, testTunes, "Tune Device", tuneDevices),
+       BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, "Alert Tunes"),
+       SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, "Tune Device", tuneDevices),
+#ifdef ENABLE_PCM_TUNES
+       VOLUME_ITEM(prefs.pcmVolume, changedPcmVolume, testTunesPcm, "PCM Volume"),
+#endif /* ENABLE_PCM_TUNES */
 #ifdef ENABLE_MIDI_TUNES
-       TEXT_ITEM(prefs.midiinstr, NULL, testTunesMidi, "MIDI Instrument", midiInstrumentTable, midiInstrumentCount),
+       VOLUME_ITEM(prefs.midiVolume, changedMidiVolume, testTunesMidi, "MIDI Volume"),
+       TEXT_ITEM(prefs.midiInstrument, NULL, testTunesMidi, "MIDI Instrument", midiInstrumentTable, midiInstrumentCount),
 #endif /* ENABLE_MIDI_TUNES */
-       BOOLEAN_ITEM(prefs.dots, NULL, NULL, "Alert Dots"),
-       SYMBOLIC_ITEM(prefs.stcellstyle, NULL, NULL, "Status Cells Style", statusStyles),
+#ifdef ENABLE_FM_TUNES
+       VOLUME_ITEM(prefs.fmVolume, changedFmVolume, testTunesFm, "FM Volume"),
+#endif /* ENABLE_FM_TUNES */
+       BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
+       SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
        GLOB_ITEM(glob_textTable, changedTextTable, NULL, "Text Table"),
        GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, "Attributes Table"),
@@ -786,53 +1012,46 @@ updatePreferences (void) {
       /* Next we deal with the braille window position in the buffer.
        * This is intended for small displays... or long item descriptions 
        */
-      if (settingChanged)
-        {
-          settingChanged = 0;
-          /* make sure the updated value is visible */
-          if (lineLength-lineIndent > brl.x*brl.y)
-            lineIndent = settingIndent;
-        }
+      if (settingChanged) {
+        settingChanged = 0;
+        /* make sure the updated value is visible */
+        if (lineLength-lineIndent > brl.x*brl.y)
+          lineIndent = settingIndent;
+      }
 
       /* Then draw the braille window */
-      memset(brl.disp, 0, brl.x*brl.y);
-      {
-         int index;
-         for (index=0; index<MIN(brl.x*brl.y, lineLength-lineIndent); index++)
-            brl.disp[index] = textTable[line[lineIndent+index]];
-      }
-      braille->writeWindow(&brl);
-      delay(refreshInterval);
+      writeBrailleText(&brl, &line[lineIndent], lineLength-lineIndent);
+      drainBrailleOutput(&brl, refreshInterval);
 
       /* Now process any user interaction */
-      switch (key = readKey(CMDS_PREFS)) {
-        case CMD_MENU_FIRST_ITEM:
+      switch (key = getBrailleCommand(CMDS_PREFS)) {
         case CMD_TOP:
         case CMD_TOP_LEFT:
+        case VAL_PASSKEY+VPK_PAGE_UP:
+        case CMD_MENU_FIRST_ITEM:
           menuIndex = lineIndent = 0;
           break;
-        case CMD_MENU_LAST_ITEM:
         case CMD_BOT:
         case CMD_BOT_LEFT:
+        case VAL_PASSKEY+VPK_PAGE_DOWN:
+        case CMD_MENU_LAST_ITEM:
           menuIndex = menuSize - 1;
           lineIndent = 0;
           break;
-        case CMD_MENU_PREV_ITEM:
         case CMD_LNUP:
         case VAL_PASSKEY+VPK_CURSOR_UP:
+        case CMD_MENU_PREV_ITEM:
           do {
-            if (menuIndex == 0)
-              menuIndex = menuSize;
+            if (menuIndex == 0) menuIndex = menuSize;
             --menuIndex;
           } while (menu[menuIndex].test && !menu[menuIndex].test());
           lineIndent = 0;
           break;
-        case CMD_MENU_NEXT_ITEM:
         case CMD_LNDN:
         case VAL_PASSKEY+VPK_CURSOR_DOWN:
+        case CMD_MENU_NEXT_ITEM:
           do {
-            if (++menuIndex == menuSize)
-              menuIndex = 0;
+            if (++menuIndex == menuSize) menuIndex = 0;
           } while (menu[menuIndex].test && !menu[menuIndex].test());
           lineIndent = 0;
           break;
@@ -848,30 +1067,46 @@ updatePreferences (void) {
           else
             playTune(&tune_bounce);
           break;
-        case CMD_MENU_PREV_SETTING:
         case CMD_WINUP:
         case CMD_CHRLT:
         case VAL_PASSKEY+VPK_CURSOR_LEFT:
-          if ((*item->setting)-- <= item->minimum)
-            *item->setting = item->maximum;
-          settingChanged = 1;
+        case CMD_MENU_PREV_SETTING: {
+          int count = item->maximum - item->minimum + 1;
+          do {
+            if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
+            if (!--count) break;
+          } while (item->changed && !item->changed());
+          if (count)
+            settingChanged = 1;
+          else
+            playTune(&tune_bad_command);
           break;
-        case CMD_MENU_NEXT_SETTING:
+        }
         case CMD_WINDN:
         case CMD_CHRRT:
         case VAL_PASSKEY+VPK_CURSOR_RIGHT:
         case CMD_HOME:
         case VAL_PASSKEY+VPK_RETURN:
-          if ((*item->setting)++ >= item->maximum)
-            *item->setting = item->minimum;
-          settingChanged = 1;
+        case CMD_MENU_NEXT_SETTING: {
+          int count = item->maximum - item->minimum + 1;
+          do {
+            if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
+            if (!--count) break;
+          } while (item->changed && !item->changed());
+          if (count)
+            settingChanged = 1;
+          else
+            playTune(&tune_bad_command);
           break;
-        case CMD_SAY:
+        }
+#ifdef ENABLE_SPEECH_SUPPORT
+        case CMD_SAY_LINE:
           speech->say(line, lineLength);
           break;
         case CMD_MUTE:
           speech->mute();
           break;
+#endif /* ENABLE_SPEECH_SUPPORT */
         case CMD_HELP:
           /* This is quick and dirty... Something more intelligent 
            * and friendly need to be done here...
@@ -892,19 +1127,25 @@ updatePreferences (void) {
           goto exitMenu;
         default:
           if (key >= CR_ROUTE && key < CR_ROUTE+brl.x) {
-             /* Why not setting a value with routing keys... */
-             key -= CR_ROUTE;
-             if (item->names) {
-                *item->setting = key % (item->maximum + 1);
-             } else {
-                *item->setting = key;
-                if (*item->setting > item->maximum)
-                   *item->setting = item->maximum;
-                if (*item->setting < item->minimum)
-                   *item->setting = item->minimum;
-             }
-             settingChanged = 1;
-             break;
+            /* Why not support setting a value with routing keys. */
+            unsigned char oldSetting = *item->setting;
+            key -= CR_ROUTE;
+            if (item->names) {
+              *item->setting = key % (item->maximum + 1);
+            } else {
+              *item->setting = key;
+              if (*item->setting > item->maximum) *item->setting = item->maximum;
+              if (*item->setting < item->minimum) *item->setting = item->minimum;
+            }
+            if (*item->setting != oldSetting) {
+              if (item->changed && !item->changed()) {
+                *item->setting = oldSetting;
+                playTune(&tune_bad_command);
+              } else {
+                settingChanged = 1;
+              }
+            }
+            break;
           }
 
           /* For any other keystroke, we exit */
@@ -923,10 +1164,6 @@ updatePreferences (void) {
 
           return;
       }
-
-      if (settingChanged)
-        if (item->changed)
-          item->changed();
     }
   }
 }
@@ -1054,9 +1291,11 @@ handleOption (const int option) {
     case 'q':                /* quiet */
       opt_quiet = 1;
       break;
+#ifdef ENABLE_SPEECH_SUPPORT
     case 's':                        /* name of speech driver */
       opt_speechDriver = optarg;
       break;
+#endif /* ENABLE_SPEECH_SUPPORT */
     case 't':                /* text translation table file name */
       opt_textTable = optarg;
       break;
@@ -1089,9 +1328,11 @@ handleOption (const int option) {
         refreshInterval = value * 10;
       break;
     }
+#ifdef ENABLE_SPEECH_SUPPORT
     case 'S':                        /* parameter to speech driver */
       extendParameters(&opt_speechParameters, optarg);
       break;
+#endif /* ENABLE_SPEECH_SUPPORT */
     case 'X':                        /* parameter to speech driver */
       extendParameters(&opt_screenParameters, optarg);
       break;
@@ -1103,6 +1344,7 @@ void
 startup(int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, NULL);
+  prepareBootParameters();
 
   /* Set logging levels. */
   if (opt_standardError)
@@ -1157,18 +1399,20 @@ startup(int argc, char *argv[]) {
     int optional = opt_configurationFile == NULL;
     ensureOptionSetting(&opt_configurationFile,
                         CONFIGURATION_DIRECTORY "/" DEFAULT_CONFIGURATION_FILE,
-                        NULL, "BRLTTY_CONFIGURATION_FILE");
+                        NULL, "BRLTTY_CONFIGURATION_FILE", -1);
     processConfigurationFile(optionTable, optionCount, opt_configurationFile, optional);
   }
-  ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE");
-  ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE");
-  ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE");
+  ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE", -1);
+  ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE", 2);
+  ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE", -1);
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  ensureOptionSetting(&opt_contractionTable, NULL, cfg_contractionTable, "BRLTTY_CONTRACTION_TABLE");
+  ensureOptionSetting(&opt_contractionTable, NULL, cfg_contractionTable, "BRLTTY_CONTRACTION_TABLE", -1);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE");
-  ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER");
-  ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER");
+  ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
+  ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER", 0);
+#ifdef ENABLE_SPEECH_SUPPORT
+  ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER", -1);
+#endif /* ENABLE_SPEECH_SUPPORT */
 
   if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
   if (*opt_brailleDevice == 0) {
@@ -1176,9 +1420,17 @@ startup(int argc, char *argv[]) {
     fprintf(stderr, "Use -d to specify one.\n");
     exit(4);
   }
+  if (*opt_brailleDevice != '/') {
+    const char *directory = DEVICE_DIRECTORY;
+    char buffer[strlen(directory) + 1 + strlen(opt_brailleDevice) + 1];
+    sprintf(buffer, "%s/%s", directory, opt_brailleDevice);
+    opt_brailleDevice = strdupWrapper(buffer);
+  }
 
   getBrailleDriver();
+#ifdef ENABLE_SPEECH_SUPPORT
   getSpeechDriver();
+#endif /* ENABLE_SPEECH_SUPPORT */
   processParameters(&screenParameters, getScreenParameters(), "screen driver",
                     opt_screenParameters, cfg_screenParameters, "BRLTTY_SCREEN_PARAMETERS");
 
@@ -1200,11 +1452,12 @@ startup(int argc, char *argv[]) {
     chdir(backup_dir);                /* home directory not found, use backup */
   }
 
-  if (opt_textTable)
+  if (opt_textTable) {
+    fixTablePath(&opt_textTable, TEXT_TABLE_PREFIX);
     loadTextTable(opt_textTable);
-  else {
+  } else {
     opt_textTable = TEXT_TABLE;
-    reverseTable(textTable, untextTable);
+    reverseTable(&textTable, &untextTable);
   }
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
@@ -1212,9 +1465,9 @@ startup(int argc, char *argv[]) {
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
-  if (opt_attributesTable)
+  if (opt_attributesTable) {
     loadAttributesTable(opt_attributesTable);
-  else
+  } else
     opt_attributesTable = ATTRIBUTES_TABLE;
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
@@ -1239,12 +1492,13 @@ startup(int argc, char *argv[]) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {
-    char buffer[0X100];
+    char buffer[PATH_MAX+1];
     char *path = getcwd(buffer, sizeof(buffer));
     LogPrint(LOG_INFO, "Working Directory: %s",
              path? path: "path-too-long");
   }
 
+  LogPrint(LOG_INFO, "Configuration File: %s", opt_configurationFile);
   LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
   LogPrint(LOG_INFO, "Help Page: %s[%d]", brailleDriver->helpFile, getHelpPageNumber());
   LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
@@ -1253,62 +1507,69 @@ startup(int argc, char *argv[]) {
   LogPrint(LOG_INFO, "Braille Driver: %s (%s)",
            opt_brailleDriver, brailleDriver->name);
   logParameters(brailleDriver->parameters, brailleParameters, "Braille");
+#ifdef ENABLE_SPEECH_SUPPORT
   LogPrint(LOG_INFO, "Speech Driver: %s (%s)",
            opt_speechDriver, speechDriver->name);
   logParameters(speechDriver->parameters, speechParameters, "Speech");
+#endif /* ENABLE_SPEECH_SUPPORT */
   logParameters(getScreenParameters(), screenParameters, "Screen");
 
   /*
    * Give braille and speech libraries a chance to introduce themselves.
    */
   brailleDriver->identify();
+#ifdef ENABLE_SPEECH_SUPPORT
   speechDriver->identify();
+#endif /* ENABLE_SPEECH_SUPPORT */
 
-  if (opt_version)
-    exit(0);
+  if (opt_version) exit(0);
 
   /* Load preferences file */
   if (!loadPreferences(0)) {
     memset(&prefs, 0, sizeof(prefs));
 
-    prefs.magicnum[0] = PREFS_MAGICNUM&0XFF;
-    prefs.magicnum[1] = PREFS_MAGICNUM>>8;
+    prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
+    prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
+    prefs.version = 1;
 
-    prefs.csrvis = DEFAULT_VISIBLE_CURSOR;
-    prefs.csrsize = DEFAULT_BLOCK_CURSOR;
-    prefs.csrblink = DEFAULT_BLINKING_CURSOR;
-    prefs.csroncnt = DEFAULT_CURSOR_VISIBLE_PERIOD;
-    prefs.csroffcnt = DEFAULT_CURSOR_INVISIBLE_PERIOD;
+    prefs.showCursor = DEFAULT_SHOW_CURSOR;
+    prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
+    prefs.blinkingCursor = DEFAULT_BLINKING_CURSOR;
+    prefs.cursorVisiblePeriod = DEFAULT_CURSOR_VISIBLE_PERIOD;
+    prefs.cursorInvisiblePeriod = DEFAULT_CURSOR_INVISIBLE_PERIOD;
 
-    prefs.attrvis = DEFAULT_VISIBLE_ATTRIBUTES;
-    prefs.attrblink = DEFAULT_BLINKING_ATTRIBUTES;
-    prefs.attroncnt = DEFAULT_ATTRIBUTES_VISIBLE_PERIOD;
-    prefs.attroffcnt = DEFAULT_ATTRIBUTES_INVISIBLE_PERIOD;
+    prefs.showAttributes = DEFAULT_SHOW_ATTRIBUTES;
+    prefs.blinkingAttributes = DEFAULT_BLINKING_ATTRIBUTES;
+    prefs.attributesVisiblePeriod = DEFAULT_ATTRIBUTES_VISIBLE_PERIOD;
+    prefs.attributesInvisiblePeriod = DEFAULT_ATTRIBUTES_INVISIBLE_PERIOD;
 
-    prefs.capblink = DEFAULT_BLINKING_CAPITALS;
-    prefs.caponcnt = DEFAULT_CAPITALS_VISIBLE_PERIOD;
-    prefs.capoffcnt = DEFAULT_CAPITALS_INVISIBLE_PERIOD;
+    prefs.blinkingCapitals = DEFAULT_BLINKING_CAPITALS;
+    prefs.capitalsVisiblePeriod = DEFAULT_CAPITALS_VISIBLE_PERIOD;
+    prefs.capitalsInvisiblePeriod = DEFAULT_CAPITALS_INVISIBLE_PERIOD;
 
     prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
     prefs.pointerFollowsWindow = DEFAULT_POINTER_FOLLOWS_WINDOW;
 
-    prefs.sixdots = DEFAULT_6DOT_BRAILLE;
-    prefs.metamode = DEFAULT_META_MODE;
+    prefs.textStyle = DEFAULT_TEXT_STYLE;
+    prefs.metaMode = DEFAULT_META_MODE;
 
-    prefs.winovlp = DEFAULT_WINDOW_OVERLAP;
-    prefs.slidewin = DEFAULT_SLIDING_WINDOW;
-    prefs.eager_slidewin = DEFAULT_EAGER_SLIDING_WINDOW;
+    prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
+    prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;
+    prefs.eagerSlidingWindow = DEFAULT_EAGER_SLIDING_WINDOW;
 
-    prefs.skpidlns = DEFAULT_SKIP_IDENTICAL_LINES;
-    prefs.skpblnkwins = DEFAULT_SKIP_BLANK_WINDOWS;
-    prefs.skpblnkwinsmode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
+    prefs.skipIdenticalLines = DEFAULT_SKIP_IDENTICAL_LINES;
+    prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
+    prefs.blankWindowsSkipMode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
 
-    prefs.tunes = DEFAULT_ALERT_TUNES;
-    prefs.tunedev = getDefaultTuneDevice();
-    prefs.midiinstr = 0;
-    prefs.dots = DEFAULT_ALERT_DOTS;
+    prefs.alertDots = DEFAULT_ALERT_DOTS;
+    prefs.alertTunes = DEFAULT_ALERT_TUNES;
+    prefs.tuneDevice = getDefaultTuneDevice();
+    prefs.pcmVolume = DEFAULT_PCM_VOLUME;
+    prefs.midiVolume = DEFAULT_MIDI_VOLUME;
+    prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
+    prefs.fmVolume = DEFAULT_FM_VOLUME;
 
-    prefs.stcellstyle = brailleDriver->statusStyle;
+    prefs.statusStyle = brailleDriver->statusStyle;
   }
   changedTuneDevice();
   atexit(exitTunes);
@@ -1358,9 +1619,11 @@ startup(int argc, char *argv[]) {
   startBrailleDriver();
   atexit(exitBrailleDriver);
 
+#ifdef ENABLE_SPEECH_SUPPORT
   /* Initialise speech */
   startSpeechDriver();
   atexit(exitSpeechDriver);
+#endif /* ENABLE_SPEECH_SUPPORT */
 
   /* Initialize help screen */
   if (!initializeHelpScreen(brailleDriver->helpFile))

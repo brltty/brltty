@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -40,7 +40,9 @@
 #include "cut.h"
 #include "scr.h"
 #include "brl.h"
+#ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
+#endif /* ENABLE_SPEECH_SUPPORT */
 #include "brltty.h"
 #include "defaults.h"
 
@@ -51,7 +53,7 @@ int messageDelay = DEFAULT_MESSAGE_DELAY;
  * Misc param variables
  */
 Preferences prefs;                /* environment (i.e. global) parameters */
-brldim brl;                        /* For the Braille routines */
+BrailleDisplay brl;                        /* For the Braille routines */
 short fwinshift;                /* Full window horizontal distance */
 short hwinshift;                /* Half window horizontal distance */
 short vwinshift;                /* Window vertical distance */
@@ -149,13 +151,13 @@ switchto (unsigned int scrno) {
 void
 clearStatusCells (void) {
    memset(statusCells, 0, sizeof(statusCells));
-   braille->writeStatus(statusCells);
+   braille->writeStatus(&brl, statusCells);
 }
 
 static void
 setStatusCells (void) {
    memset(statusCells, 0, sizeof(statusCells));
-   switch (prefs.stcellstyle) {
+   switch (prefs.statusStyle) {
       case ST_AlvaStyle:
          if ((dispmd & HELP_SCRN) == HELP_SCRN) {
             statusCells[0] = textTable['h'];
@@ -185,13 +187,13 @@ setStatusCells (void) {
          statusCells[3] = (portraitDigits[p->winy % 10] << 4) |
                           portraitDigits[scr.posy % 10];
          statusCells[4] = ((dispmd & FROZ_SCRN) == FROZ_SCRN? 1: 0) |
-                          (prefs.csrvis << 1) |
+                          (prefs.showCursor << 1) |
                           (p->showAttributes << 2) |
-                          (prefs.csrsize << 3) |
-                          (prefs.tunes << 4) |
-                          (prefs.csrblink << 5) |
+                          (prefs.cursorStyle << 3) |
+                          (prefs.alertTunes << 4) |
+                          (prefs.blinkingCursor << 5) |
                           (p->trackCursor << 6) |
-                          (prefs.slidewin << 7);
+                          (prefs.slidingWindow << 7);
          break;
       case ST_PB80Style:
          statusCells[0] = (portraitDigits[(p->winy+1) % 10] << 4) |
@@ -206,19 +208,19 @@ setStatusCells (void) {
          statusCells[STAT_SCRNUM] = scr.no;
          statusCells[STAT_FREEZE] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
          statusCells[STAT_DISPMD] = p->showAttributes;
-         statusCells[STAT_SIXDOTS] = prefs.sixdots;
-         statusCells[STAT_SLIDEWIN] = prefs.slidewin;
-         statusCells[STAT_SKPIDLNS] = prefs.skpidlns;
-         statusCells[STAT_SKPBLNKWINS] = prefs.skpblnkwins;
-         statusCells[STAT_CSRVIS] = prefs.csrvis;
+         statusCells[STAT_SIXDOTS] = prefs.textStyle;
+         statusCells[STAT_SLIDEWIN] = prefs.slidingWindow;
+         statusCells[STAT_SKPIDLNS] = prefs.skipIdenticalLines;
+         statusCells[STAT_SKPBLNKWINS] = prefs.skipBlankWindows;
+         statusCells[STAT_CSRVIS] = prefs.showCursor;
          statusCells[STAT_CSRHIDE] = p->hideCursor;
          statusCells[STAT_CSRTRK] = p->trackCursor;
-         statusCells[STAT_CSRSIZE] = prefs.csrsize;
-         statusCells[STAT_CSRBLINK] = prefs.csrblink;
-         statusCells[STAT_ATTRVIS] = prefs.attrvis;
-         statusCells[STAT_ATTRBLINK] = prefs.attrblink;
-         statusCells[STAT_CAPBLINK] = prefs.capblink;
-         statusCells[STAT_TUNES] = prefs.tunes;
+         statusCells[STAT_CSRSIZE] = prefs.cursorStyle;
+         statusCells[STAT_CSRBLINK] = prefs.blinkingCursor;
+         statusCells[STAT_ATTRVIS] = prefs.showAttributes;
+         statusCells[STAT_ATTRBLINK] = prefs.blinkingAttributes;
+         statusCells[STAT_CAPBLINK] = prefs.blinkingCapitals;
+         statusCells[STAT_TUNES] = prefs.alertTunes;
          statusCells[STAT_HELP] = (dispmd & HELP_SCRN) != 0;
          statusCells[STAT_INFO] = infmode;
          break;
@@ -242,7 +244,7 @@ setStatusCells (void) {
       default:
          break;
    }
-   braille->writeStatus(statusCells);
+   braille->writeStatus(&brl, statusCells);
 }
 
 void
@@ -254,61 +256,63 @@ setStatusText (const char *text) {
       if (!character) break;
       statusCells[i] = textTable[character];
    }
-   braille->writeStatus(statusCells);
+   braille->writeStatus(&brl, statusCells);
 }
 
 static void
-showInfo (void)
-{
+showInfo (void) {
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
-  unsigned char infbuf[22];
+  unsigned char status[22];
   setStatusText("info");
   if (brl.x*brl.y >= 21) {
-    sprintf(infbuf, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
+    sprintf(status, "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
             p->winx, p->winy, scr.posx, scr.posy, curscr, 
             p->trackCursor? 't': ' ',
-            prefs.csrvis? (prefs.csrblink? 'B': 'v'):
-                        (prefs.csrblink? 'b': ' '),
+            prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                              (prefs.blinkingCursor? 'b': ' '),
             p->showAttributes? 'a': 't',
             ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f': ' ',
-            prefs.sixdots? '6': '8',
-            prefs.capblink? 'B': ' ');
-    message(infbuf, MSG_SILENT|MSG_NODELAY);
+            prefs.textStyle? '6': '8',
+            prefs.blinkingCapitals? 'B': ' ');
+    writeBrailleString(&brl, status);
   } else {
     int i;
-    sprintf(infbuf, "xxxxx %02d %c%c%c%c%c%c     ",
+    sprintf(status, "xxxxx %02d %c%c%c%c%c%c     ",
             curscr,
             p->trackCursor? 't': ' ',
-            prefs.csrvis? (prefs.csrblink? 'B' : 'v'):
-                        (prefs.csrblink? 'b': ' '),
+            prefs.showCursor? (prefs.blinkingCursor? 'B' : 'v'):
+                              (prefs.blinkingCursor? 'b': ' '),
             p->showAttributes? 'a': 't',
             ((dispmd & FROZ_SCRN) == FROZ_SCRN) ?'f': ' ',
-            prefs.sixdots? '6': '8',
-            prefs.capblink? 'B': ' ');
-    infbuf[0] = portraitDigits[(p->winx / 10) % 10] << 4 |
+            prefs.textStyle? '6': '8',
+            prefs.blinkingCapitals? 'B': ' ');
+    if (braille->writeVisual) {
+      memcpy(brl.buffer, status, brl.x*brl.y);
+      braille->writeVisual(&brl);
+    }
+
+    status[0] = portraitDigits[(p->winx / 10) % 10] << 4 |
                 portraitDigits[(scr.posx / 10) % 10];
-    infbuf[1] = portraitDigits[p->winx % 10] << 4 | portraitDigits[scr.posx % 10];
-    infbuf[2] = portraitDigits[(p->winy / 10) % 10] << 4 |
+    status[1] = portraitDigits[p->winx % 10] << 4 | portraitDigits[scr.posx % 10];
+    status[2] = portraitDigits[(p->winy / 10) % 10] << 4 |
                 portraitDigits[(scr.posy / 10) % 10];
-    infbuf[3] = portraitDigits[p->winy % 10] << 4 | portraitDigits[scr.posy % 10];
-    infbuf[4] = (((dispmd & FROZ_SCRN) == FROZ_SCRN)? B1: 0) |
-                (p->showAttributes? B2: 0) |
-                (prefs.tunes?       B3: 0) |
-                (prefs.csrvis?      B4: 0) |
-                (prefs.csrsize?     B5: 0) |
-                (prefs.csrblink?    B6: 0) |
-                (p->trackCursor?    B7: 0) |
-                (prefs.slidewin?    B8: 0);
+    status[3] = portraitDigits[p->winy % 10] << 4 | portraitDigits[scr.posy % 10];
+    status[4] = (((dispmd & FROZ_SCRN) == FROZ_SCRN)? B1: 0) |
+                (p->showAttributes?    B2: 0) |
+                (prefs.alertTunes?     B3: 0) |
+                (prefs.showCursor?     B4: 0) |
+                (prefs.cursorStyle?    B5: 0) |
+                (prefs.blinkingCursor? B6: 0) |
+                (p->trackCursor?       B7: 0) |
+                (prefs.slidingWindow?  B8: 0);
 
     /* We have to do the Braille translation ourselves, since
      * we don't want the first five characters translated ...
      */
-    for (i=5; infbuf[i]; i++)
-      infbuf[i] = textTable[infbuf[i]];
-
-    memcpy(brl.disp, infbuf, brl.x*brl.y);
+    for (i=5; status[i]; i++) status[i] = textTable[status[i]];
+    memcpy(brl.buffer, status, brl.x*brl.y);
     braille->writeWindow(&brl);
   }
 }
@@ -345,22 +349,28 @@ exitScreenParameters (void) {
 
 static void
 terminateProgram (int quickly) {
-  int silently = quickly || (speech == &noSpeech);
+  int flags = MSG_NODELAY;
+#ifdef ENABLE_SPEECH_SUPPORT
+  int silently = quickly;
+  if (speech == &noSpeech) silently = 1;
+  if (silently) flags |= MSG_SILENT;
+#endif /* ENABLE_SPEECH_SUPPORT */
   clearStatusCells();
-  message("BRLTTY exiting.", 
-          MSG_NODELAY | (silently? MSG_SILENT: 0));
+  message("BRLTTY exiting.", flags);
+#ifdef ENABLE_SPEECH_SUPPORT
   if (!silently) {
     int awaitSilence = speech->isSpeaking();
     int i;
     for (i=0; i<messageDelay; i+=refreshInterval) {
       delay(refreshInterval);
-      if (braille->read(CMDS_MESSAGE) != EOF) break;
+      if (readBrailleCommand(&brl, CMDS_MESSAGE) != EOF) break;
       if (awaitSilence) {
         speech->doTrack();
         if (!speech->isSpeaking()) break;
       }
     }
   }
+#endif /* ENABLE_SPEECH_SUPPORT */
   exit(0);
 }
 
@@ -423,9 +433,9 @@ trackCursor (int place) {
         (scr.posy < p->winy) || (scr.posy >= (p->winy + brl.y)))
       placeWindowHorizontally(scr.posx);
 
-  if (prefs.slidewin) {
+  if (prefs.slidingWindow) {
     int reset = brl.x * 3 / 10;
-    int trigger = prefs.eager_slidewin? brl.x*3/20: 0;
+    int trigger = prefs.eagerSlidingWindow? brl.x*3/20: 0;
     if (scr.posx < (p->winx + trigger))
       p->winx = MAX(scr.posx-reset, 0);
     else if (scr.posx >= (p->winx + brl.x - trigger))
@@ -439,12 +449,41 @@ trackCursor (int place) {
   slideWindowVertically(scr.posy);
 }
 
-static int speaking_start_line = 0;
+#ifdef ENABLE_SPEECH_SUPPORT
+static int speechTracking = 0;
+static int speechScreen = -1;
+static int speechLine = 0;
+static int speechIndex = -1;
+
 static void
-trackSpeech (int inx) {
-  placeWindowHorizontally(inx % scr.cols);
-  slideWindowVertically((inx / scr.cols) + speaking_start_line);
+trackSpeech (int index) {
+  placeWindowHorizontally(index % scr.cols);
+  slideWindowVertically((index / scr.cols) + speechLine);
 }
+
+static void
+sayLines (int line, int count, int track) {
+  /* OK heres a crazy idea: why not send the attributes with the
+   * text, in case some inflection or marking can be added...! The
+   * speech driver's say function will receive a buffer of text
+   * and a length, but in reality the buffer will contain twice
+   * len bytes: the text followed by the video attribs data.
+   */
+  int length = scr.cols * count;
+  unsigned char buffer[length * 2];
+
+  readScreen(0, line, scr.cols, count, buffer, SCR_TEXT);
+  if(speech->express) {
+    readScreen(0, line, scr.cols, count, buffer+length, SCR_ATTRIB);
+    speech->express(buffer, length);
+  } else
+    speech->say(buffer, length);
+
+  speechTracking = track;
+  speechScreen = scr.no;
+  speechLine = line;
+}
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 static int
 upDifferentLine (short mode) {
@@ -457,7 +496,7 @@ upDifferentLine (short mode) {
       do {
          readScreen(0, --p->winy, scr.cols, 1, buffer2, mode);
          if (memcmp(buffer1, buffer2, scr.cols) ||
-             (mode==SCR_TEXT && prefs.csrvis && p->winy==scr.posy))
+             (mode==SCR_TEXT && prefs.showCursor && p->winy==scr.posy))
             return 1;
 
          /* lines are identical */
@@ -486,7 +525,7 @@ downDifferentLine (short mode) {
       do {
          readScreen(0, ++p->winy, scr.cols, 1, buffer2, mode);
          if (memcmp(buffer1, buffer2, scr.cols) ||
-             (mode==SCR_TEXT && prefs.csrvis && p->winy==scr.posy))
+             (mode==SCR_TEXT && prefs.showCursor && p->winy==scr.posy))
             return 1;
 
          /* lines are identical */
@@ -522,7 +561,7 @@ downOneLine (short mode) {
 
 static void
 upLine (short mode) {
-   if (prefs.skpidlns)
+   if (prefs.skipIdenticalLines)
       upDifferentLine(mode);
    else
       upOneLine(mode);
@@ -530,7 +569,7 @@ upLine (short mode) {
 
 static void
 downLine (short mode) {
-   if (prefs.skpidlns)
+   if (prefs.skipIdenticalLines)
       downDifferentLine(mode);
    else
       downOneLine(mode);
@@ -550,11 +589,11 @@ overlayAttributes (const unsigned char *attributes, int width, int height) {
         case 0x30: /* black on cyan */
           break;
         case 0x70: /* black on light-gray */
-          brl.disp[row*brl.x + column] |= (B7 | B8);
+          brl.buffer[row*brl.x + column] |= (B7 | B8);
           break;
         case 0x0F: /* white on black */
         default:
-          brl.disp[row*brl.x + column] |= (B8);
+          brl.buffer[row*brl.x + column] |= (B8);
           break;
       }
     }
@@ -598,7 +637,7 @@ insertCharacter (unsigned char character, int flags) {
       character &= 0X9F;
   }
   if (flags & VPC_META) {
-    if (prefs.metamode)
+    if (prefs.metaMode)
       character |= 0X80;
     else
       if (!insertKey(KEY_ESCAPE)) return 0;
@@ -682,8 +721,6 @@ main (int argc, char *argv[]) {
   short attron = 0;
   short attrcntr = 1;
   short oldwinx, oldwiny;
-  short speaking_scrno = -1, speaking_prev_inx = -1,
-    speak_dont_track = 0;
 
 #ifdef INIT_PATH
   if (getpid() == 1) {
@@ -716,6 +753,8 @@ main (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "Starting.");
   atexit(exitLog);
 
+  suppressTuneDeviceOpenErrors();
+
   /* Initialize global data assumed to be ready by the termination handler. */
   *p = initialScreenState;
   scrparam[0] = p;
@@ -725,7 +764,9 @@ main (int argc, char *argv[]) {
   atexit(exitScreenParameters);
   
   initializeBraille();
+#ifdef ENABLE_SPEECH_SUPPORT
   initializeSpeech();
+#endif /* ENABLE_SPEECH_SUPPORT */
 
   /* We install SIGPIPE handler before startup() so that drivers which
    * use pipes can't cause program termination (the call to message() in
@@ -774,9 +815,10 @@ main (int argc, char *argv[]) {
     /*
      * Process any Braille input 
      */
-    while ((keypress = braille->read(infmode? CMDS_STATUS:
-                                     ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
-                                     CMDS_SCREEN)) != EOF) {
+    while ((keypress = readBrailleCommand(&brl,
+                                          infmode? CMDS_STATUS:
+                                          ((dispmd & HELP_SCRN) == HELP_SCRN)? CMDS_HELP:
+                                          CMDS_SCREEN)) != EOF) {
       int oldmotx = p->winx;
       int oldmoty = p->winy;
       LogPrint(LOG_DEBUG, "Command: %5.5X", keypress);
@@ -795,11 +837,6 @@ main (int argc, char *argv[]) {
             playTune(&tune_braille_off);
             LogPrint(LOG_INFO, "Reinitializing braille driver.");
             startBrailleDriver();
-            break;
-          case CMD_RESTARTSPEECH:
-            stopSpeechDriver();
-            LogPrint(LOG_INFO, "Reinitializing speech driver.");
-            startSpeechDriver();
             break;
           case CMD_TOP:
             p->winy = 0;
@@ -826,14 +863,14 @@ main (int argc, char *argv[]) {
             p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
             break;
           case CMD_FWINLT:
-            if (!(prefs.skpblnkwins && (prefs.skpblnkwinsmode == sbwAll))) {
+            if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
               if (p->winx > 0) {
                 p->winx = MAX(p->winx-fwinshift, 0);
-                if (prefs.skpblnkwins) {
-                  if (prefs.skpblnkwinsmode == sbwEndOfLine)
+                if (prefs.skipBlankWindows) {
+                  if (prefs.blankWindowsSkipMode == sbwEndOfLine)
                     goto skipEndOfLine;
-                  if (!prefs.csrvis ||
+                  if (!prefs.showCursor ||
                       (scr.posy != p->winy) ||
                       (scr.posx >= (p->winx + brl.x))) {
                     int charCount = MIN(scr.cols, p->winx+brl.x);
@@ -859,14 +896,14 @@ main (int argc, char *argv[]) {
               p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
               upLine(SCR_TEXT);
             skipEndOfLine:
-              if (prefs.skpblnkwins && (prefs.skpblnkwinsmode == sbwEndOfLine)) {
+              if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
                 int charIndex;
                 char buffer[scr.cols];
                 readScreen(0, p->winy, scr.cols, 1, buffer, SCR_TEXT);
                 for (charIndex=scr.cols-1; charIndex>=0; --charIndex)
                   if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                     break;
-                if (prefs.csrvis && (scr.posy == p->winy))
+                if (prefs.showCursor && (scr.posy == p->winy))
                   charIndex = MAX(charIndex, scr.posx);
                 charIndex = MAX(charIndex, 0);
                 if (charIndex < p->winx)
@@ -901,12 +938,12 @@ main (int argc, char *argv[]) {
               for (charIndex=(charCount-1); charIndex>=0; charIndex--)
                 if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                   break;
-              if (prefs.csrvis &&
+              if (prefs.showCursor &&
                   (scr.posy == p->winy) &&
                   (scr.posx < (p->winx + charCount)))
                 charIndex = MAX(charIndex, scr.posx-p->winx);
               if (charIndex >= 0) {
-                if (prefs.slidewin)
+                if (prefs.slidingWindow)
                   p->winx = MAX(p->winx+charIndex-brl.x+1, 0);
                 break;
               }
@@ -917,7 +954,7 @@ main (int argc, char *argv[]) {
             upLine(SCR_TEXT);
             break;
           case CMD_PRDIFLN:
-            if (prefs.skpidlns)
+            if (prefs.skipIdenticalLines)
               upOneLine(SCR_TEXT);
             else
               upDifferentLine(SCR_TEXT);
@@ -926,13 +963,13 @@ main (int argc, char *argv[]) {
             upDifferentLine(SCR_ATTRIB);
             break;
           case CMD_FWINRT:
-            if (!(prefs.skpblnkwins && (prefs.skpblnkwinsmode == sbwAll))) {
+            if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
               int rwinshift = getRightShift();
               if (p->winx < (scr.cols - rwinshift)) {
                 p->winx += rwinshift;
-                if (prefs.skpblnkwins) {
-                  if (!prefs.csrvis ||
+                if (prefs.skipBlankWindows) {
+                  if (!prefs.showCursor ||
                       (scr.posy != p->winy) ||
                       (scr.posx < p->winx)) {
                     int charCount = scr.cols - p->winx;
@@ -987,12 +1024,12 @@ main (int argc, char *argv[]) {
               for (charIndex=0; charIndex<charCount; charIndex++)
                 if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                   break;
-              if (prefs.csrvis &&
+              if (prefs.showCursor &&
                   (scr.posy == p->winy) &&
                   (scr.posx >= p->winx))
                 charIndex = MIN(charIndex, scr.posx-p->winx);
               if (charIndex < charCount) {
-                if (prefs.slidewin)
+                if (prefs.slidingWindow)
                   p->winx = MIN(p->winx+charIndex, scr.cols-offr);
                 break;
               }
@@ -1003,7 +1040,7 @@ main (int argc, char *argv[]) {
             downLine(SCR_TEXT);
             break;
           case CMD_NXDIFLN:
-            if (prefs.skpidlns)
+            if (prefs.skipIdenticalLines)
               downOneLine(SCR_TEXT);
             else
               downDifferentLine(SCR_TEXT);
@@ -1126,13 +1163,6 @@ main (int argc, char *argv[]) {
             p->winx = p->motx;
             p->winy = p->moty;
             break;
-          case CMD_SPKHOME:
-            if(scr.no == speaking_scrno) {
-              trackSpeech(speech->getTrack());
-            } else {
-              playTune(&tune_bad_command);
-            }
-            break;
           case CMD_LNBEG:
             if (p->winx)
               p->winx = 0;
@@ -1175,7 +1205,7 @@ main (int argc, char *argv[]) {
           case CMD_CSRVIS:
             /* toggles the preferences option that decides whether cursor
                is shown at all */
-            TOGGLEPLAY ( TOGGLE(prefs.csrvis) );
+            TOGGLEPLAY ( TOGGLE(prefs.showCursor) );
             break;
           case CMD_CSRHIDE:
             /* This is for briefly hiding the cursor */
@@ -1183,26 +1213,27 @@ main (int argc, char *argv[]) {
             /* no tune */
             break;
           case CMD_ATTRVIS:
-            TOGGLEPLAY ( TOGGLE(prefs.attrvis) );
+            TOGGLEPLAY ( TOGGLE(prefs.showAttributes) );
             break;
           case CMD_CSRBLINK:
             csron = 1;
-            TOGGLEPLAY ( TOGGLE(prefs.csrblink) );
-            if (prefs.csrblink)
-              {
-                csrcntr = prefs.csroncnt;
-                attron = 1;
-                attrcntr = prefs.attroncnt;
-                capon = 0;
-                capcntr = prefs.capoffcnt;
-              }
+            TOGGLEPLAY ( TOGGLE(prefs.blinkingCursor) );
+            if (prefs.blinkingCursor) {
+              csrcntr = prefs.cursorVisiblePeriod;
+              attron = 1;
+              attrcntr = prefs.attributesVisiblePeriod;
+              capon = 0;
+              capcntr = prefs.capitalsInvisiblePeriod;
+            }
             break;
           case CMD_CSRTRK:
             TOGGLE(p->trackCursor);
             if (p->trackCursor) {
-              if (speech->isSpeaking())
-                speaking_prev_inx = -1;
-              else
+#ifdef ENABLE_SPEECH_SUPPORT
+              if (speech->isSpeaking()) {
+                speechIndex = -1;
+              } else
+#endif /* ENABLE_SPEECH_SUPPORT */
                 trackCursor(1);
               playTune(&tune_link);
             } else
@@ -1215,7 +1246,7 @@ main (int argc, char *argv[]) {
             playTune(&tune_bad_command);
             break;
           case CMD_TUNES:
-            TOGGLEPLAY ( TOGGLE(prefs.tunes) );        /* toggle sound on/off */
+            TOGGLEPLAY ( TOGGLE(prefs.alertTunes) );        /* toggle sound on/off */
             break;
           case CMD_DISPMD:
             setTranslationTable(TOGGLE(p->showAttributes));
@@ -1251,45 +1282,43 @@ main (int argc, char *argv[]) {
             break;
           case CMD_CAPBLINK:
             capon = 1;
-            TOGGLEPLAY( TOGGLE(prefs.capblink) );
-            if (prefs.capblink)
-              {
-                capcntr = prefs.caponcnt;
-                attron = 0;
-                attrcntr = prefs.attroffcnt;
-                csron = 0;
-                csrcntr = prefs.csroffcnt;
-              }
+            TOGGLEPLAY( TOGGLE(prefs.blinkingCapitals) );
+            if (prefs.blinkingCapitals) {
+              capcntr = prefs.capitalsVisiblePeriod;
+             attron = 0;
+             attrcntr = prefs.attributesInvisiblePeriod;
+             csron = 0;
+             csrcntr = prefs.cursorInvisiblePeriod;
+            }
             break;
           case CMD_ATTRBLINK:
             attron = 1;
-            TOGGLEPLAY( TOGGLE(prefs.attrblink) );
-            if (prefs.attrblink)
-              {
-                attrcntr = prefs.attroncnt;
-                capon = 1;
-                capcntr = prefs.caponcnt;
-                csron = 0;
-                csrcntr = prefs.csroffcnt;
-              }
+            TOGGLEPLAY( TOGGLE(prefs.blinkingAttributes) );
+            if (prefs.blinkingAttributes) {
+              attrcntr = prefs.attributesVisiblePeriod;
+              capon = 1;
+              capcntr = prefs.capitalsVisiblePeriod;
+              csron = 0;
+              csrcntr = prefs.cursorInvisiblePeriod;
+            }
             break;
           case CMD_INFO:
             TOGGLE(infmode);
             break;
           case CMD_CSRSIZE:
-            TOGGLEPLAY ( TOGGLE(prefs.csrsize) );
+            TOGGLEPLAY ( TOGGLE(prefs.cursorStyle) );
             break;
           case CMD_SIXDOTS:
-            TOGGLEPLAY ( TOGGLE(prefs.sixdots) );
+            TOGGLEPLAY ( TOGGLE(prefs.textStyle) );
             break;
           case CMD_SLIDEWIN:
-            TOGGLEPLAY ( TOGGLE(prefs.slidewin) );
+            TOGGLEPLAY ( TOGGLE(prefs.slidingWindow) );
             break;
           case CMD_SKPIDLNS:
-            TOGGLEPLAY ( TOGGLE(prefs.skpidlns) );
+            TOGGLEPLAY ( TOGGLE(prefs.skipIdenticalLines) );
             break;
           case CMD_SKPBLNKWINS:
-            TOGGLEPLAY ( TOGGLE(prefs.skpblnkwins) );
+            TOGGLEPLAY ( TOGGLE(prefs.skipBlankWindows) );
             break;
           case CMD_PREFSAVE:
             if (savePreferences()) {
@@ -1309,39 +1338,32 @@ main (int argc, char *argv[]) {
               playTune(&tune_done);
             }
             break;
-          case CMD_SAY:
-          case CMD_SAYALL:
-            {
-              /* OK heres a crazy idea: why not send the attributes with the
-                 text, in case some inflection or marking can be added...! The
-                 speech driver's say function will receive a buffer of text
-                 and a length, but in reality the buffer will contain twice
-                 len bytes: the text followed by the video attribs data. */
-              unsigned int i;
-              unsigned r = (keypress == CMD_SAYALL) ? scr.rows - p->winy :1;
-              unsigned char buffer[ 2*( r *scr.cols )];
-              readScreen(0, p->winy, scr.cols, r, buffer, SCR_TEXT);
-              i = r*scr.cols;
-              i--;
-              while(i>=0 && buffer[i] == 0) i--;
-              i++;
-              if(i==0) break;
-              if(speech->express != NULL) {
-                readScreen(0, p->winy, scr.cols, r, buffer+i, SCR_ATTRIB);
-                speech->express(buffer, i);
-              }else speech->say(buffer, i);
-	      speaking_scrno = scr.no;
-	      speaking_start_line = p->winy;
-	      /* 
-	       * We don't want speech tracking to move the braille window 
-	       * for a single line reading.
-	       */ 
-              speak_dont_track = ((keypress & ~VAL_SWITCHMASK) == CMD_SAY);
-            }
+#ifdef ENABLE_SPEECH_SUPPORT
+          case CMD_SAY_LINE:
+            sayLines(p->winy, 1, 0);
+            break;
+          case CMD_SAY_ABOVE:
+            sayLines(0, p->winy+1, 1);
+            break;
+          case CMD_SAY_BELOW:
+            sayLines(p->winy, scr.rows-p->winy, 1);
             break;
           case CMD_MUTE:
             speech->mute();
             break;
+          case CMD_SPKHOME:
+            if(scr.no == speechScreen) {
+              trackSpeech(speech->getTrack());
+            } else {
+              playTune(&tune_bad_command);
+            }
+            break;
+          case CMD_RESTARTSPEECH:
+            stopSpeechDriver();
+            LogPrint(LOG_INFO, "Reinitializing speech driver.");
+            startSpeechDriver();
+            break;
+#endif /* ENABLE_SPEECH_SUPPORT */
           case CMD_SWITCHVT_PREV:
             if (!switchVirtualTerminal(scr.no-1))
               playTune(&tune_bad_command);
@@ -1352,7 +1374,7 @@ main (int argc, char *argv[]) {
             break;
 #ifdef ENABLE_LEARN_MODE
           case CMD_LEARN:
-            learnMode(refreshInterval, 10000);
+            learnMode(&brl, refreshInterval, 10000);
             break;
 #endif /* ENABLE_LEARN_MODE */
           default: {
@@ -1542,15 +1564,15 @@ main (int argc, char *argv[]) {
     /*
      * Update blink counters: 
      */
-    if (prefs.csrblink)
+    if (prefs.blinkingCursor)
       if (!--csrcntr)
-        csrcntr = (csron ^= 1) ? prefs.csroncnt : prefs.csroffcnt;
-    if (prefs.capblink)
+        csrcntr = (csron ^= 1)? prefs.cursorVisiblePeriod: prefs.cursorInvisiblePeriod;
+    if (prefs.blinkingCapitals)
       if (!--capcntr)
-        capcntr = (capon ^= 1) ? prefs.caponcnt : prefs.capoffcnt;
-    if (prefs.attrblink)
+        capcntr = (capon ^= 1)? prefs.capitalsVisiblePeriod: prefs.capitalsInvisiblePeriod;
+    if (prefs.blinkingAttributes)
       if (!--attrcntr)
-        attrcntr = (attron ^= 1) ? prefs.attroncnt : prefs.attroffcnt;
+        attrcntr = (attron ^= 1)? prefs.attributesVisiblePeriod: prefs.attributesInvisiblePeriod;
 
     /*
      * Update Braille display and screen information.  Switch screen 
@@ -1581,27 +1603,32 @@ main (int argc, char *argv[]) {
       }
     }
 
+#ifdef ENABLE_SPEECH_SUPPORT
     /* speech tracking */
     speech->doTrack(); /* called continually even if we're not tracking
                              so that the pipe doesn't fill up. */
+#endif /* ENABLE_SPEECH_SUPPORT */
+
     if (p->trackCursor) {
-      if (speech->isSpeaking() && scr.no == speaking_scrno
-	  && !speak_dont_track) {
-        int inx = speech->getTrack();
-        if (inx != speaking_prev_inx) {
-          trackSpeech(speaking_prev_inx = inx);
+#ifdef ENABLE_SPEECH_SUPPORT
+      if (speech->isSpeaking() && (scr.no == speechScreen) && speechTracking) {
+        int index = speech->getTrack();
+        if (index != speechIndex) {
+          trackSpeech(speechIndex = index);
         }
-      } else {
+      } else
+#endif /* ENABLE_SPEECH_SUPPORT */
+      {
         /* If cursor moves while blinking is on */
-        if (prefs.csrblink) {
+        if (prefs.blinkingCursor) {
           if (scr.posy != p->trky) {
             /* turn off cursor to see what's under it while changing lines */
             csron = 0;
-            csrcntr = prefs.csroffcnt;
+            csrcntr = prefs.cursorInvisiblePeriod;
           } else if (scr.posx != p->trkx) {
             /* turn on cursor to see it moving on the line */
             csron = 1;
-            csrcntr = prefs.csroncnt;
+            csrcntr = prefs.cursorVisiblePeriod;
           }
         }
         /* If the cursor moves in cursor tracking mode: */
@@ -1638,13 +1665,13 @@ main (int argc, char *argv[]) {
     if (p->winx != oldwinx || p->winy != oldwiny) {
       if (prefs.pointerFollowsWindow && !pointerMoved) setPointer(p->winx, p->winy);
 
-      if (prefs.attrvis && prefs.attrblink) {
+      if (prefs.showAttributes && prefs.blinkingAttributes) {
         /* Attributes are blinking.
            We could check to see if we changed screen, but that doesn't
            really matter... this is mainly for when you are hunting up/down
            for the line with attributes. */
         attron = 1;
-        attrcntr = prefs.attroncnt;
+        attrcntr = prefs.attributesVisiblePeriod;
         /* problem: this still doesn't help when the braille window is
            stationnary and the attributes themselves are moving
            (example: tin). */
@@ -1658,7 +1685,7 @@ main (int argc, char *argv[]) {
       int cursorLocation = -1;
       contracted = 0;
 #ifdef ENABLE_CONTRACTED_BRAILLE
-      if (prefs.sixdots && contractionTable) {
+      if (prefs.textStyle && contractionTable) {
         int windowLength = brl.x * brl.y;
         while (1) {
           int cursorOffset = cursorLocation;
@@ -1709,8 +1736,8 @@ main (int argc, char *argv[]) {
             }
           }
 
-          memcpy(brl.disp, outputBuffer, outputLength);
-          memset(brl.disp+outputLength, 0, windowLength-outputLength);
+          memcpy(brl.buffer, outputBuffer, outputLength);
+          memset(brl.buffer+outputLength, 0, windowLength-outputLength);
           while (cursorOffset >= 0) {
             int offset = contractedOffsets[cursorOffset];
             if (offset >= 0) {
@@ -1724,7 +1751,7 @@ main (int argc, char *argv[]) {
           contractedTrack = 0;
           contracted = 1;
 
-          if (p->showAttributes || (prefs.attrvis && (!prefs.attrblink || attron))) {
+          if (p->showAttributes || (prefs.showAttributes && (!prefs.blinkingAttributes || attron))) {
             int inputOffset;
             int outputOffset = 0;
             unsigned char attributes = 0;
@@ -1740,7 +1767,7 @@ main (int argc, char *argv[]) {
             while (outputOffset < outputLength) outputBuffer[outputOffset++] = attributes;
             if (p->showAttributes) {
               for (outputOffset=0; outputOffset<outputLength; ++outputOffset)
-                brl.disp[outputOffset] = attributesTable[outputBuffer[outputOffset]];
+                brl.buffer[outputOffset] = attributesTable[outputBuffer[outputOffset]];
             } else {
               overlayAttributes(outputBuffer, outputLength, 1);
             }
@@ -1752,27 +1779,28 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
       if (!contracted) {
         int winlen = MIN(brl.x, scr.cols-p->winx);
-        readScreen(p->winx, p->winy, winlen, brl.y, brl.disp,
+        readScreen(p->winx, p->winy, winlen, brl.y, brl.buffer,
                    p->showAttributes? SCR_ATTRIB: SCR_TEXT);
+        if (braille->writeVisual) braille->writeVisual(&brl);
 
         /* blank out capital letters if they're blinking and should be off */
-        if (prefs.capblink && !capon)
+        if (prefs.blinkingCapitals && !capon)
           for (i=0; i<winlen*brl.y; i++)
-            if (BRL_ISUPPER(brl.disp[i]))
-              brl.disp[i] = ' ';
+            if (BRL_ISUPPER(brl.buffer[i]))
+              brl.buffer[i] = ' ';
 
         /* convert to dots using the current translation table */
-        if ((curtbl == attributesTable) || !prefs.sixdots) {
+        if ((curtbl == attributesTable) || !prefs.textStyle) {
           for (
             i = 0;
             i < (winlen * brl.y);
-            brl.disp[i] = curtbl[brl.disp[i]], i++
+            brl.buffer[i] = curtbl[brl.buffer[i]], i++
           );
         } else {
           for (
             i = 0;
             i < (winlen * brl.y);
-            brl.disp[i] = curtbl[brl.disp[i]] & (B1 | B2 | B3 | B4 | B5 | B6), i++
+            brl.buffer[i] = curtbl[brl.buffer[i]] & (B1 | B2 | B3 | B4 | B5 | B6), i++
           );
         }
 
@@ -1781,15 +1809,15 @@ main (int argc, char *argv[]) {
              is in an off-right position with some cells at the end blank
              so we'll insert these cells and blank them. */
           for (i=brl.y-1; i>0; i--)
-            memmove(brl.disp+i*brl.x, brl.disp+i*winlen, winlen);
+            memmove(brl.buffer+i*brl.x, brl.buffer+i*winlen, winlen);
           for (i=0; i<brl.y; i++)
-            memset(brl.disp+i*brl.x+winlen, 0, brl.x-winlen);
+            memset(brl.buffer+i*brl.x+winlen, 0, brl.x-winlen);
         }
 
         /* Attribute underlining: if viewing text (not attributes), attribute
            underlining is active and visible and we're not in help, then we
            get the attributes for the current region and OR the underline. */
-        if (!p->showAttributes && prefs.attrvis && (!prefs.attrblink || attron)) {
+        if (!p->showAttributes && prefs.showAttributes && (!prefs.blinkingAttributes || attron)) {
           unsigned char attrbuf[winlen*brl.y];
           readScreen(p->winx, p->winy, winlen, brl.y, attrbuf, SCR_ATTRIB);
           overlayAttributes(attrbuf, winlen, brl.y);
@@ -1803,8 +1831,8 @@ main (int argc, char *argv[]) {
           cursorLocation = (scr.posy - p->winy) * brl.x + scr.posx - p->winx;
       }
       if (cursorLocation >= 0) {
-        if (prefs.csrvis && !p->hideCursor && (!prefs.csrblink || csron)) {
-          brl.disp[cursorLocation] |= prefs.csrsize?
+        if (prefs.showCursor && !p->hideCursor && (!prefs.blinkingCursor || csron)) {
+          brl.buffer[cursorLocation] |= prefs.cursorStyle?
                                         (B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8):
                                         (B7 | B8);
         }
@@ -1813,7 +1841,7 @@ main (int argc, char *argv[]) {
       setStatusCells();
       braille->writeWindow(&brl);
     }
-    delay(refreshInterval);
+    drainBrailleOutput(&brl, refreshInterval);
   }
 
   terminateProgram(0);
@@ -1824,12 +1852,14 @@ void
 message (const char *text, short flags) {
    int length = strlen(text);
 
-   if (prefs.tunes && !(flags & MSG_SILENT)) {
+#ifdef ENABLE_SPEECH_SUPPORT
+   if (prefs.alertTunes && !(flags & MSG_SILENT)) {
       speech->mute();
       speech->say(text, length);
    }
+#endif /* ENABLE_SPEECH_SUPPORT */
 
-   if (braille && brl.disp) {
+   if (braille && brl.buffer) {
       while (length) {
          int count;
          int index;
@@ -1845,11 +1875,11 @@ message (const char *text, short flags) {
             if (!count) count = brl.x * brl.y - 1;
          }
 
-         memset(brl.disp, ' ', brl.x*brl.y);
-         for (index=0; index<count; brl.disp[index++]=*text++);
+         memset(brl.buffer, ' ', brl.x*brl.y);
+         for (index=0; index<count; brl.buffer[index++]=*text++);
          if (length -= count) {
-            while (index < brl.x*brl.y) brl.disp[index++] = '-';
-            brl.disp[brl.x*brl.y - 1] = '>';
+            while (index < brl.x*brl.y) brl.buffer[index++] = '-';
+            brl.buffer[brl.x*brl.y - 1] = '>';
          }
 
          /*
@@ -1857,16 +1887,15 @@ message (const char *text, short flags) {
           * ignored, since case can be important, and * blinking caps won't 
           * work ... 
           */
-         for (index=0; index<brl.x*brl.y; ++index) brl.disp[index] = textTable[brl.disp[index]];
-         braille->writeWindow(&brl);
+         writeBrailleBuffer(&brl);
 
          if (flags & MSG_WAITKEY)
-            while (braille->read(CMDS_MESSAGE) == EOF) delay(refreshInterval);
+            getBrailleCommand(CMDS_MESSAGE);
          else if (length || !(flags & MSG_NODELAY)) {
             int i;
             for (i=0; i<messageDelay; i+=refreshInterval) {
                delay(refreshInterval);
-               if (braille->read(CMDS_MESSAGE) != EOF) break;
+               if (readBrailleCommand(&brl, CMDS_MESSAGE) != EOF) break;
             }
          }
       }
@@ -1876,8 +1905,8 @@ message (const char *text, short flags) {
 void
 showDotPattern (unsigned char dots, unsigned char duration) {
   memset(statusCells, dots, sizeof(statusCells));
-  memset(brl.disp, dots, brl.x*brl.y);
-  braille->writeStatus(statusCells);
+  memset(brl.buffer, dots, brl.x*brl.y);
+  braille->writeStatus(&brl, statusCells);
   braille->writeWindow(&brl);
-  shortdelay(duration);
+  drainBrailleOutput(&brl, duration);
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
- <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.16">
  <TITLE>BRLTTY: Advanced Topics</TITLE>
  <LINK HREF="Manual-7.html" REL=next>
  <LINK HREF="Manual-5.html" REL=previous>
@@ -12,16 +12,16 @@
 <A HREF="Manual-5.html">Previous</A>
 <A HREF="Manual.html#toc6">Contents</A>
 <HR>
-<H2><A NAME="s6">6. Advanced Topics</A></H2>
+<H2><A NAME="s6">6.</A> <A HREF="Manual.html#toc6">Advanced Topics</A></H2>
 
-<P>
-<P>
-<H2><A NAME="multiple"></A> <A NAME="ss6.1">6.1 Installing Multiple Versions</A>
+
+
+<H2><A NAME="multiple"></A> <A NAME="ss6.1">6.1</A> <A HREF="Manual.html#toc6.1">Installing Multiple Versions</A>
 </H2>
 
 <P>It's easy to have more than one version of BRLTTY
 installed on the same system at the same time.
-This capability allows you to test a new version before removing the old one.
+This capability allows you to test a new version before removing the old one.</P>
 <P>The 
 <A HREF="Manual-2.html#build-execute-root">--with-execute-root</A> build option allows you
 to install the complete 
@@ -50,6 +50,7 @@ make install
 /brltty-3.2/bin/brltty
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>So far, this paradigm is somewhat awkward for at least two reasons.
 One is that these long path names are too hard to type,
 and the other is that you don't want to fiddle with your system's boot sequence
@@ -63,6 +64,7 @@ When it's time to switch to the newer version, just repoint the symbolc link.
 <BLOCKQUOTE><CODE>
 ln -s /brltty-3.2/bin/brltty /bin/brltty
 </CODE></BLOCKQUOTE>
+</P>
 <P>If you'd like to get really fancy, then introduce another level of indirection
 in order to make all of BRLTTY's files for any given version
 look like they're in all of the standard places.
@@ -80,8 +82,9 @@ Then all you need to do is to point <CODE>/brltty</CODE> to the desired version.
 <BLOCKQUOTE><CODE>
 ln -s /brltty-3.1 /brltty
 </CODE></BLOCKQUOTE>
-<P>
-<H2><A NAME="ss6.2">6.2 Installation/Rescue Root Disks for Linux</A>
+</P>
+
+<H2><A NAME="ss6.2">6.2</A> <A HREF="Manual.html#toc6.2">Installation/Rescue Root Disks for Linux</A>
 </H2>
 
 <P>BRLTTY can run as a stand-alone executable.
@@ -94,16 +97,15 @@ If the data directory
 and 
 <A HREF="Manual-2.html#build-execute-root">--with-execute-root</A> build options)
 doesn't exist, then BRLTTY looks in <CODE>/etc</CODE> for the files it needs.
-Even if any of these files don't exist at all, BRLTTY still works!
+Even if any of these files don't exist at all, BRLTTY still works!</P>
 <P>If, for some reason, you ever create the data directory
 (usually <CODE>/etc/brltty</CODE>) by hand, it's important
 to set its permissions so that only root can create files within it.
 <BLOCKQUOTE><CODE>
 chmod 755 /etc/brltty
 </CODE></BLOCKQUOTE>
-<P>The screen content inspection device (usually <CODE>/dev/vcsa</CODE>) is required
-(see the 
-<A HREF="Manual-2.html#build-screen-device">--with-screen-device</A> build option).
+</P>
+<P>The screen content inspection device (usually <CODE>/dev/vcsa</CODE>) is required.
 It should already exist unless your Linux distribution is quite old.
 If necessary, you can create it with:
 <BLOCKQUOTE><CODE>
@@ -113,6 +115,7 @@ chmod 660 /dev/vcsa
 chown root.tty /dev/vcsa
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>One problem often encountered when trying to use BRLTTY
 in an uncertain environment like a root disk or an incomplete system is
 that it might not find the shared libraries (or parts thereof) which it needs.
@@ -126,7 +129,7 @@ There are a number of build options which can be used
 to selectively remove unneeded features from BRLTTY
 in order to somewhat mitigate this problem
 (see section 
-<A HREF="Manual-2.html#build-features">Build Features</A>).
+<A HREF="Manual-2.html#build-features">Build Features</A>).</P>
 <P>The executable is stripped during the 
 <A HREF="Manual-2.html#make-install">make install</A>.
 This significantly reduces its size by removing its symbol table.
@@ -138,8 +141,9 @@ Don't forget to strip it.
 <BLOCKQUOTE><CODE>
 strip brltty
 </CODE></BLOCKQUOTE>
-<P>
-<H2><A NAME="ss6.3">6.3 Future Enhancements</A>
+</P>
+
+<H2><A NAME="ss6.3">6.3</A> <A HREF="Manual.html#toc6.3">Future Enhancements</A>
 </H2>
 
 <P>Apart from fixing bugs and supporting more types of braille displays,
@@ -150,33 +154,35 @@ we hope, time permitting, to work on the following:
 <LI>Attribute tracking.</LI>
 <LI>Mixed text and attribute mode.</LI>
 </UL>
-<DT><B>Scroll Tracking</B><DD><P>Locking the braille window to one line as it scrolls on the screen.
+</P>
+<DT><B>Scroll Tracking</B><DD><P>Locking the braille window to one line as it scrolls on the screen.</P>
 <DT><B>Better Speech Support</B><DD><P>
 <UL>
 <LI>Mixed braille and speech for faster reading of text.</LI>
 <LI>Better speech navigation.</LI>
 <LI>More speech synthesizers.</LI>
 </UL>
+</P>
 <DT><B>Socket Interface</B><DD><P>A mechanism allowing screen readers and X display interpreters
-to easily make full use of all braille dsplays supported by BRLTTY.
+to easily make full use of all braille dsplays supported by BRLTTY.</P>
 <DT><B>Screen Subregions</B><DD><P>Ignore cursor motion outside the region,
-and set soft navigational boundaries at the edges of the region.
+and set soft navigational boundaries at the edges of the region.</P>
 </DL>
 
-See the file <CODE>TODO</CODE> for a more complete list.
-<P>
-<H2><A NAME="ss6.4">6.4 Known Bugs</A>
+See the file <CODE>TODO</CODE> for a more complete list.</P>
+
+<H2><A NAME="ss6.4">6.4</A> <A HREF="Manual.html#toc6.4">Known Bugs</A>
 </H2>
 
-<P>At the time of writing (December 2001), the following problems are known:
+<P>At the time of writing (December 2001), the following problems are known:</P>
 <P>Cursor routing is implemented as a looping sub-process
 which runs at reduced priority to avoid using too much cpu time.
 Different system loads require different settings of its parameters.
 The defaults work very well
 in a typical Unix editor on a fairly lightly loaded system,
 but very poorly in some other situations,
-e.g. over a slow serial link to a remote host.
-<P>
+e.g. over a slow serial link to a remote host.</P>
+
 <HR>
 <A HREF="Manual-7.html">Next</A>
 <A HREF="Manual-5.html">Previous</A>

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -148,13 +148,6 @@ const unsigned char inputTable[] = {
    0XE8, 0XE9, 0XEC, 0XED, 0XF8, 0XF9, 0XFC, 0XFD,
    0XEA, 0XEB, 0XEE, 0XEF, 0XFA, 0XFB, 0XFE, 0XFF
 };
-
-static void
-clearbrl (brldim *brl) {
-   brl->x = -1;
-   brl->y = -1;
-   brl->disp = NULL;
-}
 
 static void
 refreshCells (void) {
@@ -354,7 +347,7 @@ brl_identify (void) {
 }
 
 static void
-adjustStatusCells (brldim *brl, const char *parameter) {
+adjustStatusCells (BrailleDisplay *brl, const char *parameter) {
    if (*parameter) {
       const int minimum = 0;
       const int maximum = MIN(StatusCellCount, brl->x-1);
@@ -367,8 +360,8 @@ adjustStatusCells (brldim *brl, const char *parameter) {
    }
 }
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *device) {
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
    if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
       memset(&newSettings, 0, sizeof(newSettings));
       newSettings.c_cflag = CS8 | CSTOPB | CLOCAL | CREAD;
@@ -395,17 +388,13 @@ brl_initialize (char **parameters, brldim *brl, const char *device) {
                         statusArea = cellBuffer;
                         dataArea = statusArea + statusCells;
                         if ((outputBuffer = malloc(2 + (cellCount * 2)))) {
-                           if ((brl->disp = malloc(dataCells))) {
-                              memset(brl->disp, 0, dataCells);
-                              refreshCells();
-                              persistentKeyboardMode = KBM_NAVIGATE;
-                              temporaryKeyboardMode = persistentKeyboardMode;
-                              persistentRoutingOperation = CR_ROUTE;
-                              temporaryRoutingOperation = persistentRoutingOperation;
-                              adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
-                              return;
-                           }
-                           free(outputBuffer);
+                           refreshCells();
+                           persistentKeyboardMode = KBM_NAVIGATE;
+                           temporaryKeyboardMode = persistentKeyboardMode;
+                           persistentRoutingOperation = CR_ROUTE;
+                           temporaryRoutingOperation = persistentRoutingOperation;
+                           adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
+                           return 1;
                         } else {
                            LogError("Output buffer allocation");
                         }
@@ -428,17 +417,14 @@ brl_initialize (char **parameters, brldim *brl, const char *device) {
       close(fileDescriptor);
       fileDescriptor = -1;
    }
-   clearbrl(brl);
+   return 0;
 }
 
 static void
-brl_close (brldim *brl) {
+brl_close (BrailleDisplay *brl) {
    tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
    close(fileDescriptor);
    fileDescriptor = -1;
-
-   free(brl->disp);
-   clearbrl(brl);
 
    free(outputBuffer);
    outputBuffer = NULL;
@@ -448,15 +434,15 @@ brl_close (brldim *brl) {
 }
 
 static void
-brl_writeWindow (brldim *brl) {
-   if (memcmp(dataArea, brl->disp, dataCells) != 0) {
-      memcpy(dataArea, brl->disp, dataCells);
+brl_writeWindow (BrailleDisplay *brl) {
+   if (memcmp(dataArea, brl->buffer, dataCells) != 0) {
+      memcpy(dataArea, brl->buffer, dataCells);
       refreshCells();
    }
 }
 
 static void
-brl_writeStatus (const unsigned char *status) {
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
    if (memcmp(statusArea, status, statusCells) != 0) {
       memcpy(statusArea, status, statusCells);
       /* refreshCells();
@@ -704,7 +690,7 @@ interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
       case BNC_P:
 	 return CMD_PASTE;
       case BNC_S:
-	 return CMD_SAY;
+	 return CMD_SAY_LINE;
       case BNC_V: {
 	 unsigned int vt;
 	 if (getDecimalInteger(&vt, 2, "virt term num")) {
@@ -901,7 +887,7 @@ interpretRoutingKey (unsigned char key, DriverCommandContext cmds) {
 }
 
 static int
-brl_read (DriverCommandContext cmds) {
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
    unsigned char character;
    int count = read(fileDescriptor, &character, 1);
    int (*handler)(unsigned char, DriverCommandContext);

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -103,9 +103,6 @@ extern "C" {
 /* Define this to be a string containing the path to the default attributes table. */
 #undef ATTRIBUTES_TABLE
 
-/* Define this to be a string containing the screen device. */
-#undef SCREEN_DEVICE
-
 /* Define this to include the preferences menu. */
 #undef ENABLE_PREFERENCES_MENU
 
@@ -118,17 +115,23 @@ extern "C" {
 /* Define this to include contraction table support. */
 #undef ENABLE_CONTRACTED_BRAILLE
 
-/* Define this to include PC internal speaker alert tunes support. */
-#undef ENABLE_SPEAKER_TUNES
+/* Define this to include speech synthesizer support. */
+#undef ENABLE_SPEECH_SUPPORT
 
-/* Define this to include Digital to Analog Converter alert tunes support. */
-#undef ENABLE_DAC_TUNES
+/* Define this to include beeper (console bell) alert tunes support. */
+#undef ENABLE_BEEPER_TUNES
 
-/* Define this to include Musical Instrument Digital Interface alert tunes support. */
+/* Define this to include PCM (soundcard audio) alert tunes support. */
+#undef ENABLE_PCM_TUNES
+
+/* Define this to include MIDI (Musical Instrument Digital Interface) alert tunes support. */
 #undef ENABLE_MIDI_TUNES
 
-/* Define this to include Adlib/OPL3/SB-FM alert tunes support. */
-#undef ENABLE_ADLIB_TUNES
+/* Define this to include FM (soundcard synthesizer) alert tunes support. */
+#undef ENABLE_FM_TUNES
+
+/* Define this to include Papenmeier configuration file support. */
+#undef ENABLE_PM_CONFIGURATION_FILE
 
 /* Define this if HP-UX audio support is available. */
 #undef HAVE_HPUX_AUDIO

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
- <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.16">
  <TITLE>BRLTTY: Translation Tables</TITLE>
  <LINK HREF="Manual-6.html" REL=next>
  <LINK HREF="Manual-4.html" REL=previous>
@@ -12,12 +12,12 @@
 <A HREF="Manual-4.html">Previous</A>
 <A HREF="Manual.html#toc5">Contents</A>
 <HR>
-<H2><A NAME="translation"></A> <A NAME="s5">5. Translation Tables</A></H2>
+<H2><A NAME="translation"></A> <A NAME="s5">5.</A> <A HREF="Manual.html#toc5">Translation Tables</A></H2>
 
 <P>BRLTTY uses two <B>translation tables</B> to govern
-the mapping from bytes to dot combinations.
-<P>
-<H2><A NAME="translation-text"></A> <A NAME="ss5.1">5.1 Text Translation</A>
+the mapping from bytes to dot combinations.</P>
+
+<H2><A NAME="translation-text"></A> <A NAME="ss5.1">5.1</A> <A HREF="Manual.html#toc5.1">Text Translation</A>
 </H2>
 
 <P>The first, and most important, is the text translation table.
@@ -26,19 +26,19 @@ BRLTTY is initially configured to use the
 In addition to this default text translation table,
 several alternatives are provided:
 <DL>
-<DT><B>text.danish.tbl</B><DD><P>Danish
-<DT><B>text.es.tbl</B><DD><P>Spanish
-<DT><B>text.french.tbl</B><DD><P>French
-<DT><B>text.german.tbl</B><DD><P>German
-<DT><B>text.it.tbl</B><DD><P>Italian
-<DT><B>text.no-h.tbl</B><DD><P>Norwegian and German
-<DT><B>text.no-p.tbl</B><DD><P>Norwegian
-<DT><B>text.pl-iso02.tbl</B><DD><P>Polish (iso-8859-2)
-<DT><B>text.simple.tbl</B><DD><P>American English
-<DT><B>text.sweden.tbl</B><DD><P>Swedish
-<DT><B>text.swedish.tbl</B><DD><P>Swedish
-<DT><B>text.uk.tbl</B><DD><P>United Kingdom English
-<DT><B>text.us.tbl</B><DD><P>American English
+<DT><B>text.danish.tbl</B><DD><P>Danish</P>
+<DT><B>text.es.tbl</B><DD><P>Spanish</P>
+<DT><B>text.french.tbl</B><DD><P>French</P>
+<DT><B>text.german.tbl</B><DD><P>German</P>
+<DT><B>text.it.tbl</B><DD><P>Italian</P>
+<DT><B>text.no-h.tbl</B><DD><P>Norwegian and German</P>
+<DT><B>text.no-p.tbl</B><DD><P>Norwegian</P>
+<DT><B>text.pl-iso02.tbl</B><DD><P>Polish (iso-8859-2)</P>
+<DT><B>text.simple.tbl</B><DD><P>American English</P>
+<DT><B>text.sweden.tbl</B><DD><P>Swedish</P>
+<DT><B>text.swedish.tbl</B><DD><P>Swedish</P>
+<DT><B>text.uk.tbl</B><DD><P>United Kingdom English</P>
+<DT><B>text.us.tbl</B><DD><P>American English</P>
 </DL>
 
 See the 
@@ -47,9 +47,9 @@ the
 <A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive,
 and the 
 <A HREF="Manual-2.html#build-text-table">--with-text-table</A> build option
-for details regarding how to use an alternate text translation table.
-<P>
-<H2><A NAME="translation-attributes"></A> <A NAME="ss5.2">5.2 Attributes Translation</A>
+for details regarding how to use an alternate text translation table.</P>
+
+<H2><A NAME="translation-attributes"></A> <A NAME="ss5.2">5.2</A> <A HREF="Manual.html#toc5.2">Attributes Translation</A>
 </H2>
 
 <P>The attributes translation table is used when BRLTTY
@@ -61,18 +61,18 @@ Two attributes translation tables are provided:
 <DL>
 <DT><B>attributes.tbl</B><DD><P>The lefthand column represents the background colours:
 <DL>
-<DT><B>Dot 1</B><DD><P>Red
-<DT><B>Dot 2</B><DD><P>Green
-<DT><B>Dot 3</B><DD><P>Blue
-<DT><B>Dot 7</B><DD><P>Blink
+<DT><B>Dot 1</B><DD><P>Red</P>
+<DT><B>Dot 2</B><DD><P>Green</P>
+<DT><B>Dot 3</B><DD><P>Blue</P>
+<DT><B>Dot 7</B><DD><P>Blink</P>
 </DL>
 
 The righthand column represents the foreground colours:
 <DL>
-<DT><B>Dot 4</B><DD><P>Red
-<DT><B>Dot 5</B><DD><P>Green
-<DT><B>Dot 6</B><DD><P>Blue
-<DT><B>Dot 8</B><DD><P>Bright
+<DT><B>Dot 4</B><DD><P>Red</P>
+<DT><B>Dot 5</B><DD><P>Green</P>
+<DT><B>Dot 6</B><DD><P>Blue</P>
+<DT><B>Dot 8</B><DD><P>Bright</P>
 </DL>
 
 A dot is raised when its corresponding attribute bit is on.
@@ -80,27 +80,27 @@ This is the default attributes translation table
 because it's the most intuitive.
 One of its problems, though, is that it's difficult to discern
 the difference between normal (white on black)
-and reverse (black on white) video.
+and reverse (black on white) video.</P>
 <DT><B>attrib.tbl</B><DD><P>The lefthand column represents the background colours:
 <DL>
-<DT><B>Dot 1</B><DD><P>Red
-<DT><B>Dot 2</B><DD><P>Green
-<DT><B>Dot 3</B><DD><P>Blue
-<DT><B>Dot 7</B><DD><P>Blink
+<DT><B>Dot 1</B><DD><P>Red</P>
+<DT><B>Dot 2</B><DD><P>Green</P>
+<DT><B>Dot 3</B><DD><P>Blue</P>
+<DT><B>Dot 7</B><DD><P>Blink</P>
 </DL>
 
 The righthand column represents the foreground colours:
 <DL>
-<DT><B>Dot 4</B><DD><P>Red
-<DT><B>Dot 5</B><DD><P>Green
-<DT><B>Dot 6</B><DD><P>Blue
-<DT><B>Dot 8</B><DD><P>Bright
+<DT><B>Dot 4</B><DD><P>Red</P>
+<DT><B>Dot 5</B><DD><P>Green</P>
+<DT><B>Dot 6</B><DD><P>Blue</P>
+<DT><B>Dot 8</B><DD><P>Bright</P>
 </DL>
 
 A foreground bit being on triggers its corresponding dot,
 whereas a background bit being off triggers its corresponding dot.
 This unintuitive logic actually makes it easier
-to read the most commonly used attribute combinations.
+to read the most commonly used attribute combinations.</P>
 </DL>
 
 See the 
@@ -109,9 +109,9 @@ the
 <A HREF="Manual-3.html#configure-attributes-table">attributes-table</A> configuration file directive,
 and the 
 <A HREF="Manual-2.html#build-attributes-table">--with-attributes-table</A> build option
-for details regarding how to use an alternate attributes translation table.
-<P>
-<H2><A NAME="ss5.3">5.3 Table Format</A>
+for details regarding how to use an alternate attributes translation table.</P>
+
+<H2><A NAME="ss5.3">5.3</A> <A HREF="Manual.html#toc5.3">Table Format</A>
 </H2>
 
 <P>A translation table is a 256-byte binary file.
@@ -119,20 +119,20 @@ It's indexed with either a character or an attributes byte,
 and the byte at that position contains the corresponding dot combination.
 The mapping from bit to dot is as follows:
 <DL>
-<DT><B>Bit 0</B><DD><P>Dot 1
-<DT><B>Bit 1</B><DD><P>Dot 4
-<DT><B>Bit 2</B><DD><P>Dot 2
-<DT><B>Bit 3</B><DD><P>Dot 5
-<DT><B>Bit 4</B><DD><P>Dot 3
-<DT><B>Bit 5</B><DD><P>Dot 6
-<DT><B>Bit 6</B><DD><P>Dot 7
-<DT><B>Bit 7</B><DD><P>Dot 8
+<DT><B>Bit 0</B><DD><P>Dot 1</P>
+<DT><B>Bit 1</B><DD><P>Dot 4</P>
+<DT><B>Bit 2</B><DD><P>Dot 2</P>
+<DT><B>Bit 3</B><DD><P>Dot 5</P>
+<DT><B>Bit 4</B><DD><P>Dot 3</P>
+<DT><B>Bit 5</B><DD><P>Dot 6</P>
+<DT><B>Bit 6</B><DD><P>Dot 7</P>
+<DT><B>Bit 7</B><DD><P>Dot 8</P>
 </DL>
 
 This particular mapping makes it easy and efficient for BRLTTY
-to vertically shift a dot pattern.
-<P>
-<H2><A NAME="ss5.4">5.4 Table Utilities</A>
+to vertically shift a dot pattern.</P>
+
+<H2><A NAME="ss5.4">5.4</A> <A HREF="Manual.html#toc5.4">Table Utilities</A>
 </H2>
 
 <P>These utilities reside within the <CODE>BrailleTables</CODE> subdirectory,
@@ -148,7 +148,8 @@ cd BrailleTables
 make
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>
+</P>
+
 <H3><A NAME="utility-tbl2txt"></A> tbl2txt</H3>
 
 <P>This utility converts (uncompiles) a translation table into a text file
@@ -158,14 +159,15 @@ tbl2txt -<EM>option</EM> ... <EM>table-file</EM> <EM>text-file</EM>
 </CODE></BLOCKQUOTE>
 
 <DL>
-<DT><B><EM>table-file</EM></B><DD><P>The translation table which is to be converted.
-<DT><B><EM>text-file</EM></B><DD><P>The file into which the text representing the table content is to be written.
-<DT><B><CODE>-c</CODE><EM>name</EM> <CODE>--code-page=</CODE><EM>name</EM></B><DD><P>The character set used to annotate each line of the text file.
+<DT><B><EM>table-file</EM></B><DD><P>The translation table which is to be converted.</P>
+<DT><B><EM>text-file</EM></B><DD><P>The file into which the text representing the table content is to be written.</P>
+<DT><B><CODE>-c</CODE><EM>name</EM> <CODE>--code-page=</CODE><EM>name</EM></B><DD><P>The character set used to annotate each line of the text file.</P>
 </DL>
+</P>
 <P>The generated text file can, without modification, be recompiled back into a
 translation table with the 
 <A HREF="#utility-txt2tbl">txt2tbl</A> utility.
-Each of its lines contains lots of interesting information.
+Each of its lines contains lots of interesting information.</P>
 <P>If the <CODE>-c</CODE> option isn't specified, each line looks like this:
 <BLOCKQUOTE><CODE>
 <EM>cc</EM> <EM>xx</EM> <EM>ddd</EM> (73214568)<EM>tt</EM> B+<EM>bbbb</EM> <EM>name</EM>
@@ -182,9 +184,9 @@ Unprintable characters are represented canonically.
 Control characters are flagged with a circumflex,
 e.g. Control-A (character 1) is <CODE>^A</CODE>. 
 Meta control characters are flagged with a tilde,
-e.g. Meta-Control-A (character 129) is <CODE>~A</CODE>. 
-<DT><B><EM>xx</EM></B><DD><P>The hexadecimal value of the character.
-<DT><B><EM>ddd</EM></B><DD><P>The decimal value of the character.
+e.g. Meta-Control-A (character 129) is <CODE>~A</CODE>. </P>
+<DT><B><EM>xx</EM></B><DD><P>The hexadecimal value of the character.</P>
+<DT><B><EM>ddd</EM></B><DD><P>The decimal value of the character.</P>
 <DT><B><CODE>(73214568)</CODE></B><DD><P>The braille dot numbers.
 If a dot isn't to be raised,
 then its number is replaced with a blank.
@@ -192,20 +194,21 @@ The English letter <CODE>y</CODE>, for example, would be
 <CODE>(&nbsp;3&nbsp;1456&nbsp;)</CODE>.
 The dot numbers appear in the same order
 as on a standard braille keyboard
-so as to make it easier to visualize the braille character.
+so as to make it easier to visualize the braille character.</P>
 <DT><B><EM>tt</EM></B><DD><P>The hexadecimal value of the byte representing the dot combination
-which is in the translation table.
+which is in the translation table.</P>
 <DT><B><EM>bbbb</EM></B><DD><P>The hexadecimal value of the unicode number
-corresponding to the dot combination.
+corresponding to the dot combination.</P>
 <DT><B><EM>name</EM></B><DD><P>The ASCII name of the character
-(only shown if the <CODE>-c</CODE> option isn't specified).
+(only shown if the <CODE>-c</CODE> option isn't specified).</P>
 <DT><B><EM>uuuu</EM></B><DD><P>The hexadecimal value of the unicode number
 corresponding to the character
-(only shown if the <CODE>-c</CODE> option is specified).
+(only shown if the <CODE>-c</CODE> option is specified).</P>
 <DT><B><EM>description</EM></B><DD><P>The formal unicode description for the character
-(only shown if the <CODE>-c</CODE> option is specified).
+(only shown if the <CODE>-c</CODE> option is specified).</P>
 </DL>
-<P>
+</P>
+
 <H3><A NAME="utility-txt2tbl"></A> txt2tbl</H3>
 
 <P>This utility compiles a translation table.
@@ -214,11 +217,12 @@ txt2tbl -<EM>option</EM> ... <EM>text-file</EM> <EM>table-file</EM>
 </CODE></BLOCKQUOTE>
 
 <DL>
-<DT><B><EM>text-file</EM></B><DD><P>The source file describing the table content.
-<DT><B><EM>table-file</EM></B><DD><P>The file into which the translation table is to be written.
-<DT><B><CODE>-d</CODE> <CODE>--duplicates</CODE></B><DD><P>Display a warning for each dot combination which has been used more than once.
-<DT><B><CODE>-m</CODE> <CODE>--missing</CODE></B><DD><P>Display a warning for each dot combination which hasn't been used.
+<DT><B><EM>text-file</EM></B><DD><P>The source file describing the table content.</P>
+<DT><B><EM>table-file</EM></B><DD><P>The file into which the translation table is to be written.</P>
+<DT><B><CODE>-d</CODE> <CODE>--duplicates</CODE></B><DD><P>Display a warning for each dot combination which has been used more than once.</P>
+<DT><B><CODE>-m</CODE> <CODE>--missing</CODE></B><DD><P>Display a warning for each dot combination which hasn't been used.</P>
 </DL>
+</P>
 <P>A line which assigns a dot combination to a character
 must contain that dot combination within parenthesis, e.g. <CODE>(12)</CODE>.
 The text file must contain exactly 256 such lines, each one, in order,
@@ -228,15 +232,15 @@ but each must only be specified once.
 It's valid to specify no number at all, e.g. <CODE>()</CODE> (for a space).
 Any number of spaces may occur any number of times anywhere between the parentheses.
 All characters before the left parenthesis and after the right parenthesis are ignored.
-All lines which don't contain a left parenthesis are ignored.
+All lines which don't contain a left parenthesis are ignored.</P>
 <P>The algorithm for locating the dot numbers is actually a bit more complicated
 because a line may contain more than one left and/or right parenthesis
 (the 
 <A HREF="#utility-tbl2txt">tbl2txt</A> utility does this).
 The first right parenthesis which is preceded by at least one left parenthesis is used.
 The nearest left parenthesis to the left of that right parenthesis is used.
-The line <CODE>)((12)</CODE>, for example, is valid.
-<P>
+The line <CODE>)((12)</CODE>, for example, is valid.</P>
+
 <H3><A NAME="utility-tbl2tbl"></A> tbl2tbl</H3>
 
 <P>This utility converts a binary translation table from one dot mapping to another.
@@ -245,43 +249,46 @@ tbl2tbl <EM>input-mapping</EM> <EM>output-mapping</EM>
 </CODE></BLOCKQUOTE>
 
 <DL>
-<DT><B><EM>input-mapping</EM></B><DD><P>The dot mapping used within the source table.
-<DT><B><EM>output-mapping</EM></B><DD><P>The dot mapping to be used within the table being generated.
+<DT><B><EM>input-mapping</EM></B><DD><P>The dot mapping used within the source table.</P>
+<DT><B><EM>output-mapping</EM></B><DD><P>The dot mapping to be used within the table being generated.</P>
 </DL>
 
 The source table is read from standard input,
 and the converted table is written to standard output.
 The following dot mappings are supported:
 <DL>
-<DT><B>standard</B><DD><P>BRLTTY's native mapping (described above).
+<DT><B>standard</B><DD><P>BRLTTY's native mapping (described above).</P>
 <DT><B>tieman</B><DD><P>The mapping used by 
 <A HREF="http://www.braillevoyager.nl/uk/index.html">Tieman B.V.</A>.
 <DL>
-<DT><B>Bit 0</B><DD><P>Dot 1
-<DT><B>Bit 1</B><DD><P>Dot 2
-<DT><B>Bit 2</B><DD><P>Dot 3
-<DT><B>Bit 3</B><DD><P>Dot 7
-<DT><B>Bit 4</B><DD><P>Dot 8
-<DT><B>Bit 5</B><DD><P>Dot 6
-<DT><B>Bit 6</B><DD><P>Dot 5
-<DT><B>Bit 7</B><DD><P>Dot 4
+<DT><B>Bit 0</B><DD><P>Dot 1</P>
+<DT><B>Bit 1</B><DD><P>Dot 2</P>
+<DT><B>Bit 2</B><DD><P>Dot 3</P>
+<DT><B>Bit 3</B><DD><P>Dot 7</P>
+<DT><B>Bit 4</B><DD><P>Dot 8</P>
+<DT><B>Bit 5</B><DD><P>Dot 6</P>
+<DT><B>Bit 6</B><DD><P>Dot 5</P>
+<DT><B>Bit 7</B><DD><P>Dot 4</P>
 </DL>
+</P>
 <DT><B>alva</B><DD><P>The mapping used by 
 <A HREF="http://www.alva-bv.nl/alvacorp/alva_corp_home.html">Alva B.V.</A>
 and 
 <A HREF="http://www.telesensory.com">Telesensory Systems Inc.</A>.
 <DL>
-<DT><B>Bit 0</B><DD><P>Dot 1
-<DT><B>Bit 1</B><DD><P>Dot 2
-<DT><B>Bit 2</B><DD><P>Dot 3
-<DT><B>Bit 3</B><DD><P>Dot 4
-<DT><B>Bit 4</B><DD><P>Dot 5
-<DT><B>Bit 5</B><DD><P>Dot 6
-<DT><B>Bit 6</B><DD><P>Dot 7
-<DT><B>Bit 7</B><DD><P>Dot 8
+<DT><B>Bit 0</B><DD><P>Dot 1</P>
+<DT><B>Bit 1</B><DD><P>Dot 2</P>
+<DT><B>Bit 2</B><DD><P>Dot 3</P>
+<DT><B>Bit 3</B><DD><P>Dot 4</P>
+<DT><B>Bit 4</B><DD><P>Dot 5</P>
+<DT><B>Bit 5</B><DD><P>Dot 6</P>
+<DT><B>Bit 6</B><DD><P>Dot 7</P>
+<DT><B>Bit 7</B><DD><P>Dot 8</P>
 </DL>
+</P>
 </DL>
-<P>
+</P>
+
 <HR>
 <A HREF="Manual-6.html">Next</A>
 <A HREF="Manual-4.html">Previous</A>

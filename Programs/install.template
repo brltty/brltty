@@ -3,7 +3,7 @@
 # BRLTTY - A background process providing access to the Linux console (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -102,30 +102,6 @@ makeDirectory "${to}=D" "data"
 echo -n "Installing data files..."
 cp -pR "${from}=D" "${to}=D"
 echo "done."
-
-if [ -n "=S" ]
-then
-   install=true
-   for device in =S
-   do
-      if [ -c "${to}${device}" ]
-      then
-         install=false
-         break
-      fi
-   done
-   if $install
-   then
-      device="`set -- =S && echo "${1}"`"
-      makeDirectory "${to}${device%/*}" "device"
-      echo -n "Creating screen access device..."
-      execute mknod -m o= "${to}${device}" c 7 128
-      execute chmod 660 "${to}${device}"
-      execute chown root.tty "${to}${device}"
-      echo "done."
-   fi
-   unset device install
-fi
 
 echo "Installation complete."
 exit 0

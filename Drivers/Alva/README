@@ -150,7 +150,7 @@ identified that problem.
 Key Bindings
 ============
 
-All the key definitions are listed in the files brlttyhlp*.txt.  Each file
+All the key definitions are listed in the files help*.txt.  Each file
 corresponds to an ABT model.  For more information on the functions
 listed, see the BRLTTY manual.  Basic keys are nearly the same as with the
 DOS software. As a quick start, just press the PROG key to enter the help

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -24,15 +24,19 @@
 
 /* Known Device Identification Numbers (not to be changed) */
 #define ABT_AUTO	-1	/* for new firmware only */
-#define ABT320          0
-#define ABT340          1
-#define ABT34D          2
-#define ABT380          3	/* ABT340 Desktop */
-#define ABT38D          4	/* ABT380 Twin Space */
-#define DEL440		11	/* Alva Delphi 40 */
-#define DEL480		13 	/* Delphi Multimedia */
-#define SAT540		14	/* Alva Satellite 540 */
-#define SAT570 		15 	/* Alva Satellite 570 */
+#define ABT320		0X00	/* ABT 320 */
+#define ABT340		0X01	/* ABT 340 */
+#define ABT34D		0X02	/* ABT 340 Desktop */
+#define ABT380		0X03	/* ABT 380 */
+#define ABT382		0X04	/* ABT 382 Twin Space */
+#define DEL420		0X0A	/* Delphi 20 */
+#define DEL440		0X0B	/* Delphi 40 */
+#define DEL44D		0X0C	/* Delphi 40 Desktop */
+#define DEL480		0X0D 	/* Delphi Multimedia */
+#define SAT544		0X0E	/* Satellite 544 */
+#define SAT570P		0X0F 	/* Satellite 570 Pro */
+#define SAT584P		0X10 	/* Satellite 584 Pro */
+#define SAT544T		0X11 	/* Satellite 544 Traveller */
 
 
 /***** User Settings *****  Edit as necessary for your system. */

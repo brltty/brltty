@@ -42,7 +42,7 @@ get reinitialized when the device comes back.
 
 
 Vario 40:
-See the brlttyhlp1.txt file for key-bindings.
+See the help1.txt file for key-bindings.
 
 Vario 80:
 The Braille keyboard keys of the Vario 80 are implemented.
@@ -60,7 +60,7 @@ chord 6 = cursor right
 
 To leave typing mode, just hit all 7 keys again.
 
-See brlttyhlp0.txt for help about the other keys.
+See help0.txt for help about the other keys.
 
 
 TODO:

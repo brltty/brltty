@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the Linux console (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -199,9 +199,8 @@ always beth 12-15-1456 Bethany
 always bethe 12-15-2346 Bethel (Hans) Bethe
 always bets =
 always bett =
-word bev =
-always bever 12-5-15 Beverly beverage
-word bevy =
+sufword bev = bevies
+begword bever 12-5-15 Beverly beverage
 always bio =
 midendword bious 12-24-1256-234 dubious
 joinword by 356
@@ -786,6 +785,7 @@ begword unble = unblemished
 begword undis = undisturbed
 begword uneas = unease
 begword uneat = uneaten
+sufword unful = unfulfilled
 begword unmen 136-1345-134-26 unmentioned
 word upon 45-136 Dupont
 word us 136
@@ -805,6 +805,7 @@ always W 2456
 lowword was 356
 word wh =
 always wh 156
+midendword whart 2456-125-345-2345 Newhart
 word which 156
 midendword whouse 2456-125-1256-234-15 Newhouse
 word will 2456
@@ -905,6 +906,8 @@ postpunc " 356
 always " 5
 prepunc ' 6-236
 postpunc ' 356-3
+postpunc '' 356
+postpunc ''' 356-3-356
 always ' 3
 endword 'd 3-145
 word 'em = 
@@ -946,6 +949,8 @@ always } 46-23456
 always -com =
 endword -to = pointed-to resource
 always _ 78
+prepunc `` 236
+prepunc ` 6-236
 always ` 4
 always @ 4-1
 always \\ 456-16

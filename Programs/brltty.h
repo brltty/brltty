@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -32,56 +32,56 @@ typedef enum {
 
 /*
  * Structure definition for preferences (settings which are saveable).
- * PREFS_MAGICNUM has to be bumped whenever the definition of
+ * PREFS_MAGIC_NUMBER has to be bumped whenever the definition of
  * Preferences is modified otherwise this structure could be
  * filled with incompatible data from disk.
  */
-#define PREFS_MAGICNUM 0x4005
+#define PREFS_MAGIC_NUMBER 0x4005
 
 typedef struct {
-  unsigned char magicnum[2];
-  unsigned char csrvis;
-  unsigned char spare1;
-  unsigned char attrvis;
+  unsigned char magic[2];
+  unsigned char showCursor;
+  unsigned char version;
+  unsigned char showAttributes;
   unsigned char spare2;
-  unsigned char csrblink;
+  unsigned char blinkingCursor;
   unsigned char spare3;
-  unsigned char capblink;
+  unsigned char blinkingCapitals;
   unsigned char spare4;
-  unsigned char attrblink;
+  unsigned char blinkingAttributes;
   unsigned char spare5;
-  unsigned char csrsize;
+  unsigned char cursorStyle;
   unsigned char spare6;
-  unsigned char csroncnt;
+  unsigned char cursorVisiblePeriod;
   unsigned char spare7;
-  unsigned char csroffcnt;
-  unsigned char spare8;
-  unsigned char caponcnt;
-  unsigned char spare9;
-  unsigned char capoffcnt;
-  unsigned char spare10;
-  unsigned char attroncnt;
+  unsigned char cursorInvisiblePeriod;
+  unsigned char pcmVolume;
+  unsigned char capitalsVisiblePeriod;
+  unsigned char midiVolume;
+  unsigned char capitalsInvisiblePeriod;
+  unsigned char fmVolume;
+  unsigned char attributesVisiblePeriod;
   unsigned char pointerFollowsWindow;
-  unsigned char attroffcnt;
+  unsigned char attributesInvisiblePeriod;
   unsigned char windowFollowsPointer;
-  unsigned char sixdots;
-  unsigned char metamode;
-  unsigned char slidewin;
-  unsigned char eager_slidewin;
-  unsigned char tunes;
-  unsigned char tunedev;
-  unsigned char skpidlns;
+  unsigned char textStyle;
+  unsigned char metaMode;
+  unsigned char slidingWindow;
+  unsigned char eagerSlidingWindow;
+  unsigned char alertTunes;
+  unsigned char tuneDevice;
+  unsigned char skipIdenticalLines;
   unsigned char spare15;
-  unsigned char skpblnkwinsmode;
-  unsigned char dots;
-  unsigned char skpblnkwins;
-  unsigned char midiinstr;
-  unsigned char stcellstyle;
-  unsigned char winovlp;
+  unsigned char blankWindowsSkipMode;
+  unsigned char alertDots;
+  unsigned char skipBlankWindows;
+  unsigned char midiInstrument;
+  unsigned char statusStyle;
+  unsigned char windowOverlap;
 } __attribute__((packed)) Preferences;
 extern Preferences prefs;		/* current preferences settings */
 
-extern brldim brl;			/* braille driver reference */
+extern BrailleDisplay brl;			/* braille driver reference */
 extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */
@@ -97,6 +97,7 @@ extern void updatePreferences (void);
 extern void initializeBraille (void);
 extern void startBrailleDriver (void);
 extern void stopBrailleDriver (void);
+extern int getBrailleCommand (DriverCommandContext cmds);
 extern void clearStatusCells (void);
 extern void setStatusText (const char *text);
 

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define TAILLEPLAGETACTILE 40
+#define BRAILLEDISPLAYSIZE 40
 #define BRLNAME "VisioBraille"
 #define PREFSTYLE ST_None
+/* #define SENDIDREQ */
+#define BRLRAWCAPABLE /* We support raw mode communication */
+#define BRLKEY2CMD /* We support key to brltty commands conversion */

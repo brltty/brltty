@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -75,7 +75,7 @@ static void brl_identify(void)
 	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Brailcom o.p.s. <technik@brailcom.cz>"); 
 }
 
-static void brl_initialize(char **parameters, brldim *brl, const char *brldev)
+static int brl_open(BrailleDisplay *brl, char **parameters, const char *brldev)
 {
 	__label__ __errexit;
 	struct termios newtermios;
@@ -86,8 +86,6 @@ static void brl_initialize(char **parameters, brldim *brl, const char *brldev)
 	/* init geometry */
 	brl->x = 20;
 	brl->y = 1;
-	brl->disp = malloc(brl->x * brl->y + 1);
-	if (brl->disp == NULL) goto __errexit;
 
 	/* open device */
 	if (brldev == NULL)  goto __errexit;
@@ -115,18 +113,15 @@ static void brl_initialize(char **parameters, brldim *brl, const char *brldev)
 				xtbl[n] |= 1 << Tieman[i];
 	message("BRLTTY Ready", 0);
 	beep();
-	return;
+	return 1;
 
 __errexit:
 	LogPrint(LOG_ERR, "Cannot initialize MiniBraille");
-	brl->x = brl->y = -1;
-	if (brl->disp) free(brl->disp);
-	return;
+	return 0;
 }
 
-static void brl_close(brldim *brl)
+static void brl_close(BrailleDisplay *brl)
 {
-	free(brl->disp); /* handles NULL */
 	tcsetattr(brl_fd, TCSADRAIN, &oldtermios);
 	close(brl_fd);
 }
@@ -141,15 +136,15 @@ static void refresh(void)
 	write(brl_fd, datae, sizeof datae);
 };
 
-static void brl_writeWindow(brldim *brl)
+static void brl_writeWindow(BrailleDisplay *brl)
 {
 	int i;
-	for (i = 0; i < 20; i++) xlated[i] = xtbl[brl->disp[i]];
+	for (i = 0; i < 20; i++) xlated[i] = xtbl[brl->buffer[i]];
 	refresh();
 }
 
 
-static int brl_read(DriverCommandContext cmds)
+static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 {
 	unsigned char znak;
 	int rv;
@@ -264,7 +259,7 @@ static int brl_read(DriverCommandContext cmds)
 	return EOF; /* never should reach this */
 }
 
-static void brl_writeStatus(const unsigned char *s)
+static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 {
 	status[0] = xtbl[s[0]];
 	status[1] = xtbl[s[1]];

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -43,7 +43,6 @@
 
 #include "brlconf.h"
 #include "Programs/brl.h"
-#include "Programs/scr.h"
 #include "Programs/misc.h"
 #include "Programs/brl_driver.h"
 
@@ -208,14 +207,13 @@ static void brl_identify(void)
 }
 
 
-static void brl_initialize(char **parameters, brldim *brl, const char *dev)
+static int brl_open(BrailleDisplay *brl, char **parameters, const char *dev)
 {
-  brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
   short ModelID = MODEL;
   unsigned char buffer[DIM_BRL_ID + 6];
 
-  res.disp = rawdata = NULL;	/* clear pointers */
+  rawdata = NULL;	/* clear pointers */
 
   /* Open the Braille display device */
   brl_fd = open(dev, O_RDWR | O_NOCTTY);
@@ -293,46 +291,36 @@ static void brl_initialize(char **parameters, brldim *brl, const char *dev)
   
   /* Set model params */
   model = &Models[ModelID];
-  setHelpPageNumber (ModelID);
-  res.x = model->Cols;		/* initialise size of main display */
-  res.y = BRLROWS;		/* ever is 1 in this type of braille lines */
+  brl->helpPage = ModelID;
+  brl->x = model->Cols;		/* initialise size of main display */
+  brl->y = BRLROWS;		/* ever is 1 in this type of braille lines */
   
   /* Need to calculate the size; Cols + Status + 1 (space between) */
-  BrailleSize = res.x + model->NbStCells + 1;
+  BrailleSize = brl->x + model->NbStCells + 1;
 
   /* Allocate space for buffers */
-  res.disp = (char *) malloc (res.x * res.y);  	    /* for compatibility */
   rawdata = (unsigned char *) malloc (BrailleSize); /* Phisical size */
-  if(!res.disp || !rawdata){
+  if(!rawdata){
      goto failure;
   }    
 
   /* Empty buffers */
-  memset(res.disp, 0, res.x*res.y);
   memset(rawdata, 0, BrailleSize);
   memset(Status, 0, MAX_STCELLS);
 
-  *brl = res;
-return;
+return 1;
 
 failure:;
-  if(res.disp){
-     free(res.disp);
-  }
-  
   if(rawdata){
      free(rawdata);
   }
        
-  brl->x = -1;
-  
-return;
+return 0;
 }
 
 
-static void brl_close(brldim *brl)
+static void brl_close(BrailleDisplay *brl)
 {
-  free(brl->disp);
   free(rawdata);
   tcsetattr(brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
   close(brl_fd);
@@ -343,7 +331,7 @@ static void brl_close(brldim *brl)
 }
 
 
-static void brl_writeWindow(brldim *brl)
+static void brl_writeWindow(BrailleDisplay *brl)
 {
   int i, j;
 
@@ -357,21 +345,21 @@ static void brl_writeWindow(brldim *brl)
   
   /* Make main info to rawdata */
   for(j=0; j < brl->x; j++)
-      rawdata[i++] = TransTable[brl->disp[j]];
+      rawdata[i++] = TransTable[brl->buffer[j]];
      
   /* Write to Braille Display */
   WriteToBrlDisplay(rawdata);
 }
 
 
-static void brl_writeStatus(const unsigned char *st)
+static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *st)
 {
   /* Update status cells */
   memcpy(Status, st, model->NbStCells);
 }
 
 
-static int brl_read(DriverCommandContext cmds)
+static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds)
 {
   int res = EOF;
   long bytes = 0;

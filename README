@@ -2,9 +2,9 @@ BRLTTY is a background process (daemon) providing access to the Linux/Unix
 console (when in text mode) for a blind person using a refreshable braille
 display.
 
-Version 3.1, October 2002
+Version 3.2, February 2003
 
-Copyright (C) 1995-2002 by The BRLTTY Team, All rights reserved.
+Copyright (C) 1995-2003 by The BRLTTY Team, All rights reserved.
 
 BRLTTY comes with ABSOLUTELY NO WARRANTY.
 
@@ -89,12 +89,15 @@ Features
 *  A cut & paste function which is particularly useful for copying long file
    names, copying text between virtual terminals, entering complicated
    commands, etc.
+*  Table driven in-line contracted braille (english grade 2 provided).
+*  Support for multiple braille codes.
+*  Ability to identify an unknown character.
+*  Ability to inspect character highlighting.
 *  An on-line help facility.
 *  A preferences menu.
-*  Support for multiple Braille codes.
+*  Basic speech support.
 *  Modular design allowing relatively easy addition of drivers for other
    Braille displays, or even (hopefully) porting to other Unix-like platforms.
-*  Basic speech support.
 
 -------------------------------------------------------------------------------
 
@@ -109,6 +112,7 @@ BRLTTY has been tested on:
 *  several Linux kernels (1.2.13 and beyond)
 *  all major Linux distributions (including Red Hat, Debian, Slackware, SuSE)
 *  Solaris/Sparc (release 7 and beyond)
+*  Solaris/Intel (release 9 and beyond)
 
 The following Braille displays are supported (serial communication only for
 most of them):
@@ -118,7 +122,7 @@ most of them):
 *  BrailleNote [18/32]
 *  CombiBraille [25/45/85]
 *  EcoBraille [20/40/80]
-*  EuroBraille [Clio-noteBraille 40]
+*  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]
 *  HandyTech [Modular 20/40/80, Wave 40, Star 40/80, Bookworm]
 *  LogText [32]
 *  MDV (protocol 5) [MB208/MB408L/MB408S]

@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the Linux console (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -15,7 +15,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-TOP_DIR = @top_srcdir@
+SRC_TOP = @top_srcdir@/
 SRC_DIR = @srcdir@
-VPATH = @srcdir@
-include $(TOP_DIR)/config.mk
+# VPATH = @srcdir@
+
+BLD_TOP = @top_builddir@
+BLD_DIR = @builddir@
+
+@SET_MAKE@
+include $(SRC_TOP)common.mk
+

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -39,29 +39,25 @@ static void brl_identify(void) {
   LogPrint(LOG_NOTICE, "VideoBraille Driver");
 }
 
-static void brl_initialize(char **parameters, brldim *brl, const char *dev) {
+static int brl_open(BrailleDisplay *brl, char **parameters, const char *dev) {
   /*	Seems to signal en error */ 
-  brl->x=-1;
   if (!vbinit()) {
     /* Theese are pretty static */ 
     brl->x=40;
     brl->y=1;
-    if (!(brl->disp=malloc(brl->x*brl->y))) {
-      LogError("memory allocation");
-      brl->x=-1;
-    }
+    return 1;
   }
+  return 0;
 }
 
-static void brl_close(brldim *brl) {
-  free(brl->disp);
+static void brl_close(BrailleDisplay *brl) {
 }
 
-static void brl_writeWindow(brldim *brl) {
+static void brl_writeWindow(BrailleDisplay *brl) {
   char outbuff[40];
   int i;
 
-  if (!brl || !brl->disp) {
+  if (!brl) {
     return;
   }
   /* Only display something if the data actually differs, this 
@@ -69,10 +65,10 @@ static void brl_writeWindow(brldim *brl) {
   *  but since the darn thing wants to redraw quite frequently otherwise 
   *  this still makes a better lookin result */ 
   for (i = 0; i<40; i++) {
-    if (lastbuff[i]!=brl->disp[i]) {
-      memcpy(lastbuff,brl->disp,40*sizeof(char));
+    if (lastbuff[i]!=brl->buffer[i]) {
+      memcpy(lastbuff,brl->buffer,40*sizeof(char));
       /*  Redefine the given dot-pattern to match ours */
-      vbtranslate(brl->disp, outbuff, 40);
+      vbtranslate(brl->buffer, outbuff, 40);
       vbdisplay(outbuff);
       vbdisplay(outbuff);
       shortdelay(VBREFRESHDELAY);
@@ -81,11 +77,11 @@ static void brl_writeWindow(brldim *brl) {
   }
 }
 
-static void brl_writeStatus (const unsigned char *st) {
+static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 /* The VideoBraille display has no status cells */
 }
 
-static int brl_read(DriverCommandContext cmds) {
+static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
   vbButtons buttons;
   BrButtons(&buttons);
   if (!buttons.keypressed) {

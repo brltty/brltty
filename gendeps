@@ -3,7 +3,7 @@
 # BRLTTY - A background process providing access to the Linux console (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -37,7 +37,7 @@ proc getBuildDirectories {{root ""}} {
          set path [file join $root $name]
       }
    }
-   if {[file exists [file join $root Makefile]]} {
+   if {[file exists [file join $root Makefile.in]]} {
       lappend directories $root
    }
    foreach name [readdir $root] {
@@ -55,16 +55,23 @@ proc skipFile {path} {
    }
    return 0
 }
+proc sourceFile {name} {
+   if {[regexp {^(.*)\.tab\.c$} $name x base]} {
+      return "$base.y"
+   }
+   return ""
+}
 proc dependencyExists {path} {
    if {[file exists $path]} {
       return 1
    }
-   if {[regexp {^(.*)\.tab\.c$} $path x name]} {
-      if {[file exists $name.y]} {
+   if {[file exists $path.in]} {
+      return 1
+   }
+   if {[clength [set source [sourceFile $path]]] > 0} {
+      if {[file exists $source]} {
          return 1
       }
-   } elseif {[file exists $path.in]} {
-      return 1
    }
    return 0
 }
@@ -126,12 +133,17 @@ foreach buildDirectory [lsort $buildDirectories] {
          puts $absoluteStream "# Dependencies for $objectFile:"
          puts $relativeStream "# Dependencies for $objectName:"
          foreach dependency $dependencies($sourceFile) {
-            puts $absoluteStream "\$(TOP_DIR)/$objectFile: \$(TOP_DIR)/$dependency"
+            if {[file exists "$dependency.in"] || ([clength [sourceFile $dependency]] > 0)} {
+               set tree BLD
+            } else {
+               set tree SRC
+            }
+            puts $absoluteStream "\$(BLD_TOP)$objectFile: \$(${tree}_TOP)$dependency"
             puts -nonewline $relativeStream "$objectName: "
             if {[cequal $buildDirectory [file dirname $dependency]]} {
-               puts $relativeStream [file tail $dependency]
+               puts $relativeStream "\$(${tree}_DIR)/[file tail $dependency]"
             } else {
-               puts $relativeStream "\$(TOP_DIR)/$dependency"
+               puts $relativeStream "\$(${tree}_TOP)$dependency"
             }
          }
          puts $absoluteStream "\tcd \$(@D) && \$(MAKE) \$(@F)"

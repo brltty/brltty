@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -15,17 +15,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.71 (February 2002)"
-#define COPYRIGHT "Copyright (C) 1996-2002 by Stéphane Doyon " \
+#define VERSION "BRLTTY driver for TSI displays, version 2.72 (January 2003)"
+#define COPYRIGHT "Copyright (C) 1996-2003 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/braille.c - Braille display driver for TSI displays
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled into BRLTTY versions 3.0.
+ * It is designed to be compiled into BRLTTY version 3.2.
  *
  * History:
+ * Version 2.72 jan2003: brl->buffer now allocated by core.
  * Version 2.71: Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and CMD_SIXDOTS.
  * Version 2.70: Added CR_CUTAPPEND, CR_CUTLINE, CR_SETMARK, CR_GOTOMARK
  *   and CR_SETLEFT. Changed binding for NXSEARCH.. Adjusted PB80 cut&paste
@@ -93,7 +94,6 @@
 #include "brlconf.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "Programs/scr.h"
 #include "Programs/brl_driver.h"
 
 
@@ -382,7 +382,7 @@ CheckCTSLine(int fd)
   }else if(flags & TIOCM_CTS)
     return(1);
   else return(0);
-#else
+#else /* defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS) */
   return(1);
 #endif /* defined(CHECKCTS) && defined(TIOCMGET) && defined(TIOCM_CTS) */
 }
@@ -451,15 +451,14 @@ ResetTypematic (void)
 }
 
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *tty)
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
 {
-  brldim res;			/* return result */
   int i=0;
   char reply[Q_REPLY_LENGTH];
   int speed;
 
-  res.disp = rawdata = prevdata = NULL;
+  rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
   brl_fd = open (tty, O_RDWR | O_NOCTTY);
@@ -612,7 +611,7 @@ brl_initialize (char **parameters, brldim *brl, const char *tty)
     LogPrint(LOG_ERR,"Unrecognized braille display");
     goto failure;
   };
-  setHelpPageNumber(displayType);
+  brl->helpPage = displayType;
 
   no_multiple_updates = 0;
 #ifdef FORCE_DRAIN_AFTER_SEND
@@ -669,15 +668,15 @@ brl_initialize (char **parameters, brldim *brl, const char *tty)
 
   ResetTypematic ();
 
-  res.x = brl_cols;		/* initialise size of display */
-  res.y = BRLROWS;		/* always 1 */
+  brl->x = brl_cols;		/* initialise size of display */
+  brl->y = BRLROWS;		/* always 1 */
 
   /* Allocate space for buffers */
-  dispbuf = res.disp = (unsigned char *) malloc (ncells);
+  dispbuf = (unsigned char *) malloc (ncells);
   prevdata = (unsigned char *) malloc (ncells);
   rawdata = (unsigned char *) malloc (2 * ncells + DIM_BRL_SEND);
   /* 2* to insert 0s for attribute code when sending to the display */
-  if (!res.disp || !prevdata || !rawdata)
+  if (!dispbuf || !prevdata || !rawdata)
     goto failure;
 
   /* Initialize rawdata. It will be filled in and used directly to
@@ -689,25 +688,23 @@ brl_initialize (char **parameters, brldim *brl, const char *tty)
   /* Force rewrite of display on first writebrl */
   memset(prevdata, 0xFF, ncells);
 
-  *brl = res;
-  return;
+  return 1;
 
 failure:;
   LogPrint(LOG_WARNING,"TSI driver giving up");
-  brl_close(&res);
-  brl->x = -1;
-  return;
+  brl_close(brl);
+  return 0;
 }
 
 
 static void 
-brl_close (brldim *brl)
+brl_close (BrailleDisplay *brl)
 {
   if (brl_fd >= 0) {
     tcsetattr (brl_fd, TCSADRAIN, &oldtio);
     close (brl_fd);
   }
-  free (brl->disp);
+  free (dispbuf);
   free (rawdata);
   free (prevdata);
 }
@@ -792,7 +789,7 @@ display (const unsigned char *pattern,
 }
 
 static void
-brl_writeStatus (const unsigned char *s)
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 /* Only the PB80, which actually has 81cells, can be considered to have status
    cells, and it has only one. We could also decide to devote some of
    the cells of the PB65? */
@@ -810,40 +807,41 @@ display_all (unsigned char *pattern)
 
 
 static void 
-brl_writeWindow (brldim *brl)
+brl_writeWindow (BrailleDisplay *brl)
 {
   static int count = 0;
 
-  if (brl->x != brl_cols || brl->y != BRLROWS || brl->disp != dispbuf)
-    return;
-   
+  /* assert: brl->x == brl_cols */
+
+  memcpy(dispbuf, brl->buffer, brl_cols);
+
   if (--count<=0) {
     /* Force an update of the whole display every now and then to clear any
        garble. */
     count = FULL_FRESHEN_EVERY;
-    memcpy(prevdata, brl->disp, ncells);
-    display_all (brl->disp);
+    memcpy(prevdata, dispbuf, ncells);
+    display_all (dispbuf);
   }else if(no_multiple_updates){
     int start, stop;
     
     for(start=0; start<ncells; start++)
-      if(brl->disp[start] != prevdata[start]) break;
+      if(dispbuf[start] != prevdata[start]) break;
     if(start == ncells) return;
     for(stop = ncells-1; stop > start; stop--)
-      if(brl->disp[stop] != prevdata[stop]) break;
+      if(dispbuf[stop] != prevdata[stop]) break;
     
-    memcpy(prevdata+start, brl->disp+start, stop-start+1);
-    display (brl->disp, start, stop);
+    memcpy(prevdata+start, dispbuf+start, stop-start+1);
+    display (dispbuf, start, stop);
   }else{
     int base = 0, i = 0, collecting = 0, simil = 0;
     
     while (i < ncells)
-      if (brl->disp[i] == prevdata[i])
+      if (dispbuf[i] == prevdata[i])
 	{
 	  simil++;
 	  if (collecting && 2 * simil > DIM_BRL_SEND)
 	    {
-	      display (brl->disp, base, i - simil);
+	      display (dispbuf, base, i - simil);
 	      base = i;
 	      collecting = 0;
 	      simil = 0;
@@ -854,14 +852,14 @@ brl_writeWindow (brldim *brl)
 	}
       else
 	{
-	  prevdata[i] = brl->disp[i];
+	  prevdata[i] = dispbuf[i];
 	  collecting = 1;
 	  simil = 0;
 	  i++;
 	}
     
     if (collecting)
-      display (brl->disp, base, i - simil - 1);
+      display (dispbuf, base, i - simil - 1);
   }
 }
 
@@ -930,7 +928,7 @@ do_battery_warn ()
 #define CMD_CUT_CURSOR 0xF0F0F0F0
 
 static int 
-cut_cursor ()
+cut_cursor (BrailleDisplay *brl)
 {
   static int running = 0, pos = -1;
   int res = 0, key;
@@ -969,7 +967,7 @@ cut_cursor ()
       display_all (prevdata);
       prevdata[pos] = oldchar;
 
-      while ((key = brl_read (CMDS_SCREEN)) == EOF) delay(1); /* just yield */
+      while ((key = brl_readCommand (brl, CMDS_SCREEN)) == EOF) delay(1); /* just yield */
       if((key &VAL_BLK_MASK) == CR_CUTBEGIN)
 	  res = CR_CUTBEGIN + pos;
       else if((key &VAL_BLK_MASK) == CR_CUTAPPEND)
@@ -1057,7 +1055,7 @@ cut_cursor ()
 #define MAXREAD 10
 
 static int 
-brl_read (DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
@@ -1430,8 +1428,8 @@ brl_read (DriverCommandContext cmds)
 
   /* speech */
   /* experimental speech support */
-    KEYAND(KEY_CRIGHT | KEY_BLEFT) KEY (KEY_BRIGHT | KEY_BDOWN, CMD_SAY);
-    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SAYALL);
+    KEYAND(KEY_CRIGHT | KEY_BLEFT) KEY (KEY_BRIGHT | KEY_BDOWN, CMD_SAY_LINE);
+    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SAY_BELOW);
     KEY (KEY_BROUND | KEY_BRIGHT, CMD_SPKHOME);
     KEYAND(KEY_CRIGHT | KEY_CUP | KEY_BLEFT | KEY_BUP)
       KEY (KEY_BRIGHT | KEY_BUP, CMD_MUTE);
@@ -1497,7 +1495,7 @@ brl_read (DriverCommandContext cmds)
 
   /* Special: */
   if (res == CMD_CUT_CURSOR)
-    res = cut_cursor ();
+    res = cut_cursor (brl);
   /* This activates cut_cursor(). Done here rather than with KEYSPECIAL macro
      to allow clearing of l and r and adjustment of typematic variables.
      Since cut_cursor() calls readbrl again to get key inputs, it is

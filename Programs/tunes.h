@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -26,15 +26,15 @@ typedef struct {
    unsigned char note;     /* standard MIDI values (0 means silence) */
                            /* 1 through 127 are semitones, 60 is middle C */
    unsigned char duration; /* milliseconds (0 means stop) */
-} ToneDefinition;
-#define TONE_NOTE(duration,note) {note, duration}
-#define TONE_WAIT(duration) TONE_NOTE(duration, 0)
-#define TONE_STOP() TONE_WAIT(0)
+} TuneElement;
+#define TUNE_NOTE(duration,note) (TuneElement){note, duration}
+#define TUNE_REST(duration) TUNE_NOTE(duration, 0)
+#define TUNE_STOP() TUNE_REST(0)
 
 typedef struct {
    char *message;
    unsigned int tactile;
-   ToneDefinition *tones;
+   TuneElement *elements;
 } TuneDefinition;
 #define TUNE_TACTILE(duration,pattern) (((duration) << 8) | (pattern))
 
@@ -59,14 +59,15 @@ extern TuneDefinition tune_done;
 extern TuneDefinition tune_mark_set;
 
 typedef enum {
-  tdSpeaker,
-  tdDac,
+  tdBeeper,
+  tdPcm,
   tdMidi,
-  tdAdlib
+  tdFm
 } TuneDevice;
 
 extern TuneDevice getDefaultTuneDevice (void);
-extern void setTuneDevice (TuneDevice device);
+extern void suppressTuneDeviceOpenErrors (void);
+extern int setTuneDevice (TuneDevice device);
 extern void closeTuneDevice (int force);
 extern void playTune (TuneDefinition *tune);
 

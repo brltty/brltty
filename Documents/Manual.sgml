@@ -12,9 +12,9 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.1, October 2002
+  <date>Version 3.2, February 2003
   <abstract>
-    Copyright &copy; 1995-2002 by The BRLTTY Team - All Rights Reserved.
+    Copyright &copy; 1995-2003 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
     <bf/The GNU General Public License/.
     BRLTTY comes with ABSOLUTELY NO WARRANTY.
@@ -115,9 +115,9 @@ we do welcome any interest in such projects.
     This software has been tested on the following Solaris systems:
     <itemize>
       <item>
-        The Sparc architecture.
+        The Sparc architecture (releases 7, 8, and 9).
       <item>
-        Releases 7, 8, and 9.
+        The Intel architecture (release 9).
     </itemize>
 </descrip>
 
@@ -420,13 +420,10 @@ for any additional display-specific instructions.
       <tag/linux/
         This driver provides direct access to the Linux console screen.
         It's only selectable, and is the default, on Linux systems.
-        It's default screen content inspection device list is
-        <tt>/dev/vcsa /dev/vcsa0 /dev/vcc/a</>.
       <tag/shm/
         This driver provides access to the <tt/screen/ program.
         It's selectable on all systems,
         and is the default on most.
-        It has no default screen content inspection device list.
         The patch for <tt/screen/ which we provide
         (see the <tt/Patches/ subdirectory)
         must be applied.
@@ -439,22 +436,32 @@ for any additional display-specific instructions.
     If a specific driver for the current operating system is available,
     then it's used.
     If not, then <tt/shm/ is used.
-  <tag><tt/--with-screen-device=/<em/device/<label id="build-screen-device"></tag>
-    Specify the devices which may be used to inspect the screen content.
-    If this option isn't specified,
-    then a driver appropriate list of devices is assumed.
 </descrip>
 
 <sect3>Directory Specification<label id="build-directoreis"><p>
 <descrip>
-  <tag><tt/--with-install-root=/<em/directory/<label id="build-install-root"></tag>
-    Specify the directory at which
-    the root file system of the
+  <tag><tt/--with-execute-root=/<em/directory/<label id="build-execute-root"></tag>
+    Specify the directory at which the
     <ref id="hierarchy" name="installed file hierarchy">
-    (or a partial image thereof) is rooted.
+    is to be rooted at run-time.
     The absolute path should be supplied.
     If this option isn't specified,
-    then the local system's root directory is assumed.
+    then the system's root directory is assumed.
+    Use this option if you need to install
+    BRLTTY's run-time files in a non-standard location.
+    You need to use this feature, for example, if you'd like to have
+    more than one version of BRLTTY installed at the same time
+    (see section <ref id="multiple" name="Installing Multiple Versions">
+    for an example of how to do this).
+  <tag><tt/--with-install-root=/<em/directory/<label id="build-install-root"></tag>
+    Specify the directory beneath which the
+    <ref id="hierarchy" name="installed file hierarchy">
+    is to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the run-time package root
+    (see the <ref id="build-execute-root" name="--with-execute-root"> build option)
+    is assumed.
     This directory is only used by
     <ref id="make-install" name="make install">
     and <ref id="make-uninstall" name="make uninstall">.
@@ -462,24 +469,6 @@ for any additional display-specific instructions.
     than the one from which it'll ultimately be executed.
     You need to use this feature, for example,
     if you're building BRLTTY on one system for use on another.
-  <tag><tt/--with-execute-root=/<em/directory/<label id="build-execute-root"></tag>
-    Specify the directory at which the
-    <ref id="hierarchy" name="installed file hierarchy">
-    is to be rooted.
-    The absolute path should be supplied.
-    If this option isn't specified,
-    then the system's root directory is assumed.
-    This directory is normally rooted at the system's root directory, but
-    during <ref id="make-install" name="make install">
-    and <ref id="make-uninstall" name="make uninstall">
-    it's rooted at the directory specified by the
-    <ref id="build-install-root" name="--with-install-root"> build option.
-    Use this option if you need to install any of
-    BRLTTY's run-time files in non-standard locations.
-    You need to use this feature, for example, if you'd like to have
-    more than one version of BRLTTY installed at the same time
-    (see section <ref id="multiple" name="Installing Multiple Versions">
-    for an example of how to do this).
   <tag><tt/--prefix=/<em/directory/<label id="build-portable-root"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
@@ -551,6 +540,13 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--enable-standalone-programs/<label id="build-standalone-programs"></tag>
     Create statically linked, rather than dynamically linked, programs.
     This option removes all dependencies on shared objects at run-time.
+  <tag><tt/--disable-tainted-components/<label id="build-tainted-components"></tag>
+    Exclude those components which have a build-time dependency
+    beyond what a standard system is expected to provide.
+    These include:
+    <itemize>
+      <item>The <bf/ViaVoice/ speech driver.
+    </itemize>
   <tag><tt/--disable-preferences-menu/<label id="build-preferences-menu"></tag>
     Reduce program size by excluding the preferences menu
     (see section <ref id="preferences-menu" name="The Preferences Menu">).
@@ -566,22 +562,27 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--disable-contracted-braille/<label id="build-contracted-braille"></tag>
     Reduce program size by excluding support for contracted braille
     (see section <ref id="contraction" name="Contracted Braille">).
-  <tag><tt/--disable-speaker-tunes/<label id="build-speaker-tunes"></tag>
+  <tag><tt/--disable-speech-support/<label id="build-speech-support"></tag>
+    Reduce program size by excluding support for speech synthesizers.
+  <tag><tt/--disable-beeper-tunes/<label id="build-beeper-tunes"></tag>
     Reduce program size by excluding support for the playing of alert tunes
-    via the built-in PC speaker
-    (see section <ref id="tunes" name="Alert Tunes">).
-  <tag><tt/--disable-dac-tunes/<label id="build-dac-tunes"></tag>
+    (see section <ref id="tunes" name="Alert Tunes">)
+    via the internal beeper (console tone generator).
+  <tag><tt/--disable-pcm-tunes/<label id="build-pcm-tunes"></tag>
     Reduce program size by excluding support for the playing of alert tunes
-    via the Digital to Analog Converter on the sound card
-    (see section <ref id="tunes" name="Alert Tunes">).
+    (see section <ref id="tunes" name="Alert Tunes">)
+    via the digital audio interface on the sound card.
   <tag><tt/--disable-midi-tunes/<label id="build-midi-tunes"></tag>
     Reduce program size by excluding support for the playing of alert tunes
-    via the Musical Instrument Digital Interface on the sound card
-    (see section <ref id="tunes" name="Alert Tunes">).
-  <tag><tt/--disable-adlib-tunes/<label id="build-adlib-tunes"></tag>
+    (see section <ref id="tunes" name="Alert Tunes">)
+    via the Musical Instrument Digital Interface on the sound card.
+  <tag><tt/--disable-fm-tunes/<label id="build-fm-tunes"></tag>
     Reduce program size by excluding support for the playing of alert tunes
-    via the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card
-    (see section <ref id="tunes" name="Alert Tunes">).
+    (see section <ref id="tunes" name="Alert Tunes">)
+    via the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card.
+  <tag><tt/--disable-pm-configfile/<label id="build-pm-configfile"></tag>
+    Reduce program size by excluding support for
+    the Papenmeier driver's configuration file.
   <tag><tt/--enable-gpm/<label id="build-gpm"></tag>
     Include an interface to the <tt/gpm/ application
     so that, on systems which support it,
@@ -634,9 +635,6 @@ They include:
     (see <ref id="make-all" name="make all">),
     and then install the BRLTTY executable, its data files, drivers, and help pages,
     in the correct places and with the correct permissions.
-    The screen content inspection device
-    (see the <ref id="build-screen-device" name="--with-screen-device"> build option)
-    is, if applicable, created if it doesn't already exist.
   <tag>make uninstall<label id="make-uninstall"></tag>
     Remove the BRLTTY executable, its data files, drivers, and help pages,
     from the system.
@@ -860,8 +858,7 @@ ensure that all of its components are installed within the root file system.
 See the <ref id="build-execute-root" name="--with-execute-root">,
 <ref id="build-program-directory" name="--bindir">,
 <ref id="build-data-directory" name="--sysconfdir">,
-<ref id="build-library-directory" name="--libdir">,
-and <ref id="build-screen-device" name="--with-screen-device">
+and <ref id="build-library-directory" name="--libdir">
 build options.
 
 <sect1>Security Considerations<p>
@@ -870,16 +867,16 @@ read and write access for the port to which the braille display is connected,
 read access to <tt>/dev/vcsa</> or equivalent
 (to query the screen dimensions and the cursor position,
 and to review the current screen content and highlighting),
-and read and write accesws to the system console
+and read and write access to the system console
 (for arrow key entry during cursor routing,
 for input character insertion during paste,
 for special key simulation using keys on the braille display,
 for retrieving output character translation and screen font mapping tables,
-and for making the computer's speaker beep).
+and for activation of the internal beeper).
 Access to the needed devices can, of course, be granted to a non-root user
 by changing the file permissions associated with the devices.
 Merely having access to the console, however, isn't enough because
-making the speaker beep and simulating key strokes still require root privilege.
+activating the internal beeper and simulating key strokes still require root privilege.
 So, if you're willing to give up cursor routing, cut&amp;paste, beeps,
 and all that, you can run BRLTTY without root priviledge.
 
@@ -945,10 +942,6 @@ from one location to another.
     If it's specified, then it must be an existing directory.
     If it's not specified, then the location used for the build is assumed.
 </descrip>
-
-The screen content inspection device is also created
-(if it doesn't already exist)
-within the <em/to/ hierarchy.
 
 This utility can be used, for example, to copy BRLTTY to a root disk.
 If a root floppy is mounted as <tt>/mnt</>,
@@ -1103,10 +1096,10 @@ and also provides an easy way to compose new tunes.
   <tag><tt/-d/<em/device/ <tt/--device=/<em/device/</tag>
     The device on which to play the tune.
     <descrip>
-      <tag/speaker/
-        The built-in PC speaker.
-      <tag/dac/
-        The Digital to Analog Converter on the sound card.
+      <tag/beeper/
+        The internal beeper (console tone generator).
+      <tag/pcm/
+        The digital audio interface on the sound card.
       <tag/midi/
         The Musical Instrument Digital Interface on the sound card.
       <tag/fm/
@@ -2160,7 +2153,7 @@ by playing short predefined tunes.
 This feature can be activated and deactivated with
 either the <ref id="command-TUNES" name="TUNES"> command
 or the <ref id="preference-alert-tunes" name="Alert Tunes"> preference.
-The tunes are played on the PC speaker by default,
+The tunes are played via the internal beeper by default,
 but other alternatives can be selected
 with the <ref id="preference-tune-device" name="Tune Device"> preference.
 
@@ -2531,29 +2524,29 @@ Notes:
   <tag>Tune Device<label id="preference-tune-device"></tag>
     Play alert tunes via:
     <descrip>
-      <tag/PC Speaker/
-        The built-in PC speaker.
+      <tag/Beeper/
+        The internal beeper (console tone generator).
         This setting is supported on Linux.
         It's always safe to use,
         although it may be somewhat soft.
         This device isn't available if the
-        <ref id="build-speaker-tunes" name="--disable-speaker-tunes"> build option was specified.
-      <tag/Sound Card/
-        The Digital to Analog Converter on the sound card.
+        <ref id="build-beeper-tunes" name="--disable-beeper-tunes"> build option was specified.
+      <tag/PCM/
+        The digital audio interface on the sound card.
         This setting is supported on Linux (via <tt>/dev/dsp</>),
         and on Solaris (via <tt>/dev/audio</>).
-        It doesn't work when the DAC is already being used
+        It doesn't work when this device is already being used
         by another application.
         This device isn't available if the
-        <ref id="build-dac-tunes" name="--disable-dac-tunes"> build option was specified.
+        <ref id="build-pcm-tunes" name="--disable-pcm-tunes"> build option was specified.
       <tag/MIDI/
         The Musical Instrument Digital Interface on the sound card
         This setting is supported on Linux (via <tt>/dev/sequencer</>).
-        It doesn't work when the MIDI is already being used
+        It doesn't work when this device is already being used
         by another application.
         This device isn't available if the
         <ref id="build-midi-tunes" name="--disable-midi-tunes"> build option was specified.
-      <tag/AdLib/OPL3/SB-FM/
+      <tag/FM/
         The FM synthesizer on an
         AdLib, OPL3, Sound Blaster, or equivalent sound card.
         This setting is supported on Linux.
@@ -2562,13 +2555,10 @@ Notes:
         The results are unpredictable, and potentially not very good,
         if it's used with a sound card which doesn't support this feature.
         This device isn't available if the
-        <ref id="build-adlib-tunes" name="--disable-adlib-tunes"> build option was specified.
+        <ref id="build-fm-tunes" name="--disable-fm-tunes"> build option was specified.
     </descrip>
-    The initial setting is <tt/PC Speaker/ on those platforms which support it,
-    and <tt/Sound Card/ on those platforms which don't.
-    If the selected device isn't available
-    because it was excluded at build-time,
-    then the first device which is available is used instead.
+    The initial setting is <tt/beeper/ on those platforms which support it,
+    and <tt/PCM/ on those platforms which don't.
   <tag>MIDI Instrument<label id="preference-midi-instrument"></tag>
     If the Musical Instrument Digital Interface (MIDI) of the sound card
     is being used to play the alert tunes,
@@ -2590,7 +2580,7 @@ Notes:
     if a tune has been associated with the event,
     and if the selected tune device can be opened,
     then, regardless of the setting of this preference, the dot pattern isn't displayed.
-  <tag>Status Cells Style<label id="preference-status-cells-style"></tag>
+  <tag>Status Style<label id="preference-status-style"></tag>
     This setting specifies the way that the status cells are to be used.
     You shuldn't normally need to play with it.
     It enables BRLTTY's developers to test status cell configurations
@@ -3531,8 +3521,7 @@ If, for some reason, you ever create the data directory
 to set its permissions so that only root can create files within it.
 <tscreen>chmod 755 /etc/brltty</tscreen>
 
-The screen content inspection device (usually <tt>/dev/vcsa</>) is required
-(see the <ref id="build-screen-device" name="--with-screen-device"> build option).
+The screen content inspection device (usually <tt>/dev/vcsa</>) is required.
 It should already exist unless your Linux distribution is quite old.
 If necessary, you can create it with:
 <tscreen><verb>
@@ -3619,7 +3608,11 @@ BRLTTY supports the following braille displays:
     BrailleLite 18/40
   <item>
     <htmlurl url="http://www.eurobraille.fr/Indexuk.htm" name="EuroBraille">:
-    AzerBraille (tested on Clio-noteBraille 40)
+    AzerBraille,
+    Clio,
+    Iris,
+    NoteBraille,
+    Scriba
   <item>
     <htmlurl url="http://www.handialog.com/indexuk.htm" name="Handialog">:
     VisioBraille 2040
@@ -3878,134 +3871,134 @@ Perhaps a picture will make this numbering convention easier to understand.
 | 125  7D  [  21456 ]  right brace                                |
 | 126  7E  [    45  ]  tilde accent                               |
 | 127  7F  [7   456 ]  DEL (delete)                               |
-| 128  80  [7 2   6 ]  <control>                                  |
-| 129  81  [ 3 14 68]  <control>                                  |
-| 130  82  [  2  568]  BPH (break permitted here)                 |
-| 131  83  [  2  5 8]  NBH (no break here)                        |
-| 132  84  [73   5  ]  <control>                                  |
-| 133  85  [   1   8]  NL (next line)                             |
-| 134  86  [ 32 4  8]  SSA (start of selected area)               |
-| 135  87  [ 32 45 8]  ESA (end of selected area)                 |
-| 136  88  [ 3   568]  CTS (character tabulation set)             |
-| 137  89  [   145 8]  CTJ (character tabulation justification)   |
-| 138  8A  [ 32  5 8]  LTS (line tabulation set)                  |
-| 139  8B  [7    5 8]  PLD (partial line down)                    |
-| 140  8C  [   1 5 8]  PLU (partial line up)                      |
-| 141  8D  [732 4 68]  RLF (reverse line feed)                    |
-| 142  8E  [7     6 ]  SS2 (single shift two)                     |
-| 143  8F  [7 214 6 ]  SS3 (single shift three)                   |
-| 144  90  [732  56 ]  DCS (device control string)                |
-| 145  91  [  2   68]  PU1 (private use one)                      |
-| 146  92  [      68]  PU2 (private use two)                      |
-| 147  93  [73  4   ]  STS (set transmit state)                   |
-| 148  94  [73   5 8]  CC (cancel character)                      |
-| 149  95  [    45 8]  MW (message waiting)                       |
-| 150  96  [7  14 6 ]  SGA (start of guarded area)                |
-| 151  97  [    4  8]  EGA (end of guarded area)                  |
-| 152  98  [732 456 ]  SS (start of string)                       |
-| 153  99  [ 3 1 5 8]  <control>                                  |
-| 154  9A  [7 21  6 ]  SCI (single character introducer)          |
-| 155  9B  [     568]  CSI (control sequence introducer)          |
-| 156  9C  [ 3    68]  ST (string terminator)                     |
-| 157  9D  [73  4 6 ]  OSC (operating system command)             |
-| 158  9E  [732  5  ]  PM (privacy message)                       |
-| 159  9F  [7 214 68]  APC (application program command)          |
-| 160  A0  [7       ]  no-break space                             |
-| 161  A1  [73    6 ]  inverted exclamation mark                  |
-| 162  A2  [     5 8]  cent sign                                  |
-| 163  A3  [7   4 6 ]  pound sign                                 |
-| 164  A4  [73    68]  currency sign                              |
-| 165  A5  [    4 68]  yen sign                                   |
-| 166  A6  [7 2   68]  broken bar                                 |
-| 167  A7  [73214568]  section sign                               |
-| 168  A8  [7 2    8]  diaeresis                                  |
-| 169  A9  [7  1456 ]  copyright sign                             |
-| 170  AA  [  21 5 8]  feminine ordinal indicator                 |
-| 171  AB  [7321 568]  left-pointing double angle quotation mark  |
-| 172  AC  [7 2  568]  not sign                                   |
-| 173  AD  [732 4 6 ]  soft hyphen                                |
-| 174  AE  [7   4 68]  registered sign                            |
-| 175  AF  [  2145 8]  macron                                     |
-| 176  B0  [    4568]  degree sign                                |
-| 177  B1  [732  5 8]  plus-minus sign                            |
-| 178  B2  [  21   8]  superscript two                            |
-| 179  B3  [732     ]  superscript three                          |
-| 180  B4  [ 3 1 568]  acute accent                               |
-| 181  B5  [ 3 14  8]  micro sign                                 |
-| 182  B6  [73214568]  pilcrow sign                               |
-| 183  B7  [73      ]  middle dot                                 |
-| 184  B8  [   14  8]  cedilla                                    |
-| 185  B9  [7321 56 ]  superscript one                            |
-| 186  BA  [  2 45 8]  masculine ordinal indicator                |
-| 187  BB  [732 4568]  right-pointing double angle quotation mark |
-| 188  BC  [ 3 1  68]  vulgar fraction one quarter                |
-| 189  BD  [ 321  68]  vulgar fraction one half                   |
-| 190  BE  [73  4 68]  vulgar fraction three quarters             |
-| 191  BF  [ 3     8]  inverted question mark                     |
-| 192  C0  [73     8]  capital a grave                            |
-| 193  C1  [7 2     ]  capital a acute                            |
-| 194  C2  [ 3 1   8]  capital a circumflex                       |
-| 195  C3  [732   6 ]  capital a tilde                            |
-| 196  C4  [7    56 ]  capital a diaeresis                        |
-| 197  C5  [73  456 ]  capital a ring above                       |
-| 198  C6  [73  45  ]  capital ae                                 |
-| 199  C7  [73214 6 ]  capital c cedilla                          |
-| 200  C8  [732    8]  capital e grave                            |
-| 201  C9  [ 32    8]  capital e acute                            |
-| 202  CA  [       8]  capital e circumflex                       |
-| 203  CB  [ 32145 8]  capital e diaeresis                        |
-| 204  CC  [  214  8]  capital i grave                            |
-| 205  CD  [7 2  5 8]  capital i acute                            |
-| 206  CE  [7    568]  capital i circumflex                       |
-| 207  CF  [7  1  6 ]  capital i diaeresis                        |
-| 208  D0  [7    5  ]  capital eth                                |
-| 209  D1  [7 2  56 ]  capital n tilde                            |
-| 210  D2  [  2    8]  capital o grave                            |
-| 211  D3  [ 321   8]  capital o acute                            |
-| 212  D4  [  2 4  8]  capital o circumflex                       |
-| 213  D5  [ 3214 68]  capital o tilde                            |
-| 214  D6  [ 3   5 8]  capital o diaeresis                        |
-| 215  D7  [ 321 5 8]  multiplication sign                        |
-| 216  D8  [73   56 ]  capital o stroke                           |
-| 217  D9  [7     68]  capital u grave                            |
-| 218  DA  [7 2  5  ]  capital u acute                            |
-| 219  DB  [73214568]  capital u circumflex                       |
-| 220  DC  [ 32   68]  capital u diaeresis                        |
-| 221  DD  [732   68]  capital y acute                            |
-| 222  DE  [73   568]  capital thorn                              |
-| 223  DF  [ 3  4568]  small sharp s                              |
-| 224  E0  [ 321 568]  small a grave                              |
+| 128  80  [    4  8]  <control>                                  |
+| 129  81  [   1   8]  <control>                                  |
+| 130  82  [  21   8]  BPH (break permitted here)                 |
+| 131  83  [   14  8]  NBH (no break here)                        |
+| 132  84  [   145 8]  <control>                                  |
+| 133  85  [   1 5 8]  NL (next line)                             |
+| 134  86  [  214  8]  SSA (start of selected area)               |
+| 135  87  [  2145 8]  ESA (end of selected area)                 |
+| 136  88  [  21 5 8]  CTS (character tabulation set)             |
+| 137  89  [  2 4  8]  CTJ (character tabulation justification)   |
+| 138  8A  [  2 45 8]  LTS (line tabulation set)                  |
+| 139  8B  [ 3 1   8]  PLD (partial line down)                    |
+| 140  8C  [ 321   8]  PLU (partial line up)                      |
+| 141  8D  [ 3 14  8]  RLF (reverse line feed)                    |
+| 142  8E  [ 3 145 8]  SS2 (single shift two)                     |
+| 143  8F  [ 3 1 5 8]  SS3 (single shift three)                   |
+| 144  90  [ 3214  8]  DCS (device control string)                |
+| 145  91  [ 32145 8]  PU1 (private use one)                      |
+| 146  92  [ 321 5 8]  PU2 (private use two)                      |
+| 147  93  [ 32 4  8]  STS (set transmit state)                   |
+| 148  94  [ 32 45 8]  CC (cancel character)                      |
+| 149  95  [ 3 1  68]  MW (message waiting)                       |
+| 150  96  [ 321  68]  SGA (start of guarded area)                |
+| 151  97  [  2 4568]  EGA (end of guarded area)                  |
+| 152  98  [ 3 14 68]  SS (start of string)                       |
+| 153  99  [ 3 14568]  <control>                                  |
+| 154  9A  [ 3 1 568]  SCI (single character introducer)          |
+| 155  9B  [  2 4 68]  CSI (control sequence introducer)          |
+| 156  9C  [  21 568]  ST (string terminator)                     |
+| 157  9D  [  214568]  OSC (operating system command)             |
+| 158  9E  [    45 8]  PM (privacy message)                       |
+| 159  9F  [    4568]  APC (application program command)          |
+| 160  A0  [7      8]  no-break space                             |
+| 161  A1  [732 4 6 ]  inverted exclamation mark                  |
+| 162  A2  [7 214 6 ]  cent sign                                  |
+| 163  A3  [73  456 ]  pound sign                                 |
+| 164  A4  [7  14 6 ]  currency sign                              |
+| 165  A5  [73214 6 ]  yen sign                                   |
+| 166  A6  [7  1 56 ]  broken bar                                 |
+| 167  A7  [73   5  ]  section sign                               |
+| 168  A8  [7    5  ]  diaeresis                                  |
+| 169  A9  [732  56 ]  copyright sign                             |
+| 170  AA  [       8]  feminine ordinal indicator                 |
+| 171  AB  [7 21  6 ]  left-pointing double angle quotation mark  |
+| 172  AC  [7 2  56 ]  not sign                                   |
+| 173  AD  [73    6 ]  soft hyphen                                |
+| 174  AE  [732   6 ]  registered sign                            |
+| 175  AF  [7 2   6 ]  macron                                     |
+| 176  B0  [73   56 ]  degree sign                                |
+| 177  B1  [73  4 6 ]  plus-minus sign                            |
+| 178  B2  [732     ]  superscript two                            |
+| 179  B3  [7 2  5  ]  superscript three                          |
+| 180  B4  [73      ]  acute accent                               |
+| 181  B5  [7    56 ]  micro sign                                 |
+| 182  B6  [732  5  ]  pilcrow sign                               |
+| 183  B7  [7   4 6 ]  middle dot                                 |
+| 184  B8  [7     6 ]  cedilla                                    |
+| 185  B9  [7 2     ]  superscript one                            |
+| 186  BA  [7       ]  masculine ordinal indicator                |
+| 187  BB  [73  45  ]  right-pointing double angle quotation mark |
+| 188  BC  [7321 56 ]  vulgar fraction one quarter                |
+| 189  BD  [7321456 ]  vulgar fraction one half                   |
+| 190  BE  [732 456 ]  vulgar fraction three quarters             |
+| 191  BF  [7  1456 ]  inverted question mark                     |
+| 192  C0  [732  5 8]  capital a grave                            |
+| 193  C1  [7  1  68]  capital a acute                            |
+| 194  C2  [7 2    8]  capital a circumflex                       |
+| 195  C3  [7    5 8]  capital a tilde                            |
+| 196  C4  [73214 68]  capital a diaeresis                        |
+| 197  C5  [73  45 8]  capital a ring above                       |
+| 198  C6  [73     8]  capital ae                                 |
+| 199  C7  [73  4 68]  capital c cedilla                          |
+| 200  C8  [732  568]  capital e grave                            |
+| 201  C9  [7 21  68]  capital e acute                            |
+| 202  CA  [732    8]  capital e circumflex                       |
+| 203  CB  [73214568]  capital e diaeresis                        |
+| 204  CC  [732   68]  capital i grave                            |
+| 205  CD  [7  14 68]  capital i acute                            |
+| 206  CE  [7 2  5 8]  capital i circumflex                       |
+| 207  CF  [7321 568]  capital i diaeresis                        |
+| 208  D0  [7     68]  capital eth                                |
+| 209  D1  [7   4 68]  capital n tilde                            |
+| 210  D2  [73   5 8]  capital o grave                            |
+| 211  D3  [7  14568]  capital o acute                            |
+| 212  D4  [7 2  568]  capital o circumflex                       |
+| 213  D5  [7    568]  capital o tilde                            |
+| 214  D6  [732 4 68]  capital o diaeresis                        |
+| 215  D7  [7  1  6 ]  multiplication sign                        |
+| 216  D8  [73  4  8]  capital o stroke                           |
+| 217  D9  [73   568]  capital u grave                            |
+| 218  DA  [7  1 568]  capital u acute                            |
+| 219  DB  [7 2   68]  capital u circumflex                       |
+| 220  DC  [732 4568]  capital u diaeresis                        |
+| 221  DD  [7 214 68]  capital y acute                            |
+| 222  DE  [73    68]  capital thorn                              |
+| 223  DF  [73  4568]  small sharp s                              |
+| 224  E0  [ 32  5 8]  small a grave                              |
 | 225  E1  [   1  68]  small a acute                              |
-| 226  E2  [7  1  68]  small a circumflex                         |
-| 227  E3  [ 3214  8]  small a tilde                              |
-| 228  E4  [ 3  45 8]  small a diaeresis                          |
-| 229  E5  [73  4568]  small a ring above                         |
-| 230  E6  [73  45 8]  small ae                                   |
-| 231  E7  [73214 68]  small c cedilla                            |
-| 232  E8  [ 32 4 68]  small e grave                              |
+| 226  E2  [  2    8]  small a circumflex                         |
+| 227  E3  [     5 8]  small a tilde                              |
+| 228  E4  [ 3214 68]  small a diaeresis                          |
+| 229  E5  [ 3  45 8]  small a ring above                         |
+| 230  E6  [ 3     8]  small ae                                   |
+| 231  E7  [ 3  4 68]  small c cedilla                            |
+| 232  E8  [ 32  568]  small e grave                              |
 | 233  E9  [  21  68]  small e acute                              |
-| 234  EA  [7 21  68]  small e circumflex                         |
-| 235  EB  [  214 68]  small e diaeresis                          |
-| 236  EC  [ 3  4  8]  small i grave                              |
+| 234  EA  [ 32    8]  small e circumflex                         |
+| 235  EB  [ 3214568]  small e diaeresis                          |
+| 236  EC  [ 32   68]  small i grave                              |
 | 237  ED  [   14 68]  small i acute                              |
-| 238  EE  [7  14 68]  small i circumflex                         |
-| 239  EF  [  214568]  small i diaeresis                          |
-| 240  F0  [ 32  568]  small eth                                  |
-| 241  F1  [ 3 145 8]  small n tilde                              |
-| 242  F2  [ 3  4 68]  small o grave                              |
+| 238  EE  [  2  5 8]  small i circumflex                         |
+| 239  EF  [ 321 568]  small i diaeresis                          |
+| 240  F0  [      68]  small eth                                  |
+| 241  F1  [    4 68]  small n tilde                              |
+| 242  F2  [ 3   5 8]  small o grave                              |
 | 243  F3  [   14568]  small o acute                              |
-| 244  F4  [7  14568]  small o circumflex                         |
-| 245  F5  [7  1 56 ]  small o tilde                              |
-| 246  F6  [  2 4 68]  small o diaeresis                          |
-| 247  F7  [73  4  8]  division sign                              |
-| 248  F8  [7      8]  small o stroke                             |
-| 249  F9  [ 32 4568]  small u grave                              |
+| 244  F4  [  2  568]  small o circumflex                         |
+| 245  F5  [     568]  small o tilde                              |
+| 246  F6  [ 32 4 68]  small o diaeresis                          |
+| 247  F7  [73  4   ]  division sign                              |
+| 248  F8  [ 3  4  8]  small o stroke                             |
+| 249  F9  [ 3   568]  small u grave                              |
 | 250  FA  [   1 568]  small u acute                              |
-| 251  FB  [7  1 568]  small u circumflex                         |
-| 252  FC  [  21 568]  small u diaeresis                          |
-| 253  FD  [732  568]  small y acute                              |
-| 254  FE  [7321456 ]  small thorn                                |
-| 255  FF  [ 3214568]  small y diaeresis                          |
+| 251  FB  [  2   68]  small u circumflex                         |
+| 252  FC  [ 32 4568]  small u diaeresis                          |
+| 253  FD  [  214 68]  small y acute                              |
+| 254  FE  [ 3    68]  small thorn                                |
+| 255  FF  [ 3  4568]  small y diaeresis                          |
 +-----------------------------------------------------------------+
 </verb></tscreen>
 

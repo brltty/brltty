@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -38,6 +38,32 @@
 
 #include "misc.h"
 #include "system.h"
+
+char *
+getBootParameters (void) {
+  const char *path = "/proc/cmdline";
+  FILE *file = fopen(path, "r");
+  if (file) {
+    char *parameters = strdupWrapper("");
+    char buffer[0X1000];
+    char *line = fgets(buffer, sizeof(buffer), file);
+    if (line) {
+      const char *prefix = "brltty=";
+      const unsigned int prefixLength = strlen(prefix);
+      char *token;
+      while ((token = strtok(line, " \n"))) {
+        line = NULL;
+        if (memcmp(token, prefix, prefixLength) == 0) {
+          free(parameters);
+          parameters = strdupWrapper(token + prefixLength);
+        }
+      }
+    }
+    fclose(file);
+    return parameters;
+  }
+  return NULL;
+}
 
 void *
 loadSharedObject (const char *path) {
@@ -105,19 +131,17 @@ stopBeep (void) {
   return 0;
 }
 
-#ifdef ENABLE_DAC_TUNES
+#ifdef ENABLE_PCM_TUNES
 int
-getDacDevice (void) {
+getPcmDevice (int errorLevel) {
   const char *path = "/dev/dsp";
   int descriptor = open(path, O_WRONLY|O_NONBLOCK);
-  if (descriptor == -1) {
-    LogPrint(LOG_ERR, "Cannot open DAC device: %s: %s", path, strerror(errno));
-  }
+  if (descriptor == -1) LogPrint(errorLevel, "Cannot open PCM device: %s: %s", path, strerror(errno));
   return descriptor;
 }
 
 int
-getDacBlockSize (int descriptor) {
+getPcmBlockSize (int descriptor) {
   int fragmentCount = (1 << 0X10) - 1;
   int fragmentShift = 7;
   int fragmentSize = 1 << fragmentShift;
@@ -131,7 +155,7 @@ getDacBlockSize (int descriptor) {
 }
 
 int
-getDacSampleRate (int descriptor) {
+getPcmSampleRate (int descriptor) {
   if (descriptor != -1) {
     int sampleRate;
     if (ioctl(descriptor, SOUND_PCM_READ_RATE, &sampleRate) != -1) return sampleRate;
@@ -140,7 +164,7 @@ getDacSampleRate (int descriptor) {
 }
 
 int
-getDacChannelCount (int descriptor) {
+getPcmChannelCount (int descriptor) {
   if (descriptor != -1) {
     int channelCount;
     if (ioctl(descriptor, SOUND_PCM_READ_CHANNELS, &channelCount) != -1) return channelCount;
@@ -148,37 +172,102 @@ getDacChannelCount (int descriptor) {
   return 1;
 }
 
-DacAmplitudeFormat
-getDacAmplitudeFormat (int descriptor) {
+PcmAmplitudeFormat
+getPcmAmplitudeFormat (int descriptor) {
   if (descriptor != -1) {
     int format = AFMT_QUERY;
     if (ioctl(descriptor, SNDCTL_DSP_SETFMT, &format) != -1) {
       switch (format) {
         default:          break;
-        case AFMT_U8:     return DAC_FMT_U8;
-        case AFMT_S8:     return DAC_FMT_S8;
-        case AFMT_U16_BE: return DAC_FMT_U16B;
-        case AFMT_S16_BE: return DAC_FMT_S16B;
-        case AFMT_U16_LE: return DAC_FMT_U16L;
-        case AFMT_S16_LE: return DAC_FMT_S16L;
-        case AFMT_MU_LAW: return DAC_FMT_ULAW;
+        case AFMT_U8:     return PCM_FMT_U8;
+        case AFMT_S8:     return PCM_FMT_S8;
+        case AFMT_U16_BE: return PCM_FMT_U16B;
+        case AFMT_S16_BE: return PCM_FMT_S16B;
+        case AFMT_U16_LE: return PCM_FMT_U16L;
+        case AFMT_S16_LE: return PCM_FMT_S16L;
+        case AFMT_MU_LAW: return PCM_FMT_ULAW;
       }
     }
   }
-  return DAC_FMT_UNKNOWN;
+  return PCM_FMT_UNKNOWN;
 }
-#endif /* ENABLE_DAC_TUNES */
+#endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES
 static MidiBufferFlusher flushMidiBuffer;
+static int midiDevice;
+
+#ifndef SAMPLE_TYPE_AWE
+#  define SAMPLE_TYPE_AWE 0x20
+#endif /* SAMPLE_TYPE_AWE */
+
 int
-getMidiDevice (MidiBufferFlusher flushBuffer) {
+getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
   const char *path = "/dev/sequencer";
   int descriptor = open(path, O_WRONLY);
   if (descriptor == -1) {
-    LogPrint(LOG_ERR, "Cannot open MIDI device: %s: %s", path, strerror(errno));
+    LogPrint(errorLevel, "Cannot open MIDI device: %s: %s", path, strerror(errno));
   } else {
     flushMidiBuffer = flushBuffer;
+
+    {
+      int count;
+      int awe = -1;
+      int fm = -1;
+      int gus = -1;
+      int ext = -1;
+
+      if (ioctl(descriptor, SNDCTL_SEQ_NRSYNTHS, &count) != -1) {
+        int index;
+        for (index=0; index<count; ++index) {
+          struct synth_info info;
+          info.device = index;
+          if (ioctl(descriptor, SNDCTL_SYNTH_INFO, &info) != -1) {
+            switch (info.synth_type) {
+              case SYNTH_TYPE_SAMPLE:
+                switch (info.synth_subtype) {
+                  case SAMPLE_TYPE_AWE:
+                    awe = index;
+                    continue;
+                  case SAMPLE_TYPE_GUS:
+                    gus = index;
+                    continue;
+                }
+                break;
+              case SYNTH_TYPE_FM:
+                fm = index;
+                continue;
+            }
+            LogPrint(LOG_DEBUG, "Unknown synthesizer: %d[%d]: %s",
+                     info.synth_type, info.synth_subtype, info.name);
+          } else {
+            LogPrint(errorLevel, "Cannot get description for synthesizer %d: %s",
+                     index, strerror(errno));
+          }
+        }
+
+        if (gus >= 0)
+          if (ioctl(descriptor, SNDCTL_SEQ_RESETSAMPLES, &gus) == -1)
+            LogPrint(errorLevel, "Cannot reset samples for gus synthesizer %d: %s",
+                     gus, strerror(errno));
+      } else {
+        LogPrint(errorLevel, "Cannot get MIDI synthesizer count: %s",
+                 strerror(errno));
+      }
+
+      if (ioctl(descriptor, SNDCTL_SEQ_NRMIDIS, &count) != -1) {
+        if (count > 0) ext = count - 1;
+      } else {
+        LogPrint(errorLevel, "Cannot get MIDI device count: %s",
+                 strerror(errno));
+      }
+
+      midiDevice = (awe >= 0)? awe:
+                   (gus >= 0)? gus:
+                   (fm >= 0)? fm:
+                   (ext >= 0)? ext:
+                   0;
+    }
   }
   return descriptor;
 }
@@ -191,8 +280,8 @@ seqbuf_dump (void) {
 }
 
 void
-setMidiInstrument (unsigned char device, unsigned char channel, unsigned char instrument) {
-  SEQ_SET_PATCH(device, channel, instrument);
+setMidiInstrument (unsigned char channel, unsigned char instrument) {
+  SEQ_SET_PATCH(midiDevice, channel, instrument);
 }
 
 void
@@ -208,13 +297,13 @@ endMidiBlock (int descriptor) {
 }
 
 void
-startMidiNote (unsigned char device, unsigned char channel, unsigned char note) {
-  SEQ_START_NOTE(device, channel, note, 0X7F);
+startMidiNote (unsigned char channel, unsigned char note, unsigned char volume) {
+  SEQ_START_NOTE(midiDevice, channel, note, 0X7F*volume/100);
 }
 
 void
-stopMidiNote (unsigned char device, unsigned char channel, unsigned char note) {
-  SEQ_STOP_NOTE(device, channel, note, 0X7F);
+stopMidiNote (unsigned char channel) {
+  SEQ_STOP_NOTE(midiDevice, channel, 0, 0);
 }
 
 void
@@ -224,10 +313,12 @@ insertMidiWait (int duration) {
 #endif /* ENABLE_MIDI_TUNES */
 
 int
-enablePorts (unsigned short int base, unsigned short int count) {
+enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
 #ifdef HAVE_SYS_IO_H
   if (ioperm(base, count, 1) != -1) return 1;
-  LogPrint(LOG_ERR, "Port enable error: %u.%u: %s", base, count, strerror(errno));
+  LogPrint(errorLevel, "Port enable error: %u.%u: %s", base, count, strerror(errno));
+#else /* HAVE_SYS_IO_H */
+  LogPrint(errorLevel, "I/O ports not supported.");
 #endif /* HAVE_SYS_IO_H */
   return 0;
 }
@@ -245,7 +336,7 @@ unsigned char
 readPort1 (unsigned short int port) {
 #ifdef HAVE_SYS_IO_H
   return inb(port);
-#else
+#else /* HAVE_SYS_IO_H */
   return 0;
 #endif /* HAVE_SYS_IO_H */
 }

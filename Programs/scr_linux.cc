@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -22,8 +22,6 @@
  * run-time shared libraries, nor be a huge executable.
  */
 
-#define SCR_C 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -41,7 +39,6 @@
 
 #include "misc.h"
 #include "scr.h"
-#include "scr_base.h"
 #include "scr_linux.h"
 
 
@@ -240,54 +237,71 @@ void LinuxScreen::logApplicationCharacterMap (void) {
   }
 }
 
-static const char *findDevice (char *devices) {
-  char *current = NULL;
-  int exists = 0;
+static const char *findDevicePath (const char *paths, const char *description, int mode) {
+  char *devices = strdupWrapper(paths);
+  char *tokens = devices;
   const char *delimiters = " ";
+  char *path = NULL;
+  int exists = 0;
   char *device;
-  while ((device = strtok(devices, delimiters))) {
-    devices = NULL;
+  while ((device = strtok(tokens, delimiters))) {
+    tokens = NULL;
     device = strdupWrapper(device);
-    LogPrint(LOG_DEBUG, "Checking device '%s'.", device);
-    if (access(device, R_OK|W_OK) != -1) {
-      if (current) free(current);
-      current = device;
-      break;
+    LogPrint(LOG_DEBUG, "Checking %s Device: %s",
+             description, device);
+    if (access(device, mode) == -1) {
+      LogPrint(LOG_DEBUG, "%s Device access error: %s: %s",
+               description, device, strerror(errno));
+    } else {
+      struct stat status;
+      if (stat(device, &status) == -1) {
+        LogPrint(LOG_ERR, "%s Device stat error: %s: %s",
+                 description, device, strerror(errno));
+      } else if (!S_ISCHR(status.st_mode)) {
+        LogPrint(LOG_ERR, "%s Device not character special: %s",
+                 description, device);
+      } else {
+        if (path) free(path);
+        path = device;
+        exists = 1;
+        break;
+      }
     }
-    LogPrint(LOG_DEBUG, "Cannot access device '%s': %s",
-             device, strerror(errno));
     if (errno != ENOENT) {
       if (!exists) {
         exists = 1;
-        if (current) {
-          free(current);
-          current = NULL;
+        if (path) {
+          free(path);
+          path = NULL;
         }
       }
     }
-    if (current)
+    if (path)
       free(device);
     else
-      current = device;
+      path = device;
   }
-  return current;
+  free(devices);
+  return path;
 }
 
-int LinuxScreen::setScreenPath (void) {
-  char *devices = strdupWrapper(SCREEN_DEVICE);
-  LogPrint(LOG_DEBUG, "Screen device list: %s", devices);
-  if ((screenPath = findDevice(devices))) {
-    LogPrint(LOG_INFO, "Screen Device: %s", screenPath);
+static int setDevicePath (const char *&path, const char *paths, const char *description, int mode) {
+  LogPrint(LOG_DEBUG, "%s Device List: %s", description, paths);
+  if ((path = findDevicePath(paths, description, mode))) {
+    LogPrint(LOG_INFO, "%s Device: %s", description, path);
     return 1;
   } else {
-    LogPrint(LOG_ERR, "Screen device not specified.");
+    LogPrint(LOG_ERR, "%s Device not specified.", description);
   }
   return 0;
 }
 
+int LinuxScreen::setScreenPath (void) {
+  return setDevicePath(screenPath, LINUX_SCREEN_DEVICES, "Screen", R_OK|W_OK);
+}
+
 int LinuxScreen::setConsolePath (void) {
-  consolePath = "/dev/tty0";
-  return 1;
+  return setDevicePath(consolePath, LINUX_CONSOLE_DEVICES, "Console", R_OK|W_OK);
 }
 
 
@@ -307,10 +321,40 @@ static char *makePath (const char *base, unsigned char vt) {
   return strdup(base);
 }
 
+static int openDevice (const char *path, const char *description, int flags, int major, int minor) {
+  LogPrint(LOG_DEBUG, "Opening %s device: %s", description, path);
+  int file = ::open(path, flags);
+  if (file != -1) return file;
+  int create = errno == ENOENT;
+  LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
+           description, path, strerror(errno));
+
+  if (create) {
+    mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
+    LogPrint(LOG_NOTICE, "Creating %s device: %s mode=%06o major=%d minor=%d",
+             description, path, mode, major, minor);
+    if (mknod(path, mode, makedev(major, minor)) == -1) {
+      LogPrint(LOG_ERR, "Cannot create %s device: %s: %s",
+               description, path, strerror(errno));
+    } else {
+      if ((file = ::open(path, flags)) != -1) return file;
+      LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
+               description, path, strerror(errno));
+      if (unlink(path) == -1)
+        LogPrint(LOG_ERR, "Cannot remove %s device: %s: %s",
+                 description, path, strerror(errno));
+      else
+        LogPrint(LOG_NOTICE, "Removed %s device: %s",
+                 description, path);
+    }
+  }
+  return -1;
+}
+
 int LinuxScreen::openScreen (unsigned char vt) {
   char *path = makePath(screenPath, vt);
   if (path) {
-    int screen = ::open(path, O_RDWR);
+    int screen = openDevice(path, "screen", O_RDWR, 7, 0X80|vt);
     if (screen != -1) {
       if (openConsole(vt)) {
         closeScreen();
@@ -321,9 +365,6 @@ int LinuxScreen::openScreen (unsigned char vt) {
         return 1;
       }
       ::close(screen);
-    } else {
-      LogPrint(LOG_ERR, "Cannot open screen device '%s': %s",
-               path, strerror(errno));
     }
     free(path);
   }
@@ -333,16 +374,13 @@ int LinuxScreen::openScreen (unsigned char vt) {
 int LinuxScreen::openConsole (unsigned char vt) {
   char *path = makePath(consolePath, vt);
   if (path) {
-    int console = ::open(path, O_RDWR|O_NOCTTY);
+    int console = openDevice(path, "console", O_RDWR|O_NOCTTY, 4, vt);
     if (console != -1) {
       closeConsole();
       consoleDescriptor = console;
       LogPrint(LOG_DEBUG, "Console opened: %s: fd=%d", path, consoleDescriptor);
       free(path);
       return 1;
-    } else {
-      LogPrint(LOG_ERR, "Cannot open console device '%s': %s",
-               path, strerror(errno));
     }
     free(path);
   }
@@ -506,7 +544,7 @@ int LinuxScreen::determineApplicationCharacterMap (int force) {
     logApplicationCharacterMap();
     name = "iso01";
   }
-  LogPrint(LOG_INFO, "Selected application character map: %s", name);
+  LogPrint(LOG_INFO, "Application Character Map: %s", name);
   return 1;
 }
 
@@ -608,13 +646,17 @@ void LinuxScreen::describe (ScreenDescription &desc) {
 void LinuxScreen::getScreenDescription (ScreenDescription &stat) {
   if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
     unsigned char buffer[4];
-    if (::read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
+    int count = ::read(screenDescriptor, buffer, sizeof(buffer));
+    if (count == sizeof(buffer)) {
       stat.rows = buffer[0];
       stat.cols = buffer[1];
       stat.posx = buffer[2];
       stat.posy = buffer[3];
+    } else if (count == -1) {
+      LogError("Screen header read");
     } else {
-      LogError("Screen read");
+      LogPrint(LOG_ERR, "Truncated screen header: expected %d bytes, read %d.",
+               sizeof(buffer), count);
     }
   } else {
     LogError("Screen seek");
@@ -643,7 +685,7 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
     int text = mode == SCR_TEXT;
     off_t start = 4 + (box.top * description.cols + box.left) * 2;
     if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
-      size_t length = box.width * 2;
+      int length = box.width * 2;
       unsigned char line[length];
       unsigned char *target = buffer;
       off_t increment = description.cols * 2 - length;
@@ -654,10 +696,18 @@ unsigned char *LinuxScreen::read (ScreenBox box, unsigned char *buffer, ScreenMo
             return NULL;
           }
         }
-        if (::read(screenDescriptor, line, length) == -1) {
-          LogError("Screen read");
+
+        int count = ::read(screenDescriptor, line, length);
+        if (count != length) {
+          if (count == -1) {
+            LogError("Screen data read");
+          } else {
+            LogPrint(LOG_ERR, "Truncated screen data: expected %d bytes, read %d.",
+                     length, count);
+          }
           return NULL;
         }
+
         unsigned char *source = line;
         if (text) {
           unsigned char src[box.width];

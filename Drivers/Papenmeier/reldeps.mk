@@ -1,51 +1,48 @@
 # Dependencies for braille.o:
-braille.o: braille.c
-braille.o: $(TOP_DIR)/config.h
-braille.o: brlconf.h
-braille.o: $(TOP_DIR)/Programs/brl.h
-braille.o: $(TOP_DIR)/Programs/scr.h
-braille.o: $(TOP_DIR)/Programs/misc.h
-braille.o: $(TOP_DIR)/Programs/brl_driver.h
-braille.o: config.tab.c
-braille.o: brl-cfg.h
+braille.o: $(SRC_DIR)/braille.c
+braille.o: $(BLD_TOP)config.h
+braille.o: $(SRC_DIR)/brlconf.h
+braille.o: $(SRC_TOP)Programs/brl.h
+braille.o: $(SRC_TOP)Programs/misc.h
+braille.o: $(SRC_TOP)Programs/brl_driver.h
+braille.o: $(BLD_DIR)/config.tab.c
+braille.o: $(SRC_DIR)/brl-cfg.h
 
 # Dependencies for config.tab.c:
-config.tab.c: config.y
-config.tab.c: $(TOP_DIR)/config.h
-config.tab.c: $(TOP_DIR)/Programs/brl.h
-config.tab.c: brl-cfg.h
+config.tab.c: $(SRC_DIR)/config.y
+config.tab.c: $(BLD_TOP)config.h
+config.tab.c: $(SRC_DIR)/brl-cfg.h
+config.tab.c: $(SRC_TOP)Programs/brl.h
 
 # Dependencies for dump-codes.o:
-dump-codes.o: dump-codes.c
-dump-codes.o: $(TOP_DIR)/config.h
+dump-codes.o: $(SRC_DIR)/dump-codes.c
+dump-codes.o: $(BLD_TOP)config.h
 
 # Dependencies for read_config.o:
-read_config.o: read_config.c
-read_config.o: config.tab.c
+read_config.o: $(SRC_DIR)/read_config.c
+read_config.o: $(BLD_DIR)/config.tab.c
 
 # Dependencies for serial.o:
-serial.o: serial.c
-serial.o: braille.c
-serial.o: brl-cfg.h
-serial.o: brlconf.h
-serial.o: config.tab.c
-serial.o: $(TOP_DIR)/Programs/brl.h
-serial.o: $(TOP_DIR)/Programs/brl_driver.h
-serial.o: $(TOP_DIR)/Programs/misc.h
-serial.o: $(TOP_DIR)/Programs/scr.h
-serial.o: $(TOP_DIR)/config.h
-serial.o: $(TOP_DIR)/Programs/misc.c
+serial.o: $(SRC_DIR)/serial.c
+serial.o: $(SRC_DIR)/braille.c
+serial.o: $(SRC_DIR)/brl-cfg.h
+serial.o: $(SRC_DIR)/brlconf.h
+serial.o: $(BLD_DIR)/config.tab.c
+serial.o: $(SRC_TOP)Programs/brl.h
+serial.o: $(SRC_TOP)Programs/brl_driver.h
+serial.o: $(SRC_TOP)Programs/misc.h
+serial.o: $(BLD_TOP)config.h
+serial.o: $(SRC_TOP)Programs/misc.c
 
 # Dependencies for simulate.o:
-simulate.o: simulate.c
-simulate.o: braille.c
-simulate.o: brl-cfg.h
-simulate.o: brlconf.h
-simulate.o: config.tab.c
-simulate.o: $(TOP_DIR)/Programs/brl.h
-simulate.o: $(TOP_DIR)/Programs/brl_driver.h
-simulate.o: $(TOP_DIR)/Programs/misc.h
-simulate.o: $(TOP_DIR)/Programs/scr.h
-simulate.o: $(TOP_DIR)/config.h
-simulate.o: $(TOP_DIR)/Programs/misc.c
+simulate.o: $(SRC_DIR)/simulate.c
+simulate.o: $(SRC_DIR)/braille.c
+simulate.o: $(SRC_DIR)/brl-cfg.h
+simulate.o: $(SRC_DIR)/brlconf.h
+simulate.o: $(BLD_DIR)/config.tab.c
+simulate.o: $(SRC_TOP)Programs/brl.h
+simulate.o: $(SRC_TOP)Programs/brl_driver.h
+simulate.o: $(SRC_TOP)Programs/misc.h
+simulate.o: $(BLD_TOP)config.h
+simulate.o: $(SRC_TOP)Programs/misc.c
 

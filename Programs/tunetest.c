@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -45,12 +45,17 @@ BEGIN_OPTION_TABLE
   {'i', "instrument", "instrument", NULL, 0,
    "Name of MIDI instrument."},
 #endif /* ENABLE_MIDI_TUNES */
+  {'v', "level", "volume", NULL, 0,
+   "Output volume."},
 END_OPTION_TABLE
+
+static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
 static unsigned int opt_tuneDevice;
 #ifdef ENABLE_MIDI_TUNES
 static unsigned char opt_midiInstrument = 0;
 #endif /* ENABLE_MIDI_TUNES */
+static short opt_outputVolume = 50;
 
 #ifdef ENABLE_MIDI_TUNES
 static unsigned char
@@ -94,16 +99,17 @@ handleOption (const int option) {
   switch (option) {
     default:
       return 0;
-    case 'd': {
-      const char *devices[] = {"speaker", "dac", "midi", "fm", NULL};
-      opt_tuneDevice = wordArgument(optarg, devices, "device");
+    case 'd':
+      opt_tuneDevice = wordArgument(optarg, deviceNames, "device");
       break;
-    }
 #ifdef ENABLE_MIDI_TUNES
     case 'i':
       opt_midiInstrument = instrumentArgument(optarg);
       break;
 #endif /* ENABLE_MIDI_TUNES */
+    case 'v':
+      opt_outputVolume = integerArgument(optarg, 0, 100, "level");
+      break;
   }
   return 1;
 }
@@ -119,31 +125,48 @@ main (int argc, char *argv[]) {
     fprintf(stderr, "%s: Missing duration.\n", programName);
   } else {
     unsigned int count = argc / 2;
-    ToneDefinition *tones = (ToneDefinition *)mallocWrapper((sizeof(*tones) * count) + 1);
-    ToneDefinition *tone = tones;
+    TuneElement *elements = (TuneElement *)mallocWrapper((sizeof(*elements) * count) + 1);
+    TuneElement *element = elements;
 
     while (argc) {
       short note = integerArgument(*argv++, 1, 127, "note");
       short duration = integerArgument(*argv++, 1, 255, "duration");
       argc -= 2;
-      *(tone++) = (ToneDefinition)TONE_NOTE(duration, note);
+      *(element++) = TUNE_NOTE(duration, note);
     }
-    *tone = (ToneDefinition)TONE_STOP();
+    *element = TUNE_STOP();
+
+    if (!setTuneDevice(opt_tuneDevice)) {
+      fprintf(stderr, "%s: Unsupported tune device: %s\n", programName, deviceNames[opt_tuneDevice]);
+      exit(3);
+    }
 
     memset(&prefs, 0, sizeof(prefs));
-    prefs.tunes = 1;
-    prefs.dots = 0;
-    setTuneDevice(opt_tuneDevice);
+    prefs.alertDots = 0;
+    prefs.alertTunes = 1;
+    switch (opt_tuneDevice) {
+      default:
+        break;
+      case tdPcm:
+        prefs.pcmVolume = opt_outputVolume;
+        break;
+      case tdMidi:
+        prefs.midiVolume = opt_outputVolume;
+        break;
+      case tdFm:
+        prefs.fmVolume = opt_outputVolume;
+        break;
+    }
 #ifdef ENABLE_MIDI_TUNES
-    prefs.midiinstr = opt_midiInstrument;
+    prefs.midiInstrument = opt_midiInstrument;
 #endif /* ENABLE_MIDI_TUNES */
     {
-      TuneDefinition tune = {NULL, 0, tones};
+      TuneDefinition tune = {NULL, 0, elements};
       playTune(&tune);
       closeTuneDevice(1);
     }
 
-    free(tones);
+    free(elements);
     return 0;
   }
   return 2;

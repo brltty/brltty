@@ -1,6 +1,69 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+February 3, 2003:
+ - BRLTTY 3.2 released:
+   Russian text table (text.ru.tbl) based on koi8-r. Hans Schou <chlor@schou.dk>
+   Man page (brltty.1). (dm)
+   Fixed Papenmeier easy access bar support. (dm)
+   Speech changes: (dm)
+      CMD_SAY renamed to CMD_SAY_LINE.
+      CMCD_SAYALL renamed to CMD_SAY_BELOW.
+      CMD_SAY_ABOVE added.
+   Papenmeier driver robustness enhancements. (dm)
+   Type char is unsigned on arm, powerpc and s390. (dm)
+      HandyTech/braille.c (keys.column, keys.status)
+      VideoBraille/vblow.c (BrButtons)
+   Added --disable-speech-support. (dm)
+   Added --disable-tainted-components. (dm)
+   Updated config.guess and config.sub (from automake-1.5). (dm)
+   Updated VisioBraille driver. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
+   Support building in another directory. (dm)
+   Fix Linux MIDI device initialization. (dm)
+   Add core support for visual displays. (dm)
+   Renamed help source from brlttyh*.txt to help*.txt. (dm)
+   Added --disable-pm-configfile. (dm)
+   Added braille display resize mechanism. (dm)
+   Moved brl->buffer allocation from driver to core. (dm,sd)
+      (all but: LogText, Vario)
+   Braille driver changes. (dm)
+      Renamed type brldim to BrailleDisplay.
+      Renamed field brl->disp to brl->buffer.
+      Renamed routine brl_initialize to brl_open.
+      Renamed routine brl_read to brl_readCommand.
+      brl_open success now determined by returned boolean.
+      Reordered brl_open parameters to put BrailleDisplay first.
+      Use brl->helpPage instead of setHelpPageNumber().
+      Pass BrailleDisplay to readCommand and writeStatus.
+   Allow option operand shortcuts. (dm)
+      Relative device paths are anchored at /dev.
+      The .tbl table extension is optional.
+      The text. text table prefix is optional with no directory.
+   Normalize translation table names. (dm)
+      french->fr german->de pl-iso02->pl sweden=se1 swedish=se2
+   Added LogText driver help file. Hans Schou <chlor@schou.dk>
+   Fixed LogText input/output translation for blank, NUL, and 0XFF. Hans Schou <chlor@schou.dk>
+   Better Danish translation tables. Hans Schou <chlor@schou.dk>
+   RPM now correctly builds by non-root user. Matthew Miller <mattdm@mattdm.org>
+   Define more Alva models. (dm)
+      Delphi 420, 440 Desktop; Satellite 584 Pro, 544 Traveller
+   Move device creation from the make file to the Linux screen driver. (dm)
+   Remove the --with-screen-device build option. (dm)
+   With devfs, /dev/tty0 is /dev/vc/0. (dm) + Tapio Kelloniemi <tappi@thack.org>
+   Verify that /dev/vcsa (or equivalent) is character special. (dm)
+   Version 1.2 of the EuroBraille driver. Yannick PLASSIARD <plassi_y@epitech.net>
+      (code cleanup, new models, LCD display)
+   Add cbifs text table. Yannick PLASSIARD <plassi_y@epitech.net>
+   Add a settings summary to the end of the ./configure output. (dm,sd)
+   Implement a separate settable volume level for each tune device. (dm)
+   Log tune device open errors with LOG_DEBUG. (dm,sd)
+   In the preferences menu, show each --disable-ed tune device as "unsupported". (dm,sd)
+   Split scr_base.h/cc into a separate header and source for each class. (dm)
+   Complete the conversion from tones to notes. (dm)
+   Rationalize/normalize the tune device names. (dm,sd)
+      speaker->beeper dac->pcm adlib->fm
+   Enhancements to en-us-g2 contraction table. John Boyer <director@chpi.org>
+
 October 30, 2002:
  - BRLTTY 3.1 released (note move from /sbin to /bin):
    Significantly reduced screen-3.9.11 patch size. Rich Burridge <Rich.Burridge@Sun.COM>

@@ -49,7 +49,7 @@ unset file directory
 %install
 set -e
 
-make install-programs install-help install-tables install-drivers
+make install-programs install-help install-tables install-drivers install-manpage
 install Documents/brltty.conf "${RPM_BUILD_ROOT}/etc"
 
 %post
@@ -78,8 +78,10 @@ fi
 unset device install devices
 
 %files
+%defattr(-,root,root)
 %doc COPYING
 %doc Documents/ChangeLog Documents/TODO
+%doc Bootdisks/rhmkboot Bootdisks/rhmkroot
 %doc doc/*
 %config(noreplace) /etc/brltty.conf
 /bin/brltty

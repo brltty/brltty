@@ -1,8 +1,8 @@
 # Dependencies for speech.o:
-speech.o: speech.c
-speech.o: $(TOP_DIR)/config.h
-speech.o: $(TOP_DIR)/Programs/misc.h
-speech.o: speech.h
-speech.o: $(TOP_DIR)/Programs/spk.h
-speech.o: $(TOP_DIR)/Programs/spk_driver.h
+speech.o: $(SRC_DIR)/speech.c
+speech.o: $(BLD_TOP)config.h
+speech.o: $(SRC_TOP)Programs/misc.h
+speech.o: $(SRC_DIR)/speech.h
+speech.o: $(SRC_TOP)Programs/spk.h
+speech.o: $(SRC_TOP)Programs/spk_driver.h
 

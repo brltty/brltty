@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -75,7 +75,7 @@ static int cmdtrans[64] =
   CMD_LNDN, CMD_CSRTRK, CMD_DISPMD, CMD_FREEZE, CMD_INFO, CMD_MUTE, CMD_NXSEARCH, CMD_PASTE,
   VAL_PASSKEY+VPK_CURSOR_RIGHT, 0 /*e: endcmd*/, 0 /*25: prefs*/, CMD_HOME, 0 /*35: meta*/, 0 /*o: number*/, CMD_LNBEG, CMD_RESTARTBRL,
   CMD_CSRJMP_VERT, VAL_PASSKEY+VPK_DELETE, CR_ROUTE, 0 /*g: internal cursor*/, 0 /*345: blite internal speechbox*/, CMD_NXPGRPH, VAL_PASSKEY+VPK_TAB, 0 /*q: finish uppercase*/,
-  CMD_CHRRT, CR_CUTLINE, 0 /*26: dot8shift*/, CR_CUTAPPEND, CMD_SAY, 0 /*u: uppsercase*/, CR_CUTBEGIN, CMD_SWITCHVT_NEXT,
+  CMD_CHRRT, CR_CUTLINE, 0 /*26: dot8shift*/, CR_CUTAPPEND, CMD_SAY_LINE, 0 /*u: uppsercase*/, CR_CUTBEGIN, CMD_SWITCHVT_NEXT,
   VAL_PASSKEY+VPK_RETURN, 0 /*145: free*/, VAL_PASSKEY+VPK_ESCAPE, CMD_PRPGRPH, 0 /*346: free*/, 0 /*x: xtrl*/, CMD_SIXDOTS, 0 /*12346: free*/,
   VAL_PASSKEY+VPK_CURSOR_DOWN, CMD_PRSEARCH, CMD_LNEND, CMD_BACK, CR_CUTRECT, 0 /*z: abort*/, 0 /*2356: rotate*/, CMD_NXPROMPT,
   CMD_BOT_LEFT, CMD_HELP, 0 /*w: free*/, CMD_LEARN, CMD_SWITCHVT_PREV, 0 /*y: free*/, CMD_PRPROMPT, 0 /*123456: noop*/

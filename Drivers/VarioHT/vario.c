@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -37,37 +37,33 @@ brl_identify (void)
   LogPrint(LOG_NOTICE, "HT Protocol driver");
 }
 
-static void 
-brl_initialize (char **parameters, brldim *brl, const char *dev)
+static int 
+brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
 		/*	Seems to signal en error */ 
-	brl->x=-1;
 	if(!varioinit((char*)dev)) {
 			/*	Theese are pretty static */ 
 		brl->x=40;
 		brl->y=1;
-		if(!(brl->disp=malloc(brl->x*brl->y))) {
-			LogError("memory allocation");
-			brl->x=-1;
-		}
+		return 1;
 	}
+	return 0;
 }
 
 static void 
-brl_close (brldim *brl)
+brl_close (BrailleDisplay *brl)
 {
 	varioclose();
-	free(brl->disp);
 }
 
 static void 
-brl_writeWindow (brldim *brl)
+brl_writeWindow (BrailleDisplay *brl)
 {
 	char		outbuff[40];
 	int			i;
 
 		/*	Idiot check one */ 
-	if(!brl||!brl->disp) {
+	if(!brl) {
 		return;
 	}
 		/*	Only display something if the data actually differs, this 
@@ -75,10 +71,10 @@ brl_writeWindow (brldim *brl)
 		 *	but since the darn thing wants to redraw quite frequently otherwise 
 		 *	this still makes a better lookin result */ 
 	for(i=0;i<40;i++) {
-		if(lastbuff[i]!=brl->disp[i]) {
-			memcpy(lastbuff,brl->disp,40*sizeof(char));
+		if(lastbuff[i]!=brl->buffer[i]) {
+			memcpy(lastbuff,brl->buffer,40*sizeof(char));
 				/*	Redefine the given dot-pattern to match ours */
-			variotranslate(brl->disp, outbuff, 40);
+			variotranslate(brl->buffer, outbuff, 40);
 			variodisplay(outbuff);
 			break;
 		}
@@ -86,13 +82,13 @@ brl_writeWindow (brldim *brl)
 }
 
 static void
-brl_writeStatus (const unsigned char *st)
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 {
 	/*	Dumdidummm */ 
 }
 
 static int 
-brl_read (DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
 	static int shift_button_down=0;
 	int	decoded=EOF;

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -37,7 +37,7 @@
 #include "defaults.h"
 
 int refreshInterval = DEFAULT_REFRESH_INTERVAL;
-static brldim brl;
+static BrailleDisplay brl;
 static unsigned char statusCells[StatusCellCount];        /* status cell buffer */
 
 BEGIN_OPTION_TABLE
@@ -65,25 +65,22 @@ message (const char *string, short flags) {
   int limit = brl.x * brl.y;
 
   memset(statusCells, 0, sizeof(statusCells));
-  braille->writeStatus(statusCells);
+  braille->writeStatus(&brl, statusCells);
 
-  memset(brl.disp, ' ', brl.x*brl.y);
+  memset(brl.buffer, ' ', brl.x*brl.y);
   while (length) {
     int count = (length <= limit)? length: (limit - 1);
     int index;
-    for (index=0; index<count; brl.disp[index++]=*string++);
+    for (index=0; index<count; brl.buffer[index++]=*string++);
     if (length -= count)
-      brl.disp[(brl.x * brl.y) - 1] = '-';
+      brl.buffer[(brl.x * brl.y) - 1] = '-';
     else
-      while (index < limit) brl.disp[index++] = ' ';
+      while (index < limit) brl.buffer[index++] = ' ';
+    writeBrailleBuffer(&brl);
 
-    /* Do Braille translation using text table: */
-    for (index=0; index<limit; index++)
-      brl.disp[index] = textTable[brl.disp[index]];
-    braille->writeWindow(&brl);
     if (length) {
       int timer = 0;
-      while (braille->read(CMDS_MESSAGE) == EOF) {
+      while (braille->readCommand(&brl, CMDS_MESSAGE) == EOF) {
         if (timer > 4000) break;
         delay(refreshInterval);
         timer += refreshInterval;
@@ -155,20 +152,22 @@ main (int argc, char *argv[]) {
     }
 
     if (chdir(HOME_DIRECTORY) != -1) {
-      reverseTable(textTable, untextTable);
+      reverseTable(&textTable, &untextTable);
+      initializeBrailleDisplay(&brl);
       braille->identify();		/* start-up messages */
-      braille->initialize(parameterSettings, &brl, opt_brailleDevice);
-      if (brl.x > 0) {
-        printf("Braille display successfully initialized: %d %s of %d %s\n",
-               brl.y, ((brl.y == 1)? "row": "rows"),
-               brl.x, ((brl.x == 1)? "column": "columns"));
+      if (braille->open(&brl, parameterSettings, opt_brailleDevice)) {
+        if (allocateBrailleBuffer(&brl)) {
 #ifdef ENABLE_LEARN_MODE
-        learnMode(refreshInterval, 10000);
-#else
-        message("braille test", 0);
+          learnMode(&brl, refreshInterval, 10000);
+#else /* ENABLE_LEARN_MODE */
+          message("braille test", 0);
 #endif /* ENABLE_LEARN_MODE */
-        braille->close(&brl);		/* finish with the display */
-        status = 0;
+          braille->close(&brl);		/* finish with the display */
+          status = 0;
+        } else {
+          LogPrint(LOG_ERR, "Can't allocate braille buffer.");
+          status = 6;
+        }
       } else {
         LogPrint(LOG_ERR, "Can't initialize braille driver.");
         status = 5;

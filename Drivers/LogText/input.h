@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* 00 */ 0X00, // NUL
+/* 00 */ 0XFF, // NUL
 /* 01 */ 0XC1, // SOH
 /* 02 */ 0XC5, // STX
 /* 03 */ 0XC3, // ETX
@@ -47,7 +47,7 @@
 /* 1D */ 0XE1, // GS
 /* 1E */ 0XCA, // RS
 /* 1F */ 0XF0, // US
-/* 20 */ 0X40, // mellemrum
+/* 20 */ 0X00, // mellemrum
 /* 21 */ 0X28, // ! udr}b
 /* 22 */ 0X3C, // " anf|rsel
 /* 23 */ 0XBA, // # nummer
@@ -270,4 +270,4 @@
 /* FC */ 0X9B, // 
 /* FD */ 0X8A, // 
 /* FE */ 0XB4, // 
-/* FF */ 0XFF  // 
+/* FF */ 0X40  // 

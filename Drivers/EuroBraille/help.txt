@@ -1,0 +1,15 @@
+BRLTTY help screen for EuroBraille terminals 
+
+Please note that this file is no longer used by BrlTty. The Learn Mode is umeh
+more interractive and better to use. 
+To entre in the Learn-Mode, click on the "I Z" cell to enter in the internal
+menu and then click the "Help" item.
+If you don't know how the menu system works, (if you never used Scriba or 
+DraculaWin), an explaination of the work can be found in the README.menu file,
+located in the EuroBraille directory of your brltty copy.
+
+Please note that the README file contains although version information and
+copyright notice, so if you find a bug that was not listed out in the README
+file, feel free to send an e-mail to me (plassi_y@epitech.net), because it's
+hard to test all possible functions, even if I use the driver 10 hours a day. 
+Thank you.

@@ -25,8 +25,8 @@ such things as new output from the computer, cursor motion, or window motion.
 One brutal but benign way to force a refresh of the braille cells is to
 manually restart the braille driver by pressing space+enter+[123456].
 
-*  For a list of commands by function, see "brlttyhlp.cmds.txt".
-*  For a list of commands by key combination, see "brlttyhlp.keys.txt".
+*  For a list of commands by function, see "help-cmds.txt".
+*  For a list of commands by key combination, see "help-keys.txt".
 
 The thumb keys provide access to the most commonly used screen navigation
 commands. Combinations of dots 1 through 6 either provide access to the full

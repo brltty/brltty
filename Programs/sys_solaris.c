@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -32,6 +32,11 @@
 
 #include "misc.h"
 #include "system.h"
+
+char *
+getBootParameters (void) {
+  return NULL;
+}
 
 void *
 loadSharedObject (const char *path) {
@@ -81,9 +86,9 @@ stopBeep (void) {
   return 0;
 }
 
-#ifdef ENABLE_DAC_TUNES
+#ifdef ENABLE_PCM_TUNES
 int
-getDacDevice (void) {
+getPcmDevice (int errorLevel) {
   int descriptor;
   const char *path = getenv("AUDIODEV");
   if (!path) path = "/dev/audio";
@@ -97,18 +102,18 @@ getDacDevice (void) {
     /* info.play.gain = AUDIO_MAX_GAIN; */
     ioctl(descriptor, AUDIO_SETINFO, &info);
   } else {
-    LogPrint(LOG_ERR, "Cannot open DAC device: %s: %s", path, strerror(errno));
+    LogPrint(errorLevel, "Cannot open PCM device: %s: %s", path, strerror(errno));
   }
   return descriptor;
 }
 
 int
-getDacBlockSize (int descriptor) {
+getPcmBlockSize (int descriptor) {
   return 0X100;
 }
 
 int
-getDacSampleRate (int descriptor) {
+getPcmSampleRate (int descriptor) {
   if (descriptor != 01) {
     audio_info_t info;
     if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) return info.play.sample_rate;
@@ -117,7 +122,7 @@ getDacSampleRate (int descriptor) {
 }
 
 int
-getDacChannelCount (int descriptor) {
+getPcmChannelCount (int descriptor) {
   if (descriptor != 01) {
     audio_info_t info;
     if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) return info.play.channels;
@@ -125,8 +130,8 @@ getDacChannelCount (int descriptor) {
   return 1;
 }
 
-DacAmplitudeFormat
-getDacAmplitudeFormat (int descriptor) {
+PcmAmplitudeFormat
+getPcmAmplitudeFormat (int descriptor) {
   if (descriptor != 01) {
     audio_info_t info;
     if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) {
@@ -134,28 +139,29 @@ getDacAmplitudeFormat (int descriptor) {
 	default:
 	  break;
 	case AUDIO_ENCODING_LINEAR:
-	  if (info.play.precision == 8) return DAC_FMT_S8;
-	  if (info.play.precision == 16) return DAC_FMT_S16B;
+	  if (info.play.precision == 8) return PCM_FMT_S8;
+	  if (info.play.precision == 16) return PCM_FMT_S16B;
 	  break;
 	case AUDIO_ENCODING_ULAW:
-	  return DAC_FMT_ULAW;
+	  return PCM_FMT_ULAW;
 	case AUDIO_ENCODING_LINEAR8:
-	  return DAC_FMT_U8;
+	  return PCM_FMT_U8;
       }
     }
   }
-  return DAC_FMT_UNKNOWN;
+  return PCM_FMT_UNKNOWN;
 }
-#endif /* ENABLE_DAC_TUNES */
+#endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES
 int
-getMidiDevice (MidiBufferFlusher flushBuffer) {
+getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
+  LogPrint(errorLevel, "MIDI device not supported.");
   return -1;
 }
 
 void
-setMidiInstrument (unsigned char device, unsigned char channel, unsigned char instrument) {
+setMidiInstrument (unsigned char channel, unsigned char instrument) {
 }
 
 void
@@ -167,11 +173,11 @@ endMidiBlock (int descriptor) {
 }
 
 void
-startMidiNote (unsigned char device, unsigned char channel, unsigned char note) {
+startMidiNote (unsigned char channel, unsigned char note, unsigned char volume) {
 }
 
 void
-stopMidiNote (unsigned char device, unsigned char channel, unsigned char note) {
+stopMidiNote (unsigned char channel) {
 }
 
 void
@@ -180,7 +186,8 @@ insertMidiWait (int duration) {
 #endif /* ENABLE_MIDI_TUNES */
 
 int
-enablePorts (unsigned short int base, unsigned short int count) {
+enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
+  LogPrint(errorLevel, "I/O ports not supported.");
   return 0;
 }
 

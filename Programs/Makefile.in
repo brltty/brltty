@@ -1,0 +1,282 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+include $(BLD_TOP)config.mk
+
+programs: brltty install-brltty brltest scrtest tunetest
+
+###############################################################################
+
+options.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/options.c
+
+###############################################################################
+
+ctb_compile.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctb_compile.c
+
+ctb_translate.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctb_translate.c
+
+###############################################################################
+
+SCREEN_OBJECTS = scr.o scr_base.o scr_real.o scr_frozen.o scr_help.o $(SCR_OBJ)
+
+scr.o:
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr.cc
+
+scr_base.o:
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_base.cc
+
+scr_real.o:
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_real.cc
+
+scr_frozen.o:
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_frozen.cc
+
+scr_help.o:
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_help.cc
+
+scr_linux.o:
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_linux.cc
+
+scr_shm.o:
+	$(CXX) $(CXXFLAGS) -c $(SRC_DIR)/scr_shm.cc
+
+###############################################################################
+
+TUNE_OBJECTS = tunes.o $(BEEPER_OBJS) $(PCM_OBJS) $(MIDI_OBJS) $(FM_OBJS)
+
+tunes.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunes.c
+
+beeper.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/beeper.c
+
+pcm.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/pcm.c
+
+midi.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/midi.c
+
+fm.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/fm.c
+
+adlib.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/adlib.c
+
+###############################################################################
+
+BRLTTY_OBJECTS = main.o config.o options.o misc.o $(SYS_OBJ) route.o cut.o brl.o $(SPEECH_OBJS) $(CTB_OBJS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+
+brltty: $(BRLTTY_OBJECTS) $(BRAILLE_TARGETS) $(SPEECH_TARGETS)
+	$(CXX) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(LDLIBS)
+
+main.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
+
+config.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/config.c
+
+misc.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
+
+sys_linux.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
+
+sys_solaris.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_solaris.c
+
+sys_hpux.o:
+	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
+
+route.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/route.c
+
+cut.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
+
+brl.o: text.auto.h attrib.auto.h cmds.auto.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
+
+spk.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
+
+###############################################################################
+
+BRLTEST_OBJECTS = brltest.o options.o misc.o $(SYS_OBJ) brl.o
+
+brltest: $(BRLTEST_OBJECTS) $(BRAILLE_TARGETS)
+	$(CXX) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
+
+brltest.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c
+
+###############################################################################
+
+SCRTEST_OBJECTS = scrtest.o options.o misc.o route.o
+
+scrtest: $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS)
+	$(CXX) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_OBJECTS) $(LDLIBS)
+
+scrtest.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scrtest.c
+
+###############################################################################
+
+TUNETEST_OBJECTS = tunetest.o options.o misc.o $(SYS_OBJ)
+
+tunetest: $(TUNETEST_OBJECTS) $(TUNE_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(TUNE_OBJECTS) $(LDLIBS)
+
+tunetest.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunetest.c
+
+###############################################################################
+
+dynamic-braille: txt2hlp
+	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-brl.lst
+	for target in $(BRL_TARGETS); \
+	do (cd ../Drivers/$$target && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
+	done
+
+static-braille: txt2hlp
+	cd ../Drivers/$(BRL_TARGET) && $(MAKE) braille.o braille-help
+
+###############################################################################
+
+dynamic-speech:
+	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
+	for target in $(SPK_TARGETS); \
+	do (cd ../Drivers/$$target && $(MAKE) speech-driver spk-lib-name) || exit 1; \
+	done
+
+static-speech:
+	cd ../Drivers/$(SPK_TARGET) && $(MAKE) speech.o
+
+###############################################################################
+
+text.auto.h: $(SRC_TOP)$(TBL_DIR)/$(TEXTTRANS) tbl2hex
+	./tbl2hex <$(SRC_TOP)$(TBL_DIR)/$(TEXTTRANS) >$@
+
+attrib.auto.h: $(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) tbl2hex
+	./tbl2hex <$(SRC_TOP)$(TBL_DIR)/$(ATTRTRANS) >$@
+
+cmds.auto.h: $(SRC_DIR)/brl.h $(SRC_DIR)/cmds.awk
+	$(AWK) -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brl.h >$@
+
+###############################################################################
+
+HOSTOPTS_OBJECTS = host_misc.o hostopts.o
+
+hostopts.o:
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/options.c
+
+host_misc.o:
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/misc.c
+
+###############################################################################
+
+TXT2HLP_OBJECTS = txt2hlp.o $(HOSTOPTS_OBJECTS)
+
+txt2hlp: $(TXT2HLP_OBJECTS)
+	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TXT2HLP_OBJECTS) $(LDLIBS)
+
+txt2hlp.o:
+	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/txt2hlp.c
+
+###############################################################################
+
+TBL2HEX_OBJECTS = tbl2hex.o $(HOSTOPTS_OBJECTS)
+
+tbl2hex: $(TBL2HEX_OBJECTS)
+	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)
+
+tbl2hex.o:
+	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
+
+###############################################################################
+
+install-brltty: $(SRC_DIR)/install.template
+	sed -e 's%=F%$(EXECUTE_ROOT)%g' \
+	    -e 's%=P%$(PROG_DIR)%g' \
+            -e 's%=L%$(LIB_DIR)%g' \
+	    -e 's%=D%$(DATA_DIR)%g' \
+            $(SRC_DIR)/install.template >$@
+
+###############################################################################
+
+check-braille: brltty dynamic-braille
+	for lib in $(BRL_LIBS); \
+	do test $$lib = no && continue; \
+	   ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$lib.$(LIB_EXT) || exit 10; \
+	   $(LIB_VAR)="$(BLD_TOP)$(DRV_DIR)" ./brltty -v -q -N -e -f /dev/null -b $$lib -s no 2>&1 || exit 11; \
+	done
+
+check-speech: brltty dynamic-speech
+	for lib in $(SPK_LIBS); \
+	do test $$lib = no && continue; \
+	   ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$lib.$(LIB_EXT) || exit 10; \
+	   $(LIB_VAR)="$(BLD_TOP)$(DRV_DIR)" ./brltty -v -q -N -e -f /dev/null -b no -s $$lib 2>&1 || exit 11; \
+	done
+
+###############################################################################
+
+install: install-programs install-help install-tables $(INSTALL_DRIVERS) install-manpage
+
+install-programs: brltty install-brltty
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROG_DIR) 
+	$(INSTALL_PROGRAM) brltty $(INSTALL_ROOT)$(PROG_DIR) 
+	$(INSTALL_SCRIPT) install-brltty $(INSTALL_ROOT)$(PROG_DIR) 
+
+install-help: brltty
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIR) 
+	$(INSTALL_DATA) $(BLD_TOP)$(HLP_DIR)/* $(INSTALL_ROOT)$(DATA_DIR) 
+
+install-tables:
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIR) 
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.tbl $(INSTALL_ROOT)$(DATA_DIR)
+	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.ctb $(INSTALL_ROOT)$(DATA_DIR)
+
+install-drivers: brltty
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIB_DIR)
+	$(INSTALL) $(BLD_TOP)$(DRV_DIR)/* $(INSTALL_ROOT)$(LIB_DIR)
+
+install-manpage:
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MAN_DIR)
+	$(INSTALL) $(SRC_TOP)$(DOC_DIR)/brltty.man $(INSTALL_ROOT)$(MAN_DIR)/brltty.$(MAN_NUM)
+
+uninstall:
+	-rm -f $(INSTALL_ROOT)$(PROG_DIR)/brltty
+	-rm -f $(INSTALL_ROOT)$(PROG_DIR)/install-brltty
+	-rm -f $(INSTALL_ROOT)$(LIB_DIR)/$(LIB_NAME)*
+	-rm -f $(INSTALL_ROOT)$(LIB_DIR)/brltty-*.lst
+	-rmdir $(INSTALL_ROOT)$(LIB_DIR)
+	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.tbl
+	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/*.ctb
+	-rm -f $(INSTALL_ROOT)$(DATA_DIR)/brltty*
+	-rmdir $(INSTALL_ROOT)$(DATA_DIR)
+	-rm -f $(INSTALL_ROOT)$(MAN_DIR)/brltty.$(MAN_NUM)
+
+###############################################################################
+
+clean::
+	-rm -f brltty install-brltty txt2hlp tbl2hex *test *-static
+	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(HLP_DIR)/*
+
+distclean clean::
+	-for driver in $(CONFIGURED_DRIVERS); do (cd ../Drivers/$$driver && $(MAKE) $@); done

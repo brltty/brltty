@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -203,7 +203,7 @@ void terminals(int help, int verbose)
 	      "# number: display two digits in one cell "
 	      "when status on horiz.display\n");
       for(i=0; i < STATMAX; i++) 
-	if(pm_terminals[tn].statshow[i] != STAT_EMPTY)
+	if(pm_terminals[tn].statshow[i] != OFFS_EMPTY)
 	  {
 	    int val = pm_terminals[tn].statshow[i];
 

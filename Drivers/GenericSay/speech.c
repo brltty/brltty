@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -49,7 +49,7 @@ spk_identify (void)
 }
 
 static void
-spk_initialize (char **parameters)
+spk_open (char **parameters)
 {
   const char *command = parameters[PARM_COMMAND];
   commandPath = *command? command: SAY_CMD;

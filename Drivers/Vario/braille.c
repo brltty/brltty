@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -52,7 +52,6 @@
 #include "brlconf.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "Programs/scr.h"
 #include "Programs/brl_driver.h"
 
 		  
@@ -197,13 +196,12 @@ static int QueryDisplay(int brl_fd, char *reply)
   return 0;
 }
 
-static void brl_initialize (char **parameters, brldim *brl, const char *tty)
+static int brl_open (BrailleDisplay *brl, char **parameters, const char *tty)
 {
-  brldim res;			/* return result */
   int i = 0;
   char reply[VARIO_DEVICE_ID_REPLY_LEN+1];
 
-  res.disp = rawdata = prevdata = NULL;
+  brl->buffer = rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
   brl_fd = open (tty, O_RDWR | O_NOCTTY);
@@ -268,12 +266,12 @@ static void brl_initialize (char **parameters, brldim *brl, const char *tty)
     brlcols = V80BRLCOLS;
     ncells = V80NCELLS;
     tspdatacnt = V80TSPDATACNT;
-    setHelpPageNumber (0);
+    brl->helpPage = 0;
   } else if (reply[13] == '4') {
     brlcols = V40BRLCOLS;
     ncells = V40NCELLS;
     tspdatacnt = V40TSPDATACNT;
-    setHelpPageNumber (1);
+    brl->helpPage = 1;
   } else { goto failure; };
 
   /* Mark time of last command to initialize typematic watch */
@@ -281,21 +279,21 @@ static void brl_initialize (char **parameters, brldim *brl, const char *tty)
   gettimeofday (&last_ping, &dum_tz);
   memcpy(&lastcmd_time, &last_ping, sizeof(struct timeval));
   pings=0;
-#else
+#else /* USE_PING */
   gettimeofday (&lastcmd_time, &dum_tz);
 #endif /* USE_PING */
   lastcmd = EOF;
   must_init_oldstat = must_init_code = 1;
 
-  res.x = brlcols;		/* initialise size of display */
-  res.y = BRLROWS;		/* always 1 (I want a 5 line display!!) */
+  brl->x = brlcols;		/* initialise size of display */
+  brl->y = BRLROWS;		/* always 1 (I want a 5 line display!!) */
 
   /* Allocate space for buffers */
-  dispbuf = res.disp = (unsigned char *) malloc (ncells);
+  dispbuf = brl->buffer = (unsigned char *) malloc (ncells);
   prevdata = (unsigned char *) malloc (ncells);
   rawdata = (unsigned char *) malloc (2 * ncells + VARIO_DISPLAY_LEN);
   /* 2* to insert ESCs if char is ESC */
-  if (!res.disp || !prevdata || !rawdata)
+  if (!brl->buffer || !prevdata || !rawdata)
     goto failure;
 
   /* Initialize rawdata. It will be filled in and used directly to
@@ -308,24 +306,22 @@ static void brl_initialize (char **parameters, brldim *brl, const char *tty)
   memset(prevdata, 0x00, ncells);
 
   typing_mode = 0; /* sets CK keys to command mode - 1 = typing mode */
-  *brl = res;
-  return;
+  return 1;
 
 failure:;
   LogPrint(LOG_WARNING,"Baum Vario driver giving up");
-  brl_close(&res);
-  brl->x = -1;
-  return;
+  brl_close(brl);
+  return 0;
 }
 
-static void brl_close (brldim *brl)
+static void brl_close (BrailleDisplay *brl)
 {
   if (brl_fd >= 0) {
     tcsetattr (brl_fd, TCSADRAIN, &oldtio);
     close (brl_fd);
   }
-  if (brl->disp)
-    free (brl->disp);
+  if (brl->buffer)
+    free (brl->buffer);
   if (rawdata)
     free (rawdata);
   if (prevdata)
@@ -350,7 +346,7 @@ static void display(const unsigned char *buf)
 		      smoother */
 }
 
-static void brl_writeStatus (const unsigned char *s)
+static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 /* We have 4 status cells. Unclear how to handle. 
    I choose Tieman style in brlconf.h. Any other suggestions? */
 {
@@ -362,26 +358,26 @@ static void brl_writeStatus (const unsigned char *s)
   }
 }
 
-static void brl_writeWindow (brldim *brl)
+static void brl_writeWindow (BrailleDisplay *brl)
 {
   int start, stop;
     
-  if (brl->x != brlcols || brl->y != BRLROWS || brl->disp != dispbuf)
+  if (brl->x != brlcols || brl->y != BRLROWS || brl->buffer != dispbuf)
     return;
     
   /* Determining start and stop for memcpy and prevdata */
   for (start=0;start<ncells;start++)
-    if(brl->disp[start] != prevdata[start]) break;
+    if(brl->buffer[start] != prevdata[start]) break;
   if(start == ncells) return;
 
   for(stop = ncells-1; stop > start; stop--)
-    if(brl->disp[stop] != prevdata[stop]) break;
+    if(brl->buffer[stop] != prevdata[stop]) break;
     
   /* Is it better to do it this way, or should we copy the whole display.
      Vario Emulation 1 doesnt support partial updates. So this kinda
      makes no sense */
-  memcpy(prevdata+start, brl->disp+start, stop-start+1);
-  display (brl->disp);
+  memcpy(prevdata+start, brl->buffer+start, stop-start+1);
+  display (brl->buffer);
 }
 
 
@@ -393,7 +389,7 @@ static int is_repeat_cmd (int cmd) {
   return (0);
 }
 
-static int brl_read(DriverCommandContext cmds) {
+static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext cmds) {
 #define TSP 0x22
 #define BUTTON 0x24
 #define KEY_TL1 (1<<0)

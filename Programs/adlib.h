@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -32,10 +32,10 @@ extern "C" {
  * May compile with -DDEBUG_ADLIB.
  */
 
-extern int AL_enablePorts (void);
+extern int AL_enablePorts (int errorLevel);
 extern void AL_disablePorts (void);
 
-extern int AL_testCard (void);
+extern int AL_testCard (int errorLevel);
 extern void AL_resetCard (void);
 
 extern void AL_playTone (int channel, int pitch, unsigned long int duration, int volume);

@@ -73,7 +73,7 @@ The extra cursor routing key (over the gap between the status cells
 and the main display) is used to bring up the help screen.  Pressing
 this key again goes back to normal operation.  The help screen has a
 full list of key bindings (apart from the cursor routing keys); it can
-be found in plain text format in the file brlttyhelp.txt in this
+be found in plain text format in the file help.txt in this
 directory.  The dot keys have been numbered (from left to right): 3,
 2, 1, 4, 5, 6; capital letters in brackets refer to thumb keys,
 e.g. (A) means A alone, (BD) means B and D pressed together and (CC)

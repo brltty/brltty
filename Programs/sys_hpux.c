@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -36,6 +36,11 @@
 
 #include "misc.h"
 #include "system.h"
+
+char *
+getBootParameters (void) {
+  return NULL;
+}
 
 void *
 loadSharedObject (const char *path) {
@@ -88,17 +93,17 @@ stopBeep (void) {
   return 0;
 }
 
-#ifdef ENABLE_DAC_TUNES
+#ifdef ENABLE_PCM_TUNES
 #ifdef HAVE_HPUX_AUDIO
 static Audio *audioServer = NULL;
 static ATransID audioTransaction;
 static SStream audioStream;
 
 void
-logAudioError (long status, const char *action) {
+logAudioError (int level, long status, const char *action) {
   char message[132];
   AGetErrorText(audioServer, status, message, sizeof(message)-1);
-  LogPrint(LOG_ERR, "%s error %ld: %s", action, status, message);
+  LogPrint(level, "%s error %ld: %s", action, status, message);
 }
 
 static const AudioAttributes *
@@ -108,7 +113,7 @@ getAudioAttributes (void) {
 #endif /* HAVE_HPUX_AUDIO */
 
 int
-getDacDevice (void) {
+getPcmDevice (int errorLevel) {
 #ifdef HAVE_HPUX_AUDIO
   long status;
   AudioAttrMask mask = 0;
@@ -119,7 +124,7 @@ getDacDevice (void) {
     char *server = "";
     audioServer = AOpenAudio(server, &status);
     if (status != AENoError) {
-      logAudioError(status, "AOpenAudio");
+      logAudioError(errorLevel, status, "AOpenAudio");
       audioServer = NULL;
       return -1;
     }
@@ -127,7 +132,7 @@ getDacDevice (void) {
 
     ASetCloseDownMode(audioServer, AKeepTransactions, &status);
     if (status != AENoError) {
-      logAudioError(status, "ASetCloseDownMode");
+      logAudioError(errorLevel, status, "ASetCloseDownMode");
     }
   }
 
@@ -152,14 +157,14 @@ getDacDevice (void) {
       LogError("socket creation");
     }
   } else {
-    logAudioError(status, "APlaySStream");
+    logAudioError(errorLevel, status, "APlaySStream");
   }
 #endif /* HAVE_HPUX_AUDIO */
   return -1;
 }
 
 int
-getDacBlockSize (int descriptor) {
+getPcmBlockSize (int descriptor) {
   int size = 0X100;
 #ifdef HAVE_HPUX_AUDIO
   size = MIN(size, audioStream.max_block_size);
@@ -168,51 +173,52 @@ getDacBlockSize (int descriptor) {
 }
 
 int
-getDacSampleRate (int descriptor) {
+getPcmSampleRate (int descriptor) {
 #ifdef HAVE_HPUX_AUDIO
   return getAudioAttributes()->attr.sampled_attr.sampling_rate;
-#else
+#else /* HAVE_HPUX_AUDIO */
   return 8000;
 #endif /* HAVE_HPUX_AUDIO */
 }
 
 int
-getDacChannelCount (int descriptor) {
+getPcmChannelCount (int descriptor) {
 #ifdef HAVE_HPUX_AUDIO
   return getAudioAttributes()->attr.sampled_attr.channels;
-#else
+#else /* HAVE_HPUX_AUDIO */
   return 1;
 #endif /* HAVE_HPUX_AUDIO */
 }
 
-DacAmplitudeFormat
-getDacAmplitudeFormat (int descriptor) {
+PcmAmplitudeFormat
+getPcmAmplitudeFormat (int descriptor) {
 #ifdef HAVE_HPUX_AUDIO
   switch (getAudioAttributes()->attr.sampled_attr.data_format) {
     default:
       break;
     case ADFLin8:
-      return DAC_FMT_S8;
+      return PCM_FMT_S8;
     case ADFLin8Offset:
-      return DAC_FMT_U8;
+      return PCM_FMT_U8;
     case ADFLin16:
-      return DAC_FMT_S16B;
+      return PCM_FMT_S16B;
     case ADFMuLaw:
-      return DAC_FMT_ULAW;
+      return PCM_FMT_ULAW;
   }
 #endif /* HAVE_HPUX_AUDIO */
-  return DAC_FMT_UNKNOWN;
+  return PCM_FMT_UNKNOWN;
 }
-#endif /* ENABLE_DAC_TUNES */
+#endif /* ENABLE_PCM_TUNES */
 
 #ifdef ENABLE_MIDI_TUNES
 int
-getMidiDevice (MidiBufferFlusher flushBuffer) {
+getMidiDevice (int errorLevel, MidiBufferFlusher flushBuffer) {
+  LogPrint(errorLevel, "MIDI device not supported.");
   return -1;
 }
 
 void
-setMidiInstrument (unsigned char device, unsigned char channel, unsigned char instrument) {
+setMidiInstrument (unsigned char channel, unsigned char instrument) {
 }
 
 void
@@ -224,11 +230,11 @@ endMidiBlock (int descriptor) {
 }
 
 void
-startMidiNote (unsigned char device, unsigned char channel, unsigned char note) {
+startMidiNote (unsigned char channel, unsigned char note, unsigned char volume) {
 }
 
 void
-stopMidiNote (unsigned char device, unsigned char channel, unsigned char note) {
+stopMidiNote (unsigned char channel) {
 }
 
 void
@@ -237,7 +243,8 @@ insertMidiWait (int duration) {
 #endif /* ENABLE_MIDI_TUNES */
 
 int
-enablePorts (unsigned short int base, unsigned short int count) {
+enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
+  LogPrint(errorLevel, "I/O ports not supported.");
   return 0;
 }
 

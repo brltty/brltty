@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -79,13 +79,6 @@ static unsigned char outputTable[0X100] = {
 };
 
 static void
-clearbrl (brldim *brl) {
-   brl->y = -1;
-   brl->x = -1;
-   brl->disp = NULL;
-}
-
-static void
 brl_identify (void) {
    LogPrint(LOG_NOTICE, "LogText Driver");
    LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
@@ -114,8 +107,8 @@ makeDownloadFifo (void) {
    return makeFifo(downloadPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
 }
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *device) {
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
    makeDownloadFifo();
    if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
       memset(&newSettings, 0, sizeof(newSettings));
@@ -125,10 +118,10 @@ brl_initialize (char **parameters, brldim *brl, const char *device) {
          if (tcflush(fileDescriptor, TCIOFLUSH) != -1) {
             brl->y = screenHeight;
             brl->x = screenWidth;
-            brl->disp = &sourceImage[0][0];
+            brl->buffer = &sourceImage[0][0];
             memset(sourceImage, 0, sizeof(sourceImage));
             deviceStatus = DEV_ONLINE;
-            return;
+            return 1;
          } else {
             LogError("LogText flush");
          }
@@ -137,15 +130,14 @@ brl_initialize (char **parameters, brldim *brl, const char *device) {
       close(fileDescriptor);
       fileDescriptor = -1;
    }
-   clearbrl(brl);
+   return 0;
 }
 
 static void
-brl_close (brldim *brl) {
+brl_close (BrailleDisplay *brl) {
    tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
    close(fileDescriptor);
    fileDescriptor = -1;
-   clearbrl(brl);
 }
 
 static int
@@ -246,7 +238,7 @@ handleUpdate (unsigned char line) {
 }
 
 static void
-brl_writeWindow (brldim *brl) {
+brl_writeWindow (BrailleDisplay *brl) {
    if (deviceStatus == DEV_READY) {
       sendCurrentLine();
    }
@@ -273,7 +265,7 @@ isOnline (void) {
 }
 
 static void
-brl_writeStatus (const unsigned char *status) {
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
    if (isOnline()) {
       if (status[FirstStatusCell] == FSC_GENERIC) {
          unsigned char row = status[STAT_CSRROW];
@@ -505,7 +497,7 @@ downloadFile (void) {
 }
 
 static int
-brl_read (DriverCommandContext cmds) {
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
    int key = readKey();
    if (cmds != currentContext) {
       LogPrint(LOG_DEBUG, "Context switch: %d -> %d", currentContext, cmds);

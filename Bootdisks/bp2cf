@@ -1,0 +1,60 @@
+#!/bin/sh
+# Boot Parameters to Configuration File
+
+# This script processes the brltty= boot parameters in /proc/cmdline and
+# writes a corresponding BRLTTY configuration file to standard output.
+
+parse()
+{
+   brailleDriver=""
+   brailleDevice=""
+   textTable=""
+
+   found=false
+   while [ "${#}" -gt 0 ]
+   do
+      case "${1}"
+      in
+         "brltty="*)
+            found=true
+            parameters="${1#*=}"
+
+            number=1
+            while [ "${number}" -le 3 ]
+            do
+               parameter="`echo ${parameters} | cut -d, -f${number}`"
+               if [ -n "${parameter}" ]
+               then
+                  case "${number}"
+                  in
+                     1)
+                        brailleDriver="${parameter}"
+                        ;;
+                     2)
+                        brailleDevice="${parameter}"
+                        ;;
+                     3)
+                        textTable="${parameter}"
+                        ;;
+                  esac
+               fi
+
+               number="`expr ${number} + 1`"
+            done
+            ;;
+      esac
+
+      shift
+   done
+
+   if "${found}"
+   then
+      echo "# Created by ${0##*/} `date +'on %Y-%m-%d at %H:%M:%S %Z (UTC%z)'`."
+      [ -n "${brailleDriver}" ] && echo "braille-driver ${brailleDriver}"
+      [ -n "${brailleDevice}" ] && echo "braille-device ${brailleDevice}"
+      [ -n "${textTable}" ] && echo "text-table ${textTable}"
+   fi
+}
+
+file="/proc/cmdline"
+[ -f "${file}" ] && parse `cat "${file}"`

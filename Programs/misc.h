@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -111,19 +111,6 @@ extern int validateChoice (unsigned int *choice, const char *description, const 
 extern int validateFlag (unsigned int *flag, const char *description, const char *value, const char *on, const char *off);
 extern int validateOnOff (unsigned int *flag, const char *description, const char *value);
 extern int validateYesNo (unsigned int *flag, const char *description, const char *value);
-
-/* Formatting of status cells. */
-extern const unsigned char landscapeDigits[11];
-extern int landscapeNumber (int x);
-extern int landscapeFlag (int number, int on);
-extern const unsigned char seascapeDigits[11];
-extern int seascapeNumber (int x);
-extern int seascapeFlag (int number, int on);
-extern const unsigned char portraitDigits[11];
-extern int portraitNumber (int x);
-extern int portraitFlag (int number, int on);
-
-extern void reverseTable(unsigned char *origtab, unsigned char *revtab);
 
 #ifdef __cplusplus
 }

@@ -1,19 +1,18 @@
 # Dependencies for braille.o:
-braille.o: braille.c
-braille.o: $(TOP_DIR)/config.h
-braille.o: brlconf.h
-braille.o: $(TOP_DIR)/Programs/scr.h
-braille.o: $(TOP_DIR)/Programs/misc.h
-braille.o: $(TOP_DIR)/Programs/brl.h
-braille.o: $(TOP_DIR)/Programs/brltty.h
-braille.o: $(TOP_DIR)/Programs/brl_driver.h
+braille.o: $(SRC_DIR)/braille.c
+braille.o: $(BLD_TOP)config.h
+braille.o: $(SRC_DIR)/brlconf.h
+braille.o: $(SRC_TOP)Programs/misc.h
+braille.o: $(SRC_TOP)Programs/brl.h
+braille.o: $(SRC_TOP)Programs/brltty.h
+braille.o: $(SRC_TOP)Programs/brl_driver.h
 
 # Dependencies for speech.o:
-speech.o: speech.c
-speech.o: $(TOP_DIR)/config.h
-speech.o: brlconf.h
-speech.o: speech.h
-speech.o: $(TOP_DIR)/Programs/spk.h
-speech.o: $(TOP_DIR)/Programs/spk_driver.h
-speech.o: $(TOP_DIR)/Programs/misc.h
+speech.o: $(SRC_DIR)/speech.c
+speech.o: $(BLD_TOP)config.h
+speech.o: $(SRC_DIR)/brlconf.h
+speech.o: $(SRC_DIR)/speech.h
+speech.o: $(SRC_TOP)Programs/spk.h
+speech.o: $(SRC_TOP)Programs/spk_driver.h
+speech.o: $(SRC_TOP)Programs/misc.h
 

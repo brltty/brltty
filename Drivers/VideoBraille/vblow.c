@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -32,7 +32,7 @@
 int vbinit() {
   char alldots[40];
   int i;
-  if (!(enablePorts(LPTPORT,3) && enablePorts(0x80,1))) {
+  if (!(enablePorts(LOG_ERR, LPTPORT, 3) && enablePorts(LOG_ERR, 0x80, 1))) {
     LogPrint(LOG_ERR,"Error: must be superuser");
     return -1;
   }
@@ -100,11 +100,11 @@ void BrButtons(vbButtons *dest) {
     }
   }
   dest->routingkey = 0;
-  for (i = 39; i>=0; i--) {
-    writePort1(LPTPORT, i);
+  for (i = 40; i>0; i--) {
+    writePort1(LPTPORT, i-1);
     vbsleep(VBDELAY);
     if ((readPort1(LPTSTATUSPORT) & 0x08)==0) {
-      dest->routingkey = i+1;
+      dest->routingkey = i;
       dest->keypressed = 1;
       break;
     }

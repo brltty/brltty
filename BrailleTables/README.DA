@@ -1,0 +1,32 @@
+Braille tables for brltty.
+
+To get a text file which can be easily edited with
+a text editor, use the '-c' option to add extra
+comments for each character:
+
+  ./tbl2txt -c iso-8859-1 text.us.tbl text.us.txt
+
+When the table has been edited it can be converted
+back to a 256 byte binary file:
+
+  ./txt2tbl text.us.txt text.us.tbl
+
+
+text.da.tbl
+This is the table which comes closest to the Danish
+standard 1252 table. All control characters
+are mapped as a capital letter with dot-8.
+Most braille users should use this table.
+
+text.da-lt.tbl
+Danish LogText users are used to having % and ! mapped
+to patterns which differ from the new 1252 standard. LogText
+users will be more comfortable with this table.
+
+text.da-1252.tbl
+This is the standard table defined by Svend Thougaard
+2001-08-28. It is primarily defined for use with the
+Windows-1252 character table. It is only in the BRLTTY
+package for reference as most of the control characters
+have been mapped to unusual braille patterns.
+The characters { and % don't have logical representations.

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -63,10 +63,9 @@ brl_identify (void)
 }
 
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *brldev)
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 {
-  brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
   short i, n, success;		/* loop counters, flags, etc. */
   unsigned char *init_seq = INIT_SEQ;	/* bytewise accessible copies */
@@ -78,7 +77,7 @@ brl_initialize (char **parameters, brldim *brl, const char *brldev)
   unsigned char Tieman[8] =
   {0, 7, 1, 6, 2, 5, 3, 4};	/* Tieman standard */
 
-  res.disp = prevdata = rawdata = NULL;		/* clear pointers */
+  prevdata = rawdata = NULL;		/* clear pointers */
 
   /* No need to load translation tables, as these are now
    * defined in tables.h
@@ -103,7 +102,7 @@ brl_initialize (char **parameters, brldim *brl, const char *brldev)
   /* Try MAX_ATTEMPTS times, or forever if MAX_ATTEMPTS is 0: */
 #if MAX_ATTEMPTS == 0
   while (!success)
-#else
+#else /* MAX_ATTEMPTS == 0 */
   for (i = 0; i < MAX_ATTEMPTS && !success; i++)
 #endif /* MAX_ATTEMPTS == 0 */
     {
@@ -131,18 +130,16 @@ brl_initialize (char **parameters, brldim *brl, const char *brldev)
       goto failure;
     }
 
-  res.x = brl_cols = BRLCOLS(id);		/* initialise size of display */
-  res.y = BRLROWS;
-  if ((brl->x = res.x) == -1)
-    return;
+  brl->y = BRLROWS;
+  if ((brl->x = brl_cols = BRLCOLS(id)) == -1)
+    return 0;
 
   /* Allocate space for buffers */
-  res.disp = (unsigned char *) malloc (res.x * res.y);
-  prevdata = (unsigned char *) malloc (res.x * res.y);
+  prevdata = (unsigned char *) malloc (brl->x * brl->y);
   /* rawdata has to have room for the pre- and post-data sequences,
    * the status cells, and escaped 0x1b's: */
-  rawdata = (unsigned char *) malloc (20 + res.x * res.y * 2);
-  if (!res.disp || !prevdata || !rawdata)
+  rawdata = (unsigned char *) malloc (20 + brl->x * brl->y * 2);
+  if (!prevdata || !rawdata)
     goto failure;
 
   /* Generate dot mapping table: */
@@ -151,25 +148,21 @@ brl_initialize (char **parameters, brldim *brl, const char *brldev)
     for (i = 0; i < 8; i++)
       if (n & 1 << standard[i])
 	combitrans[n] |= 1 << Tieman[i];
-  *brl = res;
-  return;
+  return 1;
 
 failure:;
-  if (res.disp)
-    free (res.disp);
   if (prevdata)
     free (prevdata);
   if (rawdata)
     free (rawdata);
   if (brl_fd >= 0)
     close (brl_fd);
-  brl->x = -1;
-  return;
+  return 0;
 }
 
 
 static void
-brl_close (brldim *brl)
+brl_close (BrailleDisplay *brl)
 {
   unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = POST_DATA;
@@ -198,7 +191,6 @@ brl_close (brldim *brl)
     }
   write (brl_fd, rawdata, rawlen);
 
-  free (brl->disp);
   free (prevdata);
   free (rawdata);
 
@@ -210,7 +202,7 @@ brl_close (brldim *brl)
 
 
 static void
-brl_writeStatus (const unsigned char *s)
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 {
   short i;
 
@@ -220,21 +212,21 @@ brl_writeStatus (const unsigned char *s)
 
 
 static void
-brl_writeWindow (brldim *brl)
+brl_writeWindow (BrailleDisplay *brl)
 {
   short i;			/* loop counter */
   unsigned char *pre_data = PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = POST_DATA;
 
   /* Only refresh display if the data has changed: */
-  if (memcmp (brl->disp, prevdata, brl->x * brl->y) || \
+  if (memcmp (brl->buffer, prevdata, brl->x * brl->y) || \
       memcmp (status, oldstatus, 5))
     {
       /* Save new Braille data: */
-      memcpy (prevdata, brl->disp, brl->x * brl->y);
+      memcpy (prevdata, brl->buffer, brl->x * brl->y);
 
       /* Dot mapping from standard to CombiBraille: */
-      for (i = 0; i < brl->x * brl->y; brl->disp[i] = combitrans[brl->disp[i]], \
+      for (i = 0; i < brl->x * brl->y; brl->buffer[i] = combitrans[brl->buffer[i]], \
 	   i++);
 
       rawlen = 0;
@@ -251,9 +243,9 @@ brl_writeWindow (brldim *brl)
 	}
       for (i = 0; i < brl->x * brl->y; i++)
 	{
-	  rawdata[rawlen++] = brl->disp[i];
-	  if (brl->disp[i] == 0x1b)	/* CombiBraille hack */
-	    rawdata[rawlen++] = brl->disp[i];
+	  rawdata[rawlen++] = brl->buffer[i];
+	  if (brl->buffer[i] == 0x1b)	/* CombiBraille hack */
+	    rawdata[rawlen++] = brl->buffer[i];
 	}
       if (post_data[0])
 	{
@@ -266,7 +258,7 @@ brl_writeWindow (brldim *brl)
 
 
 static int
-brl_read (DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
   static int status = 0;	/* cursor routing keys mode */
   int cmd = getbrlkey();

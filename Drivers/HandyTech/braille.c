@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -31,7 +31,6 @@
 
 #include "brlconf.h"
 #include "Programs/brltty.h"
-#include "Programs/scr.h"
 #include "Programs/misc.h"
 #include "Programs/brl_driver.h"
 
@@ -44,8 +43,8 @@ static unsigned char BookwormStop[] = {0X05, 0X07};	/* bookworm trailer to displ
 
 typedef struct {
   unsigned long int front;
-  char column;
-  char status;
+  int column;
+  int status;
 } Keys;
 static Keys currentKeys, pressedKeys, nullKeys;
 static int inputMode;
@@ -332,13 +331,12 @@ writeBytes (unsigned char *data, int length) {
   return 0;
 }
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *dev) {
-  brldim res;			/* return result */
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   struct termios newtio;	/* new terminal settings */
   int modelIdentifier = 0;
 
-  res.disp = rawData = prevData = NULL;		/* clear pointers */
+  rawData = prevData = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
   if (!openSerialDevice(dev, &fileDescriptor, &originalAttributes)) goto failure;
@@ -351,7 +349,7 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
   newtio.c_cc[VTIME] = 0;
 
   while (1) {
-    if (!resetSerialDevice(fileDescriptor, &newtio, B19200)) return;
+    if (!resetSerialDevice(fileDescriptor, &newtio, B19200)) return 0;
     /* autodetecting MODEL */
     if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
       if (awaitInput(fileDescriptor, 1000)) {
@@ -383,15 +381,14 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
            model->statusCells, (model->statusCells == 1)? "cell": "cells");
 
   /* Set model params... */
-  setHelpPageNumber( model->helpPage );		/* position in the model list */
-  res.x = model->columns;			/* initialise size of display */
-  res.y = BRLROWS;
+  brl->helpPage = model->helpPage;		/* position in the model list */
+  brl->x = model->columns;			/* initialise size of display */
+  brl->y = BRLROWS;
 
   /* Allocate space for buffers */
-  res.disp = (unsigned char *) malloc (res.x * res.y);
-  rawData = (unsigned char *) malloc (res.x * res.y);
-  prevData = (unsigned char *) malloc (res.x * res.y);
-  if (!res.disp || !rawData || !prevData) {
+  rawData = (unsigned char *) malloc (brl->x * brl->y);
+  prevData = (unsigned char *) malloc (brl->x * brl->y);
+  if (!rawData || !prevData) {
     LogPrint( LOG_ERR, "can't allocate braille buffers" );
     goto failure;
   }
@@ -412,14 +409,9 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
   updateRequired = 0;
   setState(BDS_READY);
 
-  *brl = res;
-  return;
+  return 1;
 
 failure:
-  if (res.disp) {
-    free(res.disp);
-    res.disp = NULL;
-  }
   if (rawData) {
     free(rawData);
     rawData = NULL;
@@ -428,19 +420,14 @@ failure:
     free(prevData);
     prevData = NULL;
   }
-  brl->x = brl->y = -1;
-  return;
+  return 0;
 }
 
 static void
-brl_close (brldim *brl) {
+brl_close (BrailleDisplay *brl) {
   if (model->stopLength) {
     writeBytes(model->stopAddress, model->stopLength);
   }
-
-  free(brl->disp);
-  brl->disp = NULL;
-  brl->x = brl->y = -1;
 
   free(rawData);
   rawData = NULL;
@@ -487,11 +474,11 @@ updateBrailleCells (void) {
 }
 
 static void
-brl_writeWindow (brldim *brl) {
-  if (memcmp(brl->disp, prevData, model->columns) != 0) {
+brl_writeWindow (BrailleDisplay *brl) {
+  if (memcmp(brl->buffer, prevData, model->columns) != 0) {
     int i;
     for (i=0; i<model->columns; ++i) {
-      rawData[i] = TransTable[(prevData[i] = brl->disp[i])];
+      rawData[i] = TransTable[(prevData[i] = brl->buffer[i])];
     }
     updateRequired = 1;
   }
@@ -499,7 +486,7 @@ brl_writeWindow (brldim *brl) {
 }
 
 static void
-brl_writeStatus (const unsigned char *st) {
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
   if (memcmp(st, prevStatus, model->statusCells) != 0) {	/* only if it changed */
     int i;
     for (i=0; i<model->statusCells; ++i) {
@@ -609,9 +596,21 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
         return 1;
     }
   } else if (keys->status >= 0) {
-    switch (keys->front) {
+    switch (keys->status) {
       default:
         break;
+      case 0:
+        *command = CMD_HELP;
+        return 1;
+      case 1:
+        *command = CMD_PREFMENU;
+        return 1;
+      case 2:
+        *command = CMD_INFO;
+        return 1;
+      case 3:
+        *command = CMD_FREEZE;
+        return 1;
     }
   } else {
     switch (keys->front) {
@@ -795,7 +794,7 @@ interpretModularKeys (DriverCommandContext context, const Keys *keys, int *comma
         *command = CMD_MUTE;
         return 1;
       case (KEY_B2 | KEY_B3 | KEY_DOWN):
-        *command = CMD_SAY;
+        *command = CMD_SAY_LINE;
         return 1;
       case (KEY_UP | KEY_DOWN):
         *command = CMD_PASTE;
@@ -1010,7 +1009,7 @@ interpretBookwormByte (DriverCommandContext context, unsigned char byte, int *co
 }
 
 static int
-brl_read (DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
   int timeout = 1;
   unsigned char byte;
 

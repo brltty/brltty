@@ -24,7 +24,7 @@ The Braille Lite 40 has two advance bars on it.  Brltty has been set up
 so that moving the display left or right works the same as it does
 when the unit is in its internal notetaker mode.
 
-See brltty_genhelp.txt for a description of the key bindings.
+See help.src for a description of the key bindings.
 
 History:
 Stéphane Doyon, April 2002, version 0.5.10:
@@ -103,6 +103,7 @@ Stéphane Doyon, August 2001
    the display during g-chord with advance bar left.
 -Fixed a statement that caused a portability problem.
 -Fixed k-chord which activated but did not toggle off keyboard emulation.
+-Renamed brltty_genhelp.txt to help.src and brlttyhelp?.txt to help?.txt.
 
 Anecdotes on weird bugs:
 

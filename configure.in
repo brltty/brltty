@@ -1,9 +1,9 @@
-dnl Process this file with autoconf to produce a configure script.
+dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 # BRLTTY - A background process providing access to the Linux console (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -16,20 +16,20 @@ dnl Process this file with autoconf to produce a configure script.
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-dnl Basic setup.
-AC_INIT([BrailleTables])
-PACKAGE_NAME="brltty"
-PACKAGE_VERSION="3.1"
+AC_INIT([brltty], [3.2])
+BRLTTY_SUMMARY_BEGIN
 
-AC_SUBST([PACKAGE_NAME])
-AC_DEFINE_UNQUOTED([PACKAGE_NAME], ["${PACKAGE_NAME}"])
+# PACKAGE_NAME="brltty"
+# AC_SUBST([PACKAGE_NAME])
+# AC_DEFINE_UNQUOTED([PACKAGE_NAME], ["${PACKAGE_NAME}"])
+
+# PACKAGE_VERSION="3.2"
+# AC_SUBST([PACKAGE_VERSION])
+# AC_DEFINE_UNQUOTED([PACKAGE_VERSION], ["${PACKAGE_VERSION}"])
 
 PACKAGE_TITLE="`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
 AC_SUBST([PACKAGE_TITLE])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
-
-AC_SUBST([PACKAGE_VERSION])
-AC_DEFINE_UNQUOTED([PACKAGE_VERSION], ["${PACKAGE_VERSION}"])
 
 package_date="`date "+%Y/%m/%d"`"
 AC_SUBST([package_date])
@@ -48,7 +48,6 @@ AC_SUBST([library_directory])
 data_directory="${sysconfdir}/\${PACKAGE_NAME}"
 AC_SUBST([data_directory])
 
-dnl Checks for programs.
 AC_PROG_MAKE_SET
 AC_PROG_CC
 if test -z "${CXX}"
@@ -83,34 +82,33 @@ MKOBJ="${brltty_cv_prog_mkobj}"
 AC_SUBST([MKOBJ])
 
 AC_CACHE_CHECK([for make shared object command], [brltty_cv_prog_mklib], [dnl
-case "${host_os}"
-in
-   linux*)
-      brltty_cv_prog_mklib="\$(LD) -shared -o"
-      ;;
-   solaris*)
-      brltty_cv_prog_mklib="\$(LD) -G -o"
-      ;;
-   hpux*)
-      brltty_cv_prog_mklib="\$(LD) -b -o"
-      ;;
-   *)
-      brltty_cv_prog_mklib="\$(LD) -o"
-      ;;
-esac])
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_mklib="\$(CC) -shared -o"
+else
+   case "${host_os}"
+   in
+      linux*)
+         brltty_cv_prog_mklib="\$(LD) -shared -o"
+         ;;
+      solaris*)
+         brltty_cv_prog_mklib="\$(LD) -G -o"
+         ;;
+      hpux*)
+         brltty_cv_prog_mklib="\$(LD) -b -o"
+         ;;
+      *)
+         brltty_cv_prog_mklib="\$(LD) -o"
+         ;;
+   esac
+fi])
 MKLIB="${brltty_cv_prog_mklib}"
 AC_SUBST([MKLIB])
 
-dnl Checks for header files.
 AC_CHECK_HEADERS([getopt.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])
 AC_CHECK_HEADERS([sys/io.h linux/vt.h])
 
-dnl Checks for typedefs.
-
-dnl Checks for structures.
-
-dnl Checks for compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
 AC_OBJEXT
@@ -201,68 +199,120 @@ esac])
 libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
-AC_CACHE_CHECK([for default braille device], [brltty_cv_default_braille_device], [dnl
 case "${host_os}"
 in
    linux*)
-      brltty_cv_default_braille_device="/dev/ttyS0"
+      system_object="linux"
       ;;
    solaris*)
-      brltty_cv_default_braille_device="/dev/ttya"
+      system_object="solaris"
       ;;
    hpux*)
-      brltty_cv_default_braille_device="/dev/tty0p0"
+      system_object="hpux"
+      if test -d /opt/audio
+      then
+         SYSCFLAGS="${SYSCFLAGS} -I/opt/audio/include"
+         LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
+         AC_DEFINE([HAVE_HPUX_AUDIO])
+      fi
       ;;
    *)
-      brltty_cv_default_braille_device=""
-      AC_MSG_WARN([no default braille device])
+      AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
-esac])
+esac
+system_object="sys_${system_object}.o"
+AC_SUBST([system_object])
 
-AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
-case "${host_os}"
-in
-   linux*)
-      brltty_cv_default_screen_driver="linux"
-      ;;
-   *)
-      brltty_cv_default_screen_driver="shm"
-      AC_MSG_WARN([no default screen driver - using ${brltty_cv_default_screen_driver}])
-      ;;
-esac])
+BRLTTY_ARG_DISABLE(
+   [tainted-components],
+   [components with build-time dependencies], [dnl
+   brltty_tainted_components="yes"
+])
 
-AC_CACHE_CHECK([for default screen device], [brltty_cv_default_screen_device], [dnl
-case "${host_os}"
-in
-   linux*)
-      brltty_cv_default_screen_device="/dev/vcsa /dev/vcsa0 /dev/vcc/a"
-      ;;
-   *)
-      brltty_cv_default_screen_device=""
-      ;;
-esac])
+BRLTTY_ARG_DISABLE(
+   [preferences-menu],
+   [the preferences menu], [dnl
+   AC_DEFINE([ENABLE_PREFERENCES_MENU])
+])
 
-dnl Allow the package to be installed in a differnet place than that wherein it will be run.
-brltty_default_install_root="/tmp/${PACKAGE}"
-BRLTTY_ARG_WITH(
-   [install-root], [DIRECTORY],
-   [where to install the package],
-   [install_root], [""]
-)
-if test "${install_root}" = "no"
-then
-   install_root=""
-elif test "${install_root}" = "yes"
-then
-   install_root="${brltty_default_install_root}"
-fi
-AC_SUBST([install_root])
+BRLTTY_ARG_DISABLE(
+   [table-selection],
+   [text/attribute/contraction table selection in preferences menu], [dnl
+   AC_DEFINE([ENABLE_TABLE_SELECTION])
+])
 
-dnl Allow the package to be ahchored in a specifiable directory.
+BRLTTY_ARG_DISABLE(
+   [learn-mode],
+   [interactive command learn mode], [dnl
+   AC_DEFINE([ENABLE_LEARN_MODE])
+])
+
+BRLTTY_ARG_DISABLE(
+   [contracted-braille],
+   [in-line contracted braille], [dnl
+   AC_DEFINE([ENABLE_CONTRACTED_BRAILLE])
+   contracted_braille_objects="ctb_compile.o ctb_translate.o"
+])
+AC_SUBST([contracted_braille_objects])
+
+BRLTTY_ARG_DISABLE(
+   [speech-support],
+   [speech synthesizer support], [dnl
+   AC_DEFINE([ENABLE_SPEECH_SUPPORT])
+   speech_support_objects="spk.o"
+])
+AC_SUBST([speech_support_objects])
+
+BRLTTY_ARG_DISABLE(
+   [beeper-tunes],
+   [tunes via beeper (console bell)], [dnl
+   AC_DEFINE([ENABLE_BEEPER_TUNES])
+   beeper_tune_objects="beeper.o"
+])
+AC_SUBST([beeper_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [pcm-tunes],
+   [tunes via PCM (soundcard digital audio)], [dnl
+   AC_DEFINE([ENABLE_PCM_TUNES])
+   pcm_tune_objects="pcm.o"
+])
+AC_SUBST([pcm_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [midi-tunes],
+   [tunes via MIDI (Musical Instrument Digital Interface)], [dnl
+   AC_DEFINE([ENABLE_MIDI_TUNES])
+   midi_tune_objects="midi.o"
+])
+AC_SUBST([midi_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [fm-tunes],
+   [tunes via FM (soundcard synthesizer)], [dnl
+   AC_DEFINE([ENABLE_FM_TUNES])
+   fm_tune_objects="fm.o adlib.o"
+])
+AC_SUBST([fm_tune_objects])
+
+BRLTTY_ARG_DISABLE(
+   [pm-configfile],
+   [user customization of Papenmeier driver], [dnl
+   AC_DEFINE([ENABLE_PM_CONFIGURATION_FILE])
+   PM_CONFIGFILE_DEPENDENCY=configuration-file
+])
+AC_SUBST([PM_CONFIGFILE_DEPENDENCY])
+
+BRLTTY_ARG_ENABLE(
+   [gpm],
+   [mouse tracking via GPM], [dnl
+   AC_CHECK_LIB([gpm], [Gpm_Open])
+])
+
 brltty_default_execute_root="/${PACKAGE_NAME}-${PACKAGE_VERSION}"
 BRLTTY_ARG_WITH(
    [execute-root], [DIRECTORY],
-   [where to anchor the package],
+   [where the package is to be anchored at run-time],
    [execute_root], [""]
 )
 if test "${execute_root}" = "no"
@@ -273,8 +323,24 @@ then
    execute_root="${brltty_default_execute_root}"
 fi
 AC_SUBST([execute_root])
+BRLTTY_SUMMARY_ITEM([execute-root], [execute_root])
 
-dnl Allow the package to be compiled for another platform.
+brltty_default_install_root="/tmp/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+BRLTTY_ARG_WITH(
+   [install-root], [DIRECTORY],
+   [where to install the package],
+   [install_root], ["${execute_root}"]
+)
+if test "${install_root}" = "no"
+then
+   install_root="${execute_root}"
+elif test "${install_root}" = "yes"
+then
+   install_root="${brltty_default_install_root}"
+fi
+AC_SUBST([install_root])
+BRLTTY_SUMMARY_ITEM([install-root], [install_root])
+
 brltty_default_compiler_prefix="${host_os}-"
 BRLTTY_ARG_WITH(
    [compiler-prefix], [PREFIX],
@@ -289,8 +355,8 @@ then
    compiler_prefix="${brltty_default_compiler_prefix}"
 fi
 AC_SUBST([compiler_prefix])
+BRLTTY_SUMMARY_ITEM([compiler-prefix], [compiler_prefix])
 
-dnl Allow the package to be run as init.
 brltty_default_init_path=/sbin/init_real
 BRLTTY_ARG_WITH(
    [init-path], [FILE],
@@ -308,8 +374,8 @@ if test -n "${init_path}"
 then
    AC_DEFINE_UNQUOTED([INIT_PATH], ["${init_path}"])
 fi
+BRLTTY_SUMMARY_ITEM([init-path], [init_path])
 
-dnl Allow the braille driver to be specified.
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
 BRLTTY_BRAILLE_DRIVER([bn], [BrailleNote])
@@ -337,7 +403,24 @@ esac
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 BRLTTY_ARG_DRIVER([braille])
 
-dnl Allow the braille device to be specified.
+AC_CACHE_CHECK([for default braille device], [brltty_cv_default_braille_device], [dnl
+case "${host_os}"
+in
+   linux*)
+      brltty_cv_default_braille_device="/dev/ttyS0"
+      ;;
+   solaris*)
+      brltty_cv_default_braille_device="/dev/ttya"
+      ;;
+   hpux*)
+      brltty_cv_default_braille_device="/dev/tty0p0"
+      ;;
+   *)
+      brltty_cv_default_braille_device=""
+      AC_MSG_WARN([no default braille device])
+      ;;
+esac])
+
 BRLTTY_ARG_WITH(
    [braille-device], [DEVICE],
    [default braille display device],
@@ -352,23 +435,25 @@ then
 fi
 test "`expr "${braille_device}" : "/"`" -eq 0 && braille_device="/dev/${braille_device}"
 AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"])
+BRLTTY_SUMMARY_ITEM([braille-device], [braille_device])
 
-dnl Allow the text table to be specified.
-brltty_default_text_table=text.simple.tbl
+brltty_default_text_table=text.nabcc.tbl
 BRLTTY_ARG_WITH(
    [text-table], [FILE],
    [default text table
-- text.danish.tbl    Danish
+- text.da.tbl        Danish
+- text.de.tbl        German
 - text.es.tbl        Spanish
-- text.french.tbl    French
-- text.german.tbl    German
+- text.fr.tbl        French
+- text.fr-cbifs.tbl  French (Code Braille Informatique Français Standard)
 - text.it.tbl        Italian
+- text.nabcc.tbl     North American Braille Computer Code
 - text.no-h.tbl      Norwegian and German
 - text.no-p.tbl      Norwegian
-- text.pl-iso02.tbl  Polish (iso-8859-2)
-- text.simple.tbl    American English
-- text.sweden.tbl    Swedish
-- text.swedish.tbl   Swedish
+- text.pl.tbl        Polish (iso-8859-2)
+- text.ru.tbl        Russian (koi8-r)
+- text.se1.tbl       Swedish
+- text.se2.tbl       Swedish
 - text.uk.tbl        United Kingdom English
 - text.us.tbl        American English
 - text.vni.tbl       Vietnamese
@@ -384,8 +469,8 @@ then
 fi
 AC_SUBST([text_table])
 AC_DEFINE_UNQUOTED([TEXT_TABLE], ["${text_table}"])
+BRLTTY_SUMMARY_ITEM([text-table], [text_table])
 
-dnl Allow the attributes table to be specified.
 brltty_default_attributes_table=attributes.tbl
 BRLTTY_ARG_WITH(
    [attributes-table], [FILE],
@@ -404,8 +489,8 @@ then
 fi
 AC_SUBST([attributes_table])
 AC_DEFINE_UNQUOTED([ATTRIBUTES_TABLE], ["${attributes_table}"])
+BRLTTY_SUMMARY_ITEM([attributes-table], [attributes_table])
 
-dnl Allow the speech driver to be specified.
 BRLTTY_SPEECH_DRIVER([al], [Alva])
 BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
 BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
@@ -413,10 +498,24 @@ BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
 BRLTTY_SPEECH_DRIVER([fv], [Festival])
 BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
 BRLTTY_SPEECH_DRIVER([tv], [Televox])
-AC_CHECK_HEADER([eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice])])
+if test "${brltty_tainted_components}" = "yes"
+then
+   AC_CHECK_HEADER([eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice])])
+fi
 BRLTTY_ARG_DRIVER([speech])
 
-dnl Allow the screen driver to be specified.
+AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
+case "${host_os}"
+in
+   linux*)
+      brltty_cv_default_screen_driver="linux"
+      ;;
+   *)
+      brltty_cv_default_screen_driver="shm"
+      AC_MSG_WARN([no default screen driver - using ${brltty_cv_default_screen_driver}])
+      ;;
+esac])
+
 BRLTTY_ARG_WITH(
    [screen-driver], [DRIVER],
    [screen driver],
@@ -431,46 +530,7 @@ then
 fi
 screen_object="scr_${screen_driver}.${OBJEXT}"
 AC_SUBST([screen_object])
-
-dnl Allow the screen device to be specified.
-BRLTTY_ARG_WITH(
-   [screen-device], [DEVICE],
-   [default screen device],
-   [screen_device], ["${brltty_cv_default_screen_device}"]
-)
-if test "${screen_device}" = "no"
-then
-   screen_device="${brltty_cv_default_screen_device}"
-elif test "${screen_device}" = "yes"
-then
-   screen_device="${brltty_cv_default_screen_device}"
-fi
-AC_SUBST([screen_device])
-AC_DEFINE_UNQUOTED([SCREEN_DEVICE], ["${screen_device}"])
-
-case "${host_os}"
-in
-   linux*)
-      system_object="linux"
-      ;;
-   solaris*)
-      system_object="solaris"
-      ;;
-   hpux*)
-      system_object="hpux"
-      if test -d /opt/audio
-      then
-         SYSCFLAGS="${SYSCFLAGS} -I/opt/audio/include"
-         LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
-         AC_DEFINE([HAVE_HPUX_AUDIO])
-      fi
-      ;;
-   *)
-      AC_MSG_ERROR([no system object available for ${host_os}])
-      ;;
-esac
-system_object="sys_${system_object}.o"
-AC_SUBST([system_object])
+BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 
 AC_CACHE_CHECK([for linkage editor flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
@@ -507,10 +567,9 @@ in
       ;;
 esac])
 brltty_static_flag="${brltty_cv_prog_ld_static}"
-
 BRLTTY_ARG_ENABLE(
    [standalone-programs],
-   [create statically linked executables], [dnl
+   [statically linked executables], [dnl
    brltty_link_flags="${brltty_link_flags} ${brltty_static_flag}"
 ])
 
@@ -530,70 +589,6 @@ if test "$GXX" = "yes"
 then
    CXXFLAGS="${CXXFLAGS} -Wall"
 fi
-
-BRLTTY_ARG_DISABLE(
-   [preferences-menu],
-   [the preferences menu], [dnl
-   AC_DEFINE([ENABLE_PREFERENCES_MENU])
-])
-
-BRLTTY_ARG_DISABLE(
-   [table-selection],
-   [text/attr/cont table selection in pref menu], [dnl
-   AC_DEFINE([ENABLE_TABLE_SELECTION])
-])
-
-BRLTTY_ARG_DISABLE(
-   [learn-mode],
-   [interactive command learn mode], [dnl
-   AC_DEFINE([ENABLE_LEARN_MODE])
-])
-
-BRLTTY_ARG_DISABLE(
-   [contracted-braille],
-   [in-line contracted braille], [dnl
-   AC_DEFINE([ENABLE_CONTRACTED_BRAILLE])
-   contracted_braille_objects="ctb_compile.o ctb_translate.o"
-])
-AC_SUBST([contracted_braille_objects])
-
-BRLTTY_ARG_DISABLE(
-   [speaker-tunes],
-   [tunes via PC internal speaker], [dnl
-   AC_DEFINE([ENABLE_SPEAKER_TUNES])
-   speaker_tune_objects="tones_speaker.o"
-])
-AC_SUBST([speaker_tune_objects])
-
-BRLTTY_ARG_DISABLE(
-   [dac-tunes],
-   [tunes via Digital to Analog Converter], [dnl
-   AC_DEFINE([ENABLE_DAC_TUNES])
-   dac_tune_objects="tones_dac.o"
-])
-AC_SUBST([dac_tune_objects])
-
-BRLTTY_ARG_DISABLE(
-   [midi-tunes],
-   [tunes via Musical Instrument Digital Interface], [dnl
-   AC_DEFINE([ENABLE_MIDI_TUNES])
-   midi_tune_objects="tones_midi.o"
-])
-AC_SUBST([midi_tune_objects])
-
-BRLTTY_ARG_DISABLE(
-   [adlib-tunes],
-   [tunes via Adlib/OPL3/SB-FM], [dnl
-   AC_DEFINE([ENABLE_ADLIB_TUNES])
-   adlib_tune_objects="tones_adlib.o adlib.o"
-])
-AC_SUBST([adlib_tune_objects])
-
-BRLTTY_ARG_ENABLE(
-   [gpm],
-   [mouse tracking via GPM], [dnl
-   AC_CHECK_LIB([gpm], [Gpm_Open])
-])
 
 BRLTTY_SEARCH_LIBS([sched_yield], [rt])
 BRLTTY_SEARCH_LIBS([sin], [m])
@@ -629,23 +624,29 @@ exec_prefix="${original_exec_prefix}"
 brltty_driver_names=
 for brltty_driver in ${brltty_item_names_braille} ${brltty_item_names_speech}
 do
-   test `expr "${brltty_driver_names} " : ".* ${brltty_driver} "` -eq 0 && brltty_driver_names="${brltty_driver_names} ${brltty_driver}"
+   if test `expr "${brltty_driver_names} " : ".* ${brltty_driver} "` -eq 0
+   then
+      brltty_driver_names="${brltty_driver_names} ${brltty_driver} "
+      # ${INSTALL} -d "Drivers/${brltty_driver}"
+   fi
 done
 changequote(, )dnl
 brltty_setup_files="`echo "${brltty_driver_names}" | sed -e '
-s/$/ /
+s%  *% %g
 s% \([^ ][^ ]*\)% Drivers/\1%g
-s%^%. Programs BrailleTables Unicode%
-s%\([^ ]\) %\1/setup.mk:setup.mk.in %g
-s/ *$//
+s%^%. Programs Documents BrailleTables Unicode Drivers/Voyager/kernel%
+s%\([^ ][^ ]*\) %\1/Makefile:setup.mk.in:\1/Makefile.in %g
+s% *$%%
 '`"
 changequote([, ])dnl
 BRLTTY_VAR_TRIM([brltty_driver_names])
 AC_SUBST([brltty_driver_names])
 
 AC_SUBST([install_drivers])
+BRLTTY_SUMMARY_END
 AC_OUTPUT([
    config.mk
    brltty.spec
    brltty.lsm
+   Drivers/Voyager/mkhlp
    ${brltty_setup_files}])

@@ -1,6 +1,6 @@
 This is the BRLTTY driver for TSI braille displays,
-Version 2.71 (February 2002
-It is designed to be compiled into BRLTTY version 3.0.
+Version 2.72 (January 2003
+It is designed to be compiled into BRLTTY version 3.2.
 
 Author and maintainer:
         Stéphane Doyon
@@ -12,7 +12,7 @@ pertains only to the support of the TSI displays. You must also read the
 documentation of the main module of BRLTTY.
 
 There is only a handful of BRLTTY users. If you are trying out my driver,
-please let me know! I am willing to help and I am open to suggetions.
+please let me know! I am willing to help and I am open to suggestions.
 
 See the headers of brl.c for history notes.
 

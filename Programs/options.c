@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -182,7 +182,7 @@ processOptions (
     int option;
 #ifdef HAVE_GETOPT_H
     option = getopt_long(*argc, *argv, shortOptions, longOptions, NULL);
-#else
+#else /* HAVE_GETOPT_H */
     option = getopt(*argc, *argv, shortOptions);
 #endif /* HAVE_GETOPT_H */
     if (option == -1) break;

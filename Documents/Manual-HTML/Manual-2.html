@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
- <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.16">
  <TITLE>BRLTTY: The Build Procedure</TITLE>
  <LINK HREF="Manual-3.html" REL=next>
  <LINK HREF="Manual-1.html" REL=previous>
@@ -12,7 +12,7 @@
 <A HREF="Manual-1.html">Previous</A>
 <A HREF="Manual.html#toc2">Contents</A>
 <HR>
-<H2><A NAME="s2">2. The Build Procedure</A></H2>
+<H2><A NAME="s2">2.</A> <A HREF="Manual.html#toc2">The Build Procedure</A></H2>
 
 <P>BRLTTY can be downloaded from its web site
 (see section 
@@ -20,26 +20,27 @@
 All releases are provided as compressed 
 <A HREF="#tar">tar balls</A>.
 Newer releases are also provided as 
-<A HREF="#rpm">RPM</A> (RedHat Package Manager) files.
+<A HREF="#rpm">RPM</A> (RedHat Package Manager) files.</P>
 <P>That tidbit of information has probably peaked your curiosity,
 and now you just can't wait to get started.
 It's a good idea, though,
-to first become familiar with the files which will ultimately be installed.
-<P>
-<H2><A NAME="hierarchy"></A> <A NAME="ss2.1">2.1 Installed File Hierarchy</A>
+to first become familiar with the files which will ultimately be installed.</P>
+
+<H2><A NAME="hierarchy"></A> <A NAME="ss2.1">2.1</A> <A HREF="Manual.html#toc2.1">Installed File Hierarchy</A>
 </H2>
 
 <P>The build procedure should result in the installation of the following files:
 <DL>
 <DT><B>/bin/</B><DD><P>
 <DL>
-<DT><B>brltty</B><DD><P>The BRLTTY program.
+<DT><B>brltty</B><DD><P>The BRLTTY program.</P>
 <DT><B>
 <A HREF="#utility-install-brltty">install-brltty</A></B><DD><P>A 
 <A HREF="#utility-install-brltty">utility</A> for copying BRLTTY's
 <A HREF="#hierarchy">installed file hierarchy</A>
-from one location to another.
+from one location to another.</P>
 </DL>
+</P>
 <DT><B>/etc/brltty/</B><DD><P>Your installation of BRLTTY may not have all of the following types of files.
 They're only created as needed based on the build options you select
 (see 
@@ -48,15 +49,15 @@ They're only created as needed based on the build options you select
 <DT><B>*.conf</B><DD><P>Driver-specific configuration data.
 Their names look more or less like <CODE>brltty-</CODE><EM>driver</EM><CODE>.conf</CODE>,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
 <DT><B>*.ctb</B><DD><P>Contraction tables
 (see section 
 <A HREF="Manual-4.html#contraction">Contracted Braille</A> for details).
-Their names look like <EM>language</EM><CODE>-</CODE><EM>country</EM><CODE>-</CODE><EM>level</EM><CODE>.ctb</CODE>.
+Their names look like <EM>language</EM><CODE>-</CODE><EM>country</EM><CODE>-</CODE><EM>level</EM><CODE>.ctb</CODE>.</P>
 <DT><B>*.hlp</B><DD><P>Driver-specific help pages.
 Their names look more or less like <CODE>brltty-</CODE><EM>driver</EM><CODE>.hlp</CODE>,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
 <DT><B>*.tbl</B><DD><P>Translation tables
 (see section 
 <A HREF="Manual-5.html#translation">Translation Tables</A> for details).
@@ -66,8 +67,9 @@ have names which indicate this fact.
 There are also a couple of special tables which map
 character highlighting attributes to braille dots:
 <CODE>attrib.tbl</CODE> does it the original way,
-and <CODE>attributes.tbl</CODE> does it the current way.
+and <CODE>attributes.tbl</CODE> does it the current way.</P>
 </DL>
+</P>
 <DT><B>/lib/brltty/</B><DD><P>Your installation of BRLTTY may not have all of the following types of files.
 They're only created as needed based on the build options you select
 (see 
@@ -79,39 +81,42 @@ and, therefore, which can be selected at run-time.
 Each line consists of
 the two-letter identification code for a driver,
 a tab character,
-and a description of the braille display which that driver is for.
+and a description of the braille display which that driver is for.</P>
 <DT><B>libbrlttyb<EM>driver</EM>.so.1</B><DD><P>The dynamically loadable driver for a braille display,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
 <DT><B>brltty-spk.lst</B><DD><P>A list of the speech synthesizer drivers which have been built
 as dynamically loadable shared objects,
 and, therefore, which can be selected at run-time.
 Each line consists of
 the two-letter identification code for a driver,
 a tab character,
-and a description of the speech synthesizer which that driver is for.
+and a description of the speech synthesizer which that driver is for.</P>
 <DT><B>libbrlttys<EM>driver</EM>.so.1</B><DD><P>The dynamically loadable driver for a speech synthesizer,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.
+<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
 </DL>
+</P>
 </DL>
+</P>
 <P>Some optional files which you should be aware of,
 although they aren't part of the installed file hierarchy, are:
 <DL>
 <DT><B>/etc/brltty.conf</B><DD><P>The system defaults configuration file.
 It's created by the system administrator.
 See 
-<A HREF="Manual-3.html#configure">The Configuration File</A> for details.
+<A HREF="Manual-3.html#configure">The Configuration File</A> for details.</P>
 <DT><B>/etc/brltty-<EM>driver</EM>.prefs</B><DD><P>The saved preferences settings file
 (<EM>driver</EM> is a two-letter 
 <A HREF="Manual-7.html#drivers">driver identification code</A>).
 It's created by the 
 <A HREF="Manual-3.html#command-PREFSAVE">PREFSAVE</A> command.
 See 
-<A HREF="Manual-4.html#preferences">Preferences Settings</A> for details.
+<A HREF="Manual-4.html#preferences">Preferences Settings</A> for details.</P>
 </DL>
-<P>
-<H2><A NAME="tar"></A> <A NAME="ss2.2">2.2 Installing from a TAR Ball</A>
+</P>
+
+<H2><A NAME="tar"></A> <A NAME="ss2.2">2.2</A> <A HREF="Manual.html#toc2.2">Installing from a TAR Ball</A>
 </H2>
 
 <P>Here's what to do if you just want to install BRLTTY as quickly as possible,
@@ -136,14 +141,16 @@ make install
 
 This should be done as <B>root</B>.</LI>
 </OL>
+</P>
 <P>To uninstall BRLTTY, do:
 <BLOCKQUOTE><CODE>
 cd brltty-<EM>release</EM><BR>
 make uninstall
 </CODE></BLOCKQUOTE>
+</P>
 <P>That's all there's to it.
-Now, for those who really want to know what's going on, here are the details.
-<P>
+Now, for those who really want to know what's going on, here are the details.</P>
+
 <H3><A NAME="build"></A> Build Options</H3>
 
 <P>The first step in building BRLTTY is to configure it
@@ -166,8 +173,8 @@ you should find out what your choices are.
 
 You should also check out the <CODE>README</CODE> file in the subdirectory
 containing the driver for your braille display
-for any additional display-specific instructions.
-<P>
+for any additional display-specific instructions.</P>
+
 <H3><A NAME="build-defaults"></A> System Defaults</H3>
 
 <P>
@@ -189,7 +196,7 @@ See the
 <A HREF="Manual-3.html#configure-braille-driver">braille-driver</A> configuration file directive
 and the 
 <A HREF="Manual-3.html#options-braille-driver">-b</A> command line option
-for run-time selection.
+for run-time selection.</P>
 <DT><B><CODE>--with-braille-device=</CODE><EM>device</EM>
 <A NAME="build-braille-device"></A> </B><DD><P>Specify the device to which the braille display is connected.
 If a relative path is supplied, then it's anchored at <CODE>/dev</CODE>.
@@ -200,7 +207,7 @@ See the
 <A HREF="Manual-3.html#configure-braille-device">braille-device</A> configuration file directive
 and the 
 <A HREF="Manual-3.html#options-braille-device">-d</A> command line option
-for run-time selection.
+for run-time selection.</P>
 <DT><B><CODE>--with-text-table=</CODE><EM>file</EM>
 <A NAME="build-text-table"></A> </B><DD><P>Specify the text translation table
 (see section 
@@ -221,7 +228,7 @@ and the
 <A HREF="Manual-3.html#options-text-table">-t</A> command line option
 for run-time selection.
 This setting can be changed with the
-<A HREF="Manual-4.html#preference-text-table">Text Table</A> preference.
+<A HREF="Manual-4.html#preference-text-table">Text Table</A> preference.</P>
 <DT><B><CODE>--with-attributes-table=</CODE><EM>file</EM>
 <A NAME="build-attributes-table"></A> </B><DD><P>Specify the attributes translation table
 (see section 
@@ -241,7 +248,7 @@ and the
 <A HREF="Manual-3.html#options-attributes-table">-a</A> command line option
 for run-time selection.
 This setting can be changed with the
-<A HREF="Manual-4.html#preference-attributes-table">Attributes Table</A> preference.
+<A HREF="Manual-4.html#preference-attributes-table">Attributes Table</A> preference.</P>
 <DT><B><CODE>--with-speech-driver=</CODE><EM>driver</EM>
 <A NAME="build-speech-driver"></A> </B><DD><P>Specify the speech synthesizer driver.
 Either a two-letter 
@@ -259,50 +266,60 @@ See the
 <A HREF="Manual-3.html#configure-speech-driver">speech-driver</A> configuration file directive
 and the 
 <A HREF="Manual-3.html#options-speech-driver">-s</A> command line option
-for run-time selection.
+for run-time selection.</P>
 <DT><B><CODE>--with-screen-driver=</CODE><EM>driver</EM>
 <A NAME="build-screen-driver"></A> </B><DD><P>Specify the screen driver.
 It may be one of the following:
 <DL>
 <DT><B>linux</B><DD><P>This driver provides direct access to the Linux console screen.
-It's only selectable, and is the default, on Linux systems.
-It's default screen content inspection device list is
-<CODE>/dev/vcsa /dev/vcsa0 /dev/vcc/a</CODE>.
+It's only selectable, and is the default, on Linux systems.</P>
 <DT><B>shm</B><DD><P>This driver provides access to the <CODE>screen</CODE> program.
 It's selectable on all systems,
 and is the default on most.
-It has no default screen content inspection device list.
 The patch for <CODE>screen</CODE> which we provide
 (see the <CODE>Patches</CODE> subdirectory)
 must be applied.
 Use of this driver,
 due to the fact that <CODE>screen</CODE> must be concurrently running,
-makes BRLTTY effectively useful only after the user has logged in.
+makes BRLTTY effectively useful only after the user has logged in.</P>
 </DL>
 
 If this option isn't specified,
 then an operating system appropriate selection is made.
 If a specific driver for the current operating system is available,
 then it's used.
-If not, then <CODE>shm</CODE> is used.
-<DT><B><CODE>--with-screen-device=</CODE><EM>device</EM>
-<A NAME="build-screen-device"></A> </B><DD><P>Specify the devices which may be used to inspect the screen content.
-If this option isn't specified,
-then a driver appropriate list of devices is assumed.
+If not, then <CODE>shm</CODE> is used.</P>
 </DL>
-<P>
+</P>
+
 <H3><A NAME="build-directoreis"></A> Directory Specification</H3>
 
 <P>
 <DL>
-<DT><B><CODE>--with-install-root=</CODE><EM>directory</EM>
-<A NAME="build-install-root"></A> </B><DD><P>Specify the directory at which
-the root file system of the
+<DT><B><CODE>--with-execute-root=</CODE><EM>directory</EM>
+<A NAME="build-execute-root"></A> </B><DD><P>Specify the directory at which the
 <A HREF="#hierarchy">installed file hierarchy</A>
-(or a partial image thereof) is rooted.
+is to be rooted at run-time.
 The absolute path should be supplied.
 If this option isn't specified,
-then the local system's root directory is assumed.
+then the system's root directory is assumed.
+Use this option if you need to install
+BRLTTY's run-time files in a non-standard location.
+You need to use this feature, for example, if you'd like to have
+more than one version of BRLTTY installed at the same time
+(see section 
+<A HREF="Manual-6.html#multiple">Installing Multiple Versions</A>
+for an example of how to do this).</P>
+<DT><B><CODE>--with-install-root=</CODE><EM>directory</EM>
+<A NAME="build-install-root"></A> </B><DD><P>Specify the directory beneath which the
+<A HREF="#hierarchy">installed file hierarchy</A>
+is to be installed.
+The absolute path should be supplied.
+If this option isn't specified,
+then the run-time package root
+(see the 
+<A HREF="#build-execute-root">--with-execute-root</A> build option)
+is assumed.
 This directory is only used by
 <A HREF="#make-install">make install</A>
 and 
@@ -310,28 +327,7 @@ and
 Use this option if you need to install BRLTTY in a different location
 than the one from which it'll ultimately be executed.
 You need to use this feature, for example,
-if you're building BRLTTY on one system for use on another.
-<DT><B><CODE>--with-execute-root=</CODE><EM>directory</EM>
-<A NAME="build-execute-root"></A> </B><DD><P>Specify the directory at which the
-<A HREF="#hierarchy">installed file hierarchy</A>
-is to be rooted.
-The absolute path should be supplied.
-If this option isn't specified,
-then the system's root directory is assumed.
-This directory is normally rooted at the system's root directory, but
-during 
-<A HREF="#make-install">make install</A>
-and 
-<A HREF="#make-uninstall">make uninstall</A>
-it's rooted at the directory specified by the
-<A HREF="#build-install-root">--with-install-root</A> build option.
-Use this option if you need to install any of
-BRLTTY's run-time files in non-standard locations.
-You need to use this feature, for example, if you'd like to have
-more than one version of BRLTTY installed at the same time
-(see section 
-<A HREF="Manual-6.html#multiple">Installing Multiple Versions</A>
-for an example of how to do this).
+if you're building BRLTTY on one system for use on another.</P>
 <DT><B><CODE>--prefix=</CODE><EM>directory</EM>
 <A NAME="build-portable-root"></A> </B><DD><P>Specify the directory within the
 <A HREF="#hierarchy">installed file hierarchy</A>
@@ -347,7 +343,7 @@ The absolute path should be supplied.
 If this option isn't specified,
 then the system's root directory is assumed.
 This directory is rooted at the directory specified by the
-<A HREF="#build-execute-root">--with-execute-root</A> build option.
+<A HREF="#build-execute-root">--with-execute-root</A> build option.</P>
 <DT><B><CODE>--exec-prefix=</CODE><EM>directory</EM>
 <A NAME="build-architecture-root"></A> </B><DD><P>Specify the directory within the
 <A HREF="#hierarchy">installed file hierarchy</A>
@@ -367,7 +363,7 @@ then the directory specified via the
 <A HREF="#build-portable-root">--prefix</A>
 build option is assumed.
 This directory is rooted at the directory specified by the
-<A HREF="#build-execute-root">--with-execute-root</A> build option.
+<A HREF="#build-execute-root">--with-execute-root</A> build option.</P>
 <DT><B><CODE>--bindir=</CODE><EM>directory</EM>
 <A NAME="build-program-directory"></A> </B><DD><P>Specify the directory within the
 <A HREF="#hierarchy">installed file hierarchy</A>
@@ -376,7 +372,7 @@ The absolute path should be supplied.
 If this option isn't specified,
 then <CODE>/bin</CODE>, rooted at the directory specified by the
 <A HREF="#build-architecture-root">--exec-prefix</A>
-build option, is assumed.
+build option, is assumed.</P>
 <DT><B><CODE>--libdir=</CODE><EM>directory</EM>
 <A NAME="build-library-directory"></A> </B><DD><P>Specify the directory within the
 <A HREF="#hierarchy">installed file hierarchy</A>
@@ -387,7 +383,7 @@ then <CODE>/lib</CODE>, rooted at the directory specified by the
 <A HREF="#build-architecture-root">--exec-prefix</A>
 build option, is assumed.
 The files themselves are installed within this directory's <CODE>brltty</CODE> subdirectory
-(which is created if necessary).
+(which is created if necessary).</P>
 <DT><B><CODE>--sysconfdir=</CODE><EM>directory</EM>
 <A NAME="build-data-directory"></A> </B><DD><P>Specify the directory within the
 <A HREF="#hierarchy">installed file hierarchy</A>
@@ -399,20 +395,29 @@ then <CODE>/etc</CODE>, rooted at the directory specified by the
 <A HREF="#build-portable-root">--prefix</A>
 build option, is assumed.
 The files themselves are installed within this directory's <CODE>brltty</CODE> subdirectory
-(which is created if necessary).
+(which is created if necessary).</P>
 </DL>
-<P>
+</P>
+
 <H3><A NAME="build-features"></A> Build Features</H3>
 
 <P>These options are primarily useful when building BRLTTY for use on a boot disk.
 <DL>
 <DT><B><CODE>--enable-standalone-programs</CODE>
 <A NAME="build-standalone-programs"></A> </B><DD><P>Create statically linked, rather than dynamically linked, programs.
-This option removes all dependencies on shared objects at run-time.
+This option removes all dependencies on shared objects at run-time.</P>
+<DT><B><CODE>--disable-tainted-components</CODE>
+<A NAME="build-tainted-components"></A> </B><DD><P>Exclude those components which have a build-time dependency
+beyond what a standard system is expected to provide.
+These include:
+<UL>
+<LI>The <B>ViaVoice</B> speech driver.</LI>
+</UL>
+</P>
 <DT><B><CODE>--disable-preferences-menu</CODE>
 <A NAME="build-preferences-menu"></A> </B><DD><P>Reduce program size by excluding the preferences menu
 (see section 
-<A HREF="Manual-4.html#preferences-menu">The Preferences Menu</A>).
+<A HREF="Manual-4.html#preferences-menu">The Preferences Menu</A>).</P>
 <DT><B><CODE>--disable-table-selection</CODE>
 <A NAME="build-table-selection"></A> </B><DD><P>Reduce program size by excluding
 the table selection entries from the preferences menu
@@ -420,43 +425,49 @@ the table selection entries from the preferences menu
 <A HREF="Manual-4.html#preference-text-table">Text Table</A>,
 <A HREF="Manual-4.html#preference-attributes-table">Attributes Table</A>,
 and 
-<A HREF="Manual-4.html#preference-contraction-table">Contraction Table</A> preferences).
+<A HREF="Manual-4.html#preference-contraction-table">Contraction Table</A> preferences).</P>
 <DT><B><CODE>--disable-learn-mode</CODE>
 <A NAME="build-learn-mode"></A> </B><DD><P>Reduce program size by excluding command learn mode
 (see section 
-<A HREF="Manual-4.html#learn">Command Learn Mode</A>).
+<A HREF="Manual-4.html#learn">Command Learn Mode</A>).</P>
 <DT><B><CODE>--disable-contracted-braille</CODE>
 <A NAME="build-contracted-braille"></A> </B><DD><P>Reduce program size by excluding support for contracted braille
 (see section 
-<A HREF="Manual-4.html#contraction">Contracted Braille</A>).
-<DT><B><CODE>--disable-speaker-tunes</CODE>
-<A NAME="build-speaker-tunes"></A> </B><DD><P>Reduce program size by excluding support for the playing of alert tunes
-via the built-in PC speaker
+<A HREF="Manual-4.html#contraction">Contracted Braille</A>).</P>
+<DT><B><CODE>--disable-speech-support</CODE>
+<A NAME="build-speech-support"></A> </B><DD><P>Reduce program size by excluding support for speech synthesizers.</P>
+<DT><B><CODE>--disable-beeper-tunes</CODE>
+<A NAME="build-beeper-tunes"></A> </B><DD><P>Reduce program size by excluding support for the playing of alert tunes
 (see section 
-<A HREF="Manual-4.html#tunes">Alert Tunes</A>).
-<DT><B><CODE>--disable-dac-tunes</CODE>
-<A NAME="build-dac-tunes"></A> </B><DD><P>Reduce program size by excluding support for the playing of alert tunes
-via the Digital to Analog Converter on the sound card
+<A HREF="Manual-4.html#tunes">Alert Tunes</A>)
+via the internal beeper (console tone generator).</P>
+<DT><B><CODE>--disable-pcm-tunes</CODE>
+<A NAME="build-pcm-tunes"></A> </B><DD><P>Reduce program size by excluding support for the playing of alert tunes
 (see section 
-<A HREF="Manual-4.html#tunes">Alert Tunes</A>).
+<A HREF="Manual-4.html#tunes">Alert Tunes</A>)
+via the digital audio interface on the sound card.</P>
 <DT><B><CODE>--disable-midi-tunes</CODE>
 <A NAME="build-midi-tunes"></A> </B><DD><P>Reduce program size by excluding support for the playing of alert tunes
-via the Musical Instrument Digital Interface on the sound card
 (see section 
-<A HREF="Manual-4.html#tunes">Alert Tunes</A>).
-<DT><B><CODE>--disable-adlib-tunes</CODE>
-<A NAME="build-adlib-tunes"></A> </B><DD><P>Reduce program size by excluding support for the playing of alert tunes
-via the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card
+<A HREF="Manual-4.html#tunes">Alert Tunes</A>)
+via the Musical Instrument Digital Interface on the sound card.</P>
+<DT><B><CODE>--disable-fm-tunes</CODE>
+<A NAME="build-fm-tunes"></A> </B><DD><P>Reduce program size by excluding support for the playing of alert tunes
 (see section 
-<A HREF="Manual-4.html#tunes">Alert Tunes</A>).
+<A HREF="Manual-4.html#tunes">Alert Tunes</A>)
+via the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card.</P>
+<DT><B><CODE>--disable-pm-configfile</CODE>
+<A NAME="build-pm-configfile"></A> </B><DD><P>Reduce program size by excluding support for
+the Papenmeier driver's configuration file.</P>
 <DT><B><CODE>--enable-gpm</CODE>
 <A NAME="build-gpm"></A> </B><DD><P>Include an interface to the <CODE>gpm</CODE> application
 so that, on systems which support it,
 BRLTTY will interact with the pointer (mouse) device
 (see section 
-<A HREF="Manual-4.html#gpm">Pointer (Mouse) Support via GPM</A>).
+<A HREF="Manual-4.html#gpm">Pointer (Mouse) Support via GPM</A>).</P>
 </DL>
-<P>
+</P>
+
 <H3><A NAME="build-miscellaneous"></A> Miscellaneous Options</H3>
 
 <P>
@@ -465,7 +476,7 @@ BRLTTY will interact with the pointer (mouse) device
 <A NAME="build-compiler-prefix"></A> </B><DD><P>Specify the prefix (path and beginning of program name)
 for the suite of compile and link tools which are to be used.
 You may need to use this option if, for example,
-you're cross-compiling for a different architecture.
+you're cross-compiling for a different architecture.</P>
 <DT><B><CODE>--with-init-path=</CODE><EM>path</EM>
 <A NAME="build-init-path"></A> </B><DD><P>Specify the path to the real <CODE>init</CODE> program for the system.
 The absolute path should be supplied.
@@ -481,9 +492,10 @@ This is one (somewhat sneaky) way to have braille right at the outset.
 It's especially useful for some install/rescue disks.</LI>
 </OL>
 
-If this option isn't specified, then this feature isn't activated.
+If this option isn't specified, then this feature isn't activated.</P>
 </DL>
-<P>
+</P>
+
 <H3><A NAME="make"></A> Make File Targets</H3>
 
 <P>Once BRLTTY has been configured,
@@ -493,23 +505,19 @@ to BRLTTY's main make file (<CODE>Makefile</CODE> in the top-level directory).
 BRLTTY's make file supports most of the common application maintenance targets.
 They include:
 <DL>
-<DT><B>make</B><DD><P>A shortcut for <CODE>make all</CODE>.
+<DT><B>make</B><DD><P>A shortcut for <CODE>make all</CODE>.</P>
 <DT><B>make all
 <A NAME="make-all"></A> </B><DD><P>Compile and link the BRLTTY executable, its drivers and their help pages,
-its test programs, and a few other small utilities.
+its test programs, and a few other small utilities.</P>
 <DT><B>make install
 <A NAME="make-install"></A> </B><DD><P>Complete the compile and link phase
 (see 
 <A HREF="#make-all">make all</A>),
 and then install the BRLTTY executable, its data files, drivers, and help pages,
-in the correct places and with the correct permissions.
-The screen content inspection device
-(see the 
-<A HREF="#build-screen-device">--with-screen-device</A> build option)
-is, if applicable, created if it doesn't already exist.
+in the correct places and with the correct permissions.</P>
 <DT><B>make uninstall
 <A NAME="make-uninstall"></A> </B><DD><P>Remove the BRLTTY executable, its data files, drivers, and help pages,
-from the system.
+from the system.</P>
 <DT><B>make clean
 <A NAME="make-clean"></A> </B><DD><P>Ensure that the next compile and link
 (see 
@@ -518,7 +526,7 @@ will be done from scratch by removing the results of
 compiling, linking, and testing from the source directory structure.
 This includes the removal of object files, executables,
 dynamically loadable shared objects, driver lists, help pages,
-temporary header files, and core files.
+temporary header files, and core files.</P>
 <DT><B>make distclean
 <A NAME="make-distclean"></A> </B><DD><P>In addition to removing the results of compiling and linking
 (see 
@@ -536,9 +544,11 @@ This includes the removal of
 editor backup files, test case results,
 rejected patch hunks, and copies of original source files.</LI>
 </UL>
+</P>
 </DL>
-<P>
-<H2><A NAME="ss2.3">2.3 Testing BRLTTY</A>
+</P>
+
+<H2><A NAME="ss2.3">2.3</A> <A HREF="Manual.html#toc2.3">Testing BRLTTY</A>
 </H2>
 
 <P>After compiling, linking, and installing BRLTTY,
@@ -552,7 +562,7 @@ For <EM>driver</EM>, specify the two-letter
 <A HREF="Manual-7.html#drivers">driver identification code</A>
 corresponding to your braille display.
 For <EM>device</EM>, specify the full path
-for the device to which your braille display is connected.
+for the device to which your braille display is connected.</P>
 <P>If you don't want to explicitly identify the driver and device
 each time you start BRLTTY, then you can take two approaches.
 You can establish system defaults
@@ -566,7 +576,7 @@ via the
 <A HREF="#build-braille-driver">--with-braille-driver</A>
 and the 
 <A HREF="#build-braille-device">--with-braille-device</A>
-build options.
+build options.</P>
 <P>If all is well, BRLTTY's version identification message
 should appear on the braille display for a few seconds
 (see the 
@@ -575,14 +585,14 @@ After it goes away (which you can hasten by pressing any key on the display),
 the area of the screen where the cursor is should appear.
 This means that you should expect to see your shell's command prompt.
 Then, as you enter your next command,
-each character should appear on the display as it's typed on the keyboard.
+each character should appear on the display as it's typed on the keyboard.</P>
 <P>If this is your experience, then leave BRLTTY running, and enjoy it.
 If this isn't your experience, then it may be necessary
 to test each driver separately in order to isolate the source of the probledm.
 The screen driver can be tested with 
 <A HREF="#utility-scrtest">scrtest</A>,
 and the braille display driver can be tested with 
-<A HREF="#utility-brltest">brltest</A>.
+<A HREF="#utility-brltest">brltest</A>.</P>
 <P>If you experience a problem which requires a lot of digging,
 then you may wish to use the following <CODE>brltty</CODE> command line options:
 <UL>
@@ -597,8 +607,9 @@ to keep BRLTTY in the foreground.</LI>
 to direct diagnostic messages to standard error
 rather than to the system log.</LI>
 </UL>
-<P>
-<H2><A NAME="ss2.4">2.4 Starting BRLTTY</A>
+</P>
+
+<H2><A NAME="ss2.4">2.4</A> <A HREF="Manual.html#toc2.4">Starting BRLTTY</A>
 </H2>
 
 <P>BRLTTY, when properly installed, is invoked with the single command <CODE>brltty</CODE>.
@@ -623,7 +634,7 @@ The
 displays a summary of all the options.
 The 
 <A HREF="Manual-3.html#options-version">-v</A> option
-displays the current version of the program and the selected drivers.
+displays the current version of the program and the selected drivers.</P>
 <P>It's probably best to have the system automatically start BRLTTY
 as part of the boot sequence
 so that the braille display is already up and running when the login prompt appears.
@@ -632,8 +643,9 @@ user-supplied applications can be safely started near the end of the boot sequen
 The name of this script is distribution-dependent.
 Here are the ones we know about so far:
 <DL>
-<DT><B>Red Hat</B><DD><P><CODE>/etc/rc.d/rc.local</CODE>
+<DT><B>Red Hat</B><DD><P><CODE>/etc/rc.d/rc.local</CODE></P>
 </DL>
+</P>
 <P>Starting BRLTTY from this script is a good approach (especially for new users).
 Just add a set of lines like these:
 <BLOCKQUOTE><CODE>
@@ -653,7 +665,7 @@ This can usually be abbreviated to the somewhat less readable form:
 </CODE></BLOCKQUOTE>
 
 Don't add these lines before the first line
-(which usually looks like <CODE>#!/bin/sh</CODE>).
+(which usually looks like <CODE>#!/bin/sh</CODE>).</P>
 <P>If the braille display is to be used by a system administrator,
 then it should probably be started as early as possible during the boot sequence
 (like before the file systems are checked)
@@ -664,7 +676,7 @@ Again, exactly where it's best to do this is distribution-dependent.
 Here are the places we know about so far:
 <DL>
 <DT><B>Debian</B><DD><P><CODE>/etc/init.d/boot</CODE> for older releases,
-and <CODE>/etc/init.d/rcS</CODE> for newer releases.
+and <CODE>/etc/init.d/rcS</CODE> for newer releases.</P>
 <DT><B>RedHat</B><DD><P><CODE>/etc/rc.d/rc.sysinit</CODE>
 Beware that later releases,
 in order to support a more user-oriented system initialization procedure,
@@ -685,10 +697,11 @@ Starting BRLTTY before this reinvocation
 results in two BRLTTY processes running at the same time,
 and that'll give you no end of problems.
 If your version of this script has this feature,
-then make sure you start BRLTTY after the lines which implement it.
-<DT><B>Slackware</B><DD><P><CODE>/etc/rc.d/rc.S</CODE>
-<DT><B>SuSE</B><DD><P><CODE>/sbin/init.d/boot</CODE>
+then make sure you start BRLTTY after the lines which implement it.</P>
+<DT><B>Slackware</B><DD><P><CODE>/etc/rc.d/rc.S</CODE></P>
+<DT><B>SuSE</B><DD><P><CODE>/sbin/init.d/boot</CODE></P>
 </DL>
+</P>
 <P>An alternative is to start BRLTTY from <CODE>/etc/inittab</CODE>.
 You have two choices if you choose this route.
 <UL>
@@ -715,17 +728,17 @@ if you forget to specify it.</LI>
 
 Check that the identifier (<CODE>bt</CODE> in these examples)
 isn't already being used by another entry,
-and, if it is, choose a different one which isn't.
+and, if it is, choose a different one which isn't.</P>
 <P>Note that a command like <CODE>kill -TERM</CODE>
 is sufficient to stop BRLTTY in its tracks.
 If it dies during entry into single user mode, for example,
-it may well be due to a problem of this nature.
+it may well be due to a problem of this nature.</P>
 <P>Some systems experience problems if an application tries to use
 the kernel's sound subsystem before it has been initialized.
 If your system is one of them, then
 you may need to disable the automatic starting of the speech synthesizer driver
 with the 
-<A HREF="Manual-3.html#options-no-speech">-N</A> option.
+<A HREF="Manual-3.html#options-no-speech">-N</A> option.</P>
 <P>Some systems, as part of the boot sequence, probe the serial ports
 (usually in order to automatically find the mouse and deduce its type).
 If your braille display is using a serial port,
@@ -750,20 +763,20 @@ chkconfig kudzu off
 Later releases allow you to let <CODE>kudzu</CODE> run
 without probing the serial ports.
 To do this, edit the file <CODE>/etc/sysconfig/kudzu</CODE>,
-and set <CODE>SAFE</CODE> to <CODE>yes</CODE>.
+and set <CODE>SAFE</CODE> to <CODE>yes</CODE>.</P>
 </DL>
+</P>
 <P>If you want to start BRLTTY before any file systems are mounted, then
 ensure that all of its components are installed within the root file system.
 See the 
 <A HREF="#build-execute-root">--with-execute-root</A>,
 <A HREF="#build-program-directory">--bindir</A>,
 <A HREF="#build-data-directory">--sysconfdir</A>,
-<A HREF="#build-library-directory">--libdir</A>,
 and 
-<A HREF="#build-screen-device">--with-screen-device</A>
-build options.
-<P>
-<H2><A NAME="ss2.5">2.5 Security Considerations</A>
+<A HREF="#build-library-directory">--libdir</A>
+build options.</P>
+
+<H2><A NAME="ss2.5">2.5</A> <A HREF="Manual.html#toc2.5">Security Considerations</A>
 </H2>
 
 <P>BRLTTY needs to run with root privileges because it needs
@@ -771,20 +784,20 @@ read and write access for the port to which the braille display is connected,
 read access to <CODE>/dev/vcsa</CODE> or equivalent
 (to query the screen dimensions and the cursor position,
 and to review the current screen content and highlighting),
-and read and write accesws to the system console
+and read and write access to the system console
 (for arrow key entry during cursor routing,
 for input character insertion during paste,
 for special key simulation using keys on the braille display,
 for retrieving output character translation and screen font mapping tables,
-and for making the computer's speaker beep).
+and for activation of the internal beeper).
 Access to the needed devices can, of course, be granted to a non-root user
 by changing the file permissions associated with the devices.
 Merely having access to the console, however, isn't enough because
-making the speaker beep and simulating key strokes still require root privilege.
+activating the internal beeper and simulating key strokes still require root privilege.
 So, if you're willing to give up cursor routing, cut&amp;paste, beeps,
-and all that, you can run BRLTTY without root priviledge.
-<P>
-<H2><A NAME="ss2.6">2.6 Build and Run-Time Restrictions</A>
+and all that, you can run BRLTTY without root priviledge.</P>
+
+<H2><A NAME="ss2.6">2.6</A> <A HREF="Manual.html#toc2.6">Build and Run-Time Restrictions</A>
 </H2>
 
 <P>
@@ -792,16 +805,17 @@ and all that, you can run BRLTTY without root priviledge.
 <DT><B>Alert Tunes</B><DD><P>Some platforms don't support all of the tune devices.
 See the 
 <A HREF="Manual-4.html#preference-tune-device">Tune Device</A>
-preference for details.
+preference for details.</P>
 <DT><B>ViaVoice Driver</B><DD><P>The driver for the ViaVoice software speech synthesizer
-is only built if that package has been installed.
+is only built if that package has been installed.</P>
 <DT><B>VideoBraille Driver</B><DD><P>The driver for the VideoBraille braille display is built on all systems,
-but only works on Linux.
+but only works on Linux.</P>
 <DT><B>Voyager Driver</B><DD><P>The driver for the Voyager braille display is only built
-on the Linux operating system.
+on the Linux operating system.</P>
 </DL>
-<P>
-<H2><A NAME="rpm"></A> <A NAME="ss2.7">2.7 Installing from an RPM File</A>
+</P>
+
+<H2><A NAME="rpm"></A> <A NAME="ss2.7">2.7</A> <A HREF="Manual.html#toc2.7">Installing from an RPM File</A>
 </H2>
 
 <P>To install BRLTTY from an RPM (RedHat Package Manager) file, do the following:
@@ -823,18 +837,19 @@ The <CODE>-h</CODE> (hashes) option displays a progress meter (using hash signs)
 
 For the brave,
 we also provide the source RPM (<CODE>.src.rpm</CODE>) file,
-but that's beyond the scope of this document.
+but that's beyond the scope of this document.</P>
 <P>To uninstall BRLTTY, do:
 <BLOCKQUOTE><CODE>
 rpm -e brltty
 </CODE></BLOCKQUOTE>
-<P>
-<H2><A NAME="ss2.8">2.8 Other Utilities</A>
+</P>
+
+<H2><A NAME="ss2.8">2.8</A> <A HREF="Manual.html#toc2.8">Other Utilities</A>
 </H2>
 
 <P>Building BRLTTY also results in the building of
-a few small helper and diagnostic utilities.
-<P>
+a few small helper and diagnostic utilities.</P>
+
 <H3><A NAME="utility-install-brltty"></A> install-brltty</H3>
 
 <P>This utility copies BRLTTY's
@@ -848,16 +863,14 @@ install-brltty <EM>to</EM> [<EM>from</EM>]
 <DT><B><EM>to</EM></B><DD><P>The location to which the
 <A HREF="#hierarchy">installed file hierarchy</A>
 is to be copied.
-It must be an existing directory.
+It must be an existing directory.</P>
 <DT><B><EM>from</EM></B><DD><P>The location from which the
 <A HREF="#hierarchy">installed file hierarchy</A>
 is to be taken.
 If it's specified, then it must be an existing directory.
-If it's not specified, then the location used for the build is assumed.
+If it's not specified, then the location used for the build is assumed.</P>
 </DL>
-<P>The screen content inspection device is also created
-(if it doesn't already exist)
-within the <EM>to</EM> hierarchy.
+</P>
 <P>This utility can be used, for example, to copy BRLTTY to a root disk.
 If a root floppy is mounted as <CODE>/mnt</CODE>,
 and BRLTTY is installed on the main system,
@@ -867,11 +880,11 @@ install-brltty /mnt
 </CODE></BLOCKQUOTE>
 
 copies BRLTTY, along with all of its data and library files,
-to the root floppy.
+to the root floppy.</P>
 <P>Some problems have been experienced when copying BRLTTY
 between systems with different versions of the shared C library.
-This is worth investigating if you have difficulties.
-<P>
+This is worth investigating if you have difficulties.</P>
+
 <H3>txt2hlp</H3>
 
 <P>This is a helper utility which is used during the build procedure
@@ -883,12 +896,13 @@ txt2hlp <EM>output-file</EM> <EM>input-file</EM> ...
 <DL>
 <DT><B><EM>output-file</EM></B><DD><P>The file which is to contain all of the compiled help pages.
 The pages are numbered, starting from zero,
-in the same order as the input files are specified.
+in the same order as the input files are specified.</P>
 <DT><B><EM>input-file</EM></B><DD><P>At least one input file must be specified.
 Each is the source for a single help page,
-and should contain plain text.
+and should contain plain text.</P>
 </DL>
-<P>
+</P>
+
 <H3>tbl2hex</H3>
 
 <P>This is a helper utility which is used during the build procedure
@@ -900,8 +914,8 @@ tbl2hex
 The translation table is read from standard input,
 and a set of hexadecimal constants
 suitable for inclusion within a C array initializer
-is written to standard output.
-<P>
+is written to standard output.</P>
+
 <H3><A NAME="utility-brltest"></A> brltest</H3>
 
 <P>This utility tests the braille display driver,
@@ -920,16 +934,17 @@ either a two-letter
 or the absolute path to a dynamically loadable shared object.
 If it's not specified, then the driver configured via the
 <A HREF="#build-braille-driver">--with-braille-driver</A> build option
-is assumed.
+is assumed.</P>
 <DT><B><EM>name</EM><CODE>=</CODE><EM>value</EM></B><DD><P>Set a braille display driver parameter.
 For a description of the parameters accepted by a specific driver,
-please see the documentation for that driver.
+please see the documentation for that driver.</P>
 <DT><B><CODE>-d</CODE><EM>device</EM> <CODE>--device=</CODE><EM>device</EM></B><DD><P>The absolute path for the device to which the braille display is connected.
 If it's not specified, then the device configured via the
 <A HREF="#build-braille-device">--with-braille-device</A> build option
-is assumed.
-<DT><B><CODE>-h</CODE> <CODE>--help</CODE></B><DD><P>Display a summary of the command line options, and then exit.
+is assumed.</P>
+<DT><B><CODE>-h</CODE> <CODE>--help</CODE></B><DD><P>Display a summary of the command line options, and then exit.</P>
 </DL>
+</P>
 <P>This utility uses BRLTTY's 
 <A HREF="Manual-4.html#learn">Command Learn Mode</A>.
 The key press timeout
@@ -937,8 +952,8 @@ The key press timeout
 is <CODE>10</CODE> seconds.
 The message hold time
 (used for non-final segments of long messages)
-is <CODE>4</CODE> seconds.
-<P>
+is <CODE>4</CODE> seconds.</P>
+
 <H3><A NAME="utility-scrtest"></A> scrtest</H3>
 
 <P>This utility tests the screen driver.
@@ -950,25 +965,26 @@ scrtest -<EM>option</EM> ... [<EM>name</EM>=<EM>value</EM> ...]
 <DL>
 <DT><B><EM>name</EM><CODE>=</CODE><EM>value</EM></B><DD><P>Set a screen driver parameter.
 For a description of the parameters accepted by a specific driver,
-please see the documentation for that driver.
+please see the documentation for that driver.</P>
 <DT><B><CODE>-l</CODE><EM>column</EM> <CODE>--left=</CODE><EM>column</EM></B><DD><P>Specify the starting (left) column (zero-origin) of the region.
 If this value isn't supplied,
 then a default value, based on the specified width,
-is selected such that the region is horizontally centred.
+is selected such that the region is horizontally centred.</P>
 <DT><B><CODE>-c</CODE><EM>count</EM> <CODE>--columns=</CODE><EM>count</EM></B><DD><P>Specify the width of the region (in columns).
 If this value isn't supplied,
 then a default value, based on the specified starting column,
-is selected such that the region is horizontally centred.
+is selected such that the region is horizontally centred.</P>
 <DT><B><CODE>-t</CODE><EM>row</EM> <CODE>--top=</CODE><EM>row</EM></B><DD><P>Specify the starting (top) row (zero-origin) of the region.
 If this value isn't supplied,
 then a default value, based on the specified height,
-is selected such that the region is vertically centred.
+is selected such that the region is vertically centred.</P>
 <DT><B><CODE>-r</CODE><EM>count</EM> <CODE>--rows=</CODE><EM>count</EM></B><DD><P>Specify the height of the region (in rows).
 If this value isn't supplied,
 then a default value, based on the specified starting row,
-is selected such that the region is vertically centred.
-<DT><B><CODE>-h</CODE> <CODE>--help</CODE></B><DD><P>Display a summary of the command line options, and then exit.
+is selected such that the region is vertically centred.</P>
+<DT><B><CODE>-h</CODE> <CODE>--help</CODE></B><DD><P>Display a summary of the command line options, and then exit.</P>
 </DL>
+</P>
 <P>Notes:
 <UL>
 <LI>If neither a starting column nor a region width is specified,
@@ -976,6 +992,7 @@ then the region is horizontally-centred and starts at column 5.</LI>
 <LI>If neither a starting row nor a region height is specified,
 then the region is vertically-centred and starts at row 5.</LI>
 </UL>
+</P>
 <P>The following is written to standard output:
 <OL>
 <LI>A line detailing the dimensions of the screen.
@@ -997,7 +1014,8 @@ Region: <EM>width</EM>x<EM>height</EM>@[<EM>column</EM>,<EM>row</EM>]
 <LI>The contents of the selected screen region.
 Unprintable characters are written as blanks.</LI>
 </OL>
-<P>
+</P>
+
 <H3><A NAME="utility-tunetest"></A> tunetest</H3>
 
 <P>This utility tests the alert tunes facility,
@@ -1016,22 +1034,22 @@ representing, respectively, the next lower and higher notes.
 The lowest value (<CODE>1</CODE>) represents
 the fifth <CODE>C-Sharp</CODE> below <CODE>Middle C</CODE>,
 and the highest value (<CODE>127</CODE>) represents
-the sixth <CODE>G</CODE> above <CODE>Middle C</CODE>.
+the sixth <CODE>G</CODE> above <CODE>Middle C</CODE>.</P>
 <DT><B><EM>duration</EM></B><DD><P>The duration of the note in milliseconds.
-It must be an integer from <CODE>1</CODE> through <CODE>255</CODE>.
+It must be an integer from <CODE>1</CODE> through <CODE>255</CODE>.</P>
 <DT><B><CODE>-d</CODE><EM>device</EM> <CODE>--device=</CODE><EM>device</EM></B><DD><P>The device on which to play the tune.
 <DL>
-<DT><B>speaker</B><DD><P>The built-in PC speaker.
-<DT><B>dac</B><DD><P>The Digital to Analog Converter on the sound card.
-<DT><B>midi</B><DD><P>The Musical Instrument Digital Interface on the sound card.
+<DT><B>beeper</B><DD><P>The internal beeper (console tone generator).</P>
+<DT><B>pcm</B><DD><P>The digital audio interface on the sound card.</P>
+<DT><B>midi</B><DD><P>The Musical Instrument Digital Interface on the sound card.</P>
 <DT><B>fm</B><DD><P>The FM synthesizer on an
-AdLib, OPL3, Sound Blaster, or equivalent sound card.
+AdLib, OPL3, Sound Blaster, or equivalent sound card.</P>
 </DL>
 
 The device name may be abbreviated.
 See the 
 <A HREF="Manual-4.html#preference-tune-device">Tune Device</A> preference
-for details regarding the default device and platform restrictions.
+for details regarding the default device and platform restrictions.</P>
 <DT><B><CODE>-i</CODE><EM>instrument</EM> <CODE>--instrument=</CODE><EM>instrument</EM></B><DD><P>The instrument to use if the selected device is <CODE>midi</CODE>.
 For the complete list of instruments,
 see the 
@@ -1040,10 +1058,11 @@ The default instrument is an <CODE>acoustic grand piano</CODE>.
 The words comprising the instrument name must be separated from one another
 by a single minus sign rather than by spaces,
 and any of the words may be abbreviated.
-An <CODE>acoustic grand piano</CODE>, for example, may be specified as <CODE>a-gra-pi</CODE>.
-<DT><B><CODE>-h</CODE> <CODE>--help</CODE></B><DD><P>Display a summary of the command line options, and then exit.
+An <CODE>acoustic grand piano</CODE>, for example, may be specified as <CODE>a-gra-pi</CODE>.</P>
+<DT><B><CODE>-h</CODE> <CODE>--help</CODE></B><DD><P>Display a summary of the command line options, and then exit.</P>
 </DL>
-<P>
+</P>
+
 <HR>
 <A HREF="Manual-3.html">Next</A>
 <A HREF="Manual-1.html">Previous</A>

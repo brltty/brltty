@@ -1,0 +1,26 @@
+#!/bin/sh
+
+SRC_DIR='@srcdir@'
+SRC_TOP='@top_srcdir@/'
+BLD_DIR='@builddir@'
+BLD_TOP='@top_builddir@'
+
+mkhlpfile()
+{
+   fno=$1
+   cols=$2
+   cells=$3
+   colsm1=`expr $cols - 1`
+
+   gcc -DHAVE_CONFIG_H -DGENHLP -I${SRC_DIR} -I${BLD_DIR} -I${SRC_TOP} -I${BLD_TOP} -E ${SRC_DIR}/braille.c |
+      ${SRC_DIR}/hlptrans.py |
+      cat ${SRC_DIR}/help.template - |
+      sort -t: -s -k 1,1 |
+      cut -d: -f 2- |
+      sed "s/<COLS>/${cols}/g" |
+      sed "s/<COLS-1>/${colsm1}/g" |
+      sed "s/<CELLS>/${cells}/g" >help${fno}.txt
+}
+
+mkhlpfile 0 40 44
+mkhlpfile 1 66 70

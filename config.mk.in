@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the Linux console (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -15,17 +15,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-@SET_MAKE@
-include $(TOP_DIR)/absdeps.mk
-include reldeps.mk
-
-PGM_DIR = $(TOP_DIR)/Programs
-DOC_DIR = $(TOP_DIR)/Documents
-TBL_DIR = $(TOP_DIR)/BrailleTables
-UCD_DIR = $(TOP_DIR)/Unicode
-CTB_DIR = $(TOP_DIR)/ContractionTables
-DRV_DIR = $(TOP_DIR)/lib
-HLP_DIR = $(TOP_DIR)/help
+PGM_DIR = Programs
+DOC_DIR = Documents
+TBL_DIR = BrailleTables
+UCD_DIR = Unicode
+CTB_DIR = ContractionTables
+DRV_DIR = lib
+HLP_DIR = help
 
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
@@ -34,7 +30,7 @@ CROSSCOMP = @compiler_prefix@
 INSTALL_ROOT = @install_root@
 EXECUTE_ROOT = @execute_root@
 
-EXTRACFLAGS = -I$(TOP_DIR) @SYSCFLAGS@ @DEFS@
+EXTRACFLAGS = -I$(BLD_DIR) -I$(BLD_TOP) -I$(SRC_DIR) -I$(SRC_TOP) @SYSCFLAGS@ @DEFS@
 YCFLAGS = @YCFLAGS@
 
 HOSTCC = @CC@
@@ -97,6 +93,9 @@ PROG_DIR = @program_directory@
 LIB_DIR = @library_directory@
 DATA_DIR = @data_directory@
 
+MAN_NUM = 1
+MAN_DIR = $(mandir)/man$(MAN_NUM)
+
 BRL_TARGET = @brltty_item_name_braille@
 BRL_TARGETS = @brltty_item_names_braille@
 BRL_LIBS = @brltty_item_codes_braille@
@@ -113,22 +112,15 @@ INSTALL_DRIVERS = @install_drivers@
 CONFIGURED_DRIVERS = @brltty_driver_names@
 
 SCR_OBJ = @screen_object@
-SCR_DEV = @screen_device@
 
 TEXTTRANS = @text_table@
 ATTRTRANS = @attributes_table@
 
 SYS_OBJ = @system_object@
 CTB_OBJS = @contracted_braille_objects@
-SPKR_OBJS = @speaker_tune_objects@
-DAC_OBJS = @dac_tune_objects@
+SPEECH_OBJS = @speech_support_objects@
+BEEPER_OBJS = @beeper_tune_objects@
+PCM_OBJS = @pcm_tune_objects@
 MIDI_OBJS = @midi_tune_objects@
-ADLIB_OBJS = @adlib_tune_objects@
-
-clean::
-	-rm -f *.o *.auto.h core
-
-distclean::
-	-rm -f *~ *orig \#*\# *.rej ? a.out
-	-rm -f setup.mk
+FM_OBJS = @fm_tune_objects@
 

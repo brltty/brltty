@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -43,7 +43,6 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/message.h"
-#include "Programs/scr.h"
 
 #include "brlconf.h"
 
@@ -117,13 +116,12 @@ brl_identify (void)
 }
 
 
-static void
-brl_initialize (char **parameters, brldim * brl, const char *brldev)
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
 {
   static unsigned good_baudrates[]
     = {300,600,1200,2400,4800,9600,19200,38400, 0};
   speed_t baudrate;
-  brldim res;			/* return result */
   struct termios newtio;	/* new terminal settings */
   short i, n;			/* loop counters */
   static unsigned char standard[8] =
@@ -139,10 +137,10 @@ brl_initialize (char **parameters, brldim * brl, const char *brldev)
 #endif /* DETECT_FOREVER */
   unsigned char BltLen;
 
-  res.disp = prevdata = rawdata = NULL;		/* clear pointers */
+  prevdata = rawdata = NULL;		/* clear pointers */
   if(!(qbase = (unsigned char *) malloc (QSZ))) {
     LogPrint(LOG_ERR, "Cannot allocate qbase");
-    return;
+    return 0;
   }
 
   if(!*parameters[PARM_BAUDRATE]
@@ -160,11 +158,11 @@ brl_initialize (char **parameters, brldim * brl, const char *brldev)
   if (blite_fd < 0)
     {
       LogPrint (LOG_ERR, "open %s: %s", brldev, strerror (errno));
-      return;
+      return 0;
     }
   if(tcgetattr (blite_fd, &oldtio) <0){	/* save current settings */
     LogPrint(LOG_ERR, "tcgetattr: %s", strerror(errno));
-    return;
+    return 0;
   }
 
   /* Set bps, flow control and 8n1, enable reading */
@@ -201,7 +199,7 @@ brl_initialize (char **parameters, brldim * brl, const char *brldev)
   }
   while (waiting_ack);
 
-#else
+#else /* DETECT_FOREVER */
   /* wait forever method */
  again:
   write (blite_fd, prebrl, 2);
@@ -225,23 +223,22 @@ brl_initialize (char **parameters, brldim * brl, const char *brldev)
   if (waiting_ack) /* no response, so it must be BLT40 */
   { /* assuming BLT40 now */
     BltLen=40;
-    setHelpPageNumber(1);
-  }else setHelpPageNumber(0);
+    brl->helpPage=1;
+  }else brl->helpPage=0;
   
-  blitesz = res.x = BltLen;	/* initialise size of display - */
-  res.y = 1;			/* Braille Lites are single line displays */
+  blitesz = brl->x = BltLen;	/* initialise size of display - */
+  brl->y = 1;			/* Braille Lites are single line displays */
   LogPrint(LOG_NOTICE, "Braille Lite %d detected",BltLen);
 
   /* Allocate space for buffers */
-  res.disp = (unsigned char *) malloc (res.x);
-  prevdata = (unsigned char *) malloc (res.x);
-  rawdata = (unsigned char *) malloc (res.x);
-  if (!res.disp || !prevdata || !rawdata)
+  prevdata = (unsigned char *) malloc (brl->x);
+  rawdata = (unsigned char *) malloc (brl->x);
+  if (!prevdata || !rawdata)
     {
       LogPrint (LOG_ERR, "Cannot allocate braille buffers.");
       goto failure;
     }
-  memset (prevdata, 0, res.x);
+  memset (prevdata, 0, brl->x);
 
   /* Generate dot mapping tables: */
   memset (blitetrans, 0, 256);	/* ordinary dot mapping */
@@ -258,11 +255,9 @@ brl_initialize (char **parameters, brldim * brl, const char *brldev)
 	    revtrans[n] |= 1;
 	}
     }
-  *brl = res;
-  return;
+  return 1;
 
 failure:
-  free (res.disp);
   free (prevdata);
   free (rawdata);
   free (qbase);
@@ -270,20 +265,19 @@ failure:
     tcsetattr (blite_fd, TCSANOW, &oldtio);	/* restore terminal settings */
     close (blite_fd);
   }
-  brl->x = -1;
+  return 0;
 }
 
 
 static void
-brl_close (brldim * brl)
+brl_close (BrailleDisplay * brl)
 {
 #if 0 /* SDo: Let's leave the BRLTTY exit message there. */
   /* We just clear the display, using writebrl(): */
-  memset (brl->disp, 0, brl->x);
+  memset (brl->buffer, 0, brl->x);
   brl_writeWindow (brl);
 #endif /* 0 */
 
-  free (brl->disp);
   free (prevdata);
   free (rawdata);
   free (qbase);
@@ -296,13 +290,13 @@ brl_close (brldim * brl)
 
 
 static void
-brl_writeStatus (const unsigned char *s)
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 {
 }
 
 
 static void
-brl_writeWindow (brldim * brl)
+brl_writeWindow (BrailleDisplay * brl)
 {
   short i;			/* loop counter */
   static unsigned char prebrl[2] =
@@ -322,17 +316,17 @@ brl_writeWindow (brldim * brl)
     {
       timer = (timer + 1) % (INT_CSR_SPEED * 2);
       if (timer < INT_CSR_SPEED)
-	brl->disp[int_cursor - 1] = 0x55;
+	brl->buffer[int_cursor - 1] = 0x55;
       else
-	brl->disp[int_cursor - 1] = 0xaa;
+	brl->buffer[int_cursor - 1] = 0xaa;
     }
 
   /* Next we must handle display reversal: */
   if (reverse_kbd)
     for (i = 0; i < blitesz; i++)
-      rawdata[i] = revtrans[brl->disp[blitesz - 1 - i]];
+      rawdata[i] = revtrans[brl->buffer[blitesz - 1 - i]];
   else
-    memcpy (rawdata, brl->disp, blitesz);
+    memcpy (rawdata, brl->buffer, blitesz);
 
   /* Only refresh display if the data has changed: */
   if (memcmp (rawdata, prevdata, blitesz))
@@ -383,7 +377,7 @@ brl_writeWindow (brldim * brl)
 
 
 static int
-brl_read (DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
   static int state = 0;		/* 0 = normal - transparent
 				 * 1 = positioning internal cursor
@@ -521,7 +515,7 @@ brl_read (DriverCommandContext cmds)
 	case 0x80:		/* dot 8 */
 #ifdef USE_TEXTTRANS
 	  dot8shift = 1;
-#else
+#else /* USE_TEXTTRANS */
 	  meta = 1;
 #endif /* USE_TEXTTRANS */
 	  break;
@@ -574,7 +568,7 @@ brl_read (DriverCommandContext cmds)
 	temp = VAL_PASSCHAR | key.asc | VPC_SHIFT;
       else
 	temp = VAL_PASSCHAR | key.asc;
-#else
+#else /* USE_TEXTTRANS */
       temp = VAL_PASSDOTS |
 	(keys_to_dots[key.raw &0x3F]
 	 | ((meta) ? VPC_META : 0)

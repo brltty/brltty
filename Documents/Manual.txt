@@ -9,9 +9,9 @@
 
   Dave Mielke <dave@mielke.cc>
 
-  Version 3.1, October 2002
+  Version 3.2, February 2003
 
-  Copyright © 1995-2002 by The BRLTTY Team - All Rights Reserved.  This
+  Copyright © 1995-2003 by The BRLTTY Team - All Rights Reserved.  This
   is free software, placed under the terms of TThhee GGNNUU GGeenneerraall PPuubblliicc
   LLiicceennssee.  BRLTTY comes with ABSOLUTELY NO WARRANTY.
 
@@ -21,56 +21,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   1. Introduction
-
      1.1 Feature Summary
      1.2 System Requirements
 
   2. The Build Procedure
-
      2.1 Installed File Hierarchy
      2.2 Installing from a TAR Ball
         2.2.1 Build Options
@@ -93,7 +48,6 @@
         2.8.6 tunetest
 
   3. Using BRLTTY
-
      3.1 Commands
         3.1.1 Vertical Motion
         3.1.2 Horizontal Motion
@@ -110,7 +64,6 @@
      3.3 Command Line Options
 
   4. Feature Descriptions
-
      4.1 Cursor Routing
      4.2 Cut and Paste
      4.3 Pointer (Mouse) Support via GPM
@@ -130,8 +83,8 @@
            4.8.3.1 Table Administration
            4.8.3.2 Special Symbol Definition
            4.8.3.3 Character Translation
-  5. Translation Tables
 
+  5. Translation Tables
      5.1 Text Translation
      5.2 Attributes Translation
      5.3 Table Format
@@ -141,14 +94,12 @@
         5.4.3 tbl2tbl
 
   6. Advanced Topics
-
      6.1 Installing Multiple Versions
      6.2 Installation/Rescue Root Disks for Linux
      6.3 Future Enhancements
      6.4 Known Bugs
 
   7. Appendices
-
      7.1 Supported Braille Displays
      7.2 Supported Speech Synthesizers
      7.3 Driver Identification Codes
@@ -157,7 +108,6 @@
      7.6 MIDI Instrument Table
 
   8. Epilogue
-
      8.1 Contact Information
      8.2 License
      8.3 Disclaimer
@@ -194,7 +144,6 @@
 
   ·  Optional use of blinking (rates individually settable) for cursor,
      special highlighting underline, and/or capital letters.
-
 
   ·  Screen freezing for leisurely review.
 
@@ -234,27 +183,27 @@
      LLiinnuuxx
         This software has been tested on a variety of Linux systems:
 
-     ·  Desktops, laptops, and some PDAs.
+        ·  Desktops, laptops, and some PDAs.
 
-     ·  Processors from a 386SX20 to a Pentium.
+        ·  Processors from a 386SX20 to a Pentium.
 
-     ·  A huge range of memory sizes.
+        ·  A huge range of memory sizes.
 
-     ·  Several distributions including Debian, Red Hat, Slackware, and
-        SuSE.
+        ·  Several distributions including Debian, Red Hat, Slackware,
+           and SuSE.
 
-     ·  Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
+        ·  Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
 
-     ·  A DEC Alpha (only tested once under Red Hat Alpha Linux on a
-        noname board kindly lent to the Cambridge University Computer
-        Laboratory by DEC in Reading, England).
+        ·  A DEC Alpha (only tested once under Red Hat Alpha Linux on a
+           noname board kindly lent to the Cambridge University Computer
+           Laboratory by DEC in Reading, England).
 
      SSoollaarriiss
         This software has been tested on the following Solaris systems:
 
-     ·  The Sparc architecture.
+        ·  The Sparc architecture (releases 7, 8, and 9).
 
-     ·  Releases 7, 8, and 9.
+        ·  The Intel architecture (release 9).
 
   On Linux, BRLTTY can inspect the content of the screen completely
   independently of any logged in user.  It does this by using a special
@@ -288,20 +237,20 @@
 
      LLiinnuuxx
 
-     ·  Set during the kernel configuration procedure.
+        ·  Set during the kernel configuration procedure.
 
-     ·  Supplied at the LILO boot prompt.
+        ·  Supplied at the LILO boot prompt.
 
-     ·  Specified on an append directive in /etc/lilo.conf.
+        ·  Specified on an append directive in /etc/lilo.conf.
 
   If the driver is a module, then its options must be:
 
      LLiinnuuxx
 
-     ·  Supplied as options to the modprobe (or insmod) command.
+        ·  Supplied as options to the modprobe (or insmod) command.
 
-     ·  Specified on an options directive in /etc/modules.conf (called
-        /etc/conf.modules by some older distributions).
+        ·  Specified on an options directive in /etc/modules.conf
+           (called /etc/conf.modules by some older distributions).
 
   BRLTTY only works with text-based consoles and applications.  It can
   be used with curses-based applications, but not with any application
@@ -332,6 +281,7 @@
   you just can't wait to get started.  It's a good idea, though, to
   first become familiar with the files which will ultimately be
   installed.
+
 
 
   22..11..  IInnssttaalllleedd FFiillee HHiieerraarrcchhyy
@@ -393,7 +343,6 @@
            The dynamically loadable driver for a braille display, where
            _d_r_i_v_e_r is the two-letter ``driver identification code''.
 
-
         bbrrllttttyy--ssppkk..llsstt
            A list of the speech synthesizer drivers which have been
            built as dynamically loadable shared objects, and, therefore,
@@ -401,7 +350,6 @@
            two-letter identification code for a driver, a tab character,
            and a description of the speech synthesizer which that driver
            is for.
-
         lliibbbbrrllttttyyss_d_r_i_v_e_r..ssoo..11
            The dynamically loadable driver for a speech synthesizer,
            where _d_r_i_v_e_r is the two-letter ``driver identification
@@ -467,7 +415,6 @@
   any options at all.
 
        ./configure
-
 
   If, however, you have some special requirements, or even if you're
   just adventurous, you should find out what your choices are.
@@ -543,13 +490,11 @@
         lliinnuuxx
            This driver provides direct access to the Linux console
            screen.  It's only selectable, and is the default, on Linux
-           systems.  It's default screen content inspection device list
-           is /dev/vcsa /dev/vcsa0 /dev/vcc/a.
+           systems.
 
         sshhmm
            This driver provides access to the screen program.  It's
-           selectable on all systems, and is the default on most.  It
-           has no default screen content inspection device list.  The
+           selectable on all systems, and is the default on most.  The
            patch for screen which we provide (see the Patches
            subdirectory) must be applied.  Use of this driver, due to
            the fact that screen must be concurrently running, makes
@@ -560,20 +505,26 @@
         operating system is available, then it's used.  If not, then shm
         is used.
 
-     --with-screen-device=_d_e_v_i_c_e
-        Specify the devices which may be used to inspect the screen
-        content.  If this option isn't specified, then a driver
-        appropriate list of devices is assumed.
-
 
   22..22..11..22..  DDiirreeccttoorryy SSppeecciiffiiccaattiioonn
 
 
+     --with-execute-root=_d_i_r_e_c_t_o_r_y
+        Specify the directory at which the ``installed file hierarchy''
+        is to be rooted at run-time.  The absolute path should be
+        supplied.  If this option isn't specified, then the system's
+        root directory is assumed.  Use this option if you need to
+        install BRLTTY's run-time files in a non-standard location.  You
+        need to use this feature, for example, if you'd like to have
+        more than one version of BRLTTY installed at the same time (see
+        section ``Installing Multiple Versions'' for an example of how
+        to do this).
+
      --with-install-root=_d_i_r_e_c_t_o_r_y
-        Specify the directory at which the root file system of the
-        ``installed file hierarchy'' (or a partial image thereof) is
-        rooted.  The absolute path should be supplied.  If this option
-        isn't specified, then the local system's root directory is
+        Specify the directory beneath which the ``installed file
+        hierarchy'' is to be installed.  The absolute path should be
+        supplied.  If this option isn't specified, then the run-time
+        package root (see the ``--with-execute-root'' build option) is
         assumed.  This directory is only used by ``make install'' and
         ``make uninstall''.  Use this option if you need to install
         BRLTTY in a different location than the one from which it'll
@@ -581,26 +532,12 @@
         example, if you're building BRLTTY on one system for use on
         another.
 
-     --with-execute-root=_d_i_r_e_c_t_o_r_y
-        Specify the directory at which the ``installed file hierarchy''
-        is to be rooted.  The absolute path should be supplied.  If this
-        option isn't specified, then the system's root directory is
-        assumed.  This directory is normally rooted at the system's root
-        directory, but during ``make install'' and ``make uninstall''
-        it's rooted at the directory specified by the ``--with-install-
-        root'' build option.  Use this option if you need to install any
-        of BRLTTY's run-time files in non-standard locations.  You need
-        to use this feature, for example, if you'd like to have more
-        than one version of BRLTTY installed at the same time (see
-        section ``Installing Multiple Versions'' for an example of how
-        to do this).
-
      --prefix=_d_i_r_e_c_t_o_r_y
         Specify the directory within the ``installed file hierarchy''
         where the default directories for the architecture-independent
         files are to be rooted.  These directories include:
 
-     ·  the ``data directory''
+        ·  the ``data directory''
 
         The absolute path should be supplied.  If this option isn't
         specified, then the system's root directory is assumed.  This
@@ -611,15 +548,14 @@
         Specify the directory within the ``installed file hierarchy''
         where the default directories for the architecture-dependent
         files are to be rooted.  These directories include:
+        ·  the ``program directory''
 
-     ·  the ``program directory''
-
-     ·  the ``library directory''
+        ·  the ``library directory''
 
         The absolute path should be supplied.  If this option isn't
         specified, then the directory specified via the ``--prefix''
-        build option is assumed.  This directory is rooted at the
-        directory specified by the ``--with-execute-root'' build option.
+        build option is assumed.  This directory is rooted at the direc­
+        tory specified by the ``--with-execute-root'' build option.
 
      --bindir=_d_i_r_e_c_t_o_r_y
         Specify the directory within the ``installed file hierarchy''
@@ -658,6 +594,13 @@
         programs.  This option removes all dependencies on shared
         objects at run-time.
 
+     --disable-tainted-components
+        Exclude those components which have a build-time dependency
+        beyond what a standard system is expected to provide.  These
+        include:
+
+        ·  The VViiaaVVooiiccee speech driver.
+
      --disable-preferences-menu
         Reduce program size by excluding the preferences menu (see
         section ``The Preferences Menu'').
@@ -675,25 +618,33 @@
         Reduce program size by excluding support for contracted braille
         (see section ``Contracted Braille'').
 
-     --disable-speaker-tunes
-        Reduce program size by excluding support for the playing of
-        alert tunes via the built-in PC speaker (see section ``Alert
-        Tunes'').
+     --disable-speech-support
+        Reduce program size by excluding support for speech
+        synthesizers.
 
-     --disable-dac-tunes
+     --disable-beeper-tunes
         Reduce program size by excluding support for the playing of
-        alert tunes via the Digital to Analog Converter on the sound
-        card (see section ``Alert Tunes'').
+        alert tunes (see section ``Alert Tunes'') via the internal
+        beeper (console tone generator).
+
+     --disable-pcm-tunes
+        Reduce program size by excluding support for the playing of
+        alert tunes (see section ``Alert Tunes'') via the digital audio
+        interface on the sound card.
 
      --disable-midi-tunes
         Reduce program size by excluding support for the playing of
-        alert tunes via the Musical Instrument Digital Interface on the
-        sound card (see section ``Alert Tunes'').
+        alert tunes (see section ``Alert Tunes'') via the Musical
+        Instrument Digital Interface on the sound card.
 
-     --disable-adlib-tunes
+     --disable-fm-tunes
         Reduce program size by excluding support for the playing of
-        alert tunes via the FM synthesizer on an AdLib, OPL3, Sound
-        Blaster, or equivalent sound card (see section ``Alert Tunes'').
+        alert tunes (see section ``Alert Tunes'') via the FM synthesizer
+        on an AdLib, OPL3, Sound Blaster, or equivalent sound card.
+
+     --disable-pm-configfile
+        Reduce program size by excluding support for the Papenmeier
+        driver's configuration file.
 
      --enable-gpm
         Include an interface to the gpm application so that, on systems
@@ -729,7 +680,6 @@
         If this option isn't specified, then this feature isn't acti­
         vated.
 
-
   22..22..22..  MMaakkee FFiillee TTaarrggeettss
 
   Once BRLTTY has been configured, the next steps are to compile and to
@@ -749,9 +699,6 @@
         Complete the compile and link phase (see ``make all''), and then
         install the BRLTTY executable, its data files, drivers, and help
         pages, in the correct places and with the correct permissions.
-        The screen content inspection device (see the ``--with-screen-
-        device'' build option) is, if applicable, created if it doesn't
-        already exist.
 
      mmaakkee uunniinnssttaallll
         Remove the BRLTTY executable, its data files, drivers, and help
@@ -769,14 +716,15 @@
         In addition to removing the results of compiling and linking
         (see ``make clean''):
 
-     ·  Remove the results of BRLTTY configuration (see ``Build
-        Options'').  This includes the removal of config.mk, config.h,
-        config.cache, config.status, and config.log.
+        ·  Remove the results of BRLTTY configuration (see ``Build
+           Options'').  This includes the removal of config.mk,
+           config.h, config.cache, config.status, and config.log.
 
-     ·  Remove other files from the source directory structure which
-        tend to accumulate over time but which don't belong there.  This
-        includes the removal of editor backup files, test case results,
-        rejected patch hunks, and copies of original source files.
+        ·  Remove other files from the source directory structure which
+           tend to accumulate over time but which don't belong there.
+           This includes the removal of editor backup files, test case
+           results, rejected patch hunks, and copies of original source
+           files.
 
 
   22..33..  TTeessttiinngg BBRRLLTTTTYY
@@ -798,7 +746,6 @@
   ``braille-device'' configuration file directives, and/or compile your
   needs right into BRLTTY via the ``--with-braille-driver'' and the
   ``--with-braille-device'' build options.
-
   If all is well, BRLTTY's version identification message should appear
   on the braille display for a few seconds (see the ``-M'' command line
   option).  After it goes away (which you can hasten by pressing any key
@@ -855,20 +802,16 @@
   new users).  Just add a set of lines like these:
 
 
-
-  if [ -x /bin/brltty ]
-  then
-     /bin/brltty
-  fi
-
+       if [ -x /bin/brltty ]
+       then
+          /bin/brltty
+       fi
 
 
 
   This can usually be abbreviated to the somewhat less readable form:
 
-
-       [ -x /bin/brltty ] && /bin/brltty
-
+  [ -x /bin/brltty ] && /bin/brltty
 
 
 
@@ -902,8 +845,6 @@
 
 
 
-
-
      Starting BRLTTY before this reinvocation results in two BRLTTY pro­
      cesses running at the same time, and that'll give you no end of
      problems.  If your version of this script has this feature, then
@@ -922,7 +863,7 @@
      automatially restarted if it dies, then add a line like this before
      the first :sysinit: line which is already in there.
 
-  brl::sysinit:/bin/brltty
+       brl::sysinit:/bin/brltty
 
 
   ·  If you don't mind it being started later but do want it to be
@@ -973,8 +914,7 @@
   If you want to start BRLTTY before any file systems are mounted, then
   ensure that all of its components are installed within the root file
   system.  See the ``--with-execute-root'', ``--bindir'',
-  ``--sysconfdir'', ``--libdir'', and ``--with-screen-device'' build
-  options.
+  ``--sysconfdir'', and ``--libdir'' build options.
 
 
   22..55..  SSeeccuurriittyy CCoonnssiiddeerraattiioonnss
@@ -983,17 +923,19 @@
   write access for the port to which the braille display is connected,
   read access to /dev/vcsa or equivalent (to query the screen dimensions
   and the cursor position, and to review the current screen content and
-  highlighting), and read and write accesws to the system console (for
+  highlighting), and read and write access to the system console (for
   arrow key entry during cursor routing, for input character insertion
   during paste, for special key simulation using keys on the braille
   display, for retrieving output character translation and screen font
-  mapping tables, and for making the computer's speaker beep).  Access
-  to the needed devices can, of course, be granted to a non-root user by
+  mapping tables, and for activation of the internal beeper).  Access to
+  the needed devices can, of course, be granted to a non-root user by
   changing the file permissions associated with the devices.  Merely
-  having access to the console, however, isn't enough because making the
-  speaker beep and simulating key strokes still require root privilege.
-  So, if you're willing to give up cursor routing, cut&paste, beeps, and
-  all that, you can run BRLTTY without root priviledge.
+  having access to the console, however, isn't enough because activating
+  the internal beeper and simulating key strokes still require root
+  privilege.  So, if you're willing to give up cursor routing,
+  cut&paste, beeps, and all that, you can run BRLTTY without root
+  priviledge.
+
 
 
   22..66..  BBuuiilldd aanndd RRuunn--TTiimmee RReessttrriiccttiioonnss
@@ -1054,6 +996,7 @@
 
   This utility copies BRLTTY's ``installed file hierarchy'' from one
   location to another.
+
        install-brltty _t_o [_f_r_o_m]
 
 
@@ -1066,9 +1009,6 @@
         be taken.  If it's specified, then it must be an existing
         directory.  If it's not specified, then the location used for
         the build is assumed.
-
-  The screen content inspection device is also created (if it doesn't
-  already exist) within the _t_o hierarchy.
 
   This utility can be used, for example, to copy BRLTTY to a root disk.
   If a root floppy is mounted as /mnt, and BRLTTY is installed on the
@@ -1115,9 +1055,6 @@
   The translation table is read from standard input, and a set of hex­
   adecimal constants suitable for inclusion within a C array initializer
   is written to standard output.
-
-
-
 
 
   22..88..44..  bbrrlltteesstt
@@ -1249,11 +1186,11 @@
      -d_d_e_v_i_c_e --device=_d_e_v_i_c_e
         The device on which to play the tune.
 
-        ssppeeaakkeerr
-           The built-in PC speaker.
+        bbeeeeppeerr
+           The internal beeper (console tone generator).
 
-        ddaacc
-           The Digital to Analog Converter on the sound card.
+        ppccmm
+           The digital audio interface on the sound card.
 
         mmiiddii
            The Musical Instrument Digital Interface on the sound card.
@@ -1315,7 +1252,6 @@
   screen.  The keys on the braille display itself can be used to send
   commands to BRLTTY which, in addition to a lot of other things, can
   also do exactly that.
-
 
 
   33..11..  CCoommmmaannddss
@@ -1383,7 +1319,6 @@
      TTOOPP
         Go up to the top line.
 
-
      BBOOTT
         Go down to the bottom line.
 
@@ -1397,6 +1332,7 @@
         Go up to the last line of the previous paragraph (the first non-
         blank line beyond the nearest previous blank line).  The current
         line is included when searching for the inter-paragraph space.
+
 
      NNXXPPGGRRPPHH
         Go down to the first line of the next paragraph (the first non-
@@ -1596,7 +1532,6 @@
 
         ddoottss 77 aanndd 88
            Black on white (reverse video).
-
         ddoott 88
            Everything else.
 
@@ -1646,8 +1581,6 @@
         ``--disable-learn-mode'' build option was specified.
 
 
-
-
   33..11..66..  PPrreeffeerreennccee MMaaiinntteennaannccee
 
 
@@ -1664,7 +1597,6 @@
      PPRREEFFLLOOAADD
         Restore the most recently saved preferences settings (see
         ``Preferences'' for full details).
-
 
   33..11..77..  MMeennuu NNaavviiggaattiioonn
 
@@ -1845,7 +1777,6 @@
         the build procedure.  This directive can be overridden with the
         ``-b'' command line option.
 
-
      braille-device _d_e_v_i_c_e
         Specify the device to which the braille display is connected.
         The full path must be supplied.  See the ``--with-braille-
@@ -1912,6 +1843,8 @@
         the ``--with-text-table'' build option for the default
         established during the build procedure.  This directive can be
         overridden with the ``-t'' command line option.
+
+
   33..33..  CCoommmmaanndd LLiinnee OOppttiioonnss
 
   Many settings can be explicitly specified when invoking BRLTTY.  The
@@ -1976,7 +1909,6 @@
         33  error
 
         44  warning
-
 
         55  notice
 
@@ -2044,11 +1976,12 @@
         is defined, then the value of that environment variable is used.
         The names of these environment variables are based on the long
         names of the options they correspond to:
-     ·  All letters are in upper case.
 
-     ·  Underscores (_) are used instead of minus signs (-).
+        ·  All letters are in upper case.
 
-     ·  The prefix BRLTTY_ is added.
+        ·  Underscores (_) are used instead of minus signs (-).
+
+        ·  The prefix BRLTTY_ is added.
 
         This option is particularly useful on the Linux operating system
         as it allows default settings to be passed to BRLTTY via boot
@@ -2061,7 +1994,6 @@
         BRLTTY_BRAILLE_DEVICE
            The braille display device (see the ``-d'' command line
            option).
-
         BRLTTY_BRAILLE_DRIVER
            The braille display driver (see the ``-b'' command line
            option).
@@ -2216,10 +2148,10 @@
      window so that the first character to be cut appears anywhere
      within it, and then:
 
-  ·  invoke the ``CUTBEGIN'' command to start a new cut buffer
+     ·  invoke the ``CUTBEGIN'' command to start a new cut buffer
 
-  ·  invoke the ``CUTAPPEND'' command to append to the existing cut
-     buffer
+     ·  invoke the ``CUTAPPEND'' command to append to the existing cut
+        buffer
 
      by pressing the key(s) associated with it and then pressing the
      routing key associated with the character.
@@ -2230,9 +2162,9 @@
      that the last character to be cut appears anywhere within it, and
      then
 
-  ·  invoke the ``CUTRECT'' command to cut a rectangular area
+     ·  invoke the ``CUTRECT'' command to cut a rectangular area
 
-  ·  invoke the ``CUTLINE'' command to cut a linear area
+     ·  invoke the ``CUTLINE'' command to cut a linear area
 
      by pressing the key(s) associated with it and then pressing the
      routing key associated with the character.  Marking the end of the
@@ -2240,7 +2172,6 @@
      Excess white-space is removed from the end of each line in the cut
      buffer so that unwanted trailing spaces won't be pasted back in.
      Control characters are replaced with blanks.
-
 
   3. Insert (paste) the text where it's needed.  Place the cursor over
      the character where the text is to be pasted, and invoke the
@@ -2259,6 +2190,7 @@
   If BRLTTY is configured with the ``--enable-gpm'' build option on a
   system where the gpm application has been installed, then it'll
   interact with the pointer (mouse).
+
 
   Moving the braille window moves the pointer (see the ``Pointer Follows
   Window'' preference).  Any motion of the braille window (manual,
@@ -2307,7 +2239,6 @@
      3. Move the pointer to the last character of the region (all
         currently selected characters are highlighted).
 
-
      4. Release the left button.
 
   ·  Paste (input) the current contents of the cut buffer by clicking
@@ -2323,8 +2254,9 @@
   BRLTTY alerts you to the occurrence of significant events by playing
   short predefined tunes.  This feature can be activated and deactivated
   with either the ``TUNES'' command or the ``Alert Tunes'' preference.
-  The tunes are played on the PC speaker by default, but other
+  The tunes are played via the internal beeper by default, but other
   alternatives can be selected with the ``Tune Device'' preference.
+
 
   Each significant event is associated, from highest to lowest priority,
   with one or more of the following:
@@ -2369,9 +2301,6 @@
   ·  When a command cannot be executed.
 
   ·  When a lengthy command completes.
-
-
-
 
 
   44..55..  PPrreeffeerreenncceess SSeettttiinnggss
@@ -2459,6 +2388,7 @@
            Automatically save the preferences settings.
 
         The initial setting is No.
+
 
      TTeexxtt SSttyyllee
         When displaying screen content (see the ``DISPMD'' command),
@@ -2571,7 +2501,6 @@
 
         This setting can also be changed with the ``CSRVIS'' command.
 
-
      CCuurrssoorr SSttyyllee
         When showing the cursor, represent it:
 
@@ -2593,7 +2522,6 @@
            predefined interval.
 
         This setting can also be changed with the ``CSRBLINK'' command.
-
      CCuurrssoorr VViissiibbllee PPeerriioodd
         When the cursor is to be blinked, this setting specifies the
         length of time (see the note on ``time settings'' below) during
@@ -2660,7 +2588,6 @@
         the length of time (see the note on ``time settings'' below)
         during each cycle that they're to be invisible.  The initial
         setting is 2.
-
      WWiinnddooww FFoolllloowwss PPooiinntteerr
         When moving the pointer device (mouse):
 
@@ -2698,42 +2625,37 @@
      TTuunnee DDeevviiccee
         Play alert tunes via:
 
-        PPCC SSppeeaakkeerr
-           The built-in PC speaker.  This setting is supported on Linux.
-           It's always safe to use, although it may be somewhat soft.
-           This device isn't available if the ``--disable-speaker-
-           tunes'' build option was specified.
+        BBeeeeppeerr
+           The internal beeper (console tone generator).  This setting
+           is supported on Linux.  It's always safe to use, although it
+           may be somewhat soft.  This device isn't available if the
+           ``--disable-beeper-tunes'' build option was specified.
 
-        SSoouunndd CCaarrdd
-           The Digital to Analog Converter on the sound card.  This
-           setting is supported on Linux (via /dev/dsp), and on Solaris
-           (via /dev/audio).  It doesn't work when the DAC is already
+        PPCCMM
+           The digital audio interface on the sound card.  This setting
+           is supported on Linux (via /dev/dsp), and on Solaris (via
+           /dev/audio).  It doesn't work when this device is already
            being used by another application.  This device isn't
-           available if the ``--disable-dac-tunes'' build option was
+           available if the ``--disable-pcm-tunes'' build option was
            specified.
 
         MMIIDDII
            The Musical Instrument Digital Interface on the sound card
            This setting is supported on Linux (via /dev/sequencer).  It
-           doesn't work when the MIDI is already being used by another
-           application.  This device isn't available if the ``--disable-
-           midi-tunes'' build option was specified.
+           doesn't work when this device is already being used by
+           another application.  This device isn't available if the
+           ``--disable-midi-tunes'' build option was specified.
 
-        AAddLLiibb
-           OPL3/SB-FM/ The FM synthesizer on an AdLib, OPL3, Sound
-           Blaster, or equivalent sound card.  This setting is supported
-           on Linux.  It works even if the FM synthesizer is already
-           being used by another application.  The results are
-           unpredictable, and potentially not very good, if it's used
-           with a sound card which doesn't support this feature.  This
-           device isn't available if the ``--disable-adlib-tunes'' build
-           option was specified.
-
-        The initial setting is PC Speaker on those platforms which sup­
-        port it, and Sound Card on those platforms which don't.  If the
-        selected device isn't available because it was excluded at
-        build-time, then the first device which is available is used
-        instead.
+        FFMM The FM synthesizer on an AdLib, OPL3, Sound Blaster, or
+           equivalent sound card.  This setting is supported on Linux.
+           It works even if the FM synthesizer is already being used by
+           another application.  The results are unpredictable, and
+           potentially not very good, if it's used with a sound card
+           which doesn't support this feature.  This device isn't
+           available if the ``--disable-fm-tunes'' build option was
+           specified.
+        The initial setting is beeper on those platforms which support
+        it, and PCM on those platforms which don't.
 
      MMIIDDII IInnssttrruummeenntt
         If the Musical Instrument Digital Interface (MIDI) of the sound
@@ -2757,7 +2679,7 @@
         then, regardless of the setting of this preference, the dot pat­
         tern isn't displayed.
 
-     SSttaattuuss CCeellllss SSttyyllee
+     SSttaattuuss SSttyyllee
         This setting specifies the way that the status cells are to be
         used.  You shuldn't normally need to play with it.  It enables
         BRLTTY's developers to test status cell configurations for
@@ -2798,7 +2720,6 @@
 
            NNoo DDoottss
               The first (leftmost) window.
-
            DDoott 77
               The second window.
 
@@ -2834,7 +2755,6 @@
               DDoott 22
                  Screen attributes are being displayed (see the
                  ``DISPMD'' command).
-
 
               DDoott 33
                  Alert tunes are being played (see the ``TUNES''
@@ -2997,6 +2917,7 @@
      _d  The number of braille dots being used to display each character
         (see the ``SIXDOTS'' command).
 
+
         8  All eight dots are being used.
 
         6  Only dots 1 through 6 are being used.
@@ -3034,6 +2955,7 @@
 
         DDoott 11
            Frozen screen image (see the ``FREEZE'' command).
+
         DDoott 22
            Display attributes (see the ``DISPMD'' command).
 
@@ -3062,7 +2984,6 @@
 
         bbllaannkk
            Cursor tracking is off.
-
         t  Cursor tracking is on.
 
      _c  The state of the cursor visibility features (see the ``CSRVIS''
@@ -3100,6 +3021,7 @@
 
      _u  The state of the uppercase (capital letter) display features
         (see the ``CAPBLINK'' command).
+
         bbllaannkk
            Uppercase letters don't blink.
 
@@ -3164,7 +3086,6 @@
 
 
   All other lines define table entries.
-
 
   The general form of a table entry is an opcode followed by its
   operands.  The opcode and its operands are separated from one another
@@ -3232,6 +3153,7 @@
         ooccttaall
            A sequence of octal digits (0-7), with the first digit being
            zero (0).
+
      ddoottss
         A braille symbol.  The braille dots must be specified via their
         standard numbers (see section ``Braille Dot Numbering
@@ -3258,6 +3180,7 @@
 
      ````33'''' _d_o_t_s
         Define begin capitals sign.
+
 
      ````44'''' _d_o_t_s
         Define letter sign.
@@ -3325,8 +3248,6 @@
 
      ````2255'''' _d_o_t_s
         Define end capitals sign.
-
-
   44..88..33..  OOppccooddeess bbyy FFuunnccttiioonn
 
   Now for all of the details.  The opcodes here are grouped by function
@@ -3496,6 +3417,7 @@
 
      tteexxtt..eess..ttbbll
         Spanish
+
      tteexxtt..ffrreenncchh..ttbbll
         French
 
@@ -3522,6 +3444,7 @@
 
      tteexxtt..sswweeddiisshh..ttbbll
         Swedish
+
 
      tteexxtt..uukk..ttbbll
         United Kingdom English
@@ -3561,7 +3484,6 @@
         DDoott 44
            Red
 
-
         DDoott 55
            Green
 
@@ -3588,6 +3510,7 @@
 
         DDoott 33
            Blue
+
 
         DDoott 77
            Blink
@@ -3627,7 +3550,6 @@
      BBiitt 00
         Dot 1
 
-
      BBiitt 11
         Dot 4
 
@@ -3653,6 +3575,7 @@
   tically shift a dot pattern.
 
 
+
   55..44..  TTaabbllee UUttiilliittiieess
 
   These utilities reside within the BrailleTables subdirectory, and
@@ -3663,8 +3586,6 @@
 
        cd BrailleTables
        make
-
-
 
 
 
@@ -3693,8 +3614,7 @@
 
   If the -c option isn't specified, each line looks like this:
 
-
-  _c_c _x_x _d_d_d (73214568)_t_t B+_b_b_b_b _n_a_m_e
+       _c_c _x_x _d_d_d (73214568)_t_t B+_b_b_b_b _n_a_m_e
 
 
   If the -c option is specified, each line looks like this:
@@ -3786,7 +3706,7 @@
   This utility converts a binary translation table from one dot mapping
   to another.
 
-       tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
+  tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
 
 
 
@@ -3826,6 +3746,7 @@
 
         BBiitt 66
            Dot 5
+
         BBiitt 77
            Dot 4
 
@@ -3849,6 +3770,7 @@
 
         BBiitt 55
            Dot 6
+
 
         BBiitt 66
            Dot 7
@@ -3879,7 +3801,6 @@
 
 
 
-
   You can then run it like this:
 
        /brltty-3.1/bin/brltty
@@ -3889,13 +3810,9 @@
   and run the new executable from there.
 
 
-
-
-
-  ./configure --with-execute-root=/brltty-3.2
-  make install
-  /brltty-3.2/bin/brltty
-
+       ./configure --with-execute-root=/brltty-3.2
+       make install
+       /brltty-3.2/bin/brltty
 
 
 
@@ -3928,7 +3845,6 @@
 
 
 
-
   Then all you need to do is to point /brltty to the desired version.
 
        ln -s /brltty-3.1 /brltty
@@ -3951,17 +3867,14 @@
        chmod 755 /etc/brltty
 
 
-  The screen content inspection device (usually /dev/vcsa) is required
-  (see the ``--with-screen-device'' build option).  It should already
-  exist unless your Linux distribution is quite old.  If necessary, you
-  can create it with:
+  The screen content inspection device (usually /dev/vcsa) is required.
+  It should already exist unless your Linux distribution is quite old.
+  If necessary, you can create it with:
 
 
-
-  mknod /dev/vcsa c 7 128
-  chmod 660 /dev/vcsa
-  chown root.tty /dev/vcsa
-
+       mknod /dev/vcsa c 7 128
+       chmod 660 /dev/vcsa
+       chown root.tty /dev/vcsa
 
 
 
@@ -3987,7 +3900,6 @@
        strip brltty
 
 
-
   66..33..  FFuuttuurree EEnnhhaanncceemmeennttss
 
   Apart from fixing bugs and supporting more types of braille displays,
@@ -3995,9 +3907,9 @@
 
      BBeetttteerr AAttttrriibbuuttee HHaannddlliinngg
 
-     ·  Attribute tracking.
+        ·  Attribute tracking.
 
-     ·  Mixed text and attribute mode.
+        ·  Mixed text and attribute mode.
 
      SSccrroollll TTrraacckkiinngg
         Locking the braille window to one line as it scrolls on the
@@ -4005,11 +3917,11 @@
 
      BBeetttteerr SSppeeeecchh SSuuppppoorrtt
 
-     ·  Mixed braille and speech for faster reading of text.
+        ·  Mixed braille and speech for faster reading of text.
 
-     ·  Better speech navigation.
+        ·  Better speech navigation.
 
-     ·  More speech synthesizers.
+        ·  More speech synthesizers.
 
      SSoocckkeett IInntteerrffaaccee
         A mechanism allowing screen readers and X display interpreters
@@ -4021,7 +3933,6 @@
         navigational boundaries at the edges of the region.
 
   See the file TODO for a more complete list.
-
 
 
   66..44..  KKnnoowwnn BBuuggss
@@ -4051,7 +3962,7 @@
 
   ·  Blazie Engineering: BrailleLite 18/40
 
-  ·  EuroBraille: AzerBraille (tested on Clio-noteBraille 40)
+  ·  EuroBraille: AzerBraille, Clio, Iris, NoteBraille, Scriba
 
   ·  Handialog: VisioBraille 2040
 
@@ -4089,7 +4000,6 @@
 
   ·  Elan Informatique: Televox
 
-
   ·  International Business Machines (IBM): ViaVoice
 
   ·  Tieman B.V.: CombiBraille
@@ -4120,6 +4030,7 @@
      ggss GenericSay
 
      hhtt HandyTech
+
 
      lltt LogText
 
@@ -4156,6 +4067,7 @@
   and three rows.  Computer braille has introduced a fourth row at the
   bottom.  Each dot can be specifically identified by its number as
   follows:
+
      11  Row 1 (top) left.
 
      22  Row 2 left.
@@ -4183,42 +4095,7 @@
 
 
 
-
-
   77..55..  NNoorrtthh AAmmeerriiccaann BBrraaiillllee CCoommppuutteerr CCooddee
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4352,137 +4229,135 @@
   | 125  7D  [  21456 ]  right brace                                |
   | 126  7E  [    45  ]  tilde accent                               |
   | 127  7F  [7   456 ]  DEL (delete)                               |
-  | 128  80  [7 2   6 ]  <control>                                  |
-  | 129  81  [ 3 14 68]  <control>                                  |
-  | 130  82  [  2  568]  BPH (break permitted here)                 |
-  | 131  83  [  2  5 8]  NBH (no break here)                        |
-  | 132  84  [73   5  ]  <control>                                  |
-  | 133  85  [   1   8]  NL (next line)                             |
-  | 134  86  [ 32 4  8]  SSA (start of selected area)               |
-  | 135  87  [ 32 45 8]  ESA (end of selected area)                 |
-  | 136  88  [ 3   568]  CTS (character tabulation set)             |
-  | 137  89  [   145 8]  CTJ (character tabulation justification)   |
-  | 138  8A  [ 32  5 8]  LTS (line tabulation set)                  |
-  | 139  8B  [7    5 8]  PLD (partial line down)                    |
-  | 140  8C  [   1 5 8]  PLU (partial line up)                      |
-  | 141  8D  [732 4 68]  RLF (reverse line feed)                    |
-  | 142  8E  [7     6 ]  SS2 (single shift two)                     |
-  | 143  8F  [7 214 6 ]  SS3 (single shift three)                   |
-  | 144  90  [732  56 ]  DCS (device control string)                |
-  | 145  91  [  2   68]  PU1 (private use one)                      |
-  | 146  92  [      68]  PU2 (private use two)                      |
-  | 147  93  [73  4   ]  STS (set transmit state)                   |
-  | 148  94  [73   5 8]  CC (cancel character)                      |
-  | 149  95  [    45 8]  MW (message waiting)                       |
-  | 150  96  [7  14 6 ]  SGA (start of guarded area)                |
-  | 151  97  [    4  8]  EGA (end of guarded area)                  |
-  | 152  98  [732 456 ]  SS (start of string)                       |
-  | 153  99  [ 3 1 5 8]  <control>                                  |
-  | 154  9A  [7 21  6 ]  SCI (single character introducer)          |
-  | 155  9B  [     568]  CSI (control sequence introducer)          |
-  | 156  9C  [ 3    68]  ST (string terminator)                     |
-  | 157  9D  [73  4 6 ]  OSC (operating system command)             |
-  | 158  9E  [732  5  ]  PM (privacy message)                       |
-  | 159  9F  [7 214 68]  APC (application program command)          |
-  | 160  A0  [7       ]  no-break space                             |
-  | 161  A1  [73    6 ]  inverted exclamation mark                  |
-  | 162  A2  [     5 8]  cent sign                                  |
-  | 163  A3  [7   4 6 ]  pound sign                                 |
-  | 164  A4  [73    68]  currency sign                              |
-  | 165  A5  [    4 68]  yen sign                                   |
-  | 166  A6  [7 2   68]  broken bar                                 |
-  | 167  A7  [73214568]  section sign                               |
-  | 168  A8  [7 2    8]  diaeresis                                  |
-  | 169  A9  [7  1456 ]  copyright sign                             |
-  | 170  AA  [  21 5 8]  feminine ordinal indicator                 |
-  | 171  AB  [7321 568]  left-pointing double angle quotation mark  |
-  | 172  AC  [7 2  568]  not sign                                   |
-  | 173  AD  [732 4 6 ]  soft hyphen                                |
-  | 174  AE  [7   4 68]  registered sign                            |
-  | 175  AF  [  2145 8]  macron                                     |
-  | 176  B0  [    4568]  degree sign                                |
-  | 177  B1  [732  5 8]  plus-minus sign                            |
-  | 178  B2  [  21   8]  superscript two                            |
-  | 179  B3  [732     ]  superscript three                          |
-  | 180  B4  [ 3 1 568]  acute accent                               |
-  | 181  B5  [ 3 14  8]  micro sign                                 |
-  | 182  B6  [73214568]  pilcrow sign                               |
-  | 183  B7  [73      ]  middle dot                                 |
-  | 184  B8  [   14  8]  cedilla                                    |
-  | 185  B9  [7321 56 ]  superscript one                            |
-  | 186  BA  [  2 45 8]  masculine ordinal indicator                |
-  | 187  BB  [732 4568]  right-pointing double angle quotation mark |
-  | 188  BC  [ 3 1  68]  vulgar fraction one quarter                |
-  | 189  BD  [ 321  68]  vulgar fraction one half                   |
-  | 190  BE  [73  4 68]  vulgar fraction three quarters             |
-  | 191  BF  [ 3     8]  inverted question mark                     |
-  | 192  C0  [73     8]  capital a grave                            |
-  | 193  C1  [7 2     ]  capital a acute                            |
-  | 194  C2  [ 3 1   8]  capital a circumflex                       |
-  | 195  C3  [732   6 ]  capital a tilde                            |
-  | 196  C4  [7    56 ]  capital a diaeresis                        |
-  | 197  C5  [73  456 ]  capital a ring above                       |
-  | 198  C6  [73  45  ]  capital ae                                 |
-  | 199  C7  [73214 6 ]  capital c cedilla                          |
-  | 200  C8  [732    8]  capital e grave                            |
-  | 201  C9  [ 32    8]  capital e acute                            |
-  | 202  CA  [       8]  capital e circumflex                       |
-  | 203  CB  [ 32145 8]  capital e diaeresis                        |
-  | 204  CC  [  214  8]  capital i grave                            |
-  | 205  CD  [7 2  5 8]  capital i acute                            |
-  | 206  CE  [7    568]  capital i circumflex                       |
-  | 207  CF  [7  1  6 ]  capital i diaeresis                        |
-  | 208  D0  [7    5  ]  capital eth                                |
-  | 209  D1  [7 2  56 ]  capital n tilde                            |
-  | 210  D2  [  2    8]  capital o grave                            |
-  | 211  D3  [ 321   8]  capital o acute                            |
-  | 212  D4  [  2 4  8]  capital o circumflex                       |
-  | 213  D5  [ 3214 68]  capital o tilde                            |
-  | 214  D6  [ 3   5 8]  capital o diaeresis                        |
-  | 215  D7  [ 321 5 8]  multiplication sign                        |
-  | 216  D8  [73   56 ]  capital o stroke                           |
-  | 217  D9  [7     68]  capital u grave                            |
-  | 218  DA  [7 2  5  ]  capital u acute                            |
-  | 219  DB  [73214568]  capital u circumflex                       |
-  | 220  DC  [ 32   68]  capital u diaeresis                        |
-  | 221  DD  [732   68]  capital y acute                            |
-  | 222  DE  [73   568]  capital thorn                              |
-  | 223  DF  [ 3  4568]  small sharp s                              |
-  | 224  E0  [ 321 568]  small a grave                              |
+  | 128  80  [    4  8]  <control>                                  |
+  | 129  81  [   1   8]  <control>                                  |
+  | 130  82  [  21   8]  BPH (break permitted here)                 |
+  | 131  83  [   14  8]  NBH (no break here)                        |
+  | 132  84  [   145 8]  <control>                                  |
+  | 133  85  [   1 5 8]  NL (next line)                             |
+  | 134  86  [  214  8]  SSA (start of selected area)               |
+  | 135  87  [  2145 8]  ESA (end of selected area)                 |
+  | 136  88  [  21 5 8]  CTS (character tabulation set)             |
+  | 137  89  [  2 4  8]  CTJ (character tabulation justification)   |
+  | 138  8A  [  2 45 8]  LTS (line tabulation set)                  |
+  | 139  8B  [ 3 1   8]  PLD (partial line down)                    |
+  | 140  8C  [ 321   8]  PLU (partial line up)                      |
+  | 141  8D  [ 3 14  8]  RLF (reverse line feed)                    |
+  | 142  8E  [ 3 145 8]  SS2 (single shift two)                     |
+  | 143  8F  [ 3 1 5 8]  SS3 (single shift three)                   |
+  | 144  90  [ 3214  8]  DCS (device control string)                |
+  | 145  91  [ 32145 8]  PU1 (private use one)                      |
+  | 146  92  [ 321 5 8]  PU2 (private use two)                      |
+  | 147  93  [ 32 4  8]  STS (set transmit state)                   |
+  | 148  94  [ 32 45 8]  CC (cancel character)                      |
+  | 149  95  [ 3 1  68]  MW (message waiting)                       |
+  | 150  96  [ 321  68]  SGA (start of guarded area)                |
+  | 151  97  [  2 4568]  EGA (end of guarded area)                  |
+  | 152  98  [ 3 14 68]  SS (start of string)                       |
+  | 153  99  [ 3 14568]  <control>                                  |
+  | 154  9A  [ 3 1 568]  SCI (single character introducer)          |
+  | 155  9B  [  2 4 68]  CSI (control sequence introducer)          |
+  | 156  9C  [  21 568]  ST (string terminator)                     |
+  | 157  9D  [  214568]  OSC (operating system command)             |
+  | 158  9E  [    45 8]  PM (privacy message)                       |
+  | 159  9F  [    4568]  APC (application program command)          |
+  | 160  A0  [7      8]  no-break space                             |
+  | 161  A1  [732 4 6 ]  inverted exclamation mark                  |
+  | 162  A2  [7 214 6 ]  cent sign                                  |
+  | 163  A3  [73  456 ]  pound sign                                 |
+  | 164  A4  [7  14 6 ]  currency sign                              |
+  | 165  A5  [73214 6 ]  yen sign                                   |
+  | 166  A6  [7  1 56 ]  broken bar                                 |
+  | 167  A7  [73   5  ]  section sign                               |
+  | 168  A8  [7    5  ]  diaeresis                                  |
+  | 169  A9  [732  56 ]  copyright sign                             |
+  | 170  AA  [       8]  feminine ordinal indicator                 |
+  | 171  AB  [7 21  6 ]  left-pointing double angle quotation mark  |
+  | 172  AC  [7 2  56 ]  not sign                                   |
+  | 173  AD  [73    6 ]  soft hyphen                                |
+  | 174  AE  [732   6 ]  registered sign                            |
+  | 175  AF  [7 2   6 ]  macron                                     |
+  | 176  B0  [73   56 ]  degree sign                                |
+  | 177  B1  [73  4 6 ]  plus-minus sign                            |
+  | 178  B2  [732     ]  superscript two                            |
+  | 179  B3  [7 2  5  ]  superscript three                          |
+  | 180  B4  [73      ]  acute accent                               |
+  | 181  B5  [7    56 ]  micro sign                                 |
+  | 182  B6  [732  5  ]  pilcrow sign                               |
+  | 183  B7  [7   4 6 ]  middle dot                                 |
+  | 184  B8  [7     6 ]  cedilla                                    |
+  | 185  B9  [7 2     ]  superscript one                            |
+  | 186  BA  [7       ]  masculine ordinal indicator                |
+  | 187  BB  [73  45  ]  right-pointing double angle quotation mark |
+  | 188  BC  [7321 56 ]  vulgar fraction one quarter                |
+  | 189  BD  [7321456 ]  vulgar fraction one half                   |
+  | 190  BE  [732 456 ]  vulgar fraction three quarters             |
+  | 191  BF  [7  1456 ]  inverted question mark                     |
+  | 192  C0  [732  5 8]  capital a grave                            |
+  | 193  C1  [7  1  68]  capital a acute                            |
+  | 194  C2  [7 2    8]  capital a circumflex                       |
+  | 195  C3  [7    5 8]  capital a tilde                            |
+  | 196  C4  [73214 68]  capital a diaeresis                        |
+  | 197  C5  [73  45 8]  capital a ring above                       |
+  | 198  C6  [73     8]  capital ae                                 |
+  | 199  C7  [73  4 68]  capital c cedilla                          |
+  | 200  C8  [732  568]  capital e grave                            |
+  | 201  C9  [7 21  68]  capital e acute                            |
+  | 202  CA  [732    8]  capital e circumflex                       |
+  | 203  CB  [73214568]  capital e diaeresis                        |
+  | 204  CC  [732   68]  capital i grave                            |
+  | 205  CD  [7  14 68]  capital i acute                            |
+  | 206  CE  [7 2  5 8]  capital i circumflex                       |
+  | 207  CF  [7321 568]  capital i diaeresis                        |
+  | 208  D0  [7     68]  capital eth                                |
+  | 209  D1  [7   4 68]  capital n tilde                            |
+  | 210  D2  [73   5 8]  capital o grave                            |
+  | 211  D3  [7  14568]  capital o acute                            |
+  | 212  D4  [7 2  568]  capital o circumflex                       |
+  | 213  D5  [7    568]  capital o tilde                            |
+  | 214  D6  [732 4 68]  capital o diaeresis                        |
+  | 215  D7  [7  1  6 ]  multiplication sign                        |
+  | 216  D8  [73  4  8]  capital o stroke                           |
+  | 217  D9  [73   568]  capital u grave                            |
+  | 218  DA  [7  1 568]  capital u acute                            |
+  | 219  DB  [7 2   68]  capital u circumflex                       |
+  | 220  DC  [732 4568]  capital u diaeresis                        |
+  | 221  DD  [7 214 68]  capital y acute                            |
+  | 222  DE  [73    68]  capital thorn                              |
+  | 223  DF  [73  4568]  small sharp s                              |
+  | 224  E0  [ 32  5 8]  small a grave                              |
   | 225  E1  [   1  68]  small a acute                              |
-  | 226  E2  [7  1  68]  small a circumflex                         |
-  | 227  E3  [ 3214  8]  small a tilde                              |
-  | 228  E4  [ 3  45 8]  small a diaeresis                          |
-  | 229  E5  [73  4568]  small a ring above                         |
-  | 230  E6  [73  45 8]  small ae                                   |
-  | 231  E7  [73214 68]  small c cedilla                            |
-  | 232  E8  [ 32 4 68]  small e grave                              |
+  | 226  E2  [  2    8]  small a circumflex                         |
+  | 227  E3  [     5 8]  small a tilde                              |
+  | 228  E4  [ 3214 68]  small a diaeresis                          |
+  | 229  E5  [ 3  45 8]  small a ring above                         |
+  | 230  E6  [ 3     8]  small ae                                   |
+  | 231  E7  [ 3  4 68]  small c cedilla                            |
+  | 232  E8  [ 32  568]  small e grave                              |
   | 233  E9  [  21  68]  small e acute                              |
-  | 234  EA  [7 21  68]  small e circumflex                         |
-  | 235  EB  [  214 68]  small e diaeresis                          |
-  | 236  EC  [ 3  4  8]  small i grave                              |
+  | 234  EA  [ 32    8]  small e circumflex                         |
+  | 235  EB  [ 3214568]  small e diaeresis                          |
+  | 236  EC  [ 32   68]  small i grave                              |
   | 237  ED  [   14 68]  small i acute                              |
-  | 238  EE  [7  14 68]  small i circumflex                         |
-  | 239  EF  [  214568]  small i diaeresis                          |
-  | 240  F0  [ 32  568]  small eth                                  |
-  | 241  F1  [ 3 145 8]  small n tilde                              |
-  | 242  F2  [ 3  4 68]  small o grave                              |
+  | 238  EE  [  2  5 8]  small i circumflex                         |
+  | 239  EF  [ 321 568]  small i diaeresis                          |
+  | 240  F0  [      68]  small eth                                  |
+  | 241  F1  [    4 68]  small n tilde                              |
+  | 242  F2  [ 3   5 8]  small o grave                              |
   | 243  F3  [   14568]  small o acute                              |
-  | 244  F4  [7  14568]  small o circumflex                         |
-  | 245  F5  [7  1 56 ]  small o tilde                              |
-  | 246  F6  [  2 4 68]  small o diaeresis                          |
-  | 247  F7  [73  4  8]  division sign                              |
-  | 248  F8  [7      8]  small o stroke                             |
-  | 249  F9  [ 32 4568]  small u grave                              |
+  | 244  F4  [  2  568]  small o circumflex                         |
+  | 245  F5  [     568]  small o tilde                              |
+  | 246  F6  [ 32 4 68]  small o diaeresis                          |
+  | 247  F7  [73  4   ]  division sign                              |
+  | 248  F8  [ 3  4  8]  small o stroke                             |
+  | 249  F9  [ 3   568]  small u grave                              |
   | 250  FA  [   1 568]  small u acute                              |
-  | 251  FB  [7  1 568]  small u circumflex                         |
-  | 252  FC  [  21 568]  small u diaeresis                          |
-  | 253  FD  [732  568]  small y acute                              |
-  | 254  FE  [7321456 ]  small thorn                                |
-  | 255  FF  [ 3214568]  small y diaeresis                          |
+  | 251  FB  [  2   68]  small u circumflex                         |
+  | 252  FC  [ 32 4568]  small u diaeresis                          |
+  | 253  FD  [  214 68]  small y acute                              |
+  | 254  FE  [ 3    68]  small thorn                                |
+  | 255  FF  [ 3  4568]  small y diaeresis                          |
   +-----------------------------------------------------------------+
-
-
 
 
 
@@ -4696,57 +4571,6 @@
   WITHOUT ANY WARRANTY - not even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GGNNUU
   GGeenneerraall PPuubblliicc LLiicceennssee for more details.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

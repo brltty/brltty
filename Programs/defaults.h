@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -41,15 +41,15 @@ extern "C" {
 
 /* Initialisation of BRLTTY environment settings: */
 
-#define DEFAULT_VISIBLE_CURSOR 1		/* 1 for cursor display, 0 for no cursor */
-#define DEFAULT_BLOCK_CURSOR 0		/* 1 for block, 0 for underline */
+#define DEFAULT_SHOW_CURSOR 1		/* 1 for cursor display, 0 for no cursor */
+#define DEFAULT_CURSOR_STYLE 0		/* 1 for block, 0 for underline */
 #define DEFAULT_TRACK_CURSOR 1		/* 1 for cursor tracking on, 0 for off */
 #define DEFAULT_HIDE_CURSOR 0		/* 1 for hiding cursor, 0 for showing it */
 #define DEFAULT_BLINKING_CURSOR 0		/* 1 for cursor blink on, 0 for off */
 #define DEFAULT_CURSOR_VISIBLE_PERIOD 10	/* for blinking cursor */
 #define DEFAULT_CURSOR_INVISIBLE_PERIOD 10
 
-#define DEFAULT_VISIBLE_ATTRIBUTES 0          /* 1 for attribute underlining */
+#define DEFAULT_SHOW_ATTRIBUTES 0          /* 1 for attribute underlining */
 #define DEFAULT_BLINKING_ATTRIBUTES 1        /* 1 for attr underlining that blinks */
 #define DEFAULT_ATTRIBUTES_VISIBLE_PERIOD 4      /* for attribute underlining */
 #define DEFAULT_ATTRIBUTES_INVISIBLE_PERIOD 12
@@ -61,7 +61,7 @@ extern "C" {
 #define DEFAULT_WINDOW_FOLLOWS_POINTER 0		/* 1 for capital blink on, 0 for off */
 #define DEFAULT_POINTER_FOLLOWS_WINDOW 0		/* 1 for capital blink on, 0 for off */
 
-#define DEFAULT_6DOT_BRAILLE 0		/* 1 for six-dot mode, 0 for eight-dot */
+#define DEFAULT_TEXT_STYLE 0		/* 1 for six-dot mode, 0 for eight-dot */
 #define DEFAULT_META_MODE 0		/* 1 for six-dot mode, 0 for eight-dot */
 
 #define DEFAULT_WINDOW_OVERLAP 0
@@ -72,8 +72,12 @@ extern "C" {
 #define DEFAULT_SKIP_BLANK_WINDOWS 0       /* 1 = skip blank windows */
 #define DEFAULT_BLANK_WINDOWS_SKIP_MODE sbwEndOfLine
 
-#define DEFAULT_ALERT_TUNES 1		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
+#define DEFAULT_ALERT_TUNES 1		/* 1 for on, 0 for off */
+#define DEFAULT_PCM_VOLUME 70		/* 1 for on, 0 for off */
+#define DEFAULT_MIDI_VOLUME 70		/* 1 for on, 0 for off */
+#define DEFAULT_MIDI_INSTRUMENT 0		/* 1 for on, 0 for off */
+#define DEFAULT_FM_VOLUME 70		/* 1 for on, 0 for off */
 
 #ifdef __cplusplus
 }

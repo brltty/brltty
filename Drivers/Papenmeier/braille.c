@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -56,7 +56,6 @@
 
 #include "brlconf.h"
 #include "Programs/brl.h"
-#include "Programs/scr.h"
 #include "Programs/misc.h"
 
 typedef enum {
@@ -69,17 +68,43 @@ typedef enum {
 #define BRLCONST
 #include "Programs/brl_driver.h"
 
-#ifdef READ_CONFIG
+#ifdef ENABLE_PM_CONFIGURATION_FILE
 #include "config.tab.c"
-static void read_config(char *path);
+ 
 int yyerror (char* s)  /* Called by yyparse on error */
 {
   LogPrint(LOG_CRIT, "Error: line %d: %s", linenumber, s);
   exit(99);
 }
-#else
+
+static void read_file(char* name)
+{
+  LogPrint(LOG_DEBUG, "Opening config file: %s", name);
+  if ((configfile = fopen(name, "r")) != NULL) {
+    LogPrint(LOG_DEBUG, "Reading config file: %s", name);
+    parse();
+    fclose(configfile);
+    configfile = NULL;
+  } else {
+    LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+             "Cannot open Papenmeier configuration file '%s': %s",
+             name, strerror(errno));
+  }
+}
+
+static void read_config(char *name)
+{
+  if (!*name) {
+    if (!(name = getenv(PM_CONFIG_ENV))) {
+      name = PM_CONFIG_FILE;
+    }
+  }
+  LogPrint(LOG_INFO, "Papenmeier Configuration File: %s", name);
+  read_file(name);
+}
+#else /* ENABLE_PM_CONFIGURATION_FILE */
 #include "brl-cfg.h"
-#endif /* READ_CONFIG */
+#endif /* ENABLE_PM_CONFIGURATION_FILE */
 
 #define CMD_ERR	EOF
 
@@ -130,6 +155,7 @@ static unsigned char change_bits[] = {
 };
 
 static int brl_fd = -1;			/* file descriptor for Braille display */
+static int chars_per_sec;			/* file descriptor for Braille display */
 static unsigned int debug_keys = 0;
 static unsigned int debug_reads = 0;
 static unsigned int debug_writes = 0;
@@ -159,37 +185,32 @@ static int code_switch_last  = -1;
 static int addr_status = -1;
 static int addr_display = -1;
 
-static unsigned char pressed_modifiers = 0;
+static unsigned int pressed_modifiers = 0;
 static int saved_command = EOF;
 
 static int input_mode = 0;
 static unsigned char input_dots = 0;
  
 static void
-flushInput (void) {
+flushTerminal (BrailleDisplay *brl) {
+  tcflush(brl_fd, TCOFLUSH);
+  drainBrailleOutput(brl, 100);
   tcflush(brl_fd, TCIFLUSH);
 }
 
-static void
-flushOutput (void) {
-  tcflush(brl_fd, TCOFLUSH);
-}
-
 static int
-writeBytes (const unsigned char *bytes, int count) {
+writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   if (safe_write(brl_fd, bytes, count) != -1) return 1;
   LogError("Write");
   return 0;
 }
 
 static void
-resetTerminal (void) {
+resetTerminal (BrailleDisplay *brl) {
   const unsigned char sequence[] = {cSTX, 0X01, cETX};
   LogPrint(LOG_WARNING, "Resetting terminal.");
-  flushOutput();
-  delay(500);
-  flushInput();
-  if (writeBytes(sequence, sizeof(sequence))) {
+  flushTerminal(brl);
+  if (writeBytes(brl, sequence, sizeof(sequence))) {
     pressed_modifiers = 0;
     saved_command = EOF;
     input_mode = 0;
@@ -197,21 +218,8 @@ resetTerminal (void) {
   }
 }
 
-#define RBF_ETX 1
-#define RBF_RESET 2
 static int
-readBytes (unsigned char *buffer, int offset, int count, int flags) {
-  if (readChunk(brl_fd, buffer, &offset, count, 100)) {
-    if (!(flags & RBF_ETX)) return 1;
-    if (*(buffer+offset-1) == cETX) return 1;
-    LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
-  }
-  if ((offset > 0) && (flags & RBF_RESET)) resetTerminal();
-  return 0;
-}
-
-static int
-writeData (int offset, int size, const unsigned char *data) {
+writeData (BrailleDisplay *brl, int offset, int size, const unsigned char *data) {
   unsigned char header[] = {
     cSTX,
     cIdSend,
@@ -221,24 +229,22 @@ writeData (int offset, int size, const unsigned char *data) {
     0,
   };
   unsigned char trailer[] = {cETX};
+  int count = sizeof(header) + size + sizeof(trailer);
   header[2] = offset >> 8;
   header[3] = offset & 0XFF;
-  header[5] = (sizeof(header) + size + sizeof(trailer)) & 0XFF; 
+  header[4] = count >> 8;
+  header[5] = count & 0XFF;
   
-  if (!writeBytes(header, sizeof(header))) return 0;
-  if (!writeBytes(data, size)) return 0;
-  if (!writeBytes(trailer, sizeof(trailer))) return 0;
-#ifdef SEND_TWICE_HACK
-  delay(100);
-  if (!writeBytes(header, sizeof(header))) return 0;
-  if (!writeBytes(data, size)) return 0;
-  if (!writeBytes(trailer, sizeof(trailer))) return 0;
-#endif /* SEND_TWICE_HACK */
-  return 1;
+  brl->writeDelay += count * 1000 / chars_per_sec;
+  if (writeBytes(brl, header, sizeof(header)))
+    if (writeBytes(brl, data, size))
+      if (writeBytes(brl, trailer, sizeof(trailer)))
+        return 1;
+  return 0;
 }
 
 static void
-updateData (int offset, int size, const unsigned char *data, unsigned char *buffer) {
+updateData (BrailleDisplay *brl, int offset, int size, const unsigned char *data, unsigned char *buffer) {
   if (memcmp(buffer, data, size) != 0) {
     int index;
     while (size) {
@@ -254,39 +260,129 @@ updateData (int offset, int size, const unsigned char *data, unsigned char *buff
       data += index;
       offset += index;
       memcpy(buffer, data, size);
-      writeData(offset, size, buffer);
+      writeData(brl, offset, size, buffer);
     }
   }
 }
 
 static void
-initializeTable (void) {
+initializeTable (BrailleDisplay *brl) {
   char line[curr_cols];
   char status[curr_stats];
 
   /* don´t use the internal table for the status cells */
   memset(status, 1, sizeof(status));
-  writeData(XMT_BRLWRITE+addr_status, sizeof(status), status);
+  writeData(brl, XMT_BRLWRITE+addr_status, sizeof(status), status);
 
   /* don´t use the internal table for the line */
   memset(line, 1, sizeof(line));
-  writeData(XMT_BRLWRITE+addr_display, sizeof(line), line);
+  writeData(brl, XMT_BRLWRITE+addr_display, sizeof(line), line);
 }
 
 static void
-writeLine (void) {
-  writeData(addr_display, curr_cols, currentLine);
+writeLine (BrailleDisplay *brl) {
+  writeData(brl, addr_display, curr_cols, currentLine);
 }
 
 static void
-writeStatus (void) {
-  if (curr_stats > 0) writeData(addr_status, curr_stats, currentStatus);
+writeStatus (BrailleDisplay *brl) {
+  if (curr_stats > 0) writeData(brl, addr_status, curr_stats, currentStatus);
+}
+
+static void
+restartTerminal (BrailleDisplay *brl) {
+  initializeTable(brl);
+  drainBrailleOutput(brl, 0);
+
+  writeStatus(brl);
+  drainBrailleOutput(brl, 0);
+
+  writeLine(brl);
+  drainBrailleOutput(brl, 0);
 }
 
 /* ------------------------------------------------------------ */
 
+#define RBF_ETX 1
+#define RBF_RESET 2
 static int
-identifyTerminal(brldim *brl) {
+readBytes (BrailleDisplay *brl, unsigned char *buffer, int offset, int count, int flags) {
+  if (readChunk(brl_fd, buffer, &offset, count, 1000)) {
+    if (!(flags & RBF_ETX)) return 1;
+    if (*(buffer+offset-1) == cETX) return 1;
+    LogPrint(LOG_WARNING, "Input packet not terminated by ETX.");
+  }
+  if ((offset > 0) && (flags & RBF_RESET)) resetTerminal(brl);
+  return 0;
+}
+
+static int
+interpretIdentity (const unsigned char *identity, BrailleDisplay *brl) {
+  int tn;
+  LogBytes("Identification packet", identity, sizeof(identity));
+  LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
+           identity[2],
+           identity[3], identity[4], identity[5],
+           identity[6], identity[7], identity[8]);
+  for (tn=0; tn<num_terminals; tn++) {
+    if (pm_terminals[tn].ident == identity[2]) {
+      the_terminal = &pm_terminals[tn];
+      LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
+               the_terminal->name,
+               the_terminal->x, the_terminal->y,
+               the_terminal->helpfile);
+      brl->x = the_terminal->x;
+      brl->y = the_terminal->y;
+
+      curr_cols = the_terminal->x;
+      curr_stats = the_terminal->statcells;
+
+      /* TODO: ?? HACK */
+      brl_driver.helpFile = the_terminal->helpfile;
+
+      /* key codes - starts at 0X300  */
+      /* status keys - routing keys - step 3 */
+      code_status_first = RCV_KEYROUTE;
+      code_status_last  = code_status_first + 3 * (curr_stats - 1);
+      code_route_first = code_status_last + 3;
+      code_route_last  = code_route_first + 3 * (curr_cols - 1);
+
+      if (the_terminal->frontkeys > 0) {
+        code_front_first = RCV_KEYFUNC + 3;
+        code_front_last  = code_front_first + 3 * (the_terminal->frontkeys - 1);
+      } else
+        code_front_first = code_front_last  = -1;
+
+      if (the_terminal->haseasybar) {
+        code_easy_first = RCV_KEYFUNC + 3;
+        code_easy_last  = 0X18;
+        code_switch_first = 0X1B;
+        code_switch_last = 0X30;
+      } else
+        code_easy_first = code_easy_last = code_switch_first = code_switch_last = -1;
+
+      LogPrint(LOG_DEBUG, "s=%03X-%03X r=%03X-%03X f=%03X-%03X e=%03X-%03X sw=%03X-%03X",
+               code_status_first, code_status_last,
+               code_route_first, code_route_last,
+               code_front_first, code_front_last,
+               code_easy_first, code_easy_last,
+               code_switch_first, code_switch_last);
+
+      /* address of display */
+      addr_status = XMT_BRLDATA;
+      addr_display = addr_status + the_terminal->statcells;
+      LogPrint(LOG_DEBUG, "addr: s=%d d=%d",
+               addr_status, addr_display);
+
+      return 1;
+    }
+  }
+  LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", identity[2]);
+  return 0;
+}
+
+static int
+identifyTerminal(BrailleDisplay *brl) {
   static const unsigned char badPacket[] = { 
     cSTX,
     cIdSend,
@@ -295,77 +391,15 @@ identifyTerminal(brldim *brl) {
     cETX
   };
 
-  flushOutput();
-  delay(100);
-  flushInput();
-
-  if (writeBytes(badPacket, sizeof(badPacket))) {
+  flushTerminal(brl);
+  if (writeBytes(brl, badPacket, sizeof(badPacket))) {
     if (awaitInput(brl_fd, 1000)) {
       unsigned char identity[10];			/* answer has 10 chars */
-      if (readBytes(identity, 0, 1, 0)) {
+      if (readBytes(brl, identity, 0, 1, 0)) {
         if (identity[0] == cSTX) {
-          if (readBytes(identity, 1, sizeof(identity)-1, RBF_ETX)) {
+          if (readBytes(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
             if (identity[1] == cIdIdentify) {
-              int tn;
-              LogBytes("Identification packet", identity, sizeof(identity));
-              LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%d%d (%02X%02X%02X)", 
-                       identity[2],
-                       identity[3], identity[4], identity[5],
-                       identity[6], identity[7], identity[8]);
-              for (tn=0; tn<num_terminals; tn++) {
-                if (pm_terminals[tn].ident == identity[2]) {
-                  the_terminal = &pm_terminals[tn];
-                  LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
-                           the_terminal->name,
-                           the_terminal->x, the_terminal->y,
-                           the_terminal->helpfile);
-                  brl->x = the_terminal->x;
-                  brl->y = the_terminal->y;
-
-                  curr_cols = the_terminal->x;
-                  curr_stats = the_terminal->statcells;
-
-                  /* TODO: ?? HACK */
-                  brl_driver.helpFile = the_terminal->helpfile;
-
-                  /* key codes - starts at 0X300  */
-                  /* status keys - routing keys - step 3 */
-                  code_status_first = RCV_KEYROUTE;
-                  code_status_last  = code_status_first + 3 * (curr_stats - 1);
-                  code_route_first = code_status_last + 3;
-                  code_route_last  = code_route_first + 3 * (curr_cols - 1);
-
-                  if (the_terminal->frontkeys > 0) {
-                    code_front_first = RCV_KEYFUNC + 3;
-                    code_front_last  = code_front_first + 3 * (the_terminal->frontkeys - 1);
-                  } else
-                    code_front_first = code_front_last  = -1;
-
-                  if (the_terminal->haseasybar) {
-                    code_easy_first = RCV_KEYFUNC + 3;
-                    code_easy_last  = 0X18;
-                    code_switch_first = 0X1B;
-                    code_switch_last = 0X30;
-                  } else
-                    code_easy_first = code_easy_last = code_switch_first = code_switch_last = -1;
-
-                  LogPrint(LOG_DEBUG, "s=%03X-%03X r=%03X-%03X f=%03X-%03X e=%03X-%03X sw=%03X-%03X",
-                           code_status_first, code_status_last,
-                           code_route_first, code_route_last,
-                           code_front_first, code_front_last,
-                           code_easy_first, code_easy_last,
-                           code_switch_first, code_switch_last);
-
-                  /* address of display */
-                  addr_status = XMT_BRLDATA;
-                  addr_display = addr_status + the_terminal->statcells;
-                  LogPrint(LOG_DEBUG, "addr: s=%d d=%d",
-                           addr_status, addr_display);
-
-                  return 1;
-                }
-              }
-              LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", identity[2]);
+              if (interpretIdentity(identity, brl)) return 1;
             } else {
               LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
             }
@@ -382,7 +416,7 @@ identifyTerminal(brldim *brl) {
 /* ------------------------------------------------------------ */
 
 static int 
-initializeDisplay (brldim *brl, const char *dev, speed_t baud) {
+initializeDisplay (BrailleDisplay *brl, const char *dev, speed_t baud) {
   if (openSerialDevice(dev, &brl_fd, &oldtio)) {
     struct termios newtio;	/* new terminal settings */
     memset(&newtio, 0, sizeof(newtio));
@@ -394,11 +428,7 @@ initializeDisplay (brldim *brl, const char *dev, speed_t baud) {
     newtio.c_cc[VTIME] = 0;
     LogPrint(LOG_DEBUG, "Trying %d baud.", baud2integer(baud));
     if (resetSerialDevice(brl_fd, &newtio, baud)) {
-      brldim res;
-      res.x = BRLCOLSMAX;		/* initialise size of display - unknownown yet */
-      res.y = 1;
-      res.disp = NULL;		/* clear pointers */
-
+      chars_per_sec = baud2integer(baud) / 10;
 /* HACK - used with serial.c */
 #ifdef _SERIAL_C_
       /* HACK - used with serial.c - 2d screen */
@@ -406,21 +436,18 @@ initializeDisplay (brldim *brl, const char *dev, speed_t baud) {
       addr_status = XMT_BRLDATA;
       addr_display = addr_status + the_terminal->statcells;
       if (1) {
-#else
-      if (identifyTerminal(&res)) {
+#else /* _SERIAL_C_ */
+      if (identifyTerminal(brl)) {
 #endif /* _SERIAL_C_ */
-        if ((res.disp = (unsigned char *)malloc(res.x * res.y))) {
-          initializeTable();
+        initializeTable(brl);
 
-          memset(currentStatus, change_bits[0], curr_stats);
-          writeStatus();
+        memset(currentStatus, change_bits[0], curr_stats);
+        writeStatus(brl);
 
-          memset(currentLine, change_bits[0], curr_cols);
-          writeLine();
+        memset(currentLine, change_bits[0], curr_cols);
+        writeLine(brl);
 
-          *brl = res;
-          return 1;
-        }
+        return 1;
       }
     }
     close(brl_fd);
@@ -429,22 +456,22 @@ initializeDisplay (brldim *brl, const char *dev, speed_t baud) {
   return 0;
 }
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *dev) {
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   validateYesNo(&debug_keys, "debug keys flag", parameters[PARM_DEBUGKEYS]);
   validateYesNo(&debug_reads, "debug reads flag", parameters[PARM_DEBUGREADS]);
   validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
 
   /* read the config file for individual configurations */
-#ifdef READ_CONFIG
+#ifdef ENABLE_PM_CONFIGURATION_FILE
   LogPrint(LOG_DEBUG, "Loading config file.");
   read_config(parameters[PARM_CONFIGFILE]);
-#endif /* READ_CONFIG */
+#endif /* ENABLE_PM_CONFIGURATION_FILE */
 
   while (1) {
     const static speed_t speeds[] = {B19200, B38400, B0};
     const static speed_t *speed = speeds;
-    if (initializeDisplay(brl, dev, *speed)) break;
+    if (initializeDisplay(brl, dev, *speed)) return 1;
     brl_close(brl);
     if (*++speed == B0) {
       speed = speeds;
@@ -454,14 +481,8 @@ brl_initialize (char **parameters, brldim *brl, const char *dev) {
 }
 
 static void
-brl_close (brldim *brl)
+brl_close (BrailleDisplay *brl)
 {
-  if (brl->disp != NULL) {
-    free(brl->disp);
-    brl->disp = NULL;
-  }
-  brl->x = brl->y = -1;
-
   if (brl_fd != -1) {
     tcsetattr(brl_fd, TCSADRAIN, &oldtio);	/* restore terminal settings */
     close(brl_fd);
@@ -479,7 +500,7 @@ brl_identify (void)
 }
 
 static void
-brl_writeStatus(const unsigned char* s) {
+brl_writeStatus(BrailleDisplay *brl, const unsigned char* s) {
   if (debug_writes)
     LogPrint(LOG_DEBUG, "setbrlstat %d", curr_stats);
 
@@ -494,7 +515,7 @@ brl_writeStatus(const unsigned char* s) {
 
       for (i=0; i < curr_stats; i++) {
 	int code = the_terminal->statshow[i];
-	if (code == STAT_EMPTY)
+	if (code == OFFS_EMPTY)
 	  cells[i] = 0;
 	else if (code >= OFFS_NUMBER)
 	  cells[i] = change_bits[portraitNumber(values[code-OFFS_NUMBER])];
@@ -515,16 +536,16 @@ brl_writeStatus(const unsigned char* s) {
       while (i < curr_stats)
         cells[i++] = change_bits[0];
     }
-    updateData(addr_status, curr_stats, cells, currentStatus);
+    updateData(brl, addr_status, curr_stats, cells, currentStatus);
   }
 }
 
 static void
-brl_writeWindow (brldim *brl) {
+brl_writeWindow (BrailleDisplay *brl) {
   int i;
-  if (debug_writes) LogBytes("write", brl->disp, curr_cols);
-  for (i=0; i<curr_cols; i++) brl->disp[i] = change_bits[brl->disp[i]];
-  updateData(addr_display, curr_cols, brl->disp, currentLine);
+  if (debug_writes) LogBytes("write", brl->buffer, curr_cols);
+  for (i=0; i<curr_cols; i++) brl->buffer[i] = change_bits[brl->buffer[i]];
+  updateData(brl, addr_display, curr_cols, brl->buffer, currentLine);
 }
 
 /* ------------------------------------------------------------ */
@@ -577,7 +598,7 @@ log_modifiers(void)
 
 /* handle modifier pressed - includes dots in input mode */
 static int
-modifier_pressed(int bit)
+modifier_pressed(unsigned int bit)
 {
   pressed_modifiers |= bit;
   log_modifiers();
@@ -604,7 +625,7 @@ modifier_pressed(int bit)
  
 /* handle modifier release */
 static int
-modifier_released(int bit)
+modifier_released(unsigned int bit)
 {
   pressed_modifiers &= ~bit;
   log_modifiers();
@@ -644,7 +665,7 @@ handle_key (int code, int ispressed, int offsroute)
   for (i=0; i<MODMAX; i++) 
     if (the_terminal->modifiers[i] == code) {
       /* found modifier: update bitfield */
-      int bit = 1 << i;
+      unsigned int bit = 1 << i;
       return ispressed? modifier_pressed(bit): modifier_released(bit);
     }
 
@@ -707,38 +728,37 @@ handle_code (int code, int press, int time) {
 
 /* ------------------------------------------------------------ */
 
-#define READ(offset,count,flags) { if (!readBytes(buf, offset, count, RBF_RESET|(flags))) return EOF; }
+#define READ(offset,count,flags) { if (!readBytes(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
 static int 
-brl_read (DriverCommandContext cmds) {
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   while (1) {
     unsigned char buf[0X100];
 
     do {
       READ(0, 1, 0);
     } while (buf[0] != cSTX);
-    if (debug_reads) LogPrint(LOG_DEBUG,  "read: STX");
+    if (debug_reads) LogPrint(LOG_DEBUG, "read: STX");
 
     READ(1, 1, 0);
     switch (buf[1]) {
       default: {
         int i;
         LogPrint(LOG_WARNING, "unknown packet: %02X", buf[1]);
-        for (i=2; i<=sizeof(buf); i++) {
+        for (i=2; i<sizeof(buf); i++) {
           READ(i, 1, 0);
           LogPrint(LOG_WARNING, "packet byte %2d: %02X", i, buf[i]);
         }
+        break;
       }
+
       case cIdIdentify: {
         const int length = 10;
         READ(2, length-2, RBF_ETX);
-        LogBytes("identify", buf, length);
-        initializeTable();
-        delay(100);
-        writeStatus();
-        delay(100);
-        writeLine();
+        if (interpretIdentity(buf, brl)) brl->resizeRequired = 1;
+        restartTerminal(brl);
         break;
       }
+
       case cIdReceive: {
         int length;
         int i;
@@ -747,7 +767,7 @@ brl_read (DriverCommandContext cmds) {
         length = (buf[4] << 8) | buf[5];	/* packet size */
         if (length != 10) {
           LogPrint(LOG_WARNING, "Unexpected input packet length: %d", length);
-          resetTerminal();
+          resetTerminal(brl);
           return CMD_ERR;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
@@ -761,6 +781,7 @@ brl_read (DriverCommandContext cmds) {
         }
         break;
       }
+
       {
         const char *message;
       case 0X03:
@@ -780,47 +801,10 @@ brl_read (DriverCommandContext cmds) {
       logError:
         READ(2, 1, RBF_ETX);
         LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
-        initializeTable();
-        writeStatus();
-        writeLine();
-        continue;
+        restartTerminal(brl);
+        break;
       }
     }
   }
 }
 #undef READ
-
-
-#ifdef READ_CONFIG
-
-/* ------------------------------------------------------------ */
-/* read config */
-
-static void read_file(char* name)
-{
-  LogPrint(LOG_DEBUG, "Opening config file: %s", name);
-  if ((configfile = fopen(name, "r")) != NULL) {
-    LogPrint(LOG_DEBUG, "Reading config file: %s", name);
-    parse();
-    fclose(configfile);
-    configfile = NULL;
-  } else {
-    LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
-             "Cannot open Papenmeier configuration file '%s': %s",
-             name, strerror(errno));
-  }
-}
-
-static void read_config(char *name)
-{
-  if (!*name) {
-    if (!(name = getenv(PM_CONFIG_ENV))) {
-      name = PM_CONFIG_FILE;
-    }
-  }
-  LogPrint(LOG_INFO, "Papenmeier Configuration File: %s", name);
-  read_file(name);
-}
-
-#endif /* READ_CONFIG */
-

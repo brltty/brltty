@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -43,9 +43,9 @@ unsigned char AL_channelOffsets[] = {
 };
 const unsigned char AL_channelCount = sizeof(AL_channelOffsets);
 
-int AL_enablePorts (void) {
-   if (enablePorts(ALP_REGISTER, 1)) {
-      if (enablePorts(ALP_DATA, 1)) {
+int AL_enablePorts (int errorLevel) {
+   if (enablePorts(errorLevel, ALP_REGISTER, 1)) {
+      if (enablePorts(errorLevel, ALP_DATA, 1)) {
          return 1;
       }
    }
@@ -87,18 +87,20 @@ static void AL_resetTimers (void) {
    AL_writeRegister(ALR_TCTL, AL_TCTL_RESET);
 }
 
-int AL_testCard (void) {
-   unsigned char before, after;
+int AL_testCard (int errorLevel) {
    const unsigned char mask = AL_STAT_EXP | AL_STAT_EXP1 | AL_STAT_EXP2;
    AL_resetTimers();
-   before = AL_readStatus();
-   AL_writeRegister(ALR_T1DATA, 0xFF);
-   AL_writeRegister(ALR_TCTL, AL_TCTL_T1START|AL_TCTL_T2MASK);
-   usleep(80);
-   after = AL_readStatus();
-   AL_resetTimers(); 
-   return ((before & mask) == 0)
-       && ((after & mask) == (AL_STAT_EXP | AL_STAT_EXP1)); 
+   if (!(AL_readStatus() & mask)) {
+      unsigned char status;
+      AL_writeRegister(ALR_T1DATA, 0xFF);
+      AL_writeRegister(ALR_TCTL, AL_TCTL_T1START|AL_TCTL_T2MASK);
+      usleep(80);
+      status = AL_readStatus();
+      AL_resetTimers(); 
+      if ((status & mask) == (AL_STAT_EXP | AL_STAT_EXP1)) return 1; 
+   }
+   LogPrint(errorLevel, "FM synthesizer initialization failure.");
+   return 0;
 }
 
 void AL_evaluatePitch (int pitch, int *exponent, int *mantissa) {

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -15,9 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION \
-"BRLTTY driver for Tieman Voyager, version 0.7 (April 2002)"
+"BRLTTY driver for Tieman Voyager, version 0.71 (January 2003)"
 #define COPYRIGHT \
-"   Copyright (C) 2001-2002 by Stéphane Doyon  <s.doyon@videotron.ca>\n" \
+"   Copyright (C) 2001-2003 by Stéphane Doyon  <s.doyon@videotron.ca>\n" \
 "                          and Stéphane Dalton <sdalton@videotron.ca>"
 /* Voyager/braille.c - Braille display driver for Tieman Voyager displays.
  *
@@ -26,9 +26,10 @@
  *   Stéphane Dalton <sdalton@videotron.ca>
  *
  * It is being tested on Voyager 44, should also support Voyager 70.
- * It is designed to be compiled in BRLTTY version 3.0.
+ * It is designed to be compiled in BRLTTY version 3.2.
  *
  * History:
+ * 0.71, January 2003: brl->buffer now allocated by core.
  * 0.7, April 2002: The name of the kernel module changed from
  *   voyager to brlvger, so some stuff (header file name, structure
  *   name, constants...) were renamed. Note that the character device
@@ -64,7 +65,6 @@
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
-#include "Programs/scr.h"
 
 #define BRLNAME "Voyager"
 #define PREFSTYLE ST_VoyagerStyle
@@ -193,10 +193,9 @@ brl_identify (void)
   LogPrint(LOG_INFO, COPYRIGHT);
 }
 
-static void
-brl_initialize (char **parameters, brldim *brl, const char *dev)
+static int
+brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
 {
-  brldim res;			/* return result */
   struct brlvger_info vi;
 
   /* use user parameters */
@@ -226,7 +225,7 @@ brl_initialize (char **parameters, brldim *brl, const char *dev)
       dots_repeat_inter_delay = DEFAULT_DOTS_REPEAT_INTER_DELAY;
   }
 
-  res.disp = dispbuf = prevdata = NULL;
+  dispbuf = prevdata = NULL;
 
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   /* Kernel driver will block until a display is connected. */
@@ -261,13 +260,13 @@ brl_initialize (char **parameters, brldim *brl, const char *dev)
   }
   LogPrint(LOG_INFO,"Display has %u cells", ncells);
   if(ncells == 44)
-    setHelpPageNumber(0);
+    brl->helpPage = 0;
   else if(ncells == 70)
-    setHelpPageNumber(1);
+    brl->helpPage = 1;
   else{
     LogPrint(LOG_NOTICE, "Unexpected display length, unknown model, "
 	     "using Voyager 44 help file.");
-    setHelpPageNumber(0);
+    brl->helpPage = 0;
   }
 
   brl_cols = ncells -NRSTATCELLS;
@@ -293,27 +292,24 @@ brl_initialize (char **parameters, brldim *brl, const char *dev)
 
   /* dispbuf will hold the 4 status cells followed by the text cells.
      We export directly to BRLTTY only the text cells. */
-  res.disp = dispbuf +NRSTATCELLS;
-  res.x = brl_cols;		/* initialize size of display */
-  res.y = BRLROWS;		/* always 1 */
+  brl->x = brl_cols;		/* initialize size of display */
+  brl->y = BRLROWS;		/* always 1 */
 
   /* Force rewrite of display on first writebrl */
   memset(prevdata, 0xFF, ncells); /* all dots */
 
   readbrl_init = 1; /* init state on first readbrl */
 
-  *brl = res;
-  return;
+  return 1;
 
 failure:;
   LogPrint(LOG_WARNING,"Voyager driver giving up");
-  brl_close(&res);
-  brl->x = -1;
-  return;
+  brl_close(brl);
+  return 0;
 }
 
 static void 
-brl_close (brldim *brl)
+brl_close (BrailleDisplay *brl)
 {
   if (brl_fd >= 0)
     close(brl_fd);
@@ -325,7 +321,7 @@ brl_close (brldim *brl)
 
 
 static void
-brl_writeStatus (const unsigned char *s)
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 {
   if(dispbuf)
     memcpy(dispbuf, s, NRSTATCELLS);
@@ -333,17 +329,16 @@ brl_writeStatus (const unsigned char *s)
 
 
 static void 
-brl_writeWindow (brldim *brl)
+brl_writeWindow (BrailleDisplay *brl)
 {
   unsigned char buf[ncells];
   int i;
   int start, stop, len;
 
-  if (brl->x != brl_cols || brl->y != BRLROWS
-      || brl->disp != dispbuf+NRSTATCELLS)
-    /* paranoia */
-    return;
+  /* assert:   brl->x == brl_cols */
     
+  memcpy(dispbuf +NRSTATCELLS, brl->buffer, brl_cols);
+
   /* If content hasn't changed, do nothing. */
   if(memcmp(prevdata, dispbuf, ncells) == 0)
     return;
@@ -437,7 +432,7 @@ brl_writeWindow (brldim *brl)
 #define HLP0(n, hlptxt)
 /* Watch out: HLP0 vanishes from code, but don't put a trailing semicolon! */
 
-#else
+#else /* GENHLP */
 
 /* To generate the help files we do gcc -DGENHLP -E (and heavily post-process
    the result). So these macros expand to something that is easily
@@ -462,7 +457,7 @@ brl_writeWindow (brldim *brl)
 #endif /* GENHLP */
 
 static int 
-brl_read (DriverCommandContext cmds)
+brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
 {
   /* State: */
   /* For a key binding that triggers two cmds */

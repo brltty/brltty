@@ -3,7 +3,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -37,15 +37,6 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "Programs/brl.h"
-typedef enum {
-  CMD_INPUT = DriverCommandCount /* toggle input mode */,
-  CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
-} InternalDriverCommands;
-typedef enum {
-  STAT_INPUT = StatusCellCount /* input mode */,
-  InternalStatusCellCount
-} InternalStatusCell;
 #include "brl-cfg.h"
 
 static int yylex(void);
@@ -55,11 +46,11 @@ static int yyparse();
 /* to be called: */
 int parse();
 
-char* nameval = 0;
+char *nameval = NULL;
 int numval, keyindex, cmdval; 
 
- int numkeys = 0;
- int keys[KEYMAX];
+int numkeys = 0;
+int keys[KEYMAX];
 
 int linenumber = 1;
 
@@ -434,7 +425,7 @@ int parse()
   linenumber = 1;
   set_current = -1;
 
-  nameval = 0;
+  nameval = NULL;
   numval = 0;
   keyindex = 0;
   cmdval = 0; 

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the Linux console (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2002 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -30,12 +30,23 @@ extern "C" {
 #include "brl.h"
 
 /* Routines provided by this braille display driver. */
-static void brl_identify (void);/* print start-up messages */
-static void brl_initialize (char **parameters, brldim *, const char *); /* initialise Braille display */
-static void brl_close (brldim *); /* close braille display */
-static void brl_writeWindow (brldim *); /* write to braille display */
-static int brl_read (DriverCommandContext);	/* get key press from braille display */
-static void brl_writeStatus (const unsigned char *);	/* set status cells */
+static void brl_identify (void);
+static int brl_open (BrailleDisplay *, char **parameters, const char *);
+static void brl_close (BrailleDisplay *);
+static int brl_readCommand (BrailleDisplay *, DriverCommandContext);
+static void brl_writeWindow (BrailleDisplay *);
+static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
+
+#ifdef BRL_HAVE_VISUAL_DISPLAY
+  static void brl_writeVisual (BrailleDisplay *);
+#endif /* BRL_HAVE_VISUAL_DISPLAY */
+
+#ifdef BRL_HAVE_PACKET_IO
+  static int brl_readPacket (BrailleDisplay *, unsigned char *, int);
+  static int brl_writePacket (BrailleDisplay *, unsigned char *, int);
+  static int brl_readKey (BrailleDisplay *);
+  static int brl_keyCommand (BrailleDisplay *, DriverCommandContext, int);
+#endif /* BRL_HAVE_PACKET_IO */
 
 #ifdef BRLPARMS
   static const char *const brl_parameters[] = {BRLPARMS, NULL};
@@ -62,11 +73,29 @@ BRLCONST BrailleDriver BRLSYMBOL = {
   PREFSTYLE,
 
   brl_identify,
-  brl_initialize,
+  brl_open,
   brl_close,
+  brl_readCommand,
   brl_writeWindow,
-  brl_read,
-  brl_writeStatus
+  brl_writeStatus,
+
+#ifdef BRL_HAVE_VISUAL_DISPLAY
+  brl_writeVisual,
+#else /* BRL_HAVE_VISUAL_DISPLAY */
+  NULL, /* brl_writeVisual */
+#endif /* BRL_HAVE_VISUAL_DISPLAY */
+
+#ifdef BRL_HAVE_PACKET_IO
+  brl_readPacket,
+  brl_writePacket,
+  brl_readKey,
+  brl_keyCommand
+#else /* BRL_HAVE_PACKET_IO */
+  NULL, /* brl_readPacket */
+  NULL, /* brl_writePacket */
+  NULL, /* brl_readKey */
+  NULL  /* brl_keyCommand */
+#endif /* BRL_HAVE_PACKET_IO */
 };
 
 #ifdef __cplusplus
