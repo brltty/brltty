@@ -269,9 +269,9 @@ isOnline (void) {
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
    if (isOnline()) {
-      if (status[FirstStatusCell] == FSC_GENERIC) {
-         unsigned char row = status[STAT_CSRROW];
-         unsigned char column = status[STAT_CSRCOL];
+      if (status[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC) {
+         unsigned char row = status[BRL_GSC_CSRROW];
+         unsigned char column = status[BRL_GSC_CSRCOL];
          row = MAX(1, MIN(row, screenHeight)) - 1;
          column = MAX(1, MIN(column, screenWidth)) - 1;
          if (deviceStatus < DEV_READY) {

@@ -1426,12 +1426,12 @@ static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
   if (terminal->statusCount) {
     unsigned char cells[terminal->statusCount];
-    if (s[FirstStatusCell] == FSC_GENERIC) {
+    if (s[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC) {
       int i;
 
       unsigned char values[InternalStatusCellCount];
-      memcpy(values, s, StatusCellCount);
-      values[STAT_INPUT] = input_mode;
+      memcpy(values, s, BRL_genericStatusCellCount);
+      values[BRL_GSC_INPUT] = input_mode;
 
       for (i=0; i<terminal->statusCount; i++) {
         int code = terminal->statusCells[i];

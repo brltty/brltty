@@ -162,7 +162,6 @@ typedef enum {
 #define BRL_FLG_REPEAT_INITIAL 0x800000
 #define BRL_FLG_REPEAT_DELAY   0x400000
 #define BRL_FLG_REPEAT_MASK    (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY)
-#define IS_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
   
 /* cursor routing keys block offset values */
 /*
@@ -213,55 +212,45 @@ typedef enum {
 
 #define BRL_BLK_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
 
-/* status cell styles */
-typedef enum {
-  ST_None,
-  ST_AlvaStyle,
-  ST_TiemanStyle,
-  ST_PB80Style,
-  ST_Generic,
-  ST_MDVStyle,
-  ST_VoyagerStyle
-} StatusCellStyles;
-
 /*
- * Please comment all STAT_* definitions. They are
+ * Please comment all BRL_GSC_* definitions. They are
  * used during automatic help file generation.
  */
+#define BRL_STATUS_CELLS_GENERIC 0XFF /* must be in BRL_firstStatusCell */
 typedef enum {
-  FirstStatusCell = 0,
-  #define FSC_GENERIC 0XFF
+  BRL_firstStatusCell = 0,
 
   /* numbers */
-  STAT_BRLCOL /* screen column where left of braille window is */,
-  STAT_BRLROW /* screen row where top of braille window is */,
-  STAT_CSRCOL /* screen column where cursor is */,
-  STAT_CSRROW /* screen row where cursor is */,
-  STAT_SCRNUM /* virtual screen number */,
+  BRL_GSC_BRLCOL /* screen column where left of braille window is */,
+  BRL_GSC_BRLROW /* screen row where top of braille window is */,
+  BRL_GSC_CSRCOL /* screen column where cursor is */,
+  BRL_GSC_CSRROW /* screen row where cursor is */,
+  BRL_GSC_SCRNUM /* virtual screen number */,
 
   /* flags */
-  STAT_FREEZE /* frozen screen */,
-  STAT_DISPMD /* attributes display */,
-  STAT_SIXDOTS /* six-dot braille */,
-  STAT_SLIDEWIN /* sliding window */,
-  STAT_SKPIDLNS /* skip identical lines */,
-  STAT_SKPBLNKWINS /* skip blank windows */,
-  STAT_CSRVIS /* visible cursor */,
-  STAT_CSRHIDE /* hidden cursor */,
-  STAT_CSRTRK /* cursor tracking */,
-  STAT_CSRSIZE /* block cursor */,
-  STAT_CSRBLINK /* blinking cursor */,
-  STAT_ATTRVIS /* visible attributes underline */,
-  STAT_ATTRBLINK /* blinking attributes underline */,
-  STAT_CAPBLINK /* blinking capital letters */,
-  STAT_TUNES /* alert tunes */,
-  STAT_HELP /* help mode */,
-  STAT_INFO /* info mode */,
-  STAT_AUTOREPEAT /* autorepeat */,
-  STAT_AUTOSPEAK /* autospeak */,
+  BRL_GSC_FREEZE /* frozen screen */,
+  BRL_GSC_DISPMD /* attributes display */,
+  BRL_GSC_SIXDOTS /* six-dot braille */,
+  BRL_GSC_SLIDEWIN /* sliding window */,
+  BRL_GSC_SKPIDLNS /* skip identical lines */,
+  BRL_GSC_SKPBLNKWINS /* skip blank windows */,
+  BRL_GSC_CSRVIS /* visible cursor */,
+  BRL_GSC_CSRHIDE /* hidden cursor */,
+  BRL_GSC_CSRTRK /* cursor tracking */,
+  BRL_GSC_CSRSIZE /* block cursor */,
+  BRL_GSC_CSRBLINK /* blinking cursor */,
+  BRL_GSC_ATTRVIS /* visible attributes underline */,
+  BRL_GSC_ATTRBLINK /* blinking attributes underline */,
+  BRL_GSC_CAPBLINK /* blinking capital letters */,
+  BRL_GSC_TUNES /* alert tunes */,
+  BRL_GSC_HELP /* help mode */,
+  BRL_GSC_INFO /* info mode */,
+  BRL_GSC_AUTOREPEAT /* autorepeat */,
+  BRL_GSC_AUTOSPEAK /* autospeak */,
 
-  StatusCellCount /* must be last */
-} StatusCell;
+  BRL_genericStatusCellCount
+} BRL_GenericStatusCell;
+#define BRL_MAX_STATUS_CELL_COUNT (MAX(22, BRL_genericStatusCellCount))
 
 /* The bits for each braille dot.
  *

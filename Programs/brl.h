@@ -22,12 +22,20 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* brl.h - Header file for the Braille display library
- */
-
 #include <unistd.h>
 
 #include "brldefs.h"
+
+/* status cell styles */
+typedef enum {
+  ST_None,
+  ST_AlvaStyle,
+  ST_TiemanStyle,
+  ST_PB80Style,
+  ST_Generic,
+  ST_MDVStyle,
+  ST_VoyagerStyle
+} StatusCellsStyle;
 
 /* Braille information structure. */
 typedef struct {
@@ -43,14 +51,18 @@ typedef struct {
 
 extern void initializeBrailleDisplay (BrailleDisplay *);
 extern unsigned int drainBrailleOutput (BrailleDisplay *, unsigned int minimumDelay);
+extern int allocateBrailleBuffer (BrailleDisplay *);
+
 extern void writeBrailleBuffer (BrailleDisplay *);
 extern void writeBrailleText (BrailleDisplay *, const char *, int);
 extern void writeBrailleString (BrailleDisplay *, const char *);
 extern void showBrailleString (BrailleDisplay *, const char *, unsigned int);
+
 extern void clearStatusCells (BrailleDisplay *brl);
 extern void setStatusText (BrailleDisplay *brl, const char *text);
-extern int allocateBrailleBuffer (BrailleDisplay *);
+
 extern int readBrailleCommand (BrailleDisplay *, BRL_DriverCommandContext);
+#define IS_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
 
 typedef enum {
   BF_MINIMUM,

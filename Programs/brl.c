@@ -161,14 +161,14 @@ showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duratio
 
 void
 clearStatusCells (BrailleDisplay *brl) {
-  unsigned char status[StatusCellCount];        /* status cell buffer */
+  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
   memset(status, 0, sizeof(status));
   braille->writeStatus(brl, status);
 }
 
 void
 setStatusText (BrailleDisplay *brl, const char *text) {
-  unsigned char status[StatusCellCount];        /* status cell buffer */
+  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
   int i;
   memset(status, 0, sizeof(status));
   for (i=0; i<sizeof(status); ++i) {

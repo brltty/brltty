@@ -281,7 +281,7 @@ static void
 adjustStatusCells (BrailleDisplay *brl, const char *parameter) {
    if (*parameter) {
       const int minimum = 0;
-      const int maximum = MIN(StatusCellCount, brl->x-1);
+      const int maximum = MIN(BRL_MAX_STATUS_CELL_COUNT, brl->x-1);
       if (validateInteger(&statusCells, "status cell count", parameter, &minimum, &maximum)) {
          statusArea = dataArea;
 	 dataArea = statusArea + statusCells;

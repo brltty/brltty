@@ -248,31 +248,31 @@ setStatusCellsPB80 (unsigned char *status) {
 
 static void
 setStatusCellsGeneric (unsigned char *status) {
-  status[FirstStatusCell] = FSC_GENERIC;
-  status[STAT_BRLCOL] = p->winx+1;
-  status[STAT_BRLROW] = p->winy+1;
-  status[STAT_CSRCOL] = scr.posx+1;
-  status[STAT_CSRROW] = scr.posy+1;
-  status[STAT_SCRNUM] = scr.no;
-  status[STAT_FREEZE] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
-  status[STAT_DISPMD] = p->showAttributes;
-  status[STAT_SIXDOTS] = prefs.textStyle;
-  status[STAT_SLIDEWIN] = prefs.slidingWindow;
-  status[STAT_SKPIDLNS] = prefs.skipIdenticalLines;
-  status[STAT_SKPBLNKWINS] = prefs.skipBlankWindows;
-  status[STAT_CSRVIS] = prefs.showCursor;
-  status[STAT_CSRHIDE] = p->hideCursor;
-  status[STAT_CSRTRK] = p->trackCursor;
-  status[STAT_CSRSIZE] = prefs.cursorStyle;
-  status[STAT_CSRBLINK] = prefs.blinkingCursor;
-  status[STAT_ATTRVIS] = prefs.showAttributes;
-  status[STAT_ATTRBLINK] = prefs.blinkingAttributes;
-  status[STAT_CAPBLINK] = prefs.blinkingCapitals;
-  status[STAT_TUNES] = prefs.alertTunes;
-  status[STAT_HELP] = (dispmd & HELP_SCRN) != 0;
-  status[STAT_INFO] = infmode;
-  status[STAT_AUTOREPEAT] = prefs.autorepeat;
-  status[STAT_AUTOSPEAK] = prefs.autospeak;
+  status[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
+  status[BRL_GSC_BRLCOL] = p->winx+1;
+  status[BRL_GSC_BRLROW] = p->winy+1;
+  status[BRL_GSC_CSRCOL] = scr.posx+1;
+  status[BRL_GSC_CSRROW] = scr.posy+1;
+  status[BRL_GSC_SCRNUM] = scr.no;
+  status[BRL_GSC_FREEZE] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
+  status[BRL_GSC_DISPMD] = p->showAttributes;
+  status[BRL_GSC_SIXDOTS] = prefs.textStyle;
+  status[BRL_GSC_SLIDEWIN] = prefs.slidingWindow;
+  status[BRL_GSC_SKPIDLNS] = prefs.skipIdenticalLines;
+  status[BRL_GSC_SKPBLNKWINS] = prefs.skipBlankWindows;
+  status[BRL_GSC_CSRVIS] = prefs.showCursor;
+  status[BRL_GSC_CSRHIDE] = p->hideCursor;
+  status[BRL_GSC_CSRTRK] = p->trackCursor;
+  status[BRL_GSC_CSRSIZE] = prefs.cursorStyle;
+  status[BRL_GSC_CSRBLINK] = prefs.blinkingCursor;
+  status[BRL_GSC_ATTRVIS] = prefs.showAttributes;
+  status[BRL_GSC_ATTRBLINK] = prefs.blinkingAttributes;
+  status[BRL_GSC_CAPBLINK] = prefs.blinkingCapitals;
+  status[BRL_GSC_TUNES] = prefs.alertTunes;
+  status[BRL_GSC_HELP] = (dispmd & HELP_SCRN) != 0;
+  status[BRL_GSC_INFO] = infmode;
+  status[BRL_GSC_AUTOREPEAT] = prefs.autorepeat;
+  status[BRL_GSC_AUTOSPEAK] = prefs.autospeak;
 }
 
 static void
@@ -309,7 +309,7 @@ static const int statusStyleCount = sizeof(statusStyleTable) / sizeof(statusStyl
 
 static void
 setStatusCells (void) {
-  unsigned char status[StatusCellCount];        /* status cell buffer */
+  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
   memset(status, 0, sizeof(status));
   if (prefs.statusStyle < statusStyleCount)
     statusStyleTable[prefs.statusStyle].set(status);
@@ -2253,7 +2253,7 @@ message (const char *text, short flags) {
 
 void
 showDotPattern (unsigned char dots, unsigned char duration) {
-  unsigned char status[StatusCellCount];        /* status cell buffer */
+  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
   memset(status, dots, sizeof(status));
   memset(brl.buffer, dots, brl.x*brl.y);
   braille->writeStatus(&brl, status);

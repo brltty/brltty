@@ -5,9 +5,8 @@ BEGIN {
   print "{\"", substr($1, 5), "\", KEYCODE, ", $1, "},"
   next
 }
-/^ *STAT_/ {
-  print "{\"", $1, "\", STATCODE, ", $1, "},"
-# print "{\"", substr($1, 6), "\", STATCODE, ", $1, "},"
+/^ *BRL_GSC_/ {
+  print "{\"", substr($1, 5), "\", STATCODE, ", $1, "},"
   next
 }
 /#define[ \t]*BRL_BLK_PASS/ {

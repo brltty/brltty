@@ -41,7 +41,7 @@ typedef enum {
 } InternalDriverCommands;
 
 typedef enum {
-  STAT_INPUT = StatusCellCount /* input mode */,
+  BRL_GSC_INPUT = BRL_genericStatusCellCount /* input mode */,
   InternalStatusCellCount
 } InternalStatusCell;
 
@@ -375,8 +375,8 @@ typedef struct {
 
 /* what to show for 2 status cells */
 #define SHOW_STAT_2 \
-      OFFS_NUMBER + STAT_BRLROW, \
-      OFFS_NUMBER + STAT_CSRROW
+      OFFS_NUMBER + BRL_GSC_BRLROW, \
+      OFFS_NUMBER + BRL_GSC_CSRROW
 
 /* commands for 2 status keys */
 #define CMDS_STAT_2 \
@@ -386,10 +386,10 @@ typedef struct {
 
 /* what to show for 4 status cells */
 #define SHOW_STAT_4 \
-      OFFS_NUMBER + STAT_BRLROW, \
-      OFFS_NUMBER + STAT_CSRROW, \
-      OFFS_NUMBER + STAT_CSRCOL, \
-      OFFS_FLAG   + STAT_DISPMD
+      OFFS_NUMBER + BRL_GSC_BRLROW, \
+      OFFS_NUMBER + BRL_GSC_CSRROW, \
+      OFFS_NUMBER + BRL_GSC_CSRCOL, \
+      OFFS_FLAG   + BRL_GSC_DISPMD
 
 /* commands for 4 status keys */
 #define CMDS_STAT_4 \
@@ -401,18 +401,18 @@ typedef struct {
 
 /* what to show for 13 status cells */
 #define SHOW_STAT_13 \
-      OFFS_HORIZ + STAT_BRLROW  , \
+      OFFS_HORIZ + BRL_GSC_BRLROW  , \
       OFFS_EMPTY                , \
-      OFFS_HORIZ + STAT_CSRROW  , \
-      OFFS_HORIZ + STAT_CSRCOL  , \
+      OFFS_HORIZ + BRL_GSC_CSRROW  , \
+      OFFS_HORIZ + BRL_GSC_CSRCOL  , \
       OFFS_EMPTY                , \
-      OFFS_FLAG  + STAT_CSRTRK  , \
-      OFFS_FLAG  + STAT_DISPMD  , \
-      OFFS_FLAG  + STAT_FREEZE  , \
+      OFFS_FLAG  + BRL_GSC_CSRTRK  , \
+      OFFS_FLAG  + BRL_GSC_DISPMD  , \
+      OFFS_FLAG  + BRL_GSC_FREEZE  , \
       OFFS_EMPTY                , \
       OFFS_EMPTY                , \
-      OFFS_FLAG  + STAT_CSRVIS  , \
-      OFFS_FLAG  + STAT_ATTRVIS , \
+      OFFS_FLAG  + BRL_GSC_CSRVIS  , \
+      OFFS_FLAG  + BRL_GSC_ATTRVIS , \
       OFFS_EMPTY
 
 /* commands for 13 status keys */
@@ -434,25 +434,25 @@ typedef struct {
 
 /* what to show for 20 status cells */
 #define SHOW_STAT_20 \
-      OFFS_HORIZ + STAT_BRLROW    , \
+      OFFS_HORIZ + BRL_GSC_BRLROW    , \
       OFFS_EMPTY                  , \
-      OFFS_HORIZ + STAT_CSRROW    , \
-      OFFS_HORIZ + STAT_CSRCOL    , \
+      OFFS_HORIZ + BRL_GSC_CSRROW    , \
+      OFFS_HORIZ + BRL_GSC_CSRCOL    , \
       OFFS_EMPTY                  , \
-      OFFS_FLAG  + STAT_CSRTRK    , \
-      OFFS_FLAG  + STAT_DISPMD    , \
-      OFFS_FLAG  + STAT_FREEZE    , \
+      OFFS_FLAG  + BRL_GSC_CSRTRK    , \
+      OFFS_FLAG  + BRL_GSC_DISPMD    , \
+      OFFS_FLAG  + BRL_GSC_FREEZE    , \
       OFFS_EMPTY                  , \
-      OFFS_HORIZ + STAT_SCRNUM    , \
+      OFFS_HORIZ + BRL_GSC_SCRNUM    , \
       OFFS_EMPTY                  , \
-      OFFS_FLAG  + STAT_CSRVIS    , \
-      OFFS_FLAG  + STAT_ATTRVIS   , \
-      OFFS_FLAG  + STAT_CAPBLINK  , \
-      OFFS_FLAG  + STAT_SIXDOTS   , \
-      OFFS_FLAG  + STAT_SKPIDLNS  , \
-      OFFS_FLAG  + STAT_TUNES     , \
-      OFFS_FLAG  + STAT_AUTOSPEAK , \
-      OFFS_FLAG  + STAT_AUTOREPEAT, \
+      OFFS_FLAG  + BRL_GSC_CSRVIS    , \
+      OFFS_FLAG  + BRL_GSC_ATTRVIS   , \
+      OFFS_FLAG  + BRL_GSC_CAPBLINK  , \
+      OFFS_FLAG  + BRL_GSC_SIXDOTS   , \
+      OFFS_FLAG  + BRL_GSC_SKPIDLNS  , \
+      OFFS_FLAG  + BRL_GSC_TUNES     , \
+      OFFS_FLAG  + BRL_GSC_AUTOSPEAK , \
+      OFFS_FLAG  + BRL_GSC_AUTOREPEAT, \
       OFFS_EMPTY
 
 /* commands for 20 status keys */
@@ -481,27 +481,27 @@ typedef struct {
 
 /* what to show for 22 status cells */
 #define SHOW_STAT_22 \
-      OFFS_HORIZ + STAT_BRLROW    , \
+      OFFS_HORIZ + BRL_GSC_BRLROW    , \
       OFFS_EMPTY                  , \
-      OFFS_HORIZ + STAT_CSRROW    , \
-      OFFS_HORIZ + STAT_CSRCOL    , \
+      OFFS_HORIZ + BRL_GSC_CSRROW    , \
+      OFFS_HORIZ + BRL_GSC_CSRCOL    , \
       OFFS_EMPTY                  , \
-      OFFS_FLAG  + STAT_CSRTRK    , \
-      OFFS_FLAG  + STAT_DISPMD    , \
-      OFFS_FLAG  + STAT_FREEZE    , \
+      OFFS_FLAG  + BRL_GSC_CSRTRK    , \
+      OFFS_FLAG  + BRL_GSC_DISPMD    , \
+      OFFS_FLAG  + BRL_GSC_FREEZE    , \
       OFFS_EMPTY                  , \
-      OFFS_HORIZ + STAT_SCRNUM    , \
+      OFFS_HORIZ + BRL_GSC_SCRNUM    , \
       OFFS_EMPTY                  , \
-      OFFS_FLAG  + STAT_CSRVIS    , \
-      OFFS_FLAG  + STAT_ATTRVIS   , \
-      OFFS_FLAG  + STAT_CAPBLINK  , \
-      OFFS_FLAG  + STAT_SIXDOTS   , \
-      OFFS_FLAG  + STAT_SKPIDLNS  , \
-      OFFS_FLAG  + STAT_TUNES     , \
+      OFFS_FLAG  + BRL_GSC_CSRVIS    , \
+      OFFS_FLAG  + BRL_GSC_ATTRVIS   , \
+      OFFS_FLAG  + BRL_GSC_CAPBLINK  , \
+      OFFS_FLAG  + BRL_GSC_SIXDOTS   , \
+      OFFS_FLAG  + BRL_GSC_SKPIDLNS  , \
+      OFFS_FLAG  + BRL_GSC_TUNES     , \
       OFFS_EMPTY                  , \
-      OFFS_FLAG  + STAT_INPUT     , \
-      OFFS_FLAG  + STAT_AUTOSPEAK , \
-      OFFS_FLAG  + STAT_AUTOREPEAT, \
+      OFFS_FLAG  + BRL_GSC_INPUT     , \
+      OFFS_FLAG  + BRL_GSC_AUTOSPEAK , \
+      OFFS_FLAG  + BRL_GSC_AUTOREPEAT, \
       OFFS_EMPTY
 
 /* commands for 22 status keys */

@@ -71,7 +71,7 @@ static int brailleRows;
 static int brailleCells;
 static unsigned char *previousBraille = NULL;
 static unsigned char *previousVisual = NULL;
-static unsigned char previousStatus[StatusCellCount];
+static unsigned char previousStatus[BRL_MAX_STATUS_CELL_COUNT];
 
 typedef struct {
   int (*getUnixConnection) (const struct sockaddr_un *address);
@@ -841,41 +841,41 @@ brl_writeVisual (BrailleDisplay *brl) {
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
-  int generic = *st == FSC_GENERIC;
-  int cells = StatusCellCount;
+  int generic = st[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC;
+  int cells = BRL_MAX_STATUS_CELL_COUNT;
 
   if (memcmp(st, previousStatus, cells) != 0) {
     if (generic) {
-      int all = previousStatus[0] != FSC_GENERIC;
+      int all = previousStatus[BRL_firstStatusCell] != BRL_STATUS_CELLS_GENERIC;
       int i;
 
-      for (i=1; i<StatusCellCount; ++i) {
+      for (i=1; i<BRL_MAX_STATUS_CELL_COUNT; ++i) {
         unsigned char value = st[i];
         if (all || (value != previousStatus[i])) {
           static const char *const names[] = {
-            [FirstStatusCell]=NULL,
-            [STAT_BRLCOL]="BRLCOL",
-            [STAT_BRLROW]="BRLROW",
-            [STAT_CSRCOL]="CSRCOL",
-            [STAT_CSRROW]="CSRROW",
-            [STAT_SCRNUM]="SCRNUM",
-            [STAT_FREEZE]="FREEZE",
-            [STAT_DISPMD]="DISPMD",
-            [STAT_SIXDOTS]="SIXDOTS",
-            [STAT_SLIDEWIN]="SLIDEWIN",
-            [STAT_SKPIDLNS]="SKPIDLNS",
-            [STAT_SKPBLNKWINS]="SKPBLNKWINS",
-            [STAT_CSRVIS]="CSRVIS",
-            [STAT_CSRHIDE]="CSRHIDE",
-            [STAT_CSRTRK]="CSRTRK",
-            [STAT_CSRSIZE]="CSRSIZE",
-            [STAT_CSRBLINK]="CSRBLINK",
-            [STAT_ATTRVIS]="ATTRVIS",
-            [STAT_ATTRBLINK]="ATTRBLINK",
-            [STAT_CAPBLINK]="CAPBLINK",
-            [STAT_TUNES]="TUNES",
-            [STAT_HELP]="HELP",
-            [STAT_INFO]="INFO"
+            [BRL_firstStatusCell] = NULL,
+            [BRL_GSC_BRLCOL] = "BRLCOL",
+            [BRL_GSC_BRLROW] = "BRLROW",
+            [BRL_GSC_CSRCOL] = "CSRCOL",
+            [BRL_GSC_CSRROW] = "CSRROW",
+            [BRL_GSC_SCRNUM] = "SCRNUM",
+            [BRL_GSC_FREEZE] = "FREEZE",
+            [BRL_GSC_DISPMD] = "DISPMD",
+            [BRL_GSC_SIXDOTS] = "SIXDOTS",
+            [BRL_GSC_SLIDEWIN] = "SLIDEWIN",
+            [BRL_GSC_SKPIDLNS] = "SKPIDLNS",
+            [BRL_GSC_SKPBLNKWINS] = "SKPBLNKWINS",
+            [BRL_GSC_CSRVIS] = "CSRVIS",
+            [BRL_GSC_CSRHIDE] = "CSRHIDE",
+            [BRL_GSC_CSRTRK] = "CSRTRK",
+            [BRL_GSC_CSRSIZE] = "CSRSIZE",
+            [BRL_GSC_CSRBLINK] = "CSRBLINK",
+            [BRL_GSC_ATTRVIS] = "ATTRVIS",
+            [BRL_GSC_ATTRBLINK] = "ATTRBLINK",
+            [BRL_GSC_CAPBLINK] = "CAPBLINK",
+            [BRL_GSC_TUNES] = "TUNES",
+            [BRL_GSC_HELP] = "HELP",
+            [BRL_GSC_INFO] = "INFO"
           };
           const char *name = names[i];
 
