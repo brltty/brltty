@@ -1045,13 +1045,13 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
             case KEY_PROG | KEY_HOME | KEY_DOWN:
               res = BRL_CMD_PASTE;
               break;
+
+            /* See released keys handling below for these. There appears
+             * to be a bug with at least some models when a routing key
+             * is pressed in conjunction with more than one front key.
+             */
             case KEY_PROG | KEY_HOME | KEY_ROUTING1:
-              /* attribute for pointed character */
-              res = BRL_BLK_DESCCHAR + RoutingPos;
-              break;
             case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
-              /* attribute for pointed character */
-              res = BRL_BLK_SETLEFT + RoutingPos;
               break;
           }
           break;
@@ -1268,6 +1268,26 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
                 break;
               case KEY_PROG | KEY_CURSOR:
                 res = BRL_CMD_PREFMENU;
+                break;
+
+              /* The following bindings really belong in the "pressed keys"
+               * section, but it appears (at least on my ABT340) that a bogus
+               * routing key press event is sometimes generated when at least
+               * two front keys are already pressed. The correct routing key
+               * event follows eventually, so the best workaround is to let
+               * GetKey() overwrite RoutingPos until some key is released.
+               * The exact bug as I observe it is that for routing keys 25-29
+               * an extra press packet for routing key 35-31 is sent before
+               * the correct one. In other words, if 25 <= x <= 29 then a key
+               * press event is prepended with x = 30 + (30-x).
+               */
+              case KEY_PROG | KEY_HOME | KEY_ROUTING1:
+                /* attribute for pointed character */
+                res = BRL_BLK_DESCCHAR + RoutingPos;
+                break;
+              case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
+                /* align window to pointed character */
+                res = BRL_BLK_SETLEFT + RoutingPos;
                 break;
             }
             break;
