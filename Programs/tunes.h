@@ -38,25 +38,26 @@ typedef struct {
 } TuneDefinition;
 #define TUNE_TACTILE(duration,pattern) (((duration) << 8) | (pattern))
 
-extern TuneDefinition tune_detected;
+extern TuneDefinition tune_braille_on;
 extern TuneDefinition tune_braille_off;
+extern TuneDefinition tune_command_rejected;
+extern TuneDefinition tune_command_done;
+extern TuneDefinition tune_routing_failed;
+extern TuneDefinition tune_mark_set;
 extern TuneDefinition tune_cut_begin;
 extern TuneDefinition tune_cut_end;
 extern TuneDefinition tune_toggle_on;
 extern TuneDefinition tune_toggle_off;
-extern TuneDefinition tune_link;
-extern TuneDefinition tune_unlink;
-extern TuneDefinition tune_freeze;
-extern TuneDefinition tune_unfreeze;
+extern TuneDefinition tune_cursor_linked;
+extern TuneDefinition tune_cursor_unlinked;
+extern TuneDefinition tune_screen_frozen;
+extern TuneDefinition tune_screen_unfrozen;
+extern TuneDefinition tune_wrap_down;
+extern TuneDefinition tune_wrap_up;
 extern TuneDefinition tune_skip_first;
 extern TuneDefinition tune_skip;
 extern TuneDefinition tune_skip_more;
-extern TuneDefinition tune_wrap_down;
-extern TuneDefinition tune_wrap_up;
 extern TuneDefinition tune_bounce;
-extern TuneDefinition tune_bad_command;
-extern TuneDefinition tune_done;
-extern TuneDefinition tune_mark_set;
 
 typedef enum {
   tdBeeper,

@@ -597,7 +597,7 @@ startBrailleDriver (void) {
 
             clearStatusCells(&brl);
             setHelpPageNumber(brl.helpPage);
-            playTune(&tune_detected);
+            playTune(&tune_braille_on);
             return;
          } else {
             LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
@@ -1314,7 +1314,7 @@ updatePreferences (void) {
           if (count)
             settingChanged = 1;
           else
-            playTune(&tune_bad_command);
+            playTune(&tune_command_rejected);
           break;
         }
         case CMD_WINDN:
@@ -1331,7 +1331,7 @@ updatePreferences (void) {
           if (count)
             settingChanged = 1;
           else
-            playTune(&tune_bad_command);
+            playTune(&tune_command_rejected);
           break;
         }
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1375,7 +1375,7 @@ updatePreferences (void) {
             if (*item->setting != oldSetting) {
               if (item->changed && !item->changed(*item->setting)) {
                 *item->setting = oldSetting;
-                playTune(&tune_bad_command);
+                playTune(&tune_command_rejected);
               } else {
                 settingChanged = 1;
               }
@@ -1387,7 +1387,7 @@ updatePreferences (void) {
         exitMenu:
           if (exitSave) {
             if (savePreferences()) {
-              playTune(&tune_done);
+              playTune(&tune_command_done);
             }
           }
 

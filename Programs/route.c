@@ -35,12 +35,13 @@
  * NOTE: if you try to route the cursor to an invalid place, BRLTTY won't
  * give up until the timeout has elapsed!
  */
-#define CSRJMP_NICENESS 10	/* niceness of cursor routing subprocess */
-#define CSRJMP_TIMEOUT 2000	/* cursor routing idle timeout in ms */
-#define CSRJMP_LOOP_DELAY 0	/* delay to use in csrjmp_sub() loops (ms) */
-#define CSRJMP_SETTLE_DELAY 400	/* delay to use in csrjmp_sub() loops (ms) */
+#define CURSOR_ROUTING_NICENESS 10	/* niceness of cursor routing subprocess */
+#define CURSOR_ROUTING_TIMEOUT 2000	/* max wait for response to key press */
+#define CURSOR_ROUTING_INTERVAL 0	/* how often to check for response */
+#define CURSOR_ROUTING_SETTLE 400	/* grace period for temporary cursor relocation */
 
 volatile pid_t routingProcess = 0;
+volatile int routingFailed = 0;
 
 static void
 insertCursorKey (unsigned short key, const sigset_t *mask) {
@@ -50,20 +51,23 @@ insertCursorKey (unsigned short key, const sigset_t *mask) {
   sigprocmask(SIG_SETMASK, &old, NULL);
 }
 
-static void
+static int
 doCursorRouting (int column, int row, int screen) {
   ScreenDescription scr;		/* for screen state infos */
   int oldx, oldy;		/* current cursor position */
   int dif, timedOut;
   sigset_t mask;		/* for blocking of SIGUSR1 */
 
-  /* Set up signal mask: */
+  /* Configure the cursor routing subprocess. */
+  nice(CURSOR_ROUTING_NICENESS); /* reduce scheduling priority */
+
+  /* Set up the signal mask. */
   sigemptyset(&mask);
   sigaddset(&mask, SIGUSR1);
   sigprocmask(SIG_UNBLOCK, &mask, NULL);
 
   /* Initialise second thread of screen reading: */
-  if (!openRoutingScreen()) return;
+  if (!openRoutingScreen()) return 2;
   describeRoutingScreen(&scr);
 
   /* Deal with vertical movement first, ignoring horizontal jumping ... */
@@ -71,21 +75,22 @@ doCursorRouting (int column, int row, int screen) {
     timeout_yet(0);		/* initialise stop-watch */
     insertCursorKey((dif > 0)? KEY_CURSOR_DOWN: KEY_CURSOR_UP, &mask);
 
+    timedOut = 0;
     do {
-#if CSRJMP_LOOP_DELAY > 0
-      delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
-#endif /* CSRJMP_LOOP_DELAY > 0 */
+      delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
 
       oldy = scr.posy;
       oldx = scr.posx;
       describeRoutingScreen(&scr);
-      timedOut = timeout_yet(CSRJMP_TIMEOUT);
-    } while ((scr.posy == oldy) && (scr.posx == oldx) && !timedOut);
-    if (timedOut) break;
+      if ((scr.posy != oldy) || (scr.posx != oldx)) break;
+
+      if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) timedOut = 1;
+    } while (!timedOut);
+    if (timedOut) goto timeout;
 
     if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
         (scr.posy != oldy && (row - scr.posy) * (row - scr.posy) >= dif * dif)) {
-      delay(CSRJMP_SETTLE_DELAY);
+      delay(CURSOR_ROUTING_SETTLE);
       describeRoutingScreen(&scr);
       if ((scr.posy == oldy && (scr.posx - oldx) * dif <= 0) ||
           (scr.posy != oldy && (row - scr.posy) * (row - scr.posy) >= dif * dif)) {
@@ -106,20 +111,21 @@ doCursorRouting (int column, int row, int screen) {
       timeout_yet(0);	/* initialise stop-watch */
       insertCursorKey((dif > 0)? KEY_CURSOR_RIGHT: KEY_CURSOR_LEFT, &mask);
 
+      timedOut = 0;
       do {
-#if CSRJMP_LOOP_DELAY > 0
-        delay(CSRJMP_LOOP_DELAY);	/* sleep a while ... */
-#endif /* CSRJMP_LOOP_DELAY > 0 */
+        delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
 
         oldx = scr.posx;
         describeRoutingScreen(&scr);
-        timedOut = timeout_yet(CSRJMP_TIMEOUT);
-      } while ((scr.posx == oldx) && (scr.posy == row) && !timedOut);
-      if (timedOut) break;
+        if ((scr.posx != oldx) || (scr.posy != row)) break;
+
+        if (timeout_yet(CURSOR_ROUTING_TIMEOUT)) timedOut = 1;
+      } while (!timedOut);
+      if (timedOut) goto timeout;
 
       if (scr.posy != row ||
           (column - scr.posx) * (column - scr.posx) >= dif * dif) {
-        delay(CSRJMP_SETTLE_DELAY);
+        delay(CURSOR_ROUTING_SETTLE);
         describeRoutingScreen(&scr);
         if (scr.posy != row ||
             (column - scr.posx) * (column - scr.posx) >= dif * dif) {
@@ -137,6 +143,11 @@ doCursorRouting (int column, int row, int screen) {
   }
 
   closeRoutingScreen();		/* close second thread of screen reading */
+  return 0;
+
+timeout:
+  LogPrint(LOG_WARNING, "Cursor routing timed out.");
+  return 1;
 }
 
 int
@@ -160,20 +171,19 @@ startCursorRouting (int column, int row, int screen) {
     do {
       sigsuspend(&oldMask);
     } while (routingProcess);
+    routingFailed = 0;
   }
 
   switch (routingProcess = fork()) {
-    case 0: /* child, cursor routing process */
-      nice(CSRJMP_NICENESS); /* reduce scheduling priority */
-      doCursorRouting(column, row, screen);
-      _exit(0);		/* terminate child process */
+    case 0: /* child: cursor routing subprocess */
+      _exit(doCursorRouting(column, row, screen));		/* terminate child process */
 
-    case -1: /* fork failed */
+    case -1: /* error: fork() failed */
       LogError("fork");
       routingProcess = 0;
       break;
 
-    default: /* parent, wait for child to return */
+    default: /* parent: continue while cursor is being routed */
       started = 1;
       break;
   }

@@ -31,13 +31,13 @@
 #include "tunes.h"
 #include "notes.h"
 
-static TuneElement elements_detected[] = {
+static TuneElement elements_braille_on[] = {
    TUNE_NOTE( 60,  64),
    TUNE_NOTE(100,  69),
    TUNE_STOP()
 };
-TuneDefinition tune_detected = {
-   NULL, 0, elements_detected
+TuneDefinition tune_braille_on = {
+   NULL, 0, elements_braille_on
 };
 
 static TuneElement elements_braille_off[] = {
@@ -47,6 +47,51 @@ static TuneElement elements_braille_off[] = {
 };
 TuneDefinition tune_braille_off = {
    NULL, 0, elements_braille_off
+};
+
+static TuneElement elements_command_rejected[] = {
+   TUNE_NOTE(100,  78),
+   TUNE_STOP()
+};
+TuneDefinition tune_command_rejected = {
+   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_command_rejected
+};
+
+static TuneElement elements_command_done[] = {
+   TUNE_NOTE( 40,  74),
+   TUNE_REST( 30),
+   TUNE_NOTE( 40,  74),
+   TUNE_REST( 40),
+   TUNE_NOTE(140,  74),
+   TUNE_REST( 20),
+   TUNE_NOTE( 50,  79),
+   TUNE_STOP()
+};
+TuneDefinition tune_command_done = {
+   "Done", 0, elements_command_done
+};
+
+static TuneElement elements_routing_failed[] = {
+   TUNE_NOTE(100,  70),
+   TUNE_REST( 50),
+   TUNE_NOTE(100,  70),
+   TUNE_REST( 50),
+   TUNE_NOTE(100,  70),
+   TUNE_STOP()
+};
+TuneDefinition tune_routing_failed = {
+   NULL, 0, elements_routing_failed
+};
+
+static TuneElement elements_mark_set[] = {
+   TUNE_NOTE( 20,  83),
+   TUNE_NOTE( 15,  81),
+   TUNE_NOTE( 15,  79),
+   TUNE_NOTE( 25,  84),
+   TUNE_STOP()
+};
+TuneDefinition tune_mark_set = {
+   NULL, 0, elements_mark_set
 };
 
 static TuneElement elements_cut_begin[] = {
@@ -91,27 +136,27 @@ TuneDefinition tune_toggle_off = {
    NULL, TUNE_TACTILE(30,B3|B7|B6|B8), elements_toggle_off
 };
 
-static TuneElement elements_link[] = {
+static TuneElement elements_cursor_linked[] = {
    TUNE_NOTE(  7,  80),
    TUNE_NOTE(  7,  79),
    TUNE_NOTE( 12,  76),
    TUNE_STOP()
 };
-TuneDefinition tune_link = {
-   NULL, 0, elements_link
+TuneDefinition tune_cursor_linked = {
+   NULL, 0, elements_cursor_linked
 };
 
-static TuneElement elements_unlink[] = {
+static TuneElement elements_cursor_unlinked[] = {
    TUNE_NOTE(  7,  78),
    TUNE_NOTE(  7,  79),
    TUNE_NOTE( 20,  83),
    TUNE_STOP()
 };
-TuneDefinition tune_unlink = {
-   NULL, 0, elements_unlink
+TuneDefinition tune_cursor_unlinked = {
+   NULL, 0, elements_cursor_unlinked
 };
 
-static TuneElement elements_freeze[] = {
+static TuneElement elements_screen_frozen[] = {
    TUNE_NOTE(  5,  58),
    TUNE_NOTE(  5,  59),
    TUNE_NOTE(  5,  60),
@@ -138,11 +183,11 @@ static TuneElement elements_freeze[] = {
    TUNE_NOTE(  5,  95),
    TUNE_STOP()
 };
-TuneDefinition tune_freeze = {
-   "Frozen", 0, elements_freeze
+TuneDefinition tune_screen_frozen = {
+   "Frozen", 0, elements_screen_frozen
 };
 
-static TuneElement elements_unfreeze[] = {
+static TuneElement elements_screen_unfrozen[] = {
    TUNE_NOTE(  5,  95),
    TUNE_NOTE(  5,  90),
    TUNE_NOTE(  5,  86),
@@ -169,8 +214,30 @@ static TuneElement elements_unfreeze[] = {
    TUNE_NOTE(  5,  58),
    TUNE_STOP()
 };
-TuneDefinition tune_unfreeze = {
-   "Unfrozen", 0, elements_unfreeze
+TuneDefinition tune_screen_unfrozen = {
+   "Unfrozen", 0, elements_screen_unfrozen
+};
+
+static TuneElement elements_wrap_down[] = {
+   TUNE_NOTE(  6,  86),
+   TUNE_NOTE(  6,  74),
+   TUNE_NOTE(  6,  62),
+   TUNE_NOTE( 10,  50),
+   TUNE_STOP()
+};
+TuneDefinition tune_wrap_down = {
+   NULL, TUNE_TACTILE(20,B1|B2|B3|B7), elements_wrap_down
+};
+
+static TuneElement elements_wrap_up[] = {
+   TUNE_NOTE(  6,  50),
+   TUNE_NOTE(  6,  62),
+   TUNE_NOTE(  6,  74),
+   TUNE_NOTE( 10,  86),
+   TUNE_STOP()
+};
+TuneDefinition tune_wrap_up = {
+   NULL, TUNE_TACTILE(20,B4|B5|B6|B8), elements_wrap_up
 };
 
 static TuneElement elements_skip_first[] = {
@@ -203,28 +270,6 @@ TuneDefinition tune_skip_more = {
    NULL, 0, elements_skip_more
 };
 
-static TuneElement elements_wrap_down[] = {
-   TUNE_NOTE(  6,  86),
-   TUNE_NOTE(  6,  74),
-   TUNE_NOTE(  6,  62),
-   TUNE_NOTE( 10,  50),
-   TUNE_STOP()
-};
-TuneDefinition tune_wrap_down = {
-   NULL, TUNE_TACTILE(20,B1|B2|B3|B7), elements_wrap_down
-};
-
-static TuneElement elements_wrap_up[] = {
-   TUNE_NOTE(  6,  50),
-   TUNE_NOTE(  6,  62),
-   TUNE_NOTE(  6,  74),
-   TUNE_NOTE( 10,  86),
-   TUNE_STOP()
-};
-TuneDefinition tune_wrap_up = {
-   NULL, TUNE_TACTILE(20,B4|B5|B6|B8), elements_wrap_up
-};
-
 static TuneElement elements_bounce[] = {
    TUNE_NOTE(  6,  98),
    TUNE_NOTE(  6,  86),
@@ -235,39 +280,6 @@ static TuneElement elements_bounce[] = {
 };
 TuneDefinition tune_bounce = {
    NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_bounce
-};
-
-static TuneElement elements_bad_command[] = {
-   TUNE_NOTE(100,  78),
-   TUNE_STOP()
-};
-TuneDefinition tune_bad_command = {
-   NULL, TUNE_TACTILE(50,B1|B2|B3|B4|B5|B6|B7|B8), elements_bad_command
-};
-
-static TuneElement elements_done[] = {
-   TUNE_NOTE( 40,  74),
-   TUNE_REST( 30),
-   TUNE_NOTE( 40,  74),
-   TUNE_REST( 40),
-   TUNE_NOTE(140,  74),
-   TUNE_REST( 20),
-   TUNE_NOTE( 50,  79),
-   TUNE_STOP()
-};
-TuneDefinition tune_done = {
-   "Done", 0, elements_done
-};
-
-static TuneElement elements_mark_set[] = {
-   TUNE_NOTE( 20,  83),
-   TUNE_NOTE( 15,  81),
-   TUNE_NOTE( 15,  79),
-   TUNE_NOTE( 25,  84),
-   TUNE_STOP()
-};
-TuneDefinition tune_mark_set = {
-   NULL, 0, elements_mark_set
 };
 
 const double noteFrequencies[] = {

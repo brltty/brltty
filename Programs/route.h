@@ -24,6 +24,7 @@ extern "C" {
 
 extern int startCursorRouting (int column, int row, int screen);
 extern volatile pid_t routingProcess;
+extern volatile int routingFailed;
 
 #ifdef __cplusplus
 }

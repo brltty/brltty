@@ -426,9 +426,15 @@ terminationHandler (int signalNumber) {
 
 static void 
 childDeathHandler (int signalNumber) {
-  pid_t pid;
-  while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
-    if (pid == routingProcess) routingProcess = 0;
+  pid_t process;
+  int status;
+  while ((process = waitpid(-1, &status, WNOHANG)) > 0) {
+    if (process == routingProcess) {
+      routingProcess = 0;
+      if (WIFEXITED(status))
+        if (WEXITSTATUS(status))
+          routingFailed = 1;
+    }
   }
 }
 
@@ -908,6 +914,11 @@ main (int argc, char *argv[]) {
 
     closeTuneDevice(0);
 
+    if (routingFailed) {
+      playTune(&tune_routing_failed);
+      routingFailed = 0;
+    }
+
     /*
      * Process any Braille input 
      */
@@ -1269,7 +1280,7 @@ main (int argc, char *argv[]) {
               if ((blank = memchr(buffer, ' ', scr.cols))) {
                 findRow(blank-buffer, increment, testPrompt, buffer);
               } else {
-                playTune(&tune_bad_command);
+                playTune(&tune_command_rejected);
               }
             }
             break;
@@ -1324,7 +1335,7 @@ main (int argc, char *argv[]) {
               }
               if (!found) playTune(&tune_bounce);
             } else {
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             }
             break;
           }
@@ -1372,7 +1383,7 @@ main (int argc, char *argv[]) {
             break;
           case CMD_CSRJMP_VERT:
             if (!routeCursor(-1, p->winy, curscr))
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             break;
           case CMD_CSRVIS:
             /* toggles the preferences option that decides whether cursor
@@ -1395,7 +1406,7 @@ main (int argc, char *argv[]) {
             }
             break;
           case CMD_CSRTRK:
-            if (TOGGLE(p->trackCursor, &tune_unlink, &tune_link)) {
+            if (TOGGLE(p->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
 #ifdef ENABLE_SPEECH_SUPPORT
               if (speech->isSpeaking()) {
                 speechIndex = -1;
@@ -1408,7 +1419,7 @@ main (int argc, char *argv[]) {
             if ((dispmd & HELP_SCRN) != HELP_SCRN && !routingProcess)
               if (cut_paste())
                 break;
-            playTune(&tune_bad_command);
+            playTune(&tune_command_rejected);
             break;
           case CMD_TUNES:
             TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
@@ -1418,7 +1429,7 @@ main (int argc, char *argv[]) {
             break;
           case CMD_FREEZE: {
             unsigned char frozen = (dispmd & FROZ_SCRN) != 0;
-            if (TOGGLE(frozen, &tune_unfreeze, &tune_freeze)) {
+            if (TOGGLE(frozen, &tune_screen_unfrozen, &tune_screen_frozen)) {
               dispmd = selectDisplay(dispmd | FROZ_SCRN);
             } else {
               dispmd = selectDisplay(dispmd & ~FROZ_SCRN);
@@ -1482,24 +1493,24 @@ main (int argc, char *argv[]) {
             break;
           case CMD_PREFSAVE:
             if (savePreferences()) {
-              playTune(&tune_done);
+              playTune(&tune_command_done);
             }
             break;
 #endif /* ENABLE_PREFERENCES_MENU */
           case CMD_PREFLOAD:
             if (loadPreferences(1)) {
               resetBlinkingStates();
-              playTune(&tune_done);
+              playTune(&tune_command_done);
             }
             break;
 
           case CMD_SWITCHVT_PREV:
             if (!switchVirtualTerminal(scr.no-1))
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             break;
           case CMD_SWITCHVT_NEXT:
             if (!switchVirtualTerminal(scr.no+1))
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             break;
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1519,7 +1530,7 @@ main (int argc, char *argv[]) {
             if (scr.no == speechScreen) {
               trackSpeech(speech->getTrack());
             } else {
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             }
             break;
           case CMD_RESTARTSPEECH:
@@ -1532,28 +1543,28 @@ main (int argc, char *argv[]) {
             if (speech->rate && (prefs.speechRate > 0)) {
               setSpeechRate(--prefs.speechRate);
             } else {
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             }
             break;
           case CMD_SAY_FASTER:
             if (speech->rate && (prefs.speechRate < SPK_MAXIMUM_RATE)) {
               setSpeechRate(++prefs.speechRate);
             } else {
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             }
             break;
           case CMD_SAY_SOFTER:
             if (speech->volume && (prefs.speechVolume > 0)) {
               setSpeechVolume(--prefs.speechVolume);
             } else {
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             }
             break;
           case CMD_SAY_LOUDER:
             if (speech->volume && (prefs.speechVolume < SPK_MAXIMUM_VOLUME)) {
               setSpeechVolume(++prefs.speechVolume);
             } else {
-              playTune(&tune_bad_command);
+              playTune(&tune_command_rejected);
             }
             break;
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -1620,17 +1631,17 @@ main (int argc, char *argv[]) {
                 }
                 if (!insertKey(key))
                 badKey:
-                  playTune(&tune_bad_command);
+                  playTune(&tune_command_rejected);
                 break;
               }
               case VAL_PASSCHAR:
                 if (!insertCharacter(arg, flags)) {
-                  playTune(&tune_bad_command);
+                  playTune(&tune_command_rejected);
                 }
                 break;
               case VAL_PASSDOTS:
                 if (!insertCharacter(untextTable[arg], flags)) {
-                  playTune(&tune_bad_command);
+                  playTune(&tune_command_rejected);
                 }
                 break;
               case CR_ROUTE:
@@ -1639,21 +1650,21 @@ main (int argc, char *argv[]) {
                   if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, curscr))
                     break;
                 }
-                playTune(&tune_bad_command);
+                playTune(&tune_command_rejected);
                 break;
               case CR_CUTBEGIN:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
                   cut_begin(p->winx+arg, p->winy);
                 } else
-                  playTune(&tune_bad_command);
+                  playTune(&tune_command_rejected);
                 break;
               case CR_CUTAPPEND:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
                   cut_append(p->winx+arg, p->winy);
                 } else
-                  playTune(&tune_bad_command);
+                  playTune(&tune_command_rejected);
                 break;
               case CR_CUTRECT:
                 if (arg < brl.x) {
@@ -1661,7 +1672,7 @@ main (int argc, char *argv[]) {
                   if (cut_rectangle(MIN(p->winx+arg, scr.cols-1), p->winy))
                     break;
                 }
-                playTune(&tune_bad_command);
+                playTune(&tune_command_rejected);
                 break;
               case CR_CUTLINE:
                 if (arg < brl.x) {
@@ -1669,7 +1680,7 @@ main (int argc, char *argv[]) {
                   if (cut_line(MIN(p->winx+arg, scr.cols-1), p->winy))
                     break;
                 }
-                playTune(&tune_bad_command);
+                playTune(&tune_command_rejected);
                 break;
               case CR_DESCCHAR:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
@@ -1691,14 +1702,14 @@ main (int argc, char *argv[]) {
                   if (attributes & 0X80) strcat(buffer, " blink");
                   message(buffer, 0);
                 } else
-                  playTune(&tune_bad_command);
+                  playTune(&tune_command_rejected);
                 break;
               case CR_SETLEFT:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
                   p->winx += arg;
                 } else
-                  playTune(&tune_bad_command);
+                  playTune(&tune_command_rejected);
                 break;
               case CR_SETMARK: {
                 ScreenMark *mark = &p->marks[arg];
@@ -1715,7 +1726,7 @@ main (int argc, char *argv[]) {
               }
               case CR_SWITCHVT:
                   if (!switchVirtualTerminal(arg+1))
-                       playTune(&tune_bad_command);
+                       playTune(&tune_command_rejected);
                   break;
               {
                 int increment;
@@ -1731,7 +1742,7 @@ main (int argc, char *argv[]) {
                 break;
               }
               default:
-                playTune(&tune_bad_command);
+                playTune(&tune_command_rejected);
                 LogPrint(LOG_WARNING, "Unrecognized command: %04X", command);
             }
             break;
