@@ -286,6 +286,8 @@ usbSubmitRequest (
     if (errno != ENXIO) LogError("USB URB submit");
 
     free(urb);
+  } else {
+    LogError("USB URB allocation");
   }
   return NULL;
 }

@@ -93,6 +93,8 @@ usbGetString (
       if (character & 0XFF00) character = '?';
       string[count] = character;
     }
+  } else {
+    LogError("USB string allocation");
   }
   return string;
 }
@@ -156,6 +158,8 @@ usbAddInputElement (
       return input;
     }
     free(input);
+  } else {
+    LogError("USB input element allocation");
   }
   return NULL;
 }
@@ -261,6 +265,8 @@ usbOpenDevice (const char *path) {
       close(device->file);
     }
     free(device);
+  } else {
+    LogError("USB device allocation");
   }
   return NULL;
 }
