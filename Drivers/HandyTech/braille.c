@@ -370,7 +370,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   newtio.c_cc[VTIME] = 0;
 
   while (1) {
-    if (!resetSerialDevice(fileDescriptor, &newtio, B19200)) return 0;
+    if (!resetSerialDevice(fileDescriptor, &newtio, B19200)) goto failure;
     /* autodetecting MODEL */
     if (writeDescribe(brl)) {
       if (awaitInput(fileDescriptor, 1000)) {
@@ -387,12 +387,14 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   }
 
   /* Find out which model we are connected to... */
-  for( model = Models;
-       model->name && model->identifier != modelIdentifier;
-       model++ );
-  if( !model->name ) {
-    /* Unknown model */
-    LogPrint( LOG_ERR, "Detected unknown HandyTech model with ID %d.", modelIdentifier );
+  for (
+    model = Models;
+    model->name && (model->identifier != modelIdentifier);
+    model++
+  );
+  if (!model->name) {
+    LogPrint(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
+             modelIdentifier);
     LogPrint(LOG_WARNING, "Please fix Models[] in HandyTech/braille.c and mail the maintainer.");
     goto failure;
   }
@@ -410,7 +412,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   rawData = (unsigned char *) malloc (brl->x * brl->y);
   prevData = (unsigned char *) malloc (brl->x * brl->y);
   if (!rawData || !prevData) {
-    LogPrint( LOG_ERR, "can't allocate braille buffers" );
+    LogError("braille buffer allocation");
     goto failure;
   }
 
@@ -433,32 +435,30 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   return 1;
 
 failure:
-  if (rawData) {
-    free(rawData);
-    rawData = NULL;
-  }
-  if (prevData) {
-    free(prevData);
-    prevData = NULL;
-  }
+  brl_close(brl);
   return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
-  if (model->stopLength) {
-    writeBytes(brl, model->stopAddress, model->stopLength);
+  if (fileDescriptor != -1) {
+    if (model->stopLength) {
+      writeBytes(brl, model->stopAddress, model->stopLength);
+    }
+    tcsetattr(fileDescriptor, TCSADRAIN, &originalAttributes);  /* restore terminal settings */
+    close(fileDescriptor);
+    fileDescriptor = -1;
   }
 
-  free(rawData);
-  rawData = NULL;
+  if (rawData) {
+    free(rawData);
+    rawData = NULL;
+  }
 
-  free(prevData);
-  prevData = NULL;
-
-  tcsetattr(fileDescriptor, TCSADRAIN, &originalAttributes);		/* restore terminal settings */
-  close(fileDescriptor);
-  fileDescriptor = -1;
+  if (prevData) {
+    free(prevData);
+    prevData = NULL;
+  }
 }
 
 static int
