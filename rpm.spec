@@ -1,4 +1,4 @@
-Name: brltty
+Name: bRLtTY
 Version: 2.99
 Release: 1
 Copyright: GPL
@@ -8,8 +8,8 @@ Group: Daemons
 Autoprov: 0
 Summary: Braille display driver for Linux.
 %description
-BrlTty is a daemon which provides access
-to the Linux console (when in text mode)
+BRLTTY is a background process which provides
+access to the Linux console (when in text mode)
 for a blind person using a refreshable braille display.
 It drives the braille display,
 and provides complete screen review functionality.

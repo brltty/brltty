@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -18,7 +18,7 @@
 /* scrdev.cc - screen types library
  *
  * Note: Although C++, this code requires no standard C++ library.
- * This is important as BrlTty *must not* rely on too many
+ * This is important as BRLTTY *must not* rely on too many
  * run-time shared libraries, nor be a huge executable.
  */
 

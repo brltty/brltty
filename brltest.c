@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -71,7 +71,7 @@ main (int argc, char *argv[])
     }
   printf ("Display initialized successfully, ");
   printf ("it is %d rows by %d cols\n", brl.y, brl.x);
-  message ("Hello world, This is BrlTty!");
+  message ("Hello world, This is BRLTTY!");
 
   printf ("\nHit return to continue:\n");
   getchar ();

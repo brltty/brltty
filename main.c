@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -41,8 +41,8 @@
 #include "common.h"
 
 
-char VERSION[] = "BrlTty 2.99 (beta)";
-char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BrlTty Team.  All rights reserved.";
+char VERSION[] = "BRLTTY 2.99 (beta)";
+char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team.  All rights reserved.";
 
 /*
  * Misc param variables
@@ -288,16 +288,51 @@ main (int argc, char *argv[])
 	    p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
 	    break;
 	  case CMD_FWINLT:
-	    if (!env.skpblnkwins) {
-	      if (p->winx == 0){
-		if(p->winy > 0){
-		  p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
-		  p->winy--;
-		  playTune (&tune_wrap_up);
-		}else
-		  playTune (&tune_bounce);
-	      }else
-		p->winx = MAX (p->winx - fwinshift, 0);
+	    if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
+	      if (p->winx > 0) {
+		p->winx = MAX(p->winx-fwinshift, 0);
+		if (env.skpblnkwins) {
+		  if (env.skpblnkwinsmode == sbwEndOfLine)
+		    goto wrappedUp;
+		  if (!env.csrvis ||
+		      (scr.posy != p->winy) ||
+		      (scr.posx >= (p->winx + brl.x))) {
+		    int charCount = MIN(scr.cols, p->winx+brl.x);
+		    int charIndex;
+		    char buffer[charCount];
+		    getscr((winpos){0, p->winy, charCount, 1},
+			   buffer, SCR_TEXT);
+		    for (charIndex=0; charIndex<charCount; ++charIndex)
+		      if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+			break;
+		    if (charIndex == charCount)
+		      goto wrapUp;
+		  }
+		}
+	      } else if (p->winy == 0)
+		playTune(&tune_bounce);
+	      else
+	        goto wrapUp;
+	      break;
+	    wrapUp:
+	      p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+	      p->winy--;
+	      playTune(&tune_wrap_up);
+	    wrappedUp:
+	      if (env.skpblnkwins && (env.skpblnkwinsmode == sbwEndOfLine)) {
+		int charIndex;
+		char buffer[scr.cols];
+		getscr((winpos){0, p->winy, scr.cols, 1},
+		       buffer, SCR_TEXT);
+		for (charIndex=scr.cols-1; charIndex>=0; --charIndex)
+		  if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+		    break;
+		if (env.csrvis && (scr.posy == p->winy))
+		  charIndex = MAX(charIndex, scr.posx);
+		charIndex = MAX(charIndex, 0);
+		if (charIndex < p->winx)
+		  p->winx = charIndex / fwinshift * fwinshift;
+	      }
 	      break;
 	    }
 	  case CMD_FWINLTSKIP: {
@@ -321,8 +356,6 @@ main (int argc, char *argv[])
 		p->winy--;
 		if (tuneLimit-- > 0)
 		  playTune(&tune_wrap_up);
-		if (env.skpblnkwinsmode == sbwRestOfLine)
-		  break;
 	      }
 	      charCount = MIN(brl.x, scr.cols-p->winx);
 	      getscr((winpos){p->winx, p->winy, charCount, 1},
@@ -396,16 +429,34 @@ main (int argc, char *argv[])
 	      }
 	    break;
 	  case CMD_FWINRT:
-	    if (!env.skpblnkwins) {
-	      if (p->winx >= scr.cols - brl.x){
-		if (p->winy < scr.rows - brl.y){
-		  p->winx = 0;
-		  p->winy++;
-		  playTune (&tune_wrap_down);
-		}else
-		    playTune (&tune_bounce);
-	      }else
-		p->winx = MIN (p->winx + fwinshift, scr.cols - offr);
+	    if (!(env.skpblnkwins && (env.skpblnkwinsmode == sbwAll))) {
+	      if (p->winx < (scr.cols - brl.x)) {
+		p->winx = MIN(p->winx+fwinshift, scr.cols-offr);
+		if (env.skpblnkwins) {
+		  if (!env.csrvis ||
+		      (scr.posy != p->winy) ||
+		      (scr.posx < p->winx)) {
+		    int charCount = scr.cols - p->winx;
+		    int charIndex;
+		    char buffer[charCount];
+		    getscr((winpos){p->winx, p->winy, charCount, 1},
+			   buffer, SCR_TEXT);
+		    for (charIndex=0; charIndex<charCount; ++charIndex)
+		      if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
+			break;
+		    if (charIndex == charCount)
+		      goto wrapDown;
+		  }
+		}
+	      } else if (p->winy >= (scr.rows - brl.y))
+		playTune(&tune_bounce);
+	      else
+	        goto wrapDown;
+	      break;
+	    wrapDown:
+	      p->winx = 0;
+	      p->winy++;
+	      playTune(&tune_wrap_down);
 	      break;
 	    }
 	  case CMD_FWINRTSKIP: {
@@ -429,10 +480,6 @@ main (int argc, char *argv[])
 		p->winy++;
 		if (tuneLimit-- > 0)
 		  playTune(&tune_wrap_down);
-		if (env.skpblnkwinsmode == sbwRestOfLine)
-		  break;
-		if (env.skpblnkwinsmode == sbwEndOfLine)
-		  break;
 	      }
 	      charCount = MIN(brl.x, scr.cols-p->winx);
 	      getscr((winpos){p->winx, p->winy, charCount, 1},
@@ -1233,7 +1280,7 @@ main (int argc, char *argv[])
     }
 
   clrbrlstat ();
-  message ("BrlTty terminating.", 0);
+  message ("BRLTTY terminating.", 0);
   closescr ();
 
   /*

@@ -91,9 +91,14 @@ Dots 1-6 with Space and Backspace:
    Dots   Description
    <none> Backspace key.
 a  1      View attributes (window highlighting).
+b  12     Turn off skipping of blank windows.
+f  124    Unfreeze screen.
 h  125    Enter/leave help screen.
+i  24     Turn off skipping of identical lines.
 s  234    Enter/leave settings summary screen.
 t  2345   View text (window contents).
+v  1236   Switch to previous virtual terminal.
+w  2456   Turn off sliding window.
 =  123456 Restart speech driver.
 6  235    View text with 6-dot braille.
 8  236    View text with 8-dot braille.
@@ -107,10 +112,15 @@ a* 1      Decrease speech volume (Braille Note function).
 "* 5      Increase speech pitch (Braille Note function).
 '* 3      Decrease speech speed (Braille Note function).
 ,* 6      Increase speech speed (Braille Note function).
+b  12     Turn on skipping of blank windows.
 d* 145    Display the date (Braille Note function).
+f  124    Freeze screen.
 h* 125    Hear punctuation in current prompt (Braille Note function).
+i  24     Turn on skipping of identical lines.
 s* 234    Spell name in current prompt (Braille Note function).
 t* 2345   Display the time (Braille Note function).
+v  1236   Switch to next virtual terminal.
+w  2456   Turn on sliding window.
 =  123456 Restart braille driver.
 
 ===============================================================================

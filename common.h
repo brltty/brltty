@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -85,8 +85,8 @@ struct brltty_param {
  * Shared variables
  */
 
-extern char VERSION[];			/* BrlTty version string */
-extern char COPYRIGHT[];		/* BrlTty copyright banner */
+extern char VERSION[];			/* BRLTTY version string */
+extern char COPYRIGHT[];		/* BRLTTY copyright banner */
 extern volatile int keep_going;		/* zero after reception of SIGTERM */
 
 extern struct brltty_param initparam;	/* defaults for new brltty_param */

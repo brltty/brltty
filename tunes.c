@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -177,9 +177,9 @@ TuneDefinition tune_cut_end = {
 
 static ToneDefinition tones_toggle_on[] = {
    {  595,  30},
-   {90000,  30},
+   {    0,  30},
    {  793,  30},
-   {90000,  30},
+   {    0,  30},
    { 1190,  40},
    {    0,   0}
 };
@@ -188,11 +188,11 @@ TuneDefinition tune_toggle_on = {
 };
 
 static ToneDefinition tones_toggle_off[] = {
-   { 1190,  20},
-   {90000,  30},
-   {  793,  20},
-   {90000,  30},
-   {  540,  20},
+   { 1190,  30},
+   {    0,  30},
+   {  793,  30},
+   {    0,  30},
+   {  540,  30},
    {    0,   0}
 };
 TuneDefinition tune_toggle_off = {
@@ -201,11 +201,11 @@ TuneDefinition tune_toggle_off = {
 
 static ToneDefinition tones_done[] = {
    {  595,  40},
-   {90000,  30},
+   {    0,  30},
    {  595,  40},
-   {90000,  40},
+   {    0,  40},
    {  595, 140},
-   {90000,  20},
+   {    0,  20},
    {  793,  50},
    {    0,   0}
 };
@@ -214,11 +214,11 @@ TuneDefinition tune_done = {
 };
 
 static ToneDefinition tones_skip_first[] = {
-   {90000,  40},
+   {    0,  40},
    {  297,   4},
    {  396,   6},
    {  595,   8},
-   {90000,  25},
+   {    0,  25},
    {    0,   0}
 };
 TuneDefinition tune_skip_first = {
@@ -227,7 +227,7 @@ TuneDefinition tune_skip_first = {
 
 static ToneDefinition tones_skip[] = {
    {  595,  10},
-   {90000,  18},
+   {    0,  18},
    {    0,   0}
 };
 TuneDefinition tune_skip = {
@@ -236,7 +236,7 @@ TuneDefinition tune_skip = {
 
 static ToneDefinition tones_skip_more[] = {
    {  566,  20},
-   {90000,   1},
+   {    0,   1},
    {    0,   0}
 };
 TuneDefinition tune_skip_more = {

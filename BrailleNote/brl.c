@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -817,12 +817,22 @@ interpretBackspaceChord(unsigned char dots)
 	 return EOF;
       case BNC_A:
 	 return CMD_DISPMD | VAL_SWITCHON;
+      case BNC_B:
+         return CMD_SKPBLNKWINS | VAL_SWITCHOFF;
+      case BNC_F:
+         return CMD_FREEZE | VAL_SWITCHOFF;
       case BNC_H:
 	 return CMD_HELP;
+      case BNC_I:
+         return CMD_SKPIDLNS | VAL_SWITCHOFF;
       case BNC_S:
 	 return CMD_INFO;
       case BNC_T:
 	 return CMD_DISPMD | VAL_SWITCHOFF;
+      case BNC_V:
+	 return CMD_SWITCHVT_PREV;
+      case BNC_W:
+         return CMD_SLIDEWIN | VAL_SWITCHOFF;
       case BNC_6:
          return CMD_SIXDOTS | VAL_SWITCHON;
       case BNC_8:
@@ -859,6 +869,8 @@ interpretEnterChord(unsigned char dots)
          return CMD_FREEZE | VAL_SWITCHON;
       case BNC_I:
          return CMD_SKPIDLNS | VAL_SWITCHON;
+      case BNC_V:
+	 return CMD_SWITCHVT_NEXT;
       case BNC_W:
          return CMD_SLIDEWIN | VAL_SWITCHON;
       case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):

@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -34,7 +34,7 @@
  * These control the performance of cursor routing.  The optimal settings
  * will depend heavily on system load, etc.  See the documentation for
  * further details.
- * NOTE: if you try to route the cursor to an invalid place, BrlTty won't
+ * NOTE: if you try to route the cursor to an invalid place, BRLTTY won't
  * give up until the timeout has elapsed!
  */
 #define CSRJMP_NICENESS 10	/* niceness of cursor routing subprocess */

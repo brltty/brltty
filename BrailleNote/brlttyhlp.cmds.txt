@@ -55,6 +55,10 @@ To view the (t)ext (contents) within a window, use space+backspace+[2345].
 To view the (a)ttributes (highlighting) within a window, use space+backspace+[1].
 To view text with (6)-dot braille, use space+backspace+[235].
 To view text with (8)-dot braille, use space+backspace+[236].
+To un(f)reeze or (f)reeze the screen, use space+backspace+[124] or space+enter+[124].
+To turn off or on the sliding (w)indow, use space+backspace+[2456] or space+enter+[2456].
+To turn off or on the skipping of (b)lank windows, use space+backspace+[12] or space+enter+[12].
+To turn off or on the skipping of (i)dentical lines, use space+backspace+[24] or space+enter+[24].
 To restart the braille driver, use space+enter+[123456].
 
 Block Commands:
@@ -86,6 +90,7 @@ To enter the insert key, use space+[35].
 To enter the delete key, use space+[256].
 To enter the escape key, use space+[26].
 To switch among (v)irtual terminals, use space+[1236]; enter digits (2-digit rolling display), then use space+enter to complete or space+backspace to cancel.
+To switch to the previous or next (v)irtual terminal, use space+backspace+[1236] or space+enter+[1236].
 
 Braille Note Interceptions:
 To go to the main menu, use space+[123456].

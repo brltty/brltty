@@ -1,10 +1,10 @@
 /*
- * BrlTty - A daemon providing access to the Linux console (when in text
- *          mode) for a blind person using a refreshable braille display.
+ * BRLTTY - A background process providing access to the Linux console (when in
+ *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2001 by The BrlTty Team. All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team. All rights reserved.
  *
- * BrlTty comes with ABSOLUTELY NO WARRANTY.
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
  * GNU General Public License, as published by the Free Software
@@ -52,7 +52,7 @@ typedef enum {
    tdAdLib
 } TuneDevice;
 
-/* Initialisation of BrlTty environment settings: */
+/* Initialisation of BRLTTY environment settings: */
 #define INIT_CSRVIS 1		/* 1 for cursor display, 0 for no cursor */
 #define INIT_CSRTRK 1		/* 1 for cursor tracking on, 0 for off */
 #define INIT_CSRHIDE 0		/* 1 for hiding cursor, 0 for showing it */
