@@ -305,10 +305,13 @@ awaitInput (int descriptor, int milliseconds) {
         if (errno == EINTR) continue;
         LogError("Input wait");
         return 0;
+
       case 0:
+        errno = EAGAIN;
         LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
                  milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
         return 0;
+
       default:
         return 1;
     }
