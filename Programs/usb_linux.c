@@ -177,9 +177,9 @@ usbSetAlternative (
 int
 usbResetEndpoint (
   UsbDevice *device,
-  unsigned int endpoint
+  unsigned int endpointAddress
 ) {
-  if (ioctl(device->file, USBDEVFS_RESETEP, &endpoint) != -1) return 1;
+  if (ioctl(device->file, USBDEVFS_RESETEP, &endpointAddress) != -1) return 1;
   LogError("USB endpoint reset");
   return 0;
 }
@@ -187,9 +187,9 @@ usbResetEndpoint (
 int
 usbClearEndpoint (
   UsbDevice *device,
-  unsigned int endpoint
+  unsigned int endpointAddress
 ) {
-  if (ioctl(device->file, USBDEVFS_CLEAR_HALT, &endpoint) != -1) return 1;
+  if (ioctl(device->file, USBDEVFS_CLEAR_HALT, &endpointAddress) != -1) return 1;
   LogError("USB endpoint clear");
   return 0;
 }
@@ -230,14 +230,14 @@ usbControlTransfer (
 static int
 usbBulkTransfer (
   UsbDevice *device,
-  unsigned char endpoint,
+  unsigned char endpointAddress,
   void *data,
   int length,
   int timeout
 ) {
   struct usbdevfs_bulktransfer arg;
   memset(&arg, 0, sizeof(arg));
-  arg.ep = endpoint;
+  arg.ep = endpointAddress;
   arg.data = data;
   arg.len = length;
   arg.timeout = timeout;
@@ -252,76 +252,76 @@ usbBulkTransfer (
 int
 usbBulkRead (
   UsbDevice *device,
-  unsigned char endpoint,
+  unsigned char endpointNumber,
   void *data,
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(device, endpoint|USB_DIRECTION_INPUT, data, length, timeout);
+  return usbBulkTransfer(device, endpointNumber|USB_DIRECTION_INPUT, data, length, timeout);
 }
 
 int
 usbBulkWrite (
   UsbDevice *device,
-  unsigned char endpoint,
+  unsigned char endpointNumber,
   const void *data,
   int length,
   int timeout
 ) {
-  return usbBulkTransfer(device, endpoint|USB_DIRECTION_OUTPUT, (unsigned char *)data, length, timeout);
+  return usbBulkTransfer(device, endpointNumber|USB_DIRECTION_OUTPUT, (unsigned char *)data, length, timeout);
 }
 
 void *
 usbSubmitRequest (
   UsbDevice *device,
-  unsigned char endpoint,
-  unsigned char transfer,
+  unsigned char endpointAddress,
   void *buffer,
   int length,
   void *data
 ) {
-  struct usbdevfs_urb *urb;
-  if ((urb = malloc(sizeof(*urb) + length))) {
-    memset(urb, 0, sizeof(*urb));
-    urb->endpoint = endpoint;
-    switch (transfer) {
-      case USB_ENDPOINT_TRANSFER_CONTROL:
-        urb->type = USBDEVFS_URB_TYPE_CONTROL;
-        break;
-      case USB_ENDPOINT_TRANSFER_ISOCHRONOUS:
-        urb->type = USBDEVFS_URB_TYPE_ISO;
-        break;
-      case USB_ENDPOINT_TRANSFER_BULK:
-        urb->type = USBDEVFS_URB_TYPE_BULK;
-        break;
-      case USB_ENDPOINT_TRANSFER_INTERRUPT:
-        urb->type = USBDEVFS_URB_TYPE_BULK;
-        break;
+  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointAddress);
+  if (endpoint) {
+    struct usbdevfs_urb *urb;
+    if ((urb = malloc(sizeof(*urb) + length))) {
+      memset(urb, 0, sizeof(*urb));
+      urb->endpoint = endpointAddress;
+      switch (endpoint->descriptor->bmAttributes & USB_ENDPOINT_TRANSFER_MASK) {
+        case USB_ENDPOINT_TRANSFER_CONTROL:
+          urb->type = USBDEVFS_URB_TYPE_CONTROL;
+          break;
+        case USB_ENDPOINT_TRANSFER_ISOCHRONOUS:
+          urb->type = USBDEVFS_URB_TYPE_ISO;
+          break;
+        case USB_ENDPOINT_TRANSFER_INTERRUPT:
+        case USB_ENDPOINT_TRANSFER_BULK:
+          urb->type = USBDEVFS_URB_TYPE_BULK;
+          break;
+      }
+      urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
+      if (buffer) memcpy(urb->buffer, buffer, length);
+      urb->flags = 0;
+      urb->signr = 0;
+      urb->usercontext = data;
+
+      LogPrint(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
+               urb, urb->type, urb->endpoint, urb->flags, urb->signr,
+               urb->buffer, urb->buffer_length, urb->usercontext);
+    submit:
+      if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
+      if ((errno == EINVAL) &&
+          ((endpoint->descriptor->bmAttributes & USB_ENDPOINT_TRANSFER_MASK) == USB_ENDPOINT_TRANSFER_INTERRUPT) &&
+          (urb->type == USBDEVFS_URB_TYPE_BULK)) {
+        urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
+        goto submit;
+      }
+
+      /* UHCI support returns ENXIO if a URB is already submitted. */
+      if (errno != ENXIO) LogError("USB URB submit");
+
+      free(urb);
+    } else {
+      LogError("USB URB allocation");
     }
-    urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
-    if (buffer) memcpy(urb->buffer, buffer, length);
-    urb->flags = 0;
-    urb->signr = 0;
-    urb->usercontext = data;
-
-    LogPrint(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
-             urb, urb->type, urb->endpoint, urb->flags, urb->signr,
-             urb->buffer, urb->buffer_length, urb->usercontext);
-  submit:
-    if (ioctl(device->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
-    if ((errno == EINVAL) &&
-        (transfer == USB_ENDPOINT_TRANSFER_INTERRUPT) &&
-        (urb->type == USBDEVFS_URB_TYPE_BULK)) {
-      urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
-      goto submit;
-    }
-
-    /* UHCI support returns ENXIO if a URB is already submitted. */
-    if (errno != ENXIO) LogError("USB URB submit");
-
-    free(urb);
-  } else {
-    LogError("USB URB allocation");
   }
   return NULL;
 }

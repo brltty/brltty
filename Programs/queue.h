@@ -29,7 +29,11 @@ typedef int (*ItemComparator) (const void *item1, const void *item2);
 
 extern Queue *newQueue (ItemDeallocator deallocate, ItemComparator compare);
 extern void deallocateQueue (Queue *queue);
-extern void scanQueue (Queue *queue);
+extern int queueSize (Queue *queue);
+
+typedef int (*ItemTester) (void *item, void *data);
+extern Element *findElement (Queue *queue, ItemTester test, void *data);
+extern void *findItem (Queue *queue, ItemTester test, void *data);
 
 extern void deleteElement (Element *element);
 

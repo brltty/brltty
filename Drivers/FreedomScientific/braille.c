@@ -152,7 +152,7 @@ chooseUsbDevice (UsbDevice *device, void *data) {
 static int
 openUsbPort (char **parameters, const char *device) {
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    if (usbBeginInput(usbDevice, usbInputEndpoint, USB_ENDPOINT_TRANSFER_BULK, 0X40, 8)) {
+    if (usbBeginInput(usbDevice, usbInputEndpoint, 8)) {
       return 1;
     }
 
@@ -177,12 +177,12 @@ closeUsbPort (void) {
 
 static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbDevice, milliseconds);
+  return usbAwaitInput(usbDevice, usbInputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (void *buffer, int length) {
-  int count = usbReapInput(usbDevice, buffer, length, 0);
+  int count = usbReapInput(usbDevice, usbInputEndpoint, buffer, length, 0);
   if (count == -1)
     if (errno == EAGAIN)
       count = 0;

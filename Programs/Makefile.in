@@ -182,7 +182,7 @@ usb_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) tbl.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O tbl.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)

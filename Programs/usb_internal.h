@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "queue.h"
+
 struct UsbInputElement {
   struct UsbInputElement *next;
   struct UsbInputElement *previous;
@@ -30,18 +32,28 @@ struct UsbInputElement {
 
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
+  Queue *endpoints;
   int file;
   int interface;
   uint16_t language;
-
-  unsigned char inputEndpoint;
-  unsigned char inputTransfer;
-  int inputSize;
-  struct UsbInputElement *inputElements;
-  void *inputRequest;
-  unsigned char *inputBuffer;
-  int inputLength;
 };
+
+typedef struct {
+  UsbDevice *device;
+  UsbEndpointDescriptor *descriptor;
+
+  union {
+    struct {
+      struct UsbInputElement *elements;
+      void *request;
+      unsigned char *buffer;
+      int length;
+    } input;
+
+    struct {
+    } output;
+  } direction;
+} UsbEndpoint;
 
 extern UsbDevice *usbTestDevice (
   const char *path,
@@ -51,6 +63,11 @@ extern UsbDevice *usbTestDevice (
 
 extern int usbReadDeviceDescriptor (
   UsbDevice *device
+);
+
+extern UsbEndpoint *usbGetEndpoint (
+  UsbDevice *device,
+  unsigned char endpointAddress
 );
 
 #ifdef __cplusplus

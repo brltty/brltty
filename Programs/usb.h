@@ -218,11 +218,11 @@ extern int usbSetAlternative (
 
 extern int usbResetEndpoint (
   UsbDevice *device,
-  unsigned int endpoint
+  unsigned int endpointAddress
 );
 extern int usbClearEndpoint (
   UsbDevice *device,
-  unsigned int endpoint
+  unsigned int endpointAddress
 );
 
 extern int usbControlTransfer (
@@ -263,14 +263,14 @@ extern void usbLogString (
 
 extern int usbBulkRead (
   UsbDevice *device,
-  unsigned char endpoint,
+  unsigned char endpointNumber,
   void *data,
   int length,
   int timeout
 );
 extern int usbBulkWrite (
   UsbDevice *device,
-  unsigned char endpoint,
+  unsigned char endpointNumber,
   const void *data,
   int length,
   int timeout
@@ -283,8 +283,7 @@ typedef struct {
 } UsbResponse;
 extern void *usbSubmitRequest (
   UsbDevice *device,
-  unsigned char endpoint,
-  unsigned char transfer,
+  unsigned char endpointAddress,
   void *buffer,
   int length,
   void *context
@@ -301,17 +300,17 @@ extern void *usbReapResponse (
 
 extern int usbBeginInput (
   UsbDevice *device,
-  unsigned char endpoint,
-  unsigned char transfer,
-  int size,
+  unsigned char endpointNumber,
   int count
 );
 extern int usbAwaitInput (
   UsbDevice *device,
+  unsigned char endpointNumber,
   int timeout
 );
 extern int usbReapInput (
   UsbDevice *device,
+  unsigned char endpointNumber,
   void *buffer,
   int length,
   int timeout

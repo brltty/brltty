@@ -521,7 +521,7 @@ openUsbPort (char **parameters, const char *device) {
   rewriteInterval = 0;
 
   if ((usbDevice = usbFindDevice(chooseUsbDevice, (void *)device))) {
-    if (usbBeginInput(usbDevice, usbInputEndpoint, USB_ENDPOINT_TRANSFER_INTERRUPT, 8, 8)) {
+    if (usbBeginInput(usbDevice, usbInputEndpoint, 8)) {
       return 1;
     }
 
@@ -553,7 +553,7 @@ static int
 readUsbPacket (unsigned char *buffer, int length) {
   while (1) {
     unsigned char bytes[2];
-    int count = usbReapInput(usbDevice, bytes, sizeof(bytes), 0);
+    int count = usbReapInput(usbDevice, usbInputEndpoint, bytes, sizeof(bytes), 0);
     if (count == -1) {
       if (errno == EAGAIN) return 0;
       return count;

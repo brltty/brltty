@@ -54,10 +54,10 @@ usbGetLanguage (
   int timeout
 ) {
   UsbDescriptor descriptor;
-  int count;
-  if ((count = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
-                                0, 0, &descriptor, timeout)) != -1) {
-    if (count >= 4) {
+  int size = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_STRING,
+                              0, 0, &descriptor, timeout);
+  if (size != -1) {
+    if (size >= 4) {
       *language = getLittleEndian(descriptor.string.wData[0]);
       return 1;
     } else {
@@ -117,23 +117,24 @@ usbLogString (
 
 static struct UsbInputElement *
 usbAddInputElement (
-  UsbDevice *device
+  UsbEndpoint *endpoint
 ) {
   struct UsbInputElement *input;
   if ((input = malloc(sizeof(*input)))) {
     memset(input, 0, sizeof(*input));
-    if ((input->request = usbSubmitRequest(device, device->inputEndpoint,
-                                           device->inputTransfer,
-                                           NULL, device->inputSize,
+    if ((input->request = usbSubmitRequest(endpoint->device,
+                                           endpoint->descriptor->bEndpointAddress,
+                                           NULL,
+                                           endpoint->descriptor->wMaxPacketSize,
                                            input))) {
-      if (device->inputElements) {
-        device->inputElements->previous = input;
-        input->next = device->inputElements;
+      if (endpoint->direction.input.elements) {
+        endpoint->direction.input.elements->previous = input;
+        input->next = endpoint->direction.input.elements;
       } else {
         input->next = NULL;
       }
       input->previous = NULL;
-      device->inputElements = input;
+      endpoint->direction.input.elements = input;
       return input;
     }
     free(input);
@@ -145,14 +146,14 @@ usbAddInputElement (
 
 static void
 usbDeleteInputElement (
-  UsbDevice *device,
+  UsbEndpoint *endpoint,
   struct UsbInputElement *input
 ) {
-  if (input->request) usbCancelRequest(device, input->request);
+  if (input->request) usbCancelRequest(endpoint->device, input->request);
   if (input->previous) {
     input->previous->next = input->next;
   } else {
-    device->inputElements = input->next;
+    endpoint->direction.input.elements = input->next;
   }
   if (input->next) input->next->previous = input->previous;
   free(input);
@@ -161,21 +162,16 @@ usbDeleteInputElement (
 int
 usbBeginInput (
   UsbDevice *device,
-  unsigned char endpoint,
-  unsigned char transfer,
-  int size,
+  unsigned char endpointNumber,
   int count
 ) {
   int actual = 0;
-
-  device->inputRequest = NULL;
-  device->inputEndpoint = endpoint | USB_DIRECTION_INPUT;
-  device->inputTransfer = transfer;
-  device->inputSize = size;
-
-  while (actual < count) {
-    if (!usbAddInputElement(device)) break;
-    actual++;
+  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointNumber|USB_DIRECTION_INPUT);
+  if (endpoint) {
+    while (actual < count) {
+      if (!usbAddInputElement(endpoint)) break;
+      actual++;
+    }
   }
   return actual;
 }
@@ -183,29 +179,33 @@ usbBeginInput (
 int
 usbAwaitInput (
   UsbDevice *device,
+  unsigned char endpointNumber,
   int timeout
 ) {
-  if (!device->inputRequest) {
+  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointNumber|USB_DIRECTION_INPUT);
+  if (!endpoint) return 0;
+  if (!endpoint->direction.input.request) {
     UsbResponse response;
-    while (!(device->inputRequest = usbReapResponse(device, &response, 0))) {
+    while (!(endpoint->direction.input.request = usbReapResponse(device, &response, 0))) {
       if (errno != EAGAIN) return 0;
       if (timeout <= 0) return 0;
+
       {
         const int interval = 10;
         delay(interval);
         timeout -= interval;
       }
     }
-    usbAddInputElement(device);
+    usbAddInputElement(endpoint);
 
     {
       struct UsbInputElement *input = response.context;
       input->request = NULL;
-      usbDeleteInputElement(device, input);
+      usbDeleteInputElement(endpoint, input);
     }
 
-    device->inputBuffer = response.buffer;
-    device->inputLength = response.length;
+    endpoint->direction.input.buffer = response.buffer;
+    endpoint->direction.input.length = response.length;
   }
   return 1;
 }
@@ -213,40 +213,135 @@ usbAwaitInput (
 int
 usbReapInput (
   UsbDevice *device,
+  unsigned char endpointNumber,
   void *buffer,
   int length,
   int timeout
 ) {
-  unsigned char *bytes = buffer;
-  unsigned char *target = bytes;
-  while (length > 0) {
-    if (!usbAwaitInput(device, timeout)) return -1;
+  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointNumber|USB_DIRECTION_INPUT);
+  if (endpoint) {
+    unsigned char *bytes = buffer;
+    unsigned char *target = bytes;
+    while (length > 0) {
+      if (!usbAwaitInput(device, endpointNumber, timeout)) return -1;
 
-    {
-      int count = device->inputLength;
-      if (length < count) count = length;
-      memcpy(target, device->inputBuffer, count);
+      {
+        int count = endpoint->direction.input.length;
+        if (length < count) count = length;
+        memcpy(target, endpoint->direction.input.buffer, count);
 
-      if ((device->inputLength -= count)) {
-        device->inputBuffer += count;
-      } else {
-        device->inputLength = 0;
-        device->inputBuffer = NULL;
-        free(device->inputRequest);
-        device->inputRequest = NULL;
+        if ((endpoint->direction.input.length -= count)) {
+          endpoint->direction.input.buffer += count;
+        } else {
+          endpoint->direction.input.length = 0;
+          endpoint->direction.input.buffer = NULL;
+          free(endpoint->direction.input.request);
+          endpoint->direction.input.request = NULL;
+        }
+
+        target += count;
+        length -= count;
+      }
+    }
+    return target - bytes;
+  }
+  return -1;
+}
+
+static void
+usbDeallocateEndpoint (void *item) {
+  UsbEndpoint *endpoint = item;
+  if (endpoint->direction.input.request) free(endpoint->direction.input.request);
+  while (endpoint->direction.input.elements) usbDeleteInputElement(endpoint, endpoint->direction.input.elements);
+  free(endpoint->descriptor);
+  free(endpoint);
+}
+
+static int
+usbTestEndpoint (void *item, void *data) {
+  UsbEndpoint *endpoint = item;
+  unsigned char *endpointAddress = data;
+  return endpoint->descriptor->bEndpointAddress == *endpointAddress;
+}
+
+UsbEndpoint *
+usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
+  UsbEndpoint *endpoint = findItem(device->endpoints, usbTestEndpoint, &endpointAddress);
+  if (endpoint) return endpoint;
+
+  {
+    int endpointNumber;
+    while ((endpointNumber = queueSize(device->endpoints) + 1) < 0X100) {
+      UsbDescriptor descriptor;
+      int size = usbGetDescriptor(device, USB_DESCRIPTOR_TYPE_ENDPOINT,
+                                  endpointNumber, 0, &descriptor, 1000);
+      if (size == -1) break;
+      if (!size) break;
+
+      {
+        const char *direction;
+        const char *transfer;
+
+        switch (descriptor.endpoint.bEndpointAddress & USB_ENDPOINT_DIRECTION_MASK) {
+          default:                   direction = "?";   break;
+          case USB_DIRECTION_INPUT:  direction = "in";  break;
+          case USB_DIRECTION_OUTPUT: direction = "out"; break;
+        }
+
+        switch (descriptor.endpoint.bmAttributes & USB_ENDPOINT_TRANSFER_MASK) {
+          default:                                transfer = "?";   break;
+          case USB_ENDPOINT_TRANSFER_CONTROL:     transfer = "ctl"; break;
+          case USB_ENDPOINT_TRANSFER_ISOCHRONOUS: transfer = "iso"; break;
+          case USB_ENDPOINT_TRANSFER_BULK:        transfer = "blk"; break;
+          case USB_ENDPOINT_TRANSFER_INTERRUPT:   transfer = "int"; break;
+        }
+
+        LogPrint(LOG_DEBUG, "USB: ept#%d adr=%02X dir=%s xfr=%s pkt=%d int=%d",
+                 endpointNumber,
+                 descriptor.endpoint.bEndpointAddress, direction, transfer,
+                 descriptor.endpoint.wMaxPacketSize,
+                 descriptor.endpoint.bInterval);
       }
 
-      target += count;
-      length -= count;
+      if ((endpoint = malloc(sizeof(*endpoint)))) {
+        memset(endpoint, 0, sizeof(*endpoint));
+        endpoint->device = device;
+
+        if ((endpoint->descriptor = malloc(size))) {
+          memcpy(endpoint->descriptor, &descriptor.endpoint, size);
+          endpoint->descriptor->wMaxPacketSize = getLittleEndian(endpoint->descriptor->wMaxPacketSize);
+
+          switch (endpoint->descriptor->bEndpointAddress & USB_ENDPOINT_DIRECTION_MASK) {
+            case USB_DIRECTION_INPUT:
+              endpoint->direction.input.elements = NULL;
+              endpoint->direction.input.request = NULL;
+              endpoint->direction.input.buffer = NULL;
+              endpoint->direction.input.length = 0;
+              break;
+          }
+
+          if (enqueueItem(device->endpoints, endpoint)) {
+            if (endpoint->descriptor->bEndpointAddress == endpointAddress) return endpoint;
+            continue;
+          }
+
+          free(endpoint->descriptor);
+        }
+
+        free(endpoint);
+      }
+
+      break;
     }
   }
-  return target - bytes;
+
+  LogPrint(LOG_WARNING, "USB: endpoint not found: %02X", endpointAddress);
+  return NULL;
 }
 
 void
 usbCloseDevice (UsbDevice *device) {
-  if (device->inputRequest) free(device->inputRequest);
-  while (device->inputElements) usbDeleteInputElement(device, device->inputElements);
+  deallocateQueue(device->endpoints);
   close(device->file);
   free(device);
 }
@@ -256,12 +351,16 @@ usbOpenDevice (const char *path) {
   UsbDevice *device;
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
-    if ((device->file = open(path, O_RDWR)) != -1) {
-      if (usbReadDeviceDescriptor(device))
-        if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
-          if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
-            return device;
-      close(device->file);
+
+    if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
+      if ((device->file = open(path, O_RDWR)) != -1) {
+        if (usbReadDeviceDescriptor(device))
+          if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
+            if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
+              return device;
+        close(device->file);
+      }
+      deallocateQueue(device->endpoints);
     }
     free(device);
   } else {

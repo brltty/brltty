@@ -94,16 +94,11 @@ linkFirstElement (Element *element) {
 }
 
 static void
-linkElementBefore (Element *reference, Element *element) {
+linkAdditionalElement (Element *reference, Element *element) {
   element->next = reference;
   element->previous = reference->previous;
   element->next->previous = element;
   element->previous->next = element;
-}
-
-static void
-linkElementAfter (Element *reference, Element *element) {
-  linkElementBefore(reference->next, element);
 }
 
 static void
@@ -128,10 +123,12 @@ deleteElement (Element *element) {
 Element *
 enqueueItem (Queue *queue, void *item) {
   Element *element = newElement(queue, item);
-  if (queue->head) {
-    linkElementBefore(queue->head, element);
-  } else {
-    linkFirstElement(element);
+  if (element) {
+    if (queue->head) {
+      linkAdditionalElement(queue->head, element);
+    } else {
+      linkFirstElement(element);
+    }
   }
   return element;
 }
@@ -170,11 +167,25 @@ deallocateQueue (Queue *queue) {
   free(queue);
 }
 
-void
-scanQueue (Queue *queue) {
+int
+queueSize (Queue *queue) {
+  return queue->size;
+}
+
+Element *
+findElement (Queue *queue, ItemTester test, void *data) {
   Element *element = queue->head;
   while (element) {
     Element *next = element->next;
+    if (test(element->item, data)) return element;
     element = (next != queue->head)? next: NULL;
   }
+  return NULL;
+}
+
+void *
+findItem (Queue *queue, ItemTester test, void *data) {
+  Element *element = findElement(queue, test, data);
+  if (element) return element->item;
+  return NULL;
 }

@@ -289,7 +289,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   ret = sndcontrolmsg(BRLVGER_BEEP, 200, 0, NULL, 0);
 
   LogPrint(LOG_DEBUG, "Starting input");
-  if (!usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, USB_ENDPOINT_TRANSFER_INTERRUPT, 8, 8)) goto failure;
+  if (!usbBeginInput(usbDevice, USB_INPUT_ENDPOINT, 8)) goto failure;
   LogPrint(LOG_DEBUG, "input started");
 
   if(!(dispbuf = malloc(ncells))
@@ -510,7 +510,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     return cmd;
   }
 
-  r = usbReapInput(usbDevice, buf, 8, 0);
+  r = usbReapInput(usbDevice, USB_INPUT_ENDPOINT, buf, 8, 0);
   if(r<0) {
     if(errno == EAGAIN) {
       /* no input */
