@@ -36,7 +36,7 @@ AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_HEADER([Programs/api.h])
 AC_PREFIX_DEFAULT([])
-AC_CONFIG_AUX_DIR([aux])
+AC_CONFIG_AUX_DIR([acdir])
 AC_CANONICAL_SYSTEM
 
 BRLTTY_PACKAGE_CHOOSE([curses],
