@@ -3695,6 +3695,8 @@ Now, finally, here are the opcode descriptions themselves:
     Translate the characters if they're either a word or at the beginning of a word.
   <tag><tt/begword/ <em/characters/ <em/dots/<label id="contraction-opcode-begword"></tag>
     Translate the characters if they're at the beginning of a word.
+  <tag><tt/begmidword/ <em/characters/ <em/dots/<label id="contraction-opcode-begmidword"></tag>
+    Translate the characters if they're either at the beginning or in the middle of a word.
   <tag><tt/midword/ <em/characters/ <em/dots/<label id="contraction-opcode-midword"></tag>
     Translate the characters if they're in the middle of a word.
   <tag><tt/midendword/ <em/characters/ <em/dots/<label id="contraction-opcode-midendword"></tag>

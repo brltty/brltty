@@ -73,6 +73,7 @@ typedef enum { /*Op codes*/
 
   CTO_SuffixableWord, /*whole word or beginning of word*/
   CTO_BegWord, /*beginning of word only*/
+  CTO_BegMidWord, /*beginning or middle of word*/
   CTO_MidWord, /*middle of word only*/
   CTO_MidEndWord, /*middle or end of word*/
   CTO_EndWord, /*end of word only*/

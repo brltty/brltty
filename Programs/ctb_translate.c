@@ -126,6 +126,11 @@ selectRule (int length) { /*check for valid contractions */
               CTC(after, CTC_Letter))
             return 1;
           break;
+        case CTO_BegMidWord:
+          if (CTC(before, CTC_Letter|CTC_Space|CTC_Punctuation) &&
+              CTC(after, CTC_Letter))
+            return 1;
+          break;
         case CTO_MidWord:
           if (CTC(before, CTC_Letter) && CTC(after, CTC_Letter))
             return 1;

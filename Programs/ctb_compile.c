@@ -68,6 +68,7 @@ static const char *const opcodeNames[CTO_None] = {
 
   "sufword",
   "begword",
+  "begmidword",
   "midword",
   "midendword",
   "endword",
@@ -512,20 +513,21 @@ processLine (FileData *data, const char *line) {
       break;
     }
     case CTO_Always:
-    case CTO_WholeWord:
-    case CTO_LowWord:
-    case CTO_JoinableWord:
     case CTO_LargeSign:
+    case CTO_WholeWord:
+    case CTO_JoinableWord:
+    case CTO_LowWord:
     case CTO_SuffixableWord:
     case CTO_BegWord:
+    case CTO_BegMidWord:
     case CTO_MidWord:
     case CTO_MidEndWord:
     case CTO_EndWord:
+    case CTO_PrePunc:
+    case CTO_PostPunc:
     case CTO_BegNum:
     case CTO_MidNum:
     case CTO_EndNum:
-    case CTO_PrePunc:
-    case CTO_PostPunc:
     case CTO_Repeated: {
       ByteString find;
       ByteString replace;
