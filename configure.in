@@ -608,6 +608,7 @@ in
       ;;
    darwin*)
       system_object="darwin"
+      LIBS="-lIOKit -framework CoreFoundation ${LIBS}"
       ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
@@ -800,6 +801,9 @@ in
       ;;
    netbsd*)
       usb_object="netbsd"
+      ;;
+   darwin*)
+      usb_object="darwin"
       ;;
    *)
       usb_object=""

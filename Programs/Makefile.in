@@ -226,6 +226,9 @@ usb_freebsd.$O:
 usb_netbsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_netbsd.c
 
+usb_darwin.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_darwin.c
+
 ###############################################################################
 
 bluez.$O:
