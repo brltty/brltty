@@ -399,11 +399,11 @@ readChunk (
 }
 
 int
-changeOpenFlags (int fileDescriptor, int clear, int set) {
+changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
   int flags;
   if ((flags = fcntl(fileDescriptor, F_GETFL)) != -1) {
-    flags &= ~clear;
-    flags |= set;
+    flags &= ~flagsToClear;
+    flags |= flagsToSet;
     if (fcntl(fileDescriptor, F_SETFL, flags) != -1) {
       return 1;
     } else {
@@ -426,7 +426,7 @@ setOpenFlags (int fileDescriptor, int state, int flags) {
 
 int
 setBlockingIo (int fileDescriptor, int state) {
-  return setOpenFlags(fileDescriptor, state, O_NONBLOCK);
+  return setOpenFlags(fileDescriptor, !state, O_NONBLOCK);
 }
 
 int
