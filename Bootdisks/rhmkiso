@@ -30,15 +30,18 @@ syntaxError() {
 
 originalImage="boot.iso"
 modifiedImage="brltty.iso"
+brlttyPattern="brltty-*"
 brailleDrivers="all"
 textTable="nabcc"
 invokeShell=false
+
 showUsage() {
    cat <<EOF
 Usage: ${programName} [-option ...]
 The following options are supported:
 -i file         The original (input) image (default: ${originalImage}).
 -o file         The modified (output) image (default: ${modifiedImage}).
+-a file         The BRLTTY archive (default: ${brlttyPattern}).
 -b driver,...   The braille driver(s) to include (default: ${brailleDrivers}).
 -t file         The text translation table to build in (default: ${textTable}).
 -s              Invoke an interactive shell to inspect the modified image.
@@ -47,12 +50,13 @@ EOF
    exit 0
 }
 
-while getopts ":i:o:b:t:sh" option
+while getopts ":i:o:a:b:t:sh" option
 do
    case "${option}"
    in
       i) originalImage="${OPTARG}";;
       o) modifiedImage="${OPTARG}";;
+      a) brlttyPattern="${OPTARG}";;
       b) brailleDrivers="${OPTARG}";;
       t) textTable="${OPTARG}";;
       s) invokeShell=true;;
@@ -67,10 +71,9 @@ shift $((OPTIND - 1))
 
 [ -f "${originalImage}" ] || programError "original image not found: ${originalImage}"
 
-brlttyPattern="brltty-*"
+shopt -s nullglob extglob
 set -- $brlttyPattern
-[ "${#}" -eq 1 -a "${1}" = "${brlttyPattern}" ] && set --
-[ "${#}" -eq 0 ] && programError "brltty archive not found."
+[ "${#}" -eq 0 ] && programError "brltty archive not found: ${brlttyPattern}"
 [ "${#}" -gt 1 ] && {
    brlttyArchives="$(echo "${*}" | sed -e 's% %,&%g')"
    programError "more than one brltty archive: ${brlttyArchives}"
@@ -138,6 +141,7 @@ rm "${linuxrcPath}"
 ln -s /bin/brltty "${linuxrcPath}"
 
 deviceDirectory="${initrdRoot}/dev"
+shopt -u nullglob
 for device in /dev/vcs*
 do
    deviceName="${device##*/}"
@@ -161,9 +165,8 @@ in
       ;;
 esac
 
-brlttyPattern="${temporaryDirectory}/brltty*"
-set -- ${brlttyPattern}
-[ "${#}" -eq 1 -a "${1}" = "${brlttyPattern}" ] && set --
+shopt -s nullglob
+set -- ${temporaryDirectory}/brltty*
 [ "${#}" -eq 0 ] && programError "brltty directory not found."
 brlttyDirectory="${1}"
 

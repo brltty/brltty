@@ -48,8 +48,9 @@ For more information on writing to a CD, please check the CD-Writing HOWTO at:
    http://tldp.org/HOWTO/CD-Writing-HOWTO.html
 
 Seventh: Boot from the CD you've just written, and wait a few seconds after it
-starts to spin in order to give the boot loader enough time to get started and
-present its initial prompt. You should hear a beep when it's ready. Then enter:
+begins to spin in order to give the boot loader enough time to get started and
+to present its initial prompt. You should hear a beep when it's ready. Then
+enter:
 
    text brltty=<driver>,<device>,<table>
 e.g.
@@ -71,14 +72,15 @@ further details.
 
 The <device> operand is the device to which your braille display is connected. 
 It's optional, and defaults to the primary serial port ("/dev/ttyS0"). If your
-display is connected to a serial port then specify the name ("ttyS1") of, or
-the path ("/dev/ttyS1") to, the corresponding device. If it's connected to the
-USB then specify "usb:" (the trailing colon is important).
+display is connected to a serial port then specify either the name (e.g.
+"ttyS1") of or the path (e.g. "/dev/ttyS1") to the corresponding device. If
+it's connected to the USB then specify "usb:" (the trailing colon is
+important).
 
 The <table> operand is the text translation table you wish to use. It's
-optional, and defaults to the North American Braille Computer Code ("nabcc").
-See the "text.*.tbl" files in the "BrailleTables" subdirectory of BRLTTY's
-source tree for alternatives. See the -t option (below) for further details.
+optional, and defaults to "nabcc" (North American Braille Computer Code). See
+the "text.*.tbl" files in the "BrailleTables" subdirectory of BRLTTY's source
+tree for alternatives. See the -t option (below) for further details.
 
 
 The Details
@@ -103,6 +105,7 @@ invocation syntax is:
 The following options are provided:
    -i file         The original (input) image (default: boot.iso).
    -o file         The modified (output) image (default: brltty.iso).
+   -a file         The BRLTTY archive (default: check current directory).
    -b driver,...   The braille driver(s) to include (default: all).
    -t file         The text translation table to build in (default: nabcc).
    -s              Invoke an interactive shell to inspect the modified image.
