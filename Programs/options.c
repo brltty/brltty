@@ -114,17 +114,16 @@ processEnvironmentVariables (
   for (optionIndex=0; optionIndex<optionCount; ++optionIndex) {
     const OptionEntry *option = &optionTable[optionIndex];
     if (option->flags & OPT_Environ) {
-      unsigned char delimiter = '_';
       unsigned char name[prefixLength + 1 + strlen(option->word) + 1];
-      sprintf(name, "%s%c%s", prefix, delimiter, option->word);
+      sprintf(name, "%s_%s", prefix, option->word);
 
       {
         unsigned char *character = name;
         while (*character) {
-          if (islower(*character)) {
+          if (*character == '-') {
+            *character = '_';
+	  } else if (islower(*character)) {
             *character = toupper(*character);
-          } else if (*character == '-') {
-            *character = delimiter;
           }
           ++character;
         }
