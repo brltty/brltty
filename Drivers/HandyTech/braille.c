@@ -174,13 +174,6 @@ static const InputOutputOperations *io;
 static const speed_t baud = B19200;
 static int charactersPerSecond;
 
-static void
-writeStopSequence (void) {
-  if (model->stopLength) {
-    io->writeBytes(model->stopAddress, model->stopLength, NULL);
-  }
-}
-
 /* Serial IO */
 #include "Programs/serial.h"
 
@@ -239,7 +232,6 @@ writeSerialBytes (const unsigned char *buffer, int length, int *delay) {
 static void
 closeSerialPort (void) {
   if (serialDevice != -1) {
-    writeStopSequence();
     tcsetattr(serialDevice, TCSADRAIN, &oldSerialSettings);
     close(serialDevice);
     serialDevice = -1;
@@ -333,7 +325,6 @@ writeUsbBytes (const unsigned char *buffer, int length, int *delay) {
 static void
 closeUsbPort (void) {
   if (usbDevice) {
-    writeStopSequence();
     usbReleaseInterface(usbDevice, usbInterface);
     usbCloseDevice(usbDevice);
     usbDevice = NULL;
@@ -586,8 +577,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_close (BrailleDisplay *brl) {
-  deallocateBuffers();
+  if (model->stopLength) {
+    io->writeBytes(model->stopAddress, model->stopLength, NULL);
+  }
   io->closePort();
+  deallocateBuffers();
 }
 
 static int
