@@ -18,15 +18,16 @@
 #ifndef _CONTRACT_H
 #define _CONTRACT_H
 
-void *CompileContractionTable (const char *name);
-int DestroyContractionTable (void *table);
-int TranslateContracted (
-			 void *tbl, /* Pointer to translation table */
-			 const char *source, /* What is to be translated */
-			 int *SourceLen, /* Its length */
-			 char *target, /* Where the translation is to go */
-			 int *TargetLen, /* length of this area */
-			 int *offsets, /* Array of offsets of translated chars in source */
-			 int cursorPos); /* Position of coursor in source */
+extern void *compileContractionTable (const unsigned char *fileName);
+extern int destroyContractionTable (void *contractionTable);
+extern int contractText (
+  void *contractionTable, /* Pointer to translation table */
+  const unsigned char *inputBuffer, /* What is to be translated */
+  int *inputLength, /* Its length */
+  unsigned char *outputBuffer, /* Where the translation is to go */
+  int *outputLength, /* length of this area */
+  int *offsetsMap, /* Array of offsets of translated chars in source */
+  int cursorOffset /* Position of coursor in source */
+);
 
 #endif /* !defined(_CONTRACT_H) */

@@ -244,16 +244,13 @@ else
    BUILTIN_BRAILLE = -DBRL_BUILTIN
 endif
 
-CONTRACT_OBJECTS = cont_compile.o cont_destroy.o cont_translate.o
+CONTRACT_OBJECTS = ctb_compile.o ctb_translate.o
 
-cont_compile.o: cont_compile.c cont_headers.h contract.h misc.h brl.h
-	$(CC) $(CFLAGS) -c cont_compile.c
+ctb_compile.o: ctb_compile.c ctb_definitions.h contract.h misc.h brl.h
+	$(CC) $(CFLAGS) -c ctb_compile.c
 
-cont_destroy.o: cont_destroy.c cont_headers.h contract.h misc.h brl.h
-	$(CC) $(CFLAGS) -c cont_destroy.c
-
-cont_translate.o: cont_translate.c cont_headers.h contract.h misc.h brl.h
-	$(CC) $(CFLAGS) -c cont_translate.c
+ctb_translate.o: ctb_translate.c ctb_definitions.h contract.h misc.h brl.h
+	$(CC) $(CFLAGS) -c ctb_translate.c
 
 TUNE_OBJECTS = tunes.o tones_speaker.o tones_soundcard.o tones_sequencer.o tones_adlib.o adlib.o
 
@@ -410,6 +407,7 @@ install-help: brltty
 install-tables:
 	install --directory $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR) 
 	install -m 644 BrailleTables/*.tbl $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)
+	install -m 644 ContractionTables/*.ctb $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)
 
 install-drivers: brltty
 	install --directory $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)
@@ -434,6 +432,7 @@ uninstall:
 	rm -f $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)/brltty-*.lst
 	rmdir $(INSTALL_ROOT)$(PREFIX)$(LIB_DIR)
 	rm -f $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)/*.tbl
+	rm -f $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)/*.ctb
 	rm -f $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)/brltty*
 	rmdir $(INSTALL_ROOT)$(PREFIX)$(DATA_DIR)
 

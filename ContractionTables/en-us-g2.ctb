@@ -1,0 +1,724 @@
+# U.S. English Grade 2 Braille Contraction Table
+#
+# The format of table entries is: opcode, operands. A line may contain only
+# one entry. The opcode is a number and tells the grade 2 compiler how to
+# handle the entry. The number 0 can be used to define mnemonic synonyms for
+# these numbers, such as "opcode" for 0 itself. In an entry, the opcode and
+# the operands are separated by blanks or tabs. more than one blank or tab is
+# ignored. Leading blanks at the beginning of lines are also ignored. Blank
+# lines and lines beginning with '#' are ignored. Lines containing table
+# entries may also contain comments following the entry and separated from the
+# last operand by at least one blank or tab. Most entries have two operands,
+# but the number is determined by the opcode.
+
+# Define the opcodes.
+# Opcodes must be defined before they are used. Except for this restriction,
+# the order of the entries in the table may be anything that is convenient.
+# You may wish to bear in mind, however, that the compiler arranges entries so
+# that the longest of several entries beginning with the same two characters
+# is tested first. If entries have the same first operand, they are arranged
+# in the order in which they are found in the table. Thus, the same string may
+# have different translations under different circumstances. This method of
+# arrangement is also followed for entries whose first operand is just one
+# character.
+# In specifying the first operand, you may simply type it, if all the
+# characters are on the keyboard. For those characters which are not, use a
+# backslash followed by two hexadecimal digits. If you wish, you can follow
+# the C convention and place "0x" between the backslash and the hexadecimal
+# digits. To enter a backslash, use two in sequence, "\\".
+#
+0 0 opcode
+opcode 1 include
+opcode 2 capsign
+opcode 3 multicaps
+opcode 4 letsign
+ opcode 5 numsign
+opcode 6 always
+opcode 7 repeated for multiple blanks, lines of underscores, etc.
+opcode 8 word
+opcode 9 begword
+opcode 10 midword
+opcode 11 endword
+opcode 12 midend
+opcode 13 midnum e.g. decimal point
+opcode 14 lowword
+opcode 15 largesign
+opcode 16 toby to,  by, into
+opcode 17 literal display in computer braille
+opcode 18 contraction multi-letter contraction that needs a letter sign
+opcode 19 ignore replace with nothing
+opcode 20 endnum
+opcode 21 begnum
+opcode 22 prepunc
+opcode 23 postpunc
+
+# In most entries, the first operand is the string to be translated, and the
+# second operand is the dot patterns of the Braille cells in the translation.
+# The standard dot numbering is used. Cells are separated by hyphens ('-').
+numsign 3456  number sign, just one operand
+letsign 56
+capsign 6
+multicaps 6-6
+# If you don't want capitalization comment out the preceding two lines.
+
+# the decimal digits
+always 1 1
+always 2 12
+always 3 14
+always 4 145
+always 5 15
+always 6 124
+always 7 1245
+always 8 125
+always 9 24
+always 0 245
+
+# the letter a
+largesign a 1
+always a 1
+word A 1
+always A 1
+always about 1-12
+contraction ab
+always above 1-12-1236
+contraction abv
+always according 1-14
+contraction ac
+always across 1-14-1235
+contraction acr
+always aed =
+always aero =
+always after 1-124
+contraction af
+word afternoon 1-124-1345
+contraction afn
+always afterward 1-124-2456
+contraction afw
+word again 1-1245
+contraction ag
+word against 1-1245-34
+word agst =
+endword agery =
+midend ally 6-13456
+word almost 1-123-134
+contraction alm
+word already 1-123-1235
+contraction alr
+word also 1-123
+contraction al
+word although 1-123-1456
+word alth =
+word altogether 1-123-2345
+contraction alt
+word always 1-123-2456
+contraction alw
+midend ance 46-15
+largesign and 12346
+always ar 345
+word as 1356
+contraction as
+midend ation 6-1345
+
+# the letter b
+always b 12
+always B 12
+midword bb 23
+lowword be 23
+begword be 23
+begword bea 12-2
+always bear 12-15-345
+begword beatif 23-1-2345-24-124
+begword beatit 23-1-2345-24-2345
+always beck 12-15-14-13
+always bed 12-1246
+word bee 12-15-15
+begword bee 12-15-15
+always been 12-15-26
+always beer 12-15-12456
+begword bei = beijing
+always being 23-346
+always bell =
+always ben 12-26
+begword beni 12-26-24
+begword ber 12-12456
+always best 12-15-34
+begword bethl 12-15-1456-123 bethlehem
+always bets =
+always bett =
+midend bble 12-3456
+always bio =
+midend ble 3456
+toby by 356
+always because 23-14
+word bec =
+always before 23-124
+word bef =
+always behind 23-125
+word beh =
+always below 23-123
+word bel =
+always beneath 23-1345
+always beside 23-234
+word bes =
+always between 23-2345
+word bet =
+always beyond 23-13456
+word bey =
+always blind 12-123
+contraction bl
+always blinded 12-123-35-145-1246
+word blinding 12-123-35-145-346
+always braille 12-1235-123
+contraction brl
+word but 12
+
+# the letter c
+always c 14
+always C 14
+midword cch 14-16
+always chloro 16-123-135-1235-135
+always cofound 14-135-124-46-145
+begword com 36
+begword con 25
+always conceive 25-14-1236
+always conceiving 25-14-1236-1245
+always cone 14-5-135
+word cons 14-135-1345-234
+always could 14-145
+contraction cd
+midword cc 25
+word can 14
+always cannot 456-14
+word ch =
+always ch 16
+always character 5-16
+always chemo 16-15-134-135
+word child 16
+always children 16-1345
+
+# the letter d
+always d 145
+always D 145
+always day 5-145
+begword decarb 145-15-14-345-12
+always deceive 145-14-1236
+contraction dcv
+always deceiving 145-14-1236-1245
+always declare 145-14-123
+contraction dcl
+always declaring 145-14-123-1245
+midword dd 256
+always denom =
+begword dera = derail
+begword deri 145-15-1235-24
+begword dero = derogatory
+begword dinu 145-24-1345-136
+begword dis 256
+begword disha 256-125-1 dishabile
+begword dishear 256-125-15-345 disheartened
+begword disho 256-125-135 dishonor
+begword dishone 256-125-5-135 dishonest
+always dish 145-24-146
+always disk =
+word do 145
+
+# the letter e
+always e 15
+always E 15
+midword ea 2
+always eable 15-1-3456
+always eally 15-6-13456
+always eation 15-6-1345
+always ear 15-345
+always ed 1246
+midword edo 15-145-135
+begword enor 15-1345-135
+always enou 15-1345-1256
+always edraw =
+word either 15-24
+contraction ei
+always en 26
+always ename 15-5-1345
+always eneck = bottleneck
+always er 12456
+begword era =
+begword ero 15-1235-135
+begword eru = erupt
+midend ence 56-15
+midend eness 15-56-234
+lowword enough 26
+word enough 26-1256-126
+begword enu 15-1345-136
+word every 15
+always ever 5-15
+always evere 15-1236-12456-15
+always evered 15-1236-12456-1246
+
+# the letter f
+always f 124
+always F 124
+midword ff 235
+always father 5-124
+always fein 124-15-35 Feingold
+always first 124-34
+always fever 124-15-1236-12456
+always ffor 124-123456
+largesign for 123456
+always fore 123456-15
+always foot =
+word from 124
+always friend 124-1235
+contraction fr
+midend ful 56-123
+always funder 124-136-1345-145-12456
+
+# the letter g
+always g 1245
+always G 1245
+midword gg 2356
+always gh 126
+always ghead 1245-125-2-145
+always gheart 1245-125-15-345-2345
+always ghouse 1245-125-1256-234-15
+begword givea = giveaway
+word go 1245
+always good 1245-145
+contraction gd
+always great 1245-1235-2345
+contraction grt
+begword gos = goshawk
+
+# the letter h
+always h 125
+always H 125
+word have 125
+always had 456-125
+always hered 125-12456-1246
+always heren 125-12456-26
+always herer 125-12456-12456
+always heres 125-12456-15-234
+always heret 125-12456-15-2345
+word herself 125-12456-124
+word herf =
+word him 125-134
+contraction hm
+word himself 125-134-124
+contraction hmf
+lowword his 236
+always here 5-125
+always hydro =
+
+# the letter i
+always i 24
+word I 24
+always I 24
+midend iever 24-15-1236-12456
+always immediate 24-134-134
+contraction imm
+lowword in 35
+word in =
+always in 35
+always iness 24-56-234
+midend ing 346
+toby into 35-235
+always isomer 24-234-135-134-12456
+word it 1346
+word its 1346-234
+word itself 1346-124
+contraction xf
+endword ity 56-13456
+
+# the letter j
+always j 245
+always J 245
+word just 245
+
+# the letter k
+always k 13
+always K 13
+always know 5-13
+word knowledge 13
+
+# the letter l
+always l 123
+always L 123
+midend less 46-234
+always letter 123-1235
+contraction lr
+word like 123
+always little 123-123
+always lord 5-123
+
+# the letter m
+always m 134
+always M 134
+midend ment 56-2345
+always mideast 134-24-145-15-1-34
+always mishap =
+word more 134
+always mother 5-134
+always much 134-16
+word must 134-34
+word mustn 134-34-1345
+word myself 134-13456-124
+contraction myf
+always many 456-134
+
+# the letter n
+always n 1345
+always N 1345
+always name 5-1345
+always namese =
+endnum nd 1345-145
+always necessary 1345-15-14
+contraction nec
+word neither 1345-15-24
+contraction nei
+midend ness 56-234
+always nonex =
+word not 1345
+word nowhere 1345-135-5-156
+
+# the letter o
+word o 135
+always o 135
+word O 135
+always O 135
+largesign of 12356
+always ofold = twofold
+midword ofor 135-123456
+always onesi =
+midend oness 135-56-234
+midend oneer 135-1345-15-12456
+midend oned 135-1345-1246
+always one 5-135
+always onent 135-1345-26-2345
+always oner 135-1345-12456
+midend ong 56-1245
+always osome =
+word ou =
+always ou 1256
+midend ound 46-145
+midend ount 46-2345
+always ourselves 1256-1235-1236-234
+word ourvs =
+word out 1256
+always ought 5-1256
+always ow 246
+word o'clock 135-3-14
+
+# the letter p
+always p 1234
+always P 1234
+word people 1234
+always perceive 1234-12456-14-1236
+always perceiving 1234-12456-14-1236-1245
+always perhaps 1234-12456-125
+always phere 1234-125-12456-15
+always part 5-1234
+begword parta 1234-345-2345-1 partake
+begword parto 1234-345-2345-135
+begword pre =
+always preach 1234-1235-2-16
+always prof =
+always profit 1234-1235-12356-24-2345
+
+# the letter q
+always q 12345
+always Q 12345
+always quick 12345-13
+word quite 12345
+always question 5-12345
+
+# the letter r
+always r 1235
+always R 1235
+word rather 1235
+endnum rd 1235-145
+always reac =
+always reach 1235-2-16
+begword reaff 1235-15-1-235
+always reagent 1235-15-1-1245-26-2345
+begword reass 1235-15-1-234-234
+always rede =
+begword redi =
+word redo =
+always redu =
+always receive 1235-14-1236
+contraction rcv
+always receiving 1235-14-1236-1245
+always rejoice 1235-245-14
+contraction rjc
+always rejoicing 1235-245-14-1245
+begword rene 1235-15-1345-15
+always rever 1235-15-1236-12456
+always right 5-1235
+
+# the letter s
+always s 234
+always S 234
+word said 234-145
+contraction sd
+always sedu =
+always sent 234-26-2345 sentimental
+word shall 146
+word sh =
+always sh 146
+always shaus = In German names
+always should 146-145
+always shoulder 146-1256-123-145-12456
+midend sion 46-1345
+midword stak 234-2345-1-13
+midend stion 234-56-1345
+word so 234
+always some 5-234
+always spirit 456-234
+endnum st 34
+always st 34
+always sth 234-1456
+always sthe 234-2346
+word still 34
+always shead 234-125-2-145
+always sheart 124-125-15-345-2345
+always shouse 234-125-1256-234-15
+always ssh =
+always shood =
+word such 234-16
+always sword =
+
+# the letter t
+always t 2345
+always T 2345
+endnum th 1456
+word th =
+always th 1456
+always thand 2345-125-12346 shorthand
+word this 1456
+word that 2345
+always tnam =
+toby to 235
+word today 2345-145
+contraction td
+word tomorrow 2345-134
+contraction tm
+word tonight 2345-1345
+contraction tn
+always thead 2345-125-2-145
+always theast 1456-15-1-34
+always theart 2345-125-15-345-2345
+always thouse 2345-125-1256-234-15
+largesign the 2346
+word themselves 2346-134-1236-234
+word themvs 1456-15-134-1236-234
+always thered 2346-1235-1246
+always therer 2346-1235-12456
+always there 5-2346
+always their 456-2346
+always thood =
+midend tion 56-1345
+always time 5-2345
+midend timer 2345-24-134-12456
+midend timed 1245-24-134-1246
+word these 45-2346
+always through 5-1456
+always together 2345-1245-1235
+contraction tgr
+word those 45-1456
+
+# the letter u
+always u 136
+always U 136
+always upon 45-136
+word us 136
+always under 5-136
+
+# the letter v
+always v 1236
+always V 1236
+word very 1236
+
+# the letter w
+always w 2456
+always W 2456
+lowword was 356
+word wh =
+always wh 156
+word which 156
+word will 2456
+lowword were 2356
+always where 5-156
+largesign with 23456
+always word 45-2456
+word whose 45-156
+always work 5-2456
+always would 2456-145
+contraction wd
+always world 456-2456
+
+# the letter x
+always x 1346
+always X 1346
+
+# the letter y
+always y 13456
+always Y 13456
+word you 13456
+word yr 13456-1235
+contraction yr
+word yourself 13456-1235-124
+contraction yrf
+word yourselves 13456-1235-1236-234
+contraction yrvs
+word your 13456-1235
+word yours 13456-1235-234
+contraction yrs
+always young 5-13456
+
+# the letter z
+always z 1356
+always Z 1356
+
+# Système International Prefixes
+begword yotta 13456-135-2345-2345-1 10^24
+begword zetta 1356-15-2345-2345-1 10^21
+begword exa 15-1346-1 10^18
+begword peta 1234-15-2345-1 10^15
+begword tera 2345-12456-1 10^12
+begword giga 1245-24-1245-1 10^9
+begword mega 134-15-1245-1 10^6
+begword kilo 13-24-123-135 10^3
+begword hecto 125-15-14-2345-135 10^2
+begword deca 145-15-14-1 10^1
+begword deci 145-15-14-24 10^-1
+begword centi 14-26-2345-24 10^-2
+begword milli 134-24-123-123-24 10^-3
+begword micro 134-24-14-1235-135 10^-6
+begword nano 1345-1-1345-135 10^-9
+begword pico 1234-24-14-135 10^-12
+begword femto 124-15-134-2345-135 10^-15
+begword atto 1-2345-2345-135 10^-18
+begword zepto 1356-15-1234-2345-135 10^-21
+begword yocto 13456-135-14-2345-135 10^-24
+
+# other prefixes
+begword electro 15-123-15-14-2345-1235-135
+begword infra 35-124-1235-1
+
+# mathematical symbols
+always < 5-13
+always = 46-13
+always > 46-2
+midnum + 346
+always + 346
+midnum - 36
+always - 36
+midnum × 46-16
+always × 46-16
+midnum ÷ 46-34
+always ÷ 46-34
+begnum $ 256
+always $ 256-3456
+
+# punctuation
+prepunc " 236
+postpunc " 356
+prepunc ' 6-236
+endword ' 3
+postpunc ' 356-3
+always ' 3
+endword 'd 3-145
+endword 'll 3-123-123
+endword 'm 3-134
+endword 're 3-1235-15
+endword 's 3-234
+endword 't 3-2345
+endword 've 3-1236-15
+midnum , 2
+always , 2
+midnum . 46
+always . 256
+always ; 23
+midnum : 25
+always : 25
+always ! 235
+always # 3456
+always / 456-34
+always ? 236
+always % 4-356
+always ^ 456-126
+always ~ 4-156
+always & 12346
+always * 35-35
+repeated *** 16-16-16
+always " 5
+always ( 2356
+always ) 2356
+always [ 456-12356
+always ] 456-23456
+always { 46-12356
+always } 46-23456
+always -com =
+always _ 78
+always ` 4
+always @ 4-1
+always \\ 456-16
+always | 456-1256
+repeated \20 0 blank
+repeated \09 0 tab
+repeated \a0 0 no break space
+repeated --- 36-36-36
+repeated ___ 456-456-456
+repeated ::: 25-25-25
+repeated === 46-13-46-13-46-13
+always \20-\20 36-36
+always \20-\20com 36-36-14-135-134
+always ... 3-3-3
+
+# the hyphen
+always ­ 36
+repeated ­­­ 36-36-36
+always \20­\20 36-36
+
+# accented letters
+always ç 123468 small c cedilla (French)
+always Ç 1234678 large c cedilla (French)
+always ñ 124568 small n tilde (Spanish)
+always Ñ 1245678 large n tilde (Spanish)
+always é 1234568 small e acute (French, Italian)
+always É 12345678 large e acute (French, Italian)
+always à 123568 small a grave (French, Italian, Spanish)
+always À 1235678 large a grave (French, Italian, Spanish)
+always è 23468 small e grave (French, Italian, Spanish)
+always È 234678 large e grave (French, Italian, Spanish)
+always ì 348 small i grave (Italian, Spanish)
+always Ì 3478 large i grave (Italian, Spanish)
+always ò 3468 small o grave (Italian, Spanish)
+always Ò 34678 large o grave (Italian, Spanish)
+always ù 234568 small u grave (French, Italian, Spanish)
+always Ù 2345678 large u grave (French, Italian, Spanish)
+always â 168 small a circumflex (French)
+always Â 1678 large a circumflex (French)
+always ê 1268 small e circumflex (French)
+always Ê 12678 large e circumflex (French)
+always î 1468 small i circumflex (French)
+always Î 14678 large i circumflex (French)
+always ô 14568 small o circumflex (French)
+always Ô 145678 large o circumflex (French)
+always û 1568 small u circumflex (French)
+always Û 15678 large u circumflex (French)
+always ä 3458 small a diaeresis (German)
+always Ä 34578 large a diaeresis (German)
+always ë 12468 small e diaeresis (French)
+always Ë 124678 large e diaeresis (French)
+always ï 124568 small i diaeresis (French)
+always Ï 1245678 large i diaeresis (French)
+always ö 2468 small o diaeresis (German)
+always Ö 24678 large o diaeresis (German)
+always ü 12568 small u diaeresis (German)
+always Ü 125678 large u diaeresis (German)
+
+literal ://
+always \a9 2356-6-14-2356 copyright symbol
+
+# d,g,r,rs,s,st,th conceive deceive declare perceive receive rejoice
+# n't could must should would

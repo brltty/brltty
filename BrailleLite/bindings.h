@@ -71,14 +71,14 @@ static unsigned char keys_to_dots[64] =
 
 static int cmdtrans[64] =
 {
-  0, CMD_LNUP, VAL_PASSKEY+VPK_CURSOR_LEFT, 0, CMD_CHRLT, 0, VAL_PASSKEY+VPK_CURSOR_UP, CMD_TOP_LEFT,
+  0, CMD_LNUP, VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_BACKSPACE, CMD_CHRLT, 0 /*k: kbemu*/, VAL_PASSKEY+VPK_CURSOR_UP, CMD_TOP_LEFT,
   CMD_LNDN, CMD_CSRTRK, CMD_DISPMD, CMD_FREEZE, CMD_INFO, CMD_MUTE, CMD_NXSEARCH, CMD_PASTE,
-  VAL_PASSKEY+VPK_CURSOR_RIGHT, 0, 0, CMD_HOME, 0, 0, CMD_LNBEG, CMD_RESTARTBRL,
-  CMD_CSRJMP_VERT, 0, CR_ROUTE, 0, 0, CMD_NXPGRPH, 0, 0,
-  CMD_CHRRT, CR_CUTLINE, 0, CR_CUTAPPEND, CMD_SAY, 0, CR_CUTBEGIN, CMD_SWITCHVT_NEXT,
-  0, 0, 0, CMD_PRPGRPH, 0, 0, 0, 0,
-  VAL_PASSKEY+VPK_CURSOR_DOWN, CMD_PRSEARCH, CMD_LNEND, CMD_BACK, CR_CUTRECT, 0, 0, 0,
-  CMD_BOT_LEFT, CMD_HELP, 0, 0, CMD_SWITCHVT_PREV, 0, 0, 0
+  VAL_PASSKEY+VPK_CURSOR_RIGHT, 0 /*e: endcmd*/, 0 /*25: prefs*/, CMD_HOME, 0 /*35: meta*/, 0 /*o: number*/, CMD_LNBEG, CMD_RESTARTBRL,
+  CMD_CSRJMP_VERT, VAL_PASSKEY+VPK_DELETE, CR_ROUTE, 0 /*g: internal cursor*/, 0 /*345: blite internal speechbox*/, CMD_NXPGRPH, VAL_PASSKEY+VPK_TAB, 0 /*q: finish uppercase*/,
+  CMD_CHRRT, CR_CUTLINE, 0 /*26: dot8shift*/, CR_CUTAPPEND, CMD_SAY, 0 /*u: uppsercase*/, CR_CUTBEGIN, CMD_SWITCHVT_NEXT,
+  VAL_PASSKEY+VPK_RETURN, 0 /*145: free*/, VAL_PASSKEY+VPK_ESCAPE, CMD_PRPGRPH, 0 /*346: free*/, 0 /*x: xtrl*/, CMD_SIXDOTS, 0 /*12346: free*/,
+  VAL_PASSKEY+VPK_CURSOR_DOWN, CMD_PRSEARCH, CMD_LNEND, CMD_BACK, CR_CUTRECT, 0 /*z: abort*/, 0 /*2356: rotate*/, CMD_NXPROMPT,
+  CMD_BOT_LEFT, CMD_HELP, 0 /*w: free*/, CMD_LEARN, CMD_SWITCHVT_PREV, 0 /*y: free*/, CMD_PRPROMPT, 0 /*123456: noop*/
 };
 
 /* Dangerous commands; 1 bit per command, order as cmdtrans[], set if
@@ -135,11 +135,5 @@ static unsigned char dangcmd[8] =
 #define BLT_DOT8SHIFT '5'
 #endif
 #define BLT_META '9'
-#define BLT_BACKSP 'b'
-#define BLT_DELETE 'd'
-#define BLT_TAB 't'
-#define BLT_ESCAPE '{'
-#define BLT_ENTER '.'
-/* Console - incr, decr, spawn.  Cursor keys? */
 
 #endif /* !defined(_BINDINGS_H) */

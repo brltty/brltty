@@ -32,6 +32,7 @@ Simulation of keyboard arrow keys:
 
 Special modes
   This help: CR1+CR40
+  Key describer (learn mode): CR1+CR2+CR79+CR40
   Freeze/unfreeze screen: cnvx+cncv (toggle)
   Attribute underlining on/off: Ldn+Rup (toggle)
   Show attribute representations: Ldn+Rup+cnvx (toggle)
@@ -51,7 +52,8 @@ Cut & paste:
     cell #(n2): CR#(n1) + CR#(n1+2) + CR#(n2)
     For example, a region from cell 10 to cell 20: CR10+CR12+CR20
   Paste cut region: CR2+CR3 or cncv+Ldn
-  Search for same text as in content buffer: CR1+CR2+Rup / CR1+CR2+Rdn
+  Prev/next prompt (same prompt as current line): CR2+CR3+Rup / CR2+CR3+Rdn
+  Search for same text as in content buffer: CR1+CR3+Rup / CR1+CR3+Rdn
 
 Speech:
   Speak line: rt+Rdn
@@ -70,6 +72,7 @@ Preferences:
     Skip identical lines (on/off): lt+rt +cncv+Rdn (toggle)
     Skip blank end-of-lines (on/off): lt+rt +cnvx+Rdn (toggle)
     Show/hide cursor: lt+rt +Lup (toggle)
+    Six dots mode (toggle): lt+rt +Ldn (toggle)
     Cursor blinking (on/off): lt+rt +Lup+cnvx (toggle)
     Blink capital letters (on/off): lt+rt +Ldn+cnvx (toggle)
     Attribute underlining (on/off): treated in section on special modes

@@ -27,6 +27,11 @@ when the unit is in its internal notetaker mode.
 See brltty_genhelp.txt for a description of the key bindings.
 
 History:
+Stéphane Doyon, February 2002, version 0.5.8:
+-Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and CMD_SIXDOTS. Several
+    VAL_PASSKEY effects were done through special cases: moved them
+    back into cmdtrans. Identified special/reserved and free bindings.
+    Cleaned out some #if 0s.
 Stéphane Doyon, January 2002, version 0.5.7:
 -Added bindings for CR_CUTAPPEND and CR_CUTLINE. Replaced CMD_CUT_BEG,
     CMD_CUT_END and CMD_CSRJMP by CR_ equivalents. Added CR_SETMARK and

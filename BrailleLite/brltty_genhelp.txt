@@ -14,6 +14,7 @@
 123: top left / 456: bottom left
 3456 previous virtual terminal / 1236 next VT
 234 search forward / 156 search backward (use cut to set search string)
+12356 next prompt / 23456 previous prompt (same prompt as current line)
 1246 previous paragraph / 1345 next paragraph (line after blank line)
 
 125: home (goto cursor)
@@ -21,13 +22,15 @@
 14: cursor tracking (toggle)
 124 chord: freeze screen (toggle)
 1456: help mode (toggle)
+12456: learn mode (key describer) (toggle)
 34: status mode (toggle)
 24: attribute display (toggle)
+2346: six dots mode (toggle)
 
 245 chord: route cursor to beginning of line
 45 chord: route cursor to current line
 236 chord: cut start
-126 chird: cut start but append
+126 chord: cut start but append
 356 chord: cut rectangular end
 16 chord: cut linear end
 1234 chord: paste

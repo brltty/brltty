@@ -24,7 +24,7 @@
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.7 (January 2002)"
+"Braille Lite driver, version 0.5.8 (February 2002)"
 
 #define BRL_C
 
@@ -427,6 +427,17 @@ brl_read (DriverCommandContext cmds)
 	  if(key.cmd == CR_CUTRECT || key.cmd == CR_CUTLINE)
 	    key.cmd += blitesz-1;
 
+	  if(key.spcbar && (key.cmd &VAL_BLK_MASK) == VAL_PASSKEY) {
+	    if(!kbemu)
+	      return EOF;
+	    if (!shiftlck)
+	      shift = 0;
+	    ctrl = meta = 0;
+#ifdef USE_TEXTTRANS
+	    dot8shift = 0;
+#endif
+	  }
+
 	  /* always OK if chorded */
 	  if (key.spcbar)
 	    return key.cmd;
@@ -501,13 +512,10 @@ brl_read (DriverCommandContext cmds)
 	  ctrl = 1;
 	  break;
 	case 0x80:		/* dot 8 */
-#ifndef USE_TEXTTRANS
-#if 0
-	  outmsg[0] = 27;
-	  outmsg[1] = 0;
-#endif
-#else
+#ifdef USE_TEXTTRANS
 	  dot8shift = 1;
+#else
+	  meta = 1;
 #endif
 	  break;
 	}
@@ -535,46 +543,6 @@ brl_read (DriverCommandContext cmds)
 	  case BLT_META:	/* meta next */
 	    meta = 1;
 	    return CMD_NOOP;
-	  case BLT_ESCAPE:
-	    if (!shiftlck)
-	      shift = 0;
-	    ctrl = meta = 0;
-#ifdef USE_TEXTTRANS
-	    dot8shift = 0;
-#endif
-	    return VAL_PASSKEY | VPK_ESCAPE;
-	  case BLT_TAB:
-	    if (!shiftlck)
-	      shift = 0;
-	    ctrl = meta = 0;
-#ifdef USE_TEXTTRANS
-	    dot8shift = 0;
-#endif
-	    return VAL_PASSKEY | VPK_TAB;
-	  case BLT_BACKSP:	/* remove backwards */
-	    if (!shiftlck)
-	      shift = 0;
-	    ctrl = meta = 0;
-#ifdef USE_TEXTTRANS
-	    dot8shift = 0;
-#endif
-	    return VAL_PASSKEY | VPK_BACKSPACE;
-	  case BLT_DELETE:	/* remove forward */
-	    if (!shiftlck)
-	      shift = 0;
-	    ctrl = meta = 0;
-#ifdef USE_TEXTTRANS
-	    dot8shift = 0;
-#endif
-	    return VAL_PASSKEY | VPK_DELETE;
-	  case BLT_ENTER:	/* enter - do ^m, or ^j if control-enter */
-	    if (!shiftlck)
-	      shift = 0;
-	    ctrl = meta = 0;
-#ifdef USE_TEXTTRANS
-	    dot8shift = 0;
-#endif
-	    return VAL_PASSKEY | VPK_RETURN;
 	  case BLT_ABORT:	/* abort - quit keyboard emulation */
 	    kbemu = 0;
 	    message ("keyboard emu off", MSG_SILENT);
@@ -728,10 +696,6 @@ brl_read (DriverCommandContext cmds)
       }
       return CMD_NOOP;
     case 3:			/* preferences options */
-#if 0 /* We remove this restriction. */
-      if (!key.spcbar)		/* not chorded */
-	return CMD_NOOP;
-#endif
       switch (key.asc)
 	{
 	case 'm':		/* preferences menu */

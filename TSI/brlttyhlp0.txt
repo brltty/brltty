@@ -25,6 +25,7 @@ Simulation of keyboard arrow keys:
 
 Special modes
   This help: Llt+Lrt (toggle)
+  Key describer (learn mode): Llt+Lrt+Lup+Ldn (toggle)
   Freeze/unfreeze screen: Lrn+Rrn (toggle)
   Attribute underlining on/off: Lup+Ldn or Ldn+Rup (toggle)
   Show attribute representations: Lup+Ldn+Lrn or Ldn+Rup+Lrn (toggle)
@@ -69,6 +70,7 @@ Preferences:
     Sliding braille window (on/off): Rlt+Rrt +Llt (toggle)
     Audio tones (enable/disable): Rlt+Rrt +Llt+Lrn (toggle)
     Show/hide cursor: Rlt+Rrt +Lup (toggle)
+    Six dots mode (toggle): Rlt+Rrt +Ldn (toggle)
     Cursor blinking (on/off): Rlt+Rrt +Lup+Lrn (toggle)
     Blink capital letters (on/off): Rlt+Rrt +Ldn+Lrn (toggle)
     Attribute underlining (on/off): treated in section on special modes

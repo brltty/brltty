@@ -169,17 +169,62 @@ learnCommands (int poll, int timeout) {
         }
         ++command;
       }
-      if (candidate && (candidate->code != cmd))
-        if ((blk == 0) || (candidate->code < last->code))
-          candidate = NULL;
+      if (candidate)
+        if (candidate->code != cmd)
+          if ((blk == 0) || (candidate->code < last->code))
+            candidate = NULL;
       if (!candidate) {
         snprintf(buffer, sizeof(buffer), "unknown: %06X", key);
       } else if ((candidate == last) && (blk != 0)) {
+        unsigned int number;
+        switch (blk) {
+          default:
+            number = cmd - candidate->code + 1;
+            break;
+          case VAL_PASSCHAR:
+            number = cmd - candidate->code;
+            break;
+          case VAL_PASSDOTS: {
+            unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
+            int dot;
+            number = 0;
+            for (dot=0; dot<sizeof(dots); ++dot) {
+              if (arg & dots[dot]) {
+                number = (number * 10) + (dot + 1);
+              }
+            }
+            break;
+          }
+        }
         snprintf(buffer, sizeof(buffer), "%s[%d]: %s",
-                 candidate->name, cmd-last->code+1, candidate->description);
+                 candidate->name, number, candidate->description);
       } else {
-        snprintf(buffer, sizeof(buffer), "%s: %s",
-                 candidate->name, candidate->description);
+        int offset;
+        snprintf(buffer, sizeof(buffer), "%s: %n%s",
+                 candidate->name, &offset, candidate->description);
+        if ((blk == 0) && (key & VAL_SWITCHMASK)) {
+          char *description = buffer + offset;
+          const char *oldVerb = "toggle";
+          int oldLength = strlen(oldVerb);
+          if (strncmp(description, oldVerb, oldLength) == 0) {
+            const char *newVerb = "set";
+            int newLength = strlen(newVerb);
+            memmove(description+newLength, description+oldLength, strlen(description+oldLength)+1);
+            memcpy(description, newVerb, newLength);
+            if (key & VAL_SWITCHON) {
+              char *end = strrchr(description, '/');
+              if (end) *end = 0;
+            } else {
+              char *target = strrchr(description, ' ');
+              if (target) {
+                const char *source = strchr(++target, '/');
+                if (source) {
+                  memmove(target, source+1, strlen(source));
+                }
+              }
+            }
+          }
+        }
       }
       message(buffer, MSG_NODELAY);
       timer = 0;

@@ -48,7 +48,7 @@
 #include "misc.h"
 #include "common.h"
 
-char VERSION[] = "BRLTTY 2.99.6";
+char VERSION[] = "BRLTTY 2.99.7";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 /*
@@ -150,7 +150,7 @@ configureAttributesTable (const char *delimiters) {
   return getToken(&cfg_attributesTable, delimiters);
 }
 
-int
+static int
 configureContractionTable (const char *delimiters) {
   return getToken(&cfg_contractionTable, delimiters);
 }
@@ -197,10 +197,8 @@ static OptionEntry optionTable[] = {
     "Path to attributes translation table file."},
    {'b', "braille-driver", "driver", configureBrailleDriver,
     "Braille driver: full library path, or one of {" BRLLIBS "}"},
-/*
    {'c', "contraction-table", "file", configureContractionTable,
     "Path to contraction table file."},
-*/
    {'d', "braille-device", "device", configureBrailleDevice,
     "Path to device for accessing braille display."},
    {'e', "standard-error", NULL, NULL,
@@ -722,7 +720,7 @@ stopBrailleDriver (void) {
 
 static void
 exitContractionTable (void) {
-   DestroyContractionTable(contractionTable);
+   destroyContractionTable(contractionTable);
    contractionTable = NULL;
 }
 
@@ -1241,7 +1239,7 @@ startup(int argc, char *argv[])
   reverseTable(textTable, untextTable);
   if (opt_contractionTable) {
     LogPrint(LOG_DEBUG, "Compiling contraction table: %s", opt_contractionTable);
-    if ((contractionTable = CompileContractionTable(opt_contractionTable))) {
+    if ((contractionTable = compileContractionTable(opt_contractionTable))) {
       atexit(exitContractionTable);
     } else {
       LogPrint(LOG_ERR, "Cannot compile contraction table.");

@@ -9,7 +9,7 @@
 
   Dave Mielke <dave@mielke.cc>
 
-  Version 2.99.6, February 2002
+  Version 2.99.7, March 2002
 
   Copyright © 1995-2001 by The BRLTTY Team - All Rights Reserved.  This
   is free software, placed under the terms of TThhee GGNNUU GGeenneerraall PPuubblliicc
@@ -1644,30 +1644,29 @@
 
   BRLTTY alerts you to the occurrence of significant events by playing
   short predefined tunes.  This feature can be activated and deactivated
-  with either the (ref id="command-TUNES" name="TUNES"> command or the
-  ``Alert Tunes'' preference.  The tunes are played on the PC speaker by
-  default, but other options can be selected with the ``Tune Device''
-  preference.
+  with either the ``TUNES'' command or the ``Alert Tunes'' preference.
+  The tunes are played on the PC speaker by default, but other
+  alternatives can be selected with the ``Tune Device'' preference.
+
   Each significant event is associated, from highest to lowest priority,
   with one or more of the following:
 
      aa ttuunnee
-        If this feature is active (see the (ref id="command-TUNES"
-        name="TUNES"> command and the ``Alert Tunes'' preference), if a
-        tune has been associated with the event, and if the selected
-        tune device (see the ``Tune Device'' preference) can be opened,
-        then the tune is played.
+        If a tune has been associated with the event, if the ``Alert
+        Tunes'' preference (see also the ``TUNES'' command) is active,
+        and if the selected tune device (see the ``Tune Device''
+        preference) can be opened, then the tune is played.
 
      aa ddoott ppaatttteerrnn
-        If the (ref id="preference-alert-dots" name="Alert Dots">
-        preference is active, and if a dot pattern has been associated
-        with the event, then the dot pattern is briefly displayed on
-        every braille cell.  Some braille displays don't respond quickly
-        enough for this mechanism to work effectively.
+        If a dot pattern has been associated with the event, and if the
+        ``Alert Dots'' preference is active, then the dot pattern is
+        briefly displayed on every braille cell.  Some braille displays
+        don't respond quickly enough for this mechanism to work
+        effectively.
 
      aa mmeessssaaggee
         If a message has been associated with the event, then it is
-        displayed within the braille window (see the ``-M'' command line
+        displayed for a few seconds (see the ``-M'' command line
         option).
 
   These events include:
@@ -1713,10 +1712,7 @@
   Short pneumonics have been used, even though they're rather cryptic,
   in order to show the precise column layout.
 
-
-  _w_x:_w_y _c_x:_c_y _v_t _t_c_m_f_d_u
-
-
+       _w_x:_w_y _c_x:_c_y _v_t _t_c_m_f_d_u
 
      _w_x:_w_y
         The column and row (counting from 0) on the screen corresponding
@@ -1778,14 +1774,13 @@
         B  Uppercase letters blink.
 
 
-
-
   33..55..22..  DDiissppllaayyss wwiitthh 2200 CCeellllss oorr LLeessss
 
   Short pneumonics have been used, even though they're rather cryptic,
   in order to show the precise column layout.
 
-       _x_x_y_y_s _v_t _t_c_m_f_d_u
+
+  _x_x_y_y_s _v_t _t_c_m_f_d_u
 
 
 
@@ -1849,6 +1844,7 @@
         B  The cursor is visible, and is blinking.
 
      _m  The current display mode (see the ``DISPMD'' command).
+
 
         t  Screen content (text) is being displayed.
 
@@ -1978,7 +1974,9 @@
 
      SSaavvee oonn EExxiitt
         When exiting the preferences menu:
+
         NNoo Don't automatically save the preferences settings.
+
 
         YYeess
            Automatically save the preferences settings.
@@ -2178,7 +2176,6 @@
         the length of time (see the note on ``time settings'' below)
         during each cycle that they're to be visible.  The initial
         setting is 4.
-
      CCaappiittaallss IInnvviissiibbllee PPeerriioodd
         When capital letters are to be blinked, this setting specifies
         the length of time (see the note on ``time settings'' below)
@@ -2374,6 +2371,7 @@
 
            22  The row (counting from 0) whereon the cursor is (see
               below).
+
            33  If the screen is frozen (see the ``FREEZE'' command), then
               the letter F.  If it isn't, then the column (counting from
               0) wherein the cursor is (see below).
@@ -2442,7 +2440,6 @@
         _d_r_i_v_e_r is a two-letter ``driver identification code''.  The
         preferences file doesn't need to exist.  This directive can be
         overridden with the ``-p'' command line option.
-
      screen-parameters _n_a_m_e=_v_a_l_u_e,...
         Specify parameters for the screen driver.  If the same parameter
         is specified more than once, then its rightmost assignment is
@@ -2509,7 +2506,6 @@
      -f_f_i_l_e --configuration-file=_f_i_l_e
         Specify the location of the ``configuration file'' which is to
         be used for the establishing of default run-time settings.
-
      -h --help
         Display a summary of the command line options accepted by
         BRLTTY, and then exit.
@@ -2576,7 +2572,6 @@
         directory, the preferences file, the text and attributes
         translation tables, and the braille display device and help file
         are identified.
-
      -B_n_a_m_e=_v_a_l_u_e,... --braille-parameters=_n_a_m_e=_v_a_l_u_e,...
         Specify parameters for the braille display driver.  If the same
         parameter is specified more than once, then its rightmost
@@ -2636,7 +2631,6 @@
         BRLTTY_SPEECH_PARAMETERS
            Parameters for the speech synthesizer driver (see the ``-S''
            command line option).
-
 
         BRLTTY_TEXT_TABLE
            The text translation table (see the ``-a'' command line
@@ -2704,12 +2698,12 @@
 
      tteexxtt..ggeerrmmaann..ttbbll
         German
+
      tteexxtt..iitt..ttbbll
         Italian
 
      tteexxtt..nnoo--hh..ttbbll
         Norwegian and German
-
      tteexxtt..nnoo--pp..ttbbll
         Norwegian
 
@@ -2768,7 +2762,6 @@
 
         DDoott 66
            Blue
-
 
         DDoott 88
            Bright
@@ -2835,7 +2828,6 @@
      BBiitt 22
         Dot 2
 
-
      BBiitt 33
         Dot 5
 
@@ -2844,7 +2836,6 @@
 
      BBiitt 55
         Dot 6
-
      BBiitt 66
         Dot 7
 
@@ -2902,12 +2893,14 @@
        _c_c _x_x _d_d_d (73214568)_t_t B+_b_b_b_b U+_u_u_u_u _d_e_s_c_r_i_p_t_i_o_n
 
 
+
      _c_c The character itself.  Unprintable characters are represented
         canonically.  Control characters are flagged with a circumflex,
         e.g. Control-A (character 1) is ^A.  Meta control characters are
         flagged with a tilde, e.g. Meta-Control-A (character 129) is ~A.
 
      _x_x The hexadecimal value of the character.
+
 
      _d_d_d
         The decimal value of the character.
@@ -3034,6 +3027,7 @@
 
         BBiitt 00
            Dot 1
+
         BBiitt 11
            Dot 2
 
@@ -3171,7 +3165,8 @@
   however, you copy it from the build directory, it'll be way too big.
   Don't forget to strip it.
 
-       strip brltty
+
+  strip brltty
 
 
 
@@ -3230,13 +3225,12 @@
 
 
 
-
-
   66..11..  SSuuppppoorrtteedd BBrraaiillllee DDiissppllaayyss
 
   BRLTTY supports the following braille displays:
 
   ·  Alva B.V.: ABT3xx, Delphi (serial and parallel ports), Satellite
+
 
   ·  Baum: Vario/RBT 40/80 (emulation 1/2)
 
@@ -3297,12 +3291,12 @@
 
      bbnn BrailleNote
 
-
      ccbb CombiBraille
 
      eecc EcoBraille
 
      eess ExternalSpeech
+
 
      eeuu EuroBraille
 
@@ -3368,16 +3362,22 @@
   stand.
 
 
-       1 o o 4
-       2 o o 5
-       3 o o 6
-       7 o o 8
+
+
+  1 o o 4
+  2 o o 5
+  3 o o 6
+  7 o o 8
 
 
 
 
 
   66..55..  NNoorrtthh AAmmeerriiccaann BBrraaiillllee CCoommppuutteerr CCooddee
+
+
+
+
 
 
 

@@ -792,15 +792,17 @@ brl_read (DriverCommandContext cmds) {
 
 static void read_file(char* name)
 {
-  LogPrint(LOG_DEBUG, "open config file %s", name);
-  configfile = fopen(name, "r");
-  if (configfile == NULL) {
-    LogError("Papenmeier configuration file open");
-    return;
+  LogPrint(LOG_DEBUG, "Opening config file: %s", name);
+  if ((configfile = fopen(name, "r")) != NULL) {
+    LogPrint(LOG_DEBUG, "read config file %s", name);
+    parse();
+    fclose(configfile);
+    configfile = NULL;
+  } else {
+    LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+             "Cannot open Papenmeier configuration file '%s': %s",
+             name, strerror(errno));
   }
-  LogPrint(LOG_DEBUG, "read config file %s", name);
-  parse ();
-  fclose(configfile);
 }
 
 static void read_config(char *name)

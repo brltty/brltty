@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION \
-"BRLTTY driver for Tieman Voyager, version 0.5 (January 2002)"
+"BRLTTY driver for Tieman Voyager, version 0.6 (February 2002)"
 #define COPYRIGHT \
 "   Copyright (C) 2001-2002 by Stéphane Doyon  <s.doyon@videotron.ca>\n" \
 "                          and Stéphane Dalton <sdalton@videotron.ca>"
@@ -29,6 +29,8 @@
  * It is designed to be compiled in BRLTTY version 3.0.
  *
  * History:
+ * 0.6, February 2002: Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and
+ *   CMD_SIXDITS. Some key bindings identification cleanups.
  * 0.5, January 2002: Added key bindings for CR_CUTAPPEND, CR_CUTLINE,
  *   CR_SETMARK, CR_GOTOMARK and CR_SETLEFT. Changed binding for NXSEARCH.
  * 0.4.1, November 2001: Added typematic repeat for braille dots typing.
@@ -629,9 +631,9 @@ brl_read (DriverCommandContext cmds)
 	  HKEY(101, K_RL, "Cursor tracking toggle", CMD_CSRTRK );
 	  HKEY2(101, K_UP,K_DOWN, "Move cursor up/down (arrow keys)",
 		VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN );
-	  HKEY(201, K_RL|K_RR, "Freeze screen (toggle)", CMD_FREEZE);
-	  HKEY(201, K_RL|K_UP, "Show attributes (toggle)", CMD_DISPMD);
-	  HKEY(201, K_RR|K_UP,
+	  HKEY(205, K_RL|K_RR, "Freeze screen (toggle)", CMD_FREEZE);
+	  HKEY(205, K_RL|K_UP, "Show attributes (toggle)", CMD_DISPMD);
+	  HKEY(205, K_RR|K_UP,
 	       "Show position and status info (toggle)", CMD_INFO);
 	  HKEY2(501, K_RL|K_B,K_RL|K_C, 
 		"Previous/next line with different attributes",
@@ -670,7 +672,7 @@ brl_read (DriverCommandContext cmds)
 	switch(rtk_which[0]) {
 	  HLP0(201, "CRs1: Help screen (toggle)")
 	    KEY( 0, CMD_HELP );
-	  HLP0(201, "CRs2: Preferences menu (and again to exit)")
+	  HLP0(205, "CRs2: Preferences menu (and again to exit)")
 	    KEY( 1, CMD_PREFMENU );
 	  HLP0(501, "CRs3: Go back to previous reading location "
 	       "(undo cursor tracking motion).")
@@ -687,11 +689,12 @@ brl_read (DriverCommandContext cmds)
 	HLP0(405,"CRtx + CRt(x+2) + CRty : Cut text from x to y")
 	  cmd = CR_CUTBEGIN + rtk_which[0] -NRSTATCELLS;
           pending_cmd = CR_CUTRECT + rtk_which[2] -NRSTATCELLS;
-      }else if (howmanykeys == 2
-		&& ((rtk_which[0] == 1 && rtk_which[1] == 2)
-		    || (rtk_which[0] == NRSTATCELLS+1
-			&& rtk_which[1] == NRSTATCELLS+2)))
-	HLP0(408,"CRt2+CRt3 or CRs2+CRs3: Paste cut text")
+      }else if (howmanykeys == 2 && rtk_which[0] == 0 && rtk_which[1] == 1)
+	HLP0(201,"CRs1+CRs2: Learn mode (key describer) (toggle)")
+	  cmd = CMD_LEARN;
+      else if (howmanykeys == 2	&& rtk_which[0] == NRSTATCELLS+1
+	       && rtk_which[1] == NRSTATCELLS+2)
+	HLP0(408,"CRt2+CRt3: Paste cut text")
 	  cmd = CMD_PASTE;
       else if (howmanykeys == 2 && rtk_which[0] == NRSTATCELLS
 	       && rtk_which[1] == NRSTATCELLS+1)
@@ -710,7 +713,7 @@ brl_read (DriverCommandContext cmds)
 	 (counting the status cell keys) */
       if(howmanykeys == 1)
 	switch(keystate) {
-	  PHKEY(201,"CRa#+", K_UP, "Switch to virtual console #",
+	  PHKEY(205,"CRa#+", K_UP, "Switch to virtual console #",
 		CR_SWITCHVT + rtk_which[0]);
 	  PHKEY(501,"CRa#+", K_RL, "Remember current position as mark #",
 		CR_SETMARK + rtk_which[0]);
@@ -719,20 +722,24 @@ brl_read (DriverCommandContext cmds)
 	}
       else if(howmanykeys == 2 && rtk_which[0] == 0 && rtk_which[1] == 1) {
 	switch(keystate) {
-	  PHKEY2(201,"CRa1+CRa2+", K_RL,K_RR, "Switch to previous/next "
+	  PHKEY2(205,"CRa1+CRa2+", K_RL,K_RR, "Switch to previous/next "
 		 "virtual console",
 		 CMD_SWITCHVT_PREV, CMD_SWITCHVT_NEXT);
 	}
       }
     }
-    else if(howmanykeys == 1 && keystate == K_DOWN) {
-      /* Some routing key combined with DOWN */
-      HLP0(501,"DOWN+CRt#: Move right # cells")
-	  cmd = CR_SETLEFT + rtk_which[0] -NRSTATCELLS;
+    else if(howmanykeys == 1 && keystate == (K_A|K_D)) {
+      /* One absolute routing key with A+D */
+      switch(rtk_which[0]) {
+	HLP0(205, "A+D +CRa1: Six dots mode (toggle)")
+	  KEY( 0, CMD_SIXDOTS );
+      };
     }
     else if(howmanykeys == 1 && rtk_which[0] >= NRSTATCELLS) {
       /* one text routing key with some other keys */
       switch(keystate){
+	PHKEY(501,"CRt#+",K_DOWN,"Move right # cells",
+	      CR_SETLEFT + rtk_which[0] -NRSTATCELLS);
 	PHKEY(401, "CRt#+",K_D, "Mark beginning of region to cut",
 	      CR_CUTBEGIN + rtk_which[0] -NRSTATCELLS);
 	PHKEY(401, "CRt#+",K_A, "Mark bottom-right of rectangular "
@@ -743,14 +750,7 @@ brl_read (DriverCommandContext cmds)
 	       CR_PRINDENT + rtk_which[0] -NRSTATCELLS,
 	       CR_NXINDENT + rtk_which[0] -NRSTATCELLS);
       }
-    }else if(howmanykeys == 2 && (keystate & (K_B|K_C))
-	     && rtk_which[0] == NRSTATCELLS && rtk_which[1] == NRSTATCELLS+1)
-      /* text routing keys 1 and 2, with B or C */
-      switch(keystate){
-	PHKEY2(501, "CRt1+CRt2+",K_B,K_C, "Move to previous/next "
-	       "paragraph (blank line separation)",
-	       CMD_PRPGRPH, CMD_NXPGRPH);
-      }
+    }
     else if(howmanykeys == 2 && (keystate & (K_A|K_D))
 	    && rtk_which[0] >= NRSTATCELLS
 	    && rtk_which[0]+1 == rtk_which[1])
@@ -763,13 +763,30 @@ brl_read (DriverCommandContext cmds)
 	      "Mark end of linear region and cut",
 	       CR_CUTLINE +rtk_which[1] -NRSTATCELLS);
       }
-    else if(howmanykeys == 2 && rtk_which[0] == NRSTATCELLS
-	     && rtk_which[1] == NRSTATCELLS+2) {
+    else if(howmanykeys == 2
+	    && rtk_which[0] == NRSTATCELLS && rtk_which[1] == NRSTATCELLS+1)
+      /* text routing keys 1 and 2, with B or C */
+      switch(keystate){
+	PHKEY2(501, "CRt1+CRt2+",K_B,K_C, "Move to previous/next "
+	       "paragraph (blank line separation)",
+	       CMD_PRPGRPH, CMD_NXPGRPH);
+      }
+    else if(howmanykeys == 2
+	    && rtk_which[0] == NRSTATCELLS && rtk_which[1] == NRSTATCELLS+2) {
       /* text routing keys 1 and 3, with some other keys */
       switch(keystate){
 	PHKEY2(501, "CRt1+CRt3+",K_B,K_C, "Search screen "
 	       "backward/forward for cut text",
 	       CMD_PRSEARCH, CMD_NXSEARCH);
+      }
+    }
+    else if(howmanykeys == 2
+	    && rtk_which[0] == NRSTATCELLS+1 && rtk_which[1] == NRSTATCELLS+2) {
+      /* text routing keys 2 and 3, with some other keys */
+      switch(keystate){
+	PHKEY2(501, "CRt2+CRt3+",K_B,K_C, "Previous/next prompt "
+	       "(same prompt as current line)",
+	       CMD_PRPROMPT, CMD_NXPROMPT);
       }
     }
   }

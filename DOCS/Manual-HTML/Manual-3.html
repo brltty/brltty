@@ -728,33 +728,36 @@ and
 <P>BRLTTY alerts you to the occurrence of significant events
 by playing short predefined tunes.
 This feature can be activated and deactivated with
-either the (ref id="command-TUNES" name="TUNES"> command
+either the 
+<A HREF="#command-TUNES">TUNES</A> command
 or the 
 <A HREF="#preference-alert-tunes">Alert Tunes</A> preference.
 The tunes are played on the PC speaker by default,
-but other options can be selected
+but other alternatives can be selected
 with the 
 <A HREF="#preference-tune-device">Tune Device</A> preference.
 <P>Each significant event is associated, from highest to lowest priority,
 with one or more of the following:
 <DL>
-<DT><B>a tune</B><DD><P>If this feature is active
-(see the (ref id="command-TUNES" name="TUNES"> command
-and the 
-<A HREF="#preference-alert-tunes">Alert Tunes</A> preference),
-if a tune has been associated with the event,
+<DT><B>a tune</B><DD><P>If a tune has been associated with the event,
+if the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference
+(see also the 
+<A HREF="#command-TUNES">TUNES</A> command)
+is active,
 and if the selected tune device
 (see the 
 <A HREF="#preference-tune-device">Tune Device</A> preference)
 can be opened,
 then the tune is played.
-<DT><B>a dot pattern</B><DD><P>If the (ref id="preference-alert-dots" name="Alert Dots"> preference is active,
-and if a dot pattern has been associated with the event,
+<DT><B>a dot pattern</B><DD><P>If a dot pattern has been associated with the event,
+and if the 
+<A HREF="#preference-alert-dots">Alert Dots</A> preference is active,
 then the dot pattern is briefly displayed on every braille cell.
 Some braille displays don't respond quickly enough
 for this mechanism to work effectively.
 <DT><B>a message</B><DD><P>If a message has been associated with the event,
-then it is displayed within the braille window
+then it is displayed for a few seconds
 (see the 
 <A HREF="#options-message-delay">-M</A> command line option).
 </DL>

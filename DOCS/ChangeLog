@@ -1,8 +1,10 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   Implement in-line contracted braille facility. John Boyer <director@chpi.org>
+   Develop contraction table for grade 2 US English braille. John Boyer <director@chpi.org>
    Implement generic driver parameters facility. (dm,sd)
-   Resolve conflict between .dat and .conf both being calledf configuration files. (dm)
+   Resolve conflict between .dat and .conf both being called configuration files. (dm)
       Default file extension .dat becomes .prefs.
       CMD_CONFMENU -> CMD_PREFMENU
       CMD_SAVECONF -> CMD_PREFSAVE
@@ -22,6 +24,7 @@ Note: this file is in reversed chronological order (bottom to top).
       braille-configuration becomes preferences-file
       dot-translation becomes text-table
       speech-driverparm becomes speech-parameters
+   Add -c (--contraction-table=) option to specify six-dot braille translation. (dm)
    Add -e (--standard-error) option to log to standard error rather than via syslog. (dm,sd)
    Add -f (--configuration-file=) option to specify default parameters file (brltty.conf). (dm)
    Recognize level names (and abbreviations thereof) for -l (--log-level=) option. (dm)

@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.70 (January 2002)"
+#define VERSION "BRLTTY driver for TSI displays, version 2.71 (February 2002)"
 #define COPYRIGHT "Copyright (C) 1996-2002 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
@@ -26,6 +26,7 @@
  * It is designed to be compiled into BRLTTY versions 3.0.
  *
  * History:
+ * Version 2.71: Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and CMD_SIXDOTS.
  * Version 2.70: Added CR_CUTAPPEND, CR_CUTLINE, CR_SETMARK, CR_GOTOMARK
  *   and CR_SETLEFT. Changed binding for NXSEARCH.. Adjusted PB80 cut&paste
  *   bindings. Replaced CMD_CUT_BEG/CMD_CUT_END by CR_CUTBEGIN/CR_CUTRECT,
@@ -1303,6 +1304,11 @@ brl_read (DriverCommandContext cmds)
 	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CMD_NXPGRPH);
 	  KEYAND(KEY_R2UP) KEY (KEY_BUP, CMD_PRPGRPH);
 	}
+      }else if(sw_which[0]==1 && sw_which[1]==2){
+	switch(code){
+	  KEY (KEY_BDOWN, CMD_NXPROMPT);
+	  KEY (KEY_BUP, CMD_PRPROMPT);
+	}
       }else if(sw_which[0]==0 && sw_which[1]==2){
 	switch(code){
 	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CMD_NXSEARCH);
@@ -1321,14 +1327,7 @@ brl_read (DriverCommandContext cmds)
       else if (sw_howmany == 3 && sw_which[0] == 0 && sw_which[1] == 1)
  	res = CR_CUTRECT + sw_which[2];
 #endif
-      else if(
-#if 0
-	      (sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
-	       && sw_which[2] == sw_lastkey-1 && sw_which[3] == sw_lastkey)
-	      ||
-#endif
-	      (sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2)
-	      )
+      else if(sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2)
  	res = CMD_PASTE;
       else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1)
 	res = CMD_CHRLT;
@@ -1343,6 +1342,9 @@ brl_read (DriverCommandContext cmds)
       else if (sw_howmany == 2 && sw_which[0] == 0
 	       && sw_which[1] == sw_lastkey)
 	res = CMD_HELP;
+      else if (sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
+	       && sw_which[2] == sw_lastkey-1 && sw_which[3] == sw_lastkey)
+	res = CMD_LEARN;
 #if 0
       else if (sw_howmany == 2 && sw_which[0] == 1
 	       && sw_which[1] == sw_lastkey - 1)
@@ -1403,6 +1405,8 @@ brl_read (DriverCommandContext cmds)
 
   /* special modes */
     KEY (KEY_CLEFT | KEY_CRIGHT, CMD_HELP);
+    KEYAND (KEY_BUT1 | KEY_BUT2 | KEY_BUT3 | KEY_BUT4)
+      KEY (KEY_CLEFT | KEY_CRIGHT | KEY_CUP | KEY_CDOWN, CMD_LEARN);
     KEY (KEY_CROUND | KEY_BROUND, CMD_FREEZE);
     KEYAND (KEY_CUP | KEY_BDOWN) KEYAND(KEY_BUT3 | KEY_BUT4)
       KEY (KEY_BUP | KEY_BDOWN, CMD_INFO);
@@ -1448,6 +1452,8 @@ brl_read (DriverCommandContext cmds)
       KEY (KEY_CLEFT | KEY_CROUND | KEY_BLEFT | KEY_BRIGHT, CMD_TUNES);
     KEYAND(KEY_BUT1 | KEY_BAR1 | KEY_BAR2)    
       KEY (KEY_CUP | KEY_BLEFT | KEY_BRIGHT, CMD_CSRVIS);
+    KEYAND(KEY_R1DN | KEY_BAR1 | KEY_BAR2)    
+      KEY (KEY_CDOWN | KEY_BLEFT | KEY_BRIGHT, CMD_SIXDOTS);
     KEYAND(KEY_BUT1 | KEY_BAR1 | KEY_BAR2 | KEY_CNVX)
       KEY (KEY_CROUND | KEY_CUP | KEY_BLEFT | KEY_BRIGHT, CMD_CSRBLINK);
     KEYAND(KEY_BUT2 | KEY_BAR1 | KEY_BAR2 | KEY_CNVX)
