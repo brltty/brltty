@@ -42,9 +42,7 @@
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #include "brl.h"
-#ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
-#endif /* ENABLE_SPEECH_SUPPORT */
 #include "scr.h"
 #include "contract.h"
 #include "tunes.h"
@@ -771,8 +769,10 @@ static void
 changedPreferences (void) {
   changedWindowAttributes();
   setTuneDevice(prefs.tuneDevice);
+#ifdef ENABLE_SPEECH_SUPPORT
   if (speech->rate) speech->rate(prefs.speechRate);
   if (speech->volume) speech->volume(prefs.speechVolume);
+#endif /* ENABLE_SPEECH_SUPPORT */
 }
 
 int
