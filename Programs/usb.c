@@ -207,6 +207,21 @@ usbVerifySerialNumber (UsbDevice *device, const char *string) {
 }
 
 int
+usbGetDeviceDescriptor (
+  UsbDevice *device,
+  UsbDeviceDescriptor *descriptor
+) {
+  UsbDescriptor desc;
+  int size = usbGetDescriptor(device, UsbDescriptorType_Device, 0, 0, &desc, 1000);
+
+  if (size != -1) {
+    *descriptor = desc.device;
+  }
+
+  return size;
+}
+
+int
 usbGetConfiguration (
   UsbDevice *device,
   unsigned char *number
@@ -218,7 +233,7 @@ usbGetConfiguration (
 }
 
 const UsbConfigurationDescriptor *
-usbGetConfigurationDescriptor (
+usbConfigurationDescriptor (
   UsbDevice *device
 ) {
   if (!device->configuration) {
@@ -283,7 +298,7 @@ usbNextDescriptor (
     if ((&next->bytes[0] - &first->bytes[0]) >= length) return 0;
     if ((&next->bytes[next->header.bLength] - &first->bytes[0]) > length) return 0;
     *descriptor = next;
-  } else if (usbGetConfigurationDescriptor(device)) {
+  } else if (usbConfigurationDescriptor(device)) {
     *descriptor = (UsbDescriptor *)device->configuration;
   } else {
     return 0;
@@ -292,7 +307,7 @@ usbNextDescriptor (
 }
 
 const UsbInterfaceDescriptor *
-usbGetInterfaceDescriptor (
+usbInterfaceDescriptor (
   UsbDevice *device,
   unsigned char interface,
   unsigned char alternative
@@ -312,7 +327,7 @@ usbGetInterfaceDescriptor (
 }
 
 const UsbEndpointDescriptor *
-usbGetEndpointDescriptor (
+usbEndpointDescriptor (
   UsbDevice *device,
   unsigned char endpointAddress
 ) {
@@ -370,7 +385,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
 
   if ((endpoint = findItem(device->endpoints, usbTestEndpoint, &endpointAddress))) return endpoint;
 
-  if ((descriptor = usbGetEndpointDescriptor(device, endpointAddress))) {
+  if ((descriptor = usbEndpointDescriptor(device, endpointAddress))) {
     {
       const char *direction;
       const char *transfer;
@@ -484,7 +499,7 @@ usbOpenInterface (
   unsigned char interface,
   unsigned char alternative
 ) {
-  const UsbInterfaceDescriptor *descriptor = usbGetInterfaceDescriptor(device, interface, alternative);
+  const UsbInterfaceDescriptor *descriptor = usbInterfaceDescriptor(device, interface, alternative);
   if (!descriptor) return 0;
   if (descriptor == device->interface) return 1;
 

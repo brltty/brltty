@@ -186,7 +186,7 @@ typedef struct {
   uint16_t wTotalLength;       /* Block size in bytes for all descriptors. */
   uint8_t bNumInterfaces;      /* Number of interfaces. */
   uint8_t bConfigurationValue; /* Configuration number. */
-  uint8_t iConfiguration;
+  uint8_t iConfiguration;      /* String index for configuration description. */
   uint8_t bmAttributes;        /* Configuration attributes. */
   uint8_t bMaxPower;           /* Maximum power in 2 milliamp units. */
 }
@@ -214,7 +214,7 @@ typedef struct {
   uint8_t bInterfaceClass;    /* Interface class. */
   uint8_t bInterfaceSubClass; /* Interface subclass. */
   uint8_t bInterfaceProtocol; /* Interface protocol. */
-  uint8_t iInterface;
+  uint8_t iInterface;         /* String index for interface description. */
 }
 #ifdef HAVE_ATTRIBUTE_PACKED
   __attribute__((packed))
@@ -271,15 +271,15 @@ extern int usbNextDescriptor (
   UsbDevice *device,
   const UsbDescriptor **descriptor
 );
-extern const UsbConfigurationDescriptor *usbGetConfigurationDescriptor (
+extern const UsbConfigurationDescriptor *usbConfigurationDescriptor (
   UsbDevice *device
 );
-extern const UsbInterfaceDescriptor *usbGetInterfaceDescriptor (
+extern const UsbInterfaceDescriptor *usbInterfaceDescriptor (
   UsbDevice *device,
   unsigned char interface,
   unsigned char alternative
 );
-extern const UsbEndpointDescriptor *usbGetEndpointDescriptor (
+extern const UsbEndpointDescriptor *usbEndpointDescriptor (
   UsbDevice *device,
   unsigned char endpointAddress
 );
@@ -333,6 +333,7 @@ extern int usbControlWrite (
   int length,
   int timeout
 );
+
 extern int usbGetDescriptor (
   UsbDevice *device,
   unsigned char type,
@@ -340,6 +341,10 @@ extern int usbGetDescriptor (
   unsigned int index,
   UsbDescriptor *descriptor,
   int timeout
+);
+extern int usbGetDeviceDescriptor (
+  UsbDevice *device,
+  UsbDeviceDescriptor *descriptor
 );
 extern int usbGetLanguage (
   UsbDevice *device,
