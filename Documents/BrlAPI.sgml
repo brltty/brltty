@@ -512,7 +512,7 @@ altering the screen display:
 
 <tscreen><code>
   fprintf(stderr,"Writing to braille display... ");
-  if (brlapi_writeBrl(0,"Press a braille key to continue...")>=0)
+  if (brlapi_writeText(0,"Press a braille key to continue...")>=0)
   {
    fprintf(stderr,"Ok\n");
 </code></tscreen>
@@ -621,7 +621,7 @@ int main()
 
 /* Write something on the display */
   fprintf(stderr,"Writing to braille display... ");
-  if (brlapi_writeBrl(0,"Press a braille key to continue...")>=0)
+  if (brlapi_writeText(0,"Press a braille key to continue...")>=0)
   {
    fprintf(stderr,"Ok\n");
 
@@ -631,7 +631,7 @@ int main()
     fprintf(stderr,"got it! (code=%d)\n",key);
    else brlapi_perror("brlapi_readKey");
 
-  } else brlapi_perror("brlapi_writeBrl");
+  } else brlapi_perror("brlapi_writeText");
 
 /* Leave tty control */
   fprintf(stderr,"Leaving tty... ");
@@ -1058,8 +1058,7 @@ display and keypresses. For this, it can send either of these types of packet:
   <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
   or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
   </itemize>
-And the server might send either <tt/BRLPACKET_KEY/ or <tt/BRLPACKET_COMMAND/
-packets to signal key presses.
+And the server might send <tt/BRLPACKET_KEY/ packets to signal key presses.
 
 
 <item>raw mode: the client wants to exchange packets directly with the braille
@@ -1089,10 +1088,10 @@ online manual page as well will hence be of good help for understanding.
 <p>
 This must be the first packet ever transmitted from the client to the
 server. It lets the client authenticate itself to the server. Data is
-first an integer indicating a protocol number, then comes the authentication
+first an integer indicating a protocol version, then comes the authentication
 key itself.
 
-If the protocol number is not the same as the server's, a 
+If the protocol version is not the same as the server's, a 
 <tt/BRLERR_PROTOCOL_VERSION/ error packet is returned and the connection is
 closed.
 
@@ -1128,16 +1127,15 @@ to get control of, and finaly
 how key presses should be sent: either <tt/BRLKEYCODES/ or <tt/BRLCOMMANDS/.
 This packet is then acknowledged by the server.
 
-<sect2><tt/BRLPACKET_KEY/ and <tt/BRLPACKET_COMMAND/ (see <em/brlapi_readKey()/
-and <em/brlapi_readCommand()/)
+<sect2><tt/BRLPACKET_KEY/ (see <em/brlapi_readKey()/)
 <p>
-As soon as the client gets a tty, it must be prepared to handle either
-<tt/BRLPACKET_KEY/ or <tt/BRLPACKET_COMMAND/ incoming packets (depending on the
-parameter given in the <tt/BRLPACKET_GETTTY/ packet), at any time (as soon as
-the key was pressed on the braille terminal, hopefuly).
-The data holds the key press code
-as an integer, either a raw key code in <tt/BRLPACKET_KEY/ packets, or a
-<tt/brltty/ command code in <tt/BRLPACKET_COMMAND/ packets.
+As soon as the client gets a tty, it must be prepared to handle
+<tt/BRLPACKET_KEY/ incoming packets
+at any time (as soon as the key
+was pressed on the braille terminal, hopefuly).
+The data holds the key or command code
+as an integer, depending on what has been request in the
+<tt/BRLPACKET_GETTTY/ packet.
 
 <sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
 
