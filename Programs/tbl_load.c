@@ -31,9 +31,10 @@
 #include "brl.h"
 #include "tbl_load.h"
 
-static const unsigned char dotBits[] = {B1, B2, B3, B4, B5, B6, B7, B8};
+#define DOT_COUNT 8
+static const char dotNumbers[DOT_COUNT] = {'1', '2', '3', '4', '5', '6', '7', '8'};
+static const unsigned char dotBits[DOT_COUNT] = {B1, B2, B3, B4, B5, B6, B7, B8};
 #define DOT_BIT(dot) (dotBits[(dot)])
-#define DOT_COUNT (sizeof(dotBits))
 
 typedef struct {
   unsigned char cell;
@@ -42,6 +43,7 @@ typedef struct {
 
 typedef struct {
   TranslationTableReporter report;
+  int options;
   unsigned ok:1;
   const char *file;
   int line;
@@ -84,8 +86,7 @@ testCharacter (char character, unsigned char *index, const char *characters, uns
 
 static int
 testDotNumber (char character, unsigned char *index) {
-  static const char dots[] = {'1', '2', '3', '4', '5', '6', '7', '8'};
-  return testCharacter(character, index, dots, sizeof(dots));
+  return testCharacter(character, index, dotNumbers, sizeof(dotNumbers));
 }
 
 static int
@@ -374,15 +375,31 @@ processTableLine (char *line, void *data) {
 static void
 setTable (InputData *input, TranslationTable *table) {
   int byteIndex;
+  TranslationTable dotsDefined;
+  memset(&dotsDefined, 0, sizeof(dotsDefined));
 
   for (byteIndex=0; byteIndex<0X100; ++byteIndex) {
     ByteEntry *byte = &input->bytes[byteIndex];
     unsigned char *cell = &(*table)[byteIndex];
     if (byte->defined) {
       *cell = byte->cell;
+
+      if (!dotsDefined[byte->cell]) {
+        dotsDefined[byte->cell] = 1;
+      } else if (input->options & TBL_DUPLICATE) {
+        char dotsBuffer[DOT_COUNT];
+        int dotCount = 0;
+        int dotIndex;
+
+        for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex)
+          if (byte->cell & DOT_BIT(dotIndex))
+            dotsBuffer[dotCount++] = dotNumbers[dotIndex];
+        reportError(input, "duplicate dots: %.*s [\\X%02X]", dotCount, dotsBuffer, byteIndex);
+      }
     } else {
       int dotIndex;
       *cell = input->undefined;
+
       for (dotIndex=0; dotIndex<DOT_COUNT; ++dotIndex) {
         if (byteIndex & input->masks[dotIndex]) {
           unsigned char bit = DOT_BIT(dotIndex);
@@ -393,6 +410,10 @@ setTable (InputData *input, TranslationTable *table) {
           }
         }
       }
+
+      if (input->options & TBL_UNDEFINED) {
+        reportError(input, "undefined byte: \\X%02X", byteIndex);
+      }
     }
   }
 }
@@ -401,7 +422,8 @@ int
 loadTranslationTable (
   const char *file,
   TranslationTable *table,
-  TranslationTableReporter report
+  TranslationTableReporter report,
+  int options
 ) {
   int ok = 0;
   InputData input;
@@ -409,6 +431,7 @@ loadTranslationTable (
 
   memset(&input, 0, sizeof(input));
   input.report = report;
+  input.options = options;
   input.ok = 1;
   input.file = file;
   input.line = 0;

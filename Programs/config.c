@@ -465,7 +465,7 @@ replaceTranslationTable (TranslationTable *table, const char *file, const char *
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
-    if (loadTranslationTable(path, table, reportTranslationTableMessage)) {
+    if (loadTranslationTable(path, table, reportTranslationTableMessage, 0)) {
       ok = 1;
     }
     free(path);

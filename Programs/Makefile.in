@@ -17,7 +17,7 @@
 
 include $(BLD_TOP)config.mk
 
-all: all-brltty all-brltest all-spktest scrtest$X tunetest$X $(BUILD_API)
+all: all-brltty all-brltest all-spktest scrtest$X tbltest$X tunetest$X $(BUILD_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
@@ -206,6 +206,16 @@ scrtest$X: $(SCRTEST_OBJECTS)
 
 scrtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scrtest.c
+
+###############################################################################
+
+TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O tbl_load.$O
+
+tbltest$X: $(TBLTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS)
+
+tbltest.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbltest.c
 
 ###############################################################################
 

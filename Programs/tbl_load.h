@@ -24,10 +24,14 @@ extern "C" {
 
 typedef void (*TranslationTableReporter) (const char *message);
 
+#define TBL_UNDEFINED 0X1
+#define TBL_DUPLICATE 0X2
+
 extern int loadTranslationTable (
   const char *file,
   TranslationTable *table,
-  TranslationTableReporter report
+  TranslationTableReporter report,
+  int options
 );
 
 #ifdef __cplusplus

@@ -56,34 +56,9 @@ main (int argc, char *argv[]) {
   processOptions(optionTable, optionCount, handleOption,
                  &argc, &argv, "input-file");
 
-  if (loadTranslationTable(argv[0], &table, reportMessage, 0)) {
-    unsigned int columns = 8;
-    unsigned int rows = 0X100 / columns;
-    unsigned int row;
-
-    for (row=0; row<rows; row++) {
-      const unsigned char *buffer = &table[row * columns];
-      unsigned int column;
-
-      for (column=0; column<columns; column++) {
-        int newline = column == (columns - 1);
-        int comma = (row < (rows - 1)) || !newline;
-
-        printf("0X%02X", buffer[column]);
-        if (ferror(stdout)) break;
-
-        if (comma) {
-          putchar(',');
-          if (ferror(stdout)) break;
-        }
-
-        putchar(newline? '\n': ' ');
-        if (ferror(stdout)) break;
-      }
-
-      if (!ferror(stdout)) fflush(stdout);
-      status = ferror(stdout)? 4: 0;
-    }
+  if (loadTranslationTable(argv[0], &table, reportMessage,
+                           TBL_UNDEFINED | TBL_DUPLICATE)) {
+    status = 0;
   } else {
     status = 3;
   }
