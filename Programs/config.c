@@ -564,11 +564,12 @@ changedPreferences (void) {
 int
 getBrailleCommand (DriverCommandContext cmds) {
    while (1) {
-      int key = readBrailleCommand(&brl, cmds);
-      if (key != EOF) {
-         LogPrint(LOG_DEBUG, "Command: %5.5X", key);
-         if (key == CMD_NOOP) continue;
-         return key;
+      int command = readBrailleCommand(&brl, cmds);
+      if (command != EOF) {
+         command &= VAL_CMD_MASK;
+         LogPrint(LOG_DEBUG, "Command: %04X", command);
+         if (command == CMD_NOOP) continue;
+         return command;
       }
       delay(updateInterval);
       closeTuneDevice(0);

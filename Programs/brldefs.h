@@ -140,8 +140,9 @@ typedef enum {
   DriverCommandCount /* must be last */
 } DriverCommand;
 #define VAL_ARG_MASK 0XFF
-# define VAL_BLK_MASK 0XFF00
-# define VAL_FLG_MASK 0XFF0000
+#define VAL_BLK_MASK 0XFF00
+#define VAL_FLG_MASK 0XFF0000
+#define VAL_CMD_MASK (VAL_BLK_MASK | VAL_ARG_MASK)
   
 /* For explicitly setting toggles on/off. */
 #define VAL_TOGGLE_ON   0x010000

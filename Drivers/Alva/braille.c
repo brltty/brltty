@@ -1271,19 +1271,11 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
     }
   }
 
-  switch (res) {
-    case CMD_LNUP:
-    case CMD_LNDN:
-    case CMD_CHRLT:
-    case CMD_CHRRT:
-      res |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
-      break;
-
-    case CMD_RESTARTBRL:
-      CurrentKeys = LastKeys = ReleasedKeys = 0;
-      RoutingPos = 0;
-    default:
-      break;
+  if (res == CMD_RESTARTBRL) {
+    CurrentKeys = LastKeys = ReleasedKeys = 0;
+    RoutingPos = 0;
+  } else if (res != EOF) {
+    res |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
   }
 
   return res;

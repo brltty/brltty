@@ -850,6 +850,38 @@ main (int argc, char *argv[]) {
         } else {
           LogPrint(LOG_DEBUG, "Command: %06X", next);
 
+          if (prefs.skipIdenticalLines) {
+            int real;
+            switch (next & VAL_CMD_MASK) {
+              default:
+                real = next;
+                break;
+              case CMD_LNUP:
+                real = CMD_PRDIFLN;
+                break;
+              case CMD_LNDN:
+                real = CMD_NXDIFLN;
+                break;
+              case CMD_PRDIFLN:
+                real = CMD_LNUP;
+                break;
+              case CMD_NXDIFLN:
+                real = CMD_LNDN;
+                break;
+            }
+            if (real != next) next = (next & ~VAL_CMD_MASK) | real;
+          }
+
+          switch (next & VAL_CMD_MASK) {
+            default:
+              next &= ~VAL_REPEAT_MASK;
+            case CMD_LNUP:
+            case CMD_LNDN:
+            case CMD_CHRLT:
+            case CMD_CHRRT:
+              break;
+          }
+
           command = next & ~VAL_REPEAT_MASK;
           if (next & VAL_REPEAT_DELAY) {
             autorepeat = autorepeatDelay;
@@ -863,7 +895,7 @@ main (int argc, char *argv[]) {
       }
 
       if (!executeScreenCommand(command)) {
-        switch (command & ~VAL_FLG_MASK) {
+        switch (command & VAL_CMD_MASK) {
           case CMD_NOOP:        /* do nothing but loop */
             if (command & VAL_TOGGLE_ON)
               playTune(&tune_toggle_on);
@@ -986,13 +1018,10 @@ main (int argc, char *argv[]) {
             break;
           }
           case CMD_LNUP:
-            upLine(SCR_TEXT);
+            upOneLine(SCR_TEXT);
             break;
           case CMD_PRDIFLN:
-            if (prefs.skipIdenticalLines)
-              upOneLine(SCR_TEXT);
-            else
-              upDifferentLine(SCR_TEXT);
+            upDifferentLine(SCR_TEXT);
             break;
           case CMD_ATTRUP:
             upDifferentLine(SCR_ATTRIB);
@@ -1072,13 +1101,10 @@ main (int argc, char *argv[]) {
             break;
           }
           case CMD_LNDN:
-            downLine(SCR_TEXT);
+            downOneLine(SCR_TEXT);
             break;
           case CMD_NXDIFLN:
-            if (prefs.skipIdenticalLines)
-              downOneLine(SCR_TEXT);
-            else
-              downDifferentLine(SCR_TEXT);
+            downDifferentLine(SCR_TEXT);
             break;
           case CMD_ATTRDN:
             downDifferentLine(SCR_ATTRIB);
@@ -1927,7 +1953,12 @@ message (const char *text, short flags) {
             int i;
             for (i=0; i<messageDelay; i+=updateInterval) {
                delay(updateInterval);
-               if (readBrailleCommand(&brl, CMDS_MESSAGE) != EOF) break;
+               {
+                  int command = readBrailleCommand(&brl, CMDS_MESSAGE);
+                  if (command == EOF) continue;
+                  command &= VAL_CMD_MASK;
+                  if (command != CMD_NOOP) break;
+               }
             }
          }
       }
