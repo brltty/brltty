@@ -1135,6 +1135,27 @@ testBlinkingCapitals (void) {
   return prefs.blinkingCapitals;
 }
 
+typedef struct {
+  unsigned char *setting;                 /* pointer to current value */
+  int (*changed) (unsigned char setting); /* called when value changes */
+  int (*test) (void);                     /* returns true if item should be presented */
+  const char *label;                      /* item name for presentation */
+  const char *const *names;               /* symbolic names of values */
+  unsigned char minimum;                  /* lowest valid value */
+  unsigned char maximum;                  /* highest valid value */
+  unsigned char divisor;                  /* present only multiples of this value */
+} MenuItem;
+
+static void
+previousSetting (MenuItem *item) {
+  if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
+}
+
+static void
+nextSetting (MenuItem *item) {
+  if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
+}
+
 void
 updatePreferences (void) {
 #ifdef ENABLE_TABLE_SELECTION
@@ -1190,16 +1211,6 @@ updatePreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
     static const char *sayModes[] = {"Immediate", "Enqueue"};
 #endif /* ENABLE_SPEECH_SUPPORT */
-    typedef struct {
-      unsigned char *setting;                 /* pointer to current value */
-      int (*changed) (unsigned char setting); /* called when value changes */
-      int (*test) (void);                     /* returns true if item should be presented */
-      const char *label;                      /* item name for presentation */
-      const char *const *names;               /* symbolic names of values */
-      unsigned char minimum;                  /* lowest valid value */
-      unsigned char maximum;                  /* highest valid value */
-      unsigned char divisor;                  /* present only multiples of this value */
-    } MenuItem;
     #define MENU_ITEM(setting, changed, test, label, values, minimum, maximum, divisor) {&setting, changed, test, label, values, minimum, maximum, divisor}
     #define NUMERIC_ITEM(setting, changed, test, label, minimum, maximum, divisor) MENU_ITEM(setting, changed, test, label, NULL, minimum, maximum, divisor)
     #define TIME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 1, 100, updateInterval/10)
@@ -1392,31 +1403,27 @@ updatePreferences (void) {
               playTune(&tune_bounce);
             break;
 
+          {
+            void (*adjust) (MenuItem *item);
+            int count;
           case CMD_WINUP:
           case CMD_CHRLT:
           case VAL_PASSKEY+VPK_CURSOR_LEFT:
           case CMD_BACK:
-          case CMD_MENU_PREV_SETTING: {
-            int count = item->maximum - item->minimum + 1;
-            do {
-              if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
-              if (!--count) break;
-            } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
-            if (count)
-              settingChanged = 1;
-            else
-              playTune(&tune_command_rejected);
-            break;
-          }
+          case CMD_MENU_PREV_SETTING:
+            adjust = previousSetting;
+            goto adjustSetting;
           case CMD_WINDN:
           case CMD_CHRRT:
           case VAL_PASSKEY+VPK_CURSOR_RIGHT:
           case CMD_HOME:
           case CMD_RETURN:
-          case CMD_MENU_NEXT_SETTING: {
-            int count = item->maximum - item->minimum + 1;
+          case CMD_MENU_NEXT_SETTING:
+            adjust = nextSetting;
+          adjustSetting:
+            count = item->maximum - item->minimum + 1;
             do {
-              if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
+              adjust(item);
               if (!--count) break;
             } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
             if (count)
