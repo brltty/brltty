@@ -42,7 +42,7 @@ int vbinit() {
 
   if (enablePorts(LOG_ERR, LPTPORT, 3)) {
     if (enablePorts(LOG_ERR, 0X80, 1)) {
-      char alldots[40];
+      unsigned char alldots[40];
       memset(alldots, 0XFF, 40);
       vbdisplay(alldots);
       return 0;
@@ -64,7 +64,7 @@ static void vbclockpause() {
   for (i = 0; i<=VBCLOCK*100; i++) ;
 }
 
-void vbdisplay(char *vbBuf) {
+void vbdisplay(unsigned char *vbBuf) {
   int i,j;
   char b;
   for (j = 0; j<VBSIZE; j++) {

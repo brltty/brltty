@@ -34,5 +34,5 @@ typedef struct {
 int vbinit();
 void vbtranslate(const unsigned char *,unsigned char *,int);
 void BrButtons(vbButtons *);
-void vbdisplay(char *);
+void vbdisplay(unsigned char *);
 

@@ -55,7 +55,7 @@ static void brl_close(BrailleDisplay *brl) {
 }
 
 static void brl_writeWindow(BrailleDisplay *brl) {
-  char outbuff[40];
+  unsigned char outbuff[40];
   int i;
 
   if (!brl) {
