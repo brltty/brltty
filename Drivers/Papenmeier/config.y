@@ -371,7 +371,7 @@ addCommand (int code) {
 %token LEFT RIGHT REAR FRONT
 %token STAT KEYCODE STATCODE EASYCODE
 %token NUMBER FLAG HORIZ
-%token ON OFF 
+%token ON OFF CHECK ROUTE
 %token VPK
 %%
 
@@ -395,6 +395,8 @@ inputline:  '\n'
        | keycode eq modifiers '\n' { addCommand(cmdval); }
        | keycode ON eq modifiers '\n' { addCommand(cmdval | BRL_FLG_TOGGLE_ON); }
        | keycode OFF eq modifiers '\n' { addCommand(cmdval | BRL_FLG_TOGGLE_OFF); }
+       | keycode CHECK eq modifiers '\n' { addCommand(cmdval | BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF); }
+       | keycode ROUTE eq modifiers '\n' { addCommand(cmdval | BRL_FLG_ROUTE); }
        ;
 
 eq:    '='
@@ -498,10 +500,11 @@ static struct init_v symbols[]= {
   { "down2",       EASYCODE, EASY_D2 },
 
   { "routing",     ROUTING, 0 },
-  { "route",       ROUTING, 0 },
 
   { "on",          ON, 0 },
   { "off",         OFF, 0 },
+  { "check",       CHECK, 0 },
+  { "route",       ROUTE, 0 },
 
 #include "cmd.auto.h"
   { "EOF", KEYCODE, -1 },

@@ -1815,6 +1815,14 @@ main (int argc, char *argv[]) {
         p->moty = p->winy;
         contracted = 0;
       }
+
+      if (command & BRL_FLG_ROUTE) {
+        int column = MIN(MAX(scr.posx, p->winx), p->winx+brl.x-1);
+        int row = MIN(MAX(scr.posy, p->winy), p->winy+brl.y-1);
+        if ((column != scr.posx) || (row != scr.posy))
+          if (routeCursor(column, row, curscr))
+            playTune(&tune_routing_started);
+      }
     }
         
     /*
