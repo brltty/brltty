@@ -209,6 +209,7 @@ terminationHandler (int signalNumber) {
   terminateProgram(signalNumber == SIGINT);
 }
 
+#ifdef SIGCHLD
 static void 
 childDeathHandler (int signalNumber) {
   pid_t process;
@@ -220,6 +221,7 @@ childDeathHandler (int signalNumber) {
     }
   }
 }
+#endif /* SIGCHLD */
 
 static void
 setDigitUpper (unsigned char *cell, int digit) {
@@ -887,8 +889,10 @@ main (int argc, char *argv[]) {
   /* Setup everything required on startup */
   startup(argc, argv);
 
+#ifdef SIGCHLD
   /* Install the handler which monitors the death of child processes. */
   handleSignal(SIGCHLD, childDeathHandler);
+#endif /* SIGCHLD */
 
   describeScreen(&scr);
   /* NB: screen size can sometimes change, f.e. the video mode may be changed
