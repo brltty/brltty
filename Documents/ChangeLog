@@ -1,6 +1,41 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+December 22, 2004:
+ - BRLTTY 3.6.1 released:
+   Remove the %pre and %post sections from the rpm for the time being.
+   Remove use of PATH_MAX (the HURD doesn't have it).
+   getWorkingDirectory() can gobble memory on failures.
+   If autogen.sh  is given arguments then run configure with them.
+   Add the -D [data-directory=] option to tbltest and ctbtest.
+   tbltest should report unused dot combinations.
+   Updates to the fr-iso01 text translation table.
+   Freedom Scientific driver changes:
+      Assume that the serial cable is disconnected if no ACK after 2.5 seconds.
+   TSI driver changes:
+      Fix memory corruption if the display is off or disconnected for an extended period of time.
+   API changes:
+      In one place select() is called with the wrong mask size.
+      Display the packet correctly in the default error handler.
+      Log the reason that the authentication key can't be loaded.
+      Check that the writeVisual() handler exists before calling it.
+      Rename mutex variables to suit core conventions.
+      Introduce new error code BRLERR_DRIVERERROR for braille driver problems.
+   apitest changes:
+      Report key read errors.
+      Report the file descriptor of the connection.
+   rhmkiso changes:
+      Automatically increase the size of the initrd as needed.
+      Remove needless manipulations of set -e.
+      Old versions of tar don't preserve bin as a symbolic link.
+   Curses package support changes:
+      Use ncursesw if available.
+      Ensure that the curses run-time library can be found.
+      Only use plain old curses as a last resort.
+   OpenBSD operating system support changes:
+      All special serial control characters must be properly disabled.
+      host_sys.o doesn't make.
+
 October 11, 2004:
  - BRLTTY 3.6 released:
    Add support for old VisioBraille input flow control (PROM version < 4).

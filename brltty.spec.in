@@ -135,45 +135,78 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref-HTML
 
 %changelog
+* Wed Dec 22 2004 Dave Mielke <dave@mielke.cc> 3.6.1
+-  Remove the %pre and %post sections from the rpm for the time being.
+-  Remove use of PATH_MAX (the HURD doesn't have it).
+-  getWorkingDirectory() can gobble memory on failures.
+-  If autogen.sh  is given arguments then run configure with them.
+-  Add the -D [data-directory=] option to tbltest and ctbtest.
+-  tbltest should report unused dot combinations.
+-  Updates to the fr-iso01 text translation table.
+-  Freedom Scientific driver changes:
+      Assume that the serial cable is disconnected if no ACK after 2.5 seconds.
+-  TSI driver changes:
+      Fix memory corruption if the display is off or disconnected for an extended period of time.
+-  API changes:
+      In one place select() is called with the wrong mask size.
+      Display the packet correctly in the default error handler.
+      Log the reason that the authentication key can't be loaded.
+      Check that the writeVisual() handler exists before calling it.
+      Rename mutex variables to suit core conventions.
+      Introduce new error code BRLERR_DRIVERERROR for braille driver problems.
+-  apitest changes:
+      Report key read errors.
+      Report the file descriptor of the connection.
+-  rhmkiso changes:
+      Automatically increase the size of the initrd as needed.
+      Remove needless manipulations of set -e.
+      Old versions of tar don't preserve bin as a symbolic link.
+-  Curses package support changes:
+      Use ncursesw if available.
+      Ensure that the curses run-time library can be found.
+      Only use plain old curses as a last resort.
+-  OpenBSD operating system support changes:
+      All special serial control characters must be properly disabled.
+      host_sys.o doesn't make.
 * Mon Oct 11 2004 Dave Mielke <dave@mielke.cc> 3.6
-+  Add support for old VisioBraille input flow control (PROM version < 4).
-+  Add rate setting to the ExternalSpeech driver.
-+  Remove type-punning warnings from the Mikropuhe driver.
-+  Add support for multi-byte character sets to the TTY driver.
-+  Remove the need for -t identity from the TTY and XWindow drivers.
-+  Correctly determine the optionality of the configuration file.
-+  Always change the menu setting even if a routing key doesn't evaluate to a new one.
-+  PCM ALSA fixes.
-+  Add xbrlapi (not installed yet).
-+  Update our copy of Gnopernicus's ttybrl.c.
-+  Alva workaround for bug exhibited by at least one ABT340:
+-  Add support for old VisioBraille input flow control (PROM version < 4).
+-  Add rate setting to the ExternalSpeech driver.
+-  Remove type-punning warnings from the Mikropuhe driver.
+-  Add support for multi-byte character sets to the TTY driver.
+-  Remove the need for -t identity from the TTY and XWindow drivers.
+-  Correctly determine the optionality of the configuration file.
+-  Always change the menu setting even if a routing key doesn't evaluate to a new one.
+-  PCM ALSA fixes.
+-  Add xbrlapi (not installed yet).
+-  Update our copy of Gnopernicus's ttybrl.c.
+-  Alva workaround for bug exhibited by at least one ABT340:
       A bogus routing key press event is generated for routing keys 25-29
       when at least two front keys are already pressed.
-+  Papenmeier driver updates:
+-  Papenmeier driver updates:
       The "query switches" command should show "both" rather than "?".
       Add bindings for bar motion with the right front key pressed.
       Resynchronize the switches and keys whenever the bar is moved.
-+  API updates:
+-  API updates:
       Add proper support for brl_writeVisual().
       Correct a bug which occurs when the display is only partially updated.
       Add a missing brlapi_libcerrno assignment to the client code.
       Add support for Unix domain sockets.
-+  Build updates:
+-  Build updates:
       Make clean shouldn't remove the text copy of the BrailleLite help files.
       The text copy of the Voyager help files should be created in the source tree.
-+  Documentation updates:
+-  Documentation updates:
       Bring the documentation up-to-date.
       Merge the documentation of reciprocal commands, e.g. LNUP/LNDN.
       Fix e-mail addresses and some examples in BrlAPI's manual.
       Remove old screen patches.
-+  Code updates:
+-  Code updates:
       Move a few routines to more logical places.
       Share the common code for moving up/down to a line with different content.
       Reindent the rest of config.c and main.c according to conventions.
       Use our own delay mechanism rather than sleep().
       Redo splitString() to allow for the easy adding of options.
       Split command line option processing into a separate routine.
-+  Fixes to the handling of counter (extendable flag) options:
+-  Fixes to the handling of counter (extendable flag) options:
       Warn if the same option is specified more than once in the configuration file.
       Allow a non-negative integer for non-command-line specifications.
 * Sat Sep 4 2004 Dave Mielke <dave@mielke.cc> 3.6pre3
