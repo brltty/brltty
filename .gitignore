@@ -1,6 +1,7 @@
 Makefile
 config.status
 config.log
+autom4te*.cache
 config.mk
 config.h
 brltty.spec
