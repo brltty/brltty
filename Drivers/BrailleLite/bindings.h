@@ -88,14 +88,26 @@ static const int cmdtrans[64] =
 static const unsigned char dangcmd[8] =
 { 0x00, 0x88, 0x80, 0x05, 0x40, 0x00, 0x10, 0x00 };
 
-/* Advance bar commands. */
-static const int barcmds[16] =
+typedef int BarCmds[16];
+const BarCmds *barcmds;
+
+/* Two advance bar commands. */
+static const BarCmds bar2cmds =
 {
 /* LeftBar\ RightBar> None         Right        Left         Both         */
 /*         None    */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
 /*         Right   */ CMD_LNUP   , CMD_ATTRDN , CMD_ATTRUP , 0          ,
 /*         Left    */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
 /*         Both    */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
+};
+
+/* One advance bar commands. */
+static const BarCmds bar1cmds =
+{
+/* None  */ 0          , 0         , 0          , 0          ,
+/* Right */ CMD_FWINRT , 0          , 0          , 0          ,
+/* Left  */ CMD_FWINLT , 0          , 0          , 0          ,
+/* Both  */ 0          , 0          , 0          , 0
 };
 
 /* Left whiz wheel commands. */

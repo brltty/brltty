@@ -195,7 +195,7 @@ qget (blkey * kp)
 	{
 	  kp->raw = c3;
 	  if (c3 & 0x80)
-            kp->cmd = barcmds[c3 & 0xF];
+            kp->cmd = (*barcmds)[c3 & 0xF];
 	  else if (c3 > 0 && c3 <= blitesz)
 	    kp->routing = c3;
 	}
@@ -220,7 +220,7 @@ qget (blkey * kp)
       kp->raw = c3;
 
       if (c3 & 0x0f)
-        kp->cmd = barcmds[((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3)];
+        kp->cmd = (*barcmds)[((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3)];
       else if (c3 & 0x30)
         kp->cmd = rwwcmds[(c3 >> 4) & 0x3];
       else if (c3 & 0xc0)
@@ -356,7 +356,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 #endif /* DETECT_FOREVER */
           LogPrint(LOG_DEBUG, "Got response.");
 
-          /* Next, let's detect the BLT-Model (18 || 40). */
+          /* Next, let's detect the BLT-Model (18, 40, M20, M40). */
+          barcmds = &bar2cmds;
           {
             unsigned char cells[18];
             memset(cells, 0, sizeof(cells));
@@ -393,6 +394,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
               } while (qlen);
               response[length] = 0;
               LogPrint(LOG_INFO, "Braille Lite identity: %s", response);
+
+              if ((response[0] == 'X') &&
+                  (response[1] == ' ') &&
+                  (response[2] == 'B')) {
+                blitesz = atoi(&response[3]);
+                if (blitesz <= 20) barcmds = &bar1cmds;
+              }
             }
           }
 
