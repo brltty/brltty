@@ -25,6 +25,8 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "misc.h"
 #include "sysmisc.h"
@@ -149,7 +151,12 @@ int
 openSpeechFifo (const char *directory, const char *path) {
   atexit(exitSpeechFifo);
   if ((speechFifoPath = makePath(directory, path))) {
-    if (mkfifo(speechFifoPath, 0) != -1) {
+    int ret = mkfifo(speechFifoPath, 0);
+    if ((ret == -1) && (errno == EEXIST)) {
+      struct stat fifo;
+      if ((lstat(speechFifoPath, &fifo) != -1) && S_ISFIFO(fifo.st_mode)) ret = 0;
+    }
+    if (ret != -1) {
       chmod(speechFifoPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
       if ((speechFifoDescriptor = open(speechFifoPath, O_RDONLY|O_NDELAY)) != -1) {
         LogPrint(LOG_DEBUG, "Speech FIFO created: %s: fd=%d",
