@@ -34,6 +34,7 @@
 #define BRLNAME "HandyTech"
 #define PREFSTYLE ST_AlvaStyle
 
+#define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
@@ -311,27 +312,44 @@ awaitData (int milliseconds) {
 }
 
 static int
-readBytes (unsigned char *bytes, int count) {
+brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, int count) {
   int offset = 0;
-  return readChunk(fileDescriptor, bytes, &offset, count, 100);
+  readChunk(fileDescriptor, bytes, &offset, count, 100);
+  return offset;
 }
 
 static int
-readByte (unsigned char *byte) {
-  return readBytes(byte, sizeof(*byte));
+readBytes (BrailleDisplay *brl, unsigned char *bytes, int count) {
+  return brl_readPacket(brl, bytes, count) == count;
 }
 
 static int
-writeBytes (unsigned char *data, int length) {
+readByte (BrailleDisplay *brl, unsigned char *byte) {
+  return readBytes(brl, byte, sizeof(*byte));
+}
+
+static int
+brl_writePacket (BrailleDisplay *brl, const unsigned char *data, int length) {
   // LogBytes("Write", data, length);
   int count = safe_write(fileDescriptor, data, length);
-  if (count == length) return 1;
-  if (count == -1) {
-    LogError("HandyTech write");
-  } else {
-    LogPrint(LOG_WARNING, "Trunccated write: %d < %d", count, length);
+  if (count != length) {
+    if (count == -1) {
+      LogError("HandyTech write");
+    } else {
+      LogPrint(LOG_WARNING, "Trunccated write: %d < %d", count, length);
+    }
   }
-  return 0;
+  return count;
+}
+
+static int
+writeBytes (BrailleDisplay *brl, unsigned char *data, int length) {
+  return brl_writePacket(brl, data, length) == length;
+}
+
+static int
+writeDescribe (BrailleDisplay *brl) {
+  return writeBytes(brl, HandyDescribe, sizeof(HandyDescribe));
 }
 
 static int
@@ -354,10 +372,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
   while (1) {
     if (!resetSerialDevice(fileDescriptor, &newtio, B19200)) return 0;
     /* autodetecting MODEL */
-    if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
+    if (writeDescribe(brl)) {
       if (awaitInput(fileDescriptor, 1000)) {
         unsigned char buffer[sizeof(HandyDescription) + 1];
-        if (readBytes(buffer, sizeof(buffer))) {
+        if (readBytes(brl, buffer, sizeof(buffer))) {
           if (memcmp(buffer, HandyDescription, sizeof(HandyDescription)) == 0) {
             modelIdentifier = buffer[sizeof(HandyDescription)];
             break;
@@ -429,7 +447,7 @@ failure:
 static void
 brl_close (BrailleDisplay *brl) {
   if (model->stopLength) {
-    writeBytes(model->stopAddress, model->stopLength);
+    writeBytes(brl, model->stopAddress, model->stopLength);
   }
 
   free(rawData);
@@ -444,7 +462,7 @@ brl_close (BrailleDisplay *brl) {
 }
 
 static int
-updateBrailleCells (void) {
+updateBrailleCells (BrailleDisplay *brl) {
   if (updateRequired && (currentState == BDS_READY)) {
     unsigned char buffer[model->brailleStartLength + model->statusCells + model->columns + model->brailleEndLength];
     int count = 0;
@@ -466,7 +484,7 @@ updateBrailleCells (void) {
     }
 
     // LogBytes("Write", buffer, count);
-    if (!writeBytes(buffer, count)) {
+    if (!writeBytes(brl, buffer, count)) {
       setState(BDS_OFF);
       return 0;
     }
@@ -485,7 +503,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     }
     updateRequired = 1;
   }
-  updateBrailleCells();
+  updateBrailleCells(brl);
 }
 
 static void
@@ -1018,7 +1036,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
 
   stateTimer += refreshInterval;
 
-  while (readByte(&byte)) {
+  while (readByte(brl, &byte)) {
     /* LogPrint(LOG_DEBUG, "Read: %02X", byte); */
     timeout = 0;
 
@@ -1063,7 +1081,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
             int command;
             if (model->interpretByte(context, byte, &command)) {
               repeatCounter = repeatDelay;
-              updateBrailleCells();
+              updateBrailleCells(brl);
               return command;
             }
             break;
@@ -1083,7 +1101,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
         if (stateTimer > 3000) {
           if (retryCount > 3) {
             setState(BDS_OFF);
-          } else if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
+          } else if (writeDescribe(brl)) {
             setState(BDS_RESETTING);
           } else {
             setState(BDS_OFF);
@@ -1092,7 +1110,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
         break;
       case BDS_IDENTIFYING:
         if (stateTimer > 1000) {
-          if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
+          if (writeDescribe(brl)) {
             setState(BDS_RESETTING);
           } else {
             setState(BDS_OFF);
@@ -1104,7 +1122,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
       case BDS_WRITING:
         if (stateTimer > 1000) {
           if (retryCount > 3) {
-            if (writeBytes(HandyDescribe, sizeof(HandyDescribe))) {
+            if (writeDescribe(brl)) {
               setState(BDS_RESETTING);
             } else {
               setState(BDS_OFF);
@@ -1116,7 +1134,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
         break;
     }
   }
-  updateBrailleCells();
+  updateBrailleCells(brl);
 
   if (!--repeatCounter) {
     if ((currentState == BDS_READY) || (currentState == BDS_WRITING)) {
