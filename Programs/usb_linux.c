@@ -173,7 +173,7 @@ usbGetSerialDevice (
     if (strcmp(driver, "serial") == 0) {
       struct serial_struct serial;
       if (usbControlDriver(device, interface, TIOCGSERIAL, &serial) != -1) {
-        static const char *const prefixTable[] = {"/dev/ttyUSB", NULL};
+        static const char *const prefixTable[] = {"/dev/ttyUSB", "/dev/usb/tts/", NULL};
         const char *const *prefix = prefixTable;
         while (*prefix) {
           char buffer[0X80];
@@ -249,15 +249,24 @@ usbControlTransfer (
   int length,
   int timeout
 ) {
-  struct usbdevfs_ctrltransfer arg;
+  union {
+    struct usbdevfs_ctrltransfer transfer;
+    struct {
+      uint8_t bRequestType;
+      uint8_t bRequest;
+      uint16_t wValue;
+      uint16_t wIndex;
+      uint16_t wLength;
+    } setup;
+  } arg;
   memset(&arg, 0, sizeof(arg));
-  arg.requesttype = direction | type | recipient;
-  arg.request = request;
-  arg.value = value;
-  arg.index = index;
-  arg.data = data;
-  arg.length = length;
-  arg.timeout = timeout;
+  arg.setup.bRequestType = direction | type | recipient;
+  arg.setup.bRequest = request;
+  arg.setup.wValue = value;
+  arg.setup.wIndex = index;
+  arg.setup.wLength = length;
+  arg.transfer.data = data;
+  arg.transfer.timeout = timeout;
   return ioctl(device->file, USBDEVFS_CONTROL, &arg);
 }
 
