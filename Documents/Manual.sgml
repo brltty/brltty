@@ -1716,118 +1716,64 @@ Use the regular motion keys (as described below) to navigate the help page,
 and press the <tt/help/ key again to quit.
 
 <sect2>Vertical Motion<label id="vertical"><p>
-See also the <ref id="command-NXINDENT" name="NXINDENT">
-and the <ref id="command-PRINDENT" name="PRINDENT"> routing key commands.
+See also the <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT"> routing key commands.
 <descrip>
-  <tag>LNUP<label id="command-LNUP"></tag>
-    Go up one line.
+  <tag>LNUP/LNDN<label id="command-LNUP-LNDN"></tag>
+    Go up/down one line.
     If identical line skipping has been activated
     (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
-    then this command, rather than moving exactly one line,
-    is an alias for the <ref id="command-PRDIFLN" name="PRDIFLN"> command.
-  <tag>LNDN<label id="command-LNDN"></tag>
-    Go down one line.
+    then these commands, rather than moving exactly one line,
+    are aliases for the <ref id="command-PRDIFLN-NXDIFLN" name="PRDIFLN/NXDIFLN"> commands.
+  <tag>WINUP/WINDN<label id="command-WINUP-WINDN"></tag>
+    Go up/down one window.
+    If the window is only 1 line high then move 5 lines.
+  <tag>PRDIFLN/NXDIFLN<label id="command-PRDIFLN-NXDIFLN"></tag>
+    Go up/down to the nearest line with different content.
     If identical line skipping has been activated
     (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
-    then this command, rather than moving exactly one line,
-    is an alias for the <ref id="command-NXDIFLN" name="NXDIFLN"> command.
-  <tag>WINUP<label id="command-WINUP"></tag>
-    Go up several lines.
-  <tag>WINDN<label id="command-WINDN"></tag>
-    Go down several lines.
-  <tag>PRDIFLN<label id="command-PRDIFLN"></tag>
-    Go up to the nearest previous line
-    with different content.
-    If identical line skipping has been activated
-    (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
-    then this command, rather than skipping identical lines,
-    is an alias for the <ref id="command-LNUP" name="LNUP"> command.
-  <tag>NXDIFLN<label id="command-NXDIFLN"></tag>
-    Go down to the nearest next line
-    with different content.
-    If identical line skipping has been activated
-    (see the <ref id="command-SKPIDLNS" name="SKPIDLNS"> command),
-    then this command, rather than skipping identical lines,
-    is an alias for the <ref id="command-LNDN" name="LNDN"> command.
-  <tag>ATTRUP<label id="command-ATTRUP"></tag>
-    Go up to the nearest previous line
-    with different character highlighting (attributes).
-  <tag>ATTRDN<label id="command-ATTRDN"></tag>
-    Go down to the nearest next line
-    with different character highlighting (attributes).
-  <tag>TOP<label id="command-TOP"></tag>
-    Go up to the top line.
-  <tag>BOT<label id="command-BOT"></tag>
-    Go down to the bottom line.
-  <tag>TOP_LEFT<label id="command-TOP_LEFT"></tag>
-    Go to the top-left corner.
-  <tag>BOT_LEFT<label id="command-BOT_LEFT"></tag>
-    Go to the bottom-left corner.
-  <tag>PRPGRPH<label id="command-PRPGRPH"></tag>
-    Go up to the last line of the previous paragraph
-    (the first non-blank line beyond the nearest previous blank line).
+    then these commands, rather than skipping identical lines,
+    are aliases for the <ref id="command-LNUP-LNDN" name="LNUP/LNDN"> commands.
+  <tag>ATTRUP/ATTRDN<label id="command-ATTRUP-ATTRDN"></tag>
+    Go up/down to the nearest line with different attributes (character highlighting).
+  <tag>TOP/BOT<label id="command-TOP-BOT"></tag>
+    Go to the top/bottom line.
+  <tag>TOP_LEFT/BOT_LEFT<label id="command-TOP_LEFT-BOT_LEFT"></tag>
+    Go to the top-left/bottom-left corner.
+  <tag>PRPGRPH/NXPGRPH<label id="command-PRPGRPH-NXPGRPH"></tag>
+    Go to the nearest line of the previous/next paragraph
+    (the first non-blank line beyond the nearest blank line).
     The current line is included when searching for the inter-paragraph space.
-  <tag>NXPGRPH<label id="command-NXPGRPH"></tag>
-    Go down to the first line of the next paragraph
-    (the first non-blank line beyond the nearest next blank line).
-    The current line is included when searching for the inter-paragraph space.
-  <tag>PRPROMPT<label id="command-PRPROMPT"></tag>
-    Go up to the previous command prompt.
-  <tag>NXPROMPT<label id="command-NXPROMPT"></tag>
-    Go down to the next command prompt.
-  <tag>PRSEARCH<label id="command-PRSEARCH"></tag>
-    Search backward for the nearest occurrence
+  <tag>PRPROMPT/NXPROMPT<label id="command-PRPROMPT-NXPROMPT"></tag>
+    Go to the previous/next command prompt.
+  <tag>PRSEARCH/NXSEARCH<label id="command-PRSEARCH-NXSEARCH"></tag>
+    Search backward/forward for the nearest occurrence
     of the character string within the cut buffer
-    (see <ref id="cut" name="Cut and Paste">).
-    The search starts at the character immediately to the left of the braille window,
-    proceeds from right to left,
-    and, at the beginning of a line, wraps to the end of the previous line.
-    The search isn't case sensitive.
-  <tag>NXSEARCH<label id="command-NXSEARCH"></tag>
-    Search forward for the nearest occurrence
-    of the character string within the cut buffer
-    (see <ref id="cut" name="Cut and Paste">).
-    The search starts at the character immediately to the right of the braille window,
-    proceeds from left to right,
-    and, at the end of a line, wraps to the beginning of the next line.
+    (see <ref id="cut" name="Cut and Paste">)
+    which isn't within the braille window.
+    The search proceeds to the left/right,
+    starting at the character immediately to the left/right of the window,
+    and wrapping at the edge of the screen.
     The search isn't case sensitive.
 </descrip>
 
 <sect2>Horizontal Motion<label id="horizontal"><p>
 See also the <ref id="command-SETLEFT" name="SETLEFT"> routing key command.
 <descrip>
-  <tag>CHRLT<label id="command-CHRLT"></tag>
-    Go left one character.
-  <tag>CHRRT<label id="command-CHRRT"></tag>
-    Go right one character.
-  <tag>HWINLT<label id="command-HWINLT"></tag>
-    Go left half a window.
-  <tag>HWINRT<label id="command-HWINRT"></tag>
-    Go right half a window.
-  <tag>FWINLT<label id="command-FWINLT"></tag>
-    Go left one window.
-    This command is particularly useful when reading backward
-    because it automatically wraps up to the end of the previous line
-    when invoked at the beginning of the current line.
-    Other features like its ability to skip blank windows
-    (see the <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command)
-    further enhance its usefulness for this purpose.
-  <tag>FWINRT<label id="command-FWINRT"></tag>
-    Go right one window.
-    This command is particularly useful when reading forward
-    because it automatically wraps down to the beginning of the next line
-    when invoked at the end of the current line.
-    Other features like its ability to skip blank windows
-    (see the <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command)
-    further enhance its usefulness for this purpose.
-  <tag>FWINLTSKIP<label id="command-FWINLTSKIP"></tag>
-    Go left to the nearest previous non-blank window.
-  <tag>FWINRTSKIP<label id="command-FWINRTSKIP"></tag>
-    Go right to the nearest next non-blank window.
-  <tag>LNBEG<label id="command-LNBEG"></tag>
-    Go to the beginning (left) of the line.
-  <tag>LNEND<label id="command-LNEND"></tag>
-    Go to the end (right) of the line.
+  <tag>CHRLT/CHRRT<label id="command-CHRLT-CHRRT"></tag>
+    Go left/right one character.
+  <tag>HWINLT/HWINRT<label id="command-HWINLT-HWINRT"></tag>
+    Go left/right half a window.
+  <tag>FWINLT/FWINRT<label id="command-FWINLT-FWINRT"></tag>
+    Go left/right one window.
+    These commands are particularly useful
+    because they automatically wrap when they reach the edge of the screen.
+    Other features, like their ability to skip blank windows
+    (see the <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS"> command),
+    further enhance their usefulness.
+  <tag>FWINLTSKIP/FWINRTSKIP<label id="command-FWINLTSKIP-FWINRTSKIP"></tag>
+    Go left/right to the nearest non-blank window.
+  <tag>LNBEG/LNEND<label id="command-LNBEG-LNEND"></tag>
+    Go to the beginning/end of the line.
 </descrip>
 
 <sect2>Implicit Motion<p>
@@ -1912,19 +1858,16 @@ via the <ref id="preferences-menu" name="preferences menu">.
   <tag>SKPIDLNS<label id="command-SKPIDLNS"></tag>
     Rather than explicitly moving exactly one line either up or down,
     skip passed lines which have the same content as the current line.
-    This feature affects the <ref id="command-LNUP" name="LNUP">
-    and <ref id="command-LNDN" name="LNDN"> commands,
+    This feature affects
+    the <ref id="command-LNUP-LNDN" name="LNUP/LNDN"> commands,
     as well as the line wrapping feature of
-    the <ref id="command-FWINLT" name="FWINLT">,
-    <ref id="command-FWINRT" name="FWINRT">,
-    <ref id="command-FWINLTSKIP" name="FWINLTSKIP">,
-    and <ref id="command-FWINRTSKIP" name="FWINRTSKIP"> commands.
+    the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">
+    and <ref id="command-FWINLTSKIP-FWINRTSKIP" name="FWINLTSKIP/FWINRTSKIP"> commands.
     This setting can also be changed with the
     <ref id="preference-skip-identical-lines" name="Skip Identical Lines"> preference.
   <tag>SKPBLNKWINS<label id="command-SKPBLNKWINS"></tag>
     Skip passed blank windows when reading either forward or backward.
-    This feature affects the <ref id="command-FWINLT" name="FWINLT">
-    and <ref id="command-FWINRT" name="FWINRT"> commands.
+    This feature affects the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> commands.
     This setting can also be changed with the
     <ref id="preference-skip-blank-windows" name="Skip Blank Windows"> preference.
   <tag>CSRVIS<label id="command-CSRVIS"></tag>
@@ -2064,18 +2007,12 @@ via the <ref id="preferences-menu" name="preferences menu">.
 
 <sect2>Menu Navigation<label id="menu"><p>
 <descrip>
-  <tag>MENU_FIRST_ITEM<label id="command-MENU_FIRST_ITEM"></tag>
-    Go to the first item in the menu.
-  <tag>MENU_LAST_ITEM<label id="command-MENU_LAST_ITEM"></tag>
-    Go to the last item in the menu.
-  <tag>MENU_PREV_ITEM<label id="command-MENU_PREV_ITEM"></tag>
-    Go to the previous item in the menu.
-  <tag>MENU_NEXT_ITEM<label id="command-MENU_NEXT_ITEM"></tag>
-    Go to the next item in the menu.
-  <tag>MENU_PREV_SETTING<label id="command-MENU_PREV_SETTING"></tag>
-    Decrement the current menu item's setting.
-  <tag>MENU_NEXT_SETTING<label id="command-MENU_NEXT_SETTING"></tag>
-    Increment the current menu item's setting.
+  <tag>MENU_FIRST_ITEM/MENU_LAST_ITEM<label id="command-MENU_FIRST_ITEM-MENU_LAST_ITEM"></tag>
+    Go to the first/last item in the menu.
+  <tag>MENU_PREV_ITEMMENU_NEXT_ITEM/<label id="command-MENU_PREV_ITEM-MENU_NEXT_ITEM"></tag>
+    Go to the previous/next item in the menu.
+  <tag>MENU_PREV_SETTING/MENU_NEXT_SETTING<label id="command-MENU_PREV_SETTING-MENU_NEXT_SETTING"></tag>
+    Decrement/increment the current menu item's setting.
 </descrip>
 
 <sect2>Speech Controls<label id="speech"><p>
@@ -2092,20 +2029,12 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Stop speaking immediately.
   <tag>SPKHOME<label id="command-SPKHOME"></tag>
     Go to where the speech cursor is.
-  <tag>SAY_SLOWER<label id="command-SAY_SLOWER"></tag>
-    Decrease the speech rate
+  <tag>SAY_SLOWER/SAY_FASTER<label id="command-SAY_SLOWER-SAY_FASTER"></tag>
+    Decrease/increase the speech rate
     (see also the <ref id="preference-speech-rate" name="Speech Rate"> preference).
     This command is only available if a driver which supports it is being used.
-  <tag>SAY_FASTER<label id="command-SAY_FASTER"></tag>
-    Increase the speech rate
-    (see also the <ref id="preference-speech-rate" name="Speech Rate"> preference).
-    This command is only available if a driver which supports it is being used.
-  <tag>SAY_SOFTER<label id="command-SAY_SOFTER"></tag>
-    Decrease the speech volume
-    (see also the <ref id="preference-speech-volume" name="Speech Volume"> preference).
-    This command is only available if a driver which supports it is being used.
-  <tag>SAY_LOUDER<label id="command-SAY_LOUDER"></tag>
-    Increase the speech volume
+  <tag>SAY_SOFTER/SAY_LOUDER<label id="command-SAY_SOFTER-SAY_LOUDER"></tag>
+    Decrease/increase the speech volume
     (see also the <ref id="preference-speech-volume" name="Speech Volume"> preference).
     This command is only available if a driver which supports it is being used.
 </descrip>
@@ -2113,12 +2042,8 @@ via the <ref id="preferences-menu" name="preferences menu">.
 <sect2>Virtual Terminal Switching<p>
 See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
 <descrip>
-  <tag>SWITCHVT_PREV<label id="command-SWITCHVT_PREV"></tag>
-    Switch to the previous virtual terminal
-    (the one whose number is one less than the current one).
-  <tag>SWITCHVT_NEXT<label id="command-SWITCHVT_NEXT"></tag>
-    Switch to the next virtual terminal
-    (the one whose number is one greater than the current one).
+  <tag>SWITCHVT_PREV/SWITCHVT_NEXT<label id="command-SWITCHVT_PREV-SWITCHVT_NEXT"></tag>
+    Switch to the previous/next virtual terminal.
 </descrip>
 
 <sect2>Other Commands<p>
@@ -2174,11 +2099,9 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
   <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
     Switch to the virtual terminal whose number
     (counting from 1) matches that of the routing key.
-  <tag>PRINDENT<label id="command-PRINDENT"></tag>
-    Go up to the nearest previous line which isn't indented
-    more than the column associated with the routing key.
-  <tag>NXINDENT<label id="command-NXINDENT"></tag>
-    Go down to the nearest next line which isn't indented
+    See also the <ref id="command-SWITCHVT_PREV-SWITCHVT_NEXT" name="SWITCHVT_PREV/SWITCHVT_NEXT"> virtual terminal switching commands.
+  <tag>PRINDENT/NXINDENT<label id="command-PRINDENT-NXINDENT"></tag>
+    Go up/down to the nearest line which isn't indented
     more than the column associated with the routing key.
   <tag>DESCCHAR<label id="command-DESCCHAR"></tag>
     Momentarily (see the <ref id="options-message-delay" name="-M"> command line option)
@@ -2195,10 +2118,10 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     This feature makes it very easy to put the window exactly where it's needed,
     and, therefore, for displays which have routing keys,
     almost eliminates the need for a lot of elementary window motion
-    (like the <ref id="command-CHRLT" name="CHRLT">,
-    <ref id="command-CHRRT" name="CHRRT">,
-    <ref id="command-HWINLT" name="HWINLT">,
-    and <ref id="command-HWINRT" name="HWINRT"> commands).
+    (like
+    the <ref id="command-CHRLT-CHRRT" name="CHRLT/CHRRT">
+    and <ref id="command-HWINLT-HWINRT" name="HWINLT/HWINRT">
+    commands).
   <tag>SETMARK<label id="command-SETMARK"></tag>
     Mark (remember) the current position of the braille window
     in a register associated with the routing key.
@@ -2759,8 +2682,7 @@ and URLs. Cutting and pasting text involves three simple steps:
 </enum>
 
 The cut buffer is also used by
-the <ref id="command-PRSEARCH" name="PRSEARCH">
-and <ref id="command-NXSEARCH" name="NXSEARCH"> commands.
+the <ref id="command-PRSEARCH-NXSEARCH" name="PRSEARCH/NXSEARCH"> commands.
 
 <sect1>Pointer (Mouse) Support via GPM<label id="gpm"><p>
 If BRLTTY is configured with the <ref id="build-gpm" name="--enable-gpm"> build option
@@ -2925,24 +2847,15 @@ commands which enable you to select items and change settings within the menu.
 For backward compatibility with old drivers, the window motion commands,
 which have modified meanings in this context, can also be used.
 <descrip>
-  <tag><tt/TOP/, <tt/TOP_LEFT/</tag>
-    Go to the first item in the menu
-    (same as <ref id="command-MENU_FIRST_ITEM" name="MENU_FIRST_ITEM">).
-  <tag><tt/BOT/, <tt/BOT_LEFT/</tag>
-    Go to the last item in the menu
-    (same as <ref id="command-MENU_LAST_ITEM" name="MENU_LAST_ITEM">).
-  <tag><tt/LNUP/, <tt/CURSOR_UP/</tag>
-    Go to the previous item in the menu
-    (same as <ref id="command-MENU_PREV_ITEM" name="MENU_PREV_ITEM">).
-  <tag><tt/LNDN/, <tt/CURSOR_DOWN/</tag>
-    Go to the next item in the menu
-    (same as <ref id="command-MENU_NEXT_ITEM" name="MENU_NEXT_ITEM">).
-  <tag><tt/WINUP/, <tt/CHRLT/, <tt/CURSOR_LEFT/</tag>
-    Decrement the current menu item's setting
-    (same as <ref id="command-MENU_PREV_SETTING" name="MENU_PREV_SETTING">).
-  <tag><tt/WINDN/, <tt/CHRRT/, <tt/CURSOR_RIGHT/, <tt/HOME/, <tt/RETURN/</tag>
-    Increment the current menu item's setting
-    (same as <ref id="command-MENU_NEXT_SETTING" name="MENU_NEXT_SETTING">).
+  <tag><tt/TOP//<tt/BOT/, <tt/TOP_LEFT//<tt/BOT_LEFT/, <tt/PAGE_UP//<tt/PAGE_DOWN/</tag>
+    Go to the first/last item in the menu
+    (same as <ref id="command-MENU_FIRST_ITEM-MENU_LAST_ITEM" name="MENU_FIRST_ITEM/MENU_LAST_ITEM">).
+  <tag><tt/LNUP//<tt/LNDN/, <tt/PRDIFLN//<tt/NXDIFLN/, <tt/CURSOR_UP//<tt/CURSOR_DOWN/</tag>
+    Go to the previous/next item in the menu
+    (same as <ref id="command-MENU_PREV_ITEM-MENU_NEXT_ITEM" name="MENU_PREV_ITEM/MENU_NEXT_ITEM">).
+  <tag><tt/WINUP//<tt/WINDN/, <tt/CHRLT//<tt/CHRRT/, <tt/CURSOR_LEFT//<tt/CURSOR_RIGHT/, <tt/BACK//<tt/HOME/</tag>
+    Decrement/increment the current menu item's setting
+    (same as <ref id="command-MENU_PREV_SETTING-MENU_NEXT_SETTING" name="MENU_PREV_SETTING/MENU_NEXT_SETTING">).
 </descrip>
 
 Notes:
@@ -2994,13 +2907,10 @@ Notes:
     <ref id="command-SIXDOTS" name="SIXDOTS"> command.
   <tag>Skip Identical Lines<label id="preference-skip-identical-lines"></tag>
     When moving either up or down exactly one line with
-    the <ref id="command-LNUP" name="LNUP">
-    and <ref id="command-LNDN" name="LNDN"> commands,
+    the <ref id="command-LNUP-LNDN" name="LNUP/LNDN"> commands,
     as well as the line wrapping feature of
-    the <ref id="command-FWINLT" name="FWINLT">,
-    <ref id="command-FWINRT" name="FWINRT">,
-    <ref id="command-FWINLTSKIP" name="FWINLTSKIP">,
-    and <ref id="command-FWINRTSKIP" name="FWINRTSKIP"> commands:
+    the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">
+    and <ref id="command-FWINLTSKIP-FWINRTSKIP" name="FWINLTSKIP/FWINRTSKIP"> commands:
     <descrip>
       <tag/No/
         Don't skip passed lines which have the same content as the current line.
@@ -3011,8 +2921,7 @@ Notes:
     <ref id="command-SKPIDLNS" name="SKPIDLNS"> command.
   <tag>Skip Blank Windows<label id="preference-skip-blank-windows"></tag>
     When moving either left or right with
-    the <ref id="command-FWINLT" name="FWINLT">
-    and <ref id="command-FWINRT" name="FWINRT"> commands:
+    the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> commands:
     <descrip>
       <tag/No/
         Don't skip passed blank windows.
@@ -3059,8 +2968,7 @@ Notes:
     The initial setting is <tt/off/.
   <tag>Window Overlap<label id="preference-window-overlap"></tag>
     When moving either left or right with
-    the <ref id="command-FWINLT" name="FWINLT">
-    and <ref id="command-FWINRT" name="FWINRT"> commands,
+    the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> commands,
     this setting specifies how many characters
     horizontally adjacent braille windows should overlap each other by.
     The initial setting is <tt/0/.
@@ -3075,17 +2983,11 @@ Notes:
     The following commands are eligible for autorepeating:
     <itemize>
       <item>
-        The <ref id="command-LNUP" name="LNUP">
-        and <ref id="command-LNDN" name="LNDN">
-        commands.
+        The <ref id="command-LNUP-LNDN" name="LNUP/LNDN"> commands.
       <item>
-        The <ref id="command-PRDIFLN" name="PRDIFLN">
-        and <ref id="command-NXDIFLN" name="NXDIFLN">
-        commands.
+        The <ref id="command-PRDIFLN-NXDIFLN" name="PRDIFLN/NXDIFLN"> commands.
       <item>
-        The <ref id="command-CHRLT" name="CHRLT">
-        and <ref id="command-CHRRT" name="CHRRT">
-        commands.
+        The <ref id="command-CHRLT-CHRRT" name="CHRLT/CHRRT"> commands.
       <item>
         The Page-Up and Page-Down operations.
       <item>
@@ -3377,18 +3279,14 @@ Notes:
     (<tt/0/ is the slowest, <tt/20/ is the fastest).
     This preference is only available if a driver which supports it is being used.
     This setting can also be changed with
-    the <ref id="command-SAY_SLOWER" name="SAY_SLOWER">
-    and <ref id="command-SAY_FASTER" name="SAY_FASTER">
-    commands.
+    the <ref id="command-SAY_SLOWER-SAY_FASTER" name="SAY_SLOWER/SAY_FASTER"> commands.
     The initial setting is <tt/10/.
   <tag>Speech Volume<label id="preference-speech-volume"></tag>
     Adjust the speech volume
     (<tt/0/ is the softest, <tt/20/ is the loudest).
     This preference is only available if a driver which supports it is being used.
     This setting can also be changed with
-    the <ref id="command-SAY_SOFTER" name="SAY_SOFTER">
-    and <ref id="command-SAY_LOUDER" name="SAY_LOUDER">
-    commands.
+    the <ref id="command-SAY_SOFTER-SAY_LOUDER" name="SAY_SOFTER/SAY_LOUDER"> commands.
     The initial setting is <tt/10/.
   <tag>Status Style<label id="preference-status-style"></tag>
     This setting specifies the way that the status cells are to be used.
