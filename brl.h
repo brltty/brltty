@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -56,6 +56,12 @@
 #define CMD_NXDIFLN '+'		/* go to next different screen line */
 #define CMD_ATTRUP 3            /* go to previous line with differing attributes */
 #define CMD_ATTRDN 4            /* go to next line with differing attributes */
+#define CMD_NXBLNKLN 12		/* look for blank line, go to first non-blank
+				   line after that. */
+#define CMD_PRBLNKLN 13		/* look for previous blank line, go to first
+				   non-blank line before that. */
+#define CMD_NXSEARCH 14         /* search screen for cut_buffer */
+#define CMD_PRSEARCH 15
 #define CMD_WINUP '<'		/* go up one window */
 #define CMD_WINDN '>'		/* go down one window */
 #define CMD_TOP 't'		/* go to top of screen */
@@ -63,7 +69,9 @@
 #define CMD_HWINLT '['		/* go left one half window */
 #define CMD_HWINRT ']'		/* go right one half window */
 #define CMD_FWINLT '{'		/* go left one full window */
+#define CMD_FWINLTSKIP 9	/* go left one full window, skipping blanks */
 #define CMD_FWINRT '}'		/* go right one full window */
+#define CMD_FWINRTSKIP 11	/* go right one full window, skipping blanks */
 #define CMD_LNBEG 's'		/* go to beginning (start) of line */
 #define CMD_LNEND 'e'		/* go to end of line */
 #define CMD_CHRLT '('		/* go left one character */
@@ -85,15 +93,21 @@
 #define CMD_CSRJMP 'j'		/* jump cursor to window (cursor routing) */
 #define CMD_CSRJMP_VERT ';'	/* jump cursor to window's line (routing) */
 /* Cursor routing key offset values */
-#define	CR_ROUTEOFFSET 0x080	/* normal cursor routing */
+#define	CR_ROUTEOFFSET 0x100	/* normal cursor routing */
 
 /* Cut and paste */
 #define CMD_CUT_BEG 'C'		/* cut text begin - use routing keys */
 #define CMD_CUT_END 'E'		/* cut text end - use routing keys */
 #define CMD_PASTE 'P'		/* insert text */
 /* Cursor routing key offset values to be used to define a block */
-#define	CR_BEGBLKOFFSET	0x100	/* to define the beginning of a block */
-#define	CR_ENDBLKOFFSET 0x180	/* to define the end of the block */
+#define	CR_BEGBLKOFFSET	0x200	/* to define the beginning of a block */
+#define	CR_ENDBLKOFFSET 0x300	/* to define the end of the block */
+
+#define	CR_SWITCHVT 0x400	/* switch virtual console */
+
+#define	CR_NXINDENT 0x500	/* find next line not more indented
+				   than routing key indicates. */
+#define	CR_PRINDENT 0x600
 
 /* Configuration commands */
 #define CMD_CONFMENU 'x'	/* enter configuration menu */
@@ -112,6 +126,7 @@
 #define CMD_SLIDEWIN 'w'	/* toggle sliding window */
 #define CMD_SKPIDLNS 'I'	/* toggle skipping of identical lines */
 #define CMD_SKPBLNKEOL 8	/* toggle skipping of blank end-of-lines */
+#define CMD_SKPBLNKWINS 10	/* toggle skipping of blank windows */
 #define CMD_SND 'S'		/* toggle sound on/off */
 
 /* Key mappings: keys on the braille device are mapped to keyboard keys */
@@ -123,21 +138,21 @@
 
 
 /* For speech devices: */
-#define CMD_SAY 'Y'		/* sound on */
-#define CMD_SAYALL 127 /* speak text continuously */
-#define CMD_SPKHOME 126 /* goto current/last speech position */
-#define CMD_MUTE 'm'		/* sound off */
+#define CMD_SAY 'Y'		/* speak current braille line */
+#define CMD_SAYALL 127		/* speak text continuously */
+#define CMD_SPKHOME 126		/* goto current/last speech position */
+#define CMD_MUTE 'm'		/* stop speech */
 
 /* For specifically turning on/off toggle commands */
-#define VAL_SWITCHMASK  0x600
-#define VAL_SWITCHON    0x200
-#define VAL_SWITCHOFF   0x400
+#define VAL_SWITCHMASK  0x30000
+#define VAL_SWITCHON    0x10000
+#define VAL_SWITCHOFF   0x20000
 
 /* For typing character -- pass through */
-#define	VAL_PASSTHRU	0x800
+#define	VAL_PASSTHRU	0x700
 
 /* For typing character -- Using current translation table */
-#define VAL_BRLKEY      0x1000
+#define VAL_BRLKEY      0x800
 
 /* Braille information structure */
 typedef struct

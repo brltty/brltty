@@ -3,7 +3,7 @@
 # BRLTTY - Access software for Unix for a blind person
 #          using a soft Braille terminal
 #
-# Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+# Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
 #
 # Web Page: http://www.cam.org/~nico/brltty
 #
@@ -188,15 +188,25 @@ else
    BUILTIN_BRAILLE = -DBRL_BUILTIN
 endif
 
-BRLTTY_OBJECTS = brltty.o misc.o beeps.o cut-n-paste.o $(INSKEY_O) spk_load.o brl_load.o
+BRLTTY_OBJECTS = main.o config.o csrjmp.o misc.o beeps.o cut-n-paste.o $(INSKEY_O) spk_load.o brl_load.o
 
 brltty: $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_TARGETS) $(BRAILLE_TARGETS)
 	$(LD) $(LDFLAGS) -Wl,-rpath,$(LIB_PATH) -o $@ \
 	  $(BRLTTY_OBJECTS) $(SCREEN_OBJECTS) $(SPEECH_OBJECTS) $(BRAILLE_OBJECTS) $(LDLIBS)
 
-brltty.o: brltty.c brl.h scr.h inskey.h misc.h message.h config.h \
-	  text.auto.h attrib.auto.h
-	$(CC) $(CFLAGS) '-DHOME_DIR="$(DATA_DIR)"' '-DBRLLIBS="$(BRL_LIBS)"' '-DSPKLIBS="$(SPK_LIBS)"' '-DBRLDEV="$(BRLDEV)"' -c brltty.c
+main.o: main.c brl.h spk.h scr.h csrjmp.h inskey.h beeps.h cut-n-paste.h \
+	misc.h message.h config.h common.h text.auto.h attrib.auto.h
+	$(CC) $(CFLAGS) -c main.c
+
+config.o: config.c config.h brl.h spk.h scr.h beeps.h message.h misc.h common.h
+	$(CC) $(CFLAGS) \
+		'-DHOME_DIR="$(DATA_DIR)"' \
+		'-DBRLLIBS="$(BRL_LIBS)"' \
+		'-DSPKLIBS="$(SPK_LIBS)"' \
+		'-DBRLDEV="$(BRLDEV)"' -c config.c
+
+csrjmp.o: csrjmp.c csrjmp.h scr.h inskey.h misc.h
+	$(CC) $(CFLAGS) -c csrjmp.c
 
 misc.o: misc.c misc.h
 	$(CC) $(CFLAGS) -c misc.c
@@ -240,7 +250,7 @@ scr.o: scr.cc scr.h scrdev.h helphdr.h config.h
 scrdev.o: scrdev.cc scr.h scrdev.h helphdr.h config.h
 	$(COMPCPP) $(CFLAGS) -c scrdev.cc
 
-scr_vcsa.o: scr_vcsa.cc scr_vcsa.h scr.h scrdev.h config.h
+scr_vcsa.o: scr_vcsa.cc scr_vcsa.h scr.h scrdev.h inskey.h
 	$(COMPCPP) $(CFLAGS) '-DVCSADEV="$(VCSADEV)"' -c scr_vcsa.cc
 
 scr_shm.o: scr_shm.cc scr_shm.h scr.h scrdev.h config.h

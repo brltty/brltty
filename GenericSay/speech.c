@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -53,8 +53,8 @@ say (unsigned char *buffer, int len)
   if (say_fd)
     {
       fwrite (buffer, len, 1, say_fd);
-      fwrite (".\n", 2, 1, say_fd);
-      fflush (say_fd);
+//      fwrite (".\n", 2, 1, say_fd);
+//      fflush (say_fd);
     }
 }
 

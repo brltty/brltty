@@ -1,6 +1,6 @@
 ExternalSpeech
 by Stéphane Doyon <s.doyon@videotron.ca>
-Version 0.5 beta, September 2000
+Version 0.6 beta, March 2001
 
 This speech driver interfaces with an external program that will handle
 speech synthesis. The protocol for talking to the external program is
@@ -31,13 +31,24 @@ commercial use. It is however much more usable and of far superior quality
 than rsynth, festival, and the TTS scripts I have seen for MBROLA. 
 
 My external speech program does some speech preprocessing and then uses
-the Viavoice library. It is still quite alpha. I hope to be able to
-release it soon. That program will be released separately and will not be
-a part of BRLTTY (in part because of the non-free nature of Viavoice
-TTS).
+the Viavoice library. It is still quite alpha. You can find it at:
+http://pages.infinit.net/sdoyon/via.html
+It will be kept separate from BRLTTY (in part because of the non-free
+nature of Viavoice TTS).
 
-The path to the external program can be either:
+The path to the external program, and the uid and gid under which it is
+executed, can be either:
 -hard-coded in speech.h
 -specified in the BRLTTY configuration file through
    the speech-driverparm keyword.
 -Specified on the command-line using the -p or --speechparm option.
+
+In the last two cases, the format is:
+   <extProgPath>[,<numerical_uid>,<numerical_gid>]
+without space.
+As in:
+speech-driverparm /home/steph/via-0.3/via_wrapper,501,501
+
+Avoid executing the external program as root if at all possible. The
+account you choose may require some rights such as access to the
+soundcard device.

@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -12,8 +12,8 @@
  * GNU General Public License, as published by the Free Software
  * Foundation.  Please see the file COPYING for details.
  */
-#define VERSION "BRLTTY External Speech driver, version 0.5 (September 2000)"
-#define COPYRIGHT "Copyright (C) 2000 by Stéphane Doyon " \
+#define VERSION "BRLTTY External Speech driver, version 0.6 (March 2001)"
+#define COPYRIGHT "Copyright (C) 2000-2001 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* ExternalSpeech/speech.c - Speech library (driver)
  * For external programs, using my own protocol. Features indexing.
@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <linux/limits.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define SPEECH_C 1
 
@@ -41,6 +42,7 @@
 #include "../spk_driver.h"
 
 static char *extProgPath = HELPER_PROG_PATH;
+static uid_t uid, gid;
 static int helper_fd_in = -1, helper_fd_out = -1;
 static unsigned short lastIndex, finalIndex;
 static char speaking = 0;
@@ -66,7 +68,7 @@ static void myperror(char *msg)
   LogPrint(LOG_ERR, buf, strerror(errno));
   closespk();
 }
-static void myperror2(char *msg, char *str1)
+static void myperror2(char *msg, void *str1)
 {
   char buf[200];
   if(strlen(msg) > 190)
@@ -77,10 +79,52 @@ static void myperror2(char *msg, char *str1)
   closespk();
 }
 
-static void initspk (char *parm)
+static void initspk (char *speechparm)
 {
   int fd1[2], fd2[2];
-  extProgPath = (parm == NULL) ? HELPER_PROG_PATH : parm;
+  char *ptr, *s_uid, *s_gid;
+  char *parm = NULL;
+  if(speechparm){
+    /* We don't want to modify speechparm, in particular if we are ever
+       to reinit this driver... */
+    parm = strdup(speechparm);
+    if(!parm){
+      myperror("strdup -> out of memory");
+      return;
+    }
+    /* but now we must not forget to free parm! */
+    extProgPath = strtok_r(parm, ",", &ptr);
+    s_uid = strtok_r(NULL, ",", &ptr);
+    s_gid = strtok_r(NULL, ",", &ptr);
+    if(s_uid) {
+      uid = strtol(s_uid, &ptr, 0);
+      if(*ptr != 0)
+	s_gid = NULL;
+    }
+    if(s_gid) {
+      gid = strtol(s_gid, &ptr, 0);
+      if(*ptr != 0)
+	s_gid = NULL;
+    }
+    if(s_uid && !s_gid) {
+      myperror2("Unable to parse parameter to ExternalSpeech driver. "
+		"Expected format is '<extProgramPath>' or "
+		"'<extProgramPath>,<numerical_uid>,<numerical_gid>'. "
+		"Got parameter '%s'", speechparm);
+      free(parm);
+      return;
+    }
+  }else extProgPath = s_uid = s_gid = NULL;
+  if(!extProgPath) extProgPath = HELPER_PROG_PATH;
+  extProgPath = strdup(extProgPath);
+  if(!extProgPath) {
+    myperror("strdup -> out of memory");
+    return;
+  }
+  if(!s_uid) uid = UID;
+  if(!s_gid) gid = GID;
+  if(parm) free(parm);
+
   if(pipe(fd1) < 0
      || pipe(fd2) < 0) {
     myperror("pipe");
@@ -92,22 +136,23 @@ static void initspk (char *parm)
     return;
   case 0: {
     int i;
-    if(setgid(GID) <0) {
-      myperror("setgid");
+    if(setgid(gid) <0) {
+      myperror2("setgid to %u", (void *)gid);
       _exit(1);
     }
-    if(setuid(UID) <0) {
-      myperror("setuid");
+    if(setuid(uid) <0) {
+      myperror2("setuid to %u", (void *)uid);
       _exit(1);
     }
-    LogPrint(LOG_DEBUG, "my uid is %u", getuid());
+    LogPrint(LOG_INFO, "ExternalSpeech program uid is %u, gid is %u",
+	     getuid(), getgid());
     if(dup2(fd2[0], 0) < 0 /* stdin */
        || dup2(fd1[1], 1) < 0){ /* stdout */
       myperror("dup2");
       _exit(1);
     }
     for(i=2; i<OPEN_MAX; i++) close(i);
-    execl(extProgPath, HELPER_PROG_PATH, 0);
+    execl(extProgPath, extProgPath, 0);
     myperror2("Unable to execute external speech program %s: exec",
 	     HELPER_PROG_PATH);
     _exit(1);
@@ -124,7 +169,8 @@ static void initspk (char *parm)
     }
   };
 
-  LogPrint(LOG_DEBUG,"Opened pipe to external speech program");
+  LogPrint(LOG_INFO,"Opened pipe to external speech program '%s'",
+	   extProgPath);
 }
 
 static void mywrite(int fd, void *buf, int len)
@@ -239,6 +285,7 @@ static void mutespk (void)
 
 static void closespk (void)
 {
+  if(extProgPath) free(extProgPath);
   if(helper_fd_in >= 0)
     close(helper_fd_in);
   if(helper_fd_out >= 0)

@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -15,17 +15,21 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-#define VERSION "BRLTTY driver for TSI displays, version 2.52 (September 2000)"
-#define COPYRIGHT "Copyright (C) 1996-2000 by Stéphane Doyon " \
+#define VERSION "BRLTTY driver for TSI displays, version 2.56 (March 2001)"
+#define COPYRIGHT "Copyright (C) 1996-2001 by Stéphane Doyon " \
                   "<s.doyon@videotron.ca>"
 /* TSI/brl.c - Braille display driver for TSI displays
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled into BRLTTY versions 2.95-3.0.
+ * It is designed to be compiled into BRLTTY versions 2.97-3.0.
  *
  * History:
+ * Version 2.56: Added key binding for NXSEARCH.
+ * Version 2.55: Added key binding for NXINDENT and NXBLNKLNS.
+ * Version 2.54: Added key binding for switchvt.
+ * Version 2.53: The IXOFF bit in the termios setting was inverted?
  * Version 2.52: Changed LOG_NOTICE to LOG_INFO. Was too noisy.
  * Version 2.51: Added CMD_RESTARTSPEECH.
  * Version 2.5: Added CMD_SPKHOME, sacrificed LNBEG and LNEND.
@@ -470,7 +474,7 @@ static void initbrl (brldim *brl, const char *tty)
                      );
   /* input */
   curtio.c_iflag &= ~( INPCK /* no input parity check */
-                      | ~IXOFF /* don't send XON/XOFF */
+                      | IXOFF /* don't send XON/XOFF */
 		     );
 
   /* noncanonical: for first operation */
@@ -1267,11 +1271,21 @@ readbrl (int type)
 
   if(has_sw && code && sw_howmany){
     if(ignore_routing) return(EOF);
+    ignore_routing = 1;
     if(sw_howmany == 1){
-      ignore_routing = 1;
       switch(code){
 	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, CR_BEGBLKOFFSET + sw_which[0]);
 	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, CR_ENDBLKOFFSET + sw_which[0]);
+	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CR_NXINDENT + sw_which[0]);
+	KEYAND(KEY_R2UP) KEY (KEY_BUP, CR_PRINDENT + sw_which[0]);
+	KEY (KEY_CDOWN, CR_SWITCHVT + sw_which[0]);
+      }
+    }else if(sw_howmany == 2 && sw_which[0]==0 && sw_which[1]==1){
+      switch(code){
+	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CMD_NXBLNKLN);
+	KEYAND(KEY_R2UP) KEY (KEY_BUP, CMD_PRBLNKLN);
+	KEYAND(KEY_BUT4) KEY (KEY_BRIGHT, CMD_NXSEARCH);
+	KEYAND(KEY_BUT3) KEY (KEY_BLEFT, CMD_PRSEARCH);
       }
     }
   }else if (has_sw && sw_howmany)	/* routing key */

@@ -1,5 +1,6 @@
 /*
- * BRLTTY - Access software for Unix for a blind person
+ * BRLTTY - Acce:q
+ * ss software for Unix for a blind person
  *          using a soft Braille terminal
  *
  * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
@@ -15,10 +16,9 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-/* cut-n-paste.h - cut & paste functionality
- */
 
-unsigned char *cut_buffer; /* for CMD_NXSEARCH */
-void cut_begin (int x, int y);
-void cut_end (int x, int y);
-void cut_paste ();
+extern volatile int csr_active;
+extern volatile pid_t csr_pid;
+
+void csrjmp (int x, int y, int scrno);
+

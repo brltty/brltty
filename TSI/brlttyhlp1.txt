@@ -18,9 +18,12 @@ Movement:
   Left/right one window (useful if line longer than 80chars): Rlt / Rrt
   Half-window left/right: CR1+CR3 / CR78+CR80 or Lup+Llt / Lup+Lrt
   Several lines up/down: Lrn+Rup / Lrn+Rdn
+  Prev/next paragraph (line after blank lines): CR1+CR2 + Rup / CR1+CR2 + Rdn
+  Prev/next line indented no more than #: CR# + Rup / CR# + Rdn
 
 Simulation of keyboard arrow keys:
-  up/dn / left/right arrow: Lup/Ldn / Llt/Lrt
+  Up/dn / left/right arrow: Lup/Ldn / Llt/Lrt
+  Switch virtual terminal: CR# + Ldn
 
 Special modes
   This help: CR1+CR80 or Llt+Lrt (toggle)
@@ -40,6 +43,7 @@ Cut & paste:
     cell #(n2): CR#(n1) + CR#(n1+2) + CR#(n2)
     For example, a region from cell 10 to cell 20: CR10+CR12+CR20
   Paste cut region: CR2+CR3 or Rrn+Ldn
+  Search for same text as in content buffer: CR1+CR2+Rlt / CR1+CR2+Rrt
 
 Speech:
   Speak line: Rrt+Rdn

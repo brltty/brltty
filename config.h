@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -32,9 +32,6 @@
 #define DISPDEL 2000		/* time duration to display messages */
 
 
-#ifdef BRLTTY_C			/* for brltty.c */
-#undef BRLTTY_C			/* only do once */
-
 /* Character cursor initialisation: */
 #define BIG_CSRCHAR 0xff	/* block cursor */
 #define SMALL_CSRCHAR 0xc0	/* underline cursor */
@@ -58,6 +55,7 @@
 #define INIT_SKPIDLNS 0		/* 1 = skip all identical lines after first */
 #define INIT_SKPBLNKEOL 0       /* 1 = when remaining of line is blank, skip
 				   to the next. */
+#define INIT_SKPBLNKWINS 0       /* 1 = skip blank windows */
 
 /* These control the speed of any blinking cursor or capital letters.
  * The numbers refer to cycles of the main program loop.
@@ -69,39 +67,3 @@
 #define INIT_ATTR_ON_CNT 4      /* for attribute underlining */
 #define INIT_ATTR_OFF_CNT 12
 
-/* These control the performance of cursor routing.  The optimal settings
- * will depend heavily on system load, etc.  See the documentation for
- * further details.
- * NOTE: if you try to route the cursor to an invalid place, BRLTTY won't
- * give up until the timeout has elapsed!
- */
-#define CSRJMP_NICENESS 10	/* niceness of cursor routing subprocess */
-#define CSRJMP_TIMEOUT 2000	/* cursor routing idle timeout in ms */
-#define CSRJMP_LOOP_DELAY 0	/* delay to use in csrjmp_sub() loops (ms) */
-#define CSRJMP_SETTLE_DELAY 400	/* delay to use in csrjmp_sub() loops (ms) */
-
-#endif /* BRLTTY_C */
-
-
-/* These are for inskey(): */
-#define CONSOLE "/dev/tty0"	/* name of device for simulating keystrokes */
-#define UP_CSR "\033[A"		/* vt100 up-cursor */
-#define DN_CSR "\033[B"		/* vt100 down-cursor */
-#define LT_CSR "\033[D"		/* vt100 left-cursor */
-#define RT_CSR "\033[C"		/* vt100 right-cursor */
-
-/* for keyboard key mapping (see KEYMAP) ... */
-#define KEY_RETURN "\r"
-
-/* ---------------- SETTINGS FOR THE SCREEN-READING LIBRARY ---------------- */
-
-#ifdef SCR_C			/* for scr.c */
-#undef SCR_C			/* only do once */
-#endif /* SCR_C */
-
-/* ------------------------------------------------------------------------- */
-
-/* misc for every files */
-#define NBR_SCR 16		/* actual number of separate screens */
-
-/* see misc.h to disable use of syslog */

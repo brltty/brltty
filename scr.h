@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -20,6 +20,7 @@
 
 #ifndef _SCR_H
 #define _SCR_H
+
 
 /* mode argument for getscr () */
 #define SCR_TEXT 0		/* get screen text */

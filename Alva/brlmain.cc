@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -828,11 +828,16 @@ static int readbrl (int type)
 	    case KEY_CURSOR | KEY_ROUTING_C:
 	      res = CMD_SLIDEWIN;
 	      break;
+	    case KEY_PROG | KEY_HOME | KEY_UP:
+	      res = CMD_SPKHOME;
+	      break;
 	    case KEY_PROG | KEY_HOME | KEY_LEFT:
-	      res = CMD_CUT_BEG;
+	      //res = CMD_CUT_BEG;
+	      res = CMD_RESTARTSPEECH;
 	      break;
 	    case KEY_PROG | KEY_HOME | KEY_RIGHT:
-	      res = CMD_CUT_END;
+	      //res = CMD_CUT_END;
+	      res = CMD_SAYALL;
 	      break;
 	    case KEY_ROUTING:
 	      /* normal Cursor routing keys */

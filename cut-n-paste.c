@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -30,7 +30,7 @@ static void cut (void);
 
 
 /* Global state variables */
-static unsigned char *cut_buffer = NULL;
+unsigned char *cut_buffer = NULL;
 static short cut_begx = 0, cut_begy = 0, cut_endx = 0, cut_endy = 0;
 
 

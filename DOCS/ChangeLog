@@ -2,6 +2,19 @@ Note: this file is in reversed chronological order (bottom to top).
 
 
 
+March 2001:
+ - version 2.97 (beta):
+ - Code cleanup i.e. the big mess that brltty.c was is now broken into
+   multiple files.
+ - Command and parameter to skip blank windows.
+ - Command to switch virtual terminal.
+ - Command to find the next/prev line indented not more than a certain point.
+ - Command to find next/prev line following blank lines (next/prev paragraph).
+ - Command to search for some text on the screen. Text is taken from
+   cut_buffer.
+ - Fixes to ExternalSpeech driver. Can now pass uid through speech driver
+   parameter.
+
 26 Nov 2000:
  - version 2.96 (beta):
  - Vario support updates from Mario Lang <mlang@home.delysid.org>
@@ -13,7 +26,6 @@ Note: this file is in reversed chronological order (bottom to top).
      errors occur;
    - loglevel lowered on less important messages to reduce noise;
    - fixes to the module for external speech program support;
-   - MDV driver updates
    - TSI driver updates
    - multiple new command bindings for speech;
    - speech tracking;

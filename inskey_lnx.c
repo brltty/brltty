@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -26,9 +26,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <linux/keyboard.h>
 #include <linux/kd.h>
+#include <linux/vt.h>
 
 #include "config.h"
 #include "inskey.h"
@@ -64,4 +67,10 @@ void inskey (unsigned char *string)
   close (ins_fd);
 }
 
-
+void switchvt(int n)
+{
+  int fd;
+  fd = open (CONSOLE, O_RDONLY);
+  if (fd == -1) return;
+  ioctl(fd, VT_ACTIVATE, n);
+}

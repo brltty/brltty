@@ -18,9 +18,12 @@ Movement:
   One character left/right: CR1+CR2 / CR39+CR40
   Half-window left/right: CR1+CR3 / CR38+CR40
   Several lines up/down: cnvx+Lup / cnvx+Ldn
+  Prev/next paragraph (line after blank lines): CR1+CR2 + Rup / CR1+CR2 + Rdn
+  Prev/next line indented no more than #: CR# + Rup / CR# + Rdn
 
 Simulation of keyboard arrow keys:
-  up/dn arrow : Lup/Ldn
+  Up/dn arrow : Lup/Ldn
+  Switch virtual terminal: CR# + Ldn
 
 Special modes
   This help: CR1+CR40
@@ -40,6 +43,7 @@ Cut & paste:
     cell #(n2): CR#(n1) + CR#(n1+2) + CR#(n2)
     For example, a region from cell 10 to cell 20: CR10+CR12+CR20
   Paste cut region: CR2+CR3 or cncv+Ldn
+  Search for same text as in content buffer: CR1+CR2+lt / CR1+CR2+rt
 
 Speech:
   Speak line: rt+Rdn

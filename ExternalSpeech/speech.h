@@ -2,7 +2,7 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Copyright (C) 1995-2000 by The BRLTTY Team, All rights reserved.
+ * Copyright (C) 1995-2001 by The BRLTTY Team, All rights reserved.
  *
  * Web Page: http://www.cam.org/~nico/brltty
  *
@@ -17,10 +17,13 @@
 
 #define SPKNAME "ExternalSpeech"
 
-/* Specify the path of the external program that will handle speech.
-   This setting can be overridden through the -p command-line parameter
-   or speech-driverparm configuration option. */
+/* The following are the default parameters that will be used if no parameter
+   is specified on the command-line (-p) or in the brltty.conf file
+   (speech-driverparm option). */
+
+/* Specify the path of the external program that will handle speech. */
 #define HELPER_PROG_PATH "/usr/local/bin/externalspeech"
 
-#define UID 501
-#define GID 501
+#define UID 65534
+#define GID 65534
+/* We setuid/setgid before exec'ing the external program. */
