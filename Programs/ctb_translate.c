@@ -24,7 +24,7 @@
 #include <string.h>
  
 #include "ctb.h"
-#include "ctb_definitions.h"
+#include "ctb_internal.h"
 #include "brl.h"
 
 static const ContractionTableHeader *table;	/*translation table */
