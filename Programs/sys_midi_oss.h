@@ -18,6 +18,10 @@
 struct MidiDeviceStruct {
   int fileDescriptor;
   int deviceNumber;
+/*SEQ_DEFINEBUF(0X80);*/
+  unsigned char buffer[0X80];
+  int bufferLength;
+  int bufferUsed;
 };
 
 #ifndef SAMPLE_TYPE_AWE
@@ -25,7 +29,9 @@ struct MidiDeviceStruct {
 #endif /* SAMPLE_TYPE_AWE */
 
 static MidiDevice *midiDevice = NULL;
-SEQ_DEFINEBUF(0X80);
+#define _seqbuf midiDevice->buffer
+#define _seqbuflen midiDevice->bufferLength
+#define _seqbufptr midiDevice->bufferUsed
 
 void
 seqbuf_dump (void) {
@@ -102,6 +108,9 @@ openMidiDevice (int errorLevel) {
                              (ext >= 0)? ext:
                              0;
       }
+
+      midi->bufferLength = sizeof(midi->buffer);
+      midi->bufferUsed = 0;
 
       return midi;
     } else {
