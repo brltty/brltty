@@ -445,7 +445,7 @@ downloadFile (void) {
                if (!count) {
                   count = read(file, buffer, sizeof(buffer));
                   if (!count) {
-                     static const char fileTrailer[] = {0X1A};
+                     static const unsigned char fileTrailer[] = {0X1A};
                      sendBytes(fileTrailer, sizeof(fileTrailer));
                      break;
                   }
@@ -456,7 +456,7 @@ downloadFile (void) {
                   address = buffer;
                }
                if ((newline = memchr(address, '\n', count))) {
-                  static const char lineTrailer[] = {0X0D, 0X0A};
+                  static const unsigned char lineTrailer[] = {0X0D, 0X0A};
                   size_t length = newline - address;
                   if (!sendBytes(address, length++)) break;
                   if (!sendBytes(lineTrailer, sizeof(lineTrailer))) break;
