@@ -306,7 +306,9 @@ setInetAddress (const char *string, struct sockaddr_in *address) {
       ok = 0;
       LogPrint(LOG_WARNING, "Unknown host name: %s", hostName);
     }
+#ifdef HAVE_ENDHOSTENT
     endhostent();
+#endif /* HAVE_ENDHOSTENT */
   } else {
     address->sin_addr.s_addr = INADDR_ANY;
   }
@@ -328,7 +330,9 @@ setInetAddress (const char *string, struct sockaddr_in *address) {
         ok = 0;
         LogPrint(LOG_WARNING, "Unknown service: %s", portNumber);
       }
+#ifdef HAVE_ENDSERVENT
       endservent();
+#endif /* HAVE_ENDSERVENT */
     }
   } else {
     address->sin_port = htons(VR_DEFAULT_PORT);

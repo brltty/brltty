@@ -74,6 +74,12 @@ extern "C" {
 /* Define this if the header file linux/uinput.h exists. */
 #undef HAVE_LINUX_UINPUT_H
 
+/* Define this if the function endhostent exists. */
+#undef HAVE_ENDHOSTENT
+
+/* Define this if the function endservent exists. */
+#undef HAVE_ENDSERVENT
+
 /* Define this if the function fchdir exists. */
 #undef HAVE_FCHDIR
 
@@ -83,8 +89,14 @@ extern "C" {
 /* Define this if the function getaddrinfo exists. */
 #undef HAVE_GETADDRINFO
 
+/* Define this if the function gai_strerror exists. */
+#undef HAVE_GAI_STRERROR
+
 /* Define this if the function getopt_long exists. */
 #undef HAVE_GETOPT_LONG
+
+/* Define this if the function hstrerror exists. */
+#undef HAVE_HSTRERROR
 
 /* Define this if the function shmget exists. */
 #undef HAVE_SHMGET
