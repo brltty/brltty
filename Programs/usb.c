@@ -209,10 +209,12 @@ usbAwaitInput (
   if (!device->inputRequest) {
     UsbResponse response;
     while (!(device->inputRequest = usbReapResponse(device, &response, 0))) {
-      const int interval = 10;
       if (timeout <= 0) return 0;
-      delay(interval);
-      timeout -= interval;
+      {
+        const int interval = 10;
+        delay(interval);
+        timeout -= interval;
+      }
     }
     usbAddInputElement(device);
 
@@ -442,11 +444,6 @@ usbGetSerialOperations (const UsbDevice *device) {
     const UsbSerialOperations *operations;
   } UsbSerialAdapter;
   static const UsbSerialAdapter usbSerialAdapters[] = {
-    {0X050D, 0X1203, &usbBelkinOperations}, /* Belkin DockStation */
-    {0X050D, 0X0103, &usbBelkinOperations}, /* Belkin Serial Adapter */
-    {0X056C, 0X8007, &usbBelkinOperations}, /* Belkin Old Single Port Serial Converter */
-    {0X0565, 0X0001, &usbBelkinOperations}, /* Peracom Single Port Serial Converter */
-    {0X0921, 0X1000, &usbBelkinOperations}, /* GoHubs Single Port Serial Converter */
     {0X0921, 0X1200, &usbBelkinOperations}, /* GoHubs HandyLink */
     {}
   };
