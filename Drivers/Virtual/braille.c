@@ -58,6 +58,7 @@ static char inputBuffer[INPUT_SIZE];
 static size_t inputLength;
 static size_t inputStart;
 static int inputEnd;
+static int inputCarriageReturn;
 static const char *inputDelimiters = " ";
 
 #define OUTPUT_SIZE 0X200
@@ -66,7 +67,7 @@ static size_t outputLength;
 
 typedef struct {
   const CommandEntry *entry;
-  unsigned int maximum;
+  unsigned int count;
 } CommandDescriptor;
 static CommandDescriptor *commandDescriptors = NULL;
 static const size_t commandSize = sizeof(*commandDescriptors);
@@ -411,7 +412,11 @@ readCommandLine (void) {
       if (newline) {
         char *string;
         int stringLength = newline - inputBuffer;
-        if ((newline != inputBuffer) && (*(newline-1) == '\r')) --stringLength;
+        inputCarriageReturn = 0;
+        if ((newline != inputBuffer) && (*(newline-1) == '\r')) {
+          inputCarriageReturn = 1;
+          --stringLength;
+        }
         string = makeString(inputBuffer, stringLength);
         inputLength -= ++newline - inputBuffer;
         memmove(inputBuffer, newline, inputLength);
@@ -528,6 +533,17 @@ writeDots (const unsigned char *cells, int count) {
   return 1;
 }
 
+static int
+writeLine (void) {
+  if (inputCarriageReturn)
+    if (!writeByte('\r'))
+      return 0;
+  if (writeByte('\n'))
+    if (flushOutput())
+      return 1;
+  return 0;
+}
+
 static size_t
 getCommandCount (void) {
   size_t count = 0;
@@ -583,7 +599,7 @@ allocateCommandDescriptors (void) {
       const CommandEntry *entry = commandTable;
       while (entry->name) {
         descriptor->entry = entry++;
-        descriptor->maximum = 0;
+        descriptor->count = 0;
         ++descriptor;
       }
     }
@@ -599,7 +615,7 @@ allocateCommandDescriptors (void) {
 
         if (currentBlock != previousBlock) {
           if (currentBlock) {
-            descriptor->maximum = VAL_ARG_MASK - (code & VAL_ARG_MASK);
+            descriptor->count = (VAL_ARG_MASK + 1) - (code & VAL_ARG_MASK);
           }
           previousBlock = currentBlock;
         }
@@ -792,7 +808,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     writeString("Braille \"");
     writeDots(brl->buffer, brailleCells);
     writeString("\"\n");
-    flushOutput();
+    writeLine();
 
     memcpy(previousBraille, brl->buffer, brailleCells);
   }
@@ -825,7 +841,7 @@ brl_writeVisual (BrailleDisplay *brl) {
       }
     }
     writeString("\"\n");
-    flushOutput();
+    writeLine();
 
     memcpy(previousVisual, brl->buffer, brailleCells);
   }
@@ -878,7 +894,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
           }
         }
       }
-      flushOutput();
+      writeLine();
     } else {
       while (cells) {
         if (st[--cells]) {
@@ -890,7 +906,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
       writeString("Status \"");
       writeDots(st, cells);
       writeString("\"\n");
-      flushOutput();
+      writeLine();
     }
 
     memcpy(previousStatus, st, cells);
@@ -914,7 +930,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
       } else {
         const CommandDescriptor *descriptor = findCommand(word);
         if (descriptor) {
-          int needsNumber = descriptor->maximum > 0;
+          int needsNumber = descriptor->count > 0;
           int numberSpecified = 0;
           int switchSpecified = 0;
           int block;
@@ -942,7 +958,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
             if (needsNumber && !numberSpecified) {
               int number;
               if (isInteger(&number, word)) {
-                if ((number > 0) && (number <= descriptor->maximum)) {
+                if ((number > 0) && (number <= descriptor->count)) {
                   numberSpecified = 1;
                   command += number;
                   continue;

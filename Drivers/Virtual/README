@@ -1,38 +1,145 @@
-Virtual Display Driver
-----------------------
+The Virtual Braille Display Driver
+----------------------------------
 
 This is a virtual braille display driver for BRLTTY.  It uses a simple
 text-based protocol over a socket to transmit information to, and to receive
-information from, the virtual braille display application. The intention of
-this driver is two-fold:
+information from, the virtual braille display application (from now on, "the
+display"). The intention of this driver is two-fold:
  * Give interested developers the ability to test BRLTTY without requiring 
    access to a real braille display.
- * Enable the implementation of a visual display based on this driver which
-   allows a sighted person to see, and even to experience, how a blind person
-   uses a braille display to work with a computer.
+ * Enable the implementation of a visual braille display based on this driver 
+   which allows a sighted person to see, and even to experience, how a blind 
+   person uses a braille display to work with a computer.
 
 This driver supports the following parameters:
-mode={client | server}
-   This parameter determines which end of the socket connection is owned by the 
-   driver. If it's "client" then the driver periodically tries to connect to 
-   the braille display application. If it's "server" then the driver waits for 
-   a connection request from the braille display application. The default mode
-   is "client".
-socket=<address>
-   This parameter specifies the network address of the braille display 
-   application. The default address is a TCP/IP connection on the default port 
-   on the local host. The address may be:
-   /path/to/unix-socket-file
-      If the address starts with a slash (/) then it's interpreted as the path
-      to a unix socket file. If the driver is in "client" mode then the 
-      specified file must already exist. If the driver is in "server" mode then 
-      the specified file is created by the driver and must not already exist.
-   [host][:[port]]
-      An IP address. The TCP/IP protocol is used. Both the host and port 
-      components of the address are optional. The delimiting colon (:) is only 
-      required if the port is being specified. The host may be a name, an 
-      alias, or an IPV4 address (in dotted-decimal form); if it's not supplied 
-      then the local host is assumed. The port may be a service name or a port 
-      number; if it's not supplied then 35752 is assumed.
+   mode={client | server}
+      This parameter determines which end of the socket connection is owned by 
+      the driver. If it's "client" then the driver periodically tries to 
+      connect to the display. If it's "server" then the driver waits for a 
+      connection request from the display. The default mode is "client".
+   socket=<address>
+      This parameter specifies the network address of the display. The default 
+      address is a TCP/IP connection on the default port on the local host. The 
+      address may be:
+      /path/to/unix-socket-file
+         If the address starts with a slash (/) then it's interpreted as the 
+         path to a unix socket file. If the driver is in "client" mode then the 
+         specified file must already exist. If the driver is in "server" mode 
+         then the specified file is created by the driver and must not already 
+         exist.
+      [host][:[port]]
+         An IP address. The TCP/IP protocol is used. Both the host and port 
+         components of the address are optional. The delimiting colon (:) is 
+         only required if the port is being specified. The host may be a name, 
+         an alias, or an IPV4 address (in dotted-decimal form); if it's omitted 
+         then the local host is assumed. The port may be a service name or a 
+         port number; if it's omitted then 35752 is assumed.
+
+
+The Protocol
+------------
+
+After the connection between the driver and the display is complete, data is
+exchanged between them via command lines. The driver first waits for a "cells"  
+command in order to determine the dimensions of the braille window. After this
+has been taken care of, commands freely flow in both directions without any
+restrictions. The braille window dimensions are appropriately reconfigured
+whenever another "cells" command is received. The "quit" command, which is also
+recognized during the initial wait for the first "cells" command, instructs the
+driver to close its end of the connection and to restart.
+
+The command lines are in plain text. Each is terminated by a line-feed [0X0A]
+(usually known on Unix systems as a new-line). A carriage-return [0X0D] may
+optionally precede the line-feed. Command lines sent to the display contain a
+carriage-return if, and only if, the most recent command line received from the
+display contained one.
+
+Command lines are composed of space-delimited words, numbers, and strings.
+Space consists of one or more blanks and/or tabs. Case is only significant
+within a string.
+
+A "number" may be specified as decimal, octal, or hexadecimal. The usual C
+syntax is recognized. If the first digit is 0 then the number is octal. If the
+first digit isn't 0 then the number is decimal. If the number begins with
+either 0X or 0x then the number is hexadecimal. The following three numbers are
+the same:
+   15   Decimal
+   017  Octal
+   0XF  Hexadecimal
+
+A "string" is a sequence of characters (including space characters) enclosed
+within double quotes ("). Special characters within a string are prefixed with
+a backslash (\). The following special characters are supported:
+   \\   A literal backslash.
+   \"   A literal double quote.
+   \Xxx Any character specified via its hexadecimal value.
+For example: "A \" (double quote) must be escaped with a \\ (backslash)."
+
+A "dots" is a string which describes a braille character sequence. Space
+(blanks and/or tabs) within the string are ignored. The braille characters are
+separated from one another by a vertical bar (|). Each braille character
+consists of the numbers (1 through 8) of the dots which represent it. For
+example, the first three letters of the English alphabet would be "1|12|14".
+
+
+Commands Recognized by the Driver
+---------------------------------
+
+Cells columns [rows]
+   The number of columns and rows in the text portion of the display. If the 
+   number of rows isn't supplied then 1 is assumed. This is the first command 
+   which the display must send to the driver. It may be sent at any other time 
+   as well to notify the driver that the dimensions of the text portion of the 
+   display have changed.
+
+Quit
+   Upon receipt of this command, the driver closes its end of the connection 
+   and then restarts. It's recognized at any time, including during the initial 
+   wait for the first "cells" command from the display.
+
+<basic-command> [state]
+   A basic command for the BRLTTY core. It may be any of the CMD_ constants 
+   (without the CMD_ prefix) defined within "brldefs.h", e.g. LnDn. The
+   optional <state> operand (which may be either on or off), when applied to an 
+   attribute toggling command, forces that attribute to the specified state.
+
+<cell-command> number
+   A cell command for the BRLTTY core. It may be any of the CR_ constants 
+   (without the CR_ prefix) defined within "brldefs.h", e.g. Route. The cell 
+   number, starting at 1 for the leftmost cell, must be supplied. If the 
+   display has more than one row then the cells for the top row are counted 
+   first, e.g. if the display has 32 columns and 2 rows then 35 refers to the 
+   third cell on the second row.
+
+<key-command> [number]
+   A key command for the BRLTTY core. It may be any of the VPK_ constants 
+   (without the VPK_ prefix) defined within "brldefs.h", e.g. Return. The 
+   Function command requires that the function key number, starting at 1, be 
+   supplied. All the other commands in this set don't accept a number operand.
+
+
+Commands Sent to the Display
+----------------------------
+
+Braille dots
+   Cells to be presented on the text portion of the display. Excess cells in 
+   the data should be ignored. Excess cells on the display should be blank.
+
+Visual string
+   Characters to be presented on the visual portion of the display. Excess 
+   characters in the data should be ignored. Excess characters on the display 
+   should be blank.
+
+Status dots
+   Cells to be presented on the status portion of the display. Excess cells in 
+   the data should be ignored. Excess cells on the display should be blank.
+
+<attribute> <setting>
+   The current setting of any of several attributes within the BRLTTY core. 
+   These are only sent if "Status Style" is set to "Generic". <attribute> is 
+   the name of any of the STAT_ constants (without the STAT_ prefix) defined 
+   within "brldefs.h", e.g. BrlRow. <setting> is a number. Rows and columns 
+   start at 1. Flags use 0 for "off" and 1 for "on".
+
 
  -- Mario Lang <mlang@delysid.org>
