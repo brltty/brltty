@@ -355,7 +355,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
   while (inputUsed > 0) {
     if (inputBuffer[0] == 0X7F) {
       if (inputUsed < 3) break;
-      if (inputBuffer[2] != 0X7E) goto corrupt;
+      if (inputBuffer[2] != 0X7E) goto unrecognized;
       if (inputUsed < 4) break;
       {
         int count = (inputBuffer[3] * 2) + 4;
@@ -364,7 +364,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
         if (!complete) count = inputUsed;
         for (index=4; index<count; index+=2)
           if (inputBuffer[index] != 0X7E)
-            goto corrupt;
+            goto unrecognized;
         if (complete) size = count;
         break;
       }
@@ -378,12 +378,13 @@ verifyInputPacket (unsigned char *buffer, int *length) {
     {
       int count = BRL_ID_LENGTH;
       if (inputUsed < count) count = inputUsed;
-      if (memcmp(&inputBuffer[0], BRL_ID, count) != 0) goto corrupt;
+      if (memcmp(&inputBuffer[0], BRL_ID, count) != 0) goto unrecognized;
       if (inputUsed >= BRL_ID_SIZE) size = BRL_ID_SIZE;
       break;
     }
 
-  corrupt:
+  unrecognized:
+    LogBytes("Unrecognized Packet", inputBuffer, inputUsed);
     memcpy(&inputBuffer[0], &inputBuffer[1], --inputUsed);
   }
 #else /* ABT3_OLD_FIRMWARE */
@@ -542,7 +543,8 @@ readUsbPacket (unsigned char *buffer, int length) {
       memcpy(&inputBuffer[inputUsed], bytes, count);
       inputUsed += count;
       if (verifyInputPacket(buffer, &length)) return length;
-    } else {
+    } else if (inputUsed) {
+      LogBytes("Truncated Packet", inputBuffer, inputUsed);
       inputUsed = 0;
     }
   }
@@ -910,7 +912,7 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
   }
 
 #endif /* ! ABT3_OLD_FIRMWARE */
-  LogBytes("Unexpected Input Packet", packet, length);
+  LogBytes("Unexpected Packet", packet, length);
   return 0;
 }
 
