@@ -88,6 +88,15 @@ static int cmdtrans[64] =
 static unsigned char dangcmd[8] =
 { 0x00, 0x88, 0x80, 0x05, 0x40, 0x00, 0x10, 0x00 };
 
+static int barcmds[16] =
+{
+/*          none         right        left         both         */
+/* none  */ 0          , CMD_FWINRT , CMD_LNDN   , CMD_HWINRT ,
+/* right */ CMD_LNUP   , CMD_ATTRDN , CMD_ATTRUP , 0          ,
+/* left  */ CMD_FWINLT , CMD_NXDIFLN, CMD_PRDIFLN, 0          ,
+/* both  */ CMD_HWINLT , CMD_BOT    , CMD_TOP    , 0
+};
+
 #endif /* BL_NEED_ARRAYS */
 
 
@@ -101,12 +110,12 @@ static unsigned char dangcmd[8] =
 #define BLT_BARRT CMD_FWINRT
 
 /* BrailleLite 40 (patterned after other screen readers) */
-/* Left-hand advance bar: left=pan left, right=line up */
-#define BLT_BARLT1 CMD_FWINLT
-#define BLT_BARRT1 CMD_LNUP
-/* Right-hand advance bar: left=line down, right=pan right */
-#define BLT_BARLT2 CMD_LNDN
-#define BLT_BARRT2 CMD_FWINRT
+/* Left-hand wheel: up=pan left, down=pan right */
+#define BLT_WHLUP1 CMD_FWINLT
+#define BLT_WHLDN1 CMD_FWINRT
+/* Right-hand wheel: up=line up, down=line down */
+#define BLT_WHLUP2 CMD_LNUP
+#define BLT_WHLDN2 CMD_LNDN
 
 
 /* Internal commands.  The definitions use the ASCII codes from brltrans[]

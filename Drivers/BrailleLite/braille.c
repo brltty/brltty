@@ -21,10 +21,11 @@
  * Copyright (C) 1998 by Nikhil Nair.
  * Some additions by: Nicolas Pitre <nico@cam.org>
  * Some modifications copyright 2001 by Stéphane Doyon <s.doyon@videotron.ca>.
+ * Some additions by: Dave Mielke <dave@mielke.cc>
  */
 
 #define VERSION \
-"Braille Lite driver, version 0.5.10 (April 2002)"
+"Braille Lite driver, version 0.6.0 (June 2003)"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -747,26 +748,27 @@ qput (unsigned char c)
 static int
 qget (blkey * kp)
 {
-  unsigned char c, c2, c3;
-  int ext;
+  unsigned char c;
+  int how;
+  static unsigned char counts[] = {1, 3, 3};
+  unsigned char count;
 
   if (qlen == 0)
     return EOF;
   c = qbase[qoff];
 
   /* extended sequences start with a zero */
-  ext = (c == 0);
-
-  /* extended sequences requires 3 bytes */
-  if (ext && qlen < 3)
+  how = (c == 0)? 1:
+        (c == 0x80 && blitesz != 18)? 2:
+        0;
+  count = counts[how];
+  if (qlen < count)
     return EOF;
 
   memset (kp, 0, sizeof (*kp));
-
-  if (!ext)
+  switch (how)
     {
-      /* non-extended sequences (BL18) */
-
+    case 0: /* non-extended sequences (BL18) */
       /* We must deal with keyboard reversal here: */
       if (reverse_kbd)
 	{
@@ -790,23 +792,23 @@ qget (blkey * kp)
 	      break;
 	    default:		/* unrecognised keypress */
 	      kp->cmd = 0;
+              break;
 	    }
 	}
       else
 	{
-	  kp->spcbar = ((c & 0x40) ? 1 : 0);
+	  kp->spcbar = ((c & 0x40)? 1: 0);
 	  c &= 0x3f;		/* leave only dot key info */
 	  kp->raw = c;
 	  kp->cmd = cmdtrans[c];
 	  kp->asc = brltrans[c];
 	}
-    }
-  else
-    {
-      /* extended sequences (BL40) */
+      break;
 
-      c2 = qbase[((qoff + 1) % QSZ)];
-      c3 = qbase[((qoff + 2) % QSZ)];
+    case 1: /* extended sequences (BL40) */
+    {
+      unsigned char c2 = qbase[((qoff + 1) % QSZ)];
+      unsigned char c3 = qbase[((qoff + 2) % QSZ)];
 
       /* We must deal with keyboard reversal here: */
       if (reverse_kbd)
@@ -821,9 +823,11 @@ qget (blkey * kp)
 		c3 = blitesz - c3 + 1;
 	    }
 	  else
-	    c2 = (((c2 & 0x38) >> 3) | ((c2 & 0x07) << 3) |
-		  ((c2 & 0x40) << 1) | ((c2 & 0x80) >> 1));
-	  c3 = ((c3 & 0x40) | ((c3 & 0x38) >> 3) | ((c3 & 0x07) << 3));
+            {
+              c2 = (((c2 & 0x38) >> 3) | ((c2 & 0x07) << 3) |
+                    ((c2 & 0x40) << 1) | ((c2 & 0x80) >> 1));
+              c3 = ((c3 & 0x40) | ((c3 & 0x38) >> 3) | ((c3 & 0x07) << 3));
+            }
 	}
 
       /* Now we fill in all the info about the keypress: */
@@ -831,42 +835,55 @@ qget (blkey * kp)
 	{
 	  kp->raw = c3;
 	  if (c3 & 0x80)
-	    {			/* advance bars */
-	      switch (c3 & 0xF)
-		{
-		case 0x8:	/* left 1 */
-		  kp->cmd = BLT_BARLT1;
-		  break;
-		case 0x4:	/* right 1 */
-		  kp->cmd = BLT_BARRT1;
-		  break;
-		case 0x2:	/* left 2 */
-		  kp->cmd = BLT_BARLT2;
-		  break;
-		case 0x1:	/* right 2 */
-		  kp->cmd = BLT_BARRT2;
-		  break;
-		default:	/* unrecognised keypress */
-		  kp->cmd = 0;
-		}
-	    }
+            kp->cmd = barcmds[c3 & 0xF];
 	  else if (c3 > 0 && c3 <= blitesz)
 	    kp->routing = c3;
 	}
       else
 	{
-	  kp->spcbar = ((c3 & 0x40) ? 1 : 0);
+	  kp->spcbar = ((c3 & 0x40)? 1: 0);
 	  c3 &= 0x3f;		/* leave only dot key info */
-	  kp->raw = (c2 &0xC0) | c3; /* combine info for all 8 dots */
-	  /* I have no idea what is in c2&0x3F. */
+	  kp->raw = (c2 & 0xC0) | c3; /* combine info for all 8 dots */
+	  /* c2&0x3F and c3&0x3F are the same, i.e. dots 1-6. */
 	  kp->cmd = cmdtrans[c3];
 	  kp->asc = brltrans[c3];
 	}
+      break;
+    }
+
+    case 2: /* extended sequences (millennium) */
+    {
+      unsigned char c3 = qbase[((qoff + 2) % QSZ)];
+
+      /* We must deal with keyboard reversal here: */
+      if (reverse_kbd)
+        c3 = ((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3) |
+             ((c3 & 0x30) << 2) | ((c3 & 0xc0) >> 2);
+      kp->raw = c3;
+
+      if (c3 & 0xf)
+        kp->cmd = barcmds[((c3 & 0x1) << 3) | ((c3 & 0x2) << 1) | ((c3 & 0x4) >> 1) | ((c3 & 0x8) >> 3)];
+      else if (c3 & 0x10)
+        kp->cmd = BLT_WHLUP2;
+      else if (c3 & 0x20)
+        kp->cmd = BLT_WHLDN2;
+      else if (c3 & 0x40)
+        kp->cmd = BLT_WHLUP1;
+      else if (c3 & 0x80)
+        kp->cmd = BLT_WHLDN1;
+      else
+        kp->cmd = 0;
+      break;
+    }
+
+    default:
+      kp->cmd = 0;
+      break;
     }
 
   /* adjust queue variables for next member */
-  qoff = (qoff + (ext ? 3 : 1)) % QSZ;
-  qlen -= (ext ? 3 : 1);
+  qoff = (qoff + count) % QSZ;
+  qlen -= count;
 
   return 0;
 }
