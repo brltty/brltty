@@ -324,7 +324,7 @@ static void brl_writeWindow (BrailleDisplay *brl)
 {
   int start, stop;
     
-  if (brl->x != brlcols || brl->y != BRLROWS || brl->buffer != dispbuf)
+  if (brl->x != brlcols || brl->y != BRLROWS)
     return;
     
   /* Determining start and stop for memcpy and prevdata */
