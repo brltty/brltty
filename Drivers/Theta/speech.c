@@ -57,17 +57,27 @@ static const int *pipeOutput = &pipeDescriptors[0];
 static const int *pipeInput = &pipeDescriptors[1];
 
 static void
+initializeTheta (void) {
+  static int initialized = 0;
+  if (!initialized) {
+    theta_init(NULL);
+    initialized = 1;
+  }
+}
+
+static void
 spk_identify (void) {
-  LogPrint(LOG_NOTICE, "Using Theta");
+  initializeTheta();
+  LogPrint(LOG_NOTICE, "Theta version %s", theta_version);
 }
 
 static int
 spk_open (char **parameters) {
   theta_voice_search criteria;
   memset(&criteria, 0, sizeof(criteria));
-  theta_init(NULL);
+  initializeTheta();
 
-  {
+  if (*parameters[PARM_GENDER]) {
     const char *const choices[] = {"male", "female", "neuter", NULL};
     int choice;
     if (validateChoice(&choice, "gender", parameters[PARM_GENDER], choices))
@@ -75,8 +85,6 @@ spk_open (char **parameters) {
   }
 
   if (*parameters[PARM_LANGUAGE]) criteria.lang = parameters[PARM_LANGUAGE];
-
-  if (*parameters[PARM_NAME]) criteria.name_regex = parameters[PARM_NAME];
 
   if (*parameters[PARM_AGE]) {
     const char *word = parameters[PARM_AGE];
@@ -93,8 +101,14 @@ spk_open (char **parameters) {
 
   if ((voiceList = theta_enum_voices(theta_voxpath, &criteria))) {
     for (voiceEntry=voiceList; voiceEntry; voiceEntry=voiceEntry->next) {
+      if (*parameters[PARM_NAME])
+        if (strcasecmp(parameters[PARM_NAME], voiceEntry->human) != 0)
+          continue;
       if ((voice = theta_load_voice(voiceEntry))) {
-        LogPrint(LOG_INFO, "Using voice %s.", voiceEntry->voxname);
+        LogPrint(LOG_INFO, "Voice: %s(%s,%d)",
+                 theta_voice_human(voice),
+                 theta_voice_gender(voice),
+                 theta_voice_age(voice));
         return 1;
       } else {
         LogPrint(LOG_WARNING, "Voice load error: %s", voiceEntry->voxname);
