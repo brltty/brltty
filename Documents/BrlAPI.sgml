@@ -62,7 +62,7 @@ A computer designed to display text in braille. In this case, the text is
 supposed to come from another computer running Linux or any other Unix system.
 
 <tag/Brltty/
-The background process that gives a blind person access to the Linux console
+The background process that gives a blind person access to the console screen
 thanks to a braille terminal or speech synthetizer.
 
 <tag/Client/
