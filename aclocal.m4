@@ -127,16 +127,20 @@ if test "${brltty_enabled_$1_support}" != "no"
 then
    if test -n "${brltty_item_name_$1}"
    then
-      $1_driver='$(BLD_TOP)Drivers/'"${brltty_item_name_$1}/$1.o"
+      $1_driver_name="${brltty_item_name_$1}"
+      $1_driver_object='$(BLD_TOP)Drivers/'"${brltty_item_name_$1}/$1.o"
       AC_DEFINE(translit([$1_builtin], [a-z], [A-Z]))
+      $1_help="$1-help"
+   fi
+   if test "${brltty_standalone_programs}" != "yes"
+   then
+      $1_drivers="$1-drivers"
+      install_drivers="install-drivers"
    fi
 fi
-if test "${brltty_standalone_programs}" != "yes"
-then
-   $1_drivers="$1-drivers"
-   install_drivers="install-drivers"
-fi
-AC_SUBST([$1_driver])
+AC_SUBST([$1_driver_name])
+AC_SUBST([$1_driver_object])
+AC_SUBST([$1_help])
 AC_SUBST([$1_drivers])])
 
 AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl

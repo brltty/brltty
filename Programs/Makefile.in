@@ -109,9 +109,9 @@ rangelist.o:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.o config.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER) $(SPEECH_DRIVER)
+BRLTTY_OBJECTS = main.o config.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) route.o cut.o $(CTB_OBJECTS) brl.o $(SPEECH_OBJECT) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS) $(BRAILLE_DRIVER_OBJECT) $(SPEECH_DRIVER_OBJECT)
 
-brltty: $(BRLTTY_OBJECTS) $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS)
+brltty: $(BRLTTY_OBJECTS) $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(LDLIBS)
 
 main.o:
@@ -149,7 +149,7 @@ spk.o:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) brl.o
+BRLTEST_OBJECTS = brltest.o options.o misc.o sysmisc.o $(SYSTEM_OBJECT) brl.o $(BRAILLE_DRIVER_OBJECT)
 
 brltest: $(BRLTEST_OBJECTS) $(BRAILLE_DRIVERS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(LDLIBS)
@@ -185,8 +185,8 @@ braille-drivers: txt2hlp
 	do (cd $(BLD_TOP)Drivers/$$target && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
 	done
 
-$(BRAILLE_DRIVER): txt2hlp
-	cd $(@D) && $(MAKE) $(@F) braille-help
+braille-help: txt2hlp
+	cd $(BLD_TOP)Drivers/$(BRAILLE_DRIVER_NAME) && $(MAKE) braille-help
 
 ###############################################################################
 
@@ -195,9 +195,6 @@ speech-drivers:
 	for target in $(SPK_TARGETS); \
 	do (cd $(BLD_TOP)Drivers/$$target && $(MAKE) speech-driver spk-lib-name) || exit 1; \
 	done
-
-$(SPEECH_DRIVER):
-	cd $(@D) && $(MAKE) $(@F)
 
 ###############################################################################
 
@@ -372,4 +369,4 @@ clean::
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(HLP_DIR)/*
 
 distclean clean install uninstall::
-	-for driver in $(CONFIGURED_DRIVERS); do (cd ../Drivers/$$driver && $(MAKE) $@); done
+	-for driver in $(CONFIGURED_DRIVERS); do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) $@); done
