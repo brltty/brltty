@@ -20,9 +20,61 @@
     BRLTTY comes with ABSOLUTELY NO WARRANTY.
   </abstract>
 </titlepag>
+
 <toc>
 <lof>
 <lot>
+
+<sect>Formalities<p>
+
+<sect1>License<p>
+This program is free software.
+You may redistribute it and/or modify it under the terms of
+<htmlurl url="http://www.gnu.org/licenses/licenses.html#GPL" name="The GNU General Public License">
+as published by <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="The Free Software Foundation">.
+Version 2 (or any later version) of the license may be used.
+
+You should have received a copy of the license along with this program.
+It should be in the file <tt/COPYING/ in the top-level directory.
+If not, write to the Free Software Foundation Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
+
+<sect1>Disclaimer<p>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY - not even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the <bf/GNU General Public License/ for more details.
+
+<sect1>Contact Information<label id="contact"><p>
+BRLTTY represents the work of a team.
+For up-to-date information, see BRLTTY's web page at
+[<htmlurl url="http://mielke.cc/brltty/" name="http://mielke.cc/brltty/">].
+As of this writing, the team includes:
+<itemize>
+  <item>
+    <htmlurl url="http://mielke.cc/" name="Dave Mielke">
+    <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
+    (current maintainer, active developer)
+  <item>
+    <htmlurl url="http://www.cam.org/~nico/" name="Nicolas Pitre">
+    <tt><htmlurl url="mailto:nico@cam.org" name="&lt;nico@cam.org&gt;"></tt>
+    (active developer)
+  <item>
+    <htmlurl url="http://pages.infinit.net/sdoyon/" name="Stéphane Doyon">
+    <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
+    (active developer)
+  <item>
+    Nikhil Nair 
+    <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
+    (original author, no longer active)
+</itemize>
+
+Comments, suggestions, criticisms, and contributions are all welcome.
+We'll try to respond promptly to all (sensible) mail, but give no guarantee.
+In general, we recommend that you send e-mail messages to all active developers.
+If you have a question about a particular type of display supported by BRLTTY,
+you may wish to contact the author of its driver
+(see the <tt/README/ file in its subdirectory for details).
 
 <sect>Introduction<p>
 BRLTTY gives a braille user access to the text consoles of a Linux/Unix system.
@@ -2729,28 +2781,32 @@ with one or more of the following:
 
 These events include:
 <itemize>
-   <item>
-     When the braille display driver starts or stops.
-   <item>
-     When the start or end of the cut block is set.
-   <item>
-     When a feature is activated or deactivated.
-   <item>
-     When cursor tracking is turned on or off.
-   <item>
-     When the screen image is frozen or unfrozen.
-   <item>
-     When identical lines are skipped.
-   <item>
-     When the braille window wraps
-     either down to the beginning of the next line
-     or up to the end of the previous line.
-   <item>
-     When a requested motion cannot be performed.
-   <item>
-     When a command cannot be executed.
-   <item>
-     When a lengthy command completes.
+  <item>
+    When the braille display driver starts or stops.
+  <item>
+    When a lengthy command completes.
+  <item>
+    When a command cannot be executed.
+  <item>
+    When a mark is set.
+  <item>
+    When the start or end of the cut block is set.
+  <item>
+    When a feature is activated or deactivated.
+  <item>
+    When cursor tracking is turned on or off.
+  <item>
+    When the screen image is frozen or unfrozen.
+  <item>
+    When the braille window wraps
+    either down to the beginning of the next line
+    or up to the end of the previous line.
+  <item>
+    When identical lines are skipped.
+  <item>
+    When a requested motion cannot be performed.
+  <item>
+    When cursor routing starts, finishes, or fails.
 </itemize>
 
 <sect1>Preferences Settings<label id="preferences"><p>
@@ -2811,8 +2867,8 @@ Notes:
   <item>
     The routing keys can also be used to select a setting for the current item.
     If the item has numeric settings,
-    then each routing key represents an integer (starting from 0),
-    and a selection which is out of range is silently brought into range.
+    then the entire row of routing keys acts as a scroll bar
+    which covers the full range of valid values.
     If the item has named settings,
     then the routing keys correspond ordinally with the settings.
   <item>
@@ -3087,6 +3143,18 @@ Notes:
     (see the note on <ref id="time-settings" name="time settings"> below)
     during each cycle that they're to be invisible.
     The initial setting is <tt/20/.
+  <tag>Braille Firmness<label id="preference-braille-firmness"></tag>
+    Adjust the firmness (or stiffness) of the braille dots.
+    It can be set to:
+    <itemize>
+      <item>Maximum
+      <item>High
+      <item>Medium
+      <item>Low
+      <item>Minimum
+    </itemize>
+    This preference is only available if a driver which supports it is being used.
+    The initial setting is <tt/Medium/.
   <tag>Window Follows Pointer<label id="preference-window-follows-pointer"></tag>
     When moving the pointer device (mouse):
     <descrip>
@@ -4195,83 +4263,142 @@ in a typical Unix editor on a fairly lightly loaded system,
 but very poorly in some other situations,
 e.g. over a slow serial link to a remote host.
 
-<sect>Appendices<p>
+<appendix>
 
-<sect1>Supported Braille Displays<label id="displays"><p>
+<sect>Supported Braille Displays<label id="displays"><p>
 BRLTTY supports the following braille displays:
-<descrip>
-  <tag/Albatross/ 46/80
-  <tag/Alva/ ABT(3nn), Delphi(4nn), Satellite(5nn)
-  <tag/BrailleLite/ 18/40/M20/M40
-  <tag/BrailleNote/ 18/32
-  <tag/CombiBraille/ 25/45/85
-  <tag/EcoBraille/ 20/40/80
-  <tag/EuroBraille/ AzerBraille, Clio, Iris, NoteBraille, Scriba
-  <tag/FreedomScientific/ Focus 44/70/84, PacMate 20/40
-  <tag/HandyTech/ Modular 20/40/80, Braille Wave 40, Braille Star 40/80, Bookworm, Braillino 20
-  <tag/LogText/ 32
-  <tag/MDV/ MB208/MB408L/MB408S (protocol 5)
-  <tag/MiniBraille/ 20
-  <tag/MultiBraille/ MB125CR/MB145CR/MB185CR
-  <tag/Papenmeier/ Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80, Elba 20/32, IB 80
-  <tag/TSI/ Navigator 20/40/80, PowerBraille 40/65/80
-  <tag/Vario/ 40/80 (native mode)
-  <tag/VarioHT/ 40 (Vario in HandyTech emulation mode)
-  <tag/VideoBraille/ 40
-  <tag/Virtual/ TCP/Unix, client/server
-  <tag/VisioBraille/ 20/40
-  <tag/Voyager/ 44/70 (USB)
-</descrip>
+<table loc="h">
+  <tabular ca="ll">
+    Name|Models@<hline>
+    Albatross
+      |46/80@
+    Alva
+      |ABT (3nn)@
+      |Delphi (4nn)@
+      |Satellite (5nn)@
+    BrailleLite
+      |18/40/M20/M40@
+    BrailleNote
+      |18/32@
+    CombiBraille
+      |25/45/85@
+    EcoBraille
+      |20/40/80@
+    EuroBraille
+      |AzerBraille@
+      |Clio@
+      |Iris@
+      |NoteBraille@
+      |Scriba@
+    FreedomScientific
+      |Focus 44/70/84@
+      |PAC Mate 20/40@
+    HandyTech
+      |Modular 20/40/80@
+      |Braille Wave 40@
+      |Braille Star 40/80@
+      |Bookworm@
+      |Braillino 20@
+    LogText
+      |32@
+    MDV
+      |MB208/MB408L/MB408S (protocol 5)@
+    MiniBraille
+      |20@
+    MultiBraille
+      |MB125CR/MB145CR/MB185CR@
+    Papenmeier
+      |Tiny@
+      |Compact@
+      |2D Lite/Screen@
+      |EL2D 40/66/80@
+      |EL 40/80@
+      |Elba 20/32@
+      |IB 80@
+      |EL 40/66/80 S@
+    TSI
+      |Navigator 20/40/80@
+      |PowerBraille 40/65/80@
+    Vario
+      |40/80 (native mode)@
+    VarioHT
+      |40 (Vario in HandyTech emulation mode)@
+    VideoBraille
+      |40@
+    Virtual
+      |TCP/Unix, client/server@
+    VisioBraille
+      |20/40@
+    Voyager
+      |44/70@
+  </tabular>
+</table>
 
-<sect1>Supported Speech Synthesizers<label id="synthesizers"><p>
+<sect>Supported Speech Synthesizers<label id="synthesizers"><p>
 BRLTTY supports the following speech synthesizers:
-<descrip>
-  <tag/Alva/ Delphi(4nn)
-  <tag/BrailleLite/ -
-  <tag/CombiBraille/ -
-  <tag/ExternalSpeech/ runs /usr/local/bin/externalspeech
-  <tag/Festival/ text to speech engine
-  <tag/FestivalLite/ text to speech engine
-  <tag/GenericSay/ pipes to /usr/local/bin/say
-  <tag/Mikropuhe/ text to speech engine
-  <tag/Theta/ text to speech engine
-  <tag/ViaVoice/ text to speech engine
-</descrip>
+<table loc="h">
+  <tabular ca="ll">
+    Name|Models@<hline>
+    Alva
+      |Delphi (4nn)@
+    BrailleLite
+      |@
+    CombiBraille
+      |@
+    ExternalSpeech
+      |runs /usr/local/bin/externalspeech@
+    Festival
+      |text to speech engine@
+    FestivalLite
+      |text to speech engine@
+    GenericSay
+      |pipes to /usr/local/bin/say@
+    Mikropuhe
+      |text to speech engine@
+    Theta
+      |text to speech engine@
+    ViaVoice
+      |text to speech engine@
+  </tabular>
+</table>
 
-<sect1>Driver Identification Codes<label id="drivers"><p>
-<descrip>
-  <tag/al/Alva
-  <tag/at/Albatross
-  <tag/bl/BrailleLite
-  <tag/bn/BrailleNote
-  <tag/cb/CombiBraille
-  <tag/ec/EcoBraille
-  <tag/es/ExternalSpeech
-  <tag/eu/EuroBraille
-  <tag/fl/FestivalLite
-  <tag/fs/FreedomScientific
-  <tag/fv/Festival
-  <tag/gs/GenericSay
-  <tag/ht/HandyTech
-  <tag/lt/LogText
-  <tag/mb/MultiBraille
-  <tag/md/MDV
-  <tag/mn/MiniBraille
-  <tag/mp/Mikropuhe
-  <tag/no/no driver
-  <tag/pm/Papenmeier
-  <tag/th/Theta
-  <tag/ts/Telesensory Systems Inc.
-  <tag/va/Vario/RBT (emulation 1)
-  <tag/vd/VideoBraille
-  <tag/vh/Vario/RBT (emulation 2)
-  <tag/vo/Voyager
-  <tag/vr/Virtual
-  <tag/vs/VisioBraille
-  <tag/vv/ViaVoice
-</descrip>
+<sect>Driver Identification Codes<label id="drivers"><p>
+<table loc="h">
+  <tabular ca="ll">
+    Code|Name@<hline>
+    al|Alva@
+    at|Albatross@
+    bl|BrailleLite@
+    bn|BrailleNote@
+    cb|CombiBraille@
+    ec|EcoBraille@
+    es|ExternalSpeech@
+    eu|EuroBraille@
+    fl|FestivalLite@
+    fs|FreedomScientific@
+    fv|Festival@
+    gs|GenericSay@
+    ht|HandyTech@
+    lt|LogText@
+    mb|MultiBraille@
+    md|MDV@
+    mn|MiniBraille@
+    mp|Mikropuhe@
+    no|no driver@
+    pm|Papenmeier@
+    th|Theta@
+    ts|Telesensory Systems Inc.@
+    va|Vario/RBT (emulation 1)@
+    vd|VideoBraille@
+    vh|Vario/RBT (emulation 2)@
+    vo|Voyager@
+    vr|Virtual@
+    vs|VisioBraille@
+    vv|ViaVoice@
+  </tabular>
+</table>
 
-<sect1>Device Specificationn<label id="devices"><p>
+<sect>Device Specificationn<label id="devices"><p>
 The general form of a device specification
 (see the <ref id="options-braille-device" name="-d"> command line option,
 the <ref id="configure-braille-device" name="braille-device"> configuration file directive,
@@ -4310,7 +4437,7 @@ The following device types are supported:
     or do set it but not to a unique value.
 </descrip>
 
-<sect1>Standard Braille Dot Numbering Convention<label id="dots"><p>
+<sect>Standard Braille Dot Numbering Convention<label id="dots"><p>
 A standard braille cell consists of six dots
 arranged in three rows and two columns.
 Each dot can be specifically identified by its number as follows:
@@ -4337,7 +4464,7 @@ Perhaps a picture will make this numbering convention easier to understand.
 7 o o 8
 </verb></tscreen>
 
-<sect1>North American Braille Computer Code<label id="nabcc"><p>
+<sect>North American Braille Computer Code<label id="nabcc"><p>
 <tscreen><verb>
   Num Hex     Dots     Description
 +-----------------------------------------------------------------+
@@ -4600,315 +4727,154 @@ Perhaps a picture will make this numbering convention easier to understand.
 +-----------------------------------------------------------------+
 </verb></tscreen>
 
-<sect1>MIDI Instrument Table<label id="midi"><p>
-<descrip>
-  <tag/Piano/
-    Acoustic Grand Piano
-    <newline>
-    Bright Acoustic Piano
-    <newline>
-    Electric Grand Piano
-    <newline>
-    Honkytonk Piano
-    <newline>
-    Electric Piano 1
-    <newline>
-    Electric Piano 2
-    <newline>
-    Harpsichord
-    <newline>
-    Clavi
-  <tag/Chromatic Percussion/
-    Celesta
-    <newline>
-    Glockenspiel
-    <newline>
-    Music Box
-    <newline>
-    Vibraphone
-    <newline>
-    Marimba
-    <newline>
-    Xylophone
-    <newline>
-    Tubular Bells
-    <newline>
-    Dulcimer
-  <tag/Organ/
-    Drawbar Organ
-    <newline>
-    Percussive Organ
-    <newline>
-    Rock Organ
-    <newline>
-    Church Organ
-    <newline>
-    Reed Organ
-    <newline>
-    Accordion
-    <newline>
-    Harmonica
-    <newline>
-    Tango Accordion
-  <tag/Guitar/
-    Nylon Acoustic Guitar
-    <newline>
-    Steel Acoustic Guitar
-    <newline>
-    Jazz Electric Guitar
-    <newline>
-    Clean Electric Guitar
-    <newline>
-    Muted Electric Guitar
-    <newline>
-    Overdriven Guitar
-    <newline>
-    Distortion Guitar
-    <newline>
-    Guitar Harmonics
-  <tag/Bass/
-    Acoustic Bass
-    <newline>
-    Finger Electric Bass
-    <newline>
-    Pick Electric Bass
-    <newline>
-    Fretless Bass
-    <newline>
-    Slap Bass 1
-    <newline>
-    Slap Bass 2
-    <newline>
-    Synth Bass 1
-    <newline>
-    Synth Bass 2
-  <tag/Strings/
-    Violin
-    <newline>
-    Viola
-    <newline>
-    Cello
-    <newline>
-    Contrabass
-    <newline>
-    Tremolo Strings
-    <newline>
-    Pizzicato Strings
-    <newline>
-    Orchestral Harp
-    <newline>
-    Timpani
-  <tag/Ensemble/
-    String Ensemble 1
-    <newline>
-    String Ensemble 2
-    <newline>
-    Synth Strings 1
-    <newline>
-    Synth Strings 2
-    <newline>
-    Choir Aahs
-    <newline>
-    Voice Oohs
-    <newline>
-    Synth Voice
-    <newline>
-    Orchestra Hit
-  <tag/Brass/
-    Trumpet
-    <newline>
-    Trombone
-    <newline>
-    Tuba
-    <newline>
-    Muted Trumpet
-    <newline>
-    French Horn
-    <newline>
-    Brass Section
-    <newline>
-    Synth Brass 1
-    <newline>
-    Synth Brass 2
-  <tag/Reed/
-    Soprano Saxophone
-    <newline>
-    Alto Saxophone
-    <newline>
-    Tenor Saxophone
-    <newline>
-    Baritone Saxophone
-    <newline>
-    Oboe
-    <newline>
-    English Horn
-    <newline>
-    Bassoon
-    <newline>
-    Clarinet
-  <tag/Pipe/
-    Piccolo
-    <newline>
-    Flute
-    <newline>
-    Recorder
-    <newline>
-    Pan Flute
-    <newline>
-    Blown Bottle
-    <newline>
-    Shakuhachi
-    <newline>
-    Whistle
-    <newline>
-    Ocarina
-  <tag/Synth Lead/
-    Lead 1 (square)
-    <newline>
-    Lead 2 (sawtooth)
-    <newline>
-    Lead 3 (calliope)
-    <newline>
-    Lead 4 (chiff)
-    <newline>
-    Lead 5 (charang)
-    <newline>
-    Lead 6 (voice)
-    <newline>
-    Lead 7 (fifths)
-    <newline>
-    Lead 8 (bass + lead)
-  <tag/Synth Pad/
-    Pad 1 (new age)
-    <newline>
-    Pad 2 (warm)
-    <newline>
-    Pad 3 (polysynth)
-    <newline>
-    Pad 4 (choir)
-    <newline>
-    Pad 5 (bowed)
-    <newline>
-    Pad 6 (metallic)
-    <newline>
-    Pad 7 (halo)
-    <newline>
-    Pad 8 (sweep)
-  <tag/Synth FM/
-    FX 1 (rain)
-    <newline>
-    FX 2 (soundtrack)
-    <newline>
-    FX 3 (crystal)
-    <newline>
-    FX 4 (atmosphere)
-    <newline>
-    FX 5 (brightness)
-    <newline>
-    FX 6 (goblins)
-    <newline>
-    FX 7 (echoes)
-    <newline>
-    FX 8 (science-fiction)
-  <tag/Ethnic/
-    Sitar
-    <newline>
-    Banjo
-    <newline>
-    Shamisen
-    <newline>
-    Koto
-    <newline>
-    Kalimba
-    <newline>
-    Bag Pipe
-    <newline>
-    Fiddle
-    <newline>
-    Shanai
-  <tag/Percussive/
-    Tinkle Bell
-    <newline>
-    Agogo
-    <newline>
-    Steel Drum
-    <newline>
-    Wooden Block
-    <newline>
-    Taiko Drum
-    <newline>
-    Melodic Tom
-    <newline>
-    Synth Drum
-    <newline>
-    Reverse Cymbal
-  <tag/Sound Effects/
-    Guitar Fret Noise
-    <newline>
-    Breath Noise
-    <newline>
-    Seashore
-    <newline>
-    Bird Tweet
-    <newline>
-    Telephone Ring
-    <newline>
-    Helicopter
-    <newline>
-    Applause
-    <newline>
-    Gunshot
-</descrip>
-
-<sect>Epilogue<p>
-
-<sect1>Contact Information<label id="contact"><p>
-For up-to-date information, see our web page at
-[<htmlurl url="http://mielke.cc/brltty/" name="http://mielke.cc/brltty/">].
-
-BRLTTY represents the work of a team, which includes:
-<itemize>
-  <item>
-    <htmlurl url="http://mielke.cc/" name="Dave Mielke">
-    <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-    (current maintainer, active developer)
-  <item>
-    <htmlurl url="http://www.cam.org/~nico/" name="Nicolas Pitre">
-    <tt><htmlurl url="mailto:nico@cam.org" name="&lt;nico@cam.org&gt;"></tt>
-    (active developer)
-  <item>
-    <htmlurl url="http://pages.infinit.net/sdoyon/" name="Stéphane Doyon">
-    <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
-    (active developer)
-  <item>
-    Nikhil Nair 
-    <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
-    (original author, no longer active)
-</itemize>
-
-Comments, suggestions, criticisms, and contributions are all welcome.
-We'll try to respond promptly to all (sensible) mail, but give no guarantee.
-In general, we recommend that you send e-mail messages to all active developers.
-If you have a question about a particular type of display supported by BRLTTY,
-you may wish to contact the author of its driver
-(see the <tt/README/ file in its subdirectory for details).
-
-<sect1>License<p>
-This program is free software.
-You may redistribute it and/or modify it under the terms of
-<htmlurl url="http://www.gnu.org/licenses/licenses.html#GPL" name="The GNU General Public License">
-as published by <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="The Free Software Foundation">.
-Version 2 (or any later version) of the license may be used.
-
-You should have received a copy of the license along with this program.
-It should be in the file <tt/COPYING/ in the top-level directory.
-If not, write to the Free Software Foundation Inc.,
-675 Mass Ave, Cambridge, MA 02139, USA.
-
-<sect1>Disclaimer<p>
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY - not even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the <bf/GNU General Public License/ for more details.
+<sect>MIDI Instrument Table<label id="midi"><p>
+<table loc="h">
+  <tabular ca="lrl">
+    <hline>Piano
+      |0|Acoustic Grand Piano@
+      |1|Bright Acoustic Piano@
+      |2|Electric Grand Piano@
+      |3|Honkytonk Piano@
+      |4|Electric Piano 1@
+      |5|Electric Piano 2@
+      |6|Harpsichord@
+      |7|Clavi@
+    <hline>Chromatic Percussion
+      |8|Celesta@
+      |9|Glockenspiel@
+      |10|Music Box@
+      |11|Vibraphone@
+      |12|Marimba@
+      |13|Xylophone@
+      |14|Tubular Bells@
+      |15|Dulcimer@
+    <hline>Organ
+      |16|Drawbar Organ@
+      |17|Percussive Organ@
+      |18|Rock Organ@
+      |19|Church Organ@
+      |20|Reed Organ@
+      |21|Accordion@
+      |22|Harmonica@
+      |23|Tango Accordion@
+    <hline>Guitar
+      |24|Nylon Acoustic Guitar@
+      |25|Steel Acoustic Guitar@
+      |26|Jazz Electric Guitar@
+      |27|Clean Electric Guitar@
+      |28|Muted Electric Guitar@
+      |29|Overdriven Guitar@
+      |30|Distortion Guitar@
+      |31|Guitar Harmonics@
+    <hline>Bass
+      |32|Acoustic Bass@
+      |33|Finger Electric Bass@
+      |34|Pick Electric Bass@
+      |35|Fretless Bass@
+      |36|Slap Bass 1@
+      |37|Slap Bass 2@
+      |38|Synth Bass 1@
+      |39|Synth Bass 2@
+    <hline>Strings
+      |40|Violin@
+      |41|Viola@
+      |42|Cello@
+      |43|Contrabass@
+      |44|Tremolo Strings@
+      |45|Pizzicato Strings@
+      |46|Orchestral Harp@
+      |47|Timpani@
+    <hline>Ensemble
+      |48|String Ensemble 1@
+      |49|String Ensemble 2@
+      |50|Synth Strings 1@
+      |51|Synth Strings 2@
+      |52|Choir Aahs@
+      |53|Voice Oohs@
+      |54|Synth Voice@
+      |55|Orchestra Hit@
+    <hline>Brass
+      |56|Trumpet@
+      |57|Trombone@
+      |58|Tuba@
+      |59|Muted Trumpet@
+      |60|French Horn@
+      |61|Brass Section@
+      |62|Synth Brass 1@
+      |63|Synth Brass 2@
+    <hline>Reed
+      |64|Soprano Saxophone@
+      |65|Alto Saxophone@
+      |66|Tenor Saxophone@
+      |67|Baritone Saxophone@
+      |68|Oboe@
+      |69|English Horn@
+      |70|Bassoon@
+      |71|Clarinet@
+    <hline>Pipe
+      |72|Piccolo@
+      |73|Flute@
+      |74|Recorder@
+      |75|Pan Flute@
+      |76|Blown Bottle@
+      |77|Shakuhachi@
+      |78|Whistle@
+      |79|Ocarina@
+    <hline>Synth Lead
+      |80|Lead 1 (square)@
+      |81|Lead 2 (sawtooth)@
+      |82|Lead 3 (calliope)@
+      |83|Lead 4 (chiff)@
+      |84|Lead 5 (charang)@
+      |85|Lead 6 (voice)@
+      |86|Lead 7 (fifths)@
+      |87|Lead 8 (bass + lead)@
+    <hline>Synth Pad
+      |88|Pad 1 (new age)@
+      |89|Pad 2 (warm)@
+      |90|Pad 3 (polysynth)@
+      |91|Pad 4 (choir)@
+      |92|Pad 5 (bowed)@
+      |93|Pad 6 (metallic)@
+      |94|Pad 7 (halo)@
+      |95|Pad 8 (sweep)@
+    <hline>Synth FM
+      |96|FX 1 (rain)@
+      |97|FX 2 (soundtrack)@
+      |98|FX 3 (crystal)@
+      |99|FX 4 (atmosphere)@
+      |100|FX 5 (brightness)@
+      |101|FX 6 (goblins)@
+      |102|FX 7 (echoes)@
+      |103|FX 8 (science-fiction)@
+    <hline>Ethnic
+      |104|Sitar@
+      |105|Banjo@
+      |106|Shamisen@
+      |107|Koto@
+      |108|Kalimba@
+      |109|Bag Pipe@
+      |110|Fiddle@
+      |111|Shanai@
+    <hline>Percussive
+      |112|Tinkle Bell@
+      |113|Agogo@
+      |114|Steel Drum@
+      |115|Wooden Block@
+      |116|Taiko Drum@
+      |117|Melodic Tom@
+      |118|Synth Drum@
+      |119|Reverse Cymbal@
+    <hline>Sound Effects
+      |120|Guitar Fret Noise@
+      |121|Breath Noise@
+      |122|Seashore@
+      |123|Bird Tweet@
+      |124|Telephone Ring@
+      |125|Helicopter@
+      |126|Applause@
+      |127|Gunshot@
+  </tabular>
+</table>
 
 </article>

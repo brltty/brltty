@@ -23,7 +23,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = vo
 DRIVER_NAME = Voyager
-BRAILLE_MODELS = 44/70 (USB)
+BRAILLE_MODELS = 44/70
 HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk

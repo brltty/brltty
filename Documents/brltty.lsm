@@ -49,7 +49,7 @@ Platforms: Linux (kernel 1.1.92 or later)
            - VideoBraille [40]
            - Virtual [TCP/Unix, client/server]
            - VisioBraille [20/40]
-           - Voyager [44/70 (USB)]
+           - Voyager [44/70]
            Supported Speech Synthesizers:
            - Alva [Delphi(4nn)]
            - BrailleLite

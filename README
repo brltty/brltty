@@ -141,7 +141,7 @@ The following braille displays are supported:
 -  VideoBraille [40]
 -  Virtual [TCP/Unix, client/server]
 -  VisioBraille [20/40]
--  Voyager [44/70 (USB)]
+-  Voyager [44/70]
 
 The following speech synthesizers are supported:
 
