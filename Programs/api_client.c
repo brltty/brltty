@@ -429,8 +429,8 @@ static int brlapi_getControllingTty()
     if ((vt >= 1) && (vt <= MAXIMUM_VIRTUAL_CONSOLE)) return vt;
   }
 #endif /* linux */
-  if ((env = getenv("WINDOW")) && sscanf(env, "%u", &tty) == 1) return tty;
-  if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;
+  /*if ((env = getenv("WINDOW")) && sscanf(env, "%u", &tty) == 1) return tty;
+  if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;*/
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
   return -1;
 }
