@@ -14,6 +14,7 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
+
 #define VERSION "0.2"
 #define DATE "August, 2004"
 #define COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
@@ -26,15 +27,13 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "Programs/brl.h"
-#include "Programs/misc.h"
-#include "Programs/scr.h"
-#include "Programs/message.h"
-
 #include <errno.h>
-#include <ctype.h>
 #include <locale.h>
+
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+static iconv_t conversionDescriptor = NULL;
+#endif /* HAVE_ICONV_H */
 
 #if defined(HAVE_PKG_CURSES)
 #include <stdarg.h>
@@ -45,10 +44,7 @@
 #error curses package either unspecified or unsupported
 #endif /* HAVE_PKG_ */
 
-#ifdef HAVE_ICONV_H
-#include <iconv.h>
-static iconv_t conversionDescriptor = NULL;
-#endif /* HAVE_ICONV_H */
+#include "Programs/misc.h"
 
 typedef enum {
   PARM_TERM,
