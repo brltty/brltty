@@ -133,8 +133,8 @@ typedef struct
  *
  * \par Example:
  * \code
- * if (brlapi_initializeConnection(&settings)<0) {
- *  fprintf(stderr,"couldn't connect to BrlAPI!\n");
+ * if (brlapi_initializeConnection(&settings,NULL)<0) {
+ *  fprintf(stderr,"couldn't connect to BrlAPI: %s\n",brlapi_strerror());
  *  exit(1);
  * }
  * \endcode
