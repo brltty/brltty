@@ -129,7 +129,7 @@ then
    then
       $1_driver_name="${brltty_item_name_$1}"
       $1_driver_object='$(BLD_TOP)Drivers/'"${brltty_item_name_$1}/$1.o"
-      AC_DEFINE(translit([$1_builtin], [a-z], [A-Z]))
+      AC_DEFINE_UNQUOTED(translit([$1_builtin], [a-z], [A-Z]), [${brltty_item_code_$1}])
       $1_help="$1-help"
    fi
    if test "${brltty_standalone_programs}" != "yes"

@@ -88,7 +88,7 @@ extern "C" {
 /* Define this to be a string containing the library extension. */
 #undef LIBRARY_EXTENSION
 
-/* Define this if the braille driver is built in. */
+/* Define this to be the code of the braille driver if it is built in. */
 #undef BRAILLE_BUILTIN
 
 /* Define this to be a string containing a list of the braille driver codes. */
@@ -97,7 +97,7 @@ extern "C" {
 /* Define this to be a string containing the path to the default braille device. */
 #undef BRAILLE_DEVICE
 
-/* Define this if the speech driver is built in. */
+/* Define this to be the code of the speech driver if it is built in. */
 #undef SPEECH_BUILTIN
 
 /* Define this to be a string containing a list of the speech driver codes. */
