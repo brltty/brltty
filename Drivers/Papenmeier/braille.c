@@ -1048,13 +1048,13 @@ flushCells2 (BrailleDisplay *brl) {
       }
     }
 
-    /* The status cells. */
-    memcpy(&buffer[size], currentStatus, terminal->statusCount);
-    size += terminal->statusCount;
-
     /* The text cells. */
     memcpy(&buffer[size], currentText, terminal->columns);
     size += terminal->columns;
+
+    /* The status cells. */
+    memcpy(&buffer[size], currentStatus, terminal->statusCount);
+    size += terminal->statusCount;
 
     /* Two dummy cells for each switch and key on the right side. */
     {
@@ -1223,18 +1223,18 @@ mapInputModules2 (void) {
                 OFFS_SWITCH+KEY_RIGHT_FRONT);
 
   {
-    unsigned char column = terminal->columns;
-    while (column) {
-      nextInputModule2(&byte, &bit);
-      addInputMapping2(byte, bit, ROUTINGKEY, --column);
-    }
-  }
-
-  {
     unsigned char cell = terminal->statusCount;
     while (cell) {
       nextInputModule2(&byte, &bit);
       addInputMapping2(byte, bit, OFFS_STAT+cell--, 0);
+    }
+  }
+
+  {
+    unsigned char column = terminal->columns;
+    while (column) {
+      nextInputModule2(&byte, &bit);
+      addInputMapping2(byte, bit, ROUTINGKEY, --column);
     }
   }
 
