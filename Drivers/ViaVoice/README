@@ -1,14 +1,18 @@
-This directory contains the BRLTTY speech driver for the ViaVoice
+This directory contains the BRLTTY speech synthesizer driver for the ViaVoice
 [http://www.ibm.com/software/speech/dev/ttssdk_linux.html] text to speech
-system from International Business Machines (IBM) [http://www.ibm.com]. It has
+engine from International Business Machines (IBM) [http://www.ibm.com]. It has
 been implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
 
-This driver can be dynamically loaded (at run time), but cannot be statically
-linked into BRLTTY (at make time), because it relies on a shared object
-(libibmeci50.so) within ViaVoice's run time kit. BRLTTY's main make file
-automatically builds this driver if, and only if, ViaVoice's software
-development kit has been installed (it checks for the existence of
-/usr/include/eci.h).
+BRLTTY's configure script automatically includes this driver if ViaVoice's
+software development kit has been installed. The default is to check the
+directories /usr, /usr/local, and /opt/viavoice. The actual location can be
+explicitly specified via --with-viavoice.
+
+This driver can be either dynamically loaded (at run time) or built directly
+into a dynamically linked BRLTTY binary (via --with-speech-driver), but it
+cannot be built into a statically linked BRLTTY binary (via
+--enable-standalone-programs) because ViaVoice's run time kit doesn't contain a
+static archive. 
 
 The path to the ini file is determined via the following huristic. If the
 driver parameter "inifile" is set, then that value is used. If it isn't, but if
