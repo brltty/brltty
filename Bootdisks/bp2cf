@@ -39,15 +39,19 @@ internalError()
 
 configurationFile=""
 requestedAction=create
+deviceTranslation=none
 requestedParameter=""
 OPTIND=1
-while getopts ":f:cup:h" option
+while getopts ":f:cundop:h" option
 do
    case "${option}"
    in
       f) configurationFile="${OPTARG}";;
       c) requestedAction=create;;
       u) requestedAction=update;;
+      n) deviceTranslation=none;;
+      d) deviceTranslation=devfs;;
+      o) deviceTranslation=old;;
       p) requestedParameter="${OPTARG}";;
       h)
          cat <<EOF
@@ -55,6 +59,9 @@ Usage: ${programName} [option ...]
 -f file  The configuration file to create/update.
 -c       Create the configuration file (write to stdout if no -f).
 -u       Update the configuration file (copying from stdin to stdout if no -f).
+-n       Do not translate device paths.
+-d       Do old-style to devfs device path translation.
+-o       Do devfs to old-style device path translation.
 -p [driver][,[device][,[table]]]
          Explicitly specify the boot parameter.
 -h       Display this usage summary.
@@ -68,6 +75,7 @@ EOF
 done
 shift "`expr $OPTIND - 1`"
 [ "${#}" -eq 0 ] || syntaxError "too many parameters."
+
 case "${requestedAction}"
 in
    create)
@@ -79,6 +87,8 @@ in
       {
          [ -n "${configurationFile}" ] && exec >"${configurationFile}"
          putConfigurationLine "`makeHeaderLine Created`"
+         putConfigurationLine "`makeParameterLine`"
+         putConfigurationLine ""
       }
       putConfigurationDirective()
       {
@@ -109,7 +119,7 @@ ${1}"
          sedScript=""
          putSedCommand "1i\\
 `makeHeaderLine Updated`\\
-# Boot Parameter:${bootParameter}\\
+`makeParameterLine`\\
 "
       }
       putConfigurationDirective()
@@ -127,15 +137,66 @@ ${1}"
    *) internalError "unimplemented action: ${requestedAction}";;
 esac
 
+translateDevice_none()
+{
+   :
+}
+translateDevice_devfs()
+{
+   minor="${device#ttyS}"
+   if [ "${minor}" != "${device}" ]
+   then
+      device="tts/${minor}"
+      return 0
+   fi
+   minor="${device#lp}"
+   if [ "${minor}" != "${device}" ]
+   then
+      device="printers/${minor}"
+      return 0
+   fi
+   programMessage "unsupported old-style device: ${device}"
+}
+translateDevice_old()
+{
+   major="${device%%/*}" 
+   if [ "${major}" != "${device}" ]
+   then
+      minor="${device#*/}"
+      case "${major}"
+      in
+         tts) devfs="ttyS${minor}";;
+         printers) devfs="lp${minor}";;
+      esac
+   fi
+   if [ -n "${devfs}" ]
+   then
+      device="${devfs}"
+   else
+      programMessage "unsupported devfs device: ${device}"
+   fi
+}
+
 makeHeaderLine()
 {
    echo "# ${1} by brltty-bp2cf`date +' on %Y-%m-%d at %H:%M:%S %Z (UTC%z)'`."
+}
+makeParameterLine()
+{
+   echo "# Boot Parameter:${bootParameter}"
 }
 putConfigurationFile()
 {
    startConfigurationFile
    [ -n "${brailleDriver}" ] && putConfigurationDirective "braille-driver" "${brailleDriver}"
-   [ -n "${brailleDevice}" ] && putConfigurationDirective "braille-device" "${brailleDevice}"
+   [ -n "${brailleDevice}" ] && {
+      device="`echo "${brailleDevice}" | sed -e 's%//*%/%g' -e 's%^/dev/%%'`"
+      if [ "${device#/}" = "${device}" ]
+      then
+         translateDevice_${deviceTranslation}
+      fi
+      putConfigurationDirective "braille-device" "${device}"
+   }
    [ -n "${textTable}" ] && putConfigurationDirective "text-table" "${textTable}"
    finalizeConfigurationFile
 }
