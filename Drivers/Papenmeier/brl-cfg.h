@@ -606,32 +606,32 @@ static CommandDefinition pm_commands_elba_20[] = {
   CMDS_EASY
 };
 
-static uint16_t pm_status_elba_40_s[] = {
+static uint16_t pm_status_el_40_s[] = {
 };
-static int16_t pm_modifiers_elba_40_s[] = {
+static int16_t pm_modifiers_el_40_s[] = {
   MOD_EASY
 };
-static CommandDefinition pm_commands_elba_40_s[] = {
+static CommandDefinition pm_commands_el_40_s[] = {
   CMDS_EASY
 };
 
-static uint16_t pm_status_elba_80_s[] = {
+static uint16_t pm_status_el_80_s[] = {
   SHOW_STAT_2
 };
-static int16_t pm_modifiers_elba_80_s[] = {
+static int16_t pm_modifiers_el_80_s[] = {
   MOD_EASY
 };
-static CommandDefinition pm_commands_elba_80_s[] = {
+static CommandDefinition pm_commands_el_80_s[] = {
   CMDS_EASY,
   CMDS_STAT_2
 };
 
-static uint16_t pm_status_elba_66_s[] = {
+static uint16_t pm_status_el_66_s[] = {
 };
-static int16_t pm_modifiers_elba_66_s[] = {
+static int16_t pm_modifiers_el_66_s[] = {
   MOD_EASY
 };
-static CommandDefinition pm_commands_elba_66_s[] = {
+static CommandDefinition pm_commands_el_66_s[] = {
   CMDS_EASY
 };
 
@@ -747,8 +747,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     85,				/* identity */
-    elba_40_s,		/* filename of local helpfile */
-    "BrailleX II Elba 40 S",		/* name of terminal */
+    el_40_s,		/* filename of local helpfile */
+    "BrailleX II EL 40 S",		/* name of terminal */
     40, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
@@ -756,8 +756,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     86,				/* identity */
-    elba_80_s,		/* filename of local helpfile */
-    "BrailleX II Elba 80 S",		/* name of terminal */
+    el_80_s,		/* filename of local helpfile */
+    "BrailleX II EL 80 S",		/* name of terminal */
     80, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
@@ -765,8 +765,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     87,				/* identity */
-    elba_66_s,		/* filename of local helpfile */
-    "BrailleX II Elba 66 S",		/* name of terminal */
+    el_66_s,		/* filename of local helpfile */
+    "BrailleX II EL 66 S",		/* name of terminal */
     66, 1,			/* size of display */
     0,				/* number of front keys */
     1				/* terminal has an easy bar */
