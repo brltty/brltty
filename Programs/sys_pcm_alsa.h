@@ -113,7 +113,7 @@ configurePcmSampleRate (PcmDevice *pcm, int errorLevel) {
     return 0;
   }
 
-  pcm->sampleRate = maximum;
+  pcm->sampleRate = MIN(MAX(16000, minimum), maximum);
   if ((result = my_snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hardwareParameters, &pcm->sampleRate, NULL)) < 0) {
     logPcmError(errorLevel, "set rate near", result);
     return 0;
