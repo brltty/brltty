@@ -635,71 +635,86 @@ processBrailleParameters (const BrailleDriver *driver) {
 
 static const BrailleDriver *
 findBrailleDriver (int *internal) {
-  const char *const *identifier;
+  char **devices;
+  if ((devices = splitString(opt_brailleDevice, ','))) {
+    char **device = devices;
+    while (*device) {
+      const char *const *identifier;
 
-  {
-    const char *type;
-    const char *device = opt_brailleDevice;
+      {
+        const char *type;
+        const char *dev = *device;
 
-    if (isSerialDevice(&device)) {
-      static const char *serialIdentifiers[] = {
-        "pm",
-        NULL
-      };
-      identifier = serialIdentifiers;
-      type = "serial";
+        if (isSerialDevice(&dev)) {
+          static const char *serialIdentifiers[] = {
+            "pm",
+            NULL
+          };
+          identifier = serialIdentifiers;
+          type = "serial";
 
 #ifdef ENABLE_USB_SUPPORT
-    } else if (isUsbDevice(&device)) {
-      static const char *usbIdentifiers[] = {
-        "al", "fs", "ht", "pm", "vo",
-        NULL
-      };
-      identifier = usbIdentifiers;
-      type = "USB";
+        } else if (isUsbDevice(&dev)) {
+          static const char *usbIdentifiers[] = {
+            "al", "fs", "ht", "pm", "vo",
+            NULL
+          };
+          identifier = usbIdentifiers;
+          type = "USB";
 #endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-    } else if (isBluetoothDevice(&device)) {
-      static const char *bluetoothIdentifiers[] = {
-        "ht",
-        NULL
-      };
-      identifier = bluetoothIdentifiers;
-      type = "bluetooth";
+        } else if (isBluetoothDevice(&dev)) {
+          static const char *bluetoothIdentifiers[] = {
+            "ht",
+            NULL
+          };
+          identifier = bluetoothIdentifiers;
+          type = "bluetooth";
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-    } else {
-      LogPrint(LOG_WARNING, "Braille display autodetection not supported for '%s'.",
-               opt_brailleDevice);
-      return NULL;
-    }
-    LogPrint(LOG_NOTICE, "Looking for %s braille display on '%s'.", type, opt_brailleDevice);
-  }
-
-  if (identifier) {
-    while (*identifier) {
-      const BrailleDriver *driver;
-      LogPrint(LOG_INFO, "Checking for '%s' braille display.", *identifier);
-      if ((driver = loadBrailleDriver(*identifier, internal, opt_libraryDirectory))) {
-        char **parameters = processBrailleParameters(driver);
-        if (parameters) {
-          initializeBrailleDisplay(&brl);
-          if (driver->open(&brl, parameters, opt_brailleDevice)) {
-            LogPrint(LOG_DEBUG, "Braille display found: %s[%s]",
-                     driver->identifier, driver->name);
-            driver->close(&brl);
-            return driver;
-          }
-
-          deallocateStrings(parameters);
+        } else {
+          LogPrint(LOG_WARNING, "Braille display autodetection not supported for '%s'.", dev);
+          goto nextDevice;
         }
-
-        if (!*internal) unloadSharedObject(driver);
+        LogPrint(LOG_NOTICE, "Looking for %s braille display on '%s'.", type, *device);
       }
 
-      ++identifier;
+      while (*identifier) {
+        const BrailleDriver *driver;
+        LogPrint(LOG_INFO, "Checking for '%s' braille display.", *identifier);
+        if ((driver = loadBrailleDriver(*identifier, internal, opt_libraryDirectory))) {
+          char **parameters = processBrailleParameters(driver);
+          if (parameters) {
+            initializeBrailleDisplay(&brl);
+            if (driver->open(&brl, parameters, *device)) {
+              driver->close(&brl);
+              LogPrint(LOG_DEBUG, "Braille display found: %s[%s]",
+                       driver->identifier, driver->name);
+
+              opt_brailleDriver = driver->identifier;
+              opt_brailleDevice = strdupWrapper(*device);
+
+              deallocateStrings(parameters);
+              deallocateStrings(devices);
+              if (!*internal) unloadSharedObject(driver);
+              return driver;
+            }
+
+            deallocateStrings(parameters);
+          }
+
+          if (!*internal) unloadSharedObject(driver);
+        }
+
+        ++identifier;
+      }
+
+    nextDevice:
+      ++device;
     }
+
+    deallocateStrings(devices);
   }
 
   LogPrint(LOG_WARNING, "No braille display found.");
@@ -711,8 +726,8 @@ getBrailleDriver (void) {
   int internal;
   if (!opt_brailleDriver || (strcmp(opt_brailleDriver, "auto") != 0)) {
     brailleDriver = loadBrailleDriver(opt_brailleDriver, &internal, opt_libraryDirectory);
-  } else if ((brailleDriver = findBrailleDriver(&internal))) {
-    opt_brailleDriver = brailleDriver->identifier;
+  } else {
+    brailleDriver = findBrailleDriver(&internal);
   }
 
   if (brailleDriver) {
