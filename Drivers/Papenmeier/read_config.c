@@ -71,22 +71,13 @@ static char* search_code(int code, int cmd)
   return "???";
 }
 
-static char* search_easycode(int cmd)
-{
-  return search_code(EASYCODE, cmd);
-}
-
-static char* search_stat(int cmd)
-{
-  return search_code(STATCODE, cmd);
-}
-
 static char* search_cmd(int cmd)
 {
   if ((cmd & ~VAL_ARG_MASK) == VAL_PASSKEY) {
     return search_code(VPK, cmd);
-  } else
+  } else {
     return search_code(KEYCODE, cmd);
+  }
 }
 
 static char* search_onoff(int cmd)
@@ -102,7 +93,8 @@ static char* search_key(int code) {
   static char res[20];
 
   if (code == ROUTINGKEY) {
-    strcpy(res, search_code(ROUTING, 0));
+    snprintf(res, sizeof(res), "%s",
+             search_code(ROUTING, 0));
     return res;
   }
 
@@ -118,7 +110,8 @@ static char* search_key(int code) {
   }
 
   if (code >= OFFS_EASY) {
-    snprintf(res, sizeof(res), "easy %s", search_easycode(code - OFFS_EASY));
+    snprintf(res, sizeof(res), "easy %s",
+             search_code(EASYCODE, code-OFFS_EASY));
     return res;
   }
 
@@ -132,7 +125,7 @@ static char* search_key(int code) {
     return res;
   }
 
-  strcpy(res, "unknown");
+  snprintf(res, sizeof(res), "unknown");
   return res;
 }
 
@@ -163,8 +156,6 @@ void terminals(int help, int verbose)
   FILE * fh = stdout;
 
   /* TODO: Comment/Help for status display */
-
-#define CMDMASK    (VAL_BLK_MASK | VAL_ARG_MASK)
 
   for(tn=0; tn < num_terminals; tn++) {
     if (pm_terminals[tn].name != 0) {
@@ -235,7 +226,7 @@ void terminals(int help, int verbose)
 	    }
 
 	    fprintf(fh, " %s # %s\n",
-		    search_stat(val),
+		    search_code(STATCODE, val),
 		    search_help_text(val + OFFS_STAT));
 	  }
 
@@ -251,8 +242,8 @@ void terminals(int help, int verbose)
 	if (pm_terminals[tn].cmds[i].code != 0) {
 	  char* txtand = "";
 	  fprintf(fh, "%s",
-		  search_cmd(pm_terminals[tn].cmds[i].code & CMDMASK));
-	  if (pm_terminals[tn].cmds[i].code >= CMDMASK) 
+		  search_cmd(pm_terminals[tn].cmds[i].code & VAL_CMD_MASK));
+	  if (pm_terminals[tn].cmds[i].code & VAL_TOGGLE_MASK) 
 	    fprintf(fh, " %s", search_onoff(pm_terminals[tn].cmds[i].code) );
 	  fprintf(fh, " = ");
 
@@ -271,8 +262,8 @@ void terminals(int help, int verbose)
 
 	  printkeys(fh, &pm_terminals[tn].cmds[i], pm_terminals[tn].modifiers);
 	  fprintf(fh, " # %s",
-		  get_command_description(pm_terminals[tn].cmds[i].code & CMDMASK));
-	  if (pm_terminals[tn].cmds[i].code > CMDMASK) 
+		  get_command_description(pm_terminals[tn].cmds[i].code & VAL_CMD_MASK));
+	  if (pm_terminals[tn].cmds[i].code & VAL_TOGGLE_MASK) 
 	    fprintf(fh, " - set %s", search_onoff(pm_terminals[tn].cmds[i].code) );
 	  fprintf(fh, "\n");
 	}
