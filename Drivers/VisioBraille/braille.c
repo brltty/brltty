@@ -382,13 +382,13 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
       case BRL_VSKEY_PLOC_PLOC_S: return BRL_CMD_PREFSAVE;
       case BRL_VSKEY_PLOC_PLOC_T: return BRL_CMD_CSRTRK;
       case BRL_VSKEY_PLOC_PLOC_U: return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
-      case BRL_VSKEY_CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; break; 
-      case BRL_VSKEY_ALT: altpressed = BRL_FLG_CHAR_META; break;   
+      case BRL_VSKEY_CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; return BRL_CMD_NOOP;
+      case BRL_VSKEY_ALT: altpressed = BRL_FLG_CHAR_META; return BRL_CMD_NOOP;   
       case BRL_VSKEY_ESCAPE: return BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
       default: return EOF;
     }
   }
- return EOF; 
+  return EOF; 
 }
 
 /* Function : brl_readKey */
