@@ -93,12 +93,8 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
   *y = 3; y++; lgtho++; 
   for (i=1; i<=5; i++) {
     if (write(brl_fd,obuf,lgtho) != lgtho) continue; /* write failed, retry */
-    tcdrain(brl_fd);
-    newtio.c_cc[VTIME]=10;
-    tcsetattr(brl_fd,TCSANOW,&newtio);
-    res = read(brl_fd,&chksum,1);
-    newtio.c_cc[VTIME] = 0;
-    tcsetattr(brl_fd,TCSANOW,&newtio);
+    drainSerialOutput(brl_fd);
+    res = timedRead(brl_fd,&chksum,1,1000,1000);
     if ((res==1) && (chksum == 0x04)) return 0;
   }
   return (-1);

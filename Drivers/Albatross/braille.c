@@ -102,9 +102,9 @@ acknowledgeDisplay (BrailleDisplay *brl) {
     unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
     if (!writeBytes(brl, acknowledgement, sizeof(acknowledgement))) return 0;
 
-    tcflush(fileDescriptor, TCIFLUSH);
+    flushSerialInput(fileDescriptor);
     delay(100);
-    tcflush(fileDescriptor, TCIFLUSH);
+    flushSerialInput(fileDescriptor);
   }
   LogPrint(LOG_DEBUG, "Albatross description byte: %02X", description);
 

@@ -55,6 +55,7 @@ extern int putSerialBaud (int descriptor, int baud, struct termios *attributes);
 
 extern int flushSerialInput (int descriptor);
 extern int flushSerialOutput (int descriptor);
+extern int drainSerialOutput (int descriptor);
 
 extern int testSerialClearToSend (int descriptor);
 extern int testSerialDataSetReady (int descriptor);

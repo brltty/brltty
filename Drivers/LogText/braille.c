@@ -113,17 +113,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
    if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
       initializeSerialAttributes(&newSettings);
       if (restartSerialDevice(fileDescriptor, &newSettings, 9600)) {
-         if (tcflush(fileDescriptor, TCIOFLUSH) != -1) {
-            brl->y = screenHeight;
-            brl->x = screenWidth;
-            brl->buffer = &sourceImage[0][0];
-            memset(sourceImage, 0, sizeof(sourceImage));
-            deviceStatus = DEV_ONLINE;
-            return 1;
-         } else {
-            LogError("LogText flush");
-         }
-         putSerialAttributes(fileDescriptor, &oldSettings);
+         brl->y = screenHeight;
+         brl->x = screenWidth;
+         brl->buffer = &sourceImage[0][0];
+         memset(sourceImage, 0, sizeof(sourceImage));
+         deviceStatus = DEV_ONLINE;
+         return 1;
       }
       close(fileDescriptor);
       fileDescriptor = -1;

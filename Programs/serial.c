@@ -353,6 +353,13 @@ flushSerialOutput (int descriptor) {
 }
 
 int
+drainSerialOutput (int descriptor) {
+  if (tcdrain(descriptor) != -1) return 1;
+  LogError("tcdrain");
+  return 0;
+}
+
+int
 isSerialDevice (const char **path) {
   if (isQualifiedDevice(path, "serial")) return 1;
   return !isQualifiedDevice(path, NULL);

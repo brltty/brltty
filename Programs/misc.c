@@ -399,6 +399,17 @@ readChunk (
 }
 
 int
+timedRead (
+  int descriptor, unsigned char *buffer, int count,
+  int initialTimeout, int subsequentTimeout
+) {
+  int length = 0;
+  if (readChunk(descriptor, buffer, &length, count, initialTimeout, subsequentTimeout)) return count;
+  if (errno == EAGAIN) return length;
+  return -1;
+}
+
+int
 changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
   int flags;
   if ((flags = fcntl(fileDescriptor, F_GETFL)) != -1) {

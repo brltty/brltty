@@ -87,7 +87,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -102,7 +101,7 @@
 #define BRLROWS 1		/* only one row on braille display */
 
 /* Type of delay the display requires after sending it commands.
-   0 -> no delay, 1 -> tcdrain only, 2 -> tcdrain + wait for SEND_DELAY. */
+   0 -> no delay, 1 -> drain only, 2 -> drain + wait for SEND_DELAY. */
 static int slow_update;
 
 /* Whether multiple packets can be sent for a single update. */
@@ -320,10 +319,7 @@ brl_identify (void)
 static int
 myread(int fd, void *buf, unsigned len)
 {
-  int l=0;
-  if(readChunk(fd,buf,&l,len,100,100)) return(len);
-  if(errno==EAGAIN) return(l);
-  return(-1);
+  return timedRead(fd,buf,len,100,100);
 }
 
 
@@ -488,7 +484,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 #ifdef HIGHBAUD
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
     write (brl_fd, BRL_UART192, DIM_BRL_UART192);
-    tcdrain(brl_fd);
+    drainSerialOutput(brl_fd);
     delay(BAUD_DELAY);
     if(!putSerialBaud(brl_fd, 19200, &curtio)) goto failure;
     LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
@@ -592,7 +588,7 @@ display (const unsigned char *pattern,
      (with long lines) holding down the up/down arrow key on the PC keyboard.
 
      pb40 has no problems: it apparently can take whatever we throw at
-     it. Nav40 is good but we tcdrain just to be safe.
+     it. Nav40 is good but we drain just to be safe.
 
      pb80 (twice larger but twice as fast as nav40) cannot take a continuous
      full speed flow. There is no flow control: apparently not supported
@@ -612,12 +608,12 @@ display (const unsigned char *pattern,
 
   write (brl_fd, rawdata, DIM_BRL_SEND + 2 * length);
 
-  /* First a tcdrain after the write helps make sure we don't fill up the
+  /* First a drain after the write helps make sure we don't fill up the
      buffer with info that will be overwritten immediately. This is not needed
      on pb40, but it might be good on nav40 (which runs only at 9600bps).
 
      Then for pb80 (and probably also needed for nav80 though untested) as
-     well as for some TSI emulators we add a supplementary delay: tcdrain
+     well as for some TSI emulators we add a supplementary delay: drain
      probably waits until the bytes are in the UART, but we still need a few
      ms to send them out.  This delay will combine with the sleep for this
      BRLTTY cycle (delay in the main program loop of 40ms).  Keeping the delay
@@ -632,9 +628,9 @@ display (const unsigned char *pattern,
   switch(slow_update){
   /* 0 does nothing */
   case 1: /* nav 40 */
-    tcdrain(brl_fd); break;
+    drainSerialOutput(brl_fd); break;
   case 2: /* nav80, pb80, some emulators */
-    tcdrain(brl_fd);
+    drainSerialOutput(brl_fd);
     shortdelay(SEND_DELAY);
     break;
   };
@@ -956,13 +952,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	return BRL_CMD_RESTARTBRL;
       else if(ping_due){
 	LogPrint(LOG_DEBUG,"Display idle: sending query");
-	tcdrain(brl_fd);
+	drainSerialOutput(brl_fd);
 	delay(2*SEND_DELAY);
 	write (brl_fd, BRL_QUERY, DIM_BRL_QUERY);
 	if(slow_update == 1)
-	  tcdrain(brl_fd);
+	  drainSerialOutput(brl_fd);
 	else if(slow_update == 2){
-	  tcdrain(brl_fd);
+	  drainSerialOutput(brl_fd);
 	  delay(SEND_DELAY);
 	}
 	pings++;

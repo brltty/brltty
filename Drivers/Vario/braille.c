@@ -126,21 +126,8 @@ static void brl_identify (void)
 }
 
 static int myread(int fd, void *buf, unsigned len)
-/* This is a replacement for read for use in nonblocking mode: when
-   c_cc[VTIME] = 1, c_cc[VMIN] = 0. We want to read len bytes into buf, but
-   return early if the timeout expires. */
 {
-  char *ptr = (char *)buf;
-  int r, l = 0;
-  while (l < len) {
-    r = read(fd, ptr+l, len-l);
-    if (r == 0)
-      return(l);
-    else if (r<0)
-      return(r);
-    l += r;
-  }
-  return(l);
+  return timedRead(fd,buf,len,100,100);
 }
 
 static int QueryDisplay(int brl_fd, char *reply)
@@ -185,10 +172,6 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* Construct new settings */
   initializeSerialAttributes(&curtio);
-
-  /* noncanonical: for first operation */
-  curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars on input */
-  curtio.c_cc[VMIN] = 0; /* no minimum input. */
 
   if(!restartSerialDevice(brl_fd, &curtio, BAUDRATE)) goto failure;
 
@@ -279,7 +262,7 @@ static void display(const unsigned char *buf)
     }
   }
   write(brl_fd, rawdata, VARIO_DISPLAY_LEN+ncells+escs);
-  tcdrain(brl_fd); /* Does this help? It seems at it made the scrolling
+  drainSerialOutput(brl_fd); /* Does this help? It seems at it made the scrolling
 		      smoother */
 }
 
@@ -392,10 +375,6 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
     goto calcres;
   }
 
-  /* reset to nonblocking */
-  curtio.c_cc[VTIME] = 0;
-  curtio.c_cc[VMIN] = 0;
-  tcsetattr (brl_fd, TCSANOW, &curtio);
   gettimeofday (&now, &dum_tz);
   /* Check for first byte */
   if (!read (brl_fd, buf, 1)){
@@ -419,7 +398,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       else if (ping_due){
 	LogPrint(LOG_DEBUG, "Display idle: sending query");
 	write (brl_fd, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID));
-	tcdrain(brl_fd);
+	drainSerialOutput(brl_fd);
 	pings++;
 	gettimeofday(&last_ping_sent, &dum_tz);
       }
@@ -432,11 +411,6 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   gettimeofday(&last_ping, &dum_tz);
   pings=0;
 #endif /* USE_PING */
-
-  /* further reads will wait a bit to get a complete sequence */
-  curtio.c_cc[VTIME] = 1;
-  curtio.c_cc[VMIN] = 0;
-  tcsetattr (brl_fd, TCSANOW, &curtio);
 
   /* read bytes */
   i=0;
@@ -493,7 +467,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   } else if (infotype == BUTTON || infotype == FRONTKEY ||
 	     infotype == COMMANDKEY) {
     char c;
-    if (!read(brl_fd, &c, 1)) {
+    if (!myread(brl_fd, &c, 1)) {
       return(EOF);
     }
     switch (infotype) {

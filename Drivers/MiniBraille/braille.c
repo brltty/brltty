@@ -101,7 +101,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 	restartSerialDevice(brl_fd, &newtermios, 9600);
 	/* hm, how to switch to 38400 ? 
 	write(brl_fd, "\eV\r", 3);
-	tcflush(brl_fd, TCIFLUSH);
+	flushSerialInput(brl_fd);
 	putSerialBaud(brl_fd, 38400, &newtermios);
 	*/
 

@@ -147,6 +147,10 @@ extern int readChunk (
   unsigned char *buffer, int *offset, int count,
   int initialTimeout, int subsequentTimeout
 );
+extern int timedRead (
+  int descriptor, unsigned char *buffer, int count,
+  int initialTimeout, int subsequentTimeout
+);
 
 extern int isInteger (int *value, const char *word);
 extern int isFloat (float *value, const char *word);

@@ -63,7 +63,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 
 #include "Programs/brl.h"
 #include "Programs/misc.h"
@@ -217,10 +216,7 @@ brl_identify (void)
 static int
 myread(int fd, void *buf, unsigned len)
 {
-  int l=0;
-  if(readChunk(fd,buf,&l,len,100,100)) return(len);
-  if(errno==EAGAIN) return(l);
-  return(-1);
+  return timedRead(fd,buf,len,100,100);
 }
 
 static int
@@ -353,7 +349,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     if(write(brl_fd, sendpacket, PACKET_HDR_LEN+NRCKSUMBYTES)
        != PACKET_HDR_LEN+NRCKSUMBYTES)
       goto failure;
-    tcdrain(brl_fd);
+    drainSerialOutput(brl_fd);
     while(expect_receive_packet(recvpacket)){
       if(memcmp(recvpacket, query_reply_packet_hdr, PACKET_HDR_LEN) == 0)
 	goto detected;
@@ -484,7 +480,7 @@ brl_writeWindow (BrailleDisplay *brl)
   put_cksum(sendpacket);
 
   write(brl_fd, sendpacket, PACKET_HDR_LEN+nrstatcells+brl_cols+NRCKSUMBYTES);
-  tcdrain(brl_fd);
+  drainSerialOutput(brl_fd);
 
   if(expect_receive_packet(recvpacket)){
     if(memcmp(recvpacket, ackpacket, ACKPACKETLEN) == 0)

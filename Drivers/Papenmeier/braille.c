@@ -334,9 +334,9 @@ closeSerialPort (void) {
 
 static void
 flushSerialPort (BrailleDisplay *brl) {
-  tcflush(serialDevice, TCOFLUSH);
+  flushSerialOutput(serialDevice);
   drainBrailleOutput(brl, 100);
-  tcflush(serialDevice, TCIFLUSH);
+  flushSerialInput(serialDevice);
 }
 
 static int
