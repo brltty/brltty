@@ -872,13 +872,25 @@ main (int argc, char *argv[]) {
             if (real != next) next = (next & ~VAL_CMD_MASK) | real;
           }
 
-          switch (next & VAL_CMD_MASK) {
+          switch (next & VAL_BLK_MASK) {
             default:
-              next &= ~VAL_REPEAT_MASK;
-            case CMD_LNUP:
-            case CMD_LNDN:
-            case CMD_CHRLT:
-            case CMD_CHRRT:
+              switch (next & VAL_CMD_MASK) {
+                default:
+                  next &= ~VAL_REPEAT_MASK;
+                case CMD_LNUP:
+                case CMD_LNDN:
+                case CMD_CHRLT:
+                case CMD_CHRRT:
+                case VAL_PASSKEY + VPK_PAGE_UP:
+                case VAL_PASSKEY + VPK_PAGE_DOWN:
+                case VAL_PASSKEY + VPK_CURSOR_UP:
+                case VAL_PASSKEY + VPK_CURSOR_DOWN:
+                case VAL_PASSKEY + VPK_CURSOR_LEFT:
+                case VAL_PASSKEY + VPK_CURSOR_RIGHT:
+                  break;
+              }
+            case VAL_PASSCHAR:
+            case VAL_PASSDOTS:
               break;
           }
 
