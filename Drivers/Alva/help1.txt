@@ -1,6 +1,8 @@
 Help Screen for Alva Satellite Models
-From left to right, the front keys are:
-Home  Left  Up  Down  Right  Cursor
+From left to right, the front keys are: Home Left Up Down Right Cursor
+The left Satellite keypad is for speech functions.
+The right Satellite keypad is for braille functions.
+The left/right large outer keys on the pads are referred to as F1/F2.
 
 Home/Cursor Keys:
 Home              go back (undo cursor tracking)
@@ -8,24 +10,18 @@ Cursor            go to cursor
 Home Cursor       toggle cursor tracking
 
 Up/Down Keys:
-Up                go up one line
-Down              go down one line
-Home Up           go to top-left corner
-Home Down         go to bottom-left corner
-Cursor Up         go to top line
-Cursor Down       go to bottom line
-Home Cursor Up    go up to nearest line with different highlighting
-Home Cursor Down  go down to nearest line with different highlighting
+Up/Down           go up.down one line
+Home Up/Down      go to top-left/bottom-left corner
+Cursor Up/Down    go to top/bottom line
+F1b Up/Down       go up/down to nearest line with different content
+F2b Up/Down       go up/down to nearest line with different highlighting
 
 Left/Right Keys:
-Left              go left one window
-Right             go right one window
-Home Left         go to start of line
-Home Right        go to end of line
-F1b Left          go left one character
-F1b Right         go right one character
-F2b Left          go left half window
-F2b Right        go right half window
+Left/Right        go left/right one window
+Home Left/Right   go to start/end of line
+Cursor Left/Right go to previous/next nonblank window
+F1b Left/Right    go left/right one character
+F2b Left/Right    go left/right half window
 
 Braille (right) Key Pad:
 F1                enter/leave help display
@@ -36,26 +32,21 @@ F1 Left           toggle screen freeze mode
 F1 Right          toggle 6-dot braille mode
 F2 Left           paste cut buffer at cursor location
 F2 Right          bring cursor to line (no horizontal motion)
-Up                go up to nearest line with different content
-Down              go down to nearest line with different content
-F1 Up             go up to previous command prompt
-F1 Down           go down to next command prompt
-F2 Up             go up to last line of previous paragraph
-F2 Down           go down to first line of next paragraph
+Up/Down           search backward/forward for content of cut buffer
+F1 Up/Down        go to previous/next command prompt
+F2 Up/Down       go to last/first line of previous/next paragraph
 F1 F2             restart braille driver
 
 Speech (left) Key Pad:
 F1                go to current (most recent) speech location
 F2                toggle autospeak
-F1 F2             restart speech driver
 Left              stop speaking immediately
 Right             say current line
 Up                say from top of screen through current line
 Down              say from current line through bottom of screen
-F2 Left           decrease speech rate
-F2 Right          increase speech rate
-F2 Up             increase speech volume
-F2 Down           decrease speech volume
+F2 Left/Right     decrease/increase speech rate
+F2 Up/Down        increase/decrease speech volume
+F1 F2             restart speech driver
 
 Routing Keys:
 Upper             describe character

@@ -1101,10 +1101,16 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             case KEY_CURSOR | KEY_DOWN:
               res = CMD_BOT;
               break;
-            case KEY_HOME | KEY_CURSOR | KEY_UP:
+            case KEY_BRL_F1 | KEY_UP:
+              res = CMD_PRDIFLN;
+              break;
+            case KEY_BRL_F1 | KEY_DOWN:
+              res = CMD_NXDIFLN;
+              break;
+            case KEY_BRL_F2 | KEY_UP:
               res = CMD_ATTRUP;
               break;
-            case KEY_HOME | KEY_CURSOR | KEY_DOWN:
+            case KEY_BRL_F2 | KEY_DOWN:
               res = CMD_ATTRDN;
               break;
 
@@ -1113,6 +1119,18 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               break;
             case KEY_RIGHT:
               res = CMD_FWINRT;
+              break;
+            case KEY_HOME | KEY_LEFT:
+              res = CMD_LNBEG;
+              break;
+            case KEY_HOME | KEY_RIGHT:
+              res = CMD_LNEND;
+              break;
+            case KEY_CURSOR | KEY_LEFT:
+              res = CMD_FWINLTSKIP;
+              break;
+            case KEY_CURSOR | KEY_RIGHT:
+              res = CMD_FWINRTSKIP;
               break;
             case KEY_TUMBLER1A:
             case KEY_BRL_F1 | KEY_LEFT:
@@ -1129,12 +1147,6 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             case KEY_TUMBLER2B:
             case KEY_BRL_F2 | KEY_RIGHT:
               res = CMD_HWINRT;
-              break;
-            case KEY_HOME | KEY_LEFT:
-              res = CMD_LNBEG;
-              break;
-            case KEY_HOME | KEY_RIGHT:
-              res = CMD_LNEND;
               break;
 
             case KEY_ROUTING2:
@@ -1209,10 +1221,10 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
               break;
 
             case KEY_BRL_UP:
-              res = CMD_PRDIFLN;
+              res = CMD_PRSEARCH;
               break;
             case KEY_BRL_DOWN:
-              res = CMD_NXDIFLN;
+              res = CMD_NXSEARCH;
               break;
             case KEY_BRL_F1 | KEY_BRL_UP:
               res = CMD_PRPROMPT;
