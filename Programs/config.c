@@ -854,17 +854,6 @@ exitBrailleDriver (void) {
   stopBrailleDriver();
 }
 
-static int
-testBrailleFirmness (void) {
-  return braille->firmness != NULL;
-}
-
-static int
-changedBrailleFirmness (unsigned char setting) {
-  setBrailleFirmness(&brl, setting);
-  return 1;
-}
-
 #ifdef ENABLE_API
 static void
 exitApi (void) {
@@ -997,28 +986,6 @@ static void
 exitSpeechDriver (void) {
   stopSpeechDriver();
 }
-
-static int
-testSpeechRate (void) {
-  return speech->rate != NULL;
-}
-
-static int
-changedSpeechRate (unsigned char setting) {
-  setSpeechRate(setting);
-  return 1;
-}
-
-static int
-testSpeechVolume (void) {
-  return speech->volume != NULL;
-}
-
-static int
-changedSpeechVolume (unsigned char setting) {
-  setSpeechVolume(setting);
-  return 1;
-}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -1073,10 +1040,40 @@ savePreferences (void) {
   return ok;
 }
 
-static void
-exitTunes (void) {
-  closeTuneDevice(1);
+static int
+testBrailleFirmness (void) {
+  return braille->firmness != NULL;
 }
+
+static int
+changedBrailleFirmness (unsigned char setting) {
+  setBrailleFirmness(&brl, setting);
+  return 1;
+}
+
+#ifdef ENABLE_SPEECH_SUPPORT
+static int
+testSpeechRate (void) {
+  return speech->rate != NULL;
+}
+
+static int
+changedSpeechRate (unsigned char setting) {
+  setSpeechRate(setting);
+  return 1;
+}
+
+static int
+testSpeechVolume (void) {
+  return speech->volume != NULL;
+}
+
+static int
+changedSpeechVolume (unsigned char setting) {
+  setSpeechVolume(setting);
+  return 1;
+}
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 static int
 testTunes (void) {
@@ -1647,6 +1644,11 @@ updatePreferences (void) {
   }
 }
 #endif /* ENABLE_PREFERENCES_MENU */
+
+static void
+exitTunes (void) {
+  closeTuneDevice(1);
+}
 
 static void
 exitScreen (void) {
