@@ -23,11 +23,11 @@
 #ifdef linux
 
 #include <sys/ioctl.h>
-#include <linux/kd.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <linux/kd.h>
 
 #endif
 

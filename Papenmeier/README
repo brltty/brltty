@@ -1,6 +1,6 @@
 README file for the Papenmeier Screen 2D
 
-Version 1.0 (Mai 1998)
+Version 1.0 (June 1998)
 
 Copyright
 =========
@@ -50,12 +50,6 @@ Key Bindings and Status Cells
 All the key definitions and Status Cells are listed in the file 
 brlttyhelp.txt.
 
-There is one additional function
-
-UPDATE  update the the display - this is useful if the terminal is switched
-        on after the start of the driver. This key can also be used if the 
-        display isn´t updated after serial problems.
-  
 Running the Driver
 ==================
 To compile and run BRLTTY, please refer to the documentation about 
@@ -63,3 +57,11 @@ BRLTTY itself. One note though: when BRLTTY starts, it will display
 on the screen some copyright stuff, current configuration (model and 
 firmware version setup) and the serial device in use.  That information 
 may be useful if nothing happens with the braille terminal.
+
+Known Problems
+==============
+Sometimes during our Test only the first part of the line was updated (this 
+could be caused by an old firmware eprom version). If you have similar 
+problems: please uncomment the line 
+  #define SEND_TWICE_HACK 
+near the top of the file brl.c (remove /* and */ ).

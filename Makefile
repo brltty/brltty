@@ -95,12 +95,15 @@ INSKEY_O = inskey_lnx.o
 # The following are compiler settings.  If you don't know what they mean,
 # LEAVE THEM ALONE!
 CC = gcc
+COMPCPP = g++
 # To compile in a.out (if you use ELF by default), you may be able to use
 # `-b i486-linuxaout'; however, you may also need to use the -V flag, or
 # possibly a different gcc executable, depending on your setup.
-CFLAGS = -O2 -Wall -D_POSIX_C_SOURCE=2 -D$(BRL_TARGET) -D$(SPK_TARGET)
-UTILS_CFLAGS = -O2 -Wall -D_POSIX_C_SOURCE=2
-LD = $(CC)
+COMMONCFLAGS = -O2 -Wall -D_POSIX_C_SOURCE=2 -D_BSD_SOURCE
+CFLAGS = $(COMMONCFLAGS) -D$(BRL_TARGET) -D$(SPK_TARGET)
+UTILS_CFLAGS = $(CFLAGS)
+#LD = gcc
+LD = g++
 LDFLAGS = -s
 #LDFLAGS = -s -static
 LDLIBS =
@@ -163,7 +166,7 @@ brltest: brltest.o brl.o misc.o
 scrtest: scrtest.o scr.o scrdev.o misc.o $(SCR_O)
 	$(LD) $(LDFLAGS) -o $@ scrtest.o scr.o scrdev.o misc.o $(SCR_O) $(LDLIBS)
 
-brl.o:
+brl.o: Makefile
 	cd $(BRL_TARGET); \
 	if [ -f Makefile ]; \
 	then \
@@ -188,16 +191,16 @@ speech.o:
 	fi
 
 scr.o: scr.cc scr.h scrdev.h helphdr.h config.h
-	$(CC) $(CFLAGS) -c scr.cc
+	$(COMPCPP) $(CFLAGS) -c scr.cc
 
 scrdev.o: scrdev.cc scr.h scrdev.h helphdr.h config.h
-	$(CC) $(CFLAGS) -c scrdev.cc
+	$(COMPCPP) $(CFLAGS) -c scrdev.cc
 
 scr_vcsa.o: scr_vcsa.cc scr_vcsa.h scr.h scrdev.h config.h
-	$(CC) $(CFLAGS) '-DVCSADEV="$(VCSADEV)"' -c scr_vcsa.cc
+	$(COMPCPP) $(CFLAGS) '-DVCSADEV="$(VCSADEV)"' -c scr_vcsa.cc
 
 scr_shm.o: scr_shm.cc scr_shm.h scr.h scrdev.h config.h
-	$(CC) $(CFLAGS) -c scr_shm.cc
+	$(COMPCPP) $(CFLAGS) -c scr_shm.cc
 
 inskey_lnx.o: inskey_lnx.c inskey.h
 	$(CC) $(CFLAGS) -c inskey_lnx.c

@@ -70,23 +70,17 @@ initscr_phys (void)
 }
 
 
-scrstat
-getstat (void)
+void
+getstat (scrstat *stat)
 {
-  scrstat stat;
-
-  current->getstat (stat);
-  return stat;
+  current->getstat (*stat);
 }
 
 
-scrstat
-getstat_phys (void)
+void
+getstat_phys (scrstat *stat)
 {
-  scrstat stat;
-
-  live->getstat (stat);
-  return stat;
+  live->getstat (*stat);
 }
 
 

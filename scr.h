@@ -50,7 +50,7 @@ winpos;
 /* Functions provided by this library */
 
 int initscr (void);		/* initialise screen reading functions */
-scrstat getstat (void);		/* get screen status */
+void getstat (scrstat *);		/* get screen status */
 unsigned char *getscr (winpos, unsigned char *, short);
 		/* Read a rectangle from the screen - text or attributes: */
 void closescr (void);		/* close screen reading */
@@ -61,7 +61,7 @@ int selectdisp (int);		/* select display page */
  * filedescriptors.  A getscr equivalent is not needed, and so not provided.
  */
 int initscr_phys (void);
-scrstat getstat_phys (void);
+void getstat_phys (scrstat *);
 void closescr_phys (void);
 
 /* Manipulation of the help screen number, for use in brl.c: */

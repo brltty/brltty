@@ -37,7 +37,7 @@ main (void)
       fprintf (stderr, "scrtest: can't initialise screen reading\n");
       exit (1);
     }
-  test = getstat ();
+  getstat (&test);
   res = getscr ((winpos)
 		{
 		5, 5, 70, 15

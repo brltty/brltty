@@ -51,6 +51,7 @@
 #include <sys/termios.h>
 #include <sys/ioctl.h>
 #include <string.h>
+#include <errno.h>
 
 #include "brlconf.h"
 #include "../brl.h"

@@ -8,7 +8,8 @@
 <subtitle>Access Software for Unix for a Blind Person Using a Soft Braille Terminal
 <author>Nikhil Nair <tt>&lt;nn201@cus.cam.ac.uk&gt;</> &nl;
 Nicolas Pitre <tt>&lt;nico@cam.org&gt;</> &nl;
-St&eacute;phane Doyon <tt>&lt;s.doyon@videotron.ca&gt;</>
+St&eacute;phane Doyon <tt>&lt;s.doyon@videotron.ca&gt;</> &nl;
+Web page: <tt>http://www.cam.org/~nico/brltty</>
 <date>Version 2.0, June 1998
 <abstract>
 Copyright (C) 1995-98 by The BRLTTY Team, All Rights
@@ -73,7 +74,7 @@ An experimental patch for running BRLTTY from a program named <tt/screen/ is
 available. This would make porting possible to platforms that do not have
 Linux's vcsa devices.
 
-This Linux version of BRLTTY uses, apart from the standard serial 
+BRLTTY uses, apart from the standard serial 
 driver, the special device introduced in kernel version 1.1.92 which 
 provides easy access to the contents of the current virtual console.  
 This is normally called <tt>/dev/vcsa</> or <tt>/dev/vcsa0</> (the 
@@ -106,6 +107,10 @@ C++ compiler, etc. The tools provided in standard Linux distributions should
 do the trick. If you have problems, contact us and we will compile a binary
 for you.
 
+In the past, BRLTTY has been tested on many distributions, including
+Slackware, Debian and Red Hat. The current version is known to compile on
+Red Hat 5.0 and 5.1.
+
 <sect1>Initial Installation and Testing
 
 <p>Before compiling BRLTTY, you must configure it for your system.  
@@ -132,7 +137,7 @@ You will have to install BRLTTY before you can use the test programs.
 BRLTTY will probably have to run with root privilege.  It needs to 
 access the virtual console screen information (<tt>/dev/vcsa0</>), the serial
 port selected and, most awkwardly, the console (<tt>/dev/console</>), which is
-used for keystroke simulation during cursor routing, for the cut &amp paste 
+used for keystroke simulation during cursor routing, for the cut &amp; paste 
 function, for arrow keys simulation using keys on the braille display and for
 beeps. Access to the serial port as well as to the <tt/vcsa0/ device can be
 granted to a non-root user by changing the permissions on the divice
@@ -217,7 +222,11 @@ This could be abbreviated to the rather less readable form:
    [ -x /sbin/brltty ] && /sbin/brltty
 </verb></tscreen>
 
-(On a Slackware system, the file to edit is <tt>/etc/rc.d/rc.S</>.)
+If you have installed the Red Hat distribution, modify the file
+<tt>/etc/rc.d/rc.sysinit</>.
+On a Slackware system, the file to edit is <tt>/etc/rc.d/rc.S</>.
+On a SuSE system the above code can be inserted at the top of
+<tt>/sbin/init.d/boot</>.
 
 One possible alternative is to start BRLTTY from <tt>/etc/inittab</>.
 
@@ -404,7 +413,7 @@ A new command, called <em/CSRJMP_VERT/, routes the cursor to anywhere on the
 current line without adjusting the horizontal position. This is especially
 useful within lynx as left and right arrow keys are never simulated.
 
-<sect1>Cut &amp Paste
+<sect1>Cut &amp; Paste
 
 <p>This feature enables you to grab some text already on the screen 
 and re-enter it at the cursor, thus saving time and avoiding errors when
@@ -419,7 +428,7 @@ the <em/cut buffer/ is cleared.  To mark the bottom right corner press
 position of the braille window and the area you defined is then copied into
 the <em/cut buffer/.  BRLTTY removes excess white space at the end of each
 line in the <em/cut buffer/ so you don't get extra spaces after your cut text.
-Some displays support more accurate <em/cut &amp paste/ using the
+Some displays support more accurate <em/cut &amp; paste/ using the
 buttons above the Braille cells, see the <tt/README/ file for your
 display.
 
@@ -710,6 +719,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 <sect1>Support<label id="support">
 
+For up to date information, see our web page at
+<tt>http://www.cam.org/~nico/brltty</>.
+
 <p>BRLTTY represents the work of a team, which includes
 <itemize>
   <item> <htmlurl url="mailto:nico@cam.org"
@@ -786,7 +798,7 @@ following:
 <descrip>
   <tag/Better attribute handling/ Attribute tracking, mixed text and
 attribute mode etc.
-  <tag/Revision of cut &amp paste/ Linear (as opposed to rectangular)
+  <tag/Revision of cut &amp; paste/ Linear (as opposed to rectangular)
 cut mode.
   <tag/Revision of beeps/ A greater variety of beeps.
   <tag/Scroll tracking/ Locking the Braille window on one line as it 
@@ -805,7 +817,7 @@ See the TODO file for a more complete list.
 <itemize>
   <item> a variety of PCs: both laptops and desktops; processors from
 386SX20 to Pentium with a huge range of memory sizes; Linux
-distributions including Debian, Slackware and Red Hat; a number of Linux
+distributions including Debian, Slackware, Red Hat and SUSE; a number of Linux
 kernels, including 1.2.13, 2.0.0 and 2.0.34.
   <item> a DEC Alpha: only tested once, under Red Hat Alpha Linux on a
 noname board kindly lent to the Cambridge University Computer
@@ -827,7 +839,7 @@ situations, e.g. over a slow serial link to a remote host.
   <tag/Operation in DOSEmu/ Keystroke simulation of any kind does not
 work correctly in DOSEmu's raw keyboard mode.  This is because
 keystroke simulation must be done differently in this case, possibly
-by using scan codes.  This affects the cursor routing and cut &amp
+by using scan codes.  This affects the cursor routing and cut &amp;
 paste functions.
 </descrip>
 

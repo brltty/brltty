@@ -2,6 +2,8 @@ Note: this file should be read from bottom to top.
 
 
   ...
+  - Web pages online
+  - Fixes to compile with egcs and glibc (RH5.1)
   - Fixed Combibraille speech support (broken when BRLTTY moved to 
     ISO-8859-1 base charset while the Combibraille expects an IBM CP437
     charset).

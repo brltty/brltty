@@ -32,6 +32,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #include "config.h"
 #include "brl.h"
@@ -42,7 +43,7 @@
 #include "cut-n-paste.h"
 #include "misc.h"
 
-#define VERSION "BRLTTY 1.9.5 (pre-release)"
+#define VERSION "BRLTTY 1.9.7 (pre-release)"
 #define COPYRIGHT "\
 Copyright (C) 1995-1998 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -413,7 +414,7 @@ main (int argc, char *argv[])
       delay (DISPDEL);		/* sleep for a while */
     }
 
-  scr = getstat ();
+  getstat (&scr);
   switchto( scr.no );			/* allocate current screen params */
   setwinxy (scr.posx, scr.posy);	/* set initial window position */
   oldwinx = p->winx; oldwiny = p->winy;
@@ -834,7 +835,7 @@ main (int argc, char *argv[])
        * Update Braille display and screen information.  Switch screen 
        * params if screen numver has changed.
        */
-      scr = getstat ();
+      getstat (&scr);
       if( !(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no)
 	switchto (scr.no);
 
@@ -1184,7 +1185,7 @@ csrjmp_sub (int x, int y)
   if (initscr_phys ())
     return;
 
-  scr = getstat_phys ();
+  getstat_phys (&scr);
 
   /* Deal with vertical movement first, ignoring horizontal jumping ... */
   dif = y - scr.posy;
@@ -1201,7 +1202,7 @@ csrjmp_sub (int x, int y)
 #endif
 	  cury = scr.posy;
 	  curx = scr.posx;
-	  scr = getstat_phys ();
+	  getstat_phys (&scr);
 	}
       while (!(t = timeout_yet (CSRJMP_TIMEOUT)) &&
 	     scr.posy==cury && scr.posx==curx);
@@ -1209,7 +1210,7 @@ csrjmp_sub (int x, int y)
       if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
 	 || (y-scr.posy)*dif > dif*dif){
 	delay(CSRJMP_SETTLE_DELAY);
-	scr = getstat_phys ();
+	getstat_phys (&scr);
 	if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
 	   || (y-scr.posy)*dif > dif*dif)
 	  break;
@@ -1232,15 +1233,15 @@ csrjmp_sub (int x, int y)
 	    delay (CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
 	    curx = scr.posx;
-	    scr = getstat_phys ();
+	    getstat_phys (&scr);
 	  }
 	while (!(t = timeout_yet (CSRJMP_TIMEOUT)) &&
 	       scr.posx==curx && scr.posy == y);
 	if(t) break;
 	if(scr.posy != y || (x-scr.posx)*dif > dif*dif){
 	  delay(CSRJMP_SETTLE_DELAY);
-	  scr = getstat_phys ();
-	  if (scr.posy != y) { 
+	  getstat_phys (&scr);
+	  if(scr.posy != y){
 	    /* We probably wrapped on a short line... Try to get back
 	     * on the correct line going backward before exiting.
 	     */

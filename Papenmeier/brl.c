@@ -42,6 +42,10 @@
 #include "../scr.h"
 #include "../misc.h"
 
+/* HACK - send all data twice - HACK */
+/* see README for details */
+/* #define SEND_TWICE_HACK */
+
 char DefDev[] = BRLDEV;		/* default braille device */
 int brl_fd = 0;			/* file descriptor for Braille display */
 struct termios oldtio;		/* old terminal settings */
@@ -184,7 +188,14 @@ write_to_braille(int offset, int size, const char* data)
   write(brl_fd,BrlHead, sizeof(BrlHead));
   write(brl_fd, data, size);
   write(brl_fd,BrlTrail, sizeof(BrlTrail));
+#ifdef SEND_TWICE_HACK
+  delay(100);
+  write(brl_fd,BrlHead, sizeof(BrlHead));
+  write(brl_fd, data, size);
+  write(brl_fd,BrlTrail, sizeof(BrlTrail));
+#endif
 }
+
 
 void 
 init_table()
@@ -360,6 +371,8 @@ int readbrl (int xx)
 
 	  /* misc */
 	  KEY(0x0300, CMD_HELP);    /* Taste Seite "1"  */
+	  KEY(0x306, CMD_CSRJMP_VERT); /* Taste Seite "3" */
+
 	  KEY(0x030F, CMD_CSRTRK);  /* Taste Seite "6"  */
 	  KEY(0x0312, CMD_DISPMD);  /* Taste Seite "7"  */
 	  KEY(0x0315, CMD_INFO);    /* Taste Seite "8"  */
@@ -388,7 +401,8 @@ int readbrl (int xx)
 	  init_table();
 	  write_to_braille(offsetVertical, PMSC, prevline);
 	  write_to_braille(offsetHorizontal, BRLCOLS, prev);
-	  return EOF;
+	  return CMD_RESTARTBRL;
+
 	  /* cut: begin, end - set flag */
 	case 0x0003: /* Taste Unten "7"  */
 	  beg_pressed = 1;
