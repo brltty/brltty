@@ -708,6 +708,7 @@ static int processRequest(Connection *c)
       LogPrintRequest(type, c->fd);
       CHECKEXC(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
       CHECKEXC(c->tty,BRLERR_ILLEGAL_INSTRUCTION);
+      doLeaveTty(c);
       writeAck(c->fd);
       return 0;
     }
