@@ -97,7 +97,7 @@ static struct timezone dum_tz;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
 {BRL_CMD_FWINRT, BRL_CMD_FWINLT, BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_WINUP, BRL_CMD_WINDN,
- VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN,
+ BRL_BLK_PASSKEY+VPK_CURSOR_LEFT, BRL_BLK_PASSKEY+VPK_CURSOR_RIGHT, BRL_BLK_PASSKEY+VPK_CURSOR_UP, BRL_BLK_PASSKEY+VPK_CURSOR_DOWN,
  BRL_CMD_PRDIFLN, BRL_CMD_NXDIFLN, 0};
 
 static TranslationTable outputTable;
@@ -563,12 +563,12 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 	/* Define some special combinations. I only use dot 7 in combination
 	   with dot 2, 3, 4, 5 and 6. */
 	if (t == (1<<6)) t = 0;  /* Space is 00000000 */
-	else if (t == ((1<<6)|(1<<1))) return(VAL_PASSKEY+VPK_RETURN);
-	else if (t == ((1<<6)|(1<<2))) return(VAL_PASSCHAR+127);
-	else if (t == ((1<<6)|(1<<3))) return(VAL_PASSCHAR+9);
-	else if (t == ((1<<6)|(1<<4))) return(VAL_PASSKEY+VPK_CURSOR_LEFT);
-	else if (t == ((1<<6)|(1<<5))) return(VAL_PASSKEY+VPK_CURSOR_RIGHT);
-	return(VAL_PASSDOTS+t);
+	else if (t == ((1<<6)|(1<<1))) return(BRL_BLK_PASSKEY+VPK_RETURN);
+	else if (t == ((1<<6)|(1<<2))) return(BRL_BLK_PASSCHAR+127);
+	else if (t == ((1<<6)|(1<<3))) return(BRL_BLK_PASSCHAR+9);
+	else if (t == ((1<<6)|(1<<4))) return(BRL_BLK_PASSKEY+VPK_CURSOR_LEFT);
+	else if (t == ((1<<6)|(1<<5))) return(BRL_BLK_PASSKEY+VPK_CURSOR_RIGHT);
+	return(BRL_BLK_PASSDOTS+t);
       } else {
 	code |= (ck<<16);
 	ck = 0;
@@ -582,20 +582,20 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   if (sw_howmany) {  /* Some Routing keys were pressed */
     /* Cut-n-paste: */
     if (sw_howmany == 3 && sw_which[0]+2 == sw_which[1]) { /* Vario80 */
-      res = CR_CUTBEGIN + sw_which[0];
-      pending_cmd = CR_CUTRECT + sw_which[2];
+      res = BRL_BLK_CUTBEGIN + sw_which[0];
+      pending_cmd = BRL_BLK_CUTRECT + sw_which[2];
     } else if (sw_howmany == 3 && 
 	       sw_which[2] == brlcols-1 && sw_which[1] == brlcols-2 &&
 	       sw_which[0] < brlcols) {
-      res = CR_CUTBEGIN + sw_which[0];
+      res = BRL_BLK_CUTBEGIN + sw_which[0];
     } else if (sw_howmany == 3 &&
 	       sw_which[0] == 0 && sw_which[1] == 1 &&
 	       sw_which[2] < brlcols) {
-      res = CR_CUTRECT + sw_which[2];
+      res = BRL_BLK_CUTRECT + sw_which[2];
     } else if (sw_howmany == 2 && sw_which[1] == 80 && sw_which[0] < 80) {
-      res = CR_CUTBEGIN + sw_which[0];
+      res = BRL_BLK_CUTBEGIN + sw_which[0];
     } else if (sw_howmany == 2 && sw_which[1] == 81 && sw_which[0] < 80) {
-      res = CR_CUTRECT + sw_which[0];
+      res = BRL_BLK_CUTRECT + sw_which[0];
     } else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1) {
       res = BRL_CMD_CHRLT;
     } else if (sw_howmany == 2 && sw_which[0] == brlcols-2 && sw_which[1] == brlcols-1) {
@@ -607,7 +607,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 	       sw_which[0] == 0 && sw_which[1] == brlcols-1) {
       res = BRL_CMD_HELP;
     } else if (sw_howmany == 1 && sw_which[0] < brlcols) {
-      res = CR_ROUTE+sw_which[0];
+      res = BRL_BLK_ROUTE+sw_which[0];
     }
   } else if (code) {
     /* Due to ergonomic reasons, I decided to use
@@ -631,9 +631,9 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 	KEY(KEY_TL1, BRL_CMD_LNUP);
 	KEY(KEY_TL2, BRL_CMD_FWINLT);
 	KEY(KEY_TL3, BRL_CMD_LNDN);
-	KEY(KEY_TR1, VAL_PASSKEY+VPK_CURSOR_UP);
+	KEY(KEY_TR1, BRL_BLK_PASSKEY+VPK_CURSOR_UP);
 	KEY(KEY_TR2, BRL_CMD_FWINRT);
-	KEY(KEY_TR3, VAL_PASSKEY+VPK_CURSOR_DOWN);
+	KEY(KEY_TR3, BRL_BLK_PASSKEY+VPK_CURSOR_DOWN);
       }
     } else if (brlcols == 80) {
       switch (code) {
@@ -641,21 +641,21 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 	KEY(KEY_TL2, BRL_CMD_HOME);
 	KEY(KEY_TL3, BRL_CMD_BOT_LEFT);
 	KEY(KEY_TR1, BRL_CMD_LNUP);
-	KEY(KEY_TR2, VAL_PASSKEY+VPK_RETURN);
+	KEY(KEY_TR2, BRL_BLK_PASSKEY+VPK_RETURN);
 	KEY(KEY_TR3, BRL_CMD_LNDN);
 	KEY(KEY_MU, BRL_CMD_LNUP);
 	KEY(KEY_MD, BRL_CMD_LNDN);
 	KEY(KEY_RU, BRL_CMD_DISPMD);
 	KEY(KEY_RD, BRL_CMD_CSRTRK);
 
-	KEY(KEY_LU, VAL_PASSKEY+VPK_CURSOR_UP);
-	KEY(KEY_LD, VAL_PASSKEY+VPK_CURSOR_DOWN);
-	KEY(KEY_CK4, VAL_PASSKEY+VPK_RETURN);
+	KEY(KEY_LU, BRL_BLK_PASSKEY+VPK_CURSOR_UP);
+	KEY(KEY_LD, BRL_BLK_PASSKEY+VPK_CURSOR_DOWN);
+	KEY(KEY_CK4, BRL_BLK_PASSKEY+VPK_RETURN);
 
 	KEY(KEY_CK3 | KEY_CK5, BRL_CMD_PREFMENU);
 	KEY(KEY_CK1 | KEY_CK3 | KEY_CK7, BRL_CMD_ATTRVIS);
-	KEY(KEY_CK1, VAL_PASSKEY+VPK_CURSOR_LEFT);
-	KEY(KEY_CK7, VAL_PASSKEY+VPK_CURSOR_RIGHT);
+	KEY(KEY_CK1, BRL_BLK_PASSKEY+VPK_CURSOR_LEFT);
+	KEY(KEY_CK7, BRL_BLK_PASSKEY+VPK_CURSOR_RIGHT);
 	KEY(KEY_CK2 | KEY_CK3 | KEY_CK5, BRL_CMD_FREEZE);
 	KEY(KEY_CK2 | KEY_CK3 | KEY_CK6, BRL_CMD_HELP);
 	KEY(KEY_CK2           | KEY_CK5, BRL_CMD_INFO);

@@ -1047,26 +1047,26 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
               break;
             case KEY_ROUTING1:
               /* normal Cursor routing keys */
-              res = CR_ROUTE + RoutingPos;
+              res = BRL_BLK_ROUTE + RoutingPos;
               break;
             case KEY_PROG | KEY_ROUTING1:
               /* marking beginning of block */
-              res = CR_CUTBEGIN + RoutingPos;
+              res = BRL_BLK_CUTBEGIN + RoutingPos;
               break;
             case KEY_HOME | KEY_ROUTING1:
               /* marking end of block */
-              res = CR_CUTRECT + RoutingPos;
+              res = BRL_BLK_CUTRECT + RoutingPos;
               break;
             case KEY_PROG | KEY_HOME | KEY_DOWN:
               res = BRL_CMD_PASTE;
               break;
             case KEY_PROG | KEY_HOME | KEY_ROUTING1:
               /* attribute for pointed character */
-              res = CR_DESCCHAR + RoutingPos;
+              res = BRL_BLK_DESCCHAR + RoutingPos;
               break;
             case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
               /* attribute for pointed character */
-              res = CR_SETLEFT + RoutingPos;
+              res = BRL_BLK_SETLEFT + RoutingPos;
               break;
           }
           break;
@@ -1140,34 +1140,34 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
               break;
 
             case KEY_ROUTING2:
-              res = CR_DESCCHAR + RoutingPos;
+              res = BRL_BLK_DESCCHAR + RoutingPos;
               break;
             case KEY_ROUTING1:
-              res = CR_ROUTE + RoutingPos;
+              res = BRL_BLK_ROUTE + RoutingPos;
               break;
             case KEY_BRL_F1 | KEY_ROUTING2:
-              res = CR_CUTAPPEND + RoutingPos;
+              res = BRL_BLK_CUTAPPEND + RoutingPos;
               break;
             case KEY_BRL_F1 | KEY_ROUTING1:
-              res = CR_CUTBEGIN + RoutingPos;
+              res = BRL_BLK_CUTBEGIN + RoutingPos;
               break;
             case KEY_BRL_F2 | KEY_ROUTING2:
-              res = CR_CUTLINE + RoutingPos;
+              res = BRL_BLK_CUTLINE + RoutingPos;
               break;
             case KEY_BRL_F2 | KEY_ROUTING1:
-              res = CR_CUTRECT + RoutingPos;
+              res = BRL_BLK_CUTRECT + RoutingPos;
               break;
             case KEY_HOME | KEY_ROUTING2:
-              res = CR_SETMARK + RoutingPos;
+              res = BRL_BLK_SETMARK + RoutingPos;
               break;
             case KEY_HOME | KEY_ROUTING1:
-              res = CR_GOTOMARK + RoutingPos;
+              res = BRL_BLK_GOTOMARK + RoutingPos;
               break;
             case KEY_CURSOR | KEY_ROUTING2:
-              res = CR_PRINDENT + RoutingPos;
+              res = BRL_BLK_PRINDENT + RoutingPos;
               break;
             case KEY_CURSOR | KEY_ROUTING1:
-              res = CR_NXINDENT + RoutingPos;
+              res = BRL_BLK_NXINDENT + RoutingPos;
               break;
 
             case KEY_STATUS1_A:

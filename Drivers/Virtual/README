@@ -103,8 +103,8 @@ Quit
    attribute toggling command, forces that attribute to the specified state.
 
 <cell-command> number
-   A cell command for the BRLTTY core. It may be any of the CR_ constants
-   (without the CR_ prefix) defined within "brldefs.h", e.g. Route. The cell
+   A cell command for the BRLTTY core. It may be any of the BRL_BLK_ constants
+   (without the BRL_BLK_ prefix) defined within "brldefs.h", e.g. Route. The cell
    number, starting at 1 for the leftmost cell, must be supplied. If the
    display has more than one row then the cells for the top row are counted
    first, e.g. if the display has 32 columns and 2 rows then 35 refers to the

@@ -34,7 +34,7 @@
  ? 0x18             45       down several lines                BRL_CMD_PRDIFLN
  * 0x04  0x0e     1     (B)  up one line                       BRL_CMD_LNUP
  * 0x08  0x13       4   (D)  down one line                     BRL_CMD_LNDN
- ? 0x21  0x10   3     6 (CC) cursor position                   CR_ROUTE
+ ? 0x21  0x10   3     6 (CC) cursor position                   BRL_BLK_ROUTE
  * 0x03         32           beginning of line                 BRL_CMD_LNBEG
  * 0x30              56      end of line                       BRL_CMD_LNEND
  * 0x05         3 1          left one character                BRL_CMD_CHRLT
@@ -48,8 +48,8 @@
  * 0x34           1  56      speak current line                BRL_CMD_SAY_LINE
  * 0x24           1   6      mute speech                       BRL_CMD_MUTE
  ? 0x1e          21 45       route cursor to start of window   BRL_CMD_HOME
- * 0x23         32    6      cut start                         CR_CUTBEGIN
- * 0x31         3    56      cut end                           CR_CUTRECT+brlcols-1
+ * 0x23         32    6      cut start                         BRL_BLK_CUTBEGIN
+ * 0x31         3    56      cut end                           BRL_BLK_CUTRECT+brlcols-1
  * 0x0f         321 4        paste                             BRL_CMD_PASTE
  * 0x10              5       cursor visibility on/off          BRL_CMD_CSRVIS
  * 0x0c  0x10     1 4   (C)  cursor tracking on/off            BRL_CMD_CSRTRK
@@ -112,11 +112,11 @@ static int cmd_S_trans[0x40] = {
 /* 0x14 */  0x00,         BRL_CMD_HWINRT,   BRL_CMD_HELP,     BRL_CMD_PREFLOAD, 
 /* 0x18 */  BRL_CMD_PRDIFLN,  0x00,         BRL_CMD_SKPIDLNS, 0x00,        
 /* 0x1c */  0x00,         0x00,         BRL_CMD_HOME,     0x00, 
-/* 0x20 */  BRL_CMD_FWINRT,   CR_ROUTE,     0x00,         CR_CUTBEGIN, 
+/* 0x20 */  BRL_CMD_FWINRT,   BRL_BLK_ROUTE,     0x00,         BRL_BLK_CUTBEGIN, 
 /* 0x24 */  BRL_CMD_MUTE,     0x00,         0x00,         0x00, 
 /* 0x28 */  BRL_CMD_CHRRT,    0x00,         BRL_CMD_HWINLT,   0x00,        
 /* 0x2c */  BRL_CMD_CAPBLINK, BRL_CMD_PREFMENU, 0x00,         0x00, 
-/* 0x30 */  BRL_CMD_LNEND,    CR_CUTRECT,   0x00,         0x00,        
+/* 0x30 */  BRL_CMD_LNEND,    BRL_BLK_CUTRECT,   0x00,         0x00,        
 /* 0x34 */  BRL_CMD_SAY_LINE, 0x00,         0x00,         0x00, 
 /* 0x38 */  BRL_CMD_BOT,      0x00,         BRL_CMD_SLIDEWIN, 0x00,        
 /* 0x3c */  0x00,         0x00,         0x00,         BRL_CMD_PREFSAVE, 

@@ -68,7 +68,7 @@ static char* search_code(int code, int cmd)
 
 static char* search_cmd(int cmd)
 {
-  if ((cmd & BRL_MSK_BLK) == VAL_PASSKEY) {
+  if ((cmd & BRL_MSK_BLK) == BRL_BLK_PASSKEY) {
     return search_code(VPK, cmd);
   } else {
     return search_code(KEYCODE, cmd);

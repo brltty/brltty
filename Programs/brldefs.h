@@ -166,24 +166,24 @@ typedef enum {
   
 /* cursor routing keys block offset values */
 /*
- * Please comment all CR_* definitions. They are
+ * Please comment all BRL_BLK_* definitions. They are
  * used during automatic help file generation.
  */
-#define CR_ROUTE     0X100   /* bring cursor to character */
-#define CR_CUTBEGIN  0X200 /* start new cut buffer at character */
-#define CR_CUTAPPEND 0X300 /* append to existing cut buffer from character */
-#define CR_CUTRECT   0X400 /* rectangular cut to character */
-#define CR_CUTLINE   0X500 /* linear cut to character */
-#define CR_SWITCHVT  0X600 /* switch to virtual terminal */
-#define CR_PRINDENT  0X700 /* go up to nearest line without greater indent */
-#define CR_NXINDENT  0X800 /* go down to nearest line without greater indent */
-#define CR_DESCCHAR  0X900 /* describe character */
-#define CR_SETLEFT   0XA00 /* position left end of window at character */
-#define CR_SETMARK   0XB00 /* remember current window position */
-#define CR_GOTOMARK  0XC00 /* go to remembered window position */
+#define BRL_BLK_ROUTE     0X100 /* bring cursor to character */
+#define BRL_BLK_CUTBEGIN  0X200 /* start new cut buffer at character */
+#define BRL_BLK_CUTAPPEND 0X300 /* append to existing cut buffer from character */
+#define BRL_BLK_CUTRECT   0X400 /* rectangular cut to character */
+#define BRL_BLK_CUTLINE   0X500 /* linear cut to character */
+#define BRL_BLK_SWITCHVT  0X600 /* switch to virtual terminal */
+#define BRL_BLK_PRINDENT  0X700 /* go up to nearest line without greater indent */
+#define BRL_BLK_NXINDENT  0X800 /* go down to nearest line without greater indent */
+#define BRL_BLK_DESCCHAR  0X900 /* describe character */
+#define BRL_BLK_SETLEFT   0XA00 /* position left end of window at character */
+#define BRL_BLK_SETMARK   0XB00 /* remember current window position */
+#define BRL_BLK_GOTOMARK  0XC00 /* go to remembered window position */
 
 /* For entering a special key. */
-#define VAL_PASSKEY 0X2000
+#define BRL_BLK_PASSKEY 0X2000
 typedef enum {
   VPK_RETURN,
   VPK_TAB,
@@ -202,8 +202,8 @@ typedef enum {
   VPK_FUNCTION
 } Key;
 
-#define VAL_PASSCHAR 0X2100 /* input character by value */
-#define VAL_PASSDOTS 0X2200 /* input character as braille dots */
+#define BRL_BLK_PASSCHAR 0X2100 /* input character by value */
+#define BRL_BLK_PASSDOTS 0X2200 /* input character as braille dots */
 
 /* For modifying a character to be typed. */
 #define BRL_FLG_CHAR_CONTROL 0X010000
@@ -211,7 +211,7 @@ typedef enum {
 #define BRL_FLG_CHAR_UPPER   0X040000
 #define BRL_FLG_CHAR_SHIFT   0X080000
 
-#define VAL_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
+#define BRL_BLK_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
 
 /* status cell styles */
 typedef enum {

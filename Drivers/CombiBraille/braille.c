@@ -276,7 +276,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
       if (arg == (BRL_MSK_ARG - 1)) {
         cmd += brl_cols - 1;
       }
-      if (status && (blk == CR_ROUTE)) {
+      if (status && (blk == BRL_BLK_ROUTE)) {
         cmd = status + arg;
       }
     }

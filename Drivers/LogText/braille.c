@@ -514,43 +514,43 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
    if (key != EOF) {
       switch (key) {
          case KEY_FUNCTION_ENTER:
-            return VAL_PASSKEY + VPK_RETURN;
+            return BRL_BLK_PASSKEY + VPK_RETURN;
          case KEY_FUNCTION_TAB:
-            return VAL_PASSKEY + VPK_TAB;
+            return BRL_BLK_PASSKEY + VPK_TAB;
          case KEY_FUNCTION_CURSOR_UP:
-            return VAL_PASSKEY + VPK_CURSOR_UP;
+            return BRL_BLK_PASSKEY + VPK_CURSOR_UP;
          case KEY_FUNCTION_CURSOR_DOWN:
-            return VAL_PASSKEY + VPK_CURSOR_DOWN;
+            return BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
          case KEY_FUNCTION_CURSOR_LEFT:
-            return VAL_PASSKEY + VPK_CURSOR_LEFT;
+            return BRL_BLK_PASSKEY + VPK_CURSOR_LEFT;
          case KEY_FUNCTION_CURSOR_RIGHT:
-            return VAL_PASSKEY + VPK_CURSOR_RIGHT;
+            return BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT;
          case KEY_FUNCTION_CURSOR_UP_JUMP:
-            return VAL_PASSKEY + VPK_HOME;
+            return BRL_BLK_PASSKEY + VPK_HOME;
          case KEY_FUNCTION_CURSOR_DOWN_JUMP:
-            return VAL_PASSKEY + VPK_END;
+            return BRL_BLK_PASSKEY + VPK_END;
          case KEY_FUNCTION_CURSOR_LEFT_JUMP:
-            return VAL_PASSKEY + VPK_PAGE_UP;
+            return BRL_BLK_PASSKEY + VPK_PAGE_UP;
          case KEY_FUNCTION_CURSOR_RIGHT_JUMP:
-            return VAL_PASSKEY + VPK_PAGE_DOWN;
+            return BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
          case KEY_FUNCTION_F1:
-            return VAL_PASSKEY + VPK_FUNCTION + 0;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 0;
          case KEY_FUNCTION_F2:
-            return VAL_PASSKEY + VPK_FUNCTION + 1;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 1;
          case KEY_FUNCTION_F3:
-            return VAL_PASSKEY + VPK_FUNCTION + 2;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 2;
          case KEY_FUNCTION_F4:
-            return VAL_PASSKEY + VPK_FUNCTION + 3;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 3;
          case KEY_FUNCTION_F5:
-            return VAL_PASSKEY + VPK_FUNCTION + 4;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 4;
          case KEY_FUNCTION_F6:
-            return VAL_PASSKEY + VPK_FUNCTION + 5;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 5;
          case KEY_FUNCTION_F7:
-            return VAL_PASSKEY + VPK_FUNCTION + 6;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 6;
          case KEY_FUNCTION_F9:
-            return VAL_PASSKEY + VPK_FUNCTION + 8;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 8;
          case KEY_FUNCTION_F10:
-            return VAL_PASSKEY + VPK_FUNCTION + 9;
+            return BRL_BLK_PASSKEY + VPK_FUNCTION + 9;
          case KEY_COMMAND: {
             int command;
             while ((command = readKey()) == EOF) delay(1);
@@ -558,35 +558,35 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
             switch (command) {
                case KEY_COMMAND:
                   /* pressing the escape command twice will pass it through */
-                  return VAL_PASSDOTS + inputTable[KEY_COMMAND];
+                  return BRL_BLK_PASSDOTS + inputTable[KEY_COMMAND];
                case KEY_COMMAND_SWITCHVT_PREV:
                   return BRL_CMD_SWITCHVT_PREV;
                case KEY_COMMAND_SWITCHVT_NEXT:
                   return BRL_CMD_SWITCHVT_NEXT;
                case KEY_COMMAND_SWITCHVT_1:
-                  return CR_SWITCHVT + 0;
+                  return BRL_BLK_SWITCHVT + 0;
                case KEY_COMMAND_SWITCHVT_2:
-                  return CR_SWITCHVT + 1;
+                  return BRL_BLK_SWITCHVT + 1;
                case KEY_COMMAND_SWITCHVT_3:
-                  return CR_SWITCHVT + 2;
+                  return BRL_BLK_SWITCHVT + 2;
                case KEY_COMMAND_SWITCHVT_4:
-                  return CR_SWITCHVT + 3;
+                  return BRL_BLK_SWITCHVT + 3;
                case KEY_COMMAND_SWITCHVT_5:
-                  return CR_SWITCHVT + 4;
+                  return BRL_BLK_SWITCHVT + 4;
                case KEY_COMMAND_SWITCHVT_6:
-                  return CR_SWITCHVT + 5;
+                  return BRL_BLK_SWITCHVT + 5;
                case KEY_COMMAND_SWITCHVT_7:
-                  return CR_SWITCHVT + 6;
+                  return BRL_BLK_SWITCHVT + 6;
                case KEY_COMMAND_SWITCHVT_8:
-                  return CR_SWITCHVT + 7;
+                  return BRL_BLK_SWITCHVT + 7;
                case KEY_COMMAND_SWITCHVT_9:
-                  return CR_SWITCHVT + 8;
+                  return BRL_BLK_SWITCHVT + 8;
                case KEY_COMMAND_SWITCHVT_10:
-                  return CR_SWITCHVT + 9;
+                  return BRL_BLK_SWITCHVT + 9;
                case KEY_COMMAND_PAGE_UP:
-                  return VAL_PASSKEY + VPK_PAGE_UP;
+                  return BRL_BLK_PASSKEY + VPK_PAGE_UP;
                case KEY_COMMAND_PAGE_DOWN:
-                  return VAL_PASSKEY + VPK_PAGE_DOWN;
+                  return BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
                case KEY_COMMAND_PREFMENU:
                   currentLine = 0;
                   cursorRow = 0;
@@ -623,7 +623,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                default: {
                   unsigned char dots = inputTable[key];
                   LogPrint(LOG_DEBUG, "Received character: 0X%2.2X dec=%d dots=%2.2X", key, key, dots);
-                  return VAL_PASSDOTS + dots;
+                  return BRL_BLK_PASSDOTS + dots;
                }
             }
             break;

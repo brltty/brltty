@@ -599,8 +599,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	ignore_next_release = 1;
 	if(howmanykeys == 1 && modifier == 0){
 	  switch(key){
-	    case RG: cmd = CR_CUTBEGIN + which_routing_keys[0]; break;
-	    case LF: cmd = CR_CUTRECT + which_routing_keys[0]; break;
+	    case RG: cmd = BRL_BLK_CUTBEGIN + which_routing_keys[0]; break;
+	    case LF: cmd = BRL_BLK_CUTRECT + which_routing_keys[0]; break;
 	  };
 	}
 	if(cmd == EOF){
@@ -637,8 +637,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	};
       }else if(modifier == SHIFT_MOD){
 	switch(key) {
-	case UP: cmd = VAL_PASSKEY + VPK_CURSOR_UP; break;
-	case DN: cmd = VAL_PASSKEY + VPK_CURSOR_DOWN; break;
+	case UP: cmd = BRL_BLK_PASSKEY + VPK_CURSOR_UP; break;
+	case DN: cmd = BRL_BLK_PASSKEY + VPK_CURSOR_DOWN; break;
 	case 1: cmd = BRL_CMD_FREEZE; break;
 	case 2: cmd = BRL_CMD_INFO; break;
 	case 3: cmd = BRL_CMD_HWINLT; break;
@@ -703,13 +703,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	/* We interpret the command when all keys have been released. */
 	if(ignore_next_release);
 	else if (howmanykeys == 1)
-	  cmd = CR_ROUTE + which_routing_keys[0];
+	  cmd = BRL_BLK_ROUTE + which_routing_keys[0];
 	else if (howmanykeys == 3 && which_routing_keys[1] == brl_cols-2
 		 && which_routing_keys[2] == brl_cols-1)
-	  cmd = CR_CUTBEGIN + which_routing_keys[0];
+	  cmd = BRL_BLK_CUTBEGIN + which_routing_keys[0];
 	else if (howmanykeys == 3 && which_routing_keys[0] == 0
 		 && which_routing_keys[1] == 1)
-	  cmd = CR_CUTRECT + which_routing_keys[2];
+	  cmd = BRL_BLK_CUTRECT + which_routing_keys[2];
 	else if ((howmanykeys == 4 && which_routing_keys[0] == 0
 		  && which_routing_keys[1] == 1
 		  && which_routing_keys[2] == brl_cols-2
@@ -722,8 +722,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	  cmd = BRL_CMD_HELP;
 	else if(howmanykeys == 3
 		&& which_routing_keys[0]+2 == which_routing_keys[1]){
-	  cmd = CR_CUTBEGIN + which_routing_keys[0];
-	  pending_cmd = CR_CUTRECT + which_routing_keys[2];
+	  cmd = BRL_BLK_CUTBEGIN + which_routing_keys[0];
+	  pending_cmd = BRL_BLK_CUTRECT + which_routing_keys[2];
 	}
 	/* Reset to no keys pressed */
 	memset(routing_were_pressed, 0, brl_cols);

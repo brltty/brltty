@@ -110,19 +110,19 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 			if (release) return EOF;
 			switch (keys) {
 				case 0:
-					return CR_ROUTE + key;
+					return BRL_BLK_ROUTE + key;
 				case (KEY_1):
-					return CR_DESCCHAR + key;
+					return BRL_BLK_DESCCHAR + key;
 				case (KEY_2):
-					return CR_CUTAPPEND + key;
+					return BRL_BLK_CUTAPPEND + key;
 				case (KEY_3):
-					return CR_CUTBEGIN + key;
+					return BRL_BLK_CUTBEGIN + key;
 				case (KEY_4):
-					return CR_SETLEFT + key;
+					return BRL_BLK_SETLEFT + key;
 				case (KEY_5):
-					return CR_CUTLINE + key;
+					return BRL_BLK_CUTLINE + key;
 				case (KEY_6):
-					return CR_CUTRECT + key;
+					return BRL_BLK_CUTRECT + key;
 				default:
 					return BRL_CMD_NOOP;
 			}

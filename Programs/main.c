@@ -1002,19 +1002,19 @@ main (int argc, char *argv[]) {
                 case BRL_CMD_MENU_PREV_SETTING:
                 case BRL_CMD_MENU_NEXT_SETTING:
 
-                case VAL_PASSKEY + VPK_BACKSPACE:
-                case VAL_PASSKEY + VPK_DELETE:
-                case VAL_PASSKEY + VPK_PAGE_UP:
-                case VAL_PASSKEY + VPK_PAGE_DOWN:
-                case VAL_PASSKEY + VPK_CURSOR_UP:
-                case VAL_PASSKEY + VPK_CURSOR_DOWN:
-                case VAL_PASSKEY + VPK_CURSOR_LEFT:
-                case VAL_PASSKEY + VPK_CURSOR_RIGHT:
+                case BRL_BLK_PASSKEY + VPK_BACKSPACE:
+                case BRL_BLK_PASSKEY + VPK_DELETE:
+                case BRL_BLK_PASSKEY + VPK_PAGE_UP:
+                case BRL_BLK_PASSKEY + VPK_PAGE_DOWN:
+                case BRL_BLK_PASSKEY + VPK_CURSOR_UP:
+                case BRL_BLK_PASSKEY + VPK_CURSOR_DOWN:
+                case BRL_BLK_PASSKEY + VPK_CURSOR_LEFT:
+                case BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT:
                   break;
               }
 
-            case VAL_PASSCHAR:
-            case VAL_PASSDOTS:
+            case BRL_BLK_PASSCHAR:
+            case BRL_BLK_PASSDOTS:
               break;
           }
 
@@ -1631,7 +1631,7 @@ main (int argc, char *argv[]) {
             int flags = command & BRL_MSK_FLG;
 
             switch (blk) {
-              case VAL_PASSKEY: {
+              case BRL_BLK_PASSKEY: {
                 unsigned short key;
                 switch (arg) {
                   case VPK_RETURN:
@@ -1687,23 +1687,23 @@ main (int argc, char *argv[]) {
                 break;
               }
 
-              case VAL_PASSCHAR:
+              case BRL_BLK_PASSCHAR:
                 if (!insertCharacter(arg, flags)) {
                   playTune(&tune_command_rejected);
                 }
                 break;
 
-              case VAL_PASSDOTS:
+              case BRL_BLK_PASSDOTS:
                 if (!insertCharacter(untextTable[arg], flags)) {
                   playTune(&tune_command_rejected);
                 }
                 break;
 
-              case VAL_PASSAT2:
+              case BRL_BLK_PASSAT2:
                 if (AT2_interpretCode(&command, arg)) goto doCommand;
                 break;
 
-              case CR_ROUTE:
+              case BRL_BLK_ROUTE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 0);
                   if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, curscr)) {
@@ -1713,21 +1713,21 @@ main (int argc, char *argv[]) {
                 }
                 playTune(&tune_command_rejected);
                 break;
-              case CR_CUTBEGIN:
+              case BRL_BLK_CUTBEGIN:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
                   cut_begin(p->winx+arg, p->winy);
                 } else
                   playTune(&tune_command_rejected);
                 break;
-              case CR_CUTAPPEND:
+              case BRL_BLK_CUTAPPEND:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
                   cut_append(p->winx+arg, p->winy);
                 } else
                   playTune(&tune_command_rejected);
                 break;
-              case CR_CUTRECT:
+              case BRL_BLK_CUTRECT:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 1);
                   if (cut_rectangle(MIN(p->winx+arg, scr.cols-1), p->winy))
@@ -1735,7 +1735,7 @@ main (int argc, char *argv[]) {
                 }
                 playTune(&tune_command_rejected);
                 break;
-              case CR_CUTLINE:
+              case BRL_BLK_CUTLINE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 1);
                   if (cut_line(MIN(p->winx+arg, scr.cols-1), p->winy))
@@ -1743,7 +1743,7 @@ main (int argc, char *argv[]) {
                 }
                 playTune(&tune_command_rejected);
                 break;
-              case CR_DESCCHAR:
+              case BRL_BLK_DESCCHAR:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   static char *colours[] = {
                     "black",     "blue",          "green",       "cyan",
@@ -1765,36 +1765,36 @@ main (int argc, char *argv[]) {
                 } else
                   playTune(&tune_command_rejected);
                 break;
-              case CR_SETLEFT:
+              case BRL_BLK_SETLEFT:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
                   p->winx += arg;
                 } else
                   playTune(&tune_command_rejected);
                 break;
-              case CR_SETMARK: {
+              case BRL_BLK_SETMARK: {
                 ScreenMark *mark = &p->marks[arg];
                 mark->column = p->winx;
                 mark->row = p->winy;
                 playTune(&tune_mark_set);
                 break;
               }
-              case CR_GOTOMARK: {
+              case BRL_BLK_GOTOMARK: {
                 ScreenMark *mark = &p->marks[arg];
                 p->winx = mark->column;
                 p->winy = mark->row;
                 break;
               }
-              case CR_SWITCHVT:
+              case BRL_BLK_SWITCHVT:
                   if (!switchVirtualTerminal(arg+1))
                        playTune(&tune_command_rejected);
                   break;
               {
                 int increment;
-              case CR_PRINDENT:
+              case BRL_BLK_PRINDENT:
                 increment = -1;
                 goto findIndent;
-              case CR_NXINDENT:
+              case BRL_BLK_NXINDENT:
                 increment = 1;
               findIndent:
                 arg = getOffset(arg, 0);

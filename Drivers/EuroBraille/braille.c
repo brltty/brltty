@@ -91,10 +91,10 @@ static t_key	num_keys[27] = {
 */
 
 static t_key	scriba_keys[17] = {		
-  {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
-  {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
-  {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
-  {VAL_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_UP, 2, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
   {0, 10, Program},
   {0, 11, ViewOn},
   {0, 13, 0},
@@ -135,13 +135,13 @@ static t_key	*pazer40_keys = pscriba_keys;
 
 static t_key	azer80_keys[23] = {
   {BRL_CMD_TOP_LEFT, 1, 0},
-  {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_UP, 2, 0},
   {BRL_CMD_PRDIFLN, 3, 0},
-  {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
   {BRL_CMD_HOME, 5, 0},
-  {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
   {BRL_CMD_BOT_LEFT, 7, 0},
-  {VAL_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
   {BRL_CMD_NXDIFLN, 9, 0},
   {0, 10, Program},
   {BRL_CMD_CSRTRK, 30, 0},
@@ -167,10 +167,10 @@ static t_key	*nb_keys = azer80_keys;
 static t_key	*pnb_keys = pscriba_keys;
 
 static t_key	iris_keys[16] = {
-  {VAL_PASSKEY | VPK_CURSOR_UP, 2, 0},
-  {VAL_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
-  {VAL_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
-  {VAL_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_UP, 2, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_LEFT, 4, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_RIGHT, 6, 0},
+  {BRL_BLK_PASSKEY | VPK_CURSOR_DOWN, 8, 0},
   {BRL_CMD_NOOP, 10, Program},
   {BRL_CMD_NOOP, 11, ViewOn},
   {BRL_CMD_FWINLT, 16, 0},
@@ -206,32 +206,32 @@ static t_key	*piris_keys = pscriba_keys;
 */
 
 static t_alias	brl_key[] = {
-  {0x100,	VAL_PASSKEY + VPK_BACKSPACE},
-  {0x300,	VAL_PASSKEY + VPK_RETURN},
-  {0x232,	VAL_PASSKEY + VPK_TAB},
-  {0x208,	VAL_PASSKEY + VPK_CURSOR_UP},
-  {0x220,	VAL_PASSKEY + VPK_CURSOR_DOWN},
-  {0x210,	VAL_PASSKEY + VPK_CURSOR_RIGHT},
-  {0x202,	VAL_PASSKEY + VPK_CURSOR_LEFT},
-  {0x205,	VAL_PASSKEY + VPK_PAGE_UP},
-  {0x228,	VAL_PASSKEY + VPK_PAGE_DOWN},
-  {0x207,	VAL_PASSKEY + VPK_HOME},
-  {0x238,	VAL_PASSKEY + VPK_END},
-  {0x224,	VAL_PASSKEY + VPK_DELETE},
-  {0x21b,	VAL_PASSKEY + VPK_ESCAPE},
-  {0x215,	VAL_PASSKEY + VPK_INSERT},
-  {0x101,	VAL_PASSKEY + VPK_FUNCTION},
-  {0x103,	VAL_PASSKEY + VPK_FUNCTION + 1},
-  {0x109,	VAL_PASSKEY + VPK_FUNCTION + 2},
-  {0x119,	VAL_PASSKEY + VPK_FUNCTION + 3},
-  {0x111,	VAL_PASSKEY + VPK_FUNCTION + 4},
-  {0x10b,	VAL_PASSKEY + VPK_FUNCTION + 5},
-  {0x11b,	VAL_PASSKEY + VPK_FUNCTION + 6},
-  {0x113,	VAL_PASSKEY + VPK_FUNCTION + 7},
-  {0x10a,	VAL_PASSKEY + VPK_FUNCTION + 8},
-  {0x11a,	VAL_PASSKEY + VPK_FUNCTION + 9},
-  {0x105,	VAL_PASSKEY + VPK_FUNCTION + 10},
-  {0x107,	VAL_PASSKEY + VPK_FUNCTION + 11},
+  {0x100,	BRL_BLK_PASSKEY + VPK_BACKSPACE},
+  {0x300,	BRL_BLK_PASSKEY + VPK_RETURN},
+  {0x232,	BRL_BLK_PASSKEY + VPK_TAB},
+  {0x208,	BRL_BLK_PASSKEY + VPK_CURSOR_UP},
+  {0x220,	BRL_BLK_PASSKEY + VPK_CURSOR_DOWN},
+  {0x210,	BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT},
+  {0x202,	BRL_BLK_PASSKEY + VPK_CURSOR_LEFT},
+  {0x205,	BRL_BLK_PASSKEY + VPK_PAGE_UP},
+  {0x228,	BRL_BLK_PASSKEY + VPK_PAGE_DOWN},
+  {0x207,	BRL_BLK_PASSKEY + VPK_HOME},
+  {0x238,	BRL_BLK_PASSKEY + VPK_END},
+  {0x224,	BRL_BLK_PASSKEY + VPK_DELETE},
+  {0x21b,	BRL_BLK_PASSKEY + VPK_ESCAPE},
+  {0x215,	BRL_BLK_PASSKEY + VPK_INSERT},
+  {0x101,	BRL_BLK_PASSKEY + VPK_FUNCTION},
+  {0x103,	BRL_BLK_PASSKEY + VPK_FUNCTION + 1},
+  {0x109,	BRL_BLK_PASSKEY + VPK_FUNCTION + 2},
+  {0x119,	BRL_BLK_PASSKEY + VPK_FUNCTION + 3},
+  {0x111,	BRL_BLK_PASSKEY + VPK_FUNCTION + 4},
+  {0x10b,	BRL_BLK_PASSKEY + VPK_FUNCTION + 5},
+  {0x11b,	BRL_BLK_PASSKEY + VPK_FUNCTION + 6},
+  {0x113,	BRL_BLK_PASSKEY + VPK_FUNCTION + 7},
+  {0x10a,	BRL_BLK_PASSKEY + VPK_FUNCTION + 8},
+  {0x11a,	BRL_BLK_PASSKEY + VPK_FUNCTION + 9},
+  {0x105,	BRL_BLK_PASSKEY + VPK_FUNCTION + 10},
+  {0x107,	BRL_BLK_PASSKEY + VPK_FUNCTION + 11},
   {0,		0}
 };
 
@@ -270,7 +270,7 @@ static unsigned char	*lcd_data = NULL;	/* previously sent to LCD */
 static int		NbCols = 0;			/* number of cells available */
 static short	ReWrite = 0;		/* 1 if display need to be rewritten */
 static short	ReWrite_LCD = 0;		/* same as rewrite, for LCD */
-static int	OffsetType = CR_ROUTE;
+static int	OffsetType = BRL_BLK_ROUTE;
 static int	PktNbr = 127; /* 127 at first time */
 static int	context = 0;   /* Input type test-value */
 static int	control = 0;
@@ -298,13 +298,13 @@ static int readbrlkey(BrailleDisplay *brl);
 
 static int begblk(BrailleDisplay *brl)
 {
-  OffsetType = CR_CUTBEGIN;
+  OffsetType = BRL_BLK_CUTBEGIN;
   return (EOF);
 }
 
 static int endblk(BrailleDisplay *brl)
 {
-  OffsetType = CR_CUTLINE;
+  OffsetType = BRL_BLK_CUTLINE;
   return (EOF);
 }
 
@@ -658,7 +658,7 @@ int ViewOn(BrailleDisplay *brl)
 	  case 20:
 	  case 21:
 	  case 22:
-	    res2 = CR_SWITCHVT + touche - 16;
+	    res2 = BRL_BLK_SWITCHVT + touche - 16;
 	    exitviewon = 1;
 	    break;
 	   case 24:
@@ -761,37 +761,37 @@ static int routing(BrailleDisplay *brl, int routekey)
 	     res = BRL_CMD_NOOP;
 	     break;
 	   case 0x09: /* switch to console 1 */
-	     res = CR_SWITCHVT;   /* CR_WITCHVT + 0 */
+	     res = BRL_BLK_SWITCHVT;   /* BRL_BLK_WITCHVT + 0 */
 	     context = 0;
 	     ReWrite = 1;
 	     break;
 	   case 0x0B: /* switch to console 2 */
-	     res = CR_SWITCHVT + 1;
+	     res = BRL_BLK_SWITCHVT + 1;
 	     ReWrite = 1;
 	     context = 0;
 	     break;
 	   case 0x0D: /* switch to console 3 */
-	     res = CR_SWITCHVT + 2;
+	     res = BRL_BLK_SWITCHVT + 2;
 	     context = 0;
 	     ReWrite = 1;
 	     break;
 	   case 0x0F: /* switch to console 4 */
-	     res = CR_SWITCHVT + 3;
+	     res = BRL_BLK_SWITCHVT + 3;
 	     ReWrite = 1;
 	     context = 0;
 	     break;
 	   case 0x11: /* switch to console 5 */
-	     res = CR_SWITCHVT + 4;
+	     res = BRL_BLK_SWITCHVT + 4;
 	     context = 0;
 	     ReWrite = 1;
 	     break;
 	   case 0x13: /* switch to console 6 */
-	     res = CR_SWITCHVT + 5;
+	     res = BRL_BLK_SWITCHVT + 5;
 	     context = 0;
 	     ReWrite = 1;
 	     break;
 	   case 0x15: /* switch to console 6 */
-	     res = CR_SWITCHVT + 6;
+	     res = BRL_BLK_SWITCHVT + 6;
 	     context = 0;
 	     ReWrite = 1;
 	     break;
@@ -810,7 +810,7 @@ static int routing(BrailleDisplay *brl, int routekey)
 	    break;
 	  default:
 	    res = OffsetType + routekey - 1;
-	    OffsetType = CR_ROUTE;
+	    OffsetType = BRL_BLK_ROUTE;
 	    break;
 	  }
 	if (flag == 1)
@@ -912,7 +912,7 @@ static int	key_handle(BrailleDisplay *brl, char *buf)
       /*
       ** we pass a char
       */
-      res = (VAL_PASSDOTS | convert(keys));
+      res = (BRL_BLK_PASSDOTS | convert(keys));
       if (control)
 	{
 	  res |= BRL_FLG_CHAR_CONTROL;

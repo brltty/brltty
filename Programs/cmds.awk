@@ -7,9 +7,9 @@ BEGIN {
   }
   next
 }
-/#define[ \t]*CR_/ {
+/#define[ \t]*BRL_BLK_/ {
   if (x = match($0, "/.*/")) {
-    print "{", $2, ", \"", substr($2,4), "\", \"", substr($0, RSTART+3, RLENGTH-6), "\"},"
+    print "{", $2, ", \"", substr($2,9), "\", \"", substr($0, RSTART+3, RLENGTH-6), "\"},"
   }
   next
 }
@@ -17,12 +17,6 @@ BEGIN {
   gsub(",", "", $1)
   key = tolower(substr($1, 5))
   gsub("_", "-", key)
-  print "{VAL_PASSKEY+", $1, ", \"", substr($1,5), "\", \"send ", key, " key\"},"
-  next
-}
-/#define[ \t]*VAL_PASS/ {
-  if (x = match($0, "/.*/")) {
-    print "{", $2, ", \"", substr($2,5), "\", \"", substr($0, RSTART+3, RLENGTH-6), "\"},"
-  }
+  print "{BRL_BLK_PASSKEY+", $1, ", \"", substr($1,5), "\", \"send ", key, " key\"},"
   next
 }

@@ -37,7 +37,7 @@ typedef enum {
   BRL_CMD_SWSIM_RF /* simulate right switch front */,
   BRL_CMD_SWSIM_BC /* simulate both switches centered */,
   BRL_CMD_SWSIM_BQ /* show positions of both switches */,
-  BRL_CMD_NODOTS = VAL_PASSDOTS /* input character corresponding to no braille dots */
+  BRL_CMD_NODOTS = BRL_BLK_PASSDOTS /* input character corresponding to no braille dots */
 } InternalDriverCommands;
 
 typedef enum {
@@ -173,11 +173,11 @@ typedef struct {
      { BRL_CMD_BOT_LEFT   , OFFS_FRONT + 7, 0X1 }, \
      { BRL_CMD_BOT        , OFFS_FRONT + 7, 0X2 }, \
                                                \
-     { CR_ROUTE       , ROUTINGKEY    , 0X0 }, \
-     { CR_CUTBEGIN    , ROUTINGKEY    , 0X1 }, \
-     { CR_CUTRECT     , ROUTINGKEY    , 0X2 }, \
-     { CR_PRINDENT    , ROUTINGKEY    , 0X4 }, \
-     { CR_NXINDENT    , ROUTINGKEY    , 0X8 }, \
+     { BRL_BLK_ROUTE       , ROUTINGKEY    , 0X0 }, \
+     { BRL_BLK_CUTBEGIN    , ROUTINGKEY    , 0X1 }, \
+     { BRL_BLK_CUTRECT     , ROUTINGKEY    , 0X2 }, \
+     { BRL_BLK_PRINDENT    , ROUTINGKEY    , 0X4 }, \
+     { BRL_BLK_NXINDENT    , ROUTINGKEY    , 0X8 }, \
      { BRL_CMD_PASTE      , NOKEY         , 0X3 }
 
 
@@ -213,42 +213,42 @@ typedef struct {
       { BRL_CMD_WINDN                   , NOKEY          , 0030 },        \
       { BRL_CMD_PRSEARCH                , NOKEY          , 0104 },        \
       { BRL_CMD_NXSEARCH                , NOKEY          , 0240 },        \
-      { CR_PRINDENT                 , ROUTINGKEY     , 0104 },        \
-      { CR_NXINDENT                 , ROUTINGKEY     , 0240 },        \
+      { BRL_BLK_PRINDENT                 , ROUTINGKEY     , 0104 },        \
+      { BRL_BLK_NXINDENT                 , ROUTINGKEY     , 0240 },        \
                                                                \
       { BRL_CMD_LNBEG                   , OFFS_FRONT +  7, 0001 }, \
       { BRL_CMD_TOP_LEFT                , OFFS_FRONT +  6, 0001 }, \
       { BRL_CMD_BOT_LEFT                , OFFS_FRONT +  8, 0001 }, \
       { BRL_CMD_FWINLT                  , OFFS_FRONT +  5, 0001 }, \
       { BRL_CMD_FWINRT                  , OFFS_FRONT +  9, 0001 }, \
-      { CR_DESCCHAR                 , ROUTINGKEY     , 0001 }, \
+      { BRL_BLK_DESCCHAR                 , ROUTINGKEY     , 0001 }, \
                                                                \
       { BRL_CMD_LNEND                   , OFFS_FRONT +  7, 0010 }, \
       { BRL_CMD_CHRLT                   , OFFS_FRONT +  6, 0010 }, \
       { BRL_CMD_CHRRT                   , OFFS_FRONT +  8, 0010 }, \
       { BRL_CMD_HWINLT                  , OFFS_FRONT +  5, 0010 }, \
       { BRL_CMD_HWINRT                  , OFFS_FRONT +  9, 0010 }, \
-      { CR_SETLEFT                  , ROUTINGKEY     , 0010 }, \
+      { BRL_BLK_SETLEFT                  , ROUTINGKEY     , 0010 }, \
                                                                \
-      { VAL_PASSKEY+VPK_INSERT      , OFFS_FRONT +  7, 0002 }, \
-      { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_FRONT +  6, 0002 }, \
-      { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_FRONT +  8, 0002 }, \
-      { VAL_PASSKEY+VPK_CURSOR_UP   , OFFS_FRONT +  5, 0002 }, \
-      { VAL_PASSKEY+VPK_CURSOR_DOWN , OFFS_FRONT +  9, 0002 }, \
-      { CR_SWITCHVT                 , ROUTINGKEY     , 0002 }, \
+      { BRL_BLK_PASSKEY+VPK_INSERT      , OFFS_FRONT +  7, 0002 }, \
+      { BRL_BLK_PASSKEY+VPK_PAGE_UP     , OFFS_FRONT +  6, 0002 }, \
+      { BRL_BLK_PASSKEY+VPK_PAGE_DOWN   , OFFS_FRONT +  8, 0002 }, \
+      { BRL_BLK_PASSKEY+VPK_CURSOR_UP   , OFFS_FRONT +  5, 0002 }, \
+      { BRL_BLK_PASSKEY+VPK_CURSOR_DOWN , OFFS_FRONT +  9, 0002 }, \
+      { BRL_BLK_SWITCHVT                 , ROUTINGKEY     , 0002 }, \
                                                                \
-      { VAL_PASSKEY+VPK_DELETE      , OFFS_FRONT +  7, 0020 }, \
-      { VAL_PASSKEY+VPK_HOME        , OFFS_FRONT +  6, 0020 }, \
-      { VAL_PASSKEY+VPK_END         , OFFS_FRONT +  8, 0020 }, \
-      { VAL_PASSKEY+VPK_CURSOR_LEFT , OFFS_FRONT +  5, 0020 }, \
-      { VAL_PASSKEY+VPK_CURSOR_RIGHT, OFFS_FRONT +  9, 0020 }, \
-      { VAL_PASSKEY+VPK_FUNCTION    , ROUTINGKEY     , 0020 }, \
+      { BRL_BLK_PASSKEY+VPK_DELETE      , OFFS_FRONT +  7, 0020 }, \
+      { BRL_BLK_PASSKEY+VPK_HOME        , OFFS_FRONT +  6, 0020 }, \
+      { BRL_BLK_PASSKEY+VPK_END         , OFFS_FRONT +  8, 0020 }, \
+      { BRL_BLK_PASSKEY+VPK_CURSOR_LEFT , OFFS_FRONT +  5, 0020 }, \
+      { BRL_BLK_PASSKEY+VPK_CURSOR_RIGHT, OFFS_FRONT +  9, 0020 }, \
+      { BRL_BLK_PASSKEY+VPK_FUNCTION    , ROUTINGKEY     , 0020 }, \
                                                                \
       { BRL_CMD_NODOTS                  , OFFS_FRONT +  7, 0004 }, \
-      { VAL_PASSKEY+VPK_ESCAPE      , OFFS_FRONT +  6, 0004 }, \
-      { VAL_PASSKEY+VPK_TAB         , OFFS_FRONT +  8, 0004 }, \
-      { VAL_PASSKEY+VPK_BACKSPACE   , OFFS_FRONT +  5, 0004 }, \
-      { VAL_PASSKEY+VPK_RETURN      , OFFS_FRONT +  9, 0004 }, \
+      { BRL_BLK_PASSKEY+VPK_ESCAPE      , OFFS_FRONT +  6, 0004 }, \
+      { BRL_BLK_PASSKEY+VPK_TAB         , OFFS_FRONT +  8, 0004 }, \
+      { BRL_BLK_PASSKEY+VPK_BACKSPACE   , OFFS_FRONT +  5, 0004 }, \
+      { BRL_BLK_PASSKEY+VPK_RETURN      , OFFS_FRONT +  9, 0004 }, \
                                                                \
       { BRL_CMD_SPKHOME                 , OFFS_FRONT +  7, 0100 }, \
       { BRL_CMD_SAY_ABOVE               , OFFS_FRONT +  6, 0100 }, \
@@ -262,12 +262,12 @@ typedef struct {
       { BRL_CMD_SAY_SOFTER              , OFFS_FRONT +  5, 0200 }, \
       { BRL_CMD_SAY_LOUDER              , OFFS_FRONT +  9, 0200 }, \
                                                                \
-      { CR_CUTBEGIN                 , ROUTINGKEY     , 0100 }, \
-      { CR_CUTAPPEND                , ROUTINGKEY     , 0004 }, \
-      { CR_CUTLINE                  , ROUTINGKEY     , 0040 }, \
-      { CR_CUTRECT                  , ROUTINGKEY     , 0200 }, \
+      { BRL_BLK_CUTBEGIN                 , ROUTINGKEY     , 0100 }, \
+      { BRL_BLK_CUTAPPEND                , ROUTINGKEY     , 0004 }, \
+      { BRL_BLK_CUTLINE                  , ROUTINGKEY     , 0040 }, \
+      { BRL_BLK_CUTRECT                  , ROUTINGKEY     , 0200 }, \
                                                                \
-      { CR_ROUTE                    , ROUTINGKEY     , 0000 }
+      { BRL_BLK_ROUTE                    , ROUTINGKEY     , 0000 }
 	
 
 /* modifiers for switches */
@@ -341,10 +341,10 @@ typedef struct {
   CMDS_EASY_BAR(NOKEY, MOD_EASY_KRR|(mod), \
                 BRL_CMD_SAY_ABOVE, BRL_CMD_SAY_BELOW, BRL_CMD_SAY_LOUDER, BRL_CMD_SAY_SOFTER, \
                 BRL_CMD_MUTE, BRL_CMD_SAY_LINE, BRL_CMD_SAY_SLOWER, BRL_CMD_SAY_FASTER), \
-  {CR_ROUTE, ROUTINGKEY, (mod)}, \
+  {BRL_BLK_ROUTE, ROUTINGKEY, (mod)}, \
   CMDS_EASY_BAR(ROUTINGKEY, (mod), \
-                CR_PRINDENT, CR_NXINDENT, CR_SETLEFT, CR_DESCCHAR, \
-                CR_CUTAPPEND, CR_CUTLINE, CR_CUTBEGIN, CR_CUTRECT)
+                BRL_BLK_PRINDENT, BRL_BLK_NXINDENT, BRL_BLK_SETLEFT, BRL_BLK_DESCCHAR, \
+                BRL_BLK_CUTAPPEND, BRL_BLK_CUTLINE, BRL_BLK_CUTBEGIN, BRL_BLK_CUTRECT)
 #define CMDS_EASY_ALL \
   CMDS_EASY_BAR(NOKEY, MOD_EASY_SLC|MOD_EASY_SRC, \
                 BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_TOP, BRL_CMD_BOT, \
@@ -353,11 +353,11 @@ typedef struct {
                 BRL_CMD_PRDIFLN, BRL_CMD_NXDIFLN, BRL_CMD_ATTRUP, BRL_CMD_ATTRDN, \
                 BRL_CMD_PRPROMPT, BRL_CMD_NXPROMPT, BRL_CMD_PRPGRPH, BRL_CMD_NXPGRPH), \
   CMDS_EASY_BAR(NOKEY, MOD_EASY_SLC|MOD_EASY_SRR, \
-                VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN, VAL_PASSKEY+VPK_PAGE_UP, VAL_PASSKEY+VPK_PAGE_DOWN, \
+                BRL_BLK_PASSKEY+VPK_CURSOR_UP, BRL_BLK_PASSKEY+VPK_CURSOR_DOWN, BRL_BLK_PASSKEY+VPK_PAGE_UP, BRL_BLK_PASSKEY+VPK_PAGE_DOWN, \
                 BRL_CMD_FWINLT, BRL_CMD_FWINRT, BRL_CMD_LNBEG, BRL_CMD_LNEND), \
   CMDS_EASY_BAR(NOKEY, MOD_EASY_SLR|MOD_EASY_SRR, \
-                VAL_PASSKEY+VPK_CURSOR_UP, VAL_PASSKEY+VPK_CURSOR_DOWN, VAL_PASSKEY+VPK_PAGE_UP, VAL_PASSKEY+VPK_PAGE_DOWN, \
-                VAL_PASSKEY+VPK_CURSOR_LEFT, VAL_PASSKEY+VPK_CURSOR_RIGHT, VAL_PASSKEY+VPK_HOME, VAL_PASSKEY+VPK_END), \
+                BRL_BLK_PASSKEY+VPK_CURSOR_UP, BRL_BLK_PASSKEY+VPK_CURSOR_DOWN, BRL_BLK_PASSKEY+VPK_PAGE_UP, BRL_BLK_PASSKEY+VPK_PAGE_DOWN, \
+                BRL_BLK_PASSKEY+VPK_CURSOR_LEFT, BRL_BLK_PASSKEY+VPK_CURSOR_RIGHT, BRL_BLK_PASSKEY+VPK_HOME, BRL_BLK_PASSKEY+VPK_END), \
   CMDS_EASY_BAR(NOKEY, MOD_EASY_SLF|MOD_EASY_SRC, \
                 BRL_CMD_PRSEARCH, BRL_CMD_NXSEARCH, BRL_CMD_HELP, BRL_CMD_LEARN, \
                 BRL_CMD_CHRLT, BRL_CMD_CHRRT, BRL_CMD_HWINLT, BRL_CMD_HWINRT), \

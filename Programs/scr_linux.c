@@ -1343,7 +1343,7 @@ execute_LinuxScreen (int command) {
   int arg __attribute__((unused)) = command & BRL_MSK_ARG;
 
   switch (blk) {
-    case VAL_PASSAT2:
+    case BRL_BLK_PASSAT2:
 #ifdef HAVE_LINUX_INPUT_H
       if (arg == 0XF0) {
         at2Pressed = 0;

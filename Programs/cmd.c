@@ -67,11 +67,11 @@ describeCommand (int command, char *buffer, int size) {
         number = cmd - candidate->code + 1;
         break;
 
-      case VAL_PASSCHAR:
+      case BRL_BLK_PASSCHAR:
         number = cmd - candidate->code;
         break;
 
-      case VAL_PASSDOTS: {
+      case BRL_BLK_PASSDOTS: {
         unsigned char dots[] = {B1, B2, B3, B4, B5, B6, B7, B8};
         int dot;
         number = 0;

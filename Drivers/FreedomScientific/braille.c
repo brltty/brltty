@@ -845,7 +845,7 @@ interpretKeys (void) {
 
   {
     if ((keys & DOT_KEYS) && !(keys & ~(DOT_KEYS | SHIFT_KEYS))) {
-      command = VAL_PASSDOTS | flags;
+      command = BRL_BLK_PASSDOTS | flags;
       if (keys & KEY_DOT1) command |= B1;
       if (keys & KEY_DOT2) command |= B2;
       if (keys & KEY_DOT3) command |= B3;
@@ -978,49 +978,49 @@ interpretKeys (void) {
       break;
 
     case (KEY_SPACE):
-      command = VAL_PASSDOTS;
+      command = BRL_BLK_PASSDOTS;
       break;
     case (KEY_SPACE | KEY_SHIFT_LEFT):
-      command = VAL_PASSKEY + VPK_BACKSPACE;
+      command = BRL_BLK_PASSKEY + VPK_BACKSPACE;
       break;
     case (KEY_SPACE | KEY_SHIFT_RIGHT):
-      command = VAL_PASSKEY + VPK_RETURN;
+      command = BRL_BLK_PASSKEY + VPK_RETURN;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5 | KEY_DOT6):
-      command = VAL_PASSKEY + VPK_TAB;
+      command = BRL_BLK_PASSKEY + VPK_TAB;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT3):
-      command = VAL_PASSKEY + VPK_CURSOR_LEFT;
+      command = BRL_BLK_PASSKEY + VPK_CURSOR_LEFT;
       break;
     case (KEY_SPACE | KEY_DOT5 | KEY_DOT6):
-      command = VAL_PASSKEY + VPK_CURSOR_RIGHT;
+      command = BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT5):
-      command = VAL_PASSKEY + VPK_CURSOR_UP;
+      command = BRL_BLK_PASSKEY + VPK_CURSOR_UP;
       break;
     case (KEY_SPACE | KEY_DOT3 | KEY_DOT6):
-      command = VAL_PASSKEY + VPK_CURSOR_DOWN;
+      command = BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
       break;
     case (KEY_SPACE | KEY_DOT5):
-      command = VAL_PASSKEY + VPK_PAGE_UP;
+      command = BRL_BLK_PASSKEY + VPK_PAGE_UP;
       break;
     case (KEY_SPACE | KEY_DOT6):
-      command = VAL_PASSKEY + VPK_PAGE_DOWN;
+      command = BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
       break;
     case (KEY_SPACE | KEY_DOT2):
-      command = VAL_PASSKEY + VPK_HOME;
+      command = BRL_BLK_PASSKEY + VPK_HOME;
       break;
     case (KEY_SPACE | KEY_DOT3):
-      command = VAL_PASSKEY + VPK_END;
+      command = BRL_BLK_PASSKEY + VPK_END;
       break;
     case (KEY_SPACE | KEY_DOT3 | KEY_DOT5):
-      command = VAL_PASSKEY + VPK_INSERT;
+      command = BRL_BLK_PASSKEY + VPK_INSERT;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT5 | KEY_DOT6):
-      command = VAL_PASSKEY + VPK_DELETE;
+      command = BRL_BLK_PASSKEY + VPK_DELETE;
       break;
     case (KEY_SPACE | KEY_DOT2 | KEY_DOT6):
-      command = VAL_PASSKEY + VPK_ESCAPE;
+      command = BRL_BLK_PASSKEY + VPK_ESCAPE;
       break;
 
     case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
@@ -1110,26 +1110,26 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   default:
                     break;
                   case 0:
-                    command = CR_ROUTE;
+                    command = BRL_BLK_ROUTE;
                     break;
                   case (KEY_ADVANCE_LEFT):
-                    command = CR_CUTBEGIN;
+                    command = BRL_BLK_CUTBEGIN;
                     break;
                   case (KEY_ADVANCE_RIGHT):
-                    command = CR_CUTRECT;
+                    command = BRL_BLK_CUTRECT;
                     break;
                   case (KEY_GDF_LEFT):
-                    command = CR_CUTAPPEND;
+                    command = BRL_BLK_CUTAPPEND;
                     break;
                   case (KEY_GDF_RIGHT):
-                    command = CR_CUTLINE;
+                    command = BRL_BLK_CUTLINE;
                     break;
 
                   case (KEY_SPACE):
-                    command = VAL_PASSKEY + VPK_FUNCTION;
+                    command = BRL_BLK_PASSKEY + VPK_FUNCTION;
                     break;
                   case (KEY_SHIFT_RIGHT):
-                    command = CR_SWITCHVT;
+                    command = BRL_BLK_SWITCHVT;
                     break;
                 }
                 break;
@@ -1139,16 +1139,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   default:
                     break;
                   case 0:
-                    command = CR_DESCCHAR;
+                    command = BRL_BLK_DESCCHAR;
                     break;
                   case (KEY_ADVANCE_LEFT):
-                    command = CR_PRINDENT;
+                    command = BRL_BLK_PRINDENT;
                     break;
                   case (KEY_ADVANCE_RIGHT):
-                    command = CR_NXINDENT;
+                    command = BRL_BLK_NXINDENT;
                     break;
                   case (KEY_GDF_LEFT):
-                    command = CR_SETLEFT;
+                    command = BRL_BLK_SETLEFT;
                     break;
                 }
                 break;

@@ -332,7 +332,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                         refreshCells();
                         persistentKeyboardMode = KBM_NAVIGATE;
                         temporaryKeyboardMode = persistentKeyboardMode;
-                        persistentRoutingOperation = CR_ROUTE;
+                        persistentRoutingOperation = BRL_BLK_ROUTE;
                         temporaryRoutingOperation = persistentRoutingOperation;
                         adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
                         return 1;
@@ -499,7 +499,7 @@ getFunctionKey (void) {
    unsigned int keyNumber;
    if (getDecimalInteger(&keyNumber, 2, "function key")) {
       if (!keyNumber) keyNumber = 0X100 - VPK_FUNCTION;
-      return VAL_PASSKEY + VPK_FUNCTION + (keyNumber - 1);
+      return BRL_BLK_PASSKEY + VPK_FUNCTION + (keyNumber - 1);
    }
    return EOF;
 }
@@ -558,10 +558,10 @@ interpretNavigation (unsigned char dots, BRL_DriverCommandContext context) {
       case (BND_2 | BND_3 | BND_6):
 	 return BRL_CMD_ATTRDN;
       case (BND_2 | BND_4):
-	 temporaryRoutingOperation = CR_PRINDENT;
+	 temporaryRoutingOperation = BRL_BLK_PRINDENT;
 	 return BRL_CMD_NOOP;
       case (BND_3 | BND_5):
-	 temporaryRoutingOperation = CR_NXINDENT;
+	 temporaryRoutingOperation = BRL_BLK_NXINDENT;
 	 return BRL_CMD_NOOP;
       case (BND_2 | BND_4 | BND_5):
 	 return BRL_CMD_WINUP;
@@ -592,7 +592,7 @@ interpretCharacter (unsigned char dots, BRL_DriverCommandContext context) {
 	 mask |= 0X80;
 	 break;
    }
-   return VAL_PASSDOTS + (inputTable[dots] | mask);
+   return BRL_BLK_PASSDOTS + (inputTable[dots] | mask);
 }
 
 static int
@@ -619,7 +619,7 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
       case BNC_F:
 	 return getFunctionKey();
       case BNC_L:
-	 temporaryRoutingOperation = CR_SETLEFT;
+	 temporaryRoutingOperation = BRL_BLK_SETLEFT;
 	 return BRL_CMD_NOOP;
       case BNC_M:
 	 return BRL_CMD_MUTE;
@@ -635,7 +635,7 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
 	 unsigned int vt;
 	 if (getDecimalInteger(&vt, 2, "virt term num")) {
 	    if (!vt) vt = 0X100;
-	    return CR_SWITCHVT + (vt - 1);
+	    return BRL_BLK_SWITCHVT + (vt - 1);
 	 }
          return EOF;
       }
@@ -646,48 +646,48 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
 	 if (!getHexadecimalCharacter(&character)) {
 	    return EOF;
 	 }
-	 return VAL_PASSCHAR + character;
+	 return BRL_BLK_PASSCHAR + character;
       }
       case BNC_LPAREN:
-	 temporaryRoutingOperation = CR_CUTBEGIN;
+	 temporaryRoutingOperation = BRL_BLK_CUTBEGIN;
 	 return BRL_CMD_NOOP;
       case BNC_LBRACE:
-	 temporaryRoutingOperation = CR_CUTAPPEND;
+	 temporaryRoutingOperation = BRL_BLK_CUTAPPEND;
 	 return BRL_CMD_NOOP;
       case BNC_RPAREN:
-	 temporaryRoutingOperation = CR_CUTRECT;
+	 temporaryRoutingOperation = BRL_BLK_CUTRECT;
 	 return BRL_CMD_NOOP;
       case BNC_RBRACE:
-	 temporaryRoutingOperation = CR_CUTLINE;
+	 temporaryRoutingOperation = BRL_BLK_CUTLINE;
 	 return BRL_CMD_NOOP;
       case BNC_BAR:
          return BRL_CMD_CSRJMP_VERT;
       case BNC_QUESTION:
          return BRL_CMD_LEARN;
       case (BND_2 | BND_3 | BND_5 | BND_6):
-	 return VAL_PASSKEY + VPK_TAB;
+	 return BRL_BLK_PASSKEY + VPK_TAB;
       case (BND_2 | BND_3):
-	 return VAL_PASSKEY + VPK_CURSOR_LEFT;
+	 return BRL_BLK_PASSKEY + VPK_CURSOR_LEFT;
       case (BND_5 | BND_6):
-	 return VAL_PASSKEY + VPK_CURSOR_RIGHT;
+	 return BRL_BLK_PASSKEY + VPK_CURSOR_RIGHT;
       case (BND_2 | BND_5):
-	 return VAL_PASSKEY + VPK_CURSOR_UP;
+	 return BRL_BLK_PASSKEY + VPK_CURSOR_UP;
       case (BND_3 | BND_6):
-	 return VAL_PASSKEY + VPK_CURSOR_DOWN;
+	 return BRL_BLK_PASSKEY + VPK_CURSOR_DOWN;
       case (BND_2):
-	 return VAL_PASSKEY + VPK_HOME;
+	 return BRL_BLK_PASSKEY + VPK_HOME;
       case (BND_3):
-	 return VAL_PASSKEY + VPK_END;
+	 return BRL_BLK_PASSKEY + VPK_END;
       case (BND_5):
-	 return VAL_PASSKEY + VPK_PAGE_UP;
+	 return BRL_BLK_PASSKEY + VPK_PAGE_UP;
       case (BND_6):
-	 return VAL_PASSKEY + VPK_PAGE_DOWN;
+	 return BRL_BLK_PASSKEY + VPK_PAGE_DOWN;
       case (BND_3 | BND_5):
-	 return VAL_PASSKEY + VPK_INSERT;
+	 return BRL_BLK_PASSKEY + VPK_INSERT;
       case (BND_2 | BND_5 | BND_6):
-	 return VAL_PASSKEY + VPK_DELETE;
+	 return BRL_BLK_PASSKEY + VPK_DELETE;
       case (BND_2 | BND_6):
-	 return VAL_PASSKEY + VPK_ESCAPE;
+	 return BRL_BLK_PASSKEY + VPK_ESCAPE;
       case (BND_4):
       case (BND_4 | BND_5):
          temporaryKeyboardMode = KBM_INPUT;
@@ -718,14 +718,14 @@ interpretBackspaceChord (unsigned char dots, BRL_DriverCommandContext context) {
       default:
 	 break;
       case BNC_SPACE:
-	 return VAL_PASSKEY + VPK_BACKSPACE;
+	 return BRL_BLK_PASSKEY + VPK_BACKSPACE;
 	 return EOF;
       case BNC_A:
 	 return BRL_CMD_DISPMD | BRL_FLG_TOGGLE_ON;
       case BNC_B:
          return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_OFF;
       case BNC_D:
-	 temporaryRoutingOperation = CR_DESCCHAR;
+	 temporaryRoutingOperation = BRL_BLK_DESCCHAR;
          return BRL_CMD_NOOP;
       case BNC_F:
          return BRL_CMD_FREEZE | BRL_FLG_TOGGLE_OFF;
@@ -734,7 +734,7 @@ interpretBackspaceChord (unsigned char dots, BRL_DriverCommandContext context) {
       case BNC_I:
          return BRL_CMD_SKPIDLNS | BRL_FLG_TOGGLE_OFF;
       case BNC_M:
-	 temporaryRoutingOperation = CR_SETMARK;
+	 temporaryRoutingOperation = BRL_BLK_SETMARK;
 	 return BRL_CMD_NOOP;
       case BNC_S:
 	 return BRL_CMD_INFO;
@@ -771,7 +771,7 @@ interpretEnterChord (unsigned char dots, BRL_DriverCommandContext context) {
       case BNC_T: /* display the time */
 	 break;
       case BNC_SPACE:
-	 return VAL_PASSKEY + VPK_RETURN;
+	 return BRL_BLK_PASSKEY + VPK_RETURN;
 	 return EOF;
       case BNC_B:
          return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_ON;
@@ -780,7 +780,7 @@ interpretEnterChord (unsigned char dots, BRL_DriverCommandContext context) {
       case BNC_I:
          return BRL_CMD_SKPIDLNS | BRL_FLG_TOGGLE_ON;
       case BNC_M:
-	 temporaryRoutingOperation = CR_GOTOMARK;
+	 temporaryRoutingOperation = BRL_BLK_GOTOMARK;
 	 return BRL_CMD_NOOP;
       case BNC_V:
 	 return BRL_CMD_SWITCHVT_NEXT;

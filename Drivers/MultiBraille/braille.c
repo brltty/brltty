@@ -319,7 +319,7 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
 		else
 			keystroke.key = cmd_S_trans[keystroke.key];
 		status = 0;
-                if ((keystroke.key == CR_CUTLINE) || (keystroke.key == CR_CUTRECT))
+                if ((keystroke.key == BRL_BLK_CUTLINE) || (keystroke.key == BRL_BLK_CUTRECT))
                   keystroke.key += brlcols - 1;
 		return keystroke.key;
 	} else { /* directly process 'R' events */
@@ -336,13 +336,13 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
 		}
 		switch (status) {
 			case 0:			/* ordinary cursor routing */
-				return keystroke.key + CR_ROUTE - MB_CR_EXTRAKEYS;
+				return keystroke.key + BRL_BLK_ROUTE - MB_CR_EXTRAKEYS;
 			case 1:			/* begin block */
 				status = 0;
-				return keystroke.key + CR_CUTBEGIN - MB_CR_EXTRAKEYS;
+				return keystroke.key + BRL_BLK_CUTBEGIN - MB_CR_EXTRAKEYS;
 			case 2:			/* end block */
 				status = 0;
-				return keystroke.key + CR_CUTRECT - MB_CR_EXTRAKEYS;
+				return keystroke.key + BRL_BLK_CUTRECT - MB_CR_EXTRAKEYS;
 		}
 		status = 0;
 	}

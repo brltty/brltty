@@ -36,8 +36,8 @@
 #include "braille.h"
 #include "Programs/serial.h"
 
-#define LOWER_ROUTING_DEFAULT CR_ROUTE
-#define UPPER_ROUTING_DEFAULT CR_DESCCHAR
+#define LOWER_ROUTING_DEFAULT BRL_BLK_ROUTE
+#define UPPER_ROUTING_DEFAULT BRL_BLK_DESCCHAR
 
 static int fileDescriptor = -1;
 static struct termios oldSettings;
@@ -361,13 +361,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         return BRL_CMD_CSRTRK;
 
       case  87: /* key: top left second */
-        lowerRoutingFunction = CR_CUTBEGIN;
-        upperRoutingFunction = CR_SETMARK;
+        lowerRoutingFunction = BRL_BLK_CUTBEGIN;
+        upperRoutingFunction = BRL_BLK_SETMARK;
         return BRL_CMD_NOOP;
 
       case  88: /* key: top left fourth */
-        lowerRoutingFunction = CR_CUTAPPEND;
-        upperRoutingFunction = CR_GOTOMARK;
+        lowerRoutingFunction = BRL_BLK_CUTAPPEND;
+        upperRoutingFunction = BRL_BLK_GOTOMARK;
         return BRL_CMD_NOOP;
 
       case  89: /* key: top left fifth upper */
@@ -389,13 +389,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         return BRL_CMD_NXDIFLN;
 
       case 198: /* key: top right second */
-        lowerRoutingFunction = CR_CUTRECT;
-        upperRoutingFunction = CR_NXINDENT;
+        lowerRoutingFunction = BRL_BLK_CUTRECT;
+        upperRoutingFunction = BRL_BLK_NXINDENT;
         return BRL_CMD_NOOP;
 
       case 197: /* key: top right fourth */
-        lowerRoutingFunction = CR_CUTLINE;
-        upperRoutingFunction = CR_PRINDENT;
+        lowerRoutingFunction = BRL_BLK_CUTLINE;
+        upperRoutingFunction = BRL_BLK_PRINDENT;
         return BRL_CMD_NOOP;
 
       case 199: /* key: top right fifth upper */

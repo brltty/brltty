@@ -568,10 +568,10 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	  /* I thought I was smart when I suggested to remove CMD_CUT_END.
 	     Well now there's this nasty exception: the command offset
 	     depends on the display size! */
-	  if(key.cmd == CR_CUTRECT || key.cmd == CR_CUTLINE)
+	  if(key.cmd == BRL_BLK_CUTRECT || key.cmd == BRL_BLK_CUTLINE)
 	    key.cmd += blitesz-1;
 
-	  if(key.spcbar && (key.cmd &BRL_MSK_BLK) == VAL_PASSKEY) {
+	  if(key.spcbar && (key.cmd &BRL_MSK_BLK) == BRL_BLK_PASSKEY) {
           /*
 	    if(!kbemu)
 	      return EOF;
@@ -643,7 +643,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 
       /* check for routing keys */
       if (key.routing)
-	return (CR_ROUTE + key.routing - 1);
+	return (BRL_BLK_ROUTE + key.routing - 1);
 
       if (!kbemu)
 	return BRL_CMD_NOOP;
@@ -705,16 +705,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 #ifndef USE_TEXTTRANS
       if (ctrl && key.asc >= 96)
 	/* old code was (key.asc & 0x1f) */
-	temp = VAL_PASSCHAR | key.asc | BRL_FLG_CHAR_CONTROL;
+	temp = BRL_BLK_PASSCHAR | key.asc | BRL_FLG_CHAR_CONTROL;
       else if (meta && key.asc >= 96)
-	temp = VAL_PASSCHAR | key.asc | BRL_FLG_CHAR_META;
+	temp = BRL_BLK_PASSCHAR | key.asc | BRL_FLG_CHAR_META;
       else if (shift && (key.asc & 0x40))
 	/* old code was (key.asc & 0xdf) */
-	temp = VAL_PASSCHAR | key.asc | BRL_FLG_CHAR_SHIFT;
+	temp = BRL_BLK_PASSCHAR | key.asc | BRL_FLG_CHAR_SHIFT;
       else
-	temp = VAL_PASSCHAR | key.asc;
+	temp = BRL_BLK_PASSCHAR | key.asc;
 #else /* USE_TEXTTRANS */
-      temp = VAL_PASSDOTS |
+      temp = BRL_BLK_PASSDOTS |
 	(keys_to_dots[key.raw &0x3F]
 	 | ((meta) ? BRL_FLG_CHAR_META : 0)
 	 | ((ctrl) ? 0xC0 : 
@@ -756,16 +756,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	  if (int_cursor < blitesz)
 	    int_cursor++;
 	  break;
-	case CR_ROUTE:	/* route cursor */
+	case BRL_BLK_ROUTE:	/* route cursor */
 	  if (key.spcbar)
 	    {
-	      temp = CR_ROUTE + int_cursor - 1;
+	      temp = BRL_BLK_ROUTE + int_cursor - 1;
 	      int_cursor = 0;
 	      state = ST_NORMAL;
 	    }
 	  return temp;
-	case CR_CUTBEGIN:	/* begin cut */
-	case CR_CUTAPPEND:
+	case BRL_BLK_CUTBEGIN:	/* begin cut */
+	case BRL_BLK_CUTAPPEND:
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;
@@ -773,8 +773,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	      state = ST_NORMAL;
 	    }
 	  return temp;
-	case CR_CUTRECT:	/* end cut */
-	case CR_CUTLINE:
+	case BRL_BLK_CUTRECT:	/* end cut */
+	case BRL_BLK_CUTLINE:
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;
@@ -783,7 +783,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	    }
 	  return temp;
 	case BRL_CMD_DISPMD: /* attribute info */
-	  temp = CR_DESCCHAR + int_cursor - 1;
+	  temp = BRL_BLK_DESCCHAR + int_cursor - 1;
 	  int_cursor = 0;
 	  state = ST_NORMAL;
 	  return temp;
@@ -824,11 +824,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	if (hold > 0) {
 	  if (key.asc == SWITCHVT_NEXT || key.asc == SWITCHVT_PREV)
 	    /* That's chorded or not... */
-	    return CR_SWITCHVT + (hold-1);
+	    return BRL_BLK_SWITCHVT + (hold-1);
 	  else if (key.asc == O_SETMARK)
-	    return CR_SETMARK + (hold-1);
+	    return BRL_BLK_SETMARK + (hold-1);
 	  else if (key.asc == O_GOTOMARK)
-	    return CR_GOTOMARK + (hold-1);
+	    return BRL_BLK_GOTOMARK + (hold-1);
 	  else if (key.spcbar)		/* chorded */
 	    switch (key.asc)
 	      {

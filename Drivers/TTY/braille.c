@@ -216,7 +216,7 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
  switch (key) {
   KEY(EOF, EOF);
   default:
-   if (key <= 0XFF) return VAL_PASSCHAR|key;
+   if (key <= 0XFF) return BRL_BLK_PASSCHAR|key;
    LogPrint(LOG_WARNING, "Unknown key: %d", key);
    return BRL_CMD_NOOP;
 
@@ -252,7 +252,7 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
   KEY(KEY_F(19), BRL_CMD_PRPGRPH);
   KEY(KEY_F(20), BRL_CMD_NXPGRPH);
 
-  KEY(KEY_BACKSPACE, VAL_PASSKEY|VPK_BACKSPACE);
+  KEY(KEY_BACKSPACE, BRL_BLK_PASSKEY|VPK_BACKSPACE);
  }
 #undef KEY
 }
