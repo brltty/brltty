@@ -550,7 +550,10 @@ in
    *)
       ;;
 esac
-BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
+if test "${brltty_enabled_learn_mode}" != "no"
+then
+   BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
+fi
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 BRLTTY_ARG_DRIVER([braille])
 
@@ -661,36 +664,39 @@ BRLTTY_ARG_DISABLE(
 ])
 AC_SUBST([speech_support_object])
 
-BRLTTY_SPEECH_DRIVER([al], [Alva])
-BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
-BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
-BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
-BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
-   BRLTTY_ARG_REQUIRED(
-      [flite-language], [LANGUAGE],
-      [the FestivalLite language to use],
-      [flite_language], ["usenglish"]
-   )
+if test "${brltty_enabled_speech_support}" != "no"
+then
+   BRLTTY_SPEECH_DRIVER([al], [Alva])
+   BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
+   BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
+   BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
+   BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
+      BRLTTY_ARG_REQUIRED(
+         [flite-language], [LANGUAGE],
+         [the FestivalLite language to use],
+         [flite_language], ["usenglish"]
+      )
 
-   BRLTTY_ARG_REQUIRED(
-      [flite-lexicon], [LEXICON],
-      [the FestivalLite lexicon to use],
-      [flite_lexicon], ["cmulex"]
-   )
+      BRLTTY_ARG_REQUIRED(
+         [flite-lexicon], [LEXICON],
+         [the FestivalLite lexicon to use],
+         [flite_lexicon], ["cmulex"]
+      )
 
-   BRLTTY_ARG_REQUIRED(
-      [flite-voice], [VOICE],
-      [the FestivalLite voice to use],
-      [flite_voice], ["cmu_us_kal16"]
-   )
+      BRLTTY_ARG_REQUIRED(
+         [flite-voice], [VOICE],
+         [the FestivalLite voice to use],
+         [flite_voice], ["cmu_us_kal16"]
+      )
 
-   BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite])
-])
-BRLTTY_SPEECH_DRIVER([fv], [Festival])
-BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
-BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
-BRLTTY_SPEECH_DRIVER([tv], [Televox])
-BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
+      BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite])
+   ])
+   BRLTTY_SPEECH_DRIVER([fv], [Festival])
+   BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
+   BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
+   BRLTTY_SPEECH_DRIVER([tv], [Televox])
+   BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
+fi
 BRLTTY_ARG_DRIVER([speech])
 
 AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
