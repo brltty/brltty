@@ -28,6 +28,8 @@ extern "C" {
 typedef struct {
   const char *name;
   const char *identifier;
+  const char *date;
+  const char *time;
   const char *const *parameters;
   void (*identify) (void);		/* print start-up messages */
   int (*open) (char **parameters);		/* initialize speech device */

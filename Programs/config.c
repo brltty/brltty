@@ -1722,13 +1722,15 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
   LogPrint(LOG_INFO, "Data Directory: %s", opt_dataDirectory);
   LogPrint(LOG_INFO, "Help File: %s", brailleDriver->helpFile);
-  LogPrint(LOG_INFO, "Braille Driver: %s (%s)",
-           opt_brailleDriver, brailleDriver->name);
+  LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
+           opt_brailleDriver, brailleDriver->name,
+           brailleDriver->date, brailleDriver->time);
   LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
   logParameters(brailleDriver->parameters, brailleParameters, "Braille");
 #ifdef ENABLE_SPEECH_SUPPORT
-  LogPrint(LOG_INFO, "Speech Driver: %s (%s)",
-           opt_speechDriver, speechDriver->name);
+  LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
+           opt_speechDriver, speechDriver->name,
+           speechDriver->date, speechDriver->time);
   logParameters(speechDriver->parameters, speechParameters, "Speech");
 #endif /* ENABLE_SPEECH_SUPPORT */
   logParameters(getScreenParameters(), screenParameters, "Screen");

@@ -54,7 +54,9 @@ extern int readBrailleCommand (BrailleDisplay *, DriverCommandContext);
 typedef struct {
   const char *name;			/* name of driver */
   const char *identifier;		/* name of driver */
-  const char *const *parameters;		/* user-supplied driver parameters */
+  const char *date;		/* compilation date of driver */
+  const char *time;		/* compilation time of driver */
+  const char *const *parameters;	/* user-supplied driver parameters */
   const char *helpFile;		/* name of help file */
   int statusStyle;		/* prefered status cells mode */
 

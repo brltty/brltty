@@ -66,12 +66,14 @@ extern SPKCONST SpeechDriver SPKSYMBOL;
 SPKCONST SpeechDriver SPKSYMBOL = {
   STRINGIFY(SPKNAME),
   STRINGIFY(SPKCODE),
+  __DATE__,
+  __TIME__,
 
-  #ifdef SPKPARMS
-    spk_parameters,
-  #else
-    NULL,
-  #endif
+#ifdef SPKPARMS
+  spk_parameters,
+#else /* SPKPARMS */
+  NULL,
+#endif /* SPKPARMS */
 
   spk_identify,
   spk_open,

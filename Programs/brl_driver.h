@@ -72,6 +72,8 @@ extern BRLCONST BrailleDriver BRLSYMBOL;
 BRLCONST BrailleDriver BRLSYMBOL = {
   STRINGIFY(BRLNAME),
   STRINGIFY(BRLCODE),
+  __DATE__,
+  __TIME__,
 
 #ifdef BRLPARMS
   brl_parameters,
