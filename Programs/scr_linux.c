@@ -378,7 +378,7 @@ getUserAcm (int force) {
   if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
     if (force || (memcmp(applicationCharacterMap, map, sizeof(applicationCharacterMap)) != 0)) {
       memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
-      LogPrint(LOG_DEBUG, "Application character map changed.");
+      if (!force) LogPrint(LOG_DEBUG, "User application character map changed.");
       logApplicationCharacterMap();
       return 1;
     }
