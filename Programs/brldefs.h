@@ -259,12 +259,18 @@ typedef enum {
 } StatusCell;
 
 /* The bits for each braille dot.
- * logical layout   real bits 
- *  1 4               1 2
- *  2 5         -->   3 4
- *  3 6               5 6
- *  7 8               7 8
- * Bx: x from logical layout, value from real layout  
+ *
+ * DotNumber  BitNumber  ActualBit
+ *    1 4        0 1     0X01 0X02
+ *    2 5        2 3     0X04 0X08
+ *    3 6        4 5     0X10 0X20
+ *    7 8        6 7     0X40 0X80
+ *
+ * This dot mapping was chosen for BRLTTY's internal dot representation
+ * because it makes programming prettier and more efficient for things such
+ * as underlining, cursor drawing, and vertical braille character shifting.
+ *
+ * Bx: x from dot number, value from actual bit.
  */
 #define B1 0X01
 #define B2 0X04
