@@ -405,7 +405,6 @@ usbFindRoot (void) {
       }
     }
     endmntent(table);
-    if (!root) LogPrint(LOG_WARNING, "USBFS not mounted.");
   } else {
     LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
              "Mounted file system table open erorr: %s: %s",
@@ -438,6 +437,8 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
   if ((root = usbFindRoot()) || (root = usbMakeRoot())) {
     device = usbSearchDevice(root, chooser, data);
     free(root);
+  } else {
+    LogPrint(LOG_WARNING, "USBFS not mounted.");
   }
   return device;
 }
