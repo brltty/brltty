@@ -77,6 +77,8 @@ FILE* configfile = NULL;
 
  static inline void set_ident(int num)
   {
+    int i;
+
     set_current++;
     set_assert(set_current < num_terminals, __LINE__);
     mod_current = -1;
@@ -89,6 +91,10 @@ FILE* configfile = NULL;
     pm_terminals[set_current].statcells = 0;
     pm_terminals[set_current].frontkeys = 0;
     pm_terminals[set_current].haseasybar = 0;
+
+    //pm_terminals[set_current].inputoff = 0;
+    //for(i=0; i < 8; i++)
+    //  pm_terminals[set_current].inputdotskey[i] = 0;
   }
 
  static inline void set_name(char* nameval)
@@ -179,11 +185,13 @@ FILE* configfile = NULL;
 %token CUTBEG CUTEND
 
 %token STATCELLS FRONTKEYS EASYBAR SIZE
-%token KEY STAT FRONT KEYCODE STATCODE
+%token STAT FRONT KEYCODE STATCODE
 %token STATCODE HORIZ FLAG
 %token EASY EASYCODE
 %token SWITCH NUMBER
 %token ROUTING
+%token ON OFF 
+%token VPK
 %%
 
 input:    /* empty */
@@ -201,9 +209,11 @@ inputline:  '\n'
        | EASYBAR '\n'               { set_haseasybar(1); }
        | EASYBAR eq NUM '\n'        { set_haseasybar(numval != 0); }
 
-       | statdef eq statdisp '\n';  { set_showstat(keyindex, numval);  }
-       | MODIFIER eq anykey '\n';   { set_modifier(keyindex); }
-       | keycode eq modifiers '\n'; { set_keycode(cmdval, numkeys, keys); }
+       | statdef eq statdisp '\n'  { set_showstat(keyindex, numval);  }
+       | MODIFIER eq anykey '\n'   { set_modifier(keyindex); }
+       | keycode eq modifiers '\n' { set_keycode(cmdval, numkeys, keys); }
+       | keycode ON eq modifiers '\n' { set_keycode(cmdval | VAL_SWITCHON, numkeys, keys); }
+       | keycode OFF eq modifiers '\n' { set_keycode(cmdval | VAL_SWITCHOFF, numkeys, keys); }
        ;
 
 eq:    '='
@@ -220,6 +230,7 @@ statdef: STAT NUM { keyindex=numval;  }
        ;
 
 keycode: KEYCODE { cmdval=numval; numkeys = 0; }
+       | VPK { cmdval = numval; numkeys = 0; } 
        ;
 
 statdisp: STATCODE            {  }
@@ -265,7 +276,6 @@ static struct init_v symbols[]= {
   { "terminal",    NAME, 0 },
   { "type",        NAME, 0 },
   { "typ",         NAME, 0 },
-  { "key",         KEY, 0 },
 
   { "modifier",    MODIFIER, 0},
 
@@ -284,37 +294,9 @@ static struct init_v symbols[]= {
   { "f",           FRONT, 0 },
   { "e",           EASY, 0 },
 
-  { "cut_begin",   KEYCODE, CMD_CUT_BEG },
-  { "cut_end",     KEYCODE, CMD_CUT_END },
-
   { "horiz",       HORIZ, 0 },
   { "flag",        FLAG, 0 },
   { "number",      NUMBER, 0 },
-
-  { "currentline", STATCODE, STAT_current },
-  { "line",        STATCODE, STAT_current },
-  { "current",     STATCODE, STAT_current },
-  { "cursorrow",   STATCODE, STAT_row },
-  { "row",         STATCODE, STAT_row },
-  { "cursorcol",   STATCODE, STAT_col },
-  { "col",         STATCODE, STAT_col },
-  { "column",      STATCODE, STAT_col },
-  { "tracking",    STATCODE, STAT_tracking },
-  { "dispmode",    STATCODE, STAT_dispmode },
-  { "mode",        STATCODE, STAT_dispmode },
-  { "frz",         STATCODE, STAT_frozen },
-  { "frozen",      STATCODE, STAT_frozen },
-  { "visible",     STATCODE, STAT_visible },
-  { "size",        STATCODE, STAT_size },
-  { "blink",       STATCODE, STAT_blink },
-  { "capitalblink",STATCODE, STAT_capitalblink },
-  { "six",         STATCODE, STAT_dots },
-  { "eight",       STATCODE, STAT_dots },
-  { "dots",        STATCODE, STAT_dots },
-  { "sound",       STATCODE,STAT_sound },
-  { "skip",        STATCODE, STAT_skip },
-  { "underline",   STATCODE,STAT_underline },
-  { "blinkattr",   STATCODE, STAT_blinkattr },
 
   { "left",        EASYCODE, EASY_LE },
   { "left1",       EASYCODE, EASY_LE },
@@ -332,7 +314,12 @@ static struct init_v symbols[]= {
   { "routing",     ROUTING, 0 },
   { "route",       ROUTING, 0 },
   { "r",           ROUTING, 0 },
+
+  { "on",          ON, 0 },
+  { "off",         OFF, 0 },
+
 #include "cmd.h"
+  { "EOF", KEYCODE, -1 },
   { NULL, 0, 0 }
 };
 
@@ -349,7 +336,6 @@ struct help_v
 static struct help_v hlptxt[]= {
 #include "hlp.h"
   { 0, NULL }
-
 };
 
 
@@ -437,12 +423,14 @@ int yylex ()
 
 int parse()
 {
+  linenumber = 1;
+  set_current = -1;
+
   nameval = 0;
   numval = 0;
   keyindex = 0;
   cmdval = 0; 
   numkeys = 0;
-  linenumber = 1;
 
   return yyparse ();
 }

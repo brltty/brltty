@@ -116,7 +116,9 @@ extern void updatePreferences (void);
 extern void initializeBraille (void);
 extern void startBrailleDriver (void);
 extern void stopBrailleDriver (void);
+
 extern void clearStatusCells (void);
+extern void setStatusText (const unsigned char *text);
 
 extern void initializeSpeech (void);
 extern void startSpeechDriver (void);

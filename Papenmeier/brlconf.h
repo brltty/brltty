@@ -59,7 +59,7 @@
 #define offsetTable      512
 
 /* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_Papenmeier
+#define PREFSTYLE ST_Generic
 
 #define CONFIG_ENV   "BRLTTY_PM_CONF"
 //#define CONFIG_FILE  "/etc/brltty/brltty.pm.conf"

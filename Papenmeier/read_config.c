@@ -68,7 +68,19 @@ static char* search_stat(int cmd)
 
 static char* search_cmd(int cmd)
 {
-  return search_code(KEYCODE, cmd);
+  if ((cmd & ~VAL_ARG_MASK) == VAL_PASSKEY) {
+    return search_code(VPK, cmd);
+  } else
+    return search_code(KEYCODE, cmd);
+}
+
+static char* search_onoff(int cmd)
+{
+  if (cmd & VAL_SWITCHON)
+    return search_code(ON, 0);
+  if (cmd & VAL_SWITCHOFF)
+    return search_code(OFF, 0);
+  return "";
 }
 
 static char* search_key(int code) {
@@ -101,12 +113,31 @@ static char* search_key(int code) {
 /* Param help is true, when procedure generates one helpfile for
    each terminaltype. Otherwise the procedure generates one
    big parameterfile via stdout                                    */
+
+void printkeys(FILE * fh, commands* cmd, int modifiers[])
+{
+  char* txtand = "";
+  int j;
+  if (cmd->keycode != NOKEY) {
+    fprintf(fh, "%s ", search_key(cmd->keycode));
+    txtand = " and ";
+  }
+  for(j=0; j < MODMAX; j++)
+    if ( ((1<<j) & (cmd->modifiers))==(1<<j)) {
+      fprintf(fh, "%s%s",
+	      txtand, search_key(modifiers[j])); 
+      txtand = " and ";
+    }
+} 
+
 void terminals(int help, int verbose)
 {
   int tn, i, j;
   FILE * fh = stdout;
 
   // TODO: Comment/Help for status display
+
+#define CMDMASK    (VAL_SWITCHON-1)
 
   for(tn=0; tn < num_terminals; tn++) {
     if (pm_terminals[tn].name != 0) {
@@ -181,19 +212,24 @@ void terminals(int help, int verbose)
 		    search_help(val + OFFS_STAT));
 	  }
 
-      fprintf(fh, "# Modifierkey settings:\n");    
+      fprintf(fh, "# Modifierkey and input mode dots - settings:\n");    
       for(i=0; i < MODMAX; i++) 
 	if (pm_terminals[tn].modifiers[i] != 0 &&
 	    pm_terminals[tn].modifiers[i] != ROUTINGKEY) 
-	  fprintf(fh, "modifier = %s\n", 
-		  search_key(pm_terminals[tn].modifiers[i]));
+	  fprintf(fh, "modifier = %s # dot %d\n", 
+		  search_key(pm_terminals[tn].modifiers[i]), i+1);
 
       fprintf(fh, "# Commandkey settings:\n");    
       for(i=0; i < CMDMAX; i++) {
 	if (pm_terminals[tn].cmds[i].code != 0) {
 	  char* txtand = "";
-	  fprintf(fh, "%s = ",
-		  search_cmd(pm_terminals[tn].cmds[i].code));
+	  fprintf(fh, "%s",
+		  search_cmd(pm_terminals[tn].cmds[i].code & CMDMASK));
+	  if (pm_terminals[tn].cmds[i].code >= CMDMASK) 
+	    fprintf(fh, " %s", search_onoff(pm_terminals[tn].cmds[i].code) );
+	  fprintf(fh, " = ");
+
+	  /*
 	  if (pm_terminals[tn].cmds[i].keycode != NOKEY) {
 	    fprintf(fh, "%s ", search_key(pm_terminals[tn].cmds[i].keycode));
 	    txtand = " and ";
@@ -204,11 +240,16 @@ void terminals(int help, int verbose)
 		      txtand, search_key(pm_terminals[tn].modifiers[j])); 
 	      txtand = " and ";
 	    }
-	  fprintf(fh, " # %s\n",
-		  search_help(pm_terminals[tn].cmds[i].code));
+	  */
+
+	  printkeys(fh, &pm_terminals[tn].cmds[i], pm_terminals[tn].modifiers);
+	  fprintf(fh, " # %s",
+		  search_help(pm_terminals[tn].cmds[i].code & CMDMASK));
+	  if (pm_terminals[tn].cmds[i].code > CMDMASK) 
+	    fprintf(fh, " - set %s", search_onoff(pm_terminals[tn].cmds[i].code) );
+	  fprintf(fh, "\n");
 	}
       }
-
       if (help)
 	fclose (fh);
     }

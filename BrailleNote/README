@@ -1,10 +1,10 @@
-This directory contains the BRLTTY driver for the BrailleNote, which is
-manufactured by Pulse Data International of New Zealand. It was implemented,
-and is being maintained, by Dave Mielke <dave@mielke.cc>. Thanks to Mike
-Pedersen <mpedersen@mindspring.com> for his help and advice.
-
-As a component of BRLTTY, this driver is released under the terms of the GNU
-Public License. It has been tested with BraillNotes 18 and 32.
+This directory contains the BRLTTY driver for the BrailleNote
+[http://www.braillenote.com], which is manufactured by Pulse Data International
+[http://www.pulsedata.co.nz] of New Zealand. It was implemented, and is being
+maintained, by Dave Mielke <dave@mielke.cc>. Thanks to Mike Pedersen
+<mpedersen@mindspring.com> for his help and advice. As a component of BRLTTY,
+this driver is released under the terms of the GNU Public License. It has been
+tested with BraillNotes 18 and 32.
 
 There are a number of ways to put the BrailleNote into its Braille Terminal
 Mode. The quickest way is to use the direct keyboard shortcut

@@ -47,7 +47,7 @@ typedef enum {
  */
 typedef enum {
    /* special commands which must be first and remain in order */
-   CMD_NOOP /* do nothing */,
+   CMD_NOOP = 0 /* do nothing */,
 
    /* vertical motion */
    CMD_LNUP /* go up one line */,
@@ -79,15 +79,15 @@ typedef enum {
    CMD_LNBEG /* go to beginning of line */,
    CMD_LNEND /* go to end of line */,
 
-   /* cursor related */
-   CMD_HOME /* go to cursor */,
-   CMD_BACK /* go to last motion */,
+   /* for displays without routing keys */
    CMD_CSRJMP /* route cursor to top-left corner of braille window */,
-   CMD_CSRJMP_VERT /* route cursor to top line of window */,
-
-   /* cut and paste */
    CMD_CUT_BEG /* cut text from top-left corner of braille window */,
    CMD_CUT_END /* cut text to bottom-right corner of braille window */,
+
+   /* miscellaneous */
+   CMD_HOME /* go to cursor */,
+   CMD_BACK /* go to last motion */,
+   CMD_CSRJMP_VERT /* route cursor to top line of window */,
    CMD_PASTE /* insert cut buffer at cursor */,
 
    /* driver options */
@@ -111,8 +111,6 @@ typedef enum {
    CMD_HELP /* display driver help */,
    CMD_INFO /* display status summary */,
    CMD_PREFMENU /* present preferences menu */,
-
-   /* preferences maintenance */
    CMD_PREFSAVE /* save preferences */,
    CMD_PREFLOAD /* reload preferences */,
 
@@ -129,6 +127,11 @@ typedef enum {
    /* general control */
    CMD_RESTARTBRL /* reinitialize braille driver */,
    CMD_RESTARTSPEECH /* reinitialize speech driver */,
+
+   /* internal (to the driver) use only */
+   CMD_INPUTMODE /* toggle input mode */,
+
+   DriverCommandCount /* must be last */
 } DriverCommand;
 #define VAL_ARG_MASK 0XFF
 
@@ -191,7 +194,7 @@ typedef enum {
    ST_AlvaStyle,
    ST_TiemanStyle,
    ST_PB80Style,
-   ST_Papenmeier,
+   ST_Generic,
    ST_MDVStyle,
    ST_VoyagerStyle
 } StatusCellStyles;
@@ -224,23 +227,38 @@ extern char *braille_libraryName;	/* name of library */
 int load_braille_driver(void);
 int list_braille_drivers(void);
 
-/* Status display Papenmeier - comment 
- * Please: comment all STAT_* - this info is used for the Papenmeier helpfile
+/*
+ * Please comment all STAT_* definitions. They are
+ * used during automatic help file generation.
  */
-#define STAT_current   1	/* current line number */
-#define STAT_row       2	/* cursor position - row */
-#define STAT_col       3	/* cursor position - column */
-#define STAT_tracking  5	/* cursor tracking */
-#define STAT_dispmode  6	/* dispmode (text / attribut) */
-#define STAT_frozen    8	/* screen frozen */
-#define STAT_visible  12	/* cursor visible */
-#define STAT_size     13	/* cursor size */
-#define STAT_blink    14	/* cursor blink */
-#define STAT_capitalblink 15	/* capital letter blink */
-#define STAT_dots     16	/* 6 or 8 dots */
-#define STAT_sound    17	/* sound */
-#define STAT_skip     18	/* skip identical lines */
-#define STAT_underline 19	/* attribute underlining */
-#define STAT_blinkattr 20	/* blinking of attribute underlining */
+typedef enum {
+   FirstStatusCell = 0,
+   #define FSC_GENERIC 0XFF
+
+   /* numbers */
+   STAT_brlcol /* current line number */,
+   STAT_brlrow /* current line number */,
+   STAT_csrcol /* cursor position - column */,
+   STAT_csrrow /* cursor position - row */,
+
+   /* flags */
+   STAT_tracking /* cursor tracking */,
+   STAT_dispmode /* dispmode (text / attribut) */,
+   STAT_frozen /* screen frozen */,
+   STAT_visible /* cursor visible */,
+   STAT_size /* cursor size */,
+   STAT_blink /* cursor blink */,
+   STAT_capitalblink /* capital letter blink */,
+   STAT_dots /* 6 or 8 dots */,
+   STAT_sound /* sound */,
+   STAT_skip /* skip identical lines */,
+   STAT_underline /* attribute underlining */,
+   STAT_blinkattr /* blinking of attribute underlining */,
+
+   /* internal (to the driver) use only */
+   STAT_input /* input mode */,
+
+   StatusCellCount /* must be last */
+} StatusCell;
 
 #endif /* !defined(_BRL_H) */

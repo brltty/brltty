@@ -55,9 +55,9 @@
 #define  FRONTMAX  13
 #define  EASYMAX   8
 #define  NAMEMAX   80
-#define  MODMAX    (KEYMAX-1)
-#define  CMDMAX    50
-
+#define  MODMAX    16
+#define  CMDMAX    100
+#define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
 #define OFFS_HORIZ    1000	/* added to status show */
@@ -77,7 +77,7 @@
 typedef struct {
   int code;			/* the code to sent */
   int keycode;			/* the key to press */
-  unsigned char modifiers;	/* modifiers (bitfield) */
+  int modifiers;	/* modifiers (bitfield) */
 } commands;
 
 typedef struct {
@@ -93,67 +93,135 @@ typedef struct {
   int statshow[STATMAX];	/* status cells: info to show */
   int modifiers[MODMAX];	/* keys used as modifier */
   commands cmds[CMDMAX];
+
 } one_terminal; 
 
-/* some makros for terminals with the same layout -
+/* some macros for terminals with the same layout -
  * named after there usage
  */
 
- /* commands for 9 front keys */
+#define CHGONOFF(cmd, offs, on, off) \
+      { cmd                , offs, 0  }, \
+      { cmd | VAL_SWITCHON , offs, on }, \
+      { cmd | VAL_SWITCHOFF, offs, off}
+
+
+/* modifiers for 9 front keys */
 #define MOD_FRONT_9 \
      OFFS_FRONT + 1, \
      OFFS_FRONT + 9, \
      OFFS_FRONT + 2, \
      OFFS_FRONT + 8
 
+/* commands for 9 front keys */
 #define CMD_FRONT_9 \
-     { CR_BEGBLKOFFSET,  ROUTINGKEY, 4 }, \
-     { CMD_WINUP,   OFFS_FRONT +  3, 0 }, \
-     { CMD_TOP,     OFFS_FRONT +  3, 1 }, \
-     { CMD_TOP,     OFFS_FRONT +  3, 2 }, \
-     { CMD_LNUP,    OFFS_FRONT +  4, 0 }, \
-     { CMD_PRDIFLN, OFFS_FRONT +  4, 1 }, \
-     { CMD_ATTRUP,  OFFS_FRONT +  4, 2 }, \
-     { CMD_HWINLT,  OFFS_FRONT +  5, 1 }, \
-     { CMD_HOME,    OFFS_FRONT +  5, 0 }, \
-     { CMD_HWINRT,  OFFS_FRONT +  5, 2 }, \
-     { CMD_LNDN,    OFFS_FRONT +  6, 0 }, \
-     { CMD_NXDIFLN, OFFS_FRONT + 6, 1 },  \
-     { CMD_ATTRDN,  OFFS_FRONT +  6, 2 }, \
-     { CMD_WINDN,   OFFS_FRONT +  7, 0 }, \
-     { CMD_BOT,     OFFS_FRONT +  7, 1 }, \
-     { CMD_BOT,     OFFS_FRONT +  7, 2 }, \
-     { CR_ENDBLKOFFSET,  ROUTINGKEY, 8 }, \
-     { CR_ROUTEOFFSET,   ROUTINGKEY, 0 }
+     { CMD_FWINLT     , NOKEY         , 0X1 }, \
+     { CMD_FWINRT     , NOKEY         , 0X2 }, \
+     { CMD_HWINLT     , NOKEY         , 0X4 }, \
+     { CMD_HWINRT     , NOKEY         , 0X8 }, \
+                                               \
+     { CMD_HOME       , OFFS_FRONT + 5, 0X0 }, \
+     { CMD_LNBEG      , OFFS_FRONT + 5, 0X1 }, \
+     { CMD_LNEND      , OFFS_FRONT + 5, 0X2 }, \
+     { CMD_CHRLT      , OFFS_FRONT + 5, 0X4 }, \
+     { CMD_CHRRT      , OFFS_FRONT + 5, 0X8 }, \
+                                               \
+     { CMD_LNUP       , OFFS_FRONT + 4, 0X0 }, \
+     { CMD_PRDIFLN    , OFFS_FRONT + 4, 0X1 }, \
+     { CMD_ATTRUP     , OFFS_FRONT + 4, 0X2 }, \
+     { CMD_PRBLNKLN   , OFFS_FRONT + 4, 0X4 }, \
+     { CMD_PRSEARCH   , OFFS_FRONT + 4, 0X8 }, \
+                                               \
+     { CMD_LNDN       , OFFS_FRONT + 6, 0X0 }, \
+     { CMD_NXDIFLN    , OFFS_FRONT + 6, 0X1 }, \
+     { CMD_ATTRDN     , OFFS_FRONT + 6, 0X2 }, \
+     { CMD_NXBLNKLN   , OFFS_FRONT + 6, 0X4 }, \
+     { CMD_NXSEARCH   , OFFS_FRONT + 6, 0X8 }, \
+                                               \
+     { CMD_WINUP      , OFFS_FRONT + 3, 0X0 }, \
+     { CMD_TOP_LEFT   , OFFS_FRONT + 3, 0X1 }, \
+     { CMD_TOP        , OFFS_FRONT + 3, 0X2 }, \
+                                               \
+     { CMD_WINDN      , OFFS_FRONT + 7, 0X0 }, \
+     { CMD_BOT_LEFT   , OFFS_FRONT + 7, 0X1 }, \
+     { CMD_BOT        , OFFS_FRONT + 7, 0X2 }, \
+                                               \
+     { CR_ROUTEOFFSET , ROUTINGKEY    , 0X0 }, \
+     { CR_BEGBLKOFFSET, ROUTINGKEY    , 0X1 }, \
+     { CR_ENDBLKOFFSET, ROUTINGKEY    , 0X2 }, \
+     { CR_PRINDENT    , ROUTINGKEY    , 0X4 }, \
+     { CR_NXINDENT    , ROUTINGKEY    , 0X8 }, \
+     { CMD_PASTE      , NOKEY         , 0X3 }
 
 
-#define MOD_SWITCH    \
+/* modifiers for 13 front keys */
+#define MOD_FRONT_13  \
+     OFFS_FRONT +  4, \
+     OFFS_FRONT +  3, \
+     OFFS_FRONT +  2, \
+     OFFS_FRONT + 10, \
+     OFFS_FRONT + 11, \
+     OFFS_FRONT + 12, \
+     OFFS_FRONT +  1, \
+     OFFS_FRONT + 13
+
+/* commands for 13 front keys */
+#define CMD_FRONT_13 \
+      { CMD_HOME                    , OFFS_FRONT +  7, 0000 }, \
+      { CMD_TOP                     , OFFS_FRONT +  6, 0000 }, \
+      { CMD_BOT                     , OFFS_FRONT +  8, 0000 }, \
+      { CMD_LNUP                    , OFFS_FRONT +  5, 0000 }, \
+      { CMD_LNDN                    , OFFS_FRONT +  9, 0000 }, \
+                                                               \
+      { CMD_PRDIFLN                 , NOKEY          , 0001 }, \
+      { CMD_NXDIFLN                 , NOKEY          , 0010 }, \
+      { CMD_WINUP                   , NOKEY          , 0002 }, \
+      { CMD_WINDN                   , NOKEY          , 0020 }, \
+      { CMD_ATTRUP                  , NOKEY          , 0004 },         \
+      { CMD_ATTRDN                  , NOKEY          , 0040 },        \
+                                                               \
+      { VAL_PASSKEY+VPK_TAB         , OFFS_FRONT +  7, 0001 }, \
+      { VAL_PASSKEY+VPK_ESCAPE      , OFFS_FRONT +  6, 0001 }, \
+      { VAL_PASSKEY+VPK_BACKSPACE   , OFFS_FRONT +  5, 0001 }, \
+      { VAL_PASSKEY+VPK_RETURN      , OFFS_FRONT +  9, 0001 }, \
+                                                               \
+      { CMD_SPKHOME                 , OFFS_FRONT +  7, 0010 }, \
+      { CMD_MUTE                    , OFFS_FRONT +  6, 0010 }, \
+      { CMD_RESTARTSPEECH           , OFFS_FRONT +  8, 0010 }, \
+      { CMD_SAY                     , OFFS_FRONT +  5, 0010 }, \
+      { CMD_SAYALL                  , OFFS_FRONT +  9, 0010 }, \
+      { CR_MSGATTRIB                , ROUTINGKEY     , 0010 }, \
+                                                               \
+      { VAL_PASSKEY+VPK_INSERT      , OFFS_FRONT +  7, 0002 }, \
+      { VAL_PASSKEY+VPK_CURSOR_LEFT , OFFS_FRONT +  6, 0002 }, \
+      { VAL_PASSKEY+VPK_CURSOR_RIGHT, OFFS_FRONT +  8, 0002 }, \
+      { VAL_PASSKEY+VPK_CURSOR_UP   , OFFS_FRONT +  5, 0002 }, \
+      { VAL_PASSKEY+VPK_CURSOR_DOWN , OFFS_FRONT +  9, 0002 }, \
+      { CR_SWITCHVT                 , ROUTINGKEY     , 0002 }, \
+                                                               \
+      { VAL_PASSKEY+VPK_DELETE      , OFFS_FRONT +  7, 0020 }, \
+      { VAL_PASSKEY+VPK_HOME        , OFFS_FRONT +  6, 0020 }, \
+      { VAL_PASSKEY+VPK_END         , OFFS_FRONT +  8, 0020 }, \
+      { VAL_PASSKEY+VPK_PAGE_UP     , OFFS_FRONT +  5, 0020 }, \
+      { VAL_PASSKEY+VPK_PAGE_DOWN   , OFFS_FRONT +  9, 0020 }, \
+      { VAL_PASSKEY+VPK_FUNCTION    , ROUTINGKEY     , 0020 }, \
+                                                               \
+      { CR_ROUTEOFFSET              , ROUTINGKEY     , 0000 }, \
+      { CR_PRINDENT                 , ROUTINGKEY     , 0004 }, \
+      { CR_NXINDENT                 , ROUTINGKEY     , 0040 }, \
+      { CR_BEGBLKOFFSET             , ROUTINGKEY     , 0100 }, \
+      { CR_ENDBLKOFFSET             , ROUTINGKEY     , 0200 }, \
+      { CMD_PASTE                   , NOKEY          , 0300 }
+	
+
+/* modifiers for switches */
+#define MOD_SWITCH \
      OFFS_SWITCH + 1, \
      OFFS_SWITCH + 2, \
      OFFS_SWITCH + 7, \
      OFFS_SWITCH + 8
 
-#define CMD_STAT_2 \
-      { CMD_HELP,        OFFS_STAT +  1, 0 }, \
-      { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 }
-
-/* commands for 13 status keys */
-#define CMD_STAT_13 \
-      { CMD_HELP,        OFFS_STAT +  1, 0 }, \
-      { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 }, \
-      { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0 }, \
-      { CMD_BACK,        OFFS_STAT +  4, 0 }, \
-      { CMD_CSRTRK,      OFFS_STAT +  5, 0 }, \
-      { CMD_DISPMD,      OFFS_STAT +  6, 0 }, \
-      { CMD_INFO,        OFFS_STAT +  7, 0 }, \
-      { CMD_FREEZE,      OFFS_STAT +  8, 0 }, \
-      { CMD_PREFMENU,    OFFS_STAT +  9, 0 }, \
-      { CMD_PREFSAVE,    OFFS_STAT + 10, 0 }, \
-      { CMD_CSRVIS,      OFFS_STAT + 11, 0 }, \
-      { CMD_CSRSIZE,     OFFS_STAT + 12, 0 }, \
-      { CMD_PASTE,       OFFS_STAT + 13, 0 }
-
-/* easy bar + switches */
+/* commands for easy bar + switches */
 #define CMD_EASY \
      { CMD_LNUP,    OFFS_EASY + EASY_UP, 0 },  \
      { CMD_TOP,     OFFS_EASY + EASY_UP2, 0 }, \
@@ -161,102 +229,121 @@ typedef struct {
      { CMD_BOT,     OFFS_EASY + EASY_DO2, 0 }, \
      { CMD_PRDIFLN, OFFS_EASY + EASY_LE, 0 },  \
      { CMD_NXDIFLN, OFFS_EASY + EASY_RI, 0 },  \
-     { CMD_HOME,    OFFS_EASY + EASY_LE2, 0 }, \
+     { CMD_BACK,    OFFS_EASY + EASY_LE2, 0 }, \
      { CMD_HOME,    OFFS_EASY + EASY_RI2, 0 }, \
      { CMD_PASTE,   OFFS_SWITCH + 6, 0 }, \
-     { CR_BEGBLKOFFSET, ROUTINGKEY, 4 },     \
+     { CR_BEGBLKOFFSET, ROUTINGKEY, 4 },  \
      { CR_ENDBLKOFFSET, ROUTINGKEY, 8 },  \
-     { CR_ROUTEOFFSET,   ROUTINGKEY, 0 }
+     { CR_ROUTEOFFSET,  ROUTINGKEY, 0 }
 
-/* 13 status cells: info to show */
+
+/* what to show for 2 status cells */
+#define SHOW_STAT_2 \
+      OFFS_NUMBER + STAT_brlrow, \
+      OFFS_NUMBER + STAT_csrrow
+
+/* commands for 2 status keys */
+#define CMD_STAT_2 \
+      { CMD_HELP,       OFFS_STAT + 1, 0 }, \
+      { CMD_RESTARTBRL, OFFS_STAT + 2, 0 }
+
+
+/* what to show for 4 status cells */
+#define SHOW_STAT_4 \
+      OFFS_HORIZ + STAT_brlrow, \
+      OFFS_HORIZ + STAT_csrrow, \
+      OFFS_HORIZ + STAT_csrcol, \
+      OFFS_FLAG  + STAT_dispmode
+
+/* commands for 4 status keys */
+#define CMD_STAT_4 \
+      { CMD_HELP       , OFFS_STAT + 1, 0 }, \
+      { CMD_RESTARTBRL , OFFS_STAT + 2, 0 }, \
+      { CMD_CSRJMP_VERT, OFFS_STAT + 3, 0 }, \
+      { CMD_DISPMD     , OFFS_STAT + 4, 0 }
+
+
+/* what to show for 13 status cells */
 #define SHOW_STAT_13 \
-      OFFS_HORIZ + STAT_current, \
-      STAT_empty,                \
-      OFFS_HORIZ + STAT_row,     \
-      OFFS_HORIZ + STAT_col,     \
-      OFFS_FLAG + STAT_tracking, \
-      OFFS_FLAG + STAT_dispmode, \
-      STAT_empty,                \
-      OFFS_FLAG + STAT_frozen,   \
-      STAT_empty,                \
-      STAT_empty,                \
-      OFFS_FLAG + STAT_visible,  \
-      OFFS_FLAG + STAT_size,     \
-      STAT_empty               
+      OFFS_HORIZ + STAT_brlrow,   \
+      STAT_empty,                 \
+      OFFS_HORIZ + STAT_csrrow,   \
+      OFFS_HORIZ + STAT_csrcol,   \
+      OFFS_FLAG  + STAT_tracking, \
+      OFFS_FLAG  + STAT_dispmode, \
+      STAT_empty,                 \
+      OFFS_FLAG  + STAT_frozen,   \
+      STAT_empty,                 \
+      STAT_empty,                 \
+      OFFS_FLAG  + STAT_visible,  \
+      OFFS_FLAG  + STAT_size,     \
+      STAT_empty
 
-/* 22 status cells: info to show */
+/* commands for 13 status keys */
+#define CMD_STAT_13 \
+              { CMD_HELP       , OFFS_STAT +  1, 0   }, \
+              { CMD_RESTARTBRL , OFFS_STAT +  2, 0   }, \
+              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0   }, \
+              { CMD_BACK       , OFFS_STAT +  4, 0   }, \
+      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  5, 2, 1), \
+      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  6, 2, 1), \
+              { CMD_INFO       , OFFS_STAT +  7, 0   }, \
+      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  8, 2, 1), \
+              { CMD_PREFMENU   , OFFS_STAT +  9, 0   }, \
+              { CMD_PREFSAVE   , OFFS_STAT + 10, 0   }, \
+      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 11, 2, 1), \
+      CHGONOFF( CMD_CSRSIZE    , OFFS_STAT + 12, 2, 1), \
+              { CMD_PASTE      , OFFS_STAT + 13, 0   }
+
+
+/* what to show for 22 status cells */
 #define SHOW_STAT_22 \
-      OFFS_HORIZ + STAT_current, \
-      STAT_empty,                \
-      OFFS_HORIZ + STAT_row,     \
-      OFFS_HORIZ + STAT_col,     \
-      STAT_empty,                \
-      OFFS_FLAG + STAT_tracking, \
-      OFFS_FLAG + STAT_dispmode, \
-      STAT_empty,                \
-      OFFS_FLAG + STAT_frozen,   \
-      STAT_empty,                \
-      STAT_empty,                \
-      STAT_empty,                \
-      OFFS_FLAG + STAT_visible,  \
-      OFFS_FLAG + STAT_size,     \
-      OFFS_FLAG + STAT_blink,    \
-      OFFS_FLAG + STAT_capitalblink,   \
-      OFFS_FLAG + STAT_dots,     \
-      OFFS_FLAG + STAT_sound,    \
-      OFFS_FLAG + STAT_skip,     \
-      OFFS_FLAG + STAT_underline, \
-      OFFS_FLAG + STAT_blinkattr, 
+      OFFS_HORIZ + STAT_brlrow      , \
+      STAT_empty                    , \
+      OFFS_HORIZ + STAT_csrrow      , \
+      OFFS_HORIZ + STAT_csrcol      , \
+      STAT_empty                    , \
+      OFFS_FLAG  + STAT_tracking    , \
+      OFFS_FLAG  + STAT_dispmode    , \
+      STAT_empty                    , \
+      OFFS_FLAG  + STAT_frozen      , \
+      STAT_empty                    , \
+      STAT_empty                    , \
+      STAT_empty                    , \
+      OFFS_FLAG  + STAT_visible     , \
+      OFFS_FLAG  + STAT_size        , \
+      OFFS_FLAG  + STAT_blink       , \
+      OFFS_FLAG  + STAT_capitalblink, \
+      OFFS_FLAG  + STAT_dots        , \
+      OFFS_FLAG  + STAT_sound       , \
+      OFFS_FLAG  + STAT_skip        , \
+      OFFS_FLAG  + STAT_underline   , \
+      OFFS_FLAG  + STAT_blinkattr   , \
+      OFFS_FLAG  + STAT_input       ,
 
-	/* commands for 13 front keys */
-#define MOD_FRONT_13 \
-     OFFS_FRONT + 1, \
-     OFFS_FRONT + 13
-
-#define CMD_FRONT_13 \
-      { CR_BEGBLKOFFSET, ROUTINGKEY, 1 },   \
-      { CMD_ATTRUP,   OFFS_FRONT +  2, 0 }, \
-      { CMD_WINUP,    OFFS_FRONT +  3, 0 }, \
-      { CMD_PRDIFLN,  OFFS_FRONT +  4, 0 }, \
-      { CMD_LNUP,     OFFS_FRONT +  5, 0 }, \
-      { CMD_TOP,      OFFS_FRONT +  6, 0 }, \
-      { CMD_HOME,     OFFS_FRONT +  7, 0 }, \
-      { CMD_BOT,      OFFS_FRONT +  8, 0 }, \
-      { CMD_LNDN,     OFFS_FRONT +  9, 0 }, \
-      { CMD_NXDIFLN,  OFFS_FRONT + 10, 0 }, \
-      { CMD_WINDN,    OFFS_FRONT + 11, 0 }, \
-      { CMD_ATTRDN,   OFFS_FRONT + 12, 0 }, \
-      { CMD_PASTE, NOKEY, 3 }, \
-      { CR_ENDBLKOFFSET, ROUTINGKEY, 2 },   \
-      { CR_ROUTEOFFSET,  ROUTINGKEY, 0 }
-	
-	/* commands for 22 status keys */
+/* commands for 22 status keys */
 #define CMD_STAT_22 \
-      { CMD_HELP,        OFFS_STAT +  1, 0 }, \
-      { CMD_RESTARTBRL,  OFFS_STAT +  2, 0 }, \
-      { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0 }, \
-      { CMD_BACK,        OFFS_STAT +  4, 0 }, \
-                                              \
-      { CMD_CSRTRK,      OFFS_STAT +  6, 0 }, \
-      { CMD_DISPMD,      OFFS_STAT +  7, 0 }, \
-      { CMD_INFO,        OFFS_STAT +  8, 0 }, \
-      { CMD_FREEZE,      OFFS_STAT +  9, 0 }, \
-                                              \
-      { CMD_PREFMENU,    OFFS_STAT + 10, 0 }, \
-      { CMD_PREFSAVE,    OFFS_STAT + 11, 0 }, \
-      { CMD_PREFLOAD,    OFFS_STAT + 12, 0 }, \
-      { CMD_CSRVIS,      OFFS_STAT + 13, 0 }, \
-      { CMD_CSRSIZE,     OFFS_STAT + 14, 0 }, \
-                                              \
-      { CMD_CSRBLINK,    OFFS_STAT + 15, 0 }, \
-      { CMD_CAPBLINK,    OFFS_STAT + 16, 0 }, \
-      { CMD_SIXDOTS,     OFFS_STAT + 17, 0 }, \
-      { CMD_SND,         OFFS_STAT + 18, 0 }, \
-      { CMD_SKPIDLNS,    OFFS_STAT + 19, 0 }, \
-                                              \
-      { CMD_ATTRVIS,     OFFS_STAT + 20, 0 }, \
-      { CMD_ATTRBLINK,   OFFS_STAT + 21, 0 }, \
-      { CMD_PASTE,       OFFS_STAT + 22, 0 }
+              { CMD_HELP       , OFFS_STAT +  1, 0000       }, \
+              { CMD_RESTARTBRL , OFFS_STAT +  2, 0000       }, \
+              { CMD_CSRJMP_VERT, OFFS_STAT +  3, 0000       }, \
+              { CMD_BACK       , OFFS_STAT +  4, 0000       }, \
+      CHGONOFF( CMD_CSRTRK     , OFFS_STAT +  6, 0200, 0100 ), \
+      CHGONOFF( CMD_DISPMD     , OFFS_STAT +  7, 0200, 0100 ), \
+              { CMD_INFO       , OFFS_STAT +  8, 0000       }, \
+      CHGONOFF( CMD_FREEZE     , OFFS_STAT +  9, 0200, 0100 ), \
+              { CMD_PREFMENU   , OFFS_STAT + 10, 0000       }, \
+              { CMD_PREFSAVE   , OFFS_STAT + 11, 0000       }, \
+              { CMD_PREFLOAD   , OFFS_STAT + 12, 0000       }, \
+      CHGONOFF( CMD_CSRVIS     , OFFS_STAT + 13, 0200, 0100 ), \
+      CHGONOFF( CMD_CSRSIZE    , OFFS_STAT + 14, 0200, 0100 ), \
+      CHGONOFF( CMD_CSRBLINK   , OFFS_STAT + 15, 0200, 0100 ), \
+      CHGONOFF( CMD_CAPBLINK   , OFFS_STAT + 16, 0200, 0100 ), \
+      CHGONOFF( CMD_SIXDOTS    , OFFS_STAT + 17, 0200, 0100 ), \
+      CHGONOFF( CMD_SND        , OFFS_STAT + 18, 0200, 0100 ), \
+      CHGONOFF( CMD_SKPIDLNS   , OFFS_STAT + 19, 0200, 0100 ), \
+      CHGONOFF( CMD_ATTRVIS    , OFFS_STAT + 20, 0200, 0100 ), \
+      CHGONOFF( CMD_ATTRBLINK  , OFFS_STAT + 21, 0200, 0100 ), \
+      CHGONOFF( CMD_INPUTMODE  , OFFS_STAT + 22, 0200, 0100 )
 
 
 static one_terminal pm_terminals[] =
@@ -325,7 +412,7 @@ static one_terminal pm_terminals[] =
     22,				/* number of status cells */
     13,				/* number of frontkeys */
     0,				/* terminal has an easy bar */
-    { /* 22 */			/* status cells: info to show */
+    {
       SHOW_STAT_22
     },
     {				/* modifiers */
@@ -345,17 +432,15 @@ static one_terminal pm_terminals[] =
     4,				/* number of status cells */
     9,				/* number of frontkeys */
     0,				/* terminal has an easy bar */
-    { /* 4 */			/* status cells: info to show */
-      OFFS_HORIZ + STAT_current,
-      OFFS_HORIZ + STAT_row,
-      OFFS_HORIZ + STAT_col,
-      OFFS_FLAG + STAT_dispmode,
+    {
+      SHOW_STAT_4
     },
     {				/* modifiers */
       MOD_FRONT_9
     },
     {				/* commands + keys */
-      CMD_FRONT_9
+      CMD_FRONT_9,
+      CMD_STAT_4
     },
   },
 
@@ -367,7 +452,7 @@ static one_terminal pm_terminals[] =
     13,				/* number of status cells */
     0,				/* number of frontkeys */
     1,				/* terminal has an easy bar */
-    { /* 13 */			
+    {
       SHOW_STAT_13
     },
     {				/* modifiers */
@@ -398,6 +483,7 @@ static one_terminal pm_terminals[] =
       CMD_EASY
     },
   },
+
   {
     66,				/* identity */
     "BrailleX EL-80",		/* name of terminal */
@@ -407,8 +493,7 @@ static one_terminal pm_terminals[] =
     0,				/* number of frontkeys */
     1,				/* terminal has an easy bar */
     {				/* status cells: info to show */
-      OFFS_NUMBER + STAT_current,
-      OFFS_NUMBER + STAT_row,
+      SHOW_STAT_2
     },
     {				/* modifiers */
       MOD_SWITCH

@@ -55,11 +55,11 @@
 
 typedef enum {
    PARM_CONFIGFILE,
+   PARM_DEBUGKEYS,
    PARM_DEBUGREADS,
-   PARM_DEBUGWRITES,
-   PARM_DEBUGMODIFIERS
+   PARM_DEBUGWRITES
 } DriverParameter;
-#define BRLPARMS "configfile", "debugreads", "debugwrites", "debugmodifiers"
+#define BRLPARMS "configfile", "debugkeys", "debugreads", "debugwrites"
 #include "../brl_driver.h"
 
 #ifdef READ_CONFIG
@@ -67,7 +67,7 @@ typedef enum {
 static void read_config(char *path);
 int yyerror (char* s)  /* Called by yyparse on error */
 {
-  LogPrint(LOG_CRIT, "Error: Zeile %d: %s", linenumber, s);
+  LogPrint(LOG_CRIT, "Error: line %d: %s", linenumber, s);
   exit(99);
 }
 #else
@@ -125,9 +125,9 @@ static unsigned char change_bits[] = {
 };
 
 static int brl_fd = -1;			/* file descriptor for Braille display */
-static unsigned int dbgrd = 0;
-static unsigned int dbgwr = 0;
-static unsigned int dbgmd = 0;
+static unsigned int debug_keys = 0;
+static unsigned int debug_reads = 0;
+static unsigned int debug_writes = 0;
 static struct termios oldtio;		/* old terminal settings */
 
 static unsigned char prevline[PMSC] = "";
@@ -318,9 +318,9 @@ try_init(brldim *brl, const char *dev, unsigned int baud)
 static void 
 initbrl (char **parameters, brldim *brl, const char *dev)
 {
-  validateYesNo(&dbgrd, "debug reads flag", parameters[PARM_DEBUGREADS]);
-  validateYesNo(&dbgwr, "debug writes flag", parameters[PARM_DEBUGWRITES]);
-  validateYesNo(&dbgmd, "debug modifiers flag", parameters[PARM_DEBUGMODIFIERS]);
+  validateYesNo(&debug_keys, "debug modifiers flag", parameters[PARM_DEBUGKEYS]);
+  validateYesNo(&debug_reads, "debug reads flag", parameters[PARM_DEBUGREADS]);
+  validateYesNo(&debug_writes, "debug writes flag", parameters[PARM_DEBUGWRITES]);
 
   /* read the config file for individual configurations */
 #ifdef READ_CONFIG
@@ -415,30 +415,47 @@ writebrlstat(const unsigned char* s, int size)
    }
 }
 
+static int input_mode = 0;
 static void
 setbrlstat(const unsigned char* s)
 {
-  int i;
-  unsigned char statcells[PMSC] = { 0 };
+  if (debug_writes)
+    LogPrint(LOG_DEBUG, "setbrlstat %d", curr_stats);
 
-  LogPrint(LOG_DEBUG,"setbrlstat %d", curr_stats);
+  if (curr_stats) {
+    unsigned char cells[curr_stats];
+    if (s[FirstStatusCell] == FSC_GENERIC) {
+      int i;
 
-  if (curr_stats==0)
-    return;
-  for (i=0; i < curr_stats; i++) {
-    int code = the_terminal->statshow[i];
-    if (code == STAT_empty)
-      statcells[i] = 0;
-    else if (code >= OFFS_NUMBER)
-      statcells [i] = change_bits[portrait_number(s[code-OFFS_NUMBER])];
-    else if (code >= OFFS_FLAG)
-      statcells[i] = change_bits[seascape_flag(i+1, s[code-OFFS_FLAG])];
-    else if (code >= OFFS_HORIZ)
-      statcells [i] = change_bits[seascape_number(s[code-OFFS_HORIZ])];
-    else
-      statcells [i] = change_bits[s[code]];
+      unsigned char values[StatusCellCount];
+      memcpy(values, s, sizeof(values));
+      values[STAT_input] = input_mode;
+
+      for (i=0; i < curr_stats; i++) {
+	int code = the_terminal->statshow[i];
+	if (code == STAT_empty)
+	  cells[i] = 0;
+	else if (code >= OFFS_NUMBER)
+	  cells[i] = change_bits[portrait_number(values[code-OFFS_NUMBER])];
+	else if (code >= OFFS_FLAG)
+	  cells[i] = change_bits[seascape_flag(i+1, values[code-OFFS_FLAG])];
+	else if (code >= OFFS_HORIZ)
+	  cells[i] = change_bits[seascape_number(values[code-OFFS_HORIZ])];
+	else
+	  cells[i] = change_bits[values[code]];
+      }
+    } else {
+      int i = 0;
+      while (i < curr_stats) {
+	unsigned char dots = s[i];
+	if (!dots) break;
+        cells[i++] = change_bits[dots];
+      }
+      while (i < curr_stats)
+        cells[i++] = change_bits[0];
+    }
+    writebrlstat(cells, curr_stats);
   }
-  writebrlstat(statcells, curr_stats);
 }
 
 static void
@@ -446,7 +463,7 @@ writebrl (brldim *brl)
 {
   int i;
 
-  if (dbgwr) {
+  if (debug_writes) {
     char buf[curr_cols*2+1];
     char *ptr = buf;
     for (i=0; i<curr_cols; ++i) {
@@ -471,12 +488,18 @@ writebrl (brldim *brl)
 /* ------------------------------------------------------------ */
 
 static unsigned char pressed_modifiers = 0;
-static int saved_cmd = EOF;
+static int saved_command = EOF;
+static unsigned char input_dots = 0;
  
 /* found command - some actions to be done within the driver */
 static int
 handle_command(int cmd)
 {
+  if (cmd == CMD_INPUTMODE) {
+    // translate toggle -> ON/OFF
+    cmd |= input_mode? VAL_SWITCHOFF: VAL_SWITCHON;
+  }
+
   switch(cmd) {
   case CMD_RESTARTBRL:
     init_table();
@@ -484,9 +507,35 @@ handle_command(int cmd)
       write_to_braille(addr_status, curr_stats, prevline);
     write_to_braille(addr_display, curr_cols, prev);
     break;
+
+  case CMD_INPUTMODE | VAL_SWITCHON:
+    input_mode = 1;
+    input_dots = 0;
+    cmd = EOF;
+    if (debug_keys) {
+      LogPrint(LOG_DEBUG, "input mode on"); 
+    }
+    break;
+
+  case CMD_INPUTMODE | VAL_SWITCHOFF: {
+    static unsigned char mod_to_dot[] = {0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80};
+    unsigned char *dot = mod_to_dot;
+    int mod;
+    cmd = VAL_PASSDOTS;
+    for (mod=1; mod<0X100; ++dot, mod<<=1)
+      if (input_dots & mod)
+        cmd |= *dot;
+    input_dots = 0;
+    input_mode = 0;
+    if (debug_keys) {
+      LogPrint(LOG_DEBUG, "input mode off: %04x", cmd); 
+    }
+    break;
   }
 
-  saved_cmd = EOF;
+  }
+
+  saved_command = EOF;
   return cmd;
 }
 
@@ -495,62 +544,75 @@ handle_command(int cmd)
  * command bound to modifiers only are remembered on press 
  * and send on last modifier released
  */
- 
-/* handle modifier pressed */
-static int
-modifier_pressed(unsigned int bit)
+
+static void
+log_modifiers(void)
 {
-  int i;
+  if (debug_keys) {
+    LogPrint(LOG_DEBUG, "modifiers: %04x", pressed_modifiers);
+  }
+}
+
+/* handle modifier pressed - includes dots in input mode */
+static int
+modifier_pressed(int bit)
+{
   pressed_modifiers |= bit;
-  
-  for(i=0; i < CMDMAX; i++)
-    if ((the_terminal->cmds[i].modifiers == pressed_modifiers) &&
-        (the_terminal->cmds[i].keycode == NOKEY)) {
-      saved_cmd = the_terminal->cmds[i].code;
-      if (dbgmd) {
- 	LogPrint(LOG_DEBUG, "save cmd: %d", saved_cmd); 
-      }
-      break;
+  log_modifiers();
+
+  saved_command = EOF;
+  if (input_mode && !(pressed_modifiers & ~0XFF)) {
+    input_dots |= pressed_modifiers;
+    if (debug_keys) {
+      LogPrint(LOG_DEBUG, "input dots: %02x", input_dots); 
     }
+  } else {
+    int i;
+    input_dots = 0;
+    for(i=0; i < CMDMAX; i++)
+      if ((the_terminal->cmds[i].modifiers == pressed_modifiers) &&
+	  (the_terminal->cmds[i].keycode == NOKEY)) {
+	saved_command = the_terminal->cmds[i].code;
+	LogPrint(LOG_DEBUG, "saving cmd: %d", saved_command); 
+	break;
+      }
+  }
   return CMD_NOOP;
 }
  
 /* handle modifier release */
 static int
-modifier_released(unsigned int bit)
+modifier_released(int bit)
 {
-  pressed_modifiers &= ~(bit);
+  pressed_modifiers &= ~bit;
+  log_modifiers();
+
   if ( pressed_modifiers == 0 &&
-       saved_cmd != EOF ) {
-    if (dbgmd) {
-      LogPrint(LOG_DEBUG, "use saved cmd: %d", saved_cmd); 
+       saved_command != EOF ) {
+    if (debug_keys) {
+      LogPrint(LOG_DEBUG, "saved cmd: %d", saved_command); 
     }
-    return handle_command( saved_cmd );
+    return handle_command( saved_command );
   }
   return EOF;
 }
- 
+
 /* one key is pressed or released */
 static int
 handle_key(int code, int ispressed, int offsroute)
 {
   int i;
   int cmd;
+
   /* look for modfier keys */
   for(i=0; i < MODMAX; i++) 
     if( the_terminal->modifiers[i] == code) {
       /* found modifier: update bitfield */
-      /* pressed_modifiers ^= (1<<i);  
-         could cause trouble if we miss one event */
+      int bit = 1 << i;
       if (ispressed)
-        /* found modifier: update bitfield */
-	cmd = modifier_pressed(1u<<i);
+	cmd = modifier_pressed(bit);
       else
-	cmd = modifier_released(1u<<i);
-
-      if (dbgmd) {
-	LogPrint(LOG_DEBUG, "Modifiers: %02x", pressed_modifiers);
-      }
+	cmd = modifier_released(bit);
       return cmd;
     }
 
@@ -561,14 +623,14 @@ handle_key(int code, int ispressed, int offsroute)
     if ( the_terminal->cmds[i].keycode == code && 
 	 the_terminal->cmds[i].modifiers == pressed_modifiers)
       {
-	if (dbgmd)
+	if (debug_keys)
 	  LogPrint(LOG_DEBUG, "cmd: %d->%d (+%d)", 
 		   code, the_terminal->cmds[i].code, offsroute); 
 	return handle_command( the_terminal->cmds[i].code + offsroute );
       }
 
   /* no command found */
-  LogPrint(LOG_DEBUG, "cmd: %d mod = %02x ??", code, pressed_modifiers); 
+  LogPrint(LOG_DEBUG, "cmd: %d[%04x] ??", code, pressed_modifiers); 
   return CMD_NOOP;
 }
 
@@ -576,15 +638,14 @@ handle_key(int code, int ispressed, int offsroute)
 
 /* some makros */
 /* read byte */
-#define READ(OFFS) \
-  if (safe_read(brl_fd,buf+OFFS,1) != 1) \
-      return EOF;                   \
+#define READ(OFFS) { if (safe_read(brl_fd,buf+OFFS,1) != 1) return EOF; }
 
 static int 
 readbrl (DriverCommandContext cmds)
 {
   unsigned char buf [20];
-  int i, l, code, num, action;
+  int code, num, action;
+  unsigned int l, i;
   int error_handling;
 
   do {
@@ -593,7 +654,8 @@ readbrl (DriverCommandContext cmds)
     READ(0);
     if (buf[0] != cSTX)
         return CMD_ERR;
-    LogPrint(LOG_DEBUG,  "read: STX");
+    if (debug_reads)
+      LogPrint(LOG_DEBUG,  "read: STX");
 
     READ(1);
     if (buf[1] != cIdReceive) {
@@ -623,7 +685,7 @@ readbrl (DriverCommandContext cmds)
   for(i = 6; i < l; i++)
     READ(i);			/* Data */
   
-  if (dbgrd) {
+  if (debug_reads) {
     char dbg_buffer[256];
     sprintf(dbg_buffer, "read: ");
     for(i=0; i<l; i++)

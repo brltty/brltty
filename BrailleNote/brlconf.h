@@ -21,12 +21,6 @@
  * Edit as necessary for your system.
  */
 
-#define BRLNAME "BrailleNote"
-#define BRLDRIVER "bn"
-
-/* Define the preferred/default status cells mode. */
-#define PREFSTYLE ST_None
-
 // The braille dots.
 #define BND_0 0000
 #define BND_1 0001

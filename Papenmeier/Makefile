@@ -44,28 +44,18 @@ read_config.o: read_config.c config.tab.c cmd.h hlp.h brl-cfg.h
 read_config: read_config.o
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ $<
 
-serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c
-	$(CC) $(CFLAGS) serial.c -o serial -lncurses 
+serial: serial.c ../brl.h brl.c ../text.auto.h ../misc.c config.tab.c brl-cfg.h cmd.h hlp.h
+	$(HOSTCC) $(CFLAGS) serial.c -o serial -lncurses 
 
-cmd.h: $(BRL_H) Makefile
-	awk '\
-	/^ *CMD_/ { \
-		print "{ \""$$1"\", KEYCODE, " $$1 "},";\
-		print "{ \""substr($$1,5)"\", KEYCODE, " $$1 "},";} \
-	/#define[ \t]*CR_/ { \
-		print "{ \""$$2"\", KEYCODE, " $$2 "},";\
-		print "{ \""substr($$2,4)"\", KEYCODE, " $$2 "},";} \
-	' < $(BRL_H) > cmd.h
+simulate: simulate.c ../brl.h brl.c ../text.auto.h ../misc.c config.tab.c brl-cfg.h cmd.h hlp.h
+	$(HOSTCC) $(CFLAGS) simulate.c -o simulate 
 
-hlp.h:  $(BRL_H) Makefile
-	awk '/^ *CMD_/  { OFS="";if (x=match($$0,"\/.*\/")) \
-	  print "{ ",$$1,", \"", substr($$0, RSTART+3, RLENGTH-6),"\" },"; \
-	} \
-	/#define[ \t]* STAT_/  { OFS="";if (x=match($$0,"\/.*\/")) \
-	  print "{ OFFS_STAT +",$$2,", \"", substr($$0, RSTART+3, RLENGTH-6),"\" },";} \
-	/#define[ \t]*CR_/  { OFS="";if (x=match($$0,"\/.*\/")) \
-	  print "{ ",$$2,", \"", substr($$0, RSTART+3, RLENGTH-6),"\" },";} \
-        '  < $(BRL_H) > hlp.h
+
+cmd.h: $(BRL_H) cmd.awk
+	awk <$(BRL_H) >cmd.h -f cmd.awk
+
+hlp.h: $(BRL_H) hlp.awk
+	awk <$(BRL_H) >hlp.h -f hlp.awk
 
 ifneq (,$(findstring s,$(MAKEFLAGS)))
    READ_CONFIG_D = d
@@ -85,7 +75,7 @@ braille-help: brltty.pm.conf
 	cp brltty.pm.conf $(HELPDIR)/
 
 distclean:
-	rm -f serial read_config dump-codes \
+	rm -f serial simulate read_config dump-codes \
 		config.tab.c config.output cmd.h hlp.h \
 		brltty-$(DRIVER_CODE)*.hlp brltty.pm.conf \
 		*.good *.diff *.out

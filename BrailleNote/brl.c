@@ -45,6 +45,9 @@ static int displayTerminal;
 #include "../message.h"
 #include "brlconf.h"
 
+#define BRLNAME "BrailleNote"
+#define BRLDRIVER "bn"
+#define PREFSTYLE ST_None
 typedef enum {
    PARM_STATUSCELLS
 } DriverParameter;
@@ -149,8 +152,14 @@ const unsigned char inputTable[] = {
 };
 
 static void
-refreshCells (void)
-{
+clearbrl (brldim *brl) {
+   brl->x = -1;
+   brl->y = -1;
+   brl->disp = NULL;
+}
+
+static void
+refreshCells (void) {
    unsigned char *output = outputBuffer;
    int i;
 
@@ -169,8 +178,7 @@ refreshCells (void)
 }
 
 static void
-writePrompt(const unsigned char *prompt)
-{
+writePrompt (const unsigned char *prompt) {
    unsigned int length = strlen(prompt);
    unsigned int index = 0;
    if (length > dataCells) {
@@ -187,8 +195,7 @@ writePrompt(const unsigned char *prompt)
 }
 
 static unsigned char
-getByte(void)
-{
+getByte (void) {
    unsigned char byte;
    fd_set mask;
    FD_ZERO(&mask);
@@ -199,8 +206,7 @@ getByte(void)
 }
 
 static unsigned char
-getCharacter(void)
-{
+getCharacter (void) {
    for (;;) {
       switch (getByte()) {
          default:
@@ -237,8 +243,7 @@ getCharacter(void)
 }
 
 static void
-openConsole(void)
-{
+openConsole (void) {
    if (consoleDescriptor == -1) {
       const char *consoleDevice = "/dev/console";
       consoleDescriptor = open(consoleDevice, O_RDONLY);
@@ -246,8 +251,7 @@ openConsole(void)
 }
 
 static int
-getVirtualTerminal(void)
-{
+getVirtualTerminal (void) {
    int vt = -1;
 #ifdef VT_GETSTATE
    openConsole();
@@ -262,8 +266,7 @@ getVirtualTerminal(void)
 }
 
 static void
-setVirtualTerminal(int vt)
-{
+setVirtualTerminal (int vt) {
 #ifdef VT_ACTIVATE
    openConsole();
    if (consoleDescriptor != -1) {
@@ -282,8 +285,7 @@ setVirtualTerminal(int vt)
 }
 
 static void
-openVisualDisplay(void)
-{
+openVisualDisplay (void) {
 #ifdef VT_OPENQRY
    if (displayDescriptor == -1) {
       openConsole();
@@ -304,8 +306,7 @@ openVisualDisplay(void)
 }
 
 static void
-closeVisualDisplay(int vt)
-{
+closeVisualDisplay (int vt) {
    if (displayDescriptor != -1) {
       if (getVirtualTerminal() == displayTerminal) {
          setVirtualTerminal(vt);
@@ -317,16 +318,14 @@ closeVisualDisplay(int vt)
 }
 
 static void
-writeVisualDisplay(unsigned char c)
-{
+writeVisualDisplay (unsigned char c) {
    if (displayDescriptor != -1) {
       write(displayDescriptor, &c, 1);
    }
 }
 
 static int
-visualDisplay(unsigned char character, DriverCommandContext cmds)
-{
+visualDisplay (unsigned char character, DriverCommandContext cmds) {
    int vt = getVirtualTerminal();
    const unsigned char end[] = {0X1B, 0};
    unsigned int state = 0;
@@ -359,14 +358,13 @@ visualDisplay(unsigned char character, DriverCommandContext cmds)
 }
 
 static void
-identbrl (void)
-{
+identbrl (void) {
    LogPrint(LOG_NOTICE, "BrailleNote Driver, version 1.0");
    LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
 
-static void adjustStatusCells (brldim *brl, const char *parameter)
-{
+static void
+adjustStatusCells (brldim *brl, const char *parameter) {
    if (*parameter) {
       const int minimum = 0;
       const int maximum = MIN(MAXNSTATCELLS, brl->x-1);
@@ -380,8 +378,7 @@ static void adjustStatusCells (brldim *brl, const char *parameter)
 }
 
 static void
-initbrl (char **parameters, brldim *brl, const char *device)
-{
+initbrl (char **parameters, brldim *brl, const char *device) {
    if ((fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
       if (tcgetattr(fileDescriptor, &oldSettings) != -1) {
 	 memset(&newSettings, 0, sizeof(newSettings));
@@ -453,23 +450,21 @@ initbrl (char **parameters, brldim *brl, const char *device)
 	 LogError("BrailleNote attribute query");
       }
       close(fileDescriptor);
+      fileDescriptor = -1;
    } else {
       LogError("BrailleNote open");
    }
-   brl->x = -1;
-   brl->y = -1;
+   clearbrl(brl);
 }
 
 static void
-closebrl (brldim *brl)
-{
+closebrl (brldim *brl) {
    tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
-
    close(fileDescriptor);
    fileDescriptor = -1;
 
    free(brl->disp);
-   brl->disp = NULL;
+   clearbrl(brl);
 
    free(outputBuffer);
    outputBuffer = NULL;
@@ -479,8 +474,7 @@ closebrl (brldim *brl)
 }
 
 static void
-writebrl (brldim *brl)
-{
+writebrl (brldim *brl) {
    if (memcmp(dataArea, brl->disp, dataCells) != 0) {
       memcpy(dataArea, brl->disp, dataCells);
       refreshCells();
@@ -488,8 +482,7 @@ writebrl (brldim *brl)
 }
 
 static void
-setbrlstat (const unsigned char *status)
-{
+setbrlstat (const unsigned char *status) {
    if (memcmp(statusArea, status, statusCells) != 0) {
       memcpy(statusArea, status, statusCells);
       /* refreshCells();
@@ -499,8 +492,7 @@ setbrlstat (const unsigned char *status)
 }
 
 static int
-getDecimalInteger(unsigned int *integer, unsigned int width, const char *description)
-{
+getDecimalInteger (unsigned int *integer, unsigned int width, const char *description) {
    char buffer[width + 1];
    memset(buffer, '0', width);
    buffer[width] = 0;
@@ -535,8 +527,7 @@ getDecimalInteger(unsigned int *integer, unsigned int width, const char *descrip
 }
 
 static int
-getHexadecimalCharacter(unsigned char *character)
-{
+getHexadecimalCharacter (unsigned char *character) {
    *character = 0X00;
    for (;;) {
       unsigned char digit;
@@ -604,18 +595,17 @@ getHexadecimalCharacter(unsigned char *character)
 }
 
 static int
-getFunctionKey(void)
-{
+getFunctionKey (void) {
    unsigned int keyNumber;
    if (getDecimalInteger(&keyNumber, 2, "function key")) {
-      return VAL_PASSKEY + VPK_FUNCTION + keyNumber;
+      if (!keyNumber) keyNumber = 0X100 - VPK_FUNCTION;
+      return VAL_PASSKEY + VPK_FUNCTION + (keyNumber - 1);
    }
    return EOF;
 }
 
 static int
-interpretNavigation(unsigned char dots, DriverCommandContext cmds)
-{
+interpretNavigation (unsigned char dots, DriverCommandContext cmds) {
    switch (dots) {
       default:
          break;
@@ -682,8 +672,7 @@ interpretNavigation(unsigned char dots, DriverCommandContext cmds)
 }
 
 static int
-interpretCharacter(unsigned char dots, DriverCommandContext cmds)
-{
+interpretCharacter (unsigned char dots, DriverCommandContext cmds) {
    int mask = 0X00;
    if (cmds != CMDS_SCREEN) {
       return interpretNavigation(dots, cmds);
@@ -707,8 +696,7 @@ interpretCharacter(unsigned char dots, DriverCommandContext cmds)
 }
 
 static int
-interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
-{
+interpretSpaceChord (unsigned char dots, DriverCommandContext cmds) {
    switch (dots) {
       default:
       // These are overridden by the Braille Note itself.
@@ -816,8 +804,7 @@ interpretSpaceChord(unsigned char dots, DriverCommandContext cmds)
 }
 
 static int
-interpretBackspaceChord(unsigned char dots, DriverCommandContext cmds)
-{
+interpretBackspaceChord (unsigned char dots, DriverCommandContext cmds) {
    switch (dots & 0X3F) {
       default:
 	 break;
@@ -853,8 +840,7 @@ interpretBackspaceChord(unsigned char dots, DriverCommandContext cmds)
 }
 
 static int
-interpretEnterChord(unsigned char dots, DriverCommandContext cmds)
-{
+interpretEnterChord (unsigned char dots, DriverCommandContext cmds) {
    switch (dots) {
       default:
       // These are overridden by the Braille Note itself.
@@ -889,8 +875,7 @@ interpretEnterChord(unsigned char dots, DriverCommandContext cmds)
 }
 
 static int
-interpretThumbKeys(unsigned char keys, DriverCommandContext cmds)
-{
+interpretThumbKeys (unsigned char keys, DriverCommandContext cmds) {
    switch (keys) {
       default:
 	 break;
@@ -919,14 +904,12 @@ interpretThumbKeys(unsigned char keys, DriverCommandContext cmds)
 }
 
 static int
-interpretRoutingKey(unsigned char key, DriverCommandContext cmds)
-{
+interpretRoutingKey (unsigned char key, DriverCommandContext cmds) {
    return currentRoutingOperation + key;
 }
 
 static int
-readbrl (DriverCommandContext cmds)
-{
+readbrl (DriverCommandContext cmds) {
    unsigned char character;
    int count = read(fileDescriptor, &character, 1);
    int (*handler)(unsigned char, DriverCommandContext);

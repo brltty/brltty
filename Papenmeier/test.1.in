@@ -16,7 +16,8 @@ status 3 = flag frz
 status 4 = flag blink
 
 modifier = status 1
-modifier = front 3
+modifier = front 1
+modifier = front 13
 
 # CMD_SIXDOTS '6'
 SIXDOTS = status 1 
@@ -28,8 +29,18 @@ WINUP front 1
 CMD_LNUP = f 2
 
 HWINLT = f 3 and status 1
-CMD_HOME = front 4 front 3
-INFO f 5 f 3 s 1
+CMD_HOME = front 4 front 13
+INFO f 5 f 13 s 1
 
-TOP = front 3 and routing
-SAY =  status 1 and front 3
+TOP = routing and front 13
+SAY = status 1 and front 13
+#
+inputmode = status 22
+#
+inputmode on = status 22 and front 13
+#
+inputmode off = status 22
+#
+#
+BACKSPACE = front 5
+FUNCTION = routing

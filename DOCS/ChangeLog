@@ -1,7 +1,7 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
-   Resolved conflict between .dat and .conf both being calledf configuration files. (dm)
+   Resolve conflict between .dat and .conf both being calledf configuration files. (dm)
       Default file extension .dat becomes .prefs.
       CMD_CONFMENU -> CMD_PREFMENU
       CMD_SAVECONF -> CMD_PREFSAVE
@@ -17,27 +17,29 @@ Note: this file is in reversed chronological order (bottom to top).
       --speech becomes --speech-driver
       --speechparm becomes --speech-parameters
       --table becomes --text-table
-   normalized brltty.conf directives. (dm)
+   normalize brltty.conf directives. (dm)
       braille-configuration becomes preferences-file
       dot-translation becomes text-table
       speech-driverparm becomes speech-parameters
-   Added -e (--standard-error) option to log to standard error rather than via syslog. (dm,sd)
-   Added -f (--configuration-file=) option to specify default parameters file (brltty.conf). (dm)
+   Add -e (--standard-error) option to log to standard error rather than via syslog. (dm,sd)
+   Add -f (--configuration-file=) option to specify default parameters file (brltty.conf). (dm)
    Recognize level names (and abbreviations thereof) for -l (--log-level=) option. (dm)
       (emergency, alert, critical, error, warning, notice, information, debug)
-   Added -n (--no-daemon) option to make debugging easier and to permit invocation from inittab. (dm,sd)
-   Added -B (--braille-parameters=) option, and the braille-parameters brltty.conf directive. (dm)
-   Implemented user-settable attributes translation table. (dm)
+   Add -n (--no-daemon) option to make debugging easier and to permit invocation from inittab. (dm,sd)
+   Add -B (--braille-parameters=) option, and the braille-parameters brltty.conf directive. (dm)
+   Implement user-settable attributes translation table. (dm)
       Introduce short option -a.
       Introduce long option --attributes-table=.
       Introduce brltty.conf directive attributes-table.
-   Added -C (--cycle-delay=) option. (dm)
-   Added -M (--message-delay=) option. (dm)
-   Added -R (--read-delay=) option. (dm)
-   Added -P (--pid-file=) option. (dm)
-   Implemented generic driver parameters facility. (dm,sd)
-   BrailleNote driver added. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
-   HandyTech driver added. Andreas Gross <andi@andi-bika.de>
+   Add -C (--cycle-delay=) option. (dm)
+   Add -M (--message-delay=) option. (dm)
+   Add -R (--read-delay=) option. (dm)
+   Add -P (--pid-file=) option. (dm)
+   Implement generic driver parameters facility. (dm,sd)
+   Implement BrailleNote driver. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
+   Implement HandyTech driver. Andreas Gross <andi@andi-bika.de>
+   Implement LogText driver. (dm) with help from Hans Schou <chlor@schou.dk>
+   Implement Voyager driver. (sd) with help from Stephane Dalton <sdalton@videotron.ca>
    BrailleLite driver enhancements. (sd)
       Auto-detect 18 verses 40.
       Add DETECT_FOREVER option.
@@ -45,93 +47,115 @@ Note: this file is in reversed chronological order (bottom to top).
       Add bindings for search backward/forward.
       Add bindings for move to previous/next paragraph.
       Add bindings for switch to previous/next virtual terminal.
-      Changed binding for restart driver to a safer combination.
-      Added shortcut for one-digit repeat count.
-      Fixed bug causing internal cursor to go off display during g-chord with advance bar left.
-      Fixed k-chord to toggle off keyboard emulation.
-      Fixed day-one startup segfault bug.
-      Added baudrate parameter.
+      Change binding for restart driver to a safer combination.
+      Add shortcut for one-digit repeat count.
+      Fix bug causing internal cursor to go off display during g-chord with advance bar left.
+      Fix k-chord to toggle off keyboard emulation.
+      Fix day-one startup segfault bug.
+      Add baudrate parameter.
       Portability fixes.
    Papenmeier driver enhancements:
-      Remove special case code for routing keys. (ah)
-      Recognize keyword "routing" in configuration file. (ah)
+      Remove special-case code for routing keys. (ah)
+      Recognize key "routing" in configuration file. (ah)
       Allow routing keys to be bound to modifier keys. (ah)
+      Recognize toggle modifiers "on" and "off" in configuration file. (ah)
+      Add on/off capability to existing toggle key definitions. (ah)
       Allow command to be bound to just modifier keys. (ah)
+      Implement input mode and special key support. (ah,dm)
       Remove yacc noise from make. (dm,ah)
-      Cleaned up log messages. (dm)
+      Clean up log messages. (dm)
       Log display type even if unknown. (dm)
-      Fixed type 3 status key assignments: 5-8 -> 6-9. (dm)
-      Redefined type 3 front key 13 from cut_beg to cut_end. (dm)
-      Renamed environment variable BRLTTY_CONF to BRLTTY_PM_CONF. (dm)
+      For displays with an easy access bar: (dm)
+         Change left2 from HOME to BACK.
+      For displays with 9 front keys: (dm)
+         Change 1+3 from TOP to TOP_LEFT.
+         Change 1+7 from BOT to BOT_LEFT.
+         Move cut begin/end from 2/8 to 1/9.
+         Add paste as 1+9 for displays with less than 13 status cells.
+         Move half window left/right from 1+5/9+5 to 2/8.
+         Add more horizontal motion commands.
+      For displays with 13 front keys: (dm)
+         Define keys 1-4 and 10-13 as modifiers.
+         Define 1+13 as paste.
+         Add many more commands.
+      For displays with 22 status keys: (dm)
+         Fix key assignments: 5-8 -> 6-9.
+         Redefine 22 as input mode toggle.
+      Define status key commands for displays with 4 status cells. (dm)
+      Rename environment variable BRLTTY_CONF to BRLTTY_PM_CONF. (dm)
       Key releases no longer interrupt message waits. (dm)
       Remove conditional compiling for debugging. (dm)
-      Add driver parameters: configfile, debugreads, debugwrites, debugmodifiers. (dm)
+      Add driver parameters: configfile, debugreads, debugwrites, debugkeys. (dm)
    TSI driver enhancements. (sd)
-      Added bindings for go to beginning/end of current line.
-   Cleaned up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
+      Add bindings for go to beginning/end of current line.
+   Clean up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
    Version 1.0 of the EuroBraille driver. Yannick Plassiard <Yannick.Plassiard@free.fr>
-   MiniBraille delay after write fixed. (dm)
+   Fix MiniBraille delay after write. (dm)
    Vario driver can now be statically linked. (dm)
-   Added cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
-   Added identification output to visioBraille driver. (dm)
+   Add cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
+   Add identification output to VisioBraille driver. (dm)
+   Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
    Stop GenericSay from reannouncing BRLTTY version during cursor routing. (dm)
    Add command parameter to GenericSay driver. (dm)
-   Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
-   Add ViaVoice driver. (dm)
+   Implement ViaVoice driver. (dm)
    List translation tables in make file. (dm)
-   Cross-compile support added to make file. (sd,dm)
-   INSTALL_ROOT added to make file. (dm)
-   Cleaned up screen device creation in make file. (dm)
-   Configuration menu made more user-friendly. (dm,sd)
+   Add cross-compile support to make file. (sd,dm)
+   Add INSTALL_ROOT support to make file. (dm)
+   Add Danish text translation table. Hans Schou <chlor@schou.dk>
+   Add -c (--code-page=) option to tbl2txt. (dm)
+      Initial code and tables supplied by Hans Schou <chlor@schou.dk>.
+   Clean up screen device creation in make file. (dm)
+   Make preferences menu more user-friendly. (dm,sd)
       Choices are words rather than numbers.
       Only present relevant items.
-   Added support for tunes via sound card (/dev/dsp). (dm,np)
-   Added support for tunes via MIDI (/dev/sequencer). (dm)
-   Added support for tunes via AdLib/OPL3/SB-FM. (dm)
-   Replaced skip blank end-of-lines with configurable skip blank windows mode. (dm)
-   Implemented horizontal window scroll overlap. (dm)
+   Change left/right arrow in prefs menu from prev/next item to prev/next choice. (dm)
+   Add support for tunes via sound card (/dev/dsp). (dm,np)
+   Add support for tunes via MIDI (/dev/sequencer). (dm)
+   Add support for tunes via AdLib/OPL3/SB-FM. (dm)
+   Replace skip blank end-of-lines with configurable skip blank windows mode. (dm)
+   Implement horizontal window scroll overlap. (dm)
    Display message when sound is off for critical operations like freeze/unfreeze. (sd)
    Allow braille display to stick out to the right of the screen. (sd)
-   Added commands to switch to the next and previous virtual terminals. (sd)
+   Add commands to switch to the next and previous virtual terminals. (sd)
    Implement CMD_BACK (to go back after a cursor tracking motion). (dm)
-      Added to Alva driver. (np)
-      Added to BrailleLite driver. (sd)
-      Added to BrailleNote driver. (dm)
-      Added to Papenmeier driver. (dm)
-      Added to TSI driver. (sd)
+      Add to Alva driver. (np)
+      Add to BrailleLite driver. (sd)
+      Add to BrailleNote driver. (dm)
+      Add to Papenmeier driver. (dm)
+      Add to TSI driver. (sd)
    Implement CR_MSGATTRIB (message attributes of character at routing key). (dm)
-      Added to Alva driver. (np)
-      Added to BrailleLite driver. (sd)
-      Added to BrailleNote driver. (dm)
-      Added to TSI driver. (sd)
-   Maintain reverse text translation table for input from braille display. (dm,sd)
+      Add to Alva driver. (np)
+      Add to BrailleLite driver. (sd)
+      Add to BrailleNote driver. (dm)
+      Add to TSI driver. (sd)
+   Add reverse text translation table for input from braille display. (dm,sd)
    Get font data from kernel rather than guess at it by probing. (sd)
    Handle font change and screen size change. (sd)
    Search list of known screen device names (/dev/vcsa0 /dev/vcsa /dev/vcc/a)
       rather than just check for /dev/vcsa0. (dm)
    Don't use LOG_CONS option of syslog uhtil in the background. (dm)
-   Converted CMD_ from defines to enum. (dm)
+   Convert CMD_ from defines to enum. (dm)
       CombiBraille: tables.h converted to cmdtrans.h, argtrans removed.
-   Converted CMD_KEY_... commands to VAL_PASSKEY+VPK_... mechanism. (dm)
+   Convert CMD_KEY_... commands to VAL_PASSKEY+VPK_... mechanism. (dm)
       BrailleLite cmdtrans[] and blkey.cmd changed from unsigned char to int.
-   Renamed VAL_PASSTHRU to VAL_PASSCHAR. (dm)
-   Renamed VAL_BRLKEY to VAL_PASSDOTS. (dm)
+   Rename VAL_PASSTHRU to VAL_PASSCHAR. (dm)
+   Rename VAL_BRLKEY to VAL_PASSDOTS. (dm)
    Inform readbrl of the current command context. (dm)
    Remove TBL_CMD and TBL_ARG. (dm)
-   Log command line option errors to syslog. (dm)
+   Log command line syntax errors to syslog. (dm)
    Make message delay by default; add MSG_NODELAY flag. (sd)
    Close console file descriptor in switchvt. (dm)
    Fix problems with the skipping of blank windows and ends of liens. (sd)
    Change directory to right place if PREFIX is set. (dm)
    Disable speech tracking when CMD_SAY is used. (np)
-   Merged LogAndStderr into LohPrint. (dm)
-   Long help (-h) output lines now wrap cleanly. (dm)
-   Increased default message delay from 2 to 5 seconds. (dm)
+   Merge LogAndStderr into LohPrint. (dm)
+   Cleanly wrap long help (-h) output lines. (dm)
+   Increase default message delay from 2 to 5 seconds. (dm)
    Message delay is now interruptable by pressing key on braille display. (dm)
    Startup and exiting messages now fit within 18 characters. (dm,sd)
-   Added message to alert user to presence of startup errors. (dm)
+   Add message to alert user to presence of startup errors. (dm)
    Warn if a configuration file directive is specified more than once. (dm)
-   Added more memory allocation and I/O error checks. (dm)
+   Add more memory allocation and I/O error checks. (dm)
    Control-C now usable during startup and driver restart. (dm,sd)
    Audit all braille and speech drivers. (dm)
       Remove printing via stdio.

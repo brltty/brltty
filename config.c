@@ -675,6 +675,8 @@ startBrailleDriver (void) {
       LogPrint(LOG_CRIT, "Braille driver initialization failed.");
       exit(6);
    }
+   playTune(&tune_detected);
+
 #ifdef ALLOW_OFFRIGHT_POSITIONS
    /* The braille display is allowed to stick out the right side of the
     * screen by brl.x-offr. This allows the feature:
@@ -684,21 +686,22 @@ startBrailleDriver (void) {
    /* This disallows it, as it was before. */
    offr = brl.x;
 #endif
+
    changedWindowAttributes();
    LogPrint(LOG_DEBUG, "Braille display has %d rows of %d cells.", brl.y, brl.x);
-   playTune(&tune_detected);
    clearStatusCells();
 }
 
 void
 stopBrailleDriver (void) {
    braille->close(&brl);
-   playTune(&tune_braille_off);
    initializeBraille();
 }
 
 static void
 exitBrailleDriver (void) {
+   clearStatusCells();
+   message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
    stopBrailleDriver();
 }
 
@@ -766,16 +769,20 @@ loadPreferences (int change)
   int fd = open(opt_preferencesFile, O_RDONLY);
   if (fd != -1) {
     struct brltty_env newenv;
-    if (read(fd, &newenv, sizeof(newenv)) == sizeof(newenv)) {
+    int count = read(fd, &newenv, sizeof(newenv));
+    if (count == sizeof(newenv)) {
       if ((newenv.magicnum[0] == (ENV_MAGICNUM&0XFF)) && (newenv.magicnum[1] == (ENV_MAGICNUM>>8))) {
-	env = newenv;
-	ok = 1;
-	if (change) changedPreferences();
+        env = newenv;
+        ok = 1;
+        if (change) changedPreferences();
       } else
-	LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
-    } else
+        LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
+    } else if (count == -1)
       LogPrint(LOG_ERR, "Cannot read preferences file: %s: %s",
-	       opt_preferencesFile, strerror(errno));
+               opt_preferencesFile, strerror(errno));
+    else
+      LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %d).",
+               opt_preferencesFile, count, sizeof(newenv));
     close(fd);
   } else
     LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
@@ -854,7 +861,7 @@ updatePreferences (void)
   static char *booleanValues[] = {"No", "Yes"};
   static char *cursorStyles[] = {"Underline", "Block"};
   static char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
-  static char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Papenmeier", "MDV", "Voyager"};
+  static char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Generic", "MDV", "Voyager"};
   static char *textStyles[] = {"8 dot", "6 dot"};
   static char *tuneDevices[] = {"PC Speaker", "Sound Card", "MIDI", "AdLib/OPL3/SB-FM"};
   typedef struct {
@@ -907,13 +914,7 @@ updatePreferences (void)
   int key;				/* readbrl() value */
 
   /* status cells */
-  memset(statcells, 0, sizeof(statcells));
-  statcells[0] = texttrans['C'];
-  statcells[1] = texttrans['n'];
-  statcells[2] = texttrans['f'];
-  statcells[3] = texttrans['i'];
-  statcells[4] = texttrans['g'];
-  braille->setstatus(statcells);
+  setStatusText("prefs");
   message("Preferences Menu", 0);
 
   while (1)
@@ -965,6 +966,7 @@ updatePreferences (void)
 	  menuIndex = menuSize - 1;
 	  lineIndent = 0;
 	  break;
+	case VAL_PASSKEY+VPK_CURSOR_UP:
 	case CMD_LNUP:
 	  do {
 	    if (menuIndex == 0)
@@ -973,6 +975,7 @@ updatePreferences (void)
 	  } while (menu[menuIndex].test && !menu[menuIndex].test());
 	  lineIndent = 0;
 	  break;
+	case VAL_PASSKEY+VPK_CURSOR_DOWN:
 	case CMD_LNDN:
 	  do {
 	    if (++menuIndex == menuSize)
@@ -995,7 +998,6 @@ updatePreferences (void)
 	case CMD_WINUP:
 	case CMD_CHRLT:
 	case VAL_PASSKEY+VPK_CURSOR_LEFT:
-	case VAL_PASSKEY+VPK_CURSOR_UP:
 	  if ((*item->setting)-- <= item->minimum)
 	    *item->setting = item->maximum;
 	  settingChanged = 1;
@@ -1003,7 +1005,6 @@ updatePreferences (void)
 	case CMD_WINDN:
 	case CMD_CHRRT:
 	case VAL_PASSKEY+VPK_CURSOR_RIGHT:
-	case VAL_PASSKEY+VPK_CURSOR_DOWN:
 	case CMD_HOME:
 	case VAL_PASSKEY+VPK_RETURN:
 	  if ((*item->setting)++ >= item->maximum)

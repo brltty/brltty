@@ -22,6 +22,10 @@
 
 TOOLS = tbl2txt txt2tbl convtable ibm437toiso ibm850toiso
 
+UCDIR = ../Unicode
+UCOBJ = $(UCDIR)/unicode.o
+UCHDR = $(UCDIR)/unicode.h
+
 CC = gcc
 CFLAGS = -O2 -Wall
 LD = $(CC)
@@ -30,7 +34,9 @@ LDFLAGS = -s
 
 all: $(TOOLS)
 
-tbl2txt: tbl2txt.c
+tbl2txt: tbl2txt.o $(UCOBJ)
+
+tbl2txt.o: tbl2txt.c $(UCHDR)
 
 txt2tbl: txt2tbl.c
 
@@ -39,6 +45,9 @@ convtable: convtable.c
 ibm437toiso: ibm437toiso.c
 
 ibm850toiso: ibm850toiso.c
+
+$(UCOBJ):
+	$(MAKE) -C $(UCDIR)
 
 clean:
 	rm -f *.o *~

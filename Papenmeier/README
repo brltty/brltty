@@ -119,15 +119,26 @@ switch NUMBER     - switches on the left and right side of the
 
 Modifier key settings:
 any key can be defined as a modifier (like the shift or alt key on the 
-standard keyboard)
+standard keyboard). 
+
+Input mode:
+during inputmode the modifier keys are used to input the 8 dots of a 
+character. When you end the input mode, the driver will emulate
+a keystroke. Attention: the modifiers keys are used to simulate
+the different dots, so INPUTMODE or INPUTMODE OFF should be
+mapped to a single key.
 
 Commandkey settings:
 list of definitions:
- command = key 
- command = key and modifier
+  command = key 
+  command = key and modifier
 The command will generated on keypress; if you specify only modifiers 
 the command will be stored and be generated when the last modifier is 
 released.
+For commands which toggle a setting it is possible to add ON or OFF to 
+the command to define a predictable state change
+  command ON = <as above>
+  command OFF = <as above>
 A list of the possible commands (the following list is sometimes out of 
 date - see brl.h and/or Papenmeier/hlp.h for the actual values), the names 
 may be used with or without the leading CMD_:
@@ -193,6 +204,7 @@ SWITCHVT_PREV - switch to previous virtual terminal
 SWITCHVT_NEXT - switch to next virtual terminal
 RESTARTBRL - reinitialize braille driver
 RESTARTSPEECH - reinitialize speech driver
+INPUTMODE - toggle input mode
 Values to be used in combination with "routing":
 names may be used with or without the leading CR_:
 ROUTEOFFSET - route cursor to character
@@ -202,3 +214,20 @@ SWITCHVT - switch virtual terminal
 NXINDENT - find next line not more indented than routing key indicates
 PRINDENT - find previous line not more indented than routing key indicates
 MSGATTRIB - message attributes of character
+Special commands to send keystrokes, 
+the names may be used with or without the leading VPK_:
+RETURN - send RETURN key
+TAB - send TAB key
+BACKSPACE - send BACKSPACE key
+ESCAPE - send ESCAPE key
+CURSOR_LEFT - send CURSOR_LEFT key
+CURSOR_RIGHT - send CURSOR_RIGHT key
+CURSOR_UP - send CURSOR_UP key
+CURSOR_DOWN - send CURSOR_DOWN key
+PAGE_UP - send PAGE_UP key
+PAGE_DOWN - send PAGE_DOWN key
+HOME - send HOME key
+END - send END key
+INSERT - send INSERT key
+DELETE - send DELETE key
+FUNCTION - send FUNCTION key

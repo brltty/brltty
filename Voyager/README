@@ -1,0 +1,74 @@
+BRLTTY Driver for the Tieman Voyager Braille Display
+
+Authors:
+Stéphane Doyon  <s.doyon@videotron.ca>
+Stéphane Dalton <sdalton@videotron.ca>
+
+This driver supports the Tieman Voyager 44 and 70.
+
+Many thanks to the Tieman people: Corand van Strien, Ivar Illing, Daphne
+Vogelaar and Ingrid Vogel. They provided us with a Braille display (as
+well as programming information) so that we could write this driver. They
+replaced the display when it broke and they answered our technical
+questions. It is very motivating when companies take an interest in such
+projects and are so supportive.
+
+Thanks to Andor Demarteau <ademarte@students.cs.uu.nl> who got this whole
+project started and beta-tested all our early buggy attempts.
+
+This is the first release of this driver. It seems to work very well but
+it may still need some work. I have chosen the key bindings somewhat
+quickly, and also I have never used Tieman's software for the Voyager so
+I do not know what key bindings users may be used to. So key bindings may
+need to be reworked.
+
+When BRLTTY will be running, press the leftmost routing key to bring up
+the help screen so you can read the details of the key bindings.
+
+Other BRLTTY drivers are typically "stand alone" in the sense that they
+can just open a serial port and talk directly to the display. However the
+Voyager display connects through USB, so this driver must rely on a
+kernel module to talk to the display.
+
+Therefore you must also compile and install the kernel module found in
+the kernel/ subdirectory: see kernel/README.
+
+The kernel module implements a character device file which this driver
+uses to talk to the kernel module. Use "make install-device" from THIS
+directory to create that device file. Alternatively you can use mknod and
+create a character device file with major 180 and the minor indicated in
+kernel/voyager.h (currently 144). We suggest the name /dev/voyager.
+
+You must tell BRLTTY to use that device file as the braille device. To do
+this, edit the top-level BRLTTY Makefile and change
+BRLDEV = /dev/ttyS0
+to
+BRLDEV = /dev/voyager
+(alternatively use the braille-device parameter in your BRLTTY
+configuration file).
+
+Before you start BRLTTY, you will need to insert the kernel module. Do:
+/sbin/modprobe voyager
+Do not forget this command if you intend to modify your boot scripts to
+start BRLTTY automatically.
+
+Look in /var/log/messages for confirmation or error messages.
+
+This driver knows two parameters, which you can pass using the
+braille-parameters clause in your BRLTTY configuration file. They control
+the repeat rate of some keys (only a few keys actually do repeat when
+they are held). They are:
+-"repeat_init_delay": delay in milliseconds before key takes effect and
+   starts to repeat.
+-"repeat_inter_delay": Delay in milliseconds between each repetition.
+The default values (given in brlconf.h) seem fine, but if you want to
+change them, place a line like this in your brltty.conf:
+braille-parameters repeat_init_delay=300,repeat_inter_delay=150
+
+There is only a handful of BRLTTY users, so if you are trying out this
+driver, please drop us a note, even if you have no problems!
+
+Note to BRLTTY developers: This is my first attempt at combining the key
+binding definitions with the help file text in one place, through
+annotations in the brl.c file. If you change the key bindings, currently
+you need python installed to be able to rebuild the help files.

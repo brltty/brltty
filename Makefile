@@ -34,6 +34,7 @@ PREFIX =
 #BRL_TARGET = EcoBraille
 #BRL_TARGET = EuroBraille
 #BRL_TARGET = HandyTech
+#BRL_TARGET = LogText
 #BRL_TARGET = MDV
 #BRL_TARGET = MiniBraille
 #BRL_TARGET = MultiBraille
@@ -43,6 +44,7 @@ PREFIX =
 #BRL_TARGET = Vario-HT
 #BRL_TARGET = VideoBraille
 #BRL_TARGET = VisioBraille
+#BRL_TARGET = Voyager
 
 # If you would like the driver for your speech interface built into the
 # program, then specify it by uncommenting one, and only one, of these
@@ -66,17 +68,18 @@ PREFIX =
 # overridden at run-time by giving brltty the -t option.
 # Uncomment exactly one of the following lines.
 # See the content of the BrailleTables directory for more tables.
-#TEXTTRANS = text.es.tbl      # Spanish
-#TEXTTRANS = text.french.tbl  # French
-#TEXTTRANS = text.german.tbl  # German
-#TEXTTRANS = text.it.tbl      # Italian
-#TEXTTRANS = text.no-h.tbl    # Norwegian and German
-#TEXTTRANS = text.no-p.tbl    # Norwegian
-#TEXTTRANS = text.simple.tbl  # American English
-#TEXTTRANS = text.sweden.tbl  # Swedish
-#TEXTTRANS = text.swedish.tbl # Swedish
-#TEXTTRANS = text.uk.tbl      # United Kingdom English
-#TEXTTRANS = text.us.tbl      # American English
+#TEXTTRANS = text.da-tactilog.tbl # Danish
+#TEXTTRANS = text.es.tbl          # Spanish
+#TEXTTRANS = text.french.tbl      # French
+#TEXTTRANS = text.german.tbl      # German
+#TEXTTRANS = text.it.tbl          # Italian
+#TEXTTRANS = text.no-h.tbl        # Norwegian and German
+#TEXTTRANS = text.no-p.tbl        # Norwegian
+#TEXTTRANS = text.simple.tbl      # American English
+#TEXTTRANS = text.sweden.tbl      # Swedish
+#TEXTTRANS = text.swedish.tbl     # Swedish
+#TEXTTRANS = text.uk.tbl          # United Kingdom English
+#TEXTTRANS = text.us.tbl          # American English
 
 # Specify the device name for the serial port your Braille display will
 # normally be connected to.  For port com(n), use /dev/ttyS(n-1) -
@@ -174,8 +177,8 @@ endif
 
 INSTALL_DRIVERS =
 
-BRL_TARGETS = Alva BrailleLite BrailleNote CombiBraille EcoBraille EuroBraille HandyTech MDV MiniBraille MultiBraille Papenmeier TSI Vario Vario-HT VideoBraille VisioBraille
-BRL_LIBS = al bl bn cb ec eu ht md mn mb pm ts va vh vd vs
+BRL_TARGETS = Alva BrailleLite BrailleNote CombiBraille EcoBraille EuroBraille HandyTech LogText MDV MiniBraille MultiBraille Papenmeier TSI Vario Vario-HT VideoBraille VisioBraille Voyager
+BRL_LIBS = al bl bn cb ec eu ht lt md mn mb pm ts va vh vd vs vo
 
 SPK_TARGETS = NoSpeech Alva BrailleLite CombiBraille ExternalSpeech Festival GenericSay Televox
 SPK_LIBS = no al bl cb es fv gs tv
@@ -398,5 +401,6 @@ distclean: clean
 	rm -f *~ */*~ *orig */*orig \#*\# */\#*\# *.rej */*.rej
 	$(MAKE) -C BrailleLite distclean
 	$(MAKE) -C Papenmeier distclean
+	$(MAKE) -C Voyager distclean
 	$(MAKE) -C BrailleTables distclean
 

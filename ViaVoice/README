@@ -1,5 +1,7 @@
-This is BRLTTY's speech driver for IBM's ViaVoice text to speech system. It has
-been implemented, and is supported, by Dave Mielke <dave@mielke.cc>.
+This directory contains the BRLTTY speech driver for the ViaVoice
+[http://www.ibm.com/software/speech/dev/ttssdk_linux.html] text to speech
+system from International Business Machines (IBM) [http://www.ibm.com]. It has
+been implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
 
 This driver can be dynamically loaded (at run time), but cannot be statically
 linked into BRLTTY (at make time), because it relies on a shared object

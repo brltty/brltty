@@ -1,0 +1,61 @@
+---BRLTTY Voyager 70 Help Screen---
+
+Keys Names:
+  Front Pannel keys:
+    Leftmost key is named A, second key from left is named B.
+    Rightmost key is named D, second key from right is named C.
+    Round extension to left of central keypad is named RL, to right is RR.
+    Up position of central keypad is named UP, down is DOWN.
+  Round keys on top are used as a braille keyboard.
+  Cursor routing keys:
+    CRt1 to CRt66: routing keys over text cells.
+    CRs1 to CRs4: routing keys over status cells.
+    CRa1 to CRa70: all routing keys counting from left extremity.
+
+Basic Navigation
+A / D: Move backward/forward
+B / C: Move up/down
+A+B / A+C: Goto top-left / bottom-left
+RR: Goto cursor
+RL: Cursor tracking toggle
+UP / DOWN: Move cursor up/down (arrow keys)
+
+Modes And Functions
+RL+RR: Freeze screen (toggle)
+RL+UP: Show attributes (toggle)
+RR+UP: Show position and status info (toggle)
+CRs1: Help screen (toggle)
+CRs2: Preferences menu (and again to exit)
+UP+CRa#: Switch to virtual console #
+CRa1+CRa2+RL / RR: Switch to previous/next virtual console
+
+Cursor Routing
+CRs4: Route cursor to current line
+CRt#: Route cursor to cell
+
+Cut & Paste
+CRt#+D: Mark beginning of region to cut
+CRt#+A: Mark end of region and cut
+CRtx + CRt(x+2) + CRty : Cut text from x to y
+CRt2+CRt3 or CRs2+CRs3: Paste cut text
+
+Fancy Navigation
+RL+B / RL+C: Previous/next line with different attributes
+RR+B / RR+C: Previous/next different line
+RR+A / RR+D: Previous/next non-blank window
+CRs3: Go back to previously selected location (undo cursor tracking motion).
+CRt1+CRt2 / CRt65+CRt66: Move window left/right one character
+CRt#+B / C: Move to previous/next line indented no more than #
+CRt1+CRt2+B / C: Move to previous/next paragraph (blank line separation)
+CRt1+CRt2+A / D: Search screen backward/forward for cut text
+
+Typing In Braille
+B+C: Space (spacebar)
+Chord-46: Return
+Chord-2345: Tab
+Chord-12: Backspace
+Chord-246: Escape
+Chord-145: Delete
+Chord-7: Left arrow
+Chord-8: Right arrow
+-----End of help screen-----
