@@ -381,16 +381,34 @@ processOptions (
   int index;
 
 #ifdef HAVE_GETOPT_LONG
-  struct option longOptions[optionCount + 1];
+  struct option longOptions[(optionCount * 2) + 1];
+  int flagLetter;
   {
     struct option *opt = longOptions;
     for (index=0; index<optionCount; ++index) {
       const OptionEntry *entry = &optionTable[index];
+
       opt->name = entry->word;
       opt->has_arg = entry->argument? required_argument: no_argument;
       opt->flag = NULL;
       opt->val = entry->letter;
       ++opt;
+
+      if (!entry->argument) {
+        static const char *prefix = "no-";
+        int length = strlen(prefix);
+        if (strncasecmp(prefix, entry->word, length) == 0) {
+          opt->name = strdupWrapper(entry->word + length);
+        } else {
+          char *name = mallocWrapper(length + strlen(entry->word) + 1);
+          sprintf(name, "%s%s", prefix, entry->word);
+          opt->name = name;
+        }
+        opt->has_arg = no_argument;
+        opt->flag = &flagLetter;
+        opt->val = entry->letter;
+        ++opt;
+      }
     }
     memset(opt, 0, sizeof(*opt));
   }
@@ -461,6 +479,15 @@ processOptions (
         break;
       }
 
+#ifdef HAVE_GETOPT_LONG
+      case 0: {
+        const OptionEntry *entry = optionEntries[flagLetter];
+        FLAG_SETTING(entry);
+        *setting = 0;
+        break;
+      }
+#endif /* HAVE_GETOPT_LONG */
+
       case '?':
         LogPrint(LOG_ERR, "Unknown option: -%c", optopt);
         return 0;
@@ -477,6 +504,16 @@ processOptions (
     }
   }
   *argumentVector += optind, *argumentCount -= optind;
+
+#ifdef HAVE_GETOPT_LONG
+  {
+    struct option *opt = longOptions;
+    while (opt->name) {
+      if (opt->flag) free((char *)opt->name);
+      ++opt;
+    }
+  }
+#endif /* HAVE_GETOPT_LONG */
 
   if (opt_help) {
     printHelp(optionTable, optionCount,
