@@ -167,7 +167,7 @@ LogWindowsError (const char *action) {
   char *message;
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                &message, 0, NULL);
+                (char *)&message, 0, NULL);
 
   {
     char *end = strpbrk(message, "\r\n");

@@ -228,7 +228,7 @@ static int
 setReuseAddress (int socket) {
   int yes = 1;
 
-  if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) != -1) {
+  if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes)) != -1) {
     return 1;
   } else {
     LogError("setsockopt REUSEADDR");

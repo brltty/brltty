@@ -852,7 +852,7 @@ static int initializeTcpSocket(char *hostname, char *port)
       continue;
     }
     /* Specifies that address can be reused */
-    if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes))!=0) {
+    if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void*)&yes,sizeof(yes))!=0) {
       fun = "setsockopt";
       goto cont;
     }
@@ -956,12 +956,12 @@ cont:
     fun = "socket";
     goto err;
   }
-  if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes))!=0) {
+  if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void*)&yes,sizeof(yes))!=0) {
     fun = "setsockopt";
     goto errfd;
   }
   if (loopBind(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
-    fun = "setsockopt";
+    fun = "bind";
     goto errfd;
   }
   if (listen(fd,1)<0) {
