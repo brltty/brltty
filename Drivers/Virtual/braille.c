@@ -55,6 +55,14 @@ static int fileDescriptor = -1;
 static char inputBuffer[INPUT_SIZE];
 static int inputLength;
 
+typedef struct {
+  const CommandEntry *entry;
+  unsigned int count;
+} CommandDescriptor;
+static CommandDescriptor *commandDescriptors = NULL;
+static const size_t commandSize = sizeof(*commandDescriptors);
+static size_t commandCount;
+
 static unsigned char *prevVisualData, *prevData; /* previously sent raw data */
 static unsigned char prevStatus[StatusCellCount]; /* to hold previous status */
 static int columns, statusCells = 0;
@@ -173,10 +181,10 @@ readString (void) {
     
     default: {
       char *inputStart = &inputBuffer[inputLength];
-      int received = recv(fileDescriptor, inputStart, INPUT_SIZE-inputLength, 0);
+      int received = read(fileDescriptor, inputStart, INPUT_SIZE-inputLength);
 
       if (received == -1) {
-        LogError("recv");
+        LogError("read");
         break;
       }
 
@@ -234,6 +242,98 @@ printDots (const unsigned char *cells, int count) {
   return result;
 }
 
+static size_t
+getCommandCount (void) {
+  size_t count = 0;
+  const CommandEntry *entry = commandTable;
+  while (entry++->name) ++count;
+  return count;
+}
+
+static void
+sortCommands (int (*compareCommands) (const void *command1, const void *command2)) {
+  qsort(commandDescriptors, commandCount, commandSize, compareCommands);
+}
+
+static int
+compareCommandCodes (const void *item1, const void *item2) {
+  const CommandDescriptor *descriptor1 = item1;
+  const CommandDescriptor *descriptor2 = item2;
+
+  int code1 = descriptor1->entry->code;
+  int code2 = descriptor2->entry->code;
+
+  if (code1 < code2) return -1;
+  if (code1 > code2) return 1;
+  return 0;
+}
+
+static void
+sortCommandCodes (void) {
+  sortCommands(compareCommandCodes);
+}
+
+static int
+compareCommandNames (const void *item1, const void *item2) {
+  const CommandDescriptor *descriptor1 = item1;
+  const CommandDescriptor *descriptor2 = item2;
+
+  return strcmp(descriptor1->entry->name, descriptor2->entry->name);
+}
+
+static void
+sortCommandNames (void) {
+  sortCommands(compareCommandNames);
+}
+
+static void
+allocateCommandDescriptors (void) {
+  if (!commandDescriptors) {
+    commandCount = getCommandCount();
+    commandDescriptors = mallocWrapper(commandCount * commandSize);
+
+    {
+      CommandDescriptor *descriptor = commandDescriptors;
+      const CommandEntry *entry = commandTable;
+      while (entry->name) {
+        descriptor->entry = entry++;
+        descriptor->count = 0;
+        ++descriptor;
+      }
+    }
+
+    sortCommandCodes();
+    {
+      CommandDescriptor *descriptor = commandDescriptors + commandCount;
+      int previousBlock = -1;
+      while (descriptor-- != commandDescriptors) {
+        int code = descriptor->entry->code;
+        int currentBlock = code & VAL_BLK_MASK;
+        if (currentBlock != previousBlock) {
+          if (currentBlock) {
+            descriptor->count = (VAL_ARG_MASK + 1) - (code & VAL_ARG_MASK);
+          }
+          previousBlock = currentBlock;
+        }
+      }
+    }
+
+    sortCommandNames();
+  }
+}
+
+static int
+testCommandName (const void *key, const void *item) {
+  const char *name = key;
+  const CommandDescriptor *descriptor = item;
+  return strcasecmp(name, descriptor->entry->name);
+}
+
+static const CommandDescriptor *
+findCommand (const char *name) {
+  return bsearch(name, commandDescriptors, commandCount, commandSize, testCommandName);
+}
+
 static void
 brl_identify (void) {
   LogPrint(LOG_NOTICE, "Virtual Braille Driver: version 0.1");
@@ -246,6 +346,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   int port = -1;
   unsigned long addr = INADDR_ANY;
 
+  allocateCommandDescriptors();
   if (*parameters[PARM_PORT]) {
     port = atoi(parameters[PARM_PORT]);
   } else {
@@ -351,7 +452,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     sprintf(outbuf,"Braille=\"%s\"\n", dots);
     free(dots);
 
-    send(fileDescriptor, (void *)outbuf, strlen(outbuf), 0);
+    write(fileDescriptor, (void *)outbuf, strlen(outbuf));
 
     for (i=0; i<columns; ++i)
       prevData[i] = brl->buffer[i];
@@ -369,7 +470,7 @@ brl_writeVisual (BrailleDisplay *brl) {
       buf[i+8] = (prevVisualData[i] = brl->buffer[i]);
     }
     buf[columns+8] = '"'; buf[columns+9] = '\n';
-    send(fileDescriptor, (void *)buf, columns+10, 0);
+    write(fileDescriptor, (void *)buf, columns+10);
   }
 }
 
@@ -385,7 +486,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
       snprintf(printbuf,sizeof(printbuf),
 	       "Row/col: %d,%d\n",
 	       st[STAT_BRLROW], st[STAT_BRLCOL]);
-      send(fileDescriptor, printbuf, strlen(printbuf), 0);
+      write(fileDescriptor, printbuf, strlen(printbuf));
     } else {
       char *dots = printDots(st, statusCells);
       char outbuf[(statusCells*9)+10];
@@ -393,7 +494,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
       snprintf(outbuf,sizeof(outbuf),"StCells=\"%s\"\n", dots);
       free(dots);
 
-      send(fileDescriptor, outbuf, strlen(outbuf), 0);
+      write(fileDescriptor, outbuf, strlen(outbuf));
     }
   }
 }
@@ -407,146 +508,14 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
     LogPrint(LOG_DEBUG, "cmd '%s' received", str);
 
     if (strcmp(str, "quit") == 0) {
-      rc = CMD_RESTARTBRL; goto done;
-    } else if (strcmp(str, "noop") == 0) {
-      rc = CMD_NOOP; goto done;
-    } else if (strcmp(str, "lnup") == 0) {
-      rc = CMD_LNUP; goto done;
-    } else if (strcmp(str, "lndn") == 0) {
-      rc = CMD_LNDN; goto done;
-    } else if (strcmp(str, "winup") == 0) {
-      rc = CMD_WINUP; goto done;
-    } else if (strcmp(str, "windn") == 0) {
-      rc = CMD_WINDN; goto done;
-    } else if (strcmp(str, "prdifln") == 0) {
-      rc = CMD_PRDIFLN; goto done;
-    } else if (strcmp(str, "nxdifln") == 0) {
-      rc = CMD_NXDIFLN; goto done;
-    } else if (strcmp(str, "attrup") == 0) {
-      rc = CMD_ATTRUP; goto done;
-    } else if (strcmp(str, "attrdn") == 0) {
-      rc = CMD_ATTRDN; goto done;
-    } else if (strcmp(str, "top") == 0) {
-      rc = CMD_TOP; goto done;
-    } else if (strcmp(str, "bot") == 0) {
-      rc = CMD_BOT; goto done;
-    } else if (strcmp(str, "top_left") == 0) {
-      rc = CMD_TOP_LEFT; goto done;
-    } else if (strcmp(str, "bot_left") == 0) {
-      rc = CMD_BOT_LEFT; goto done;
-    } else if (strcmp(str, "prpgrph") == 0) {
-      rc = CMD_PRPGRPH; goto done;
-    } else if (strcmp(str, "nxpgrph") == 0) {
-      rc = CMD_NXPGRPH; goto done;
-    } else if (strcmp(str, "prprompt") == 0) {
-      rc = CMD_PRPROMPT; goto done;
-    } else if (strcmp(str, "nxprompt") == 0) {
-      rc = CMD_NXPROMPT; goto done;
-    } else if (strcmp(str, "prsearch") == 0) {
-      rc = CMD_PRSEARCH; goto done;
-    } else if (strcmp(str, "nxsearch") == 0) {
-      rc = CMD_NXSEARCH; goto done;
-    } else if (strcmp(str, "chrlt") == 0) {
-      rc = CMD_CHRLT; goto done;
-    } else if (strcmp(str, "chrrt") == 0) {
-      rc = CMD_CHRRT; goto done;
-    } else if (strcmp(str, "hwinlt") == 0) {
-      rc = CMD_HWINLT; goto done;
-    } else if (strcmp(str, "hwinrt") == 0) {
-      rc = CMD_HWINRT; goto done;
-    } else if (strcmp(str, "fwinlt") == 0) {
-      rc = CMD_FWINLT; goto done;
-    } else if (strcmp(str, "fwinrt") == 0) {
-      rc = CMD_FWINRT; goto done;
-    } else if (strcmp(str, "fwinltskip") == 0) {
-      rc = CMD_FWINLTSKIP; goto done;
-    } else if (strcmp(str, "fwinrtskip") == 0) {
-      rc = CMD_FWINRTSKIP; goto done;
-    } else if (strcmp(str, "lnbeg") == 0) {
-      rc = CMD_LNBEG; goto done;
-    } else if (strcmp(str, "lnend") == 0) {
-      rc = CMD_LNEND; goto done;
-    } else if (strcmp(str, "home") == 0) {
-      rc = CMD_HOME; goto done;
-    } else if (strcmp(str, "back") == 0) {
-      rc = CMD_BACK; goto done;
-    } else if (strcmp(str, "freeze") == 0) {
-      rc = CMD_FREEZE; goto done;
-    } else if (strcmp(str, "dispmd") == 0) {
-      rc = CMD_DISPMD; goto done;
-    } else if (strcmp(str, "sixdots") == 0) {
-      rc = CMD_SIXDOTS; goto done;
-    } else if (strcmp(str, "slidewin") == 0) {
-      rc = CMD_SLIDEWIN; goto done;
-    } else if (strcmp(str, "skpidlns") == 0) {
-      rc = CMD_SKPIDLNS; goto done;
-    } else if (strcmp(str, "skpblnkwins") == 0) {
-      rc = CMD_SKPBLNKWINS; goto done;
-    } else if (strcmp(str, "csrvis") == 0) {
-      rc = CMD_CSRVIS; goto done;
-    } else if (strcmp(str, "csrhide") == 0) {
-      rc = CMD_CSRHIDE; goto done;
-    } else if (strcmp(str, "csrtrk") == 0) {
-      rc = CMD_CSRTRK; goto done;
-    } else if (strcmp(str, "csrsize") == 0) {
-      rc = CMD_CSRSIZE; goto done;
-    } else if (strcmp(str, "csrblink") == 0) {
-      rc = CMD_CSRBLINK; goto done;
-    } else if (strcmp(str, "attrvis") == 0) {
-      rc = CMD_ATTRVIS; goto done;
-    } else if (strcmp(str, "attrblink") == 0) {
-      rc = CMD_ATTRBLINK; goto done;
-    } else if (strcmp(str, "capblink") == 0) {
-      rc = CMD_CAPBLINK; goto done;
-    } else if (strcmp(str, "tunes") == 0) {
-      rc = CMD_TUNES; goto done;
-    } else if (strcmp(str, "help") == 0) {
-      rc = CMD_HELP; goto done;
-    } else if (strcmp(str, "info") == 0) {
-      rc = CMD_INFO; goto done;
-    } else if (strcmp(str, "learn") == 0) {
-      rc = CMD_LEARN; goto done;
-    } else if (strcmp(str, "prefmenu") == 0) {
-      rc = CMD_PREFMENU; goto done;
-    } else if (strcmp(str, "prefsave") == 0) {
-      rc = CMD_PREFSAVE; goto done;
-    } else if (strcmp(str, "prefload") == 0) {
-      rc = CMD_PREFLOAD; goto done;
-    } else if (strcmp(str, "menu_first_item") == 0) {
-      rc = CMD_MENU_FIRST_ITEM; goto done;
-    } else if (strcmp(str, "menu_last_item") == 0) {
-      rc = CMD_MENU_LAST_ITEM; goto done;
-    } else if (strcmp(str, "menu_prev_item") == 0) {
-      rc = CMD_MENU_PREV_ITEM; goto done;
-    } else if (strcmp(str, "menu_next_item") == 0) {
-      rc = CMD_MENU_NEXT_ITEM; goto done;
-    } else if (strcmp(str, "menu_prev_setting") == 0) {
-      rc = CMD_MENU_PREV_SETTING; goto done;
-    } else if (strcmp(str, "menu_next_setting") == 0) {
-      rc = CMD_MENU_NEXT_SETTING; goto done;
-    } else if (strcmp(str, "say_line") == 0) {
-      rc = CMD_SAY_LINE; goto done;
-    } else if (strcmp(str, "say_above") == 0) {
-      rc = CMD_SAY_ABOVE; goto done;
-    } else if (strcmp(str, "say_below") == 0) {
-      rc = CMD_SAY_BELOW; goto done;
-    } else if (strcmp(str, "mute") == 0) {
-      rc = CMD_MUTE; goto done;
-    } else if (strcmp(str, "spkhome") == 0) {
-      rc = CMD_SPKHOME; goto done;
-    } else if (strcmp(str, "switchvt_prev") == 0) {
-      rc = CMD_SWITCHVT_PREV; goto done;
-    } else if (strcmp(str, "switchvt_next") == 0) {
-      rc = CMD_SWITCHVT_NEXT; goto done;
-    } else if (strcmp(str, "csrjmp_vert") == 0) {
-      rc = CMD_CSRJMP_VERT; goto done;
-    } else if (strcmp(str, "restartspeech") == 0) {
-      rc = CMD_RESTARTSPEECH; goto done;
+      rc = CMD_RESTARTBRL;
+    } else {
+      const CommandDescriptor *descriptor = findCommand(str);
+      if (descriptor) rc = descriptor->entry->code;
     }
-  }
 
- done:
-  if (str) free(str);
+    free(str);
+  }
 
   return rc;
 }
