@@ -118,7 +118,7 @@ extern void LogPrint
        (int level, char *format, ...)
 #ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
        __attribute__((format(printf, 2, 3)))
-#endif
+#endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
        ;
 extern void LogError (const char *action);
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
