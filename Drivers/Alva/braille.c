@@ -410,6 +410,12 @@ writeFunction (BrailleDisplay *brl, unsigned char code) {
   return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
+static int
+writeParameter (BrailleDisplay *brl, unsigned char parameter, unsigned char setting) {
+  unsigned char bytes[] = {0X1B, 'P', 'A', 3, 0, parameter, setting, '\r'};
+  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
+}
+
 #include "Programs/serial.h"
 static int serialDevice = -1;
 static struct termios oldSerialSettings;
@@ -640,7 +646,10 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   if (!reallocateBuffers(brl)) return 0;
   ReWrite = 1;			/* To write whole display at first time */
 
-  if (model->Flags & BPF_CONFIGURABLE) writeFunction(brl, 0X07);
+  if (model->Flags & BPF_CONFIGURABLE) {
+    writeFunction(brl, 0X07);
+    writeFunction(brl, 0X0B);
+  }
   return 1;
 }
 
@@ -874,6 +883,21 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 
           ReWrite = 1;
           return 0;
+        }
+
+        case 0X0B: { /* display parameters reconfigured */
+          int count = packet[3];
+
+          if (count >= 8) {
+            unsigned char frontKeys = packet[19];
+            const unsigned char progKey = 0X02;
+            if (frontKeys & progKey) {
+              unsigned char newSetting = frontKeys & ~progKey;
+              LogPrint(LOG_DEBUG, "Reconfiguring front keys: %02X -> %02X",
+                       frontKeys, newSetting);
+              writeParameter(brl, 6, newSetting);
+            }
+          }
         }
       }
       break;
