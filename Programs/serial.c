@@ -35,8 +35,8 @@
 #include <windows.h>
 #include <io.h>
 
-typedef DWORD SerialSpeed;
 typedef DCB SerialAttributes;
+typedef DWORD SerialSpeed;
 
 typedef DWORD SerialLines;
 #define SERIAL_LINE_CTS MS_CTS_ON
@@ -45,8 +45,8 @@ typedef DWORD SerialLines;
 #include <sys/ioctl.h>
 #include <termios.h>
 
-typedef speed_t SerialSpeed;
 typedef struct termios SerialAttributes;
+typedef speed_t SerialSpeed;
 
 typedef int SerialLines;
 #define SERIAL_LINE_CTS TIOCM_CTS
@@ -740,10 +740,12 @@ serialCloseDevice (SerialDevice *serial) {
 
   if (serial->stream) {
     fclose(serial->stream);
+
 #ifdef __MINGW32__
-  } else if (serial->fileDescriptor == -1) {
+  } else if (serial->fileDescriptor < 0) {
     CloseHandle(serial->fileHandle);
 #endif /* __MINGW32__ */
+
   } else {
     close(serial->fileDescriptor);
   }
