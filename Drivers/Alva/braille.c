@@ -1266,8 +1266,11 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
                 res = CMD_RESTARTBRL;
                 break;
 
-              case KEY_SPK_F2:
+              case KEY_SPK_F1:
                 res = CMD_SPKHOME;
+                break;
+              case KEY_SPK_F2:
+                res = CMD_AUTOSPEAK;
                 break;
               case KEY_SPK_F1 | KEY_SPK_F2:
                 res = CMD_RESTARTSPEECH;

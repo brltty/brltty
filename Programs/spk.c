@@ -105,7 +105,6 @@ listSpeechDrivers (const char *directory) {
 
 void
 sayString (const char *string) {
-  speech->mute();
   speech->say(string, strlen(string));
 }
 
@@ -113,6 +112,7 @@ void
 saySpeechSetting (int setting, const char *name) {
   char phrase[0X40];
   snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
+  speech->mute();
   sayString(phrase);
 }
 

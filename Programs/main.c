@@ -459,27 +459,33 @@ trackSpeech (int index) {
 }
 
 static void
-sayLines (int line, int count, int track, SayMode mode) {
+sayRegion (int left, int top, int width, int height, int track, SayMode mode) {
   /* OK heres a crazy idea: why not send the attributes with the
    * text, in case some inflection or marking can be added...! The
    * speech driver's say function will receive a buffer of text
    * and a length, but in reality the buffer will contain twice
    * len bytes: the text followed by the video attribs data.
    */
-  int length = scr.cols * count;
+  int length = width * height;
   unsigned char buffer[length * 2];
 
   if (mode == sayImmediate) speech->mute();
-  readScreen(0, line, scr.cols, count, buffer, SCR_TEXT);
+  readScreen(left, top, width, height, buffer, SCR_TEXT);
   if (speech->express) {
-    readScreen(0, line, scr.cols, count, buffer+length, SCR_ATTRIB);
+    readScreen(left, top, width, height, buffer+length, SCR_ATTRIB);
     speech->express(buffer, length);
-  } else
+  } else {
     speech->say(buffer, length);
+  }
 
   speechTracking = track;
   speechScreen = scr.no;
-  speechLine = line;
+  speechLine = top;
+}
+
+static void
+sayLines (int line, int count, int track, SayMode mode) {
+  sayRegion(0, line, scr.cols, count, track, mode);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1449,6 +1455,9 @@ main (int argc, char *argv[]) {
           case CMD_RESTARTSPEECH:
             restartSpeechDriver();
             break;
+          case CMD_AUTOSPEAK:
+            TOGGLE_PLAY(prefs.autospeak);
+            break;
           case CMD_SAY_SLOWER:
             if (speech->rate && (prefs.speechRate > 0)) {
               setSpeechRate(--prefs.speechRate);
@@ -1715,9 +1724,65 @@ main (int argc, char *argv[]) {
     speech->doTrack(); /* called continually even if we're not tracking
                              so that the pipe doesn't fill up. */
     if (prefs.autospeak) {
-      if (p->winy != oldwiny) {
-        sayLines(p->winy, 1, 0, sayImmediate);
+      static unsigned char *oldText = NULL;
+      static int oldLength = 0;
+      static int oldX = -1;
+      static int oldY = -1;
+
+      int newX = scr.posx;
+      int newY = scr.posy;
+      int newLength = scr.cols;
+      unsigned char newText[newLength];
+
+      int column = 0;
+      int count = scr.cols;
+      const unsigned char *text = newText;
+
+      readScreen(0, p->winy, newLength, 1, newText, SCR_TEXT);
+
+      if (oldText) {
+        if ((p->winy == oldwiny) && (newLength == oldLength)) {
+          if (memcmp(newText, oldText, newLength) != 0) {
+            if ((newY == p->winy) && (newY == oldY)) {
+              if (newX > oldX) {
+                if ((memcmp(newText, oldText, oldX) == 0) &&
+                    (memcmp(newText+newX, oldText+oldX, newLength-newX) == 0)) {
+                  column = oldX;
+                  count = newX - oldX;
+                }
+              } else if (newX < oldX) {
+                if ((memcmp(newText, oldText, newX) == 0) &&
+                    (memcmp(newText+newX, oldText+oldX, newLength-oldX) == 0)) {
+                  column = newX;
+                  count = oldX - newX;
+                  text = oldText;
+                }
+              } else {
+                while (newText[column] == oldText[column]) ++column;
+                while (newText[count-1] == oldText[count-1]) --count;
+                count -= column;
+              }
+            }
+          } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY))) {
+            column = newX;
+            count = 1;
+          } else {
+            count = 0;
+          }
+        }
       }
+
+      if (count) {
+        speech->mute();
+        speech->say(text+column, count);
+      }
+
+      oldText = reallocWrapper(oldText, newLength);
+      memcpy(oldText, newText, newLength);
+      oldLength = newLength;
+
+      oldX = newX;
+      oldY = newY;
     }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

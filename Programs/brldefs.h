@@ -120,7 +120,7 @@ typedef enum {
   CMD_MENU_PREV_SETTING /* change current item in menu to previous choice */,
   CMD_MENU_NEXT_SETTING /* change current item in menu to next choice */,
  
-  /* speech */
+  /* basic speech controls */
   CMD_SAY_LINE /* speak current line */,
   CMD_SAY_ABOVE /* speak from top of screen through current line */,
   CMD_SAY_BELOW /* speak from current line through bottom of screen */,
@@ -137,6 +137,8 @@ typedef enum {
   CMD_RESTARTBRL /* reinitialize braille driver */,
   CMD_RESTARTSPEECH /* reinitialize speech driver */,
   
+  /* advanced speech controls */
+  CMD_AUTOSPEAK /* toggle autospeak on/off */,
   CMD_SAY_SLOWER /* decrease speech rate */,
   CMD_SAY_FASTER /* increase speech rate */,
   CMD_SAY_SOFTER /* decrease speech volume */,

@@ -63,13 +63,14 @@ F2 Down           go down to first line of next paragraph
 F1 F2             restart braille driver
 
 Speech (left) Key Pad:
-F2                go to current (most recent) speech location
+F1                go to current (most recent) speech location
+F2                toggle autospeak
+F1 F2             restart speech driver
 Left              stop speaking immediately
 Right             say current line
 Up                say from top of screen through current line
 Down              say from current line through bottom of screen
 F2 Left           decrease speech rate
 F2 Right          increase speech rate
-F2 Down           decrease speech volume
 F2 Up             increase speech volume
-F1 F2             restart speech driver
+F2 Down           decrease speech volume

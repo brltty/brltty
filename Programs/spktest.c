@@ -63,11 +63,6 @@ handleOption (const int option) {
   return 1;
 }
 
-static void
-sayString (const char *string) {
-  speech->say(string, strlen(string));
-}
-
 static int
 sayLine (char *line, void *data) {
   sayString(line);
