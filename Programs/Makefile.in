@@ -288,7 +288,7 @@ install:: install-programs install-help install-tables $(INSTALL_DRIVERS) instal
 install-programs: brltty$X
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-	$(INSTALL_DATA) brltty-config $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) brltty-config$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) brltty-install$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_DRIVERS) $(BRAILLE_HELP) install-data-directory
@@ -347,7 +347,7 @@ uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manp
 
 uninstall-programs:
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty$X
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-config
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-config$X
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install$X
 
 uninstall-data:
@@ -391,3 +391,4 @@ clean::
 
 distclean clean install uninstall::
 	-for driver in $(CONFIGURED_DRIVERS); do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) $@); done
+	-rm -f brltty-config$X
