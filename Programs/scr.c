@@ -116,6 +116,17 @@ selectDisplay (int disp) {
   return dismd;
 }
 
+int
+validateScreenBox (const ScreenBox *box, int columns, int rows) {
+  if ((box->left >= 0))
+    if ((box->width > 0))
+      if (((box->left + box->width) <= columns))
+        if ((box->top >= 0))
+          if ((box->height > 0))
+            if (((box->top + box->height) <= rows))
+              return 1;
+  return 0;
+}
 
 void
 describeScreen (ScreenDescription *description) {

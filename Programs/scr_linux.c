@@ -714,9 +714,8 @@ describe_LinuxScreen (ScreenDescription *description) {
 static unsigned char *
 read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
-  getScreenDescription(&description);
-  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= description.cols) &&
-      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= description.rows)) {
+  describe_LinuxScreen(&description);
+  if (validateScreenBox(&box, description.cols, description.rows)) {
     int text = mode == SCR_TEXT;
     off_t start = 4 + (box.top * description.cols + box.left) * 2;
     if (lseek(screenDescriptor, start, SEEK_SET) != -1) {

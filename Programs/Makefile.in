@@ -53,6 +53,9 @@ scr_frozen.o:
 scr_help.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_help.c
 
+scr_null.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_null.c
+
 scr_linux.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_linux.c
 

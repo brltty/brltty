@@ -198,8 +198,7 @@ describe_HelpScreen (ScreenDescription *description) {
 static unsigned char *
 read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   const HelpPageEntry *description = &pageDescriptions[pageNumber];
-  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= description->columns) &&
-      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= description->rows)) {
+  if (validateScreenBox(&box, description->columns, description->rows)) {
     if (mode == SCR_TEXT) {
        int row;
       for (row=0; row<box.height; row++) {

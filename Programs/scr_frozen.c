@@ -74,8 +74,7 @@ describe_FrozenScreen (ScreenDescription *description) {
 
 static unsigned char *
 read_FrozenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
-  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= screenDescription.cols) &&
-      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= screenDescription.rows)) {
+  if (validateScreenBox(&box, screenDescription.cols, screenDescription.rows)) {
     unsigned char *screen = (mode == SCR_TEXT)? screenText: screenAttributes;
     int row;
     for (row=0; row<box.height; row++)

@@ -46,6 +46,7 @@ typedef struct {
   short left, top;	/* top-left corner (offset from 0) */
   short width, height;	/* dimensions */
 } ScreenBox;
+extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
 
 typedef enum {
   KEY_RETURN = 0X100,

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "misc.h"
 #include "scr.h"
@@ -29,15 +30,21 @@
 
 static void
 describe_BaseScreen (ScreenDescription *description) {
-  description->rows = 0;
-  description->cols = 0;
+  description->rows = 1;
+  description->cols = 1;
   description->posx = 0;
   description->posy = 0;
-  description->no = 0;
+  description->no = 1;
 }
 
 static unsigned char *
 read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+  ScreenDescription description;
+  describe_BaseScreen(&description);
+  if (validateScreenBox(&box, description.cols, description.rows)) {
+    memset(buffer, (mode == SCR_TEXT? ' ' : 0X07), box.width*box.height);
+    return buffer;
+  }
   return NULL;
 }
 

@@ -66,8 +66,7 @@ static unsigned char *
 read_ShmScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;                 /* screen statistics */
   describe_ShmScreen(&description);
-  if ((box.left >= 0) && (box.width > 0) && ((box.left + box.width) <= description.cols) &&
-      (box.top >= 0) && (box.height > 0) && ((box.top + box.height) <= description.rows)) {
+  if (validateScreenBox(&box, description.cols, description.rows)) {
     off_t start = 4 + (((mode == SCR_TEXT)? 0: 1) * description.cols * description.rows) + (box.top * description.cols) + box.left;
     int row;
     for (row=0; row<box.height; row++) {

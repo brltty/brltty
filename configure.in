@@ -669,13 +669,12 @@ BRLTTY_ARG_WITH(
 )
 if test "${screen_driver}" = "no"
 then
-   screen_driver="${brltty_cv_default_screen_driver}"
+   screen_driver="null"
 elif test "${screen_driver}" = "yes"
 then
    screen_driver="${brltty_cv_default_screen_driver}"
 fi
-screen_object="scr_${screen_driver}.${OBJEXT}"
-AC_SUBST([screen_object])
+AC_SUBST([screen_object], ["scr_${screen_driver}.${OBJEXT}"])
 BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 
 AC_SUBST([library_prefix], [lib])
