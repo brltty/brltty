@@ -301,6 +301,100 @@ static const InputOutputOperations usbOperations = {
 };
 #endif /* ENABLE_USB */
 
+/* Bluetooth IO */
+
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/rfcomm.h>
+
+static int bluezSocket = -1;
+
+static int
+openBluezPort (char **parameters, const char *device) {
+  struct sockaddr_rc laddr, raddr;
+
+  laddr.rc_family = AF_BLUETOOTH;
+  bacpy(&laddr.rc_bdaddr, BDADDR_ANY);  /* Any HCI, no support for explicit
+					   interface specification yet. */
+  laddr.rc_channel = 0;
+
+  raddr.rc_family = AF_BLUETOOTH;
+  {
+    const char *ptr = device;
+    int i;
+    for (i=0; i<6; i++) {
+      raddr.rc_bdaddr.b[5-i]=(uint8_t) strtol(ptr, NULL, 16);
+      if (i != 5 && !(ptr = strchr(ptr, ':'))) ptr = ":00:00:00:00:00";
+      ptr++;
+    }
+  }
+  raddr.rc_channel = 1;
+
+  if (bacmp(&raddr.rc_bdaddr, BDADDR_ANY) == 0) {
+    LogPrint(LOG_INFO, "No Bluetooth Device Address specified");
+    return 0;
+  }
+    
+  if ((bluezSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0) {
+    LogError("Can't create RFCOMM socket");
+    return 0;
+  }
+  if (bind(bluezSocket, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
+    LogError("Can't bind RFCOMM socket");
+    close(bluezSocket);
+    bluezSocket = -1;
+    return 0;
+  }
+  if (connect(bluezSocket, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
+    LogError("Can't connect RFCOMM socket");
+    close(bluezSocket);
+    bluezSocket = -1;
+    return 0;
+  }
+  return 1;
+}
+
+static int
+awaitBluezInput (int milliseconds) {
+  return awaitInput(bluezSocket, milliseconds);
+}
+
+static int
+readBluezBytes (unsigned char *buffer, int length) {
+  int offset = 0;
+  if (awaitInput(bluezSocket, 0)) {
+    readChunk(bluezSocket, buffer, &offset, length, 100);
+  }
+  return offset;
+}
+
+static int
+writeBluezBytes (const unsigned char *buffer, int length, int *delay) {
+  int count = safe_write(bluezSocket, buffer, length);
+  if (delay) *delay += length * 1000 / charactersPerSecond;
+  if (count != length) {
+    if (count == -1) {
+      LogError("HandyTech Bluetooth write");
+    } else {
+      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+    }
+  }
+  return count;
+}
+
+static void
+closeBluezPort (void) {
+  close(bluezSocket);
+}
+
+static const InputOutputOperations bluezOperations = {
+  openBluezPort, closeBluezPort,
+  awaitBluezInput, readBluezBytes, writeBluezBytes
+};
+
 typedef enum {
   BDS_OFF,
   BDS_RESETTING,
@@ -484,6 +578,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   } else if (isUsbDevice(&device)) {
     io = &usbOperations;
 #endif /* ENABLE_USB */
+
+  } else if (isQualifiedDevice(&device, "bluez:")) {
+    io = &bluezOperations;
 
   } else {
     unsupportedDevice(device);
