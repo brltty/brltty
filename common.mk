@@ -15,11 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-default: all
-
-include $(SRC_DIR)/reldeps.mk
-include $(SRC_TOP)absdeps.mk
-
 $(BLD_TOP)Drivers/VarioHT/braille.$O: $(BLD_TOP)Drivers/VarioHT/vario.$O
 $(BLD_TOP)Drivers/VarioHT/braille.$O: $(BLD_TOP)Drivers/VarioHT/variolow.$O
 	cd $(@D) && $(MAKE) $(@F)

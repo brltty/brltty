@@ -26,5 +26,10 @@ O = @OBJEXT@
 X = @EXEEXT@
 
 @SET_MAKE@
+
+default: all
+
+include $(SRC_DIR)/reldeps.mk
+include $(SRC_TOP)absdeps.mk
 include $(SRC_TOP)common.mk
 
