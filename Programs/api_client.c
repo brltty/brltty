@@ -248,6 +248,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     }
     if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
       brlapi_errno = BRLERR_LIBCERR;
+      brlapi_libcerrno = errno;
       return fd;
     }
     sa.sun_family = AF_UNIX;
