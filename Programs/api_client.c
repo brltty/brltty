@@ -430,12 +430,12 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 /* -1 if error or unknown */
 static int brlapi_getControllingTty()
 {
-  int vt = 0;
   int tty;
   const char *env;
 
 #ifdef linux
   {
+    int vt = 0;
     pid_t pid = getpid();
     while (pid != 1) {
       int ok = 0;
@@ -790,11 +790,6 @@ static pthread_key_t errno_key;
 
 /* the key must be created at most once */
 static pthread_once_t errno_key_once = PTHREAD_ONCE_INIT;
-
-extern int pthread_key_create(pthread_key_t *, void (*) (void *)) __attribute__ ((weak));
-extern int pthread_once(pthread_once_t *, void (*) (void)) __attribute__ ((weak));
-extern void *pthread_getspecific(pthread_key_t) __attribute__ ((weak));
-extern int pthread_setspecific(pthread_key_t, const void *) __attribute__ ((weak));
 
 static void errno_key_free(void *key)
 {

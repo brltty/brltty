@@ -194,8 +194,11 @@ void brlapi_splitHost(const char *host, char **hostname, char **port) {
     *hostname=NULL;
     *port=strdup(BRLAPI_SOCKETPORT);
   } else if ((c = strchr(host,':'))) {
-    if (c != host)
-      *hostname = strndup(host,c-host);
+    if (c != host) {
+      *hostname = (char *)malloc(c-host+1);
+      memcpy(*hostname, host, c-host);
+      *hostname[c-host] = 0;
+    }
     else
       *hostname = NULL;
     *port = strdup(c+1);
