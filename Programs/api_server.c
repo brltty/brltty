@@ -687,10 +687,11 @@ void *ConnectionsManager(void *arg)
 int InitializeUnmaskedKeys(Tconnection *c)
 {
  if (c==NULL) return 0;
- if (c->how==BRLKEYCODES) return AddRange(0,BRL_KEYCODE_MAX,&c->UnmaskedKeys);
- if (AddRange(CMD_LNUP,CMD_BACK,&c->UnmaskedKeys)==-1) return -1;
- if (AddRange(CMD_HELP,CMD_MENU_NEXT_SETTING,&c->UnmaskedKeys)==-1) return -1;
- if (AddRange(CR_ROUTE,CR_ROUTE+c->brl.x*c->brl.y,&c->UnmaskedKeys)==-1) return -1;
+ if (AddRange(0,BRL_KEYCODE_MAX,&c->UnmaskedKeys)==-1) return -1;
+ if (c->how==BRLKEYCODES) return 0;
+ if (RemoveRange(CMD_SWITCHVT_PREV,CMD_SWITCHVT_NEXT,&c->UnmaskedKeys)==-1) return -1;
+ if (RemoveRange(CMD_RESTARTBRL,CMD_RESTARTSPEECH,&c->UnmaskedKeys)==-1) return -1;
+ if (RemoveRange(CR_SWITCHVT,CR_SWITCHVT|0XFF,&c->UnmaskedKeys)==-1) return -1;
  return 0; 
 }
 
