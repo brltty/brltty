@@ -127,7 +127,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O cut.$O route.$O cmd.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O cut.$O route.$O cmd.$O at2.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -147,14 +147,17 @@ misc.$O:
 sysmisc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sysmisc.c
 
-serial.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
-
 cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
 
 cmd.$O: cmds.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cmd.c
+
+at2.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/at2.c
+
+serial.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
 brl.$O: brl.auto.h text.auto.h attrib.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
@@ -201,7 +204,7 @@ usb_freebsd.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O tbl.$O cmd.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O sysmisc.$O $(SYSTEM_OBJECT) queue.$O tbl.$O cmd.$O at2.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
