@@ -93,6 +93,7 @@ typedef struct
   int raw;
   uint32_t how; /* how keys must be delivered to clients */
   BrailleDisplay brl;
+  unsigned int cursor;
   TBrlBufState brlbufstate; 
   pthread_mutex_t brlmutex;
   Trangelist *UnmaskedKeys;
@@ -221,7 +222,7 @@ Tconnection *CreateConnection(int fd,int x, int y)
         return NULL;
       }
     } else c->brl.buffer = NULL;  
-    /* From now on, nothing can prevent us from settling connexion */
+    /* From now on, nothing can prevent us from settling connection */
     /* That's why one can already release the mutex : one can assume one won't */
     /* have to modify connections for now... */
     pthread_mutex_unlock(&connections_mutex);
@@ -230,6 +231,7 @@ Tconnection *CreateConnection(int fd,int x, int y)
     c->fd = fd;
     c->tty = -1;
     c->raw = 0;
+    c->cursor = 0;
     c->brlbufstate = EMPTY;
     pthread_mutex_init(&c->brlmutex,NULL);
     pthread_mutex_init(&c->maskmutex,NULL);
@@ -424,6 +426,71 @@ void *ProcessConnection(void *arg)
       case BRLPACKET_STATWRITE: {
         CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
         WriteErrorPacket(c->fd,BRLERR_OPNOTSUPP);
+        continue;
+      }
+      case BRLPACKET_EXTWRITE: {
+        uint32_t dispSize, cursor, rbeg, rend, strSize, flags = ints[0];
+        unsigned char *p = packet;
+        unsigned char buf[200]; /* dirty! */ 
+        LogPrint(LOG_DEBUG,"Received Extended Write request...");
+        CHECK(size>=4, BRLERR_INVALID_PACKET);
+        CHECK(((!c->raw)&&(c->tty!=-1)),BRLERR_ILLEGAL_INSTRUCTION);
+        pthread_mutex_lock(&c->brlmutex);
+        cursor = c->cursor;
+        dispSize = c->brl.x*c->brl.y;
+        memcpy(buf, c->brl.buffer, dispSize);
+        pthread_mutex_unlock(&c->brlmutex);
+        p += sizeof(uint32_t); size -= sizeof(uint32_t); /* flags */
+        CHECK((flags & BRLAPI_EWF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP);
+        if (flags & BRLAPI_EWF_CURSOR) {
+          CHECK(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
+          cursor = ntohl( *((uint32_t *) p) );
+          p += sizeof(uint32_t); size -= sizeof(uint32_t); /* cursor */
+          if (cursor>dispSize) cursor = 0;
+        }
+        if (flags & BRLAPI_EWF_REGION) {
+          CHECK(size>2*sizeof(uint32_t), BRLERR_INVALID_PACKET);
+          rbeg = ntohl( *((uint32_t *) p) );
+          p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region begin */
+          rend = ntohl( *((uint32_t *) p) );
+          p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region end */
+          CHECK(
+            (1<=rbeg) && (rbeg<=dispSize) && (1<=rend) && (rend<=dispSize)
+            && (rbeg<=rend), BRLERR_INVALID_PARAMETER);
+        } else {
+          rbeg = 1;
+          rend = dispSize; 
+        }
+        strSize = (rend-rbeg) + 1;
+        if (flags & BRLAPI_EWF_TEXT) {
+          CHECK(size>=strSize, BRLERR_INVALID_PACKET);
+          for (i=rbeg-1; i<rend; i++)
+            buf[i] = textTable[*(p+i)];          
+          p += strSize; size -= strSize; /* text */
+        }
+        if (flags & BRLAPI_EWF_ATTR_AND) {
+          CHECK(size>=strSize, BRLERR_INVALID_PACKET);
+          for (i=rbeg-1; i<rend; i++)
+            buf[i] &= *(p+i);          
+          p += strSize; size -= strSize; /* and attributes */
+        }
+        if (flags & BRLAPI_EWF_ATTR_OR) {
+          CHECK(size>=strSize, BRLERR_INVALID_PACKET);
+          for (i=rbeg-1; i<rend; i++)
+            buf[i] |= *(p+i);          
+          p += strSize; size -= strSize; /* or attributes */
+        }
+        CHECK(size==0, BRLERR_INVALID_PACKET);
+        /* Here all the packet has been processed. */
+        /* We can now set the cursor if any, and update the actual buffer */
+        /* with the new information to display */
+        if (cursor) buf[cursor-1] |= prefs.cursorStyle ? (B1|B2|B3|B4|B5|B6|B7|B8) : (B7|B8); 
+        pthread_mutex_lock(&c->brlmutex);
+        c->cursor = cursor;
+        memcpy(c->brl.buffer, buf, dispSize);
+        c->brlbufstate = FULL; 
+        pthread_mutex_unlock(&c->brlmutex);
+        WriteAckPacket(c->fd);
         continue;
       }
       case BRLPACKET_GETRAW: {

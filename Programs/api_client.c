@@ -58,6 +58,7 @@
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
 #include "brlapi.h"
+#include "brldefs.h"
 #include "api_common.h"
 
 #ifndef MIN
@@ -158,7 +159,7 @@ static int brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf
 
 /* Function : updateSettings */
 /* Updates the content of a brlapi_settings_t structure according to */
-/* another structure of th same type */
+/* another structure of the same type */
 static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 {
   if (s2==NULL) return;
@@ -573,6 +574,65 @@ int brlapi_writeBrlDots(const unsigned char *dots)
   }
   memcpy(disp,dots,size);
   return brlapi_writePacketWaitForAck(fd,BRLPACKET_WRITEDOTS,disp,size);
+}
+
+/* Function : brlapi_extWrite */
+/* Extended writes on braille displays */
+int brlapi_extWriteBrl(int cursor, int rbeg, int rend, const unsigned char *text, const unsigned char *and, const unsigned char *or)
+{
+  uint32_t rmin, rmax, strSize;
+  unsigned int size = 4;
+  int dispSize = brlx * brly;
+  static unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  uint32_t *flags = (uint32_t *) packet;
+  char *p = &packet[sizeof(uint32_t)];
+  unsigned int i, textlen, andlen, orlen;
+  if (text==NULL) textlen = 0; else textlen = strlen(text);
+  if (and==NULL) andlen = 0; else andlen = strlen(and);
+  if (or==NULL) orlen = 0; else orlen = strlen(or);
+  *flags = 0;
+  if (cursor>=0) {
+    *flags |= BRLAPI_EWF_CURSOR;
+    *((uint32_t *) p) = htonl(cursor);
+    p += sizeof(uint32_t); size += sizeof(uint32_t);
+  }
+  if ((1<=rbeg) && (rbeg<=dispSize) && (1<=rend) && (rend<=dispSize)) {
+    rmin = MIN(rbeg, rend);
+    rmax = MAX(rbeg, rend);
+    *flags |= BRLAPI_EWF_REGION;
+    *((uint32_t *) p) = htonl(rmin);
+    p += sizeof(uint32_t); size += sizeof(uint32_t);
+    *((uint32_t *) p) = htonl(rmax);
+    p += sizeof(uint32_t); size += sizeof(uint32_t);
+  } else {
+    rmin = 1; rmax = dispSize;
+  }
+  strSize = (rmax-rmin) + 1;
+  if (textlen) {
+    *flags |= BRLAPI_EWF_TEXT;
+    if (textlen<strSize) {
+      memcpy(p, text, textlen);
+      for (i=textlen; i<strSize; i++) *(p+i) = ' ';
+    } else memcpy(p, text, strSize);
+    p += strSize; size += strSize;
+  }
+  if (andlen) {
+    *flags |= BRLAPI_EWF_ATTR_AND;
+    if (andlen<strSize) {
+      memcpy(p, and, andlen);
+      for (i=andlen; i<strSize; i++) *(p+i) = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8;
+    } else memcpy(p, and, strSize);
+    p += strSize; size += strSize;
+  }
+  if (orlen) {
+    *flags |= BRLAPI_EWF_ATTR_OR;
+    if (orlen<strSize) {
+      memcpy(p, or, orlen);
+      for (i=orlen; i<strSize; i++) *(p+i) = '\0';
+    } else memcpy(p, or, strSize);
+    p += strSize; size += strSize;
+  }
+  return brlapi_writePacketWaitForAck(fd,BRLPACKET_EXTWRITE,packet,size);
 }
 
 /* Function : packetReady */

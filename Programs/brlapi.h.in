@@ -318,6 +318,29 @@ int brlapi_writeBrl(int cursor, const char *str);
  */
 int brlapi_writeBrlDots(const unsigned char *dots);
 
+/* brlapi_extWriteBrl */
+/** Update a specific region of the braille display and apply and/or masks
+ *
+ * \param cursor gives the cursor position; if 0 or greater than the
+ * display size, cursor is hidden. If -1, it is left where it was.
+ *
+ * \param rbeg
+ * \param rend specify which part of the display should be updated.
+ * If one of rbeg,rend is not in [1..displaySize], the whole display will
+ * be updated.
+ *
+ * \param text Text to display; If NULL the previous text is kept.
+ *
+ * \param and applies an \e and mask to the text; the mask is an array of dots.
+ * NUKL means no \e and mask.
+ *
+ * \param or dots to set; useful for underlining; NULL means no \e or mask.
+ *
+ * \return 0 on success, -1 on error.
+ */
+int brlapi_extWriteBrl(int cursor, int rbeg, int rend, const unsigned char *text, const
+unsigned char *and, const unsigned char *or);
+
 /** @} */
 
 /** \defgroup brlapi_keys Reading key presses
@@ -575,6 +598,7 @@ typedef uint32_t brl_type_t;
 #define BRLPACKET_WRITE             'W'    /**< Write On Braille Display    */
 #define BRLPACKET_WRITEDOTS         'D'    /**< Write Dots On Braille Display  */
 #define BRLPACKET_STATWRITE         'S'    /**< Write Status Cells          */
+#define BRLPACKET_EXTWRITE          'e'    /**< Extended Write              */
 #define BRLPACKET_GETRAW            '*'    /**< Enter in raw mode           */
 #define BRLPACKET_LEAVERAW          '#'    /**< Leave raw mode              */
 #define BRLPACKET_PACKET            'p'    /**< Raw packets                 */
@@ -583,6 +607,14 @@ typedef uint32_t brl_type_t;
 
 /** Magic number to give when sending a BRLPACKET_GETRAW packet */
 #define BRLRAW_MAGIC (0xdeadbeefL)
+
+/** Flags for extended write */
+#define BRLAPI_EWF_DISPLAYNUMBER 0X01   /**< Display number                 */
+#define BRLAPI_EWF_CURSOR        0X02   /**< Cursor position                */
+#define BRLAPI_EWF_REGION        0X04   /**< Region parameter               */
+#define BRLAPI_EWF_TEXT          0X08   /**< Contains some text             */
+#define BRLAPI_EWF_ATTR_AND      0X10   /**< And attributes                 */
+#define BRLAPI_EWF_ATTR_OR       0X20   /**< Or attributes                  */
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server
