@@ -18,61 +18,66 @@
 #include <stdint.h>
 
 typedef struct {
-  uint8_t bLength;
-  uint8_t bDescriptorType;
-  uint16_t bcdUSB;
-  uint8_t bDeviceClass;
-  uint8_t bDeviceSubClass;
-  uint8_t bDeviceProtocol;
-  uint8_t bMaxPacketSize0;
-  uint16_t idVendor;
-  uint16_t idProduct;
-  uint16_t bcdDevice;
-  uint8_t iManufacturer;
-  uint8_t iProduct;
-  uint8_t iSerialNumber;
-  uint8_t bNumConfigurations;
+  uint8_t bLength;            /* Descriptor size in bytes (18). */
+  uint8_t bDescriptorType;    /* Descriptor type (1 == device). */
+  uint16_t bcdUSB;            /* USB revision number. */
+  uint8_t bDeviceClass;       /* Device class. */
+  uint8_t bDeviceSubClass;    /* Device subclass. */
+  uint8_t bDeviceProtocol;    /* Device protocol. */
+  uint8_t bMaxPacketSize0;    /* Maximum packet size in bytes for endpoint 0. */
+  uint16_t idVendor;          /* Vendor identifier. */
+  uint16_t idProduct;         /* Product identifier. */
+  uint16_t bcdDevice;         /* Product revision number. */
+  uint8_t iManufacturer;      /* String index for manufacturer name. */
+  uint8_t iProduct;           /* String index for product description. */
+  uint8_t iSerialNumber;      /* String index for serial number. */
+  uint8_t bNumConfigurations; /* Number of configurations. */
 } __attribute__((packed)) UsbDeviceDescriptor;
 
 typedef struct {
-  uint8_t bLength;
-  uint8_t bDescriptorType;
-  uint16_t wTotalLength;
-  uint8_t bNumInterfaces;
-  uint8_t bConfigurationValue;
+  uint8_t bLength;             /* Descriptor size in bytes (9). */
+  uint8_t bDescriptorType;     /* Descriptor type (2 == configuration). */
+  uint16_t wTotalLength;       /* Block size in bytes for all descriptors. */
+  uint8_t bNumInterfaces;      /* Number of interfaces. */
+  uint8_t bConfigurationValue; /* Configuration number. */
   uint8_t iConfiguration;
-  uint8_t bmAttributes;
-  uint8_t MaxPower;
+  uint8_t bmAttributes;        /* Configuration attributes. */
+  uint8_t MaxPower;            /* Maximum power in milliamps. */
 } __attribute__((packed)) UsbConfigurationDescriptor;
 
 typedef struct {
-  uint8_t bLength;
-  uint8_t bDescriptorType;
-  uint8_t bInterfaceNumber;
-  uint8_t bAlternateSetting;
-  uint8_t bNumEndpoints;
-  uint8_t bInterfaceClass;
-  uint8_t bInterfaceSubClass;
-  uint8_t bInterfaceProtocol;
+  uint8_t bLength;         /* Descriptor size in bytes (2 + numchars/2). */
+  uint8_t bDescriptorType; /* Descriptor type (3 == string). */
+  uint16_t wData[1];       /* First 16-bit character. */
+} __attribute__((packed)) UsbStringDescriptor;
+
+typedef struct {
+  uint8_t bLength;            /* Descriptor size in bytes (9). */
+  uint8_t bDescriptorType;    /* Descriptor type (4 == interface). */
+  uint8_t bInterfaceNumber;   /* Interface number. */
+  uint8_t bAlternateSetting;  /* Interface alternative. */
+  uint8_t bNumEndpoints;      /* Number of endpoints. */
+  uint8_t bInterfaceClass;    /* Interface class. */
+  uint8_t bInterfaceSubClass; /* Interface subclass. */
+  uint8_t bInterfaceProtocol; /* Interface protocol. */
   uint8_t iInterface;
 } __attribute__((packed)) UsbInterfaceDescriptor;
 
 typedef struct {
-  uint8_t bLength;
-  uint8_t bDescriptorType;
-  uint8_t bEndpointAddress;
-  uint8_t bmAttributes;
-  uint16_t wMaxPacketSiz;
-  uint8_t bInterval;
+  uint8_t bLength;          /* Descriptor size in bytes (7). */
+  uint8_t bDescriptorType;  /* Descriptor type (5 == endpoint). */
+  uint8_t bEndpointAddress; /* Endpoint number (ored with 0X80 if input. */
+  uint8_t bmAttributes;     /* Endpoint type and attributes. */
+  uint16_t wMaxPacketSiz;   /* Maximum packet size in bytes. */
+  uint8_t bInterval;        /* Maximum interval in milliseconds between transfers. */
   uint8_t bRefresh;
   uint8_t bSynchAddress;
 } __attribute__((packed)) UsbEndpointDescriptor;
 
 typedef struct {
-  uint8_t bLength;
-  uint8_t bDescriptorType;
-  uint16_t wData[1];
-} __attribute__((packed)) UsbStringDescriptor;
+  uint8_t bLength;         /* Descriptor size in bytes. */
+  uint8_t bDescriptorType; /* Descriptor type. */
+} __attribute__((packed)) UsbDescriptorHeader;
 
 typedef union {
   UsbDeviceDescriptor device;
@@ -80,15 +85,16 @@ typedef union {
   UsbInterfaceDescriptor interface;
   UsbEndpointDescriptor endpoint;
   UsbStringDescriptor string;
+  UsbDescriptorHeader header;
   unsigned char bytes[0XFF];
 } UsbDescriptor;
 
 typedef struct {
-  uint8_t bRequestType;
-  uint8_t bRequest;
-  uint16_t wValue;
-  uint16_t wIndex;
-  uint16_t wLength;
+  uint8_t bRequestType; /* Recipient, direction, and type. */
+  uint8_t bRequest;     /* Request code. */
+  uint16_t wValue;      /* Request value. */
+  uint16_t wIndex;      /* Recipient number (language for strings). */
+  uint16_t wLength;     /* Data length in bytes. */
 } __attribute__((packed)) UsbSetupPacket;
 
 typedef struct UsbDeviceStruct UsbDevice;
