@@ -249,10 +249,16 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	}
 	if (length-toDelete>0) {
 	  /* still something on line y */
+	  if (y!=downTo) {
+	    curRowLengths[y] = length-toDelete;
+	    curRows[y]=realloc(curRows[y],curRowLengths[y]*sizeof(*curRows[y]));
+	  }
 	  if ((toCopy = length-toDelete-x))
 	    memcpy(curRows[y]+x,curRows[downTo]+curRowLengths[downTo]-toCopy,toCopy*sizeof(curRows[downTo]));
-	  curRowLengths[y] = length-toDelete;
-	  curRows[y]=realloc(curRows[y],curRowLengths[y]*sizeof(*curRows[y]));
+	  if (y==downTo) {
+	    curRowLengths[y] = length-toDelete;
+	    curRows[y]=realloc(curRows[y],curRowLengths[y]*sizeof(*curRows[y]));
+	  }
 	} else {
 	  /* kills this line as well ! */
 	  y--;

@@ -1886,7 +1886,7 @@ main (int argc, char *argv[]) {
      * scr.cols may have changed.
      */
     {
-      int maximum = scr.rows - brl.y;
+      int maximum = MAX(scr.rows-brl.y, 0);
       int *table[] = {&p->winy, &p->moty, NULL};
       int **value = table;
       while (*value) {
@@ -1895,7 +1895,7 @@ main (int argc, char *argv[]) {
       }
     }
     {
-      int maximum = scr.cols - 1;
+      int maximum = MAX(scr.cols-1, 0);
       int *table[] = {&p->winx, &p->motx, NULL};
       int **value = table;
       while (*value) {
