@@ -1839,8 +1839,8 @@ main (int argc, char *argv[]) {
      * params if screen number has changed.
      */
     describeScreen(&scr);
-    if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no)
-      switchto(scr.no);
+    if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no) switchto(scr.no);
+
     /* NB: This should also accomplish screen resizing: scr.rows and
      * scr.cols may have changed.
      */
@@ -1870,12 +1870,17 @@ main (int argc, char *argv[]) {
 
     if (p->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
-      if (speechTracking && (scr.no == speechScreen) && speech->isSpeaking()) {
-        int index = speech->getTrack();
-        if (index != speechIndex) {
-          trackSpeech(speechIndex = index);
+      if (speechTracking) {
+        if ((scr.no == speechScreen) && speech->isSpeaking()) {
+          int index = speech->getTrack();
+          if (index != speechIndex) {
+            trackSpeech(speechIndex = index);
+          }
+        } else {
+          speechTracking = 0;
         }
-      } else
+      }
+      if (!speechTracking)
 #endif /* ENABLE_SPEECH_SUPPORT */
       {
         /* If cursor moves while blinking is on */
@@ -1919,7 +1924,7 @@ main (int argc, char *argv[]) {
     }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    if (prefs.autospeak) {
+    if (prefs.autospeak && !speechTracking) {
       static int oldScreen = -1;
       static unsigned char *oldText = NULL;
       static int oldLength = 0;
