@@ -218,6 +218,16 @@ The build procedure should result in the installation of the following files:
         A utility for copying BRLTTY's
         <ref id="hierarchy" name="installed file hierarchy">
         from one location to another.
+      <tag><ref id="utility-brltty-config" name="brltty-config"></tag>
+        A utility which sets a number of environment variables to values
+        which reflect the current installation of BRLTTY.
+    </descrip>
+  <tag>/etc/</>
+    <descrip>
+      <tag/brltty.conf/
+        System defaults for BRLTTY.
+      <tag/brlapi.key/
+        The access key for BrlAPI.
     </descrip>
   <tag>/etc/brltty/</>
     Your installation of BRLTTY may not have all of the following types of files.
@@ -249,6 +259,13 @@ The build procedure should result in the installation of the following files:
         <tt/attrib.tbl/ does it the original way,
         and <tt/attributes.tbl/ does it the current way.
     </descrip>
+  <tag>/lib/</>
+    <descrip>
+      <tag/libbrlapi.a/
+        Static archive of the Application Programming Interface.
+      <tag/libbrlapi.so/
+        Dynamically loadable object for the Application Programming Interface.
+    </descrip>
   <tag>/lib/brltty/</>
     Your installation of BRLTTY may not have all of the following types of files.
     They're only created as needed based on the build options you select
@@ -276,6 +293,19 @@ The build procedure should result in the installation of the following files:
       <tag>libbrlttys<em/driver/.so.1</tag>
         The dynamically loadable driver for a speech synthesizer,
         where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
+    </descrip>
+  <tag>/include/brltty/</>
+    C header files for the Application Programming Interface.
+    Their naems look like <em/function/<tt/.h/
+    or <em/function/<tt/-/<em/driver/<tt/.h/
+    (where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">).
+  <tag>/man/</>
+    Man pages.
+    <descrip>
+      <tag>man1/<em/name/.1</tag>
+        Man pages for BRLTTY-related user commands.
+      <tag>man3/<em/name/.3</tag>
+        Man pages for Application Programming Interface library routines.
     </descrip>
 </descrip>
 
@@ -512,7 +542,10 @@ for any additional display-specific instructions.
     then <tt>/lib</>, rooted at the directory specified by the
     <ref id="build-architecture-root" name="--exec-prefix">
     build option, is assumed.
-    The files themselves are installed within this directory's <tt/brltty/ subdirectory
+    BrlAPI's files
+    (see section <ref id="api" name="The Application Programming Interface">)
+    are installed within this directory itself.
+    BRLTTY's files are installed within this directory's <tt/brltty/ subdirectory
     (which is created if necessary).
   <tag><tt/--sysconfdir=/<em/directory/<label id="build-data-directory"></tag>
     Specify the directory within the
@@ -526,6 +559,28 @@ for any additional display-specific instructions.
     build option, is assumed.
     The files themselves are installed within this directory's <tt/brltty/ subdirectory
     (which is created if necessary).
+  <tag><tt/--includedir=/<em/directory/<label id="build-include-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the C header files
+    (see section <ref id="api" name="The Application Programming Interface">)
+    are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then <tt>/include</>, rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix">
+    build option, is assumed.
+    The files themselves are installed within this directory's <tt/brltty/ subdirectory
+    (which is created if necessary).
+  <tag><tt/--mandir=/<em/directory/<label id="build-manpages-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    where the man pages are to be installed.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then <tt>/man</>, rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix">
+    build option, is assumed.
 </descrip>
 
 <sect3>Build Features<label id="build-features"><p>
@@ -962,6 +1017,70 @@ to the root floppy.
 Some problems have been experienced when copying BRLTTY
 between systems with different versions of the shared C library.
 This is worth investigating if you have difficulties.
+
+<sect2>brltty-config<label id="utility-brltty-config"><p>
+This utility sets a number of environment variables to values
+which reflect the current installation of BRLTTY
+(see <ref id="build" name="Build Options">).
+It should be executed within an existing shell environment,
+i.e. not as a command in its own right,
+and can only be used by scripts which support <bf/Bourne Shell/ syntax.
+<tscreen>. brltty-config</tscreen>
+
+The following environment variables are set:
+<descrip>
+  <tag/BRLTTY_VERSION/
+    The version number of the BRLTTY package.
+  <tag/BRLTTY_EXECUTE_ROOT/
+    Root for the installed package.
+    Configured via the <ref id="build-execute-root" name="--with-execute-root"> build option.
+  <tag/BRLTTY_PROGRAM_DIRECTORY/
+    Directory for user executables.
+    Configured via the <ref id="build-program-directory" name="--bindir"> build option.
+  <tag/BRLTTY_LIBRARY_DIRECTORY/
+    Directory for object code libraries.
+    Configured via the <ref id="build-library-directory" name="--libdir"> build option.
+  <tag/BRLTTY_DATA_DIRECTORY/
+    Directory for data files.
+    Configured via the <ref id="build-data-directory" name="--sysconfdir"> build option.
+  <tag/BRLTTY_MANPAGE_DIRECTORY/
+    Directory for man pages.
+    Configured via the <ref id="build-manpages-directory" name="--mandir"> build option.
+  <tag/BRLTTY_INCLUDE_DIRECTORY/
+    Directory for BrlAPI's C header files.
+    Configured via the <ref id="build-include-directory" name="--includedir"> build option.
+  <tag/BRLAPI_VERSION/
+    The version number of BrlAPI (BRLTTY's Application Programming Interface).
+  <tag/BRLAPI_RELEASE/
+    The full release number of BrlAPI.
+  <tag/BRLAPI_KEYFILE/
+    The name of BrlAPI's key file.
+</descrip>
+
+In addition, the following <bf/autoconf/ environment variables are also set:
+<descrip>
+  <tag/prefix/
+    Subroot for architecture-independent files.
+    Configured via the <ref id="build-portable-root" name="--prefix"> build option.
+  <tag/exec_prefix/
+    Subroot for architecture-dependent files.
+    Configured via the <ref id="build-architecture-root" name="--exec-prefix"> build option.
+  <tag/bindir/
+    Directory for user executables.
+    Configured via the <ref id="build-program-directory" name="--bindir"> build option.
+  <tag/libdir/
+    Directory for object code libraries.
+    Configured via the <ref id="build-library-directory" name="--libdir"> build option.
+  <tag/sysconfdir/
+    Directory for read-only single-machine data.
+    Configured via the <ref id="build-data-directory" name="--sysconfdir"> build option.
+  <tag/includedir/
+    Directory for C header files.
+    Configured via the <ref id="build-include-directory" name="--includedir"> build option.
+  <tag/mandir/
+    Directory for man pages.
+    Configured via the <ref id="build-manpages-directory" name="--mandir"> build option.
+</descrip>
 
 <sect2>txt2hlp<p>
 This is a helper utility which is used during the build procedure
