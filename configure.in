@@ -526,6 +526,26 @@ in
       ;;
 esac
 
+case "${host_os}"
+in
+   linux*)
+      usb_object="linux"
+      ;;
+   *)
+      usb_object=""
+      ;;
+esac
+if test -n "${usb_object}"
+then
+   usb_object="usb_${usb_object}."'$O'
+   BRLTTY_ARG_DISABLE(
+      [usb],
+      [support for the Universal Serial Bus], [dnl
+      AC_DEFINE([ENABLE_USB])
+   ])
+fi
+AC_SUBST([usb_object])
+
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
@@ -546,7 +566,10 @@ BRLTTY_BRAILLE_DRIVER([vh], [VarioHT])
 case "${host_os}"
 in
    linux*)
-      BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
+      if test "${brltty_enabled_usb}" != "no"
+      then
+         BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
+      fi
       ;;
    *)
       ;;

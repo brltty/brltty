@@ -141,6 +141,7 @@ TEXTTRANS = @text_table@
 ATTRTRANS = @attributes_table@
 
 SYSTEM_OBJECT = @system_object@
+USB_OBJECT = @usb_object@
 CTB_OBJECTS = @contracted_braille_objects@
 SPEECH_OBJECT = @speech_support_object@
 BEEPER_OBJECTS = @beeper_tune_objects@

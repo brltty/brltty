@@ -142,6 +142,9 @@ extern "C" {
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
 
+/* Define this if Universal Serial Bus support is to be included. */
+#undef ENABLE_USB
+
 /* Define this to include Papenmeier configuration file support. */
 #undef ENABLE_PM_CONFIGURATION_FILE
 
