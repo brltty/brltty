@@ -45,7 +45,7 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static int maximumPayloadLength;
+static int outputPayloadLimit;
 
 #include "Programs/serial.h"
 static int serialDevice = -1;
@@ -454,6 +454,8 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
           LogError("read");
         } else if ((count == 0) && (inputCount > 0)) {
           if (io->awaitInput(1000)) goto retry;
+          LogBytes("Aborted Input", inputBuffer.bytes, inputCount);
+          inputCount = 0;
         }
         return count;
       }
@@ -469,9 +471,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
           if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
             break;
         if (first) {
-#ifdef DEBUG_PACKETS
           LogBytes("Discarded Input", inputBuffer.bytes, first);
-#endif /* DEBUG_PACKETS */
           memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
         }
       }
@@ -522,10 +522,10 @@ updateCells (BrailleDisplay *brl) {
   if (!writing) {
     if (writeTo != -1) {
       int count = writeTo + 1 - writeFrom;
-      int truncate = count > maximumPayloadLength;
-      if (truncate) count = maximumPayloadLength;
+      int truncate = count > outputPayloadLimit;
+      if (truncate) count = outputPayloadLimit;
       if (writePacket(brl, PKT_WRITE, count, writeFrom, 0,
-                      &outputBuffer[writeFrom])) {
+                      &outputBuffer[writeFrom]) > 0) {
         writing = 1;
         gettimeofday(&writingTime, NULL);
         writingFrom = writeFrom;
@@ -581,11 +581,19 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     unsupportedDevice(device);
     return 0;
   }
-  inputCount = 0;
-  maximumPayloadLength = 0XFF;
 
+  inputCount = 0;
+  outputPayloadLimit = 0XFF;
   if (!io->openPort(parameters, device)) goto failure;
-  while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL)) {
+
+  while (1) {
+    Packet packet;
+    int count = readPacket(brl, &packet);
+    if (count == -1) goto failure;
+    if (count == 0) break;
+  }
+
+  while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0) {
     int acknowledged = 0;
     delay(1000);
     while (1) {
@@ -935,14 +943,14 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
         negativeAcknowledgement(&packet);
         switch (packet.header.arg1) {
           case PKT_ERR_TIMEOUT: {
-            int originalLimit = maximumPayloadLength;
-            if (maximumPayloadLength > model->totalCells)
-              maximumPayloadLength = model->totalCells;
-            if (maximumPayloadLength > 1)
-              maximumPayloadLength--;
-            if (maximumPayloadLength != originalLimit)
+            int originalLimit = outputPayloadLimit;
+            if (outputPayloadLimit > model->totalCells)
+              outputPayloadLimit = model->totalCells;
+            if (outputPayloadLimit > 1)
+              outputPayloadLimit--;
+            if (outputPayloadLimit != originalLimit)
               LogPrint(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
-                       originalLimit, maximumPayloadLength);
+                       originalLimit, outputPayloadLimit);
             break;
           }
         }
