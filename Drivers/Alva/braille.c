@@ -331,11 +331,15 @@ static int BraillePad[6] = {
   KEY_BRL_DOWN, KEY_BRL_RIGHT, KEY_BRL_F2
 };
 
-static int (*openPort) (char **parameters, const char *device);
-static int (*resetPort) (void);
-static void (*closePort) (void);
-static int (*readPacket) (unsigned char *buffer, int length);
-static int (*writePacket) (const unsigned char *buffer, int length);
+typedef struct {
+  int (*openPort) (char **parameters, const char *device);
+  int (*resetPort) (void);
+  void (*closePort) (void);
+  int (*readPacket) (unsigned char *buffer, int length);
+  int (*writePacket) (const unsigned char *buffer, int length);
+} InputOutputOperations;
+
+static const InputOutputOperations *io;
 static unsigned char inputBuffer[0X40];
 static int inputUsed;
 
@@ -398,7 +402,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
 static int
 writeFunction (unsigned char code) {
   unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
-  return writePacket(bytes, sizeof(bytes));
+  return io->writePacket(bytes, sizeof(bytes));
 }
 
 #include "Programs/serial.h"
@@ -453,6 +457,12 @@ static int
 writeSerialPacket (const unsigned char *buffer, int length) {
   return safe_write(serialDevice, buffer, length);
 }
+
+static const InputOutputOperations serialOperations = {
+  openSerialPort, resetSerialPort, closeSerialPort,
+  readSerialPacket, writeSerialPacket
+};
+
 #ifdef ENABLE_USB
 #include "Programs/usb.h"
 
@@ -546,6 +556,11 @@ static int
 writeUsbPacket (const unsigned char *buffer, int length) {
   return usbBulkWrite(usbDevice, usbOutputEndpoint, buffer, length, 1000);
 }
+
+static const InputOutputOperations usbOperations = {
+  openUsbPort, resetUsbPort, closeUsbPort,
+  readUsbPacket, writeUsbPacket
+};
 #endif /* ENABLE_USB */
 
 static void
@@ -573,7 +588,7 @@ extern int SendToAlva( unsigned char *data, int len );
 
 int SendToAlva( unsigned char *data, int len )
 {
-  if (writePacket(data, len) == len) return 1;
+  if (io->writePacket(data, len) == len) return 1;
   return 0;
 }
 
@@ -630,7 +645,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 static int
 getModelIdentifier (unsigned char *identifier) {
   unsigned char packet[BRL_ID_SIZE];
-  if (readPacket(packet, sizeof(packet)) == sizeof(packet)) {
+  if (io->readPacket(packet, sizeof(packet)) == sizeof(packet)) {
     if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
       *identifier = packet[BRL_ID_LENGTH];
       return 1;
@@ -649,33 +664,25 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   }
 
   if (isSerialDevice(&device)) {
-    openPort = openSerialPort;
-    resetPort = resetSerialPort;
-    closePort = closeSerialPort;
-    readPacket = readSerialPacket;
-    writePacket = writeSerialPacket;
+    io = &serialOperations;
 
 #ifdef ENABLE_USB
   } else if (isUsbDevice(&device)) {
-    openPort = openUsbPort;
-    resetPort = resetUsbPort;
-    closePort = closeUsbPort;
-    readPacket = readUsbPacket;
-    writePacket = writeUsbPacket;
+    io = &usbOperations;
 #endif /* ENABLE_USB */
 
   } else {
-    LogPrint(LOG_WARNING, "Unsupported device: %s", device);
+    unsupportedDevice(device);
     return 0;
   }
   inputUsed = 0;
 
   /* Open the Braille display device */
-  if (!openPort(parameters, device)) goto failure;
+  if (!io->openPort(parameters, device)) goto failure;
 
   /* autodetecting ABT model */
   do {
-    if (!resetPort()) goto failure;
+    if (!io->resetPort()) goto failure;
     delay(1000);		/* delay before 2nd line drop */
     if (getModelIdentifier(&ModelID)) break;
 
@@ -705,7 +712,7 @@ static void brl_close (BrailleDisplay *brl)
     prevdata = NULL;
   }
 
-  closePort();
+  io->closePort();
 }
 
 
@@ -722,7 +729,7 @@ static int WriteToBrlDisplay (int Start, int Len, unsigned char *Data)
   outsz += Len;
   memcpy( outbuf+outsz, BRL_END, BRL_END_LENGTH );
   outsz += BRL_END_LENGTH;
-  return writePacket(outbuf, outsz);
+  return io->writePacket(outbuf, outsz);
 }
 
 static void brl_writeWindow (BrailleDisplay *brl)
@@ -778,7 +785,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 {
   unsigned char packet[0X40];
-  int length = readPacket(packet, sizeof(packet));
+  int length = io->readPacket(packet, sizeof(packet));
   if (length < 1) return length;
 #if ! ABT3_OLD_FIRMWARE
 
