@@ -46,7 +46,7 @@ openPcmDevice (int errorLevel, const char *device) {
             int rate;
             if ((result = snd_pcm_hw_params_get_rate_max(pcm->hwparams, &rate, 0)) == 0) {
               if ((result = snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hwparams, &rate, 0)) == 0) {
-                LogPrint(LOG_INFO, "Using maximum rate of %d.", rate);
+                LogPrint(LOG_DEBUG, "Using maximum rate of %d.", rate);
               } else {
                 logPcmError(errorLevel, "set rate near", result);
               }
