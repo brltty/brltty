@@ -345,7 +345,7 @@ typedef struct {
   CMDS_EASY_BAR(ROUTINGKEY, (mod), \
                 CR_PRINDENT, CR_NXINDENT, CR_SETLEFT, CR_DESCCHAR, \
                 CR_CUTAPPEND, CR_CUTLINE, CR_CUTBEGIN, CR_CUTRECT)
-#define CMDS_EASY \
+#define CMDS_EASY_ALL \
   CMDS_EASY_BAR(NOKEY, MOD_EASY_SLC|MOD_EASY_SRC, \
                 CMD_LNUP, CMD_LNDN, CMD_TOP, CMD_BOT, \
                 CMD_FWINLT, CMD_FWINRT, CMD_LNBEG, CMD_LNEND), \
@@ -587,7 +587,7 @@ static int16_t pm_modifiers_el_2d_40[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_2d_40[] = {
-  CMDS_EASY,
+  CMDS_EASY_ALL,
   CMDS_STAT_13(0X8000, 0X4000)
 };
 
@@ -598,7 +598,7 @@ static int16_t pm_modifiers_el_2d_66[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_2d_66[] = {
-  CMDS_EASY,
+  CMDS_EASY_ALL,
   CMDS_STAT_13(0X8000, 0X4000)
 };
 
@@ -609,7 +609,7 @@ static int16_t pm_modifiers_el_80[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_80[] = {
-  CMDS_EASY,
+  CMDS_EASY_ALL,
   CMDS_STAT_2
 };
 
@@ -620,7 +620,7 @@ static int16_t pm_modifiers_el_2d_80[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_2d_80[] = {
-  CMDS_EASY,
+  CMDS_EASY_ALL,
   CMDS_STAT_20(0X8000, 0X4000)
 };
 
@@ -630,7 +630,7 @@ static int16_t pm_modifiers_el_40_p[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_40_p[] = {
-  CMDS_EASY
+  CMDS_EASY_ALL
 };
 
 static uint16_t pm_status_elba_32[] = {
@@ -639,7 +639,7 @@ static int16_t pm_modifiers_elba_32[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_elba_32[] = {
-  CMDS_EASY
+  CMDS_EASY_ALL
 };
 
 static uint16_t pm_status_elba_20[] = {
@@ -648,7 +648,7 @@ static int16_t pm_modifiers_elba_20[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_elba_20[] = {
-  CMDS_EASY
+  CMDS_EASY_ALL
 };
 
 static uint16_t pm_status_el_40_s[] = {
@@ -657,7 +657,7 @@ static int16_t pm_modifiers_el_40_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_40_s[] = {
-  CMDS_EASY,
+  CMDS_EASY_ALL,
   CMDS_EASY_SWSIM
 };
 
@@ -668,7 +668,7 @@ static int16_t pm_modifiers_el_80_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_80_s[] = {
-  CMDS_EASY,
+  CMDS_EASY_ALL,
   CMDS_STAT_2,
   CMDS_EASY_SWSIM
 };
@@ -679,7 +679,7 @@ static int16_t pm_modifiers_el_66_s[] = {
   MOD_EASY
 };
 static CommandDefinition pm_commands_el_66_s[] = {
-  CMDS_EASY,
+  CMDS_EASY_ALL,
   CMDS_EASY_SWSIM
 };
 

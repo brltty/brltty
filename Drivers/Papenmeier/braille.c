@@ -212,19 +212,19 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
       break;
 
     case CMD_SWSIM_LC:
-      return changeModifiers(0X3, 0X0);
+      return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF, MOD_EASY_SLC);
     case CMD_SWSIM_LR:
-      return changeModifiers(0X2, 0X1);
+      return changeModifiers(MOD_EASY_SLF, MOD_EASY_SLR);
     case CMD_SWSIM_LF:
-      return changeModifiers(0X1, 0X2);
+      return changeModifiers(MOD_EASY_SLR, MOD_EASY_SLF);
     case CMD_SWSIM_RC:
-      return changeModifiers(0XC, 0X0);
+      return changeModifiers(MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SRC);
     case CMD_SWSIM_RR:
-      return changeModifiers(0X8, 0X4);
+      return changeModifiers(MOD_EASY_SRF, MOD_EASY_SRR);
     case CMD_SWSIM_RF:
-      return changeModifiers(0X4, 0X8);
+      return changeModifiers(MOD_EASY_SRR, MOD_EASY_SRF);
     case CMD_SWSIM_BC:
-      return changeModifiers(0XF, 0X0);
+      return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF|MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SLC|MOD_EASY_SRC);
     case CMD_SWSIM_BQ: {
       static const char *const states[] = {"center", "rear", "front", "?"};
       const char *left = states[pressed_modifiers & 0X3];
