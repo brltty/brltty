@@ -121,6 +121,14 @@ static const ModelDescription Models[] = {
   }
   ,
   {
+    "Braillino", 0X72,
+    20, 0, 2,
+    interpretKeyByte, interpretBrailleStarKeys,
+    HandyBrailleStart,         NULL, NULL,
+    sizeof(HandyBrailleStart), 0,    0 
+  }
+  ,
+  {
     "Braille Star 40", 0X74,
     40, 0, 2,
     interpretKeyByte, interpretBrailleStarKeys,

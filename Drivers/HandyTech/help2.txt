@@ -1,4 +1,4 @@
-BRLTTY Help for Handy Tech Braille Star Displays
+BRLTTY Help for Handy Tech Braille Star and Braillino Displays
 
 There are two navigation keys, one at the left end and one at the right end of
 the braille line. Each has a top, middle, and bottom position. These six

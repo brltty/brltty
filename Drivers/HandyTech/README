@@ -2,7 +2,8 @@ This directory contains the BRLTTY driver for braille displays which are
 manufactured by Handy Tech Elektronik GmbH [http://www.handytech.com/] of
 Germany. As a component of BRLTTY, this driver is released under the terms of
 the GNU Public License. It has been tested with the modular displays
-[20/40/80], the Braille Wave, the Braille Star [40/80], and the Bookworm.
+[20/40/80], the Braille Wave, the Braille Star [40/80], the Bookworm, and
+the Braillino.
 
 This driver was originally implemented by Andreas Gross <andi@andi-bika.de>. It
 has since been extended, and is being maintained, by Dave Mielke

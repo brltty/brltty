@@ -70,3 +70,11 @@ I'm not sure what this is caused by, and if it is a kernel bug,
 or a brltty bug.  It's more likely a kernel bug though.
 
 You'll have to reboot to get it working again.
+
+The Braillino
+-------------
+On the Braillino, HandyTech used yet another USB-to-Serial chip,
+luckily, that one is already supported by the Linux Generic usb-serial
+driver.  The chip is recognized as "FTDI 8U232AM".
+
+
