@@ -1,4 +1,4 @@
-HELP for Braillex, 2D Screen Papenmeier
+HELP for Papenmeier Braillex Screen 2D
 status display:
 line 1   current line number
 line 3   cursor position - row
@@ -32,7 +32,7 @@ front key "7" + routing key: CUT begin (CUTBEG)
 front key "8" + routing key: CUT end (CUTEND)
 status col "22" Einfügen (PASTE)
 routing key      cursor jump
-side keys (status column) are:
+Side keys (status column) are:
 status col "1"  display help (HELP)
 status col "2"  redisplay (UPDATE)
 status col "6"  toggle cursor tracking (CSRTRK) 
@@ -52,9 +52,9 @@ status col "19" toggle skip identical lines (SKPIDLNS)
 status col "20" toggle attribute underlining
 status col "21" toggle blinking of attribute underlining
 status col "22" paste (PASTE)
-during configuration:
+During configuration:
 front key  "up"  next entry
-front key  "dwn" previos entry
+front key  "dwn" previous entry
 front key  "2"   change (up)
 front key  "5"   change (down)
 

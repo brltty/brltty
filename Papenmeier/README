@@ -22,12 +22,11 @@ This Driver was written as a project in the
   Teacher:
     August Hörandl <hoerandl@elina.htlw1.ac.at>
 
-Translation of the manual: W. Schimann
+German translation of the manual: W. Schimann
 
 Supported Hardware
 ==================
-This driver is supposed to work with the Papenmeier Screen 2D Terminal
-So far, there is only support the buildin table for character translation.
+This driver is supposed to work with the Papenmeier Screen 2D Terminal.
 
 Connection
 ==========
@@ -39,15 +38,17 @@ Select the Papenmeier Terminal in the Makefile
 
   BRL_TARGET = Papenmeier
 
-The Papenmeier Terminal does the translation ASCII to Braille Dots
-with an intern table - you don´t have to change the TEXTTRANS entry.
+There is also a german translation of the help file - move the symbolic link
+brlttyhelp.txt from help.us.txt to help.ger.txt with
 
-There is also a german translation of the helpfile - create a symbolic link
- ln -s brlttyhelp.ger.txt brlttydev.hlp
+  ln -sf help.ger.txt brlttyhelp.txt
+
+in the Papenmeier subdirectory.
 
 Key Bindings and Status Cells
 =============================
-All the key definitions and Status Cells are listed in the file brlttyhlp.txt.
+All the key definitions and Status Cells are listed in the file 
+brlttyhelp.txt.
 
 There is one additional function
 

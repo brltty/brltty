@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -44,7 +42,7 @@
 #include "cut-n-paste.h"
 #include "misc.h"
 
-#define VERSION "BRLTTY 1.9.1 (pre-release)"
+#define VERSION "BRLTTY 1.9.4 (pre-release)"
 #define COPYRIGHT "\
 Copyright (C) 1995-1998 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
@@ -54,6 +52,7 @@ Usage: %s [options]\n\
  -t text-trans-file   use translation table `text-trans-file'\n\
  -h, --help           print this usage message\n\
  -q, --quiet          suppress start-up messages\n\
+ -l n                 debugging level for syslog (from 0 to 7, default 4)\n\
  -v, --version        print start-up messages and exit\n"
 
 #define ENV_MAGICNUM 0x4004
@@ -171,7 +170,8 @@ volatile sig_atomic_t keep_going = 1;	/*
 					 * controls program termination 
 					 */
 int tbl_fd;			/* Translation table filedescriptor */
-short opt_h = 0, opt_q = 0, opt_v = 0;	/* -h, -q and -v options */
+/* -h, -l, -q and -v options */
+short opt_h = 0, opt_q = 0, opt_v = 0, opt_l = 4;
 char *opt_c = NULL, *opt_d = NULL, *opt_t = NULL;	/* filename options */
 short homedir_found = 0;	/* CWD status */
 
@@ -198,6 +198,7 @@ pid_t csr_pid;
 /*
  * Function prototypes: 
  */
+void startbrl();
 void switchto (unsigned int scrno); /* activate params for specified screen */
 void csrjmp (int x, int y);	/* move cursor to (x,y) */
 void csrjmp_sub (int x, int y);	/* cursor routing subprocess */
@@ -218,13 +219,10 @@ int nice (int);			/* should really be in a header file ... */
 int pm_num(int x);
 int pm_stat(int line, int on);
 #else
-int pm_num(int x)
-{ return 0; }
-
-int pm_stat(int line, int on)
-{ return 0; }
-
+int pm_num(int x) { return 0; }
+int pm_stat(int line, int on) { return 0; }
 #endif
+
 
 int 
 main (int argc, char *argv[])
@@ -240,7 +238,9 @@ main (int argc, char *argv[])
   short oldwinx, oldwiny;
 
   /* Parse command line using getopt(): */
-  while ((i = getopt (argc, argv, "c:d:t:hqv-:")) != -1)
+  while ((i = getopt (argc, argv, "c:d:t:hl:qv-:")) != -1)
+    /* This will complain if an incorrect option is given but will still
+       proceed. I assume this is intended? SD */
     switch (i)
       {
       case 'c':		/* configuration filename */
@@ -254,6 +254,15 @@ main (int argc, char *argv[])
 	break;
       case 'h':		/* help */
 	opt_h = 1;
+	break;
+      case 'l':	{  /* log level */
+	char *endptr;
+	opt_l = strtol(optarg,&endptr,0);
+	if(endptr==optarg || *endptr != 0 || opt_l<0 || opt_l>7){
+	  fprintf(stderr,"Invalid log level... ignored\n");
+	  opt_l = 4;
+	}
+      }
 	break;
       case 'q':		/* quiet */
 	opt_q = 1;
@@ -277,6 +286,9 @@ main (int argc, char *argv[])
       return 0;
     }
 
+  /* Open syslog */
+  LogOpen(opt_l);
+
   /*
    * Print version and copyright information: 
    */
@@ -284,6 +296,7 @@ main (int argc, char *argv[])
     {	
       /* keep quiet only if -q and not -v */
       puts (VERSION);
+      LogPrint(LOG_NOTICE, "%s starting", VERSION);
       puts (COPYRIGHT);
 
       /*
@@ -308,11 +321,10 @@ main (int argc, char *argv[])
       if ((tbl_fd = open (opt_t, O_RDONLY)) >= 0 && \
 	  (curtbl = (unsigned char *) malloc (256)) && \
 	  read (tbl_fd, curtbl, 256) == 256)
-	{
-	  memcpy (texttrans, curtbl, 256);
-	}
+	memcpy (texttrans, curtbl, 256);
       else if (!opt_q)
-	fprintf (stderr, "%s: Failed to read %s\n", argv[0], opt_t);
+	LogAndStderr(LOG_WARNING, "Failed to read dot translation table %s",
+		 opt_t);
       if (curtbl)
 	free (curtbl);
       if (tbl_fd >= 0)
@@ -325,16 +337,20 @@ main (int argc, char *argv[])
   if (initscr ())
     {				
       /* initialise screen reading */
-      if (!opt_q)
-	fprintf (stderr, "%s: Cannot read screen\n", argv[0]);
-      exit (2);
+      if (!opt_q){
+	LogAndStderr(LOG_ERR, "Cannot read screen\n");
+	LogClose();
+	exit (2);
+      }
     }
-
+  
   /* allocate the first screen information structures */
   p = malloc (sizeof (*p));
   if (!p)
     {
-      fprintf (stderr, "brltty: memory allocation error\n" );
+      LogAndStderr(LOG_ERR, "memory allocation error\n");
+      closescr();
+      LogClose();
       exit( -1 );
     }
   *p = initparam;
@@ -352,47 +368,34 @@ main (int argc, char *argv[])
       if (!opt_q)
 	perror ("fork()");
       closescr ();
+      LogClose();
       exit (3);
     case 0:			/* child, process becomes a daemon: */
       close (STDIN_FILENO);
       close (STDOUT_FILENO);
       close (STDERR_FILENO);
+      LogPrint(LOG_DEBUG, "Becoming daemon");
       if (setsid () == -1)
 	{			
 	  /* request a new session (job control) */
 	  closescr ();
+	  LogPrint(LOG_ERR, "setsid: %s", strerror(errno));
+	  LogClose();
 	  exit (4);
 	}
       break;
     default:			/* parent returns to calling process: */
       return 0;
     }
-  /*
-   * Initialise Braille and set text display: 
-   */
-  brl = initbrl (opt_d);
-  if (brl.x == -1)
-    {
-      closescr ();
-      free (p);
-      exit (5);
-    }
-  clrbrlstat ();
 
-  /*
-   * Initialise speech 
-   */
-  initspk ();
-
-  /*
-   * Load configuration file: 
-   */
+  /* Load configuration file */
   loadconfig ();
 
-  fwinshift = brl.x;
-  hwinshift = fwinshift / 2;
-  csr_offright = brl.x / 4;
-  vwinshift = 5;
+  /* Initialise Braille and set text display: */
+  startbrl();
+
+  /* Initialise speech */
+  initspk ();
 
   /*
    * Establish signal handler to clean up before termination: 
@@ -402,7 +405,6 @@ main (int argc, char *argv[])
   signal (SIGINT, SIG_IGN);
   signal (SIGHUP, SIG_IGN);
   signal (SIGCHLD, stop_child);
-
 
   usetable (TBL_TEXT);
   if (!opt_q)
@@ -430,6 +432,12 @@ main (int argc, char *argv[])
       while ((keypress = readbrl (TBL_CMD)) != EOF)
 	switch (keypress & ~VAL_SWITCHMASK)
 	  {
+	  case CMD_RESTARTBRL:
+	    closebrl(brl);
+	    play(snd_brloff);
+	    LogPrint(LOG_INFO,"Reinitializing braille driver");
+	    startbrl();
+	    break;
 	  case CMD_TOP:
 	    p->winy = 0;
 	    break;
@@ -473,8 +481,8 @@ main (int argc, char *argv[])
 	    else
 	      {
 		char buffer1[scr.cols], buffer2[scr.cols];
-		int scrtype = (keypress == CMD_ATTRUP) ? SCR_ATTRIB : \
-			      p->dispmode ? SCR_ATTRIB : SCR_TEXT;
+		int scrtype = (p->dispmode || keypress==CMD_ATTRUP)
+		  ? SCR_ATTRIB : SCR_TEXT;
 		int skipped = 0;
 		getscr ((winpos)
 			{
@@ -489,14 +497,14 @@ main (int argc, char *argv[])
 			    }
 			    ,buffer2, scrtype);
 		    if (memcmp (buffer1, buffer2, scr.cols) || \
-			p->winy == scr.posy)
+			(keypress!=CMD_ATTRUP && p->winy == scr.posy))
 		      break;	/* lines are different */
                     if(p->winy == 0){
                       play(snd_bounce);
                       break;
                     }
 		    /* lines are identical */
-		    /* don't sound if it's the first time or we would have
+		    /* don't sound if it's the first time or we have
 		       beeped too many times already... */
 		    if (skipped <= 4)
 		      play (snd_skip);
@@ -526,8 +534,8 @@ main (int argc, char *argv[])
 	    else
 	      {
 		char buffer1[scr.cols], buffer2[scr.cols];
-		int scrtype = (keypress == CMD_ATTRDN) ? SCR_ATTRIB : \
-			      p->dispmode ? SCR_ATTRIB : SCR_TEXT;
+		int scrtype = (p->dispmode || keypress==CMD_ATTRDN)
+		  ? SCR_ATTRIB : SCR_TEXT;
 		int skipped = 0;
 		getscr ((winpos)
 			{
@@ -542,14 +550,14 @@ main (int argc, char *argv[])
 			    }
 			    ,buffer2, scrtype);
 		    if (memcmp (buffer1, buffer2, scr.cols) || \
-			p->winy == scr.posy)
+			(keypress!=CMD_ATTRDN && p->winy == scr.posy))
 		      break;	/* lines are different */
 		    if(p->winy == scr.rows-brl.y){
 		      play(snd_bounce);
 		      break;
 		    }
 		    /* lines are identical */
-		    /* don't sound if it's the first time or we would have
+		    /* don't sound if it's the first time or we have
 		       beeped too many times already... */
 		    if (skipped <= 4)
 		      play (snd_skip);
@@ -803,6 +811,9 @@ main (int argc, char *argv[])
 	    else if (keypress >= CR_ENDBLKOFFSET && \
 		     keypress < CR_ENDBLKOFFSET + brl.x)
 	      cut_end (p->winx + keypress - CR_ENDBLKOFFSET, p->winy);
+	    else
+	      LogPrint(LOG_DEBUG,
+		       "Driver sent unrecognized command 0x%x\n", keypress);
 	    break;
 	  }
 
@@ -856,13 +867,16 @@ main (int argc, char *argv[])
 	}
       /* If attribute underlining is blinking during display movement */
       if(env.attrvis && env.attrblink){
-	/* We could check that to see if we changed screen, but that doesn't
+	/* We could check to see if we changed screen, but that doesn't
 	   really matter... this is mainly for when you are hunting up/down
 	   for the line with attributes. */
 	if(p->winx != oldwinx || p->winy != oldwiny){
 	  attron = 1;
 	  attrcntr = env.attroncnt;
 	}
+	/* problem: this still doesn't help when the braille window is
+	   stationnary and the attributes themselves are moving
+	   (example: tin). */
       }
       oldwinx = p->winx; oldwiny = p->winy;
       /* If not in info mode, get screen image: */
@@ -980,6 +994,7 @@ main (int argc, char *argv[])
 		    SCR_ATTRIB);
 	    for (i = 0; i < brl.x * brl.y; i++)
 	      switch(attrbuf[i]){
+		/* Experimental! Attribute values are hardcoded... */
   	        case 0x07: 
   	        case 0x17: 
   	        case 0x30: 
@@ -1047,7 +1062,31 @@ main (int argc, char *argv[])
   closebrl (brl);
   for (i = 0; i <= NBR_SCR; i++) 
     free (scrparam[i]);
+  LogPrint(LOG_NOTICE,"Terminating");
+  LogClose();
   return 0;
+}
+
+
+void
+startbrl()
+{
+  brl = initbrl (opt_d);
+  if (brl.x == -1)
+    {
+      LogPrint(LOG_ERR,"Braille driver initialization failed");
+      closescr ();
+      LogClose();
+      exit (5);
+    }
+  fwinshift = brl.x;
+  hwinshift = fwinshift / 2;
+  csr_offright = brl.x / 4;
+  vwinshift = 5;
+  LogPrint(LOG_DEBUG,"Braille display has %d rows by %d cells.",
+	   brl.y,brl.x);
+  play(snd_detected);
+  clrbrlstat ();
 }
 
 
@@ -1133,7 +1172,7 @@ void
 csrjmp_sub (int x, int y)
 {
   int curx, cury;		/* current cursor position */
-  int difx, dify;		/* initial displacement to target */
+  int dif, t = 0;
   sigset_t mask;		/* for blocking of SIGUSR1 */
 
   /* Set up signal mask: */
@@ -1144,18 +1183,15 @@ csrjmp_sub (int x, int y)
   if (initscr_phys ())
     return;
 
-  timeout_yet (0);		/* initialise stop-watch */
   scr = getstat_phys ();
 
   /* Deal with vertical movement first, ignoring horizontal jumping ... */
-  dify = y - scr.posy;
-  while (dify * (y - scr.posy) > 0 && 
-	 curscr == scr.no &&
-	 !timeout_yet (CSRJMP_TIMEOUT))
+  dif = y - scr.posy;
+  while (dif != 0 && curscr == scr.no)
     {
-      sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-      inskey (dify > 0 ? DN_CSR : UP_CSR);
       timeout_yet (0);		/* initialise stop-watch */
+      sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
+      inskey (dif > 0 ? DN_CSR : UP_CSR);
       do
 	{
 #if CSRJMP_LOOP_DELAY > 0
@@ -1165,35 +1201,49 @@ csrjmp_sub (int x, int y)
 	  curx = scr.posx;
 	  scr = getstat_phys ();
 	}
-      while ((scr.posy - cury) * dify <= 0
-	     && !((scr.posx - curx) * dify <= 0)
-	     && !timeout_yet (CSRJMP_TIMEOUT));
+      while (scr.posy==cury && scr.posx==curx
+	     && !(t = timeout_yet (CSRJMP_TIMEOUT)));
       sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
+      if(t) break;
+      if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
+	 || (y-scr.posy)*dif > dif*dif){
+	delay(CSRJMP_SETTLE_DELAY);
+	scr = getstat_phys ();
+	if((scr.posy==cury && (scr.posx-curx)*dif <= 0)
+	   || (y-scr.posy)*dif > dif*dif)
+	  break;
+      }
+      dif = y - scr.posy;
     }
 
-  if(x<0) return; /* vertical routing only */
-
-  /* Now horizontal movement, quitting if the vertical position is wrong: */
-  difx = x - scr.posx;
-  while (difx * (x - scr.posx) > 0 && scr.posy == y && 
-	 curscr == scr.no && 
-	 !timeout_yet (CSRJMP_TIMEOUT))
-    {
-      sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
-      inskey (difx > 0 ? RT_CSR : LT_CSR);
-      timeout_yet (0);		/* initialise stop-watch */
-      do
-	{
+  if(x>=0){ /* don't do this for vertical-only routing (x=-1) */
+    /* Now horizontal movement, quitting if the vertical position is wrong: */
+    dif = x - scr.posx;
+    while (dif != 0 && scr.posy == y && curscr == scr.no)
+      {
+	timeout_yet (0);		/* initialise stop-watch */
+	sigprocmask (SIG_BLOCK, &mask, NULL);	/* block SIGUSR1 */
+	inskey (dif > 0 ? RT_CSR : LT_CSR);
+	do
+	  {
 #if CSRJMP_LOOP_DELAY > 0
-	  delay (CSRJMP_LOOP_DELAY);	/* sleep a while ... */
+	    delay (CSRJMP_LOOP_DELAY);	/* sleep a while ... */
 #endif
-	  curx = scr.posx;
+	    curx = scr.posx;
+	    scr = getstat_phys ();
+	  }
+	while (scr.posx==curx && scr.posy == y &&
+	       !(t = timeout_yet (CSRJMP_TIMEOUT)));
+	sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
+	if(t) break;
+	if(scr.posy != y || (x-scr.posx)*dif > dif*dif){
+	  delay(CSRJMP_SETTLE_DELAY);
 	  scr = getstat_phys ();
+	  if(scr.posy != y || (x-scr.posx)*dif > dif*dif) break;
 	}
-      while ((scr.posx - curx) * difx <= 0 && scr.posy == y && \
-	     !timeout_yet (CSRJMP_TIMEOUT));
-      sigprocmask (SIG_UNBLOCK, &mask, NULL);	/* killed here if SIGUSR1 */
-    }
+	dif = x - scr.posx;
+      }
+  }
 
   closescr_phys ();		/* close second thread of screen reading */
 }
@@ -1376,10 +1426,12 @@ configmenu (void)
 	switch (k)
 	  {
 	  case CMD_TOP:
+	  case CMD_TOP_LEFT:
 	  case CMD_HOME:
 	    n = 0;
 	    break;
 	  case CMD_BOT:
+	  case CMD_BOT_LEFT:
 	    n = maxn;
 	    break;
 	  case CMD_LNUP:
@@ -1405,7 +1457,7 @@ configmenu (void)
 	    break;
 	  case CMD_SAVECONF:
 	    savecfg |= 1;
-	    break;
+	    /*break;*/
 	  default:
 	    if (savecfg)
 	      {
@@ -1431,10 +1483,13 @@ loadconfig (void)
 {
   int i = 1;
   struct brltty_env newenv;
+  char *fname;
 
-  tbl_fd = open (opt_c ? opt_c : CONFFILE_NAME, O_RDONLY);
-  if (tbl_fd >= 0)
-    {
+  fname = opt_c ? opt_c : CONFFILE_NAME;
+  tbl_fd = open (fname, O_RDONLY);
+  if(tbl_fd < 0)
+    LogPrint(LOG_WARNING,"Could not open config file %s", fname);
+  else{
       if (read (tbl_fd, &newenv, sizeof (struct brltty_env)) == \
 	  sizeof (struct brltty_env))
 	if (newenv.magicnum == ENV_MAGICNUM)
@@ -1453,17 +1508,21 @@ loadconfig (void)
 void 
 saveconfig (void)
 {
-  tbl_fd = open (opt_c ? opt_c : CONFFILE_NAME, O_WRONLY | O_CREAT | O_TRUNC);
-  if (tbl_fd >= 0)
-    {
-      fchmod (tbl_fd, S_IRUSR | S_IWUSR);
-      if (write (tbl_fd, &env, sizeof (struct brltty_env)) != \
-	  sizeof (struct brltty_env))
-	{
-	  close (tbl_fd);
-	  tbl_fd = -2;
-	}
-      else
+  char *fname;
+
+  fname = opt_c ? opt_c : CONFFILE_NAME;
+  tbl_fd = open (fname, O_WRONLY | O_CREAT | O_TRUNC);
+  if (tbl_fd < 0)
+    LogPrint(LOG_WARNING,"Could not save to config file %s", fname);
+  else{
+    fchmod (tbl_fd, S_IRUSR | S_IWUSR);
+    if (write (tbl_fd, &env, sizeof (struct brltty_env)) != \
+	sizeof (struct brltty_env))
+      {
 	close (tbl_fd);
-    }
+	tbl_fd = -2;
+      }
+    else
+      close (tbl_fd);
+  }
 }

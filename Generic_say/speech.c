@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -21,7 +19,6 @@
 
 /* Generic_say/speech.c - To use a generic 'say' command, like for the
  * rsynth package.
- * $Id: speech.c,v 1.3 1996/09/26 09:48:56 nn201 Exp $
  */
 
 #define SPEECH_C 1

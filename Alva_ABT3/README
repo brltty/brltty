@@ -1,6 +1,6 @@
 README file for the Alva_ABT3 driver
 
-Version 1.32 (September 22, 1996)
+Version 1.50 (June 21, 1998)
 
 
 Copyright
@@ -23,10 +23,11 @@ not implemented since I don't have them and have no idea regarding their use.
 Since I have an ABT340, I tested the driver on that model only with both the 
 old and the new firmware versions.  If anyone of you tested it on another 
 model, please advise me. For the same reason, as this README file might not 
-be accurate for all models, please send me any corrections required.
+be accurate for all models, please send me any corrections required to this 
+file.
 
-If you want any information about Alva B.V. and its products, you can contact
-the company via e-mail at alva@xs4all.nl.
+If you want any information about Alva B.V. and its products, you can look
+at http://www.alva-bv.nl/home-eng.html .
 
 
 ABT Connection
@@ -56,10 +57,6 @@ connections:
 
 This kind of cable is called a 'null-modem' cable.
 All connectors are female D connectors.
-
-By default, the ABT communicates at 9600 Baud, 8 data bits, no parity, 
-1 stop bit.  However,  I have run it to a higher baudrate, but chances to 
-get serial communication errors increase.  Actual default is 9600.
 
 NOTE:  I experienced some problems using the serial port while the
 computer was connected to the parallel port on the ABT.  If BRLTTY seems 
@@ -107,7 +104,12 @@ Port Settings
 In the file 'Makefile' located in the BRLTTY home directory, there is a 
 line where you can define the default (i.e. when not given on the command 
 line) serial port device (such as /dev/ttyS0).  The baudrate setup is 
-still defined in the brlconf.h file.
+however defined in the brlconf.h file.
+
+By default, the ABT communicates at 9600 Baud.  However, I have run it to
+a higher baudrate, but chances to get serial communication errors
+increase.  If you change the baudrate in brlconf.h, you must also change it
+in the local menu of your ABT.
 
 
 Running the Driver
@@ -148,9 +150,10 @@ Key Bindings
 ============
 
 All the key definitions are listed in the files brlttyhlp*.txt.  Each file
-corresponds to an ABT model.  For more information on the functions listed, 
-see the BRLTTY manual.  Basic keys are nearly the same as with the DOS 
-software. 
+corresponds to an ABT model.  For more information on the functions
+listed, see the BRLTTY manual.  Basic keys are nearly the same as with the
+DOS software. As a quick start, just press the PROG key to enter the help
+screen. 
 
 Some keys found on the ABT34D, the ABT380 and the ABT38D are not actually 
 bound to any function, since I don't have those keys.  However, it is 
@@ -181,12 +184,12 @@ Quick Tips
 - If you want to know the ABT model 
   currently autodetected (or configured in), simply go into the help screen
   with the PROG key.  The first line of the help screen will show it.
-- The whole braille display is refreshed each time the CURSOR key is pressed.
-  This can be useful if serial communication errors result in some garbage
-  on the display.
-
+- Sometimes the driver seems to have problems autodetecting the terminal.
+  If BRLTTY seems stuck i.e. it's running but nothing appears on the
+  display, turning it off and back on may help the detection phase. 
+  This might be called more or less a bug...  :)
 
 
 Nicolas Pitre
 nico@cam.org
-September 22, 1996
+June 21, 1998

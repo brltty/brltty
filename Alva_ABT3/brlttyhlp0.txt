@@ -8,8 +8,6 @@ LEFT            left one full window
 RIGHT           right one full window
 DOWN            down one line
 CURSOR          goto cursor position
-CURSOR + UP     up several lines
-CURSOR + DOWN   down several lines
 CURSOR + LEFT   left one half window
 CURSOR + RIGHT  right one half window
 HOME            top left of screen
@@ -19,6 +17,8 @@ HOME + LEFT     beginning of line
 HOME + RIGHT    end of line
 PROG + LEFT     left one character
 PROG + RIGHR    right one character
+CURSOR + UP     up to previous line with different attributes
+CURSOR + DOWN   down to next line with different attributes
 HOME + CURSOR + UP   skip to previous different screen line
 HOME + CURSOR + DOWN skip to next different screen line
 

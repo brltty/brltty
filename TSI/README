@@ -1,77 +1,37 @@
-This is the driver for TSI displays, version 1.1
-It is designed to be compiled into BRLTTY version 1.0.2
-
-September 1996
+This is the BRLTTY driver for TSI braille displays, version 2.0
+It is designed to be compiled into BRLTTY version 2.0.
+June 1998
 
 Author and maintainer:
         Stéphane Doyon
 E-Mail: s.doyon@videotron.ca
 
-This driver contains the code to support some of
-Telesensory Systems' braille displays. It is a part of the source code for
-BRLTTY. The information here pertains only to the support of the
-TSI displays. You must also read the documentation of the main
-module of BRLTTY.
+This driver contains the code to support most of Telesensory Systems' braille
+displays. It is a part of the source code for BRLTTY. The information here
+pertains only to the support of the TSI displays. You must also read the
+documentation of the main module of BRLTTY.
+
+There is only a handful of BRLTTY users. If you are trying out my driver,
+please let me know! I am willing to help and I am open to suggetions.
+
+See the headers of brl.c for history notes.
 
 Supported braille displays
 ==========================
   Navigator 20 / 40 / 80
-  PowerBraille 40
+  PowerBraille 40 / 65 / 80
 
 Unsupported displays:
-  PowerBraille 65 / 80
+  Older firmware versions of the navigator models may not work.
 
-You must understand that there has been only very limited
-testing of this driver. I use a Navigator 40, so that model at least
-has been tested extensively. If you experience problems, I will do
-my best to help.
-
-Display specific information
-
-PowerBraille 65 / 80
-    These braille displays are not supported yet. I have
-the necessary specifications, but I do not have or know anyone who
-owns such a device. It is next to impossible to write a driver
-without actually trying it out several times and making many
-adjustments: it won't work on the first try. So in order to support
-these devices, I'll need serious help from someone willing to try
-out each of my attempts on his PowerBraille unit until it works. That's
-how support for PowerBraille 40 was added, so it can be done even if
-I don't have the device at my disposal. If you have a PowerBraille
-65 / 80 and want support for it, then contact me, and be patient!
-
-Navigator displays
-    The specifications I have describe the protocol used for version 3.2
-of the Navigator firmware (I believe this is the last and latest version).
-It is quite possible that older versions won't work, but again I do not
-have the equipment to try it out!
-
-Navigator 20
-    I don't expect any problems, but it has never been tested.
-
-Navigator 40
-    I have a Navigator 40 and I have been using it with Linux
-for long enough. Unless something went very wrong in the last
-versions of the driver, I can assure you that it works quite well.
-
-Navigator 80
-    It has not been tested yet. However, according to
-the specifications, it basically works the same as the Navigator 40.
-The only real difference is the routing keys, which work the
-same as the PowerBraille 40. So it should work properly.
-However the specifications did not discribe the keys of
-the Navigator 80, therefore the key bindings I have chosen might not be
-appropriate. Does it posess cursor left/right keys like the Navigator 20/40
-models have? Does it use rocker style keys like the PowerBraille or button
-pairs like the smaller Navigator models? If you know, please tell me...
-
-PowerBraille 40
-    Support for the PowerBraille is recent and it has only been used by
-one person for a short while. Howeever it seems to work great.
-
-In any case, whether you're display is supported or not, please send me
-a note if you intend to use this driver. Tell me how it goes! I'll do my
-best to help if you have problems.
+I have been using a Navigator 40 with BRLTTY every day for two years now, so
+I can say that BRLTTY and this driver are pretty stable. Note however that
+version 2.0 is still young and that many additions and changes have been made
+recently. I have used BRLTTY with a PB80 for a few weeks and it also works
+very well. I have heard of two other people successfully using BRLTTY with
+a PB40, but I do not know how extensively. The PB40 has not been tested a lot
+since version 2.0. Navigator 20 and 80 should work but have not been tested at
+all.
 
 For impatients
 ==============
@@ -81,10 +41,12 @@ go for it: no special configuration is really necessary. All you have to know
 is the key to bring up the help screen:
   - For navigator users: press the "cursor left" and "cursor right" keys
     together.
-  - For PowerBraille users: press the first and the last cursor routing keys
+  - For PB40 users: press the first and the last cursor routing keys
     together (cursor routing keys 1 and 40).
+  - For PB65/80 users: Press cursor routing keys 1 and 80 together, or press
+    the two small square buttons on top and to the left of the display.
 
-Connecting the PowerBraille
+Connecting the display
 ===========================
 
 Navigator users should connect their displays the same way as they do
@@ -102,11 +64,8 @@ Configuration of the driver
 ===========================
 
 The file brlconf.h contains some few parameters specific to this driver
-which you may want to modify. However, no adjustments are necessary:
-everything will be autodetected by the driver when you start BRLTTY.
-There really aren't many options there... Therefore I suggest you leave
-it as is for now, use the driver for a while, get to know it, and then
-see if there's anything you'd like to change.
+which you can modify, but you really don't have to. No adjustments are
+necessary: everything will be autodetected by the driver when you start BRLTTY.
 
 The first two options are the only ones I would like to talk about here.
 These control the speed at which the keys of your braille display will be
@@ -118,6 +77,10 @@ options of the good old "gateway" DOS driver for the Navigator: the only
 difference is that the values in brlconf.h are the square of the "/panelrep"
 values.
 
+Note that PowerBraille displays will operate at 19200baud. If you don't trust
+your COM port to operate at that speed, you can disable this feature in
+brlconf.h, and crawl at 9600baud.
+
 Initialization and reset
 ========================
 
@@ -128,98 +91,36 @@ Immediatly, it will be detected, identified, initialized, and updated with
 a welcome message, and then with some text from the screen. It will then be
 ready for use.
 
-This means that your braille display needs not be active when your machine
+This means that your braille display need not be active when your machine
 boots (when BRLTTY starts up).
 
 Furthermore, you may also turn off your display at any time while BRLTTY is
 running, take it away for the day while your computer is still running, and
-connect it back later. In that case however, the driver is not (yet) able to
-determine that the braille display was inaccessible: is simply continues as
-it would have if the braille display had been there all the time. The
-consequence is that when you connect and turn on your display a second time,
-it will not be reset and initialized properly: only part of the display will
-be updated and it will feel very sluggish.
-
-The sluggishness comes from the fact that the key repetition parameters of
-the braille display have not been reset properly. These two parameters
-define how quickly the display's keys will be detected and how fast they
-will repeat. They can be adjusted by modifying the first two values in
-the brlconf.h file. These parameters are not handled directly by this
-driver however: key repetitions are generated by the braille display itself.
-Therefore, the driver simply transmits a command to the braille display (as
-part of its initialization) telling it how fast the repetitions are to
-be generated. When you turn off the display however, these settings are
-lost and the display returns to the default typematic parameters, which
-make the whole thing very sluggish.
-
-To solve this problem, I have created a special key binding (key press or
-command) to reset the braille display when ever you want to. Whenever you turn
-your display off and then back on during the lifetime of one BRLTTY process,
-use that command: it will reset the typematic (repetition) parameters and
-properly refresh the braille display.
-
-Navigator users must press the "cursor left" and "display right" keys
-together (the key at the far left + the key at the far right). PowerBraille
-users must press both the second and the second last cursor routing keys
-together (cursor routing keys 2 and 39).
-
-Note: If you have turned your braille display off and then back on again,
-something strange may happen. There can be a lot of text streaming by
-very fast on the display for a few seconds before it calms down. Just
-ignore it all.
+connect it back later. After 2 or 3 seconds, BRLTTY will realize that the
+display is off or disconnected. It will then go back to waiting for you to
+connect it and turn it on, at which point it will reinitialize it.
 
 Key bindings
 ============
 
-This section deals with the commands associated to each key or key
-combination. We are talking about the keys on the braille display itself,
-since BRLTTY does not trap any of the keyboard keys.
-
-I don't intend to give specific instructions for each and every possible key
-combination. Here are some general information. For a description of what
-the functions do, refer to the documentation in the BRLTTY general module.
-
-The most important key to memorize is the key to bring up the help screen:
+The online help describes the key bindings: for each available function, the
+display key or combination of keys that activates it is listed. For details
+on the functions themselves, see the documentation of the main module of
+BRLTTY. Note that all functions are triggered using keys of the braille
+display: BRLTTY does not trap keyboard keys. Here again is how to bring up the
+help screen:
   - For navigator users: press the "cursor left" and "cursor right" keys
     together.
-  - For PowerBraille users: press the first and the last cursor routing keys
+  - For PB40 users: press the first and the last cursor routing keys
     together (cursor routing keys 1 and 40).
-All key bindings will be listed there. Repeat the same command to exit
-this mode. But before you refer to that, we
-might want to agree on the names I use for each key in those help screens:
+  - For PB65/80 users: Press cursor routing keys 1 and 80 together, or press
+    the two small square buttons on top and to the left of the display.
 
-For Navigator 20 / 40:
-L-left / L-right / L-up / L-down
-    These are the keys of the left (or cursor) keypad.
-R-left / R-right / R-up / R-down
-    And these of course for the right keypad (the one that moves the
-    braille display window and not the cursor).
-L-round
-    The leftmost round button (associated to the left keypad).
-R-round
-    The rightmost round button.
-
-For Navigator 80:
-I will assume it has the same keys as other Navigator models, +the routing keys
-CR1 -- CR80
-    Each of the 80 routing keys (over each braille cell).
-    
-For PowerBraille 40:
-L-up / L-down / R-up / R-down
-    Represents pressing the left/right rocker in the up/down position.
-L-round / R-round
-    The left and right round buttons.
-D-back / D-forw
-    The "display backward" and "display forward" buttons (those located near
-    the end the the braille display).
-CR1 -- CR40
-    Each of the 40 cursor routing keys (over each braille cell).
-
-The symbol "+" is used to denote a combination, and the symbol "/" is used
-to present several similar key bindings together.
-
-If you don't like any of this, or if you find it confusing, I'm open to
-suggestions.
+I am open to suggestions. If you don't like the help screen, if you find the
+names of the keys confusing, if you find an inconsistency or if you just don't
+like the bindings I have chosen, send me your comments. It is not very hard to
+change which keys trigger which function. I have tryed to come up with the
+best arrangement but you might have a better idea.
 
 If any of the keys mentioned in the help screen do not work or are somehow
 inconsistant, please let me know.
@@ -230,30 +131,28 @@ have some added key bindings to take advantage of their routing keys.
 Furthermore, certain key combinations that can conviniently be pressed on
 the Navigator 20/40 cannot be entered on a PowerBraille since it does not
 have the cursor left/right keys and since it uses rockers instead of button
-pairs. Therefore, certain key bindings that are appropriate for the
-Navigator have been duplicated for PowerBraile support: this means that the
-same command may be accessible on two different key combinations.
+pairs.
 
 But you do not have to worry, since the help screen that is provided will
-vary according to the model that is detected. In fact, the first line of the
-help screen identifies the model that this driver has detected: if it is
-incorrect, then you're in trouble and you should contact me.
+vary according to the model of the display that is detected. In fact, the
+first line of the help screen identifies the display model that was detected.
+If this is incorrect, then you're in trouble and you should contact me!
 
 I've tryed to keep key bindings similar to what is used under DOS, but there
 are several differences. Basic movement of the braille display is the
 same, but several bindings have been added for more elaborate
 functionalities since we cannot use any keys of the real keyboard. You
 also have those keys that are mapped to the keyboard arrow keys,
-but I did not think it was really relevant to have any key act as the
-RETURN key (do contact me if you disagree on this point). Also the
-link/unlink button does not exactly work the same: the rightmost round
-button simply jumps to the cursor; it is not a toggle. The leftmost round
-button toggles the link/unlink (whether or not the braille display should
-follow the cursor if it moves), but unlinking the braille display from the
-cursor can be done without bringing the braille window back to the cursor.
+but I did not think it was really relevant to have a key act as the
+RETURN key. Also the link/unlink button does not exactly work the same: the
+rightmost of the front middle buttons simply jumps to the cursor; it is not
+a toggle. The left button toggles the link/unlink (whether or not the braille
+display should follow the cursor if it moves), but unlinking the braille
+display from the cursor can be done without bringing the braille window back
+to the cursor beeforehand.
 
 Also note that there is no function to suppress blank spaces, combine lines
-and wrap words... yet... There is however a function to skip identical lines.
+and wrap words... There is however a function to skip identical lines.
 
 For Navigator 20/40 users:
     You will find one interesting addition to cursor routing: now you do not
@@ -265,24 +164,22 @@ forced me to add a very strange twist to the interface. Users of braille
 displays with cursor routing keys normally will mark text to be cut/copied
 by using some combination of these routing keys. Since we don't have them,
 I've added a key binding that brings you into a special mode in which a
-special cursor appears. By moving that special cursor around you can mark up
+"virtual" cursor appears. By moving that special cursor around you can mark up
 the start of the text to cut. As soon as this mark is made, you are returned
 to the normal mode of operation. You can then move to the end of the
-text to mark, reactivate the special cursor, and mark the end of the
+text to mark, reactivate the special cursor mode, and mark the end of the
 text. At that point the text will by copied in a buffer, and you'll be able to
 paste it wherever you want. Note that there also are two shortcut keys to do
-the same thing: one combination states that the block should start at the
-beginning of the display and the other states that the block of text should
-end at the end of the braille display. Just experiment with it in an editor:
-you'll see it's great!
+cut & paste: one combination states that the block of text to be copied starts
+at the beginning of the display and the other states that the block of text
+ends at the end of the braille display. Just experiment with it in an editor.
+you'll see it's great! Mail me if you're mixed up.
 
-For Navigator 80 / PowerBraile 40 users:
+For Navigator 80 / PowerBraile users:
     You will find that several key bindings use combinations of cursor
 routing keys. You may not be used to that. In particular the cut-and-paste
 functions, used to mark the start and the end of a block of text to be
-copied, uses combinations of three keys. I have imagined this system but I
-have never tryed it myself, so I don't know how it really feels. Any
-comments would be appreciated. One more thing so that you don't get
+copied, uses combinations of three keys. One more thing so that you don't get
 confused: it is impossible to mark the beginning of a block of text to
 cut/copy in the last two cells of the braille display, and it is impossible
 to mark the end of a block in the first two cells. There is a function that
@@ -294,13 +191,14 @@ contact me.
 Credits
 =======
 
-Thanks to Jason Fayre <jfayre@pangea.ca> for his patient help in getting
-PowerBraille 40 support working: he tested each version of the PowerBraile
-support until it worked.
+Thanks to Jason Fayre (I don't have his current address) for his patient help
+in getting PowerBraille 40 support working: he tested each version of the
+PowerBraile support until it worked. I myself did not have access to a PB40.
+We worked over E-mail.
 
 Thanks to Nicolas Pitre <nico@cam.org> for extensive help writing the very
 first version of this driver. Initially, this code was derived from that of
-the driver for the Alva ABT40.
+the driver for the Alva ABT40. Surprising how little they have in common now.
 
 -------------------------------------------------------------------------------
 Well that's about it! Try it out and do let me know how it goes PLEASE!

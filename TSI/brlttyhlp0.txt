@@ -1,71 +1,69 @@
 ---BRLTTY Navigator 20/40 Help Screen---
 
 "L-" means left keypad and "R-" mean right keypad
-     (as in "R-down" which means the "down" button from the right keypad)
+  (as in "Rdn" which means the "down" button from the right keypad).
+"dn" means down, "rt" is right, "lt" is left, "rn" for the round buttons.
+"+" means keys are combined (pressed together).
 
 Movement:
-  R-left / R-right : one braille window left/right
-  R-round+R-left / R-round+R-right : beginning/end of line
-  L-left+L-up / L-Right+L-up : half a braille window left/right
-  L-round+L-left / L-round+L-right : one character left/right
-  R-up / R-down : one line up/down
-  L-round+L-up / L-round+L-down : up/down several lines
-  R-round+R-up / R-round/R-down : top/bottom of screen
-  R-left+R-up / R-left+R-down : screen top-left / bottom-left
+  Left/right one window: Rlt / Rrt
+  One line up/down: Rup / Rdn
+  Goto cursor: Rrn
+  Cursor tracking (link/unlink): Lrn (toggle)
+  Goto top left of screen: RUP+RLT
+  Goto bottom left of screen: RDN+RLT
+  Previous/next non-identical line: Rrn+Rup / Rrn+Rdn
+  Previous/next line with different attributes: Lrn+Rup / Lrn+Rdn
+  One character left/right: Lrn+Llt / Lrn+Lrt
+  Goto beginning/end of line: Rrn+Rlt / Rrn+Rrt
+  Half-window left/right: Lup+Llt / Lup+Lrt
+  Several lines up/down: Lrn+Rup / Lrn+Rdn
 
-Arrow key mappings:
-  L-left / L-right / L-up / L-down : mapped to computer keyboard arrow keys
+Simulation of keyboard arrow keys:
+  up/dn / left/right arrow: Lup/Ldn / Llt/Lrt
 
-Others:
-  R-round : bring braille window to cursor
-  L-round : toggle cursor tracking on/off (toggle)
-  R-down + R-left + R-right : toggle skipping of identical lines
-  L-round + R-round : freeze / unfreeze screen (toggle)
-  L-up + L-down : display attributes (toggle)
-  R-up + R-down : give status information (toggle)
-  L-left + L-right : this help screen (toggle)
+Special modes
+  This help: Llt+Lrt (toggle)
+  Freeze/unfreeze screen: Lrn+Rrn (toggle)
+  Attribute underlining on/off: Lup+Ldn or Ldn+Rup (toggle)
+  Show attribute representations: Lup+Ldn+Lrn or Ldn+Rup+Lrn (toggle)
+  Info mode: Rup+Rdn or Lup+Rdn (toggle)
 
-Routing:
-  L-down + R-down : route cursor to first cell of display
-  L-up+R-up : route cursor to somewhere about 3/4 of the length of the display
+Cursor routing:
+  Route cursor to anywhere on current line: Ldn+Rdn
+  Route cursor to cell 1 of display: Ldn+Rdn+Rlt
+  Route cursor towards end of display: Ldn+Rdn+Rrt
 
 Cut & paste:
-  R-round + L-left : mark beginning of buffer at start of braille display
-  R-round + L-right : mark buffer end at end of braille display and cut
-  R-round + L-left + L-right : cut-cursor special mode
-     In this mode:
-     R-round + L-left + L-right : cancel and return to normal mode
-     R-left / R-right : move cursor left/right
-     L-left / R-right : bring special cursor to first/last cell
-     R-up / R-down : move cursor forward/backward by 5cells
-     L-up / L-down : move cursor forward/backward by 10cells
-     R-round + L-left  : mark beginning of buffer at cursor position
-     R-round + L-right : mark end of buffer at cursor position
-  R-round + L-down : paste buffer
+  Mark that beginning of region to cut starts at cell 1: Rrn+Llt
+  Mark that end (bottom right) of region is at last cell: Rrn+Lrt
+  Virtual cursor mode for specifying region to cut: Rrn+Llt+Lrt
+    In this mode:
+    Quit and cancel: Rrn+Llt+Lrt again
+    Mark that beginning of region is at virtual cursor position: Rrn+Llt
+    End of region at cursor position: Rrn+Lrt
+    Move virtual cursor left/right: Rlt / Rrt
+    Move cursor left/right by 5cells: Rup / Rdn
+    ... By 10cells: Lup / Ldn
+    Bring virtual cursor to first/last cell: Llt / Lrt
+  Paste cut region: Rrn+Ldn
 
-Online configuration facility:
-  R-left+R-right : enter/exit configuration menu (toggle)
-     In that menu:
-     R-right / R-left : next/previous settings for the current option
-     R-down / R-up : next/previous option
-  R-left+R-right + R-round : save active configuration
-  R-left+R-right + R-round + L-round : reset active config from saved settings
-
-Online configuration options shortcuts (toggles):
-(these key combinations all include R-left + R-right)
-  L-round + L-left : select 6dot cursor or dots7-8 cursor
-  L-round + L-up : cursor visible on/off
-  L-round + L-down : cursor blinking on/off
-  L-up : capitals blinking on/off
-  L-down : sliding window on/off
-  L-right : beeps on/off
-
-Special:
-  L-left + R-right : reset navigator's typematic rate
-
-Alternative key bindings for PowerBraille:
-(These less convinient alternatives have been defined
-for PowerBraille but still work for Navigator)
-  L-up + R-down : display attributes (toggle)
-  L-down + R-up : give status information (toggle)
+Configuration:
+  Configuration menu:
+    Enter/exit configuration menu: Rlt+Rrt (sort of a toggle)
+      In the menu:
+      Previous/next setting option for this item: Rlt / Rrt
+      Previous/next menu item: Rup / Rdn
+    Save current settings to config file: Rlt+Rrt+Rrn
+    Load settings from config file: Rlt+Rrt+Rrn+Lrn
+  Various options can be controlled directly (hotkeys):
+    Skip identical lines (on/off): Rlt+Rrt +Rdn (toggle)
+    Sliding braille window (on/off): Rlt+Rrt +Llt (toggle)
+    Audio tones (enable/disable): Rlt+Rrt +Llt+Lrn (toggle)
+    Show/hide cursor: Rlt+Rrt +Lup (toggle)
+    Cursor blinking (on/off): Rlt+Rrt +Lup+Lrn (toggle)
+    Blink capital letters (on/off): Rlt+Rrt +Ldn+Lrn (toggle)
+    Attribute underlining (on/off): treated in section on special modes
+    Attribute underlining blinks (on/off): Rlt+Rrt +Lrt+Lrn
+      or Rlt+Rrt +Lrn+Rup (toggle)
 -----End of help screen-----

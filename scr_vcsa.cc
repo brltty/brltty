@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -36,6 +34,9 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <linux/vt.h>
+#include <errno.h>
+
+#include "misc.h"
 
 #include "scrdev.h"
 #include "scr_vcsa.h"
@@ -78,10 +79,28 @@ static unsigned char charset_conv[128] =
 
 int vcsa_Screen::open (void)
 {
-  if ((fd = ::open (VCSADEV, O_RDONLY)) == -1)
+  fd = -1;
+  if ((fd = ::open (VCSADEV, O_RDONLY)) == -1){
+#if 0
+    if(errno == ENOENT){
+      LogAndStderr(LOG_WARNING, "Can't find vcsa device '%s'. Creating it.",
+		   VCSADEV);
+      if(mknod(VCSADEV, S_IFCHR | 0600, (7<<8)|128) == 0)
+	fd = ::open (VCSADEV, O_RDONLY);
+      else
+	LogAndStderr(LOG_WARNING, "mknod: %s", strerror(errno));
+    }
+#endif
+  }
+  if(fd<0){
+    LogAndStderr(LOG_WARNING,"Can't open vcsa device '%s': %s\n",
+		 VCSADEV, strerror(errno));
     return 1;
+  }
   if ((cons_fd = ::open (CONSOLE, O_RDONLY)) == -1)
     {
+      LogAndStderr(LOG_WARNING,"Can't open console device '%s': %s\n",
+		 CONSOLE, strerror(errno));
       ::close (fd);
       return 1;
     }

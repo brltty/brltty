@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -80,9 +78,9 @@
 #define CSRJMP_NICENESS 10	/* niceness of cursor routing subprocess */
 #define CSRJMP_TIMEOUT 2000	/* cursor routing idle timeout in ms */
 #define CSRJMP_LOOP_DELAY 0	/* delay to use in csrjmp_sub() loops (ms) */
+#define CSRJMP_SETTLE_DELAY 400	/* delay to use in csrjmp_sub() loops (ms) */
 
 #endif /* BRLTTY_C */
-
 
 
 /* These are for inskey(): */
@@ -108,3 +106,4 @@
 /* misc for every files */
 #define NBR_SCR 16		/* actual number of separate screens */
 
+/* see misc.h to disable use of syslog */

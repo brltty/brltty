@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -19,13 +17,13 @@
  * This software is maintained by Nicolas Pitre <nico@cam.org>.
  */
 
-/* TSI/brlconf.h - Braille display driver for TSI displays
+/* TSI/brl.c - Braille display driver for TSI displays
  *
- * Written by Stephane Doyon (doyons@JSP.UMonteal.CA)
+ * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
- * This is version 1.1 (September 25ft 1996) of the TSI driver.
- * It attempts full support for Navigator 20/40/80 and Powerbraille 40.
- * It is designed to be compiled into version 1.0.2 of BRLTTY.
+ * This is version 2.0 (June 1998) of the TSI driver.
+ * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
+ * It is designed to be compiled in BRLTTY version 2.0.
  */
 
 /* Configuration file for the TSI driver.
@@ -45,7 +43,7 @@
    navigator and gateway's default.
 */
 
-/* Cut-and-paste cursor
+/* Cut-and-paste cursor position
    Initial position (cell) of the special cut-and-paste cursor
    Set to 0 for leftmost, 1 for middle, 2 for rightmost */
 #define CUT_CSR_INIT_POS 0
@@ -70,18 +68,15 @@
   #define BATTERY_DELAY (1750) /* milliseconds */
 #endif
 
-/* You should never have to change anything bellow this line */
+/* A query is sent if we don't get any keys in a certain time, to detect
+   if the display was turned off. How soon do we get nervous and send
+   the ping? (in miliseconds) */
+#define PING_INTRVL 2000
+/* The maximum time needed to realize that the display was turned off is
+   approx PING_INTRVL +500 ms. */
 
-/* Braille display parameters */
-
-/* Number of braille cells
-   This is autodetected. Only use this to override.
-   Possible values: 20/40/80 */
-/*#define BRLCOLS 40*/
-
-/* routing keys
-   Define to 1 if you have routing keys, to 0 if you don't.
-   This too is autodetected. Only use this to override. */
-/*#define HAS_SW 1*/
+/* PB models communicate at 19200baud. Comment this out if you want to remain
+   at 9600baud for some reason. */
+#define HIGHBAUD 1
 
 /* End of driver config */

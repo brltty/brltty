@@ -1,0 +1,15 @@
+#!/bin/sh
+
+TARGETS="Alva_ABT3 CombiBraille EuroBraille Papenmeier TSI"
+
+rm bin/*
+
+for t in $TARGETS; do
+  echo ""
+  echo "Making target $t"
+  make clean
+  make BRL_TARGET=$t LDFLAGS="-s -static" brltty
+  strip brltty
+  mv brltty bin/brltty-$t
+done
+make clean

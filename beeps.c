@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -88,15 +86,14 @@ void
 play (int song[])
 {
 }
-
 #endif
 
+/* Definitions of beep "tunes" for various events */
 
-
-
-
-/* Definitions of different types of beeps */
-
+int snd_detected[] =
+{3600, 60, 2700, 100, 0};
+int snd_brloff[] =
+{3600, 60, 5400, 60, 0};
 int snd_link[] =
 {1400, 7, 1500, 7, 1600, 10, 0};
 

@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -24,9 +22,16 @@
 
 #define __EXTENSIONS__	/* for time.h */
 
+#include <stdio.h>
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include "misc.h"
+
+#ifdef USE_SYSLOG
+#include <syslog.h>
+#include <stdarg.h>
+#endif
 
 unsigned
 elapsed_msec (struct timeval *t1, struct timeval *t2)
@@ -83,3 +88,53 @@ timeout_yet (int msec)
   return ((tnow.tv_sec * 1e6 + tnow.tv_usec) - \
 	  (tstart.tv_sec * 1e6 + tstart.tv_usec) >= msec * 1e3);
 }
+
+#ifdef USE_SYSLOG
+
+static int LogPrio, LogOpened = 0;
+
+void LogOpen(int prio)
+{
+  openlog("BRLTTY",LOG_CONS,LOG_DAEMON);
+  LogPrio = prio;
+  LogOpened = 1;
+}
+
+void LogClose()
+{
+  closelog();
+  LogOpened = 0;
+}
+
+void LogPrint(int prio, char *fmt, ...)
+{
+  va_list argp;
+
+  if(LogOpened && (prio & LOG_PRIMASK) <= LogPrio){
+    va_start(argp, fmt);
+    vsyslog(prio, fmt, argp);
+    va_end(argp);
+  }
+}
+
+void LogAndStderr(int prio, char *fmt, ...)
+{
+  va_list argp;
+
+  va_start(argp, fmt);
+
+  vfprintf(stderr, fmt, argp);
+  fprintf(stderr,"\n");
+  if(LogOpened && (prio & LOG_PRIMASK) <= LogPrio)
+    vsyslog(prio, fmt, argp);
+
+  va_end(argp);
+}
+
+#else /* don't USE_SYSLOG */
+
+void LogOpen(int prio) {}
+void LogClose() {}
+void LogPrint(int prio, char *fmt, ...) {}
+void LogAndStderr(int prio, char *fmt, ...) {}
+#endif

@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -27,7 +25,11 @@
  */
 
 /* Changes:
+ *    jun 21, 1998:
  *    apr 23, 1998:
+ *		- replaced CMD_WINUP/DN with CMD_ATTRUP/DN wich seems
+ *		  to be a more useful binding.  Modified help files 
+ *		  appropriately.
  *		- I finally had the chance to test with an ABT380... and
  *		  corrected the ABT380 model ID for autodetection.
  *		- Added a refresh delay to force redrawing the whole display
@@ -91,8 +93,8 @@
 
 
 static char StartupString[] =
-"  Alva ABT3xx driver, version 1.33 \n"
-"  Copyright (C) 1995-1996 by Nicolas Pitre <nico@cam.org> \n";
+"  Alva ABT3xx driver, version 1.50 \n"
+"  Copyright (C) 1995-1998 by Nicolas Pitre <nico@cam.org> \n";
 
 
 

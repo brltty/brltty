@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -34,6 +32,8 @@
 
 
 /* The following define command codes: */
+
+/* Note: the value 0xF0F0 is reserved for internal use by the drivers. */
 
 #define CMD_ERR '\0'		/* invalid code */
 
@@ -66,6 +66,7 @@
 #define CMD_FREEZE 'f'		/* freeze the screen */
 #define CMD_HELP '?'		/* display help */
 #define CMD_INFO 'i'		/* get status information */
+#define CMD_RESTARTBRL 5        /* reinitialize braille display */
 
 /* Cursor routing */
 #define CMD_CSRJMP 'j'		/* jump cursor to window (cursor routing) */

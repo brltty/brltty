@@ -2,13 +2,11 @@
  * BRLTTY - Access software for Unix for a blind person
  *          using a soft Braille terminal
  *
- * Version 1.9.0, 06 April 1998
- *
  * Copyright (C) 1995-1998 by The BRLTTY Team, All rights reserved.
  *
- * Nikhil Nair <nn201@cus.cam.ac.uk>
  * Nicolas Pitre <nico@cam.org>
- * Stephane Doyon <s.doyon@videotron.ca>
+ * Stéphane Doyon <s.doyon@videotron.ca>
+ * Nikhil Nair <nn201@cus.cam.ac.uk>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -21,14 +19,28 @@
 
 /* TSI/brl.c - Braille display driver for TSI displays
  *
- * Written by Stephane Doyon (s.doyon@videotron.ca)
+ * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
- * This is version 1.1 (September 25ft 1996) of the TSI driver.
- * It attempts full support for Navigator 20/40/80 and Powerbraille 40.
- * It is designed to be compiled into version 1.0.2 of BRLTTY.
+ * This is version 2.0 (June 1998) of the TSI driver.
+ * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
+ * It is designed to be compiled in BRLTTY version 2.0.
+ *
+ * History:
+ * Version 2.0: Tested with Nav40 PB40 PB80. Support for functions added
+ *   in BRLTTY 2.0: added key bindings for new fonctions (attributes and
+ *   routing). Support for PB at 19200baud. Live detection of display, checks
+ *   both at 9600 and 19200baud. RS232 wire monitoring. Ping when idle to 
+ *   detect when display turned off and issue a CMD_RESTARTBRL.
+ * Version 1.2 (not released) introduces support for PB65/80. Rework of key
+ *   binding mechanism and readbrl(). Slight modifications to routing keys
+ *   support, + corrections. May have broken routing key support for PB40.
+ * Version 1.1 worked on nav40 and was reported to work on pb40.
  */
 
 #define BRL_C 1
+
+#define VERSION "BRLTTY driver for TSI displays, version 2.0"
+/* see identbrl() */
 
 #define __EXTENSIONS__	/* for termios.h */
 
@@ -37,6 +49,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/termios.h>
+#include <sys/ioctl.h>
 #include <string.h>
 
 #include "brlconf.h"
@@ -45,21 +58,37 @@
 #include "../scr.h"
 
 
-/* Braille display parameters that will never be changed by the user */
+/* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
-#define BAUDRATE B9600		/* Navigator's speed */
+
+/* A query is sent if we don't get any keys in a certain time, to detect
+   if the display was turned off. */
+/* We record the time at which the last ping reply was received,
+   and the time at which the last ping (query) was sent. */
+static struct timeval last_ping, last_ping_sent;
+/* that many pings are sent, that many chances to reply */
+#define PING_MAXNQUERY 2
+static int pings; /* counts number of pings sent since last reply */
+/* how long we wait for a reply */
+#define PING_REPLY_DELAY 200
+
+/* sleep this long after sending a braille display update */
+#define SEND_DELAY 30
+
+/* for routing keys */
+int must_init_oldstat = 1;
 
 /* Definitions to avoid typematic repetitions of function keys other
    than movement keys */
-#define NONREPEAT_TIMEOUT 500
-static int lastcmd = 0;
-static struct timeval lastcmd_time;
+#define NONREPEAT_TIMEOUT 300
+#define READBRL_SKIP_TIME 300
+static int lastcmd = EOF;
+static struct timeval lastcmd_time, last_readbrl_time;
 static struct timezone dum_tz;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
-{CMD_FWINRT, CMD_FWINLT, CMD_LNUP, CMD_LNDN, CMD_WINUP,
- CMD_WINDN, CMD_CHRLT, CMD_CHRRT, CMD_KEY_LEFT,
- CMD_KEY_RIGHT, CMD_KEY_UP, CMD_KEY_DOWN,
+{CMD_FWINRT, CMD_FWINLT, CMD_LNUP, CMD_LNDN, CMD_WINUP, CMD_WINDN,
+ CMD_CHRLT, CMD_CHRRT, CMD_KEY_LEFT, CMD_KEY_RIGHT, CMD_KEY_UP, CMD_KEY_DOWN,
  CMD_CSRTRK, 0};
 
 /* Low battery warning */
@@ -67,15 +96,13 @@ static int repeat_list[] =
 /* We must code the dots forming the message, not its text since handling
    of translation tables has been moved to the main module of brltty. */
 static unsigned char battery_msg_20[] =		/* "-><- Low batteries" */
-{0x30, 0x1a, 0x25, 0x30, 0x00, 0x55, 0x19, 0x2e, 0x00, 0x05,
- 0x01, 0x1e, 0x1e, 0x09, 0x1d, 0x06, 0x09, 0x16, 0x00, 0x00}, battery_msg_40[] =	/* "-><-- Navigator:  Batteries are low" */
-{0x30, 0x1a, 0x25, 0x30, 0x30, 0x00, 0x5b, 0x01, 0x35, 0x06,
- 0x0f, 0x01, 0x1e, 0x19, 0x1d, 0x29, 0x00, 0x00, 0x45, 0x01,
- 0x1e, 0x1e, 0x09, 0x1d, 0x06, 0x09, 0x16, 0x00, 0x01, 0x1d,
- 0x09, 0x00, 0x15, 0x19, 0x2e, 0x00, 0x00, 0x00, 0x00, 0x00};
-/* input codes signaling low power */
-#define BATTERY_H1 (0x00)
-#define BATTERY_H2 (0x01)
+  {0x30, 0x1a, 0x25, 0x30, 0x00, 0x55, 0x19, 0x2e, 0x00, 0x05,
+     0x01, 0x1e, 0x1e, 0x09, 0x1d, 0x06, 0x09, 0x16, 0x00, 0x00},
+          battery_msg_40[] =	/* "-><-- Navigator:  Batteries are low" */
+  {0x30, 0x1a, 0x25, 0x30, 0x30, 0x00, 0x5b, 0x01, 0x35, 0x06,
+     0x0f, 0x01, 0x1e, 0x19, 0x1d, 0x29, 0x00, 0x00, 0x45, 0x01,
+     0x1e, 0x1e, 0x09, 0x1d, 0x06, 0x09, 0x16, 0x00, 0x01, 0x1d,
+     0x09, 0x00, 0x15, 0x19, 0x2e, 0x00, 0x00, 0x00, 0x00, 0x00};
 #endif
 
 /* This defines the mapping between brltty and Navigator's dots coding. */
@@ -112,213 +139,460 @@ static char DotsTable[256] =
   0xE0, 0xE1, 0xE8, 0xE9, 0xE2, 0xE3, 0xEA, 0xEB,
   0xF0, 0xF1, 0xF8, 0xF9, 0xF2, 0xF3, 0xFA, 0xFB,
   0xE4, 0xE5, 0xEC, 0xED, 0xE6, 0xE7, 0xEE, 0xEF,
-  0xF4, 0xF5, 0xFC, 0xFD, 0xF6, 0xF7, 0xFE, 0xFF};
+  0xF4, 0xF5, 0xFC, 0xFD, 0xF6, 0xF7, 0xFE, 0xFF
+};
 
-#define RESET_DELAY (1000)	/* msec */
+/* delay between auto-detect attemps at initialization */
+#define DETECT_DELAY (2000)	/* msec */
+/* Stabilization delay after changing baud rate */
+#define BAUD_DELAY (100)
 
 /* Communication codes */
-static char BRL_QUERY[] =
-{0xFF, 0xFF, 0x0A};
+static char BRL_QUERY[] = {0xFF, 0xFF, 0x0A};
 #define DIM_BRL_QUERY 3
-static char BRL_TYPEMATIC[] =
-{0xFF, 0xFF, 0x0D};
+static char BRL_TYPEMATIC[] = {0xFF, 0xFF, 0x0D};
 #define DIM_BRL_TYPEMATIC 3
-/* Normal header with cursor always off */
-static char BRL_SEND_HEAD[] =
-{0xFF, 0xFF, 0x04, 0x00, 0x00, 0x01};
+#ifdef HIGHBAUD
+/* Command to put the PB at 19200baud */
+static char BRL_UART192[] = {0xFF, 0xFF, 0x05, 0x04};
+#define DIM_BRL_UART192 4
+#endif
+/* Normal header for sending dots, with cursor always off */
+static char BRL_SEND_HEAD[] = {0xFF, 0xFF, 0x04, 0x00, 0x00, 0x01};
 #define DIM_BRL_SEND_FIXED 6
 #define DIM_BRL_SEND 8
-/* To extra bytes for lenght and offset */
+/* Two extra bytes for lenght and offset */
 #define BRL_SEND_LENGTH 6
 #define BRL_SEND_OFFSET 7
 
 /* Description of reply to query */
 #define Q_REPLY_LENGTH 12
-static char Q_HEADER[] =
-{0x0, 0x05};
+static char Q_HEADER[] = {0x0, 0x05};
 #define Q_HEADER_LENGTH 2
 #define Q_OFFSET_COLS 2
-			    /*#define Q_OFFSET_DOTS 3 *//* not used */
-#define Q_OFFSET_VER 4		/* not used */
-#define Q_VER_LENGTH 4		/* not used */
-			       /*#define Q_OFFSET_CHKSUM 8 *//* not used */
-			       /*#define Q_CHKSUM_LENGTH 4 *//* not used */
+/*#define Q_OFFSET_DOTS 3 *//* not used */
+#define Q_OFFSET_VER 4 /* hardware version */
+#define Q_VER_LENGTH 4
+/*#define Q_OFFSET_CHKSUM 8 *//* not used */
+/*#define Q_CHKSUM_LENGTH 4 *//* not used */
 
 /* Bit definition of key codes returned by the display */
-#define KEY_LEFT 1
-#define KEY_UP	2
-#define KEY_RIGHT 4
-#define KEY_DOWN 8
-#define KEY_EXEC 16
-#define KEY_BASELEFT 224
-#define KEY_BASERIGHT 96
-#define KEY_MASK 224		/* to keep the key base */
+/* Navigator and pb40 return 2bytes, pb65/80 returns 6. Each byte has a
+   different specific mask/signature in the 3 most significant bits.
+   Other bits indicate whether a specific key is pressed.
+   See readbrl(). */
+
+/* Bits to take into account when checking each byte's signature */
+#define KEY_SIGMASK 0xE0
+
+/* How we describe each byte */
+struct inbytedesc {
+  unsigned char sig, /* it's signature */
+                mask, /* bits that do represent keys */
+                shift; /* where to shift them into "code" */
+};
+/* We combine all key bits into one 32bit int. Each byte is masked by the
+   corresponding "mask" to extract valid bits then those are shifted by
+   "shift" and or'ed into the 32bits "code". */
+
+/* Description of bytes for navigator and pb40. */
+#define NAV_KEY_LEN 2
+struct inbytedesc nav_key_desc[NAV_KEY_LEN] =
+  {{0x60, 0x1F, 0},
+   {0xE0, 0x1F, 5}};
+/* Description of bytes for pb65/80 */
+#define PB_KEY_LEN 6
+struct inbytedesc pb_key_desc[PB_KEY_LEN] =
+  {{0x40, 0x0F, 10},
+   {0xC0, 0x0F, 14},
+   {0x20, 0x05, 18},
+   {0xA0, 0x05, 21},
+   {0x60, 0x1F, 24},
+   {0xE0, 0x1F, 5}};
+
+/* Symbolic labels for keys
+   Each key has it's own bit in "code". Key combinations are ORs. */
+
+/* For navigator and pb40 */
+/* bits from byte 1: navigator right pannel keys, pb right rocker +round button
+   + dislpay forward/backward controls on the top of the display */
+#define KEY_BLEFT  (1<<0)
+#define KEY_BUP	   (1<<1)
+#define KEY_BRIGHT (1<<2)
+#define KEY_BDOWN  (1<<3)
+#define KEY_BROUND (1<<4)
+/* bits from byte 2: navigator's left pannel; pb's left rocker and round
+   button; pb cannot produce CLEFT and CRIGHT. */
+#define KEY_CLEFT  (1<<5)
+#define KEY_CUP	   (1<<6)
+#define KEY_CRIGHT (1<<7)
+#define KEY_CDOWN  (1<<8)
+#define KEY_CROUND (1<<9)
+
+/* For pb65/80 */
+/* Bits from byte 5, could be just renames of byte 1 from navigator, but
+   we want to distinguish BAR1-2 from BUP/BDOWN. */
+#define KEY_BAR1   (1<<24)
+#define KEY_R2UP   (1<<25)
+#define KEY_BAR2   (1<<26)
+#define KEY_R2DN   (1<<27)
+#define KEY_CNCV   (1<<28)
+/* Bits from byte 6, are just renames of byte 2 from navigator */
+#define KEY_BUT1   (1<<5)
+#define KEY_R1UP   (1<<6)
+#define KEY_BUT2   (1<<7)
+#define KEY_R1DN   (1<<8)
+#define KEY_CNVX   (1<<9)
+/* bits from byte 1: left rocker switches */
+#define KEY_S1UP   (1<<10)
+#define KEY_S1DN   (1<<11)
+#define KEY_S2UP   (1<<12)
+#define KEY_S2DN   (1<<13)
+/* bits from byte 2: right rocker switches */
+#define KEY_S3UP   (1<<14)
+#define KEY_S3DN   (1<<15)
+#define KEY_S4UP   (1<<16)
+#define KEY_S4DN   (1<<17)
+/* Special mask: switches are special keys to distinguish... */
+#define KEY_SWITCHMASK (KEY_S1UP|KEY_S1DN | KEY_S2UP|KEY_S2DN \
+			| KEY_S3UP|KEY_S3DN | KEY_S4UP|KEY_S4DN)
+/* bits from byte 3: rightmost forward bars from dislpay top */
+#define KEY_BAR3   (1<<18)
+  /* one unused bit */
+#define KEY_BAR4   (1<<20)
+/* bits from byte 4: two buttons on the top, right side (left side buttons
+   are mapped in byte 6) */
+#define KEY_BUT3   (1<<21)
+  /* one unused bit */
+#define KEY_BUT4   (1<<23)
+
+/* Some special case input codes */
+/* input codes signaling low battery power (2bytes) */
+#define BATTERY_H1 0x00
+#define BATTERY_H2 0x01
+/* Sensor switches/cursor routing keys information (2bytes header) */
+#define KEY_SW_H1 0x00
+#define KEY_SW_H2 0x08
 
 /* Definitions for sensor switches/cursor routing keys */
-#define KEY_SW_H1 0
-#define KEY_SW_H2 8
-#define SW_NVERT 4
-#define SW_MAXHORIZ 10		/* bytes of horizontal info */
+#define SW_NVERT 4 /* vertical switches. unused info. 4bytes to skip */
+#define SW_MAXHORIZ 11	/* bytes of horizontal info (81cells
+			   / 8bits per byte = 11bytes) */
+/* actual total number of switch informatio bytes depending on size
+   of display (40/65/81) including 4bytes of unused vertical switches */
 #define SW_CNT40 9
 #define SW_CNT80 14
+#define SW_CNT81 15
 
 /* Global variables */
 
-static int brl_fd;		/* file descriptor for comm port */
+static int brl_fd;              /* file descriptor for comm port */
 static struct termios oldtio,	/* old terminal settings for com port */
                       curtio;   /* current settings */
 static unsigned char *rawdata,	/* translated data to send to display */
- *prevdata;			/* previous data sent */
-static int brl_cols;		/* Number of cells on display */
-static char disp_ver[Q_VER_LENGTH],	/* version of the hardware */
+                     *prevdata, /* previous data sent */
+                     *dispbuf;
+static int brl_cols;		/* Number of cells available for text */
+static int ncells;              /* Total number of cells on display: this is
+				   brl_cols cells + 1 status cell on PB80. */
+static unsigned char has_sw,    /* flag: has routing keys or not */
+                     sw_lastkey,/* index of the last routing key (first
+				   being 0). On PB80 this excludes the 81st. */
+                     sw_bcnt;   /* bytes of sensor switch information */
+static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
 #ifdef LOW_BATTERY_WARN
- *battery_msg,			/* Same thing for low battery warning msg */
-  redisplay = 0,		/* a flag, causes complete refresh on next call
-				   to display() */
+unsigned char *battery_msg;     /* low battery warning msg */
 #endif
-  has_sw;			/* flag: has routing keys or not */
-
-static void 
-ResetTypematic (void)
-/* Sends a command to the display to set the typematic parameters */
-{
-  char params[2] =
-  {BRL_TYPEMATIC_DELAY, BRL_TYPEMATIC_REPEAT};
-  write (brl_fd, BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
-  write (brl_fd, &params, 2);
-}
 
 
 void 
 identbrl (const char *tty)
 {
-  printf ("  BRLTTY driver for TSI displays, version 1.1\n");
-  printf ("  Copyright (C) 1996 by Stephane Doyon <s.doyon@videotron.ca>\n");
-  if (tty)
-    printf ("  Using serial port %s\n", tty);
-  else
-    printf ("  Defaulting to serial port %s\n", BRLDEV);
+  printf ("  %s\n", VERSION);
+  LogPrint(LOG_NOTICE,"%s", VERSION);
+  printf ("    Copyright (C) 1996-98 by Stéphane Doyon "
+	  "<s.doyon@videotron.ca>\n");
+  if (tty){
+    printf ("    Using serial port %s\n", tty);
+    LogPrint(LOG_NOTICE,"  Using serial port %s", tty);
+  }else{
+    printf ("    Defaulting to serial port %s\n", BRLDEV);
+    LogPrint(LOG_NOTICE,"  Defaulting to serial port %s", BRLDEV);
+  }
 }
 
-brldim 
+
+static int
+CheckCTSLine(int fd)
+/* If supported (might not be portable) check that the CTS line (RS232)
+   is up. */
+{
+#if defined(TIOCMGET) && defined(TIOCM_CTS)
+  int flags;
+  if (ioctl(fd, TIOCMGET, &flags) < 0){
+    LogPrint(LOG_ERR, "TIOCMGET: %s", strerror(errno));
+    return(-1);
+  }else if(flags & TIOCM_CTS)
+    return(1);
+  else return(0);
+#else
+  return(1);
+#endif
+}
+
+
+static int
+SetSpeed(int fd, struct termios *tio, int code)
+{
+  if(cfsetispeed(tio,code) == -1
+     || cfsetospeed(tio,code) == -1
+     || tcsetattr (fd, TCSAFLUSH, tio) == -1){
+      LogPrint(LOG_ERR, "Failed to set baudrate to %s",
+	       (code == B9600) ? "9600"
+	       : (code == B19200) ? "19200"
+	       : "???");
+      return(0);
+    }
+  return(1);
+}
+
+
+static int
+myread(int fd, void *buf, unsigned len)
+/* This is a replacement for read for use in nonblocking mode: when
+   c_cc[VTIME] = 1, c_cc[VMIN] = 0. We want to read len bytes into buf, but
+   return early if the timeout expires. I would have thought setting
+   c_cc[VMIN] to len would have done the trick, but apparently c_cc[VMIN]>0
+   means to wait indefinitly for at least 1byte, which we don't want. */
+{
+  char *ptr = (char *)buf;
+  int r, l = 0;
+  while(l < len){
+    r = read(fd,ptr+l,len-l);
+    if(r == 0) return(l);
+    else if(r<0) return(r);
+    l += r;
+  }
+  return(l);
+}
+
+
+static int
+QueryDisplay(int brl_fd, char *reply)
+/* For auto-detect: send query, read response and validate response header. */
+{
+  int r=-1;
+  if (write (brl_fd, BRL_QUERY, DIM_BRL_QUERY) == DIM_BRL_QUERY
+      && (r = myread (brl_fd, reply, Q_REPLY_LENGTH)) == Q_REPLY_LENGTH
+      && !memcmp (reply, Q_HEADER, Q_HEADER_LENGTH)){
+    LogPrint(LOG_DEBUG,"Valid reply received");
+    return 1;
+  }
+  LogPrint(LOG_DEBUG,"Invalid reply of %d bytes", r);
+  return 0;
+}
+
+
+static void 
+ResetTypematic (void)
+/* Sends a command to the display to set the typematic parameters */
+{
+  static unsigned char params[2] =
+    {BRL_TYPEMATIC_DELAY, BRL_TYPEMATIC_REPEAT};
+  write (brl_fd, BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
+  write (brl_fd, &params, 2);
+}
+
+
+brldim
 initbrl (const char *tty)
 {
   brldim res;			/* return result */
-  int i;
+  int i=0;
   char reply[Q_REPLY_LENGTH];
+  int speed;
 
   res.disp = rawdata = prevdata = NULL;
 
   /* Open the Braille display device for random access */
-  if (tty != NULL)
-    brl_fd = open (tty, O_RDWR | O_NOCTTY);
-  else
-    brl_fd = open (BRLDEV, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0)
+  if (tty == NULL)
+    tty = BRLDEV;
+  brl_fd = open (tty, O_RDWR | O_NOCTTY);
+  if (brl_fd < 0){
+    LogPrint(LOG_ERR, "Open failed on port %s: %s", tty, strerror(errno));
     goto failure;
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
+  }
+  if(!isatty(brl_fd)){
+    LogPrint(LOG_ERR,"Opened device %s is not a tty!", tty);
+    goto failure;
+  }
+  LogPrint(LOG_DEBUG,"Tty %s opened", tty);
 
-  /* Elaborate new settings by working from current state */
-  tcgetattr (brl_fd, &curtio);
-  /* Set bps */
-  if(cfsetispeed(&curtio,BAUDRATE) == -1) goto failure;
-  if(cfsetospeed(&curtio,BAUDRATE) == -1) goto failure;
+  tcgetattr (brl_fd, &oldtio);	/* save current settings */
+  /* we don't check the return code. could only be EBADF or ENOTTY. */
+
+  /* Construct new settings by working from current state */
+  memcpy(&curtio, &oldtio, sizeof(struct termios));
   cfmakeraw(&curtio);
   /* should we use cfmakeraw ? */
   /* local */
   curtio.c_lflag &= ~TOSTOP; /* no SIGTTOU to backgrounded processes */
   /* control */
   curtio.c_cflag |= CLOCAL /* ignore status lines (carrier detect...) */
-                  | CREAD /* enable reading */
-                  | CRTSCTS; /* hardware flow control */
+                  | CREAD; /* enable reading */
   curtio.c_cflag &= ~( CSTOPB /* 1 stop bit */
+		      | CRTSCTS /* disable hardware flow control */
                       | PARENB /* disable parity generation and detection */
                      );
   /* input */
   curtio.c_iflag &= ~( INPCK /* no input parity check */
-                      | ~IXOFF
+                      | ~IXOFF /* don't send XON/XOFF */
 		     );
 
   /* noncanonical: for first operation */
-  curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars */
-  curtio.c_cc[VMIN] = Q_REPLY_LENGTH; /* fill buffer before read returns */
-  tcflush (brl_fd, TCIOFLUSH);	/* clean line */
-  tcsetattr (brl_fd, TCSANOW, &curtio);		/* activate new settings */
+  curtio.c_cc[VTIME] = 1;  /* 0.1sec timeout between chars on input */
+  curtio.c_cc[VMIN] = 0; /* no minimum input. it would have been nice to set
+			    this to Q_REPLY_LENGTH except it waits
+			    indefinitly for the first char if VTIME != 0... */
 
-  /* Query display */
-  do
-    {
-      if (write (brl_fd, BRL_QUERY, DIM_BRL_QUERY) != DIM_BRL_QUERY)
-	{
-	  delay (RESET_DELAY);
-	  continue;
-	}
-      if (read (brl_fd, reply, Q_REPLY_LENGTH) != Q_REPLY_LENGTH)
-	{
-	  tcflush(brl_fd,TCIOFLUSH);
-	  continue;
-	}
+  /* Speed (baud rate) will be set in detection loop below. */
+
+  /* Make the settings active and flush the input/output queues. This time we
+     check the return code in case somehow the settings are invalid. */
+  if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1){
+    LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
+    goto failure;
+  }
+
+  /* Try to detect display by sending query */
+  while(1){
+    /* Check RS232 wires: we should have CTS if the device is connected and
+       ON. The NAV40 lowers CTS when off, the PB80 doesn't, and I don't know
+       about the others. */
+    if((i = CheckCTSLine(brl_fd)) == -1)
+      goto failure;
+    else if(!i){
+      LogPrint(LOG_INFO, "Display is off or not connected");
+      while(!i){
+	delay(DETECT_DELAY);
+	if((i = CheckCTSLine(brl_fd)) == -1)
+	  goto failure;
+      }
+      LogPrint(LOG_DEBUG,"Device was connected or activated");
     }
-  while (memcmp (reply, Q_HEADER, Q_HEADER_LENGTH));
+    /* Set speed / baud rate / bps */
+    LogPrint(LOG_DEBUG,"Sending query at 9600bps");
+    if(!SetSpeed(brl_fd,&curtio, B9600)) goto failure;
+    if(QueryDisplay(brl_fd,reply)) break;
+#ifdef HIGHBAUD
+    /* Then send the query at 19200bps, in case a PB was left ON
+       at that speed */
+    LogPrint(LOG_DEBUG,"Sending query at 19200bps");
+    if(!SetSpeed(brl_fd,&curtio, B19200)) goto failure;
+    if(QueryDisplay(brl_fd,reply)) break;
+#endif
+    delay(DETECT_DELAY);
+  }
 
   memcpy (disp_ver, &reply[Q_OFFSET_VER], Q_VER_LENGTH);
+  ncells = reply[Q_OFFSET_COLS];
+  LogPrint(LOG_INFO,"Display replyed: %d cells, version %c%c%c%c", ncells,
+	   disp_ver[0], disp_ver[1], disp_ver[2], disp_ver[3]);
 
-  if (disp_ver[1] > '3')
-    sethlpscr (2);		/* pb (?40) */
-  else if (reply[Q_OFFSET_COLS] == 80)
-    sethlpscr (1);		/* nav80 */
-  else
-    sethlpscr (0);		/* nav20/40 */
+  brl_cols = ncells;
+  sw_lastkey = brl_cols-1;
+  speed = 1;
 
-#ifdef BRLCOLS
-  brl_cols = BRLCOLS;
-#else
-  brl_cols = reply[Q_OFFSET_COLS];
-#endif
+  switch(brl_cols){
+  case 20:
+    /* nav 20 */
+    sethlpscr (0);
+    has_sw = 0;
+    LogPrint(LOG_NOTICE, "Detected Navigator 20");
+    break;
+  case 40:
+    if(disp_ver[1] > '3'){
+      /* pb 40 */
+      sethlpscr (2);
+      has_sw = 1;
+      sw_bcnt = SW_CNT40;
+      sw_lastkey = 39;
+      speed = 2;
+      LogPrint(LOG_NOTICE, "Detected PowerBraille 40");
+    }else{
+      /* nav 40 */
+      has_sw = 0;
+      sethlpscr (0);
+      LogPrint(LOG_NOTICE, "Detected Navigator 40");
+    }
+    break;
+  case 80:
+    /* nav 80 */
+    sethlpscr (1);
+    has_sw = 1;
+    sw_bcnt = SW_CNT80;
+    sw_lastkey = 79;
+    LogPrint(LOG_NOTICE, "Detected Navigator 80");
+    break;
+  case 65:
+    /* pb65 */
+    sethlpscr (3);
+    has_sw = 1;
+    sw_bcnt = SW_CNT81;
+    sw_lastkey = 64;
+    speed = 2;
+    LogPrint(LOG_NOTICE, "Detected PowerBraille 65");
+    break;
+  case 81:
+    /* pb80 */
+    sethlpscr (3);
+    has_sw = 1;
+    sw_bcnt = SW_CNT81;
+    sw_lastkey = 79;
+    brl_cols = 80;
+    speed = 2;
+    LogPrint(LOG_NOTICE, "Detected PowerBraille 80");
+    break;
+  default:
+    LogPrint(LOG_ERR,"Unrecognized braille display");
+    goto failure;
+  };
 
-#ifdef HAS_SW
-  has_sw = HAS_SW;
-#else
-  has_sw = (disp_ver[1] > '3' || brl_cols == 80);
-#endif
-
-  if (brl_cols == 20)
-    {
 #ifdef LOW_BATTERY_WARN
+  if (brl_cols == 20){
       battery_msg = battery_msg_20;
-#endif
-    }
-  else if (brl_cols == 40)
-    {
-#ifdef LOW_BATTERY_WARN
+    }else{
       battery_msg = battery_msg_40;
-#endif
     }
-  else if (brl_cols == 80)
-    {
-#ifdef LOW_BATTERY_WARN
-      battery_msg = battery_msg_40;
 #endif
-    }
-  else
-    goto failure;		/* unsupported display length (pb 65/81) */
 
   res.x = brl_cols;		/* initialise size of display */
   res.y = BRLROWS;		/* always 1 */
 
-  curtio.c_cc[VTIME] = 0;
-  curtio.c_cc[VMIN] = 0;
-  tcsetattr (brl_fd, TCSANOW, &curtio);         /* activate new settings */
+#ifdef HIGHBAUD
+  if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
+    write (brl_fd, BRL_UART192, DIM_BRL_UART192);
+    tcdrain(brl_fd);
+    delay(BAUD_DELAY);
+    if(!SetSpeed(brl_fd,&curtio, B19200)) goto failure;
+    LogPrint(LOG_DEBUG,"Switched to 19200bps");
+  }
+#endif
 
   /* Mark time of last command to initialize typematic watch */
-  gettimeofday (&lastcmd_time, &dum_tz);
+  gettimeofday (&last_ping, &dum_tz);
+  memcpy(&last_readbrl_time, &last_ping, sizeof(struct timeval));
+  memcpy(&lastcmd_time, &last_ping, sizeof(struct timeval));
+  lastcmd = EOF;
+  pings=0;
+  must_init_oldstat = 1;
 
   ResetTypematic ();
 
   /* Allocate space for buffers */
-  res.disp = (unsigned char *) malloc (brl_cols);
-  prevdata = (unsigned char *) malloc (brl_cols);
-  rawdata = (unsigned char *) malloc (2 * brl_cols + DIM_BRL_SEND);
+  dispbuf = res.disp = (unsigned char *) malloc (ncells);
+  prevdata = (unsigned char *) malloc (ncells);
+  rawdata = (unsigned char *) malloc (2 * ncells + DIM_BRL_SEND);
   /* 2* to insert 0s for attribute code when sending to the display */
   if (!res.disp || !prevdata || !rawdata)
     goto failure;
@@ -327,26 +601,15 @@ initbrl (const char *tty)
      write to the display in writebrl(). */
   for (i = 0; i < DIM_BRL_SEND_FIXED; i++)
     rawdata[i] = BRL_SEND_HEAD[i];
-  memset (rawdata + DIM_BRL_SEND, 0, 2 * brl_cols * BRLROWS);
+  memset (rawdata + DIM_BRL_SEND, 0, 2 * ncells * BRLROWS);
 
   /* Force rewrite of display on first writebrl */
-  for (i = 0; i < brl_cols; i++)
-    prevdata[i] = 0xFF;
+  memset(prevdata, 0xFF, ncells);
 
   return res;
 
 failure:;
-  if (brl_fd >= 0)
-    {
-      tcsetattr (brl_fd, TCSANOW, &oldtio);
-      close (brl_fd);
-    }
-  if (res.disp)
-    free (res.disp);
-  if (rawdata)
-    free (rawdata);
-  if (prevdata)
-    free (prevdata);
+  closebrl(res);
   res.x = -1;
   return res;
 }
@@ -355,50 +618,80 @@ failure:;
 void 
 closebrl (brldim brl)
 {
-  free (brl.disp);
-  free (rawdata);
-  free (prevdata);
-  tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
-  close (brl_fd);
+  if (brl_fd >= 0)
+    {
+      tcsetattr (brl_fd, TCSANOW, &oldtio);
+      close (brl_fd);
+    }
+  if (brl.disp)
+    free (brl.disp);
+  if (rawdata)
+    free (rawdata);
+  if (prevdata)
+    free (prevdata);
 }
 
-/* no status cells */
-void setbrlstat (const unsigned char *s) {}
-
-
 static void 
-display (unsigned char *pattern, unsigned start, unsigned stop)
-/* display a given dot pattern. The pattern contains brl_cols bytes, but we
-   only want to update from byte (or cell) start, to byte (cell) stop. */
+display (const unsigned char *pattern, 
+	 unsigned start, unsigned stop, 
+	 unsigned brloffset)
+/* display a given dot pattern. We process only part of the pattern, from
+   byte (cell) start to byte stop. That pattern should be shown at position 
+   brloffset on the display. */
 {
   int i, length;
-
-#ifdef LOW_BATTERY_WARN
-  /* A hack for battery warning message go away... */
-  if (redisplay)
-    {
-      start = 0;
-      stop = brl_cols - 1;
-      redisplay = 0;
-    }
-#endif
 
   /* Assumes BRLROWS == 1 */
   length = stop - start + 1;
 
   rawdata[BRL_SEND_LENGTH] = 2 * length;
-  rawdata[BRL_SEND_OFFSET] = start;
+  rawdata[BRL_SEND_OFFSET] = brloffset;
 
   for (i = 0; i < length; i++)
     rawdata[DIM_BRL_SEND + 2 * i + 1] = DotsTable[pattern[start + i]];
 
+  /* If we update the display too often, then the packets queue up in the send
+     queue, the info displayed is not up to date, and the info displayed
+     continues to change after we stop updating while the queue empties. We
+     also risk overflows which put garbage on the display. If the queue is
+     not empty then we're going at it too hard, so we'll wait until
+     it drains. If the queue is empty then this is a wasted syscall. */
+
+  /* Apparently this is not even good enough when updating fast (holding down
+     an up/down arrow key). ping replies get lost and we think the display
+     has been turned off... */
+
+  tcdrain(brl_fd);
   write (brl_fd, rawdata, DIM_BRL_SEND + 2 * length);
+
+  /* So we extend the sleep for this cycle. Keeping the delay in the main
+     brltty loop low keeps the response time good, but SEND_DELAY give the
+     display time to show what we're sending. */
+
+  tcdrain(brl_fd);
+  shortdelay(SEND_DELAY);
+  /* timing complications: when scrolllling through long files, the display
+     gets garbled with pb80. seems it cannot take a full speed continuous flow.
+     Now we drain, write, drain again, then shortdelay for 30ms. delay instead
+     of shortdelay is too long, longer delay is also too long. this seems OK,
+     no distortion or ping fault. But it's just a bit slow, and I don't know
+     for other displays. affraid about nav80. */
 }
+
+void setbrlstat (const unsigned char *s)
+/* Only the PB80, which actually has 81cells, can be considered to have status
+   cells, and it has only one. We could also decide to devote some of
+   the cells of the PB65? */
+{
+  if(ncells == 81)
+    dispbuf[80] = s[0];
+}
+
 
 static void 
 display_all (unsigned char *pattern)
 {
-  display (pattern, 0, brl_cols - 1);
+  display (pattern, 0, brl_cols - 1, 0);
 }
 
 
@@ -407,16 +700,16 @@ writebrl (brldim brl)
 {
   int base = 0, i = 0, collecting = 0, simil = 0;
 
-  if (brl.x != brl_cols || brl.y != BRLROWS)
+  if (brl.x != brl_cols || brl.y != BRLROWS || brl.disp != dispbuf)
     return;
 
-  while (i < brl_cols)
+  while (i < ncells)
     if (brl.disp[i] == prevdata[i])
       {
 	simil++;
 	if (collecting && 2 * simil > DIM_BRL_SEND)
 	  {
-	    display (brl.disp, base, i - simil);
+	    display (brl.disp, base, i - simil, base);
 	    base = i;
 	    collecting = 0;
 	    simil = 0;
@@ -434,7 +727,7 @@ writebrl (brldim brl)
       }
 
   if (collecting)
-    display (brl.disp, base, i - simil - 1);
+    display (brl.disp, base, i - simil - 1, base);
 }
 
 
@@ -481,11 +774,12 @@ do_battery_warn ()
   flicker ();
   display_all (battery_msg);
   delay (BATTERY_DELAY);
-  redisplay = 1;
+  memset(prevdata, 255, brl_cols); /* force refreshing of the display */
 }
 #endif
 
 
+/* OK now about key inputs */
 int readbrl (int);
 
 
@@ -493,11 +787,12 @@ int readbrl (int);
    the display's key pads. It calls cut_cursor() if it gets a certain key
    press. cut_cursor() is an elaborate function that allows selection of
    portions of text for cut&paste (presenting a moving cursor to replace
-   the cursor routing keys that the Navigator/20/40 does not have). The strange
-   part is that cut_cursor() itself calls back to readbrl() to get keys
-   from the user. It receives and processes keys by calling readbrl again
-   and again and eventually returns a single code to the original readbrl()
-   function that had called cut_cursor() in the first place. */
+   the cursor routing keys that the Navigator/20/40 does not have). (This
+   function is not bound to PB keys). The strange part is that cut_cursor()
+   itself calls back to readbrl() to get keys from the user. It receives
+   and processes keys by calling readbrl again and again and eventually
+   returns a single code to the original readbrl() function that had 
+   called cut_cursor() in the first place. */
 
 /* If cut_cursor() returns the following special code to readbrl(), then
    the cut_cursor() operation has been cancelled. */
@@ -542,7 +837,8 @@ cut_cursor ()
       prevdata[pos] |= CUT_CSR_CHAR;
       display_all (prevdata);
       prevdata[pos] = oldchar;
-      while ((key = readbrl (TBL_CMD)) == EOF);
+
+      while ((key = readbrl (TBL_CMD)) == EOF) delay(1); /* just yield */
       switch (key)
 	{
 	case CMD_FWINRT:
@@ -581,6 +877,10 @@ cut_cursor ()
 	  break;
 	  /* That's where we catch the special return code: user has typed
 	     cut_cursor() activation key again, so we cancel it. */
+	case CMD_RESTARTBRL:
+	  res = CMD_RESTARTBRL;
+	  pos = -1;
+	  break;
 	}
     }
 
@@ -590,250 +890,408 @@ cut_cursor ()
 }
 
 
-/* These macros, although unusual, make the key binding declarations look
+/* Now for readbrl().
+   Description of received bytes and key names are near the top of the file.
+
+   These macros, although unusual, make the key binding declarations look
    much better */
-/* For front panel */
+
 #define KEY(code,result) \
     case code: res = result; break;
-#define KEYS(codeleft,coderight,result) \
-    else if ( l == (codeleft) && r == (coderight) ) res = result;
-#define KEYSPECIAL(codeleft,coderight,action) \
-    else if ( l == (codeleft) && r == (coderight) ) { action }
+#define KEYAND(code) \
+    case code:
+#define KEYSPECIAL(code,action) \
+    case code: { action }; break;
+#define KEYSW(codeon, codeoff, result) \
+    case codeon: res = result | VAL_SWITCHON; break; \
+    case codeoff: res = result | VAL_SWITCHOFF; break;
 
 /* For cursor routing */
+/* lookup so find out if a certain key is active */
 #define SW_CHK(swnum) \
-      ( sw_stat[swnum/8] & (1 << (swnum % 8)) )
-#define SW_MAXKEY (brl_cols-1)
+      ( sw_oldstat[swnum/8] & (1 << (swnum % 8)) )
 
+/* These are (sort of) states of the state machine parsing the bytes
+   received form the display. These can be navigator|pb40 keys, pb80 keys,
+   sensor switch info, low battery warning or query reply. The last three
+   cannot be distinguished until the second byte, so at first they both fall
+   under K_SPECIAL. */
+#define K_SPECIAL 1
+#define K_NAVKEY 2
+#define K_PBKEY 3
+#define K_BATTERY 4
+#define K_SW 5
+#define K_QUERYREP 6
+
+/* read buffer size: maximum is query reply minus header */
+#define MAXREAD 10
 
 int 
 readbrl (int type)
 {
+  /* static bit vector recording currently pressed sensor switches (for
+     repetition detection) */
   static unsigned char sw_oldstat[SW_MAXHORIZ];
-  unsigned char l, r, t;
-  unsigned char sw_stat[SW_MAXHORIZ], sw_which[SW_MAXHORIZ * 8], sw_howmany = 0;
-  int res = EOF;
+  unsigned char sw_stat[SW_MAXHORIZ], /* received switch data */
+                sw_which[SW_MAXHORIZ * 8], /* list of pressed keys */
+                sw_howmany = 0; /* length of that list */
+  unsigned int code = 0; /* 32bits code representing pressed keys once the
+			    input bytes are interpreted */
+  int res = EOF; /* command code to return. code is mapped to res. */
+  static int pending_cmd = EOF;
+  char buf[MAXREAD], /* read buffer */
+       packtype = 0; /* type of packet being received (state) */
+  unsigned i;
+  struct timeval now;
+  int skip_this_cmd = 0;
 
   /* We have no need for command arguments... */
   if (type != TBL_CMD)
     return (EOF);
 
-/* Key press codes for the front panel come in pairs of bytes. We must get
-   both before we can proceed in case it's a combination. We get the right
-   side first. Each byte has 1bit for each key + a special mask identifying
-   the panel.
+  gettimeofday (&now, &dum_tz);
+  if (elapsed_msec (&last_readbrl_time, &now) > READBRL_SKIP_TIME)
+    /* if the key we get this time is the same as the one we returned at last
+       call, and if it has been abnormally long since we were called
+       (presumably sound was being played or a message displayed) then
+       the bytes we will read can be old... so we forget this key, if it is
+       a repeat. */
+    skip_this_cmd = 1;
+  memcpy(&last_readbrl_time, &now, sizeof(struct timeval));
+       
+  if(pending_cmd != EOF){
+    res = pending_cmd;
+    lastcmd = EOF;
+    pending_cmd = EOF;
+    return(res);
+  }
+
+/* Key press codes come in pairs of bytes for nav and pb40, in 6bytes
+   for pb65/80. Each byte has bits representing individual keys + a special
+   mask/signature in the most significant 3bits.
 
    The low battery warning from the display is a specific 2bytes code.
 
-   Finally, the routing keys have a special 2bytes header followed by 9 or 14
-   bytes of info (1bit for each routing key). The first 4bytes describe
+   Finally, the routing keys have a special 2bytes header followed by 9, 14
+   or 15 bytes of info (1bit for each routing key). The first 4bytes describe
    vertical routing keys and are ignored in this driver.
+
+   We might get a query reply, since we send queries when we don't get
+   any keys in a certain time. That a 2byte header + 10 more bytes ignored.
  */
 
   /* reset to nonblocking */
   curtio.c_cc[VTIME] = 0;
   curtio.c_cc[VMIN] = 0;
   tcsetattr (brl_fd, TCSANOW, &curtio);
-
-  /* Get the first byte, or right panel key */
-  if (!read (brl_fd, &r, 1))
+  /* Check for first byte */
+  if (!read (brl_fd, buf, 1)){
+    if((i = elapsed_msec(&last_ping, &now) > PING_INTRVL)){
+      int ping_due = (pings==0 || (elapsed_msec(&last_ping_sent, &now)
+				   > PING_REPLY_DELAY));
+      if((pings>=PING_MAXNQUERY && ping_due)
+	 || CheckCTSLine(brl_fd) != 1)
+	return CMD_RESTARTBRL;
+      else if(ping_due){
+	LogPrint(LOG_DEBUG,"Display idle: sending query");
+	tcdrain(brl_fd);
+	delay(2*SEND_DELAY);
+	write (brl_fd, BRL_QUERY, DIM_BRL_QUERY);
+	pings++;
+	gettimeofday(&last_ping_sent, &dum_tz);
+      }
+    }
     return (EOF);
-  while ((r & KEY_MASK) != KEY_BASERIGHT
-#ifdef LOW_BATTERY_WARN
-	 && r != BATTERY_H1
-#endif
-	 && (!has_sw || r != KEY_SW_H1)
-    )
-    /* read through and discard garbage
-       until we get to a valid first byte */
-    if (!read (brl_fd, &r, 1))
-      return (EOF);
-  /* Now get left key or second byte of header. */
+  }
+  /* there was some input, we heard something. */
+  gettimeofday(&last_ping, &dum_tz);
+  pings=0;
+
+  /* further reads will wait a bit to get a complete sequence */
   curtio.c_cc[VTIME] = 1;
-  curtio.c_cc[VMIN] = 1;
+  curtio.c_cc[VMIN] = 0;
   tcsetattr (brl_fd, TCSANOW, &curtio);
-  if (!read (brl_fd, &l, 1))
-    return (EOF);
-  /* If it didn't work, it's a timeout: that was not a pair */
-#ifdef LOW_BATTERY_WARN
-  if (r == BATTERY_H1 && l == BATTERY_H2)
-    {
-      do_battery_warn ();
+
+  /* read bytes */
+  i=0;
+  while(1){
+    if(i==0){
+      if(buf[0] == BATTERY_H1)
+	 /* || buf[0] == KEY_SW_H1 || buf[0] == Q_HEADER[0] */
+	packtype = K_SPECIAL;
+      else if((buf[0]&KEY_SIGMASK) == nav_key_desc[0].sig) packtype = K_NAVKEY;
+      else if((buf[0]&KEY_SIGMASK) == pb_key_desc[0].sig) packtype = K_PBKEY;
+      else return(EOF);
+      /* unrecognized byte (garbage...?) */
+    }else{ /* i>0 */
+      if(packtype == K_SPECIAL){
+	if(buf[1] == BATTERY_H2) packtype = K_BATTERY;
+	else if(buf[1] == KEY_SW_H2) packtype = K_SW;
+	else if(buf[1] == Q_HEADER[1]) packtype = K_QUERYREP;
+	else return(EOF);
+	break;
+      }else if(packtype == K_NAVKEY){
+	if((buf[1]&KEY_SIGMASK) != nav_key_desc[1].sig)
+	  return(EOF);
+	break;
+      }else{ /* K_PBKEY */
+	if((buf[i]&KEY_SIGMASK) != pb_key_desc[i].sig)
+	  return(EOF);
+	if(i==PB_KEY_LEN-1) break;
+      }
+    }
+    i++;
+    if (!myread (brl_fd, buf+i, 1))
       return (EOF);
-    }
-  else
-#endif
-  if (has_sw && r == KEY_SW_H1 && l == KEY_SW_H2)
-    {				/* read the rest of the sequence */
-      unsigned i, cnt;
-      r = l = 0;
+  }/* while */
 
-      /* read next byte: it indicates length of sequence */
-      /* still VMIN = VTIME = 1 */
-      if (!read (brl_fd, &t, 1))
-	return (EOF);
-
-      /* how long is the sequence supposed to be... */
-      if (brl_cols == 40)
-	cnt = SW_CNT40;
-      else if (brl_cols == 80)
-	cnt = SW_CNT80;
-      else
-	return (EOF);
-      /* if cnt and brl_cols disagree, then must be garbage??? */
-      if (t != cnt)
-	return (EOF);
-
-      /* skip the vertical keys info */
-      curtio.c_cc[VTIME] = 1;
-      curtio.c_cc[VMIN] = SW_NVERT;
-      tcsetattr (brl_fd, TCSANOW, &curtio);
-      if (read (brl_fd, &t, SW_NVERT) != SW_NVERT)
-	return (EOF);
-      cnt -= SW_NVERT;
-      /* cnt now gives the number of bytes describing horizontal
-         routing keys only */
-
-      /* Finally, the horizontal keys */
-      curtio.c_cc[VTIME] = 1;
-      curtio.c_cc[VMIN] = cnt;
-      tcsetattr (brl_fd, TCSANOW, &curtio);
-      if (read (brl_fd, &sw_stat, cnt) != cnt)
-	return (EOF);
-
-      /* if key press is maintained, then packet is resent by display
-         every 0.5secs. process only if it has changed form alst time.
-         When the key is released, then display sends a packet with all
-         info bits at 0, which will clear sw_oldstat for next press... */
-      if (!memcmp (sw_stat, sw_oldstat, cnt))
-	return (EOF);
-
-      memcpy (sw_oldstat, sw_stat, cnt);
-
-      for (sw_howmany = 0, i = 0; i < brl_cols; i++)
-	if (SW_CHK (i))
-	  sw_which[sw_howmany++] = i;
-      /* SW_CHK(i) tells if routing key i is pressed.
-         sw_which[0] to sw_which[howmany-1] give the numbers of the keys
-         that are pressed. */
-    }
-  else if ((l & KEY_MASK) != KEY_BASELEFT)	/* It was not a real
-						   keypress pair */
+  if(packtype == K_BATTERY){
+    do_battery_warn ();
     return (EOF);
+  }else if(packtype == K_QUERYREP){
+    /* flush the last 10bytes of the reply. */
+    LogPrint(LOG_DEBUG,"Got reply to idle ping");
+    myread(brl_fd, buf, Q_REPLY_LENGTH - Q_HEADER_LENGTH);
+    return(EOF);
+  }else if(packtype == K_NAVKEY || packtype == K_PBKEY){
+    /* construct code */
+    int n;
+    struct inbytedesc *desc;
+    if(packtype == K_NAVKEY){
+      n = NAV_KEY_LEN;
+      desc = nav_key_desc;
+    }else{
+      n = PB_KEY_LEN;
+      desc = pb_key_desc;
+    }
+    code = 0;
+    for(i=0; i<n; i++)
+      code |= (buf[i]&desc[i].mask) << desc[i].shift;
+  }else if(packtype == K_SW){
+    /* read the rest of the sequence */
+    unsigned char cnt;
+    unsigned char buf[SW_NVERT];
 
-  /* if the key was a front panel key or combination, then remove the
-     masks from l and r so we can extract the key codes properly */
-  if (l)
-    {
-      l -= KEY_BASELEFT;
-      r -= KEY_BASERIGHT;
+    code = 0; /* no normal (non-sensor switch) keys are pressed */
+
+    /* read next byte: it indicates length of sequence */
+    /* still VMIN = 0, VTIME = 1 */
+    if (!myread (brl_fd, &cnt, 1))
+      return (EOF);
+    
+    /* if sw_bcnt and cnt disagree, then must be garbage??? */
+    /* problematic for PB 65/80/81... not clear */
+    if (cnt != sw_bcnt)
+      return (EOF);
+
+    /* skip the vertical keys info */
+#if 0
+    curtio.c_cc[VTIME] = 1;
+    curtio.c_cc[VMIN] = SW_NVERT;
+    tcsetattr (brl_fd, TCSANOW, &curtio);
+#endif
+    if (myread (brl_fd, buf, SW_NVERT) != SW_NVERT)
+      return (EOF);
+    cnt -= SW_NVERT;
+    /* cnt now gives the number of bytes describing horizontal
+       routing keys only */
+    
+    /* Finally, the horizontal keys */
+#if 0
+    curtio.c_cc[VTIME] = 1;
+    curtio.c_cc[VMIN] = cnt;
+    tcsetattr (brl_fd, TCSANOW, &curtio);
+#endif
+    if (myread (brl_fd, sw_stat, cnt) != cnt)
+      return (EOF);
+
+    if(must_init_oldstat){
+      must_init_oldstat=0;
+      for(i=0;i<SW_MAXHORIZ; i++)
+	sw_oldstat[i] = 0;
     }
 
-  /* Now associate a command to the key */
+    /* if key press is maintained, then packet is resent by display
+       every 0.5secs. When the key is released, then display sends a packet
+       with all info bits at 0. */
+    for(i=0; i<cnt; i++)
+      sw_oldstat[i] |= sw_stat[i];
 
-  if (has_sw && !l && !r)	/* routing key */
+    for (sw_howmany = 0, i = 0; i < ncells; i++)
+      if (SW_CHK (i))
+	sw_which[sw_howmany++] = i;
+    /* SW_CHK(i) tells if routing key i is pressed.
+       sw_which[0] to sw_which[howmany-1] give the numbers of the keys
+       that are pressed. */
+
+    for(i=0; i<cnt; i++)
+      if(sw_stat[i] != 0){
+	return (EOF);
+      }
+    must_init_oldstat = 1;
+  }
+
+  /* Now associate a command (in res) to the key(s) (in code and sw_...) */
+
+  if (has_sw && !code)	/* routing key */
     {
       if (sw_howmany == 1)
 	res = CR_ROUTEOFFSET + sw_which[0];
-      else if (sw_howmany == 3 && sw_which[1] == SW_MAXKEY - 1
-	       && sw_which[2] == SW_MAXKEY)
+     else if (sw_howmany == 3 && sw_which[1] == sw_lastkey - 1
+	       && sw_which[2] == sw_lastkey)
 	res = CR_BEGBLKOFFSET + sw_which[0];
       else if (sw_howmany == 3 && sw_which[0] == 0 && sw_which[1] == 1)
-	res = CR_ENDBLKOFFSET + sw_which[2];
+ 	res = CR_ENDBLKOFFSET + sw_which[2];
+      else if ((sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
+	       && sw_which[2] == sw_lastkey-1 && sw_which[3] == sw_lastkey)
+	       || (sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2))
+ 	res = CMD_PASTE;
       else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1)
 	res = CMD_CHRLT;
-      else if (sw_howmany == 2 && sw_which[0] == SW_MAXKEY - 1
-	       && sw_which[1] == SW_MAXKEY)
+      else if (sw_howmany == 2 && sw_which[0] == sw_lastkey - 1
+	       && sw_which[1] == sw_lastkey)
 	res = CMD_CHRRT;
       else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 2)
 	res = CMD_HWINLT;
-      else if (sw_howmany == 2 && sw_which[0] == SW_MAXKEY - 2
-	       && sw_which[1] == SW_MAXKEY)
+      else if (sw_howmany == 2 && sw_which[0] == sw_lastkey - 2
+	       && sw_which[1] == sw_lastkey)
 	res = CMD_HWINRT;
-      else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == SW_MAXKEY)
+      else if (sw_howmany == 2 && sw_which[0] == 0
+	       && sw_which[1] == sw_lastkey)
 	res = CMD_HELP;
+#if 0
       else if (sw_howmany == 2 && sw_which[0] == 1
-	       && sw_which[1] == SW_MAXKEY - 1)
+	       && sw_which[1] == sw_lastkey - 1)
 	{
 	  ResetTypematic ();
 	  display_all (prevdata);
 	  /* Special: No res code... */
 	}
+#endif
+      else if(sw_howmany == 3 && sw_which[0]+2 == sw_which[1]){
+	  res = CR_BEGBLKOFFSET + sw_which[0];
+	  pending_cmd = CR_ENDBLKOFFSET + sw_which[2];
+	}
     }
-  else if (!l)			/* On the right panel only */
-    switch (r)
-      {
-	KEY (KEY_UP, CMD_LNUP)
-	  KEY (KEY_DOWN, CMD_LNDN)
-	  KEY (KEY_LEFT, CMD_FWINLT)
-	  KEY (KEY_RIGHT, CMD_FWINRT)
-	  KEY (KEY_EXEC, CMD_HOME)
-	  KEY (KEY_EXEC | KEY_UP, CMD_TOP)
-	  KEY (KEY_LEFT | KEY_UP, CMD_TOP_LEFT)
-	  KEY (KEY_EXEC | KEY_DOWN, CMD_BOT)
-	  KEY (KEY_LEFT | KEY_DOWN, CMD_BOT_LEFT)
-	  KEY (KEY_EXEC | KEY_LEFT, CMD_LNBEG)
-	  KEY (KEY_EXEC | KEY_RIGHT, CMD_LNEND)
-	  KEY (KEY_UP | KEY_DOWN, CMD_INFO)
-	  KEY (KEY_LEFT | KEY_RIGHT, CMD_CONFMENU)
-	  KEY (KEY_LEFT | KEY_RIGHT | KEY_DOWN, CMD_SKPIDLNS)
-	  KEY (KEY_LEFT | KEY_RIGHT | KEY_EXEC, CMD_SAVECONF)
-      }
-  else if (!r)			/* On the left panel only */
-    switch (l)
-      {
-	KEY (KEY_LEFT, CMD_KEY_LEFT)
-	  KEY (KEY_RIGHT, CMD_KEY_RIGHT)
-	  KEY (KEY_UP, CMD_KEY_UP)
-	  KEY (KEY_DOWN, CMD_KEY_DOWN)
-	  KEY (KEY_LEFT | KEY_EXEC, CMD_CHRLT)
-	  KEY (KEY_RIGHT | KEY_EXEC, CMD_CHRRT)
-	  KEY (KEY_LEFT | KEY_UP, CMD_HWINLT)
-	  KEY (KEY_RIGHT | KEY_UP, CMD_HWINRT)
-	  KEY (KEY_EXEC | KEY_UP, CMD_WINUP)
-	  KEY (KEY_EXEC | KEY_DOWN, CMD_WINDN)
-	  KEY (KEY_EXEC, CMD_CSRTRK)
-	  KEY (KEY_UP | KEY_DOWN, CMD_DISPMD)
-	  KEY (KEY_LEFT | KEY_RIGHT, CMD_HELP)
-      }
-  /* Combinations from both panels */
-    KEYS (KEY_DOWN, KEY_UP, CMD_INFO)
-    KEYS (KEY_UP, KEY_DOWN, CMD_DISPMD)
-    KEYS (KEY_EXEC, KEY_EXEC, CMD_FREEZE)
-    KEYS (KEY_DOWN, KEY_DOWN, CMD_CSRJMP)
-    KEYS (KEY_UP, KEY_UP, CR_ROUTEOFFSET + 3 * brl_cols / 4 - 1)
-    KEYS (KEY_LEFT, KEY_EXEC, CMD_CUT_BEG)
-    KEYS (KEY_RIGHT, KEY_EXEC, CMD_CUT_END)
-    KEYS (KEY_LEFT | KEY_RIGHT, KEY_EXEC, CMD_CUT_CURSOR)  /* special: see
-						    at the end of this fn */
-    KEYS (KEY_DOWN, KEY_EXEC, CMD_PASTE)
-    KEYS (KEY_EXEC | KEY_LEFT, KEY_LEFT | KEY_RIGHT, CMD_CSRSIZE)
-    KEYS (KEY_EXEC | KEY_UP, KEY_LEFT | KEY_RIGHT, CMD_CSRVIS)
-    KEYS (KEY_EXEC | KEY_DOWN, KEY_LEFT | KEY_RIGHT, CMD_CSRBLINK)
-    KEYS (KEY_UP, KEY_LEFT | KEY_RIGHT, CMD_CAPBLINK)
-    KEYS (KEY_DOWN, KEY_LEFT | KEY_RIGHT, CMD_SLIDEWIN)
-    KEYS (KEY_RIGHT, KEY_LEFT | KEY_RIGHT, CMD_SND)
-    KEYS (KEY_EXEC, KEY_LEFT | KEY_RIGHT | KEY_EXEC, CMD_RESET)
-    KEYSPECIAL (KEY_LEFT, KEY_RIGHT, ResetTypematic ();
+  else switch (code){
+  /* renames: CLEFT=BUT1 CRIGHT=BUT2 CUP=R1UP CDOWN=R2DN CROUNT=CNVX */
+
+  /* movement */
+    KEYAND(KEY_BAR1) KEYAND(KEY_R2UP) KEY (KEY_BUP, CMD_LNUP);
+    KEYAND(KEY_BAR2) KEYAND(KEY_BAR3) KEYAND(KEY_BAR4)
+      KEYAND(KEY_R2DN) KEY (KEY_BDOWN, CMD_LNDN);
+    KEYAND(KEY_BUT3) KEY (KEY_BLEFT, CMD_FWINLT);
+    KEYAND(KEY_BUT4) KEY (KEY_BRIGHT, CMD_FWINRT);
+
+    KEYAND(KEY_CNCV) KEY (KEY_BROUND, CMD_HOME);
+    KEY (KEY_CROUND, CMD_CSRTRK);
+
+    KEYAND(KEY_BUT1 | KEY_BAR1) KEY (KEY_BLEFT | KEY_BUP, CMD_TOP_LEFT);
+    KEYAND(KEY_BUT1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BDOWN, CMD_BOT_LEFT);
+
+    KEYAND(KEY_BUT2 | KEY_BAR1) KEY (KEY_BROUND | KEY_BUP, CMD_PRDIFLN);
+    KEYAND(KEY_BUT2 | KEY_BAR2) KEYAND(KEY_BUT2 | KEY_BAR3)
+      KEYAND(KEY_BUT2 | KEY_BAR4) KEY (KEY_BROUND | KEY_BDOWN, CMD_NXDIFLN);
+    KEYAND(KEY_BUT2 | KEY_R2UP) KEY(KEY_CROUND | KEY_BUP, CMD_ATTRUP);
+    KEYAND(KEY_BUT2 | KEY_R2DN) KEY(KEY_CROUND | KEY_BDOWN, CMD_ATTRDN);
+
+    KEY (KEY_CLEFT | KEY_CROUND, CMD_CHRLT);
+    KEY (KEY_CRIGHT | KEY_CROUND, CMD_CHRRT);
+
+    KEYAND(KEY_BAR4 | KEY_BUT3) KEY (KEY_BROUND | KEY_BLEFT, CMD_LNBEG);
+    KEYAND(KEY_BAR4 | KEY_BUT4) KEY (KEY_BROUND | KEY_BRIGHT, CMD_LNEND);
+    KEY (KEY_CLEFT | KEY_CUP, CMD_HWINLT);
+    KEY (KEY_CRIGHT | KEY_CUP, CMD_HWINRT);
+
+    KEYAND(KEY_BUT1|KEY_BUT2|KEY_BAR1)  KEY (KEY_CROUND | KEY_CUP, CMD_WINUP);
+    KEYAND(KEY_BUT1|KEY_BUT2|KEY_BAR2) KEY (KEY_CROUND | KEY_CDOWN, CMD_WINDN);
+
+  /* keyboard cursor keys simulation */
+    KEY (KEY_CLEFT, CMD_KEY_LEFT);
+    KEY (KEY_CRIGHT, CMD_KEY_RIGHT);
+    KEY (KEY_CUP, CMD_KEY_UP);
+    KEY (KEY_CDOWN, CMD_KEY_DOWN);
+
+  /* special modes */
+    KEY (KEY_CLEFT | KEY_CRIGHT, CMD_HELP);
+    KEY (KEY_CROUND | KEY_BROUND, CMD_FREEZE);
+    KEYAND (KEY_CUP | KEY_BDOWN) KEYAND(KEY_BUT3 | KEY_BUT4)
+      KEY (KEY_BUP | KEY_BDOWN, CMD_INFO);
+    KEYAND (KEY_CDOWN | KEY_BUP)
+      KEY (KEY_CUP | KEY_CDOWN, CMD_ATTRVIS);
+    KEYAND (KEY_CDOWN | KEY_BUP | KEY_CROUND)
+      KEY (KEY_CUP | KEY_CDOWN | KEY_CROUND, CMD_DISPMD)
+
+  /* Emulation of cursor routing */
+    KEYAND(KEY_R1DN | KEY_R2DN) KEY (KEY_CDOWN | KEY_BDOWN, CMD_CSRJMP_VERT);
+    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BLEFT, CMD_CSRJMP);
+    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BRIGHT, CR_ROUTEOFFSET + 3 * brl_cols / 4 - 1);
+
+  /* Emulation of routing keys for cut&paste */
+    KEY (KEY_CLEFT | KEY_BROUND, CMD_CUT_BEG);
+    KEY (KEY_CRIGHT | KEY_BROUND, CMD_CUT_END);
+    KEY (KEY_CLEFT | KEY_CRIGHT | KEY_BROUND, CMD_CUT_CURSOR);  /* special: see
+	 				    at the end of this fn */
+  /* paste */
+    KEY (KEY_CDOWN | KEY_BROUND, CMD_PASTE);
+
+  /* config menu */
+    KEYAND(KEY_BAR1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BRIGHT, CMD_CONFMENU);
+    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNCV) 
+      KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_SAVECONF);
+    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNVX | KEY_CNCV) 
+      KEY (KEY_CROUND | KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, CMD_RESET);
+    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, CMD_SKPIDLNS);
+    KEY (KEY_CLEFT | KEY_BLEFT | KEY_BRIGHT, CMD_SLIDEWIN);
+    KEYAND(KEY_BUT2 | KEY_BAR1 | KEY_BAR2)
+      KEY (KEY_CLEFT | KEY_CROUND | KEY_BLEFT | KEY_BRIGHT, CMD_SND);
+    KEYAND(KEY_BUT1 | KEY_BAR1 | KEY_BAR2)    
+      KEY (KEY_CUP | KEY_BLEFT | KEY_BRIGHT, CMD_CSRVIS);
+    KEYAND(KEY_BUT1 | KEY_BAR1 | KEY_BAR2 | KEY_CNVX)
+      KEY (KEY_CROUND | KEY_CUP | KEY_BLEFT | KEY_BRIGHT, CMD_CSRBLINK);
+    KEYAND(KEY_BUT2 | KEY_BAR1 | KEY_BAR2 | KEY_CNVX)
+      KEY (KEY_CROUND | KEY_CDOWN | KEY_BLEFT | KEY_BRIGHT, CMD_CAPBLINK);
+    KEYAND (KEY_CROUND | KEY_BUP | KEY_BLEFT | KEY_BRIGHT)
+      KEY (KEY_CROUND | KEY_CRIGHT | KEY_BLEFT | KEY_BRIGHT, CMD_ATTRBLINK);
+
+  /* PB80 switches */
+    KEYSW(KEY_S1UP, KEY_S1DN, CMD_ATTRVIS);
+    KEYSW(KEY_S1UP |KEY_BAR1|KEY_BAR2|KEY_CNVX,
+	  KEY_S1DN |KEY_BAR1|KEY_BAR2|KEY_CNVX, CMD_ATTRBLINK);
+    KEYSW(KEY_S1UP | KEY_CNVX, KEY_S1DN | KEY_CNVX, CMD_ATTRBLINK);
+    KEYSW(KEY_S2UP, KEY_S2DN, CMD_FREEZE);
+    KEYSW(KEY_S3UP, KEY_S3DN, CMD_SKPIDLNS);
+    KEYSW(KEY_S4UP, KEY_S4DN, CMD_DISPMD);
+
+#if 0
+  /* typematic reset */
+    KEYSPECIAL (KEY_CLEFT | KEY_BRIGHT, ResetTypematic ();
 		display_all (prevdata);
-    )
+    );
+#endif
+
+  /* experimental speech support */
+    KEY (KEY_CRIGHT | KEY_BLEFT, CMD_SAY);
+    KEY (KEY_CRIGHT | KEY_CUP | KEY_BLEFT | KEY_BUP, CMD_MUTE);
+  };
 
   /* If this is a typematic repetition of some key other than movement keys */
-    if (lastcmd == res && !is_repeat_cmd (res))
-    {
+  if (lastcmd == res && !is_repeat_cmd (res)){
+    if(skip_this_cmd){
+      gettimeofday (&lastcmd_time, &dum_tz);
+      res = EOF;
+    }else{
       /* if to short a time has elapsed since last command, ignore this one */
-      struct timeval now;
       gettimeofday (&now, &dum_tz);
       if (elapsed_msec (&lastcmd_time, &now) < NONREPEAT_TIMEOUT)
 	res = EOF;
     }
-
+  }
   /* reset timer to avoid unwanted typematic */
-  if (res != EOF)
-    {
-      lastcmd = res;
-      gettimeofday (&lastcmd_time, &dum_tz);
-    }
+  if (res != EOF){
+    lastcmd = res;
+    gettimeofday (&lastcmd_time, &dum_tz);
+  }
 
   /* Special: */
   if (res == CMD_CUT_CURSOR)

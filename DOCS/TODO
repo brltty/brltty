@@ -6,13 +6,6 @@ drivers may have their own TODO lists.)
 
 Your help is welcome.
 
-Firstly, some restructuring: specification of a standard Braille display
-interface library, including standardisation of the use of status cells.
-
-Then (not necessarily in this order):
-
-- Updating the documentation.
-
 - Setting marks at convenient places on the screen and jumping to them.
 
 - Defining smaller regions of the screen to be concentrated on.  Cursor
@@ -39,8 +32,7 @@ Implement .au and .wav sounds (through a soundcard).
 line you're on even when new text is printed and the screen scrolls up?
 Like in IRC for instance...
 
-- Speech support improovement.
-In progress but not finished...
+- Speech support
 
 - On-the-fly grade II translation: translating one line at a time into
 grade II Braille would speed up reading.  It may be possible to use some

@@ -1,4 +1,25 @@
-BRLTTY braille table format
+Files in this directory
+=======================
+
+All files with .tbl sufix are braille tables that may be used with
+BRLTTY.  Note that BRLTTY has its own braille table format and it may
+slightly differ from other braille table files.
+
+There are also few tools provided in this directory to manipulate
+those braille tables.  To build the tools, simply run 'make'.  The
+following tools will be made:
+
+tbl2txt 	outputs an ASCII list file from a braille table file (so
+		the result can be modified with a regular text editor).
+txt2tbl		outputs a braille table file from an ASCII list file
+		(as produced with tbl2txt).
+convtable	converts braille table files between different dot 
+		mappings.
+ibm437toiso	converts braille table files from the IBM code page 437
+		to the ISO-8859-1 character set.
+
+
+BRLTTY Braille Table Format
 ===========================
 
 Each table consists of a binary file made up of 256 bytes.  The byte

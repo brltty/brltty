@@ -1,52 +1,60 @@
 ---BRLTTY PowerBraille 40 Help Screen---
 
+"Lup" / "Ldn" means left rocker up/down. "Rup" / "Rdn" for the right rocker.
+"lt" is the left top square button, "rt" is the right button.
+"cnvx" and "cncv" are the two front middle buttons (convex and concave).
+"CR#" means cursor routing key (sensor switch) number #.
+"+" means keys are combined (pressed together).
+
 Movement:
-  D-back / D-forw : one braille window left/right
-  R-round+D-back / R-round+D-forw : beginning/end of line
-  CR1+CR3 / CR38+CR40 : half a braille window left/right
-  CR1+CR2 / CR39+CR40 : one character left/right
-  R-up / R-down : one line up/down
-  L-round+L-up / L-round+L-down : up/down several lines
-  R-round+R-up / R-round/R-down : top/bottom of screen
-  D-back+R-up / D-back+R-down : screen top-left / bottom-left
+  Left/right one window: lt / rt
+  One line up/down: Rup / Rdn
+  Goto cursor: cncv
+  Cursor tracking (link/unlink): cnvx (toggle)
+  Goto top left of screen: Rup+lt
+  Goto bottom left of screen: Rdn+lt
+  Previous/next non-identical line: cncv+Rup / cncv+Rdn
+  Previous/next line with different attributes: cnvx+Rup / cnvx+Rdn
+  One character left/right: CR1+CR2 / CR39+CR40
+  Goto beginning/end of line: cncv+lt / cncv+rt
+  Half-window left/right: CR1+CR3 / CR38+CR40
+  Several lines up/down: cnvx+Rup / cnvx+Rdn
 
-Arrow key mappings:
-  L-up / L-down : mapped to computer keyboard arrow keys
+Simulation of keyboard arrow keys:
+  up/dn arrow : Lup/Ldn
 
-Routing:
-  CR1 -- CR40 : route the cursor to the appropriate cell
-  L-down + R-down : route cursor to first cell of display
-  L-up+R-up : route cursor to somewhere about 3/4 of the length of the display
+Special modes
+  This help: CR1+CR40
+  Freeze/unfreeze screen: cnvx+cncv (toggle)
+  Attribute underlining on/off: Ldn+Rup (toggle)
+  Show attribute representations: Ldn+Rup+cnvx (toggle)
+  Info mode: Lup+Rdn (toggle)
 
-Others:
-  R-round : bring braille window to cursor
-  L-round : toggle cursor tracking on/off (toggle)
-  R-down + R-left + R-right : toggle skipping of identical lines
-  L-round + R-round : freeze / unfreeze screen (toggle)
-  L-up + R-down : display attributes (toggle)
-  L-down + R-up : give status information (toggle)
-  CR1+CR40 : this help screen (toggle)
+Cursor routing:
+  Route cursor to anywhere on current line: Ldn+Rdn
+  Route cursor to cell #: CR#
 
 Cut & paste:
-  CR39+CR40+CR# : mark beginning of buffer at cell #
-  CR1+CR2+CR#   : mark end of buffer at cell #
-  R-round + L-down : paste buffer
+  Mark that region to cut starts at cell #: CR#+CR39+CR40
+  Mark that end (bottom right) of region is at cell #: CR1+CR2+CR#
+  Mark whole region (on one display) starting at cell #(n1) and ending at
+    cell #(n2): CR#(n1) + CR#(n1+2) + CR#(n2)
+    For example, a region from cell 10 to cell 20: CR10+CR12+CR20
+  Paste cut region: CR2+CR3 or cncv+Ldn
 
-Online configuration facility:
-  D-back+D-forw : enter/exit configuration menu (toggle)
-     In that menu:
-     D-forw / D-back : next/previous settings for the current option
-     R-down / R-up : next/previous option
-  D-back+D-forw + R-round : save active configuration
-  D-back+D-forw + R-round + L-round : reset active config from saved settings
-
-Online configuration options shortcuts (toggles):
-(these key combinations all include D-back + D-forw)
-  L-round + L-up : cursor visible on/off
-  L-round + L-down : cursor blinking on/off
-  L-up : capitals blinking on/off
-  L-down : sliding window on/off
-
-Special:
-  CR2+CR39 : reset navigator's typematic rate
+Configuration:
+  Configuration menu:
+    Enter/exit configuration menu: lt+rt (sort of a toggle)
+      In the menu:
+      Previous/next setting option for this item: lt / rt
+      Previous/next menu item: Rup / Rdn
+    Save current settings to config file: lt+rt+cncv
+    Load settings from config file: lt+rt+cncv+cnvx
+  Various options can be controlled directly (hotkeys):
+    Skip identical lines (on/off): lt+rt +Rdn (toggle)
+    Show/hide cursor: lt+rt +Lup (toggle)
+    Cursor blinking (on/off): lt+rt +Lup+Lrn (toggle)
+    Blink capital letters (on/off): lt+rt +Ldn+Lrn (toggle)
+    Attribute underlining (on/off): treated in section on special modes
+    Attribute underlining blinks (on/off): lt+rt +Lrn+Rup (toggle)
 -----End of help screen-----

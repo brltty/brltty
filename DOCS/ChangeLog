@@ -2,10 +2,21 @@ Note: this file should be read from bottom to top.
 
 
   ...
+  - Updated manual, FAQ and TODO.
+  - Fixes (hopefully) to the cursor routing algorithm in csrjmp_sub.
+  - Added syslog support functions, and messages in brltty.c.
+  - Added CMD_RESTARTBRL command to reinitialize braille driver when
+    the braille display is turned off.
+  -  Additions to TSI driver: support for PB65/80, support for all PB models
+     at 19200baud, detects when display is turned off and reinitializes itself.
   -  Papenmeier driver update.
   -  EuroBraille driver fixes.
-  -  Added attribute underlining/blinking functions.
+  - Added CMD_CSRJMP_VERT command which routes the cursor to the current line
+    but does not try to change the horizontal position. Hopefully will be
+    useful in lynx!
+  -  Added attribute underlining/blinking functions (experimental).
   -  Incorporated Papenmeier braille terminal driver + German manual.
+     Thanks to August Hörandl <hoerandl@elina.htlw1.ac.at> and his team!
   -  Alva driver fixes.
 
 
