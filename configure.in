@@ -21,8 +21,12 @@ AC_INIT([brltty], [3.3], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 
-AC_SUBST([BRLAPI_VERSION], [0.1])
-AC_DEFINE_UNQUOTED([BRLAPI_VERSION], ["${BRLAPI_VERSION}"])
+AC_SUBST([BRLAPI_MAJOR], [0])
+AC_SUBST([BRLAPI_MINOR], [1])
+AC_SUBST([BRLAPI_REVISION], [0])
+AC_SUBST([BRLAPI_VERSION], [${BRLAPI_MAJOR}.${BRLAPI_MINOR}])
+AC_SUBST([BRLAPI_RELEASE], [${BRLAPI_VERSION}.${BRLAPI_REVISION}])
+AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${BRLAPI_RELEASE}"])
 
 AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
@@ -193,8 +197,19 @@ else
          ;;
    esac
 fi])
-MKLIB="${brltty_cv_prog_mklib}"
-AC_SUBST([MKLIB])
+AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
+
+AC_CACHE_CHECK([for configure shared object directory command], [brltty_cv_prog_conflibdir], [dnl
+case "${host_os}"
+in
+   linux*)
+      brltty_cv_prog_conflibdir="/sbin/ldconfig -n"
+      ;;
+   *)
+      brltty_cv_prog_conflibdir=":"
+      ;;
+esac])
+AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 
 AC_CHECK_HEADERS([getopt.h syslog.h])
 AC_CHECK_FUNCS([vsyslog])

@@ -27,7 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* Define this to be a string containing the library version. */
-#undef BRLAPI_VERSION
+#undef BRLAPI_RELEASE
 
 /* this is for UINT32_MAX */
 #include <inttypes.h>

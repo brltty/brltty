@@ -61,7 +61,7 @@ typedef enum {
 
 const char *const api_parameters[] = { "host", "port", "keyfile", NULL };
 
-#define VERSION "BRLTTY API Library: version " BRLAPI_VERSION
+#define RELEASE "BRLTTY API Library: release " BRLAPI_RELEASE
 #define COPYRIGHT "   Copyright Sebastien HINDERER <shindere@ens-lyon.fr> \
 & Samuel THIBAULT <samuel.thibault@fnac.net>"
 
@@ -880,7 +880,7 @@ void api_unlink(void)
 /* Identifies BrlApi */
 void api_identify(void)
 {
- LogPrint(LOG_NOTICE, VERSION);
+ LogPrint(LOG_NOTICE, RELEASE);
  LogPrint(LOG_INFO,   COPYRIGHT);
 }
 
