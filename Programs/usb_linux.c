@@ -32,6 +32,14 @@
 #include <linux/compiler.h>
 #include <linux/usbdevice_fs.h>
 
+#ifndef USBDEVFS_DISCONNECT
+#define USBDEVFS_DISCONNECT _IO('U', 22)
+#endif /* USBDEVFS_DISCONNECT */
+
+#ifndef USBDEVFS_CONNECT
+#define USBDEVFS_CONNECT _IO('U', 23)
+#endif /* USBDEVFS_CONNECT */
+
 #include "misc.h"
 #include "usb.h"
 #include "usb_definitions.h"
@@ -131,6 +139,7 @@ claim:
         if (usbDisconnectDriver(device, interface)) goto claim;
       }
     }
+    errno = EBUSY;
   }
 
   LogError("USB interface claim");

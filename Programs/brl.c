@@ -36,7 +36,6 @@
 #define BRLNAME NoBraille
 #define BRLCODE no
 #define BRLHELP "/dev/null"
-#define PREFSTYLE ST_None
 #include "brl_driver.h"
 static void brl_identify (void) {
   LogPrint(LOG_NOTICE, "No braille support.");

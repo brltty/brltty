@@ -24,7 +24,7 @@ extern "C" {
 
 /* this header file is used to create the driver structure
  * for a dynamically loadable braille display driver.
- * BRLNAME, BRLCODE, BRLHELP, and BRLSTAT must be defined - see driver make file
+ * BRLNAME, BRLCODE, and BRLHELP must be defined - see driver make file
  */
 
 #include "brl.h"
