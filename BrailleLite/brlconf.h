@@ -4,13 +4,24 @@
  * Edit as necessary for your system.
  */
 
-#define BRLNAME	"BrailleLite"
-
 #ifndef BLITE_SIZE
    /* Set the display size here if it has not been set in the make file. */
    /* BrailleLite size (18/40) */
    #define BLITE_SIZE 18
    //#define BLITE_SIZE 40
+#endif
+
+#undef BRLDRIVER
+#if BLITE_SIZE == 18
+  #define BRLNAME "BrailleLite18"
+  #define BRLDRIVER "b1"
+#else
+  #if BLITE_SIZE == 40
+    #define BRLNAME "BrailleLite40"
+    #define BRLDRIVER "b4"
+  #else
+    #error "BrailleLite size not specified."
+  #endif
 #endif
 
 /* We always expect 8 data bits, no parity, 1 stop bit. */

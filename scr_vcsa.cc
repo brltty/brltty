@@ -120,11 +120,11 @@ void vcsa_Screen::set_screen_translation_table (void)
 
     // Determine which translation table to use when reading the screen.
     {
-	int level = LOG_INFO;
+	int priority = LOG_NOTICE;
 	const char *font;
 	switch (new_character) {
 	  default: // no translation
-	    level = LOG_WARNING;
+	    priority = LOG_WARNING;
 	    translation_table = NULL;
 	    font = "unknown";
 	    break;
@@ -137,18 +137,19 @@ void vcsa_Screen::set_screen_translation_table (void)
 	    font = "CP-437";
 	    break;
 	}
-	LogAndStderr(level, "Screen Font: %s", font);
+	LogAndStderr(priority, "Screen Font: %s", font);
     }
 }
 
 
 int vcsa_Screen::open (int for_csr_routing)
 {
-  fd = -1;
   if ((fd = ::open (VCSADEV, O_RDWR)) == -1){
 #if 0
     if(errno == ENOENT){
-      LogAndStderr(LOG_WARNING, "Can't find vcsa device '%s'. Creating it.",
+      LogAndStderr(LOG_WARNING,
+                   "Cannot find virtual screen device '%s'"
+		   " - creating it.",
 		   VCSADEV);
       if(mknod(VCSADEV, S_IFCHR | 0600, (7<<8)|128) == 0)
 	fd = ::open (VCSADEV, O_RDONLY);
@@ -158,14 +159,16 @@ int vcsa_Screen::open (int for_csr_routing)
 #endif
   }
   if(fd<0){
-    LogAndStderr(LOG_WARNING,"Can't open vcsa device '%s': %s\n",
+    LogAndStderr(LOG_ERR,
+                 "Cannot open virtual screen device '%s': %s",
 		 VCSADEV, strerror(errno));
     return 1;
   }
-  if ((cons_fd = ::open (CONSOLE, O_RDWR)) == -1)
+  if ((cons_fd = ::open (CONSOLE, O_RDWR|O_NOCTTY)) == -1)
     {
-      LogAndStderr(LOG_WARNING,"Can't open console device '%s': %s\n",
-		 CONSOLE, strerror(errno));
+      LogAndStderr(LOG_WARNING,
+                   "Cannot open console device '%s': %s",
+		   CONSOLE, strerror(errno));
       ::close (fd);
       return 1;
     }

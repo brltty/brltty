@@ -60,7 +60,7 @@ main (int argc, char *argv[])
 
   if (!load_braille_driver())
     {
-      LogAndStderr(LOG_ERR, "braille driver not specified.");
+      LogAndStderr(LOG_ERR, "Braille driver not specified.");
       exit(10);
     }
 

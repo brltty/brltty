@@ -22,6 +22,8 @@
 
 /* ------------------------ OVERALL CONFIGURATIONS ------------------------ */
 
+#define CONFIG_FILE "/etc/brltty.conf"
+
 /* Delay times, measured in milliseconds.
  * Note that I found a large error in timing - 40 is nearer 50 ms.
  */
@@ -54,9 +56,6 @@
 #define INIT_BEEPSON 1		/* 1 for beeps, 0 for no beeps */
 #define INIT_SKPIDLNS 0		/* 1 = skip all identical lines after first */
 
-/* Filenames needed by the main module: */
-#define CONFFILE_NAME "brlttyconf.dat"	/* filename of binary config. file */
-
 /* These control the speed of any blinking cursor or capital letters.
  * The numbers refer to cycles of the main program loop.
  */
@@ -82,7 +81,7 @@
 
 
 /* These are for inskey(): */
-#define CONSOLE "/dev/console"	/* name of device for simulating keystrokes */
+#define CONSOLE "/dev/tty0"	/* name of device for simulating keystrokes */
 #define UP_CSR "\033[A"		/* vt100 up-cursor */
 #define DN_CSR "\033[B"		/* vt100 down-cursor */
 #define LT_CSR "\033[D"		/* vt100 left-cursor */

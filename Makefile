@@ -142,6 +142,8 @@ LDLIBS = -ldl
 
 PREFIX =
 
+INSTALL_DRIVERS =
+
 BRL_TARGETS = Alva BrailleLite CombiBraille EcoBraille EuroBraille MDV Papenmeier TSI Vario
 BRL_LIBS = al b1 b4 cb ec eu md pm ts va
 
@@ -155,40 +157,6 @@ SPK_LIBS = no al bl cb fv gs tv
 
 all: brltty install-brltty txt2hlp brltest scrtest
 
-install: install-programs install-help install-tables install-drivers install-devices
-
-install-programs: brltty install-brltty txt2hlp
-	install $(INSTALL_EXEC) --strip brltty $(PREFIX)$(EXEC_PATH) 
-	install $(INSTALL_EXEC) install-brltty $(PREFIX)$(REINSTALL_PATH) 
-
-install-help: brltty
-	install --directory $(PREFIX)$(DATA_DIR) 
-	install --mode=0644 help/* $(PREFIX)$(DATA_DIR) 
-
-install-tables:
-	install --directory $(PREFIX)$(DATA_DIR) 
-	install -m 644 BrailleTables/*.tbl $(PREFIX)$(DATA_DIR)
-
-install-drivers: brltty
-	install --directory $(PREFIX)$(LIB_PATH)
-	install $(INSTALL_LIB) lib/* $(PREFIX)$(LIB_PATH)
-
-install-devices:
-	if [ "$(VCSADEV)" ]; \
-	then \
-	  if [ ! -c $(PREFIX)$(VCSADEV) ]; \
-	  then \
-	    mknod -m o= $(PREFIX)$(VCSADEV) c 7 128; \
-	    chown root.tty $(PREFIX)$(VCSADEV); \
-	    chmod 660 $(PREFIX)$(VCSADEV); \
-	  fi; \
-	fi
-
-uninstall:
-	rm -f $(PREFIX)$(EXEC_PATH) $(PREFIX)$(REINSTALL_PATH)
-	rm -rf $(PREFIX)$(LIB_PATH)
-	rm -rf $(PREFIX)$(DATA_DIR)
-
 install-brltty: install.template
 	sed -e 's%=E%$(EXEC_PATH)%g' -e 's%=I%$(REINSTALL_PATH)%g' \
 	  -e 's%=D%$(DATA_DIR)%g' -e 's%=V%$(VCSADEV)%g' install.template > $@
@@ -197,6 +165,7 @@ SCREEN_OBJECTS = scr.o scrdev.o $(SCR_O)
 
 ifeq ($(SPK_TARGET),)
    SPK_TARGET = NoSpeech
+   INSTALL_DRIVERS = install-drivers
    SPEECH_TARGETS = dynamic-speech
 else
    SPEECH_TARGETS = static-speech
@@ -205,6 +174,7 @@ SPEECH_OBJECTS = $(SPK_TARGET)/speech.o
 BUILTIN_SPEECH = -DSPK_BUILTIN
 
 ifeq ($(BRL_TARGET),)
+   INSTALL_DRIVERS = install-drivers
    BRAILLE_TARGETS = dynamic-braille
    BRAILLE_OBJECTS =
    BUILTIN_BRAILLE =
@@ -240,8 +210,9 @@ spk_load.o: spk_load.c spk.h brl.h misc.h
 	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' $(BUILTIN_SPEECH) -c spk_load.c 
 
 dynamic-speech:
+	rm -f lib/brltty-spk.lst
 	for target in $(SPK_TARGETS); \
-	do $(MAKE) -C $$target speech-driver || exit 1; \
+	do $(MAKE) -C $$target speech-driver spk-lib-name || exit 1; \
 	done
 
 static-speech:
@@ -251,7 +222,7 @@ brl_load.o: brl_load.c brl.h misc.h
 	$(CC) $(CFLAGS) '-DLIB_PATH="$(LIB_PATH)"' $(BUILTIN_BRAILLE) -c brl_load.c 
 
 dynamic-braille: txt2hlp
-	rm -f lib/brl_drivers.lst
+	rm -f lib/brltty-brl.lst
 	for target in $(BRL_TARGETS); \
 	do $(MAKE) -C $$target braille-driver braille-help brl-lib-name || exit 1; \
 	done
@@ -315,8 +286,46 @@ comptable: comptable.o
 comptable.o: comptable.c
 	$(CC) $(UTILS_CFLAGS) -c comptable.c
 
+install: install-programs install-help install-tables $(INSTALL_DRIVERS) install-devices
+
+install-programs: brltty install-brltty txt2hlp
+	install $(INSTALL_EXEC) --strip brltty $(PREFIX)$(EXEC_PATH) 
+	install $(INSTALL_EXEC) install-brltty $(PREFIX)$(REINSTALL_PATH) 
+
+install-help: brltty
+	install --directory $(PREFIX)$(DATA_DIR) 
+	install --mode=0644 help/* $(PREFIX)$(DATA_DIR) 
+
+install-tables:
+	install --directory $(PREFIX)$(DATA_DIR) 
+	install -m 644 BrailleTables/*.tbl $(PREFIX)$(DATA_DIR)
+
+install-drivers: brltty
+	install --directory $(PREFIX)$(LIB_PATH)
+	install $(INSTALL_LIB) lib/* $(PREFIX)$(LIB_PATH)
+
+install-devices:
+	if [ "$(VCSADEV)" ]; \
+	then \
+	  if [ ! -c $(PREFIX)$(VCSADEV) ]; \
+	  then \
+	    mknod -m o= $(PREFIX)$(VCSADEV) c 7 128; \
+	    chown root.tty $(PREFIX)$(VCSADEV); \
+	    chmod 660 $(PREFIX)$(VCSADEV); \
+	  fi; \
+	fi
+
+uninstall:
+	rm -f $(PREFIX)$(EXEC_PATH) $(PREFIX)$(REINSTALL_PATH)
+	rm -f $(PREFIX)$(LIB_PATH)/$(LIB_SO_NAME)*
+	rm -f $(PREFIX)$(LIB_PATH)/brltty-*.lst
+	rmdir $(PREFIX)$(LIB_PATH)
+	rm -f $(PREFIX)$(DATA_DIR)/*.tbl
+	rm -f $(PREFIX)$(DATA_DIR)/brltty*
+	rmdir $(PREFIX)$(DATA_DIR)
+
 clean:
-	rm -f *.o */*.o lib/* help/* install-brltty *.auto.h
+	rm -f *.o */*.o lib/* help/* install-brltty *.auto.h core
 
 distclean: clean
 	rm -f brltty txt2hlp comptable *test

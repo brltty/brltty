@@ -31,12 +31,12 @@ include ../driver.mk
 variolow.o:	variolow.c variolow.h
 	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c variolow.c
 
-vario.o:	vario.c brlconf.h ../brl_driver.h
+vario.o:	vario.c brlconf.h ../brl_driver.h ../misc.h
 	$(CC) $(BRL_CFLAGS) $(IFLAGS) -c vario.c
 	
 brl.o:	vario.o	variolow.o
 	$(LD) -r -o brl.o variolow.o vario.o 
 
 brl-lib-name:
-	echo -e "va\tBAUM Vario" >> $(LIBNAMES)
+	echo -e "va\tBAUM Vario" >> $(BRLNAMES)
 

@@ -150,6 +150,7 @@ brldim;				/* used for writing to a braille display */
 typedef struct 
 {
   char* name;			/* name of driver */
+  char* identifier;		/* name of driver */
   char* helpfile;		/* name of help file */
   int pref_style;		/* prefered status cells mode */
 
@@ -167,6 +168,6 @@ extern braille_driver *braille;	/* filled by dynamic libs */
 extern char* braille_libname;	/* name of library */
 
 int load_braille_driver(void);
-int list_braille_driver(void);
+int list_braille_drivers(void);
 
 #endif /* !defined(_BRL_H) */

@@ -46,10 +46,6 @@
 #include "../config.h"
 #include "../brl_driver.h"
 
-static char StartupString[] =
-"  EcoBraille driver, version 1.00 \n"
-"  Copyright (C) 1999 by Oscar Fernandez <ofa@once.es> \n";
-
 // Braille display parameters
 typedef struct{
     char *Name;
@@ -205,8 +201,8 @@ return(0);
 
 static void identbrl(void)
 {
-  // Hello display
-  printf (StartupString);
+  LogAndStderr(LOG_NOTICE, "EcoBraille driver, version 1.00");
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>.");
 }
 
 

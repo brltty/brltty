@@ -117,12 +117,6 @@ extern "C"
 #endif
 
 
-static char StartupString[] =
-"  Alva driver, version 2.0 \n"
-"  Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org> \n";
-
-
-
 /* Braille display parameters */
 
 typedef struct
@@ -312,9 +306,9 @@ static int StatusKeys[6] =
 static void
 identbrl (void)
 {
-  /* Hello display... */
-  printf (StartupString);
-  printf ("  - compiled for %s with %s version \n",
+  LogAndStderr(LOG_NOTICE, "Alva driver, version 2.0");
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org>.");
+  LogAndStderr(LOG_NOTICE, "   Compiled for %s with %s version.",
 #if MODEL == ABT_AUTO
 	  "terminal autodetection",
 #else
@@ -327,7 +321,7 @@ identbrl (void)
 #endif
     );
 #if USE_PARALLEL_PORT
-  printf ("  - device = LPT at 0x%03X\n", LPT_PORT );
+  LogAndStderr(LOG_INFO, "   Device = LPT at 0x%03X", LPT_PORT);
 #endif
 }
 
@@ -366,16 +360,16 @@ static void initbrl (brldim *brl, const char *dev)
 #if USE_PARALLEL_PORT
 
   if( ioperm( LPT_PORT, 3, 1 ) ) {
-    LogPrint( LOG_ERR, "unable to acquire IO permission at 0x%03X\n", LPT_PORT );
+    LogPrint( LOG_ERR, "Unable to acquire IO permission at 0x%03X.", LPT_PORT );
     if( geteuid() != 0 )
-      LogPrint( LOG_ERR, "you must run BRLTTY as root for this to work\n" );
+      LogPrint( LOG_ERR, "BRLTTY must be run as root to access parallel port." );
     goto failure;
   }
   BrailleOpen( (unsigned char *) LPT_PORT );
   BrailleProcess();
   if ((BrailleRead( buffer, DIM_BRL_ID+1) != DIM_BRL_ID+1 ) ||
       (strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID) != 0)) {
-    LogPrint( LOG_ERR, "can't get braille terminal ID\n" );
+    LogPrint( LOG_ERR, "Cannot get braille terminal ID." );
     goto failure;
   }
   if (ModelID == ABT_AUTO)
@@ -386,7 +380,7 @@ static void initbrl (brldim *brl, const char *dev)
   /* Open the Braille display device for random access */
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
-    LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );
+    LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
     goto failure;
   }
   tcgetattr (brl_fd, &oldtio);	/* save current settings */
@@ -435,8 +429,8 @@ static void initbrl (brldim *brl, const char *dev)
        model++ );
   if( !model->Name ) {
     /* Unknown model */
-    LogPrint( LOG_CRIT, "*** Detected unknown Alva model which ID is %d.\n", ModelID );
-    LogPrint( LOG_CRIT, "*** Please fix Models[] in Alva/brlmain.cc and mail the maintainer\n" );
+    LogPrint( LOG_CRIT, "Detected unknown Alva model with ID %d.", ModelID );
+    LogPrint( LOG_CRIT, "Please fix Models[] in Alva/brlmain.cc and mail the maintainer." );
     goto failure;
   }
 
@@ -450,7 +444,7 @@ static void initbrl (brldim *brl, const char *dev)
   rawdata = (unsigned char *) malloc (res.x * res.y);
   prevdata = (unsigned char *) malloc (res.x * res.y);
   if (!res.disp || !rawdata || !prevdata) {
-    LogPrint( LOG_ERR, "can't allocate braille buffers\n" );
+    LogPrint( LOG_ERR, "Cannot allocate braille buffers." );
     goto failure;
   }
 

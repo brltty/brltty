@@ -13,6 +13,7 @@ static void setbrlstat (const unsigned char *);	/* set status cells */
 braille_driver brl_driver = 
 {
   BRLNAME,
+  BRLDRIVER,
   HELPNAME,
   PREFSTYLE,
   identbrl,

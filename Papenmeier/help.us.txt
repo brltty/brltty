@@ -36,6 +36,8 @@ Side keys (status column) are:
 status col "1"  display help (HELP)
 status col "2"  redisplay (RESTARTBRL)
 status col "3"  cursor move vertical (CMD_CSRJMP_VERT)
+status col "4"  stop speaking (CMD_MUTE)
+status col "5"  say current line (CMD_SAY)
 status col "6"  toggle cursor tracking (CSRTRK) 
 status col "7"  toggle attribute display (DISPMD)
 status col "8"  get status information (INFO)

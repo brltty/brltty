@@ -21,10 +21,134 @@
 #define __EXTENSIONS__	/* for time.h */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #include "misc.h"
+
+// Process each line of an input text file safely.
+// This routine handles the actual reading of the file,
+// insuring that the input buffer is always big enough,
+// and calls a caller-supplied handler once for each line in the file.
+// The caller-supplied data pointer is passed straight through to the handler.
+void process_lines (FILE *file,
+                    void (*handler) (char *line, void *data),
+		    void *data)
+{
+  size_t buff_size = 0X80; // Initial buffer size.
+  char *buff_addr = malloc(buff_size); // Allocate the buffer.
+  char *line; // Will point to each line that is read.
+
+  // Keep looping, once per line, until end-of-file.
+  while ((line = fgets(buff_addr, buff_size, file)) != NULL)
+    {
+      size_t line_len = strlen(line); // Line length including new-line.
+
+      // No trailing new-line means that the buffer isn't big enough.
+      while (line[line_len-1] != '\n')
+        {
+          // Extend the buffer, keeping track of its new size.
+          buff_addr = realloc(buff_addr, (buff_size <<= 1));
+
+          // Read the rest of the line into the end of the buffer.
+          line = fgets(buff_addr+line_len, buff_size-line_len, file);
+
+          line_len += strlen(line); // New total line length.
+          line = buff_addr; // Point to the beginning of the line.
+        }
+      line[line_len -= 1] = '\0'; // Remove trailing new-line.
+
+      handler(line, data);
+    }
+
+  // Deallocate the buffer.
+  free(buff_addr);
+}
+
+// Read data safely by continually retrying the read system call until all
+// of the requested data has been transferred or an end-of-file is encountered.
+// This routine is a wrapper for the read system call which is fully compatible
+// with it except that the caller does not need to handle the various
+// scenarios which can occur when a signal interrupts the system call.
+size_t safe_read (int fd, unsigned char *buffer, size_t length)
+{
+  unsigned char *address = buffer;
+
+  // Keep looping while there's still some data to be read.
+  while (length > 0)
+    {
+      // Read the rest of the data.
+      size_t count = read(fd, address, length);
+
+      // Handle errors.
+      if (count == -1)
+        {
+	  // If the system call was interrupted by a signal, then restart it.
+	  if (errno == EINTR)
+	    {
+	      continue;
+	    }
+
+	  // Return all other errors to the caller.
+	  return -1;
+	}
+
+      // Stop looping if the end of the file has been reached.
+      if (count == 0)
+        break;
+
+      // In case the system call was interrupted by a signal
+      // after some, but not all, of the data was read,
+      // point to the remainder of the buffer and try again.
+      address += count;
+      length -= count;
+    }
+
+  // Return the number of bytes which were actually read.
+  return address - buffer;
+}
+
+// Write data safely by continually retrying the write system call until
+// all of the requested data has been transferred.
+// This routine is a wrapper for the write system call which is fully compatible
+// with it except that the caller does not need to handle the various
+// scenarios which can occur when a signal interrupts the system call.
+size_t safe_write (int fd, const unsigned char *buffer, size_t length)
+{
+  const unsigned char *address = buffer;
+
+  // Keep on looping while there's still some data to be written.
+  while (length > 0)
+    {
+      // Write the rest of the data.
+      size_t count = write(fd, address, length);
+
+      // Handle errors.
+      if (count == -1)
+        {
+	  // If the system call was interrupted by a signal, then restart it.
+          if (errno == EINTR)
+	    {
+	      continue;
+	    }
+
+	  // Return all other errors to the caller.
+          return -1;
+        }
+
+      // In case the system call was interrupted by a signal
+      // after some, but not all, of the data was written,
+      // point to the remainder of the buffer and try again.
+      address += count;
+      length -= count;
+    }
+
+  // Return the number of bytes which were actually written.
+  return address - buffer;
+}
 
 #ifdef USE_SYSLOG
 #include <syslog.h>
@@ -89,26 +213,41 @@ timeout_yet (int msec)
 
 #ifdef USE_SYSLOG
 
-static int LogPrio, LogOpened = 0;
+static int LogOpened = 0;
+static int LogPrio;
+static int ErrPrio;
 
-void LogOpen(int prio)
+void LogOpen(void)
 {
-  openlog("BRLTTY",LOG_CONS,LOG_DAEMON);
-  LogPrio = prio;
+  static char name[0X20]; // Must be static as syslog points at it.
+  sprintf(name, "brltty[%d]", getpid());
+  openlog(name,LOG_CONS,LOG_DAEMON);
+  LogPrio = LOG_INFO;
+  ErrPrio = LOG_INFO;
   LogOpened = 1;
 }
 
-void LogClose()
+void LogClose(void)
 {
   closelog();
   LogOpened = 0;
+}
+
+void SetLogPrio(int prio)
+{
+  LogPrio = prio;
+}
+
+void SetErrPrio(int prio)
+{
+  ErrPrio = prio;
 }
 
 void LogPrint(int prio, char *fmt, ...)
 {
   va_list argp;
 
-  if(LogOpened && (prio & LOG_PRIMASK) <= LogPrio){
+  if(LogOpened && (prio <= LogPrio)){
     va_start(argp, fmt);
     vsyslog(prio, fmt, argp);
     va_end(argp);
@@ -121,9 +260,11 @@ void LogAndStderr(int prio, char *fmt, ...)
 
   va_start(argp, fmt);
 
-  vfprintf(stderr, fmt, argp);
-  fprintf(stderr,"\n");
-  if(LogOpened && (prio & LOG_PRIMASK) <= LogPrio)
+  if(prio <= ErrPrio){
+    vfprintf(stderr, fmt, argp);
+    fprintf(stderr,"\n");
+  }
+  if(LogOpened && (prio <= LogPrio))
     vsyslog(prio, fmt, argp);
 
   va_end(argp);
@@ -131,44 +272,67 @@ void LogAndStderr(int prio, char *fmt, ...)
 
 #else /* don't USE_SYSLOG */
 
-void LogOpen(int prio) {}
-void LogClose() {}
+void LogOpen(void) {}
+void LogClose(void) {}
+void SetLogPrio(int prio) {}
+void SetErrPrio(int prio) {}
 void LogPrint(int prio, char *fmt, ...) {}
 void LogAndStderr(int prio, char *fmt, ...) {}
 #endif
 
 
-/* helper funktion for papenmeier status */
-/* special table for papenmeier */
+/* Functions which support horizontal status cells, e.g. Papenmeier. */
 #define B1 1
-#define B2 2
-#define B3 4
-#define B4 8
-#define B5 16
+#define B2 4
+#define B3 16
+#define B4 2
+#define B5 8
 #define B6 32
 #define B7 64
 #define B8 128
 
-const unsigned char pm_ones[11] = { B1+B5+B4, B2, B2+B5, 
-				    B2+B1, B2+B1+B4, B2+B4, 
-				    B2+B5+B1, B2+B5+B4+B1, B2+B5+B4, 
-				    B5+B1, B1+B2+B4+B5 };
-const unsigned char pm_tens[11] = { B8+B6+B3, B7, B7+B8, 
-				    B7+B3, B7+B3+B6, B7+B6, 
-				    B7+B8+B3, B7+B8+B3+B6, B7+B8+B6,
-				    B8+B3, B3+B6+B7+B8};
-
-/* create bits for number 0..99 - special for papenmeier */
-int pm_num(int x)
+/* Dots for landscape (counterclockwise-rotated) digits. */
+const unsigned char landscape_digits[11] =
 {
-  return pm_tens[(x / 10) % 10] | pm_ones[x % 10];  
+  B1+B5+B2,    B4,          B4+B1,       B4+B5,       B4+B5+B2,
+  B4+B2,       B4+B1+B5,    B4+B1+B5+B2, B4+B1+B2,    B1+B5,
+  B1+B2+B4+B5
+};
+
+/* Format landscape representation of numbers 0 through 99. */
+int landscape_number(int x)
+{
+  return landscape_digits[(x / 10) % 10] | (landscape_digits[x % 10] << 4);  
 }
 
-/* status cell   tens: line number    ones: no/all bits set */
-int pm_stat(int line, int on)
+/* Format landscape flag state indicator. */
+int landscape_flag(int number, int on)
 {
-  int stat = pm_tens[line%10];
+  int dots = landscape_digits[number % 10];
   if (on)
-    stat |= pm_ones[10];
-  return stat;
+    dots |= landscape_digits[10] << 4;
+  return dots;
+}
+
+/* Dots for seascape (clockwise-rotated) digits. */
+const unsigned char seascape_digits[11] =
+{
+  B5+B1+B4,    B2,          B2+B5,       B2+B1,       B2+B1+B4,
+  B2+B4,       B2+B5+B1,    B2+B5+B1+B4, B2+B5+B4,    B5+B1,
+  B1+B2+B4+B5
+};
+
+/* Format seascape representation of numbers 0 through 99. */
+int seascape_number(int x)
+{
+  return (seascape_digits[(x / 10) % 10] << 4) | seascape_digits[x % 10];  
+}
+
+/* Format seascape flag state indicator. */
+int seascape_flag(int number, int on)
+{
+  int dots = seascape_digits[number % 10] << 4;
+  if (on)
+    dots |= seascape_digits[10];
+  return dots;
 }

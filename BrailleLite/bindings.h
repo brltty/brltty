@@ -68,10 +68,12 @@ static unsigned char dangcmd[8] =
 #define BLT_BARLT CMD_FWINLT
 #define BLT_BARRT CMD_FWINRT
 
-/* BrailleLite 40 */
-#define BLT_BARLT1 CMD_LNUP
-#define BLT_BARRT1 CMD_LNDN
-#define BLT_BARLT2 CMD_FWINLT
+/* BrailleLite 40 (patterned after other screen readers) */
+/* Left-hand advance bar: left=pan left, right=line up */
+#define BLT_BARLT1 CMD_FWINLT
+#define BLT_BARRT1 CMD_LNUP
+/* Right-hand advance bar: left=line down, right=pan right */
+#define BLT_BARLT2 CMD_LNDN
 #define BLT_BARRT2 CMD_FWINRT
 
 

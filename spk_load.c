@@ -16,11 +16,13 @@
  */
 
 /*
- * spk_load.c - handling of dynamic drivers
+ * spk_load.c - handling of dynamic speech drivers
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
 #include <dlfcn.h>
 
@@ -33,23 +35,27 @@ char* speech_libname = NULL;	/* name of library */
 static void* library = NULL;	/* handle to driver */
 #define SPK_SYMBOL "spk_driver"
 
-/* load driver from libray */
+/* load driver from library */
 /* return true (nonzero) on success */
 int load_speech_driver(void)
 {
   const char* error;
 
-  if (speech_libname == NULL)
-    {
-      #ifdef SPK_BUILTIN
-        extern speech_driver spk_driver;
+  #ifdef SPK_BUILTIN
+    extern speech_driver spk_driver;
+    if (speech_libname != NULL)
+      if (strcmp(speech_libname, spk_driver.identifier) == 0)
+        speech_libname = NULL;
+    if (speech_libname == NULL)
+      {
 	speech = &spk_driver;
 	speech_libname = "built-in";
 	return 1;
-      #else
-        return 0;
-      #endif
-    }
+      }
+  #else
+    if (speech_libname == NULL)
+      return 0;
+  #endif
 
   /* allow shortcuts */
   if (strlen(speech_libname) == 2)
@@ -64,18 +70,41 @@ int load_speech_driver(void)
   library = dlopen(speech_libname, RTLD_NOW);
   if (library == NULL) 
     {
-      LogAndStderr(LOG_ERR, "could not open library %s: %s",
-		   speech_libname, dlerror()); 
-      exit(10);
+      LogAndStderr(LOG_ERR, "%s", dlerror());
+      LogAndStderr(LOG_ERR, "Cannot open speech driver library: %s", speech_libname);
+      return 0;
     }
 
   speech = dlsym(library, SPK_SYMBOL); /* locate struct driver - filled with all the data */
   error = dlerror();
   if (error)
     {
-      LogAndStderr(LOG_ERR, "symbol not found: %s: %s", SPK_SYMBOL, error);
+      LogAndStderr(LOG_ERR, "%s", error);
+      LogAndStderr(LOG_ERR, "Speech driver symbol not found: %s", SPK_SYMBOL);
       exit(10);
     }
 
   return 1;
 }
+
+
+int list_speech_drivers(void)
+{
+	char buf[64];
+	static const char *list_file = LIB_PATH "/brltty-spk.lst";
+	int cnt, fd = open( list_file, O_RDONLY );
+	if (fd < 0) {
+		fprintf( stderr, "Error: can't access speech driver list file\n" );
+		perror( list_file );
+		return 0;
+	}
+	fprintf( stderr, "Available Speech Drivers:\n\n" );
+	fprintf( stderr, "XX\tDescription\n" );
+	fprintf( stderr, "--\t-----------\n" );
+	while( (cnt = read( fd, buf, sizeof(buf) )) )
+		fwrite( buf, cnt, 1, stderr );
+	close(fd);
+	return 1;
+}
+
+

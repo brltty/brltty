@@ -33,6 +33,7 @@
 #include "speech.h"
 #include "../spk.h"
 #include "../spk_driver.h"
+#include "../misc.h"
 
 
 static char DevPath[] = "/dev/tlvx";	/* full path for the tlvx fifo */
@@ -42,7 +43,7 @@ static unsigned char ShutUp[] = "\033S";	/* stop string */
 static void
 identspk (void)
 {
-  printf ("Using the Televox speech interface.\n");
+  LogAndStderr(LOG_NOTICE, "Using the Televox speech interface.");
 }
 
 static void

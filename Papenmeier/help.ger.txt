@@ -36,6 +36,8 @@ Statusspalte:
 Statusspalte "1"  Hilfe anzeigen (HELP)
 Statusspalte "2"  neuerliche Anzeige (RESTARTBRL)
 Statusspalte "3"  Cursor bewegen vertikal (CMD_CSRJMP_VERT)
+Statusspalte "4"  Ende der Sprachausgabe (CMD_MUTE)
+Statusspalte "5"  aktuelle Zeile vorlesen (CMD_SAY)
 Statusspalte "6"  Umschalten Cursorverfolgung (CSRTRK) 
 Statusspalte "7"  Umschalten Attribut Anzeige (DISPMD)
 Statusspalte "8"  Status Information (INFO)

@@ -3,6 +3,37 @@ Note: this file is in reversed chronological order (bottom to top).
 
   ...
 
+08 April 2000:
+  - Released BRLTTY 2.50 (beta)
+  - Added Installation Bootdisk Hacking Mini-HowTo (SD, NP)
+  - Fixed BrailleLite speech loading (added RTLD_GLOBAL to dlopen() flags) (NP)
+  - TSI driver updates (SD)
+  - BrailleLite advance bar binding improvements from Pete De Vasto 
+    <pdevasto@incyte.com>
+  - Apply the -q option to all log messages. Never print debug messages.
+      If -q is specified then don't print information messages and
+      notices. (DM)
+  - Change the default of the -l option from 4 (LOG_WARNING) to 5 (LOG_NOTICE). (DM)
+  - Standardized the way in which drivers identify themselves:
+      LOG_NOTICE for configuration information, LOG_INFO for copyright.
+      First line no indent, subsequent lines indented 3 spaces. (DM)
+  - Added Papenmeier functions: CMD_SAY to status key 5, CMD_MUTE to
+      status key 4. (DM)
+  - Papenmeier status cells did not say "Info " when in info mode. Fixed. (DM)
+  - The default name of the configuration save/restore file is now
+      driver-dependent. Renamed from "/etc/brltty/brlttyconf.dat" to
+      "/etc/brltty/brltty-XX.dat", where "XX" is the two-letter
+      identifier of the braille driver. To preserve current settings
+      when upgrading, preserve and rename old file. (DM)
+  - Use getopt_long, if the installation has it, to give every option a
+      long (--keyword or --keyword=value) name. (DM)
+  - Add support for "/etc/brltty.conf" (with sample file in DOCS
+      subdirectory). (DM)
+  - Papenmeier driver now uses safe read and write routines. (DM)
+  - Safe read and write routines now available for drivers so that
+      signals won't interfere with their I/O operations. (DM)
+  - Full list of speech drivers now displayed if bad driver specified. (DM)
+  - Add more options to the GenericSay AccentSA helper script. (DM)
   - Cursor routing has been broken -- fixed  (NP)
   - Better fix for cursor routing which happened to re-open and redetect 
     screen font, and incidentally writing to stderr.  Fixed  (NP)
@@ -11,6 +42,10 @@ Note: this file is in reversed chronological order (bottom to top).
 01 April 2000:
   - Released BRLTTY 2.40 (beta)
   - Work from Dave Mielke <dave@mielke.cc>:
+    - Added helper script for Accent/SA to GenericSay.
+    - GenericSay now closes pipe to signal mute function.
+    - GenericSay command changed to /usr/local/bin/say from /usr/bin/say.
+    - Generic-say renamed to GenericSay.
     - Speech driver are dynamically loadable.
     - BRLTTY now has the ability to determine the character set used by 
       the screen fonts.
@@ -45,7 +80,7 @@ June 1999:
 
 21 June 1999:
   - Released BRLTTY 2.11 (beta)
-  - Added support for BrailleLite 40 (nico).
+  - Added support for BrailleLite 40 (NP).
   - Added autodetection of some extra CombiBraille models.  Thanks to
     William Blokland <William_Blokland@tieman.nl>.
   - Added Alva Delphi 80 support.  Thanks to ??? <cstrobel@crosslink.net>.
@@ -64,7 +99,7 @@ June 1999:
   - Added some bindings for switching settings in config menu. Quickly
     fixed the manual. Regenerated the german manual using latin-1 source
     though not with all suggested options.
-  - Some tweaks to the BrailleLite driver (Nico)
+  - Some tweaks to the BrailleLite driver (NP)
   - Rework of the config menu so small braille displays can use it.
   - Alva Delphi support added (thanks to Terry Barnaby 
     <terry@beam.demon.co.uk>).

@@ -28,6 +28,7 @@
 #include "speech.h"
 #include "../spk.h"
 #include "../spk_driver.h"
+#include "../misc.h"
 
 
 static char say_path[] = SAY_CMD;	/* full path for the say command */
@@ -36,7 +37,7 @@ static FILE *say_fd = NULL;
 static void
 identspk (void)
 {
-  printf ("Speech will be piped to the \"%s\" command.\n", say_path);
+  LogAndStderr(LOG_NOTICE, "Speech will be piped to \"%s\".", say_path);
 }
 
 static void

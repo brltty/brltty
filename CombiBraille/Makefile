@@ -28,9 +28,12 @@ include ../driver.mk
 brl.o: brl.c ../brl.h ../misc.h brlconf.h ../brl_driver.h tables.h
 	$(CC) $(BRL_CFLAGS) -c brl.c
 
-speech.o: speech.c speech.h ../spk.h ../spk_driver.h brlconf.h
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h brlconf.h
 	$(CC) $(SPK_CFLAGS) -c speech.c
 
 brl-lib-name:
-	echo -e "cb\tTieman CombiBraille" >> $(LIBNAMES)
+	echo -e "cb\tTieman CombiBraille" >> $(BRLNAMES)
+
+spk-lib-name:
+	echo -e "cb\tTieman CombiBraille" >> $(SPKNAMES)
 

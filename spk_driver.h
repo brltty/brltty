@@ -12,6 +12,7 @@ static void closespk (void); /* close speech device */
 speech_driver spk_driver = 
 {
   SPKNAME,
+  SPKDRIVER,
   identspk,
   initspk,
   say,

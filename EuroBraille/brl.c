@@ -40,12 +40,6 @@
 #include "../brl_driver.h"
 
 
-static char StartupString[] =
-"  EuroBraille driver, version 0.2 \n"
-"  Copyright (C) 1997-1998 by Nicolas Pitre and VisuAide, Inc. \n";
-
-
-
 #define BRLROWS		1
 #define MAX_STCELLS	5	/* hiest number of status cells, if ever... */
 
@@ -178,8 +172,8 @@ WriteToBrlDisplay (int len, char *data)
 static void
 identbrl (void)
 {
-  /* Hello display... */
-  printf (StartupString);
+  LogAndStderr(LOG_NOTICE, "EuroBraille driver, version 0.2");
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1997-1998 by Nicolas Pitre and VisuAide, Inc.");
 }
 
 
@@ -193,7 +187,7 @@ static void initbrl (brldim *brl, const char *dev)
   /* Open the Braille display device for random access */
   brl_fd = open (dev, O_RDWR | O_NOCTTY);
   if (brl_fd < 0) {
-    LogPrint( LOG_ERR, "%s: %s\n", dev, strerror(errno) );
+    LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
     goto failure;
   }
   tcgetattr (brl_fd, &oldtio);	/* save current settings */
@@ -236,7 +230,7 @@ static void initbrl (brldim *brl, const char *dev)
   rawdata = (unsigned char *) malloc (res.x * res.y);
   prevdata = (unsigned char *) malloc (res.x * res.y);
   if (!res.disp || !rawdata || !prevdata) {
-    LogPrint( LOG_ERR, "can't allocate braille buffers\n" );
+    LogPrint( LOG_ERR, "Cannot allocate braille buffers." );
     goto failure;
   }
 

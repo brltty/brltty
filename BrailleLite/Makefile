@@ -47,10 +47,13 @@ brl40.o: $(TARGETS)
 $(BRL40_FILE): brl40.o
 	$(LD) $(BRL_LFLAGS) -soname $(BRL40_NAME) -o $(BRL40_FILE) brl40.o -lc
 
-speech.o: speech.c speech.h ../spk.h ../spk_driver.h brlconf.h
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h brlconf.h
 	$(CC) $(SPK_CFLAGS) -c speech.c
 
 brl-lib-name:
-	echo -e "b1\tBrailleLite 18" >> $(LIBNAMES)
-	echo -e "b4\tBrailleLite 40" >> $(LIBNAMES)
+	echo -e "b1\tBrailleLite 18" >> $(BRLNAMES)
+	echo -e "b4\tBrailleLite 40" >> $(BRLNAMES)
+
+spk-lib-name:
+	echo -e "bl\tBrailleLite" >> $(SPKNAMES)
 

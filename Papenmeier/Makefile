@@ -34,4 +34,4 @@ serial: serial.c ../brl.h brl.c ../text.auto.h
 	$(CC) $(CFLAGS) serial.c -o serial -lncurses 
 
 brl-lib-name:
-	echo -e "pm\tPapenmeier displays" >> $(LIBNAMES)
+	echo -e "pm\tPapenmeier displays" >> $(BRLNAMES)

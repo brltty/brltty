@@ -29,6 +29,7 @@
 #include "speech.h"		/* for speech definitions */
 #include "../spk.h"
 #include "../spk_driver.h"
+#include "../misc.h"
 
 
 /* This is shared with brlmain.c */
@@ -60,7 +61,7 @@ static unsigned char latin2cp437[128] =
 static void
 identspk (void)
 {
-  printf ("Using the Alva Delphi's in-built speech.\n");
+  LogAndStderr(LOG_NOTICE, "Using the Alva Delphi's built-in speech.");
 }
 
 

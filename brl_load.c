@@ -16,7 +16,7 @@
  */
 
 /*
- * brl_load.c - handling of dynamic drivers
+ * brl_load.c - handling of dynamic braille drivers
  */
 
 #include <stdio.h>
@@ -40,17 +40,21 @@ int load_braille_driver(void)
 {
   const char* error;
 
-  if (braille_libname == NULL)
-    {
-      #ifdef BRL_BUILTIN
-        extern braille_driver brl_driver;
+  #ifdef BRL_BUILTIN
+    extern braille_driver brl_driver;
+    if (braille_libname != NULL)
+      if (strcmp(braille_libname, brl_driver.identifier) == 0)
+        braille_libname = NULL;
+    if (braille_libname == NULL)
+      {
 	braille = &brl_driver;
 	braille_libname = "built-in";
 	return 1;
-      #else
-        return 0;
-      #endif
-    }
+      }
+  #else
+    if (braille_libname == NULL)
+      return 0;
+  #endif
 
   /* allow shortcuts */
   if (strlen(braille_libname) == 2)
@@ -62,11 +66,11 @@ int load_braille_driver(void)
       braille_libname = name;
     }
 
-  library = dlopen(braille_libname, RTLD_NOW);
+  library = dlopen(braille_libname, RTLD_NOW|RTLD_GLOBAL);
   if (library == NULL) 
     {
-      LogAndStderr(LOG_ERR, "could not open library %s", braille_libname);
-      LogAndStderr(LOG_ERR, dlerror()); 
+      LogAndStderr(LOG_ERR, "%s", dlerror()); 
+      LogAndStderr(LOG_ERR, "Cannot open braille driver library: %s", braille_libname);
       return 0;
     }
 
@@ -74,7 +78,8 @@ int load_braille_driver(void)
   error = dlerror();
   if (error)
     {
-      LogAndStderr(LOG_ERR, "symbol not found: %s: %s", BRL_SYMBOL, error);
+      LogAndStderr(LOG_ERR, "%s", error);
+      LogAndStderr(LOG_ERR, "Braille driver symbol not found: %s", BRL_SYMBOL);
       exit(10);
     }
 
@@ -82,13 +87,13 @@ int load_braille_driver(void)
 }
 
 
-int list_braille_driver(void)
+int list_braille_drivers(void)
 {
 	char buf[64];
-	static const char *list_file = LIB_PATH "/brl_drivers.lst";
+	static const char *list_file = LIB_PATH "/brltty-brl.lst";
 	int cnt, fd = open( list_file, O_RDONLY );
 	if (fd < 0) {
-		fprintf( stderr, "Error: can't access driver list file\n" );
+		fprintf( stderr, "Error: can't access braille driver list file\n" );
 		perror( list_file );
 		return 0;
 	}

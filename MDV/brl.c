@@ -45,10 +45,6 @@
 
 #define BRL_C 1
 
-#define VERSION "BRLTTY driver for MDV MB408S, version 0.5 (June 99)"
-#define COPYRIGHT "Copyright (C) 1996-99 by Stéphane Doyon " \
-                  "<s.doyon@videotron.ca>"
-
 #define __EXTENSIONS__	/* for termios.h */
 
 #include <stdio.h>
@@ -230,9 +226,8 @@ static char packet_to_process = 1, /* flag: if a packet is received while
 static void 
 identbrl (void)
 {
-  printf ("  %s\n", VERSION);
-  LogPrint(LOG_NOTICE,"%s", VERSION);
-  printf ("    %s\n", COPYRIGHT);
+  LogAndStderr(LOG_NOTICE, "BRLTTY driver for MDV MB408S, version 0.5 (June 99)");
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1996-99 by Stéphane Doyon <s.doyon@videotron.ca>.");
 }
 
 

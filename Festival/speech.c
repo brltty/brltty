@@ -26,6 +26,7 @@
 #include "speech.h"		/* for speech definitions */
 #include "../spk.h"
 #include "../spk_driver.h"
+#include "../misc.h"
 
 
 static FILE *festival;
@@ -34,7 +35,7 @@ static FILE *festival;
 static void
 identspk (void)
 {
-  printf ("Using the Festival text to speech package.\n");
+  LogAndStderr(LOG_NOTICE, "Using the Festival text to speech package.");
 }
 
 

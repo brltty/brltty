@@ -26,12 +26,13 @@
 #include "speech.h"
 #include "../spk.h"
 #include "../spk_driver.h"
+#include "../misc.h"
 
 
 static void
 identspk (void)
 {
-  printf ("No speech support.\n");
+  LogAndStderr(LOG_NOTICE, "No speech support.");
 }
 
 static void

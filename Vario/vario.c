@@ -5,6 +5,7 @@
 #include "brl.h"
 #include "brlconf.h"
 #include "../brl_driver.h"
+#include "../misc.h"
 
 
 static unsigned char lastbuff[40];
@@ -12,8 +13,7 @@ static unsigned char lastbuff[40];
 static void
 identbrl (void)
 {
-		/*	Do nothing .. dumdidumm */ 
-	printf("HT Protocol driver\n");
+  LogAndStderr(LOG_NOTICE, "HT Protocol driver");
 }
 
 static void 

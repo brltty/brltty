@@ -27,5 +27,9 @@
 DRIVER = gs
 include ../driver.mk
 
-speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../config.h
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h ../config.h
 	$(CC) $(SPK_CFLAGS) -c speech.c
+
+spk-lib-name:
+	echo -e "gs\tGeneric Say (pipes to /usr/local/bin/say)" >> $(SPKNAMES)
+

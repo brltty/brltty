@@ -29,7 +29,8 @@ LD = ld
 
 HELPDIR = ../help
 LIBDIR = ../lib
-LIBNAMES = $(LIBDIR)/brl_drivers.lst
+BRLNAMES = $(LIBDIR)/brltty-brl.lst
+SPKNAMES = $(LIBDIR)/brltty-spk.lst
 
 HELPNAME = brltty-$(DRIVER).hlp
 HELPFILE = $(HELPDIR)/$(HELPNAME)
@@ -38,7 +39,7 @@ $(HELPFILE): brlttyh*.txt
 
 braille-help: $(HELPFILE)
 
-BRL_CFLAGS = $(LIB_CFLAGS) '-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
+BRL_CFLAGS = $(LIB_CFLAGS) '-DBRLDRIVER="$(DRIVER)"' '-DHELPNAME="$(PREFIX)$(DATA_DIR)/$(HELPNAME)"'
 BRL_LFLAGS = -shared
 BRL_SO_NAME = $(LIB_SO_NAME)b
 BRL_NAME = $(BRL_SO_NAME)$(DRIVER).so.$(LIB_VER)
@@ -51,7 +52,7 @@ ifeq ($(BRL_FILES),)
 endif
 braille-driver: $(BRL_FILES)
 
-SPK_CFLAGS = $(LIB_CFLAGS)
+SPK_CFLAGS = $(LIB_CFLAGS) '-DSPKDRIVER="$(DRIVER)"'
 SPK_LFLAGS = -shared
 SPK_SO_NAME = $(LIB_SO_NAME)s
 SPK_NAME = $(SPK_SO_NAME)$(DRIVER).so.$(LIB_VER)

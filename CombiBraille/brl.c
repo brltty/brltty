@@ -49,8 +49,8 @@ static int getbrlkey (void);		/* get a keystroke from the CombiBraille */
 static void
 identbrl (void)
 {
-  printf ("\nTieman B.V. CombiBraille driver   ");
-  printf ("Copyright (C) 1995, 1996 by Nikhil Nair.\n");
+  LogAndStderr(LOG_NOTICE, "Tieman B.V. CombiBraille driver");
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1995, 1996 by Nikhil Nair.");
 }
 
 

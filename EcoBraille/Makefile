@@ -31,5 +31,5 @@ brl.o: brl.c brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../config.h
 	$(CC) $(BRL_CFLAGS) -c brl.c
 
 brl-lib-name:
-	echo -e "ec\tEcoBraille displays" >> $(LIBNAMES)
+	echo -e "ec\tEcoBraille displays" >> $(BRLNAMES)
 

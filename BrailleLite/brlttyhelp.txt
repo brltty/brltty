@@ -2,7 +2,13 @@ Braille Lite Driver for BRLTTY (help screen)
 
 Key bindings:
 
-advance bar: full window left/right
+advance bar left (BL18): full window left
+advance bar right (BL18): full window right
+left advance bar left (BL40): full window left
+left advance bar right (BL40): line up
+right advance bar left (BL40): line down
+right advance bar right (BL40): full window right
+
 1: line up
 4: line down
 23: keyboard up arrow

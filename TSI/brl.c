@@ -19,11 +19,16 @@
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
  *
- * This is version 2.2beta3 (October 99) of the TSI driver.
+ * This is version 2.3 (April 2000) of the TSI driver.
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
- * It is designed to be compiled in BRLTTY version 2.1.
+ * It is designed to be compiled in BRLTTY versions 2.41-3.0.
  *
  * History:
+ * Version 2.3: Reset serial port attributes at each detection attempt in
+ *   initbrl. This should help BRLTTY recover if another application (such
+ *   as kudzu) scrambles the serial port while BRLTTY is running.
+ * Unnumbered version: Fixes for dynmically loading drivers (declare all
+ *   non-exported functions and variables static).
  * Version 2.2beta3: Option to disable CTS checking. Apparently, Vario
  *   does not raise CTS when connected.
  * Version 2.2beta1: Exploring problems with emulators of TSI (PB40): BAUM
@@ -329,9 +334,8 @@ static unsigned char *battery_msg;     /* low battery warning msg */
 static void 
 identbrl (void)
 {
-  printf ("  %s\n", VERSION);
-  LogPrint(LOG_NOTICE,"%s", VERSION);
-  printf ("    %s\n", COPYRIGHT);
+  LogAndStderr(LOG_NOTICE, VERSION);
+  LogAndStderr(LOG_INFO, "   "COPYRIGHT);
 }
 
 
@@ -489,6 +493,12 @@ static void initbrl (brldim *brl, const char *tty)
 	  goto failure;
       }
       LogPrint(LOG_DEBUG,"Device was connected or activated");
+    }
+    /* Reset serial port config, in case some other program interfered and
+       BRLTTY is resetting... */
+    if(tcsetattr (brl_fd, TCSAFLUSH, &curtio) == -1){
+      LogPrint(LOG_ERR, "tcsetattr: %s", strerror(errno));
+      goto failure;
     }
     /* Set speed / baud rate / bps */
     LogPrint(LOG_DEBUG,"Sending query at 9600bps");

@@ -79,8 +79,8 @@ static int qget (blkey *);	/* get a byte from the input queue */
 static void
 identbrl (void)
 {
-  printf ("  Braille Lite 18/40 driver (configured for %d)\n", BLITE_SIZE);
-  printf ("  Copyright (C) 1998 by Nikhil Nair.\n");
+  LogAndStderr(LOG_NOTICE, "Braille Lite %d driver", BLITE_SIZE);
+  LogAndStderr(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");
 }
 
 
@@ -101,7 +101,7 @@ initbrl (brldim * brl, const char *brldev)
   blite_fd = open (brldev, O_RDWR | O_NOCTTY);
   if (blite_fd < 0)
     {
-      LogPrint (LOG_ERR, "%s: %s\n", brldev, strerror (errno));
+      LogPrint (LOG_ERR, "%s: %s", brldev, strerror (errno));
       goto failure;
     }
   tcgetattr (blite_fd, &oldtio);	/* save current settings */
@@ -134,7 +134,7 @@ initbrl (brldim * brl, const char *brldev)
   qbase = (unsigned char *) malloc (QSZ);
   if (!res.disp || !prevdata || !rawdata || !qbase)
     {
-      LogPrint (LOG_ERR, "can't allocate braille buffers\n");
+      LogPrint (LOG_ERR, "Cannot allocate braille buffers.");
       goto failure;
     }
   memset (prevdata, 0, res.x);

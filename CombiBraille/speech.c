@@ -31,6 +31,7 @@
 #include "speech.h"		/* for speech definitions */
 #include "../spk.h"
 #include "../spk_driver.h"
+#include "../misc.h"
 
 /* These are shared with CombiBraille/brl.c: */
 extern int brl_fd;
@@ -62,7 +63,7 @@ static unsigned char latin2cp437[128] =
 static void
 identspk (void)
 {
-  printf ("Using the CombiBraille's in-built speech.\n");
+  LogAndStderr(LOG_NOTICE, "Using the CombiBraille's built-in speech.");
 }
 
 

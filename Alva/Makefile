@@ -41,8 +41,12 @@ brlmain.o: brlmain.cc brlconf.h ../brl_driver.h ../brl.h ../misc.h ../scr.h ../c
 brl.o: brlmain.o $(ALVALIB)
 	$(LD) -r -o brl.o brlmain.o $(ALVALIB)
 
-speech.o: speech.c speech.h ../spk.h ../spk_driver.h brlconf.h
+speech.o: speech.c speech.h ../spk.h ../spk_driver.h ../misc.h brlconf.h
 	$(CC) $(SPK_CFLAGS) -c speech.c
 
 brl-lib-name:
-	echo -e "al\tAlva (ABT3xx/Delphi)" >> $(LIBNAMES)
+	echo -e "al\tAlva (ABT3xx/Delphi)" >> $(BRLNAMES)
+
+spk-lib-name:
+	echo -e "al\tAlva (Delphi)" >> $(SPKNAMES)
+

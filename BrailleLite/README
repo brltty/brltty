@@ -1,7 +1,7 @@
 Braille Lite Driver for BRLTTY
 
 This is a beta driver for the Blazie Engineering's Braille Lite.
-written by Nikhil Nair, with additions from Nicolas Pitre.
+written by Nikhil Nair, with additions from Nicolas Pitre and Pete De Vasto.
 
 Both BrailleLite 18 and 40 should work.  However you must edit brlconf.h
 to select which one you want to compile for.  It seems that there is no way
@@ -16,6 +16,10 @@ functions.
 Be sure your BrailleLite's serial port baudrate and the value configured
 in the brlconf.h file are the same.
 
+The Braille Lite 40 has two advance bars on it.  Brltty has been set up
+so that moving the display left or right works the same as it does
+when the unit is in its internal notetaker mode.
+
 Enjoy!
 Nicolas Pitre <nico@cam.org>
 -----
@@ -23,7 +27,13 @@ Nicolas Pitre <nico@cam.org>
 
 Key bindings:
 
-advance bar: full window left/right
+advance bar left (Braille Lite 18): full window left
+advance bar right (Braille Lite 18): full window right
+left advance bar left (Braille Lite 40): full window left
+left advance bar right (Braille Lite 40): 1 line up
+right advance bar left (Braille Lite 40): 1 line down
+right advance bar right (Braille Lite 40): full window right
+
 1: line up
 4: line down
 23: keyboard up arrow

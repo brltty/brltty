@@ -32,6 +32,15 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+// Not all sysems have support for getopt_long, i.e. --name=value options.
+// Our simple test is that we have it if we're using glibc.
+// Experience may show that this test needs to be enhanced.
+// The rest of the code should test one of the defines related to
+// getopt_long, e.g. the presence of no_argument.
+#ifdef __GLIBC__
+  #include <getopt.h>
+#endif
+
 #include "config.h"
 #include "brl.h"
 #include "scr.h"
@@ -42,22 +51,22 @@
 #include "misc.h"
 #include "message.h"
 
-#define VERSION "BRLTTY 2.42 (beta)"
+#define VERSION "BRLTTY 2.50 (beta)"
 #define COPYRIGHT "\
 Copyright (C) 1995-2000 by The BRLTTY Team.  All rights reserved."
 #define USAGE "\
-Usage: %s [options] \n\
- -b driver            which braille display driver to use: full library name\n\
-                      or shortcut ("##BRLLIBS##")\n\
- -c config-file       use binary configuration file `config-file' \n\
- -d serial-device     use `serial-device' to access Braille terminal\n\
- -s driver            which speech device driver to use: full library name\n\
-                      or shortcut ("##SPKLIBS##")\n\
- -t text-trans-file   use translation table `text-trans-file' \n\
- -h, --help           print this usage message \n\
- -q, --quiet          suppress start-up messages \n\
- -l n                 debugging level for syslog (from 0 to 7, default 4)\n\
- -v, --version        print start-up messages and exit \n"
+Usage: %s [option ...]\n\
+ -b driver  --braille=driver  Braille display driver to use: full library name\n\
+                                or shortcut ("##BRLLIBS##")\n\
+ -c file    --config=file     Path to configuration save/restore file.\n\
+ -d device  --device=device   Path to device for accessing braille display.\n\
+ -l n       --log=n           Syslog debugging level (from 0 to 7, default 5)\n\
+ -q         --quiet           Suppress start-up messages.\n\
+ -s driver  --speech=driver   Speech interface driver to use: full library name\n\
+                                or shortcut ("##SPKLIBS##")\n\
+ -t file    --table=file      Path to dot translation table file.\n\
+ -h         --help            Print this usage information.\n\
+ -v         --version         Print start-up messages and exit.\n"
 
 #define ENV_MAGICNUM 0x4004
 
@@ -165,7 +174,7 @@ volatile sig_atomic_t keep_going = 1;	/*
 					 */
 int tbl_fd;			/* Translation table filedescriptor */
 /* -h, -l, -q and -v options */
-short opt_h = 0, opt_q = 0, opt_v = 0, opt_l = 4;
+short opt_h = 0, opt_q = 0, opt_v = 0, opt_l = LOG_NOTICE;
 char *opt_c = NULL, *opt_d = NULL, *opt_t = NULL;	/* filename options */
 short homedir_found = 0;	/* CWD status */
 
@@ -206,6 +215,198 @@ void loadconfig (void);
 void saveconfig (void);
 int nice (int);			/* should really be in a header file ... */
 
+// Define error codes for configuration file processing.
+#define CF_OK 0		// No error.
+#define CF_NOVAL 1	// Operand not specified.
+#define CF_INVAL 2	// Bad operand specified.
+#define CF_EXTRA 3	// Too many operands.
+
+static int set_braille_configuration (const char *delims)
+{
+  char *path = strtok(NULL, delims);
+
+  if (path == NULL)
+    {
+      return CF_NOVAL;
+    }
+    
+  if (strtok(NULL, delims) != NULL)
+    {
+      return CF_EXTRA;
+    }
+
+  opt_c = strdup(path);
+  return CF_OK;
+}
+
+static int set_braille_device (const char *delims)
+{
+  char *device = strtok(NULL, delims);
+
+  if (device == NULL)
+    {
+      return CF_NOVAL;
+    }
+    
+  if (strtok(NULL, delims) != NULL)
+    {
+      return CF_EXTRA;
+    }
+
+  opt_d = strdup(device);
+  return CF_OK;
+}
+
+static int set_braille_driver (const char *delims)
+{
+  char *library = strtok(NULL, delims);
+
+  if (library == NULL)
+    {
+      return CF_NOVAL;
+    }
+    
+  if (strtok(NULL, delims) != NULL)
+    {
+      return CF_EXTRA;
+    }
+
+  braille_libname = strdup(library);
+  return CF_OK;
+}
+
+static int set_speech_driver (const char *delims)
+{
+  char *library = strtok(NULL, delims);
+
+  if (library == NULL)
+    {
+      return CF_NOVAL;
+    }
+    
+  if (strtok(NULL, delims) != NULL)
+    {
+      return CF_EXTRA;
+    }
+
+  speech_libname = strdup(library);
+  return CF_OK;
+}
+
+static int set_dot_translation (const char *delims)
+{
+  char *path = strtok(NULL, delims);
+
+  if (path == NULL)
+    {
+      return CF_NOVAL;
+    }
+    
+  if (strtok(NULL, delims) != NULL)
+    {
+      return CF_EXTRA;
+    }
+
+  opt_t = strdup(path);
+  return CF_OK;
+}
+
+static void process_configuration_line (char *line, void *data)
+{
+  const char *word_delims = " \t"; // Characters which separate words.
+  char *keyword; // Points to first word of each line.
+
+  // Relate each keyword to its handler via a table.
+  typedef struct
+    {
+      const char *name;
+      int (*handler) (const char *delims); 
+    } keyword_entry;
+  const keyword_entry keyword_table[] =
+    {
+      {"braille-configuration", set_braille_configuration},
+      {"braille-device",        set_braille_device},
+      {"braille-driver",        set_braille_driver},
+      {"speech-driver",         set_speech_driver},
+      {"dot-translation",       set_dot_translation},
+      {NULL,                    NULL}
+    };
+
+  // Remove comment from end of line.
+  {
+    char *comment = strchr(line, '#');
+    if (comment != NULL)
+      *comment = '\0';
+  }
+
+  keyword = strtok(line, word_delims);
+  if (keyword != NULL) // Ignore blank lines.
+    {
+      const keyword_entry *kw = keyword_table;
+      while (kw->name != NULL)
+        {
+	  if (strcasecmp(keyword, kw->name) == 0)
+	    {
+	      int code = kw->handler(word_delims);
+	      switch (code)
+	        {
+		  case CF_OK:
+		    break;
+
+		  case CF_NOVAL:
+		    LogAndStderr(LOG_WARNING,
+		                 "Operand not supplied for"
+				 " configuration item '%s'.",
+				 keyword);
+		    break;
+
+		  case CF_INVAL:
+		    LogAndStderr(LOG_WARNING,
+		                 "Invalid operand specified"
+				 " for configuration item '%s'.",
+				 keyword);
+		    break;
+
+		  case CF_EXTRA:
+		    LogAndStderr(LOG_WARNING,
+		                 "Too many operands supplied"
+				 " for configuration item '%s'.",
+				 keyword);
+		    break;
+
+		  default:
+		    LogAndStderr(LOG_WARNING,
+		                 "Internal error: unsupported"
+				 " configuration file error code: %d",
+				 code);
+		    break;
+		}
+	      return;
+	    }
+	  ++kw;
+	}
+      LogAndStderr(LOG_WARNING,
+                   "Unknown configuration item: '%s'.",
+		   keyword);
+    }
+}
+
+static void process_configuration_file (char *path)
+{
+   FILE *file = fopen(path, "r");
+   if (file != NULL)
+     { // The configuration file has been successfully opened.
+       process_lines(file, process_configuration_line, NULL);
+       fclose(file);
+     }
+   else if (errno != ENOENT)
+     {
+       LogAndStderr(LOG_WARNING,
+                    "Cannot open configuration file '%s': %s",
+                    path, strerror(errno));
+       // Just a warning, don't exit.
+     }
+}
 
 int 
 main (int argc, char *argv[])
@@ -220,12 +421,42 @@ main (int argc, char *argv[])
   short attrcntr = 1;
   short oldwinx, oldwiny;
 
+  const char *short_options = "+b:c:d:hl:qs:t:v-:";
+  #ifdef no_argument
+    const struct option long_options[] =
+      {
+        {"braille", required_argument, NULL, 'b'},
+        {"config" , required_argument, NULL, 'c'},
+        {"device" , required_argument, NULL, 'd'},
+        {"help"   , no_argument      , NULL, 'h'},
+        {"log"    , required_argument, NULL, 'l'},
+        {"quiet"  , no_argument      , NULL, 'q'},
+        {"speech" , required_argument, NULL, 's'},
+        {"table"  , required_argument, NULL, 't'},
+        {"version", no_argument      , NULL, 'v'},
+        {NULL     , 0                , NULL, 0  }
+      };
+    #define get_option() getopt_long(argc, argv, short_options, long_options, NULL)
+  #else
+    #define get_option() getopt(argc, argv, short_options)
+  #endif
+
+  /* Open the system log. */
+  LogOpen();
+  LogPrint(LOG_NOTICE, "%s starting.", VERSION);
+
+  /* Process the configuration file. */
+  process_configuration_file(CONFIG_FILE);
+
   /* Parse command line using getopt(): */
-  while ((i = getopt (argc, argv, "b:c:d:hl:qs:t:v-:")) != -1)
+  while ((i = get_option()) != -1)
     /* This will complain if an incorrect option is given but will still
        proceed. I assume this is intended? SD */
     switch (i)
       {
+      case '?': // An invalid option has been specified.
+	// An error message has already been displayed.
+        exit(2);
       case 'b':			/* name of driver */
 	braille_libname = optarg;
 	break;
@@ -266,8 +497,14 @@ main (int argc, char *argv[])
 	  opt_q = 1;
 	else if (strcmp (optarg, "version") == 0)
 	  opt_v = 1;
+	else
+	  {
+	    fprintf(stderr, "Unknown option -- %s\n", optarg);
+	    exit(2);
+	  }
 	break;
       }
+  #undef get_option
 
   if (opt_h)
     {
@@ -275,60 +512,59 @@ main (int argc, char *argv[])
       return 0;
     }
 
-  /* Open syslog */
-  LogOpen(opt_l);
+  /* Set logging priority levels. */
+  SetLogPrio(opt_l);
+  SetErrPrio(opt_q ? LOG_WARNING : LOG_INFO);
 
   if (opt_d == NULL)
     opt_d = BRLDEV;
   if (*opt_d == 0)
     {
-      LogAndStderr(LOG_ERR, "no braille device specified - use -d");
+      LogAndStderr(LOG_ERR, "No braille device specified - use -d.");
       exit(10);
     }
 
   if (!load_braille_driver())
     {
-      fprintf( stderr, "\nNo or bad braille driver selection -- use '-b XX' option to specify one.\n\n" );
-      list_braille_driver();
+      fprintf(stderr, "%s braille driver selection -- use '-b XX' option to specify one.\n\n",
+              braille_libname ? "Bad" : "No");
+      list_braille_drivers();
       fprintf( stderr, "\nUse '%s -h' for quick help.\n\n", argv[0] );
       exit(10);
     }
 
+  if (!opt_c)
+    {
+      char *part1 = "brltty-";
+      char *part2 = braille->identifier;
+      char *part3 = ".dat";
+      opt_c = malloc(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+      sprintf(opt_c, "%s%s%s", part1, part2, part3);
+    }
+
   if (!load_speech_driver())
     {
-      fprintf( stderr, "no speech driver specified - use -s\n" );
+      fprintf(stderr, "%s speech driver selection -- use '-s XX' option to specify one.\n\n",
+              speech_libname ? "Bad" : "No");
+      list_speech_drivers();
+      fprintf( stderr, "\nUse '%s -h' for quick help.\n\n", argv[0] );
       exit(10);
     }
 
   /* copy default mode for status display */
   initenv.stcellstyle = braille->pref_style;
 
-  /*
-   * Print version and copyright information: 
-   */
-  if (!(opt_q && !opt_v))
-    {	
-      /* keep quiet only if -q and not -v */
-      puts (VERSION);
-      LogPrint(LOG_NOTICE, "%s starting", VERSION);
-      puts (COPYRIGHT);
-
-      LogAndStderr(LOG_INFO, "Braille Library: %s", braille_libname);
-      LogAndStderr(LOG_INFO, "Braille Device: %s", opt_d);
-      LogAndStderr(LOG_INFO, "Braille Help File: %s", braille->helpfile);
-      LogAndStderr(LOG_INFO, "Speech Library: %s", speech_libname);
-
-      /*
-       * Give braille and speech libraries a chance to introduce themselves.
-       */
-      braille->identify();
-      speech->identify();
-    }
-  if (opt_v)
-    return 0;
-
   if (chdir (HOME_DIR))		/* * change to directory containing data files  */
-    chdir ("/etc");		/* home directory not found, use backup */
+    {
+      char *backup_dir = "/etc";
+      LogAndStderr(LOG_WARNING,
+                   "Cannot change directory to '%s': %s",
+                   HOME_DIR, strerror(errno));
+      LogAndStderr(LOG_WARNING,
+                   "Using backup directory '%s' instead.",
+                   backup_dir);
+      chdir (backup_dir);		/* home directory not found, use backup */
+    }
 
   /*
    * Load text translation table: 
@@ -339,38 +575,80 @@ main (int argc, char *argv[])
 	  (curtbl = (unsigned char *) malloc (256)) && \
 	  read (tbl_fd, curtbl, 256) == 256)
 	memcpy (texttrans, curtbl, 256);
-      else if (!opt_q)
-	LogAndStderr(LOG_WARNING, "Failed to read dot translation table %s",
-		 opt_t);
-      if (curtbl) {
-	free (curtbl);
-	curtbl = NULL;
-      }
+      else
+	{
+	  if (!opt_q)
+	    LogAndStderr(LOG_WARNING,
+	                 "Cannot read dot translation table '%s'.",
+		         opt_t);
+	  opt_t = NULL;
+	}
+      if (curtbl)
+	{
+	  free (curtbl);
+	  curtbl = NULL;
+        }
       if (tbl_fd >= 0)
-	close (tbl_fd);
+	{
+	  close (tbl_fd);
+	  tbl_fd = -1;
+	}
     }
+
+  /*
+   * Print version and copyright information: 
+   */
+  if (opt_v || !opt_q)
+    {	
+      /* keep quiet only if -q and not -v */
+      puts (VERSION);
+      puts (COPYRIGHT);
+    }
+
+  {
+    char buffer[0X100];
+    char *path = getcwd(buffer, sizeof(buffer));
+    LogAndStderr(LOG_NOTICE, "Working Directory: %s",
+	         path ? path : "path-too-long");
+  }
+
+  LogAndStderr(LOG_NOTICE, "Dot Translation Table: %s",
+               opt_t ? opt_t : "built-in");
+  LogAndStderr(LOG_NOTICE, "Braille Device: %s", opt_d);
+  LogAndStderr(LOG_NOTICE, "Braille Driver: %s (%s)",
+               braille_libname, braille->name);
+  LogAndStderr(LOG_NOTICE, "Braille Help File: %s", braille->helpfile);
+  LogAndStderr(LOG_NOTICE, "Braille Configuration File: %s", opt_c);
+  LogAndStderr(LOG_NOTICE, "Speech Driver: %s (%s)",
+               speech_libname, speech->name);
+
+  /*
+   * Give braille and speech libraries a chance to introduce themselves.
+   */
+  braille->identify();
+  speech->identify();
+
+  if (opt_v)
+    return 0;
 
   /*
    * Initialize screen library 
    */
   if (initscr (braille->helpfile))
     {				
-      /* initialize screen reading */
-      if (!opt_q){
-	LogAndStderr(LOG_ERR, "Cannot read screen\n");
-	LogClose();
-	exit (2);
-      }
+      LogAndStderr(LOG_ERR, "Cannot read screen.");
+      LogClose();
+      exit (2);
     }
   
   /* allocate the first screen information structures */
   p = malloc (sizeof (*p));
   if (!p)
     {
-      LogAndStderr(LOG_ERR, "memory allocation error\n");
+      LogAndStderr(LOG_ERR, "Memory allocation error.");
       closescr();
       LogClose();
-      exit( -1 );
+      exit(2);
     }
   *p = initparam;
   scrparam[0] = p;
@@ -384,8 +662,7 @@ main (int argc, char *argv[])
   switch (fork ())
     {
     case -1:			/* can't fork */
-      if (!opt_q)
-	perror ("fork()");
+      LogAndStderr(LOG_ERR, "fork: %s", strerror(errno));
       closescr ();
       LogClose();
       exit (3);
@@ -393,7 +670,7 @@ main (int argc, char *argv[])
       close (STDIN_FILENO);
       close (STDOUT_FILENO);
       close (STDERR_FILENO);
-      LogPrint(LOG_DEBUG, "Becoming daemon");
+      LogPrint(LOG_DEBUG, "Becoming daemon.");
       if (setsid () == -1)
 	{			
 	  /* request a new session (job control) */
@@ -461,7 +738,7 @@ main (int argc, char *argv[])
 	  case CMD_RESTARTBRL:
 	    braille->close(&brl);
 	    play(snd_brloff);
-	    LogPrint(LOG_INFO,"Reinitializing braille driver");
+	    LogPrint(LOG_INFO,"Reinitializing braille driver.");
 	    startbrl();
 	    break;
 	  case CMD_TOP:
@@ -848,7 +1125,8 @@ main (int argc, char *argv[])
 	      }
 	    else
 	      LogPrint(LOG_DEBUG,
-		       "Driver sent unrecognized command 0x%x\n", keypress);
+		       "Driver sent unrecognized command 0x%x.",
+		       keypress);
 	    break;
 	  }
 
@@ -970,28 +1248,27 @@ main (int argc, char *argv[])
 		| (num[(p->winx+1) % 10] << 4);
 	      break;
 	    case ST_Papenmeier:
-	      statcells [0] = pm_num(p->winy+1);
+	      statcells [0] = seascape_number(p->winy+1);
 	      statcells [1] = 0;  /* empty for easier reading */
-	      statcells [2] =  pm_num(scr.posy+1);
-
-	      statcells [3] =  pm_num(scr.posx+1);
+	      statcells [2] =  seascape_number(scr.posy+1);
+	      statcells [3] =  seascape_number(scr.posx+1);
 	      statcells [4] = 0;     /* empty for easier reading */
-	      statcells [5] = pm_stat(6, p->csrtrk);
-	      statcells [6] = pm_stat(7, p->dispmode);
+	      statcells [5] = seascape_flag(6, p->csrtrk);
+	      statcells [6] = seascape_flag(7, p->dispmode);
 	      statcells [7] = 0;     /* empty for easier reading */
-	      statcells [8] = pm_stat(9, (dispmd & FROZ_SCRN) == FROZ_SCRN);
+	      statcells [8] = seascape_flag(9, (dispmd & FROZ_SCRN) == FROZ_SCRN);
 	      statcells [9] = 0;
 	      statcells [10] = 0;
 	      statcells [11] = 0;
-	      statcells [12] = pm_stat(3, env.csrvis);
-	      statcells [13] = pm_stat(4, env.csrsize);
-	      statcells [14] = pm_stat(5, env.csrblink);
-	      statcells [15] = pm_stat(6, env.capblink);
-	      statcells [16] = pm_stat(7, env.sixdots);
-	      statcells [17] = pm_stat(8, env.sound);
-	      statcells [18] = pm_stat(9, env.skpidlns);
-	      statcells [19] = pm_stat(0, env.attrvis);
-	      statcells [20] = pm_stat(1, env.attrblink);
+	      statcells [12] = seascape_flag(3, env.csrvis);
+	      statcells [13] = seascape_flag(4, env.csrsize);
+	      statcells [14] = seascape_flag(5, env.csrblink);
+	      statcells [15] = seascape_flag(6, env.capblink);
+	      statcells [16] = seascape_flag(7, env.sixdots);
+	      statcells [17] = seascape_flag(8, env.sound);
+	      statcells [18] = seascape_flag(9, env.skpidlns);
+	      statcells [19] = seascape_flag(0, env.attrvis);
+	      statcells [20] = seascape_flag(1, env.attrblink);
               statcells [21] = 0;
 	      break;
 	    default:
@@ -1149,7 +1426,7 @@ main (int argc, char *argv[])
   play(snd_brloff);
   for (i = 0; i <= NBR_SCR; i++) 
     free (scrparam[i]);
-  LogPrint(LOG_NOTICE,"Terminating");
+  LogPrint(LOG_NOTICE,"Terminating.");
   LogClose();
   return 0;
 }
@@ -1161,7 +1438,7 @@ startbrl()
   braille->initialize(&brl, opt_d);
   if (brl.x == -1)
     {
-      LogPrint(LOG_ERR,"Braille driver initialization failed");
+      LogPrint(LOG_ERR, "Braille driver initialization failed.");
       closescr ();
       LogClose();
       exit (5);
@@ -1170,8 +1447,8 @@ startbrl()
   hwinshift = fwinshift / 2;
   csr_offright = brl.x / 4;
   vwinshift = 5;
-  LogPrint(LOG_DEBUG,"Braille display has %d rows by %d cells.",
-	   brl.y,brl.x);
+  LogPrint(LOG_DEBUG, "Braille display has %d rows of %d cells.",
+	   brl.y, brl.x);
   play(snd_detected);
   clrbrlstat ();
 }
@@ -1365,14 +1642,14 @@ message (unsigned char *s, short flags)
   int i, j, l, silent;
 
   silent = (flags & MSG_SILENT);
+  l = strlen (s);
 
   if (!silent && env.sound)
     {
       speech->mute();
-      speech->say(s, strlen(s));
+      speech->say(s, l);
     }
 
-  l = strlen (s);
   while (l)
     {
       memset (brl.disp, ' ', brl.x * brl.y);
@@ -1691,13 +1968,10 @@ loadconfig (void)
 {
   int i = 1;
   struct brltty_env newenv;
-  char *fname;
 
-  fname = opt_c ? opt_c : CONFFILE_NAME;
-  tbl_fd = open (fname, O_RDONLY);
+  tbl_fd = open (opt_c, O_RDONLY);
   if(tbl_fd < 0){
-    if(opt_c)
-      LogPrint(LOG_WARNING,"Could not open config file %s", fname);
+    LogPrint(LOG_WARNING, "Cannot open configuration file '%s'.", opt_c);
   }else{
       if (read (tbl_fd, &newenv, sizeof (struct brltty_env)) == \
 	  sizeof (struct brltty_env))
@@ -1717,12 +1991,9 @@ loadconfig (void)
 void 
 saveconfig (void)
 {
-  char *fname;
-
-  fname = opt_c ? opt_c : CONFFILE_NAME;
-  tbl_fd = open (fname, O_WRONLY | O_CREAT | O_TRUNC);
+  tbl_fd = open (opt_c, O_WRONLY | O_CREAT | O_TRUNC);
   if (tbl_fd < 0){
-    LogPrint(LOG_WARNING,"Could not save to config file %s", fname);
+    LogPrint(LOG_WARNING, "Cannot save to configuration file '%s'.", opt_c);
     message ("can't save config", 0);
     delay (DISPDEL);
   }

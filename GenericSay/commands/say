@@ -1,0 +1,16 @@
+#!/bin/sh
+# Simple BrlTTY GenericSay helper script.
+# It should be installed as "/usr/local/bin/say".
+
+# If your speech synthesizer does not require any special initialization
+# sequences, and if you either are satisfied with its default settings or
+# don't know how to change them, then this helper script is for you. It
+# does no more than simply send the text to be spoken directly to your
+# synthesizer. Note that, being totally general, it cannot, and does
+# not, implement the mute function. All you need to do is:
+# - Set the device (see "device=" line below).
+# - Install the script (as /usr/local/bin/say).
+
+device=/dev/ttyS0
+exec cat >"${device}"
+exit $?

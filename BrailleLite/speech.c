@@ -14,6 +14,7 @@
 #include "speech.h"		/* for BLite speech definitions */
 #include "../spk.h"
 #include "../spk_driver.h"
+#include "../misc.h"
 
 /* This is shared with BrailleLite/brl.c: */
 extern int blite_fd;
@@ -46,7 +47,7 @@ static unsigned char latin2cp437[128] =
 static void
 identspk (void)
 {
-  printf ("Using the Braille Lite's in-built speech.\n");
+  LogAndStderr(LOG_NOTICE, "Using the Braille Lite's built-in speech.");
 }
 
 
