@@ -35,6 +35,25 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
+#ifdef ENABLE_USB
+#include "Programs/usbio.h"
+
+static char *usbDevice;
+
+static int
+albatrossChooser (UsbDevice *device, void *data) {
+  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
+  if ((descriptor->idVendor == 0X0403) && (descriptor->idProduct == 0X6001)) {
+    char *serialDevice = usbGetSerialDevice(device, 0);
+    if (serialDevice) {
+      usbDevice = serialDevice;
+      return 1;
+    }
+  }
+  return 0;
+}
+#endif /* ENABLE_USB */
+
 #define LOWER_ROUTING_DEFAULT CR_ROUTE
 #define UPPER_ROUTING_DEFAULT CR_DESCCHAR
 
@@ -87,6 +106,7 @@ acknowledgeDisplay (void) {
   {
     unsigned char identifier;
     if (!awaitByte(&identifier)) return 0;
+    if (identifier == 0XFF) return 0;
 
     {
       unsigned char byte;
@@ -166,6 +186,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
     makeOutputTable(&dots, &outputTable);
   }
+
+#ifdef ENABLE_USB
+  usbDevice = NULL;
+  {
+    UsbDevice *device = usbFindDevice(albatrossChooser, NULL);
+    usbCloseDevice(device);
+    LogPrint(LOG_INFO, "Albatross USB serial device: %s", usbDevice);
+    free(usbDevice);
+    usbDevice = NULL;
+  }
+#endif /* ENABLE_USB */
 
   if (openSerialDevice(device, &fileDescriptor, &oldSettings)) {
     speed_t speedTable[] = {B19200, B9600, B0};
