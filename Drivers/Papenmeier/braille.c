@@ -110,15 +110,6 @@ read_config (const char *directory, const char *name) {
 
 #define CMD_ERR	EOF
 
-/*
- * change bits for the papenmeier terminal
- *                             1 2           1 4
- * dot number -> bit number    3 4   we get  2 5 
- *                             5 6           3 6
- *                             7 8           7 8
- */
-static TranslationTable outputTable;
-
 static unsigned int debug_keys = 0;
 static unsigned int debug_reads = 0;
 static unsigned int debug_writes = 0;
@@ -126,6 +117,7 @@ static unsigned int debug_writes = 0;
 /*--- Command Utilities ---*/
 
 static const TerminalDefinition *the_terminal = NULL;
+static TranslationTable outputTable;
 static unsigned int pressed_modifiers = 0;
 static unsigned int saved_modifiers = 0;
 static int input_mode = 0;
@@ -458,19 +450,15 @@ static const InputOutputOperations usbOperations = {
 
 /*--- Protocol Operation Utilities ---*/
 
-static int rcvStatusFirst;
-static int rcvStatusLast;
-static int rcvCursorFirst;
-static int rcvCursorLast;
-static int rcvFrontFirst;
-static int rcvFrontLast;
-static int rcvBarFirst;
-static int rcvBarLast;
-static int rcvSwitchFirst;
-static int rcvSwitchLast;
+typedef struct {
+  void (*initializeTerminal) (BrailleDisplay *brl);
+  int (*readCommand) (BrailleDisplay *brl, DriverCommandContext cmds);
+} ProtocolOperations;
 
-static unsigned char xmtStatusOffset;
-static unsigned char xmtTextOffset;
+static const ProtocolOperations *protocol;
+static unsigned char currentStatus[PMSC];
+static unsigned char currentLine[BRLCOLSMAX];
+
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
@@ -502,33 +490,6 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
       /* TODO: ?? HACK */
       BRLSYMBOL.helpFile = the_terminal->helpFile;
 
-      /* routing key codes: 0X300 -> status -> cursor */
-      rcvStatusFirst = RCV_KEYROUTE;
-      rcvStatusLast  = rcvStatusFirst + 3 * (the_terminal->statusCount - 1);
-      rcvCursorFirst = rcvStatusLast + 3;
-      rcvCursorLast  = rcvCursorFirst + 3 * (the_terminal->columns - 1);
-      LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
-               rcvStatusFirst, rcvStatusLast,
-               rcvCursorFirst, rcvCursorLast);
-
-      /* function key codes: 0X000 -> front -> bar -> switches */
-      rcvFrontFirst = RCV_KEYFUNC + 3;
-      rcvFrontLast  = rcvFrontFirst + 3 * (the_terminal->frontKeys - 1);
-      rcvBarFirst = rcvFrontLast + 3;
-      rcvBarLast  = rcvBarFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
-      rcvSwitchFirst = rcvBarLast + 3;
-      rcvSwitchLast  = rcvSwitchFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
-      LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
-               rcvFrontFirst, rcvFrontLast,
-               rcvBarFirst, rcvBarLast,
-               rcvSwitchFirst, rcvSwitchLast);
-
-      /* cell offsets: 0X00 -> status -> text */
-      xmtStatusOffset = 0;
-      xmtTextOffset = xmtStatusOffset + the_terminal->statusCount;
-      LogPrint(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
-               xmtStatusOffset, xmtTextOffset);
-
       sortCommands();
       return 1;
     }
@@ -538,6 +499,20 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
 }
 
 /*--- Protocol 1 Operations ---*/
+
+static int rcvStatusFirst;
+static int rcvStatusLast;
+static int rcvCursorFirst;
+static int rcvCursorLast;
+static int rcvFrontFirst;
+static int rcvFrontLast;
+static int rcvBarFirst;
+static int rcvBarLast;
+static int rcvSwitchFirst;
+static int rcvSwitchLast;
+
+static unsigned char xmtStatusOffset;
+static unsigned char xmtTextOffset;
 
 static void
 resetTerminal1 (BrailleDisplay *brl) {
@@ -596,9 +571,211 @@ writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned cha
 
 static int
 interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
-  return interpretIdentity(brl, identity[2], 
-                           identity[3], ((identity[4] * 10) + identity[5]));
+  {
+    unsigned char id = identity[2];
+    unsigned char major = identity[3];
+    unsigned char minor = ((identity[4] * 10) + identity[5]);
+    if (!interpretIdentity(brl, id, major, minor)) return 0;
+  }
+
+  /* routing key codes: 0X300 -> status -> cursor */
+  rcvStatusFirst = RCV_KEYROUTE;
+  rcvStatusLast  = rcvStatusFirst + 3 * (the_terminal->statusCount - 1);
+  rcvCursorFirst = rcvStatusLast + 3;
+  rcvCursorLast  = rcvCursorFirst + 3 * (the_terminal->columns - 1);
+  LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
+           rcvStatusFirst, rcvStatusLast,
+           rcvCursorFirst, rcvCursorLast);
+
+  /* function key codes: 0X000 -> front -> bar -> switches */
+  rcvFrontFirst = RCV_KEYFUNC + 3;
+  rcvFrontLast  = rcvFrontFirst + 3 * (the_terminal->frontKeys - 1);
+  rcvBarFirst = rcvFrontLast + 3;
+  rcvBarLast  = rcvBarFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+  rcvSwitchFirst = rcvBarLast + 3;
+  rcvSwitchLast  = rcvSwitchFirst + 3 * ((the_terminal->hasEasyBar? 8: 0) - 1);
+  LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
+           rcvFrontFirst, rcvFrontLast,
+           rcvBarFirst, rcvBarLast,
+           rcvSwitchFirst, rcvSwitchLast);
+
+  /* cell offsets: 0X00 -> status -> text */
+  xmtStatusOffset = 0;
+  xmtTextOffset = xmtStatusOffset + the_terminal->statusCount;
+  LogPrint(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
+           xmtStatusOffset, xmtTextOffset);
+
+  return 1;
 }
+
+static int
+handleKey1 (int code, int press, int time) {
+  /* which key -> translate to OFFS_* + number */
+  /* attn: number starts with 1 */
+  int num;
+
+  if (rcvFrontFirst <= code && 
+      code <= rcvFrontLast) { /* front key */
+    num = 1 + (code - rcvFrontFirst) / 3;
+    return handleKey(OFFS_FRONT + num, press, 0);
+  }
+
+  if (rcvStatusFirst <= code && 
+      code <= rcvStatusLast) { /* status key */
+    num = 1 + (code - rcvStatusFirst) / 3;
+    return handleKey(OFFS_STAT + num, press, 0);
+  }
+
+  if (rcvBarFirst <= code && 
+      code <= rcvBarLast) { /* easy bar */
+    num = 1 + (code - rcvBarFirst) / 3;
+    return handleKey(OFFS_EASY + num, press, 0);
+  }
+
+  if (rcvSwitchFirst <= code && 
+      code <= rcvSwitchLast) { /* easy bar */
+    num = 1 + (code - rcvSwitchFirst) / 3;
+    return handleKey(OFFS_SWITCH + num, press, 0);
+  }
+
+  if (rcvCursorFirst <= code && 
+      code <= rcvCursorLast) { /* Routing Keys */ 
+    num = (code - rcvCursorFirst) / 3;
+    return handleKey(ROUTINGKEY, press, num);
+  }
+
+  LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
+  return CMD_NOOP;
+}
+
+static int
+disableOutputTranslation1 (BrailleDisplay *brl, unsigned char xmtOffset, int count) {
+  unsigned char buffer[count];
+  memset(buffer, 1, sizeof(buffer));
+  return writePacket1(brl, XMT_BRLWRITE+xmtOffset,
+                      sizeof(buffer), buffer);
+}
+
+static void
+initializeTable1 (BrailleDisplay *brl) {
+  disableOutputTranslation1(brl, xmtStatusOffset, the_terminal->statusCount);
+  disableOutputTranslation1(brl, xmtTextOffset, the_terminal->columns);
+}
+
+static void
+writeLine1 (BrailleDisplay *brl) {
+  writePacket1(brl, XMT_BRLDATA+xmtTextOffset, the_terminal->columns, currentLine);
+}
+
+static void
+writeStatus1 (BrailleDisplay *brl) {
+  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset, the_terminal->statusCount, currentStatus);
+}
+
+static void
+initializeTerminal1 (BrailleDisplay *brl) {
+  initializeTable1(brl);
+  drainBrailleOutput(brl, 0);
+
+  writeStatus1(brl);
+  drainBrailleOutput(brl, 0);
+
+  writeLine1(brl);
+  drainBrailleOutput(brl, 0);
+}
+
+static void
+restartTerminal1 (BrailleDisplay *brl) {
+  initializeTerminal1(brl);
+  resetState();
+}
+
+static int
+readCommand1 (BrailleDisplay *brl, DriverCommandContext cmds) {
+#define READ(offset,count,flags) { if (!readBytes1(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
+  while (1) {
+    unsigned char buf[0X100];
+
+    do {
+      READ(0, 1, 0);
+    } while (buf[0] != cSTX);
+    if (debug_reads) LogPrint(LOG_DEBUG, "read: STX");
+
+    READ(1, 1, 0);
+    switch (buf[1]) {
+      default: {
+        int i;
+        LogPrint(LOG_WARNING, "unknown packet: %02X", buf[1]);
+        for (i=2; i<sizeof(buf); i++) {
+          READ(i, 1, 0);
+          LogPrint(LOG_WARNING, "packet byte %2d: %02X", i, buf[i]);
+        }
+        break;
+      }
+
+      case cIdIdentify: {
+        const int length = 10;
+        READ(2, length-2, RBF_ETX);
+        if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
+        delay(200);
+        restartTerminal1(brl);
+        break;
+      }
+
+      case cIdReceive: {
+        int length;
+        int i;
+
+        READ(2, 4, 0);
+        length = (buf[4] << 8) | buf[5];	/* packet size */
+        if (length != 10) {
+          LogPrint(LOG_WARNING, "Unexpected input packet length: %d", length);
+          resetTerminal1(brl);
+          return CMD_ERR;
+        }
+        READ(6, length-6, RBF_ETX);			/* Data */
+        if (debug_reads) LogBytes("read", buf, length);
+
+        {
+          int command = handleKey1(((buf[2] << 8) | buf[3]),
+                                   (buf[6] == PRESSED),
+                                   ((buf[7] << 8) | buf[8]));
+          if (command != EOF) return command;
+        }
+        break;
+      }
+
+      {
+        const char *message;
+      case 0X03:
+        message = "missing identification byte";
+        goto logError;
+      case 0X04:
+        message = "data too long";
+        goto logError;
+      case 0X05:
+        message = "data starts beyond end of structure";
+        goto logError;
+      case 0X06:
+        message = "data extends beyond end of structure";
+        goto logError;
+      case 0X07:
+        message = "data framing error";
+      logError:
+        READ(2, 1, RBF_ETX);
+        LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
+        restartTerminal1(brl);
+        break;
+      }
+    }
+  }
+#undef READ
+}
+
+static const ProtocolOperations protocolOperations1 = {
+  initializeTerminal1,
+  readCommand1
+};
 
 static int
 identifyTerminal1 (BrailleDisplay *brl) {
@@ -618,7 +795,10 @@ identifyTerminal1 (BrailleDisplay *brl) {
         if (identity[0] == cSTX) {
           if (readBytes1(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
             if (identity[1] == cIdIdentify) {
-              if (interpretIdentity1(brl, identity)) return 1;
+              if (interpretIdentity1(brl, identity)) {
+                protocol = &protocolOperations1;
+                return 1;
+              }
             } else {
               LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
             }
@@ -735,11 +915,29 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
 
 static int
 interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
-  return interpretIdentity(brl,
-                           PM2_MAKE_BYTE(identity[4], identity[5]),
-                           LOW_NIBBLE(identity[6]),
-                           PM2_MAKE_INTEGER2(identity[7], identity[8]));
+  {
+    unsigned char id = PM2_MAKE_BYTE(identity[4], identity[5]);
+    unsigned char major = LOW_NIBBLE(identity[6]);
+    unsigned char minor = PM2_MAKE_INTEGER2(identity[7], identity[8]);
+    if (!interpretIdentity(brl, id, major, minor)) return 0;
+  }
+
+  return 1;
 }
+
+static void
+initializeTerminal2 (BrailleDisplay *brl) {
+}
+
+static int 
+readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
+  return EOF;
+}
+
+static const ProtocolOperations protocolOperations2 = {
+  initializeTerminal2,
+  readCommand2
+};
 
 static int
 identifyTerminal2 (BrailleDisplay *brl) {
@@ -750,7 +948,10 @@ identifyTerminal2 (BrailleDisplay *brl) {
       unsigned char identity[20];			/* answer has 10 chars */
       if (readPacket2(brl, identity, sizeof(identity))) {
         if (identity[1] == 0X4A) {
-          if (interpretIdentity2(brl, identity)) return 1;
+          if (interpretIdentity2(brl, identity)) {
+            protocol = &protocolOperations2;
+            return 1;
+          }
         }
       }
     }
@@ -764,12 +965,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
   return 0;
 }
 
-/*---  ---*/
-
-static unsigned char currentStatus[PMSC];
-static unsigned char currentLine[BRLCOLSMAX];
-
-/* ------------------------------------------------------------ */
+/*--- Driver Operations ---*/
 
 static void
 updateData (BrailleDisplay *brl, unsigned char xmtOffset, int size, const unsigned char *data, unsigned char *buffer) {
@@ -793,44 +989,6 @@ updateData (BrailleDisplay *brl, unsigned char xmtOffset, int size, const unsign
   }
 }
 
-static int
-disableOutputTranslation (BrailleDisplay *brl, unsigned char xmtOffset, int count) {
-  unsigned char buffer[count];
-  memset(buffer, 1, sizeof(buffer));
-  return writePacket1(brl, XMT_BRLWRITE+xmtOffset,
-                   sizeof(buffer), buffer);
-}
-
-static void
-initializeTable (BrailleDisplay *brl) {
-  disableOutputTranslation(brl, xmtStatusOffset, the_terminal->statusCount);
-  disableOutputTranslation(brl, xmtTextOffset, the_terminal->columns);
-}
-
-static void
-writeLine (BrailleDisplay *brl) {
-  writePacket1(brl, XMT_BRLDATA+xmtTextOffset, the_terminal->columns, currentLine);
-}
-
-static void
-writeStatus (BrailleDisplay *brl) {
-  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset, the_terminal->statusCount, currentStatus);
-}
-
-static void
-restartTerminal (BrailleDisplay *brl) {
-  initializeTable(brl);
-  drainBrailleOutput(brl, 0);
-
-  writeStatus(brl);
-  drainBrailleOutput(brl, 0);
-
-  writeLine(brl);
-  drainBrailleOutput(brl, 0);
-
-  resetState();
-}
-
 /* ------------------------------------------------------------ */
 
 static int
@@ -843,19 +1001,14 @@ identifyTerminal (BrailleDisplay *brl) {
 /* ------------------------------------------------------------ */
 
 static int 
-initializeDisplay (BrailleDisplay *brl, char **parameters, const char *device) {
+initializeTerminal (BrailleDisplay *brl, char **parameters, const char *device) {
   if (io->openPort(parameters, device)) {
     charactersPerSecond = baud2integer(*baudRate) / 10;
     if (identifyTerminal(brl)) {
-      initializeTable(brl);
-
       memset(currentStatus, outputTable[0], the_terminal->statusCount);
-      writeStatus(brl);
-
       memset(currentLine, outputTable[0], the_terminal->columns);
-      writeLine(brl);
-
       resetState();
+      protocol->initializeTerminal(brl);
       return 1;
     }
     io->closePort();
@@ -895,7 +1048,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   baudRate = io->baudRates;
   while (*baudRate != B0) {
-    if (initializeDisplay(brl, parameters, device)) return 1;
+    if (initializeTerminal(brl, parameters, device)) return 1;
     ++baudRate;
   }
   return 0;
@@ -963,124 +1116,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 /* ------------------------------------------------------------ */
 
-static int
-handleCode (int code, int press, int time) {
-  /* which key -> translate to OFFS_* + number */
-  /* attn: number starts with 1 */
-  int num;
-
-  if (rcvFrontFirst <= code && 
-      code <= rcvFrontLast) { /* front key */
-    num = 1 + (code - rcvFrontFirst) / 3;
-    return handleKey(OFFS_FRONT + num, press, 0);
-  }
-
-  if (rcvStatusFirst <= code && 
-      code <= rcvStatusLast) { /* status key */
-    num = 1 + (code - rcvStatusFirst) / 3;
-    return handleKey(OFFS_STAT + num, press, 0);
-  }
-
-  if (rcvBarFirst <= code && 
-      code <= rcvBarLast) { /* easy bar */
-    num = 1 + (code - rcvBarFirst) / 3;
-    return handleKey(OFFS_EASY + num, press, 0);
-  }
-
-  if (rcvSwitchFirst <= code && 
-      code <= rcvSwitchLast) { /* easy bar */
-    num = 1 + (code - rcvSwitchFirst) / 3;
-    return handleKey(OFFS_SWITCH + num, press, 0);
-  }
-
-  if (rcvCursorFirst <= code && 
-      code <= rcvCursorLast) { /* Routing Keys */ 
-    num = (code - rcvCursorFirst) / 3;
-    return handleKey(ROUTINGKEY, press, num);
-  }
-
-  LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
-  return CMD_NOOP;
-}
-
-#define READ(offset,count,flags) { if (!readBytes1(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
 static int 
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
-  while (1) {
-    unsigned char buf[0X100];
-
-    do {
-      READ(0, 1, 0);
-    } while (buf[0] != cSTX);
-    if (debug_reads) LogPrint(LOG_DEBUG, "read: STX");
-
-    READ(1, 1, 0);
-    switch (buf[1]) {
-      default: {
-        int i;
-        LogPrint(LOG_WARNING, "unknown packet: %02X", buf[1]);
-        for (i=2; i<sizeof(buf); i++) {
-          READ(i, 1, 0);
-          LogPrint(LOG_WARNING, "packet byte %2d: %02X", i, buf[i]);
-        }
-        break;
-      }
-
-      case cIdIdentify: {
-        const int length = 10;
-        READ(2, length-2, RBF_ETX);
-        if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
-        delay(200);
-        restartTerminal(brl);
-        break;
-      }
-
-      case cIdReceive: {
-        int length;
-        int i;
-
-        READ(2, 4, 0);
-        length = (buf[4] << 8) | buf[5];	/* packet size */
-        if (length != 10) {
-          LogPrint(LOG_WARNING, "Unexpected input packet length: %d", length);
-          resetTerminal1(brl);
-          return CMD_ERR;
-        }
-        READ(6, length-6, RBF_ETX);			/* Data */
-        if (debug_reads) LogBytes("read", buf, length);
-
-        {
-          int command = handleCode(((buf[2] << 8) | buf[3]),
-                                    (buf[6] == PRESSED),
-                                    ((buf[7] << 8) | buf[8]));
-          if (command != EOF) return command;
-        }
-        break;
-      }
-
-      {
-        const char *message;
-      case 0X03:
-        message = "missing identification byte";
-        goto logError;
-      case 0X04:
-        message = "data too long";
-        goto logError;
-      case 0X05:
-        message = "data starts beyond end of structure";
-        goto logError;
-      case 0X06:
-        message = "data extends beyond end of structure";
-        goto logError;
-      case 0X07:
-        message = "data framing error";
-      logError:
-        READ(2, 1, RBF_ETX);
-        LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
-        restartTerminal(brl);
-        break;
-      }
-    }
-  }
+  return protocol->readCommand(brl, cmds);
 }
-#undef READ
