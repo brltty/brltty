@@ -22,5 +22,3 @@
 
 #define BRLNAME "Virtual"
 #define PREFSTYLE ST_Generic
-#define BRL_HAVE_VISUAL_DISPLAY
-#define BRLPARMS "port" "loopback"

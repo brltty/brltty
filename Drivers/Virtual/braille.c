@@ -15,8 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define BRL_C 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -25,148 +23,177 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <sys/select.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/select.h>
-#include <sys/types.h>                                                                  
-#include <sys/socket.h>                                                                 
 
-#include "brlconf.h"
-#include "Programs/brltty.h"
 #include "Programs/misc.h"
+#include "Programs/brl.h"
+#include "brlconf.h"
+
+#define BRL_HAVE_VISUAL_DISPLAY
+typedef enum {
+  PARM_PORT
+} DriverParameter;
+#define BRLPARMS "port"
 #include "Programs/brl_driver.h"
 
 #define BRLROWS		1
 
-/* Global variables */
-static int fileDescriptor;
+static int fileDescriptor = -1;
+
+#define INPUT_SIZE 0X200
+static char inputBuffer[INPUT_SIZE];
+static int inputLength;
+
 static unsigned char *prevVisualData, *prevData; /* previously sent raw data */
 static unsigned char prevStatus[StatusCellCount]; /* to hold previous status */
 static int columns, statusCells = 0;
 
-int accept_connection(short port, unsigned long addr)                                                                     
-{                                                                                  
-  struct sockaddr_in myaddr, remoteaddr;
-  int fd, newfd;
-  int addrlen = sizeof(remoteaddr);
-  short i;
+static int
+acceptConnection (unsigned short port, unsigned long address) {
+  int serverSocket = -1;
+  int queueSocket;
 
-  if ((fd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {                      
-    LogError("socket");                                                          
-    return -1;                                                                   
-  }                                                                              
+  if ((queueSocket = socket(PF_INET, SOCK_STREAM, 0)) != -1) {
+    struct sockaddr_in localAddress;
 
-  /* lose the pesky "address already in use" error message */
-  {
-    int yes=1;
-
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
-      LogError("setsockopt");                                                      
-      return -1;                                                                   
-    }                                                                              
-  }
-
-  myaddr.sin_family = AF_INET;                                                   
-  myaddr.sin_addr.s_addr = addr;                                           
-  myaddr.sin_port = htons(port);                                                 
-  memset(&(myaddr.sin_zero), 0, 8);                                           
-
-  if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {        
-    LogError("bind");                                                            
-    return -1;                                                                   
-  }                                                                              
-
-  if (listen(fd, 1) == -1) {                                              
-    LogError("listen");                                                          
-    return -1;                                                                   
-  }                                                                              
-
-  LogPrint(LOG_NOTICE, "Listening on %s:%d",
-	   inet_ntoa(myaddr.sin_addr), ntohs(myaddr.sin_port));
-
-                                                                                        
-  for(i = 1; i<11; i++) {                                                                      
-    int rc;
-    fd_set read_fds;
-    struct timeval tv = { 10, 0 };
-
-    FD_ZERO(&read_fds);                                                            
-    FD_SET(fd, &read_fds);                                                     
-
-    if ((rc = select(fd+1, &read_fds, NULL, NULL, &tv)) == -1) {                  
-      LogError("select");                                                      
-      return -1;                                                               
-    }                                                                          
-
-    if (rc == 0) {
-      LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d)", i);
-      continue;
-    }
-    if (FD_ISSET(fd, &read_fds)) {
-      if ((newfd = accept(fd, (struct sockaddr *)&remoteaddr, &addrlen))
-	  == -1) {
-	LogError("accept");
-	return -1;
-      } else {
-	LogPrint(LOG_INFO, "Connection from %s",
-		 inet_ntoa(remoteaddr.sin_addr));
-	close(fd);
-	return newfd;
+    /* lose the pesky "address already in use" error message */
+    {
+      int yes = 1;
+      if (setsockopt(queueSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+        LogError("setsockopt");
+        /* non-fatal */
       }
     }
+
+    memset(&localAddress, 0, sizeof(localAddress));
+    localAddress.sin_family = AF_INET;
+    localAddress.sin_addr.s_addr = address;
+    localAddress.sin_port = htons(port);
+    if (bind(queueSocket, (struct sockaddr *)&localAddress, sizeof(localAddress)) != -1) {
+      if (listen(queueSocket, 1) != -1) {
+        int attempts = 0;
+        LogPrint(LOG_NOTICE, "Listening on %s:%u.",
+                 inet_ntoa(localAddress.sin_addr),
+                 ntohs(localAddress.sin_port));
+
+        while (1) {
+          fd_set readMask;
+          struct timeval timeout;
+
+          FD_ZERO(&readMask);
+          FD_SET(queueSocket, &readMask);
+
+          memset(&timeout, 0, sizeof(timeout));
+          timeout.tv_sec = 10;
+
+          ++attempts;
+          switch (select(queueSocket+1, &readMask, NULL, NULL, &timeout)) {
+            case -1:
+              if (errno == EINTR) continue;
+              LogError("select");
+              break;
+
+            case 0:
+              LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d).", attempts);
+              continue;
+
+            default: {
+              struct sockaddr_in remoteAddress;
+              int addressLength = sizeof(remoteAddress);
+
+              if (!FD_ISSET(queueSocket, &readMask)) continue;
+
+              if ((serverSocket = accept(queueSocket,
+                                         (struct sockaddr *)&remoteAddress,
+                                         &addressLength)) != -1) {
+                LogPrint(LOG_NOTICE, "Client is %s:%u.",
+                         inet_ntoa(remoteAddress.sin_addr),
+                         ntohs(remoteAddress.sin_port));
+              } else {
+                LogError("accept");
+              }
+            }
+          }
+          break;
+        }
+      } else {
+        LogError("listen");
+      }
+    } else {
+      LogError("bind");
+    }
+
+    close(queueSocket);
+  } else {
+    LogError("socket");
   }
 
-  close(fd);
-  return -1;
+  return serverSocket;
 }
 
-#define BUFLEN 512
+static char *
+makeString (const char *characters, int count) {
+  char *string = mallocWrapper(count+1);
+  memcpy(string, characters, count);
+  string[count] = 0;
+  return string;
+}
 
-static char buf[BUFLEN];
-static short bufstart = 0;
+static char *
+copyString (const char *string) {
+  return makeString(string, strlen(string));
+}
 
-char *readString(int fd)
-{
-  fd_set readfds;
-  struct timeval tv = { 0, 50*1000 };
-  int rc;
+static char *
+readString (void) {
+  fd_set readMask;
+  struct timeval timeout;
 
-  FD_ZERO(&readfds);
-  FD_SET(fd,&readfds);
+  FD_ZERO(&readMask);
+  FD_SET(fileDescriptor, &readMask);
 
-  if ((rc = select(fd+1, &readfds, NULL, NULL, &tv)) == -1) {
-    LogError("select");
-    return NULL;
-  }
+  memset(&timeout, 0, sizeof(timeout));
 
-  if (rc == 0) {
-    return NULL;
-  } else {
-    int rcvd;
+  switch (select(fileDescriptor+1, &readMask, NULL, NULL, &timeout)) {
+    case -1:
+      LogError("select");
+    case 0:
+      break;
+    
+    default: {
+      char *inputStart = &inputBuffer[inputLength];
+      int received = recv(fileDescriptor, inputStart, INPUT_SIZE-inputLength, 0);
 
-    if ((rcvd = recv(fd, (void *)buf+bufstart, BUFLEN-bufstart, 0)) == 0) {
-      char *quitsym = (char *)malloc(5);
-      strcpy(quitsym,"quit");
-      LogPrint(LOG_NOTICE, "Remote closed connection\n");
-      return quitsym;
-    } else {
-      char *p;
-      bufstart = rcvd;
-      for (p = buf; p<buf+bufstart; p++) {
-	if (*p == '\n' && *(p-1) == '\r') {
-	  short size = p-buf-1;
-	  char *result = (char *)malloc(size);
+      if (received == -1) {
+        LogError("recv");
+        break;
+      }
 
-	  memcpy(result, buf, size);
-	  *(result+size) = 0;
+      if (received == 0) {
+        LogPrint(LOG_NOTICE, "Remote closed connection.");
+        return copyString("quit");
+      }
+      inputLength += received;
 
-	  memmove(buf, p+1, rcvd-(size+1));
-	  bufstart = rcvd-(size+2);
+      while (received-- > 0) {
+        if (*inputStart == '\n') {
+          char *string;
+          int stringLength = inputStart - inputBuffer;
+          if ((inputStart != inputBuffer) && (*(inputStart-1) == '\r')) --stringLength;
+          string = makeString(inputBuffer, stringLength);
+          inputLength -= ++inputStart - inputBuffer;
+          memmove(inputBuffer, inputStart, inputLength);
+          return string;
+        }
 
-	  return result;
-	}
+        ++inputStart;
       }
     }
   }
@@ -174,56 +201,62 @@ char *readString(int fd)
   return NULL;
 }
 
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Virtual Driver, version 0.1");
-  LogPrint(LOG_INFO, "  Copyright (C) 2003 by Mario Lang <mlang@delysid.org>");
-}
-
 /* Print the dots in buf in a humanly readable form into a string.
-   Caller is responsible for freeing string */
-char *printDots(unsigned char *buf, int len) {
-  char *result = (char *)malloc((len*9)+1);
+ * Caller is responsible for freeing string
+ */
+static char *
+printDots (const unsigned char *cells, int count) {
+  char *result = mallocWrapper((count*9)+1);
   char *p = result;
-  int i;
 
-  for (i=0; i<len; i++) {
-    if (buf[i] & B1) *p++ = '1';
-    if (buf[i] & B2) *p++ = '2';
-    if (buf[i] & B3) *p++ = '3';
-    if (buf[i] & B4) *p++ = '4';
-    if (buf[i] & B5) *p++ = '5';
-    if (buf[i] & B6) *p++ = '6';
-    if (buf[i] & B7) *p++ = '7';
-    if (buf[i] & B8) *p++ = '8';
-    if (buf[i] == 0) *p++ = ' ';
-    if (i < len-1) *p++ = '|';
+  while (count-- > 0) {
+    unsigned char cell = *cells++;
+    if (p != result) *p++ = '|';
+    if (cell == 0) {
+      *p++ = ' ';
+    } else {
+      if (cell & B1) *p++ = '1';
+      if (cell & B2) *p++ = '2';
+      if (cell & B3) *p++ = '3';
+      if (cell & B4) *p++ = '4';
+      if (cell & B5) *p++ = '5';
+      if (cell & B6) *p++ = '6';
+      if (cell & B7) *p++ = '7';
+      if (cell & B8) *p++ = '8';
+    }
   }
   *p = 0;
 
   return result;
 }
 
+static void
+brl_identify (void) {
+  LogPrint(LOG_NOTICE, "Virtual Braille Driver: version 0.1");
+  LogPrint(LOG_INFO,   "  Copyright (C) 2003 by Mario Lang <mlang@delysid.org>");
+}
+
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   char *str = NULL;
   int port = -1;
   unsigned long addr = INADDR_ANY;
 
-  if (*parameters[0]) {
-    port = atoi(parameters[0]);
+  if (*parameters[PARM_PORT]) {
+    port = atoi(parameters[PARM_PORT]);
   } else {
     port = 9999;
   }
 
-  if ((fileDescriptor = accept_connection(port, addr)) <= 0)
+  if ((fileDescriptor = acceptConnection(port, addr)) <= 0)
     goto failure;
-      
+
+  inputLength = 0;
   while (!str || (strcmp(str, "quit") != 0)) {
     if (str)
       free(str);
 
-    if ((str = readString(fileDescriptor))) {
+    if ((str = readString())) {
       LogPrint(LOG_DEBUG, "Received command '%s'", str);
 
       if (!strncmp(str, "cells ", 6)) {
@@ -364,7 +397,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 static int
 brl_readCommand (BrailleDisplay *brl, DriverCommandContext context) {
   int rc = EOF;
-  char *str = readString(fileDescriptor);
+  char *str = readString();
 
   if (str) {
     LogPrint(LOG_DEBUG, "cmd '%s' received", str);
