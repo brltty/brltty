@@ -114,7 +114,7 @@ getPcmBlockSize (int descriptor) {
 
 int
 getPcmSampleRate (int descriptor) {
-  if (descriptor != 01) {
+  if (descriptor != -1) {
     audio_info_t info;
     if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) return info.play.sample_rate;
   }
@@ -123,7 +123,7 @@ getPcmSampleRate (int descriptor) {
 
 int
 getPcmChannelCount (int descriptor) {
-  if (descriptor != 01) {
+  if (descriptor != -1) {
     audio_info_t info;
     if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) return info.play.channels;
   }
@@ -132,7 +132,7 @@ getPcmChannelCount (int descriptor) {
 
 PcmAmplitudeFormat
 getPcmAmplitudeFormat (int descriptor) {
-  if (descriptor != 01) {
+  if (descriptor != -1) {
     audio_info_t info;
     if (ioctl(descriptor, AUDIO_GETINFO, &info) != -1) {
       switch (info.play.encoding) {
