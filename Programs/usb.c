@@ -227,7 +227,7 @@ usbDeallocateEndpoint (void *item, void *data) {
       break;
   }
 
-  usbCloseEndpoint(endpoint);
+  usbDeallocateEndpointExtension(endpoint);
   free(endpoint);
 }
 
@@ -281,7 +281,6 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         memset(endpoint, 0, sizeof(*endpoint));
         endpoint->device = device;
         endpoint->descriptor = descriptor;
-        endpoint->system = NULL;
 
         switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
           case USB_ENDPOINT_DIRECTION_INPUT:
@@ -292,9 +291,10 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
             break;
         }
 
-        if (usbOpenEndpoint(endpoint)) {
+        endpoint->extension = NULL;
+        if (usbAllocateEndpointExtension(endpoint)) {
           if (enqueueItem(device->endpoints, endpoint)) return endpoint;
-          usbCloseEndpoint(endpoint);
+          usbDeallocateEndpointExtension(endpoint);
         }
 
         free(endpoint);
@@ -354,6 +354,7 @@ usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length) {
 
 void
 usbCloseDevice (UsbDevice *device) {
+  usbDeallocateDeviceExtension(device);
   deallocateQueue(device->inputFilters);
   deallocateQueue(device->endpoints);
   close(device->file);
@@ -372,10 +373,14 @@ usbOpenDevice (const char *path) {
       if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
         if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
           if ((device->file = open(path, O_RDWR)) != -1) {
-            if (usbReadDeviceDescriptor(device))
-              if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
-                if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
-                  return device;
+            device->extension = NULL;
+            if (usbAllocateDeviceExtension(device)) {
+              if (usbReadDeviceDescriptor(device))
+                if (device->descriptor.bDescriptorType == USB_DESCRIPTOR_TYPE_DEVICE)
+                  if (device->descriptor.bLength == USB_DESCRIPTOR_SIZE_DEVICE)
+                    return device;
+              usbDeallocateDeviceExtension(device);
+            }
             close(device->file);
           }
           deallocateQueue(device->inputFilters);

@@ -217,12 +217,12 @@ usbControlTransfer (
 }
 
 int
-usbOpenEndpoint (UsbEndpoint *endpoint) {
+usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   return 1;
 }
 
 void
-usbCloseEndpoint (UsbEndpoint *endpoint) {
+usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 static int
@@ -422,6 +422,15 @@ usbReadDeviceDescriptor (UsbDevice *device) {
     return 1;
   }
   return 0;
+}
+
+int
+usbAllocateDeviceExtension (UsbDevice *device) {
+  return 1;
+}
+
+void
+usbDeallocateDeviceExtension (UsbDevice *device) {
 }
 
 static UsbDevice *

@@ -115,12 +115,12 @@ usbControlTransfer (
 }
 
 int
-usbOpenEndpoint (UsbEndpoint *endpoint) {
+usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   return 1;
 }
 
 void
-usbCloseEndpoint (UsbEndpoint *endpoint) {
+usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 int
@@ -188,6 +188,15 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   errno = ENOSYS;
   LogError("USB device descriptor read");
   return 0;
+}
+
+int
+usbAllocateDeviceExtension (UsbDevice *device) {
+  return 1;
+}
+
+void
+usbDeallocateDeviceExtension (UsbDevice *device) {
 }
 
 UsbDevice *

@@ -31,7 +31,7 @@ typedef struct {
 typedef struct {
   UsbDevice *device;
   UsbEndpointDescriptor *descriptor;
-  void *system;
+  void *extension;
 
   union {
     struct {
@@ -49,6 +49,7 @@ typedef struct {
 struct UsbDeviceStruct {
   char *path;
   UsbDeviceDescriptor descriptor;
+  void *extension;
   UsbDescriptor *configurationDescriptor;
   int configurationLength;
   Queue *endpoints;
@@ -63,13 +64,15 @@ extern UsbDevice *usbTestDevice (
   void *data
 );
 extern int usbReadDeviceDescriptor (UsbDevice *device);
+extern int usbAllocateDeviceExtension (UsbDevice *device);
+extern void usbDeallocateDeviceExtension (UsbDevice *device);
 
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 
-extern int usbOpenEndpoint (UsbEndpoint *endpoint);
-extern void usbCloseEndpoint (UsbEndpoint *endpoint);
+extern int usbAllocateEndpointExtension (UsbEndpoint *endpoint);
+extern void usbDeallocateEndpointExtension (UsbEndpoint *endpoint);
 
 extern int usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length);
 

@@ -16,9 +16,13 @@
  */
 
 typedef struct {
+  int timeout;
+} BsdDeviceExtension;
+
+typedef struct {
   int file;
   int timeout;
-} BsdEndpoint;
+} BsdEndpointExtension;
 
 static int
 usbSetTimeout (int file, int new, int *old) {
@@ -132,6 +136,7 @@ usbControlTransfer (
   int length,
   int timeout
 ) {
+  BsdDeviceExtension *bsd = device->extension;
   struct usb_ctl_request arg;
   memset(&arg, 0, sizeof(arg));
   arg.ucr_request.bmRequestType = direction | recipient | type;
@@ -141,7 +146,7 @@ usbControlTransfer (
   USETW(arg.ucr_request.wLength, length);
   arg.ucr_data = buffer;
   arg.ucr_flags = USBD_SHORT_XFER_OK;
-  if (usbSetTimeout(device->file, timeout, NULL)) {
+  if (usbSetTimeout(device->file, timeout, &bsd->timeout)) {
     if (ioctl(device->file, USB_DO_REQUEST, &arg) != -1) return arg.ucr_actlen;
     LogError("USB control transfer");
   }
@@ -149,36 +154,44 @@ usbControlTransfer (
 }
 
 int
-usbOpenEndpoint (UsbEndpoint *endpoint) {
-  BsdEndpoint *bsd;
+usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
+  BsdEndpointExtension *bsd;
+
   if ((bsd = malloc(sizeof(*bsd)))) {
     const char *prefix = endpoint->device->path;
     const char *dot = strchr(prefix, '.');
     int length = dot? (dot - prefix): strlen(prefix);
     char path[PATH_MAX+1];
     int flags = O_RDWR;
+
     snprintf(path, sizeof(path), USB_ENDPOINT_PATH_FORMAT,
              length, prefix, USB_ENDPOINT_NUMBER(endpoint->descriptor));
+
     switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
       case USB_ENDPOINT_DIRECTION_INPUT : flags = O_RDONLY; break;
       case USB_ENDPOINT_DIRECTION_OUTPUT: flags = O_WRONLY; break;
     }
+
     if ((bsd->file = open(path, flags)) != -1) {
       if (usbSetShortTransfers(bsd->file, 1)) {
         bsd->timeout = -1;
-        endpoint->system = bsd;
+
+        endpoint->extension = bsd;
         return 1;
       }
+
       close(bsd->file);
     }
+
     free(bsd);
   }
+
   return 0;
 }
 
 void
-usbCloseEndpoint (UsbEndpoint *endpoint) {
-  BsdEndpoint *bsd = endpoint->system;
+usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
+  BsdEndpointExtension *bsd = endpoint->extension;
   close(bsd->file);
   free(bsd);
 }
@@ -194,7 +207,7 @@ usbReadEndpoint (
   int count = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
-    BsdEndpoint *bsd = endpoint->system;
+    BsdEndpointExtension *bsd = endpoint->extension;
     if (usbSetTimeout(bsd->file, timeout, &bsd->timeout)) {
       if ((count = read(bsd->file, buffer, length)) != -1) {
         if (!usbApplyInputFilters(device, buffer, length, &count)) {
@@ -219,7 +232,7 @@ usbWriteEndpoint (
 ) {
   UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
   if (endpoint) {
-    BsdEndpoint *bsd = endpoint->system;
+    BsdEndpointExtension *bsd = endpoint->extension;
     if (usbSetTimeout(bsd->file, timeout, &bsd->timeout)) {
       int count = write(bsd->file, buffer, length);
       if (count != -1) return count;
@@ -274,6 +287,28 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   }
   LogError("USB device descriptor read");
   return 0;
+}
+
+int
+usbAllocateDeviceExtension (UsbDevice *device) {
+  BsdDeviceExtension *bsd;
+
+  if ((bsd = malloc(sizeof(*bsd)))) {
+    bsd->timeout = -1;
+
+    device->extension = bsd;
+    return 1;
+
+    free(bsd);
+  }
+
+  return 0;
+}
+
+void
+usbDeallocateDeviceExtension (UsbDevice *device) {
+  BsdDeviceExtension *bsd = device->extension;
+  free(bsd);
 }
 
 UsbDevice *
