@@ -104,8 +104,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <sys/termios.h>
 #include <string.h>
 
@@ -393,12 +391,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   rawdata = prevdata = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
-  brl_fd = open (dev, O_RDWR | O_NOCTTY);
-  if (brl_fd < 0) {
-    LogPrint( LOG_ERR, "%s: %s", dev, strerror(errno) );
-    goto failure;
-  }
-  tcgetattr (brl_fd, &oldtio);	/* save current settings */
+  if (!openSerialDevice(dev, &brl_fd, &oldtio)) goto failure;
 
   /* Set flow control and 8n1, enable reading */
   newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
@@ -413,17 +406,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   /* autodetecting ABT model */
   do
     {
-      /* to force DTR off */
-      cfsetispeed (&newtio, B0);
-      cfsetospeed (&newtio, B0);
-      tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
-      delay (500);
-      tcflush (brl_fd, TCIOFLUSH);	/* clean line */
-      delay (500);
-      /* DTR back on */
-      cfsetispeed (&newtio, BAUDRATE);
-      cfsetospeed (&newtio, BAUDRATE);
-      tcsetattr (brl_fd, TCSANOW, &newtio);	/* activate new settings */
+      resetSerialDevice(brl_fd, &newtio, BAUDRATE);	/* activate new settings */
       delay (1000);		/* delay before 2nd line drop */
       /* This "if" statement can be commented out to try autodetect once anyway */
       if (ModelID != ABT_AUTO)

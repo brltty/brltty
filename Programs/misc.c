@@ -243,7 +243,6 @@ openSerialDevice (const char *path, int *descriptor, struct termios *attributes)
           if (!attributes || (tcgetattr(*descriptor, attributes) != -1)) {
             LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d", path, *descriptor);
             return 1;
-          } else {
           }
           LogPrint(LOG_ERR, "Cannot get attributes for '%s': %s", path, strerror(errno));
         } else {
@@ -293,6 +292,7 @@ setSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
 int
 resetSerialDevice (int descriptor, struct termios *attributes, speed_t baud) {
   if (setSerialDevice(descriptor, attributes, B0)) {
+    delay(500);
     if (tcflush(descriptor, TCIOFLUSH) != -1) {
       if (setSerialDevice(descriptor, attributes, baud)) {
         return 1;
