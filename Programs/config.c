@@ -249,6 +249,22 @@ configureScreenParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_screenParameters, delimiters, 1);
 }
 
+#ifdef ENABLE_PCM_SUPPORT
+static char *cfg_pcmDevice = NULL;
+static ConfigurationLineStatus
+configurePcmDevice (const char *delimiters) {
+  return getConfigurationOperand(&cfg_pcmDevice, delimiters, 0);
+}
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+static char *cfg_midiDevice = NULL;
+static ConfigurationLineStatus
+configureMidiDevice (const char *delimiters) {
+  return getConfigurationOperand(&cfg_midiDevice, delimiters, 0);
+}
+#endif /* ENABLE_MIDI_SUPPORT */
+
 BEGIN_OPTION_TABLE
   {'a', "attributes-table", "file", configureAttributesTable, 0,
    "Path to attributes translation table file."},
@@ -267,13 +283,13 @@ BEGIN_OPTION_TABLE
   {'l', "log-level", "level", NULL, 0,
    "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
 #ifdef ENABLE_MIDI_SUPPORT
-  {'m', "midi-device", "device", NULL, 0,
+  {'m', "midi-device", "device", configureMidiDevice, 0,
    "Device specifier for the Musical Instrument Digital Interface."},
 #endif /* ENABLE_MIDI_SUPPORT */
   {'n', "no-daemon", NULL, NULL, 0,
    "Remain a foreground process."},
 #ifdef ENABLE_PCM_SUPPORT
-  {'p', "pcm-device", "device", NULL, 0,
+  {'p', "pcm-device", "device", configurePcmDevice, 0,
    "Device specifier for soundcard digital audio."},
 #endif /* ENABLE_PCM_SUPPORT */
   {'q', "quiet", NULL, NULL, 0,
@@ -2088,6 +2104,12 @@ startup (int argc, char *argv[]) {
   ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER", -1);
   ensureOptionSetting(&opt_speechFifo, NULL, cfg_speechFifo, "BRLTTY_SPEECH_FIFO", -1);
 #endif /* ENABLE_SPEECH_SUPPORT */
+#ifdef ENABLE_PCM_SUPPORT
+  ensureOptionSetting(&opt_pcmDevice, NULL, cfg_pcmDevice, "BRLTTY_PCM_DEVICE", -1);
+#endif /* ENABLE_PCM_SUPPORT */
+#ifdef ENABLE_MIDI_SUPPORT
+  ensureOptionSetting(&opt_midiDevice, NULL, cfg_midiDevice, "BRLTTY_MIDI_DEVICE", -1);
+#endif /* ENABLE_MIDI_SUPPORT */
 
   {
     const char *directories[] = {DATA_DIRECTORY, "/etc", "/", NULL};

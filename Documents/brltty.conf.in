@@ -52,6 +52,7 @@
 #braille-driver	vo	# Voyager
 #braille-driver	vr	# Virtual
 #braille-driver	vs	# VisioBraille
+#braille-driver	xw	# XWindow
 
 # The braille-device directive specifies the device to which the braille
 # display is connected. Relative paths are anchored at "/dev". If not
@@ -98,6 +99,8 @@
 #contraction-table	big5		# Chinese
 #contraction-table	compress	# Remove excess white space.
 #contraction-table	en-us-g2	# Grade 2 American English
+#contraction-table	fr-abrege	# Contracted French
+#contraction-table	fr-integral	# Uncontracted French
 
 
 #############################
@@ -228,6 +231,25 @@
 #speech-parameters vv:Roughness= # [0-100]
 
 
+##################
+# Sound Settings #
+##################
+
+# The pcm-device directive specifies the device to use for soundcard
+# digital audio. If not specified, a method- and system-dependent
+# default will be used.
+# (can be overridden with the -p [--pcm-device=] option)
+#pcm-device	/path/to/device	# most methods
+#pcm-device	pcm-handle-id	# ALSA (see second parameter of snd_pcm_open)
+
+# The pcm-device directive specifies the device to use for the Musical
+# Instrument Digital Interface. If not specified, a method- and
+# system-dependent default will be used.
+# (can be overridden with the -m [--midi-device=] option)
+#midi-device	/path/to/device	# most methods
+#midi-device	client:port	# ALSA (may use number or case-sensitive substring of name)
+
+
 ##########################
 # Miscellaneous Settings #
 ##########################
@@ -256,10 +278,16 @@
 # (can be overridden with the -C [--contractions-directory=] option)
 #contractions-directory @DATA_DIRECTORY@
 
+
+################################################
+# Application Programming Interface Parameters #
+################################################
+
 # The api-parameters directive passes parameters to the Application
 # Programming Interface.
 # (can be overridden with the -A [--api-parameters=] option)
 #api-parameters parameter=setting,...
+
 #api-parameters Host=
 #api-parameters Port=35751
 #api-parameters KeyFile=@CONFIGURATION_DIRECTORY@/@api_keyfile@
