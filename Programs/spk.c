@@ -32,8 +32,8 @@
 #include "spk.auto.h"
 
 #define SPKSYMBOL noSpeech
-#define SPKNAME "NoSpeech"
-#define SPKDRIVER no
+#define SPKNAME NoSpeech
+#define SPKCODE no
 #include "spk_driver.h"
 static void spk_identify (void) {
   LogPrint(LOG_NOTICE, "No speech support.");

@@ -35,9 +35,7 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
-#define BRLNAME	"CombiBraille"
-#define PREFSTYLE ST_TiemanStyle
-
+#define BRLSTAT ST_TiemanStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
 

@@ -34,9 +34,6 @@
 #include "Programs/scr.h"
 #include "Programs/message.h"
 
-#define BRLNAME "VisioBraille"
-#define PREFSTYLE ST_None
-
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_KEY_CODES
 #include "Programs/brl_driver.h"

@@ -33,8 +33,6 @@
 #include "Programs/spk.h"
 #include "Programs/misc.h"
 
-#define SPKNAME "BrailleLite"
-
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for BLite speech definitions */
 

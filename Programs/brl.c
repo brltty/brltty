@@ -33,8 +33,8 @@
 #include "brl.auto.h"
 
 #define BRLSYMBOL noBraille
-#define BRLNAME "NoBraille"
-#define BRLDRIVER no
+#define BRLNAME NoBraille
+#define BRLCODE no
 #define BRLHELP "/dev/null"
 #define PREFSTYLE ST_None
 #include "brl_driver.h"

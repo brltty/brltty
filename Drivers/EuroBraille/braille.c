@@ -36,21 +36,13 @@
 #include "Programs/message.h"
 #include "Programs/misc.h"
 
-#define BRLNAME	"EuroBraille"
-#define PREFSTYLE ST_None
-
-/*
-** the next define controls whichever you want the LCD support or not.
-** Please do not use this define if you use an IRIS, this terminal doesn't have
-** any LCD screen.
-*/
-#define BRL_HAVE_VISUAL_DISPLAY
 /*
 ** For debugging only
 ** #define		LOG_IO
 */
 
 #define BRL_HAVE_PACKET_IO
+#define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "braille.h"
 

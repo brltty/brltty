@@ -23,7 +23,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = fl
 DRIVER_NAME = FestivalLite
-SPEECH_MODELS = 
+SPEECH_MODELS = text to speech engine
 SPK_OBJS = @speech_libraries_fl@
 
 include $(SRC_TOP)driver.mk

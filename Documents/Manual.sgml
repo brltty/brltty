@@ -493,8 +493,9 @@ for any additional display-specific instructions.
         This is equivalent to specifying <tt/--without-flite/.
       <tag/yes/
         Build the driver if the package can be found in
-        either <tt>/usr</>
-        or <tt>/usr/local</>.
+        <tt>/usr</>,
+        <tt>/usr/local</>,
+        or <tt>/opt/flite</>.
         This is equivalent to specifying <tt/--with-flite/.
     </descrip>
   <tag><tt/--with-theta=/<em/directory/<label id="build-theta"></tag>
@@ -507,8 +508,9 @@ for any additional display-specific instructions.
         This is equivalent to specifying <tt/--without-theta/.
       <tag/yes/
         Build the driver if the package can be found in
-        either <tt>/usr</>
-        or <tt>/usr/local</>.
+        <tt>/usr</>,
+        <tt>/usr/local</>,
+        or <tt>/opt/theta</>.
         This is equivalent to specifying <tt/--with-theta/.
     </descrip>
   <tag><tt/--with-viavoice=/<em/directory/<label id="build-viavoice"></tag>
@@ -521,8 +523,9 @@ for any additional display-specific instructions.
         This is equivalent to specifying <tt/--without-viavoice/.
       <tag/yes/
         Build the driver if the package can be found in
-        either <tt>/usr</>
-        or <tt>/usr/local</>.
+        <tt>/usr</>,
+        <tt>/usr/local</>,
+        or <tt>/opt/viavoice</>.
         This is equivalent to specifying <tt/--with-viavoice/.
     </descrip>
   <tag><tt/--with-screen-driver=/<em/driver/<label id="build-screen-driver"></tag>

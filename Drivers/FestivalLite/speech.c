@@ -34,8 +34,6 @@
 #include "Programs/spk.h"
 #include "Programs/misc.h"
 
-#define SPKNAME "FestivalLite"
-
 typedef enum {
   PARM_wpm,
   PARM_pitch

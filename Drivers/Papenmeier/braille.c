@@ -57,9 +57,6 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
-#define BRLNAME	"Papenmeier"
-#define PREFSTYLE ST_Generic
-
 typedef enum {
    PARM_CONFIGFILE,
    PARM_DEBUGKEYS,
@@ -68,6 +65,7 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "configfile", "debugkeys", "debugreads", "debugwrites"
 
+#define BRLSTAT ST_Generic
 #define BRLCONST
 #include "Programs/brl_driver.h"
 #include "braille.h"

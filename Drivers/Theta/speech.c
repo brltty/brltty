@@ -34,8 +34,6 @@
 #include "Programs/spk.h"
 #include "Programs/misc.h"
 
-#define SPKNAME "Theta"
-
 typedef enum {
   PARM_AGE,
   PARM_GENDER,
@@ -60,8 +58,12 @@ static void
 initializeTheta (void) {
   static int initialized = 0;
   if (!initialized) {
-    const char *directory = THETA_ROOT "/voices";
-    setenv("THETA_VOXPATH", directory, 0);
+    {
+      const char *directory = THETA_ROOT "/voices";
+      setenv("THETA_VOXPATH", directory, 0);
+    }
+
+    setenv("THETA_HOME", THETA_ROOT, 0);
     theta_init(NULL);
     initialized = 1;
   }

@@ -39,8 +39,6 @@
 #include "Programs/misc.h"
 #include "Programs/spk.h"
 
-#define SPKNAME "ExternalSpeech"
-
 typedef enum {
   PARM_PROGRAM=0,
   PARM_UID, PARM_GID

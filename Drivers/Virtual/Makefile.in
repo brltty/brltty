@@ -26,7 +26,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = vr
 DRIVER_NAME = Virtual
-BRAILLE_MODELS = Line base terminals
+BRAILLE_MODELS = TCP/Unix, client/server
 HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk

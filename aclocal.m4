@@ -336,10 +336,10 @@ then
    fi
 fi
 AC_SUBST([$2_root])
-AC_DEFINE_UNQUOTED(translit([$2_root], [a-z], [A-Z]), ["${$2_root}"])
 BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])
 if test -n "${$2_root}"
 then
+   AC_DEFINE_UNQUOTED(translit([$2_root], [a-z], [A-Z]), ["${$2_root}"])
    $4
 fi])
 

@@ -30,8 +30,6 @@
 #include "Programs/spk.h"
 #include "Programs/misc.h"
 
-#define SPKNAME "GenericSay"
-
 typedef enum {
    PARM_COMMAND
 } DriverParameter;

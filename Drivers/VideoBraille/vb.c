@@ -31,9 +31,6 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
-#define BRLNAME "VideoBraille"
-#define PREFSTYLE ST_None
-
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "vblow.h"

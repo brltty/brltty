@@ -22,8 +22,8 @@ include $(BLD_TOP)config.mk
 ###############################################################################
 
 DRIVER_CODE = gs
-DRIVER_NAME = Generic Say (pipes to /usr/local/bin/say)
-SPEECH_MODELS = 
+DRIVER_NAME = GenericSay
+SPEECH_MODELS = pipes to /usr/local/bin/say
 
 include $(SRC_TOP)driver.mk
 

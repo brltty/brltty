@@ -69,9 +69,7 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
-#define BRLNAME	"MDV"
-#define PREFSTYLE ST_MDVStyle
-
+#define BRLSTAT ST_MDVStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
 

@@ -54,7 +54,7 @@
 
 /* HACK - include braille.c - with little adjustments */
 
-#define  BRLDRIVER   NULL
+#define  BRLCODE   NULL
 #define  BRLHELP "nohelp" 
 
 #define _SERIAL_C_

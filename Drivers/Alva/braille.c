@@ -110,9 +110,7 @@
 #include "Programs/misc.h"
 #include "Programs/brltty.h"
 
-#define BRLNAME	"Alva"
-#define PREFSTYLE ST_AlvaStyle
-
+#define BRLSTAT ST_AlvaStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
 

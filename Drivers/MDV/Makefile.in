@@ -25,8 +25,8 @@ include $(BLD_TOP)config.mk
 ###############################################################################
 
 DRIVER_CODE = md
-DRIVER_NAME = MDV (protocol 5)
-BRAILLE_MODELS = MB208/MB408L/MB408S
+DRIVER_NAME = MDV
+BRAILLE_MODELS = MB208/MB408L/MB408S (protocol 5)
 HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk

@@ -90,9 +90,7 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
-#define BRLNAME	"TSI"
-#define PREFSTYLE ST_PB80Style
-
+#define BRLSTAT ST_PB80Style
 #include "Programs/brl_driver.h"
 #include "braille.h"
 

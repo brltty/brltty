@@ -33,8 +33,6 @@
 
 #include "Programs/spk.h"
 
-#define SPKNAME "MultiBraille"
-
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for speech definitions */
 #include "braille.h"

@@ -64,9 +64,6 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
-#define BRLNAME "Voyager"
-#define PREFSTYLE ST_VoyagerStyle
-
 typedef enum {
   PARM_REPEAT_INIT_DELAY=0,
   PARM_REPEAT_INTER_DELAY,
@@ -76,6 +73,7 @@ typedef enum {
 #define BRLPARMS "repeat_init_delay", "repeat_inter_delay", \
                  "dots_repeat_init_delay", "dots_repeat_inter_delay"
 
+#define BRLSTAT ST_VoyagerStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
 

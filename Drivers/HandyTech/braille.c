@@ -31,9 +31,7 @@
 #include "Programs/brltty.h"
 #include "Programs/misc.h"
 
-#define BRLNAME "HandyTech"
-#define PREFSTYLE ST_AlvaStyle
-
+#define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 #include "braille.h"

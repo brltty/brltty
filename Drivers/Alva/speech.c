@@ -32,8 +32,6 @@
 #include "Programs/spk.h"
 #include "Programs/misc.h"
 
-#define SPKNAME "Alva"
-
 #include "Programs/spk_driver.h"
 #include "speech.h"		/* for speech definitions */
 #include "braille.h"

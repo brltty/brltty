@@ -30,8 +30,6 @@
 #include "Programs/spk.h"
 #include "Programs/misc.h"
 
-#define SPKNAME "ViaVoice"
-
 typedef enum {
    PARM_IniFile,
    PARM_SampleRate,

@@ -40,9 +40,6 @@ static int displayTerminal;
 
 #include "Programs/misc.h"
 
-#define BRLNAME "BrailleNote"
-#define PREFSTYLE ST_None
-
 typedef enum {
    PARM_STATUSCELLS
 } DriverParameter;

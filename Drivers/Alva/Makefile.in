@@ -26,8 +26,8 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = al
 DRIVER_NAME = Alva
-BRAILLE_MODELS = ABT3xx, Delphi, Satellite
-SPEECH_MODELS = Delphi
+BRAILLE_MODELS = ABT(3nn), Delphi(4nn), Satellite(5nn)
+SPEECH_MODELS = Delphi(4nn)
 HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)driver.mk

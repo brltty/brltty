@@ -42,9 +42,6 @@
 #include "Programs/misc.h"
 #include "Programs/message.h"
 
-#define BRLNAME "BrailleLite"
-#define PREFSTYLE ST_None
-
 typedef enum {
   PARM_BAUDRATE=0,
   PARM_KBEMU

@@ -24,7 +24,7 @@ extern "C" {
 
 /* this header file is used to create the driver structure
  * for a dynamically loadable braille display driver.
- * BRLNAME, BRLDRIVER, BRLHELP, and PREFSTYLE must be defined - see brlconf.h
+ * BRLNAME, BRLCODE, BRLHELP, and BRLSTAT must be defined - see driver make file
  */
 
 #include "brl.h"
@@ -56,16 +56,22 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
   static const char *const brl_parameters[] = {BRLPARMS, NULL};
 #endif /* BRLPARMS */
 
+#ifndef BRLSTAT
+#  define BRLSTAT ST_None
+#endif /* BRLSTAT */
+
 #ifndef BRLSYMBOL
-#  define BRLSYMBOL CONCATENATE(brl_driver_,BRLDRIVER)
+#  define BRLSYMBOL CONCATENATE(brl_driver_,BRLCODE)
 #endif /* BRLSYMBOL */
+
 #ifndef BRLCONST
 #  define BRLCONST const
 #endif /* BRLCONST */
+
 extern BRLCONST BrailleDriver BRLSYMBOL;
 BRLCONST BrailleDriver BRLSYMBOL = {
-  BRLNAME,
-  STRINGIFY(BRLDRIVER),
+  STRINGIFY(BRLNAME),
+  STRINGIFY(BRLCODE),
 
 #ifdef BRLPARMS
   brl_parameters,
@@ -74,7 +80,7 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 #endif /* BRLPARMS */
 
   BRLHELP,
-  PREFSTYLE,
+  BRLSTAT,
 
   brl_identify,
   brl_open,

@@ -38,9 +38,7 @@
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 
-#define BRLNAME "LogText"
-#define PREFSTYLE ST_Generic
-
+#define BRLSTAT ST_Generic
 #include "Programs/brl_driver.h"
 #include "braille.h"
 

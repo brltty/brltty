@@ -38,15 +38,13 @@
 #include "Programs/misc.h"
 #include "Programs/brl.h"
 
-#define BRLNAME "Virtual"
-#define PREFSTYLE ST_Generic
-
 typedef enum {
   PARM_SOCKET,
   PARM_MODE
 } DriverParameter;
 #define BRLPARMS "socket", "mode"
 
+#define BRLSTAT ST_Generic
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "braille.h"
