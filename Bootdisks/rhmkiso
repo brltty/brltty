@@ -31,6 +31,7 @@ syntaxError() {
 originalImage="boot.iso"
 modifiedImage="brltty.iso"
 brailleDrivers="all"
+textTable="text.nabcc.tbl"
 invokeShell=false
 showUsage() {
    cat <<EOF
@@ -39,17 +40,19 @@ The original (input) image defaults to "${originalImage}".
 The modified (output) image defaults to "${modifiedImage}".
 The following options are supported:
 -b driver,...   The braille driver(s) to include (default: ${brailleDrivers}).
+-t file         The built-in text translation table (default: ${textTable}).
 -h              Display usage information for this command.
 -s              Invoke interactive shell to inspect modified image.
 EOF
    exit 0
 }
 
-while getopts ":b:hs" option
+while getopts ":b:t:hs" option
 do
    case "${option}"
    in
       b) brailleDrivers="${OPTARG}";;
+      t) textTable="${OPTARG}";;
       h) showUsage;;
       s) invokeShell=true;;
      \?) syntaxError "unknown option: -${OPTARG}";;
@@ -169,6 +172,7 @@ brlttyDirectory="${1}"
    ./configure --quiet --with-install-root="${initrdRoot}" \
 	       --with-init-path="${initPath}" \
 	       --with-braille-driver="${brailleDrivers}" \
+	       --with-text-table="${textTable}" \
 	       --disable-speech-support \
 	       --disable-pcm-tunes --disable-fm-tunes --disable-midi-tunes \
                --enable-standalone-programs --disable-api --disable-gpm
