@@ -964,6 +964,7 @@ flushCells2 (BrailleDisplay *brl) {
     unsigned char buffer[0XFF];
     unsigned int size = 0;
 
+    /* Two dummy cells for each switch and key on the left side. */
     {
       int modules = leftModules2;
       while (modules-- > 0) {
@@ -972,12 +973,15 @@ flushCells2 (BrailleDisplay *brl) {
       }
     }
 
+    /* The status cells. */
     memcpy(&buffer[size], currentStatus, terminal->statusCount);
     size += terminal->statusCount;
 
+    /* The text cells. */
     memcpy(&buffer[size], currentText, terminal->columns);
     size += terminal->columns;
 
+    /* Two dummy cells for each switch and key on the right side. */
     {
       int modules = rightModules2;
       while (modules-- > 0) {
@@ -1061,6 +1065,7 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
               if ((new & bit) && !(old & bit)) {
                 InputMapping2 *mapping = &inputMap2[index];
                 inputState2[byte] |= bit;
+
                 if (mapping->code != NOKEY) {
                   command = handleKey(mapping->code, 1, mapping->offset);
                 }
@@ -1152,6 +1157,14 @@ mapInputModules2 (void) {
     } while (column);
   }
 
+  {
+    unsigned char cell = terminal->statusCount;
+    do {
+      nextInputModule2(&byte, &bit);
+      addInputMapping2(byte, bit, OFFS_STAT+cell--, 0);
+    } while (cell);
+  }
+
   mapSwitchKey2(terminal->leftKeys, &byte, &bit,
                 OFFS_SWITCH+KEY_LEFT_REAR,
                 OFFS_SWITCH+KEY_LEFT_FRONT);
@@ -1191,7 +1204,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
             rightModules2 = terminal->rightSwitches + terminal->rightKeys;
             {
               int modules = leftModules2 + rightModules2;
-              inputBytes2 = modules + ((((modules * 4) + ((terminal->statusCount + terminal->columns) * 2)) + 7) / 8);
+              inputBytes2 = modules + 1 + ((((modules * 4) + ((terminal->statusCount + terminal->columns) * 2)) + 7) / 8);
             }
             inputBits2 = inputBytes2 * 8;
 
