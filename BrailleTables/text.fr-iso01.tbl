@@ -217,7 +217,7 @@
 \XC2 (    5 78)  # latin capital letter a with circumflex
 \XC3 (  345678)  # latin capital letter a with tilde
 \XC4 (12 4 678)  # latin capital letter a with diaeresis
-\XC5 (1  4 678)  # latin capital letter a with ring above
+\XC5 (   4 678)  # latin capital letter a with ring above
 \XC6 (1234 678)  # latin capital letter ae
 \XC7 (1234 67 )  # latin capital letter c with cedilla
 \XC8 (123 5678)  # latin capital letter e with grave
@@ -226,7 +226,7 @@
 \XCB (  34 678)  # latin capital letter e with diaeresis
 \XCC (     678)  # latin capital letter i with grave
 \XCD (  3  678)  # latin capital letter i with acute
-\XCE (   4 678)  # latin capital letter i with circumflex
+\XCE (    5 78)  # latin capital letter i with circumflex
 \XCF (  34  78)  # latin capital letter i with diaeresis
 \XD0 (  3 5678)  # latin capital letter eth
 \XD1 (12 456 8)  # latin capital letter n with tilde
