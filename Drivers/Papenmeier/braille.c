@@ -546,7 +546,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 /* found command - some actions to be done within the driver */
 static int
-handle_command(int cmd)
+handle_command(int cmd, int repeat)
 {
   if (cmd == CMD_INPUT) {
     /* translate toggle -> ON/OFF */
@@ -573,6 +573,7 @@ handle_command(int cmd)
 
   saved_command = EOF;
   input_dots = 0;
+  if (repeat) cmd |= VAL_REPEAT_INITIAL | VAL_REPEAT_DELAY;
   return cmd;
 }
 
@@ -628,7 +629,7 @@ modifier_released(unsigned int bit)
     if (debug_keys) {
       LogPrint(LOG_DEBUG, "saved cmd: %d", saved_command); 
     }
-    return handle_command(saved_command);
+    return handle_command(saved_command, 0);
   }
 
   if (input_mode && (input_dots != 0)) {
@@ -642,10 +643,10 @@ modifier_released(unsigned int bit)
     if (debug_keys) {
       LogPrint(LOG_DEBUG, "dots=%02X cmd=%04X", input_dots, cmd); 
     }
-    return handle_command(cmd);
+    return handle_command(cmd, 0);
   }
 
-  return EOF;
+  return CMD_NOOP;
 }
 
 /* one key is pressed or released */
@@ -664,7 +665,7 @@ handle_key (int code, int ispressed, int offsroute)
     }
 
   /* must be a "normal key" - search for cmd on keypress */
-  if (!ispressed) return EOF;
+  if (!ispressed) return CMD_NOOP;
   input_dots = 0;
   for (i=0; i<CMDMAX; i++)
     if ((the_terminal->cmds[i].keycode == code) &&
@@ -672,7 +673,7 @@ handle_key (int code, int ispressed, int offsroute)
       if (debug_keys)
         LogPrint(LOG_DEBUG, "cmd: %d->%d (+%d)", 
                  code, the_terminal->cmds[i].code, offsroute); 
-      return handle_command(the_terminal->cmds[i].code + offsroute);
+      return handle_command(the_terminal->cmds[i].code + offsroute, 1);
     }
 
   /* no command found */
@@ -717,7 +718,7 @@ handle_code (int code, int press, int time) {
   }
 
   LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
-  return press? CMD_NOOP: EOF;
+  return CMD_NOOP;
 }
 
 /* ------------------------------------------------------------ */
