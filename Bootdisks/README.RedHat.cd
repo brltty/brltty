@@ -37,7 +37,11 @@ Fifth: Run the "rhmkiso" script with no options or parameters.
 Sixth: You should now have a new file, "brltty.iso", in the current directory. 
 Write this modified image to a CD.
 
-   cdrecord dev=0,0,0 -v -data brltty.iso
+   cdrecord -dao dev=0,0,0 -v -data brltty.iso
+
+If you're using a rewritable CD then you should erase it first.
+
+   cdrecord dev=0,0,0 -v blank=fast
 
 Seventh: Boot from the CD you've just written, and wait a few seconds after it
 starts to spin in order to give the boot loader enough time to get started and
