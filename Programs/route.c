@@ -166,10 +166,10 @@ int csrjmp(int x, int y, int scrno)
      * that wait can't catch the dying child.
      */
     if (csr_active) {
-	kill(csr_pid, SIGUSR1);
-        do {
-            sigsuspend(&old_mask);
-	} while (csr_active);
+      kill(csr_pid, SIGUSR1);
+      do {
+        sigsuspend(&old_mask);
+      } while (csr_active);
     }
 
     switch (csr_pid = fork()) {
@@ -177,7 +177,7 @@ int csrjmp(int x, int y, int scrno)
         LogError("fork");
 	break;
       default:			/* parent waits for child to return */
-        csr_active++;
+        csr_active = 1;
         started = 1;
 	break;
       case 0:			/* child, cursor routing process */

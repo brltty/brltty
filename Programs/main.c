@@ -382,9 +382,11 @@ terminationHandler (int signalNumber) {
 static void 
 childDeathHandler (int signalNumber) {
   pid_t pid = wait(NULL);
-  if (pid == csr_pid) {
-    csr_pid = 0;
-    csr_active--;
+  if (csr_active) {
+    if (pid == csr_pid) {
+      csr_pid = 0;
+      csr_active = 0;
+    }
   }
 }
 
