@@ -51,6 +51,8 @@ extern int getPcmChannelCount (int descriptor);
 extern int setPcmChannelCount (int descriptor, int channels);
 extern PcmAmplitudeFormat getPcmAmplitudeFormat (int descriptor);
 extern PcmAmplitudeFormat setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format);
+extern void forcePcmOutput (int descriptor);
+extern void awaitPcmOutput (int descriptor);
 extern void cancelPcmOutput (int descriptor);
 
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);

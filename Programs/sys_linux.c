@@ -233,6 +233,16 @@ setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
 }
 
 void
+forcePcmOutput (int descriptor) {
+  ioctl(descriptor, SNDCTL_DSP_POST, 0);
+}
+
+void
+awaitPcmOutput (int descriptor) {
+  ioctl(descriptor, SNDCTL_DSP_SYNC, 0);
+}
+
+void
 cancelPcmOutput (int descriptor) {
   ioctl(descriptor, SNDCTL_DSP_RESET, 0);
 }

@@ -208,6 +208,14 @@ setPcmAmplitudeFormat (int descriptor, PcmAmplitudeFormat format) {
 }
 
 void
+forcePcmOutput (int descriptor) {
+}
+
+void
+awaitPcmOutput (int descriptor) {
+}
+
+void
 cancelPcmOutput (int descriptor) {
 }
 #endif /* ENABLE_PCM_TUNES */
