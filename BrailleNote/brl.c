@@ -361,8 +361,8 @@ visualDisplay(unsigned char character, DriverCommandContext cmds)
 static void
 identbrl (void)
 {
-   LogPrint(LOG_NOTICE, "BrailleNote driver, version 1.0");
-   LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
+   LogAndStderr(LOG_NOTICE, "BrailleNote Driver, version 1.0");
+   LogAndStderr(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
 
 static void

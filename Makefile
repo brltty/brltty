@@ -213,7 +213,7 @@ else
    BUILTIN_BRAILLE = -DBRL_BUILTIN
 endif
 
-TUNE_OBJECTS = tunes.o tones_speaker.o tones_soundcard.o tones_adlib.o adlib.o
+TUNE_OBJECTS = tunes.o tones_speaker.o tones_soundcard.o tones_sequencer.o tones_adlib.o adlib.o
 
 tunes.o: tunes.c tunes.h tones.h common.h misc.h message.h brl.h
 	$(CC) $(CFLAGS) -c tunes.c
@@ -224,7 +224,10 @@ tones_speaker.o: tones_speaker.c tones.h
 tones_soundcard.o: tones_soundcard.c tones.h
 	$(CC) $(CFLAGS) -c tones_soundcard.c
 
-tones_adlib.o: tones_adlib.c tones.h adlib.h
+tones_sequencer.o: tones_sequencer.c tones.h misc.h
+	$(CC) $(CFLAGS) -c tones_sequencer.c
+
+tones_adlib.o: tones_adlib.c tones.h adlib.h misc.h
 	$(CC) $(CFLAGS) -c tones_adlib.c
 
 adlib.o: adlib.c

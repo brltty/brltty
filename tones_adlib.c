@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "misc.h"
 #include "tones.h"
 #include "adlib.h"
 
@@ -41,7 +42,10 @@ static int openAdLib (void) {
 }
 
 static int generateAdLib (int frequency, int duration) {
-   AL_playTone(channelNumber, frequency, duration, 100);
+   if (frequency)
+      AL_playTone(channelNumber, frequency, duration, 100);
+   else
+      shortdelay(duration);
    return 1;
 }
 

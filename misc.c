@@ -20,13 +20,14 @@
 
 #define __EXTENSIONS__	/* for time.h */
 
-#include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "misc.h"
 #include "config.h"
@@ -57,13 +58,17 @@ unsigned char attribtrans[256] =
  */
 unsigned char statcells[MAXNSTATCELLS];	/* status cell buffer */
 
+void setCloseOnExec (int fileDescriptor) {
+   fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC);
+}
+
 // Process each line of an input text file safely.
 // This routine handles the actual reading of the file,
 // insuring that the input buffer is always big enough,
 // and calls a caller-supplied handler once for each line in the file.
 // The caller-supplied data pointer is passed straight through to the handler.
-void process_lines (FILE *file,
-                    void (*handler) (char *line, void *data),
+void processLines (FILE *file,
+                   void (*handler) (char *line, void *data),
 		    void *data)
 {
   size_t buff_size = 0X80; // Initial buffer size.

@@ -35,8 +35,10 @@ static int openSoundCard (void) {
       if ((fileDescriptor = open("/dev/dsp", O_WRONLY)) == -1) {
          return 0;
       }
+      setCloseOnExec(fileDescriptor);
       {
-	 int setting;
+	 int setting = 0X7FFF0008;
+	 ioctl(fileDescriptor, SNDCTL_DSP_SETFRAGMENT, &setting);
 	 QUERY_SOUND(sampleRate, SOUND_PCM_READ_RATE, 8000);
 	 QUERY_SOUND(channelCount, SOUND_PCM_READ_CHANNELS, 1);
       }
@@ -46,7 +48,7 @@ static int openSoundCard (void) {
 
 static int generateSoundCard (int frequency, int duration) {
    if (fileDescriptor != -1) {
-      double waveLength = (double)sampleRate / (double)frequency;
+      double waveLength = frequency? (double)sampleRate / (double)frequency: HUGE_VAL;
       unsigned int sampleCount = sampleRate * duration / 1000;
       int sampleNumber;
       for (sampleNumber=0; sampleNumber<sampleCount; ++sampleNumber) {

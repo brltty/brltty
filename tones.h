@@ -24,4 +24,5 @@ typedef struct {
 typedef ToneGenerator *(ToneProcedure) (void);
 extern ToneProcedure toneSpeaker;
 extern ToneProcedure toneSoundCard;
+extern ToneProcedure toneSequencer;
 extern ToneProcedure toneAdLib;

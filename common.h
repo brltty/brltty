@@ -60,7 +60,7 @@ struct brltty_env {
 	unsigned char skpblnkwinsmode;
 	unsigned char spare16;
 	unsigned char skpblnkwins;
-	unsigned char spare17;
+	unsigned char midiinstr;
 	unsigned char stcellstyle;
 	unsigned char winovlp;
 } __attribute__((packed));

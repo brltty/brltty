@@ -325,6 +325,7 @@ main (int argc, char *argv[])
    */
   while (keep_going)
     {
+      closeTuneDevice();
       TickCount++;
       /*
        * Process any Braille input 
@@ -607,7 +608,7 @@ main (int argc, char *argv[])
 	  case CMD_PRSEARCH: {
 	    int dir = (keypress == CMD_NXSEARCH) ? +1 : -1;
 	    int found = 0, caseSens = 0;
-	    int l = p->winy;
+	    int l = p->winy + dir;
 	    char buffer[scr.cols+1];
 	    char *ptr;
 	    if(!cut_buffer || strlen(cut_buffer) > scr.cols)
@@ -845,7 +846,6 @@ main (int argc, char *argv[])
 	    break;
 	  case CMD_PREFMENU:
 	    updatePreferences();
-	    setTuneDevice (env.tunedev);
 	    break;
 	  case CMD_PREFLOAD:
 	    loadPreferences();
@@ -936,15 +936,9 @@ main (int argc, char *argv[])
 		break;
 	      case CR_MSGATTRIB:
 		if (arg < brl.x || p->winx+arg < scr.cols) {
-		  char *colours[] = {
-		    "black",
-		    "red",
-		    "green",
-		    "yellow",
-		    "blue",
-		    "magenta",
-		    "cyan",
-		    "white"
+		  static char *colours[] = {
+		    "black",   "red",     "green",   "yellow",
+		    "blue",    "magenta", "cyan",    "white"
 		  };
 		  char buffer[0X40];
 		  unsigned char attributes;
@@ -964,34 +958,38 @@ main (int argc, char *argv[])
 		if (arg < 0X3F-1)
 		  switchvt(arg+1);
 		break;
+	      {
+	        int increment;
 	      case CR_NXINDENT:
-	      case CR_PRINDENT: {
-		int i;
-		int dir = (key == CR_NXINDENT) ? +1 : -1;
-		int n = arg+p->winx+1;
-		int found = 0;
-		int l = p->winy +dir;
-		char buffer[scr.cols];
-		if(n<=scr.cols) {
-		  while(l>=0 && l <= scr.rows - brl.y) {
-		    getscr ((winpos)
-			{0, l, n, 1}
-			,buffer, SCR_TEXT);
-		    for(i=0; i<n; i++)
-		      if(buffer[i] != ' ' && buffer[i] != 0)
+	        increment = 1;
+		goto find;
+	      case CR_PRINDENT:
+	        increment = -1;
+	      find:
+	        {
+		  int count = MIN(p->winx+arg+1, scr.cols);
+		  int found = 0;
+		  int row = p->winy + increment;
+		  char buffer[scr.cols];
+		  while ((row >= 0) && (row <= scr.rows-brl.y)) {
+		    int column;
+		    getscr((winpos){0, row, count, 1},
+			   buffer, SCR_TEXT);
+		    for (column=0; column<count; column++)
+		      if ((buffer[column] != ' ') && (buffer[column] != 0))
 			break;
-		    if(i<n){
+		    if (column < count) {
 		      found = 1;
-		      p->winy = l;
+		      p->winy = row;
 		      break;
 		    }
-		    l += dir;
+		    row += increment;
 		  }
-		  if(!found) {
-		    playTune (&tune_bounce);
-		    playTune (&tune_bounce);
+		  if (!found) {
+		    playTune(&tune_bounce);
+		    playTune(&tune_bounce);
 		  }
-		}
+	        }
 		break;
 	      }
 	      default:
@@ -1317,6 +1315,7 @@ main (int argc, char *argv[])
 
       delay (DELAY_TIME);
     }
+  closeTuneDevice();
 
   clrbrlstat ();
   message ("BRLTTY terminating.", 0);

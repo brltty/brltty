@@ -25,7 +25,7 @@
 // insuring that the input buffer is always big enough,
 // and calls a caller-supplied handler once for each line in the file.
 // The caller-supplied data pointer is passed straight through to the handler.
-void process_lines (FILE *file, // The input file.
+void processLines (FILE *file, // The input file.
                     void (*handler) (char *line, void *data), // The input line handler.
 		    void *data); // A pointer to caller-specific data.
 
@@ -53,6 +53,8 @@ size_t safe_write (int fd, const unsigned char *buffer, size_t length);
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+extern void setCloseOnExec (int fileDescriptor);
 
 unsigned elapsed_msec (struct timeval *t1, struct timeval *t2);
 void shortdelay (unsigned msec);

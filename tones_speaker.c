@@ -31,12 +31,17 @@ static int openSpeaker (void) {
       if ((fileDescriptor = open("/dev/console", O_WRONLY)) == -1) {
          return 0;
       }
+      setCloseOnExec(fileDescriptor);
    }
    return 1;
 }
 
 static int generateSpeaker (int frequency, int duration) {
    if (fileDescriptor != -1) {
+      if (!frequency) {
+         shortdelay(duration);
+	 return 1;
+      }
       if (ioctl(fileDescriptor, KIOCSOUND, 1190000/frequency) != -1) {
          shortdelay(duration);
 	 if (ioctl(fileDescriptor, KDMKTONE, 0) != -1) {

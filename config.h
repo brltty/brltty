@@ -48,7 +48,8 @@ typedef enum {
 
 typedef enum {
    tdSpeaker,
-   tdPcm,
+   tdSoundCard,
+   tdSequencer,
    tdAdLib
 } TuneDevice;
 

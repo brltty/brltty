@@ -16,7 +16,7 @@
  */
 
 /* Alva/brl.c - Braille display library for Alva braille displays
- * Copyright (C) 1995-1999 by Nicolas Pitre <nico@cam.org>
+ * Copyright (C) 1995-2001 by Nicolas Pitre <nico@cam.org>
  * See the GNU Public license for details in the ../COPYING file
  *
  */
@@ -392,7 +392,7 @@ static void initbrl (brldim *brl, const char *dev)
   BrailleOpen( (unsigned char *) LPT_PORT );
   BrailleProcess();
   if ((BrailleRead( buffer, DIM_BRL_ID+1) != DIM_BRL_ID+1 ) ||
-      (strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID) != 0)) {
+      (strncmp ((char *)buffer, BRL_ID, DIM_BRL_ID) != 0)) {
     LogPrint( LOG_ERR, "Cannot get braille terminal ID." );
     goto failure;
   }
@@ -438,13 +438,13 @@ static void initbrl (brldim *brl, const char *dev)
       if (ModelID != ABT_AUTO)
 	break;
 
-      if (!(read (brl_fd, &buffer, DIM_BRL_ID + 1) == DIM_BRL_ID +1))
+      if (!(read (brl_fd, buffer, DIM_BRL_ID + 1) == DIM_BRL_ID +1))
 	{ // try init method for AD4MM and AS...
           write (brl_fd,alva_init,DIM_BRL_ID + 2);
           delay(200);
-          read (brl_fd, &buffer, DIM_BRL_ID + 1);         
+          read (brl_fd, buffer, DIM_BRL_ID + 1);         
         }
-      if (!strncmp ((char*)buffer, BRL_ID, DIM_BRL_ID))
+      if (!strncmp ((char *)buffer, BRL_ID, DIM_BRL_ID))
 	ModelID = buffer[DIM_BRL_ID];
     }
   while (ModelID == ABT_AUTO);
@@ -821,14 +821,14 @@ static int readbrl (DriverCommandContext cmds)
 	    case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
 	      res = CMD_SAY;
 	      break;
-	    case KEY_PROG | KEY_CURSOR:
-	      res = CMD_PREFMENU;
-	      break;
 	    case KEY_PROG | KEY_DOWN:
 	      res = CMD_FREEZE;
 	      break;
 	    case KEY_PROG | KEY_UP:
 	      res = CMD_INFO;
+	      break;
+	    case KEY_PROG | KEY_CURSOR | KEY_LEFT:
+	      res = CMD_BACK;
 	      break;
 	    case KEY_ROUTING_A:
 	      res = CMD_CAPBLINK;
@@ -874,6 +874,10 @@ static int readbrl (DriverCommandContext cmds)
 	    case KEY_PROG | KEY_HOME | KEY_DOWN:
 	      res = CMD_PASTE;
 	      break;
+	    case KEY_PROG | KEY_HOME | KEY_ROUTING:
+	      /* attribute for pointed character */
+	      res = CR_MSGATTRIB + RoutingPos;
+	      break;
 	    }
 	}
       else
@@ -900,6 +904,9 @@ static int readbrl (DriverCommandContext cmds)
 		  break;
 		case KEY_HOME | KEY_CURSOR:
 		  res = CMD_CSRTRK;
+		  break;
+		case KEY_PROG | KEY_CURSOR:
+		  res = CMD_PREFMENU;
 		  break;
 		}
 	    }

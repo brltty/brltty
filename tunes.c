@@ -246,17 +246,26 @@ TuneDefinition tune_skip_more = {
 
 static ToneGenerator *toneGenerator = NULL;
 void setTuneDevice (unsigned char device) {
+   if (toneGenerator)
+      toneGenerator->close();
    switch (device) {
       case tdSpeaker:
          toneGenerator = toneSpeaker();
 	 break;
-      case tdPcm:
+      case tdSoundCard:
          toneGenerator = toneSoundCard();
+	 break;
+      case tdSequencer:
+         toneGenerator = toneSequencer();
 	 break;
       case tdAdLib:
          toneGenerator = toneAdLib();
 	 break;
    }
+}
+
+void closeTuneDevice (void) {
+   toneGenerator->close();
 }
  
 void playTune (TuneDefinition *tune) {
@@ -266,15 +275,13 @@ void playTune (TuneDefinition *tune) {
          ToneDefinition *tone = tune->tones;
 	 tunePlayed = 1;
 	 while (tone->duration) {
-	    if (!tone->frequency) {
-	       shortdelay(tone->duration);
-	    } else if (!toneGenerator->generate(tone->frequency, tone->duration)) {
+	    if (!toneGenerator->generate(tone->frequency, tone->duration)) {
 	       tunePlayed = 0;
 	       break;
 	    }
 	    ++tone;
 	 }
-	 toneGenerator->close();
+      // toneGenerator->close();
       }
    }
    if (!tunePlayed) {

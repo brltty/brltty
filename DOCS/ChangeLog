@@ -1,19 +1,28 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+   Implement horizontal window scroll overlap. (dm)
    Implement CR_MSGATTRIB (message attributes of character at routing key). (dm)
+      Added to Alva driver (prog + home). (np)
    Implement CMD_BACK (to go back after a cursor tracking motion). (dm)
       Added to Papenmeier driver (status key 4). (dm)
-   Change -c to -p, --config= to --prefs=, and references to .dat file to "preferences". (dm)
+      Added to Alva driver (prog + cursor + left). (np)
+   Resolve conflict between .dat and .conf both being calledf configuration files. (dm)
+      Short option -c becomes -p.
+      Long option --config= becomes --prefs=.
+      /etc/brltty.conf directive braille-configuration becomes preferences-file.
+      Default file extension .dat becomes .prefs.
    Inform readbrl of the current command context. (dm)
    Converted CMD_ defines to enum. (dm)
       CombiBraille: tables.h converted to cmdtrans.h, argtrans removed
    Replaced CMD_SKPBLNKEOL with configurable skip blank windows mode. (dm)
    Rename -p option to -S. (dm)
+   Rename speech-driverparm directive (brltty.conf) to speech-parameter. (dm)
    Added -n (--nodaemon) option to make debugging easier and to permit invocation from inittab. (dm)
    Added -f (--file=) option to specify default parameters file (brltty.conf). (dm)
    Added support for tunes via AdLib/OPL3/SB-FM. (dm)
-   Added support for tunes via sound card. (dm)
+   Added support for tunes via MIDI (/dev/sequencer). (dm)
+   Added support for tunes via sound card (/dev/dsp). (dm)
    Configuration menu made more user-friendly. (dm)
    Disable speech tracking when CMD_SAY is used. (np)
    Fix problems with the skipping of blank windows and end-of-liens. (sd)
