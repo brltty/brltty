@@ -94,8 +94,8 @@ int brl_log;
 /* Communication codes */
 static char BRL_ID[] = "\x10\x02\xF1";
 #define DIM_BRL_ID 3
-static char SYS_READY[] = "\x10\x02\xF1\x57\x57\x57\x10\x03";
-#define DIM_SYS_READY 8
+static unsigned char SYS_READY[] = {0X10, 0X02, 0XF1, 0X57, 0X57, 0X57, 0X10, 0X03};
+#define DIM_SYS_READY sizeof(SYS_READY)
 static char BRL_READY[]
 #ifdef HAVE_ATTRIBUTE_UNUSED
        __attribute__((unused))
@@ -143,13 +143,13 @@ static char BRL_KEY[] = "\x10\x02\x88";
 #define KEY_F8		0x80
 
 
-static int WriteToBrlDisplay(char *Data)
+static int WriteToBrlDisplay(unsigned char *Data)
 {
   int size = DIM_BRL_WRITE_PREFIX + DIM_BRL_WRITE_SUFIX + BrailleSize;
-  char *buffTmp;
+  unsigned char *buffTmp;
   
   /* Make temporal buffer */
-  buffTmp = (unsigned char *) malloc(size);
+  buffTmp = malloc(size);
 
   /* Copy the prefix, Data and sufix */
   memcpy(buffTmp, BRL_WRITE_PREFIX, DIM_BRL_WRITE_PREFIX);
@@ -211,7 +211,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
       }
       	
       if(serialReadData(serialDevice, &buffer, DIM_BRL_ID + 6, 600, 100) == DIM_BRL_ID + 6){
-	  if(!strncmp (buffer, BRL_ID, DIM_BRL_ID)){
+	  if(memcmp (buffer, BRL_ID, DIM_BRL_ID) == 0){
 	  
 	    /* Possible values; 0x20, 0x40, 0x80 */
 	    int tmpModel=buffer[DIM_BRL_ID] / 0x20;
@@ -235,9 +235,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
     
   /* Need answer to BR */
   /*do{*/
-      strcpy(buffer, SYS_READY);
-      
-      serialWriteData(serialDevice, &buffer, DIM_SYS_READY);
+      serialWriteData(serialDevice, SYS_READY, DIM_SYS_READY);
       serialReadData(serialDevice, &buffer, DIM_BRL_READY + 6, 100, 100);
       /*}while(strncmp (buffer, BRL_READY, DIM_BRL_READY));*/
       
@@ -333,8 +331,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 #endif /* DEBUG */
   
      /* Is a Key? */
-     pBuff=strstr(buff, BRL_KEY);
-     if(!strncmp(pBuff, BRL_KEY, DIM_BRL_KEY)){  
+     if((pBuff=(unsigned char *)strstr((char *)buff, BRL_KEY))){  
     
         /* Byte A. Check Status sensors */
 	switch(*(pBuff+3)){
