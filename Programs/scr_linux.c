@@ -216,7 +216,7 @@ setDevicePath (const char **path, const char *paths, const char *description, in
 }
 
 static char *
-makePath (const char *base, unsigned char vt) {
+vtPath (const char *base, unsigned char vt) {
   if (vt) {
     size_t length = strlen(base);
     char buffer[length+4];
@@ -278,7 +278,7 @@ closeConsole (void) {
 
 static int
 openConsole (unsigned char vt) {
-  char *path = makePath(consolePath, vt);
+  char *path = vtPath(consolePath, vt);
   if (path) {
     int console = openDevice(path, "console", O_RDWR|O_NOCTTY, 4, vt);
     if (console != -1) {
@@ -315,7 +315,7 @@ closeScreen (void) {
 
 static int
 openScreen (unsigned char vt) {
-  char *path = makePath(screenPath, vt);
+  char *path = vtPath(screenPath, vt);
   if (path) {
     int screen = openDevice(path, "screen", O_RDWR, 7, 0X80|vt);
     if (screen != -1) {

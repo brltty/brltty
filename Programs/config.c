@@ -71,8 +71,10 @@ static const char *opt_brailleDriver = NULL;
 static char *opt_brailleParameters = NULL;
 static const char *opt_configurationFile = NULL;
 #ifdef ENABLE_CONTRACTED_BRAILLE
+static const char *opt_contractionsDirectory = NULL;
 static const char *opt_contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+static const char *opt_dataDirectory = NULL;
 static short opt_environmentVariables = 0;
 static const char *opt_libraryDirectory = NULL;
 static short opt_logLevel = LOG_NOTICE;
@@ -87,18 +89,23 @@ static const char *opt_speechDriver = NULL;
 static char *opt_speechParameters = NULL;
 #endif /* ENABLE_SPEECH_SUPPORT */
 static short opt_standardError = 0;
+static const char *opt_tablesDirectory = NULL;
 static const char *opt_textTable = NULL;
 static short opt_version = 0;
 
 static char *cfg_preferencesFile = NULL;
+static char *cfg_tablesDirectory = NULL;
 static char *cfg_textTable = NULL;
 static char *cfg_attributesTable = NULL;
 #ifdef ENABLE_CONTRACTED_BRAILLE
+static char *cfg_contractionsDirectory = NULL;
 static char *cfg_contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #ifdef ENABLE_API
 static char *cfg_apiParameters = NULL;
 #endif /* ENABLE_API */
+static char *cfg_libraryDirectory = NULL;
+static char *cfg_dataDirectory = NULL;
 static char *cfg_brailleDriver = NULL;
 static char *cfg_brailleDevice = NULL;
 static char *cfg_brailleParameters = NULL;
@@ -107,7 +114,6 @@ static char *cfg_speechDriver = NULL;
 static char *cfg_speechParameters = NULL;
 #endif /* ENABLE_SPEECH_SUPPORT */
 static char *cfg_screenParameters = NULL;
-static char *cfg_libraryDirectory = NULL;
 
 static const BrailleDriver *brailleDriver;
 static char **brailleParameters = NULL;
@@ -158,6 +164,11 @@ configurePreferencesFile (const char *delimiters) {
 }
 
 static ConfigurationLineStatus
+configureTablesDirectory (const char *delimiters) {
+  return getConfigurationOperand(&cfg_tablesDirectory, delimiters, 0);
+}
+
+static ConfigurationLineStatus
 configureTextTable (const char *delimiters) {
   return getConfigurationOperand(&cfg_textTable, delimiters, 0);
 }
@@ -168,6 +179,11 @@ configureAttributesTable (const char *delimiters) {
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
+static ConfigurationLineStatus
+configureContractionsDirectory (const char *delimiters) {
+  return getConfigurationOperand(&cfg_contractionsDirectory, delimiters, 0);
+}
+
 static ConfigurationLineStatus
 configureContractionTable (const char *delimiters) {
   return getConfigurationOperand(&cfg_contractionTable, delimiters, 0);
@@ -180,6 +196,16 @@ configureApiParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_apiParameters, delimiters, 1);
 }
 #endif /* ENABLE_API */
+
+static ConfigurationLineStatus
+configureLibraryDirectory (const char *delimiters) {
+  return getConfigurationOperand(&cfg_libraryDirectory, delimiters, 0);
+}
+
+static ConfigurationLineStatus
+configureDataDirectory (const char *delimiters) {
+  return getConfigurationOperand(&cfg_dataDirectory, delimiters, 0);
+}
 
 static ConfigurationLineStatus
 configureBrailleDriver (const char *delimiters) {
@@ -211,11 +237,6 @@ configureSpeechParameters (const char *delimiters) {
 static ConfigurationLineStatus
 configureScreenParameters (const char *delimiters) {
   return getConfigurationOperand(&cfg_screenParameters, delimiters, 1);
-}
-
-static ConfigurationLineStatus
-configureLibraryDirectory (const char *delimiters) {
-  return getConfigurationOperand(&cfg_libraryDirectory, delimiters, 0);
 }
 
 BEGIN_OPTION_TABLE
@@ -255,6 +276,12 @@ BEGIN_OPTION_TABLE
 #endif /* ENABLE_API */
   {'B', "braille-parameters", "arg,...", configureBrailleParameters, 0,
    "Parameters for the braille driver."},
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  {'C', "contractions-directory", "directory", configureContractionsDirectory, OPT_Hidden,
+   "Path to directory for contractions tables."},
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+  {'D', "data-directory", "directory", configureDataDirectory, OPT_Hidden,
+   "Path to directory for driver help and configuration files."},
   {'E', "environment-variables", NULL, NULL, 0,
    "Recognize environment variables."},
   {'L', "library-directory", "directory", configureLibraryDirectory, OPT_Hidden,
@@ -271,6 +298,8 @@ BEGIN_OPTION_TABLE
   {'S', "speech-parameters", "arg,...", configureSpeechParameters, 0,
    "Parameters for the speech driver."},
 #endif /* ENABLE_SPEECH_SUPPORT */
+  {'T', "tables-directory", "directory", configureTablesDirectory, OPT_Hidden,
+   "Path to directory for text and attributes tables."},
   {'X', "screen-parameters", "arg,...", configureScreenParameters, 0,
    "Parameters for the screen driver."},
 END_OPTION_TABLE
@@ -429,34 +458,39 @@ logParameters (const char *const *names, char **values, char *description) {
 }
 
 static int
-loadTranslationTable (TranslationTable *table, const char *path, const char *name) {
+loadTranslationTable (TranslationTable *table, const char *file, const char *name) {
   int ok = 0;
-  int fd = open(path, O_RDONLY);
-  if (fd >= 0) {
-    TranslationTable buffer;
-    if (read(fd, &buffer, sizeof(buffer)) == sizeof(buffer)) {
-      memcpy(table, &buffer, sizeof(buffer));
-      ok = 1;
+  char *path = makePath(opt_tablesDirectory, file);
+  if (path) {
+    int fd = open(path, O_RDONLY);
+    if (fd >= 0) {
+      TranslationTable buffer;
+      if (read(fd, &buffer, sizeof(buffer)) == sizeof(buffer)) {
+        memcpy(table, &buffer, sizeof(buffer));
+        ok = 1;
+      } else {
+        LogPrint(LOG_ERR, "Cannot read %s translation table: %s", name, path);
+      }
+      close(fd);
     } else {
-      LogPrint(LOG_ERR, "Cannot read %s translation table: %s", name, path);
+      LogPrint(LOG_ERR, "Cannot open %s translation table: %s: %s",
+               name, path, strerror(errno));
     }
-    close(fd);
-  } else {
-    LogPrint(LOG_ERR, "Cannot open %s translation table: %s", name, path);
+    free(path);
   }
   return ok;
 }
 
 static int
-loadTextTable (const char *path) {
-  if (!loadTranslationTable(&textTable, path, "text")) return 0;
+loadTextTable (const char *file) {
+  if (!loadTranslationTable(&textTable, file, "text")) return 0;
   reverseTable(&textTable, &untextTable);
   return 1;
 }
 
 static int
-loadAttributesTable (const char *path) {
-  return loadTranslationTable(&attributesTable, path, "attributes");
+loadAttributesTable (const char *file) {
+  return loadTranslationTable(&attributesTable, file, "attributes");
 }
 
 static void
@@ -566,15 +600,15 @@ startBrailleDriver (void) {
             playTune(&tune_detected);
             return;
          } else {
-            LogPrint(LOG_CRIT, "Braille buffer allocation failed.");
+            LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
          }
          brailleDriver->close(&brl);
       } else {
-         LogPrint(LOG_CRIT, "Braille driver initialization failed.");
+         LogPrint(LOG_DEBUG, "Braille driver initialization failed.");
       }
 
       initializeBraille();
-      sleep(5);
+      delay(5000);
    }
 }
 
@@ -657,6 +691,25 @@ exitContractionTable (void) {
       destroyContractionTable(contractionTable);
       contractionTable = NULL;
    }
+}
+
+static int
+loadContractionTable (const char *file) {
+  void *table = NULL;
+  if (*file) {
+    char *path = makePath(opt_contractionsDirectory, file);
+    LogPrint(LOG_DEBUG, "Compiling contraction table: %s", file);
+    if (path) {
+      if (!(table = compileContractionTable(path))) {
+        LogPrint(LOG_ERR, "Cannot compile contraction table: %s", path);
+      }
+      free(path);
+    }
+    if (!table) return 0;
+  }
+  if (contractionTable) destroyContractionTable(contractionTable);
+  contractionTable = table;
+  return 1;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -776,6 +829,7 @@ changedFmVolume (void) {
 
 #ifdef ENABLE_TABLE_SELECTION
 typedef struct {
+  const char *directory;
   const char *pattern;
   const char *initial;
   char *current;
@@ -791,8 +845,9 @@ static GlobData glob_attributesTable;
 static GlobData glob_contractionTable;
 
 static void
-globPrepare (GlobData *data, const char *pattern, const char *initial, int none) {
+globPrepare (GlobData *data, const char *directory, const char *pattern, const char *initial, int none) {
   memset(data, 0, sizeof(*data));
+  data->directory = directory;
   data->pattern = pattern;
   if (!initial) initial = "";
   data->current = strdupWrapper(data->initial = initial);
@@ -804,17 +859,34 @@ globBegin (GlobData *data) {
   int index;
   memset(&data->glob, 0, sizeof(data->glob));
   data->glob.gl_offs = (sizeof(data->pathsArea) / sizeof(data->pathsArea[0])) - 1;
-  if (glob(data->pattern, GLOB_DOOFFS, NULL, &data->glob) == 0) {
-    data->paths = (const char **)data->glob.gl_pathv;
-    /* The behaviour of gl_pathc is inconsistent. Some implementations
-     * include the leading NULL pointers and some don't. Let's just
-     * figure it out the hard way by finding the trailing NULL.
-     */
-    data->count = data->glob.gl_offs;
-    while (data->paths[data->count]) ++data->count;
-  } else {
-    data->paths = data->pathsArea;
-    data->paths[data->count = data->glob.gl_offs] = NULL;
+
+  {
+    int originalDirectory = open(".", O_RDONLY);
+    if (originalDirectory != -1) {
+      if (chdir(data->directory) != -1) {
+        if (glob(data->pattern, GLOB_DOOFFS, NULL, &data->glob) == 0) {
+          data->paths = (const char **)data->glob.gl_pathv;
+          /* The behaviour of gl_pathc is inconsistent. Some implementations
+           * include the leading NULL pointers and some don't. Let's just
+           * figure it out the hard way by finding the trailing NULL.
+           */
+          data->count = data->glob.gl_offs;
+          while (data->paths[data->count]) ++data->count;
+        } else {
+          data->paths = data->pathsArea;
+          data->paths[data->count = data->glob.gl_offs] = NULL;
+        }
+        if (fchdir(originalDirectory) == -1) {
+          LogError("working directory restore");
+        }
+      } else {
+        LogPrint(LOG_ERR, "Cannot set working directory: %s: %s",
+                 data->directory, strerror(errno));
+      }
+      close(originalDirectory);
+    } else {
+      LogError("working directory open");
+    }
   }
 
   index = data->glob.gl_offs;
@@ -874,16 +946,7 @@ changedAttributesTable (void) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static int
 changedContractionTable (void) {
-  const char *path = globChanged(&glob_contractionTable);
-  void *table;
-  if (*path) {
-    if (!(table = compileContractionTable(path))) return 0;
-  } else {
-    table = NULL;
-  }
-  if (contractionTable) destroyContractionTable(contractionTable);
-  contractionTable = table;
-  return 1;
+  return loadContractionTable(globChanged(&glob_contractionTable));
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
@@ -1379,10 +1442,18 @@ handleOption (const int option) {
     case 'B':                        /* parameters for braille driver */
       extendParameters(&opt_brailleParameters, optarg);
       break;
+#ifdef ENABLE_CONTRACTED_BRAILLE
+    case 'C':                        /* path to contraction tables directory */
+      opt_contractionsDirectory = optarg;
+      break;
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+    case 'D':                        /* path to driver help/configuration files directory */
+      opt_dataDirectory = optarg;
+      break;
     case 'E':                        /* parameter to speech driver */
       opt_environmentVariables = 1;
       break;
-    case 'L':                        /* name of driver */
+    case 'L':                        /* path to drivers directory */
       opt_libraryDirectory = optarg;
       break;
     case 'M': {        /* message delay */
@@ -1410,6 +1481,9 @@ handleOption (const int option) {
       extendParameters(&opt_speechParameters, optarg);
       break;
 #endif /* ENABLE_SPEECH_SUPPORT */
+    case 'T':                        /* path to text/attributes tables directory */
+      opt_tablesDirectory = optarg;
+      break;
     case 'X':                        /* parameters for screen driver */
       extendParameters(&opt_screenParameters, optarg);
       break;
@@ -1481,17 +1555,20 @@ startup (int argc, char *argv[]) {
     processConfigurationFile(optionTable, optionCount, opt_configurationFile, optional);
   }
   ensureOptionSetting(&opt_preferencesFile, NULL, cfg_preferencesFile, "BRLTTY_PREFERENCES_FILE", -1);
+  ensureOptionSetting(&opt_tablesDirectory, HOME_DIRECTORY, cfg_tablesDirectory, "BRLTTY_TABLES_DIRECTORY", -1);
   ensureOptionSetting(&opt_textTable, NULL, cfg_textTable, "BRLTTY_TEXT_TABLE", 2);
   ensureOptionSetting(&opt_attributesTable, NULL, cfg_attributesTable, "BRLTTY_ATTRIBUTES_TABLE", -1);
 #ifdef ENABLE_CONTRACTED_BRAILLE
+  ensureOptionSetting(&opt_contractionsDirectory, HOME_DIRECTORY, cfg_contractionsDirectory, "BRLTTY_CONTRACTIONS_DIRECTORY", -1);
   ensureOptionSetting(&opt_contractionTable, NULL, cfg_contractionTable, "BRLTTY_CONTRACTION_TABLE", -1);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
+  ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
+  ensureOptionSetting(&opt_dataDirectory, HOME_DIRECTORY, cfg_dataDirectory, "BRLTTY_DATA_DIRECTORY", -1);
   ensureOptionSetting(&opt_brailleDriver, NULL, cfg_brailleDriver, "BRLTTY_BRAILLE_DRIVER", 0);
+  ensureOptionSetting(&opt_brailleDevice, NULL, cfg_brailleDevice, "BRLTTY_BRAILLE_DEVICE", 1);
 #ifdef ENABLE_SPEECH_SUPPORT
   ensureOptionSetting(&opt_speechDriver, NULL, cfg_speechDriver, "BRLTTY_SPEECH_DRIVER", -1);
 #endif /* ENABLE_SPEECH_SUPPORT */
-  ensureOptionSetting(&opt_libraryDirectory, LIBRARY_DIRECTORY, cfg_libraryDirectory, "BRLTTY_LIBRARY_DIRECTORY", -1);
 
   if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
   if (*opt_brailleDevice == 0) {
@@ -1544,7 +1621,7 @@ startup (int argc, char *argv[]) {
   }
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_textTable, "text.*.tbl", opt_textTable, 0);
+  globPrepare(&glob_textTable, opt_tablesDirectory, "text.*.tbl", opt_textTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
@@ -1554,24 +1631,18 @@ startup (int argc, char *argv[]) {
     opt_attributesTable = ATTRIBUTES_TABLE;
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_attributesTable, "attr*.tbl", opt_attributesTable, 0);
+  globPrepare(&glob_attributesTable, opt_tablesDirectory, "attr*.tbl", opt_attributesTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_contractionTable, "*.ctb", opt_contractionTable, 1);
+  globPrepare(&glob_contractionTable, opt_contractionsDirectory, "*.ctb", opt_contractionTable, 1);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
-  if (opt_contractionTable) {
-    LogPrint(LOG_DEBUG, "Compiling contraction table: %s", opt_contractionTable);
-    if ((contractionTable = compileContractionTable(opt_contractionTable))) {
-      atexit(exitContractionTable);
-    } else {
-      LogPrint(LOG_ERR, "Cannot compile contraction table.");
-    }
-  }
+  if (opt_contractionTable) loadContractionTable(opt_contractionTable);
+  atexit(exitContractionTable);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {
@@ -1580,19 +1651,22 @@ startup (int argc, char *argv[]) {
     LogPrint(LOG_INFO, "Working Directory: %s",
              path? path: "path-too-long");
   }
-  LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
   LogPrint(LOG_INFO, "Configuration File: %s", opt_configurationFile);
   LogPrint(LOG_INFO, "Preferences File: %s", opt_preferencesFile);
-  LogPrint(LOG_INFO, "Help Page: %s[%d]", brailleDriver->helpFile, getHelpPageNumber());
+  LogPrint(LOG_INFO, "Tables Directory: %s", opt_tablesDirectory);
   LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
   LogPrint(LOG_INFO, "Attributes Table: %s", opt_attributesTable);
-#ifdef ENABLE_CONTRACTED_BRAILLE
+#ifdef ENABLE_CONTRACTED_BRAILLEtable
+  LogPrint(LOG_INFO, "Contractions Directory: %s", opt_contractionsDirectory);
   LogPrint(LOG_INFO, "Contraction Table: %s",
            opt_contractionTable? opt_contractionTable: "none");
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #ifdef ENABLE_API
   logParameters(api_parameters, apiParameters, "API");
 #endif /* ENABLE_API */
+  LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
+  LogPrint(LOG_INFO, "Data Directory: %s", opt_dataDirectory);
+  LogPrint(LOG_INFO, "Help Page: %s[%d]", brailleDriver->helpFile, getHelpPageNumber());
   LogPrint(LOG_INFO, "Braille Driver: %s (%s)",
            opt_brailleDriver, brailleDriver->name);
   LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
@@ -1726,8 +1800,14 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   /* Initialize the braille driver help screen. */
-  if (!openHelpScreen(brailleDriver->helpFile))
-    LogPrint(LOG_WARNING, "Cannot open help screen file: %s", brailleDriver->helpFile);
+  {
+    char *path = makePath(opt_dataDirectory, brailleDriver->helpFile);
+    if (path) {
+      if (!openHelpScreen(path))
+        LogPrint(LOG_WARNING, "Cannot open help screen file: %s", brailleDriver->helpFile);
+      free(path);
+    }
+  }
 
   if (!opt_quiet) {
     char buffer[18 + 1];

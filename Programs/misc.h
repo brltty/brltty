@@ -96,6 +96,7 @@ extern int ringBell (void);
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
+extern char *makePath (const char *directory, const char *file);
 
 extern int openSerialDevice (const char *path, int *descriptor, struct termios *attributes);
 extern void rawSerialDevice (struct termios *attributes);

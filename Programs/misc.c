@@ -199,6 +199,37 @@ strdupWrapper (const char *string) {
    return address;
 }
 
+char *
+makePath (const char *directory, const char *file) {
+  const int count = 3;
+  const char *components[count];
+  int lengths[count];
+  const int last = count - 1;
+  int first = last;
+  int length = 0;
+  int index;
+  char *path;
+  components[last] = file;
+  if (file[0] != '/') {
+    if (directory[strlen(directory)-1] != '/') components[--first] = "/";
+    components[--first] = directory;
+  }
+  for (index=first; index<=last; ++index) {
+    length += lengths[index] = strlen(components[index]);
+  }
+  path = mallocWrapper(length+1);
+  {
+    char *target = path;
+    for (index=first; index<=last; ++index) {
+      length = lengths[index];
+      memcpy(target, components[index], length);
+      target += length;
+    }
+    *target = 0;
+  }
+  return path;
+}
+
 int
 openSerialDevice (const char *path, int *descriptor, struct termios *attributes) {
   if ((*descriptor = open(path, O_RDWR|O_NOCTTY)) != -1) {
