@@ -41,9 +41,10 @@
 #define PREFSTYLE ST_Generic
 
 typedef enum {
-  PARM_SOCKET
+  PARM_SOCKET,
+  PARM_MODE
 } DriverParameter;
-#define BRLPARMS "socket"
+#define BRLPARMS "socket", "mode"
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
@@ -650,22 +651,38 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   outputLength = 0;
 
   {
+    typedef struct {
+      int (*getUnixConnection) (const char *path);
+      int (*getInetConnection) (unsigned short port, unsigned long host);
+    } ModeEntry;
+    const ModeEntry modeTable[] = {
+      {requestUnixConnection, requestInetConnection},
+      {acceptUnixConnection , acceptInetConnection }
+    };
+    const ModeEntry *mode;
+
     const char *socket = parameters[PARM_SOCKET];
     int port;
 
-    if (!socket) socket = "";
+    {
+      const char *modes[] = {"client", "server", NULL};
+      int modeIndex;
+      validateChoice(&modeIndex, "mode", parameters[PARM_MODE], modes);
+      mode = &modeTable[modeIndex];
+    }
+
     if (!*socket) socket = "brltty-vr.socket";
 
     if (isInteger(&port, socket)) {
       if ((port > 0) && (port <= 0XFFFF)) {
-        fileDescriptor = acceptInetConnection(port, INADDR_ANY);
+        fileDescriptor = mode->getInetConnection(port, INADDR_ANY);
       } else {
         LogPrint(LOG_WARNING, "Invalid port: %d", port);
       }
     } else {
       char *path = makePath(brl->dataDirectory, socket);
       if (path) {
-        fileDescriptor = acceptUnixConnection(path);
+        fileDescriptor = mode->getUnixConnection(path);
         free(path);
       }
     }
