@@ -1028,11 +1028,11 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
           unsigned char new = packet.data.bytes[offset];
 
           while (index < 8) {
-            const EasyEntry *easy = &easyTable[index];
+            const EasyEntry *easy = &easyTable[index++];
             if (!(new & easy->bit) && (old & easy->bit)) {
               command = handleKey(OFFS_EASY + easy->code, 0, 0);
+              break;
             }
-            index++;
           }
 
           while (index-- > 0) {
