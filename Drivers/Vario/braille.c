@@ -90,7 +90,6 @@ static char typing_mode; /* For Vario80 - holds the mode of Command keys */
 static char button_waitcount = 0;
 static char ck;
 static struct timeval lastcmd_time;
-static struct timezone dum_tz;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
 {BRL_CMD_FWINRT, BRL_CMD_FWINLT, BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_WINUP, BRL_CMD_WINDN,
@@ -189,11 +188,11 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
   /* Mark time of last command to initialize typematic watch */
 #ifdef USE_PING
-  gettimeofday (&last_ping, &dum_tz);
+  gettimeofday (&last_ping, NULL);
   memcpy(&lastcmd_time, &last_ping, sizeof(struct timeval));
   pings=0;
 #else /* USE_PING */
-  gettimeofday (&lastcmd_time, &dum_tz);
+  gettimeofday (&lastcmd_time, NULL);
 #endif /* USE_PING */
   lastcmd = EOF;
   must_init_oldstat = must_init_code = 1;
@@ -366,7 +365,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
     goto calcres;
   }
 
-  gettimeofday (&now, &dum_tz);
+  gettimeofday (&now, NULL);
   /* Check for first byte */
   if (serialReadData (serialDevice, buf, 1, 0, 0) != 1){
     if (button_waitcount >= BUTTON_STEP) { 
@@ -377,7 +376,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       button_waitcount++;
     else if (millisecondsBetween(&lastcmd_time, &now) > REPEAT_TIME &&
 	     is_repeat_cmd(lastcmd)) {
-      gettimeofday(&lastcmd_time, &dum_tz);
+      gettimeofday(&lastcmd_time, NULL);
       return(lastcmd);
     }
 #ifdef USE_PING
@@ -391,7 +390,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 	serialWriteData (serialDevice, VARIO_DEVICE_ID, sizeof(VARIO_DEVICE_ID));
 	serialDrainOutput(serialDevice);
 	pings++;
-	gettimeofday(&last_ping_sent, &dum_tz);
+	gettimeofday(&last_ping_sent, NULL);
       }
     }
 #endif /* USE_PING */
@@ -399,7 +398,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   }
   /* there was some input, we heard something. */
 #ifdef USE_PING
-  gettimeofday(&last_ping, &dum_tz);
+  gettimeofday(&last_ping, NULL);
   pings=0;
 #endif /* USE_PING */
 
@@ -604,7 +603,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   }
 
   lastcmd = res;
-  gettimeofday (&lastcmd_time, &dum_tz);
+  gettimeofday (&lastcmd_time, NULL);
   button_waitcount = 0;
   return(res);
 }
