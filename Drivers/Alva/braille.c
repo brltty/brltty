@@ -366,7 +366,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
   if (!openSerialDevice(dev, &brl_fd, &oldtio)) goto failure;
 
   /* Set flow control and 8n1, enable reading */
-  newtio.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
+  newtio.c_cflag = CS8 | CLOCAL | CREAD;
 
   /* Ignore bytes with parity errors and make terminal raw and dumb */
   newtio.c_iflag = IGNPAR;
