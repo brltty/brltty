@@ -177,7 +177,7 @@ t_key		iris_keys[14] = {
   {16, 0, CMD_FWINLT},
   {17, 0, CMD_LNUP},
   {18, 0, CMD_CSRVIS},
-  {19, 0, CMD_NOOP},
+  {19, 0, CMD_PREFMENU},
   {20, 0, CMD_NOOP},
   {21, 0, CMD_NOOP},
   {22, 0, CMD_TUNES},
@@ -293,19 +293,21 @@ char TransTable[256] =
 
 /* Global variables */
 
-int InDate = 0;
-int chars_per_sec;
-int brl_fd;			/* file descriptor for Braille display */
-struct termios oldtio;		/* old terminal settings */
-unsigned char *rawdata = NULL;		/* translated data to send to Braille */
-unsigned char *prevdata = NULL;	/* previously sent raw data */
-unsigned char *lcd_data = NULL;	/* previously sent to LCD */
-int NbCols = 0;			/* number of cells available */
-static short ReWrite = 0;		/* 1 if display need to be rewritten */
-static short ReWrite_LCD = 0;		/* same as rewrite, for LCD */
-static int OffsetType = CR_ROUTE;
-static int PktNbr = 127; /* 127 at first time */
-static int context = 0;   /* Input type test-value */
+int		InDate = 0;
+int		chars_per_sec;
+int		brl_fd;			/* file descriptor for Braille display */
+struct termios	oldtio;		/* old terminal settings */
+unsigned char	*rawdata = NULL;		/* translated data to send to Braille */
+unsigned char	*prevdata = NULL;	/* previously sent raw data */
+unsigned char	*lcd_data = NULL;	/* previously sent to LCD */
+int		NbCols = 0;			/* number of cells available */
+static short	ReWrite = 0;		/* 1 if display need to be rewritten */
+static short	ReWrite_LCD = 0;		/* same as rewrite, for LCD */
+static int	OffsetType = CR_ROUTE;
+static int	PktNbr = 127; /* 127 at first time */
+static int	context = 0;   /* Input type test-value */
+static int	control = 0;
+static int	alt = 0;
 
 /* Communication codes */
 
@@ -329,13 +331,13 @@ static int readbrlkey(BrailleDisplay *brl);
 static int begblk(BrailleDisplay *brl)
 {
   OffsetType = CR_CUTBEGIN;
-  return (CMD_NOOP);
+  return (EOF);
 }
 
 static int endblk(BrailleDisplay *brl)
 {
   OffsetType = CR_CUTLINE;
-  return (CMD_NOOP);
+  return (EOF);
 }
 
 static int sendbyte(unsigned char c)
@@ -764,6 +766,8 @@ static int routing(int routekey)
       case 0:
 	switch (routekey)
 	  {
+	  case 0x57:
+	    /* no break */
 	   case 0x83: /* Entering in menu-mode */
 	     message("-:tty help version t", MSG_NODELAY);
 	     context = 1;
@@ -796,254 +800,257 @@ static int	convert(int keys)
 }
 
 
+static int	key_handle(BrailleDisplay *brl, char *buf)
+{
+  int	res = EOF;
+  /* here the braille keys are bitmapped into an int with
+   * dots 1 through 8, left thumb and right thumb
+   * respectively.  It makes up to 1023 possible
+   * combinations! Here's some of them.
+   */
+  unsigned int keys = (buf[0] & 0x3F) |
+    ((buf[1] & 0x03) << 6) |
+    ((int) (buf[0] & 0xC0) << 2);
+  if (keys >= 0xff && keys != 0x280 && keys != 0x2c0
+      && keys != 0x200)
+    {
+      /*
+      ** keys that must be explicitly listed
+      */
+      int	h;
+      for (h = 0; brl_key[h].brl; h++)
+	if (brl_key[h].brl == keys)
+	  res = brl_key[h].key;
+      if (control || alt)
+	{
+	  control = 0;
+	  alt = 0;
+	  context = 0;
+	  ReWrite = 1;
+	}
+    }
+  if (keys == 0x280 && alt)
+    {
+      context = 0;
+      alt = 0;
+      ReWrite = 1;
+      res = CMD_NOOP;
+    }
+  if (keys == 0x280 && !alt && !control) /* alt */
+    {
+      message("! alt", MSG_NODELAY);
+      context = 4;
+      ReWrite = 0;
+      alt = 1;
+      res = CMD_NOOP;
+    }
+  if (alt && control)
+    {
+      context = 0;
+      message("! alt control", MSG_NODELAY);
+      context = 4;
+    }
+  if (keys == 0x2c0 && control)
+    {
+      context = 0;
+      ReWrite = 1;
+      res = CMD_NOOP;
+      control = 0;
+    }
+  if (keys == 0x2c0 && !control) /* control */
+    {
+      control = 1;
+      message("! control ", MSG_NODELAY);
+      context = 4;
+      ReWrite = 0;
+      res = CMD_NOOP;
+    }
+  if (keys <= 0xff || keys == 0x200)
+    {
+      /*
+      ** we pass a char
+      */
+      res = (VAL_PASSDOTS | convert(keys));
+      if (control)
+	{
+	  res |= VPC_CONTROL;
+	  control = 0;
+	  context = 0;
+	}
+      if (alt)
+	{
+	  res |= VPC_META;
+	  context = 0;
+	  alt = 0;
+	}
+    }
+  return (res);
+}
+
 static int readbrlkey(BrailleDisplay *brl)
 {
-  static int	control = 0;
-  static int	alt = 0;
-   int res = EOF;
-   unsigned char c;
-   static unsigned char buf[DIM_INBUFSZ];
-   static int DLEflag = 0, ErrFlag = 0;
-   static int pos = 0, p = 0, pktready = 0;
-
+  int res = EOF;
+  unsigned char c;
+  static unsigned char buf[DIM_INBUFSZ];
+  static int DLEflag = 0, ErrFlag = 0;
+  static int pos = 0, p = 0, pktready = 0;
+  
   /* here we process incoming data */
-   while (!pktready && read (brl_fd, &c, 1))
-     {
-	if (DLEflag)
-	  {
-	     DLEflag = 0;
-	     if (pos < DIM_INBUFSZ) buf[pos++] = c;
-	  }
-	else if( ErrFlag )
-	  {
-	     ErrFlag = 0;
+  while (!pktready && read (brl_fd, &c, 1))
+    {
+      if (DLEflag)
+	{
+	  DLEflag = 0;
+	  if (pos < DIM_INBUFSZ) buf[pos++] = c;
+	}
+      else if( ErrFlag )
+	{
+	  ErrFlag = 0;
 	  /* Maybe should we check error code in c here? */
-	     ReWrite = 1;
-	  }
-	else
-	  switch (c)
-	    {
-	     case NACK:
-	       ErrFlag = 1;
-	    /* no break */
-	     case ACK:
-	     case SOH:
-	       pos = 0;
-	       break;
-	     case DLE:
-	       DLEflag = 1;
-	       break;
-	     case EOT:
-		 {
-	      /* end of packet, let's read it */
-		    int i;
-		    unsigned char parity = 0;
-		    if (pos < 4)
-		      break;		/* packets can't be shorter */
-		    for( i = 0; i < pos-1; i++ )
-		      parity ^= buf[i];
-		    if ( parity != buf[pos - 1])
-		      {
-			 sendbyte (NACK);
-			 sendbyte (PRT_E_PAR);
-		      }
-		    else if (buf[pos - 2] < 0x80)
-		      {
-			 sendbyte (NACK);
-			 sendbyte (PRT_E_NUM);
-		      }
-		    else
-		      {
-		  /* packet is OK */
-			 sendbyte (ACK);
-			 pos -= 2;	/* now forget about packet number and parity */
-			 p = 0;
-			 pktready = 1;
-		      }
-		    break;
-		 }
-	     default:
-	       if (pos < DIM_INBUFSZ)
-		 buf[pos++] = c;
-	       break;
-	    }
-     }
-
-  /* Packet is OK, we go inside */
-   if (pktready)
-     {
-	int lg;
-	for (lg = 0; res == EOF; )
+	  ReWrite = 1;
+	}
+      else
+	switch (c)
 	  {
-	  /* let's look at the next message */
-	     lg = buf[p++];
-	     if (lg >= 0x80 || p + lg > pos)
-	       {
-		  pktready = 0;	/* we are done with this packet */
-		  break;
-	       }
-	     if (buf[p] == 'K' && buf[p + 1] != 'B' && context == 4)
-	       {
-		 context = 0;
-		 alt = 0;
-		 control = 0;
-	       }
-	     switch (buf[p])
-	       {
-		case 'R': /* Mode checking */
-		  switch(buf[p + 1])
-		    {
-		     case 'B': /* PC-BRAILLE mode */
-		       InDate = 0;
-		       ReWrite = 1; /* to refresh display */
-		       context = 0;
-		       res = CMD_NOOP;
-		       break;
-		     case 'V': /* Braille and Speech mode */
-		       message("! Speech unavailable", MSG_WAITKEY);
-		       break;
-		    }
-		  break;
-	       case 'K':      /* Keyboard -- here are the key bindings */
-		 switch (buf[p + 1])
-		   {
-		     case 'T':
-		       {
-			 int	p2;
-
-			 for (p2 = 0; num_keys[p2].brl_key; p2++)
-			   if (buf[p + 2] == num_keys[p2].brl_key)
-			     res = num_keys[p2].res;
-		       }
-		       break;
-		   case 'I':	/* Routing Key */
-		       res = routing(buf[p + 2]);
-		       break;
-		     case 'B':	/* Braille keyboard */
-			 {
-		    /* here the braille keys are bitmapped into an int with
-		     * dots 1 through 8, left thumb and right thumb
-		     * respectively.  It makes up to 1023 possible
-		     * combinations! Here's some of them.
-		     */
-			    unsigned int keys = (buf[p + 2] & 0x3F) |
-			      ((buf[p + 3] & 0x03) << 6) |
-			      ((int) (buf[p + 2] & 0xC0) << 2);
-			    if (keys >= 0xff && keys != 0x280 && keys != 0x2c0
-				&& keys != 0x200)
-			      {
-				/*
-				** keys that must be explicitly listed
-				*/
-				int	h;
-				for (h = 0; brl_key[h].brl; h++)
-				  if (brl_key[h].brl == keys)
-				    res = brl_key[h].key;
-				if (control || alt)
-				  {
-				    control = 0;
-				    alt = 0;
-				    context = 0;
-				    ReWrite = 1;
-				  }
-			      }
-			    if (keys == 0x280 && alt)
-			      {
-				 context = 0;
-				 alt = 0;
-				 ReWrite = 1;
-				 res = CMD_NOOP;
-			      }
-			    if (keys == 0x280 && !alt && !control) /* alt */
-			      {
-				 message("! alt", MSG_NODELAY);
-				 context = 4;
-				 ReWrite = 0;
-				 alt = 1;
-				 res = CMD_NOOP;
-			      }
-			    if (alt && control)
-			      {
-				context = 0;
-				message("! alt control", MSG_NODELAY);
-				context = 4;
-			      }
-			    if (keys == 0x2c0 && control)
-			      {
-				 context = 0;
-				 ReWrite = 1;
-				 res = CMD_NOOP;
-				 control = 0;
-			      }
-			    if (keys == 0x2c0 && !control) /* control */
-			      {
-				 control = 1;
-				 message("! control ", MSG_NODELAY);
-				 context = 4;
-				 ReWrite = 0;
-				 res = CMD_NOOP;
-			      }
-			    if (keys <= 0xff || keys == 0x200)
-			      {
-				/*
-				** we pass a char
-				*/
-				 res = (VAL_PASSDOTS | convert(keys));
-				 if (control)
-				   {
-				      res |= VPC_CONTROL;
-				      control = 0;
-				      context = 0;
-				   }
-				 if (alt)
-				   {
-				      res |= VPC_META;
-				      context = 0;
-				      alt = 0;
-				   }
-			      }
-			 }
-		       break;
-		    }
-		  break;
-		case 'S':		/* status information */
-		  if (buf[p + 1] == 'I')
-		    {
-		/* we take the third letter from the model identification
-		 * string as the amount of cells available and the two first letters
-		 * for the model name in order to optimize the key configuration.
-		 */
-		      if (buf[p + 2] == 'N' && buf[p + 3] == 'B')
-			model_ID = 1;
-                      else if (buf[p + 2] == 'C' && buf[p + 3] == 'N')
-			model_ID = 2;
-                      else if (buf[p + 2] == 'S' && 
-			       ((buf[p + 3] == 'C') || (buf[p + 3] == 'B')))
-			model_ID = 3;
-                      else if (buf[p + 2] == 'C' && (buf[p + 3] == 'Z' || buf[p + 3] == 'P'))
-			model_ID = 4;
-                      else if (buf[p + 2] == 'I' && buf[p + 3] == 'R')
-			model_ID = 5;
-                      else
-			model_ID = 0;
-		      if (strncmp(version_ID, buf + p + 2, 3))
-			{
-			  strncpy(version_ID, buf + p + 2, 20);
-			  NbCols = (buf[p + 4] - '0') * 10;
-			  LogPrint(LOG_INFO, "Detected EuroBraille version %s: %d columns",
-                                   version_ID, NbCols);
-			  brl->x = NbCols;
-			  rawdata = realloc(rawdata, brl->y * brl->x);
-			  prevdata = realloc(prevdata, brl->x * brl->y);
-			  lcd_data = realloc(lcd_data, brl->x * brl->y);
-			  brl->resizeRequired = 1;
-			}
-		    }
-		  ReWrite = 1;
-	       }
-	     break;
+	  case NACK:
+	    ErrFlag = 1;
+	    /* no break */
+	  case ACK:
+	  case SOH:
+	    pos = 0;
+	    break;
+	  case DLE:
+	    DLEflag = 1;
+	    break;
+	  case EOT:
+	    {
+	      /* end of packet, let's read it */
+	      int i;
+	      unsigned char parity = 0;
+	      if (pos < 4)
+		break;		/* packets can't be shorter */
+	      for( i = 0; i < pos-1; i++ )
+		parity ^= buf[i];
+	      if ( parity != buf[pos - 1])
+		{
+		  sendbyte (NACK);
+		  sendbyte (PRT_E_PAR);
+		}
+	      else if (buf[pos - 2] < 0x80)
+		{
+		  sendbyte (NACK);
+		  sendbyte (PRT_E_NUM);
+		}
+	      else
+		{
+		  /* packet is OK */
+		  sendbyte (ACK);
+		  pos -= 2;	/* now forget about packet number and parity */
+		  p = 0;
+		  pktready = 1;
+		}
+	      break;
+	    }
+	  default:
+	    if (pos < DIM_INBUFSZ)
+	      buf[pos++] = c;
+	    break;
 	  }
-	p += lg;
-     }
-   return (res);
+    }
+  
+  /* Packet is OK, we go inside */
+  if (pktready)
+    {
+      int lg;
+      for (lg = 0; res == EOF; )
+	{
+	  /* let's look at the next message */
+	  lg = buf[p++];
+	  if (lg >= 0x80 || p + lg > pos)
+	    {
+	      pktready = 0;	/* we are done with this packet */
+	      break;
+	    }
+	  if (buf[p] == 'K' && buf[p + 1] != 'B' && context == 4)
+	    {
+	      context = 0;
+	      alt = 0;
+	      control = 0;
+	    }
+	  switch (buf[p])
+	    {
+	    case 'R': /* Mode checking */
+	      switch(buf[p + 1])
+		{
+		case 'B': /* PC-BRAILLE mode */
+		  InDate = 0;
+		  ReWrite = 1; /* to refresh display */
+		  context = 0;
+		  res = CMD_NOOP;
+		  break;
+		case 'V': /* Braille and Speech mode */
+		  message("! Speech unavailable", MSG_WAITKEY);
+		  break;
+		}
+	      break;
+	    case 'K':      /* Keyboard -- here are the key bindings */
+	      switch (buf[p + 1])
+		{
+		case 'T':
+		  {
+		    int	p2;
+		    
+		    for (p2 = 0; num_keys[p2].brl_key; p2++)
+		      if (buf[p + 2] == num_keys[p2].brl_key)
+			res = num_keys[p2].res;
+		  }
+		  break;
+		case 'I':	/* Routing Key */
+		  res = routing(buf[p + 2]);
+		  break;
+		case 'B':	/* Braille keyboard */
+		  res = key_handle(brl, buf + p + 2);
+		  break;
+		}
+	      break;
+	    case 'S':		/* status information */
+	      if (buf[p + 1] == 'I')
+		{
+		  /* we take the third letter from the model identification
+		   * string as the amount of cells available and the two first letters
+		   * for the model name in order to optimize the key configuration.
+		   */
+		  if (buf[p + 2] == 'N' && buf[p + 3] == 'B')
+		    model_ID = 1;
+		  else if (buf[p + 2] == 'C' && buf[p + 3] == 'N')
+		    model_ID = 2;
+		  else if (buf[p + 2] == 'S' && 
+			   ((buf[p + 3] == 'C') || (buf[p + 3] == 'B')))
+		    model_ID = 3;
+		  else if (buf[p + 2] == 'C' && (buf[p + 3] == 'Z' || buf[p + 3] == 'P'))
+		    model_ID = 4;
+		  else if (buf[p + 2] == 'I' && buf[p + 3] == 'R')
+		    model_ID = 5;
+		  else
+		    model_ID = 0;
+		  if (strncmp(version_ID, buf + p + 2, 3))
+		    {
+		      strncpy(version_ID, buf + p + 2, 20);
+		      NbCols = (buf[p + 4] - '0') * 10;
+		      LogPrint(LOG_INFO, "Detected EuroBraille version %s: %d columns",
+			       version_ID, NbCols);
+		      brl->x = NbCols;
+		      rawdata = realloc(rawdata, brl->y * brl->x);
+		      prevdata = realloc(prevdata, brl->x * brl->y);
+		      lcd_data = realloc(lcd_data, brl->x * brl->y);
+		      brl->resizeRequired = 1;
+		    }
+		}
+	      ReWrite = 1;
+	    }
+	  break;
+	}
+      p += lg;
+    }
+  return (res);
 }
