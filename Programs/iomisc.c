@@ -70,11 +70,16 @@ awaitInput (int fileDescriptor, int milliseconds) {
 int
 readChunk (
   int fileDescriptor,
-  unsigned char *buffer, size_t *offset, size_t count,
+  void *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 ) {
   while (count > 0) {
-    ssize_t amount = read(fileDescriptor, buffer+*offset, count);
+    ssize_t amount;
+    {
+      unsigned char *address = buffer;
+      address += *offset;
+      amount = read(fileDescriptor, address, count);
+    }
 
     if (amount == -1) {
       if (errno == EINTR) continue;
@@ -107,7 +112,7 @@ readData (
   int fileDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  int length = 0;
+  size_t length = 0;
   if (readChunk(fileDescriptor, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
   if (errno == EAGAIN) return length;
   return -1;
@@ -172,6 +177,6 @@ setBlockingIo (int fileDescriptor, int state) {
 }
 
 int
-setCloseOnExec (int fileDescriptor) {
-  return fcntl(fileDescriptor, F_SETFD, FD_CLOEXEC) != -1;
+setCloseOnExec (int fileDescriptor, int state) {
+  return fcntl(fileDescriptor, F_SETFD, (state? FD_CLOEXEC: 0)) != -1;
 }

@@ -2147,8 +2147,8 @@ startup (int argc, char *argv[]) {
    */
 
   /* Activate the braille display. */
-  brailleDevices = splitString(opt_brailleDevice, ',');
-  brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',');
+  brailleDevices = splitString(opt_brailleDevice, ',', NULL);
+  brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
   atexit(exitTunes);
   atexit(exitBrailleDriver);
   startBrailleDriver();
@@ -2168,7 +2168,7 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */
-  speechDrivers = splitString(opt_speechDriver, ',');
+  speechDrivers = splitString(opt_speechDriver, ',', NULL);
   atexit(exitSpeechDriver);
   startSpeechDriver();
 

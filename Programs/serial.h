@@ -44,7 +44,7 @@ extern ssize_t serialReadData (
 );
 extern int serialReadChunk (
   SerialDevice *serial,
-  unsigned char *buffer, size_t *offset, size_t count,
+  void *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 );
 extern ssize_t serialWriteData (

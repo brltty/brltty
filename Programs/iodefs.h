@@ -31,17 +31,20 @@ typedef enum {
 } SerialParity;
 
 typedef enum {
-  SERIAL_FLOW_OUTPUT_XON = 0X01, /* output controlled by XON/XOFF */
+  SERIAL_FLOW_OUTPUT_XON = 0X01, /* output controlled by X-ON/X-OFF */
   SERIAL_FLOW_OUTPUT_CTS = 0X02, /* output controlled by CTS(input) */
   SERIAL_FLOW_OUTPUT_DSR = 0X04, /* output controlled by DSR(input) */
   SERIAL_FLOW_OUTPUT_RTS = 0X08, /* output indicated by RTS(output) */
-  SERIAL_FLOW_INPUT_XON  = 0X10, /* input controlled by XON/XOFF */
+
+  SERIAL_FLOW_INPUT_XON  = 0X10, /* input controlled by X-ON/X-OFF */
   SERIAL_FLOW_INPUT_RTS  = 0X20, /* input controlled by RTS(output) */
   SERIAL_FLOW_INPUT_DTR  = 0X40, /* input controlled by DTR(output) */
   SERIAL_FLOW_INPUT_DSR  = 0X80, /* input enabled by DSR(input) */
+
+  SERIAL_FLOW_HARDWARE   = (SERIAL_FLOW_OUTPUT_CTS | SERIAL_FLOW_INPUT_RTS),
+
   SERIAL_FLOW_NONE       = 0X00  /* no input or output flow control */
 } SerialFlowControl;
-#define SERIAL_FLOW_HARDWARE (SERIAL_FLOW_OUTPUT_CTS | SERIAL_FLOW_INPUT_RTS)
 
 #ifdef __cplusplus
 }

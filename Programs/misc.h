@@ -63,7 +63,7 @@ extern "C" {
 #define _STRINGIFY(a) #a
 #define STRINGIFY(a) _STRINGIFY(a)
 
-extern char **splitString (const char *string, char delimiter);
+extern char **splitString (const char *string, char delimiter, int *count);
 extern void deallocateStrings (char **array);
 
 /* Process each line of an input text file safely.

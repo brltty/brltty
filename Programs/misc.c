@@ -37,16 +37,16 @@
 #include "misc.h"
 
 char **
-splitString (const char *string, char delimiter) {
+splitString (const char *string, char delimiter, int *count) {
   char **array;
 
   {
-    int count = 2;
+    int size = 2;
     const char *character = string;
     while (*character)
       if (*character++ == delimiter)
-        count++;
-    array = mallocWrapper(count * sizeof(*array));
+        size++;
+    array = mallocWrapper(size * sizeof(*array));
   }
 
   {
@@ -63,6 +63,8 @@ splitString (const char *string, char delimiter) {
       string = end + 1;
     }
     *element = NULL;
+
+    if (count) *count = element - array;
   }
   return array;
 }

@@ -502,7 +502,7 @@ serialReadData (
 int
 serialReadChunk (
   SerialDevice *serial,
-  unsigned char *buffer, size_t *offset, size_t count,
+  void *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 ) {
   if (!serialFlushAttributes(serial)) return 0;
