@@ -342,6 +342,7 @@ static int inputUsed;
 static int
 verifyInputPacket (unsigned char *buffer, int *length) {
   int size = 0;
+//LogBytes("Input Buffer", inputBuffer, inputUsed);
 #if ! ABT3_OLD_FIRMWARE
   while (inputUsed > 0) {
     if (inputBuffer[0] == 0X7F) {
@@ -370,10 +371,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
       int count = sizeof(BRL_ID);
       if (inputUsed < count) count = inputUsed;
       if (memcmp(&inputBuffer[0], BRL_ID, count) != 0) goto corrupt;
-      if (inputUsed >= 6) {
-        if (inputBuffer[5] != '\r') goto corrupt;
-        size = 6;
-      }
+      if (inputUsed >= sizeof(BRL_ID)+1) size = sizeof(BRL_ID)+1;
       break;
     }
 
@@ -647,9 +645,10 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *dev)
     if (writeFunction(0X06) == -1) goto failure;
     delay(200);
     {
-      unsigned char packet[6];
-      if (readPacket(packet, sizeof(packet)) <= sizeof(BRL_ID)) continue;
-      if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0) ModelID = packet[sizeof(BRL_ID)];
+      unsigned char packet[sizeof(BRL_ID)+1];
+      if (readPacket(packet, sizeof(packet)) != sizeof(packet)) continue;
+      if (memcmp(packet, BRL_ID, sizeof(BRL_ID)) == 0)
+        ModelID = packet[sizeof(BRL_ID)];
     }
   } while (ModelID == ABT_AUTO);
 
