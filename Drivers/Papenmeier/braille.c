@@ -915,7 +915,6 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
   {
     int size = byte - buffer;
     if (debug_writes) LogBytes("Output Packet", buffer, size);
-    io->flushPort(brl);
     return writeBytes(brl, buffer, size);
   }
 }
@@ -960,7 +959,7 @@ flushCells2 (BrailleDisplay *brl) {
     buffer[size++] = 0;
     buffer[size++] = 0;
 
-    writePacket2(brl, 0X43, size, buffer);
+    writePacket2(brl, 3, size, buffer);
     refreshDisplay = 0;
   }
 }
@@ -991,7 +990,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
         if (packet.type == 0X0A) {
           if (interpretIdentity2(brl, packet.data.bytes)) {
             protocol = &protocolOperations2;
-            refreshDisplay = 0;
+            refreshDisplay = 1;
             return 1;
           }
         }
