@@ -237,6 +237,14 @@ usbGetConfiguration (
   return size;
 }
 
+static void
+usbDeallocateConfigurationDescriptor (UsbDevice *device) {
+  if (device->configuration) {
+    free(device->configuration);
+    device->configuration = NULL;
+  }
+}
+
 const UsbConfigurationDescriptor *
 usbConfigurationDescriptor (
   UsbDevice *device
@@ -297,14 +305,8 @@ usbConfigureDevice (
   unsigned char configuration
 ) {
   usbCloseInterface(device);
-
   if (!usbSetConfiguration(device, configuration)) return 0;
-
-  if (device->configuration) {
-    free(device->configuration);
-    device->configuration = NULL;
-  }
-
+  usbDeallocateConfigurationDescriptor(device);
   return 1;
 }
 
@@ -556,16 +558,12 @@ usbCloseDevice (UsbDevice *device) {
     device->inputFilters = NULL;
   }
 
-  if (device->configuration) {
-    free(device->configuration);
-    device->configuration = NULL;
-  }
-
   if (device->extension) {
     usbDeallocateDeviceExtension(device);
     device->extension = NULL;
   }
 
+  usbDeallocateConfigurationDescriptor(device);
   free(device);
 }
 

@@ -114,41 +114,6 @@ usbControlTransfer (
   return -1;
 }
 
-int
-usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
-  return 1;
-}
-
-void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-}
-
-int
-usbReadEndpoint (
-  UsbDevice *device,
-  unsigned char endpointNumber,
-  void *buffer,
-  int length,
-  int timeout
-) {
-  errno = ENOSYS;
-  LogError("USB endpoint read");
-  return -1;
-}
-
-int
-usbWriteEndpoint (
-  UsbDevice *device,
-  unsigned char endpointNumber,
-  const void *buffer,
-  int length,
-  int timeout
-) {
-  errno = ENOSYS;
-  LogError("USB endpoint write");
-  return -1;
-}
-
 void *
 usbSubmitRequest (
   UsbDevice *device,
@@ -185,10 +150,45 @@ usbReapResponse (
 }
 
 int
+usbReadEndpoint (
+  UsbDevice *device,
+  unsigned char endpointNumber,
+  void *buffer,
+  int length,
+  int timeout
+) {
+  errno = ENOSYS;
+  LogError("USB endpoint read");
+  return -1;
+}
+
+int
+usbWriteEndpoint (
+  UsbDevice *device,
+  unsigned char endpointNumber,
+  const void *buffer,
+  int length,
+  int timeout
+) {
+  errno = ENOSYS;
+  LogError("USB endpoint write");
+  return -1;
+}
+
+int
 usbReadDeviceDescriptor (UsbDevice *device) {
   errno = ENOSYS;
   LogError("USB device descriptor read");
   return 0;
+}
+
+int
+usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
+  return 1;
+}
+
+void
+usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void

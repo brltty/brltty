@@ -157,54 +157,39 @@ usbControlTransfer (
   return -1;
 }
 
+void *
+usbSubmitRequest (
+  UsbDevice *device,
+  unsigned char endpointAddress,
+  void *buffer,
+  int length,
+  void *data
+) {
+  errno = ENOSYS;
+  LogError("USB request submit");
+  return NULL;
+}
+
 int
-usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbDeviceExtension *devx = endpoint->device->extension;
-  UsbEndpointExtension *eptx;
-
-  if ((eptx = malloc(sizeof(*eptx)))) {
-    const char *prefix = devx->path;
-    const char *dot = strchr(prefix, '.');
-    int length = dot? (dot - prefix): strlen(prefix);
-    char path[PATH_MAX+1];
-    int flags = O_RDWR;
-
-    snprintf(path, sizeof(path), USB_ENDPOINT_PATH_FORMAT,
-             length, prefix, USB_ENDPOINT_NUMBER(endpoint->descriptor));
-
-    switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
-      case UsbEndpointDirection_Input : flags = O_RDONLY; break;
-      case UsbEndpointDirection_Output: flags = O_WRONLY; break;
-    }
-
-    if ((eptx->file = open(path, flags)) != -1) {
-      if (((flags & O_ACCMODE) != O_RDONLY) || 
-          usbSetShortTransfers(eptx->file, 1)) {
-        eptx->timeout = -1;
-
-        endpoint->extension = eptx;
-        return 1;
-      }
-
-      close(eptx->file);
-    }
-
-    free(eptx);
-  }
-
+usbCancelRequest (
+  UsbDevice *device,
+  void *request
+) {
+  errno = ENOSYS;
+  LogError("USB request cancel");
   return 0;
 }
 
-void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbEndpointExtension *eptx = endpoint->extension;
-
-  if (eptx->file != -1) {
-    close(eptx->file);
-    eptx->file = -1;
-  }
-
-  free(eptx);
+void *
+usbReapResponse (
+  UsbDevice *device,
+  unsigned char endpointAddress,
+  UsbResponse *response,
+  int wait
+) {
+  errno = ENOSYS;
+  LogError("USB request reap");
+  return NULL;
 }
 
 int
@@ -253,41 +238,6 @@ usbWriteEndpoint (
   return -1;
 }
 
-void *
-usbSubmitRequest (
-  UsbDevice *device,
-  unsigned char endpointAddress,
-  void *buffer,
-  int length,
-  void *data
-) {
-  errno = ENOSYS;
-  LogError("USB request submit");
-  return NULL;
-}
-
-int
-usbCancelRequest (
-  UsbDevice *device,
-  void *request
-) {
-  errno = ENOSYS;
-  LogError("USB request cancel");
-  return 0;
-}
-
-void *
-usbReapResponse (
-  UsbDevice *device,
-  unsigned char endpointAddress,
-  UsbResponse *response,
-  int wait
-) {
-  errno = ENOSYS;
-  LogError("USB request reap");
-  return NULL;
-}
-
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
@@ -300,6 +250,56 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   }
   LogError("USB device descriptor read");
   return 0;
+}
+
+int
+usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
+  UsbDeviceExtension *devx = endpoint->device->extension;
+  UsbEndpointExtension *eptx;
+
+  if ((eptx = malloc(sizeof(*eptx)))) {
+    const char *prefix = devx->path;
+    const char *dot = strchr(prefix, '.');
+    int length = dot? (dot - prefix): strlen(prefix);
+    char path[PATH_MAX+1];
+    int flags = O_RDWR;
+
+    snprintf(path, sizeof(path), USB_ENDPOINT_PATH_FORMAT,
+             length, prefix, USB_ENDPOINT_NUMBER(endpoint->descriptor));
+
+    switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+      case UsbEndpointDirection_Input : flags = O_RDONLY; break;
+      case UsbEndpointDirection_Output: flags = O_WRONLY; break;
+    }
+
+    if ((eptx->file = open(path, flags)) != -1) {
+      if (((flags & O_ACCMODE) != O_RDONLY) || 
+          usbSetShortTransfers(eptx->file, 1)) {
+        eptx->timeout = -1;
+
+        endpoint->extension = eptx;
+        return 1;
+      }
+
+      close(eptx->file);
+    }
+
+    free(eptx);
+  }
+
+  return 0;
+}
+
+void
+usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  if (eptx->file != -1) {
+    close(eptx->file);
+    eptx->file = -1;
+  }
+
+  free(eptx);
 }
 
 void

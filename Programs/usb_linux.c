@@ -235,64 +235,6 @@ usbControlTransfer (
   }
 }
 
-static void
-usbDeallocateRequest (void *item, void *data) {
-  free(item);
-}
-
-int
-usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbEndpointExtension *eptx;
-
-  if ((eptx = malloc(sizeof(*eptx)))) {
-    if ((eptx->completedRequests = newQueue(usbDeallocateRequest, NULL))) {
-      endpoint->extension = eptx;
-      return 1;
-    } else {
-      LogError("USB endpoint completed request queue allocate");
-    }
-  } else {
-    LogError("USB endpoint extension allocate");
-  }
-
-  return 0;
-}
-
-void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbEndpointExtension *eptx = endpoint->extension;
-
-  if (eptx->completedRequests) {
-    deallocateQueue(eptx->completedRequests);
-    eptx->completedRequests = NULL;
-  }
-
-  free(eptx);
-}
-
-static int
-usbBulkTransfer (
-  UsbEndpoint *endpoint,
-  void *buffer,
-  int length,
-  int timeout
-) {
-  UsbDeviceExtension *devx = endpoint->device->extension;
-  struct usbdevfs_bulktransfer arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.ep = endpoint->descriptor->bEndpointAddress;
-  arg.data = buffer;
-  arg.len = length;
-  arg.timeout = timeout;
-
-  {
-    int count = ioctl(devx->file, USBDEVFS_BULK, &arg);
-    if (count != -1) return count;
-    LogError("USB bulk transfer");
-  }
-  return -1;
-}
-
 static int
 usbReapUrb (
   UsbDevice *device,
@@ -322,104 +264,6 @@ usbReapUrb (
   }
 
   return 0;
-}
-
-int
-usbReadEndpoint (
-  UsbDevice *device,
-  unsigned char endpointNumber,
-  void *buffer,
-  int length,
-  int timeout
-) {
-  int count = -1;
-  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
-  if (endpoint) {
-    UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
-    switch (transfer) {
-      case UsbEndpointTransfer_Bulk:
-        count = usbBulkTransfer(endpoint, buffer, length, timeout);
-        break;
-
-      case UsbEndpointTransfer_Interrupt: {
-        struct usbdevfs_urb *urb = usbSubmitRequest(device,
-                                                    endpoint->descriptor->bEndpointAddress,
-                                                    NULL, length, NULL);
-
-        count = -1;
-        if (urb) {
-          UsbEndpointExtension *eptx = endpoint->extension;
-          int interval = endpoint->descriptor->bInterval + 1;
-
-          hasTimedOut(0);
-          do {
-            if (usbReapUrb(device, 0) &&
-                deleteItem(eptx->completedRequests, urb)) {
-              if (!urb->status) {
-                count = urb->actual_length;
-                if (count > length) count = length;
-                memcpy(buffer, urb->buffer, count);
-              } else if ((errno = urb->status) < 0) {
-                errno = -errno;
-              }
-
-              break;
-            }
-
-            if (hasTimedOut(timeout)) {
-              usbCancelRequest(device, urb);
-              urb = NULL;
-
-              errno = ETIMEDOUT;
-              break;
-            }
-            approximateDelay(interval);
-          } while (1);
-
-          if (urb) free(urb);
-        }
-
-        break;
-      }
-
-      default:
-        LogPrint(LOG_ERR, "USB input transfer not supported: %d", transfer);
-        errno = ENOSYS;
-        break;
-    }
-
-    if (count != -1) {
-      if (!usbApplyInputFilters(device, buffer, length, &count)) {
-        errno = EIO;
-        count = -1;
-      }
-    }
-  }
-  return count;
-}
-
-int
-usbWriteEndpoint (
-  UsbDevice *device,
-  unsigned char endpointNumber,
-  const void *buffer,
-  int length,
-  int timeout
-) {
-  UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
-  if (endpoint) {
-    UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
-    switch (transfer) {
-      case UsbEndpointTransfer_Bulk:
-        return usbBulkTransfer(endpoint, (void *)buffer, length, timeout);
-
-      default:
-        LogPrint(LOG_ERR, "USB output transfer not supported: %d", transfer);
-        errno = ENOSYS;
-        break;
-    }
-  }
-  return -1;
 }
 
 void *
@@ -560,6 +404,127 @@ usbReapResponse (
   return NULL;
 }
 
+static int
+usbBulkTransfer (
+  UsbEndpoint *endpoint,
+  void *buffer,
+  int length,
+  int timeout
+) {
+  UsbDeviceExtension *devx = endpoint->device->extension;
+  struct usbdevfs_bulktransfer arg;
+  memset(&arg, 0, sizeof(arg));
+  arg.ep = endpoint->descriptor->bEndpointAddress;
+  arg.data = buffer;
+  arg.len = length;
+  arg.timeout = timeout;
+
+  {
+    int count = ioctl(devx->file, USBDEVFS_BULK, &arg);
+    if (count != -1) return count;
+    LogError("USB bulk transfer");
+  }
+  return -1;
+}
+
+int
+usbReadEndpoint (
+  UsbDevice *device,
+  unsigned char endpointNumber,
+  void *buffer,
+  int length,
+  int timeout
+) {
+  int count = -1;
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+  if (endpoint) {
+    UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
+    switch (transfer) {
+      case UsbEndpointTransfer_Bulk:
+        count = usbBulkTransfer(endpoint, buffer, length, timeout);
+        break;
+
+      case UsbEndpointTransfer_Interrupt: {
+        struct usbdevfs_urb *urb = usbSubmitRequest(device,
+                                                    endpoint->descriptor->bEndpointAddress,
+                                                    NULL, length, NULL);
+
+        if (urb) {
+          UsbEndpointExtension *eptx = endpoint->extension;
+          int interval = endpoint->descriptor->bInterval + 1;
+
+          hasTimedOut(0);
+          do {
+            if (usbReapUrb(device, 0) &&
+                deleteItem(eptx->completedRequests, urb)) {
+              if (!urb->status) {
+                count = urb->actual_length;
+                if (count > length) count = length;
+                memcpy(buffer, urb->buffer, count);
+              } else if ((errno = urb->status) < 0) {
+                errno = -errno;
+              }
+
+              break;
+            }
+
+            if (hasTimedOut(timeout)) {
+              usbCancelRequest(device, urb);
+              urb = NULL;
+
+              errno = ETIMEDOUT;
+              break;
+            }
+            approximateDelay(interval);
+          } while (1);
+
+          if (urb) free(urb);
+        }
+
+        break;
+      }
+
+      default:
+        LogPrint(LOG_ERR, "USB input transfer not supported: %d", transfer);
+        errno = ENOSYS;
+        break;
+    }
+
+    if (count != -1) {
+      if (!usbApplyInputFilters(device, buffer, length, &count)) {
+        errno = EIO;
+        count = -1;
+      }
+    }
+  }
+
+  return count;
+}
+
+int
+usbWriteEndpoint (
+  UsbDevice *device,
+  unsigned char endpointNumber,
+  const void *buffer,
+  int length,
+  int timeout
+) {
+  UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
+  if (endpoint) {
+    UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
+    switch (transfer) {
+      case UsbEndpointTransfer_Bulk:
+        return usbBulkTransfer(endpoint, (void *)buffer, length, timeout);
+
+      default:
+        LogPrint(LOG_ERR, "USB output transfer not supported: %d", transfer);
+        errno = ENOSYS;
+        break;
+    }
+  }
+  return -1;
+}
+
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
@@ -572,6 +537,41 @@ usbReadDeviceDescriptor (UsbDevice *device) {
     return 1;
   }
   return 0;
+}
+
+static void
+usbDeallocateRequest (void *item, void *data) {
+  free(item);
+}
+
+int
+usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
+  UsbEndpointExtension *eptx;
+
+  if ((eptx = malloc(sizeof(*eptx)))) {
+    if ((eptx->completedRequests = newQueue(usbDeallocateRequest, NULL))) {
+      endpoint->extension = eptx;
+      return 1;
+    } else {
+      LogError("USB endpoint completed request queue allocate");
+    }
+  } else {
+    LogError("USB endpoint extension allocate");
+  }
+
+  return 0;
+}
+
+void
+usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  if (eptx->completedRequests) {
+    deallocateQueue(eptx->completedRequests);
+    eptx->completedRequests = NULL;
+  }
+
+  free(eptx);
 }
 
 void

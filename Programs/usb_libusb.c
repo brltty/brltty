@@ -153,13 +153,38 @@ usbControlTransfer (
   return -1;
 }
 
-int
-usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
-  return 1;
+void *
+usbSubmitRequest (
+  UsbDevice *device,
+  unsigned char endpointAddress,
+  void *buffer,
+  int length,
+  void *data
+) {
+  errno = ENOSYS;
+  return NULL;
 }
 
-void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
+int
+usbCancelRequest (
+  UsbDevice *device,
+  void *request
+) {
+  errno = ENOSYS;
+  LogError("USB request cancel");
+  return 0;
+}
+
+void *
+usbReapResponse (
+  UsbDevice *device,
+  unsigned char endpointAddress,
+  UsbResponse *response,
+  int wait
+) {
+  errno = ENOSYS;
+  LogError("USB request reap");
+  return NULL;
 }
 
 int
@@ -244,45 +269,20 @@ usbWriteEndpoint (
   return -1;
 }
 
-void *
-usbSubmitRequest (
-  UsbDevice *device,
-  unsigned char endpointAddress,
-  void *buffer,
-  int length,
-  void *data
-) {
-  errno = ENOSYS;
-  return NULL;
-}
-
-int
-usbCancelRequest (
-  UsbDevice *device,
-  void *request
-) {
-  errno = ENOSYS;
-  LogError("USB request cancel");
-  return 0;
-}
-
-void *
-usbReapResponse (
-  UsbDevice *device,
-  unsigned char endpointAddress,
-  UsbResponse *response,
-  int wait
-) {
-  errno = ENOSYS;
-  LogError("USB request reap");
-  return NULL;
-}
-
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   memcpy(&device->descriptor, &usb_device(devx->handle)->descriptor, UsbDescriptorSize_Device);
   return 1;
+}
+
+int
+usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
+  return 1;
+}
+
+void
+usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
