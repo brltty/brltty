@@ -573,6 +573,11 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
       switch (packet->header.type) {
         case PKT_NAK:
           negativeAcknowledgement(packet);
+          if (!writing) {
+            LogPrint(LOG_WARNING, "Unexpected NAK.");
+            continue;
+          }
+
           switch (packet->header.arg1) {
             case PKT_ERR_TIMEOUT: {
               int originalLimit = outputPayloadLimit;
@@ -588,12 +593,15 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           }
 
         handleNegativeAcknowledgement:
-          if (writing) {
-            if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
-            if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
+          if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
+          if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
+
         case PKT_ACK:
+          if (writing) {
             writing = 0;
             updateCells(brl);
+          } else {
+            LogPrint(LOG_WARNING, "Unexpected ACK.");
           }
           continue;
       }
